@@ -23607,7 +23607,7 @@
     "title": "K873: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K873 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] K873 tests weekend vol effect. SPY weekend ratio=0.440 (95% CI [0.31,0.60]), significantly <1.0. French-Roll ratio=1.32 (far below 3.0). Weekend variance only 40% of 3x time-scaling prediction. Confirms French & Roll (1986): variance comes from trading no",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K873",
@@ -23623,7 +23623,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T05:08:34+00:00"
+    "created_at": "2026-06-07T05:08:34+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-07T10:09:58.053913+00:00",
+    "claim_session_id": "4a6ec94984e5",
+    "started_at": "2026-06-07T10:10:05.288476+00:00",
+    "completed_at": "2026-06-07T10:14:57.028073+00:00",
+    "result": "已發佈 K873 週末效應一般讀者文章（draft 池）mile_77ef5c00；anti-ai-gate PASS (warn=1/3)；3 標的對照表 + 2 張圖嵌入；audience=general 確認"
   },
   {
     "id": "K705_article_general_v2",
@@ -23793,7 +23799,7 @@
     "title": "K320: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K320 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: experiment: K320 title: Website Content Quality Audit — Are Our Published Articles Accurate? date: 2026-03-25T07:37:05.077895",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K320",
@@ -23805,7 +23811,13 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-06-07T07:15:55+00:00",
-    "last_released_at": "2026-06-07T09:10:18.227100+00:00"
+    "last_released_at": "2026-06-07T09:10:18.227100+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T09:46:24.623144+00:00",
+    "claim_session_id": "8158217a78d9",
+    "started_at": "2026-06-07T09:46:24.732839+00:00",
+    "completed_at": "2026-06-07T09:47:45.884286+00:00",
+    "result": "Published general draft mile_c7649422 for K320 content audit; rewrote existing draft into plain reader-facing language and published with 3 governance charts."
   },
   {
     "id": "K451_article_general_v2",
