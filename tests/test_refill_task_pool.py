@@ -295,3 +295,109 @@ def test_terminal_article_attempts_null_completed_at_treated_as_pregate():
     ]
     blocked = MODULE._kids_with_terminal_article_attempts(tasks)
     assert "K7777" not in blocked
+
+
+def test_refill_skips_general_retry_v2_when_feed_already_has_k_coverage(tmp_path, monkeypatch):
+    """Regression: 2026-06-08 stale retry-v2 pollution.
+
+    If a K already has:
+    1. a succeeded `*_article_general` task, and
+    2. any feed article referencing that K,
+    refill must not auto-create `*_article_general_v2` even when
+    publication_candidates still reports `audiences_covered=["research"]`.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    candidates = tmp_path / "storage" / "publication_candidates.json"
+    feed = tmp_path / "storage" / "reports" / "feed.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    feed.parent.mkdir(parents=True, exist_ok=True)
+
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "K676_article_general",
+                    "status": "succeeded",
+                    "task_type": "daily_article",
+                    "k_id": "K676",
+                    "completed_at": "2026-05-08T07:13:00+00:00",
+                }
+            ],
+            ensure_ascii=False,
+        ) + "\n",
+        encoding="utf-8",
+    )
+    feed.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_d9d88717",
+                    "title": "VT 策略的稅務黑盒",
+                    "status": "published",
+                    "audience": "research",
+                    "details": {"experiment_refs": ["K676"]},
+                }
+            ],
+            ensure_ascii=False,
+        ) + "\n",
+        encoding="utf-8",
+    )
+    candidates.write_text(
+        json.dumps(
+            {
+                "top_10_uncovered": [],
+                "missing_research_top5": [],
+                "missing_general_top5": [
+                    {
+                        "k_id": "K676",
+                        "title": "K676 tax optimization",
+                        "score": 4,
+                        "reasons": ["PASS"],
+                        "verdict_preview": "already covered in feed",
+                        "audiences_covered": ["research"],
+                        "covered_by": [
+                            {
+                                "id": "mile_d9d88717",
+                                "title": "VT 策略的稅務黑盒",
+                                "status": "published",
+                                "audience": "research",
+                            }
+                        ],
+                    }
+                ],
+                "candidates": [
+                    {
+                        "k_id": "K676",
+                        "title": "K676 tax optimization",
+                        "score": 4,
+                        "reasons": ["PASS"],
+                        "verdict_preview": "already covered in feed",
+                        "audiences_covered": ["research"],
+                        "covered_by": [
+                            {
+                                "id": "mile_d9d88717",
+                                "title": "VT 策略的稅務黑盒",
+                                "status": "published",
+                                "audience": "research",
+                            }
+                        ],
+                    }
+                ],
+            },
+            ensure_ascii=False,
+        ) + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+
+    result = MODULE.refill(target=3, dry_run=False)
+
+    assert result["ok"] is True
+    assert result["added"] == 0
+    assert result["reason"] == "no_new_candidates_passing_filter"
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert [t["id"] for t in data] == ["K676_article_general"]
