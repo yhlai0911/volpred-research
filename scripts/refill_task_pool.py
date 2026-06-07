@@ -206,6 +206,40 @@ def _kids_with_terminal_article_attempts(tasks: list) -> set[str]:
     return kids
 
 
+def _kids_with_succeeded_article_attempt(tasks: list, audience: str) -> set[str]:
+    """K-ids with a succeeded article task for the given audience.
+
+    2026-06-08 retry-v2 pollution: several K's (K676/K696/K707/K717/K904)
+    already had a succeeded `*_article_general` task plus feed coverage, but
+    candidate audience metadata still showed only `research`, so refill created
+    `*_article_general_v2` retries. Once a general article task has succeeded
+    and feed already references the K, blind auto-retry is the wrong action;
+    it should be handled by a targeted audience/provenance audit instead.
+    """
+    import re
+
+    want = f"_article_{audience}"
+    kids: set[str] = set()
+    for t in tasks:
+        if str(t.get("status") or "").lower() != "succeeded":
+            continue
+        if str(t.get("task_type") or "") != "daily_article":
+            continue
+        tid = str(t.get("id") or "")
+        if want not in tid:
+            continue
+        candidate_kids: set[str] = set()
+        for key in ("k_id", "experiment_id"):
+            v = t.get(key)
+            if v:
+                candidate_kids.add(str(v).upper())
+        m = re.match(r"^(K\d{2,5})_article_", tid)
+        if m:
+            candidate_kids.add(m.group(1).upper())
+        kids.update(candidate_kids)
+    return kids
+
+
 def _any_feed_coverage_kids() -> set[str]:
     """K-ids referenced by ANY feed article regardless of audience.
 
@@ -463,6 +497,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
     already_covered = _kids_with_general_article()
     # 2026-05-29 audience-mismatch retry-loop guard (see helper docstrings).
     terminal_article_kids = _kids_with_terminal_article_attempts(tasks)
+    succeeded_general_kids = _kids_with_succeeded_article_attempt(tasks, "general")
     any_feed_kids = _any_feed_coverage_kids()
     audit_pending_kids = terminal_article_kids & any_feed_kids
 
@@ -576,6 +611,13 @@ def refill(target: int, dry_run: bool = False) -> dict:
         priority = _score_to_priority(int(cand.get("score") or 0))
         # Pick retry suffix if base id already used by terminal task
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
+        if (
+            needed_audience == "general"
+            and retry_suffix
+            and kid.upper() in any_feed_kids
+            and kid.upper() in succeeded_general_kids
+        ):
+            continue
         new_entries.append(_make_article_task(cand, priority, retry_suffix))
 
     # Fill remaining target from deferred dominant-cluster candidates only if the
@@ -588,6 +630,13 @@ def refill(target: int, dry_run: bool = False) -> dict:
         needed_audience = "general" if "general" not in audiences_covered else "research"
         priority = _score_to_priority(int(cand.get("score") or 0))
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
+        if (
+            needed_audience == "general"
+            and retry_suffix
+            and kid.upper() in any_feed_kids
+            and kid.upper() in succeeded_general_kids
+        ):
+            continue
         new_entries.append(_make_article_task(cand, priority, retry_suffix))
 
     if not new_entries:

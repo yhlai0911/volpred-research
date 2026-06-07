@@ -1476,3 +1476,20 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **Flow gap 1 — candidates「uncovered」不認列既有 draft**：`publication_candidates` 的 uncovered 偵測似乎只看 published article，K 有 draft 但未 publish 仍被列 uncovered → refill 推薦 → 產生重複 article 任務。**待修**：refill / candidates generator 應把「有 draft 的 K」視為 in-progress/covered，不再 queue 新 article task。strike 1，記錄；若再現則修 candidates generator。
 
 **Flow gap 2 — dashboard_latest.json 只由 cron 刷新，tick 間 stale**：`ops_dashboard.py` 只 `print` stdout，靠 `cron_ops_dashboard.sh` 重導寫檔。autonomous tick 直接 `jq` 讀 dashboard_latest.json 會讀到上次 cron fire 的舊快照（本 incident 中補池後檔案仍顯示 critical，實際 live recompute 已 ok）。**教訓**：tick 巡檢若要可信，應 live recompute（`uv run python scripts/ops_dashboard.py | jq ...`）而非信任可能 stale 的檔案；或縮短 ops_dashboard cron 間隔。
+
+## 2026-06-08 00:10 — host_cron_fail strike-2 結構修正 + article 池 churn 根因（autonomous tick）
+
+**A. host_cron_fail false-critical（strike 2 → 結構修正）**
+- `audit_publish_sync.log` exit 1（findings signal：mismatch_total=27 published-vs-live 不一致）被 `_parse_host_cron_state` 誤當 infra-critical。
+- 同根因 strike 1 = 2026-06-07 `audit_fb_pipeline` exit 1（已修但只硬編碼加該檔到 `_AUDIT_SIGNAL_LOGS`）。
+- **結構性 root**：audit 腳本慣例用 exit code 當 findings signal，host_cron_fail 卻把任何 non-zero 當 infra 失敗。
+- **Fix（pattern-based，非 whack-a-mole）**：`src/volpred/ops/alerts.py:_parse_host_cron_state` 改用 `name.startswith("audit_")` 排除所有 audit_* log，不再逐檔加。verified `breached=False`。
+
+**B. article 池 churn — uncovered candidate 源 stale/exhausted（待白天正解）**
+- 症狀：refill 補 K###_article_general_v2 → 短時間內 pending 7→1，task 變 succeeded(5)/blocked(2) 但無 hourly dispatch、無 commit。
+- 釐清：`sync_next_tasks_status.py` 的 `K_ID_RE=^K\d+[a-z_]*$` **不匹配** `_v2` 結尾 → sync 沒動它們（synced=NONE）；這些 task 多為**早已存在**的 succeeded/blocked entry（K506_v2=awaiting_external_data 缺 EWT data；completed_at 16:11 早於 refill）。
+- **根因**：publication_candidates 的 uncovered 候選指向已覆蓋/已完成/已 block 的 K → refill「加」進來但立刻 resolve → 池趨空。深層 = 易寫的 uncovered K 已大致寫完（與「故步自封」題材回收同一根因）。
+- **待白天正解**（勿半夜半懂硬修）：(1) 重生 publication_candidates 使 uncovered 反映現實（排除有 draft/已 block 的 K）；(2) 評估是否該從「補既有 uncovered」轉向 contrarian 新研究（加密/HFT 微結構/options surface/總經/行為財務/EM ex-台）；(3) refill dedup 應認列 blocked+draft 狀態。
+- **夜間策略**：不 churn-refill（會反覆 add→resolve 空轉）；留 pool warn，待白天處理。
+
+**C. dashboard_latest.json stale（承上 tick）**：`ops_dashboard.py` 只 print，靠 cron 重導寫檔；tick 巡檢改 live recompute。
