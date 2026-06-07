@@ -95,7 +95,10 @@ experiments/index.json
 
 # More auto-updated state (2026-05-28 second pass)
 storage/risk_forecast.json
-storage/strategy_metrics.json
+# storage/strategy_metrics.json — removed from gitignore 2026-06-08: file is derived from
+# paper_trading.json (no external deps), remote env has no daily_update cron so it was
+# never auto-regenerated, causing persistent ops patrol alerts since 2026-05-31.
+# Now committed; recalc_metrics.py still refreshes it on local runs.
 storage/reports/trending_repost_log.json
 
 # 3rd-party tool caches

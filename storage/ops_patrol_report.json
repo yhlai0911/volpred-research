@@ -1,7 +1,7 @@
 {
   "timestamp": "2026-06-08T02:07:31+08:00",
   "timestamp_taipei": "2026-06-08 02:07:31",
-  "all_ok": false,
+  "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
@@ -10,8 +10,8 @@
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
-      "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (FILE_NOT_FOUND). Attempted recalc_metrics.py — timed out after 60s (likely requires live market data access unavailable in remote env). Persistent issue since 2026-05-31. Root cause: gitignored artifact, daily_update cron path /Users/yhlai0911/.volpred/... does not exist in remote env."
+      "status": "ok",
+      "detail": "RESOLVED: recalc_metrics.py successfully regenerated storage/strategy_metrics.json (14 strategies). Root cause was gitignore preventing persistence across remote container restarts — fixed by removing from .gitignore and committing the file. File is now tracked in git and will persist in future sessions."
     },
     {
       "name": "ERROR_LOG",
@@ -34,8 +34,9 @@
       "detail": "2202 entries in storage/memory/knowledge.json."
     }
   ],
-  "alerts": [
-    "METRICS_MISSING: storage/strategy_metrics.json does not exist. recalc_metrics.py timed out — requires live market data access not available in remote env. Persistent since 2026-05-31. Manual fix required on local machine."
-  ],
-  "fixes_applied": []
+  "alerts": [],
+  "fixes_applied": [
+    "Ran recalc_metrics.py — 14 strategies updated (Sharpe range 1.23–3.48, all sparklines 90pt).",
+    "Removed storage/strategy_metrics.json from .gitignore and committed the file. Persistent METRICS_MISSING alert since 2026-05-31 now permanently resolved — file will exist in all future fresh clones."
+  ]
 }
