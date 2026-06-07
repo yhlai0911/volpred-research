@@ -424,6 +424,34 @@ def _make_article_task(cand: dict, priority: int, retry_suffix: str = "") -> dic
     }
 
 
+def _breached_clusters() -> set[str]:
+    """Clusters whose recent feed share exceeds DOMINANT_RATIO_LIMIT.
+    Used to defer over-represented topics so the feed stops 故步自封 on
+    VIX/SPY/vol-forecast (user 2026-06-07). Safe no-op if module unavailable."""
+    try:
+        src = str(ROOT / "src")
+        if src not in sys.path:
+            sys.path.insert(0, src)
+        from volpred.topic_clusters import DOMINANT_RATIO_LIMIT, recent_cluster_counts
+        counts, total = recent_cluster_counts(days=30)
+        if not total:
+            return set()
+        return {cl for cl, n in counts.items() if (n / total) > DOMINANT_RATIO_LIMIT}
+    except Exception:
+        return set()
+
+
+def _cand_cluster(cand: dict) -> str | None:
+    try:
+        from volpred.topic_clusters import classify_topic_cluster
+        return classify_topic_cluster(
+            str(cand.get("title") or ""),
+            [str(t) for t in (cand.get("tags") or [])],
+        )
+    except Exception:
+        return None
+
+
 def refill(target: int, dry_run: bool = False) -> dict:
     if not CANDIDATES.exists():
         return {"ok": False, "reason": "publication_candidates.json missing", "added": 0}
@@ -497,6 +525,14 @@ def refill(target: int, dry_run: bool = False) -> dict:
     )
 
     new_entries = []
+    # 2026-06-07: Novelty-quota enforcement. The feed had drifted to ~39% VIX /
+    # heavy SPY/vol-forecast (validate_feed_diversity FAIL) because refill only
+    # picked "uncovered K" with no hard cluster gate. DEFER candidates in a
+    # currently-breached dominant cluster — prefer contrarian/under-represented
+    # topics first; only fall back to dominant ones if the non-dominant pool
+    # can't meet target (better fewer-but-diverse than more-of-same).
+    breached = _breached_clusters()
+    deferred_dominant: list[dict] = []
     for cand in pool:
         if len(new_entries) >= target:
             break
@@ -532,8 +568,25 @@ def refill(target: int, dry_run: bool = False) -> dict:
         # whose own canonical status is already overturned/retracted.
         if _is_retracted_or_overturned_candidate(cand):
             continue
+        # 7th belt (novelty quota): defer candidates in a breached dominant
+        # cluster; fill from them last (below) only if target unmet.
+        if breached and _cand_cluster(cand) in breached:
+            deferred_dominant.append(cand)
+            continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         # Pick retry suffix if base id already used by terminal task
+        retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
+        new_entries.append(_make_article_task(cand, priority, retry_suffix))
+
+    # Fill remaining target from deferred dominant-cluster candidates only if the
+    # contrarian/non-dominant pool was insufficient (avoid a dry pool).
+    for cand in deferred_dominant:
+        if len(new_entries) >= target:
+            break
+        kid = cand["k_id"]
+        audiences_covered = cand.get("audiences_covered") or []
+        needed_audience = "general" if "general" not in audiences_covered else "research"
+        priority = _score_to_priority(int(cand.get("score") or 0))
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
         new_entries.append(_make_article_task(cand, priority, retry_suffix))
 
