@@ -1,0 +1,6 @@
+{
+  "timestamp": "2026-06-08T02:07:31+08:00",
+  "alert_type": "METRICS_MISSING",
+  "severity": "warn",
+  "detail": "storage/strategy_metrics.json does not exist. recalc_metrics.py timed out after 60s — requires live market data access not available in remote/CI env. Root cause: gitignored artifact, daily_update cron path /Users/yhlai0911/.volpred/... is Mac-only. Persistent since 2026-05-31. Fix: run recalc_metrics.py locally and commit the file, or add it to git tracking."
+}

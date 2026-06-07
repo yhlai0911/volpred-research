@@ -1,41 +1,41 @@
 {
-  "timestamp": "2026-06-07T12:14:00Z",
-  "timestamp_taipei": "2026-06-07 20:14:00",
-  "all_ok": true,
+  "timestamp": "2026-06-08T02:07:31+08:00",
+  "timestamp_taipei": "2026-06-08 02:07:31",
+  "all_ok": false,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total draft=144 (OK >=12). research=48 (OK >=4). general=96 (OK >=8)."
+      "detail": "146 draft articles total (research=46, general=100). Both above thresholds (research>=4 ✅, general>=8 ✅, total>=12 ✅)."
     },
     {
-      "name": "strategy_metrics_freshness",
-      "status": "ok",
-      "detail": "storage/strategy_metrics.json regenerated at 2026-06-07T12:14Z by running recalc_metrics.py. 14 strategies updated. Root cause: daily_update.py cron relies on local Mac path (/Users/yhlai0911/.volpred/bin/cron_daily_update.sh) that does not exist in remote Linux env — file was never auto-regenerated. Fix: ran recalc_metrics.py manually; ops patrol should call it when file is missing."
+      "name": "STRATEGY_METRICS_FRESHNESS",
+      "status": "alert",
+      "detail": "storage/strategy_metrics.json does not exist (FILE_NOT_FOUND). Attempted recalc_metrics.py — timed out after 60s (likely requires live market data access unavailable in remote env). Persistent issue since 2026-05-31. Root cause: gitignored artifact, daily_update cron path /Users/yhlai0911/.volpred/... does not exist in remote env."
     },
     {
-      "name": "error_log",
+      "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-07 (today) or 2026-06-06 (yesterday). Last entry dated 2026-06-05 (jump-share variance K851)."
+      "detail": "No entries dated today (2026-06-08) or yesterday (2026-06-07) in docs/error_log.md. Last logged entry was 2026-06-05 (K851 jump-share variance phrasing)."
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. All strategies have entries with valid portfolio_return values from 2023-01-04. _market_daily has 0 entries (expected — no data loaded). No strategy has >2 nulls in last 3 entries."
+      "detail": "14 strategies checked. All have last-3 null count = 1 (most recent day not yet filled, expected). No strategy exceeds threshold of >2 nulls. _market_daily has 0 entries (expected). No alert required."
     },
     {
-      "name": "git_status",
+      "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (well under 50 threshold). Working tree is clean."
+      "detail": "0 uncommitted files in main repo. Working tree is clean (threshold: >50)."
     },
     {
-      "name": "knowledge_size",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json has 2202 entries."
+      "detail": "2202 entries in storage/memory/knowledge.json."
     }
   ],
-  "alerts": [],
-  "fixes_applied": [
-    "ran scripts/recalc_metrics.py to regenerate storage/strategy_metrics.json (14 strategies, gitignored artifact) — was missing due to daily_update cron not running in remote env"
-  ]
+  "alerts": [
+    "METRICS_MISSING: storage/strategy_metrics.json does not exist. recalc_metrics.py timed out — requires live market data access not available in remote env. Persistent since 2026-05-31. Manual fix required on local machine."
+  ],
+  "fixes_applied": []
 }
