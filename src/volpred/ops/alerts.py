@@ -448,18 +448,24 @@ def _latest_cron_exit(log_path: Path) -> dict[str, Any] | None:
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     logs_dir = _cron_logs_dir(storage_dir)
     failing_logs: list[dict[str, Any]] = []
-    # 2026-06-07: audit_* scripts use the exit code as a FINDINGS signal
-    # (audit_fb_pipeline.py returns 1 when it finds stale-pending FB posts —
-    # see scripts/audit_fb_pipeline.py:132), NOT as an infra-failure signal.
-    # Those findings are already surfaced via the dashboard fb_pipeline section.
-    # host_cron_fail is about *infrastructure* health (dispatch/collect/sync), so
-    # treating "audit found a content backlog" as a CRITICAL host-cron-failure is
-    # a false-critical. Exclude audit-signal logs from the infra-failure scan;
-    # they keep their own exit-code contract for their own consumers.
-    _AUDIT_SIGNAL_LOGS = {"audit_fb_pipeline.log"}
+    # 2026-06-07 (strike-2 structural fix): audit_* scripts use the exit code as a
+    # FINDINGS signal by convention — audit_fb_pipeline.py returns 1 when it finds
+    # stale-pending FB posts (scripts/audit_fb_pipeline.py:132); audit_publish_sync.py
+    # returns 1 when it finds published-vs-live mismatches (mismatch_total>0). That is
+    # NOT an infra-failure signal. Those findings are surfaced via their own dashboard
+    # sections / report JSON. host_cron_fail is about *infrastructure* health
+    # (dispatch/collect/sync), so treating "audit found a backlog/mismatch" as a
+    # CRITICAL host-cron-failure is a false-critical.
+    #
+    # Originally this was a hardcoded set {"audit_fb_pipeline.log"}; the same
+    # false-positive recurred on audit_publish_sync.log (strike 2) — so exclude ANY
+    # log whose script follows the audit-exit-as-findings convention via the
+    # `audit_*.log` name prefix, instead of whack-a-mole adding each file.
+    def _is_audit_signal_log(name: str) -> bool:
+        return name.startswith("audit_")
     if logs_dir.exists():
         for log_path in sorted(logs_dir.glob("*.log")):
-            if log_path.name in _AUDIT_SIGNAL_LOGS:
+            if _is_audit_signal_log(log_path.name):
                 continue
             latest = _latest_cron_exit(log_path)
             if latest and int(latest.get("exit_code", 0)) != 0:

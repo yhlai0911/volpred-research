@@ -24088,7 +24088,7 @@
     "title": "K506: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K506 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Reference: Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF Reference: Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K506",
@@ -24102,14 +24102,19 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T15:35:31+00:00"
+    "created_at": "2026-06-07T15:35:31+00:00",
+    "last_released_at": "2026-06-07T16:09:36.824075+00:00",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-06-07T16:11:20+00:00",
+    "blocked_note": "K506 retry_in_progress：缺 EWT 2010-2021 原始價格，外網被 sandbox 擋；舊 results.json 已標失效不可引用；retry 完成且 Codex source-review PASS 才能寫 article",
+    "blocked_until": "2026-07-01"
   },
   {
     "id": "K676_article_general_v2",
     "title": "K676: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K676 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: K604 延伸, 執行: Claude] 5 種 tax-aware VT 策略。Annual rebalance 最佳 CAGR(7.24%) terminal($311K)——vs daily $226K 多 $85K。Tax drag: annual 18.6% vs daily 40.9%。Tax-loss harvesting 只省 $43（wash sale rule 限制）。Threshold+tax-aware MDD 最低(-11.4%)且省 $12K 稅——最佳風險調整。稅拖累 18.6-40.9% initial capi",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K676",
@@ -24126,7 +24131,12 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T15:35:31+00:00"
+    "created_at": "2026-06-07T15:35:31+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-07T16:11:15.320137+00:00",
+    "claim_session_id": "3d63f6fd4a1c",
+    "completed_at": "2026-06-07T16:11:15.896162+00:00",
+    "result": "already covered in feed (mile_d9d88717); refill bug推入 uncovered pool"
   },
   {
     "id": "K678_article_general_v2",
@@ -24158,7 +24168,7 @@
     "title": "K696: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K696 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: K687 延伸, 執行: Claude] 12/VIX 50/50 minimum floor sweep {0-70%} lag-corrected。Sharpe 單調增加（floor↑→接近 BH→Sharpe↑）。No floor beats BH 0.545。Best: floor 70% Sharpe 0.506（still -0.039 vs BH, t=-2.72 p=0.007）。MDD 單調惡化（floor↑→更多曝險→更大 MDD）。Calmar 在 floor 20% 最佳(0.598 vs BH 0.342)——draw",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K696",
@@ -24174,14 +24184,19 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T15:35:31+00:00"
+    "created_at": "2026-06-07T15:35:31+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-07T16:11:16.336014+00:00",
+    "claim_session_id": "ecd23d693038",
+    "completed_at": "2026-06-07T16:11:16.567327+00:00",
+    "result": "already covered in feed (mile_1f0e3bb0); refill bug推入 uncovered pool"
   },
   {
     "id": "K707_article_general_v2",
     "title": "K707: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K707 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: session 收尾, 執行: Claude] 20 個投資人常見問題，引用 25 個實驗。14 high confidence, 6 medium。One-line: 50/50 SPY/GLD 不要動，怕虧→EWMA VT。覆蓋：市場預測(3)、資產配置(5)、VT策略(4)、交易執行(4)、回撤風險(1)、方法論(2)、總結(1)。可直接用於網站 FAQ 頁面。",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K707",
@@ -24196,14 +24211,19 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T15:36:01+00:00"
+    "created_at": "2026-06-07T15:36:01+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-07T16:11:16.800672+00:00",
+    "claim_session_id": "af2cf256667d",
+    "completed_at": "2026-06-07T16:11:17.242638+00:00",
+    "result": "already covered in feed (mile_64b8e390); refill bug推入 uncovered pool"
   },
   {
     "id": "K709_article_general_v2",
     "title": "K709: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K709 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: K663/K706 延伸, 執行: Claude] 利率條件 60/40↔40/60 SPY/GLD（rising→more SPY, falling→more GLD）。Falling regime GLD +30.8% vs SPY +13.4%（huge gap）但 lag 6m window 後 conditional Sharpe 0.869 vs BH 0.850 Δ=+0.019——太小不值得。Rate regime 佔比：rising 21%, stable 62%, falling 19%。結論：利率資訊到達太晚（6m lag",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K709",
@@ -24218,14 +24238,17 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T15:36:01+00:00"
+    "created_at": "2026-06-07T15:36:01+00:00",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_at": "2026-06-07T16:11:21+00:00",
+    "blocked_note": "K709 knowledge entry verdict=FAIL_PROVENANCE：原 mile_ada624d5 文章 lookahead/口徑問題已標退；rebuild 已完成但 delta Sharpe +0.019 not actionable，無新 publishable story"
   },
   {
     "id": "K717_article_general_v2",
     "title": "K717: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K717 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: 用戶, 執行: Claude] 6 維度 composite（CAGR + Sharpe + MDD + Calmar + 月勝率 + 壓力表現，等權重）。排名洗牌：TW Momentum composite #1（CAGR 32.6% + stress +6.6%），Adaptive #2，Piecewise #3（CAGR 14.3% 拖累）。VIX Cond Leverage 月勝率 87.2%（最高）。50/50 降到 #11（CAGR 13.7%）。結論：純 Sharpe 排名偏向低 vol 低 return 策略，composite",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K717",
@@ -24241,14 +24264,19 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T15:36:01+00:00"
+    "created_at": "2026-06-07T15:36:01+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-07T16:11:17.456589+00:00",
+    "claim_session_id": "515427a31257",
+    "completed_at": "2026-06-07T16:11:17.737370+00:00",
+    "result": "already covered in feed (mile_8e899fba); refill bug推入 uncovered pool"
   },
   {
     "id": "K904_article_general_v2",
     "title": "K904: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K904 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Paper 8 S2/S4, 執行: Claude] Table 5 N: rate=87 (paper 127), risk-off=186 (paper 203), geo=150 (paper 89). Classification priority ordering differs. Geo shocks ARE absorbed (t=2.36) contrary to paper. NFP overall ratio 1.14x p=0.074 (NS), paper claimed 1.17x p=0.037. Medium VI",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K904",
@@ -24263,6 +24291,26 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T15:36:01+00:00"
+    "created_at": "2026-06-07T15:36:01+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-07T16:11:18.105569+00:00",
+    "claim_session_id": "d8400cd15b43",
+    "completed_at": "2026-06-07T16:11:18.439906+00:00",
+    "result": "already covered in feed (mile_3b689404); refill bug推入 uncovered pool"
+  },
+  {
+    "id": "ops_refill_v2_dedup_audit_20260608",
+    "title": "[platform_ops] Audit refill_task_pool retry-v2 為何推已 covered K",
+    "description": "2026-06-08 00:08 hourly fire 發現 7 條 K_article_general_v2 retry-v2 pending 全部 invalid：K676/K696/K707/K717/K904 5 條已在 feed.json 有 published article（mile_d9d88717/1f0e3bb0/64b8e390/8e899fba/3b689404），K506 卡 EWT 資料 retry_in_progress 無新數字，K709 FAIL_PROVENANCE。已逐條 mark succeeded/blocked。\n\nRoot cause 待查：publication_candidates.json 顯示 updated_at=null + top_10_uncovered 只剩 1 條 K267，但 refill_task_pool.py 的 _kids_with_general_article belt 應已過濾這類。需要 grep next_tasks.json 看這 7 條 created_at + audiences_covered 當時值，判斷是 (a) candidates stale 沒重 build (b) belt 邏輯 v2 retry 路徑漏 check covered (c) 其他 reproduction path。\n\nFix scope:\n1. 跑 uv run python scripts/build_publication_candidates.py 重 build candidates\n2. 看 refill_task_pool.py L490+ retry-v2 推進路徑是否仍依賴 audiences_covered=[]\n3. 加 regression test: refill 不能對 feed.json 已有 mile_*.experiment_refs 含 K_id 的 K 推 v2\n4. 跑 dry-run 確認新 pool 不再推這 7 條",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "agent_discovered",
+    "tags": [
+      "refill-bug",
+      "publication-candidates",
+      "regression"
+    ],
+    "created_at": "2026-06-08T00:25:00+08:00"
   }
 ]
