@@ -257,6 +257,13 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
     return {"agentable": agentable, "main_thread": main_thread, "blocked": blocked}
 
 
+def _current_agentable_count() -> int:
+    """Recompute live agentable pending count after refill side effects."""
+    recent_type_counts = load_recent_task_type_counts()
+    cats = categorize(load_pending_tasks(), recent_type_counts=recent_type_counts)
+    return len(cats["agentable"])
+
+
 def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
     """Auto-trigger pool refill when agentable < REFILL_FLOOR.
 
@@ -286,8 +293,22 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
         combined.setdefault("warnings", []).append(f"diverse_gen: {exc}")
 
     try:
+        current_agentable = _current_agentable_count()
+        if current_agentable < REFILL_FLOOR:
+            try:
+                from refill_reader_facing_pool import refill_event_candidates as _event_refill  # type: ignore
+                event_result = _event_refill(horizon_days=14)
+                event_added = len(event_result.get("added") or [])
+                if event_added:
+                    combined["added"] += event_added
+                    combined["added_ids"].extend(event_result.get("added") or [])
+                    combined["by_type"]["event_article"] = event_added
+            except Exception as exc:  # noqa: BLE001
+                combined.setdefault("warnings", []).append(f"event_refill: {exc}")
+
         from refill_task_pool import refill as _refill_fn  # type: ignore
-        gap = max(0, REFILL_FLOOR - agentable_count - combined["added"])
+        current_agentable = _current_agentable_count()
+        gap = max(0, REFILL_FLOOR - current_agentable)
         if gap > 0:
             article = _refill_fn(target=gap, dry_run=False)
             if article.get("added"):
@@ -305,7 +326,8 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
         # is fully covered but research_program.md still has open questions.
         # The dispatcher must NEVER idle when the project has unfinished
         # research — pool stays full via autonomous research generation.
-        gap = max(0, REFILL_FLOOR - agentable_count - combined["added"])
+        current_agentable = _current_agentable_count()
+        gap = max(0, REFILL_FLOOR - current_agentable)
         if gap > 0:
             try:
                 from generate_research_backlog import generate as _research_gen  # type: ignore

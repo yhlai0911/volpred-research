@@ -1509,3 +1509,18 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 - **夜間策略**：不 churn-refill（會反覆 add→resolve 空轉）；留 pool warn，待白天處理。
 
 **C. dashboard_latest.json stale（承上 tick）**：`ops_dashboard.py` 只 print，靠 cron 重導寫檔；tick 巡檢改 live recompute。
+
+## 2026-06-08 01:47 — 回溯更正：00:18 refill 判斷不完整（被 hourly 8th belt 推翻）
+
+**回溯更正前一條（00:10 B 項）**：我當時補 6 篇「可寫」文章（026c8110）並 email 宣稱「池非枯竭、已解決」。**此判斷不完整且錯誤**。
+
+**真相（hourly 01:07 agent 8th belt commit 078fa9d8 抓到）**：那 5 個 K（K159/K181/K510/K737/K495）各已有 ≥2 篇 research-audience feed 文章。它們**有 results.json（資料可寫）但故事已被講過** → 寫 general-audience 版是 **narrative-arc duplicate**（[[feedback_narrative_arc_dedup]]：同邏輯 arc 換外殼算 dup），publisher dedup 會在 agent 浪費 token 生草稿後 reject。全部正確被標 failed。
+
+**我的判斷漏洞**：refill 前我只查「has results.json」（資料存在），**沒查「該 K 已有幾篇文章」（narrative-arc 飽和度）**。audience-gap（research→general）不是 refillable signal，若 research 已飽和那是 fully-told story 不是 gap。
+
+**系統自我修正**：hourly agent 獨立診斷同根因 + 上線 8th belt（refill 跳過 research-saturated K）。無有害衝突；我的 host_cron_fail 結構修正（0c9cdcd3）獨立且仍有效。
+
+**教訓（已記憶體）**：
+1. refill / 補池前 `pgrep hourly` — 深層 pool 問題時 parallel hourly agent 可能也在處理，避免 race。
+2. 判斷 K「可寫成文章」≠「有 results.json」；要查 narrative-arc 飽和度（既有文章數 + arc 是否已講）。
+3. 真結論：易寫的 uncovered K 已大致寫完 → 真需求是 **contrarian 新研究**（白天決策），非反覆 refill。

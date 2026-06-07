@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from collections import Counter
 from pathlib import Path
+from types import ModuleType
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "continue_task_dispatch.py"
 SPEC = importlib.util.spec_from_file_location("continue_task_dispatch_module", MODULE_PATH)
@@ -77,3 +79,73 @@ def test_build_report_exposes_disambiguated_pending_summary(monkeypatch):
         "blocked": 0,
         "label": "agentable 2 / main_thread 1 / blocked 0",
     }
+
+
+def test_maybe_refill_uses_live_agentable_count_not_raw_added(monkeypatch):
+    """Regression: 2026-06-08 pool exhaustion.
+
+    Stage-1 diverse_gen may add only main-thread-only paper_review tasks.
+    Those count as `added`, but they do not raise the live agentable pool.
+    `_maybe_refill` must continue into later stages based on refreshed
+    agentable pending count, otherwise research backlog never fires.
+    """
+    diverse_mod = ModuleType("generate_diverse_tasks")
+    article_mod = ModuleType("refill_task_pool")
+    research_mod = ModuleType("generate_research_backlog")
+    event_mod = ModuleType("refill_reader_facing_pool")
+
+    diverse_mod.generate = lambda dry_run=False: {
+        "ok": True,
+        "added": 2,
+        "added_ids": ["paper_review_mile_a", "paper_review_mile_b"],
+        "by_type": {"paper_review": 2},
+    }
+    event_mod.refill_event_candidates = lambda horizon_days=14: {"added": []}
+    article_mod.refill = lambda target, dry_run=False: {"ok": True, "added": 0, "reason": "no_new_candidates_passing_filter"}
+    research_mod.generate = lambda dry_run=False, max_new=0: {
+        "ok": True,
+        "added": 1,
+        "added_ids": ["K1302"],
+    }
+
+    monkeypatch.setitem(sys.modules, "generate_diverse_tasks", diverse_mod)
+    monkeypatch.setitem(sys.modules, "refill_reader_facing_pool", event_mod)
+    monkeypatch.setitem(sys.modules, "refill_task_pool", article_mod)
+    monkeypatch.setitem(sys.modules, "generate_research_backlog", research_mod)
+
+    counts = iter([0, 0, 1])
+    monkeypatch.setattr(dispatch, "_current_agentable_count", lambda: next(counts))
+
+    result = dispatch._maybe_refill(0, auto_refill=True)
+
+    assert result["added"] == 3
+    assert "K1302" in result["added_ids"]
+    assert result["by_type"]["paper_review"] == 2
+    assert result["by_type"]["experiment_autonomous"] == 1
+
+
+def test_maybe_refill_runs_event_refill_before_article_backfill(monkeypatch):
+    diverse_mod = ModuleType("generate_diverse_tasks")
+    article_mod = ModuleType("refill_task_pool")
+    research_mod = ModuleType("generate_research_backlog")
+    event_mod = ModuleType("refill_reader_facing_pool")
+
+    diverse_mod.generate = lambda dry_run=False: {"ok": True, "added": 0, "added_ids": [], "by_type": {}}
+    event_mod.refill_event_candidates = lambda horizon_days=14: {
+        "added": ["event_article_cpi_us_2026-06-11_tminus2"]
+    }
+    article_mod.refill = lambda target, dry_run=False: {"ok": True, "added": 0, "reason": "no_new_candidates_passing_filter"}
+    research_mod.generate = lambda dry_run=False, max_new=0: {"ok": True, "added": 0}
+
+    monkeypatch.setitem(sys.modules, "generate_diverse_tasks", diverse_mod)
+    monkeypatch.setitem(sys.modules, "refill_reader_facing_pool", event_mod)
+    monkeypatch.setitem(sys.modules, "refill_task_pool", article_mod)
+    monkeypatch.setitem(sys.modules, "generate_research_backlog", research_mod)
+
+    counts = iter([0, 1, 1])
+    monkeypatch.setattr(dispatch, "_current_agentable_count", lambda: next(counts))
+
+    result = dispatch._maybe_refill(0, auto_refill=True)
+
+    assert result["by_type"]["event_article"] == 1
+    assert "event_article_cpi_us_2026-06-11_tminus2" in result["added_ids"]
