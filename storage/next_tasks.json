@@ -23804,14 +23804,15 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T07:15:55+00:00"
+    "created_at": "2026-06-07T07:15:55+00:00",
+    "last_released_at": "2026-06-07T09:10:18.227100+00:00"
   },
   {
     "id": "K451_article_general_v2",
     "title": "K451: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K451 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude(文獻搜尋), 執行: Claude] K451: Overnight/intraday vol decomposition using OHLC. Refs: Hansen & Lunde (2005), Tsiakas (2008). Overnight var = 36.3% of total (surges to 56.4% during COVID). ON returns more left-skewed (-1.47 vs -0.23). Strong Granger: ON→ID F=181.0 (p<1e-40).",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K451",
@@ -23826,7 +23827,13 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T07:15:55+00:00"
+    "created_at": "2026-06-07T07:15:55+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-07T09:10:18.441451+00:00",
+    "claim_session_id": "a228948b12e5",
+    "started_at": "2026-06-07T09:10:18.964516+00:00",
+    "completed_at": "2026-06-07T09:18:45.330128+00:00",
+    "result": "mile_f2e4c991 / 1378字 / anti-ai PASS / commit 319261fc / 2 圖嵌入 / 16 數字 verified"
   },
   {
     "id": "K478_article_general_v2",
@@ -23887,7 +23894,7 @@
     "title": "K603: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K603 has verdict signal (score=0, reasons=[]) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [提出: Claude, 執行: Claude] 5 dynamic target strategies。Rate-Adjusted best (+0.035 Sharpe) but DM t=1.32 (NS)。VIX-Regime/Rolling Sharpe/Inv Pctile 全部更差。原因：target vol 在 Sharpe ratio 分子分母抵消，動態調整只增加 noise + turnover。VIX double-dipping（K4 確認）。",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K603",
@@ -23901,6 +23908,12 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-07T07:15:55+00:00"
+    "created_at": "2026-06-07T07:15:55+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T08:43:24.629181+00:00",
+    "claim_session_id": "b085daf982ac",
+    "started_at": "2026-06-07T08:43:24.720518+00:00",
+    "completed_at": "2026-06-07T08:45:55.269301+00:00",
+    "result": "Published general draft mile_b62392bc for K603; rewrote the existing draft into general-reader language, corrected tx-cost wording to 10bp, and published with a methodology-only cooldown waiver."
   }
 ]
