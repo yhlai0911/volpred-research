@@ -24658,14 +24658,20 @@
     "description": "從 Broadcom 指引未達預期觸發科技股輪動切入，分析市場對 AI 資本支出回報率的敏感度。可量化：分析半導體板塊隱含波動率與 VIX 偏斜，檢定下行風險定價。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-07T21:10:08+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-07T22:09:33.337160+00:00",
+    "claim_session_id": "d8de9aa8bc65",
+    "started_at": "2026-06-07T22:09:33.749275+00:00",
+    "completed_at": "2026-06-07T22:22:36.928346+00:00",
+    "result": "Feed published mile_22d52561；FB followup queued fb_dispatch_20260607_222204_semicon_vol"
   },
   {
     "id": "K1422_har_quantile_commodity_rerun_fair",
@@ -24673,7 +24679,7 @@
     "task_type": "experiment",
     "description": "Fix K1421 (verdict=NULL) two blocking issues identified by Codex gpt-5.4 review (knowledge entry ac45417a): (1) replace OLS point forecast套 pinball@τ as q05/q95 DM baseline with FAIR alternatives — Gaussian conditional quantile (μ+σ·Φ⁻¹(τ)), location-scale HAR-GARCH quantile, and historical-residual empirical quantile（任一即可，建議三選一同跑做 robustness）；(2) fix joint_bootstrap() p-value formula: change `p_one_sided = mean(boot_T_centered >= T_obs)` to `mean(boot_T_centered >= 0)` (or equivalent percentile-recentered test). Re-evaluate GLD/USO/UNG with corrected design. Pre-registered prediction: 若 fair baseline 下 DM q05/q95 仍 significant POS (HLN p<0.10) → 真有 tail forecasting improvement; 若 not significant → K1402→K1403→K1421 commodity lineage formal conclusion 推翻，需在 paper / feed 回溯更正。Lookahead PASS (verified by Codex), DM HLN PASS — 不需重做。\n\nDeliverables: experiments/k1422/{README.md, k1422.py, k1422_results.json}; updated knowledge entry; commit message containing K1422 + linked K1421 retract decision.\n\nFair comparison HARD: 不可加 Gaussian baseline 但 QR 仍在自己 criterion 上 dominate（這是設計性 advantage 非 forecasting skill）；建議 baseline 用 OLS HAR 點 forecast + sigma from rolling 60d residual std → conditional Gaussian quantile，這跟 QR 兩種模型都用相同 HAR 特徵但 distributional assumption 不同，比較成立。\n\nFalsifiability: 若所有 3 fair baselines 下 DM 都 NOT significant → write NULL + retract K1402-K1421 lineage 的 commodity tail claim。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "main_thread_followup",
     "created_at": "2026-06-08T05:13:00+08:00",
     "lineage": [
@@ -24682,6 +24688,27 @@
       "K1421"
     ],
     "blocked_reason": null,
-    "claimed_by": null
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T21:43:05.133496+00:00",
+    "claim_session_id": "38a624e746eb",
+    "started_at": "2026-06-07T21:43:05.239394+00:00",
+    "completed_at": "2026-06-07T21:47:42.732396+00:00",
+    "result": "Built and ran K1422 fair-rerun artifact with 3 HAR-based quantile baselines + centered-null bootstrap. Result overturns K1421 artifact but not the economic claim: K1421 remains invalid due design bugs, while K1422 formal PASS survives in 3/3 fair baselines (q05 3/3 assets sig POS, q95 2/3; joint p<=0.001). Added knowledge entry ac45422a and experiments/k1422/{README.md,k1422.py,k1422_results.json}."
+  },
+  {
+    "id": "fb_dispatch_20260607_222204_semicon_vol",
+    "title": "[FB dispatch] 半導體 vol 文 Ivan Lai 同步發佈 + 留言貼連結",
+    "description": "走 Claude in Chrome MACBOOK 帳號發到 Ivan Lai FB 個人帳號。fb_post_draft 已存在 storage/reports/feed.json 的文章 mile_22d52561；FB 文案請讀 fb_post_draft 欄位（若無，依 trending-repost skill fb-ivanlai-tone.md 重寫 200-400 字版本）；發出後第一則留言貼 https://volpred.zeabur.app/v3/reports/mile_22d52561；完成後跑 uv run python scripts/mark_fb_post_status.py --mile-id mile_22d52561 --status success，並記錄 fb_post_url。Report id: mile_22d52561",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-06-08T06:22:00+00:00",
+    "source": "trending_repost_2026_06_08_ai風險_followup",
+    "tags": [
+      "fb_dispatch",
+      "reader_facing",
+      "followup",
+      "half_conductor_vol"
+    ]
   }
 ]
