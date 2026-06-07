@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-08 Refill_task_pool 8th belt — research-saturated K narrative-arc dup
+
+**問題**：hourly-00 codex-cli refill (commit 026c8110) 補 6 個「writable uncovered K」入池，hourly-01 上線發現 5/5 pending 全是 narrative-arc dup（K159/K181/K495/K510/K737 — feed.json 已有 research-tagged 文章覆蓋同主題）。
+
+**現象**：5 個 task 全 dispatch 出去會產出 5 個 narrative-arc dup 文章；publisher 端 audience+duplicate gate 會擋 publish 但 agent token 已燒。
+
+**過程**：7 belts 都沒擋住，因為 — `_kids_with_general_article` 只看 audience=None/general（dup 文章 audience=research）；`_kids_with_terminal_article_attempts ∩ _any_feed_coverage_kids` 需要先前 terminal task（這些 K 都是首次 dispatch）；其他 belts 跟 narrative arc 無關。
+
+**結構性 root cause**：refill 把「audience-gap」當主要 signal，但**沒有 narrative arc saturation 概念** — 一個 K 即使只有 research 文章，若已有多篇（≥2），narrative 已飽和，「general companion」只會被 publisher dedup 攔下浪費 agent token。
+
+**解決方法**：scripts/refill_task_pool.py 加 `_is_research_saturated(cand)` helper + 第 8 belt — 任何 covered_by 含 ≥2 個 research-audience（published/archived/draft/scheduled）的 K，無論 audiences_covered 缺哪個 audience，refill 都跳過。tests/test_refill_task_pool.py 加 `test_refill_skips_research_saturated_k` regression（K159 3-research 飽和 vs K1056 1-research 合格）。Followup：`platform_ops_refill_pool_exhaustion_20260608` 處理 candidate source 擴充 + audit_pending 196 K 是否該加 expiry recheck + K181 narrative-arc dup（不在 experiment_refs 的同主題 K447/K979/K184 case，需 semantic similarity）。
+
+**Strike count**：refill bug strike 2/3（strike 1 = 2026-06-07 hourly-00 "refill bug audit — 7 invalid retry-v2 cleared"）。第三次同 root cause 出現 → 觸發底層重構（candidate source 改 narrative-arc-first 而非 audience-gap-first）。
+
+
+
 主檔保留近 30 天 incident（2026-03-27 之後）。更舊條目按月歸檔：
 
 - [error_log_archive_2026-03.md](error_log_archive_2026-03.md) — 2026-03-16 至 2026-03-25（26 條）

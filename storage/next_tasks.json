@@ -24303,7 +24303,7 @@
     "title": "[platform_ops] Audit refill_task_pool retry-v2 為何推已 covered K",
     "description": "2026-06-08 00:08 hourly fire 發現 7 條 K_article_general_v2 retry-v2 pending 全部 invalid：K676/K696/K707/K717/K904 5 條已在 feed.json 有 published article（mile_d9d88717/1f0e3bb0/64b8e390/8e899fba/3b689404），K506 卡 EWT 資料 retry_in_progress 無新數字，K709 FAIL_PROVENANCE。已逐條 mark succeeded/blocked。\n\nRoot cause 待查：publication_candidates.json 顯示 updated_at=null + top_10_uncovered 只剩 1 條 K267，但 refill_task_pool.py 的 _kids_with_general_article belt 應已過濾這類。需要 grep next_tasks.json 看這 7 條 created_at + audiences_covered 當時值，判斷是 (a) candidates stale 沒重 build (b) belt 邏輯 v2 retry 路徑漏 check covered (c) 其他 reproduction path。\n\nFix scope:\n1. 跑 uv run python scripts/build_publication_candidates.py 重 build candidates\n2. 看 refill_task_pool.py L490+ retry-v2 推進路徑是否仍依賴 audiences_covered=[]\n3. 加 regression test: refill 不能對 feed.json 已有 mile_*.experiment_refs 含 K_id 的 K 推 v2\n4. 跑 dry-run 確認新 pool 不再推這 7 條",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "agent_discovered",
     "tags": [
@@ -24315,14 +24315,16 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-07T16:13:52.916079+00:00",
     "claim_session_id": "4f55038ff7c8",
-    "started_at": "2026-06-07T16:14:02.131430+00:00"
+    "started_at": "2026-06-07T16:14:02.131430+00:00",
+    "completed_at": "2026-06-07T16:19:12.511955+00:00",
+    "result": "Patched refill_task_pool retry-v2 dedup: if a K already has feed coverage and a succeeded *_article_general task, auto-refill no longer creates *_article_general_v2. Added regression test, rebuilt publication_candidates, and dry-run now proposes only K524 instead of stale K506/K676/K696/K707/K709/K717/K904 retries."
   },
   {
     "id": "K159_article_general",
     "title": "K159: write general-audience article (auto-discovered uncovered K)",
     "description": "K K159 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (vt 30d=13>8)']) but no general article in feed.json.  Verdict preview: EVT-GPD best-calibrated VaR (mean abs error 0.0007 at 1%, 0.0005 at 2.5%), 12/12 Kupiec pass, but DQ/Trinity same as Student-t EVT-GPD Kupiec pass rate: 12/12 vs Normal 9/12, Student-t 12/12 EVT-GPD Trinity (Kupiec+CC+DQ) pass rate: 3/12 At 1.0%: EVT mean violation rate = 0.0107 ",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K159",
@@ -24332,14 +24334,19 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-07T16:17:59+00:00"
+    "created_at": "2026-06-07T16:17:59+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-07T17:10:45.084692+00:00",
+    "claim_session_id": "4bc7646800e7",
+    "completed_at": "2026-06-07T17:10:45.298082+00:00",
+    "result": "dup: mile_c77404a7 'EVT-GPD VaR：12/12 Kupiec...' experiment_refs=[K159] 已 covered；refill bug (commit 026c8110 標稱 uncovered)"
   },
   {
     "id": "K1202_article_general",
     "title": "K1202: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1202 has verdict signal (score=0, reasons=['cluster cooldown penalty (vt 30d=13>8)']) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1202",
@@ -24359,14 +24366,19 @@
       "audience-general"
     ],
     "topic_cluster": "vt",
-    "created_at": "2026-06-07T16:17:59+00:00"
+    "created_at": "2026-06-07T16:17:59+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T16:19:26.076027+00:00",
+    "claim_session_id": "bd1a875311df",
+    "completed_at": "2026-06-07T16:20:52.363290+00:00",
+    "result": "Invalid low-score audience-gap task from pre-fix refill fallback. Refill now requires score>=4 for audience-gap fallback, so this queue item was closed without article creation."
   },
   {
     "id": "K181_article_general",
     "title": "K181: write general-audience article (auto-discovered uncovered K)",
     "description": "K K181 has verdict signal (score=0, reasons=['mixed/non-novel', 'cluster cooldown penalty (garch 30d=18>10)']) but no general article in feed.json.  Verdict preview: Mixed results — partial corr sig in 4/4 horizons, GARCH-X no help, VT overlay Harvey FAIL",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K181",
@@ -24377,14 +24389,19 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-07T16:17:59+00:00"
+    "created_at": "2026-06-07T16:17:59+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-07T17:12:22.460860+00:00",
+    "claim_session_id": "0808fca2a6c6",
+    "completed_at": "2026-06-07T17:12:22.762111+00:00",
+    "result": "dup: K447/K979/K184 已 cover SKEW+VIX 充分性 narrative arc (mile_1b2ad1f8, mile_f46b6320, mile_53eed970, mile_f572cc94)"
   },
   {
     "id": "K510_article_general",
     "title": "K510: write general-audience article (auto-discovered uncovered K)",
     "description": "K K510 has verdict signal (score=0, reasons=['cluster cooldown penalty (garch 30d=18>10)']) but no general article in feed.json.  Verdict preview: [提出: 用戶, 執行: Claude] K510: L&L (1990) replication. Persistence drops 17% IS but OOS all worse (+2-11%). Volume is contemporaneous MDH proxy, not predictive.",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K510",
@@ -24396,14 +24413,19 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-07T16:17:59+00:00"
+    "created_at": "2026-06-07T16:17:59+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-07T17:10:46.718043+00:00",
+    "claim_session_id": "65a79e813059",
+    "completed_at": "2026-06-07T17:10:47.335373+00:00",
+    "result": "dup: feed.json 已有 K510 experiment_refs；refill bug (commit 026c8110 標稱 uncovered)"
   },
   {
     "id": "K737_article_general",
     "title": "K737: write general-audience article (auto-discovered uncovered K)",
     "description": "K K737 has verdict signal (score=1, reasons=['PASS/Harvey-significant', 'cluster cooldown penalty (spy 30d=96>10)']) but no general article in feed.json.  Verdict preview: [提出: Claude, 執行: Claude] K737 Maximum Diversification Portfolio: tested 4 methods (EW, MinVar, MaxDiv, RiskParity) × 7 asset subsets (2-9 assets) vs 50/50 SPY/GLD baseline. COMMON_START 2023-01-04 to 2026-03-27. Key findings: (1) NO multi-asset strategy beats 50/50 SPY/GLD on Sha",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K737",
@@ -24420,14 +24442,19 @@
       "audience-general"
     ],
     "topic_cluster": "spy",
-    "created_at": "2026-06-07T16:17:59+00:00"
+    "created_at": "2026-06-07T16:17:59+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-07T17:10:48.115126+00:00",
+    "claim_session_id": "5d87f256fed3",
+    "completed_at": "2026-06-07T17:10:48.502026+00:00",
+    "result": "dup: feed.json 已有 K737 experiment_refs；refill bug (commit 026c8110 標稱 uncovered)"
   },
   {
     "id": "K495_article_general",
     "title": "K495: write general-audience article (auto-discovered uncovered K)",
     "description": "K K495 has verdict signal (score=0, reasons=['cluster cooldown penalty (vix 30d=163>15)']) but no general article in feed.json.  Verdict preview: c1_gamma_sufficient: Gamma-based selection within 5% of oracle for 15/15 assets c2_exact_match_rate: 5/15 exact matches (33%) c3_vix_equity_only: VIX as exogenous variable primarily benefits equity assets CONFIRMED Reference: Glosten, Jagannathan, Runkle (1993) On the Relation be",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K495",
@@ -24437,6 +24464,27 @@
       "audience-general"
     ],
     "topic_cluster": "vix",
-    "created_at": "2026-06-07T16:17:59+00:00"
+    "created_at": "2026-06-07T16:17:59+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-07T17:12:23.878494+00:00",
+    "claim_session_id": "088ad101eb51",
+    "completed_at": "2026-06-07T17:12:24.208601+00:00",
+    "result": "dup: mile_d002c8d5 'K495: 跨資產波動率模型選擇指南 — GJR γ 係數作為 15 資產、6 類別的充分統計量' 已 cover"
+  },
+  {
+    "id": "platform_ops_refill_pool_exhaustion_20260608",
+    "title": "[platform_ops] Refill candidate exhaustion + audit_pending 196 K's → 擴充 candidate source",
+    "description": "8th belt 上線後（commit pending），publication_candidates.json 唯一 uncovered K (K267) 已 blocked deprecated，pool 入 0。同時 audit_pending_kids 累積 196 K（terminal task + feed coverage），全部被 refill 排除。任務：(1) 評估 _kids_with_terminal_article_attempts 是否應加 expiry（>30 day 後 recheck），(2) 擴充 candidate source 到 research_program.md backlog / event_jobs / paper R1 follow-ups，(3) 補 narrative-arc dup detection (K181 case：K447/K979/K184 narrative dup 不在 experiment_refs)。背景：hourly-00 codex-cli refill 5/6 dup 是這次 incident，3-strike trigger 在 docs/error_log.md。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "incident_followup",
+    "tags": [
+      "refill",
+      "candidate-source",
+      "narrative-arc-dup",
+      "audit-pending-exhaustion"
+    ],
+    "created_at": "2026-06-07T17:30:00+00:00"
   }
 ]

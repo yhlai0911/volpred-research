@@ -428,6 +428,45 @@ def _is_retracted_or_overturned_candidate(cand: dict) -> bool:
     return any(token in merged for token in needles)
 
 
+# 2026-06-08 K159/K181/K495/K510/K737 incident (3-strike trigger on refill bug):
+# hourly-00 codex-cli refill picked 5 K's whose only difference from the existing
+# research-tagged coverage was audience (research vs general). Narrative arc was
+# identical (same K-id, same conclusion summary, same data); adding a "general
+# companion" would have produced 5 duplicates by the publisher's narrative-arc
+# rule but the refill belts didn't catch it because _kids_with_general_article
+# only matched audience=None/general and audit_pending_kids required a prior
+# terminal task. The 5 K's had heavy archived+published research coverage with no
+# prior task → all gates whiffed.
+_SATURATION_THRESHOLD = 2
+
+
+def _is_research_saturated(cand: dict) -> bool:
+    """True if K already has >= _SATURATION_THRESHOLD research articles in
+    feed.json (published+archived combined). Adding a "general companion" in
+    this state is a narrative-arc dup, not an audience gap.
+
+    Reasoning: a K with multiple research articles has been told once + reframed
+    + (often) retracted/rewritten. The user-facing story is well-trodden. The
+    publisher's 3-layer dedup (candidates / grep / matrix) and narrative-arc
+    rule will reject the new draft regardless; refill should not waste an agent
+    slot generating it. Better to defer refill to a fresh K with no coverage.
+
+    Saturation-aware refill is intentionally PER-K, not per-cluster — the
+    7th belt (_breached_clusters) handles cluster-level over-representation.
+    """
+    covered_by = cand.get("covered_by") or []
+    research_count = 0
+    for art in covered_by:
+        if not isinstance(art, dict):
+            continue
+        if art.get("audience") != "research":
+            continue
+        if art.get("status") not in ("published", "archived", "draft", "scheduled"):
+            continue
+        research_count += 1
+    return research_count >= _SATURATION_THRESHOLD
+
+
 def _make_article_task(cand: dict, priority: int, retry_suffix: str = "") -> dict:
     k_id = cand["k_id"]
     audiences_covered = cand.get("audiences_covered") or []
@@ -526,6 +565,8 @@ def refill(target: int, dry_run: bool = False) -> dict:
         kid = cand.get("k_id")
         if not kid or kid in seen_in_pool:
             continue
+        if int(cand.get("score") or 0) < 4:
+            continue
         audiences_covered = cand.get("audiences_covered") or []
         collisions = cand.get("topic_family_collisions") or {}
         needed_audience = "general" if "general" not in audiences_covered else "research"
@@ -608,6 +649,13 @@ def refill(target: int, dry_run: bool = False) -> dict:
         if breached and _cand_cluster(cand) in breached:
             deferred_dominant.append(cand)
             continue
+        # 8th belt (2026-06-08): skip K already research-saturated. Audience-gap
+        # (research-only → general) is a real signal only when the K has 1
+        # research article worth a reader-facing reframe. ≥2 research articles
+        # means the story has been told, reframed, possibly retracted — the
+        # narrative-arc dedup will reject any new general draft.
+        if _is_research_saturated(cand):
+            continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         # Pick retry suffix if base id already used by terminal task
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
@@ -626,6 +674,9 @@ def refill(target: int, dry_run: bool = False) -> dict:
         if len(new_entries) >= target:
             break
         kid = cand["k_id"]
+        # 8th belt also applies to deferred dominant pool (2026-06-08).
+        if _is_research_saturated(cand):
+            continue
         audiences_covered = cand.get("audiences_covered") or []
         needed_audience = "general" if "general" not in audiences_covered else "research"
         priority = _score_to_priority(int(cand.get("score") or 0))

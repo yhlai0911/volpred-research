@@ -401,3 +401,152 @@ def test_refill_skips_general_retry_v2_when_feed_already_has_k_coverage(tmp_path
     assert result["reason"] == "no_new_candidates_passing_filter"
     data = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert [t["id"] for t in data] == ["K676_article_general"]
+
+
+def test_refill_fallback_audience_gap_requires_score_threshold(tmp_path, monkeypatch):
+    """Regression: 2026-06-08 low-signal audience-gap leakage.
+
+    Fallback audience-gap scanning should not enqueue low-score K's that only
+    have research coverage. Otherwise paper appendix / guide / score-0 null
+    studies flood the general article queue.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    candidates = tmp_path / "storage" / "publication_candidates.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    candidates.write_text(
+        json.dumps(
+            {
+                "top_10_uncovered": [],
+                "missing_research_top5": [],
+                "missing_general_top5": [],
+                "candidates": [
+                    {
+                        "k_id": "K1202",
+                        "title": "paper appendix verification",
+                        "score": 0,
+                        "reasons": [],
+                        "verdict_preview": "",
+                        "audiences_covered": ["research"],
+                        "covered_by": [
+                            {
+                                "id": "mile_cbb93ff8",
+                                "title": "K1202 research article",
+                                "status": "published",
+                                "audience": "research",
+                            }
+                        ],
+                        "topic_family_collisions": {"general": [], "research": []},
+                    },
+                    {
+                        "k_id": "K1056",
+                        "title": "legit missing general",
+                        "score": 4,
+                        "reasons": ["PASS"],
+                        "verdict_preview": "ok",
+                        "audiences_covered": ["research"],
+                        "covered_by": [
+                            {
+                                "id": "mile_some_research",
+                                "title": "K1056 research article",
+                                "status": "published",
+                                "audience": "research",
+                            }
+                        ],
+                        "topic_family_collisions": {"general": [], "research": []},
+                    },
+                ],
+            },
+            ensure_ascii=False,
+        ) + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
+    monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+
+    result = MODULE.refill(target=5, dry_run=False)
+
+    assert result["ok"] is True
+    assert result["added"] == 1
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert [t["id"] for t in data] == ["K1056_article_general"]
+
+
+def test_refill_skips_research_saturated_k(tmp_path, monkeypatch):
+    """Regression: 2026-06-08 K159/K495/K510/K737 incident.
+
+    hourly-00 codex-cli refill enqueued 5 K-article-general tasks where each K
+    already had ≥2 research-audience feed articles (published+archived). All 5
+    became narrative-arc duplicates — the K's story had been told under
+    research audience and pulling/reframing it had already happened.
+
+    8th belt (_is_research_saturated): K with ≥2 research articles in
+    feed (published / archived / draft / scheduled) is research-saturated.
+    Refill should skip a general companion for these K's; the audience gate
+    and duplicate gate were not the right enforcement layer because the agent
+    had already spent tokens producing the draft.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    candidates = tmp_path / "storage" / "publication_candidates.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    candidates.write_text(
+        json.dumps(
+            {
+                "top_10_uncovered": [],
+                "missing_research_top5": [],
+                "missing_general_top5": [],
+                "candidates": [
+                    {
+                        "k_id": "K159",
+                        "title": "EVT-GPD VaR comparison",
+                        "score": 4,
+                        "reasons": ["PASS"],
+                        "verdict_preview": "Mixed",
+                        "audiences_covered": ["research"],
+                        "covered_by": [
+                            {"id": "a", "title": "x", "status": "published", "audience": "research"},
+                            {"id": "b", "title": "y", "status": "archived", "audience": "research"},
+                            {"id": "c", "title": "z", "status": "archived", "audience": "research"},
+                        ],
+                        "topic_family_collisions": {"general": [], "research": []},
+                    },
+                    {
+                        "k_id": "K1056",
+                        "title": "legit single research coverage",
+                        "score": 4,
+                        "reasons": ["PASS"],
+                        "verdict_preview": "ok",
+                        "audiences_covered": ["research"],
+                        "covered_by": [
+                            {"id": "d", "title": "w", "status": "published", "audience": "research"},
+                        ],
+                        "topic_family_collisions": {"general": [], "research": []},
+                    },
+                ],
+            },
+            ensure_ascii=False,
+        ) + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
+    monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+
+    result = MODULE.refill(target=5, dry_run=False)
+
+    assert result["ok"] is True
+    assert result["added"] == 1
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    ids = [t["id"] for t in data]
+    assert "K1056_article_general" in ids
+    assert "K159_article_general" not in ids, (
+        f"K159 with 3 research articles should be skipped as saturated; got {ids}"
+    )
