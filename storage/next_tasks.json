@@ -24476,7 +24476,7 @@
     "title": "[platform_ops] Refill candidate exhaustion + audit_pending 196 K's → 擴充 candidate source",
     "description": "8th belt 上線後（commit pending），publication_candidates.json 唯一 uncovered K (K267) 已 blocked deprecated，pool 入 0。同時 audit_pending_kids 累積 196 K（terminal task + feed coverage），全部被 refill 排除。任務：(1) 評估 _kids_with_terminal_article_attempts 是否應加 expiry（>30 day 後 recheck），(2) 擴充 candidate source 到 research_program.md backlog / event_jobs / paper R1 follow-ups，(3) 補 narrative-arc dup detection (K181 case：K447/K979/K184 narrative dup 不在 experiment_refs)。背景：hourly-00 codex-cli refill 5/6 dup 是這次 incident，3-strike trigger 在 docs/error_log.md。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "platform_ops",
     "source": "incident_followup",
     "tags": [
@@ -24485,6 +24485,10 @@
       "narrative-arc-dup",
       "audit-pending-exhaustion"
     ],
-    "created_at": "2026-06-07T17:30:00+00:00"
+    "created_at": "2026-06-07T17:30:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T17:21:28.623914+00:00",
+    "claim_session_id": "981c4c05b322",
+    "started_at": "2026-06-07T17:21:40.451055+00:00"
   }
 ]
