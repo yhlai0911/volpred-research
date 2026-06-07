@@ -1,761 +1,424 @@
 {
   "experiment_id": "K501",
-  "title": "SSVS for Return Prediction (Welch-Goyal Framework)",
-  "attribution": "[\u63d0\u51fa: \u7528\u6236(\u65b0\u7814\u7a76\u65b9\u5411), \u57f7\u884c: Claude]",
-  "hypothesis": "SSVS-selected variables can predict OOS returns, especially for Taiwan (K461: SPY_ret PIP=1.000)",
-  "references": [
-    "Welch & Goyal (2008) \"Comprehensive Look at Equity Premium Prediction\" RFS",
-    "So, Chen, Liu (2006) \"Best Subset Selection of ARX\" JRSS-C 55(2):201-224",
-    "Campbell & Thompson (2008) \"Predicting Excess Stock Returns OOS\" RFS",
-    "Harvey, Liu, Zhu (2016) t>3.0 threshold",
-    "K461: SSVS Taiwan SPY_ret PIP=1.000 (t=10.81)",
-    "K433: SSVS SPY empty model wins for mean equation"
-  ],
-  "data": {
-    "source": "yfinance (empirical)",
-    "assets": [
+  "title": "K501 retry: timing-aligned return prediction with tradable Taiwan implementation",
+  "timestamp": "2026-06-07T15:11:35.678912+00:00",
+  "data_source": {
+    "primary": "local sqlite cache: /Users/yhlai0911/Desktop/volpred-research/data/cache/price_cache.db",
+    "tickers_loaded": [
       "SPY",
+      "QQQ",
       "0050.TW",
-      "QQQ"
+      "^VIX",
+      "TLT"
     ],
-    "oos_start": "2020-01-02",
-    "min_is": 1000,
-    "ridge_alpha": 1.0
+    "period": "2016-01-04 to 2026-06-06",
+    "oos_start": "2020-01-02"
   },
-  "descriptive_stats": {
-    "SPY": {
-      "asset": "SPY",
-      "n_total": 4769,
-      "mean_pct": 0.038953,
-      "std_pct": 1.246312,
-      "skewness": -0.2926,
-      "excess_kurtosis": 13.8554,
-      "min_pct": -11.5887,
-      "max_pct": 13.5577,
-      "pct_positive": 54.98,
-      "adf_stat": -23.3338,
-      "adf_p": 0.0,
-      "ljung_box_5": 0.0,
-      "ljung_box_10": 0.0,
-      "ljung_box_20": 0.0,
-      "autocorr_1": -0.104408
-    },
-    "0050.TW": {
-      "asset": "0050.TW",
-      "n_total": 4195,
-      "mean_pct": 0.02987,
-      "std_pct": 2.486133,
-      "skewness": -41.5632,
-      "excess_kurtosis": 2321.8549,
-      "min_pct": -138.8853,
-      "max_pct": 15.311,
-      "pct_positive": 51.11,
-      "adf_stat": -65.1573,
-      "adf_p": 0.0,
-      "ljung_box_5": 0.88304,
-      "ljung_box_10": 0.901942,
-      "ljung_box_20": 0.965883,
-      "autocorr_1": -0.006337
-    },
-    "QQQ": {
-      "asset": "QQQ",
-      "n_total": 4769,
-      "mean_pct": 0.057053,
-      "std_pct": 1.404107,
-      "skewness": -0.2546,
-      "excess_kurtosis": 7.4473,
-      "min_pct": -12.7592,
-      "max_pct": 11.4798,
-      "pct_positive": 55.53,
-      "adf_stat": -23.2272,
-      "adf_p": 0.0,
-      "ljung_box_5": 0.0,
-      "ljung_box_10": 0.0,
-      "ljung_box_20": 0.0,
-      "autocorr_1": -0.088717
-    }
-  },
+  "methodology_changes_vs_original": [
+    "Taiwan predictive target split into same-day close-to-close info channel and same-day open-to-close tradable channel.",
+    "0050.TW open and close cleaned with clean_tw50_data before feature engineering.",
+    "Tradable strategy uses long/cash at TW open and deducts 18.55bp round-trip cost on every position change.",
+    "Artifact path unified to experiments/k501/k501_return_prediction_results.json.",
+    "Legacy I8 timing-bias citation replaced with canonical K521 artifact provenance."
+  ],
   "asset_results": {
     "SPY": {
-      "n_oos": 1565,
-      "oos_period": "2020-01-02 to 2026-03-25",
-      "ssvs": {
+      "selected_vars": [],
+      "pip_dict": {
+        "ret_L1": {
+          "PIP": 0.1877,
+          "selected": false
+        },
+        "ret_L2": {
+          "PIP": 0.1324,
+          "selected": false
+        },
+        "vix_level_L1": {
+          "PIP": 0.196,
+          "selected": false
+        },
+        "vix_change_L1": {
+          "PIP": 0.1573,
+          "selected": false
+        },
+        "tlt_ret_L1": {
+          "PIP": 0.3025,
+          "selected": false
+        },
+        "qqq_ret_L1": {
+          "PIP": 0.1248,
+          "selected": false
+        },
+        "vol_surprise_L1": {
+          "PIP": 0.2173,
+          "selected": false
+        }
+      },
+      "evaluation": {
+        "hist_mean": {
+          "oos_r2_pct": 0.0,
+          "hit_rate": 0.5514,
+          "binom_p": 3.9e-05,
+          "dm_stat": 0.0,
+          "dm_p": 0.0,
+          "cw_stat": 0.0,
+          "cw_p": 0.0,
+          "passes_harvey": false
+        },
+        "ar1": {
+          "oos_r2_pct": 1.0493,
+          "hit_rate": 0.5235,
+          "binom_p": 0.061889,
+          "dm_stat": 0.508,
+          "dm_p": 0.611438,
+          "cw_stat": 2.149,
+          "cw_p": 0.015816,
+          "passes_harvey": false
+        },
+        "ssvs_ols": {
+          "oos_r2_pct": 0.0,
+          "hit_rate": 0.5514,
+          "binom_p": 3.9e-05,
+          "dm_stat": 0.0,
+          "dm_p": 1.0,
+          "cw_stat": 0.0,
+          "cw_p": 0.5,
+          "passes_harvey": false
+        },
+        "ridge": {
+          "oos_r2_pct": -2.9675,
+          "hit_rate": 0.5366,
+          "binom_p": 0.003575,
+          "dm_stat": -1.516,
+          "dm_p": 0.129517,
+          "cw_stat": 0.7389,
+          "cw_p": 0.229975,
+          "passes_harvey": false
+        },
+        "logistic_direction": {
+          "oos_r2_pct": -0.1966,
+          "hit_rate": 0.5514,
+          "binom_p": 3.9e-05,
+          "dm_stat": -0.4327,
+          "dm_p": 0.665217,
+          "cw_stat": 0.1379,
+          "cw_p": 0.445166,
+          "passes_harvey": false
+        }
+      }
+    },
+    "QQQ": {
+      "selected_vars": [],
+      "pip_dict": {
+        "ret_L1": {
+          "PIP": 0.2482,
+          "selected": false
+        },
+        "ret_L2": {
+          "PIP": 0.1389,
+          "selected": false
+        },
+        "vix_level_L1": {
+          "PIP": 0.1396,
+          "selected": false
+        },
+        "vix_change_L1": {
+          "PIP": 0.1418,
+          "selected": false
+        },
+        "spy_ret_L1": {
+          "PIP": 0.1413,
+          "selected": false
+        },
+        "tlt_ret_L1": {
+          "PIP": 0.168,
+          "selected": false
+        },
+        "vol_surprise_L1": {
+          "PIP": 0.139,
+          "selected": false
+        }
+      },
+      "evaluation": {
+        "hist_mean": {
+          "oos_r2_pct": 0.0,
+          "hit_rate": 0.562,
+          "binom_p": 1e-06,
+          "dm_stat": 0.0,
+          "dm_p": 0.0,
+          "cw_stat": 0.0,
+          "cw_p": 0.0,
+          "passes_harvey": false
+        },
+        "ar1": {
+          "oos_r2_pct": 1.1364,
+          "hit_rate": 0.518,
+          "binom_p": 0.155934,
+          "dm_stat": 0.6015,
+          "dm_p": 0.547531,
+          "cw_stat": 2.6673,
+          "cw_p": 0.003824,
+          "passes_harvey": false
+        },
+        "ssvs_ols": {
+          "oos_r2_pct": 0.0,
+          "hit_rate": 0.562,
+          "binom_p": 1e-06,
+          "dm_stat": 0.0,
+          "dm_p": 1.0,
+          "cw_stat": 0.0,
+          "cw_p": 0.5,
+          "passes_harvey": false
+        },
+        "ridge": {
+          "oos_r2_pct": -1.3421,
+          "hit_rate": 0.526,
+          "binom_p": 0.038797,
+          "dm_stat": -1.2038,
+          "dm_p": 0.228674,
+          "cw_stat": 1.7095,
+          "cw_p": 0.043677,
+          "passes_harvey": false
+        },
+        "logistic_direction": {
+          "oos_r2_pct": 0.0059,
+          "hit_rate": 0.562,
+          "binom_p": 1e-06,
+          "dm_stat": 0.0135,
+          "dm_p": 0.989193,
+          "cw_stat": 0.7312,
+          "cw_p": 0.232336,
+          "passes_harvey": false
+        }
+      }
+    },
+    "0050.TW": {
+      "timing_definitions": {
+        "non_tradable_channel": "SPY previous close available before TW open -> explains TW same-day close-to-close return (contains overnight gap).",
+        "tradable_channel": "SPY previous close available before TW open -> trade 0050.TW at TW open, realize same-day open-to-close return net of 18.55bp round-trip cost."
+      },
+      "data_quality": {
+        "cleaning_applied": "clean_tw50_data on both open and close",
+        "close_to_close_min_pct": -10.5361,
+        "close_to_close_kurtosis": 7.9744,
+        "open_to_close_min_pct": -6.7741,
+        "open_to_close_kurtosis": 6.2343
+      },
+      "non_tradable_info_channel": {
+        "target": "TW same-day close-to-close return",
+        "selected_vars": [
+          "ret_L1",
+          "spy_mom5_prev"
+        ],
         "pip_dict": {
           "ret_L1": {
-            "PIP": 0.1319,
-            "selected": false
-          },
-          "ret_L2": {
-            "PIP": 0.8273,
+            "PIP": 0.8234,
             "selected": true
           },
-          "vix_level_L1": {
-            "PIP": 0.1188,
+          "ret_L2": {
+            "PIP": 0.2975,
             "selected": false
           },
-          "vix_change_L1": {
-            "PIP": 0.466,
-            "selected": false
-          },
-          "term_spread_L1": {
+          "spy_ret_prev": {
             "PIP": 0.1362,
             "selected": false
           },
-          "credit_spread_L1": {
-            "PIP": 0.1253,
+          "spy_mom5_prev": {
+            "PIP": 0.9983,
+            "selected": true
+          },
+          "vix_level_prev": {
+            "PIP": 0.1926,
+            "selected": false
+          },
+          "vix_change_prev": {
+            "PIP": 0.4583,
             "selected": false
           },
           "vol_surprise_L1": {
-            "PIP": 0.4423,
-            "selected": false
-          },
-          "mom5_L1": {
-            "PIP": 0.3918,
-            "selected": false
-          },
-          "ret_abs_L1": {
-            "PIP": 0.1177,
+            "PIP": 0.1649,
             "selected": false
           }
         },
-        "n_selected": 1,
+        "evaluation": {
+          "hist_mean": {
+            "oos_r2_pct": 0.0,
+            "hit_rate": 0.5196,
+            "binom_p": 0.128341,
+            "dm_stat": 0.0,
+            "dm_p": 0.0,
+            "cw_stat": 0.0,
+            "cw_p": 0.0,
+            "passes_harvey": false
+          },
+          "ar1": {
+            "oos_r2_pct": -0.4458,
+            "hit_rate": 0.5074,
+            "binom_p": 0.577171,
+            "dm_stat": -2.6849,
+            "dm_p": 0.007254,
+            "cw_stat": -1.7435,
+            "cw_p": 0.959375,
+            "passes_harvey": false
+          },
+          "ssvs_ols": {
+            "oos_r2_pct": 8.0863,
+            "hit_rate": 0.5883,
+            "binom_p": 0.0,
+            "dm_stat": 4.1172,
+            "dm_p": 3.8e-05,
+            "cw_stat": 6.6383,
+            "cw_p": 0.0,
+            "passes_harvey": true
+          },
+          "ridge": {
+            "oos_r2_pct": 8.0977,
+            "hit_rate": 0.5825,
+            "binom_p": 0.0,
+            "dm_stat": 2.9153,
+            "dm_p": 0.003553,
+            "cw_stat": 4.7081,
+            "cw_p": 1e-06,
+            "passes_harvey": false
+          },
+          "logistic_direction": {
+            "oos_r2_pct": 6.0756,
+            "hit_rate": 0.5979,
+            "binom_p": 0.0,
+            "dm_stat": 6.0332,
+            "dm_p": 0.0,
+            "cw_stat": 7.7532,
+            "cw_p": 0.0,
+            "passes_harvey": true
+          }
+        },
+        "best_model_by_oos_r2": "ridge"
+      },
+      "tradable_open_to_close_channel": {
+        "target": "TW same-day open-to-close return",
         "selected_vars": [
-          "ret_L2"
+          "spy_ret_prev"
         ],
-        "pip_stability": {
-          "initial_selected": [
-            "ret_L2"
-          ],
-          "midpoint_selected": [
-            "vix_change_L1",
-            "vol_surprise_L1"
-          ],
-          "pip_correlation": 0.4341376080647979
-        }
-      },
-      "evaluation": {
-        "hist_mean": {
-          "oos_r2_pct": 0.0,
-          "msfe_ratio": 1.0,
-          "hit_rate": 0.5489,
-          "hit_rate_n": 1563,
-          "binom_p": 0.000119,
-          "dm_stat": 0.0,
-          "dm_p": 1.0,
-          "cw_stat": 0.0,
-          "cw_p": 1.0,
-          "strategy_sharpe_ann": 0.6175,
-          "strategy_mean_daily_pct": 0.05033,
-          "strategy_t_stat": 1.5388,
-          "strategy_max_dd_pct": -41.12,
-          "strategy_cum_return_pct": 78.77,
-          "bnh_sharpe_ann": 0.6175,
-          "bnh_cum_return_pct": 78.77,
-          "passes_harvey": false
-        },
-        "ar1": {
-          "oos_r2_pct": 1.7795,
-          "msfe_ratio": 0.982205,
-          "hit_rate": 0.5202,
-          "hit_rate_n": 1563,
-          "binom_p": 0.116797,
-          "dm_stat": 1.0121,
-          "dm_p": 0.311486,
-          "cw_stat": 2.2574,
-          "cw_p": 0.011991,
-          "strategy_sharpe_ann": 0.558,
-          "strategy_mean_daily_pct": 0.045487,
-          "strategy_t_stat": 1.3905,
-          "strategy_max_dd_pct": -25.25,
-          "strategy_cum_return_pct": 71.19,
-          "bnh_sharpe_ann": 0.6175,
-          "bnh_cum_return_pct": 78.77,
-          "passes_harvey": "False"
-        },
-        "ssvs_ols": {
-          "oos_r2_pct": -1.2589,
-          "msfe_ratio": 1.012589,
-          "hit_rate": 0.5457,
-          "hit_rate_n": 1563,
-          "binom_p": 0.000326,
-          "dm_stat": -1.3316,
-          "dm_p": 0.182978,
-          "cw_stat": -1.4265,
-          "cw_p": 0.923131,
-          "strategy_sharpe_ann": 0.4902,
-          "strategy_mean_daily_pct": 0.039965,
-          "strategy_t_stat": 1.2216,
-          "strategy_max_dd_pct": -40.49,
-          "strategy_cum_return_pct": 62.55,
-          "bnh_sharpe_ann": 0.6175,
-          "bnh_cum_return_pct": 78.77,
-          "passes_harvey": "False"
-        },
-        "ridge": {
-          "oos_r2_pct": 0.7213,
-          "msfe_ratio": 0.992787,
-          "hit_rate": 0.5118,
-          "hit_rate_n": 1563,
-          "binom_p": 0.362516,
-          "dm_stat": 0.4537,
-          "dm_p": 0.650078,
-          "cw_stat": 1.5227,
-          "cw_p": 0.063922,
-          "strategy_sharpe_ann": 0.074,
-          "strategy_mean_daily_pct": 0.006039,
-          "strategy_t_stat": 0.1845,
-          "strategy_max_dd_pct": -28.69,
-          "strategy_cum_return_pct": 9.45,
-          "bnh_sharpe_ann": 0.6175,
-          "bnh_cum_return_pct": 78.77,
-          "passes_harvey": "False"
-        },
-        "logistic_direction": {
-          "oos_r2_pct": 0.6946,
-          "msfe_ratio": 0.993054,
-          "hit_rate": 0.5547,
-          "hit_rate_n": 1563,
-          "binom_p": 1.7e-05,
-          "dm_stat": 1.3102,
-          "dm_p": 0.190144,
-          "cw_stat": 2.19,
-          "cw_p": 0.014261,
-          "strategy_sharpe_ann": 1.1264,
-          "strategy_mean_daily_pct": 0.09165,
-          "strategy_t_stat": 2.807,
-          "strategy_max_dd_pct": -24.06,
-          "strategy_cum_return_pct": 143.43,
-          "bnh_sharpe_ann": 0.6175,
-          "bnh_cum_return_pct": 78.77,
-          "passes_harvey": "False"
-        }
-      },
-      "rolling_hit_rate": {
-        "mean": 0.5506,
-        "std": 0.0469,
-        "min": 0.4422,
-        "max": 0.627,
-        "pct_above_55": 61.3,
-        "pct_above_50": 79.9,
-        "n_windows": 1314
-      },
-      "subperiod": {
-        "COVID_2020": {
-          "n": 253,
-          "hit_rate": 0.6087,
-          "strategy_cum_pct": 78.91,
-          "bnh_cum_pct": 14.53,
-          "strategy_beats_bnh": true
-        },
-        "Recovery_2021": {
-          "n": 252,
-          "hit_rate": 0.5873,
-          "strategy_cum_pct": 29.24,
-          "bnh_cum_pct": 27.2,
-          "strategy_beats_bnh": true
-        },
-        "Bear_2022": {
-          "n": 251,
-          "hit_rate": 0.44,
-          "strategy_cum_pct": -22.12,
-          "bnh_cum_pct": -21.06,
-          "strategy_beats_bnh": false
-        },
-        "Bull_2023": {
-          "n": 250,
-          "hit_rate": 0.5542,
-          "strategy_cum_pct": 16.91,
-          "bnh_cum_pct": 23.11,
-          "strategy_beats_bnh": false
-        },
-        "Bull_2024": {
-          "n": 252,
-          "hit_rate": 0.5873,
-          "strategy_cum_pct": 22.34,
-          "bnh_cum_pct": 22.54,
-          "strategy_beats_bnh": false
-        },
-        "Recent_2025_26": {
-          "n": 307,
-          "hit_rate": 0.5505,
-          "strategy_cum_pct": 18.16,
-          "bnh_cum_pct": 12.44,
-          "strategy_beats_bnh": true
-        }
-      }
-    },
-    "0050.TW": {
-      "n_oos": 1509,
-      "oos_period": "2020-01-02 to 2026-03-25",
-      "ssvs": {
         "pip_dict": {
           "ret_L1": {
-            "PIP": 0.1576,
+            "PIP": 0.1448,
             "selected": false
           },
           "ret_L2": {
-            "PIP": 0.145,
+            "PIP": 0.1365,
             "selected": false
           },
-          "spy_ret_L1": {
-            "PIP": 0.9528,
+          "spy_ret_prev": {
+            "PIP": 0.7101,
             "selected": true
           },
-          "spy_mom5_L1": {
-            "PIP": 0.1195,
+          "spy_mom5_prev": {
+            "PIP": 0.1323,
             "selected": false
           },
-          "vix_level_L1": {
-            "PIP": 0.1741,
+          "vix_level_prev": {
+            "PIP": 0.1413,
             "selected": false
           },
-          "vix_change_L1": {
-            "PIP": 0.1278,
-            "selected": false
-          },
-          "fx_change_L1": {
-            "PIP": 0.1298,
+          "vix_change_prev": {
+            "PIP": 0.1471,
             "selected": false
           },
           "vol_surprise_L1": {
-            "PIP": 0.1447,
+            "PIP": 0.1262,
             "selected": false
           }
         },
-        "n_selected": 1,
-        "selected_vars": [
-          "spy_ret_L1"
-        ],
-        "pip_stability": {
-          "initial_selected": [
-            "spy_ret_L1"
-          ],
-          "midpoint_selected": [
-            "spy_ret_L1"
-          ],
-          "pip_correlation": 0.998740656438961
-        }
-      },
-      "evaluation": {
-        "hist_mean": {
-          "oos_r2_pct": 0.0,
-          "msfe_ratio": 1.0,
-          "hit_rate": 0.5233,
-          "hit_rate_n": 1458,
-          "binom_p": 0.07928,
-          "dm_stat": 0.0,
-          "dm_p": 1.0,
-          "cw_stat": 0.0,
-          "cw_p": 1.0,
-          "strategy_sharpe_ann": 0.7883,
-          "strategy_mean_daily_pct": 0.068552,
-          "strategy_t_stat": 1.929,
-          "strategy_max_dd_pct": -53.7,
-          "strategy_cum_return_pct": 103.44,
-          "bnh_sharpe_ann": 1.0184,
-          "bnh_cum_return_pct": 133.54,
-          "passes_harvey": false
-        },
-        "ar1": {
-          "oos_r2_pct": -0.0381,
-          "msfe_ratio": 1.000381,
-          "hit_rate": 0.5055,
-          "hit_rate_n": 1458,
-          "binom_p": 0.694454,
-          "dm_stat": -0.9381,
-          "dm_p": 0.348202,
-          "cw_stat": -0.4896,
-          "cw_p": 0.68779,
-          "strategy_sharpe_ann": 0.3941,
-          "strategy_mean_daily_pct": 0.034305,
-          "strategy_t_stat": 0.9644,
-          "strategy_max_dd_pct": -59.6,
-          "strategy_cum_return_pct": 51.77,
-          "bnh_sharpe_ann": 1.0184,
-          "bnh_cum_return_pct": 133.54,
-          "passes_harvey": "False"
-        },
-        "ssvs_ols": {
-          "oos_r2_pct": 15.5935,
-          "msfe_ratio": 0.844065,
-          "hit_rate": 0.6749,
-          "hit_rate_n": 1458,
-          "binom_p": 0.0,
-          "dm_stat": 5.6973,
-          "dm_p": 0.0,
-          "cw_stat": 7.317,
-          "cw_p": 0.0,
-          "strategy_sharpe_ann": 5.6566,
-          "strategy_mean_daily_pct": 0.463956,
-          "strategy_t_stat": 13.842,
-          "strategy_max_dd_pct": -10.71,
-          "strategy_cum_return_pct": 700.11,
-          "bnh_sharpe_ann": 1.0184,
-          "bnh_cum_return_pct": 133.54,
-          "passes_harvey": "True"
-        },
-        "ridge": {
-          "oos_r2_pct": 15.0188,
-          "msfe_ratio": 0.849812,
-          "hit_rate": 0.6797,
-          "hit_rate_n": 1458,
-          "binom_p": 0.0,
-          "dm_stat": 5.171,
-          "dm_p": 0.0,
-          "cw_stat": 7.1004,
-          "cw_p": 0.0,
-          "strategy_sharpe_ann": 5.613,
-          "strategy_mean_daily_pct": 0.460781,
-          "strategy_t_stat": 13.7354,
-          "strategy_max_dd_pct": -14.01,
-          "strategy_cum_return_pct": 695.32,
-          "bnh_sharpe_ann": 1.0184,
-          "bnh_cum_return_pct": 133.54,
-          "passes_harvey": "True"
-        },
-        "logistic_direction": {
-          "oos_r2_pct": 12.3666,
-          "msfe_ratio": 0.876334,
-          "hit_rate": 0.679,
-          "hit_rate_n": 1458,
-          "binom_p": 0.0,
-          "dm_stat": 10.0754,
-          "dm_p": 0.0,
-          "cw_stat": 11.7939,
-          "cw_p": 0.0,
-          "strategy_sharpe_ann": 5.6177,
-          "strategy_mean_daily_pct": 0.461121,
-          "strategy_t_stat": 13.7468,
-          "strategy_max_dd_pct": -14.01,
-          "strategy_cum_return_pct": 695.83,
-          "bnh_sharpe_ann": 1.0184,
-          "bnh_cum_return_pct": 133.54,
-          "passes_harvey": "True"
-        }
-      },
-      "rolling_hit_rate": {
-        "mean": 0.6752,
-        "std": 0.0178,
-        "min": 0.6393,
-        "max": 0.7276,
-        "pct_above_55": 100.0,
-        "pct_above_50": 100.0,
-        "n_windows": 1258
-      },
-      "subperiod": {
-        "COVID_2020": {
-          "n": 245,
-          "hit_rate": 0.678,
-          "strategy_cum_pct": 104.01,
-          "bnh_cum_pct": 28.09,
-          "strategy_beats_bnh": true
-        },
-        "Recovery_2021": {
-          "n": 243,
-          "hit_rate": 0.6441,
-          "strategy_cum_pct": 78.07,
-          "bnh_cum_pct": 18.74,
-          "strategy_beats_bnh": true
-        },
-        "Bear_2022": {
-          "n": 246,
-          "hit_rate": 0.722,
-          "strategy_cum_pct": 148.26,
-          "bnh_cum_pct": -23.97,
-          "strategy_beats_bnh": true
-        },
-        "Bull_2023": {
-          "n": 239,
-          "hit_rate": 0.6826,
-          "strategy_cum_pct": 84.38,
-          "bnh_cum_pct": 23.4,
-          "strategy_beats_bnh": true
-        },
-        "Bull_2024": {
-          "n": 242,
-          "hit_rate": 0.6681,
-          "strategy_cum_pct": 147.01,
-          "bnh_cum_pct": 39.17,
-          "strategy_beats_bnh": true
-        },
-        "Recent_2025_26": {
-          "n": 294,
-          "hit_rate": 0.6821,
-          "strategy_cum_pct": 133.59,
-          "bnh_cum_pct": 48.1,
-          "strategy_beats_bnh": true
-        }
-      }
-    },
-    "QQQ": {
-      "n_oos": 1565,
-      "oos_period": "2020-01-02 to 2026-03-25",
-      "ssvs": {
-        "pip_dict": {
-          "ret_L1": {
-            "PIP": 0.218,
-            "selected": false
+        "evaluation": {
+          "hist_mean": {
+            "oos_r2_pct": 0.0,
+            "hit_rate": 0.4785,
+            "binom_p": 0.094369,
+            "dm_stat": 0.0,
+            "dm_p": 0.0,
+            "cw_stat": 0.0,
+            "cw_p": 0.0,
+            "passes_harvey": false
           },
-          "ret_L2": {
-            "PIP": 0.4687,
-            "selected": false
+          "ar1": {
+            "oos_r2_pct": -0.2654,
+            "hit_rate": 0.4733,
+            "binom_p": 0.037665,
+            "dm_stat": -1.2642,
+            "dm_p": 0.206165,
+            "cw_stat": -0.6636,
+            "cw_p": 0.746535,
+            "passes_harvey": false
           },
-          "vix_level_L1": {
-            "PIP": 0.1292,
-            "selected": false
+          "ssvs_ols": {
+            "oos_r2_pct": 2.5116,
+            "hit_rate": 0.535,
+            "binom_p": 0.006182,
+            "dm_stat": 0.9657,
+            "dm_p": 0.334176,
+            "cw_stat": 3.3251,
+            "cw_p": 0.000442,
+            "passes_harvey": false
           },
-          "vix_change_L1": {
-            "PIP": 0.4056,
-            "selected": false
+          "ridge": {
+            "oos_r2_pct": 1.8078,
+            "hit_rate": 0.5183,
+            "binom_p": 0.155818,
+            "dm_stat": 0.5995,
+            "dm_p": 0.548871,
+            "cw_stat": 3.0219,
+            "cw_p": 0.001256,
+            "passes_harvey": false
           },
-          "term_spread_L1": {
-            "PIP": 0.1395,
-            "selected": false
-          },
-          "credit_spread_L1": {
-            "PIP": 0.1233,
-            "selected": false
-          },
-          "spy_ret_L1": {
-            "PIP": 0.2679,
-            "selected": false
-          },
-          "vol_surprise_L1": {
-            "PIP": 0.7127,
-            "selected": true
-          },
-          "mom5_L1": {
-            "PIP": 0.2745,
-            "selected": false
+          "logistic_direction": {
+            "oos_r2_pct": 2.1396,
+            "hit_rate": 0.5279,
+            "binom_p": 0.029263,
+            "dm_stat": 1.7968,
+            "dm_p": 0.072371,
+            "cw_stat": 3.8032,
+            "cw_p": 7.1e-05,
+            "passes_harvey": false
           }
         },
-        "n_selected": 1,
-        "selected_vars": [
-          "vol_surprise_L1"
-        ],
-        "pip_stability": {
-          "initial_selected": [
-            "vol_surprise_L1"
-          ],
-          "midpoint_selected": [
-            "vix_change_L1",
-            "vol_surprise_L1"
-          ],
-          "pip_correlation": 0.835229536399394
-        }
-      },
-      "evaluation": {
-        "hist_mean": {
-          "oos_r2_pct": 0.0,
-          "msfe_ratio": 1.0,
-          "hit_rate": 0.5588,
-          "hit_rate_n": 1564,
-          "binom_p": 4e-06,
-          "dm_stat": 0.0,
-          "dm_p": 1.0,
-          "cw_stat": 0.0,
-          "cw_p": 1.0,
-          "strategy_sharpe_ann": 0.6589,
-          "strategy_mean_daily_pct": 0.065531,
-          "strategy_t_stat": 1.6419,
-          "strategy_max_dd_pct": -43.26,
-          "strategy_cum_return_pct": 102.56,
-          "bnh_sharpe_ann": 0.6589,
-          "bnh_cum_return_pct": 102.56,
-          "passes_harvey": false
+        "best_model_by_oos_r2": "ssvs_ols",
+        "best_model_tradable_long_cash_net": {
+          "ann_return_pct": -9.8359,
+          "ann_vol_pct": 10.5419,
+          "sharpe": -0.933,
+          "mdd_pct": -58.7208,
+          "turnover_per_year": 120.9017,
+          "n_trades": 747,
+          "exposure_pct": 57.16,
+          "signal_positive_pct": 57.16
         },
-        "ar1": {
-          "oos_r2_pct": 1.3463,
-          "msfe_ratio": 0.986537,
-          "hit_rate": 0.5217,
-          "hit_rate_n": 1564,
-          "binom_p": 0.090201,
-          "dm_stat": 1.1444,
-          "dm_p": 0.252445,
-          "cw_stat": 2.6875,
-          "cw_p": 0.0036,
-          "strategy_sharpe_ann": 0.9167,
-          "strategy_mean_daily_pct": 0.0911,
-          "strategy_t_stat": 2.2844,
-          "strategy_max_dd_pct": -37.86,
-          "strategy_cum_return_pct": 142.57,
-          "bnh_sharpe_ann": 0.6589,
-          "bnh_cum_return_pct": 102.56,
-          "passes_harvey": "False"
-        },
-        "ssvs_ols": {
-          "oos_r2_pct": -0.016,
-          "msfe_ratio": 1.00016,
-          "hit_rate": 0.5467,
-          "hit_rate_n": 1564,
-          "binom_p": 0.000244,
-          "dm_stat": -0.1243,
-          "dm_p": 0.901104,
-          "cw_stat": 0.2797,
-          "cw_p": 0.389847,
-          "strategy_sharpe_ann": 0.6693,
-          "strategy_mean_daily_pct": 0.06657,
-          "strategy_t_stat": 1.668,
-          "strategy_max_dd_pct": -45.43,
-          "strategy_cum_return_pct": 104.18,
-          "bnh_sharpe_ann": 0.6589,
-          "bnh_cum_return_pct": 102.56,
-          "passes_harvey": "False"
-        },
-        "ridge": {
-          "oos_r2_pct": 1.4739,
-          "msfe_ratio": 0.985261,
-          "hit_rate": 0.5237,
-          "hit_rate_n": 1564,
-          "binom_p": 0.064875,
-          "dm_stat": 0.9356,
-          "dm_p": 0.349464,
-          "cw_stat": 2.104,
-          "cw_p": 0.01769,
-          "strategy_sharpe_ann": 0.623,
-          "strategy_mean_daily_pct": 0.061967,
-          "strategy_t_stat": 1.5525,
-          "strategy_max_dd_pct": -31.52,
-          "strategy_cum_return_pct": 96.98,
-          "bnh_sharpe_ann": 0.6589,
-          "bnh_cum_return_pct": 102.56,
-          "passes_harvey": "False"
-        },
-        "logistic_direction": {
-          "oos_r2_pct": 0.2696,
-          "msfe_ratio": 0.997304,
-          "hit_rate": 0.5639,
-          "hit_rate_n": 1564,
-          "binom_p": 0.0,
-          "dm_stat": 0.6965,
-          "dm_p": 0.486109,
-          "cw_stat": 1.6056,
-          "cw_p": 0.05418,
-          "strategy_sharpe_ann": 1.0664,
-          "strategy_mean_daily_pct": 0.105919,
-          "strategy_t_stat": 2.6576,
-          "strategy_max_dd_pct": -37.09,
-          "strategy_cum_return_pct": 165.76,
-          "bnh_sharpe_ann": 0.6589,
-          "bnh_cum_return_pct": 102.56,
-          "passes_harvey": "False"
-        }
-      },
-      "rolling_hit_rate": {
-        "mean": 0.559,
-        "std": 0.05,
-        "min": 0.4365,
-        "max": 0.6468,
-        "pct_above_55": 69.8,
-        "pct_above_50": 80.0,
-        "n_windows": 1314
-      },
-      "subperiod": {
-        "COVID_2020": {
-          "n": 253,
-          "hit_rate": 0.6443,
-          "strategy_cum_pct": 71.41,
-          "bnh_cum_pct": 36.4,
-          "strategy_beats_bnh": true
-        },
-        "Recovery_2021": {
-          "n": 252,
-          "hit_rate": 0.5777,
-          "strategy_cum_pct": 35.49,
-          "bnh_cum_pct": 26.61,
-          "strategy_beats_bnh": true
-        },
-        "Bear_2022": {
-          "n": 251,
-          "hit_rate": 0.4382,
-          "strategy_cum_pct": -34.89,
-          "bnh_cum_pct": -41.05,
-          "strategy_beats_bnh": true
-        },
-        "Bull_2023": {
-          "n": 250,
-          "hit_rate": 0.568,
-          "strategy_cum_pct": 42.7,
-          "bnh_cum_pct": 42.7,
-          "strategy_beats_bnh": false
-        },
-        "Bull_2024": {
-          "n": 252,
-          "hit_rate": 0.5913,
-          "strategy_cum_pct": 26.46,
-          "bnh_cum_pct": 24.29,
-          "strategy_beats_bnh": true
-        },
-        "Recent_2025_26": {
-          "n": 307,
-          "hit_rate": 0.5635,
-          "strategy_cum_pct": 24.58,
-          "bnh_cum_pct": 13.61,
-          "strategy_beats_bnh": true
+        "ssvs_tradable_long_cash_net": {
+          "ann_return_pct": -9.8359,
+          "ann_vol_pct": 10.5419,
+          "sharpe": -0.933,
+          "mdd_pct": -58.7208,
+          "turnover_per_year": 120.9017,
+          "n_trades": 747,
+          "exposure_pct": 57.16,
+          "signal_positive_pct": 57.16
         }
       }
     }
   },
-  "cross_asset_comparison": {
-    "SPY": {
-      "best_model": "ar1",
-      "oos_r2_pct": 1.7795,
-      "hit_rate": 0.5202,
-      "dm_stat": 1.0121,
-      "strategy_sharpe": 0.558,
-      "passes_harvey": "False"
+  "timing_bias_provenance": {
+    "legacy_i8_reference_invalid": true,
+    "replacement_artifact": "experiments/k521/k521_2day_momentum_check_results.json",
+    "replacement_fields": {
+      "gap_sharpe": 5.644,
+      "intraday_sharpe": 0.453,
+      "c2c_sharpe": 4.225,
+      "conclusion": "100% of alpha is in overnight gap; intraday has near-zero signal"
     },
-    "0050.TW": {
-      "best_model": "ssvs_ols",
-      "oos_r2_pct": 15.5935,
-      "hit_rate": 0.6749,
-      "dm_stat": 5.6973,
-      "strategy_sharpe": 5.6566,
-      "passes_harvey": "True"
-    },
-    "QQQ": {
-      "best_model": "ridge",
-      "oos_r2_pct": 1.4739,
-      "hit_rate": 0.5237,
-      "dm_stat": 0.9356,
-      "strategy_sharpe": 0.623,
-      "passes_harvey": "False"
-    }
+    "note": "The previously cited `I8 3.09 -> 0.87` numbers are not reproducible from a canonical local I8 artifact in this repo. K521 is the canonical local timing-bias artifact now referenced."
   },
-  "conclusions": [
-    "\u2605\u2605\u2605 At least one model passes Harvey (2016) t>3.0 threshold",
-    "\u2605\u2605 Positive OOS R\u00b2 found (model beats historical mean)",
-    "\u2605\u2605 Direction accuracy > 55% found (economically meaningful)"
-  ],
-  "any_harvey_pass": true,
-  "any_positive_oos_r2": true,
-  "any_direction_above_55pct": true,
   "limitations": [
-    "SSVS variable selection done once (not re-estimated each period) for efficiency",
-    "Logistic regression uses all features, not SSVS-selected (direction model)",
-    "No transaction costs in strategy evaluation",
-    "OOS R\u00b2 benchmarked against expanding historical mean (prevailing mean)",
-    "Small OOS R\u00b2 (0-3%) is typical for return prediction literature",
-    "Daily returns inherently noisy -- weekly/monthly may show clearer patterns",
-    "Timezone lag for Taiwan features is approximate (trading day alignment)",
-    "0050.TW data has extreme outlier (min=-138.9%) suggesting yfinance data quality issue; winsorization not applied",
-    "CRITICAL: Taiwan close-to-close return includes overnight gap (I8 timing bias). SPY(T) closes 4AM Taiwan time T+1; Taiwan opens 9AM T+1; opening gap already reflects SPY info (I8: gap R^2=0.35). OOS R^2=15.6% and Sharpe=5.66 are STATISTICALLY real but NOT IMPLEMENTABLE. Same issue as I8 TZ Momentum."
-  ],
-  "critical_caveat_taiwan": {
-    "issue": "I8 Timing Bias applies to Taiwan return prediction",
-    "explanation": "SPY_ret_L1 predicts 0050.TW close-to-close returns with OOS R^2=15.6%. But Taiwan's opening price at 9AM already reflects SPY's 4AM close. The 67.5% hit rate and Sharpe=5.66 are based on close-to-close returns that include this non-tradable overnight gap. An open-to-open or open-to-close implementation would likely show much weaker results (cf. I8: c2c Sharpe 3.09 -> o2o Sharpe 0.87, -72% degradation).",
-    "implication": "Return prediction signal is REAL (information transmission confirmed) but NOT TRADABLE at the strategy level shown. Need open-to-open verification (requires intraday/open price data).",
-    "reference": "I8 TZ Momentum Timing Bias analysis"
-  },
-  "key_findings_summary": {
-    "finding_1": "SSVS correctly identifies SPY_ret as sole predictor for Taiwan (PIP=0.95, stable at midpoint), confirming K461 US->Taiwan lead-lag",
-    "finding_2": "Taiwan OOS R^2=15.6% is extremely high for return prediction (Welch-Goyal 2008 standard: most predictors yield R^2<0), but includes I8 timing bias",
-    "finding_3": "SPY and QQQ return prediction follows EMH expectations: OOS R^2 ~ 1-2%, no Harvey passes, consistent with efficient market",
-    "finding_4": "For SPY, SSVS selects ret_L2 (PIP=0.83) -- a weak reversal signal. PIP stability is low (corr=0.43), confirming K433 empty model result",
-    "finding_5": "QQQ logistic model shows 56.4% hit rate (binomial p<0.001) but DM test fails Harvey threshold -- marginal predictability",
-    "finding_6": "Across all assets, direction-based models (logistic) tend to produce better Sharpe than level-based models (OLS/Ridge)",
-    "finding_7": "The US-Taiwan information transmission channel is the strongest return prediction signal found in 120+ K-series experiments"
-  },
-  "computation_time_seconds": 26.9,
-  "timestamp": "2026-03-26T14:51:20.702363+00:00"
+    "Retry uses locally cached tickers only; original HYG/^TNX/^IRX/TWD=X feature set is unavailable offline.",
+    "SPY/QQQ histories in local cache begin 2016-01-04, so the retry sample is shorter than the original 2007-start run.",
+    "Tradable Taiwan implementation is long/cash, not shortable ETF exposure."
+  ]
 }
