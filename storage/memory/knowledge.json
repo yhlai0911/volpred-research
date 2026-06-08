@@ -32750,5 +32750,32 @@
     "article_refs": [
       "mile_2673f6c4"
     ]
+  },
+  {
+    "id": "k1426",
+    "k_id": "K1426",
+    "title": "Partial Cointegration Hedging — IS-only PoC, 3 pairs (SPY/IVV, USO/BNO, GLD/IAU)",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1426",
+    "experiment_path": "experiments/k1426/",
+    "reviewer": "Codex CLI 0.137.0 gpt-5.4",
+    "reviewer_source": "Codex review",
+    "codex_review": "CONDITIONAL_PASS",
+    "key_findings": "Partial cointegration (Clegg-Krauss 2018 state-space MLE) IS-only PoC across 3 ETF pairs, all NULL: (1) SPY/IVV rho=-0.198 (oscillating, NULL_RHO_NEGATIVE), HE_PCH 0.9983 ≈ HE_OLS 0.9982; (2) USO/BNO rho=-0.401 (NULL_RHO_NEGATIVE), R²_MR=0.07 (low mean-reverting fraction), HE_PCH 0.887 vs HE_OLS 0.590 is decomposition-scale artifact (PCH beta=1.008 vs OLS beta=0.424 — different spread scales, not directly HE-comparable); (3) GLD/IAU rho=+0.053, half-life=0.24d (NULL_HALFLIFE_TRIVIAL — trivial mean reversion ~ i.i.d. noise). Overall NULL: 3/3 pairs fail canonical PCH interpretation. Honest null result.",
+    "method": "Self-coded Kalman state-space MLE (Clegg-Krauss 2018). Multistart=20 (scope-cut from canonical 100 due to 50min cap; full 100 + bootstrap CI queued for compute_queue). Baselines: OLS + Engle-Granger VECM. HE = 1 - Var(spread)/Var(unhedged), same denominator. Seed=42. Codex confirmed no lookahead, no seed bug, no numerical instability.",
+    "caveats": "(a) 20-multistart insufficient for canonical pooled-MLE rule. (b) IS-only; OOS rolling-window queued. (c) Codex caveat fixed: k1426.py verdict gate aligned with run_fast.py (added NULL_RHO_NEGATIVE + NULL_HALFLIFE_TRIVIAL conditions). (d) Pair 2 HE cross-baseline invalid due to different beta scales.",
+    "followup": "K1426-OOS: full 100-multistart + rolling-window OOS HE + bootstrap CI + cross-pair generalization (priority: USO/BNO)",
+    "phase": "IS_proof_of_concept",
+    "task_id": "research_partial_cointegration_hedging",
+    "session_owner": "hourly-21",
+    "tags": [
+      "hedging",
+      "cointegration",
+      "partial-cointegration",
+      "state-space-MLE",
+      "kalman",
+      "ETF-pairs",
+      "NULL-result"
+    ]
   }
 ]

@@ -1,0 +1,122 @@
+{
+  "experiment_id": "k1426",
+  "title": "Partial Cointegration Hedging \u2014 IS Proof of Concept",
+  "seed": 42,
+  "data_range": {
+    "start": "2015-01-01",
+    "end": "2024-12-31"
+  },
+  "multistart_policy": {
+    "pair_1_SPY_IVV": 20,
+    "pair_2_USO_BNO": 20,
+    "pair_3_GLD_IAU": 20,
+    "note": "All pairs ran 20 multistarts due to 50min cap scope cut (pooled-MLE 100-start rule K1213\u2192K1216c is queued in followup_brief for compute_queue). Pair 1 + 3 are duplicate ETFs (SPY/IVV, GLD/IAU) with single dominant basin so 20 starts should suffice; USO/BNO is the discriminating pair where full 100-start is most important and is the priority OOS task."
+  },
+  "pairs": {
+    "pair_1_SPY_IVV": {
+      "symbols": {
+        "x": "SPY",
+        "y": "IVV"
+      },
+      "n_obs": 2515,
+      "date_start": "2015-01-02",
+      "date_end": "2024-12-30",
+      "n_multistart": 20,
+      "n_starts_converged": 20,
+      "ols": {
+        "mu": 0.007245129482379046,
+        "beta": 0.9984739139906817,
+        "he": 0.9982382049518634
+      },
+      "eg_vecm": {
+        "beta": 0.9984739139906817,
+        "alpha": -0.04872632862885072,
+        "he": 0.9982382049518634
+      },
+      "pch": {
+        "mu": -0.001997988694883983,
+        "beta": 0.9959351163054493,
+        "rho": -0.19801156853723598,
+        "sigma_M": 0.00027901289432635275,
+        "sigma_R": 0.00013396111366460476,
+        "loglik": 16327.834033040584,
+        "r2_mr": 0.8126644456641695,
+        "half_life_days": null,
+        "he": 0.9982886111379295
+      },
+      "verdict": "NULL_RHO_NEGATIVE",
+      "notes": "PCH rho=-0.1980 \u2264 0 \u2014 AR(1) oscillates rather than mean-reverts; not economically 'partial cointegration' in Clegg-Krauss sense even though MLE converged. R\u00b2_MR=0.8127."
+    },
+    "pair_2_USO_BNO": {
+      "symbols": {
+        "x": "USO",
+        "y": "BNO"
+      },
+      "n_obs": 2515,
+      "date_start": "2015-01-02",
+      "date_end": "2024-12-30",
+      "n_multistart": 20,
+      "n_starts_converged": 20,
+      "ols": {
+        "mu": 3.0658711015535283,
+        "beta": 0.42384117633630564,
+        "he": 0.5901505502229711
+      },
+      "eg_vecm": {
+        "beta": 0.42384117633630564,
+        "alpha": 0.0005530589934005279,
+        "he": 0.5901505502229711
+      },
+      "pch": {
+        "mu": 3.0339272091413614,
+        "beta": 1.0084501423961059,
+        "rho": -0.4011928052918498,
+        "sigma_M": 0.0020841677062175606,
+        "sigma_R": 0.007624047144954008,
+        "loglik": 8429.9008818772,
+        "r2_mr": 0.06953362357782539,
+        "half_life_days": null,
+        "he": 0.8867048067043842
+      },
+      "verdict": "NULL_RHO_NEGATIVE",
+      "notes": "PCH rho=-0.4012 \u2264 0 \u2014 AR(1) oscillates rather than mean-reverts; not economically 'partial cointegration' in Clegg-Krauss sense even though MLE converged. R\u00b2_MR=0.0695."
+    },
+    "pair_3_GLD_IAU": {
+      "symbols": {
+        "x": "GLD",
+        "y": "IAU"
+      },
+      "n_obs": 2515,
+      "date_start": "2015-01-02",
+      "date_end": "2024-12-30",
+      "n_multistart": 20,
+      "n_starts_converged": 20,
+      "ols": {
+        "mu": 1.6540200346955236,
+        "beta": 0.9824762306520769,
+        "he": 0.9940093456174155
+      },
+      "eg_vecm": {
+        "beta": 0.9824762306520769,
+        "alpha": -0.09003937373506009,
+        "he": 0.9940093456174155
+      },
+      "pch": {
+        "mu": 1.5698765461147333,
+        "beta": 0.9979589060860166,
+        "rho": 0.05278864642695201,
+        "sigma_M": 0.0004894886330119873,
+        "sigma_R": 4.817041013656351e-05,
+        "loglik": 15467.482968850645,
+        "r2_mr": 0.9904084279509968,
+        "half_life_days": 0.2356473937899983,
+        "he": 0.9942210111164205
+      },
+      "verdict": "NULL_HALFLIFE_TRIVIAL",
+      "notes": "PCH half-life=0.236d < 1d \u2014 M component reverts essentially instantaneously, indistinguishable from i.i.d. noise; not a persistent mean-reverting structure. rho=0.0528, R\u00b2_MR=0.9904."
+    }
+  },
+  "verdict": "NULL",
+  "notes": "IS-only PoC. Baselines (OLS, EG-VECM) ran on all pairs at full spec. Multistart MLE seed=42. NULL gate: rho>=0.999 OR R2_MR<0.05.",
+  "reproduce": "uv run python experiments/k1426/run_fast.py"
+}

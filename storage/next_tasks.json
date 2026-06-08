@@ -24843,7 +24843,8 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T02:11:17+00:00"
+    "created_at": "2026-06-08T02:11:17+00:00",
+    "last_released_at": "2026-06-08T12:33:45.961232+00:00"
   },
   {
     "id": "research_time_varying_hurst_via_ewma",
@@ -24916,7 +24917,7 @@
     "title": "研究 backlog fallback: Adaptive Fractal Dynamics",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Adaptive Fractal Dynamics — Frontiers Applied Math 2025 | 來源 section: rough volatility & hurst. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "adaptive_fractal_dynamics",
@@ -24924,7 +24925,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T02:34:03+00:00"
+    "created_at": "2026-06-08T02:34:03+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T12:33:58.220683+00:00",
+    "claim_session_id": "379127d73420",
+    "started_at": "2026-06-08T12:33:58.332190+00:00",
+    "completed_at": "2026-06-08T12:34:24.940551+00:00",
+    "result": "Resolved as duplicate of K973. Added backlog resolution note mapping the task to the existing adaptive Hurst / time-varying fractal volatility experiment."
   },
   {
     "id": "research_non_gaussian_rough_vol_stable_increments_arxiv_2",
@@ -25063,7 +25070,7 @@
     "title": "研究 backlog fallback: Quadratic Hedging under GARCH",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Quadratic Hedging under GARCH — Ma, J. Futures Markets 2026 | 來源 section: 期貨避險方法論. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "quadratic_hedging_under_garch",
@@ -25071,7 +25078,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T05:08:20+00:00"
+    "created_at": "2026-06-08T05:08:20+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T13:35:24.100633+00:00",
+    "claim_session_id": "b0dbd9f19310",
+    "started_at": "2026-06-08T13:35:32.019066+00:00",
+    "completed_at": "2026-06-08T13:35:56.510232+00:00",
+    "result": "Resolved as duplicate of K945. Added backlog resolution note mapping the task to the existing quadratic-vs-MV hedging under GARCH experiment."
   },
   {
     "id": "research_wild_bootstrap_ohr",
@@ -25099,7 +25112,7 @@
     "title": "研究 backlog fallback: Partial Cointegration Hedging",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Partial Cointegration Hedging — RQFA 2023 | 來源 section: 期貨避險方法論. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "partial_cointegration_hedging",
@@ -25107,7 +25120,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T06:08:05+00:00"
+    "created_at": "2026-06-08T06:08:05+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-06-08T13:08:58.960365+00:00",
+    "claim_session_id": "0803ebdd6753",
+    "started_at": "2026-06-08T13:09:10.936580+00:00",
+    "completed_at": "2026-06-08T13:51:18.143747+00:00",
+    "result": "K1426 IS PoC: 3/3 pairs NULL (SPY/IVV+USO/BNO rho<0, GLD/IAU half-life<1d) → honest null. Codex CONDITIONAL_PASS (lookahead/seed/numerics clean; verdict gate alignment fixed post-review). Knowledge.json appended. Followup task research_partial_cointegration_hedging_oos enqueued for 100-multistart + OOS rolling + bootstrap CI."
   },
   {
     "id": "K1403_daily_article_cross_asset_quantile",
@@ -25348,5 +25367,25 @@
     ],
     "paper_id": "leverage-direction",
     "created_at": "2026-06-08T10:13:11+00:00"
+  },
+  {
+    "id": "research_partial_cointegration_hedging_oos",
+    "title": "K1426 follow-up: OOS rolling-window + 100-multistart MLE + bootstrap CI",
+    "description": "K1426 IS PoC NULL 已寫入 knowledge.json (CONDITIONAL_PASS by Codex). Heavy compute followup: (1) full 100-multistart MLE for all 3 pairs (pooled-MLE rule K1213→K1216c) — priority pair USO/BNO; (2) OOS rolling-window: expanding window estimate (beta, rho), shift(1), compute OOS HE; (3) bootstrap CI: block-bootstrap 1000 reps for HE_PCH−HE_OLS 95% CI + Patton-style DM equivalence test; (4) cross-pair generalization: add GLD/SLV, XLE/USO, XLF/XLK to test R²_MR cross-asset-class behavior; (5) multivariate extension: 3+ assets PCH state-space (Poulos et al. 2024). Async via compute_queue worker — write OOS script under experiments/k1426/oos.py + enqueue with --result-artifact + --followup-brief. Predecessor: experiments/k1426/.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "k1426_followup",
+    "research_slug": "partial_cointegration_hedging_oos",
+    "predecessor_k": "k1426",
+    "tags": [
+      "k1426-followup",
+      "heavy-compute",
+      "OOS",
+      "bootstrap-CI",
+      "pooled-MLE",
+      "hedging"
+    ],
+    "created_at": "2026-06-08T13:51:14+00:00"
   }
 ]
