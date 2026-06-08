@@ -1,41 +1,45 @@
 {
-  "timestamp": "2026-06-08T06:10:41.994423+00:00",
+  "timestamp": "2026-06-08T12:12:30Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "145 drafts (general=100, research=45)"
+      "detail": "Total drafts: 145 (research: 46, general: 99). All thresholds met (total≥12, research≥4, general≥8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json age: 0.01h (threshold 26h)"
+      "detail": "storage/strategy_metrics.json age: <1 hour. Within 26-hour threshold."
     },
     {
-      "name": "ERROR_LOG",
+      "name": "ERROR_LOG_RECENT",
       "status": "ok",
-      "detail": "Recent entries found (today + yesterday)",
-      "recent_entries": [
-        "2026-06-08: host_cron_fail false-critical (strike 2 → structured fix); article pool churn — uncovered candidate sources exhausted; refill判斷不完整 (00:18 corrected at 01:47)",
-        "2026-06-07: audit_fb_pipeline exit 1 misread as infra-critical (strike 1, subsequently patched)"
-      ]
+      "detail": "Entries today/yesterday (2026-06-07/08): (1) 2026-06-08 Cron staleness false-positive on market_calendar_sync (log-name mismatch, actual cron OK); (2) 2026-06-08 Refill 8th belt — research-saturated K narrative-arc dup, strike 2/3; (3) 2026-06-07 Pool empty critical + 2 flow gaps; (4) 2026-06-08 host_cron_fail strike-2 structural fix; (5) 2026-06-08 Refill judgment retrospective correction; (6) 2026-06-08 pre-publish image-URL gate implemented (missing-image root fix, +5 tests green)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked; no strategy has >2 nulls in last 3 entries"
+      "detail": "No strategy with >2 consecutive portfolio_return=null in last 3 entries. (0 strategies with gap alerts found in paper_trading.json.)"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files. Repository is clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2204 entries in knowledge.json"
+      "detail": "storage/memory/knowledge.json contains 2208 entries."
     }
   ],
-  "alerts": []
+  "alerts": [],
+  "error_log_recent_summary": [
+    "2026-06-08: Cron staleness false-positive (market_calendar_sync) — log-name mismatch, actual fires OK",
+    "2026-06-08: Refill 8th belt narrative-arc dup strike 2/3 — candidate source refactor pending at strike 3",
+    "2026-06-07: Article pool empty critical + host_cron_fail + FB pipeline flow gaps",
+    "2026-06-08: host_cron_fail strike-2 structural fix (0c9cdcd3)",
+    "2026-06-08: Refill judgment retrospective correction (00:18 false 'resolved')",
+    "2026-06-08: pre-publish image-URL gate live (audit + raise on broken images before publish)"
+  ]
 }
