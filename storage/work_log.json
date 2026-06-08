@@ -9944,5 +9944,13 @@
     "owner": "main-thread-hourly-13",
     "status": "succeeded",
     "result": "DM +vix vs +h_vix p=0.0028 d=-0.000121 (NULL: H 控制 VIX 後 marginal harm, effect ~10⁻⁴ 實務無意義); README 結果區+knowledge.json item 2a4b737e + compute_queue followup marked dispatched"
+  },
+  {
+    "timestamp": "2026-06-08T15:14+08:00",
+    "task_id": "platform_ops_worktree_audit_20260608_1507",
+    "task_type": "platform_ops",
+    "title": "Worktree state audit + graceful orphan prune",
+    "result": "agent-a984dee3c1e31ca5c orphan worktree (locked by 8-day idle PID 13569, unique commit d15e5726 already superseded by K1425 in main) gracefully pruned via unlock+remove. No force, no data loss. Slot-occupancy 1/4 → 0/4 corrected. Audit report: storage/ops/worktree_audit_20260608_1511.md",
+    "verdict": "succeeded"
   }
 ]

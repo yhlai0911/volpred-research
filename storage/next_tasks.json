@@ -25118,5 +25118,50 @@
     "started_at": "2026-06-08T06:10:39.939776+00:00",
     "completed_at": "2026-06-08T06:25:17.337261+00:00",
     "result": "mile_2673f6c4 published (draft pool, research audience, 3041 字, 2 圖 Supabase, anti-ai-style PASS independent re-verify, knowledge bdb0b4cc CONDITIONAL_PASS)"
+  },
+  {
+    "id": "research_regime_switching_correlation_hedging",
+    "title": "研究 backlog fallback: Regime-Switching Correlation Hedging",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Regime-Switching Correlation Hedging | 來源 section: 期貨避險方法論. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "regime_switching_correlation_hedging",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T07:09:31+00:00"
+  },
+  {
+    "id": "research_autoencoder_enhanced_realised_garch",
+    "title": "研究 backlog fallback: Autoencoder Enhanced Realised GARCH",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Autoencoder Enhanced Realised GARCH — arXiv:2411.17136。以 autoencoder 生成合成 realised measure，非線性整合多個 realised measures；4 大股市 one-step rolling 預測勝傳統 Realised GARCH。面向A 可測：對齊我方 multi-RM / A4f 線，可比 K-series HAR-RV baseline。 | 來源 section: 新發現（2026-05-29 arxiv 文獻搜尋；scan_arxiv_topics.py 能力建立）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "autoencoder_enhanced_realised_garch",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T07:09:31+00:00"
+  },
+  {
+    "id": "platform_ops_worktree_audit_20260608_1507",
+    "task_type": "platform_ops",
+    "priority": "P2",
+    "title": "Worktree state audit + orphan policy",
+    "description": "Audit all git worktrees: list every worktree, cross-check against active task claims (storage/next_tasks.json in_progress + agent sessions), check lock-holder PID liveness (etime), document orphans. Goal: confirm only living agents hold worktrees. Do NOT force-remove locked worktrees. Output: storage/ops/worktree_audit_$(date +%Y%m%d_%H%M).md with table {worktree_path, branch, locked_by, pid_alive, claim_match, recommended_action}.",
+    "created_at": "2026-06-08T07:08:00+00:00",
+    "status": "succeeded",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-08T07:11:29.144151+00:00",
+    "claim_session_id": "a5320b457f5a",
+    "started_at": "2026-06-08T07:11:29.398117+00:00",
+    "completed_at": "2026-06-08T07:13:31.460711+00:00",
+    "result": "Worktree audit + graceful prune: agent-a984dee3c1e31ca5c (functional orphan, locked by 8-day idle PID 13569) successfully unlocked + removed. Branch retained for audit trail. Slot-occupancy 1/4 → 0/4. Report storage/ops/worktree_audit_20260608_1511.md."
   }
 ]
