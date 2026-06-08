@@ -88,3 +88,8 @@ python experiments/k1427/k1427.py
 ## Reviewer
 
 - Codex CLI code review（見 commit message / 下方審查結論）。
+
+## Review 紀錄（2026-06-09）
+- **Reviewer**: `feature-dev:code-reviewer` subagent fallback（Codex CLI 0.137.0 故障，exec 無輸出）。
+- **Verdict**: CONDITIONAL_PASS。無 lookahead（主路徑）、無捏造數字、seed=42 固定、external_claim_verdict 誠實（XLE 當天 −1.84% → 能源那部分判 REFUTED，未 cherry-pick）。
+- **唯一條件（Q5 caveat）**：q5「dispersion → 未來 N 日 RV」的 forward 公式（k1427.py line 207）有雙重 shift，實際窗口比宣稱的 t+1..t+N 滑後 N-1 天（仍向未來，非 lookahead，但窗口定義不符）。Q5 本為描述性 null result、非核心結論。**文章不引用 Q5 具體數字，只用「無預測力」方向性結論。** 核心發現（q1 dispersion 比較 / q2 regime / q4 最近 selloff / external_claim_verdict）不受影響。
