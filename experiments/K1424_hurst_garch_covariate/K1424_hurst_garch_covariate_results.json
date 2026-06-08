@@ -1,0 +1,270 @@
+{
+  "k_id": "K1424",
+  "title": "Hurst as GARCH covariate \u2014 SPY OOS forecasting",
+  "generated_at": "2026-06-08T04:30:05.047662+00:00",
+  "lineage": {
+    "parent_k": "K1423_ewma_hurst_pilot",
+    "rationale": "K1423 \u03c1(H,VIX)=+0.32 descriptive; K1424 tests forecasting use"
+  },
+  "data": {
+    "symbol": "SPY",
+    "covar": [
+      "^VIX",
+      "EWMA-Hurst \u03bb=0.94 (from K1423)"
+    ],
+    "n_obs_total": 3629,
+    "is_period": [
+      "2010-01-01",
+      "2019-12-31"
+    ],
+    "oos_period": [
+      "2020-01-01",
+      "2030-12-31"
+    ],
+    "n_is": 2014,
+    "n_oos": 1615,
+    "source": "yfinance (cached via K1423)"
+  },
+  "config": {
+    "hurst_window": 500,
+    "hurst_lambda": 0.94,
+    "dm_n_boot": 500,
+    "dm_block_len": 5,
+    "seed": 42
+  },
+  "lookahead_audit": {
+    "h_shifted": true,
+    "vix_shifted": true,
+    "rv_lagged": true,
+    "split_strict_by_time": true,
+    "rule": "all covariates use t-1 info only; verified at build_dataset()"
+  },
+  "models": {
+    "garch_baseline": {
+      "type": "GARCH",
+      "fit": {
+        "params": [
+          6.145217773901672e-06,
+          0.16149157510127649,
+          0.7320284083132755
+        ],
+        "nll": -7036.82640789189,
+        "sigma2_terminal": 3.198326024866066e-05,
+        "success": true,
+        "termination_flag": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "nll_finite_ratio": 1.0,
+        "sigma2_clamp_ratio": 0.0,
+        "k_exog": 0
+      },
+      "qlike_mean": 1.551459945959185,
+      "qlike_median": 0.7404251830106501,
+      "mse_mean": 3.100586569343462e-07,
+      "n_oos": 1615
+    },
+    "garch_plus_h": {
+      "type": "GARCH",
+      "fit": {
+        "params": [
+          4.401133222768592e-06,
+          0.10000000411312072,
+          0.8499999973829041,
+          -2.2793020215391284e-06
+        ],
+        "nll": -7030.403010368386,
+        "sigma2_terminal": 2.7779913926910875e-05,
+        "success": true,
+        "termination_flag": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "nll_finite_ratio": 1.0,
+        "sigma2_clamp_ratio": 0.0,
+        "k_exog": 1
+      },
+      "qlike_mean": 1.5290404086370444,
+      "qlike_median": 0.7275308137161285,
+      "mse_mean": 3.2116969597301577e-07,
+      "n_oos": 1615
+    },
+    "garch_plus_vix": {
+      "type": "GARCH",
+      "fit": {
+        "params": [
+          1.0094024760224327e-06,
+          0.09999999999994681,
+          0.8499999999996322,
+          1.443469171803461e-07
+        ],
+        "nll": -7038.048746022663,
+        "sigma2_terminal": 2.965335781869045e-05,
+        "success": false,
+        "termination_flag": "ABNORMAL:",
+        "nll_finite_ratio": 1.0,
+        "sigma2_clamp_ratio": 0.0,
+        "k_exog": 1
+      },
+      "qlike_mean": 1.505031659741677,
+      "qlike_median": 0.7109457205450103,
+      "mse_mean": 3.2019849481648916e-07,
+      "n_oos": 1615
+    },
+    "garch_plus_h_vix": {
+      "type": "GARCH",
+      "fit": {
+        "params": [
+          1.0093049419377462e-06,
+          0.09999999999994677,
+          0.8499999999996259,
+          5.962406000795917e-09,
+          1.437622097534655e-07
+        ],
+        "nll": -7038.033519395784,
+        "sigma2_terminal": 2.9633212282197143e-05,
+        "success": false,
+        "termination_flag": "ABNORMAL:",
+        "nll_finite_ratio": 1.0,
+        "sigma2_clamp_ratio": 0.0,
+        "k_exog": 2
+      },
+      "qlike_mean": 1.5051529109056707,
+      "qlike_median": 0.7106181486631837,
+      "mse_mean": 3.202028131547184e-07,
+      "n_oos": 1615
+    }
+  },
+  "dm_tests": [
+    {
+      "compare": "garch_baseline vs garch_plus_h",
+      "loss": "QLIKE",
+      "sign_convention": "positive d \u2192 'new' model lower loss (better)",
+      "dm": {
+        "dm_stat": 2.2518282612496447,
+        "p_value": 0.024333127001331167,
+        "n": 1615,
+        "lag_nw": 7,
+        "mean_loss_diff": 0.02241953732214023
+      },
+      "bootstrap_ci": {
+        "ci_low": 0.003329602103178913,
+        "ci_high": 0.04139354304375875,
+        "boot_mean": 0.022867482196005384,
+        "n_boot": 500,
+        "block_len": 5,
+        "seed": 42
+      }
+    },
+    {
+      "compare": "garch_baseline vs garch_plus_vix",
+      "loss": "QLIKE",
+      "sign_convention": "positive d \u2192 'new' model lower loss (better)",
+      "dm": {
+        "dm_stat": 3.853085084203729,
+        "p_value": 0.00011663883636847672,
+        "n": 1615,
+        "lag_nw": 7,
+        "mean_loss_diff": 0.04642828621750779
+      },
+      "bootstrap_ci": {
+        "ci_low": 0.022681077534654856,
+        "ci_high": 0.07116757116886095,
+        "boot_mean": 0.045767920591293636,
+        "n_boot": 500,
+        "block_len": 5,
+        "seed": 42
+      }
+    },
+    {
+      "compare": "garch_baseline vs garch_plus_h_vix",
+      "loss": "QLIKE",
+      "sign_convention": "positive d \u2192 'new' model lower loss (better)",
+      "dm": {
+        "dm_stat": 3.849516652957174,
+        "p_value": 0.00011835113748448478,
+        "n": 1615,
+        "lag_nw": 7,
+        "mean_loss_diff": 0.04630703505351408
+      },
+      "bootstrap_ci": {
+        "ci_low": 0.02261614785354699,
+        "ci_high": 0.07103101679406329,
+        "boot_mean": 0.045653561641371014,
+        "n_boot": 500,
+        "block_len": 5,
+        "seed": 42
+      }
+    },
+    {
+      "compare": "garch_plus_vix vs garch_plus_h_vix",
+      "loss": "QLIKE",
+      "interpretation": "incremental value of H beyond VIX control",
+      "dm": {
+        "dm_stat": -2.988627871347143,
+        "p_value": 0.002802332107164629,
+        "n": 1615,
+        "lag_nw": 7,
+        "mean_loss_diff": -0.00012125116399371018
+      },
+      "bootstrap_ci": {
+        "ci_low": -0.00019790530114373282,
+        "ci_high": -4.232751036838328e-05,
+        "boot_mean": -0.00011435894992262891,
+        "n_boot": 500,
+        "block_len": 5,
+        "seed": 42
+      }
+    }
+  ],
+  "per_year_oos": {
+    "2020": {
+      "n": 253,
+      "qlike_garch_baseline": 1.4656311759780716,
+      "qlike_garch_plus_h": 1.4607235445744398,
+      "qlike_garch_plus_vix": 1.425496080222827,
+      "qlike_garch_plus_h_vix": 1.4256484853715357
+    },
+    "2021": {
+      "n": 252,
+      "qlike_garch_baseline": 1.408689239437498,
+      "qlike_garch_plus_h": 1.4382406565947243,
+      "qlike_garch_plus_vix": 1.41312192027342,
+      "qlike_garch_plus_h_vix": 1.4131904483337845
+    },
+    "2022": {
+      "n": 251,
+      "qlike_garch_baseline": 1.5752505157917847,
+      "qlike_garch_plus_h": 1.4659182245772753,
+      "qlike_garch_plus_vix": 1.4233410331226108,
+      "qlike_garch_plus_h_vix": 1.4235666534573843
+    },
+    "2023": {
+      "n": 250,
+      "qlike_garch_baseline": 1.4530200283372408,
+      "qlike_garch_plus_h": 1.4320821097715553,
+      "qlike_garch_plus_vix": 1.424589896256618,
+      "qlike_garch_plus_h_vix": 1.4246331655595197
+    },
+    "2024": {
+      "n": 252,
+      "qlike_garch_baseline": 1.636640119148581,
+      "qlike_garch_plus_h": 1.6273025276441855,
+      "qlike_garch_plus_vix": 1.6192619889603252,
+      "qlike_garch_plus_h_vix": 1.6193712344560394
+    },
+    "2025": {
+      "n": 250,
+      "qlike_garch_baseline": 1.7341193944177795,
+      "qlike_garch_plus_h": 1.7103192926201545,
+      "qlike_garch_plus_vix": 1.6911664713808936,
+      "qlike_garch_plus_h_vix": 1.6912541262525291
+    },
+    "2026": {
+      "n": 107,
+      "qlike_garch_baseline": 1.6374522587424911,
+      "qlike_garch_plus_h": 1.624060708191261,
+      "qlike_garch_plus_vix": 1.5852073442651984,
+      "qlike_garch_plus_h_vix": 1.5854232456056865
+    }
+  },
+  "artifacts": {
+    "forecasts_csv": "experiments/K1424_hurst_garch_covariate/data/K1424_forecasts.csv",
+    "loss_csv": "experiments/K1424_hurst_garch_covariate/data/K1424_loss_diff_series.csv"
+  },
+  "verdict_hint": "NULL_candidate: H not incremental beyond VIX"
+}

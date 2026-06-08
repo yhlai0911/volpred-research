@@ -69,6 +69,40 @@ _STAT_KEYWORDS = [
 # Pure-year / pure-label tokens to exclude even if a stat keyword is nearby.
 _YEAR_RE = re.compile(r"^(?:19|20)\d{2}$")
 
+# Non-statistic numeric labels that legitimately sit next to stat keywords but
+# are NOT reported result-statistics (2026-06-08 K1423 false-positive fix):
+#   - Ticker symbols (0050, 2330, …) — appear next to 報酬/迴歸/alpha etc.
+#   - Index names (標普 500 / S&P 500) — "500" sits next to 迴歸/alpha.
+#   - Methodology constants — HAC lag (lag=5) and annualization (× 252).
+# These would otherwise trip the provenance gate on every TW/US factor article.
+_METHODOLOGY_PREFIX_RE = re.compile(r"(?:lag\s*[=＝]\s*|[×*xX]\s*)$")
+_ANNUALIZATION_VALUES = {"252", "252.0"}
+
+
+def _is_non_stat_label(raw_num: str, is_pct: bool, start: int, end: int, content: str, context: str) -> bool:
+    if is_pct:
+        return False
+    # .TW ticker suffix immediately after the number → ticker, not a stat.
+    if content[end:end + 3].upper() == ".TW":
+        return True
+    # Index names: 標普 500 / S&P 500 — "500" sits next to 迴歸/alpha.
+    if raw_num in ("500", "500.0"):
+        pre8 = content[max(0, start - 8):start]
+        if "標普" in pre8 or "s&p" in context.lower():
+            return True
+    # 4-digit token whose surrounding text marks it as a TW ticker.
+    if re.fullmatch(r"\d{4}", raw_num):
+        # Leading-zero ticker (0050) or TW ticker in explicit ticker-list context.
+        if raw_num.startswith("0") or "．TW" in context or ".TW" in context:
+            return True
+    # Annualization factor (× 252 / *252) and HAC lag parameter (lag=N).
+    pre6 = content[max(0, start - 6):start]
+    if _METHODOLOGY_PREFIX_RE.search(pre6):
+        return True
+    if raw_num in _ANNUALIZATION_VALUES:
+        return True
+    return False
+
 # Numeric token: percentages (-42.4%), decimals (-0.79), thousands-separated
 # (-1,234.5), plain integers. Optional leading "-" is required so Tier-1
 # provenance matches negative Sharpe / delta claims verbatim.
@@ -111,6 +145,8 @@ def extract_numeric_claims(content: str) -> list[dict]:
         # Exclude pure years unless explicitly a percent (a percent can never be
         # a bare year label).
         if not is_pct and _YEAR_RE.match(raw_num):
+            continue
+        if _is_non_stat_label(raw_num, is_pct, start, end, content, context):
             continue
         if not _has_stat_context(context):
             continue
