@@ -1,0 +1,443 @@
+{
+  "experiment_id": "k1423",
+  "title": "PCA + factor regression: is sector-ETF alpha a real alpha or an unnamed factor exposure?",
+  "seed": 42,
+  "period": {
+    "start": "2014-01-01",
+    "end": "2026-06-01"
+  },
+  "method_note": "Contemporaneous risk-attribution regression (sector_t ~ mkt_t [+ PC1_t]); NOT a forecast, no lookahead. Alpha annualized = daily_alpha*252. Newey-West HAC SE with lag=5.",
+  "data_source": "yfinance (auto_adjust=True, daily log returns)",
+  "US": {
+    "tickers_present": [
+      "SPY",
+      "SMH",
+      "AMD",
+      "TSM",
+      "ASML",
+      "NVDA",
+      "QCOM",
+      "AMAT",
+      "AVGO",
+      "MU"
+    ],
+    "tickers_dropped": [],
+    "sector_proxy": {
+      "label": "EW_leaveout_proxy(4)",
+      "kind": "equal_weight_basket_leave_out"
+    },
+    "market_proxy": "SPY",
+    "pca": {
+      "n_obs": 3119,
+      "components": [
+        "AMAT",
+        "AMD",
+        "ASML",
+        "AVGO"
+      ],
+      "factor_construction": "market-residualized PCA, unit-L2 loadings, return units",
+      "explained_var_pc1": 0.4966481635120011,
+      "explained_var_pc2": 0.21442960823417168,
+      "explained_var_top3": [
+        0.4966481635120011,
+        0.21442960823417168,
+        0.18231014895567116
+      ],
+      "pc1_loadings": {
+        "AMAT": 0.5983073550209428,
+        "AMD": 0.220419465206681,
+        "ASML": 0.6200734074632716,
+        "AVGO": 0.4571132656604177
+      },
+      "pc2_loadings": {
+        "AMAT": -0.16559610098507002,
+        "AMD": 0.779073904858593,
+        "ASML": -0.25136606839331166,
+        "AVGO": -0.5499426167950757
+      },
+      "pc1_all_same_sign": true,
+      "factor_pool": [
+        "AMAT",
+        "AMD",
+        "ASML",
+        "AVGO"
+      ],
+      "split_note": "leave-out split: factor pool=['AMAT', 'AMD', 'ASML', 'AVGO']; sector_y=EW of disjoint pool=['MU', 'NVDA', 'QCOM', 'TSM'] (NO shared stocks -> no mechanical collinearity)",
+      "full_basket_pca": {
+        "n_obs": 3119,
+        "components": [
+          "NVDA",
+          "AMD",
+          "TSM",
+          "ASML",
+          "AMAT",
+          "MU",
+          "QCOM",
+          "AVGO"
+        ],
+        "explained_var_pc1": 0.6301913781334834,
+        "explained_var_pc2": 0.07947383836624428,
+        "explained_var_top3": [
+          0.6301913781334834,
+          0.07947383836624428,
+          0.06296111289546652
+        ],
+        "pc1_loadings": {
+          "NVDA": 0.3591273930314633,
+          "AMD": 0.30629177804878444,
+          "TSM": 0.35990880664328206,
+          "ASML": 0.376086905014886,
+          "AMAT": 0.38942988550777663,
+          "MU": 0.34679146393053933,
+          "QCOM": 0.3308935910681818,
+          "AVGO": 0.3533081222663705
+        },
+        "pc2_loadings": {
+          "NVDA": 0.2961142202841711,
+          "AMD": 0.8508984380742487,
+          "TSM": -0.14739099842415893,
+          "ASML": -0.19302555740188093,
+          "AMAT": -0.1659702747007938,
+          "MU": -0.08096408725163695,
+          "QCOM": -0.18739110464497166,
+          "AVGO": -0.24512956327769736
+        },
+        "pc1_all_same_sign": true
+      }
+    },
+    "regression_mkt_only": {
+      "n_obs": 3119,
+      "r2": 0.5739925129807779,
+      "alpha_daily": 0.00045297441687813437,
+      "alpha_annual": 0.11414955305328986,
+      "alpha_tstat": 1.8771957455360604,
+      "alpha_pvalue": 0.06049127042728813,
+      "betas": {
+        "mkt": {
+          "coef": 1.4739980471231122,
+          "tstat": 36.750535635043924,
+          "pvalue": 1.139950115963444e-295
+        }
+      }
+    },
+    "regression_mkt_plus_pc1_variance_attr": {
+      "n_obs": 3119,
+      "r2": 0.7647919066633886,
+      "alpha_daily": 0.00045297441687813404,
+      "alpha_annual": 0.11414955305328978,
+      "alpha_tstat": 2.415362414739629,
+      "alpha_pvalue": 0.015719560051314224,
+      "betas": {
+        "mkt": {
+          "coef": 1.4739980471231127,
+          "tstat": 65.97627055364363,
+          "pvalue": 0.0
+        },
+        "PC1": {
+          "coef": 0.3504850403010034,
+          "tstat": 32.59292888362197,
+          "pvalue": 5.165460207290914e-233
+        }
+      }
+    },
+    "regression_mkt_plus_sectorlong_premium_attr": {
+      "n_obs": 3119,
+      "r2": 0.7605555780038824,
+      "alpha_daily": 0.0001594830205171743,
+      "alpha_annual": 0.04018972117032792,
+      "alpha_tstat": 0.8488173458157791,
+      "alpha_pvalue": 0.39598293666819884,
+      "betas": {
+        "mkt": {
+          "coef": 0.5052920257436867,
+          "tstat": 12.594619121112457,
+          "pvalue": 2.2604843923653627e-36
+        },
+        "SECTOR_LONG": {
+          "coef": 0.623144378609693,
+          "tstat": 29.444651340434234,
+          "pvalue": 1.47398209881986e-190
+        }
+      },
+      "sector_long_mean_annual": 0.323107897432539
+    },
+    "alpha_shrink_pct_variance_attr": 7.771561172376096e-14,
+    "alpha_shrink_pct_premium_attr": 64.79204684089682,
+    "etf_descriptive_baseline": {
+      "etf": "SMH",
+      "market": "SPY",
+      "regression_mkt_only": {
+        "n_obs": 3119,
+        "r2": 0.6578580892705315,
+        "alpha_daily": 0.000363904098655471,
+        "alpha_annual": 0.0917038328611787,
+        "alpha_tstat": 1.9119122234965396,
+        "alpha_pvalue": 0.05588745357779587,
+        "betas": {
+          "mkt": {
+            "coef": 1.4390172166294897,
+            "tstat": 37.12822228085559,
+            "pvalue": 9.848905790415517e-302
+          }
+        }
+      }
+    },
+    "n_drops_in_alignment_stage1": 0,
+    "premium_attr_split_robustness": {
+      "n_splits": 35,
+      "alpha_with_sectorlong_mean": 0.05735703524522223,
+      "alpha_with_sectorlong_min": -0.055508141686824504,
+      "alpha_with_sectorlong_max": 0.17016693339545377,
+      "frac_splits_alpha_insignificant": 0.7428571428571429,
+      "tstat_mean": 1.1123981589390823
+    }
+  },
+  "TW": {
+    "tickers_present": [
+      "2454.TW",
+      "3034.TW",
+      "2308.TW",
+      "0050.TW",
+      "2379.TW",
+      "3037.TW",
+      "2303.TW",
+      "3711.TW",
+      "2330.TW"
+    ],
+    "tickers_dropped": [],
+    "sector_proxy": {
+      "label": "EW_leaveout_proxy(4)",
+      "kind": "equal_weight_basket_leave_out"
+    },
+    "market_proxy": "0050.TW",
+    "pca": {
+      "n_obs": 3017,
+      "components": [
+        "2303.TW",
+        "2308.TW",
+        "2330.TW",
+        "2379.TW"
+      ],
+      "factor_construction": "market-residualized PCA, unit-L2 loadings, return units",
+      "explained_var_pc1": 0.2896760602619092,
+      "explained_var_pc2": 0.25585146176264967,
+      "explained_var_top3": [
+        0.2896760602619092,
+        0.25585146176264967,
+        0.23811869592318444
+      ],
+      "pc1_loadings": {
+        "2303.TW": 0.5056777172343315,
+        "2308.TW": 0.17356636493893685,
+        "2330.TW": -0.7004349378295084,
+        "2379.TW": 0.472816731009312
+      },
+      "pc2_loadings": {
+        "2303.TW": -0.2464868045321149,
+        "2308.TW": 0.6085918565172919,
+        "2330.TW": -0.7451782486500642,
+        "2379.TW": -0.11648856214755939
+      },
+      "pc1_all_same_sign": false,
+      "factor_pool": [
+        "2303.TW",
+        "2308.TW",
+        "2330.TW",
+        "2379.TW"
+      ],
+      "split_note": "leave-out split: factor pool=['2303.TW', '2308.TW', '2330.TW', '2379.TW']; sector_y=EW of disjoint pool=['2454.TW', '3034.TW', '3037.TW', '3711.TW'] (NO shared stocks -> no mechanical collinearity)",
+      "full_basket_pca": {
+        "n_obs": 3017,
+        "components": [
+          "2330.TW",
+          "2454.TW",
+          "2303.TW",
+          "3711.TW",
+          "2379.TW",
+          "3034.TW",
+          "3037.TW",
+          "2308.TW"
+        ],
+        "explained_var_pc1": 0.46373532259134204,
+        "explained_var_pc2": 0.10785513348126406,
+        "explained_var_top3": [
+          0.46373532259134204,
+          0.10785513348126406,
+          0.08767612963672261
+        ],
+        "pc1_loadings": {
+          "2330.TW": 0.4030601230342285,
+          "2454.TW": 0.36096698752489154,
+          "2303.TW": 0.33074358602447734,
+          "3711.TW": 0.377734356477635,
+          "2379.TW": 0.3419628195423263,
+          "3034.TW": 0.34007013035366856,
+          "3037.TW": 0.31411439292504045,
+          "2308.TW": 0.3520180279846013
+        },
+        "pc2_loadings": {
+          "2330.TW": -0.2535517418340846,
+          "2454.TW": 0.16764839076068466,
+          "2303.TW": 0.11700194479687726,
+          "3711.TW": -0.3051263609468009,
+          "2379.TW": 0.5118685987304497,
+          "3034.TW": 0.5300330216954408,
+          "3037.TW": -0.2796071184908197,
+          "2308.TW": -0.4238978330833417
+        },
+        "pc1_all_same_sign": true
+      }
+    },
+    "regression_mkt_only": {
+      "n_obs": 3017,
+      "r2": 0.5539006926967276,
+      "alpha_daily": 0.00011287232737428569,
+      "alpha_annual": 0.028443826498319995,
+      "alpha_tstat": 0.5327331815648848,
+      "alpha_pvalue": 0.5942182933777567,
+      "betas": {
+        "mkt": {
+          "coef": 1.1019267689361683,
+          "tstat": 41.50656424396678,
+          "pvalue": 0.0
+        }
+      }
+    },
+    "regression_mkt_plus_pc1_variance_attr": {
+      "n_obs": 3017,
+      "r2": 0.612528751772347,
+      "alpha_daily": 0.00011287232737428583,
+      "alpha_annual": 0.02844382649832003,
+      "alpha_tstat": 0.5979247825202995,
+      "alpha_pvalue": 0.549890122929762,
+      "betas": {
+        "mkt": {
+          "coef": 1.101926768936168,
+          "tstat": 47.017147658365495,
+          "pvalue": 0.0
+        },
+        "PC1": {
+          "coef": 0.27685297269286613,
+          "tstat": 17.932690364082248,
+          "pvalue": 6.553061534622462e-72
+        }
+      }
+    },
+    "regression_mkt_plus_sectorlong_premium_attr": {
+      "n_obs": 3017,
+      "r2": 0.5974199174442894,
+      "alpha_daily": 3.2079022653324816e-05,
+      "alpha_annual": 0.008083913708637853,
+      "alpha_tstat": 0.16197900167942736,
+      "alpha_pvalue": 0.8713223897207596,
+      "betas": {
+        "mkt": {
+          "coef": 0.6491300573443046,
+          "tstat": 15.067026415575404,
+          "pvalue": 2.6685618892885766e-51
+        },
+        "SECTOR_LONG": {
+          "coef": 0.44714263530469456,
+          "tstat": 12.982478323245841,
+          "pvalue": 1.5382143611659963e-38
+        }
+      },
+      "sector_long_mean_annual": 0.25185376899188555
+    },
+    "alpha_shrink_pct_variance_attr": -1.1102230246251565e-13,
+    "alpha_shrink_pct_premium_attr": 71.57937343938123,
+    "etf_descriptive_baseline": null,
+    "n_drops_in_alignment_stage1": 0,
+    "premium_attr_split_robustness": {
+      "n_splits": 35,
+      "alpha_with_sectorlong_mean": 0.02001486938330834,
+      "alpha_with_sectorlong_min": -0.0032656221418914727,
+      "alpha_with_sectorlong_max": 0.04466745798955456,
+      "frac_splits_alpha_insignificant": 1.0,
+      "tstat_mean": 0.47689523519540195
+    }
+  },
+  "cross_market_comparison": {
+    "pc1_explained_var": {
+      "US": 0.6301913781334834,
+      "TW": 0.46373532259134204
+    },
+    "pc2_explained_var": {
+      "US": 0.07947383836624428,
+      "TW": 0.10785513348126406
+    },
+    "alpha_annual_mkt_only": {
+      "US": 0.11414955305328986,
+      "TW": 0.028443826498319995
+    },
+    "alpha_tstat_mkt_only": {
+      "US": 1.8771957455360604,
+      "TW": 0.5327331815648848
+    },
+    "r2_mkt_only": {
+      "US": 0.5739925129807779,
+      "TW": 0.5539006926967276
+    },
+    "alpha_annual_with_pc1": {
+      "US": 0.11414955305328978,
+      "TW": 0.02844382649832003
+    },
+    "alpha_tstat_with_pc1": {
+      "US": 2.415362414739629,
+      "TW": 0.5979247825202995
+    },
+    "r2_with_pc1": {
+      "US": 0.7647919066633886,
+      "TW": 0.612528751772347
+    },
+    "alpha_shrink_pct_variance_attr": {
+      "US": 7.771561172376096e-14,
+      "TW": -1.1102230246251565e-13
+    },
+    "alpha_annual_with_sectorlong": {
+      "US": 0.04018972117032792,
+      "TW": 0.008083913708637853
+    },
+    "alpha_tstat_with_sectorlong": {
+      "US": 0.8488173458157791,
+      "TW": 0.16197900167942736
+    },
+    "r2_with_sectorlong": {
+      "US": 0.7605555780038824,
+      "TW": 0.5974199174442894
+    },
+    "alpha_shrink_pct_premium_attr": {
+      "US": 64.79204684089682,
+      "TW": 71.57937343938123
+    },
+    "frac_splits_alpha_insignificant": {
+      "US": 0.7428571428571429,
+      "TW": 1.0
+    },
+    "etf_descriptive_baseline_US_SMH": {
+      "etf": "SMH",
+      "market": "SPY",
+      "regression_mkt_only": {
+        "n_obs": 3119,
+        "r2": 0.6578580892705315,
+        "alpha_daily": 0.000363904098655471,
+        "alpha_annual": 0.0917038328611787,
+        "alpha_tstat": 1.9119122234965396,
+        "alpha_pvalue": 0.05588745357779587,
+        "betas": {
+          "mkt": {
+            "coef": 1.4390172166294897,
+            "tstat": 37.12822228085559,
+            "pvalue": 9.848905790415517e-302
+          }
+        }
+      }
+    }
+  },
+  "verdict": {
+    "US": "alpha_not_significant_even_in_mkt_only",
+    "TW": "alpha_not_significant_even_in_mkt_only",
+    "note": "Variance-attribution (PC1) leaves alpha LEVEL unchanged by construction (zero-mean market-neutral factor raises R2/beta only). The alpha-absorption test is the premium-attribution stage (mean-bearing leave-out sector-long factor)."
+  },
+  "honest_conclusion": "US: a real semiconductor ETF (SMH) shows a headline alpha of 9.2%/yr vs SPY (t=1.91, marginal). On a clean disjoint leave-out proxy the sector alpha point estimate shrinks substantially (11.4%->4.0%/yr) once a disjoint sector-long factor is added, and becomes insignificant (t=0.85) -- but the mkt-only alpha was itself only marginally significant (t=1.88, p=0.060) and the result is split-sensitive (35-split residual-alpha range [-5.6%, 17.0%], 74% of splits insignificant). Evidence is SUGGESTIVE that the sector alpha is mostly unnamed common-factor exposure, not decisive. TW: no significant alpha to begin with (t=0.53), so there is nothing to absorb; TW sector cohesion is weaker (PC1 explains 46% vs US 63%). Variance-attribution (market-neutral PC1) raises R2/beta sharply but cannot move the alpha LEVEL by construction -- the comovement is a strong common factor, but the alpha-level question is answered only by the mean-bearing premium-attribution stage."
+}
