@@ -25703,5 +25703,46 @@
     "started_at": "2026-06-08T21:11:33.850493+00:00",
     "completed_at": "2026-06-08T21:32:57.032448+00:00",
     "result": "Article mile_072c3972 published (NVDA EAV, K1429 CONDITIONAL_PASS). Codex review primary path PASS w/ caveats. Knowledge 72f62789 written. FB dual-publish deferred to interactive session."
+  },
+  {
+    "id": "paper_review_mile_072c3972",
+    "title": "Paper review (Codex 24h-rule): 財報前波動率反而縮水？NVDA 九次財報的 EAV 解剖",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_072c3972 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_072c3972",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-08T22:08:12+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-08T22:08:53.901420+00:00",
+    "claim_session_id": "aad6e0f4f8d4",
+    "started_at": "2026-06-08T22:08:59.800380+00:00",
+    "completed_at": "2026-06-08T22:15:57.099060+00:00",
+    "result": "Codex 24h re-review verdict=FAIL. 2 SEV1: (1) ttest_rel vs constant baseline_arr underestimates SE; (2) earnings T=0 not shifted to next trading day for after-hours. Article amended with '編輯部後續校正' disclaimer in feed.json + reports/mile_072c3972.json (synced). P1 followup task daily_article_k1429_v2_methodology_fix created (24h deadline). Review summary written to experiments/k1429/codex_review_v1.md."
+  },
+  {
+    "id": "daily_article_k1429_v2_methodology_fix",
+    "title": "K1429 NVDA EAV v2 — methodology fix per Codex 24h FAIL",
+    "description": "Codex 24h re-review on mile_072c3972 returned FAIL with 2 SEVERITY 1 issues:\n(1) ttest_rel against constant baseline_arr underestimates SE — replace with permutation test or moving-block bootstrap incorporating baseline uncertainty.\n(2) Event T=0 alignment ignores after-hours announcements — shift T=0 to next trading day for after-close, keep for before-open.\n\nRequired deliverables:\n  a. experiments/k1429/k1429_v2.py — proper methodology (permutation test, after-hours T-shift, single-window sqrt(252/5*sum r^2) measure)\n  b. experiments/k1429/k1429_v2_results.json — new test stats + Bonferroni-corrected p-values\n  c. Rewrite article: replace '反而縮水' / '倍增' narrative with samples-observed-difference + multi-test-status\n  d. Update feed.json mile_072c3972 content with v2 numbers + remove the Codex warning section (replaced by corrected body)\n  e. Codex re-verify v2 — must achieve PASS or CONDITIONAL_PASS\n\nReference: experiments/k1429/codex_review_v1.md (just written)\nParent article published 2026-06-08T21:22 UTC; honesty caveat appended 2026-06-09T06:14 CST.",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "codex_24h_fail_followup",
+    "article_id": "mile_072c3972",
+    "experiment_id": "K1429",
+    "tags": [
+      "k1429-v2",
+      "codex-fail-followup",
+      "methodology-fix",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-09T06:15:00+08:00",
+    "deadline": "2026-06-10T06:15:00+08:00"
   }
 ]
