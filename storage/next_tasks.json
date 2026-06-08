@@ -24724,10 +24724,54 @@
     "id": "platform_ops_publication_candidates_audit_20260608",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch_07_discovery",
     "title": "Publication candidates metadata audit: K672/K1056/K1076/K593/K1403 仍列 missing_general 但 article 已寫",
     "description": "publication_candidates.json (generated 2026-06-07T16:21Z) 列 K672/K1056/K1076/K593/K1403 為 missing_general_top5，但 next_tasks.json 顯示 K1056/K1076/K593/K1403 已 succeeded（有 article）、K672 v1-v3 failed + v4 blocked。\n\n根因兩種可能：\n(a) publisher 把這些 K 的 article 標成 audience=research 不是 general（per memory feedback_publisher_strict_audit_tag），導致 publication_candidates 的 audience filter 還算 missing\n(b) build_publication_candidates.py 的 audience query 對 K674/K1056/K1076 等舊 K 不認某些 tagging schema\n\n步驟：\n1. 跑 build_publication_candidates.py 重生 candidates (refresh generated_at)\n2. 若 K1056/K1076/K593/K1403 仍列 missing_general → 對應 feed.json 該 K 的 article id 查 audience field\n3. audience=='research' 但內容明顯 general → 用 retag CLI 改 audience=general\n4. K672 v4 blocked 看 blocked_reason 決定是 unblock 還是 close\n5. commit 改動\n\n影響：refill_task_pool 找不到新候選 → pool 乾涸 → hourly fire 無 actionable task。修整後 refill 應能正常運作。",
-    "created_at": "2026-06-07T23:10:00+00:00"
+    "created_at": "2026-06-07T23:10:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-07T23:50:39.287601+00:00",
+    "claim_session_id": "e4a50d6db834",
+    "started_at": "2026-06-07T23:52:35.783391+00:00",
+    "completed_at": "2026-06-07T23:58:23.147540+00:00",
+    "result": "Audit confirmed K672/K593/K1056/K1076/K1403 are research-only coverage, not stale missing coverage. Clarified publication_candidates audience-gap semantics (notes + missing_target_audience aliases) and refreshed storage/publication_candidates.json. Kept K672 general-v4 blocked because prior retries failed and this task found no metadata bug to justify unblock."
+  },
+  {
+    "id": "K1422_article_general",
+    "title": "K1422: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1422 has verdict signal (score=4, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1422",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-08T00:09:25+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-08T00:09:25.866292+00:00",
+    "claim_session_id": "5f66bb9d517e",
+    "started_at": "2026-06-08T00:09:32.150331+00:00",
+    "completed_at": "2026-06-08T00:25:33.171037+00:00",
+    "result": "Published mile_b87cc779 (research, 10383 chars, K1422 PASS lineage 修 K1421 retract). Anti-AI gate PASS warn=2/3. 2 real charts on Supabase. Live HTTP 200."
+  },
+  {
+    "id": "K1421_article_general",
+    "title": "K1421: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1421 has verdict signal (score=1, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1421",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-08T00:09:25+00:00"
   }
 ]

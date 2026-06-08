@@ -384,8 +384,28 @@ def main():
         and not _self_overturned(c)
     ]
 
+    def _audience_gap_row(candidate: dict, target_audience: str) -> dict:
+        return {
+            "k_id": candidate["k_id"],
+            "score": candidate["score"],
+            "title": candidate["title"][:120],
+            "missing_target_audience": target_audience,
+            "coverage_status": "covered_for_other_audiences",
+            "already_covered_for": candidate["audiences_covered"],
+        }
+
     output = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "notes": {
+            "missing_general_top5": (
+                "Covered by at least one published article, but still missing "
+                "a general-audience article."
+            ),
+            "missing_research_top5": (
+                "Covered by at least one published article, but still missing "
+                "a research-audience article."
+            ),
+        },
         "summary": {
             "total_k": total,
             "incomplete_research_filtered": incomplete_research_count,
@@ -400,13 +420,20 @@ def main():
             for c in candidates[:10] if c["uncovered"] and not c["overturned_by"]
         ],
         "missing_general_top5": [
-            {"k_id": c["k_id"], "score": c["score"], "title": c["title"][:120],
-             "already_covered_for": c["audiences_covered"]}
+            _audience_gap_row(c, "general")
             for c in missing_general[:5]
         ],
         "missing_research_top5": [
-            {"k_id": c["k_id"], "score": c["score"], "title": c["title"][:120],
-             "already_covered_for": c["audiences_covered"]}
+            _audience_gap_row(c, "research")
+            for c in missing_research[:5]
+        ],
+        # Clearer aliases for future readers; keep legacy keys above for compatibility.
+        "general_audience_gap_top5": [
+            _audience_gap_row(c, "general")
+            for c in missing_general[:5]
+        ],
+        "research_audience_gap_top5": [
+            _audience_gap_row(c, "research")
             for c in missing_research[:5]
         ],
         "candidates": candidates,
