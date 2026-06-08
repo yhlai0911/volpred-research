@@ -2,7 +2,8 @@
 """Poll Gmail inbox for replies to assistant-sent mails; queue into task pool.
 
 Strategy:
-  1. IMAP fetch UNSEEN since last poll
+  1. IMAP search by SINCE-date window (UNSEEN is unreliable — Gmail auto-marks
+     read on preview). NOTE: this returns ALL recent mail, not just VolPred.
   2. Identify replies to assistant-sent messages by:
      - Subject starts with "Re:" (case-insensitive)
      - OR In-Reply-To / References header matches a tracked sent Message-ID
@@ -10,7 +11,9 @@ Strategy:
   3. Extract reply body (strip quoted portion below "On ... wrote:" or "----- Original Message -----")
   4. Extract original assistant content (the quoted block) for context
   5. Append a new task to storage/next_tasks.json with task_type="email_reply"
-  6. Mark message as Seen (\\Seen flag) so we don't reprocess
+  6. Do NOT mark any message as Seen. Fetch uses BODY.PEEK[] so neither VolPred
+     nor the user's personal mail has its read-state touched (用戶 2026-06-08).
+     Reprocessing is prevented by Message-ID / subject / state-file dedup instead.
   7. Persist last UID to storage/ops/gmail_inbox_state.json
 
 Run:
@@ -514,7 +517,13 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
 
         for raw_uid in uids[:max_messages]:
             uid = int(raw_uid)
-            typ, msg_data = M.fetch(raw_uid, "(RFC822)")
+            # BODY.PEEK[] (NOT RFC822/BODY[]) — PEEK does not set the \Seen flag.
+            # 2026-06-08 (用戶要求): the SINCE-date search (line ~504) returns ALL
+            # recent mail, not just VolPred; fetching each with RFC822 silently
+            # marked every message — including the user's personal non-VolPred mail —
+            # as read. PEEK fetches identical content without touching read state,
+            # honouring the long-standing intent (see "Do NOT set \\Seen" below).
+            typ, msg_data = M.fetch(raw_uid, "(BODY.PEEK[])")
             if typ != "OK" or not msg_data or not msg_data[0]:
                 skipped += 1
                 continue
