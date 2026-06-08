@@ -24946,7 +24946,7 @@
     "title": "K1423 Codex code review retry (stdin pipe pattern)",
     "description": "K1423 EWMA Hurst pilot 已完成 + CONDITIONAL_PASS knowledge entry 已寫。原 Codex review 派出但卡 stdin pipe bug (heredoc + cat 重定向 ~34min hung)，最終 SIGTERM kill。retry pattern: `cat /tmp/k1423_codex_brief.txt | codex exec --skip-git-repo-check -` 或 inline -m。檢核重點同原 brief（lookahead / Lo R/S 公式 / EWMA double-count / chi2 smoothing / 數值穩定性）。Verdict 後若 PASS 則升 knowledge.json verdict CONDITIONAL_PASS→PASS + 排 K1423_article_general；若 FAIL 則檢討實作並降級 verdict。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "k1423_followup",
     "tags": [
@@ -24954,14 +24954,19 @@
       "codex-review",
       "stdin-pipe-fix"
     ],
-    "created_at": "2026-06-08T03:20:00+00:00"
+    "created_at": "2026-06-08T03:20:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T04:07:50.200411+00:00",
+    "claim_session_id": "b05e7408a0de",
+    "completed_at": "2026-06-08T04:09:13.112502+00:00",
+    "result": "FAIL review. K1423 should not be upgraded to PASS: the code labels a simplified classical/weighted R/S estimator as Lo modified R/S, H(t) is correlated against same-date VIX even though H uses returns only through t-1, and the README selectively reports λ=0.94 insignificance while λ=0.97/0.99 are significant in results.json. Review artifact: storage/ops/review_history/K1423_codex_review_retry_2026-06-08.md"
   },
   {
     "id": "K1424_hurst_garch_covariate",
     "title": "K1424: H(t) as GARCH covariate forecast vol (forecasting; must shift(1))",
     "description": "K1423 pilot 顯示 rolling H 與 VIX ρ=0.32 顯著正相關。K1424 升級到 forecasting：把 H(t-1) (shift(1) 必加) 作為 GARCH(1,1) 或 HAR-RV 的 covariate，OOS DM test vs baseline。確認 H 是否為真實 incremental predictor 或只是 VIX 的 noisy proxy。Sample: SPY 2010-2026, IS:2010-2019, OOS:2020-2026。Must: lookahead audit, Codex review, 多 seed bootstrap CI for incremental QLIKE。",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "k1423_followup",
     "tags": [
@@ -24972,6 +24977,42 @@
       "forecasting",
       "shift1-required"
     ],
-    "created_at": "2026-06-08T03:20:00+00:00"
+    "created_at": "2026-06-08T03:20:00+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-08T04:09:44.899367+00:00",
+    "claim_session_id": "bf88f6a7c13e",
+    "started_at": "2026-06-08T04:09:56.090077+00:00",
+    "completed_at": "2026-06-08T04:24:41.459651+00:00",
+    "result": "Stage 1/3 完成：腳本 + README 已產出 (experiments/K1424_hurst_garch_covariate/)，Codex Round 1 FAIL → 砍 HAR family + 補 MLE 數值診斷 + 修 bootstrap 口徑 → Round 2 PASS (script-side) + 主線重寫 README 同步收斂。Stage 2 (compute) enqueued: K1424_hurst_garch_covariate_compute (~3-5 min worker run)；Stage 3 (interpretation) followup will auto-dispatch next hourly fire when worker completes (claude_followup brief 已寫入 compute_queue)."
+  },
+  {
+    "id": "research_proxy_reliance_control_in_conformal_var",
+    "title": "研究 backlog fallback: Proxy-Reliance Control in Conformal VaR",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Proxy-Reliance Control in Conformal VaR — arXiv:2603.22569 (2026)。校準 one-sided VaR 時控制 proxy 依賴。直接相關我們的 Patton (2011) proxy-robust 框架。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "proxy_reliance_control_in_conformal_var",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T04:08:06+00:00"
+  },
+  {
+    "id": "research_online_conformal_via_universal_portfolio",
+    "title": "研究 backlog fallback: Online Conformal via Universal Portfolio",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Online Conformal via Universal Portfolio — arXiv:2602.03168 (2026)。在線 conformal prediction + portfolio theory 交叉。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "online_conformal_via_universal_portfolio",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T04:08:06+00:00"
   }
 ]

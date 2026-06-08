@@ -9927,5 +9927,13 @@
     "task_type": "experiment",
     "status": "succeeded",
     "notes": "K1423 EWMA Hurst pilot 完成 — SPY daily 2010-2026, rolling+EWMA Lo R/S; ρ(rolling H, VIX)=+0.32 sig; EWMA λ=0.94 leads COVID regime by ~3w; χ² nonsig (太 noisy)。Bug: 初版 cum_sum 誤乘 weights 致 H clamp 全 0.05，修正後合理。Codex review 卡 stdin pipe (~34min hung)，knowledge CONDITIONAL_PASS + followup K1423_codex_review_retry / K1424 queued."
+  },
+  {
+    "timestamp": "2026-06-08T12:24:49+08:00",
+    "task_type": "experiment",
+    "task_id": "K1424_hurst_garch_covariate",
+    "owner": "hourly-12",
+    "stage": "scripted+codex_round2_pass+enqueued",
+    "notes": "GARCH-only scope (HAR推K1425); compute_queue id=K1424_hurst_garch_covariate_compute; followup auto-dispatch next hourly"
   }
 ]

@@ -1,0 +1,23 @@
+{
+  "id": "K1424_hurst_garch_covariate_compute",
+  "title": "K1424: H(t-1) as GARCH covariate (4 model) — SPY 2010-2026 OOS DM test",
+  "script_path": "experiments/K1424_hurst_garch_covariate/K1424_hurst_garch_covariate.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-06-08T04:24:19Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/K1424_hurst_garch_covariate_compute.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/K1424_hurst_garch_covariate_compute.stderr",
+  "result_artifact": "experiments/K1424_hurst_garch_covariate/K1424_hurst_garch_covariate_results.json",
+  "claude_followup": {
+    "brief": "K1424 results 已就緒：4 GARCH model OOS DM test (SPY 2010-2026, IS 2010-2019 / OOS 2020-2026). 讀 results.json + forecasts.csv，重點看 (1) garch_plus_vix vs garch_plus_h_vix DM p-value (核心 incremental test，控制 VIX 後 H 是否邊際有效) (2) per-year breakdown 是否一致 (3) MLE termination_flag / sigma2_clamp_ratio 數值健康。寫 README 結果區 + 知識庫 K1424 entry (provenance: experiment_id + reviewer='codex_round2_pass+round1_har_scoped_out')。Verdict 規則：核心 pair DM p<0.05 & d>0 PASS；p<0.10 CONDITIONAL_PASS；p≥0.10 NULL。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1200
+}
