@@ -32817,5 +32817,18 @@
     "phase": "publication-review",
     "task_id": "paper_review_mile_f8af30d0",
     "created_at": "2026-06-08T14:12:30.748543+00:00"
+  },
+  {
+    "item_id": "2350ee94",
+    "category": "market_microstructure",
+    "content": "[K1427][CONDITIONAL_PASS][reviewer:code-reviewer subagent fallback (Codex CLI 故障)] 裁決外部總經主張「近期 selloff 資金未撤、輪動到能源/防禦抗通膨」= MIXED。最近 selloff (2026-06-05 SPY -2.58%) 板塊橫斷面 dispersion 在 99.5 分位; 4 板塊逆勢 (XLP+1.71/XLU+0.93/XLV+0.61/XLF+0.21) vs XLK -6.66% → 支持「輪動非全撤」; 但 XLE 能源當天 -1.84%(也跌, 只是抗跌) → 「輪動到能源抗通膨」具體說法 REFUTED, 實為流向防禦。更廣: 2014~ 101 大跌日 dispersion 1.25% vs 平常 0.71% (1.75x, Welch t=7.91 p=3.2e-12) → 打臉「大跌=齊跌」直覺, 大跌板塊更分歧。但高 dispersion ≠ 輪動: 69 episode 僅 19(28%)真輪動(有板塊正報酬), 33(48%)高 dispersion 全跌, 17(25%)低 dispersion 清算。方法: cross-sectional dispersion=同日板塊報酬橫斷面 std; 長期核心用 early-9 板塊(XLRE/XLC 晚上市); seed=42; 描述性非 forecast 無 lookahead(主路徑)。Q5 future-vol off-by-one(非核心 null, 文章未引用)。文章 mile_c07025d2。",
+    "evidence": [
+      "experiments/k1427/k1427_results.json",
+      "experiments/k1427/README.md",
+      "K1427",
+      "mile_c07025d2"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-09T02:08:38.027922"
   }
 ]
