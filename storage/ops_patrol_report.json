@@ -1,36 +1,40 @@
 {
-  "timestamp": "2026-06-08T00:11:14Z",
+  "timestamp": "2026-06-08T06:10:41.994423+00:00",
   "all_ok": true,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 146, research: 46, general: 100"
+      "detail": "145 drafts (general=100, research=45)"
     },
     {
-      "name": "strategy_metrics_freshness",
+      "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json age: 0.0031 hours (11 seconds old)"
+      "detail": "strategy_metrics.json age: 0.01h (threshold 26h)"
     },
     {
-      "name": "error_log_recent",
+      "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-07 or 2026-06-08 found in error_log.md"
+      "detail": "Recent entries found (today + yesterday)",
+      "recent_entries": [
+        "2026-06-08: host_cron_fail false-critical (strike 2 → structured fix); article pool churn — uncovered candidate sources exhausted; refill判斷不完整 (00:18 corrected at 01:47)",
+        "2026-06-07: audit_fb_pipeline exit 1 misread as infra-critical (strike 1, subsequently patched)"
+      ]
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked; max nulls in last 3 entries = 1 (threshold: >2). No alerts triggered."
+      "detail": "15 strategies checked; no strategy has >2 nulls in last 3 entries"
     },
     {
-      "name": "git_status",
+      "name": "GIT_STATUS",
       "status": "ok",
       "detail": "0 uncommitted files"
     },
     {
-      "name": "knowledge_size",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json entries: 2202"
+      "detail": "2204 entries in knowledge.json"
     }
   ],
   "alerts": []
