@@ -323,3 +323,75 @@ def _extract_json_object(text: str) -> dict | None:
                 except json.JSONDecodeError:
                     return None
     return None
+
+
+# ── Pre-publish image-URL gate (2026-06-08) ────────────────────────────────
+# 缺圖 incident (2026-06-08): 20 published articles shipped with image URLs on
+# paths the frontend never serves (/experiments/, /api/storage/, /figures/,
+# _PLACEHOLDER, github raw, local abs) → HTTP 404 broken images. The image
+# normalization at publish time (publish_draft.normalize_image_paths) transforms
+# local refs but missed absolute zeabur /experiments/ URLs. This is a
+# DETERMINISTIC path-based verification gate: every embedded image must live on a
+# canonical *served* path (Supabase public storage bucket OR frontend /charts/),
+# else block (修流程不修資料 — stop broken images at publish, not after).
+import re as _img_re
+
+# Markdown ![alt](url) and HTML <img src="url">.
+_IMG_MD_RE = _img_re.compile(r"!\[[^\]]*\]\(\s*(?P<url>[^)\s]+)")
+_IMG_HTML_RE = _img_re.compile(r"<img\b[^>]*?\bsrc=[\"'](?P<url>[^\"']+)", _img_re.IGNORECASE)
+
+# Canonical SERVED locations (an image here is reachable in production).
+_CANONICAL_IMG_SUBSTRINGS = (
+    "/storage/v1/object/public/",   # any Supabase public bucket (article-images, paper-images…)
+)
+# Frontend-served static charts: volpred.zeabur.app/charts/... or relative /charts/...
+_CANONICAL_CHARTS_RE = _img_re.compile(r"(^|//[^/]+)/charts/[^)\s]+\.(png|svg|jpe?g|webp)$", _img_re.IGNORECASE)
+
+# Known-broken markers (used to give a precise reason; anything non-canonical is
+# blocked regardless, but these explain WHY for the most common cases).
+_BROKEN_IMG_MARKERS = (
+    ("/experiments/", "experiments/ path is not served by the frontend (repo-only)"),
+    ("/api/storage/", "/api/storage/ is not a served route"),
+    ("/figures/", "/figures/ path is not served"),
+    ("_PLACEHOLDER", "placeholder filename — real chart was never wired"),
+    ("raw.githubusercontent.com", "github raw is not the canonical asset host"),
+    ("github.com", "github URL is not the canonical asset host"),
+    ("file://", "local file:// path is not reachable in production"),
+    ("/Users/", "local absolute path is not reachable in production"),
+)
+
+
+def _is_canonical_image_url(url: str) -> bool:
+    u = (url or "").strip()
+    if not u:
+        return False
+    if any(s in u for s in _CANONICAL_IMG_SUBSTRINGS):
+        return True
+    if _CANONICAL_CHARTS_RE.search(u):
+        return True
+    return False
+
+
+def audit_image_urls(content: str) -> dict:
+    """Deterministic path-based image gate.
+
+    Returns {"broken": [{"url","reason"}...], "total": int}. `broken` lists every
+    embedded image whose URL is NOT on a canonical served path. Network-free.
+    """
+    text = content or ""
+    urls: list[str] = []
+    for m in _IMG_MD_RE.finditer(text):
+        urls.append(m.group("url"))
+    for m in _IMG_HTML_RE.finditer(text):
+        urls.append(m.group("url"))
+    broken: list[dict] = []
+    for u in urls:
+        if _is_canonical_image_url(u):
+            continue
+        reason = "non-canonical image path (not Supabase public storage or /charts/)"
+        for marker, why in _BROKEN_IMG_MARKERS:
+            if marker in u:
+                reason = why
+                break
+        broken.append({"url": u, "reason": reason})
+    return {"broken": broken, "total": len(urls)}

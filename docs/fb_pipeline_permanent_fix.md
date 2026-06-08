@@ -99,3 +99,20 @@
 - 這是**第二次**違反 memory（第一次 5/29，第二次 6/3 hourly-11）— 三振前線
 - boss 用粗口表達 = trust violation；hourly chain 再提 Page 會變第三振
 - 從此把「FB 自動化路徑」當 **closed question**，連 followup task 都不開
+
+## 七、Boss-report 句型禁忌（2026-06-08 email-11728 新增）
+
+Hourly cron / autonomous fire 寄的 boss report **禁止**：
+
+- ❌ 「還需要你做：mile_xxxx FB 走 Claude in Chrome」
+- ❌ 「FB Ivan Lai 發文待你接手」
+- ❌ 任何把 awaiting_interactive_session 包裝成 user-actionable 的 imperative 段
+
+**Why**: 6/8 10:14 hourly-10 boss report 仍寫此句型 → 10:21 boss 回信「你是說你沒辦法幫我用FB發文嗎？那是你的問題，你要解決」（email-11728） — AI 該自動處理的 ops gap 不該丟回老闆，違反 mission #1 全自動運營承諾。
+
+**How**:
+1. cron 寫 FB awaiting 後**只**記 work_log + 留 status；boss report 不列
+2. 流程保護已就位：72h auto-expire + dashboard awaiting 不警報 + `expired_skip` enum
+3. 互動 session 自然接管做（trending dual-publish）；沒接管 → 72h 後 auto-expire 成本可接受
+4. Boss report 真要 mention FB（罕見）→ 用「FB 狀態」純資訊段、無 imperative「你 / 請」字眼
+5. memory `feedback_boss_report_no_fb_handback` 紀錄此規則
