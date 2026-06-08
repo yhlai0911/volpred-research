@@ -25252,7 +25252,7 @@
     "title": "研究 backlog fallback: Regime-aware In-Context Learning",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting） | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "regime_aware_in_context_learning",
@@ -25260,7 +25260,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T10:08:10+00:00"
+    "created_at": "2026-06-08T10:08:10+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T11:31:54.463971+00:00",
+    "claim_session_id": "59971abf9b4f",
+    "started_at": "2026-06-08T11:32:07.747699+00:00",
+    "completed_at": "2026-06-08T11:32:35.464408+00:00",
+    "result": "Resolved as duplicate of K149. Added backlog resolution note mapping the task to the existing regime-aware ICL experiment and its 0/48 significant-cell null result."
   },
   {
     "id": "research_har_ceiling",
@@ -25311,7 +25317,7 @@
     "title": "garch-x-vix v7 review verdict read + plan v8",
     "description": "讀 paper/garch-x-vix/review_history/v7/README.md + 任何 v7 sub-reports。寫 v8 plan: 列出 MAJOR/MED/MIN 數 + recommended fixes + 預估 effort + 是否 ready_for_submission promotion path。Output: paper/garch-x-vix/v8_plan.md。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "paper_portfolio_audit_2026-06-08",
     "tags": [
@@ -25319,7 +25325,13 @@
       "garch-x-vix"
     ],
     "paper_id": "garch-x-vix",
-    "created_at": "2026-06-08T10:13:11+00:00"
+    "created_at": "2026-06-08T10:13:11+00:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-08T12:08:52.307275+00:00",
+    "claim_session_id": "d71f826ca1ae",
+    "started_at": "2026-06-08T12:08:58.567392+00:00",
+    "completed_at": "2026-06-08T12:10:02.920028+00:00",
+    "result": "v8_plan.md written: 4 findings (1 high + 2 med-high + 1 med) → R1-prep packet path (no main.tex change pre-R1). A1 metadata sync (30min) + A2 wording queue (20min) + A3 errata consolidation (15min). Maintain submitted/amber. Promotion only on R1 reviewer response."
   },
   {
     "id": "paper_body_leverage_direction_submission_package",
