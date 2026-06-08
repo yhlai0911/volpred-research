@@ -9935,5 +9935,14 @@
     "owner": "hourly-12",
     "stage": "scripted+codex_round2_pass+enqueued",
     "notes": "GARCH-only scope (HAR推K1425); compute_queue id=K1424_hurst_garch_covariate_compute; followup auto-dispatch next hourly"
+  },
+  {
+    "timestamp": "2026-06-08T13:10",
+    "task_type": "paper_review",
+    "task_id": "K1424_hurst_garch_covariate_interpret",
+    "title": "K1424 OOS interpretation: H as GARCH covariate — verdict NULL",
+    "owner": "main-thread-hourly-13",
+    "status": "succeeded",
+    "result": "DM +vix vs +h_vix p=0.0028 d=-0.000121 (NULL: H 控制 VIX 後 marginal harm, effect ~10⁻⁴ 實務無意義); README 結果區+knowledge.json item 2a4b737e + compute_queue followup marked dispatched"
   }
 ]

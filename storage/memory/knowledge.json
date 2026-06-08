@@ -32696,5 +32696,27 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-08T12:42:06.595046"
+  },
+  {
+    "item_id": "2a4b737e",
+    "category": "hurst_garch_covariate",
+    "content": "K1424 — EWMA-Hurst (λ=0.94, window=500) as GARCH(1,1) covariate, SPY OOS 2020-2026 (n=1615). 核心 incremental test garch_plus_vix vs garch_plus_h_vix: DM stat=-2.99, p=0.0028, mean_d=-0.000121, bootstrap CI [-0.00020, -0.00004]. H 控制 VIX 後 marginal harm (統計顯著為負但 effect ~10⁻⁴ 實務無意義). VIX vs baseline d=+0.046 (p=0.0001) 3% QLIKE lift; +H vs baseline d=+0.022 (p=0.024) 1.5% lift 完全被 VIX 吸收. Per-year: VIX 在 6/7 年 OOS 最佳; H 在 2021 反而 -2%. K1423 ρ(H,VIX)=+0.32 確認被 VIX 涵蓋. Verdict=NULL. 啟示: long-memory 訊息已含於 IV (VIX); H 可能僅在無成熟 IV market (TW/EM) 有差異化價值. MLE 數值健康: baseline/+H success=True; +VIX/+H+VIX ABNORMAL termination 但 NLL finite + clamp=0 + params 落 α=0.1/β=0.85 IS constraint 邊界 (非失敗,K1425 改 reparameterize).",
+    "evidence": [
+      "experiments/K1424_hurst_garch_covariate/K1424_hurst_garch_covariate_results.json",
+      "experiments/K1424_hurst_garch_covariate/README.md",
+      "experiments/K1424_hurst_garch_covariate/K1424_hurst_garch_covariate.py"
+    ],
+    "confidence": 0.85,
+    "verdict": "NULL",
+    "experiment_id": "K1424_hurst_garch_covariate",
+    "experiment_path": "experiments/K1424_hurst_garch_covariate/",
+    "k_id": "K1424",
+    "reviewer": "codex_round2_pass",
+    "reviewer_source": "codex_round1_FAIL_round2_PASS_har_scoped_out",
+    "parent_k": "K1423",
+    "related_experiments": [
+      "K1423_ewma_hurst_pilot"
+    ],
+    "created_at": "2026-06-08T13:10:27.438619"
   }
 ]

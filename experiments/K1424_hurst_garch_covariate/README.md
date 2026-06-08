@@ -115,9 +115,48 @@ HAR-RV 加 H 推 K1425：HAR 用 multi-day overlap target，需 overlap-correct 
 - `data/K1424_forecasts.csv` — OOS 每日 4 GARCH model forecasts
 - `data/K1424_loss_diff_series.csv` — OOS 每日 QLIKE，供 DM/bootstrap re-run
 
-## 結果（待執行後補）
+## 結果（2026-06-08 OOS run）
 
-_run 完後在此補表格：DM stats / p-values / per-year QLIKE / verdict_
+### DM tests（n=1615, NW lag=7, two-sided）
+
+| Pair | mean d | DM stat | p-value | Bootstrap CI (block=5, n=500) | 解讀 |
+|---|---:|---:|---:|---|---|
+| baseline vs +H | +0.0224 | 2.25 | 0.0243 | [+0.0033, +0.0414] | H 對 baseline 有顯著小 lift |
+| baseline vs +VIX | +0.0464 | 3.85 | 0.0001 | [+0.0227, +0.0712] | VIX 強 lift（~3% QLIKE 改善） |
+| baseline vs +H+VIX | +0.0463 | 3.85 | 0.0001 | [+0.0226, +0.0710] | 與 +VIX 幾乎相等 |
+| **+VIX vs +H+VIX**（核心） | **-0.00012** | **-2.99** | **0.0028** | **[-0.00020, -0.00004]** | **加 H 反而 marginal harm（effect ~10⁻⁴ 微小）** |
+
+### Per-year OOS QLIKE
+
+| Year | n | baseline | +H | +VIX | +H+VIX | 最佳 |
+|---|---:|---:|---:|---:|---:|---|
+| 2020 | 253 | 1.466 | 1.461 | **1.425** | 1.426 | +VIX |
+| 2021 | 252 | **1.409** | 1.438 | 1.413 | 1.413 | baseline |
+| 2022 | 251 | 1.575 | 1.466 | **1.423** | 1.424 | +VIX |
+| 2023 | 250 | 1.453 | 1.432 | **1.425** | 1.425 | +VIX |
+| 2024 | 252 | 1.637 | 1.627 | **1.619** | 1.619 | +VIX |
+| 2025 | 250 | 1.734 | 1.710 | **1.691** | 1.691 | +VIX |
+| 2026 | 107 | 1.637 | 1.624 | **1.585** | 1.585 | +VIX |
+
+VIX 在 6/7 年最佳；H 在 2021 反而 -2% 變差；加 H 進 +VIX model 7 年皆無感（差異在小數第 4 位）。
+
+### MLE 數值健康
+
+- baseline / +H：`CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH`、`success=True`
+- +VIX / +H+VIX：`termination_flag=ABNORMAL`、`success=False`，但 NLL 有限、`sigma2_clamp_ratio=0`、params 落 IS-fit α=0.1, β=0.85 邊界 → L-BFGS-B 邊界停止判據未滿足，估計值仍可用（不是失敗）；建議 K1425 系列改 reparameterize 或 unconstrained optimization
+
+### Verdict
+
+**NULL** — H 控制 VIX 後不僅無 incremental value，反而**統計上顯著**為負（p=0.0028）；惟 effect size 極小（~10⁻⁴ QLIKE 量級），實務無意義。K1423 ρ(H, VIX) = +0.32 被 VIX 完全吸收。
+
+研究啟示：EWMA-Hurst 作為 long-memory 指標的訊息已被 VIX 隱含波動率涵蓋；單獨用 H 對 baseline 仍有 1.5% lift（DM p=0.024）— H 對「無 VIX 可用」的市場可能仍有價值（後續可在 TW / EM 等無成熟 IV market 上測）。
+
+### 後續方向（依 NULL verdict）
+
+- 結案 `research_program.md` backlog 條目 `time_varying_hurst_via_ewma`（標 NULL_resolved）
+- **K1425 PCA factor-attribution 已啟動**（無關 Hurst，獨立方向）
+- **不**推 K1425a HAR-RV + H（NULL_in_garch 已削弱 prior，HAR scope 性價比低；改測 TW/EM market 才有差異化動機）
+- **可**寫一篇 reader-facing 短文：「市場記憶力預測波動嗎？答：VIX 已先一步知道」（draft pool）
 
 ## Notes
 

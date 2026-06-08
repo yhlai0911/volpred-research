@@ -415,7 +415,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 ### Rough Volatility & Hurst
 - [x] ~~Multivariate fBm for RV~~ → **K806 完成 NULL**（⚠️ Codex 1 HIGH: 0050.TW 未清洗，跨資產 H 不可信；SPY 自身結果可信）。自身 H(t) 改善 NS (DM=-0.09)。5 資產全 rough (H<<0.5)。日頻 variogram 不夠精確。
 - [ ] ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。
-- [ ] Time-Varying Hurst via EWMA — arXiv:2509.05820
+- [x] ~~Time-Varying Hurst via EWMA~~ — arXiv:2509.05820 → **K1423 (pilot CONDITIONAL_PASS, ρ(H,VIX)=+0.32) → K1424 (GARCH covariate, NULL_resolved 2026-06-08)**：H 控制 VIX 後 garch_plus_vix vs garch_plus_h_vix DM=-2.99 p=0.0028 d=-1.2e-4 marginal harm（effect ~10⁻⁴ 實務無意義）；VIX vs baseline d=+0.046 強 lift，H 訊息已被 VIX 完全吸收。後續方向：TW/EM 等無成熟 IV market 才有差異化動機
 - [ ] Adaptive Fractal Dynamics — Frontiers Applied Math 2025
 - [ ] Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437
 

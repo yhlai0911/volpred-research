@@ -24863,8 +24863,8 @@
     "claimed_at": "2026-06-08T02:37:06.086858+00:00",
     "claim_session_id": "678946162776",
     "started_at": "2026-06-08T02:37:18.615336+00:00",
-    "completed_at": "2026-06-08T03:17:50.057630+00:00",
-    "result": "Materialized as K1423_ewma_hurst_pilot. Pilot ran SPY daily 2010-2026 R/S Hurst (rolling + EWMA λ=0.94/0.97/0.99). Findings: Rolling H≈0.50, ρ(H,VIX)=+0.32 (p<1e-80) significant; EWMA λ=0.94 leads rolling on COVID regime by ~3w but χ² regime nonsig. Knowledge entry CONDITIONAL_PASS (Lo R/S simplified, no Newey-West LRV). Codex review hung on stdin pipe bug → followup task K1423_codex_review_retry. Followup K1424 (H→GARCH covariate forecast) queued."
+    "completed_at": "2026-06-08T05:11:18.275342+00:00",
+    "result": "Materialized as K1423_ewma_hurst_pilot. Pilot ran SPY daily 2010-2026 R/S Hurst (rolling + EWMA λ=0.94/0.97/0.99). Findings: Rolling H≈0.50, ρ(H,VIX)=+0.32 (p<1e-80) significant; EWMA λ=0.94 leads rolling on COVID regime by ~3w but χ² regime nonsig. Knowledge entry CONDITIONAL_PASS (Lo R/S simplified, no Newey-West LRV). Codex review hung on stdin pipe bug → followup task K1423_codex_review_retry. Followup K1424 (H→GARCH covariate forecast) queued.\n\nK1424 OOS NULL (2026-06-08): H 控制 VIX 後 DM=-2.99 p=0.0028 d=-1.2e-4 marginal harm; VIX 已含全部 long-memory 訊息; backlog 條目 research_program.md L418 結案"
   },
   {
     "id": "email-11728-21e21e",
@@ -25014,5 +25014,55 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T04:08:06+00:00"
+  },
+  {
+    "id": "paper_review_mile_22d9d2a5",
+    "title": "Paper review (Codex 24h-rule): 定期定額的報酬率，什麼時候被高估、什麼時候被低估",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_22d9d2a5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_22d9d2a5",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-08T05:08:19+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T05:10:06.005612+00:00",
+    "claim_session_id": "29aed6a883fe",
+    "started_at": "2026-06-08T05:10:06.098192+00:00"
+  },
+  {
+    "id": "research_kowcpi_kernel_optimally_weighted_conformal",
+    "title": "研究 backlog fallback: KOWCPI (Kernel-Optimally-Weighted Conformal)",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: KOWCPI (Kernel-Optimally-Weighted Conformal) — arXiv:2405.16828。自適應權重 conformal prediction interval，適合波動率聚集。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "kowcpi_kernel_optimally_weighted_conformal",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T05:08:20+00:00"
+  },
+  {
+    "id": "research_quadratic_hedging_under_garch",
+    "title": "研究 backlog fallback: Quadratic Hedging under GARCH",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Quadratic Hedging under GARCH — Ma, J. Futures Markets 2026 | 來源 section: 期貨避險方法論. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "quadratic_hedging_under_garch",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T05:08:20+00:00"
   }
 ]
