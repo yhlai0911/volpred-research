@@ -158,6 +158,18 @@ uv run python experiments/k1426/k1426.py
 
 （後者預計 ~15-25min，前者 ~3-5min）
 
+OOS follow-up（async worker；expanding window + strict `shift(1)`）：
+
+```
+uv run python scripts/compute_queue.py enqueue \
+  --script experiments/k1426/oos.py \
+  --title "K1426 — OOS partial cointegration hedging" \
+  --result-artifact experiments/k1426/k1426_oos_results.json \
+  --followup-brief "Read k1426_oos_results.json. Verify whether any pair shows OOS HE_PCH > HE_OLS with bootstrap 95% CI excluding 0 and DM |t| > 3.0 after multiple-testing caution. If all six pairs are NULL/weak, write a null-result interpretation and decide whether multivariate PCH is still worth queueing." \
+  --followup-task-type paper_review \
+  --timeout 21600
+```
+
 ## 三件套 + 附件
 
 - `README.md` — 本檔

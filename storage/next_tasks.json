@@ -25380,7 +25380,7 @@
     "title": "K1426 follow-up: OOS rolling-window + 100-multistart MLE + bootstrap CI",
     "description": "K1426 IS PoC NULL 已寫入 knowledge.json (CONDITIONAL_PASS by Codex). Heavy compute followup: (1) full 100-multistart MLE for all 3 pairs (pooled-MLE rule K1213→K1216c) — priority pair USO/BNO; (2) OOS rolling-window: expanding window estimate (beta, rho), shift(1), compute OOS HE; (3) bootstrap CI: block-bootstrap 1000 reps for HE_PCH−HE_OLS 95% CI + Patton-style DM equivalence test; (4) cross-pair generalization: add GLD/SLV, XLE/USO, XLF/XLK to test R²_MR cross-asset-class behavior; (5) multivariate extension: 3+ assets PCH state-space (Poulos et al. 2024). Async via compute_queue worker — write OOS script under experiments/k1426/oos.py + enqueue with --result-artifact + --followup-brief. Predecessor: experiments/k1426/.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "k1426_followup",
     "research_slug": "partial_cointegration_hedging_oos",
@@ -25393,7 +25393,13 @@
       "pooled-MLE",
       "hedging"
     ],
-    "created_at": "2026-06-08T13:51:14+00:00"
+    "created_at": "2026-06-08T13:51:14+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T15:59:48.485888+00:00",
+    "claim_session_id": "e7c2272842ce",
+    "started_at": "2026-06-08T15:59:48.566179+00:00",
+    "completed_at": "2026-06-08T16:06:07.119093+00:00",
+    "result": "Added experiments/k1426/oos.py for async expanding-window OOS PCH hedging: 6 pairs, strict shift(1), 100-start refits, HE bootstrap CI, DM squared-loss comparison. Enqueued compute-k1426-oos-partial-cointegration-hedging-1780934756 and documented the queue command in experiments/k1426/README.md."
   },
   {
     "id": "paper_review_mile_f8af30d0",
@@ -25492,5 +25498,51 @@
     "started_at": "2026-06-08T14:36:40.656537+00:00",
     "completed_at": "2026-06-08T14:58:42.442955+00:00",
     "result": "K1090b complete: built experiments/k1090b with nested LOOCV and N=20 asset pool. Honest metrics: ridge LOOCV R2=0.151 / RMSE=2.00; compact OLS LOOCV R2=-0.146 / RMSE=2.32 vs K1090 0.257 / 1.94. Added 4 new labels (IEF/ETH-USD/AAPL/NVDA), all Harvey FAIL."
+  },
+  {
+    "id": "research_multiplicative_volatility_factor_mvf",
+    "title": "研究 backlog fallback: Multiplicative Volatility Factor (MVF)",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Multiplicative Volatility Factor (MVF) — ScienceDirect 2025, J. Econometrics | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "multiplicative_volatility_factor_mvf",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T16:08:27+00:00"
+  },
+  {
+    "id": "research_volare_har_har_q_mem_amem_arxiv_2602_19732",
+    "title": "研究 backlog fallback: VOLARE 平台（HAR/HAR-Q/MEM/AMEM 標準化比較框架）— arXiv:2602.19732",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: VOLARE 平台（HAR/HAR-Q/MEM/AMEM 標準化比較框架）— arXiv:2602.19732 | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "volare_har_har_q_mem_amem_arxiv_2602_19732",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T16:08:27+00:00"
+  },
+  {
+    "id": "daily_article_k1426_pch_null",
+    "task_type": "daily_article",
+    "priority": 2,
+    "status": "succeeded",
+    "source": "agent_discovered",
+    "title": "K1426 文章：partial cointegration hedging IS PoC — NULL 結果如實報告",
+    "description": "K1426 (commit f75c380d, 2026-06-08 21:51 CST) 對 SPY/IVV、USO/BNO、GLD/IAU 三對 ETF 跑 Clegg-Krauss partial cointegration hedging IS PoC，3/3 NULL（ρ 負或 half-life trivial）。Feed 零覆蓋；研究誠實要求 NULL 也要報告。寫一般讀者向 daily_article，台灣繁體中文，560-720 字。Evidence package 已齊（k1426_results.json + figures/）。發 draft pool。",
+    "created_at": "2026-06-08T16:08:00+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-08T16:11:23.185663+00:00",
+    "claim_session_id": "0f8f821b2e2b",
+    "started_at": "2026-06-08T16:11:23.520320+00:00",
+    "completed_at": "2026-06-08T16:20:28.916847+00:00",
+    "result": "K1426 NULL result daily_article published as mile_6caaf80a (draft pool, 6165 chars, anti-AI gate PASS, em-dash 0.77/1000)"
   }
 ]

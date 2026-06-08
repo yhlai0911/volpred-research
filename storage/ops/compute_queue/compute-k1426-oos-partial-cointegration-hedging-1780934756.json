@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1426-oos-partial-cointegration-hedging-1780934756",
+  "title": "K1426 — OOS partial cointegration hedging",
+  "script_path": "experiments/k1426/oos.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-06-08T16:05:56Z",
+  "started_at": "2026-06-08T16:15:03Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1426-oos-partial-cointegration-hedging-1780934756.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1426-oos-partial-cointegration-hedging-1780934756.stderr",
+  "result_artifact": "experiments/k1426/k1426_oos_results.json",
+  "claude_followup": {
+    "brief": "Read k1426_oos_results.json. Verify whether any pair shows OOS HE_PCH > HE_OLS with bootstrap 95% CI excluding 0 and DM |t| > 3.0 after multiple-testing caution. If all six pairs are NULL/weak, write a null-result interpretation and decide whether multivariate PCH is still worth queueing.",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 21600
+}
