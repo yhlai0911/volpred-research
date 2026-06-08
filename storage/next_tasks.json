@@ -25589,8 +25589,14 @@
     "title": "K1427 Codex CLI 審查 — sector dispersion 齊跌 vs 輪動",
     "description": "K1427 (experiments/k1427/) IS PoC MIXED verdict 已 commit (1706ba3a)，但未經 Codex review。請派 Codex CLI 審 k1427.py：lookahead / seed / regime threshold (70 分位 + 方向廣度) / Welch test 有效性 / regime 分類 robustness / 0050 dispersion robustness。通過才寫 knowledge.json + 排 daily_article。",
     "source": "hourly-01_followup",
-    "status": "pending",
-    "created_at": "2026-06-08T17:18:49+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-08T17:18:49+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T18:10:24.415423+00:00",
+    "claim_session_id": "398895e1218d",
+    "started_at": "2026-06-08T18:10:35.727940+00:00",
+    "completed_at": "2026-06-08T18:12:17.745641+00:00",
+    "result": "CONDITIONAL_PASS. Core K1427 claim is honest (no main-path lookahead, seed fixed, 2026-06-05 verdict MIXED is supported), but 4 review caveats remain: Q1 Welch/MW treat clustered time-series days as iid; Q5 future-RV window is misaligned vs README; JSON definitions still describe the old 1-D regime rule; task-brief 0050 robustness is not implemented. Review artifact: storage/reviews/codex_review_k1427_20260609.md."
   },
   {
     "id": "daily_article_k1427_dispersion",
@@ -25599,7 +25605,36 @@
     "title": "K1427 daily article — sector dispersion 拆解齊跌 vs 輪動 (時事 + 裁決外部評論)",
     "description": "K1427 (experiments/k1427/) verdict MIXED，裁決 2026-06-05 selloff 「資金輪動到能源抗通膨」評論。本主題時事性強（6 月初剛發生）。Gate: 必先等 paper_review_k1427_codex PASS/CONDITIONAL_PASS 才能派寫作。讀 .claude/skills/feed-publisher + anti-ai-style 3 canonical + evidence package 先於 prose（n=101 大跌日 / 69 episodes / 11 sector ETF / Welch p=3.2e-12 已備）。直接 published 不進 draft pool（時事性 event-flavored）。",
     "source": "hourly-01_followup",
+    "status": "succeeded",
+    "created_at": "2026-06-08T17:18:49+00:00",
+    "completed_at": "2026-06-08T18:11:17.405663+00:00",
+    "result": "K1427 daily article mile_c07025d2 已於 2026-06-08T18:07:34 published 至 feed.json（裁決 MacroMicro 輪動論 MIXED）。subagent fallback PASS（Codex CLI 故障），主路徑 Codex 二次驗證仍掛 paper_review_k1427_codex 待 diversity 解鎖時派工"
+  },
+  {
+    "id": "daily_article_k672_meta",
+    "task_type": "daily_article",
+    "priority": 3,
+    "title": "K672 daily article — 1400+ 實驗後的定論盤點 (mid-2026 review)",
+    "description": "K672 (experiments/k672/) score=9 missing_general candidate. 改寫成「跑了 1400+ 實驗，VolPred 學到的 7 條定論 + 6 條強證據」reader-facing 文章。Audience: 一般讀者（量化好奇）+ 研究者副線。Evidence: K672 knowledge entry (Category A 7 定論 / B 6 強證據 / C 5 新興 / D 5 單一), experiments/k672/k672_results.json + charts/. 3 canonical 必讀: feed-publisher + anti-ai-style + publishing rules. Anti-AI gate (anti_ai_gate.py FB-mode OFF, feed-mode) 必跑 PASS. Draft pool (非事件)。",
+    "source": "hourly-02_inline_dispatch",
+    "status": "succeeded",
+    "created_at": "2026-06-08T18:14:02+00:00",
+    "claimed_by": "hourly-02",
+    "claim_started_at": "2026-06-08T18:14:02+00:00",
+    "claimed_at": "2026-06-08T18:14:07.954538+00:00",
+    "claim_session_id": "29aa7ad18ae1",
+    "started_at": "2026-06-08T18:14:08.187504+00:00",
+    "completed_at": "2026-06-08T18:21:09.137248+00:00",
+    "result": "K672 meta-summary daily article mile_9e09eb37 draft 已入 feed.json (1457 字 zh-Hant, anti_ai_gate PASS 0/0, audience research overridden by _infer_audience). 17 K-refs cited (K100/K118/K124/K147/K184/K440/K548/K568/K590/K621/K632/K640/K643/K659/K1056/K672 等), DM t-stats, rho=1.000, p-values 等具體數字 ≥7. Image: experiments/k672/charts/k672_evidence_hierarchy.png"
+  },
+  {
+    "id": "daily_article_k1427_revision_codex_caveats",
+    "task_type": "daily_article",
+    "priority": 2,
+    "title": "K1427 article mile_c07025d2 修訂 — per primary-path Codex CONDITIONAL_PASS 4 caveats",
+    "description": "Codex CLI 24h-rule review (storage/reviews/codex_review_k1427_20260609.md, completed 2026-06-09 02:12 台灣) 在 mile_c07025d2 published 後抓出 4 caveats: (1) Welch p=3.2e-12 過強, 改 episode-level bootstrap or 改述 (2) Q5 forward-RV 對齊與 README 不一致, 數字不引或降 exploratory (3) JSON definitions 留舊 1-D regime 與實作 2-D 不一致 (4) 0050 robustness 未做, 明寫僅美股 sector ETF. Article 已發 published, 改 revision 走 edit-and-republish 不 retract. 研究誠實原則 — 推翻舊結論必回溯更正.",
+    "source": "hourly-02_codex_review_followup",
     "status": "pending",
-    "created_at": "2026-06-08T17:18:49+00:00"
+    "created_at": "2026-06-08T18:22:01+00:00"
   }
 ]
