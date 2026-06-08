@@ -25020,7 +25020,7 @@
     "title": "Paper review (Codex 24h-rule): 定期定額的報酬率，什麼時候被高估、什麼時候被低估",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_22d9d2a5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_22d9d2a5",
@@ -25033,7 +25033,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-08T05:10:06.005612+00:00",
     "claim_session_id": "29aed6a883fe",
-    "started_at": "2026-06-08T05:10:06.098192+00:00"
+    "started_at": "2026-06-08T05:10:06.098192+00:00",
+    "completed_at": "2026-06-08T05:15:52.370899+00:00",
+    "result": "CONDITIONAL_PASS: K1407 source mostly matches; fixed published intro that wrongly said Taiwan is more prone to TWR-overstates-IRR. Review saved to storage/reviews/codex_24h/mile_22d9d2a5_review.md."
   },
   {
     "id": "research_kowcpi_kernel_optimally_weighted_conformal",
@@ -25064,5 +25066,57 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T05:08:20+00:00"
+  },
+  {
+    "id": "research_wild_bootstrap_ohr",
+    "title": "研究 backlog fallback: Wild Bootstrap OHR",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Wild Bootstrap OHR — JRFM 2024 | 來源 section: 期貨避險方法論. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "wild_bootstrap_ohr",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T06:08:05+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T06:16:56.707940+00:00",
+    "claim_session_id": "227659653f15",
+    "started_at": "2026-06-08T06:17:08.973621+00:00",
+    "completed_at": "2026-06-08T06:18:19.444284+00:00",
+    "result": "Resolved as duplicate already covered by experiments/k965. Added backlog_task_resolution_2026-06-08.md documenting K965 triplet, core results, and literature chain (JRFM 2024 / Mammen 1993 / Ederington 1979)."
+  },
+  {
+    "id": "research_partial_cointegration_hedging",
+    "title": "研究 backlog fallback: Partial Cointegration Hedging",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Partial Cointegration Hedging — RQFA 2023 | 來源 section: 期貨避險方法論. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "partial_cointegration_hedging",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T06:08:05+00:00"
+  },
+  {
+    "id": "K1403_daily_article_cross_asset_quantile",
+    "title": "K1403 daily_article: HAR-RV Quantile 跨資產 robustness — 中位數輸 OLS、尾端覆蓋率可信",
+    "task_type": "daily_article",
+    "priority": "P2",
+    "status": "succeeded",
+    "source": "main_thread_promoted",
+    "description": "Promote K1403 cross-asset robustness 結果寫成 daily_article。Layer 4 dedup: 與 K1313 single-asset SPY 全通過 arc 區隔（mixed-result mid-vs-tail 新 arc）。Audience=research（含 K-id/Kupiec/QLIKE/DM stats）。Brief 詳見 agent dispatch prompt。",
+    "created_at": "2026-06-08T14:08:00+08:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-08T06:10:39.774275+00:00",
+    "claim_session_id": "a7c5cff7dac8",
+    "started_at": "2026-06-08T06:10:39.939776+00:00",
+    "completed_at": "2026-06-08T06:25:17.337261+00:00",
+    "result": "mile_2673f6c4 published (draft pool, research audience, 3041 字, 2 圖 Supabase, anti-ai-style PASS independent re-verify, knowledge bdb0b4cc CONDITIONAL_PASS)"
   }
 ]

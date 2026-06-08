@@ -32718,5 +32718,37 @@
       "K1423_ewma_hurst_pilot"
     ],
     "created_at": "2026-06-08T13:10:27.438619"
+  },
+  {
+    "item_id": "bdb0b4cc",
+    "category": "experiment_result",
+    "experiment_id": "K1403",
+    "k_id": "K1403",
+    "content": "K1403 HAR-RV 分位數迴歸跨資產驗證（QQQ/GLD/TLT）。OOS 2021-01-04～2026-05-27，n_oos=1,355。結果：τ=0.50 中位數 DM stat 三資產全為顯著負值（QQQ=-12.68, GLD=-10.51, TLT=-11.59，p≈0），QLIKE 損失分別為 OLS 的 1.44x / 1.64x / 1.35x；但 τ=0.95/0.99 尾部覆蓋率 6/6 個 Kupiec UC PASS（gap ≤±0.54pp）。Aggregate verdict: TAIL_CALIB_USABLE — 3/3 dm_sig_neg AND 3/3 tail usable。根本原因：pinball loss（QuantReg 目標）≠ QLIKE（波動率評估標準），兩者不可同時最小化。實務結論：HAR-RV QuantReg 定位為 VaR 上界估計器（q95/q99），不可替代 OLS 做點預測。與 K1402（SPY）結論一致；跨股票/商品/固定收益 robustness 確認。後續：expanding window refit（K783c）、Christoffersen CC 檢定、CAViaR 對照。",
+    "verdict": "CONDITIONAL_PASS",
+    "verdict_reason": "中位數 DM 顯著負值（NULL on point forecast），尾端 q95/q99 Kupiec PASS（TAIL_CALIB_USABLE）",
+    "reviewer": "Claude",
+    "reviewer_source": "byte-for-byte verification against experiments/k1403/k1403_results.json",
+    "evidence": [
+      "experiments/k1403/k1403_results.json",
+      "experiments/k1403/k1403.py"
+    ],
+    "confidence": 0.9,
+    "tags": [
+      "HAR-RV",
+      "quantile-regression",
+      "VaR",
+      "cross-asset",
+      "QQQ",
+      "GLD",
+      "TLT",
+      "Kupiec",
+      "DM-test"
+    ],
+    "phase": "research",
+    "created_at": "2026-06-08T14:19:43.987985",
+    "article_refs": [
+      "mile_2673f6c4"
+    ]
   }
 ]
