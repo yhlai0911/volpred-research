@@ -1,45 +1,41 @@
 {
-  "timestamp": "2026-06-08T12:12:30Z",
+  "timestamp": "2026-06-08T18:08:17Z",
   "all_ok": true,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "ARTICLE POOL",
       "status": "ok",
-      "detail": "Total drafts: 145 (research: 46, general: 99). All thresholds met (total≥12, research≥4, general≥8)."
+      "detail": "145 drafts total (research: 46, general: 99). All thresholds met (total≥12, research≥4, general≥8)."
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "STRATEGY METRICS FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: <1 hour. Within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json age: ~0h. Well within 26h threshold."
     },
     {
-      "name": "ERROR_LOG_RECENT",
+      "name": "ERROR LOG",
       "status": "ok",
-      "detail": "Entries today/yesterday (2026-06-07/08): (1) 2026-06-08 Cron staleness false-positive on market_calendar_sync (log-name mismatch, actual cron OK); (2) 2026-06-08 Refill 8th belt — research-saturated K narrative-arc dup, strike 2/3; (3) 2026-06-07 Pool empty critical + 2 flow gaps; (4) 2026-06-08 host_cron_fail strike-2 structural fix; (5) 2026-06-08 Refill judgment retrospective correction; (6) 2026-06-08 pre-publish image-URL gate implemented (missing-image root fix, +5 tests green)."
+      "detail": "2 entries dated 2026-06-08 found: (1) 01:47 — refill判斷不完整，hourly 8th belt root-fix (narrative-arc dedup); (2) 11:1x — pre-publish image-URL gate deployed (prepublish_audit.py), 52 broken images patched (9bc7e2af)."
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "PAPER TRADING GAPS",
       "status": "ok",
-      "detail": "No strategy with >2 consecutive portfolio_return=null in last 3 entries. (0 strategies with gap alerts found in paper_trading.json.)"
+      "detail": "Checked 10 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage). No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
-      "name": "GIT_STATUS",
+      "name": "GIT STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Repository is clean."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "KNOWLEDGE SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2208 entries."
+      "detail": "storage/memory/knowledge.json: 2208 entries."
     }
   ],
   "alerts": [],
-  "error_log_recent_summary": [
-    "2026-06-08: Cron staleness false-positive (market_calendar_sync) — log-name mismatch, actual fires OK",
-    "2026-06-08: Refill 8th belt narrative-arc dup strike 2/3 — candidate source refactor pending at strike 3",
-    "2026-06-07: Article pool empty critical + host_cron_fail + FB pipeline flow gaps",
-    "2026-06-08: host_cron_fail strike-2 structural fix (0c9cdcd3)",
-    "2026-06-08: Refill judgment retrospective correction (00:18 false 'resolved')",
-    "2026-06-08: pre-publish image-URL gate live (audit + raise on broken images before publish)"
+  "error_log_today_entries": [
+    "2026-06-08 01:47 — 回溯更正：00:18 refill 判斷不完整。Root: 判斷 K 可寫 ≠ narrative-arc 飽和度；hourly 8th belt deployed as fix.",
+    "2026-06-08 11:1x — pre-publish image-URL gate incident root-fix: prepublish_audit.py deployed, 52 broken image URLs patched across 20 published articles (commit 9bc7e2af)."
   ]
 }
