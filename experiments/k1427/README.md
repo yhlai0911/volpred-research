@@ -90,6 +90,18 @@ python experiments/k1427/k1427.py
 - Codex CLI code review（見 commit message / 下方審查結論）。
 
 ## Review 紀錄（2026-06-09）
+
+### Round 1 — subagent fallback（02:00 台灣）
 - **Reviewer**: `feature-dev:code-reviewer` subagent fallback（Codex CLI 0.137.0 故障，exec 無輸出）。
 - **Verdict**: CONDITIONAL_PASS。無 lookahead（主路徑）、無捏造數字、seed=42 固定、external_claim_verdict 誠實（XLE 當天 −1.84% → 能源那部分判 REFUTED，未 cherry-pick）。
-- **唯一條件（Q5 caveat）**：q5「dispersion → 未來 N 日 RV」的 forward 公式（k1427.py line 207）有雙重 shift，實際窗口比宣稱的 t+1..t+N 滑後 N-1 天（仍向未來，非 lookahead，但窗口定義不符）。Q5 本為描述性 null result、非核心結論。**文章不引用 Q5 具體數字，只用「無預測力」方向性結論。** 核心發現（q1 dispersion 比較 / q2 regime / q4 最近 selloff / external_claim_verdict）不受影響。
+- **唯一條件（Q5 caveat）**：q5「dispersion → 未來 N 日 RV」的 forward 公式（k1427.py line 207）有雙重 shift，實際窗口比宣稱的 t+1..t+N 滑後 N-1 天（仍向未來，非 lookahead，但窗口定義不符）。Q5 本為描述性 null result、非核心結論。**文章不引用 Q5 具體數字，只用「無預測力」方向性結論。**
+
+### Round 2 — primary-path Codex CLI（02:12 台灣，CLI 恢復後二次驗證）
+- **Reviewer**: Codex CLI primary-path（per `.claude/rules/experiments.md` K1259 教訓：subagent PASS 後 Codex 恢復必須二次驗證）。
+- **Report**: `storage/reviews/codex_review_k1427_20260609.md`。
+- **Verdict**: CONDITIONAL_PASS。確認核心發現（q1 / q2 / q4 / external_claim_verdict）不變，方法論 caveat 補 4 條。
+- **Caveats 與處置**：
+  1. **Q1 Welch 把時序當獨立樣本** — 101 大跌日 / 3024 平常日 t-test 把 clustered episode（69 個）當獨立樣本，`p=3.2e-12` 偏樂觀。**處置**: article mile_c07025d2 已 update（`codex_review_caveats_fix`）— 不引精準 p 值、加 episode-clustered 注腳、強調定性結論「方向不錯但 t-test 未校正時序相依」。嚴格時序檢定留 follow-up（episode-level bootstrap）。
+  2. **Q5 forward-RV 對齊與 README 不一致**（與 Round 1 同）— 文章未引 Q5 具體數字 → 處置同 Round 1，定性引用 null 即可。
+  3. **JSON definitions 留舊 1-D regime 與實作 2-D 不一致** — 原 `definitions.rotation_regime` / `liquidation_regime` 只寫 dispersion 門檻，實作已是 `dispersion × 方向廣度`。**處置**: k1427.py `definitions` 區塊已改寫（加 `taxonomy_dimensions`、`broad_selloff_high_disp_regime`、`rotation_regime` 補方向廣度條件）。
+  4. **0050 / 台股 cross-market robustness 未做** — 全部資料都在美股 SPY + SPDR sectors。**處置**: article 末段加「**結論限定美股 sector ETF**」明寫範圍；未來 follow-up 可開新 K（K1428? 台股 0050 + ETF sector proxy）做 cross-market robustness。

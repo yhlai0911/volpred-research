@@ -25556,7 +25556,7 @@
     "title": "Paper review (Codex 24h-rule): 換把獨立的尺量，結果還是一樣：HAR Log-Range 的可靠性再確認",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7c104f6d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_7c104f6d",
@@ -25565,7 +25565,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-08T17:07:58+00:00"
+    "created_at": "2026-06-08T17:07:58+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T19:12:56.996677+00:00",
+    "claim_session_id": "c47acbe48560",
+    "started_at": "2026-06-08T19:13:08.255148+00:00",
+    "completed_at": "2026-06-08T19:15:00.034277+00:00",
+    "result": "CONDITIONAL_PASS。K469 的核心結論可保留，但 DM/Harvey 顯著性表述偏強，且 scale calibration 敘述過度簡化。Review 寫入 storage/reviews/codex_24h/mile_7c104f6d_review.md。"
   },
   {
     "id": "research_multi_transformer_vol_forecast",
@@ -25634,7 +25640,13 @@
     "title": "K1427 article mile_c07025d2 修訂 — per primary-path Codex CONDITIONAL_PASS 4 caveats",
     "description": "Codex CLI 24h-rule review (storage/reviews/codex_review_k1427_20260609.md, completed 2026-06-09 02:12 台灣) 在 mile_c07025d2 published 後抓出 4 caveats: (1) Welch p=3.2e-12 過強, 改 episode-level bootstrap or 改述 (2) Q5 forward-RV 對齊與 README 不一致, 數字不引或降 exploratory (3) JSON definitions 留舊 1-D regime 與實作 2-D 不一致 (4) 0050 robustness 未做, 明寫僅美股 sector ETF. Article 已發 published, 改 revision 走 edit-and-republish 不 retract. 研究誠實原則 — 推翻舊結論必回溯更正.",
     "source": "hourly-02_codex_review_followup",
-    "status": "pending",
-    "created_at": "2026-06-08T18:22:01+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-08T18:22:01+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-08T19:08:54.287284+00:00",
+    "claim_session_id": "ea29a6adaae9",
+    "started_at": "2026-06-08T19:08:58.989389+00:00",
+    "completed_at": "2026-06-08T19:30:48.122923+00:00",
+    "result": "Caveat 1 弱化 Welch + episode-cluster 注腳 / Caveat 2 Q5 文章未引自然 OK / Caveat 3 k1427.py definitions 2-D taxonomy / Caveat 4 末段明寫限定美股 sector ETF. anti_ai PASS, publish_draft --update OK, supabase sync 1587 entries OK 0 fail, live 200 verified."
   }
 ]

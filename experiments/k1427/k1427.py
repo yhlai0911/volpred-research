@@ -353,8 +353,10 @@ def main():
         "definitions": {
             "daily_selloff": f"SPY 日報酬 < {DAILY_SELLOFF_THRESH}",
             "dispersion": "每日跨板塊日報酬的橫斷面標準差 (ddof=1)",
-            "rotation_regime": f"episode 平均 dispersion >= 歷史 {int(DISPERSION_HI_Q*100)} 分位 ({disp_q70:.5f})",
-            "liquidation_regime": "episode 平均 dispersion < 70 分位",
+            "taxonomy_dimensions": "2-D: (1) episode 平均 dispersion vs 70 分位門檻 × (2) episode 內板塊累積報酬的方向廣度 (是否有任一板塊正報酬)",
+            "rotation_regime": f"episode 平均 dispersion >= 歷史 {int(DISPERSION_HI_Q*100)} 分位 ({disp_q70:.5f}) 且至少 1 板塊 episode 累積報酬 > 0 (真有資金輪入)",
+            "broad_selloff_high_disp_regime": f"episode 平均 dispersion >= 歷史 {int(DISPERSION_HI_Q*100)} 分位 但所有板塊 episode 累積報酬 ≤ 0 (高離散但全跌, 仍屬齊跌)",
+            "liquidation_regime": f"episode 平均 dispersion < 歷史 {int(DISPERSION_HI_Q*100)} 分位 (低離散齊跌清算, 分散失靈)",
             "episode_grouping": "selloff 日相隔 <=3 交易日歸為同一 episode",
             "rv_ann": f"日報酬 rolling-{RV_WINDOW} std × sqrt({TRADING_DAYS})",
         },
