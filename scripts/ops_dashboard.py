@@ -83,16 +83,31 @@ def main():
     pending = [t for t in nt if t.get("status") == "pending"]
     pending_main = [t for t in nt if t.get("status") == "pending_main_thread"]
     actionable = pending + pending_main
+    # 2026-06-08 (boss mandate「立刻徹底解決 warning」): production_pending was
+    # firing CRITICAL whenever the *article* pending pool emptied — even when
+    # research was actively in flight (experiments compute_queued / claimed).
+    # An empty article-pending pool with research running is NOT an idle platform;
+    # it's the healthy state between research→article cycles. Count in-flight work
+    # so "0 pending" only escalates to CRITICAL when the platform is TRULY idle
+    # (nothing pending, nothing main-thread, nothing compute-queued, nothing claimed).
+    in_flight = [t for t in nt if t.get("status") in ("compute_queued", "claimed", "in_progress")]
     by_type = {}
     for t in actionable:
         by_type[t.get("task_type", "?")] = by_type.get(t.get("task_type", "?"), 0) + 1
+    # Health threshold counts ALL active pipeline work, not just dispatchable
+    # `pending`: pending + pending_main + in_flight (compute_queued/claimed/in_progress).
+    # A platform with 2 pending + 2 compute_queued experiments has 4 work items
+    # flowing — it is NOT under-supplied. (boss mandate 2026-06-08：persistent warn
+    # at "2 pending" while research was compute-queued was a false signal.)
+    total_active = len(actionable) + len(in_flight)
     if pending:
         pending_tldr = (
             f"{len(pending)} pending tasks"
             + (f" + {len(pending_main)} pending_main_thread" if pending_main else "")
+            + (f" + {len(in_flight)} in-flight" if in_flight else "")
             + f" (top types: {sorted(by_type.items(), key=lambda x:-x[1])[:3]})"
         )
-        pending_status = "ok" if len(actionable) >= 4 else "warn"
+        pending_status = "ok" if total_active >= 4 else "warn"
         pending_next = "dispatch top P1-P3 if slots free"
     elif pending_main:
         pending_tldr = (
@@ -101,10 +116,21 @@ def main():
         )
         pending_status = "warn"
         pending_next = "main-thread backlog exists; do not auto-refill agentable pool blindly"
+    elif in_flight:
+        # Article pool empty but research/work is in flight → healthy-but-low, not idle.
+        flt_types = {}
+        for t in in_flight:
+            flt_types[t.get("task_type", "?")] = flt_types.get(t.get("task_type", "?"), 0) + 1
+        pending_tldr = (
+            f"0 pending tasks, but {len(in_flight)} in-flight "
+            f"(compute_queued/claimed/in_progress: {sorted(flt_types.items(), key=lambda x:-x[1])[:3]})"
+        )
+        pending_status = "warn"
+        pending_next = "research in flight; refill articles when experiments complete (or auto research-fallback)"
     else:
-        pending_tldr = "0 pending tasks (top types: [])"
+        pending_tldr = "0 pending tasks, 0 in-flight — platform idle (top types: [])"
         pending_status = "critical"
-        pending_next = "refill pool"
+        pending_next = "refill pool (article candidates + research-backlog fallback)"
     out.append(section(
         "production_pending",
         pending_status,
@@ -112,6 +138,7 @@ def main():
         pending_next,
         pending_count=len(pending),
         pending_main_thread_count=len(pending_main),
+        in_flight_count=len(in_flight),
     ))
 
     feed = jl(REPO / "storage" / "reports" / "feed.json", [])

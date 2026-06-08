@@ -544,6 +544,119 @@ def _cand_cluster(cand: dict) -> str | None:
         return None
 
 
+RESEARCH_PROGRAM = ROOT / "research_program.md"
+
+# Subsection headers under which open `- [ ]` items are NOT auto-queueable because
+# they require data we don't have. Matched as substrings against the nearest
+# preceding `###` header (case-insensitive). Everything else with the right shape
+# is treated as immediately actionable (no new data needed).
+_BLOCKED_RESEARCH_HEADER_TOKENS = ("blocked", "需 5-min", "需 5min", "需 options", "需 tick", "5-min 數據", "tick 數據")
+
+
+def _slugify_research(title: str) -> str:
+    """Stable ASCII-ish slug for a research-direction title → task id suffix."""
+    import re as _re
+    # Keep ascii alnum; collapse the rest to underscores. Non-ascii (Chinese) is
+    # dropped, so we fall back to a short hash to keep ids unique & stable.
+    base = _re.sub(r"[^a-zA-Z0-9]+", "_", title).strip("_").lower()
+    base = _re.sub(r"_+", "_", base)[:48].strip("_")
+    if len(base) < 6:  # mostly-Chinese title → hash for stability
+        import hashlib
+        base = "rp_" + hashlib.sha1(title.encode("utf-8")).hexdigest()[:10]
+    return base
+
+
+def _research_backlog_candidates(tasks: list, existing_ids: set[str], limit: int = 2) -> list[dict]:
+    """Parse research_program.md for OPEN `- [ ]` research directions that need no
+    new data, deduped against tasks already queued. Returns experiment-task dicts.
+
+    This implements the long-commented `(future) research_program.md backlog`
+    fallback (module docstring item 2). It is the durable fix for the recurring
+    production_pending warn/critical: when the article candidate pool legitimately
+    exhausts (all uncovered K's are research-saturated, 8th belt), the pool should
+    keep flowing by queueing NEW research — more research = new findings = new
+    writable articles (Mission #2 → #1), instead of going idle.
+
+    Safety: only OPEN `- [x]`→excluded, only data-unblocked subsections, hard cap
+    `limit` per refill (don't flood with unvetted research), idempotent slug-dedup.
+    """
+    if not RESEARCH_PROGRAM.exists():
+        return []
+    import re as _re
+    text = RESEARCH_PROGRAM.read_text(encoding="utf-8", errors="replace")
+    out: list[dict] = []
+    current_header = ""
+    # Only scan within the curated frontier-literature backlog section
+    # (`## 前沿文獻方向`); other `## ` sections (面向 A-I, 論文 workflow) contain
+    # status notes / tooling checklists whose `- [ ]` lines are NOT research
+    # directions (e.g. `- [ ] /latex-academic-reviewer 審查` in 面向 H).
+    in_backlog_section = False
+    # Existing research-fallback task slugs already queued (any status) → skip.
+    queued_research_slugs = {
+        str(t.get("research_slug")) for t in tasks if t.get("research_slug")
+    }
+    for raw in text.splitlines():
+        line = raw.strip()
+        if line.startswith("## ") and not line.startswith("###"):
+            in_backlog_section = "前沿文獻方向" in line
+            current_header = ""
+            continue
+        if line.startswith("###"):
+            current_header = line.lstrip("#").strip().lower()
+            continue
+        if not in_backlog_section:
+            continue
+        if not line.startswith("- [ ]"):
+            continue
+        # Skip data-blocked subsections.
+        if any(tok in current_header for tok in _BLOCKED_RESEARCH_HEADER_TOKENS):
+            continue
+        body = line[len("- [ ]"):].strip()
+        # Strip leading decoration: ★, **, ~~.
+        title_raw = body
+        title_raw = title_raw.replace("★", "").replace("**", "").replace("~~", "").strip()
+        # Title = text up to first em-dash / 「—」 / period (drops the citation tail).
+        title = _re.split(r"\s+[—–-]\s+|。", title_raw)[0].strip()
+        if len(title) < 6:
+            continue
+        slug = _slugify_research(title)
+        if slug in queued_research_slugs:
+            continue
+        task_id = f"research_{slug}"
+        if task_id in existing_ids:
+            continue
+        # Loose dup-guard: if any existing task title already contains this title, skip.
+        tl = title.lower()
+        if any(tl and tl in str(t.get("title") or "").lower() for t in tasks):
+            continue
+        out.append(_make_research_task(title, title_raw, current_header, slug, task_id))
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _make_research_task(title: str, full_line: str, header: str, slug: str, task_id: str) -> dict:
+    return {
+        "id": task_id,
+        "title": f"研究 backlog fallback: {title}",
+        "description": (
+            f"Article pool exhausted (all uncovered K research-saturated) → auto-queued "
+            f"NEW research from research_program.md open backlog to keep the pipeline "
+            f"flowing (Mission #2 research → #1 articles). "
+            f"方向: {full_line[:300]} | 來源 section: {header}. "
+            f"主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; "
+            f"完成後 Codex review → knowledge.json → 可發佈排文章。"
+        ),
+        "priority": 3,
+        "status": "pending",
+        "task_type": "experiment",
+        "source": "auto_research_fallback",
+        "research_slug": slug,
+        "tags": ["auto-research-fallback", "research-program-backlog"],
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+
+
 def refill(target: int, dry_run: bool = False) -> dict:
     if not CANDIDATES.exists():
         return {"ok": False, "reason": "publication_candidates.json missing", "added": 0}
@@ -711,6 +824,19 @@ def refill(target: int, dry_run: bool = False) -> dict:
             continue
         new_entries.append(_make_article_task(cand, priority, retry_suffix))
 
+    # Research-backlog fallback (2026-06-08 boss mandate「徹底解決 warning」):
+    # when the article candidate pool is exhausted (all uncovered K's are
+    # research-saturated → 8th belt drops them), keep the pool flowing by queueing
+    # NEW research directions from research_program.md instead of going idle.
+    fallback_reason = None
+    if not new_entries:
+        research_tasks = _research_backlog_candidates(
+            tasks, existing, limit=max(1, min(2, target))
+        )
+        if research_tasks:
+            new_entries.extend(research_tasks)
+            fallback_reason = "research_backlog_fallback"
+
     if not new_entries:
         return {"ok": True, "added": 0, "reason": "no_new_candidates_passing_filter"}
 
@@ -720,6 +846,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
             "dry_run": True,
             "would_add": len(new_entries),
             "preview_ids": [e["id"] for e in new_entries],
+            **({"fallback": fallback_reason} if fallback_reason else {}),
         }
 
     tasks.extend(new_entries)
@@ -728,6 +855,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
         "ok": True,
         "added": len(new_entries),
         "added_ids": [e["id"] for e in new_entries],
+        **({"fallback": fallback_reason} if fallback_reason else {}),
     }
 
 

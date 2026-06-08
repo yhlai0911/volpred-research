@@ -24647,7 +24647,7 @@
     "title": "Paper review (Codex 24h-rule): K951：Copula-GARCH 在高相關 ETF 配對避險上全面落敗 Rolling OLS — 尾部結構缺失是根本原因",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a1507cf2 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_a1507cf2",
@@ -24656,7 +24656,12 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-07T21:08:16+00:00"
+    "created_at": "2026-06-07T21:08:16+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T02:01:47.054649+00:00",
+    "claim_session_id": "a29297966bae",
+    "completed_at": "2026-06-08T02:03:50.739079+00:00",
+    "result": "FAIL review. K951 article numbers match source and no lookahead is evident, but it overstates the statistics by calling a hardcoded |t|>3 rule a Harvey gate, and it misstates K931 as an r>0.9 comparison case to support an over-strong asset-type conclusion. Review artifact: storage/ops/review_history/mile_a1507cf2_codex_review_2026-06-08.md"
   },
   {
     "id": "trending_repost_2026_06_08_ai風險",
@@ -24807,7 +24812,7 @@
     "description": "Gmail UID: 11723\nMessage-ID: <EB7FEB65-5872-405A-BEA9-C63CE292960E@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 8 Jun 2026 09:15:41 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-08 09:01 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n立刻徹底解決warning的問題\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月8日 09:02 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-06-08 09:01 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\twarn\t1 pending tasks (top types: [('paper_review', 1)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t7 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t7/7 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample live URLs return 200\t—\r\n> verification_fb_pipeline\twarn\t1 FB posts pending sync\thandoff doc + manual paste or retry MCP\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\tok\t0 current warn/critical alert conditions\t—\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\r\n> \r\n> === cron 成果掌握 review — 2026-06-08 09:01:55（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=338 exit=0 idle | last: 2026-06-08 08:29:28 (log-mtime)\r\n>   compute_worker    runs=1347 exit=0 idle | last: 2026-06-08 09:00:09 (log-mtime)\r\n>   check_alerts      runs=337 exit=0 running | last: 2026-06-08 09:00:09 (log-mtime)\r\n>   collect_tw        runs=10 exit=0 idle | last: 2026-06-05 15:00:32 (log-mtime)  ⚠️ 上次完成 66.0h 前（>30h）\r\n>   collect_us        runs=10 exit=0 idle | last: 2026-06-06 07:03:24 (log-mtime)  ⚠️ 上次完成 50.0h 前（>30h）\r\n>   daily_update      runs=12 exit=0 idle | last: 2026-06-08 08:18:33 (log-mtime)\r\n>   release_pool      runs=56 exit=0 idle | last: 2026-06-08 07:00:18 (log-mtime)\r\n>   market_cal        runs=2 exit=0 idle | last: 2026-06-08 08:00:10 (log-mtime)\r\n>   memory_health     runs=14 exit=0 idle | last: 2026-06-08 05:30:10 (log-mtime)\r\n>   work_summary      runs=56 exit=0 idle | last: 2026-06-08 06:05:25 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：25 筆\r\n>   7f36e164 hourly-08 K1422_article_general | publish mile_b87cc779 HAR-Quantile commodity (PASS) 修 K1421 retract\r\n>   1bec99f2 hourly-07 PHASE Z | FB dispatch blocked + publication_candidates audit task enqueued\r\n>   55bb9290 hourly-06 PHASE Z | trending_repost mile_22d52561 完工後 state sync + data refresh\r\n>   6702b340 trending_repost | 半導體 vol 結構重定價 — Broadcom 指引後的 SKEW/VXN 分析\r\n>   54ddaaae hourly-05 PHASE B | K1422 brief 補池 (K1421 NULL follow-up)\r\n>   8f342eb2 hourly-05 PHASE 0.5 | reader-facing refill cron + scan_state 補上 2026-06-08\r\n>   d53e04fa hourly-04 PHASE Z | bundle K1420 / K1421 untracked artifacts\r\n>   2d22b6c0 K1421_har_quantile_commodity_robustness | interpret commodity HAR-Quantile results (verdict=NULL) — Codex FAIL on fair-comparison + bootstrap bug; knowledge entry ac45417a written\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - collect_tw: ⚠️ 上次完成 66.0h 前（>30h）\r\n>   - collect_us: ⚠️ 上次完成 50.0h 前（>30h）\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 25 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 7f36e164\thourly-08 K1422_article_general\tle_b8\r\n> 1bec99f2\thourly-07 PHASE Z\th blo\r\n> 55bb9290\thourly-06 PHASE Z\tepost\r\n> 6702b340\ttrending_repost\t重定價 —\r\n> 54ddaaae\thourly-05 PHASE B\tf 補池\r\n> 8f342eb2\thourly-05 PHASE 0.5\ting r\r\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "in_progress",
     "tags": [
       "email_reply",
       "user_input"
@@ -24820,6 +24825,37 @@
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-06-08T01:31:39.406103+00:00",
-    "claim_session_id": "0767e37f541f"
+    "claim_session_id": "0767e37f541f",
+    "started_at": "2026-06-08T02:08:27.978329+00:00"
+  },
+  {
+    "id": "research_cnn_transformer_hybrid",
+    "title": "研究 backlog fallback: CNN-Transformer Hybrid",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: CNN-Transformer Hybrid — European J. Finance 2025 | 來源 section: ml-garch 混合. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "cnn_transformer_hybrid",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T02:11:17+00:00"
+  },
+  {
+    "id": "research_time_varying_hurst_via_ewma",
+    "title": "研究 backlog fallback: Time-Varying Hurst via EWMA",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Time-Varying Hurst via EWMA — arXiv:2509.05820 | 來源 section: rough volatility & hurst. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "time_varying_hurst_via_ewma",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T02:11:17+00:00"
   }
 ]
