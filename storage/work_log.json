@@ -9970,5 +9970,15 @@
     "summary": "Paper portfolio audit (12 papers) + seed 3 paper tasks (prg v4.1 hotfix P2, garch-x-vix v7 verdict P3, leverage-direction submission package P3) — pool diversification beyond experiment fallback",
     "artifact": "storage/ops/paper_portfolio_status_2026-06-08.md",
     "actor": "hourly-18"
+  },
+  {
+    "timestamp": "2026-06-08T19:11+08:00",
+    "task_id": "paper_body_prg_v4_1_hotfix",
+    "task_type": "paper_body",
+    "title": "PRG-Periodic-GARCH v4.1 hotfix — verify + promote to ready_for_submission",
+    "result": "Audit: 5/5 v4.1 fixes 早於 2026-04-27 commit 9205bfcc 完成 (M-NEW-1 Table 5 PRG-vs-GJR row 已移除無 5.24 殘留 + M-NEW-2 §2.2 L94 cite BollerslevWooldridge1992 + Min-NEW-1 §4.5 caption \"LR diagnostic internal grid\" 澄清 + Min-NEW-2 bibitem heteroskedasticity + Min-NEW-3 Sou\\v{c}ek diacritic). 本 fire 跑 xelatex 編譯驗證 (19pp 0 error, 1 cosmetic inputenc warning + 1 micro 0.17pt overfull) + paper-update CLI sync (Supabase updated_at 2026-06-08T11:10:55 refresh). 任務本質是 audit script 在 2026-06-08 建立 task 時未察 commit 9205bfcc 已 close — false-positive。實際 Paper 6 已 v4.1 內容，可升 ready_for_submission。",
+    "verdict": "succeeded",
+    "paper_id": "prg-periodic-garch",
+    "fire": "hourly-19"
   }
 ]
