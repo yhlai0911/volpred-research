@@ -25175,7 +25175,7 @@
     "title": "Paper review (Codex 24h-rule): 財報日前，分析師說「IC 設計股波動較小」— 背後只有 4 家公司，其中 2 家數字截然相反",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_2ed9949e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_2ed9949e",
@@ -25184,7 +25184,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-08T08:08:08+00:00"
+    "created_at": "2026-06-08T08:08:08+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T08:21:13.384872+00:00",
+    "claim_session_id": "275e3cd5960f",
+    "started_at": "2026-06-08T08:21:13.488193+00:00",
+    "completed_at": "2026-06-08T08:26:32.462417+00:00",
+    "result": "FAIL: article mixes K1107 event-panel means with K1104 firm-level theta2 signs; added codex_24h review artifact and feed errata metadata."
   },
   {
     "id": "research_quantum_reservoir_computing_for_realized_volatil",
