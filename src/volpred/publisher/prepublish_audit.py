@@ -101,6 +101,15 @@ def _is_non_stat_label(raw_num: str, is_pct: bool, start: int, end: int, content
         return True
     if raw_num in _ANNUALIZATION_VALUES:
         return True
+    # Window / period length: "20 日"/"20日"/"60 天"/"5 分鐘" — a day/week/min count
+    # is a methodology window (RV window, lookback), not a reported result-stat.
+    post3 = content[end:end + 3]
+    # NOTE: 分 deliberately excluded — would swallow 分位 (percentile), a real stat.
+    if re.match(r"\s*[日天週月年]", post3):
+        return True
+    # Date fragments: "6/5" / "2026/6" — number immediately followed by "/" digit.
+    if re.match(r"/\d", content[end:end + 2]):
+        return True
     return False
 
 # Numeric token: percentages (-42.4%), decimals (-0.79), thousands-separated
