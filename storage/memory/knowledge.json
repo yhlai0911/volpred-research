@@ -32683,5 +32683,18 @@
       "K1423_article_general (Codex PASS 後)"
     ],
     "created_at": "2026-06-08T03:20:00+00:00"
+  },
+  {
+    "item_id": "a205bfa8",
+    "category": "factor_attribution",
+    "content": "[K1425][CONDITIONAL_PASS][reviewer:Codex 3-round] Sector-ETF alpha 多為未命名 sector 共同因子曝險（suggestive 非鐵證）。美股半導體籃子 PC1 解釋 63.0% 變異、台股 46.4%。SMH~SPY headline alpha 9.2%/yr (t=1.91 邊際)；在 disjoint leave-out proxy 上加帶 mean 的 sector-long factor，美股 alpha 11.4%→4.0%/yr (t=0.85, 縮 65% 失顯著)；台股本就無顯著 alpha (2.8%, t=0.53)。市場中性零均值 PC1 只吸 variance 不動 alpha LEVEL（需 mean-bearing premium factor 才測得 alpha）。35-split robustness: 美 74%、台 100% 不顯著 → 結論 suggestive。Meta: PCA/AI 的 latent structure 非 alpha 證明，常是讓 alpha 消失的遺漏變數。無 lookahead（contemporaneous risk-attribution），seed=42，HAC lag=5。文章 mile_bfedb004。⚠️注意 K-id：本實驗為 experiments/k1425/（原 k1423 與 Hurst EWMA pilot 撞號已改名）。",
+    "evidence": [
+      "experiments/k1425/k1425_results.json",
+      "experiments/k1425/README.md",
+      "K1425",
+      "mile_bfedb004"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-08T12:42:06.595046"
   }
 ]
