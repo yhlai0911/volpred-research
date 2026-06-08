@@ -32830,5 +32830,18 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-09T02:08:38.027922"
+  },
+  {
+    "item_id": "283594c0",
+    "category": "paper_review",
+    "content": "[K1427][CONDITIONAL_PASS][reviewer:Codex CLI 0.137.0 primary path] Codex 24h re-review on revised mile_c07025d2 article. Caveats 1/2/4 fully addressed in article: (1) precise p-value removed + 69 clustered episodes footnote added; (2) Q5 forward-RV numbers no longer cited; (4) US-sector-ETF scope limit explicit. Caveat 3 (JSON definitions) only partially closed by Codex review — k1427.py:353 had 2-D taxonomy code but k1427_results.json kept old 1-D definitions. This hourly fire reran experiments/k1427/k1427.py to sync — both `taxonomy_dimensions` and `broad_selloff_high_disp_regime` now present in results.json:67 definitions. README claim-evidence mismatch (line 84 vs results.json) also resolved. Numbers identical to prior PoC (101 selloff days, 69 episodes, disp ratio 1.75, p=3.18e-12 internal). Review report: storage/reviews/codex_24h/mile_c07025d2_review.md. experiment_id=K1427 experiment_path=experiments/k1427/ article_id=mile_c07025d2",
+    "evidence": [
+      "storage/reviews/codex_24h/mile_c07025d2_review.md",
+      "experiments/k1427/k1427_results.json",
+      "experiments/k1427/k1427.py:353",
+      "storage/reports/mile_c07025d2.json"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-09T04:12:23.233264"
   }
 ]

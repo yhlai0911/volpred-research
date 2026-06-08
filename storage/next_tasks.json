@@ -25648,5 +25648,27 @@
     "started_at": "2026-06-08T19:08:58.989389+00:00",
     "completed_at": "2026-06-08T19:30:48.122923+00:00",
     "result": "Caveat 1 弱化 Welch + episode-cluster 注腳 / Caveat 2 Q5 文章未引自然 OK / Caveat 3 k1427.py definitions 2-D taxonomy / Caveat 4 末段明寫限定美股 sector ETF. anti_ai PASS, publish_draft --update OK, supabase sync 1587 entries OK 0 fail, live 200 verified."
+  },
+  {
+    "id": "paper_review_mile_c07025d2",
+    "title": "Paper review (Codex 24h-rule): 「股債金油齊跌、資金在輪動」這個說法，數據站哪邊？——拆開大跌底下的板塊離散度",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c07025d2 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c07025d2",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-08T20:07:57+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-08T20:08:23.846770+00:00",
+    "claim_session_id": "a140d041c241",
+    "started_at": "2026-06-08T20:08:24.223494+00:00",
+    "completed_at": "2026-06-08T20:12:30.033205+00:00",
+    "result": "Codex 24h re-review CONDITIONAL_PASS → closure: caveats 1/2/4 addressed in article (drop p-value+episode-clustered note / drop Q5 numbers / US sector ETF scope); caveat 3 (JSON definitions) closed via k1427.py rerun (taxonomy_dimensions + broad_selloff_high_disp_regime now in results.json). Review: storage/reviews/codex_24h/mile_c07025d2_review.md. Knowledge id=283594c0."
   }
 ]

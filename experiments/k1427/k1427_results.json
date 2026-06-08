@@ -67,8 +67,10 @@
   "definitions": {
     "daily_selloff": "SPY 日報酬 < -0.02",
     "dispersion": "每日跨板塊日報酬的橫斷面標準差 (ddof=1)",
-    "rotation_regime": "episode 平均 dispersion >= 歷史 70 分位 (0.00830)",
-    "liquidation_regime": "episode 平均 dispersion < 70 分位",
+    "taxonomy_dimensions": "2-D: (1) episode 平均 dispersion vs 70 分位門檻 × (2) episode 內板塊累積報酬的方向廣度 (是否有任一板塊正報酬)",
+    "rotation_regime": "episode 平均 dispersion >= 歷史 70 分位 (0.00830) 且至少 1 板塊 episode 累積報酬 > 0 (真有資金輪入)",
+    "broad_selloff_high_disp_regime": "episode 平均 dispersion >= 歷史 70 分位 但所有板塊 episode 累積報酬 ≤ 0 (高離散但全跌, 仍屬齊跌)",
+    "liquidation_regime": "episode 平均 dispersion < 歷史 70 分位 (低離散齊跌清算, 分散失靈)",
     "episode_grouping": "selloff 日相隔 <=3 交易日歸為同一 episode",
     "rv_ann": "日報酬 rolling-20 std × sqrt(252)"
   },
@@ -80,12 +82,12 @@
     "median_dispersion_selloff": 0.010798,
     "median_dispersion_normal": 0.006378,
     "ratio_selloff_over_normal": 1.749,
-    "welch_t": 7.91,
-    "welch_p": 3.1904562848717786e-12,
-    "mannwhitney_p": 4.372676170515176e-25,
+    "welch_t": 7.911,
+    "welch_p": 3.183868869406533e-12,
+    "mannwhitney_p": 4.331919454856929e-25,
     "interpretation": "大跌日 dispersion 顯著高於平常日 => 大跌通常伴隨更高橫斷面離散(非單純齊跌)",
-    "dispersion_q70_threshold": 0.008300005832474904,
-    "dispersion_median_overall": 0.006464064136872122
+    "dispersion_q70_threshold": 0.008300009111848522,
+    "dispersion_median_overall": 0.0064639801322567084
   },
   "q2_regime_classification": {
     "taxonomy": {
@@ -105,7 +107,7 @@
         "start": "2014-01-24",
         "end": "2014-01-24",
         "n_selloff_days": 1,
-        "mean_dispersion": 0.006958,
+        "mean_dispersion": 0.006959,
         "dispersion_pctile": 0.556,
         "regime": "liquidation",
         "spy_cum_ret_on_selloff_days": -0.0213,
@@ -149,7 +151,7 @@
         "start": "2014-04-10",
         "end": "2014-04-10",
         "n_selloff_days": 1,
-        "mean_dispersion": 0.008764,
+        "mean_dispersion": 0.008765,
         "dispersion_pctile": 0.736,
         "regime": "broad_selloff_high_disp",
         "spy_cum_ret_on_selloff_days": -0.021,
@@ -326,7 +328,7 @@
         "end": "2016-09-09",
         "n_selloff_days": 1,
         "mean_dispersion": 0.005634,
-        "dispersion_pctile": 0.388,
+        "dispersion_pctile": 0.387,
         "regime": "liquidation",
         "spy_cum_ret_on_selloff_days": -0.0239,
         "n_sectors_positive_in_span": 0,
@@ -658,7 +660,7 @@
         "mean_dispersion": 0.017424,
         "dispersion_pctile": 0.978,
         "regime": "broad_selloff_high_disp",
-        "spy_cum_ret_on_selloff_days": -0.0734,
+        "spy_cum_ret_on_selloff_days": -0.0735,
         "n_sectors_positive_in_span": 0,
         "n_sectors": 9,
         "sector_cum_ret": {
@@ -722,7 +724,7 @@
         "end": "2020-05-01",
         "n_selloff_days": 1,
         "mean_dispersion": 0.013014,
-        "dispersion_pctile": 0.926,
+        "dispersion_pctile": 0.927,
         "regime": "broad_selloff_high_disp",
         "spy_cum_ret_on_selloff_days": -0.0265,
         "n_sectors_positive_in_span": 0,
@@ -986,7 +988,7 @@
         "end": "2022-02-17",
         "n_selloff_days": 1,
         "mean_dispersion": 0.01325,
-        "dispersion_pctile": 0.932,
+        "dispersion_pctile": 0.933,
         "regime": "rotation",
         "spy_cum_ret_on_selloff_days": -0.0214,
         "n_sectors_positive_in_span": 2,
@@ -1294,7 +1296,7 @@
         "end": "2022-11-09",
         "n_selloff_days": 1,
         "mean_dispersion": 0.013034,
-        "dispersion_pctile": 0.927,
+        "dispersion_pctile": 0.928,
         "regime": "broad_selloff_high_disp",
         "spy_cum_ret_on_selloff_days": -0.0206,
         "n_sectors_positive_in_span": 0,
@@ -1469,7 +1471,7 @@
         "start": "2025-03-28",
         "end": "2025-03-28",
         "n_selloff_days": 1,
-        "mean_dispersion": 0.012376,
+        "mean_dispersion": 0.012377,
         "dispersion_pctile": 0.91,
         "regime": "rotation",
         "spy_cum_ret_on_selloff_days": -0.0201,
@@ -1549,7 +1551,7 @@
           "XLF": -0.0343,
           "XLV": -0.0372,
           "XLY": -0.0447,
-          "XLI": -0.0305,
+          "XLI": -0.0306,
           "XLB": -0.0162
         }
       },
@@ -1558,7 +1560,7 @@
         "end": "2025-10-10",
         "n_selloff_days": 1,
         "mean_dispersion": 0.012689,
-        "dispersion_pctile": 0.919,
+        "dispersion_pctile": 0.92,
         "regime": "rotation",
         "spy_cum_ret_on_selloff_days": -0.027,
         "n_sectors_positive_in_span": 1,
@@ -1656,7 +1658,7 @@
       "name": "科技",
       "type": "cyclical",
       "mean_ret_selloff_days": -0.03713,
-      "mean_ret_normal_days": 0.00218,
+      "mean_ret_normal_days": 0.00217,
       "rv_ann_selloff_days": 0.353,
       "rv_ann_overall": 0.2016,
       "rv_ratio_selloff_vs_overall": 1.751,
@@ -1766,7 +1768,7 @@
         "future_rv_hi_dispersion_mean": 0.3085,
         "future_rv_lo_dispersion_mean": 0.2692,
         "welch_t": 0.944,
-        "welch_p": 0.3478,
+        "welch_p": 0.3477,
         "spearman_disp_vs_fwd_rv": 0.26,
         "spearman_p": 0.0089
       }
@@ -1775,8 +1777,8 @@
   "robustness_full11": {
     "mean_dispersion_selloff": 0.013226,
     "mean_dispersion_normal": 0.007941,
-    "welch_t": 7.174,
-    "welch_p": 3.0805319691066914e-10,
+    "welch_t": 7.175,
+    "welch_p": 3.071759251500467e-10,
     "n_selloff_days": 80
   },
   "external_claim_verdict": {
@@ -1793,17 +1795,17 @@
       },
       "XLU": {
         "ret_on_selloff_day": 0.00933,
-        "cum_ret_window_9d": -0.01655,
+        "cum_ret_window_9d": -0.02082,
         "rv_ann_on_selloff_day": 0.1875
       },
       "XLP": {
         "ret_on_selloff_day": 0.01706,
-        "cum_ret_window_9d": 0.00283,
+        "cum_ret_window_9d": 0.00207,
         "rv_ann_on_selloff_day": 0.1522
       },
       "XLK": {
         "ret_on_selloff_day": -0.06663,
-        "cum_ret_window_9d": -0.02785,
+        "cum_ret_window_9d": -0.03552,
         "rv_ann_on_selloff_day": 0.3601
       }
     },
