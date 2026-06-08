@@ -1541,3 +1541,15 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 1. refill / 補池前 `pgrep hourly` — 深層 pool 問題時 parallel hourly agent 可能也在處理，避免 race。
 2. 判斷 K「可寫成文章」≠「有 results.json」；要查 narrative-arc 飽和度（既有文章數 + arc 是否已講）。
 3. 真結論：易寫的 uncovered K 已大致寫完 → 真需求是 **contrarian 新研究**（白天決策），非反覆 refill。
+
+## 2026-06-08 11:1x — pre-publish image-URL gate（缺圖 incident 根治）
+
+**Incident**：用戶抓到 mile_23399029 等文章缺圖。subagent 全面 audit：20 篇 published 文章、52 個 image URL 指向前端不 serve 的路徑（5 種：`/experiments/`、`/api/storage/`、`/figures/`、`_PLACEHOLDER`、github raw）→ HTTP 404 破圖。已逐一上傳 Supabase + 改寫（commit 9bc7e2af）。
+
+**根因**：publish 時的 image 正規化（`publish_draft.normalize_image_paths`）只轉本地相對路徑，**沒攔絕對 zeabur `/experiments/` URL**。無 verification gate。
+
+**根治（修流程不修資料）**：`src/volpred/publisher/prepublish_audit.py::audit_image_urls` — deterministic path-based gate，每個嵌入圖必須在 canonical served path（Supabase `/storage/v1/object/public/` OR 前端 `/charts/`），否則列 broken。Wire 進 `publish_milestone`：`audit_strict=True`（預設）時 broken image → **raise 擋發佈**（mirror content gate）；`audit_strict=False` → warn + `content_audit_flagged`。Network-free（不靠 curl，純路徑判斷）。
+
+**測試**：`tests/test_prepublish_audit.py` +5 cases（experiments/ blocked、Supabase passes、/charts/ passes、placeholder/api/local blocked、no-image clean）。全綠。
+
+**效果**：往後任何文章引用未 serve 路徑的圖 → 發佈前就被擋，不再 silent 404。

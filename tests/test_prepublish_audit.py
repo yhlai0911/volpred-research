@@ -181,3 +181,48 @@ def test_negative_claim_without_source_match_is_flagged():
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))
+
+
+# ï¿½”€ï¿½”€ image-URL gate (2026-06-08 ç¼ºï¿½œ– incident) ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€
+from volpred.publisher.prepublish_audit import audit_image_urls
+
+
+def test_experiments_path_image_blocked():
+    c = "![ï¿½œ–1](https://volpred.zeabur.app/experiments/k674/k674_dd_heatmap.png)"
+    r = audit_image_urls(c)
+    assert r["total"] == 1
+    assert len(r["broken"]) == 1
+    assert "experiments" in r["broken"][0]["reason"]
+
+
+def test_supabase_article_images_passes():
+    c = "![ï¿½œ–1](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k674_dd_heatmap.png)"
+    r = audit_image_urls(c)
+    assert r["total"] == 1
+    assert r["broken"] == []
+
+
+def test_frontend_charts_passes():
+    for url in (
+        "https://volpred.zeabur.app/charts/k1046_timing_comparison.png",
+        "/charts/k957_sankey.png",
+    ):
+        r = audit_image_urls(f"![c]({url})")
+        assert r["broken"] == [], url
+
+
+def test_placeholder_and_api_storage_and_local_blocked():
+    c = (
+        "![a](k674_PLACEHOLDER.png)\n"
+        "![b](https://volpred.zeabur.app/api/storage/foo.png)\n"
+        "![c](/Users/yhlai0911/Desktop/x.png)"
+    )
+    r = audit_image_urls(c)
+    assert r["total"] == 3
+    assert len(r["broken"]) == 3
+
+
+def test_no_images_is_clean():
+    r = audit_image_urls("ï¿½”ï¿½–‡ï¿½­—ï¿½’ï¿½œ‰ï¿½œ–ï¿½€‚")
+    assert r["total"] == 0
+    assert r["broken"] == []

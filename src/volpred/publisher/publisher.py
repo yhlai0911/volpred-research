@@ -761,6 +761,38 @@ class Publisher:
                 raise ValueError(msg)
             print(f"  ⚠️ prepublish_audit Tier-1 findings (audit_strict=False bypass):\n  - {issue_text}")
 
+        # --- Pre-publish image-URL gate (2026-06-08 缺圖 incident) ---
+        # 20 published articles shipped with image URLs on unserved paths
+        # (/experiments/, /api/storage/, /figures/, _PLACEHOLDER, github raw,
+        # local abs) → HTTP 404 broken images. Deterministic path-based check:
+        # every embedded image must be on a canonical served path (Supabase
+        # public storage OR frontend /charts/). Hard gate when audit_strict
+        # (mirrors content gate); else warn + stamp. Network-free.
+        try:
+            from volpred.publisher.prepublish_audit import audit_image_urls
+            img_audit = audit_image_urls(description or '')
+        except Exception as _img_exc:
+            print(f"  [prepublish_audit] image gate exception (degrading): {_img_exc}")
+            img_audit = {"broken": [], "total": 0}
+            content_audit_flagged = True
+        if img_audit.get("broken"):
+            img_lines = '\n  - '.join(
+                f"{b['url']} ({b['reason']})" for b in img_audit["broken"]
+            )
+            img_msg = (
+                "pre-publish image-URL violations: the following embedded images "
+                "are NOT on a canonical served path (must be Supabase public "
+                f"storage `/storage/v1/object/public/...` or frontend `/charts/...`):\n  - {img_lines}\n"
+                "Upload the PNG to the Supabase article-images bucket "
+                "(`from volpred.charts import upload_chart; upload_chart(path)`) and "
+                "use the returned public URL. /experiments/ and other repo paths are "
+                "NOT served by the frontend → 404 broken images."
+            )
+            if audit_strict:
+                raise ValueError(img_msg)
+            content_audit_flagged = True
+            print(f"  ⚠️ prepublish_audit image-URL findings (audit_strict=False bypass):\n  - {img_lines}")
+
         # Tier-2 LLM conclusion consistency — fully wrapped; never blocks.
         if not prov.get("skipped"):
             try:
