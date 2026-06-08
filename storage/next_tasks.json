@@ -24990,7 +24990,7 @@
     "title": "研究 backlog fallback: Proxy-Reliance Control in Conformal VaR",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Proxy-Reliance Control in Conformal VaR — arXiv:2603.22569 (2026)。校準 one-sided VaR 時控制 proxy 依賴。直接相關我們的 Patton (2011) proxy-robust 框架。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "proxy_reliance_control_in_conformal_var",
@@ -24998,7 +24998,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T04:08:06+00:00"
+    "created_at": "2026-06-08T04:08:06+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T09:27:28.332398+00:00",
+    "claim_session_id": "bf6278177cd5",
+    "started_at": "2026-06-08T09:27:36.833928+00:00",
+    "completed_at": "2026-06-08T09:28:54.008831+00:00",
+    "result": "Resolved as duplicate of K1026. Added backlog resolution note mapping this task to existing conformal VaR experiment, results, and diagnostics."
   },
   {
     "id": "research_online_conformal_via_universal_portfolio",
@@ -25240,5 +25246,83 @@
     "started_at": "2026-06-08T08:09:49.542081+00:00",
     "completed_at": "2026-06-08T08:16:51.217049+00:00",
     "result": "mile_4642e259 draft / 1350 字 / anti_ai_gate round 2 PASS / 2 真圖嵌入 (FZ score series + regime breakdown) / audience 被 publisher_strict 自動覆為 research (含統計術語) — 風格仍一般讀者向，達成 K1076 缺 general-audience 覆蓋的核心意圖"
+  },
+  {
+    "id": "research_regime_aware_in_context_learning",
+    "title": "研究 backlog fallback: Regime-aware In-Context Learning",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting） | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "regime_aware_in_context_learning",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T10:08:10+00:00"
+  },
+  {
+    "id": "research_har_ceiling",
+    "title": "研究 backlog fallback: 「HAR ceiling」驗證",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 「HAR ceiling」驗證 — Los Flamingos 2025 | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "har_ceiling",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T10:08:10+00:00",
+    "last_released_at": "2026-06-08T10:10:49.848959+00:00"
+  },
+  {
+    "id": "paper_body_prg_v4_1_hotfix",
+    "title": "PRG-Periodic-GARCH v4.1 hotfix — promote to ready_for_submission",
+    "description": "讀 paper/prg-periodic-garch/review_history/v4/README.md (MAJOR/MED/MINOR sections) + storage/ops/paper_portfolio_status_2026-06-08.md。修 5 items: (1) M-NEW-1-v4 §4.5 Table 5 移除 PRG-vs-GJR row + narrative 1 句 (2) M-NEW-2-v4 §2.2 L94 cite Bollerslev1996 → BollerslevWooldridge1992 + 加 bibitem (3) Min-NEW-1 §4.5 caption L334 改 phrasing (4) Min-NEW-2 L385 heteroscedasticity → heteroskedasticity (5) Min-NEW-3 L530+ Soucek → Souček。完成標準: xelatex 0 warning + paper-update CLI + NotebookLM refresh + commit。完成後 paper 升 ready_for_submission，預期 FRL desk-accept 35-45%。主線程任務（CLAUDE.md 禁 background agent 寫 paper .tex）。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "paper_body",
+    "source": "paper_portfolio_audit_2026-06-08",
+    "tags": [
+      "paper-portfolio-audit",
+      "paper2-prg",
+      "ready-for-submission-promotion"
+    ],
+    "paper_id": "prg-periodic-garch",
+    "created_at": "2026-06-08T10:13:11+00:00"
+  },
+  {
+    "id": "paper_review_garch_x_vix_v7_verdict",
+    "title": "garch-x-vix v7 review verdict read + plan v8",
+    "description": "讀 paper/garch-x-vix/review_history/v7/README.md + 任何 v7 sub-reports。寫 v8 plan: 列出 MAJOR/MED/MIN 數 + recommended fixes + 預估 effort + 是否 ready_for_submission promotion path。Output: paper/garch-x-vix/v8_plan.md。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "paper_portfolio_audit_2026-06-08",
+    "tags": [
+      "paper-portfolio-audit",
+      "garch-x-vix"
+    ],
+    "paper_id": "garch-x-vix",
+    "created_at": "2026-06-08T10:13:11+00:00"
+  },
+  {
+    "id": "paper_body_leverage_direction_submission_package",
+    "title": "leverage-direction ready_for_submission → 投稿包製備",
+    "description": "leverage-direction v10 = ready_for_submission（per v10 README.md Stage Assessment）。製備投稿包: (1) cover letter draft (target journal e.g. JFE/RFS, 推薦 reviewers 3-5) (2) page count check (JFE/RFS limit) + 若超頁 propose trim sections (3) journal-specific formatting (line spacing, figure resolution, bibliography style) (4) submission checklist (anonymization, data availability statement, code availability via reproduce.py, conflict-of-interest) (5) submission zip in storage/paper_submission_pkgs/leverage-direction-v10/。Output: 該 dir + paper/leverage-direction/submission_plan_v10.md。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "paper_body",
+    "source": "paper_portfolio_audit_2026-06-08",
+    "tags": [
+      "paper-portfolio-audit",
+      "leverage-direction",
+      "submission-package"
+    ],
+    "paper_id": "leverage-direction",
+    "created_at": "2026-06-08T10:13:11+00:00"
   }
 ]
