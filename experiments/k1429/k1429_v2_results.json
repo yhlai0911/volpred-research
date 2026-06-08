@@ -1,0 +1,316 @@
+{
+  "metadata": {
+    "analysis_start": "2024-01-01",
+    "analysis_end": "2026-06-08",
+    "tickers": [
+      "NVDA",
+      "AAPL",
+      "MSFT"
+    ],
+    "price_source": "yfinance adjusted close",
+    "earnings_source": "yfinance.Ticker.get_earnings_dates(limit=12)",
+    "window_measure": "sqrt(252/5 * sum(r_t^2)) over 5 close-to-close log returns",
+    "pre_window": "T-5 to T-1, where T is the first tradable reaction day",
+    "post_window": "T to T+4, where T is the first tradable reaction day",
+    "baseline_exclusion": "exclude reaction-day neighborhoods ±10 trading days",
+    "inference": "two-sided randomization test: compare observed event-window mean difference vs mean differences from baseline pseudo-event samples",
+    "multiple_testing": "Bonferroni over 6 tests",
+    "seed": 42,
+    "n_permutations": 20000
+  },
+  "results_by_ticker": {
+    "NVDA": {
+      "n_events": 10,
+      "baseline_windows_n": 378,
+      "baseline_mean_window_vol": 0.4274,
+      "pre_mean_window_vol": 0.3549,
+      "post_mean_window_vol": 0.5953,
+      "pre_mean_diff": -0.0725,
+      "post_mean_diff": 0.1679,
+      "pre_diff_pct": -16.97,
+      "post_diff_pct": 39.28,
+      "p_pre_permutation": 0.351532,
+      "p_post_permutation": 0.032698,
+      "p_pre_bonferroni": 1.0,
+      "p_post_bonferroni": 0.19619,
+      "significant_pre_uncorrected": false,
+      "significant_post_uncorrected": true,
+      "significant_pre_bonferroni": false,
+      "significant_post_bonferroni": false,
+      "reaction_dates": [
+        "2024-02-22",
+        "2024-05-23",
+        "2024-08-29",
+        "2024-11-21",
+        "2025-02-27",
+        "2025-05-29",
+        "2025-08-28",
+        "2025-11-20",
+        "2026-02-26",
+        "2026-05-21"
+      ]
+    },
+    "AAPL": {
+      "n_events": 10,
+      "baseline_windows_n": 375,
+      "baseline_mean_window_vol": 0.2229,
+      "pre_mean_window_vol": 0.1958,
+      "post_mean_window_vol": 0.2927,
+      "pre_mean_diff": -0.0271,
+      "post_mean_diff": 0.0698,
+      "pre_diff_pct": -12.14,
+      "post_diff_pct": 31.32,
+      "p_pre_permutation": 0.588971,
+      "p_post_permutation": 0.145243,
+      "p_pre_bonferroni": 1.0,
+      "p_post_bonferroni": 0.871456,
+      "significant_pre_uncorrected": false,
+      "significant_post_uncorrected": false,
+      "significant_pre_bonferroni": false,
+      "significant_post_bonferroni": false,
+      "reaction_dates": [
+        "2024-02-02",
+        "2024-05-03",
+        "2024-08-02",
+        "2024-11-01",
+        "2025-01-31",
+        "2025-05-02",
+        "2025-08-01",
+        "2025-10-31",
+        "2026-01-30",
+        "2026-05-01"
+      ]
+    },
+    "MSFT": {
+      "n_events": 10,
+      "baseline_windows_n": 375,
+      "baseline_mean_window_vol": 0.188,
+      "pre_mean_window_vol": 0.2254,
+      "post_mean_window_vol": 0.4075,
+      "pre_mean_diff": 0.0374,
+      "post_mean_diff": 0.2196,
+      "pre_diff_pct": 19.89,
+      "post_diff_pct": 116.81,
+      "p_pre_permutation": 0.227389,
+      "p_post_permutation": 5e-05,
+      "p_pre_bonferroni": 1.0,
+      "p_post_bonferroni": 0.0003,
+      "significant_pre_uncorrected": false,
+      "significant_post_uncorrected": true,
+      "significant_pre_bonferroni": false,
+      "significant_post_bonferroni": true,
+      "reaction_dates": [
+        "2024-01-31",
+        "2024-04-26",
+        "2024-07-31",
+        "2024-10-31",
+        "2025-01-30",
+        "2025-05-01",
+        "2025-07-31",
+        "2025-10-30",
+        "2026-01-29",
+        "2026-04-30"
+      ]
+    }
+  },
+  "event_records_by_ticker": {
+    "NVDA": [
+      {
+        "announce_ts_ny": "2024-02-21T16:00:00-05:00",
+        "announce_date": "2024-02-21",
+        "release_session": "after_close",
+        "reaction_date": "2024-02-22"
+      },
+      {
+        "announce_ts_ny": "2024-05-22T16:00:00-04:00",
+        "announce_date": "2024-05-22",
+        "release_session": "after_close",
+        "reaction_date": "2024-05-23"
+      },
+      {
+        "announce_ts_ny": "2024-08-28T16:00:00-04:00",
+        "announce_date": "2024-08-28",
+        "release_session": "after_close",
+        "reaction_date": "2024-08-29"
+      },
+      {
+        "announce_ts_ny": "2024-11-20T16:00:00-05:00",
+        "announce_date": "2024-11-20",
+        "release_session": "after_close",
+        "reaction_date": "2024-11-21"
+      },
+      {
+        "announce_ts_ny": "2025-02-26T16:00:00-05:00",
+        "announce_date": "2025-02-26",
+        "release_session": "after_close",
+        "reaction_date": "2025-02-27"
+      },
+      {
+        "announce_ts_ny": "2025-05-28T16:00:00-04:00",
+        "announce_date": "2025-05-28",
+        "release_session": "after_close",
+        "reaction_date": "2025-05-29"
+      },
+      {
+        "announce_ts_ny": "2025-08-27T16:00:00-04:00",
+        "announce_date": "2025-08-27",
+        "release_session": "after_close",
+        "reaction_date": "2025-08-28"
+      },
+      {
+        "announce_ts_ny": "2025-11-19T16:00:00-05:00",
+        "announce_date": "2025-11-19",
+        "release_session": "after_close",
+        "reaction_date": "2025-11-20"
+      },
+      {
+        "announce_ts_ny": "2026-02-25T16:00:00-05:00",
+        "announce_date": "2026-02-25",
+        "release_session": "after_close",
+        "reaction_date": "2026-02-26"
+      },
+      {
+        "announce_ts_ny": "2026-05-20T16:00:00-04:00",
+        "announce_date": "2026-05-20",
+        "release_session": "after_close",
+        "reaction_date": "2026-05-21"
+      }
+    ],
+    "AAPL": [
+      {
+        "announce_ts_ny": "2024-02-01T16:00:00-05:00",
+        "announce_date": "2024-02-01",
+        "release_session": "after_close",
+        "reaction_date": "2024-02-02"
+      },
+      {
+        "announce_ts_ny": "2024-05-02T16:00:00-04:00",
+        "announce_date": "2024-05-02",
+        "release_session": "after_close",
+        "reaction_date": "2024-05-03"
+      },
+      {
+        "announce_ts_ny": "2024-08-01T16:00:00-04:00",
+        "announce_date": "2024-08-01",
+        "release_session": "after_close",
+        "reaction_date": "2024-08-02"
+      },
+      {
+        "announce_ts_ny": "2024-10-31T16:00:00-04:00",
+        "announce_date": "2024-10-31",
+        "release_session": "after_close",
+        "reaction_date": "2024-11-01"
+      },
+      {
+        "announce_ts_ny": "2025-01-30T16:00:00-05:00",
+        "announce_date": "2025-01-30",
+        "release_session": "after_close",
+        "reaction_date": "2025-01-31"
+      },
+      {
+        "announce_ts_ny": "2025-05-01T16:00:00-04:00",
+        "announce_date": "2025-05-01",
+        "release_session": "after_close",
+        "reaction_date": "2025-05-02"
+      },
+      {
+        "announce_ts_ny": "2025-07-31T16:00:00-04:00",
+        "announce_date": "2025-07-31",
+        "release_session": "after_close",
+        "reaction_date": "2025-08-01"
+      },
+      {
+        "announce_ts_ny": "2025-10-30T16:00:00-04:00",
+        "announce_date": "2025-10-30",
+        "release_session": "after_close",
+        "reaction_date": "2025-10-31"
+      },
+      {
+        "announce_ts_ny": "2026-01-29T16:00:00-05:00",
+        "announce_date": "2026-01-29",
+        "release_session": "after_close",
+        "reaction_date": "2026-01-30"
+      },
+      {
+        "announce_ts_ny": "2026-04-30T16:00:00-04:00",
+        "announce_date": "2026-04-30",
+        "release_session": "after_close",
+        "reaction_date": "2026-05-01"
+      }
+    ],
+    "MSFT": [
+      {
+        "announce_ts_ny": "2024-01-30T16:00:00-05:00",
+        "announce_date": "2024-01-30",
+        "release_session": "after_close",
+        "reaction_date": "2024-01-31"
+      },
+      {
+        "announce_ts_ny": "2024-04-25T16:00:00-04:00",
+        "announce_date": "2024-04-25",
+        "release_session": "after_close",
+        "reaction_date": "2024-04-26"
+      },
+      {
+        "announce_ts_ny": "2024-07-30T16:00:00-04:00",
+        "announce_date": "2024-07-30",
+        "release_session": "after_close",
+        "reaction_date": "2024-07-31"
+      },
+      {
+        "announce_ts_ny": "2024-10-30T16:00:00-04:00",
+        "announce_date": "2024-10-30",
+        "release_session": "after_close",
+        "reaction_date": "2024-10-31"
+      },
+      {
+        "announce_ts_ny": "2025-01-29T16:00:00-05:00",
+        "announce_date": "2025-01-29",
+        "release_session": "after_close",
+        "reaction_date": "2025-01-30"
+      },
+      {
+        "announce_ts_ny": "2025-04-30T16:00:00-04:00",
+        "announce_date": "2025-04-30",
+        "release_session": "after_close",
+        "reaction_date": "2025-05-01"
+      },
+      {
+        "announce_ts_ny": "2025-07-30T16:00:00-04:00",
+        "announce_date": "2025-07-30",
+        "release_session": "after_close",
+        "reaction_date": "2025-07-31"
+      },
+      {
+        "announce_ts_ny": "2025-10-29T16:00:00-04:00",
+        "announce_date": "2025-10-29",
+        "release_session": "after_close",
+        "reaction_date": "2025-10-30"
+      },
+      {
+        "announce_ts_ny": "2026-01-28T16:00:00-05:00",
+        "announce_date": "2026-01-28",
+        "release_session": "after_close",
+        "reaction_date": "2026-01-29"
+      },
+      {
+        "announce_ts_ny": "2026-04-29T16:00:00-04:00",
+        "announce_date": "2026-04-29",
+        "release_session": "after_close",
+        "reaction_date": "2026-04-30"
+      }
+    ]
+  },
+  "experiment_id": "K1429",
+  "title": "EAV Effect v2: Reaction-day aligned 5-day window volatility",
+  "description": "Recomputed NVDA/AAPL/MSFT earnings-window volatility with reaction-day alignment, 5-day realized-vol windows, and permutation inference.",
+  "figures": [
+    "fig_event_windows_v2.png",
+    "fig_premium_compare_v2.png"
+  ],
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_rationale": "Only MSFT post survives Bonferroni after correcting event alignment and inference.",
+  "bonferroni_survivors": [
+    "MSFT post"
+  ]
+}
