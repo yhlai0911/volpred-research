@@ -25124,7 +25124,7 @@
     "title": "研究 backlog fallback: Regime-Switching Correlation Hedging",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Regime-Switching Correlation Hedging | 來源 section: 期貨避險方法論. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "regime_switching_correlation_hedging",
@@ -25132,7 +25132,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T07:09:31+00:00"
+    "created_at": "2026-06-08T07:09:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T07:19:23.342982+00:00",
+    "claim_session_id": "760834806622",
+    "started_at": "2026-06-08T07:19:23.422581+00:00",
+    "completed_at": "2026-06-08T07:20:12.087094+00:00",
+    "result": "Resolved as duplicate already covered by experiments/i5. Added README plus backlog_task_resolution_2026-06-08.md; existing result shows OHR stable across VIX regimes and regime-aware hedging adds no significant value for SPY/ES=F."
   },
   {
     "id": "research_autoencoder_enhanced_realised_garch",
@@ -25163,5 +25169,70 @@
     "started_at": "2026-06-08T07:11:29.398117+00:00",
     "completed_at": "2026-06-08T07:13:31.460711+00:00",
     "result": "Worktree audit + graceful prune: agent-a984dee3c1e31ca5c (functional orphan, locked by 8-day idle PID 13569) successfully unlocked + removed. Branch retained for audit trail. Slot-occupancy 1/4 → 0/4. Report storage/ops/worktree_audit_20260608_1511.md."
+  },
+  {
+    "id": "paper_review_mile_2ed9949e",
+    "title": "Paper review (Codex 24h-rule): 財報日前，分析師說「IC 設計股波動較小」— 背後只有 4 家公司，其中 2 家數字截然相反",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_2ed9949e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_2ed9949e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-08T08:08:08+00:00"
+  },
+  {
+    "id": "research_quantum_reservoir_computing_for_realized_volatil",
+    "title": "研究 backlog fallback: Quantum Reservoir Computing for Realized Volatility Forecasting",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Quantum Reservoir Computing for Realized Volatility Forecasting — arXiv:2505.13933 (2026-04)。指出 GARCH 低維參數遞迴對複雜非線性/多尺度動態表達受限，改用 reservoir computing。面向A/D 觀察：方法新穎但需評估是否可在無量子硬體下以 echo-state network 近似復現（reproducibility gate）。 | 來源 section: 新發現（2026-05-29 arxiv 文獻搜尋；scan_arxiv_topics.py 能力建立）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "quantum_reservoir_computing_for_realized_volatil",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T08:08:08+00:00"
+  },
+  {
+    "id": "research_transfer_learning_for_new_issues_vol",
+    "title": "研究 backlog fallback: Transfer Learning for New Issues Vol",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Transfer Learning for New Issues Vol — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。 | 來源 section: 新發現（2026-04-01 文獻搜尋）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "transfer_learning_for_new_issues_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T08:08:08+00:00"
+  },
+  {
+    "id": "K1076_daily_article_fz_vares_general",
+    "task_type": "daily_article",
+    "priority": 3,
+    "status": "succeeded",
+    "title": "K1076 daily_article (general): Fissler-Ziegel 聯合 VaR/ES — A4f 為什麼是更好的風險模型",
+    "description": "為 K1076（A4f vs GJR-GARCH 的 Fissler-Ziegel 聯合 VaR/ES backtest）寫一篇給一般讀者的長文。Paper 9 風險管理核心；FZ 是目前學界 gold standard。實驗已完成：4/4 DM Harvey PASS（A4f 顯著勝 GJR，t 在 3.5~5.2 之間），1/1 H4 dist 一致。Results 與圖在 experiments/k1076/。沒既有 general-audience article 覆蓋（research 版有）。",
+    "source": "auto_discovered",
+    "created_at": "2026-06-08T16:09:43+08:00",
+    "k_ids": [
+      "K1076"
+    ],
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-08T08:09:44.523417+00:00",
+    "claim_session_id": "6edb786ed54c",
+    "started_at": "2026-06-08T08:09:49.542081+00:00",
+    "completed_at": "2026-06-08T08:16:51.217049+00:00",
+    "result": "mile_4642e259 draft / 1350 字 / anti_ai_gate round 2 PASS / 2 真圖嵌入 (FZ score series + regime breakdown) / audience 被 publisher_strict 自動覆為 research (含統計術語) — 風格仍一般讀者向，達成 K1076 缺 general-audience 覆蓋的核心意圖"
   }
 ]
