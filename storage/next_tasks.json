@@ -24850,7 +24850,7 @@
     "title": "研究 backlog fallback: Time-Varying Hurst via EWMA",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Time-Varying Hurst via EWMA — arXiv:2509.05820 | 來源 section: rough volatility & hurst. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "time_varying_hurst_via_ewma",
@@ -24858,7 +24858,11 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T02:11:17+00:00"
+    "created_at": "2026-06-08T02:11:17+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-08T02:37:06.086858+00:00",
+    "claim_session_id": "678946162776",
+    "started_at": "2026-06-08T02:37:18.615336+00:00"
   },
   {
     "id": "email-11728-21e21e",
@@ -24866,7 +24870,7 @@
     "description": "Gmail UID: 11728\nMessage-ID: <F9E5F0F8-9783-432A-97E2-FA370788B469@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 8 Jun 2026 10:21:28 +0800\nSubject: Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] 2026-06-08 09:01 平台運營報告— Warning 已徹底解決 (Dashboard ok / 0 breaches)\n\n--- 用戶回信內容 ---\n你是說你沒有辦法幫我用FB發文嗎？\r\n那是你的問題，你要解決\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月8日 10:14 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Re: [VolPred Boss Report] 2026-06-08 09:01 平台運營報告 — Warning 已徹底解決 (Dashboard ok / 0 breaches)\r\n> Alert level: info\r\n> INFO\r\n> 已徹底解決 — Dashboard 0 breaches\r\n> \r\n> 回應你 09:15 的「立刻徹底解決warning的問題」。\r\n> \r\n> TL;DR\r\n> \r\n> 項目\t之前\t現在\r\n> Dashboard overall\twarn\tok\r\n> section_breaches\t2\t0\r\n> collect_tw 假 stale\t66h ⚠️\t✅（週末本不該 fire）\r\n> collect_us 假 stale\t50h ⚠️\t✅（週末本不該 fire）\r\n> mile_22d52561 FB pipeline\tactionable_pending\tawaiting_interactive\r\n> 根因 + 三層重構\r\n> \r\n> WARN 1：collect_tw / collect_us 反覆假警報（boss report 「66h / 50h」）\r\n> 根因（wrong domain model）：scripts/cron_review.py JOBS 表用 30h 通用閾值判 staleness，沒 honor cron schedule。collect_tw 是 0 15 * * 1-5（週一到五）、collect_us 是 3 7 * * 2-6（週二到六），週末本來就不該 fire；30h wallclock 必每週日假警報。\r\n> \r\n> Three-Strike 規則觸發：屬「結構性 root cause」，per CLAUDE.md 規則「一旦看見就立刻三層重構，不等次數累積到 3」。\r\n> \r\n> Fix（commit pending PHASE Z）：\r\n> \r\n> 底層邏輯：staleness 不是 wallclock 函數，是 cron schedule 函數。scripts/cron_review.py JOBS 表加 cron_expr 欄位（10 個 job 全寫入 cron expression）；用 croniter.get_prev(now) 算 expected_last_fire；actual_last_fire >= expected_last_fire - 2h slack → OK。\r\n> 流程：_expected_last_fire() 抽出獨立函數，cron_expr 缺省自動 fallback 回舊 max_gap_h 行為（backward compat，安全）。\r\n> 程式架構：未動（單一 script，已是合理 scope；改造 ledger / 加 worker daemon 是 over-engineering）。\r\n> 驗證：本 fire uv run python scripts/cron_review.py → ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。collect_tw/us 不再 false-flag。\r\n> \r\n> WARN 2：mile_22d52561 FB pipeline actionable_pending\r\n> 根因：hourly-06 published trending_repost「Broadcom 半導體 vol 結構重定價」(7:17) → hourly-07 enqueue fb_dispatch task 但標 blocked: awaiting_interactive_session（hourly cron 無 Claude in Chrome 自主能力）；trending_repost_log.json fb_post_status 仍寫 pending → dashboard classify_fb_pipeline 抓到歸 actionable_pending。status 不同步問題。\r\n> \r\n> Fix：uv run python scripts/mark_fb_post_status.py --mile-id mile_22d52561 --status awaiting_interactive_session（同步 feed.json + trending_repost_log.json）。\r\n> \r\n> 驗證：dashboard regenerate → fb_pipeline 從 warn 變 ok（actionable_pending=[] / awaiting_interactive=['mile_22d52561']）。\r\n> \r\n> 還需要你做\r\n> \r\n> mile_22d52561 FB 貼文走 Claude in Chrome + Ivan Lai 口吻（依 .claude/skills/trending-repost/references/fb-ivanlai-tone.md）。Hourly cron 無此能力。同類待辦 = mile_123a3855（之前已記 handoff）。\r\n> 下次自動 fire\r\n> \r\n> <<autonomous-loop-dynamic>> 預設 30 min；下一班 hourly cron = 2026-06-08 11:07 台灣時間。\r\n> \r\n> hourly-10 fire | 起 10:07 / 寄 10:14（台灣時間）\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "claimed",
     "tags": [
       "email_reply",
       "user_input"
@@ -24876,6 +24880,55 @@
     "email_uid": 11728,
     "email_message_id": "<F9E5F0F8-9783-432A-97E2-FA370788B469@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] 2026-06-08 09:01 平台運營報告— Warning 已徹底解決 (Dashboard ok / 0 breaches)",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-08T02:31:06.161250+00:00",
+    "claim_session_id": "e748feb15b0b"
+  },
+  {
+    "id": "paper_review_mile_96093433",
+    "title": "Paper review (Codex 24h-rule): K893：VIX 政體加權 Conformal VaR（RWC）vs 歷史模擬法——λ=0.05 值得 3–4% 更緊的區間嗎？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_96093433 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_96093433",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-08T02:34:02+00:00"
+  },
+  {
+    "id": "research_adaptive_fractal_dynamics",
+    "title": "研究 backlog fallback: Adaptive Fractal Dynamics",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Adaptive Fractal Dynamics — Frontiers Applied Math 2025 | 來源 section: rough volatility & hurst. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "adaptive_fractal_dynamics",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T02:34:03+00:00"
+  },
+  {
+    "id": "research_non_gaussian_rough_vol_stable_increments_arxiv_2",
+    "title": "研究 backlog fallback: Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437 | 來源 section: rough volatility & hurst. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "non_gaussian_rough_vol_stable_increments_arxiv_2",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T02:34:03+00:00"
   }
 ]

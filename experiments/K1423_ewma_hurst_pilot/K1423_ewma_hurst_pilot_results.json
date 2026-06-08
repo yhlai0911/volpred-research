@@ -1,0 +1,216 @@
+{
+  "k_id": "K1423",
+  "title": "Time-Varying Hurst via EWMA \u2014 SPY pilot",
+  "generated_at": "2026-06-08T02:47:39.278496+00:00",
+  "data": {
+    "symbol": "SPY",
+    "covar": "^VIX",
+    "n_obs": 4130,
+    "start": "2010-01-05",
+    "end": "2026-06-05",
+    "source": "yfinance"
+  },
+  "config": {
+    "window": 500,
+    "ewma_lambdas": [
+      0.94,
+      0.97,
+      0.99
+    ],
+    "regime_thresholds": {
+      "lo": 0.45,
+      "hi": 0.55
+    },
+    "estimator": "Lo (1991) modified R/S"
+  },
+  "estimators": {
+    "rolling_equal_weight": {
+      "summary": {
+        "label": "rolling_equal_weight",
+        "n": 3630,
+        "mean": 0.5044878339873688,
+        "std": 0.02965341113102239,
+        "q05": 0.44712162263961397,
+        "q50": 0.5066666983441894,
+        "q95": 0.5507525492340004,
+        "min": 0.41848196476114674,
+        "max": 0.5743412827572145
+      },
+      "vix_correlation": {
+        "n": 3630,
+        "pearson_r": 0.3167272797113254,
+        "pearson_p": 2.184895180329495e-85,
+        "spearman_rho": 0.33801687568031447,
+        "spearman_p": 1.0229427484415341e-97
+      },
+      "regime_table": {
+        "crosstab": {
+          "false": {
+            "anti_persistent": 198,
+            "random": 2359,
+            "persistent": 151
+          },
+          "true": {
+            "anti_persistent": 7,
+            "random": 875,
+            "persistent": 40
+          }
+        },
+        "chi2": 58.04537786663984,
+        "p_value": 2.4866023873011997e-13,
+        "dof": 2,
+        "interp": "p<0.05 \u2192 regime conditional on VIX>20"
+      }
+    },
+    "ewma_lambda_0.94": {
+      "summary": {
+        "label": "ewma_lambda_0.94",
+        "n": 3630,
+        "mean": 0.668654315767413,
+        "std": 0.09215297704575244,
+        "q05": 0.5058746138220293,
+        "q50": 0.6763977284836789,
+        "q95": 0.8090530497847107,
+        "min": 0.3424987145348966,
+        "max": 0.8994109698185332
+      },
+      "vix_correlation": {
+        "n": 3630,
+        "pearson_r": 0.06801882724634503,
+        "pearson_p": 4.1059041687771786e-05,
+        "spearman_rho": 0.027035971045922688,
+        "spearman_p": 0.1033892707420718
+      },
+      "regime_table": {
+        "crosstab": {
+          "false": {
+            "anti_persistent": 33,
+            "random": 290,
+            "persistent": 2385
+          },
+          "true": {
+            "anti_persistent": 15,
+            "random": 85,
+            "persistent": 822
+          }
+        },
+        "chi2": 2.5039519329832554,
+        "p_value": 0.2859392319345927,
+        "dof": 2,
+        "interp": "p<0.05 \u2192 regime conditional on VIX>20"
+      }
+    },
+    "ewma_lambda_0.97": {
+      "summary": {
+        "label": "ewma_lambda_0.97",
+        "n": 3630,
+        "mean": 0.6186608720167994,
+        "std": 0.08123178165991556,
+        "q05": 0.4845342881573902,
+        "q50": 0.6237508162650314,
+        "q95": 0.7494933598834986,
+        "min": 0.3762972161894811,
+        "max": 0.8308390000573319
+      },
+      "vix_correlation": {
+        "n": 3630,
+        "pearson_r": 0.09610292853465127,
+        "pearson_p": 6.568920222144876e-09,
+        "spearman_rho": 0.04151741590568491,
+        "spearman_p": 0.012362659124485777
+      },
+      "regime_table": {
+        "crosstab": {
+          "false": {
+            "anti_persistent": 62,
+            "random": 531,
+            "persistent": 2115
+          },
+          "true": {
+            "anti_persistent": 30,
+            "random": 137,
+            "persistent": 755
+          }
+        },
+        "chi2": 12.240149352819607,
+        "p_value": 0.0021982917963738655,
+        "dof": 2,
+        "interp": "p<0.05 \u2192 regime conditional on VIX>20"
+      }
+    },
+    "ewma_lambda_0.99": {
+      "summary": {
+        "label": "ewma_lambda_0.99",
+        "n": 3630,
+        "mean": 0.5545391080967408,
+        "std": 0.060734883264595155,
+        "q05": 0.4584206529446944,
+        "q50": 0.5510700710271412,
+        "q95": 0.6556805496220015,
+        "min": 0.40781207994708263,
+        "max": 0.725366750288599
+      },
+      "vix_correlation": {
+        "n": 3630,
+        "pearson_r": 0.13444708156078367,
+        "pearson_p": 4.135270997101803e-16,
+        "spearman_rho": 0.0430958684166589,
+        "spearman_p": 0.009409234470155957
+      },
+      "regime_table": {
+        "crosstab": {
+          "false": {
+            "anti_persistent": 102,
+            "random": 1337,
+            "persistent": 1269
+          },
+          "true": {
+            "anti_persistent": 18,
+            "random": 341,
+            "persistent": 563
+          }
+        },
+        "chi2": 56.794951876251346,
+        "p_value": 4.646574450451449e-13,
+        "dof": 2,
+        "interp": "p<0.05 \u2192 regime conditional on VIX>20"
+      }
+    }
+  },
+  "sub_periods_rolling": {
+    "2010-2014": {
+      "n": 757,
+      "mean": 0.4813909253411836,
+      "std": 0.01851629743217562,
+      "frac_anti": 0.08058124174372523,
+      "frac_persistent": 0.0
+    },
+    "2015-2019": {
+      "n": 1258,
+      "mean": 0.49814917435614114,
+      "std": 0.03638278492384712,
+      "frac_anti": 0.11446740858505565,
+      "frac_persistent": 0.12162162162162163
+    },
+    "2020-2026": {
+      "n": 1615,
+      "mean": 0.5202515452327228,
+      "std": 0.015982385245722278,
+      "frac_anti": 0.0,
+      "frac_persistent": 0.023529411764705882
+    }
+  },
+  "covid_case_study": {
+    "window": "2020-02-01 ~ 2020-04-30",
+    "first_h_below_045": {
+      "rolling": null,
+      "ewma_094": "2020-04-07",
+      "ewma_097": "2020-04-13"
+    },
+    "vix_peak_date": "2020-03-16",
+    "vix_peak_value": 82.69000244140625
+  },
+  "artifacts": {
+    "h_series_csv": "experiments/K1423_ewma_hurst_pilot/data/K1423_h_series.csv"
+  }
+}
