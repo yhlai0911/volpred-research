@@ -428,6 +428,25 @@ def _is_retracted_or_overturned_candidate(cand: dict) -> bool:
     return any(token in merged for token in needles)
 
 
+def _is_invalidated_artifact_candidate(cand: dict) -> bool:
+    """Skip candidates whose latest knowledge explicitly says unusable artifact."""
+    haystacks = [
+        str(cand.get("title") or ""),
+        str(cand.get("verdict_preview") or ""),
+        " ".join(str(t) for t in (cand.get("tags") or [])),
+    ]
+    merged = "\n".join(haystacks).lower()
+    needles = (
+        "codex review fail",
+        "formal conclusion 不可採信",
+        "formal conclusion not trustworthy",
+        "artifact 作廢",
+        "invalidated artifact",
+        "設計錯誤作廢",
+    )
+    return any(token in merged for token in needles)
+
+
 # 2026-06-08 K159/K181/K495/K510/K737 incident (3-strike trigger on refill bug):
 # hourly-00 codex-cli refill picked 5 K's whose only difference from the existing
 # research-tagged coverage was audience (research vs general). Narrative arc was
@@ -615,6 +634,8 @@ def refill(target: int, dry_run: bool = False) -> dict:
         kid = cand["k_id"]
         audiences_covered = cand.get("audiences_covered") or []
         needed_audience = "general" if "general" not in audiences_covered else "research"
+        if _is_invalidated_artifact_candidate(cand):
+            continue
         # Skip if K has a LIVE task (pending/in_progress/blocked) — don't dup.
         # Terminal tasks (succeeded/failed/superseded) eligible for retry if
         # feed.json still lacks coverage (2026-05-29 fix; see _live_kids).

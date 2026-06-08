@@ -2,6 +2,23 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-08 Cron staleness detector — piggy_back_skip + log-name mismatch false-positive
+
+**問題**：`market_calendar_sync` 被反覆報 stale（last fire 337.1h ago，超過 168h cadence 2x），但 host crontab 實際每週一 08:00 正常 fire（log mtime + 內容已驗證 2026-06-08 08:00 PASS）。
+
+**現象**：hourly diverse_gen 自動建 `platform_ops_cron_stale_market_calendar_sync` 任務進池，dispatcher 反覆推薦主線程處理。
+
+**根因（雙層）**：
+1. `piggy_back_skip=true` 的 job（host crontab 唯一 fire 來源） — `run_due_jobs.py` line 279-282 SKIP 後**不更新** `cron_last_run.json`。state 永凍結在 piggy-back 接管前最後一次 fire（2026-05-25）。
+2. Fallback `_latest_cron_log_ts(job_id)` 寫死 `{job_id}.log` 但實際 log filename 由 schedule `log_path` 指定，`market_calendar_sync` 的 log 叫 `market_cal.log` → 檔案找不到 → fallback 失效。即便找到，banner 解析也僅吃 `=== ... exit ... ===` 格式，部分 wrapper 不寫該 banner。
+
+**解決方法**（`scripts/generate_diverse_tasks.py`）：
+1. `_latest_cron_log_ts(job_id, log_rel)` 新增參數讀 schedule `log_path`，找不到 banner 時 fallback 到 file mtime（檔案被寫即更新，絕對可靠）
+2. `gen_platform_ops_tasks` 跳過 `host_crontab_managed=false` advisory items（如 shared_scheduler_tick）
+3. 缺 `last_run` 但有 log mtime 時用 mtime 當 baseline
+
+**Regression tests**：`tests/test_generate_diverse_tasks.py` 新增 2 case 覆蓋（piggy_back_skip + custom log_path / host_crontab_managed=false）— 4/4 全綠。
+
 ## 2026-06-08 Refill_task_pool 8th belt — research-saturated K narrative-arc dup
 
 **問題**：hourly-00 codex-cli refill (commit 026c8110) 補 6 個「writable uncovered K」入池，hourly-01 上線發現 5/5 pending 全是 narrative-arc dup（K159/K181/K495/K510/K737 — feed.json 已有 research-tagged 文章覆蓋同主題）。

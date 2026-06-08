@@ -204,8 +204,12 @@ def _parse_banner_ts(text: str) -> datetime | None:
     return None
 
 
-def _latest_cron_log_ts(job_id: str) -> datetime | None:
-    log_path = CRON_LOGS / f"{job_id}.log"
+def _latest_cron_log_ts(job_id: str, log_rel: str | None = None) -> datetime | None:
+    if log_rel:
+        candidate = ROOT / log_rel if not log_rel.startswith("/") else Path(log_rel)
+        log_path = candidate if candidate.exists() else CRON_LOGS / f"{job_id}.log"
+    else:
+        log_path = CRON_LOGS / f"{job_id}.log"
     if not log_path.exists():
         return None
     try:
@@ -218,7 +222,10 @@ def _latest_cron_log_ts(job_id: str) -> datetime | None:
         ts = _parse_banner_ts(line)
         if ts is not None:
             return ts
-    return None
+    try:
+        return datetime.fromtimestamp(log_path.stat().st_mtime, tz=timezone.utc)
+    except OSError:
+        return None
 
 
 def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
@@ -236,17 +243,24 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
         cron_expr = item.get("cron")
         if not cid or not cron_expr:
             continue
+        if item.get("host_crontab_managed") is False:
+            continue
         expected = _parse_cron_gap_seconds(cron_expr)
         if expected is None:
             continue
         last_iso = last_run.get(cid)
+        log_rel = item.get("log_path")
+        log_dt = _latest_cron_log_ts(cid, log_rel)
         if not last_iso:
-            continue
-        try:
-            last_dt = datetime.fromisoformat(last_iso.replace("Z", "+00:00"))
-        except Exception:
-            continue
-        log_dt = _latest_cron_log_ts(cid)
+            if log_dt is None:
+                continue
+            last_dt = log_dt
+            last_iso = log_dt.isoformat()
+        else:
+            try:
+                last_dt = datetime.fromisoformat(last_iso.replace("Z", "+00:00"))
+            except Exception:
+                continue
         if log_dt and log_dt > last_dt:
             last_dt = log_dt
             last_iso = last_dt.isoformat()

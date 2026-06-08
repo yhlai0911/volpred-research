@@ -186,6 +186,27 @@ def _extract_overturned_map(knowledge: list) -> dict[str, list[str]]:
     return {kid: sorted(refs) for kid, refs in overturned_map.items()}
 
 
+def _is_invalidated_artifact(entry: dict) -> bool:
+    """True if the latest knowledge entry says the artifact is not promotable."""
+    haystacks = [
+        str(entry.get("title") or ""),
+        str(entry.get("summary") or ""),
+        str(entry.get("content") or ""),
+        str(entry.get("codex_review") or ""),
+        " ".join(str(t) for t in (entry.get("tags") or [])),
+    ]
+    merged = "\n".join(haystacks).lower()
+    fail_markers = (
+        "codex review fail",
+        "formal conclusion 不可採信",
+        "formal conclusion not trustworthy",
+        "artifact 作廢",
+        "invalidated artifact",
+        "設計錯誤作廢",
+    )
+    return any(marker in merged for marker in fail_markers)
+
+
 def main():
     if not KNOWLEDGE_PATH.exists():
         print(f"ERROR: {KNOWLEDGE_PATH} not found", file=sys.stderr)
@@ -222,6 +243,8 @@ def main():
         )
         if not has_results:
             incomplete_research_count += 1
+            continue
+        if _is_invalidated_artifact(entry):
             continue
         covering_articles = []
         for article in feed:

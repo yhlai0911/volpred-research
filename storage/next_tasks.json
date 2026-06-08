@@ -24763,7 +24763,7 @@
     "title": "K1421: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1421 has verdict signal (score=1, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1421",
@@ -24772,6 +24772,33 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-08T00:09:25+00:00"
+    "created_at": "2026-06-08T00:09:25+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T00:59:11.772016+00:00",
+    "claim_session_id": "d64ccbaca14a",
+    "started_at": "2026-06-08T01:00:53.902143+00:00",
+    "completed_at": "2026-06-08T01:01:02.936969+00:00",
+    "result": "Retired stale auto-discovered article task. Root cause: publication_candidates/refill treated K1421 as promotable despite latest knowledge marking the artifact invalid after Codex FAIL. Added invalidated-artifact guards to build_publication_candidates.py and refill_task_pool.py, and removed K1421 from storage/publication_candidates.json so future refills point to K1422 instead."
+  },
+  {
+    "id": "platform_ops_cron_stale_market_calendar_sync",
+    "title": "Cron staleness: market_calendar_sync — last fire 337.1h ago (expected ≤336.0h)",
+    "description": "`market_calendar_sync` last ran at 2026-05-25T00:00:14+00:00 (337.1h ago). Expected cadence per config/runtime_schedules.json gives gap ≤168.0h; observed >2x. Investigate: (a) wrapper script exists & executable, (b) recent log at storage/logs/cron/market_calendar_sync.log, (c) launchd / crontab entry actually installed, (d) downstream consumer (release_pool / daily_update) for failure cascade.",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "source": "diverse_gen",
+    "tags": [
+      "platform-ops",
+      "cron-staleness",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-08T01:08:21+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-08T01:10:39.119886+00:00",
+    "claim_session_id": "0b2d9c93e8e0",
+    "started_at": "2026-06-08T01:10:39.380516+00:00",
+    "completed_at": "2026-06-08T01:10:39.616048+00:00",
+    "result": "False positive: market_calendar_sync 實際 2026-06-08 08:00 host crontab 正常 fire (log mtime 已驗證)，但 piggy_back_skip=true 導致 cron_last_run.json 永不更新。修流程 generate_diverse_tasks.py: (1) _latest_cron_log_ts 改讀 schedule.log_path + fallback to file mtime (2) staleness loop 跳過 host_crontab_managed=false (3) 允許 log mtime 作為 last_run baseline (last_iso 缺時)"
   }
 ]
