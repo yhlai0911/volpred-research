@@ -1,42 +1,37 @@
 {
-  "timestamp": "2026-06-08T02:07:31+08:00",
-  "timestamp_taipei": "2026-06-08 02:07:31",
+  "timestamp": "2026-06-08T00:11:14Z",
   "all_ok": true,
   "checks": [
     {
-      "name": "ARTICLE_POOL",
+      "name": "article_pool",
       "status": "ok",
-      "detail": "146 draft articles total (research=46, general=100). Both above thresholds (research>=4 ✅, general>=8 ✅, total>=12 ✅)."
+      "detail": "Total drafts: 146, research: 46, general: 100"
     },
     {
-      "name": "STRATEGY_METRICS_FRESHNESS",
+      "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "RESOLVED: recalc_metrics.py successfully regenerated storage/strategy_metrics.json (14 strategies). Root cause was gitignore preventing persistence across remote container restarts — fixed by removing from .gitignore and committing the file. File is now tracked in git and will persist in future sessions."
+      "detail": "strategy_metrics.json age: 0.0031 hours (11 seconds old)"
     },
     {
-      "name": "ERROR_LOG",
+      "name": "error_log_recent",
       "status": "ok",
-      "detail": "No entries dated today (2026-06-08) or yesterday (2026-06-07) in docs/error_log.md. Last logged entry was 2026-06-05 (K851 jump-share variance phrasing)."
+      "detail": "No entries dated 2026-06-07 or 2026-06-08 found in error_log.md"
     },
     {
-      "name": "PAPER_TRADING_GAPS",
+      "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "14 strategies checked. All have last-3 null count = 1 (most recent day not yet filled, expected). No strategy exceeds threshold of >2 nulls. _market_daily has 0 entries (expected). No alert required."
+      "detail": "15 strategies checked; max nulls in last 3 entries = 1 (threshold: >2). No alerts triggered."
     },
     {
-      "name": "GIT_STATUS",
+      "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files in main repo. Working tree is clean (threshold: >50)."
+      "detail": "0 uncommitted files"
     },
     {
-      "name": "KNOWLEDGE_SIZE",
+      "name": "knowledge_size",
       "status": "ok",
-      "detail": "2202 entries in storage/memory/knowledge.json."
+      "detail": "knowledge.json entries: 2202"
     }
   ],
-  "alerts": [],
-  "fixes_applied": [
-    "Ran recalc_metrics.py — 14 strategies updated (Sharpe range 1.23–3.48, all sparklines 90pt).",
-    "Removed storage/strategy_metrics.json from .gitignore and committed the file. Persistent METRICS_MISSING alert since 2026-05-31 now permanently resolved — file will exist in all future fresh clones."
-  ]
+  "alerts": []
 }
