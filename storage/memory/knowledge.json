@@ -32777,5 +32777,45 @@
       "ETF-pairs",
       "NULL-result"
     ]
+  },
+  {
+    "item_id": "f8af30d0review",
+    "id": "paper_review_mile_f8af30d0_codex_2026_06_08",
+    "category": "article_review",
+    "k_id": "K1090",
+    "experiment_id": "K1090",
+    "experiment_path": "experiments/k1090/",
+    "article_refs": [
+      "mile_f8af30d0"
+    ],
+    "title": "Article review (Codex 24h K1018-rule): mile_f8af30d0 — 看到新資產，能不能先猜這套波動率方法值不值得跑？",
+    "content": "Codex source-code-level review per K1018 24h rule。verdict=CONDITIONAL_PASS。數字一致（54%/0.26/1.94 與 ols_compact 一致）但方法論表述需修：(1) post-selection LOOCV leakage — LASSO 選特徵在全樣本，再回算 compact OLS LOOCV (k1090.py:255,258)，需標『post-selection 偏樂觀』；(2) preprocessing leakage — fillna+StandardScaler 用全 12 資產 fit 後 LOOCV (k1090.py:208,215,225)，建議 nested LOOCV fold 內各自 fit；(3) overclaim — 文章標『out-of-sample R²』，實際只是 leave-one-asset-out 橫截面 CV，需明寫『12 資產內輪流留一』；(4) currency_usd 邊際顯著 p≈0.056 + 單一非 USD 資產 0050.TW 識別 + multiple comparisons under n=12，不可稱顯著。實際數字與 results.json 對得上，無 fabrication；問題是包裝過度。",
+    "verdict": "CONDITIONAL_PASS",
+    "verdict_reason": "數字一致但 4 處方法論表述（post-selection leakage / preprocessing leakage / OOS R² overclaim / 邊際 sig 多重比較）需修",
+    "reviewer": "Codex",
+    "reviewer_source": "codex exec --skip-git-repo-check (codex-cli 0.137.0, ChatGPT auth, gpt-5.4 medium)",
+    "codex_review": true,
+    "evidence": [
+      "/tmp/codex_review_output.txt",
+      "experiments/k1090/k1090.py",
+      "experiments/k1090/k1090_results.json",
+      "storage/reports/feed.json#mile_f8af30d0"
+    ],
+    "confidence": 0.85,
+    "tags": [
+      "article-review",
+      "K1018-24h-rule",
+      "K1090",
+      "meta-regression",
+      "LOOCV",
+      "post-selection-leakage",
+      "preprocessing-leakage",
+      "overclaim",
+      "mile_f8af30d0",
+      "general-audience"
+    ],
+    "phase": "publication-review",
+    "task_id": "paper_review_mile_f8af30d0",
+    "created_at": "2026-06-08T14:12:30.748543+00:00"
   }
 ]

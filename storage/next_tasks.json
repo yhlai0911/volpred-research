@@ -25387,5 +25387,93 @@
       "hedging"
     ],
     "created_at": "2026-06-08T13:51:14+00:00"
+  },
+  {
+    "id": "paper_review_mile_f8af30d0",
+    "title": "Paper review (Codex 24h-rule): 看到一個新資產，能不能先猜這套波動率方法值不值得跑？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f8af30d0 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_f8af30d0",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-08T14:08:39+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-08T14:09:20.872457+00:00",
+    "claim_session_id": "5589e916a608",
+    "started_at": "2026-06-08T14:09:21.108321+00:00",
+    "completed_at": "2026-06-08T14:15:49.531544+00:00",
+    "result": "CONDITIONAL_PASS: K1090 source-code numbers match results.json (54%/0.26/1.94), but 4 methodology framing issues (post-selection LOOCV leakage + preprocessing leakage + 'OOS R²' overclaim + n=12 marginal sig). Applied: errata_24h_review metadata + 方法局限 disclaimer appended to content. Review artifact: storage/reviews/codex_24h/mile_f8af30d0_review.md. Knowledge: paper_review_mile_f8af30d0_codex_2026_06_08. Followup: research_k1090b_nested_loocv."
+  },
+  {
+    "id": "paper_review_mile_85502a95",
+    "title": "Paper review (Codex 24h-rule): 31 家公司、6 個指標、5 個假設：為什麼「看得到的特徵」無法預測財報當天的波動反應",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_85502a95 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_85502a95",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-08T14:08:39+00:00"
+  },
+  {
+    "id": "research_financial_innovation_2025_review",
+    "title": "研究 backlog fallback: Financial Innovation 2025 review",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Financial Innovation 2025 review — realized volatility forecasting 綜述 | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "financial_innovation_2025_review",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T14:08:40+00:00"
+  },
+  {
+    "id": "research_rgarch_carr_sk_realized_garch_carr_2025",
+    "title": "研究 backlog fallback: RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025 | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rgarch_carr_sk_realized_garch_carr_2025",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-08T14:08:40+00:00"
+  },
+  {
+    "id": "research_k1090b_nested_loocv",
+    "title": "K1090b: nested LOOCV + expanded asset pool for cross-asset A4f meta-regression",
+    "description": "Follow-up to K1090 / mile_f8af30d0 Codex CONDITIONAL_PASS findings (storage/reviews/codex_24h/mile_f8af30d0_review.md). 修兩個 leakage 來源：(1) nested LOOCV — 每 fold 內各自做 LASSO 特徵選擇 + StandardScaler + fillna，不在 fold 切分前用全樣本 fit；(2) 擴大資產池 ≥20 個（加 EWG/SLV/HG/AAPL/NVDA/USO/EUR=X 等已可取得 daily data 標的）+ bootstrap CI 重估。看 LOOCV R² 是否仍在 0.26 同量級或顯著下降。Codex review 已記 knowledge.json (paper_review_mile_f8af30d0_codex_2026_06_08)。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_followup_codex_review",
+    "tags": [
+      "K1090b",
+      "nested-LOOCV",
+      "leakage-fix",
+      "cross-asset",
+      "meta-regression",
+      "followup"
+    ],
+    "parent_task_id": "paper_review_mile_f8af30d0",
+    "parent_article": "mile_f8af30d0",
+    "created_at": "2026-06-08T14:15:49.343934+00:00"
   }
 ]
