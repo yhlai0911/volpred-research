@@ -1,4 +1,4 @@
-# K1423 — 「打敗市場的超額報酬，是真 Alpha，還是還沒被命名的因子？」
+# K1425 — 「打敗市場的超額報酬，是真 Alpha，還是還沒被命名的因子？」
 
 **Status: COMPLETE**
 
@@ -24,7 +24,7 @@
 - **期間**：2014-01-01 至 2026-06-01。
 - **美股籃子**：NVDA, AMD, TSM, ASML, AMAT, MU, QCOM, AVGO（8 檔，全到齊，dropped=[]）。ETF baseline：SMH；市場 proxy：SPY。
 - **台股籃子**：2330.TW, 2454.TW, 2303.TW, 3711.TW, 2379.TW, 3034.TW, 3037.TW, 2308.TW（8 檔，全到齊，dropped=[]）。市場 proxy：0050.TW；無純半導體 ETF → sector 用籃子自建。
-- 報酬對齊用 inner join；缺值 drop（對齊階段 drop 數記在 `k1423_results.json` 的 `n_drops_in_alignment_stage1`）。
+- 報酬對齊用 inner join；缺值 drop（對齊階段 drop 數記在 `k1425_results.json` 的 `n_drops_in_alignment_stage1`）。
 - **seed = 42**（np.random + PCA random_state 全固定）。
 
 ## 方法
@@ -60,7 +60,7 @@
 | 35-split residual-α 範圍 | [-5.6%, 17.0%] | [-0.3%, 4.5%] |
 | 35-split 不顯著比例 | 74% | 100% |
 
-（* = |t| > 1.96。完整數字見 `k1423_results.json`。）
+（* = |t| > 1.96。完整數字見 `k1425_results.json`。）
 
 **解讀**：
 - **Variance attribution（PC1）**：R² 大幅上升（US 0.57→0.77、TW 0.55→0.61）、PC1 beta 顯著 → 半導體籃子確實有強烈的共同因子；但 alpha LEVEL 完全不動（11.4%→11.4%）— 這是設計使然（零均值市場中性因子），它回答的是「波動有多少來自 sector 共動」，不是「alpha 是不是 sector premium」。
@@ -75,8 +75,8 @@ Sector ETF 的「alpha」**傾向是未命名的 sector 共同因子曝險**，�
 
 ## 產出檔案
 
-- `k1423.py`：完整可重現腳本（seed=42）。
-- `k1423_results.json`：所有數字（PCA 解釋比例、loadings、三階段迴歸 α/t/R²、35-split robustness、台美對比、honest_conclusion）。
+- `k1425.py`：完整可重現腳本（seed=42）。
+- `k1425_results.json`：所有數字（PCA 解釋比例、loadings、三階段迴歸 α/t/R²、35-split robustness、台美對比、honest_conclusion）。
 - `fig1_pca_explained_var.png`：台美 PC1/PC2 解釋變異對比。
 - `fig2_alpha_before_after.png`：alpha 三階段（Mkt only / +PC1 / +SectorLong）台美 6 條 bar + t-stat。
 - `fig3_pc1_loadings.png`：台美籃子 PC1 loadings（全同號 = 共同因子）。
@@ -87,7 +87,7 @@ Sector ETF 的「alpha」**傾向是未命名的 sector 共同因子曝險**，�
 - **seed 全固定**（np.random.seed(42) + PCA(random_state=42)）。
 - **HAC 推論限制**：t-stat 是 conditional on generated regressor，未修正第一階段 factor estimation error；屬 conditional inference，不宜當強結論（這也是結論寫 suggestive 的原因之一）。
 - **Fama-French 未做**：台股 FF factors 不易取得，為維持台美對稱（symmetric）口徑，本實驗只用「市場模型 + PCA / sector-long factor」，不硬湊 FF（誠實註明）。
-- 數據來源：yfinance（2026-06-08 抓取）。所有結論來自實際 `k1423_results.json`，無手改。
+- 數據來源：yfinance（2026-06-08 抓取）。所有結論來自實際 `k1425_results.json`，無手改。
 
 ## Review
 

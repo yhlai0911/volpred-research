@@ -1,5 +1,5 @@
 """
-K1423: 「打敗市場的超額報酬，是真 Alpha，還是還沒被命名的因子？」
+K1425: 「打敗市場的超額報酬，是真 Alpha，還是還沒被命名的因子？」
 PCA + 因子回歸在台股與美股半導體籃子上實證。
 
 核心論點：sector ETF（不選股、不擇時）對市場做迴歸常得顯著 alpha，
@@ -11,7 +11,7 @@ structure 抽出 (PC1=sector factor)，加進迴歸後 alpha 應大幅縮小。
 - contemporaneous risk-attribution 迴歸（非 forecast），無 lookahead。
 - seed=42 固定；報酬 inner join 對齊，缺值 drop 並記數量。
 - alpha 年化 = 日 alpha * 252；t-stat 用 Newey-West HAC（lag=5）。
-- 所有數字寫進 k1423_results.json。
+- 所有數字寫進 k1425_results.json。
 """
 import json
 import warnings
@@ -324,7 +324,7 @@ def analyze_market(name, basket, etf_or_basket_proxy, mkt, results):
 
 def main():
     results = {
-        "experiment_id": "k1423",
+        "experiment_id": "k1425",
         "title": "PCA + factor regression: is sector-ETF alpha a real alpha or an unnamed factor exposure?",
         "seed": SEED,
         "period": {"start": START, "end": END},
@@ -410,7 +410,7 @@ def main():
         f"question is answered only by the mean-bearing premium-attribution stage."
     )
 
-    out_path = HERE / "k1423_results.json"
+    out_path = HERE / "k1425_results.json"
     out_path.write_text(json.dumps(results, indent=2, ensure_ascii=False))
     print(f"\nWrote {out_path}")
 
