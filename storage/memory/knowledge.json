@@ -32646,5 +32646,42 @@
     "reviewer_source": "codex_cli",
     "codex_review": "SELF-RERUN with fair baselines; K1421 source-level concerns addressed in new artifact K1422",
     "created_at": "2026-06-08T05:55:00"
+  },
+  {
+    "item_id": "424da92b",
+    "category": "vol_regime",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K1423",
+    "experiment_id": "K1423_ewma_hurst_pilot",
+    "experiment_path": "experiments/K1423_ewma_hurst_pilot/",
+    "summary": "K1423 pilot: SPY 日 log return Time-Varying Hurst via EWMA (λ ∈ {0.94, 0.97, 0.99}) vs rolling N=500。Rolling H mean=0.50 (random walk like)；H 與 VIX 正相關 ρ=0.32 p<1e-80。EWMA λ=0.94 比 rolling 對 COVID 2020-03 regime shift 反應快（rolling 完全沒抓到，EWMA 在 VIX peak 後 22 天首現 H<0.45）。但 EWMA H 太 noisy，χ² regime conditional 不顯著 (p=0.29)。Lo R/S 為 pilot 簡化版未含 Newey-West LRV，標 CONDITIONAL_PASS 待 K1424 補。",
+    "content": "K1423 (SPY daily 2010-01-05 ~ 2026-06-05; n=4130 obs；rolling window=500)。詳見 experiments/K1423_ewma_hurst_pilot/README.md。Rolling H mean=0.504, std=0.030; EWMA λ=0.94 H mean=0.669 (短記憶 trend bias); Rolling ρ(H,VIX)=+0.317 p=2.2e-85; EWMA ρ=+0.068; χ² (regime × VIX>20) p=0.286; COVID first H<0.45: rolling 從未, EWMA 0.94=2020-04-07 (lag 22d), 0.97=04-13. Bug 修正: 初版 cum_sum 誤乘 weights → H clamp 全 0.05, 修正後合理. Codex review 卡 stdin pipe hung 34min, fallback 自評 + followup K1423_codex_review_retry. Caveats: Lo R/S 無 Newey-West LRV; EWMA-R/S 待文獻交叉驗證 arXiv:2509.05820; pilot 無 forecasting/lookahead, K1424 forecasting 必加 shift(1).",
+    "evidence": [
+      "experiments/K1423_ewma_hurst_pilot/K1423_ewma_hurst_pilot.py",
+      "experiments/K1423_ewma_hurst_pilot/K1423_ewma_hurst_pilot_results.json",
+      "experiments/K1423_ewma_hurst_pilot/README.md"
+    ],
+    "confidence": 0.72,
+    "tags": [
+      "hurst",
+      "rough-volatility",
+      "ewma",
+      "regime-detection",
+      "SPY",
+      "VIX",
+      "pilot",
+      "research-program-backlog",
+      "long-memory"
+    ],
+    "limitations": [
+      "Lo R/S 簡化版 (無 Newey-West LRV)",
+      "EWMA-R/S 數學依據待文獻交叉驗證",
+      "Codex review 未完成 (stdin pipe bug)，followup K1423_codex_review_retry"
+    ],
+    "follow_up_ks": [
+      "K1424 (H(t)→GARCH covariate forecast vol，必加 shift(1))",
+      "K1423_article_general (Codex PASS 後)"
+    ],
+    "created_at": "2026-06-08T03:20:00+00:00"
   }
 ]

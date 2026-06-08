@@ -24850,7 +24850,7 @@
     "title": "研究 backlog fallback: Time-Varying Hurst via EWMA",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Time-Varying Hurst via EWMA — arXiv:2509.05820 | 來源 section: rough volatility & hurst. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "time_varying_hurst_via_ewma",
@@ -24862,7 +24862,9 @@
     "claimed_by": "hourly-10",
     "claimed_at": "2026-06-08T02:37:06.086858+00:00",
     "claim_session_id": "678946162776",
-    "started_at": "2026-06-08T02:37:18.615336+00:00"
+    "started_at": "2026-06-08T02:37:18.615336+00:00",
+    "completed_at": "2026-06-08T03:17:50.057630+00:00",
+    "result": "Materialized as K1423_ewma_hurst_pilot. Pilot ran SPY daily 2010-2026 R/S Hurst (rolling + EWMA λ=0.94/0.97/0.99). Findings: Rolling H≈0.50, ρ(H,VIX)=+0.32 (p<1e-80) significant; EWMA λ=0.94 leads rolling on COVID regime by ~3w but χ² regime nonsig. Knowledge entry CONDITIONAL_PASS (Lo R/S simplified, no Newey-West LRV). Codex review hung on stdin pipe bug → followup task K1423_codex_review_retry. Followup K1424 (H→GARCH covariate forecast) queued."
   },
   {
     "id": "email-11728-21e21e",
@@ -24938,5 +24940,38 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T02:34:03+00:00"
+  },
+  {
+    "id": "K1423_codex_review_retry",
+    "title": "K1423 Codex code review retry (stdin pipe pattern)",
+    "description": "K1423 EWMA Hurst pilot 已完成 + CONDITIONAL_PASS knowledge entry 已寫。原 Codex review 派出但卡 stdin pipe bug (heredoc + cat 重定向 ~34min hung)，最終 SIGTERM kill。retry pattern: `cat /tmp/k1423_codex_brief.txt | codex exec --skip-git-repo-check -` 或 inline -m。檢核重點同原 brief（lookahead / Lo R/S 公式 / EWMA double-count / chi2 smoothing / 數值穩定性）。Verdict 後若 PASS 則升 knowledge.json verdict CONDITIONAL_PASS→PASS + 排 K1423_article_general；若 FAIL 則檢討實作並降級 verdict。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "k1423_followup",
+    "tags": [
+      "k1423-followup",
+      "codex-review",
+      "stdin-pipe-fix"
+    ],
+    "created_at": "2026-06-08T03:20:00+00:00"
+  },
+  {
+    "id": "K1424_hurst_garch_covariate",
+    "title": "K1424: H(t) as GARCH covariate forecast vol (forecasting; must shift(1))",
+    "description": "K1423 pilot 顯示 rolling H 與 VIX ρ=0.32 顯著正相關。K1424 升級到 forecasting：把 H(t-1) (shift(1) 必加) 作為 GARCH(1,1) 或 HAR-RV 的 covariate，OOS DM test vs baseline。確認 H 是否為真實 incremental predictor 或只是 VIX 的 noisy proxy。Sample: SPY 2010-2026, IS:2010-2019, OOS:2020-2026。Must: lookahead audit, Codex review, 多 seed bootstrap CI for incremental QLIKE。",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "k1423_followup",
+    "tags": [
+      "k1423-followup",
+      "hurst",
+      "garch",
+      "har-rv",
+      "forecasting",
+      "shift1-required"
+    ],
+    "created_at": "2026-06-08T03:20:00+00:00"
   }
 ]

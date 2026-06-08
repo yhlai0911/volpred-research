@@ -9920,5 +9920,12 @@
     "task_type": "daily_article",
     "status": "succeeded",
     "notes": "mile_b87cc779 published: HAR-Quantile commodity rerun (PASS) 修 K1421 NULL retract methodology gap; 3 fair baselines + corrected centered-null bootstrap. audience=research, draft, 10383 chars. Live + figures 200."
+  },
+  {
+    "timestamp": "2026-06-08T11:20:00+08:00",
+    "task_id": "research_time_varying_hurst_via_ewma",
+    "task_type": "experiment",
+    "status": "succeeded",
+    "notes": "K1423 EWMA Hurst pilot 完成 — SPY daily 2010-2026, rolling+EWMA Lo R/S; ρ(rolling H, VIX)=+0.32 sig; EWMA λ=0.94 leads COVID regime by ~3w; χ² nonsig (太 noisy)。Bug: 初版 cum_sum 誤乘 weights 致 H clamp 全 0.05，修正後合理。Codex review 卡 stdin pipe (~34min hung)，knowledge CONDITIONAL_PASS + followup K1423_codex_review_retry / K1424 queued."
   }
 ]
