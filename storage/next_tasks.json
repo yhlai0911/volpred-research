@@ -21701,13 +21701,16 @@
     "task_type": "platform_ops",
     "priority": 3,
     "source": "decision_2026_06_05",
-    "status": "blocked",
-    "blocked_reason": "awaiting_external_data",
-    "blocked_at": "2026-06-05T11:18:00+08:00",
-    "blocked_note": "Soft block: depends on Paper1_v10_citation_cleanup + Paper1_shorten_for_jbf 完成。當 dispatcher 看到那兩個 succeeded 後再 unblock。",
+    "status": "succeeded",
     "title": "P1 (leverage-direction) JBF submission portal prep",
     "description": "After v10 citation cleanup + 篇幅縮減 done: (a) cover_letter.tex Editor-in-Chief 名稱對齊 JBF 最新人選 (b) highlights.txt 5 條校稿 (c) graphical_abstract.svg → portal-spec PNG/PDF export (d) cover letter 內 acknowledge C3 K899 unified VaR 「reserved for revision round」 (e) submission package 最終 README 標 ready_for_upload. Decision: paper/leverage-direction/decision_2026_06_05.md.",
-    "created_at": "2026-06-05T11:18:00+08:00"
+    "created_at": "2026-06-05T11:18:00+08:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-08T15:11:35.732854+00:00",
+    "claim_session_id": "5e44b2a389b1",
+    "started_at": "2026-06-08T15:11:36.096451+00:00",
+    "completed_at": "2026-06-08T15:17:22.516990+00:00",
+    "result": "JBF submission portal prep complete: (a) cover_letter.tex addressed to Managing Editor Christa H.S. Bouwman (Texas A&M Mays, current since Feb 2025), recompiled to 2pp PDF; (b) highlights.txt 5 bullets verified (no edits needed); (c) graphical_abstract.svg → PNG 1600px@300dpi (312KB) + PDF (35KB) via cairosvg; (d) cover letter adds C3 K899 unified VaR R&R-round acknowledgement paragraph; (e) submission_package.md rewritten as portal-upload checklist with status=READY_FOR_UPLOAD. Next: user/admin bundles 7 portal files and uploads to JBF Editorial Manager when convenient."
   },
   {
     "id": "Paper2_v2_fix_H1_H2_blocking",
@@ -25357,7 +25360,7 @@
     "title": "leverage-direction ready_for_submission → 投稿包製備",
     "description": "leverage-direction v10 = ready_for_submission（per v10 README.md Stage Assessment）。製備投稿包: (1) cover letter draft (target journal e.g. JFE/RFS, 推薦 reviewers 3-5) (2) page count check (JFE/RFS limit) + 若超頁 propose trim sections (3) journal-specific formatting (line spacing, figure resolution, bibliography style) (4) submission checklist (anonymization, data availability statement, code availability via reproduce.py, conflict-of-interest) (5) submission zip in storage/paper_submission_pkgs/leverage-direction-v10/。Output: 該 dir + paper/leverage-direction/submission_plan_v10.md。",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "paper_body",
     "source": "paper_portfolio_audit_2026-06-08",
     "tags": [
@@ -25366,7 +25369,11 @@
       "submission-package"
     ],
     "paper_id": "leverage-direction",
-    "created_at": "2026-06-08T10:13:11+00:00"
+    "created_at": "2026-06-08T10:13:11+00:00",
+    "last_released_at": "2026-06-08T15:11:21.659914+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-08T15:11:29+00:00",
+    "blocked_note": "Duplicate of canonical Paper1_jbf_submission_prep (per paper/leverage-direction/decision_2026_06_05.md); same scope. Use Paper1_jbf_submission_prep instead."
   },
   {
     "id": "research_partial_cointegration_hedging_oos",
@@ -25415,7 +25422,7 @@
     "title": "Paper review (Codex 24h-rule): 31 家公司、6 個指標、5 個假設：為什麼「看得到的特徵」無法預測財報當天的波動反應",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_85502a95 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_85502a95",
@@ -25424,7 +25431,11 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-08T14:08:39+00:00"
+    "created_at": "2026-06-08T14:08:39+00:00",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-06-08T15:09:13+00:00",
+    "blocked_note": "Article published 2026-06-08T14:00Z; 24h-rule requires 2026-06-09T14:00Z review trigger time",
+    "blocked_until": "2026-06-09"
   },
   {
     "id": "research_financial_innovation_2025_review",
@@ -25461,7 +25472,7 @@
     "title": "K1090b: nested LOOCV + expanded asset pool for cross-asset A4f meta-regression",
     "description": "Follow-up to K1090 / mile_f8af30d0 Codex CONDITIONAL_PASS findings (storage/reviews/codex_24h/mile_f8af30d0_review.md). 修兩個 leakage 來源：(1) nested LOOCV — 每 fold 內各自做 LASSO 特徵選擇 + StandardScaler + fillna，不在 fold 切分前用全樣本 fit；(2) 擴大資產池 ≥20 個（加 EWG/SLV/HG/AAPL/NVDA/USO/EUR=X 等已可取得 daily data 標的）+ bootstrap CI 重估。看 LOOCV R² 是否仍在 0.26 同量級或顯著下降。Codex review 已記 knowledge.json (paper_review_mile_f8af30d0_codex_2026_06_08)。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_followup_codex_review",
     "tags": [
@@ -25474,6 +25485,12 @@
     ],
     "parent_task_id": "paper_review_mile_f8af30d0",
     "parent_article": "mile_f8af30d0",
-    "created_at": "2026-06-08T14:15:49.343934+00:00"
+    "created_at": "2026-06-08T14:15:49.343934+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T14:36:40.569663+00:00",
+    "claim_session_id": "4c8edd786c5a",
+    "started_at": "2026-06-08T14:36:40.656537+00:00",
+    "completed_at": "2026-06-08T14:58:42.442955+00:00",
+    "result": "K1090b complete: built experiments/k1090b with nested LOOCV and N=20 asset pool. Honest metrics: ridge LOOCV R2=0.151 / RMSE=2.00; compact OLS LOOCV R2=-0.146 / RMSE=2.32 vs K1090 0.257 / 1.94. Added 4 new labels (IEF/ETH-USD/AAPL/NVDA), all Harvey FAIL."
   }
 ]
