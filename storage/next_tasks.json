@@ -25173,7 +25173,7 @@
     "title": "研究 backlog fallback: Autoencoder Enhanced Realised GARCH",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Autoencoder Enhanced Realised GARCH — arXiv:2411.17136。以 autoencoder 生成合成 realised measure，非線性整合多個 realised measures；4 大股市 one-step rolling 預測勝傳統 Realised GARCH。面向A 可測：對齊我方 multi-RM / A4f 線，可比 K-series HAR-RV baseline。 | 來源 section: 新發現（2026-05-29 arxiv 文獻搜尋；scan_arxiv_topics.py 能力建立）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "autoencoder_enhanced_realised_garch",
@@ -25181,7 +25181,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-08T07:09:31+00:00"
+    "created_at": "2026-06-08T07:09:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-08T21:20:30.124612+00:00",
+    "claim_session_id": "2740979e9809",
+    "started_at": "2026-06-08T21:20:38.755626+00:00",
+    "completed_at": "2026-06-08T21:31:53.775250+00:00",
+    "result": "K1430 完成：以 SPY 99 天 5-min 資料做 AE synthetic realised measure PoC。結果 PARTIAL_NULL：BPV OOS QLIKE 最佳，AE 不勝 RV/PCA，DM 皆不顯著；已產出 experiments/k1430 三件套。"
   },
   {
     "id": "platform_ops_worktree_audit_20260608_1507",
@@ -25448,7 +25454,7 @@
     "title": "研究 backlog fallback: Financial Innovation 2025 review",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Financial Innovation 2025 review — realized volatility forecasting 綜述 | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "financial_innovation_2025_review",
@@ -25460,7 +25466,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-08T20:16:00.208386+00:00",
     "claim_session_id": "509b0d216293",
-    "started_at": "2026-06-08T20:16:10.027738+00:00"
+    "started_at": "2026-06-08T20:16:10.027738+00:00",
+    "completed_at": "2026-06-08T20:19:44.385966+00:00",
+    "result": "K1428 literature-review experiment completed. Added canonical three-piece artifact (README/py/results.json) on realized-volatility forecasting reviews with 6 primary sources and 4 prioritized follow-ups for VolPred."
   },
   {
     "id": "research_rgarch_carr_sk_realized_garch_carr_2025",
@@ -25674,5 +25682,26 @@
     "started_at": "2026-06-08T20:08:24.223494+00:00",
     "completed_at": "2026-06-08T20:12:30.033205+00:00",
     "result": "Codex 24h re-review CONDITIONAL_PASS → closure: caveats 1/2/4 addressed in article (drop p-value+episode-clustered note / drop Q5 numbers / US sector ETF scope); caveat 3 (JSON definitions) closed via k1427.py rerun (taxonomy_dimensions + broad_selloff_high_disp_regime now in results.json). Review: storage/reviews/codex_24h/mile_c07025d2_review.md. Knowledge id=283594c0."
+  },
+  {
+    "id": "trending_repost_2026_06_09_ai_eav",
+    "title": "[trending_repost] 輝達財報週的 EAV 效應：解構盈餘公告前後的波動率特徵",
+    "description": "從跨市場 Earnings Announcement Volatility 規律切入，探討 AI 龍頭股在公告日前後的波動率攀升與選後壓抑。可量化：分析公告前後 realized vol 相較於基準日期的溢價，並進行統計檢定。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "succeeded",
+    "created_at": "2026-06-08T21:10:16+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-06-08T21:11:20.335890+00:00",
+    "claim_session_id": "2065e8296b29",
+    "started_at": "2026-06-08T21:11:33.850493+00:00",
+    "completed_at": "2026-06-08T21:32:57.032448+00:00",
+    "result": "Article mile_072c3972 published (NVDA EAV, K1429 CONDITIONAL_PASS). Codex review primary path PASS w/ caveats. Knowledge 72f62789 written. FB dual-publish deferred to interactive session."
   }
 ]

@@ -1,0 +1,224 @@
+{
+  "experiment_id": "k1428",
+  "title": "Financial Innovation 2025 review — realized volatility forecasting 綜述",
+  "experiment_type": "literature_review",
+  "run_date": "2026-06-09",
+  "seed": null,
+  "scope": {
+    "question": "2025 時點的 realized volatility forecasting 文獻主線，對 VolPred 下一步最值得測什麼？",
+    "search_window": "core review papers through 2025 plus recent benchmark empirical papers",
+    "inclusion_rule": [
+      "primary sources only",
+      "must explicitly discuss realized volatility forecasting or directly benchmark RV forecasting models",
+      "prefer open-access or publisher-hosted abstracts/full text"
+    ],
+    "exclusion_rule": [
+      "pure latent-volatility papers with no RV forecasting angle",
+      "secondary summaries and blog posts",
+      "non-verifiable citation aggregators as evidence source"
+    ]
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Advances in forecasting realized volatility: a review of methodologies",
+      "year": 2025,
+      "venue": "Financial Innovation",
+      "doi_or_url": "https://doi.org/10.1186/s40854-025-00809-5",
+      "type": "review",
+      "key_points": [
+        "surveys publicly available studies from 2000 to H1 2024",
+        "covers 32 linear, ML, and DL model families",
+        "explicitly excludes latent-volatility models such as standard GARCH when RV is not the modeled target",
+        "highlights model-class fragmentation and future-research gaps"
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Prediction of realized volatility and implied volatility indices using AI and machine learning: A review",
+      "year": 2024,
+      "venue": "International Review of Financial Analysis",
+      "doi_or_url": "https://doi.org/10.1016/j.irfa.2024.103221",
+      "type": "review",
+      "key_points": [
+        "systematic review of AI/ML forecasting papers for realized and implied volatility",
+        "asks whether AI materially beats traditional econometric benchmarks",
+        "flags limited explainable-AI usage and uneven benchmarking discipline"
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "Forecasting realized volatility: A review",
+      "year": 2018,
+      "venue": "Journal of the Korean Statistical Society",
+      "doi_or_url": "https://doi.org/10.1016/j.jkss.2018.08.002",
+      "type": "review",
+      "key_points": [
+        "canonical older review of HAR-class, MIDAS, realized GARCH, HEAVY, jumps, breaks, and forecast evaluation",
+        "useful baseline for what 2025 reviews add versus what was already known"
+      ]
+    },
+    {
+      "id": "S4",
+      "title": "Forecasting realized volatility: Does anything beat linear models?",
+      "year": 2024,
+      "venue": "Journal of Empirical Finance",
+      "doi_or_url": "https://doi.org/10.1016/j.jempfin.2024.101524",
+      "type": "empirical_benchmark",
+      "key_points": [
+        "ten global stock indices, 2000-2021",
+        "additional predictors help daily and weekly OOS forecasts",
+        "no general statistical evidence that nonlinear ML dominates linear models",
+        "monthly economic-value results favor simpler models"
+      ]
+    },
+    {
+      "id": "S5",
+      "title": "Combining realized volatility estimators based on economic performance",
+      "year": 2025,
+      "venue": "Journal of Asset Management",
+      "doi_or_url": "https://doi.org/10.1057/s41260-025-00415-1",
+      "type": "empirical_benchmark",
+      "key_points": [
+        "economic-performance-weighted forecast combinations outperform statistical combinations",
+        "advantage is strongest in crisis and high-volatility periods",
+        "pushes the literature beyond pure MSE / QLIKE ranking toward application-aware evaluation"
+      ]
+    },
+    {
+      "id": "S6",
+      "title": "Dynamics in Realized Volatility Forecasting: Evaluating GARCH Models and Deep Learning Algorithms Across Parameter Variations",
+      "year": 2025,
+      "venue": "Computational Economics",
+      "doi_or_url": "https://doi.org/10.1007/s10614-024-10694-2",
+      "type": "empirical_benchmark",
+      "key_points": [
+        "forecast ranking changes with realized-measure choice and training-size setup",
+        "5-minute RV worked best for GARCH-type models in that study",
+        "MedRV worked best for deep-learning models in that study"
+      ]
+    }
+  ],
+  "project_lineage": [
+    {
+      "k_id": "K1301",
+      "relevance": "HAR-type decomposition on TAIFEX produced a null result, reminding us not to overclaim RV feature tweaks without formal significance."
+    },
+    {
+      "k_id": "K1421/K1422",
+      "relevance": "Recent HAR-Quantile work exposed fairness and bootstrap pitfalls; any K1428 follow-up must lock target/loss fairness before claiming improvements."
+    },
+    {
+      "k_id": "Research backlog high-frequency models",
+      "relevance": "research_program already marks HAR-RV / Realized GARCH / Realized GJR as blocked mainly by 5-minute data depth; K1428 should sharpen which one to test first once data accumulates."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "claim": "2025 literature does not justify a blanket 'DL beats HAR / linear RV models' conclusion.",
+      "strength": "moderate",
+      "evidence": [
+        "S2",
+        "S4",
+        "S6"
+      ],
+      "detail": "Recent reviews and benchmark studies converge on a narrower claim: nonlinear or deep models can win in some datasets or horizons, but general statistical dominance over strong linear RV baselines is not established."
+    },
+    {
+      "id": "F2",
+      "claim": "Benchmark discipline remains the central bottleneck, not model novelty.",
+      "strength": "high",
+      "evidence": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
+      "detail": "The persistent comparison problems are target mismatch, inconsistent loss functions, weak statistical testing, and selective benchmark choice. This matches VolPred's recent K1421/K1422 lessons."
+    },
+    {
+      "id": "F3",
+      "claim": "Economic-value evaluation is a live edge where the literature is thinner and more actionable than another generic accuracy horse race.",
+      "strength": "moderate",
+      "evidence": [
+        "S4",
+        "S5"
+      ],
+      "detail": "Statistical gains do not automatically translate to portfolio or risk-management value. Combination methods tuned to economic objectives look more promising than chasing small average-loss improvements."
+    },
+    {
+      "id": "F4",
+      "claim": "The realized-measure choice is model-interacting, not a harmless preprocessing detail.",
+      "strength": "moderate",
+      "evidence": [
+        "S3",
+        "S6"
+      ],
+      "detail": "Recent evidence suggests model rankings can shift when using 5-minute RV versus robust alternatives like MedRV. Follow-up experiments should treat measurement choice as a first-order design dimension."
+    },
+    {
+      "id": "F5",
+      "claim": "For VolPred's current data and tooling constraints, the first post-review experiment should favor disciplined linear/high-frequency baselines over transformer-first exploration.",
+      "strength": "moderate",
+      "evidence": [
+        "S1",
+        "S4",
+        "S6"
+      ],
+      "detail": "Because local 5-minute history is still shallow, the best near-term research path is a fair HAR-RV / Realized-GARCH / HEAVY baseline study, not a data-hungry deep architecture race."
+    }
+  ],
+  "methodology_risks": [
+    {
+      "risk": "model-target mismatch",
+      "why_it_matters": "HAR-RV / Realized GARCH forecast RV-type targets; comparing them to close-to-close GARCH on mismatched targets creates mechanical wins.",
+      "mitigation": "force same target family or use proxy-robust comparison rules documented in experiment-preamble.md"
+    },
+    {
+      "risk": "loss-function cherry-picking",
+      "why_it_matters": "MSE, RMSE, QLIKE, VaR, and economic utility often rank models differently.",
+      "mitigation": "pre-register primary loss and secondary risk/economic criteria"
+    },
+    {
+      "risk": "statistical-significance underreporting",
+      "why_it_matters": "many benchmark papers report average-loss gains without equally strong multiple-testing control.",
+      "mitigation": "DM/Harvey or bootstrap procedures must be part of follow-up design"
+    },
+    {
+      "risk": "data-depth mismatch for deep models",
+      "why_it_matters": "deep architectures can look competitive only in longer/high-frequency panels; shallow local data will bias against a fair read.",
+      "mitigation": "do not start with transformer-heavy tests until 5-minute history is adequate"
+    }
+  ],
+  "recommended_followups": [
+    {
+      "priority": 1,
+      "slug": "har_rv_vs_realized_garch_vs_heavy_on_shared_rv_target",
+      "why": "best match to current backlog and strongest literature-supported baseline question",
+      "design": "same asset set, same 5-minute realized-measure target family, QLIKE + DM/Harvey + VaR/ES where feasible"
+    },
+    {
+      "priority": 2,
+      "slug": "realized_measure_ablation_5min_rv_vs_medrv_vs_range_based_proxy",
+      "why": "S6 implies measurement choice may flip rankings",
+      "design": "hold model class fixed, vary realized-measure construction only"
+    },
+    {
+      "priority": 3,
+      "slug": "economic_value_of_rv_forecast_combinations",
+      "why": "S5 suggests higher payoff than another pure-accuracy bake-off",
+      "design": "compare statistical combinations versus utility / risk-management weighted combinations"
+    },
+    {
+      "priority": 4,
+      "slug": "ml_or_transformer_extension_after_baseline_lock",
+      "why": "only after baseline fairness and data sufficiency are secured",
+      "design": "HAR-RV or Realized-GARCH as locked baseline, then test one restrained ML extension rather than a model zoo"
+    }
+  ],
+  "verdict": {
+    "label": "ACTIONABLE_REVIEW",
+    "summary": "K1428 does not find a clean literature mandate to jump straight into deep models. The stronger 2025 conclusion is to harden benchmark fairness, target alignment, and economic-value evaluation, then test high-frequency linear RV baselines first."
+  }
+}

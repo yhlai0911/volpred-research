@@ -1,0 +1,111 @@
+{
+  "experiment_id": "K1429",
+  "title": "EAV Effect: Realized Volatility Around Earnings Announcements (NVDA, AAPL, MSFT)",
+  "description": "Event-window study of 5-day rolling annualised RV patterns around earnings for NVDA, AAPL, MSFT (2024-2026). Paired t-tests vs baseline RV.",
+  "metadata": {
+    "tickers": [
+      "NVDA",
+      "AAPL",
+      "MSFT"
+    ],
+    "analysis_start": "2024-01-01",
+    "analysis_end": "2026-06-08",
+    "rv_window_days": 5,
+    "pre_window": "T-5 to T-1",
+    "post_window": "T+1 to T+5",
+    "baseline_excl_window": "±10 days around earnings",
+    "test_method": "scipy.stats.ttest_rel (paired t-test vs baseline mean)",
+    "significance_threshold": 0.05,
+    "data_source": "yfinance daily adjusted close",
+    "seed": 42,
+    "nvda_earnings_dates": [
+      "2024-02-21",
+      "2024-05-22",
+      "2024-08-28",
+      "2024-11-20",
+      "2025-02-26",
+      "2025-05-28",
+      "2025-08-27",
+      "2025-11-19",
+      "2026-05-28"
+    ],
+    "aapl_earnings_dates": [
+      "2024-02-01",
+      "2024-05-02",
+      "2024-08-01",
+      "2024-10-31",
+      "2025-01-30",
+      "2025-05-01",
+      "2025-07-31",
+      "2025-10-30",
+      "2026-01-30"
+    ],
+    "msft_earnings_dates": [
+      "2024-01-30",
+      "2024-04-25",
+      "2024-07-30",
+      "2024-10-30",
+      "2025-01-29",
+      "2025-04-30",
+      "2025-07-29",
+      "2025-10-29",
+      "2026-01-29"
+    ]
+  },
+  "results_by_ticker": {
+    "NVDA": {
+      "baseline_mean_rv": 0.4235,
+      "pre_mean_rv": 0.3401,
+      "post_mean_rv": 0.6047,
+      "pre_mean_diff": -0.0834,
+      "post_mean_diff": 0.1812,
+      "pre_premium_pct": -19.69,
+      "post_premium_pct": 42.8,
+      "t_pre": -2.56,
+      "p_pre": 0.0336,
+      "t_post": 1.803,
+      "p_post": 0.109,
+      "n_events": 9,
+      "significant_pre": true,
+      "significant_post": false
+    },
+    "AAPL": {
+      "baseline_mean_rv": 0.2167,
+      "pre_mean_rv": 0.1996,
+      "post_mean_rv": 0.2744,
+      "pre_mean_diff": -0.0171,
+      "post_mean_diff": 0.0577,
+      "pre_premium_pct": -7.91,
+      "post_premium_pct": 26.61,
+      "t_pre": -0.733,
+      "p_pre": 0.4842,
+      "t_post": 1.565,
+      "p_post": 0.1563,
+      "n_events": 9,
+      "significant_pre": false,
+      "significant_post": false
+    },
+    "MSFT": {
+      "baseline_mean_rv": 0.1919,
+      "pre_mean_rv": 0.2084,
+      "post_mean_rv": 0.3889,
+      "pre_mean_diff": 0.0165,
+      "post_mean_diff": 0.197,
+      "pre_premium_pct": 8.6,
+      "post_premium_pct": 102.64,
+      "t_pre": 0.488,
+      "p_pre": 0.6385,
+      "t_post": 3.851,
+      "p_post": 0.0049,
+      "n_events": 9,
+      "significant_pre": false,
+      "significant_post": true
+    }
+  },
+  "figures": [
+    "fig_rv_event_study.png",
+    "fig_premium_compare.png"
+  ],
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_rationale": "2/6 tests significant. NVDA pre: p=0.0336, post: p=0.1090."
+}

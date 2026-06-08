@@ -1,0 +1,134 @@
+{
+  "experiment_id": "k1430",
+  "title": "Autoencoder Enhanced Realised GARCH PoC",
+  "date_run": "2026-06-09T05:31:46.270633+08:00",
+  "seed": 42,
+  "sample": {
+    "asset": "SPY",
+    "intraday_source": "data/intraday/SPY_5min_*.csv",
+    "n_intraday_days_raw": 99,
+    "n_aligned_days": 98,
+    "date_start": "2026-01-15",
+    "date_end": "2026-06-05",
+    "train_n": 69,
+    "test_n": 29,
+    "train_end": "2026-04-24",
+    "test_start": "2026-04-27"
+  },
+  "methodology": {
+    "lookahead_control": "All forecasts use realised measure at t to predict RV_5min at t+1.",
+    "autoencoder_architecture": [
+      3,
+      1,
+      3
+    ],
+    "autoencoder_reconstruction_mse_train": 0.2109917958595488,
+    "forecast_model": "OLS: log(RV_{t+1}) ~ signal_t",
+    "note": "PoC validates the synthetic-measure claim upstream of full Realised GARCH, not a full HHS2012 replication."
+  },
+  "same_day_alignment_test_window": {
+    "AE_1D": {
+      "corr": 0.8900630141561602,
+      "mse": 7.117310711911464e-11
+    },
+    "PCA_1D": {
+      "corr": 0.9248636673943407,
+      "mse": 4.0271566228720215e-11
+    },
+    "BPV": {
+      "corr": 0.9798422992580861,
+      "mse": 1.4668628227427715e-11
+    },
+    "GarmanKlass": {
+      "corr": 0.6808732699508112,
+      "mse": 3.095367170108462e-10
+    },
+    "Parkinson": {
+      "corr": 0.5924332343251468,
+      "mse": 8.012797997277805e-10
+    }
+  },
+  "oos_forecast_ranking": [
+    {
+      "model": "BPV",
+      "qlike": 0.1763137665167436,
+      "mse": 2.657702173668436e-10,
+      "corr": 0.34878892568014586,
+      "coef": 0.414069431672825
+    },
+    {
+      "model": "RV_5min",
+      "qlike": 0.18343546442607897,
+      "mse": 2.7851586331125197e-10,
+      "corr": 0.3672751193903148,
+      "coef": 0.3766044219386458
+    },
+    {
+      "model": "PCA_1D",
+      "qlike": 0.18584850600736755,
+      "mse": 2.889259187834786e-10,
+      "corr": 0.3565664262214886,
+      "coef": 0.3513169959628666
+    },
+    {
+      "model": "AE_1D",
+      "qlike": 0.18928482295910234,
+      "mse": 2.961129448263854e-10,
+      "corr": 0.3507612761837667,
+      "coef": 0.3522391194435389
+    },
+    {
+      "model": "GarmanKlass",
+      "qlike": 0.2237294097727988,
+      "mse": 3.7781730666899925e-10,
+      "corr": 0.2115171901684652,
+      "coef": 0.19794585554660243
+    },
+    {
+      "model": "Parkinson",
+      "qlike": 0.22583792443723755,
+      "mse": 3.7702897218861676e-10,
+      "corr": 0.24987402648170093,
+      "coef": 0.1710616542367863
+    },
+    {
+      "model": "OC2",
+      "qlike": 0.28506857846652084,
+      "mse": 5.354769928674588e-10,
+      "corr": -0.1112279709860641,
+      "coef": -0.006075772873574237
+    }
+  ],
+  "dm_tests": {
+    "AE_1D_vs_RV_5min": {
+      "t_stat": 0.7167162395787032,
+      "p_value": 0.4794853461118347
+    },
+    "AE_1D_vs_BPV": {
+      "t_stat": 0.8403291306524241,
+      "p_value": 0.40784258754093305
+    },
+    "BPV_vs_RV_5min": {
+      "t_stat": -0.8237081567738744,
+      "p_value": 0.41706664521646974
+    }
+  },
+  "verdict": "PARTIAL_NULL",
+  "key_takeaway": "AE 1D is feasible but does not beat BPV, raw RV, or PCA on this short SPY sample; all DM tests remain non-significant.",
+  "literature": [
+    "Hansen, Huang & Shek (2012) — Realized GARCH: a joint model for returns and realized measures of volatility.",
+    "Autoencoder Enhanced Realised GARCH on Volatility Forecasting (arXiv:2411.17136).",
+    "Bollerslev, Patton & Quaedvlieg (2016) — exploiting realized-volatility measurement errors.",
+    "Skintzi & Fameliti (2025) — combining realized volatility estimators based on economic performance."
+  ],
+  "limitations": [
+    "Only 99 local SPY 5-min days are available; after close-to-close alignment the usable sample is 98 days.",
+    "No formal full-sample Realised GARCH estimation battle is attempted here because the sample is too short for a credible superiority claim.",
+    "Results are SPY-only and may not generalize to 0050.TW, futures, or longer regimes."
+  ],
+  "next_steps": [
+    "Once 252+ aligned 5-min days are available, rerun the same synthetic measure inside full Realized GARCH/HAR-RV horse races.",
+    "Test whether AE wins only after excluding raw RV from the input feature set.",
+    "Add multi-asset replication on SPY plus 0050.TW using the same train/test protocol."
+  ]
+}

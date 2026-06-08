@@ -10012,5 +10012,14 @@
     "task_id": "paper_review_mile_c07025d2",
     "summary": "K1427 24h Codex re-review CONDITIONAL_PASS → closure; rerun synced k1427_results.json to 2-D taxonomy",
     "owner": "hourly-04"
+  },
+  {
+    "timestamp": "2026-06-09T05:35+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_06_09_ai_eav",
+    "task_title": "K1429 NVDA earnings EAV trending — feed published (mile_072c3972), FB awaiting",
+    "claimed_by": "hourly-05",
+    "result": "succeeded",
+    "summary": "K1429 NVDA / AAPL / MSFT earnings-window 5d RV analysis (n=9 events each). Findings: NVDA pre-RV -19.7% (single-test p=0.034, fails Bonferroni); MSFT post +102.6% (p=0.0049, borderline survives Bonferroni). Codex CLI primary-path CONDITIONAL_PASS w/ 5 caveats (paired ttest_rel vs constant baseline ≈ 1-sample, small n). Article mile_072c3972 published to feed (after p=N sanitizer fix update — caught misleading 'p=0.64 → 達顯著水準' bug). Knowledge 72f62789 written with experiment_id + reviewer provenance. FB dual-publish marked awaiting_interactive_session (Ivan Lai voice via Claude in Chrome). supabase sync ran clean. anti_ai_gate PASS."
   }
 ]

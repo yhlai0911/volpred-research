@@ -32843,5 +32843,37 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-09T04:12:23.233264"
+  },
+  {
+    "item_id": "72f62789",
+    "category": "event_study_earnings",
+    "content": "K1429: NVDA earnings announcement RV — pre-event compression, post-event extension (CONDITIONAL_PASS).\n\nEvent-window study of 5-day rolling annualised RV around NVDA / AAPL / MSFT earnings 2024-01-01 to 2026-06-08. n_events=9 per ticker. Paired t-test vs ex-event baseline (±10 day exclusion).\n\nNVDA: pre-earnings RV 0.3401 vs baseline 0.4235, premium -19.7% (t=-2.56, single-test p=0.034). Post-earnings RV 0.6047, +42.8% (t=1.80, p=0.109).\nAAPL: pre -7.9% (p=0.484), post +26.6% (p=0.156) — all NS.\nMSFT: pre +8.6% (p=0.639) NS; post +102.6% (t=3.85, p=0.0049) significant.\n\nBonferroni at 6 tests (0.05/6=0.0083): NVDA pre p=0.034 does NOT survive multiple-testing correction; MSFT post p=0.0049 borderline survives. Conservative reading: strong evidence for MSFT post-extension, trend-only evidence for NVDA pre-compression. Event-day alignment uses earnings date as T=0 directly (not T+1 for after-close announcements) — direction robust but magnitudes may shift.\n\nArticle: mile_072c3972 (trending_repost, published). FB dual-publish deferred to interactive session (awaiting_interactive_session). Codex CONDITIONAL_PASS caveats: ttest_rel vs constant baseline ≈ one-sample t-test (should consider Welch / permutation / block bootstrap); small n_events=9.",
+    "evidence": [
+      "experiments/k1429/k1429_results.json",
+      "experiments/k1429/k1429.py",
+      "mile_072c3972"
+    ],
+    "confidence": 0.65,
+    "created_at": "2026-06-09T05:32:49.872119",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1429",
+    "experiment_path": "experiments/k1429/",
+    "reviewer": "Codex CLI",
+    "reviewer_source": "Codex review primary path (codex 0.135 / gpt-5.4 medium)",
+    "codex_review": "CONDITIONAL_PASS: lookahead clean; seed fixed; hardcoded earnings dates; ttest_rel vs constant baseline = one-sample t-test (consider Welch / permutation); Bonferroni α/6=0.0083 → only MSFT post survives; n_events=9 small power",
+    "related_articles": [
+      "mile_072c3972"
+    ],
+    "tags": [
+      "event_study",
+      "earnings",
+      "NVDA",
+      "AAPL",
+      "MSFT",
+      "EAV",
+      "realized_volatility",
+      "K1429",
+      "trending_repost"
+    ]
   }
 ]
