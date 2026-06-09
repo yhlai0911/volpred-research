@@ -1,41 +1,37 @@
 {
-  "timestamp": "2026-06-08T18:08:17Z",
+  "timestamp": "2026-06-09T00:11:04.901597+00:00",
   "all_ok": true,
   "checks": [
     {
-      "name": "ARTICLE POOL",
+      "name": "article_pool",
       "status": "ok",
-      "detail": "145 drafts total (research: 46, general: 99). All thresholds met (total≥12, research≥4, general≥8)."
+      "detail": "145 drafts total (research=46, general=99)"
     },
     {
-      "name": "STRATEGY METRICS FRESHNESS",
+      "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~0h. Well within 26h threshold."
+      "detail": "strategy_metrics.json age: 0.0h (mtime: 1780963781)"
     },
     {
-      "name": "ERROR LOG",
+      "name": "error_log_recent",
       "status": "ok",
-      "detail": "2 entries dated 2026-06-08 found: (1) 01:47 — refill判斷不完整，hourly 8th belt root-fix (narrative-arc dedup); (2) 11:1x — pre-publish image-URL gate deployed (prepublish_audit.py), 52 broken images patched (9bc7e2af)."
+      "detail": "Error log entries from 2026-06-08 (yesterday): pre-publish image-URL gate incident root cause fixed; article pool refill retrospective correction recorded"
     },
     {
-      "name": "PAPER TRADING GAPS",
+      "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "Checked 10 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage). No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "All 14 strategies: max 1 null in last 3 entries (threshold >2). No alerts."
     },
     {
-      "name": "GIT STATUS",
+      "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files"
     },
     {
-      "name": "KNOWLEDGE SIZE",
+      "name": "knowledge_size",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json: 2208 entries."
+      "detail": "2208 entries in knowledge.json"
     }
   ],
-  "alerts": [],
-  "error_log_today_entries": [
-    "2026-06-08 01:47 — 回溯更正：00:18 refill 判斷不完整。Root: 判斷 K 可寫 ≠ narrative-arc 飽和度；hourly 8th belt deployed as fix.",
-    "2026-06-08 11:1x — pre-publish image-URL gate incident root-fix: prepublish_audit.py deployed, 52 broken image URLs patched across 20 published articles (commit 9bc7e2af)."
-  ]
+  "alerts": []
 }
