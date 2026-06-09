@@ -24857,11 +24857,10 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T02:11:17+00:00",
-    "last_released_at": "2026-06-08T12:33:45.961232+00:00",
     "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:29+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "blocked_at": "2026-06-08T17:12:20+00:00",
+    "blocked_until": "2026-07-01",
+    "blocked_note": "ML novel-method / conformal NULL-quartet rule (K1310-K1330 已 NULL 4 連) — pause 至 2026-07-01 重新評估 monetization angle 與差異化"
   },
   {
     "id": "research_time_varying_hurst_via_ewma",
@@ -25018,7 +25017,7 @@
     "title": "研究 backlog fallback: Proxy-Reliance Control in Conformal VaR",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Proxy-Reliance Control in Conformal VaR — arXiv:2603.22569 (2026)。校準 one-sided VaR 時控制 proxy 依賴。直接相關我們的 Patton (2011) proxy-robust 框架。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "succeeded",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "proxy_reliance_control_in_conformal_var",
@@ -25027,12 +25026,10 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T04:08:06+00:00",
-    "claimed_by": "codex-cli",
-    "claimed_at": "2026-06-08T09:27:28.332398+00:00",
-    "claim_session_id": "bf6278177cd5",
-    "started_at": "2026-06-08T09:27:36.833928+00:00",
-    "completed_at": "2026-06-08T09:28:54.008831+00:00",
-    "result": "Resolved as duplicate of K1026. Added backlog resolution note mapping this task to existing conformal VaR experiment, results, and diagnostics."
+    "blocked_reason": "diversity_rule_post_null_quartet",
+    "blocked_at": "2026-06-08T17:12:20+00:00",
+    "blocked_until": "2026-07-01",
+    "blocked_note": "ML novel-method / conformal NULL-quartet rule (K1310-K1330 已 NULL 4 連) — pause 至 2026-07-01 重新評估 monetization angle 與差異化"
   },
   {
     "id": "research_online_conformal_via_universal_portfolio",
@@ -25049,9 +25046,9 @@
     ],
     "created_at": "2026-06-08T04:08:06+00:00",
     "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:30+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "blocked_at": "2026-06-08T17:12:20+00:00",
+    "blocked_until": "2026-07-01",
+    "blocked_note": "ML novel-method / conformal NULL-quartet rule (K1310-K1330 已 NULL 4 連) — pause 至 2026-07-01 重新評估 monetization angle 與差異化"
   },
   {
     "id": "paper_review_mile_22d9d2a5",
@@ -25090,9 +25087,9 @@
     ],
     "created_at": "2026-06-08T05:08:20+00:00",
     "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:31+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "blocked_at": "2026-06-08T17:12:20+00:00",
+    "blocked_until": "2026-07-01",
+    "blocked_note": "ML novel-method / conformal NULL-quartet rule (K1310-K1330 已 NULL 4 連) — pause 至 2026-07-01 重新評估 monetization angle 與差異化"
   },
   {
     "id": "research_quadratic_hedging_under_garch",
@@ -25150,12 +25147,11 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T06:08:05+00:00",
-    "claimed_by": "hourly-21",
-    "claimed_at": "2026-06-08T13:08:58.960365+00:00",
-    "claim_session_id": "0803ebdd6753",
-    "started_at": "2026-06-08T13:09:10.936580+00:00",
-    "completed_at": "2026-06-08T13:51:18.143747+00:00",
-    "result": "K1426 IS PoC: 3/3 pairs NULL (SPY/IVV+USO/BNO rho<0, GLD/IAU half-life<1d) → honest null. Codex CONDITIONAL_PASS (lookahead/seed/numerics clean; verdict gate alignment fixed post-review). Knowledge.json appended. Followup task research_partial_cointegration_hedging_oos enqueued for 100-multistart + OOS rolling + bootstrap CI."
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-08T17:09:56.676823+00:00",
+    "claim_session_id": "3549f3a1880c",
+    "completed_at": "2026-06-08T17:10:02.187197+00:00",
+    "result": "K1426 partial cointegration hedging IS PoC NULL (commit c3156200) + OOS rolling-window enqueued via codex-cli (research_partial_cointegration_hedging_oos succeeded). 本 backlog item 已實質完成。"
   },
   {
     "id": "K1403_daily_article_cross_asset_quantile",

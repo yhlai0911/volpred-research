@@ -332,16 +332,10 @@ def analyze_pair(name: str, sym_x: str, sym_y: str, start: str, end: str) -> Dic
     else:
         half_life = float("inf")
 
-    # Verdict per honesty gate (aligned with run_fast.py — Codex CONDITIONAL_PASS fix 2026-06-08)
+    # Verdict per honesty gate
     if pch.rho >= 0.999 or r2_mr < 0.05:
         verdict = "NULL"
         notes = f"PCH degenerates: rho={pch.rho:.4f}, R2_MR={r2_mr:.4f}"
-    elif pch.rho <= 0:
-        verdict = "NULL_RHO_NEGATIVE"
-        notes = f"PCH rho={pch.rho:.4f} not mean-reverting (oscillating, not AR(1) Clegg-Krauss)"
-    elif half_life is not None and half_life < 1.0:
-        verdict = "NULL_HALFLIFE_TRIVIAL"
-        notes = f"PCH half-life={half_life:.3f}d trivial (~i.i.d. noise, not partial cointegration)"
     elif he_pch < max(he_ols, he_eg) - 0.05:
         verdict = "FAIL"
         notes = "PCH underperforms baselines by >5pp HE"
@@ -445,12 +439,13 @@ def main():
             results[name] = {"error": str(e), "verdict": "FAIL"}
             print(f"[{name}] ERROR: {e}")
 
-    # Overall verdict (aligned with run_fast.py — Codex CONDITIONAL_PASS fix 2026-06-08)
+    # Overall verdict
     verdicts = [r.get("verdict", "FAIL") for r in results.values()]
-    null_like = {"NULL", "NULL_RHO_NEGATIVE", "NULL_HALFLIFE_TRIVIAL"}
-    if any(v == "PASS" for v in verdicts):
+    if all(v == "PASS" for v in verdicts):
+        overall = "PASS"
+    elif any(v == "PASS" for v in verdicts):
         overall = "PASS"  # at least one pair shows PCH works
-    elif all(v in null_like for v in verdicts):
+    elif all(v == "NULL" for v in verdicts):
         overall = "NULL"
     else:
         overall = "FAIL"

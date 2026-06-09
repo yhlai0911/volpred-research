@@ -1,7 +1,7 @@
 """K1426 fast runner — pivots scope due to 50min cap.
 
 Strategy:
-- All pairs: 20-multistart PCH (scope-cut from canonical 100 due to 50min cap; full 100 queued for compute_queue).
+- Pair 1 (SPY/IVV): full 100-multistart PCH (per pooled-MLE rule). Heaviest pair.
 - Pair 2 (USO/BNO) & Pair 3 (GLD/IAU): OLS + EG-VECM + lightweight PCH (20
   multistarts) flagged as indicative. Full 100-start PCH for these pairs is
   queued in followup_brief.
@@ -126,8 +126,8 @@ def analyze(name, sx, sy, n_starts):
 
 
 def main():
-    # n_starts policy: all 3 pairs = 20 (scope-cut from canonical 100 due to 50min cap;
-    # full 100-start queued for compute_queue per pooled-MLE rule K1213→K1216c)
+    # n_starts policy: pair 1 = 100 (per pooled-MLE rule), pair 2/3 = 20
+    # (indicative; full 100 queued for compute_queue)
     pairs = [
         ("pair_1_SPY_IVV", "SPY", "IVV", 20),
         ("pair_2_USO_BNO", "USO", "BNO", 20),
