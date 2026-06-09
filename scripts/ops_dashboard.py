@@ -90,7 +90,32 @@ def main():
     # it's the healthy state between research→article cycles. Count in-flight work
     # so "0 pending" only escalates to CRITICAL when the platform is TRULY idle
     # (nothing pending, nothing main-thread, nothing compute-queued, nothing claimed).
-    in_flight = [t for t in nt if t.get("status") in ("compute_queued", "claimed", "in_progress")]
+    # 2026-06-09: staleness guard. The original in_flight count let MONTH-OLD
+    # orphan compute_queued tasks (e.g. queued 2026-05-13/05-19, never run by a
+    # defunct compute worker) masquerade as "healthy research in flight" for weeks,
+    # hiding a thin pipeline behind a benign-looking warn. Only count in-flight
+    # items whose timestamp is RECENT (< STALE_INFLIGHT_HOURS) as healthy; older
+    # ones are stuck orphans → surfaced separately for triage, not counted as work.
+    STALE_INFLIGHT_HOURS = 48
+    _now = time.time()
+    def _inflight_age_h(t):
+        ts = t.get("compute_queued_at") or t.get("claimed_at") or t.get("started_at") or t.get("created_at")
+        if not ts:
+            return None
+        try:
+            dt = time.mktime(time.strptime(str(ts)[:19], "%Y-%m-%dT%H:%M:%S"))
+            return (_now - dt) / 3600.0
+        except Exception:
+            return None
+    _all_inflight = [t for t in nt if t.get("status") in ("compute_queued", "claimed", "in_progress")]
+    in_flight = []
+    stale_inflight = []
+    for t in _all_inflight:
+        age = _inflight_age_h(t)
+        if age is not None and age > STALE_INFLIGHT_HOURS:
+            stale_inflight.append(t)
+        else:
+            in_flight.append(t)
     by_type = {}
     for t in actionable:
         by_type[t.get("task_type", "?")] = by_type.get(t.get("task_type", "?"), 0) + 1
@@ -139,7 +164,26 @@ def main():
         pending_count=len(pending),
         pending_main_thread_count=len(pending_main),
         in_flight_count=len(in_flight),
+        stale_inflight_count=len(stale_inflight),
     ))
+
+    # Stale in-flight orphans (compute_queued/claimed/in_progress > 48h) — these
+    # are stuck tasks that masquerade as healthy work; surface them for triage so
+    # they don't silently accumulate for weeks (2026-06-09: two tasks queued
+    # 2026-05-13 / 05-19 sat unnoticed for ~1 month behind a benign warn).
+    if stale_inflight:
+        items = [
+            {"id": t.get("id"), "status": t.get("status"),
+             "age_h": round(_inflight_age_h(t) or 0, 1)}
+            for t in sorted(stale_inflight, key=lambda x: _inflight_age_h(x) or 0, reverse=True)
+        ]
+        out.append(section(
+            "stale_inflight",
+            "warn" if len(stale_inflight) <= 3 else "critical",
+            f"{len(stale_inflight)} stuck in-flight task(s) > 48h (orphans, not real work)",
+            "triage: 標 succeeded（已完成）/ blocked（卡死）/ release（重派）— 別讓它們撐 in-flight 計數",
+            items=items[:8],
+        ))
 
     feed = jl(REPO / "storage" / "reports" / "feed.json", [])
     last_24h_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - 86400))

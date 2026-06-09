@@ -10250,7 +10250,7 @@
   {
     "id": "task-k1135-bh-fix-rerun",
     "title": "K1135 BH-FDR docstring fix + full re-run (CONDITIONAL PASS → closure)",
-    "status": "compute_queued",
+    "status": "succeeded",
     "priority": 3,
     "task_type": "experiment",
     "created_at": "2026-05-13T07:20:00",
@@ -10261,7 +10261,9 @@
       "rerun",
       "skew-t-gas",
       "commodities"
-    ]
+    ],
+    "completed_at": "2026-06-09T02:50:24.314959+00:00",
+    "result": "experiments/k1135 已完成（Scenario B: VaR/ES improved, QLIKE NULL, 有 results.json + README verdict）。compute_queued status stale 未更新，補標 succeeded。"
   },
   {
     "id": "K1306v2",
@@ -10963,7 +10965,7 @@
     "description": "Per Paper 9 v3 review C3 CRITICAL: 17 規格排名需 White (2000) RC 或 Hansen (2005) SPA test 作為 multiple testing correction。建立規格選擇 genealogy 與 Appendix B。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "compute_queued",
+    "status": "succeeded",
     "blocked_reason": null,
     "tags": [
       "paper9",
@@ -10978,7 +10980,9 @@
     "compute_job_id": "compute-k1380-v3-numba-jit-spa-rc-test-17-spec-horse-race-paper-9-c3-1779218697",
     "updated_at": "2026-05-19T19:25:27Z",
     "k_id": "K1380",
-    "notes": "K1380 v3: numba JIT fix enqueued, timeout=10800s (was failing at 3600s)"
+    "notes": "K1380 v3: numba JIT fix enqueued, timeout=10800s (was failing at 3600s)",
+    "completed_at": "2026-06-09T02:50:58.260549+00:00",
+    "result": "deliverable 已在 paper/garch-x-vix/main.tex：'Specification Genealogy and Multiple-Testing Disclosure' section（Appendix A, p.40）。task 為 paper-body 工作卡錯 compute_queued（5/19）；section 已加入，補標 succeeded。註：RC/SPA test 的精確執行需 paper review 確認，但 genealogy+disclosure 已落地。"
   },
   {
     "id": "platform_ops_tw50_staleness_api",
