@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-06-09T00:11:04.901597+00:00",
+  "timestamp": "2026-06-09T14:11:38+08:00",
   "all_ok": true,
   "checks": [
     {
       "name": "article_pool",
       "status": "ok",
-      "detail": "145 drafts total (research=46, general=99)"
+      "detail": "147 drafts total (general=100, research=47). All thresholds met (total ≥12, research ≥4, general ≥8)."
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "strategy_metrics.json age: 0.0h (mtime: 1780963781)"
+      "detail": "strategy_metrics.json age: ~0h (mtime 1780985382, checked at 1780985393). Well within 26h threshold."
     },
     {
       "name": "error_log_recent",
       "status": "ok",
-      "detail": "Error log entries from 2026-06-08 (yesterday): pre-publish image-URL gate incident root cause fixed; article pool refill retrospective correction recorded"
+      "detail": "Today 2026-06-09 09:15 台灣時間: merge_worktree.sh main..worktree detection bug (strike-2). Script uses git diff main..worktree instead of merge-base diff, causing false-positive shared-file alerts when main advances after worktree fork. K1426+K1427 impacted. Strike-3 will trigger full rewrite of _changed_shared_paths(). Workaround: reverse diff + manual git merge --no-ff -X theirs."
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "All 14 strategies: max 1 null in last 3 entries (threshold >2). No alerts."
+      "detail": "0 strategies with >2 null portfolio_returns in last 3 entries (checked paper_trading_open.json). Latest entry date: 2026-03-12."
     },
     {
       "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "knowledge_size",
       "status": "ok",
-      "detail": "2208 entries in knowledge.json"
+      "detail": "2213 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": []
