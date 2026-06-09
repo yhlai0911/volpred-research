@@ -26007,7 +26007,7 @@
     "description": "Hypothesis: BTC 24/7 市場無 session-close 但週末散戶集中 + 機構流動性退場 → 波動率有 weekday-of-week seasonality。Method: 抓 BTC 1m / 5m bars → 算 daily RV (sum of 5-min log returns squared)；Baseline HAR-RV 加 6 個 weekday dummies (Mon-Sat, Sun=reference)；OOS 2024-2026；DM test vs HAR-RV no-dummy。Diff vs prior K：K757-K880 多看股票 session boundary，crypto 無 session → 替代特徵是 weekday-cluster。Lookahead 防錯：dummy 用 timestamp.weekday() 計算的 t-1 day，不洩漏 t day。Seed = 42。Monetization：直接 — crypto vol 策略付費；間接 — 拓展 crypto trader 流量入口。Scope ≤ 50min；fail-fast：若 LBYS_test p > 0.10 表示 seasonality 不顯著 → 收 NULL 報告。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-09T15:10:09+08:00",
     "source": "hourly_15_governance_seed",
     "tags": [
@@ -26016,7 +26016,13 @@
       "seasonality",
       "HAR-RV"
     ],
-    "monetization_angle": "direct_paid_strategy + crypto_trader_traffic"
+    "monetization_angle": "direct_paid_strategy + crypto_trader_traffic",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T08:12:02.285912+00:00",
+    "claim_session_id": "5030cea549e5",
+    "started_at": "2026-06-09T08:12:31.018994+00:00",
+    "completed_at": "2026-06-09T08:15:24.993950+00:00",
+    "result": "Built K1433 with full experiment trio using local BTC OHLC (2020-2026) and Parkinson range-vol proxy. Result: BTC weekends are much quieter than weekdays (~-64% level premium), but calendar covariates still add forecasting value: HAR+weekend DM t=4.00 p=6.8e-05 and HAR+weekday DM t=4.08 p=4.9e-05 vs HAR baseline in OOS 2024-2026."
   },
   {
     "id": "K1434_tw_earnings_cluster_vol",
@@ -26107,5 +26113,21 @@
       "VIX1D"
     ],
     "monetization_angle": "direct_intraday_strategy + hft_traffic"
+  },
+  {
+    "id": "daily_article_k1432_oos_overfitting",
+    "task_type": "daily_article",
+    "priority": 2,
+    "status": "succeeded",
+    "created_at": "2026-06-09T16:10:42+08:00",
+    "source": "hourly-16-discovered",
+    "title": "K1432 daily_article: in-sample Granger 顯著卻 OOS 惡化（金融股壓力指標 → TSMC 波動率）",
+    "description": "Write research-audience daily article on K1432 NULL result. 故事弧: K757 級數 Granger 顯著 → K1432 把 stress index 拿來預測 TSMC RV → in-sample 4-spec 全 significant → OOS DM 全惡化 across 3 horizons. Anti-overfitting lesson. Source: experiments/k1432/k1432_tw_financial_stress_results.json. Audience=research (含 K-id/HAR-RV/DM/p-value).",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-09T08:10:43.849786+00:00",
+    "claim_session_id": "b91cfad0d44b",
+    "started_at": "2026-06-09T08:10:44.124237+00:00",
+    "completed_at": "2026-06-09T08:19:17.036270+00:00",
+    "result": "K1432 NULL OOS overfitting daily_article published mile_d7873948 draft, 2 figs, anti-ai PASS, audience=research, HTTP 200"
   }
 ]
