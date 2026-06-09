@@ -32910,5 +32910,28 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-09T19:22:14.615863"
+  },
+  {
+    "item_id": "62944463",
+    "category": "paper_review_codex_24h",
+    "topic": "K1057 Codex source-code review (24h-rule for mile_fa859ea5)",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K1057",
+    "experiment_id": "k1057",
+    "experiment_path": "experiments/k1057/",
+    "experiment_script": "experiments/k1057/k1057.py",
+    "reviewer": "Codex CLI 0.137.0 (gpt-5.4 medium)",
+    "reviewer_source": "codex_exec_primary_path",
+    "codex_review": true,
+    "codex_verdict": "CONDITIONAL_PASS",
+    "review_artifact": "storage/ops/paper_reviews/2026-06-09/codex_review_mile_fa859ea5_k1057.md",
+    "related_article": "mile_fa859ea5",
+    "date": "2026-06-09",
+    "content": "K1057 source-code review: NULL narrative confirmed, no lookahead bias. 2 critical bugs: (1) BN-S z-stat implementation deviates from canonical relative form (line 119-126), 8/60 jump count depends on this; (2) QLIKE is constant-shifted, not canonical Patton (2011), rankings unchanged but article phrasing imprecise. Recommendation: amend article (not retract).",
+    "confidence": 0.85,
+    "evidence": [
+      "storage/ops/paper_reviews/2026-06-09/codex_review_mile_fa859ea5_k1057.md"
+    ],
+    "created_at": "2026-06-09T21:13:34.638930"
   }
 ]

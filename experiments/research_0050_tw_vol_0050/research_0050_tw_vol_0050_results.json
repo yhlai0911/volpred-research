@@ -1,0 +1,39 @@
+{
+  "experiment_id": "RESEARCH_0050_TW_VOL_0050",
+  "title": "Backlog Resolver — 0050.TW Ex-Dividend Volatility Question",
+  "status": "RESOLVED_ALREADY_COVERED",
+  "question": "Do ex-dividend periods materially raise 0050.TW volatility?",
+  "canonical_sources": {
+    "k512": "experiments/k512/k512_tw_exdividend_results.json",
+    "k917": "experiments/k917/k917_taiwan_ex_dividend_vol_results.json",
+    "topics_doc": "docs/research_archive/detailed_research_topics.md",
+    "research_program": "research_program.md"
+  },
+  "existing_evidence": {
+    "k512_event_window": {
+      "n_events": 24,
+      "post_near_vs_control_t": 2.2776010160506215,
+      "post_near_vs_control_p": 0.032366638058783634,
+      "pre_vs_post_t": -2.321675202118492,
+      "pre_vs_post_p": 0.029462844843110736,
+      "interpretation": "Specific 0050.TW ex-dividend event windows show a modest near-post-event volatility lift in K512."
+    },
+    "k917_seasonal_cluster_test": {
+      "summer_mean_rv": 0.16906435087971622,
+      "other_mean_rv": 0.18458515480815388,
+      "welch_t": -1.0334976625302397,
+      "welch_p": 0.30276761697672566,
+      "cohens_d": -0.11946756057014955,
+      "interpretation": "When the question is broadened to ex-dividend season / concentrated dividend months, there is no statistically significant 0050.TW volatility regime shift."
+    }
+  },
+  "resolution": {
+    "answer": "The backlog question is already effectively answered by existing experiments: K512 finds a local ex-dividend event-window uplift, but K917 rejects a broader, systematic seasonal-volatility effect for 0050.TW.",
+    "operational_decision": "Do not re-run as a fresh experiment unless the question is narrowed further (for example, constituent-level clustering, ETF-vs-stock decomposition, or post-2026 extension)."
+  },
+  "closeout_actions": [
+    "Treat this pending backlog item as covered by K512 + K917 evidence.",
+    "Keep K1374/K1375 as the broader Taiwan ex-dividend extension line in research_program.",
+    "Recycle the slot instead of duplicating the same 0050.TW ex-div question."
+  ]
+}
