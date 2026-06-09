@@ -25464,7 +25464,7 @@
     "title": "Paper review (Codex 24h-rule): 31 家公司、6 個指標、5 個假設：為什麼「看得到的特徵」無法預測財報當天的波動反應",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_85502a95 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_85502a95",
@@ -25481,7 +25481,13 @@
         "to": "pending",
         "reason": "blocked_until_expired (2026-06-09)"
       }
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T00:45:57.338252+00:00",
+    "claim_session_id": "f80c57445320",
+    "started_at": "2026-06-09T00:46:14.096284+00:00",
+    "completed_at": "2026-06-09T00:49:38.205893+00:00",
+    "result": "Codex 24h review complete: CONDITIONAL_PASS. Core null-result numbers match K1113, but article overstates ex-ante selection-rule validity and prereg lock evidence; review saved to storage/reviews/codex_24h/mile_85502a95_review.md."
   },
   {
     "id": "research_financial_innovation_2025_review",
