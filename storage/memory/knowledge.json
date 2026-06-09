@@ -32997,5 +32997,20 @@
       "^FVX",
       "^IRX"
     ]
+  },
+  {
+    "item_id": "4ac443ce",
+    "category": "paper_review",
+    "content": "Paper review (Codex 24h-rule): mile_5e0944a1「為什麼同樣吃財報，聯發科和聯電的波動反應會差這麼多？」(K1104, 2026-06-09 published).\n\nVerdict: CONDITIONAL_PASS (Codex CLI gpt-5.4, session 019eae03-7357-73a1-9b73-3b25f0863acb).\n\nFindings:\n(1) fabless 顯著性表述偏強 — 文章原寫「有過傳統顯著門檻」但實際 OLS p=0.039 / White robust p=0.149。N=23 小樣本應優先 robust SE。已修文加 caveat。\n(2) 結尾總結「更可能來自代工/設計」過強 — adj R²=0.110 解釋力低 + 日月光 hold-out 低估幅度大（observed +9.44e-4 vs predicted +3.57e-5~+1.94e-4）。已改為「方向上有關，但證據強度只到方向，還不到普遍結論」。\n(3) Lookahead 風險 — VERIFIED OK：k1104.py L149-154 / L312-313 vix_lag、eav_lag 已 properly shift(1)；EAV_{t-1} 影響 τ_t = 隔天 vol，沒有 lookahead。\n\nFixes applied:\n- feed.json: mile_5e0944a1.content 1761→1865 chars (fabless robust SE caveat + 結尾降強度)\n- feed.json: details.post_publish_revisions log entry\n- Supabase incremental sync (articles=2)\n\nKey numbers verified (K1104):\n- fabless coef -9.61e-4, p_ols=0.039, p_white=0.149\n- foundry coef +4.72e-4, p_ols=0.463\n- log_mktcap coef -2.90e-4, p_ols=0.146\n- adj R²=0.110, N=23 firms + 1 holdout\n- MediaTek observed θ₂=-1.609e-3, UMC +ve, TSMC ≈ 0\n- ASUS (日月光) holdout observed +9.44e-4\n\nProcess: 24h Codex review rule honored. Published 2026-06-09 19:07 UTC → reviewed 2026-06-10 04:11+08 → content revised + Supabase synced within 12h.\n",
+    "evidence": [
+      "K1104",
+      "experiments/k1104/k1104_results.json",
+      "Codex CLI gpt-5.4 session 019eae03",
+      "OLS p=0.039 vs robust p=0.149 mismatch",
+      "feed.json mile_5e0944a1 content updated 1761→1865 chars",
+      "Supabase sync articles=2 confirmed"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-06-10T04:16:50.308384"
   }
 ]

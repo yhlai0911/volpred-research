@@ -1,0 +1,280 @@
+{
+  "experiment_id": "K1441",
+  "title": "EM ex-TW realized volatility landscape via PCA and correlation regimes",
+  "created_at": "2026-06-09T20:08:31.536424+00:00",
+  "data_source": "yfinance (EEM, INDA, EWZ, EWY, EWW)",
+  "period": {
+    "start": "2012-02-03",
+    "end": "2026-06-09",
+    "joint_price_obs": 3607,
+    "rv_obs": 3586,
+    "joint_sample_note": "Joint sample begins at INDA inception"
+  },
+  "rv_definition": "21d rolling std of daily log returns, annualized by sqrt(252)",
+  "descriptive_stats": {
+    "EEM": {
+      "mean_rv": 0.18558014377632692,
+      "median_rv": 0.17116889690916087,
+      "std_rv": 0.08264944486229062,
+      "acf1": 0.9884828951368424,
+      "n_obs": 3586
+    },
+    "INDA": {
+      "mean_rv": 0.19252994928263073,
+      "median_rv": 0.17697521540494415,
+      "std_rv": 0.10863101749934724,
+      "acf1": 0.9915040245916154,
+      "n_obs": 3586
+    },
+    "EWZ": {
+      "mean_rv": 0.29893344690830714,
+      "median_rv": 0.2686664357690915,
+      "std_rv": 0.15068590144655566,
+      "acf1": 0.9894668698960274,
+      "n_obs": 3586
+    },
+    "EWY": {
+      "mean_rv": 0.22552869655716137,
+      "median_rv": 0.20306013425897362,
+      "std_rv": 0.11114471958106831,
+      "acf1": 0.9907189437983258,
+      "n_obs": 3586
+    },
+    "EWW": {
+      "mean_rv": 0.21758373658331892,
+      "median_rv": 0.2000684320132358,
+      "std_rv": 0.09999900916530188,
+      "acf1": 0.9883755354587616,
+      "n_obs": 3586
+    }
+  },
+  "rv_corr_matrix": {
+    "EEM": {
+      "EEM": 1.0,
+      "INDA": 0.799393,
+      "EWZ": 0.772446,
+      "EWY": 0.81166,
+      "EWW": 0.795416
+    },
+    "INDA": {
+      "EEM": 0.799393,
+      "INDA": 1.0,
+      "EWZ": 0.692674,
+      "EWY": 0.572564,
+      "EWW": 0.729242
+    },
+    "EWZ": {
+      "EEM": 0.772446,
+      "INDA": 0.692674,
+      "EWZ": 1.0,
+      "EWY": 0.574178,
+      "EWW": 0.715141
+    },
+    "EWY": {
+      "EEM": 0.81166,
+      "INDA": 0.572564,
+      "EWZ": 0.574178,
+      "EWY": 1.0,
+      "EWW": 0.686317
+    },
+    "EWW": {
+      "EEM": 0.795416,
+      "INDA": 0.729242,
+      "EWZ": 0.715141,
+      "EWY": 0.686317,
+      "EWW": 1.0
+    }
+  },
+  "pca": {
+    "explained_variance_ratio": [
+      0.7737163428007093,
+      0.09452567009391848,
+      0.061775203637456276,
+      0.05019172116099766,
+      0.019791062306918326
+    ],
+    "pc1_loadings": {
+      "EEM": 0.4844664223138504,
+      "INDA": 0.43940737296794535,
+      "EWZ": 0.4341309429555688,
+      "EWY": 0.42051108547550337,
+      "EWW": 0.45487822281633755
+    },
+    "pc1_basket_rv_corr": 0.9984357656385738
+  },
+  "correlation_regime": {
+    "window_days": 63,
+    "avg_pairwise_corr_q25": 0.2732620400902487,
+    "avg_pairwise_corr_q75": 0.6722430568057999,
+    "regime_counts": {
+      "mid": 1762,
+      "low": 881,
+      "high": 881
+    },
+    "avg_pairwise_corr_mean": 0.48301413712619223,
+    "avg_pairwise_corr_std": 0.2581550005666941,
+    "corr_avgcorr_basket_rv": 0.3614589165678373,
+    "basket_rv_regression_hac": {
+      "Intercept": {
+        "coef": 0.213558259252835,
+        "se_hac": 0.006830162495087787,
+        "t_hac": 31.26693682711427,
+        "p_hac": 1.3141207050362032e-214
+      },
+      "C(regime, Treatment(reference=\"mid\"))[T.high]": {
+        "coef": 0.060985466268700064,
+        "se_hac": 0.03141202514301833,
+        "t_hac": 1.9414687843599527,
+        "p_hac": 0.05220144215930596
+      },
+      "C(regime, Treatment(reference=\"mid\"))[T.low]": {
+        "coef": -0.018906990724587132,
+        "se_hac": 0.00701874267737391,
+        "t_hac": -2.693785994682064,
+        "p_hac": 0.007064550812316864
+      },
+      "meta": {
+        "n_obs": 3524,
+        "r2": 0.09558182430591522,
+        "hac_maxlags": 63
+      }
+    },
+    "asset_rv_regression_hac": {
+      "EEM": {
+        "Intercept": {
+          "coef": 0.17739651499845005,
+          "se_hac": 0.007294310267059046,
+          "t_hac": 24.319847731123946,
+          "p_hac": 1.2090046889105567e-130
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.high]": {
+          "coef": 0.05067461115035725,
+          "se_hac": 0.023233387855517585,
+          "t_hac": 2.181111573804454,
+          "p_hac": 0.029175165000683272
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.low]": {
+          "coef": -0.019093266699765254,
+          "se_hac": 0.007893735663693112,
+          "t_hac": -2.418787189389162,
+          "p_hac": 0.015572347618143204
+        },
+        "meta": {
+          "n_obs": 3524,
+          "r2": 0.09672314510193847,
+          "hac_maxlags": 63
+        }
+      },
+      "INDA": {
+        "Intercept": {
+          "coef": 0.18570009647393282,
+          "se_hac": 0.008201312256515865,
+          "t_hac": 22.642729683459603,
+          "p_hac": 1.6453292529461964e-113
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.high]": {
+          "coef": 0.05666527162822004,
+          "se_hac": 0.033913795630669555,
+          "t_hac": 1.670861977388796,
+          "p_hac": 0.09474894327875417
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.low]": {
+          "coef": -0.036282135850679416,
+          "se_hac": 0.009910886248161282,
+          "t_hac": -3.660836674158243,
+          "p_hac": 0.00025139297911899196
+        },
+        "meta": {
+          "n_obs": 3524,
+          "r2": 0.09382301027683404,
+          "hac_maxlags": 63
+        }
+      },
+      "EWZ": {
+        "Intercept": {
+          "coef": 0.2895337347356137,
+          "se_hac": 0.012250905944161493,
+          "t_hac": 23.63365909878681,
+          "p_hac": 1.7381121463335297e-123
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.high]": {
+          "coef": 0.07973254297606881,
+          "se_hac": 0.04676302056833419,
+          "t_hac": 1.7050340633911083,
+          "p_hac": 0.08818807165564638
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.low]": {
+          "coef": -0.03628487675961726,
+          "se_hac": 0.012961285628982326,
+          "t_hac": -2.79948130133648,
+          "p_hac": 0.005118478094678289
+        },
+        "meta": {
+          "n_obs": 3524,
+          "r2": 0.07840254403059255,
+          "hac_maxlags": 63
+        }
+      },
+      "EWY": {
+        "Intercept": {
+          "coef": 0.21292332578649004,
+          "se_hac": 0.01158085522857274,
+          "t_hac": 18.38580325753121,
+          "p_hac": 1.706926561420718e-75
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.high]": {
+          "coef": 0.05392111050386729,
+          "se_hac": 0.028940313000724454,
+          "t_hac": 1.8631833906743682,
+          "p_hac": 0.0624364688728525
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.low]": {
+          "coef": -0.001753293427323603,
+          "se_hac": 0.01214487731606239,
+          "t_hac": -0.14436485290837467,
+          "p_hac": 0.8852123693496879
+        },
+        "meta": {
+          "n_obs": 3524,
+          "r2": 0.04444375476823226,
+          "hac_maxlags": 63
+        }
+      },
+      "EWW": {
+        "Intercept": {
+          "coef": 0.20223762426968817,
+          "se_hac": 0.007871235901009964,
+          "t_hac": 25.69324904158176,
+          "p_hac": 1.3906712886616019e-145
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.high]": {
+          "coef": 0.06393379508498707,
+          "se_hac": 0.031161944349609477,
+          "t_hac": 2.0516625781660602,
+          "p_hac": 0.0402024659645391
+        },
+        "C(regime, Treatment(reference=\"mid\"))[T.low]": {
+          "coef": -0.0011213808855500913,
+          "se_hac": 0.012455949801681031,
+          "t_hac": -0.09002772999283859,
+          "p_hac": 0.9282651789503876
+        },
+        "meta": {
+          "n_obs": 3524,
+          "r2": 0.07632765080682735,
+          "hac_maxlags": 63
+        }
+      }
+    },
+    "bonferroni_alpha_asset_tests": 0.01,
+    "n_low_regime_asset_contrasts_sig": 2,
+    "n_high_regime_asset_contrasts_sig": 0
+  },
+  "figures": [
+    "figures/rv_corr_heatmap.png",
+    "figures/pc1_loadings.png",
+    "figures/avg_corr_vs_basket_rv.png"
+  ],
+  "verdict": "PASS",
+  "verdict_reason": "PC1 explains >70% of standardized RV variance with uniformly positive loadings, and at least two asset-level correlation-regime contrasts survive Bonferroni."
+}
