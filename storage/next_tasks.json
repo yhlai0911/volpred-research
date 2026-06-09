@@ -25984,7 +25984,7 @@
     "title": "Paper review (Codex 24h-rule): 同樣 100 萬，30 年後差 4.9 倍：投資策略真的要看年齡",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ea4b38b7 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_ea4b38b7",
@@ -25997,7 +25997,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-09T07:09:54.392181+00:00",
     "claim_session_id": "5eabe53a94dc",
-    "started_at": "2026-06-09T07:10:04.161479+00:00"
+    "started_at": "2026-06-09T07:10:04.161479+00:00",
+    "completed_at": "2026-06-09T07:11:25.940510+00:00",
+    "result": "24h review completed: CONDITIONAL_PASS. K575 headline numbers match, but the article overstates a hard-coded life-stage/risk recommendation matrix as if it were model-derived optimization; README and publish artifacts are also incomplete."
   },
   {
     "id": "K1433_btc_weekend_vol_seasonality",
