@@ -5,12 +5,13 @@
     "priority": 2,
     "status": "blocked",
     "blocked_reason": "awaiting_interactive_session",
-    "blocked_note": "chrome session 接手：在 Ivan Lai FB 個人帳號發 event_article 改寫版 200-400 字，主貼文純文字無連結，第一則留言貼 https://volpred.zeabur.app/v3/reports/mile_71dd116b 。文章：VIX 從 17 降到 15：CPI 前市場已在說什麼。anti-AI FB style 適用。發完後 mark_fb_post_status.py --mile-id mile_71dd116b --status success。",
+    "blocked_note": "FB 個人帳號（Ivan Lai）只能走 Claude in Chrome；hourly cron 無自主能力；待互動 session 接手（per memory feedback_fb_personal_account_chrome_only）",
     "description": "FB 雙發佈 followup: event_cpi_20260611 mile_71dd116b",
     "created_at": "2026-06-05T08:16:00+08:00",
     "source": "event_cpi_20260611",
     "article_mile_id": "mile_71dd116b",
-    "article_url": "https://volpred.zeabur.app/v3/reports/mile_71dd116b"
+    "article_url": "https://volpred.zeabur.app/v3/reports/mile_71dd116b",
+    "blocked_at": "2026-06-09T05:11:39+00:00"
   },
   {
     "id": "K1401_gdp_q1_second_estimate_event_study",
@@ -12013,8 +12014,8 @@
       "T-2"
     ],
     "blocked_reason": "deprecated",
-    "blocked_at": "2026-06-05T11:13:44+00:00",
-    "blocked_note": "T-2 window passed (2026-06-03). Event already occurred today; T+0 task handles actual results. Cleared from pending pool."
+    "blocked_at": "2026-06-09T05:11:03+00:00",
+    "blocked_note": "NFP 2026-06-05 已過期 T-2 window；事件已過，無 T+0/T+5 文章需求（hourly-13 governance cleanup）"
   },
   {
     "id": "event_article_nfp_us_2026-06-05_tplus0",
@@ -12072,8 +12073,8 @@
       "T+0"
     ],
     "blocked_reason": "awaiting_external_data",
-    "blocked_at": "2026-05-27T01:10:13+00:00",
-    "blocked_note": "Event not yet occurred — consensus/actual data unavailable until 2026-06-10. Premature in pool.",
+    "blocked_at": "2026-06-09T05:11:06+00:00",
+    "blocked_note": "TSMC 5月營收於 2026-06-10 公佈；T+0 文章需等公佈後 evidence package 才能寫。Auto-recheck 6/10（hourly-13 governance cleanup）",
     "blocked_until": "2026-06-10"
   },
   {
@@ -12099,9 +12100,9 @@
     "task_type": "platform_ops",
     "priority": 2,
     "status": "blocked",
-    "blocked_reason": "awaiting_external_data",
-    "blocked_at": "2026-05-26T19:18:28Z",
-    "blocked_note": "FB MCP auth 待恢復；同 fb_post_trending_etf_dividend / silicon_layoffs blocked pattern",
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_at": "2026-06-09T05:11:39+00:00",
+    "blocked_note": "FB 個人帳號（Ivan Lai）只能走 Claude in Chrome；hourly cron 無自主能力；待互動 session 接手（per memory feedback_fb_personal_account_chrome_only）",
     "created_at": "2026-05-26T19:18:28Z",
     "source": "event_article_nfp_t7_followup",
     "ref_milestone_id": "mile_91692461",
@@ -12706,10 +12707,9 @@
       "T+0"
     ],
     "not_before": "2026-06-11T12:00:00+00:00",
-    "blocked_reason": "awaiting_event_window",
-    "blocked_at": "2026-05-27T20:12:05+00:00",
-    "blocked_note": "event_jobs not_before=2026-06-11T21:30+08:00 — refill bug prematurely materialized; refill fix 2026-05-28 prevents recurrence",
-    "blocked_until": "2026-06-11"
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-09T05:11:04+00:00",
+    "blocked_note": "CPI 2026-06-11 event 已由 mile_0fa9c7f5 (T-2, 2026-06-09 08:17 published) covered；T+0 重複，不再產出（hourly-13 governance cleanup）"
   },
   {
     "id": "platform_ops_install_reader_facing_crontab",
@@ -17893,9 +17893,9 @@
       "reader_facing",
       "auto_refill"
     ],
-    "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-06-01T22:11:15+00:00",
-    "blocked_note": "reader-facing 需新建 MOVE/Fed quant evidence + anti-AI gate 多輪改寫 + Chrome FB 雙發；hourly cron 50min cap 風險高，留互動 session 收尾"
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-09T05:11:34+00:00",
+    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_02_fed新局 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）"
   },
   {
     "id": "paper_review_mile_95f49685",
@@ -19236,8 +19236,8 @@
     "completed_at": "2026-06-02T22:18:05.098654+00:00",
     "result": "Hard arc-dup: K1098 已被 mile_81b4713f (2026-04-19 research audience) 完整覆蓋，內含同樣 OOS 數字 + Harvey + DM。Publisher dup gate 拒絕；且 narrative-arc 與 mile_609d9ff3 (2026-05-16 trending VIXTWN/VIX divergence) 屬同 cluster。標 failed-dup 不重派。",
     "blocked_reason": "deprecated",
-    "blocked_at": "2026-06-02T22:18:10+00:00",
-    "blocked_note": "K1098 angle 與 mile_81b4713f (research, 2026-04-19) hard dup + mile_609d9ff3 (trending, 2026-05-16) narrative-arc 同 cluster。寫成另一篇會踩 publisher dup gate 與 dedup rule。"
+    "blocked_at": "2026-06-09T05:11:35+00:00",
+    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_03_跨市場風險 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）"
   },
   {
     "id": "paper_review_mile_31529fdf",
@@ -21651,8 +21651,8 @@
       "K1418"
     ],
     "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-06-05T00:08:53+00:00",
-    "blocked_note": "需 claude-in-chrome MACBOOK session 才能貼 FB + 留言；hourly cron 無 chrome 工具。下次 interactive session 接手。"
+    "blocked_at": "2026-06-09T05:11:37+00:00",
+    "blocked_note": "FB 個人帳號（Ivan Lai）只能走 Claude in Chrome；hourly cron 無自主能力；待互動 session 接手（per memory feedback_fb_personal_account_chrome_only）"
   },
   {
     "id": "email-11706-7ef167",
@@ -23169,8 +23169,8 @@
       "auto_refill"
     ],
     "blocked_reason": "deprecated",
-    "blocked_at": "2026-06-07T00:09:49+00:00",
-    "blocked_note": "30 天內 NVDA/SKEW 已 6 篇飽和 (NVDA 倒數/SKEW 真能補捉尾端/SKEW 增量預測 K979)；非真 trending 掃描而是 refill 自動產出，narrative arc 邊界 dup 換題"
+    "blocked_at": "2026-06-09T05:11:35+00:00",
+    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_07_ai晶片 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）"
   },
   {
     "id": "trending_repost_2026_06_07_台股集中度",
@@ -23187,8 +23187,8 @@
       "auto_refill"
     ],
     "blocked_reason": "deprecated",
-    "blocked_at": "2026-06-07T00:09:47+00:00",
-    "blocked_note": "Layer 4 narrative arc dup: mile_123a3855 SPY 集中度→低 VIX 已寫，proxy 換但同結論不重派"
+    "blocked_at": "2026-06-09T05:11:36+00:00",
+    "blocked_note": "trending_repost 時效性 ≤24h；trending_repost_2026_06_07_台股集中度 已過期 ≥2 天，topic stale；不再產出（hourly-13 governance cleanup）"
   },
   {
     "id": "K1046_article_general_v2",
@@ -24739,8 +24739,8 @@
       "half_conductor_vol"
     ],
     "blocked_reason": "awaiting_interactive_session",
-    "blocked_at": "2026-06-07T23:09:01+00:00",
-    "blocked_note": "FB Ivan Lai 同步需 Claude in Chrome 個人帳號 — hourly cron 無自主能力，留給互動 session 接手"
+    "blocked_at": "2026-06-09T05:11:37+00:00",
+    "blocked_note": "FB 個人帳號（Ivan Lai）只能走 Claude in Chrome；hourly cron 無自主能力；待互動 session 接手（per memory feedback_fb_personal_account_chrome_only）"
   },
   {
     "id": "platform_ops_publication_candidates_audit_20260608",
@@ -25920,7 +25920,7 @@
     "title": "Paper review (Codex 24h-rule): 一個模型如果只在某段行情好用，其實還不算真的可靠",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_85699c9e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_85699c9e",
@@ -25929,6 +25929,27 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-09T04:07:57+00:00"
+    "created_at": "2026-06-09T04:07:57+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T05:06:18.647219+00:00",
+    "claim_session_id": "1b7d50817e29",
+    "started_at": "2026-06-09T05:06:30.288642+00:00",
+    "completed_at": "2026-06-09T05:08:03.380565+00:00",
+    "result": "24h review completed: FAIL. K465 HAR OOS uses same-day test features against same-day Parkinson proxy, so the article's 10/10 robustness claim is not publishable until the alignment bug is fixed and rerun."
+  },
+  {
+    "id": "platform_ops_silent_blocked_reasons_backfill",
+    "title": "[platform_ops] 補修剩下 64 個 silent-blocked tasks 的 blocked_reason",
+    "description": "2026-06-09 hourly-13 governance audit 發現 next_tasks.json 有 75 個 status=blocked 但 blocked_reason=null（違反 .claude/rules/control-plane.md 「skip-dispatch 必須 mark blocked」硬規則）。本輪已補 11 個（3 event_articles, 4 trending_reposts, 4 fb_*）；剩 64 個（多為 fb_*/experiment K-series novel-method/paper_decision/paper_body）。Action: list 全部 silent-blocked → 依 task_type 對應 reason vocab 分類補（fb_* → awaiting_interactive_session, deprecated K-series novel-method → diversity_rule_post_null_quartet 或 deprecated, paper_body → 改用 task_pool_claim.py handoff-main-thread）。Scope ≤40min；剩餘排下一 fire。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-06-09T05:12:37+00:00",
+    "source": "governance_followup",
+    "tags": [
+      "governance",
+      "silent_blocked_cleanup",
+      "control_plane_rule"
+    ]
   }
 ]
