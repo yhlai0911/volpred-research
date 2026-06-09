@@ -26187,7 +26187,7 @@
     "title": "研究 backlog fallback: I7: 台灣投資人跨境避險實務",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: I7: 台灣投資人跨境避險實務 — 用台指期避台股、用 ES mini 避美股，匯率風險、保證金需求、稅務影響 | 來源 section: 面向 i: 期貨避險（futures hedging）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "rp_7c58652216",
@@ -26195,7 +26195,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-09T11:56:39+00:00"
+    "created_at": "2026-06-09T11:56:39+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T15:48:47.361202+00:00",
+    "claim_session_id": "1ad78305c77f",
+    "started_at": "2026-06-09T15:48:59.074035+00:00",
+    "completed_at": "2026-06-09T15:50:25.083269+00:00",
+    "result": "Resolved by prior evidence: K758 covers FX hedging for Taiwan investors and I9/I9b cover futures hedge effectiveness. See storage/ops/research_notes/2026-06-09/research_i7_tw_cross_border_hedging_resolution.md."
   },
   {
     "id": "research_etf_0056_00878_00919",
@@ -26223,7 +26229,7 @@
     "title": "研究 backlog fallback: 「填息率」與波動率的關係——填息快的股票 vol 是否較低？",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 「填息率」與波動率的關係——填息快的股票 vol 是否較低？ | 來源 section: 除權息研究方向（用戶指定）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "rp_8f163c50fd",
@@ -26231,7 +26237,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-09T12:07:56+00:00"
+    "created_at": "2026-06-09T12:07:56+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T15:46:30.371262+00:00",
+    "claim_session_id": "81690dc24898",
+    "started_at": "2026-06-09T15:46:49.564350+00:00",
+    "completed_at": "2026-06-09T15:48:38.354352+00:00",
+    "result": "Resolved by prior evidence in K512; no significant support that faster fill implies lower volatility. See storage/ops/research_notes/2026-06-09/research_fill_rate_vol_duplicate_resolution.md."
   },
   {
     "id": "research_0050_tw_vol_0050",
@@ -26353,5 +26365,111 @@
     "started_at": "2026-06-09T15:13:17.162215+00:00",
     "completed_at": "2026-06-09T15:23:19.581053+00:00",
     "result": "K1403 general daily_article published as mile_127dc20d (title: 預測輸了，守底線卻贏了：一個模型的分裂成績單). anti_ai_gate PASS r1, 2 figures, 1351 words, Supabase synced."
+  },
+  {
+    "id": "paper_review_mile_579ad22f",
+    "title": "Paper review (Codex 24h-rule): 債券波動明明最怕利率，為什麼最後還是 VIX 比較有用？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_579ad22f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_579ad22f",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-09T16:08:33+00:00"
+  },
+  {
+    "id": "research_spillover_btc_usd_eth_usd_realized_vol_spy_vol_s",
+    "title": "研究 backlog fallback: 加密貨幣波動率 spillover：BTC-USD / ETH-USD 的 realized vol 與股市（SPY）vol 的雙向 spillover，crypto 是否領先/落後 equity vol（yfinance，明確 lag，VAR/Granger + DCC）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 加密貨幣波動率 spillover：BTC-USD / ETH-USD 的 realized vol 與股市（SPY）vol 的雙向 spillover，crypto 是否領先/落後 equity vol（yfinance，明確 lag，VAR/Granger + DCC） | 來源 section: 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/vix/台股 主導, novelty quota）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "spillover_btc_usd_eth_usd_realized_vol_spy_vol_s",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T16:09:13+00:00"
+  },
+  {
+    "id": "research_regime_tnx_fvx_10y_5y_tnx_irx_regime_spy_realize",
+    "title": "研究 backlog fallback: 收益率曲線斜率作為股市波動率 regime 指標：用 ^TNX − ^FVX（10Y−5Y）或 ^TNX−^IRX 斜率，檢驗曲線倒掛/陡峭 regime 下 SPY realized vol 的條件分佈差異（yfinance）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 收益率曲線斜率作為股市波動率 regime 指標：用 ^TNX − ^FVX（10Y−5Y）或 ^TNX−^IRX 斜率，檢驗曲線倒掛/陡峭 regime 下 SPY realized vol 的條件分佈差異（yfinance） | 來源 section: 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/vix/台股 主導, novelty quota）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "regime_tnx_fvx_10y_5y_tnx_irx_regime_spy_realize",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T16:09:13+00:00"
+  },
+  {
+    "id": "research_ex_eem_inda_ewz_ewy_eww_realized_vol_em_vol_fact",
+    "title": "研究 backlog fallback: 新興市場 ex-台 波動率景觀：EEM / INDA(印度) / EWZ(巴西) / EWY(韓國) / EWW(墨西哥) 的 realized vol 與彼此相關性結構，找跨 EM 共同 vol factor（yfinance，PCA + 相關 regime）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 新興市場 ex-台 波動率景觀：EEM / INDA(印度) / EWZ(巴西) / EWY(韓國) / EWW(墨西哥) 的 realized vol 與彼此相關性結構，找跨 EM 共同 vol factor（yfinance，PCA + 相關 regime） | 來源 section: 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/vix/台股 主導, novelty quota）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "ex_eem_inda_ewz_ewy_eww_realized_vol_em_vol_fact",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T16:09:19+00:00"
+  },
+  {
+    "id": "research_spillover_cl_f_uso_vol_spy_vol_vol_of_vol_yfinan",
+    "title": "研究 backlog fallback: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag） | 來源 section: 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/vix/台股 主導, novelty quota）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "spillover_cl_f_uso_vol_spy_vol_vol_of_vol_yfinan",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T16:09:19+00:00"
+  },
+  {
+    "id": "research_ura_krbn_vol_clustering",
+    "title": "研究 backlog fallback: 另類資產波動率特性：URA(鈾) / KRBN(碳權) / 比特幣 等非傳統資產的 vol clustering、尾部、與傳統股債的相關性",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 另類資產波動率特性：URA(鈾) / KRBN(碳權) / 比特幣 等非傳統資產的 vol clustering、尾部、與傳統股債的相關性 — 它們是分散工具還是高 beta 放大器（yfinance） | 來源 section: 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/vix/台股 主導, novelty quota）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "ura_krbn_vol_clustering",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T16:09:23+00:00"
+  },
+  {
+    "id": "research_dxy_uup_vol_regime_em_vol_yfinance",
+    "title": "研究 backlog fallback: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance） | 來源 section: 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/vix/台股 主導, novelty quota）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "dxy_uup_vol_regime_em_vol_yfinance",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T16:09:23+00:00"
   }
 ]

@@ -455,6 +455,15 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] VOLARE 平台（HAR/HAR-Q/MEM/AMEM 標準化比較框架）— arXiv:2602.19732
 - [ ] Multi-Transformer Vol Forecast — Engineering App AI 2024
 
+### 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/VIX/台股 主導, Novelty Quota）
+> 這批刻意跳出 GARCH/HAR vol-forecast 與 VIX/台股 dominant clusters，全部 yfinance 免費資料可跑，服務 Novelty Quota 20% contrarian 配額。
+- [ ] 加密貨幣波動率 spillover：BTC-USD / ETH-USD 的 realized vol 與股市（SPY）vol 的雙向 spillover，crypto 是否領先/落後 equity vol（yfinance，明確 lag，VAR/Granger + DCC）
+- [ ] 收益率曲線斜率作為股市波動率 regime 指標：用 ^TNX − ^FVX（10Y−5Y）或 ^TNX−^IRX 斜率，檢驗曲線倒掛/陡峭 regime 下 SPY realized vol 的條件分佈差異（yfinance）
+- [ ] 新興市場 ex-台 波動率景觀：EEM / INDA(印度) / EWZ(巴西) / EWY(韓國) / EWW(墨西哥) 的 realized vol 與彼此相關性結構，找跨 EM 共同 vol factor（yfinance，PCA + 相關 regime）
+- [ ] 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）
+- [ ] 另類資產波動率特性：URA(鈾) / KRBN(碳權) / 比特幣 等非傳統資產的 vol clustering、尾部、與傳統股債的相關性 — 它們是分散工具還是高 beta 放大器（yfinance）
+- [ ] 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）
+
 ## 決策框架
 
 ### 何時深入某面向
