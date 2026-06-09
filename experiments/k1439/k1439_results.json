@@ -137,9 +137,9 @@
   "tests_level": {
     "EEM": {
       "welch_t": 4.177316962427681,
-      "welch_p": 3.0277523529130927e-05,
+      "welch_p": 0.000030277523529130927,
       "levene_stat": 31.309220489394843,
-      "levene_p": 2.383286163708681e-08,
+      "levene_p": 2.383286163708681E-8,
       "n_strong": 1887,
       "n_weak": 1356,
       "mean_strong_rv": 0.2036182055974268,
@@ -163,9 +163,9 @@
     },
     "DBC": {
       "welch_t": 8.156132491089071,
-      "welch_p": 4.893385283864603e-16,
+      "welch_p": 4.893385283864603E-16,
       "levene_stat": 72.0601410599457,
-      "levene_p": 3.131584376596918e-17,
+      "levene_p": 3.131584376596918E-17,
       "n_strong": 1887,
       "n_weak": 1356,
       "mean_strong_rv": 0.1714262483113313,
@@ -176,9 +176,9 @@
     },
     "USO": {
       "welch_t": 10.003153989366552,
-      "welch_p": 3.3395195370966934e-23,
+      "welch_p": 3.3395195370966934E-23,
       "levene_stat": 67.71364808154432,
-      "levene_p": 2.7072820032933404e-16,
+      "levene_p": 2.7072820032933404E-16,
       "n_strong": 1887,
       "n_weak": 1356,
       "mean_strong_rv": 0.3493921029197189,
@@ -189,9 +189,9 @@
     },
     "DBB": {
       "welch_t": 4.63153072221924,
-      "welch_p": 3.7745537583612795e-06,
+      "welch_p": 0.0000037745537583612795,
       "levene_stat": 34.06778754500031,
-      "levene_p": 5.847503827816802e-09,
+      "levene_p": 5.847503827816802E-9,
       "n_strong": 1887,
       "n_weak": 1356,
       "mean_strong_rv": 0.18905695143058465,
@@ -204,9 +204,9 @@
   "tests_trend": {
     "EEM": {
       "welch_t": 5.587229807223617,
-      "welch_p": 2.4594204801493955e-08,
+      "welch_p": 2.4594204801493955E-8,
       "levene_stat": 48.65294101990798,
-      "levene_p": 3.5531535646885528e-12,
+      "levene_p": 3.5531535646885528E-12,
       "n_strong": 2398,
       "n_weak": 1650,
       "mean_strong_rv": 0.20194585321665134,
@@ -230,9 +230,9 @@
     },
     "DBC": {
       "welch_t": 8.351980840235052,
-      "welch_p": 9.134180223525104e-17,
+      "welch_p": 9.134180223525104E-17,
       "levene_stat": 69.23194600057406,
-      "levene_p": 1.1831285995448795e-16,
+      "levene_p": 1.1831285995448795E-16,
       "n_strong": 2398,
       "n_weak": 1650,
       "mean_strong_rv": 0.1677610349684092,
@@ -243,9 +243,9 @@
     },
     "USO": {
       "welch_t": 11.2999977648794,
-      "welch_p": 3.7667710255027686e-29,
+      "welch_p": 3.7667710255027686E-29,
       "levene_stat": 85.51087682510189,
-      "levene_p": 3.635419943714533e-20,
+      "levene_p": 3.635419943714533E-20,
       "n_strong": 2398,
       "n_weak": 1650,
       "mean_strong_rv": 0.3419251598783671,
@@ -256,9 +256,9 @@
     },
     "DBB": {
       "welch_t": 4.366423816917631,
-      "welch_p": 1.2957832701172634e-05,
+      "welch_p": 0.000012957832701172634,
       "levene_stat": 27.461020351477824,
-      "levene_p": 1.684641610044858e-07,
+      "levene_p": 1.684641610044858E-7,
       "n_strong": 2398,
       "n_weak": 1650,
       "mean_strong_rv": 0.187619126681538,
@@ -277,12 +277,31 @@
     "level_vs_trend_sign_concordance": "4/5"
   },
   "most_sensitive_asset_by_abs_welch_t": "USO",
-  "verdict": "PASS",
-  "verdict_reason": "4/5 assets show Bonferroni-significant RV difference between strong vs weak USD level regime, with sign concordant across trend regime in 4/5 assets.",
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_reason": "Codex review CONDITIONAL_PASS: 4/5 assets show large mean RV difference between strong vs weak USD regime, sign-concordant across level + trend regime definitions, Bonferroni alpha=0.01 cleared. Caveat: standard Welch t-test does not account for 21d-RV serial autocorrelation (acf1≈0.98, acf21≈0.47-0.59), so p-values are likely optimistic; HAC/Newey-West or block-bootstrap correction recommended as follow-up before promoting to strong inference.",
   "lookahead_protected": true,
   "seed": 42,
   "figures": [
     "figures/rv_by_regime_level.png",
     "figures/rv_by_regime_trend.png"
-  ]
+  ],
+  "codex_review": {
+    "verdict": "CONDITIONAL_PASS",
+    "timestamp": "2026-06-10T01:25:00+08:00",
+    "tool": "codex-cli 0.137.0 gpt-5.4",
+    "high_risk": "Welch t-test ignores strong serial autocorrelation in 21d rolling RV (acf1 ~0.98, acf21 ~0.47-0.59); SE under-estimated, p-values optimistic",
+    "medium_risk_1": "README line numbers stale (shift(1) at lines 105/116 not 90/100); lookahead protection itself is correct",
+    "medium_risk_2": "yfinance fetch not version-locked / no raw cache; strict reproducibility weakened (seed=42 unused since no randomness)",
+    "passed_checks": [
+      "lookahead_protection_via_shift1",
+      "bonferroni_alpha_correct",
+      "regime_balance_adequate",
+      "data_integrity_general"
+    ],
+    "followup_recommended": [
+      "add_hac_newey_west_or_block_bootstrap",
+      "fix_readme_line_numbers",
+      "consider_raw_data_snapshot"
+    ]
+  }
 }

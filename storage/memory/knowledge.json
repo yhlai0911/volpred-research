@@ -32933,5 +32933,44 @@
       "storage/ops/paper_reviews/2026-06-09/codex_review_mile_fa859ea5_k1057.md"
     ],
     "created_at": "2026-06-09T21:13:34.638930"
+  },
+  {
+    "item_id": "c37e27f7",
+    "category": "empirical_finding",
+    "content": "K1439 DXY/UUP regime conditioning on cross-asset realized volatility (2010-2026, N=4131 daily, 5 assets: EEM/GLD/DBC/USO/DBB) — CONDITIONAL_PASS (Codex review). Welch t-test: 4/5 assets show Bonferroni-significant (alpha=0.01) higher mean RV in strong-USD regime (UUP 100d z>+0.5, n=1887) vs weak-USD (z<-0.5, n=1356). USO most sensitive (t=10.00, p=3.3e-23, diff=+5.88pp annualized RV); DBC (t=8.16), DBB (t=4.63), EEM (t=4.18) all positive; GLD NULL (t=0.73, p=0.47) — dual safe-haven channels offset. Trend regime (60d log-return sign) robustness: 4/5 sign-concordant. Caveat (Codex high-risk): standard Welch ignores 21d-RV serial autocorrelation (acf1~0.98, acf21~0.47-0.59); p-values likely optimistic — HAC/Newey-West or block-bootstrap follow-up recommended before promoting to strong inference. Lookahead-protected via shift(1) on regime bucket; seed=42 (no randomness used). Mission contribution: #2 research (cross-asset USD-regime conditioning), #1 reader-facing topic candidate, #3 USD-regime covariate for cross-asset paper.",
+    "evidence": [
+      "experiments/k1439/README.md",
+      "experiments/k1439/k1439.py",
+      "experiments/k1439/k1439_results.json",
+      "experiments/k1439/figures/rv_by_regime_level.png",
+      "experiments/k1439/figures/rv_by_regime_trend.png"
+    ],
+    "confidence": 0.65,
+    "created_at": "2026-06-10T01:19:53.596840",
+    "k_id": "K1439",
+    "experiment_id": "K1439",
+    "experiment_path": "experiments/k1439/",
+    "verdict": "CONDITIONAL_PASS",
+    "codex_review_verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "codex-cli 0.137.0 gpt-5.4",
+    "tickers": [
+      "EEM",
+      "GLD",
+      "DBC",
+      "USO",
+      "DBB",
+      "UUP"
+    ],
+    "period": {
+      "start": "2010-01-04",
+      "end": "2026-06-05",
+      "n_obs": 4131
+    },
+    "tags": [
+      "cross-asset-vol",
+      "usd-regime",
+      "conditioning-variable",
+      "auto-research-fallback"
+    ]
   }
 ]
