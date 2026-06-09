@@ -10021,5 +10021,15 @@
     "claimed_by": "hourly-05",
     "result": "succeeded",
     "summary": "K1429 NVDA / AAPL / MSFT earnings-window 5d RV analysis (n=9 events each). Findings: NVDA pre-RV -19.7% (single-test p=0.034, fails Bonferroni); MSFT post +102.6% (p=0.0049, borderline survives Bonferroni). Codex CLI primary-path CONDITIONAL_PASS w/ 5 caveats (paired ttest_rel vs constant baseline ≈ 1-sample, small n). Article mile_072c3972 published to feed (after p=N sanitizer fix update — caught misleading 'p=0.64 → 達顯著水準' bug). Knowledge 72f62789 written with experiment_id + reviewer provenance. FB dual-publish marked awaiting_interactive_session (Ivan Lai voice via Claude in Chrome). supabase sync ran clean. anti_ai_gate PASS."
+  },
+  {
+    "timestamp": "2026-06-09T12:19:40+08:00",
+    "task_type": "experiment",
+    "task_id": "K1432_tw_financial_stress",
+    "k_id": "K1432",
+    "verdict": "NULL",
+    "summary": "TW 金融股壓力指標→TSMC vol 早期預警 OOS NULL (in-sample Granger PASS 但 OOS DM 全惡化)",
+    "commit": "b4980d1d",
+    "dispatched_by": "hourly-12"
   }
 ]

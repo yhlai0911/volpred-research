@@ -25873,7 +25873,7 @@
     "title": "K1061: 台股財報公告日 EAV 擴展至 TWSE 50 全成分（binomial power N≥50）",
     "description": "延伸 K1059-K1064 台股財報公告日×波動率研究：把 earnings announcement vol (EAV) 效應從子樣本擴展到 TWSE 50 全成分股，N≥50 提供足夠 binomial power。研究誠實：T+1 event window、lag 明確、seed 固定、與既有 K1059 對齊。先讀 docs/error_log.md + .claude/rules/experiments.md + 查相似 K。Codex/code-reviewer 審後才寫 knowledge。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "tags": [
@@ -25883,14 +25883,20 @@
       "波動率",
       "auto-research-fallback"
     ],
-    "created_at": "2026-06-09T03:29:47+00:00"
+    "created_at": "2026-06-09T03:29:47+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T04:03:44.837586+00:00",
+    "claim_session_id": "ebd509170dd6",
+    "started_at": "2026-06-09T04:03:44.929358+00:00",
+    "completed_at": "2026-06-09T04:04:21.052629+00:00",
+    "result": "Verified K1061 already has complete experiment artifacts. Added Codex closure review confirming T+1 event timing, no-lookahead implementation, and source/result consistency; closed stale pending task without rerun."
   },
   {
     "id": "research_tw_financial_stress_early_warning",
     "title": "金融股壓力指標作為 TSMC 波動率早期預警（K757 Fubon→TSMC Granger F=6.11 延伸）",
     "description": "K757 發現富邦→台積電有 Granger 因果（F=6.11）。建立台股金融股壓力指標（金融股 vol / spread / 相對強弱），檢驗能否作為 TSMC（或大盤）波動率的早期預警 signal。研究誠實：明確 lag（金融股_t → TSMC vol_{t+k}），無 lookahead、seed 固定、OOS 驗證、與 baseline（VIX/歷史 vol）公平比較。先讀 error_log + experiments rules + 查相似 K。審查後才寫 knowledge。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "tags": [
@@ -25901,6 +25907,28 @@
       "波動率",
       "auto-research-fallback"
     ],
-    "created_at": "2026-06-09T03:29:47+00:00"
+    "created_at": "2026-06-09T03:29:47+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-09T04:09:11.627343+00:00",
+    "claim_session_id": "554b998cbcd8",
+    "started_at": "2026-06-09T04:09:15.604943+00:00",
+    "completed_at": "2026-06-09T04:19:32.702474+00:00",
+    "result": "K1432 done | NULL: TW 金融股壓力指標 (5檔金融股) 對 TSMC 波動率 in-sample Granger PASS (F=3.7-5.7, p<0.01) 但 OOS (2021-01-01+, n=1397) DM 全部對 B2 HAR-RV 顯著惡化 (h=1 S4 DM=-2.23 p=0.026, h=5 all DM=-3.12 p=0.002, h=10 all DM=-3.25 p=0.001). 經典 in-sample ≠ OOS forecastability 案例 - HAR-RV 已 internalize 訊號. seed=42, lag .shift(k), 4 specs precommitted. commit b4980d1d."
+  },
+  {
+    "id": "paper_review_mile_85699c9e",
+    "title": "Paper review (Codex 24h-rule): 一個模型如果只在某段行情好用，其實還不算真的可靠",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_85699c9e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_85699c9e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-09T04:07:57+00:00"
   }
 ]
