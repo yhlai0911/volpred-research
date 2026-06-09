@@ -26289,7 +26289,7 @@
   {
     "id": "amend_k1057_mile_fa859ea5_53ef1847",
     "task_type": "experiment",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 4,
     "title": "K1057 amend: BN-S canonical z-stat + QLIKE phrasing fix (per Codex review)",
     "description": "Codex review on mile_fa859ea5 (2026-06-09) flagged 2 critical bugs in K1057: (1) BN-S z-stat at experiments/k1057/k1057.py:119-126 uses unnormalized rv-bpv with non-canonical denominator; 8/60 significant jump count rests on this. Re-implement canonical relative BN-S z-stat with max(1, TPQ/BPV^2) denominator; verify 8/60 jump count after fix. (2) QLIKE at line 453-459 / 558-562 is constant-shifted (actual/predicted + log(predicted)) not canonical Patton (2011) σ²/h - log(σ²/h) - 1; rankings unchanged but article claims Patton (2011) QLIKE — amend article wording OR swap to canonical formula. Also add clarifying notes: Spearman uses 30-day OOS not full sample; DM test uses HAC variance not Harvey 1997 small-sample correction. After re-run, if 8/60 changes materially, issue correction note on mile_fa859ea5. Review report: storage/ops/paper_reviews/2026-06-09/codex_review_mile_fa859ea5_k1057.md. Knowledge id: 62944463.",
@@ -26297,6 +26297,37 @@
     "created_at": "2026-06-09T21:13:53.380573",
     "related_article": "mile_fa859ea5",
     "related_experiment": "k1057",
-    "parent_review_task": "paper_review_mile_fa859ea5"
+    "parent_review_task": "paper_review_mile_fa859ea5",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T13:35:04.816540+00:00",
+    "claim_session_id": "e9d053d7efcb",
+    "started_at": "2026-06-09T13:35:10.663150+00:00",
+    "completed_at": "2026-06-09T13:42:45.633572+00:00",
+    "result": "K1057 amended and rerun. Fixed canonical BN-S relative z-stat, pinned sample to 2026-01-14..2026-04-10, added local SPY/VIX fallback, switched to canonical QLIKE, regenerated results/plots. Jump count changed 8/60->4/60; feed.json errata + human-readable correction note added; core NULL claim still holds."
+  },
+  {
+    "id": "daily_article_k1437_usdtwd_twii_asymmetry",
+    "title": "K1437 daily_article: 台幣對台股「不對稱」傳染（NULL spillover + ASYMMETRY borderline）",
+    "description": "K1437 USDTWD↔TWII vol spillover 14 年 VAR+DCC+ asymmetry。Primary NULL（Granger p=0.610）但 secondary 不對稱 Wald p=0.048（borderline 5%）。寫 daily_article 給一般讀者：(1) 為何台幣大幅升貶不會明顯傳染到台股波動率（NULL）；(2) 但「方向不對稱」的細節（升值衝擊 vs 貶值衝擊 borderline 不同）；(3) 對出口導向投資的啟示。draft 進池非立即 published。",
+    "task_type": "daily_article",
+    "priority": 2,
+    "status": "succeeded",
+    "created_at": "2026-06-09T22:10:08+08:00",
+    "source": "hourly-22_diversity_rotation",
+    "tags": [
+      "daily_article",
+      "K1437",
+      "USDTWD",
+      "TWII",
+      "spillover",
+      "asymmetry"
+    ],
+    "monetization_angle": "tw_retail_education + organic_search_tw_equity_fx",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-09T14:10:09.462208+00:00",
+    "claim_session_id": "14e82e7499d6",
+    "started_at": "2026-06-09T14:10:09.719588+00:00",
+    "completed_at": "2026-06-09T14:20:32.811132+00:00",
+    "result": "feed_id=mile_df7a8bce | K1437 USD/TWD↔TWII vol 14yr NULL Granger (p=0.610) + borderline asymmetry (升值 lag1 p=0.00028, 貶值 lag1 p=0.256, Wald p=0.048) + DCC rho=-0.131 | anti_ai_gate PASS warn=2 | Codex CONDITIONAL_PASS"
   }
 ]
