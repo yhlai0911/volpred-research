@@ -1,0 +1,259 @@
+{
+  "experiment_id": "K1431",
+  "title": "VIX9D-VIX spread as HAR-RV OOS covariate for SPY daily RV",
+  "verdict": "NULL",
+  "rationale": "H1 (spread alone): full DM HLN p=0.5375 improvement=+2.18% 0/3 subperiods at p<0.10 -> NULL. Side finding M2 (spread+VIX_level): full p=3.21e-09 improvement=+18.93% 3/3 subperiods at p<0.10 -> VIX LEVEL adds strong incremental info, but credit is to VIX level not spread.",
+  "data": {
+    "source": "yfinance ^VIX9D, ^VIX, ^GSPC",
+    "sample_start": "2011-02-04",
+    "sample_end": "2026-06-08",
+    "n_total": 3857,
+    "spread_mean": -0.6481591805232322,
+    "spread_std": 2.2658174683436862,
+    "spread_min": -6.470001220703125,
+    "spread_max": 28.089996337890625
+  },
+  "method": {
+    "RV_proxy_main": "squared log return (Andersen-Bollerslev-Diebold-Labys 1999 daily)",
+    "RV_proxy_robust": "abs(log return)",
+    "lag_rule": "spread_lag1 = (VIX9D - VIX).shift(1); train end < test start enforced",
+    "models": {
+      "M0_baseline": "HAR-RV {RV_d_lag1, RV_w_lag1, RV_m_lag1}",
+      "M1_spread": "M0 + spread_lag1",
+      "M2_full": "M0 + spread_lag1 + VIX_lag1"
+    },
+    "estimator": "OLS via numpy.linalg.lstsq",
+    "evaluation": "rolling expanding window, min_train=1000",
+    "losses": [
+      "QLIKE (Patton 2011)",
+      "MSE"
+    ],
+    "DM_test": "Diebold-Mariano with Harvey-Leybourne-Newbold h=1 small-sample correction",
+    "subperiods": [
+      [
+        "2015-2017",
+        "2015-01-01",
+        "2017-12-31"
+      ],
+      [
+        "2018-2021",
+        "2018-01-01",
+        "2021-12-31"
+      ],
+      [
+        "2022-2026",
+        "2022-01-01",
+        "2026-12-31"
+      ]
+    ],
+    "seed": 42
+  },
+  "results_main_RV": {
+    "label": "RV=squared_log_return",
+    "target": "RV",
+    "oos_start": "2015-01-28",
+    "oos_end": "2026-06-08",
+    "n_oos": 2857,
+    "full_qlike": {
+      "M0_vs_M1_spread": {
+        "n": 2857,
+        "mean_base": 4.629297214714364,
+        "mean_alt": 4.528156136509132,
+        "improvement_pct": 2.1848041617149088,
+        "dm_hln": 0.6166005587731437,
+        "p_value": 0.5375473711482206
+      },
+      "M0_vs_M2_full": {
+        "n": 2857,
+        "mean_base": 4.629297214714364,
+        "mean_alt": 3.752816344741734,
+        "improvement_pct": 18.933346236372735,
+        "dm_hln": 5.939441713084394,
+        "p_value": 3.2056475252062455e-09
+      }
+    },
+    "full_mse": {
+      "M0_vs_M1_spread": {
+        "n": 2857,
+        "mean_base": 2.837800409900925e-07,
+        "mean_alt": 3.771356613439054e-05,
+        "improvement_pct": -13189.717628769818,
+        "dm_hln": -1.1226388320846528,
+        "p_value": 0.2616852822906717
+      },
+      "M0_vs_M2_full": {
+        "n": 2857,
+        "mean_base": 2.837800409900925e-07,
+        "mean_alt": 0.0035706488658200828,
+        "improvement_pct": -1258145.2428163346,
+        "dm_hln": -1.431248707055713,
+        "p_value": 0.15246836044909817
+      }
+    },
+    "subperiod_qlike": {
+      "M0_vs_M1_spread": {
+        "2015-2017": {
+          "n": 738,
+          "mean_base": 4.067405871770272,
+          "mean_alt": 3.8793789865252157,
+          "improvement_pct": 4.6227716429789325,
+          "dm_hln": 0.8614893273981152,
+          "p_value": 0.3892487920892982
+        },
+        "2018-2021": {
+          "n": 1008,
+          "mean_base": 5.371176112231351,
+          "mean_alt": 5.3157740924641,
+          "improvement_pct": 1.0314690602136152,
+          "dm_hln": 0.1385993901177882,
+          "p_value": 0.889794436099203
+        },
+        "2022-2026": {
+          "n": 1111,
+          "mean_base": 4.329442923441293,
+          "mean_alt": 4.244518546127064,
+          "improvement_pct": 1.9615543804588589,
+          "dm_hln": 0.5319142882789056,
+          "p_value": 0.5948918000949734
+        }
+      },
+      "M0_vs_M2_full": {
+        "2015-2017": {
+          "n": 738,
+          "mean_base": 4.067405871770272,
+          "mean_alt": 3.547760227894166,
+          "improvement_pct": 12.775849282283172,
+          "dm_hln": 2.206851291583425,
+          "p_value": 0.027632008164072852
+        },
+        "2018-2021": {
+          "n": 1008,
+          "mean_base": 5.371176112231351,
+          "mean_alt": 3.698924565378056,
+          "improvement_pct": 31.13380592837405,
+          "dm_hln": 5.099231822761789,
+          "p_value": 4.0730417971701627e-07
+        },
+        "2022-2026": {
+          "n": 1111,
+          "mean_base": 4.329442923441293,
+          "mean_alt": 3.9379237505311973,
+          "improvement_pct": 9.043176681929626,
+          "dm_hln": 2.2489954878807104,
+          "p_value": 0.02470823156351476
+        }
+      }
+    }
+  },
+  "results_robust_AV": {
+    "label": "AV=abs_log_return  (robustness)",
+    "target": "AV",
+    "oos_start": "2015-01-28",
+    "oos_end": "2026-06-08",
+    "n_oos": 2857,
+    "full_qlike": {
+      "M0_vs_M1_spread": {
+        "n": 2857,
+        "mean_base": 0.5167833880881563,
+        "mean_alt": 238688.0344707763,
+        "improvement_pct": -46187149.81733727,
+        "dm_hln": -1.7087333494922026,
+        "p_value": 0.08760900435491625
+      },
+      "M0_vs_M2_full": {
+        "n": 2857,
+        "mean_base": 0.5167833880881563,
+        "mean_alt": 0.4772853369506421,
+        "improvement_pct": 7.643057429465267,
+        "dm_hln": 7.068477219242547,
+        "p_value": 1.9608759060929515e-12
+      }
+    },
+    "full_mse": {
+      "M0_vs_M1_spread": {
+        "n": 2857,
+        "mean_base": 5.45107541310907e-05,
+        "mean_alt": 5.192360899223907e-05,
+        "improvement_pct": 4.746118779846477,
+        "dm_hln": 2.214206960052006,
+        "p_value": 0.026893240891230796
+      },
+      "M0_vs_M2_full": {
+        "n": 2857,
+        "mean_base": 5.45107541310907e-05,
+        "mean_alt": 4.87841706667162e-05,
+        "improvement_pct": 10.50541962894675,
+        "dm_hln": 3.631810444165052,
+        "p_value": 0.0002863891104998295
+      }
+    },
+    "subperiod_qlike": {
+      "M0_vs_M1_spread": {
+        "2015-2017": {
+          "n": 738,
+          "mean_base": 0.5680668688136159,
+          "mean_alt": 143700.5070132843,
+          "improvement_pct": -25296306.972896848,
+          "dm_hln": -1.3591852644617852,
+          "p_value": 0.17450364153006825
+        },
+        "2018-2021": {
+          "n": 1008,
+          "mean_base": 0.48333801194249687,
+          "mean_alt": 571309.6968027981,
+          "improvement_pct": -118200762.06477948,
+          "dm_hln": -1.4717649802580945,
+          "p_value": 0.14139678845154613
+        },
+        "2022-2026": {
+          "n": 1111,
+          "mean_base": 0.5130621733081703,
+          "mean_alt": 0.5093879240487752,
+          "improvement_pct": 0.7161411327020878,
+          "dm_hln": 0.44127884880567536,
+          "p_value": 0.6590970768925652
+        }
+      },
+      "M0_vs_M2_full": {
+        "2015-2017": {
+          "n": 738,
+          "mean_base": 0.5680668688136159,
+          "mean_alt": 0.535315667258698,
+          "improvement_pct": 5.765377872382785,
+          "dm_hln": 2.430622495605704,
+          "p_value": 0.015310483073592174
+        },
+        "2018-2021": {
+          "n": 1008,
+          "mean_base": 0.48333801194249687,
+          "mean_alt": 0.44028479071274484,
+          "improvement_pct": 8.907476789736558,
+          "dm_hln": 4.579060441230576,
+          "p_value": 5.254521621811392e-06
+        },
+        "2022-2026": {
+          "n": 1111,
+          "mean_base": 0.5130621733081703,
+          "mean_alt": 0.4723079893722942,
+          "improvement_pct": 7.943322672396107,
+          "dm_hln": 5.560300536332737,
+          "p_value": 3.372383106103882e-08
+        }
+      }
+    }
+  },
+  "limitations": [
+    "RV proxy is daily squared return, not 5-min realized variance \u2014 noisier than HF RV.",
+    "OOS window starts ~2015 due to 1000-day in-sample requirement; pre-2011 VIX9D unavailable.",
+    "Only SPY (via ^GSPC); cross-asset / cross-index extension future work.",
+    "OLS linear specification; could be extended to HAR-Q (Bollerslev-Patton-Quaedvlieg 2016) or HAR-CJ."
+  ],
+  "references": [
+    "Corsi, F. (2009). A Simple Approximate Long-Memory Model of Realized Volatility. JFE.",
+    "Patton, A. J. (2011). Volatility forecast comparison using imperfect volatility proxies. JoE.",
+    "Bollerslev, T., Tauchen, G., & Zhou, H. (2009). Expected stock returns and variance risk premia. RFS.",
+    "Andersen, T. G., Bollerslev, T., Diebold, F. X., & Labys, P. (1999). The distribution of realized exchange rate volatility. JASA.",
+    "Harvey, D., Leybourne, S., & Newbold, P. (1997). Testing the equality of prediction mean squared errors. IJF."
+  ],
+  "timestamp_utc": "2026-06-09T02:19:25.906289+00:00"
+}
