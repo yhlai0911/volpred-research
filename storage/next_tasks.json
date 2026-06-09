@@ -26030,7 +26030,7 @@
     "description": "Hypothesis: 台股 Q1 財報於 4 月底集中公告（90% TWSE50 在 4/28-4/30），形成 vol cluster；HAR-RV 對 cluster day 預測系統性低估。Method: 抓 TWII daily RV + 標記每年 4 月最後 5 個交易日 = cluster_window；計算 cluster vs non-cluster 平均 RV t-test；HAR-RV 加 cluster_window dummy (signal shift 1 day lag)；OOS 2022-2026；DM test。Diff vs K1432 financial stress：那做日頻 spillover，本做 event-window clustering。Lookahead：dummy 用 calendar 月份判斷不是真實公告日（避免 forward-looking）。Seed = 42。Monetization：間接 — 台股法人客群 → 機構波動率諮詢；feed 文章吸引 4 月台股 retail。Scope ≤ 50min。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-09T15:10:09+08:00",
     "source": "hourly_15_governance_seed",
     "tags": [
@@ -26040,7 +26040,12 @@
       "earnings",
       "HAR-RV"
     ],
-    "monetization_angle": "indirect_institutional_advisory + retail_traffic"
+    "monetization_angle": "indirect_institutional_advisory + retail_traffic",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T09:17:32.744538+00:00",
+    "claim_session_id": "800344088293",
+    "completed_at": "2026-06-09T09:21:39.879353+00:00",
+    "result": "Built K1434 with full experiment trio using local TWII OHLC and 財報公告日.txt. Result: Q1 earnings cluster days show slightly higher TWII range-vol descriptively, but no formal signal survives — cluster vs non-cluster Welch p=0.254, HAR+cluster_count HAC p=0.688 / DM p=0.600, HAR+cluster_day HAC p=0.428 / DM p=0.848 in OOS 2021-2026."
   },
   {
     "id": "K1435_gold_dollar_vol_spillover_fed",
@@ -26058,7 +26063,8 @@
       "event_study",
       "DCC-GARCH"
     ],
-    "monetization_angle": "direct_event_hedge_strategy + paper_candidate"
+    "monetization_angle": "direct_event_hedge_strategy + paper_candidate",
+    "last_released_at": "2026-06-09T09:16:57.514054+00:00"
   },
   {
     "id": "K1436_btc_funding_rate_vol_covariate",
@@ -26084,7 +26090,7 @@
     "description": "Hypothesis: USD/TWD 大幅升貶值傳導至 TWII 波動率（出口導向經濟）；spillover asymmetric (升值衝擊 > 貶值)。Method: 抓 USD/TWD daily + TWII daily → VAR(p) on log-RV → BEKK-GARCH 或 DCC-GARCH variance spillover；Asymmetry test (升值 dummy interact)；Granger causality TWD-vol → TWII-vol。Diff vs K1432 financial stress (TWD vs TSMC)：本做 macro FX → broad index，K1432 做 sector → single stock。Lookahead：FX rate t-1 close → TWII t-day vol forecast。Seed = 42。Monetization：直接 — 出口企業 FX-vol hedge 諮詢付費；間接 — 台股機構研究 credibility。Scope ≤ 50min；compute_queue if BEKK MLE > 50min。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-09T15:10:09+08:00",
     "source": "hourly_15_governance_seed",
     "tags": [
@@ -26094,7 +26100,13 @@
       "spillover",
       "VAR-GARCH"
     ],
-    "monetization_angle": "direct_exporter_hedge_advisory + institutional_credibility"
+    "monetization_angle": "direct_exporter_hedge_advisory + institutional_credibility",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-09T09:09:07.521367+00:00",
+    "claim_session_id": "d04f8ad03c63",
+    "started_at": "2026-06-09T09:09:23.003124+00:00",
+    "completed_at": "2026-06-09T09:47:10.076558+00:00",
+    "result": "K1437 CONDITIONAL_PASS (Codex round-2). N=3358 2012-2026 14yr. PRIMARY Granger TWD-vol→TWII-vol p=0.610 NULL robust. Reverse p=0.062 borderline. DCC α=0.0079 β=0.9896 (98/100 multistart success). SECONDARY asymmetry Wald p=0.048 borderline. NULL_RESULT primary. Lookahead PASS seed=42. Commit 33306dc3. knowledge item_id=49e09409."
   },
   {
     "id": "K1438_vix1d_spy_intraday_vol_covariate",

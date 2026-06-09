@@ -1,0 +1,186 @@
+{
+  "experiment_id": "K1434",
+  "title": "TWII volatility around clustered Q1 earnings announcement days",
+  "timestamp": "2026-06-09T09:21:12.642361+00:00",
+  "data_source": {
+    "twii_file": "storage/macro/yf_TWII.csv",
+    "earnings_file": "\u8ca1\u5831\u516c\u544a\u65e5.txt",
+    "twii_start": "2014-02-21",
+    "twii_end": "2026-03-17",
+    "n_obs": 2936
+  },
+  "methodology": {
+    "target": "TWII Parkinson variance proxy",
+    "transform": "log(RV)",
+    "cluster_definition": "TWSE50 Q1 earnings announcement count per trading date; cluster_day=1{count>=3}",
+    "is_end": "2020-12-31",
+    "oos_start": "2021-01-04",
+    "seed": 42,
+    "lookahead_policy": {
+      "har_terms": "shift(1)",
+      "cluster_terms": "announcement density on t used only via shift(1) to predict t+1"
+    }
+  },
+  "descriptive_stats": {
+    "n_q1_announcements": 593,
+    "n_unique_q1_dates": 193,
+    "cluster_count_distribution": {
+      "0": 2743,
+      "1": 66,
+      "2": 43,
+      "3": 21,
+      "4": 19,
+      "5": 11,
+      "6": 12,
+      "7": 9,
+      "8": 5,
+      "9": 4,
+      "11": 2,
+      "14": 1
+    },
+    "cluster_vs_noncluster": {
+      "n_cluster_days": 193,
+      "n_noncluster_days": 2743,
+      "mean_log_rv_cluster": -10.4063828303595,
+      "mean_log_rv_noncluster": -10.48793693929181,
+      "welch_t": 1.1433556412682173,
+      "welch_p": 0.254129731405114
+    },
+    "high_cluster_vs_low_cluster": {
+      "n_high_cluster_days": 84,
+      "n_low_cluster_days": 109,
+      "mean_log_rv_high": -10.315634268299751,
+      "mean_log_rv_low": -10.476317502038572,
+      "welch_t": 1.129505328131971,
+      "welch_p": 0.2603813450228818
+    }
+  },
+  "full_sample_regressions_hac7": {
+    "har": {
+      "n_obs": 2936,
+      "r2": 0.2977417732903711,
+      "adj_r2": 0.2970232280379397,
+      "params": {
+        "const": {
+          "coef": -1.4565349255604199,
+          "t_stat": -4.430821195420625,
+          "p_value": 9.731539409486111e-06
+        },
+        "log_rv_l1": {
+          "coef": 0.157605570676906,
+          "t_stat": 6.247417285531004,
+          "p_value": 4.777484937441159e-10
+        },
+        "log_rv_7": {
+          "coef": 0.438605469696839,
+          "t_stat": 9.1120564469864,
+          "p_value": 1.4594704089631721e-19
+        },
+        "log_rv_30": {
+          "coef": 0.2643505305476215,
+          "t_stat": 5.690968024742428,
+          "p_value": 1.3880035283966966e-08
+        }
+      }
+    },
+    "har_cluster_count": {
+      "n_obs": 2936,
+      "r2": 0.29778008109608745,
+      "adj_r2": 0.2968217461675253,
+      "params": {
+        "const": {
+          "coef": -1.4604493756565773,
+          "t_stat": -4.445049722194617,
+          "p_value": 9.11334637849236e-06
+        },
+        "log_rv_l1": {
+          "coef": 0.15754900202855063,
+          "t_stat": 6.25001194015984,
+          "p_value": 4.70003088131991e-10
+        },
+        "log_rv_7": {
+          "coef": 0.4385052884569972,
+          "t_stat": 9.115964946241029,
+          "p_value": 1.4094842442331371e-19
+        },
+        "log_rv_30": {
+          "coef": 0.2642515331205107,
+          "t_stat": 5.688329641721574,
+          "p_value": 1.4094216619736385e-08
+        },
+        "q1_cluster_count_l1": {
+          "coef": 0.006099036568189747,
+          "t_stat": 0.4017415952349132,
+          "p_value": 0.6879034993727235
+        }
+      }
+    },
+    "har_cluster_day": {
+      "n_obs": 2936,
+      "r2": 0.2979397232517875,
+      "adj_r2": 0.2969816061903775,
+      "params": {
+        "const": {
+          "coef": -1.4640627679184444,
+          "t_stat": -4.459425241360509,
+          "p_value": 8.526885611407587e-06
+        },
+        "log_rv_l1": {
+          "coef": 0.15724597204712118,
+          "t_stat": 6.251077160708584,
+          "p_value": 4.668501074059605e-10
+        },
+        "log_rv_7": {
+          "coef": 0.43849181336429033,
+          "t_stat": 9.127258314460056,
+          "p_value": 1.2736386736260451e-19
+        },
+        "log_rv_30": {
+          "coef": 0.26432906126429556,
+          "t_stat": 5.698458666793699,
+          "p_value": 1.3290679377771536e-08
+        },
+        "q1_cluster_day_l1": {
+          "coef": 0.08182073428441844,
+          "t_stat": 0.7919988637930067,
+          "p_value": 0.4284254312307737
+        }
+      }
+    }
+  },
+  "oos": {
+    "har": {
+      "qlike_mean": -8.737497586868779,
+      "mse_mean": 1.424248734093621e-08,
+      "n_oos": 1258
+    },
+    "har_cluster_count": {
+      "qlike_mean": -8.737138174330783,
+      "mse_mean": 1.422575243029012e-08,
+      "n_oos": 1258
+    },
+    "har_cluster_day": {
+      "qlike_mean": -8.737773621144244,
+      "mse_mean": 1.4198850952418696e-08,
+      "n_oos": 1258
+    }
+  },
+  "dm_tests": {
+    "har_vs_har_cluster_count": {
+      "n": 1258,
+      "t_stat": -0.5249239385265307,
+      "p_value": 0.5997286327238709,
+      "mean_diff": -0.00035941253799965473
+    },
+    "har_vs_har_cluster_day": {
+      "n": 1258,
+      "t_stat": 0.1912863447991863,
+      "p_value": 0.8483321508350197,
+      "mean_diff": 0.00027603427546526706
+    }
+  },
+  "artifacts": {
+    "cluster_counts": "k1434_cluster_counts.png",
+    "cum_qlike_diff": "k1434_cum_qlike_diff.png"
+  }
+}

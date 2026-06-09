@@ -32875,5 +32875,29 @@
       "K1429",
       "trending_repost"
     ]
+  },
+  {
+    "item_id": "49e09409",
+    "category": "empirical_finding",
+    "content": "K1437 USD/TWD-TWII vol spillover VAR-GARCH (2012-2026, 14yr, N=3358) — CONDITIONAL_PASS (Codex round-2). VAR(p=4 BIC) on log-RV proxies + DCC(1,1) with 100 multistarts (98 success, 80 within 1 NLL unit). PRIMARY: Granger TWD-vol → TWII-vol F=0.67, p=0.610 (NULL, robust 3%/4%/5% bad-tick thresholds). Reverse TWII→TWD p=0.062 (borderline). DCC α=0.0079, β=0.9896, persistence=0.9975. SECONDARY (asymmetric signed-return decomposition): no-spillover F=2.98, p=0.0025; Symmetry Wald p=0.048 (borderline 5%). VERDICT: NULL_RESULT primary. Codex round-1 FAIL → fixed (20 bad ticks dropped at 4% threshold, ffill TWII calendar). Lookahead PASS: signal.shift(1) bidirectional. Seed=42. Caveats: ffill alignment makes interpretation 'cumulative FX move since last TWII day' not strict same-day; asymmetric secondary signal sensitive to threshold (3%→0.055, 5%→0.005). Diff vs T5b (paper2_sec3): T5b 2015-2024 TWD return→TWII vol p=0.08; K1437 extends 14yr, vol→vol bidir + DCC + asymmetric decomp. Diff vs K1432: K1432 sector→single stock financial stress; K1437 macro FX → broad index. Complementary. Monetization: export-industry FX-vol hedge (null spillover ⇒ TWD-hedge ≠ TWII-vol hedge, separate premia). Reviewer: Codex CLI gpt-5.4 medium. experiment_path=experiments/k1437, commit=33306dc3.",
+    "evidence": [
+      "experiments/k1437/k1437_results.json",
+      "experiments/k1437/README.md",
+      "experiments/k1437/k1437.py",
+      "commit 33306dc3"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-06-09T17:46:57.720124"
+  },
+  {
+    "item_id": "5ce804e6",
+    "category": "empirical_finding",
+    "content": "K1434 TWII vol around clustered Q1 earnings announcement days — NULL_RESULT. OOS 2021-2026 N=1258 days. HAR vs HAR+cluster_count: DM t=-0.52 p=0.600; HAR vs HAR+cluster_day: DM t=0.19 p=0.848. HAC full-sample regressions: cluster_count p=0.688, cluster_day p=0.428. Cluster-vs-non-cluster Welch p=0.254. Descriptively cluster days slightly higher range-vol but no formal signal. Lookahead PASS (announcement date known T-1). Data: local TWII OHLC + 財報公告日.txt. Reviewer: codex-cli (claimed 2026-06-09 09:21). experiment_path=experiments/k1434.",
+    "evidence": [
+      "experiments/k1434/k1434_results.json",
+      "experiments/k1434/README.md"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-09T17:48:22.405885"
   }
 ]
