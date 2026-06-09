@@ -1,0 +1,218 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-09",
+  "week_range": "2026-06-05 → 2026-06-12",
+  "totals": {
+    "input_tokens": 20,
+    "output_tokens": 2509,
+    "cache_read_tokens": 381882,
+    "cache_create_tokens": 106531,
+    "billable_total": 109060,
+    "assistant_messages": 14,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.5518
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 20,
+      "output_tokens": 2509,
+      "cache_read_tokens": 381882,
+      "cache_create_tokens": 106531,
+      "messages": 14,
+      "estimated_cost_usd": 0.5518
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 12,
+      "output_tokens": 1491,
+      "cache_read_tokens": 209426,
+      "cache_create_tokens": 70202,
+      "messages": 8,
+      "billable_total": 71705,
+      "estimated_cost_usd": 0.3485,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 205,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 33114,
+      "messages": 1,
+      "billable_total": 33322,
+      "estimated_cost_usd": 0.1273,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 523,
+      "cache_read_tokens": 103429,
+      "cache_create_tokens": 1927,
+      "messages": 3,
+      "billable_total": 2453,
+      "estimated_cost_usd": 0.0461,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "investigation": {
+      "input_tokens": 2,
+      "output_tokens": 290,
+      "cache_read_tokens": 69027,
+      "cache_create_tokens": 1288,
+      "messages": 2,
+      "billable_total": 1580,
+      "estimated_cost_usd": 0.0299,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 8,
+      "billable_total": 71705,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 8,
+          "billable_total": 71705
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 4,
+          "billable_total": 35930
+        },
+        {
+          "name": "other",
+          "messages": 4,
+          "billable_total": 35775
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 4,
+          "billable_total": 35930
+        },
+        {
+          "name": "今日是 2026-06-09（週一），執行 Token 用量日報。",
+          "messages": 1,
+          "billable_total": 33322
+        },
+        {
+          "name": "環境正在安裝依賴，等待完成。",
+          "messages": 1,
+          "billable_total": 1561
+        },
+        {
+          "name": "uv 安裝需要下載大型 CUDA 套件，嘗試直接用 python3 執行。",
+          "messages": 1,
+          "billable_total": 508
+        },
+        {
+          "name": "⏱ 開始 2026-06-09 22:44:38（台灣時間）",
+          "messages": 1,
+          "billable_total": 384
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 33322,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 33322
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 33322
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 33322
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 106531,
+      "billable_total": 109060,
+      "cache_create_share_pct": 97.7,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "e7383ccf-1667-5471-8d67-485fd3dd486b",
+          "messages": 14,
+          "billable_total": 109060,
+          "cache_create_tokens": 106531,
+          "cache_read_tokens": 381882,
+          "duration_minutes": 2.4,
+          "cache_create_share_pct": 97.7,
+          "first_ts": "2026-06-09T14:44:36.815000+00:00",
+          "last_ts": "2026-06-09T14:46:59.675000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "f440960",
+      "message": "Ops patrol report 2026-06-09T12:12Z"
+    },
+    {
+      "sha": "b8c0514",
+      "message": "Ops patrol report 2026-06-09T14:11Z"
+    },
+    {
+      "sha": "644aa53",
+      "message": "K1431_vix9d_spread_har_oos | hourly-11 K1431 worktree merge + cherry-pick (NULL "
+    },
+    {
+      "sha": "dc7812e",
+      "message": "K1431 VIX9D-VIX spread HAR-RV OOS PoC | NULL (spread alone, p=0.54)"
+    },
+    {
+      "sha": "8da308e",
+      "message": "fix(dashboard): in-flight staleness guard — 清 2 月齡 orphan + 防 stale 偽裝健康"
+    },
+    {
+      "sha": "e99fd1c",
+      "message": "K1431_vix9d_spread_har_oos | hourly-10 dispatch + K1428 orphan figures/draft swe"
+    },
+    {
+      "sha": "a45abfb",
+      "message": "merge origin/main (ops patrol + token usage reports) | hourly-09"
+    },
+    {
+      "sha": "e854c9a",
+      "message": "hourly-09 | docs/error_log: merge_worktree.sh main..worktree bug strike-2 entry "
+    },
+    {
+      "sha": "ab73884",
+      "message": "hourly-09 | K1426 worktree merge + script-bug bypass + paper_review_mile_85502a9"
+    },
+    {
+      "sha": "32bbd93",
+      "message": "merge worktree K1426 partial cointegration hedging (NULL IS-PoC) | hourly-09 man"
+    },
+    {
+      "sha": "f864905",
+      "message": "hourly-08 | CPI_US 2026-06-11 T-2 event article published mile_0fa9c7f5 + FB awa"
+    },
+    {
+      "sha": "31db1a5",
+      "message": "Ops patrol report 2026-06-09T00:11Z"
+    }
+  ]
+}
