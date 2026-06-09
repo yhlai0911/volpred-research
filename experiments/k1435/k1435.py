@@ -301,9 +301,10 @@ def hedge_effectiveness(
     su = sigma_uup.loc[common]
 
     # Dynamic optimal hedge ratio h_t = rho_t * sigma_gld_t / sigma_uup_t
-    h_dyn = rho * sg / su
-    # Apply at t with t-1 conditional info => shift(1) for OOS realism
-    h_dyn_lag = h_dyn.shift(1)
+    # rho_t / sigma_t are already t-conditional formed from t-1 info under standard
+    # DCC/GARCH indexing convention — they hedge r_t directly. Do NOT additional shift(1)
+    # (Codex review 2026-06-09: previous version over-lagged by 1 day, distorting HE).
+    h_dyn_lag = rho * sg / su
 
     # Naive: constant OLS on in-sample
     in_mask = rets.index <= pd.Timestamp(in_sample_end)
@@ -324,8 +325,8 @@ def hedge_effectiveness(
 
     return {
         "h_naive_constant": float(h_naive),
-        "h_dyn_mean": float(h_dyn.mean()),
-        "h_dyn_std": float(h_dyn.std()),
+        "h_dyn_mean": float(h_dyn_lag.mean()),
+        "h_dyn_std": float(h_dyn_lag.std()),
         "in_sample": {
             "period": f"{START} to {in_sample_end}",
             "he_dcc": he(rets["GLD"], hedged_dyn, is_mask),

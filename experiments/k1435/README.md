@@ -35,10 +35,24 @@ spike beyond the steady-state DCC level.
 ## Lookahead protection
 
 - FOMC dates are public calendar — no leakage.
-- DCC ρ_t at time t uses Q_t (built from t−1 info per standard DCC convention).
-- Hedge ratio `h_dyn.shift(1)` applied before computing hedged returns.
+- DCC ρ_t at time t uses Q_t (built from t−1 info per standard DCC convention),
+  so ρ_t / σ_t indexed at t hedge r_t directly with no extra lag (Codex review
+  2026-06-09 fixed earlier over-shift artifact).
 - Log returns are strictly close-to-close (no intraday peeking).
 - All random init / multistart seeded with `seed=42`.
+
+## Interpretation caveat: ex-ante conditional, not announcement reaction
+
+The DCC ρ_t at FOMC day t is the **pre-announcement conditional correlation**
+formed from information up to t−1. This test asks: "Does the ex-ante
+conditional correlation differ on days that *will* host an FOMC
+announcement?" — *not* "Does the FOMC announcement itself induce a realized
+correlation jump?". A genuine announcement-impact study would use
+intraday windows around the 2:00 PM ET release, or realized covariance
+computed from intraday returns spanning the announcement. The ex-ante
+NULL here is consistent with the forward-guidance era pre-pricing
+hypothesis but does not rule out short-horizon announcement-window
+effects on realized comovement.
 
 ## Key Results
 
@@ -124,4 +138,10 @@ Expected runtime: ~30s (GARCH ~1s × 2 + DCC MLE ~10s with 8 multistart).
 
 ## Reviewer status
 
-- `reviewer_source: pending_codex_review` — Codex CLI review pending.
+- **Codex CLI (gpt-5.4) CONDITIONAL_PASS** — 2026-06-09. Verdict NULL upheld.
+  Fixes applied:
+  1. Removed `h_dyn.shift(1)` over-lag at line 306 (rho/sigma at t already
+     t-conditional from t−1 info).
+  2. Clarified ex-ante vs announcement-reaction in README interpretation.
+  Follow-up (not blocking NULL verdict):
+  - t-distribution marginal GARCH robustness (run as K1435a if pursued).
