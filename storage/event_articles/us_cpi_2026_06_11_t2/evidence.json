@@ -1,0 +1,185 @@
+{
+  "event": "US CPI 2026-06-11",
+  "article_slot": "T-2",
+  "data_period": "2025-05-01 to 2026-06-08",
+  "latest_closed_trading_day": "2026-06-08",
+  "cpi_dates_full_n": 13,
+  "cpi_dates_recent4_n": 4,
+  "primary_numbers": {
+    "recent4_vix_day_pct": {
+      "values": [
+        {
+          "date": "2026-02-12",
+          "pct": 17.96,
+          "vix_prev": 17.65,
+          "vix_curr": 20.82
+        },
+        {
+          "date": "2026-03-12",
+          "pct": 12.629,
+          "vix_prev": 24.23,
+          "vix_curr": 27.29
+        },
+        {
+          "date": "2026-04-10",
+          "pct": -1.334,
+          "vix_prev": 19.49,
+          "vix_curr": 19.23
+        },
+        {
+          "date": "2026-05-13",
+          "pct": -0.667,
+          "vix_prev": 17.99,
+          "vix_curr": 17.87
+        }
+      ],
+      "mean": 7.147,
+      "std": 8.366,
+      "min": -1.334,
+      "max": 17.96
+    },
+    "earlier9_vix_day_pct": {
+      "mean": -0.022,
+      "std": 6.525,
+      "min": -9.354,
+      "max": 14.22,
+      "n": 9
+    },
+    "variance_compression_ftest": {
+      "F_stat": 0.513,
+      "df_earlier": 8,
+      "df_recent": 3,
+      "one_sided_pval": 0.7995,
+      "interpretation": "p<0.05 表示近 4 次方差顯著低於前 9 次"
+    },
+    "current_term_structure": {
+      "as_of_date": "2026-06-08",
+      "vix": 18.92,
+      "vix9d": 19.69,
+      "ratio_vix9d_vix": 1.0407,
+      "latest5_ratio_mean": 0.9291,
+      "latest10_ratio_mean": 0.8836,
+      "baseline_ratio_mean": 0.9,
+      "baseline_ratio_std": 0.0742,
+      "z_score_latest5_vs_baseline": 0.39
+    },
+    "pre_cpi_runup": {
+      "T-5": {
+        "mean_pct_vs_cpi_day": 3.318,
+        "n": 13
+      },
+      "T-4": {
+        "mean_pct_vs_cpi_day": 3.043,
+        "n": 13
+      },
+      "T-3": {
+        "mean_pct_vs_cpi_day": 0.83,
+        "n": 13
+      },
+      "T-2": {
+        "mean_pct_vs_cpi_day": -1.335,
+        "n": 13
+      },
+      "T-1": {
+        "mean_pct_vs_cpi_day": -1.578,
+        "n": 13
+      }
+    }
+  },
+  "table_rows_recent4": [
+    {
+      "CPI 發布日": "2026-02-12",
+      "VIX（T-1）": 17.65,
+      "VIX（當日）": 20.82,
+      "VIX 當日漲跌": "+18.0%",
+      "VIX9D/VIX 比值": "0.951",
+      "VIX T+5 變化": "-8.3%"
+    },
+    {
+      "CPI 發布日": "2026-03-12",
+      "VIX（T-1）": 24.23,
+      "VIX（當日）": 27.29,
+      "VIX 當日漲跌": "+12.6%",
+      "VIX9D/VIX 比值": "1.062",
+      "VIX T+5 變化": "-11.8%"
+    },
+    {
+      "CPI 發布日": "2026-04-10",
+      "VIX（T-1）": 19.49,
+      "VIX（當日）": 19.23,
+      "VIX 當日漲跌": "-1.3%",
+      "VIX9D/VIX 比值": "0.851",
+      "VIX T+5 變化": "-9.1%"
+    },
+    {
+      "CPI 發布日": "2026-05-13",
+      "VIX（T-1）": 17.99,
+      "VIX（當日）": 17.87,
+      "VIX 當日漲跌": "-0.7%",
+      "VIX9D/VIX 比值": "0.888",
+      "VIX T+5 變化": "-2.4%"
+    }
+  ],
+  "latest_10_days": [
+    {
+      "date": "2026-05-26",
+      "vix": 17.01,
+      "vix9d": 14.84,
+      "ratio": 0.8724
+    },
+    {
+      "date": "2026-05-27",
+      "vix": 16.29,
+      "vix9d": 13.27,
+      "ratio": 0.8146
+    },
+    {
+      "date": "2026-05-28",
+      "vix": 15.74,
+      "vix9d": 12.98,
+      "ratio": 0.8247
+    },
+    {
+      "date": "2026-05-29",
+      "vix": 15.32,
+      "vix9d": 12.59,
+      "ratio": 0.8218
+    },
+    {
+      "date": "2026-06-01",
+      "vix": 16.05,
+      "vix9d": 13.76,
+      "ratio": 0.8573
+    },
+    {
+      "date": "2026-06-02",
+      "vix": 15.77,
+      "vix9d": 13.19,
+      "ratio": 0.8364
+    },
+    {
+      "date": "2026-06-03",
+      "vix": 16.06,
+      "vix9d": 13.41,
+      "ratio": 0.835
+    },
+    {
+      "date": "2026-06-04",
+      "vix": 15.4,
+      "vix9d": 12.65,
+      "ratio": 0.8214
+    },
+    {
+      "date": "2026-06-05",
+      "vix": 21.51,
+      "vix9d": 23.92,
+      "ratio": 1.112
+    },
+    {
+      "date": "2026-06-08",
+      "vix": 18.92,
+      "vix9d": 19.69,
+      "ratio": 1.0407
+    }
+  ]
+}
