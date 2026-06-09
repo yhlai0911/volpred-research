@@ -10063,5 +10063,14 @@
     "reviewer": "Codex CLI 0.137.0",
     "notes": "K1023 VRP article: 3 warns (首筆 lag / DM overclaim / VRP proxy 口徑), 4 findings 都已寫 review_history. 數字 OK align.",
     "artifact": "storage/review_history/mile_206b2186/v1_codex_review_20260609_1810.md"
+  },
+  {
+    "timestamp": "2026-06-09T19:21:32+08:00",
+    "task_type": "experiment",
+    "task_id": "K1435_gold_dollar_vol_spillover_fed",
+    "verdict": "NULL",
+    "summary": "K1435 GLD-DXY DCC-GARCH FOMC event study (2010-2026, 4131 obs). FOMC days ρ vs other days p=0.341, ρ_diff=+0.0137 — no announcement-day correlation spike. OOS HE DCC vs naive +3.1pp. Codex CLI CONDITIONAL_PASS (hedge over-lag fixed, ex-ante caveat added).",
+    "owner": "hourly-19",
+    "commit": "post-merge main"
   }
 ]

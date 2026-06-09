@@ -1,0 +1,93 @@
+{
+  "experiment_id": "K1438",
+  "title": "VIX1D as SPY Intraday RV Covariate — Feasibility Audit",
+  "status": "BLOCKED_DATA_UNAVAILABLE",
+  "question": "Can VolPred currently run a reproducible HAR-RV vs HAR-RV+VIX vs HAR-RV+VIX1D comparison on SPY 5-min realized variance?",
+  "data_audit": {
+    "spy_5min_local": {
+      "file_count": 100,
+      "start_date": "2026-01-14",
+      "end_date": "2026-06-08",
+      "trading_days": 100
+    },
+    "minimum_history_for_formal_har_rv_oos_days": 252,
+    "has_sufficient_har_history": false,
+    "repo_vix1d_scan": {
+      "mention_count": 12,
+      "sample_paths": [
+        "research_findings.md",
+        "experiments/k182/k182_fomc_vol_effect.py",
+        "experiments/k1438/k1438.py",
+        "experiments/k1438/README.md",
+        "experiments/k1438/k1438_results.json",
+        "docs/research_notes/literature_review_2024_2026.md",
+        "storage/next_tasks.json",
+        "storage/content_correction_report.json",
+        "storage/memory/thinking_journal.json",
+        "storage/memory/knowledge.json",
+        "storage/ops/handoff_latest.md",
+        "storage/ops/dispatch_report_latest.json"
+      ],
+      "matching_data_files": []
+    },
+    "snapshot_csv_audit": {
+      "0050_tw_vix_2007-2022.csv": {
+        "column_count": 13,
+        "has_vix1d_column": false
+      },
+      "gld_vix_gvz_2000-2026.csv": {
+        "column_count": 19,
+        "has_vix1d_column": false
+      },
+      "spy_vix_qqq_eem_fez_2000-2026.csv": {
+        "column_count": 31,
+        "has_vix1d_column": false
+      },
+      "uso_vix_ovx_2005-2026.csv": {
+        "column_count": 19,
+        "has_vix1d_column": false
+      }
+    },
+    "has_local_vix1d_series": false
+  },
+  "prior_internal_evidence": {
+    "research_findings_vix1d_lines": [
+      "- [x] N6: VIX1D vs 30-day VIX — null result。VIX ratio Sharpe 1.118 > VIX1D 0.919。30-day VIX 更適合 position sizing（穩定信號 vs noisy 短期）",
+      "- [x] N7: 0DTE 文獻搜尋：Vasquez 2025 (gamma +6.4pp), Dim 2024 (stabilizing), Albers 2025 (VIX1D as new indicator)"
+    ],
+    "literature_review_lines": [
+      "## 二、HAR-RV 與 Realized Volatility 進展",
+      "### 2.1 HAR-RV-CARMA：Kalman 濾波加權混合模型",
+      "- **論文**: HAR-RV-CARMA (2025), *MDPI Risks*, 13(11), 223",
+      "- **核心發現**: 結合 HAR-RV 與連續自迴歸移動平均 (CARMA) 模型，用 Kalman 濾波動態權重機制融合兩者。減少過擬合",
+      "- **與我們的關聯**: 我們的 HAR-RV 正在等待足夠 5-min 數據。此模型提供了一個可能的增強方向",
+      "### 2.2 Uncertain HAR-RV 模型（不確定性理論）",
+      "- **論文**: Shi (2026), \"Uncertain HAR-RV Models and Their Extensions\", *Journal of Futures Markets*",
+      "- **核心發現**: 用不確定性理論替代概率理論來建模 HAR-RV，應用於中國原油期貨波動率預測",
+      "### 7.1 Heterogeneous Volatility Information in Realized GARCH ★★",
+      "- **論文**: (2025), \"Heterogeneous Volatility Information Content for the Realized GARCH Modeling and Forecasting Volatility\", *Studies in Nonlinear Dynamics & Econometrics*"
+    ]
+  },
+  "methodology_constraints": {
+    "target_match_rule": "HAR-RV must be tested on 5-min RV, not close-to-close r^2.",
+    "lookahead_rule": "Any volatility covariate must enter as t-1 information.",
+    "reproducibility_rule": "No uncached external series should be used as the sole data source in a network-restricted runtime."
+  },
+  "findings": [
+    "Local SPY 5-min coverage exists for 100 trading days (2026-01-14 to 2026-06-08).",
+    "No local canonical CSV snapshot currently contains a VIX1D column.",
+    "Repo references to VIX1D are narrative / prior-result mentions rather than a reusable local time series.",
+    "The environment therefore cannot run a source-verifiable HAR-RV+VIX1D horse race without first materializing a local VIX1D data source."
+  ],
+  "conclusion": "K1438 cannot honestly claim forecasting evidence yet. The correct completion for this hourly tick is a feasibility audit that records the current data gap and prevents a non-reproducible or fabricated VIX1D experiment.",
+  "next_steps": [
+    "Add a canonical local VIX1D history file or snapshot column to the repository.",
+    "Once VIX1D exists locally, run HAR-RV / HAR-RV+VIX / HAR-RV+VIX1D on the same 5-min RV target.",
+    "Only report DM/Harvey significance after OOS length is adequate and all covariates are lagged."
+  ],
+  "references": [
+    "Corsi (2009) HAR-RV.",
+    "Patton (2011) proxy-robust volatility forecast comparison.",
+    "Internal literature review note: Heterogeneous Volatility Information in Realized GARCH (2025)."
+  ]
+}

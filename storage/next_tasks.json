@@ -26053,7 +26053,7 @@
     "description": "Hypothesis: FOMC 公告日（一年 8 次）GLD-DXY 波動率動態相關性升高；DCC-GARCH ρ_t spike 統計顯著。Method: 抓 GLD + DXY daily returns → GARCH(1,1) marginal → DCC(1,1) dynamic correlation；標記 FOMC release dates (FRED FEDTARMD)；t-test ρ_FOMC vs ρ_other days；event window ±2 days。Diff: 既有 K 多看單資產 vol，本看 cross-asset cov dynamics 於 macro event；HE 計算 vs naive 60/40 GLD/DXY。Lookahead：FOMC date 來自公開 calendar，t 日預測用 t-1 day end-of-day data。Seed = 42。Monetization：直接 — Fed-event hedge strategy 付費；間接 — 多資產配置學術 credibility (paper 8 candidate)。Scope ≤ 50min；compute_queue if DCC MLE > 50min。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-09T15:10:09+08:00",
     "source": "hourly_15_governance_seed",
     "tags": [
@@ -26064,7 +26064,13 @@
       "DCC-GARCH"
     ],
     "monetization_angle": "direct_event_hedge_strategy + paper_candidate",
-    "last_released_at": "2026-06-09T09:16:57.514054+00:00"
+    "last_released_at": "2026-06-09T09:16:57.514054+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-09T11:08:42.683604+00:00",
+    "claim_session_id": "f6ba095c8b6f",
+    "started_at": "2026-06-09T11:08:48.094421+00:00",
+    "completed_at": "2026-06-09T11:21:55.665597+00:00",
+    "result": "NULL verdict. ρ_diff=+0.0137 p=0.341 (n=131 FOMC vs 4000 other). OOS HE DCC+3.1pp. Codex CONDITIONAL_PASS — hedge over-lag fixed. K1435a (t-dist robustness) follow-up."
   },
   {
     "id": "K1436_btc_funding_rate_vol_covariate",
@@ -26114,7 +26120,7 @@
     "description": "Hypothesis: CBOE VIX1D (2022-09 launched, 1-day implied vol) 比 VIX (30-day) 對 SPY 隔日 5-min RV 預測力更強，因為 horizon 對齊。Method: 抓 VIX1D + VIX daily close + SPY 5-min bars → daily RV；HAR-RV + VIX1D 對比 HAR-RV + VIX 對比 HAR-RV-only；OOS 2024-2026；DM test (3-way pairwise)；rolling W=500 (受限 2022-09 起樣本)。Diff vs K1431 VIX9D-VIX spread：K1431 用 spread，本用 VIX1D level 直接 + 比較 horizon-matching 效應。Lookahead：VIX1D 用 t-1 close → t-day RV。Seed = 42。注意 sample size warning (≤ 4yr OOS 短)。Monetization：直接 — intraday vol 策略付費；間接 — 高頻交易客群曝光。Scope ≤ 50min。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-09T15:10:09+08:00",
     "source": "hourly_15_governance_seed",
     "tags": [
@@ -26124,7 +26130,13 @@
       "HAR-RV",
       "VIX1D"
     ],
-    "monetization_angle": "direct_intraday_strategy + hft_traffic"
+    "monetization_angle": "direct_intraday_strategy + hft_traffic",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T10:22:23.274146+00:00",
+    "claim_session_id": "e9262abf8e75",
+    "started_at": "2026-06-09T10:22:38.410321+00:00",
+    "completed_at": "2026-06-09T10:28:11.725039+00:00",
+    "result": "Created experiments/k1438 feasibility audit: local SPY 5-min sample has 100 days but no canonical local VIX1D series/snapshot column, so HAR-RV+VIX1D cannot be run honestly. Added README + script + results.json documenting the data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted)."
   },
   {
     "id": "daily_article_k1432_oos_overfitting",

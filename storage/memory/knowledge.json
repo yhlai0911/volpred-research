@@ -32899,5 +32899,16 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-09T17:48:22.405885"
+  },
+  {
+    "item_id": "0c6702a0",
+    "category": "experiment_null",
+    "content": "K1435 — GLD/UUP DCC-GARCH FOMC event study (2010-2026, 4131 obs daily)\nVerdict: NULL. FOMC announcement days (n=131) show no significant DCC ρ vs other days (n=4000).\nρ_FOMC=-0.4201, ρ_other=-0.4338, diff=+0.0137, Welch t=0.954, p=0.341. Event window ±2: p=0.659.\nSteady-state ρ̄≈-0.43 dominates. Consistent with forward-guidance era pre-pricing.\nDCC dynamic hedge: OOS HE 0.201 vs naive 0.170 (+3.1pp), but gain from vol scaling not FOMC regime.\nMethodology: yfinance close→close log returns; GARCH(1,1) normal marginal via arch; DCC(1,1) custom MLE scipy L-BFGS-B 8-start seed=42; Welch t-test; 131 hardcoded FOMC dates incl 2020 emergencies.\nLookahead: FOMC public calendar, DCC Q_t uses t-1 info, h_t at t hedges r_t (no extra shift after Codex fix).\nCaveat: Tests ex-ante pre-FOMC conditional correlation, NOT realized announcement-day comovement. Intraday window around 2pm ET release would test announcement impact directly.\nexperiment_id: K1435\nexperiment_path: experiments/k1435/\nreviewer: Codex CLI (gpt-5.4) CONDITIONAL_PASS — hedge over-lag fixed (line 306), ex-ante caveat added in README, t-dist robustness deferred K1435a follow-up\nreviewer_source: codex_cli_gpt54\nrelated_k: K903 (gold inventory vol), K1437 (USD/TWD-TWII VAR-GARCH)\nmonetization: NULL closes door on Fed-event-driven gold-USD hedge product; preserves methodology credibility for paper 8 candidate",
+    "evidence": [
+      "experiments/k1435/k1435_results.json",
+      "experiments/k1435/README.md"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-09T19:22:14.615863"
   }
 ]
