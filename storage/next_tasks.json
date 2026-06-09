@@ -26211,5 +26211,51 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-09T11:56:39+00:00"
+  },
+  {
+    "id": "research_rp_8f163c50fd",
+    "title": "研究 backlog fallback: 「填息率」與波動率的關係——填息快的股票 vol 是否較低？",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 「填息率」與波動率的關係——填息快的股票 vol 是否較低？ | 來源 section: 除權息研究方向（用戶指定）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_8f163c50fd",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T12:07:56+00:00"
+  },
+  {
+    "id": "research_0050_tw_vol_0050",
+    "title": "研究 backlog fallback: 除息日對 0050.TW 的 vol 影響（0050 成分股集中除息期間）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 除息日對 0050.TW 的 vol 影響（0050 成分股集中除息期間） | 來源 section: 除權息研究方向（用戶指定）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "0050_tw_vol_0050",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T12:07:56+00:00"
+  },
+  {
+    "id": "daily_article_k1435_gold_fomc_null_1781007001",
+    "task_type": "daily_article",
+    "priority": 2,
+    "status": "succeeded",
+    "title": "K1435 daily_article: FOMC 沒讓金/美元的關係變緊（DCC-GARCH NULL）",
+    "description": "把 K1435 NULL 結果寫成讀者文章：FOMC 不會打破金/美元的負相關（ρ=-0.43 穩定），但 DCC 動態避險仍勝靜態 +3pp HE（來自 vol time-variation 非 FOMC）。對沖實務含義。",
+    "created_at": "2026-06-09T12:10:01Z",
+    "timestamp": "2026-06-09T12:10:01Z",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-09T12:10:08.062057+00:00",
+    "claim_session_id": "6b3e4c89e817",
+    "started_at": "2026-06-09T12:10:08.358981+00:00",
+    "completed_at": "2026-06-09T12:16:53.173884+00:00",
+    "result": "K1435 daily_article published as draft mile_3942eab2 (audience=research); anti_ai_gate PASS; 2 figures auto-uploaded; Tier-2 flag re GLD/DXY-vs-UUP (minor)"
   }
 ]
