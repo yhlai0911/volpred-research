@@ -26141,5 +26141,27 @@
     "started_at": "2026-06-09T08:10:44.124237+00:00",
     "completed_at": "2026-06-09T08:19:17.036270+00:00",
     "result": "K1432 NULL OOS overfitting daily_article published mile_d7873948 draft, 2 figs, anti-ai PASS, audience=research, HTTP 200"
+  },
+  {
+    "id": "paper_review_mile_206b2186",
+    "title": "Paper review (Codex 24h-rule): 為什麼市場賣你的波動保險，幾乎都比最後真的發生的還貴？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_206b2186 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_206b2186",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-09T10:08:02+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-09T10:08:26.402289+00:00",
+    "claim_session_id": "e7ec3390842b",
+    "started_at": "2026-06-09T10:08:26.703342+00:00",
+    "completed_at": "2026-06-09T10:11:37.416454+00:00",
+    "result": "Codex CONDITIONAL_PASS: 數字對齊 OK; 3 warns (k1023 首筆 lag / 文章口徑過強 / VRP proxy 需註明). Review saved to storage/review_history/mile_206b2186/v1_codex_review_20260609_1810.md. 3 followup revisions not auto-dispatched (low ROI for already-published article; user can promote if relevant)."
   }
 ]
