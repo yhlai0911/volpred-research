@@ -25964,13 +25964,146 @@
     "description": "hourly-14 偵測 publication_candidates top_10_uncovered=1, missing_research_top5=0, missing_general_top5=4 — curated 前沿用盡。前 bbc7fff0 的 2 條台股 seed 已被 K1431/K1432 完成。Action: 跑 scripts/generate_diverse_tasks.py 或 scripts/generate_research_backlog.py（已驗證 active）+ scan research_program.md Open Question + 文獻 last 14 天，seed 5+ 個新 K backlog（priority P2-P3）。覆蓋面：跨資產（台股/美股/比特幣/外匯）+ 跨方法論（波動率/避險/事件研究/機器學習）。Mission gate：每條 brief 含 monetization angle（直接：付費策略；間接：曝光/學術權威）。Scope ≤40min。",
     "task_type": "governance",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-09T14:09:00+08:00",
     "source": "hourly_14_pool_depletion_detected",
     "tags": [
       "governance",
       "backlog_seed",
       "candidates_depletion"
-    ]
+    ],
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-09T07:08:02.851215+00:00",
+    "claim_session_id": "8107b3329985",
+    "started_at": "2026-06-09T07:08:20.636696+00:00",
+    "completed_at": "2026-06-09T07:10:19.347089+00:00",
+    "result": "Seeded 6 K-experiment briefs K1433-K1438 across 4 assets (crypto/TW/FX/US) × 5 methods (seasonality/event-study/spillover/covariate/DCC-GARCH). 兩個自動 generator (research_backlog + diverse_tasks) 都回 'no add' (research_program.md unchecked items 全 covered)，需主線程介入。Pool 從 agentable=1 補到 agentable≥7. Each brief 含 monetization angle + lookahead 防錯 + ≤50min scope cap."
+  },
+  {
+    "id": "paper_review_mile_ea4b38b7",
+    "title": "Paper review (Codex 24h-rule): 同樣 100 萬，30 年後差 4.9 倍：投資策略真的要看年齡",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ea4b38b7 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_ea4b38b7",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-09T07:07:52+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T07:09:54.392181+00:00",
+    "claim_session_id": "5eabe53a94dc",
+    "started_at": "2026-06-09T07:10:04.161479+00:00"
+  },
+  {
+    "id": "K1433_btc_weekend_vol_seasonality",
+    "title": "K1433: BTC 週末 / 週間波動率季節性 — HAR-RV with weekday + weekend dummies (2020-2026)",
+    "description": "Hypothesis: BTC 24/7 市場無 session-close 但週末散戶集中 + 機構流動性退場 → 波動率有 weekday-of-week seasonality。Method: 抓 BTC 1m / 5m bars → 算 daily RV (sum of 5-min log returns squared)；Baseline HAR-RV 加 6 個 weekday dummies (Mon-Sat, Sun=reference)；OOS 2024-2026；DM test vs HAR-RV no-dummy。Diff vs prior K：K757-K880 多看股票 session boundary，crypto 無 session → 替代特徵是 weekday-cluster。Lookahead 防錯：dummy 用 timestamp.weekday() 計算的 t-1 day，不洩漏 t day。Seed = 42。Monetization：直接 — crypto vol 策略付費；間接 — 拓展 crypto trader 流量入口。Scope ≤ 50min；fail-fast：若 LBYS_test p > 0.10 表示 seasonality 不顯著 → 收 NULL 報告。",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-06-09T15:10:09+08:00",
+    "source": "hourly_15_governance_seed",
+    "tags": [
+      "experiment",
+      "crypto",
+      "seasonality",
+      "HAR-RV"
+    ],
+    "monetization_angle": "direct_paid_strategy + crypto_trader_traffic"
+  },
+  {
+    "id": "K1434_tw_earnings_cluster_vol",
+    "title": "K1434: 台股 Q1 財報集中公告日波動率 cluster vs HAR-RV (TWII 2014-2026)",
+    "description": "Hypothesis: 台股 Q1 財報於 4 月底集中公告（90% TWSE50 在 4/28-4/30），形成 vol cluster；HAR-RV 對 cluster day 預測系統性低估。Method: 抓 TWII daily RV + 標記每年 4 月最後 5 個交易日 = cluster_window；計算 cluster vs non-cluster 平均 RV t-test；HAR-RV 加 cluster_window dummy (signal shift 1 day lag)；OOS 2022-2026；DM test。Diff vs K1432 financial stress：那做日頻 spillover，本做 event-window clustering。Lookahead：dummy 用 calendar 月份判斷不是真實公告日（避免 forward-looking）。Seed = 42。Monetization：間接 — 台股法人客群 → 機構波動率諮詢；feed 文章吸引 4 月台股 retail。Scope ≤ 50min。",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-06-09T15:10:09+08:00",
+    "source": "hourly_15_governance_seed",
+    "tags": [
+      "experiment",
+      "tw_equity",
+      "event_study",
+      "earnings",
+      "HAR-RV"
+    ],
+    "monetization_angle": "indirect_institutional_advisory + retail_traffic"
+  },
+  {
+    "id": "K1435_gold_dollar_vol_spillover_fed",
+    "title": "K1435: 黃金—美元波動率 spillover 於 FOMC 公告日加劇 — GARCH-DCC on GLD/DXY (2010-2026)",
+    "description": "Hypothesis: FOMC 公告日（一年 8 次）GLD-DXY 波動率動態相關性升高；DCC-GARCH ρ_t spike 統計顯著。Method: 抓 GLD + DXY daily returns → GARCH(1,1) marginal → DCC(1,1) dynamic correlation；標記 FOMC release dates (FRED FEDTARMD)；t-test ρ_FOMC vs ρ_other days；event window ±2 days。Diff: 既有 K 多看單資產 vol，本看 cross-asset cov dynamics 於 macro event；HE 計算 vs naive 60/40 GLD/DXY。Lookahead：FOMC date 來自公開 calendar，t 日預測用 t-1 day end-of-day data。Seed = 42。Monetization：直接 — Fed-event hedge strategy 付費；間接 — 多資產配置學術 credibility (paper 8 candidate)。Scope ≤ 50min；compute_queue if DCC MLE > 50min。",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-06-09T15:10:09+08:00",
+    "source": "hourly_15_governance_seed",
+    "tags": [
+      "experiment",
+      "commodity",
+      "fx",
+      "event_study",
+      "DCC-GARCH"
+    ],
+    "monetization_angle": "direct_event_hedge_strategy + paper_candidate"
+  },
+  {
+    "id": "K1436_btc_funding_rate_vol_covariate",
+    "title": "K1436: BTC perpetual funding rate as RV covariate — HAR-RV + funding (Binance 2020-2026)",
+    "description": "Hypothesis: BTC perpetual funding rate 反映 leveraged positioning 失衡，預測 next-day RV jump。Method: 抓 Binance BTC/USDT perpetual 8h funding rate → daily mean (3 obs/day)；HAR-RV + lag-1 funding covariate；Compare β vs HAR-RV no-funding；DM test OOS 2024-2026；rolling W=1000。Diff vs K1431 spread covariate：K1431 用 VIX9D-VIX (美股 implied)，本用 crypto realized leverage signal。Lookahead：funding rate 用 t-1 day 8h close 三 obs 均值，不用 t 日 funding (forward-looking)。Seed = 42。Monetization：直接 — crypto vol covariate strategy 付費；間接 — crypto research credibility。Scope ≤ 50min。",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-06-09T15:10:09+08:00",
+    "source": "hourly_15_governance_seed",
+    "tags": [
+      "experiment",
+      "crypto",
+      "covariate",
+      "HAR-RV",
+      "funding_rate"
+    ],
+    "monetization_angle": "direct_paid_strategy + crypto_research_credibility"
+  },
+  {
+    "id": "K1437_usdtwd_twii_vol_spillover",
+    "title": "K1437: USD/TWD 匯率波動率對 TWII 波動率 spillover — VAR-GARCH (2012-2026, 14yr)",
+    "description": "Hypothesis: USD/TWD 大幅升貶值傳導至 TWII 波動率（出口導向經濟）；spillover asymmetric (升值衝擊 > 貶值)。Method: 抓 USD/TWD daily + TWII daily → VAR(p) on log-RV → BEKK-GARCH 或 DCC-GARCH variance spillover；Asymmetry test (升值 dummy interact)；Granger causality TWD-vol → TWII-vol。Diff vs K1432 financial stress (TWD vs TSMC)：本做 macro FX → broad index，K1432 做 sector → single stock。Lookahead：FX rate t-1 close → TWII t-day vol forecast。Seed = 42。Monetization：直接 — 出口企業 FX-vol hedge 諮詢付費；間接 — 台股機構研究 credibility。Scope ≤ 50min；compute_queue if BEKK MLE > 50min。",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-06-09T15:10:09+08:00",
+    "source": "hourly_15_governance_seed",
+    "tags": [
+      "experiment",
+      "fx",
+      "tw_equity",
+      "spillover",
+      "VAR-GARCH"
+    ],
+    "monetization_angle": "direct_exporter_hedge_advisory + institutional_credibility"
+  },
+  {
+    "id": "K1438_vix1d_spy_intraday_vol_covariate",
+    "title": "K1438: VIX1D 短天期波動率指標作為 SPY intraday RV covariate (2022-09 起資料)",
+    "description": "Hypothesis: CBOE VIX1D (2022-09 launched, 1-day implied vol) 比 VIX (30-day) 對 SPY 隔日 5-min RV 預測力更強，因為 horizon 對齊。Method: 抓 VIX1D + VIX daily close + SPY 5-min bars → daily RV；HAR-RV + VIX1D 對比 HAR-RV + VIX 對比 HAR-RV-only；OOS 2024-2026；DM test (3-way pairwise)；rolling W=500 (受限 2022-09 起樣本)。Diff vs K1431 VIX9D-VIX spread：K1431 用 spread，本用 VIX1D level 直接 + 比較 horizon-matching 效應。Lookahead：VIX1D 用 t-1 close → t-day RV。Seed = 42。注意 sample size warning (≤ 4yr OOS 短)。Monetization：直接 — intraday vol 策略付費；間接 — 高頻交易客群曝光。Scope ≤ 50min。",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-06-09T15:10:09+08:00",
+    "source": "hourly_15_governance_seed",
+    "tags": [
+      "experiment",
+      "us_equity",
+      "covariate",
+      "HAR-RV",
+      "VIX1D"
+    ],
+    "monetization_angle": "direct_intraday_strategy + hft_traffic"
   }
 ]
