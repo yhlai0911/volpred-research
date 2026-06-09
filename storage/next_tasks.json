@@ -26078,7 +26078,7 @@
     "description": "Hypothesis: BTC perpetual funding rate 反映 leveraged positioning 失衡，預測 next-day RV jump。Method: 抓 Binance BTC/USDT perpetual 8h funding rate → daily mean (3 obs/day)；HAR-RV + lag-1 funding covariate；Compare β vs HAR-RV no-funding；DM test OOS 2024-2026；rolling W=1000。Diff vs K1431 spread covariate：K1431 用 VIX9D-VIX (美股 implied)，本用 crypto realized leverage signal。Lookahead：funding rate 用 t-1 day 8h close 三 obs 均值，不用 t 日 funding (forward-looking)。Seed = 42。Monetization：直接 — crypto vol covariate strategy 付費；間接 — crypto research credibility。Scope ≤ 50min。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-09T15:10:09+08:00",
     "source": "hourly_15_governance_seed",
     "tags": [
@@ -26088,7 +26088,13 @@
       "HAR-RV",
       "funding_rate"
     ],
-    "monetization_angle": "direct_paid_strategy + crypto_research_credibility"
+    "monetization_angle": "direct_paid_strategy + crypto_research_credibility",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T11:28:49.004257+00:00",
+    "claim_session_id": "a055007291ad",
+    "started_at": "2026-06-09T11:29:16.273039+00:00",
+    "completed_at": "2026-06-09T11:32:12.414708+00:00",
+    "result": "Created experiments/k1436 feasibility audit: repo has BTC daily OHLCV CSVs but no canonical Binance funding-rate series and no local BTC intraday cache for HAR-RV target construction, so HAR-RV+funding cannot be run honestly yet. Added README + script + results.json documenting the double data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted)."
   },
   {
     "id": "K1437_usdtwd_twii_vol_spillover",
@@ -26175,5 +26181,35 @@
     "started_at": "2026-06-09T10:08:26.703342+00:00",
     "completed_at": "2026-06-09T10:11:37.416454+00:00",
     "result": "Codex CONDITIONAL_PASS: 數字對齊 OK; 3 warns (k1023 首筆 lag / 文章口徑過強 / VRP proxy 需註明). Review saved to storage/review_history/mile_206b2186/v1_codex_review_20260609_1810.md. 3 followup revisions not auto-dispatched (low ROI for already-published article; user can promote if relevant)."
+  },
+  {
+    "id": "research_rp_7c58652216",
+    "title": "研究 backlog fallback: I7: 台灣投資人跨境避險實務",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: I7: 台灣投資人跨境避險實務 — 用台指期避台股、用 ES mini 避美股，匯率風險、保證金需求、稅務影響 | 來源 section: 面向 i: 期貨避險（futures hedging）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_7c58652216",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T11:56:39+00:00"
+  },
+  {
+    "id": "research_etf_0056_00878_00919",
+    "title": "研究 backlog fallback: 高股息 ETF（0056/00878/00919）除息日前後的價格行為",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 高股息 ETF（0056/00878/00919）除息日前後的價格行為 | 來源 section: 除權息研究方向（用戶指定）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "etf_0056_00878_00919",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-09T11:56:39+00:00"
   }
 ]

@@ -552,6 +552,45 @@ RESEARCH_PROGRAM = ROOT / "research_program.md"
 # is treated as immediately actionable (no new data needed).
 _BLOCKED_RESEARCH_HEADER_TOKENS = ("blocked", "需 5-min", "需 5min", "需 options", "需 tick", "5-min 數據", "tick 數據")
 
+# 2026-06-09: the fallback originally scanned ONLY `## 前沿文獻方向` (curated arXiv
+# directions). K1420-K1432 burned through that curated list in ~2 days, so the
+# pool kept going critical and required manual seeding. Broaden to scan ALL
+# sections' open `- [ ]` items so the ~34 remaining research directions (台股財報,
+# 金融股, microstructure, …) feed the pool — BUT filter out non-research lines
+# that share the `- [ ]` shape: paper-workflow tooling (latex/citation/投稿/審查)
+# and data-blocked items (no yfinance data). A line OR its header hitting any of
+# these tokens is skipped.
+_NON_RESEARCH_LINE_TOKENS = (
+    "/latex", "latex-academic", "/citation", "citation-verifier", "引用驗證",
+    "投稿", "校稿", "cover letter", "graphical abstract", "highlights",
+    "adversarial review", "codex", "全面審查", "robustness（refit",
+    "blocked", "需要 vix futures", "yfinance 無", "5-min 數據", "tick data",
+    "需 options", "需 tick", "iv surface 圖像", "eta 2026", "數據累積到",
+    "修正 gemini", "gemini v4", "gemini v3", "gemini 的",  # paper-review-fix items
+)
+
+_KID_IN_LINE_RE = re.compile(r"[Kk]\d{2,5}[a-z]?")
+
+
+def _line_references_done_experiment(line: str) -> bool:
+    """True if the line mentions a K-id that already has a completed experiment
+    (experiments/k<id>/*results.json) — avoids re-queuing already-done directions
+    (e.g. 'K1061: extend...' when experiments/k1061 already exists, or a follow-up
+    idea anchored on a finding K whose work is done)."""
+    for m in _KID_IN_LINE_RE.findall(line):
+        d = ROOT / "experiments" / m.lower()
+        if d.is_dir() and any(d.glob("*results*.json")):
+            return True
+    return False
+
+
+def _is_non_research_line(line_low: str, header_low: str) -> bool:
+    if any(tok in header_low for tok in _BLOCKED_RESEARCH_HEADER_TOKENS):
+        return True
+    if any(tok in line_low for tok in _NON_RESEARCH_LINE_TOKENS):
+        return True
+    return False
+
 
 def _slugify_research(title: str) -> str:
     """Stable ASCII-ish slug for a research-direction title → task id suffix."""
@@ -586,11 +625,11 @@ def _research_backlog_candidates(tasks: list, existing_ids: set[str], limit: int
     text = RESEARCH_PROGRAM.read_text(encoding="utf-8", errors="replace")
     out: list[dict] = []
     current_header = ""
-    # Only scan within the curated frontier-literature backlog section
-    # (`## 前沿文獻方向`); other `## ` sections (面向 A-I, 論文 workflow) contain
-    # status notes / tooling checklists whose `- [ ]` lines are NOT research
-    # directions (e.g. `- [ ] /latex-academic-reviewer 審查` in 面向 H).
-    in_backlog_section = False
+    current_h2 = ""
+    # 2026-06-09: scan ALL sections (not just 前沿文獻方向) so the broader backlog
+    # feeds the pool; filter non-research lines via _is_non_research_line. Skip the
+    # paper-writing section (面向 H 論文 / 論文撰寫) wholesale — its `- [ ]` items are
+    # paper-workflow steps, not research experiments.
     # Existing research-fallback task slugs already queued (any status) → skip.
     queued_research_slugs = {
         str(t.get("research_slug")) for t in tasks if t.get("research_slug")
@@ -598,18 +637,22 @@ def _research_backlog_candidates(tasks: list, existing_ids: set[str], limit: int
     for raw in text.splitlines():
         line = raw.strip()
         if line.startswith("## ") and not line.startswith("###"):
-            in_backlog_section = "前沿文獻方向" in line
+            current_h2 = line.lstrip("#").strip()
             current_header = ""
             continue
         if line.startswith("###"):
             current_header = line.lstrip("#").strip().lower()
             continue
-        if not in_backlog_section:
+        # Skip the paper-writing 面向 wholesale (paper-workflow, not research).
+        if ("論文" in current_h2 or "面向 H" in current_h2 or "投稿" in current_h2):
             continue
         if not line.startswith("- [ ]"):
             continue
-        # Skip data-blocked subsections.
-        if any(tok in current_header for tok in _BLOCKED_RESEARCH_HEADER_TOKENS):
+        # Skip non-research lines (paper tooling / data-blocked).
+        if _is_non_research_line(line.lower(), current_header):
+            continue
+        # Skip directions anchored on an already-completed experiment K-id.
+        if _line_references_done_experiment(line):
             continue
         body = line[len("- [ ]"):].strip()
         # Strip leading decoration: ★, **, ~~.

@@ -1,0 +1,149 @@
+{
+  "experiment_id": "K1436",
+  "title": "BTC Funding Rate as HAR-RV Covariate — Feasibility Audit",
+  "status": "BLOCKED_DATA_UNAVAILABLE",
+  "question": "Can VolPred currently run a reproducible HAR-RV + Binance funding-rate experiment for BTC from local data only?",
+  "data_audit": {
+    "funding_rate_files": {
+      "count": 0,
+      "sample_paths": []
+    },
+    "binance_named_files": {
+      "count": 0,
+      "sample_paths": []
+    },
+    "perp_named_files": {
+      "count": 0,
+      "sample_paths": []
+    },
+    "perpetual_named_files": {
+      "count": 0,
+      "sample_paths": []
+    },
+    "btc_intraday_files": {
+      "count": 0,
+      "sample_paths": []
+    },
+    "btc_daily_files": {
+      "count": 7,
+      "sample_paths": [
+        "experiments/k1090/data/BTC-USD.csv",
+        "experiments/k1090b/data/BTC-USD.csv",
+        "experiments/k1119/data/btc_ohlcv.csv",
+        "experiments/k1186/data/BTC_USD.csv",
+        "experiments/k1206/data/BTC_USD.csv",
+        "paper/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv",
+        "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv"
+      ]
+    },
+    "btc_daily_sample_schemas": [
+      {
+        "path": "experiments/k1090/data/BTC-USD.csv",
+        "columns": [
+          "Date",
+          "Close",
+          "High",
+          "Low",
+          "Open",
+          "Volume"
+        ]
+      },
+      {
+        "path": "experiments/k1090b/data/BTC-USD.csv",
+        "columns": [
+          "Date",
+          "Close",
+          "High",
+          "Low",
+          "Open",
+          "Volume"
+        ]
+      },
+      {
+        "path": "experiments/k1119/data/btc_ohlcv.csv",
+        "columns": [
+          "date",
+          "Open",
+          "High",
+          "Low",
+          "Close",
+          "Volume",
+          "log_r"
+        ]
+      },
+      {
+        "path": "experiments/k1186/data/BTC_USD.csv",
+        "columns": [
+          "Date",
+          "Close",
+          "High",
+          "Low",
+          "Open",
+          "Volume"
+        ]
+      },
+      {
+        "path": "experiments/k1206/data/BTC_USD.csv",
+        "columns": [
+          "Date",
+          "Close",
+          "High",
+          "Low",
+          "Open",
+          "Volume"
+        ]
+      }
+    ],
+    "text_mentions_only": [
+      "data/congressional_trades_house.csv",
+      "experiments/btc_liquidation_abm/btc_liquidation_abm.py",
+      "experiments/k1228/k1228_init_checklist.json",
+      "experiments/k1228/k1228_repo_init_guide.md",
+      "experiments/k1242/k1242_s7_s8_s9_draft.md",
+      "experiments/k1306/data/dict/LM_MasterDictionary.csv",
+      "experiments/k1436/README.md",
+      "experiments/k1436/k1436.py",
+      "experiments/k1436/k1436_results.json",
+      "experiments/k334/k334_defi_vol.py",
+      "paper/btc-gas-negative/drafts/body_v1.md",
+      "paper/btc-gas-negative/drafts/v1_section1_introduction.md",
+      "paper/btc-gas-negative/drafts/v1_sections7-9_discussion.md",
+      "storage/memory/knowledge.json",
+      "storage/next_tasks.json",
+      "storage/notifications/29683233.json",
+      "storage/notifications/94653585.json",
+      "storage/notifications/notification_log.json",
+      "storage/ops/dispatch_report_latest.json",
+      "storage/ops/executions/task_c50e24b4aca4/run_01af0bb6959c.json"
+    ],
+    "has_local_funding_series": false,
+    "has_local_btc_intraday_target_data": false
+  },
+  "prior_internal_context": {
+    "btc_derivatives_vol_exists": true,
+    "btc_derivatives_vol_status_note": "Existing btc_derivatives_vol line uses volume / weekend / VIX proxies, not funding-rate data.",
+    "knowledge_gap_note": "Knowledge base already notes that genuine improvement likely needs Binance funding/OI/liquidation data."
+  },
+  "methodology_constraints": {
+    "target_match_rule": "HAR-RV must be evaluated on realized-volatility target, not daily squared return relabelled as HAR-RV.",
+    "source_rule": "Funding-rate covariate must come from a canonical local series if the experiment is to be reproducible.",
+    "lookahead_rule": "Funding information must enter with an explicit lag relative to next-period RV target."
+  },
+  "findings": [
+    "No local funding-rate dataset is present under canonical experiment/data paths.",
+    "No local BTC intraday cache suitable for HAR-RV target construction was found.",
+    "The repository does contain BTC daily OHLCV CSVs, but daily OHLCV alone is not enough for a proper HAR-RV + funding experiment.",
+    "A prior BTC derivatives experiment exists, but it uses volume/weekend/VIX proxies rather than true funding-rate data."
+  ],
+  "conclusion": "K1436 is blocked at the data layer. Completing it honestly requires first materializing local Binance funding-rate history and local BTC intraday data for realized-volatility target construction.",
+  "next_steps": [
+    "Create a canonical local funding-rate file for BTC perpetuals (exchange, frequency, timezone documented).",
+    "Create or ingest a canonical local BTC intraday bar cache sufficient to build RV/HAR-RV target series.",
+    "Only then run HAR-RV baseline vs HAR-RV+funding with explicit t-1 lagging and formal OOS evaluation."
+  ],
+  "references": [
+    "Corsi (2009) HAR-RV.",
+    "Patton (2011) proxy-robust volatility forecast comparison.",
+    "Internal BTC derivatives note: true BTC improvement likely needs funding/OI/liquidation data."
+  ]
+}
