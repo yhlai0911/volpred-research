@@ -1,0 +1,54 @@
+{
+  "id": "mile_31d5b253",
+  "title": "把很多盤中訊號揉成一個指標，沒有比老方法更會猜",
+  "description": "在 98 天的 SPY 五分鐘資料上，把多種盤中波動訊號壓成一個綜合指標，並沒有打敗最穩的老指標 BPV，也沒有贏過直接看昨天的波動。",
+  "content": "# 把很多盤中訊號揉成一個指標，沒有比老方法更會猜\n\n做市場研究的人很容易對一種想法著迷：\n\n如果一個指標不夠好，那就把很多指標疊在一起，讓系統自己濃縮成一個更聰明的答案。\n\n聽起來很合理。畢竟一天的盤中資料那麼多，裡面有高低點、有上漲段、有下跌段、有開盤到收盤的移動。直覺上，把這些訊號全部揉進去，應該比只看單一指標更會抓到隔天的風險。\n\n這次我們就在 SPY 的五分鐘資料上，測了一個很直白的版本：先把七種盤中波動訊號壓成一個綜合指標，再拿它去猜隔天的波動。\n\n結果不算糟，但也不漂亮。\n\n**這個新做法可以運作，可是沒有打敗最穩的老方法。**\n\n## 先講答案：第一名還是老指標\n\n這次比較的樣本很短，只有 **98 個可用交易日**，其中訓練 69 天、測試 29 天。對這種題目來說，樣本偏短，所以本來就不適合下太重的結論。\n\n但就算在這麼短的窗口裡，排名還是很清楚。\n\n測試結果裡，表現最好的是 **BPV**。第二名是直接看昨天的五分鐘總波動。第三名是最簡單的線性壓縮版。把很多訊號揉成一個綜合指標的做法，只排到第四。\n\n換句話說，這次不是「新方法差一點點就贏」，而是：\n\n- 它沒贏過最穩的老指標\n- 也沒贏過直接看昨天波動\n- 甚至連更簡單的壓縮版本都排在它前面\n\n![K1430 OOS 比較圖](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1430_ae_measure_comparison.png)\n\n## 這件事為什麼值得講\n\n因為很多新方法真正賣的，不是它的名字，而是它背後那個誘惑：\n\n**多資訊一起丟進去，應該比單一指標更有料。**\n\n這次測完之後，比較誠實的說法是：\n\n資訊變多，不代表有效訊號就變多。\n\n有些盤中指標其實描述的是同一件事，只是換不同角度講。你把它們全部塞進去，最後濃縮出來的那個綜合指標，未必真的比其中最乾淨的那一個更好。\n\nBPV 這次勝出的意思，很可能不是它比較花俏，而是它本來就比較穩，少了很多不必要的雜訊。\n\n## 同一天的貼近度，老方法也還是更好\n\n這次不只看隔天預測，還看同一天的貼近度。\n\n如果一個綜合指標真的比較好，它至少應該先在「描述今天發生了什麼」這件事上靠前一點。\n\n但結果還是老方法領先。\n\n在測試區間裡，BPV 和當日真實波動的相關係數大約是 **0.980**。最簡單的線性壓縮版約 **0.925**。這次的新做法約 **0.890**。\n\n這不是崩壞，只是很難說服人它有額外價值。因為如果你連同一天都沒有比老方法更貼近，拿去猜隔天時自然也很難突然反超。\n\n![K1430 same-day correlation](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1430_same_day_corr.png)\n\n## 那是不是代表這條路完全沒用？\n\n也不能這樣講。\n\n這次更像是在說：**這條路還沒有證明自己。**\n\n它有兩個正面訊號。\n\n第一，流程是能跑通的。代表這不是紙上談兵，未來資料更長時可以繼續測。\n\n第二，它沒有爛到完全失真。只是現在的證據強度，還不夠讓你說「這個綜合指標已經比老方法更好」。\n\n真正該保留的態度是：\n\n先承認它目前沒有贏，再決定要不要給它更長的樣本和更正式的比賽機會。\n\n## 一般讀者可以帶走的一句話\n\n把很多盤中訊號揉成一個看起來更聰明的指標，不一定會讓預測真的變準。\n\n有時候最難接受的答案反而最有用：\n\n**老方法沒有比較炫，但它可能就是更穩。**\n\n## 資料來源\n\n本文基於 VolPred 的 SPY 五分鐘資料測試。期間為 2026-01-15 到 2026-06-05，可用樣本 98 天，訓練 69 天、測試 29 天。比較對象包含多種盤中波動指標與一個綜合壓縮指標；評估目標是隔天的五分鐘總波動，另附同日貼近度比較。\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1430"
+    ],
+    "cluster_waiver": "Methodology article on synthetic realized-measure compression; distinct from routine SPY directional/strategy coverage and needed to cover uncovered K1430.",
+    "topic_cluster": "spy",
+    "topic_cluster_30d": {
+      "count": 98,
+      "cap": 10,
+      "ratio": 0.2333,
+      "exempt": false
+    }
+  },
+  "tags": [
+    "一般讀者",
+    "美股",
+    "波動率",
+    "盤中資料",
+    "模型比較",
+    "風險管理"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-09T03:01:56.809545+00:00",
+  "published_at": "2026-06-09T03:01:56.809545+00:00",
+  "status": "draft",
+  "errata": {
+    "update_at": "2026-06-09T03:02:25.885681+00:00",
+    "update_action": "single_file_repair",
+    "update_summary": "Re-ran publisher update path to restore the missing parallel single-article JSON after the initial draft publish only persisted feed.json.",
+    "update_history": [
+      {
+        "at": "2026-06-09T03:02:25.885681+00:00",
+        "action": "single_file_repair",
+        "summary": "Re-ran publisher update path to restore the missing parallel single-article JSON after the initial draft publish only persisted feed.json.",
+        "old_content_chars": 1697,
+        "new_content_chars": 1697,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "frontmatter override",
+        "image_paths_normalized": 2,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-09T03:02:25.885681+00:00"
+}

@@ -25836,11 +25836,36 @@
     "priority": 2,
     "title": "K1431: VIX9D-VIX spread as retail-tradable OOS covariate in HAR-RV (SPY 2011-2026)",
     "description": "Test whether VIX9D-VIX spread (short-term term structure / VRP proxy) adds OOS QLIKE / DM improvement over vanilla HAR-RV on SPY daily realized vol. Grounded in K1430 PARTIAL_NULL lesson (BPV > AE in short window) + literature Stivers (2003), Carr & Wu (2009 RFS), Vilkov & Xiao (2012). Retail-tradable signal supports M1+M5.",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-06-09T02:08:00+00:00",
     "claimed_by": "hourly-10",
     "claimed_at": "2026-06-09T02:11:28.987631+00:00",
     "claim_session_id": "8d5e3b8a2c90",
-    "started_at": "2026-06-09T02:11:29.360215+00:00"
+    "started_at": "2026-06-09T02:11:29.360215+00:00",
+    "completed_at": "2026-06-09T03:09:11.281113+00:00",
+    "result": "K1431 OOS PoC NULL: VIX9D-VIX spread alone p=0.54 (cherry-pick dc7812e2). Written to experiments/k1431/."
+  },
+  {
+    "id": "gen_article_k1430",
+    "title": "K1430: write general-audience article (auto-discovered, verdict=PARTIAL_NULL)",
+    "description": "K1430 has a non-null verdict in experiments/k1430/ but no published feed article and no existing task. Verdict: PARTIAL_NULL. Write a general-audience article summarising key findings.",
+    "task_type": "daily_article",
+    "priority": 4,
+    "status": "succeeded",
+    "tags": [
+      "auto-generated",
+      "audience-general",
+      "uncovered-k"
+    ],
+    "source": "task_generator_v2_daily_article",
+    "created_at": "2026-06-09T02:59:44.244764+00:00",
+    "generated_at": "2026-06-09T02:59:44.245059+00:00",
+    "k_id": "K1430",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T02:59:51.547972+00:00",
+    "claim_session_id": "9cedef30b660",
+    "started_at": "2026-06-09T02:59:51.634054+00:00",
+    "completed_at": "2026-06-09T03:02:16.349377+00:00",
+    "result": "Published draft article mile_31d5b253 for K1430 with cluster waiver. Added general-audience draft, generated a second PNG comparison chart, passed audience/image gates, and wrote feed.json plus storage/reports/mile_31d5b253.json."
   }
 ]
