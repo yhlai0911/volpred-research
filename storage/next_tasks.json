@@ -25802,5 +25802,41 @@
     "started_at": "2026-06-08T22:33:19.657402+00:00",
     "completed_at": "2026-06-08T22:43:56.726606+00:00",
     "result": "K1429 v2 completed: rebuilt the experiment with reaction-day alignment, yfinance earnings timestamps, single 5-day window volatility, and permutation inference. Updated mile_072c3972 with corrected sample counts, v2 figures, and a CONDITIONAL_PASS Codex re-review; only MSFT post-event survives Bonferroni."
+  },
+  {
+    "id": "gen_article_k1428",
+    "title": "K1428: write general-audience article (auto-discovered, verdict={'label': 'ACTIONABLE_REVIEW', 'summary')",
+    "description": "K1428 has a non-null verdict in experiments/k1428/ but no published feed article and no existing task. Verdict: {'label': 'ACTIONABLE_REVIEW', 'summary': 'K1428 does not find a clean literatur. Write a general-audience article summarising key findings.",
+    "task_type": "daily_article",
+    "priority": 4,
+    "status": "succeeded",
+    "tags": [
+      "auto-generated",
+      "audience-general",
+      "uncovered-k"
+    ],
+    "source": "task_generator_v2_daily_article",
+    "created_at": "2026-06-09T01:51:41.805963+00:00",
+    "generated_at": "2026-06-09T01:51:41.806403+00:00",
+    "k_id": "K1428",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-09T01:52:09.328102+00:00",
+    "claim_session_id": "267fec559579",
+    "started_at": "2026-06-09T01:52:09.412591+00:00",
+    "completed_at": "2026-06-09T01:57:38.602674+00:00",
+    "result": "Published draft article mile_66eb3cd1 for K1428. Added general-audience draft, generated 2 PNG charts, passed audience/image gates, and stored article as draft in feed.json + storage/reports/mile_66eb3cd1.json."
+  },
+  {
+    "id": "K1431_vix9d_spread_har_oos",
+    "task_type": "experiment",
+    "priority": 2,
+    "title": "K1431: VIX9D-VIX spread as retail-tradable OOS covariate in HAR-RV (SPY 2011-2026)",
+    "description": "Test whether VIX9D-VIX spread (short-term term structure / VRP proxy) adds OOS QLIKE / DM improvement over vanilla HAR-RV on SPY daily realized vol. Grounded in K1430 PARTIAL_NULL lesson (BPV > AE in short window) + literature Stivers (2003), Carr & Wu (2009 RFS), Vilkov & Xiao (2012). Retail-tradable signal supports M1+M5.",
+    "status": "in_progress",
+    "created_at": "2026-06-09T02:08:00+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-09T02:11:28.987631+00:00",
+    "claim_session_id": "8d5e3b8a2c90",
+    "started_at": "2026-06-09T02:11:29.360215+00:00"
   }
 ]
