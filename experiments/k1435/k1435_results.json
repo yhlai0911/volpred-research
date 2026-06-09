@@ -1,0 +1,87 @@
+{
+  "experiment_id": "K1435",
+  "hypothesis": "FOMC announcement days exhibit elevated DCC dynamic correlation between GLD (gold ETF) and UUP (USD index ETF) returns vs other days.",
+  "data": {
+    "source": "yfinance",
+    "tickers": [
+      "GLD",
+      "UUP"
+    ],
+    "start": "2010-01-05",
+    "end": "2026-06-08",
+    "n_obs": 4131,
+    "returns_scale": "log returns x 100 (pct)"
+  },
+  "garch_params": {
+    "GLD": {
+      "mu": 0.01873483060585517,
+      "omega": 0.02382892711884941,
+      "alpha": 0.07071257192568704,
+      "beta": 0.9083102273834042,
+      "loglik": -5712.648800298215
+    },
+    "UUP": {
+      "mu": 0.012324472324116032,
+      "omega": 0.0018665716944293983,
+      "alpha": 0.04928323519014827,
+      "beta": 0.9427860414946535,
+      "loglik": -2445.6402722459034
+    }
+  },
+  "dcc_params": {
+    "a": 0.05143711265297817,
+    "b": 0.9202400555422837,
+    "persistence": 0.9716771681952618,
+    "loglik": 505.43812205840254,
+    "q_bar_offdiag": -0.4273475686635589
+  },
+  "rho_summary": {
+    "mean": -0.4333542236682128,
+    "std": 0.16896412950808629,
+    "min": -0.747145643852233,
+    "max": 0.35111351544561537
+  },
+  "fomc_test": {
+    "n_fomc_days": 131,
+    "n_other_days": 4000,
+    "n_fomc_calendar_dates": 132,
+    "n_fomc_matched_trading_days": 131,
+    "rho_fomc_mean": -0.4201074414920495,
+    "rho_fomc_std": 0.16054882167526377,
+    "rho_other_mean": -0.43378805578448215,
+    "rho_other_std": 0.16919402755242496,
+    "rho_diff": 0.013680614292432669,
+    "t_stat": 0.9544839037141397,
+    "p_value": 0.34148920481762784
+  },
+  "event_window_pm2": {
+    "window_days": 2,
+    "n_event_days": 655,
+    "n_other_days": 3476,
+    "rho_event_mean": -0.43077768198132044,
+    "rho_other_mean": -0.4338397342565081,
+    "rho_diff": 0.0030620522751876877,
+    "t_stat": 0.44153174151698266,
+    "p_value": 0.6589285824357386
+  },
+  "hedge_effectiveness": {
+    "h_naive_constant": -0.7781113737584462,
+    "h_dyn_mean": -0.9839727502956069,
+    "h_dyn_std": 0.4758630113920945,
+    "in_sample": {
+      "period": "2010-01-01 to 2019-12-31",
+      "he_dcc": 0.15400841268263343,
+      "he_naive": 0.13412232324760232
+    },
+    "oos": {
+      "period": "2019-12-31 to 2026-06-09",
+      "he_dcc": 0.19984380498344556,
+      "he_naive": 0.1695555848375948
+    }
+  },
+  "verdict": "NULL",
+  "verdict_reason": "No significant FOMC effect on DCC correlation (diff=+0.0137, p=0.3415). OOS hedge improvement DCC vs naive: +0.0303.",
+  "lookahead_check": "FOMC dates from public Fed calendar (no leakage). DCC rho_t at time t uses t-1 conditional Q (standard DCC). Hedge ratio h_t shifted by 1 day (signal.shift(1)) for OOS realism. Log returns are close-to-close.",
+  "seed": 42,
+  "reviewer_source": "pending_codex_review"
+}
