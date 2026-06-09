@@ -39,15 +39,15 @@ K156 (46 days) provided descriptive RV decomposition finding that BPV (continuou
 | A4f-VIX^2 | (VIX_{t-1}/100)^2/252 |
 
 ### Evaluation
-- QLIKE on RV proxy (HAR native target)
-- QLIKE on r^2 proxy (Patton 2011 cross-model fair comparison)
-- Spearman rank correlation
-- DM test (Harvey |t|>3.0)
+- Canonical QLIKE on RV proxy
+- Canonical QLIKE on r^2 proxy (Patton 2011 cross-model fair comparison)
+- Spearman rank correlation on 30-day common OOS window
+- DM test with HAC variance (not Harvey 1997 small-sample correction)
 
 ## Key Results
 
 ### Jump Detection
-- **8/60 significant jumps (13.3%)** — much higher than K156's 0/45 (longer sample caught more events)
+- **4/60 significant jumps (6.7%)** under canonical BN-S relative z-stat
 - Jump fraction of total RV: **3.9%** (consistent with literature: jumps are rare but impactful)
 - Jump ACF(1) = -0.056 (unpredictable, as expected)
 
@@ -56,41 +56,41 @@ K156 (46 days) provided descriptive RV decomposition finding that BPV (continuou
 **On RV proxy (HAR native):**
 | Rank | Model | QLIKE |
 |------|-------|-------|
-| 1 | HAR-RV | -8.5973 |
-| 2 | HAR-C | -8.5828 |
-| 3 | HAR-RV-J | -8.5720 |
-| 4 | HAR-CJ | -8.5458 |
-| 5 | HAR-CJ-ABD | -8.5215 |
-| 6 | GJR-GARCH | -8.5042 |
-| 7 | A4f-VIX^2 | -8.0742 |
+| 1 | HAR-RV | 0.1546 |
+| 2 | HAR-C | 0.1691 |
+| 3 | HAR-RV-J | 0.1799 |
+| 4 | HAR-CJ-ABD | 0.2039 |
+| 5 | HAR-CJ | 0.2062 |
+| 6 | GJR-GARCH | 0.2569 |
+| 7 | A4f-VIX^2 | 0.6777 |
 
 **On r^2 proxy (Patton 2011 fair):**
 | Rank | Model | QLIKE |
 |------|-------|-------|
-| 1 | GJR-GARCH | -8.0697 |
-| 2 | A4f-VIX^2 | -7.8948 |
-| 3 | HAR-CJ-ABD | -7.7798 |
-| 4 | HAR-RV | -7.7738 |
-| 5 | HAR-RV-J | -7.7732 |
-| 6 | HAR-C | -7.7617 |
-| 7 | HAR-CJ | -7.7436 |
+| 1 | GJR-GARCH | 1.4860 |
+| 2 | A4f-VIX^2 | 1.6522 |
+| 3 | HAR-CJ-ABD | 1.7679 |
+| 4 | HAR-RV | 1.8018 |
+| 5 | HAR-RV-J | 1.8019 |
+| 6 | HAR-C | 1.8151 |
+| 7 | HAR-CJ | 1.8333 |
 
 **Rankings are NOT consistent across proxies** — mechanical result per preamble: HAR naturally wins on RV, GARCH naturally wins on r^2.
 
-### DM Tests (Harvey |t|>3.0 threshold)
+### DM Tests (HAC-DM; no Harvey small-sample correction)
 - **HAR variants vs HAR-RV on RV proxy**: None significant (all |t| < 1.5). Adding jump term does NOT help.
 - **HAR-RV vs A4f on RV proxy**: t=-5.97*** (HAR significantly better — but this is HAR's native target, mechanical advantage)
 - **On r^2 proxy (fair)**: No significant differences between HAR variants and A4f (all |t| < 0.5)
-- **A4f vs GJR-GARCH on RV proxy**: t=+12.4*** (GARCH much better than A4f on RV)
+- **A4f vs GJR-GARCH on RV proxy**: t=+12.0*** (GARCH much better than A4f on RV)
 
 ### Spearman Rank Correlations
 - HAR variants: **negative rho(RV)** (-0.10 to -0.17) — HAR forecasts are inversely correlated with actual RV in this short sample!
 - A4f-VIX^2: rho(RV)=0.313, rho(r^2)=0.303 — best directional accuracy
-- GJR-GARCH: rho(RV)=0.072, rho(r^2)=0.023 — low in this period
+- GJR-GARCH: rho(RV)=0.047, rho(r^2)=0.058 — low in this period
 
 ### Overnight Analysis
-- Mean overnight share: **32.7%** of total variance (lower than K156's 47.4%, which used a different calculation)
-- Correlation(overnight_r^2, intraday_RV): **0.186** (low, suggesting different information content)
+- Mean overnight share: **33.0%** of total variance (lower than K156's 47.4%, which used a different calculation)
+- Correlation(overnight_r^2, intraday_RV): **0.189** (low, suggesting different information content)
 
 ## Conclusions
 
@@ -108,6 +108,7 @@ K156 (46 days) provided descriptive RV decomposition finding that BPV (continuou
 - 30 OOS days is far below the 252-day minimum for reliable conclusions
 - HAR expanding window starts from only 30 observations (very small for OLS with 4 regressors)
 - BN-S jump test power is low with ~78 intraday observations per day
+- Daily SPY/VIX fallback may use local cached series when live yfinance is unavailable
 - No VaR/ES evaluation (requires longer OOS period)
 
 ## Files

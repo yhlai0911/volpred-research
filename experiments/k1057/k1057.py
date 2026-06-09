@@ -52,6 +52,9 @@ REPO_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', '..'))
 MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
 DATA_DIR = os.path.join(MAIN_REPO, 'data', 'intraday')
 OUTPUT_DIR = BASE_DIR
+SAMPLE_START = '2026-01-14'
+SAMPLE_END = '2026-04-10'
+LOCAL_DAILY_FALLBACK = '/Users/yhlai0911/.gemini/antigravity-cli/scratch/crypto-fear-channel/data/spy_btc_usd_vix_2015-2026.csv'
 
 print("=" * 70)
 print("K1057: HAR-RV-J — Jump Component & Bipower Variation (60 days)")
@@ -65,6 +68,10 @@ print("=" * 70)
 print("\n[1] Loading 5-min data and computing RV components...")
 
 fivemin_files = sorted(glob(os.path.join(DATA_DIR, 'SPY_5min_*.csv')))
+fivemin_files = [
+    f for f in fivemin_files
+    if SAMPLE_START <= os.path.basename(f).replace('SPY_5min_', '').replace('.csv', '') <= SAMPLE_END
+]
 print(f"  Found {len(fivemin_files)} 5-min CSV files")
 
 # Helper: compute RV, BPV, J from a single day's 5-min data
@@ -119,11 +126,16 @@ def compute_rv_components(filepath):
     # Relative jump: (RV - BPV) / RV
     rel_jump = (rv - bpv) / rv if rv > 0 else 0.0
 
-    # Z-statistic (BN-S 2006, eq. 5)
-    # z = (RV - BPV) / sqrt((pi^2/4 + pi - 5) * max(TPQ, RV^2) / n)
+    # BN-S relative jump statistic:
+    # z = sqrt(n) * ((RV - BPV) / RV) / sqrt(theta * max(1, TPQ / BPV^2))
+    # This is the canonical relative form typically used in practice.
     theta = np.pi ** 2 / 4.0 + np.pi - 5.0  # ≈ 0.6090
-    var_term = theta * max(tpq, 1e-30) / n
-    z_stat = (rv - bpv) / np.sqrt(max(var_term, 1e-30)) if var_term > 0 else 0.0
+    if bpv > 0:
+        iq_ratio = max(1.0, tpq / max(bpv ** 2, 1e-30))
+    else:
+        iq_ratio = 1.0
+    denom = np.sqrt(max(theta * iq_ratio, 1e-30))
+    z_stat = np.sqrt(n) * rel_jump / denom if denom > 0 else 0.0
 
     # One-sided test (jumps are positive)
     p_value = 1.0 - stats.norm.cdf(z_stat)
@@ -193,6 +205,9 @@ try:
     spy_data = yf.download('SPY', start='2016-01-01', end='2026-04-11', progress=False)
     vix_data = yf.download('^VIX', start='2016-01-01', end='2026-04-11', progress=False)
 
+    if spy_data.empty or vix_data.empty:
+        raise ValueError("yfinance returned empty daily data")
+
     # Handle multi-level columns
     if isinstance(spy_data.columns, pd.MultiIndex):
         spy_close = spy_data[('Close', 'SPY')].squeeze()
@@ -207,7 +222,7 @@ try:
         vix_close = vix_data['Close'].squeeze()
 
     # Daily returns
-    daily_ret = spy_close.pct_change().dropna()
+    daily_ret = spy_close.pct_change(fill_method=None).dropna()
     daily_r2 = daily_ret ** 2
 
     # Overnight returns: (open_t - close_{t-1}) / close_{t-1}
@@ -218,8 +233,23 @@ try:
     print(f"  VIX data: {len(vix_close)} observations")
 
 except Exception as e:
-    print(f"  ERROR loading yfinance data: {e}")
-    sys.exit(1)
+    print(f"  yfinance unavailable, using local fallback: {e}")
+    fallback = pd.read_csv(LOCAL_DAILY_FALLBACK, parse_dates=['date']).set_index('date').sort_index()
+    fallback = fallback.loc['2016-01-01':'2026-04-10']
+    fallback = fallback[['spy_close', 'spy_open', 'vix_close']].dropna()
+
+    spy_close = fallback['spy_close'].astype(float)
+    spy_open = fallback['spy_open'].astype(float)
+    vix_close = fallback['vix_close'].astype(float)
+
+    daily_ret = spy_close.pct_change(fill_method=None).dropna()
+    daily_r2 = daily_ret ** 2
+
+    overnight_ret = (spy_open - spy_close.shift(1)) / spy_close.shift(1)
+    overnight_r2 = overnight_ret ** 2
+
+    print(f"  Daily SPY returns (fallback): {len(daily_ret)} observations")
+    print(f"  VIX data (fallback): {len(vix_close.dropna())} observations")
 
 # Align overnight return² with RV dates
 overnight_aligned = overnight_r2.reindex(df_rv.index).dropna()
@@ -451,11 +481,13 @@ print(f"  A4f-VIX²: {len(a4f_forecasts)} OOS forecasts")
 print("\n[6] Evaluating models...")
 
 def qlike(actual, predicted):
-    """QLIKE loss: sigma2/h + log(h), where sigma2=actual, h=predicted."""
+    """Canonical QLIKE loss: sigma2/h - log(sigma2/h) - 1."""
     actual = np.asarray(actual, dtype=float)
     predicted = np.asarray(predicted, dtype=float)
+    actual = np.maximum(actual, 1e-12)
     predicted = np.maximum(predicted, 1e-10)
-    loss = actual / predicted + np.log(predicted)
+    ratio = actual / predicted
+    loss = ratio - np.log(ratio) - 1.0
     return float(np.nanmean(loss))
 
 def dm_test(loss1, loss2):
@@ -556,10 +588,12 @@ print("\n[7] Diebold-Mariano tests...")
 
 # Compute QLIKE losses per observation for DM test
 def qlike_losses(actual, predicted):
-    """Per-observation QLIKE losses."""
+    """Per-observation canonical QLIKE losses."""
     actual = np.asarray(actual, dtype=float)
+    actual = np.maximum(actual, 1e-12)
     predicted = np.maximum(np.asarray(predicted, dtype=float), 1e-10)
-    return actual / predicted + np.log(predicted)
+    ratio = actual / predicted
+    return ratio - np.log(ratio) - 1.0
 
 # DM test pairs: each HAR variant vs HAR-RV, and best HAR vs A4f
 dm_results = {}
@@ -733,19 +767,23 @@ print(f"  Saved: {results_path}")
 
 print("\n[10] Creating plots...")
 
+x_dates = df_rv.index.to_pydatetime()
+sig_dates = df_rv[df_rv['jump_significant']].index
+sig_x = sig_dates.to_pydatetime()
+overnight_x = overnight_share.index.to_pydatetime()
+
 # ── Plot 1: RV Decomposition time series ──
 fig, axes = plt.subplots(3, 1, figsize=(14, 10), sharex=True)
 
 # Panel A: RV vs BPV
 ax = axes[0]
-ax.plot(df_rv.index, df_rv['rv'] * 1e4, label='RV', color='#2196F3', linewidth=1.5)
-ax.plot(df_rv.index, df_rv['bpv'] * 1e4, label='BPV (Continuous)', color='#4CAF50', linewidth=1.5, alpha=0.8)
-ax.fill_between(df_rv.index, df_rv['bpv'] * 1e4, df_rv['rv'] * 1e4,
+ax.plot(x_dates, df_rv['rv'].values * 1e4, label='RV', color='#2196F3', linewidth=1.5)
+ax.plot(x_dates, df_rv['bpv'].values * 1e4, label='BPV (Continuous)', color='#4CAF50', linewidth=1.5, alpha=0.8)
+ax.fill_between(x_dates, df_rv['bpv'].values * 1e4, df_rv['rv'].values * 1e4,
                 where=df_rv['rv'] > df_rv['bpv'], alpha=0.3, color='#FF5722', label='Jump (RV-BPV)')
 # Mark significant jumps
-sig_dates = df_rv[df_rv['jump_significant']].index
 if len(sig_dates) > 0:
-    ax.scatter(sig_dates, df_rv.loc[sig_dates, 'rv'] * 1e4,
+    ax.scatter(sig_x, df_rv.loc[sig_dates, 'rv'].values * 1e4,
                marker='v', color='red', s=80, zorder=5, label=f'Significant Jump ({len(sig_dates)})')
 ax.set_ylabel('Variance (×10⁴)')
 ax.set_title('(A) Realized Variance vs Bipower Variation (Continuous)')
@@ -754,9 +792,9 @@ ax.grid(True, alpha=0.3)
 
 # Panel B: Jump component
 ax = axes[1]
-ax.bar(df_rv.index, df_rv['jump'] * 1e4, color='#FF5722', alpha=0.7, label='Jump = max(RV-BPV, 0)')
+ax.bar(x_dates, df_rv['jump'].values * 1e4, color='#FF5722', alpha=0.7, label='Jump = max(RV-BPV, 0)')
 if len(sig_dates) > 0:
-    ax.bar(sig_dates, df_rv.loc[sig_dates, 'jump'] * 1e4, color='red', alpha=0.9, label='Significant (BN-S p<0.05)')
+    ax.bar(sig_x, df_rv.loc[sig_dates, 'jump'].values * 1e4, color='red', alpha=0.9, label='Significant (BN-S p<0.05)')
 ax.set_ylabel('Jump (×10⁴)')
 ax.set_title(f'(B) Jump Component — {n_sig_jumps}/{len(df_rv)} Significant')
 ax.legend(loc='upper right', fontsize=9)
@@ -764,7 +802,7 @@ ax.grid(True, alpha=0.3)
 
 # Panel C: BN-S z-statistic
 ax = axes[2]
-ax.plot(df_rv.index, df_rv['z_stat'], color='#9C27B0', linewidth=1.2)
+ax.plot(x_dates, df_rv['z_stat'].values, color='#9C27B0', linewidth=1.2)
 ax.axhline(y=1.645, color='red', linestyle='--', alpha=0.7, label='z=1.645 (5%)')
 ax.axhline(y=0, color='gray', linestyle='-', alpha=0.5)
 ax.set_ylabel('BN-S z-statistic')
@@ -836,10 +874,10 @@ fig, axes = plt.subplots(2, 1, figsize=(14, 7))
 
 # Panel A: Overnight share time series
 ax = axes[0]
-ax.plot(overnight_share.index, overnight_share.values * 100, color='#FF5722', linewidth=1.5)
+ax.plot(overnight_x, overnight_share.values * 100, color='#FF5722', linewidth=1.5)
 ax.axhline(y=overnight_share.mean() * 100, color='red', linestyle='--', alpha=0.7,
            label=f'Mean: {overnight_share.mean():.1%}')
-ax.fill_between(overnight_share.index, 0, overnight_share.values * 100, alpha=0.2, color='#FF5722')
+ax.fill_between(overnight_x, 0, overnight_share.values * 100, alpha=0.2, color='#FF5722')
 ax.set_ylabel('Overnight Share (%)')
 ax.set_title('(A) Overnight Return² as Share of Total Variance')
 ax.legend(fontsize=10)
