@@ -33024,5 +33024,21 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-06-10T05:19:40.989417"
+  },
+  {
+    "item_id": "3ebd7930",
+    "category": "empirical_finding",
+    "content": "K1444 oil vol-of-vol spillover: yfinance CL=F/USO/SPY/XLE 2012-2026 daily (N=3,398, 21d RV → 21d std of RV). CONDITIONAL_PASS (Codex round-1). Stage A bivariate Granger (4 pairs, max-lag 21, Bonferroni α=0.0125): CL=F→SPY p=2.5e-57 lag1, CL=F→XLE p=5.0e-55 lag1, USO→SPY p=1.7e-42 lag9, USO→XLE p=1.8e-10 lag21 — 4/4 PASS. Stage B Diebold-Yilmaz 2012 generalized FEVD (VAR(2), h=10): total spillover 48.84%, net contributions CL=F=−56.1% (receiver), USO=+40.3% (transmitter), SPY=−5.5%, XLE=+21.2%. DIRECTION CONTRADICTS hypothesis: futures CL=F is net receiver not transmitter. Stage C asymmetric did not flip Stage B reading. VERDICT: PRELIMINARY at experiment level; CONDITIONAL_PASS at code-review level (Codex CLI gpt-5.4 medium 4-point review). Codex concerns: (1) Granger reports 'HAC' label but uses statsmodels grangercausalitytests ssr_ftest (plain F-test, not HAC-Wald) — needs followup with proper HAC SE; (2) DY FEVD formula correct but per-series differencing decision documented as transformation-coherent risk; no σjj=0/row-sum=0 guards; (3) lookahead via VAR lag structure + Stage C explicit signal.shift(1) PASS; (4) SEED=42 set but yfinance data drift is the real reproducibility floor. Diff vs K861: K861 was first-order oil-vol → equity-vol LEVEL spillover (oil drops drive equity vol, asymmetric t=5.82). K1444 = second-order vol-of-vol angle, complementary not redundant. Diff vs K1088: K1088 USO+OVX cross-section PASS (asset-matched). K1444 extends to system VAR. Tradeability caveat: original monetization hypothesis (OVX vov leads VIX vov → buy VIX gamma) NOT supported by DY direction. ~49% bidirectional connectedness without clear oil lead. Caveats: (a) CL=F roll effect (yfinance auto_adjust does NOT roll futures) may mechanically push CL=F into DY receiver bucket; followup K-experiment needed with continuous front-month or equal-weighted CL=F+USO basket. (b) Daily frequency may miss intraday gamma transmission. (c) No structural-break test for 2014 oil crash / 2020 COVID / 2022 RU-UA. Reviewer: Codex CLI gpt-5.4 medium. experiment_path=experiments/k1444, commit=dc9ba518, k_id=K1444.",
+    "evidence": [
+      "experiments/k1444/k1444_results.json",
+      "experiments/k1444/README.md",
+      "experiments/k1444/k1444.py",
+      "experiments/k1444/fig_a_volvol_levels.png",
+      "experiments/k1444/fig_b_spillover.png",
+      "experiments/k1444/fig_c_asymmetry.png",
+      "commit dc9ba518"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-06-10T06:27:56.481761"
   }
 ]
