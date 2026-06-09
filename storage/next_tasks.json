@@ -25867,5 +25867,40 @@
     "started_at": "2026-06-09T02:59:51.634054+00:00",
     "completed_at": "2026-06-09T03:02:16.349377+00:00",
     "result": "Published draft article mile_31d5b253 for K1430 with cluster waiver. Added general-audience draft, generated a second PNG comparison chart, passed audience/image gates, and wrote feed.json plus storage/reports/mile_31d5b253.json."
+  },
+  {
+    "id": "K1061_twse50_financial_report_eav",
+    "title": "K1061: 台股財報公告日 EAV 擴展至 TWSE 50 全成分（binomial power N≥50）",
+    "description": "延伸 K1059-K1064 台股財報公告日×波動率研究：把 earnings announcement vol (EAV) 效應從子樣本擴展到 TWSE 50 全成分股，N≥50 提供足夠 binomial power。研究誠實：T+1 event window、lag 明確、seed 固定、與既有 K1059 對齊。先讀 docs/error_log.md + .claude/rules/experiments.md + 查相似 K。Codex/code-reviewer 審後才寫 knowledge。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "tags": [
+      "台股",
+      "財報",
+      "EAV",
+      "波動率",
+      "auto-research-fallback"
+    ],
+    "created_at": "2026-06-09T03:29:47+00:00"
+  },
+  {
+    "id": "research_tw_financial_stress_early_warning",
+    "title": "金融股壓力指標作為 TSMC 波動率早期預警（K757 Fubon→TSMC Granger F=6.11 延伸）",
+    "description": "K757 發現富邦→台積電有 Granger 因果（F=6.11）。建立台股金融股壓力指標（金融股 vol / spread / 相對強弱），檢驗能否作為 TSMC（或大盤）波動率的早期預警 signal。研究誠實：明確 lag（金融股_t → TSMC vol_{t+k}），無 lookahead、seed 固定、OOS 驗證、與 baseline（VIX/歷史 vol）公平比較。先讀 error_log + experiments rules + 查相似 K。審查後才寫 knowledge。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "tags": [
+      "台股",
+      "金融股",
+      "早期預警",
+      "Granger",
+      "波動率",
+      "auto-research-fallback"
+    ],
+    "created_at": "2026-06-09T03:29:47+00:00"
   }
 ]
