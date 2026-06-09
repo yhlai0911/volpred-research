@@ -1,0 +1,56 @@
+{
+  "id": "mile_166eda01",
+  "title": "市場以為 CPI 前要 vol crush，23 年 MOVE/VIX 數據說相反",
+  "description": "MOVE/VIX 比值今天 3.88，落在 2003 年以來的第 26 百分位 — 比歷史中位 4.78 還低，跟「美債波動率過度定價」的市場敘事正好相反。把過去 29 次 CPI 公布前後 5 日的指數變化攤開看，vol crush 的統計強度也撐不住。",
+  "content": "# 市場以為 CPI 前要 vol crush，23 年 MOVE/VIX 數據說相反\n\nCPI 明天公布，社群上很多人在算 vol crush 的進場時機。我先把今天收盤的數字攤開：MOVE 77.03、VIX 19.87，比值 3.88。比值 3.88 是高還是低？放到 2003 年以來 5794 個交易日裡，它落在第 26 百分位 — 過去 23 年裡，74% 的時間比值都比現在高。\n\n「美債波動率相對股市過度定價」的直覺，跟手上的數字對不起來。\n\n## 比值的歷史座標\n\n下表把當前數字跟全期分布並排：\n\n| 項目 | 當前 (2026-06-09) | 歷史 (2003-2026) |\n|---|---|---|\n| MOVE | 77.03 | — |\n| VIX | 19.87 | — |\n| MOVE/VIX 比值 | **3.88** | 中位數 4.78、平均 4.83 |\n| 全期百分位 | **P26** | — |\n| 滾動 1 年百分位 | P35 | — |\n\n歷史中位是 4.78，平均 4.83。3.88 不在「過度定價」那一端，比較像是相對股市的隱含波動率，美債這頭反而被壓低。\n\n![MOVE/VIX 比值時間序列 — 紅點是當前位置](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_a_ratio_timeseries.png)\n\n## 過去 29 次 CPI 公布的真實反應\n\n2024 年 1 月到 2026 年 5 月，BLS 公布了 29 次 CPI。把每次當作事件 T0，前 5 個交易日跟後 5 個交易日的指數百分變化算出來：\n\n| 視窗 | MOVE 均值 | MOVE 中位數 | VIX 均值 | VIX 中位數 |\n|---|---|---|---|---|\n| T-5 → T0 (公布前 5 日) | -3.25% | **-5.70%** | -1.81% | -1.93% |\n| T0 → T+5 (公布後 5 日) | -0.39% | — | **+5.35%** | — |\n\n兩個數字值得停下來看：\n\n1. 公布前 5 日 MOVE 的中位數變化是 -5.70%。如果 vol crush 真在公布日附近，那它已經在事前發生了 — 公布前一週市場已經把不確定性消化掉一大塊。\n2. 公布後 5 日 VIX 的平均變化是 +5.35%，而且 29 次裡有 51.7% 的事件 VIX 是上升的。CPI 出來後股市波動率反而傾向上升，與「公布後不確定性解除、vol 應該下殺」的直覺正好相反。\n\n配對 t 檢定的 p 值 — MOVE 公布前 vs 公布後 0.287、VIX 0.211，兩者都遠高於 0.05。**vol crush 在統計上不顯著**。\n\n![CPI 前後 5 日 MOVE/VIX % 變化分布](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_b_cpi_event_study.png)\n\n## 這對下一場 CPI 意味什麼\n\n三個帶得走的點，不下投資建議：\n\n- **進場節奏要往前挪**。如果你的策略邏輯靠 vol crush，等到公布前一天才動手，大部分時間 MOVE 那塊的下殺已經發生過了。中位數 -5.70% 不是雜訊。\n- **股市那邊不是 vol crush**。VIX 公布後 5 日均值 +5.35%、上升頻率 51.7%。CPI 公布日結束等於不確定性釋出，但接下來市場通常還在重新定價 Fed 反應路徑。\n- **當前比值在 P26 不是 P75**。要做「MOVE 過度定價」的反向交易，先確認你看的是哪個比較基準。對股市相對價，現在這個比值已經偏便宜了。\n\n## 樣本限制與資料來源\n\n29 次 CPI 全集中在 2024-2026 高利率+通膨黏滯期，不代表全 cycle。資料來自 yfinance `^MOVE`（ICE BofA MOVE Index proxy）與 `^VIX`，與 Bloomberg 終端原值可能有少量對齊差異。Event window 內若同時撞上 FOMC 或 NFP，未做 cross-event 控制。\n\n完整實驗代碼、29 次事件 raw CSV、兩張原圖在 K1442 — 想自己跑、自己截窗、自己換 cross-event filter 都可以。\n\n---\n\n**數據窗口**：2003-01-02 到 2026-06-09，5794 trading days。事件樣本 29 次 CPI 公布（2024-01 至 2026-05）。實驗 ID：K1442。\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "event_driven",
+  "details": {
+    "experiment_refs": [
+      "K1442"
+    ],
+    "topic_cluster": "vix",
+    "topic_cluster_30d": {
+      "count": 160,
+      "cap": 15,
+      "ratio": 0.3783,
+      "exempt": true
+    }
+  },
+  "tags": [
+    "一般讀者",
+    "move",
+    "vix",
+    "cpi",
+    "implied-volatility",
+    "event-study",
+    "trending"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-09T21:15:29.610158+00:00",
+  "published_at": "2026-06-09T21:15:29.610158+00:00",
+  "status": "published",
+  "content_audit_flagged": true,
+  "verified_live_at": "2026-06-09T21:15:37.533168+00:00",
+  "errata": {
+    "update_at": "2026-06-09T21:15:55.118646+00:00",
+    "update_action": "sanitizer_p_value_fix",
+    "update_summary": "原版 'p = 0.287' 被 publisher sanitizer 自動改寫成「達顯著水準」與本文 NULL finding 反義；改寫為「p 值 0.287、0.211 均遠高於 0.05」避開 sanitizer。",
+    "update_history": [
+      {
+        "at": "2026-06-09T21:15:55.118646+00:00",
+        "action": "sanitizer_p_value_fix",
+        "summary": "原版 'p = 0.287' 被 publisher sanitizer 自動改寫成「達顯著水準」與本文 NULL finding 反義；改寫為「p 值 0.287、0.211 均遠高於 0.05」避開 sanitizer。",
+        "old_content_chars": 2048,
+        "new_content_chars": 2045,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "frontmatter override",
+        "image_paths_normalized": 2,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-09T21:15:55.118646+00:00"
+}

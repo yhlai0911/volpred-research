@@ -33012,5 +33012,17 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-06-10T04:16:50.308384"
+  },
+  {
+    "item_id": "c4f922bf",
+    "category": "event_study_null",
+    "content": "[K1442 verdict=NULL reviewer=hourly-05-self feed=mile_166eda01] MOVE/VIX 比值與 CPI 公布前後的隱含波動率定價. (1) 當前 (2026-06-09) MOVE/VIX 比值 3.88 落在 2003-2026 全期 P26 — 否定「美債波動率相對股市過度定價」敘事; (2) 29 次 CPI 事件研究 (2024-2026): MOVE T-5→T0 中位數 -5.70% (市場提前消化); VIX T0→T+5 均值 +5.35% (公布後反而上升 51.7% 事件); 配對 t 檢定 p_MOVE 0.287, p_VIX 0.211 — vol crush 統計不顯著. Limits: 樣本集中 2024-2026 高利率+通膨黏滯期, yfinance ^MOVE proxy 與 Bloomberg 原值或略有差異, 未控制鄰近 FOMC/NFP cross-event.",
+    "evidence": [
+      "experiments/k1442/k1442_results.json",
+      "experiments/k1442/k1442_cpi_events.csv",
+      "storage/reports/mile_166eda01.json"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-06-10T05:19:40.989417"
   }
 ]
