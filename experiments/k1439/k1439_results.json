@@ -1,0 +1,288 @@
+{
+  "k_id": "K1439",
+  "title": "USD regime conditional cross-asset realized volatility",
+  "hypothesis": "Conditional on strong vs weak USD regime (DXY proxy=UUP), EM/gold/commodity/oil 21d realized vols differ systematically.",
+  "period": {
+    "start": "2010-01-04",
+    "end": "2026-06-05",
+    "n_obs": 4131
+  },
+  "tickers": [
+    "EEM",
+    "GLD",
+    "DBC",
+    "USO",
+    "DBB"
+  ],
+  "uup_obs": 4131,
+  "regime_def": {
+    "level_primary": {
+      "indicator": "UUP - 100d MA, divided by 100d std",
+      "strong": "z > +0.5",
+      "weak": "z < -0.5",
+      "neutral": "else",
+      "lookahead_protection": "shift(1) on bucket"
+    },
+    "trend_robustness": {
+      "indicator": "UUP 60d log-return sign",
+      "strong": "60d log-return > 0",
+      "weak": "60d log-return < 0",
+      "neutral": "exact zero",
+      "lookahead_protection": "shift(1) on bucket"
+    }
+  },
+  "rv_definition": "21d rolling std of daily log returns, annualized by sqrt(252)",
+  "regime_stats_level": {
+    "EEM": {
+      "strong": {
+        "mean_rv": 0.2036182055974268,
+        "median_rv": 0.17541547603724322,
+        "std_rv": 0.10761055326505375,
+        "n_days": 1887
+      },
+      "weak": {
+        "mean_rv": 0.1903749388918193,
+        "median_rv": 0.1830767827602415,
+        "std_rv": 0.07285121093519542,
+        "n_days": 1356
+      },
+      "neutral": {
+        "mean_rv": 0.1883029048444248,
+        "median_rv": 0.1723125291167802,
+        "std_rv": 0.07541055140718879,
+        "n_days": 867
+      }
+    },
+    "GLD": {
+      "strong": {
+        "mean_rv": 0.1535519132780795,
+        "median_rv": 0.13732094485124927,
+        "std_rv": 0.06799350664239814,
+        "n_days": 1887
+      },
+      "weak": {
+        "mean_rv": 0.1519092906397077,
+        "median_rv": 0.14073902781819703,
+        "std_rv": 0.05975363802097523,
+        "n_days": 1356
+      },
+      "neutral": {
+        "mean_rv": 0.15144318402959717,
+        "median_rv": 0.13581185364256085,
+        "std_rv": 0.07297461298459795,
+        "n_days": 867
+      }
+    },
+    "DBC": {
+      "strong": {
+        "mean_rv": 0.1714262483113313,
+        "median_rv": 0.15826746083488633,
+        "std_rv": 0.07275418098098028,
+        "n_days": 1887
+      },
+      "weak": {
+        "mean_rv": 0.15351584351042427,
+        "median_rv": 0.15097255159346318,
+        "std_rv": 0.052298958114364164,
+        "n_days": 1356
+      },
+      "neutral": {
+        "mean_rv": 0.1524730888467126,
+        "median_rv": 0.14757847765986273,
+        "std_rv": 0.05307245699394743,
+        "n_days": 867
+      }
+    },
+    "USO": {
+      "strong": {
+        "mean_rv": 0.3493921029197189,
+        "median_rv": 0.29784007909804244,
+        "std_rv": 0.21373505238174492,
+        "n_days": 1887
+      },
+      "weak": {
+        "mean_rv": 0.29062867122380437,
+        "median_rv": 0.276015150647301,
+        "std_rv": 0.11818399072815929,
+        "n_days": 1356
+      },
+      "neutral": {
+        "mean_rv": 0.2923399045675728,
+        "median_rv": 0.26436461410825346,
+        "std_rv": 0.14533605690220797,
+        "n_days": 867
+      }
+    },
+    "DBB": {
+      "strong": {
+        "mean_rv": 0.18905695143058465,
+        "median_rv": 0.17222692496571343,
+        "std_rv": 0.06604553209482909,
+        "n_days": 1887
+      },
+      "weak": {
+        "mean_rv": 0.17932125073598057,
+        "median_rv": 0.17519439528619396,
+        "std_rv": 0.053451700055661716,
+        "n_days": 1356
+      },
+      "neutral": {
+        "mean_rv": 0.1863321923563326,
+        "median_rv": 0.1712192646532865,
+        "std_rv": 0.06897840527303378,
+        "n_days": 867
+      }
+    }
+  },
+  "tests_level": {
+    "EEM": {
+      "welch_t": 4.177316962427681,
+      "welch_p": 3.0277523529130927e-05,
+      "levene_stat": 31.309220489394843,
+      "levene_p": 2.383286163708681e-08,
+      "n_strong": 1887,
+      "n_weak": 1356,
+      "mean_strong_rv": 0.2036182055974268,
+      "mean_weak_rv": 0.1903749388918193,
+      "diff_mean_rv": 0.013243266705607493,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    },
+    "GLD": {
+      "welch_t": 0.7285742118154775,
+      "welch_p": 0.46631695738281465,
+      "levene_stat": 10.259730978553883,
+      "levene_p": 0.0013728266271682882,
+      "n_strong": 1887,
+      "n_weak": 1356,
+      "mean_strong_rv": 0.1535519132780795,
+      "mean_weak_rv": 0.1519092906397077,
+      "diff_mean_rv": 0.0016426226383717824,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    },
+    "DBC": {
+      "welch_t": 8.156132491089071,
+      "welch_p": 4.893385283864603e-16,
+      "levene_stat": 72.0601410599457,
+      "levene_p": 3.131584376596918e-17,
+      "n_strong": 1887,
+      "n_weak": 1356,
+      "mean_strong_rv": 0.1714262483113313,
+      "mean_weak_rv": 0.15351584351042427,
+      "diff_mean_rv": 0.017910404800907026,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    },
+    "USO": {
+      "welch_t": 10.003153989366552,
+      "welch_p": 3.3395195370966934e-23,
+      "levene_stat": 67.71364808154432,
+      "levene_p": 2.7072820032933404e-16,
+      "n_strong": 1887,
+      "n_weak": 1356,
+      "mean_strong_rv": 0.3493921029197189,
+      "mean_weak_rv": 0.29062867122380437,
+      "diff_mean_rv": 0.058763431695914525,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    },
+    "DBB": {
+      "welch_t": 4.63153072221924,
+      "welch_p": 3.7745537583612795e-06,
+      "levene_stat": 34.06778754500031,
+      "levene_p": 5.847503827816802e-09,
+      "n_strong": 1887,
+      "n_weak": 1356,
+      "mean_strong_rv": 0.18905695143058465,
+      "mean_weak_rv": 0.17932125073598057,
+      "diff_mean_rv": 0.009735700694604082,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    }
+  },
+  "tests_trend": {
+    "EEM": {
+      "welch_t": 5.587229807223617,
+      "welch_p": 2.4594204801493955e-08,
+      "levene_stat": 48.65294101990798,
+      "levene_p": 3.5531535646885528e-12,
+      "n_strong": 2398,
+      "n_weak": 1650,
+      "mean_strong_rv": 0.20194585321665134,
+      "mean_weak_rv": 0.18684763934370247,
+      "diff_mean_rv": 0.015098213872948879,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    },
+    "GLD": {
+      "welch_t": -0.6015434218087697,
+      "welch_p": 0.5475182899838824,
+      "levene_stat": 0.056440378897320516,
+      "levene_p": 0.8122252229553355,
+      "n_strong": 2398,
+      "n_weak": 1650,
+      "mean_strong_rv": 0.15170390503721146,
+      "mean_weak_rv": 0.1530034531210897,
+      "diff_mean_rv": -0.0012995480838782492,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    },
+    "DBC": {
+      "welch_t": 8.351980840235052,
+      "welch_p": 9.134180223525104e-17,
+      "levene_stat": 69.23194600057406,
+      "levene_p": 1.1831285995448795e-16,
+      "n_strong": 2398,
+      "n_weak": 1650,
+      "mean_strong_rv": 0.1677610349684092,
+      "mean_weak_rv": 0.15179455837420636,
+      "diff_mean_rv": 0.015966476594202833,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    },
+    "USO": {
+      "welch_t": 11.2999977648794,
+      "welch_p": 3.7667710255027686e-29,
+      "levene_stat": 85.51087682510189,
+      "levene_p": 3.635419943714533e-20,
+      "n_strong": 2398,
+      "n_weak": 1650,
+      "mean_strong_rv": 0.3419251598783671,
+      "mean_weak_rv": 0.28501486464074244,
+      "diff_mean_rv": 0.05691029523762464,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    },
+    "DBB": {
+      "welch_t": 4.366423816917631,
+      "welch_p": 1.2957832701172634e-05,
+      "levene_stat": 27.461020351477824,
+      "levene_p": 1.684641610044858e-07,
+      "n_strong": 2398,
+      "n_weak": 1650,
+      "mean_strong_rv": 0.187619126681538,
+      "mean_weak_rv": 0.17927229754737786,
+      "diff_mean_rv": 0.008346829134160128,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    }
+  },
+  "bonferroni_alpha": 0.01,
+  "robustness": {
+    "n_tests": 5,
+    "n_bonferroni_sig_level": 4,
+    "n_bonferroni_sig_trend": 4,
+    "level_vs_trend_sig_concordance": "5/5",
+    "level_vs_trend_sign_concordance": "4/5"
+  },
+  "most_sensitive_asset_by_abs_welch_t": "USO",
+  "verdict": "PASS",
+  "verdict_reason": "4/5 assets show Bonferroni-significant RV difference between strong vs weak USD level regime, with sign concordant across trend regime in 4/5 assets.",
+  "lookahead_protected": true,
+  "seed": 42,
+  "figures": [
+    "figures/rv_by_regime_level.png",
+    "figures/rv_by_regime_trend.png"
+  ]
+}
