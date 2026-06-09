@@ -32972,5 +32972,30 @@
       "conditioning-variable",
       "auto-research-fallback"
     ]
+  },
+  {
+    "item_id": "fe75b809",
+    "category": "empirical_finding",
+    "content": "K1440 Yield-curve slope regimes (^TNX-^FVX 10Y-5Y, ^TNX-^IRX 10Y-3M proxy) vs SPY forward 21d realized vol — NULL. Naive Welch contrast: tnx_minus_fvx inverted regime shows marginally higher forward RV; but 21d-overlap autocorrelation (acf1≈0.992, acf21≈0.497) inflates significance. HAC (Newey-West, maxlags=21) inference: 0/4 regime contrasts survive Bonferroni α=0.0125. Confirms K871 conclusion (curve slope is not robust short-horizon equity vol signal) + K1439 methodological lesson (naive Welch on overlapping RV → false positives). yfinance-only (no FRED dep). Lookahead-protected: slope.shift(1) at signal time, forward RV uses returns t+1..t+21. No randomness used (no seed needed). Sample 2007-2026 daily.",
+    "evidence": [
+      "experiments/k1440/README.md",
+      "experiments/k1440/k1440.py",
+      "experiments/k1440/k1440_results.json",
+      "experiments/k1440/figures/tnx_minus_fvx_forward_rv_boxplot.png",
+      "experiments/k1440/figures/tnx_minus_irx_forward_rv_boxplot.png"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-10T02:13:40.037341",
+    "k_id": "K1440",
+    "experiment_id": "K1440",
+    "experiment_path": "experiments/k1440/",
+    "verdict": "NULL",
+    "reviewer_source": "main_thread_lookahead_seed_audit_2026-06-10_hourly-02",
+    "tickers": [
+      "SPY",
+      "^TNX",
+      "^FVX",
+      "^IRX"
+    ]
   }
 ]

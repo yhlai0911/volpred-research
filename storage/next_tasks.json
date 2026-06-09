@@ -26407,7 +26407,7 @@
     "title": "研究 backlog fallback: 收益率曲線斜率作為股市波動率 regime 指標：用 ^TNX − ^FVX（10Y−5Y）或 ^TNX−^IRX 斜率，檢驗曲線倒掛/陡峭 regime 下 SPY realized vol 的條件分佈差異（yfinance）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 收益率曲線斜率作為股市波動率 regime 指標：用 ^TNX − ^FVX（10Y−5Y）或 ^TNX−^IRX 斜率，檢驗曲線倒掛/陡峭 regime 下 SPY realized vol 的條件分佈差異（yfinance） | 來源 section: 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/vix/台股 主導, novelty quota）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "regime_tnx_fvx_10y_5y_tnx_irx_regime_spy_realize",
@@ -26415,7 +26415,14 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-09T16:09:13+00:00"
+    "created_at": "2026-06-09T16:09:13+00:00",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-06-09T17:53:53.944445+00:00",
+    "claim_session_id": "044058b2573c",
+    "started_at": "2026-06-09T17:54:17.265709+00:00",
+    "completed_at": "2026-06-10T02:13:40.077849",
+    "result": "K1440 completed: yfinance-only yield-curve regime test (^TNX-^FVX, ^TNX-^IRX) vs forward 21d SPY RV, 2010-01-04 to 2026-06-09, n=4131. Verdict=NULL: 0/4 HAC contrasts survive Bonferroni alpha=0.0125; naive Welch significance disappears once overlap autocorrelation is handled. Artifacts: experiments/k1440/{k1440.py,README.md,k1440_results.json,figures/}.",
+    "result_summary": "K1440 NULL verdict — HAC removes naive Welch significance, 0/4 contrasts survive Bonferroni α=0.0125"
   },
   {
     "id": "research_ex_eem_inda_ewz_ewy_eww_realized_vol_em_vol_fact",
@@ -26499,5 +26506,16 @@
     "started_at": "2026-06-09T16:13:04.426108+00:00",
     "completed_at": "2026-06-09T16:24:23.722276+00:00",
     "result": "Published mile_fab21350 (draft, K1150 general 3-market EAV). Anti-AI gate PASS (warn 1/3). 2 real PNG charts (matplotlib, Supabase upload). Audience gate PASS after K-id strip. Cluster waiver: 跨市場 article (TW+US+JP equal weight). Force-duplicate vs mile_b0bf6634 (different arc). Prepublish_audit caught EAV window direction error → fixed (post-announcement, not pre) + title alignment '前' → '前後'. Mission #1 (article) + #5 (exposure via universal regularity story). 1980 chars zh-Hant."
+  },
+  {
+    "id": "platform_ops_orphan_branch_audit_20260610",
+    "task_type": "platform_ops",
+    "priority": "P3",
+    "status": "pending",
+    "title": "Orphan worktree branch audit (K1423/K1427/K1431)",
+    "description": "Three orphan worktree branches not merged to main:\n  - worktree-agent-a984dee3c1e31ca5c (K1423 PCA factor regression, d15e5726) — main has NO experiments/k1423/ but knowledge.json has 1 K1423 entry → branch content likely orphaned, needs cherry-pick or branch delete after verification\n  - worktree-agent-add8052fcf1842aba (K1427 sector dispersion, 4d3381dd + 3dcace48 IS PoC MIXED) — main has experiments/k1427/ but missing results.json; branch has more complete content\n  - worktree-agent-a446f906b29eeb057 (K1431 VIX9D HAR-RV OOS, c924f2b8 NULL p=0.54) — main has complete experiments/k1431/ AND main commit 644aa538 message says 'cherry-pick'; safe to delete branch but verify content parity first\n\nAction: for each branch, diff vs main to determine if branch content is (a) already cherry-picked (safe delete) or (b) orphaned (needs merge or archive). Use `git log --oneline main..<branch>` + `git diff main..<branch> -- experiments/`.\n\nReferences: ops audit triggered by K1439 worktree cleanup on 2026-06-10 hourly-02 fire.",
+    "source": "auto_discovered_by_hourly_dispatch",
+    "created_at": "2026-06-10T02:08:00+08:00",
+    "preferred_agent": "main_thread"
   }
 ]

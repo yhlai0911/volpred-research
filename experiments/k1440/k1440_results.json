@@ -1,0 +1,206 @@
+{
+  "experiment_id": "K1440",
+  "title": "Yield-curve slope regimes and forward SPY realized volatility",
+  "created_at": "2026-06-09T18:00:01.198078+00:00",
+  "period": {
+    "start": "2010-01-04",
+    "end": "2026-06-09",
+    "n_obs_joint_prices": 4131
+  },
+  "data_source": "yfinance (^TNX, ^FVX, ^IRX, SPY)",
+  "outcome": "Forward 21d SPY realized volatility, annualized",
+  "lookahead_protection": {
+    "signal": "slope.shift(1)",
+    "outcome": "forward RV uses returns t+1..t+21"
+  },
+  "regime_definition": {
+    "inverted": "lagged slope < 0",
+    "flat": "0 <= lagged slope <= q75 of positive lagged slope (full-sample descriptive)",
+    "steep": "lagged slope > q75 of positive lagged slope (full-sample descriptive)"
+  },
+  "multiple_testing": {
+    "n_hac_contrasts": 4,
+    "bonferroni_alpha": 0.0125
+  },
+  "analyses": {
+    "tnx_minus_fvx": {
+      "slope_name": "tnx_minus_fvx",
+      "steep_threshold_q75_positive": 1.0160000324249268,
+      "slope_stats": {
+        "mean": 0.5440309070436935,
+        "std": 0.45337162177244905,
+        "min": -0.3599998950958252,
+        "max": 1.497999906539917
+      },
+      "rv_acf": {
+        "lag_1": 0.9922825532575514,
+        "lag_5": 0.9334969335498373,
+        "lag_21": 0.4966379181479086
+      },
+      "regime_counts": {
+        "inverted": 437,
+        "flat": 2749,
+        "steep": 923
+      },
+      "regime_summary": {
+        "inverted": {
+          "mean_rv": 0.16564612409545929,
+          "median_rv": 0.15343760922712443,
+          "std_rv": 0.06818063260954596,
+          "n_days": 437
+        },
+        "flat": {
+          "mean_rv": 0.1423889118581194,
+          "median_rv": 0.11754189357502229,
+          "std_rv": 0.09760762539644893,
+          "n_days": 2749
+        },
+        "steep": {
+          "mean_rv": 0.15101509864887233,
+          "median_rv": 0.1301504995137749,
+          "std_rv": 0.07774446600603593,
+          "n_days": 923
+        }
+      },
+      "welch_pairwise": {
+        "inverted_vs_flat": {
+          "left": "inverted",
+          "right": "flat",
+          "n_left": 437,
+          "n_right": 2749,
+          "diff_mean_rv": 0.023257212237339897,
+          "welch_t": 6.192959083573095,
+          "welch_p": 9.700983481640367e-10
+        },
+        "steep_vs_flat": {
+          "left": "steep",
+          "right": "flat",
+          "n_left": 923,
+          "n_right": 2749,
+          "diff_mean_rv": 0.008626186790752943,
+          "welch_t": 2.7259124938174772,
+          "welch_p": 0.006469142954690149
+        }
+      },
+      "hac_regression": {
+        "Intercept": {
+          "coef": 0.1423889118581192,
+          "se_hac": 0.007988586421067968,
+          "t_hac": 17.824043498184214,
+          "p_hac": 4.598891832021128e-71
+        },
+        "C(regime, Treatment(reference=\"flat\"))[T.inverted]": {
+          "coef": 0.02325721223734007,
+          "se_hac": 0.015179398695696,
+          "t_hac": 1.5321563589955953,
+          "p_hac": 0.12548385485248398
+        },
+        "C(regime, Treatment(reference=\"flat\"))[T.steep]": {
+          "coef": 0.008626186790753256,
+          "se_hac": 0.013450501614628612,
+          "t_hac": 0.6413282595625663,
+          "p_hac": 0.5213094324532839
+        },
+        "meta": {
+          "n_obs": 4109,
+          "r2": 0.006619521592864275,
+          "hac_maxlags": 21
+        }
+      },
+      "figures": [
+        "figures/tnx_minus_fvx_forward_rv_boxplot.png"
+      ]
+    },
+    "tnx_minus_irx": {
+      "slope_name": "tnx_minus_irx",
+      "steep_threshold_q75_positive": 2.172999946400523,
+      "slope_stats": {
+        "mean": 1.2212638104556368,
+        "std": 1.211220211449807,
+        "min": -1.7039997577667236,
+        "max": 3.8339999616146088
+      },
+      "rv_acf": {
+        "lag_1": 0.9922825532575514,
+        "lag_5": 0.9334969335498373,
+        "lag_21": 0.4966379181479086
+      },
+      "regime_counts": {
+        "inverted": 614,
+        "flat": 2616,
+        "steep": 879
+      },
+      "regime_summary": {
+        "inverted": {
+          "mean_rv": 0.13937426858071136,
+          "median_rv": 0.12271057410166779,
+          "std_rv": 0.09826237765851513,
+          "n_days": 614
+        },
+        "flat": {
+          "mean_rv": 0.15033807520977321,
+          "median_rv": 0.1258469651270217,
+          "std_rv": 0.09353806728417158,
+          "n_days": 2616
+        },
+        "steep": {
+          "mean_rv": 0.14145757147129864,
+          "median_rv": 0.12528182699444657,
+          "std_rv": 0.07632959361836816,
+          "n_days": 879
+        }
+      },
+      "welch_pairwise": {
+        "inverted_vs_flat": {
+          "left": "inverted",
+          "right": "flat",
+          "n_left": 614,
+          "n_right": 2616,
+          "diff_mean_rv": -0.01096380662906185,
+          "welch_t": -2.5106410799315837,
+          "welch_p": 0.012227119968334582
+        },
+        "steep_vs_flat": {
+          "left": "steep",
+          "right": "flat",
+          "n_left": 879,
+          "n_right": 2616,
+          "diff_mean_rv": -0.008880503738474571,
+          "welch_t": -2.8120914277226126,
+          "welch_p": 0.0049745216637480045
+        }
+      },
+      "hac_regression": {
+        "Intercept": {
+          "coef": 0.15033807520977324,
+          "se_hac": 0.0074479630950666205,
+          "t_hac": 20.185126227243813,
+          "p_hac": 1.3228931670555437e-90
+        },
+        "C(regime, Treatment(reference=\"flat\"))[T.inverted]": {
+          "coef": -0.010963806629061542,
+          "se_hac": 0.0105990377561401,
+          "t_hac": -1.0344152819636978,
+          "p_hac": 0.30094206320323225
+        },
+        "C(regime, Treatment(reference=\"flat\"))[T.steep]": {
+          "coef": -0.008880503738475036,
+          "se_hac": 0.012482543991170316,
+          "t_hac": -0.7114338026572765,
+          "p_hac": 0.4768154583776175
+        },
+        "meta": {
+          "n_obs": 4109,
+          "r2": 0.0026963830554289636,
+          "hac_maxlags": 21
+        }
+      },
+      "figures": [
+        "figures/tnx_minus_irx_forward_rv_boxplot.png"
+      ]
+    }
+  },
+  "verdict": "NULL",
+  "verdict_reason": "0/4 HAC regime contrasts survive Bonferroni alpha=0.0125. Naive overlap-sensitive Welch can suggest significance, but HAC removes it.",
+  "mission_note": "Extends K871 from predictive regression NULL to regime-conditioned distribution tests using yfinance-only proxies."
+}
