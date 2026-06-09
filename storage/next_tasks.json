@@ -25943,13 +25943,34 @@
     "description": "2026-06-09 hourly-13 governance audit 發現 next_tasks.json 有 75 個 status=blocked 但 blocked_reason=null（違反 .claude/rules/control-plane.md 「skip-dispatch 必須 mark blocked」硬規則）。本輪已補 11 個（3 event_articles, 4 trending_reposts, 4 fb_*）；剩 64 個（多為 fb_*/experiment K-series novel-method/paper_decision/paper_body）。Action: list 全部 silent-blocked → 依 task_type 對應 reason vocab 分類補（fb_* → awaiting_interactive_session, deprecated K-series novel-method → diversity_rule_post_null_quartet 或 deprecated, paper_body → 改用 task_pool_claim.py handoff-main-thread）。Scope ≤40min；剩餘排下一 fire。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-09T05:12:37+00:00",
     "source": "governance_followup",
     "tags": [
       "governance",
       "silent_blocked_cleanup",
       "control_plane_rule"
+    ],
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-09T06:08:36.827698+00:00",
+    "claim_session_id": "5a44901eb1f7",
+    "started_at": "2026-06-09T06:08:59.084561+00:00",
+    "completed_at": "2026-06-09T06:08:59.171475+00:00",
+    "result": "Verified silent-blocked count=0 (all 75 blocked tasks have non-null blocked_reason). Task fully resolved by hourly-13 (commit 038fc673) but missed status flip. No backfill needed."
+  },
+  {
+    "id": "governance_seed_new_research_directions_20260609",
+    "title": "[governance] 補 5+ 個新研究方向到 backlog（candidates 池燒完）",
+    "description": "hourly-14 偵測 publication_candidates top_10_uncovered=1, missing_research_top5=0, missing_general_top5=4 — curated 前沿用盡。前 bbc7fff0 的 2 條台股 seed 已被 K1431/K1432 完成。Action: 跑 scripts/generate_diverse_tasks.py 或 scripts/generate_research_backlog.py（已驗證 active）+ scan research_program.md Open Question + 文獻 last 14 天，seed 5+ 個新 K backlog（priority P2-P3）。覆蓋面：跨資產（台股/美股/比特幣/外匯）+ 跨方法論（波動率/避險/事件研究/機器學習）。Mission gate：每條 brief 含 monetization angle（直接：付費策略；間接：曝光/學術權威）。Scope ≤40min。",
+    "task_type": "governance",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-06-09T14:09:00+08:00",
+    "source": "hourly_14_pool_depletion_detected",
+    "tags": [
+      "governance",
+      "backlog_seed",
+      "candidates_depletion"
     ]
   }
 ]
