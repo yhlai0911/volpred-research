@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-06-09T12:12:30Z",
+  "type": "error_log_today",
+  "severity": "warn",
+  "title": "Error log entry dated today (2026-06-09)",
+  "detail": "merge_worktree.sh main..worktree diff logic bug (strike-2). Script incorrectly used git diff main..worktree for shared-path detection instead of git diff $(merge-base)..worktree, causing false-positive abort on K1426 and K1427 worktrees. Workaround: manual git merge --no-ff -X theirs. Strike 3 will trigger full refactor per three-strike rule."
+}

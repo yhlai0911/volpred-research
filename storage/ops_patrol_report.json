@@ -1,37 +1,39 @@
 {
-  "timestamp": "2026-06-09T14:11:38+08:00",
-  "all_ok": true,
+  "timestamp": "2026-06-09T12:12:23Z",
+  "all_ok": false,
   "checks": [
     {
       "name": "article_pool",
       "status": "ok",
-      "detail": "147 drafts total (general=100, research=47). All thresholds met (total ≥12, research ≥4, general ≥8)."
+      "detail": "total drafts: 147, research: 47, general: 100"
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "strategy_metrics.json age: ~0h (mtime 1780985382, checked at 1780985393). Well within 26h threshold."
+      "detail": "strategy_metrics.json age: 0.00h (threshold: 26h)"
     },
     {
       "name": "error_log_recent",
-      "status": "ok",
-      "detail": "Today 2026-06-09 09:15 台灣時間: merge_worktree.sh main..worktree detection bug (strike-2). Script uses git diff main..worktree instead of merge-base diff, causing false-positive shared-file alerts when main advances after worktree fork. K1426+K1427 impacted. Strike-3 will trigger full rewrite of _changed_shared_paths(). Workaround: reverse diff + manual git merge --no-ff -X theirs."
+      "status": "alert",
+      "detail": "2026-06-09 09:15 TWN: merge_worktree.sh main..worktree diff bug (strike-2). Script used git diff main..worktree for shared-path detection instead of merge-base; caused false-positive abort on K1426/K1427 worktrees."
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "0 strategies with >2 null portfolio_returns in last 3 entries (checked paper_trading_open.json). Latest entry date: 2026-03-12."
+      "detail": "All 15 strategies: 0 with >2 null portfolio_return in last 3 entries"
     },
     {
       "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files"
     },
     {
       "name": "knowledge_size",
       "status": "ok",
-      "detail": "2213 entries in storage/memory/knowledge.json."
+      "detail": "2213 entries in storage/memory/knowledge.json"
     }
   ],
-  "alerts": []
+  "alerts": [
+    "error_log: entry dated today (2026-06-09) — merge_worktree.sh diff logic bug (strike-2), see docs/error_log.md"
+  ]
 }
