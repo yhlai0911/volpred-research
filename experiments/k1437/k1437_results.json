@@ -1,0 +1,440 @@
+{
+  "experiment_id": "K1437",
+  "title": "USD/TWD vs TWII volatility spillover (VAR + DCC-GARCH + asymmetry)",
+  "seed": 42,
+  "sample_period": {
+    "start": "2012-01-04",
+    "end": "2026-03-30",
+    "n_obs": 3358,
+    "years": 14.234086242299794
+  },
+  "data_sources": {
+    "usdtwd": "paper/taiwan-vt/data/_usdtwd_snapshot.csv",
+    "twii": "paper/taiwan-vt/data/0050_tw_twii_2330_tw_2317_tw_2454_tw_0056_tw_spy_vix_2008-2026.csv"
+  },
+  "data_quality": {
+    "calendar": "TWII trading days; USDTWD forward-aligned (last close at-or-before each TWII day)",
+    "bad_tick_threshold_log_return": 0.04,
+    "n_twii_days": 3700,
+    "n_twd_days_in_window": 3689,
+    "n_joined": 3465,
+    "usdtwd_bad_ticks_dropped": [
+      {
+        "date": "2011-10-25",
+        "twd_close": 1.8014999628067017,
+        "log_return_vs_prev": -2.787396675994288
+      },
+      {
+        "date": "2011-10-26",
+        "twd_close": 30.11000061035156,
+        "log_return_vs_prev": 2.816237732204096
+      },
+      {
+        "date": "2012-01-30",
+        "twd_close": 28.951000213623047,
+        "log_return_vs_prev": -0.04719177695897958
+      },
+      {
+        "date": "2014-12-31",
+        "twd_close": 3.6700000762939458,
+        "log_return_vs_prev": -2.132439770211308
+      },
+      {
+        "date": "2015-01-01",
+        "twd_close": 31.625,
+        "log_return_vs_prev": 2.1537562641926646
+      },
+      {
+        "date": "2015-04-03",
+        "twd_close": 30.06599998474121,
+        "log_return_vs_prev": -0.041851194444913364
+      },
+      {
+        "date": "2015-04-17",
+        "twd_close": 29.993999481201172,
+        "log_return_vs_prev": -0.043259517016069005
+      },
+      {
+        "date": "2015-04-27",
+        "twd_close": 29.75,
+        "log_return_vs_prev": -0.04502159428620578
+      },
+      {
+        "date": "2015-06-23",
+        "twd_close": 30.961999893188477,
+        "log_return_vs_prev": 0.04063763920248764
+      },
+      {
+        "date": "2015-08-20",
+        "twd_close": 31.332000732421875,
+        "log_return_vs_prev": -0.040929168472389144
+      },
+      {
+        "date": "2015-08-21",
+        "twd_close": 32.659000396728516,
+        "log_return_vs_prev": 0.04148051784644213
+      },
+      {
+        "date": "2015-10-07",
+        "twd_close": 31.608999252319336,
+        "log_return_vs_prev": -0.04279296470821903
+      },
+      {
+        "date": "2015-10-12",
+        "twd_close": 31.291000366210938,
+        "log_return_vs_prev": -0.04825589152679788
+      },
+      {
+        "date": "2015-11-16",
+        "twd_close": 32.900001525878906,
+        "log_return_vs_prev": 0.041677294868990966
+      },
+      {
+        "date": "2016-02-10",
+        "twd_close": 32.19200134277344,
+        "log_return_vs_prev": -0.04003635512734238
+      },
+      {
+        "date": "2016-03-04",
+        "twd_close": 31.791000366210938,
+        "log_return_vs_prev": -0.048084356350317936
+      },
+      {
+        "date": "2016-03-14",
+        "twd_close": 31.68600082397461,
+        "log_return_vs_prev": -0.0428119915351437
+      },
+      {
+        "date": "2016-03-17",
+        "twd_close": 31.60099983215332,
+        "log_return_vs_prev": -0.04058779796838774
+      },
+      {
+        "date": "2025-05-05",
+        "twd_close": 30.704299926757812,
+        "log_return_vs_prev": -0.044814595905523724
+      },
+      {
+        "date": "2025-05-06",
+        "twd_close": 29.15999984741211,
+        "log_return_vs_prev": -0.051604805638443274
+      }
+    ]
+  },
+  "descriptive_stats": {
+    "twd_ret": {
+      "mean": 0.003208480626222661,
+      "std": 0.7567248315842476,
+      "skew": -0.34056643034413886,
+      "kurt": 12.246933757167763,
+      "jarque_bera_stat": 20982.05608884057,
+      "jarque_bera_p": 0.0,
+      "adf_stat": -12.291093654852212,
+      "adf_p": 7.824148465351125e-23,
+      "n": 3358
+    },
+    "twii_ret": {
+      "mean": 0.04506706674187286,
+      "std": 1.0455005941588285,
+      "skew": -0.7351871871572868,
+      "kurt": 9.003532940595719,
+      "jarque_bera_stat": 11606.148599812235,
+      "jarque_bera_p": 0.0,
+      "adf_stat": -57.80448296249522,
+      "adf_p": 0.0,
+      "n": 3358
+    },
+    "twd_logrv": {
+      "mean": -3.3797890731583133,
+      "std": 2.5329940818821526,
+      "skew": -0.26138109917566876,
+      "kurt": 0.7510629502708213,
+      "jarque_bera_stat": 116.51950251819217,
+      "jarque_bera_p": 4.990125994029125e-26,
+      "adf_stat": -9.463852677748191,
+      "adf_p": 4.28208071249197e-16,
+      "n": 3358
+    },
+    "twii_logrv": {
+      "mean": -1.6694474454008656,
+      "std": 2.3676494933167054,
+      "skew": -1.0247742811536074,
+      "kurt": 1.7632458134365994,
+      "jarque_bera_stat": 1020.048215438822,
+      "jarque_bera_p": 3.157507420211444e-222,
+      "adf_stat": -9.768371178895908,
+      "adf_p": 7.246652108811914e-17,
+      "n": 3358
+    }
+  },
+  "var": {
+    "p_bic": 4,
+    "selection_orders": {
+      "aic": 5,
+      "bic": 4,
+      "hqic": 5,
+      "fpe": 5
+    },
+    "n_obs": 3354,
+    "loglik": -15338.893904245522,
+    "bic": 3.514439716153862,
+    "aic": 3.4816065733503745,
+    "coefs": {
+      "twd_logrv": {
+        "const": -1.717811153029847,
+        "L1.twd_logrv": 0.19879909267709,
+        "L1.twii_logrv": 0.0386588394987011,
+        "L2.twd_logrv": 0.08475777937111172,
+        "L2.twii_logrv": 0.017934542513639733,
+        "L3.twd_logrv": 0.05563190126340997,
+        "L3.twii_logrv": 0.025997494451606748,
+        "L4.twd_logrv": 0.11017755104297222,
+        "L4.twii_logrv": 0.004983053318950142
+      },
+      "twii_logrv": {
+        "const": -1.2524542457293928,
+        "L1.twd_logrv": 0.0026784469693966395,
+        "L1.twii_logrv": 0.02636483673304718,
+        "L2.twd_logrv": 0.004658984894337111,
+        "L2.twii_logrv": 0.06476642308725031,
+        "L3.twd_logrv": 0.024533684243846804,
+        "L3.twii_logrv": 0.06543366782897182,
+        "L4.twd_logrv": -0.0011105602099211172,
+        "L4.twii_logrv": 0.030532887807528462
+      }
+    },
+    "granger_twd_vol_to_twii_vol": {
+      "F": 0.6741282880447528,
+      "p_value": 0.6098740382496157,
+      "lag": 4
+    },
+    "granger_twii_vol_to_twd_vol": {
+      "F": 2.2409498994766257,
+      "p_value": 0.06224724293631647,
+      "lag": 4
+    }
+  },
+  "univariate_gjr_garch": {
+    "twd": {
+      "label": "USDTWD",
+      "params": {
+        "mu": 0.0065759730709395595,
+        "omega": 0.03363251897920111,
+        "alpha[1]": 0.28805012434523297,
+        "gamma[1]": 0.2878152768942158,
+        "beta[1]": 0.5680422372076591,
+        "nu": 3.0404433341029713
+      },
+      "loglik": -1864.822631034834,
+      "aic": 3741.645262069668,
+      "bic": 3778.359867095493,
+      "converged": true
+    },
+    "twii": {
+      "label": "TWII",
+      "params": {
+        "mu": 0.068957057307774,
+        "omega": 0.05384328344808394,
+        "alpha[1]": 0.02827451644923502,
+        "gamma[1]": 0.1416125016508277,
+        "beta[1]": 0.843386612591848,
+        "nu": 5.854457745870007
+      },
+      "loglik": -4411.179609225284,
+      "aic": 8834.359218450569,
+      "bic": 8871.073823476394,
+      "converged": true
+    }
+  },
+  "dcc": {
+    "converged": true,
+    "n_starts": 100,
+    "n_success": 98,
+    "alpha": 0.007861678960424015,
+    "beta": 0.9896131935671757,
+    "persistence": 0.9974748725275997,
+    "nll_best": -39.17464214647182,
+    "nll_distribution": {
+      "min": -39.17464214647182,
+      "median": -39.17464214632053,
+      "max": -26.76692943696939,
+      "n_within_1_nll_unit_of_best": 80,
+      "tolerance_used": "absolute_1.0_NLL_units"
+    },
+    "Qbar": [
+      [
+        1.1879519877508833,
+        -0.1320866293792423
+      ],
+      [
+        -0.1320866293792423,
+        0.9975925684589149
+      ]
+    ]
+  },
+  "dcc_rho_summary": {
+    "mean": -0.13066073343773005,
+    "median": -0.12571175847848137,
+    "min": -0.3789319278272829,
+    "max": 0.07472066276077675,
+    "std": 0.083372811671963
+  },
+  "asymmetry": {
+    "lag": 4,
+    "n_obs": 3354,
+    "k_full": 17,
+    "rss_full": 18446.404846987767,
+    "rss_no_spill": 18578.171843406693,
+    "F_no_spillover": 2.979621711502225,
+    "p_no_spillover": 0.0025008650198722338,
+    "wald_symmetric": 9.58596336106411,
+    "p_symmetric": 0.04801054758939427,
+    "coef_table": {
+      "const": {
+        "coef": -0.8393689568200688,
+        "se": 0.18965380842178398,
+        "t": -4.425795420640008,
+        "p": 9.91630528068832e-06
+      },
+      "twd_neg_l1": {
+        "coef": -0.40134631848483693,
+        "se": 0.1102996523778871,
+        "t": -3.638690692422336,
+        "p": 0.00027817810135788434
+      },
+      "twd_pos_l1": {
+        "coef": -0.14739152953463638,
+        "se": 0.12980469635558636,
+        "t": -1.1354868789251873,
+        "p": 0.25625292292534074
+      },
+      "twii_logrv_l1": {
+        "coef": 0.019987696251455928,
+        "se": 0.017353892783687756,
+        "t": 1.151770182091011,
+        "p": 0.2494980344831581
+      },
+      "twd_logrv_l1": {
+        "coef": 0.06101643709869814,
+        "se": 0.023873114739576907,
+        "t": 2.555864107566364,
+        "p": 0.010636387338664122
+      },
+      "twd_neg_l2": {
+        "coef": -0.19231357718324466,
+        "se": 0.12523291825752864,
+        "t": -1.5356471753518635,
+        "p": 0.12471974006655517
+      },
+      "twd_pos_l2": {
+        "coef": 0.21801719705890177,
+        "se": 0.13224907085180562,
+        "t": 1.6485348112820042,
+        "p": 0.09933710737996893
+      },
+      "twii_logrv_l2": {
+        "coef": 0.058842338276661466,
+        "se": 0.01732364928766942,
+        "t": 3.396647975236032,
+        "p": 0.0006901477185865534
+      },
+      "twd_logrv_l2": {
+        "coef": 0.013642039138700676,
+        "se": 0.024039674932361643,
+        "t": 0.5674801833670423,
+        "p": 0.5704261603302374
+      },
+      "twd_neg_l3": {
+        "coef": -0.2652993387416474,
+        "se": 0.12568273320992335,
+        "t": -2.110865446397696,
+        "p": 0.03485807560521148
+      },
+      "twd_pos_l3": {
+        "coef": -0.03880979938934049,
+        "se": 0.1317671523726727,
+        "t": -0.2945331874485381,
+        "p": 0.7683688278497449
+      },
+      "twii_logrv_l3": {
+        "coef": 0.06318117281375932,
+        "se": 0.017317126821334464,
+        "t": 3.6484789576017294,
+        "p": 0.00026783364875093696
+      },
+      "twd_logrv_l3": {
+        "coef": 0.043694548633644574,
+        "se": 0.024015656535007417,
+        "t": 1.819419284663378,
+        "p": 0.06893705602995981
+      },
+      "twd_neg_l4": {
+        "coef": 0.035419978444198745,
+        "se": 0.12335434146727939,
+        "t": 0.28714010405214757,
+        "p": 0.7740228739710431
+      },
+      "twd_pos_l4": {
+        "coef": 0.0339957863136154,
+        "se": 0.11560829617177303,
+        "t": 0.29406009291153123,
+        "p": 0.7687302733554224
+      },
+      "twii_logrv_l4": {
+        "coef": 0.03143631928392711,
+        "se": 0.017322553848256688,
+        "t": 1.8147623935422665,
+        "p": 0.0696501771944662
+      },
+      "twd_logrv_l4": {
+        "coef": -0.002651571755831326,
+        "se": 0.023849592980232096,
+        "t": -0.1111789101822031,
+        "p": 0.9114811614023526
+      }
+    },
+    "note": "twd_neg = (-twd_ret).clip(0,inf) measures TWD APPRECIATION (USDTWD return < 0); twd_pos = twd_ret.clip(0,inf) measures TWD DEPRECIATION (USDTWD return > 0)."
+  },
+  "bad_tick_sensitivity": {
+    "threshold_0.03": {
+      "n_dropped": 82,
+      "n_obs": 3309,
+      "p_bic": 2,
+      "granger_twd_to_twii_p": 0.4798876664873894,
+      "granger_twii_to_twd_p": 0.004648355240592841,
+      "asym_no_spillover_p": 0.002537260696377608,
+      "asym_symmetry_p": 0.05513530612708095
+    },
+    "threshold_0.04": {
+      "n_dropped": 20,
+      "n_obs": 3358,
+      "p_bic": 4,
+      "granger_twd_to_twii_p": 0.6098740382496157,
+      "granger_twii_to_twd_p": 0.06224724293631647,
+      "asym_no_spillover_p": 0.0025008650198722338,
+      "asym_symmetry_p": 0.04801054758939427
+    },
+    "threshold_0.05": {
+      "n_dropped": 5,
+      "n_obs": 3369,
+      "p_bic": 4,
+      "granger_twd_to_twii_p": 0.6020889057196503,
+      "granger_twii_to_twd_p": 0.04620131839416327,
+      "asym_no_spillover_p": 0.00144277434763318,
+      "asym_symmetry_p": 0.00548320295714988
+    }
+  },
+  "verdict": {
+    "spillover": "NULL — no Granger causal vol spillover in either direction",
+    "asymmetry": "ASYMMETRIC — TWD appreciation shocks differ from depreciation shocks (Wald rejects symmetry)",
+    "decision": "NULL_RESULT"
+  },
+  "figures": [
+    "experiments/k1437/figures/k1437_dual_vol.png",
+    "experiments/k1437/figures/k1437_dcc_rho.png"
+  ],
+  "diff_vs_prior": {
+    "T5b_2015_2024": "T5b tested TWD RETURN -> TWII vol with p=0.08 (NS). K1437 tests vol -> vol (log-RV) bidirectional + DCC time-varying correlation + asymmetric appreciation/depreciation decomposition over the longer 2012-2026 window (14yr). Methodologically distinct: T5b used return->vol granger F; K1437 uses log-RV VAR + multistart DCC.",
+    "paper2_sec3_twd_usd_test": "That test was nested OLS F-test of TWD return adding power to VIX-controlled regression of r^2. K1437 drops VIX and tests pure pairwise vol-vol bidirectional spillover + structural asymmetry."
+  }
+}
