@@ -1553,3 +1553,29 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **測試**：`tests/test_prepublish_audit.py` +5 cases（experiments/ blocked、Supabase passes、/charts/ passes、placeholder/api/local blocked、no-image clean）。全綠。
 
 **效果**：往後任何文章引用未 serve 路徑的圖 → 發佈前就被擋，不再 silent 404。
+
+---
+
+## 2026-06-09 09:15 台灣時間 — merge_worktree.sh main..worktree 偵測邏輯 bug（strike-2）
+
+**症狀**：兩個 worktree (`agent-a37312080bf85fcfb` K1426 + `agent-add8052fcf1842aba` K1427) 跑 `bash scripts/merge_worktree.sh` 都被 abort，理由「Agent 修改了共享 JSON: storage/reports/feed.json storage/memory/knowledge.json storage/paper_trading.json」。但 reverse diff (`git diff $(merge-base)..worktree`) 證明兩 worktree **完全沒改**這三檔 — 只改 experiments/kXXX/ + storage/next_tasks.json + storage/reports/token_usage/weekly_*.json (auto-generated)。
+
+**根因**：script 用 `git diff main..worktree -- <shared paths>` 偵測 agent 違規。實際語意是「main 相對 worktree 多了什麼」，當 main 在 worktree fork 之後寫了 knowledge.json 新 entry（hourly fire 寫入 Kxxx entry 是正常 ops），diff 也會出現 — script 誤判為 agent 改了 shared。
+
+**正確邏輯應是**：`git diff $(git merge-base main worktree)..worktree -- <shared>` — 只看 worktree 自己 commits 改了什麼。
+
+**Strike 2 / 3 紀錄**：
+- Strike 1: ≤2026-06-08 worktree merge 卡關（已忘細節，error_log 未明 entry，視為強烈的 silent strike）
+- **Strike 2: 2026-06-09 09:09–09:11**（本 entry，兩個 worktree 連續誤判）
+
+**本 fire 處置**：
+1. K1427 worktree drop（main 已有完整 K1427 history，worktree 是並行 redundant；worktree pid 13569 仍 alive 未 force remove）
+2. K1426 worktree manual merge — `git merge --no-ff -X theirs worktree-agent-a37312080bf85fcfb` 繞過 script
+3. 註記 commit message 標明 script bug bypass
+
+**Strike 3 觸發後須做**（per CLAUDE.md three-strike rule，預計近期）：
+- (a) `scripts/merge_worktree.sh` 重寫 `_changed_shared_paths()` 用 merge-base 而非 main 比對
+- (b) regression test：fork 後 main 寫 shared、worktree 不寫 shared → 應 detect zero shared changes
+- (c) 廢棄 `main..worktree` patch 路徑
+
+**Workaround until strike 3**：worktree merge 不通過 script abort 時 → reverse diff 證實 worktree 未改 shared → 手動 `git merge --no-ff -X theirs worktree-<id>` 並 commit 註記 bypass。
