@@ -27081,5 +27081,15 @@
     "started_at": "2026-06-10T10:09:27.734889+00:00",
     "completed_at": "2026-06-10T10:12:31.160254+00:00",
     "result": "H1 trough decomposition script written (experiments/k1458_h1_trough_decomposition/) + compute_queue enqueued (id=compute-k1458-h1-trough-decomposition-paper-6-v5-1781086338). Heavy yfinance+rolling-beta on 21y window async to */15 worker. Followup paper_review task auto-dispatched after worker completes; that task does body.tex update + Codex 3rd-model adversarial review + v6 review_history archive."
+  },
+  {
+    "id": "ponzi_collapse_math_boss_20260607",
+    "task_type": "experiment",
+    "priority": 1,
+    "source": "boss_email_recovered_20260610",
+    "title": "龐氏結構崩潰數學：每輪新本金支付承諾報酬可支撐幾輪？臨界人數？（boss 6/7 指令，dedup bug 回收）",
+    "description": "Boss 2026-06-07 13:50 email 指令（被 gmail subject-dedup bug 丟棄、6/10 自垃圾桶回收）：『如果每輪拿新的本金來發放承諾的報酬，這樣可以支撐幾輪的發展？臨界人數是多少？做完整分析』。Context: havingchien Substack『龐氏騙局是會崩潰的數學結構』。設計：解析模型 + 模擬 — 參數化（承諾報酬率 r、新進人數成長率 g、提領率 w、初始人數 N0），推導可持續條件（g 與 r 臨界關係）、崩潰輪數、臨界人數/資金缺口公式；蒙地卡羅掃 (r,g,w) 格點 + 敏感度；對照公開歷史案例規模（Madoff 等，標來源）。產出 experiments/kXXXX/ 三件套 + reader-facing 文章（general；與 havingchien 文不重複不引用，自建模型角度）。寫前必跑 scripts/check_arc_dedup.py；固定 seed。Boss 直接指令 = user-assigned 最高優先。",
+    "status": "pending",
+    "created_at": "2026-06-10T10:35:00+00:00"
   }
 ]
