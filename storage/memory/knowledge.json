@@ -33208,5 +33208,45 @@
       "experiment": "experiments/k1082/",
       "results_json": "experiments/k1082/k1082_results.json"
     }
+  },
+  {
+    "k_id": "K1464",
+    "experiment_id": "k1464_bab_vol_conditional",
+    "experiment_path": "experiments/k1464_bab_vol_conditional/",
+    "title": "BAB return conditional on prior-month realized vol regime",
+    "verdict": "FAIL",
+    "verdict_reason": "Codex review found 2 HIGH methodology issues: (1) tertile cutoffs use full-sample quantile (regime-threshold lookahead); (2) HAC diff test concatenates low/high subsamples breaking time order — hac_coef is (low-high)/2 not low-high. Reported NULL result not trustworthy until fixes applied. Also: q-cutoffs unused in BAB construction (README claims top/bottom 30% but actual is FP-style rank weights over full cross-section); block bootstrap resamples within subsample not full series; universe contains ETFs (GLD/TLT) and is hand-curated survivors.",
+    "reviewer": "Codex CLI (gpt-5.4)",
+    "reviewer_source": "Codex review 2026-06-11 hourly-03",
+    "codex_review": "FAIL — 2 HIGH + 4 MED issues, all detailed in /tmp/k1464_codex_review log",
+    "key_numbers_preliminary": {
+      "low_vol_sharpe": 0.95,
+      "mid_vol_sharpe": 0.92,
+      "high_vol_sharpe": 0.29,
+      "unconditional_sharpe": 0.72,
+      "hac_diff_t": 1.04,
+      "bootstrap_ci_95": [
+        -0.0076,
+        0.0244
+      ],
+      "minimum_detectable_diff_80pct_power_annual_pct": 25.4,
+      "observed_diff_annual_pct": 10.3,
+      "note": "Numbers preliminary; NULL likely due to (a) low power N=84/tertile and (b) above methodology bugs. Direction matches JFE 2025 hypothesis but cannot be claimed without rework."
+    },
+    "data_provenance": {
+      "source": "yfinance",
+      "universe": "198 hand-curated US large-caps (includes GLD/TLT ETFs — flagged for removal)",
+      "period": "2005-01 to 2025-12 (252 months)",
+      "seed": 42
+    },
+    "followup_task": "k1464_rework_methodology_fixes",
+    "lessons": [
+      "Tertile cutoffs for regime labels MUST be expanding/recursive when applied per-period — full-sample quantile is a subtle lookahead even when shift(1) is on the regime indicator",
+      "HAC diff test on two regime subsamples must be done on original time series with regime dummies, not by concatenating subsamples",
+      "Survivor universe with mixed equities + ETFs contaminates both unconditional level and conditional comparison (conditional bias is not constant across regimes)",
+      "N=84/tertile gives MDES ~25% annualized diff at 80% power — most realistic effect sizes (10-15%) are underpowered"
+    ],
+    "timestamp": "2026-06-11T03:22:37+08:00",
+    "session": "hourly-03 2026-06-11"
   }
 ]

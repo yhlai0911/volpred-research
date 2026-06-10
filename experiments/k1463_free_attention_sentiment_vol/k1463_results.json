@@ -1,0 +1,265 @@
+{
+  "experiment_id": "K1463",
+  "title": "Free attention/sentiment proxies beyond HAR+VIX for SPY volatility",
+  "status": "completed",
+  "seed": 42,
+  "data": {
+    "asset": "SPY",
+    "price_source": "experiments/k1206/data/SPY.csv",
+    "vix_source": "experiments/k1312/data/VIX.csv",
+    "proxy_sources": {
+      "cnnfg": "storage/sentiment/cnn_fear_greed_historical.csv",
+      "aaii": "storage/sentiment/aaii_sentiment.csv",
+      "usepu": "experiments/k1121/data/fred_USEPUINDXD.csv",
+      "umcsent_pit": "experiments/k1117b/data/UMCSENT_monthly_pit.csv"
+    },
+    "sample_start": "2011-02-03",
+    "sample_end": "2023-12-29",
+    "n_total": 3226
+  },
+  "timing_rules": {
+    "vix": "lagged 1 trading day",
+    "cnnfg": "lagged 1 trading day",
+    "aaii": "report date + 1 business day, then lagged 1 day in model",
+    "usepu": "shift(2) per publication delay + trading lag rule",
+    "umcsent": "PIT release-date alignment, then lagged 1 day in model"
+  },
+  "literature_reviewed": [
+    "Baker, Bloom and Davis (2016) Measuring Economic Policy Uncertainty.",
+    "Da, Engelberg and Gao (2011) In Search of Attention.",
+    "Shapiro et al. (2022) Measuring News Sentiment.",
+    "Corsi (2009) HAR-RV multi-scale volatility persistence."
+  ],
+  "full_sample_hac": {
+    "har": {
+      "params": {
+        "const": -1.2715118366871465,
+        "log_park_lag1": 0.284289340999793,
+        "log_park_lag5": 0.35794623970045564,
+        "log_park_lag22": 0.2524838707729198
+      },
+      "pvalues": {
+        "const": 1.6883397061288109e-12,
+        "log_park_lag1": 5.812441279791281e-26,
+        "log_park_lag5": 3.3834602123396377e-17,
+        "log_park_lag22": 6.77100024055965e-15
+      },
+      "r2": 0.4978311390521326,
+      "n": 3226
+    },
+    "har_vix": {
+      "params": {
+        "const": -11.920082273386296,
+        "log_park_lag1": 0.19515033787919678,
+        "log_park_lag5": 0.18612257048394726,
+        "log_park_lag22": -0.04601406788457141,
+        "log_vix_l1": 0.8758625876839181
+      },
+      "pvalues": {
+        "const": 1.3097274841249613e-62,
+        "log_park_lag1": 8.13555746335504e-15,
+        "log_park_lag5": 5.445064844021122e-06,
+        "log_park_lag22": 0.21583080920841613,
+        "log_vix_l1": 3.4439654632010845e-53
+      },
+      "r2": 0.5431043864295904,
+      "n": 3226
+    },
+    "har_vix_cnnfg": {
+      "params": {
+        "const": -12.322622982158624,
+        "log_park_lag1": 0.18146996202778246,
+        "log_park_lag5": 0.11782448917366889,
+        "log_park_lag22": -0.03740396925343034,
+        "log_vix_l1": 0.8706715302577143,
+        "cnnfg_l1": -0.006528968018950374
+      },
+      "pvalues": {
+        "const": 1.6763194325905979e-65,
+        "log_park_lag1": 3.587049447958746e-13,
+        "log_park_lag5": 0.004763084561495757,
+        "log_park_lag22": 0.3026659780447287,
+        "log_vix_l1": 5.375548711139337e-54,
+        "cnnfg_l1": 6.526158979795493e-12
+      },
+      "r2": 0.5521298609138252,
+      "n": 3226
+    },
+    "har_vix_aaii": {
+      "params": {
+        "const": -12.029383010714382,
+        "log_park_lag1": 0.19643482714737978,
+        "log_park_lag5": 0.1747442801433533,
+        "log_park_lag22": -0.0493685239876777,
+        "log_vix_l1": 0.871977995035029,
+        "aaii_l1": -0.19366475828308216
+      },
+      "pvalues": {
+        "const": 3.482685383592722e-62,
+        "log_park_lag1": 4.740537966221796e-15,
+        "log_park_lag5": 3.697688371369904e-05,
+        "log_park_lag22": 0.18605672643474425,
+        "log_vix_l1": 1.3082991442109681e-52,
+        "aaii_l1": 0.11304631538271535
+      },
+      "r2": 0.5435676471450009,
+      "n": 3226
+    },
+    "har_vix_usepu": {
+      "params": {
+        "const": -11.905672176278166,
+        "log_park_lag1": 0.1887824362156512,
+        "log_park_lag5": 0.17852759761460496,
+        "log_park_lag22": -0.04293370155442404,
+        "log_vix_l1": 0.9345842064416633,
+        "usepu_l2": -0.09998262230141342
+      },
+      "pvalues": {
+        "const": 1.4167822097265537e-64,
+        "log_park_lag1": 3.979963622644061e-14,
+        "log_park_lag5": 9.945094223005446e-06,
+        "log_park_lag22": 0.2402401904281085,
+        "log_vix_l1": 9.696655757074428e-59,
+        "usepu_l2": 0.0007586955555189322
+      },
+      "r2": 0.5449424159617791,
+      "n": 3226
+    },
+    "har_vix_umcsent": {
+      "params": {
+        "const": -12.172949796417257,
+        "log_park_lag1": 0.19412337112406947,
+        "log_park_lag5": 0.1838613670259902,
+        "log_park_lag22": -0.044080188647663554,
+        "log_vix_l1": 0.8931741358290454,
+        "umcsent_l1": 0.0017054604853728728
+      },
+      "pvalues": {
+        "const": 8.189926681242125e-62,
+        "log_park_lag1": 8.57810797709668e-15,
+        "log_park_lag5": 7.093704542320088e-06,
+        "log_park_lag22": 0.23351184894800792,
+        "log_vix_l1": 2.9796968573156202e-52,
+        "umcsent_l1": 0.19143463868018185
+      },
+      "r2": 0.5433799720087812,
+      "n": 3226
+    },
+    "har_vix_all": {
+      "params": {
+        "const": -12.152580617666413,
+        "log_park_lag1": 0.17931913527218082,
+        "log_park_lag5": 0.11537267852537686,
+        "log_park_lag22": -0.03786800863254515,
+        "log_vix_l1": 0.8910074211890363,
+        "cnnfg_l1": -0.006314672560461032,
+        "aaii_l1": -0.034232645336198964,
+        "usepu_l2": -0.05511116608324047,
+        "umcsent_l1": -0.001134471644805457
+      },
+      "pvalues": {
+        "const": 4.785974410517728e-60,
+        "log_park_lag1": 7.980650326970284e-13,
+        "log_park_lag5": 0.006525553361718891,
+        "log_park_lag22": 0.29381317846628197,
+        "log_vix_l1": 2.1304671682643447e-50,
+        "cnnfg_l1": 7.933557667152357e-10,
+        "aaii_l1": 0.7800307204882913,
+        "usepu_l2": 0.06177516573224774,
+        "umcsent_l1": 0.3947270160280152
+      },
+      "r2": 0.552745327701064,
+      "n": 3226
+    }
+  },
+  "oos": {
+    "metadata": {
+      "train_window": 1000,
+      "refit_every": 63,
+      "oos_start": "2018-01-02",
+      "oos_end": "2023-12-29",
+      "n_oos": 1487
+    },
+    "qlike": {
+      "har": 0.5319078768275349,
+      "har_vix": 0.450440388768439,
+      "har_vix_cnnfg": 0.4481051431881451,
+      "har_vix_aaii": 0.4481615437724715,
+      "har_vix_usepu": 0.45151142609835837,
+      "har_vix_umcsent": 0.5050703544045625,
+      "har_vix_all": 0.4848423662479153
+    },
+    "pairwise_dm_vs_har_vix": {
+      "har_vix_cnnfg": {
+        "dm_t": 0.4144784765664725,
+        "dm_p": 0.6785835495626826,
+        "harvey_pass": false
+      },
+      "har_vix_aaii": {
+        "dm_t": 0.6506477563424462,
+        "dm_p": 0.5153744806550511,
+        "harvey_pass": false
+      },
+      "har_vix_usepu": {
+        "dm_t": -0.3027476550783981,
+        "dm_p": 0.7621245501494895,
+        "harvey_pass": false
+      },
+      "har_vix_umcsent": {
+        "dm_t": -3.7283096517495897,
+        "dm_p": 0.00020000552829002594,
+        "harvey_pass": true
+      },
+      "har_vix_all": {
+        "dm_t": -2.431331716698786,
+        "dm_p": 0.015160987670777004,
+        "harvey_pass": false
+      }
+    },
+    "bootstrap_vs_har_vix": {
+      "har_vix_cnnfg": {
+        "mean_diff": -0.00233524558029383,
+        "ci_95": [
+          -0.01064108860637476,
+          0.005890202488328713
+        ]
+      },
+      "har_vix_aaii": {
+        "mean_diff": -0.002278844995967483,
+        "ci_95": [
+          -0.00855903778407446,
+          0.003993798754606776
+        ]
+      },
+      "har_vix_usepu": {
+        "mean_diff": 0.00107103732991934,
+        "ci_95": [
+          -0.00500725739809623,
+          0.007106658931534998
+        ]
+      },
+      "har_vix_umcsent": {
+        "mean_diff": 0.05462996563612348,
+        "ci_95": [
+          0.037061171863426556,
+          0.07295686110547125
+        ]
+      },
+      "har_vix_all": {
+        "mean_diff": 0.03440197747947638,
+        "ci_95": [
+          0.018013613913540442,
+          0.051742041071403976
+        ]
+      }
+    }
+  },
+  "verdict": {
+    "result": "MOSTLY_NULL_AFTER_VIX",
+    "reason": "VIX materially improves HAR, but free sentiment proxies do not deliver Harvey-significant OOS gains beyond HAR+VIX; UMCSENT and the all-in stack are significantly worse out of sample."
+  },
+  "notes": [
+    "This is not a Google Trends replication; prior direct Trends experiments already exist (K473/K750/K789).",
+    "The goal here is shared-sample incremental value after HAR+VIX, not exhaustive proxy discovery."
+  ]
+}
