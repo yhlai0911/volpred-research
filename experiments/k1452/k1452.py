@@ -311,7 +311,7 @@ def main() -> None:
     results = {
         "experiment_id": EXPERIMENT_ID,
         "title": "Overnight vs Intraday Variance Risk Premium Sign-Flip Test",
-        "date": pd.Timestamp.utcnow().strftime("%Y-%m-%d"),
+        "date": pd.Timestamp.now("UTC").strftime("%Y-%m-%d"),
         "seed": SEED,
         "data": {
             "source": ["yfinance: SPY", "yfinance: ^VIX"],

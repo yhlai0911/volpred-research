@@ -1,0 +1,150 @@
+{
+  "experiment_id": "k1452",
+  "title": "Overnight vs Intraday Variance Risk Premium Sign-Flip Test",
+  "date": "2026-06-10",
+  "seed": 42,
+  "data": {
+    "source": [
+      "yfinance: SPY",
+      "yfinance: ^VIX"
+    ],
+    "start": "2006-01-03",
+    "end": "2025-12-04",
+    "n_obs": 5013,
+    "rv_window_days": 22,
+    "share_window_days": 252,
+    "short_horizon_days": 22,
+    "long_horizon_days": 126
+  },
+  "methodology": {
+    "signal_timing": "Signals are formed at day t close using same-day SPY open/close and VIX close; all targets are t+1 onward forward variance.",
+    "segment_definition": {
+      "overnight": "log(Open_t / Close_{t-1})",
+      "intraday": "log(Close_t / Open_t)"
+    },
+    "implied_variance_proxy": "Total implied variance = (VIX/100)^2. Segment implied variance proxy uses trailing 252d realized variance shares.",
+    "formal_tests": "2 one-sided HAC mean tests + 4 HAC predictive regressions; Bonferroni and BH applied over 6 primary tests.",
+    "bootstrap": {
+      "type": "moving_block_bootstrap_mean_ci",
+      "reps": 2000,
+      "block_size": 10,
+      "seed": 42
+    }
+  },
+  "summary_stats": {
+    "mean_vrp_overnight": 0.002530610323432783,
+    "mean_vrp_intraday": 0.006778965218833752,
+    "mean_vrp_total": 0.007673424699383952,
+    "median_share_overnight_252": 0.3410308059971429,
+    "median_share_intraday_252": 0.658969194002857,
+    "corr_overnight_intraday_vrp": 0.4583480910924755
+  },
+  "mean_tests": {
+    "overnight_negative": {
+      "n": 5013,
+      "mean": 0.0025306103234327823,
+      "t_stat_hac": 2.870891037382978,
+      "p_value": 0.9979534170509773,
+      "alternative": "less",
+      "bootstrap_ci_95": [
+        0.0007922633119100508,
+        0.004009295497702785
+      ]
+    },
+    "intraday_positive": {
+      "n": 5013,
+      "mean": 0.006778965218833749,
+      "t_stat_hac": 7.375140061848074,
+      "p_value": 8.2086182211805e-14,
+      "alternative": "greater",
+      "bootstrap_ci_95": [
+        0.004997648192300684,
+        0.008441956747971728
+      ]
+    }
+  },
+  "predictive_tests": {
+    "overnight_22d": {
+      "n": 5013,
+      "coef_z": -0.0039642091830326825,
+      "t_stat_hac": -2.827038622242161,
+      "p_value_two_sided": 0.004698066121387854,
+      "r_squared": 0.012816414080616068
+    },
+    "intraday_22d": {
+      "n": 5013,
+      "coef_z": -0.005331556028007714,
+      "t_stat_hac": -0.839793447002948,
+      "p_value_two_sided": 0.40102420827625185,
+      "r_squared": 0.015411026531005234
+    },
+    "overnight_126d": {
+      "n": 5013,
+      "coef_z": -0.001162720479140411,
+      "t_stat_hac": -1.7840862645914148,
+      "p_value_two_sided": 0.07440964883167041,
+      "r_squared": 0.0033791482866069034
+    },
+    "intraday_126d": {
+      "n": 5013,
+      "coef_z": -0.0031452490395718455,
+      "t_stat_hac": -1.2015265225080427,
+      "p_value_two_sided": 0.22954702458193232,
+      "r_squared": 0.011019644515951166
+    }
+  },
+  "multiple_testing": [
+    {
+      "label": "overnight mean < 0",
+      "raw_p": 0.9979534170509773,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.9979534170509773,
+      "bonferroni_sig_5pct": false
+    },
+    {
+      "label": "intraday mean > 0",
+      "raw_p": 8.2086182211805e-14,
+      "bonferroni_p": 4.9251709327083e-13,
+      "bh_p": 4.9251709327083e-13,
+      "bonferroni_sig_5pct": true
+    },
+    {
+      "label": "overnight VRP -> fwd overnight RV (22d)",
+      "raw_p": 0.004698066121387854,
+      "bonferroni_p": 0.028188396728327122,
+      "bh_p": 0.014094198364163561,
+      "bonferroni_sig_5pct": true
+    },
+    {
+      "label": "intraday VRP -> fwd intraday RV (22d)",
+      "raw_p": 0.40102420827625185,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.48122904993150223,
+      "bonferroni_sig_5pct": false
+    },
+    {
+      "label": "overnight VRP -> fwd overnight RV (126d)",
+      "raw_p": 0.07440964883167041,
+      "bonferroni_p": 0.4464578929900225,
+      "bh_p": 0.14881929766334082,
+      "bonferroni_sig_5pct": false
+    },
+    {
+      "label": "intraday VRP -> fwd intraday RV (126d)",
+      "raw_p": 0.22954702458193232,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.3443205368728985,
+      "bonferroni_sig_5pct": false
+    }
+  ],
+  "horizon_comparison": {
+    "overnight_abs_t_22_vs_126": 1.042952357650746,
+    "intraday_abs_t_22_vs_126": -0.3617330755050947
+  },
+  "verdict": "NULL",
+  "conclusion": "The sign-flip story does not survive the repo's minimum evidence bar. Corrected sign tests: overnight=False, intraday=True; predictive tests short=True, long=False.",
+  "figures": [
+    "experiments/k1452/figures/segment_vrp_timeseries.png",
+    "experiments/k1452/figures/segment_vrp_means.png"
+  ]
+}
