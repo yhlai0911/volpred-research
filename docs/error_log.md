@@ -1579,3 +1579,33 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 - (c) 廢棄 `main..worktree` patch 路徑
 
 **Workaround until strike 3**：worktree merge 不通過 script abort 時 → reverse diff 證實 worktree 未改 shared → 手動 `git merge --no-ff -X theirs worktree-<id>` 並 commit 註記 bypass。
+
+## 2026-06-10 — **3-STRIKE TRIGGER** 文章 narrative-arc 重複（K1449/K1091）→ arc-dedup 三層重構
+
+**Incident**：mile_5af5ec51（K1449「銅博士的波動率版本」，hourly-13 派寫）與 mile_232ce5d4（K1091「銅銀吃不到 VIX 紅利」，2026-05-16）同 arc — 銅 vol × 股市 vol/VIX →「無增量資訊」。用戶抓到（「最新發文不是重複了嗎」）。已 `volpred ops unpublish mile_5af5ec51` 下架（Supabase row=unpublished、feed 列表已除名）。
+
+**三次同類 incident**：
+1. 2026-05-16 K1396 dup（mile_7fbc61c8 + mile_31529fdf 同 K 不同標題）→ 當時 patch：title-sim>0.40+same-ref hard block
+2. 2026-06-03 narrative-arc dup → 當時 patch：memory 規則 `feedback_narrative_arc_dedup`（soft，靠主線程自律）
+3. 2026-06-10 K1449/K1091 → **跨 K、標題 0 重疊、方向相反** — title-similarity 與 memory 規則雙雙失效
+
+**四層防線為何全漏**（forensics）：
+- L0 方向源頭：`_research_backlog_candidates` 只查行內 K-id 已完成，不查資產×結論覆蓋
+- L1 refill 8th belt：只算「同 K 編號的文章數」→ 新 K 必 pass（跨 K 盲區）
+- L2 daily_article 派工：無 code gate（trending_repost 有 30 日查重，daily_article 沒有）
+- L3 publisher HARD BLOCK：title-token Jaccard ≈0（「銅」1-char 不在 DOMAIN_TERMS；2-char pair 銅博≠銅銀）+ shared_ref false
+
+**結構性 root cause**：dedup domain model 用「字面相似 + 同 K ref」定義重複；讀者眼中重複 = **(資產 entities, 結論 class) 同構**，方向無關（A→B null 與 B→A null 同一篇故事）。
+
+**重構（不 patch）**：
+1. **底層邏輯**：新模組 `src/volpred/publisher/arc_dedup.py` — canonical entity 詞典（ticker+中文→COPPER/VIX/...）+ conclusion class（null/positive/mixed/descriptive）+ `find_arc_duplicates()`（distinctive-entity overlap + 同 class，90 天窗）
+2. **程式碼 hard gates**：
+   - `publisher.publish_milestone` arc-level HARD BLOCK（`dup_waiver` 可 override）— 最後防線
+   - `refill_task_pool._research_backlog_candidates` 方向源頭 arc filter（entity-overlap 即 skip + log）— 第一道防線
+   - `scripts/check_arc_dedup.py` CLI（exit 1 = dup）— 寫文 agent pre-write gate，hourly prompt (b2) 強制
+3. **流程**：池內既有 pending 用新 filter 清查 — 撤 1 真 dup（research_fxe_fxy_fxb 日圓 risk-off，已被 mile_430f4b26 覆蓋）；2 個核實為同資產不同問題（EM 脫鉤、季節性）留池
+4. **Regression test**：`tests/test_arc_dedup.py` — K1449 vs K1091 case 必 BLOCK（含 end-to-end publish_milestone 擋下測試）+ 方向反轉同擋 + core-entity-only 不誤殺 + 結論相反不誤殺。全綠。
+
+**廢棄面**：title-similarity block 保留（仍抓同 ref 高相似），但不再是唯一防線；memory soft 規則降級為背景說明（hard gate 取代執法）。
+
+**教訓**：dedup 這類「語意判斷」不能只靠字面 similarity 或 memory 自律 — 要把 domain model（資產×結論）寫成 code gate 放在 choke point（源頭 + 派工 + 發佈三層）。

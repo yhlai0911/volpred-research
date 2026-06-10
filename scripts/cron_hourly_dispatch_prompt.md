@@ -145,6 +145,7 @@ PHASE B — 派新工:
        - `.claude/skills/anti-ai-style/SKILL.md`
        - `.claude/rules/publishing.md`
    (b) **Evidence package 先於 prose** — 任何句子之前先組好：≥3 個可驗證數字（primary source）+ ≥1 表 + ≥1 圖 + ≥1 層量化分析（descriptive stats / before-after / cross-section / rolling / event-window / vol change）+ 最好有統計檢定或比較框架。不滿足 → 換題目或換 task type，禁強推。
+   (b2) **ARC-DEDUP GATE（2026-06-10 強制；K1449/K1091 dup incident）**：寫任何 feed 文章**之前**必跑 `uv run python scripts/check_arc_dedup.py --k-id <kXXXX> --title "<planned title>"`（無對應 K 就 `--text-file` 餵主題摘要）。**exit 1 = 同 narrative arc 已有文章（資產×結論同構，標題不同、方向相反也算）→ 不寫**，換題或回報 arc-covered。標題字面不像 ≠ 不重複 —「銅博士 vol」與「銅銀吃不到 VIX 紅利」是同一篇故事。publisher publish 時另有 hard block 兜底，但寫前跑省整篇浪費。
    (c) **trending_repost 特別**：正式 task type 非摘要 / 翻譯；風格可參 havingchien Substack/commentary tone 但不引用不貼近改寫；先選題掃描 + 30 日查重 + VolPred angle 確認；**VolPred 直接 published 不進 draft pool**；daily cap = 2/day；雙發佈 feed + Ivan Lai FB。
 
    (c2) **event_article 特別（2026-05-25 新增 FB 強制）**：CPI/NFP/FOMC/財報/地緣政治 → **VolPred 直接 published 不進 draft pool** + **FB 雙發佈強制**（與 trending_repost 共用 `.claude/skills/trending-repost/references/fb-ivanlai-tone.md` SOP；但**不算入** trending daily cap=2/day）。語氣可更貼「即時市場觀察」非「專欄式 commentary」。FB 失敗不阻塞 feed publish 但**必留 retry log + work_log entry `fb_post_failed`**。

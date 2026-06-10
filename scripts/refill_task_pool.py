@@ -605,6 +605,62 @@ def _slugify_research(title: str) -> str:
     return base
 
 
+_ARC_FEED_CACHE: list | None = None
+
+
+def _arc_covered_by_recent_article(direction_text: str, days: int = 90) -> list[dict]:
+    """Return recent feed articles whose narrative arc (asset entities) already
+    covers this backlog direction. Entity-overlap only (conclusion unknown at
+    direction stage). See src/volpred/publisher/arc_dedup.py for the model.
+    Fail-open on import/IO errors — this is a filter, not a hard dependency."""
+    global _ARC_FEED_CACHE
+    try:
+        import sys as _sys
+
+        src = str(ROOT / "src")
+        if src not in _sys.path:
+            _sys.path.insert(0, src)
+        from volpred.publisher.arc_dedup import (
+            _is_significant_overlap,
+            extract_entities,
+        )
+
+        if _ARC_FEED_CACHE is None:
+            feed_path = ROOT / "storage" / "reports" / "feed.json"
+            _ARC_FEED_CACHE = json.loads(feed_path.read_text(encoding="utf-8"))
+        new_ents = extract_entities(direction_text)
+        if not new_ents:
+            return []
+        from datetime import datetime, timedelta, timezone
+
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        hits: list[dict] = []
+        for existing in _ARC_FEED_CACHE[:300]:
+            if existing.get("status") in ("unpublished", "retracted"):
+                continue
+            ts_raw = existing.get("published_at") or existing.get("created_at") or ""
+            try:
+                from dateutil.parser import parse as dtparse
+
+                if dtparse(ts_raw).astimezone(timezone.utc) < cutoff:
+                    continue
+            except Exception:
+                pass
+            ex_text = f"{existing.get('title', '')}\n{existing.get('description') or ''}"
+            ex_ents = extract_entities(ex_text)
+            if _is_significant_overlap(new_ents, ex_ents):
+                hits.append(
+                    {
+                        "id": existing.get("id", "?"),
+                        "title": existing.get("title", "?"),
+                        "shared_entities": sorted(new_ents & ex_ents),
+                    }
+                )
+        return hits
+    except Exception:
+        return []
+
+
 def _research_backlog_candidates(tasks: list, existing_ids: set[str], limit: int = 2) -> list[dict]:
     """Parse research_program.md for OPEN `- [ ]` research directions that need no
     new data, deduped against tasks already queued. Returns experiment-task dicts.
@@ -671,6 +727,21 @@ def _research_backlog_candidates(tasks: list, existing_ids: set[str], limit: int
         # Loose dup-guard: if any existing task title already contains this title, skip.
         tl = title.lower()
         if any(tl and tl in str(t.get("title") or "").lower() for t in tasks):
+            continue
+        # Arc-level dup-guard (2026-06-10 K1449/K1091 incident): a direction whose
+        # asset entities + likely-conclusion arc is already covered by a recent
+        # article is a duplicate-in-the-making — stop it at the source, before an
+        # experiment and an article get built on it. Conclusion is unknown at
+        # direction stage, so we block on entity-arc overlap with ANY conclusion
+        # class (conservative: a covered asset-pair needs a genuinely new angle,
+        # which a one-line backlog item can't establish).
+        arc_hits = _arc_covered_by_recent_article(title_raw)
+        if arc_hits:
+            print(
+                f"  [refill] skip research direction (arc already covered by "
+                f"{arc_hits[0]['id']} '{arc_hits[0]['title'][:40]}', shared="
+                f"{arc_hits[0]['shared_entities']}): {title[:50]}"
+            )
             continue
         out.append(_make_research_task(title, title_raw, current_header, slug, task_id))
         if len(out) >= limit:

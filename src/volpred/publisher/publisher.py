@@ -603,6 +603,26 @@ class Publisher:
                           f"Set details['dup_waiver'] to override.")
                     return s['id']
 
+        # --- HARD BLOCK narrative-arc duplicates (2026-06-10 fix; K1449/K1091
+        # incident, 3rd strike of the title-similarity blind spot after K1396).
+        # Title-token Jaccard misses "same story, different shell": same asset
+        # entities + same conclusion class is a duplicate to the reader even
+        # with ~0 title overlap and different experiment refs. 90-day window.
+        # Override with details['dup_waiver'] for a genuinely new angle.
+        if not (details or {}).get('dup_waiver'):
+            try:
+                from volpred.publisher.arc_dedup import find_arc_duplicates
+                arc_dups = find_arc_duplicates(title, description or '', feed)
+                if arc_dups:
+                    d = arc_dups[0]
+                    print(f"  🚫 BLOCKED narrative-arc duplicate of {d['id']} "
+                          f"'{d['title'][:50]}' (shared entities={d['shared_entities']}, "
+                          f"conclusion_class={d['conclusion_class']}) — skipping publish. "
+                          f"Set details['dup_waiver'] to override.")
+                    return d['id']
+            except ImportError:
+                pass
+
         high_overlap = [s for s in similar if s['similarity'] > 0.30]
         if high_overlap:
             print(f"  ⚠️ HIGH similarity articles found ({len(high_overlap)}) — likely duplicate topic:")
