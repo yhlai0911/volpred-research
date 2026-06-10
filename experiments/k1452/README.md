@@ -55,3 +55,18 @@
 ## 預期解讀邊界
 
 這個實驗只能回答「在一個 past-only、日頻、VIX-share-based proxy 下，是否看得到 segment VRP sign split 與 horizon split」；它不能直接證明期權市場真的分別對隔夜與日內做獨立定價。若 sign split 存在，也只能說是 reduced-form evidence。
+
+## Code Review 記錄（2026-06-10）
+
+**Reviewer**: Codex CLI (`codex exec`, gpt-5.4) — primary path。
+
+**v1 verdict: FAIL**（NULL 結論本身保守且成立，但兩個方法論缺陷）：
+1. `share_overnight_252` 的 `rolling(252)` 沒有 `.shift(1)` — share 在 t 日含當日平方報酬，與 README 宣稱的 past-only 矛盾（同日污染，非未來 lookahead）。
+2. Baseline VRP 用 trailing 22d RV（×252 年化）對 `(VIX/100)^2`（~30 曆日 forward 風險中性）— 方向/horizon mismatch 未處理、結論未承認 proxy-dependence。
+
+**v2 修正**（主線程，commit 同日）：
+1. share split 加 `.shift(1)`（嚴格 ex-ante）。
+2. 新增 `sensitivity_horizon_matched`：BTZ 式 ex-post premium `IV_t − RV_{t+1..t+22}`（horizon-matched；只用於 mean sign test，絕不作 signal）。
+3. methodology 加 `horizon_mismatch_note`；conclusion 加 proxy-dependence caveat。
+
+**v2 重跑結果**：verdict 維持 **NULL** 且更穩健 — baseline 與 horizon-matched 兩個版本的 overnight VRP 平均都是**正**（baseline mean=0.0025, HAC t=+2.85；HM mean=0.0025, t=+1.49），「隔夜負」前提在此 proxy 下不成立；intraday 為正且顯著（兩版本一致）。反號故事 NULL 與 proxy 選擇無關。

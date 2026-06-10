@@ -8,9 +8,9 @@
       "yfinance: SPY",
       "yfinance: ^VIX"
     ],
-    "start": "2006-01-03",
+    "start": "2006-01-04",
     "end": "2025-12-04",
-    "n_obs": 5013,
+    "n_obs": 5012,
     "rv_window_days": 22,
     "share_window_days": 252,
     "short_horizon_days": 22,
@@ -22,7 +22,8 @@
       "overnight": "log(Open_t / Close_{t-1})",
       "intraday": "log(Close_t / Open_t)"
     },
-    "implied_variance_proxy": "Total implied variance = (VIX/100)^2. Segment implied variance proxy uses trailing 252d realized variance shares.",
+    "implied_variance_proxy": "Total implied variance = (VIX/100)^2. Segment implied variance proxy uses trailing 252d realized variance shares, lagged one day (shift(1)) so the share at t uses data through t-1 only.",
+    "horizon_mismatch_note": "Baseline VRP subtracts trailing 22-trading-day RV (annualized x252) from (VIX/100)^2, a ~30-calendar-day forward risk-neutral measure — a direction/horizon mismatch, so baseline VRP levels and sign tests are proxy-dependent. Sensitivity 'sensitivity_horizon_matched' uses the BTZ-style ex-post premium IV_t - RV_{t+1..t+22} (horizon-matched; mean tests only, never as a signal).",
     "formal_tests": "2 one-sided HAC mean tests + 4 HAC predictive regressions; Bonferroni and BH applied over 6 primary tests.",
     "bootstrap": {
       "type": "moving_block_bootstrap_mean_ci",
@@ -32,117 +33,141 @@
     }
   },
   "summary_stats": {
-    "mean_vrp_overnight": 0.002530610323432783,
-    "mean_vrp_intraday": 0.006778965218833752,
-    "mean_vrp_total": 0.007673424699383952,
-    "median_share_overnight_252": 0.3410308059971429,
-    "median_share_intraday_252": 0.658969194002857,
-    "corr_overnight_intraday_vrp": 0.4583480910924755
+    "mean_vrp_overnight": 0.002516854084895078,
+    "mean_vrp_intraday": 0.006793737272016218,
+    "mean_vrp_total": 0.007674349578000334,
+    "median_share_overnight_252": 0.3409744493468223,
+    "median_share_intraday_252": 0.6590255506531777,
+    "corr_overnight_intraday_vrp": 0.4486415515257815
   },
   "mean_tests": {
     "overnight_negative": {
-      "n": 5013,
-      "mean": 0.0025306103234327823,
-      "t_stat_hac": 2.870891037382978,
-      "p_value": 0.9979534170509773,
+      "n": 5012,
+      "mean": 0.002516854084895077,
+      "t_stat_hac": 2.851513572894564,
+      "p_value": 0.997824418570329,
       "alternative": "less",
       "bootstrap_ci_95": [
-        0.0007922633119100508,
-        0.004009295497702785
+        0.0008004524064511681,
+        0.004009276906805604
       ]
     },
     "intraday_positive": {
-      "n": 5013,
-      "mean": 0.006778965218833749,
-      "t_stat_hac": 7.375140061848074,
-      "p_value": 8.2086182211805e-14,
+      "n": 5012,
+      "mean": 0.006793737272016216,
+      "t_stat_hac": 7.377469647225122,
+      "p_value": 8.066306695941009e-14,
       "alternative": "greater",
       "bootstrap_ci_95": [
-        0.004997648192300684,
-        0.008441956747971728
+        0.005007087504059061,
+        0.008445810410999368
+      ]
+    }
+  },
+  "sensitivity_horizon_matched": {
+    "overnight_negative_hm": {
+      "n": 5012,
+      "mean": 0.0025033511893099675,
+      "t_stat_hac": 1.493866433770225,
+      "p_value": 0.9323947333619804,
+      "alternative": "less",
+      "bootstrap_ci_95": [
+        -0.00025999182540096323,
+        0.00482157071844718
+      ]
+    },
+    "intraday_positive_hm": {
+      "n": 5012,
+      "mean": 0.00676572321288765,
+      "t_stat_hac": 3.5811848733883296,
+      "p_value": 0.00017101975620113547,
+      "alternative": "greater",
+      "bootstrap_ci_95": [
+        0.0037582780175915223,
+        0.009619628783366783
       ]
     }
   },
   "predictive_tests": {
     "overnight_22d": {
-      "n": 5013,
-      "coef_z": -0.0039642091830326825,
-      "t_stat_hac": -2.827038622242161,
-      "p_value_two_sided": 0.004698066121387854,
-      "r_squared": 0.012816414080616068
+      "n": 5012,
+      "coef_z": -0.004092232422002114,
+      "t_stat_hac": -2.991909082228106,
+      "p_value_two_sided": 0.002772388159206522,
+      "r_squared": 0.01365517745881184
     },
     "intraday_22d": {
-      "n": 5013,
-      "coef_z": -0.005331556028007714,
-      "t_stat_hac": -0.839793447002948,
-      "p_value_two_sided": 0.40102420827625185,
-      "r_squared": 0.015411026531005234
+      "n": 5012,
+      "coef_z": -0.005220441708830872,
+      "t_stat_hac": -0.8241312000760056,
+      "p_value_two_sided": 0.40986501392457386,
+      "r_squared": 0.014772798524807396
     },
     "overnight_126d": {
-      "n": 5013,
-      "coef_z": -0.001162720479140411,
-      "t_stat_hac": -1.7840862645914148,
-      "p_value_two_sided": 0.07440964883167041,
-      "r_squared": 0.0033791482866069034
+      "n": 5012,
+      "coef_z": -0.001189776662015423,
+      "t_stat_hac": -1.8342292844823591,
+      "p_value_two_sided": 0.06661996614424598,
+      "r_squared": 0.0035377893845174313
     },
     "intraday_126d": {
-      "n": 5013,
-      "coef_z": -0.0031452490395718455,
-      "t_stat_hac": -1.2015265225080427,
-      "p_value_two_sided": 0.22954702458193232,
-      "r_squared": 0.011019644515951166
+      "n": 5012,
+      "coef_z": -0.0031153251219906805,
+      "t_stat_hac": -1.1962034338018854,
+      "p_value_two_sided": 0.23161718119818342,
+      "r_squared": 0.010809163744230799
     }
   },
   "multiple_testing": [
     {
       "label": "overnight mean < 0",
-      "raw_p": 0.9979534170509773,
+      "raw_p": 0.997824418570329,
       "bonferroni_p": 1.0,
-      "bh_p": 0.9979534170509773,
+      "bh_p": 0.997824418570329,
       "bonferroni_sig_5pct": false
     },
     {
       "label": "intraday mean > 0",
-      "raw_p": 8.2086182211805e-14,
-      "bonferroni_p": 4.9251709327083e-13,
-      "bh_p": 4.9251709327083e-13,
+      "raw_p": 8.066306695941009e-14,
+      "bonferroni_p": 4.839784017564606e-13,
+      "bh_p": 4.839784017564606e-13,
       "bonferroni_sig_5pct": true
     },
     {
       "label": "overnight VRP -> fwd overnight RV (22d)",
-      "raw_p": 0.004698066121387854,
-      "bonferroni_p": 0.028188396728327122,
-      "bh_p": 0.014094198364163561,
+      "raw_p": 0.002772388159206522,
+      "bonferroni_p": 0.01663432895523913,
+      "bh_p": 0.008317164477619566,
       "bonferroni_sig_5pct": true
     },
     {
       "label": "intraday VRP -> fwd intraday RV (22d)",
-      "raw_p": 0.40102420827625185,
+      "raw_p": 0.40986501392457386,
       "bonferroni_p": 1.0,
-      "bh_p": 0.48122904993150223,
+      "bh_p": 0.4918380167094886,
       "bonferroni_sig_5pct": false
     },
     {
       "label": "overnight VRP -> fwd overnight RV (126d)",
-      "raw_p": 0.07440964883167041,
-      "bonferroni_p": 0.4464578929900225,
-      "bh_p": 0.14881929766334082,
+      "raw_p": 0.06661996614424598,
+      "bonferroni_p": 0.3997197968654759,
+      "bh_p": 0.13323993228849196,
       "bonferroni_sig_5pct": false
     },
     {
       "label": "intraday VRP -> fwd intraday RV (126d)",
-      "raw_p": 0.22954702458193232,
+      "raw_p": 0.23161718119818342,
       "bonferroni_p": 1.0,
-      "bh_p": 0.3443205368728985,
+      "bh_p": 0.34742577179727513,
       "bonferroni_sig_5pct": false
     }
   ],
   "horizon_comparison": {
-    "overnight_abs_t_22_vs_126": 1.042952357650746,
-    "intraday_abs_t_22_vs_126": -0.3617330755050947
+    "overnight_abs_t_22_vs_126": 1.1576797977457467,
+    "intraday_abs_t_22_vs_126": -0.37207223372587983
   },
   "verdict": "NULL",
-  "conclusion": "The sign-flip story does not survive the repo's minimum evidence bar. Corrected sign tests: overnight=False, intraday=True; predictive tests short=True, long=False.",
+  "conclusion": "The sign-flip story does not survive the repo's minimum evidence bar. Corrected sign tests: overnight=False, intraday=True; predictive tests short=True, long=False. Caveat: segment VRP is a reduced-form proxy (VIX share split + 22d-RV-vs-30d-IV convention mismatch in the baseline), so VRP levels/signs are proxy-dependent; see methodology.horizon_mismatch_note and sensitivity_horizon_matched.",
   "figures": [
     "experiments/k1452/figures/segment_vrp_timeseries.png",
     "experiments/k1452/figures/segment_vrp_means.png"

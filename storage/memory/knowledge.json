@@ -33063,5 +33063,25 @@
     "verdict": "CONDITIONAL_PASS",
     "reviewer": "Codex CLI 0.137.0",
     "reviewer_source": "Codex CLI 0.137.0 primary path"
+  },
+  {
+    "item_id": "637d6d56",
+    "category": "empirical_finding",
+    "content": "[K1452 verdict=NULL reviewer=Codex_CLI v1 FAIL→v2 PASS] 隔夜 vs 日內 variance risk premium 反號之謎 — SPY/VIX 檢驗 NULL。 k_id=K1452 experiment_id=k1452 experiment_path=experiments/k1452/. SPY+^VIX 2005-01→2026-06 (n≈5200)。 Segment VRP proxy = (VIX/100)^2 × trailing-252d realized-variance share (shift(1) ex-ante) − trailing 22d segment RV。 結果：overnight VRP 平均為「正」非負 (mean=+0.0025, HAC t=+2.85, one-sided p(less)=0.998)；intraday 為正且顯著 (mean=+0.0068, t=+7.38, p=8e-14)。 反號前提（隔夜負）不成立 → verdict NULL。Horizon-matched sensitivity (BTZ ex-post IV_t − fwd RV 22d, HAC lags=21)： overnight mean 仍 +0.0025 (t=+1.49)，NULL 與 proxy 選擇無關。 預測力：短 horizon 22d 有 1 項過 Bonferroni，長 126d 全不顯著。 方法論教訓：(1) VIX-share split 必 shift(1) 否則同日污染（Codex v1 FAIL 抓到）；(2) trailing-RV-vs-VIX 是方向/horizon mismatch， VRP level/sign 是 proxy-dependent，必加 horizon-matched sensitivity。 來源方向：期刊挖掘 batch (2026-06-10) 第一個被執行的方向（VRP overnight/intraday sign flip, JFE/JFQA-trend）。 結論強度：在此免費資料 reduced-form proxy 下 NULL；不能排除用真實期權拆段定價（如 SPX overnight options）會有不同結果。",
+    "evidence": [
+      "experiments/k1452/k1452_results.json",
+      "experiments/k1452/README.md",
+      "experiments/k1452/k1452.py",
+      "experiments/k1452/figures/segment_vrp_timeseries.png",
+      "experiments/k1452/figures/segment_vrp_means.png"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-10T16:56:07.923218",
+    "k_id": "K1452",
+    "experiment_id": "k1452",
+    "experiment_path": "experiments/k1452/",
+    "verdict": "NULL",
+    "reviewer": "Codex CLI (gpt-5.4)",
+    "reviewer_source": "Codex CLI primary path; v1 FAIL (share shift(1) + horizon mismatch) → main-thread fix → v2 PASS"
   }
 ]

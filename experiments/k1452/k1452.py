@@ -160,9 +160,12 @@ def build_dataset() -> pd.DataFrame:
     df["rv_intraday_22"] = 252.0 * df["intraday_sq"].rolling(ROLL_RV).mean()
     df["rv_total_22"] = 252.0 * df["total_sq"].rolling(ROLL_RV).mean()
 
+    # Codex review fix #1 (2026-06-10): shift(1) makes the share strictly
+    # ex-ante — share used at day t is computed from data through t-1 only,
+    # matching the stated "trailing / past-only" interpretation.
     df["share_overnight_252"] = (
         df["overnight_sq"].rolling(ROLL_SHARE).sum() / df["total_sq"].rolling(ROLL_SHARE).sum()
-    )
+    ).shift(1)
     df["share_intraday_252"] = 1.0 - df["share_overnight_252"]
 
     df["iv_total_30d"] = (df["VIX_Close"] / 100.0) ** 2
@@ -177,6 +180,15 @@ def build_dataset() -> pd.DataFrame:
         df[f"fwd_overnight_rv_{horizon}"] = forward_annualized_variance(df["overnight_sq"], horizon)
         df[f"fwd_intraday_rv_{horizon}"] = forward_annualized_variance(df["intraday_sq"], horizon)
         df[f"fwd_total_rv_{horizon}"] = forward_annualized_variance(df["total_sq"], horizon)
+
+    # Codex review fix #2 (2026-06-10): VIX^2 is a ~30-calendar-day (~22
+    # trading-day) FORWARD-looking measure while the baseline VRP subtracts
+    # trailing 22d RV — a horizon/direction mismatch. Sensitivity: BTZ-style
+    # ex-post premium IV_t - RV_{t+1..t+22} (horizon-matched). Used only for
+    # the mean sign tests (it embeds future realizations, so it must never be
+    # used as a predictive signal).
+    df["vrp_overnight_hm"] = df["iv_overnight_proxy"] - df[f"fwd_overnight_rv_{SHORT_H}"]
+    df["vrp_intraday_hm"] = df["iv_intraday_proxy"] - df[f"fwd_intraday_rv_{SHORT_H}"]
 
     return df.dropna(
         subset=[
@@ -233,6 +245,13 @@ def main() -> None:
     mean_tests = {
         "overnight_negative": hac_mean_test(df["vrp_overnight"], alternative="less"),
         "intraday_positive": hac_mean_test(df["vrp_intraday"], alternative="greater"),
+    }
+
+    # Horizon-matched ex-post VRP sensitivity (overlapping 22d forward windows
+    # -> HAC lags = SHORT_H - 1).
+    sensitivity_tests = {
+        "overnight_negative_hm": hac_mean_test(df["vrp_overnight_hm"], lags=SHORT_H - 1, alternative="less"),
+        "intraday_positive_hm": hac_mean_test(df["vrp_intraday_hm"], lags=SHORT_H - 1, alternative="greater"),
     }
 
     predictive_tests = {
@@ -329,7 +348,16 @@ def main() -> None:
                 "overnight": "log(Open_t / Close_{t-1})",
                 "intraday": "log(Close_t / Open_t)",
             },
-            "implied_variance_proxy": "Total implied variance = (VIX/100)^2. Segment implied variance proxy uses trailing 252d realized variance shares.",
+            "implied_variance_proxy": (
+                "Total implied variance = (VIX/100)^2. Segment implied variance proxy uses trailing 252d "
+                "realized variance shares, lagged one day (shift(1)) so the share at t uses data through t-1 only."
+            ),
+            "horizon_mismatch_note": (
+                "Baseline VRP subtracts trailing 22-trading-day RV (annualized x252) from (VIX/100)^2, a "
+                "~30-calendar-day forward risk-neutral measure — a direction/horizon mismatch, so baseline VRP "
+                "levels and sign tests are proxy-dependent. Sensitivity 'sensitivity_horizon_matched' uses the "
+                "BTZ-style ex-post premium IV_t - RV_{t+1..t+22} (horizon-matched; mean tests only, never as a signal)."
+            ),
             "formal_tests": "2 one-sided HAC mean tests + 4 HAC predictive regressions; Bonferroni and BH applied over 6 primary tests.",
             "bootstrap": {
                 "type": "moving_block_bootstrap_mean_ci",
@@ -347,6 +375,7 @@ def main() -> None:
             "corr_overnight_intraday_vrp": float(df["vrp_overnight"].corr(df["vrp_intraday"])),
         },
         "mean_tests": mean_tests,
+        "sensitivity_horizon_matched": sensitivity_tests,
         "predictive_tests": predictive_tests,
         "multiple_testing": corrected,
         "horizon_comparison": short_vs_long,
@@ -376,6 +405,12 @@ def main() -> None:
             f"Corrected sign tests: overnight={overnight_sig}, intraday={intraday_sig}; "
             f"predictive tests short={short_any}, long={long_any}."
         )
+
+    results["conclusion"] += (
+        " Caveat: segment VRP is a reduced-form proxy (VIX share split + 22d-RV-vs-30d-IV convention "
+        "mismatch in the baseline), so VRP levels/signs are proxy-dependent; see "
+        "methodology.horizon_mismatch_note and sensitivity_horizon_matched."
+    )
 
     RESULTS_PATH.write_text(json.dumps(results, indent=2, ensure_ascii=False))
     print(json.dumps({"ok": True, "results_path": str(RESULTS_PATH), "verdict": verdict}, ensure_ascii=False))
