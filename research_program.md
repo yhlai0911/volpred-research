@@ -464,6 +464,16 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 另類資產波動率特性：URA(鈾) / KRBN(碳權) / 比特幣 等非傳統資產的 vol clustering、尾部、與傳統股債的相關性 — 它們是分散工具還是高 beta 放大器（yfinance）
 - [ ] 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）
 
+### 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）
+- [ ] 信用利差作為股市 vol 領先指標：HYG−LQD（高收益−投資級）spread 與 SPY realized vol 的 lead-lag（yfinance，明確 lag）
+- [ ] 通膨預期 regime 與資產 vol：用 TIP/不同久期國債（IEF/TLT）相對表現代理通膨預期，檢驗 regime 下股債 vol 與相關性（yfinance）
+- [ ] Factor ETF 的波動率特性：MTUM(動能)/QUAL(品質)/USMV(min-vol)/VLUE(價值) 各自 realized vol 與下行風險，min-vol 真的較低 vol 嗎（yfinance）
+- [ ] 貨幣對波動率與股市風險：FXE(歐)/FXY(日圓避險)/FXB(英鎊) realized vol，日圓避險屬性在 risk-off 是否成立（yfinance）
+- [ ] 更多新興市場 vol：VNM(越南)/EIDO(印尼)/THD(泰國)/EPHE(菲律賓) 邊境/東南亞市場 vol 與已開發市場的脫鉤程度（yfinance）
+- [ ] 天然氣與農產品 vol 的季節性：UNG(天然氣)/DBA(農產) realized vol 是否有顯著季節 pattern，與能源股/通膨的關係（yfinance）
+- [ ] 銅作為景氣領先的 vol 訊號：CPER/銅期貨代理 vol 與股市 vol 的 lead-lag，「銅博士」在 vol 維度成立嗎（yfinance，明確 lag）
+- [ ] REIT 波動率與利率敏感度：VNQ realized vol 在升息/降息 regime 下的差異，REIT 是股是債（yfinance）
+
 ## 決策框架
 
 ### 何時深入某面向

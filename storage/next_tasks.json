@@ -26677,7 +26677,7 @@
     "description": "K1440 has a non-null verdict in experiments/k1440/ but no published feed article and no existing task. Verdict: NULL. Write a general-audience article summarising key findings.",
     "task_type": "daily_article",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "auto-generated",
       "audience-general",
@@ -26686,6 +26686,42 @@
     "source": "task_generator_v2_daily_article",
     "created_at": "2026-06-10T00:34:23.790484+00:00",
     "generated_at": "2026-06-10T00:34:23.790489+00:00",
-    "k_id": "K1440"
+    "k_id": "K1440",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T01:38:46.950336+00:00",
+    "claim_session_id": "abb66dee2252",
+    "started_at": "2026-06-10T01:39:11.038040+00:00",
+    "completed_at": "2026-06-10T01:46:57.454901+00:00",
+    "result": "Drafted general-audience K1440 article and queued it as draft mile_5180ca0c. Angle focuses on the overlap trap: yield-curve inversion looks scary on first pass, but the signal disappears after overlap-aware correction. Included 2 real experiment charts and preserved yfinance/K1440 provenance."
+  },
+  {
+    "id": "research_vol_hyg_lqd_spread_spy_realized_vol_lead_lag_yfi",
+    "title": "研究 backlog fallback: 信用利差作為股市 vol 領先指標：HYG−LQD（高收益−投資級）spread 與 SPY realized vol 的 lead-lag（yfinance，明確 lag）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 信用利差作為股市 vol 領先指標：HYG−LQD（高收益−投資級）spread 與 SPY realized vol 的 lead-lag（yfinance，明確 lag） | 來源 section: 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "vol_hyg_lqd_spread_spy_realized_vol_lead_lag_yfi",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T02:04:26+00:00"
+  },
+  {
+    "id": "research_regime_vol_tip_ief_tlt_regime_vol_yfinance",
+    "title": "研究 backlog fallback: 通膨預期 regime 與資產 vol：用 TIP/不同久期國債（IEF/TLT）相對表現代理通膨預期，檢驗 regime 下股債 vol 與相關性（yfinance）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 通膨預期 regime 與資產 vol：用 TIP/不同久期國債（IEF/TLT）相對表現代理通膨預期，檢驗 regime 下股債 vol 與相關性（yfinance） | 來源 section: 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "regime_vol_tip_ief_tlt_regime_vol_yfinance",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T02:04:26+00:00"
   }
 ]
