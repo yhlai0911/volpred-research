@@ -1,0 +1,400 @@
+{
+  "k_id": "k1465",
+  "title": "Day-of-week VRP clustering and tradability",
+  "started_at_utc": "2026-06-10T22:15:19.346537+00:00",
+  "finished_at_utc": "2026-06-10T22:15:23.852957+00:00",
+  "config": {
+    "seed": 42,
+    "data_start": "2010-01-01",
+    "data_end": "2026-06-11",
+    "oos_start": "2023-01-01",
+    "rv_window_days": 5,
+    "cost_bps_per_side": 30.0,
+    "bootstrap_reps": 1000,
+    "best_dow_selection": "in-sample (2010 .. 2022) VRP mean \u2014 no lookahead"
+  },
+  "data_source": "yfinance SPY + ^VIX (auto_adjust=False, split-adj via AdjClose/Close ratio)",
+  "sample": {
+    "full": {
+      "n": 4129,
+      "start": "2010-01-11",
+      "end": "2026-06-10"
+    },
+    "is": {
+      "n": 3266,
+      "start": "2010-01-11",
+      "end": "2022-12-29"
+    },
+    "oos": {
+      "n": 862,
+      "start": "2023-01-03",
+      "end": "2026-06-10"
+    }
+  },
+  "dow_descriptive_full": {
+    "r_on_sq_x1e4": {
+      "n": {
+        "0": 7720000.0,
+        "1": 8500000.0,
+        "2": 8470000.0,
+        "3": 8310000.0,
+        "4": 8290000.0
+      },
+      "mean": {
+        "0": 0.7206,
+        "1": 0.443,
+        "2": 0.3795,
+        "3": 0.435,
+        "4": 0.4083
+      },
+      "median": {
+        "0": 0.0927,
+        "1": 0.0767,
+        "2": 0.0659,
+        "3": 0.0836,
+        "4": 0.0933
+      },
+      "std": {
+        "0": 4.7178,
+        "1": 1.4905,
+        "2": 1.7327,
+        "3": 1.8644,
+        "4": 1.5624
+      },
+      "p25": {
+        "0": 0.0191,
+        "1": 0.0191,
+        "2": 0.0116,
+        "3": 0.0175,
+        "4": 0.0209
+      },
+      "p75": {
+        "0": 0.3585,
+        "1": 0.2784,
+        "2": 0.2356,
+        "3": 0.3129,
+        "4": 0.3109
+      }
+    },
+    "r_id_sq_x1e4": {
+      "n": {
+        "0": 7720000.0,
+        "1": 8500000.0,
+        "2": 8470000.0,
+        "3": 8310000.0,
+        "4": 8290000.0
+      },
+      "mean": {
+        "0": 0.543,
+        "1": 0.6218,
+        "2": 0.7826,
+        "3": 0.7202,
+        "4": 0.6499
+      },
+      "median": {
+        "0": 0.1219,
+        "1": 0.1543,
+        "2": 0.1494,
+        "3": 0.1781,
+        "4": 0.1595
+      },
+      "std": {
+        "0": 1.3317,
+        "1": 1.707,
+        "2": 4.4993,
+        "3": 1.8575,
+        "4": 1.6686
+      },
+      "p25": {
+        "0": 0.0205,
+        "1": 0.0309,
+        "2": 0.0306,
+        "3": 0.032,
+        "4": 0.0297
+      },
+      "p75": {
+        "0": 0.466,
+        "1": 0.5407,
+        "2": 0.589,
+        "3": 0.6474,
+        "4": 0.5903
+      }
+    },
+    "vrp": {
+      "n": {
+        "0": 772,
+        "1": 850,
+        "2": 847,
+        "3": 831,
+        "4": 829
+      },
+      "mean": {
+        "0": 0.02255,
+        "1": 0.0221,
+        "2": 0.02159,
+        "3": 0.02208,
+        "4": 0.02124
+      },
+      "median": {
+        "0": 0.01784,
+        "1": 0.01811,
+        "2": 0.01784,
+        "3": 0.0175,
+        "4": 0.01697
+      },
+      "std": {
+        "0": 0.04025,
+        "1": 0.03264,
+        "2": 0.03835,
+        "3": 0.03952,
+        "4": 0.03496
+      },
+      "p25": {
+        "0": 0.0116,
+        "1": 0.01196,
+        "2": 0.01176,
+        "3": 0.01158,
+        "4": 0.01162
+      },
+      "p75": {
+        "0": 0.02763,
+        "1": 0.02801,
+        "2": 0.02765,
+        "3": 0.02679,
+        "4": 0.0268
+      }
+    }
+  },
+  "dow_descriptive_oos": {
+    "vrp": {
+      "n": {
+        "0": 161,
+        "1": 179,
+        "2": 177,
+        "3": 171,
+        "4": 174
+      },
+      "mean": {
+        "0": 0.01618,
+        "1": 0.01607,
+        "2": 0.01502,
+        "3": 0.0155,
+        "4": 0.01541
+      },
+      "median": {
+        "0": 0.018,
+        "1": 0.01834,
+        "2": 0.01877,
+        "3": 0.01788,
+        "4": 0.01752
+      },
+      "std": {
+        "0": 0.05829,
+        "1": 0.04631,
+        "2": 0.05964,
+        "3": 0.05636,
+        "4": 0.05539
+      },
+      "p25": {
+        "0": 0.01291,
+        "1": 0.01263,
+        "2": 0.01304,
+        "3": 0.01274,
+        "4": 0.01266
+      },
+      "p75": {
+        "0": 0.02462,
+        "1": 0.02465,
+        "2": 0.02428,
+        "3": 0.02415,
+        "4": 0.02376
+      }
+    }
+  },
+  "kruskal_wallis": {
+    "r_on_sq_full": {
+      "H": 16.46560733885417,
+      "p": 0.0024539877835868546
+    },
+    "r_id_sq_full": {
+      "H": 11.28939772066392,
+      "p": 0.023497071386991416
+    },
+    "vrp_full": {
+      "H": 2.3042143530674366,
+      "p": 0.6800018690231328
+    },
+    "vrp_oos": {
+      "H": 0.7307642308146569,
+      "p": 0.9474815751956767
+    }
+  },
+  "dunn_bonferroni": {
+    "vrp_full": {
+      "Mon": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      },
+      "Tue": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      },
+      "Wed": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      },
+      "Thu": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      },
+      "Fri": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      }
+    },
+    "vrp_oos": {
+      "Mon": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      },
+      "Tue": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      },
+      "Wed": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      },
+      "Thu": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      },
+      "Fri": {
+        "Mon": 1.0,
+        "Tue": 1.0,
+        "Wed": 1.0,
+        "Thu": 1.0,
+        "Fri": 1.0
+      }
+    }
+  },
+  "best_dow": {
+    "int": 0,
+    "label": "Mon",
+    "is_mean_vrp": 0.024223405508367768,
+    "selection_window": "2010-01-11 .. 2022-12-29"
+  },
+  "backtest_full": {
+    "strat_ret": {
+      "n": 4129,
+      "mean_ann": -0.09338584427527241,
+      "std_ann": 0.07183381686232825,
+      "sharpe": -1.3000262042910695,
+      "max_dd": -0.7924788555518294,
+      "t_stat": -5.262283934553839,
+      "p_value": 1.4950122239893192e-07,
+      "final_equity": 0.20752114444817063
+    },
+    "bh_ret": {
+      "n": 4129,
+      "mean_ann": 0.14490768371827156,
+      "std_ann": 0.1713508121873522,
+      "sharpe": 0.845678417677016,
+      "max_dd": -0.3371727136343,
+      "t_stat": 3.423161730472546,
+      "p_value": 0.0006249946274193741,
+      "final_equity": 8.437020391593379
+    }
+  },
+  "backtest_oos": {
+    "strat_ret": {
+      "n": 862,
+      "mean_ann": -0.1143120788816079,
+      "std_ann": 0.05467763897836261,
+      "sharpe": -2.090654992013174,
+      "max_dd": -0.34151705143139055,
+      "t_stat": -3.8666577436436045,
+      "p_value": 0.00011864371202286326,
+      "final_equity": 0.6728520825878985
+    },
+    "bh_ret": {
+      "n": 862,
+      "mean_ann": 0.21012037647219411,
+      "std_ann": 0.15155921548213952,
+      "sharpe": 1.3863912913758498,
+      "max_dd": -0.18755230510174525,
+      "t_stat": 2.564124947921922,
+      "p_value": 0.010512253817693117,
+      "final_equity": 1.9727610699442442
+    }
+  },
+  "dm_test_full": {
+    "n": 4128,
+    "DM_stat": -1.2754679011666468,
+    "DM_p": 0.2021436784708217,
+    "DM_HLN": -1.2753134019956887,
+    "DM_HLN_p": 0.20227011969819064,
+    "interpretation": "negative DM \u2192 F1 (DoW-gated) better; positive \u2192 F2 (flat) better"
+  },
+  "dm_test_oos": {
+    "n": 861,
+    "DM_stat": 1.5343855415257284,
+    "DM_p": 0.12493483245231518,
+    "DM_HLN": 1.5334942341362419,
+    "DM_HLN_p": 0.1255219003834982,
+    "interpretation": "negative DM \u2192 F1 (DoW-gated) better; positive \u2192 F2 (flat) better"
+  },
+  "verdict": "NULL",
+  "rationale": "Kruskal\u2013Wallis fails to reject equal-distribution across DoW (p > 0.05); no exploitable calendar clustering.",
+  "key_numbers": {
+    "kw_pvalue_vrp_full": 0.6800018690231328,
+    "kw_pvalue_vrp_oos": 0.9474815751956767,
+    "best_dow": "Mon",
+    "backtest_sharpe_full": -1.3000262042910695,
+    "backtest_sharpe_oos": -2.090654992013174,
+    "baseline_sharpe_full": 0.845678417677016,
+    "baseline_sharpe_oos": 1.3863912913758498,
+    "DM_p_oos": 0.12493483245231518
+  },
+  "differentiation_vs_vrp_regime_decomposition": "vrp_regime_decomposition is a planning stub for VRP-magnitude regime split (low/mid/high). K1465 attacks an orthogonal axis \u2014 calendar day-of-week clustering of overnight vs intraday variance and VRP level, with explicit lookahead-controlled tradability test.",
+  "limitations": [
+    "Short-vol P&L proxied by SPY close-to-close return \u2014 not actual VXX/SVXY/short-VIX-call returns; magnitudes likely underestimate vol-risk-premium harvest both sides.",
+    "Costs (30 bps one-way) are a conservative SPY-ETF assumption; real VIX-futures or short-call costs are larger and would shift the bar higher.",
+    "Single asset (SPY); follow-up should replicate on QQQ, IWM, and SPY-implied futures contracts.",
+    "RV_5d uses only intraday squared returns; ignores overnight variance contribution to total RV (a conservative VRP proxy per BTZ 2009)."
+  ],
+  "references": [
+    "Bollerslev, T., Tauchen, G., & Zhou, H. (2009). Expected Stock Returns and Variance Risk Premia. RFS, 22(11), 4463-4492.",
+    "Bekaert, G., & Hoerova, M. (2014). The VIX, the variance premium and stock market volatility. Journal of Econometrics, 183(2), 181-192.",
+    "Patton, A. J. (2011). Volatility forecast comparison using imperfect volatility proxies. JoE, 160(1), 246-256.",
+    "Harvey, D., Leybourne, S., & Newbold, P. (1997). Testing the equality of prediction mean squared errors. IJF, 13(2), 281-291.",
+    "Lou, D., Polk, C., & Skouras, S. (2019). A tug of war: Overnight versus intraday expected returns. JFE, 134(1), 192-213."
+  ]
+}
