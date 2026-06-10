@@ -1,0 +1,116 @@
+{
+  "paper_id": "leverage-direction",
+  "title_en": "Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection and Volatility Targeting",
+  "main_file": "paper/leverage-direction/body.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "核心結果（黃金 inverted leverage γ=−0.067/t=−5.79/93%）已被自家 Table 2 K903 替換值（+0.002/t=+0.15 NS/67%）推翻，但 Intro/§4.2/§5.1/§6 全文仍宣稱舊數字 — body 與 canonical table 必須先收斂、Table 3 八列 legacy 數字對齊 K903、reproduce gate 重跑轉 green，才談投稿。",
+  "provenance_spot_checks": "5 項抽查：(1) Table 4 vs experiments/k1185/k1185_results.json — MATCH（33/18/14/14 violations 全對）。(2) Table 3 vs experiments/k903/tables/k903_table3.csv — 僅 SPY 2023-24 列 MATCH（−8.623/−8.674/p=.0032）；其餘 8 列 MISMATCH，含 GLD 2023-24 正負與顯著性翻轉（K903: GARCH 顯著勝 GJR，DM p=0.0013；論文稱 NS p=0.871）、QQQ 2023-24 方向翻轉。(3) Table 2 vs k903_results.json — GLD 列 MATCH（+0.002/0.055/67%/+0.15），但 SPY（紙 +0.211 vs K903 +0.132）、EEM（+0.180 vs +0.087）、SLV（t=−2.91 vs −0.68 NS）、BTC（t=+1.83 vs +2.88）全 MISMATCH — 整表是混血 vintage。(4) tab:var_ortho GJR+Normal：紙 10/502 Kupiec p=0.049；canonical K802 shim 為 9/502（→ Kupiec p≈0.11，不再是 borderline FAIL）；10/502→p=0.046 算術本身正確但跨來源脆弱。(5) Pearson ρ=0.944, N=5 宣稱 p<0.001 — 重算 t=4.96, df=3 → 雙尾 p≈0.016，宣稱錯一個數量級。",
+  "citation_status": "54 條書目抽查：主力引用（Bollerslev 1986/1987、Glosten et al. 1993、Patton 2011、Hansen & Lunde 2005、Hansen et al. 2011、Moreira & Muir 2017、Cederburg et al. 2020、Fissler & Ziegel 2016、Bayer & Dimitriadis 2022、Kupiec 1995、Christoffersen 1998、Baur 兩篇）作者/年份/期刊/DOI 均正確。可疑 3 條：hood2025「Hood, B., & Raughtigan, C. (2025) JPM 52(1), DOI 10.3905/jpm.2025.1.764」— 姓氏 Raughtigan 與 DOI 無法確認存在，且此文是 Contribution 2 框架的錨點引用，投稿前必走 citation-verifier；nelson2025 SSRN No. 5931154 編號偏高無法確認；xu2024 CFR forthcoming 無 DOI 無法核實。另 main.tex 手寫 thebibliography 含 ~9 條 body.tex 從未引用的項目（engle2004, longin2001, mcneil2015, kim2019, bucci2020, araya2024, campbell2017, engleGhyselsSohn2013, pattonSheppard2015）。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "body.tex:11,134,154,156,162 vs tables_main.tex:24,33",
+      "issue": "核心結果自相矛盾：Table 2 GLD 列已改為 K903 canonical（mean γ=+0.002, HAC t=+0.15 NS, 67% negative），caption 明寫舊估計（−0.067, t=−5.79）「source experiment could not be re-located」；但 Intro L11 仍稱「Gold's inverted leverage is statistically significant (HAC t=−5.79, p<0.001), persists across 93%」，L134 稱 mean −0.067/93%、L154 稱 HAC t=−5.79、L156 bootstrap CI [−0.099,−0.035] 排除零、L162 再稱 93%。論文標題級主張與自家 canonical 表直接互斥。",
+      "fix": "二擇一且全文一致：(a) 採 K903 → 重寫 Intro/§4.2.1/§4.2.3/§5.1/§6，把黃金敘事降為 regime-dependent（abstract 已是此版本），刪 −5.79/93%/CI 等舊統計；或 (b) 重新定位舊估計來源並以新 K 實驗復現後恢復舊表。不可保留現狀混合版。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "body.tex:134 footnote vs experiments/k903/k903_results.json::table2_rolling_gamma.GLD",
+      "issue": "L134 腳註辯稱 K903 的 +0.002 是「single full-sample point estimate」、與 rolling-window mean −0.067「measure different objects」— 但 k903_results.json 顯示 +0.002 正是 58 個 quarterly rolling windows（w=504, step=63, 2010–2026, HAC lags=8）的 mean_gamma，與論文統計量是同一物件。腳註對 K903 的描述事實錯誤，且與 tables_main.tex L24 caption（「n=58 quarterly windows」）互斥。",
+      "fix": "刪除或改寫此腳註：承認 K903 是同規格 canonical replication 且符號翻轉（k903_vs_paper_diff.md 標 SIGN REVERSED critical），不可用「不同物件」說法掩蓋。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "tables_main.tex:49-58 (tab:qlike) vs experiments/k903/tables/k903_table3.csv",
+      "issue": "Table 3 九列僅 SPY 2023-24 對齊 K903，其餘 8 列為 legacy 數字且與 canonical 復現衝突：GLD 2023-24 紙稱 Δ=−0.07% p=0.871（NS），K903 為 Δ=+0.39% p=0.0013（GARCH 顯著勝 GJR，與 L185「Neither approaches significance」矛盾）；QQQ 2023-24 紙 +0.92% p=0.067 vs K903 −0.33% p=0.181（方向翻轉）；SPY 2025 紙 p=0.029 vs K903 p=0.048。experiments.md L21 自承「remaining rows still legacy」。9/9 分類宣稱建立在無法復現的數字上。",
+      "fix": "全表改用 K903 數值（或重跑一個 pin 住 vintage 的新 K 對齊全部 9 cells），再依新表重新計算分類正確率與 §4.3.2 敘事；GLD 顯著反向結果必須如實報告。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "body.tex:199 vs tables_main.tex:35; abstract main.tex:39",
+      "issue": "模型選擇規則被自家表打臉：L199 稱 BTC「yields t<1.65, so the rule correctly prescribes symmetric GARCH」，但 Table 2 BTC 列 HAC t=+1.83 > 1.65（K903 更高 +2.88），依規則應選 GJR，與表內 Model Choice=GARCH 及文字矛盾；abstract 的合併判準（t>1.65, |γ|>0.10）對 BTC（γ=0.117, t=1.83）同樣失效。9/9 與 6/6 分類宣稱在 BTC 上不成立。",
+      "fix": "明確定義規則用的 t 是哪個統計量（單窗估計 t 或 quarterly-mean HAC t），用同一統計量重算全部分類；若 BTC 被誤分類，下修 9/9→8/9 並改寫 L199 的 BTC 示範段。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "paper/leverage-direction/reproduce_report.json (2026-05-17) vs README.md:4",
+      "issue": "Reproduce gate 過期且非 green：report 生成於 2026-05-17，早於 2026-06-07 的 body/tables 重寫（含 Table 2 GLD 行替換、tab:var_panel 三個 pass rate 修訂）；alert_level=amber、traceable_match_rate 80.9% < 95% gate rule；untraceable_summary 明列「Abstract 6/6 OOS claim and rho=0.83 have no traceable JSON」。README 稱「Reproduce gate 0 MISMATCH」具誤導性 — paper-workflow 規則要求 green 才可 review/submit。",
+      "fix": "更新 reproduce.py 的 expected values 對齊 6/7 新表後重跑；為 abstract 的 6/6 OOS 分類與 ρ=0.83（N=14）建立 dedicated K 實驗 JSON；gate 轉 green 前凍結投稿。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "body.tex:13,250,271,408; main.tex:39 (abstract); body.tex:514 (conclusion)",
+      "issue": "統計錯誤：「Pearson ρ=0.944, p<0.001, N=5」— t = 0.944·√3/√(1−0.891) = 4.96, df=3，雙尾 p≈0.016（單尾 0.008），p<0.001 錯一個數量級。同段正確算出 ρ=0.80 N=5 p=0.10 與 ρ=0.83 N=14 p=0.0002，顯示 N=5 那條 p 是孤立錯值，重複出現於 abstract、intro、§4.5、§5.3、conclusion 共 5 處。",
+      "fix": "全部改為 p≈0.016（或只報 N=14 擴展樣本的 p=0.0002 作為推論依據，N=5 僅報點估計）。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "body.tex:11 vs 199 vs 201",
+      "issue": "門檻值三版漂移：Intro 稱「|γ|>0.10 rule correctly classifies all nine」；L199 稱「A raw γ>0.10 threshold would misclassify BTC」且等效門檻是 [0.12, 0.17]；L201 又稱「the numerical threshold (γ>0.08)」。三個互斥的門檻陳述，Intro 與 §4.3.2 直接矛盾。",
+      "fix": "統一為 t>1.65 主規則 + 等效幅度區間 [0.12,0.17]；刪 Intro 的 |γ|>0.10 9/9 句與 L201 的 0.08。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "body.tex:144,185,285 vs tables_main.tex:49,94,454",
+      "issue": "同一 cell（SPY 2023-24, w=504）的 DM p 與 Δ 多版並存：L144 與 tab:var_ortho 註腳稱「−3.8%, DM p=0.001」；Table 3 與 L185 稱 Δ=−0.59%, p=0.003（K903 canonical 為 0.0032）；L285 又用 −3.8%。−3.8% vs −0.59% 來自 Patton-centered vs quasi-LL 兩種尺度但文中未標示，p=0.001 vs 0.003 則是不同來源（K799 vs K802/K903）未統一。",
+      "fix": "統一採 K903 的 p=0.003；所有 Δ% 標明尺度（建議全改 quasi-LL 尺度 −0.59%，或在 −3.8% 處加 centered-loss 腳註），對齊 K903_vs_paper_diff.md 已標的 Table 3 vs Table 8 內部不一致。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "number_provenance",
+      "location": "tables_main.tex:91 (tab:var_ortho) vs paper/leverage-direction/experiments/k802_gjr_skewt_results.json",
+      "issue": "Orthogonality 敘事的關鍵 cell 跨來源脆弱：紙報 GJR+Normal 10/502 violations (1.99%, Kupiec p=0.049, 「Borderline FAIL」)，但 canonical K802 為 9/502 (1.79%) → Kupiec p≈0.11，Green Zone PASS。reproduce gate 把此列標 NOTE（canonical K799），即「GJR+Normal fails VaR」的核心結論依賴 10 vs 9 一個 violation 的 vintage 選擇。",
+      "fix": "在 tab:var_ortho 加註 vintage 敏感度（9–10 violations, p∈[0.049,0.11]），把 §4.4/§5.2 的「borderline failure」措辭軟化為「borderline（vintage-dependent）」，或重跑 pin 住 snapshot 的單一 canonical 實驗。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "body.tex:496 (Limitations, Multiple testing)",
+      "issue": "Multiple-testing 防線與實際推論不一致：宣稱以 Harvey t>3.0 為顯著門檻緩解 110+ 實驗的 data mining，但 headline 結果全在 t<3 被接受（Spearman ρ=0.886 p=0.019、DM p=0.003/0.029/0.023、regime t=−3.79 勉強過）；「BH FDR audit 30/32 survive」無 K 實驗 JSON 可溯源（reproduce report 未列）。",
+      "fix": "明確區分哪些主張過 t>3（GARCH-X VIX、HAR-ABS、regime-conditional t=7.90）哪些只到 5% 名目水準，並為 BH audit 補 dedicated 實驗 JSON 或刪除該句。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "body.tex:34,42 (§3.1) vs tables_main.tex:24; body.tex:162,173,330",
+      "issue": "樣本期間口徑混亂：§3.1 宣告資料為 2017-01–2026-03，但 Table 2 rolling γ 用 2010–2026、regime 分析用 2005–2026、timing tests 用 2014–2026、L162 又稱「our 2019–2026 sample」的 93% — 資料節從未描述這些更長期間的資料抓取與處理；93% 的母體窗口（2010–2026 vs 2019–2026）兩處說法不同。",
+      "fix": "§3.1 加一段列出每類分析的確切期間與資料延伸（2005/2010/2014 起始的 pull），並統一 93%（若保留）所屬窗口的唯一定義。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "main.tex:181-182 (hood2025), 214-215 (nelson2025), 229-230 (xu2024)",
+      "issue": "三條關鍵引用無法確認存在：hood2025「Hood, B., & Raughtigan, C. (2025). Volatility targeting is trendy. JPM 52(1), DOI 10.3905/jpm.2025.1.764」— 姓氏與 DOI 皆可疑，而 Contribution 2 自稱「generalizes the equity-specific finding of hood2025」，若該文不存在則貢獻定位崩塌；nelson2025 SSRN No.5931154 編號異常；xu2024 CFR forthcoming 無 DOI。",
+      "fix": "投稿前對這三條跑 citation-verifier / web 檢索確認書目；hood2025 若不存在，Contribution 2 的文獻定位需改錨到 Moreira & Muir (2017) + Harvey et al. (2018) 等可驗證文獻。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "tables_main.tex:123-143 (tab:vt notes)",
+      "issue": "跨資產 VT 比較表每資產用不同評估窗（GLD 2022–2026 金牛市、SPY 2014–2026、BTC post-2019、TLT/EEM ~2015–2026），再以這些不可比的 MDD/Sharpe 算跨資產 Pearson ρ=0.944；註腳自承 reproducibility check 僅 6/20 cells 匹配、GLD 需「paper-original data vintage」。Referee 必挑窗口 cherry-picking（GLD BH Sharpe 1.56 即牛市窗產物）。",
+      "fix": "主表改用統一 OOS 窗（如 2015–2026）重算 5 資產（replication check 已有此版本），把 per-asset 原窗版移到 supplement 作 robustness；ρ=0.944 用統一窗數字重算。"
+    },
+    {
+      "severity": "LOW",
+      "category": "citation",
+      "location": "main.tex:62-235 (thebibliography)",
+      "issue": "~9 條書目在 body.tex/tables_main.tex 從未被 \\cite：engle2004, longin2001, mcneil2015, kim2019, bucci2020, araya2024, campbell2017, engleGhyselsSohn2013, pattonSheppard2015（手寫 thebibliography 不會產生 unused 警告）。",
+      "fix": "刪除未引用條目，或在對應 supplement 引用處保留並把書目移到 supplementary.tex。"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "body.tex:500; experiments.md:5,17-32",
+      "issue": "(a) Crowding 段「We analyze this through two channels」後接 First/Second/Third 三項，數目不符；(b) experiments.md 仍標「Current body: body_v3.tex」且表號對映到舊 66pp 版（Table 1–14），與現行 7-table main + supplement 架構脫節 — replication package 的 canonical mapping 文件失準，JBF hard requirement。",
+      "fix": "(a) 改為 three channels；(b) 更新 experiments.md 至 body.tex/tables_main.tex 的新表號（Table 1–7 + supplement），重建 table→K mapping。"
+    }
+  ]
+}

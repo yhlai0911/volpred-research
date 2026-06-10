@@ -1,0 +1,109 @@
+{
+  "paper_id": "eav-universal-magnitude",
+  "main_file": "paper/eav-universal-magnitude/body.tex",
+  "title_en": "Earnings-Announcement Volatility Amplification: A Cross-Market Regularity with Magnitude Ordering — Evidence from Taiwan, U.S., and Japan Equity Markets",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "主結果（Table 1）被論文自己的 §6.6 multistart 段落宣告為 single-init FRAGILE 而未重估，加上 abstract/conclusion 與 13-market body 結構脫節、[CITATION NEEDED] 與兩個 placeholder 未補 — 需重估主表 + 全文敘事重整後才可投稿。",
+  "provenance_spot_checks": "抽查 8 組數字全部 MATCH：(1) Table 1 三市場 θ̂/t/CI/pooled_obs vs k1145/k1147/k1150_results.json 逐位吻合（TW 6.362e-5/t=5.242/[4.13e-5,9.38e-5]/121,014；US 1.909e-4/t=4.496/90,479；JP 1.413e-4/t=11.989/87,917）；(2) k1145 Hessian t=14.136≈「14.1」、pooled loglik 329,349.98≈「329,350」✓；(3) K1216c ρ=0.3791/p=0.2014/N=13 ✓；(4) K1207 F=689.52/p=7.87e-14/incR²=0.148 vs 0.0046 ✓；(5) K1163 θ_rel=0.194/boot t=4.807/placebo z=22.27 ✓；(6) K1149 TW lrt_p=0.0101、t_stress=-0.385 ✓；(7) K1165 ρ=+0.75 起點 ✓；(8) K1172 panel t=3.789、ρ=0.441/p=0.152 ✓。reproduce_report.json 20/20 green 但只覆蓋 Tables 1–3，§6.6 新增的所有數字（K1207/K1216c/K1163/multistart LR 表）完全不在 reproduce gate 內。",
+  "citation_status": "references.bib 10 條全部真實且 metadata 正確（Beaver 1968 JAR; Patell 1976 JAR; Patell-Wolfson 1979 JFE; Ball-Kothari 1991 TAR; Engle-Rangel 2008 RFS; Engle-Ghysels-Sohn 2013 ReStat ✓已修正; Glosten et al. 1993 JF; Harvey-Liu-Zhu 2016 RFS; Diebold-Mariano 1995 JBES; Benjamini-Hochberg 1995 JRSS-B）。問題：(a) 全部缺 DOI 欄位；(b) line 197 [CITATION NEEDED] cross-market EAV anchor 仍未解決（v1 SEVERE）；(c) §6.4/6.5 的「Harvey pass」DM 小樣本修正引用 Harvey-Leybourne-Newbold (1997) 仍缺（v1 已flag未補）。v1 的無效 key（k1213_convergence_lesson、garch_x_vix_paper、engel_rangel 拼錯）已確認移除 ✓。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "body.tex:1041-1043 (tab:multistart_lr note) vs body.tex:598-603 (Table 1) + abstract:61-68",
+      "issue": "論文自我否定主結果：§6.6.4 multistart 表註明寫「The two-basin pathology is invisible under default single-init L-BFGS-B (used in K1145/K1147/K1150/K1153/K1168/K1172)」且 10/10 市場 FRAGILE、LR 最高 2837（p<10⁻³⁰）、TW θ_rel 0.314→1.364（4.3×）、US 0.415→8.614（20.8×）。但 Table 1 / abstract / US>JP>TW magnitude ordering 全建立在未經 multistart 重估的 K1145/K1147/K1150 single-init 估計上，且 line 981 自己宣告「All future extensions must follow the multistart protocol」。Referee 讀到此處會直接判定 headline estimates 不可信。",
+      "fix": "對 K1145/K1147/K1150 主 spec 跑同一 100-multistart 協議重估 Table 1（或以明確 multistart 證據證明 3-market 主 spec 無 two-basin 問題），並在 §2.3/§4 交代 refined vs canonical 差異與 ordering 是否保持；abstract 數字同步更新。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "structure",
+      "location": "abstract (53-87) + conclusion (1199-1230) vs §6.6 (777-1109)",
+      "issue": "Abstract 與 Conclusion 描述的是 3-market 論文；body §6.6 卻是 13-market panel 並宣告「Paper 2 commits to three cross-market structural drivers」（line 974-980：analyst attention、sector FE F=689.5、ownership ladder ρ=0.379）。Conclusion line 1228-1230 甚至把「extending to the United Kingdom, Hong Kong, or the Eurozone」列為 future work — 但 body line 783 的 13-market panel 已含 HK 與 EU，直接自相矛盾。",
+      "fix": "重寫 abstract、intro contributions、conclusion，把 12/13-market panel 與三大 structural drivers 納入論文主敘事；刪除 conclusion 中已被 §6.6 做掉的 future-work 條目。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "citation",
+      "location": "body.tex:196-198",
+      "issue": "§1.3 第三貢獻 strand 仍掛著「[CITATION NEEDED: international cross-market EAV anchor---see lit_review.md A5; needs NotebookLM pass before submission]」— v1 review（2026-05-18）唯一 SEVERE finding，May 22 build 仍未解決。",
+      "fix": "跑 NotebookLM/文獻 pass 找 cross-market EAV anchor（候選在 lit_review.md A5），補進 references.bib 並替換 placeholder。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "body.tex:889-892 vs body.tex:1024-1033 (tab:multistart_lr)",
+      "issue": "同一符號 θ̂_rel 在相鄰段落取值矛盾：K1173 段落寫「TW = 0.17 through US = 0.59」（來自 k1163 四市場值 tw=0.167/us=0.586/jp=0.388），multistart 表卻列 TW canon=0.314、US=0.415、JP=1.668。JP=1.668（已開發市場）落在該段宣稱的「EM 3-25× above the developed-market reference range」區間內，直接打臉「developed range [0.17,0.59]」的敘述。同段還混用 multistart 表的 BR=1.89/IN=1.17/MX=1.20。違反專案自身 3-spec disambiguation 規則。",
+      "fix": "為兩套 θ_rel（K1163 四市場 normalization vs K1216c pooled refit）加 footnote 明確 disambiguation，或統一採 K1216c refined 值重寫該段；逐一檢查 §6.6 所有 θ_rel 出處。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "body.tex:804,926,985,1064 (% source: k1222b_revision_guide.md) + reproduce_report.json (May 18)",
+      "issue": "Reproduce gate 對新 body 已 stale：reproduce_report.json（20 cells，May 18）只綁定 Tables 1-3；§6.6 全部數字（eq:analyst_trajectory 3.236→3.808、K1207 F=689.5、K1216c ρ=0.379、K1163、multistart LR 表 10 行、Figures 5A-5E）不在 reproduce.py 內。且 4 處 % source 指向 k1222b_revision_guide.md（markdown 修訂指南，非 results JSON），違反專案硬規則「Table row → JSON source traceable binding」。",
+      "fix": "擴充 reproduce.py 覆蓋 §6.6 所有 table/equation cells（指向 k1165/k1166/k1168/k1171/k1172/k1207/k1213/k1216*/k1163/k1173 results.json），把 revision_guide 來源全部改綁 JSON field；重跑 gate 到 green 才能進下一輪 review。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "body.tex:866,941,988-989 vs body.tex:1024-1043",
+      "issue": "「9 audited markets」計數錯誤且全文不一致：line 988-989 寫「all 9 audited markets (AU + 5 EM + 4 DEV)」但 1+5+4=10；表 tab:multistart_lr 有 10 行；表註先寫「All 10 markets reject」又接「The 9/9 FRAGILE pattern」（1038-1039）。",
+      "fix": "統一口徑：10 個 audited（= 9 refined-in-K1216c-rebuild + AU），全文 grep『9-market / 9/9 / 9 audited』逐處更正。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "body.tex:740-744 (§6.4)",
+      "issue": "K1149 TW stress interaction 的統計解釋不成立：單一新增參數下 LRT 與 Wald 應大致一致（LRT p=0.010 ⇔ |t|≈2.57），但報告 t=-0.39 — 寫成「the additional parameter is jointly significant at the model level despite the individual t-statistic being near zero」在統計上不通。如此大的 LRT/Wald 背離恰是 likelihood surface 病態（與 FRAGILE 發現一致）的訊號，referee 會抓。Abstract 只說 TW null 也未揭露衝突的 LRT。",
+      "fix": "刪除該句錯誤解釋；明寫 LRT/Wald 背離可能反映 flat/two-basin likelihood，將 TW interaction 判定降為 inconclusive 或用 multistart 重估後再下結論。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "body.tex:241-260 (eqs 1-3) + 303-313 (§2.3)",
+      "issue": "模型設定三處會被計量審稿人擋下：(a) τ_t（eq 3）含 firm-specific EAV_{i,t-1} 卻只下標 t 且命名為 market-level factor — 應為 τ_{i,t}；(b) §2.3 文字提到 stock fixed effects m_i (scale normalizations) 但 m_i 不出現在 eqs (1)-(4) 也不在 θ 參數列表（312-313）；(c) 乘法分解 g×τ 同時放 free ω_i 與 free θ0 有 scale indeterminacy（g/c × cτ 不變），文中未交代 normalization；另 ε_{i,t} 定義為 standardized innovation（241）卻直接當 eq (2) 的 ARCH 輸入，量綱無法生成 variance recursion。",
+      "fix": "改記號 τ_{i,t}；把 m_i 寫進 likelihood 式並說明 scale normalization（如 E[g]=1 或 ω 約束）；核對 code 實際 recursion（應是 r²/τ 類），讓 eq (2) 與實作一致。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "structure",
+      "location": "body.tex:425-451 (tab:summary) + body.tex:1238-1247 (Appendix A) vs body.tex:325-326,968",
+      "issue": "v1 review 兩個 MAJOR 仍未修：Summary statistics 表全是 '---' 加 [PLACEHOLDER]；Appendix A 仍是 placeholder，但 line 325-326 footnote 與 line 968 都把「Appendix A 提供 analytic-gradient verification / multistart 細節」當作 convergence caveat 的支撐引用 — 引用不存在的內容。",
+      "fix": "在 reproduce.py 加 summary_stats section 填表；完成 P1 analytic-gradient 重估後寫 Appendix A（含 multistart 結果），在此之前把指向它的支撐性 footnote 改為 forward-looking 措辭。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "body.tex:768-769,774 (§6.5 Harvey pass) + references.bib",
+      "issue": "DM 檢定的「Harvey pass」小樣本修正（K1148_d2/K1149 用 HLN correction）缺 Harvey-Leybourne-Newbold (1997, IJF) 引用 — v1 review 已點名，references.bib 重建時仍未加；目前文中 Harvey 只指 harvey2016 多重檢定門檻，兩個不同 Harvey 概念會被混淆。",
+      "fix": "加 bib entry：Harvey, D., Leybourne, S., Newbold, P. (1997). Testing the equality of prediction mean squared errors. International Journal of Forecasting 13(2), 281-291，並在首次出現 'Harvey pass' 處改為 \\citet{harvey1997} 修正的 DM 檢定。"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "body.tex:981",
+      "issue": "「All future extensions on this specification must follow the §5.5.4 multistart protocol」— §5.5.4 是 k1222b revision guide 的編號，不是本文結構（該段實為 §6 內 subsubsection），交叉引用會讓 referee 困惑。",
+      "fix": "改為 Section~\\ref{sec:multistart_method}。"
+    },
+    {
+      "severity": "LOW",
+      "category": "methodology",
+      "location": "body.tex:330-342 (§2.4) + body.tex:289-299 (§2.2)",
+      "issue": "(a) Cluster bootstrap B=150 對 2.5/97.5 percentile CI 偏少（N=30-31 clusters，期刊慣例 ≥999）；(b) EAV timing 敘述模糊：「We index the event as EAV_{i,t-1}=1 on the first trading day following the announcement」無法判讀 variance spike 是落在公告後首個交易日 t 還是 t+1。",
+      "fix": "(a) 至少對主結果補 B=999 sensitivity（或引文獻支持 150 足夠）；(b) 用一行 timeline 例子（公告日 → EAV index 日 → τ 反應日）寫死 timing。"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "body.tex:40,46,13-15",
+      "issue": "v1 MINOR 未修三件套：line 46 title page 仍有「(First draft; not for citation)」、line 40「[GitHub repo TBD]」、lines 13-15 fontspec+xeCJK+PingFang TC（非 macOS LaTeX 編譯會炸，英文論文無 CJK 需求）。",
+      "fix": "投稿前刪 draft 標記、填 repo URL、移除 CJK 套件改 pdflatex-compatible preamble。"
+    },
+    {
+      "severity": "LOW",
+      "category": "number_provenance",
+      "location": "body.tex:942",
+      "issue": "「canonical trajectory ρ = +0.75 → +0.44 → +0.39」的 +0.75 無 inline % source（已驗證 k1165_results.json rho=0.750 屬實，但綁定缺失）。",
+      "fix": "補「% source: experiments/k1165/k1165_results.json: ...rho = 0.75」並納入 reproduce.py。"
+    }
+  ]
+}

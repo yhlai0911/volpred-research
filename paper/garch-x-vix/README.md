@@ -12,9 +12,11 @@
 
 Proposes a daily multiplicative GARCH-X model (σ²_t = τ_t × g_t) where τ_t is a simple function
 of lagged VIX. In a 17-model horse race, the simplest daily VIX-squared spec with free intercept
-(A4f) achieves the lowest QLIKE (DM t=4.03, Harvey |t|>3.0 threshold passed), outperforming all
-GARCH-MIDAS variants. Key structural finding: the g_t component tracks the variance risk premium
-(Spearman ρ≈0.80), providing an economic interpretation for the decomposition.
+(A4f) achieves the lowest QLIKE (DM t=4.03 paper-frozen vintage; canonical re-run 4.15, see
+`errata_pending.md`), significantly outperforming GJR-GARCH and dominating longer-lag GARCH-MIDAS
+specifications in point estimates — while being statistically indistinguishable from the best
+MIDAS alternative (B1, DM t=−0.90). Key structural finding: the g_t component tracks the variance
+risk premium (Spearman ρ≈0.80), providing an economic interpretation for the decomposition.
 
 ---
 
@@ -38,7 +40,8 @@ See `data_sources.md` for full details.
 | K988 | **Main horse race**: 11 specs, A4f identified as champion |
 | K988b | 6 additional GARCH-MIDAS specs (B1–B3, C1–C3); all fail to beat A4f |
 | K989 | VIX² convexity synthesis; tau/OOS figures |
-| K1085 | GLD+GVZ cross-asset PASS (t=+4.46) |
+| K997 | **Paper-period cross-asset table source** (QQQ/EEM/0050/STOXX/FEZ/GLD+GVZ; GLD t=3.17) |
+| K1085 | GLD+GVZ earlier-period exploratory run (t=+4.46; NOT the paper table source) |
 | K1088 | USO+OVX cross-asset PASS (t=+4.48) |
 | K1098 | 0050.TW+VIXTWN Taiwan full 15-year test |
 
@@ -59,8 +62,8 @@ See `scripts/README.md` for full reproduction sequence.
 
 ## Key Results
 
-- A4f: QLIKE = −8.360, DM t = 4.03 vs GJR-GARCH (Harvey PASS)
-- Cross-asset: QQQ t=3.71, FEZ t=3.64, GLD+GVZ t=3.17
+- A4f: QLIKE = −8.360, DM t = 4.03 vs GJR-GARCH (Harvey PASS; paper-frozen vintage — canonical mcs_dm re-run 4.15, K1393 faithful re-run 3.60, all Harvey-pass)
+- Cross-asset: QQQ t=3.71, STOXX50E t=3.64, FEZ t=3.45, GLD+GVZ t=3.17 (source: K997)
 - VaR scorecard: A4f-t passes 3/4 levels vs GJR 1/4
 - g_t Spearman ρ with VRP: 0.78–0.82 (vs raw ratio ρ=0.15)
 - Kurtosis reduction: 60% absorbed by VIX τ component

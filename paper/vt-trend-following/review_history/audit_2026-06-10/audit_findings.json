@@ -1,0 +1,116 @@
+{
+  "paper_id": "vt-trend-following",
+  "title_en": "Is Volatility Targeting Just Trend Following? Decomposing the Benefits of Volatility Targeting",
+  "main_file": "paper/vt-trend-following/body_v3.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "距可投稿還差：兩張表（Table 3 50/50 欄、K1417 比較表）與 Figure 1 仍混用已被推翻的 v2/非 canonical 數字、reproduce gate 失效（80.7% yellow/fail 且 2 個月未更新）、primary foil（hood2025）與 bondarenko2019 引用至今未驗證、K1458 H1 敘事修正尚未落地 body。",
+  "provenance_spot_checks": "抽查 6 個 K 來源：(1) K1192 50/50 canonical MDD = −16.84(VT)/−17.53(hedged)/−32.49(BH)、retention 95.6%、CI [76,189.9] — §3.3 文字✓但 Table 3 用 −12.4/−13.1 ✗；(2) K1376 SPY point 103.7/median 115.8/CI [93.0,182.2]、XLE 223.4 lo 37.7、SLV lo −2.5 全✓；(3) K1417 lo 97.1/97.7（SPY 756/1260）✓ 但論文表把 JSON `hi`（95th=181.1）標成「50th」，真 median=103.8 ✗，且 fixed-252 基線欄 [86,97] 是不可復現的 v2 數字非 K1192 canonical ✗；(4) K1178 avg ΔMDD 24.90、t=10.246、r=−0.806、ρ=−0.835 ✓；(5) K1193 r=0.7934、CI [0.589,0.919]、ρ=0.749 ✓；(6) K1457 γ̂₁=0.457、t=2.00、HC3 t=2.03、attenuation 19.5% ✓。",
+  "citation_status": "24 條 bibliography 中 21 條已發表文獻（moreira2017、moskowitz2012、daniel2016、harvey2016/2018、cederburg2020、bollerslev2009、politis1994 等）作者/年份/期刊/DOI 均真實正確。可疑 2 條：(1) hood2025（Hood & Raughtigan, Working Paper）— 全文 primary foil（\"91% alpha absorbed\" 動機來源），無 URL/SSRN/機構，\"Raughtigan\" 姓氏無法以已知文獻佐證，r1/v5 連續三輪要求補仍未補；(2) bondarenko2019（RFS 32(3), DOI 10.1093/rfs/hhy061）— Bondarenko 的 put-option 主要著作為單一作者 2014 \"Why Are Put Options So Expensive?\"，Bondarenko & Bernardo 合著組合與此 DOI 自 v5 即標 CONDITIONAL 至今未驗證。另缺 1 條：BAB 因子（Table 4 M5）未引 Frazzini & Pedersen (2014, JFE)，r1 已指出但 v3 bibliography 仍無此條。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "body_v3.tex:312-339 (Table tab:k1417_stationary_compare)",
+      "issue": "表格欄位標「5th(%)/50th(%)」但 K1417 stationary 欄填的是 90% CI 上界（95th）：SPY 756d 表寫 50th=181.1，k1417_results.json 的 median=103.8（hi=181.1）；且「K1192 fixed-block 252d」基線欄 SPY=86/97 是 Discussion line 519-522 已宣告不可復現的 v2 Table 6 CI，非 K1192 canonical（lo=93.0, median=115.4）——同一 252-day lo 在 Table tab:mdd_bootstrap 是 93.0、在本表是 86，自相矛盾；表注 mean/median lo-shift +9.28/+10.4 pp 全部以 v2 錯誤基線計算（SPY 真實 shift 是 97.7−93.0=+4.7 pp 非 +11.7）",
+      "fix": "欄位改標 5th/95th（或補真 median 欄）；fixed-252 基線改用 K1192/K1376 canonical CI（93/76/82.7/89/86.7）；重算 shift summary 並同步修正表注「median moving substantially upward」的錯誤推論；K1417 JSON 本身把 v2 CI 誤存為 reference_k1192_fixed_block_ci，須回修實驗 script（修流程不修資料）"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "body_v3.tex:256,355-364 (Table tab:dual_mechanism 50/50 欄)",
+      "issue": "Table 3 50/50 欄 MDD = −12.4(VT)/−13.1(hedged) 與 §3.3 文字（line 256）引用的 K1192 canonical −16.8/−17.5 不一致（k1192_results.json: vt_mdd_pct=−16.84, hedged=−17.53）；表中 decomposition 列「MDD protection 20.1 pp / retained 19.4 pp (96%)」由舊數字推得，canonical 應為 15.7/15.0 pp (95.6%)；Calmar 0.624/0.501 亦由舊 MDD 算出（即 v5 NEW-M1 不成比例之謎的根因）；同段文字甚至混用舊 spec Sharpe (0.982→0.937) 與新 canonical MDD",
+      "fix": "以 K1192 canonical（monthly rebalancing spec）重生 Table 3 50/50 整欄（MDD、Calmar、decomposition 列），或若 Sharpe/Calmar 確屬另一 spec，加 % source binding 與 footnote 明示兩 spec 並重算 retention 列"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "body_v3.tex:378,383 (Figure 1 + 前段文字)",
+      "issue": "line 378「90–97% of the total drawdown reduction survives」與 Fig.1 caption「TSMOM explains ... only 3–10% of MDD protection」仍是 v2 數字；Discussion line 522 明寫 v2 的 90–97% 已被 K1192 canonical（95.6–109.0%，即 TSMOM share ≈ −9% 至 +4.4%）取代；figures/fig1_return_decomposition.pdf 停在 Apr 18 未重生，abstract/§3.3/Conclusion 全用 canonical 值，同一篇內兩套數字並存",
+      "fix": "用 K1192 canonical 重跑 figures/generate_figures.py 重生 Fig.1，line 378 改為 95.6–109.0%（或『at or above ~96%』），caption 的 3–10% 同步更正"
+    },
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "paper/vt-trend-following/reproduce_report.json",
+      "issue": "Reproduce gate 處於 fail：match_rate 80.7%、alert_level=yellow、gate_status=fail、34 個 untraceable checks，且 timestamp 2026-04-19 早於其後新增的 Table 6(K1376)、K1417 比較表、Table 2 M0/M1a/M1(K1457) 等內容——paper-workflow 硬規則要求 ≥95% green 才能 review/submit；上述 Table 3 與 K1417 表的數字錯位正是 gate 未覆蓋新表的直接後果",
+      "fix": "擴充 reproduce.py 的 table_row_mapping 覆蓋 K1376/K1417/K1457 新表列，補 untraceable 列的 % source binding，重跑至 ≥95% green 後才進下一輪 review"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "body_v3.tex:8,32 (abstract/intro) vs 435 (§3.5)",
+      "issue": "Abstract 與 Intro 把 sector 邊界條件寫成 γ→TSMOM loading 連結在 sector 內失效（r=0.163, NS, N=11），但 §3.5 定義 r=0.163 是 γ 與『VT Sharpe improvement』的相關——因變數不同；且此數字至今無專屬 K 實驗（README 標 PENDING），是全文唯一無溯源的 headline 統計量",
+      "fix": "統一因變數表述（abstract 改為 γ vs Sharpe improvement 或補跑 sector 內 γ vs TSMOM loading）；跑 K1179（11 SPDR sectors）落 canonical JSON，否則 abstract 刪去此句"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "body_v3.tex:632-633 (hood2025)",
+      "issue": "全文 primary foil（『91% of equity VT alpha is absorbed』的唯一來源，被 abstract/intro/discussion 反覆對話）是無 URL、無 SSRN 編號、無機構的 working paper，作者姓氏 Raughtigan 無法佐證存在；r1、citation_check.md、v5 三輪均要求補仍未補——若 referee 找不到此文，整篇 framing 的動機失去支撐",
+      "fix": "投稿前完成 SSRN/Google Scholar 定位並補 URL+機構；若確認不存在或記錯，改以可驗證文獻（moreira2017/cederburg2020/barroso2015）重寫動機段並修 abstract 第一句"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "body_v3.tex:599-600 (bondarenko2019)",
+      "issue": "『Bondarenko, O., & Bernardo, A.E. (2019). The economics of S&P 500 put options. RFS 32(3), 983–1026, DOI 10.1093/rfs/hhy061』作者組合可疑（Bondarenko 的 put 定價主要著作為單一作者 2014 'Why Are Put Options So Expensive?'）；v5 標 CONDITIONAL 要求 DOI 驗證，至今未做，而該引用支撐 M2 VRP confound 限定語（abstract 與 §4.3 各一次）",
+      "fix": "DOI lookup 驗證 10.1093/rfs/hhy061 實際對應文章；若不符，改引 Bondarenko (2014, QJF) 或 Chen-Joslin-Ni (2019, RFS) 等真實 put-insurance 文獻"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "body_v3.tex:166 (Table 1) vs 407-422 (Table 4)",
+      "issue": "同一 SPY 12/VIX、同期間（Jan 2005–Mar 2026）、同 M1/M2 spec，Table 1（K55）報 α=1.35、t=1.44、R²=0.802、TSMOM t=7.65，Table 4（K54/K71）報 α=1.45、t=1.60、R²=0.787、TSMOM t=8.89，無任何 footnote 解釋管線差異；referee 必抓同 spec 兩套數字（known issue B.2 只覆蓋 M5 N=3,740 vs 5,049，未覆蓋 α/t/R² 分歧）",
+      "fix": "依 3-spec disambiguation pattern 在 Table 4 注補 footnote 說明 K55 與 K54 估計管線差異（rf 序列/樣本起算/TSMOM window），並將兩組數字納入 reproduce.py binding"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "body_v3.tex:480-482 (Table 5 t-statistics)",
+      "issue": "13 國 ΔMDD 的 one-sample t=10.25 把 13 個市場當獨立觀測，但所有市場的 MDD 改善由同樣的美股事件（GFC、COVID）與同一 VIX 信號驅動（文中自己報 VIX sensitivity ρ ∈ [−0.40,−0.65]），cross-sectional 高度相依使有效 N 遠小於 13，t 值精度被高估；abstract 直接引用 t=10.25",
+      "fix": "改報 cross-sectional dependence-robust 推論（market-level block bootstrap 或對 13 市場共同因子去除後的 t），或至少在表注加 dependence caveat 並弱化 abstract 的 t 引述"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "body_v3.tex:254-260, 524-533 (§3.3/§4.1) + review_history/v6",
+      "issue": "v6 round（K1458 trough decomposition, Codex FAIL 後降級為 PARTIAL SUGGESTIVE）的證據與 10-obs limitation 尚未落地 body：正文仍只有 daniel2016 口頭 caveat，未引 K1458 數據（2020-03 TSMOM<0 日 hedge 中位數 +30 pp、2009-03 3/5 資產 hedge=0）、未加 10-obs footnote、未附 appendix table——v6 README 明列為投稿前 P1 必做",
+      "fix": "執行 pending paper_body task：§3.3/4.1 依 v6 建議措辭改寫、加『10 asset-trough observations, illustrative evidence』footnote、K1458 decomposition table 入 Online Appendix"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "body_v3.tex:67-72 (Eq. 2)",
+      "issue": "TSMOM_t = sign(r_{t−252:t}) × r_t 的記號讓信號窗含當日 t：若 sign 用到 r_t 即 contemporaneous lookahead；Moskowitz et al. (2012) 標準作法是 t−1 以前的 sign 配 t 期報酬。記號歧義會被 referee 當 lookahead 質疑（即使 code 有 shift）",
+      "fix": "改寫為 sign(r_{t−253:t−1}) 或明寫『signal computed through day t−1』，並在 reproduce package 註明 code 的 shift(1) 位置"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "body_v3.tex:117-131, 263-310 (Eq. mdd_retention_boot + Table 6)",
+      "issue": "Retention 比值分母（MDD_BH − MDD_VT）在 bootstrap 樣本可趨近 0：K1376/K1192 JSON 顯示 50/50 只有 n=9,925/10,000 有效（75 條被丟），XLE point 223.4 vs median 100.0 顯示比值極不穩定，但論文未揭露無效 replication 的處理規則",
+      "fix": "Table 6 注明 invalid-replication 處理（捨棄準則、各資產有效 n），XLE/SLV 等極端列加 denominator-instability 說明"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "body_v3.tex:34,258,520",
+      "issue": "K898『subject to ongoing forensic reconciliation』qualifier 在 3 處殘留——v5 NEW-MINOR-2 已要求收案（報 5.3% canonical、明寫 1.4% 不可復現、刪 ongoing 字眼），跨 ≥3 輪未修，referee 會視為 unresolved data integrity flag",
+      "fix": "三處統一改為『the originally reported 1.4% could not be reproduced; we report the K898 back-calculated 5.3% as canonical』並刪 ongoing 措辭"
+    },
+    {
+      "severity": "LOW",
+      "category": "internal_consistency",
+      "location": "body_v3.tex:533 vs 355",
+      "issue": "§4.1 直接檢定段引 B&H SPY Sharpe = 0.41（K518），Table 3 同資產 B&H Sharpe = 0.611（2005–2026），樣本期間差異未說明，同篇兩個 SPY B&H Sharpe 並存",
+      "fix": "在 line 533 補 K518 的樣本窗（與主樣本不同處明示），或統一以主樣本重跑五個 trend 策略"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "body_v3.tex:52,435 (sector sample)",
+      "issue": "Sector sample 寫『11 SPDR sector ETFs ... December 1998 to March 2026』，但 XLRE（2015 上市）與 XLC（2018 上市）不可能有 1998 起的資料，資料描述不準確",
+      "fix": "註明各 ETF 實際 inception（XLRE 2015-10、XLC 2018-06）與 unbalanced panel 處理方式"
+    }
+  ]
+}

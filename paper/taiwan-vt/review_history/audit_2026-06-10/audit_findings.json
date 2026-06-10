@@ -1,0 +1,101 @@
+{
+  "paper_id": "taiwan-vt",
+  "title_en": "Volatility Targeting in the Taiwan Stock Market: Leverage Amplification, Model Selection, and Practical Implementation",
+  "main_file": "paper/taiwan-vt/body_v3.tex (via main_v3.tex, PDF main_v3.pdf 2026-06-07)",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "v1 的 H1（γ=0.097 統一）與 H2（2383.TW 揭露）已確實修復，但 abstract/intro/§8 仍殘留至少 5 處被正文自身 errata 推翻的舊版數字（5.0×/CI[2.8,8.1]、Student-t 0.5%、MDD −77.3%、Sharpe 0.69）＋ SSVS 表 2 個 PIP 無法溯源 — 需一輪全文 stale-number purge + SSVS 表重建 + 修 broken ref，再過 reproduce gate 才可投稿。",
+  "provenance_spot_checks": "6 個 K 抽查：(1) K892 0050.TW γ=0.09704/t=3.5965/n=4219 ↔ 正文 0.097/3.60 ✓；(2) K1175 vix_863 sharpe=1.1369/mdd=−13.71/turnover=102.1 ↔ Table 3 ✓，GJR 1.0742 vs GARCH 0.9497 → +0.124 ✓；(3) K900 table_common_period GJR=1.0835/B&H=1.1223/vix=1.1324/EWMA=1.0182/n=1512 ↔ Table 4 ✓；(4) K896 1% violations 30/18/18/9（Normal/Student-t/HistSim/CF）、OOS 2019-01-01→2026-04-02 ↔ §6.2 ✓ 但 intro 與 §6.5 與之矛盾（見 findings）；(5) K1370 CI90=[2.284,6.581]/median=3.781/1000 valid ✓ 但 K1370 matched-sample 點估計=4.699（TAIEX 0.1139/indiv 0.0242），論文 4.3×（0.114/0.027）兩者皆非；(6) K461 SSVS：SPY_ret_L1 PIP=1.0（非 0.9994）、AR(1) PIP=0.9994 — 正文表 tab:ssvs_pip 的 0.312/0.087 在 K461 JSON 中不存在 ✗ MISMATCH。",
+  "citation_status": "34 條 bibitem 全為真實文獻（Moreira-Muir 2017 JF、Ang-Chen 2002 JFE、Harvey et al. 2016 RFS、Barber et al. 2009 RFS、Acerbi-Székely 2014、Fissler-Ziegel 2016 AoS 等核對無誤）；v1 引用修復已落實（Engle 1982 頁碼 987–1008 ✓、et~al. 4 處 ✓、politis1994 key 統一 ✓、christoffersen1998 已入 VaR trinity ✓）。未解：(a) 全部 bibitem 無 DOI（v1 C-MINOR-2，PBFJ production 需要）；(b) 正文用 Steiger Z 檢定（body_v3.tex:118）但無 Steiger (1980) 引用；(c) Fig 1 caption 用 Engle-Ng OLS 規格但 Engle & Ng (1993) 不在書目；(d) bozovic2024（IRFA 95, 103353）合理但屬冷門新文獻，投稿前建議 DOI 核驗。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "location": "main_v3.tex:35 (Abstract)",
+      "issue": "Abstract 宣稱放大比 ≈5.0×、90% bootstrap CI [2.8, 8.1]，與正文 §3.2/§9 的 canonical 4.3×、CI [2.28, 6.58]（K1370: ci_low_90=2.284, ci_high_90=6.581）直接矛盾 — abstract 是舊 rolling-spec 版本未同步，且 [2.8,8.1] 在全 repo 任何 K JSON 都找不到。v2 fix note 自己已警告 'abstract mirrored wording' 要再查，未執行。",
+      "fix": "重寫 abstract 該句為與 §3.2 一致：4.3×（canonical BW-robust, K1302/K1302b 點估計）+ 90% CI [2.28, 6.58]（K1370），並標明 rolling-window 對應值 5.0× 移入正文 footnote。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "body_v3.tex:16 (Introduction)",
+      "issue": "Intro 仍寫 'Student-t Value-at-Risk achieves a 0.5% violation rate over 2020–2026'。K896 canonical：GJR+Student-t = 18 違規 = 1.03%；0.51% 屬 GJR+Cornish-Fisher；OOS 窗為 2019-01-01→2026-04-02 非 2020–2026。§6.2（line 387）已修正但 v1-M6 修復未傳播到 intro — 模型歸屬與期間雙錯。",
+      "fix": "改為 'GJR+Student-t and GJR+HistSim achieve 1.03% violation rates and are the only specifications passing the VaR trinity over the 2019–2026 OOS window (K896)'，或直接引 §6.2 措辭。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "body_v3.tex:213-219 (Table tab:ssvs_pip + footnote)",
+      "issue": "表中 'Lagged own return PIP = 0.312 (0050.TW) / 0.087 (SPY)' 在 K461 JSON 完全不存在（grep 0.312/0.087 零命中）；K461 實際 AR(1) PIP = 0.9994（強烈入選，OLS t=−10.29）與 0.312 實質矛盾。Footnote 'PIP 1.000 rounded from 0.9994 (K461)' 歸屬錯誤 — K461 的 SPY_ret_L1 PIP 恰為 1.0，0.9994 是 AR(1) 的 PIP。另 SPY 欄（empty model wins）無任何 K 來源。",
+      "fix": "用 K461 posterior_inclusion_probabilities 重建整表（SPY_ret_L1=1.000、AR(1)=0.9994），刪除錯誤 footnote；SPY 對照欄需補對應實驗 K 編號或整欄刪除並改為文字引述。注意 K461 中 VIX_level/FX 等 PIP 也都 >0.5，正文 'TWD/USD does not add power' 的口徑需與表一致。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "body_v3.tex:429 (§8.2 Insurance cost quantification)",
+      "issue": "EWMA VT MDD 從 −77.3% 改善至 −48.6%、CAGR 7.59%→3.71% — 與 canonical K1175（B&H −33.83%→EWMA −21.17%；ann return 14.48%/7.42%）及 Table 3 註（line 269 明言 pre-2009 vendor 舊值『have been corrected』）正面矛盾。此即 v1-M1，v2 blocker fix 未處理，仍在正文。−77.3% 來自已棄用的 pre-2009 資料。",
+      "fix": "以 K1175 數字重算整段：MDD 改善 12.6pp、CAGR 成本 14.48−7.42=7.06pp → 每 1pp MDD 改善成本 ≈56bp（非 13.5bp），與 U.S. 5–8bp 的對比結論需重新評估或刪段。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "body_v3.tex:419 (§8.1 Currency Risk)",
+      "issue": "引用 8.63/VIX Sharpe 0.69（TWD）與 12/VIX-on-SPY 0.67 — 但 line 308-310 已明文撤回 0.690（'Earlier draft values (Sharpe 0.690 …) have been corrected' → canonical 1.137, K1175）。同一篇論文一處撤回、另一處仍當論據，審稿人必抓。",
+      "fix": "以 K1175 canonical（1.137）為基準重算 TWD/USD 換算比較（或補一個新 K 實驗支撐 FX 換算），無法重算則刪除該數字比較、保留質性論述。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "body_v3.tex:308",
+      "issue": "\\ref{sec:results} 無對應 \\label（main_v3.aux 中 sec:results 零命中）→ PDF 渲染為 'Section ??'。",
+      "fix": "改為 \\ref{sec:vt}（指 VT 策略評估章）並重新編譯確認無 undefined reference。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "body_v3.tex:387 vs 404 (§6.2 vs §6.5)",
+      "issue": "同一 K896 backtest（n=1,756）在 §6.2 標 '2019–2026' 而 §6.5 標 'full 2008–2026 OOS period'。K896 oos_period = 2019-01-01 to 2026-04-02，§6.5 期間標籤錯誤（1,756 天 ≈ 7 年，不可能是 2008–2026）。",
+      "fix": "§6.5 line 404 改為 '2019–2026 OOS period (n = 1,756)'。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "body_v3.tex:16, 245, 263, 286 (Intro / §4.2 / Table 3 / Table 4)",
+      "issue": "Intro 同句並用 GJR VT Sharpe 1.084（K900 common-period）與差距 '+0.124'（K1175: 1.0742−0.9497）— 若按 K900 口徑差距應為 1.0835−0.950≈0.134。同一 2020–2026 GJR VT 在 Table 3 報 1.074（K1175）、Table 4 報 1.084（K900），無 footnote 解釋兩來源差異。",
+      "fix": "擇一口徑：intro 與 conclusion 統一引 K1175 對（1.074, +0.124）或 K900 對（1.084, +0.134）；Table 3/4 加一行 note 說明 K1175 vs K900 實作差（n=1511 vs 1512、rebalance gate）造成 0.01 級差。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "body_v3.tex:124 vs 269 (§2.6 vs Table 3 Notes)",
+      "issue": "§2.6 寫 'Unless otherwise stated, all VT strategies use monthly rebalancing'，但 Table 3 Notes 與 K1175 config 明言 GARCH/EWMA/GJR VT 全為 daily rebalancing（turnover 480–694%/yr），僅 8.63/VIX monthly — 方法論陳述與實作直接相反。",
+      "fix": "§2.6 改為 'GARCH/EWMA/GJR VT use daily rebalancing; VIX-proxy strategies use monthly rebalancing (Table 3 Notes)'，並刪除『monthly 為預設』的句子。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "body_v3.tex:170 (§3.2)",
+      "issue": "Canonical 點估計 '4.3×'（0.114/0.027=4.22）與 K1370 自身輸出不符：K1370 matched-sample = 4.699（TAIEX γ=0.1139 / indiv 0.0242）、mixed-sample = 4.447。CI [2.28,6.58] 來自點估計為 4.70 的 bootstrap 分佈，卻配 4.3 的點估計 — 點估計與 CI 來源不同 K（K1302/K1302b vs K1370）且未揭露。",
+      "fix": "明確標注：點估計 4.3×（K1302+K1302b canonical γ 組合，列出 0.114/0.027 的確切 JSON 欄位）vs K1370 bootstrap 同窗點估計 4.70 與 CI [2.28,6.58]，加 footnote 說明兩者樣本窗/multistart 差異；或全部統一用 K1370 matched-sample（4.70）。"
+    },
+    {
+      "severity": "LOW",
+      "location": "main_v3.tex:35 vs body_v3.tex:33",
+      "issue": "Abstract 寫 '0050.TW ETF over 2008–2026'，§2.1 明言 0050.TW 樣本為 2009-01-02 起（yfinance 可得性）；TWII 才有 1997 起。",
+      "fix": "Abstract 改 '2009–2026 (0050.TW) and 1997–2026 (TAIEX)'。"
+    },
+    {
+      "severity": "LOW",
+      "location": "body_v3.tex:554 vs 601 (Appendix Table A vs §A.6)",
+      "issue": "同一 0050.TW 10-day SPY momentum c2c 策略，Table tab:tz_results 報 t=6.76 / Sharpe 1.915，§A.6 報 t=3.25 — 差近一倍且無任何 spec/期間差異說明。",
+      "fix": "§A.6 補注兩處 t 值的實驗來源與期間/成本假設差異（K1176 vs 個股橫斷面實驗），或統一為同一 spec。"
+    },
+    {
+      "severity": "LOW",
+      "location": "body_v3.tex:118, 187 + main_v3.tex bibliography",
+      "issue": "(a) Steiger Z=16.2 檢定無 Steiger (1980) 引用；(b) Fig 1 caption 的 γ 用 'OLS Engle-Ng specification' 估計但 Engle & Ng (1993) 不在書目，且正文 line 182 稱其為 'rolling GJR γ estimates' — 估計法描述不一致（K636 已記 OLS Engle-Ng γ 與 MLE γ 量級不同）；(c) 全書目無 DOI（v1 C-MINOR-2 未解）。",
+      "fix": "補 Steiger (1980, Psych. Bull.) 與 Engle & Ng (1993, JF) 兩條 bibitem；Fig 1 caption 與 line 182 統一稱 'Engle-Ng OLS asymmetry coefficient'；全部 bibitem 補 DOI。"
+    },
+    {
+      "severity": "LOW",
+      "location": "body_v3.tex:433 (§8.3)",
+      "issue": "'MDD improvement is statistically significant (bootstrap p = 0.0004)' — 0.0004 恰等於 K900 var_trinity 中 EWMA VT 的 ES Z1 檢定 p 值（K900 JSON p_value=0.0004），疑似誤綁；MDD bootstrap 檢定本身無可溯源 K。",
+      "fix": "指明該 p 值的確切實驗與檢定（若無 MDD bootstrap 實驗則補跑或改為引 §4.3 的 bootstrap p<0.001 並給 K 編號）。"
+    },
+    {
+      "severity": "LOW",
+      "location": "body_v3.tex:172",
+      "issue": "\\citep[Politis-Romano][]{politis1994} 的 optional argument 用法錯誤，渲染為 '(Politis-Romano Politis and Romano, 1994)' 重複姓名。",
+      "fix": "改為 stationary block bootstrap \\citep{politis1994} 即可。"
+    }
+  ]
+}

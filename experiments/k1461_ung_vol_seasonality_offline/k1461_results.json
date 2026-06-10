@@ -1,0 +1,300 @@
+{
+  "experiment_id": "k1461",
+  "title": "UNG realized volatility seasonality under offline DBA constraint",
+  "seed": 42,
+  "constraint": {
+    "dba_local_ohlc_available": false,
+    "network_download_available": false,
+    "note": "DBA raw yfinance data could not be reconstructed in this offline sandbox; results are UNG-only."
+  },
+  "data_sources": {
+    "ung": "experiments/k1422/data/UNG.csv",
+    "uso": "experiments/k1422/data/USO.csv",
+    "cpi": "storage/macro/fred_CPIAUCSL.csv",
+    "t10yie": "storage/macro/fred_T10YIE.csv"
+  },
+  "sample": {
+    "ung_start": "2012-01-03",
+    "ung_end": "2026-06-05",
+    "ung_n_daily_rows": 3627,
+    "proxy_monthly_rows": 158
+  },
+  "seasonality_close_to_close": {
+    "anova_f_stat": 61.006484362505404,
+    "anova_p_value": 5.217583130758258e-125,
+    "permutation_p_value": 0.0,
+    "monthly_table": [
+      {
+        "calendar_month": 1,
+        "mean": 0.6194551240231448,
+        "median": 0.6092209458722933,
+        "std": 0.21224291481516733,
+        "count": 284,
+        "month_name": "Jan"
+      },
+      {
+        "calendar_month": 2,
+        "mean": 0.633219041870445,
+        "median": 0.6287168260657479,
+        "std": 0.26786336478626344,
+        "count": 287,
+        "month_name": "Feb"
+      },
+      {
+        "calendar_month": 3,
+        "mean": 0.4559079718729239,
+        "median": 0.4387460417826664,
+        "std": 0.18052542942272257,
+        "count": 326,
+        "month_name": "Mar"
+      },
+      {
+        "calendar_month": 4,
+        "mean": 0.3924677385969836,
+        "median": 0.3424319480894641,
+        "std": 0.15696737841787717,
+        "count": 311,
+        "month_name": "Apr"
+      },
+      {
+        "calendar_month": 5,
+        "mean": 0.42907338034352666,
+        "median": 0.38151065511117227,
+        "std": 0.19123082266957614,
+        "count": 318,
+        "month_name": "May"
+      },
+      {
+        "calendar_month": 6,
+        "mean": 0.43083832892118945,
+        "median": 0.36085284092174147,
+        "std": 0.18475495923028779,
+        "count": 299,
+        "month_name": "Jun"
+      },
+      {
+        "calendar_month": 7,
+        "mean": 0.4304634711304456,
+        "median": 0.3812449683823382,
+        "std": 0.18868187522259788,
+        "count": 297,
+        "month_name": "Jul"
+      },
+      {
+        "calendar_month": 8,
+        "mean": 0.39474627044429744,
+        "median": 0.3809876403583782,
+        "std": 0.15687823667288306,
+        "count": 310,
+        "month_name": "Aug"
+      },
+      {
+        "calendar_month": 9,
+        "mean": 0.3788410571818665,
+        "median": 0.3458351439959403,
+        "std": 0.13163628352221626,
+        "count": 285,
+        "month_name": "Sep"
+      },
+      {
+        "calendar_month": 10,
+        "mean": 0.40774269161570686,
+        "median": 0.3451818304623735,
+        "std": 0.16848755673991747,
+        "count": 310,
+        "month_name": "Oct"
+      },
+      {
+        "calendar_month": 11,
+        "mean": 0.4927813914370933,
+        "median": 0.440133393998599,
+        "std": 0.20843396874467796,
+        "count": 285,
+        "month_name": "Nov"
+      },
+      {
+        "calendar_month": 12,
+        "mean": 0.5427651290051351,
+        "median": 0.5010543938679465,
+        "std": 0.20966063526708412,
+        "count": 294,
+        "month_name": "Dec"
+      }
+    ],
+    "top_month": {
+      "calendar_month": 2,
+      "month_name": "Feb",
+      "mean": 0.633219041870445
+    },
+    "bottom_month": {
+      "calendar_month": 9,
+      "month_name": "Sep",
+      "mean": 0.3788410571818665
+    }
+  },
+  "seasonality_parkinson": {
+    "anova_f_stat": 25.0600498583371,
+    "anova_p_value": 1.2769206695227484e-50,
+    "permutation_p_value": 0.0,
+    "monthly_table": [
+      {
+        "calendar_month": 1,
+        "mean": 0.3744305414726109,
+        "median": 0.3784921186188138,
+        "std": 0.09884931220953323,
+        "count": 284,
+        "month_name": "Jan"
+      },
+      {
+        "calendar_month": 2,
+        "mean": 0.38049365040138694,
+        "median": 0.378146381097483,
+        "std": 0.10834002419480104,
+        "count": 288,
+        "month_name": "Feb"
+      },
+      {
+        "calendar_month": 3,
+        "mean": 0.3205449025804519,
+        "median": 0.3293072901793501,
+        "std": 0.10297047937365589,
+        "count": 326,
+        "month_name": "Mar"
+      },
+      {
+        "calendar_month": 4,
+        "mean": 0.292317535870647,
+        "median": 0.2733406863532448,
+        "std": 0.116216729713146,
+        "count": 311,
+        "month_name": "Apr"
+      },
+      {
+        "calendar_month": 5,
+        "mean": 0.30146323302058375,
+        "median": 0.2780903349988835,
+        "std": 0.12318863449477875,
+        "count": 318,
+        "month_name": "May"
+      },
+      {
+        "calendar_month": 6,
+        "mean": 0.30145483652548605,
+        "median": 0.2729426415477945,
+        "std": 0.13194345268738344,
+        "count": 299,
+        "month_name": "Jun"
+      },
+      {
+        "calendar_month": 7,
+        "mean": 0.3075842076195393,
+        "median": 0.26938492002069697,
+        "std": 0.14519969264968008,
+        "count": 297,
+        "month_name": "Jul"
+      },
+      {
+        "calendar_month": 8,
+        "mean": 0.28630463449925236,
+        "median": 0.2584366368106401,
+        "std": 0.11423473803856596,
+        "count": 310,
+        "month_name": "Aug"
+      },
+      {
+        "calendar_month": 9,
+        "mean": 0.2804287213561768,
+        "median": 0.2667121060861088,
+        "std": 0.09656883202680909,
+        "count": 285,
+        "month_name": "Sep"
+      },
+      {
+        "calendar_month": 10,
+        "mean": 0.28865930806418794,
+        "median": 0.27654016270673765,
+        "std": 0.08833523106146103,
+        "count": 310,
+        "month_name": "Oct"
+      },
+      {
+        "calendar_month": 11,
+        "mean": 0.31750428627376964,
+        "median": 0.3048586175079573,
+        "std": 0.10752184668829774,
+        "count": 285,
+        "month_name": "Nov"
+      },
+      {
+        "calendar_month": 12,
+        "mean": 0.3371274119551323,
+        "median": 0.3192739427129098,
+        "std": 0.10440236261733898,
+        "count": 294,
+        "month_name": "Dec"
+      }
+    ],
+    "top_month": {
+      "calendar_month": 2,
+      "month_name": "Feb",
+      "mean": 0.38049365040138694
+    },
+    "bottom_month": {
+      "calendar_month": 9,
+      "month_name": "Sep",
+      "mean": 0.2804287213561768
+    }
+  },
+  "proxy_relationships": {
+    "same_month_corr_ung_vs_uso_rv": {
+      "rho": 0.2490945663177627,
+      "p_value": 0.001598889352005019
+    },
+    "lag1_corr_ung_vs_uso_rv": {
+      "rho": 0.2354595833402476,
+      "p_value": 0.0028997612347776824
+    },
+    "same_month_corr_ung_vs_t10yie": {
+      "rho": 0.25204231911347363,
+      "p_value": 0.0013997433156533532
+    },
+    "lag1_corr_ung_vs_t10yie": {
+      "rho": 0.2343347325647009,
+      "p_value": 0.0030413169386423844
+    },
+    "same_month_corr_ung_vs_cpi_yoy": {
+      "rho": 0.4416377299590446,
+      "p_value": 6.29731153831032e-09
+    }
+  },
+  "hac_regression_monthly": {
+    "n_obs": 158,
+    "r_squared": 0.561703751921689,
+    "adj_r_squared": 0.5531655133227609,
+    "params": {
+      "const": -0.013188298735252638,
+      "ung_rv_cc_lag1": 0.691756112636799,
+      "uso_rv_cc_lag1": 0.11254367557545926,
+      "t10yie_lag1": 0.05975541291119744
+    },
+    "tvalues": {
+      "const": -0.17899042427243525,
+      "ung_rv_cc_lag1": 9.334019257039357,
+      "uso_rv_cc_lag1": 1.7852695757570258,
+      "t10yie_lag1": 1.730169730877689
+    },
+    "pvalues": {
+      "const": 0.8579452205985353,
+      "ung_rv_cc_lag1": 1.0193052217671067e-20,
+      "uso_rv_cc_lag1": 0.07421760128201933,
+      "t10yie_lag1": 0.08359995466995127
+    }
+  },
+  "verdict": "PARTIAL_SIGNAL",
+  "summary": [
+    "UNG month-of-year seasonality verdict=PARTIAL_SIGNAL",
+    "Parkinson permutation p=0.0000",
+    "UNG-USO same-month vol corr=0.249",
+    "DBA leg blocked by missing local OHLC and offline sandbox"
+  ]
+}

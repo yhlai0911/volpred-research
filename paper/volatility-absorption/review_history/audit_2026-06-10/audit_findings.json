@@ -1,0 +1,109 @@
+{
+  "paper_id": "volatility-absorption",
+  "title_en": "Volatility Absorption: The Diminishing Marginal Impact of Market Fear",
+  "main_file": "paper/volatility-absorption/main_v3.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "距離可投稿差三件事：(1) 對 v3 重跑 reproduce gate（現存 report 是 v2、61.3% red、Tables 6-8 數字無 JSON 來源）；(2) 統一全文 original-snapshot vs 2026-04-19 pinned-snapshot 數字（§5.1 與 Table 4 仍用舊值 t=-3.42 無揭露，與 Intro/Table 9/Appendix B 的 t=-1.77/-1.85 直接矛盾）；(3) 撤回或重新框架 RV-normalized regression「free of denominator issues」的過強宣稱。",
+  "provenance_spot_checks": "6 項抽查：(a) Table 3 SAR vs k716_results.json 完全吻合（3.16/2.77/2.37/2.32/2.43，shock days 34/168/189/132/244）；(b) Appendix Table B vs k1418_results.json 完全吻合（SPY -2.73e-4/t=-1.85/N=769；GLD/TLT/0050.TW 全對）；(c) Tables 9/10 + RV-norm（-0.01249/t=-8.2/N=767）+ controlled（-0.000216/t=-1.26/N=768）vs k903_paper8_robustness_results.json 完全吻合；(d) Table 5 Low 行 N=63 vs K741 JSON n=62 不符，且欄加總 63+78+27+28=196 ≠ 表注宣稱的 195；(e) Table 6 N=127/203/89 無來源 — K903 audit 系統搜尋後明載「no combination reproducing 127/203/89」（重現值 87/186/150）；(f) Table 7/8 數值與 t-stats 全部 untraceable，且唯一存檔的 k720_results.json 寫 vrp_flip_confirmed=true，與論文「no VRP sign flip」主張相反。",
+  "citation_status": "37 條 bibliography（thebibliography 格式、全部無 DOI）。抽查約 30 條：絕大多數（Engle 1982、Bollerslev 1986/2009、Carr-Wu 2009、Todorov 2010、Bekaert-Hoerova 2014、Da et al. 2015、Danielsson et al. 2018、Vlastakis-Markellos 2012、Moreira-Muir 2017、Andersen et al. 2003、Balduzzi et al. 2001、Martin 2017、Patton 2011、Romer-Romer 2004 等）作者/年份/期刊/卷期正確。可疑 3 條：(1) zakoian1994 期刊錯誤 — 實際發表於 Journal of Economic Dynamics and Control 18(5), 931-955，非 bib 所列 Journal of Time Series Analysis 15(3), 253-266；(2) chernov2018 為孤兒引用（正文從未 \\cite），label 年份 2018 與印出年份 2022 不一致，venue（RFS 35(3)）需查證（該文公認版本為 2022 年發表，NBER WP 為 2018）；(3) 正文 line 606 footnote 把 multiple-testing threshold 歸給 \"Harvey et al. (2018)\"，但 bib 中唯一的 harvey2018 是 JPM 波動率目標化論文 — 正確出處應為 Harvey, Liu & Zhu (2016, RFS) 或 Harvey (2017 presidential address)，目前 bib 完全缺此文獻。lin2020（PBFJ 61, 101316）無法確證、標記待查。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main_v3.tex:325-330 vs main_v3.tex:67 與 main_v3.tex:551",
+      "issue": "§5.1 正文與 Eq.(15) 仍把 baseline NSI 迴歸寫成 β=-0.00028、NW t=-3.42（p<0.001）且無任何 snapshot 揭露，但同一條迴歸在 Intro（line 67）是 -0.000267/t=-1.77/p=0.076（pinned snapshot），在 Table 9 τ=2.0 行也是 -0.000267/-1.77/0.077。同一 specification 在同一篇論文出現兩組互相矛盾的 headline 數字，referee 一對表就會抓到。",
+      "fix": "§5.1 改報 pinned-snapshot 值（-0.000267, t=-1.77）為主、原始值降為 footnote（沿用 Intro line 67 的揭露格式），或在 Eq.(15) 後立即加 snapshot footnote 並明確標示該數字屬 original snapshot。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main_v3.tex:337-357 (Table 4) vs main_v3.tex:792-812 (Table B) 與 main_v3.tex:620 (Conclusion #2)",
+      "issue": "主文 Table 4 cross-asset 仍是 original-snapshot 值（SPY -0.00028/t=-3.42 標 p<0.001、GLD -4.17、TLT -3.89）且表注無 snapshot 揭露；Appendix Table B（K1418 pinned）同一迴歸是 SPY t=-1.85、GLD -2.90、TLT -3.31；Intro line 73 又用 pinned 值。Conclusion 第 2 點宣稱「Three of four assets exhibit statistically significant negative absorption coefficients」— 在 pinned snapshot 下 SPY t=-1.85（p≈0.065）5% 不顯著，宣稱過強。",
+      "fix": "Table 4 與 Table B 合併或同步為 pinned-snapshot 值 + original 值入 footnote；Conclusion #2 改為「GLD/TLT 在 5% 顯著、SPY 邊際顯著（t=-1.85）」。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "main_v3.tex:407-421 (Table 6 + 表注)",
+      "issue": "論文「最重要結果」Table 6 的 N=127/203/89 不可重現：K903 audit（k903_paper8_robustness_results.json task1）系統搜尋所有 priority ordering 與 GLD threshold 組合後明載 no combination reproduces 127/203/89（重現值 87/186/150）。更嚴重的是表注的 reconciliation 宣稱「the middle three bins account for the remainder」對 geopolitical 在數學上不可能成立：full-sample N=89 < K721 兩-bin 子集 146，remainder 為負。t-stats 2.87/1.94/-0.68 亦無任何 JSON 來源（absorption 係數 +0.019/+0.007/-0.003 倒是可從 K721 norm 差值溯源）。",
+      "fix": "刪除表注中不成立的 remainder 宣稱；用 pinned snapshot 重跑 shock-type 分類，以可重現的 N（87/186/150 類）與重新計算的 bootstrap t-stats 更新 Table 6，並 inline % source 指向新 JSON；或明記為 frozen paper-time 值且承認 N 不可重現（比照 K716 揭露模式）。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "main_v3.tex:377 (Table 5 Low 行) + main_v3.tex:386 (表注) + main_v3.tex:366",
+      "issue": "Table 5 Low regime「NFP Days = 63」與來源 k741_nfp_event_study_results.json part_b 的 n=62 不符；且欄加總 63+78+27+28=196 與表注及 Intro footnote 宣稱的 total 195 矛盾（62+78+27+28=195 才對）。正文 line 366 與 line 71 也寫 n=63。referee 加總一欄就能抓到的算術錯誤。",
+      "fix": "Low 行改 62（mean_abs 0.498 也順手對齊 JSON 的 0.4982），line 71/366 的 n=63 同步改 62；重算該行 t/p 若受影響。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "main_v3.tex:592-597, 618, 631（RV-normalized regression 宣稱）",
+      "issue": "論文把 RV-normalized 迴歸（t=-8.2）稱為「strongest and most robust quantitative evidence」且「free of VIX denominator issues」（line 618），但該設計是把 |r_t|/√RV 回歸在 RV 本身上 — 與 §3.3 自承的 NSI 機械性負相關問題完全同構（分母同時是解釋變數），只是把 VIX 換成 RV。t=-8.2 的異常強度正是機械偏誤的典型徵兆；它解決的只是 VIX-specific measurement 問題，不是 denominator 問題。唯一乾淨的識別是 SAR。",
+      "fix": "把 RV 迴歸降級為「替代 normalizer 的一致性檢查」而非最強證據；刪除『free of denominator issues』措辭；或補一個 placebo/null simulation 量化 RV-denominator 機械斜率（K897 框架可直接延伸）後才允許保留強宣稱。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "paper/volatility-absorption/reproduce_report.json（v2, 2026-04-20）+ main_v3.tex:439-458 (Table 7), 477-496 (Table 8)",
+      "issue": "Reproduce gate 停在 v2、match_rate 61.3% red，從未對 main_v3 重跑 — 違反專案 hard rule（≥95% green 才可 review/ready）。Table 7 的 VRP 值（3.5/3.1/2.8）與 t-stats（8.34/4.69/2.01）、Table 8 的 CB（13.7/8.0/3.6）全部 untraceable；且唯一存檔的 k720_results.json 內容是 vrp_flip_confirmed:true，與論文「no VRP sign flip」的 headline 主張方向相反，目前無任何 JSON 支持 Table 7 的不翻轉結論。",
+      "fix": "重跑 reproduce.py 對 v3 出新 report；為 Table 7/8 補產出 JSON（pinned snapshot 重算 VRP by regime 與 hedge CB）並 inline % source binding；若 K720 的 flip 結論是早期錯誤被後續修正，需在 experiments 留 correction trail。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "main_v3.tex:606（footnote）vs main_v3.tex:715-716",
+      "issue": "Footnote 宣稱原始 t=-3.14「passes the Harvey et al. (2018) multiple-testing threshold」，但 bib 中唯一的 Harvey et al. 2018 是 JPM 的 volatility targeting 論文（與 multiple testing 無關）。multiple-testing threshold（t>3.0）的正確出處 Harvey, Liu & Zhu (2016, RFS) 完全不在 bibliography。引用-宣稱不匹配。",
+      "fix": "新增 Harvey, C.R., Liu, Y., & Zhu, H. (2016). ...and the cross-section of expected returns. RFS 29(1), 5-68 至 bib，footnote 改引該文；或改引 Harvey (2017, JF presidential address)。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "main_v3.tex:754-755 (zakoian1994) 與 main_v3.tex:682-683 (chernov2018)",
+      "issue": "兩條 bibliography 錯誤：(1) Zakoian (1994) Threshold heteroskedastic models 實際發表於 Journal of Economic Dynamics and Control 18(5), 931-955，非所列 Journal of Time Series Analysis 15(3), 253-266；(2) chernov2018 是孤兒引用（grep 確認正文零次 \\cite），label 年份 2018 與印出年份 2022 自相矛盾，venue（RFS 35(3), 1310-1347）需查證 — 該文公認發表版為 2022。",
+      "fix": "修正 zakoian1994 為 JEDC 18(5), 931-955；chernov2018 либо刪除（未被引用）либо改 key/label 為 chernov2022 並核實正確期刊卷期。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main_v3.tex:283 (Table 2 表注)",
+      "issue": "Table 2 表注仍寫「The absorption regression (Tables cross_asset_detail and robust_threshold) reports N=893 because...」，但 v3 中這兩張表已更新為 pinned snapshot 的 N=769/768 — 表注引用的數字已不存在於被引用的表中；同一句尾巴又說 sub-period 加總 768「confirm the regression sample size」，一個表注內自相矛盾（893 vs 768）。",
+      "fix": "表注改寫：N=893 標明為 original-snapshot 值、768/769 為 pinned-snapshot 值，與 line 67 footnote 的揭露邏輯對齊。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main_v3.tex:318-321 (Table 3 表注)",
+      "issue": "檢定描述不連貫：「p-values are from a two-sample t-test comparing the SAR across regimes via bootstrap with 10,000 replications」— t-test 與 bootstrap 是兩種不同程序；SAR 是兩個均值之比，跨 regime 比較 SAR 差需明確定義 bootstrap 的 resampling 單位與統計量；未報告 seed（違反專案 seed 固定規則，亦是 referee 對 reproducibility 的標準質疑）。Table 6 表注同樣只寫『bootstrap tests with 10,000 replications』。",
+      "fix": "表注改為精確描述：例如『block bootstrap (10,000 reps, seed=X) of the SAR difference between regime j and the calm regime；p 為雙尾 percentile p-value』，並在 replication code 中固定 seed。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "structure",
+      "location": "main_v3.tex:31 (作者欄) + main_v3.tex:29, 502, 519, 626 (available upon request)",
+      "issue": "兩個投稿 blocker：(1)『VolPred Research System』列為共同作者 — COPE 與所有主要財金期刊（Elsevier/JBF、JoE、IJF）明文禁止 AI 系統掛名作者，desk reject 風險；(2) §6.2/6.3 與 Conclusion #5 把未發表、無引用、無 JSON 來源的內部結果（Sharpe 0.53 vs 0.68、DM t=-2.81、daily 1.42 vs monthly 0.82）當作支持證據，僅標 available upon request — reproduce report 已把這 4 個數字列為 untraceable。",
+      "fix": "作者欄改單一作者、AI 移至 acknowledgments（現有 thanks 已寫 computational support，保留即可）；§6.2/6.3 的內部數字 либо連結到具體 K 實驗 JSON 並放進 replication package，либо改為定性陳述刪掉精確數字。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main_v3.tex:631-637 (Limitations/Future research) vs experiments/k897_sar_null_simulation_results.json",
+      "issue": "K897 null simulation（結論：NULL REJECTED — empirical absorption is STRONGER than GARCH predicts）正是回應 R1 SEVERE issue S1 的關鍵防禦，但 v3 正文從未引用；Limitations 反而寫『future work using simulation exercises to quantify the mechanical component』— 把已完成的自家證據說成未來工作，白白把 GARCH-artifact 質疑留給 referee。",
+      "fix": "在 §7 Robustness 新增一小節報告 K897：GARCH(1,1)/GJR null 模擬下的 SAR 衰減 CI vs 實證 SAR，明確說明 absorption 超出 volatility clustering 機械預測；Limitations 對應段落改寫。"
+    },
+    {
+      "severity": "LOW",
+      "category": "internal_consistency",
+      "location": "main_v3.tex:448-450 (Table 7), 486-488 (Table 8) vs main_v3.tex:119-126 (§3.1)",
+      "issue": "Regime 標籤不一致：§3.1 定義 Elevated=20-25、High=25-30、Crisis≥30（五-bin），但 Table 7/8 用『Elevated (15≤V<25)』『High (V≥25)』（三-bin、同名不同界），Table 5 又用 Low/Medium/Elevated/High 四-bin。同一標籤對應不同 VIX 區間，易誤導。",
+      "fix": "三-bin 表改用不同標籤（如 Low/Mid/High-stress）並在表注明示與五-bin 分類的對應關係。"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "main_v3.tex:809 (Table B 表注) 與 main_v3.tex:563",
+      "issue": "Table B 表注出現重複自引『see Section~\\ref{sec:robustness} and Section~\\ref{sec:robustness}』（同一 label 連引兩次）；line 563 在 Robustness section 內部又寫『(Section~\\ref{sec:robustness})』自我引用。編譯後顯示『see Section 7 and Section 7』。",
+      "fix": "刪除重複引用；line 563 改為指向具體小節（如 §7.3 Alternative Normalization）或直接刪除括號引用。"
+    }
+  ]
+}

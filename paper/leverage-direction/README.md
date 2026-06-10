@@ -1,7 +1,7 @@
 # Paper 1: Leverage Direction Matters — Asymmetric Volatility and the Cross-Section of VT Alpha
 
 **Target Journal**: Journal of Banking and Finance (JBF)
-**Status**: R1 review — 2 CRITICAL (C3/C4/C5 subsets), needs revision | **Reproduce gate 0 MISMATCH** (2026-04-19 post-session: C1 HM gamma RESOLVED via K1256 3-spec; C2 Kupiec rounding RESOLVED via tables.tex L93/L95 + 5 cross-source NOTE reclass; 7 figure scripts bundled self-contained). 28 MATCH / 0 MISMATCH / 9 NOTE / 19 UNTRACEABLE (structural data-limit, non-error).
+**Status**: ⛔ **SUBMISSION FROZEN（2026-06-10 全組合學術審查）** — 6 HIGH blocking：核心結果（GLD γ=−0.067/t=−5.79/93%）已被 K903 canonical replication 推翻（+0.002/NS/67%，SIGN REVERSED），Table 2 已換 K903 但 Intro/§4.2/§5/§6 殘留舊敘事；Table 3 八列 legacy 與 K903 衝突（GLD 顯著反向）；BTC 分類規則自相矛盾（9/9 需重算）；ρ=0.944 的 p<0.001 錯一個數量級（實 p≈0.016，5 處）；reproduce gate amber 80.9% 且過期。**決策（2026-06-10）：採 K903 canonical 全文一致化**（abstract 已是此版）。修正清單：`review_history/audit_2026-06-10/audit_findings.json`。修完 + reproduce green 才解凍。｜前段歷史：R1 review — 2 CRITICAL (C3/C4/C5 subsets)；Reproduce (2026-05-17，已過期): 28 MATCH / 0 MISMATCH / 9 NOTE / 19 UNTRACEABLE.
 **Pages**: 48 | **Citations**: 54
 
 ## Data Sources

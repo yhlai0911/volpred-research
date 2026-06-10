@@ -1,0 +1,101 @@
+{
+  "paper_id": "crypto-fear-channel",
+  "title_en": "The Crypto Fear Channel: Asymmetric, Tail-Concentrated, and Regime-Dependent Volatility Spillover from Bitcoin to Equity Markets",
+  "main_file": "paper/crypto-fear-channel/main.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "v2 重跑修掉了 v5 review 的 3 個 BLOCKING（QR lag+bootstrap、subperiod AIC、OOS rolling），但 5 個 MAJOR 中 4 個（HAC 不實宣稱、generalized FEVD 不實宣稱、EWMA 冒稱 DCC、Harvey 門檻誤用）文稿仍未修，且新增 Table 1/DY 數字混用 v1-v2 兩代結果、K1025b robustness 仍跑被 block 的舊方法 — 需重算 Table 1、重跑 K1025b、改寫方法描述後才可投。",
+  "provenance_spot_checks": "對 experiments/k1025/k1025_v2_results.json 抽查：(1) QR β/SE_boot/t 全部 match（β₀.₀₅=-2.7836→-2.78、β₀.₉₅=19.8459→19.85、t=8.1667→8.17 ✓）；(2) 非對稱 Granger F lag1-5 match（21.777→21.78 ✓）；(3) subperiod F/p match（2020 F=12.3094→12.31, p=1.594e-7→1.6e-7 ✓）；(4) OOS DM=-1.1389→-1.14, p=0.2547→0.26, MSE 4.6487/4.6618 ✓；(5) DY mean 90.11、net -74.41 ✓ 但 min/max/std（89.79/90.81/0.21）來自 v1 JSON（v2 實為 89.73/90.84/0.22）✗；(6) Table 1 描述統計（BTC kurt 7.579、skew -0.093、mean 0.229%）全部來自 v1 k1025_results.json，footnote 卻標 v2 來源，v2 實際值為 kurt 11.83/skew -0.739/mean 0.158% ✗。reproduce_report.json 37/37 green 是因 reproduce.py 明知 Table 1 對 v1 驗（程式註解自承），gate 設計掩蓋了 vintage 混用。",
+  "citation_status": "22 條 bibitem 抽查（Hatemi-J 2012 Empirical Economics 43:447-456、Adrian-Brunnermeier 2016 AER、Harvey-Liu-Zhu 2016 RFS 29:5-68、Diebold-Yilmaz 2012 IJF、HLN 1997 IJF、Koenker-Bassett 1978、Iyer 2022 IMF GFS Note 2022/01 等）作者/年份/期刊/DOI 均真實無虛構。兩個使用問題：(a) Andrews (1991) 被引為 grangercausalitytests 的「HAC 自動 bandwidth 預設」— 程式實際用 plain F-test，引用支撐不實宣稱；(b) Harvey et al. (2016) |t|>3 門檻被移植到 DM 預測比較，原文脈絡是 cross-section factor discovery。另 README 宣稱「citation 21/22 VERIFIED」但 citation_check.md 自述「No external lookup yet performed」（實際驗證紀錄在 review_history/v4/citation_check_report.md）。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "location": "main.tex:96-118 (§3.3 Table 1 + ADF)",
+      "issue": "Table 1 描述統計與 ADF 數字來自 v1 k1025_results.json（BTC kurt 7.579、skew -0.093、mean 0.229%、RV max 1.701、ADF -4.90），但 footnote 標來源為 k1025_v2_results.json；v2 實際值 kurt 11.83、skew -0.739、mean 0.158%、RV max 1.960、ADF -5.10。v1/v2 回報建構不同（v1 BTC simple return），故 Table 1 描述的是「另一個資料集」而非全文估計所用樣本。reproduce.py L50-51 自承 T1 對 v1 驗證。",
+      "fix": "用 v2 資料集重算 Table 1 與 ADF，連動改寫 §3.3 kurtosis ranking 敘事段（BTC 11.83 vs SPY 14.15 的對比論述需重寫），footnote 來源改正；reproduce.py T1 mapping 改對 v2。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "main.tex:29,48,239,249,401 (abstract/§5.3 Table 3/conclusion)",
+      "issue": "Table 3 自己顯示 2015-2017 子期 p=0.014（5% 水準顯著，JSON significant=True），但 abstract、intro、§5.3 正文、conclusion 四處宣稱「only 2020 significant / other four subperiods fail to reject at any conventional level」— 文字與自己的表格直接矛盾。只有 Bonferroni 校正後（threshold 0.01）才成立。",
+      "fix": "全文改為 Bonferroni-corrected 口徑：『只有 2020 通過 multiple-testing 校正（p<0.01/5）；2015-2017 在未校正 5% 水準邊際顯著（p=0.014）但不過校正門檻』，abstract/intro/conclusion 同步收斂。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "main.tex:133 (§4.1)",
+      "issue": "宣稱 Granger F-test『under HAC standard errors, Newey-West kernel with Andrews (1991) automatic bandwidth, which is the default specification of statsmodels grangercausalitytests』— 不實。k1025_v2.py:172-173 用 ssr_ftest（plain OLS F），statsmodels 該函式根本沒有 HAC 選項。此為 v5 review MAJOR 1，宣稱已修但未修，且現在多了對套件預設的虛假陳述。",
+      "fix": "二選一：(a) 改寫為『standard OLS F-tests; 殘差自相關由 lag augmentation 吸收』並刪 Andrews 引用；(b) 真正改用 HAC Wald test 重跑。不可保留現有句子。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "main.tex:161,282,293 (§4.4/§5.3/§6.1)",
+      "issue": "兩層不實＋混 vintage：(1) 宣稱 generalized VAR『order p=4』+ generalized FEVD（order-invariant），但 k1025_v2.py:349-368 用 statsmodels results.fevd()（Cholesky orthogonalized、變數排序相依）且每窗 AIC 選 lag 1-5，無固定 p=4，v5 MAJOR 2 未修；(2) §6.1 引 min 89.79/max 90.81/std 0.21 是 v1 值（v2: 89.73/90.84/0.22），同段 mean 90.11、net -74.4 卻是 v2 值。",
+      "fix": "方法段如實描述：Cholesky FEVD + per-window AIC lag；加變數排序 robustness（至少換序重算一次）或改實作 KPPS generalized FEVD；§5.3/§6.1 min/max/std 換成 v2 數字。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "main.tex:261-280 (§5.3 Table 4) + 368 (§7)",
+      "issue": "(1) 表中 regime 切點寫 Low≤15/Normal 15-22/High 22-30/Crisis>30，但 k1025_v2.py:499-502 實際用 <15/15-25/25-35/>35（表內 n=1037/1386/326/63 與 code 切點 match，故文字切點是錯的）；(2) 全文稱『DCC correlation』但 code L468 自註『Simple EWMA correlation as DCC proxy』（RiskMetrics λ=0.94），非 Engle DCC，且 Engle (2002) 未列參考文獻；(3) §7 crisis 子樣本用 VIX>25 與 §5.3 Crisis>30 定義不一致。v5 MAJOR 2 後半未修。",
+      "fix": "切點改回 15/25/35；全部『DCC』改稱『EWMA dynamic correlation (RiskMetrics, λ=0.94)』或真跑 DCC-GARCH；統一 crisis 定義或明注兩處不同用途。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "main.tex:308-340 (§6.4 Table 5 multi-asset)",
+      "issue": "宣稱 K1025b『only ticker swaps SPY→QQQ, ^VIX→^VXN』，但 k1025b.py 仍是 v5 review 整批 BLOCK 的舊方法：subperiod 用 min-p lag mining（L725，非 AIC）、QR 同期不 lag 無 bootstrap（L293-295）、OOS expanding window 且 2019-01-01 同落 is/oos（L550-551）。Table 5 是 v2 修正方法 vs v1 舊方法的 asymmetric 比較（違反專案自己的 K1216b symmetric refinement 硬規則），且 K1025b QR β 是同期係數、K1025 是 lag-1 係數，不可同列一表稱同一 finding。",
+      "fix": "以 k1025_v2.py 相同 spec 重跑 K1025b（lagged QR + bootstrap + AIC subperiod + rolling OOS）再填 Table 5；重跑前此節不可保留。"
+    },
+    {
+      "severity": "HIGH",
+      "location": "main.tex:86-92 (§3.1-3.2)",
+      "issue": "資料建構描述與產出結果的程式三處不符：(1) 宣稱分析用 pinned snapshot CSV（auto_adjust=False），但 k1025_v2.py:51-53 是 live yfinance 下載且 auto_adjust=True（也違反專案 data-pinning 硬規則）；(2) 宣稱 SPY/BTC 都是 log return，code L61 SPY 用 simple pct_change；(3) 文字寫『22-day rolling std_{[t-21,t]}』、符號卻是 RV^{(20)}、code rolling(20) 是 20 天。v5 MAJOR 3 未修。",
+      "fix": "k1025_v2.py 改讀 paper/data snapshot（auto_adjust=False）、SPY 改 log return、統一 20-day 後重跑；或如實改寫 §3.1-3.2 並修符號為一致的 20-day。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "main.tex:215-232 (§5.2 Table 2)",
+      "issue": "t 統計量與 p 值來源不同且互相矛盾：t=β/SE_boot（bootstrap），p 值卻取 QuantReg 解析 pvalues（code L316-317）。τ=0.5 列 t=4.15 配 p<10⁻⁸（normal t=4.15 對應 p≈3×10⁻⁵）、τ=0.75 列 t=6.61 配 p<10⁻²⁹ — 審稿人手算即拆穿。footnote 只說『SE 與 t 是 bootstrap』未揭露 p 是解析值。",
+      "fix": "p 值改用 bootstrap（percentile CI 或 bootstrap p），或刪 p 列只報 bootstrap 95% CI（JSON 已有 ci_lo/ci_hi）；footnote 如實標注。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "main.tex:156 (§4.3)",
+      "issue": "方法段寫 tail-dependence ratio『exceeds 8 in our sample』，但實際 β₀.₉₅/β₀.₅=19.85/2.82=7.04，abstract 與 Table 2 都寫 7.0× — v1 時代 8.5× 的殘留句。",
+      "fix": "改為『approximately 7 in our sample』與全文一致。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "main.tex:50,75,171,347,364 (Harvey threshold 用法)",
+      "issue": "Harvey et al. (2016) |t|>3 是 cross-section factor discovery 的 multiple-testing 門檻，被直接移植當 DM 預測比較的臨界值（『p-value=0.26 under the Harvey 2016 threshold』概念錯置）。v5 MAJOR 5 未修。OOS null 在傳統 1.96 下也成立，根本不需要這個站不住的門檻。",
+      "fix": "DM 檢定只用傳統臨界值報告；Harvey (2016) 降為動機性引用（『we adopt a conservative posture motivated by…』），刪除『under the threshold』式表述。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "main.tex:193-196 (Table 2 asym Granger p bounds)",
+      "issue": "p 值上界寫錯：lag 3 真值 1.68×10⁻⁸ 卻標『<10⁻⁸』、lag 4 真值 1.28×10⁻⁷ 卻標『<10⁻⁷』、lag 1 真值 3.21×10⁻⁶ 卻印『3.0×10⁻⁶』。任何核對 replication JSON 的審稿人都會抓到。",
+      "fix": "lag3 改 1.7×10⁻⁸、lag4 改 1.3×10⁻⁷、lag1 改 3.2×10⁻⁶。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "main.tex:298-306 (§6.2 + §6.3)",
+      "issue": "兩個 robustness 宣稱（uniform ℓ=5 subperiod 重估『only 2020 rejects』；2024-01-11 ETF 切分『neither half rejects』）在 k1025_v2_results.json 完全沒有對應欄位，也無 % source 註解 — replication package 內不可驗證，違反專案 traceable-binding 硬規則。",
+      "fix": "把 ℓ=5 uniform subperiod 與 pre/post-ETF Granger 加進 k1025_v2.py 輸出 JSON + reproduce.py checks，或刪除這兩段宣稱。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "paper/crypto-fear-channel/README.md:4 + review_history/v5_independent/",
+      "issue": "README 仍標『READY FOR SUBMISSION…0 blocking issues』，但 2026-05-21 獨立審查 codex_review.md = REJECT（3 BLOCKING）且 commit bc2e9a1a 已降回 working；agy_review.md 為 0 byte 空檔（第二位獨立審查未完成）；main.pdf（5/17）早於 main.tex 最後修改（5/22）未重編譯。",
+      "fix": "README status 改 working/major-revision 並記錄 v5 REJECT→v2 重跑的 closure 狀態；補跑或刪除空的 agy_review.md；xelatex 重編 main.pdf。"
+    },
+    {
+      "severity": "MEDIUM",
+      "location": "main.tex:381,388-392 (§8.1/§8.3)",
+      "issue": "Reduced-form 證據（且 OOS 完全無預測增益）被升級成結構機制與政策語句：『margin calls cascade』『stress-test calibration threshold』『retail-investor protection…positive externalities』，無任何結構識別或 retail-share 代理變數支撐。v5 MAJOR 4 僅部分軟化。",
+      "fix": "§8.1 機制段降為『one candidate interpretation, untested here』；§8.3 政策建議加 conditional 語氣並刪『quantitative threshold for stress-test calibration』這類可操作性宣稱。"
+    },
+    {
+      "severity": "LOW",
+      "location": "main.tex:79,181 (§2.3/§5.1)",
+      "issue": "v5 兩個 MINOR 未修：(1) L181 仍稱 RV⁻ 為『the cumulative downside innovation』，與 §3.2 定義的 first-differenced rolling directional RV 不符（方法透明度疑慮）；(2) L79『the first such honest joint reporting』novelty claim 無系統性文獻比對表支撐。",
+      "fix": "L181 改『the first-differenced downside directional RV series』；L79 刪 first claim 或降為『rare in this literature』並引 1-2 篇對照。"
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "paper_id": "vt-crowding-abm",
+  "title_en": "When Positive-Feedback Strategies Crowd: A Family-Level Threshold Framework via Agent-Based Simulation",
+  "main_file": "paper/vt-crowding-abm/main.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "v5_independent（2026-05-21）Codex+Antigravity 雙 REJECT 的 4 個 blocking issues（detector 循環校準、NoiseControl 無效對照、iid bootstrap CI 口徑、cell1 TF/MR 閾值不可再現）自 main.tex 4/28 定稿後一條都沒修，必須重設計 threshold detector 與 active control 並重跑 cell1 才可再投。",
+  "provenance_spot_checks": "抽查 5 組關鍵數字 vs experiments JSON：(1) Sharpe@φ=70%=0.08 vs k827v3 part1_results.70%.vt_sharpe.mean=0.0844 ✓；(2) kurtosis@100%=61.4 vs 61.3526 ✓；(3) Welch t(50% vs 10%)=7.12 vs reproduce 重算 7.125、t(70% vs 50%)=16.94 vs 16.9438 ✓；(4) Table 2 row 0%/10%（AnnVol 16.0%、VIX 19.4、MDD −33.4%/−34.2%）直接核對 k827v3 JSON raw blocks ✓；(5) Table 3/4 閾值（VT 70%、TF 20/30%、MR 20/70%、NC null）對 k1261/k1262/k1262b results.json 經 reproduce_report.json 47/47 GREEN 全 match。數字溯源乾淨，無造假跡象；問題在統計方法與內部敘事一致性，不在 provenance。",
+  "citation_status": "21 條 bibliography 全數抽查：作者/年份/期刊/卷期均真實存在（Baltas 2019 FAJ、Barroso-Detzel 2021 JFE、Cederburg et al. 2020 JFE、Moreira-Muir 2017 JF、Harvey et al. 2018 JPM 等核對無誤）。問題：(a) Kyle (1985) 頁碼誤植 1315–1336，正確為 1315–1335；(b) 8 條缺 DOI（kyle1985、gennotte1990、perchet2015、lebaron2006、danielsson2012 WP、bookstaber2014 WP、ecb2020、cole2017）；(c) cole2017 為 Artemis 業界報告（非學術來源）卻獨撐 \"USD 2 trillion AUM\" 實證宣稱；(d) thebibliography 未按字母排序（cole2017/danielsson2012 插在 perchet2015 後、cont2000/greenwood2011 殿後）與 plainnat 宣告不符。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "main.tex:36, 218, 243, 305, 360",
+      "issue": "Sharpe-only detector 循環校準（v5 雙審稿人 blocking、未修）：文中自承 detector 是 'calibrated to the standalone VT benchmark' 且 'reproduces exactly' 70% 閾值（L243），即先知道 K827v3 的 70% headline、再把 drop>70% 設為觸發條件去重現它，然後用這個為 VT 偏斜校準的 detector 衡量 TF/MR 得出 family-level ordering。這是循環識別，不是外生檢定",
+      "fix": "detector 必須在分析前外生給定：改用 Sharpe-vs-φ 曲線的正式結構斷點檢定（supremum-type break test 或對 500 sim-level Sharpe 做 changepoint detection），並把 drop threshold ∈ {30%,50%,70%} 當 robustness grid 報告而非 calibration anchor；刪除全部 'calibrated to'/'reproduces exactly' 措辭"
+    },
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "main.tex:97, 245, 360",
+      "issue": "NoiseControl 固定權重 0.5 幾乎零交易流量，無法檢驗『任何大型協同交易塊都會致不穩』的對立假說（v5 雙審稿人 blocking、未修）——拿幾乎不交易的 treatment 當 falsifier 是 strawman control",
+      "fix": "新增 active control：隨機方向再平衡 agent，其 |Δw| 分佈與再平衡頻率 match VT/TF/MR 的實際 turnover，但方向與價格/波動正交；NoiseControl 降級為 sanity check 而非 falsifiability anchor"
+    },
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "main.tex:156 vs 167, 213",
+      "issue": "CI 統計口徑自相矛盾且不支撐推論（v5 blocking、未修）：Table 1 note（L156）說 95% CI 來自 pooled 1.26M 日報酬的 iid bootstrap，Figure 1 caption（L167）卻說 whiskers 是 'from 500 Monte Carlo simulations'——兩者不是同一統計量；正回饋系統日報酬有強 volatility clustering，iid pooling 嚴重低估 SE；L156 還有 '1.26M days × 500 sims' 樣本數重複計算錯誤（1.26M 本身已是 500 sims × 2,520 days）",
+      "fix": "全文 CI 統一改為 500 條 sim-level Sharpe 的 path-level bootstrap；pooled return 統計量（kurtosis 等）改 block bootstrap（文中已承認 block-bootstrap 會加寬 CI）；刪除 '× 500 sims' 錯誤字串並重寫 note"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main.tex:229-231 (Table 3) vs 290-300 (Table 4 + footnote b)",
+      "issue": "同一 cell1 microstructure 下核心閾值不可再現：Table 3（M=500）TF=20%/MR=20%，Table 4（M=200）TF=30%/MR=70%——MR 閾值從 20% 跳到 70%（3.5 倍）僅因 MC 數改變。footnote b 雖揭露此事（v4 標 FIXED），但 v5 兩位審稿人均判定揭露不等於解決：central result 對 MC count 與 adoption grid boundary 高度敏感，threshold magnitude 本身無 CI",
+      "fix": "K1262b cell1 重跑 M=500 並在 30-70% 間加密 adoption grid（40%、60%）；對每個 threshold 報 bootstrap CI（對 500 sim-level Sharpe 重抽樣後重算 detector crossing），把 magnitude 改為 interval estimate"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main.tex:299 (footnote a) vs 358, 367",
+      "issue": "cell3 MR null 的 rank encoding 與主張方向相反：footnote a 明寫 'the null is treated as MR threshold ≥ VT threshold'，但 §5.4（L358）與 Conclusion（L367）把同一個 null 計入 'MR ≤ VT in 5/5 cells'——≥ 被當成 ≤ 的支持證據，邏輯翻轉；且 MR 在 cell3 baseline Sharpe=−5.56 證明 detector 在 loss-making regime 失效（v5 MAJOR、未修）",
+      "fix": "cell3 改報 'detector not applicable (saturated loss regime)'，主張降為 4/5 + saturation 討論；或改用對負 baseline 仍有效的 detector（絕對 Sharpe level 或 MDD-based）後重算"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "number_provenance",
+      "location": "main.tex:314 (§4.7 Design Validation)",
+      "issue": "52% 歸因方向算錯：括號自己定義 0.13（fixed）/0.25（scaled）=52%，這是 fixed liquidity 下『仍存在』的 crowding 份額；歸因給 liquidity evaporation 的份額應為 (0.25−0.13)/0.25=48%。句子卻寫 'roughly 52% ... was driven by liquidity evaporation rather than crowding per se'——比例與其口語對應顛倒（Intro L60 與 Conclusion L367 用 'approximately half' 反而沒錯）",
+      "fix": "L314 改為 'roughly 48%（=(0.25−0.13)/0.25）of the originally observed degradation was driven by liquidity evaporation'，或統一改用 'approximately half' 避免假精確"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:121 (§2.4) vs 222 (Table 3 caption)",
+      "issue": "Phase 1 模擬數自相矛盾：§2.4 與 abstract 說 Phase 1 = 4 treatments × 7 × 500 = 14,000，Table 3 caption 卻說 '10,500-simulation Phase 1 run for VT, TF, MR, NoiseControl'。實際上 K1261 只新跑 TF/MR/NC = 10,500 sims，VT 的 3,500 slice 是重用 K827v3 stored run（experiments/k1261/k1261_results.json key 'VT_baseline_K827v3_stored'；k1261/README.md L3 明寫 10,500）——46,800 總數把一週前的 K827v3 算進 Phase 1",
+      "fix": "§2.4 明寫 'the VT slice reuses the K827v3 run (byte-exact seed-paired sanity gate, see k1261_sanity_verification)'，Phase 1 新增模擬數統一為 10,500，總數敘述改為 '43,300 new + 3,500 reused = 46,800 evidence base'"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main.tex:72 vs 99",
+      "issue": "φ=100% 的 population accounting 不一致（v5 MAJOR、未修）：L72 說組成只在 φ<80% 時 well-defined（因 noise 固定 200），L99 又定義 φ 為全體 N 的 fraction——noise 固定下 treatment agents 最多 800/1000，所謂 100% adoption 實為 80% of N，影響 adoption 軸的經濟解讀",
+      "fix": "重定義 φ 為非噪音 agents（800 人池）中的 fraction，全文 adoption 軸與表格標籤一致化；或把 '100%' 改標 '80% of N (all non-noise)'並在 §2.1 給出兩種口徑換算"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "main.tex:54, 323, 369",
+      "issue": "關鍵實證量級無學術引用支撐（v5 MAJOR、未修）：'over USD 2 trillion'（L54）僅引業界報告 cole2017；'current levels below 5%'（L323）與 'Current VT adoption appears safely below the threshold'（L369）完全無 citation——policy 段落把未經本文估計的實證量級寫成既定事實",
+      "fix": "補 regulatory/學術來源（如 BIS Quarterly Review 或 Fed Financial Stability Report 的 vol-control AUM 估計）；找不到可審核來源就改寫為 'industry estimates suggest…(illustrative)' 並把 below-5% 句降為 conditional 陳述"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main.tex:90-95",
+      "issue": "MR 歸入 positive-feedback family 的機制是二階條件式（L95 自承只在買壓大到觸發反向 cascade 時才正回饋），與 VT/TF 的一階正回饋不對稱；且 φ=30% 時 500/500 sims final price ~1e-23 被直稱 'legitimate simulation finding' 而無數值診斷（價格下界、浮點 underflow、複利 convention 皆未排除）（v5 MAJOR+MINOR、未修）",
+      "fix": "加 appendix 診斷：log-price 路徑、clamp 計數（k1261 已記 price_clamps 欄位可引）、arithmetic vs log compounding 對照；family 主張改寫為 'VT/TF first-order + MR conditional second-order positive feedback'"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "main.tex:36, 67 vs 335",
+      "issue": "abstract 與 §2 稱 '1,000 heterogeneous agents'，但 Limitation 2（L335）自承 'agents within each class are homogeneous'——異質性只存在於 3-4 個 type 之間，措辭過強且前後矛盾",
+      "fix": "改為 '1,000 agents of heterogeneous types (BH/strategy/noise)'，abstract 同步修改"
+    },
+    {
+      "severity": "LOW",
+      "category": "structure",
+      "location": "paper/vt-crowding-abm/README.md:4-5, 31-38",
+      "issue": "README status 過期且與事實矛盾：仍標 '✅ Submission-ready (R3 SEVERE=0)'、'15 pages'、'16 citations'、K index 只列 K827–K864——未反映 v4 改版（26 頁、21 citations、K1261/K1262/K1262b 三個主結果實驗）也未反映 v5_independent 雙 REJECT（2026-05-21）",
+      "fix": "README status 改 'major revision in progress (v5_independent: 2× REJECT, 4 blocking)'；K index 補 K1261/K1262/K1262b 三 rows；頁數/引用數更新"
+    },
+    {
+      "severity": "LOW",
+      "category": "citation",
+      "location": "main.tex:435-509 (thebibliography)",
+      "issue": "Kyle (1985) 頁碼 1315–1336 應為 1315–1335；bibliography 未按字母序排列（cole2017、danielsson2012 插在 perchet2015 之後，cont2000/greenwood2011 殿後）與 plainnat 宣告不符；8 條目缺 DOI",
+      "fix": "修 Kyle 頁碼；entries 按第一作者字母序重排（或改用 .bib + bibtex 讓 plainnat 自動排序）；為有 DOI 的條目（如 lehmann1990 已有，gennotte1990 無 DOI 屬正常）逐條補齊"
+    }
+  ]
+}

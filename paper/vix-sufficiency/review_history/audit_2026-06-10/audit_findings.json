@@ -1,0 +1,116 @@
+{
+  "paper_id": "vix-sufficiency",
+  "title_en": "Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Eleven [sic, body says Thirteen] Signal Families for Equity Volatility Forecasting and Volatility Timing",
+  "main_file": "paper/vix-sufficiency/main_v4.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "v4 新增章節數字溯源乾淨，但 2026-05-30 errata（Table 3 BH Sharpe 0.947→0.827 + narrative 翻轉）未落地、標題/正文 family 數不一致、§7.1 文字殘留 v3 stale 數字、reproduce gate 仍停在 v3 — 修完這四件加引用更正後才可進下一輪 review cycle。",
+  "provenance_spot_checks": "5 組抽查：(1) K1116b Table 8 全 12 rows DM t 值 byte-level 對上 experiments/k1116b/k1116b_results.json（SPY M4 -3.00→-3.61、TLT M4 +3.74→+1.96 等全符）✓；(2) K1121 Tables 10-12 對 k1121_results.json：bootstrap diff +0.0028/p=0.966、MDD/Calmar/n=1817/period 全符 ✓；(3) K1203 panorama 28 cells 全符 panorama_7asset_pit_shift0 ✓；(4) K752 Tables 5/6/7（era R²/β/t、incremental R²、era Sharpe）全符 ✓；(5) Table 3 BH 50/50 Sharpe 0.947 ✗ 對不上 registered canonical k731_results full_sample_strategies.\"BH 50/50\".sharpe=0.8268（paper 自家 errata 已記錄但未修）。另 K1137 t 值對上但 IWM high t=2.73 與正文宣稱的 |t|>3.0 判準矛盾。",
+  "citation_status": "44 bibitem 抽查約 30 條（Harvey/Patton/Hansen/DM/Moreira-Muir/Campbell-Thompson/Politis-Romano/Opdyke/Kupiec/Christoffersen 等）作者/年份/期刊/卷期頁全部真實存在；bozovic2024 經 web 驗證存在（IRFA 95, 103353）。問題條目：(1) luo2019 作者錯置 — \"VIX term structure and VIX futures pricing with realized volatility\" JFM 39(1):72-93 實際作者是 Huang, Tong & Wang (2019)，Luo & Zhang 2019 寫的是 \"Instantaneous squared VIX and VIX derivatives\"（不同論文）；(2) hansen2005 方法誤述（用 SPA test 非 MCS）；(3) bozovic2024 in-text gloss（\"drawdown reduction rather than return enhancement\"）與原文主打 spanning-alpha return enhancement 不符；(4) bollerslev2020、engle2006 在 bib 但正文零引用（AMEM/MEM 段落反而該引 engle2006）；(5) 全 bibliography 無 DOI、且非字母排序（Bozovic 在 Brave 後、Christoffersen/Engle&Gallo 插在 Holm 後）。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "main_v4.tex:528,551 (Table 3) + decisions/errata_table3_bh_sharpe_canonical_fix.md",
+      "issue": "2026-05-30 errata 明文要求 BH 50/50 Sharpe 0.947→0.827（K731 canonical 0.8268，期間對齊 2008–2026）且 narrative 翻轉（12/VIX 0.870 > BH 0.827），但 main_v4.tex（Jun 7 編譯）L528 仍是 0.947、L551 仍寫 'static 50/50 outperforms every dynamic strategy'。0.947 來自 K507 不同期間 sample，與同表 12/VIX row（K731）期間不對齊。",
+      "fix": "按 errata 四步執行：L528 改 0.827 + ΔSharpe -0.043 + % source binding；L529 12/VIX 改 reference row + MDD -32.2；L551 narrative 重寫為 12/VIX 略勝；同步校準 intro/abstract 的 'VT costly in Sharpe terms' 敘事到 K738 與 K731 的範圍差異。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main_v4.tex:35 (title) vs :48,74,148",
+      "issue": "標題寫 'Eleven Signal Families'，abstract、intro、§3、Table 1 全篇是 thirteen（families 12-13 本輪加入）。投稿第一頁即露餡。",
+      "fix": "標題改 'Thirteen Signal Families'（或拿掉數字改 'a Systematic Out-of-Sample Evaluation of Signal Families'）。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main_v4.tex:504",
+      "issue": "'All eight testable DM tests produce raw p-values well above 0.05 (minimum raw p = 0.147)' 是 v3 殘文：Table 2 實有 10 testable families，且 Family 12 raw p=0.012、Family 13 raw p<0.001，直接打臉 'well above 0.05' 與 'minimum 0.147'；§5.2 L388-390 也明寫 10 tests。",
+      "fix": "重寫 L504：10 testable；families 1-4,8-11 raw p≥0.147 全 null；families 12-13 兩側顯著但方向為 harmful（signed t<0），one-sided 'beats VIX' null 不拒絕（接 footnote ‡ 的論述）。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main_v4.tex:89 (intro bullet) + :553",
+      "issue": "Intro 宣稱 'maximum Sharpe improvement = +0.010'，但 Table 3 Family 3 behavioral sentiment ΔSharpe=+0.030（Sharpe 0.900）；L553 同段先說 contango boost (+0.010) 'comes closest to matching 12/VIX'，下一句又報 behavioral 0.900 (+0.030)，自相矛盾。",
+      "fix": "L89 改 +0.030（behavioral sentiment）；L553 改寫為 behavioral sentiment (+0.030) 為最大但 DM |t|=0.72 不顯著。注意 errata 落地後 ΔSharpe 基準 (12/VIX) 不變，此修正獨立有效。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "citation",
+      "location": "main_v4.tex:1255-1256 (bibitem luo2019) + :208",
+      "issue": "luo2019 作者錯置：'VIX term structure and VIX futures pricing with realized volatility' JFM 39(1):72-93 (2019) 實際作者是 Huang, Tong & Wang；Luo & Zhang (2019) 是另一篇 'Instantaneous squared VIX and VIX derivatives'（Wiley doi:10.1002/fut.21955 vs 10.1002/fut.22037 可驗）。",
+      "fix": "bibitem 改 Huang, Z., Tong, C., & Wang, T. (2019)，cite key 改 huang2019 並同步 L208 的 \\citep；或若本意引 Luo & Zhang 的 term structure 文獻，改引 Luo & Zhang (2012, JFM 32(12)) 'The term structure of VIX'。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "main_v4.tex:74,77 vs :165",
+      "issue": "宣稱 'first comprehensive, pre-registered horse race' 且 safeguard (i) 說 13 families 'defined before examining out-of-sample results'，但 L165 自承 'Families 12–13 are added in this revision'（看過前輪結果後加入），且無任何 OSF/AEA registry 證據。Reviewer 必抓 overclaim。",
+      "fix": "刪 'pre-registered' 改 'pre-specified'；safeguard (i) 加 disclosure：families 1-11 於原始設計 pre-specified，12-13 為 revision 加入並以同一 pipeline + HB 校正評估（rule-based、非 data-snooped 選入）。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main_v4.tex:852 (§7.9 text) vs Table 8 (:866-877)",
+      "issue": "正文稱 'thirteen of sixteen DM statistics change by less than 0.5… the three cells with material movement'，但依 Table 8 自身數據 |Δt|≥0.5 的 cell 有 5 個：SPY M4 (0.61)、GLD M5 (0.54)、TLT M4 (1.78)、TLT M5 (2.25)、BTC M5 (2.36) — 是 11/16 非 13/16。",
+      "fix": "改為 'eleven of sixteen … five cells with material movement'，並把 TLT M5 / GLD M5 納入後句的方向性討論（兩者亦 weaken alt-data case，論點不變）。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "paper/vix-sufficiency/reproduce_report.json (paper_version=v3, 2026-04-20)",
+      "issue": "Reproduce gate 仍綁 v3：main_v4 新增的 K1116b/K1121/K1203 panorama/channel 三節（Tables 8-12，約佔正文 1/3）完全不在 100 checks 內；paper-workflow 硬規則 #2 要求 gate 對 current version GREEN 才可 review/標 ready。",
+      "fix": "擴充 reproduce.py 覆蓋 v4 新表（K1116b 12 cells、K1121 headline+bootstrap、K1203 28 cells、K1137/K1138 channel 數字），重跑出 v4 reproduce_report.json；順帶落地 errata 提的 LaTeX↔JSON 雙向驗證。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main_v4.tex:791-793 (Channel 1) + Table :823",
+      "issue": "L791 定義 regime-invariance = 'Harvey threshold (|t|>3.0, BH-adjusted) in all three regimes'，但 L793 宣稱 IWM 3/3 PASS，其 high-regime t=2.73 < 3.0（K1137 的 pass_BH 實際用 BH p<0.05 判準，非 |t|>3.0）；QQQ high t=3.09 勉強過。定義與引用數據的判準不一致，且 K1138 v2 correction 已把 IWM (HAR-RV-X) 改判 NULL。",
+      "fix": "把定義改成與 K1137 實際判準一致（'DM-HLN t>2.0 且 BH-adjusted p<0.05'），或保留 |t|>3.0 定義並把 IWM 降為 2/3 partial pass；Table channel_outcomes 同步更新。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main_v4.tex:471,482 (Table 2 rows 1, 12)",
+      "issue": "Family 1 的 IS ΔR² = −0.022：nested OLS 加 regressor 的 in-sample R² 不可能下降，且該值與同 row 的 R²_OOS,VIX (−0.022) 完全相同，疑似抄錯格（本 paper 已有 K732/K736 抄錯格前科）；Family 12 IS ΔR²=−0.001 同樣不可能（除非是 adjusted R²，但未標明）。",
+      "fix": "回查 k730/k1116 JSON 源欄位：若是 adjusted R² 在 column header 標 'IS ΔR̄²'；若是 OOS 值誤植，修正並補 % source inline binding。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main_v4.tex:373-376 (Eq 6) vs Table 2 note (:493-496)",
+      "issue": "Eq (6) 定義 DM 用 squared forecast errors，但 Families 12-13 的 DM t 值取自 K1116b 的 QLIKE 比較（JSON 為 OOS_QLIKE diff）— 同一張 Table 2 的 DM 欄混用兩種 loss，且 Raw p 為兩側、HB p 按單側 directional null 計成 1.000，同列混兩種檢定口徑。",
+      "fix": "§5.1 明寫兩個 loss regime（daily families: squared error, bandwidth 22；weekly families 12-13: QLIKE, bandwidth 4）；Table 2 拆 'Raw p (two-sided)' 與 'HB p (one-sided directional)' 欄名，或統一改報 one-sided。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "main_v4.tex:140",
+      "issue": "宣稱 Hansen & Lunde (2005) 'compare 330 ARCH-type models … using the Model Confidence Set (MCS) framework'，實際 H&L 2005 用的是 SPA test（Hansen 2005）；MCS 是 Hansen-Lunde-Nason 2011 才有，該句 'subsequently formalized' 的補丁救不了時代錯置。",
+      "fix": "改為 'using the test for superior predictive ability (SPA), a precursor to the Model Confidence Set later formalized in \\citet{hansen2011mcs}'。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "main_v4.tex:130",
+      "issue": "bozovic2024 的 in-text 支撐不符：正文說其機制 'operates through drawdown reduction rather than return enhancement'，但原文（IRFA 95, 103353）主打 VIX-managed 策略產生 'substantially higher spanning regression alphas'，即明確的 return enhancement 主張 — 此 gloss 是為配合本文 insurance 敘事而扭曲來源。",
+      "fix": "改寫為如實轉述（Božović 報告 alpha 改善，與本文 Sharpe-null 結果構成張力），並把該張力放進 §2.2 或 conclusion 的 literature reconciliation 一句。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "structure",
+      "location": "main_v4.tex:35-37 (title page)",
+      "issue": "'VolPred Research System' 列為共同作者 + acknowledgement 'We thank the VolPred Research System for computational support'：COPE 及 Elsevier/Wiley/JoF 系列期刊政策一致禁止 AI 系統掛名作者，desk-reject 風險；同時 'Data and replication code available upon request' 低於多數期刊現行 replication package 要求。",
+      "fix": "作者欄只留 Yi-Hao Lai；AI 系統移至 acknowledgements 註明用途；replication 句改為指向公開 repository（self-contained paper folder 已存在，掛上即可）。"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "main_v4.tex:502-510 + bibliography :1148-1291",
+      "issue": "(a) §7.1 段落編號斷裂：First/Second/Third 之後又出現 'Second, the variance risk premium…' 'Third, the overnight VIX…'（v3 殘段疊在 v4 新段上）；L510 的 '+0.45%' 與 Table 2 Family 10 任一欄（IS 0.005 / OOS 0.003）都對不上。(b) bibliography 非字母序且 bollerslev2020、engle2006 未被引用、全無 DOI。",
+      "fix": "(a) 重排為 First–Fifth 連續編號，0.45% 校正為 JSON 源值並加 % source；(b) 字母序重排、刪除或在 AMEM 段補引 engle2006、補 DOI。"
+    }
+  ]
+}

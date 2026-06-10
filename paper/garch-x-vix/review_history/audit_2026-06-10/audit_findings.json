@@ -1,0 +1,116 @@
+{
+  "paper_id": "garch-x-vix",
+  "title_en": "Multiplicative GARCH-X with VIX: A Parsimonious Alternative to GARCH-MIDAS for Volatility Forecasting and Risk Management",
+  "main_file": "paper/garch-x-vix/main.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "已投稿（under review），但 Table 3 顯著性欄與 replication package 有質性矛盾（C1/A3f/B2 翻轉）、headline t=4.03 對不上任何 archived artifact、macro 段落宣稱 6 變數實測 2 個、1 條 chimeric 引用 — R1 回覆前必須先把這些 body-level 數字溯源修乾淨，否則拿到 replication package 的 reviewer 一跑就會抓到。",
+  "provenance_spot_checks": "抽查 6 組：(1) K994 cross-asset PASS — QQQ QLIKE 1.481/1.420、|t|=3.71；EEM 1.338/1.307、2.47；0050.TW 1.458/1.432、1.44（JSON 存 −1.4388，論文取絕對值有 inline 註記）全 byte-level 對上。(2) K1393 leave-COVID PASS — t=4.26/2.52/1.48/3.76、n=1721/273/104/1448 全對；但同段「COVID window 改善 ~2.5× larger」對不上（JSON mean_diff 比值 ≈7.6×）。(3) K988b VRP 相關 PASS — 0.819/0.801/0.778/0.151 全對。(4) Table 3 C-block FAIL — C1 論文 t=3.49 Harvey Yes，k988b 存 2.849 False、canonical mcs_dm 存 1.995 false；A3f（論文 2.92 No）與 B2（論文 2.99 No）兩來源皆 >3.0 顯著，質性翻轉。(5) Headline FAIL — 論文 4.03 vs K988 JSON 4.483、mcs_dm_results.json 4.148、K1393 重跑 3.603，三個 artifact 皆對不上，而 main.tex:723 明文宣稱 4.03 出自 mcs_dm_results.json。(6) K1001 macro FAIL — 論文稱 6 個 macro 變數，JSON 只有 TermSpread+Unemployment(+Combined)；t=4.77 是 GJR_N_vs_A4f_VIX，非「VIX vs best macro」。",
+  "citation_status": "27 條 bibliography 逐條核對：25 條真實且 author/year/期刊/卷期正確（Diebold-Mariano 2002 為 JBES 20(1) 合法 reprint；Conrad & Loch 2015 main.tex 的 JAE 30(7):1090-1114 正確，舊 citation_check.md 反而寫錯成 JBES）。1 條 chimeric：acerbi2019「Backtesting expected shortfall: Accounting for tail risk, Management Science 65(12):5542-5567」— 該標題屬 Du & Escanciano (2017, Management Science 63(4):940-958)；論文實際使用的 Z1/Z2 檢定出自 Acerbi & Székely (2014, Risk 27(11):76-81)，即 citation_check.md 當初驗證通過的版本，bibitem 在驗證後被改壞。1 條 self-citation working paper（lai2026vt）可接受。前輪報告的 fabricated Bayer & Hackethal (2020) 已確認移除。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "main.tex:413 (C1 row), 409 (A3f), 410 (B2), 817 (§Multiple Testing)",
+      "issue": "Table 3 的 Harvey 顯著性欄與兩個 archived 來源質性矛盾：C1 報 t=3.49「Yes」，但 k988b_results.json 存 dm_t=2.8486 significant=False、canonical mcs_dm_results.json 存 1.9953 significant_harvey=false — 3.49 無任何來源支持；反向地 A3f（論文 2.92 No）兩來源為 3.38/3.02 顯著、B2（論文 2.99 No）兩來源為 3.11/3.07 顯著。連帶「10 of 16 models achieve |t|>3.0」(line 817) 依 canonical JSON 應為 11/16 且成員不同。Reviewer 拿 replication package 跑 compute_mcs_dm.py 會直接重現此矛盾。",
+      "fix": "以單一 canonical artifact（pinned-snapshot mcs_dm_results.json）重生 Table 3 全表，重算 Harvey 顯著集合與 §Multiple Testing 計數；若保留 paper-frozen vintage 則須在表注明 vintage 並補 errata 對照表（現行 errata 只涵蓋 SPY headline，未涵蓋 C1/A3f/B2 翻轉）。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main.tex:723（另見 52, 80, 776, 905）",
+      "issue": "全文 headline DM t=4.03 對不上任何 archived artifact：K988 自身 JSON 存 4.4826、canonical mcs_dm_results.json 存 4.1484、K988-faithful 重跑 K1393 存 3.6029。line 723 更明文宣稱 4.03「comes from the canonical pairwise DM matrix in mcs_dm_results.json」— 該檔存的是 4.148，陳述為偽。reproduce_report.json 已標 mismatch（rel diff 2.93% > tol 1%）。",
+      "fix": "統一採 canonical 4.148（或對 4.03 給出可追溯的 frozen-vintage artifact 並 errata 註記），全文 abstract/intro/Table 3/Table 5/conclusion 同步；line 723 的來源宣稱必須改寫為真實來源。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "main.tex:861 (§5.3 VIX vs Macro)",
+      "issue": "宣稱估計「six macroeconomic variables (term spread, unemployment rate, industrial production, consumer sentiment, financial stress index, inflation expectations)」，但來源 K1001 只跑了 TermSpread + Unemployment (+Combined)（k1001_results.json models 區塊；experiments.md 自己也註明 scope 只有 2 個）。且「DM t=4.77 for VIX vs best macro model」實為 k1001 的 GJR_N_vs_A4f_VIX（A4f 對 GJR benchmark），不是 VIX 對 best macro 的比較。一句話兩處與證據不符。",
+      "fix": "改寫為實際範圍（two macro variables and their combination）或補跑其餘四變數；t=4.77 重新標註為 A4f vs GJR，另補 A4f vs Macro_Combined 的正確 DM 統計量。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "citation",
+      "location": "main.tex:976-980（in-text 321, 642）",
+      "issue": "acerbi2019 為 chimeric reference：標題「Backtesting expected shortfall: Accounting for tail risk」屬 Du & Escanciano (2017, Management Science 63(4):940-958)；論文使用的 Z1/Z2 檢定出自 Acerbi & Székely (2014), 'Back-testing expected shortfall', Risk 27(11):76-81（citation_check.md 2026-04-10 驗證通過的正是 2014 Risk 版）；現印的 Management Science 65(12):5542-5567 (2019) 兩者皆非。",
+      "fix": "bibitem 改回 Acerbi & Székely (2014, Risk 27(11):76-81) 並把 in-text (2019) 改 (2014)；若要引 tail-risk 修正版檢定另列 Du & Escanciano (2017)。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "paper/garch-x-vix/README.md:4,15,63 + reproduce_report.json + 缺 r1_response_queue.md",
+      "issue": "v7 唯一 HIGH（replication metadata stale）在 v8_plan（2026-06-08，標 do-now ~65min）排定後仍未執行：README 保留「outperforming all GARCH-MIDAS variants」舊 headline、把 t=3.64 歸給 FEZ（main.tex abstract：STOXX50E=3.64、FEZ=3.45）、GLD 來源仍指 K1085 而非 paper-period K997；reproduce_report.json 自 2026-04-20 未更新（paper_frozen/pinned/live 三層未區分）；v8 A2 的 r1_response_queue.md 不存在。",
+      "fix": "執行 v8_plan A1-A3：README headline 改 qualified 表述 + FEZ/STOXX 值對調 + GLD 來源改 K997；reproduce_report.json 加 layer 欄位標 controlled erratum；建立 r1_response_queue.md 收 v7 P1-P3 wording patches。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main.tex:917 (Limitations) vs errata_pending.md SF1 (K1378)",
+      "issue": "內部 K1378（2026-05-19）已發現同 OOS 窗（2019-2026, n=1852）用另一種 r²-QLIKE normalization 時 A4f vs GJR 的 DM 翻號（t=−1.19，非顯著且方向反轉）；Limitations 只承認 5-min RV proxy 下「magnitudes may differ」，低估了已知的 proxy/loss-normalization 敏感度。",
+      "fix": "R1 response 須誠實揭露 loss-kernel normalization 敏感性並給 reconciliation（K1066 OC-proxy t=+4.04 shelf-ready LaTeX 可同時納入作為正面 robustness）；Limitations 措辭從『magnitudes may differ』升級為 sign-sensitivity 揭露。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:416-417 (Table 3) vs 525 (Table 5)；另 777-778 (Table 8)",
+      "issue": "同一量在不同表用了不同 vintage：GJR SPY QLIKE Table 3 = −8.273（合 K988b）vs Table 5 = −8.277（合 K988）；A4f −8.360 vs −8.361。Table 8 pairwise A4f vs A4 = +0.64、vs A2 = +0.72，canonical JSON 為 1.35/0.84。",
+      "fix": "全文 SPY 數字統一單一 canonical run；不可避免的 vintage 差異用一個 footnote 一次性揭露。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:412 (Table 3 A5 row) vs 428 (Finding 1 text)",
+      "issue": "A5 DM t：表報 1.90、內文寫 1.84（K988 JSON 存 1.8396、canonical 存 1.9467）— 表與文各取不同 vintage。",
+      "fix": "統一為所選 canonical 來源的值（canonical=1.95 或 frozen=1.84），表文一致。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:430, 432 (Findings 2-3) vs Table 3 (402-403)",
+      "issue": "內文 Finding 2 寫 A2 QLIKE −8.356（表為 −8.355）、Finding 3 寫 A2f −8.353 / A2 −8.356（表為 −8.354 / −8.355）— 第三位小數逐處不合，reviewer 抽查即中。",
+      "fix": "以 Table 3 最終值回改內文所有 QLIKE 引述。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:369-377 (Data §4.2), 514, 911, 917",
+      "issue": "資產數三處互相矛盾：Data 節列「四個 additional assets」（QQQ/EEM/GLD/0050.TW），Table 5 卻有 6 個非 SPY 資產（STOXX50E、FEZ 從未在 Data 節介紹、無資料來源描述），結論說「five of seven tested markets」，Limitations 又說「covers only five assets」。",
+      "fix": "Data 節補 STOXX50E/FEZ 的來源與期間；統一計數（7 markets incl. SPY / 6 additional），Limitations 句改正。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main.tex:530 (Table 5 EEM row) vs 543-545",
+      "issue": "機制敘事自相矛盾：EEM 被歸因為「weak VIX linkage / idiosyncratic drivers」而不顯著，但論文自己的相關欄顯示 EEM VIX-r² corr = 0.50（k994: 0.4989），不低於顯著的 QQQ (0.49) 與 SPY (0.52)。「fear index relevance」機制無法以該欄位解釋 EEM 失敗，reviewer 必抓。",
+      "fix": "修正機制論述（例如改以 overnight/time-zone mismatch 或 idiosyncratic EM factor 證據支撐），或承認 correlation 不是 sufficient statistic 並弱化該段因果語氣。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:799-801, 808 (§HAR-RV)",
+      "issue": "宣稱 HAR 比較「evaluation period and estimation protocol match those of the main horse race」，但 n=1,852（r² proxy 評估）與 n=1,866（QLIKE 評估）皆 ≠ 主表 n=1,825，差異來源未解釋。",
+      "fix": "加 footnote 說明樣本差（RV 資料可得性 / refit 邊界處理），或對齊到同一 n。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "number_provenance",
+      "location": "main.tex:723（COVID window 段）",
+      "issue": "「mean QLIKE improvement during this window is approximately 2.5× larger than outside it」對不上來源 k1393_results.json：COVID mean_diff=0.5117 vs non-COVID 0.0674 → ≈7.6×；vs full-OOS 0.0927 → ≈5.5×。2.5× 無對應欄位。",
+      "fix": "改為 JSON 可追溯的比值（~7.6×）或刪句；若 2.5× 另有計算定義（如相對 QLIKE 比例）需寫明公式與來源。"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "main.tex:919 (Conclusion, future research)",
+      "issue": "結論夾帶無表、無實驗編號的結果性宣稱：「preliminary DCC-A4f results suggest significant gains」、「initial tests suggest √h scaling provides adequate approximation」— 在 Harvey-rigor 框架下這是 unsupported claims，reviewer 會要求出示或刪除。",
+      "fix": "刪除結果性措辭，改純 future-work 描述；或補對應 K 實驗與數字。"
+    },
+    {
+      "severity": "LOW",
+      "category": "structure",
+      "location": "main.tex:721（extended sub-period 段）",
+      "issue": "七個 2 年窗的整段統計（4.80-7.00%、mean 6.42%、pooled t=6.977、3/7 Harvey）無 in-text 來源標註（其他 robustness 段皆有 \\texttt{experiments/kXXXX} 指引；此段對應 K1027 但正文未引）。",
+      "fix": "段末補「Source: experiments/k1027/」並考慮升格為小表，與 Table 9 體例一致。"
+    }
+  ]
+}

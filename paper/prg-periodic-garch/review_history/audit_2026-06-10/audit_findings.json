@@ -1,0 +1,102 @@
+{
+  "paper_id": "prg-periodic-garch",
+  "title_en": "Periodic Realized GARCH: Session-Boundary Information Transfers and Volatility Forecasting",
+  "main_file": "paper/prg-periodic-garch/main.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "數字溯源全部通過，但 v5 獨立審查的三大 BLOCKING（Table 2 DM 符號口徑自相矛盾、GJR-X「fair-information」宣稱與 Eq.(10) 的 t-1 lag 不符、Basel 燈號計算錯誤）至今未修，加上 VaR/ES「六市場一致排序」缺 0050.TW 證據——修掉這四項才有 FRL 投稿基礎。",
+  "provenance_spot_checks": "抽查 11 個關鍵數字全部對上：Table 2 SPY DM 6.00 = k880 layer5_dm_tests.GJR_vs_PRG_Extended 6.0039；EEM 6.63 = k881 6.6289；QQQ 4.26 = 4.2572；GLD 6.12 = 6.1175；0050.TW 5.27 = k886 5.2672；TAIFEX 5.10 = k874d 5.0996；TAIFEX PRG-vs-Sep −4.07 = k874c PRG_Extended_vs_Separate_GARCH −4.0657；SPY VaR 0.93%/Kupiec p=0.77 = k880 layer4_var (17/1823, p=0.7696)；SPY FZ DM 3.75 = k880b 3.7502；Table 5 Sharpe 1.66/MDD −11.5% = k874e layer6_economic (1.6622/−0.1146)；GJR-X 數字 = k1260（reproduce gate 22/22 green）。唯一弱點：reproduce_report table3 ablation DM 重現值 +0.049 vs 論文 −0.57（符號翻轉，定性結論不變但未入 tolerance gate）。",
+  "citation_status": "21 條 bibliography 抽查全部真實存在且附 DOI（Linton & Wu 2020 JoE 217(1)、Kim et al. 2023 JBES 41(4)、Blanc et al. 2014 Physica A 402、Todorova & Souček 2014 FRL、Lai et al. 2024 APFM 31(2) 皆正確）。兩個 usage 問題：(1) line 85 把 proxy-substitution/ranking-consistency 歸給 Hansen & Lunde (2005) JAE horse-race 論文，正確來源是 Hansen & Lunde (2006, JoE, Consistent Ranking of Volatility Models)；(2) line 209 把 Harvey et al. (2016)（cross-section factor 研究的 t>3）包裝成「volatility-forecasting/MCS literature 的標準門檻」，屬 citation overreach（v5 Codex #4 已標，僅軟化未修正）。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main.tex:195-205 (Table 2 note) + main.tex:41 (abstract)",
+      "issue": "Table 2 註明「positive values favor PRG」，但 PRG-vs-Sep 欄全為負值（−4.07..−6.69）且正文/摘要把負值解讀為 PRG 勝。實際是表格混用兩種 JSON 方向：PRG-vs-GJR 欄取自 GJR_vs_PRG_Extended（正=PRG 勝），PRG-vs-Sep 欄取自 PRG_Extended_vs_Separate（負=PRG 勝，k880 winner 欄確認 PRG_Extended）。同一表同一標籤格式、相反符號口徑——v5 agy review BLOCKING #2 已指出，未修。",
+      "fix": "統一 d = loss(benchmark) − loss(PRG) 口徑，把 vs-Sep 欄翻號為 +4.07..+6.69，同步改摘要「−6.69 ≤ DM t ≤ −4.07」與 Conclusion 同句；Table 2 note 一句講清 loss-differential 定義。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "main.tex:307-314 (§4.5, Eq. 10) + main.tex:41 (abstract)",
+      "issue": "「By construction, PRG and GJR-X consume identical session-level information」為假：Eq.(10) 與 K1260 程式（experiments/k1260 README line 31：r²_overnight,t-1 在 t-1 close 已知）都用昨日 overnight，而 PRG 的 intraday forecast（Eq. 4）在開盤用當日已實現 r²_{d,0}。GJR-X 永遠少看一個 session 的資訊，故摘要「dominance is structural, not informational」與 line 314「cannot be reduced to overnight information access」不成立。v5 Codex BLOCKING #2 原文指出，未修。",
+      "fix": "補一個兩階段 GJR-X†：在 day-d open 以同日 r²_{d,0} 為 regressor 重估再比 DM（與 PRG 同資訊集）；或刪除「identical information / structural not informational」字句，改為「GJR-X shows the t-1 exogenous-regressor route does not replicate PRG's gain」這種可支撐的弱宣稱。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "number_provenance",
+      "location": "main.tex:259-262 (Table 4 Basel column); experiments/k874e/k874e_full_comparison.py:831-837",
+      "issue": "Basel 燈號計算錯誤：程式用 violation rate ≤ 4% 即標 GREEN（不依樣本數的二項分佈臨界值）。TAIFEX GJR 21/843 違約（2.49%，Kupiec p=0.0003）與 SPY GJR 35/1823（1.92%，p=0.0005）按 Basel 累積二項規則應為 yellow/red，表中卻標 Green，與同列 Kupiec p<0.01 自相矛盾。v5 agy MAJOR #3 已指出，未修。",
+      "fix": "用累積二項分佈（yellow 起點 95%、red 起點 99.99%）按各市場實際 n 重算 zone；或刪 Basel 欄只留 Kupiec/CC。同步修 k874e/k880/k881 共用的 basel_zone 函式（修流程不是只修表）。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main.tex:274 (§4.3 末句) + Table 4 (main.tex:248-272)",
+      "issue": "「consistent ranking PRG Extended > PRG Basic > Separate > GJR > HAR holds across all six markets for both VaR and ES」無證據：Table 4 完全沒有 0050.TW 列；k886 results JSON 無任何 ES/FZ 欄位（keys 只到 layer5_dm_tests）；GLD 的 QLIKE 排名中 PRG Basic 還優於 Extended。摘要「PRG also dominates in VaR and ES evaluations」同屬過度宣稱（v5 Codex MAJOR #5）。",
+      "fix": "把宣稱限縮到有資料的市場（VaR 六市場可補 k886 layer4_var；ES 只有五市場），或補跑 0050.TW ES；刪「consistent ranking ... all six markets」改為按表列實際勝負陳述。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:196 (Table 2 SPY QLIKE 0.748) vs main.tex:330-332 (Table gjrx PRG Ext 0.7559)",
+      "issue": "同一 SPY PRG Extended、同稱 n=1823，Table 2 報 0.748（K880，OOS 迄 2026-04-02）、§4.5 報 0.7559（K1260，OOS 迄 2026-04-08），1% 差異無任何 footnote 解釋。v4 review 已把 K1260 的 PRG-vs-GJR DM row 移除，但 QLIKE 歧異仍裸露，referee 會讀成 cherry-picking。",
+      "fix": "在 Table gjrx note 加一句 disambiguation footnote：兩值來自不同資料 snapshot（K880 2026-04-02 vs K1260 2026-04-08）、估計 pipeline 獨立重跑（比照 feedback_3spec_disambiguation 的 P1 K1256 pattern）。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "main.tex:209 (§4.1)",
+      "issue": "宣稱 Harvey et al. (2016) 門檻「explicitly corrects for ... multiple volatility forecasting models」且「now standard in the model-confidence-set and volatility-forecasting literatures」——HLZ 2016 是 cross-section factor discovery 的 t>3 建議，與 DM 波動率比較無直接關係，文內也無任何支持「已是標準」的引文。v5 Codex MAJOR #4 指出後僅加長句子未改實質。",
+      "fix": "改寫為「we adopt |t|>3.0 as a conservative threshold, adapting the multiple-testing logic of Harvey et al. (2016) from factor research」並刪「now standard in ... literatures」句。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "citation",
+      "location": "main.tex:85 (§2.1)",
+      "issue": "把 proxy-substitution / ranking-consistency 性質歸給 Hansen2005（JAE 的 GARCH(1,1) horse race 論文）：「with Hansen (2005) establishing the companion proxy-substitution property」。該結果的正確來源是 Hansen & Lunde (2006, Journal of Econometrics, Consistent Ranking of Volatility Models)。",
+      "fix": "新增 Hansen & Lunde (2006) bibitem 並把該句的 \\citet{Hansen2005} 換掉；Hansen2005 保留給 benchmark-comparison 脈絡。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:345 (Discussion 首句) vs main.tex:161-162 (Table 1)",
+      "issue": "「EEM, with the highest overnight share (52.6%)」與自己的 Table 1 矛盾：GLD 53.1% 才是最高（§3 正文也寫 varies ... to 53.1% (GLD)）。且 GLD share 最高但 DM 6.12 非最大，所謂 share→DM 單調關係在 GLD 處斷裂。",
+      "fix": "改為「EEM, with one of the highest overnight shares」並加一句承認 GLD 是反例（share 最高但 DM 次高），把機制解讀降為 suggestive correlation。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main.tex:§2.2/§4 全文（無參數表）",
+      "issue": "提出新計量模型卻全文無任何市場的參數估計值/標準誤/session 間異質性檢定，也未報告各 refit 窗口 ρ₀ρ₁<1 是否恆成立（Eq. 5 是核心平穩性條件）。v5 agy MAJOR #4 指出，未修。",
+      "fix": "加一張 compact 表（TAIFEX + SPY 全樣本估計：ω_s/α_s/β_s/γ_s + SE + overnight-vs-intraday Wald test + ρ₀ρ₁ 值），FRL 篇幅不夠就放 Online Appendix。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main.tex:298 (Table 5 note) + §4.4",
+      "issue": "VT 策略 Sharpe 1.66 vs 1.01 無任何正式統計檢定（無 Sharpe-difference test、無 bootstrap CI），成本分析只在 note 做 35bps 均勻扣減的 back-of-envelope。v5 Codex MINOR #10 指出，未修。",
+      "fix": "加 Ledoit-Wolf (2008) Sharpe difference test 或 stationary-bootstrap CI（固定 seed），與 0.5/1/2.5bp 三檔成本敏感度一列帶過。"
+    },
+    {
+      "severity": "LOW",
+      "category": "internal_consistency",
+      "location": "main.tex:195 (Table 2 TAIFEX MCS 欄) vs main.tex:211",
+      "issue": "MCS 欄寫「PRG only」但正文與 k874e layer2_mcs superior_set 是兩個模型（PRG Basic + PRG Extended）。v5 agy MINOR #8 指出，未修。",
+      "fix": "欄位改「PRG Basic+Ext」或在 note 定義「PRG only = both PRG specifications, all benchmarks eliminated」。"
+    },
+    {
+      "severity": "LOW",
+      "category": "number_provenance",
+      "location": "main.tex:230 (Table 3 K880v2 DM −0.57); reproduce_report.json table3_ablation_check",
+      "issue": "Table 3 的 K880v2 DM −0.57 在 reproduce gate 重現為 +0.049（符號翻轉，且該項未入 22/22 match 計數，只留 note）。定性結論（優勢消失）成立，但點估計對 yfinance snapshot 漂移極脆弱。",
+      "fix": "正文與 Table 3 改報「statistically indistinguishable from zero (|t|<0.6 across snapshots)」而非單點 −0.57，或 pin 資料 snapshot 後重算並把該項納入 reproduce tolerance gate。"
+    },
+    {
+      "severity": "LOW",
+      "category": "structure",
+      "location": "paper/prg-periodic-garch/experiments.md:56 (Table 5 mapping)",
+      "issue": "Replication package 的 Table→K 對應表把 Table 5（VT 經濟價值）標 K874d/K883，但 Sharpe/CAGR/MDD/turnover 實際存在 k874e_results.json layer6_economic（k874d/k883 JSON 內 grep 不到任何 sharpe 欄位）。投稿 hard requirement 的 traceable binding 在此斷鏈。",
+      "fix": "experiments.md Table 5 source 改為 K874e（layer6_economic），並在 reproduce.py 補 Table 5 數字的 table_row_mapping 檢查。"
+    }
+  ]
+}

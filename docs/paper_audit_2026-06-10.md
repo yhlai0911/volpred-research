@@ -1,0 +1,515 @@
+# 論文組合全面學術審查報告（2026-06-10）
+
+> 12 篇並行獨立審查（嚴格 JBF/JFE/JoE 審稿人標準）；每 finding 附 file:line 證據與具體修法。
+> Raw: storage/ops/paper_audit_raw_2026-06-10.json；逐篇歸檔 paper/<id>/review_history/audit_2026-06-10/audit_findings.json。
+
+## 總表
+
+| 論文 | Verdict | HIGH | MED | LOW | 距投稿 |
+|---|---|---|---|---|---|
+| btc-gas-negative | MAJOR_REVISION | 6 | 7 | 2 | 距可投稿尚缺 body_v2：§8/附錄捏造數字必須真跑實驗或整段砍掉、K1129 動機統計量重新歸屬、abstract/標題的 MS「underperforms」方向錯誤修正、Period 3 日期改 2026Q1、§3.4 估計法描述對 |
+| crypto-fear-channel | MAJOR_REVISION | 7 | 7 | 1 | v2 重跑修掉了 v5 review 的 3 個 BLOCKING（QR lag+bootstrap、subperiod AIC、OOS rolling），但 5 個 MAJOR 中 4 個（HAC 不實宣稱、generalized FEV |
+| eav-universal-magnitude | MAJOR_REVISION | 5 | 5 | 4 | 主結果（Table 1）被論文自己的 §6.6 multistart 段落宣告為 single-init FRAGILE 而未重估，加上 abstract/conclusion 與 13-market body 結構脫節、[CITATION |
+| garch-x-vix | MAJOR_REVISION | 5 | 8 | 2 | 已投稿（under review），但 Table 3 顯著性欄與 replication package 有質性矛盾（C1/A3f/B2 翻轉）、headline t=4.03 對不上任何 archived artifact、macro  |
+| leverage-direction | MAJOR_REVISION | 6 | 7 | 2 | 核心結果（黃金 inverted leverage γ=−0.067/t=−5.79/93%）已被自家 Table 2 K903 替換值（+0.002/t=+0.15 NS/67%）推翻，但 Intro/§4.2/§5.1/§6 全文仍宣稱 |
+| prg-periodic-garch | MAJOR_REVISION | 4 | 6 | 3 | 數字溯源全部通過，但 v5 獨立審查的三大 BLOCKING（Table 2 DM 符號口徑自相矛盾、GJR-X「fair-information」宣稱與 Eq.(10) 的 t-1 lag 不符、Basel 燈號計算錯誤）至今未修，加上  |
+| taiwan-vt | MAJOR_REVISION | 5 | 5 | 5 | v1 的 H1（γ=0.097 統一）與 H2（2383.TW 揭露）已確實修復，但 abstract/intro/§8 仍殘留至少 5 處被正文自身 errata 推翻的舊版數字（5.0×/CI[2.8,8.1]、Student-t 0. |
+| vix-sufficiency | MAJOR_REVISION | 6 | 8 | 1 | v4 新增章節數字溯源乾淨，但 2026-05-30 errata（Table 3 BH Sharpe 0.947→0.827 + narrative 翻轉）未落地、標題/正文 family 數不一致、§7.1 文字殘留 v3 stale  |
+| volatility-absorption | MAJOR_REVISION | 6 | 6 | 2 | 距離可投稿差三件事：(1) 對 v3 重跑 reproduce gate（現存 report 是 v2、61.3% red、Tables 6-8 數字無 JSON 來源）；(2) 統一全文 original-snapshot vs 2026 |
+| vt-crowding-abm | MAJOR_REVISION | 5 | 5 | 3 | v5_independent（2026-05-21）Codex+Antigravity 雙 REJECT 的 4 個 blocking issues（detector 循環校準、NoiseControl 無效對照、iid bootstrap |
+| vt-insurance-cost | MAJOR_REVISION | 3 | 6 | 3 | 數字溯源乾淨（Table 1/2 全對上 K811v2），但 DM 檢定註腳與實際代碼不符、cross-OOS 4 窗無聲跳過 2017-18/2021-22、rebalancing premium 子期間翻負未揭露 — 修完這三項 HIG |
+| vt-trend-following | MAJOR_REVISION | 4 | 8 | 3 | 距可投稿還差：兩張表（Table 3 50/50 欄、K1417 比較表）與 Figure 1 仍混用已被推翻的 v2/非 canonical 數字、reproduce gate 失效（80.7% yellow/fail 且 2 個月未更新 |
+
+## 修正執行狀態（2026-06-10 起）
+
+- **garch-x-vix**（已投稿）：pre-R1 不動 main.tex；README 修正 + r1_response_queue.md 建立（5 BLOCKING 收錄）✅
+- **leverage-direction**：⛔ SUBMISSION FROZEN + 採 K903 決策已記 README；全文一致化任務入池（P1）
+- 其餘 10 篇：paper_body 修正任務入池（P1×3 + P2×7），主線程/hourly 逐篇消化
+
+---
+
+## btc-gas-negative（MAJOR_REVISION）
+
+**主檔**: paper/btc-gas-negative/drafts/body_v1.md
+**距投稿**: 距可投稿尚缺 body_v2：§8/附錄捏造數字必須真跑實驗或整段砍掉、K1129 動機統計量重新歸屬、abstract/標題的 MS「underperforms」方向錯誤修正、Period 3 日期改 2026Q1、§3.4 估計法描述對齊實作，再補 reproduce.py + 真實 snapshot CSV 才能轉 .tex。
+**引用狀態**: 0 篇 hallucinated（Creal-Koopman-Lucas 2013 JAE、Klaassen 2002 EE、HLN 1997 IJF、Patton 2011 JoE、Welch-Goyal 2008 RFS、Liu-Tsyvinski 2021 RFS、Klein et al. 2018 IRFA、Yi et al. 2018 IRFA、Marcucci 2005 SNDE、Hansen-Lunde-Nason 2003 OBES 等皆真實存在）。未修 cleanup（R0 已列、無 v2）：Table 1 注「Newbould」typo、L327「Harvey-Lin-Newey」錯誤展開、缺 bib（Hamilton 1989、Harvey 2017 JF、Blasques et al. 2014/2018、Andrews 1993、Bai-Perron 1998）、9 條缺 DOI、k1133b JSON refs 把 CKL 2013 寫成 JASA（應為 JAE）、outline 把 Catania et al. 2019 標成 JFE（應為 IJF）。本輪新發現：§6 L372 將「對 regime-switching 的 skepticism」歸給 Hansen et al. (2003) — 該文是 Model Confidence Set 方法論，未做此主張。
+**數字溯源抽查**: 5 組抽查 vs experiments/k1133b/k1133b_results.json：(1) P1 headline 全 PASS — QLIKE M1 1.99261/M3 2.19037/M4 2.04015、DM -3.355→-3.36、-4.669→-4.67、+2.665→+2.67、MS vs M3 +5.971、MS vs M1 +0.275、9.92%=rel -9.9249% 全部 2 位小數內吻合；(2) Period 3 OOS 日期 FAIL — JSON oos_start/end = 2026-01-05→2026-04-14，論文寫 2024-01-21→2024-04-30（差 2 年）；(3) ν>30 FAIL — ms_fit_log 全 6 次 refit max ν=15.48（state_0 2.80-6.90, state_1 7.06-15.48），無任何 state 近 30；(4) §8/附錄 robustness 數字 FAIL — LOO「-3.91/-5.24」、±60 天「-3.5/-4.9」、alt-loss「+2.4」、「96% windows dispersion<0.5」、skewed-t/GED、ETH/BNB factorial 在 k1133b/k1133/K1129 三份 JSON、README、run.log 全部 grep 不到（K1129 assets 僅 USO/GLD/UNG/BTC-USD）；(5) MS QLIKE=1.98699 < M1 1.99261（rel +0.28%），abstract/§9 寫「still underperforms GJR-Normal」方向相反。
+
+### Findings
+
+- **[HIGH/?]** `drafts/body_v1.md:410-424 (§8) + §5 L358/L360 + Appendix A/B refs` — R0 (r0_review_opus C1) 標 CRITICAL 的捏造數字全數仍在 v1：leave-one-year-out DM「-3.91 (excl 2018) 到 -5.24 (excl 2020)」(L422)、±60 天 boundary「below -3.5 / below -4.9」(L418)、alt-loss「above +2.4」(L420)、「96% of windows dispersion <0.5」+ Latin hypercube (L416)、M4「max-to-median LL ratio <1.5%」(L360)、Appendix A skewed-t/GED、Appendix B ETH/BNB factorial — 以上沒有任何一個出現在 k1133b/k1133/K1129 的 results.json、README 或 run.log；K1129 assets 僅 USO/GLD/UNG/BTC-USD，全 repo 無 ETH/BNB 實驗。違反研究誠實原則第 1 條。
+  - **修法**: 二擇一：(a) 真跑 robustness 套件並落地 k1133b_robustness_results.json 後引真數字；(b) §8 改寫為 planned robustness（無點估計），刪除附錄內文宣稱。未解決前禁止轉 .tex。
+- **[HIGH/?]** `abstract L21 + Contributions L34 + §9 L428 vs §6 L372` — 新發現（R0 三份 review 皆未抓）：abstract 寫 MS-GAS-t「but still underperforms GJR-Normal」、§9 寫「still fails to reach parity with GJR-Normal」— 但 JSON 顯示 MS QLIKE 1.98699 < M1 1.99261（rel +0.28%，DM +0.28 NS），點估計是 MS 略勝；body §6 L372 自己正確寫「point estimate is positive, indicating a slight advantage」。abstract/結論與 body/資料方向相反，標題「Cannot Fully Rescue It」同樣過強。
+  - **修法**: abstract/§9/Contribution 3 改為「rescues to statistical parity (DM +0.28 NS) but not superiority, at a substantial parameter cost」；標題副標改 'Regime-Switching Rescues to Parity, Not Superiority' 或等義；確保三處與 §6 用同一方向敘述。
+- **[HIGH/?]** `abstract L21 + §1 L196/L204 + §4 L323 + README.md L31 + experiments.md L9` — K1129 動機統計量錯誤歸屬（R0-opus C3 未修）：論文稱「K1129 documents full-sample BTC reversal DM -4.67 / 9.92%」，但 -4.67/9.92% 是 K1133b Period 1 (2017-2020) 的值；K1129 的 BTC OOS 是 2021-01-01 起（k1129_results.json oos_start），full-sample DM ≈ -4.58 / rel -3.96%，且「K1129 full-sample reversal 由 2017-2020 驅動」在邏輯上不可能（K1129 無 2017-2020 OOS）。
+  - **修法**: 重新 frame：K1133/K1133b 是 -4.67 的 documenting experiments；K1129（-4.58, 2021-2026, window 1500）只作為 prompt 期切分的 cross-asset anomaly。同步改 abstract、§1、§4、§7.3、README、experiments.md。
+- **[HIGH/?]** `drafts/body_v1.md:376 (§6)` — ν>30 機制宣稱捏造（R0 S2/C2 未修）：L376 寫高波動 state「degrees of freedom above 30 across the multi-start basin, effectively a Normal innovation」，但 ms_fit_log 6 次 refit 的 ν 全距 2.80-15.48，max=15.48，無 state 近 30；ν≈15 仍是中度厚尾，「de-fattening = revealed preference for Normal」整段推論失去依據。
+  - **修法**: 改寫為真實範圍（高 ν state ~9-15.5、低 ν state ~3-7），刪除「effectively Normal」，把 revealed-preference 論證降級為 partial de-fattening 的弱化版本，或刪除該段。
+- **[HIGH/?]** `drafts/body_v1.md:61, 265 (§3.2) + data_sources.md` — Period 3 OOS 日期錯 2 年（R0 S1/C4 未修）：論文寫 2024-01-21→2024-04-30，JSON 實際 oos_start/end = 2026-01-05→2026-04-14（2024-01 起算 sub-period 經 750 天 warm-up 後 OOS 落在 2026Q1）。§3.2/§4/§7.2 所有「immediately following the January 2024 approval」敘事都建立在錯日期上。
+  - **修法**: 日期改 2026-01-05→2026-04-14；Period 3 重新詮釋為「spot-ETF 制度成熟 2 年後的窗口」而非 approval 即刻反應；保留 n=100 preliminary caveat。
+- **[HIGH/?]** `drafts/body_v1.md:291-303 (§3.4) vs experiments/k1133b/README.md:148` — 新發現：§3.4 把估計法描述為純 Klaassen (2002) state-probability recursion（並給出 Klaassen 式的 h_{j,t} 方程），但 k1133b README 自承實作是 hybrid Gray(1996)/Klaassen — per-state log-variance paths + Gray-style filtered-probability update，且自稱「approximately equivalent when p00,p11→1」；實際 fitted p00∈[0.42,0.85]、p11∈[0.25,0.75]，近似成立條件不滿足。Referee 按 §3.4 復現會得到不同估計。
+  - **修法**: §3.4 如實描述 hybrid 實作（引 Gray 1996 + Klaassen 2002 並補 Gray 1996 進 bib），明說與純 Klaassen 的差異與近似條件不成立的事實，或改實作為純 Klaassen 後重跑 MS 結果。
+- **[MEDIUM/?]** `drafts/body_v1.md:317 (§3.6) vs 327/338 (Table 1) vs 350 (§5)` — HLZ threshold 內部矛盾（R0 S3/M1 未修）且有實質後果：§3.6 寫 |DM|>3、Table 1 注與 §5 寫 |t|>2 並稱其為 HLZ gate；headline 創新對比 +2.67 過 2 但不過 3 — 若統一成論文自稱的 |3| 標準，核心 factorial 證據本身不過 gate。另 §8 L422 又用 |3|。
+  - **修法**: 全篇統一一個 threshold 並誠實處理後果：建議主檢定用傳統 5%（|t|>1.96）報告、HLZ |3| 作為 robustness tier 標註哪些結果（-3.36/-4.67/+5.97）過、哪些（+2.67）不過，不得再把 |t|>2 標成 HLZ (2016) gate。
+- **[MEDIUM/?]** `drafts/body_v1.md:350, 354 (§5)` — 70/30 attribution 算術錯（R0 M2 未修）：innovation step = 2.1904-2.0402 = 0.1502，dynamics step = 2.0402-1.9926 = 0.0476，總 deficit 0.1978 → 實為 75.9%/24.1%，非 70/30。
+  - **修法**: L350「roughly 70%」與 L354「70%/30%」改為 76%/24%（或 'roughly three-quarters / one-quarter'）。
+- **[MEDIUM/?]** `drafts/body_v1.md:378 (§6 Figure 3 段)` — 新發現：「state durations on the order of weeks to months」與 fitted 轉移機率矛盾 — ms_fit_log p00∈[0.42,0.85]、p11∈[0.25,0.75] 隱含期望停留時間 1/(1-p)≈1.3-6.7 天，是『天』不是『週到月』。
+  - **修法**: 按實際 p00/p11 改寫為 days-scale persistence；或若 Figure 3 filtered path 確實呈現週-月級 persistence，需解釋與低 p11 的張力（如 state-label switching across refits），並引用真實計算。
+- **[MEDIUM/?]** `drafts/body_v1.md:208 (§1), 390 (§7.1), 428 (§9)` — kurtosis 宣稱無來源（R0 M5 未修）：「excess kurtosis above twelve」「roughly double the FTX-Luna era and triple the spot-ETF era」— 三個實驗 JSON 無任何 per-period kurtosis；唯一存檔數字是 7.97（K1129 2021-2026 / k1133b 全樣本），既不支持也與 >12 表面矛盾。
+  - **修法**: 用 pinned snapshot 計算 2017-2020/2023/2026Q1 三段 excess kurtosis 落地至 results JSON 後引真數字；否則降為定性敘述並刪掉 double/triple 比率。
+- **[MEDIUM/?]** `§3.6/§4/§6 整體檢定架構` — 新發現：全文報 ~15 個 DM-HLN 檢定（4 比較 × 3 期 + MS × 多基準 + contrasts）但無任何 multiple-testing 處理；§2.4/§6 兩度引 Hansen-Lunde-Nason (2003) MCS 卻從未執行 MCS。JoE/IJF referee 必問。
+  - **修法**: 對每期 5+1 模型跑 MCS（α=0.10/0.25）作為 Table 1 的 joint-inference 補充；或至少在 §3.6 明述為何 pre-specified 的 2 個 primary contrasts（M4-M3、M4-M1）不需 family-wise 校正、其餘為 descriptive。
+- **[MEDIUM/?]** `drafts/body_v1.md:253 (§3.1) + README.md L42` — 資料宣稱與檔案系統不符（R0 C5 部分 + 新驗證）：§3.1 以事實語氣稱「dataset is pinned as a snapshot CSV in paper/btc-gas-negative/data/btc_daily_20260410.csv」— 該 data/ 目錄不存在；且 §3.1 sample end「10 April 2026」vs JSON date_range 2015-01-01→2026-04-15（4,121 obs）不一致；reproduce.py 亦缺（paper-workflow reproduce gate 投稿前置條件）。
+  - **修法**: 真正落地 snapshot CSV（以 2026-04-15 為準、檔名對齊）+ reproduce.py（match_rate≥95% gate）；§3.1 日期統一為 2026-04-15；在落地前不得以完成式描述。
+- **[MEDIUM/?]** `abstract L21 vs §3.2 L263 + JSON preliminary_flag` — Period 2 框架問題（R0 m2+M1 未修）：abstract 稱「FTX-Luna (2021-2023)」但 OOS 僅 2023-01-21→2023-12-31，Luna（2022-05）與 FTX（2022-11）崩盤都落在 warm-up 不在評估窗 — 「FTX-Luna era 無 reversal」的宣稱從未在崩盤當期上檢定；且 JSON preliminary_flag=true 而 §4 稱 Period 2「carries adequate power」如完整推論。
+  - **修法**: 期名改「post-FTX recovery (OOS 2023)」並在 §3.2/§4 明述 2021-2022 被 warm-up 消耗、崩盤事件不在 OOS；abstract 的 (2021-2023) 與 body 對齊；交代或移除 preliminary flag 的差異。
+- **[LOW/?]** `drafts/body_v1.md:327, 338 + bib seed L120-137` — 引用 cleanup 全部未修（R0 已列）：L327「Diebold-Mariano-Harvey-Lin-Newey」錯誤展開、L338「Newbould」typo、缺 bib（Hamilton 1989、Harvey 2017、Blasques et al. 2014/2018、Andrews 1993、Bai-Perron 1998、Gray 1996）、9 條缺 DOI、Lucas-Zhang (2016) 研究對象是個股+匯率非「panel of equity indices」(§2.2 L227)。
+  - **修法**: L327/L338 統一為 Harvey-Leybourne-Newbold (1997)；補 6 條 bib + DOI；§2.2 改「individual stock returns and exchange rates」。
+- **[LOW/?]** `drafts/body_v1.md:372 (§6)` — 新發現 claim-citation mismatch：「broader skepticism toward regime-switching extensions in the volatility literature documented by Hansen, Lunde, and Nason (2003)」— HLN 2003 (OBES) 是 Model Confidence Set 方法論應用於匯率波動模型選擇，沒有對 regime-switching 的 skepticism 論述。
+  - **修法**: 改引適切來源（如 Hansen 2005 SPA 對複雜模型 OOS 不勝出的證據，或 Marcucci 2005 自身的混合結果），或刪除該歸屬只保留論點。
+
+---
+
+## crypto-fear-channel（MAJOR_REVISION）
+
+**主檔**: paper/crypto-fear-channel/main.tex
+**距投稿**: v2 重跑修掉了 v5 review 的 3 個 BLOCKING（QR lag+bootstrap、subperiod AIC、OOS rolling），但 5 個 MAJOR 中 4 個（HAC 不實宣稱、generalized FEVD 不實宣稱、EWMA 冒稱 DCC、Harvey 門檻誤用）文稿仍未修，且新增 Table 1/DY 數字混用 v1-v2 兩代結果、K1025b robustness 仍跑被 block 的舊方法 — 需重算 Table 1、重跑 K1025b、改寫方法描述後才可投。
+**引用狀態**: 22 條 bibitem 抽查（Hatemi-J 2012 Empirical Economics 43:447-456、Adrian-Brunnermeier 2016 AER、Harvey-Liu-Zhu 2016 RFS 29:5-68、Diebold-Yilmaz 2012 IJF、HLN 1997 IJF、Koenker-Bassett 1978、Iyer 2022 IMF GFS Note 2022/01 等）作者/年份/期刊/DOI 均真實無虛構。兩個使用問題：(a) Andrews (1991) 被引為 grangercausalitytests 的「HAC 自動 bandwidth 預設」— 程式實際用 plain F-test，引用支撐不實宣稱；(b) Harvey et al. (2016) |t|>3 門檻被移植到 DM 預測比較，原文脈絡是 cross-section factor discovery。另 README 宣稱「citation 21/22 VERIFIED」但 citation_check.md 自述「No external lookup yet performed」（實際驗證紀錄在 review_history/v4/citation_check_report.md）。
+**數字溯源抽查**: 對 experiments/k1025/k1025_v2_results.json 抽查：(1) QR β/SE_boot/t 全部 match（β₀.₀₅=-2.7836→-2.78、β₀.₉₅=19.8459→19.85、t=8.1667→8.17 ✓）；(2) 非對稱 Granger F lag1-5 match（21.777→21.78 ✓）；(3) subperiod F/p match（2020 F=12.3094→12.31, p=1.594e-7→1.6e-7 ✓）；(4) OOS DM=-1.1389→-1.14, p=0.2547→0.26, MSE 4.6487/4.6618 ✓；(5) DY mean 90.11、net -74.41 ✓ 但 min/max/std（89.79/90.81/0.21）來自 v1 JSON（v2 實為 89.73/90.84/0.22）✗；(6) Table 1 描述統計（BTC kurt 7.579、skew -0.093、mean 0.229%）全部來自 v1 k1025_results.json，footnote 卻標 v2 來源，v2 實際值為 kurt 11.83/skew -0.739/mean 0.158% ✗。reproduce_report.json 37/37 green 是因 reproduce.py 明知 Table 1 對 v1 驗（程式註解自承），gate 設計掩蓋了 vintage 混用。
+
+### Findings
+
+- **[HIGH/?]** `main.tex:96-118 (§3.3 Table 1 + ADF)` — Table 1 描述統計與 ADF 數字來自 v1 k1025_results.json（BTC kurt 7.579、skew -0.093、mean 0.229%、RV max 1.701、ADF -4.90），但 footnote 標來源為 k1025_v2_results.json；v2 實際值 kurt 11.83、skew -0.739、mean 0.158%、RV max 1.960、ADF -5.10。v1/v2 回報建構不同（v1 BTC simple return），故 Table 1 描述的是「另一個資料集」而非全文估計所用樣本。reproduce.py L50-51 自承 T1 對 v1 驗證。
+  - **修法**: 用 v2 資料集重算 Table 1 與 ADF，連動改寫 §3.3 kurtosis ranking 敘事段（BTC 11.83 vs SPY 14.15 的對比論述需重寫），footnote 來源改正；reproduce.py T1 mapping 改對 v2。
+- **[HIGH/?]** `main.tex:29,48,239,249,401 (abstract/§5.3 Table 3/conclusion)` — Table 3 自己顯示 2015-2017 子期 p=0.014（5% 水準顯著，JSON significant=True），但 abstract、intro、§5.3 正文、conclusion 四處宣稱「only 2020 significant / other four subperiods fail to reject at any conventional level」— 文字與自己的表格直接矛盾。只有 Bonferroni 校正後（threshold 0.01）才成立。
+  - **修法**: 全文改為 Bonferroni-corrected 口徑：『只有 2020 通過 multiple-testing 校正（p<0.01/5）；2015-2017 在未校正 5% 水準邊際顯著（p=0.014）但不過校正門檻』，abstract/intro/conclusion 同步收斂。
+- **[HIGH/?]** `main.tex:133 (§4.1)` — 宣稱 Granger F-test『under HAC standard errors, Newey-West kernel with Andrews (1991) automatic bandwidth, which is the default specification of statsmodels grangercausalitytests』— 不實。k1025_v2.py:172-173 用 ssr_ftest（plain OLS F），statsmodels 該函式根本沒有 HAC 選項。此為 v5 review MAJOR 1，宣稱已修但未修，且現在多了對套件預設的虛假陳述。
+  - **修法**: 二選一：(a) 改寫為『standard OLS F-tests; 殘差自相關由 lag augmentation 吸收』並刪 Andrews 引用；(b) 真正改用 HAC Wald test 重跑。不可保留現有句子。
+- **[HIGH/?]** `main.tex:161,282,293 (§4.4/§5.3/§6.1)` — 兩層不實＋混 vintage：(1) 宣稱 generalized VAR『order p=4』+ generalized FEVD（order-invariant），但 k1025_v2.py:349-368 用 statsmodels results.fevd()（Cholesky orthogonalized、變數排序相依）且每窗 AIC 選 lag 1-5，無固定 p=4，v5 MAJOR 2 未修；(2) §6.1 引 min 89.79/max 90.81/std 0.21 是 v1 值（v2: 89.73/90.84/0.22），同段 mean 90.11、net -74.4 卻是 v2 值。
+  - **修法**: 方法段如實描述：Cholesky FEVD + per-window AIC lag；加變數排序 robustness（至少換序重算一次）或改實作 KPPS generalized FEVD；§5.3/§6.1 min/max/std 換成 v2 數字。
+- **[HIGH/?]** `main.tex:261-280 (§5.3 Table 4) + 368 (§7)` — (1) 表中 regime 切點寫 Low≤15/Normal 15-22/High 22-30/Crisis>30，但 k1025_v2.py:499-502 實際用 <15/15-25/25-35/>35（表內 n=1037/1386/326/63 與 code 切點 match，故文字切點是錯的）；(2) 全文稱『DCC correlation』但 code L468 自註『Simple EWMA correlation as DCC proxy』（RiskMetrics λ=0.94），非 Engle DCC，且 Engle (2002) 未列參考文獻；(3) §7 crisis 子樣本用 VIX>25 與 §5.3 Crisis>30 定義不一致。v5 MAJOR 2 後半未修。
+  - **修法**: 切點改回 15/25/35；全部『DCC』改稱『EWMA dynamic correlation (RiskMetrics, λ=0.94)』或真跑 DCC-GARCH；統一 crisis 定義或明注兩處不同用途。
+- **[HIGH/?]** `main.tex:308-340 (§6.4 Table 5 multi-asset)` — 宣稱 K1025b『only ticker swaps SPY→QQQ, ^VIX→^VXN』，但 k1025b.py 仍是 v5 review 整批 BLOCK 的舊方法：subperiod 用 min-p lag mining（L725，非 AIC）、QR 同期不 lag 無 bootstrap（L293-295）、OOS expanding window 且 2019-01-01 同落 is/oos（L550-551）。Table 5 是 v2 修正方法 vs v1 舊方法的 asymmetric 比較（違反專案自己的 K1216b symmetric refinement 硬規則），且 K1025b QR β 是同期係數、K1025 是 lag-1 係數，不可同列一表稱同一 finding。
+  - **修法**: 以 k1025_v2.py 相同 spec 重跑 K1025b（lagged QR + bootstrap + AIC subperiod + rolling OOS）再填 Table 5；重跑前此節不可保留。
+- **[HIGH/?]** `main.tex:86-92 (§3.1-3.2)` — 資料建構描述與產出結果的程式三處不符：(1) 宣稱分析用 pinned snapshot CSV（auto_adjust=False），但 k1025_v2.py:51-53 是 live yfinance 下載且 auto_adjust=True（也違反專案 data-pinning 硬規則）；(2) 宣稱 SPY/BTC 都是 log return，code L61 SPY 用 simple pct_change；(3) 文字寫『22-day rolling std_{[t-21,t]}』、符號卻是 RV^{(20)}、code rolling(20) 是 20 天。v5 MAJOR 3 未修。
+  - **修法**: k1025_v2.py 改讀 paper/data snapshot（auto_adjust=False）、SPY 改 log return、統一 20-day 後重跑；或如實改寫 §3.1-3.2 並修符號為一致的 20-day。
+- **[MEDIUM/?]** `main.tex:215-232 (§5.2 Table 2)` — t 統計量與 p 值來源不同且互相矛盾：t=β/SE_boot（bootstrap），p 值卻取 QuantReg 解析 pvalues（code L316-317）。τ=0.5 列 t=4.15 配 p<10⁻⁸（normal t=4.15 對應 p≈3×10⁻⁵）、τ=0.75 列 t=6.61 配 p<10⁻²⁹ — 審稿人手算即拆穿。footnote 只說『SE 與 t 是 bootstrap』未揭露 p 是解析值。
+  - **修法**: p 值改用 bootstrap（percentile CI 或 bootstrap p），或刪 p 列只報 bootstrap 95% CI（JSON 已有 ci_lo/ci_hi）；footnote 如實標注。
+- **[MEDIUM/?]** `main.tex:156 (§4.3)` — 方法段寫 tail-dependence ratio『exceeds 8 in our sample』，但實際 β₀.₉₅/β₀.₅=19.85/2.82=7.04，abstract 與 Table 2 都寫 7.0× — v1 時代 8.5× 的殘留句。
+  - **修法**: 改為『approximately 7 in our sample』與全文一致。
+- **[MEDIUM/?]** `main.tex:50,75,171,347,364 (Harvey threshold 用法)` — Harvey et al. (2016) |t|>3 是 cross-section factor discovery 的 multiple-testing 門檻，被直接移植當 DM 預測比較的臨界值（『p-value=0.26 under the Harvey 2016 threshold』概念錯置）。v5 MAJOR 5 未修。OOS null 在傳統 1.96 下也成立，根本不需要這個站不住的門檻。
+  - **修法**: DM 檢定只用傳統臨界值報告；Harvey (2016) 降為動機性引用（『we adopt a conservative posture motivated by…』），刪除『under the threshold』式表述。
+- **[MEDIUM/?]** `main.tex:193-196 (Table 2 asym Granger p bounds)` — p 值上界寫錯：lag 3 真值 1.68×10⁻⁸ 卻標『<10⁻⁸』、lag 4 真值 1.28×10⁻⁷ 卻標『<10⁻⁷』、lag 1 真值 3.21×10⁻⁶ 卻印『3.0×10⁻⁶』。任何核對 replication JSON 的審稿人都會抓到。
+  - **修法**: lag3 改 1.7×10⁻⁸、lag4 改 1.3×10⁻⁷、lag1 改 3.2×10⁻⁶。
+- **[MEDIUM/?]** `main.tex:298-306 (§6.2 + §6.3)` — 兩個 robustness 宣稱（uniform ℓ=5 subperiod 重估『only 2020 rejects』；2024-01-11 ETF 切分『neither half rejects』）在 k1025_v2_results.json 完全沒有對應欄位，也無 % source 註解 — replication package 內不可驗證，違反專案 traceable-binding 硬規則。
+  - **修法**: 把 ℓ=5 uniform subperiod 與 pre/post-ETF Granger 加進 k1025_v2.py 輸出 JSON + reproduce.py checks，或刪除這兩段宣稱。
+- **[MEDIUM/?]** `paper/crypto-fear-channel/README.md:4 + review_history/v5_independent/` — README 仍標『READY FOR SUBMISSION…0 blocking issues』，但 2026-05-21 獨立審查 codex_review.md = REJECT（3 BLOCKING）且 commit bc2e9a1a 已降回 working；agy_review.md 為 0 byte 空檔（第二位獨立審查未完成）；main.pdf（5/17）早於 main.tex 最後修改（5/22）未重編譯。
+  - **修法**: README status 改 working/major-revision 並記錄 v5 REJECT→v2 重跑的 closure 狀態；補跑或刪除空的 agy_review.md；xelatex 重編 main.pdf。
+- **[MEDIUM/?]** `main.tex:381,388-392 (§8.1/§8.3)` — Reduced-form 證據（且 OOS 完全無預測增益）被升級成結構機制與政策語句：『margin calls cascade』『stress-test calibration threshold』『retail-investor protection…positive externalities』，無任何結構識別或 retail-share 代理變數支撐。v5 MAJOR 4 僅部分軟化。
+  - **修法**: §8.1 機制段降為『one candidate interpretation, untested here』；§8.3 政策建議加 conditional 語氣並刪『quantitative threshold for stress-test calibration』這類可操作性宣稱。
+- **[LOW/?]** `main.tex:79,181 (§2.3/§5.1)` — v5 兩個 MINOR 未修：(1) L181 仍稱 RV⁻ 為『the cumulative downside innovation』，與 §3.2 定義的 first-differenced rolling directional RV 不符（方法透明度疑慮）；(2) L79『the first such honest joint reporting』novelty claim 無系統性文獻比對表支撐。
+  - **修法**: L181 改『the first-differenced downside directional RV series』；L79 刪 first claim 或降為『rare in this literature』並引 1-2 篇對照。
+
+---
+
+## eav-universal-magnitude（MAJOR_REVISION）
+
+**主檔**: paper/eav-universal-magnitude/body.tex
+**距投稿**: 主結果（Table 1）被論文自己的 §6.6 multistart 段落宣告為 single-init FRAGILE 而未重估，加上 abstract/conclusion 與 13-market body 結構脫節、[CITATION NEEDED] 與兩個 placeholder 未補 — 需重估主表 + 全文敘事重整後才可投稿。
+**引用狀態**: references.bib 10 條全部真實且 metadata 正確（Beaver 1968 JAR; Patell 1976 JAR; Patell-Wolfson 1979 JFE; Ball-Kothari 1991 TAR; Engle-Rangel 2008 RFS; Engle-Ghysels-Sohn 2013 ReStat ✓已修正; Glosten et al. 1993 JF; Harvey-Liu-Zhu 2016 RFS; Diebold-Mariano 1995 JBES; Benjamini-Hochberg 1995 JRSS-B）。問題：(a) 全部缺 DOI 欄位；(b) line 197 [CITATION NEEDED] cross-market EAV anchor 仍未解決（v1 SEVERE）；(c) §6.4/6.5 的「Harvey pass」DM 小樣本修正引用 Harvey-Leybourne-Newbold (1997) 仍缺（v1 已flag未補）。v1 的無效 key（k1213_convergence_lesson、garch_x_vix_paper、engel_rangel 拼錯）已確認移除 ✓。
+**數字溯源抽查**: 抽查 8 組數字全部 MATCH：(1) Table 1 三市場 θ̂/t/CI/pooled_obs vs k1145/k1147/k1150_results.json 逐位吻合（TW 6.362e-5/t=5.242/[4.13e-5,9.38e-5]/121,014；US 1.909e-4/t=4.496/90,479；JP 1.413e-4/t=11.989/87,917）；(2) k1145 Hessian t=14.136≈「14.1」、pooled loglik 329,349.98≈「329,350」✓；(3) K1216c ρ=0.3791/p=0.2014/N=13 ✓；(4) K1207 F=689.52/p=7.87e-14/incR²=0.148 vs 0.0046 ✓；(5) K1163 θ_rel=0.194/boot t=4.807/placebo z=22.27 ✓；(6) K1149 TW lrt_p=0.0101、t_stress=-0.385 ✓；(7) K1165 ρ=+0.75 起點 ✓；(8) K1172 panel t=3.789、ρ=0.441/p=0.152 ✓。reproduce_report.json 20/20 green 但只覆蓋 Tables 1–3，§6.6 新增的所有數字（K1207/K1216c/K1163/multistart LR 表）完全不在 reproduce gate 內。
+
+### Findings
+
+- **[HIGH/internal_consistency]** `body.tex:1041-1043 (tab:multistart_lr note) vs body.tex:598-603 (Table 1) + abstract:61-68` — 論文自我否定主結果：§6.6.4 multistart 表註明寫「The two-basin pathology is invisible under default single-init L-BFGS-B (used in K1145/K1147/K1150/K1153/K1168/K1172)」且 10/10 市場 FRAGILE、LR 最高 2837（p<10⁻³⁰）、TW θ_rel 0.314→1.364（4.3×）、US 0.415→8.614（20.8×）。但 Table 1 / abstract / US>JP>TW magnitude ordering 全建立在未經 multistart 重估的 K1145/K1147/K1150 single-init 估計上，且 line 981 自己宣告「All future extensions must follow the multistart protocol」。Referee 讀到此處會直接判定 headline estimates 不可信。
+  - **修法**: 對 K1145/K1147/K1150 主 spec 跑同一 100-multistart 協議重估 Table 1（或以明確 multistart 證據證明 3-market 主 spec 無 two-basin 問題），並在 §2.3/§4 交代 refined vs canonical 差異與 ordering 是否保持；abstract 數字同步更新。
+- **[HIGH/structure]** `abstract (53-87) + conclusion (1199-1230) vs §6.6 (777-1109)` — Abstract 與 Conclusion 描述的是 3-market 論文；body §6.6 卻是 13-market panel 並宣告「Paper 2 commits to three cross-market structural drivers」（line 974-980：analyst attention、sector FE F=689.5、ownership ladder ρ=0.379）。Conclusion line 1228-1230 甚至把「extending to the United Kingdom, Hong Kong, or the Eurozone」列為 future work — 但 body line 783 的 13-market panel 已含 HK 與 EU，直接自相矛盾。
+  - **修法**: 重寫 abstract、intro contributions、conclusion，把 12/13-market panel 與三大 structural drivers 納入論文主敘事；刪除 conclusion 中已被 §6.6 做掉的 future-work 條目。
+- **[HIGH/citation]** `body.tex:196-198` — §1.3 第三貢獻 strand 仍掛著「[CITATION NEEDED: international cross-market EAV anchor---see lit_review.md A5; needs NotebookLM pass before submission]」— v1 review（2026-05-18）唯一 SEVERE finding，May 22 build 仍未解決。
+  - **修法**: 跑 NotebookLM/文獻 pass 找 cross-market EAV anchor（候選在 lit_review.md A5），補進 references.bib 並替換 placeholder。
+- **[HIGH/internal_consistency]** `body.tex:889-892 vs body.tex:1024-1033 (tab:multistart_lr)` — 同一符號 θ̂_rel 在相鄰段落取值矛盾：K1173 段落寫「TW = 0.17 through US = 0.59」（來自 k1163 四市場值 tw=0.167/us=0.586/jp=0.388），multistart 表卻列 TW canon=0.314、US=0.415、JP=1.668。JP=1.668（已開發市場）落在該段宣稱的「EM 3-25× above the developed-market reference range」區間內，直接打臉「developed range [0.17,0.59]」的敘述。同段還混用 multistart 表的 BR=1.89/IN=1.17/MX=1.20。違反專案自身 3-spec disambiguation 規則。
+  - **修法**: 為兩套 θ_rel（K1163 四市場 normalization vs K1216c pooled refit）加 footnote 明確 disambiguation，或統一採 K1216c refined 值重寫該段；逐一檢查 §6.6 所有 θ_rel 出處。
+- **[HIGH/number_provenance]** `body.tex:804,926,985,1064 (% source: k1222b_revision_guide.md) + reproduce_report.json (May 18)` — Reproduce gate 對新 body 已 stale：reproduce_report.json（20 cells，May 18）只綁定 Tables 1-3；§6.6 全部數字（eq:analyst_trajectory 3.236→3.808、K1207 F=689.5、K1216c ρ=0.379、K1163、multistart LR 表 10 行、Figures 5A-5E）不在 reproduce.py 內。且 4 處 % source 指向 k1222b_revision_guide.md（markdown 修訂指南，非 results JSON），違反專案硬規則「Table row → JSON source traceable binding」。
+  - **修法**: 擴充 reproduce.py 覆蓋 §6.6 所有 table/equation cells（指向 k1165/k1166/k1168/k1171/k1172/k1207/k1213/k1216*/k1163/k1173 results.json），把 revision_guide 來源全部改綁 JSON field；重跑 gate 到 green 才能進下一輪 review。
+- **[MEDIUM/internal_consistency]** `body.tex:866,941,988-989 vs body.tex:1024-1043` — 「9 audited markets」計數錯誤且全文不一致：line 988-989 寫「all 9 audited markets (AU + 5 EM + 4 DEV)」但 1+5+4=10；表 tab:multistart_lr 有 10 行；表註先寫「All 10 markets reject」又接「The 9/9 FRAGILE pattern」（1038-1039）。
+  - **修法**: 統一口徑：10 個 audited（= 9 refined-in-K1216c-rebuild + AU），全文 grep『9-market / 9/9 / 9 audited』逐處更正。
+- **[MEDIUM/methodology]** `body.tex:740-744 (§6.4)` — K1149 TW stress interaction 的統計解釋不成立：單一新增參數下 LRT 與 Wald 應大致一致（LRT p=0.010 ⇔ |t|≈2.57），但報告 t=-0.39 — 寫成「the additional parameter is jointly significant at the model level despite the individual t-statistic being near zero」在統計上不通。如此大的 LRT/Wald 背離恰是 likelihood surface 病態（與 FRAGILE 發現一致）的訊號，referee 會抓。Abstract 只說 TW null 也未揭露衝突的 LRT。
+  - **修法**: 刪除該句錯誤解釋；明寫 LRT/Wald 背離可能反映 flat/two-basin likelihood，將 TW interaction 判定降為 inconclusive 或用 multistart 重估後再下結論。
+- **[MEDIUM/methodology]** `body.tex:241-260 (eqs 1-3) + 303-313 (§2.3)` — 模型設定三處會被計量審稿人擋下：(a) τ_t（eq 3）含 firm-specific EAV_{i,t-1} 卻只下標 t 且命名為 market-level factor — 應為 τ_{i,t}；(b) §2.3 文字提到 stock fixed effects m_i (scale normalizations) 但 m_i 不出現在 eqs (1)-(4) 也不在 θ 參數列表（312-313）；(c) 乘法分解 g×τ 同時放 free ω_i 與 free θ0 有 scale indeterminacy（g/c × cτ 不變），文中未交代 normalization；另 ε_{i,t} 定義為 standardized innovation（241）卻直接當 eq (2) 的 ARCH 輸入，量綱無法生成 variance recursion。
+  - **修法**: 改記號 τ_{i,t}；把 m_i 寫進 likelihood 式並說明 scale normalization（如 E[g]=1 或 ω 約束）；核對 code 實際 recursion（應是 r²/τ 類），讓 eq (2) 與實作一致。
+- **[MEDIUM/structure]** `body.tex:425-451 (tab:summary) + body.tex:1238-1247 (Appendix A) vs body.tex:325-326,968` — v1 review 兩個 MAJOR 仍未修：Summary statistics 表全是 '---' 加 [PLACEHOLDER]；Appendix A 仍是 placeholder，但 line 325-326 footnote 與 line 968 都把「Appendix A 提供 analytic-gradient verification / multistart 細節」當作 convergence caveat 的支撐引用 — 引用不存在的內容。
+  - **修法**: 在 reproduce.py 加 summary_stats section 填表；完成 P1 analytic-gradient 重估後寫 Appendix A（含 multistart 結果），在此之前把指向它的支撐性 footnote 改為 forward-looking 措辭。
+- **[MEDIUM/citation]** `body.tex:768-769,774 (§6.5 Harvey pass) + references.bib` — DM 檢定的「Harvey pass」小樣本修正（K1148_d2/K1149 用 HLN correction）缺 Harvey-Leybourne-Newbold (1997, IJF) 引用 — v1 review 已點名，references.bib 重建時仍未加；目前文中 Harvey 只指 harvey2016 多重檢定門檻，兩個不同 Harvey 概念會被混淆。
+  - **修法**: 加 bib entry：Harvey, D., Leybourne, S., Newbold, P. (1997). Testing the equality of prediction mean squared errors. International Journal of Forecasting 13(2), 281-291，並在首次出現 'Harvey pass' 處改為 \citet{harvey1997} 修正的 DM 檢定。
+- **[LOW/writing]** `body.tex:981` — 「All future extensions on this specification must follow the §5.5.4 multistart protocol」— §5.5.4 是 k1222b revision guide 的編號，不是本文結構（該段實為 §6 內 subsubsection），交叉引用會讓 referee 困惑。
+  - **修法**: 改為 Section~\ref{sec:multistart_method}。
+- **[LOW/methodology]** `body.tex:330-342 (§2.4) + body.tex:289-299 (§2.2)` — (a) Cluster bootstrap B=150 對 2.5/97.5 percentile CI 偏少（N=30-31 clusters，期刊慣例 ≥999）；(b) EAV timing 敘述模糊：「We index the event as EAV_{i,t-1}=1 on the first trading day following the announcement」無法判讀 variance spike 是落在公告後首個交易日 t 還是 t+1。
+  - **修法**: (a) 至少對主結果補 B=999 sensitivity（或引文獻支持 150 足夠）；(b) 用一行 timeline 例子（公告日 → EAV index 日 → τ 反應日）寫死 timing。
+- **[LOW/writing]** `body.tex:40,46,13-15` — v1 MINOR 未修三件套：line 46 title page 仍有「(First draft; not for citation)」、line 40「[GitHub repo TBD]」、lines 13-15 fontspec+xeCJK+PingFang TC（非 macOS LaTeX 編譯會炸，英文論文無 CJK 需求）。
+  - **修法**: 投稿前刪 draft 標記、填 repo URL、移除 CJK 套件改 pdflatex-compatible preamble。
+- **[LOW/number_provenance]** `body.tex:942` — 「canonical trajectory ρ = +0.75 → +0.44 → +0.39」的 +0.75 無 inline % source（已驗證 k1165_results.json rho=0.750 屬實，但綁定缺失）。
+  - **修法**: 補「% source: experiments/k1165/k1165_results.json: ...rho = 0.75」並納入 reproduce.py。
+
+---
+
+## garch-x-vix（MAJOR_REVISION）
+
+**主檔**: paper/garch-x-vix/main.tex
+**距投稿**: 已投稿（under review），但 Table 3 顯著性欄與 replication package 有質性矛盾（C1/A3f/B2 翻轉）、headline t=4.03 對不上任何 archived artifact、macro 段落宣稱 6 變數實測 2 個、1 條 chimeric 引用 — R1 回覆前必須先把這些 body-level 數字溯源修乾淨，否則拿到 replication package 的 reviewer 一跑就會抓到。
+**引用狀態**: 27 條 bibliography 逐條核對：25 條真實且 author/year/期刊/卷期正確（Diebold-Mariano 2002 為 JBES 20(1) 合法 reprint；Conrad & Loch 2015 main.tex 的 JAE 30(7):1090-1114 正確，舊 citation_check.md 反而寫錯成 JBES）。1 條 chimeric：acerbi2019「Backtesting expected shortfall: Accounting for tail risk, Management Science 65(12):5542-5567」— 該標題屬 Du & Escanciano (2017, Management Science 63(4):940-958)；論文實際使用的 Z1/Z2 檢定出自 Acerbi & Székely (2014, Risk 27(11):76-81)，即 citation_check.md 當初驗證通過的版本，bibitem 在驗證後被改壞。1 條 self-citation working paper（lai2026vt）可接受。前輪報告的 fabricated Bayer & Hackethal (2020) 已確認移除。
+**數字溯源抽查**: 抽查 6 組：(1) K994 cross-asset PASS — QQQ QLIKE 1.481/1.420、|t|=3.71；EEM 1.338/1.307、2.47；0050.TW 1.458/1.432、1.44（JSON 存 −1.4388，論文取絕對值有 inline 註記）全 byte-level 對上。(2) K1393 leave-COVID PASS — t=4.26/2.52/1.48/3.76、n=1721/273/104/1448 全對；但同段「COVID window 改善 ~2.5× larger」對不上（JSON mean_diff 比值 ≈7.6×）。(3) K988b VRP 相關 PASS — 0.819/0.801/0.778/0.151 全對。(4) Table 3 C-block FAIL — C1 論文 t=3.49 Harvey Yes，k988b 存 2.849 False、canonical mcs_dm 存 1.995 false；A3f（論文 2.92 No）與 B2（論文 2.99 No）兩來源皆 >3.0 顯著，質性翻轉。(5) Headline FAIL — 論文 4.03 vs K988 JSON 4.483、mcs_dm_results.json 4.148、K1393 重跑 3.603，三個 artifact 皆對不上，而 main.tex:723 明文宣稱 4.03 出自 mcs_dm_results.json。(6) K1001 macro FAIL — 論文稱 6 個 macro 變數，JSON 只有 TermSpread+Unemployment(+Combined)；t=4.77 是 GJR_N_vs_A4f_VIX，非「VIX vs best macro」。
+
+### Findings
+
+- **[HIGH/number_provenance]** `main.tex:413 (C1 row), 409 (A3f), 410 (B2), 817 (§Multiple Testing)` — Table 3 的 Harvey 顯著性欄與兩個 archived 來源質性矛盾：C1 報 t=3.49「Yes」，但 k988b_results.json 存 dm_t=2.8486 significant=False、canonical mcs_dm_results.json 存 1.9953 significant_harvey=false — 3.49 無任何來源支持；反向地 A3f（論文 2.92 No）兩來源為 3.38/3.02 顯著、B2（論文 2.99 No）兩來源為 3.11/3.07 顯著。連帶「10 of 16 models achieve |t|>3.0」(line 817) 依 canonical JSON 應為 11/16 且成員不同。Reviewer 拿 replication package 跑 compute_mcs_dm.py 會直接重現此矛盾。
+  - **修法**: 以單一 canonical artifact（pinned-snapshot mcs_dm_results.json）重生 Table 3 全表，重算 Harvey 顯著集合與 §Multiple Testing 計數；若保留 paper-frozen vintage 則須在表注明 vintage 並補 errata 對照表（現行 errata 只涵蓋 SPY headline，未涵蓋 C1/A3f/B2 翻轉）。
+- **[HIGH/internal_consistency]** `main.tex:723（另見 52, 80, 776, 905）` — 全文 headline DM t=4.03 對不上任何 archived artifact：K988 自身 JSON 存 4.4826、canonical mcs_dm_results.json 存 4.1484、K988-faithful 重跑 K1393 存 3.6029。line 723 更明文宣稱 4.03「comes from the canonical pairwise DM matrix in mcs_dm_results.json」— 該檔存的是 4.148，陳述為偽。reproduce_report.json 已標 mismatch（rel diff 2.93% > tol 1%）。
+  - **修法**: 統一採 canonical 4.148（或對 4.03 給出可追溯的 frozen-vintage artifact 並 errata 註記），全文 abstract/intro/Table 3/Table 5/conclusion 同步；line 723 的來源宣稱必須改寫為真實來源。
+- **[HIGH/number_provenance]** `main.tex:861 (§5.3 VIX vs Macro)` — 宣稱估計「six macroeconomic variables (term spread, unemployment rate, industrial production, consumer sentiment, financial stress index, inflation expectations)」，但來源 K1001 只跑了 TermSpread + Unemployment (+Combined)（k1001_results.json models 區塊；experiments.md 自己也註明 scope 只有 2 個）。且「DM t=4.77 for VIX vs best macro model」實為 k1001 的 GJR_N_vs_A4f_VIX（A4f 對 GJR benchmark），不是 VIX 對 best macro 的比較。一句話兩處與證據不符。
+  - **修法**: 改寫為實際範圍（two macro variables and their combination）或補跑其餘四變數；t=4.77 重新標註為 A4f vs GJR，另補 A4f vs Macro_Combined 的正確 DM 統計量。
+- **[HIGH/citation]** `main.tex:976-980（in-text 321, 642）` — acerbi2019 為 chimeric reference：標題「Backtesting expected shortfall: Accounting for tail risk」屬 Du & Escanciano (2017, Management Science 63(4):940-958)；論文使用的 Z1/Z2 檢定出自 Acerbi & Székely (2014), 'Back-testing expected shortfall', Risk 27(11):76-81（citation_check.md 2026-04-10 驗證通過的正是 2014 Risk 版）；現印的 Management Science 65(12):5542-5567 (2019) 兩者皆非。
+  - **修法**: bibitem 改回 Acerbi & Székely (2014, Risk 27(11):76-81) 並把 in-text (2019) 改 (2014)；若要引 tail-risk 修正版檢定另列 Du & Escanciano (2017)。
+- **[HIGH/internal_consistency]** `paper/garch-x-vix/README.md:4,15,63 + reproduce_report.json + 缺 r1_response_queue.md` — v7 唯一 HIGH（replication metadata stale）在 v8_plan（2026-06-08，標 do-now ~65min）排定後仍未執行：README 保留「outperforming all GARCH-MIDAS variants」舊 headline、把 t=3.64 歸給 FEZ（main.tex abstract：STOXX50E=3.64、FEZ=3.45）、GLD 來源仍指 K1085 而非 paper-period K997；reproduce_report.json 自 2026-04-20 未更新（paper_frozen/pinned/live 三層未區分）；v8 A2 的 r1_response_queue.md 不存在。
+  - **修法**: 執行 v8_plan A1-A3：README headline 改 qualified 表述 + FEZ/STOXX 值對調 + GLD 來源改 K997；reproduce_report.json 加 layer 欄位標 controlled erratum；建立 r1_response_queue.md 收 v7 P1-P3 wording patches。
+- **[MEDIUM/methodology]** `main.tex:917 (Limitations) vs errata_pending.md SF1 (K1378)` — 內部 K1378（2026-05-19）已發現同 OOS 窗（2019-2026, n=1852）用另一種 r²-QLIKE normalization 時 A4f vs GJR 的 DM 翻號（t=−1.19，非顯著且方向反轉）；Limitations 只承認 5-min RV proxy 下「magnitudes may differ」，低估了已知的 proxy/loss-normalization 敏感度。
+  - **修法**: R1 response 須誠實揭露 loss-kernel normalization 敏感性並給 reconciliation（K1066 OC-proxy t=+4.04 shelf-ready LaTeX 可同時納入作為正面 robustness）；Limitations 措辭從『magnitudes may differ』升級為 sign-sensitivity 揭露。
+- **[MEDIUM/internal_consistency]** `main.tex:416-417 (Table 3) vs 525 (Table 5)；另 777-778 (Table 8)` — 同一量在不同表用了不同 vintage：GJR SPY QLIKE Table 3 = −8.273（合 K988b）vs Table 5 = −8.277（合 K988）；A4f −8.360 vs −8.361。Table 8 pairwise A4f vs A4 = +0.64、vs A2 = +0.72，canonical JSON 為 1.35/0.84。
+  - **修法**: 全文 SPY 數字統一單一 canonical run；不可避免的 vintage 差異用一個 footnote 一次性揭露。
+- **[MEDIUM/internal_consistency]** `main.tex:412 (Table 3 A5 row) vs 428 (Finding 1 text)` — A5 DM t：表報 1.90、內文寫 1.84（K988 JSON 存 1.8396、canonical 存 1.9467）— 表與文各取不同 vintage。
+  - **修法**: 統一為所選 canonical 來源的值（canonical=1.95 或 frozen=1.84），表文一致。
+- **[MEDIUM/internal_consistency]** `main.tex:430, 432 (Findings 2-3) vs Table 3 (402-403)` — 內文 Finding 2 寫 A2 QLIKE −8.356（表為 −8.355）、Finding 3 寫 A2f −8.353 / A2 −8.356（表為 −8.354 / −8.355）— 第三位小數逐處不合，reviewer 抽查即中。
+  - **修法**: 以 Table 3 最終值回改內文所有 QLIKE 引述。
+- **[MEDIUM/internal_consistency]** `main.tex:369-377 (Data §4.2), 514, 911, 917` — 資產數三處互相矛盾：Data 節列「四個 additional assets」（QQQ/EEM/GLD/0050.TW），Table 5 卻有 6 個非 SPY 資產（STOXX50E、FEZ 從未在 Data 節介紹、無資料來源描述），結論說「five of seven tested markets」，Limitations 又說「covers only five assets」。
+  - **修法**: Data 節補 STOXX50E/FEZ 的來源與期間；統一計數（7 markets incl. SPY / 6 additional），Limitations 句改正。
+- **[MEDIUM/methodology]** `main.tex:530 (Table 5 EEM row) vs 543-545` — 機制敘事自相矛盾：EEM 被歸因為「weak VIX linkage / idiosyncratic drivers」而不顯著，但論文自己的相關欄顯示 EEM VIX-r² corr = 0.50（k994: 0.4989），不低於顯著的 QQQ (0.49) 與 SPY (0.52)。「fear index relevance」機制無法以該欄位解釋 EEM 失敗，reviewer 必抓。
+  - **修法**: 修正機制論述（例如改以 overnight/time-zone mismatch 或 idiosyncratic EM factor 證據支撐），或承認 correlation 不是 sufficient statistic 並弱化該段因果語氣。
+- **[MEDIUM/internal_consistency]** `main.tex:799-801, 808 (§HAR-RV)` — 宣稱 HAR 比較「evaluation period and estimation protocol match those of the main horse race」，但 n=1,852（r² proxy 評估）與 n=1,866（QLIKE 評估）皆 ≠ 主表 n=1,825，差異來源未解釋。
+  - **修法**: 加 footnote 說明樣本差（RV 資料可得性 / refit 邊界處理），或對齊到同一 n。
+- **[MEDIUM/number_provenance]** `main.tex:723（COVID window 段）` — 「mean QLIKE improvement during this window is approximately 2.5× larger than outside it」對不上來源 k1393_results.json：COVID mean_diff=0.5117 vs non-COVID 0.0674 → ≈7.6×；vs full-OOS 0.0927 → ≈5.5×。2.5× 無對應欄位。
+  - **修法**: 改為 JSON 可追溯的比值（~7.6×）或刪句；若 2.5× 另有計算定義（如相對 QLIKE 比例）需寫明公式與來源。
+- **[LOW/writing]** `main.tex:919 (Conclusion, future research)` — 結論夾帶無表、無實驗編號的結果性宣稱：「preliminary DCC-A4f results suggest significant gains」、「initial tests suggest √h scaling provides adequate approximation」— 在 Harvey-rigor 框架下這是 unsupported claims，reviewer 會要求出示或刪除。
+  - **修法**: 刪除結果性措辭，改純 future-work 描述；或補對應 K 實驗與數字。
+- **[LOW/structure]** `main.tex:721（extended sub-period 段）` — 七個 2 年窗的整段統計（4.80-7.00%、mean 6.42%、pooled t=6.977、3/7 Harvey）無 in-text 來源標註（其他 robustness 段皆有 \texttt{experiments/kXXXX} 指引；此段對應 K1027 但正文未引）。
+  - **修法**: 段末補「Source: experiments/k1027/」並考慮升格為小表，與 Table 9 體例一致。
+
+---
+
+## leverage-direction（MAJOR_REVISION）
+
+**主檔**: paper/leverage-direction/body.tex
+**距投稿**: 核心結果（黃金 inverted leverage γ=−0.067/t=−5.79/93%）已被自家 Table 2 K903 替換值（+0.002/t=+0.15 NS/67%）推翻，但 Intro/§4.2/§5.1/§6 全文仍宣稱舊數字 — body 與 canonical table 必須先收斂、Table 3 八列 legacy 數字對齊 K903、reproduce gate 重跑轉 green，才談投稿。
+**引用狀態**: 54 條書目抽查：主力引用（Bollerslev 1986/1987、Glosten et al. 1993、Patton 2011、Hansen & Lunde 2005、Hansen et al. 2011、Moreira & Muir 2017、Cederburg et al. 2020、Fissler & Ziegel 2016、Bayer & Dimitriadis 2022、Kupiec 1995、Christoffersen 1998、Baur 兩篇）作者/年份/期刊/DOI 均正確。可疑 3 條：hood2025「Hood, B., & Raughtigan, C. (2025) JPM 52(1), DOI 10.3905/jpm.2025.1.764」— 姓氏 Raughtigan 與 DOI 無法確認存在，且此文是 Contribution 2 框架的錨點引用，投稿前必走 citation-verifier；nelson2025 SSRN No. 5931154 編號偏高無法確認；xu2024 CFR forthcoming 無 DOI 無法核實。另 main.tex 手寫 thebibliography 含 ~9 條 body.tex 從未引用的項目（engle2004, longin2001, mcneil2015, kim2019, bucci2020, araya2024, campbell2017, engleGhyselsSohn2013, pattonSheppard2015）。
+**數字溯源抽查**: 5 項抽查：(1) Table 4 vs experiments/k1185/k1185_results.json — MATCH（33/18/14/14 violations 全對）。(2) Table 3 vs experiments/k903/tables/k903_table3.csv — 僅 SPY 2023-24 列 MATCH（−8.623/−8.674/p=.0032）；其餘 8 列 MISMATCH，含 GLD 2023-24 正負與顯著性翻轉（K903: GARCH 顯著勝 GJR，DM p=0.0013；論文稱 NS p=0.871）、QQQ 2023-24 方向翻轉。(3) Table 2 vs k903_results.json — GLD 列 MATCH（+0.002/0.055/67%/+0.15），但 SPY（紙 +0.211 vs K903 +0.132）、EEM（+0.180 vs +0.087）、SLV（t=−2.91 vs −0.68 NS）、BTC（t=+1.83 vs +2.88）全 MISMATCH — 整表是混血 vintage。(4) tab:var_ortho GJR+Normal：紙 10/502 Kupiec p=0.049；canonical K802 shim 為 9/502（→ Kupiec p≈0.11，不再是 borderline FAIL）；10/502→p=0.046 算術本身正確但跨來源脆弱。(5) Pearson ρ=0.944, N=5 宣稱 p<0.001 — 重算 t=4.96, df=3 → 雙尾 p≈0.016，宣稱錯一個數量級。
+
+### Findings
+
+- **[HIGH/internal_consistency]** `body.tex:11,134,154,156,162 vs tables_main.tex:24,33` — 核心結果自相矛盾：Table 2 GLD 列已改為 K903 canonical（mean γ=+0.002, HAC t=+0.15 NS, 67% negative），caption 明寫舊估計（−0.067, t=−5.79）「source experiment could not be re-located」；但 Intro L11 仍稱「Gold's inverted leverage is statistically significant (HAC t=−5.79, p<0.001), persists across 93%」，L134 稱 mean −0.067/93%、L154 稱 HAC t=−5.79、L156 bootstrap CI [−0.099,−0.035] 排除零、L162 再稱 93%。論文標題級主張與自家 canonical 表直接互斥。
+  - **修法**: 二擇一且全文一致：(a) 採 K903 → 重寫 Intro/§4.2.1/§4.2.3/§5.1/§6，把黃金敘事降為 regime-dependent（abstract 已是此版本），刪 −5.79/93%/CI 等舊統計；或 (b) 重新定位舊估計來源並以新 K 實驗復現後恢復舊表。不可保留現狀混合版。
+- **[HIGH/number_provenance]** `body.tex:134 footnote vs experiments/k903/k903_results.json::table2_rolling_gamma.GLD` — L134 腳註辯稱 K903 的 +0.002 是「single full-sample point estimate」、與 rolling-window mean −0.067「measure different objects」— 但 k903_results.json 顯示 +0.002 正是 58 個 quarterly rolling windows（w=504, step=63, 2010–2026, HAC lags=8）的 mean_gamma，與論文統計量是同一物件。腳註對 K903 的描述事實錯誤，且與 tables_main.tex L24 caption（「n=58 quarterly windows」）互斥。
+  - **修法**: 刪除或改寫此腳註：承認 K903 是同規格 canonical replication 且符號翻轉（k903_vs_paper_diff.md 標 SIGN REVERSED critical），不可用「不同物件」說法掩蓋。
+- **[HIGH/number_provenance]** `tables_main.tex:49-58 (tab:qlike) vs experiments/k903/tables/k903_table3.csv` — Table 3 九列僅 SPY 2023-24 對齊 K903，其餘 8 列為 legacy 數字且與 canonical 復現衝突：GLD 2023-24 紙稱 Δ=−0.07% p=0.871（NS），K903 為 Δ=+0.39% p=0.0013（GARCH 顯著勝 GJR，與 L185「Neither approaches significance」矛盾）；QQQ 2023-24 紙 +0.92% p=0.067 vs K903 −0.33% p=0.181（方向翻轉）；SPY 2025 紙 p=0.029 vs K903 p=0.048。experiments.md L21 自承「remaining rows still legacy」。9/9 分類宣稱建立在無法復現的數字上。
+  - **修法**: 全表改用 K903 數值（或重跑一個 pin 住 vintage 的新 K 對齊全部 9 cells），再依新表重新計算分類正確率與 §4.3.2 敘事；GLD 顯著反向結果必須如實報告。
+- **[HIGH/internal_consistency]** `body.tex:199 vs tables_main.tex:35; abstract main.tex:39` — 模型選擇規則被自家表打臉：L199 稱 BTC「yields t<1.65, so the rule correctly prescribes symmetric GARCH」，但 Table 2 BTC 列 HAC t=+1.83 > 1.65（K903 更高 +2.88），依規則應選 GJR，與表內 Model Choice=GARCH 及文字矛盾；abstract 的合併判準（t>1.65, |γ|>0.10）對 BTC（γ=0.117, t=1.83）同樣失效。9/9 與 6/6 分類宣稱在 BTC 上不成立。
+  - **修法**: 明確定義規則用的 t 是哪個統計量（單窗估計 t 或 quarterly-mean HAC t），用同一統計量重算全部分類；若 BTC 被誤分類，下修 9/9→8/9 並改寫 L199 的 BTC 示範段。
+- **[HIGH/methodology]** `paper/leverage-direction/reproduce_report.json (2026-05-17) vs README.md:4` — Reproduce gate 過期且非 green：report 生成於 2026-05-17，早於 2026-06-07 的 body/tables 重寫（含 Table 2 GLD 行替換、tab:var_panel 三個 pass rate 修訂）；alert_level=amber、traceable_match_rate 80.9% < 95% gate rule；untraceable_summary 明列「Abstract 6/6 OOS claim and rho=0.83 have no traceable JSON」。README 稱「Reproduce gate 0 MISMATCH」具誤導性 — paper-workflow 規則要求 green 才可 review/submit。
+  - **修法**: 更新 reproduce.py 的 expected values 對齊 6/7 新表後重跑；為 abstract 的 6/6 OOS 分類與 ρ=0.83（N=14）建立 dedicated K 實驗 JSON；gate 轉 green 前凍結投稿。
+- **[HIGH/number_provenance]** `body.tex:13,250,271,408; main.tex:39 (abstract); body.tex:514 (conclusion)` — 統計錯誤：「Pearson ρ=0.944, p<0.001, N=5」— t = 0.944·√3/√(1−0.891) = 4.96, df=3，雙尾 p≈0.016（單尾 0.008），p<0.001 錯一個數量級。同段正確算出 ρ=0.80 N=5 p=0.10 與 ρ=0.83 N=14 p=0.0002，顯示 N=5 那條 p 是孤立錯值，重複出現於 abstract、intro、§4.5、§5.3、conclusion 共 5 處。
+  - **修法**: 全部改為 p≈0.016（或只報 N=14 擴展樣本的 p=0.0002 作為推論依據，N=5 僅報點估計）。
+- **[MEDIUM/internal_consistency]** `body.tex:11 vs 199 vs 201` — 門檻值三版漂移：Intro 稱「|γ|>0.10 rule correctly classifies all nine」；L199 稱「A raw γ>0.10 threshold would misclassify BTC」且等效門檻是 [0.12, 0.17]；L201 又稱「the numerical threshold (γ>0.08)」。三個互斥的門檻陳述，Intro 與 §4.3.2 直接矛盾。
+  - **修法**: 統一為 t>1.65 主規則 + 等效幅度區間 [0.12,0.17]；刪 Intro 的 |γ|>0.10 9/9 句與 L201 的 0.08。
+- **[MEDIUM/internal_consistency]** `body.tex:144,185,285 vs tables_main.tex:49,94,454` — 同一 cell（SPY 2023-24, w=504）的 DM p 與 Δ 多版並存：L144 與 tab:var_ortho 註腳稱「−3.8%, DM p=0.001」；Table 3 與 L185 稱 Δ=−0.59%, p=0.003（K903 canonical 為 0.0032）；L285 又用 −3.8%。−3.8% vs −0.59% 來自 Patton-centered vs quasi-LL 兩種尺度但文中未標示，p=0.001 vs 0.003 則是不同來源（K799 vs K802/K903）未統一。
+  - **修法**: 統一採 K903 的 p=0.003；所有 Δ% 標明尺度（建議全改 quasi-LL 尺度 −0.59%，或在 −3.8% 處加 centered-loss 腳註），對齊 K903_vs_paper_diff.md 已標的 Table 3 vs Table 8 內部不一致。
+- **[MEDIUM/number_provenance]** `tables_main.tex:91 (tab:var_ortho) vs paper/leverage-direction/experiments/k802_gjr_skewt_results.json` — Orthogonality 敘事的關鍵 cell 跨來源脆弱：紙報 GJR+Normal 10/502 violations (1.99%, Kupiec p=0.049, 「Borderline FAIL」)，但 canonical K802 為 9/502 (1.79%) → Kupiec p≈0.11，Green Zone PASS。reproduce gate 把此列標 NOTE（canonical K799），即「GJR+Normal fails VaR」的核心結論依賴 10 vs 9 一個 violation 的 vintage 選擇。
+  - **修法**: 在 tab:var_ortho 加註 vintage 敏感度（9–10 violations, p∈[0.049,0.11]），把 §4.4/§5.2 的「borderline failure」措辭軟化為「borderline（vintage-dependent）」，或重跑 pin 住 snapshot 的單一 canonical 實驗。
+- **[MEDIUM/methodology]** `body.tex:496 (Limitations, Multiple testing)` — Multiple-testing 防線與實際推論不一致：宣稱以 Harvey t>3.0 為顯著門檻緩解 110+ 實驗的 data mining，但 headline 結果全在 t<3 被接受（Spearman ρ=0.886 p=0.019、DM p=0.003/0.029/0.023、regime t=−3.79 勉強過）；「BH FDR audit 30/32 survive」無 K 實驗 JSON 可溯源（reproduce report 未列）。
+  - **修法**: 明確區分哪些主張過 t>3（GARCH-X VIX、HAR-ABS、regime-conditional t=7.90）哪些只到 5% 名目水準，並為 BH audit 補 dedicated 實驗 JSON 或刪除該句。
+- **[MEDIUM/methodology]** `body.tex:34,42 (§3.1) vs tables_main.tex:24; body.tex:162,173,330` — 樣本期間口徑混亂：§3.1 宣告資料為 2017-01–2026-03，但 Table 2 rolling γ 用 2010–2026、regime 分析用 2005–2026、timing tests 用 2014–2026、L162 又稱「our 2019–2026 sample」的 93% — 資料節從未描述這些更長期間的資料抓取與處理；93% 的母體窗口（2010–2026 vs 2019–2026）兩處說法不同。
+  - **修法**: §3.1 加一段列出每類分析的確切期間與資料延伸（2005/2010/2014 起始的 pull），並統一 93%（若保留）所屬窗口的唯一定義。
+- **[MEDIUM/citation]** `main.tex:181-182 (hood2025), 214-215 (nelson2025), 229-230 (xu2024)` — 三條關鍵引用無法確認存在：hood2025「Hood, B., & Raughtigan, C. (2025). Volatility targeting is trendy. JPM 52(1), DOI 10.3905/jpm.2025.1.764」— 姓氏與 DOI 皆可疑，而 Contribution 2 自稱「generalizes the equity-specific finding of hood2025」，若該文不存在則貢獻定位崩塌；nelson2025 SSRN No.5931154 編號異常；xu2024 CFR forthcoming 無 DOI。
+  - **修法**: 投稿前對這三條跑 citation-verifier / web 檢索確認書目；hood2025 若不存在，Contribution 2 的文獻定位需改錨到 Moreira & Muir (2017) + Harvey et al. (2018) 等可驗證文獻。
+- **[MEDIUM/methodology]** `tables_main.tex:123-143 (tab:vt notes)` — 跨資產 VT 比較表每資產用不同評估窗（GLD 2022–2026 金牛市、SPY 2014–2026、BTC post-2019、TLT/EEM ~2015–2026），再以這些不可比的 MDD/Sharpe 算跨資產 Pearson ρ=0.944；註腳自承 reproducibility check 僅 6/20 cells 匹配、GLD 需「paper-original data vintage」。Referee 必挑窗口 cherry-picking（GLD BH Sharpe 1.56 即牛市窗產物）。
+  - **修法**: 主表改用統一 OOS 窗（如 2015–2026）重算 5 資產（replication check 已有此版本），把 per-asset 原窗版移到 supplement 作 robustness；ρ=0.944 用統一窗數字重算。
+- **[LOW/citation]** `main.tex:62-235 (thebibliography)` — ~9 條書目在 body.tex/tables_main.tex 從未被 \cite：engle2004, longin2001, mcneil2015, kim2019, bucci2020, araya2024, campbell2017, engleGhyselsSohn2013, pattonSheppard2015（手寫 thebibliography 不會產生 unused 警告）。
+  - **修法**: 刪除未引用條目，或在對應 supplement 引用處保留並把書目移到 supplementary.tex。
+- **[LOW/writing]** `body.tex:500; experiments.md:5,17-32` — (a) Crowding 段「We analyze this through two channels」後接 First/Second/Third 三項，數目不符；(b) experiments.md 仍標「Current body: body_v3.tex」且表號對映到舊 66pp 版（Table 1–14），與現行 7-table main + supplement 架構脫節 — replication package 的 canonical mapping 文件失準，JBF hard requirement。
+  - **修法**: (a) 改為 three channels；(b) 更新 experiments.md 至 body.tex/tables_main.tex 的新表號（Table 1–7 + supplement），重建 table→K mapping。
+
+---
+
+## prg-periodic-garch（MAJOR_REVISION）
+
+**主檔**: paper/prg-periodic-garch/main.tex
+**距投稿**: 數字溯源全部通過，但 v5 獨立審查的三大 BLOCKING（Table 2 DM 符號口徑自相矛盾、GJR-X「fair-information」宣稱與 Eq.(10) 的 t-1 lag 不符、Basel 燈號計算錯誤）至今未修，加上 VaR/ES「六市場一致排序」缺 0050.TW 證據——修掉這四項才有 FRL 投稿基礎。
+**引用狀態**: 21 條 bibliography 抽查全部真實存在且附 DOI（Linton & Wu 2020 JoE 217(1)、Kim et al. 2023 JBES 41(4)、Blanc et al. 2014 Physica A 402、Todorova & Souček 2014 FRL、Lai et al. 2024 APFM 31(2) 皆正確）。兩個 usage 問題：(1) line 85 把 proxy-substitution/ranking-consistency 歸給 Hansen & Lunde (2005) JAE horse-race 論文，正確來源是 Hansen & Lunde (2006, JoE, Consistent Ranking of Volatility Models)；(2) line 209 把 Harvey et al. (2016)（cross-section factor 研究的 t>3）包裝成「volatility-forecasting/MCS literature 的標準門檻」，屬 citation overreach（v5 Codex #4 已標，僅軟化未修正）。
+**數字溯源抽查**: 抽查 11 個關鍵數字全部對上：Table 2 SPY DM 6.00 = k880 layer5_dm_tests.GJR_vs_PRG_Extended 6.0039；EEM 6.63 = k881 6.6289；QQQ 4.26 = 4.2572；GLD 6.12 = 6.1175；0050.TW 5.27 = k886 5.2672；TAIFEX 5.10 = k874d 5.0996；TAIFEX PRG-vs-Sep −4.07 = k874c PRG_Extended_vs_Separate_GARCH −4.0657；SPY VaR 0.93%/Kupiec p=0.77 = k880 layer4_var (17/1823, p=0.7696)；SPY FZ DM 3.75 = k880b 3.7502；Table 5 Sharpe 1.66/MDD −11.5% = k874e layer6_economic (1.6622/−0.1146)；GJR-X 數字 = k1260（reproduce gate 22/22 green）。唯一弱點：reproduce_report table3 ablation DM 重現值 +0.049 vs 論文 −0.57（符號翻轉，定性結論不變但未入 tolerance gate）。
+
+### Findings
+
+- **[HIGH/internal_consistency]** `main.tex:195-205 (Table 2 note) + main.tex:41 (abstract)` — Table 2 註明「positive values favor PRG」，但 PRG-vs-Sep 欄全為負值（−4.07..−6.69）且正文/摘要把負值解讀為 PRG 勝。實際是表格混用兩種 JSON 方向：PRG-vs-GJR 欄取自 GJR_vs_PRG_Extended（正=PRG 勝），PRG-vs-Sep 欄取自 PRG_Extended_vs_Separate（負=PRG 勝，k880 winner 欄確認 PRG_Extended）。同一表同一標籤格式、相反符號口徑——v5 agy review BLOCKING #2 已指出，未修。
+  - **修法**: 統一 d = loss(benchmark) − loss(PRG) 口徑，把 vs-Sep 欄翻號為 +4.07..+6.69，同步改摘要「−6.69 ≤ DM t ≤ −4.07」與 Conclusion 同句；Table 2 note 一句講清 loss-differential 定義。
+- **[HIGH/methodology]** `main.tex:307-314 (§4.5, Eq. 10) + main.tex:41 (abstract)` — 「By construction, PRG and GJR-X consume identical session-level information」為假：Eq.(10) 與 K1260 程式（experiments/k1260 README line 31：r²_overnight,t-1 在 t-1 close 已知）都用昨日 overnight，而 PRG 的 intraday forecast（Eq. 4）在開盤用當日已實現 r²_{d,0}。GJR-X 永遠少看一個 session 的資訊，故摘要「dominance is structural, not informational」與 line 314「cannot be reduced to overnight information access」不成立。v5 Codex BLOCKING #2 原文指出，未修。
+  - **修法**: 補一個兩階段 GJR-X†：在 day-d open 以同日 r²_{d,0} 為 regressor 重估再比 DM（與 PRG 同資訊集）；或刪除「identical information / structural not informational」字句，改為「GJR-X shows the t-1 exogenous-regressor route does not replicate PRG's gain」這種可支撐的弱宣稱。
+- **[HIGH/number_provenance]** `main.tex:259-262 (Table 4 Basel column); experiments/k874e/k874e_full_comparison.py:831-837` — Basel 燈號計算錯誤：程式用 violation rate ≤ 4% 即標 GREEN（不依樣本數的二項分佈臨界值）。TAIFEX GJR 21/843 違約（2.49%，Kupiec p=0.0003）與 SPY GJR 35/1823（1.92%，p=0.0005）按 Basel 累積二項規則應為 yellow/red，表中卻標 Green，與同列 Kupiec p<0.01 自相矛盾。v5 agy MAJOR #3 已指出，未修。
+  - **修法**: 用累積二項分佈（yellow 起點 95%、red 起點 99.99%）按各市場實際 n 重算 zone；或刪 Basel 欄只留 Kupiec/CC。同步修 k874e/k880/k881 共用的 basel_zone 函式（修流程不是只修表）。
+- **[HIGH/internal_consistency]** `main.tex:274 (§4.3 末句) + Table 4 (main.tex:248-272)` — 「consistent ranking PRG Extended > PRG Basic > Separate > GJR > HAR holds across all six markets for both VaR and ES」無證據：Table 4 完全沒有 0050.TW 列；k886 results JSON 無任何 ES/FZ 欄位（keys 只到 layer5_dm_tests）；GLD 的 QLIKE 排名中 PRG Basic 還優於 Extended。摘要「PRG also dominates in VaR and ES evaluations」同屬過度宣稱（v5 Codex MAJOR #5）。
+  - **修法**: 把宣稱限縮到有資料的市場（VaR 六市場可補 k886 layer4_var；ES 只有五市場），或補跑 0050.TW ES；刪「consistent ranking ... all six markets」改為按表列實際勝負陳述。
+- **[MEDIUM/internal_consistency]** `main.tex:196 (Table 2 SPY QLIKE 0.748) vs main.tex:330-332 (Table gjrx PRG Ext 0.7559)` — 同一 SPY PRG Extended、同稱 n=1823，Table 2 報 0.748（K880，OOS 迄 2026-04-02）、§4.5 報 0.7559（K1260，OOS 迄 2026-04-08），1% 差異無任何 footnote 解釋。v4 review 已把 K1260 的 PRG-vs-GJR DM row 移除，但 QLIKE 歧異仍裸露，referee 會讀成 cherry-picking。
+  - **修法**: 在 Table gjrx note 加一句 disambiguation footnote：兩值來自不同資料 snapshot（K880 2026-04-02 vs K1260 2026-04-08）、估計 pipeline 獨立重跑（比照 feedback_3spec_disambiguation 的 P1 K1256 pattern）。
+- **[MEDIUM/citation]** `main.tex:209 (§4.1)` — 宣稱 Harvey et al. (2016) 門檻「explicitly corrects for ... multiple volatility forecasting models」且「now standard in the model-confidence-set and volatility-forecasting literatures」——HLZ 2016 是 cross-section factor discovery 的 t>3 建議，與 DM 波動率比較無直接關係，文內也無任何支持「已是標準」的引文。v5 Codex MAJOR #4 指出後僅加長句子未改實質。
+  - **修法**: 改寫為「we adopt |t|>3.0 as a conservative threshold, adapting the multiple-testing logic of Harvey et al. (2016) from factor research」並刪「now standard in ... literatures」句。
+- **[MEDIUM/citation]** `main.tex:85 (§2.1)` — 把 proxy-substitution / ranking-consistency 性質歸給 Hansen2005（JAE 的 GARCH(1,1) horse race 論文）：「with Hansen (2005) establishing the companion proxy-substitution property」。該結果的正確來源是 Hansen & Lunde (2006, Journal of Econometrics, Consistent Ranking of Volatility Models)。
+  - **修法**: 新增 Hansen & Lunde (2006) bibitem 並把該句的 \citet{Hansen2005} 換掉；Hansen2005 保留給 benchmark-comparison 脈絡。
+- **[MEDIUM/internal_consistency]** `main.tex:345 (Discussion 首句) vs main.tex:161-162 (Table 1)` — 「EEM, with the highest overnight share (52.6%)」與自己的 Table 1 矛盾：GLD 53.1% 才是最高（§3 正文也寫 varies ... to 53.1% (GLD)）。且 GLD share 最高但 DM 6.12 非最大，所謂 share→DM 單調關係在 GLD 處斷裂。
+  - **修法**: 改為「EEM, with one of the highest overnight shares」並加一句承認 GLD 是反例（share 最高但 DM 次高），把機制解讀降為 suggestive correlation。
+- **[MEDIUM/methodology]** `main.tex:§2.2/§4 全文（無參數表）` — 提出新計量模型卻全文無任何市場的參數估計值/標準誤/session 間異質性檢定，也未報告各 refit 窗口 ρ₀ρ₁<1 是否恆成立（Eq. 5 是核心平穩性條件）。v5 agy MAJOR #4 指出，未修。
+  - **修法**: 加一張 compact 表（TAIFEX + SPY 全樣本估計：ω_s/α_s/β_s/γ_s + SE + overnight-vs-intraday Wald test + ρ₀ρ₁ 值），FRL 篇幅不夠就放 Online Appendix。
+- **[MEDIUM/methodology]** `main.tex:298 (Table 5 note) + §4.4` — VT 策略 Sharpe 1.66 vs 1.01 無任何正式統計檢定（無 Sharpe-difference test、無 bootstrap CI），成本分析只在 note 做 35bps 均勻扣減的 back-of-envelope。v5 Codex MINOR #10 指出，未修。
+  - **修法**: 加 Ledoit-Wolf (2008) Sharpe difference test 或 stationary-bootstrap CI（固定 seed），與 0.5/1/2.5bp 三檔成本敏感度一列帶過。
+- **[LOW/internal_consistency]** `main.tex:195 (Table 2 TAIFEX MCS 欄) vs main.tex:211` — MCS 欄寫「PRG only」但正文與 k874e layer2_mcs superior_set 是兩個模型（PRG Basic + PRG Extended）。v5 agy MINOR #8 指出，未修。
+  - **修法**: 欄位改「PRG Basic+Ext」或在 note 定義「PRG only = both PRG specifications, all benchmarks eliminated」。
+- **[LOW/number_provenance]** `main.tex:230 (Table 3 K880v2 DM −0.57); reproduce_report.json table3_ablation_check` — Table 3 的 K880v2 DM −0.57 在 reproduce gate 重現為 +0.049（符號翻轉，且該項未入 22/22 match 計數，只留 note）。定性結論（優勢消失）成立，但點估計對 yfinance snapshot 漂移極脆弱。
+  - **修法**: 正文與 Table 3 改報「statistically indistinguishable from zero (|t|<0.6 across snapshots)」而非單點 −0.57，或 pin 資料 snapshot 後重算並把該項納入 reproduce tolerance gate。
+- **[LOW/structure]** `paper/prg-periodic-garch/experiments.md:56 (Table 5 mapping)` — Replication package 的 Table→K 對應表把 Table 5（VT 經濟價值）標 K874d/K883，但 Sharpe/CAGR/MDD/turnover 實際存在 k874e_results.json layer6_economic（k874d/k883 JSON 內 grep 不到任何 sharpe 欄位）。投稿 hard requirement 的 traceable binding 在此斷鏈。
+  - **修法**: experiments.md Table 5 source 改為 K874e（layer6_economic），並在 reproduce.py 補 Table 5 數字的 table_row_mapping 檢查。
+
+---
+
+## taiwan-vt（MAJOR_REVISION）
+
+**主檔**: paper/taiwan-vt/body_v3.tex (via main_v3.tex, PDF main_v3.pdf 2026-06-07)
+**距投稿**: v1 的 H1（γ=0.097 統一）與 H2（2383.TW 揭露）已確實修復，但 abstract/intro/§8 仍殘留至少 5 處被正文自身 errata 推翻的舊版數字（5.0×/CI[2.8,8.1]、Student-t 0.5%、MDD −77.3%、Sharpe 0.69）＋ SSVS 表 2 個 PIP 無法溯源 — 需一輪全文 stale-number purge + SSVS 表重建 + 修 broken ref，再過 reproduce gate 才可投稿。
+**引用狀態**: 34 條 bibitem 全為真實文獻（Moreira-Muir 2017 JF、Ang-Chen 2002 JFE、Harvey et al. 2016 RFS、Barber et al. 2009 RFS、Acerbi-Székely 2014、Fissler-Ziegel 2016 AoS 等核對無誤）；v1 引用修復已落實（Engle 1982 頁碼 987–1008 ✓、et~al. 4 處 ✓、politis1994 key 統一 ✓、christoffersen1998 已入 VaR trinity ✓）。未解：(a) 全部 bibitem 無 DOI（v1 C-MINOR-2，PBFJ production 需要）；(b) 正文用 Steiger Z 檢定（body_v3.tex:118）但無 Steiger (1980) 引用；(c) Fig 1 caption 用 Engle-Ng OLS 規格但 Engle & Ng (1993) 不在書目；(d) bozovic2024（IRFA 95, 103353）合理但屬冷門新文獻，投稿前建議 DOI 核驗。
+**數字溯源抽查**: 6 個 K 抽查：(1) K892 0050.TW γ=0.09704/t=3.5965/n=4219 ↔ 正文 0.097/3.60 ✓；(2) K1175 vix_863 sharpe=1.1369/mdd=−13.71/turnover=102.1 ↔ Table 3 ✓，GJR 1.0742 vs GARCH 0.9497 → +0.124 ✓；(3) K900 table_common_period GJR=1.0835/B&H=1.1223/vix=1.1324/EWMA=1.0182/n=1512 ↔ Table 4 ✓；(4) K896 1% violations 30/18/18/9（Normal/Student-t/HistSim/CF）、OOS 2019-01-01→2026-04-02 ↔ §6.2 ✓ 但 intro 與 §6.5 與之矛盾（見 findings）；(5) K1370 CI90=[2.284,6.581]/median=3.781/1000 valid ✓ 但 K1370 matched-sample 點估計=4.699（TAIEX 0.1139/indiv 0.0242），論文 4.3×（0.114/0.027）兩者皆非；(6) K461 SSVS：SPY_ret_L1 PIP=1.0（非 0.9994）、AR(1) PIP=0.9994 — 正文表 tab:ssvs_pip 的 0.312/0.087 在 K461 JSON 中不存在 ✗ MISMATCH。
+
+### Findings
+
+- **[HIGH/?]** `main_v3.tex:35 (Abstract)` — Abstract 宣稱放大比 ≈5.0×、90% bootstrap CI [2.8, 8.1]，與正文 §3.2/§9 的 canonical 4.3×、CI [2.28, 6.58]（K1370: ci_low_90=2.284, ci_high_90=6.581）直接矛盾 — abstract 是舊 rolling-spec 版本未同步，且 [2.8,8.1] 在全 repo 任何 K JSON 都找不到。v2 fix note 自己已警告 'abstract mirrored wording' 要再查，未執行。
+  - **修法**: 重寫 abstract 該句為與 §3.2 一致：4.3×（canonical BW-robust, K1302/K1302b 點估計）+ 90% CI [2.28, 6.58]（K1370），並標明 rolling-window 對應值 5.0× 移入正文 footnote。
+- **[HIGH/?]** `body_v3.tex:16 (Introduction)` — Intro 仍寫 'Student-t Value-at-Risk achieves a 0.5% violation rate over 2020–2026'。K896 canonical：GJR+Student-t = 18 違規 = 1.03%；0.51% 屬 GJR+Cornish-Fisher；OOS 窗為 2019-01-01→2026-04-02 非 2020–2026。§6.2（line 387）已修正但 v1-M6 修復未傳播到 intro — 模型歸屬與期間雙錯。
+  - **修法**: 改為 'GJR+Student-t and GJR+HistSim achieve 1.03% violation rates and are the only specifications passing the VaR trinity over the 2019–2026 OOS window (K896)'，或直接引 §6.2 措辭。
+- **[HIGH/?]** `body_v3.tex:213-219 (Table tab:ssvs_pip + footnote)` — 表中 'Lagged own return PIP = 0.312 (0050.TW) / 0.087 (SPY)' 在 K461 JSON 完全不存在（grep 0.312/0.087 零命中）；K461 實際 AR(1) PIP = 0.9994（強烈入選，OLS t=−10.29）與 0.312 實質矛盾。Footnote 'PIP 1.000 rounded from 0.9994 (K461)' 歸屬錯誤 — K461 的 SPY_ret_L1 PIP 恰為 1.0，0.9994 是 AR(1) 的 PIP。另 SPY 欄（empty model wins）無任何 K 來源。
+  - **修法**: 用 K461 posterior_inclusion_probabilities 重建整表（SPY_ret_L1=1.000、AR(1)=0.9994），刪除錯誤 footnote；SPY 對照欄需補對應實驗 K 編號或整欄刪除並改為文字引述。注意 K461 中 VIX_level/FX 等 PIP 也都 >0.5，正文 'TWD/USD does not add power' 的口徑需與表一致。
+- **[HIGH/?]** `body_v3.tex:429 (§8.2 Insurance cost quantification)` — EWMA VT MDD 從 −77.3% 改善至 −48.6%、CAGR 7.59%→3.71% — 與 canonical K1175（B&H −33.83%→EWMA −21.17%；ann return 14.48%/7.42%）及 Table 3 註（line 269 明言 pre-2009 vendor 舊值『have been corrected』）正面矛盾。此即 v1-M1，v2 blocker fix 未處理，仍在正文。−77.3% 來自已棄用的 pre-2009 資料。
+  - **修法**: 以 K1175 數字重算整段：MDD 改善 12.6pp、CAGR 成本 14.48−7.42=7.06pp → 每 1pp MDD 改善成本 ≈56bp（非 13.5bp），與 U.S. 5–8bp 的對比結論需重新評估或刪段。
+- **[HIGH/?]** `body_v3.tex:419 (§8.1 Currency Risk)` — 引用 8.63/VIX Sharpe 0.69（TWD）與 12/VIX-on-SPY 0.67 — 但 line 308-310 已明文撤回 0.690（'Earlier draft values (Sharpe 0.690 …) have been corrected' → canonical 1.137, K1175）。同一篇論文一處撤回、另一處仍當論據，審稿人必抓。
+  - **修法**: 以 K1175 canonical（1.137）為基準重算 TWD/USD 換算比較（或補一個新 K 實驗支撐 FX 換算），無法重算則刪除該數字比較、保留質性論述。
+- **[MEDIUM/?]** `body_v3.tex:308` — \ref{sec:results} 無對應 \label（main_v3.aux 中 sec:results 零命中）→ PDF 渲染為 'Section ??'。
+  - **修法**: 改為 \ref{sec:vt}（指 VT 策略評估章）並重新編譯確認無 undefined reference。
+- **[MEDIUM/?]** `body_v3.tex:387 vs 404 (§6.2 vs §6.5)` — 同一 K896 backtest（n=1,756）在 §6.2 標 '2019–2026' 而 §6.5 標 'full 2008–2026 OOS period'。K896 oos_period = 2019-01-01 to 2026-04-02，§6.5 期間標籤錯誤（1,756 天 ≈ 7 年，不可能是 2008–2026）。
+  - **修法**: §6.5 line 404 改為 '2019–2026 OOS period (n = 1,756)'。
+- **[MEDIUM/?]** `body_v3.tex:16, 245, 263, 286 (Intro / §4.2 / Table 3 / Table 4)` — Intro 同句並用 GJR VT Sharpe 1.084（K900 common-period）與差距 '+0.124'（K1175: 1.0742−0.9497）— 若按 K900 口徑差距應為 1.0835−0.950≈0.134。同一 2020–2026 GJR VT 在 Table 3 報 1.074（K1175）、Table 4 報 1.084（K900），無 footnote 解釋兩來源差異。
+  - **修法**: 擇一口徑：intro 與 conclusion 統一引 K1175 對（1.074, +0.124）或 K900 對（1.084, +0.134）；Table 3/4 加一行 note 說明 K1175 vs K900 實作差（n=1511 vs 1512、rebalance gate）造成 0.01 級差。
+- **[MEDIUM/?]** `body_v3.tex:124 vs 269 (§2.6 vs Table 3 Notes)` — §2.6 寫 'Unless otherwise stated, all VT strategies use monthly rebalancing'，但 Table 3 Notes 與 K1175 config 明言 GARCH/EWMA/GJR VT 全為 daily rebalancing（turnover 480–694%/yr），僅 8.63/VIX monthly — 方法論陳述與實作直接相反。
+  - **修法**: §2.6 改為 'GARCH/EWMA/GJR VT use daily rebalancing; VIX-proxy strategies use monthly rebalancing (Table 3 Notes)'，並刪除『monthly 為預設』的句子。
+- **[MEDIUM/?]** `body_v3.tex:170 (§3.2)` — Canonical 點估計 '4.3×'（0.114/0.027=4.22）與 K1370 自身輸出不符：K1370 matched-sample = 4.699（TAIEX γ=0.1139 / indiv 0.0242）、mixed-sample = 4.447。CI [2.28,6.58] 來自點估計為 4.70 的 bootstrap 分佈，卻配 4.3 的點估計 — 點估計與 CI 來源不同 K（K1302/K1302b vs K1370）且未揭露。
+  - **修法**: 明確標注：點估計 4.3×（K1302+K1302b canonical γ 組合，列出 0.114/0.027 的確切 JSON 欄位）vs K1370 bootstrap 同窗點估計 4.70 與 CI [2.28,6.58]，加 footnote 說明兩者樣本窗/multistart 差異；或全部統一用 K1370 matched-sample（4.70）。
+- **[LOW/?]** `main_v3.tex:35 vs body_v3.tex:33` — Abstract 寫 '0050.TW ETF over 2008–2026'，§2.1 明言 0050.TW 樣本為 2009-01-02 起（yfinance 可得性）；TWII 才有 1997 起。
+  - **修法**: Abstract 改 '2009–2026 (0050.TW) and 1997–2026 (TAIEX)'。
+- **[LOW/?]** `body_v3.tex:554 vs 601 (Appendix Table A vs §A.6)` — 同一 0050.TW 10-day SPY momentum c2c 策略，Table tab:tz_results 報 t=6.76 / Sharpe 1.915，§A.6 報 t=3.25 — 差近一倍且無任何 spec/期間差異說明。
+  - **修法**: §A.6 補注兩處 t 值的實驗來源與期間/成本假設差異（K1176 vs 個股橫斷面實驗），或統一為同一 spec。
+- **[LOW/?]** `body_v3.tex:118, 187 + main_v3.tex bibliography` — (a) Steiger Z=16.2 檢定無 Steiger (1980) 引用；(b) Fig 1 caption 的 γ 用 'OLS Engle-Ng specification' 估計但 Engle & Ng (1993) 不在書目，且正文 line 182 稱其為 'rolling GJR γ estimates' — 估計法描述不一致（K636 已記 OLS Engle-Ng γ 與 MLE γ 量級不同）；(c) 全書目無 DOI（v1 C-MINOR-2 未解）。
+  - **修法**: 補 Steiger (1980, Psych. Bull.) 與 Engle & Ng (1993, JF) 兩條 bibitem；Fig 1 caption 與 line 182 統一稱 'Engle-Ng OLS asymmetry coefficient'；全部 bibitem 補 DOI。
+- **[LOW/?]** `body_v3.tex:433 (§8.3)` — 'MDD improvement is statistically significant (bootstrap p = 0.0004)' — 0.0004 恰等於 K900 var_trinity 中 EWMA VT 的 ES Z1 檢定 p 值（K900 JSON p_value=0.0004），疑似誤綁；MDD bootstrap 檢定本身無可溯源 K。
+  - **修法**: 指明該 p 值的確切實驗與檢定（若無 MDD bootstrap 實驗則補跑或改為引 §4.3 的 bootstrap p<0.001 並給 K 編號）。
+- **[LOW/?]** `body_v3.tex:172` — \citep[Politis-Romano][]{politis1994} 的 optional argument 用法錯誤，渲染為 '(Politis-Romano Politis and Romano, 1994)' 重複姓名。
+  - **修法**: 改為 stationary block bootstrap \citep{politis1994} 即可。
+
+---
+
+## vix-sufficiency（MAJOR_REVISION）
+
+**主檔**: paper/vix-sufficiency/main_v4.tex
+**距投稿**: v4 新增章節數字溯源乾淨，但 2026-05-30 errata（Table 3 BH Sharpe 0.947→0.827 + narrative 翻轉）未落地、標題/正文 family 數不一致、§7.1 文字殘留 v3 stale 數字、reproduce gate 仍停在 v3 — 修完這四件加引用更正後才可進下一輪 review cycle。
+**引用狀態**: 44 bibitem 抽查約 30 條（Harvey/Patton/Hansen/DM/Moreira-Muir/Campbell-Thompson/Politis-Romano/Opdyke/Kupiec/Christoffersen 等）作者/年份/期刊/卷期頁全部真實存在；bozovic2024 經 web 驗證存在（IRFA 95, 103353）。問題條目：(1) luo2019 作者錯置 — "VIX term structure and VIX futures pricing with realized volatility" JFM 39(1):72-93 實際作者是 Huang, Tong & Wang (2019)，Luo & Zhang 2019 寫的是 "Instantaneous squared VIX and VIX derivatives"（不同論文）；(2) hansen2005 方法誤述（用 SPA test 非 MCS）；(3) bozovic2024 in-text gloss（"drawdown reduction rather than return enhancement"）與原文主打 spanning-alpha return enhancement 不符；(4) bollerslev2020、engle2006 在 bib 但正文零引用（AMEM/MEM 段落反而該引 engle2006）；(5) 全 bibliography 無 DOI、且非字母排序（Bozovic 在 Brave 後、Christoffersen/Engle&Gallo 插在 Holm 後）。
+**數字溯源抽查**: 5 組抽查：(1) K1116b Table 8 全 12 rows DM t 值 byte-level 對上 experiments/k1116b/k1116b_results.json（SPY M4 -3.00→-3.61、TLT M4 +3.74→+1.96 等全符）✓；(2) K1121 Tables 10-12 對 k1121_results.json：bootstrap diff +0.0028/p=0.966、MDD/Calmar/n=1817/period 全符 ✓；(3) K1203 panorama 28 cells 全符 panorama_7asset_pit_shift0 ✓；(4) K752 Tables 5/6/7（era R²/β/t、incremental R²、era Sharpe）全符 ✓；(5) Table 3 BH 50/50 Sharpe 0.947 ✗ 對不上 registered canonical k731_results full_sample_strategies."BH 50/50".sharpe=0.8268（paper 自家 errata 已記錄但未修）。另 K1137 t 值對上但 IWM high t=2.73 與正文宣稱的 |t|>3.0 判準矛盾。
+
+### Findings
+
+- **[HIGH/number_provenance]** `main_v4.tex:528,551 (Table 3) + decisions/errata_table3_bh_sharpe_canonical_fix.md` — 2026-05-30 errata 明文要求 BH 50/50 Sharpe 0.947→0.827（K731 canonical 0.8268，期間對齊 2008–2026）且 narrative 翻轉（12/VIX 0.870 > BH 0.827），但 main_v4.tex（Jun 7 編譯）L528 仍是 0.947、L551 仍寫 'static 50/50 outperforms every dynamic strategy'。0.947 來自 K507 不同期間 sample，與同表 12/VIX row（K731）期間不對齊。
+  - **修法**: 按 errata 四步執行：L528 改 0.827 + ΔSharpe -0.043 + % source binding；L529 12/VIX 改 reference row + MDD -32.2；L551 narrative 重寫為 12/VIX 略勝；同步校準 intro/abstract 的 'VT costly in Sharpe terms' 敘事到 K738 與 K731 的範圍差異。
+- **[HIGH/internal_consistency]** `main_v4.tex:35 (title) vs :48,74,148` — 標題寫 'Eleven Signal Families'，abstract、intro、§3、Table 1 全篇是 thirteen（families 12-13 本輪加入）。投稿第一頁即露餡。
+  - **修法**: 標題改 'Thirteen Signal Families'（或拿掉數字改 'a Systematic Out-of-Sample Evaluation of Signal Families'）。
+- **[HIGH/internal_consistency]** `main_v4.tex:504` — 'All eight testable DM tests produce raw p-values well above 0.05 (minimum raw p = 0.147)' 是 v3 殘文：Table 2 實有 10 testable families，且 Family 12 raw p=0.012、Family 13 raw p<0.001，直接打臉 'well above 0.05' 與 'minimum 0.147'；§5.2 L388-390 也明寫 10 tests。
+  - **修法**: 重寫 L504：10 testable；families 1-4,8-11 raw p≥0.147 全 null；families 12-13 兩側顯著但方向為 harmful（signed t<0），one-sided 'beats VIX' null 不拒絕（接 footnote ‡ 的論述）。
+- **[HIGH/internal_consistency]** `main_v4.tex:89 (intro bullet) + :553` — Intro 宣稱 'maximum Sharpe improvement = +0.010'，但 Table 3 Family 3 behavioral sentiment ΔSharpe=+0.030（Sharpe 0.900）；L553 同段先說 contango boost (+0.010) 'comes closest to matching 12/VIX'，下一句又報 behavioral 0.900 (+0.030)，自相矛盾。
+  - **修法**: L89 改 +0.030（behavioral sentiment）；L553 改寫為 behavioral sentiment (+0.030) 為最大但 DM |t|=0.72 不顯著。注意 errata 落地後 ΔSharpe 基準 (12/VIX) 不變，此修正獨立有效。
+- **[HIGH/citation]** `main_v4.tex:1255-1256 (bibitem luo2019) + :208` — luo2019 作者錯置：'VIX term structure and VIX futures pricing with realized volatility' JFM 39(1):72-93 (2019) 實際作者是 Huang, Tong & Wang；Luo & Zhang (2019) 是另一篇 'Instantaneous squared VIX and VIX derivatives'（Wiley doi:10.1002/fut.21955 vs 10.1002/fut.22037 可驗）。
+  - **修法**: bibitem 改 Huang, Z., Tong, C., & Wang, T. (2019)，cite key 改 huang2019 並同步 L208 的 \citep；或若本意引 Luo & Zhang 的 term structure 文獻，改引 Luo & Zhang (2012, JFM 32(12)) 'The term structure of VIX'。
+- **[HIGH/methodology]** `main_v4.tex:74,77 vs :165` — 宣稱 'first comprehensive, pre-registered horse race' 且 safeguard (i) 說 13 families 'defined before examining out-of-sample results'，但 L165 自承 'Families 12–13 are added in this revision'（看過前輪結果後加入），且無任何 OSF/AEA registry 證據。Reviewer 必抓 overclaim。
+  - **修法**: 刪 'pre-registered' 改 'pre-specified'；safeguard (i) 加 disclosure：families 1-11 於原始設計 pre-specified，12-13 為 revision 加入並以同一 pipeline + HB 校正評估（rule-based、非 data-snooped 選入）。
+- **[MEDIUM/internal_consistency]** `main_v4.tex:852 (§7.9 text) vs Table 8 (:866-877)` — 正文稱 'thirteen of sixteen DM statistics change by less than 0.5… the three cells with material movement'，但依 Table 8 自身數據 |Δt|≥0.5 的 cell 有 5 個：SPY M4 (0.61)、GLD M5 (0.54)、TLT M4 (1.78)、TLT M5 (2.25)、BTC M5 (2.36) — 是 11/16 非 13/16。
+  - **修法**: 改為 'eleven of sixteen … five cells with material movement'，並把 TLT M5 / GLD M5 納入後句的方向性討論（兩者亦 weaken alt-data case，論點不變）。
+- **[MEDIUM/methodology]** `paper/vix-sufficiency/reproduce_report.json (paper_version=v3, 2026-04-20)` — Reproduce gate 仍綁 v3：main_v4 新增的 K1116b/K1121/K1203 panorama/channel 三節（Tables 8-12，約佔正文 1/3）完全不在 100 checks 內；paper-workflow 硬規則 #2 要求 gate 對 current version GREEN 才可 review/標 ready。
+  - **修法**: 擴充 reproduce.py 覆蓋 v4 新表（K1116b 12 cells、K1121 headline+bootstrap、K1203 28 cells、K1137/K1138 channel 數字），重跑出 v4 reproduce_report.json；順帶落地 errata 提的 LaTeX↔JSON 雙向驗證。
+- **[MEDIUM/internal_consistency]** `main_v4.tex:791-793 (Channel 1) + Table :823` — L791 定義 regime-invariance = 'Harvey threshold (|t|>3.0, BH-adjusted) in all three regimes'，但 L793 宣稱 IWM 3/3 PASS，其 high-regime t=2.73 < 3.0（K1137 的 pass_BH 實際用 BH p<0.05 判準，非 |t|>3.0）；QQQ high t=3.09 勉強過。定義與引用數據的判準不一致，且 K1138 v2 correction 已把 IWM (HAR-RV-X) 改判 NULL。
+  - **修法**: 把定義改成與 K1137 實際判準一致（'DM-HLN t>2.0 且 BH-adjusted p<0.05'），或保留 |t|>3.0 定義並把 IWM 降為 2/3 partial pass；Table channel_outcomes 同步更新。
+- **[MEDIUM/internal_consistency]** `main_v4.tex:471,482 (Table 2 rows 1, 12)` — Family 1 的 IS ΔR² = −0.022：nested OLS 加 regressor 的 in-sample R² 不可能下降，且該值與同 row 的 R²_OOS,VIX (−0.022) 完全相同，疑似抄錯格（本 paper 已有 K732/K736 抄錯格前科）；Family 12 IS ΔR²=−0.001 同樣不可能（除非是 adjusted R²，但未標明）。
+  - **修法**: 回查 k730/k1116 JSON 源欄位：若是 adjusted R² 在 column header 標 'IS ΔR̄²'；若是 OOS 值誤植，修正並補 % source inline binding。
+- **[MEDIUM/methodology]** `main_v4.tex:373-376 (Eq 6) vs Table 2 note (:493-496)` — Eq (6) 定義 DM 用 squared forecast errors，但 Families 12-13 的 DM t 值取自 K1116b 的 QLIKE 比較（JSON 為 OOS_QLIKE diff）— 同一張 Table 2 的 DM 欄混用兩種 loss，且 Raw p 為兩側、HB p 按單側 directional null 計成 1.000，同列混兩種檢定口徑。
+  - **修法**: §5.1 明寫兩個 loss regime（daily families: squared error, bandwidth 22；weekly families 12-13: QLIKE, bandwidth 4）；Table 2 拆 'Raw p (two-sided)' 與 'HB p (one-sided directional)' 欄名，或統一改報 one-sided。
+- **[MEDIUM/citation]** `main_v4.tex:140` — 宣稱 Hansen & Lunde (2005) 'compare 330 ARCH-type models … using the Model Confidence Set (MCS) framework'，實際 H&L 2005 用的是 SPA test（Hansen 2005）；MCS 是 Hansen-Lunde-Nason 2011 才有，該句 'subsequently formalized' 的補丁救不了時代錯置。
+  - **修法**: 改為 'using the test for superior predictive ability (SPA), a precursor to the Model Confidence Set later formalized in \citet{hansen2011mcs}'。
+- **[MEDIUM/citation]** `main_v4.tex:130` — bozovic2024 的 in-text 支撐不符：正文說其機制 'operates through drawdown reduction rather than return enhancement'，但原文（IRFA 95, 103353）主打 VIX-managed 策略產生 'substantially higher spanning regression alphas'，即明確的 return enhancement 主張 — 此 gloss 是為配合本文 insurance 敘事而扭曲來源。
+  - **修法**: 改寫為如實轉述（Božović 報告 alpha 改善，與本文 Sharpe-null 結果構成張力），並把該張力放進 §2.2 或 conclusion 的 literature reconciliation 一句。
+- **[MEDIUM/structure]** `main_v4.tex:35-37 (title page)` — 'VolPred Research System' 列為共同作者 + acknowledgement 'We thank the VolPred Research System for computational support'：COPE 及 Elsevier/Wiley/JoF 系列期刊政策一致禁止 AI 系統掛名作者，desk-reject 風險；同時 'Data and replication code available upon request' 低於多數期刊現行 replication package 要求。
+  - **修法**: 作者欄只留 Yi-Hao Lai；AI 系統移至 acknowledgements 註明用途；replication 句改為指向公開 repository（self-contained paper folder 已存在，掛上即可）。
+- **[LOW/writing]** `main_v4.tex:502-510 + bibliography :1148-1291` — (a) §7.1 段落編號斷裂：First/Second/Third 之後又出現 'Second, the variance risk premium…' 'Third, the overnight VIX…'（v3 殘段疊在 v4 新段上）；L510 的 '+0.45%' 與 Table 2 Family 10 任一欄（IS 0.005 / OOS 0.003）都對不上。(b) bibliography 非字母序且 bollerslev2020、engle2006 未被引用、全無 DOI。
+  - **修法**: (a) 重排為 First–Fifth 連續編號，0.45% 校正為 JSON 源值並加 % source；(b) 字母序重排、刪除或在 AMEM 段補引 engle2006、補 DOI。
+
+---
+
+## volatility-absorption（MAJOR_REVISION）
+
+**主檔**: paper/volatility-absorption/main_v3.tex
+**距投稿**: 距離可投稿差三件事：(1) 對 v3 重跑 reproduce gate（現存 report 是 v2、61.3% red、Tables 6-8 數字無 JSON 來源）；(2) 統一全文 original-snapshot vs 2026-04-19 pinned-snapshot 數字（§5.1 與 Table 4 仍用舊值 t=-3.42 無揭露，與 Intro/Table 9/Appendix B 的 t=-1.77/-1.85 直接矛盾）；(3) 撤回或重新框架 RV-normalized regression「free of denominator issues」的過強宣稱。
+**引用狀態**: 37 條 bibliography（thebibliography 格式、全部無 DOI）。抽查約 30 條：絕大多數（Engle 1982、Bollerslev 1986/2009、Carr-Wu 2009、Todorov 2010、Bekaert-Hoerova 2014、Da et al. 2015、Danielsson et al. 2018、Vlastakis-Markellos 2012、Moreira-Muir 2017、Andersen et al. 2003、Balduzzi et al. 2001、Martin 2017、Patton 2011、Romer-Romer 2004 等）作者/年份/期刊/卷期正確。可疑 3 條：(1) zakoian1994 期刊錯誤 — 實際發表於 Journal of Economic Dynamics and Control 18(5), 931-955，非 bib 所列 Journal of Time Series Analysis 15(3), 253-266；(2) chernov2018 為孤兒引用（正文從未 \cite），label 年份 2018 與印出年份 2022 不一致，venue（RFS 35(3)）需查證（該文公認版本為 2022 年發表，NBER WP 為 2018）；(3) 正文 line 606 footnote 把 multiple-testing threshold 歸給 "Harvey et al. (2018)"，但 bib 中唯一的 harvey2018 是 JPM 波動率目標化論文 — 正確出處應為 Harvey, Liu & Zhu (2016, RFS) 或 Harvey (2017 presidential address)，目前 bib 完全缺此文獻。lin2020（PBFJ 61, 101316）無法確證、標記待查。
+**數字溯源抽查**: 6 項抽查：(a) Table 3 SAR vs k716_results.json 完全吻合（3.16/2.77/2.37/2.32/2.43，shock days 34/168/189/132/244）；(b) Appendix Table B vs k1418_results.json 完全吻合（SPY -2.73e-4/t=-1.85/N=769；GLD/TLT/0050.TW 全對）；(c) Tables 9/10 + RV-norm（-0.01249/t=-8.2/N=767）+ controlled（-0.000216/t=-1.26/N=768）vs k903_paper8_robustness_results.json 完全吻合；(d) Table 5 Low 行 N=63 vs K741 JSON n=62 不符，且欄加總 63+78+27+28=196 ≠ 表注宣稱的 195；(e) Table 6 N=127/203/89 無來源 — K903 audit 系統搜尋後明載「no combination reproducing 127/203/89」（重現值 87/186/150）；(f) Table 7/8 數值與 t-stats 全部 untraceable，且唯一存檔的 k720_results.json 寫 vrp_flip_confirmed=true，與論文「no VRP sign flip」主張相反。
+
+### Findings
+
+- **[HIGH/internal_consistency]** `main_v3.tex:325-330 vs main_v3.tex:67 與 main_v3.tex:551` — §5.1 正文與 Eq.(15) 仍把 baseline NSI 迴歸寫成 β=-0.00028、NW t=-3.42（p<0.001）且無任何 snapshot 揭露，但同一條迴歸在 Intro（line 67）是 -0.000267/t=-1.77/p=0.076（pinned snapshot），在 Table 9 τ=2.0 行也是 -0.000267/-1.77/0.077。同一 specification 在同一篇論文出現兩組互相矛盾的 headline 數字，referee 一對表就會抓到。
+  - **修法**: §5.1 改報 pinned-snapshot 值（-0.000267, t=-1.77）為主、原始值降為 footnote（沿用 Intro line 67 的揭露格式），或在 Eq.(15) 後立即加 snapshot footnote 並明確標示該數字屬 original snapshot。
+- **[HIGH/internal_consistency]** `main_v3.tex:337-357 (Table 4) vs main_v3.tex:792-812 (Table B) 與 main_v3.tex:620 (Conclusion #2)` — 主文 Table 4 cross-asset 仍是 original-snapshot 值（SPY -0.00028/t=-3.42 標 p<0.001、GLD -4.17、TLT -3.89）且表注無 snapshot 揭露；Appendix Table B（K1418 pinned）同一迴歸是 SPY t=-1.85、GLD -2.90、TLT -3.31；Intro line 73 又用 pinned 值。Conclusion 第 2 點宣稱「Three of four assets exhibit statistically significant negative absorption coefficients」— 在 pinned snapshot 下 SPY t=-1.85（p≈0.065）5% 不顯著，宣稱過強。
+  - **修法**: Table 4 與 Table B 合併或同步為 pinned-snapshot 值 + original 值入 footnote；Conclusion #2 改為「GLD/TLT 在 5% 顯著、SPY 邊際顯著（t=-1.85）」。
+- **[HIGH/number_provenance]** `main_v3.tex:407-421 (Table 6 + 表注)` — 論文「最重要結果」Table 6 的 N=127/203/89 不可重現：K903 audit（k903_paper8_robustness_results.json task1）系統搜尋所有 priority ordering 與 GLD threshold 組合後明載 no combination reproduces 127/203/89（重現值 87/186/150）。更嚴重的是表注的 reconciliation 宣稱「the middle three bins account for the remainder」對 geopolitical 在數學上不可能成立：full-sample N=89 < K721 兩-bin 子集 146，remainder 為負。t-stats 2.87/1.94/-0.68 亦無任何 JSON 來源（absorption 係數 +0.019/+0.007/-0.003 倒是可從 K721 norm 差值溯源）。
+  - **修法**: 刪除表注中不成立的 remainder 宣稱；用 pinned snapshot 重跑 shock-type 分類，以可重現的 N（87/186/150 類）與重新計算的 bootstrap t-stats 更新 Table 6，並 inline % source 指向新 JSON；或明記為 frozen paper-time 值且承認 N 不可重現（比照 K716 揭露模式）。
+- **[HIGH/number_provenance]** `main_v3.tex:377 (Table 5 Low 行) + main_v3.tex:386 (表注) + main_v3.tex:366` — Table 5 Low regime「NFP Days = 63」與來源 k741_nfp_event_study_results.json part_b 的 n=62 不符；且欄加總 63+78+27+28=196 與表注及 Intro footnote 宣稱的 total 195 矛盾（62+78+27+28=195 才對）。正文 line 366 與 line 71 也寫 n=63。referee 加總一欄就能抓到的算術錯誤。
+  - **修法**: Low 行改 62（mean_abs 0.498 也順手對齊 JSON 的 0.4982），line 71/366 的 n=63 同步改 62；重算該行 t/p 若受影響。
+- **[HIGH/methodology]** `main_v3.tex:592-597, 618, 631（RV-normalized regression 宣稱）` — 論文把 RV-normalized 迴歸（t=-8.2）稱為「strongest and most robust quantitative evidence」且「free of VIX denominator issues」（line 618），但該設計是把 |r_t|/√RV 回歸在 RV 本身上 — 與 §3.3 自承的 NSI 機械性負相關問題完全同構（分母同時是解釋變數），只是把 VIX 換成 RV。t=-8.2 的異常強度正是機械偏誤的典型徵兆；它解決的只是 VIX-specific measurement 問題，不是 denominator 問題。唯一乾淨的識別是 SAR。
+  - **修法**: 把 RV 迴歸降級為「替代 normalizer 的一致性檢查」而非最強證據；刪除『free of denominator issues』措辭；或補一個 placebo/null simulation 量化 RV-denominator 機械斜率（K897 框架可直接延伸）後才允許保留強宣稱。
+- **[HIGH/number_provenance]** `paper/volatility-absorption/reproduce_report.json（v2, 2026-04-20）+ main_v3.tex:439-458 (Table 7), 477-496 (Table 8)` — Reproduce gate 停在 v2、match_rate 61.3% red，從未對 main_v3 重跑 — 違反專案 hard rule（≥95% green 才可 review/ready）。Table 7 的 VRP 值（3.5/3.1/2.8）與 t-stats（8.34/4.69/2.01）、Table 8 的 CB（13.7/8.0/3.6）全部 untraceable；且唯一存檔的 k720_results.json 內容是 vrp_flip_confirmed:true，與論文「no VRP sign flip」的 headline 主張方向相反，目前無任何 JSON 支持 Table 7 的不翻轉結論。
+  - **修法**: 重跑 reproduce.py 對 v3 出新 report；為 Table 7/8 補產出 JSON（pinned snapshot 重算 VRP by regime 與 hedge CB）並 inline % source binding；若 K720 的 flip 結論是早期錯誤被後續修正，需在 experiments 留 correction trail。
+- **[MEDIUM/citation]** `main_v3.tex:606（footnote）vs main_v3.tex:715-716` — Footnote 宣稱原始 t=-3.14「passes the Harvey et al. (2018) multiple-testing threshold」，但 bib 中唯一的 Harvey et al. 2018 是 JPM 的 volatility targeting 論文（與 multiple testing 無關）。multiple-testing threshold（t>3.0）的正確出處 Harvey, Liu & Zhu (2016, RFS) 完全不在 bibliography。引用-宣稱不匹配。
+  - **修法**: 新增 Harvey, C.R., Liu, Y., & Zhu, H. (2016). ...and the cross-section of expected returns. RFS 29(1), 5-68 至 bib，footnote 改引該文；或改引 Harvey (2017, JF presidential address)。
+- **[MEDIUM/citation]** `main_v3.tex:754-755 (zakoian1994) 與 main_v3.tex:682-683 (chernov2018)` — 兩條 bibliography 錯誤：(1) Zakoian (1994) Threshold heteroskedastic models 實際發表於 Journal of Economic Dynamics and Control 18(5), 931-955，非所列 Journal of Time Series Analysis 15(3), 253-266；(2) chernov2018 是孤兒引用（grep 確認正文零次 \cite），label 年份 2018 與印出年份 2022 自相矛盾，venue（RFS 35(3), 1310-1347）需查證 — 該文公認發表版為 2022。
+  - **修法**: 修正 zakoian1994 為 JEDC 18(5), 931-955；chernov2018 либо刪除（未被引用）либо改 key/label 為 chernov2022 並核實正確期刊卷期。
+- **[MEDIUM/internal_consistency]** `main_v3.tex:283 (Table 2 表注)` — Table 2 表注仍寫「The absorption regression (Tables cross_asset_detail and robust_threshold) reports N=893 because...」，但 v3 中這兩張表已更新為 pinned snapshot 的 N=769/768 — 表注引用的數字已不存在於被引用的表中；同一句尾巴又說 sub-period 加總 768「confirm the regression sample size」，一個表注內自相矛盾（893 vs 768）。
+  - **修法**: 表注改寫：N=893 標明為 original-snapshot 值、768/769 為 pinned-snapshot 值，與 line 67 footnote 的揭露邏輯對齊。
+- **[MEDIUM/methodology]** `main_v3.tex:318-321 (Table 3 表注)` — 檢定描述不連貫：「p-values are from a two-sample t-test comparing the SAR across regimes via bootstrap with 10,000 replications」— t-test 與 bootstrap 是兩種不同程序；SAR 是兩個均值之比，跨 regime 比較 SAR 差需明確定義 bootstrap 的 resampling 單位與統計量；未報告 seed（違反專案 seed 固定規則，亦是 referee 對 reproducibility 的標準質疑）。Table 6 表注同樣只寫『bootstrap tests with 10,000 replications』。
+  - **修法**: 表注改為精確描述：例如『block bootstrap (10,000 reps, seed=X) of the SAR difference between regime j and the calm regime；p 為雙尾 percentile p-value』，並在 replication code 中固定 seed。
+- **[MEDIUM/structure]** `main_v3.tex:31 (作者欄) + main_v3.tex:29, 502, 519, 626 (available upon request)` — 兩個投稿 blocker：(1)『VolPred Research System』列為共同作者 — COPE 與所有主要財金期刊（Elsevier/JBF、JoE、IJF）明文禁止 AI 系統掛名作者，desk reject 風險；(2) §6.2/6.3 與 Conclusion #5 把未發表、無引用、無 JSON 來源的內部結果（Sharpe 0.53 vs 0.68、DM t=-2.81、daily 1.42 vs monthly 0.82）當作支持證據，僅標 available upon request — reproduce report 已把這 4 個數字列為 untraceable。
+  - **修法**: 作者欄改單一作者、AI 移至 acknowledgments（現有 thanks 已寫 computational support，保留即可）；§6.2/6.3 的內部數字 либо連結到具體 K 實驗 JSON 並放進 replication package，либо改為定性陳述刪掉精確數字。
+- **[MEDIUM/methodology]** `main_v3.tex:631-637 (Limitations/Future research) vs experiments/k897_sar_null_simulation_results.json` — K897 null simulation（結論：NULL REJECTED — empirical absorption is STRONGER than GARCH predicts）正是回應 R1 SEVERE issue S1 的關鍵防禦，但 v3 正文從未引用；Limitations 反而寫『future work using simulation exercises to quantify the mechanical component』— 把已完成的自家證據說成未來工作，白白把 GARCH-artifact 質疑留給 referee。
+  - **修法**: 在 §7 Robustness 新增一小節報告 K897：GARCH(1,1)/GJR null 模擬下的 SAR 衰減 CI vs 實證 SAR，明確說明 absorption 超出 volatility clustering 機械預測；Limitations 對應段落改寫。
+- **[LOW/internal_consistency]** `main_v3.tex:448-450 (Table 7), 486-488 (Table 8) vs main_v3.tex:119-126 (§3.1)` — Regime 標籤不一致：§3.1 定義 Elevated=20-25、High=25-30、Crisis≥30（五-bin），但 Table 7/8 用『Elevated (15≤V<25)』『High (V≥25)』（三-bin、同名不同界），Table 5 又用 Low/Medium/Elevated/High 四-bin。同一標籤對應不同 VIX 區間，易誤導。
+  - **修法**: 三-bin 表改用不同標籤（如 Low/Mid/High-stress）並在表注明示與五-bin 分類的對應關係。
+- **[LOW/writing]** `main_v3.tex:809 (Table B 表注) 與 main_v3.tex:563` — Table B 表注出現重複自引『see Section~\ref{sec:robustness} and Section~\ref{sec:robustness}』（同一 label 連引兩次）；line 563 在 Robustness section 內部又寫『(Section~\ref{sec:robustness})』自我引用。編譯後顯示『see Section 7 and Section 7』。
+  - **修法**: 刪除重複引用；line 563 改為指向具體小節（如 §7.3 Alternative Normalization）或直接刪除括號引用。
+
+---
+
+## vt-crowding-abm（MAJOR_REVISION）
+
+**主檔**: paper/vt-crowding-abm/main.tex
+**距投稿**: v5_independent（2026-05-21）Codex+Antigravity 雙 REJECT 的 4 個 blocking issues（detector 循環校準、NoiseControl 無效對照、iid bootstrap CI 口徑、cell1 TF/MR 閾值不可再現）自 main.tex 4/28 定稿後一條都沒修，必須重設計 threshold detector 與 active control 並重跑 cell1 才可再投。
+**引用狀態**: 21 條 bibliography 全數抽查：作者/年份/期刊/卷期均真實存在（Baltas 2019 FAJ、Barroso-Detzel 2021 JFE、Cederburg et al. 2020 JFE、Moreira-Muir 2017 JF、Harvey et al. 2018 JPM 等核對無誤）。問題：(a) Kyle (1985) 頁碼誤植 1315–1336，正確為 1315–1335；(b) 8 條缺 DOI（kyle1985、gennotte1990、perchet2015、lebaron2006、danielsson2012 WP、bookstaber2014 WP、ecb2020、cole2017）；(c) cole2017 為 Artemis 業界報告（非學術來源）卻獨撐 "USD 2 trillion AUM" 實證宣稱；(d) thebibliography 未按字母排序（cole2017/danielsson2012 插在 perchet2015 後、cont2000/greenwood2011 殿後）與 plainnat 宣告不符。
+**數字溯源抽查**: 抽查 5 組關鍵數字 vs experiments JSON：(1) Sharpe@φ=70%=0.08 vs k827v3 part1_results.70%.vt_sharpe.mean=0.0844 ✓；(2) kurtosis@100%=61.4 vs 61.3526 ✓；(3) Welch t(50% vs 10%)=7.12 vs reproduce 重算 7.125、t(70% vs 50%)=16.94 vs 16.9438 ✓；(4) Table 2 row 0%/10%（AnnVol 16.0%、VIX 19.4、MDD −33.4%/−34.2%）直接核對 k827v3 JSON raw blocks ✓；(5) Table 3/4 閾值（VT 70%、TF 20/30%、MR 20/70%、NC null）對 k1261/k1262/k1262b results.json 經 reproduce_report.json 47/47 GREEN 全 match。數字溯源乾淨，無造假跡象；問題在統計方法與內部敘事一致性，不在 provenance。
+
+### Findings
+
+- **[HIGH/methodology]** `main.tex:36, 218, 243, 305, 360` — Sharpe-only detector 循環校準（v5 雙審稿人 blocking、未修）：文中自承 detector 是 'calibrated to the standalone VT benchmark' 且 'reproduces exactly' 70% 閾值（L243），即先知道 K827v3 的 70% headline、再把 drop>70% 設為觸發條件去重現它，然後用這個為 VT 偏斜校準的 detector 衡量 TF/MR 得出 family-level ordering。這是循環識別，不是外生檢定
+  - **修法**: detector 必須在分析前外生給定：改用 Sharpe-vs-φ 曲線的正式結構斷點檢定（supremum-type break test 或對 500 sim-level Sharpe 做 changepoint detection），並把 drop threshold ∈ {30%,50%,70%} 當 robustness grid 報告而非 calibration anchor；刪除全部 'calibrated to'/'reproduces exactly' 措辭
+- **[HIGH/methodology]** `main.tex:97, 245, 360` — NoiseControl 固定權重 0.5 幾乎零交易流量，無法檢驗『任何大型協同交易塊都會致不穩』的對立假說（v5 雙審稿人 blocking、未修）——拿幾乎不交易的 treatment 當 falsifier 是 strawman control
+  - **修法**: 新增 active control：隨機方向再平衡 agent，其 |Δw| 分佈與再平衡頻率 match VT/TF/MR 的實際 turnover，但方向與價格/波動正交；NoiseControl 降級為 sanity check 而非 falsifiability anchor
+- **[HIGH/methodology]** `main.tex:156 vs 167, 213` — CI 統計口徑自相矛盾且不支撐推論（v5 blocking、未修）：Table 1 note（L156）說 95% CI 來自 pooled 1.26M 日報酬的 iid bootstrap，Figure 1 caption（L167）卻說 whiskers 是 'from 500 Monte Carlo simulations'——兩者不是同一統計量；正回饋系統日報酬有強 volatility clustering，iid pooling 嚴重低估 SE；L156 還有 '1.26M days × 500 sims' 樣本數重複計算錯誤（1.26M 本身已是 500 sims × 2,520 days）
+  - **修法**: 全文 CI 統一改為 500 條 sim-level Sharpe 的 path-level bootstrap；pooled return 統計量（kurtosis 等）改 block bootstrap（文中已承認 block-bootstrap 會加寬 CI）；刪除 '× 500 sims' 錯誤字串並重寫 note
+- **[HIGH/internal_consistency]** `main.tex:229-231 (Table 3) vs 290-300 (Table 4 + footnote b)` — 同一 cell1 microstructure 下核心閾值不可再現：Table 3（M=500）TF=20%/MR=20%，Table 4（M=200）TF=30%/MR=70%——MR 閾值從 20% 跳到 70%（3.5 倍）僅因 MC 數改變。footnote b 雖揭露此事（v4 標 FIXED），但 v5 兩位審稿人均判定揭露不等於解決：central result 對 MC count 與 adoption grid boundary 高度敏感，threshold magnitude 本身無 CI
+  - **修法**: K1262b cell1 重跑 M=500 並在 30-70% 間加密 adoption grid（40%、60%）；對每個 threshold 報 bootstrap CI（對 500 sim-level Sharpe 重抽樣後重算 detector crossing），把 magnitude 改為 interval estimate
+- **[HIGH/internal_consistency]** `main.tex:299 (footnote a) vs 358, 367` — cell3 MR null 的 rank encoding 與主張方向相反：footnote a 明寫 'the null is treated as MR threshold ≥ VT threshold'，但 §5.4（L358）與 Conclusion（L367）把同一個 null 計入 'MR ≤ VT in 5/5 cells'——≥ 被當成 ≤ 的支持證據，邏輯翻轉；且 MR 在 cell3 baseline Sharpe=−5.56 證明 detector 在 loss-making regime 失效（v5 MAJOR、未修）
+  - **修法**: cell3 改報 'detector not applicable (saturated loss regime)'，主張降為 4/5 + saturation 討論；或改用對負 baseline 仍有效的 detector（絕對 Sharpe level 或 MDD-based）後重算
+- **[MEDIUM/number_provenance]** `main.tex:314 (§4.7 Design Validation)` — 52% 歸因方向算錯：括號自己定義 0.13（fixed）/0.25（scaled）=52%，這是 fixed liquidity 下『仍存在』的 crowding 份額；歸因給 liquidity evaporation 的份額應為 (0.25−0.13)/0.25=48%。句子卻寫 'roughly 52% ... was driven by liquidity evaporation rather than crowding per se'——比例與其口語對應顛倒（Intro L60 與 Conclusion L367 用 'approximately half' 反而沒錯）
+  - **修法**: L314 改為 'roughly 48%（=(0.25−0.13)/0.25）of the originally observed degradation was driven by liquidity evaporation'，或統一改用 'approximately half' 避免假精確
+- **[MEDIUM/internal_consistency]** `main.tex:121 (§2.4) vs 222 (Table 3 caption)` — Phase 1 模擬數自相矛盾：§2.4 與 abstract 說 Phase 1 = 4 treatments × 7 × 500 = 14,000，Table 3 caption 卻說 '10,500-simulation Phase 1 run for VT, TF, MR, NoiseControl'。實際上 K1261 只新跑 TF/MR/NC = 10,500 sims，VT 的 3,500 slice 是重用 K827v3 stored run（experiments/k1261/k1261_results.json key 'VT_baseline_K827v3_stored'；k1261/README.md L3 明寫 10,500）——46,800 總數把一週前的 K827v3 算進 Phase 1
+  - **修法**: §2.4 明寫 'the VT slice reuses the K827v3 run (byte-exact seed-paired sanity gate, see k1261_sanity_verification)'，Phase 1 新增模擬數統一為 10,500，總數敘述改為 '43,300 new + 3,500 reused = 46,800 evidence base'
+- **[MEDIUM/methodology]** `main.tex:72 vs 99` — φ=100% 的 population accounting 不一致（v5 MAJOR、未修）：L72 說組成只在 φ<80% 時 well-defined（因 noise 固定 200），L99 又定義 φ 為全體 N 的 fraction——noise 固定下 treatment agents 最多 800/1000，所謂 100% adoption 實為 80% of N，影響 adoption 軸的經濟解讀
+  - **修法**: 重定義 φ 為非噪音 agents（800 人池）中的 fraction，全文 adoption 軸與表格標籤一致化；或把 '100%' 改標 '80% of N (all non-noise)'並在 §2.1 給出兩種口徑換算
+- **[MEDIUM/citation]** `main.tex:54, 323, 369` — 關鍵實證量級無學術引用支撐（v5 MAJOR、未修）：'over USD 2 trillion'（L54）僅引業界報告 cole2017；'current levels below 5%'（L323）與 'Current VT adoption appears safely below the threshold'（L369）完全無 citation——policy 段落把未經本文估計的實證量級寫成既定事實
+  - **修法**: 補 regulatory/學術來源（如 BIS Quarterly Review 或 Fed Financial Stability Report 的 vol-control AUM 估計）；找不到可審核來源就改寫為 'industry estimates suggest…(illustrative)' 並把 below-5% 句降為 conditional 陳述
+- **[MEDIUM/methodology]** `main.tex:90-95` — MR 歸入 positive-feedback family 的機制是二階條件式（L95 自承只在買壓大到觸發反向 cascade 時才正回饋），與 VT/TF 的一階正回饋不對稱；且 φ=30% 時 500/500 sims final price ~1e-23 被直稱 'legitimate simulation finding' 而無數值診斷（價格下界、浮點 underflow、複利 convention 皆未排除）（v5 MAJOR+MINOR、未修）
+  - **修法**: 加 appendix 診斷：log-price 路徑、clamp 計數（k1261 已記 price_clamps 欄位可引）、arithmetic vs log compounding 對照；family 主張改寫為 'VT/TF first-order + MR conditional second-order positive feedback'
+- **[LOW/writing]** `main.tex:36, 67 vs 335` — abstract 與 §2 稱 '1,000 heterogeneous agents'，但 Limitation 2（L335）自承 'agents within each class are homogeneous'——異質性只存在於 3-4 個 type 之間，措辭過強且前後矛盾
+  - **修法**: 改為 '1,000 agents of heterogeneous types (BH/strategy/noise)'，abstract 同步修改
+- **[LOW/structure]** `paper/vt-crowding-abm/README.md:4-5, 31-38` — README status 過期且與事實矛盾：仍標 '✅ Submission-ready (R3 SEVERE=0)'、'15 pages'、'16 citations'、K index 只列 K827–K864——未反映 v4 改版（26 頁、21 citations、K1261/K1262/K1262b 三個主結果實驗）也未反映 v5_independent 雙 REJECT（2026-05-21）
+  - **修法**: README status 改 'major revision in progress (v5_independent: 2× REJECT, 4 blocking)'；K index 補 K1261/K1262/K1262b 三 rows；頁數/引用數更新
+- **[LOW/citation]** `main.tex:435-509 (thebibliography)` — Kyle (1985) 頁碼 1315–1336 應為 1315–1335；bibliography 未按字母序排列（cole2017、danielsson2012 插在 perchet2015 之後，cont2000/greenwood2011 殿後）與 plainnat 宣告不符；8 條目缺 DOI
+  - **修法**: 修 Kyle 頁碼；entries 按第一作者字母序重排（或改用 .bib + bibtex 讓 plainnat 自動排序）；為有 DOI 的條目（如 lehmann1990 已有，gennotte1990 無 DOI 屬正常）逐條補齊
+
+---
+
+## vt-insurance-cost（MAJOR_REVISION）
+
+**主檔**: paper/vt-insurance-cost/main.tex
+**距投稿**: 數字溯源乾淨（Table 1/2 全對上 K811v2），但 DM 檢定註腳與實際代碼不符、cross-OOS 4 窗無聲跳過 2017-18/2021-22、rebalancing premium 子期間翻負未揭露 — 修完這三項 HIGH 才可投 FRL。
+**引用狀態**: 17 條 bibliography 已過 3 輪 citation-verifier（citation_check_v3.md），主要文獻（Moreira-Muir 2017 JF、Harvey et al. 2018 JPM、Cederburg et al. 2020 JFE、Huang et al. 2019 JFQA、Bollerslev et al. 2009 RFS、Booth-Fama 1992 FAJ 等）均真實且卷頁正確，無虛構引用。殘留問題：(a) 全部 bibitem 無 DOI（apalike 格式 FRL 可接受但建議補）；(b) main.tex:70 「12/VIX rule \citep{perchet2016}」— Perchet et al. 研究一般化 vol targeting，並未提出 12/VIX 這個特定 heuristic，屬 attribution 過度；(c) main.tex:108 引 Hasbrouck (2009) 支撐「SPY typical bid-ask spread 1-2 bps」— 該文估計美股橫斷面有效成本（1993-2005 CRSP），未記載 SPY 點差，支撐力不足。
+**數字溯源抽查**: 抽查 6 組關鍵數字全部對上：(1) Table 1 五策略 CAGR/Vol/Sharpe/MDD/turnover vs experiments/k811v2_insurance_premium_vov_fixed_results.json（如 S0 CAGR 12.506→12.51、S2 Sharpe 0.6335→0.63、S2 turnover 1044.74→1044.7）✓；(2) Table 2 分解 S1 4.195/0.428/4.623→4.20/0.43/4.62、S2 0.696/0.522/1.218 ✓；(3) DM t 值 S1vsS0 2.4183→2.42、S2vsS0 0.7487→0.75 ✓；(4) 敏感度 64/57/65% 與 62-76% vs k811v2_th0_5（1.137/1.772=64.2%、降61.7%）與 th1_5（0.737/1.129=65.3%、降75.6%）✓；(5) K846 54 bps（53.67）、CAGR 10.02/9.49、ρ=0.057（0.0572）✓；(6) regime 19.95%/7.7%、2.54%/45.5%、76% 低VoV 天數 ✓。reproduce_report.json match_rate 100%（但 claim #9 靠 tolerance 5→10 bps 放寬達成，相對差 16.5%）。
+
+### Findings
+
+- **[HIGH/methodology]** `main.tex:194 (Cross-OOS footnote)` — DM 檢定註腳宣稱「QLIKE loss on squared returns + Newey-West bandwidth ⌊4(T/100)^{2/9}⌋」，但產出 t=2.42/0.75 的實際代碼（k811v2 script L439 呼叫 src/volpred/stats/model_evaluation.py:114 strategy_dm_test）用 loss_fn="negative_return"（L=−r，即報酬差 HAC t 檢定），QLIKE 根本不是該函式選項；HAC bandwidth 實為 ceil(n^{1/3})≈15（n=3262），非註腳公式的 8。此註腳是 R2 W7 的「修復」，但修出與代碼不符的錯誤描述 — replication 時必被抓。
+  - **修法**: 改寫註腳為實際 spec：loss differential d_t = r_{1,t} − r_{2,t}（negative daily return loss），Bartlett-kernel NW，max lag = ⌈T^{1/3}⌉；或依註腳宣稱的 spec 重跑並更新 t 值。
+- **[HIGH/methodology]** `main.tex:194 + Discussion L209 (Cross-OOS Robustness)` — 「four non-overlapping two-year windows」（2013-14、2015-16、2019-20、2023-24）無聲跳過 2017-18 與 2021-22 — 2012-2024 樣本實有 6 個完整不重疊 2 年窗。被跳過的 2018（Volmageddon）與 2022（熊市、VT 有利期）正是 VoV/VT 最關鍵的事件期；JSON note 顯示 4 窗 grid 是從 2006 起跑設計繼承而來（"4 periods (not 5) since backtest starts 2012"），非有意設計但形同 cherry-picking，reviewer 必問。
+  - **修法**: 補跑 2017-18 與 2021-22 兩窗，報告 S2 在 6 窗中的勝率；或在文中明確揭露窗格來源與排除原因。
+- **[HIGH/internal_consistency]** `main.tex:184, 186, 207, 216（structural premium 宣稱）` — 54 bps rebalancing premium 被定性為「structural」「free alpha」「creates a floor that VT must overcome」，但 K846 自己的 sub_period_analysis 顯示 empirical premium 在 4 個子期間有 2 個翻負：2006-09 GFC = −95.27 bps、2010-14 = −55.55 bps（k846_rebalancing_premium_results.json sub_period_analysis）。全文未揭露符號不穩定，「structural floor」宣稱強度超過自家證據。
+  - **修法**: 在 §3.3 加一句子期間結果（2 of 4 sub-periods negative），把「structural floor」改為「full-sample average premium with substantial sub-period variation」；Conclusion 同步軟化。
+- **[MEDIUM/number_provenance]** `main.tex:184（gold crisis alpha 句）` — 「during the four VoV regimes identified by VVIX, gold consistently appreciates during equity drawdowns---the 'HighVoV_Rising' regime ... is precisely the regime where gold delivers positive returns」— 全部實驗 JSON 中找不到任何 GLD-by-VoV-regime 的量化數據（K811v2 insurance_by_regime 無 gold 欄、K846 part3 是 correlation regime 非 VoV regime），唯一來源是 K846 summary 的一句敘述文字。empirical claim 無數據支撐。
+  - **修法**: 補算 GLD 報酬按四個 VoV regime 分組的表（一行 pandas groupby 即可）放進 K846 JSON 並引用；或刪掉「consistently / precisely」這句改為推測語氣。
+- **[MEDIUM/internal_consistency]** `main.tex:184（第一句）` — 同一句混用兩個樣本期：ρ=0.057 是 2006-2024（K846），但 portfolio vol 11.47% 與 SPY vol 16.56% 是 2012-2024（Table 1/K811v2）。footnote 只聲明 correlation 與 premium 用 2006-2024，未涵蓋 vol 數字 — K846 的 2006-2024 vol 其實是 σ_SPY=19.38、σ_GLD=17.76。
+  - **修法**: vol 數字改用 2006-2024 的 19.38%/組合 vol，或在句中標明 11.47%/16.56% 為 2012-2024 估計。
+- **[MEDIUM/methodology]** `main.tex:108（Data）` — 「consistent with CRSP to within rounding precision」— replication package 與全部實驗中不存在任何 CRSP 數據或 yfinance-vs-CRSP 比對紀錄，此 verifiability 宣稱無法支撐；referee 若要求出示比對會無法回應。
+  - **修法**: 刪除 CRSP 比對句，或實際抽樣比對（如 WRDS 試用）後在 data_sources.md 留紀錄再保留。
+- **[MEDIUM/internal_consistency]** `main.tex:184 footnote vs main.tex:186` — footnote 說「both estimates fall within the structural ~50--81 bps range reported in the next paragraph」，但下一段寫的是「approximately 54--81 bps」（50≠54）；且 L186 括號「(the rebalancing premium alone plus the diversification benefit)」誤述 — 81.46 bps 是 K846 50/50 的 theoretical rebalancing premium（variance-reduction 公式值），54 是 empirical monthly，兩者皆是 rebalancing premium 的不同估計，並非「premium + diversification benefit」之和；第三項 crisis alpha 全文未量化。
+  - **修法**: 統一範圍寫法並改標註：54 bps = empirical (monthly)、81 bps = theoretical (Booth-Fama formula)；刪除誤導性括號。
+- **[MEDIUM/number_provenance]** `reproduce_report.json claim #9 + README.md status 行` — Reproduce gate「GREEN 100%」是把 claim #9 tolerance 從 ±5 放寬到 ±10 bps、剛好罩住 8.91 bps（相對差 16.5%）達成的；resolution.md 自己寫明 16.5% 「well above the <5% rounding threshold」。雖有 L184 dual-convention footnote 誠實揭露，但 post-hoc tolerance widening 讓 gate 形同虛設 — referee 跑 replication 會直接看到 63 vs 54。
+  - **修法**: 依 resolution.md option (a) 補一組 auto_adjust=True 2006-2024 CSV 專供 claim #9 路徑精確還原 54 bps，恢復 ±5 bps tolerance；dual-convention footnote 保留。
+- **[MEDIUM/internal_consistency]** `reviews/review_v3.tex:48 vs main.tex（N2 項）` — R3 review 記錄 N2 已修復「sub-period numbers now provided: ρ=0.04, rebalancing premium 48 bps」，但 grep main_v1.tex 與現行 main.tex 均無 48 bps 與 ρ=0.04 — 宣稱已修的 2012-2024 子期間揭露在現行稿中不存在（疑似 4/19 footnote 改寫時被覆蓋）。
+  - **修法**: 把 2012-2024 子期間 rebalancing premium（48 bps, ρ≈0.04）補回 L184 footnote，與 dual-convention 說明並存。
+- **[LOW/writing]** `main.tex:86-89 vs main.tex:108` — 符號衝突：Eq.(3) 的 N 是「年數」（annualized over N years），L108 與摘要的 N=3,262 是「交易日數」。同一符號兩義，referee 會標。
+  - **修法**: Eq.(3) 改用 T_y 或在式後明寫 N_years=12.94。
+- **[LOW/writing]** `main.tex:137-138 (Table 1)` — S4（50/50 月再平衡）的 Avg Weight 與 Ann. Turnover 填「---」，但 S4 確實有 turnover（K846 2006-2024 為 14.66%/yr）；留空會被問是否 S4 未計交易成本、比較是否公平。
+  - **修法**: 補 2012-2024 樣本的 S4 turnover 數字，並在 notes 確認 S4 同樣套 5 bps 成本。
+- **[LOW/citation]** `main.tex:70 + 272-273` — 「We use the 12/VIX rule \citep{perchet2016}」— Perchet et al. (2015, JAI) 研究 volatility targeting 的一般框架（target/forecast vol），未提出 12/VIX 這個特定常數規則；屬 practitioner heuristic 的過度歸因。
+  - **修法**: 改為 "following the volatility-targeting framework of \citet{perchet2016}, we adopt the practitioner 12/VIX rule"。
+
+---
+
+## vt-trend-following（MAJOR_REVISION）
+
+**主檔**: paper/vt-trend-following/body_v3.tex
+**距投稿**: 距可投稿還差：兩張表（Table 3 50/50 欄、K1417 比較表）與 Figure 1 仍混用已被推翻的 v2/非 canonical 數字、reproduce gate 失效（80.7% yellow/fail 且 2 個月未更新）、primary foil（hood2025）與 bondarenko2019 引用至今未驗證、K1458 H1 敘事修正尚未落地 body。
+**引用狀態**: 24 條 bibliography 中 21 條已發表文獻（moreira2017、moskowitz2012、daniel2016、harvey2016/2018、cederburg2020、bollerslev2009、politis1994 等）作者/年份/期刊/DOI 均真實正確。可疑 2 條：(1) hood2025（Hood & Raughtigan, Working Paper）— 全文 primary foil（"91% alpha absorbed" 動機來源），無 URL/SSRN/機構，"Raughtigan" 姓氏無法以已知文獻佐證，r1/v5 連續三輪要求補仍未補；(2) bondarenko2019（RFS 32(3), DOI 10.1093/rfs/hhy061）— Bondarenko 的 put-option 主要著作為單一作者 2014 "Why Are Put Options So Expensive?"，Bondarenko & Bernardo 合著組合與此 DOI 自 v5 即標 CONDITIONAL 至今未驗證。另缺 1 條：BAB 因子（Table 4 M5）未引 Frazzini & Pedersen (2014, JFE)，r1 已指出但 v3 bibliography 仍無此條。
+**數字溯源抽查**: 抽查 6 個 K 來源：(1) K1192 50/50 canonical MDD = −16.84(VT)/−17.53(hedged)/−32.49(BH)、retention 95.6%、CI [76,189.9] — §3.3 文字✓但 Table 3 用 −12.4/−13.1 ✗；(2) K1376 SPY point 103.7/median 115.8/CI [93.0,182.2]、XLE 223.4 lo 37.7、SLV lo −2.5 全✓；(3) K1417 lo 97.1/97.7（SPY 756/1260）✓ 但論文表把 JSON `hi`（95th=181.1）標成「50th」，真 median=103.8 ✗，且 fixed-252 基線欄 [86,97] 是不可復現的 v2 數字非 K1192 canonical ✗；(4) K1178 avg ΔMDD 24.90、t=10.246、r=−0.806、ρ=−0.835 ✓；(5) K1193 r=0.7934、CI [0.589,0.919]、ρ=0.749 ✓；(6) K1457 γ̂₁=0.457、t=2.00、HC3 t=2.03、attenuation 19.5% ✓。
+
+### Findings
+
+- **[HIGH/number_provenance]** `body_v3.tex:312-339 (Table tab:k1417_stationary_compare)` — 表格欄位標「5th(%)/50th(%)」但 K1417 stationary 欄填的是 90% CI 上界（95th）：SPY 756d 表寫 50th=181.1，k1417_results.json 的 median=103.8（hi=181.1）；且「K1192 fixed-block 252d」基線欄 SPY=86/97 是 Discussion line 519-522 已宣告不可復現的 v2 Table 6 CI，非 K1192 canonical（lo=93.0, median=115.4）——同一 252-day lo 在 Table tab:mdd_bootstrap 是 93.0、在本表是 86，自相矛盾；表注 mean/median lo-shift +9.28/+10.4 pp 全部以 v2 錯誤基線計算（SPY 真實 shift 是 97.7−93.0=+4.7 pp 非 +11.7）
+  - **修法**: 欄位改標 5th/95th（或補真 median 欄）；fixed-252 基線改用 K1192/K1376 canonical CI（93/76/82.7/89/86.7）；重算 shift summary 並同步修正表注「median moving substantially upward」的錯誤推論；K1417 JSON 本身把 v2 CI 誤存為 reference_k1192_fixed_block_ci，須回修實驗 script（修流程不修資料）
+- **[HIGH/internal_consistency]** `body_v3.tex:256,355-364 (Table tab:dual_mechanism 50/50 欄)` — Table 3 50/50 欄 MDD = −12.4(VT)/−13.1(hedged) 與 §3.3 文字（line 256）引用的 K1192 canonical −16.8/−17.5 不一致（k1192_results.json: vt_mdd_pct=−16.84, hedged=−17.53）；表中 decomposition 列「MDD protection 20.1 pp / retained 19.4 pp (96%)」由舊數字推得，canonical 應為 15.7/15.0 pp (95.6%)；Calmar 0.624/0.501 亦由舊 MDD 算出（即 v5 NEW-M1 不成比例之謎的根因）；同段文字甚至混用舊 spec Sharpe (0.982→0.937) 與新 canonical MDD
+  - **修法**: 以 K1192 canonical（monthly rebalancing spec）重生 Table 3 50/50 整欄（MDD、Calmar、decomposition 列），或若 Sharpe/Calmar 確屬另一 spec，加 % source binding 與 footnote 明示兩 spec 並重算 retention 列
+- **[HIGH/internal_consistency]** `body_v3.tex:378,383 (Figure 1 + 前段文字)` — line 378「90–97% of the total drawdown reduction survives」與 Fig.1 caption「TSMOM explains ... only 3–10% of MDD protection」仍是 v2 數字；Discussion line 522 明寫 v2 的 90–97% 已被 K1192 canonical（95.6–109.0%，即 TSMOM share ≈ −9% 至 +4.4%）取代；figures/fig1_return_decomposition.pdf 停在 Apr 18 未重生，abstract/§3.3/Conclusion 全用 canonical 值，同一篇內兩套數字並存
+  - **修法**: 用 K1192 canonical 重跑 figures/generate_figures.py 重生 Fig.1，line 378 改為 95.6–109.0%（或『at or above ~96%』），caption 的 3–10% 同步更正
+- **[HIGH/methodology]** `paper/vt-trend-following/reproduce_report.json` — Reproduce gate 處於 fail：match_rate 80.7%、alert_level=yellow、gate_status=fail、34 個 untraceable checks，且 timestamp 2026-04-19 早於其後新增的 Table 6(K1376)、K1417 比較表、Table 2 M0/M1a/M1(K1457) 等內容——paper-workflow 硬規則要求 ≥95% green 才能 review/submit；上述 Table 3 與 K1417 表的數字錯位正是 gate 未覆蓋新表的直接後果
+  - **修法**: 擴充 reproduce.py 的 table_row_mapping 覆蓋 K1376/K1417/K1457 新表列，補 untraceable 列的 % source binding，重跑至 ≥95% green 後才進下一輪 review
+- **[MEDIUM/internal_consistency]** `body_v3.tex:8,32 (abstract/intro) vs 435 (§3.5)` — Abstract 與 Intro 把 sector 邊界條件寫成 γ→TSMOM loading 連結在 sector 內失效（r=0.163, NS, N=11），但 §3.5 定義 r=0.163 是 γ 與『VT Sharpe improvement』的相關——因變數不同；且此數字至今無專屬 K 實驗（README 標 PENDING），是全文唯一無溯源的 headline 統計量
+  - **修法**: 統一因變數表述（abstract 改為 γ vs Sharpe improvement 或補跑 sector 內 γ vs TSMOM loading）；跑 K1179（11 SPDR sectors）落 canonical JSON，否則 abstract 刪去此句
+- **[MEDIUM/citation]** `body_v3.tex:632-633 (hood2025)` — 全文 primary foil（『91% of equity VT alpha is absorbed』的唯一來源，被 abstract/intro/discussion 反覆對話）是無 URL、無 SSRN 編號、無機構的 working paper，作者姓氏 Raughtigan 無法佐證存在；r1、citation_check.md、v5 三輪均要求補仍未補——若 referee 找不到此文，整篇 framing 的動機失去支撐
+  - **修法**: 投稿前完成 SSRN/Google Scholar 定位並補 URL+機構；若確認不存在或記錯，改以可驗證文獻（moreira2017/cederburg2020/barroso2015）重寫動機段並修 abstract 第一句
+- **[MEDIUM/citation]** `body_v3.tex:599-600 (bondarenko2019)` — 『Bondarenko, O., & Bernardo, A.E. (2019). The economics of S&P 500 put options. RFS 32(3), 983–1026, DOI 10.1093/rfs/hhy061』作者組合可疑（Bondarenko 的 put 定價主要著作為單一作者 2014 'Why Are Put Options So Expensive?'）；v5 標 CONDITIONAL 要求 DOI 驗證，至今未做，而該引用支撐 M2 VRP confound 限定語（abstract 與 §4.3 各一次）
+  - **修法**: DOI lookup 驗證 10.1093/rfs/hhy061 實際對應文章；若不符，改引 Bondarenko (2014, QJF) 或 Chen-Joslin-Ni (2019, RFS) 等真實 put-insurance 文獻
+- **[MEDIUM/internal_consistency]** `body_v3.tex:166 (Table 1) vs 407-422 (Table 4)` — 同一 SPY 12/VIX、同期間（Jan 2005–Mar 2026）、同 M1/M2 spec，Table 1（K55）報 α=1.35、t=1.44、R²=0.802、TSMOM t=7.65，Table 4（K54/K71）報 α=1.45、t=1.60、R²=0.787、TSMOM t=8.89，無任何 footnote 解釋管線差異；referee 必抓同 spec 兩套數字（known issue B.2 只覆蓋 M5 N=3,740 vs 5,049，未覆蓋 α/t/R² 分歧）
+  - **修法**: 依 3-spec disambiguation pattern 在 Table 4 注補 footnote 說明 K55 與 K54 估計管線差異（rf 序列/樣本起算/TSMOM window），並將兩組數字納入 reproduce.py binding
+- **[MEDIUM/methodology]** `body_v3.tex:480-482 (Table 5 t-statistics)` — 13 國 ΔMDD 的 one-sample t=10.25 把 13 個市場當獨立觀測，但所有市場的 MDD 改善由同樣的美股事件（GFC、COVID）與同一 VIX 信號驅動（文中自己報 VIX sensitivity ρ ∈ [−0.40,−0.65]），cross-sectional 高度相依使有效 N 遠小於 13，t 值精度被高估；abstract 直接引用 t=10.25
+  - **修法**: 改報 cross-sectional dependence-robust 推論（market-level block bootstrap 或對 13 市場共同因子去除後的 t），或至少在表注加 dependence caveat 並弱化 abstract 的 t 引述
+- **[MEDIUM/methodology]** `body_v3.tex:254-260, 524-533 (§3.3/§4.1) + review_history/v6` — v6 round（K1458 trough decomposition, Codex FAIL 後降級為 PARTIAL SUGGESTIVE）的證據與 10-obs limitation 尚未落地 body：正文仍只有 daniel2016 口頭 caveat，未引 K1458 數據（2020-03 TSMOM<0 日 hedge 中位數 +30 pp、2009-03 3/5 資產 hedge=0）、未加 10-obs footnote、未附 appendix table——v6 README 明列為投稿前 P1 必做
+  - **修法**: 執行 pending paper_body task：§3.3/4.1 依 v6 建議措辭改寫、加『10 asset-trough observations, illustrative evidence』footnote、K1458 decomposition table 入 Online Appendix
+- **[MEDIUM/methodology]** `body_v3.tex:67-72 (Eq. 2)` — TSMOM_t = sign(r_{t−252:t}) × r_t 的記號讓信號窗含當日 t：若 sign 用到 r_t 即 contemporaneous lookahead；Moskowitz et al. (2012) 標準作法是 t−1 以前的 sign 配 t 期報酬。記號歧義會被 referee 當 lookahead 質疑（即使 code 有 shift）
+  - **修法**: 改寫為 sign(r_{t−253:t−1}) 或明寫『signal computed through day t−1』，並在 reproduce package 註明 code 的 shift(1) 位置
+- **[MEDIUM/methodology]** `body_v3.tex:117-131, 263-310 (Eq. mdd_retention_boot + Table 6)` — Retention 比值分母（MDD_BH − MDD_VT）在 bootstrap 樣本可趨近 0：K1376/K1192 JSON 顯示 50/50 只有 n=9,925/10,000 有效（75 條被丟），XLE point 223.4 vs median 100.0 顯示比值極不穩定，但論文未揭露無效 replication 的處理規則
+  - **修法**: Table 6 注明 invalid-replication 處理（捨棄準則、各資產有效 n），XLE/SLV 等極端列加 denominator-instability 說明
+- **[LOW/writing]** `body_v3.tex:34,258,520` — K898『subject to ongoing forensic reconciliation』qualifier 在 3 處殘留——v5 NEW-MINOR-2 已要求收案（報 5.3% canonical、明寫 1.4% 不可復現、刪 ongoing 字眼），跨 ≥3 輪未修，referee 會視為 unresolved data integrity flag
+  - **修法**: 三處統一改為『the originally reported 1.4% could not be reproduced; we report the K898 back-calculated 5.3% as canonical』並刪 ongoing 措辭
+- **[LOW/internal_consistency]** `body_v3.tex:533 vs 355` — §4.1 直接檢定段引 B&H SPY Sharpe = 0.41（K518），Table 3 同資產 B&H Sharpe = 0.611（2005–2026），樣本期間差異未說明，同篇兩個 SPY B&H Sharpe 並存
+  - **修法**: 在 line 533 補 K518 的樣本窗（與主樣本不同處明示），或統一以主樣本重跑五個 trend 策略
+- **[LOW/writing]** `body_v3.tex:52,435 (sector sample)` — Sector sample 寫『11 SPDR sector ETFs ... December 1998 to March 2026』，但 XLRE（2015 上市）與 XLC（2018 上市）不可能有 1998 起的資料，資料描述不準確
+  - **修法**: 註明各 ETF 實際 inception（XLRE 2015-10、XLC 2018-06）與 unbalanced panel 處理方式
+
+---

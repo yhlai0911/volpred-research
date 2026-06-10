@@ -1,0 +1,95 @@
+{
+  "paper_id": "vt-insurance-cost",
+  "title_en": "The True Cost of Volatility Targeting: Decomposing the Insurance Premium into Opportunity and Transaction Components",
+  "main_file": "paper/vt-insurance-cost/main.tex",
+  "overall_verdict": "MAJOR_REVISION",
+  "submission_readiness": "數字溯源乾淨（Table 1/2 全對上 K811v2），但 DM 檢定註腳與實際代碼不符、cross-OOS 4 窗無聲跳過 2017-18/2021-22、rebalancing premium 子期間翻負未揭露 — 修完這三項 HIGH 才可投 FRL。",
+  "provenance_spot_checks": "抽查 6 組關鍵數字全部對上：(1) Table 1 五策略 CAGR/Vol/Sharpe/MDD/turnover vs experiments/k811v2_insurance_premium_vov_fixed_results.json（如 S0 CAGR 12.506→12.51、S2 Sharpe 0.6335→0.63、S2 turnover 1044.74→1044.7）✓；(2) Table 2 分解 S1 4.195/0.428/4.623→4.20/0.43/4.62、S2 0.696/0.522/1.218 ✓；(3) DM t 值 S1vsS0 2.4183→2.42、S2vsS0 0.7487→0.75 ✓；(4) 敏感度 64/57/65% 與 62-76% vs k811v2_th0_5（1.137/1.772=64.2%、降61.7%）與 th1_5（0.737/1.129=65.3%、降75.6%）✓；(5) K846 54 bps（53.67）、CAGR 10.02/9.49、ρ=0.057（0.0572）✓；(6) regime 19.95%/7.7%、2.54%/45.5%、76% 低VoV 天數 ✓。reproduce_report.json match_rate 100%（但 claim #9 靠 tolerance 5→10 bps 放寬達成，相對差 16.5%）。",
+  "citation_status": "17 條 bibliography 已過 3 輪 citation-verifier（citation_check_v3.md），主要文獻（Moreira-Muir 2017 JF、Harvey et al. 2018 JPM、Cederburg et al. 2020 JFE、Huang et al. 2019 JFQA、Bollerslev et al. 2009 RFS、Booth-Fama 1992 FAJ 等）均真實且卷頁正確，無虛構引用。殘留問題：(a) 全部 bibitem 無 DOI（apalike 格式 FRL 可接受但建議補）；(b) main.tex:70 「12/VIX rule \\citep{perchet2016}」— Perchet et al. 研究一般化 vol targeting，並未提出 12/VIX 這個特定 heuristic，屬 attribution 過度；(c) main.tex:108 引 Hasbrouck (2009) 支撐「SPY typical bid-ask spread 1-2 bps」— 該文估計美股橫斷面有效成本（1993-2005 CRSP），未記載 SPY 點差，支撐力不足。",
+  "findings": [
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "main.tex:194 (Cross-OOS footnote)",
+      "issue": "DM 檢定註腳宣稱「QLIKE loss on squared returns + Newey-West bandwidth ⌊4(T/100)^{2/9}⌋」，但產出 t=2.42/0.75 的實際代碼（k811v2 script L439 呼叫 src/volpred/stats/model_evaluation.py:114 strategy_dm_test）用 loss_fn=\"negative_return\"（L=−r，即報酬差 HAC t 檢定），QLIKE 根本不是該函式選項；HAC bandwidth 實為 ceil(n^{1/3})≈15（n=3262），非註腳公式的 8。此註腳是 R2 W7 的「修復」，但修出與代碼不符的錯誤描述 — replication 時必被抓。",
+      "fix": "改寫註腳為實際 spec：loss differential d_t = r_{1,t} − r_{2,t}（negative daily return loss），Bartlett-kernel NW，max lag = ⌈T^{1/3}⌉；或依註腳宣稱的 spec 重跑並更新 t 值。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "methodology",
+      "location": "main.tex:194 + Discussion L209 (Cross-OOS Robustness)",
+      "issue": "「four non-overlapping two-year windows」（2013-14、2015-16、2019-20、2023-24）無聲跳過 2017-18 與 2021-22 — 2012-2024 樣本實有 6 個完整不重疊 2 年窗。被跳過的 2018（Volmageddon）與 2022（熊市、VT 有利期）正是 VoV/VT 最關鍵的事件期；JSON note 顯示 4 窗 grid 是從 2006 起跑設計繼承而來（\"4 periods (not 5) since backtest starts 2012\"），非有意設計但形同 cherry-picking，reviewer 必問。",
+      "fix": "補跑 2017-18 與 2021-22 兩窗，報告 S2 在 6 窗中的勝率；或在文中明確揭露窗格來源與排除原因。"
+    },
+    {
+      "severity": "HIGH",
+      "category": "internal_consistency",
+      "location": "main.tex:184, 186, 207, 216（structural premium 宣稱）",
+      "issue": "54 bps rebalancing premium 被定性為「structural」「free alpha」「creates a floor that VT must overcome」，但 K846 自己的 sub_period_analysis 顯示 empirical premium 在 4 個子期間有 2 個翻負：2006-09 GFC = −95.27 bps、2010-14 = −55.55 bps（k846_rebalancing_premium_results.json sub_period_analysis）。全文未揭露符號不穩定，「structural floor」宣稱強度超過自家證據。",
+      "fix": "在 §3.3 加一句子期間結果（2 of 4 sub-periods negative），把「structural floor」改為「full-sample average premium with substantial sub-period variation」；Conclusion 同步軟化。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "number_provenance",
+      "location": "main.tex:184（gold crisis alpha 句）",
+      "issue": "「during the four VoV regimes identified by VVIX, gold consistently appreciates during equity drawdowns---the 'HighVoV_Rising' regime ... is precisely the regime where gold delivers positive returns」— 全部實驗 JSON 中找不到任何 GLD-by-VoV-regime 的量化數據（K811v2 insurance_by_regime 無 gold 欄、K846 part3 是 correlation regime 非 VoV regime），唯一來源是 K846 summary 的一句敘述文字。empirical claim 無數據支撐。",
+      "fix": "補算 GLD 報酬按四個 VoV regime 分組的表（一行 pandas groupby 即可）放進 K846 JSON 並引用；或刪掉「consistently / precisely」這句改為推測語氣。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:184（第一句）",
+      "issue": "同一句混用兩個樣本期：ρ=0.057 是 2006-2024（K846），但 portfolio vol 11.47% 與 SPY vol 16.56% 是 2012-2024（Table 1/K811v2）。footnote 只聲明 correlation 與 premium 用 2006-2024，未涵蓋 vol 數字 — K846 的 2006-2024 vol 其實是 σ_SPY=19.38、σ_GLD=17.76。",
+      "fix": "vol 數字改用 2006-2024 的 19.38%/組合 vol，或在句中標明 11.47%/16.56% 為 2012-2024 估計。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "methodology",
+      "location": "main.tex:108（Data）",
+      "issue": "「consistent with CRSP to within rounding precision」— replication package 與全部實驗中不存在任何 CRSP 數據或 yfinance-vs-CRSP 比對紀錄，此 verifiability 宣稱無法支撐；referee 若要求出示比對會無法回應。",
+      "fix": "刪除 CRSP 比對句，或實際抽樣比對（如 WRDS 試用）後在 data_sources.md 留紀錄再保留。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "main.tex:184 footnote vs main.tex:186",
+      "issue": "footnote 說「both estimates fall within the structural ~50--81 bps range reported in the next paragraph」，但下一段寫的是「approximately 54--81 bps」（50≠54）；且 L186 括號「(the rebalancing premium alone plus the diversification benefit)」誤述 — 81.46 bps 是 K846 50/50 的 theoretical rebalancing premium（variance-reduction 公式值），54 是 empirical monthly，兩者皆是 rebalancing premium 的不同估計，並非「premium + diversification benefit」之和；第三項 crisis alpha 全文未量化。",
+      "fix": "統一範圍寫法並改標註：54 bps = empirical (monthly)、81 bps = theoretical (Booth-Fama formula)；刪除誤導性括號。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "number_provenance",
+      "location": "reproduce_report.json claim #9 + README.md status 行",
+      "issue": "Reproduce gate「GREEN 100%」是把 claim #9 tolerance 從 ±5 放寬到 ±10 bps、剛好罩住 8.91 bps（相對差 16.5%）達成的；resolution.md 自己寫明 16.5% 「well above the <5% rounding threshold」。雖有 L184 dual-convention footnote 誠實揭露，但 post-hoc tolerance widening 讓 gate 形同虛設 — referee 跑 replication 會直接看到 63 vs 54。",
+      "fix": "依 resolution.md option (a) 補一組 auto_adjust=True 2006-2024 CSV 專供 claim #9 路徑精確還原 54 bps，恢復 ±5 bps tolerance；dual-convention footnote 保留。"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "internal_consistency",
+      "location": "reviews/review_v3.tex:48 vs main.tex（N2 項）",
+      "issue": "R3 review 記錄 N2 已修復「sub-period numbers now provided: ρ=0.04, rebalancing premium 48 bps」，但 grep main_v1.tex 與現行 main.tex 均無 48 bps 與 ρ=0.04 — 宣稱已修的 2012-2024 子期間揭露在現行稿中不存在（疑似 4/19 footnote 改寫時被覆蓋）。",
+      "fix": "把 2012-2024 子期間 rebalancing premium（48 bps, ρ≈0.04）補回 L184 footnote，與 dual-convention 說明並存。"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "main.tex:86-89 vs main.tex:108",
+      "issue": "符號衝突：Eq.(3) 的 N 是「年數」（annualized over N years），L108 與摘要的 N=3,262 是「交易日數」。同一符號兩義，referee 會標。",
+      "fix": "Eq.(3) 改用 T_y 或在式後明寫 N_years=12.94。"
+    },
+    {
+      "severity": "LOW",
+      "category": "writing",
+      "location": "main.tex:137-138 (Table 1)",
+      "issue": "S4（50/50 月再平衡）的 Avg Weight 與 Ann. Turnover 填「---」，但 S4 確實有 turnover（K846 2006-2024 為 14.66%/yr）；留空會被問是否 S4 未計交易成本、比較是否公平。",
+      "fix": "補 2012-2024 樣本的 S4 turnover 數字，並在 notes 確認 S4 同樣套 5 bps 成本。"
+    },
+    {
+      "severity": "LOW",
+      "category": "citation",
+      "location": "main.tex:70 + 272-273",
+      "issue": "「We use the 12/VIX rule \\citep{perchet2016}」— Perchet et al. (2015, JAI) 研究 volatility targeting 的一般框架（target/forecast vol），未提出 12/VIX 這個特定常數規則；屬 practitioner heuristic 的過度歸因。",
+      "fix": "改為 \"following the volatility-targeting framework of \\citet{perchet2016}, we adopt the practitioner 12/VIX rule\"。"
+    }
+  ]
+}
