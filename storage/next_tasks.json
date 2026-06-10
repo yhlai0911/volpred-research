@@ -27091,5 +27091,22 @@
     "description": "Boss 2026-06-07 13:50 email 指令（被 gmail subject-dedup bug 丟棄、6/10 自垃圾桶回收）：『如果每輪拿新的本金來發放承諾的報酬，這樣可以支撐幾輪的發展？臨界人數是多少？做完整分析』。Context: havingchien Substack『龐氏騙局是會崩潰的數學結構』。設計：解析模型 + 模擬 — 參數化（承諾報酬率 r、新進人數成長率 g、提領率 w、初始人數 N0），推導可持續條件（g 與 r 臨界關係）、崩潰輪數、臨界人數/資金缺口公式；蒙地卡羅掃 (r,g,w) 格點 + 敏感度；對照公開歷史案例規模（Madoff 等，標來源）。產出 experiments/kXXXX/ 三件套 + reader-facing 文章（general；與 havingchien 文不重複不引用，自建模型角度）。寫前必跑 scripts/check_arc_dedup.py；固定 seed。Boss 直接指令 = user-assigned 最高優先。",
     "status": "pending",
     "created_at": "2026-06-10T10:35:00+00:00"
+  },
+  {
+    "id": "paper_review_k1458_h1_partial_closure_v6_2026_06_10",
+    "task_type": "paper_review",
+    "priority": 2,
+    "status": "succeeded",
+    "title": "Paper 6 v6 review: K1458 H1 PARTIAL CLOSURE README + Codex 3rd-model adversarial review",
+    "description": "compute_queue K1458 followup: 寫 paper/vt-trend-following/review_history/v6/README.md (H1 PARTIAL CLOSURE with K1458 decomposition table 5 assets × 2 troughs × 3 components) + Codex adversarial review on narrative claims. NOT body修訂（另案）.",
+    "created_at": "2026-06-10T19:09:09+08:00",
+    "source": "compute_queue_followup",
+    "compute_id": "compute-k1458-h1-trough-decomposition-paper-6-v5-1781086338",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-10T11:09:16.960195+00:00",
+    "claim_session_id": "4b6c4b13c4a6",
+    "started_at": "2026-06-10T11:09:17.443696+00:00",
+    "completed_at": "2026-06-10T11:17:44.843828+00:00",
+    "result": "v6 README: H1 PARTIAL SUGGESTIVE EVIDENCE (not closure). Codex FAIL → 5 fixes: decomposition identity corrected, 2009 downgraded MOSTLY ABSENT, mechanism inference qualified, beta-clip unverified, CLOSURE language removed. Table numbers all PASS vs k1458_results.json."
   }
 ]
