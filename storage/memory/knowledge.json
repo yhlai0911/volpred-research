@@ -33301,5 +33301,54 @@
     ],
     "timestamp": "2026-06-11T03:28:29.196570",
     "session": "codex-cli interactive 2026-06-11"
+  },
+  {
+    "item_id": "dd043583",
+    "k_id": "K1466",
+    "category": "cross_asset_em_vol_decoupling",
+    "title": "SE Asia frontier EM vol decoupling: partial unconditional, full crisis convergence",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "VNM/EIDO/THD/EPHE (SE Asia/frontier EM ETFs) show partial vol decoupling unconditionally — 60d rolling correlation with SPY medians 0.45-0.55 (vs EEM-SPY 0.75) and diversification ratio 1.254 with bootstrap 95% CI [1.209, 1.307] strictly above 1. BUT regime-conditional: every EM-vs-SPY pair shows corr jump +0.31 to +0.39 when VIX>25 vs VIX<15, Fisher z p<0.001 for all 4 pairs. Crisis windows (2015 China, 2018Q4, 2020 COVID, 2022 Fed, 2024 yen unwind) all converge with developed markets. Practical: diversification benefit exists in calm regimes, disappears precisely when needed.",
+    "evidence": [
+      "experiments/k1466/k1466.py",
+      "experiments/k1466/k1466_results.json",
+      "experiments/k1466/README.md",
+      "commit a446f6c7"
+    ],
+    "experiment_id": "k1466",
+    "experiment_path": "experiments/k1466/",
+    "reviewer_source": "main_thread_inline_audit_codex_timeout",
+    "reviewer_notes": "Codex CLI timeout >25min — fallback per .claude/rules/experiments.md. Inline audit: auto_adjust=True (adj close), np.log + .shift(1), .rolling(21).std() past-only vol, .rolling(60).corr() past-only, RNG_SEED=42 fixed for block bootstrap (B=1000, block=20), Fisher z per Steiger (1980). No lookahead; bug-free per inline read.",
+    "sample": {
+      "period_start": "2010-09-29",
+      "period_end": "2026-06-09",
+      "n_obs": 3946
+    },
+    "key_numbers": {
+      "div_ratio_point": 1.2543,
+      "div_ratio_ci_95": [
+        1.2094,
+        1.3066
+      ],
+      "rolling60_median_corr_spy": {
+        "VNM": 0.448,
+        "EIDO": 0.549,
+        "THD": 0.536,
+        "EPHE": 0.513,
+        "EEM_benchmark": 0.746
+      },
+      "regime_corr_jumps_vix_high_vs_low": {
+        "VNM_SPY": 0.389,
+        "EIDO_SPY": 0.355,
+        "THD_SPY": 0.311,
+        "EPHE_SPY": 0.31
+      },
+      "regime_p_value_max": 0.0
+    },
+    "caveats": "Thin trading on 4 EM ETFs may bias unconditional corr downward (stale-price); VIX regime concurrent (descriptive only); DCC-GARCH and block-size sensitivity deferred; equal-weight basket only.",
+    "monetization_angle": "Reader story for general audience + Paper 4/5 R1 frontier-EM contagion narrative.",
+    "confidence": 0.75,
+    "created_at": "2026-06-11T07:39:15.638295",
+    "date": "2026-06-11"
   }
 ]
