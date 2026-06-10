@@ -1,0 +1,234 @@
+{
+  "experiment_id": "K1450",
+  "title": "VNQ realized volatility and stock/bond affinity under rate regimes",
+  "created_at": "2026-06-10T06:05:41.875286+00:00",
+  "sample": {
+    "start": "2005-04-06",
+    "end": "2026-05-07",
+    "n_obs": 5301
+  },
+  "data_source": "yfinance (VNQ, SPY, TLT, ^TNX)",
+  "rate_regime_definition": {
+    "signal": "^TNX.diff(63).shift(1)",
+    "rate_up": "lagged 63d 10Y yield change > 0",
+    "rate_down": "lagged 63d 10Y yield change <= 0"
+  },
+  "lookahead_protection": {
+    "signal": "rate regime uses ^TNX at t-1 and earlier only",
+    "outcomes": "forward 21d RV/correlation use returns t+1..t+21"
+  },
+  "methods": {
+    "primary_inference": "OLS with Newey-West HAC maxlags=21",
+    "multiple_testing": "Bonferroni + BH over 5 primary contrasts"
+  },
+  "regime_counts": {
+    "rate_down": 2651,
+    "rate_up": 2650
+  },
+  "summaries": {
+    "fwd_rv_vnq": {
+      "rate_down": {
+        "mean": 0.23847581410154156,
+        "median": 0.15672372173729238,
+        "std": 0.23449712397084538,
+        "n_days": 2651
+      },
+      "rate_up": {
+        "mean": 0.19757512957323284,
+        "median": 0.1624523799936432,
+        "std": 0.13194336062082246,
+        "n_days": 2650
+      }
+    },
+    "fwd_rv_spy": {
+      "rate_down": {
+        "mean": 0.16986286754914037,
+        "median": 0.131303667474989,
+        "std": 0.13876911264563685,
+        "n_days": 2651
+      },
+      "rate_up": {
+        "mean": 0.14435370914570744,
+        "median": 0.12867128649210674,
+        "std": 0.06915372600864464,
+        "n_days": 2650
+      }
+    },
+    "fwd_rv_tlt": {
+      "rate_down": {
+        "mean": 0.1397767654319268,
+        "median": 0.12558515806570825,
+        "std": 0.06534084739954729,
+        "n_days": 2651
+      },
+      "rate_up": {
+        "mean": 0.1321627927231647,
+        "median": 0.12217530875485957,
+        "std": 0.04512758484182539,
+        "n_days": 2650
+      }
+    },
+    "fwd_corr_vnq_spy": {
+      "rate_down": {
+        "mean": 0.6251992588443902,
+        "median": 0.6564883082234444,
+        "std": 0.2316318756873535,
+        "n_days": 2651
+      },
+      "rate_up": {
+        "mean": 0.6280708453066364,
+        "median": 0.6915765170068837,
+        "std": 0.2278754953224365,
+        "n_days": 2650
+      }
+    },
+    "fwd_corr_vnq_tlt": {
+      "rate_down": {
+        "mean": -0.07726841834582111,
+        "median": -0.07544007198603767,
+        "std": 0.3991019394737475,
+        "n_days": 2651
+      },
+      "rate_up": {
+        "mean": 0.040864974173451384,
+        "median": 0.07103463589197563,
+        "std": 0.37790808485526806,
+        "n_days": 2650
+      }
+    }
+  },
+  "models": {
+    "fwd_rv_vnq": {
+      "Intercept": {
+        "coef": 0.2384758141015412,
+        "se_hac": 0.020150360898078444,
+        "t_hac": 11.834816026758233,
+        "p_hac": 2.5790838626132374e-32
+      },
+      "C(regime, Treatment(reference=\"rate_down\"))[T.rate_up]": {
+        "coef": -0.040900684528308286,
+        "se_hac": 0.02173544682902139,
+        "t_hac": -1.881750343116815,
+        "p_hac": 0.05986992086042973
+      },
+      "meta": {
+        "n_obs": 5301,
+        "r2": 0.01142447007812164,
+        "hac_maxlags": 21
+      }
+    },
+    "fwd_rv_spy": {
+      "Intercept": {
+        "coef": 0.16986286754914007,
+        "se_hac": 0.011654104674305613,
+        "t_hac": 14.575368275492258,
+        "p_hac": 4.0294379356950497e-48
+      },
+      "C(regime, Treatment(reference=\"rate_down\"))[T.rate_up]": {
+        "coef": -0.0255091584034326,
+        "se_hac": 0.01212886593600756,
+        "t_hac": -2.103177538445891,
+        "p_hac": 0.03545025298027337
+      },
+      "meta": {
+        "n_obs": 5301,
+        "r2": 0.013357291834569684,
+        "hac_maxlags": 21
+      }
+    },
+    "fwd_rv_tlt": {
+      "Intercept": {
+        "coef": 0.13977676543192658,
+        "se_hac": 0.005353195099279909,
+        "t_hac": 26.11090439254284,
+        "p_hac": 2.741469438132112e-150
+      },
+      "C(regime, Treatment(reference=\"rate_down\"))[T.rate_up]": {
+        "coef": -0.007613972708761915,
+        "se_hac": 0.006226728043454046,
+        "t_hac": -1.222788703092025,
+        "p_hac": 0.22140951338548276
+      },
+      "meta": {
+        "n_obs": 5301,
+        "r2": 0.004577056914579658,
+        "hac_maxlags": 21
+      }
+    },
+    "fwd_corr_vnq_spy": {
+      "Intercept": {
+        "coef": 0.6251992588443893,
+        "se_hac": 0.01762520130765239,
+        "t_hac": 35.471893224444734,
+        "p_hac": 1.333718540856681e-275
+      },
+      "C(regime, Treatment(reference=\"rate_down\"))[T.rate_up]": {
+        "coef": 0.0028715864622469267,
+        "se_hac": 0.022198219893601746,
+        "t_hac": 0.1293611143601029,
+        "p_hac": 0.897071915337365
+      },
+      "meta": {
+        "n_obs": 5301,
+        "r2": 3.9063879518463906e-05,
+        "hac_maxlags": 21
+      }
+    },
+    "fwd_corr_vnq_tlt": {
+      "Intercept": {
+        "coef": -0.0772684183458209,
+        "se_hac": 0.031188944650716106,
+        "t_hac": -2.477429717842242,
+        "p_hac": 0.013233246864866606
+      },
+      "C(regime, Treatment(reference=\"rate_down\"))[T.rate_up]": {
+        "coef": 0.11813339251927193,
+        "se_hac": 0.039796043110962506,
+        "t_hac": 2.9684708147964103,
+        "p_hac": 0.002992855220682666
+      },
+      "meta": {
+        "n_obs": 5301,
+        "r2": 0.022584360819292493,
+        "hac_maxlags": 21
+      }
+    }
+  },
+  "multiple_test_correction": {
+    "fwd_corr_vnq_tlt": {
+      "raw_p": 0.002992855220682666,
+      "bonferroni_p": 0.01496427610341333,
+      "bh_p": 0.01496427610341333,
+      "rank": 1
+    },
+    "fwd_rv_spy": {
+      "raw_p": 0.03545025298027337,
+      "bonferroni_p": 0.17725126490136686,
+      "bh_p": 0.08862563245068343,
+      "rank": 2
+    },
+    "fwd_rv_vnq": {
+      "raw_p": 0.05986992086042973,
+      "bonferroni_p": 0.29934960430214863,
+      "bh_p": 0.09978320143404955,
+      "rank": 3
+    },
+    "fwd_rv_tlt": {
+      "raw_p": 0.22140951338548276,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.27676189173185345,
+      "rank": 4
+    },
+    "fwd_corr_vnq_spy": {
+      "raw_p": 0.897071915337365,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.8970719153373651,
+      "rank": 5
+    }
+  },
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_reason": "At least one VNQ rate-regime contrast survives Bonferroni; interpret as descriptive regime dependence, not a tradable timing rule.",
+  "figures": [
+    "figures/vnq_rate_regime_summary.png"
+  ]
+}
