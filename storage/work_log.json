@@ -10199,5 +10199,27 @@
     "result": "K1460 completed: lagged stock-bond correlation regime test for 60/40; static 60/40 SPY/IEF beat all adaptive rules; knowledge entry added",
     "verdict": "NULL",
     "k_id": "K1460"
+  },
+  {
+    "task_id": "research_vol_ung_dba_realized_vol_pattern_yfinance",
+    "task_type": "experiment",
+    "timestamp": "2026-06-10T13:45:40.491721+00:00",
+    "owner": "codex-cli",
+    "result": "K1461 completed: UNG seasonality test finished with DBA explicitly blocked by offline data constraint; strong UNG month-of-year pattern, only moderate energy/inflation proxy links",
+    "verdict": "PARTIAL_SIGNAL",
+    "k_id": "K1461"
+  },
+  {
+    "id": "paper_review_mile_a6b1ed98",
+    "task_type": "paper_review",
+    "timestamp": "2026-06-10T14:16:37.622405+00:00",
+    "owner": "hourly-22",
+    "status": "succeeded",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K1082",
+    "article_id": "mile_a6b1ed98",
+    "reviewer": "Codex CLI gpt-5.4 (24h-rule)",
+    "summary": "Codex source-code review on mile_a6b1ed98 (K1082 EM ETF USD wrapper diagnostic). 演算法 PASS、5 MED + 2 LOW issues, applied 5 errata to feed.json + supabase sync. No retract.",
+    "tokens_used": 113232
   }
 ]

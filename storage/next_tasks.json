@@ -26823,7 +26823,7 @@
     "title": "研究 backlog fallback: 天然氣與農產品 vol 的季節性：UNG(天然氣)/DBA(農產) realized vol 是否有顯著季節 pattern，與能源股/通膨的關係（yfinance）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 天然氣與農產品 vol 的季節性：UNG(天然氣)/DBA(農產) realized vol 是否有顯著季節 pattern，與能源股/通膨的關係（yfinance） | 來源 section: 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "vol_ung_dba_realized_vol_pattern_yfinance",
@@ -26831,7 +26831,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-10T03:08:01+00:00"
+    "created_at": "2026-06-10T03:08:01+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T13:39:39.680343+00:00",
+    "claim_session_id": "cf73b34e78ae",
+    "started_at": "2026-06-10T13:39:39.780073+00:00",
+    "completed_at": "2026-06-10T13:45:53.210151+00:00",
+    "result": "K1461 completed: UNG-only honest partial replication under offline DBA constraint; strong UNG month-of-year seasonality, moderate proxy links, DBA explicitly blocked by missing local OHLC and no network"
   },
   {
     "id": "research_vol_cper_vol_vol_lead_lag_vol_yfinance_lag",
@@ -27166,5 +27172,152 @@
     "started_at": "2026-06-10T13:08:36.208551+00:00",
     "completed_at": "2026-06-10T13:13:58.356458+00:00",
     "result": "mile_9fdad80e draft 入池；K1459 ponzi math; 3 PNG 已上傳 Supabase; anti-AI gate PASS; arc dedup waiver=USD currency-unit不是 topic"
+  },
+  {
+    "id": "paper_body_audit_fix_leverage_direction_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 1,
+    "source": "paper_audit_2026-06-10",
+    "title": "leverage-direction 審查修正：6 HIGH（SUBMISSION FROZEN — K903 全文一致化）",
+    "description": "依 paper/leverage-direction/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）。決策已定（README）：採 K903 canonical 全文一致化（abstract 已是此版）— 重寫 Intro L11/§4.2.1/§4.2.3/§5.1/§6 刪 −5.79/93%/CI 舊統計；刪除 L134 不實腳註；Table 3 九列全改 K903 值並重算分類正確率；BTC 分類規則統一統計量重算（9/9 可能降 8/9 如實報）；ρ=0.944 的 p<0.001 改 p≈0.016（5 處）；reproduce.py expected values 對齊後重跑至 green。修 .tex 後 xelatex exit 0 → uv run volpred ops paper-update --paper-id leverage-direction → fix_log.md 記每條處置。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_vix_sufficiency_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 1,
+    "source": "paper_audit_2026-06-10",
+    "title": "vix-sufficiency 審查修正：6 HIGH（errata 未落地 + family 數不一致）",
+    "description": "依 paper/vix-sufficiency/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH 後 MEDIUM）。重點：2026-05-30 errata（Table 3 BH Sharpe 0.947→0.827 + narrative 翻轉）落地正文、標題/正文 family 數一致化、§7.1 殘留文字清理。數字修正必對 experiments JSON 驗證；xelatex exit 0 → paper-update 上傳 → fix_log.md。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_taiwan_vt_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 1,
+    "source": "paper_audit_2026-06-10",
+    "title": "taiwan-vt 審查修正：5 HIGH（abstract/intro 殘留 errata 推翻數字）",
+    "description": "依 paper/taiwan-vt/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH 後 MEDIUM）。重點：abstract/intro/§8 ≥5 處被正文 errata 推翻的舊數字（5.0×/CI[2.8,8.1] 等）全文一致化。數字對 experiments JSON 驗證；xelatex exit 0 → paper-update 上傳 → fix_log.md。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_vt_trend_following_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 1,
+    "source": "paper_audit_2026-06-10",
+    "title": "vt-trend-following 審查修正：4 HIGH（與 v6 round4 線合併收尾）",
+    "description": "依 paper/vt-trend-following/review_history/audit_2026-06-10/audit_findings.json 逐條修正，與進行中的 v6 fixes round4（K1458 H1 + Codex gate）合併：Table 3 50/50 欄與 K1417 比較表混用已推翻 v2 數字、Figure 1 非 canonical、reproduce gate 80.7% yellow 重跑。xelatex exit 0 → paper-update 上傳 → fix_log.md。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_btc_gas_negative_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 2,
+    "source": "paper_audit_2026-06-10",
+    "title": "btc-gas-negative 審查修正：6 HIGH（§8 捏造數字砍除 + abstract 方向修正）",
+    "description": "依 paper/btc-gas-negative/review_history/audit_2026-06-10/audit_findings.json 逐條修正。重點：§8/附錄捏造 robustness 數字（R0 CRITICAL 未修）二擇一 — 真跑落地 JSON 或整段改 planned/刪除；abstract『MS underperforms』方向錯誤（JSON 顯示 MS 1.98699<M1 1.99261 略勝）改 parity 表述；K1129 動機統計量重新歸屬；Period 3 日期 2024→2026Q1；§3.4 估計法描述對齊 hybrid Gray/Klaassen 實作；ν>30 宣稱改真實範圍（max 15.48）。仍是 drafts/*.md 階段 — 修完才可轉 .tex。fix_log.md 記處置。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_volatility_absorption_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 2,
+    "source": "paper_audit_2026-06-10",
+    "title": "volatility-absorption 審查修正：6 HIGH（reproduce gate v3 重跑 + snapshot 統一）",
+    "description": "依 paper/volatility-absorption/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）：對 v3 重跑 reproduce gate（現存 report 是 v2、61.3% red）、統一 original-snapshot 口徑、Tables 6-8 數字補 JSON 來源。xelatex exit 0 → paper-update 上傳 → fix_log.md。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_eav_universal_magnitude_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 2,
+    "source": "paper_audit_2026-06-10",
+    "title": "eav-universal-magnitude 審查修正：5 HIGH（FRAGILE 主結果重估）",
+    "description": "依 paper/eav-universal-magnitude/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）：主結果（Table 1）被 §6.6 multistart 段宣告 single-init FRAGILE — 需 100+ multistart 重估（CLAUDE.md pooled-MLE 硬規則）或如實降級結論；abstract/conclusion 與 13-market body 結構對齊。重估屬 heavy compute → 走 compute_queue。fix_log.md 記處置。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_vt_crowding_abm_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 2,
+    "source": "paper_audit_2026-06-10",
+    "title": "vt-crowding-abm 審查修正：5 HIGH（雙 REJECT blocking 4 項未修）",
+    "description": "依 paper/vt-crowding-abm/review_history/audit_2026-06-10/audit_findings.json 逐條修正：v5_independent（2026-05-21）Codex+Antigravity 雙 REJECT 的 4 個 blocking（detector 循環校準、NoiseControl 無效對照、iid 假設等）必須先解 — 涉及模擬重設計，必要時開新 K 實驗。fix_log.md 記處置。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_prg_periodic_garch_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 2,
+    "source": "paper_audit_2026-06-10",
+    "title": "prg-periodic-garch 審查修正：4 HIGH（DM 符號口徑 + lag 宣稱 + Basel 燈號）",
+    "description": "依 paper/prg-periodic-garch/review_history/audit_2026-06-10/audit_findings.json 逐條修正：Table 2 DM 符號口徑自相矛盾、GJR-X fair-information 宣稱與 Eq.(10) t-1 lag 不符、Basel 燈號計算錯誤。數字溯源已全過 — 修口徑與宣稱層。xelatex exit 0 → paper-update 上傳 → fix_log.md。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_crypto_fear_channel_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 2,
+    "source": "paper_audit_2026-06-10",
+    "title": "crypto-fear-channel 審查修正：7 HIGH（HAC 宣稱 + 4 個 v5 MAJOR 殘留）",
+    "description": "依 paper/crypto-fear-channel/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）：v2 重跑修掉 3 個 BLOCKING 但 4 個 MAJOR 殘留（HAC 不實宣稱等）。數字對 experiments JSON 驗證；xelatex exit 0 → paper-update 上傳 → fix_log.md。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_body_audit_fix_vt_insurance_cost_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 2,
+    "source": "paper_audit_2026-06-10",
+    "title": "vt-insurance-cost 審查修正：3 HIGH（DM 註腳 + cross-OOS 跳窗揭露）",
+    "description": "依 paper/vt-insurance-cost/review_history/audit_2026-06-10/audit_findings.json 逐條修正：DM 檢定註腳與實際代碼不符、cross-OOS 4 窗無聲跳過 2017-18/2021-22 必須揭露、rebalancing premium 子期間翻負如實報告。數字溯源乾淨 — 修揭露與註腳層。xelatex exit 0 → paper-update 上傳 → fix_log.md。",
+    "status": "pending",
+    "created_at": "2026-06-10T13:58:00+00:00"
+  },
+  {
+    "id": "paper_review_mile_a6b1ed98",
+    "title": "Paper review (Codex 24h-rule): 同一籃子台股，換個市場掛牌，波動預測就變了？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a6b1ed98 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_a6b1ed98",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-10T14:08:27+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-10T14:09:20.929268+00:00",
+    "claim_session_id": "e4a33c9bc264",
+    "started_at": "2026-06-10T14:09:33.605830+00:00",
+    "completed_at": "2026-06-10T14:16:40.379211+00:00",
+    "result": "Codex 24h-rule review (CONDITIONAL_PASS): 演算法 PASS lookahead lag t-1 確認; 5 MED issues 已 errata feed.json (n=4848 拆 0050.TW=3913, Harvey 降級, EWT 語氣弱化, USD 必要條件改樣本內觀察, EWH 註未測) + supabase sync; knowledge.json k_9e3c177fb5cb; no retract."
+  },
+  {
+    "id": "research_tail_hedging_overlay_vs_crisis_alpha",
+    "title": "研究 backlog fallback: tail-hedging overlay 的真實成本 vs crisis-alpha 淨值",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: tail-hedging overlay 的真實成本 vs crisis-alpha 淨值 — yfinance VXX/put-proxy 疊 SPY，量化長期 drag（短 VIX 期貨歷史 -355bp）vs 危機保護，beta-adjusted 後是否仍正貢獻（來源：JPM/Goldman 2025 true value of tail hedging） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "tail_hedging_overlay_vs_crisis_alpha",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T14:08:36+00:00"
   }
 ]
