@@ -234,7 +234,20 @@ def main():
 
     # L3 FB pipeline
     fb_log = jl(REPO / "storage" / "reports" / "trending_repost_log.json", [])
-    fb_pending, fb_awaiting = classify_fb_pipeline(fb_log)
+    # 2026-06-10 process-audit CRITICAL #2: event_article FB statuses live as
+    # top-level fb_post_status on feed.json entries, NOT in trending_repost_log
+    # — both this dashboard and audit_fb_pipeline.py were blind to them (6
+    # awaiting found, oldest 06-05 past the 72h auto-expire bar; structural
+    # repeat of the 2026-06-03 FB-audit incident). Merge feed-side entries in;
+    # normalize id key to mile_id for the section output.
+    fb_feed_entries = [
+        {**a, "mile_id": a.get("mile_id") or a.get("id")}
+        for a in feed
+        if isinstance(a, dict) and str(a.get("fb_post_status") or "").strip()
+    ]
+    seen_mile_ids = {x.get("mile_id") for x in fb_log if isinstance(x, dict)}
+    fb_all = list(fb_log) + [e for e in fb_feed_entries if e.get("mile_id") not in seen_mile_ids]
+    fb_pending, fb_awaiting = classify_fb_pipeline(fb_all)
     fb_status = "ok" if len(fb_pending) == 0 else "warn" if len(fb_pending) <= 2 else "critical"
     fb_tldr = (
         f"{len(fb_awaiting)} FB posts awaiting interactive session"

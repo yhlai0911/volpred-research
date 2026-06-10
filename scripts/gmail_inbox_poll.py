@@ -444,9 +444,25 @@ def _normalize_subject(subject: str) -> str:
     return " ".join(s.split())
 
 
+# Statuses that mean the prior email_reply task is finished — a NEW message on
+# the same thread must be queued again. 2026-06-10 process-audit CRITICAL #1:
+# subject-dedup previously applied to ANY status, so once one alert-thread task
+# succeeded, every later boss reply on that recurring thread title was silently
+# skipped (log showed 195 skip_by_subject hits incl. boss replies to CRITICAL
+# alerts on 05-27/06-01/06-02/06-07). Message-ID dedup (layer 1) + processed_ids
+# state file (layer 3) still prevent re-queueing the SAME message, so relaxing
+# the subject layer cannot duplicate a message — worst case is a redundant task,
+# which is recoverable; a lost boss reply is not.
+_EMAIL_TASK_TERMINAL_STATUSES = {
+    "succeeded", "failed", "cancelled", "completed", "skipped",
+    "superseded", "expired", "done", "retracted", "wont_fix",
+}
+
+
 def _existing_task_keys() -> tuple[set[str], set[str]]:
-    """Read next_tasks.json and return (message_ids, normalized_subjects)
-    already queued as email_reply tasks (any status)."""
+    """Read next_tasks.json and return (message_ids, normalized_subjects) of
+    email_reply tasks. Message-IDs: ANY status (same message never re-queued).
+    Subjects: ACTIVE (non-terminal) tasks only — see note above."""
     path = ROOT / "storage" / "next_tasks.json"
     if not path.exists():
         return set(), set()
@@ -466,9 +482,15 @@ def _existing_task_keys() -> tuple[set[str], set[str]]:
         mid = (t.get("email_message_id") or "").strip()
         if mid:
             mids.add(mid)
-        subj_norm = _normalize_subject(t.get("email_subject") or t.get("title") or "")
-        if subj_norm:
-            subs.add(subj_norm)
+        # Empty status counts as terminal (queue the reply): a duplicate task
+        # is cheap; dropping a boss reply is not. Non-terminal statuses
+        # (pending/in_progress/claimed/...) keep the thread deduped while the
+        # prior task is genuinely being worked.
+        status = str(t.get("status") or "").strip().lower()
+        if status and status not in _EMAIL_TASK_TERMINAL_STATUSES:
+            subj_norm = _normalize_subject(t.get("email_subject") or t.get("title") or "")
+            if subj_norm:
+                subs.add(subj_norm)
     return mids, subs
 
 
