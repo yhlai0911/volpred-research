@@ -27466,14 +27466,16 @@
     "id": "k1464_rework_methodology_fixes",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "title": "K1464 rework: 修 tertile lookahead + HAC diff test + survivor universe（Codex 2 HIGH + 4 MED）",
     "description": "K1464 first-pass NULL verdict 因 Codex review 找到 2 HIGH 方法缺陷不可採信，需 rework。具體修整：(1) regime tertile cutoffs 改 expanding quantile（每月用 t-1 之前的 lagged RV 算 cutoffs，不可用全樣本 quantile）；(2) HAC diff test 改在原始月序列上跑 BAB_t ~ const + 1{low}_t + 1{high}_t 回歸並檢定 low-high 線性限制（不可串接 subsample 破壞時間順序）；(3) block bootstrap 改 stationary block over full monthly series with regime indicator（不可在 subsample 上 bootstrap）；(4) 移除 GLD/TLT 等 ETF（universe 應全 equity）；(5) README 改口徑：FP-style approximation 而非「嚴格 FP 2014」+ 明寫 power MDES 25% 年化差。完成後重跑 + Codex re-review。Source: experiments/k1464_bab_vol_conditional/ + storage/memory/knowledge.json K1464 entry。",
-    "claimed_by": null,
+    "claimed_by": "codex-cli",
     "claimed_session": null,
-    "claimed_at": null,
+    "claimed_at": "2026-06-10T19:23:39.507637+00:00",
     "created_at": "2026-06-11T03:22:50+08:00",
     "source": "auto_discovered",
-    "parent_task_id": "research_bab_beta_anomaly"
+    "parent_task_id": "research_bab_beta_anomaly",
+    "claim_session_id": "fe05726f24ac",
+    "started_at": "2026-06-10T19:23:43.685091+00:00"
   }
 ]
