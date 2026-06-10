@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-06-10T06:05:43Z",
+  "timestamp": "2026-06-10T12:04:47Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "147 draft articles total (general: 100, research: 47). All thresholds met (total≥12 ✓, general≥8 ✓, research≥4 ✓)."
+      "detail": "147 drafts total (research: 47, general: 100). All thresholds met (total≥12, research≥4, general≥8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified ~12 seconds ago (mtime 1781071488, now 1781071500). Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json is <1 minute old (mtime 1781093077, checked at 1781093105). Well within 26h threshold."
     },
     {
-      "name": "ERROR_LOG_RECENT",
-      "status": "info",
-      "detail": "Entry from 2026-06-09 (yesterday): merge_worktree.sh main..worktree detection logic bug (strike-2). Root cause: `git diff main..worktree` catches main-side changes post-fork, not just agent writes. False-positive triggered on K1426+K1427. Workaround: manual `git merge --no-ff -X theirs`. Strike-3 rewrite pending."
+      "name": "ERROR_LOG",
+      "status": "ok",
+      "detail": "No entries dated today (2026-06-10). One entry from yesterday (2026-06-09 09:15): merge_worktree.sh main..worktree detection logic bug (Strike-2). Root cause: script uses `git diff main..worktree` instead of `git diff merge-base..worktree`, causing false-positive shared-file detection when main advances after worktree fork. Workaround: manual `git merge --no-ff -X theirs worktree-<id>`. Strike-3 rewrite pending."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies found. Strategy values are non-list (nested dict per strategy, not time-series arrays). Last-3-null check not applicable to current schema. No null alerts triggered."
+      "detail": "All 15 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier) have 0 null portfolio_returns in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree is clean."
+      "detail": "0 uncommitted files. Clean working tree."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2213 entries."
+      "detail": "2213 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": []
