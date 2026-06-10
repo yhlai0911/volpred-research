@@ -1,0 +1,303 @@
+"""K1449: CPER copper-volatility lead-lag test for SPY forward RV.
+
+Question:
+  Does lagged copper-proxy volatility (CPER) contain short-horizon lead-lag
+  information for future SPY realized volatility, or is it merely a concurrent
+  risk-state proxy already absorbed by VIX?
+
+Design:
+  - Predictor: trailing 21d CPER realized volatility observed at t-1.
+  - Outcome: forward 21d SPY realized volatility on returns t+1..t+21.
+  - Formal inference uses HAC(Newey-West, maxlags=21) due to overlapping outcome.
+  - Cross-correlation CI uses moving-block bootstrap with seed=42.
+"""
+from __future__ import annotations
+
+import json
+import time
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+import yfinance as yf
+
+SEED = 42
+START = "2010-01-01"
+END = "2026-06-10"
+RV_WINDOW = 21
+HAC_LAGS = 21
+N_BOOT = 1000
+BLOCK_SIZE = 21
+ANNUALIZER = float(np.sqrt(252.0))
+
+OUT_DIR = Path(__file__).parent
+FIG_DIR = OUT_DIR / "figures"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def fetch_prices() -> pd.DataFrame:
+    tickers = ["CPER", "SPY", "^VIX"]
+    for attempt in range(3):
+        try:
+            raw = yf.download(
+                tickers,
+                start=START,
+                end=END,
+                auto_adjust=True,
+                progress=False,
+                threads=True,
+                group_by="ticker",
+            )
+            out = {}
+            for ticker in tickers:
+                try:
+                    ser = raw[ticker]["Close"].rename(ticker)
+                except Exception:
+                    ser = raw["Close"][ticker].rename(ticker)
+                out[ticker] = ser.dropna()
+            df = pd.DataFrame(out).sort_index().dropna()
+            if not df.empty:
+                return df
+        except Exception as exc:  # noqa: BLE001
+            print(f"[warn] download attempt {attempt + 1}/3 failed: {exc}")
+        time.sleep(2 + attempt)
+    raise RuntimeError("yfinance download failed after 3 attempts")
+
+
+def compute_trailing_rv(price: pd.Series) -> pd.Series:
+    log_ret = np.log(price).diff()
+    return (log_ret.rolling(RV_WINDOW).std() * ANNUALIZER).rename(f"{price.name}_rv21")
+
+
+def compute_forward_rv(price: pd.Series) -> pd.Series:
+    log_ret = np.log(price).diff()
+    fwd = log_ret.shift(-1).rolling(RV_WINDOW).std() * ANNUALIZER
+    return fwd.shift(-(RV_WINDOW - 1)).rename(f"{price.name}_fwd_rv21")
+
+
+def moving_block_bootstrap_corr(xs: np.ndarray, ys: np.ndarray, rng: np.random.Generator) -> tuple[float, float]:
+    n = len(xs)
+    n_blocks = int(np.ceil(n / BLOCK_SIZE))
+    starts = np.arange(0, n - BLOCK_SIZE + 1)
+    vals = np.empty(N_BOOT)
+    for i in range(N_BOOT):
+        chosen = rng.choice(starts, size=n_blocks, replace=True)
+        idx = np.concatenate([np.arange(s, s + BLOCK_SIZE) for s in chosen])[:n]
+        vals[i] = np.corrcoef(xs[idx], ys[idx])[0, 1]
+    return float(np.percentile(vals, 2.5)), float(np.percentile(vals, 97.5))
+
+
+def lead_lag_corr(cper_rv: pd.Series, spy_fwd_rv: pd.Series, max_lag: int = 5) -> dict:
+    rng = np.random.default_rng(SEED)
+    aligned = pd.concat([cper_rv.rename("x"), spy_fwd_rv.rename("y")], axis=1).dropna()
+    x = aligned["x"].to_numpy()
+    y = aligned["y"].to_numpy()
+    n = len(aligned)
+    out = {"lags": list(range(-max_lag, max_lag + 1)), "corr": [], "ci_lo": [], "ci_hi": []}
+    for lag in out["lags"]:
+        if lag < 0:
+            xs = x[: n + lag]
+            ys = y[-lag:n]
+        elif lag > 0:
+            xs = x[lag:]
+            ys = y[: n - lag]
+        else:
+            xs = x
+            ys = y
+        c = float(np.corrcoef(xs, ys)[0, 1])
+        lo, hi = moving_block_bootstrap_corr(xs, ys, rng)
+        out["corr"].append(c)
+        out["ci_lo"].append(lo)
+        out["ci_hi"].append(hi)
+    return out
+
+
+def build_analysis_frame(px: pd.DataFrame) -> pd.DataFrame:
+    cper_rv = compute_trailing_rv(px["CPER"])
+    spy_rv = compute_trailing_rv(px["SPY"])
+    spy_fwd_rv = compute_forward_rv(px["SPY"])
+    vix_lag1 = (px["^VIX"] / 100.0).shift(1).rename("vix_lag1")
+    cper_rv_lag1 = cper_rv.shift(1).rename("cper_rv_lag1")
+    cper_rv_z_lag1 = ((cper_rv - cper_rv.rolling(252).mean()) / cper_rv.rolling(252).std()).shift(1).rename("cper_rv_z_lag1")
+    high_cper_vol = (cper_rv_z_lag1 > 1.5).rename("high_cper_vol")
+    frame = pd.concat(
+        [cper_rv, spy_rv, spy_fwd_rv, cper_rv_lag1, cper_rv_z_lag1, vix_lag1, high_cper_vol],
+        axis=1,
+    ).dropna()
+    frame["high_cper_vol"] = frame["high_cper_vol"].astype(int)
+    return frame
+
+
+def hac_model(formula: str, data: pd.DataFrame) -> dict:
+    model = smf.ols(formula, data=data).fit(cov_type="HAC", cov_kwds={"maxlags": HAC_LAGS})
+    out = {}
+    for key in model.params.index:
+        out[key] = {
+            "coef": float(model.params[key]),
+            "se_hac": float(model.bse[key]),
+            "t_hac": float(model.tvalues[key]),
+            "p_hac": float(model.pvalues[key]),
+        }
+    out["meta"] = {
+        "n_obs": int(model.nobs),
+        "r2": float(model.rsquared),
+        "hac_maxlags": HAC_LAGS,
+    }
+    return out
+
+
+def multiple_test_correction(pvals: list[tuple[str, float]]) -> dict:
+    m = len(pvals)
+    ranked = sorted(pvals, key=lambda x: x[1])
+    bh_raw = [min(p * m / rank, 1.0) for rank, (_, p) in enumerate(ranked, start=1)]
+    bh_adj = [0.0] * m
+    running = 1.0
+    for idx in range(m - 1, -1, -1):
+        running = min(running, bh_raw[idx])
+        bh_adj[idx] = running
+    out = {}
+    for idx, (label, p) in enumerate(ranked):
+        out[label] = {
+            "raw_p": float(p),
+            "bonferroni_p": float(min(p * m, 1.0)),
+            "bh_p": float(bh_adj[idx]),
+            "rank": int(idx + 1),
+        }
+    return out
+
+
+def make_figures(frame: pd.DataFrame, ll: dict) -> None:
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    axes[0].plot(frame.index, frame["CPER_rv21"], label="CPER RV21", lw=0.8, color="#dd8452")
+    axes[0].plot(frame.index, frame["SPY_fwd_rv21"], label="SPY forward RV21", lw=0.8, color="#4c72b0")
+    axes[0].set_title("Trailing CPER RV vs forward SPY RV")
+    axes[0].grid(True, alpha=0.25)
+    axes[0].legend()
+
+    lags = ll["lags"]
+    corr = np.array(ll["corr"])
+    lo = np.array(ll["ci_lo"])
+    hi = np.array(ll["ci_hi"])
+    axes[1].errorbar(
+        lags,
+        corr,
+        yerr=[corr - lo, hi - corr],
+        fmt="o-",
+        capsize=4,
+        color="#55a868",
+    )
+    axes[1].axhline(0, color="black", lw=0.6)
+    axes[1].axvline(0, color="gray", lw=0.6, ls="--")
+    axes[1].set_xlabel("Lag (negative = CPER RV leads SPY fwd RV)")
+    axes[1].set_ylabel("Correlation")
+    axes[1].set_title("Lead-lag cross-correlation with block-bootstrap 95% CI")
+    axes[1].grid(True, alpha=0.25)
+
+    fig.tight_layout()
+    fig.savefig(FIG_DIR / "lead_lag_and_timeseries.png", dpi=130)
+    plt.close(fig)
+
+
+def main() -> dict:
+    px = fetch_prices()
+    frame = build_analysis_frame(px)
+    ll = lead_lag_corr(frame["CPER_rv21"], frame["SPY_fwd_rv21"])
+
+    model_univariate = hac_model("SPY_fwd_rv21 ~ cper_rv_lag1", frame)
+    model_control = hac_model("SPY_fwd_rv21 ~ cper_rv_lag1 + vix_lag1", frame)
+    model_z = hac_model("SPY_fwd_rv21 ~ cper_rv_z_lag1 + vix_lag1", frame)
+    model_bucket = hac_model("SPY_fwd_rv21 ~ high_cper_vol + vix_lag1", frame)
+
+    pvals = [
+        ("uni_cper_rv_lag1", model_univariate["cper_rv_lag1"]["p_hac"]),
+        ("ctl_cper_rv_lag1", model_control["cper_rv_lag1"]["p_hac"]),
+        ("ctl_cper_rv_z_lag1", model_z["cper_rv_z_lag1"]["p_hac"]),
+        ("bucket_high_cper_vol", model_bucket["high_cper_vol"]["p_hac"]),
+    ]
+    correction = multiple_test_correction(pvals)
+
+    make_figures(frame, ll)
+
+    peak_idx = int(np.argmin(np.abs(np.array(ll["lags"]) + 1)))
+    lagm1_corr = ll["corr"][peak_idx]
+    lagm1_ci = [ll["ci_lo"][peak_idx], ll["ci_hi"][peak_idx]]
+
+    ctl_bonf = correction["ctl_cper_rv_lag1"]["bonferroni_p"]
+    z_bonf = correction["ctl_cper_rv_z_lag1"]["bonferroni_p"]
+    bucket_bonf = correction["bucket_high_cper_vol"]["bonferroni_p"]
+
+    if ctl_bonf < 0.05 or z_bonf < 0.05 or bucket_bonf < 0.05:
+        verdict = "CONDITIONAL_PASS"
+        verdict_reason = (
+            "At least one lagged CPER-vol predictor survives Bonferroni after VIX control; "
+            "interpret as descriptive copper-risk-state evidence, not a standalone trading signal."
+        )
+    else:
+        verdict = "NULL"
+        verdict_reason = (
+            "No lagged CPER-vol predictor survives Bonferroni after VIX control; "
+            "copper-vol lead-lag is not robust beyond concurrent risk-state proxies."
+        )
+
+    result = {
+        "experiment_id": "K1449",
+        "title": "CPER copper-volatility lead-lag test for SPY forward RV",
+        "created_at": pd.Timestamp.now("UTC").isoformat(),
+        "sample": {
+            "start": str(frame.index.min().date()),
+            "end": str(frame.index.max().date()),
+            "n_obs": int(len(frame)),
+        },
+        "data_source": "yfinance (CPER, SPY, ^VIX)",
+        "lookahead_protection": {
+            "predictor": "cper_rv_lag1 = trailing RV shifted by 1 day",
+            "outcome": "SPY forward RV uses returns t+1..t+21",
+            "control": "vix_lag1",
+        },
+        "methods": {
+            "rv": "21d trailing std * sqrt(252)",
+            "forward_rv": "21d forward std on returns t+1..t+21",
+            "hac": "OLS with Newey-West HAC maxlags=21",
+            "bootstrap": f"moving-block bootstrap n={N_BOOT}, block={BLOCK_SIZE}, seed={SEED}",
+        },
+        "descriptive": {
+            "cper_rv_mean": float(frame["CPER_rv21"].mean()),
+            "spy_fwd_rv_mean": float(frame["SPY_fwd_rv21"].mean()),
+            "corr_contemporaneous": float(frame["CPER_rv21"].corr(frame["SPY_fwd_rv21"])),
+            "corr_lag1_predictor": float(frame["cper_rv_lag1"].corr(frame["SPY_fwd_rv21"])),
+            "high_cper_vol_share": float(frame["high_cper_vol"].mean()),
+        },
+        "lead_lag_cross_corr": {
+            **ll,
+            "highlight_lag_minus_1": {
+                "corr": float(lagm1_corr),
+                "ci95": [float(lagm1_ci[0]), float(lagm1_ci[1])],
+            },
+        },
+        "models": {
+            "univariate_level": model_univariate,
+            "vix_control_level": model_control,
+            "vix_control_zscore": model_z,
+            "vix_control_high_bucket": model_bucket,
+        },
+        "multiple_test_correction": correction,
+        "verdict": verdict,
+        "verdict_reason": verdict_reason,
+        "figures": ["figures/lead_lag_and_timeseries.png"],
+        "notes": [
+            "K422 futures-based result suggested copper vol was contrarian for future equity vol after VIX control.",
+            "This experiment uses CPER ETF as a retail-accessible copper proxy and explicit t-1 lagging.",
+        ],
+    }
+
+    (OUT_DIR / "k1449_results.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    print(json.dumps({"verdict": verdict, "reason": verdict_reason}, indent=2))
+    return result
+
+
+if __name__ == "__main__":
+    main()

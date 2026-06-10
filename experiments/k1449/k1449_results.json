@@ -1,0 +1,221 @@
+{
+  "experiment_id": "K1449",
+  "title": "CPER copper-volatility lead-lag test for SPY forward RV",
+  "created_at": "2026-06-10T05:02:14.435974+00:00",
+  "sample": {
+    "start": "2012-12-18",
+    "end": "2026-05-07",
+    "n_obs": 3366
+  },
+  "data_source": "yfinance (CPER, SPY, ^VIX)",
+  "lookahead_protection": {
+    "predictor": "cper_rv_lag1 = trailing RV shifted by 1 day",
+    "outcome": "SPY forward RV uses returns t+1..t+21",
+    "control": "vix_lag1"
+  },
+  "methods": {
+    "rv": "21d trailing std * sqrt(252)",
+    "forward_rv": "21d forward std on returns t+1..t+21",
+    "hac": "OLS with Newey-West HAC maxlags=21",
+    "bootstrap": "moving-block bootstrap n=1000, block=21, seed=42"
+  },
+  "descriptive": {
+    "cper_rv_mean": 0.24347505339032058,
+    "spy_fwd_rv_mean": 0.14242569187907095,
+    "corr_contemporaneous": 0.05844967329742678,
+    "corr_lag1_predictor": 0.05727253474259638,
+    "high_cper_vol_share": 0.08318478906714201
+  },
+  "lead_lag_cross_corr": {
+    "lags": [
+      -5,
+      -4,
+      -3,
+      -2,
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "corr": [
+      0.04964599720492853,
+      0.051654389808187026,
+      0.05344232033227853,
+      0.05552937692873394,
+      0.05725353777408106,
+      0.05844967329742678,
+      0.06074033162182848,
+      0.06322869262037,
+      0.06620305818013415,
+      0.06981588063573745,
+      0.07395611486820176
+    ],
+    "ci_lo": [
+      -0.0024717073184454953,
+      -0.00025380819086841694,
+      -0.0003058009677729346,
+      0.0009081603633820264,
+      0.003486445577678331,
+      0.003606856447553967,
+      0.003067689590934624,
+      0.005576990672102802,
+      0.006296186406398545,
+      0.012587831527247885,
+      0.009035715702401194
+    ],
+    "ci_hi": [
+      0.14608035929619767,
+      0.1453194139587847,
+      0.14955821884640763,
+      0.15173017552266468,
+      0.16165931250197757,
+      0.16852418660348173,
+      0.17662970013961188,
+      0.17110019734577792,
+      0.17627536850861422,
+      0.18513532104356942,
+      0.20675873385147162
+    ],
+    "highlight_lag_minus_1": {
+      "corr": 0.05725353777408106,
+      "ci95": [
+        0.003486445577678331,
+        0.16165931250197757
+      ]
+    }
+  },
+  "models": {
+    "univariate_level": {
+      "Intercept": {
+        "coef": 0.1362916902978031,
+        "se_hac": 0.008516225171938195,
+        "t_hac": 16.00376781333797,
+        "p_hac": 1.2027079499837954e-57
+      },
+      "cper_rv_lag1": {
+        "coef": 0.025197753999258443,
+        "se_hac": 0.016335927787131912,
+        "t_hac": 1.5424746195993313,
+        "p_hac": 0.12295830086890801
+      },
+      "meta": {
+        "n_obs": 3366,
+        "r2": 0.0032801432358420257,
+        "hac_maxlags": 21
+      }
+    },
+    "vix_control_level": {
+      "Intercept": {
+        "coef": 0.005638041424749213,
+        "se_hac": 0.014229772228544815,
+        "t_hac": 0.3962144533444706,
+        "p_hac": 0.6919468297522593
+      },
+      "cper_rv_lag1": {
+        "coef": -0.003362341361582699,
+        "se_hac": 0.012502505866913921,
+        "t_hac": -0.26893339602268457,
+        "p_hac": 0.7879809370630573
+      },
+      "vix_lag1": {
+        "coef": 0.7748072565983329,
+        "se_hac": 0.09997978314760084,
+        "t_hac": 7.749639299121901,
+        "p_hac": 9.215393828519562e-15
+      },
+      "meta": {
+        "n_obs": 3366,
+        "r2": 0.3183965677242573,
+        "hac_maxlags": 21
+      }
+    },
+    "vix_control_zscore": {
+      "Intercept": {
+        "coef": 0.007947211784389044,
+        "se_hac": 0.015690790672165094,
+        "t_hac": 0.5064889303817631,
+        "p_hac": 0.612513458707748
+      },
+      "cper_rv_z_lag1": {
+        "coef": 0.00321418588266643,
+        "se_hac": 0.0033086189511245803,
+        "t_hac": 0.9714584635302131,
+        "p_hac": 0.3313200274903807
+      },
+      "vix_lag1": {
+        "coef": 0.7562834806110823,
+        "se_hac": 0.09887527647499512,
+        "t_hac": 7.648863371849496,
+        "p_hac": 2.027635334255717e-14
+      },
+      "meta": {
+        "n_obs": 3366,
+        "r2": 0.3200724206065828,
+        "hac_maxlags": 21
+      }
+    },
+    "vix_control_high_bucket": {
+      "Intercept": {
+        "coef": 0.005430067446115262,
+        "se_hac": 0.015186152805430722,
+        "t_hac": 0.3575670227796875,
+        "p_hac": 0.7206673607657252
+      },
+      "high_cper_vol": {
+        "coef": 0.008427243244481875,
+        "se_hac": 0.018654032290072824,
+        "t_hac": 0.4517652330304278,
+        "p_hac": 0.6514381184362892
+      },
+      "vix_lag1": {
+        "coef": 0.7674224002447044,
+        "se_hac": 0.09783362475925693,
+        "t_hac": 7.844157896971835,
+        "p_hac": 4.358684003391e-15
+      },
+      "meta": {
+        "n_obs": 3366,
+        "r2": 0.3189556323757037,
+        "hac_maxlags": 21
+      }
+    }
+  },
+  "multiple_test_correction": {
+    "uni_cper_rv_lag1": {
+      "raw_p": 0.12295830086890801,
+      "bonferroni_p": 0.49183320347563203,
+      "bh_p": 0.49183320347563203,
+      "rank": 1
+    },
+    "ctl_cper_rv_z_lag1": {
+      "raw_p": 0.3313200274903807,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.6626400549807614,
+      "rank": 2
+    },
+    "bucket_high_cper_vol": {
+      "raw_p": 0.6514381184362892,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.7879809370630573,
+      "rank": 3
+    },
+    "ctl_cper_rv_lag1": {
+      "raw_p": 0.7879809370630573,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.7879809370630573,
+      "rank": 4
+    }
+  },
+  "verdict": "NULL",
+  "verdict_reason": "No lagged CPER-vol predictor survives Bonferroni after VIX control; copper-vol lead-lag is not robust beyond concurrent risk-state proxies.",
+  "figures": [
+    "figures/lead_lag_and_timeseries.png"
+  ],
+  "notes": [
+    "K422 futures-based result suggested copper vol was contrarian for future equity vol after VIX control.",
+    "This experiment uses CPER ETF as a retail-accessible copper proxy and explicit t-1 lagging."
+  ]
+}
