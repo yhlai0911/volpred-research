@@ -474,6 +474,23 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 銅作為景氣領先的 vol 訊號：CPER/銅期貨代理 vol 與股市 vol 的 lead-lag，「銅博士」在 vol 維度成立嗎（yfinance，明確 lag）
 - [ ] REIT 波動率與利率敏感度：VNQ realized vol 在升息/降息 regime 下的差異，REIT 是股是債（yfinance）
 
+### 期刊主題挖掘 batch（2026-06-10；掃 JBF/JFE/JoE/JFQA + JPM/FAJ/J.Fixed Income/J.Futures Markets 2025-26 熱門趨勢，全 yfinance/FRED/TAIFEX 可跑，contrarian/under-explored）
+> 來源：journal-topic-discovery agent（WebSearch 趨勢層級，非捏造論文）。刻意避開純 GARCH/HAR-vol-forecast、VIX 水平、台股 VT 三大既有主軸。
+- [ ] 隔夜 vs 日內 variance risk premium 反號之謎 — yfinance SPY 開/收盤切隔夜段與日內段 RV，FRED+^VIX 算 implied，檢定 VRP 在兩段是否反號（隔夜負/日內正）+ 1-3M vs 6-12M 預測力差異（來源：JFE/J.Futures Markets 2025 VRP intraday-overnight decomposition）
+- [ ] BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來源：JFE 2025 The volatility puzzle of the beta anomaly）
+- [ ] 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025）
+- [ ] 股債相關係數 regime 化下的 60/40 適應性配置 — FRED+yfinance 滾動股債相關，依相關 regime 動態調 60/40，比靜態的 drawdown 與 Sharpe（來源：JPM/FAJ 2025 rethinking 60/40；相關由 +0.8 降至 +0.16）
+- [ ] CTA/trend-following 的 drawdown 形態 vs 股市：頻繁但淺 — yfinance 多期貨 ETF 構 time-series momentum，比 trend vs 買進持有的 drawdown 深度/頻率 + vol-scaling 是否減半 MDD（來源：FAJ/Man Group/AlphaSimplex 2025 managed-futures drawdown）
+- [ ] regime-switching HAR 中「商業循環吸收 jump 成分」假說 — TAIFEX/yfinance RV+jump（BNS bipower），Markov 2-regime HAR-RV 加 FRED 景氣指標，檢定加景氣後 jump 係數是否轉不顯著（來源：JoE/Risks 2025 business-cycle vs jump RV）
+- [ ] 多訊號 momentum composite 改善尾部：11 訊號等權 vs 純價格動能 — yfinance 美股價格動能 + 替代訊號 composite，比 t-stat、MDD（純價動能歷史 MDD -88%）（來源：CFA Institute/FAJ 2025 multidimensional momentum）
+- [ ] dispersion / 相關性風險溢酬的免期權代理 — yfinance 指數 RV vs 成份股平均 RV 算「已實現 dispersion」，研究 mean-reversion 與 regime 擇時力（純期權版 blocked，用 RV 代理）（來源：CBOE DSPX/Numerix 2025）
+- [ ] tail-hedging overlay 的真實成本 vs crisis-alpha 淨值 — yfinance VXX/put-proxy 疊 SPY，量化長期 drag（短 VIX 期貨歷史 -355bp）vs 危機保護，beta-adjusted 後是否仍正貢獻（來源：JPM/Goldman 2025 true value of tail hedging）
+- [ ] 新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-attention & sentiment vol）
+- [ ] MOVE（債市波動）對股市波動與股債配置的領先性 — FRED/yfinance ^MOVE 代理，檢定債市波動是否領先 VIX 與股債相關 regime，構 MOVE-gated 配置訊號（來源：J.Fixed Income/CFA 2025 + MOVE）
+- [ ] 隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect）
+- [ ] 加密「vol-of-vol」與跨市場尾部外溢的免期權版 — yfinance BTC/ETH 算 RV 與 vol-of-vol，檢定對股/金/油尾部外溢（CoVaR/quantile spillover），加密能否當尾部避險（來源：J.Futures Markets 2025 crypto vol-of-vol；BTC vol 200%→50% 結構轉變）
+- [ ] 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）
+
 ## 決策框架
 
 ### 何時深入某面向

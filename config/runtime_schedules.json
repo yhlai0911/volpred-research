@@ -434,6 +434,13 @@
         "prompt": "Codex quota 已於 2026-04-24 10:27 reset。依 queue 最高 priority 派 Codex:\n1. uv run volpred ops tasks --status queued\n2. 檢查 task_7d2c (P25 crypto-fear audit) + task_06584aeee667 (P30 release-task CLI)\n3. 若仍 queued → dispatch codex:codex-rescue subagent（預設 serialize；若任務完全獨立可最多 3 個）\n4. 派工 brief 照 .claude/skills/autonomous-research/references/agent-brief-template.md\n5. Append work_log.json 記 quota-resumed event",
         "recurring": false,
         "description": "One-shot: Codex quota reset 後 resume 2 延後 tasks (2026-04-19 quota 耗盡對策)。fire 一次自動 delete。"
+      },
+      {
+        "id": "journal_topic_scan",
+        "cron": "17 8 * * 1,4",
+        "prompt": "研究 backlog 補充（取代手寫方向）：先測 refill research fallback 候選數，若 < 3（或每週一/四 cadence），派 general-purpose agent(WebSearch, background) 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖學術(JBF/JFE/RFS/JoE)+ 實務(JPM/FAJ/CFA/J.Fixed Income)期刊挖 12-15 個 contrarian VolPred 研究方向(yfinance/FRED/TAIFEX 可跑、不捏造論文)。完成後 review agent 輸出、貼進 research_program.md「期刊主題挖掘 batch」section、跑 refill 補池。",
+        "recurring": true,
+        "description": "每週一/四 08:17 從頂尖財金期刊(學術+實務 JPM/FAJ/CFA)挖交易/投資策略熱門主題補研究 backlog，取代手寫方向(treadmill)。agent-based(WebSearch)，有防捏造 guard。2026-06-10 老闆要求建立。"
       }
     ]
   },
