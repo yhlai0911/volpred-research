@@ -6,3 +6,10 @@
 3. structural premium 過強 → abstract/intro/§3.3/§5 四處改 full-sample average + K846 子期間 2/4 翻負揭露（−95/−56 bps）
 
 編譯 exit 0 + paper-update 上傳 ✅。殘項：補跑 2017-18/2021-22 兩窗（compute 批次）。
+
+## 2026-06-11 Codex 收尾
+- `README.md` 狀態從過時的 `Submission-ready / GREEN 100%` 降為 `MAJOR_REVISION`
+- `experiments.md` 同步標明 audit downgrade
+- `main.tex` limitation 段改為明確揭露：2012--2024 樣本其實有 6 個完整 two-year windows，目前只覆蓋 4 個
+- `xelatex -interaction=nonstopmode -halt-on-error main.tex` exit 0
+- `uv run volpred ops paper-update --paper-id vt-insurance-cost` ✅

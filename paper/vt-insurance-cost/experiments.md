@@ -2,7 +2,7 @@
 
 **Paper**: The True Cost of Volatility Targeting — Insurance Premium Decomposition
 **Journal**: Finance Research Letters (FRL)
-**Status**: Submission-ready (R3 SEVERE=0)
+**Status**: Audit 2026-06-10 downgraded to `MAJOR_REVISION` pending two omitted cross-OOS re-runs and reproduce-gate cleanup for claim #9.
 **Last Updated**: 2026-04-17
 
 ---

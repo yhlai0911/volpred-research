@@ -1,7 +1,7 @@
 # Paper 4: The True Cost of Volatility Targeting — Insurance Premium Decomposition
 
 **Target Journal**: Finance Research Letters (FRL)
-**Status**: ✅ **Submission-ready — GREEN 100% (9/9)** (R3 SEVERE=0) | Reproduce gate 88.9% amber → **100% GREEN** 2026-04-19 via (a) main.tex L184 dual-convention footnote (54 bps K846 auto_adjust=True vs ~63 bps replication auto_adjust=False, both within paper's structural 50-80 bps claim L186) + (b) reproduce.py tolerance widened 5→10 bps per L11 disambiguation. All 9 claims now within tolerance.
+**Status**: `MAJOR_REVISION` after 2026-06-10 audit. The three HIGH findings are now applied in `main.tex` and logged in `review_history/audit_2026-06-10/fix_log.md`, but the package is **not submission-ready yet** because (a) cross-OOS still covers only 4 of 6 complete two-year windows, and (b) reproduce gate reaches 100% only by widening claim #9 tolerance from 5 to 10 bps. Treat the current state as `body fixed / compute follow-up pending`.
 **Pages**: 14 | **Citations**: 17
 
 ## Data Sources
@@ -14,16 +14,23 @@
 uv run python paper/vt-insurance-cost/reproduce.py
 ```
 
-### Reproduction Status (2026-04-19, diagnosis_v1 closed)
+### Reproduction Status
 
-| Metric | Pre-fix | Post-Sub1 | Post-Sub2+Sub3 |
+| Metric | Pre-fix | Post-Sub1 | Current package state |
 |---|---|---|---|
-| Match rate | 44.4% (4/9) | 88.9% (8/9) | **88.9% (8/9)** |
-| Alert level | red | amber | **amber** |
-| S1/S2 insurance decomposition (claims #1–#8) | 4/8 | 8/8 | **8/8 match** |
-| 50/50 SPY/GLD rebalancing premium (claim #9) | −121 bps (divergent) | n/a | **62.91 bps (divergent, +8.91 vs 54)** |
+| Match rate | 44.4% (4/9) | 88.9% (8/9) | `100%` only under widened `±10 bps` tolerance on claim #9 |
+| Alert level | red | amber | `green` in `reproduce_report.json`, but audit 2026-06-10 treats this as over-permissive |
+| S1/S2 insurance decomposition (claims #1–#8) | 4/8 | 8/8 | **8/8 exact match** |
+| 50/50 SPY/GLD rebalancing premium (claim #9) | −121 bps (divergent) | n/a | **62.91 bps vs paper 54 bps** |
 
-**Residual divergence:** claim #9 only. Root cause = dividend convention asymmetry — K846 paper anchor used `yfinance auto_adjust=True` (Adj Close, 53.67 bps), replication package enforces `auto_adjust=False` raw Close (62.91 bps). **Pending L11 policy decision** between option (a) parallel adjusted-close 2006-2024 CSVs for claim #9 path vs option (b) update `main.tex:184` to "~63 bps raw Close".
+**Residual divergence:** claim #9 only. Root cause = dividend convention asymmetry — K846 paper anchor used `yfinance auto_adjust=True` (Adj Close, 53.67 bps), replication package enforces `auto_adjust=False` raw Close (62.91 bps). The current paper discloses both conventions in `main.tex:184`, but the reproduce gate should not be read as a strict green replication until claim #9 is either split into dual-basis checks or re-anchored to one basis.
+
+### Audit Status (2026-06-10)
+
+- HIGH #1 fixed: DM footnote now matches `strategy_dm_test` implementation.
+- HIGH #2 fixed: omitted 2017--18 and 2021--22 windows are explicitly disclosed in `§4.5`.
+- HIGH #3 fixed: rebalancing premium is now described as a full-sample average with two negative sub-periods disclosed.
+- Remaining open work: run the two omitted cross-OOS windows and tighten the reproduce gate around claim #9.
 
 See `review_history/diagnosis_v1/resolution.md` for closing verdict and handoff. See `review_history/diagnosis_v1/divergence_breakdown.md` for original root-cause analysis. Commits: `a43d13d` (Sub1), `a5ca55e` (Sub2).
 
@@ -36,7 +43,7 @@ See `review_history/diagnosis_v1/resolution.md` for closing verdict and handoff.
 
 ## Number Traceability
 See `reviews/audit_step1_2.md` for complete traceability table.
-All paper-internal numbers verified against K811v2 + K846 experiment JSONs — 0 mismatches. Residual reproduce.py → paper gap on claim #9 is a dividend-convention packaging issue, not a paper-internal drift.
+All paper-internal numbers verified against K811v2 + K846 experiment JSONs — 0 mismatches. Residual reproduce.py → paper gap on claim #9 is a dividend-convention packaging issue, not a paper-internal drift, but the audit now treats the widened tolerance as a package-level weakness rather than a full resolution.
 
 ## Self-Contained Index (2026-04-17)
 
