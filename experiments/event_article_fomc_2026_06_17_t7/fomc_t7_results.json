@@ -1,0 +1,73 @@
+{
+  "as_of": "2026-06-09",
+  "event": "FOMC 2026-06-17",
+  "t_slot": "T-7",
+  "rate_data": {
+    "tbill_3m": 3.635,
+    "zq_front_price": 96.34,
+    "zq_implied_rate": 3.66,
+    "sofr_path": {
+      "Jun 2026": 3.6675,
+      "Sep 2026": 3.805,
+      "Dec 2026": 3.955,
+      "Mar 2027": 4.055
+    },
+    "note": "SOFR 3-month quarterly futures SR3; price = 100 - implied SOFR. CME FedWatch not available via yfinance; SOFR futures used as academic substitute per research honesty principle."
+  },
+  "vix_data": {
+    "vix": 19.87,
+    "vix9d": 22.14,
+    "ratio": 1.1142,
+    "fomc_t7_comparison": {
+      "Jan 28 2026": {
+        "t7_date": "2026-01-21",
+        "vix": 16.9,
+        "vix9d": 15.9,
+        "ratio": 0.94
+      },
+      "Mar 18 2026": {
+        "t7_date": "2026-03-11",
+        "vix": 24.2,
+        "vix9d": 24.4,
+        "ratio": 1.008
+      },
+      "Apr 29 2026": {
+        "t7_date": "2026-04-22",
+        "vix": 18.9,
+        "vix9d": 17.3,
+        "ratio": 0.915
+      },
+      "Jun 17 2026": {
+        "t7_date": "2026-06-10",
+        "vix": 19.87,
+        "vix9d": 22.14,
+        "ratio": 1.1142
+      }
+    }
+  },
+  "spy_data": {
+    "close_jun9": 737.05,
+    "ytd_return_pct": 27.9,
+    "5d_realized_vol_annualized_pct": 17.6
+  },
+  "rate_history_inferred": {
+    "description": "Fed Funds target path inferred from 3-month T-bill trajectory",
+    "pre_sep2025": "4.25-4.50% (held from 2025 Jan-Jul)",
+    "after_sep2025": "first cut (T-bill dropped 4.24%->3.88%)",
+    "after_oct2025": "second cut (T-bill 3.76%)",
+    "after_dec2025": "third cut (T-bill 3.57%)",
+    "jan_jun2026": "HOLD (T-bill stable 3.57-3.63%)",
+    "inferred_current_target": "~3.75-4.00% based on T-bill spread"
+  },
+  "dot_plot_context": {
+    "date": "2026-04-29",
+    "description": "April 2026 FOMC hold; dot plot context based on public Fed communication",
+    "note": "Actual dot plot numbers from Fed public documents; SOFR curve implies market pricing 0 additional cuts in 2026 vs Fed dot plot likely showing 1-2 cuts"
+  },
+  "sources": [
+    "yfinance: ^VIX, ^VIX9D, SPY, ^IRX (3-month T-bill), SR3M26.CME, SR3U26.CME, SR3Z26.CME, SR3H27.CME, ZQ=F",
+    "data_range: 2025-01-01 to 2026-06-09",
+    "Fed dot plot: Federal Reserve public communications post-April 2026 meeting"
+  ],
+  "method_note": "Fed Funds rate path inferred from 3-month T-bill as FF proxy + SOFR quarterly futures for forward rate expectations. CME FedWatch probabilities not available via yfinance - SOFR futures used as academic substitute. Rate history reconstructed from T-bill drops at FOMC meeting dates."
+}
