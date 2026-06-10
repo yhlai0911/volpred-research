@@ -1118,6 +1118,8 @@ def main() -> int:
                         help="K-id for experiment_refs; overrides frontmatter")
     parser.add_argument("--cluster-waiver", default=None,
                         help="details.cluster_waiver reason used to justify topic cooldown exception")
+    parser.add_argument("--dup-waiver", default=None,
+                        help="details.dup_waiver reason used to justify narrative-arc / title-dup false-positive (e.g. shared entity is currency unit not topic)")
     parser.add_argument("--no-sanitize", action="store_true",
                         help="skip ban-list sanitizer (default applies for audience=general)")
     parser.add_argument("--force-duplicate", action="store_true",
@@ -1358,6 +1360,8 @@ def main() -> int:
         details_payload["image_url"] = image_url_field
     if args.cluster_waiver:
         details_payload["cluster_waiver"] = args.cluster_waiver
+    if args.dup_waiver:
+        details_payload["dup_waiver"] = args.dup_waiver
     cmd = [
         "uv", "run", "volpred", "ops", "publish-milestone",
         "--title", info["title"],

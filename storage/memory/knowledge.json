@@ -33112,5 +33112,22 @@
     "verdict": "CONDITIONAL_PASS",
     "reviewer": "Codex CLI",
     "reviewer_source": "Codex CLI primary path self-review"
+  },
+  {
+    "category": "empirical_finding",
+    "content": "[K1460 verdict=NULL reviewer=Codex CLI] Simple stock-bond correlation-regime adaptation for 60/40 fails to beat the best static benchmark. k_id=K1460 experiment_id=k1460 experiment_path=experiments/k1460_regime_60_40/. Data: SPY/TLT/IEF daily closes 2018-01-02→2024-12-30 from local CSV, monthly rebalance, lagged 60d rolling correlation signal, IS 2018-2021 / OOS 2022-2024 (36 months), seed=42. OOS best static strategy is 60/40 SPY/IEF with cumret +11.4%, ann ret +4.5%, vol 13.2%, Sharpe 0.345, MDD -17.2%. Dynamic rules all underperform: weight-switch 80/20 when corr>0 has Sharpe 0.213 (bootstrap diff vs best static -0.132, 95% CI [-0.303,+0.010]); duration-switch (TLT→IEF when corr>0) Sharpe 0.124 with CI entirely negative; defensive 40/60 rule Sharpe -0.023, significantly worse. Regime exists descriptively (positive SPY-TLT corr in 58.3% of OOS months; mean corr +0.075), but converting it into a simple tactical 60/40 rule does not produce robust incremental performance. Result is consistent with prior K104-style lesson: correlation regime is a descriptive state variable, not automatically a trading edge.",
+    "evidence": [
+      "experiments/k1460_regime_60_40/k1460_results.json",
+      "experiments/k1460_regime_60_40/README.md",
+      "experiments/k1460_regime_60_40/k1460_regime_60_40.py",
+      "experiments/k1460_regime_60_40/k1460_corr_and_nav.png"
+    ],
+    "confidence": 0.78,
+    "k_id": "K1460",
+    "experiment_id": "k1460",
+    "experiment_path": "experiments/k1460_regime_60_40/",
+    "verdict": "NULL",
+    "reviewer": "Codex CLI",
+    "reviewer_source": "Codex CLI primary path self-review"
   }
 ]
