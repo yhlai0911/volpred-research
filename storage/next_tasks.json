@@ -27220,8 +27220,14 @@
     "source": "paper_audit_2026-06-10",
     "title": "vt-trend-following 審查修正：4 HIGH（與 v6 round4 線合併收尾）",
     "description": "依 paper/vt-trend-following/review_history/audit_2026-06-10/audit_findings.json 逐條修正，與進行中的 v6 fixes round4（K1458 H1 + Codex gate）合併：Table 3 50/50 欄與 K1417 比較表混用已推翻 v2 數字、Figure 1 非 canonical、reproduce gate 80.7% yellow 重跑。xelatex exit 0 → paper-update 上傳 → fix_log.md。",
-    "status": "pending",
-    "created_at": "2026-06-10T13:58:00+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-10T13:58:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T15:58:26.618483+00:00",
+    "claim_session_id": "76ff1fae1d37",
+    "started_at": "2026-06-10T15:59:30.618098+00:00",
+    "completed_at": "2026-06-10T16:06:17.674360+00:00",
+    "result": "修正 K1417/Table3/Figure1 與 K1458 敘事；reproduce gate 轉綠(100%)；xelatex 與 paper-update 完成。"
   },
   {
     "id": "paper_body_audit_fix_btc_gas_negative_2026_06_10",
@@ -27335,5 +27341,42 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-10T14:08:36+00:00"
+  },
+  {
+    "id": "paper_review_mile_4e5a221e",
+    "title": "Paper review (Codex 24h-rule): 明知道 VIX 在比特幣恐慌時會失靈，為什麼把它關掉還是沒救？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_4e5a221e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_4e5a221e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-10T16:08:09+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-10T16:09:42.674585+00:00",
+    "claim_session_id": "6104c7e5c20a",
+    "started_at": "2026-06-10T16:09:42.942319+00:00",
+    "completed_at": "2026-06-10T16:13:45.622024+00:00",
+    "result": "K1096 24h-rule Codex review CONDITIONAL_PASS: lookahead PASS, 3 framing errata applied (FTX 段 Harvey gate 揭露, regime rescue 不誇大, 結論收斂 K1096 規則範圍); feed sync OK"
+  },
+  {
+    "id": "research_rp_80caca34b0",
+    "title": "研究 backlog fallback: 新聞情緒 / 總經注意力增益波動預測",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-attention & sentiment vol） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_80caca34b0",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T16:08:18+00:00"
   }
 ]
