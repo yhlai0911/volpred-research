@@ -33040,5 +33040,28 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-06-10T06:27:56.481761"
+  },
+  {
+    "item_id": "2d2e018f",
+    "category": "empirical_finding",
+    "content": "[K1445 verdict=CONDITIONAL_PASS reviewer=Codex_CLI_0.137.0] URA / KRBN alt-asset vol clustering descriptive PoC. k_id=K1445 experiment_id=k1445 experiment_path=experiments/k1445/. URA (n=3919, 2010-11-09→2026-06-09) + KRBN (n=1470, 2020-08-03→2026-06-09). GARCH(1,1) α+β: URA 0.9886, KRBN 0.9900 — both near-IGARCH (KRBN small-sample-sensitive). Ljung-Box² p<1e-44 both, ARCH-LM p<1e-44 both → strong vol clustering. Cross-asset (intersection n=1470): URA-SPY ρ=0.516 (high equity beta), KRBN-SPY ρ=0.230 (moderate diversifier). Rolling 60d corr URA-SPY range -0.108→+0.918, KRBN-SPY -0.156→+0.599 (regime-dependent). URA ann ret -2.7%/vol 36.6%/MDD -93.5% (Fukushima legacy); KRBN +14.3%/28.7%/-36.4%. Codex review (CLI 0.137.0): CONDITIONAL_PASS minor — downgraded from PASS, descriptive only no predictive setup, KRBN near-IGARCH small-sample, static correlation 用四資產交集 n=1470 非 URA 真正全樣本，無 lookahead/leakage. Implications: KRBN viable diversifier, URA not (high beta + extreme MDD). Not actionable trading signal — descriptive PoC. experiment_path=experiments/k1445/, commit=3b8de396.",
+    "evidence": [
+      "experiments/k1445/k1445_results.json",
+      "experiments/k1445/README.md",
+      "experiments/k1445/k1445.py",
+      "experiments/k1445/fig1_cumulative_returns.png",
+      "experiments/k1445/fig2_rolling_vol.png",
+      "experiments/k1445/fig3_rolling_corr.png",
+      "experiments/k1445/fig4_garch_condvol.png",
+      "commit 3b8de396"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-06-10T09:13:29.479214",
+    "k_id": "K1445",
+    "experiment_id": "k1445",
+    "experiment_path": "experiments/k1445/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI 0.137.0",
+    "reviewer_source": "Codex CLI 0.137.0 primary path"
   }
 ]

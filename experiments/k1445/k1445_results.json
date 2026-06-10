@@ -87,13 +87,13 @@
     "URA": {
       "lags": 10,
       "stat": 451.69371366926015,
-      "pvalue": 9.093416381538481e-91,
+      "pvalue": 9.093416381538481E-91,
       "reject_no_autocorr_at_5pct": true
     },
     "KRBN": {
       "lags": 10,
       "stat": 395.6721289514205,
-      "pvalue": 7.847378821449174e-79,
+      "pvalue": 7.847378821449174E-79,
       "reject_no_autocorr_at_5pct": true
     },
     "SPY": {
@@ -113,33 +113,33 @@
     "URA": {
       "nlags": 10,
       "lm_stat": 260.02474576496587,
-      "lm_pvalue": 4.222165294786715e-50,
+      "lm_pvalue": 4.222165294786715E-50,
       "f_stat": 27.777016514854967,
-      "f_pvalue": 6.618774412725032e-52,
+      "f_pvalue": 6.618774412725032E-52,
       "reject_no_arch_at_5pct": true
     },
     "KRBN": {
       "nlags": 10,
       "lm_stat": 231.32603509400488,
-      "lm_pvalue": 4.527984394649721e-44,
+      "lm_pvalue": 4.527984394649721E-44,
       "f_stat": 27.280746107195196,
-      "f_pvalue": 3.994242056078587e-48,
+      "f_pvalue": 3.994242056078587E-48,
       "reject_no_arch_at_5pct": true
     },
     "SPY": {
       "nlags": 10,
       "lm_stat": 1191.7394756357364,
-      "lm_pvalue": 8.717164906773209e-250,
+      "lm_pvalue": 8.717164906773209E-250,
       "f_stat": 167.1947235954874,
-      "f_pvalue": 1.233785121023965e-295,
+      "f_pvalue": 1.233785121023965E-295,
       "reject_no_arch_at_5pct": true
     },
     "TLT": {
       "nlags": 10,
       "lm_stat": 1009.6825584110113,
-      "lm_pvalue": 1.5348793428791256e-210,
+      "lm_pvalue": 1.5348793428791256E-210,
       "f_stat": 133.3670191273446,
-      "f_pvalue": 4.092095872350338e-242,
+      "f_pvalue": 4.092095872350338E-242,
       "reject_no_arch_at_5pct": true
     }
   },
@@ -265,11 +265,18 @@
       }
     }
   },
-  "verdict": "PASS",
+  "verdict": "CONDITIONAL_PASS",
   "figures": [
     "fig1_cumulative_returns.png",
     "fig2_rolling_vol.png",
     "fig3_rolling_corr.png",
     "fig4_garch_condvol.png"
-  ]
+  ],
+  "codex_review": {
+    "date": "2026-06-10",
+    "verdict": "CONDITIONAL_PASS",
+    "severity": "minor",
+    "reviewer_source": "Codex CLI 0.137.0",
+    "note": "Downgraded from PASS — descriptive PoC only, no predictive setup. KRBN n=1470 near-IGARCH small-sample-sensitive. Static correlation 用四資產交集 n=1470 而非 URA 真正全樣本。無 lookahead / data leakage."
+  }
 }

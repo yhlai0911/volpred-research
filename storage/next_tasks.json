@@ -26487,7 +26487,7 @@
     "title": "研究 backlog fallback: 另類資產波動率特性：URA(鈾) / KRBN(碳權) / 比特幣 等非傳統資產的 vol clustering、尾部、與傳統股債的相關性",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 另類資產波動率特性：URA(鈾) / KRBN(碳權) / 比特幣 等非傳統資產的 vol clustering、尾部、與傳統股債的相關性 — 它們是分散工具還是高 beta 放大器（yfinance） | 來源 section: 跨資產 / 另類（contrarian, yfinance-doable, 2026-06-10 補；破 vol-forecast/vix/台股 主導, novelty quota）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "ura_krbn_vol_clustering",
@@ -26500,7 +26500,9 @@
     "claimed_by": "hourly-07",
     "claimed_at": "2026-06-09T23:11:56.946881+00:00",
     "claim_session_id": "c7ef39fe71d4",
-    "started_at": "2026-06-09T23:12:14.308631+00:00"
+    "started_at": "2026-06-09T23:12:14.308631+00:00",
+    "completed_at": "2026-06-10T01:09:58.970537+00:00",
+    "result": "K1445 URA/KRBN PASS (PoC): GARCH α+β≈0.99, URA-SPY ρ=0.516, KRBN-SPY ρ=0.230. Merged to main 3b8de396. Codex review pending."
   },
   {
     "id": "research_dxy_uup_vol_regime_em_vol_yfinance",
@@ -26621,5 +26623,69 @@
     "started_at": "2026-06-09T22:24:51.198500+00:00",
     "completed_at": "2026-06-09T22:26:08.450638+00:00",
     "result": "Codex 24h review 完成，verdict=CONDITIONAL_PASS。主數字與 K1442 source 對齊、無 lookahead；兩個修文點： (1) T-5→T0 被寫成『公布前5日』其實含 T0，時間標示需更精確； (2) p=0.287/0.211 只支持『無顯著 vol crush』，不宜寫成『數據說相反 / 股市那邊不是 vol crush』。review 存於 storage/reviews/codex_24h/mile_166eda01_review.md。"
+  },
+  {
+    "id": "gen_article_k1431",
+    "title": "K1431: write general-audience article (auto-discovered, verdict=NULL)",
+    "description": "K1431 has a non-null verdict in experiments/k1431/ but no published feed article and no existing task. Verdict: NULL. Write a general-audience article summarising key findings.",
+    "task_type": "daily_article",
+    "priority": 4,
+    "status": "blocked",
+    "tags": [
+      "auto-generated",
+      "audience-general",
+      "uncovered-k"
+    ],
+    "source": "task_generator_v2_daily_article",
+    "created_at": "2026-06-10T00:30:51.560954+00:00",
+    "generated_at": "2026-06-10T00:30:51.562478+00:00",
+    "k_id": "K1431",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T00:31:03.717139+00:00",
+    "claim_session_id": "48bccf74e038",
+    "started_at": "2026-06-10T00:31:18.193216+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-10T00:34:22+00:00",
+    "blocked_note": "VIX cluster cooldown blocked publish (cluster=vix count_30d=158>15); do not re-dispatch while cluster saturated"
+  },
+  {
+    "id": "gen_article_k1439",
+    "title": "K1439: write general-audience article (auto-discovered, verdict=CONDITIONAL_PASS)",
+    "description": "K1439 has a non-null verdict in experiments/k1439/ but no published feed article and no existing task. Verdict: CONDITIONAL_PASS. Write a general-audience article summarising key findings.",
+    "task_type": "daily_article",
+    "priority": 4,
+    "status": "succeeded",
+    "tags": [
+      "auto-generated",
+      "audience-general",
+      "uncovered-k"
+    ],
+    "source": "task_generator_v2_daily_article",
+    "created_at": "2026-06-10T00:34:23.788877+00:00",
+    "generated_at": "2026-06-10T00:34:23.789868+00:00",
+    "k_id": "K1439",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T00:34:38.282766+00:00",
+    "claim_session_id": "2179302b630b",
+    "started_at": "2026-06-10T00:34:38.313957+00:00",
+    "completed_at": "2026-06-10T00:37:37.418088+00:00",
+    "result": "Published general-audience draft mile_377b569a from K1439 (USD regime cross-asset vol). Anti-AI gate PASS; 2 chart images uploaded. K1431 article task blocked separately due VIX cluster cooldown 158>15."
+  },
+  {
+    "id": "gen_article_k1440",
+    "title": "K1440: write general-audience article (auto-discovered, verdict=NULL)",
+    "description": "K1440 has a non-null verdict in experiments/k1440/ but no published feed article and no existing task. Verdict: NULL. Write a general-audience article summarising key findings.",
+    "task_type": "daily_article",
+    "priority": 4,
+    "status": "pending",
+    "tags": [
+      "auto-generated",
+      "audience-general",
+      "uncovered-k"
+    ],
+    "source": "task_generator_v2_daily_article",
+    "created_at": "2026-06-10T00:34:23.790484+00:00",
+    "generated_at": "2026-06-10T00:34:23.790489+00:00",
+    "k_id": "K1440"
   }
 ]
