@@ -110,6 +110,62 @@ Multiple testing:
 - `figures/forward_outcomes_by_regime.png`
 - `figures/inflation_proxy_ratios.png`
 
+## Main Results
+
+### Proxy 1: `TIP/IEF`
+
+- Regime counts: falling `1,920`, rising `2,128`
+- Rising regime 的 forward RV 比 falling 低，但只有 `SPY` 在 HAC 下接近顯著：
+  - `SPY` ΔRV = `-2.67pp`, HAC `p=0.011`
+  - `IEF` ΔRV = `-0.36pp`, HAC `p=0.186`
+  - `TLT` ΔRV = `-0.85pp`, HAC `p=0.198`
+- 股債 forward correlation 在 rising regime 較不負，但都沒過多重比較：
+  - `SPY-IEF` Δcorr = `+0.114`, HAC `p=0.0138`
+  - `SPY-TLT` Δcorr = `+0.110`, HAC `p=0.0158`
+
+解讀：
+`TIP/IEF` 有一些方向性訊號，但經 Bonferroni 後不夠穩健。
+
+### Proxy 2: `TIP/TLT`
+
+- Regime counts: falling `1,974`, rising `2,074`
+- Forward RV 幾乎沒有穩健差異：
+  - `SPY` ΔRV = `-1.27pp`, HAC `p=0.266`
+  - `IEF` ΔRV = `+0.32pp`, HAC `p=0.270`
+  - `TLT` ΔRV = `-0.20pp`, HAC `p=0.780`
+- 但股債 forward correlation 差異明顯且通過 Bonferroni：
+  - `SPY-IEF` Δcorr = `+0.209`, HAC `p=1.91e-06`
+  - `SPY-TLT` Δcorr = `+0.202`, HAC `p=1.91e-06`
+
+解讀：
+當 `TIP/TLT` 指向 rising inflation-expectation regime 時，
+未來 21 日股債相關會變得 **顯著較不負**，
+也就是債券的避險屬性會變弱；
+但這不代表 forward RV 一定同步上升。
+
+### Multiple testing
+
+- 10 個 primary HAC contrasts
+- Bonferroni `alpha = 0.005`
+- 最終只有 **2/10** survive：
+  - `TIP/TLT -> SPY-IEF forward corr`
+  - `TIP/TLT -> SPY-TLT forward corr`
+
+## Verdict
+
+**CONDITIONAL_PASS**
+
+原因不是「通膨 proxy 能穩健預測所有資產 vol」，
+而是：
+
+- `TIP/TLT` regime 對 **未來股債相關** 有穩健訊號
+- 但對 **未來 realized vol** 沒有穩健證據
+
+因此結論應限定為：
+
+1. 通膨預期 proxy 對 **stock-bond hedge quality** 比對 **short-horizon RV level** 更有資訊
+2. rising inflation-expectation regime 比較像是「股債去負相關化」訊號，不是「全面高 vol」訊號
+
 ## Reproduce
 
 ```bash
