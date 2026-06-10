@@ -851,18 +851,16 @@ def var_backtest(returns, sigma2_forecasts, alpha_levels=[0.01, 0.05]):
             lr_cc = np.nan
             p_cc = np.nan
 
-        # Basel traffic light (250-day window)
-        if n >= 250:
-            recent_violations = int(np.sum(violations[-250:]))
-            if recent_violations < 5:
-                basel = "Green"
-            elif recent_violations < 10:
-                basel = "Yellow"
-            else:
-                basel = "Red"
+        # Basel traffic light using exact-binomial thresholds at the realized sample size.
+        green_cutoff = int(sp_stats.binom.ppf(0.95, n, alpha))
+        yellow_cutoff = int(sp_stats.binom.ppf(0.9999, n, alpha))
+        recent_violations = n_violations
+        if n_violations <= green_cutoff:
+            basel = "Green"
+        elif n_violations <= yellow_cutoff:
+            basel = "Yellow"
         else:
-            recent_violations = n_violations
-            basel = "N/A"
+            basel = "Red"
 
         results[f"VaR_{int(alpha*100)}pct"] = {
             'n': n,
@@ -876,7 +874,10 @@ def var_backtest(returns, sigma2_forecasts, alpha_levels=[0.01, 0.05]):
             'cc_p': float(p_cc) if np.isfinite(p_cc) else None,
             'cc_pass': bool(p_cc > 0.05) if np.isfinite(p_cc) else None,
             'basel': basel,
-            'basel_violations_250d': recent_violations,
+            'basel_violations_eval_window': recent_violations,
+            'basel_eval_n': n,
+            'basel_green_cutoff': green_cutoff,
+            'basel_yellow_cutoff': yellow_cutoff,
         }
 
     return results

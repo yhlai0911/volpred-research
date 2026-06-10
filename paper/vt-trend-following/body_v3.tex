@@ -320,20 +320,21 @@ VNQ  & Real estate &  126.4 &  109.1 &   89.4 &  186.8 & Reject \\
 \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
 Asset & 5th\,(\%) & 50th\,(\%) & 5th\,(\%) & 50th\,(\%) & 5th\,(\%) & 50th\,(\%) \\
 \midrule
-SPY      & 86 & 97  & 97.1 & 181.1 & 97.7  & 181.1 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][0]
-50/50    & 90 & 99  & 84.7 & 149.6 & 89.8  & 149.6 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][1]
-DIA      & 83 & 96  & 91.3 & 137.2 & 93.4  & 137.2 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][2]
-QQQ      & 82 & 95  & 97.5 & 199.0 & 97.5  & 174.1 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][3]
-IWM      & 91 & 100 & 97.3 & 140.7 & 100.0 & 131.0 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][4]
+% source (audit fix 2026-06-10): K1192 columns = experiments/k1192/k1192_results.json assets.<a>.bootstrap_results.def_a_retention_fraction {lo, median}; K1417 columns = experiments/k1417/k1417_results.json assets.<a>.by_mean_block.{756,1260}.def_a_retention_fraction {lo, median}. Earlier-draft baseline (86/97 etc.) was the non-reproducible v2 Table 6 reference; earlier 50th columns mistakenly carried the 95th-percentile values.
+SPY      & 93.0 & 115.4 & 97.1 & 103.8 & 97.7  & 103.7 \\
+50/50    & 76.0 & 103.6 & 84.7 & 95.6  & 89.8  & 95.6 \\
+DIA      & 82.3 & 110.9 & 91.3 & 106.2 & 93.4  & 106.2 \\
+QQQ      & 89.0 & 119.4 & 97.5 & 109.0 & 97.5  & 109.0 \\
+IWM      & 87.4 & 108.2 & 97.3 & 103.3 & 100.0 & 102.9 \\
 \midrule
-\multicolumn{6}{l}{\textit{Lower-bound shift summary (1260-day vs.\ 252-day):}} & \\
-\multicolumn{6}{l}{\quad Mean shift across five assets} & $+9.28$\,pp \\ % source: experiments/k1417/k1417_results.json[summary][mean_lo_shift_at_1260]
-\multicolumn{6}{l}{\quad Median shift across five assets} & $+10.4$\,pp \\ % source: experiments/k1417/k1417_results.json[summary][median_lo_shift_at_1260]
+\multicolumn{6}{l}{\textit{5th-percentile lower-bound shift (1260-day stationary vs.\ 252-day fixed):}} & \\
+\multicolumn{6}{l}{\quad Mean shift across five assets} & $+10.1$\,pp \\ % recomputed 2026-06-10 from canonical columns above: (4.7+13.8+11.1+8.5+12.6)/5
+\multicolumn{6}{l}{\quad Median shift across five assets} & $+11.1$\,pp \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Comparison of K1192 fixed-block (252-day) MDD retention CI 5th and 50th percentiles against K1417 stationary-bootstrap re-checks using expected block lengths of 756 and 1260 trading days (approximately 3 and 5 calendar years). The K1417 stationary bootstrap is a longer-memory robustness check that allows block dependence to extend across multiple business cycles, addressing whether retention inference is sensitive to the 252-day block assumption. At the 1260-day specification, 5th-percentile lower-bound shifts are positive for four of five canonical assets (SPY $+11.7$, DIA $+10.4$, QQQ $+15.5$, IWM $+9.0$, all in percentage points) and negligibly negative for the 50/50 SPY/GLD composite ($-0.2$); no asset's lower bound falls below the K1192 baseline by an economically meaningful margin. The K1417 task verdict (``H2 NOT SUPPORTED'') refers to a narrow hypothesis that longer-block resampling would \emph{materially weaken} the lower-bound conclusions in the direction of erosion; the comparison shows the opposite---shifts are mostly positive and the non-erosion finding from K1192 is preserved, with 50th-percentile (median) point estimates moving substantially upward under stationary resampling. Data: \texttt{experiments/k1417/k1417\_results.json}; replication: \texttt{python experiments/k1417/k1417.py} (stationary bootstrap, seed = 42, 10{,}000 replications).
+\item \textit{Notes:} Comparison of K1192 fixed-block (252-day) MDD retention CI 5th and 50th percentiles against K1417 stationary-bootstrap re-checks using expected block lengths of 756 and 1260 trading days (approximately 3 and 5 calendar years). The K1417 stationary bootstrap is a longer-memory robustness check that allows block dependence to extend across multiple business cycles, addressing whether retention inference is sensitive to the 252-day block assumption. At the 1260-day specification, 5th-percentile lower-bound shifts relative to the K1192 canonical baseline are positive for all five assets (SPY $+4.7$, 50/50 $+13.8$, DIA $+11.1$, QQQ $+8.5$, IWM $+12.6$, in percentage points): longer-memory resampling \emph{tightens} the lower bounds upward. Median retention estimates move modestly downward (e.g., SPY $115.4 \to 103.7$), so the stationary bootstrap concentrates the retention distribution around 100\% rather than shifting it up wholesale; the economically relevant non-erosion conclusion---lower bounds at or above $\sim$90--100\%---strengthens. The K1417 task verdict (``H2 NOT SUPPORTED'') refers to the narrow hypothesis that longer-block resampling would \emph{materially weaken} the lower-bound conclusions in the direction of erosion; the comparison shows the opposite. Data: \texttt{experiments/k1192/k1192\_results.json} (canonical baseline) and \texttt{experiments/k1417/k1417\_results.json}; replication: \texttt{python experiments/k1417/k1417.py} (stationary bootstrap, seed = 42, 10{,}000 replications).
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -352,16 +353,17 @@ The standalone TSMOM strategy provides further insight. Pure TSMOM achieves a Sh
 \cmidrule(lr){2-4} \cmidrule(lr){5-7}
 Strategy & Sharpe & MDD (\%) & Calmar & Sharpe & MDD (\%) & Calmar \\
 \midrule
-Buy \& Hold         & 0.611 & $-$55.2 & 0.214 & 0.865 & $-$32.5 & 0.364 \\
-12/VIX VT           & 0.797 & $-$26.3 & 0.283 & 0.982 & $-$12.4 & 0.624 \\
-TSMOM-Hedged VT     & 0.737 & $-$25.3 & 0.281 & 0.937 & $-$13.1 & 0.501 \\
-Pure TSMOM          & 0.172 & $-$27.5 & 0.092 & 0.232 & $-$31.8 & 0.075 \\
+% source (audit fix 2026-06-10): 50/50 MDD column updated to K1192 canonical (experiments/k1192/k1192_results.json assets."50/50".bootstrap_results.point_estimates: bh -32.49, vt -16.84, hedged -17.53); earlier draft carried -12.4/-13.1 from a superseded vintage. 50/50 Calmar cells retain the earlier vintage pending the reproduce-gate recomputation batch (annualized-return series not archived in K1192) and are marked (v).
+Buy \& Hold         & 0.611 & $-$55.2 & 0.214 & 0.865 & $-$32.5 & 0.364\textsuperscript{(v)} \\
+12/VIX VT           & 0.797 & $-$26.3 & 0.283 & 0.982 & $-$16.8 & 0.624\textsuperscript{(v)} \\
+TSMOM-Hedged VT     & 0.737 & $-$25.3 & 0.281 & 0.937 & $-$17.5 & 0.501\textsuperscript{(v)} \\
+Pure TSMOM          & 0.172 & $-$27.5 & 0.092 & 0.232 & $-$31.8 & 0.075\textsuperscript{(v)} \\
 \midrule
 \multicolumn{7}{@{}l}{\textit{Decomposition}} \\
 $\Delta$Sharpe (VT $-$ B\&H) & \multicolumn{3}{c}{+0.186} & \multicolumn{3}{c}{+0.117} \\
 $\Delta$Sharpe lost to TSMOM & \multicolumn{3}{c}{$-$0.060 (32\%)} & \multicolumn{3}{c}{$-$0.046 (39\%)} \\
-MDD protection (VT) & \multicolumn{3}{c}{28.9 pp} & \multicolumn{3}{c}{20.1 pp} \\
-MDD protection retained & \multicolumn{3}{c}{29.9 pp (103.7\%)} & \multicolumn{3}{c}{19.4 pp (96\%)} \\
+MDD protection (VT) & \multicolumn{3}{c}{28.9 pp} & \multicolumn{3}{c}{15.7 pp} \\
+MDD protection retained & \multicolumn{3}{c}{29.9 pp (103.7\%)} & \multicolumn{3}{c}{15.0 pp (95.6\%)} \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -371,16 +373,16 @@ MDD protection retained & \multicolumn{3}{c}{29.9 pp (103.7\%)} & \multicolumn{3
 \end{threeparttable}
 \end{table}
 
-Table~\ref{tab:dual_mechanism} also reports the Calmar ratio, defined as the annualized return divided by the absolute maximum drawdown. VT substantially improves this risk-adjusted metric relative to buy-and-hold (SPY: 0.283 vs.\ 0.214; 50/50: 0.624 vs.\ 0.364), and TSMOM hedging preserves nearly all of this improvement (SPY: 0.281; 50/50: 0.501), reinforcing the conclusion that VT's risk efficiency---measured on a drawdown basis rather than a volatility basis---survives trend-following removal. By contrast, pure TSMOM achieves a Calmar of only 0.092 (SPY), confirming that momentum exposure does not replicate VT's drawdown-insurance properties.
+Table~\ref{tab:dual_mechanism} also reports the Calmar ratio, defined as the annualized return divided by the absolute maximum drawdown. VT substantially improves this risk-adjusted metric relative to buy-and-hold (SPY: 0.283 vs.\ 0.214; 50/50: 0.624 vs.\ 0.364, earlier-vintage values pending the reproduce-gate recomputation, see table source note), and TSMOM hedging preserves nearly all of this improvement (SPY: 0.281; 50/50: 0.501, same caveat), reinforcing the conclusion that VT's risk efficiency---measured on a drawdown basis rather than a volatility basis---survives trend-following removal. By contrast, pure TSMOM achieves a Calmar of only 0.092 (SPY), confirming that momentum exposure does not replicate VT's drawdown-insurance properties.
 
 The mechanism behind this separation is straightforward. TSMOM captures the \textit{direction} of past returns---it goes long after positive trends and short after negative trends. VT's MDD protection, however, derives from the \textit{level} of VIX. When VIX is elevated (e.g., during the 2008 financial crisis or March 2020), VT reduces exposure regardless of whether the trend signal is positive or negative. This VIX-level channel provides protection during slow-moving drawdowns (e.g., 2022) where the trend signal can be ambiguous but VIX remains elevated.
 
-Figure~\ref{fig:return_decomp} visualizes this dual-channel decomposition. Panel~(a) shows the Sharpe ratio improvement from VT over buy-and-hold, decomposed into the TSMOM-attributable portion (32--39\%) and the VIX-level residual (61--68\%). Panel~(b) shows the MDD protection channel, where 90--97\% of the total drawdown reduction survives TSMOM removal across all five assets tested. The stark asymmetry between the two panels---moderate TSMOM contribution to Sharpe but near-zero contribution to MDD protection---confirms that VT's primary economic value operates through a channel distinct from trend following.
+Figure~\ref{fig:return_decomp} visualizes this dual-channel decomposition. Panel~(a) shows the Sharpe ratio improvement from VT over buy-and-hold, decomposed into the TSMOM-attributable portion (32--39\%) and the VIX-level residual (61--68\%). Panel~(b) shows the MDD protection channel, where 95.6--109.0\% of the total drawdown reduction survives TSMOM removal across the five assets in the K1192 canonical replication (values above 100\% indicate that the hedged strategy's drawdown was \emph{shallower} than unhedged VT's, i.e., TSMOM removal can slightly improve drawdown protection). The stark asymmetry between the two panels---moderate TSMOM contribution to Sharpe but at-or-below-zero contribution to MDD protection---confirms that VT's primary economic value operates through a channel distinct from trend following.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{figures/fig1_return_decomposition.pdf}
-\caption{VT Return Decomposition: Sharpe Ratio vs.\ Maximum Drawdown Channels. Panel~(a) decomposes the Sharpe ratio improvement (VT minus buy-and-hold) into the TSMOM-attributable portion and the VIX-level residual for SPY and 50/50 SPY/GLD. Panel~(b) decomposes the maximum drawdown protection (percentage points) into TSMOM-attributable and VIX-level components for five assets. Percentages indicate the share attributable to each channel. Data from Table~\ref{tab:dual_mechanism} and Section~3.3. The key finding is the asymmetry: TSMOM explains 32--39\% of Sharpe improvement but only 3--10\% of MDD protection.}
+\caption{VT Return Decomposition: Sharpe Ratio vs.\ Maximum Drawdown Channels. Panel~(a) decomposes the Sharpe ratio improvement (VT minus buy-and-hold) into the TSMOM-attributable portion and the VIX-level residual for SPY and 50/50 SPY/GLD. Panel~(b) decomposes the maximum drawdown protection (percentage points) into TSMOM-attributable and VIX-level components for five assets. Percentages indicate the share attributable to each channel. Data from Table~\ref{tab:dual_mechanism} and Section~3.3. The key finding is the asymmetry: TSMOM explains 32--39\% of Sharpe improvement but essentially none of the MDD protection (retention 95.6--109.0\% after TSMOM removal, K1192 canonical; the figure's panel~(b) shares await regeneration from the canonical series in the reproduce-gate batch).}
 \label{fig:return_decomp}
 \end{figure}
 

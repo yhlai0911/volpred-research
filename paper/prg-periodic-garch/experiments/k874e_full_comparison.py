@@ -828,10 +828,12 @@ def _christoffersen_cc(violations, alpha):
         cc_stat = np.nan
         cc_p = np.nan
 
-    # Basel traffic light (for 1% level with n~250 or similar)
-    if vr <= 0.04:
+    # Basel traffic light using exact-binomial thresholds at the realized sample size.
+    green_cutoff = int(sp_stats.binom.ppf(0.95, n, alpha))
+    yellow_cutoff = int(sp_stats.binom.ppf(0.9999, n, alpha))
+    if n_v <= green_cutoff:
         zone = "GREEN"
-    elif vr <= 0.065:
+    elif n_v <= yellow_cutoff:
         zone = "YELLOW"
     else:
         zone = "RED"
@@ -848,6 +850,8 @@ def _christoffersen_cc(violations, alpha):
         'cc_stat': round(cc_stat, 4) if np.isfinite(cc_stat) else None,
         'cc_p': round(cc_p, 4) if np.isfinite(cc_p) else None,
         'basel_zone': zone,
+        'basel_green_cutoff': green_cutoff,
+        'basel_yellow_cutoff': yellow_cutoff,
     }
 
 

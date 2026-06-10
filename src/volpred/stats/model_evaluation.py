@@ -285,10 +285,12 @@ def var_backtest(
     except Exception:
         cc_stat, cc_p = 0.0, 1.0
 
-    # Basel traffic light
-    if pi_hat <= alpha * 1.5:
+    # Basel-style traffic light using exact-binomial thresholds at the realized sample size.
+    green_cutoff = int(stats.binom.ppf(0.95, n, alpha))
+    yellow_cutoff = int(stats.binom.ppf(0.9999, n, alpha))
+    if n1 <= green_cutoff:
         traffic = "green"
-    elif pi_hat <= alpha * 2.0:
+    elif n1 <= yellow_cutoff:
         traffic = "yellow"
     else:
         traffic = "red"
@@ -301,6 +303,8 @@ def var_backtest(
         "kupiec": {"stat": kupiec_stat, "p_value": kupiec_p, "pass": kupiec_p > 0.05},
         "christoffersen": {"stat": cc_stat, "p_value": cc_p, "pass": cc_p > 0.05},
         "basel_traffic_light": traffic,
+        "basel_green_cutoff": green_cutoff,
+        "basel_yellow_cutoff": yellow_cutoff,
         "trinity_pass": kupiec_p > 0.05 and cc_p > 0.05 and traffic == "green",
     }
 

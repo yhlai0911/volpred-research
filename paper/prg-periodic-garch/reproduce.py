@@ -60,7 +60,7 @@ PAPER_CLAIMS = {
     # here remain loose to tolerate future small drift in the Harvey-regime t-stat band.
     "SPY PRG_Extended QLIKE":     {"paper": 0.748, "tol": 0.05},
     "SPY DM_t (PRG vs GJR)":      {"paper": 6.00,  "tol": 0.15},
-    "SPY DM_t (PRG vs Separate)": {"paper": -6.69, "tol": 0.15},
+    "SPY DM_t (PRG vs Separate)": {"paper": 6.69, "tol": 0.15},
     "SPY DM_t (PRG vs HAR)":      {"paper": 7.31,  "tol": 0.15},
     # QQQ (K881) — DM_t tol 0.15 per yfinance drift note above
     "QQQ PRG_Extended QLIKE":     {"paper": 0.765, "tol": 0.05},
@@ -199,9 +199,12 @@ if d_spy:
                         l1.get("PRG_Extended", {}).get("QLIKE")))
     checks.append(check("SPY DM_t (PRG vs GJR)",
                         dm.get("GJR_vs_PRG_Extended", {}).get("t_stat")))
-    # Paper reports DM_t (PRG vs Separate) = -6.69; JSON stores same convention (negative = PRG better).
+    # Paper reports the sign-flipped benchmark-minus-PRG convention, so stored JSON
+    # PRG_Extended_vs_Separate must be multiplied by -1 to match the table.
     checks.append(check("SPY DM_t (PRG vs Separate)",
-                        dm.get("PRG_Extended_vs_Separate", {}).get("t_stat")))
+                        (-dm.get("PRG_Extended_vs_Separate", {}).get("t_stat")
+                         if dm.get("PRG_Extended_vs_Separate", {}).get("t_stat") is not None
+                         else None)))
     checks.append(check("SPY DM_t (PRG vs HAR)",
                         dm.get("HAR_vs_PRG_Extended", {}).get("t_stat")))
 

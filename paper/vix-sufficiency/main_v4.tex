@@ -32,7 +32,7 @@
 \newtheorem{hypothesis}{Hypothesis}
 
 % ─── Title ───────────────────────────────────────────────────
-\title{Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Eleven Signal Families for Equity Volatility Forecasting and Volatility Timing\thanks{We thank the VolPred Research System for computational support. Data and replication code available upon request.}}
+\title{Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Thirteen Signal Families for Equity Volatility Forecasting and Volatility Timing\thanks{We thank the VolPred Research System for computational support. Data and replication code available upon request.}}
 
 \author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw} \and VolPred Research System}
 
@@ -71,13 +71,13 @@ This question is not merely academic. Volatility-timing (VT) strategies, which s
 
 The existing literature offers fragments of evidence but no systematic verdict. Individual studies have examined specific signal categories---the variance risk premium \citep{bollerslev2009}, cross-asset spillovers \citep{diebold2012}, macroeconomic determinants of time-varying volatility \citep{schwert1989, engle2008}, and sentiment measures \citep{baker2006}---but each study uses its own sample period, evaluation metric, and benchmark specification, making cross-study comparison unreliable. Moreover, most studies do not enforce the multiple-testing corrections that \citet{harvey2016} argue are essential when many predictors are examined.
 
-We address this gap by conducting the first comprehensive, pre-registered horse race among thirteen signal families, evaluated under a unified framework with six methodological safeguards:
+We address this gap by conducting the first comprehensive, pre-specified horse race among thirteen signal families, evaluated under a unified framework with six methodological safeguards (families 1--11 were specified in the original design; families 12--13 were added in this revision and evaluated under the identical pipeline and multiple-testing correction):
 
 \begin{enumerate}[label=(\roman*)]
     \item \textbf{Pre-specification}: All thirteen signal families and their construction rules are defined before examining out-of-sample results, eliminating data-snooping in signal selection.
     \item \textbf{Strict lag enforcement}: Every signal is lagged one trading day (\texttt{signal.shift(1)}) before being applied to returns, preventing look-ahead bias---a surprisingly common error that we document has inflated Sharpe ratios by up to 373\% in prior work.\footnote{In our own research program, Codex code review identified look-ahead bias in four separate experiments (K618, K621, K679, K698), with one case producing a Sharpe ratio of 1.68 that collapsed to 0.355 after lag correction.}
     \item \textbf{Transaction costs}: All strategies deduct 5 basis points per leg on each weight change, applied to both buy and sell sides.
-    \item \textbf{Multiple-testing control}: We adopt the approximate conservative threshold of $|t| > 3.0$ motivated by \citet{harvey2016} and implement formal Holm-Bonferroni sequential correction across all Diebold-Mariano tests in the pre-registered family set, controlling the family-wise error rate at $\alpha = 0.05$.
+    \item \textbf{Multiple-testing control}: We adopt the approximate conservative threshold of $|t| > 3.0$ motivated by \citet{harvey2016} and implement formal Holm-Bonferroni sequential correction across all Diebold-Mariano tests in the full family set (including the two revision-added families), controlling the family-wise error rate at $\alpha = 0.05$.
     \item \textbf{Proxy-robust evaluation}: Following \citet{patton2011}, we evaluate forecasts using QLIKE on $r_t^2$ (a proxy-robust loss function), supplemented by Spearman rank correlations and the Model Confidence Set of \citet{hansen2011mcs}, ensuring that our rankings are not artifacts of the volatility proxy choice.
     \item \textbf{Cross-era stability}: Results are evaluated separately across five non-overlapping eras spanning 1993--2026, preventing any single regime from driving conclusions.
 \end{enumerate}
@@ -86,7 +86,7 @@ Our main finding is strongly negative but highly informative. Across 13 signal f
 
 \begin{itemize}
     \item No signal family produces a statistically significant out-of-sample $R^2$ improvement over VIX alone (maximum incremental $R^2 = 0.038$, all Diebold-Mariano $|t| < 3.0$).
-    \item No signal-based strategy statistically outperforms the simple 12/VIX benchmark or the static 50/50 SPY/GLD allocation (maximum Sharpe improvement = +0.010, not significant).
+    \item No signal-based strategy statistically outperforms the simple 12/VIX benchmark (maximum Sharpe improvement = +0.030, behavioral sentiment, DM $|t| = 0.72$, not significant).
     \item VIX's forecasting power is time-invariant: the VIX--realized volatility $R^2$ ranges from 0.24 (low-volatility QE era, 2012--2020) to 0.64 (post-dot-com era, 2000--2007), with a coefficient of variation of only 0.33.
     \item Even the most economically motivated signal---the variance risk premium---achieves an in-sample $t$-statistic of 3.51 for return prediction but delivers out-of-sample $R^2 < 0.3\%$.
 \end{itemize}
@@ -501,7 +501,7 @@ Table~\ref{tab:main_results} presents the main results for all thirteen signal f
 
 Several patterns are noteworthy. First, the dual $R^2$ metrics reveal a striking pattern: most signal families achieve positive Campbell-Thompson $R^2_{\text{OOS,CT}}$ values in the range of 0.31--0.40, indicating that they do forecast volatility better than the naive historical mean. However, these same signals show zero or negative VIX-relative $R^2_{\text{OOS,VIX}}$, confirming that their forecasting power is entirely subsumed by VIX. The VIX-only benchmark itself achieves $R^2_{\text{OOS,CT}} = 0.365$, which accounts for almost all of the predictive content in every signal family.
 
-Second, the Holm-Bonferroni correction reinforces the null. All eight testable DM tests produce raw $p$-values well above 0.05 (minimum raw $p = 0.147$ for cross-asset momentum), and the adjusted $p$-values are uniformly 1.000. The multiplicity correction is strictly redundant here---no individual test even approaches marginal significance---but reporting it demonstrates that our conclusions are robust to formal multiple-testing control.
+Second, the Holm-Bonferroni correction reinforces the null. Among the ten testable DM tests, families 1--4 and 8--11 produce raw $p$-values of 0.147 or above and adjusted $p$-values of 1.000. Families 12--13 are two-sided significant in the raw tests (raw $p = 0.012$ and $p < 0.001$ respectively) but in the \emph{harmful} direction---their signed DM statistics are negative, meaning the alt-data augmentations significantly \emph{underperform} the VIX baseline (see footnote $\ddagger$)---so the one-sided ``beats VIX'' null is not rejected for any family. The multiplicity correction leaves no family significant in the beneficial direction, demonstrating that our conclusions are robust to formal multiple-testing control.
 
 Third, there is a stark disconnect between in-sample and out-of-sample performance. Google Trends fear (Family 9) achieves a partial correlation of 0.271 and an in-sample $\Delta R^2$ of 0.038 with a highly significant $t$-statistic of 7.92, yet delivers essentially zero out-of-sample improvement (DM $|t| = 0.67$, raw $p = 0.503$). This is consistent with overfitting---the fear signal captures contemporaneous co-movement with VIX but has no genuine predictive lead.
 
@@ -525,8 +525,9 @@ Table~\ref{tab:strategy_results} compares the trading strategies derived from ea
 \# & Strategy & Sharpe & $\Delta$Sharpe & MDD (\%) & Turnover & DM $|t|$ \\
 \midrule
 \multicolumn{7}{l}{\textit{Benchmarks}} \\
---- & Buy-and-hold 50/50 SPY/GLD & 0.947 & --- & $-32.5$ & 0.0 & --- \\
---- & 12/VIX (SPY/GLD) & 0.870 & $-0.077$ & $-32.3$ & 8.9$\times$ & --- \\
+% source: experiments/k731/ canonical (errata_table3_bh_sharpe_canonical_fix.md 2026-05-30, applied 2026-06-10): BH 50/50 Sharpe 0.8268 over aligned 2008--2026 sample
+--- & 12/VIX (SPY/GLD) & 0.870 & --- & $-32.2$ & 8.9$\times$ & --- \\
+--- & Buy-and-hold 50/50 SPY/GLD & 0.827 & $-0.043$ & $-32.5$ & 0.0 & --- \\
 \midrule
 \multicolumn{7}{l}{\textit{Signal-based strategies}} \\
 1 & Cross-asset composite & 0.810 & $-0.060$ & $-34.1$ & 11.2$\times$ & 0.93 \\
@@ -548,9 +549,9 @@ Table~\ref{tab:strategy_results} compares the trading strategies derived from ea
 \end{threeparttable}
 \end{table}
 
-The most striking result is that the static 50/50 SPY/GLD allocation (Sharpe = 0.947) outperforms \emph{every} dynamic strategy, including the 12/VIX benchmark (Sharpe = 0.870). This confirms our earlier finding that VT strategies sacrifice return in exchange for drawdown protection.
+Under the canonical period-aligned benchmark (K731; 2008--2026 common sample), the 12/VIX strategy (Sharpe = 0.870) modestly outperforms the static 50/50 SPY/GLD allocation (Sharpe = 0.827, $\Delta = -0.043$), reversing the conclusion of an earlier draft whose buy-and-hold Sharpe (0.947) was computed over a non-aligned sample (see the 2026-05-30 erratum in the replication package). The margin is small and not statistically significant; the substantive conclusion is that no \emph{signal-augmented} strategy improves on the plain 12/VIX rule, while VT continues to deliver its drawdown-protection benefit relative to buy-and-hold.
 
-Among signal-based strategies, the VIX term structure ``contango boost'' variant comes closest to matching 12/VIX, with a Sharpe improvement of +0.010, but this is far from statistical significance (DM $|t| = 0.31$). The behavioral sentiment strategy achieves Sharpe 0.900 but does not significantly outperform 12/VIX (DM $|t| = 0.72$).
+Among signal-based strategies, the behavioral sentiment (fear hedge) variant comes closest to beating 12/VIX, with the largest Sharpe improvement (+0.030, Sharpe 0.900), but this is far from statistical significance (DM $|t| = 0.72$). The VIX term structure ``contango boost'' variant is the only other strategy with a positive improvement (+0.010, DM $|t| = 0.31$); all remaining strategies underperform the benchmark.
 
 \subsection{Multi-Asset Portfolio Optimization}
 
@@ -1252,8 +1253,8 @@ Kupiec, P.~H. (1995). Techniques for verifying the accuracy of risk measurement 
 \bibitem[Lou et~al.(2019)]{lou2019}
 Lou, D., Polk, C., \& Skouras, S. (2019). A tug of war: Overnight versus intraday expected returns. \textit{Journal of Financial Economics}, 134(1), 192--213.
 
-\bibitem[Luo and Zhang(2019)]{luo2019}
-Luo, X., \& Zhang, J.~E. (2019). VIX term structure and VIX futures pricing with realized volatility. \textit{Journal of Futures Markets}, 39(1), 72--93.
+\bibitem[Huang et al.(2019)]{luo2019}
+Huang, Z., Tong, C., \& Wang, T. (2019). VIX term structure and VIX futures pricing with realized volatility. \textit{Journal of Futures Markets}, 39(1), 72--93.
 
 \bibitem[Maillard et al.(2010)]{maillard2010}
 Maillard, S., Roncalli, T., \& Te\"{i}letche, J. (2010). The properties of equally weighted risk contribution portfolios. \textit{Journal of Portfolio Management}, 36(4), 60--70.
