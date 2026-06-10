@@ -2,6 +2,10 @@
 
 Task: `paper_body_audit_fix_prg_periodic_garch_2026_06_10`
 
+> **主線程獨立驗證（2026-06-11 00:15, fable-5）**：4 項 HIGH 修正逐項以 grep/讀檔驗證屬實
+> （Table 2 正值+note L195-205、GJR-X 資訊集 L313、Basel exact-binomial L259-272、six-markets 句 0 hits）。
+> 編譯 exit 0 + paper-update 重新上傳完成。
+
 Completed:
 - Unified Table 2 DM sign convention to `benchmark loss - PRG loss`, so positive values favor PRG in every column.
 - Softened Harvey 2016 wording from "standard volatility-forecasting threshold" to a conservative paper-specific adoption motivated by multiple-testing logic.

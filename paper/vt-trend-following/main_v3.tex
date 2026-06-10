@@ -16,7 +16,9 @@
 \usepackage{array}
 \usepackage{fontspec}
 \usepackage{xeCJK}
-\setCJKmainfont{PingFang TC}
+\IfFontExistsTF{PingFang TC}
+  {\setCJKmainfont{PingFang TC}}
+  {\setCJKmainfont{Songti TC}}
 
 \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 \doublespacing

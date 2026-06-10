@@ -1,12 +1,11 @@
-"""
-Generate figures for the VT-Trend-Following paper.
-All data from Tables 3 and 4 in main.tex (empirical results).
-"""
+"""Generate figures for the VT-trend-following paper."""
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
+import json
+from pathlib import Path
 
 # ── Academic style ──────────────────────────────────────────────────
 plt.rcParams.update({
@@ -38,28 +37,11 @@ def figure1_return_decomposition():
     TSMOM-attributable and TSMOM-independent components for both
     Sharpe and MDD channels, across 5 assets.
     """
-    assets = ['SPY', '50/50\nSPY/GLD', 'DIA', 'QQQ', 'IWM']
+    paper_dir = Path(__file__).resolve().parents[1]
+    fig_dir = Path(__file__).resolve().parent
+    k1192 = json.loads((paper_dir.parents[1] / 'experiments' / 'k1192' / 'k1192_results.json').read_text())
 
-    # From Table 3 and Section 3.3 text:
-    # Sharpe: VT improvement over B&H, split into TSMOM-explained vs residual
-    # SPY: Delta Sharpe = 0.186, TSMOM portion = 0.060 (32%), residual = 0.126
-    # 50/50: Delta Sharpe = 0.117, TSMOM portion = 0.046 (39%), residual = 0.071
-    # DIA/QQQ/IWM: paper doesn't give exact Sharpe decomposition numbers,
-    # but gives MDD retention rates. We use the MDD data which is the paper's
-    # primary contribution.
-
-    # MDD protection (percentage points), from Section 3.3:
-    # SPY:   30.5 pp total, 28.3 pp retained (93%) -> 2.2 pp from TSMOM
-    # 50/50: 20.1 pp total, 19.4 pp retained (96%) -> 0.7 pp from TSMOM
-    # DIA:   MDD retention 91%
-    # QQQ:   MDD retention 90%
-    # IWM:   MDD retention 97%
-
-    # For DIA/QQQ/IWM, we need MDD values. From Table 1 context and B&H benchmarks:
-    # These are stated in the text as passing 90-97% MDD retention.
-    # We'll use the data that IS in the paper explicitly for all 5.
-
-    # Panel A: Sharpe Channel (SPY and 50/50 only — paper provides exact numbers)
+    # Panel A: current manuscript's Sharpe decomposition (SPY and 50/50 only).
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.5), gridspec_kw={'width_ratios': [1, 1.5]})
 
     # Left panel: Sharpe decomposition (SPY and 50/50)
@@ -96,28 +78,19 @@ def figure1_return_decomposition():
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
 
-    # Right panel: MDD decomposition (all 5 assets)
+    # Right panel: MDD decomposition (all 5 assets) from K1192 canonical.
     ax2 = axes[1]
     mdd_assets = ['SPY', '50/50\nSPY/GLD', 'DIA', 'QQQ', 'IWM']
-
-    # MDD protection total (pp) — from paper Table 3 and text
-    # SPY: B&H MDD = -55.2%, VT MDD = -24.7% -> protection = 30.5 pp
-    # 50/50: B&H MDD = -32.5%, VT MDD = -12.4% -> protection = 20.1 pp
-    # DIA: using retention rate 91%, from paper text. Need total.
-    # QQQ: retention 90%
-    # IWM: retention 97%
-    # Paper text says "30.5 percentage points of MDD protection" for SPY.
-    # For DIA/QQQ/IWM the paper gives retention % but not absolute pp.
-    # We estimate from Table 1 B&H MDD context. Paper Section 3.3 says:
-    # "we repeat the decomposition for DIA, QQQ, and IWM"
-    # Using typical B&H MDD ~ 50-60% and VT MDD ~ 25-30%:
-    # We use conservative estimates consistent with the retention rates.
-
-    mdd_total = [30.5, 20.1, 28.0, 32.0, 27.0]  # pp of MDD protection
-    mdd_retention_pct = [0.93, 0.96, 0.91, 0.90, 0.97]  # from paper text exactly
-
-    mdd_retained = [t * r for t, r in zip(mdd_total, mdd_retention_pct)]
-    mdd_tsmom = [t - ret for t, ret in zip(mdd_total, mdd_retained)]
+    rows = []
+    for asset in ['SPY', '50/50', 'DIA', 'QQQ', 'IWM']:
+        point = k1192['assets'][asset]['bootstrap_results']['point_estimates']
+        total = abs(point['bh_mdd_pct']) - abs(point['vt_mdd_pct'])
+        retained = abs(point['bh_mdd_pct']) - abs(point['hedged_mdd_pct'])
+        rows.append((total, retained, point['a_retention'] / 100.0))
+    mdd_total = [r[0] for r in rows]
+    mdd_retained = [r[1] for r in rows]
+    mdd_tsmom = [t - r for t, r in zip(mdd_total, mdd_retained)]
+    mdd_retention_pct = [r[2] for r in rows]
 
     x2 = np.arange(len(mdd_assets))
     width2 = 0.5
@@ -133,8 +106,9 @@ def figure1_return_decomposition():
     for i, (ret, tsm, tot, pct) in enumerate(zip(mdd_retained, mdd_tsmom, mdd_total, mdd_retention_pct)):
         ax2.text(i, ret / 2, f'{pct*100:.0f}%', ha='center', va='center',
                 fontweight='bold', fontsize=10, color='white')
-        if tsm > 1.5:
-            ax2.text(i, ret + tsm / 2, f'{(1-pct)*100:.0f}%', ha='center', va='center',
+        if abs(tsm) > 0.75:
+            label_y = ret + tsm / 2
+            ax2.text(i, label_y, f'{(tot-ret)/tot*100:.0f}%', ha='center', va='center',
                     fontweight='bold', fontsize=9, color='white')
         ax2.text(i, tot + 0.3, f'{tot:.1f} pp', ha='center', va='bottom', fontsize=8)
 
@@ -142,15 +116,15 @@ def figure1_return_decomposition():
     ax2.set_title('(b) Maximum Drawdown Channel', fontweight='bold')
     ax2.set_xticks(x2)
     ax2.set_xticklabels(mdd_assets)
-    ax2.set_ylim(0, 38)
+    ax2.set_ylim(-2.5, 38)
     ax2.legend(loc='upper right', framealpha=0.9, edgecolor='gray')
     ax2.spines['top'].set_visible(False)
     ax2.spines['right'].set_visible(False)
 
     fig.suptitle('', y=1.02)
     plt.tight_layout()
-    plt.savefig('fig1_return_decomposition.pdf', format='pdf')
-    plt.savefig('fig1_return_decomposition.png', format='png')
+    plt.savefig(fig_dir / 'fig1_return_decomposition.pdf', format='pdf')
+    plt.savefig(fig_dir / 'fig1_return_decomposition.png', format='png')
     plt.close()
     print("Figure 1 saved: fig1_return_decomposition.pdf")
 
@@ -259,8 +233,9 @@ def figure2_cross_asset_scatter():
                      edgecolor='#999999', alpha=0.9))
 
     plt.tight_layout()
-    plt.savefig('fig2_cross_asset_scatter.pdf', format='pdf')
-    plt.savefig('fig2_cross_asset_scatter.png', format='png')
+    fig_dir = Path(__file__).resolve().parent
+    plt.savefig(fig_dir / 'fig2_cross_asset_scatter.pdf', format='pdf')
+    plt.savefig(fig_dir / 'fig2_cross_asset_scatter.png', format='png')
     plt.close()
     print("Figure 2 saved: fig2_cross_asset_scatter.pdf")
 

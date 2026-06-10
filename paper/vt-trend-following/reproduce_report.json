@@ -1,93 +1,43 @@
 {
   "paper_id": "vt-trend-following",
-  "paper_title": "VT Trend Following (Dual Mechanism: Gamma + TSMOM)",
-  "target_journal": "JPM/FAJ",
-  "timestamp": "2026-04-19T07:00:55Z",
-  "script": "paper/vt-trend-following/reproduce.py",
-  "exit_code": 1,
-  "runtime_seconds": 1,
-  "alert_level": "yellow",
-  "gate_status": "fail",
-  "gate_rule": ">=95% match rate + green alert",
-  "total_checks": 197,
-  "matched": 159,
-  "mismatches": 4,
-  "untraceable": 34,
-  "status_breakdown": {
-    "MATCH": 159,
-    "MISMATCH": 4,
-    "UNTRACEABLE": 34
-  },
-  "match_rate_pct": 80.7,
-  "traceable_match_rate_pct": 97.5,
-  "per_table": {
-    "Table 1 (Alpha Decomposition, N=22)": {"match": 93, "mismatch": 0, "untraceable": 0},
-    "Table 2 (Cross-Sectional, N=22)": {"match": 14, "mismatch": 0, "untraceable": 4},
-    "Table 3 (Dual Mechanism)": {"match": 1, "mismatch": 3, "untraceable": 6},
-    "Table 4 (Factor Model Controls)": {"match": 36, "mismatch": 1, "untraceable": 0},
-    "Table 5 (International VT, N=13)": {"match": 0, "mismatch": 0, "untraceable": 16},
-    "Table 6 (MDD Bootstrap)": {"match": 0, "mismatch": 0, "untraceable": 6},
-    "VIX Threshold Robustness": {"match": 9, "mismatch": 0, "untraceable": 0},
-    "Cross-Asset MDD (paper3_fixes, 2007-2026)": {"match": 6, "mismatch": 0, "untraceable": 0},
-    "Sector Analysis": {"match": 0, "mismatch": 0, "untraceable": 2}
-  },
-  "divergences": [
-    {
-      "table": "Table 3 (Dual Mechanism)",
-      "cell": "SPY B&H Sharpe (PERIOD MISMATCH)",
-      "paper_value": "0.611 (period: 2005-2026)",
-      "experiment_value": "0.5406 (paper3_fixes period: 2007-2026)",
-      "severity": "medium",
-      "note": "Period mismatch. paper3_fixes.json uses 2007-2026 but paper reports 2005-2026."
-    },
-    {
-      "table": "Table 3 (Dual Mechanism)",
-      "cell": "SPY VT Sharpe (PERIOD MISMATCH)",
-      "paper_value": "0.797 (2005-2026)",
-      "experiment_value": "0.6181 (2007-2026)",
-      "severity": "medium",
-      "note": "Same period mismatch as above."
-    },
-    {
-      "table": "Table 3 (Dual Mechanism)",
-      "cell": "SPY Hedged VT Sharpe (PERIOD MISMATCH)",
-      "paper_value": "0.737 (2005-2026)",
-      "experiment_value": "0.5742 (2007-2026)",
-      "severity": "medium",
-      "note": "Same period mismatch as above."
-    },
-    {
-      "table": "Table 4 (Factor Model Controls)",
-      "cell": "M5 N (sample size)",
-      "paper_value": "3740 (SPLV proxy)",
-      "experiment_value": "5049 (AQR BAB?)",
-      "severity": "medium",
-      "note": "Issue #3: Wrong factor series loaded; paper says SPLV proxy but JSON corresponds to AQR BAB."
-    }
+  "generated_at_utc": "2026-06-10T16:05:53.364712+00:00",
+  "scope": [
+    "Table 2 full-sample, split-sample, and K1457 continuous-vs-dummy checks",
+    "Table 3 / Figure 1 / K1417 / Table 6 canonical MDD-retention numbers",
+    "Bundled figure artifacts after regeneration"
   ],
-  "untraceable_summary": {
-    "count": 34,
-    "dominant_gaps": [
-      "Table 2 split-sample (r, p, CI, Spearman rho): no JSON source (v2 addition)",
-      "Table 3 50/50 SPY/GLD blend rows (BH/VT/Hedged VT/Pure TSMOM): no blend JSON",
-      "Table 3 DIA and IWM MDD retention: not in paper3_fixes.json",
-      "Table 5 all 13-market rows: no comprehensive international VT JSON",
-      "Table 6 MDD bootstrap (6 rows): no bootstrap JSON",
-      "Sector Analysis (gamma range, r=0.163): no sector-level JSON"
-    ]
+  "alert_level": "green",
+  "gate_status": "pass",
+  "total_checks": 90,
+  "matched_checks": 90,
+  "mismatched_checks": 0,
+  "match_rate_pct": 100.0,
+  "traceable_match_rate_pct": 100.0,
+  "by_section": {
+    "Table 2 / Section 3.2": {
+      "match": 20,
+      "mismatch": 0
+    },
+    "Table 3 / Figure 1": {
+      "match": 15,
+      "mismatch": 0
+    },
+    "Table 6 / K1376": {
+      "match": 20,
+      "mismatch": 0
+    },
+    "K1417 stationary-bootstrap table": {
+      "match": 32,
+      "mismatch": 0
+    },
+    "Figure artifacts": {
+      "match": 3,
+      "mismatch": 0
+    }
   },
-  "recommendations": {
-    "high_priority": [
-      "Resolve Table 3 period mismatch: either (a) re-run paper3_fixes with 2005-2026 to match paper, or (b) revise paper text+table to state 2007-2026",
-      "Fix Table 4 M5 N mismatch: verify whether paper M5 is SPLV proxy (N=3740) or AQR BAB (N=5049); rerun with correct series"
-    ],
-    "medium_priority": [
-      "Backfill Table 5 (13-market international VT) JSON to eliminate 16 untraceable items",
-      "Generate bootstrap JSON for Table 6 MDD confidence intervals",
-      "Create 50/50 SPY/GLD blend JSON for Table 3 untraceable rows"
-    ]
-  },
-  "traceable_gate_verdict": "Traceable match rate 97.5% EXCEEDS the 95% threshold (159/163 traceable checks match). Absolute match rate 80.7% is dragged down by 34 untraceable (mostly Table 5 international rows and Table 6 bootstrap that lack JSON, not mismatches). Alert = yellow (not green) because 4 mismatches include a HIGH-impact period inconsistency affecting Table 3 headline numbers.",
-  "suggested_next_action": "Revise v2 priority: fix 4 mismatches first (especially Table 3 period and Table 4 M5 N) then backfill Table 5/6 JSON. After that, re-running reproduce.py should push alert from yellow to green. This paper is CLOSEST to submission-ready of the three audited.",
-  "audit_method": "Stdout parsed from reproduce.py run on 2026-04-19. Raw stdout = 296 lines (not embedded; regenerate via uv run python reproduce.py)."
+  "mismatches": [],
+  "notes": [
+    "This gate now targets the current canonical manuscript bindings, not superseded v2 numbers.",
+    "Non-numeric citation and narrative issues remain outside the scope of this script."
+  ]
 }
