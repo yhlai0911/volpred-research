@@ -250,7 +250,7 @@ The pattern is similar for the 50/50 SPY/GLD blend. The Sharpe drops from 0.982 
 
 To confirm that this MDD preservation is not SPY-specific, we repeat the decomposition for DIA, QQQ, and IWM. The K1192 canonical MDD retention rates are 106.2\% (DIA), 109.0\% (QQQ), and 102.2\% (IWM)---with point estimates clustering at or slightly above 100\% across all five assets tested. This consistency confirms that VT's drawdown protection operates through the VIX-level channel regardless of the specific equity asset. We again avoid reading the $>100\%$ values as evidence that TSMOM hedging creates a superior standalone insurance strategy, because those values can also arise mechanically when the hedge reduces exposure around rebound phases inside momentum-crash episodes. The TSMOM contribution to the total strategy Sharpe ratio is correspondingly small---the K898 back-calculation gives approximately 5.3\% of the full VT Sharpe, subject to ongoing reconciliation against the originally reported 1.4\% figure (see forensic note in Section~\ref{sec:discussion})---indicating that the alpha reduction percentages in Table~\ref{tab:alpha_decomp} reflect compositional reallocation within the factor model rather than economically large value transfer.
 
-\paragraph{Bootstrap inference for MDD retention.} Because maximum drawdown is a single extreme-value statistic with high sampling variability, we provide formal statistical inference via block bootstrap (10,000 replications, block size = 252 days) and verify the sign of the inference under a stationary-bootstrap robustness check with multi-year expected block lengths. Table~\ref{tab:mdd_bootstrap} reports the moving-block results for all 22 assets plus the 50/50 composite using the retention-fraction definition (Eq.~\ref{eq:mdd_retention_boot}). Point estimates are at or above 100\% for 20 of 23 rows (range: 83.8\% for LQD to 223.4\% for XLE). The 90\% confidence intervals are asymmetric---all distributions are right-skewed---and 22 of 23 assets have CI lower bounds above zero (SLV: $-$2.5\%, marginally negative). Eight assets reject $H_0$: Retention $\leq 80\%$ at the 5th percentile (SPY, QQQ, DIA, IWM, EFA, INDA, FXI, VNQ). No asset rejects $H_0$: Retention $\leq 100\%$, consistent with TSMOM hedging preserving rather than eroding the drawdown channel across asset classes. The stationary-bootstrap re-check does not reverse any of the five canonical non-erosion conclusions (K1417 task audit), so the main claim does not depend on the 252-day resampling choice.
+\paragraph{Bootstrap inference for MDD retention.} Because maximum drawdown is a single extreme-value statistic with high sampling variability, we provide formal statistical inference via block bootstrap (10,000 replications, block size = 252 days) and verify the sign of the inference under a stationary-bootstrap robustness check with multi-year expected block lengths. Table~\ref{tab:mdd_bootstrap} reports the moving-block results for all 22 assets plus the 50/50 composite using the retention-fraction definition (Eq.~\ref{eq:mdd_retention_boot}). Point estimates are at or above 100\% for 20 of 23 rows (range: 83.8\% for LQD to 223.4\% for XLE). The 90\% confidence intervals are asymmetric---all distributions are right-skewed---and 22 of 23 assets have CI lower bounds above zero (SLV: $-$2.5\%, marginally negative). Eight assets reject $H_0$: Retention $\leq 80\%$ at the 5th percentile (SPY, QQQ, DIA, IWM, EFA, INDA, FXI, VNQ). No asset rejects $H_0$: Retention $\leq 100\%$, consistent with TSMOM hedging preserving rather than eroding the drawdown channel across asset classes. The stationary-bootstrap re-check does not reverse any of the five canonical non-erosion conclusions (K1417 task audit; see Table~\ref{tab:k1417_stationary_compare}), so the main claim does not depend on the 252-day resampling choice.
 
 % source: K1376 (experiments/k1376/k1376_results.json), block-bootstrap B=10000 block=252 seed=42, 90% CI
 \begin{table}[H]
@@ -298,6 +298,35 @@ VNQ  & Real estate &  126.4 &  109.1 &   89.4 &  186.8 & Reject \\
 \begin{tablenotes}
 \small
 \item \textit{Notes:} K1376 moving-block bootstrap, 10,000 replications, block size 252 trading days, seed 42, on full-sample returns (Jan 2005--Mar 2026). MDD retention is defined as the fraction of buy-and-hold-to-VT drawdown improvement preserved after TSMOM hedging (Eq.~\ref{eq:mdd_retention_boot}). Point estimates $\geq 100\%$ indicate TSMOM hedging does not degrade MDD protection; some incremental improvement can arise mechanically if the hedge trims exposure during rebound windows inside momentum-crash episodes. 90\% CI is the 5th--95th percentile of the bootstrap distribution. $H_0$: Retention $\leq 80\%$: ``Reject'' where 5th percentile exceeds 80\%. $H_0$: Retention $\leq 100\%$ is not rejected at the 5\% level for any asset, consistent with the hedge fully preserving the drawdown channel. SLV CI lower bound of $-$2.5\% reflects silver's episodic parabolic drawdowns; the point estimate (116.8\%) and median (100.5\%) are positive. XLE's high point estimate (223.4\%) reflects energy sector's unusually severe drawdown path relative to VT's de-risking window; CI lower bound (37.7\%) is positive. 50/50 denotes the SPY/GLD equal-weight blend (K1192 canonical). Extends K1192 (5-asset) to all 22 paper assets. As a longer-memory robustness check, K1417 reruns the canonical five-asset inference with a stationary bootstrap using multi-year expected block lengths and finds no material weakening of the lower-bound conclusions.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{Stationary-Bootstrap Robustness Check: MDD Retention CI Comparison Against K1192 Canonical (Five US Equity Assets)}
+\label{tab:k1417_stationary_compare}
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{2}{c}{K1192 fixed-block 252d} & \multicolumn{2}{c}{K1417 stationary 756d} & \multicolumn{2}{c}{K1417 stationary 1260d} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+Asset & 5th\,(\%) & 50th\,(\%) & 5th\,(\%) & 50th\,(\%) & 5th\,(\%) & 50th\,(\%) \\
+\midrule
+SPY      & 86 & 97  & 97.1 & 181.1 & 97.7  & 181.1 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][0]
+50/50    & 90 & 99  & 84.7 & 149.6 & 89.8  & 149.6 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][1]
+DIA      & 83 & 96  & 91.3 & 137.2 & 93.4  & 137.2 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][2]
+QQQ      & 82 & 95  & 97.5 & 199.0 & 97.5  & 174.1 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][3]
+IWM      & 91 & 100 & 97.3 & 140.7 & 100.0 & 131.0 \\ % source: experiments/k1417/k1417_results.json[reference_k1192_fixed_block_ci][4]
+\midrule
+\multicolumn{6}{l}{\textit{Lower-bound shift summary (1260-day vs.\ 252-day):}} & \\
+\multicolumn{6}{l}{\quad Mean shift across five assets} & $+9.28$\,pp \\ % source: experiments/k1417/k1417_results.json[summary][mean_lo_shift_at_1260]
+\multicolumn{6}{l}{\quad Median shift across five assets} & $+10.4$\,pp \\ % source: experiments/k1417/k1417_results.json[summary][median_lo_shift_at_1260]
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Comparison of K1192 fixed-block (252-day) MDD retention CI 5th and 50th percentiles against K1417 stationary-bootstrap re-checks using expected block lengths of 756 and 1260 trading days (approximately 3 and 5 calendar years). The K1417 stationary bootstrap is a longer-memory robustness check that allows block dependence to extend across multiple business cycles, addressing whether retention inference is sensitive to the 252-day block assumption. At the 1260-day specification, 5th-percentile lower-bound shifts are positive for four of five canonical assets (SPY $+11.7$, DIA $+10.4$, QQQ $+15.5$, IWM $+9.0$, all in percentage points) and negligibly negative for the 50/50 SPY/GLD composite ($-0.2$); no asset's lower bound falls below the K1192 baseline by an economically meaningful margin. The K1417 task verdict (``H2 NOT SUPPORTED'') refers to a narrow hypothesis that longer-block resampling would \emph{materially weaken} the lower-bound conclusions in the direction of erosion; the comparison shows the opposite---shifts are mostly positive and the non-erosion finding from K1192 is preserved, with 50th-percentile (median) point estimates moving substantially upward under stationary resampling. Data: \texttt{experiments/k1417/k1417\_results.json}; replication: \texttt{python experiments/k1417/k1417.py} (stationary bootstrap, seed = 42, 10{,}000 replications).
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
