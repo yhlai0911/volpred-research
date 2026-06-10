@@ -232,12 +232,26 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
 
     metrics: dict[str, int | None] = {}
 
-    # Find the best tex file (v3 > v2 > v1)
-    for name in ["main_v4.tex", "main_v3.tex", "main_v2.tex", "main.tex",
-                 "body.tex", "body_v5.tex", "body_v4.tex", "body_v3.tex"]:
-        tex = paper_dir / name
-        if tex.exists():
-            break
+    # Find the current main tex file. 2026-06-11 fix (leverage-direction
+    # incident): a fixed version-priority list picked the STALE main_v3.tex
+    # over the actively-edited main.tex, pushing an outdated abstract (with
+    # superseded claims) to the live site. Among existing candidates, prefer
+    # the most recently modified one — the file the main thread actually
+    # edits and compiles is the current version, regardless of its suffix.
+    main_candidates = [paper_dir / n for n in
+                       ["main_v4.tex", "main_v3.tex", "main_v2.tex", "main.tex"]]
+    body_candidates = [paper_dir / n for n in
+                       ["body.tex", "body_v5.tex", "body_v4.tex", "body_v3.tex"]]
+    mains = [c for c in main_candidates if c.exists()]
+    bodies = [c for c in body_candidates if c.exists()]
+    if mains:
+        # main* wrappers carry \title/\begin{abstract}; pick the most recently
+        # edited one (NOT the body file, whose mtime is usually newer but which
+        # lacks the abstract environment — picking it left the stale Supabase
+        # abstract untouched).
+        tex = max(mains, key=lambda c: c.stat().st_mtime)
+    elif bodies:
+        tex = max(bodies, key=lambda c: c.stat().st_mtime)
     else:
         return metrics
 
@@ -311,11 +325,52 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
             if candidate.is_file():
                 search_sources.append(candidate.read_text(errors="ignore"))
                 break
+    def _clean_abstract(raw: str) -> str:
+        """Strip LaTeX comments/markup so the site shows readable prose.
+        2026-06-11 fix: the live abstract opened with a literal '% v2: ...'
+        editor comment and exposed \\medskip/\\textbf/Keywords markup."""
+        # Drop comment lines (and trailing inline comments) BEFORE whitespace
+        # collapsing, while line structure still exists.
+        lines = []
+        for line in raw.splitlines():
+            stripped = line.lstrip()
+            if stripped.startswith("%"):
+                continue
+            # strip inline unescaped comments
+            line = re.sub(r"(?<!\\)%.*$", "", line)
+            lines.append(line)
+        text = " ".join(lines)
+        # Cut at the keywords/JEL block — not part of the abstract prose.
+        text = re.split(r"\\medskip|\\textbf\{Keywords|\\textbf\{JEL", text)[0]
+        # De-LaTeX the most common inline markup.
+        text = re.sub(r"\\(?:textbf|textit|emph|texttt|mbox)\{([^{}]*)\}", r"\1", text)
+        text = re.sub(r"\\(?:citet|citep|cite)\{[^{}]*\}", "", text)
+        text = re.sub(r"\\(?:noindent|smallskip|bigskip|par)\b", " ", text)
+        text = text.replace(r"\%", "%").replace(r"\&", "&").replace(r"\$", "$")
+        text = text.replace("---", "—").replace("--", "–").replace("~", " ")
+        text = text.replace(r"\,", " ").replace("``", '"').replace("''", '"')
+        # $...$ math: keep contents, drop the delimiters (mathless frontend).
+        text = re.sub(r"\$([^$]*)\$", r"\1", text)
+        text = re.sub(r"\\(rho|gamma|beta|alpha|sigma|tau|nu|lambda|Delta)(?![a-zA-Z])",
+                      lambda m: {"rho": "ρ", "gamma": "γ", "beta": "β", "alpha": "α",
+                                 "sigma": "σ", "tau": "τ", "nu": "ν", "lambda": "λ",
+                                 "Delta": "Δ"}[m.group(1)], text)
+        text = re.sub(r"\\(?:le|leq)\b", "≤", text)
+        text = re.sub(r"\\(?:ge|geq)\b", "≥", text)
+        text = re.sub(r"\\times\b", "×", text)
+        text = text.replace("\\\\", " ")          # forced line breaks
+        text = re.sub(r"\\'\{?([a-zA-Z])\}?", r"\1", text)  # accents: Sz\'{e}kely → Szekely
+        text = re.sub(r"\\[`^\"~=.]\{?([a-zA-Z])\}?", r"\1", text)
+        text = text.replace("\\ ", " ")           # escaped interword space (U.S.\ VT)
+        text = re.sub(r"\\[a-zA-Z]+", "", text)  # any leftover commands
+        text = text.replace("{", "").replace("}", "")
+        return re.sub(r"\s+", " ", text).strip()
+
     for src in search_sources:
         m = abstract_re.search(src)
         if not m:
             continue
-        cleaned = re.sub(r"\s+", " ", m.group(1).strip())
+        cleaned = _clean_abstract(m.group(1))
         if cleaned:
             metrics["abstract"] = cleaned
             break
