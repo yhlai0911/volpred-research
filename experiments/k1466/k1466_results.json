@@ -1,0 +1,566 @@
+{
+  "k_id": "K1466",
+  "verdict": "CONDITIONAL_PASS",
+  "headline": "Mixed decoupling evidence: diversification ratio CI > 1 but only some EM ETFs sit below the EEM-SPY correlation benchmark.",
+  "rng_seed": 42,
+  "sample": {
+    "start": "2010-09-29",
+    "end": "2026-06-09",
+    "n_obs_returns": 3946,
+    "tickers_em": [
+      "VNM",
+      "EIDO",
+      "THD",
+      "EPHE"
+    ],
+    "tickers_bench": [
+      "SPY",
+      "EFA",
+      "EEM"
+    ]
+  },
+  "descriptive": {
+    "VNM": {
+      "n_obs": 3946,
+      "first_date": "2010-09-30",
+      "last_date": "2026-06-09",
+      "ann_mean_vol_rv21": 0.22922896026812312,
+      "ann_median_vol_rv21": 0.20621352502356152,
+      "ann_sd_of_rv21": 0.09811299932317084,
+      "skew_daily_ret": -0.3778402775347368,
+      "kurt_daily_ret_excess": 4.770103054557853,
+      "acf1_daily_ret": -0.04156295869114862,
+      "acf1_rv21": 0.9859077503022471
+    },
+    "EIDO": {
+      "n_obs": 3946,
+      "first_date": "2010-09-30",
+      "last_date": "2026-06-09",
+      "ann_mean_vol_rv21": 0.2348019812728142,
+      "ann_median_vol_rv21": 0.2054142104106261,
+      "ann_sd_of_rv21": 0.12647129395811085,
+      "skew_daily_ret": -0.5467372061158959,
+      "kurt_daily_ret_excess": 8.60819618547322,
+      "acf1_daily_ret": -0.005921868446107761,
+      "acf1_rv21": 0.9897489666764032
+    },
+    "THD": {
+      "n_obs": 3946,
+      "first_date": "2010-09-30",
+      "last_date": "2026-06-09",
+      "ann_mean_vol_rv21": 0.20172989704702135,
+      "ann_median_vol_rv21": 0.18040492571742467,
+      "ann_sd_of_rv21": 0.10793104363337996,
+      "skew_daily_ret": -0.7485223562833078,
+      "kurt_daily_ret_excess": 14.759834732241043,
+      "acf1_daily_ret": -0.09115998060977319,
+      "acf1_rv21": 0.9892468454670689
+    },
+    "EPHE": {
+      "n_obs": 3946,
+      "first_date": "2010-09-30",
+      "last_date": "2026-06-09",
+      "ann_mean_vol_rv21": 0.19948433057684883,
+      "ann_median_vol_rv21": 0.17919896243155548,
+      "ann_sd_of_rv21": 0.10432771385531994,
+      "skew_daily_ret": -1.7277661980760632,
+      "kurt_daily_ret_excess": 29.496240072122625,
+      "acf1_daily_ret": -0.07305757736464971,
+      "acf1_rv21": 0.9882149364147529
+    },
+    "SPY": {
+      "n_obs": 3946,
+      "first_date": "2010-09-30",
+      "last_date": "2026-06-09",
+      "ann_mean_vol_rv21": 0.14503407806164548,
+      "ann_median_vol_rv21": 0.12187622763619366,
+      "ann_sd_of_rv21": 0.09149659676392988,
+      "skew_daily_ret": -0.5847607597896796,
+      "kurt_daily_ret_excess": 13.259617857871426,
+      "acf1_daily_ret": -0.10529277542637881,
+      "acf1_rv21": 0.9924393473257979
+    },
+    "EFA": {
+      "n_obs": 3946,
+      "first_date": "2010-09-30",
+      "last_date": "2026-06-09",
+      "ann_mean_vol_rv21": 0.15827974148789004,
+      "ann_median_vol_rv21": 0.13856078581696302,
+      "ann_sd_of_rv21": 0.08826698090775892,
+      "skew_daily_ret": -0.8594373349756718,
+      "kurt_daily_ret_excess": 10.959248966318162,
+      "acf1_daily_ret": -0.09038387083506769,
+      "acf1_rv21": 0.990772748728654
+    },
+    "EEM": {
+      "n_obs": 3946,
+      "first_date": "2010-09-30",
+      "last_date": "2026-06-09",
+      "ann_mean_vol_rv21": 0.19329382114635071,
+      "ann_median_vol_rv21": 0.17563967562433574,
+      "ann_sd_of_rv21": 0.09026761416254467,
+      "skew_daily_ret": -0.58491613174305,
+      "kurt_daily_ret_excess": 6.894961984055467,
+      "acf1_daily_ret": -0.09364992476393019,
+      "acf1_rv21": 0.9896620824368306
+    }
+  },
+  "crisis_windows_ann_vol": {
+    "2015_china_crash": {
+      "VNM": {
+        "peak_ann_vol": 0.5093128891752351,
+        "mean_ann_vol": 0.27358760973264235
+      },
+      "EIDO": {
+        "peak_ann_vol": 0.553482593487599,
+        "mean_ann_vol": 0.2964354090785683
+      },
+      "THD": {
+        "peak_ann_vol": 0.3647238369091909,
+        "mean_ann_vol": 0.21596762714828877
+      },
+      "EPHE": {
+        "peak_ann_vol": 0.4194155111030208,
+        "mean_ann_vol": 0.2248855082293643
+      },
+      "SPY": {
+        "peak_ann_vol": 0.3206591730062167,
+        "mean_ann_vol": 0.1630620472401135
+      },
+      "EFA": {
+        "peak_ann_vol": 0.29262026068529673,
+        "mean_ann_vol": 0.19193121444505992
+      },
+      "EEM": {
+        "peak_ann_vol": 0.3778069872922964,
+        "mean_ann_vol": 0.22932088224094768
+      }
+    },
+    "2018_q4": {
+      "VNM": {
+        "peak_ann_vol": 0.32884186399504894,
+        "mean_ann_vol": 0.23703948601328306
+      },
+      "EIDO": {
+        "peak_ann_vol": 0.39195481086103184,
+        "mean_ann_vol": 0.3019727727987568
+      },
+      "THD": {
+        "peak_ann_vol": 0.26359488724824803,
+        "mean_ann_vol": 0.20889681083654374
+      },
+      "EPHE": {
+        "peak_ann_vol": 0.2478156072823905,
+        "mean_ann_vol": 0.20357848613957993
+      },
+      "SPY": {
+        "peak_ann_vol": 0.30337890680015617,
+        "mean_ann_vol": 0.19551726762612479
+      },
+      "EFA": {
+        "peak_ann_vol": 0.19522410143867275,
+        "mean_ann_vol": 0.15921094658780494
+      },
+      "EEM": {
+        "peak_ann_vol": 0.3170039879736411,
+        "mean_ann_vol": 0.24387510296121132
+      }
+    },
+    "2020_covid": {
+      "VNM": {
+        "peak_ann_vol": 0.8429506429043456,
+        "mean_ann_vol": 0.4677240032223044
+      },
+      "EIDO": {
+        "peak_ann_vol": 1.3113810766811995,
+        "mean_ann_vol": 0.677874079116497
+      },
+      "THD": {
+        "peak_ann_vol": 1.2076029508906871,
+        "mean_ann_vol": 0.5964050869191164
+      },
+      "EPHE": {
+        "peak_ann_vol": 1.3849818813220989,
+        "mean_ann_vol": 0.6404857887478573
+      },
+      "SPY": {
+        "peak_ann_vol": 0.9366835409302267,
+        "mean_ann_vol": 0.49430967604064996
+      },
+      "EFA": {
+        "peak_ann_vol": 0.8785603971953135,
+        "mean_ann_vol": 0.448714297239803
+      },
+      "EEM": {
+        "peak_ann_vol": 0.963197910015581,
+        "mean_ann_vol": 0.4941443930143578
+      }
+    },
+    "2022_fed_hike": {
+      "VNM": {
+        "peak_ann_vol": 0.36941499134480227,
+        "mean_ann_vol": 0.2301162730193214
+      },
+      "EIDO": {
+        "peak_ann_vol": 0.29608834604075907,
+        "mean_ann_vol": 0.19921770010194353
+      },
+      "THD": {
+        "peak_ann_vol": 0.24943903209654403,
+        "mean_ann_vol": 0.18020191175739222
+      },
+      "EPHE": {
+        "peak_ann_vol": 0.2682427090747927,
+        "mean_ann_vol": 0.1887160637119316
+      },
+      "SPY": {
+        "peak_ann_vol": 0.34565295756344544,
+        "mean_ann_vol": 0.25167714312460016
+      },
+      "EFA": {
+        "peak_ann_vol": 0.3235140695911829,
+        "mean_ann_vol": 0.22496306858472387
+      },
+      "EEM": {
+        "peak_ann_vol": 0.39370035166154976,
+        "mean_ann_vol": 0.25114074496647826
+      }
+    },
+    "2024_yen_carry": {
+      "VNM": {
+        "peak_ann_vol": 0.2279157233832958,
+        "mean_ann_vol": 0.18479988439662523
+      },
+      "EIDO": {
+        "peak_ann_vol": 0.2613362950763463,
+        "mean_ann_vol": 0.18750441302399581
+      },
+      "THD": {
+        "peak_ann_vol": 0.24154518779586767,
+        "mean_ann_vol": 0.17473899689293743
+      },
+      "EPHE": {
+        "peak_ann_vol": 0.18908511859385252,
+        "mean_ann_vol": 0.16649780460100377
+      },
+      "SPY": {
+        "peak_ann_vol": 0.21991604104131707,
+        "mean_ann_vol": 0.1675032393067064
+      },
+      "EFA": {
+        "peak_ann_vol": 0.19788561417865322,
+        "mean_ann_vol": 0.16246582500775503
+      },
+      "EEM": {
+        "peak_ann_vol": 0.21019812901279203,
+        "mean_ann_vol": 0.16956564128611035
+      }
+    }
+  },
+  "unconditional_corr": {
+    "n_obs": 3946,
+    "pearson": {
+      "VNM": {
+        "VNM": 1.0,
+        "EIDO": 0.4068,
+        "THD": 0.425,
+        "EPHE": 0.3885,
+        "SPY": 0.4992,
+        "EFA": 0.5001,
+        "EEM": 0.5163
+      },
+      "EIDO": {
+        "VNM": 0.4068,
+        "EIDO": 1.0,
+        "THD": 0.6338,
+        "EPHE": 0.6128,
+        "SPY": 0.5927,
+        "EFA": 0.6267,
+        "EEM": 0.6994
+      },
+      "THD": {
+        "VNM": 0.425,
+        "EIDO": 0.6338,
+        "THD": 1.0,
+        "EPHE": 0.6268,
+        "SPY": 0.6012,
+        "EFA": 0.6681,
+        "EEM": 0.7322
+      },
+      "EPHE": {
+        "VNM": 0.3885,
+        "EIDO": 0.6128,
+        "THD": 0.6268,
+        "EPHE": 1.0,
+        "SPY": 0.569,
+        "EFA": 0.6004,
+        "EEM": 0.663
+      },
+      "SPY": {
+        "VNM": 0.4992,
+        "EIDO": 0.5927,
+        "THD": 0.6012,
+        "EPHE": 0.569,
+        "SPY": 1.0,
+        "EFA": 0.8551,
+        "EEM": 0.7727
+      },
+      "EFA": {
+        "VNM": 0.5001,
+        "EIDO": 0.6267,
+        "THD": 0.6681,
+        "EPHE": 0.6004,
+        "SPY": 0.8551,
+        "EFA": 1.0,
+        "EEM": 0.8447
+      },
+      "EEM": {
+        "VNM": 0.5163,
+        "EIDO": 0.6994,
+        "THD": 0.7322,
+        "EPHE": 0.663,
+        "SPY": 0.7727,
+        "EFA": 0.8447,
+        "EEM": 1.0
+      }
+    },
+    "spearman": {
+      "VNM": {
+        "VNM": 1.0,
+        "EIDO": 0.3454,
+        "THD": 0.3587,
+        "EPHE": 0.3209,
+        "SPY": 0.4306,
+        "EFA": 0.4361,
+        "EEM": 0.4597
+      },
+      "EIDO": {
+        "VNM": 0.3454,
+        "EIDO": 1.0,
+        "THD": 0.5506,
+        "EPHE": 0.5274,
+        "SPY": 0.5129,
+        "EFA": 0.564,
+        "EEM": 0.6536
+      },
+      "THD": {
+        "VNM": 0.3587,
+        "EIDO": 0.5506,
+        "THD": 1.0,
+        "EPHE": 0.5104,
+        "SPY": 0.515,
+        "EFA": 0.5878,
+        "EEM": 0.6802
+      },
+      "EPHE": {
+        "VNM": 0.3209,
+        "EIDO": 0.5274,
+        "THD": 0.5104,
+        "EPHE": 1.0,
+        "SPY": 0.4734,
+        "EFA": 0.5085,
+        "EEM": 0.593
+      },
+      "SPY": {
+        "VNM": 0.4306,
+        "EIDO": 0.5129,
+        "THD": 0.515,
+        "EPHE": 0.4734,
+        "SPY": 1.0,
+        "EFA": 0.8092,
+        "EEM": 0.7155
+      },
+      "EFA": {
+        "VNM": 0.4361,
+        "EIDO": 0.564,
+        "THD": 0.5878,
+        "EPHE": 0.5085,
+        "SPY": 0.8092,
+        "EFA": 1.0,
+        "EEM": 0.7926
+      },
+      "EEM": {
+        "VNM": 0.4597,
+        "EIDO": 0.6536,
+        "THD": 0.6802,
+        "EPHE": 0.593,
+        "SPY": 0.7155,
+        "EFA": 0.7926,
+        "EEM": 1.0
+      }
+    }
+  },
+  "rolling_corr_60d_vs_spy": {
+    "benchmark": "SPY",
+    "window_days": 60,
+    "per_em": {
+      "VNM": {
+        "median": 0.4481914731872893,
+        "iqr_25": 0.31827522565410576,
+        "iqr_75": 0.5963363750379196,
+        "min": -0.05380786656879051,
+        "max": 0.8751815237872876,
+        "n_obs": 3887
+      },
+      "EIDO": {
+        "median": 0.5487242736510066,
+        "iqr_25": 0.41695243654465036,
+        "iqr_75": 0.6614287573317915,
+        "min": -0.04943189127323715,
+        "max": 0.9293598300655437,
+        "n_obs": 3887
+      },
+      "THD": {
+        "median": 0.5363456173802781,
+        "iqr_25": 0.4194779934154075,
+        "iqr_75": 0.6787725802326816,
+        "min": -0.11447592120293888,
+        "max": 0.896562941405365,
+        "n_obs": 3887
+      },
+      "EPHE": {
+        "median": 0.5125526246367709,
+        "iqr_25": 0.3559477034967256,
+        "iqr_75": 0.6437820299097394,
+        "min": -0.03697676129264825,
+        "max": 0.881243998237575,
+        "n_obs": 3887
+      }
+    }
+  },
+  "eem_spy_60d_rolling_corr_median": 0.7464888538832251,
+  "n_em_below_eem_spy_corr_median": 4,
+  "regime_conditional_corr": {
+    "n_high": 490,
+    "n_low": 1438,
+    "vix_high_threshold": 25,
+    "vix_low_threshold": 15,
+    "pairs": {
+      "VNM_vs_SPY": {
+        "rho_high_vix": 0.6804449000959243,
+        "rho_low_vix": 0.2910543862912636,
+        "delta": 0.38939051380466067,
+        "fisher_z": 10.110515558577985,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "VNM_vs_EFA": {
+        "rho_high_vix": 0.679034964631258,
+        "rho_low_vix": 0.2921284892566459,
+        "delta": 0.3869064753746121,
+        "fisher_z": 10.038154052615534,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "VNM_vs_EEM": {
+        "rho_high_vix": 0.7112623429391488,
+        "rho_low_vix": 0.3262227947660764,
+        "delta": 0.3850395481730724,
+        "fisher_z": 10.50932072704008,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "EIDO_vs_SPY": {
+        "rho_high_vix": 0.7548881594201583,
+        "rho_low_vix": 0.40014834836882146,
+        "delta": 0.35473981105133684,
+        "fisher_z": 10.685868300330583,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "EIDO_vs_EFA": {
+        "rho_high_vix": 0.7673227482461656,
+        "rho_low_vix": 0.49051858206409304,
+        "delta": 0.2768041661820726,
+        "fisher_z": 9.096405481911102,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "EIDO_vs_EEM": {
+        "rho_high_vix": 0.8120273993681955,
+        "rho_low_vix": 0.6466810617699396,
+        "delta": 0.1653463375982559,
+        "fisher_z": 6.929062126645771,
+        "p_value": 4.236389017364672e-12,
+        "significant_5pct": true
+      },
+      "THD_vs_SPY": {
+        "rho_high_vix": 0.7410417197324461,
+        "rho_low_vix": 0.43545885469483314,
+        "delta": 0.305582865037613,
+        "fisher_z": 9.27052421807948,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "THD_vs_EFA": {
+        "rho_high_vix": 0.8020508715163962,
+        "rho_low_vix": 0.5307970612691468,
+        "delta": 0.27125381024724937,
+        "fisher_z": 9.783623529031301,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "THD_vs_EEM": {
+        "rho_high_vix": 0.8453564762750108,
+        "rho_low_vix": 0.6333618714254539,
+        "delta": 0.2119946048495569,
+        "fisher_z": 9.393891190653996,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "EPHE_vs_SPY": {
+        "rho_high_vix": 0.720227040900033,
+        "rho_low_vix": 0.40748529643403886,
+        "delta": 0.3127417444659941,
+        "fisher_z": 9.067479909481037,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "EPHE_vs_EFA": {
+        "rho_high_vix": 0.7352307126087201,
+        "rho_low_vix": 0.45726347620746,
+        "delta": 0.2779672364012601,
+        "fisher_z": 8.507787346647676,
+        "p_value": 0.0,
+        "significant_5pct": true
+      },
+      "EPHE_vs_EEM": {
+        "rho_high_vix": 0.7721667386113675,
+        "rho_low_vix": 0.6092741212170476,
+        "delta": 0.16289261739431993,
+        "fisher_z": 6.0619507191025,
+        "p_value": 1.3448042679442551e-09,
+        "significant_5pct": true
+      }
+    }
+  },
+  "n_significant_crisis_corr_increases_vs_spy": 4,
+  "diversification_ratio_bootstrap": {
+    "point": 1.2542576140502337,
+    "boot_mean": 1.2561510498517259,
+    "boot_sd": 0.025260682470667734,
+    "ci_2_5": 1.209439150844627,
+    "ci_97_5": 1.3065774771363667,
+    "B": 1000,
+    "block": 20,
+    "n_obs": 3946,
+    "weights": "equal"
+  },
+  "dr_ci_strictly_above_1": true,
+  "limitations": "yfinance daily auto_adjust prices; thin trading on VNM/EIDO/THD/EPHE may bias vol estimates (stale-price noise inflates idiosyncratic vol, depresses synchronous corr). VIX regime classification is concurrent (descriptive, not a forecasting signal). DCC-GARCH deferred to future work. Bootstrap block size 20 chosen by convention; results robust to \u00b150% block size not formally verified.",
+  "key_numbers": {
+    "rolling60_median_corr_vs_spy": {
+      "VNM": 0.4481914731872893,
+      "EIDO": 0.5487242736510066,
+      "THD": 0.5363456173802781,
+      "EPHE": 0.5125526246367709
+    },
+    "eem_spy_60d_median": 0.7464888538832251,
+    "diversification_ratio_point": 1.2542576140502337,
+    "diversification_ratio_ci": [
+      1.209439150844627,
+      1.3065774771363667
+    ],
+    "n_significant_crisis_corr_jumps": 4
+  }
+}
