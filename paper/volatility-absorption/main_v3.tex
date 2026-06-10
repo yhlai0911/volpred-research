@@ -68,7 +68,7 @@ As a supplementary continuous-variable summary, we also compute the \textit{norm
 
 Our most important contribution is the decomposition of absorption by shock type. We classify shocks into three categories based on the joint behavior of SPY, TLT, and GLD on shock days: (i) \textit{rate shocks} (SPY$\downarrow$, TLT$\downarrow$), in which both equities and bonds fall, typically driven by monetary policy surprises; (ii) \textit{risk-off flights} (SPY$\downarrow$, TLT$\uparrow$), the classic flight-to-quality pattern; and (iii) \textit{geopolitical shocks} (SPY$\downarrow$, GLD$\uparrow$), in which gold rallies as a safe haven while equities decline \citep{baur2010}. The key finding is that endogenous risks---those already reflected in the VIX level, such as rate shocks and risk-off flights---are heavily absorbed (absorption coefficients of $+0.019$ and $+0.007$, respectively), whereas exogenous risks such as geopolitical shocks are \textit{not} absorbed (coefficient $-0.003$). This endogenous/exogenous distinction connects to \citet{danielsson2018}'s analysis of how financial crises generate endogenous risk dynamics and has, to our knowledge, not been documented in the context of contemporaneous shock absorption.
 
-Event-level evidence provides directionally supportive evidence. We examine nonfarm payroll (NFP) release days---a scheduled macroeconomic event whose impact should, in theory, depend on the surprise component rather than the ambient fear level. Overall, NFP days produce absolute returns 1.17 times normal ($p = 0.061$ vs.\ Fridays; $p = 0.081$ vs.\ all non-NFP days; Welch's $t$-test, $N_{\text{NFP}} = 195$, sample 2010--2026).\footnote{The 1.17$\times$ overall NFP volatility ratio and all regime-specific ratios reported in this section are estimated from 195 NFP release dates over 4,081 SPY trading days (January 2010 to March 2026), using Bureau of Labor Statistics release calendar dates and daily SPY absolute returns. Data source: yfinance (SPY, \^{}VIX). Replication code available upon request.} In the medium-VIX regime (15--20), the ratio is 1.30$\times$ ($p = 0.009$), while in calm markets (VIX $< 15$), the ratio is 1.24$\times$ though only marginally significant ($p = 0.069$, $n = 63$). When VIX exceeds 25, the NFP effect vanishes: the ratio drops to 0.95$\times$ ($p = 0.777$). The general decline from low/medium VIX to high VIX is consistent with the absorption hypothesis, though small sample sizes in high-VIX regimes ($n = 28$) limit the statistical power of regime-specific tests.
+Event-level evidence provides directionally supportive evidence. We examine nonfarm payroll (NFP) release days---a scheduled macroeconomic event whose impact should, in theory, depend on the surprise component rather than the ambient fear level. Overall, NFP days produce absolute returns 1.17 times normal ($p = 0.061$ vs.\ Fridays; $p = 0.081$ vs.\ all non-NFP days; Welch's $t$-test, $N_{\text{NFP}} = 195$, sample 2010--2026).\footnote{The 1.17$\times$ overall NFP volatility ratio and all regime-specific ratios reported in this section are estimated from 195 NFP release dates over 4,081 SPY trading days (January 2010 to March 2026), using Bureau of Labor Statistics release calendar dates and daily SPY absolute returns. Data source: yfinance (SPY, \^{}VIX). Replication code available upon request.} In the medium-VIX regime (15--20), the ratio is 1.30$\times$ ($p = 0.009$), while in calm markets (VIX $< 15$), the ratio is 1.24$\times$ though only marginally significant ($p = 0.069$, $n = 62$). When VIX exceeds 25, the NFP effect vanishes: the ratio drops to 0.95$\times$ ($p = 0.777$). The general decline from low/medium VIX to high VIX is consistent with the absorption hypothesis, though small sample sizes in high-VIX regimes ($n = 28$) limit the statistical power of regime-specific tests.
 
 We extend our analysis to multiple assets and find that the absorption effect is universal across US-traded assets. SPY (slope $-0.000273$), GLD ($-0.000434$), and TLT ($-0.000437$) all exhibit negative normalized regression slopes under the 2026-04-19 pinned snapshot, confirming diminishing marginal fear impact (see Table~\ref{tab:cross_asset_detail} and Section~\ref{sec:robustness} for snapshot-sensitivity disclosure). The sole exception is the Taiwan equity ETF 0050.TW (slope $+0.000092$), which we interpret as evidence that VIX is a US-specific fear gauge with limited direct relevance for non-US equity markets. Taiwanese equities respond to VIX indirectly through US lead-lag effects, and a US-specific VIX shock may not capture the incremental fear relevant to the Taiwan market.
 
@@ -322,12 +322,12 @@ Crisis ($V \geq 30$)         & 244 & 2.99 & 1.23 & 2.43 & $-0.73$ & $< 0.01$ \\
 \end{threeparttable}
 \end{table}
 
-The supplementary NSI regression (Equation~\ref{eq:absorption_reg}) yields:
+The supplementary NSI regression (Equation~\ref{eq:absorption_reg}) yields, under the 2026-04-19 pinned snapshot ($N = 768$):
 \begin{equation}
-\text{NSI}_t = 0.091 - 0.00028 \cdot V_t + \hat{\varepsilon}_t
+\text{NSI}_t = 0.091 - 0.000267 \cdot V_t + \hat{\varepsilon}_t
 \label{eq:absorption_result}
 \end{equation}
-with Newey-West $t$-statistic of $-3.42$ ($p < 0.001$). The negative slope is consistent with the SAR evidence: each additional VIX point reduces the normalized shock impact by 0.028 percentage points. Moving from VIX $= 15$ to VIX $= 40$ reduces the predicted NSI by 37\%. We reiterate, however, that the NSI regression carries a mechanical component from the VIX denominator (see Section~\ref{sec:method}), and the SAR analysis above provides the cleaner identification.
+with Newey-West $t$-statistic of $-1.77$ ($p = 0.076$), marginally significant.\footnote{Under the paper's original data snapshot (2025 yfinance pull, $N = 893$), the corresponding estimate was $-0.00028$ with $t = -3.42$; the weakening reflects yfinance retroactive adjustment of VIX history, which changes the shock-day classification (see Section~\ref{sec:robustness} for full snapshot-sensitivity disclosure). All headline NSI statistics in this paper are reported on the pinned snapshot, consistent with the Introduction.} The negative slope is directionally consistent with the SAR evidence: each additional VIX point reduces the normalized shock impact by 0.027 percentage points. We reiterate, however, that the NSI regression carries a mechanical component from the VIX denominator (see Section~\ref{sec:method}), and the SAR analysis above provides the cleaner identification.
 
 \subsection{Cross-Asset Evidence}
 \label{sec:cross_asset}
@@ -343,15 +343,16 @@ Table~\ref{tab:cross_asset} reports the absorption regression slope for each of 
 \toprule
 Asset & Slope ($\hat{\beta}$) & $t$-stat (NW) & $p$-value & Absorption? \\
 \midrule
-SPY     & $-0.00028$ & $-3.42$ & $< 0.001$ & Yes \\
-GLD     & $-0.00043$ & $-4.17$ & $< 0.001$ & Yes \\
-TLT     & $-0.00044$ & $-3.89$ & $< 0.001$ & Yes \\
+% source (audit fix 2026-06-10): pinned-snapshot values from experiments/k1418/k1418_results.json (= Appendix Table B), replacing original-2025-snapshot values which move to the table note
+SPY     & $-0.000273$ & $-1.85$ & $0.064$ & Marginal \\
+GLD     & $-0.000434$ & $-2.90$ & $0.004$ & Yes \\
+TLT     & $-0.000437$ & $-3.31$ & $0.001$ & Yes \\
 0050.TW & $+0.00019$ & $+1.62$ & $0.106$   & No  \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Dependent variable: $\text{NSI}_t = |r_t| / V_t$. Independent variable: $V_t$ (VIX level). Sample restricted to shock days ($|\Delta\text{VIX}| > 2$). Newey-West standard errors with 10 lags. Sample: 2006--2026.
+\item \textit{Notes:} Dependent variable: $\text{NSI}_t = |r_t| / V_t$. Independent variable: $V_t$ (VIX level). Sample restricted to shock days ($|\Delta\text{VIX}| > 2$). Newey-West standard errors with 10 lags. Sample: 2006--2026 under the 2026-04-19 pinned snapshot (K1418; $N = 769$ for U.S. assets), consistent with Appendix Table~B. Under the original paper-drafting snapshot (2025 yfinance pull, $N = 893$), the U.S. estimates were SPY $-0.00028$ ($t=-3.42$), GLD $-0.00043$ ($-4.17$), TLT $-0.00044$ ($-3.89$): signs and magnitudes are preserved while $t$-statistics weaken under the pinned snapshot due to yfinance's retroactive VIX adjustment (Section~\ref{sec:robustness}). GLD and TLT remain significant at 5\%; SPY is marginal.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -363,7 +364,7 @@ Interestingly, GLD and TLT exhibit \textit{stronger} absorption than SPY ($-0.00
 \subsection{Event-Level Evidence: Nonfarm Payrolls}
 \label{sec:nfp}
 
-Table~\ref{tab:nfp} reports the NFP-day volatility ratio across VIX regimes. Overall, NFP days produce absolute SPY returns 1.17 times the non-NFP average ($p = 0.061$ vs.\ Fridays; $p = 0.081$ vs.\ all non-NFP days; Welch's $t$-test), marginally significant at the 10\% level. In the low-VIX regime (VIX $< 15$), the NFP ratio is 1.24$\times$, though with limited statistical power ($t = 1.85$, $p = 0.069$; $n = 63$ NFP days). In the medium-VIX regime (15--20), the ratio strengthens to 1.30$\times$ ($p = 0.009$). In the elevated regime (20--25), the ratio weakens to 1.18$\times$ ($p = 0.279$). In the high-fear regime (VIX $\geq 25$), the ratio drops to 0.95$\times$ ($p = 0.777$)---NFP days are actually \textit{less} volatile than average, though the difference is not statistically significant.
+Table~\ref{tab:nfp} reports the NFP-day volatility ratio across VIX regimes. Overall, NFP days produce absolute SPY returns 1.17 times the non-NFP average ($p = 0.061$ vs.\ Fridays; $p = 0.081$ vs.\ all non-NFP days; Welch's $t$-test), marginally significant at the 10\% level. In the low-VIX regime (VIX $< 15$), the NFP ratio is 1.24$\times$, though with limited statistical power ($t = 1.85$, $p = 0.069$; $n = 62$ NFP days). In the medium-VIX regime (15--20), the ratio strengthens to 1.30$\times$ ($p = 0.009$). In the elevated regime (20--25), the ratio weakens to 1.18$\times$ ($p = 0.279$). In the high-fear regime (VIX $\geq 25$), the ratio drops to 0.95$\times$ ($p = 0.777$)---NFP days are actually \textit{less} volatile than average, though the difference is not statistically significant.
 
 \begin{table}[H]
 \centering
@@ -374,7 +375,7 @@ Table~\ref{tab:nfp} reports the NFP-day volatility ratio across VIX regimes. Ove
 \toprule
 VIX Regime & NFP Days & $\overline{|r|}_{\text{NFP}}$ (\%) & $\overline{|r|}_{\text{NFP}} / \overline{|r|}_{\text{non-NFP}}$ & $t$-stat & $p$-value \\
 \midrule
-Low ($V < 15$)              & 63  & 0.499 & 1.24 & 1.85 & 0.069 \\
+Low ($V < 15$)              & 62  & 0.498 & 1.24 & 1.85 & 0.069 \\ % source: experiments/k741/k741_nfp_event_study_results.json part_b n=62, mean_abs=0.4982 (audit fix 2026-06-10: 63→62, column sum now 62+78+27+28=195 matching the stated total)
 % sources: K741 (paper/volatility-absorption/experiments/k741_*_results.json .part_b_vix_regimes)
 Medium ($15 \leq V < 20$)   & 78  & 0.757 & 1.30 & 2.69 & 0.009 \\
 Elevated ($20 \leq V < 25$) & 27  & 1.022 & 1.18 & 1.10 & 0.279 \\
@@ -594,7 +595,7 @@ Our baseline NSI normalizes absolute returns by the VIX level. An alternative no
 \text{NSI}_t^{\text{RV}} = \frac{|r_t|}{\sqrt{RV_t^{(20)}}}
 \label{eq:nsi_rv}
 \end{equation}
-where $RV_t^{(20)} = \sum_{i=1}^{20} r_{t-i}^2$. We re-estimate the absorption regression using $\text{NSI}^{\text{RV}}$ as the dependent variable and the 20-day realized volatility as the independent variable. The slope remains strongly negative ($\hat{\beta}^{\text{RV}} = -0.01249$, $t = -8.2$, $N = 767$) under the 2026-04-19 pinned snapshot,\footnote{Under the paper's original data snapshot, the RV-normalized estimate was $-0.0031$ ($t = -2.76$). The pinned-snapshot estimate is substantially larger in magnitude and more significant, reflecting that the RV normalization is robust to---and in fact strengthened by---the yfinance data revision.} confirming that the absorption effect is not an artifact of VIX-specific measurement. The RV-normalized regression provides our strongest and most robust quantitative evidence for the absorption hypothesis.
+where $RV_t^{(20)} = \sum_{i=1}^{20} r_{t-i}^2$. We re-estimate the absorption regression using $\text{NSI}^{\text{RV}}$ as the dependent variable and the 20-day realized volatility as the independent variable. The slope remains strongly negative ($\hat{\beta}^{\text{RV}} = -0.01249$, $t = -8.2$, $N = 767$) under the 2026-04-19 pinned snapshot,\footnote{Under the paper's original data snapshot, the RV-normalized estimate was $-0.0031$ ($t = -2.76$). The pinned-snapshot estimate is substantially larger in magnitude and more significant, reflecting that the RV normalization is robust to---and in fact strengthened by---the yfinance data revision.} indicating that the negative slope is not specific to the VIX normalizer. We caution, however, that this design shares the structural feature of the NSI regression---the normalizer ($\sqrt{RV}$) is itself correlated with the regressor (RV)---so a mechanical component analogous to the VIX-denominator issue (Section~\ref{sec:method}) cannot be excluded without a placebo simulation quantifying the mechanical slope under the null. We therefore read the RV-normalized regression as a consistency check across normalizers, not as independent identification; the SAR evidence remains the cleaner basis for the absorption claim. % audit fix 2026-06-10: downgraded from "strongest and most robust quantitative evidence" pending a K897-style placebo calibration
 
 \subsection{Controlling for Return Autocorrelation}
 
@@ -615,9 +616,9 @@ Under the 2026-04-19 pinned snapshot, the absorption coefficient $\hat{\beta}$ r
 This paper documents and quantifies \textit{volatility absorption}---the diminishing marginal impact of fear shocks on asset prices as the ambient level of market fear rises. Our main findings are:
 
 \begin{enumerate}
-    \item \textbf{The absorption effect is real and economically significant.} The shock amplification ratio for SPY declines from 3.16$\times$ in calm markets to 2.32$\times$ in high-fear markets (VIX 25--30), with a slight reversal to 2.43$\times$ in crisis regimes (VIX $\geq 30$) attributable to extreme outlier events. The SAR evidence is robust across data snapshots. The NSI regression ($\hat{\beta} = -0.000267$, $t = -1.77$ under the 2026-04-19 snapshot) and the RV-normalized regression ($\hat{\beta}^{\text{RV}} = -0.01249$, $t = -8.2$) are directionally consistent; the latter provides strong independent evidence free of VIX denominator issues. Sub-period and threshold regression results are sensitive to yfinance data revisions (see Section~\ref{sec:robustness}).
+    \item \textbf{The absorption effect is real and economically significant.} The shock amplification ratio for SPY declines from 3.16$\times$ in calm markets to 2.32$\times$ in high-fear markets (VIX 25--30), with a slight reversal to 2.43$\times$ in crisis regimes (VIX $\geq 30$) attributable to extreme outlier events. The SAR evidence is robust across data snapshots. The NSI regression ($\hat{\beta} = -0.000267$, $t = -1.77$ under the 2026-04-19 snapshot) and the RV-normalized regression ($\hat{\beta}^{\text{RV}} = -0.01249$, $t = -8.2$) are directionally consistent; the latter serves as a cross-normalizer consistency check (it shares the denominator-regressor correlation structure and awaits a placebo calibration; see Section~\ref{sec:robustness}). Sub-period and threshold regression results are sensitive to yfinance data revisions (see Section~\ref{sec:robustness}).
 
-    \item \textbf{Absorption is a cross-asset phenomenon.} Three of four tested assets (SPY, GLD, TLT) exhibit statistically significant negative absorption coefficients. The exception (0050.TW) is consistent with VIX being a US-specific fear gauge.
+    \item \textbf{Absorption is a cross-asset phenomenon.} Under the pinned snapshot, GLD and TLT exhibit negative absorption coefficients significant at the 5\% level, and SPY is marginally significant ($t = -1.85$, $p = 0.064$); the exception (0050.TW) is consistent with VIX being a US-specific fear gauge.
 
     \item \textbf{The endogenous/exogenous distinction is the key mechanism.} Rate shocks and risk-off flights---risks already reflected in VIX---show evidence of absorption (coefficients $+0.019$ and $+0.007$). Geopolitical shocks---exogenous to the VIX information set---show no statistically significant absorption ($-0.003$, $p > 0.10$), suggesting these shocks may retain their impact. This distinction is the paper's central contribution, though the geopolitical shock sample ($N = 89$) limits statistical power.
 
