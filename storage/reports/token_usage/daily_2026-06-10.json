@@ -1,0 +1,360 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-10",
+  "week_range": "2026-06-05 → 2026-06-12",
+  "totals": {
+    "input_tokens": 15,
+    "output_tokens": 1581,
+    "cache_read_tokens": 205002,
+    "cache_create_tokens": 106163,
+    "billable_total": 107759,
+    "assistant_messages": 9,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.4834
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 15,
+      "output_tokens": 1581,
+      "cache_read_tokens": 205002,
+      "cache_create_tokens": 106163,
+      "messages": 9,
+      "estimated_cost_usd": 0.4834
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 8,
+      "output_tokens": 806,
+      "cache_read_tokens": 68560,
+      "cache_create_tokens": 69032,
+      "messages": 4,
+      "billable_total": 69846,
+      "estimated_cost_usd": 0.2916,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 201,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 33139,
+      "messages": 1,
+      "billable_total": 33343,
+      "estimated_cost_usd": 0.1273,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "investigation": {
+      "input_tokens": 2,
+      "output_tokens": 248,
+      "cache_read_tokens": 69023,
+      "cache_create_tokens": 2388,
+      "messages": 2,
+      "billable_total": 2638,
+      "estimated_cost_usd": 0.0334,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "token_report": {
+      "input_tokens": 2,
+      "output_tokens": 326,
+      "cache_read_tokens": 67419,
+      "cache_create_tokens": 1604,
+      "messages": 2,
+      "billable_total": 1932,
+      "estimated_cost_usd": 0.0311,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 4,
+      "billable_total": 69846,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 4,
+          "billable_total": 69846
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 2,
+          "billable_total": 34923
+        },
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 34923
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 2,
+          "billable_total": 34923
+        },
+        {
+          "name": "⏱ 開始 2026-06-10 執行 Token 用量日報",
+          "messages": 1,
+          "billable_total": 33343
+        },
+        {
+          "name": "下載大型套件中，讓我先檢查腳本內容並等待完成。",
+          "messages": 1,
+          "billable_total": 1580
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 33343,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 33343
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 33343
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 33343
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 106163,
+      "billable_total": 107759,
+      "cache_create_share_pct": 98.5,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "cc48592c-1b04-57c3-a885-c85a94c6ad3a",
+          "messages": 9,
+          "billable_total": 107759,
+          "cache_create_tokens": 106163,
+          "cache_read_tokens": 205002,
+          "duration_minutes": 1.6,
+          "cache_create_share_pct": 98.5,
+          "first_ts": "2026-06-10T14:46:04.439000+00:00",
+          "last_ts": "2026-06-10T14:47:40.204000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "910bcd7",
+      "message": "gen_article_k1459_ponzi | K1459 ponzi math reader-facing 文章發佈 + publish_draft.py"
+    },
+    {
+      "sha": "ccdeb67",
+      "message": "ops(hourly 20:07): K1459 ponzi orphan commit + governance audit"
+    },
+    {
+      "sha": "3e2727a",
+      "message": "ops(hourly 19:07): K1458 compute followup dispatched + task pool sync"
+    },
+    {
+      "sha": "85279b2",
+      "message": "ops: work_log entry for paper_review_k1458_h1_partial_closure_v6_2026_06_10"
+    },
+    {
+      "sha": "a5fb7e2",
+      "message": "paper_review_k1458_v6 | H1 PARTIAL SUGGESTIVE EVIDENCE + Codex 3rd-model adversa"
+    },
+    {
+      "sha": "038497a",
+      "message": "fix(audit-criticals): ISS-003/004/005 修復 + issue registry 制度 + 龐氏任務回收入池"
+    },
+    {
+      "sha": "c218fce",
+      "message": "ops(hourly 18:07): ops_dashboard process-audit 4-1+4-2 — flag no-fire-evidence j"
+    },
+    {
+      "sha": "5d8fee0",
+      "message": "ops(hourly 18:07): paper_review_mile_41b7c7d0 codex review + audit_fb_pipeline F"
+    },
+    {
+      "sha": "78a3a36",
+      "message": "process_audit_2026-06-10 | CRITICAL #1+#2 fixes: gmail subject-dedup terminal-on"
+    },
+    {
+      "sha": "cf1c7cf",
+      "message": "paper_body_vtt_v6_fixes_round4 | K1458 H1 trough decomp: Codex v1 FAIL → v2 raw-"
+    },
+    {
+      "sha": "1bdfa5c",
+      "message": "refactor(3-strike): narrative-arc dedup � ������ domain model �代�­���"
+    },
+    {
+      "sha": "22056d3",
+      "message": "paper_body_vtt_v6_fixes_round3 | K1457 M1 safe-haven dummy: gamma subsumes asset"
+    },
+    {
+      "sha": "a62995c",
+      "message": "fix(k1452): Codex v1 FAIL→v2 PASS — share split shift(1) + horizon-matched VRP s"
+    },
+    {
+      "sha": "d38f197",
+      "message": "ops(loop 16:17): K1452 隔夜/日內 VRP 實驗產出收尾（verdict NULL）+ next_tasks status sync"
+    },
+    {
+      "sha": "9105ca5",
+      "message": "ops(hourly 16:14): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "f0264c6",
+      "message": "paper_body_vtt_v6_fixes_round2_2026_06_10 | Paper 6 v6 fix #2 H2 K1417 comparati"
+    },
+    {
+      "sha": "089d136",
+      "message": "ops(hourly 15:15): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "30231ee",
+      "message": "paper_body_vtt_v6_fixes_2026_06_10 | Paper 6 v6 fix #1 NEW-H1 abstract CI direct"
+    },
+    {
+      "sha": "4af20e0",
+      "message": "paper_review_vtt_v5_audit_2026_06_10 | Paper 6 v5 audit MAJOR_REVISION"
+    },
+    {
+      "sha": "a2da565",
+      "message": "research(journal-discovery): 從頂尖期刊挖 14 個方向 + 建 weekly journal_topic_scan 機制"
+    },
+    {
+      "sha": "b7ee219",
+      "message": "hourly-13 | gen_article_k1449 K1449 reader-facing general article (mile_5af5ec51"
+    },
+    {
+      "sha": "58d8b7b",
+      "message": "hourly-12 | K1448 main results writeup (TIP/IEF/TLT regime vol, ΔRV/HAC numbers "
+    },
+    {
+      "sha": "8292e49",
+      "message": "feat(article): K1445 URA/KRBN 替代資產 vol clustering reader-facing | gen_article_k1"
+    },
+    {
+      "sha": "dffcf7e",
+      "message": "ops(hourly 11:57): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "815839b",
+      "message": "hourly-10 | event_article FOMC 6/17 T-7 task → succeeded (mile_0e1eb5aa)"
+    },
+    {
+      "sha": "19c99cf",
+      "message": "event_article_fomc_2026-06-17_tminus7 | FOMC 6/17 T-7 reader-facing: FedWatch pa"
+    },
+    {
+      "sha": "4e56336",
+      "message": "research(replenish batch 2): 加 8 個 diverse yfinance-doable 方向 — 降低 backlog tread"
+    },
+    {
+      "sha": "c7b4f85",
+      "message": "hourly-09 | K1445 URA/KRBN merge + Codex CONDITIONAL_PASS + knowledge entry"
+    },
+    {
+      "sha": "c80d529",
+      "message": "K1445 URA/KRBN alt-asset vol clustering — PASS (descriptive PoC)"
+    },
+    {
+      "sha": "e608118",
+      "message": "hourly-08 | TSMC 5月營收 mile_64f2e656 FB pending draft + log"
+    },
+    {
+      "sha": "7dc195b",
+      "message": "event_article_tsmc_revenue_2026-06-10_tplus0 | TSMC 5月營收 NT$3,205億 +39.6% YoY Vo"
+    },
+    {
+      "sha": "69d9358",
+      "message": "hourly-07 | K1445 URA/KRBN 派工 + orphan worktree 清理"
+    },
+    {
+      "sha": "82c50f7",
+      "message": "hourly-06 | K1444 oil vol-of-vol spillover PRELIMINARY: Granger 4/4 PASS but DY "
+    },
+    {
+      "sha": "dc6ce1e",
+      "message": "K1444 oil vol-of-vol spillover — PRELIMINARY: Granger 4/4 pass but DY direction "
+    },
+    {
+      "sha": "c9aff2a",
+      "message": "ops(hourly 05:36): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "7257309",
+      "message": "hourly-05 | K1442 MOVE/VIX CPI vol crush NULL → mile_166eda01 + K1443 BTC/ETH SP"
+    },
+    {
+      "sha": "58b0d5a",
+      "message": "hourly-04 | paper_review_mile_5e0944a1: Codex 24h CONDITIONAL_PASS — fabless OLS"
+    },
+    {
+      "sha": "0f5e78a",
+      "message": "hourly-03 | orphan-branch cleanup: K1431/K1427 -D + K1423 PCA recover"
+    },
+    {
+      "sha": "55a6764",
+      "message": "hourly-02 | K1440 yield-curve regime fwd RV NULL + K1439 worktree cleanup"
+    },
+    {
+      "sha": "bf24451",
+      "message": "hourly-01 | K1439 DXY/UUP regime cross-asset vol CONDITIONAL_PASS (Codex)"
+    },
+    {
+      "sha": "9c81e3c",
+      "message": "feat(k1439): DXY regime cross-asset vol conditioning experiment"
+    },
+    {
+      "sha": "5156894",
+      "message": "daily_article_k1150_general_20260610_0012 | K1150 general daily_article publishe"
+    },
+    {
+      "sha": "3db0bee",
+      "message": "research(replenish): 加 6 個 contrarian 跨資產/另類研究方向（backlog 耗盡，Novelty Quota）"
+    },
+    {
+      "sha": "14ba29a",
+      "message": "hourly-23 | K1403 general daily_article draft (mile_127dc20d, anti-AI gate PASS "
+    },
+    {
+      "sha": "688386f",
+      "message": "hourly-22 | K1057 amend orphan catch-up (codex-cli amend BN-S z-stat + QLIKE Pat"
+    },
+    {
+      "sha": "0ea4e07",
+      "message": "daily_article_k1437_usdtwd_twii_asymmetry | K1437 USD/TWD↔TWII vol NULL + asymme"
+    },
+    {
+      "sha": "debc900",
+      "message": "hourly-21 | K1057 paper_review (mile_fa859ea5 24h-rule) — Codex CONDITIONAL_PASS"
+    },
+    {
+      "sha": "726ef32",
+      "message": "hourly-20 | K1435 daily_article draft (FOMC 不會炸金/美元關係, NULL p=0.341) | reader-fa"
+    },
+    {
+      "sha": "7984538",
+      "message": "fix(refill): research fallback 擴掃全檔 backlog + junk/done filter — pool 自我補充防反覆 cr"
+    },
+    {
+      "sha": "2975aef",
+      "message": "hourly-19 | K1435 GLD-DXY DCC-GARCH FOMC event study (NULL, Codex CONDITIONAL_PA"
+    }
+  ]
+}
