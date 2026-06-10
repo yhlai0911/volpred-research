@@ -1,36 +1,25 @@
 """K1464 — BAB return conditional on prior-month realized volatility.
 
 Research question (JFE 2025 "The volatility puzzle of the beta anomaly"):
-Is Betting-Against-Beta (BAB) strategy return conditional on prior-month
-realized volatility? Hypothesis: BAB premium is concentrated after low-vol
-months, and shrinks (or reverses) after high-vol months.
+Is a Frazzini-Pedersen-style BAB portfolio more profitable after lower-vol
+market months than after higher-vol market months?
 
-Design:
-- Universe: S&P 500 constituents (approximated via current SPY holdings list
-  + survivorship-bias caveat noted in README).
-- Period: 2000-01 to 2025-12 (25 years, monthly rebalance).
-- Beta: rolling 60-month OLS beta vs SPY (Frazzini & Pedersen 2014).
-- BAB portfolio: monthly rebalance, long bottom-30% beta + short top-30%
-  beta, Frazzini-Pedersen rank weights, scaled to net beta = 0.
-- Conditioning: market month-t RV → tertiles → analyze month-(t+1) BAB ret.
-
-Lookahead protection:
-- Beta estimated on returns t-60 .. t-1 → used for portfolio formed at end
-  of month t, return measured in month t+1. All `.shift(1)` explicit.
-- RV regime for conditioning is also lagged (regime from month t → BAB
-  return in month t+1).
-
-Seed: 42 (bootstrap and any resampling).
+Design highlights:
+- Universe: hand-curated US large-cap equities only (no ETFs).
+- Beta: rolling 60-month monthly beta vs SPY.
+- BAB: full-cross-section rank-weighted FP-style approximation, with each leg
+  levered by inverse beta to target net beta near zero.
+- Conditioning: prior-month market realized volatility assigned to recursive
+  expanding tertiles to avoid threshold look-ahead.
+- Inference: Newey-West HAC (lag=6) plus stationary block bootstrap over the
+  full monthly time series (block length 12, reps 10000, seed 42).
 """
 from __future__ import annotations
 
 import json
-import os
-import sys
 import warnings
-from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -61,10 +50,9 @@ RNG = np.random.default_rng(SEED)
 def get_universe() -> List[str]:
     """Return a broad US large-cap tickers list.
 
-    To avoid look-ahead via current-SP500 (survivorship bias warning in
-    README), we use a fixed list of large-cap tickers active across most of
-    the 2000-2025 window. ~250 tickers, mix of survivors + some that delisted
-    will be dropped naturally by yfinance.
+    Fixed large-cap equity list active across most of 2000-2025. This is still
+    survivorship-prone, but we exclude ETFs so BAB remains a stock-only
+    cross-section.
     """
     # Hand-curated large-cap list spanning sectors; tickers active for most of
     # 2000-2025. Survivorship bias acknowledged.
@@ -104,8 +92,6 @@ def get_universe() -> List[str]:
         "AMT", "PLD", "EQIX", "PSA", "SPG", "WELL", "AVB", "EQR",
         # Communication / media
         "WBD", "PARA", "FOX", "NWSA",
-        # Others (some may have data gaps but yfinance will tag NaN)
-        "GLD", "TLT",  # ETFs as cross-check
     ]
     # dedupe preserving order
     seen = set()
@@ -215,16 +201,15 @@ def rolling_beta_60m(stock_m: pd.DataFrame, mkt_m: pd.Series,
 # ---------------------------------------------------------------------------
 # BAB portfolio (Frazzini-Pedersen 2014)
 # ---------------------------------------------------------------------------
-def bab_returns(betas: pd.DataFrame, fwd_ret: pd.DataFrame,
-                low_q: float = 0.30, high_q: float = 0.30) -> pd.Series:
+def bab_returns(betas: pd.DataFrame, fwd_ret: pd.DataFrame) -> pd.Series:
     """Construct BAB return series.
 
     For each month t:
     - Use beta_t (computed from t-60..t-1 data) — already lag-safe by
       construction (betas series shifted by 1 below).
-    - Long bottom low_q beta, short top high_q beta.
-    - Rank weights (Frazzini-Pedersen): z_i = rank(beta_i); weight_L =
-      2 * (z_bar - z_i)+ / sum(...); weight_H = 2 * (z_i - z_bar)+ / sum(...).
+    - Use the full cross-section with rank weights (Frazzini-Pedersen style):
+      z_i = rank(beta_i); weight_L = (z_bar - z_i)+ / sum(...); weight_H =
+      (z_i - z_bar)+ / sum(...).
     - Leverage: long leg scaled to beta=1/avg_beta_L, short leg to
       beta=1/avg_beta_H, so that BAB = 1/beta_L * r_L - 1/beta_H * r_H.
 
@@ -302,37 +287,95 @@ def newey_west_tstat(x: np.ndarray, lag: int = 6) -> Tuple[float, float, float]:
     return float(mean), se, float(t)
 
 
-def block_bootstrap_diff(low: np.ndarray, high: np.ndarray,
-                         block_len: int = 12, reps: int = 10000,
-                         seed: int = 42) -> Tuple[float, float, float]:
-    """Block-bootstrap on the *difference of means* low - high.
+def recursive_tertile_masks(rv_lag: pd.Series,
+                            min_history: int = 36) -> Tuple[pd.Series, pd.Series, pd.Series]:
+    """Assign each month to a tertile using only prior observations."""
+    low = pd.Series(False, index=rv_lag.index)
+    mid = pd.Series(False, index=rv_lag.index)
+    high = pd.Series(False, index=rv_lag.index)
+    for i, (idx, value) in enumerate(rv_lag.items()):
+        hist = rv_lag.iloc[:i].dropna()
+        if len(hist) < min_history or np.isnan(value):
+            continue
+        q33 = hist.quantile(1.0 / 3.0)
+        q67 = hist.quantile(2.0 / 3.0)
+        if value <= q33:
+            low.loc[idx] = True
+        elif value <= q67:
+            mid.loc[idx] = True
+        else:
+            high.loc[idx] = True
+    return low, mid, high
 
-    Each tertile sample has its own length; use stationary block bootstrap on
-    each independently with the given block_len.
-    """
+
+def expanding_percentile_signal(rv_lag: pd.Series, min_history: int = 36) -> pd.Series:
+    """Percentile-rank each signal against only prior history."""
+    out = pd.Series(index=rv_lag.index, dtype=float)
+    for i, (idx, value) in enumerate(rv_lag.items()):
+        hist = rv_lag.iloc[:i].dropna()
+        if len(hist) < min_history or np.isnan(value):
+            continue
+        out.loc[idx] = float((hist <= value).mean())
+    return out
+
+
+def hac_regime_difference(bab: pd.Series,
+                          low_mask: pd.Series,
+                          high_mask: pd.Series,
+                          lag: int = 6) -> Tuple[float, float, float]:
+    """Estimate low-minus-high mean difference on the original time axis."""
+    df = pd.DataFrame({
+        "bab": bab,
+        "low": low_mask.astype(float),
+        "high": high_mask.astype(float),
+    }).dropna()
+    X = sm.add_constant(df[["low", "high"]])
+    model = sm.OLS(df["bab"], X).fit(cov_type="HAC", cov_kwds={"maxlags": lag})
+    test = model.t_test([0.0, 1.0, -1.0])
+    coef = float(test.effect.item())
+    se = float(np.sqrt(test.sd.item()))
+    tstat = float(test.tvalue.item())
+    pvalue = float(test.pvalue)
+    return coef, se, tstat, pvalue
+
+
+def block_bootstrap_diff_full_series(bab: pd.Series,
+                                     low_mask: pd.Series,
+                                     high_mask: pd.Series,
+                                     block_len: int = 12,
+                                     reps: int = 10000,
+                                     seed: int = 42) -> Tuple[float, float, float]:
+    """Stationary block bootstrap on the full monthly series with regime labels."""
     rng = np.random.default_rng(seed)
+    bab_arr = bab.to_numpy(dtype=float)
+    low_arr = low_mask.to_numpy(dtype=bool)
+    high_arr = high_mask.to_numpy(dtype=bool)
+    n = len(bab_arr)
 
-    def stationary_block(arr, n, p):
-        out = np.empty(n)
+    def stationary_indices(n_obs: int, p: float) -> np.ndarray:
+        out = np.empty(n_obs, dtype=int)
         i = 0
-        while i < n:
-            start = rng.integers(0, len(arr))
-            block_len_i = rng.geometric(p)
+        while i < n_obs:
+            start = int(rng.integers(0, n_obs))
+            block_len_i = int(rng.geometric(p))
             for k in range(block_len_i):
-                if i >= n:
+                if i >= n_obs:
                     break
-                out[i] = arr[(start + k) % len(arr)]
+                out[i] = (start + k) % n_obs
                 i += 1
         return out
 
     p = 1.0 / block_len
-    n_low = len(low)
-    n_high = len(high)
     diffs = np.empty(reps)
     for r in range(reps):
-        bl = stationary_block(low, n_low, p)
-        bh = stationary_block(high, n_high, p)
-        diffs[r] = bl.mean() - bh.mean()
+        idx = stationary_indices(n, p)
+        low_vals = bab_arr[idx][low_arr[idx]]
+        high_vals = bab_arr[idx][high_arr[idx]]
+        if len(low_vals) == 0 or len(high_vals) == 0:
+            diffs[r] = np.nan
+            continue
+        diffs[r] = low_vals.mean() - high_vals.mean()
+    diffs = diffs[~np.isnan(diffs)]
     ci = np.percentile(diffs, [2.5, 97.5])
     return float(diffs.mean()), float(ci[0]), float(ci[1])
 
@@ -344,12 +387,13 @@ def conditional_analysis(bab: pd.Series, mkt_rv: pd.Series) -> Dict:
     rv_lag = mkt_rv.shift(1).reindex(bab.index).dropna()
     bab_aligned = bab.reindex(rv_lag.index).dropna()
     rv_lag = rv_lag.reindex(bab_aligned.index)
-    # tertile by lagged RV
-    q33 = rv_lag.quantile(1.0 / 3.0)
-    q67 = rv_lag.quantile(2.0 / 3.0)
-    low_mask = rv_lag <= q33
-    mid_mask = (rv_lag > q33) & (rv_lag <= q67)
-    high_mask = rv_lag > q67
+    low_mask, mid_mask, high_mask = recursive_tertile_masks(rv_lag)
+    valid_mask = low_mask | mid_mask | high_mask
+    bab_aligned = bab_aligned[valid_mask]
+    rv_lag = rv_lag[valid_mask]
+    low_mask = low_mask[valid_mask]
+    mid_mask = mid_mask[valid_mask]
+    high_mask = high_mask[valid_mask]
     out: Dict[str, Dict] = {}
     for name, mask in [("low_vol", low_mask), ("mid_vol", mid_mask),
                        ("high_vol", high_mask)]:
@@ -372,30 +416,21 @@ def conditional_analysis(bab: pd.Series, mkt_rv: pd.Series) -> Dict:
     high = bab_aligned[high_mask].values
     welch_t, welch_p = stats.ttest_ind(low, high, equal_var=False)
     diff_mean = float(low.mean() - high.mean())
-    # Block bootstrap
-    bs_mean, bs_lo, bs_hi = block_bootstrap_diff(
-        low, high, block_len=12, reps=10000, seed=SEED
+    # Block bootstrap over the full monthly series preserves regime clustering.
+    bs_mean, bs_lo, bs_hi = block_bootstrap_diff_full_series(
+        bab_aligned, low_mask, high_mask, block_len=12, reps=10000, seed=SEED
     )
-    # HAC on combined: regress BAB on low_dummy - high_dummy (zero=mid)
-    # Build difference test via OLS with HAC for joint sample
-    df = pd.DataFrame({
-        "bab": np.concatenate([low, high]),
-        "low_minus_high": np.concatenate([np.ones(len(low)),
-                                          -np.ones(len(high))]),
-    })
-    # Slightly off but OK as additional check; primary HAC = per-tertile NW
-    X = sm.add_constant(df["low_minus_high"].values)
-    hac_model = sm.OLS(df["bab"].values, X).fit(
-        cov_type="HAC", cov_kwds={"maxlags": 6}
+    hac_coef, hac_se, hac_tstat, hac_p = hac_regime_difference(
+        bab_aligned, low_mask, high_mask, lag=6
     )
     out["diff_test"] = {
         "mean_low_minus_high": diff_mean,
         "welch_t": float(welch_t),
         "welch_p": float(welch_p),
-        "hac_coef": float(hac_model.params[1]),
-        "hac_se": float(hac_model.bse[1]),
-        "hac_tstat": float(hac_model.tvalues[1]),
-        "hac_p": float(hac_model.pvalues[1]),
+        "hac_low_minus_high": float(hac_coef),
+        "hac_se": float(hac_se),
+        "hac_tstat": float(hac_tstat),
+        "hac_p": float(hac_p),
         "bootstrap_mean_diff": bs_mean,
         "bootstrap_ci95_lo": bs_lo,
         "bootstrap_ci95_hi": bs_hi,
@@ -413,10 +448,11 @@ def conditional_analysis(bab: pd.Series, mkt_rv: pd.Series) -> Dict:
         "nw_tstat": float(t_u),
         "ann_return_pct": float(mean_u * 12 * 100),
     }
-    # Fama-MacBeth lite: regress BAB_{t} on lagged RV percentile
-    rv_pct = rv_lag.rank(pct=True)
+    # Continuous robustness: use recursive percentile scaling of lagged RV.
+    rv_pct = expanding_percentile_signal(rv_lag)
+    fm_mask = rv_pct.notna()
     X_fm = sm.add_constant(rv_pct.values)
-    fm = sm.OLS(bab_aligned.values, X_fm).fit(
+    fm = sm.OLS(bab_aligned[fm_mask].values, X_fm[fm_mask.values]).fit(
         cov_type="HAC", cov_kwds={"maxlags": 6}
     )
     out["fama_macbeth_lite"] = {
@@ -428,6 +464,7 @@ def conditional_analysis(bab: pd.Series, mkt_rv: pd.Series) -> Dict:
         "rv_pct_t": float(fm.tvalues[1]),
         "rv_pct_p": float(fm.pvalues[1]),
         "r2": float(fm.rsquared),
+        "n_obs": int(fm_mask.sum()),
     }
     return out, bab_aligned, rv_lag, (low_mask, mid_mask, high_mask)
 
