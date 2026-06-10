@@ -1,0 +1,874 @@
+{
+  "experiment_id": "k1458_h1_trough_decomposition",
+  "task": "paper_body_vtt_v6_fixes_round4_2026_06_10",
+  "data_window": {
+    "start": "2004-06-01",
+    "end": "2026-04-01"
+  },
+  "tsmom_lookback": 252,
+  "vt_numerator": 12.0,
+  "trough_half_window_days": 63,
+  "trough_search_windows": [
+    [
+      "2009-03",
+      "2008-06-01",
+      "2010-06-30"
+    ],
+    [
+      "2020-03",
+      "2019-06-01",
+      "2021-06-30"
+    ]
+  ],
+  "per_asset": {
+    "SPY": [
+      {
+        "asset": "SPY",
+        "trough_label": "2009-03",
+        "trough_date": "2009-03-09",
+        "trough_dd_in_window": -0.5069912603487519,
+        "window_start": "2008-12-04",
+        "window_end": "2009-06-08",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 66,
+        "days_tsmom_nonneg": 61,
+        "full_window_cumret": {
+          "bh": 0.0906328337902962,
+          "vt": 0.0234110271957241,
+          "pure_vt": 0.0234110271957241,
+          "vix_timing_arith_sum": -0.09617459277129227,
+          "tsmom_hedge_arith_sum": 0.0
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 66,
+            "sum_arith_return": -0.8742256604493339,
+            "mean_arith_return": -0.013245843340141422,
+            "cumulative_log_return": -0.8844018790856557
+          },
+          "tsmom_hedge": {
+            "days": 66,
+            "sum_arith_return": 0.0,
+            "mean_arith_return": 0.0,
+            "cumulative_log_return": 0.0
+          },
+          "vt_excess_bh": {
+            "days": 66,
+            "sum_arith_return": -0.8742256604493339,
+            "mean_arith_return": -0.013245843340141422,
+            "cumulative_log_return": -0.8844018790856557
+          },
+          "pure_vt_excess_bh": {
+            "days": 66,
+            "sum_arith_return": -0.8742256604493339,
+            "mean_arith_return": -0.013245843340141422,
+            "cumulative_log_return": -0.8844018790856557
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 61,
+            "sum_arith_return": 0.7780510676780417,
+            "mean_arith_return": 0.012754935535705602,
+            "cumulative_log_return": 0.7702530352778194
+          },
+          "tsmom_hedge": {
+            "days": 61,
+            "sum_arith_return": 0.0,
+            "mean_arith_return": 0.0,
+            "cumulative_log_return": 0.0
+          },
+          "vt_excess_bh": {
+            "days": 61,
+            "sum_arith_return": 0.7780510676780417,
+            "mean_arith_return": 0.012754935535705602,
+            "cumulative_log_return": 0.7702530352778194
+          },
+          "pure_vt_excess_bh": {
+            "days": 61,
+            "sum_arith_return": 0.7780510676780417,
+            "mean_arith_return": 0.012754935535705602,
+            "cumulative_log_return": 0.7702530352778194
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": -0.09617459277129227,
+          "vix_timing_total_arith": -0.09617459277129227,
+          "tsmom_hedge_total_arith": 0.0,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.0,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": null,
+          "share_valid": false
+        }
+      },
+      {
+        "asset": "SPY",
+        "trough_label": "2020-03",
+        "trough_date": "2020-03-23",
+        "trough_dd_in_window": -0.33717253344371834,
+        "window_start": "2019-12-19",
+        "window_end": "2020-06-22",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 62,
+        "days_tsmom_nonneg": 65,
+        "full_window_cumret": {
+          "bh": -0.013310013188119384,
+          "vt": -0.06591292570132261,
+          "pure_vt": 0.051072563396889224,
+          "vix_timing_arith_sum": -0.08433252915648443,
+          "tsmom_hedge_arith_sum": 0.12198673939464298
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 62,
+            "sum_arith_return": -0.048526027031559026,
+            "mean_arith_return": -0.0007826778553477262,
+            "cumulative_log_return": -0.05521020172658652
+          },
+          "tsmom_hedge": {
+            "days": 62,
+            "sum_arith_return": 0.34552087341204485,
+            "mean_arith_return": 0.005572917313097498,
+            "cumulative_log_return": 0.34130365706355514
+          },
+          "vt_excess_bh": {
+            "days": 62,
+            "sum_arith_return": -0.048526027031559026,
+            "mean_arith_return": -0.0007826778553477262,
+            "cumulative_log_return": -0.05521020172658652
+          },
+          "pure_vt_excess_bh": {
+            "days": 62,
+            "sum_arith_return": 0.29699484638048596,
+            "mean_arith_return": 0.004790239457749774,
+            "cumulative_log_return": 0.28485826713949247
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 65,
+            "sum_arith_return": -0.0358065021249254,
+            "mean_arith_return": -0.0005508692634603908,
+            "cumulative_log_return": -0.03949937426001845
+          },
+          "tsmom_hedge": {
+            "days": 65,
+            "sum_arith_return": -0.22353413401740188,
+            "mean_arith_return": -0.003438986677190798,
+            "cumulative_log_return": -0.22616569273720374
+          },
+          "vt_excess_bh": {
+            "days": 65,
+            "sum_arith_return": -0.0358065021249254,
+            "mean_arith_return": -0.0005508692634603908,
+            "cumulative_log_return": -0.03949937426001845
+          },
+          "pure_vt_excess_bh": {
+            "days": 65,
+            "sum_arith_return": -0.2593406361423273,
+            "mean_arith_return": -0.0039898559406511885,
+            "cumulative_log_return": -0.26416234475439343
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": 0.037654210238158604,
+          "vix_timing_total_arith": -0.08433252915648443,
+          "tsmom_hedge_total_arith": 0.12198673939464298,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.34552087341204485,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": 9.176155102621049,
+          "share_valid": true
+        }
+      }
+    ],
+    "50/50": [
+      {
+        "asset": "50/50",
+        "trough_label": "2009-03",
+        "trough_date": "2008-11-20",
+        "trough_dd_in_window": -0.30454169825844213,
+        "window_start": "2008-08-22",
+        "window_end": "2009-02-24",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 63,
+        "days_tsmom_nonneg": 64,
+        "full_window_cumret": {
+          "bh": -0.14356918755751708,
+          "vt": -0.07166756969832981,
+          "pure_vt": -0.053561608580269114,
+          "vix_timing_arith_sum": 0.04533837384962208,
+          "tsmom_hedge_arith_sum": 0.021107601066936293
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 63,
+            "sum_arith_return": -0.5541386338976021,
+            "mean_arith_return": -0.00879585133170797,
+            "cumulative_log_return": -0.5610323984001223
+          },
+          "tsmom_hedge": {
+            "days": 63,
+            "sum_arith_return": 0.11914442745927381,
+            "mean_arith_return": 0.0018911813882424415,
+            "cumulative_log_return": 0.11847261635608537
+          },
+          "vt_excess_bh": {
+            "days": 63,
+            "sum_arith_return": -0.5541386338976021,
+            "mean_arith_return": -0.00879585133170797,
+            "cumulative_log_return": -0.5610323984001223
+          },
+          "pure_vt_excess_bh": {
+            "days": 63,
+            "sum_arith_return": -0.43499420643832853,
+            "mean_arith_return": -0.006904669943465533,
+            "cumulative_log_return": -0.44191941578236293
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 64,
+            "sum_arith_return": 0.5994770077472245,
+            "mean_arith_return": 0.009366828246050382,
+            "cumulative_log_return": 0.5931753776263435
+          },
+          "tsmom_hedge": {
+            "days": 64,
+            "sum_arith_return": -0.09803682639233752,
+            "mean_arith_return": -0.0015318254123802737,
+            "cumulative_log_return": -0.09841896769074047
+          },
+          "vt_excess_bh": {
+            "days": 64,
+            "sum_arith_return": 0.5994770077472245,
+            "mean_arith_return": 0.009366828246050382,
+            "cumulative_log_return": 0.5931753776263435
+          },
+          "pure_vt_excess_bh": {
+            "days": 64,
+            "sum_arith_return": 0.5014401813548869,
+            "mean_arith_return": 0.007835002833670108,
+            "cumulative_log_return": 0.49572745662377327
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": 0.06644597491655835,
+          "vix_timing_total_arith": 0.04533837384962208,
+          "tsmom_hedge_total_arith": 0.021107601066936293,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.11914442745927381,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": 1.7931022550108298,
+          "share_valid": true
+        }
+      },
+      {
+        "asset": "50/50",
+        "trough_label": "2020-03",
+        "trough_date": "2020-03-20",
+        "trough_dd_in_window": -0.2031512085400059,
+        "window_start": "2019-12-18",
+        "window_end": "2020-06-19",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 48,
+        "days_tsmom_nonneg": 79,
+        "full_window_cumret": {
+          "bh": 0.0861807313195373,
+          "vt": 0.025996441379945497,
+          "pure_vt": 0.0558309427876661,
+          "vix_timing_arith_sum": -0.07103677355798278,
+          "tsmom_hedge_arith_sum": 0.02774939182349711
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 48,
+            "sum_arith_return": 0.21972832197518138,
+            "mean_arith_return": 0.0045776733744829455,
+            "cumulative_log_return": 0.2177840413611581
+          },
+          "tsmom_hedge": {
+            "days": 48,
+            "sum_arith_return": 0.300033195893244,
+            "mean_arith_return": 0.00625069158110925,
+            "cumulative_log_return": 0.29746804419423234
+          },
+          "vt_excess_bh": {
+            "days": 48,
+            "sum_arith_return": 0.21972832197518138,
+            "mean_arith_return": 0.0045776733744829455,
+            "cumulative_log_return": 0.2177840413611581
+          },
+          "pure_vt_excess_bh": {
+            "days": 48,
+            "sum_arith_return": 0.5197615178684254,
+            "mean_arith_return": 0.010828364955592196,
+            "cumulative_log_return": 0.5130072261894275
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 79,
+            "sum_arith_return": -0.2907650955331642,
+            "mean_arith_return": -0.003680570829533724,
+            "cumulative_log_return": -0.29251807497507887
+          },
+          "tsmom_hedge": {
+            "days": 79,
+            "sum_arith_return": -0.2722838040697469,
+            "mean_arith_return": -0.003446630431262619,
+            "cumulative_log_return": -0.273419088929168
+          },
+          "vt_excess_bh": {
+            "days": 79,
+            "sum_arith_return": -0.2907650955331642,
+            "mean_arith_return": -0.003680570829533724,
+            "cumulative_log_return": -0.29251807497507887
+          },
+          "pure_vt_excess_bh": {
+            "days": 79,
+            "sum_arith_return": -0.5630488996029109,
+            "mean_arith_return": -0.007127201260796341,
+            "cumulative_log_return": -0.5684922883973915
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": -0.043287381734485667,
+          "vix_timing_total_arith": -0.07103677355798278,
+          "tsmom_hedge_total_arith": 0.02774939182349711,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.300033195893244,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": null,
+          "share_valid": false
+        }
+      }
+    ],
+    "DIA": [
+      {
+        "asset": "DIA",
+        "trough_label": "2009-03",
+        "trough_date": "2009-03-09",
+        "trough_dd_in_window": -0.46806797600385,
+        "window_start": "2008-12-04",
+        "window_end": "2009-06-08",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 61,
+        "days_tsmom_nonneg": 66,
+        "full_window_cumret": {
+          "bh": 0.03624069508512093,
+          "vt": 0.009646775892223862,
+          "pure_vt": 0.009646775892223862,
+          "vix_timing_arith_sum": -0.04982450544732777,
+          "tsmom_hedge_arith_sum": 0.0
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 61,
+            "sum_arith_return": -0.7699888433638298,
+            "mean_arith_return": -0.012622767923997209,
+            "cumulative_log_return": -0.7782613998429118
+          },
+          "tsmom_hedge": {
+            "days": 61,
+            "sum_arith_return": 0.0,
+            "mean_arith_return": 0.0,
+            "cumulative_log_return": 0.0
+          },
+          "vt_excess_bh": {
+            "days": 61,
+            "sum_arith_return": -0.7699888433638298,
+            "mean_arith_return": -0.012622767923997209,
+            "cumulative_log_return": -0.7782613998429118
+          },
+          "pure_vt_excess_bh": {
+            "days": 61,
+            "sum_arith_return": -0.7699888433638298,
+            "mean_arith_return": -0.012622767923997209,
+            "cumulative_log_return": -0.7782613998429118
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 66,
+            "sum_arith_return": 0.7201643379165018,
+            "mean_arith_return": 0.010911580877522755,
+            "cumulative_log_return": 0.7139045104756718
+          },
+          "tsmom_hedge": {
+            "days": 66,
+            "sum_arith_return": 0.0,
+            "mean_arith_return": 0.0,
+            "cumulative_log_return": 0.0
+          },
+          "vt_excess_bh": {
+            "days": 66,
+            "sum_arith_return": 0.7201643379165018,
+            "mean_arith_return": 0.010911580877522755,
+            "cumulative_log_return": 0.7139045104756718
+          },
+          "pure_vt_excess_bh": {
+            "days": 66,
+            "sum_arith_return": 0.7201643379165018,
+            "mean_arith_return": 0.010911580877522755,
+            "cumulative_log_return": 0.7139045104756718
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": -0.04982450544732777,
+          "vix_timing_total_arith": -0.04982450544732777,
+          "tsmom_hedge_total_arith": 0.0,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.0,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": null,
+          "share_valid": false
+        }
+      },
+      {
+        "asset": "DIA",
+        "trough_label": "2020-03",
+        "trough_date": "2020-03-23",
+        "trough_dd_in_window": -0.3669604272834024,
+        "window_start": "2019-12-19",
+        "window_end": "2020-06-22",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 68,
+        "days_tsmom_nonneg": 59,
+        "full_window_cumret": {
+          "bh": -0.06962203825748263,
+          "vt": -0.10091549742613046,
+          "pure_vt": -0.07210135738072966,
+          "vix_timing_arith_sum": -0.07006320781010832,
+          "tsmom_hedge_arith_sum": 0.035149669403880604
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 68,
+            "sum_arith_return": -0.32066253342622986,
+            "mean_arith_return": -0.0047156254915622035,
+            "cumulative_log_return": -0.32829288523868544
+          },
+          "tsmom_hedge": {
+            "days": 68,
+            "sum_arith_return": 0.2400452871662475,
+            "mean_arith_return": 0.0035300777524448165,
+            "cumulative_log_return": 0.2377486479293411
+          },
+          "vt_excess_bh": {
+            "days": 68,
+            "sum_arith_return": -0.32066253342622986,
+            "mean_arith_return": -0.0047156254915622035,
+            "cumulative_log_return": -0.32829288523868544
+          },
+          "pure_vt_excess_bh": {
+            "days": 68,
+            "sum_arith_return": -0.08061724625998232,
+            "mean_arith_return": -0.001185547739117387,
+            "cumulative_log_return": -0.09106672614892372
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 59,
+            "sum_arith_return": 0.2505993256161215,
+            "mean_arith_return": 0.004247446196883416,
+            "cumulative_log_return": 0.24562817036760845
+          },
+          "tsmom_hedge": {
+            "days": 59,
+            "sum_arith_return": -0.20489561776236692,
+            "mean_arith_return": -0.0034728070807180833,
+            "cumulative_log_return": -0.20745831864843478
+          },
+          "vt_excess_bh": {
+            "days": 59,
+            "sum_arith_return": 0.2505993256161215,
+            "mean_arith_return": 0.004247446196883416,
+            "cumulative_log_return": 0.24562817036760845
+          },
+          "pure_vt_excess_bh": {
+            "days": 59,
+            "sum_arith_return": 0.04570370785375457,
+            "mean_arith_return": 0.0007746391161653317,
+            "cumulative_log_return": 0.04046246789831036
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": -0.03491353840622777,
+          "vix_timing_total_arith": -0.07006320781010832,
+          "tsmom_hedge_total_arith": 0.035149669403880604,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.2400452871662475,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": null,
+          "share_valid": false
+        }
+      }
+    ],
+    "QQQ": [
+      {
+        "asset": "QQQ",
+        "trough_label": "2009-03",
+        "trough_date": "2008-11-20",
+        "trough_dd_in_window": -0.4936682187478907,
+        "window_start": "2008-08-22",
+        "window_end": "2009-02-24",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 55,
+        "days_tsmom_nonneg": 72,
+        "full_window_cumret": {
+          "bh": -0.4855727851846993,
+          "vt": -0.2003112391226347,
+          "pure_vt": -0.2370966998511329,
+          "vix_timing_arith_sum": 0.22940866402817336,
+          "tsmom_hedge_arith_sum": -0.03500289511543407
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 55,
+            "sum_arith_return": -0.8548422074368314,
+            "mean_arith_return": -0.01554258558976057,
+            "cumulative_log_return": -0.8671016425598618
+          },
+          "tsmom_hedge": {
+            "days": 55,
+            "sum_arith_return": 0.03262772268716604,
+            "mean_arith_return": 0.000593231321584837,
+            "cumulative_log_return": 0.03256451046993164
+          },
+          "vt_excess_bh": {
+            "days": 55,
+            "sum_arith_return": -0.8548422074368314,
+            "mean_arith_return": -0.01554258558976057,
+            "cumulative_log_return": -0.8671016425598618
+          },
+          "pure_vt_excess_bh": {
+            "days": 55,
+            "sum_arith_return": -0.8222144847496653,
+            "mean_arith_return": -0.014949354268175733,
+            "cumulative_log_return": -0.8342856772521317
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 72,
+            "sum_arith_return": 1.0842508714650045,
+            "mean_arith_return": 0.015059039881458396,
+            "cumulative_log_return": 1.0705210061696822
+          },
+          "tsmom_hedge": {
+            "days": 72,
+            "sum_arith_return": -0.0676306178026001,
+            "mean_arith_return": -0.0009393141361472236,
+            "cumulative_log_return": -0.06783509192010079
+          },
+          "vt_excess_bh": {
+            "days": 72,
+            "sum_arith_return": 1.0842508714650045,
+            "mean_arith_return": 0.015059039881458396,
+            "cumulative_log_return": 1.0705210061696822
+          },
+          "pure_vt_excess_bh": {
+            "days": 72,
+            "sum_arith_return": 1.0166202536624045,
+            "mean_arith_return": 0.014119725745311174,
+            "cumulative_log_return": 1.003940418084597
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": 0.19440576891273925,
+          "vix_timing_total_arith": 0.22940866402817336,
+          "tsmom_hedge_total_arith": -0.03500289511543407,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.03262772268716604,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": 0.1678330991392096,
+          "share_valid": true
+        }
+      },
+      {
+        "asset": "QQQ",
+        "trough_label": "2020-03",
+        "trough_date": "2020-03-16",
+        "trough_dd_in_window": -0.2855936318587723,
+        "window_start": "2019-12-12",
+        "window_end": "2020-06-15",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 50,
+        "days_tsmom_nonneg": 77,
+        "full_window_cumret": {
+          "bh": 0.15679931183041618,
+          "vt": 0.047212992079164254,
+          "pure_vt": 0.0855836979258627,
+          "vix_timing_arith_sum": -0.14058035785206002,
+          "tsmom_hedge_arith_sum": 0.030405462032811702
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 50,
+            "sum_arith_return": 0.34708321780620743,
+            "mean_arith_return": 0.006941664356124149,
+            "cumulative_log_return": 0.3419839396640942
+          },
+          "tsmom_hedge": {
+            "days": 50,
+            "sum_arith_return": 0.5611378821529126,
+            "mean_arith_return": 0.011222757643058252,
+            "cumulative_log_return": 0.5539413475172622
+          },
+          "vt_excess_bh": {
+            "days": 50,
+            "sum_arith_return": 0.34708321780620743,
+            "mean_arith_return": 0.006941664356124149,
+            "cumulative_log_return": 0.3419839396640942
+          },
+          "pure_vt_excess_bh": {
+            "days": 50,
+            "sum_arith_return": 0.9082210999591199,
+            "mean_arith_return": 0.0181644219991824,
+            "cumulative_log_return": 0.8893400765894427
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 77,
+            "sum_arith_return": -0.4876635756582675,
+            "mean_arith_return": -0.00633329319036711,
+            "cumulative_log_return": -0.49259099819820223
+          },
+          "tsmom_hedge": {
+            "days": 77,
+            "sum_arith_return": -0.5307324201201007,
+            "mean_arith_return": -0.00689262883272858,
+            "cumulative_log_return": -0.5352266028415599
+          },
+          "vt_excess_bh": {
+            "days": 77,
+            "sum_arith_return": -0.4876635756582675,
+            "mean_arith_return": -0.00633329319036711,
+            "cumulative_log_return": -0.49259099819820223
+          },
+          "pure_vt_excess_bh": {
+            "days": 77,
+            "sum_arith_return": -1.0183959957783681,
+            "mean_arith_return": -0.01322592202309569,
+            "cumulative_log_return": -1.0361944961745244
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": -0.11017489581924826,
+          "vix_timing_total_arith": -0.14058035785206002,
+          "tsmom_hedge_total_arith": 0.030405462032811702,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.5611378821529126,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": null,
+          "share_valid": false
+        }
+      }
+    ],
+    "IWM": [
+      {
+        "asset": "IWM",
+        "trough_label": "2009-03",
+        "trough_date": "2009-03-09",
+        "trough_dd_in_window": -0.5425862652782973,
+        "window_start": "2008-12-04",
+        "window_end": "2009-06-08",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 69,
+        "days_tsmom_nonneg": 58,
+        "full_window_cumret": {
+          "bh": 0.1537394177258067,
+          "vt": 0.04325186924283132,
+          "pure_vt": 0.04325186924283132,
+          "vix_timing_arith_sum": -0.16109173156366957,
+          "tsmom_hedge_arith_sum": 0.0
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 69,
+            "sum_arith_return": -1.2022935875140666,
+            "mean_arith_return": -0.017424544746580676,
+            "cumulative_log_return": -1.2203019677963838
+          },
+          "tsmom_hedge": {
+            "days": 69,
+            "sum_arith_return": 0.0,
+            "mean_arith_return": 0.0,
+            "cumulative_log_return": 0.0
+          },
+          "vt_excess_bh": {
+            "days": 69,
+            "sum_arith_return": -1.2022935875140666,
+            "mean_arith_return": -0.017424544746580676,
+            "cumulative_log_return": -1.2203019677963838
+          },
+          "pure_vt_excess_bh": {
+            "days": 69,
+            "sum_arith_return": -1.2022935875140666,
+            "mean_arith_return": -0.017424544746580676,
+            "cumulative_log_return": -1.2203019677963838
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 58,
+            "sum_arith_return": 1.0412018559503973,
+            "mean_arith_return": 0.017951756137075815,
+            "cumulative_log_return": 1.0278085664485446
+          },
+          "tsmom_hedge": {
+            "days": 58,
+            "sum_arith_return": 0.0,
+            "mean_arith_return": 0.0,
+            "cumulative_log_return": 0.0
+          },
+          "vt_excess_bh": {
+            "days": 58,
+            "sum_arith_return": 1.0412018559503973,
+            "mean_arith_return": 0.017951756137075815,
+            "cumulative_log_return": 1.0278085664485446
+          },
+          "pure_vt_excess_bh": {
+            "days": 58,
+            "sum_arith_return": 1.0412018559503973,
+            "mean_arith_return": 0.017951756137075815,
+            "cumulative_log_return": 1.0278085664485446
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": -0.16109173156366957,
+          "vix_timing_total_arith": -0.16109173156366957,
+          "tsmom_hedge_total_arith": 0.0,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.0,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": null,
+          "share_valid": false
+        }
+      },
+      {
+        "asset": "IWM",
+        "trough_label": "2020-03",
+        "trough_date": "2020-03-23",
+        "trough_dd_in_window": -0.41072376057683635,
+        "window_start": "2019-12-19",
+        "window_end": "2020-06-22",
+        "window_trading_days": 127,
+        "days_tsmom_negative": 66,
+        "days_tsmom_nonneg": 61,
+        "full_window_cumret": {
+          "bh": -0.14019162545700115,
+          "vt": -0.16906306118054307,
+          "pure_vt": -0.16906306118054307,
+          "vix_timing_arith_sum": -0.07788452748084157,
+          "tsmom_hedge_arith_sum": 0.0
+        },
+        "tsmom_neg_partition": {
+          "vix_timing": {
+            "days": 66,
+            "sum_arith_return": -0.6725497947359156,
+            "mean_arith_return": -0.01019014840508963,
+            "cumulative_log_return": -0.6823389947758934
+          },
+          "tsmom_hedge": {
+            "days": 66,
+            "sum_arith_return": 0.0,
+            "mean_arith_return": 0.0,
+            "cumulative_log_return": 0.0
+          },
+          "vt_excess_bh": {
+            "days": 66,
+            "sum_arith_return": -0.6725497947359156,
+            "mean_arith_return": -0.01019014840508963,
+            "cumulative_log_return": -0.6823389947758934
+          },
+          "pure_vt_excess_bh": {
+            "days": 66,
+            "sum_arith_return": -0.6725497947359156,
+            "mean_arith_return": -0.01019014840508963,
+            "cumulative_log_return": -0.6823389947758934
+          }
+        },
+        "tsmom_nonneg_partition": {
+          "vix_timing": {
+            "days": 61,
+            "sum_arith_return": 0.594665267255074,
+            "mean_arith_return": 0.00974861093860777,
+            "cumulative_log_return": 0.5857378652601402
+          },
+          "tsmom_hedge": {
+            "days": 61,
+            "sum_arith_return": 0.0,
+            "mean_arith_return": 0.0,
+            "cumulative_log_return": 0.0
+          },
+          "vt_excess_bh": {
+            "days": 61,
+            "sum_arith_return": 0.594665267255074,
+            "mean_arith_return": 0.00974861093860777,
+            "cumulative_log_return": 0.5857378652601402
+          },
+          "pure_vt_excess_bh": {
+            "days": 61,
+            "sum_arith_return": 0.594665267255074,
+            "mean_arith_return": 0.00974861093860777,
+            "cumulative_log_return": 0.5857378652601402
+          }
+        },
+        "headline": {
+          "pure_vt_excess_bh_total_arith": -0.07788452748084157,
+          "vix_timing_total_arith": -0.07788452748084157,
+          "tsmom_hedge_total_arith": 0.0,
+          "tsmom_hedge_in_tsmom_neg_days_arith": 0.0,
+          "share_attributable_to_mechanical_rebound_hedge_same_sign_only": null,
+          "share_valid": false
+        }
+      }
+    ]
+  },
+  "generated_at_utc": "2026-06-10T10:17:05Z",
+  "cross_asset_summary": {
+    "2009-03": {
+      "n_assets": 5,
+      "pure_vt_excess_arith": {
+        "median": -0.04982450544732777,
+        "min": -0.16109173156366957,
+        "max": 0.19440576891273925
+      },
+      "vix_timing_arith": {
+        "median": -0.04982450544732777,
+        "min": -0.16109173156366957,
+        "max": 0.22940866402817336
+      },
+      "tsmom_hedge_full_arith": {
+        "median": 0.0,
+        "min": -0.03500289511543407,
+        "max": 0.021107601066936293
+      },
+      "tsmom_hedge_on_tsmom_neg_days_arith": {
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.11914442745927381
+      },
+      "valid_share_count": 2,
+      "valid_share_median": 0.9804676770750197,
+      "valid_share_min": 0.1678330991392096,
+      "valid_share_max": 1.7931022550108298,
+      "note": "share = TSMOM-hedge-contrib-on-tsmom<0-days / PureVT_excess_vs_BH; reported only when both numerator and denominator are positive (same sign). Negative or sign-flipped denominators make the ratio unbounded \u2014 use raw arithmetic contributions instead."
+    },
+    "2020-03": {
+      "n_assets": 5,
+      "pure_vt_excess_arith": {
+        "median": -0.043287381734485667,
+        "min": -0.11017489581924826,
+        "max": 0.037654210238158604
+      },
+      "vix_timing_arith": {
+        "median": -0.07788452748084157,
+        "min": -0.14058035785206002,
+        "max": -0.07006320781010832
+      },
+      "tsmom_hedge_full_arith": {
+        "median": 0.030405462032811702,
+        "min": 0.0,
+        "max": 0.12198673939464298
+      },
+      "tsmom_hedge_on_tsmom_neg_days_arith": {
+        "median": 0.300033195893244,
+        "min": 0.0,
+        "max": 0.5611378821529126
+      },
+      "valid_share_count": 1,
+      "valid_share_median": 9.176155102621049,
+      "valid_share_min": 9.176155102621049,
+      "valid_share_max": 9.176155102621049,
+      "note": "share = TSMOM-hedge-contrib-on-tsmom<0-days / PureVT_excess_vs_BH; reported only when both numerator and denominator are positive (same sign). Negative or sign-flipped denominators make the ratio unbounded \u2014 use raw arithmetic contributions instead."
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1458-h1-trough-decomposition-paper-6-v5-1781086338",
+  "title": "K1458 H1 trough decomposition (Paper 6 v5)",
+  "script_path": "experiments/k1458_h1_trough_decomposition/k1458_h1_trough_decomposition.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-06-10T10:12:18Z",
+  "started_at": "2026-06-10T10:15:07Z",
+  "completed_at": "2026-06-10T10:15:28Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1458-h1-trough-decomposition-paper-6-v5-1781086338.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1458-h1-trough-decomposition-paper-6-v5-1781086338.stderr",
+  "result_artifact": "experiments/k1458_h1_trough_decomposition/k1458_results.json",
+  "claude_followup": {
+    "brief": "讀 experiments/k1458_h1_trough_decomposition/k1458_results.json `cross_asset_summary`（含 per-asset detail in `per_asset`）。Codex FAIL 修正後改報 raw arithmetic contributions（unbounded ratio 已剔除）。\n\n關鍵觀察（從 run.log / cross_asset_summary）：\n- 2009-03: PureVT-BH median=-0.050; TSMOM-hedge contrib full=0, neg-only=0（5 資產中 3 個 beta clipped to 0；2009 起始期 rolling-beta 未累積）→ Gemini H1 concern **NOT** 由 mechanical hedge 主導，純 VIX-timing 駁回 (median VT-BH=-0.050)。\n- 2020-03: TSMOM-hedge contrib median full=+0.030 / neg-only=+0.300; VIX-timing median=-0.078; PureVT-BH median=-0.043 → mechanical hedge 確實在 V-shape rebound 有 +3-12pp 正貢獻 (SPY=+0.122, QQQ=+0.030)，但 VIX-timing 同期虧損抵銷，整體 PureVT 仍輸 BH。\n\n結論建議：\n1. Gemini H1 concern **PARTIALLY VALIDATED for 2020-03**（mechanical hedge 確有貢獻），但 **NOT VALIDATED for 2009-03**（beta clipped, 純 VIX-timing 主導）。\n2. PureVT_excess_vs_BH 在 trough window 多為負（5 資產 2 troughs 共 10 條 obs 中 8 條 PureVT 輸 BH），說明 PureVT 在 trough window 並不靠 mechanical rebound「贏」BH — 它就是輸給 BH。MDD 改善的解釋是 PureVT 在 BH 最低點時的 drawdown 沒那麼深，而非 V-rebound 賺更多。\n3. body.tex 修訂建議：Section 3.3 / 4.1 narrative 改寫 — 不是「PureVT MDD 改善可能來自 mechanical rebound hedge」（Gemini 原本擔心的版本），而是「PureVT trough-window 期間 mechanical hedge 對 2020 trough 確實有 +3-12pp 正貢獻 (per K1458 Table)，但同期 VIX-timing 負貢獻抵銷，PureVT 整體仍輸 BH；2009 trough 則因 rolling-beta 樣本初期被 clipped 至 0，無 mechanical hedge 效應」。引用 K1458 Table 數據。\n4. 寫 paper/vt-trend-following/review_history/v6/README.md：H1 PARTIAL CLOSURE — 加 K1458 decomposition table（5 資產 × 2 troughs × 3 components, raw arithmetic contributions, no unbounded ratio）。\n5. 接 Codex 3rd-model adversarial review（per feedback_3model_review_discipline）：跑 Codex review body.tex 改動 + K1458 數據，verdict 寫 v6 review_history。",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1200
+}

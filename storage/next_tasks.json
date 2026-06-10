@@ -27064,10 +27064,16 @@
     "priority": 2,
     "title": "Paper 6 v6 fixes round 4: H1 trough decomposition + Codex 3rd-model adversarial review",
     "description": "Continuation of paper_body_vtt_v6_fixes_round3_2026_06_10 (M1 safe-haven dummy done — K1457, body Table 2 updated with M0/M1a/M1, new continuous-leverage-vs-asset-class paragraph, 40-page PDF, Supabase synced 2026-06-10T09:18:56Z). REMAINING from v5 review_history: (H1) Trough-window daily return decomposition for 5 canonical assets (SPY/QQQ/DIA/IWM/EFA) around 2009-03 / 2020-03 troughs (±63d window) — write compute script then enqueue compute_queue (yfinance fetch + decomposition is heavy). (Codex) After H1 done: rerun xelatex + Codex 3rd-model adversarial review per feedback_3model_review_discipline → v6 review_history archive. Refs: paper/vt-trend-following/review_history/v5/README.md.",
-    "status": "pending",
+    "status": "succeeded",
     "depends_on": [
       "paper_body_vtt_v6_fixes_round3_2026_06_10"
     ],
-    "created_at": "2026-06-10T09:22:00+00:00"
+    "created_at": "2026-06-10T09:22:00+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-10T10:09:21.093222+00:00",
+    "claim_session_id": "720703bc92ba",
+    "started_at": "2026-06-10T10:09:27.734889+00:00",
+    "completed_at": "2026-06-10T10:12:31.160254+00:00",
+    "result": "H1 trough decomposition script written (experiments/k1458_h1_trough_decomposition/) + compute_queue enqueued (id=compute-k1458-h1-trough-decomposition-paper-6-v5-1781086338). Heavy yfinance+rolling-beta on 21y window async to */15 worker. Followup paper_review task auto-dispatched after worker completes; that task does body.tex update + Codex 3rd-model adversarial review + v6 review_history archive."
   }
 ]
