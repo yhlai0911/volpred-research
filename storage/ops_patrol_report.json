@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-06-09T18:08:05Z",
+  "timestamp": "2026-06-10T00:04:47Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "147 draft articles total (research: 47, general: 100). All thresholds met (research ≥4, general ≥8, total ≥12)."
+      "detail": "147 draft articles total (general: 100, research: 47). All thresholds met (total≥12 ✓, general≥8 ✓, research≥4 ✓)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime: 2026-06-09T18:07:49Z — only ~34 seconds old, well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json is ~0 hours old (mtime 1781049866, ~06:04 UTC). Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG_RECENT",
       "status": "info",
-      "detail": "Entries found dated 2026-06-08 and 2026-06-09: (1) 2026-06-08 00:10 host_cron_fail strike-2 structural fix + article pool churn root cause; (2) 2026-06-08 01:47 refill judgment correction; (3) 2026-06-08 11:1x pre-publish image-URL gate (cured); (4) 2026-06-09 09:15 merge_worktree.sh main..worktree detection logic bug (strike-2) — workaround documented, strike-3 refactor pending."
+      "detail": "Entry from 2026-06-09 (yesterday): merge_worktree.sh main..worktree detection logic bug (strike-2). Root cause: `git diff main..worktree` catches main-side changes post-fork, not just agent writes. False-positive triggered on K1426+K1427. Workaround: manual `git merge --no-ff -X theirs`. Strike-3 rewrite pending."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategies found with >2 null portfolio_return in last 3 entries."
+      "detail": "All 15 strategies checked. No strategy has >2 null portfolio_return values in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files. Working tree is clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
