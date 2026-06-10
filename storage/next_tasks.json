@@ -27480,8 +27480,14 @@
     "source": "v11_review_2026-06-11",
     "title": "leverage-direction reproduce.py 對齊重寫（解凍前提；v11-5）",
     "description": "paper/leverage-direction/reproduce.py 仍驗已廢 14-table 佈局且 report 停 2026-05-17 amber。比照 vt-trend-following 2026-06-11 hourly 班的 reproduce.py 重寫前例：(1) 對齊現行 7-table main+supplement 佈局；(2) expected values 全部改 K903 canonical（experiments/k903/tables/k903_table2.csv + k903_table3.csv）+ K1256 HM 3-spec + K802/K799 VaR 來源；(3) 輸出新 reproduce_report.json（match_rate >=95% green 為 SUBMISSION FROZEN 解凍前提）；(4) abstract 6/6 OOS 與 rho=0.83(N=14) 的 untraceable 項建 dedicated 檢查或標 NOTE tier；(5) 完成後跑 reproduce.py exit 0 + 更新 README status 行。參考：review_history/v11/README.md + fix_log。",
-    "status": "pending",
-    "created_at": "2026-06-10T19:25:00+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-10T19:25:00+00:00",
+    "claimed_by": "agent-ld-reproduce-rewriter",
+    "claimed_at": "2026-06-10T22:43:45.454788+00:00",
+    "claim_session_id": "8f1b1e11bdf4",
+    "started_at": "2026-06-10T22:43:54.874114+00:00",
+    "completed_at": "2026-06-10T22:48:14.461886+00:00",
+    "result": "reproduce.py 重寫 v12 K903 7-table → green 100% (161M/0MM/23N) + Kupiec 0.64→0.40 修正；README 解凍狀態統整為 MAJOR_REVISION 待 v12 確認輪"
   },
   {
     "id": "k1464_rework_methodology_fixes",
