@@ -305,6 +305,10 @@ def main():
     job_log_map.setdefault("hourly_dispatch", "storage/logs/cron/hourly_dispatch.log")
     job_cron_map.setdefault("compute_worker", "*/15 * * * *")
     job_log_map.setdefault("compute_worker", "storage/logs/cron/compute_worker.log")
+    # handoff_regen: spec log_path (cron/handoff_regen.log) does not exist on
+    # disk (4-2 spec-drift instance) — its freshest fire evidence is the
+    # artifact it regenerates. Override the spec-seeded mapping.
+    job_log_map["handoff_regen"] = "storage/ops/handoff_latest.md"
     stale = []
     try:
         from croniter import croniter
@@ -337,6 +341,11 @@ def main():
             except Exception:
                 pass
         if not last_ts:
+            # 2026-06-10 process-audit 4-1: a monitored job with NO fire
+            # evidence at all (no cron_last_run entry, no log file) was
+            # silently skipped — the worst failure (never ran / log deleted /
+            # plist unloaded) was the least visible. Flag it.
+            stale.append({"job": job, "last_run": None, "reason": "no_fire_evidence"})
             continue
         cron_str = job_cron_map.get(job)
         if cron_str and croniter:
