@@ -33094,5 +33094,23 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-10T17:19:40.545303"
+  },
+  {
+    "category": "empirical_finding",
+    "content": "[K1459 verdict=CONDITIONAL_PASS reviewer=Codex CLI] Ponzi collapse math minimal model. k_id=K1459 experiment_id=k1459 experiment_path=experiments/k1459_ponzi_collapse_math/. Analytical core: flat-reserve entrant requirement E_t=(r+w)A_(t-1), active base grows as A_t=N0(1+r)^t, cumulative participants C_T=N0*[1+((r+w)/r)*((1+r)^T-1)], and asymptotic critical entrant growth is g*=r (withdrawal rate w raises the cash level needed but not the long-run slope). Deterministic + Poisson/Binomial stress grid (r in {0.5%,1%,2%,5%,10%}, g in {0..10%}, w in {0,1%,2%,5%,10%}, horizon=120, seed=42) confirms: when g<r collapse is inevitable; high-w paths fail sooner; aggressive case r=10%, g=5%, w=5% collapses at round 17 with Monte Carlo collapse probability 100%. Scale examples: with outstanding capital 17.5B USD and promised 1% monthly return, new money needed is 175M/month before withdrawals, 525M/month at w=2%, and 1.05B/month at w=5%. Reader-facing article draft included.",
+    "evidence": [
+      "experiments/k1459_ponzi_collapse_math/k1459_results.json",
+      "experiments/k1459_ponzi_collapse_math/README.md",
+      "experiments/k1459_ponzi_collapse_math/k1459_ponzi_collapse_math.py",
+      "experiments/k1459_ponzi_collapse_math/k1459_collapse_heatmaps.png",
+      "experiments/k1459_ponzi_collapse_math/article_draft.md"
+    ],
+    "confidence": 0.8,
+    "k_id": "K1459",
+    "experiment_id": "k1459",
+    "experiment_path": "experiments/k1459_ponzi_collapse_math/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI",
+    "reviewer_source": "Codex CLI primary path self-review"
   }
 ]

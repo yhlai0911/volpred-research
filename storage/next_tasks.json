@@ -27089,8 +27089,14 @@
     "source": "boss_email_recovered_20260610",
     "title": "龐氏結構崩潰數學：每輪新本金支付承諾報酬可支撐幾輪？臨界人數？（boss 6/7 指令，dedup bug 回收）",
     "description": "Boss 2026-06-07 13:50 email 指令（被 gmail subject-dedup bug 丟棄、6/10 自垃圾桶回收）：『如果每輪拿新的本金來發放承諾的報酬，這樣可以支撐幾輪的發展？臨界人數是多少？做完整分析』。Context: havingchien Substack『龐氏騙局是會崩潰的數學結構』。設計：解析模型 + 模擬 — 參數化（承諾報酬率 r、新進人數成長率 g、提領率 w、初始人數 N0），推導可持續條件（g 與 r 臨界關係）、崩潰輪數、臨界人數/資金缺口公式；蒙地卡羅掃 (r,g,w) 格點 + 敏感度；對照公開歷史案例規模（Madoff 等，標來源）。產出 experiments/kXXXX/ 三件套 + reader-facing 文章（general；與 havingchien 文不重複不引用，自建模型角度）。寫前必跑 scripts/check_arc_dedup.py；固定 seed。Boss 直接指令 = user-assigned 最高優先。",
-    "status": "pending",
-    "created_at": "2026-06-10T10:35:00+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-10T10:35:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T11:22:54.768784+00:00",
+    "claim_session_id": "4a337950b768",
+    "started_at": "2026-06-10T11:23:09.093682+00:00",
+    "completed_at": "2026-06-10T11:31:48.648250+00:00",
+    "result": "K1459 completed:解析 Ponzi 臨界條件 g*=r；deterministic+MC grid 完成；README/article_draft/knowledge/work_log 已落地"
   },
   {
     "id": "paper_review_k1458_h1_partial_closure_v6_2026_06_10",
@@ -27108,5 +27114,35 @@
     "started_at": "2026-06-10T11:09:17.443696+00:00",
     "completed_at": "2026-06-10T11:17:44.843828+00:00",
     "result": "v6 README: H1 PARTIAL SUGGESTIVE EVIDENCE (not closure). Codex FAIL → 5 fixes: decomposition identity corrected, 2009 downgraded MOSTLY ABSENT, mechanism inference qualified, beta-clip unverified, CLOSURE language removed. Table numbers all PASS vs k1458_results.json."
+  },
+  {
+    "id": "research_regime_60_40",
+    "title": "研究 backlog fallback: 股債相關係數 regime 化下的 60/40 適應性配置",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 股債相關係數 regime 化下的 60/40 適應性配置 — FRED+yfinance 滾動股債相關，依相關 regime 動態調 60/40，比靜態的 drawdown 與 Sharpe（來源：JPM/FAJ 2025 rethinking 60/40；相關由 +0.8 降至 +0.16） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "regime_60_40",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T11:41:42+00:00"
+  },
+  {
+    "id": "research_regime_switching_har_jump",
+    "title": "研究 backlog fallback: regime-switching HAR 中「商業循環吸收 jump 成分」假說",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: regime-switching HAR 中「商業循環吸收 jump 成分」假說 — TAIFEX/yfinance RV+jump（BNS bipower），Markov 2-regime HAR-RV 加 FRED 景氣指標，檢定加景氣後 jump 係數是否轉不顯著（來源：JoE/Risks 2025 business-cycle vs jump RV） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "regime_switching_har_jump",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T11:41:45+00:00"
   }
 ]
