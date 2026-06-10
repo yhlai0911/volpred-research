@@ -27215,8 +27215,14 @@
     "source": "paper_audit_2026-06-10",
     "title": "taiwan-vt 審查修正：5 HIGH（abstract/intro 殘留 errata 推翻數字）",
     "description": "依 paper/taiwan-vt/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH 後 MEDIUM）。重點：abstract/intro/§8 ≥5 處被正文 errata 推翻的舊數字（5.0×/CI[2.8,8.1] 等）全文一致化。數字對 experiments JSON 驗證；xelatex exit 0 → paper-update 上傳 → fix_log.md。",
-    "status": "pending",
-    "created_at": "2026-06-10T13:58:00+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-10T13:58:00+00:00",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-06-10T18:12:08.000380+00:00",
+    "claim_session_id": "d4f27ed1661b",
+    "started_at": "2026-06-10T18:12:08.354004+00:00",
+    "completed_at": "2026-06-10T18:13:31.693885+00:00",
+    "result": "5 HIGH 全部完成（fix_log.md 逐條稽核：abstract 4.3×+CI[2.28,6.58]/K1370、intro Student-t VaR 1.03% K896、SSVS 表重建 K461、§8.2 56bp/pp K1175、§8.1 質性化）。commit 83d73878 已推 origin/main。paper-update sync 2026-06-10T18:13Z 成功，Supabase abstract 已更新 canonical 版本。MEDIUM 5 項未處置（留下批 fire）。hourly-02 完成。"
   },
   {
     "id": "paper_body_audit_fix_vt_trend_following_2026_06_10",
@@ -27345,7 +27351,8 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-10T14:08:36+00:00"
+    "created_at": "2026-06-10T14:08:36+00:00",
+    "last_released_at": "2026-06-10T18:12:07.617295+00:00"
   },
   {
     "id": "paper_review_mile_4e5a221e",
