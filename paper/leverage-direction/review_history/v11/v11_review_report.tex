@@ -1,0 +1,159 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\IfFontExistsTF{PingFang TC}{\setCJKmainfont{PingFang TC}}{\setCJKmainfont{Songti TC}}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\newcommand{\high}{\textcolor{errorred}{\textbf{HIGH}}}
+\newcommand{\med}{\textcolor{warncolor}{\textbf{MEDIUM}}}
+\newcommand{\low}{\textbf{LOW}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries 學術審查報告 — v11 Round}\\[0.4em]
+{\large Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection and Volatility Targeting}\\[0.4em]
+{\normalsize 目標期刊：Journal of Banking and Finance (JBF)}\\
+{\normalsize 審查日期：2026-06-11（台灣時間）}\\
+{\normalsize 審查範圍：2026-06-10 修正 session 之後的 \texttt{main.tex} / \texttt{body.tex} / \texttt{tables\_main.tex} 現狀}\\
+{\normalsize 審查標準：嚴格（JBF 投稿 gate）}\\
+{\normalsize 對照 canonical：\texttt{experiments/k903/k903\_vs\_paper\_diff.md} + \texttt{k903\_table3.csv}}
+\end{center}
+
+\section*{審查摘要}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{嚴重問題（HIGH，blocking）} & 5 項 \\
+\textcolor{warncolor}{中度問題（MEDIUM）} & 5 項 \\
+輕微問題（LOW） & 2 項 \\
+整體評估 & \textcolor{errorred}{\textbf{MAJOR REVISION — 維持 SUBMISSION FROZEN}} \\
+\end{tabular}
+
+\medskip
+\noindent\textbf{核心結論}：2026-06-10 audit 採用「K903 canonical 全文一致化」的決策正確，但\textbf{執行不完整}。重寫只觸及 Intro、GLD 專段（L134/L144）與 Table~3 cell，遺漏了 (a) L184 的 legacy GLD QLIKE 散文、(b) Table~2 的非 GLD 各列、(c) L184 的 SPY-2025 散文、(d) L405 的 GLD $\beta^{\text{trend}}$ 映射。結果是論文在至少四處與自家 canonical 表互相矛盾，且 reproduce gate 從未重跑（仍停在 2026-05-17 amber）。\textbf{凍結決策維持正確。}
+
+\section{一、邏輯結構審查}
+
+論文骨幹（taxonomy $\to$ model selection $\to$ VT channel $\to$ complexity ceiling）論述鏈完整，兩貢獻定位清楚，domain-restriction 的誠實揭露（$\rho$ 在 12 資產失效）是強項。但\textbf{結構完整性被數字不一致破壞}：同一個 GLD 2023--2024 QLIKE 結論在 L144（GARCH 顯著勝，$p=0.001$）與 L184（兩模型無差異，$p=0.871$）兩處給出互斥敘述，讀者在第 7 頁與第 9 頁會讀到自相矛盾的結論。這不是文字轉承問題，是 canonical 替換漏改。
+
+\section{二、研究動機與貢獻審查}
+
+動機（asymmetric GARCH 對非股票資產的 model-selection 後果未被系統檢視）充分。Contribution~2 自稱「generalizes the equity-specific finding of \citet{hood2025}」——若 hood2025 無法驗證（見 §九），此貢獻的文獻錨點崩塌，需改錨 \citet{moreira2017} + \citet{harvey2018}。貢獻宣稱與證據範圍大致匹配（已誠實標 domain restriction），唯 taxonomy 的「safe-haven assets show inverted leverage ($\gamma<0$)」在 abstract/Intro 仍以 GLD 為招牌，但 canonical GLD $\gamma=+0.002$（不顯著），招牌資產本身不支持無條件 inverted leverage——已靠 regime-dependent 敘事補救，但 abstract 的 taxonomy 一句仍讀來像無條件主張。
+
+\section{三、文獻回顧審查}
+
+奠基文獻（Engle 1982、Bollerslev 1986/1987、Glosten et al. 1993、Nelson 1991、Black 1976、Christie 1982）齊備；asymmetric-commodity（Chevallier \& Ielpo 2017）、gold-regime（Chang et al. 2021）、VT（Moreira \& Muir 2017、Cederburg et al. 2020、Harvey et al. 2018、DeMiguel et al. 2024）覆蓋良好。問題在引用\textbf{可驗證性}與\textbf{未引用條目}（§九 / §十）。
+
+\section{四、模型設定審查}
+
+GJR-GARCH $\gamma$ 作為 taxonomy 軸心、$t>1.65$ 作為 model-selection rule 的設定合理；in-sample 校準的 mechanical 性質已被 L200 誠實揭露（加分）。穩健性設計（window $\{252,504,756,2000\}$、cross-OOS 六期、Parkinson proxy）充分。\textbf{識別性隱憂}：rule 用的 $t$ 在 L198 區分了 single-window $t$ 與 quarterly-mean HAC $t$，這個 disambiguation 是必要且做得好的；但 Table~2 的 HAC $t$ 是混血 vintage（見 V11-2），所以「rule 的輸入數字」本身未經 canonical 復現。
+
+\section{五、方程式與符號審查}
+
+方程式（QLIKE quasi-LL vs Patton centered、$w_t=\sigma_{\text{target}}/\hat\sigma_t$、HM regression）正確；centered vs quasi-LL 雙尺度在 L489 與 L214 已加腳註標明（audit MEDIUM 已修，good）。$\gamma_{HM}$ 三 spec disambiguation 腳註（L380）完整。\textbf{符號衝突殘留}：$\gamma$（GJR 參數）對 GLD 在三處取三個互斥值（見 V11-4）——不是 symbol clash，是同一物件多 vintage 並存。
+
+\section{六、研究方法審查}
+
+DM / Kupiec / Christoffersen / DQ / FZ / HM 方法論套用正確，HAC lag 與 seed 有交代。方法層級無 fatal flaw；問題集中在「報出來的數字哪一個 vintage」而非方法本身。
+
+\section{七、資料與樣本審查}
+
+樣本期間口徑仍混亂（audit MEDIUM 殘項）：§3.1 宣告 2017-01--2026-03，但 Table~2 用 2010--2026、regime 用 2005--2026、timing 用 2014--2026、L161 又出現 2025-01--2026-03 的 $N=300$。各分析的確切期間與資料 pull 未在 §3.1 統一列表。Table~\ref{tab:vt} 每資產用不同 evaluation window（GLD 2022--2026 牛市、SPY 2014--2026、BTC post-2019），再以這些不可比 metric 算 $\rho=0.944$——referee 必挑 window cherry-picking。
+
+\section*{} % spacer
+
+\section{八、引用規範審查}
+
+主力引用 author/year/journal/DOI 抽查正確。三條待驗：\texttt{hood2025}（姓氏 Raughtigan + DOI 10.3905/jpm.2025.1.764 可疑，且為 Contribution~2 錨點）、\texttt{nelson2025}（SSRN 5931154 編號異常）、\texttt{xu2024}（CFR forthcoming 無 DOI）。另 \texttt{main.tex} 手寫 \texttt{thebibliography} 含約 9 條從未 \texttt{\textbackslash cite} 的條目（手寫 bib 不產生 unused 警告）。
+
+\section{九、具體問題清單}
+
+\subsection*{\textcolor{errorred}{嚴重問題（HIGH — 阻擋投稿）}}
+
+\begin{description}[leftmargin=1.4em]
+
+\item[\high\ V11-1 — GLD QLIKE 散文殘留舊 vintage（self-contradiction）]\hfill\\
+\textbf{位置}：\texttt{body.tex:184} vs \texttt{:144} vs \texttt{tables\_main.tex:54}\\
+\textbf{問題}：L184 仍寫「For GLD, the two models produce nearly identical QLIKE: GJR marginally wins in 2023--2024 ($\Delta=-0.07\%$, DM $p=0.871$)\ldots Neither approaches significance, confirming that inverted leverage adds no forecasting value for gold.」但 (i) Table~3（K903 canonical, L54）為 GLD 2023--2024 $\Delta=+0.39\%$, $p=0.001$（GARCH \emph{顯著}勝）；(ii) 同篇 L144 已改成「symmetric GARCH \emph{significantly outperforms} GJR in 2023--2024 ($\Delta=+0.39\%$, $p=0.001$)」。L184 與 L144 在隔兩頁處給互斥結論，且 L184 與 canonical 表互斥。\\
+\textbf{修正}：L184 整段 GLD 句改用 K903：2023--2024 GARCH 顯著勝（$\Delta=+0.39\%$, $p=0.001$），2025 同向不顯著（$p=0.070$）；刪「Neither approaches significance」與「adds no forecasting value」。SPY-2025 數字一併改（見 V11-3）。
+
+\item[\high\ V11-2 — Table 2（tab:gamma）混血 vintage]\hfill\\
+\textbf{位置}：\texttt{tables\_main.tex:30--36} vs \texttt{experiments/k903/k903\_vs\_paper\_diff.md} Table~2 區\\
+\textbf{問題}：06-10 只把 GLD 列換成 K903（$+0.002$）。其餘各列仍是舊 draft，與 K903 canonical 衝突：SPY mean $\gamma$ 紙 $+0.211$ vs K903 $+0.132$、HAC $t$ 紙 $+8.30$ vs $+11.08$；QQQ HAC $t$ 紙 $+3.21$ vs $+10.76$；EEM mean $+0.180$ vs $+0.087$、HAC $t$ $+4.12$ vs $+11.88$；BTC HAC $t$ 紙 $+1.83$ vs $+2.88$；SLV HAC $t$ 紙 $-2.91$ vs $-0.68$。\\
+\textbf{後果}：model-selection rule 的關鍵輸入（BTC「Borderline」因 $t=+1.83$ 勉強過 1.65；SLV「significant negative」因 $t=-2.91$）全建立在\textbf{未經 canonical 復現}的數字上。K903 下 BTC $t=+2.88$（穩過門檻、不再 borderline）、SLV $t=-0.68$（不顯著、敘事翻轉）。\\
+\textbf{修正}：二擇一且全表一致——(a) 全 7 列換 K903（須同步改 BTC 不再 borderline、SLV 不顯著的所有散文），或 (b) 重新定位 SPY/QQQ/EEM/BTC/SLV 的 source 並以新 K 復現後恢復舊表。caption 須完整揭露所有 earlier-draft 列，不只 GLD。
+
+\item[\high\ V11-3 — SPY 2025 散文 vs Table 3 數字分歧]\hfill\\
+\textbf{位置}：\texttt{body.tex:184} vs \texttt{tables\_main.tex:51}\\
+\textbf{問題}：L184 報 SPY 2025「$-8.818$ vs $-8.719$, $\Delta=-1.13\%$, DM $p=0.029$」；Table~3（K903）為「$-8.412$ vs $-8.268$, $\Delta=-1.74\%$, $p=0.048$」。兩處皆宣稱 canonical，數字不同。L144 又另報 SPY 2025 $p=0.048$（與表一致）——即 L144 已改、L184 未改。\\
+\textbf{修正}：L184 SPY-2025 改 K903（$-8.412/-8.268$, $\Delta=-1.74\%$, $p=0.048$）。
+
+\item[\high\ V11-4 — GLD $\gamma$ 三版並存]\hfill\\
+\textbf{位置}：\texttt{body.tex:405}（$\gamma=-0.088$）vs Table~2/L134（$+0.002$）vs L172（bull $-0.043$/bear $+0.048$）\\
+\textbf{問題}：L405「For GLD ($\gamma=-0.088$), VT is contrarian」用的是\textbf{已被推翻的舊 draft 負值}（接近舊 $-0.067$ 家族），且此值直接支撐 contrarian-VT 的因果敘事。同句 SPY $\gamma=0.211$ 亦與 K903 $+0.132$ 不一致（與 Table~2 混血一致，但與 canonical 不一致）。\\
+\textbf{修正}：L405 GLD 的 $\beta^{\text{trend}}$ 對應論述改錨到 regime-conditional $\gamma$（fear-rally 期 $\gamma<0$），不可引用無條件 $-0.088$；或明確標註此 $-0.088$ 是 in-sample 2010--2017 估計窗的值並與 Table~2 caption 對齊（但仍須說明為何與 +0.002 不同物件）。
+
+\item[\high\ V11-5 — Reproduce gate 過期且 amber（paper-workflow 硬規則）]\hfill\\
+\textbf{位置}：\texttt{reproduce\_report.json}（timestamp 2026-05-17）vs \texttt{README.md}\\
+\textbf{問題}：report 生成於 2026-05-17，早於 06-10 的 body/Table 重寫；\texttt{alert\_level=amber}、\texttt{traceable\_match\_rate\_pct=80.9}（$<95\%$ gate）、\texttt{untraceable=19}，且 \texttt{untraceable\_summary} 仍引用已廢的 14-table 佈局（Tables 1,2,6,7,8,11,14）與舊 HM 衝突。README 寫「Reproduce gate 0 MISMATCH」具誤導性。\texttt{.claude/rules/paper-workflow.md}：gate 非 green 不得 review / 標 ready / submit。\\
+\textbf{修正}：更新 \texttt{reproduce.py} 的 expected values 對齊 7-table 新佈局；為 abstract 的 6/6 OOS 與 $\rho=0.83$（$N=14$）建立 dedicated K 實驗 JSON；gate 轉 green 前維持 FROZEN。
+
+\end{description}
+
+\subsection*{\textcolor{warncolor}{中度問題（MEDIUM）}}
+
+\begin{description}[leftmargin=1.4em]
+
+\item[\med\ V11-6 — EEM「GJR」prescription 在表內無 DM 支持]\hfill\\
+\texttt{tables\_main.tex:32}（EEM Model Choice = GJR）vs \texttt{:57}（EEM 2023-24 $\Delta=-0.01\%$, $p=0.949$）vs \texttt{body.tex:144}（EEM 與 TLT/BTC 同列「fail to reject」）。EEM 被 prescribe GJR（因 $\gamma$ 顯著正）但 DM 無法區分兩模型；BTC（$t$ 更高）卻標 Borderline。referee 會問分類邏輯的一致性。建議在 L198 的「nine DM comparisons」段補一句說明 EEM「prescribed GJR 但 OOS 兩模型 indistinguishable，與 rule 不矛盾（never significantly beaten）」。
+
+\item[\med\ V11-7 — 未定義交叉引用 \texttt{sec:model\_selection}]\hfill\\
+\texttt{main.log}「There were undefined references」；\texttt{\textbackslash ref\{sec:model\_selection\}} 出現於 Intro（L11）與 L198，但該 label 從未 \texttt{\textbackslash label} 定義 $\Rightarrow$ PDF 印「??」。投稿前必修（補 \texttt{\textbackslash label\{sec:model\_selection\}} 到 §4.3.2 model-selection-rule 小節，或改指 \texttt{sec:garch\_comparison}）。
+
+\item[\med\ V11-8 — Table 3 只列 9/12 cells 的選取規則未說明]\hfill\\
+K903 \texttt{k903\_table3.csv} 有 12 列（6 資產 $\times$ 2 期間）；Table~3 只顯示 9 列（TLT-2025、EEM-2025、BTC-2025、QQQ 部分被略）。「nine Diebold-Mariano comparisons」的 9 是被選出的子集；須在 caption 或 §4.3.2 說明為何只報這 9 cells（否則像 cherry-pick）。
+
+\item[\med\ V11-9 — Table 2 caption 僅揭露 GLD 一列的 earlier-draft 來源]\hfill\\
+caption 只說 GLD 是替換 earlier-draft；SPY/QQQ/EEM/BTC/SLV 的 vintage 分歧（V11-2）未揭露。若採 V11-2(b) 保留舊表，caption 須對所有非 K903 列加同等揭露。
+
+\item[\med\ V11-10 — 三條引用未驗證（hood2025 / nelson2025 / xu2024）]\hfill\\
+carried from 06-10 audit。hood2025 為 Contribution~2 文獻錨點，投稿前必跑 citation-verifier；若不存在，改錨 \citet{moreira2017}+\citet{harvey2018}。
+
+\end{description}
+
+\subsection*{輕微問題（LOW）}
+
+\begin{description}[leftmargin=1.4em]
+\item[\low\ V11-11] \texttt{main.tex} 手寫 thebibliography 約 9 條未被 \texttt{\textbackslash cite}（engle2004, longin2001, mcneil2015, kim2019, bucci2020, araya2024, campbell2017, engleGhyselsSohn2013, pattonSheppard2015）——刪除或移至 supplement 引用處。
+\item[\low\ V11-12] (a) Overfull \texttt{\textbackslash hbox} 262pt at \texttt{body.tex:449--466}（表格超出版面）；(b) \texttt{main.tex} \texttt{\textbackslash date} 仍寫「May 2026 (v3.3)」，與 v11 round 不一致；(c) \texttt{experiments.md} 仍標「Current body: body\_v3.tex」+ 舊 14-table mapping（replication package canonical mapping 失準，JBF hard requirement）。
+\end{description}
+
+\section{總結與建議}
+
+\textbf{整體評估}：論文的研究設計、方法論嚴謹度與誠實揭露（domain restriction、in-sample mechanical caveat、雙尺度腳註）都達到 JBF 水準；但 06-10 的 K903 全文一致化\textbf{執行不完整}，留下 4 處 body↔canonical-table 的直接數字矛盾（V11-1/2/3/4），任一處被 referee 抓到即 desk-reject 風險。reproduce gate（V11-5）違反 paper-workflow 硬規則。\textbf{維持 SUBMISSION FROZEN 是正確的。}
+
+\textbf{修訂優先順序}：
+\begin{enumerate}
+\item \textbf{(blocking)} 全文掃描每一個 $\gamma$ / QLIKE / DM-$p$ 數字，逐一對齊 K903 canonical——特別是 L184（GLD+SPY-2025 散文）、L405（GLD $\beta$-trend）、Table~2 全 7 列。建立一份「number $\to$ K903 source cell」對照表，確保 body、Table、abstract 三方同 vintage。
+\item \textbf{(blocking)} 修 \texttt{\textbackslash label\{sec:model\_selection\}}（V11-7）。
+\item \textbf{(blocking)} \texttt{reproduce.py} expected values 對齊 7-table 佈局重跑 $\to$ green；為 6/6 OOS 與 $\rho=0.83$ 補 dedicated JSON（V11-5）。
+\item \textbf{(pre-submit)} citation-verifier 跑 hood2025 / nelson2025 / xu2024；hood2025 不存在則改錨（V11-10）。
+\item \textbf{(pre-submit)} §3.1 補各分析期間總表（V11-7 §七）；Table~3 的 9-cell 選取規則說明（V11-8）；Table~2 caption 完整 vintage 揭露（V11-9）。
+\item \textbf{(housekeeping)} 清未引用 bib（V11-11）；修 overfull hbox + \texttt{\textbackslash date} + \texttt{experiments.md} mapping（V11-12）。
+\end{enumerate}
+
+\medskip
+\noindent\textit{審查方法}：fresh-context 對照 K903 canonical 逐 cell re-walk（非子集抽樣），涵蓋 body.tex 全 513 行 + tables\_main.tex 全 144 行 + main.tex abstract/bib。所有引用數字取自實際檔案 grep 與 K903 source CSV，未臆造。
+
+\end{document}

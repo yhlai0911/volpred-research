@@ -21,19 +21,20 @@ SLV & 0.082 & 1.76 & -0.13 & 5.8 & -13.6 & 9.1 & 2260 \\
 
 \begin{table}[H]
 \centering
-\caption{GJR-GARCH $\gamma$ Parameter: Rolling Quarterly Estimates ($w = 504$, step $= 63$, 2010--2026; HAC $t$ uses Newey--West with 8 lags). The GLD row reflects the K903 canonical replication ($n = 58$ quarterly windows, mean $+0.002$, HAC $t = +0.15$ NS), replacing an earlier-draft estimate (mean $-0.067$, HAC $t = -5.79$) whose source experiment could not be re-located in the current ledger.}
+\caption{GJR-GARCH $\gamma$ Parameter: Rolling Quarterly Estimates ($w = 504$, step $= 63$, 2010--2026; HAC $t$ uses Newey--West with 8 lags). All rows reflect the K903 canonical replication ($n = 58$--$60$ quarterly windows per asset; \texttt{k903\_table2.csv}); earlier drafts carried estimates from a vintage whose source experiment could not be re-located (most notably GLD mean $-0.067$, HAC $t=-5.79$, since reversed to $+0.002$ NS, and SLV $t=-2.91$, since revised to $-0.68$ NS). Model Choice applies the $t > 1.65$ rule to the HAC column.}
 \label{tab:gamma}
 \begin{tabular}{lrrrrl}
 \toprule
 Asset & Mean $\gamma$ & Std & \% Negative & HAC $t$ & Model Choice \\
 \midrule
-SPY & +0.211 & 0.044 & 0\% & +8.30 & GJR \\
-QQQ & +0.110 & 0.072 & 12\% & +3.21 & GJR/Context \\
-EEM & +0.180 & 0.095 & 8\% & +4.12 & GJR \\
+% source: experiments/k903/tables/k903_table2.csv — FULL table swapped to K903 canonical (v11 fix 2026-06-11; the 06-10 fix had swapped only the GLD row, leaving a mixed-vintage table)
+SPY & +0.132 & 0.061 & 0\% & +11.08 & GJR \\
+QQQ & +0.116 & 0.052 & 0\% & +10.76 & GJR \\
+EEM & +0.087 & 0.034 & 2\% & +11.88 & GJR \\
 GLD & +0.002 & 0.055 & 67\% & +0.15 & GARCH \\
-TLT & -0.008 & 0.048 & 52\% & -0.34 & GARCH \\
-BTC & +0.117 & 0.136 & 28\% & +1.83 & GJR/Borderline \\
-SLV & -0.041 & 0.058 & 72\% & -2.91 & GARCH \\
+TLT & -0.005 & 0.044 & 69\% & -0.46 & GARCH \\
+BTC & +0.072 & 0.105 & 25\% & +2.88 & GJR \\
+SLV & -0.009 & 0.044 & 71\% & -0.68 & GARCH \\
 \bottomrule
 \end{tabular}
 \end{table}

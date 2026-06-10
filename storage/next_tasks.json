@@ -27060,7 +27060,7 @@
     "title": "研究 backlog fallback: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來源：JFE 2025 The volatility puzzle of the beta anomaly） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "bab_beta_anomaly",
@@ -27069,10 +27069,9 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-10T09:08:12+00:00",
-    "claimed_by": "hourly-23",
-    "claimed_at": "2026-06-10T15:10:14.734983+00:00",
-    "claim_session_id": "d78c9bea52bf",
-    "started_at": "2026-06-10T15:10:27.542800+00:00"
+    "started_at": "2026-06-10T15:10:27.542800+00:00",
+    "last_released_at": "2026-06-10T17:50:08.243396+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "paper_body_vtt_v6_fixes_round4_2026_06_10",
@@ -27190,11 +27189,11 @@
     "source": "paper_audit_2026-06-10",
     "title": "leverage-direction 審查修正：6 HIGH（SUBMISSION FROZEN — K903 全文一致化）",
     "description": "依 paper/leverage-direction/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）。決策已定（README）：採 K903 canonical 全文一致化（abstract 已是此版）— 重寫 Intro L11/§4.2.1/§4.2.3/§5.1/§6 刪 −5.79/93%/CI 舊統計；刪除 L134 不實腳註；Table 3 九列全改 K903 值並重算分類正確率；BTC 分類規則統一統計量重算（9/9 可能降 8/9 如實報）；ρ=0.944 的 p<0.001 改 p≈0.016（5 處）；reproduce.py expected values 對齊後重跑至 green。修 .tex 後 xelatex exit 0 → uv run volpred ops paper-update --paper-id leverage-direction → fix_log.md 記每條處置。",
-    "status": "in_progress",
-    "claimed_by": "main-thread-fable5",
-    "claimed_at": "2026-06-10T14:55:00+00:00",
+    "status": "pending",
     "result_note": ".tex 修正全部完成（6 HIGH + 4 MEDIUM, fix_log.md 已寫）；待分類器恢復後 xelatex + paper-update + reproduce 重跑",
-    "created_at": "2026-06-10T13:58:00+00:00"
+    "created_at": "2026-06-10T13:58:00+00:00",
+    "last_released_at": "2026-06-10T17:50:08.243430+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "paper_body_audit_fix_vix_sufficiency_2026_06_10",
@@ -27203,11 +27202,11 @@
     "source": "paper_audit_2026-06-10",
     "title": "vix-sufficiency 審查修正：6 HIGH（errata 未落地 + family 數不一致）",
     "description": "依 paper/vix-sufficiency/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH 後 MEDIUM）。重點：2026-05-30 errata（Table 3 BH Sharpe 0.947→0.827 + narrative 翻轉）落地正文、標題/正文 family 數一致化、§7.1 殘留文字清理。數字修正必對 experiments JSON 驗證；xelatex exit 0 → paper-update 上傳 → fix_log.md。",
-    "status": "in_progress",
-    "claimed_by": "main-thread-fable5",
-    "claimed_at": "2026-06-10T14:55:00+00:00",
+    "status": "pending",
     "result_note": ".tex 修正完成（6 HIGH 全處置, fix_log.md 已寫）；待分類器恢復後 xelatex + paper-update；MEDIUM 8 項殘",
-    "created_at": "2026-06-10T13:58:00+00:00"
+    "created_at": "2026-06-10T13:58:00+00:00",
+    "last_released_at": "2026-06-10T17:50:08.243439+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "paper_body_audit_fix_taiwan_vt_2026_06_10",
