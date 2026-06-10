@@ -18,3 +18,10 @@
 1. xelatex 編譯 + paper-update 上傳（分類器中斷中，恢復即跑）
 2. MEDIUM 8 項逐條
 3. errata 檔標記「已落地 2026-06-10」
+
+## 2026-06-11 Codex 收尾
+- `README.md` 與 `experiments.md` 已從 stale 的「11 families / near submission-ready / reproduce green」口徑改為 audit 後的 `13 families / MAJOR_REVISION / reproduce v3 stale`
+- 本輪不擴張處理 MEDIUM 項；僅完成 HIGH 任務要求的 surface sync
+- `main_v4.tex` / `main.tex` 補上 `PingFang TC` 不存在時回退 `Songti TC` 的字型 fallback，修復本地 XeLaTeX 可重現性
+- `xelatex -interaction=nonstopmode -halt-on-error main_v4.tex` 已成功，生成新的 `main_v4.pdf`
+- 注意：`paper-update` 依 `main*.tex` 的 mtime 判斷 active source；若 `main.tex` 比 `main_v4.tex` 新，會把 stale 11-family metadata 誤同步出去。本輪需明確以 `main_v4.tex` 作為 active source 重跑

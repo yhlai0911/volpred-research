@@ -1,13 +1,13 @@
 # Paper 4: Supporting Experiments Index
 
-**Paper**: Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Eleven Signal Families for Equity Volatility Forecasting and Volatility Timing
+**Paper**: Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Thirteen Signal Families for Equity Volatility Forecasting and Volatility Timing
 **Journal**: Journal of Forecasting
-**Status**: Near submission-ready (R2 SEVERE=0)
-**Last Updated**: 2026-04-17
+**Status**: `MAJOR_REVISION` after audit 2026-06-10; HIGH findings landed in body, MEDIUM findings and reproduce-gate upgrade still pending.
+**Last Updated**: 2026-06-11
 
 ---
 
-## Part A: Original 11 Signal Families (pre-2026-04-17 core experiments)
+## Part A: Original 11 Signal Families (pre-revision core experiments)
 
 These experiments underpin the original VIX sufficiency claim across SPY 1993–2026.
 

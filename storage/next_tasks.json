@@ -27194,11 +27194,17 @@
     "source": "paper_audit_2026-06-10",
     "title": "leverage-direction 審查修正：6 HIGH（SUBMISSION FROZEN — K903 全文一致化）",
     "description": "依 paper/leverage-direction/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）。決策已定（README）：採 K903 canonical 全文一致化（abstract 已是此版）— 重寫 Intro L11/§4.2.1/§4.2.3/§5.1/§6 刪 −5.79/93%/CI 舊統計；刪除 L134 不實腳註；Table 3 九列全改 K903 值並重算分類正確率；BTC 分類規則統一統計量重算（9/9 可能降 8/9 如實報）；ρ=0.944 的 p<0.001 改 p≈0.016（5 處）；reproduce.py expected values 對齊後重跑至 green。修 .tex 後 xelatex exit 0 → uv run volpred ops paper-update --paper-id leverage-direction → fix_log.md 記每條處置。",
-    "status": "pending",
+    "status": "succeeded",
     "result_note": ".tex 修正全部完成（6 HIGH + 4 MEDIUM, fix_log.md 已寫）；待分類器恢復後 xelatex + paper-update + reproduce 重跑",
     "created_at": "2026-06-10T13:58:00+00:00",
     "last_released_at": "2026-06-10T17:50:08.243430+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T21:40:14.658623+00:00",
+    "claim_session_id": "733649797613",
+    "started_at": "2026-06-10T21:40:25.770094+00:00",
+    "completed_at": "2026-06-10T21:43:03.433235+00:00",
+    "result": "Closed leverage-direction audit HIGH #5 by rewriting/re-running reproduce to green, fixed the residual GARCH-Normal Kupiec p from 0.64 to 0.40, recompiled main.tex, and synced paper-update."
   },
   {
     "id": "paper_body_audit_fix_vix_sufficiency_2026_06_10",
@@ -27207,11 +27213,17 @@
     "source": "paper_audit_2026-06-10",
     "title": "vix-sufficiency 審查修正：6 HIGH（errata 未落地 + family 數不一致）",
     "description": "依 paper/vix-sufficiency/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH 後 MEDIUM）。重點：2026-05-30 errata（Table 3 BH Sharpe 0.947→0.827 + narrative 翻轉）落地正文、標題/正文 family 數一致化、§7.1 殘留文字清理。數字修正必對 experiments JSON 驗證；xelatex exit 0 → paper-update 上傳 → fix_log.md。",
-    "status": "pending",
+    "status": "succeeded",
     "result_note": ".tex 修正完成（6 HIGH 全處置, fix_log.md 已寫）；待分類器恢復後 xelatex + paper-update；MEDIUM 8 項殘",
     "created_at": "2026-06-10T13:58:00+00:00",
     "last_released_at": "2026-06-10T17:50:08.243439+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T21:34:12.114560+00:00",
+    "claim_session_id": "2b3e2331a63d",
+    "started_at": "2026-06-10T21:34:18.915976+00:00",
+    "completed_at": "2026-06-10T21:39:56.847672+00:00",
+    "result": "Aligned vix-sufficiency audit surfaces to 13-family/MAJOR_REVISION, added XeLaTeX font fallback, recompiled main_v4, and re-synced paper-update from main_v4."
   },
   {
     "id": "paper_body_audit_fix_taiwan_vt_2026_06_10",
@@ -27414,7 +27426,7 @@
     "title": "研究 backlog fallback: 隔夜/日內波動率溢酬 clustering 與星期效應擇時",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "clustering",
@@ -27423,9 +27435,12 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-10T17:08:08+00:00",
-    "started_at": "2026-06-10T17:09:18.963257+00:00",
+    "started_at": "2026-06-10T22:10:17.747860+00:00",
     "last_released_at": "2026-06-10T19:50:08.290526+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-10T22:09:42.631245+00:00",
+    "claim_session_id": "a706bfb42f0b"
   },
   {
     "id": "paper_review_mile_c26fcd8e",
@@ -27492,13 +27507,16 @@
     "description": "從5月CPI年增率衝高至4.2%與中東能源危機切入，分析市場對新任Fed主席Warsh首秀可能重燃升息預期的恐慌。可量化：SOFR選擇權隱含波動率Skew與泰勒法則偏差值的回測分析。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-10T21:13:10+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-10T22:09:41+00:00",
+    "blocked_note": "auto-refill 產生未驗證/虛構前提：5月CPI 4.2% 未公布（今晚 20:30 台灣才釋出）、Warsh首秀未確認、中東能源危機虛構。違反研究誠實原則，不可作為文章基礎。"
   }
 ]

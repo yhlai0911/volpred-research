@@ -10,7 +10,7 @@
 | 2 | L134 腳註「不同物件」說法不實 | ✅ 腳註改寫：承認 K903 同規格 canonical replication、SIGN REVERSED（引 k903_vs_paper_diff.md）、全文採 K903 |
 | 3 | Table 3 八列 legacy | ✅ 全表 9 列換 K903（experiments/k903/tables/k903_table3.csv，加 % source 註）；L144 敘事重寫（QQQ 2025 p=0.086 非 0.023；GLD 23-24 GARCH 顯著勝 p=0.001 如實報告）；L188 QQQ natural-experiment 弱化為 illustrative |
 | 4 | BTC 分類規則矛盾 | ✅ 明確區分單窗 t vs quarterly-mean HAC t；BTC 標 GJR/Borderline（Table 2 Model Choice 欄改）；9/9 改「prescribed model is never significantly beaten」判準 + BTC borderline 揭露（Intro/abstract/§4.3.2 三處一致）；L200 的 γ>0.08 改 [0.12,0.17] band |
-| 5 | Reproduce gate 過期 amber | ⚠️ 殘項：reproduce.py expected values 對齊新表後重跑 — 需 compute（已列 next step；gate green 前維持 FROZEN） |
+| 5 | Reproduce gate 過期 amber | ✅ `reproduce.py` 已重寫為 v12 / K903 canonical 7-table verifier，並於 2026-06-11 重跑轉 green；另把 tab:var_ortho 的 GARCH-Normal Kupiec p 從錯誤的 `0.64` 修正為 `0.40`，最新 gate 為 `161 MATCH / 0 MISMATCH / 23 NOTE` |
 | 6 | ρ=0.944 p<0.001 錯一數量級 | ✅ 3 處（L13/L249/L270）改 p=0.016 + L249 加「formal inference 以 N=14 為準」；L407/L513/abstract 無 p 值不需改 |
 
 ## MEDIUM（部分處置）
@@ -30,7 +30,6 @@
 - unused bibitems → ⚠️ 殘項；experiments.md 表號 mapping 更新 → ⚠️ 殘項
 
 ## 殘項 next steps
-1. reproduce.py 對齊 + 重跑 → green（解凍前提）
-2. citation 三條查證
-3. tab:vt 統一窗重算（compute_queue）
-4. §3.1 期間總表、multiple-testing 段、BH 溯源、bib 清理
+1. citation 三條查證
+2. tab:vt 統一窗重算（compute_queue）
+3. §3.1 期間總表、multiple-testing 段、BH 溯源、bib 清理

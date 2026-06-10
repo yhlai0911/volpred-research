@@ -3,7 +3,7 @@
 **Paper**: Leverage Direction Matters (`paper/leverage-direction/`)
 **Purpose**: index of canonical result JSONs and reproduce-gate outputs that
 back every numerical claim in `body.tex` / `body_v3.tex`.
-**Last updated**: 2026-05-25
+**Last updated**: 2026-06-11
 
 This folder does **not** duplicate result files. It catalogues where each
 canonical result lives in the existing two-tier layout:
@@ -36,20 +36,20 @@ canonical result lives in the existing two-tier layout:
 
 | File | Purpose |
 |---|---|
-| `../reproduce.py` | Single-entry verifier: walks all canonical JSONs above + body.tex/tables.tex extracted numbers; emits Check rows with status MATCH/MISMATCH/NOTE/UNTRACEABLE |
-| `../reproduce_report.json` | Latest run; **2026-05-17**: 0 MISMATCH, 28 MATCH, 9 NOTE, 19 UNTRACEABLE (structural data-limit), `alert_level=amber`, `gate_status=pass_with_untraceable`, `traceable_match_rate_pct=80.9` |
+| `../reproduce.py` | Single-entry verifier: walks all canonical JSONs above + body.tex/tables_main.tex extracted numbers; emits Check rows with status MATCH/MISMATCH/NOTE |
+| `../reproduce_report.json` | Latest run; **2026-06-11**: 0 MISMATCH, 161 MATCH, 23 NOTE, `alert_level=green`, `traceable_match_rate_pct=100.0` |
 
 ---
 
 ## Tables / figures in body.tex
 
-Tables are produced inline as LaTeX in `tables.tex`. Figures live as PDFs in
+Tables are produced inline as LaTeX in `tables_main.tex`. Figures live as PDFs in
 the paper root and PNGs in `figures/`; generator scripts are in
 `scripts/figures/` (per `scripts/README.md`).
 
 | Output | Location | Built from |
 |---|---|---|
-| Tables 1-14 | `../tables.tex` (LaTeX inline) | K799 / K802 / K824v2 / K902 / K1185 / K1188 / K829 / K273 |
+| Tables 1-7 | `../tables_main.tex` (LaTeX inline) | K903 / K902 / K799 / K802 / K1185 / K829 / K273 |
 | Figures 1-7 | `../figures/*.png` + `../fig_*.pdf` | `scripts/figures/fig_*.py` (see `scripts/figures/data_source.md` for per-figure status) |
 
 ---

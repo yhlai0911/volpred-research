@@ -12,7 +12,7 @@
 \usepackage{float}
 \usepackage{fontspec}           % XeLaTeX for Unicode/CJK support
 \usepackage{xeCJK}              % 繁體中文支援
-\setCJKmainfont{PingFang TC}    % macOS 內建繁體中文字型
+\IfFontExistsTF{PingFang TC}{\setCJKmainfont{PingFang TC}}{\setCJKmainfont{Songti TC}}
 \usepackage{multirow}
 \usepackage{threeparttable}
 \usepackage{tabularx}
