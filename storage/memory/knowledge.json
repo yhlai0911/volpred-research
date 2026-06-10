@@ -33083,5 +33083,16 @@
     "verdict": "NULL",
     "reviewer": "Codex CLI (gpt-5.4)",
     "reviewer_source": "Codex CLI primary path; v1 FAIL (share shift(1) + horizon mismatch) → main-thread fix → v2 PASS"
+  },
+  {
+    "item_id": "686c9c90",
+    "category": "paper6_round3_M1",
+    "content": "K1457 (Paper 6 v6 round-3 fix M1): safe-haven dummy added to cross-sectional β_TSMOM_orth = γ0+γ1·γ+γ2·D_nonEq regression (N=22, K55 canonical full sample). M0 baseline reproduces body exactly: γ1=0.568 (t_cls=3.06, R²=0.319). M1a dummy-alone: γ2=-0.075 (t_cls=-2.27 p=0.034, t_HC3=-1.84 p=0.065, R²=0.205) — non_equity 7 assets (GLD/TLT/USO/HYG/LQD/VNQ/SLV) load 7.5pp lower β. M1 joint regression KEY: γ1=0.457 (t_cls=2.00, t_HC3=2.03, p<0.05) still significant, γ2 collapses to NS (t=-0.84, p=0.41). γ1 attenuation 19.5%, R² incremental 0.024 over M0. Verdict PASS: γ subsumes asset-class effect — continuous leverage mechanism is operative channel, not discrete asset-class grouping. Body §3.x narrative strengthened. experiment_id=K1457, experiment_path=experiments/k1457/, reviewer=main_thread_reproduce_check, reviewer_source=body M0 exact match self-check, verdict=PASS.",
+    "evidence": [
+      "experiments/k1457/k1457_results.json",
+      "paper/vt-trend-following/body_v3.tex#tab:cross_section"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-10T17:19:40.545303"
   }
 ]

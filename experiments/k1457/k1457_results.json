@@ -1,0 +1,288 @@
+{
+  "experiment_id": "K1457",
+  "title": "M1: Safe-haven dummy in cross-sectional \u03b2_TSMOM ~ \u03b3 regression (N=22)",
+  "paper_ref": "paper/vt-trend-following/body_v3.tex line 228-229, 230-234 (round 3 M1 fix)",
+  "data_source": "paper/vt-trend-following/experiments/vt_tsmom_final_n22.json",
+  "n_assets": 22,
+  "n_equity": 15,
+  "n_non_equity": 7,
+  "panel_summary": {
+    "equity": {
+      "n": 15,
+      "mean_gamma": 0.14017813335643467,
+      "mean_beta_orth": 0.08724,
+      "std_beta_orth": 0.06254811633568877
+    },
+    "non_equity": {
+      "n": 7,
+      "mean_gamma": 0.045204481250146124,
+      "mean_beta_orth": 0.01212857142857143,
+      "std_beta_orth": 0.09092677849577126
+    }
+  },
+  "specifications": {
+    "M0_baseline_gamma_only": {
+      "n": 22,
+      "r2": 0.31852539922253065,
+      "r2_adj": 0.28445166918365716,
+      "f_stat_classical": 9.348122405710695,
+      "f_pvalue_classical": 0.006215501395610019,
+      "coefficients": {
+        "intercept": {
+          "coef": 0.0008681212923988685,
+          "se_classical": 0.024917175604919854,
+          "t_classical": 0.0348402766896044,
+          "p_classical": 0.9725524878190656,
+          "ci95_classical_lo": -0.051108196228568645,
+          "ci95_classical_hi": 0.05284443881336638,
+          "se_hc3": 0.027695380614011084,
+          "t_hc3": 0.03134534616071267,
+          "p_hc3": 0.9749941271521174
+        },
+        "gamma": {
+          "coef": 0.5681449371384037,
+          "se_classical": 0.185821921113695,
+          "t_classical": 3.0574699353731507,
+          "p_classical": 0.00621550139561,
+          "ci95_classical_lo": 0.18052720199451505,
+          "ci95_classical_hi": 0.9557626722822925,
+          "se_hc3": 0.16163322642993097,
+          "t_hc3": 3.5150256521340815,
+          "p_hc3": 0.0004397115125288648
+        }
+      }
+    },
+    "M1a_dummy_only": {
+      "n": 22,
+      "r2": 0.2050689626953507,
+      "r2_adj": 0.16532241083011823,
+      "f_stat_classical": 5.1594151711744045,
+      "f_pvalue_classical": 0.034315661291824215,
+      "coefficients": {
+        "intercept": {
+          "coef": 0.08724000000000001,
+          "se_classical": 0.018652775511588462,
+          "t_classical": 4.677051945743955,
+          "p_classical": 0.0001449364179065242,
+          "ci95_classical_lo": 0.04833099209277065,
+          "ci95_classical_hi": 0.12614900790722938,
+          "se_hc3": 0.01671668725115898,
+          "t_hc3": 5.218737342469071,
+          "p_hc3": 1.8014702149196812e-07
+        },
+        "dummy_non_eq": {
+          "coef": -0.07511142857142855,
+          "se_classical": 0.03306783667010614,
+          "t_classical": -2.2714346064050357,
+          "p_classical": 0.03431566129182427,
+          "ci95_classical_lo": -0.14408972714542773,
+          "ci95_classical_hi": -0.00613312999742939,
+          "se_hc3": 0.04071110586301444,
+          "t_hc3": -1.844986201656251,
+          "p_hc3": 0.0650395458455625
+        }
+      }
+    },
+    "M1_gamma_plus_dummy": {
+      "n": 22,
+      "r2": 0.34288131055839044,
+      "r2_adj": 0.2737109221961157,
+      "f_stat_classical": 4.9570534252688505,
+      "f_pvalue_classical": 0.018518946790481043,
+      "coefficients": {
+        "intercept": {
+          "coef": 0.023133016746887756,
+          "se_classical": 0.036525489610552846,
+          "t_classical": 0.6333389913055191,
+          "p_classical": 0.5340623727181064,
+          "ci95_classical_lo": -0.05331571160704013,
+          "ci95_classical_hi": 0.09958174510081563,
+          "se_hc3": 0.04039377514289749,
+          "t_hc3": 0.5726876644990998,
+          "p_hc3": 0.5668561911338101
+        },
+        "gamma": {
+          "coef": 0.4573251313748464,
+          "se_classical": 0.2291005391090574,
+          "t_classical": 1.9961765832299008,
+          "p_classical": 0.060449112721016995,
+          "ci95_classical_lo": -0.022187807858322195,
+          "ci95_classical_hi": 0.936838070608015,
+          "se_hc3": 0.22529006356773265,
+          "t_hc3": 2.029939199858911,
+          "p_hc3": 0.04236271986751286
+        },
+        "dummy_non_eq": {
+          "coef": -0.031677590644771346,
+          "se_classical": 0.037748096734547286,
+          "t_classical": -0.8391837836894125,
+          "p_classical": 0.41180080791831664,
+          "ci95_classical_lo": -0.11068526511831053,
+          "ci95_classical_hi": 0.04733008382876785,
+          "se_hc3": 0.04883644449796455,
+          "t_hc3": -0.6486465378553845,
+          "p_hc3": 0.5165668677486153
+        }
+      }
+    }
+  },
+  "delta_gamma1_after_dummy": -0.11081980576355732,
+  "pct_attenuation_gamma1": 19.505551932175525,
+  "interpretation": "If \u03b31 coefficient remains significant and similar magnitude with the dummy added (small attenuation), the leverage effect channel survives after controlling for asset class. If \u03b31 collapses or loses significance, the \u03b3\u2192TSMOM relationship reflects an equity-vs-non-equity grouping rather than a continuous leverage-effect mechanism.",
+  "raw_panel": [
+    {
+      "ticker": "SPY",
+      "asset_class": "equity",
+      "gamma": 0.26107402717268285,
+      "beta_orth": 0.1208,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "QQQ",
+      "asset_class": "equity",
+      "gamma": 0.22508658486092475,
+      "beta_orth": 0.1116,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "IWM",
+      "asset_class": "equity",
+      "gamma": 0.14413932274144253,
+      "beta_orth": 0.137,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "XLF",
+      "asset_class": "equity",
+      "gamma": 0.17406924904012513,
+      "beta_orth": 0.1416,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "XLE",
+      "asset_class": "equity",
+      "gamma": 0.078233723117949,
+      "beta_orth": 0.1126,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "DIA",
+      "asset_class": "equity",
+      "gamma": 0.23490814534820373,
+      "beta_orth": 0.1477,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "EEM",
+      "asset_class": "equity",
+      "gamma": 0.12083287973174062,
+      "beta_orth": 0.1415,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "EFA",
+      "asset_class": "equity",
+      "gamma": 0.15168471473040024,
+      "beta_orth": 0.1251,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "FXI",
+      "asset_class": "equity",
+      "gamma": 0.0692065724632978,
+      "beta_orth": 0.1312,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "EWZ",
+      "asset_class": "equity",
+      "gamma": 0.0737304554210984,
+      "beta_orth": 0.1207,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "GLD",
+      "asset_class": "non_equity",
+      "gamma": -0.037419606888514076,
+      "beta_orth": -0.0729,
+      "dummy_non_eq": 1
+    },
+    {
+      "ticker": "TLT",
+      "asset_class": "non_equity",
+      "gamma": -0.014520757515930283,
+      "beta_orth": -0.078,
+      "dummy_non_eq": 1
+    },
+    {
+      "ticker": "USO",
+      "asset_class": "non_equity",
+      "gamma": 0.061202854666307184,
+      "beta_orth": 0.0645,
+      "dummy_non_eq": 1
+    },
+    {
+      "ticker": "HYG",
+      "asset_class": "non_equity",
+      "gamma": 0.18430967398648154,
+      "beta_orth": 0.1272,
+      "dummy_non_eq": 1
+    },
+    {
+      "ticker": "LQD",
+      "asset_class": "non_equity",
+      "gamma": 0.055447325053418886,
+      "beta_orth": 0.0833,
+      "dummy_non_eq": 1
+    },
+    {
+      "ticker": "EWJ",
+      "asset_class": "equity",
+      "gamma": 0.1008199017628816,
+      "beta_orth": -0.0059,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "EWG",
+      "asset_class": "equity",
+      "gamma": 0.11726217577289455,
+      "beta_orth": 0.0195,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "EWU",
+      "asset_class": "equity",
+      "gamma": 0.13540214793421337,
+      "beta_orth": -0.0067,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "EWA",
+      "asset_class": "equity",
+      "gamma": 0.10914376891894623,
+      "beta_orth": -0.0112,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "INDA",
+      "asset_class": "equity",
+      "gamma": 0.107078331329719,
+      "beta_orth": 0.0231,
+      "dummy_non_eq": 0
+    },
+    {
+      "ticker": "VNQ",
+      "asset_class": "non_equity",
+      "gamma": 0.08954299741229832,
+      "beta_orth": -0.0944,
+      "dummy_non_eq": 1
+    },
+    {
+      "ticker": "SLV",
+      "asset_class": "non_equity",
+      "gamma": -0.022131117963038727,
+      "beta_orth": 0.0552,
+      "dummy_non_eq": 1
+    }
+  ]
+}

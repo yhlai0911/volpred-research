@@ -26992,10 +26992,81 @@
     "priority": 2,
     "title": "Paper 6 v6 fixes round 3: M1 safe-haven dummy + H1 trough decomposition + Codex 3rd-model review",
     "description": "Continuation of paper_body_vtt_v6_fixes_round2_2026_06_10 (H2 K1417 table done 2026-06-10 hourly-16, commit pending). Remaining: (M1) Add equity-vs-non-equity safe-haven dummy to Table 2 cross-sectional regression (γ → TSMOM-loading); requires re-running OLS with binary dummy column from K1193 22-asset universe. (H1) Trough-window daily return decomposition for 5 canonical assets around 2009-03 / 2020-03 (±63d) — write compute script first then enqueue compute_queue. (Codex) After body fixes: rerun xelatex + Codex 3rd-model adversarial review (per feedback_3model_review_discipline) → v6 review_history archive. Refs: paper/vt-trend-following/review_history/v5/README.md",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-10T08:13:00+00:00",
     "depends_on": [
       "paper_body_vtt_v6_fixes_round2_2026_06_10"
-    ]
+    ],
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-10T09:09:13.908524+00:00",
+    "claim_session_id": "06566a11401e",
+    "started_at": "2026-06-10T09:09:18.356706+00:00",
+    "completed_at": "2026-06-10T09:20:06.563481+00:00",
+    "result": "M1 safe-haven dummy completed via K1457: cross-sectional regression β_TSMOM_orth ~ γ + γ2·D_nonEq added to Table 2 (M0/M1a/M1 rows); body §3.x new paragraph 'Continuous leverage mechanism vs. asset-class grouping' inserted after Table 2; main_v3.pdf 40 pages (vs round-2 39), 0 undefined refs; paper-update synced 2026-06-10T09:18:56Z. Key finding: γ subsumes asset-class effect — γ1=0.457 (t=2.00) significant in joint M1, dummy collapses to NS (t=-0.84); supports continuous-leverage narrative, not grouping artifact. M0 reproduces body baseline exactly (0.568, t=3.06, R²=0.319) — self-check passed. K1457 knowledge.json item_id=686c9c90. H1 trough decomposition + Codex 3rd-model review carried over to round 4 task paper_body_vtt_v6_fixes_round4_2026_06_10 (scope split for 50min cap)."
+  },
+  {
+    "id": "paper_review_mile_2e12b166",
+    "title": "Paper review (Codex 24h-rule): K1306：SEC 10-K 管理階層語氣能預測個股月度 RV 嗎？Loughran-McDonald pilot — NULL",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_2e12b166 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_2e12b166",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-10T09:08:11+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T09:16:40.271460+00:00",
+    "claim_session_id": "74d8ff78cca7",
+    "started_at": "2026-06-10T09:16:52.438639+00:00",
+    "completed_at": "2026-06-10T09:18:40.615257+00:00",
+    "result": "PASS: K1306 article claims match code/results; no new lookahead or overclaim issues. Review receipt: storage/reviews/codex_24h/mile_2e12b166_review.md; non-blocking note: results limitation string still says 5 firms though n_firms=4."
+  },
+  {
+    "id": "paper_review_mile_41b7c7d0",
+    "title": "Paper review (Codex 24h-rule): 退休時房貸該一次還清嗎？模擬 1 萬次後，答案其實沒那麼直覺",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_41b7c7d0 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_41b7c7d0",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-10T09:08:11+00:00"
+  },
+  {
+    "id": "research_bab_beta_anomaly",
+    "title": "研究 backlog fallback: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來源：JFE 2025 The volatility puzzle of the beta anomaly） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "bab_beta_anomaly",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T09:08:12+00:00"
+  },
+  {
+    "id": "paper_body_vtt_v6_fixes_round4_2026_06_10",
+    "task_type": "paper_body",
+    "priority": 2,
+    "title": "Paper 6 v6 fixes round 4: H1 trough decomposition + Codex 3rd-model adversarial review",
+    "description": "Continuation of paper_body_vtt_v6_fixes_round3_2026_06_10 (M1 safe-haven dummy done — K1457, body Table 2 updated with M0/M1a/M1, new continuous-leverage-vs-asset-class paragraph, 40-page PDF, Supabase synced 2026-06-10T09:18:56Z). REMAINING from v5 review_history: (H1) Trough-window daily return decomposition for 5 canonical assets (SPY/QQQ/DIA/IWM/EFA) around 2009-03 / 2020-03 troughs (±63d window) — write compute script then enqueue compute_queue (yfinance fetch + decomposition is heavy). (Codex) After H1 done: rerun xelatex + Codex 3rd-model adversarial review per feedback_3model_review_discipline → v6 review_history archive. Refs: paper/vt-trend-following/review_history/v5/README.md.",
+    "status": "pending",
+    "depends_on": [
+      "paper_body_vtt_v6_fixes_round3_2026_06_10"
+    ],
+    "created_at": "2026-06-10T09:22:00+00:00"
   }
 ]

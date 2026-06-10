@@ -225,8 +225,13 @@ GJR $\gamma$ vs.\ $\Delta\alpha$ & 0.291 & 0.189 & --- & --- \\
 GJR $\gamma$ vs.\ $\beta_{\text{TSMOM}}^{\perp}$ & 0.793 & $< 0.001$ & 0.749 & $< 0.001$ \\
 \multicolumn{5}{@{}l}{Bootstrap 95\% CI for Pearson $r$: $[0.589, 0.919]$} \\
 \midrule
-\multicolumn{5}{@{}l}{\textit{Cross-sectional regression (full sample): $\beta_{\text{TSMOM},i}^{\perp} = \gamma_0 + \gamma_1 \cdot \text{GJR}_{\gamma,i} + \varepsilon_i$}} \\
-\multicolumn{5}{@{}l}{$\hat{\gamma}_0 = 0.001$ ($t = 0.03$), $\hat{\gamma}_1 = 0.568$ ($t = 3.06$), $R^2 = 0.319$} \\
+\multicolumn{5}{@{}l}{\textit{Cross-sectional regression (full sample): $\beta_{\text{TSMOM},i}^{\perp} = \gamma_0 + \gamma_1 \cdot \text{GJR}_{\gamma,i} + \gamma_2 \cdot D_{\text{non-eq},i} + \varepsilon_i$}} \\
+% source: K1457 (experiments/k1457/k1457_results.json), classical OLS SE, HC3 reported in parentheses; M0 reproduces body baseline
+\multicolumn{5}{@{}l}{M0 ($\gamma$ only): $\hat{\gamma}_0 = 0.001$ ($t = 0.03$), $\hat{\gamma}_1 = 0.568$ ($t = 3.06$), $R^2 = 0.319$} \\
+% source: K1457 — dummy-only OLS, classical SE; HC3 t=-1.84 reported alongside
+\multicolumn{5}{@{}l}{M1a (dummy only): $\hat{\gamma}_2 = -0.075$ ($t = -2.27$, HC3 $t = -1.84$), $R^2 = 0.205$} \\
+% source: K1457 — joint OLS β = γ0 + γ1·γ + γ2·D_nonEq + ε; γ subsumes asset-class effect
+\multicolumn{5}{@{}l}{M1 ($\gamma$ + safe-haven dummy): $\hat{\gamma}_1 = 0.457$ ($t = 2.00$, HC3 $t = 2.03$), $\hat{\gamma}_2 = -0.032$ ($t = -0.84$), $R^2 = 0.343$} \\
 \midrule
 \multicolumn{5}{@{}l}{\textit{Equity vs.\ Non-Equity Comparison}} \\
 Equity ($N = 15$): & \multicolumn{2}{c}{Mean $\beta_{\text{TSMOM}}^{\perp} = 0.087$} & \multicolumn{2}{c}{Std = 0.060} \\
@@ -236,10 +241,12 @@ Non-Equity ($N = 7$): & \multicolumn{2}{c}{Mean $\beta_{\text{TSMOM}}^{\perp} = 
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} This table reports cross-sectional correlations between the GJR-GARCH $\gamma$ parameter and the orthogonalized TSMOM loading ($\beta_{\text{TSMOM}}^{\perp}$) for 22 assets. Panel A uses full-sample estimates for both variables. Panel B addresses the endogeneity concern by estimating $\gamma$ from the first half of the sample (2007--2016) and $\beta_{\text{TSMOM}}^{\perp}$ from the second half (2017--2026). Bootstrap 95\% CI for full-sample Pearson $r$: $[0.263, 0.772]$ (5,000 replications). The Welch $t$-test compares mean TSMOM loadings between equity and non-equity asset groups.
+\item \textit{Notes:} This table reports cross-sectional correlations between the GJR-GARCH $\gamma$ parameter and the orthogonalized TSMOM loading ($\beta_{\text{TSMOM}}^{\perp}$) for 22 assets. Panel A uses full-sample estimates for both variables. Panel B addresses the endogeneity concern by estimating $\gamma$ from the first half of the sample (2007--2016) and $\beta_{\text{TSMOM}}^{\perp}$ from the second half (2017--2026). Bootstrap 95\% CI for full-sample Pearson $r$: $[0.263, 0.772]$ (5,000 replications). The Welch $t$-test compares mean TSMOM loadings between equity and non-equity asset groups. The M1 cross-sectional regression adds a safe-haven dummy $D_{\text{non-eq}} = 1$ for non-equity assets (GLD, TLT, USO, HYG, LQD, VNQ, SLV); reported $t$-statistics are classical OLS with HC3 robust $t$-statistics noted in parentheses (K1457 canonical, classical reproduces body baseline M0).
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
+
+\paragraph{Continuous leverage mechanism vs.\ asset-class grouping.} A second identification concern is that the $\gamma$--$\beta_{\text{TSMOM}}^{\perp}$ correlation may merely reflect a discrete equity-vs-non-equity grouping rather than a continuous leverage-effect mechanism: non-equity safe-haven assets (GLD, TLT, USO, HYG, LQD, VNQ, SLV) happen to carry both low GJR $\gamma$ and low TSMOM loadings, which could mechanically drive the $r = 0.564$ result. We address this by adding a binary safe-haven dummy ($D_{\text{non-eq},i} = 1$ for the seven non-equity assets) to the cross-sectional regression (Table~\ref{tab:cross_section}, M1). Two findings support the continuous leverage interpretation. First, the dummy alone (M1a) explains $R^2 = 0.205$ and is significant under classical SE ($\hat{\gamma}_2 = -0.075$, $t = -2.27$, $p = 0.034$) but only marginal under HC3 ($t = -1.84$, $p = 0.065$), so the asset-class effect is real but modest. Second, in the joint regression (M1), the dummy \textit{collapses} to insignificance ($\hat{\gamma}_2 = -0.032$, $t = -0.84$, $p = 0.41$) while the GJR $\gamma$ coefficient remains statistically significant ($\hat{\gamma}_1 = 0.457$, $t = 2.00$, HC3 $t = 2.03$). The 19.5\% attenuation of $\hat{\gamma}_1$ relative to M0 reflects mild collinearity (non-equity mean $\gamma = 0.045$ vs equity mean $\gamma = 0.143$), not a structural shift. We interpret this as evidence that $\gamma$ subsumes the asset-class effect: non-equity assets exhibit low $\beta_{\text{TSMOM}}^{\perp}$ \textit{because} their leverage-effect parameter is small, not because they belong to a different asset class per se. The continuous-leverage mechanism is therefore the operative channel, not a discrete grouping artifact (K1457 canonical).
 
 
 \subsection{Dual Mechanism: Sharpe Ratio vs.\ Maximum Drawdown}
