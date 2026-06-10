@@ -27032,7 +27032,7 @@
     "title": "Paper review (Codex 24h-rule): 退休時房貸該一次還清嗎？模擬 1 萬次後，答案其實沒那麼直覺",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_41b7c7d0 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_41b7c7d0",
@@ -27041,7 +27041,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-10T09:08:11+00:00"
+    "created_at": "2026-06-10T09:08:11+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T10:20:30.579955+00:00",
+    "claim_session_id": "4835ce67a798",
+    "started_at": "2026-06-10T10:20:37.858626+00:00",
+    "completed_at": "2026-06-10T10:21:55.616334+00:00",
+    "result": "PASS: K1400 article claims match code/results; no lookahead or overclaim issue. Review receipt: storage/reviews/codex_24h/mile_41b7c7d0_review.md; non-blocking note: bust-month wording is 0-indexed in source, so article month labels are off by +1 in plain-language counting."
   },
   {
     "id": "research_bab_beta_anomaly",

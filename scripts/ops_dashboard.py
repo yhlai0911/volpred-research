@@ -292,7 +292,19 @@ def main():
         "collect_us_data": 60, "collect_tw_data": 60, "release_pool": 30,
         "check_alerts": 30, "paper_sync_all": 60, "memory_health_daily": 60,
         "market_calendar_sync": 120, "refresh_paper_snapshots": 120,
+        # 2026-06-10 process-audit HIGH 4-1: the four MOST critical jobs were
+        # absent — a dead LaunchAgent (log frozen at exit 0) never breached
+        # anything. hourly_dispatch/compute_worker live in cron_jobs (not
+        # system_crontab), so their cron/log maps are seeded below.
+        "hourly_dispatch": 30, "gmail_poll": 30,
+        "compute_worker": 60, "handoff_regen": 90,
     }
+    # cron_jobs-section jobs (LaunchAgent-fired) aren't in system_crontab.items
+    # — seed their cron + log mappings explicitly so staleness math works.
+    job_cron_map.setdefault("hourly_dispatch", "7 * * * *")
+    job_log_map.setdefault("hourly_dispatch", "storage/logs/cron/hourly_dispatch.log")
+    job_cron_map.setdefault("compute_worker", "*/15 * * * *")
+    job_log_map.setdefault("compute_worker", "storage/logs/cron/compute_worker.log")
     stale = []
     try:
         from croniter import croniter

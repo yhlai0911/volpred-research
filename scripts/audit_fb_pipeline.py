@@ -15,6 +15,12 @@ from pathlib import Path
 
 REPO = Path(__file__).parent.parent
 LOG = REPO / "storage" / "reports" / "trending_repost_log.json"
+# 2026-06-10 process-audit CRITICAL #2: event_article FB statuses live as
+# top-level fb_post_status on feed.json entries (publishing.md canonical),
+# NOT in trending_repost_log.json — this audit was blind to them (6 awaiting,
+# oldest 06-05, past the 72h auto-expire bar; structural repeat of the
+# 2026-06-03 wrong-source incident this script's own docstring records).
+FEED = REPO / "storage" / "reports" / "feed.json"
 STALE_HOURS = 24
 AUTO_EXPIRE_HOURS = 72
 TERMINAL_STATUSES = {
@@ -57,11 +63,44 @@ def _auto_expire_stale_awaiting(data: list, expire_cutoff_iso: str) -> list[dict
     return expired
 
 
+def _load_entries() -> list:
+    """Merge trending log entries with feed.json top-level fb_post_status
+    entries (event_article path). Feed entries are normalized to carry
+    mile_id + date keys the rest of this script expects."""
+    data: list = []
+    if LOG.exists():
+        data = json.loads(LOG.read_text())
+    seen = {e.get("mile_id") for e in data if isinstance(e, dict)}
+    if FEED.exists():
+        try:
+            feed = json.loads(FEED.read_text())
+        except json.JSONDecodeError:
+            feed = []
+        for a in feed:
+            if not isinstance(a, dict):
+                continue
+            status = str(a.get("fb_post_status") or "").strip()
+            if not status:
+                continue
+            mid = a.get("mile_id") or a.get("id")
+            if mid in seen:
+                continue
+            data.append({
+                "mile_id": mid,
+                "fb_post_status": status,
+                "date": (a.get("fb_post_status_at") or a.get("published_at")
+                         or a.get("created_at") or ""),
+                "fb_post_draft": a.get("fb_post_draft"),
+                "source": "feed.json",
+            })
+    return data
+
+
 def main():
-    if not LOG.exists():
+    if not LOG.exists() and not FEED.exists():
         print(json.dumps({"audit": "fb_pipeline", "skip": "no log"}))
         return 0
-    data = json.loads(LOG.read_text())
+    data = _load_entries()
     now = time.time()
     stale_cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - STALE_HOURS * 3600))
     expire_cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - AUTO_EXPIRE_HOURS * 3600))
@@ -69,8 +108,8 @@ def main():
     # 1) Auto-expire awaiting >72h（不再無限期等）
     auto_expired = _auto_expire_stale_awaiting(data, expire_cutoff_iso)
     if auto_expired:
-        # 重 load log（mark_fb_post_status 已寫盤）
-        data = json.loads(LOG.read_text())
+        # 重 load（mark_fb_post_status 已寫盤；feed 端 status 也可能已被改）
+        data = _load_entries()
 
     # 2) 掃 stale pending（含仍未過 72h 的 awaiting）
     pending = []
