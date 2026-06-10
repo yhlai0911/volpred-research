@@ -1,0 +1,6 @@
+{
+  "timestamp": "2026-06-10T18:04:54Z",
+  "alert_type": "ERROR_LOG_TODAY",
+  "severity": "warn",
+  "detail": "Error log contains entry dated 2026-06-10 (today): 3-STRIKE TRIGGER arc-dedup refactor. K1449/K1091 narrative-arc duplicate published and caught by user. Article mile_5af5ec51 unpublished. Root cause: dedup domain model used literal similarity + same-K-ref, missing (asset-entities x conclusion-class) equivalence. Fix: arc_dedup.py module + 3 hard gates (publisher, refill pool, CLI check). Regression tests green."
+}
