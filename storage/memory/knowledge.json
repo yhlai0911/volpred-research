@@ -33248,5 +33248,58 @@
     ],
     "timestamp": "2026-06-11T03:22:37+08:00",
     "session": "hourly-03 2026-06-11"
+  },
+  {
+    "k_id": "K1464",
+    "experiment_id": "k1464_bab_vol_conditional",
+    "experiment_path": "experiments/k1464_bab_vol_conditional/",
+    "title": "K1464 rework — recursive RV tertiles still fail to confirm BAB conditioning",
+    "verdict": "NULL",
+    "verdict_reason": "After fixing regime-threshold lookahead, HAC diff test timing, full-series block bootstrap, and removing ETF contamination, low-vol BAB still exceeds high-vol BAB directionally but remains statistically inconclusive: HAC t=1.45, Welch p=0.147, bootstrap CI includes zero.",
+    "reviewer": "Codex CLI (gpt-5.4)",
+    "reviewer_source": "Codex re-review after methodology rework 2026-06-11 hourly tick",
+    "codex_review": "CONDITIONAL_PASS — original HIGH issues fixed; result is methodologically acceptable but remains NULL / underpowered",
+    "methodology_fixes": [
+      "Regime tertile cutoffs switched from full-sample quantiles to expanding recursive quantiles with min_history=36",
+      "Low-minus-high HAC test moved to original monthly series via BAB_t ~ const + 1{low}_t + 1{high}_t with linear restriction low-high",
+      "Stationary block bootstrap now resamples the full monthly BAB/regime series instead of within-regime subsamples",
+      "Removed GLD/TLT ETFs from the hand-curated universe"
+    ],
+    "key_numbers": {
+      "low_vol_n": 65,
+      "mid_vol_n": 75,
+      "high_vol_n": 76,
+      "low_vol_ann_return_pct": 12.07,
+      "high_vol_ann_return_pct": -2.2,
+      "low_minus_high_monthly": 0.0119,
+      "low_minus_high_annualized_pct": 14.28,
+      "hac_tstat": 1.45,
+      "welch_p": 0.147,
+      "bootstrap_ci_95": [
+        -0.007,
+        0.0274
+      ],
+      "mdes_80pct_power_annualized_pct": 27.42,
+      "unconditional_ann_return_pct": 8.62,
+      "unconditional_nw_tstat": 2.19
+    },
+    "data_provenance": {
+      "source": "yfinance",
+      "universe": "196 hand-curated US large-cap equities after dropping 9 insufficient-history tickers; ETFs removed in rework",
+      "period": "2008-01 to 2025-12 effective after beta warm-up + recursive regime warm-up",
+      "seed": 42
+    },
+    "links": {
+      "experiment": "experiments/k1464_bab_vol_conditional/",
+      "results_json": "experiments/k1464_bab_vol_conditional/k1464_bab_vol_conditional_results.json",
+      "readme": "experiments/k1464_bab_vol_conditional/README.md"
+    },
+    "lessons": [
+      "Regime-conditioning experiments can leak future information through threshold calibration even when the raw signal is shifted",
+      "For regime-split mean comparisons, HAC inference must preserve the original time axis",
+      "With N around 65-76 per regime, realistic 10-15% annualized effects are materially underpowered in monthly BAB conditioning tests"
+    ],
+    "timestamp": "2026-06-11T03:28:29.196570",
+    "session": "codex-cli interactive 2026-06-11"
   }
 ]

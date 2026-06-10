@@ -1,78 +1,85 @@
 {
   "low_vol": {
-    "n_obs": 84,
-    "mean_monthly": 0.012842966607913156,
-    "std_monthly": 0.04697548196708079,
-    "annual_sharpe": 0.9470757830821023,
-    "nw_se": 0.0045872888749754264,
-    "nw_tstat": 2.7996856003497173,
-    "ann_return_pct": 15.411559929495787
+    "n_obs": 65,
+    "mean_monthly": 0.010061065268691483,
+    "std_monthly": 0.043534325648205474,
+    "annual_sharpe": 0.8005763711357083,
+    "nw_se": 0.0051152224499511545,
+    "nw_tstat": 1.9668871426671888,
+    "ann_return_pct": 12.073278322429779
   },
   "mid_vol": {
-    "n_obs": 84,
-    "mean_monthly": 0.014619256305372337,
-    "std_monthly": 0.05502074134333245,
-    "annual_sharpe": 0.9204272451281703,
-    "nw_se": 0.00541537299713572,
-    "nw_tstat": 2.699584370846607,
-    "ann_return_pct": 17.543107566446807
+    "n_obs": 75,
+    "mean_monthly": 0.013829550413586078,
+    "std_monthly": 0.04969971668372991,
+    "annual_sharpe": 0.9639283907631557,
+    "nw_se": 0.0035906434800530213,
+    "nw_tstat": 3.8515520937717445,
+    "ann_return_pct": 16.595460496303293
   },
   "high_vol": {
-    "n_obs": 84,
-    "mean_monthly": 0.0042727794904074455,
-    "std_monthly": 0.05103376157365496,
-    "annual_sharpe": 0.2900304010020058,
-    "nw_se": 0.006838981764571307,
-    "nw_tstat": 0.6247683701310877,
-    "ann_return_pct": 5.127335388488935
+    "n_obs": 76,
+    "mean_monthly": -0.0018368384383159971,
+    "std_monthly": 0.053304361966161964,
+    "annual_sharpe": -0.11937100016236639,
+    "nw_se": 0.007439498815759695,
+    "nw_tstat": -0.24690351914901484,
+    "ann_return_pct": -2.204206125979197
   },
   "diff_test": {
-    "mean_low_minus_high": 0.00857018711750571,
-    "welch_t": 1.1324157919188373,
-    "welch_p": 0.2591038747611379,
-    "hac_coef": 0.004285093558752857,
-    "hac_se": 0.004133321172490095,
-    "hac_tstat": 1.0367192337418405,
-    "hac_p": 0.2998667255550572,
-    "bootstrap_mean_diff": 0.008504976241588132,
-    "bootstrap_ci95_lo": -0.007588913499561096,
-    "bootstrap_ci95_hi": 0.0243703992607275,
-    "n_low": 84,
-    "n_high": 84
+    "mean_low_minus_high": 0.01189790370700748,
+    "welch_t": 1.4585348594228218,
+    "welch_p": 0.14695359212983955,
+    "hac_low_minus_high": 0.011897903707007492,
+    "hac_se": 0.008199666850695064,
+    "hac_tstat": 1.4510228188111007,
+    "hac_p": 0.14677350625839397,
+    "bootstrap_mean_diff": 0.011074215379642368,
+    "bootstrap_ci95_lo": -0.006965220361086987,
+    "bootstrap_ci95_hi": 0.027416917265492936,
+    "n_low": 65,
+    "n_high": 76
   },
   "unconditional": {
-    "n_obs": 252,
-    "mean_monthly": 0.010578334134564311,
-    "annual_sharpe": 0.7169383066252996,
-    "nw_se": 0.0031536354722258996,
-    "nw_tstat": 3.3543300193468175,
-    "ann_return_pct": 12.694000961477172
+    "n_obs": 216,
+    "mean_monthly": 0.00718326760264762,
+    "annual_sharpe": 0.5025016741956986,
+    "nw_se": 0.0032853602376269257,
+    "nw_tstat": 2.186447477015861,
+    "ann_return_pct": 8.619921123177145
   },
   "fama_macbeth_lite": {
-    "intercept": 0.018052880174969137,
-    "intercept_se": 0.005613130356828691,
-    "intercept_t": 3.216187586487598,
-    "rv_pct_coef": -0.01489000476033215,
-    "rv_pct_se": 0.012098874059401568,
-    "rv_pct_t": -1.2306934254565367,
-    "rv_pct_p": 0.21843754796703507,
-    "r2": 0.007100291375885748
+    "intercept": 0.014454487998150228,
+    "intercept_se": 0.004515754009635157,
+    "intercept_t": 3.2009024334162204,
+    "rv_pct_coef": -0.009410699499498158,
+    "rv_pct_se": 0.009785642766372735,
+    "rv_pct_t": -0.9616843496307644,
+    "rv_pct_p": 0.33620818622527104,
+    "r2": 0.003137388630352289,
+    "n_obs": 180
   },
   "effective_period": {
-    "start": "2005-01-31",
+    "start": "2008-01-31",
     "end": "2025-12-31",
-    "n_months": 252
+    "n_months": 216
   },
   "universe": {
-    "candidates_requested": 207,
-    "tickers_with_data": 198,
-    "median_betas_per_month": 187,
-    "survivorship_bias_note": "Hand-curated large-cap list; survivors over-represented. Results should be read as upper bound on premium magnitude; tertile *conditioning* (within-strategy) is robust to constant survivorship bias."
+    "candidates_requested": 205,
+    "tickers_with_data": 196,
+    "median_betas_per_month": 185,
+    "survivorship_bias_note": "Hand-curated large-cap list with survivors over-represented. This likely inflates unconditional BAB magnitude and may still distort conditional comparisons if survivor composition co-moves with crisis regimes."
+  },
+  "power": {
+    "alpha": 0.05,
+    "power_target": 0.8,
+    "mdes_monthly_abs": 0.022853750074423543,
+    "mdes_annualized_pct": 27.42450008930825
   },
   "verdict": "NULL",
   "verdict_basis": {
-    "hac_tstat_abs": 1.0367192337418405,
-    "welch_tstat_abs": 1.1324157919188373,
+    "hac_tstat_abs": 1.4510228188111007,
+    "welch_tstat_abs": 1.4585348594228218,
     "bootstrap_excludes_zero": false,
     "sign_low_minus_high": 1.0,
     "bar": "SUPPORT requires |HAC t|>2.5 AND bootstrap CI excludes 0 AND low>high"
@@ -83,6 +90,7 @@
     "source_paper": "JFE 2025 'The volatility puzzle of the beta anomaly'",
     "seed": 42,
     "lag_safety": "betas shifted by 1 (use beta_{t-1} for portfolio formed at end of t-1, ret at t); RV regime also lagged",
+    "regime_cutoff_method": "expanding quantiles using only prior lagged RV history (min_history=36)",
     "bootstrap": {
       "type": "stationary_block",
       "block_len": 12,

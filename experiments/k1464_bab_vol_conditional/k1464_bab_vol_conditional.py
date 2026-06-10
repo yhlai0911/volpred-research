@@ -322,7 +322,7 @@ def expanding_percentile_signal(rv_lag: pd.Series, min_history: int = 36) -> pd.
 def hac_regime_difference(bab: pd.Series,
                           low_mask: pd.Series,
                           high_mask: pd.Series,
-                          lag: int = 6) -> Tuple[float, float, float]:
+                          lag: int = 6) -> Tuple[float, float, float, float]:
     """Estimate low-minus-high mean difference on the original time axis."""
     df = pd.DataFrame({
         "bab": bab,
@@ -333,7 +333,7 @@ def hac_regime_difference(bab: pd.Series,
     model = sm.OLS(df["bab"], X).fit(cov_type="HAC", cov_kwds={"maxlags": lag})
     test = model.t_test([0.0, 1.0, -1.0])
     coef = float(test.effect.item())
-    se = float(np.sqrt(test.sd.item()))
+    se = float(test.sd.item())
     tstat = float(test.tvalue.item())
     pvalue = float(test.pvalue)
     return coef, se, tstat, pvalue
@@ -378,6 +378,15 @@ def block_bootstrap_diff_full_series(bab: pd.Series,
     diffs = diffs[~np.isnan(diffs)]
     ci = np.percentile(diffs, [2.5, 97.5])
     return float(diffs.mean()), float(ci[0]), float(ci[1])
+
+
+def mdes_two_sample(sd1: float, sd2: float, n1: int, n2: int,
+                    alpha: float = 0.05, power: float = 0.80) -> float:
+    """Approximate minimum detectable absolute mean difference."""
+    z_alpha = stats.norm.ppf(1.0 - alpha / 2.0)
+    z_beta = stats.norm.ppf(power)
+    sigma = np.sqrt((sd1 ** 2) / n1 + (sd2 ** 2) / n2)
+    return float((z_alpha + z_beta) * sigma)
 
 
 def conditional_analysis(bab: pd.Series, mkt_rv: pd.Series) -> Dict:
@@ -560,7 +569,7 @@ def main():
 
     # BAB returns (returns at t use beta_{t-1})
     print("[bab] constructing BAB portfolio...")
-    bab, diag = bab_returns(betas, mret, low_q=0.30, high_q=0.30)
+    bab, diag = bab_returns(betas, mret)
     print(f"[bab] {len(bab)} monthly observations: {bab.index.min()} -> {bab.index.max()}")
 
     # Market RV monthly
@@ -578,8 +587,23 @@ def main():
         "candidates_requested": len(tickers),
         "tickers_with_data": int(px.shape[1]),
         "median_betas_per_month": int(betas.notna().sum(axis=1).median()),
-        "survivorship_bias_note": "Hand-curated large-cap list; survivors over-represented. Results should be read as upper bound on premium magnitude; tertile *conditioning* (within-strategy) is robust to constant survivorship bias.",
+        "survivorship_bias_note": "Hand-curated large-cap list with survivors over-represented. This likely inflates unconditional BAB magnitude and may still distort conditional comparisons if survivor composition co-moves with crisis regimes.",
     }
+    low_stats = results.get("low_vol", {})
+    high_stats = results.get("high_vol", {})
+    if low_stats and high_stats:
+        mdes = mdes_two_sample(
+            low_stats["std_monthly"],
+            high_stats["std_monthly"],
+            low_stats["n_obs"],
+            high_stats["n_obs"],
+        )
+        results["power"] = {
+            "alpha": 0.05,
+            "power_target": 0.80,
+            "mdes_monthly_abs": float(mdes),
+            "mdes_annualized_pct": float(mdes * 12 * 100),
+        }
 
     # Verdict logic
     dt = results["diff_test"]
@@ -614,6 +638,7 @@ def main():
         "source_paper": "JFE 2025 'The volatility puzzle of the beta anomaly'",
         "seed": SEED,
         "lag_safety": "betas shifted by 1 (use beta_{t-1} for portfolio formed at end of t-1, ret at t); RV regime also lagged",
+        "regime_cutoff_method": "expanding quantiles using only prior lagged RV history (min_history=36)",
         "bootstrap": {"type": "stationary_block", "block_len": 12, "reps": 10000, "seed": SEED},
         "hac_lag": 6,
     }
