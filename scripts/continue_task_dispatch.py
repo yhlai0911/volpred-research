@@ -232,9 +232,18 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
         is_p1 = priority == 1
         explicit_experiment = (t.get("task_type") or "").lower() == "experiment"
 
-        if is_main_thread_only(t) or is_paper_task(t):
+        # Explicit task_type=experiment overrides regex false positives.
+        # 2026-06-10: research backlog auto-fallback task descriptions contain
+        # "主線程派 experiment agent 前先讀..." (= main thread DISPATCHES the
+        # agent, not main thread does it), triggering MAIN_THREAD_MARKERS
+        # regex on bare "主線程" → all 5 yfinance experiments mis-tagged
+        # main_thread → agentable=0, pool silently stuck. Explicit task_type
+        # is more authoritative than free-text inference.
+        if explicit_experiment:
+            agentable.append(t)
+        elif is_main_thread_only(t) or is_paper_task(t):
             main_thread.append(t)
-        elif is_p1 and not explicit_experiment:
+        elif is_p1:
             main_thread.append(t)
         else:
             agentable.append(t)

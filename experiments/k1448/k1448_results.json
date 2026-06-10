@@ -1,0 +1,521 @@
+{
+  "experiment_id": "K1448",
+  "title": "Inflation-expectation regime and forward stock/bond volatility",
+  "created_at": "2026-06-10T03:57:05.486036+00:00",
+  "period": {
+    "start": "2010-01-04",
+    "end": "2026-06-09",
+    "n_obs_joint_prices": 4133
+  },
+  "data_source": "yfinance (TIP, IEF, TLT, SPY)",
+  "signal_definition": {
+    "tip_over_ief": "log(TIP/IEF).diff(63).shift(1)",
+    "tip_over_tlt": "log(TIP/TLT).diff(63).shift(1)"
+  },
+  "regime_definition": {
+    "rising": "lagged 63d log-ratio change > 0",
+    "falling": "lagged 63d log-ratio change <= 0"
+  },
+  "outcomes": {
+    "forward_rv": "21d annualized realized vol using returns t+1..t+21",
+    "forward_corr": "21d rolling correlation using returns t+1..t+21"
+  },
+  "lookahead_protection": {
+    "signal": "proxy diff window shifted by 1 day",
+    "outcome": "forward windows start at t+1"
+  },
+  "multiple_testing": {
+    "n_hac_contrasts": 10,
+    "bonferroni_alpha": 0.005
+  },
+  "analyses": {
+    "tip_over_ief": {
+      "proxy_name": "tip_over_ief",
+      "signal_window_days": 63,
+      "regime_counts": {
+        "falling": 1920,
+        "rising": 2128
+      },
+      "proxy_level_stats": {
+        "ratio_mean": 1.0582223205180064,
+        "ratio_std": 0.0643406481502563,
+        "ratio_min": 0.8773629130039405,
+        "ratio_max": 1.1732041291166775
+      },
+      "summaries": {
+        "fwd_rv_spy": {
+          "falling": {
+            "mean": 0.16110985569651345,
+            "median": 0.13416307710338984,
+            "std": 0.10657880980999651,
+            "n_days": 1920
+          },
+          "rising": {
+            "mean": 0.13439458676484659,
+            "median": 0.1159305437341242,
+            "std": 0.07296005229354971,
+            "n_days": 2128
+          }
+        },
+        "fwd_rv_ief": {
+          "falling": {
+            "mean": 0.06361907481683868,
+            "median": 0.05764023635936095,
+            "std": 0.024992323115400478,
+            "n_days": 1920
+          },
+          "rising": {
+            "mean": 0.05997795503712597,
+            "median": 0.05534137599904043,
+            "std": 0.02320521915493388,
+            "n_days": 2128
+          }
+        },
+        "fwd_rv_tlt": {
+          "falling": {
+            "mean": 0.1450031253506157,
+            "median": 0.13353467190237173,
+            "std": 0.0660942991262802,
+            "n_days": 1920
+          },
+          "rising": {
+            "mean": 0.13651177258425254,
+            "median": 0.12597613190021173,
+            "std": 0.04393381726532128,
+            "n_days": 2128
+          }
+        },
+        "fwd_corr_spy_ief": {
+          "falling": {
+            "mean": -0.307393359333685,
+            "median": -0.4027132879848264,
+            "std": 0.3786334053729864,
+            "n_days": 1920
+          },
+          "rising": {
+            "mean": -0.1936431093382605,
+            "median": -0.2544763999496747,
+            "std": 0.4051254481247155,
+            "n_days": 2128
+          }
+        },
+        "fwd_corr_spy_tlt": {
+          "falling": {
+            "mean": -0.30700331782737666,
+            "median": -0.39543280854909246,
+            "std": 0.37605856887376704,
+            "n_days": 1920
+          },
+          "rising": {
+            "mean": -0.19741349858075158,
+            "median": -0.23373260961779285,
+            "std": 0.38509669285070786,
+            "n_days": 2128
+          }
+        }
+      },
+      "hac_regression": {
+        "fwd_rv_spy": {
+          "Intercept": {
+            "coef": 0.1611098556965134,
+            "se_hac": 0.009946144191787186,
+            "t_hac": 16.19822240557767,
+            "p_hac": 5.190590635856262e-59
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": -0.026715268931666848,
+            "se_hac": 0.010506499153855759,
+            "t_hac": -2.542737456164232,
+            "p_hac": 0.01099878383170717
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.02128685532308272,
+            "hac_maxlags": 21
+          }
+        },
+        "fwd_rv_ief": {
+          "Intercept": {
+            "coef": 0.06361907481683868,
+            "se_hac": 0.0022776187404611654,
+            "t_hac": 27.932275796061145,
+            "p_hac": 1.0824029196474346e-171
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": -0.003641119779712768,
+            "se_hac": 0.0027549465713849674,
+            "t_hac": -1.3216662049029515,
+            "p_hac": 0.18627932692415738
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.005676416303975862,
+            "hac_maxlags": 21
+          }
+        },
+        "fwd_rv_tlt": {
+          "Intercept": {
+            "coef": 0.14500312535061574,
+            "se_hac": 0.006198052091271638,
+            "t_hac": 23.394951061288328,
+            "p_hac": 4.810486806253713e-121
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": -0.008491352766363272,
+            "se_hac": 0.006598995665632078,
+            "t_hac": -1.2867644103157532,
+            "p_hac": 0.19817641518689288
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.005793623256337255,
+            "hac_maxlags": 21
+          }
+        },
+        "fwd_corr_spy_ief": {
+          "Intercept": {
+            "coef": -0.3073933593336847,
+            "se_hac": 0.03435440854378709,
+            "t_hac": -8.947712167475986,
+            "p_hac": 3.629259213605924e-19
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": 0.11375024999542405,
+            "se_hac": 0.046200131959911586,
+            "t_hac": 2.4621195907865916,
+            "p_hac": 0.013811860420193904
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.020493340060692367,
+            "hac_maxlags": 21
+          }
+        },
+        "fwd_corr_spy_tlt": {
+          "Intercept": {
+            "coef": -0.3070033178273764,
+            "se_hac": 0.03440090200641089,
+            "t_hac": -8.9242810485075,
+            "p_hac": 4.486034634598736e-19
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": 0.1095898192466246,
+            "se_hac": 0.04541592764028122,
+            "t_hac": 2.4130261108973796,
+            "p_hac": 0.015820686144048163
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.020239019166083505,
+            "hac_maxlags": 21
+          }
+        }
+      },
+      "outcome_acf": {
+        "fwd_rv_spy": {
+          "lag_1": 0.9923479175465414,
+          "lag_5": 0.9343271183129792,
+          "lag_21": 0.5052813916100192
+        },
+        "fwd_rv_ief": {
+          "lag_1": 0.9890695787853586,
+          "lag_5": 0.9256373097678539,
+          "lag_21": 0.5771713370508631
+        },
+        "fwd_rv_tlt": {
+          "lag_1": 0.989391554999637,
+          "lag_5": 0.9197524590613589,
+          "lag_21": 0.49911653830469943
+        },
+        "fwd_corr_spy_ief": {
+          "lag_1": 0.9819881230027906,
+          "lag_5": 0.8956520819670197,
+          "lag_21": 0.5028433386657212
+        },
+        "fwd_corr_spy_tlt": {
+          "lag_1": 0.9817314509462902,
+          "lag_5": 0.8950895410083572,
+          "lag_21": 0.5164733198670951
+        }
+      }
+    },
+    "tip_over_tlt": {
+      "proxy_name": "tip_over_tlt",
+      "signal_window_days": 63,
+      "regime_counts": {
+        "falling": 1974,
+        "rising": 2074
+      },
+      "proxy_level_stats": {
+        "ratio_mean": 1.008180559533116,
+        "ratio_std": 0.1526928014703967,
+        "ratio_min": 0.6683196921928477,
+        "ratio_max": 1.316222196143469
+      },
+      "summaries": {
+        "fwd_rv_spy": {
+          "falling": {
+            "mean": 0.15355119293491026,
+            "median": 0.1281794147017594,
+            "std": 0.10954400782484229,
+            "n_days": 1974
+          },
+          "rising": {
+            "mean": 0.14089322503345542,
+            "median": 0.12090283673732657,
+            "std": 0.06946462211213249,
+            "n_days": 2074
+          }
+        },
+        "fwd_rv_ief": {
+          "falling": {
+            "mean": 0.060068350548323615,
+            "median": 0.054452088488600545,
+            "std": 0.023857284949325853,
+            "n_days": 1974
+          },
+          "rising": {
+            "mean": 0.06326267501684836,
+            "median": 0.057833549542407006,
+            "std": 0.024299934972943443,
+            "n_days": 2074
+          }
+        },
+        "fwd_rv_tlt": {
+          "falling": {
+            "mean": 0.14154521478050688,
+            "median": 0.12977201391838322,
+            "std": 0.06627474954183815,
+            "n_days": 1974
+          },
+          "rising": {
+            "mean": 0.13958187018117213,
+            "median": 0.13050338387251348,
+            "std": 0.04332617143006344,
+            "n_days": 2074
+          }
+        },
+        "fwd_corr_spy_ief": {
+          "falling": {
+            "mean": -0.35465483346800086,
+            "median": -0.45098886537940874,
+            "std": 0.3573751332628867,
+            "n_days": 1974
+          },
+          "rising": {
+            "mean": -0.14569872002249745,
+            "median": -0.17604576381717962,
+            "std": 0.4056558573259535,
+            "n_days": 2074
+          }
+        },
+        "fwd_corr_spy_tlt": {
+          "falling": {
+            "mean": -0.3528810720797261,
+            "median": -0.4525546146797197,
+            "std": 0.3561508242905715,
+            "n_days": 1974
+          },
+          "rising": {
+            "mean": -0.1508944353534345,
+            "median": -0.1606294131373031,
+            "std": 0.38509053248804453,
+            "n_days": 2074
+          }
+        }
+      },
+      "hac_regression": {
+        "fwd_rv_spy": {
+          "Intercept": {
+            "coef": 0.1535511929349103,
+            "se_hac": 0.01041200172789232,
+            "t_hac": 14.747518963963268,
+            "p_hac": 3.1918456058980345e-49
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": -0.012657967901454776,
+            "se_hac": 0.011375258673440209,
+            "t_hac": -1.1127630821274888,
+            "p_hac": 0.26581019482518675
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.0047885434869257,
+            "hac_maxlags": 21
+          }
+        },
+        "fwd_rv_ief": {
+          "Intercept": {
+            "coef": 0.060068350548323705,
+            "se_hac": 0.002166625545541054,
+            "t_hac": 27.724380279714335,
+            "p_hac": 3.549651548076906e-169
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": 0.0031943244685246498,
+            "se_hac": 0.0028957975778852035,
+            "t_hac": 1.1030896955364746,
+            "p_hac": 0.269988215272679
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.004377694103187224,
+            "hac_maxlags": 21
+          }
+        },
+        "fwd_rv_tlt": {
+          "Intercept": {
+            "coef": 0.141545214780507,
+            "se_hac": 0.0062523823123593085,
+            "t_hac": 22.638605208243504,
+            "p_hac": 1.8067015900291354e-113
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": -0.0019633445993348245,
+            "se_hac": 0.007038695488378916,
+            "t_hac": -0.2789358628422499,
+            "p_hac": 0.7802940457947364
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.00031036489709779236,
+            "hac_maxlags": 21
+          }
+        },
+        "fwd_corr_spy_ief": {
+          "Intercept": {
+            "coef": -0.3546548334679996,
+            "se_hac": 0.030768017778838655,
+            "t_hac": -11.52673649688024,
+            "p_hac": 9.674178929140381e-31
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": 0.20895611344550066,
+            "se_hac": 0.04387663185413163,
+            "t_hac": 4.762355372677138,
+            "p_hac": 1.913463285563721e-06
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.06929489464895444,
+            "hac_maxlags": 21
+          }
+        },
+        "fwd_corr_spy_tlt": {
+          "Intercept": {
+            "coef": -0.35288107207972486,
+            "se_hac": 0.030956684737064085,
+            "t_hac": -11.399188093847284,
+            "p_hac": 4.220365195231495e-30
+          },
+          "C(regime, Treatment(reference=\"falling\"))[T.rising]": {
+            "coef": 0.20198663672628872,
+            "se_hac": 0.04240940962676826,
+            "t_hac": 4.762778791402874,
+            "p_hac": 1.9094512326149262e-06
+          },
+          "meta": {
+            "n_obs": 4048,
+            "r2": 0.06889335966281085,
+            "hac_maxlags": 21
+          }
+        }
+      },
+      "outcome_acf": {
+        "fwd_rv_spy": {
+          "lag_1": 0.9923479175465414,
+          "lag_5": 0.9343271183129792,
+          "lag_21": 0.5052813916100192
+        },
+        "fwd_rv_ief": {
+          "lag_1": 0.9890695787853586,
+          "lag_5": 0.9256373097678539,
+          "lag_21": 0.5771713370508631
+        },
+        "fwd_rv_tlt": {
+          "lag_1": 0.989391554999637,
+          "lag_5": 0.9197524590613589,
+          "lag_21": 0.49911653830469943
+        },
+        "fwd_corr_spy_ief": {
+          "lag_1": 0.9819881230027906,
+          "lag_5": 0.8956520819670197,
+          "lag_21": 0.5028433386657212
+        },
+        "fwd_corr_spy_tlt": {
+          "lag_1": 0.9817314509462902,
+          "lag_5": 0.8950895410083572,
+          "lag_21": 0.5164733198670951
+        }
+      }
+    }
+  },
+  "multiple_test_correction": {
+    "tip_over_tlt:fwd_corr_spy_tlt:rising_minus_falling": {
+      "raw_p": 1.9094512326149262e-06,
+      "bonferroni_p": 1.909451232614926e-05,
+      "bh_p": 9.567316427818604e-06,
+      "rank": 1
+    },
+    "tip_over_tlt:fwd_corr_spy_ief:rising_minus_falling": {
+      "raw_p": 1.913463285563721e-06,
+      "bonferroni_p": 1.913463285563721e-05,
+      "bh_p": 9.567316427818604e-06,
+      "rank": 2
+    },
+    "tip_over_ief:fwd_rv_spy:rising_minus_falling": {
+      "raw_p": 0.01099878383170717,
+      "bonferroni_p": 0.1099878383170717,
+      "bh_p": 0.031641372288096326,
+      "rank": 3
+    },
+    "tip_over_ief:fwd_corr_spy_ief:rising_minus_falling": {
+      "raw_p": 0.013811860420193904,
+      "bonferroni_p": 0.13811860420193905,
+      "bh_p": 0.031641372288096326,
+      "rank": 4
+    },
+    "tip_over_ief:fwd_corr_spy_tlt:rising_minus_falling": {
+      "raw_p": 0.015820686144048163,
+      "bonferroni_p": 0.15820686144048163,
+      "bh_p": 0.031641372288096326,
+      "rank": 5
+    },
+    "tip_over_ief:fwd_rv_ief:rising_minus_falling": {
+      "raw_p": 0.18627932692415738,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.28310916455270413,
+      "rank": 6
+    },
+    "tip_over_ief:fwd_rv_tlt:rising_minus_falling": {
+      "raw_p": 0.19817641518689288,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.28310916455270413,
+      "rank": 7
+    },
+    "tip_over_tlt:fwd_rv_spy:rising_minus_falling": {
+      "raw_p": 0.26581019482518675,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.2999869058585322,
+      "rank": 8
+    },
+    "tip_over_tlt:fwd_rv_ief:rising_minus_falling": {
+      "raw_p": 0.269988215272679,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.2999869058585322,
+      "rank": 9
+    },
+    "tip_over_tlt:fwd_rv_tlt:rising_minus_falling": {
+      "raw_p": 0.7802940457947364,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.7802940457947364,
+      "rank": 10
+    }
+  },
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_reason": "2/10 HAC contrasts survive Bonferroni correction; treat as descriptive cross-asset regime evidence, not a trading rule.",
+  "figures": [
+    "figures/forward_outcomes_by_regime.png",
+    "figures/inflation_proxy_ratios.png"
+  ]
+}

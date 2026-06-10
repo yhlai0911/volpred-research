@@ -1,0 +1,256 @@
+{
+  "experiment_id": "K1446",
+  "title": "Factor ETF volatility and downside-risk diagnostics",
+  "created_at": "2026-06-10T02:52:34.959519Z",
+  "data_source": "yfinance (MTUM, QUAL, USMV, VLUE, SPY)",
+  "seed": 42,
+  "sample": {
+    "raw_period_per_asset": {
+      "MTUM": {
+        "start": "2013-04-19",
+        "end": "2026-06-09",
+        "n_obs": 3305
+      },
+      "QUAL": {
+        "start": "2013-07-19",
+        "end": "2026-06-09",
+        "n_obs": 3242
+      },
+      "USMV": {
+        "start": "2011-10-21",
+        "end": "2026-06-09",
+        "n_obs": 3678
+      },
+      "VLUE": {
+        "start": "2013-04-19",
+        "end": "2026-06-09",
+        "n_obs": 3305
+      },
+      "SPY": {
+        "start": "2010-01-05",
+        "end": "2026-06-09",
+        "n_obs": 4132
+      }
+    },
+    "common_sample_start": "2013-07-19",
+    "common_sample_end": "2026-06-09",
+    "common_sample_n_obs": 3242
+  },
+  "method": {
+    "type": "descriptive risk comparison",
+    "common_sample_only": true,
+    "block_design": "non-overlapping 21-trading-day blocks",
+    "bootstrap_reps": 5000,
+    "wilcoxon_alternative": "peer risk > USMV risk",
+    "multiple_testing": {
+      "n_tests": 8,
+      "bonferroni_alpha": 0.00625
+    }
+  },
+  "full_sample_risk": {
+    "MTUM": {
+      "ann_return_pct": 14.777701394488494,
+      "ann_vol_pct": 19.898079934620892,
+      "downside_dev_pct": 14.35106852188289,
+      "var_5_pct": -1.9289221709033688,
+      "es_5_pct": -3.0795330005745325,
+      "max_drawdown_pct": -34.08228449791707,
+      "neg_day_share_pct": 44.04688463911166,
+      "worst_day_pct": -13.199214538706942,
+      "n_obs": 3242,
+      "start": "2013-07-19",
+      "end": "2026-06-09"
+    },
+    "QUAL": {
+      "ann_return_pct": 12.722641176951749,
+      "ann_vol_pct": 17.168146952439667,
+      "downside_dev_pct": 12.260085202778425,
+      "var_5_pct": -1.613633587742923,
+      "es_5_pct": -2.608569282034508,
+      "max_drawdown_pct": -34.0567424956422,
+      "neg_day_share_pct": 45.09561998766194,
+      "worst_day_pct": -10.737883453127681,
+      "n_obs": 3242,
+      "start": "2013-07-19",
+      "end": "2026-06-09"
+    },
+    "USMV": {
+      "ann_return_pct": 9.945966242944735,
+      "ann_vol_pct": 13.839430301123196,
+      "downside_dev_pct": 10.018239291185067,
+      "var_5_pct": -1.1918963608207653,
+      "es_5_pct": -2.053503346365615,
+      "max_drawdown_pct": -33.098882920258276,
+      "neg_day_share_pct": 44.201110425663174,
+      "worst_day_pct": -10.626851998805291,
+      "n_obs": 3242,
+      "start": "2013-07-19",
+      "end": "2026-06-09"
+    },
+    "VLUE": {
+      "ann_return_pct": 12.274828619483822,
+      "ann_vol_pct": 18.746471129161385,
+      "downside_dev_pct": 13.505393299039364,
+      "var_5_pct": -1.758712928240364,
+      "es_5_pct": -2.8077553530569217,
+      "max_drawdown_pct": -39.47049303075283,
+      "neg_day_share_pct": 45.61998766193708,
+      "worst_day_pct": -13.568122609770025,
+      "n_obs": 3242,
+      "start": "2013-07-19",
+      "end": "2026-06-09"
+    },
+    "SPY": {
+      "ann_return_pct": 13.149756996915462,
+      "ann_vol_pct": 17.04593115512538,
+      "downside_dev_pct": 12.285855340294402,
+      "var_5_pct": -1.6212434098176975,
+      "es_5_pct": -2.6238205488941726,
+      "max_drawdown_pct": -33.7172648213807,
+      "neg_day_share_pct": 44.6637877853177,
+      "worst_day_pct": -11.588649805800296,
+      "n_obs": 3242,
+      "start": "2013-07-19",
+      "end": "2026-06-09"
+    }
+  },
+  "paired_block_tests_usmv_vs_peer": {
+    "MTUM": {
+      "rv": {
+        "n_blocks": 154,
+        "mean_usmv": 0.11281491172352434,
+        "mean_peer": 0.17090863652803992,
+        "mean_diff_peer_minus_usmv": 0.05809372480451562,
+        "bootstrap_ci_95": [
+          0.0504836696862907,
+          0.06625709294343585
+        ],
+        "bootstrap_prob_peer_gt_usmv": 1.0,
+        "wilcoxon_stat": 11820.0,
+        "wilcoxon_pvalue_one_sided": 2.3567955266110112e-26,
+        "passes_bonferroni_0_00625": true
+      },
+      "downside_dev": {
+        "n_blocks": 154,
+        "mean_usmv": 0.076268854900271,
+        "mean_peer": 0.1161984768204365,
+        "mean_diff_peer_minus_usmv": 0.039929621920165526,
+        "bootstrap_ci_95": [
+          0.03360220030901037,
+          0.04661506011186187
+        ],
+        "bootstrap_prob_peer_gt_usmv": 1.0,
+        "wilcoxon_stat": 11670.0,
+        "wilcoxon_pvalue_one_sided": 4.055647917107327e-25,
+        "passes_bonferroni_0_00625": true
+      }
+    },
+    "QUAL": {
+      "rv": {
+        "n_blocks": 154,
+        "mean_usmv": 0.11281491172352434,
+        "mean_peer": 0.14484268961971825,
+        "mean_diff_peer_minus_usmv": 0.03202777789619392,
+        "bootstrap_ci_95": [
+          0.028031948216534038,
+          0.03630793398780011
+        ],
+        "bootstrap_prob_peer_gt_usmv": 1.0,
+        "wilcoxon_stat": 11618.0,
+        "wilcoxon_pvalue_one_sided": 1.0692850098649527e-24,
+        "passes_bonferroni_0_00625": true
+      },
+      "downside_dev": {
+        "n_blocks": 154,
+        "mean_usmv": 0.076268854900271,
+        "mean_peer": 0.09718002466480395,
+        "mean_diff_peer_minus_usmv": 0.020911169764532958,
+        "bootstrap_ci_95": [
+          0.01739834186824642,
+          0.02443417930269512
+        ],
+        "bootstrap_prob_peer_gt_usmv": 1.0,
+        "wilcoxon_stat": 10993.0,
+        "wilcoxon_pvalue_one_sided": 6.216342259242234e-20,
+        "passes_bonferroni_0_00625": true
+      }
+    },
+    "VLUE": {
+      "rv": {
+        "n_blocks": 154,
+        "mean_usmv": 0.11281491172352434,
+        "mean_peer": 0.15872188223840605,
+        "mean_diff_peer_minus_usmv": 0.04590697051488172,
+        "bootstrap_ci_95": [
+          0.04068431432593977,
+          0.05154158765853475
+        ],
+        "bootstrap_prob_peer_gt_usmv": 1.0,
+        "wilcoxon_stat": 11837.0,
+        "wilcoxon_pvalue_one_sided": 1.6993504738207916e-26,
+        "passes_bonferroni_0_00625": true
+      },
+      "downside_dev": {
+        "n_blocks": 154,
+        "mean_usmv": 0.076268854900271,
+        "mean_peer": 0.10687840215400915,
+        "mean_diff_peer_minus_usmv": 0.030609547253738156,
+        "bootstrap_ci_95": [
+          0.02609682293836314,
+          0.035297756981955135
+        ],
+        "bootstrap_prob_peer_gt_usmv": 1.0,
+        "wilcoxon_stat": 11439.0,
+        "wilcoxon_pvalue_one_sided": 2.814968422539281e-23,
+        "passes_bonferroni_0_00625": true
+      }
+    },
+    "SPY": {
+      "rv": {
+        "n_blocks": 154,
+        "mean_usmv": 0.11281491172352434,
+        "mean_peer": 0.14295641661512545,
+        "mean_diff_peer_minus_usmv": 0.03014150489160112,
+        "bootstrap_ci_95": [
+          0.026193760747996297,
+          0.03459603104712152
+        ],
+        "bootstrap_prob_peer_gt_usmv": 1.0,
+        "wilcoxon_stat": 11605.0,
+        "wilcoxon_pvalue_one_sided": 1.3606930032634287e-24,
+        "passes_bonferroni_0_00625": true
+      },
+      "downside_dev": {
+        "n_blocks": 154,
+        "mean_usmv": 0.076268854900271,
+        "mean_peer": 0.0964484907259857,
+        "mean_diff_peer_minus_usmv": 0.02017963582571471,
+        "bootstrap_ci_95": [
+          0.01661400797382513,
+          0.023759253705202293
+        ],
+        "bootstrap_prob_peer_gt_usmv": 1.0,
+        "wilcoxon_stat": 10906.0,
+        "wilcoxon_pvalue_one_sided": 2.590861165445518e-19,
+        "passes_bonferroni_0_00625": true
+      }
+    }
+  },
+  "verdict": "PASS",
+  "verdict_reason": "USMV is the lowest-risk asset on full-sample vol/downside metrics and beats at least 3 peers under non-overlapping 21d paired tests.",
+  "figures": [
+    "fig1_rolling_vol_63d.png",
+    "fig2_full_sample_risk_bars.png",
+    "fig3_block_rv_usmv_vs_peers.png"
+  ],
+  "literature_refs": [
+    "Blitz & van Vliet (2007) The Volatility Effect",
+    "Frazzini & Pedersen (2014) Betting Against Beta",
+    "Baker, Bradley & Wurgler (2011) Benchmarks as Limits to Arbitrage"
+  ],
+  "related_ks": [
+    "K89 factor tilts + VT null",
+    "K566 factor timing VT null",
+    "K876 MTUM crash risk and VIX"
+  ]
+}

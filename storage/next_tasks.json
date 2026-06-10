@@ -26714,7 +26714,7 @@
     "title": "研究 backlog fallback: 通膨預期 regime 與資產 vol：用 TIP/不同久期國債（IEF/TLT）相對表現代理通膨預期，檢驗 regime 下股債 vol 與相關性（yfinance）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 通膨預期 regime 與資產 vol：用 TIP/不同久期國債（IEF/TLT）相對表現代理通膨預期，檢驗 regime 下股債 vol 與相關性（yfinance） | 來源 section: 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "regime_vol_tip_ief_tlt_regime_vol_yfinance",
@@ -26722,7 +26722,11 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-10T02:04:26+00:00"
+    "created_at": "2026-06-10T02:04:26+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T03:53:33.053886+00:00",
+    "claim_session_id": "82beccf0d301",
+    "started_at": "2026-06-10T03:53:47.871851+00:00"
   },
   {
     "id": "event_article_fomc_2026-06-17_tminus7",
@@ -26756,7 +26760,7 @@
     "title": "研究 backlog fallback: Factor ETF 的波動率特性：MTUM(動能)/QUAL(品質)/USMV(min-vol)/VLUE(價值) 各自 realized vol 與下行風險，min-vol 真的較低 vol 嗎（yfinance）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Factor ETF 的波動率特性：MTUM(動能)/QUAL(品質)/USMV(min-vol)/VLUE(價值) 各自 realized vol 與下行風險，min-vol 真的較低 vol 嗎（yfinance） | 來源 section: 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "factor_etf_mtum_qual_usmv_min_vol_vlue_realized",
@@ -26764,14 +26768,20 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-10T02:07:58+00:00"
+    "created_at": "2026-06-10T02:07:58+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-10T02:48:09.719699+00:00",
+    "claim_session_id": "f076d4b526fd",
+    "started_at": "2026-06-10T02:48:21.731877+00:00",
+    "completed_at": "2026-06-10T02:52:50.025392+00:00",
+    "result": "Completed K1446 factor-ETF risk diagnostic using yfinance MTUM/QUAL/USMV/VLUE/SPY. On the 2013-07-19 to 2026-06-09 common sample (n=3242), USMV is lowest on annualized vol, downside deviation, and MDD; all 4 USMV-vs-peer non-overlapping 21d block tests pass Bonferroni for both realized vol and downside risk. Artifacts: experiments/k1446/{k1446.py,README.md,k1446_results.json,fig1-3}."
   },
   {
     "id": "research_fxe_fxy_fxb_realized_vol_risk_off_yfinance",
     "title": "研究 backlog fallback: 貨幣對波動率與股市風險：FXE(歐)/FXY(日圓避險)/FXB(英鎊) realized vol，日圓避險屬性在 risk-off 是否成立（yfinance）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 貨幣對波動率與股市風險：FXE(歐)/FXY(日圓避險)/FXB(英鎊) realized vol，日圓避險屬性在 risk-off 是否成立（yfinance） | 來源 section: 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "fxe_fxy_fxb_realized_vol_risk_off_yfinance",
@@ -26779,6 +26789,40 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-10T02:07:58+00:00"
+    "created_at": "2026-06-10T02:07:58+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-10T03:09:28.930440+00:00",
+    "claim_session_id": "007f468eb21c",
+    "started_at": "2026-06-10T03:09:58.380541+00:00"
+  },
+  {
+    "id": "research_vol_vnm_eido_thd_ephe_vol_yfinance",
+    "title": "研究 backlog fallback: 更多新興市場 vol：VNM(越南)/EIDO(印尼)/THD(泰國)/EPHE(菲律賓) 邊境/東南亞市場 vol 與已開發市場的脫鉤程度（yfinance）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 更多新興市場 vol：VNM(越南)/EIDO(印尼)/THD(泰國)/EPHE(菲律賓) 邊境/東南亞市場 vol 與已開發市場的脫鉤程度（yfinance） | 來源 section: 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "vol_vnm_eido_thd_ephe_vol_yfinance",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T03:08:01+00:00"
+  },
+  {
+    "id": "research_vol_ung_dba_realized_vol_pattern_yfinance",
+    "title": "研究 backlog fallback: 天然氣與農產品 vol 的季節性：UNG(天然氣)/DBA(農產) realized vol 是否有顯著季節 pattern，與能源股/通膨的關係（yfinance）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 天然氣與農產品 vol 的季節性：UNG(天然氣)/DBA(農產) realized vol 是否有顯著季節 pattern，與能源股/通膨的關係（yfinance） | 來源 section: 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "vol_ung_dba_realized_vol_pattern_yfinance",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-10T03:08:01+00:00"
   }
 ]
