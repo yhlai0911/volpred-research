@@ -919,6 +919,20 @@ class Publisher:
             ][:5]
 
         details_clean = {k: v for k, v in (details or {}).items() if k not in ('content', 'description', 'title')}
+        # 2026-06-11: content_type 強制落地（boss badge-精確性 feedback 的底層修正）。
+        # 歷史 1210/1320 篇 details.content_type 為空 → 前端 badge 只能靠 audience 猜。
+        # 從本次起每篇必有 content_type：caller 顯式傳的優先，否則由 audience/category 推導。
+        if not details_clean.get('content_type'):
+            if audience == 'member_qa' or category == 'member_qa':
+                details_clean['content_type'] = 'member_qa'
+            elif category == 'event_article' or audience == 'event':
+                details_clean['content_type'] = 'event_article'
+            elif audience == 'daily':
+                details_clean['content_type'] = 'daily_update'
+            elif audience == 'general':
+                details_clean['content_type'] = 'general_article'
+            else:
+                details_clean['content_type'] = 'research_article'
         # Merge auto-extracted experiment_refs (K-ids removed from tags)
         if experiment_refs:
             existing_refs = details_clean.get('experiment_refs') or []
