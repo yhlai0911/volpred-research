@@ -7,11 +7,26 @@
     "target": "0050.TW close-to-close return t（當日報酬方向）",
     "horizon_days": 1,
     "data_sources": {
-      "SPY": {"provider": "yfinance", "ticker": "SPY", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true},
-      "0050.TW": {"provider": "yfinance", "ticker": "0050.TW", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true},
+      "SPY": {
+        "provider": "yfinance",
+        "ticker": "SPY",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      },
+      "0050.TW": {
+        "provider": "yfinance",
+        "ticker": "0050.TW",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      },
       "emit_time_tst": "07:30 台北時間（美股 05:00 收盤後、台股開盤前）"
     },
-    "k_refs": ["K461", "K521"],
+    "k_refs": [
+      "K461",
+      "K521"
+    ],
     "oos_evidence": {
       "K461": {
         "results_json_path": "experiments/k461/k461_ssvs_taiwan_results.json",
@@ -42,7 +57,11 @@
     "listed_at": "2026-06-11T00:00:00Z",
     "delisted_at": null,
     "status_history": [
-      {"status": "active", "since": "2026-06-11T00:00:00Z", "reason": "Phase 1 首發上架"}
+      {
+        "status": "active",
+        "since": "2026-06-11T00:00:00Z",
+        "reason": "Phase 1 首發上架"
+      }
     ]
   },
   {
@@ -53,10 +72,25 @@
     "target": "SPY 5d realized vol 升/降方向",
     "horizon_days": 5,
     "data_sources": {
-      "^VIX9D": {"provider": "yfinance", "ticker": "^VIX9D", "update_freq": "daily", "fallback": "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX9D_History.csv", "tested_ok_2026_06_11": true, "note": "偶有 1-2 日延遲 → fallback CBOE CSV"},
-      "^VIX": {"provider": "yfinance", "ticker": "^VIX", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true}
+      "^VIX9D": {
+        "provider": "yfinance",
+        "ticker": "^VIX9D",
+        "update_freq": "daily",
+        "fallback": "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX9D_History.csv",
+        "tested_ok_2026_06_11": true,
+        "note": "偶有 1-2 日延遲 → fallback CBOE CSV"
+      },
+      "^VIX": {
+        "provider": "yfinance",
+        "ticker": "^VIX",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      }
     },
-    "k_refs": ["K1415"],
+    "k_refs": [
+      "K1415"
+    ],
     "oos_evidence": {
       "K1415": {
         "results_json_path": "experiments/k1415/k1415_results.json",
@@ -81,7 +115,11 @@
     "listed_at": "2026-06-11T00:00:00Z",
     "delisted_at": null,
     "status_history": [
-      {"status": "active", "since": "2026-06-11T00:00:00Z", "reason": "Phase 1 首發上架"}
+      {
+        "status": "active",
+        "since": "2026-06-11T00:00:00Z",
+        "reason": "Phase 1 首發上架"
+      }
     ]
   },
   {
@@ -92,10 +130,24 @@
     "target": "SPY 明日報酬是否跌破 VaR（期望 violation rate 2.5%）",
     "horizon_days": 1,
     "data_sources": {
-      "SPY": {"provider": "yfinance", "ticker": "SPY", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true},
-      "^VIX9D": {"provider": "yfinance", "ticker": "^VIX9D", "update_freq": "daily", "fallback": "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX9D_History.csv", "tested_ok_2026_06_11": true}
+      "SPY": {
+        "provider": "yfinance",
+        "ticker": "SPY",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      },
+      "^VIX9D": {
+        "provider": "yfinance",
+        "ticker": "^VIX9D",
+        "update_freq": "daily",
+        "fallback": "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX9D_History.csv",
+        "tested_ok_2026_06_11": true
+      }
     },
-    "k_refs": ["K1004"],
+    "k_refs": [
+      "K1004"
+    ],
     "oos_evidence": {
       "K1004": {
         "results_json_path": "experiments/k1004/k1004_results.json",
@@ -123,7 +175,11 @@
     "listed_at": "2026-06-11T00:00:00Z",
     "delisted_at": null,
     "status_history": [
-      {"status": "active", "since": "2026-06-11T00:00:00Z", "reason": "Phase 1 首發上架"}
+      {
+        "status": "active",
+        "since": "2026-06-11T00:00:00Z",
+        "reason": "Phase 1 首發上架"
+      }
     ]
   },
   {
@@ -134,9 +190,17 @@
     "target": "SPY 明日 5% VaR violation 校準",
     "horizon_days": 1,
     "data_sources": {
-      "SPY": {"provider": "yfinance", "ticker": "SPY", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true}
+      "SPY": {
+        "provider": "yfinance",
+        "ticker": "SPY",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      }
     },
-    "k_refs": ["K1313"],
+    "k_refs": [
+      "K1313"
+    ],
     "oos_evidence": {
       "K1313": {
         "results_json_path": "experiments/K1313/K1313_results.json",
@@ -163,7 +227,11 @@
     "listed_at": "2026-06-11T00:00:00Z",
     "delisted_at": null,
     "status_history": [
-      {"status": "active", "since": "2026-06-11T00:00:00Z", "reason": "Phase 1 首發上架"}
+      {
+        "status": "active",
+        "since": "2026-06-11T00:00:00Z",
+        "reason": "Phase 1 首發上架"
+      }
     ]
   },
   {
@@ -174,10 +242,24 @@
     "target": "0050.TW 當日報酬方向（條件預警型）",
     "horizon_days": 1,
     "data_sources": {
-      "^VIX": {"provider": "yfinance", "ticker": "^VIX", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true},
-      "0050.TW": {"provider": "yfinance", "ticker": "0050.TW", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true}
+      "^VIX": {
+        "provider": "yfinance",
+        "ticker": "^VIX",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      },
+      "0050.TW": {
+        "provider": "yfinance",
+        "ticker": "0050.TW",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      }
     },
-    "k_refs": ["K817"],
+    "k_refs": [
+      "K817"
+    ],
     "oos_evidence": {
       "K817": {
         "results_json_path": "experiments/k817/k817_vix_taiwan_spillover_results.json",
@@ -203,7 +285,11 @@
     "listed_at": "2026-06-11T00:00:00Z",
     "delisted_at": null,
     "status_history": [
-      {"status": "active", "since": "2026-06-11T00:00:00Z", "reason": "Phase 1 首發上架"}
+      {
+        "status": "active",
+        "since": "2026-06-11T00:00:00Z",
+        "reason": "Phase 1 首發上架"
+      }
     ]
   },
   {
@@ -214,11 +300,31 @@
     "target": "QQQ/GLD/TLT 明日 RV ≤ q95 上界（尾部校準）",
     "horizon_days": 1,
     "data_sources": {
-      "QQQ": {"provider": "yfinance", "ticker": "QQQ", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true},
-      "GLD": {"provider": "yfinance", "ticker": "GLD", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true},
-      "TLT": {"provider": "yfinance", "ticker": "TLT", "update_freq": "daily", "fallback": null, "tested_ok_2026_06_11": true}
+      "QQQ": {
+        "provider": "yfinance",
+        "ticker": "QQQ",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      },
+      "GLD": {
+        "provider": "yfinance",
+        "ticker": "GLD",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      },
+      "TLT": {
+        "provider": "yfinance",
+        "ticker": "TLT",
+        "update_freq": "daily",
+        "fallback": null,
+        "tested_ok_2026_06_11": true
+      }
     },
-    "k_refs": ["K1403"],
+    "k_refs": [
+      "K1403"
+    ],
     "oos_evidence": {
       "K1403": {
         "results_json_path": "experiments/k1403/k1403_results.json",
@@ -237,12 +343,22 @@
       }
     },
     "caveats": "Point forecast 是 NULL（dm_status=SIG_NEG）— 不得宣稱此指標能預測 RV 水準，只能宣稱 q95 尾部區間校準。Arena 只評校準面（violation rate 是否接近 5%）。",
-    "status": "active",
-    "status_since": "2026-06-11T00:00:00Z",
+    "status": "delisted",
+    "status_since": "2026-06-11T10:37:40.934754+00:00",
     "listed_at": "2026-06-11T00:00:00Z",
-    "delisted_at": null,
+    "delisted_at": "2026-06-11T10:37:40.934754+00:00",
     "status_history": [
-      {"status": "active", "since": "2026-06-11T00:00:00Z", "reason": "Phase 1 首發上架"}
+      {
+        "status": "active",
+        "since": "2026-06-11T00:00:00Z",
+        "reason": "Phase 1 首發上架"
+      },
+      {
+        "from": "active",
+        "to": "delisted",
+        "at": "2026-06-11T10:37:40.934754+00:00",
+        "reason": "editorial: 投資實用價值不足（非績效因素）— q95 RV 上界屬統計校準練習，一般投資人無法據此做出操作決策（boss 2026-06-11 指示指標須具投資實用性）。歷史訊號與回顧永久保留。"
+      }
     ]
   }
 ]
