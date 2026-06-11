@@ -219,6 +219,13 @@ MEMBER_QA_ACTIVE_TASK_STATUSES = {
     "pending_main_thread",
 }
 
+# 2026-06-11 (boss): member_qa min-age gate. A question must be at least this
+# old before it gets materialized into a research/evaluate task. The 6h cron
+# cadence (0/6/12/18) was a dispatch interval, NOT a per-question cooldown — a
+# question posted at 17:31 was processed at the 18:00 fire (酒店文 mile_9b76989e).
+# Boss wants a real cooldown so questions are not answered the moment they land.
+MEMBER_QA_MIN_AGE_SECONDS = 6 * 3600
+
 
 def _parse_time(value: Any) -> float:
     if not value:
@@ -468,22 +475,46 @@ def ensure_member_qa_task(
     if int(health.get("researching", 0) or 0) > 0:
         return {"created": False, "reason": "already_researching"}
 
+    # 2026-06-11 (boss): min-age gate — skip questions younger than 6h so they
+    # are not answered the moment they land. Track the youngest gated candidate
+    # for observability (so the cron log shows "waiting, not stuck").
+    now_ts = datetime.now(timezone.utc).timestamp()
+
+    def _too_young(item: dict[str, Any]) -> bool:
+        created = _parse_time(item.get("created_at"))
+        if created <= 0:
+            return False  # unknown age → don't block (fail-open, avoid stuck)
+        return (now_ts - created) < MEMBER_QA_MIN_AGE_SECONDS
+
+    gated_min_age = 0
+
     candidate: dict[str, Any] | None = None
     mode = "research"
     for item in ranked_table:
         if isinstance(item, dict) and str(item.get("status") or "") == "ranked":
+            if _too_young(item):
+                gated_min_age += 1
+                continue
             candidate = item
             break
 
     if candidate is None and pending_questions:
         for item in pending_questions:
             if isinstance(item, dict):
+                if _too_young(item):
+                    gated_min_age += 1
+                    continue
                 candidate = item
                 mode = "evaluate"
                 break
 
     if candidate is None:
-        return {"created": False, "reason": "no_pending_member_qa_work"}
+        reason = (
+            "min_age_gate_all_too_young"
+            if gated_min_age > 0
+            else "no_pending_member_qa_work"
+        )
+        return {"created": False, "reason": reason, "gated_min_age": gated_min_age}
 
     question_id = str(candidate.get("question_id") or "").strip()
     if not question_id:

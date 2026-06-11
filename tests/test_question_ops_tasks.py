@@ -116,3 +116,66 @@ def test_ensure_member_qa_task_dedupes_existing_active_task(monkeypatch, tmp_pat
 
     assert result["created"] is False
     assert result["reason"] == "task_already_exists"
+
+
+def test_ensure_member_qa_task_min_age_gate_blocks_young_question(monkeypatch, tmp_path: Path):
+    """2026-06-11 boss: a question younger than 6h must not be materialized."""
+    _patch_project_path(monkeypatch, tmp_path)
+    from datetime import datetime, timezone, timedelta
+
+    young = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+    monkeypatch.setattr(
+        questions,
+        "get_member_question_ranking_summary",
+        lambda source="user", limit=10: {
+            "health": {"researching": 0},
+            "ranked_table": [
+                {
+                    "question_id": "young0001-0000-0000-0000-000000000000",
+                    "question": "ï¿½‰›ï¿½•ï¿½š„ï¿½•ï¿½Œ",
+                    "proposer": "reader",
+                    "status": "ranked",
+                    "score": 9.0,
+                    "created_at": young,
+                }
+            ],
+            "pending_questions": [],
+        },
+    )
+
+    result = questions.ensure_member_qa_task()
+
+    assert result["created"] is False
+    assert result["reason"] == "min_age_gate_all_too_young"
+    assert result["gated_min_age"] == 1
+
+
+def test_ensure_member_qa_task_min_age_gate_allows_aged_question(monkeypatch, tmp_path: Path):
+    """A question older than 6h passes the gate and materializes normally."""
+    _patch_project_path(monkeypatch, tmp_path)
+    from datetime import datetime, timezone, timedelta
+
+    aged = (datetime.now(timezone.utc) - timedelta(hours=8)).isoformat()
+    monkeypatch.setattr(
+        questions,
+        "get_member_question_ranking_summary",
+        lambda source="user", limit=10: {
+            "health": {"researching": 0},
+            "ranked_table": [
+                {
+                    "question_id": "aged0001-0000-0000-0000-000000000000",
+                    "question": "ï¿½­‰ï¿½†ï¿½…ï¿½ï¿½ï¿½™‚ï¿½š„ï¿½•ï¿½Œ",
+                    "proposer": "reader",
+                    "status": "ranked",
+                    "score": 9.0,
+                    "created_at": aged,
+                }
+            ],
+            "pending_questions": [],
+        },
+    )
+
+    result = questions.ensure_member_qa_task()
+
+    assert result["created"] is True
+    assert result["mode"] == "research"
