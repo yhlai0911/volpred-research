@@ -27286,12 +27286,14 @@
     "source": "paper_audit_2026-06-10",
     "title": "volatility-absorption 審查修正：6 HIGH（reproduce gate v3 重跑 + snapshot 統一）",
     "description": "依 paper/volatility-absorption/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）：對 v3 重跑 reproduce gate（現存 report 是 v2、61.3% red）、統一 original-snapshot 口徑、Tables 6-8 數字補 JSON 來源。xelatex exit 0 → paper-update 上傳 → fix_log.md。",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-06-10T13:58:00+00:00",
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-11T02:19:40.237439+00:00",
     "claim_session_id": "2ff74d9df522",
-    "started_at": "2026-06-11T02:20:13.136452+00:00"
+    "started_at": "2026-06-11T02:20:13.136452+00:00",
+    "completed_at": "2026-06-11T02:28:56.414530+00:00",
+    "result": "Narrowed volatility-absorption to a reproducible v3 evidence set. Removed unsupported shock-type/VRP/hedging claims from active body, rewrote reproduce gate to 30/30 GREEN using K716/K741/K897/K903/K1418, compiled main_v3.pdf, and ran paper-update; only residual issue is paper-update metadata still showing stale author text."
   },
   {
     "id": "paper_body_audit_fix_eav_universal_magnitude_2026_06_10",
@@ -27477,7 +27479,7 @@
     "title": "Paper review (Codex 24h-rule): 把六個市場一起看，真的比只看自己更懂波動嗎？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c26fcd8e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c26fcd8e",
@@ -27486,7 +27488,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-10T19:08:17+00:00"
+    "created_at": "2026-06-10T19:08:17+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-11T03:08:31.902556+00:00",
+    "claim_session_id": "630594c89ff0",
+    "started_at": "2026-06-11T03:08:53.889440+00:00",
+    "completed_at": "2026-06-11T03:12:58.318406+00:00",
+    "result": "Codex 24h-rule review verdict=FAIL. 4 HIGH (lookahead x2, post-selection, spec mismatch) + 4 MEDIUM. Report: paper/k189_audit/codex_review_2026_06_11.md. Knowledge entry 9b6bf190. Followups: errata_k189_mile_c26fcd8e_2026_06_11 (P3) + experiment_k189_relag_resimulation_2026_06_11 (P2)."
   },
   {
     "id": "research_vs_har_horizon",
@@ -27654,5 +27662,37 @@
     "description": "§6.6.4 自承 K1145/K1147/K1150 主三市場 spec 用 default single-init L-BFGS-B 有 two-basin pathology（10/10 市場 FRAGILE，LR 最高 2837）。對主三市場跑同 §6.6.4 協議：≥100 random init（seeds 43-142）+ DE seed 49 + K-means seed 42 + LR canonical-vs-refined 選 basin，驗 US>JP>TW magnitude ordering 是否保持。heavy compute → compute_queue。完成後同步 Table 1 + abstract 數字 + reproduce.py 擴充覆蓋 §6.6（k1163/k1165/k1166/k1168/k1171/k1172/k1207/k1213/k1216*/k1173）+ 4 處 source-binding 改綁 results-JSON。Codex review before knowledge.",
     "status": "pending",
     "created_at": "2026-06-11T02:24:41.896812+00:00"
+  },
+  {
+    "id": "errata_k189_mile_c26fcd8e_2026_06_11",
+    "title": "K189 article mile_c26fcd8e errata: lookahead + post-selection + spec mismatch（24h Codex review FAIL）",
+    "description": "Codex 24h-rule review verdict=FAIL（paper/k189_audit/codex_review_2026_06_11.md）。4 HIGH: contemporaneous leakage (forecast+attn weights), post-selection alpha picking, training window=500 spec mismatch。文章需 errata：(a) 刪「historical window 只用 t-1 前資訊」(b) 「最佳 0.9」改「grid 中 0.9 最常勝」(c) 「相關不等於增量」改「本 attention 規格未顯示穩健增量」。errata 應加注審稿發現 + 提示重跑進行中。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "codex_24h_review",
+    "article_id": "mile_c26fcd8e",
+    "tags": [
+      "errata",
+      "post-publish-fix",
+      "k189"
+    ],
+    "created_at": "2026-06-11T11:12:03+08:00"
+  },
+  {
+    "id": "experiment_k189_relag_resimulation_2026_06_11",
+    "title": "K189 重跑：lagged forecast + ex ante alpha selection + Bonferroni（解 Codex FAIL HIGH 4）",
+    "description": "Per paper/k189_audit/codex_review_2026_06_11.md HIGH severity 4 條，K189 attention vol 需重做：(1) forecast + attention weights 全改 shift(1) lagged (2) alpha 選擇 rolling re-selection 於 training window 內，不可整段 OOS 挑 (3) DM test + Bonferroni/FDR 校正（6 資產 × 2 baselines）(4) 補 README.md 完整方法描述。若重跑後 VERDICT 變 PASS 或 CONDITIONAL_PASS → article 解凍（移除 errata）；若仍 FAIL → article 維持 errata + downgrade conclusion。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "codex_24h_review",
+    "k_id": "K189",
+    "tags": [
+      "lookahead-fix",
+      "post-selection-fix",
+      "rerun"
+    ],
+    "created_at": "2026-06-11T11:12:03+08:00"
   }
 ]

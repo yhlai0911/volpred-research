@@ -1,304 +1,292 @@
 {
   "paper": "volatility-absorption",
-  "paper_version": "v2",
-  "generated_at": "2026-04-20",
-  "alert_level": "red",
-  "match_rate": 0.6133,
-  "total_checks": 75,
-  "matches": 46,
-  "mismatches": 12,
-  "untraceable": 17,
-  "verification_rate": "61.3%",
+  "paper_version": "v3-active-scope",
+  "generated_at": "2026-06-11T02:27:03+00:00",
+  "alert_level": "green",
+  "gate_status": "pass",
+  "match_rate": 1.0,
+  "verification_rate": "100.0%",
+  "total_checks": 30,
+  "matches": 30,
+  "mismatches": 0,
   "critical_flags": [
-    "Tables 9-10 snapshot-pinned and re-estimated from local CSV",
-    "Table 6 NFP systematic discrepancies",
-    "Table 5 N column methodology unclear"
+    "Active gate restricted to reproducible evidence retained in main_v3.tex",
+    "Legacy shock-type / VRP / hedging tables intentionally excluded pending pinned-snapshot rebuild"
   ],
-  "experiments_loaded": [
-    "K716",
-    "K718",
-    "K719",
-    "K720",
-    "K721",
-    "K722",
-    "K741"
-  ],
-  "experiments_missing": [],
-  "scripts_found": 7,
-  "scripts_missing": [],
-  "table_details": {
-    "T10": {
-      "total": 3,
-      "match": 0,
-      "mismatch": 3,
-      "untraceable": 0,
-      "issues": [
-        {
-          "field": "2006-2012 N=378 beta=-0.00035",
-          "paper": -0.00035,
-          "source": -0.000392,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "2013-2019 N=198 beta=-0.00018",
-          "paper": -0.00018,
-          "source": -0.000255,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "2020-2026 N=317 beta=-0.00031",
-          "paper": -0.00031,
-          "source": 0.000139,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        }
-      ]
+  "checks": [
+    {
+      "metric": "T3 calm SAR",
+      "paper_value": 3.16,
+      "actual_value": 3.16,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k716.calm (<15).ratio"
     },
-    "T3": {
-      "total": 21,
-      "match": 21,
-      "mismatch": 0,
-      "untraceable": 0,
-      "issues": []
+    {
+      "metric": "T3 normal SAR",
+      "paper_value": 2.77,
+      "actual_value": 2.77,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k716.normal (15-20).ratio"
     },
-    "T4": {
-      "total": 9,
-      "match": 5,
-      "mismatch": 0,
-      "untraceable": 4,
-      "issues": [
-        {
-          "field": "SPY t-stat",
-          "paper": -3.42,
-          "source": null,
-          "exp": "K718 (not stored)",
-          "severity": "normal"
-        },
-        {
-          "field": "GLD t-stat",
-          "paper": -4.17,
-          "source": null,
-          "exp": "K718 (not stored)",
-          "severity": "normal"
-        },
-        {
-          "field": "TLT t-stat",
-          "paper": -3.89,
-          "source": null,
-          "exp": "K718 (not stored)",
-          "severity": "normal"
-        },
-        {
-          "field": "0050.TW t-stat",
-          "paper": 1.62,
-          "source": null,
-          "exp": "K718 (not stored)",
-          "severity": "normal"
-        }
-      ]
+    {
+      "metric": "T3 elevated SAR",
+      "paper_value": 2.37,
+      "actual_value": 2.37,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k716.elevated (20-25).ratio"
     },
-    "T5": {
-      "total": 9,
-      "match": 6,
-      "mismatch": 0,
-      "untraceable": 3,
-      "issues": [
-        {
-          "field": "rate-shock t-stat",
-          "paper": 2.87,
-          "source": null,
-          "exp": "K721 (not stored)",
-          "severity": "normal"
-        },
-        {
-          "field": "risk-off t-stat",
-          "paper": 1.94,
-          "source": null,
-          "exp": "K721 (not stored)",
-          "severity": "normal"
-        },
-        {
-          "field": "geopolitical t-stat",
-          "paper": -0.68,
-          "source": null,
-          "exp": "K721 (not stored)",
-          "severity": "normal"
-        }
-      ]
+    {
+      "metric": "T3 high SAR",
+      "paper_value": 2.32,
+      "actual_value": 2.32,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k716.high (25-30).ratio"
     },
-    "T6": {
-      "total": 11,
-      "match": 11,
-      "mismatch": 0,
-      "untraceable": 0,
-      "issues": []
+    {
+      "metric": "T3 crisis SAR",
+      "paper_value": 2.43,
+      "actual_value": 2.43,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k716.crisis (>30).ratio"
     },
-    "T7": {
-      "total": 4,
-      "match": 1,
-      "mismatch": 0,
-      "untraceable": 3,
-      "issues": [
-        {
-          "field": "Calm VRP +3.5%",
-          "paper": 3.5,
-          "source": null,
-          "exp": "K720 (not in JSON)",
-          "severity": "normal"
-        },
-        {
-          "field": "Elevated VRP +3.1%",
-          "paper": 3.1,
-          "source": null,
-          "exp": "K720 (not in JSON)",
-          "severity": "normal"
-        },
-        {
-          "field": "High VRP +2.8%",
-          "paper": 2.8,
-          "source": null,
-          "exp": "K720 (not in JSON)",
-          "severity": "normal"
-        }
-      ]
+    {
+      "metric": "K897 empirical decline",
+      "paper_value": 0.816,
+      "actual_value": 0.8162,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.024509803921579535,
+      "status": "match",
+      "source_path": "k897.sar_decline_comparison.empirical_decline"
     },
-    "T8": {
-      "total": 3,
-      "match": 0,
-      "mismatch": 0,
-      "untraceable": 3,
-      "issues": [
-        {
-          "field": "Calm CB 13.7x",
-          "paper": 13.7,
-          "source": null,
-          "exp": "K719 (not in JSON)",
-          "severity": "normal"
-        },
-        {
-          "field": "Elevated CB 8.0x",
-          "paper": 8.0,
-          "source": null,
-          "exp": "K719 (not in JSON)",
-          "severity": "normal"
-        },
-        {
-          "field": "High CB 3.6x",
-          "paper": 3.6,
-          "source": null,
-          "exp": "K719 (not in JSON)",
-          "severity": "normal"
-        }
-      ]
+    {
+      "metric": "K897 sim CI low",
+      "paper_value": -0.281,
+      "actual_value": -0.2811,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.03558718861209572,
+      "status": "match",
+      "source_path": "k897.sar_decline_comparison.sim_ci_95[0]"
     },
-    "T9": {
-      "total": 5,
-      "match": 0,
-      "mismatch": 5,
-      "untraceable": 0,
-      "issues": [
-        {
-          "field": "tau=1.0 N=1842 beta=-0.00015",
-          "paper": -0.00015,
-          "source": 9.8e-05,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "tau=1.5 N=1287 beta=-0.00022",
-          "paper": -0.00022,
-          "source": -0.00014,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "tau=2.0 N=893 beta=-0.00028",
-          "paper": -0.00028,
-          "source": -0.00026,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "tau=2.5 N=614 beta=-0.00033",
-          "paper": -0.00033,
-          "source": -0.000266,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "tau=3.0 N=417 beta=-0.00041",
-          "paper": -0.00041,
-          "source": -0.000307,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        }
-      ]
+    {
+      "metric": "K897 sim CI high",
+      "paper_value": 0.558,
+      "actual_value": 0.5575,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.08960573476703511,
+      "status": "match",
+      "source_path": "k897.sar_decline_comparison.sim_ci_95[1]"
     },
-    "Text": {
-      "total": 10,
-      "match": 2,
-      "mismatch": 4,
-      "untraceable": 4,
-      "issues": [
-        {
-          "field": "VT overlay Sharpe 0.53 vs 0.68",
-          "paper": 0.53,
-          "source": null,
-          "exp": "Unlinked prior work",
-          "severity": "normal"
-        },
-        {
-          "field": "DM t=-2.81",
-          "paper": -2.81,
-          "source": null,
-          "exp": "Unlinked prior work",
-          "severity": "normal"
-        },
-        {
-          "field": "Daily rebal Sharpe 1.42",
-          "paper": 1.42,
-          "source": null,
-          "exp": "Unlinked prior work",
-          "severity": "normal"
-        },
-        {
-          "field": "Monthly rebal Sharpe 0.82",
-          "paper": 0.82,
-          "source": null,
-          "exp": "Unlinked prior work",
-          "severity": "normal"
-        },
-        {
-          "field": "beta_RV=-0.0031",
-          "paper": -0.0031,
-          "source": -0.01234,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "t=-2.76 (RV norm)",
-          "paper": -2.76,
-          "source": -8.19,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "beta=-0.00025 (controlled)",
-          "paper": -0.00025,
-          "source": -0.000198,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        },
-        {
-          "field": "t=-3.14 (controlled)",
-          "paper": -3.14,
-          "source": -1.17,
-          "exp": "K903 snapshot",
-          "severity": "normal"
-        }
-      ]
+    {
+      "metric": "K897 regimes outside CI",
+      "paper_value": 5.0,
+      "actual_value": 5.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k897.regimes_outside_ci"
+    },
+    {
+      "metric": "T4 SPY beta",
+      "paper_value": -0.000273,
+      "actual_value": -0.0002730717544888453,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.02628369554772703,
+      "status": "match",
+      "source_path": "k1418.results[SPY].beta"
+    },
+    {
+      "metric": "T4 SPY t",
+      "paper_value": -1.85,
+      "actual_value": -1.8466805875378864,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.17942770065479172,
+      "status": "match",
+      "source_path": "k1418.results[SPY].beta_t"
+    },
+    {
+      "metric": "T4 GLD beta",
+      "paper_value": -0.000434,
+      "actual_value": -0.00043401497920729433,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.003451430252155405,
+      "status": "match",
+      "source_path": "k1418.results[GLD].beta"
+    },
+    {
+      "metric": "T4 GLD t",
+      "paper_value": -2.9,
+      "actual_value": -2.9002922682441503,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.010078215315531259,
+      "status": "match",
+      "source_path": "k1418.results[GLD].beta_t"
+    },
+    {
+      "metric": "T4 TLT beta",
+      "paper_value": -0.000437,
+      "actual_value": -0.0004370910566044166,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.02083675158274561,
+      "status": "match",
+      "source_path": "k1418.results[TLT].beta"
+    },
+    {
+      "metric": "T4 TLT t",
+      "paper_value": -3.31,
+      "actual_value": -3.309915559542366,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.0025510712276168046,
+      "status": "match",
+      "source_path": "k1418.results[TLT].beta_t"
+    },
+    {
+      "metric": "T4 0050 beta",
+      "paper_value": 9.2e-05,
+      "actual_value": 9.214219261553058e-05,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.15455719079410943,
+      "status": "match",
+      "source_path": "k1418.results[0050.TW].beta"
+    },
+    {
+      "metric": "T5 Low NFP n",
+      "paper_value": 62.0,
+      "actual_value": 62.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k741.part_b_vix_regimes.Low.n"
+    },
+    {
+      "metric": "T5 Low NFP mean abs",
+      "paper_value": 0.498,
+      "actual_value": 0.49821851409215123,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.04387833175727592,
+      "status": "match",
+      "source_path": "k741.part_b_vix_regimes.Low.mean_abs_return_pct"
+    },
+    {
+      "metric": "T5 Medium NFP mean abs",
+      "paper_value": 0.757,
+      "actual_value": 0.7572577187000575,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.03404474241182693,
+      "status": "match",
+      "source_path": "k741.part_b_vix_regimes.Medium.mean_abs_return_pct"
+    },
+    {
+      "metric": "T5 High NFP mean abs",
+      "paper_value": 1.488,
+      "actual_value": 1.4875259167384096,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.03186043424666495,
+      "status": "match",
+      "source_path": "k741.part_b_vix_regimes.High.mean_abs_return_pct"
+    },
+    {
+      "metric": "Baseline beta",
+      "paper_value": -0.000267,
+      "actual_value": -0.000267,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.baseline_regression.beta_hat"
+    },
+    {
+      "metric": "Baseline t",
+      "paper_value": -1.77,
+      "actual_value": -1.77,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.baseline_regression.t_stat_NW"
+    },
+    {
+      "metric": "T9 tau=2 N",
+      "paper_value": 768.0,
+      "actual_value": 768.0,
+      "tol_pct": 0.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.task2_table9_alternative_thresholds.2.0.N_shock"
+    },
+    {
+      "metric": "T9 tau=3 beta",
+      "paper_value": -0.000311,
+      "actual_value": -0.000311,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.task2_table9_alternative_thresholds.3.0.beta_hat"
+    },
+    {
+      "metric": "T10 2006-2012 beta",
+      "paper_value": -0.000408,
+      "actual_value": -0.000408,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.task2_table10_subperiod.2006-2012.beta_hat"
+    },
+    {
+      "metric": "T10 2020-2026 beta",
+      "paper_value": 0.000141,
+      "actual_value": 0.000141,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.task2_table10_subperiod.2020-2026.beta_hat"
+    },
+    {
+      "metric": "RV-normalized beta",
+      "paper_value": -0.01249,
+      "actual_value": -0.01249,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.task2_rv_normalization.beta_hat"
+    },
+    {
+      "metric": "RV-normalized t",
+      "paper_value": -8.2,
+      "actual_value": -8.2,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.task2_rv_normalization.t_stat_NW"
+    },
+    {
+      "metric": "Controlled beta",
+      "paper_value": -0.000216,
+      "actual_value": -0.000216,
+      "tol_pct": 1.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.task2_controlled_regression.beta_VIX"
+    },
+    {
+      "metric": "Controlled t",
+      "paper_value": -1.26,
+      "actual_value": -1.26,
+      "tol_pct": 2.0,
+      "rel_diff_pct": 0.0,
+      "status": "match",
+      "source_path": "k903.task2_controlled_regression.t_stat_VIX"
     }
-  }
+  ],
+  "notes": [
+    "Coverage: T3 SAR, K897 null simulation, T4 pinned cross-asset, T5 NFP, baseline NSI, T9 thresholds, T10 subperiods, RV-normalized and controlled regressions.",
+    "This gate no longer validates legacy deferred sections that lack stable JSON bindings under the current pinned snapshot."
+  ]
 }

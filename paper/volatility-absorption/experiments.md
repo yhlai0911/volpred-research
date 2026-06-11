@@ -2,8 +2,8 @@
 
 **Paper**: The Volatility Absorption Hypothesis
 **Journal**: TBD
-**Status**: R1 review — 5 SEVERE, needs major revision
-**Last Updated**: 2026-04-17
+**Status**: MAJOR REVISION — active manuscript narrowed to reproducible evidence set
+**Last Updated**: 2026-06-11
 
 ---
 
@@ -14,9 +14,9 @@
 | K716 | Absorption regression (SPY, pilot) | Original shock amplification ratio estimation; VIX regime binning | `experiments/k716/` |
 | K718 | Cross-asset absorption | Cross-asset absorption coefficients (Table 4) | `experiments/k718/` |
 | K719 | NFP event study | Nonfarm Payroll day volatility by VIX regime (Table 5) | `experiments/k719/` |
-| K720 | Absorption by shock type | Positive vs negative shock asymmetry (Table 6) | `experiments/k720/` |
-| K721 | Variance Risk Premium by regime | VRP narrowing at high VIX (Table 7) | `experiments/k721/` |
-| K722 | Hedging cost-benefit ratio | Hedging cost analysis by VIX regime (Table 8) | `experiments/k722/` |
+| K720 | Absorption by shock type | Legacy shock-type artifact; not active manuscript evidence | `experiments/k720/` |
+| K721 | Variance Risk Premium by regime | Legacy VRP artifact; not active manuscript evidence | `experiments/k721/` |
+| K722 | Hedging cost-benefit ratio | Legacy hedging artifact; not active manuscript evidence | `experiments/k722/` |
 | K741 | NFP event study (revision) | Revised NFP analysis addressing reviewer S4 | `experiments/` (paper folder) |
 | K897 | SAR null simulation | Proves absorption is real (not GARCH artifact); addresses reviewer S1 | `experiments/k897/` |
 | K903 | Paper 8 robustness | Alternative shock thresholds robustness (Table 9) | `experiments/k903/` |
@@ -46,9 +46,9 @@ Scripts co-located in paper folder:
 | Table 3 | Shock Amplification Ratio by VIX Regime (SPY, Five-Bin) | K716 |
 | Table 4 | Cross-Asset Absorption Coefficients | K718 |
 | Table 5 | Nonfarm Payroll Day Volatility by VIX Regime | K719/K741 |
-| Table 6 | Absorption by Shock Type | K720 |
-| Table 7 | Variance Risk Premium by VIX Regime | K721 |
-| Table 8 | Hedging Cost-Benefit Ratio by VIX Regime | K722 |
+| Table 6 | Shock-type extension | Deferred from active evidence |
+| Table 7 | Variance Risk Premium by VIX Regime | Deferred from active evidence |
+| Table 8 | Hedging Cost-Benefit Ratio by VIX Regime | Deferred from active evidence |
 | Table 9 | Absorption Coefficient Under Alternative Shock Thresholds | K903 |
 | Table 10 | Absorption Coefficient by Sub-Period | K903/K904 |
 | Appendix A | Variable Definitions | Methodology section |
@@ -66,7 +66,7 @@ No figures with `\includegraphics` found in main_v2.tex. All results are tabular
 ## Known Issues (from README and reviews)
 
 - **S1**: Null simulation → K897 proves absorption is real (not GARCH artifact) ✅
-- **S2**: Table 5 sample-size inconsistency → K904 addresses this
-- **S3**: Tables 9–10 fully untraceable → K903 partially addresses
-- **S4**: Table 6 NFP discrepancies → K741/K904 address this
+- **S2**: Table 5 sample-size inconsistency → K741 fix adopted in active body ✅
+- **S3**: Old v2 gate / snapshot mixing → active body now tied to K903 + K1418 + K897 + K741
+- **Deferred**: shock-type / VRP / hedging sections await pinned-snapshot rebuild before they can re-enter the manuscript
 - **Missing .py scripts for K716–K722**: original estimation scripts not in repo [K-ref found in experiments/ JSON but source scripts missing — see `experiments/k716/k716_results.json` etc.]

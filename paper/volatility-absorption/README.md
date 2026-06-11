@@ -1,11 +1,11 @@
 # Paper 8: The Volatility Absorption Hypothesis
 
 **Target Journal**: TBD
-**Status**: R1 review — Path B errata revision applied in main_v3.tex (2026-05-13) | Reproduce gate 61.3% **red** (canonical threshold: <80% match → red; previously mislabelled "amber" prior to alert_level schema fix 2026-05-12). **2026-04-19 CRITICAL errata** (see `errata_pending.md`):
+**Status**: MAJOR REVISION — active manuscript narrowed to the reproducible evidence set (SAR / pinned cross-asset / NFP / K903 / K897). Legacy shock-type, VRP, and hedging tables are now treated as deferred extensions until rebuilt from pinned-snapshot JSON bindings.
 - ~~**CRITICAL**: controlled regression $t = -3.14 \to -1.17$ crosses Harvey boundary~~ → **ADDRESSED** in main_v3.tex: K903 values applied ($\beta=-0.000216$, $t=-1.26$) with Harvey-boundary footnote
 - ~~**HIGH**: T10 2020-2026 $\beta$ sign flip~~ → **ADDRESSED** in main_v3.tex: table updated to K903 snapshot (2020-2026 $\beta=+0.000141$, $t=+0.47$); "all periods" claim removed; crisis-era caveat added
 - **MEDIUM**: 10+ T9/T10 magnitude drifts within acceptable yfinance drift range
-- **Remaining**: cross-asset table (GLD/TLT/0050.TW) K903 snapshot rerun + paper-update sync
+- **Remaining**: keep main_v3 / reproduce gate / results index synchronized whenever deferred sections are rebuilt
 
 ### **2026-05-06 K716 errata disclosure (per K1249 finding, upgrade from option (a) to (c))**
 
@@ -31,11 +31,10 @@ uv run python paper/volatility-absorption/reproduce.py
 ```
 
 ## Known Issues
-- S1: Null simulation → K897 proves absorption is real (not GARCH artifact)
-- S2: Table 5 sample-size inconsistency
-- S3: Tables 9-10 fully untraceable
-- S4: Table 6 NFP discrepancies
-- Missing .py scripts for K716-K722
+- Legacy shock-type table is removed from active evidence because archived counts / bootstrap t-stats do not reconcile under the pinned snapshot.
+- Legacy VRP and hedging tables are removed from active evidence because the surviving JSON package does not support those regime means at the paper-body standard.
+- `main.tex` is not the active source; `main_v3.tex` is the audited manuscript to keep in sync with `reproduce.py`.
+- Missing original estimation scripts for K716-K722 still limit full historical provenance.
 
 ## Self-Contained Index (2026-04-17)
 
