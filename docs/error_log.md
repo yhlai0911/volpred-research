@@ -1649,3 +1649,11 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **修法**：(a) publisher 防線 — `proposer` 非空（member-questions 流程專用欄位）→ 強制 audience='member_qa' + category='member_qa'，跳過整段 inference；(b) mile_9b76989e backfill correction（research→member_qa + details.audience_correction 記錄）+ supabase sync；(c) feed tab 新增「會員提問」入口（9 篇舊文被 cluster 排序排到 100 名外，原本完全不可見）。
 
 **防再發**：enforce-gate 類修改必列「豁免矩陣」：所有 11 類 task_type × 此 gate 是否該豁免 — 逐類過一遍才能上線；新增 gate 時 member_qa/event/daily/trending 四個 reader-facing 類全要驗證。
+
+## 2026-06-12 — codex exec 中文 prompt 經 positional arg 永久 hang（13 zombie）+ K1474 artifact 偽摘要
+
+**症狀 A（codex hang）**：paper_review agent 跑 `codex exec --skip-git-repo-check "$PROMPT"`（prompt 當 positional arg）時，harness 仍掛 stdin pipe → codex 卡在「Reading additional input from stdin」永不返回，累積 13 個 zombie 進程。
+**正解**：`printf '%s' "$PROMPT" | codex exec --skip-git-repo-check -`（prompt 從 stdin 餵、結尾 `-` 明示讀 stdin）→ EXIT 0 正常完成。中文多行 prompt 尤其要走 stdin（避免 shell 引號/positional 歧義）。已驗證 codex 0.137.0。
+
+**症狀 B（研究誠實）**：K1474 `results.json` `key_findings.corr_rises_during_crisis` 寫「All hotel/leisure tickers show elevated corr vs SPY during COVID crash」— **偽**。檔內自身數字打臉：covid corr vs 2018-2019 baseline，只有 PEJ/XLY/CCL 上升，HLT/MAR/H/RCL 下降（3/7 升、4/7 降）。Codex 24h review (mile_9b76989e) 抓到。已用檔內既有數字重算更正摘要 + 留 `_correction_2026_06_12` provenance（數字未動，只修偽英文摘要）。發佈文章正文未犯此錯（正文談 co-movement/drawdown，HLT 確實隨大盤跌 -43.7%，非宣稱 corr 上升）→ 正文 CONDITIONAL_PASS 維持，不改文。
+**防再發**：實驗 `key_findings` 的 universal quantifier 字串（All/全部/每個）必須能被同檔數字逐一驗證；agent 寫 summary 字串時禁止用 all-claim 除非程式碼實算過 min/全員通過。
