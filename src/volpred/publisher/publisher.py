@@ -854,7 +854,14 @@ class Publisher:
             or '每日建議' in tag_list
             or 'daily-update' in tag_list
         )
-        if is_daily_signal:
+        # 2026-06-11 fix (mile_9b76989e incident): proposer 是 member-questions 流程
+        # 專用欄位（回答發佈時掛會員名）。會員回答文必含學術詞 → _infer_audience 會
+        # 強制改 research → badge 變「研究」、不進會員提問 tab、提問會員看不到回覆。
+        # proposer 非空 = member_qa 文，整段 inference 跳過。
+        if proposer:
+            audience = 'member_qa'
+            category = 'member_qa'
+        elif is_daily_signal:
             audience = 'daily'
         else:
             # 2026-05-26: _infer_audience enforce gate — prevents agents from mis-tagging

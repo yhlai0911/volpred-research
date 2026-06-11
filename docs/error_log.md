@@ -1639,3 +1639,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **遺留（ISS-009）**：feed.json 整檔 PUT 21MB server 處理 >180s 超時 — 此 path 在 timeout=10 下從來沒成功過。canonical 是 Supabase 單篇 sync（正常），mirror feed 整檔 replica 需改 incremental 或壓縮，列 issue registry。
 
 **防再發**：(1) server 端加 auth 的 PR 必含 caller 同步修改與端到端測試；(2) 部署來源（working dir）與 git 不同步超過 1 檔即為 red flag — 巡檢加 `git -C frontend-v2-fix status` 檢查；(3) 禁 bare `except: pass` 於任何 sync/publish path（loud log 最低要求）。
+
+## 2026-06-11 — 會員提問回答文被 _infer_audience 改標 research（mile_9b76989e）
+
+**症狀**：6 小時 member-questions 機制全程正常（cron materialize → evaluate → research+write → 11:20 發文，proposer=yaoxk1431），但發出的文 audience=research — badge 顯示「研究」、不進會員提問 tab，提問會員看不到自己的問題被回答。boss 抓到「會員提問 badge 不見了」。
+
+**根因**：寫作 agent 發文沒傳 content_type='member_qa' → publisher 的 member_qa 豁免（靠 content_type 觸發）沒生效 → 回答文必含學術詞（相關性/文獻回顧/實證）→ _infer_audience enforce gate 改標 research。與 2026-05-27 daily 保留 fix（mile_a91f19be）同款盲區：enforce gate 的豁免名單漏了一類。
+
+**修法**：(a) publisher 防線 — `proposer` 非空（member-questions 流程專用欄位）→ 強制 audience='member_qa' + category='member_qa'，跳過整段 inference；(b) mile_9b76989e backfill correction（research→member_qa + details.audience_correction 記錄）+ supabase sync；(c) feed tab 新增「會員提問」入口（9 篇舊文被 cluster 排序排到 100 名外，原本完全不可見）。
+
+**防再發**：enforce-gate 類修改必列「豁免矩陣」：所有 11 類 task_type × 此 gate 是否該豁免 — 逐類過一遍才能上線；新增 gate 時 member_qa/event/daily/trending 四個 reader-facing 類全要驗證。
