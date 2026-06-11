@@ -1,29 +1,30 @@
 {
-  "timestamp": "2026-06-11T06:04:56Z",
+  "timestamp": "2026-06-11T12:05:17Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "147 drafts total (research=48 >=4 OK, general=99 >=8 OK). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "140 drafts total (general=93 >=8 OK, research=47 >=4 OK). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified 2026-06-11T06:03:36Z (~1 min ago). Well within 26h threshold."
+      "detail": "storage/strategy_metrics.json last modified ~12 seconds before patrol run (2026-06-11T12:05:05Z approx). Well within 26h threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Entry dated 2026-06-10 (yesterday): 3-STRIKE TRIGGER arc-dedup — K1449/K1091 narrative-arc dup. Article mile_5af5ec51 unpublished. arc_dedup.py + 3-layer hard gates deployed. Regression tests pass. No new errors today (2026-06-11).",
+      "detail": "Two entries dated today (2026-06-11): (1) 文章圖片中文豆腐字 — matplotlib CJK font fallback in k202/mile_872abdc3; fixed with scripts/plot_style.py + regenerate_figures.py + Supabase re-upsert (commit 618e8720). (2) Mirror sync 靜默 401 近一個月 — OPS_ADMIN_TOKEN gate on /api/sync/* not propagated to callers; fixed with mirror_auth.py + loud exception logging. Both entries resolved.",
       "recent_entries": [
-        "2026-06-10: 3-STRIKE arc-dedup refactor — K1449/K1091 narrative-arc dup caught by user; mile_5af5ec51 unpublished; entity-level dedup module + 3-layer gates + regression tests."
+        "2026-06-11: matplotlib CJK font fallback in k202 — fixed with scripts/plot_style.py apply_cjk_style()",
+        "2026-06-11: Mirror sync silent 401 for ~1 month — fixed with OPS_ADMIN_TOKEN propagation to callers"
       ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies checked (last_date=2026-06-09 for all). Each has exactly 1 null portfolio_return in last 3 entries — within tolerance (threshold: >2 nulls). _market_daily has no entries (inactive)."
+      "detail": "14 active strategies checked. All have <=1 null portfolio_return in last 3 entries (threshold: >2 nulls for alert). _market_daily has no entries (inactive/skipped)."
     },
     {
       "name": "GIT_STATUS",
@@ -33,7 +34,7 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2227 entries in storage/memory/knowledge.json."
+      "detail": "2237 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": []
