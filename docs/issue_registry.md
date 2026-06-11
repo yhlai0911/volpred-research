@@ -30,3 +30,10 @@
 - 影響：mirror replica 的 feed 整檔同步不可用；canonical Supabase 單篇 sync 正常，無讀者面影響
 - 方向：incremental sync（只推 delta）或 gzip + server 端 streaming parse；或廢止整檔 mirror path（評估 mirror feed 是否仍有讀者）
 - Priority: P3
+
+## ISS-010: 首頁 React #418 hydration mismatch（HTML variant）殘留（2026-06-11）
+- 已修：text variant（FeedBrowser getTimeAgo Date.now() SSR/client 差 → suppressHydrationWarning，fe a16a0be）
+- 殘留：args[]=HTML 一條，硬刷新後仍在；頁面視覺與功能正常（React 自動 client fallback）
+- 嫌疑：瀏覽器 extension 注入 DOM（檢測環境本身有 Claude in Chrome）/ StrategyPanel SWR / details[open]
+- 驗證法：無 extension 的乾淨 profile 或 headless Chrome 重現；dev build 看 component stack
+- Priority: P3（無使用者面影響）
