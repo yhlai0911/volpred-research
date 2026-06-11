@@ -27332,11 +27332,13 @@
     "source": "paper_audit_2026-06-10",
     "title": "crypto-fear-channel 審查修正：7 HIGH（HAC 宣稱 + 4 個 v5 MAJOR 殘留）",
     "description": "依 paper/crypto-fear-channel/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）：v2 重跑修掉 3 個 BLOCKING 但 4 個 MAJOR 殘留（HAC 不實宣稱等）。數字對 experiments JSON 驗證；xelatex exit 0 → paper-update 上傳 → fix_log.md。",
-    "status": "claimed",
+    "status": "succeeded",
     "created_at": "2026-06-10T13:58:00+00:00",
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-11T01:02:22.992331+00:00",
-    "claim_session_id": "060ba54a0966"
+    "claim_session_id": "060ba54a0966",
+    "completed_at": "2026-06-11T01:18:57.420669+00:00",
+    "result": "Synced crypto-fear-channel back to an audit-honest major-revision state. Rewrote methods/body to match k1025_v2 actual implementation, removed legacy K1025b robustness from active evidence, rebuilt reproduce gate to 32/32 GREEN, recompiled PDF, and ran paper-update."
   },
   {
     "id": "paper_body_audit_fix_vt_insurance_cost_2026_06_10",

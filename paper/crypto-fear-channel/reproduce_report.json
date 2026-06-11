@@ -4,8 +4,8 @@
   "target_journal": "JIMFIM / JEF / FRL",
   "alert_level": "green",
   "gate_status": "pass",
-  "match_rate_pct": 96.9,
-  "matched": 31,
+  "match_rate_pct": 100.0,
+  "matched": 32,
   "total_checks": 32,
   "checks": [
     {
@@ -19,11 +19,11 @@
     },
     {
       "metric": "T1: btc_ret mean (%)",
-      "paper_value": 0.16,
+      "paper_value": 0.158,
       "actual_value": 0.15752857161502168,
       "tol_pct": 1.0,
-      "rel_diff_pct": 1.544642740611453,
-      "status": "mismatch",
+      "rel_diff_pct": 0.29837239555590056,
+      "status": "match",
       "source_path": "k1025_v2.descriptive_statistics.btc_ret.mean (×100)"
     },
     {
@@ -297,7 +297,7 @@
       "source_path": "k1025_v2.forecast_evaluation.oos_n"
     }
   ],
-  "generated_at": "2026-06-11T01:17:54+00:00",
+  "generated_at": "2026-06-11T01:18:35+00:00",
   "stage": "major-revision manuscript after 2026-06-11 audit sync",
   "notes": [
     "2026-06-11 gate scope aligned to the active manuscript after removing legacy K1025b claims.",
