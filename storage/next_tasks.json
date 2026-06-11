@@ -28047,7 +28047,7 @@
     "title": "Paper review (Codex 24h-rule): 做了 305 次投資研究後，真正活下來的結論有多少？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_23312ae9 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_23312ae9",
@@ -28056,7 +28056,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-11T14:08:09+00:00"
+    "created_at": "2026-06-11T14:08:09+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T15:44:57.088068+00:00",
+    "claim_session_id": "585689d74f69",
+    "started_at": "2026-06-11T15:44:57.151711+00:00",
+    "completed_at": "2026-06-11T15:46:09.465910+00:00",
+    "result": "CONDITIONAL_PASS: review saved at storage/reviews/codex_24h/mile_23312ae9_review.md; core 305/86/28.2 numbers match K286, but article should disclose K286 is a curated summary rather than fully auto-recomputed audit."
   },
   {
     "id": "paper_review_mile_938a158f",
@@ -28158,7 +28164,7 @@
     "title": "Paper review (Codex 24h-rule): 酒店娛樂業是股市的晴雨表嗎？文獻回顧與十年實證",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_9b76989e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_9b76989e",
@@ -28167,7 +28173,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-11T15:08:08+00:00"
+    "created_at": "2026-06-11T15:08:08+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-11T16:08:52.356377+00:00",
+    "claim_session_id": "04f999a66e79",
+    "started_at": "2026-06-11T16:08:57.447001+00:00",
+    "completed_at": "2026-06-11T16:11:20.368623+00:00",
+    "result": "Codex 24h review CONDITIONAL_PASS (article prose honest, numbers match; flagged README/results key_findings false generalization + recovery-window double-count for follow-up). Verdict written to feed details, supabase synced."
   },
   {
     "id": "research_fragility_0050_vol_event_study",
