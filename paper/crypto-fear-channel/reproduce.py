@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """Paper 10 (crypto-fear-channel) — Reproducibility check.
 
-Validates numbers cited in main.tex (K1025-v2 corrected methods) against
-experiments/k1025/k1025_v2_results.json. Per .claude/rules/paper-workflow.md
-hard rule 3 traceable binding: each body Table row + key %-source claim
-maps to a JSON field path here.
+Validates numbers cited in the active `main.tex` against
+`experiments/k1025/k1025_v2_results.json`.
 
-Coverage: 25 byte-match checks across 6 tables in body_v5.tex —
-T1 Descriptive (8) / T2 Asymmetric Granger (4) / T3 QR (5) /
-T4 5-subperiod Granger (5) / T5 DCC by VIX regime (2) /
-T6 OOS forecast (3) / Spillover (2).
+Coverage reflects the current major-revision manuscript scope:
+- T1 Descriptive statistics
+- T2 Asymmetric Granger
+- T3 Quantile regression coefficients / bootstrap intervals
+- T4 5-subperiod Granger
+- T5 EWMA-by-regime correlation
+- Spillover summary
+- T6 OOS forecast evaluation
 
-Usage:
-    uv run python paper/crypto-fear-channel/reproduce.py
-    -> exit 0 if match_rate >= 95%, exit 1 otherwise
-    -> writes reproduce_report.json with alert_level + match_summary
+Legacy K1025b cross-asset checks were removed after that section was downgraded
+to deferred work pending a method-symmetric rerun.
 """
 from __future__ import annotations
 
@@ -26,96 +26,88 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent.parent
 PAPER_DIR = Path(__file__).resolve().parent
 EXP_DIR = PROJECT / "experiments"
-
 REPORT_PATH = PAPER_DIR / "reproduce_report.json"
 
 
 def _load(rel_path: str) -> dict:
-    p = EXP_DIR / rel_path
-    if not p.exists():
-        raise FileNotFoundError(f"missing: {p}")
-    return json.loads(p.read_text())
+    path = EXP_DIR / rel_path
+    if not path.exists():
+        raise FileNotFoundError(f"missing: {path}")
+    return json.loads(path.read_text())
 
 
 def _approx(actual: float, paper: float, tol_pct: float = 1.0) -> bool:
     if paper == 0:
-        return abs(actual) < 1e-9
+        return abs(actual) < 1e-12
     return abs(actual - paper) / abs(paper) * 100 <= tol_pct
 
 
-def main() -> int:
-    checks = []
-    # v2 = corrected methodology (canonical for all model outputs)
-    k1025 = _load("k1025/k1025_v2_results.json")
-    # v1 = raw data descriptive stats (T1 only; v2 computes on post-alignment shorter sample)
-    k1025_raw = _load("k1025/k1025_results.json")
-    k1025b = _load("k1025b/k1025b_results.json")
+def _rel_diff(actual: float, paper: float) -> float:
+    if paper == 0:
+        return 0.0
+    return abs(actual - paper) / abs(paper) * 100
 
-    # Table of paper claims sourced from body_v5.tex (9-section draft 2026-04-28).
-    # Each entry maps a body claim (table row, abstract number, or %-source comment)
-    # to a JSON field path in experiments/k1025/k1025_results.json.
+
+def main() -> int:
+    k1025 = _load("k1025/k1025_v2_results.json")
+
     paper_claims = [
-        # === Sample / Data (§3.1) ===
         {
             "metric": "Sample N (§3.1, abstract)",
             "paper_value": 2812,
-            "source_path": "k1025.n_observations",
+            "source_path": "k1025_v2.n_observations",
             "actual": k1025["n_observations"],
             "tol_pct": 0.0,
         },
-        # === T1 Descriptive Statistics (§3.3) — sourced from k1025_raw (v1) ===
-        # v2 computes desc stats on post-rolling-alignment sample (shorter by ~19 obs);
-        # paper Table 1 reports full-sample raw-data stats from v1.
         {
             "metric": "T1: btc_ret mean (%)",
-            "paper_value": 0.229,
-            "source_path": "k1025_raw.descriptive_statistics.btc_ret.mean (× 100)",
-            "actual": k1025_raw["descriptive_statistics"]["btc_ret"]["mean"] * 100,
+            "paper_value": 0.158,
+            "source_path": "k1025_v2.descriptive_statistics.btc_ret.mean (×100)",
+            "actual": k1025["descriptive_statistics"]["btc_ret"]["mean"] * 100,
             "tol_pct": 1.0,
         },
         {
             "metric": "T1: btc_ret std (%)",
-            "paper_value": 3.764,
-            "source_path": "k1025_raw.descriptive_statistics.btc_ret.std (× 100)",
-            "actual": k1025_raw["descriptive_statistics"]["btc_ret"]["std"] * 100,
+            "paper_value": 3.790,
+            "source_path": "k1025_v2.descriptive_statistics.btc_ret.std (×100)",
+            "actual": k1025["descriptive_statistics"]["btc_ret"]["std"] * 100,
             "tol_pct": 1.0,
         },
         {
             "metric": "T1: btc_ret excess kurtosis",
-            "paper_value": 7.579,
-            "source_path": "k1025_raw.descriptive_statistics.btc_ret.kurtosis",
-            "actual": k1025_raw["descriptive_statistics"]["btc_ret"]["kurtosis"],
+            "paper_value": 11.826,
+            "source_path": "k1025_v2.descriptive_statistics.btc_ret.kurtosis",
+            "actual": k1025["descriptive_statistics"]["btc_ret"]["kurtosis"],
             "tol_pct": 1.0,
         },
         {
             "metric": "T1: spy_ret excess kurtosis",
             "paper_value": 14.150,
-            "source_path": "k1025_raw.descriptive_statistics.spy_ret.kurtosis",
-            "actual": k1025_raw["descriptive_statistics"]["spy_ret"]["kurtosis"],
+            "source_path": "k1025_v2.descriptive_statistics.spy_ret.kurtosis",
+            "actual": k1025["descriptive_statistics"]["spy_ret"]["kurtosis"],
             "tol_pct": 1.0,
         },
         {
             "metric": "T1: VIX mean",
             "paper_value": 18.382,
-            "source_path": "k1025_raw.descriptive_statistics.vix.mean",
-            "actual": k1025_raw["descriptive_statistics"]["vix"]["mean"],
+            "source_path": "k1025_v2.descriptive_statistics.vix.mean",
+            "actual": k1025["descriptive_statistics"]["vix"]["mean"],
             "tol_pct": 1.0,
         },
         {
-            "metric": "T1: VIX max (March 2020)",
+            "metric": "T1: VIX max",
             "paper_value": 82.69,
-            "source_path": "k1025_raw.descriptive_statistics.vix.max",
-            "actual": k1025_raw["descriptive_statistics"]["vix"]["max"],
+            "source_path": "k1025_v2.descriptive_statistics.vix.max",
+            "actual": k1025["descriptive_statistics"]["vix"]["max"],
             "tol_pct": 1.0,
         },
         {
             "metric": "T1: VIX min",
             "paper_value": 9.14,
-            "source_path": "k1025_raw.descriptive_statistics.vix.min",
-            "actual": k1025_raw["descriptive_statistics"]["vix"]["min"],
+            "source_path": "k1025_v2.descriptive_statistics.vix.min",
+            "actual": k1025["descriptive_statistics"]["vix"]["min"],
             "tol_pct": 1.0,
         },
-        # === T2 Asymmetric Granger BTC- → VIX (§5.1) ===
         {
             "metric": "T2: BTC- → VIX lag 1 F-stat",
             "paper_value": 21.78,
@@ -131,124 +123,140 @@ def main() -> int:
             "tol_pct": 1.0,
         },
         {
-            "metric": "T2: BTC+ → VIX lag 1 F-stat (NS branch)",
+            "metric": "T2: BTC+ → VIX lag 1 F-stat",
             "paper_value": 2.04,
             "source_path": "k1025_v2.asymmetric_granger.btc_pos_to_vix.1.F",
             "actual": k1025["asymmetric_granger"]["btc_pos_to_vix"]["1"]["F"],
             "tol_pct": 2.0,
         },
         {
-            "metric": "T2: BTC+ → VIX lag 5 p-value (NS branch)",
+            "metric": "T2: BTC+ → VIX lag 5 p-value",
             "paper_value": 0.919,
             "source_path": "k1025_v2.asymmetric_granger.btc_pos_to_vix.5.p",
             "actual": k1025["asymmetric_granger"]["btc_pos_to_vix"]["5"]["p"],
             "tol_pct": 2.0,
         },
-        # === T3 QR by quantile (§5.2) ===
         {
-            "metric": "T3: QR β τ=0.05 (sign-reversal lower tail)",
+            "metric": "T3: QR beta tau=0.05",
             "paper_value": -2.78,
             "source_path": "k1025_v2.quantile_regression['0.05'].beta",
             "actual": k1025["quantile_regression"]["0.05"]["beta"],
             "tol_pct": 1.0,
         },
         {
-            "metric": "T3: QR β τ=0.25",
+            "metric": "T3: QR beta tau=0.25",
             "paper_value": -2.12,
             "source_path": "k1025_v2.quantile_regression['0.25'].beta",
             "actual": k1025["quantile_regression"]["0.25"]["beta"],
             "tol_pct": 1.0,
         },
         {
-            "metric": "T3: QR β τ=0.50 (median)",
+            "metric": "T3: QR beta tau=0.50",
             "paper_value": 2.82,
             "source_path": "k1025_v2.quantile_regression['0.5'].beta",
             "actual": k1025["quantile_regression"]["0.5"]["beta"],
             "tol_pct": 1.0,
         },
         {
-            "metric": "T3: QR β τ=0.75",
+            "metric": "T3: QR beta tau=0.75",
             "paper_value": 9.39,
             "source_path": "k1025_v2.quantile_regression['0.75'].beta",
             "actual": k1025["quantile_regression"]["0.75"]["beta"],
             "tol_pct": 1.0,
         },
         {
-            "metric": "T3: QR β τ=0.95 (upper-tail amplification)",
+            "metric": "T3: QR beta tau=0.95",
             "paper_value": 19.85,
             "source_path": "k1025_v2.quantile_regression['0.95'].beta",
             "actual": k1025["quantile_regression"]["0.95"]["beta"],
             "tol_pct": 1.0,
         },
-        # === T4 5-subperiod Granger (§5.3) ===
         {
-            "metric": "T4: 2015-2017 Granger F (conventional sig, Bonferroni NS)",
+            "metric": "T3: QR 95% CI tau=0.05 lower",
+            "paper_value": -3.32,
+            "source_path": "k1025_v2.quantile_regression['0.05'].ci_lo",
+            "actual": k1025["quantile_regression"]["0.05"]["ci_lo"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "T3: QR 95% CI tau=0.95 upper",
+            "paper_value": 23.21,
+            "source_path": "k1025_v2.quantile_regression['0.95'].ci_hi",
+            "actual": k1025["quantile_regression"]["0.95"]["ci_hi"],
+            "tol_pct": 1.0,
+        },
+        {
+            "metric": "T4: 2015-2017 Granger F",
             "paper_value": 2.88,
             "source_path": "k1025_v2.subperiod_granger['2015-2017 (Pre-mania)'].F",
             "actual": k1025["subperiod_granger"]["2015-2017 (Pre-mania)"]["F"],
             "tol_pct": 2.0,
         },
         {
-            "metric": "T4: 2018-2019 Granger F (NS)",
+            "metric": "T4: 2018-2019 Granger F",
             "paper_value": 0.37,
             "source_path": "k1025_v2.subperiod_granger['2018-2019 (Crypto winter)'].F",
             "actual": k1025["subperiod_granger"]["2018-2019 (Crypto winter)"]["F"],
             "tol_pct": 2.0,
         },
         {
-            "metric": "T4: 2020 COVID Granger F (structural watershed, Bonferroni pass)",
+            "metric": "T4: 2020 Granger F",
             "paper_value": 12.31,
             "source_path": "k1025_v2.subperiod_granger['2020 (COVID)'].F",
             "actual": k1025["subperiod_granger"]["2020 (COVID)"]["F"],
             "tol_pct": 1.0,
         },
         {
-            "metric": "T4: 2021-2022 Granger F (NS)",
+            "metric": "T4: 2021-2022 Granger F",
             "paper_value": 2.03,
             "source_path": "k1025_v2.subperiod_granger['2021-2022 (Bull-Bear)'].F",
             "actual": k1025["subperiod_granger"]["2021-2022 (Bull-Bear)"]["F"],
             "tol_pct": 2.0,
         },
         {
-            "metric": "T4: 2023-2026 Granger F (NS)",
+            "metric": "T4: 2023-2026 Granger F",
             "paper_value": 0.16,
             "source_path": "k1025_v2.subperiod_granger['2023-2026 (Recovery+ETF)'].F",
             "actual": k1025["subperiod_granger"]["2023-2026 (Recovery+ETF)"]["F"],
             "tol_pct": 5.0,
         },
-        # === T5 DCC correlation by VIX regime (§5.3) ===
         {
-            "metric": "T5: DCC Low regime mean correlation",
+            "metric": "T5: EWMA Low regime mean correlation",
             "paper_value": 0.068,
-            "source_path": "k1025.dcc_correlation_by_regime.Low.mean",
+            "source_path": "k1025_v2.dcc_correlation_by_regime.Low.mean",
             "actual": k1025["dcc_correlation_by_regime"]["Low"]["mean"],
             "tol_pct": 2.0,
         },
         {
-            "metric": "T5: DCC Crisis regime mean correlation",
+            "metric": "T5: EWMA Crisis regime mean correlation",
             "paper_value": 0.409,
-            "source_path": "k1025.dcc_correlation_by_regime.Crisis.mean",
+            "source_path": "k1025_v2.dcc_correlation_by_regime.Crisis.mean",
             "actual": k1025["dcc_correlation_by_regime"]["Crisis"]["mean"],
             "tol_pct": 1.0,
         },
-        # === Diebold-Yilmaz spillover (§5.3 + §6.1) ===
         {
-            "metric": "DY: total spillover index mean (%)",
+            "metric": "DY: total spillover mean (%)",
             "paper_value": 90.11,
             "source_path": "k1025_v2.spillover_index.mean_total",
             "actual": k1025["spillover_index"]["mean_total"],
             "tol_pct": 0.5,
         },
         {
-            "metric": "DY: BTC net spillover (net receiver)",
+            "metric": "DY: total spillover std (%)",
+            "paper_value": 0.22,
+            "source_path": "k1025_v2.spillover_index.std_total",
+            "actual": k1025["spillover_index"]["std_total"],
+            "tol_pct": 5.0,
+        },
+        {
+            "metric": "DY: BTC net spillover (pp)",
             "paper_value": -74.41,
             "source_path": "k1025_v2.spillover_index.mean_net_btc",
             "actual": k1025["spillover_index"]["mean_net_btc"],
             "tol_pct": 1.0,
         },
-        # === T6 OOS forecast (§7) ===
         {
-            "metric": "T6: DM t-stat (Harvey, full OOS)",
+            "metric": "T6: OOS DM t-stat",
             "paper_value": -1.14,
             "source_path": "k1025_v2.forecast_evaluation.dm_stat_harvey",
             "actual": k1025["forecast_evaluation"]["dm_stat_harvey"],
@@ -262,99 +270,44 @@ def main() -> int:
             "tol_pct": 1.0,
         },
         {
-            "metric": "T6: OOS n (2019-01-01 to 2026-04-08)",
+            "metric": "T6: OOS N",
             "paper_value": 1826,
-            "source_path": "k1025.forecast_evaluation.oos_n",
+            "source_path": "k1025_v2.forecast_evaluation.oos_n",
             "actual": k1025["forecast_evaluation"]["oos_n"],
             "tol_pct": 0.0,
         },
-        # === T7 K1025b multi-asset robustness (§6.4) ===
-        {
-            "metric": "T7 K1025b: BTC- → VXN lag 1 F-stat",
-            "paper_value": 24.31,
-            "source_path": "k1025b.asymmetric_granger.btc_neg_to_vix.1.F",
-            "actual": k1025b["asymmetric_granger"]["btc_neg_to_vix"]["1"]["F"],
-            "tol_pct": 1.0,
-        },
-        {
-            "metric": "T7 K1025b: QR β τ=0.05",
-            "paper_value": -1.46,
-            "source_path": "k1025b.quantile_regression['0.05'].beta",
-            "actual": k1025b["quantile_regression"]["0.05"]["beta"],
-            "tol_pct": 1.0,
-        },
-        {
-            "metric": "T7 K1025b: QR β τ=0.50 (median)",
-            "paper_value": 2.83,
-            "source_path": "k1025b.quantile_regression['0.5'].beta",
-            "actual": k1025b["quantile_regression"]["0.5"]["beta"],
-            "tol_pct": 1.0,
-        },
-        {
-            "metric": "T7 K1025b: QR β τ=0.95",
-            "paper_value": 16.29,
-            "source_path": "k1025b.quantile_regression['0.95'].beta",
-            "actual": k1025b["quantile_regression"]["0.95"]["beta"],
-            "tol_pct": 1.0,
-        },
-        {
-            "metric": "T7 K1025b: 2020 COVID Granger F",
-            "paper_value": 13.41,
-            "source_path": "k1025b.subperiod_granger['2020 (COVID)'].F",
-            "actual": k1025b["subperiod_granger"]["2020 (COVID)"]["F"],
-            "tol_pct": 1.0,
-        },
-        {
-            "metric": "T7 K1025b: DY total spillover (%)",
-            "paper_value": 90.09,
-            "source_path": "k1025b.spillover_index.mean_total",
-            "actual": k1025b["spillover_index"]["mean_total"],
-            "tol_pct": 0.5,
-        },
-        {
-            "metric": "T7 K1025b: DY net BTC (receiver)",
-            "paper_value": -76.64,
-            "source_path": "k1025b.spillover_index.mean_net_btc",
-            "actual": k1025b["spillover_index"]["mean_net_btc"],
-            "tol_pct": 1.0,
-        },
-        {
-            "metric": "T7 K1025b: OOS DM t-stat",
-            "paper_value": -0.43,
-            "source_path": "k1025b.forecast_evaluation.dm_stat",
-            "actual": k1025b["forecast_evaluation"]["dm_stat"],
-            "tol_pct": 5.0,
-        },
     ]
 
-    for c in paper_claims:
-        match = _approx(c["actual"], c["paper_value"], c["tol_pct"])
-        checks.append({
-            "metric": c["metric"],
-            "paper_value": c["paper_value"],
-            "actual_value": c["actual"],
-            "tol_pct": c["tol_pct"],
-            "rel_diff_pct": (abs(c["actual"] - c["paper_value"]) / abs(c["paper_value"]) * 100)
-                            if c["paper_value"] else 0.0,
-            "status": "match" if match else "mismatch",
-            "source_path": c["source_path"],
-        })
+    checks = []
+    for claim in paper_claims:
+        match = _approx(claim["actual"], claim["paper_value"], claim["tol_pct"])
+        checks.append(
+            {
+                "metric": claim["metric"],
+                "paper_value": claim["paper_value"],
+                "actual_value": claim["actual"],
+                "tol_pct": claim["tol_pct"],
+                "rel_diff_pct": _rel_diff(claim["actual"], claim["paper_value"]),
+                "status": "match" if match else "mismatch",
+                "source_path": claim["source_path"],
+            }
+        )
 
     total = len(checks)
     matched = sum(1 for c in checks if c["status"] == "match")
-    match_rate = (matched / total) * 100 if total else 0
-
+    match_rate = (matched / total) * 100 if total else 0.0
     alert_level = "green" if match_rate >= 95 else ("amber" if match_rate >= 80 else "red")
     gate_status = "pass" if match_rate >= 95 else "fail"
 
-    # Print human summary
-    print(f"{'Metric':<60} {'Paper':>10} {'Actual':>10} {'diff %':>8} {'status':>10}")
-    print("-" * 100)
+    print(f"{'Metric':<52} {'Paper':>10} {'Actual':>10} {'diff %':>8} {'status':>10}")
+    print("-" * 96)
     for c in checks:
-        print(f"{c['metric'][:58]:<60} {c['paper_value']:>10.3f} {c['actual_value']:>10.3f} "
-              f"{c['rel_diff_pct']:>7.2f}% {c['status']:>10}")
-    print("-" * 100)
-    print(f"\nMatched: {matched}/{total}  rate: {match_rate:.1f}%  alert: {alert_level}  gate: {gate_status}")
+        print(
+            f"{c['metric'][:50]:<52} {c['paper_value']:>10.3f} "
+            f"{c['actual_value']:>10.3f} {c['rel_diff_pct']:>7.2f}% {c['status']:>10}"
+        )
+    print("-" * 96)
+    print(f"Matched: {matched}/{total}  rate: {match_rate:.1f}%  alert: {alert_level}  gate: {gate_status}")
 
     report = {
         "paper_id": "crypto-fear-channel",
@@ -367,18 +320,17 @@ def main() -> int:
         "total_checks": total,
         "checks": checks,
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "stage": "body draft complete (v5, 9 sections, 15 pages)",
+        "stage": "major-revision manuscript after 2026-06-11 audit sync",
         "notes": [
-            "Expanded 2026-04-28 from 7 → 25 checks covering all 6 tables in body_v5.tex.",
-            "Coverage: T1 Descriptive (8) / T2 Asymmetric Granger (4) / T3 QR (5) / "
-            "T4 5-subperiod Granger (5) / T5 DCC by VIX regime (2) / Spillover (2) / "
-            "T6 OOS forecast (3).",
-            "Per .claude/rules/paper-workflow.md hard rule 3: each table row + key %-source "
-            "claim has a traceable JSON field path in source_path.",
+            "2026-06-11 gate scope aligned to the active manuscript after removing legacy K1025b claims.",
+            "Coverage: T1 Descriptive / T2 Asymmetric Granger / T3 QR coeff+CI / "
+            "T4 5-subperiod Granger / T5 EWMA by regime / Spillover / T6 OOS forecast.",
+            "Per .claude/rules/paper-workflow.md hard rule 3: each table row or numeric body claim "
+            "kept in the manuscript has a traceable JSON field path in source_path.",
         ],
     }
     REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False))
-    print(f"\n[write] {REPORT_PATH.relative_to(PROJECT)}")
+    print(f"[write] {REPORT_PATH.relative_to(PROJECT)}")
     return 0 if gate_status == "pass" else 1
 
 

@@ -93,7 +93,7 @@ For the asymmetric Granger tests of \S\ref{sec:methodology}.2 we follow \citet{h
 
 \subsection{Descriptive statistics and stationarity}
 
-Table~\ref{tab:descriptive} reports descriptive statistics for the four primary series. BTC daily returns exhibit mean $0.16\%$, daily standard deviation $3.79\%$, and excess kurtosis $11.83$ with pronounced negative skewness ($-0.74$). SPY daily returns are an order of magnitude less volatile in standard deviation ($1.12\%$) and exhibit a still-higher excess kurtosis ($14.15$) in this sample window, concentrated in a handful of COVID-2020 and 2022 crisis days; the two series' tail thickness is thus of comparable order in this window, with SPY's edge reflecting a small set of extreme equity outliers rather than a reversal of the well-documented unconditional ranking of BTC over equities. The VIX averages $18.4$ with maximum $82.7$ (March 2020) and minimum $9.1$, spanning the calm 2017--2019 vol regime, the COVID shock, the 2022 inflation regime, and the 2024--2026 normalization.% audit fix 2026-06-10: paragraph and Table 1 updated from v1 values (kurt 7.58, skew -0.09, mean 0.23%) to k1025_v2_results.json values matching the cited source.
+Table~\ref{tab:descriptive} reports descriptive statistics for the four primary series. BTC daily returns exhibit mean $0.158\%$, daily standard deviation $3.79\%$, and excess kurtosis $11.83$ with pronounced negative skewness ($-0.74$). SPY daily returns are an order of magnitude less volatile in standard deviation ($1.12\%$) and exhibit a still-higher excess kurtosis ($14.15$) in this sample window, concentrated in a handful of COVID-2020 and 2022 crisis days; the two series' tail thickness is thus of comparable order in this window, with SPY's edge reflecting a small set of extreme equity outliers rather than a reversal of the well-documented unconditional ranking of BTC over equities. The VIX averages $18.4$ with maximum $82.7$ (March 2020) and minimum $9.1$, spanning the calm 2017--2019 vol regime, the COVID shock, the 2022 inflation regime, and the 2024--2026 normalization.% audit fix 2026-06-10: paragraph and Table 1 updated from v1 values (kurt 7.58, skew -0.09, mean 0.23%) to k1025_v2_results.json values matching the cited source.
 
 \begin{table}[H]
 \centering
@@ -103,7 +103,7 @@ Table~\ref{tab:descriptive} reports descriptive statistics for the four primary 
 \toprule
 Series & Mean & Std.\ dev. & Skewness & Excess kurtosis \\
 \midrule
-$r^{\text{btc}}$ (\%) & 0.160 & 3.790 & $-$0.739 & 11.826 \\
+$r^{\text{btc}}$ (\%) & 0.158 & 3.790 & $-$0.739 & 11.826 \\
 $r^{\text{spy}}$ (\%) & 0.060 & 1.120 & $-$0.307 & 14.150 \\
 VIX & 18.382 & 7.110 & --- & --- \\
 $\text{RV}^{(20)}_{\text{btc}}$ & 0.543 & 0.266 & --- & --- \\
@@ -231,7 +231,7 @@ $t$-stat    & $-13.84$ & $-4.89$ & $4.15$  & $6.61$ & $8.17$  \\
 \end{flushleft}
 \end{table}
 
-The economically meaningful summary statistic is the upper-tail amplification ratio $\beta_{0.95} / \beta_{0.5} \approx 7.04$: the conditional sensitivity of VIX to BTC realized variance is roughly 7 times stronger at the 95th percentile of VIX than at the median. The sign reversal at lower quantiles is, to our knowledge, a new finding for crypto-equity spillover: it implies that conditional-mean estimators (OLS, DCC-GARCH) average over a regime in which BTC volatility \emph{dampens} expected equity fear (the bull-market decoupling we discuss in \S\ref{sec:discussion}) and a regime in which it \emph{amplifies} fear, producing a pooled slope that mischaracterizes both halves.
+The economically meaningful summary statistic is the upper-tail amplification ratio $\beta_{0.95} / \beta_{0.5} \approx 7.04$: the conditional sensitivity of VIX to BTC realized variance is roughly 7 times stronger at the 95th percentile of VIX than at the median. The sign reversal at lower quantiles is, to our knowledge, a new finding for crypto-equity spillover: it implies that pooled conditional-mean estimators average over a regime in which BTC volatility \emph{dampens} expected equity fear (the bull-market decoupling we discuss in \S\ref{sec:discussion}) and a regime in which it \emph{amplifies} fear, producing a pooled slope that mischaracterizes both halves.
 
 \subsection{Regime dependence: COVID-2020 as structural watershed}
 \label{subsec:r_regime}
