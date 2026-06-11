@@ -1609,3 +1609,21 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **廢棄面**：title-similarity block 保留（仍抓同 ref 高相似），但不再是唯一防線；memory soft 規則降級為背景說明（hard gate 取代執法）。
 
 **教訓**：dedup 這類「語意判斷」不能只靠字面 similarity 或 memory 自律 — 要把 domain model（資產×結論）寫成 code gate 放在 choke point（源頭 + 派工 + 發佈三層）。
+
+## 2026-06-11 — 文章圖片中文豆腐字（k202/mile_872abdc3，boss 抓到）→ 全站掃描 + durable fix
+
+**症狀**：線上文章 mile_872abdc3 兩張圖（experiments/k202/btc_feature_*.png）中文全是豆腐字（□）。
+
+**根因（三層）**：
+1. 直接原因：產圖時 matplotlib fallback 到 DejaVu Sans（無 CJK glyphs）。
+2. 結構原因：專案一直依賴 `.venv/.../mpl-data/matplotlibrc` 被手動 patch（font.sans-serif 前置 PingFang HK）— 這是脆弱防線：`uv sync` 重裝 matplotlib 會洗掉 patch、worktree fresh venv 沒有 patch、用系統 anaconda python 跑則完全繞過（anaconda matplotlibrc 是 stock DejaVu）。k202 的圖就是在沒有 patch 的環境產的。
+3. 流程原因：產圖腳本沒有「字型設定必須寫在 code 裡」的慣例，靠環境隱性保證。
+
+**全站掃描（2026-06-11）**：grep experiments/+scripts/ 共 182 個「有 savefig + 含中文 + 無字型設定」可疑腳本 → 反向交集 storage/reports/*.json + feed.json 的線上圖引用得 33+7 張 → 逐張視覺確認（Read 工具直接看圖）：**全部正常，無豆腐**（多數是純英文圖；含中文者皆在 patched venv 產出）。k202 是孤例，已於 commit 618e8720 修復（regenerate_figures.py + Supabase x-upsert 同名覆蓋）。
+
+**修法（durable）**：新增 `scripts/plot_style.py` — `apply_cjk_style()` 一行設定字型鏈（PingFang TC → PingFang HK → Heiti TC → Arial Unicode MS → Noto CJK）+ `axes.unicode_minus=False` + CJK 字型 resolve 失敗時 loud warning。兩個 python 環境（uv venv / anaconda）皆 smoke-test 通過。
+
+**防再發**：
+1. 任何新的產圖腳本（experiments/、scripts/、agent brief 模板）一律 `from plot_style import apply_cjk_style; apply_cjk_style()` 開頭 — 不依賴環境 matplotlibrc。
+2. 含中文圖的文章 publish 前看一眼圖（feed-publisher 已有 image gate；中文渲染屬 content-vs-source 檢查範圍）。
+3. 不可再手 patch venv matplotlibrc 當正式修法（環境態 patch = 修資料不修流程）。
