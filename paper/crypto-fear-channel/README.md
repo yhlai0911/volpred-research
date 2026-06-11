@@ -1,7 +1,7 @@
 # Paper 10: The Crypto Fear Channel — Asymmetric BTC–Equity Volatility Spillover
 
 **Target Journal**: Journal of International Financial Markets, Institutions & Money (1st) / Journal of Empirical Finance (2nd) / Finance Research Letters (backup)
-**Status**: **READY FOR SUBMISSION** (2026-05-17 v4.1 hotfix; 4-round review history complete; 0 blocking issues; academic 4.70★; citation 21/22 VERIFIED; reproduce gate GREEN)
+**Status**: **MAJOR REVISION** (2026-06-11 audit sync; v2 experiment rerun exists, but manuscript remains downgraded until data-pinning, FEVD-ordering robustness, and K1025b symmetric rerun are completed)
 **Pages**: ~30 (target met)
 **Citations**: TBD (citation_check.md pending)
 
@@ -20,14 +20,14 @@ All from VolPred experiments (2015-02 – 2026-04, N=2,812 daily obs):
 - **K746b** — BTC volatility asymmetrically Granger-causes VIX (negative-BTC branch dominates)
 - **K1025** — Full spillover framework: asymmetric Granger + quantile regression + rolling Diebold-Yilmaz spillover index + EWMA correlation by VIX regime + 5-subperiod structural change
 
-Underlying daily data: BTC-USD / SPY / VIX from yfinance (`auto_adjust=False` per replication package rule).
+Underlying daily data for the currently reported estimates come from the archived `k1025_v2.py` yfinance pull (`auto_adjust=True`). A paper-local CSV snapshot exists in `data/`, but the headline results have not yet been fully rerun from that pinned file.
 
 ## Files
 
-- `outline.md` — Detailed paper outline (kickoff 2026-04-17)
-- `body_v0_intro.tex` — Introduction draft (v0)
-- `reproducibility_audit/` — Pre-body audit placeholder
-- (pending) `main.tex`, `body.tex`, `reproduce.py`, `data/`, `figures/`, `citation_check.md`
+- `main.tex` — Active manuscript
+- `reproduce.py` — Active traceable-binding gate for the current manuscript scope
+- `data/spy_btc_usd_vix_2015-2026.csv` — Paper-local snapshot archive (not yet the direct input to all headline estimates)
+- `review_history/audit_2026-06-10/` — Current audit findings and fix log
 
 ## Supporting Experiments
 
@@ -39,11 +39,10 @@ Underlying daily data: BTC-USD / SPY / VIX from yfinance (`auto_adjust=False` pe
 
 ## Next Actions
 
-- **Submit to JIMF** (Journal of International Financial Markets, Institutions & Money, 1st choice). Prepare cover letter + submission package.
-- **Pre-submission copy-edit** (3 MINOR deferred): (1) wrap `\texttt{statsmodels...}` overfull hbox into footnote; (2) Table 6 caption scope clarification; (3) §8.2 F/p pairing style.
-- ~~**review cycle**~~ — COMPLETE (4 rounds, v1-v4; see `review_history/`; v4.1 hotfix closes last MAJOR+3MED)
-- ~~**reproduce.py setup**~~ — DONE (37/37 byte-match, gate=pass)
-- ~~**citation_check.md**~~ — DONE (24 citations inventoried; 21 VERIFIED, 1 NEEDS_CHECK, 0 ERROR)
+- Re-run `k1025_v2.py` off the pinned paper snapshot with a method-consistent data pipeline (`auto_adjust`, return definitions, rolling-window notation aligned).
+- Either add ordering-robust generalized FEVD or keep the current Cholesky FEVD but document ordering sensitivity explicitly.
+- Rebuild `K1025b` under the same v2 spec before restoring any cross-asset robustness claim.
+- Keep the paper in `MAJOR REVISION` until the above reruns are landed and `reproduce.py` remains green against the updated body.
 
 ## Cross-reference
 

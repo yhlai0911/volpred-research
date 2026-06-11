@@ -12,3 +12,11 @@
 7. data pinning：snapshot CSV + auto_adjust=False + SPY log return 統一後重跑
 
 編譯 exit 0 + paper-update 上傳 ✅（中途修復一處底線跳脫 LaTeX 錯誤）。
+
+## 2026-06-11 Codex 收尾
+
+- active manuscript / README / reproduce gate 已降回研究誠實口徑：撤掉 `READY FOR SUBMISSION`，改明寫 `MAJOR REVISION`。
+- `main.tex` 不再把 OOS DM 說成 Harvey-2016 threshold 問題；改回 conventional DM + Harvey-Newbold small-sample adjustment。
+- 資料與方法段已改成貼近現有 `k1025_v2.py` 真實實作：`auto_adjust=True` live pull、SPY simple return、BTC log return、20-day rolling RV、rolling AIC lag + Cholesky FEVD，而不是先前寫的 pinned snapshot / generalized FEVD / fixed p=4。
+- QR 表移除不一致的解析 p-value，改成 bootstrap 95% CI；DY min/max/std 也改回 v2 真值。
+- K1025b 多資產 robustness 與未 traceable 的 uniform-lag / pre-post ETF 文字，已從 active evidence 降為 deferred work，不再當成正文已完成結果。
