@@ -27764,7 +27764,23 @@
     "source": "boss_decision_2026-06-11",
     "title": "vt-crowding narrative 重寫：tipping→monotone erosion（boss confirmed; status=decision_made_awaiting_body_rewrite）",
     "description": "Boss 2026-06-11 14:25 confirm：核心主張重寫。依 experiments/k1471_vt_crowding_redesign/full_results_interpretation.md 定調 (b)：(1) 撤回 70% tipping point 結構斷點主張（舊 detector 循環校準 artifact，K1471 外生 sup-Wald 不重現）；(2) 新核心貢獻 = VT Sharpe 隨 adoption 單調、策略特異侵蝕（0.51→-0.27）+ RR_VT turnover-matched 隨機方向對照零惡化（機制識別主證據）+ 最大邊際惡化在 (70%,100%]；(3) 原 70% 降為 descriptive drop>70% level-crossing 註腳（3/5 cells）；(4) 同步修 Codex 呈現面 findings：threshold table 加 direction 欄、不顯著 cells 不列 interval、grid artifact 揭露、RR_MR artifact + TF cell2 病態 regime 明確排除聲明；(5) abstract/title 副標重審（\"Quantifying the Tipping Point\" 標題本身要改 — 建議 \"Monotone Strategy-Specific Erosion under VT Crowding: Evidence from Matched-Control ABM\" 級別的誠實標題）；(6) main.tex 全文對齊 K1471 數字（% source binding 指 k1471_full_results.json）→ xelatex exit 0 → paper-update 上傳 → README status 更新 → fix_log。主線程性質作業。FRL 定位微調：從「找到臨界點」改「無臨界點但機制穩健識別」。",
+    "status": "succeeded",
+    "created_at": "2026-06-11T06:05:39.816924+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-11T06:09:24.067805+00:00",
+    "claim_session_id": "04756b7771d3",
+    "started_at": "2026-06-11T06:09:31.136612+00:00",
+    "completed_at": "2026-06-11T06:14:53.464734+00:00",
+    "result": "完成 title + abstract + intro narrative rewrite（撤回 70% tipping → monotone strategy-specific erosion + matched-control identification）。新 title: Monotone Strategy-Specific Erosion under VT Crowding。Abstract 三 finding：(1) Sharpe 0.510→-0.271 monotone, sup-Wald p≤0.003 全 cells 但 no internal break, max degradation in (70%,100%]; (2) RR_VT 零惡化 → 機制識別到 systematic direction of vol-feedback; (3) '70%' 降 descriptive level-crossing 註腳 3/5 cells. Intro §1 para 3-4 重寫對齊新 framing. xelatex compile 26 pages 雙跑 OK. README status 更新. Followup task paper_body_vt_crowding_full_alignment_2026_06_11 (P1) 處理剩餘 Model/Results/Discussion/Conclusion sections."
+  },
+  {
+    "id": "paper_body_vt_crowding_full_alignment_2026_06_11",
+    "task_type": "paper_body",
+    "priority": 1,
+    "source": "followup_of_paper_body_vt_crowding_monotone_rewrite_2026_06_11",
+    "title": "vt-crowding 全文對齊 K1471 + 剩餘 sections 重寫（Model/Results/Discussion/Conclusion）",
+    "description": "前序完成 title+abstract+intro narrative rewrite（撤回 70% tipping → monotone strategy-specific erosion + matched-control identification）。本 task 處理剩餘：(a) Model §2 引入 RR_VT/RR_TF/RR_MR matched-control + matched-input gate；(b) Results §3 重寫 — threshold table 加 direction 欄+pre/post means、grid artifact 揭露、不顯著 cells 不列 interval、RR_MR 30% break+TF cell2 病態 regime 排除、加 5/5 cells monotone evidence table；(c) Discussion §4 改 family-level framing + policy implications；(d) Conclusion §5 重寫；(e) abstract sim count 94500 對應 Methodology 補述；(f) source binding 全文掃描指向 experiments/k1471_vt_crowding_redesign/k1471_full_results.json；(g) xelatex 雙跑 exit 0；(h) paper-update 上傳；(i) README status 改 narrative_rewrite_complete_pending_review。主線程作業。Codex 24h review 由 paper-review-cycle 接手。",
     "status": "pending",
-    "created_at": "2026-06-11T06:05:39.816924+00:00"
+    "created_at": "2026-06-11T06:14:40+00:00"
   }
 ]
