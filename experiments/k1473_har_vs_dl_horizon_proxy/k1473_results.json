@@ -1,0 +1,327 @@
+{
+  "experiment_id": "K1473",
+  "title": "HAR vs lightweight deep learning across horizons (honest proxy)",
+  "task_origin": "research_vs_har_horizon",
+  "seed": 42,
+  "oos_start": "2021-01-04",
+  "data_paths": {
+    "SPY": "experiments/k1206/data/SPY.csv",
+    "QQQ": "experiments/k1206/data/QQQ.csv"
+  },
+  "proxy_notice": "Queued task requested 5-minute realized volatility. This run uses a daily squared-return proxy because no canonical long-sample intraday RV panel is pinned locally for the requested setup.",
+  "methodology": {
+    "target": "future mean daily squared log return over horizon h",
+    "horizons": [
+      1,
+      5,
+      22
+    ],
+    "baseline": "HAR OLS on lagged variance proxies (1/5/22)",
+    "challengers": [
+      "small LSTM",
+      "tiny Transformer encoder"
+    ],
+    "timing_rule": "all features/sequences stop at t-1; target begins at t",
+    "evaluation": [
+      "QLIKE",
+      "Diebold-Mariano vs HAR"
+    ]
+  },
+  "assets": {
+    "SPY": {
+      "h1": {
+        "sample": {
+          "asset": "SPY",
+          "horizon": 1,
+          "train_n": 5239,
+          "test_n": 1327,
+          "oos_start": "2021-01-04",
+          "oos_end": "2026-04-16"
+        },
+        "models": {
+          "har": {
+            "qlike": 4.551022561280302,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null
+          },
+          "lstm1": {
+            "qlike": 4.474761205440879,
+            "rel_improvement_pct": 1.67569716063918,
+            "dm_t_vs_har": -0.2190258787675955,
+            "dm_p_vs_har": 0.8266635959912452
+          },
+          "tiny_transformer": {
+            "qlike": 3.1477797780457553,
+            "rel_improvement_pct": 30.833571232390987,
+            "dm_t_vs_har": -6.854342882152964,
+            "dm_p_vs_har": 1.0945244710569568e-11
+          }
+        }
+      },
+      "h5": {
+        "sample": {
+          "asset": "SPY",
+          "horizon": 5,
+          "train_n": 5239,
+          "test_n": 1327,
+          "oos_start": "2021-01-04",
+          "oos_end": "2026-04-16"
+        },
+        "models": {
+          "har": {
+            "qlike": 0.650701361869208,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null
+          },
+          "lstm1": {
+            "qlike": 0.6508742514173672,
+            "rel_improvement_pct": -0.026569722808409486,
+            "dm_t_vs_har": 0.004696607368480333,
+            "dm_p_vs_har": 0.9962533697242488
+          },
+          "tiny_transformer": {
+            "qlike": 0.5687410141337941,
+            "rel_improvement_pct": 12.595693283932007,
+            "dm_t_vs_har": -2.2012026201536328,
+            "dm_p_vs_har": 0.027893477478267537
+          }
+        }
+      },
+      "h22": {
+        "sample": {
+          "asset": "SPY",
+          "horizon": 22,
+          "train_n": 5239,
+          "test_n": 1327,
+          "oos_start": "2021-01-04",
+          "oos_end": "2026-04-16"
+        },
+        "models": {
+          "har": {
+            "qlike": 0.37059530808284746,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null
+          },
+          "lstm1": {
+            "qlike": 0.38093721466126335,
+            "rel_improvement_pct": -2.7906199438725556,
+            "dm_t_vs_har": 0.4726585148017524,
+            "dm_p_vs_har": 0.6365346128335982
+          },
+          "tiny_transformer": {
+            "qlike": 0.30694166681892265,
+            "rel_improvement_pct": 17.17605157853075,
+            "dm_t_vs_har": -1.391891276876541,
+            "dm_p_vs_har": 0.16418873775267118
+          }
+        }
+      }
+    },
+    "QQQ": {
+      "h1": {
+        "sample": {
+          "asset": "QQQ",
+          "horizon": 1,
+          "train_n": 5239,
+          "test_n": 1327,
+          "oos_start": "2021-01-04",
+          "oos_end": "2026-04-16"
+        },
+        "models": {
+          "har": {
+            "qlike": 4.621183298411118,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null
+          },
+          "lstm1": {
+            "qlike": 4.148581113567862,
+            "rel_improvement_pct": 10.226865162560188,
+            "dm_t_vs_har": -2.421735823825808,
+            "dm_p_vs_har": 0.015579995993660223
+          },
+          "tiny_transformer": {
+            "qlike": 3.162872680717766,
+            "rel_improvement_pct": 31.557082321204554,
+            "dm_t_vs_har": -10.199131266893676,
+            "dm_p_vs_har": 0.0
+          }
+        }
+      },
+      "h5": {
+        "sample": {
+          "asset": "QQQ",
+          "horizon": 5,
+          "train_n": 5239,
+          "test_n": 1327,
+          "oos_start": "2021-01-04",
+          "oos_end": "2026-04-16"
+        },
+        "models": {
+          "har": {
+            "qlike": 0.5787091819475287,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null
+          },
+          "lstm1": {
+            "qlike": 0.5362631705451287,
+            "rel_improvement_pct": 7.334601338025524,
+            "dm_t_vs_har": -1.3703880660006293,
+            "dm_p_vs_har": 0.17079774262340797
+          },
+          "tiny_transformer": {
+            "qlike": 0.4314832218079291,
+            "rel_improvement_pct": 25.440405082936557,
+            "dm_t_vs_har": -3.767990486911945,
+            "dm_p_vs_har": 0.00017178770393466714
+          }
+        }
+      },
+      "h22": {
+        "sample": {
+          "asset": "QQQ",
+          "horizon": 22,
+          "train_n": 5239,
+          "test_n": 1327,
+          "oos_start": "2021-01-04",
+          "oos_end": "2026-04-16"
+        },
+        "models": {
+          "har": {
+            "qlike": 0.3082606601107185,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null
+          },
+          "lstm1": {
+            "qlike": 0.30163999013458737,
+            "rel_improvement_pct": 2.1477505348081674,
+            "dm_t_vs_har": -0.22081392472229924,
+            "dm_p_vs_har": 0.8252713153044655
+          },
+          "tiny_transformer": {
+            "qlike": 0.23429742873202955,
+            "rel_improvement_pct": 23.993730290502675,
+            "dm_t_vs_har": -1.9968127185813627,
+            "dm_p_vs_har": 0.04604964217256069
+          }
+        }
+      }
+    }
+  },
+  "summary_rows": [
+    {
+      "asset": "SPY",
+      "horizon": 1,
+      "model": "lstm1",
+      "rel_improvement_pct": 1.67569716063918,
+      "dm_t_vs_har": -0.2190258787675955
+    },
+    {
+      "asset": "SPY",
+      "horizon": 1,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 30.833571232390987,
+      "dm_t_vs_har": -6.854342882152964
+    },
+    {
+      "asset": "SPY",
+      "horizon": 5,
+      "model": "lstm1",
+      "rel_improvement_pct": -0.026569722808409486,
+      "dm_t_vs_har": 0.004696607368480333
+    },
+    {
+      "asset": "SPY",
+      "horizon": 5,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 12.595693283932007,
+      "dm_t_vs_har": -2.2012026201536328
+    },
+    {
+      "asset": "SPY",
+      "horizon": 22,
+      "model": "lstm1",
+      "rel_improvement_pct": -2.7906199438725556,
+      "dm_t_vs_har": 0.4726585148017524
+    },
+    {
+      "asset": "SPY",
+      "horizon": 22,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 17.17605157853075,
+      "dm_t_vs_har": -1.391891276876541
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 1,
+      "model": "lstm1",
+      "rel_improvement_pct": 10.226865162560188,
+      "dm_t_vs_har": -2.421735823825808
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 1,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 31.557082321204554,
+      "dm_t_vs_har": -10.199131266893676
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 5,
+      "model": "lstm1",
+      "rel_improvement_pct": 7.334601338025524,
+      "dm_t_vs_har": -1.3703880660006293
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 5,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 25.440405082936557,
+      "dm_t_vs_har": -3.767990486911945
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 22,
+      "model": "lstm1",
+      "rel_improvement_pct": 2.1477505348081674,
+      "dm_t_vs_har": -0.22081392472229924
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 22,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 23.993730290502675,
+      "dm_t_vs_har": -1.9968127185813627
+    }
+  ],
+  "strong_wins_vs_har": [
+    {
+      "asset": "SPY",
+      "horizon": 1,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 30.833571232390987,
+      "dm_t_vs_har": -6.854342882152964
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 1,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 31.557082321204554,
+      "dm_t_vs_har": -10.199131266893676
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 5,
+      "model": "tiny_transformer",
+      "rel_improvement_pct": 25.440405082936557,
+      "dm_t_vs_har": -3.767990486911945
+    }
+  ],
+  "headline_verdict": "DL gains appear in this proxy setup, but not only at medium/long horizons; the queued boundary claim is not supported.",
+  "runtime_seconds": 22.33
+}

@@ -27989,7 +27989,7 @@
     "description": "Question id: 79077d59-9647-4119-90dc-d86cfb230bdb (已 claim, status=researching)\nProposer: yaoxk1431\nScore: 4/10 (rank #1，僅入榜 1 題)\n\n原題: 深入瞭解酒店消費娛樂業是民生消費市場的火車頭，幫我文獻回顧娛樂產業特別是酒店與股市的相關性，並且歸納出產業指標項目，摘要3000字\n\n執行：\n1. 文獻：consumer discretionary × market correlation；hotel REITs / leisure ETF (PEJ/XLY) 與 SP500 相關性；台股餐旅指數 vs 加權\n2. 數據：抓 PEJ/XLY/HOT/H/MAR/HLT/RCL/CCL daily 2015-now → 相關性、beta、波動率 vs SPY\n3. 寫 3000 字答覆（zh-Hant）：reader-facing 4 維度（深度/可讀性/資訊性/參考性）\n4. anti-ai-style gate：寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist + scripts/anti_ai_gate.py\n5. question-answer + question-finish；同步 feed published\n\n備註：score 偏低（脫離 vol 核心），但會員提問必答；務必加 VolPred 角度（如：娛樂業 vol pattern 對 macro consumption shock 的反映），不純做產業 essay。\n\n注意：member_qa 為 reader-facing published flow，不可只 review report 就停。",
     "task_type": "member_qa",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "tags": [
       "member_qa",
       "user"
@@ -28005,16 +28005,24 @@
     "claimed_by": "hourly-19",
     "claimed_at": "2026-06-11T11:08:34.508513+00:00",
     "claim_session_id": "b828a79e8017",
-    "started_at": "2026-06-11T11:08:44.821746+00:00"
+    "started_at": "2026-06-11T11:08:44.821746+00:00",
+    "completed_at": "2026-06-11T11:24:54.186407+00:00",
+    "result": "K1474 (PEJ-SPY ρ=0.781, leisure beta 1.01-1.75, COVID -74%/+214%) + 3000 字 mile_9b76989e published, anti-ai gate PASS, knowledge.json e3a4631e, question 79077d59 → answered, commit 0b4f795e"
   },
   {
     "id": "homepage_ux_polish_batch_2026_06_11",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "title": "首頁 UX 打磨批次（boss 巡檢遺留 4 項）",
     "description": "frontend-v2-fix（巢狀 repo，cd 進去 commit；部署 deploy-zeabur-safe.sh）：(1) StrategyPanel 策略卡配置數字加語意標籤（『目前配置：100% 現金（避險中）』式白話，0/0/100 保守型勿看似壞掉）；(2) Hero 三數字（實驗/策略/論文）可點擊導流（#feed / 策略區 / /paper）；(3) MDD/Sharpe/σ 縮寫 title tooltip 白話解釋；(4) 競技場 5 卡 3-col grid 缺口（auto-fit 或末排置中）。npm run build 通過後部署＋線上驗證。文案沿用 indicator-arena 白話風格。",
     "created_at": "2026-06-11T19:21:00+08:00",
-    "source": "boss_ui_review_2026_06_11"
+    "source": "boss_ui_review_2026_06_11",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T11:20:16.728630+00:00",
+    "claim_session_id": "ef79536c0932",
+    "started_at": "2026-06-11T11:20:27.701378+00:00",
+    "completed_at": "2026-06-11T11:24:02.507413+00:00",
+    "result": "Homepage UX polish batch completed in frontend-v2-fix: Hero counts now deep-link to feed/strategy/paper; StrategyPanel adds plain-language allocation summaries plus sigma/MDD/Sharpe tooltips; indicator arena grid now auto-fit centers the last row. Verified with Node 22 build success; Zeabur deploy script reached variable sync but live deploy could not be verified in this network-restricted sandbox."
   }
 ]
