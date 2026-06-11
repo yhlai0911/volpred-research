@@ -1,0 +1,54 @@
+========================================================================
+K1471 VT-crowding redesign — tag=smoke, M=50
+  cells: ['cell1_baseline', 'cell2_lambda_low', 'cell3_lambda_high', 'cell4_gamma_low', 'cell5_gamma_high']
+  treatments: ['VT_baseline', 'TF', 'MR', 'RR_VT', 'RR_TF', 'RR_MR', 'NoiseControl']
+  cell1 grid: [0.1, 0.3, 0.4, 0.5, 0.6, 0.7, 1.0]; other: [0.1, 0.3, 0.5, 0.7, 1.0]
+  workers: 8
+  detector: exogenous sup-Wald (alpha=0.05, perm B=999, boot B=500)
+  started: 2026-06-11 12:34:56
+========================================================================
+  [cell1_baseline] VT_baseline done (21s elapsed)
+  [cell1_baseline] TF done (43s elapsed)
+  [cell1_baseline] MR done (63s elapsed)
+  [cell1_baseline] NoiseControl done (70s elapsed)
+  [cell1_baseline] RR_VT (matched to VT_baseline) done (75s elapsed)
+  [cell1_baseline] RR_TF (matched to TF) done (79s elapsed)
+  [cell1_baseline] RR_MR (matched to MR) done (84s elapsed)
+[cell1_baseline] COMPLETE (85s elapsed)
+  [cell2_lambda_low] VT_baseline done (88s elapsed)
+  [cell2_lambda_low] TF done (93s elapsed)
+  [cell2_lambda_low] MR done (98s elapsed)
+  [cell2_lambda_low] NoiseControl done (102s elapsed)
+  [cell2_lambda_low] RR_VT (matched to VT_baseline) done (106s elapsed)
+  [cell2_lambda_low] RR_TF (matched to TF) done (109s elapsed)
+  [cell2_lambda_low] RR_MR (matched to MR) done (112s elapsed)
+[cell2_lambda_low] COMPLETE (113s elapsed)
+  [cell3_lambda_high] VT_baseline done (116s elapsed)
+  [cell3_lambda_high] TF done (121s elapsed)
+  [cell3_lambda_high] MR done (125s elapsed)
+  [cell3_lambda_high] NoiseControl done (129s elapsed)
+  [cell3_lambda_high] RR_VT (matched to VT_baseline) done (133s elapsed)
+  [cell3_lambda_high] RR_TF (matched to TF) done (136s elapsed)
+  [cell3_lambda_high] RR_MR (matched to MR) done (140s elapsed)
+[cell3_lambda_high] COMPLETE (140s elapsed)
+  [cell4_gamma_low] VT_baseline done (144s elapsed)
+  [cell4_gamma_low] TF done (148s elapsed)
+  [cell4_gamma_low] MR done (153s elapsed)
+  [cell4_gamma_low] NoiseControl done (158s elapsed)
+  [cell4_gamma_low] RR_VT (matched to VT_baseline) done (162s elapsed)
+  [cell4_gamma_low] RR_TF (matched to TF) done (165s elapsed)
+  [cell4_gamma_low] RR_MR (matched to MR) done (169s elapsed)
+[cell4_gamma_low] COMPLETE (169s elapsed)
+  [cell5_gamma_high] VT_baseline done (173s elapsed)
+  [cell5_gamma_high] TF done (177s elapsed)
+  [cell5_gamma_high] MR done (181s elapsed)
+  [cell5_gamma_high] NoiseControl done (185s elapsed)
+  [cell5_gamma_high] RR_VT (matched to VT_baseline) done (189s elapsed)
+  [cell5_gamma_high] RR_TF (matched to TF) done (192s elapsed)
+  [cell5_gamma_high] RR_MR (matched to MR) done (195s elapsed)
+[cell5_gamma_high] COMPLETE (196s elapsed)
+
+[SAVED] /Users/yhlai0911/Desktop/volpred-research/experiments/k1471_vt_crowding_redesign/k1471_smoke_results.json
+[SAVED] /Users/yhlai0911/Desktop/volpred-research/experiments/k1471_vt_crowding_redesign/k1471_smoke_threshold_table.md
+
+K1471 smoke COMPLETE — 196s, 9450 sims
