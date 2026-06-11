@@ -1,0 +1,270 @@
+{
+  "experiment_id": "K1472",
+  "title": "Low-frequency illiquidity proxies in rolling HAR volatility forecasts",
+  "seed": 42,
+  "task_origin": "research_tick_realized_illiquidity_vol",
+  "data_paths": {
+    "SPY": "experiments/k1206/data/SPY.csv",
+    "QQQ": "experiments/k1206/data/QQQ.csv",
+    "0050.TW": "experiments/k1090/data/0050.TW.csv"
+  },
+  "methodology": {
+    "target": "next-day close-to-close squared log return",
+    "baseline": "HAR with lag1 / lag5 / lag22 realized-variance proxies",
+    "incremental_predictors": [
+      "Amihud 22d mean, lagged",
+      "Corwin-Schultz 5d mean, lagged"
+    ],
+    "oos_protocol": "rolling window, refit every 21 observations, OOS starts at max(train_window, 70% split)",
+    "evaluation": [
+      "QLIKE",
+      "Diebold-Mariano vs HAR",
+      "HAC coefficient audit"
+    ]
+  },
+  "related_prior_experiments": [
+    "K150",
+    "K265",
+    "K266",
+    "K862"
+  ],
+  "references": [
+    "Amihud (2002) Journal of Financial Markets",
+    "Corwin & Schultz (2012) Journal of Finance",
+    "Corsi (2009) Journal of Financial Econometrics",
+    "Patton (2011) Journal of Econometrics"
+  ],
+  "assets": {
+    "SPY": {
+      "sample_start": "2000-02-04",
+      "sample_end": "2026-04-16",
+      "n_model_obs": 6588,
+      "train_window": 1000,
+      "oos_results": {
+        "oos_n": 1977,
+        "oos_start": "2018-06-05",
+        "oos_end": "2026-04-16",
+        "models": {
+          "har": {
+            "qlike": 5.298351666409428,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null,
+            "harvey_pass_vs_har": null
+          },
+          "har_amihud": {
+            "qlike": 5.344845611062987,
+            "rel_improvement_pct": -0.8775171521422758,
+            "dm_t_vs_har": 0.25063377089798156,
+            "dm_p_vs_har": 0.802123326344099,
+            "harvey_pass_vs_har": false
+          },
+          "har_cs": {
+            "qlike": 5.152502227657758,
+            "rel_improvement_pct": 2.7527323200596365,
+            "dm_t_vs_har": -1.0396993587932253,
+            "dm_p_vs_har": 0.29860679672924406,
+            "harvey_pass_vs_har": false
+          },
+          "har_both": {
+            "qlike": 5.184672314295134,
+            "rel_improvement_pct": 2.1455607191006325,
+            "dm_t_vs_har": -0.48696009057725076,
+            "dm_p_vs_har": 0.626340623775246,
+            "harvey_pass_vs_har": false
+          }
+        },
+        "actual_mean_rv": 0.0001501235655569031,
+        "actual_median_rv": 3.1071478188241873e-05
+      },
+      "hac_full_sample_har_amihud": {
+        "const": -11.317428333989769,
+        "const_pvalue": 0.0,
+        "rv_lag1": -77.00635632734547,
+        "rv_lag1_pvalue": 0.4075090741487781,
+        "rv_lag5": 738.0661741620954,
+        "rv_lag5_pvalue": 0.02539960894100969,
+        "rv_lag22": 1467.4985429381143,
+        "rv_lag22_pvalue": 7.155194888009734e-09,
+        "amihud": 7.56295932854186,
+        "amihud_pvalue": 8.016823686398435e-25,
+        "r2": 0.07651429615320327,
+        "n": 6588
+      },
+      "hac_full_sample_har_cs": {
+        "const": -11.503381840661822,
+        "const_pvalue": 0.0,
+        "rv_lag1": -17.390382781621277,
+        "rv_lag1_pvalue": 0.871898533367324,
+        "rv_lag5": 428.61118317415094,
+        "rv_lag5_pvalue": 0.20187564942365588,
+        "rv_lag22": 942.017989986899,
+        "rv_lag22_pvalue": 0.00032786179754091865,
+        "cs_spread": 155.99341508424834,
+        "cs_spread_pvalue": 2.8513672134916355e-23,
+        "r2": 0.07921101375525819,
+        "n": 6588
+      }
+    },
+    "QQQ": {
+      "sample_start": "2000-02-04",
+      "sample_end": "2026-04-16",
+      "n_model_obs": 6588,
+      "train_window": 1000,
+      "oos_results": {
+        "oos_n": 1977,
+        "oos_start": "2018-06-05",
+        "oos_end": "2026-04-16",
+        "models": {
+          "har": {
+            "qlike": 4.605553601300356,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null,
+            "harvey_pass_vs_har": null
+          },
+          "har_amihud": {
+            "qlike": 4.35384083430427,
+            "rel_improvement_pct": 5.465418249068164,
+            "dm_t_vs_har": -3.1437012807484876,
+            "dm_p_vs_har": 0.0016930338279750323,
+            "harvey_pass_vs_har": true
+          },
+          "har_cs": {
+            "qlike": 4.518916040446632,
+            "rel_improvement_pct": 1.881154109882953,
+            "dm_t_vs_har": -0.6682649732986462,
+            "dm_p_vs_har": 0.5040425171589333,
+            "harvey_pass_vs_har": false
+          },
+          "har_both": {
+            "qlike": 4.439338890878727,
+            "rel_improvement_pct": 3.6090061002590277,
+            "dm_t_vs_har": -1.1854509113491747,
+            "dm_p_vs_har": 0.23598175027499857,
+            "harvey_pass_vs_har": false
+          }
+        },
+        "actual_mean_rv": 0.0002294493870650692,
+        "actual_median_rv": 5.8247329953225244e-05
+      },
+      "hac_full_sample_har_amihud": {
+        "const": -10.819168433230429,
+        "const_pvalue": 0.0,
+        "rv_lag1": -14.076473245554375,
+        "rv_lag1_pvalue": 0.8716753041356355,
+        "rv_lag5": 238.89254086418333,
+        "rv_lag5_pvalue": 0.38352500109561305,
+        "rv_lag22": 1022.3901588276203,
+        "rv_lag22_pvalue": 8.685578888276661e-09,
+        "amihud": 7.837551598227396,
+        "amihud_pvalue": 1.6507464322665386e-06,
+        "r2": 0.07290663772439476,
+        "n": 6588
+      },
+      "hac_full_sample_har_cs": {
+        "const": -10.937982033946222,
+        "const_pvalue": 0.0,
+        "rv_lag1": 13.334343481917584,
+        "rv_lag1_pvalue": 0.8770221562801025,
+        "rv_lag5": -27.305659793527695,
+        "rv_lag5_pvalue": 0.9213869513306714,
+        "rv_lag22": 1084.5308699102006,
+        "rv_lag22_pvalue": 1.1418022405996673e-11,
+        "cs_spread": 99.72937137392053,
+        "cs_spread_pvalue": 4.422911586013167e-08,
+        "r2": 0.08005059820507421,
+        "n": 6588
+      }
+    },
+    "0050.TW": {
+      "sample_start": "2018-02-02",
+      "sample_end": "2024-12-30",
+      "n_model_obs": 1655,
+      "train_window": 1000,
+      "oos_results": {
+        "oos_n": 497,
+        "oos_start": "2022-11-08",
+        "oos_end": "2024-12-30",
+        "models": {
+          "har": {
+            "qlike": 5.889901794120356,
+            "rel_improvement_pct": 0.0,
+            "dm_t_vs_har": null,
+            "dm_p_vs_har": null,
+            "harvey_pass_vs_har": null
+          },
+          "har_amihud": {
+            "qlike": 6.441404416129063,
+            "rel_improvement_pct": -9.363528311443988,
+            "dm_t_vs_har": 1.6068832967488689,
+            "dm_p_vs_har": 0.10871634904141247,
+            "harvey_pass_vs_har": false
+          },
+          "har_cs": {
+            "qlike": 5.852438097127568,
+            "rel_improvement_pct": 0.6360665814528023,
+            "dm_t_vs_har": -0.23503961770291507,
+            "dm_p_vs_har": 0.8142749861885863,
+            "harvey_pass_vs_har": false
+          },
+          "har_both": {
+            "qlike": 6.345893430366915,
+            "rel_improvement_pct": -7.741922568246487,
+            "dm_t_vs_har": 1.2392029213077953,
+            "dm_p_vs_har": 0.2158564083776855,
+            "harvey_pass_vs_har": false
+          }
+        },
+        "actual_mean_rv": 0.00017275286699054652,
+        "actual_median_rv": 3.644922329375209e-05
+      },
+      "hac_full_sample_har_amihud": {
+        "const": -11.12711487608708,
+        "const_pvalue": 0.0,
+        "rv_lag1": 334.9065314086434,
+        "rv_lag1_pvalue": 0.05617477933777164,
+        "rv_lag5": 877.2727567269419,
+        "rv_lag5_pvalue": 0.02639524849822399,
+        "rv_lag22": 818.5408177700901,
+        "rv_lag22_pvalue": 0.18146603713064424,
+        "amihud": -0.6344710324829812,
+        "amihud_pvalue": 0.6813905308018419,
+        "r2": 0.013939242737218915,
+        "n": 1655
+      },
+      "hac_full_sample_har_cs": {
+        "const": -11.423971161159535,
+        "const_pvalue": 0.0,
+        "rv_lag1": 357.62865584368717,
+        "rv_lag1_pvalue": 0.04417648748252385,
+        "rv_lag5": 714.2254528987122,
+        "rv_lag5_pvalue": 0.06522258806027874,
+        "rv_lag22": 727.8727730722485,
+        "rv_lag22_pvalue": 0.21784359573226364,
+        "cs_spread": 175.22333780649018,
+        "cs_spread_pvalue": 0.014112647969655936,
+        "r2": 0.017448569018299054,
+        "n": 1655
+      }
+    }
+  },
+  "summary": {
+    "mean_rel_improvement_pct": {
+      "har_amihud": -1.5918757381726998,
+      "har_cs": 1.7566510037984637,
+      "har_both": -0.6624519162956091
+    },
+    "broad_incremental_claim_supported": false,
+    "best_single_cell": {
+      "asset": "QQQ",
+      "model": "HAR+Amihud",
+      "rel_improvement_pct": 5.465418249068164,
+      "dm_t": -3.1437012807484876,
+      "dm_p": 0.0016930338279750323
+    },
+    "n_harvey_pass_cells": 1,
+    "verdict": "BROAD_NULL_WITH_ONE_QQQ_AMIHUD_EXCEPTION",
+    "interpretation": "Corwin-Schultz does not deliver robust OOS HAR gains. Amihud helps QQQ in this rolling HAR setup, but fails on SPY and 0050.TW, so the queued low-frequency illiquidity claim does not generalize cross-asset."
+  }
+}

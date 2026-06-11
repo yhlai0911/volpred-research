@@ -27843,7 +27843,7 @@
     "title": "研究 backlog fallback: 免 tick 的「realized illiquidity」作 vol 預測增量因子",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 免 tick 的「realized illiquidity」作 vol 預測增量因子 — 日 OHLCV 算 Amihud/Corwin-Schultz/range-volume 比，加入 HAR-RV 檢定美股/台股 OOS 增量 QLIKE+DM（來源：JEF 2024-25 低頻流動性測度賽馬） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "tick_realized_illiquidity_vol",
@@ -27854,7 +27854,10 @@
     "created_at": "2026-06-11T06:46:35+00:00",
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-11T07:52:28.821129+00:00",
-    "claim_session_id": "ed525ac581e7"
+    "claim_session_id": "ed525ac581e7",
+    "started_at": "2026-06-11T07:57:40.350215+00:00",
+    "completed_at": "2026-06-11T08:01:20.697733+00:00",
+    "result": "Built K1472 from local SPY/QQQ/0050 snapshots: rolling HAR vs HAR+Amihud/Corwin-Schultz OOS QLIKE+DM. Broad claim failed cross-asset; only QQQ HAR+Amihud showed a single significant cell."
   },
   {
     "id": "paper_body_vt_crowding_phase2_2026_06_11",

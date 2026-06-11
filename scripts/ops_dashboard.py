@@ -218,18 +218,40 @@ def main():
         missing=miss_supa[:5]
     ))
 
-    # L3 Verification: live URL sample (3 newest)
+    # L3 Verification: live URL sample (3 newest reports + core pages)
+    # 2026-06-11 incident: /paper full-page React render error (unknown
+    # status crashed STATUS_CONFIG) went undetected — HTTP was 200 and the
+    # page wasn't in the sample. Fix: (a) include core pages, (b) content
+    # check — a client-crash page still returns 200 but its SSR shell loses
+    # the expected anchor text / carries Next.js error markers.
     sample = recent_ids[:3]
     live_404 = []
     for mid in sample:
         if not http_ok(f"https://volpred.zeabur.app/v3/reports/{mid}"):
             live_404.append(mid)
+    CORE_PAGES = {  # path -> anchor text that must appear in the SSR HTML
+        "/": "VolPred",
+        "/paper": "VolPred",
+        "/v3": "VolPred",
+    }
+    page_fail = []
+    for path, anchor in CORE_PAGES.items():
+        try:
+            import urllib.request
+            req = urllib.request.Request(f"https://volpred.zeabur.app{path}",
+                                         headers={"User-Agent": "volpred-ops-dashboard"})
+            html = urllib.request.urlopen(req, timeout=10).read().decode("utf-8", "replace")
+            if anchor not in html or "Application error" in html or "__next_error__" in html:
+                page_fail.append(path)
+        except Exception:
+            page_fail.append(path)
     out.append(section(
         "verification_live_url",
-        "ok" if not live_404 else "critical",
-        f"{len(sample) - len(live_404)}/{len(sample)} sample live URLs return 200",
-        "查 frontend route + Zeabur cache" if live_404 else None,
-        sample=sample, dead=live_404
+        "ok" if not (live_404 or page_fail) else "critical",
+        f"{len(sample) - len(live_404)}/{len(sample)} sample report URLs ok; "
+        f"{len(CORE_PAGES) - len(page_fail)}/{len(CORE_PAGES)} core pages content-ok",
+        "查 frontend route / render error / Zeabur cache" if (live_404 or page_fail) else None,
+        sample=sample, dead=live_404, core_page_fail=page_fail
     ))
 
     # L3 FB pipeline
