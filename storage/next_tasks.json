@@ -27616,8 +27616,14 @@
     "title": "K193 article mile_6a601155 errata: Bonferroni + partial-r 補述",
     "description": "Per paper_review_mile_6a601155 verdict CONDITIONAL_PASS — feed/Supabase update article content 末段加 2 句 caveat: (1) 4-pair Bonferroni 校正後 SPY-QQQ NS / SPY-GLD borderline；(2) SPY-QQQ partial-r|VIX=-0.049 反向消失。對應 review report: storage/paper_reviews/k193_mile_6a601155/codex_24h_review.md",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "source": "paper_review_followup",
-    "created_at": "2026-06-11T09:17:03+08:00"
+    "created_at": "2026-06-11T09:17:03+08:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-11T02:09:29.215745+00:00",
+    "claim_session_id": "0608e5cfc1ef",
+    "started_at": "2026-06-11T02:09:33.151441+00:00",
+    "completed_at": "2026-06-11T02:12:34.437592+00:00",
+    "result": "Errata applied: feed.json + Supabase synced (updated_at 2026-06-11T02:11:37Z). 2 caveats added: (1) 4-pair Bonferroni: SPY-QQQ NS adj p~0.075, SPY-GLD borderline adj p~0.033; (2) SPY-QQQ partial r|VIX = -0.049 (signal vanishes after controlling VIX). errata trace in details.errata. Verified prod has_errata=true."
   }
 ]
