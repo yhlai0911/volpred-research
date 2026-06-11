@@ -42,3 +42,56 @@ markets=['TW', 'US', 'JP'] seeds=43..142 base_seed=42
   [start 20/100] valid=18/20 elapsed=103s (~5.2s/start)
   [start 30/100] valid=27/30 elapsed=152s (~5.1s/start)
   [start 40/100] valid=37/40 elapsed=209s (~5.2s/start)
+  [start 50/100] valid=45/50 elapsed=261s (~5.2s/start)
+  [start 60/100] valid=55/60 elapsed=306s (~5.1s/start)
+  [start 70/100] valid=65/70 elapsed=353s (~5.0s/start)
+  [start 80/100] valid=75/80 elapsed=411s (~5.1s/start)
+  [start 90/100] valid=85/90 elapsed=465s (~5.2s/start)
+  [start 100/100] valid=95/100 elapsed=519s (~5.2s/start)
+[US] multistart done in 519s; valid=95/100; csv -> /Users/yhlai0911/Desktop/volpred-research/experiments/k1470_eav_multistart_main_spec/k1470_multistart_US.csv
+[US] basins: A frac=0.59 theta_mean=0.001755662196764726 ll_max=256733.9752983546 | B frac=0.41 theta_mean=0.009986947602862327 ll_max=256723.76273161918
+[US] best multistart: theta_eav=+5.341070e-03 LL=256733.98 (seed=139)
+[US] Nelder-Mead polish + BCD continuation ...
+[US] NM continuation: theta_eav=+5.249913e-03 LL=256723.53
+[US] refined=best_multistart: theta_eav=+5.341070e-03 LL=256733.98 | LR=+40.559 vs chi2(1)=3.84 -> FRAGILE | theta ratio refined/canon=27.97857233097682 | identification=OK
+[US] refined Hessian SE=0.00023853359071964445 t=22.391271487559163
+    plot -> /Users/yhlai0911/Desktop/volpred-research/experiments/k1470_eav_multistart_main_spec/k1470_basin_hist_US.png
+[US] done in 529s
+[checkpoint] -> /Users/yhlai0911/Desktop/volpred-research/experiments/k1470_eav_multistart_main_spec/k1470_results_partial.json
+
+========================================================================
+[K1470 JP] loading original module + cached data
+========================================================================
+[JP] loaded 30/30 stocks (stored n_stocks=30)
+[JP] pooled_obs=87917  mean_sigma2=3.642e-04
+[JP] canonical reproduction: fit_pooled_panel(max_outer=8, time_budget=600, default init 1e-7/5e-5) ...
+[JP] canonical repro: theta_eav=+1.412787e-04 LL=234432.52 (5.0s) | stored theta_eav=+1.412787e-04 LL=234432.52 | rel_dtheta=0.00e+00 rel_dLL=0.00e+00
+[JP] multistart x100 (seeds 43..142), per-start = exact original BCD call ...
+  [start 10/100] valid=10/10 elapsed=51s (~5.1s/start)
+  [start 20/100] valid=20/20 elapsed=106s (~5.3s/start)
+  [start 30/100] valid=30/30 elapsed=158s (~5.3s/start)
+  [start 40/100] valid=40/40 elapsed=212s (~5.3s/start)
+  [start 50/100] valid=50/50 elapsed=267s (~5.3s/start)
+  [start 60/100] valid=60/60 elapsed=315s (~5.2s/start)
+  [start 70/100] valid=70/70 elapsed=367s (~5.2s/start)
+  [start 80/100] valid=80/80 elapsed=424s (~5.3s/start)
+  [start 90/100] valid=90/90 elapsed=481s (~5.3s/start)
+  [start 100/100] valid=100/100 elapsed=536s (~5.4s/start)
+[JP] multistart done in 536s; valid=100/100; csv -> /Users/yhlai0911/Desktop/volpred-research/experiments/k1470_eav_multistart_main_spec/k1470_multistart_JP.csv
+[JP] basins: A frac=0.61 theta_mean=0.0013167339554188374 ll_max=234437.90962078102 | B frac=0.39 theta_mean=0.009916236782953152 ll_max=234437.89824697276
+[JP] best multistart: theta_eav=+2.875735e-03 LL=234437.91 (seed=77)
+[JP] Nelder-Mead polish + BCD continuation ...
+[JP] NM continuation: theta_eav=+2.875951e-03 LL=234437.91
+[JP] refined=nm_continuation: theta_eav=+2.875951e-03 LL=234437.91 | LR=+10.779 vs chi2(1)=3.84 -> FRAGILE | theta ratio refined/canon=20.356583533522276 | identification=OK
+[JP] refined Hessian SE=0.0001418660420510316 t=20.2722983497334
+    plot -> /Users/yhlai0911/Desktop/volpred-research/experiments/k1470_eav_multistart_main_spec/k1470_basin_hist_JP.png
+[JP] done in 543s
+[checkpoint] -> /Users/yhlai0911/Desktop/volpred-research/experiments/k1470_eav_multistart_main_spec/k1470_results_partial.json
+
+[ordering] canonical: ['US', 'JP', 'TW'] ({'TW': '6.362e-05', 'US': '1.909e-04', 'JP': '1.413e-04'})
+[ordering] refined:   ['US', 'JP', 'TW'] ({'TW': '6.844e-04', 'US': '5.341e-03', 'JP': '2.876e-03'})
+
+Results -> /Users/yhlai0911/Desktop/volpred-research/experiments/k1470_eav_multistart_main_spec/k1470_results.json
+Total elapsed: 1697s
+VERDICTS: {'TW': 'STABLE', 'US': 'FRAGILE', 'JP': 'FRAGILE'}
+ORDERING preserved: True (refined order = ['US', 'JP', 'TW'])

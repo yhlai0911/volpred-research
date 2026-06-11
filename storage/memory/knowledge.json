@@ -33363,5 +33363,25 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-06-11T11:12:51.822063"
+  },
+  {
+    "item_id": "4d6e91ad",
+    "category": "experiment_audit",
+    "content": "K1470 — 主 Table 1（K1145 TW / K1147 US / K1150 JP）100-multistart 重估 CONDITIONAL_PASS。三市場 LR vs χ²(1)：TW 1.43 (STABLE-FLAT_RIDGE) / US 40.56 (FRAGILE) / JP 10.78 (FRAGILE)；refined θ_EAV：TW 6.84e-4 (10.8× canon) / US 5.34e-3 (28× canon) / JP 2.88e-3 (20× canon)；refined Hessian t 全 ≥ 14（sign/significance robust）。Magnitude ordering US > JP > TW 在 canonical 與 refined 下都保持（refined gap 拉大）。\n\n主要結論：(1) Full-panel BCD spec 比 K1216c small-S joint spec 穩健一個數量級（LR 1-40 vs 236-2837）；(2) US/JP canonical 落 inferior basin，magnitude 不能引用 K1145/K1147/K1150 原表；(3) TW STABLE-but-FLAT_RIDGE = LL 對 θ_EAV 接近平坦；(4) Paper 'universal magnitude' 主張需降級為 'universal sign + preserved ordering'。\n\nCodex review verdict (gpt-5.4 high) = CONDITIONAL_PASS：實作面 provenance / seed (43-142) / canonical reproduction (bit-exact) / no-oracle-init 過關；3 caveats：(a) LR vs χ²(1) 是 optimization-sensitivity descriptive 非正式 nested test (HIGH) (b) NM polish bound [-1e-2,1e-2] 超出 multistart init [1e-6,5e-4]，實證 NM ≈ best-multistart 不翻結論 (MED) (c) K-means basin 單 seed=42，basin fraction 不作 inference (MED)。已寫入 README §4.4b。Ordering preserved 可信度 MED（不上升 robust 待 cross-market bootstrap）。Reviewer: Codex gpt-5.4 high; verdict CONDITIONAL_PASS. Followup: paper Table 1 / abstract 數字同步 + 'universal magnitude' → 'universal sign + ordering' 重定調 + reproduce.py §6.6 擴充（已排入 task pool experiment_eav_multistart_reestimate_2026_06_11 + paper_body_eav_optionA_narrative_2026_06_11）。",
+    "evidence": [
+      "experiments/k1470_eav_multistart_main_spec/k1470_results.json",
+      "experiments/k1470_eav_multistart_main_spec/README.md",
+      "experiments/k1470_eav_multistart_main_spec/k1470.py",
+      "experiments/k1470_eav_multistart_main_spec/run.log"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-11T12:14:07.405000",
+    "experiment_id": "K1470",
+    "k_id": "K1470",
+    "experiment_path": "experiments/k1470_eav_multistart_main_spec/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex gpt-5.4 high (foreground sync)",
+    "reviewer_source": "Codex review",
+    "codex_review": true
   }
 ]

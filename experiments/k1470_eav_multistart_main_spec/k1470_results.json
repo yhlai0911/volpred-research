@@ -3,11 +3,11 @@
   "title": "100-multistart re-estimation of main Table 1 spec (K1145 TW / K1147 US / K1150 JP BCD pooled MLE)",
   "proposer": "Claude (paper eav-universal-magnitude sec 6.6.4 mandated re-run of single-init main results)",
   "executor": "compute_queue worker",
-  "timestamp_utc": "2026-06-11T03:35:24.707186+00:00",
+  "timestamp_utc": "2026-06-11T04:04:48.188497+00:00",
   "random_seed": 42,
   "start_seeds": [
     43,
-    48
+    142
   ],
   "protocol": "sec:multistart_method (K1213/K1216/K1216b/K1216c), adapted to BCD: random shared-init (log-uniform theta_EAV [1e-6,5e-4]; log-uniform theta_VIX [1e-9,1e-3]) x exact original fit_pooled_panel call (max_outer=8, time_budget=600); penalty guard; K-means K=2 basins; NM polish + BCD continuation; LR vs chi2(1)=3.84",
   "spec_provenance": "fit_pooled_panel / load_one_stock / hessian_se_theta_eav imported verbatim from experiments/k1145/k1145.py, k1147/k1147.py, k1150/k1150.py (no re-implementation; lag conventions untouched)",
@@ -34,63 +34,246 @@
         "repro_rel_dll": 0.0
       },
       "multistart": {
-        "n_starts": 6,
+        "n_starts": 100,
         "start_seeds": [
           43,
-          48
+          142
         ],
-        "n_valid": 6,
-        "theta_eav_min": 1.4330852162789342e-05,
+        "n_valid": 100,
+        "theta_eav_min": 2.748731553068248e-06,
         "theta_eav_max": 0.01,
-        "theta_eav_std": 0.00356100735613036,
-        "loglik_min": 329320.85370167403,
-        "loglik_max": 329350.69649282994,
-        "loglik_spread": 29.842791155911982,
+        "theta_eav_std": 0.004474376312550046,
+        "loglik_min": 327977.81151172414,
+        "loglik_max": 329350.6968817055,
+        "loglik_spread": 1372.885369981348,
         "basin_stats": {
-          "basin_A_frac": 0.8333333333333334,
-          "basin_B_frac": 0.16666666666666666,
-          "basin_A_theta_mean": 0.0007208803771296907,
-          "basin_B_theta_mean": 0.01,
-          "basin_A_ll_mean": 329342.431354472,
-          "basin_B_ll_mean": 329323.6278113713,
-          "basin_A_ll_max": 329350.69649282994,
-          "basin_B_ll_max": 329323.6278113713
+          "basin_A_frac": 0.87,
+          "basin_B_frac": 0.13,
+          "basin_A_theta_mean": 0.003157264719423316,
+          "basin_B_theta_mean": 0.009999999999999998,
+          "basin_A_ll_mean": 329305.28754669573,
+          "basin_B_ll_mean": 328440.08100830985,
+          "basin_A_ll_max": 329350.6968817055,
+          "basin_B_ll_max": 329007.0361103858
         },
         "best": {
-          "start_seed": 45,
-          "theta_vix": 1.438704325281459e-06,
-          "theta_eav": 0.000963746162789519,
-          "pooled_loglik": 329350.69649282994
+          "start_seed": 134,
+          "theta_vix": 1.0215316332063518e-06,
+          "theta_eav": 0.000684388591081308,
+          "pooled_loglik": 329350.6968817055
         }
       },
       "nm_continuation": {
         "nm_shared": [
-          1.4386666742692473e-06,
-          0.0009636989058122792
+          1.0215300105607977e-06,
+          0.0006843611416912088
         ],
-        "theta_vix": 1.4386506262184614e-06,
-        "theta_eav": 0.0009637997741292219,
-        "pooled_loglik": 329350.6968816531
+        "theta_vix": 1.0215300105607918e-06,
+        "theta_eav": 0.0006843611416911461,
+        "pooled_loglik": 329350.6968815982
+      },
+      "refined": {
+        "source": "best_multistart",
+        "theta_vix": 1.0215316332063518e-06,
+        "theta_eav": 0.000684388591081308,
+        "theta_rel": 1.7998829681946547,
+        "pooled_loglik": 329350.6968817055,
+        "hessian_se": 4.8424094710838296e-05,
+        "hessian_t": 14.133224279526447
+      },
+      "lr_test": {
+        "lr_stat": 1.4300829339772463,
+        "chi2_1_crit": 3.841458820694124,
+        "theta_shift": 0.0006207669385953241,
+        "theta_ratio_refined_over_canonical": 10.757164649756339
+      },
+      "verdict": "STABLE",
+      "identification_flag": "FLAT_RIDGE",
+      "elapsed_seconds": 623.8611738681793
+    },
+    "US": {
+      "market": "US",
+      "source_experiment": "K1147",
+      "n_stocks": 30,
+      "pooled_obs": 90479,
+      "mean_sigma2": 0.00032551106383586737,
+      "canonical_stored": {
+        "exp": "K1147",
+        "theta_eav": 0.00019089860360002893,
+        "pooled_loglik": 256713.69603405558,
+        "n_stocks": 30
+      },
+      "canonical_reproduced": {
+        "theta_vix": 9.435358019080664e-08,
+        "theta_eav": 0.00019089860360002893,
+        "pooled_loglik": 256713.69603405558,
+        "n_outer_iters": 8,
+        "converged": false,
+        "repro_rel_dtheta": 0.0,
+        "repro_rel_dll": 0.0
+      },
+      "multistart": {
+        "n_starts": 100,
+        "start_seeds": [
+          43,
+          142
+        ],
+        "n_valid": 95,
+        "theta_eav_min": 6.443486032961844e-06,
+        "theta_eav_max": 0.01,
+        "theta_eav_std": 0.004426146797651471,
+        "loglik_min": 253719.60528305863,
+        "loglik_max": 256733.9752983546,
+        "loglik_spread": 3014.370015295979,
+        "basin_stats": {
+          "basin_A_frac": 0.5894736842105263,
+          "basin_B_frac": 0.4105263157894737,
+          "basin_A_theta_mean": 0.001755662196764726,
+          "basin_B_theta_mean": 0.009986947602862327,
+          "basin_A_ll_mean": 256578.00017011634,
+          "basin_B_ll_mean": 255392.08781366586,
+          "basin_A_ll_max": 256733.9752983546,
+          "basin_B_ll_max": 256723.76273161918
+        },
+        "best": {
+          "start_seed": 139,
+          "theta_vix": 2.6576544219651404e-06,
+          "theta_eav": 0.0053410703887058816,
+          "pooled_loglik": 256733.9752983546
+        }
+      },
+      "nm_continuation": {
+        "nm_shared": [
+          2.658734465957076e-06,
+          0.005256977757706898
+        ],
+        "theta_vix": 2.657503747939192e-06,
+        "theta_eav": 0.005249912703859355,
+        "pooled_loglik": 256723.5262819172
+      },
+      "refined": {
+        "source": "best_multistart",
+        "theta_vix": 2.6576544219651404e-06,
+        "theta_eav": 0.0053410703887058816,
+        "theta_rel": 16.408260677120985,
+        "pooled_loglik": 256733.9752983546,
+        "hessian_se": 0.00023853359071964445,
+        "hessian_t": 22.391271487559163
+      },
+      "lr_test": {
+        "lr_stat": 40.558528598048724,
+        "chi2_1_crit": 3.841458820694124,
+        "theta_shift": 0.005150171785105853,
+        "theta_ratio_refined_over_canonical": 27.97857233097682
+      },
+      "verdict": "FRAGILE",
+      "identification_flag": "OK",
+      "elapsed_seconds": 529.4957010746002
+    },
+    "JP": {
+      "market": "JP",
+      "source_experiment": "K1150",
+      "n_stocks": 30,
+      "pooled_obs": 87917,
+      "mean_sigma2": 0.0003641935275053656,
+      "canonical_stored": {
+        "exp": "K1150",
+        "theta_eav": 0.00014127865441754286,
+        "pooled_loglik": 234432.52034662137,
+        "n_stocks": 30
+      },
+      "canonical_reproduced": {
+        "theta_vix": 9.052189472182472e-08,
+        "theta_eav": 0.00014127865441754286,
+        "pooled_loglik": 234432.52034662137,
+        "n_outer_iters": 8,
+        "converged": true,
+        "repro_rel_dtheta": 0.0,
+        "repro_rel_dll": 0.0
+      },
+      "multistart": {
+        "n_starts": 100,
+        "start_seeds": [
+          43,
+          142
+        ],
+        "n_valid": 100,
+        "theta_eav_min": 3.1815965355930548e-06,
+        "theta_eav_max": 0.01,
+        "theta_eav_std": 0.004449627655744272,
+        "loglik_min": 232842.609234857,
+        "loglik_max": 234437.90962078102,
+        "loglik_spread": 1595.300385924027,
+        "basin_stats": {
+          "basin_A_frac": 0.61,
+          "basin_B_frac": 0.39,
+          "basin_A_theta_mean": 0.0013167339554188374,
+          "basin_B_theta_mean": 0.009916236782953152,
+          "basin_A_ll_mean": 234386.8222616731,
+          "basin_B_ll_mean": 233937.63408425922,
+          "basin_A_ll_max": 234437.90962078102,
+          "basin_B_ll_max": 234437.89824697276
+        },
+        "best": {
+          "start_seed": 77,
+          "theta_vix": 1.8330422473571084e-06,
+          "theta_eav": 0.0028757353707356756,
+          "pooled_loglik": 234437.90962078102
+        }
+      },
+      "nm_continuation": {
+        "nm_shared": [
+          1.8330539366206378e-06,
+          0.0028758675880658836
+        ],
+        "theta_vix": 1.8330325556605935e-06,
+        "theta_eav": 0.002875950730154337,
+        "pooled_loglik": 234437.90964317814
       },
       "refined": {
         "source": "nm_continuation",
-        "theta_vix": 1.4386506262184614e-06,
-        "theta_eav": 0.0009637997741292219,
-        "theta_rel": 2.5347102812807547,
-        "pooled_loglik": 329350.6968816531,
-        "hessian_se": 6.819415483632577e-05,
-        "hessian_t": 14.133172798203278
+        "theta_vix": 1.8330325556605935e-06,
+        "theta_eav": 0.002875950730154337,
+        "theta_rel": 7.8967650794177455,
+        "pooled_loglik": 234437.90964317814,
+        "hessian_se": 0.0001418660420510316,
+        "hessian_t": 20.2722983497334
       },
       "lr_test": {
-        "lr_stat": 1.4300828292034566,
+        "lr_stat": 10.778593113529496,
         "chi2_1_crit": 3.841458820694124,
-        "theta_shift": 0.000900178121643238,
-        "theta_ratio_refined_over_canonical": 15.148927078584629
+        "theta_shift": 0.002734672075736794,
+        "theta_ratio_refined_over_canonical": 20.356583533522276
       },
-      "verdict": "STABLE",
-      "elapsed_seconds": 51.99496603012085
+      "verdict": "FRAGILE",
+      "identification_flag": "OK",
+      "elapsed_seconds": 543.4550721645355
     }
   },
-  "ordering_check": null,
-  "elapsed_seconds_total": 51.99652695655823
+  "ordering_check": {
+    "canonical_theta_eav": {
+      "TW": 6.362165248598386e-05,
+      "US": 0.00019089860360002893,
+      "JP": 0.00014127865441754286
+    },
+    "refined_theta_eav": {
+      "TW": 0.000684388591081308,
+      "US": 0.0053410703887058816,
+      "JP": 0.002875950730154337
+    },
+    "canonical_order": [
+      "US",
+      "JP",
+      "TW"
+    ],
+    "refined_order": [
+      "US",
+      "JP",
+      "TW"
+    ],
+    "canonical_order_is_US_JP_TW": true,
+    "refined_order_is_US_JP_TW": true,
+    "ordering_preserved": true
+  },
+  "elapsed_seconds_total": 1696.8157720565796
 }

@@ -27660,8 +27660,14 @@
     "source": "paper_audit_2026-06-10",
     "title": "eav 主 Table 1 三市場 100-multistart 重估（HIGH #1 解凍前提）",
     "description": "§6.6.4 自承 K1145/K1147/K1150 主三市場 spec 用 default single-init L-BFGS-B 有 two-basin pathology（10/10 市場 FRAGILE，LR 最高 2837）。對主三市場跑同 §6.6.4 協議：≥100 random init（seeds 43-142）+ DE seed 49 + K-means seed 42 + LR canonical-vs-refined 選 basin，驗 US>JP>TW magnitude ordering 是否保持。heavy compute → compute_queue。完成後同步 Table 1 + abstract 數字 + reproduce.py 擴充覆蓋 §6.6（k1163/k1165/k1166/k1168/k1171/k1172/k1207/k1213/k1216*/k1173）+ 4 處 source-binding 改綁 results-JSON。Codex review before knowledge.",
-    "status": "pending",
-    "created_at": "2026-06-11T02:24:41.896812+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-11T02:24:41.896812+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-11T04:10:50.122698+00:00",
+    "claim_session_id": "3e09a344f884",
+    "started_at": "2026-06-11T04:10:55.634096+00:00",
+    "completed_at": "2026-06-11T04:14:27.042746+00:00",
+    "result": "K1470 100-multistart 主三市場重估完成（runtime 28.3min, 295/300 valid starts）+ Codex review CONDITIONAL_PASS。Verdicts: TW STABLE-FLAT_RIDGE / US/JP FRAGILE；refined θ_EAV 10-28× canonical；ordering US>JP>TW 在 canonical 與 refined 都保持；3 caveats 補進 README §4.4b（LR 非正式 nested test / NM bound 超出 multistart 範圍 / K-means 單 seed）；knowledge.json item_id=4d6e91ad。Follow-up: paper Table 1 sync + reproduce.py §6.6 擴充已排入 P2 paper_body_eav_optionA_narrative_2026_06_11 task。"
   },
   {
     "id": "errata_k189_mile_c26fcd8e_2026_06_11",

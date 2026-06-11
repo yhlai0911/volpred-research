@@ -7,10 +7,10 @@
 > 協議 ≥100-multistart 重估，回答：canonical θ̂_EAV 是否在 inferior basin？
 > US>JP>TW magnitude ordering 是否保持？
 
-[提出: Claude（§6.6.4 mandated re-run，body.tex:598-607 明文標註）, 執行: compute_queue worker]
+[提出: Claude（§6.6.4 mandated re-run，body.tex:598-607 明文標註）, 執行: Claude subagent background run]
 
-- Status: **queued → compute_queue**（見下方 job id）
-- Verdict: PENDING（待 compute job 完成）
+- Status: **completed 2026-06-11**（runtime 1697s = 28.3 min；100 starts × 3 markets，295/300 valid）
+- Verdict: **TW STABLE-but-FLAT_RIDGE / US FRAGILE / JP FRAGILE；US>JP>TW magnitude ordering 在 refined 下保持**
 
 ---
 
@@ -99,7 +99,7 @@ adapted to BCD spec：
 ## 3. 執行（How）
 
 ```bash
-# 全量（compute_queue worker 跑）
+# 全量（2026-06-11 實際以 background Bash 跑完，1697s）
 uv run python experiments/k1470_eav_multistart_main_spec/k1470.py
 
 # smoke test（單市場、少 starts）
@@ -110,17 +110,84 @@ K1470_N_STARTS=2 K1470_MARKETS=TW uv run python experiments/k1470_eav_multistart
 - 產出：`k1470_results.json` + `k1470_multistart_<MKT>.csv` ×3 +
   `k1470_basin_hist_<MKT>.png` ×3
 
-## 4. 結果（PENDING）
+## 4. 結果（completed 2026-06-11，runtime 28.3 min）
 
-待 compute_queue job 完成後由主線程 followup 填寫：
+### 4.0 Canonical reproduction（audit 前提）
 
-- [ ] TW/US/JP canonical reproduction PASS?
-- [ ] 各市場 LR + FRAGILE/STABLE verdict
-- [ ] refined θ̂_EAV vs canonical（shift ratio）
-- [ ] US > JP > TW ordering 是否保持
-- [ ] basin 結構（A/B fraction、LL gap）
+三市場 canonical fit **bit-exact 重現** stored results.json（rel Δθ = rel ΔLL =
+0.00e+00）— audit 基準完全成立，無資料 / 環境漂移。
+
+### 4.1 主表：canonical vs refined
+
+| Market | canonical θ̂_EAV | refined θ̂_EAV (source) | ratio | LL gain | LR | χ²(1) multiple | Verdict | identification |
+|--------|-----------------|--------------------------|-------|---------|-----|----------------|---------|----------------|
+| TW (K1145) | +6.362e-05 | +6.844e-04 (best multistart, seed 見 csv) | 10.8× | +0.72 | **1.43** | 0.37× | **STABLE** | **FLAT_RIDGE** |
+| US (K1147) | +1.909e-04 | +5.341e-03 (best multistart) | 28.0× | +20.28 | **40.56** | 10.6× | **FRAGILE** | OK |
+| JP (K1150) | +1.413e-04 | +2.876e-03 (NM continuation) | 20.4× | +5.39 | **10.78** | 2.8× | **FRAGILE** | OK |
+
+- valid starts: TW 100/100、US 95/100、JP 100/100（5 個 US start 被 penalty guard 排除）
+- refined Hessian t：TW 14.13、US 22.39、JP 20.27（正向顯著性不受影響）
+- refined θ_rel（θ̂_EAV / mean σ²）：TW 1.80、US 16.41、JP 7.90
+
+### 4.2 Ordering check（核心問題之一）
+
+| | TW | JP | US | order |
+|---|----|----|----|----|
+| canonical | 6.36e-05 | 1.41e-04 | 1.91e-04 | **US > JP > TW** |
+| refined | 6.84e-04 | 2.88e-03 | 5.34e-03 | **US > JP > TW** |
+
+→ **US > JP > TW magnitude ordering 在 multistart refinement 下保持**（且
+refined 下市場間 gap 拉大）。
+
+### 4.3 Basin 結構
+
+| Market | basin A frac (θ mean) | basin B frac (θ mean) | 備註 |
+|--------|----------------------|----------------------|------|
+| TW | 0.87 (3.16e-03) | 0.13 (1.00e-02) | basin B 聚在 shared bound 上界 1e-2，LL 較低 |
+| US | 0.59 (1.76e-03) | 0.41 (9.99e-03) | 同上 |
+| JP | 0.61 (1.32e-03) | 0.39 (9.92e-03) | 同上 |
+
+### 4.4 誠實結論
+
+1. **單一 init 的 pathology 在主 BCD spec 也存在，但程度遠輕於 K1216c 的 S=10
+   joint spec**：LR 1.4 / 40.6 / 10.8 vs K1216c 的 588 / 2837 / 236（TW/US/JP）。
+   Full-panel（N=30/31）BCD 比 small-S joint MLE 穩健一個數量級以上。
+2. **US 與 JP canonical 落在 inferior basin（FRAGILE）**：refined θ̂_EAV 比
+   canonical 大 28× / 20×，LR 顯著超過 χ²(1)。Table 1 的 US/JP point estimates
+   不能當 final magnitude 引用。
+3. **TW 名義 STABLE 但實質 FLAT_RIDGE**：θ̂_EAV 從 6.36e-05 移到 6.84e-04（10.8×）
+   而 LL 只 +0.72 — likelihood 在 θ_EAV 方向接近平坦。「STABLE」只說 canonical
+   不輸 refined 超過 χ²(1) 噪音，不代表 magnitude 良好識別。
+4. **三市場共同訊息**：pooled θ_EAV 的「正向、顯著」結論 robust（refined Hessian
+   t = 14-22，全部 ≫ 3）；但 **magnitude 本身識別薄弱**（LL 對 θ_EAV 在 1-2 個
+   數量級範圍內幾乎不變）。Paper 的 'universal magnitude' 主張需要降級為
+   'universal sign + ordering'，或改報 basin-aware CI。
+5. **Ordering robust**：US > JP > TW 在 canonical 與 refined 下都成立 — Table 1
+   的相對排序結論存活，絕對 magnitude 不存活。
+6. Limitation：本 audit 不重做 cluster bootstrap（Table 1 的 t_CB 是 bootstrap
+   口徑）；refined 點的 bootstrap SE / CI 留待 follow-up（若 narrative 需要）。
+
+### 4.4b Codex review caveats（2026-06-11，CONDITIONAL_PASS）
+
+Codex methodological review（gpt-5.4 high reasoning，verbatim 紀錄）：
+
+1. **(HIGH) LR vs χ²(1) 是優化敏感性描述，非正式 nested test**：canonical / best_multistart / nm_continuation 都是同維度同模型不同初始化/優化路徑，不是 nested restriction；2(LL_refined − LL_canonical) 沒有 χ²(1) 漸近分布。本 README 的 FRAGILE/STABLE verdict 應理解為「優化敏感性 / multi-basin 證據」**descriptive label**，**不是統計顯著性檢定**。section 4.4 #3 已自承「'STABLE' 不代表 magnitude 良好識別」呼應此 caveat；正式 inference 留給 paper narrative 改寫時的 cluster bootstrap CI。
+2. **(MED) NM polish 的 θ_EAV bound [-1e-2, 1e-2] 超出 multistart init 範圍 [1e-6, 5e-4]**：refined 候選集已非單純 multistart family，可能拉到 search-space 邊緣。實證上 best-multistart 與 NM-continuation 的 θ_EAV 接近（TW 6.84e-4 vs 6.84e-4 / US 5.34e-3 vs 5.25e-3 / JP 2.88e-3 從 NM 取），shift 都遠在 NM bound 內，**結論不被 bound mismatch 翻轉**；但 paper 文字若引用 refined 數字，應註明此 bound expansion。
+3. **(MED) Basin K-means 只跑 seed=42 一次，沒有 multi-restart stability check**：basin A/B fraction 解讀（TW 0.87/0.13、US 0.59/0.41、JP 0.61/0.39）為單樣本 K-means partition，僅作視覺摘要用；basin mass 不應上升為 inference statement。
+
+**綜合**：實作面 provenance / seed discipline / canonical reproduction / no-oracle-init 全過關（Codex LOW finding 明文確認）；本 audit 結論強度應降為「optimization sensitivity audit」而非「正式 LR 檢定」，ordering preserved 限定 in point estimates，magnitude robustness 留 follow-up bootstrap。
+
+### 4.5 後續（主線程）
+
+- [x] TW/US/JP canonical reproduction PASS（bit-exact）
+- [x] 各市場 LR + FRAGILE/STABLE verdict
+- [x] refined θ̂_EAV vs canonical（shift ratio）
+- [x] US > JP > TW ordering 保持確認
+- [x] basin 結構（A/B fraction、LL gap）
 - [ ] Codex review → knowledge.json（主線程）
-- [ ] Paper narrative 決策（Option A rewrite — 主線程，**本實驗不改 .tex**）
+- [ ] Paper narrative 決策（Option A rewrite — 主線程，**本實驗不改 .tex**）；
+      建議方向：tab:main_results footnote 更新 + §6.6.4 加 K1470 行 +
+      'universal magnitude' → 'universal sign + preserved ordering' 重新定調
 
 ## 5. 防錯規則 checklist
 
