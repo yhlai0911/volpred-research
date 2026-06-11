@@ -1,0 +1,288 @@
+{
+  "experiment_id": "k1468",
+  "title": "CTA/Managed-Futures ETF vs SPY drawdown descriptive comparison",
+  "generated_at": "2026-06-11T09:12:23.081707+00:00",
+  "research_question": "Trend-following CTA \u7b56\u7565\u5ba3\u7a31 drawdown \u983b\u7e41\u4f46\u6dfa\uff0c\u514d\u8cbb ETF proxy (KMLM, DBMF) \u5c0d\u7167 SPY \u662f\u5426\u9a57\u8b49\uff1f",
+  "data": {
+    "tickers": [
+      "SPY",
+      "KMLM",
+      "DBMF"
+    ],
+    "source": "yfinance Close (auto_adjust=True)",
+    "full_history": {
+      "start": "2010-01-04",
+      "end": "2026-06-09"
+    },
+    "overlap_window": {
+      "start": "2020-12-02",
+      "end": "2026-06-09",
+      "n_days": 1385
+    },
+    "asset_start_dates": {
+      "DBMF": "2019-05-08",
+      "KMLM": "2020-12-02",
+      "SPY": "2010-01-04"
+    }
+  },
+  "spy_full_baseline": {
+    "window": {
+      "start": "2010-01-04",
+      "end": "2026-06-09"
+    },
+    "stats": {
+      "n_episodes": 24,
+      "episodes_per_year": 1.461,
+      "mean_depth": -0.1099637494831714,
+      "median_depth": -0.08187708005202338,
+      "mean_duration_days": 75.375,
+      "median_duration_days": 34.5,
+      "mean_recovery_days": 51.166666666666664,
+      "median_recovery_days": 31.5,
+      "max_drawdown": -0.3371726975633843,
+      "pct_time_below_threshold": 0.2673602709895959,
+      "depth_bins": {
+        "-5%_to_-10%": 16,
+        "-10%_to_-20%": 6,
+        "deeper_than_-20%": 2
+      },
+      "years_covered": 16.427104722792606,
+      "n_observations": 4133,
+      "episodes_sample": [
+        {
+          "start": "2010-01-22",
+          "trough_date": "2010-02-08",
+          "end": "2010-03-11",
+          "trough_pct": -0.07969783312726164,
+          "duration_days": 33,
+          "trough_to_recovery_days": 22
+        },
+        {
+          "start": "2010-05-06",
+          "trough_date": "2010-07-02",
+          "end": "2010-11-04",
+          "trough_pct": -0.1569970234939233,
+          "duration_days": 127,
+          "trough_to_recovery_days": 87
+        },
+        {
+          "start": "2011-03-16",
+          "trough_date": "2011-03-16",
+          "end": "2011-04-26",
+          "trough_pct": -0.06206802786624921,
+          "duration_days": 28,
+          "trough_to_recovery_days": 28
+        },
+        {
+          "start": "2011-06-06",
+          "trough_date": "2011-10-03",
+          "end": "2012-02-03",
+          "trough_pct": -0.18605445999795645,
+          "duration_days": 168,
+          "trough_to_recovery_days": 85
+        },
+        {
+          "start": "2012-05-14",
+          "trough_date": "2012-06-04",
+          "end": "2012-08-16",
+          "trough_pct": -0.09686925192493157,
+          "duration_days": 66,
+          "trough_to_recovery_days": 52
+        }
+      ]
+    }
+  },
+  "overlap_window_comparison": {
+    "DBMF": {
+      "n_episodes": 5,
+      "episodes_per_year": 0.9063275434243176,
+      "mean_depth": -0.09109382370253134,
+      "median_depth": -0.06176924449613397,
+      "mean_duration_days": 199.4,
+      "median_duration_days": 50.0,
+      "mean_recovery_days": 176.0,
+      "median_recovery_days": 49.0,
+      "max_drawdown": -0.20393119771182633,
+      "pct_time_below_threshold": 0.5148014440433213,
+      "depth_bins": {
+        "-5%_to_-10%": 4,
+        "-10%_to_-20%": 0,
+        "deeper_than_-20%": 1
+      },
+      "years_covered": 5.516769336071184,
+      "n_observations": 1385,
+      "episodes_sample": [
+        {
+          "start": "2021-07-19",
+          "trough_date": "2021-08-18",
+          "end": "2021-11-09",
+          "trough_pct": -0.05495070112846967,
+          "duration_days": 80,
+          "trough_to_recovery_days": 58
+        },
+        {
+          "start": "2021-12-01",
+          "trough_date": "2021-12-02",
+          "end": "2022-02-11",
+          "trough_pct": -0.06176924449613397,
+          "duration_days": 50,
+          "trough_to_recovery_days": 49
+        },
+        {
+          "start": "2022-07-28",
+          "trough_date": "2022-08-01",
+          "end": "2022-09-21",
+          "trough_pct": -0.07380745054112303,
+          "duration_days": 38,
+          "trough_to_recovery_days": 36
+        },
+        {
+          "start": "2022-11-10",
+          "trough_date": "2023-03-24",
+          "end": "2025-12-19",
+          "trough_pct": -0.20393119771182633,
+          "duration_days": 779,
+          "trough_to_recovery_days": 688
+        },
+        {
+          "start": "2026-03-20",
+          "trough_date": "2026-03-23",
+          "end": "2026-06-02",
+          "trough_pct": -0.0610105246351037,
+          "duration_days": 50,
+          "trough_to_recovery_days": 49
+        }
+      ]
+    },
+    "KMLM": {
+      "n_episodes": 5,
+      "episodes_per_year": 0.9063275434243176,
+      "mean_depth": -0.08435856748371043,
+      "median_depth": -0.061940438387580454,
+      "mean_duration_days": 53.0,
+      "median_duration_days": 23.0,
+      "mean_recovery_days": 41.4,
+      "median_recovery_days": 21.0,
+      "max_drawdown": -0.31005883166820414,
+      "pct_time_below_threshold": 0.7696750902527075,
+      "depth_bins": {
+        "-5%_to_-10%": 4,
+        "-10%_to_-20%": 1,
+        "deeper_than_-20%": 0
+      },
+      "years_covered": 5.516769336071184,
+      "n_observations": 1385,
+      "episodes_sample": [
+        {
+          "start": "2021-03-23",
+          "trough_date": "2021-03-25",
+          "end": "2021-04-26",
+          "trough_pct": -0.05924082723314161,
+          "duration_days": 23,
+          "trough_to_recovery_days": 21
+        },
+        {
+          "start": "2021-06-17",
+          "trough_date": "2021-07-19",
+          "end": "2022-02-04",
+          "trough_pct": -0.09106159633799571,
+          "duration_days": 161,
+          "trough_to_recovery_days": 140
+        },
+        {
+          "start": "2022-03-09",
+          "trough_date": "2022-03-16",
+          "end": "2022-03-24",
+          "trough_pct": -0.061940438387580454,
+          "duration_days": 11,
+          "trough_to_recovery_days": 6
+        },
+        {
+          "start": "2022-06-22",
+          "trough_date": "2022-08-04",
+          "end": "2022-09-26",
+          "trough_pct": -0.14933061513983548,
+          "duration_days": 66,
+          "trough_to_recovery_days": 36
+        },
+        {
+          "start": "2022-10-04",
+          "trough_date": "2022-10-04",
+          "end": "2022-10-10",
+          "trough_pct": -0.06021936031999886,
+          "duration_days": 4,
+          "trough_to_recovery_days": 4
+        }
+      ]
+    },
+    "SPY": {
+      "n_episodes": 7,
+      "episodes_per_year": 1.2688585607940446,
+      "mean_depth": -0.10868802452339703,
+      "median_depth": -0.08405632697678511,
+      "mean_duration_days": 93.0,
+      "median_duration_days": 17.0,
+      "mean_recovery_days": 61.714285714285715,
+      "median_recovery_days": 17.0,
+      "max_drawdown": -0.24496386028119854,
+      "pct_time_below_threshold": 0.3458483754512635,
+      "depth_bins": {
+        "-5%_to_-10%": 5,
+        "-10%_to_-20%": 1,
+        "deeper_than_-20%": 1
+      },
+      "years_covered": 5.516769336071184,
+      "n_observations": 1385,
+      "episodes_sample": [
+        {
+          "start": "2021-09-30",
+          "trough_date": "2021-10-04",
+          "end": "2021-10-20",
+          "trough_pct": -0.051141472115454056,
+          "duration_days": 14,
+          "trough_to_recovery_days": 12
+        },
+        {
+          "start": "2022-01-19",
+          "trough_date": "2022-10-12",
+          "end": "2023-12-13",
+          "trough_pct": -0.24496386028119854,
+          "duration_days": 478,
+          "trough_to_recovery_days": 294
+        },
+        {
+          "start": "2024-04-19",
+          "trough_date": "2024-04-19",
+          "end": "2024-05-14",
+          "trough_pct": -0.053538879910534964,
+          "duration_days": 17,
+          "trough_to_recovery_days": 17
+        },
+        {
+          "start": "2024-08-02",
+          "trough_date": "2024-08-05",
+          "end": "2024-09-19",
+          "trough_pct": -0.08405632697678511,
+          "duration_days": 33,
+          "trough_to_recovery_days": 32
+        },
+        {
+          "start": "2025-03-04",
+          "trough_date": "2025-04-08",
+          "end": "2025-06-26",
+          "trough_pct": -0.18755238717833633,
+          "duration_days": 79,
+          "trough_to_recovery_days": 54
+        }
+      ]
+    }
+  },
+  "figure": "k1468_drawdown_comparison.png",
+  "methodology_notes": [
+    "Drawdown threshold: -5%",
+    "Episode = drawdown crosses below threshold; ends when recovers to running max (dd>=0).",
+    "Overlap-window cummax \u5f9e overlap_start \u8d77\u7b97\uff08\u5c40\u90e8 max\uff09\uff0c\u975e full-history max\u3002",
+    "Pure descriptive \u2014 no statistical test / no return-based comparison\uff08K-followup \u53ef\u52a0 vol-scaled return + Sharpe + DM\uff09\u3002",
+    "Lookahead-safe: cummax \u53ea\u7528 \u2264t \u8cc7\u6599\u3002"
+  ]
+}

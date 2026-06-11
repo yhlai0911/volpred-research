@@ -2180,6 +2180,16 @@ def ops_sync_all(storage_dir: str) -> None:
     _print_json({"action": "sync_all", "counts": result})
 
 
+@ops.command("indicator-arena-sync")
+@click.option("--storage-dir", default="storage", show_default=True, help="Local storage root containing indicator_arena/")
+@click.option("--dry-run", is_flag=True, help="Preview row counts without invoking Supabase")
+def ops_indicator_arena_sync(storage_dir: str, dry_run: bool) -> None:
+    """Sync local Indicator Arena canonical files to Supabase projection tables."""
+    from volpred.indicators.supabase_sync import sync_indicator_arena
+
+    _print_json(sync_indicator_arena(storage_dir=storage_dir, dry_run=dry_run))
+
+
 @ops.command("feed-sync")
 @click.option("--storage-dir", default="storage", show_default=True)
 @click.option("--dry-run/--apply", default=True, show_default=True,

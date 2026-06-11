@@ -25,6 +25,7 @@ from .signals import (
     read_signals,
 )
 from .reviews import REVIEWS_DIR, read_reviews
+from .supabase_sync import sync_indicator_arena
 
 
 # ---------------------------------------------------------------------------
@@ -229,6 +230,24 @@ def status(registry_path: str | None, json_output: bool) -> None:
                 f"league={row['league']:<13} horizon={row['horizon_days']}d "
                 f"k_refs={row['k_refs']}"
             )
+
+
+@cli.command(name="sync-supabase")
+@click.option(
+    "--storage-dir",
+    default="storage",
+    show_default=True,
+    help="Local storage root containing indicator_arena/.",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Show counts + preview without invoking Supabase.",
+)
+def sync_supabase(storage_dir: str, dry_run: bool) -> None:
+    """Project local indicator_arena canonical files into Supabase tables."""
+    click.echo(json.dumps(sync_indicator_arena(storage_dir=storage_dir, dry_run=dry_run), indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":

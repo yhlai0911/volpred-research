@@ -33402,5 +33402,52 @@
     "verdict": "CONDITIONAL_PASS",
     "reviewer": "Codex CLI 0.137.0 (gpt-5.4)",
     "reviewer_source": "Codex CLI primary path; CONDITIONAL PASS 9 findings all presentation-layer; independent recomputation of cell1 sup-Wald confirms grid-artifact reading"
+  },
+  {
+    "item_id": "eab76e58",
+    "category": "research_finding",
+    "experiment_id": "K1468",
+    "k_id": "K1468",
+    "experiment_path": "experiments/k1468/",
+    "experiment_script": "experiments/k1468/k1468.py",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "main_thread_descriptive_only_no_model_no_test",
+    "title": "CTA/Managed-Futures ETF vs SPY drawdown 形態：頻繁但淺主張部分驗證",
+    "content": "K1468 用免費 ETF proxy (KMLM 上市 2020-12, DBMF 上市 2019-05) 對照 SPY 在 2020-12 ~ 2026-06 (5.52 yr) overlap 窗口跑 drawdown 描述統計。FAJ/Man Group/AlphaSimplex 2025 managed-futures literature 主張 trend-following drawdown「頻繁但淺」(frequent shallow)。結果部分驗證：(1) 較淺 ✓ — CTA 平均深度 −8 ~ −9% < SPY −10.9%，中位 −6.2% < SPY −8.4%；(2) 不更頻繁 ✗ — episodes/yr KMLM 0.91 / DBMF 0.91 < SPY 1.27（CTA 反而少，literature 的「頻繁」可能指 1m 內 minor pullback，5% threshold 不抓得到）；(3) 代價 ⚠️ — CTA 大部分時間在 dd（KMLM 77% / DBMF 51% vs SPY 35%），DBMF 平均 199 天才 recover，KMLM 雖快（53 天 duration）但 max_dd −31% 反深於 SPY −24.5%。Implication：CTA proxy ETF 想當 SPY diversifier 不能只看 max_dd 較淺，要同時看 return（本實驗未做）+ recovery 速度；DBMF/KMLM 不可互換。Caveat：窗口短（5.5 yr 1 cycle）；ETF 代理 ≠ 真 active CTA；threshold 敏感（−5% vs −10%）。",
+    "evidence": [
+      "experiments/k1468/k1468_results.json",
+      "experiments/k1468/k1468_drawdown_comparison.png",
+      "experiments/k1468/README.md"
+    ],
+    "key_numbers": {
+      "overlap_window": "2020-12-04 to 2026-06-10 (5.52 yr)",
+      "spy_episodes_per_year": 1.27,
+      "kmlm_episodes_per_year": 0.91,
+      "dbmf_episodes_per_year": 0.91,
+      "spy_mean_depth": -0.109,
+      "kmlm_mean_depth": -0.084,
+      "dbmf_mean_depth": -0.091,
+      "spy_pct_time_in_dd": 0.346,
+      "kmlm_pct_time_in_dd": 0.77,
+      "dbmf_pct_time_in_dd": 0.515,
+      "spy_max_dd": -0.245,
+      "kmlm_max_dd": -0.31,
+      "dbmf_max_dd": -0.204,
+      "spy_mean_duration_days": 93,
+      "kmlm_mean_duration_days": 53,
+      "dbmf_mean_duration_days": 199
+    },
+    "related_k": [
+      "K577",
+      "K544",
+      "K657",
+      "K1467"
+    ],
+    "next_actions": [
+      "可發 reader-facing article (CTA ETF drawdown 真相)",
+      "K-followup: 加 vol-scaled return + Sharpe + DM test 量化 diversification benefit"
+    ],
+    "confidence": 0.65,
+    "created_at": "2026-06-11T17:14:11.530063"
   }
 ]
