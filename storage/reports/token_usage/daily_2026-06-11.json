@@ -1,0 +1,344 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-11",
+  "week_range": "2026-06-05 → 2026-06-12",
+  "totals": {
+    "input_tokens": 12,
+    "output_tokens": 948,
+    "cache_read_tokens": 0,
+    "cache_create_tokens": 132580,
+    "billable_total": 133540,
+    "assistant_messages": 4,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.5114
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 12,
+      "output_tokens": 948,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 132580,
+      "messages": 4,
+      "estimated_cost_usd": 0.5114
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 6,
+      "output_tokens": 474,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 66290,
+      "messages": 2,
+      "billable_total": 66770,
+      "estimated_cost_usd": 0.2557,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 237,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 33145,
+      "messages": 1,
+      "billable_total": 33385,
+      "estimated_cost_usd": 0.1279,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "token_report": {
+      "input_tokens": 3,
+      "output_tokens": 237,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 33145,
+      "messages": 1,
+      "billable_total": 33385,
+      "estimated_cost_usd": 0.1279,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 2,
+      "billable_total": 66770,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 2,
+          "billable_total": 66770
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 33385
+        },
+        {
+          "name": "other",
+          "messages": 1,
+          "billable_total": 33385
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 33385
+        },
+        {
+          "name": "⏱ 開始 2026-06-11 執行 token 用量日報",
+          "messages": 1,
+          "billable_total": 33385
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 33385,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 33385
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 33385
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 33385
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 132580,
+      "billable_total": 133540,
+      "cache_create_share_pct": 99.3,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "395e298b-3e5d-5f56-964f-f029d9c036ad",
+          "messages": 4,
+          "billable_total": 133540,
+          "cache_create_tokens": 132580,
+          "cache_read_tokens": 0,
+          "duration_minutes": 0.0,
+          "cache_create_share_pct": 99.3,
+          "first_ts": "2026-06-11T14:44:41.827000+00:00",
+          "last_ts": "2026-06-11T14:44:44.044000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "2900733",
+      "message": "Ops patrol report 2026-06-11T12:05Z"
+    },
+    {
+      "sha": "e094a9d",
+      "message": "hourly-19 | member_qa K1474 succeeded + K1473 untracked tracked"
+    },
+    {
+      "sha": "0e5c41d",
+      "message": "member_qa | yaoxk1431 酒店娛樂業×股市 published (K1474 證據+3000 字 + dual sync) — hourly-"
+    },
+    {
+      "sha": "710984d",
+      "message": "task: 首頁 UX 打磨批次入池（boss 巡檢遺留 4 項，P2）"
+    },
+    {
+      "sha": "3e7aea3",
+      "message": "docs: ISS-010 首頁 #418 HTML variant 殘留追蹤（text variant 已修）"
+    },
+    {
+      "sha": "7bb9832",
+      "message": "indicator_arena | C6 editorial 下架（投資實用價值不足，status_history 留痕 + Supabase synced）+"
+    },
+    {
+      "sha": "f48645c",
+      "message": "ops(hourly 18:13): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "33be788",
+      "message": "hourly-18 | member_qa evaluate: yaoxk1431 酒店娛樂業×股市 score 4/10 rank #1 → research"
+    },
+    {
+      "sha": "4c63744",
+      "message": "fix(mirror-sync): 修復近一月靜默 401 — OPS_ADMIN_TOKEN 落地（Zeabur env + .env.local）+ mir"
+    },
+    {
+      "sha": "cbe91cd",
+      "message": "indicator_arena_phase1 complete | 前端首頁專區+/indicators 上線（fe 1351be4+2866cab）、hit "
+    },
+    {
+      "sha": "71783e0",
+      "message": "indicator_arena_phase1d | 每日 pipeline 上線：6 指標真實訊號落地 + cron + tests"
+    },
+    {
+      "sha": "ff30fd9",
+      "message": "fix(figures): 全站中文豆腐字掃描（182 可疑腳本 → 線上 40 圖逐張視覺確認全正常）+ scripts/plot_style.py dura"
+    },
+    {
+      "sha": "a82fd0d",
+      "message": "hourly-17 | K1468 CTA proxy ETF drawdown 描述統計 + Indicator Arena 1c supabase_sync"
+    },
+    {
+      "sha": "373c70d",
+      "message": "hourly-16 | indicator_arena_phase1_backend complete: next_tasks status + work_lo"
+    },
+    {
+      "sha": "d76edf7",
+      "message": "indicator_arena_phase1_backend_2026_06_11 | 建立 Indicator Arena 後端模組 (registry/si"
+    },
+    {
+      "sha": "f04a9eb",
+      "message": "fix(k202): 文章圖中文豆腐字修復 — regenerate_figures.py（CJK 字型）+ Supabase 同名覆蓋（mile_872abd"
+    },
+    {
+      "sha": "9abca06",
+      "message": "fix(ops): /paper render-error 修復 + 巡檢盲區補（core pages 內容驗證非僅 HTTP 200）"
+    },
+    {
+      "sha": "3afc57b",
+      "message": "indicator_arena_phase1a | Arena 設計文件：三表資料模型+狀態機+誠實機制+評分公式+6 首發候選（OOS 已回 results."
+    },
+    {
+      "sha": "8665bec",
+      "message": "feat(indicator-arena): Phase 1 任務鏈 ×3（boss 需求：首頁預警/預測指標競技場）"
+    },
+    {
+      "sha": "70a550e",
+      "message": "paper_body_vt_crowding_full_alignment_2026_06_11 | Model §2 RR matched-control +"
+    },
+    {
+      "sha": "530c939",
+      "message": "research(journal-discovery): batch 2 — 14 方向五新軸（microstructure/ETF flow/GPR/氣候/r"
+    },
+    {
+      "sha": "189b6fc",
+      "message": "fix(refill): arc filter direction-level 校準 — 單 distinctive entity 不再擋（≥2 才擋）；MOV"
+    },
+    {
+      "sha": "587f77b",
+      "message": "paper(vt-crowding): title+abstract+intro narrative rewrite — tipping→monotone st"
+    },
+    {
+      "sha": "8b11fb8",
+      "message": "paper(vt-crowding): narrative decision confirmed（tipping→monotone erosion）+ body"
+    },
+    {
+      "sha": "54feed4",
+      "message": "experiment(K1471): M=500 驗證+Codex CONDITIONAL_PASS — 70% tipping 撤回、monotone ero"
+    },
+    {
+      "sha": "259638f",
+      "message": "compute_queue: k1471 vt-crowding-redesign full M=500 結果落地"
+    },
+    {
+      "sha": "533e12c",
+      "message": "paper(eav-universal-magnitude): Option A narrative 重寫 — 13-market panel + 3 stru"
+    },
+    {
+      "sha": "f43b091",
+      "message": "experiment(K1471): vt-crowding ABM resimulation redesign — 5 v5-blocking fixes +"
+    },
+    {
+      "sha": "92b81d6",
+      "message": "experiment(K1470): EAV 主 Table 1 100-multistart 重估 + Codex CONDITIONAL_PASS"
+    },
+    {
+      "sha": "a86fef2",
+      "message": "paper(leverage-direction): README → REVISION COMPLETE（gate GREEN 171/0）"
+    },
+    {
+      "sha": "02c9100",
+      "message": "paper(leverage-direction): v12 確認輪殘留全修 — L187 K903 對齊 + Table 3 補 TLT/EEM 2025 +"
+    },
+    {
+      "sha": "43f228d",
+      "message": "ops(hourly 11:15): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "0fe79e7",
+      "message": "paper_review_mile_c26fcd8e | K189 Codex 24h-rule FAIL (4 HIGH) + errata/rerun fo"
+    },
+    {
+      "sha": "352a613",
+      "message": "paper(audit-fixes-3): eav A 類文字修 + vt-crowding README 降級 + 2 重跑任務入池"
+    },
+    {
+      "sha": "4acb03e",
+      "message": "errata(K193 mile_6a601155): Bonferroni + partial-r|VIX caveats per Codex 24h-rul"
+    },
+    {
+      "sha": "054a72f",
+      "message": "paper(crypto-fear): Codex 收尾產物（reproduce_report + pdf + 口徑同步）+ next_tasks sync"
+    },
+    {
+      "sha": "bf88d24",
+      "message": "ops(hourly 09:18): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "3c906ad",
+      "message": "hourly-09 PHASE-Z | paper_review_mile_6a601155 CONDITIONAL_PASS — K193 Codex 24h"
+    },
+    {
+      "sha": "c5d700a",
+      "message": "experiment(K1467): tail-hedging overlay vs crisis-alpha (SPY+VXX) CONDITIONAL_PA"
+    },
+    {
+      "sha": "5f83424",
+      "message": "experiment(k1465): DoW clustering of overnight/intraday variance and VRP tradabi"
+    },
+    {
+      "sha": "ab35017",
+      "message": "ops(hourly 08:24): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    },
+    {
+      "sha": "5c0f9a8",
+      "message": "ops(hourly 08:07): deprecate CPI 6/13 stale event_job + dispatch K1467 tail-hedg"
+    },
+    {
+      "sha": "a7b241b",
+      "message": "ops(hourly 07:07): K1466 EM SE-Asia vol decoupling CONDITIONAL_PASS — partial un"
+    },
+    {
+      "sha": "63b6efb",
+      "message": "experiment(k1466): SE Asia frontier EM vol decoupling — VERDICT CONDITIONAL_PASS"
+    },
+    {
+      "sha": "2904792",
+      "message": "paper(leverage-direction): 解凍前提全達成 — reproduce green 100% + README 統整 MAJOR_REVI"
+    },
+    {
+      "sha": "5169081",
+      "message": "ops(hourly 06:07): block speculative CPI trending + dispatch K1465 VRP×DoW + PHA"
+    },
+    {
+      "sha": "f415432",
+      "message": "ops(hourly 05:16): release research_tail_hedging claim"
+    },
+    {
+      "sha": "7d7761b",
+      "message": "ops(hourly 05:08): PHASE-Z cleanup + reader-facing refill"
+    },
+    {
+      "sha": "b198f92",
+      "message": "ops(autonomous 04:07): PHASE-Z auto-commit | K1464 BAB vol-conditional 修正落地"
+    },
+    {
+      "sha": "880717b",
+      "message": "ops(hourly 03:25): PHASE-Z safety-net auto-commit (agent left uncommitted)"
+    }
+  ]
+}
