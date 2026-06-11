@@ -347,6 +347,20 @@
           "drain_failed_syncs.log",
           "cron_drain_failed_syncs.sh"
         ]
+      },
+      {
+        "id": "indicator_arena_daily",
+        "label": "Indicator Arena 每日訊號發布+回顧評分",
+        "cron": "0 7 * * 1-6",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_indicator_arena_daily.sh",
+        "log_path": "storage/logs/cron/indicator_arena_daily.log",
+        "description": "每日 07:00 台北（週一~週六；美股 ~05:00 收盤後、台股 09:00 開盤前）跑 scripts/indicator_arena_daily.py：6 個指標 ex-ante 訊號（yfinance + 本地 price_cache 補洞 + CBOE VIX9D fallback）→ append-only signals → 到期訊號回顧評分（reviews）→ sync Supabase 三表。冪等（同 indicator+target_date 跳過）。exit≠0（抓取失敗/stale skip/sync 失敗）寄 warn alert（§4.5 skip 必須可見）。Phase 1d 上線 2026-06-11。",
+        "matchers": [
+          "indicator_arena_daily.py",
+          "cron_indicator_arena_daily.sh"
+        ],
+        "piggy_back_skip": true,
+        "piggy_back_skip_reason": "host crontab fires reliably at minute 0; pipeline is idempotent but double-fire wastes yfinance quota."
       }
     ]
   },

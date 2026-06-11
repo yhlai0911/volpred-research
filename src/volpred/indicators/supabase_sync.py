@@ -94,9 +94,48 @@ def build_review_rows(storage_dir: str | Path = DEFAULT_STORAGE_DIR) -> list[dic
     return out
 
 
+# daily_signals / outcome_reviews are append-only at the DB level (BEFORE
+# UPDATE/DELETE triggers raise). A merge-duplicates upsert of already-synced
+# rows would fire that trigger and fail the whole sync, so append-only tables
+# use `resolution=ignore-duplicates` (ON CONFLICT DO NOTHING): existing rows
+# untouched, new rows inserted.
+APPEND_ONLY_CONFLICT_KEYS = {
+    "daily_signals": "signal_id",
+    "outcome_reviews": "review_id",
+}
+
+
+def _post_append_only(table: str, rows: list[dict[str, Any]], conflict_col: str) -> bool:
+    from urllib.error import HTTPError
+    from urllib.request import Request, urlopen
+
+    from scripts.supabase_sync import HEADERS, SUPABASE_URL
+
+    headers = {**HEADERS, "Prefer": "resolution=ignore-duplicates,return=minimal"}
+    url = f"{SUPABASE_URL}/rest/v1/{table}?on_conflict={conflict_col}"
+    payload = json.dumps(rows, ensure_ascii=False).encode("utf-8")
+    req = Request(url, data=payload, headers=headers, method="POST")
+    try:
+        urlopen(req, timeout=30)
+        return True
+    except HTTPError as exc:
+        try:
+            body = exc.read().decode("utf-8", "replace")[:400]
+        except Exception:
+            body = "<unreadable>"
+        print(f"  Supabase {table} error: {exc.code} — {body}")
+        return False
+    except Exception as exc:
+        print(f"  Supabase {table} error: {exc}")
+        return False
+
+
 def _default_upsert(table: str, rows: list[dict[str, Any]]) -> bool:
     if not rows:
         return True
+    conflict_col = APPEND_ONLY_CONFLICT_KEYS.get(table)
+    if conflict_col:
+        return _post_append_only(table, rows, conflict_col)
     from scripts.supabase_sync import _post
 
     return _post(table, rows)
