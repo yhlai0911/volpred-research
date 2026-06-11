@@ -33449,5 +33449,49 @@
     ],
     "confidence": 0.65,
     "created_at": "2026-06-11T17:14:11.530063"
+  },
+  {
+    "item_id": "e3a4631e",
+    "category": "research_finding",
+    "experiment_id": "K1474",
+    "k_id": "K1474",
+    "experiment_path": "experiments/k1474_hotel_leisure_market_corr/",
+    "experiment_script": "experiments/k1474_hotel_leisure_market_corr/k1474.py",
+    "verdict": "PASS",
+    "reviewer": "main_thread_descriptive_analysis",
+    "reviewer_source": "main_thread_descriptive_analysis",
+    "title": "酒店娛樂業與 S&P500 相關性：高 Beta 順週期板塊，COVID 放大效應實證（2015-2026）",
+    "content": "K1474 用 yfinance 抓取 2015-01-02 至 2026-06-09（2,875 交易日），比較 PEJ（娛樂 ETF）、XLY（消費可選 ETF）、HLT/MAR/H（酒店股）、RCL/CCL（郵輪股）與 SPY 的日對數報酬相關性、beta 與波動率。核心發現：(1) XLY-SPY 全期相關 0.898，PEJ-SPY 0.781；個別酒店股 0.56-0.62，郵輪股 0.56；(2) 個別酒店股 beta 1.01-1.12（HLT/MAR/H），郵輪 RCL beta 1.64、CCL 1.75；(3) COVID 崩跌（2020-02-20 to 03-23）：酒店業多跌 10-40 個百分點，RCL/CCL 腰斬以上（-74%/-72%）；(4) COVID 復甦（Mar23-Dec31）RCL +214%；(5) 危機期相關性收斂：XLY corr 0.92→0.96；(6) CCL 年化波動率 55.3%，最大回撤 -90.4%，RCL -83.3%，屬極高風險資產。方法論：純描述統計，滾動 252 日相關/beta，無預測性信號，無 lookahead，seed=42。",
+    "tags": [
+      "酒店業",
+      "娛樂業",
+      "股市相關性",
+      "consumer_discretionary",
+      "beta",
+      "COVID",
+      "波動率",
+      "PEJ",
+      "XLY",
+      "member_qa"
+    ],
+    "key_metrics": {
+      "PEJ_SPY_corr": 0.7811,
+      "XLY_SPY_corr": 0.8979,
+      "HLT_SPY_corr": 0.6231,
+      "CCL_SPY_corr": 0.5593,
+      "PEJ_beta": 1.0694,
+      "RCL_beta": 1.6445,
+      "CCL_beta": 1.7491,
+      "CCL_ann_vol_pct": 55.32,
+      "PEJ_ann_vol_pct": 24.22,
+      "COVID_crash_PEJ_pct": -52.43,
+      "COVID_crash_RCL_pct": -74.35,
+      "COVID_recovery_RCL_pct": 213.7,
+      "n_obs": 2874
+    },
+    "article_id": "mile_9b76989e",
+    "question_id": "79077d59-9647-4119-90dc-d86cfb230bdb",
+    "proposer": "yaoxk1431",
+    "created_at": "2026-06-11T11:22:30.537829Z"
   }
 ]
