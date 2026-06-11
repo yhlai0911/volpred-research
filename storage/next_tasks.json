@@ -27286,8 +27286,12 @@
     "source": "paper_audit_2026-06-10",
     "title": "volatility-absorption 審查修正：6 HIGH（reproduce gate v3 重跑 + snapshot 統一）",
     "description": "依 paper/volatility-absorption/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）：對 v3 重跑 reproduce gate（現存 report 是 v2、61.3% red）、統一 original-snapshot 口徑、Tables 6-8 數字補 JSON 來源。xelatex exit 0 → paper-update 上傳 → fix_log.md。",
-    "status": "pending",
-    "created_at": "2026-06-10T13:58:00+00:00"
+    "status": "in_progress",
+    "created_at": "2026-06-10T13:58:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T02:19:40.237439+00:00",
+    "claim_session_id": "2ff74d9df522",
+    "started_at": "2026-06-11T02:20:13.136452+00:00"
   },
   {
     "id": "paper_body_audit_fix_eav_universal_magnitude_2026_06_10",
@@ -27296,8 +27300,11 @@
     "source": "paper_audit_2026-06-10",
     "title": "eav-universal-magnitude 審查修正：5 HIGH（FRAGILE 主結果重估）",
     "description": "依 paper/eav-universal-magnitude/review_history/audit_2026-06-10/audit_findings.json 逐條修正（先 HIGH）：主結果（Table 1）被 §6.6 multistart 段宣告 single-init FRAGILE — 需 100+ multistart 重估（CLAUDE.md pooled-MLE 硬規則）或如實降級結論；abstract/conclusion 與 13-market body 結構對齊。重估屬 heavy compute → 走 compute_queue。fix_log.md 記處置。",
-    "status": "pending",
-    "created_at": "2026-06-10T13:58:00+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-10T13:58:00+00:00",
+    "claimed_by": "agent-eav-fixer",
+    "completed_at": "2026-06-11T02:24:41.896812+00:00",
+    "result": "A 類文字層 done（CITATION 降級+θ_rel footnote+bibstyle 修，body.tex compile 0 undef）；B narrative 待決(email boss)；C 派 compute(experiment_eav_multistart_reestimate)"
   },
   {
     "id": "paper_body_audit_fix_vt_crowding_abm_2026_06_10",
@@ -27306,8 +27313,10 @@
     "source": "paper_audit_2026-06-10",
     "title": "vt-crowding-abm 審查修正：5 HIGH（雙 REJECT blocking 4 項未修）",
     "description": "依 paper/vt-crowding-abm/review_history/audit_2026-06-10/audit_findings.json 逐條修正：v5_independent（2026-05-21）Codex+Antigravity 雙 REJECT 的 4 個 blocking（detector 循環校準、NoiseControl 無效對照、iid 假設等）必須先解 — 涉及模擬重設計，必要時開新 K 實驗。fix_log.md 記處置。",
-    "status": "pending",
-    "created_at": "2026-06-10T13:58:00+00:00"
+    "status": "superseded",
+    "created_at": "2026-06-10T13:58:00+00:00",
+    "completed_at": "2026-06-11T02:24:41.896812+00:00",
+    "result": "5 HIGH 全需 ABM resimulation 無文字層 → 改派 experiment_vt_crowding_resimulation_2026_06_11（P1 compute）；README 降 MAJOR_REVISION"
   },
   {
     "id": "paper_body_audit_fix_prg_periodic_garch_2026_06_10",
@@ -27625,5 +27634,25 @@
     "started_at": "2026-06-11T02:09:33.151441+00:00",
     "completed_at": "2026-06-11T02:12:34.437592+00:00",
     "result": "Errata applied: feed.json + Supabase synced (updated_at 2026-06-11T02:11:37Z). 2 caveats added: (1) 4-pair Bonferroni: SPY-QQQ NS adj p~0.075, SPY-GLD borderline adj p~0.033; (2) SPY-QQQ partial r|VIX = -0.049 (signal vanishes after controlling VIX). errata trace in details.errata. Verified prod has_errata=true."
+  },
+  {
+    "id": "experiment_vt_crowding_resimulation_2026_06_11",
+    "task_type": "experiment",
+    "priority": 1,
+    "source": "paper_audit_2026-06-10",
+    "title": "vt-crowding-abm 5 HIGH 重跑/重設計（v5 雙審稿人 blocking，全需 ABM resimulation）",
+    "description": "paper/vt-crowding-abm 的 5 HIGH（audit_findings.json）全是 v5 Codex+Antigravity 早標 blocking 但未修的 methodology 問題，無文字層可改，需重跑/重設計 K1262b ABM 模擬：(1) detector 循環校準 → 改外生結構斷點檢定（supremum break test / changepoint on 500 sim-level Sharpe），不可先知 70% 閾值；(2) NoiseControl strawman → 新增 active control（隨機方向再平衡 agent，|Δw| 與 turnover match VT/TF/MR 但方向正交）；(3) CI 口徑矛盾（Table 1 note iid bootstrap vs Fig 1 caption MC sim）→ 全文統一 path-level bootstrap（500 sim-level Sharpe）+ pooled 統計量改 block bootstrap；(4) cell1 閾值不可再現（M=500 TF/MR=20% vs M=200 MR=70%）→ K1262b cell1 重跑 M=500 + 加密 40/60% grid + 每 threshold 報 bootstrap CI；(5) cell3 MR null rank encoding 方向錯 → 改報 detector-not-applicable + 主張降 4/5。屬 heavy compute → 主 ABM 重跑走 compute_queue。完成後 main.tex 對齊新結果 + xelatex + paper-update + fix_log。README 先標 MAJOR_REVISION blocked-on-resimulation。Codex review before knowledge write。",
+    "status": "pending",
+    "created_at": "2026-06-11T02:25:00+00:00"
+  },
+  {
+    "id": "experiment_eav_multistart_reestimate_2026_06_11",
+    "task_type": "experiment",
+    "priority": 1,
+    "source": "paper_audit_2026-06-10",
+    "title": "eav 主 Table 1 三市場 100-multistart 重估（HIGH #1 解凍前提）",
+    "description": "§6.6.4 自承 K1145/K1147/K1150 主三市場 spec 用 default single-init L-BFGS-B 有 two-basin pathology（10/10 市場 FRAGILE，LR 最高 2837）。對主三市場跑同 §6.6.4 協議：≥100 random init（seeds 43-142）+ DE seed 49 + K-means seed 42 + LR canonical-vs-refined 選 basin，驗 US>JP>TW magnitude ordering 是否保持。heavy compute → compute_queue。完成後同步 Table 1 + abstract 數字 + reproduce.py 擴充覆蓋 §6.6（k1163/k1165/k1166/k1168/k1171/k1172/k1207/k1213/k1216*/k1173）+ 4 處 source-binding 改綁 results-JSON。Codex review before knowledge.",
+    "status": "pending",
+    "created_at": "2026-06-11T02:24:41.896812+00:00"
   }
 ]

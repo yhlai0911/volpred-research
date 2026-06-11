@@ -192,13 +192,18 @@ the macroeconomic long-run driver with an event-date covariate, preserving the
 multiplicative structure's identifying power while focusing on the
 announcement-day spike.
 
-Third, we contribute to the growing body of work on cross-market regularities
-in volatility dynamics
-[CITATION NEEDED: international cross-market EAV anchor---see lit\_review.md A5;
-needs NotebookLM pass before submission].
-Our evidence of magnitude ordering across Taiwan, the United States, and Japan
-extends these findings to a setting that is rarely studied jointly with a unified
-model specification.
+Third, we contribute to the literature on volatility regularities by documenting,
+to our knowledge, the first directly comparable cross-market estimate of
+earnings-announcement volatility amplification under a single unified model
+specification. While the within-market EAV spike is well established
+\citep{beaver1968,patell1976,patell_wolfson1979,ball_kothari1991}, we are not
+aware of a prior study that estimates the EAV magnitude jointly across multiple
+international equity markets with a common pooled-MLE design; the cross-country
+earnings literature has instead focused on information content and disclosure
+quality rather than on a comparable volatility-amplification coefficient. Our
+evidence of magnitude ordering across Taiwan, the United States, and Japan therefore
+extends the EAV regularity to a setting that is rarely studied jointly with a
+unified model specification.
 
 \subsection*{Paper Outline}
 
@@ -586,8 +591,22 @@ also pass. The joint probability of all three being false positives under
 independence is negligible.
 
 \begin{table}[htbp]
-\caption{Main In-Sample Estimates: Earnings-Announcement Volatility Amplification}
+\caption{Main In-Sample Estimates: Earnings-Announcement Volatility Amplification.%
+\protect\footnotemark}
 \label{tab:main_results}
+\footnotetext{Caveat: these headline estimates
+(K1145/K1147/K1150) are produced under default single-init L-BFGS-B and have
+\emph{not} yet been re-estimated under the 100-multistart protocol. Section~%
+\ref{sec:cross_market_panel} (the 9/10-market multistart audit,
+Table~\ref{tab:multistart_lr}) documents a two-basin likelihood pathology that is
+invisible under single-init optimization and shifts the \emph{relative} EAV
+coefficient $\hat{\theta}_{\mathrm{rel}}$ materially in every audited market.
+Whether the main three-market $\hat{\theta}_{\mathrm{EAV}}$ point estimates, their
+significance, and the US $>$ JP $>$ TW magnitude ordering survive a matched
+100-multistart re-estimation is an open verification item: the main specification
+(K1145/K1147/K1150) must be re-run under the same multistart protocol before these
+numbers can be treated as final. Results are reported here as the current
+single-init estimates pending that re-estimation.}
 \centering
 \begin{threeparttable}
 \begin{tabular}{lcccccc}
@@ -774,6 +793,30 @@ preferred ($\Delta$DM $t \approx 0.33$). The earlier framing that
 robustly identify the earnings-announcement effect.
 
 %==============================================================
+% NARRATIVE-DECISION-PENDING (audit_2026-06-10 HIGH #2): SCOPE INCONSISTENCY.
+% The abstract and conclusion describe a 3-market paper (TW/US/JP), but this
+% subsection (§6.6) presents a 12/13-market institutional panel and commits to
+% three cross-market structural drivers (analyst attention, sector FE, ownership
+% ladder). The conclusion also lists "extending to the UK, HK, or the Eurozone"
+% as future work, which §6.6's panel already covers (HK and EU are in the panel)
+% — a direct self-contradiction.
+%
+% This is a paper-level narrative-scope decision (3-market vs 13-market panel)
+% and is reserved for the main thread / boss confirmation per the CLAUDE.md
+% narrative state machine. It was NOT resolved in this audit-fix pass.
+% Two options under consideration (see fix_log.md):
+%   Option A: Expand abstract + intro contributions + conclusion to make the
+%             12/13-market panel and the three structural drivers part of the
+%             paper's MAIN narrative; delete the stale future-work bullets that
+%             §6.6 already addresses (HK/EU).
+%   Option B: Demote this 12/13-market panel to a ROBUSTNESS APPENDIX, keeping
+%             the abstract/conclusion as a focused 3-market paper; reframe §6.6
+%             as supporting evidence rather than a co-equal contribution.
+% RECOMMENDATION (agent): Option A. The panel materially strengthens the
+% headline cross-market regularity claim and the magnitude-ordering thesis; it
+% is too central to relegate to an appendix. But this requires rewriting the
+% abstract/conclusion, which is a main-thread narrative task — flagged, not done.
+%==============================================================
 \subsection{Broader Cross-Market Evidence: 12-Market Institutional Panel}
 \label{sec:cross_market_panel}
 %==============================================================
@@ -889,7 +932,25 @@ $\rho$ is expected to fall between $+0.30$ and $+0.50$.
 \paragraph{Residual caveat (i): emerging-market cost-of-capital scale factor (K1173).}
 Institutional-ownership values for EM markets sit 3--25$\times$ above the developed-market
 reference range ($\hat{\theta}_{\mathrm{rel}}$: BR $= 1.89$, CA $= 1.45$, IN $= 1.17$,
-MX $= 1.20$ vs.\ TW $= 0.17$ through US $= 0.59$).
+MX $= 1.20$ vs.\ TW $= 0.17$ through US $= 0.59$).\footnote{%
+Two distinct normalizations of $\hat{\theta}_{\mathrm{rel}}$ appear in this section
+and must not be conflated. The values quoted here and in the cross-market
+ladder/trajectory analysis (TW $= 0.167$, EU $= 0.194$, JP $= 0.388$, US $= 0.586$;
+K1163 four-market normalization) are computed under the K1163/K1172 four-market
+pooled normalization used to construct the inst\_pct ladder.
+% source: k1163_results.json: tw_theta_rel=0.167, eu_k1163_theta_rel=0.19402, jp_theta_rel=0.388, us_theta_rel=0.586
+The canonical $\hat{\theta}_{\mathrm{rel}}$ values reported in
+Table~\ref{tab:multistart_lr} (TW $= 0.314$, US $= 0.415$, JP $= 1.668$)
+are estimated under the K1216c \emph{pooled-joint refit} specification, a different
+estimation setup; the two systems share a symbol but differ in normalization base and
+therefore in absolute scale. The ``developed-market reference range $[0.17, 0.59]$''
+in this paragraph refers exclusively to the K1163 four-market normalization; under that
+normalization, JP $= 0.388$ sits inside the developed range, consistent with the
+EM-versus-developed contrast. The larger JP $= 1.668$ in Table~\ref{tab:multistart_lr}
+is a K1216c-normalization canonical estimate and is not directly comparable to the
+$[0.17, 0.59]$ developed range.
+% source: k1216c_results.json: per_market.{TW,US,JP}.canonical_theta_rel = 0.31397, 0.41482, 1.66751
+}
 K1173 tests whether this off-ladder position reflects a data-quality artefact:
 \texttt{yfinance} \texttt{major\_holders} can conflate promoter, government, and
 institutional blocks in EM filings.
@@ -1250,9 +1311,10 @@ to verify magnitude-order agreement.]
 % BIBLIOGRAPHY
 %==============================================================
 
-\bibliographystyle{jfe}
-% NOTE: jfe.bst required — obtain from JFE editorial site before submission.
-% For compilation/review: replace with \bibliographystyle{plainnat} temporarily.
+\bibliographystyle{plainnat}
+% 2026-06-11: switched jfe→plainnat so the package compiles/reviews cleanly
+% (jfe.bst is not installed; obtain from JFE editorial site and switch back
+% only at final submission formatting). plainnat resolves all \citep keys.
 \bibliography{references}
 
 % ─── Inline citation fallbacks (to be moved to .bib) ─────────

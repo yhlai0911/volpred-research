@@ -2,7 +2,7 @@
 
 **Working Title**: Earnings-Announcement Volatility Amplification: A Cross-Market Regularity with Magnitude Ordering — Evidence from Taiwan, U.S., and Japan Equity Markets
 **Target Journal**: Journal of Empirical Finance | International Review of Financial Analysis | Finance Research Letters (backup)
-**Status**: scaffold v2 (paper_decision confirmed 2026-04-17; kickoff 2026-05-17; scaffold rewrite per `review_v1.md` 2026-05-17)
+**Status**: 🔶 **MAJOR_REVISION（2026-06-10 全組合審查，5 HIGH）**。A 類文字層已修（2026-06-11）：CITATION-NEEDED placeholder 誠實降級、θ_rel 雙來源 footnote disambiguation、bibstyle jfe→plainnat（0 undefined cites）。待決/待重跑：(B/narrative) abstract/conclusion 是 3-market 但 body §6.6 是 13-market panel — scope 不一致待 narrative decision（建議 Option A 擴展納入 panel；待 boss confirm）；(C/compute) 主 Table 1（K1145/K1147/K1150）需 100-multistart 重估（§6.6.4 自承 single-init FRAGILE）；reproduce.py 需擴充覆蓋 §6.6 全 cells + 4 處 source-binding 改綁 results-JSON。findings：`review_history/audit_2026-06-10/{audit_findings.json, fix_log.md}`。｜前段歷史：scaffold v2（paper_decision 2026-04-17；kickoff 2026-05-17）。
 **Narrative state**: `decision_made_awaiting_body_rewrite` (per `research_program.md` K1146 DECISION_MADE)
 **Decision Record**:
 - K1146 (2026-05-17) — three-market regularity confirmed: TW (K1145) + US (K1147) + JP (K1150) all PASS pooled bootstrap + placebo

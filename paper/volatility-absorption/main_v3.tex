@@ -26,9 +26,9 @@
 \newtheorem{definition}{Definition}
 
 % ─── Title ───────────────────────────────────────────────────
-\title{Volatility Absorption: The Diminishing Marginal Impact of Market Fear\thanks{We thank seminar participants for helpful comments. Computational support was provided by the VolPred Research System. All errors remain our own. Data and replication code available upon request.}}
+\title{Volatility Absorption: The Diminishing Marginal Impact of Market Fear\thanks{We thank seminar participants for helpful comments. Computational support was provided by the VolPred Research System. All errors remain our own.}}
 
-\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw} \and VolPred Research System}
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
 
 \date{March 2026}
 
@@ -39,7 +39,7 @@
 % ─── Abstract ────────────────────────────────────────────────
 \begin{abstract}
 \noindent
-We document a novel empirical regularity: the marginal impact of fear shocks on realized asset returns diminishes as the ambient fear level rises---a phenomenon we term \textit{volatility absorption}. Using daily data on four assets (SPY, GLD, TLT, 0050.TW) and VIX from 2006 to 2026, we measure absorption primarily through the \textit{shock amplification ratio} (SAR)---the ratio of shock-day to normal-day absolute returns within each VIX regime---which avoids the mechanical denominator problem inherent in VIX-normalized measures. The SAR declines from 3.16$\times$ in calm markets (VIX $< 15$) to 2.32$\times$ in high-fear regimes (VIX 25--30), with a slight reversal to 2.43$\times$ in crisis regimes (VIX $\geq 30$). This absorption effect is confirmed across three of four assets, with the exception being the Taiwanese equity ETF, consistent with VIX being a US-specific fear gauge. We further decompose shocks by type and find that \textit{endogenous} risks---rate shocks and risk-off flights already reflected in VIX---are heavily absorbed (coefficient $+0.019$), whereas \textit{exogenous} risks such as geopolitical shocks are not ($-0.003$). Event-level evidence from nonfarm payroll releases is directionally consistent, though we note the limitation of using a binary NFP dummy rather than surprise-magnitude controls. These findings have direct implications for hedging, portfolio rebalancing, and volatility-targeting strategy design.
+We document a novel empirical regularity: the marginal impact of fear shocks on realized asset returns diminishes as the ambient fear level rises---a phenomenon we term \textit{volatility absorption}. Using daily data on four assets (SPY, GLD, TLT, 0050.TW) and VIX from 2006 to 2026, we measure absorption primarily through the \textit{shock amplification ratio} (SAR)---the ratio of shock-day to normal-day absolute returns within each VIX regime---which avoids the mechanical denominator problem inherent in VIX-normalized measures. The SAR declines from 3.16$\times$ in calm markets (VIX $< 15$) to 2.32$\times$ in high-fear regimes (VIX 25--30), with a slight reversal to 2.43$\times$ in crisis regimes (VIX $\geq 30$). A GARCH-based null simulation rejects the view that this pattern is merely volatility clustering: the empirical calm-to-high SAR decline of 0.816 lies well outside the simulated 95\% interval $[-0.281,\,0.558]$. Cross-asset regressions under the 2026-04-19 pinned snapshot show negative absorption coefficients for SPY, GLD, and TLT, with SPY only marginally significant and GLD/TLT significant at the 5\% level. Event-level evidence from nonfarm payroll releases is directionally consistent, though we note the limitation of using a binary NFP dummy rather than surprise-magnitude controls. The paper is strongest as a reduced-form characterization of absorption and its robustness to alternative normalizers, while richer shock-type and portfolio-design extensions remain deferred pending fully reproducible supporting experiments.
 
 \medskip
 \noindent
@@ -66,7 +66,7 @@ We formalize and quantify this observation under the label \textit{volatility ab
 
 As a supplementary continuous-variable summary, we also compute the \textit{normalized shock impact} (NSI $= |r_t|/V_t$) and regress it on VIX level. The slope is $-0.000267$ ($t = -1.77$, $p = 0.076$) under the 2026-04-19 pinned snapshot ($N = 768$), directionally consistent with the absorption hypothesis.\footnote{Under the paper's original data snapshot (2025 yfinance pull), the corresponding estimate was $-0.00028$ ($t = -3.42$). The sign is preserved but the $t$-statistic weakens substantially due to yfinance retroactive adjustment of VIX historical data, which changes the shock-day classification and regression N from 893 to 768. The RV-normalized alternative ($\hat{\beta}^{\text{RV}} = -0.01249$, $t = -8.2$) is unaffected by this revision and provides the stronger quantitative evidence. See Section~\ref{sec:robustness} for full snapshot-sensitivity disclosure.} We emphasize that this ``paralysis'' coefficient is consistent with---but does not substitute for---the SAR evidence, because the NSI construction introduces a mechanical negative correlation through the VIX denominator. The differential absorption across shock types (which share the same VIX denominator) and the SAR evidence (which does not divide by VIX) together provide identification beyond mechanical correlation.
 
-Our most important contribution is the decomposition of absorption by shock type. We classify shocks into three categories based on the joint behavior of SPY, TLT, and GLD on shock days: (i) \textit{rate shocks} (SPY$\downarrow$, TLT$\downarrow$), in which both equities and bonds fall, typically driven by monetary policy surprises; (ii) \textit{risk-off flights} (SPY$\downarrow$, TLT$\uparrow$), the classic flight-to-quality pattern; and (iii) \textit{geopolitical shocks} (SPY$\downarrow$, GLD$\uparrow$), in which gold rallies as a safe haven while equities decline \citep{baur2010}. The key finding is that endogenous risks---those already reflected in the VIX level, such as rate shocks and risk-off flights---are heavily absorbed (absorption coefficients of $+0.019$ and $+0.007$, respectively), whereas exogenous risks such as geopolitical shocks are \textit{not} absorbed (coefficient $-0.003$). This endogenous/exogenous distinction connects to \citet{danielsson2018}'s analysis of how financial crises generate endogenous risk dynamics and has, to our knowledge, not been documented in the context of contemporaneous shock absorption.
+An earlier draft emphasized a decomposition of absorption by shock type. That classification remains economically interesting, but the archived counts and bootstrap test statistics are not yet reproducible under the current pinned-snapshot workflow, so we no longer treat it as headline evidence in this version of the paper. The conceptual distinction between endogenous risks already reflected in VIX and exogenous risks that arrive outside the existing fear state remains a useful hypothesis for future work, especially given \citet{danielsson2018}'s emphasis on endogenous risk dynamics within financial crises.
 
 Event-level evidence provides directionally supportive evidence. We examine nonfarm payroll (NFP) release days---a scheduled macroeconomic event whose impact should, in theory, depend on the surprise component rather than the ambient fear level. Overall, NFP days produce absolute returns 1.17 times normal ($p = 0.061$ vs.\ Fridays; $p = 0.081$ vs.\ all non-NFP days; Welch's $t$-test, $N_{\text{NFP}} = 195$, sample 2010--2026).\footnote{The 1.17$\times$ overall NFP volatility ratio and all regime-specific ratios reported in this section are estimated from 195 NFP release dates over 4,081 SPY trading days (January 2010 to March 2026), using Bureau of Labor Statistics release calendar dates and daily SPY absolute returns. Data source: yfinance (SPY, \^{}VIX). Replication code available upon request.} In the medium-VIX regime (15--20), the ratio is 1.30$\times$ ($p = 0.009$), while in calm markets (VIX $< 15$), the ratio is 1.24$\times$ though only marginally significant ($p = 0.069$, $n = 62$). When VIX exceeds 25, the NFP effect vanishes: the ratio drops to 0.95$\times$ ($p = 0.777$). The general decline from low/medium VIX to high VIX is consistent with the absorption hypothesis, though small sample sizes in high-VIX regimes ($n = 28$) limit the statistical power of regime-specific tests.
 
@@ -74,7 +74,7 @@ We extend our analysis to multiple assets and find that the absorption effect is
 
 Our findings connect to several strands of the literature. First, the volatility clustering literature \citep{engle1982, bollerslev1986} documents that high-volatility periods persist, and the news impact curve framework of \citet{engle1993} parameterizes how shock magnitude varies with prior shocks, but neither addresses the diminishing \textit{marginal} impact within sustained high-volatility episodes. The threshold GARCH model of \citet{zakoian1994} allows for state-dependent shock responses, making it the closest parametric analogue to our nonparametric findings. Second, the variance risk premium (VRP) literature \citep{bollerslev2009, carr2009, todorov2010} shows that implied volatility systematically exceeds realized volatility. We find that the VRP narrows at high VIX ($+2.8\%$ annualized versus $+3.5\%$ at low VIX) but remains strictly positive---there is no VRP sign flip, contrary to concerns raised in short-sample analyses. Third, the literature on the leverage effect \citep{black1976, christie1982} documents asymmetric volatility responses to returns but does not examine how the magnitude of this response varies with the ambient fear level. Fourth, the investor attention literature---including work on the VIX as an ``investor fear gauge'' \citep{whaley2000}, the FEARS index \citep{da2015}, and attention-based models \citep{andrei2015}---suggests that investors' information-processing capacity becomes saturated during sustained crises, providing a behavioral foundation for our empirical findings.
 
-The economic implications of volatility absorption are substantial. Hedging cost-benefit ratios decline from 13.7$\times$ in calm markets to 3.6$\times$ in high-fear regimes, suggesting that the marginal value of incremental hedging is dramatically lower during crises. The marginal value of increased rebalancing frequency also appears limited once the base VT mechanism is in place. Crucially, the widely-used volatility targeting (VT) strategy with a $12/\text{VIX}$ equity weight naturally accounts for absorption: because exposure is inversely proportional to VIX, the strategy automatically reduces its sensitivity to incremental shocks as fear rises. Prior work in our research program suggests that adding overlays (momentum filters, regime switches) to VT strategies at high VIX levels tends to degrade rather than improve performance, consistent with the absorption framework.
+The economic implications of volatility absorption are substantial, but this draft now states them more cautiously. If shocks have diminishing marginal impact at high VIX, then the incremental value of adding protection or reacting mechanically to every additional fear spike should be lower in already-stressed regimes. This logic is consistent with volatility-targeting frameworks that scale exposure inversely with VIX, though the paper does not rely on unreproduced portfolio-backtest numbers to make that point.
 
 The remainder of the paper proceeds as follows. Section~\ref{sec:lit} reviews the related literature. Section~\ref{sec:method} describes our methodology. Section~\ref{sec:data} presents the data. Section~\ref{sec:results} reports the main results. Section~\ref{sec:implications} discusses economic implications. Section~\ref{sec:robustness} presents robustness checks. Section~\ref{sec:conclusion} concludes.
 
@@ -393,74 +393,15 @@ This pattern is directionally consistent with the absorption hypothesis, though 
 
 \paragraph{Limitation: absence of surprise control.} An important caveat is that our NFP analysis uses a binary dummy (NFP day vs.\ non-NFP day) rather than the surprise component---the difference between the actual NFP release and the consensus forecast---as the independent variable. The seminal macro-event-study methodology of \citet{andersen2003} and \citet{balduzzi2001} demonstrates that the market response to macroeconomic announcements depends primarily on the surprise magnitude, not on the announcement per se. This creates an alternative interpretation of our declining NFP effect: if NFP surprises tend to be smaller in absolute terms during high-VIX periods---for example, because markets are already in a heightened state of uncertainty and forecasters widen their ranges---then the declining volatility ratio could reflect smaller surprises rather than absorption of a same-sized surprise. Without controlling for surprise magnitude, we cannot cleanly distinguish between these two channels. We note, however, that the NFP evidence is supplementary to the SAR-based primary analysis; the absorption hypothesis does not depend on the NFP result alone. Future work obtaining NFP consensus forecasts from Bloomberg or the Federal Reserve Bank of Philadelphia's real-time dataset would enable the more rigorous specification: $|r_t^{\text{SPY}}| = \alpha + \beta_1 |\text{surprise}_t| + \beta_2 V_t + \beta_3 (|\text{surprise}_t| \times V_t) + \varepsilon_t$, where a negative $\hat{\beta}_3$ would provide cleaner evidence for the absorption hypothesis conditional on surprise magnitude.
 
-\subsection{Endogenous versus Exogenous Shocks}
+\subsection{Shock-Type Extension (Deferred)}
 \label{sec:endo_exo}
 
-Table~\ref{tab:shock_types} reports the absorption coefficient by shock type. This is the paper's most important result.
+An earlier version of the paper included a three-way decomposition of shock days into rate shocks, risk-off flights, and geopolitical shocks. The economic intuition remains appealing: endogenous risks that are already priced into the current fear regime may be more absorbable than genuinely exogenous shocks. However, the archived counts and bootstrap test statistics behind that table are not reproducible under the current pinned-snapshot workflow. In particular, the paper-time sample sizes and the reconstructed counts from the surviving experiment artifacts do not reconcile cleanly. We therefore remove the shock-type table from the active evidence set and treat the endogenous-versus-exogenous distinction as a forward-looking research hypothesis rather than a settled empirical finding in this draft.
 
-\begin{table}[H]
-\centering
-\caption{Absorption by Shock Type}
-\label{tab:shock_types}
-\begin{threeparttable}
-\begin{tabular}{llrrrl}
-\toprule
-Shock Type & Classification & $N$ & Absorption & $t$-stat & Interpretation \\
-\midrule
-Rate shocks       & Endogenous & 127 & $+0.019$ & 2.87 & \textbf{Most absorbed} \\
-(SPY$\downarrow$, TLT$\downarrow$) & & & & & \\
-\addlinespace
-Risk-off flights  & Endogenous & 203 & $+0.007$ & 1.94 & Absorbed \\
-(SPY$\downarrow$, TLT$\uparrow$)  & & & & & \\
-\addlinespace
-Geopolitical shocks & Exogenous & 89 & $-0.003$ & $-0.68$ & \textbf{Not absorbed} \\
-(SPY$\downarrow$, GLD$\uparrow$)  & & & & & \\
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\small
-\item \textit{Notes:} Absorption $= \overline{\text{NSI}}_{\text{calm}} - \overline{\text{NSI}}_{\text{high}}$ (Equation~\ref{eq:type_absorption}). Positive values indicate that the normalized shock impact declines from calm to high VIX (absorption). $N$ is the total number of shock days of each type aggregated across all five VIX bins (calm / normal / elevated / high / crisis) over the full 2006--2026 sample; the companion binary-split reconstruction in \texttt{experiments/k721/k721\_results\_reconstructed.json} reports $n_{\text{low}} + n_{\text{high}}$ for the VIX~$<$~15 and VIX~$\geq$~25 subsets (79, 182, and 146 for rate-shock / risk-off / geopolitical respectively), which differs from the full-sample $N$ by construction; the middle three bins account for the remainder. $t$-statistics are from bootstrap tests with 10,000 replications. Sample: 2006--2026 for SPY, restricted to days with $r_t^{\text{SPY}} < 0$ and $|\Delta V_t| > 2$.
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-The results are consistent with Hypothesis~\ref{hyp:endo_exo}. Rate shocks---the most ``expected'' type of risk in a high-fear environment---have the highest absorption coefficient ($+0.019$, $t = 2.87$). When VIX is already elevated due to recession fears or monetary policy uncertainty, the marginal impact of an additional rate shock appears to diminish. The market has already priced in the possibility of adverse rate movements, and the normalized shock impact declines from calm to high-VIX regimes.
-
-Risk-off flights also show evidence of absorption ($+0.007$, $t = 1.94$), though the effect is weaker and only marginally significant. The flight-to-quality pattern is partially expected in high-fear environments, but it retains some information content because the timing and magnitude of flight-to-quality episodes are not fully anticipated.
-
-Geopolitical shocks, in contrast, show no statistically significant absorption ($-0.003$, $t = -0.68$, $p > 0.10$), suggesting that these shocks may retain their impact regardless of the ambient fear level. This is economically intuitive: VIX---originally characterized as the ``investor fear gauge'' by \citet{whaley2000}---prices in financial and macroeconomic risks but does not price in exogenous geopolitical events. A geopolitical shock represents genuinely new information that is orthogonal to the risks already reflected in VIX, and therefore its impact does not diminish with the ambient fear level. This interpretation is consistent with \citet{danielsson2018}'s distinction between endogenous risk (generated within the financial system) and exogenous risk (originating outside it), and with the information demand framework of \citet{vlastakis2012}, which shows that the market's information-processing capacity has finite bandwidth. However, the small sample size ($N = 89$) limits the statistical power of this test, and we cannot definitively distinguish between ``no absorption'' and ``absorption too small to detect.''
-
-This endogenous/exogenous distinction has implications for risk management. Hedging against rate shocks becomes progressively less valuable as VIX rises (because the market has already ``absorbed'' much of the rate risk), while hedging against geopolitical risks retains its value across VIX regimes. The small sample ($N = 89$) warrants caution, but the direction of the evidence is clear.
-
-\subsection{Variance Risk Premium Dynamics}
+\subsection{Variance Risk Premium Dynamics (Deferred)}
 \label{sec:vrp}
 
-Table~\ref{tab:vrp} reports the variance risk premium across VIX regimes. The VRP narrows at high VIX ($+2.8\%$ annualized) compared to low VIX ($+3.5\%$), but it remains \textit{strictly positive} in all regimes.
-
-\begin{table}[H]
-\centering
-\caption{Variance Risk Premium by VIX Regime}
-\label{tab:vrp}
-\begin{threeparttable}
-\begin{tabular}{lrrr}
-\toprule
-VIX Regime & Mean VRP (\% ann.) & Std Dev & $t$-stat ($H_0$: VRP $= 0$) \\
-\midrule
-Calm ($V < 15$)         & 3.5 & 4.2 & 8.34 \\
-Elevated ($15 \leq V < 25$) & 3.1 & 7.8 & 4.69 \\
-High ($V \geq 25$)      & 2.8 & 14.3 & 2.01 \\
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\small
-\item \textit{Notes:} VRP is computed as $\text{VIX}_t^2 / 252 - RV_t^{(22)} / 22$, annualized. $t$-statistics test the null hypothesis that the mean VRP is zero. Sample: 2006--2026.
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-This finding is important because it clarifies a potential misconception. Some studies examining short crisis sub-samples have reported instances of negative VRP (realized volatility exceeding implied), but our full-sample analysis shows that the VRP remains strictly positive on average across all regimes. This is consistent with the theoretical frameworks of \citet{todorov2010} and \citet{drechsler2011}, which predict a positive VRP driven by jump risk and macroeconomic uncertainty premiums. Our evidence shows that while the VRP compresses (consistent with absorption: the ``insurance premium'' is smaller when fear is already priced in), it does not flip. Implied volatility continues to exceed realized volatility on average, even during the most extreme VIX regimes. The higher standard deviation of VRP at high VIX ($14.3\%$ versus $4.2\%$) indicates that the VRP becomes noisier during crises, which may have contributed to erroneous conclusions about sign flips based on short sub-samples \citep[see also][for discussion of time-varying risk appetite]{bekaert2022}.
-
-The VRP compression is itself a manifestation of absorption. When VIX is high, option writers are pricing in a large amount of expected volatility. Realized volatility is also high, but VIX ``over-predicts'' by a smaller margin, reflecting the fact that the market's fear has already absorbed much of the tail-risk premium. The insurance premium is lower not because risk has decreased, but because the price of insurance has already been marked up to incorporate the crisis-level risk environment.
+Earlier drafts also included a three-bin variance-risk-premium table and a companion hedging cost-benefit table. The surviving archived JSON files do not provide a clean, traceable reconstruction of those regime means and test statistics under the current pinned-snapshot workflow, and one of the legacy experiments points in the opposite direction of the narrative claim when taken literally. Rather than overstate certainty, we treat the VRP-compression story as a plausible extension motivated by the option-implied volatility literature \citep{bollerslev2009, carr2009, todorov2010, drechsler2011, bekaert2022}, but not as active numerical evidence in this revision.
 
 
 % ══════════════════════════════════════════════════════════════
@@ -471,38 +412,13 @@ The VRP compression is itself a manifestation of absorption. When VIX is high, o
 
 The volatility absorption effect has direct and economically significant implications for hedging, portfolio rebalancing, and volatility-targeting strategy design. In this section, we translate the statistical findings into actionable guidance for practitioners and discuss the theoretical implications for asset pricing models.
 
-\subsection{Hedging Cost-Benefit Analysis}
+\subsection{Hedging Cost-Benefit Analysis (Deferred)}
 
-The marginal value of hedging depends on the regime. We define the hedging cost-benefit ratio as the ratio of average loss avoidance (on shock days) to the cost of maintaining a hedge (proxied by the VRP). In calm markets, this ratio is 13.7$\times$: the expected loss on a shock day is nearly 14 times the daily cost of the hedge. In high-fear markets, the ratio drops to 3.6$\times$---still positive, but dramatically lower.
-
-\begin{table}[H]
-\centering
-\caption{Hedging Cost-Benefit Ratio by VIX Regime}
-\label{tab:hedge_cb}
-\begin{threeparttable}
-\begin{tabular}{lrrr}
-\toprule
-VIX Regime & Avg Shock Loss (\%) & Daily Hedge Cost (\%) & Cost-Benefit Ratio \\
-\midrule
-Calm ($V < 15$)         & 1.18 & 0.086 & 13.7 \\
-Elevated ($15 \leq V < 25$) & 1.56 & 0.196 &  8.0 \\
-High ($V \geq 25$)      & 2.61 & 0.725 &  3.6 \\
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-\small
-\item \textit{Notes:} Avg shock loss is the mean absolute return on shock days. Daily hedge cost is proxied by the daily VRP (VIX$^2$/252 $-$ RV/252). Cost-benefit ratio = shock loss / hedge cost. These are illustrative calculations; actual hedging costs depend on the specific instruments used.
-\end{tablenotes}
-\end{threeparttable}
-\end{table}
-
-The implication is clear: the marginal value of \textit{incremental} hedging declines sharply as VIX rises. A risk manager who is already hedged in a high-VIX environment gains relatively little from adding more protection. This does not mean that hedging is unnecessary during crises---the absolute shock magnitudes are larger---but rather that the return per dollar of hedging expenditure is lower. Rational hedging should front-load protection during calm markets, when it is cheap and effective, rather than panic-buying protection during crises, when it is expensive and offers diminishing marginal benefit.
+The same caution applies to the legacy hedging cost-benefit calculations. The qualitative idea is straightforward: if the marginal impact of additional fear shocks diminishes as VIX rises, then the incremental value of buying yet more protection in already-stressed regimes should also diminish. But the archived numerical ratios behind the earlier table are not currently reproducible from the surviving experiment package, so we keep only the qualitative implication and defer the numeric calibration.
 
 \subsection{Portfolio Rebalancing}
 
-We test whether the marginal value of daily portfolio rebalancing varies across VIX regimes. Using a simple volatility-targeting framework, prior work in our research program (available upon request) finds that the improvement from daily versus monthly rebalancing is primarily driven by the baseline VT mechanism: daily rebalancing achieves a net Sharpe of 1.42, compared to 0.82 for monthly rebalancing, but the tracking error between daily and monthly is only 1.68\% annualized with a return correlation of 0.976. The difference narrows substantially when transaction costs are accounted for, and high-VIX regimes do not disproportionately reward more frequent rebalancing.
-
-This is consistent with the absorption framework. If shocks have diminishing marginal impact at high VIX, then the information content of daily VIX updates---which could in principle justify daily rebalancing---also diminishes. The optimal rebalancing frequency is determined by transaction costs rather than by the value of intra-regime information.
+The absorption framework also suggests a qualitative lesson for portfolio rebalancing. If shocks have diminishing marginal impact at high VIX, then the information content of every additional day-to-day fear move should also diminish once the market is already stressed. That logic points toward a transaction-cost-sensitive rebalancing problem rather than one in which ultra-high-frequency reaction is obviously valuable. We leave the exact portfolio-design calibration to dedicated, fully reproducible strategy experiments rather than treating legacy backtest snippets as evidence here.
 
 \subsection{Volatility Targeting Strategy Design}
 
@@ -517,7 +433,7 @@ where $c$ is a target volatility parameter (e.g., $c = 12$ for a 12\% target) an
 \textit{VT as natural absorption handler.} A VT strategy with weight $w_t = c/V_{t-1}$ automatically accounts for volatility absorption. When VIX rises from $V_0$ to $V_1 > V_0$, the strategy reduces exposure by a factor of $V_0/V_1$, which is consistent with the factor by which the marginal impact of the next shock is reduced (as shown by the absorption regression). The VT weight and the absorption effect are both inversely proportional to VIX, making VT a reasonable heuristic under the absorption hypothesis.
 \end{proposition}
 
-This observation helps explain the success of simple VT rules documented in the literature \citep{moreira2017, harvey2018}. It also suggests why adding complexity to VT---such as momentum overlays, regime-switch indicators, or conditional leverage rules---may fail to improve performance at high VIX levels. Prior work in our research program (available upon request) finds that volatility-of-volatility overlays reduce returns relative to the standard $12/\text{VIX}$ rule (Sharpe 0.53 versus 0.68; DM test $t = -2.81$, $p = 0.005$), and that higher rebalancing frequency yields negligible net improvement once transaction costs are accounted for (daily net Sharpe 1.42 versus monthly 0.82, with the gap driven primarily by the baseline VT mechanism rather than by incremental high-frequency information). These findings are consistent with the absorption framework: overlays attempt to exploit information in a regime where the marginal information content of fear signals is precisely at its lowest.
+This observation helps explain the success of simple VT rules documented in the literature \citep{moreira2017, harvey2018}. It also suggests why adding complexity to VT---such as momentum overlays, regime-switch indicators, or conditional leverage rules---may fail to improve performance at high VIX levels. We treat that statement as a qualitative implication rather than as a proven backtest result in this paper, because the relevant overlay and rebalancing experiments are not part of the current replication package.
 
 \subsection{Crisis Response Timing}
 
@@ -604,7 +520,7 @@ VIX changes and SPY returns are contemporaneously correlated: large VIX increase
 \text{NSI}_t = \alpha + \beta \cdot V_t + \gamma \cdot |r_{t-1}| + \varepsilon_t
 \label{eq:absorption_controlled}
 \end{equation}
-Under the 2026-04-19 pinned snapshot, the absorption coefficient $\hat{\beta}$ remains negative ($-0.000216$, $t = -1.26$, $p = 0.21$, $N = 768$), indicating directional robustness to the inclusion of the autocorrelation control.\footnote{Under the paper's original data snapshot, the controlled regression yielded $\hat{\beta} = -0.00025$, $t = -3.14$, which passes the Harvey et al.\ (2018) multiple-testing threshold for time-series predictability regressions. Under the 2026-04-19 snapshot, the sign is preserved but the magnitude decreases by approximately 14\% and the $t$-statistic falls below conventional significance thresholds. We interpret this as snapshot-sensitivity of the VIX-denominator-based NSI measure rather than absence of the underlying absorption effect, given (i) the robust SAR evidence, (ii) the highly significant RV-normalized regression ($t = -8.2$), and (iii) preservation of the negative sign. Future work using a pinned data snapshot throughout the estimation period would avoid this sensitivity.}
+Under the 2026-04-19 pinned snapshot, the absorption coefficient $\hat{\beta}$ remains negative ($-0.000216$, $t = -1.26$, $p = 0.21$, $N = 768$), indicating directional robustness to the inclusion of the autocorrelation control.\footnote{Under the paper's original data snapshot, the controlled regression yielded $\hat{\beta} = -0.00025$ with $t = -3.14$. Under the 2026-04-19 snapshot, the sign is preserved but the magnitude decreases by approximately 14\% and the $t$-statistic falls below conventional significance thresholds. We interpret this as snapshot-sensitivity of the VIX-denominator-based NSI measure rather than absence of the underlying absorption effect, given (i) the robust SAR evidence, (ii) the highly significant RV-normalized regression ($t = -8.2$), and (iii) preservation of the negative sign. Future work using a pinned data snapshot throughout the estimation period would avoid this sensitivity.}
 
 
 % ══════════════════════════════════════════════════════════════
@@ -620,11 +536,7 @@ This paper documents and quantifies \textit{volatility absorption}---the diminis
 
     \item \textbf{Absorption is a cross-asset phenomenon.} Under the pinned snapshot, GLD and TLT exhibit negative absorption coefficients significant at the 5\% level, and SPY is marginally significant ($t = -1.85$, $p = 0.064$); the exception (0050.TW) is consistent with VIX being a US-specific fear gauge.
 
-    \item \textbf{The endogenous/exogenous distinction is the key mechanism.} Rate shocks and risk-off flights---risks already reflected in VIX---show evidence of absorption (coefficients $+0.019$ and $+0.007$). Geopolitical shocks---exogenous to the VIX information set---show no statistically significant absorption ($-0.003$, $p > 0.10$), suggesting these shocks may retain their impact. This distinction is the paper's central contribution, though the geopolitical shock sample ($N = 89$) limits statistical power.
-
-    \item \textbf{The VRP narrows but does not flip.} The variance risk premium compresses from $+3.5\%$ to $+2.8\%$ at high VIX but remains strictly positive. There is no evidence of a VRP sign flip during extreme market stress.
-
-    \item \textbf{VT strategies naturally handle absorption.} The standard $c/\text{VIX}$ weight rule is approximately optimal under the absorption hypothesis. Prior work in our research program (available upon request) suggests that adding overlays at high VIX tends to degrade performance, consistent with this framework.
+    \item \textbf{Shock-type, VRP, and hedging extensions remain open rather than settled.} Earlier drafts pushed further into endogenous-versus-exogenous shock classification, variance-risk-premium compression, and hedging calibration. Those topics remain economically interesting, but the surviving archived package does not yet support them at the same reproducibility standard as the core SAR, cross-asset, NFP, and K903/K897 robustness results. We therefore treat them as deferred extensions rather than as headline findings.
 \end{enumerate}
 
 \subsection{Limitations}
