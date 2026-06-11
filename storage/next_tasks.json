@@ -27882,8 +27882,10 @@
     "source": "boss_request_2026-06-11",
     "title": "Indicator Arena Phase 1a：設計文件 + 從 knowledge 挖首發指標候選（boss 直接需求）",
     "description": "Boss 2026-06-11 需求：首頁預警/預測指標測試專區（每日指標值/預測內容/時效/結果回顧評價；績效排名揭露；差→觀察區→下架）。Phase 1a：(1) 寫 docs/indicator_arena_design.md — 資料模型（indicator registry + daily_signals + outcome_reviews 三表）、生命週期狀態機（active/observation/delisted + 閾值規則）、ex-ante timestamp 不可改寫紀律（同 paper_trading forward-tracking）、評價指標（方向命中率/分位數校準/經濟價值）；(2) 從 storage/memory/knowledge.json 挖 5-8 個首發候選 — 條件：PASS/CONDITIONAL_PASS + OOS 預測力證據 + 明確 lag + 免費資料可日更（候選方向：HYG-LQD 信用利差、VIX term structure、當沖比率、MOVE、GPR、K461 SPY→0050 等 — 用 jq 掃 verdict+predictive 關鍵詞，逐一驗證 K 的 OOS 數字）；(3) 每候選寫：訊號規則（可程式化）、預測目標+horizon、K 來源+OOS 證據、日更資料源。產出進設計文件。",
-    "status": "pending",
-    "created_at": "2026-06-11T07:54:23.183014+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-11T07:54:23.183014+00:00",
+    "completed_at": "2026-06-11T08:09:21.121109+00:00",
+    "result": "Phase 1a design doc complete (commit 1035cb2f, docs/indicator_arena_design.md 214 lines + 6 OOS-verified 首發候選)"
   },
   {
     "id": "indicator_arena_phase1_backend_2026_06_11",
@@ -27892,11 +27894,15 @@
     "source": "boss_request_2026-06-11",
     "title": "Indicator Arena Phase 1b：後端 pipeline（依賴 1a 設計）",
     "description": "依 docs/indicator_arena_design.md：(1) src/volpred/indicators/ 模組 — registry 載入、每日計算、ex-ante 寫入 storage/indicators/（timestamp 鎖定）、到期回顧與績效更新；(2) Supabase 表 + sync；(3) cron job（每日收盤後）入 config/runtime_schedules.json + wrapper；(4) 回顧不可改寫：daily_signals append-only + hash chain 或同等防竄改；(5) 測試。",
-    "status": "pending",
+    "status": "in_progress",
     "depends_on": [
       "indicator_arena_phase1_design_candidates_2026_06_11"
     ],
-    "created_at": "2026-06-11T07:54:23.183014+00:00"
+    "created_at": "2026-06-11T07:54:23.183014+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-11T08:09:21.640307+00:00",
+    "claim_session_id": "7d9bce5c797a",
+    "started_at": "2026-06-11T08:09:34.003512+00:00"
   },
   {
     "id": "indicator_arena_phase1_frontend_2026_06_11",
@@ -27910,5 +27916,25 @@
       "indicator_arena_phase1_backend_2026_06_11"
     ],
     "created_at": "2026-06-11T07:54:23.183014+00:00"
+  },
+  {
+    "id": "indicator_arena_phase1c_supabase_sync_2026_06_11",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "title": "Indicator Arena Phase 1c: Supabase tables + sync",
+    "description": "建 Supabase 3 表 (indicator_registry / daily_signals / outcome_reviews) + Edge Function sync from storage/indicator_arena/* jsonl。append-only enforce via RLS。",
+    "source": "phase1b_followup",
+    "created_at": "2026-06-11T08:17:38Z"
+  },
+  {
+    "id": "indicator_arena_phase1d_cron_job_2026_06_11",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "title": "Indicator Arena Phase 1d: cron job",
+    "description": "config/runtime_schedules.json 加入 indicator_arena_daily_emit (每日台股收盤後 14:00 台灣時間 = 06:00 UTC)；scripts/cron_indicator_arena_emit.sh wrapper；piggy-back scheduler 自動 fire。觸發 src/volpred/indicators/cli.py emit-all + review-due。",
+    "source": "phase1b_followup",
+    "created_at": "2026-06-11T08:17:38Z"
   }
 ]
