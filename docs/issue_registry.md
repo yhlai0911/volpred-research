@@ -24,3 +24,9 @@
 | ISS-006 | 2026-06-10 | open | release_pool lost-update race + unpublish 無 lock（process audit 3-3/3-4） | 待設計（critical section 重構） |
 | ISS-007 | 2026-06-10 | open | 兩個紙上 gate：provenance CI 未接線（audit 2-1）+ paper reproduce gate 無實作（audit 7-1） | 待接線 cron_memory_health + update_paper_full 最小 gate |
 | ISS-008 | 2026-06-10 | open | task status vocabulary 失控（24 種 free-form；audit 1-1/1-2） | 待設計（canonical status 集 + migration） |
+
+## ISS-009: mirror feed.json 整檔 PUT 21MB 超時（2026-06-11）
+- 症狀：`PUT /api/sync/feed.json` 21MB body，server >180s 無回應（auth 已通，小檔 200）
+- 影響：mirror replica 的 feed 整檔同步不可用；canonical Supabase 單篇 sync 正常，無讀者面影響
+- 方向：incremental sync（只推 delta）或 gzip + server 端 streaming parse；或廢止整檔 mirror path（評估 mirror feed 是否仍有讀者）
+- Priority: P3

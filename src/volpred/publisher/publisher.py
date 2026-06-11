@@ -1282,16 +1282,23 @@ class Publisher:
             return
         try:
             import urllib.request
+
+            from volpred.mirror_auth import ops_admin_headers
+
             data = self._feed_file.read_bytes()
             req = urllib.request.Request(
                 f"{self.REMOTE_URL}/api/sync/feed.json",
                 data=data,
-                headers={"Content-Type": "application/json"},
+                headers={"Content-Type": "application/json", **ops_admin_headers()},
                 method="PUT",
             )
             urllib.request.urlopen(req, timeout=10)
-        except Exception:
-            pass
+        except Exception as exc:
+            # 2026-06-11: was a bare ``except: pass`` that swallowed a month of
+            # 401s after the remote gated /api/sync (C1 fix). Mirror is a
+            # replica path (Supabase is canonical) so we don't raise, but we
+            # must be loud so silent failures surface in logs/dashboards.
+            print(f"[mirror-sync] feed.json remote sync FAILED: {exc}")
 
     def _load_feed(self) -> list[dict]:
         if self._feed_file.exists():

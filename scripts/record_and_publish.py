@@ -123,11 +123,15 @@ def record_and_publish(
     zeabur_url = os.environ.get("VOLPRED_REMOTE_URL", get_default_remote_url())
     try:
         import urllib.request
+
+        from volpred.mirror_auth import ops_admin_headers
+
+        _sync_headers = {"Content-Type": "application/json", **ops_admin_headers()}
         feed_data = json_mod.loads(feed_path.read_text())
         req = urllib.request.Request(
             f"{zeabur_url}/api/sync/feed.json",
             data=json_mod.dumps(feed_data).encode(),
-            headers={"Content-Type": "application/json"},
+            headers=_sync_headers,
             method="POST",
         )
         resp = urllib.request.urlopen(req, timeout=10)
@@ -138,13 +142,15 @@ def record_and_publish(
             req2 = urllib.request.Request(
                 f"{zeabur_url}/api/sync/reports/{report_id}.json",
                 data=json_mod.dumps(report_data).encode(),
-                headers={"Content-Type": "application/json"},
+                headers=_sync_headers,
                 method="POST",
             )
             resp2 = urllib.request.urlopen(req2, timeout=10)
             print(f"✓ Zeabur synced (report: {resp2.status})")
     except Exception as e:
-        print(f"  Zeabur sync skipped: {e}")
+        # 2026-06-11: remote gated /api/sync (C1) — surface auth failures
+        # loudly instead of a quiet "skipped" so 401s can't hide for weeks.
+        print(f"  ⚠ Zeabur mirror sync FAILED (replica path, Supabase unaffected): {e}")
 
     # 6. Sync to Supabase (v2 website)
     try:

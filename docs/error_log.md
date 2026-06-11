@@ -1627,3 +1627,15 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 1. 任何新的產圖腳本（experiments/、scripts/、agent brief 模板）一律 `from plot_style import apply_cjk_style; apply_cjk_style()` 開頭 — 不依賴環境 matplotlibrc。
 2. 含中文圖的文章 publish 前看一眼圖（feed-publisher 已有 image gate；中文渲染屬 content-vs-source 檢查範圍）。
 3. 不可再手 patch venv matplotlibrc 當正式修法（環境態 patch = 修資料不修流程）。
+
+## 2026-06-11 — Mirror sync 靜默 401 近一個月（C1 auth gate 上線但 caller 未帶 token + bare except 吞錯）
+
+**症狀**：`/api/sync/*` 與 `/api/publications/publish` 自 ~2026-05-16 起被 OPS_ADMIN_TOKEN gate 保護（C1/C2 安全修正、隨部署上線但**未 commit**），但三處 caller（`publisher._sync_feed_to_remote`、`record_and_publish.py` feed/report POST）都不帶 token → 每次 mirror sync 都 401。`publisher.py` 的 `except Exception: pass` 把錯誤完全吞掉，`record_and_publish.py` 只印「skipped」— 近一個月無人察覺。網站沒壞純屬僥倖：前端 canonical 讀 Supabase（service key 直連），mirror API 只是 replica。
+
+**根因三層**：(1) 安全修正只改 server 端、沒同步改 caller（變更不完整就上線）；(2) 改動留 working tree 未 commit，主 repo 無人知道 gate 存在；(3) bare `except: pass` 讓 replica path 失敗永遠不可見 — audit terminal set 規則（2026-06-03）同款 silent failure。
+
+**修法**：(a) gate 入庫（fe 3f780e9）；(b) 生 OPS_ADMIN_TOKEN → Zeabur env（volpred-v3）+ `.env.local`；(c) 新 `src/volpred/mirror_auth.py::ops_admin_headers()` 共用 helper，三處 caller 全帶 `x-ops-key`；(d) bare except 改 loud print（`[mirror-sync] ... FAILED`）。端到端驗證：帶 token 200 synced、無 token 401。
+
+**遺留（ISS-009）**：feed.json 整檔 PUT 21MB server 處理 >180s 超時 — 此 path 在 timeout=10 下從來沒成功過。canonical 是 Supabase 單篇 sync（正常），mirror feed 整檔 replica 需改 incremental 或壓縮，列 issue registry。
+
+**防再發**：(1) server 端加 auth 的 PR 必含 caller 同步修改與端到端測試；(2) 部署來源（working dir）與 git 不同步超過 1 檔即為 red flag — 巡檢加 `git -C frontend-v2-fix status` 檢查；(3) 禁 bare `except: pass` 於任何 sync/publish path（loud log 最低要求）。
