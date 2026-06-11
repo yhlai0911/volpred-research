@@ -27843,7 +27843,7 @@
     "title": "研究 backlog fallback: 免 tick 的「realized illiquidity」作 vol 預測增量因子",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 免 tick 的「realized illiquidity」作 vol 預測增量因子 — 日 OHLCV 算 Amihud/Corwin-Schultz/range-volume 比，加入 HAR-RV 檢定美股/台股 OOS 增量 QLIKE+DM（來源：JEF 2024-25 低頻流動性測度賽馬） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "claimed",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "tick_realized_illiquidity_vol",
@@ -27851,7 +27851,10 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-11T06:46:35+00:00"
+    "created_at": "2026-06-11T06:46:35+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T07:52:28.821129+00:00",
+    "claim_session_id": "ed525ac581e7"
   },
   {
     "id": "paper_body_vt_crowding_phase2_2026_06_11",
@@ -27860,7 +27863,49 @@
     "source": "split_of_paper_body_vt_crowding_full_alignment_2026_06_11",
     "title": "vt-crowding Phase 2: Discussion/Conclusion/abstract 補述 + source binding + paper-update + README",
     "description": "前序 task (paper_body_vt_crowding_full_alignment_2026_06_11) 完成 Model §2 引入 RR_VT/RR_TF/RR_MR matched-control + matched-input gate；Results §3.1 重寫 monotone erosion + table direction 欄 + 加 §3.4 Matched-Control Identification subsection。本 task 處理剩餘：(c) Discussion §4 改 family-level framing + 撤回 tipping policy implication，改 monotone erosion 漸進 erosion policy（adopters mass + 邊際惡化）；(d) Conclusion §5 重寫對齊 monotone-not-tipping；(e) abstract sim count 94,500 對應 Methodology 補述（K1471 layer 揭露）；(f) source binding 全文掃描指向 experiments/k1471_vt_crowding_redesign/k1471_full_results.json；(g) xelatex 雙跑 exit 0；(h) uv run volpred ops paper-update --paper-id vt-crowding-abm；(i) README status 改 narrative_rewrite_complete_pending_review。主線程作業。Codex 24h review 由 paper-review-cycle 接手。",
+    "status": "succeeded",
+    "created_at": "2026-06-11T07:15:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T07:47:52.602784+00:00",
+    "claim_session_id": "5b5f2df823ff",
+    "started_at": "2026-06-11T07:51:34.755193+00:00",
+    "completed_at": "2026-06-11T07:51:43.353244+00:00",
+    "result": "Rewrote vt-crowding Discussion/Conclusion/abstract to monotone-erosion framing, updated README status, reran xelatex twice, and completed volpred ops paper-update against K1471 full_results source binding."
+  },
+  {
+    "id": "indicator_arena_phase1_design_candidates_2026_06_11",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "boss_request_2026-06-11",
+    "title": "Indicator Arena Phase 1a：設計文件 + 從 knowledge 挖首發指標候選（boss 直接需求）",
+    "description": "Boss 2026-06-11 需求：首頁預警/預測指標測試專區（每日指標值/預測內容/時效/結果回顧評價；績效排名揭露；差→觀察區→下架）。Phase 1a：(1) 寫 docs/indicator_arena_design.md — 資料模型（indicator registry + daily_signals + outcome_reviews 三表）、生命週期狀態機（active/observation/delisted + 閾值規則）、ex-ante timestamp 不可改寫紀律（同 paper_trading forward-tracking）、評價指標（方向命中率/分位數校準/經濟價值）；(2) 從 storage/memory/knowledge.json 挖 5-8 個首發候選 — 條件：PASS/CONDITIONAL_PASS + OOS 預測力證據 + 明確 lag + 免費資料可日更（候選方向：HYG-LQD 信用利差、VIX term structure、當沖比率、MOVE、GPR、K461 SPY→0050 等 — 用 jq 掃 verdict+predictive 關鍵詞，逐一驗證 K 的 OOS 數字）；(3) 每候選寫：訊號規則（可程式化）、預測目標+horizon、K 來源+OOS 證據、日更資料源。產出進設計文件。",
     "status": "pending",
-    "created_at": "2026-06-11T07:15:00+00:00"
+    "created_at": "2026-06-11T07:54:23.183014+00:00"
+  },
+  {
+    "id": "indicator_arena_phase1_backend_2026_06_11",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "source": "boss_request_2026-06-11",
+    "title": "Indicator Arena Phase 1b：後端 pipeline（依賴 1a 設計）",
+    "description": "依 docs/indicator_arena_design.md：(1) src/volpred/indicators/ 模組 — registry 載入、每日計算、ex-ante 寫入 storage/indicators/（timestamp 鎖定）、到期回顧與績效更新；(2) Supabase 表 + sync；(3) cron job（每日收盤後）入 config/runtime_schedules.json + wrapper；(4) 回顧不可改寫：daily_signals append-only + hash chain 或同等防竄改；(5) 測試。",
+    "status": "pending",
+    "depends_on": [
+      "indicator_arena_phase1_design_candidates_2026_06_11"
+    ],
+    "created_at": "2026-06-11T07:54:23.183014+00:00"
+  },
+  {
+    "id": "indicator_arena_phase1_frontend_2026_06_11",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "boss_request_2026-06-11",
+    "title": "Indicator Arena Phase 1c：前端首頁專區（依賴 1b）",
+    "description": "frontend-v2-fix（獨立巢狀 git repo — cd 進去 commit）：首頁指標競技場專區 — 指標卡（今日值/預測/時效/近期命中率/狀態 badge）按績效排序、詳情頁完整回顧時間軸、observation/delisted 誠實標示。讀 Supabase indicators 表。延續既有視覺。npm run build + 測 tab + deploy-zeabur-safe.sh。",
+    "status": "pending",
+    "depends_on": [
+      "indicator_arena_phase1_backend_2026_06_11"
+    ],
+    "created_at": "2026-06-11T07:54:23.183014+00:00"
   }
 ]
