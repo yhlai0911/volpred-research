@@ -474,6 +474,23 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 銅作為景氣領先的 vol 訊號：CPER/銅期貨代理 vol 與股市 vol 的 lead-lag，「銅博士」在 vol 維度成立嗎（yfinance，明確 lag）
 - [ ] REIT 波動率與利率敏感度：VNQ realized vol 在升息/降息 regime 下的差異，REIT 是股是債（yfinance）
 
+### 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/ETF flow/GPR/氣候/retail，全免費資料 yfinance/FRED/TAIFEX tick/TWSE/FINRA/NOAA/CWB/GPR 官網）
+> 來源：journal-topic-discovery agent batch 2（JFM/JBF/JFE/JEF/RoF/JFQA + Cboe/IMF GFSR/OFR/arXiv 趨勢層級，非捏造論文）。已對 06-10 batch 與既有 arcs 去重。台灣在地優勢題 ×3（台海 GPR、颱風假停市、當沖比率）。
+- [ ] Order-flow imbalance 的 regime 依賴預測力：台指期 tick OFI → 短期 RV — TAIFEX tick 建 5-min OFI，檢定對 5min/30min/日 RV 增量預測力是否隨 vol regime 與 horizon 變化，明確 lag（來源：JFM/Quantitative Finance 2025-26 OFI-vol 統一框架）
+- [ ] 免 tick 的「realized illiquidity」作 vol 預測增量因子 — 日 OHLCV 算 Amihud/Corwin-Schultz/range-volume 比，加入 HAR-RV 檢定美股/台股 OOS 增量 QLIKE+DM（來源：JEF 2024-25 低頻流動性測度賽馬）
+- [ ] 0DTE 時代的日內 vs 隔夜波動結構轉變 — SPY 日 OHLC 拆 intraday range vol vs c2c vol，斷點檢定 2022-Q2 前後 + expiration-day 效應（來源：Cboe research + SSRN/J.Derivatives 2025；0DTE 佔 SPX 量 59%）
+- [ ] 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arXiv/JPM 2025 beyond volatility drag）
+- [ ] 被動化與個股 fragility：0050 成分調整 vol event study — TWSE 公告，納入/剔除前後個股 RV 與 idio vol DiD（來源：JFM 2024-25 ETF fragility measure）
+- [ ] 單股槓桿 ETF 上市對標的尾盤 vol 的因果效應 — TSLL/NVDL/CONL 上市日 DiD（控制組同業），2025 AUM $36B+ under-explored（來源：J.Derivatives/監管關注線）
+- [ ] GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（來源：AER 2022 + IMF GFSR 2025-04 Ch.2）
+- [ ] 台灣 country-GPR 與台股波動：台海風險的可測價 — GPR(Taiwan) 月頻 + TAIEX/0050 RV + TWD vol，事件窗（2022-08、2024 選舉）領先性與外資通道；台灣版幾乎無人做（來源：IMF GFSR 2025 + DPE 2025 同型設計）
+- [ ] 極端高溫/颶風對保險與公用 ETF 的 vol event study — NOAA 事件日期 + KIE/KBWP/XLU RV，dose-response（來源：PLOS One 2025 + JIFM 2025 climate-vol；physical>transition 是 2025 共識）
+- [ ] Green-minus-brown 波動價差作 transition-risk 情緒指標 — ICLN/TAN vs XLE/XOP RV spread，氣候政策事件跳變與訊號力（來源：climate finance 2025 回顧；vol-spread 角度 under-explored）
+- [ ] 颱風登陸與台股波動：颱風假的 vol 機制 — CWB 警報/登陸資料 + TAIEX/台指期，停市後復市日 gap vol 系統性檢定、與一般連假區分；台灣特有制度國際空白（來源：physical-risk event-study 2025 方法移植）
+- [ ] FINRA off-exchange short volume ratio → 次日 vol — 免費日頻檔，off-exchange short ratio 對次日 RV/極端報酬預測，明確 lag（來源：OFR 2025 WP；off-exchange ~46% 政策熱點）
+- [ ] 台股當沖佔比與波動：散戶 herding 在地量化 — TWSE 免費日頻當沖比率，對次日 RV 預測力 + 雙向 Granger（vol 吸引當沖 vs 當沖放大 vol）；台灣數據完整國際罕見（來源：JFQA/JEF 2024-25 retail order-imbalance 辯論）
+- [ ] 現貨 BTC ETF 上市對加密 vol「時段結構」的改變 — BTC-USD 小時資料拆美股時段/非時段/週末 RV，斷點檢定 2024-01 IBIT 前後（ETF-ization 拉向傳統市場時鐘；與既有 vol-of-vol spillover 不同 — 時間分配結構非外溢）（來源：J.Futures Markets 2025）
+
 ### 期刊主題挖掘 batch（2026-06-10；掃 JBF/JFE/JoE/JFQA + JPM/FAJ/J.Fixed Income/J.Futures Markets 2025-26 熱門趨勢，全 yfinance/FRED/TAIFEX 可跑，contrarian/under-explored）
 > 來源：journal-topic-discovery agent（WebSearch 趨勢層級，非捏造論文）。刻意避開純 GARCH/HAR-vol-forecast、VIX 水平、台股 VT 三大既有主軸。
 - [ ] 隔夜 vs 日內 variance risk premium 反號之謎 — yfinance SPY 開/收盤切隔夜段與日內段 RV，FRED+^VIX 算 implied，檢定 VRP 在兩段是否反號（隔夜負/日內正）+ 1-3M vs 6-12M 預測力差異（來源：JFE/J.Futures Markets 2025 VRP intraday-overnight decomposition）

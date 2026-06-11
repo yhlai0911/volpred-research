@@ -27568,7 +27568,7 @@
     "title": "Paper review (Codex 24h-rule): 市場跌過之後通常更容易亂，但把波動拆更細，真的比較有用嗎？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_9a5c1ea4 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_9a5c1ea4",
@@ -27577,7 +27577,11 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-11T00:08:00+00:00"
+    "created_at": "2026-06-11T00:08:00+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T06:45:09.489447+00:00",
+    "claim_session_id": "1c26b640278d",
+    "started_at": "2026-06-11T06:45:09.609807+00:00"
   },
   {
     "id": "event_article_cpi_us_2026-06-13_tminus2",
@@ -27812,5 +27816,35 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-11T06:39:37+00:00"
+  },
+  {
+    "id": "research_order_flow_imbalance_regime_tick_ofi_rv",
+    "title": "研究 backlog fallback: Order-flow imbalance 的 regime 依賴預測力：台指期 tick OFI → 短期 RV",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Order-flow imbalance 的 regime 依賴預測力：台指期 tick OFI → 短期 RV — TAIFEX tick 建 5-min OFI，檢定對 5min/30min/日 RV 增量預測力是否隨 vol regime 與 horizon 變化，明確 lag（來源：JFM/Quantitative Finance 2025-26 OFI-vol 統一框架） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "order_flow_imbalance_regime_tick_ofi_rv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-11T06:46:32+00:00"
+  },
+  {
+    "id": "research_tick_realized_illiquidity_vol",
+    "title": "研究 backlog fallback: 免 tick 的「realized illiquidity」作 vol 預測增量因子",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 免 tick 的「realized illiquidity」作 vol 預測增量因子 — 日 OHLCV 算 Amihud/Corwin-Schultz/range-volume 比，加入 HAR-RV 檢定美股/台股 OOS 增量 QLIKE+DM（來源：JEF 2024-25 低頻流動性測度賽馬） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "tick_realized_illiquidity_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-11T06:46:35+00:00"
   }
 ]
