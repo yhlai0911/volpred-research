@@ -16,3 +16,11 @@
 2. Gray (1996) bibitem + 其他 R0 cleanup（Newbould typo、缺 bib 等 — 見 audit_findings MEDIUM/LOW）
 3. data snapshot CSV 落地 + reproduce.py（§3.1 宣稱的 data/ 目錄不存在）
 4. MEDIUM 7 項（HLZ threshold 統一、70/30→76/24、state duration 矛盾、kurtosis 來源、MCS、Period 2 描述等）
+
+## 2026-06-11 Codex 收尾
+
+- active paper surface 已同步到 parity 口徑：README、experiments、data_sources、drafts 全部改成「MS-GAS-t rescues to parity, not superiority」。
+- K1129 / K1133 歸因已拆清：`-4.67` 改回 K1133 / K1133b 的 2017--2020 OOS 結果；K1129 只保留作 2021+ anomaly 動機，不再錯掛為該統計量來源。
+- Period 3 日期與敘事已改成 `2026-01-05 -> 2026-04-14` 的 2026Q1 post-warm-up window；舊的 2024 日期已從 active draft 移除。
+- 未落地的 robustness 一律降級為 planned work，不再在正文或 appendix 口徑中假裝已完成；ETH / BNB replication、leave-one-year-out、alternative loss/cutoff 均如此。
+- 仍然存在的真正 blocker 也明寫保留：paper-local snapshot CSV 尚未落地，`reproduce.py` 尚未建立，所以這篇仍不應宣稱 submission-ready 或 reproducible end-to-end。

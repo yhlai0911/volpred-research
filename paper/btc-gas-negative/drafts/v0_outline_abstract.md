@@ -10,7 +10,7 @@
 
 ## Working Title
 
-**Why GAS-t Fails on Pre-Institutional Bitcoin: Student-t Innovation, Not Score-Driven Dynamics, Is the Culprit (and Regime-Switching Cannot Fully Rescue It)**
+**Why GAS-t Fails on Pre-Institutional Bitcoin: Student-t Innovation, Not Score-Driven Dynamics, Is the Culprit (and Regime-Switching Rescues to Parity, Not Superiority)**
 
 Alt short title: *Decomposing the BTC GAS-t Reversal: A Factorial 5-Model Diagnosis*
 
@@ -18,7 +18,7 @@ Alt short title: *Decomposing the BTC GAS-t Reversal: A Factorial 5-Model Diagno
 
 ## Abstract (draft, ≈210 words)
 
-We document a previously unreported reversal in Generalized Autoregressive Score (GAS) volatility models with Student-t innovations applied to Bitcoin: over the pre-institutional period (Jan 2017 – Dec 2020, n=1,441 OOS days), GAS-t produces 9.92% worse QLIKE than the GJR-Normal benchmark (Diebold-Mariano-HLN t = -4.67, p < 10⁻⁵). Two natural hypotheses — that score-driven GAS dynamics fail, or that Student-t innovations fail — are typically conflated in the GAS literature. We resolve this via a factorial 5-model decomposition (GJR-N, GJR-t, GAS-N, GAS-t, GJR-N-standardized) which shows that GAS-Normal *recovers* to statistical parity with GJR-Normal (DM-HLN = -1.90, p = 0.058) while GAS-t and GJR-t both reverse, isolating Student-t innovation — not GAS dynamics — as the proximate cause. A Markov-Switching GAS-t extension following Klaassen (2002) state-probability recursion partially rescues GAS dynamics (DM-HLN = +5.97 vs single-state GAS-t) but still underperforms GJR-Normal, indicating a deeper structural mismatch. The reversal disappears in the FTX-Luna (2021-2023) and spot-ETF (2024+) eras, suggesting institutional flows fundamentally altered Bitcoin's return distribution. We provide practitioner guidance on when GAS-t is and is not appropriate for crypto volatility forecasting.
+We document a previously unreported reversal in Generalized Autoregressive Score (GAS) volatility models with Student-t innovations applied to Bitcoin: over the pre-institutional period (Jan 2017 – Dec 2020, n=1,441 OOS days), GAS-t produces 9.92% worse QLIKE than the GJR-Normal benchmark (Diebold-Mariano-HLN t = -4.67, p < 10⁻⁵). Two natural hypotheses — that score-driven GAS dynamics fail, or that Student-t innovations fail — are typically conflated in the GAS literature. We resolve this via a factorial 5-model decomposition (GJR-N, GJR-t, GAS-N, GAS-t, GJR-N-standardized) which shows that GAS-Normal *recovers* to statistical parity with GJR-Normal (DM-HLN = -1.90, p = 0.058) while GAS-t and GJR-t both reverse, isolating Student-t innovation — not GAS dynamics — as the proximate cause. A Markov-Switching GAS-t extension rescues GAS-t to statistical parity with GJR-Normal (DM-HLN = +5.97 vs single-state GAS-t; vs GJR-Normal the point estimate is marginally favourable but indistinguishable, DM-HLN = +0.28), at a substantial parameter cost — parity, not superiority. The reversal disappears in the post-FTX recovery (OOS 2023) and spot-ETF regime-maturity (OOS 2026Q1) eras, suggesting institutional flows fundamentally altered Bitcoin's return distribution. We provide practitioner guidance on when GAS-t is and is not appropriate for crypto volatility forecasting.
 
 **JEL**: C22, C53, C58, G17
 **Keywords**: Bitcoin, GAS models, Student-t innovation, volatility forecasting, negative result, Markov-switching, regime change
@@ -31,7 +31,7 @@ We document a previously unreported reversal in Generalized Autoregressive Score
 
 2. **Proximate cause isolated via factorial decomposition.** A five-model factorial design (orthogonalizing innovation distribution × score-driven dynamics) shows that the GAS-Normal specification recovers to statistical parity with GJR-Normal, while *both* GAS-t and GJR-t reverse, identifying Student-t innovation — not GAS score-driven dynamics — as the root cause. This is a methodologically sharper diagnosis than the typical "GAS-t loses on BTC" stylized fact.
 
-3. **Regime-switching rescue is partial and informative.** A Markov-Switching GAS-t extension following Klaassen (2002) provides a +5.97 DM-HLN improvement over single-state GAS-t but still underperforms GJR-Normal. The partial rescue rules out simple regime-confounding and indicates that the t-innovation mismatch is structural to pre-institutional BTC return distributions, not an artifact of unmodeled volatility regimes.
+3. **Regime-switching rescue is partial and informative.** A Markov-Switching GAS-t extension provides a +5.97 DM-HLN improvement over single-state GAS-t and rescues to statistical parity with GJR-Normal, but not to clear superiority. The partial rescue rules out simple regime-confounding and indicates that the t-innovation mismatch is structural to pre-institutional BTC return distributions, not an artifact of unmodeled volatility regimes.
 
 ---
 
@@ -58,7 +58,7 @@ We document a previously unreported reversal in Generalized Autoregressive Score
 - **Three-period split** (institutional structure-based, pre-registered):
   - **Period 1 (pre-institutional)**: 2017-01-21 → 2020-12-31 (n_OOS = 1,441). No spot ETF, no major institutional custody, dominated by retail flow.
   - **Period 2 (FTX-Luna era)**: 2023-01-21 → 2023-12-31 (n_OOS = 345). Post-crash recovery, institutional rebuild.
-  - **Period 3 (spot-ETF era)**: 2024-01-21 → 2024-04-30 (n_OOS = 100, preliminary). BlackRock/Fidelity spot ETF approvals 2024-01-10.
+  - **Period 3 (spot-ETF regime maturity window)**: 2026-01-05 → 2026-04-14 (n_OOS = 100, preliminary). BlackRock/Fidelity spot ETF approvals 2024-01-10, with the OOS window arriving only after the rolling warm-up.
 - **Five competing models** (orthogonal factorial: innovation × dynamics):
 
 | Model | Innovation | Dynamics |
@@ -91,7 +91,7 @@ We document a previously unreported reversal in Generalized Autoregressive Score
 ### 6. Results 3: Markov-Switching GAS-t Rescue (~900 words)
 - Klaassen (2002) recursion: state-probability filter avoids Hamilton's path-dependence.
 - MS-GAS-t vs single-state M3: DM-HLN = +5.97 (substantial rescue).
-- MS-GAS-t vs GJR-N (M1): DM-HLN = +0.28 NS (still underperforms benchmark).
+- MS-GAS-t vs GJR-N (M1): DM-HLN = +0.28 NS (point estimate slightly favours MS, but only reaches parity, not superiority).
 - Implication: Regime-switching captures part of the t-innovation mismatch but not all → structural problem, not regime-confounding artifact.
 - Figure 3: MS-GAS-t state probability time series with FTX/Luna/spot-ETF event markers.
 
@@ -104,10 +104,9 @@ We document a previously unreported reversal in Generalized Autoregressive Score
 ### 8. Robustness (~700 words)
 - Lookahead audit: All forecasts use `realized.shift(1)`; verified via independent Codex review (2026-04-17).
 - Seed sensitivity: 100-init multi-start MLE; log-likelihood basin stable across seeds.
-- Alternative period cuts: ±60 days at FTX-Luna and spot-ETF boundaries; conclusions unchanged.
-- Alternative loss functions: MSE, robust loss (Patton 2011 Table 1) → same direction.
+- Planned robustness only: alternative period cuts and alternative loss functions are specified but not yet run; no numeric claims from these exercises are used in this draft.
 - Sample inclusion: Excluding 2017 super-bull or 2018 crash years individually → Period 1 reversal persists.
-- Out-of-distribution check: ETH and BNB (both pre-institutional 2017-2020) → directionally consistent reversal pattern (Appendix B).
+- Planned future robustness: ETH and BNB out-of-distribution checks are specified but not yet landed in an archived results file.
 
 ### 9. Conclusion and Future Directions (~600 words)
 - Summary: BTC GAS-t reversal is (a) period-specific, (b) driven by Student-t innovation not GAS dynamics, (c) partially rescued by MS-extension but structurally mismatched.
