@@ -27756,5 +27756,15 @@
     "started_at": "2026-06-11T05:42:12.837662+00:00",
     "completed_at": "2026-06-11T05:44:25.396277+00:00",
     "result": "Codex 24h review verdict=FAIL. 3 HIGH + 1 MEDIUM + 1 LOW: article null narrative contradicts K202’s own incremental-over-VIX outputs, 'all forecasts use t-1 info' mismatches end-of-day-t features, and DM expanding-window uses future-RV labels before fully realized. Report: storage/paper_reviews/k202_mile_872abdc3/codex_24h_review.md."
+  },
+  {
+    "id": "paper_body_vt_crowding_monotone_rewrite_2026_06_11",
+    "task_type": "paper_body",
+    "priority": 1,
+    "source": "boss_decision_2026-06-11",
+    "title": "vt-crowding narrative 重寫：tipping→monotone erosion（boss confirmed; status=decision_made_awaiting_body_rewrite）",
+    "description": "Boss 2026-06-11 14:25 confirm：核心主張重寫。依 experiments/k1471_vt_crowding_redesign/full_results_interpretation.md 定調 (b)：(1) 撤回 70% tipping point 結構斷點主張（舊 detector 循環校準 artifact，K1471 外生 sup-Wald 不重現）；(2) 新核心貢獻 = VT Sharpe 隨 adoption 單調、策略特異侵蝕（0.51→-0.27）+ RR_VT turnover-matched 隨機方向對照零惡化（機制識別主證據）+ 最大邊際惡化在 (70%,100%]；(3) 原 70% 降為 descriptive drop>70% level-crossing 註腳（3/5 cells）；(4) 同步修 Codex 呈現面 findings：threshold table 加 direction 欄、不顯著 cells 不列 interval、grid artifact 揭露、RR_MR artifact + TF cell2 病態 regime 明確排除聲明；(5) abstract/title 副標重審（\"Quantifying the Tipping Point\" 標題本身要改 — 建議 \"Monotone Strategy-Specific Erosion under VT Crowding: Evidence from Matched-Control ABM\" 級別的誠實標題）；(6) main.tex 全文對齊 K1471 數字（% source binding 指 k1471_full_results.json）→ xelatex exit 0 → paper-update 上傳 → README status 更新 → fix_log。主線程性質作業。FRL 定位微調：從「找到臨界點」改「無臨界點但機制穩健識別」。",
+    "status": "pending",
+    "created_at": "2026-06-11T06:05:39.816924+00:00"
   }
 ]
