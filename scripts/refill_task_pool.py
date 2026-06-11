@@ -621,9 +621,20 @@ def _arc_covered_by_recent_article(direction_text: str, days: int = 90) -> list[
         if src not in _sys.path:
             _sys.path.insert(0, src)
         from volpred.publisher.arc_dedup import (
-            _is_significant_overlap,
+            _CORE_ENTITIES,
             extract_entities,
         )
+
+        def _direction_level_overlap(new_e: set, old_e: set) -> bool:
+            # 2026-06-11 calibration: at direction level (conclusion unknown)
+            # the single-distinctive-entity rule produced false positives
+            # (MOVE-lead-lag direction blocked by a TSMC-revenue article that
+            # merely mentioned MOVE). Require >=2 shared DISTINCTIVE entities
+            # to block; single-entity overlaps are logged by the caller's
+            # print but no longer block. Publisher-side gate (entity+conclusion)
+            # remains the hard backstop at publish time.
+            distinctive = (new_e & old_e) - _CORE_ENTITIES
+            return len(distinctive) >= 2
 
         if _ARC_FEED_CACHE is None:
             feed_path = ROOT / "storage" / "reports" / "feed.json"
@@ -648,7 +659,7 @@ def _arc_covered_by_recent_article(direction_text: str, days: int = 90) -> list[
                 pass
             ex_text = f"{existing.get('title', '')}\n{existing.get('description') or ''}"
             ex_ents = extract_entities(ex_text)
-            if _is_significant_overlap(new_ents, ex_ents):
+            if _direction_level_overlap(new_ents, ex_ents):
                 hits.append(
                     {
                         "id": existing.get("id", "?"),
