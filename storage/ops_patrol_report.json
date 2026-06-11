@@ -1,26 +1,29 @@
 {
-  "timestamp": "2026-06-10T18:04:54Z",
-  "all_ok": false,
+  "timestamp": "2026-06-11T00:05:43Z",
+  "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "147 drafts total (research: 48, general: 99). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "147 drafts total (research=48 >=4 OK, general=99 >=8 OK). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age ~25 seconds (mtime 1781114636, checked at 1781114661). Well within 26h threshold."
+      "detail": "storage/strategy_metrics.json last modified 2026-06-11T00:04:38Z (~1 min ago). Well within 26h threshold."
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Entry dated 2026-06-10 (today): 3-STRIKE TRIGGER arc-dedup -- K1449/K1091 narrative-arc duplicate incident. Article mile_5af5ec51 unpublished. New module src/volpred/publisher/arc_dedup.py deployed + 3-layer hard gates (publisher.publish_milestone, refill_task_pool, scripts/check_arc_dedup.py). Regression tests pass."
+      "status": "ok",
+      "detail": "Entry dated 2026-06-10 (yesterday): 3-STRIKE TRIGGER arc-dedup -- K1449/K1091 narrative-arc duplicate incident. Article mile_5af5ec51 unpublished. arc_dedup.py + 3-layer hard gates (publisher.publish_milestone, refill_task_pool, scripts/check_arc_dedup.py) deployed. Regression tests pass. No new errors today (2026-06-11).",
+      "recent_entries": [
+        "2026-06-10: 3-STRIKE arc-dedup refactor — K1449/K1091 narrative-arc dup caught by user; mile_5af5ec51 unpublished; new entity-level dedup module + 3-layer gates + regression tests."
+      ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return in last 3 entries. All 15 strategies checked via .entries sub-array."
+      "detail": "15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -30,10 +33,8 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2227 entries in storage/memory/knowledge.json (up from 2213 at last patrol -- 14 new entries)."
+      "detail": "2227 entries in storage/memory/knowledge.json."
     }
   ],
-  "alerts": [
-    "ERROR_LOG_TODAY: 2026-06-10 3-STRIKE arc-dedup refactor triggered. Narrative-arc duplicate K1449/K1091 caught by user. Article mile_5af5ec51 unpublished. arc_dedup.py + 3-layer hard gates deployed."
-  ]
+  "alerts": []
 }
