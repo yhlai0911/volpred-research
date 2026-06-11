@@ -33493,5 +33493,17 @@
     "question_id": "79077d59-9647-4119-90dc-d86cfb230bdb",
     "proposer": "yaoxk1431",
     "created_at": "2026-06-11T11:22:30.537829Z"
+  },
+  {
+    "item_id": "e88f725c",
+    "category": "paper_review",
+    "content": "K190 Realized Semivariance paper review for mile_9a5c1ea4 (Codex 24h-rule).\n\nVerdict: CONDITIONAL_PASS\n- Lookahead: CLEAN (ewma_forecast/model_ewma_semivar/semivar_har_forecast/gjr_garch_forecast/garch_x_sjv_forecast all use t-1 info)\n- Number consistency: ALIGNED (SPY 1.54=ratio 1.5393; QQQ 1.32=ratio 1.3226; GJR_GARCH 4/5 wins; QQQ EWMA_semivar exception; TLT inverse 0.7305 p=0.0163)\n- DM overclaim: FLAGGED (acceptable hedge) - QQQ EWMA_semivar 'slight win' is raw QLIKE -7.968 vs -7.957; DM t=-0.4611 p=0.6449 not significant. Article uses '略勝一點點' soft language so not Harvey/DM-significant overclaim\n- SJV->RV causality: CLEAN (sjv_regime_analysis shift(-1) is forward outcome alignment, not lookahead bias)\n- Audience gate: PASS (0 academic keywords, audience='general' correct)\n\nReviewer: Codex CLI gpt-5.4 (session cf4029f10a7b, hourly-20 dispatch)\nReviewer source: codex_cli\nCodex review: True\nExperiment: K190\nArticle: mile_9a5c1ea4\nReview report: experiments/k190/reviews/paper_review_mile_9a5c1ea4_codex_20260611.md\n",
+    "evidence": [
+      "experiments/k190/k190_realized_semivariance_results.json",
+      "experiments/k190/k190_realized_semivariance.py",
+      "experiments/k190/reviews/paper_review_mile_9a5c1ea4_codex_20260611.md"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-11T20:12:52.711088"
   }
 ]
