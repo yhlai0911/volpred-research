@@ -27650,8 +27650,11 @@
     "source": "paper_audit_2026-06-10",
     "title": "vt-crowding-abm 5 HIGH 重跑/重設計（v5 雙審稿人 blocking，全需 ABM resimulation）",
     "description": "paper/vt-crowding-abm 的 5 HIGH（audit_findings.json）全是 v5 Codex+Antigravity 早標 blocking 但未修的 methodology 問題，無文字層可改，需重跑/重設計 K1262b ABM 模擬：(1) detector 循環校準 → 改外生結構斷點檢定（supremum break test / changepoint on 500 sim-level Sharpe），不可先知 70% 閾值；(2) NoiseControl strawman → 新增 active control（隨機方向再平衡 agent，|Δw| 與 turnover match VT/TF/MR 但方向正交）；(3) CI 口徑矛盾（Table 1 note iid bootstrap vs Fig 1 caption MC sim）→ 全文統一 path-level bootstrap（500 sim-level Sharpe）+ pooled 統計量改 block bootstrap；(4) cell1 閾值不可再現（M=500 TF/MR=20% vs M=200 MR=70%）→ K1262b cell1 重跑 M=500 + 加密 40/60% grid + 每 threshold 報 bootstrap CI；(5) cell3 MR null rank encoding 方向錯 → 改報 detector-not-applicable + 主張降 4/5。屬 heavy compute → 主 ABM 重跑走 compute_queue。完成後 main.tex 對齊新結果 + xelatex + paper-update + fix_log。README 先標 MAJOR_REVISION blocked-on-resimulation。Codex review before knowledge write。",
-    "status": "pending",
-    "created_at": "2026-06-11T02:25:00+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-11T02:25:00+00:00",
+    "claimed_by": "main-thread-fable5",
+    "completed_at": "2026-06-11T06:03:07.411926+00:00",
+    "result": "K1471 M=500 完成+四謎驗證+Codex CONDITIONAL_PASS：70% tipping 撤回、monotone erosion 主張存活（RR_VT 零惡化=機制識別）；narrative 重寫待 boss confirm"
   },
   {
     "id": "experiment_eav_multistart_reestimate_2026_06_11",
@@ -27737,7 +27740,7 @@
     "title": "Paper review (Codex 24h-rule): 比特幣自己的數據，真的比 VIX 更懂它的波動嗎？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_872abdc3 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_872abdc3",
@@ -27746,6 +27749,12 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-11T05:08:03+00:00"
+    "created_at": "2026-06-11T05:08:03+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T05:42:00.585833+00:00",
+    "claim_session_id": "be3e41c258ea",
+    "started_at": "2026-06-11T05:42:12.837662+00:00",
+    "completed_at": "2026-06-11T05:44:25.396277+00:00",
+    "result": "Codex 24h review verdict=FAIL. 3 HIGH + 1 MEDIUM + 1 LOW: article null narrative contradicts K202’s own incremental-over-VIX outputs, 'all forecasts use t-1 info' mismatches end-of-day-t features, and DM expanding-window uses future-RV labels before fully realized. Report: storage/paper_reviews/k202_mile_872abdc3/codex_24h_review.md."
   }
 ]

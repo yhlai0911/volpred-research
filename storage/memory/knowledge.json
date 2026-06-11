@@ -33383,5 +33383,24 @@
     "reviewer": "Codex gpt-5.4 high (foreground sync)",
     "reviewer_source": "Codex review",
     "codex_review": true
+  },
+  {
+    "item_id": "bc120d10",
+    "category": "empirical_finding",
+    "content": "[K1471 verdict=CONDITIONAL_PASS reviewer=Codex_CLI_0.137.0_primary] vt-crowding ABM 重設計 M=500 full（94,500 sims）— 原 70% tipping point 作為結構斷點被推翻（detector 循環校準 artifact），但修改版主張存活且識別更乾淨。k_id=K1471 experiment_id=k1471_vt_crowding_redesign experiment_path=experiments/k1471_vt_crowding_redesign/。重設計：外生 sup-Wald detector + permutation null（B=999）+ turnover-matched 隨機方向 active controls（RR_VT/TF/MR）+ path-level bootstrap + cell3 saturation gate；seeds 全固定。核心結果：(1) VT Sharpe 隨 adoption 單調漸進侵蝕（0.51→-0.27），無離散 tipping 存在於任何位置；最大邊際惡化在 (70%,100%]；(2) RR_VT matched 對照全 5 cells 零惡化（方向為 improvement 0.447→0.541）= VT 方向性 feedback 的機制識別主證據；(3) 原 70% 數字僅以 descriptive drop>70% level-crossing 在 3/5 cells 倖存（robustness 註腳級，非 anchor）；(4) RR_MR 30% break 為 matched-control 失效 artifact（MR 30% 市場崩潰 final_price≈2e-14、turnover 病態超 cap）不可引用；(5) TF cell2 threshold=30% 落病態 regime（baseline -0.444）不可作 crowding 證據；(6) NoiseControl 全 null（sanity）。Codex 9 findings 全呈現面（table direction 欄、grid artifact 揭露、matched-input gate），無計算/lookahead/seed bug；Codex 獨立重算 cell1 sup-Wald 單調遞增印證 grid artifact 論點。論文含義：narrative 從 'tipping at ~70%' 重寫為 'monotone strategy-specific erosion; maximal deterioration in (70%,100%]'（待 boss confirm）。詳：full_results_interpretation.md + codex_review_full_m500.md。",
+    "evidence": [
+      "experiments/k1471_vt_crowding_redesign/k1471_full_results.json",
+      "experiments/k1471_vt_crowding_redesign/full_results_interpretation.md",
+      "experiments/k1471_vt_crowding_redesign/codex_review_full_m500.md",
+      "experiments/k1471_vt_crowding_redesign/k1471_full_threshold_table.md"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-06-11T06:03:06.855348+00:00",
+    "k_id": "K1471",
+    "experiment_id": "k1471_vt_crowding_redesign",
+    "experiment_path": "experiments/k1471_vt_crowding_redesign/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI 0.137.0 (gpt-5.4)",
+    "reviewer_source": "Codex CLI primary path; CONDITIONAL PASS 9 findings all presentation-layer; independent recomputation of cell1 sup-Wald confirms grid-artifact reading"
   }
 ]
