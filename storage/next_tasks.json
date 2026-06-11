@@ -27501,7 +27501,7 @@
     "title": "研究 backlog fallback: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "claimed",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "vs_har_horizon",
@@ -27509,7 +27509,10 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-10T19:08:31+00:00"
+    "created_at": "2026-06-10T19:08:31+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T10:09:17.228575+00:00",
+    "claim_session_id": "198d68156d4a"
   },
   {
     "id": "paper_reproduce_rewrite_leverage_direction_2026_06_11",
@@ -27951,5 +27954,50 @@
     "source": "phase1b_followup",
     "created_at": "2026-06-11T08:17:38Z",
     "completed_at": "2026-06-11T17:50:00+08:00"
+  },
+  {
+    "id": "member_qa_79077d59_evaluate",
+    "title": "[member_qa] yaoxk1431 提問：深入瞭解酒店消費娛樂業是民生消費市場的火車頭，幫我文獻回顧娛樂產業特別是酒店與股市的相關性，並且歸納出產業指標項目，摘要3000字",
+    "description": "Member question id: 79077d59-9647-4119-90dc-d86cfb230bdb\nProposer: yaoxk1431\nCreated: 2026-06-11T07:31:03.172369+00:00\n\n原題：\n深入瞭解酒店消費娛樂業是民生消費市場的火車頭，幫我文獻回顧娛樂產業特別是酒店與股市的相關性，並且歸納出產業指標項目，摘要3000字\n\n執行流程：\n1. uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\n2. 主線程逐題做 4 維度評分（研究可行性 / 讀者價值 / 研究相關性 / 預期影響力）\n3. uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\n4. rerank 後如本題入榜，再 uv run volpred ops question-claim --question-id 79077d59-9647-4119-90dc-d86cfb230bdb --actor claude\n5. 完成 research / write / question-answer / question-finish\n\n注意：member_qa 為 reader-facing published flow，不可只 review report 就停。",
+    "task_type": "member_qa",
+    "priority": 2,
+    "status": "succeeded",
+    "tags": [
+      "member_qa",
+      "user"
+    ],
+    "created_at": "2026-06-11T10:00:10.757244+00:00",
+    "source": "question_ops_maintain",
+    "question_id": "79077d59-9647-4119-90dc-d86cfb230bdb",
+    "question_status": "evaluating",
+    "proposer": "yaoxk1431",
+    "question_score": null,
+    "task_mode": "evaluate",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-11T10:09:06.309508+00:00",
+    "claim_session_id": "f861a6fcbc2e",
+    "started_at": "2026-06-11T10:09:11.854020+00:00",
+    "completed_at": "2026-06-11T10:10:49.382679+00:00",
+    "result": "evaluate 完成：1 題評分 4/10 (rank #1, only entry)，question-claim 成功 status=researching；建 followup member_qa_79077d59_write_2026_06_11 給 3000 字 research+write 階段"
+  },
+  {
+    "id": "member_qa_79077d59_write_2026_06_11",
+    "title": "[member_qa] yaoxk1431 提問：酒店娛樂業×股市相關性 — research + write + answer",
+    "description": "Question id: 79077d59-9647-4119-90dc-d86cfb230bdb (已 claim, status=researching)\nProposer: yaoxk1431\nScore: 4/10 (rank #1，僅入榜 1 題)\n\n原題: 深入瞭解酒店消費娛樂業是民生消費市場的火車頭，幫我文獻回顧娛樂產業特別是酒店與股市的相關性，並且歸納出產業指標項目，摘要3000字\n\n執行：\n1. 文獻：consumer discretionary × market correlation；hotel REITs / leisure ETF (PEJ/XLY) 與 SP500 相關性；台股餐旅指數 vs 加權\n2. 數據：抓 PEJ/XLY/HOT/H/MAR/HLT/RCL/CCL daily 2015-now → 相關性、beta、波動率 vs SPY\n3. 寫 3000 字答覆（zh-Hant）：reader-facing 4 維度（深度/可讀性/資訊性/參考性）\n4. anti-ai-style gate：寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist + scripts/anti_ai_gate.py\n5. question-answer + question-finish；同步 feed published\n\n備註：score 偏低（脫離 vol 核心），但會員提問必答；務必加 VolPred 角度（如：娛樂業 vol pattern 對 macro consumption shock 的反映），不純做產業 essay。\n\n注意：member_qa 為 reader-facing published flow，不可只 review report 就停。",
+    "task_type": "member_qa",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "member_qa",
+      "user"
+    ],
+    "created_at": "2026-06-11T10:10:46+00:00",
+    "source": "hourly-18_followup_from_evaluate",
+    "question_id": "79077d59-9647-4119-90dc-d86cfb230bdb",
+    "question_status": "researching",
+    "proposer": "yaoxk1431",
+    "question_score": 4,
+    "task_mode": "write",
+    "parent_task_id": "member_qa_79077d59_evaluate"
   }
 ]
