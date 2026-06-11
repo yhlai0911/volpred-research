@@ -27674,7 +27674,7 @@
     "title": "K189 article mile_c26fcd8e errata: lookahead + post-selection + spec mismatch（24h Codex review FAIL）",
     "description": "Codex 24h-rule review verdict=FAIL（paper/k189_audit/codex_review_2026_06_11.md）。4 HIGH: contemporaneous leakage (forecast+attn weights), post-selection alpha picking, training window=500 spec mismatch。文章需 errata：(a) 刪「historical window 只用 t-1 前資訊」(b) 「最佳 0.9」改「grid 中 0.9 最常勝」(c) 「相關不等於增量」改「本 attention 規格未顯示穩健增量」。errata 應加注審稿發現 + 提示重跑進行中。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "codex_24h_review",
     "article_id": "mile_c26fcd8e",
@@ -27683,7 +27683,13 @@
       "post-publish-fix",
       "k189"
     ],
-    "created_at": "2026-06-11T11:12:03+08:00"
+    "created_at": "2026-06-11T11:12:03+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T04:35:39.406414+00:00",
+    "claim_session_id": "bfcfb0bd2e29",
+    "started_at": "2026-06-11T04:35:51.889059+00:00",
+    "completed_at": "2026-06-11T04:40:50.754087+00:00",
+    "result": "Applied in-place errata to mile_c26fcd8e: added Codex review disclosure, corrected t-1 / rolling ex-ante alpha-selection wording, and downgraded overclaim to 'no robust increment over EWMA'. Local feed.json + single-article JSON updated with errata audit trail; explicit feed-sync was attempted but produced no observable completion output in this sandbox."
   },
   {
     "id": "experiment_k189_relag_resimulation_2026_06_11",
@@ -27714,10 +27720,32 @@
     "source": "boss_decision_2026-06-11",
     "title": "eav Option A narrative 重寫（boss 已 confirm；依賴 multistart 重估完成）",
     "description": "Boss 2026-06-11 確認 Option A：abstract/intro contributions/conclusion 擴展為 13-market panel 主敘事（納入三大 structural drivers：analyst attention 3.236→3.808、sector FE F=689.5、order flow）。depends_on experiment_eav_multistart_reestimate_2026_06_11（等重估後 Table 1 數字一起改，headline 只重寫一次）。重寫範圍：abstract、§1.3 contributions、conclusion；移除 §6.6 的 NARRATIVE-DECISION-PENDING note。主線程性質；xelatex exit 0 + fix_log 補記。",
-    "status": "pending",
+    "status": "succeeded",
     "depends_on": [
       "experiment_eav_multistart_reestimate_2026_06_11"
     ],
-    "created_at": "2026-06-11T03:15:00+00:00"
+    "created_at": "2026-06-11T03:15:00+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-06-11T05:08:56.212148+00:00",
+    "claim_session_id": "e5cff0e4ecce",
+    "started_at": "2026-06-11T05:08:59.560744+00:00",
+    "completed_at": "2026-06-11T05:14:02.067860+00:00",
+    "result": "Option A narrative 重寫完成: abstract 加 13-market panel + 3 structural drivers + K1470 multistart preservation; §1 intro central finding 擴 panel arc; §1.3 加 contribution #4 (panel/3 drivers) + #5 (multistart protocol); §1.4 outline 含 §6.6 transition; §6.6 NARRATIVE-PENDING block 改 RESOLVED 2026-06-11 (cite K1470 ordering_preserved=true); §7 Conclusion 把 3 drivers 改成 primary findings, 移除 stale HK/EU future-work, 換為 CA/HK/KR multistart + EU disaggregation + UK addition + K1216c pre-reg ρ band [0.30,0.50]. Table 1 headline 數字 (TW 6.36e-5 / US 1.91e-4 / JP 1.41e-4) 不變 — K1470 canonical reconfirmed. xelatex 2 pass exit 0, 30 頁 PDF (vs 27 頁前一版). paper-update CLI Supabase sync OK."
+  },
+  {
+    "id": "paper_review_mile_872abdc3",
+    "title": "Paper review (Codex 24h-rule): 比特幣自己的數據，真的比 VIX 更懂它的波動嗎？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_872abdc3 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_872abdc3",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-11T05:08:03+00:00"
   }
 ]

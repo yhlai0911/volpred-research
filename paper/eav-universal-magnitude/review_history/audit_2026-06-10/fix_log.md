@@ -61,3 +61,34 @@
 - `xelatex -interaction=nonstopmode -halt-on-error body.tex` → **exit 0**, 27 pages, `body.pdf` written.
 - One transient fix during this session: an unescaped `_` in the new Table 1 footnote ("audit_2026-06-10") triggered a Missing-$ error; removed it → clean build.
 - **Pre-existing (out of scope)**: `\bibliographystyle{jfe}` references a missing `jfe.bst` → bibtex fails → citations show as undefined in the live build. This is pre-existing (body.tex line 1316 already comments "For compilation/review: replace with \bibliographystyle{plainnat} temporarily") and unrelated to these fixes. Verified on a temp copy with `\bibliographystyle{plainnat}`: bibtex exit 0, **0 undefined citations** — all newly-added \citep keys resolve correctly against references.bib.
+
+---
+
+## 2026-06-11 follow-up: HIGH #2 Option A narrative rewrite (boss-confirmed) — RESOLVED
+
+**Trigger**: Task `paper_body_eav_optionA_narrative_2026_06_11` (P2, claimed by hourly-13 at 2026-06-11 13:07 台灣時間). Depends on `experiment_eav_multistart_reestimate_2026_06_11` (K1470, completed 2026-06-11 12:14 with CONDITIONAL_PASS).
+
+**K1470 100-multistart on main 3-market spec** (`experiments/k1470_eav_multistart_main_spec/k1470_results.json`):
+- Canonical θ_EAV: TW=6.36e-5, US=1.91e-4, JP=1.41e-4 (matches existing Table 1 / abstract; no Table 1 number change).
+- Refined θ_EAV: TW=6.84e-4, US=5.34e-3, JP=2.88e-3 (10–28× canonical).
+- LR: TW 1.43 (< χ²(1)=3.84, STABLE-FLAT_RIDGE); US 40.56, JP 10.78 (FRAGILE).
+- Ordering check: `ordering_preserved=true` — canonical US>JP>TW preserved under refined basin.
+
+**Narrative edits applied to body.tex** (Option A):
+1. **Abstract**: Added closing block (after the within-market null) describing the 13-market institutional panel, three structural drivers (analyst attention 3.236→3.808; sector FE F=689.5, p=7.9e-14; institutional ownership refined Spearman ρ=+0.379, N=13), and the K1470 multistart-preservation result for the headline ordering.
+2. **§1 Introduction — central-finding paragraph**: Extended to acknowledge the 3-market core + 13-market panel + multistart pathology as one unified contribution arc.
+3. **§1.3 Relation to the Literature**: Added paragraphs (4) and (5) — (4) 13-market panel + 3 structural drivers as a primary mechanism contribution; (5) ≥100-multistart protocol as a methodological contribution for small-S shared-MIDAS+stock-FE-GJR specifications.
+4. **§1.4 Paper Outline**: Reframed §5/§6/§6.6 transition to flag the 13-market panel + multistart contribution explicitly as part of the main narrative.
+5. **§6.6 NARRATIVE-DECISION-PENDING comment block**: Replaced with a "RESOLVED 2026-06-11" provenance block citing boss confirmation + K1470. No surrounding § text changed.
+6. **§7 Conclusion**: Replaced the "Three open directions" closing block — the prior axis (c) ("12-market panel as future deepening") is rewritten as a paragraph of *primary* findings (three structural drivers + multistart preservation of US>JP>TW); the new "Open directions" axis (c) replaces it with CA/HK/KR multistart audit completion + EU disaggregation + UK addition, plus the K1216c pre-registration band ρ ∈ [+0.30, +0.50]. The stale "extending to HK/Eurozone" future-work bullet that contradicted §6.6's panel is removed.
+
+**Table 1 / abstract headline magnitudes UNCHANGED**: K1470 reconfirmed canonical 6.36e-5 / 1.91e-4 / 1.41e-4. No Table 1 cell rewrite required. The Table 1 caveat footnote added in the 2026-06-10 audit remains valid (TW STABLE; US/JP FRAGILE with refined point estimate 10–28× canonical but US>JP>TW ordering preserved) — caveat language in tab:main_results stays as-is; the §1 Intro / Abstract / Conclusion now also state the preservation result so readers see it without flipping to the footnote.
+
+**Compile verification (2026-06-11 13:12)**:
+- `xelatex -interaction=nonstopmode -halt-on-error body.tex` → **exit 0**, 30 pages (was 27 in 2026-06-10 audit; +3 pages from Abstract block + Intro paragraphs + Conclusion paragraph), `body.pdf` 289,973 bytes.
+- Two compile passes (label resolution); no `LaTeX Error` / no Emergency stop. Pre-existing overfull-hbox warnings on lines 945/1030/1098/1228 unchanged (pre-existing typography, out of this edit's scope).
+- Pre-existing `\bibliographystyle{jfe}` bibtex issue unchanged (out of scope; bibliography is body.bbl from prior bibtex pass).
+
+**Follow-up not done in this task (deferred)**:
+- HIGH #1 / HIGH #5 reproduce.py § coverage extension remains FLAGGED (K list: k1163/k1165/k1166/k1168/k1171/k1172/k1207/k1213/k1216/k1216b/k1216c/k1173/k1470). Out of scope for this narrative-rewrite task; covered by a separate paper_review / paper_body follow-up task.
+- K1470's `verdict` field is null in the per-market dict structure (only `lr_test.lr_stat` populated); narrative cites the LR magnitudes + STABLE/FRAGILE classification from the K1470 knowledge.json entry (item_id=4d6e91ad) summary string and the matched §6.6.4 LR test convention. A subsequent K1470 results.json schema enrichment task (add explicit `verdict` strings) would let reproduce.py bind these cells directly.

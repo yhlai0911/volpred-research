@@ -1,0 +1,23 @@
+{
+  "id": "k1471-vt-crowding-redesign-full-m500",
+  "title": "K1471 vt-crowding ABM redesign full run (M=500, 94500 sims, exogenous detector + matched controls)",
+  "script_path": "experiments/k1471_vt_crowding_redesign/run_full_m500.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-06-11T04:39:38Z",
+  "started_at": "2026-06-11T04:45:07Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1471-vt-crowding-redesign-full-m500.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1471-vt-crowding-redesign-full-m500.stderr",
+  "result_artifact": "experiments/k1471_vt_crowding_redesign/k1471_full_results.json",
+  "claude_followup": {
+    "brief": "K1471 M=500 full run 完成。讀 experiments/k1471_vt_crowding_redesign/k1471_full_results.json 與 k1471_full_threshold_table.md：(1) 驗證 5 cells × 7 treatments 的外生 sup-Wald threshold + p-value + bootstrap interval 完整；(2) 對照 audit_2026-06-10 5 HIGH 逐項確認重設計證據（外生 detector / RR_* active control 對比 / path-level CI / cell1 加密 grid CI / cell3 not-applicable gate）；(3) 跑 Codex review k1471_vt_crowding_redesign.py；(4) PASS 後寫 knowledge.json（提 K1471、reviewer 欄位）並回報主線程進入 vt-crowding-abm 論文 narrative decision。不直接改 paper/*.tex。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 14400
+}
