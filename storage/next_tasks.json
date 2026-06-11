@@ -27894,7 +27894,7 @@
     "source": "boss_request_2026-06-11",
     "title": "Indicator Arena Phase 1b：後端 pipeline（依賴 1a 設計）",
     "description": "依 docs/indicator_arena_design.md：(1) src/volpred/indicators/ 模組 — registry 載入、每日計算、ex-ante 寫入 storage/indicators/（timestamp 鎖定）、到期回顧與績效更新；(2) Supabase 表 + sync；(3) cron job（每日收盤後）入 config/runtime_schedules.json + wrapper；(4) 回顧不可改寫：daily_signals append-only + hash chain 或同等防竄改；(5) 測試。",
-    "status": "in_progress",
+    "status": "succeeded",
     "depends_on": [
       "indicator_arena_phase1_design_candidates_2026_06_11"
     ],
@@ -27902,7 +27902,9 @@
     "claimed_by": "hourly-16",
     "claimed_at": "2026-06-11T08:09:21.640307+00:00",
     "claim_session_id": "7d9bce5c797a",
-    "started_at": "2026-06-11T08:09:34.003512+00:00"
+    "started_at": "2026-06-11T08:09:34.003512+00:00",
+    "completed_at": "2026-06-11T08:21:35.343504+00:00",
+    "result": "Backend pipeline 完成: src/volpred/indicators/ 5 模組 (registry/signals/reviews/cli/__init__) + storage/indicator_arena/registry.json 6 active indicators (k_refs+oos_evidence 全 audited from results.json field paths) + 19/19 pytest 全綠 + commit 4f7d482d. Followup tasks: phase1c (Supabase) + phase1d (cron) 已加入 next_tasks (pending P2)."
   },
   {
     "id": "indicator_arena_phase1_frontend_2026_06_11",
