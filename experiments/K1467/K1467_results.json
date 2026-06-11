@@ -1,0 +1,270 @@
+{
+  "experiment": "K1467",
+  "title": "Tail-hedging overlay vs crisis alpha",
+  "seed": 20260611,
+  "data_source": "yfinance (Yahoo Finance)",
+  "tickers": [
+    "SPY",
+    "VXX",
+    "^VIX"
+  ],
+  "window": {
+    "start": "2018-01-26",
+    "end": "2026-06-09",
+    "n_days": 2102,
+    "n_years": 8.34
+  },
+  "tc_bps_overlay_roundtrip": 5.0,
+  "crisis_windows": [
+    {
+      "name": "2018Q4_volmageddon",
+      "start": "2018-09-20",
+      "end": "2018-12-31"
+    },
+    {
+      "name": "2020Q1_covid",
+      "start": "2020-02-19",
+      "end": "2020-04-30"
+    },
+    {
+      "name": "2022_bear",
+      "start": "2022-01-03",
+      "end": "2022-10-12"
+    },
+    {
+      "name": "2025Q2_tariff",
+      "start": "2025-02-19",
+      "end": "2025-04-30"
+    }
+  ],
+  "summary": {
+    "SPY_only": {
+      "name": "SPY_only",
+      "cagr": 0.1378474668206524,
+      "vol_ann": 0.19267546751594686,
+      "sharpe": 0.7669815346792913,
+      "sortino": 0.939675473226824,
+      "mdd": -0.33717248409413614,
+      "final_value": 2.9363794069120113,
+      "n_days": 2102,
+      "annual_drag_vs_spy_bps": 0.0,
+      "alpha_bps_ann": 6.830473686658678e-14,
+      "alpha_t": 0.6120390736699574,
+      "alpha_p": 0.540511905936226,
+      "beta": 0.9999999999999999
+    },
+    "SPY+5%_VXX": {
+      "name": "SPY+5%_VXX",
+      "cagr": 0.12214430946864652,
+      "vol_ann": 0.15730799983101545,
+      "sharpe": 0.8113164565075494,
+      "sortino": 1.0478401210335186,
+      "mdd": -0.26380292245485404,
+      "final_value": 2.6149886448885207,
+      "n_days": 2102,
+      "annual_drag_vs_spy_bps": -157.0315735200589,
+      "alpha_bps_ann": 84.34894228230675,
+      "alpha_t": 1.0069074361760861,
+      "alpha_p": 0.31397925816946304,
+      "beta": 0.8065561227760473
+    },
+    "SPY+10%_VXX": {
+      "name": "SPY+10%_VXX",
+      "cagr": 0.10447280050859287,
+      "vol_ann": 0.12781638285599306,
+      "sharpe": 0.8412358321178234,
+      "sortino": 1.15531449397502,
+      "mdd": -0.20448589986348675,
+      "final_value": 2.2906973291282418,
+      "n_days": 2102,
+      "annual_drag_vs_spy_bps": -333.74666312059543,
+      "alpha_bps_ann": 169.2002686133678,
+      "alpha_t": 1.0098477809836108,
+      "alpha_p": 0.31256822411351215,
+      "beta": 0.6131046026914947
+    },
+    "VT_12_over_VIX": {
+      "name": "VT_12_over_VIX",
+      "cagr": 0.07228722943012422,
+      "vol_ann": 0.09615336512303131,
+      "sharpe": 0.7741231778068602,
+      "sortino": 1.0229336107493325,
+      "mdd": -0.1457098997621823,
+      "final_value": 1.7899188659287166,
+      "n_days": 2102,
+      "annual_drag_vs_spy_bps": -655.6023739052819,
+      "alpha_bps_ann": 69.02941791820585,
+      "alpha_t": 0.49791692932372206,
+      "alpha_p": 0.6185425944103023,
+      "beta": 0.4569784846747752
+    }
+  },
+  "crisis_panel": {
+    "SPY+5%_VXX": [
+      {
+        "crisis": "2018Q4_volmageddon",
+        "start": "2018-09-20",
+        "end": "2018-12-31",
+        "n_days": 70,
+        "strat_intraperiod_mdd": -0.15496627403670526,
+        "bench_intraperiod_mdd": -0.19348906181731185,
+        "mdd_reduction": 0.03852278778060658,
+        "strat_period_return": -0.10367017769280151,
+        "bench_period_return": -0.13986866849968083,
+        "crisis_alpha": 0.03619849080687931
+      },
+      {
+        "crisis": "2020Q1_covid",
+        "start": "2020-02-19",
+        "end": "2020-04-30",
+        "n_days": 51,
+        "strat_intraperiod_mdd": -0.26380292245485404,
+        "bench_intraperiod_mdd": -0.33717248409413614,
+        "mdd_reduction": 0.0733695616392821,
+        "strat_period_return": -0.06293958357927343,
+        "bench_period_return": -0.13640648974644032,
+        "crisis_alpha": 0.07346690616716689
+      },
+      {
+        "crisis": "2022_bear",
+        "start": "2022-01-03",
+        "end": "2022-10-12",
+        "n_days": 196,
+        "strat_intraperiod_mdd": -0.21804213807871875,
+        "bench_intraperiod_mdd": -0.2449638934590389,
+        "mdd_reduction": 0.026921755380320156,
+        "strat_period_return": -0.21804213807871875,
+        "bench_period_return": -0.2449638934590389,
+        "crisis_alpha": 0.026921755380320156
+      },
+      {
+        "crisis": "2025Q2_tariff",
+        "start": "2025-02-19",
+        "end": "2025-04-30",
+        "n_days": 50,
+        "strat_intraperiod_mdd": -0.1432260163059751,
+        "bench_intraperiod_mdd": -0.1875524692549112,
+        "mdd_reduction": 0.04432645294893611,
+        "strat_period_return": -0.057074936500565054,
+        "bench_period_return": -0.0925421779567207,
+        "crisis_alpha": 0.03546724145615565
+      }
+    ],
+    "SPY+10%_VXX": [
+      {
+        "crisis": "2018Q4_volmageddon",
+        "start": "2018-09-20",
+        "end": "2018-12-31",
+        "n_days": 70,
+        "strat_intraperiod_mdd": -0.11508985431321339,
+        "bench_intraperiod_mdd": -0.19348906181731185,
+        "mdd_reduction": 0.07839920750409846,
+        "strat_period_return": -0.06649079843851546,
+        "bench_period_return": -0.13986866849968083,
+        "crisis_alpha": 0.07337787006116536
+      },
+      {
+        "crisis": "2020Q1_covid",
+        "start": "2020-02-19",
+        "end": "2020-04-30",
+        "n_days": 51,
+        "strat_intraperiod_mdd": -0.18411506479233586,
+        "bench_intraperiod_mdd": -0.33717248409413614,
+        "mdd_reduction": 0.15305741930180028,
+        "strat_period_return": 0.014021336495892545,
+        "bench_period_return": -0.13640648974644032,
+        "crisis_alpha": 0.15042782624233286
+      },
+      {
+        "crisis": "2022_bear",
+        "start": "2022-01-03",
+        "end": "2022-10-12",
+        "n_days": 196,
+        "strat_intraperiod_mdd": -0.19181449301551112,
+        "bench_intraperiod_mdd": -0.2449638934590389,
+        "mdd_reduction": 0.05314940044352778,
+        "strat_period_return": -0.19118172084156493,
+        "bench_period_return": -0.2449638934590389,
+        "crisis_alpha": 0.05378217261747398
+      },
+      {
+        "crisis": "2025Q2_tariff",
+        "start": "2025-02-19",
+        "end": "2025-04-30",
+        "n_days": 50,
+        "strat_intraperiod_mdd": -0.09785278233000338,
+        "bench_intraperiod_mdd": -0.1875524692549112,
+        "mdd_reduction": 0.08969968692490782,
+        "strat_period_return": -0.02139833441581218,
+        "bench_period_return": -0.0925421779567207,
+        "crisis_alpha": 0.07114384354090852
+      }
+    ],
+    "VT_12_over_VIX": [
+      {
+        "crisis": "2018Q4_volmageddon",
+        "start": "2018-09-20",
+        "end": "2018-12-31",
+        "n_days": 70,
+        "strat_intraperiod_mdd": -0.12766199728718897,
+        "bench_intraperiod_mdd": -0.19348906181731185,
+        "mdd_reduction": 0.06582706453012288,
+        "strat_period_return": -0.10754280814147821,
+        "bench_period_return": -0.13986866849968083,
+        "crisis_alpha": 0.03232586035820262
+      },
+      {
+        "crisis": "2020Q1_covid",
+        "start": "2020-02-19",
+        "end": "2020-04-30",
+        "n_days": 51,
+        "strat_intraperiod_mdd": -0.13125637182684413,
+        "bench_intraperiod_mdd": -0.33717248409413614,
+        "mdd_reduction": 0.205916112267292,
+        "strat_period_return": -0.07488062406185214,
+        "bench_period_return": -0.13640648974644032,
+        "crisis_alpha": 0.06152586568458818
+      },
+      {
+        "crisis": "2022_bear",
+        "start": "2022-01-03",
+        "end": "2022-10-12",
+        "n_days": 196,
+        "strat_intraperiod_mdd": -0.1457098997621823,
+        "bench_intraperiod_mdd": -0.2449638934590389,
+        "mdd_reduction": 0.09925399369685661,
+        "strat_period_return": -0.1457098997621823,
+        "bench_period_return": -0.2449638934590389,
+        "crisis_alpha": 0.09925399369685661
+      },
+      {
+        "crisis": "2025Q2_tariff",
+        "start": "2025-02-19",
+        "end": "2025-04-30",
+        "n_days": 50,
+        "strat_intraperiod_mdd": -0.10671664083198396,
+        "bench_intraperiod_mdd": -0.1875524692549112,
+        "mdd_reduction": 0.08083582842292725,
+        "strat_period_return": -0.0789191724472672,
+        "bench_period_return": -0.0925421779567207,
+        "crisis_alpha": 0.0136230055094535
+      }
+    ]
+  },
+  "jpm_gs_benchmark_drag_bps_yr": -355.0,
+  "interpretation": {
+    "drag_5pct_overlay_bps_yr": -157.0315735200589,
+    "drag_10pct_overlay_bps_yr": -333.74666312059543,
+    "vs_jpm_gs_355bp": {
+      "5pct": 197.9684264799411,
+      "10pct": 21.25333687940457
+    },
+    "alpha_significant_at_5pct": {
+      "5pct_overlay": false,
+      "10pct_overlay": false
+    },
+    "verdict_logic": "PASS if (a) any overlay shows positive Newey-West alpha significant at 5% AND (b) crisis-period drawdown reduction >= 200bps in >=1 pre-registered window.  NULL if alpha NS and drag exists.  FAIL if drag > -500bps/yr with no offsetting crisis alpha."
+  },
+  "verdict": "CONDITIONAL_PASS",
+  "generated_at": "2026-06-11T00:23:12.978007+00:00"
+}
