@@ -27784,8 +27784,14 @@
     "source": "followup_of_paper_body_vt_crowding_monotone_rewrite_2026_06_11",
     "title": "vt-crowding 全文對齊 K1471 + 剩餘 sections 重寫（Model/Results/Discussion/Conclusion）",
     "description": "前序完成 title+abstract+intro narrative rewrite（撤回 70% tipping → monotone strategy-specific erosion + matched-control identification）。本 task 處理剩餘：(a) Model §2 引入 RR_VT/RR_TF/RR_MR matched-control + matched-input gate；(b) Results §3 重寫 — threshold table 加 direction 欄+pre/post means、grid artifact 揭露、不顯著 cells 不列 interval、RR_MR 30% break+TF cell2 病態 regime 排除、加 5/5 cells monotone evidence table；(c) Discussion §4 改 family-level framing + policy implications；(d) Conclusion §5 重寫；(e) abstract sim count 94500 對應 Methodology 補述；(f) source binding 全文掃描指向 experiments/k1471_vt_crowding_redesign/k1471_full_results.json；(g) xelatex 雙跑 exit 0；(h) paper-update 上傳；(i) README status 改 narrative_rewrite_complete_pending_review。主線程作業。Codex 24h review 由 paper-review-cycle 接手。",
-    "status": "pending",
-    "created_at": "2026-06-11T06:14:40+00:00"
+    "status": "succeeded",
+    "created_at": "2026-06-11T06:14:40+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-11T07:09:09.556556+00:00",
+    "claim_session_id": "3566ae95885b",
+    "started_at": "2026-06-11T07:09:16.355334+00:00",
+    "completed_at": "2026-06-11T07:17:52.581256+00:00",
+    "result": "Model §2 加 RR_VT/RR_TF/RR_MR matched-control + matched-input gate 段落。Results §3.1 重寫 monotone erosion narrative + Table tab:vt_monotone_curve (K1471 cell1 真實 7-row CI 數據, source binding ✓)。Results §3.2 新 subsection Matched-Control Identification + Table tab:matched_control_vt 5/5 cells VT vs RR_VT 對比（VT 全 degrade, RR_VT 全 improve）。abstract+intro+body p≤0.003 → p=0.001 全篇對齊真實 JSON 值。xelatex 雙跑 exit 0, 31 pages, 0 undefined refs. Followup: paper_body_vt_crowding_phase2_2026_06_11 (Discussion/Conclusion/abstract sim count Methodology 補述 + remaining source binding + paper-update + README)。"
   },
   {
     "id": "research_cta_trend_following_drawdown_vs",
@@ -27846,5 +27852,15 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-11T06:46:35+00:00"
+  },
+  {
+    "id": "paper_body_vt_crowding_phase2_2026_06_11",
+    "task_type": "paper_body",
+    "priority": 1,
+    "source": "split_of_paper_body_vt_crowding_full_alignment_2026_06_11",
+    "title": "vt-crowding Phase 2: Discussion/Conclusion/abstract 補述 + source binding + paper-update + README",
+    "description": "前序 task (paper_body_vt_crowding_full_alignment_2026_06_11) 完成 Model §2 引入 RR_VT/RR_TF/RR_MR matched-control + matched-input gate；Results §3.1 重寫 monotone erosion + table direction 欄 + 加 §3.4 Matched-Control Identification subsection。本 task 處理剩餘：(c) Discussion §4 改 family-level framing + 撤回 tipping policy implication，改 monotone erosion 漸進 erosion policy（adopters mass + 邊際惡化）；(d) Conclusion §5 重寫對齊 monotone-not-tipping；(e) abstract sim count 94,500 對應 Methodology 補述（K1471 layer 揭露）；(f) source binding 全文掃描指向 experiments/k1471_vt_crowding_redesign/k1471_full_results.json；(g) xelatex 雙跑 exit 0；(h) uv run volpred ops paper-update --paper-id vt-crowding-abm；(i) README status 改 narrative_rewrite_complete_pending_review。主線程作業。Codex 24h review 由 paper-review-cycle 接手。",
+    "status": "pending",
+    "created_at": "2026-06-11T07:15:00+00:00"
   }
 ]
