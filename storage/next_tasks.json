@@ -27829,7 +27829,7 @@
     "title": "研究 backlog fallback: 多訊號 momentum composite 改善尾部：11 訊號等權 vs 純價格動能",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 多訊號 momentum composite 改善尾部：11 訊號等權 vs 純價格動能 — yfinance 美股價格動能 + 替代訊號 composite，比 t-stat、MDD（純價動能歷史 MDD -88%）（來源：CFA Institute/FAJ 2025 multidimensional momentum） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "momentum_composite_11_vs",
@@ -27837,14 +27837,20 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-11T06:39:37+00:00"
+    "created_at": "2026-06-11T06:39:37+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T12:24:57.506873+00:00",
+    "claim_session_id": "f0bd1b5bac4f",
+    "started_at": "2026-06-11T12:25:10.694717+00:00",
+    "completed_at": "2026-06-11T12:34:41.121787+00:00",
+    "result": "K1475 honest-proxy complete: local ETF panel test shows 11-signal composite loses to pure 12_1 on both Sharpe and MDD; README/results/figures + knowledge entry recorded."
   },
   {
     "id": "research_order_flow_imbalance_regime_tick_ofi_rv",
     "title": "研究 backlog fallback: Order-flow imbalance 的 regime 依賴預測力：台指期 tick OFI → 短期 RV",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Order-flow imbalance 的 regime 依賴預測力：台指期 tick OFI → 短期 RV — TAIFEX tick 建 5-min OFI，檢定對 5min/30min/日 RV 增量預測力是否隨 vol regime 與 horizon 變化，明確 lag（來源：JFM/Quantitative Finance 2025-26 OFI-vol 統一框架） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "order_flow_imbalance_regime_tick_ofi_rv",
@@ -27852,7 +27858,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-11T06:46:32+00:00"
+    "created_at": "2026-06-11T06:46:32+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T13:35:53.922771+00:00",
+    "claim_session_id": "31258a774acc",
+    "started_at": "2026-06-11T13:39:40.792018+00:00",
+    "completed_at": "2026-06-11T13:40:50.977924+00:00",
+    "result": "K1476 complete: local TAIFEX 5-min cache shows OFI gains are horizon/regime dependent; 5min weak, 30min significant, next-day RV strongest in high-vol regime; results, figures, README, knowledge entry saved."
   },
   {
     "id": "research_tick_realized_illiquidity_vol",
@@ -28029,5 +28041,104 @@
     "started_at": "2026-06-11T11:20:27.701378+00:00",
     "completed_at": "2026-06-11T11:24:02.507413+00:00",
     "result": "Homepage UX polish batch completed in frontend-v2-fix: Hero counts now deep-link to feed/strategy/paper; StrategyPanel adds plain-language allocation summaries plus sigma/MDD/Sharpe tooltips; indicator arena grid now auto-fit centers the last row. Verified with Node 22 build success; Zeabur deploy script reached variable sync but live deploy could not be verified in this network-restricted sandbox."
+  },
+  {
+    "id": "paper_review_mile_23312ae9",
+    "title": "Paper review (Codex 24h-rule): 做了 305 次投資研究後，真正活下來的結論有多少？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_23312ae9 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_23312ae9",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-11T14:08:09+00:00"
+  },
+  {
+    "id": "paper_review_mile_938a158f",
+    "title": "Paper review (Codex 24h-rule): 跌的時候才算數：RS⁻ 跨 8 資產波動率預測力實測",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_938a158f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_938a158f",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-11T14:08:09+00:00"
+  },
+  {
+    "id": "paper_review_mile_08704ceb",
+    "title": "Paper review (Codex 24h-rule): 以為拉到每週看，波動率會更好猜？SPY 給的答案剛好相反",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_08704ceb needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_08704ceb",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-11T14:08:09+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-11T14:08:47.684090+00:00",
+    "claim_session_id": "667daf33e9c9",
+    "started_at": "2026-06-11T14:08:54.339599+00:00",
+    "completed_at": "2026-06-11T14:17:04.192498+00:00",
+    "result": "Codex 24h-rule CONDITIONAL_PASS. No lookahead. Issues: (1) OOS evaluation horizon 1-week offset (train end pos-1 → forecast pos → target pos+1, effectively 2-step ahead but labeled 1-step). (2) Semivar code (RS_neg + RV_lag) vs docstring (RS_neg + RS_pos) mismatch. DM tests + cross-freq numbers all match article. Knowledge entry ea582650 written. Article errata appended via publish_draft.py update mode (action=codex_24h_review_errata)."
+  },
+  {
+    "id": "platform_ops_cron_stale_collect_tw_data",
+    "title": "Cron staleness: collect_tw_data — last fire 343.1h ago (expected ≤336.0h)",
+    "description": "`collect_tw_data` last ran at 2026-05-28T07:00:24.467842+00:00 (343.1h ago). Expected cadence per config/runtime_schedules.json gives gap ≤168.0h; observed >2x. Investigate: (a) wrapper script exists & executable, (b) recent log at storage/logs/cron/collect_tw_data.log, (c) launchd / crontab entry actually installed, (d) downstream consumer (release_pool / daily_update) for failure cascade.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "diverse_gen",
+    "tags": [
+      "platform-ops",
+      "cron-staleness",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-11T14:08:09+00:00"
+  },
+  {
+    "id": "research_0dte_vs",
+    "title": "研究 backlog fallback: 0DTE 時代的日內 vs 隔夜波動結構轉變",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 0DTE 時代的日內 vs 隔夜波動結構轉變 — SPY 日 OHLC 拆 intraday range vol vs c2c vol，斷點檢定 2022-Q2 前後 + expiration-day 效應（來源：Cboe research + SSRN/J.Derivatives 2025；0DTE 佔 SPX 量 59%） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "0dte_vs",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-11T14:08:11+00:00"
+  },
+  {
+    "id": "research_rp_fe613ecb10",
+    "title": "研究 backlog fallback: 槓桿 ETF 機械再平衡與尾盤波動放大",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arXiv/JPM 2025 beyond volatility drag） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_fe613ecb10",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-11T14:08:11+00:00"
   }
 ]

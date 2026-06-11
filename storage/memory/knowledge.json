@@ -33505,5 +33505,68 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-11T20:12:52.711088"
+  },
+  {
+    "item_id": "1d23ea09",
+    "category": "model_evaluation",
+    "content": "K1475 honest-proxy result: an equal-weight 11-signal momentum composite (11 cross-sectional rank signals from price/risk/liquidity features) did NOT improve tail outcomes versus pure 12_1 price momentum on a locally cached 11-ETF panel. Sample: 2019-01-31 to 2024-12-30, monthly rebalance, top-3 selection, 10bp turnover cost, fallback to IEF. Baseline beat composite on both Sharpe (0.538 vs 0.400) and MDD (-20.3% vs -32.4%); 3-month block bootstrap gave only 17.7% probability that the composite had better MDD. Interpretation: in this repo-local proxy, adding many intuitive signals mostly increased turnover/noise rather than delivering a stable momentum tail fix.",
+    "evidence": [
+      "K1475",
+      "experiments/k1475/k1475_results.json",
+      "experiments/k1475/README.md"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-11T20:34:25.468626"
+  },
+  {
+    "item_id": "6e7cce76",
+    "category": "model_evaluation",
+    "content": "K1476 using the local TAIFEX 5-minute cache finds that OFI predictive value for RV is both horizon- and regime-dependent. With adaptive prior-day daily-RV tertiles (expanding window, 60-day warmup), adding OFI to HAR-style controls improves OOS QLIKE by 0.44% at 5min (DM t=1.65, not significant), 1.16% at 30min (DM t=4.90, significant), and strongly for next-day daily RV when using same-day aggregated OFI features with log-RV regression (QLIKE 0.950->0.453, DM t=5.83). The key nuance is regime concentration: the daily gain is negative in low-vol regime, modest in mid, and overwhelmingly positive in high-vol regime. Interpretation: OFI regime dependence survives on TAIFEX when framed with adaptive prior-day RV regimes and longer horizons, whereas the shortest-horizon 5min effect is weak.",
+    "evidence": [
+      "K1476",
+      "experiments/k1476/k1476_results.json",
+      "experiments/k1476/README.md"
+    ],
+    "confidence": 0.83,
+    "created_at": "2026-06-11T21:40:41.153674"
+  },
+  {
+    "item_id": "ea582650",
+    "category": "paper_review_codex_24h",
+    "content": "mile_08704ceb (SPY 週頻波動率 vs 日頻 8 模型 OOS 比較) Codex source-code-level 24h-rule review CONDITIONAL_PASS。無 lookahead（train [start:pos) → forecast pos → target pos+1，target 永遠在 training data 之後），但 timing 有 1-week offset：實質為以 week pos-1 資訊評估 week pos+1 RV，文章/註解暗示為 1-step ahead，實際更接近 2-step ahead。DM 檢定數字 vs article claim 完全一致（Semivar t=-1.166 p=0.123；VIX_scaled t=-1.044 p=0.149；其他全 p>0.35），supports「沒任何模型穩穩把基準壓下去」。Cross-frequency gamma 0.518 vs 0.219 vs 2.36 倍與 results JSON 完全 match。Semivar 實作 (next_week_RV ~ RS_neg + RV_lag) 與 docstring 註解 (RS_neg + RS_pos) 不一致 — 文章不受影響因未宣稱 full semivariance decomposition。",
+    "evidence": [
+      "experiments/k457/k457_weekly_vol_results.json",
+      "storage/reports/feed.json#mile_08704ceb"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-11T22:13:54.992228",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K457",
+    "experiment_ids": [
+      "K457"
+    ],
+    "k_id": "K457",
+    "reviewer": "Codex (gpt-5.4, codex-cli 0.137.0)",
+    "reviewer_source": "codex_review_primary_path",
+    "codex_review": true,
+    "article": "mile_08704ceb",
+    "review_date": "2026-06-11T14:11:00+08:00",
+    "tags": [
+      "codex-review",
+      "24h-rule",
+      "weekly-vol",
+      "K457",
+      "SPY",
+      "no-lookahead",
+      "timing-offset"
+    ],
+    "issues": [
+      "Timing offset (1-week): train end at pos-1, target=rv[pos+1]; effectively 2-step ahead but labeled 1-step. 不是 lookahead，但 horizon 標籤錯",
+      "Semivar regression code 與 docstring mismatch (RS_pos 沒入模)"
+    ],
+    "actions_taken": [
+      "補 article errata: 註明 OOS evaluation 實為 week t+1 vs week t-1 info（horizon nuance），三條核心結論方向不變",
+      "K457 script 留 timing offset fix 給 followup (low-priority — 影響評估 horizon 標籤但不影響 ranking / DM test 結論方向)"
+    ]
   }
 ]

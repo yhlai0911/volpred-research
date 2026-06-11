@@ -1,0 +1,251 @@
+{
+  "experiment_id": "K1475",
+  "title": "11-signal momentum composite vs pure price momentum",
+  "run_timestamp": "2026-06-11T12:33:53.651250+00:00",
+  "seed": 42,
+  "data": {
+    "source": "local cached CSV snapshots in experiments/k1090b/data",
+    "sample_start": "2019-01-31",
+    "sample_end": "2024-12-30",
+    "n_days": 1489,
+    "n_rebalances": 71,
+    "universe": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "EEM",
+      "EWJ",
+      "FXI",
+      "VGK",
+      "GLD",
+      "TLT",
+      "USO",
+      "SLV"
+    ],
+    "safe_asset": "IEF",
+    "frequency": "daily returns, monthly rebalance"
+  },
+  "methodology": {
+    "top_n": 3,
+    "tx_cost_bps": 10,
+    "eligibility_rule": "asset must have positive 12_1 momentum at rebalance date; else leftover weight goes to IEF",
+    "timing_rule": "signals at month-end t, positions held from next trading day to next rebalance",
+    "signal_definitions": {
+      "ret_21": "1-month total return",
+      "ret_63": "3-month total return",
+      "ret_126": "6-month total return",
+      "mom_12_1": "12_1 price momentum (t-252 to t-21)",
+      "sharpe_21": "1-month daily mean/std",
+      "sharpe_63": "3-month daily mean/std",
+      "sharpe_126": "6-month daily mean/std",
+      "dist_52w_high": "distance to trailing 52-week high",
+      "up_day_frac_63": "share of positive days over past 63 sessions",
+      "dv_trend_21_126": "log short-vs-long dollar-volume trend",
+      "downside_vol_63": "negative annualized downside volatility over past 63 sessions"
+    },
+    "score_construction": "each signal converted to cross-sectional percentile rank; composite = equal-weight average of 11 ranks",
+    "benchmark": "pure price momentum uses only the mom_12_1 signal under the same top-3 and eligibility rules"
+  },
+  "metrics": {
+    "pure_price_momentum": {
+      "n_days": 1489,
+      "n_months": 72,
+      "start": "2019-01-31",
+      "end": "2024-12-30",
+      "annual_return": 0.092352,
+      "annual_vol": 0.171546,
+      "sharpe": 0.5384,
+      "sortino": 0.7462,
+      "max_drawdown": -0.203118,
+      "calmar": 0.4547,
+      "harvey_t_daily": 1.4606,
+      "nw_t_monthly_mean": 2.1977,
+      "annual_turnover": 5.6978,
+      "worst_day": -0.057983,
+      "worst_month": -0.092221,
+      "best_month": 0.095064,
+      "avg_positions": 2.998
+    },
+    "signal_composite_11": {
+      "n_days": 1489,
+      "n_months": 72,
+      "start": "2019-01-31",
+      "end": "2024-12-30",
+      "annual_return": 0.070074,
+      "annual_vol": 0.175415,
+      "sharpe": 0.3995,
+      "sortino": 0.5247,
+      "max_drawdown": -0.324243,
+      "calmar": 0.2161,
+      "harvey_t_daily": 1.1525,
+      "nw_t_monthly_mean": 1.1935,
+      "annual_turnover": 9.1954,
+      "worst_day": -0.069521,
+      "worst_month": -0.097378,
+      "best_month": 0.168304,
+      "avg_positions": 2.998
+    }
+  },
+  "bootstrap": {
+    "n_months": 72,
+    "block_size_months": 3,
+    "n_boot": 5000,
+    "challenger_sharpe_gt_base_prob": 0.2624,
+    "challenger_cagr_gt_base_prob": 0.3258,
+    "challenger_mdd_better_prob": 0.1766,
+    "mean_monthly_diff_avg": -0.001437,
+    "sharpe_diff_avg": -0.197,
+    "mdd_diff_avg": -0.062802,
+    "mdd_diff_p5_p50_p95": [
+      -0.194216,
+      -0.055204,
+      0.042176
+    ]
+  },
+  "crash_windows": {
+    "pure_price_momentum": {
+      "q4_2018": {
+        "n_days": 0,
+        "total_return": null,
+        "worst_day": null,
+        "max_drawdown": null
+      },
+      "covid_2020": {
+        "n_days": 24,
+        "total_return": -0.1441,
+        "worst_day": -0.042029,
+        "max_drawdown": -0.191413
+      },
+      "rate_shock_2022": {
+        "n_days": 198,
+        "total_return": -0.075925,
+        "worst_day": -0.046281,
+        "max_drawdown": -0.181212
+      }
+    },
+    "signal_composite_11": {
+      "q4_2018": {
+        "n_days": 0,
+        "total_return": null,
+        "worst_day": null,
+        "max_drawdown": null
+      },
+      "covid_2020": {
+        "n_days": 24,
+        "total_return": -0.11662,
+        "worst_day": -0.041794,
+        "max_drawdown": -0.16526
+      },
+      "rate_shock_2022": {
+        "n_days": 198,
+        "total_return": -0.246515,
+        "worst_day": -0.057628,
+        "max_drawdown": -0.324243
+      }
+    }
+  },
+  "subperiods": {
+    "pure_price_momentum": {
+      "2019_2019": {
+        "annual_return": 0.135287,
+        "annual_vol": 0.108171,
+        "sharpe": 1.2507,
+        "max_drawdown": -0.09598
+      },
+      "2020_2021": {
+        "annual_return": 0.148757,
+        "annual_vol": 0.192211,
+        "sharpe": 0.7739,
+        "max_drawdown": -0.191413
+      },
+      "2022_2024": {
+        "annual_return": 0.043551,
+        "annual_vol": 0.172909,
+        "sharpe": 0.2519,
+        "max_drawdown": -0.181212
+      }
+    },
+    "signal_composite_11": {
+      "2019_2019": {
+        "annual_return": 0.074376,
+        "annual_vol": 0.109952,
+        "sharpe": 0.6764,
+        "max_drawdown": -0.08565
+      },
+      "2020_2021": {
+        "annual_return": 0.262386,
+        "annual_vol": 0.195467,
+        "sharpe": 1.3424,
+        "max_drawdown": -0.16526
+      },
+      "2022_2024": {
+        "annual_return": -0.043524,
+        "annual_vol": 0.177429,
+        "sharpe": -0.2453,
+        "max_drawdown": -0.324243
+      }
+    }
+  },
+  "selection_examples": {
+    "pure_price_first_5": {
+      "2019-01-31": [
+        "TLT",
+        "GLD",
+        "QQQ"
+      ],
+      "2019-02-28": [
+        "TLT",
+        "GLD",
+        "SPY"
+      ],
+      "2019-03-29": [
+        "QQQ",
+        "SPY",
+        "IWM"
+      ],
+      "2019-04-30": [
+        "QQQ",
+        "TLT",
+        "SPY"
+      ],
+      "2019-05-31": [
+        "QQQ",
+        "SPY",
+        "TLT"
+      ]
+    },
+    "composite_first_5": {
+      "2019-01-31": [
+        "GLD",
+        "TLT",
+        "SLV"
+      ],
+      "2019-02-28": [
+        "GLD",
+        "TLT",
+        "SLV"
+      ],
+      "2019-03-29": [
+        "TLT",
+        "QQQ",
+        "SPY"
+      ],
+      "2019-04-30": [
+        "QQQ",
+        "SPY",
+        "VGK"
+      ],
+      "2019-05-31": [
+        "TLT",
+        "GLD",
+        "QQQ"
+      ]
+    }
+  },
+  "verdict": {
+    "tail_improves": false,
+    "sharpe_improves": false,
+    "bootstrap_mdd_better_prob_gt_60pct": false,
+    "summary": "composite does not deliver a clean tail-improvement win"
+  }
+}

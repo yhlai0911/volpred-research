@@ -1,0 +1,183 @@
+{
+  "experiment_id": "K1476",
+  "title": "TAIFEX OFI -> RV across horizon and adaptive prior-day RV regime",
+  "seed": 42,
+  "data": {
+    "source": "experiments/k1124/_cache_bars_2017-01-01_2021-12-31.parquet",
+    "bar_period": "2017-01-03 to 2021-12-30",
+    "n_bar_rows": 73203,
+    "n_days": 1223,
+    "regime_definition": "expanding tertiles of lagged prior-day daily RV with 60-day warmup",
+    "is_period": "2017-01-03 to 2019-12-31",
+    "oos_period": "2020-01-01 to 2021-12-30"
+  },
+  "methodology": {
+    "5min_target": "next-bar RV",
+    "30min_target": "sum of next 6 bars RV within same day",
+    "1day_target": "next-day daily RV",
+    "baseline_controls_bar": [
+      "rv_lag1",
+      "rv_mean6",
+      "rv_mean12"
+    ],
+    "baseline_controls_day": [
+      "rv_lag1",
+      "rv_mean5",
+      "rv_mean22"
+    ],
+    "ofi_features_bar": [
+      "abs_ofi",
+      "signed_ofi"
+    ],
+    "ofi_features_day": [
+      "abs_ofi_mean",
+      "signed_ofi_mean",
+      "abs_ofi_last12",
+      "signed_ofi_last12"
+    ],
+    "timing_rule": "all OFI features at t predict strictly future RV; no same-bar target leakage"
+  },
+  "5min": {
+    "n_is": 28210,
+    "n_oos": 20426,
+    "qlike_base": 0.282031,
+    "qlike_ofi": 0.280784,
+    "qlike_gain_pct": 0.4423,
+    "dm_vs_base": {
+      "t_stat": 1.6463,
+      "p_value": 0.0997,
+      "n": 20426
+    },
+    "beta_base": [
+      5e-07,
+      0.2088074,
+      0.43377807,
+      3.05e-06
+    ],
+    "beta_ofi": [
+      4.7e-07,
+      0.20903151,
+      0.43600609,
+      3.3e-06,
+      2.1e-07,
+      -3.7e-07
+    ],
+    "regime_oos_gain": {
+      "high": {
+        "n": 11098,
+        "avg_qlike_gain": 0.000403
+      },
+      "low": {
+        "n": 3171,
+        "avg_qlike_gain": 0.004658
+      },
+      "mid": {
+        "n": 6157,
+        "avg_qlike_gain": 0.001013
+      }
+    },
+    "regime_counts_oos": {
+      "high": 11098,
+      "low": 3171,
+      "mid": 6157
+    }
+  },
+  "30min": {
+    "n_is": 28210,
+    "n_oos": 20426,
+    "qlike_base": 0.225259,
+    "qlike_ofi": 0.222647,
+    "qlike_gain_pct": 1.1594,
+    "dm_vs_base": {
+      "t_stat": 4.9039,
+      "p_value": 0.0,
+      "n": 20426
+    },
+    "beta_base": [
+      4.45e-06,
+      0.70072962,
+      2.2809603,
+      -0.00010429
+    ],
+    "beta_ofi": [
+      4.96e-06,
+      0.69153579,
+      2.26081779,
+      -0.0001054,
+      -2.52e-06,
+      -1.41e-06
+    ],
+    "regime_oos_gain": {
+      "high": {
+        "n": 11098,
+        "avg_qlike_gain": 0.003255
+      },
+      "low": {
+        "n": 3171,
+        "avg_qlike_gain": 0.00125
+      },
+      "mid": {
+        "n": 6157,
+        "avg_qlike_gain": 0.002153
+      }
+    },
+    "regime_counts_oos": {
+      "high": 11098,
+      "low": 3171,
+      "mid": 6157
+    }
+  },
+  "1day": {
+    "n_is": 674,
+    "n_oos": 487,
+    "qlike_base": 0.950397,
+    "qlike_ofi": 0.452609,
+    "qlike_gain_pct": 52.3768,
+    "dm_vs_base": {
+      "t_stat": 5.8263,
+      "p_value": 0.0,
+      "n": 487
+    },
+    "beta_base": [
+      -8.57456988,
+      -0.67509921,
+      1.67182552,
+      -0.32022394
+    ],
+    "beta_ofi": [
+      -7.59272711,
+      -0.46495958,
+      1.91664272,
+      -0.30350006,
+      -7.32108251,
+      0.86979253,
+      0.5640531,
+      -1.06526245
+    ],
+    "regime_oos_gain": {
+      "high": {
+        "n": 265,
+        "avg_qlike_gain": 0.879003
+      },
+      "low": {
+        "n": 75,
+        "avg_qlike_gain": -0.022367
+      },
+      "mid": {
+        "n": 147,
+        "avg_qlike_gain": 0.075947
+      }
+    },
+    "regime_counts_oos": {
+      "high": 265,
+      "low": 75,
+      "mid": 147
+    }
+  },
+  "verdict": {
+    "best_horizon": "1day",
+    "best_gain_pct": 52.3768,
+    "high_regime_best_horizon_gain": 0.879003,
+    "summary": "OFI regime/horizon pattern is mixed"
+  }
+}
