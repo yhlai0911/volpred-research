@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-11T00:05:43Z",
+  "timestamp": "2026-06-11T06:04:56Z",
   "all_ok": true,
   "checks": [
     {
@@ -10,20 +10,20 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified 2026-06-11T00:04:38Z (~1 min ago). Well within 26h threshold."
+      "detail": "storage/strategy_metrics.json last modified 2026-06-11T06:03:36Z (~1 min ago). Well within 26h threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Entry dated 2026-06-10 (yesterday): 3-STRIKE TRIGGER arc-dedup -- K1449/K1091 narrative-arc duplicate incident. Article mile_5af5ec51 unpublished. arc_dedup.py + 3-layer hard gates (publisher.publish_milestone, refill_task_pool, scripts/check_arc_dedup.py) deployed. Regression tests pass. No new errors today (2026-06-11).",
+      "detail": "Entry dated 2026-06-10 (yesterday): 3-STRIKE TRIGGER arc-dedup — K1449/K1091 narrative-arc dup. Article mile_5af5ec51 unpublished. arc_dedup.py + 3-layer hard gates deployed. Regression tests pass. No new errors today (2026-06-11).",
       "recent_entries": [
-        "2026-06-10: 3-STRIKE arc-dedup refactor — K1449/K1091 narrative-arc dup caught by user; mile_5af5ec51 unpublished; new entity-level dedup module + 3-layer gates + regression tests."
+        "2026-06-10: 3-STRIKE arc-dedup refactor — K1449/K1091 narrative-arc dup caught by user; mile_5af5ec51 unpublished; entity-level dedup module + 3-layer gates + regression tests."
       ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "14 active strategies checked (last_date=2026-06-09 for all). Each has exactly 1 null portfolio_return in last 3 entries — within tolerance (threshold: >2 nulls). _market_daily has no entries (inactive)."
     },
     {
       "name": "GIT_STATUS",
