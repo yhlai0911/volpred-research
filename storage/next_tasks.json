@@ -27918,11 +27918,12 @@
     "source": "boss_request_2026-06-11",
     "title": "Indicator Arena Phase 1c：前端首頁專區（依賴 1b）",
     "description": "frontend-v2-fix（獨立巢狀 git repo — cd 進去 commit）：首頁指標競技場專區 — 指標卡（今日值/預測/時效/近期命中率/狀態 badge）按績效排序、詳情頁完整回顧時間軸、observation/delisted 誠實標示。讀 Supabase indicators 表。延續既有視覺。npm run build + 測 tab + deploy-zeabur-safe.sh。",
-    "status": "pending",
+    "status": "succeeded",
     "depends_on": [
       "indicator_arena_phase1_backend_2026_06_11"
     ],
-    "created_at": "2026-06-11T07:54:23.183014+00:00"
+    "created_at": "2026-06-11T07:54:23.183014+00:00",
+    "completed_at": "2026-06-11T17:50:00+08:00"
   },
   {
     "id": "indicator_arena_phase1c_supabase_sync_2026_06_11",
@@ -27944,10 +27945,11 @@
     "id": "indicator_arena_phase1d_cron_job_2026_06_11",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "title": "Indicator Arena Phase 1d: cron job",
     "description": "config/runtime_schedules.json 加入 indicator_arena_daily_emit (每日台股收盤後 14:00 台灣時間 = 06:00 UTC)；scripts/cron_indicator_arena_emit.sh wrapper；piggy-back scheduler 自動 fire。觸發 src/volpred/indicators/cli.py emit-all + review-due。",
     "source": "phase1b_followup",
-    "created_at": "2026-06-11T08:17:38Z"
+    "created_at": "2026-06-11T08:17:38Z",
+    "completed_at": "2026-06-11T17:50:00+08:00"
   }
 ]

@@ -67,7 +67,7 @@ Phase 1b 落地 Supabase 前，本地 source of truth 放 `storage/indicator_are
 | `signal_id` | text FK | |
 | `reviewed_at` | timestamptz | 自動回顧執行時間 |
 | `realized` | jsonb | 實際結果（target 實際報酬 / 是否突破 VaR） |
-| `hit` | boolean/null | 方向組：方向對錯；校準組：是否 violation（語意不同，league 區分） |
+| `hit` | boolean/null | 方向組：方向對錯；校準組：**是否在界內**（hit=true = 無 violation；violation 數 = hit=false 數）。兩組語意統一為「hit = 好結果」（2026-06-11 與 reviews.py 實作對齊更正；violation 細節在 `realized.violation` / `realized.per_asset[*].violation`） |
 | `econ_value_bps` | numeric | 該筆訊號的單筆 expectancy（見 §5） |
 | `data_source_asof` | timestamptz | 回顧用收盤數據的抓取時間 |
 | `correction_of` | text/null | 若為更正單，指向原 review_id（原單不刪不改） |
