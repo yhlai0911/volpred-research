@@ -27684,7 +27684,7 @@
     "title": "K189 重跑：lagged forecast + ex ante alpha selection + Bonferroni（解 Codex FAIL HIGH 4）",
     "description": "Per paper/k189_audit/codex_review_2026_06_11.md HIGH severity 4 條，K189 attention vol 需重做：(1) forecast + attention weights 全改 shift(1) lagged (2) alpha 選擇 rolling re-selection 於 training window 內，不可整段 OOS 挑 (3) DM test + Bonferroni/FDR 校正（6 資產 × 2 baselines）(4) 補 README.md 完整方法描述。若重跑後 VERDICT 變 PASS 或 CONDITIONAL_PASS → article 解凍（移除 errata）；若仍 FAIL → article 維持 errata + downgrade conclusion。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "codex_24h_review",
     "k_id": "K189",
@@ -27693,7 +27693,13 @@
       "post-selection-fix",
       "rerun"
     ],
-    "created_at": "2026-06-11T11:12:03+08:00"
+    "created_at": "2026-06-11T11:12:03+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T03:29:38.870383+00:00",
+    "claim_session_id": "ddb5baecd46d",
+    "started_at": "2026-06-11T03:29:51.106647+00:00",
+    "completed_at": "2026-06-11T03:34:08.447229+00:00",
+    "result": "K189 corrected rerun complete: past-only lagged forecast + rolling ex-ante alpha selection + DM Bonferroni/BH. Results still show 6/6 worse than EWMA; alpha=0.9 selected on all 502 OOS days per asset. README and results JSON updated for errata follow-up."
   },
   {
     "id": "paper_body_eav_optionA_narrative_2026_06_11",
@@ -27703,7 +27709,9 @@
     "title": "eav Option A narrative 重寫（boss 已 confirm；依賴 multistart 重估完成）",
     "description": "Boss 2026-06-11 確認 Option A：abstract/intro contributions/conclusion 擴展為 13-market panel 主敘事（納入三大 structural drivers：analyst attention 3.236→3.808、sector FE F=689.5、order flow）。depends_on experiment_eav_multistart_reestimate_2026_06_11（等重估後 Table 1 數字一起改，headline 只重寫一次）。重寫範圍：abstract、§1.3 contributions、conclusion；移除 §6.6 的 NARRATIVE-DECISION-PENDING note。主線程性質；xelatex exit 0 + fix_log 補記。",
     "status": "pending",
-    "depends_on": ["experiment_eav_multistart_reestimate_2026_06_11"],
+    "depends_on": [
+      "experiment_eav_multistart_reestimate_2026_06_11"
+    ],
     "created_at": "2026-06-11T03:15:00+00:00"
   }
 ]

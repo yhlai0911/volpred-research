@@ -1,199 +1,172 @@
 """
 K189: Attention-Weighted Volatility (Cross-Asset Information Aggregation)
 =========================================================================
-[提出: 用戶, 執行: Claude]
+[提出: 用戶, 修正重跑: Codex]
 
-Research Question:
-Instead of treating each asset independently (as GARCH does), can a simple
-cross-asset attention mechanism improve volatility forecasts? Weight other
-assets' recent volatility signals by their historical predictive relevance.
-
-Data Source: yfinance daily data for SPY, QQQ, GLD, TLT, EEM, IWM
-OOS: 2023-2024. Training window: 500 days (rolling).
-
-Methodology:
-1. Compute "attention weights" via rolling correlation of asset j's lagged RV
-   with asset i's future RV (window=252). Softmax normalization.
-2. Attention-weighted vol forecast:
-   h_i,t = alpha * EWMA_i,t + (1-alpha) * sum_j(w_j * EWMA_j,t)
-3. Compare vs standalone GJR-GARCH and standalone EWMA(0.94)
-4. DM test on QLIKE loss
-5. Partial correlation controlling for VIX
-6. Harvey (2016) threshold check
-
-No look-ahead: attention weights computed from rolling past data only.
+This rerun fixes four review blockers from 2026-06-11:
+1. All forecasts are strictly past-only for date t.
+2. Attention weights for date t use data no later than t-1.
+3. Alpha is selected ex ante using a rolling 500-day training window.
+4. DM test output includes Bonferroni and BH-FDR adjustments.
 """
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
-import numpy as np
-import pandas as pd
-import yfinance as yf
-from scipy import stats
-from arch import arch_model
 import json
-import os
 import time
 from datetime import datetime
 from pathlib import Path
 
-print("=" * 70)
-print("K189: Attention-Weighted Volatility")
-print("     Cross-Asset Information Aggregation")
-print("=" * 70)
+import numpy as np
+import pandas as pd
+import yfinance as yf
+from arch import arch_model
+from scipy import stats
 
-# ============================================================
-# 1. DATA LOADING
-# ============================================================
-print("\n[1] Loading data from yfinance ...")
+print("=" * 70)
+print("K189: Attention-Weighted Volatility (Corrected Re-Run)")
+print("=" * 70)
 
 ASSETS = ["SPY", "QQQ", "GLD", "TLT", "EEM", "IWM"]
 VIX_TICKER = "^VIX"
 OOS_START = "2023-01-01"
 OOS_END = "2025-01-01"
-TRAIN_WINDOW = 500       # rolling training window for EWMA/GARCH
-ATTN_WINDOW = 252        # rolling window for attention weight estimation
-RV_LAG = 1               # lag for cross-asset predictive correlation
-EWMA_LAMBDA = 0.94       # RiskMetrics standard
-ALPHA_GRID = [0.3, 0.5, 0.7, 0.9]  # weight on own EWMA vs cross-asset
+TRAIN_WINDOW = 500
+ATTN_WINDOW = 252
+RV_LAG = 1
+RV_WINDOW = 22
+EWMA_LAMBDA = 0.94
+ALPHA_GRID = [0.3, 0.5, 0.7, 0.9]
+MIN_DM_OBS = 60
 
-t0 = time.time()
 
-# Download all assets + VIX
-data = {}
-for ticker in ASSETS + [VIX_TICKER]:
-    df_raw = yf.download(ticker, start="2005-01-01", end=OOS_END, progress=False)
-    if isinstance(df_raw.columns, pd.MultiIndex):
-        df_raw.columns = df_raw.columns.get_level_values(0)
-    data[ticker] = df_raw["Close"]
+def qlike_loss(forecast_var: pd.Series, realized_var: pd.Series) -> float:
+    mask = (
+        (forecast_var > 0)
+        & (realized_var > 0)
+        & ~forecast_var.isna()
+        & ~realized_var.isna()
+    )
+    if mask.sum() == 0:
+        return np.nan
+    h = forecast_var[mask].to_numpy()
+    rv_vals = realized_var[mask].to_numpy()
+    return float(np.mean(np.log(h) + rv_vals / h))
 
-prices = pd.DataFrame({t: data[t] for t in ASSETS})
-prices["VIX"] = data[VIX_TICKER]
-prices = prices.dropna()
 
-# Log returns (annualized for display, raw for computation)
-returns = np.log(prices[ASSETS] / prices[ASSETS].shift(1)).dropna()
-vix = prices["VIX"].reindex(returns.index)
+def qlike_pointwise(forecast_var: pd.Series, realized_var: pd.Series) -> pd.Series:
+    mask = (
+        (forecast_var > 0)
+        & (realized_var > 0)
+        & ~forecast_var.isna()
+        & ~realized_var.isna()
+    )
+    if mask.sum() == 0:
+        return pd.Series(dtype=float)
+    h = forecast_var[mask]
+    rv_vals = realized_var[mask]
+    return pd.Series(np.log(h) + rv_vals / h, index=h.index)
 
-print(f"  Total obs: {len(returns)} ({returns.index[0].strftime('%Y-%m-%d')} to {returns.index[-1].strftime('%Y-%m-%d')})")
-print(f"  Assets: {ASSETS}")
-print(f"  Data load time: {time.time()-t0:.1f}s")
 
-# ============================================================
-# 2. REALIZED VOLATILITY (22-day)
-# ============================================================
-print("\n[2] Computing 22-day realized volatility ...")
+def dm_test_qlike(loss_model: pd.Series, loss_baseline: pd.Series) -> tuple[float, float, int]:
+    d = (loss_model - loss_baseline).dropna()
+    n = len(d)
+    if n < MIN_DM_OBS:
+        return np.nan, np.nan, n
 
-rv_window = 22
-rv = returns.rolling(rv_window).var() * 252  # annualized variance
-rv = rv.dropna()
+    d_mean = d.mean()
+    nw_lags = int(np.floor(n ** (1 / 3)))
+    gamma0 = d.var(ddof=1)
+    gamma_sum = 0.0
 
-# Align all series
-common_idx = rv.index.intersection(vix.index)
-rv = rv.loc[common_idx]
-returns_aligned = returns.loc[common_idx]
-vix_aligned = vix.loc[common_idx]
+    for k in range(1, nw_lags + 1):
+        gamma_k = d.iloc[k:].reset_index(drop=True).cov(
+            d.iloc[:-k].reset_index(drop=True)
+        )
+        gamma_sum += 2 * (1 - k / (nw_lags + 1)) * gamma_k
 
-print(f"  RV obs after alignment: {len(rv)}")
+    var_d = (gamma0 + gamma_sum) / n
+    if not np.isfinite(var_d) or var_d <= 0:
+        return np.nan, np.nan, n
 
-# ============================================================
-# 3. EWMA VOLATILITY FORECASTS
-# ============================================================
-print("\n[3] Computing EWMA(0.94) forecasts ...")
+    t_stat = d_mean / np.sqrt(var_d)
+    p_val = 2 * stats.t.sf(abs(t_stat), df=n - 1)
+    return float(t_stat), float(p_val), n
 
-def ewma_variance(ret_series, lam=EWMA_LAMBDA):
-    """Compute EWMA variance series."""
-    n = len(ret_series)
-    var = np.zeros(n)
-    var[0] = ret_series.iloc[0] ** 2
-    for i in range(1, n):
-        var[i] = lam * var[i-1] + (1 - lam) * ret_series.iloc[i] ** 2
-    return pd.Series(var * 252, index=ret_series.index)  # annualized
 
-ewma_forecasts = {}
-for asset in ASSETS:
-    ewma_forecasts[asset] = ewma_variance(returns[asset])
+def adjust_pvalues(p_values: list[float]) -> tuple[list[float], list[float]]:
+    valid = [(i, p) for i, p in enumerate(p_values) if np.isfinite(p)]
+    bonf = [np.nan] * len(p_values)
+    bh = [np.nan] * len(p_values)
 
-ewma_df = pd.DataFrame(ewma_forecasts).reindex(common_idx)
+    m = len(valid)
+    if m == 0:
+        return bonf, bh
 
-# ============================================================
-# 4. GJR-GARCH FORECASTS
-# ============================================================
-print("\n[4] Computing GJR-GARCH(1,1) rolling forecasts ...")
+    for i, p in valid:
+        bonf[i] = min(p * m, 1.0)
 
-oos_mask = rv.index >= OOS_START
-oos_dates = rv.index[oos_mask]
-print(f"  OOS dates: {len(oos_dates)} ({oos_dates[0].strftime('%Y-%m-%d')} to {oos_dates[-1].strftime('%Y-%m-%d')})")
+    order = sorted(valid, key=lambda x: x[1])
+    ranked = [0.0] * m
+    running = 1.0
+    for rank in range(m - 1, -1, -1):
+        _, p = order[rank]
+        adj = p * m / (rank + 1)
+        running = min(running, adj)
+        ranked[rank] = min(running, 1.0)
 
-gjr_forecasts = {asset: pd.Series(dtype=float) for asset in ASSETS}
+    for rank, (i, _) in enumerate(order):
+        bh[i] = ranked[rank]
 
-for asset in ASSETS:
-    ret_full = returns[asset] * 100  # scale for arch
-    forecasts = []
-    dates_out = []
+    return bonf, bh
 
-    for t_idx in range(len(oos_dates)):
-        t = oos_dates[t_idx]
-        t_loc = ret_full.index.get_loc(t)
 
-        if t_loc < TRAIN_WINDOW:
-            continue
+def ewma_variance_forecast(ret_series: pd.Series, lam: float = EWMA_LAMBDA) -> pd.Series:
+    values = ret_series.to_numpy()
+    n = len(values)
+    out = np.full(n, np.nan)
+    if n < 2:
+        return pd.Series(out, index=ret_series.index)
 
-        train = ret_full.iloc[t_loc - TRAIN_WINDOW:t_loc]
+    out[1] = values[0] ** 2
+    for i in range(2, n):
+        out[i] = lam * out[i - 1] + (1 - lam) * values[i - 1] ** 2
 
-        try:
-            model = arch_model(train, vol="GARCH", p=1, o=1, q=1, dist="normal", mean="Zero")
-            res = model.fit(disp="off", show_warning=False)
-            fcast = res.forecast(horizon=1)
-            h = fcast.variance.iloc[-1, 0] / 10000 * 252  # annualized
-            forecasts.append(h)
-            dates_out.append(t)
-        except Exception:
-            forecasts.append(np.nan)
-            dates_out.append(t)
+    return pd.Series(out * 252, index=ret_series.index)
 
-    gjr_forecasts[asset] = pd.Series(forecasts, index=dates_out)
-    print(f"    {asset}: {len(dates_out)} GJR forecasts")
 
-gjr_df = pd.DataFrame(gjr_forecasts)
-
-# ============================================================
-# 5. ATTENTION WEIGHTS (Rolling, No Look-Ahead)
-# ============================================================
-print("\n[5] Computing attention weights (rolling, no look-ahead) ...")
-
-def compute_attention_weights(rv_df, target_asset, other_assets, window=ATTN_WINDOW):
+def compute_attention_weights(
+    rv_df: pd.DataFrame, target_asset: str, other_assets: list[str], window: int = ATTN_WINDOW
+) -> pd.DataFrame:
     """
-    For target asset i, compute attention weights from other assets j.
-    Weight = softmax of rolling correlation between:
-      - asset j's lagged RV (RV_j,t-1)
-      - asset i's current RV (RV_i,t)
-    All computed using past data only (no look-ahead).
+    Weight for forecast date t uses only information available up to t-1.
+    Each rolling correlation uses pairs (RV_j,s-1, RV_i,s) for s in [t-window, t-1].
     """
     n = len(rv_df)
     weight_series = {a: np.full(n, np.nan) for a in other_assets}
-
-    rv_target = rv_df[target_asset].values
-    rv_others = {a: rv_df[a].values for a in other_assets}
+    rv_target = rv_df[target_asset].to_numpy()
+    rv_others = {a: rv_df[a].to_numpy() for a in other_assets}
 
     for t in range(window + RV_LAG, n):
-        # Use data from [t-window, t) to compute correlations
-        target_future = rv_target[t - window + RV_LAG:t + RV_LAG]  # shifted forward by RV_LAG
+        target_hist = rv_target[t - window : t]
         corrs = {}
         for a in other_assets:
-            other_lagged = rv_others[a][t - window:t]  # lagged by RV_LAG
-            if len(target_future) == len(other_lagged) and np.std(target_future) > 0 and np.std(other_lagged) > 0:
-                c = np.corrcoef(other_lagged, target_future)[0, 1]
-                corrs[a] = c if not np.isnan(c) else 0.0
+            other_hist = rv_others[a][t - window - RV_LAG : t - RV_LAG]
+            if (
+                len(target_hist) == len(other_hist)
+                and np.std(target_hist) > 0
+                and np.std(other_hist) > 0
+            ):
+                corr = np.corrcoef(other_hist, target_hist)[0, 1]
+                corrs[a] = 0.0 if np.isnan(corr) else float(corr)
             else:
                 corrs[a] = 0.0
 
-        # Softmax normalization (temperature=1)
-        vals = np.array([corrs[a] for a in other_assets])
-        # Clip to prevent overflow
+        vals = np.array([corrs[a] for a in other_assets], dtype=float)
         vals = np.clip(vals, -5, 5)
-        exp_vals = np.exp(vals)
+        exp_vals = np.exp(vals - vals.max())
         softmax_vals = exp_vals / exp_vals.sum()
 
         for k, a in enumerate(other_assets):
@@ -202,514 +175,312 @@ def compute_attention_weights(rv_df, target_asset, other_assets, window=ATTN_WIN
     return pd.DataFrame(weight_series, index=rv_df.index)
 
 
-attention_weights = {}
-for target in ASSETS:
-    others = [a for a in ASSETS if a != target]
-    attention_weights[target] = compute_attention_weights(rv, target, others)
-
-print("  Attention weights computed for all assets")
-
-# Show sample weights for SPY at a few dates
-sample_dates = oos_dates[:3]
-print(f"\n  Sample attention weights for SPY (first 3 OOS dates):")
-spy_w = attention_weights["SPY"]
-for d in sample_dates:
-    if d in spy_w.index:
-        w_row = spy_w.loc[d]
-        w_str = ", ".join([f"{a}={w_row[a]:.3f}" for a in w_row.index if not np.isnan(w_row[a])])
-        print(f"    {d.strftime('%Y-%m-%d')}: {w_str}")
-
-# ============================================================
-# 6. ATTENTION-WEIGHTED VOLATILITY FORECASTS
-# ============================================================
-print("\n[6] Computing attention-weighted volatility forecasts ...")
-
-def attention_forecast(target, alpha, ewma_df, attn_weights, oos_dates):
-    """
-    h_i,t = alpha * EWMA_i,t + (1-alpha) * sum_j(w_j,t * EWMA_j,t)
-    """
+def attention_forecast_series(
+    target: str, alpha: float, ewma_df: pd.DataFrame, attn_weights: dict[str, pd.DataFrame]
+) -> pd.Series:
     others = [a for a in ASSETS if a != target]
     forecasts = []
-    dates_out = []
+    idx = []
 
-    for t in oos_dates:
-        if t not in ewma_df.index or t not in attn_weights[target].index:
-            continue
-
+    for t in ewma_df.index:
         own_ewma = ewma_df.loc[t, target]
         w = attn_weights[target].loc[t]
-
         if np.isnan(own_ewma) or w.isna().all():
             continue
 
         cross_signal = 0.0
         w_sum = 0.0
         for a in others:
-            if not np.isnan(w[a]) and not np.isnan(ewma_df.loc[t, a]):
-                cross_signal += w[a] * ewma_df.loc[t, a]
+            other_ewma = ewma_df.loc[t, a]
+            if not np.isnan(w[a]) and not np.isnan(other_ewma):
+                cross_signal += w[a] * other_ewma
                 w_sum += w[a]
 
-        if w_sum > 0:
-            cross_signal /= w_sum  # re-normalize in case some are NaN
+        if w_sum <= 0:
+            continue
 
-        h = alpha * own_ewma + (1 - alpha) * cross_signal
-        forecasts.append(h)
-        dates_out.append(t)
+        cross_signal /= w_sum
+        forecasts.append(alpha * own_ewma + (1 - alpha) * cross_signal)
+        idx.append(t)
 
-    return pd.Series(forecasts, index=dates_out)
+    return pd.Series(forecasts, index=idx, dtype=float)
 
 
-# Compute forecasts for all alpha values
-attn_results = {}
+print("\n[1] Loading data from yfinance ...")
+t0 = time.time()
+
+raw = {}
+for ticker in ASSETS + [VIX_TICKER]:
+    df_raw = yf.download(ticker, start="2005-01-01", end=OOS_END, progress=False)
+    if isinstance(df_raw.columns, pd.MultiIndex):
+        df_raw.columns = df_raw.columns.get_level_values(0)
+    raw[ticker] = df_raw["Close"]
+
+prices = pd.DataFrame({t: raw[t] for t in ASSETS})
+prices["VIX"] = raw[VIX_TICKER]
+prices = prices.dropna()
+
+returns = np.log(prices[ASSETS] / prices[ASSETS].shift(1)).dropna()
+vix = prices["VIX"].reindex(returns.index)
+rv = returns.rolling(RV_WINDOW).var() * 252
+rv = rv.dropna()
+
+common_idx = rv.index.intersection(returns.index).intersection(vix.index)
+returns = returns.loc[common_idx]
+rv = rv.loc[common_idx]
+vix = vix.loc[common_idx]
+oos_dates = rv.index[(rv.index >= OOS_START) & (rv.index < OOS_END)]
+
+print(
+    f"  Observations: {len(rv)} | OOS: {len(oos_dates)} "
+    f"({oos_dates[0].strftime('%Y-%m-%d')} to {oos_dates[-1].strftime('%Y-%m-%d')})"
+)
+
+print("\n[2] Computing past-only EWMA and rolling GJR forecasts ...")
+ewma_df = pd.DataFrame({asset: ewma_variance_forecast(returns[asset]) for asset in ASSETS})
+
+gjr_forecasts = {}
+for asset in ASSETS:
+    ret_full = returns[asset] * 100
+    forecasts = []
+    dates_out = []
+    for t in oos_dates:
+        t_loc = ret_full.index.get_loc(t)
+        if t_loc < TRAIN_WINDOW:
+            continue
+        train = ret_full.iloc[t_loc - TRAIN_WINDOW : t_loc]
+        try:
+            model = arch_model(train, vol="GARCH", p=1, o=1, q=1, dist="normal", mean="Zero")
+            res = model.fit(disp="off", show_warning=False)
+            fcast = res.forecast(horizon=1)
+            forecasts.append(float(fcast.variance.iloc[-1, 0] / 10000 * 252))
+            dates_out.append(t)
+        except Exception:
+            forecasts.append(np.nan)
+            dates_out.append(t)
+    gjr_forecasts[asset] = pd.Series(forecasts, index=dates_out, dtype=float)
+gjr_df = pd.DataFrame(gjr_forecasts)
+
+print("\n[3] Computing lagged attention weights and alpha-specific forecasts ...")
+attention_weights = {}
+for target in ASSETS:
+    others = [a for a in ASSETS if a != target]
+    attention_weights[target] = compute_attention_weights(rv, target, others)
+
+attn_raw = {}
 for alpha in ALPHA_GRID:
-    attn_results[alpha] = {}
+    attn_raw[alpha] = {}
     for target in ASSETS:
-        attn_results[alpha][target] = attention_forecast(
-            target, alpha, ewma_df, attention_weights, oos_dates
+        attn_raw[alpha][target] = attention_forecast_series(target, alpha, ewma_df, attention_weights)
+
+print("\n[4] Rolling ex-ante alpha selection within 500-day training window ...")
+selected_attn = {}
+alpha_choice_records = []
+
+for target in ASSETS:
+    realized = rv[target]
+    forecasts = []
+    forecast_idx = []
+    chosen_alphas = []
+
+    for t in oos_dates:
+        t_loc = realized.index.get_loc(t)
+        if t_loc < TRAIN_WINDOW:
+            continue
+
+        train_idx = realized.index[t_loc - TRAIN_WINDOW : t_loc]
+        alpha_losses = {}
+        for alpha in ALPHA_GRID:
+            train_forecast = attn_raw[alpha][target].reindex(train_idx)
+            train_realized = realized.reindex(train_idx)
+            alpha_losses[alpha] = qlike_loss(train_forecast, train_realized)
+
+        valid = {a: q for a, q in alpha_losses.items() if np.isfinite(q)}
+        if not valid:
+            continue
+
+        best_alpha = min(valid, key=valid.get)
+        forecast_value = attn_raw[best_alpha][target].get(t, np.nan)
+        if not np.isfinite(forecast_value):
+            continue
+
+        forecasts.append(float(forecast_value))
+        forecast_idx.append(t)
+        chosen_alphas.append(best_alpha)
+        alpha_choice_records.append(
+            {
+                "asset": target,
+                "date": t.strftime("%Y-%m-%d"),
+                "selected_alpha": best_alpha,
+                "training_window_start": train_idx[0].strftime("%Y-%m-%d"),
+                "training_window_end": train_idx[-1].strftime("%Y-%m-%d"),
+            }
         )
 
-print(f"  Computed attention forecasts for {len(ALPHA_GRID)} alpha values x {len(ASSETS)} assets")
+    selected_attn[target] = pd.Series(forecasts, index=forecast_idx, dtype=float)
+    counts = pd.Series(chosen_alphas).value_counts().sort_index().to_dict() if chosen_alphas else {}
+    print(f"  {target}: selected alpha counts {counts}")
 
-# ============================================================
-# 7. EVALUATION: QLIKE LOSS
-# ============================================================
-print("\n[7] Evaluating with QLIKE loss ...")
-
-def qlike_loss(forecast_var, realized_var):
-    """QLIKE = mean(log(h) + r^2/h), using realized variance as proxy."""
-    mask = (forecast_var > 0) & (realized_var > 0) & ~np.isnan(forecast_var) & ~np.isnan(realized_var)
-    h = forecast_var[mask].values
-    rv_vals = realized_var[mask].values
-    return np.mean(np.log(h) + rv_vals / h)
-
-def dm_test_qlike(loss1, loss2):
-    """Diebold-Mariano test. H0: equal predictive accuracy.
-    Negative t-stat means model 1 is better (lower loss)."""
-    d = loss1 - loss2
-    d = d.dropna()
-    n = len(d)
-    if n < 10:
-        return np.nan, np.nan
-    d_mean = d.mean()
-    # HAC variance (Newey-West with automatic lag)
-    nw_lags = int(np.floor(n ** (1/3)))
-    gamma0 = d.var()
-    gamma_sum = 0
-    for k in range(1, nw_lags + 1):
-        gamma_k = d.iloc[k:].reset_index(drop=True).cov(d.iloc[:-k].reset_index(drop=True))
-        gamma_sum += 2 * (1 - k / (nw_lags + 1)) * gamma_k
-    var_d = (gamma0 + gamma_sum) / n
-    if var_d <= 0:
-        return np.nan, np.nan
-    t_stat = d_mean / np.sqrt(var_d)
-    p_val = 2 * stats.t.sf(abs(t_stat), df=n - 1)  # two-sided
-    return t_stat, p_val
-
-
-# Compute QLIKE for each method
-print(f"\n  {'Asset':<6} {'EWMA':<10} {'GJR':<10}", end="")
-for alpha in ALPHA_GRID:
-    print(f"  {'Attn('+str(alpha)+')':<12}", end="")
-print()
-print("-" * (26 + 12 * len(ALPHA_GRID)))
-
+print("\n[5] Evaluating corrected forecasts with QLIKE ...")
 results_table = []
+dm_records = []
+raw_p_registry = []
 
 for target in ASSETS:
-    row = {"asset": target}
-
-    # Get OOS realized variance
     rv_oos = rv[target].reindex(oos_dates).dropna()
+    ewma_oos = ewma_df[target].reindex(rv_oos.index)
+    gjr_oos = gjr_df[target].reindex(rv_oos.index)
+    attn_oos = selected_attn[target].reindex(rv_oos.index)
 
-    # EWMA baseline
-    ewma_oos = ewma_df[target].reindex(rv_oos.index).dropna()
-    common = rv_oos.index.intersection(ewma_oos.index)
-    ql_ewma = qlike_loss(ewma_oos.loc[common], rv_oos.loc[common])
-    row["qlike_ewma"] = ql_ewma
+    ql_ewma = qlike_loss(ewma_oos, rv_oos)
+    ql_gjr = qlike_loss(gjr_oos, rv_oos)
+    ql_attn = qlike_loss(attn_oos, rv_oos)
 
-    # GJR baseline
-    gjr_oos = gjr_df[target].reindex(rv_oos.index).dropna()
-    common_gjr = rv_oos.index.intersection(gjr_oos.index)
-    if len(common_gjr) > 10:
-        ql_gjr = qlike_loss(gjr_oos.loc[common_gjr], rv_oos.loc[common_gjr])
-    else:
-        ql_gjr = np.nan
-    row["qlike_gjr"] = ql_gjr
+    common = rv_oos.index.intersection(attn_oos.dropna().index)
+    chosen_alphas = [
+        rec["selected_alpha"] for rec in alpha_choice_records if rec["asset"] == target and rec["date"] in set(common.strftime("%Y-%m-%d"))
+    ]
+    mode_alpha = float(pd.Series(chosen_alphas).mode().iloc[0]) if chosen_alphas else np.nan
 
-    print(f"  {target:<6} {ql_ewma:<10.4f} {ql_gjr:<10.4f}", end="")
-
-    # Attention forecasts
-    for alpha in ALPHA_GRID:
-        attn_oos = attn_results[alpha][target].reindex(rv_oos.index).dropna()
-        common_attn = rv_oos.index.intersection(attn_oos.index)
-        if len(common_attn) > 10:
-            ql_attn = qlike_loss(attn_oos.loc[common_attn], rv_oos.loc[common_attn])
-        else:
-            ql_attn = np.nan
-        row[f"qlike_attn_{alpha}"] = ql_attn
-        print(f"  {ql_attn:<12.4f}", end="")
-
-    print()
-    results_table.append(row)
-
-# ============================================================
-# 8. DM TESTS
-# ============================================================
-print("\n[8] Diebold-Mariano tests (QLIKE loss) ...")
-print("     H0: Equal predictive accuracy")
-print("     Negative t → Attention is better; Positive t → Baseline is better\n")
-
-dm_results = []
-
-# Best alpha for each asset
-best_alpha_per_asset = {}
-for target in ASSETS:
-    best_alpha = None
-    best_ql = np.inf
-    for alpha in ALPHA_GRID:
-        row = [r for r in results_table if r["asset"] == target][0]
-        ql = row.get(f"qlike_attn_{alpha}", np.inf)
-        if not np.isnan(ql) and ql < best_ql:
-            best_ql = ql
-            best_alpha = alpha
-    best_alpha_per_asset[target] = best_alpha
-
-print(f"  Best alpha per asset: {best_alpha_per_asset}\n")
-
-print(f"  {'Asset':<6} {'Best alpha':<12} {'vs EWMA t':<12} {'p-val':<10} {'vs GJR t':<12} {'p-val':<10}")
-print("-" * 62)
-
-for target in ASSETS:
-    alpha = best_alpha_per_asset[target]
-    rv_oos = rv[target].reindex(oos_dates).dropna()
-
-    # Attention losses
-    attn_oos = attn_results[alpha][target].reindex(rv_oos.index).dropna()
-    common_attn = rv_oos.index.intersection(attn_oos.index)
-
-    # EWMA losses
-    ewma_oos = ewma_df[target].reindex(rv_oos.index).dropna()
-    common_ewma = rv_oos.index.intersection(ewma_oos.index)
-
-    # Pointwise QLIKE
-    common_all = common_attn.intersection(common_ewma)
-
-    if len(common_all) > 10:
-        loss_attn = pd.Series(
-            np.log(attn_oos.loc[common_all].values) + rv_oos.loc[common_all].values / attn_oos.loc[common_all].values,
-            index=common_all
-        )
-        loss_ewma = pd.Series(
-            np.log(ewma_oos.loc[common_all].values) + rv_oos.loc[common_all].values / ewma_oos.loc[common_all].values,
-            index=common_all
-        )
-        t_ewma, p_ewma = dm_test_qlike(loss_attn, loss_ewma)
-    else:
-        t_ewma, p_ewma = np.nan, np.nan
-
-    # vs GJR
-    gjr_oos = gjr_df[target].reindex(rv_oos.index).dropna()
-    common_gjr = common_attn.intersection(gjr_oos.index)
-
-    if len(common_gjr) > 10:
-        loss_attn_g = pd.Series(
-            np.log(attn_oos.loc[common_gjr].values) + rv_oos.loc[common_gjr].values / attn_oos.loc[common_gjr].values,
-            index=common_gjr
-        )
-        loss_gjr = pd.Series(
-            np.log(gjr_oos.loc[common_gjr].values) + rv_oos.loc[common_gjr].values / gjr_oos.loc[common_gjr].values,
-            index=common_gjr
-        )
-        t_gjr, p_gjr = dm_test_qlike(loss_attn_g, loss_gjr)
-    else:
-        t_gjr, p_gjr = np.nan, np.nan
-
-    sig_ewma = "***" if p_ewma < 0.01 else ("**" if p_ewma < 0.05 else ("*" if p_ewma < 0.10 else ""))
-    sig_gjr = "***" if p_gjr < 0.01 else ("**" if p_gjr < 0.05 else ("*" if p_gjr < 0.10 else ""))
-
-    print(f"  {target:<6} {alpha:<12} {t_ewma:<12.3f} {p_ewma:<10.4f} {t_gjr:<12.3f} {p_gjr:<10.4f}  {sig_ewma} / {sig_gjr}")
-
-    dm_results.append({
-        "asset": target,
-        "best_alpha": alpha,
-        "dm_vs_ewma_t": round(t_ewma, 4),
-        "dm_vs_ewma_p": round(p_ewma, 4),
-        "dm_vs_gjr_t": round(t_gjr, 4),
-        "dm_vs_gjr_p": round(p_gjr, 4),
-    })
-
-# ============================================================
-# 9. ATTENTION WEIGHT ANALYSIS
-# ============================================================
-print("\n[9] Attention weight analysis ...")
-
-print("\n  Average attention weights (OOS period) for each target:")
-print(f"  {'Target':<6}", end="")
-for a in ASSETS:
-    print(f"  {a:<8}", end="")
-print()
-print("-" * (6 + 10 * len(ASSETS)))
-
-for target in ASSETS:
-    others = [a for a in ASSETS if a != target]
-    w_df = attention_weights[target]
-    w_oos = w_df.loc[w_df.index >= OOS_START].dropna(how="all")
-
-    print(f"  {target:<6}", end="")
-    for a in ASSETS:
-        if a == target:
-            print(f"  {'---':<8}", end="")
-        elif a in w_oos.columns:
-            print(f"  {w_oos[a].mean():<8.3f}", end="")
-        else:
-            print(f"  {'N/A':<8}", end="")
-    print()
-
-# Weight stability
-print("\n  Attention weight stability (std over OOS):")
-for target in ASSETS:
-    others = [a for a in ASSETS if a != target]
-    w_df = attention_weights[target]
-    w_oos = w_df.loc[w_df.index >= OOS_START].dropna(how="all")
-    stds = {a: w_oos[a].std() for a in others}
-    max_std_asset = max(stds, key=stds.get)
-    print(f"    {target}: max_std={stds[max_std_asset]:.4f} ({max_std_asset}), mean_std={np.mean(list(stds.values())):.4f}")
-
-# ============================================================
-# 10. PARTIAL CORRELATION CONTROLLING FOR VIX
-# ============================================================
-print("\n[10] Partial correlation: Attention signal vs RV, controlling for VIX ...")
-
-print(f"\n  {'Asset':<6} {'r(Attn,RV)':<14} {'r_partial':<14} {'p_partial':<12} {'r(VIX,RV)':<14}")
-print("-" * 60)
-
-partial_corr_results = []
-
-for target in ASSETS:
-    alpha = best_alpha_per_asset[target]
-    attn_oos = attn_results[alpha][target]
-    rv_oos = rv[target]
-    vix_oos = vix_aligned
-
-    # Common OOS dates
-    common = attn_oos.index.intersection(rv_oos.index).intersection(vix_oos.index)
-    common = common[common >= OOS_START]
-
-    if len(common) < 30:
-        print(f"  {target:<6} insufficient data")
-        continue
-
-    x = attn_oos.loc[common].values
-    y = rv_oos.loc[common].values
-    z = vix_oos.loc[common].values
-
-    # Simple correlation
-    r_simple = np.corrcoef(x, y)[0, 1]
-
-    # VIX-RV correlation
-    r_vix = np.corrcoef(z, y)[0, 1]
-
-    # Partial correlation (controlling for VIX)
-    # r_xy.z = (r_xy - r_xz * r_yz) / sqrt((1 - r_xz^2)(1 - r_yz^2))
-    r_xz = np.corrcoef(x, z)[0, 1]
-    r_yz = np.corrcoef(y, z)[0, 1]
-
-    numerator = r_simple - r_xz * r_yz
-    denominator = np.sqrt((1 - r_xz ** 2) * (1 - r_yz ** 2))
-
-    if denominator > 0:
-        r_partial = numerator / denominator
-        # Fisher z-transform for significance
-        n = len(common)
-        z_fisher = 0.5 * np.log((1 + r_partial) / (1 - r_partial))
-        se = 1.0 / np.sqrt(n - 3 - 1)  # -1 for controlling variable
-        p_partial = 2 * stats.norm.sf(abs(z_fisher / se))
-    else:
-        r_partial = np.nan
-        p_partial = np.nan
-
-    sig = "***" if p_partial < 0.01 else ("**" if p_partial < 0.05 else ("*" if p_partial < 0.10 else ""))
-    print(f"  {target:<6} {r_simple:<14.4f} {r_partial:<14.4f} {p_partial:<12.4f} {r_vix:<14.4f}  {sig}")
-
-    partial_corr_results.append({
-        "asset": target,
-        "r_simple": round(r_simple, 4),
-        "r_partial_controlling_vix": round(r_partial, 4),
-        "p_partial": round(p_partial, 4),
-        "r_vix_rv": round(r_vix, 4),
-    })
-
-# ============================================================
-# 11. DOES ATTENTION BEAT VIX-BASED FORECASTING?
-# ============================================================
-print("\n[11] Attention vs VIX-based vol forecast ...")
-
-# VIX-based forecast: VIX^2 / 100 as annualized variance proxy
-# (VIX is quoted in annualized % vol, so VIX^2/100 ~ annualized var in decimal)
-vix_var_forecast = (vix_aligned ** 2) / 100
-
-print(f"\n  {'Asset':<6} {'QLIKE_VIX':<12} {'QLIKE_Attn':<12} {'DM t':<10} {'DM p':<10} {'Winner':<10}")
-print("-" * 56)
-
-for target in ASSETS:
-    alpha = best_alpha_per_asset[target]
-    attn_oos = attn_results[alpha][target]
-    rv_oos = rv[target]
-    vix_f = vix_var_forecast
-
-    common = attn_oos.index.intersection(rv_oos.index).intersection(vix_f.index)
-    common = common[common >= OOS_START]
-
-    if len(common) < 30:
-        print(f"  {target:<6} insufficient data")
-        continue
-
-    ql_vix = qlike_loss(vix_f.loc[common], rv_oos.loc[common])
-    ql_attn = qlike_loss(attn_oos.loc[common], rv_oos.loc[common])
-
-    # DM test
-    loss_vix = pd.Series(
-        np.log(vix_f.loc[common].values) + rv_oos.loc[common].values / vix_f.loc[common].values,
-        index=common
+    results_table.append(
+        {
+            "asset": target,
+            "oos_n": int(len(common)),
+            "qlike_ewma": ql_ewma,
+            "qlike_gjr": ql_gjr,
+            "qlike_attn_selected": ql_attn,
+            "modal_selected_alpha": mode_alpha,
+            "pct_change_vs_ewma": (ql_attn - ql_ewma) / abs(ql_ewma) * 100 if np.isfinite(ql_ewma) and np.isfinite(ql_attn) else np.nan,
+            "pct_change_vs_gjr": (ql_attn - ql_gjr) / abs(ql_gjr) * 100 if np.isfinite(ql_gjr) and np.isfinite(ql_attn) else np.nan,
+        }
     )
-    loss_attn = pd.Series(
-        np.log(attn_oos.loc[common].values) + rv_oos.loc[common].values / attn_oos.loc[common].values,
-        index=common
+
+    loss_attn = qlike_pointwise(attn_oos, rv_oos)
+    loss_ewma = qlike_pointwise(ewma_oos, rv_oos)
+    loss_gjr = qlike_pointwise(gjr_oos, rv_oos)
+
+    t_ewma, p_ewma, n_ewma = dm_test_qlike(loss_attn, loss_ewma)
+    t_gjr, p_gjr, n_gjr = dm_test_qlike(loss_attn, loss_gjr)
+
+    dm_records.extend(
+        [
+            {
+                "asset": target,
+                "baseline": "EWMA",
+                "dm_t": t_ewma,
+                "dm_p_raw": p_ewma,
+                "n_obs": n_ewma,
+                "winner": "Attention" if np.isfinite(t_ewma) and t_ewma < 0 else "Baseline",
+            },
+            {
+                "asset": target,
+                "baseline": "GJR",
+                "dm_t": t_gjr,
+                "dm_p_raw": p_gjr,
+                "n_obs": n_gjr,
+                "winner": "Attention" if np.isfinite(t_gjr) and t_gjr < 0 else "Baseline",
+            },
+        ]
     )
-    t_dm, p_dm = dm_test_qlike(loss_attn, loss_vix)
-    winner = "Attention" if t_dm < 0 else "VIX"
-    sig = "***" if p_dm < 0.01 else ("**" if p_dm < 0.05 else ("*" if p_dm < 0.10 else ""))
+    raw_p_registry.extend([p_ewma, p_gjr])
 
-    print(f"  {target:<6} {ql_vix:<12.4f} {ql_attn:<12.4f} {t_dm:<10.3f} {p_dm:<10.4f} {winner:<10} {sig}")
+bonf, bh = adjust_pvalues(raw_p_registry)
+for rec, bonf_p, bh_p in zip(dm_records, bonf, bh):
+    rec["dm_p_bonferroni_12"] = bonf_p
+    rec["dm_p_bh_fdr_12"] = bh_p
+    rec["sig_raw_5pct"] = bool(np.isfinite(rec["dm_p_raw"]) and rec["dm_p_raw"] < 0.05)
+    rec["sig_bonf_5pct"] = bool(np.isfinite(bonf_p) and bonf_p < 0.05)
+    rec["sig_bh_5pct"] = bool(np.isfinite(bh_p) and bh_p < 0.05)
 
-# ============================================================
-# 12. HARVEY (2016) THRESHOLD CHECK
-# ============================================================
-print("\n[12] Harvey (2016) threshold check ...")
-print("     For a 'new factor' claim, need |t| > 3.0\n")
+print("\n[6] Summary tables ...")
+for row in results_table:
+    print(
+        f"  {row['asset']}: attn={row['qlike_attn_selected']:.4f}, "
+        f"ewma={row['qlike_ewma']:.4f}, gjr={row['qlike_gjr']:.4f}, "
+        f"modal_alpha={row['modal_selected_alpha']}"
+    )
 
-print(f"  {'Asset':<6} {'vs EWMA |t|':<14} {'Pass Harvey?':<14} {'vs GJR |t|':<14} {'Pass Harvey?':<14}")
-print("-" * 62)
-
-harvey_pass_count = 0
-total_count = 0
-
-for dm in dm_results:
-    t_ewma = abs(dm["dm_vs_ewma_t"])
-    t_gjr = abs(dm["dm_vs_gjr_t"])
-    pass_ewma = "YES" if t_ewma > 3.0 else "NO"
-    pass_gjr = "YES" if t_gjr > 3.0 else "NO"
-
-    if t_ewma > 3.0:
-        harvey_pass_count += 1
-    total_count += 1
-
-    print(f"  {dm['asset']:<6} {t_ewma:<14.3f} {pass_ewma:<14} {t_gjr:<14.3f} {pass_gjr:<14}")
-
-print(f"\n  Harvey pass rate (vs EWMA): {harvey_pass_count}/{total_count}")
-
-# ============================================================
-# 13. CROSS-ASSET IMPROVEMENT ANALYSIS
-# ============================================================
-print("\n[13] Cross-asset improvement analysis ...")
-
-# For each asset, compute % improvement of best attention over EWMA
-print(f"\n  {'Asset':<6} {'EWMA QLIKE':<12} {'Best Attn':<12} {'% Change':<12} {'Improved?':<10}")
-print("-" * 52)
+print("\n[7] Harvey threshold check ...")
+harvey = []
+for rec in dm_records:
+    pass_harvey = bool(np.isfinite(rec["dm_t"]) and abs(rec["dm_t"]) > 3.0)
+    harvey.append(
+        {
+            "asset": rec["asset"],
+            "baseline": rec["baseline"],
+            "abs_dm_t": abs(rec["dm_t"]) if np.isfinite(rec["dm_t"]) else np.nan,
+            "pass_harvey_abs_t_gt_3": pass_harvey,
+        }
+    )
 
 improvements = []
-for r in results_table:
-    ql_ewma = r["qlike_ewma"]
-    best_attn_ql = min([r.get(f"qlike_attn_{a}", np.inf) for a in ALPHA_GRID])
-    pct_change = (best_attn_ql - ql_ewma) / abs(ql_ewma) * 100
-    improved = "YES" if best_attn_ql < ql_ewma else "NO"
-    print(f"  {r['asset']:<6} {ql_ewma:<12.4f} {best_attn_ql:<12.4f} {pct_change:<12.2f}% {improved:<10}")
-    improvements.append({
-        "asset": r["asset"],
-        "qlike_ewma": round(ql_ewma, 6),
-        "qlike_best_attn": round(best_attn_ql, 6),
-        "pct_change": round(pct_change, 4),
-        "improved": improved,
-    })
+for row in results_table:
+    improvements.append(
+        {
+            "asset": row["asset"],
+            "qlike_ewma": round(row["qlike_ewma"], 6) if np.isfinite(row["qlike_ewma"]) else np.nan,
+            "qlike_attn_selected": round(row["qlike_attn_selected"], 6) if np.isfinite(row["qlike_attn_selected"]) else np.nan,
+            "pct_change_vs_ewma": round(row["pct_change_vs_ewma"], 4) if np.isfinite(row["pct_change_vs_ewma"]) else np.nan,
+            "improved_vs_ewma": "YES" if row["qlike_attn_selected"] < row["qlike_ewma"] else "NO",
+        }
+    )
 
-# ============================================================
-# 14. SUMMARY
-# ============================================================
-print("\n" + "=" * 70)
-print("SUMMARY: K189 Attention-Weighted Volatility")
-print("=" * 70)
+alpha_counts = {}
+for asset in ASSETS:
+    values = [rec["selected_alpha"] for rec in alpha_choice_records if rec["asset"] == asset]
+    alpha_counts[asset] = {str(k): int(v) for k, v in pd.Series(values).value_counts().sort_index().to_dict().items()} if values else {}
 
-n_improved = sum(1 for r in improvements if r["improved"] == "YES")
-n_total = len(improvements)
-avg_improvement = np.mean([r["pct_change"] for r in improvements])
-
-print(f"\n  Assets improved (QLIKE): {n_improved}/{n_total}")
-print(f"  Average QLIKE change: {avg_improvement:+.2f}%")
-print(f"  Harvey threshold passes (vs EWMA): {harvey_pass_count}/{total_count}")
-
-# Count significant DM tests
-n_sig_ewma = sum(1 for dm in dm_results if dm["dm_vs_ewma_p"] < 0.05)
-n_sig_gjr = sum(1 for dm in dm_results if dm["dm_vs_gjr_p"] < 0.05)
-print(f"  DM significant vs EWMA (p<0.05): {n_sig_ewma}/{n_total}")
-print(f"  DM significant vs GJR (p<0.05): {n_sig_gjr}/{n_total}")
-
-# Partial correlation summary
-n_partial_sig = sum(1 for p in partial_corr_results if p["p_partial"] < 0.05)
-avg_partial = np.mean([p["r_partial_controlling_vix"] for p in partial_corr_results])
-print(f"  Partial corr significant (controlling VIX, p<0.05): {n_partial_sig}/{len(partial_corr_results)}")
-print(f"  Average partial correlation: {avg_partial:.4f}")
-
-# Conclusion
-print("\n  CONCLUSION:")
-if harvey_pass_count > 0 and n_improved >= n_total // 2:
-    print("  Cross-asset attention provides SIGNIFICANT improvement for some assets.")
-    print("  However, Harvey threshold must be checked for strategy claims.")
-elif n_improved >= n_total // 2:
-    print("  Cross-asset attention shows modest directional improvement")
-    print("  but FAILS Harvey (2016) threshold — insufficient for publication claims.")
-else:
-    print("  Cross-asset attention does NOT consistently improve vol forecasts.")
-    print("  VIX sufficient statistic hypothesis further confirmed:")
-    print("  cross-asset EWMA adds negligible information beyond own-asset EWMA.")
+summary = {
+    "oos_start_effective": oos_dates[0].strftime("%Y-%m-%d"),
+    "oos_end_effective": oos_dates[-1].strftime("%Y-%m-%d"),
+    "oos_n_calendar_days": int(len(oos_dates)),
+    "n_improved_vs_ewma": int(sum(r["improved_vs_ewma"] == "YES" for r in improvements)),
+    "avg_pct_change_vs_ewma": float(np.nanmean([r["pct_change_vs_ewma"] for r in improvements])),
+    "raw_sig_count_5pct": int(sum(rec["sig_raw_5pct"] for rec in dm_records)),
+    "bonf_sig_count_5pct": int(sum(rec["sig_bonf_5pct"] for rec in dm_records)),
+    "bh_sig_count_5pct": int(sum(rec["sig_bh_5pct"] for rec in dm_records)),
+    "harvey_pass_count": int(sum(h["pass_harvey_abs_t_gt_3"] for h in harvey)),
+}
 
 elapsed = time.time() - t0
-print(f"\n  Total runtime: {elapsed:.1f}s")
+print(f"\nRuntime: {elapsed:.1f}s")
 
-# ============================================================
-# 15. SAVE RESULTS
-# ============================================================
 output = {
     "experiment": "K189",
-    "title": "Attention-Weighted Volatility (Cross-Asset Information Aggregation)",
-    "attribution": "[提出: 用戶, 執行: Claude]",
+    "title": "Attention-Weighted Volatility (Cross-Asset Information Aggregation) — corrected rerun",
+    "attribution": "[提出: 用戶, 修正重跑: Codex]",
     "timestamp": datetime.now().isoformat(),
-    "data_source": "yfinance daily (SPY/QQQ/GLD/TLT/EEM/IWM)",
+    "data_source": "yfinance daily (SPY/QQQ/GLD/TLT/EEM/IWM/^VIX)",
     "oos_period": f"{OOS_START} to {OOS_END}",
+    "oos_effective_dates": {
+        "start": oos_dates[0].strftime("%Y-%m-%d"),
+        "end": oos_dates[-1].strftime("%Y-%m-%d"),
+        "n_days": int(len(oos_dates)),
+    },
     "train_window": TRAIN_WINDOW,
     "attention_window": ATTN_WINDOW,
+    "rv_window": RV_WINDOW,
+    "rv_lag": RV_LAG,
     "ewma_lambda": EWMA_LAMBDA,
     "alpha_grid": ALPHA_GRID,
+    "method_changes": [
+        "EWMA forecast for date t uses returns through t-1 only.",
+        "Attention weights for date t use rolling correlations estimated with data through t-1 only.",
+        "Alpha is chosen separately for each asset/date using the prior 500 trading days.",
+        "DM tests report Bonferroni and BH-FDR corrections over the 12 asset-baseline comparisons.",
+    ],
     "qlike_table": results_table,
-    "dm_tests": dm_results,
-    "partial_correlations": partial_corr_results,
+    "dm_tests": dm_records,
+    "harvey_checks": harvey,
     "improvements": improvements,
-    "summary": {
-        "n_improved": n_improved,
-        "n_total": n_total,
-        "avg_pct_change": round(avg_improvement, 4),
-        "harvey_passes": harvey_pass_count,
-        "dm_sig_vs_ewma": n_sig_ewma,
-        "dm_sig_vs_gjr": n_sig_gjr,
-        "partial_corr_sig": n_partial_sig,
-        "avg_partial_corr": round(avg_partial, 4),
-    },
+    "alpha_selection_counts": alpha_counts,
+    "alpha_selection_history_head": alpha_choice_records[:30],
+    "summary": summary,
     "runtime_seconds": round(elapsed, 1),
 }
 
-# Save to experiments directory
 results_path = Path(__file__).resolve().parent / "k189_attention_vol_results.json"
 with open(results_path, "w") as f:
     json.dump(output, f, indent=2, default=str)
-print(f"\n  Results saved to {results_path}")
 
-print("\nDone.")
+print(f"Results saved to {results_path}")

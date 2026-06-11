@@ -1,10 +1,10 @@
 {
   "paper": "leverage-direction",
   "layout_version": "v12 K903 canonical (main.tex + body.tex + tables_main.tex 7 tables)",
-  "generated_at": "2026-06-11T05:43:42.891948+08:00",
+  "generated_at": "2026-06-11T11:50:34.034773+08:00",
   "script": "reproduce.py (2026-06-11 rewrite, task paper_reproduce_rewrite_leverage_direction_2026_06_11)",
-  "n_checks": 184,
-  "n_match": 161,
+  "n_checks": 194,
+  "n_match": 171,
   "n_mismatch": 0,
   "n_note": 23,
   "traceable_match_rate": 1.0,
@@ -654,6 +654,51 @@
     },
     {
       "table": "Table 3 (tab:qlike)",
+      "cell": "TLT 2025 garch_qlike",
+      "paper_value": "-8.826",
+      "source_value": "-8.826",
+      "source": "experiments/k903/tables/k903_table3.csv",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "TLT 2025 gjr_qlike",
+      "paper_value": "-8.855",
+      "source_value": "-8.855",
+      "source": "experiments/k903/tables/k903_table3.csv",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "TLT 2025 delta_pct",
+      "paper_value": "-0.33",
+      "source_value": "-0.33",
+      "source": "experiments/k903/tables/k903_table3.csv",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "TLT 2025 dm_pvalue",
+      "paper_value": "0.133",
+      "source_value": "0.1332",
+      "source": "experiments/k903/tables/k903_table3.csv",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "TLT 2025 5% star",
+      "paper_value": "(none)",
+      "source_value": "(none)",
+      "source": "k903_table3.csv dm_pvalue",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
       "cell": "EEM 2023-2024 garch_qlike",
       "paper_value": "-8.239",
       "source_value": "-8.239",
@@ -691,6 +736,51 @@
     {
       "table": "Table 3 (tab:qlike)",
       "cell": "EEM 2023-2024 5% star",
+      "paper_value": "(none)",
+      "source_value": "(none)",
+      "source": "k903_table3.csv dm_pvalue",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "EEM 2025 garch_qlike",
+      "paper_value": "-7.896",
+      "source_value": "-7.896",
+      "source": "experiments/k903/tables/k903_table3.csv",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "EEM 2025 gjr_qlike",
+      "paper_value": "-8.010",
+      "source_value": "-8.01",
+      "source": "experiments/k903/tables/k903_table3.csv",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "EEM 2025 delta_pct",
+      "paper_value": "-1.44",
+      "source_value": "-1.44",
+      "source": "experiments/k903/tables/k903_table3.csv",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "EEM 2025 dm_pvalue",
+      "paper_value": "0.133",
+      "source_value": "0.1325",
+      "source": "experiments/k903/tables/k903_table3.csv",
+      "status": "MATCH",
+      "note": ""
+    },
+    {
+      "table": "Table 3 (tab:qlike)",
+      "cell": "EEM 2025 5% star",
       "paper_value": "(none)",
       "source_value": "(none)",
       "source": "k903_table3.csv dm_pvalue",

@@ -182,7 +182,9 @@ for asset, mean_g, std_g, pct_neg, hac_t, model in gamma_rows:
 
 
 # ===========================================================================
-# TABLE 3 (tab:qlike) — K903 canonical, all 9 rows
+# TABLE 3 (tab:qlike) — K903 canonical, all 11 rows
+# (TLT/EEM 2025 rows added 2026-06-11 per v12-confirmation M2; BTC 2025 has
+#  no canonical source row in k903_table3.csv and is intentionally absent.)
 # ===========================================================================
 
 k903_t3 = {(r["asset"], r["period"]): r for r in load_csv_rows(K903_TABLE3)}
@@ -193,8 +195,8 @@ qlike_re = re.compile(
     re.M,
 )
 qlike_rows = qlike_re.findall(qlike_block)
-if len(qlike_rows) != 9:
-    add("Table 3", "row count", f"{len(qlike_rows)} rows parsed", "9 expected",
+if len(qlike_rows) != 11:
+    add("Table 3", "row count", f"{len(qlike_rows)} rows parsed", "11 expected",
         "tables_main.tex tab:qlike", "MISMATCH", "regex failed to parse all rows")
 
 for asset, period, garch_q, gjr_q, delta, dm_p, star in qlike_rows:

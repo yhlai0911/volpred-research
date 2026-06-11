@@ -1,0 +1,96 @@
+{
+  "experiment_id": "K1470",
+  "title": "100-multistart re-estimation of main Table 1 spec (K1145 TW / K1147 US / K1150 JP BCD pooled MLE)",
+  "proposer": "Claude (paper eav-universal-magnitude sec 6.6.4 mandated re-run of single-init main results)",
+  "executor": "compute_queue worker",
+  "timestamp_utc": "2026-06-11T03:35:24.707186+00:00",
+  "random_seed": 42,
+  "start_seeds": [
+    43,
+    48
+  ],
+  "protocol": "sec:multistart_method (K1213/K1216/K1216b/K1216c), adapted to BCD: random shared-init (log-uniform theta_EAV [1e-6,5e-4]; log-uniform theta_VIX [1e-9,1e-3]) x exact original fit_pooled_panel call (max_outer=8, time_budget=600); penalty guard; K-means K=2 basins; NM polish + BCD continuation; LR vs chi2(1)=3.84",
+  "spec_provenance": "fit_pooled_panel / load_one_stock / hessian_se_theta_eav imported verbatim from experiments/k1145/k1145.py, k1147/k1147.py, k1150/k1150.py (no re-implementation; lag conventions untouched)",
+  "per_market": {
+    "TW": {
+      "market": "TW",
+      "source_experiment": "K1145",
+      "n_stocks": 31,
+      "pooled_obs": 121014,
+      "mean_sigma2": 0.0003802406062921822,
+      "canonical_stored": {
+        "exp": "K1145",
+        "theta_eav": 6.362165248598386e-05,
+        "pooled_loglik": 329349.9818402385,
+        "n_stocks": 31
+      },
+      "canonical_reproduced": {
+        "theta_vix": 9.323374844748691e-08,
+        "theta_eav": 6.362165248598386e-05,
+        "pooled_loglik": 329349.9818402385,
+        "n_outer_iters": 8,
+        "converged": false,
+        "repro_rel_dtheta": 0.0,
+        "repro_rel_dll": 0.0
+      },
+      "multistart": {
+        "n_starts": 6,
+        "start_seeds": [
+          43,
+          48
+        ],
+        "n_valid": 6,
+        "theta_eav_min": 1.4330852162789342e-05,
+        "theta_eav_max": 0.01,
+        "theta_eav_std": 0.00356100735613036,
+        "loglik_min": 329320.85370167403,
+        "loglik_max": 329350.69649282994,
+        "loglik_spread": 29.842791155911982,
+        "basin_stats": {
+          "basin_A_frac": 0.8333333333333334,
+          "basin_B_frac": 0.16666666666666666,
+          "basin_A_theta_mean": 0.0007208803771296907,
+          "basin_B_theta_mean": 0.01,
+          "basin_A_ll_mean": 329342.431354472,
+          "basin_B_ll_mean": 329323.6278113713,
+          "basin_A_ll_max": 329350.69649282994,
+          "basin_B_ll_max": 329323.6278113713
+        },
+        "best": {
+          "start_seed": 45,
+          "theta_vix": 1.438704325281459e-06,
+          "theta_eav": 0.000963746162789519,
+          "pooled_loglik": 329350.69649282994
+        }
+      },
+      "nm_continuation": {
+        "nm_shared": [
+          1.4386666742692473e-06,
+          0.0009636989058122792
+        ],
+        "theta_vix": 1.4386506262184614e-06,
+        "theta_eav": 0.0009637997741292219,
+        "pooled_loglik": 329350.6968816531
+      },
+      "refined": {
+        "source": "nm_continuation",
+        "theta_vix": 1.4386506262184614e-06,
+        "theta_eav": 0.0009637997741292219,
+        "theta_rel": 2.5347102812807547,
+        "pooled_loglik": 329350.6968816531,
+        "hessian_se": 6.819415483632577e-05,
+        "hessian_t": 14.133172798203278
+      },
+      "lr_test": {
+        "lr_stat": 1.4300828292034566,
+        "chi2_1_crit": 3.841458820694124,
+        "theta_shift": 0.000900178121643238,
+        "theta_ratio_refined_over_canonical": 15.148927078584629
+      },
+      "verdict": "STABLE",
+      "elapsed_seconds": 51.99496603012085
+    }
+  },
+  "ordering_check": null,
+  "elapsed_seconds_total": 51.99652695655823
+}
