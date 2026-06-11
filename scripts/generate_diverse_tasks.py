@@ -200,6 +200,15 @@ def _parse_banner_ts(text: str) -> datetime | None:
                 "%Y-%m-%d %H:%M:%S",
             ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
         except ValueError:
+            pass
+    m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?!:)", text)
+    if m:
+        try:
+            return datetime.strptime(
+                m.group(0).replace("T", " "),
+                "%Y-%m-%d %H:%M",
+            ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
+        except ValueError:
             return None
     return None
 
@@ -217,7 +226,7 @@ def _latest_cron_log_ts(job_id: str, log_rel: str | None = None) -> datetime | N
     except OSError:
         return None
     for line in reversed(lines):
-        if "===" not in line or "exit" not in line:
+        if "===" not in line:
             continue
         ts = _parse_banner_ts(line)
         if ts is not None:

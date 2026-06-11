@@ -170,3 +170,36 @@ def test_host_crontab_unmanaged_advisory_items_skipped(tmp_path, monkeypatch) ->
     tasks = generate_diverse_tasks.gen_platform_ops_tasks(existing=set())
 
     assert tasks == []
+
+
+def test_parse_banner_ts_accepts_hhmm_without_seconds() -> None:
+    """Python script banners like `=== 台股數據收集: 2026-06-11 15:00 ===` use HH:MM
+    (no seconds). _parse_banner_ts must accept them, otherwise _latest_cron_log_ts
+    walks backward past every recent run and returns an ancient cron_lib banner —
+    triggering a false 'cron staleness' alarm (2026-06-11 root cause)."""
+    ts = generate_diverse_tasks._parse_banner_ts(
+        "=== 台股數據收集: 2026-06-11 15:00 ==="
+    )
+    assert ts is not None
+    # 15:00 Asia/Taipei = 07:00 UTC
+    assert ts.hour == 7 and ts.minute == 0
+    assert ts.year == 2026 and ts.month == 6 and ts.day == 11
+
+
+def test_latest_cron_log_ts_picks_latest_hhmm_banner_over_old_seconds_banner(
+    tmp_path, monkeypatch
+) -> None:
+    """Regression: when a log contains old cron_lib banners (with seconds) followed
+    by newer python-print banners (HH:MM only), detector must return the newer one."""
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", tmp_path / "cron")
+    (tmp_path / "cron").mkdir()
+    log = tmp_path / "cron" / "x.log"
+    log.write_text(
+        "=== [collect_tw_data] exit 0 at 2026-05-28T07:00:24.467842+00:00 (duration=16.7s) ===\n"
+        "=== 台股數據收集: 2026-06-11 15:00 ===\n",
+        encoding="utf-8",
+    )
+    ts = generate_diverse_tasks._latest_cron_log_ts("x", "cron/x.log")
+    assert ts is not None
+    assert ts.year == 2026 and ts.month == 6 and ts.day == 11

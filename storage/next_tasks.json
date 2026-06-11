@@ -28063,7 +28063,7 @@
     "title": "Paper review (Codex 24h-rule): 跌的時候才算數：RS⁻ 跨 8 資產波動率預測力實測",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_938a158f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_938a158f",
@@ -28072,7 +28072,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-11T14:08:09+00:00"
+    "created_at": "2026-06-11T14:08:09+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-11T14:41:32.061736+00:00",
+    "claim_session_id": "f1e35098897d",
+    "started_at": "2026-06-11T14:41:32.169674+00:00",
+    "completed_at": "2026-06-11T14:43:57.984525+00:00",
+    "result": "CONDITIONAL_PASS: review saved at storage/reviews/codex_24h/mile_938a158f_review.md; no lookahead, but article should clarify |r| proxy target and mention IWM as borderline positive case."
   },
   {
     "id": "paper_review_mile_08704ceb",
@@ -28101,7 +28107,7 @@
     "title": "Cron staleness: collect_tw_data — last fire 343.1h ago (expected ≤336.0h)",
     "description": "`collect_tw_data` last ran at 2026-05-28T07:00:24.467842+00:00 (343.1h ago). Expected cadence per config/runtime_schedules.json gives gap ≤168.0h; observed >2x. Investigate: (a) wrapper script exists & executable, (b) recent log at storage/logs/cron/collect_tw_data.log, (c) launchd / crontab entry actually installed, (d) downstream consumer (release_pool / daily_update) for failure cascade.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "diverse_gen",
     "tags": [
@@ -28109,7 +28115,13 @@
       "cron-staleness",
       "main-thread-only"
     ],
-    "created_at": "2026-06-11T14:08:09+00:00"
+    "created_at": "2026-06-11T14:08:09+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-11T15:13:42.570859+00:00",
+    "claim_session_id": "79efae8722bd",
+    "started_at": "2026-06-11T15:13:42.726197+00:00",
+    "completed_at": "2026-06-11T15:13:42.867357+00:00",
+    "result": "Fix root cause: _parse_banner_ts now accepts HH:MM banners (Python print without seconds); sync canonical scripts/cron_collect_tw.sh → ~/.volpred/bin/cron_collect_tw.sh (was missing cron_lib banners). Verified: _latest_cron_log_ts('collect_tw_data')=2026-06-11T07:00Z; false 'staleness 343h ago' alarm cleared. Added 2 regression tests."
   },
   {
     "id": "research_0dte_vs",
@@ -28140,5 +28152,51 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-11T14:08:11+00:00"
+  },
+  {
+    "id": "paper_review_mile_9b76989e",
+    "title": "Paper review (Codex 24h-rule): 酒店娛樂業是股市的晴雨表嗎？文獻回顧與十年實證",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_9b76989e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_9b76989e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-11T15:08:08+00:00"
+  },
+  {
+    "id": "research_fragility_0050_vol_event_study",
+    "title": "研究 backlog fallback: 被動化與個股 fragility：0050 成分調整 vol event study",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 被動化與個股 fragility：0050 成分調整 vol event study — TWSE 公告，納入/剔除前後個股 RV 與 idio vol DiD（來源：JFM 2024-25 ETF fragility measure） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "fragility_0050_vol_event_study",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-11T15:08:11+00:00"
+  },
+  {
+    "id": "research_etf_vol",
+    "title": "研究 backlog fallback: 單股槓桿 ETF 上市對標的尾盤 vol 的因果效應",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 單股槓桿 ETF 上市對標的尾盤 vol 的因果效應 — TSLL/NVDL/CONL 上市日 DiD（控制組同業），2025 AUM $36B+ under-explored（來源：J.Derivatives/監管關注線） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "etf_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-11T15:08:11+00:00"
   }
 ]
