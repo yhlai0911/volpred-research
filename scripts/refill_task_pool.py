@@ -1078,8 +1078,14 @@ def refill(target: int, dry_run: bool = False) -> dict:
     # NEW research directions from research_program.md instead of going idle.
     fallback_reason = None
     if not new_entries:
+        # 2026-06-14 Three-Strike fix（pool-empty critical 反覆觸發根因）：原 cap
+        # min(2, target) 讓 fallback 每次只補 2 個，低於 REFILL_FLOOR(4) → 即使
+        # backlog 有 fresh 方向，pool 仍補不到健康水位、隔幾小時又 dry → 反覆 warn/
+        # critical。改成補到 target（= floor 缺口），讓 dry pool 一次回到健康水位。
+        # 品質 gate 仍由 _research_backlog_candidates 內的 arc-dedup / done-exp /
+        # non-research / slug-dup 多層 filter 把關，不會 flood 無關題。
         research_tasks = _research_backlog_candidates(
-            tasks, existing, limit=max(1, min(2, target))
+            tasks, existing, limit=max(1, target)
         )
         if research_tasks:
             new_entries.extend(research_tasks)

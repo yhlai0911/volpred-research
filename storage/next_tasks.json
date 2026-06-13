@@ -29885,7 +29885,7 @@
     "title": "K1481: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1481 has verdict signal (score=0, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1481",
@@ -29894,6 +29894,102 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-13T22:12:04+00:00"
+    "created_at": "2026-06-13T22:12:04+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T22:50:16.476330+00:00",
+    "claim_session_id": "cb1e18decc53",
+    "started_at": "2026-06-13T22:50:19.608124+00:00",
+    "completed_at": "2026-06-13T22:55:45.219624+00:00",
+    "result": "Published draft mile_624871ea for K1481 via publish_draft with cluster waiver: blocked-on-data / publication-date governance angle, not another Taiwan allocation story. Added 2 real PNG charts (market coverage + research gate) and passed image/content audits. Local feed.json updated; initial mirror sync hit EOF and a manual feed-sync retry hung, so remote sync remains unverified this turn."
+  },
+  {
+    "id": "research_risk_vol_cap_weight_vs_equal_weight",
+    "title": "研究 backlog fallback: 市場集中度 risk 與大盤 vol：cap-weight vs equal-weight 波動裂口",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 市場集中度 risk 與大盤 vol：cap-weight vs equal-weight 波動裂口 — yfinance SPY vs RSP（等權）RV 與相關，建 top-10 集中度 proxy（用前十大成分權重或 SPY/RSP return spread），檢定集中度升高 regime 下大盤 tail vol 是否系統性放大（來源：J.Index Investing/SPGI 2025；2025 末前十大佔 S&P 41% 創高） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "risk_vol_cap_weight_vs_equal_weight",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T23:08:13+00:00"
+  },
+  {
+    "id": "research_drawdown_low_vol_quality_value_yfinance_usmv_qua",
+    "title": "研究 backlog fallback: 防禦因子的 drawdown 分解：low-vol/quality/value 各自只保護「哪一半」— yfinance USMV/QUAL/VLUE/SPLV vs SPY，把 drawdown 拆 frequency × depth，檢定哪個防禦因子降深度、哪個降頻率，並對比加 trend overlay 的互補性；與既有 factor-ETF RV 題不同，聚焦 drawdown 機制分解（來源：FAJ 2026「Best Defensive Strategies, 220 years」；DAR+trend 最 robust）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 防禦因子的 drawdown 分解：low-vol/quality/value 各自只保護「哪一半」— yfinance USMV/QUAL/VLUE/SPLV vs SPY，把 drawdown 拆 frequency × depth，檢定哪個防禦因子降深度、哪個降頻率，並對比加 trend overlay 的互補性；與既有 factor-ETF RV 題不同，聚焦 drawdown 機制分解（來源：FAJ 2026「Best Defensive Strategies, 220 years」；DAR+trend 最 robust） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "drawdown_low_vol_quality_value_yfinance_usmv_qua",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T23:08:15+00:00"
+  },
+  {
+    "id": "research_rp_f2b1b83d49",
+    "title": "研究 backlog fallback: 跳躍 × 非對稱外溢同時控制是否仍改善 HAR",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 跳躍 × 非對稱外溢同時控制是否仍改善 HAR — yfinance 多市場指數 ETF（SPY/EWJ/EWG/EWU/EEM）日 RV+jump proxy，比較 HAR-RV vs 加 jump、加 sign-asymmetry spillover、兩者皆加，檢定 1/5/22 日 horizon QLIKE+DM 是否真有增量（來源：J.Forecasting 2025 jump & sign-asymmetry spillover；20 市場樣本） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_f2b1b83d49",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T23:09:39+00:00"
+  },
+  {
+    "id": "research_quantile_connectedness_var_yfinance_etf_rv_quant",
+    "title": "研究 backlog fallback: 極端尾部下的跨資產 quantile connectedness（非均值 VAR）— yfinance 股/債/金/油/加密 ETF RV，用 quantile-VAR 或 CoVaR 算「尾部 vs 中位」連結度差異，檢定危機期尾部外溢是否遠高於均值外溢、誰是淨尾部傳染源；與既有 level-VAR/Granger spillover 題正交（來源：JBF/SEF 2025-26 quantile connectedness；極端期 total connectedness >80%）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 極端尾部下的跨資產 quantile connectedness（非均值 VAR）— yfinance 股/債/金/油/加密 ETF RV，用 quantile-VAR 或 CoVaR 算「尾部 vs 中位」連結度差異，檢定危機期尾部外溢是否遠高於均值外溢、誰是淨尾部傳染源；與既有 level-VAR/Granger spillover 題正交（來源：JBF/SEF 2025-26 quantile connectedness；極端期 total connectedness >80%） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "quantile_connectedness_var_yfinance_etf_rv_quant",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T23:09:39+00:00"
+  },
+  {
+    "id": "research_conditional_drawdown_at_risk_cdar_vs_vol_target",
+    "title": "研究 backlog fallback: Conditional Drawdown-at-Risk（CDaR）目標 vs 傳統 vol-target",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Conditional Drawdown-at-Risk（CDaR）目標 vs 傳統 vol-target — yfinance 股/債/商品 ETF，比較以 CDaR 為風控目標 vs 固定 vol-target 的 net Sharpe、MDD 與左尾頻率，檢定 drawdown-aware 風控在壓力期是否真優於 vol-aware（與既有 VT 跨資產題不同，目標函數換成 drawdown）（來源：ITOR 2026 drawdown MINLP；JPM drawdown control trend） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "conditional_drawdown_at_risk_cdar_vs_vol_target",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T23:09:41+00:00"
+  },
+  {
+    "id": "research_diurnal_pattern_rv",
+    "title": "研究 backlog fallback: 日內 diurnal pattern 是否「足夠」解釋 RV 變異",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 日內 diurnal pattern 是否「足夠」解釋 RV 變異 — yfinance 或可得 5-min 代理，用無母數方法檢定剔除已知日內 U 型季節後是否仍有顯著 intraday vol 變異，量化季節成分占 RV 的比例（方法論基礎題，校準我方所有日內 RV 估計）（來源：arXiv 2601 diurnal sufficiency nonparametric assessment） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "diurnal_pattern_rv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T23:09:41+00:00"
   }
 ]

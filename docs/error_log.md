@@ -1726,3 +1726,18 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 
 **防再發**：refill 是 pool-dry 的唯一守門員，必須自帶 freshness 保證 — 不能假設外部會替它 rebuild。相同 staleness pattern 也應該套用到 `_journal_discovery_dispatch_task` 依賴的任何 backlog source（後續觀察）。
 
+
+## 2026-06-14 — pool-empty critical 反覆觸發（Three-Strike）→ 根因雙修
+
+**3-STRIKE TRIGGER**：production_pending critical（pool 0 pending、platform idle）一晚內反覆觸發 ≥3 次（2026-06-13 23:xx、06-14 02:xx 已手動補、06-14 07:00 又空）。手動補任務 = patch，不解根。
+
+**三層根因診斷**：
+1. **底層**：研究 pipeline 被平台消化速度 > 補充速度。backlog（research_program.md open `- [ ]`）逐層 filter 後 0 PASS — 不是 filter bug，是 103 個 open 項中 74 個已有 task（slug_dup）、25 非研究、6 已完成 = **真的抽乾**。
+2. **流程**：補充源頭（journal-discovery）受 24h + 每日一次 cap 限制；週末平台仍消化、源頭冷卻 → gap。
+3. **架構**：research-backlog fallback 的 per-refill cap = `min(2, target)` = **2 < REFILL_FLOOR(4)** → 即使 backlog 有 fresh 方向，refill 每次只補 2、永遠補不到健康水位 → 隔幾小時又 dry。這是反覆 warn/critical 的結構性主因。
+
+**雙修**：
+- (a) 即時：critical-idle 時 override journal-discovery 冷卻、手動派 agent 補 14 個新方向（WebSearch 趨勢層級非捏造、已去重既有 K）→ research_program.md batch 2026-06-14b。
+- (b) 結構（durable）：`scripts/refill_task_pool.py` research-backlog fallback cap `min(2,target)` → `max(1,target)`，讓 dry pool 一次補到 floor(4)。品質 gate 仍由 arc-dedup/done-exp/non-research/slug-dup 多層 filter 把關。驗證：refill 一次補 4、pool 2→6、arc-dedup 仍正確擋已覆蓋題、dashboard 0/0。
+
+**防再發**：pool 補到 floor 而非僅 +2 → 消化緩衝變大、dry 頻率大降。後續若仍反覆，下一層 fix = journal-discovery critical-idle 時 auto-override 24h cap（目前靠主線程手動）。
