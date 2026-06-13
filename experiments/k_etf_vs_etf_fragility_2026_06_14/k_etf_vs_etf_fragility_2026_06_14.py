@@ -134,7 +134,7 @@ def pc1_share(window_returns: pd.DataFrame) -> float:
     return float(vals[0] / vals.sum())
 
 
-def non_overlapping_events(shock: pd.Series, min_gap: int = PC_WINDOW) -> list[pd.Timestamp]:
+def non_overlapping_events(shock: pd.Series, min_gap: int = 2 * PC_WINDOW + 1) -> list[pd.Timestamp]:
     dates: list[pd.Timestamp] = []
     last_pos = -10_000
     idx = list(shock.index)
@@ -262,6 +262,12 @@ def run_experiment() -> dict:
         "seed": SEED,
         "data": {
             "source": "yfinance",
+            "data_pulled_at": pd.Timestamp.now(tz="UTC").isoformat(),
+            "package_versions": {
+                "numpy": np.__version__,
+                "pandas": pd.__version__,
+                "yfinance": yf.__version__,
+            },
             "tickers": ALL_TICKERS,
             "start_date": START_DATE,
             "end_date": END_DATE,
@@ -278,15 +284,18 @@ def run_experiment() -> dict:
         },
         "literature": [asdict(item) for item in LITERATURE],
         "hypotheses": {
-            "h1_macro_efficiency_proxy": "ETF basket absorbs macro shock contemporaneously: same-day abs returns on shock days exceed normal days.",
-            "h2_fragility_proxy": "Shock days are followed by stronger return reversal and/or higher common-factor share.",
+            "h1_market_stress_comovement_proxy": (
+                "ETF basket co-moves strongly on same-day SPY/VIX market-stress days. "
+                "Because stress is defined from same-day SPY/VIX returns, this is not independent proof of macro-information efficiency."
+            ),
+            "h2_post_shock_stress_proxy": "Shock days are followed by stronger return reversal and/or higher common-factor share.",
         },
         "interpretation": {
-            "verdict": "PARTIAL_POSITIVE_PROXY",
+            "verdict": "REDUCED_FORM_SUPPORT_WITH_CAVEATS",
             "summary": (
-                "The public ETF panel strongly supports contemporaneous macro-shock absorption "
-                "and shows post-shock fragility signatures through reversal and higher common-factor share. "
-                "It remains a reduced-form proxy, not direct evidence from ETF ownership or create/redeem flows."
+                "The public ETF panel strongly co-moves on same-day SPY/VIX stress days and shows post-shock "
+                "stress signatures through reversal and higher common-factor share. It remains a reduced-form "
+                "proxy, not direct evidence of ETF macro-efficiency, ETF ownership fragility, or create/redeem flows."
             ),
         },
         "tests": {

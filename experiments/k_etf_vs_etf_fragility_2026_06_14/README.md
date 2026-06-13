@@ -2,7 +2,7 @@
 
 ## Research Question
 
-Do broad country and sector ETFs show the two-sided pattern implied by the recent ETF literature: faster macro-information incorporation on shock days, but stronger post-shock fragility through reversal or co-movement?
+Do broad country and sector ETFs show the two-sided pattern implied by the recent ETF literature: strong same-day market-stress co-movement, followed by post-shock reversal or stronger common-factor dominance?
 
 This is an honest public-data proxy experiment. It does **not** observe ETF primary-market create/redeem flows, ETF ownership, or underlying-stock order flow. It tests whether the pattern is visible in a tradable ETF panel using daily public prices.
 
@@ -42,13 +42,13 @@ A macro-shock day is defined as:
 
 `abs(SPY return)` or positive `VIX` log change above its own lagged 252-day 95th percentile.
 
-The threshold is lagged by one day, so the event definition uses information available before the current day's return is classified. This is an event classification, not a trading signal.
+The threshold is lagged by one day, so the event definition uses information available before the current day's return is classified. The shock **label** still uses same-day SPY/VIX returns, so H1 is a same-day market-stress co-movement test, not independent proof of macro-information efficiency and not a trading signal.
 
 ## Tests
 
-### H1: macro-efficiency proxy
+### H1: market-stress co-movement proxy
 
-The equal-weight ETF basket should move more on shock days than normal days if ETFs absorb macro information contemporaneously.
+The equal-weight ETF basket should move more on SPY/VIX shock days than normal days if ETF panel returns co-move strongly with broad market stress.
 
 - Compare same-day absolute ETF-basket return on shock days vs normal days.
 - Mann-Whitney test for distribution difference.
@@ -59,7 +59,7 @@ The equal-weight ETF basket should move more on shock days than normal days if E
 Fragility should show up as reversal or stronger common-factor dominance after shock days.
 
 - Reversal panel: `r_{i,t+1} = a + b r_{i,t} + c shock_t + d r_{i,t} * shock_t + asset FE + e`, with date-clustered robust standard errors.
-- Common-factor event study: for non-overlapping shock dates, compare ETF-panel PC1 share in the 21 trading days before the event vs the 21 trading days after the event.
+- Common-factor event study: for shock dates spaced at least 43 trading days apart, compare ETF-panel PC1 share in the 21 trading days before the event vs the 21 trading days after the event. The 43-day gap prevents adjacent event windows from sharing observations.
 
 ## Files
 
@@ -70,26 +70,26 @@ Fragility should show up as reversal or stronger common-factor dominance after s
 
 ## Main Result
 
-Verdict: **PARTIAL_POSITIVE_PROXY**.
+Verdict: **REDUCED_FORM_SUPPORT_WITH_CAVEATS**.
 
-The public ETF panel supports the two-sided ETF story in reduced-form data:
+The public ETF panel supports a reduced-form two-sided pattern, but only after downgrading the claim from "ETF macroefficiency / ETF fragility" to "same-day market-stress co-movement / post-shock stress signatures":
 
-- H1 macro-efficiency proxy passes: ETF basket same-day absolute return is `2.09%` on macro-shock days vs `0.66%` on normal days, a `3.17x` ratio. Mann-Whitney p-value is `9.84e-103`.
+- H1 same-day stress co-movement is strong: ETF basket same-day absolute return is `2.09%` on SPY/VIX shock days vs `0.66%` on normal days, a `3.17x` ratio. Mann-Whitney p-value is `9.83e-103`.
 - Same-day shock absorption is front-loaded: shock-day absolute return is `2.09%`, while next-day absolute return falls to `1.16%`; paired t-stat is `10.59`, p-value `1.83e-22`.
 - H2 reversal proxy is directionally supportive and still passes at the 5% level after date clustering: the interaction term `ret_t * shock_t` in the next-day return panel is `-0.183`, date-clustered t-stat `-2.01`, p-value `0.0449`.
-- H2 co-vol proxy passes: post-shock 21-day PC1 share rises from `0.634` to `0.692`, delta `+0.058`; t-stat `3.99`, p-value `0.00013`; Wilcoxon p-value `0.00038`.
+- H2 common-factor proxy is stronger after enforcing non-overlap: post-shock 21-day PC1 share rises from `0.605` to `0.691`, delta `+0.085`; t-stat `4.40`, p-value `4.79e-05`; Wilcoxon p-value `0.00012`; `58` non-overlapping events.
 
 The honest reading is:
 
-1. ETFs in this panel do absorb macro shocks contemporaneously.
-2. Shock days are followed by stronger reversal and higher common-factor dominance.
+1. ETFs in this panel co-move strongly on SPY/VIX stress days.
+2. Shock days are followed by a marginal but correctly signed reversal interaction and a clearer rise in common-factor dominance.
 3. This is consistent with the macro-efficiency-plus-fragility literature, but it is **not** direct causal evidence from ETF ownership, primary-market create/redeem flow, or underlying-stock arbitrage records.
 
 ## Caveats
 
-- Macro-shock days are defined from SPY/VIX returns, so this is a reduced-form market shock design, not an exogenous macro-announcement design.
+- Macro-shock days are defined from same-day SPY/VIX returns, so the H1 result is partly mechanical co-movement with broad market stress, not an exogenous macro-announcement design.
 - The ETF basket mixes country ETFs and US sector ETFs. It tests traded ETF-panel behavior, not stock-level ETF ownership exposure.
-- PC1 share uses 21-day windows and non-overlapping shock dates, which reduces dependence but does not eliminate event clustering.
+- PC1 share uses 21-day windows and a 43-trading-day event gap, which prevents overlapping event windows but still does not make this a causal design.
 - Results should not be used as a trading strategy without a separate strictly lagged OOS rule. This experiment is descriptive/event-study evidence.
 
 ## Follow-up
