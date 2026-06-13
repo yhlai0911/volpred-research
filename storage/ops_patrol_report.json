@@ -1,35 +1,35 @@
 {
-  "timestamp": "2026-06-11T12:05:17Z",
+  "timestamp": "2026-06-13T11:31:02+08:00",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "140 drafts total (general=93 >=8 OK, research=47 >=4 OK). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "140 drafts total (general=93 >=8 OK, research=47 >=4 OK). All thresholds met (total>=12, research>=4, general>=8). Total feed items: 1606."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified ~12 seconds before patrol run (2026-06-11T12:05:05Z approx). Well within 26h threshold."
+      "detail": "storage/strategy_metrics.json mtime epoch 1781321419, age ~26 seconds at check time. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Two entries dated today (2026-06-11): (1) 文章圖片中文豆腐字 — matplotlib CJK font fallback in k202/mile_872abdc3; fixed with scripts/plot_style.py + regenerate_figures.py + Supabase re-upsert (commit 618e8720). (2) Mirror sync 靜默 401 近一個月 — OPS_ADMIN_TOKEN gate on /api/sync/* not propagated to callers; fixed with mirror_auth.py + loud exception logging. Both entries resolved.",
+      "detail": "Last 30 lines of docs/error_log.md contain entries from 2026-06-11 (2 days ago). No entries dated today (2026-06-13) or yesterday (2026-06-12). Most recent issues resolved: (1) matplotlib CJK font fallback k202 — fixed with scripts/plot_style.py. (2) Mirror sync silent 401 ~1 month — fixed with OPS_ADMIN_TOKEN propagation.",
       "recent_entries": [
-        "2026-06-11: matplotlib CJK font fallback in k202 — fixed with scripts/plot_style.py apply_cjk_style()",
-        "2026-06-11: Mirror sync silent 401 for ~1 month — fixed with OPS_ADMIN_TOKEN propagation to callers"
+        "2026-06-11: matplotlib CJK font fallback in k202/mile_872abdc3 — fixed with scripts/plot_style.py apply_cjk_style()",
+        "2026-06-11: Mirror sync silent 401 for ~1 month — fixed with mirror_auth.py + OPS_ADMIN_TOKEN propagation to callers"
       ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 active strategies checked. All have <=1 null portfolio_return in last 3 entries (threshold: >2 nulls for alert). _market_daily has no entries (inactive/skipped)."
+      "detail": "10 active strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage). No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Clean working tree."
+      "detail": "0 uncommitted files. Clean working tree. Threshold: 50 files."
     },
     {
       "name": "KNOWLEDGE_SIZE",
