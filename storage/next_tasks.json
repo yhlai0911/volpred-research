@@ -29497,7 +29497,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
     "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "auto_journal_discovery_fallback",
     "tags": [
@@ -29505,7 +29505,13 @@
       "research-backlog-refresh",
       "tier3-fallback"
     ],
-    "created_at": "2026-06-13T16:12:35+00:00"
+    "created_at": "2026-06-13T16:12:35+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T16:43:16.315962+00:00",
+    "claim_session_id": "b0767fca90c6",
+    "started_at": "2026-06-13T16:43:27.820499+00:00",
+    "completed_at": "2026-06-13T16:50:49.844548+00:00",
+    "result": "依 journal_topic_scan.md + WebSearch 完成 2026-06-14 期刊主題挖掘 batch。已在 research_program.md 補 12 個新研究方向，覆蓋 novel-risk LLM、ETF macroefficiency/fragility、Treasury OFI/funding、private credit/BDC、AI infra、VRP decline、XAI ensemble、bond-fund design、BNPL、stablecoin、commodity inventory。驗證 next_tasks.json 可解析。"
   },
   {
     "id": "email-11738-2921b9",

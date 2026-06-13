@@ -508,6 +508,21 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 加密「vol-of-vol」與跨市場尾部外溢的免期權版 — yfinance BTC/ETH 算 RV 與 vol-of-vol，檢定對股/金/油尾部外溢（CoVaR/quantile spillover），加密能否當尾部避險（來源：J.Futures Markets 2025 crypto vol-of-vol；BTC vol 200%→50% 結構轉變）
 - [ ] 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）
 
+### 期刊主題挖掘 batch（2026-06-14；JPM novel risk / CFA AI / JFM ETF / Fed Treasury OFI / private credit，可由免費代理資料啟動）
+> 來源：journal-topic-discovery fallback（JPM 2025 Novel Risks and Sources of Volatility、CFA Institute Research Foundation 2025 AI / macro-correlation briefs、JFM 2025 ETF fragility、Fed 2025 Treasury OFI note、FSB/IMF/private-credit survey）。只採趨勢層級，不編造未核實文章；避開 06-10/06-11 已有 0DTE、LETF、GPR、氣候 green-brown、FINRA short volume、台股當沖、MOVE、stock-bond-correlation 題。
+- [ ] LLM novel-risk intensity 作為 RV 先行訊號 — 用 GDELT/新聞 RSS + 開源 LLM/關鍵詞分類建立 daily novel-risk intensity（AI、private credit、tariff、cyber、supply-chain），加入 HAR-RV/GJR-X 檢定 SPY/QQQ/HYG/TLT 次日與 5 日 RV 增量 QLIKE+DM（來源：JPM 2025 novel risks / LLM novel-risk measurement；CFA AI risk oversight）
+- [ ] ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 shock 日更快反映資訊但後續 co-volatility / reversal 更強（來源：JPM 2025 ETF macroefficiency + JFM 2025 ETF-based fragility）
+- [ ] Treasury signed-volume imbalance 免訂單簿代理 — 用 ZN=F/TLT/IEF intraday 或日頻 signed volume = sign(return)×volume 建流動性需求 proxy，檢定大單邊需求日是否預測 TLT RV、SPY RV 與股債相關升高；若 intraday 不足則先做日頻 pilot（來源：Fed 2025 Treasury order-flow imbalance / market-depth volatility）
+- [ ] Private credit 壓力的公開市場影子指標 — 用 BIZD/BDC 個股 basket、BKLN、HYG、KRE、LQD 建 private-credit stress proxy，檢定 BDC/loan ETF vol 或 drawdown 是否領先高收益信用與小型股 RV；明確標示 private-credit 真實 NAV/loan tape blocked（來源：FSB 2026 private-credit vulnerabilities；IMF/academic private-credit systemic-risk frontier）
+- [ ] AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift）
+- [ ] variance risk premium 下降後，短波策略是否失去經濟 edge — 用 ^VIX vs SPY realized variance、SVXY/VXX proxy、分段 2006-2017/2018-2026，檢定 VRP 均值、tail loss、short-vol Sharpe 與 drawdown 是否結構性惡化；不使用 options chain 先做免期權版（來源：Chicago Fed 2025 VRP decline）
+- [ ] explainable ensemble vol model 的「特徵穩定性 gate」 — RandomForest/XGBoost/LightGBM ensemble 加 HAR/GJR features、macro/ETF/credit proxies，追蹤 walk-forward feature importance / SHAP rank drift；若 QLIKE 改善但特徵不穩，標為不可上架（來源：CFA 2025 ensemble learning / XAI in finance；回應本專案 ML ceiling）
+- [ ] Bond-fund investor design 與債券 ETF 波動 proxy — 用 HYG/LQD/AGG/BND/TLT trading volume、折溢價可得性與 fund-flow proxy（若流量資料 blocked 則用成交額 shock）檢定 ETF 結構在信用壓力日是緩衝還是放大債券 RV（來源：IMF 2025 fund investor types and bond market volatility；J.Fixed Income / bond ETF liquidity trend）
+- [ ] BNPL / 消費信貸平台作 credit-cycle 前哨 — 用 AFRM/UPST/SOFI/ALLY RV + FRED 信用卡/汽車貸款 delinquency、消費者信心，檢定 consumer-credit proxy 是否領先 IWM/HYG/金融股 RV（來源：CFA 2025 Alternative Credit: Rise of Consumer Lending；BNPL/consumer lending 風險透明度）
+- [ ] Repo-basis funding stress gate 預測 duration 資產波動 — FRED/NY Fed SOFR-EFFR/TGCR spread、CFTC leveraged funds Treasury futures shorts、ZN=F/TLT/IEF RV，檢定 repo funding 壓力與 basis-trade proxy 是否領先長債 RV（來源：NY Fed / Dallas Fed 2025 Treasury funding liquidity and basis trade）
+- [ ] Stablecoin redemption pressure 作 crypto-to-Treasury vol channel — DefiLlama stablecoin supply net flow、CoinGecko USDT/USDC peg deviation、BTC/ETH/T-bill/TLT RV，測試穩定幣流出或脫鉤是否領先 crypto RV 與短債/長債波動（來源：CFA 2025 stablecoins and Treasuries funding link；IMF/Fed digital finance concern）
+- [ ] Inventory surprise 作 commodity RV regime feature — EIA crude/natgas inventory surprise、USDA WASDE/crop report dates、CL=F/NG=F/USO/UNG/DBA RV，把 inventory/carry/momentum 加入 HAR 或 gradient boosting，與 price-only baseline 做 QLIKE/DM（來源：CFA 2025 ML in commodity futures；J.Futures Markets inventory/liquidity/speculation trend）
+
 ## 決策框架
 
 ### 何時深入某面向
