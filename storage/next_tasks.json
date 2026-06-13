@@ -29677,5 +29677,39 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-13T17:34:10+00:00"
+  },
+  {
+    "id": "research_variance_risk_premium_edge",
+    "title": "研究 backlog fallback: variance risk premium 下降後，短波策略是否失去經濟 edge",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: variance risk premium 下降後，短波策略是否失去經濟 edge — 用 ^VIX vs SPY realized variance、SVXY/VXX proxy、分段 2006-2017/2018-2026，檢定 VRP 均值、tail loss、short-vol Sharpe 與 drawdown 是否結構性惡化；不使用 options chain 先做免期權版（來源：Chicago Fed 2025 VRP decline） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "variance_risk_premium_edge",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T18:08:19+00:00",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-06-13T18:09:08.677331+00:00",
+    "claim_session_id": "f634e28ffdde",
+    "started_at": "2026-06-13T18:09:09.550363+00:00"
+  },
+  {
+    "id": "research_explainable_ensemble_vol_model_gate",
+    "title": "研究 backlog fallback: explainable ensemble vol model 的「特徵穩定性 gate」",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: explainable ensemble vol model 的「特徵穩定性 gate」 — RandomForest/XGBoost/LightGBM ensemble 加 HAR/GJR features、macro/ETF/credit proxies，追蹤 walk-forward feature importance / SHAP rank drift；若 QLIKE 改善但特徵不穩，標為不可上架（來源：CFA 2025 ensemble learning / XAI in finance；回應本專案 ML ceiling） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "explainable_ensemble_vol_model_gate",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T18:08:19+00:00"
   }
 ]
