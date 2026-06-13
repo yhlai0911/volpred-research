@@ -29967,7 +29967,7 @@
     "title": "研究 backlog fallback: Conditional Drawdown-at-Risk（CDaR）目標 vs 傳統 vol-target",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Conditional Drawdown-at-Risk（CDaR）目標 vs 傳統 vol-target — yfinance 股/債/商品 ETF，比較以 CDaR 為風控目標 vs 固定 vol-target 的 net Sharpe、MDD 與左尾頻率，檢定 drawdown-aware 風控在壓力期是否真優於 vol-aware（與既有 VT 跨資產題不同，目標函數換成 drawdown）（來源：ITOR 2026 drawdown MINLP；JPM drawdown control trend） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "conditional_drawdown_at_risk_cdar_vs_vol_target",
@@ -29975,7 +29975,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-13T23:09:41+00:00"
+    "created_at": "2026-06-13T23:09:41+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T23:18:32.136802+00:00",
+    "claim_session_id": "47ea07f5b6d6",
+    "started_at": "2026-06-13T23:18:57.511596+00:00",
+    "completed_at": "2026-06-13T23:27:02.649016+00:00",
+    "result": "K1494 completed: SPY/TLT/GLD/DBC yfinance experiment comparing trailing CDaR95 exposure scaling vs 63d vol target. Verdict NULL: OOS CDaR CAGR higher (11.432% vs 10.441%) but Sharpe lower, MDD worse (-23.237% vs -16.258%), and 2% left-tail days worse (29 vs 18; bootstrap CI for tail-frequency diff [0.00095, 0.01041]). Three-piece + data cache + 2 PNGs created; knowledge item 2d5d425f written. experiments index rebuild was attempted but killed after >90s with no output."
   },
   {
     "id": "research_diurnal_pattern_rv",

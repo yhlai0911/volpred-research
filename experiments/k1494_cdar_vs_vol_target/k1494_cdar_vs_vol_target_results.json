@@ -1,0 +1,426 @@
+{
+  "experiment_id": "k1494_cdar_vs_vol_target",
+  "title": "Conditional Drawdown-at-Risk target vs traditional vol target",
+  "run_timestamp": "2026-06-13T23:23:57.398945+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance auto-adjusted close",
+    "tickers": [
+      "SPY",
+      "TLT",
+      "GLD",
+      "DBC"
+    ],
+    "download_start": "2006-01-01",
+    "download_end": "2026-06-01",
+    "analysis_start": "2008-12-31",
+    "analysis_end": "2026-05-29",
+    "n_days": 4379,
+    "cached_prices": "experiments/k1494_cdar_vs_vol_target/data/prices.csv"
+  },
+  "method": {
+    "base_portfolio": "equal-weight daily return of SPY/TLT/GLD/DBC",
+    "vol_target": {
+      "target_ann_vol": 0.1,
+      "lookback_days": 63,
+      "signal_lag": "shift(1) before applying returns"
+    },
+    "cdar_target": {
+      "alpha": 0.95,
+      "lookback_days": 252,
+      "target_cdar": 0.08199999999999999,
+      "target_calibration": {
+        "target_cdar": 0.08199999999999999,
+        "vol_target_is_mean_exposure": 1.1380356679765216,
+        "cdar_is_mean_exposure": 1.1421795901722347,
+        "absolute_gap": 0.0041439221957131345,
+        "calibration_period": [
+          "2008-01-02",
+          "2017-12-29"
+        ]
+      },
+      "signal_lag": "shift(1) before applying returns"
+    },
+    "exposure_clip": [
+      0.0,
+      1.5
+    ],
+    "transaction_cost_one_way": 0.0005,
+    "oos_start": "2018-01-02",
+    "bootstrap": {
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    }
+  },
+  "metrics_full": {
+    "buy_hold": {
+      "n_days": 4379,
+      "start": "2008-12-31",
+      "end": "2026-05-29",
+      "cagr_pct": 8.114,
+      "ann_return_pct": 8.261,
+      "ann_vol_pct": 9.566,
+      "sharpe": 0.8636,
+      "mdd_pct": -19.429,
+      "calmar": 0.4176,
+      "cdar95_pct": 14.821,
+      "left_tail_days_2pct": 21,
+      "left_tail_freq_2pct": 0.0048,
+      "cvar5_daily_pct": -1.393,
+      "mean_exposure": 1.0,
+      "turnover_ann": 0.0
+    },
+    "vol_target": {
+      "n_days": 4379,
+      "start": "2008-12-31",
+      "end": "2026-05-29",
+      "cagr_pct": 8.172,
+      "ann_return_pct": 8.371,
+      "ann_vol_pct": 10.136,
+      "sharpe": 0.8258,
+      "mdd_pct": -25.686,
+      "calmar": 0.3181,
+      "cdar95_pct": 18.957,
+      "left_tail_days_2pct": 28,
+      "left_tail_freq_2pct": 0.00639,
+      "cvar5_daily_pct": -1.474,
+      "mean_exposure": 1.1524,
+      "turnover_ann": 2.5462
+    },
+    "cdar_target": {
+      "n_days": 4379,
+      "start": "2008-12-31",
+      "end": "2026-05-29",
+      "cagr_pct": 8.612,
+      "ann_return_pct": 8.907,
+      "ann_vol_pct": 11.339,
+      "sharpe": 0.7855,
+      "mdd_pct": -23.428,
+      "calmar": 0.3676,
+      "cdar95_pct": 20.103,
+      "left_tail_days_2pct": 46,
+      "left_tail_freq_2pct": 0.0105,
+      "cvar5_daily_pct": -1.73,
+      "mean_exposure": 1.1782,
+      "turnover_ann": 0.6357
+    }
+  },
+  "metrics_oos": {
+    "buy_hold": {
+      "n_days": 2113,
+      "start": "2018-01-02",
+      "end": "2026-05-29",
+      "cagr_pct": 10.391,
+      "ann_return_pct": 10.399,
+      "ann_vol_pct": 10.103,
+      "sharpe": 1.0293,
+      "mdd_pct": -18.003,
+      "calmar": 0.5772,
+      "cdar95_pct": 14.033,
+      "left_tail_days_2pct": 12,
+      "left_tail_freq_2pct": 0.00568,
+      "cvar5_daily_pct": -1.495,
+      "mean_exposure": 1.0,
+      "turnover_ann": 0.0
+    },
+    "vol_target": {
+      "n_days": 2113,
+      "start": "2018-01-02",
+      "end": "2026-05-29",
+      "cagr_pct": 10.441,
+      "ann_return_pct": 10.487,
+      "ann_vol_pct": 10.523,
+      "sharpe": 0.9966,
+      "mdd_pct": -16.258,
+      "calmar": 0.6422,
+      "cdar95_pct": 13.031,
+      "left_tail_days_2pct": 18,
+      "left_tail_freq_2pct": 0.00852,
+      "cvar5_daily_pct": -1.548,
+      "mean_exposure": 1.1304,
+      "turnover_ann": 2.7151
+    },
+    "cdar_target": {
+      "n_days": 2113,
+      "start": "2018-01-02",
+      "end": "2026-05-29",
+      "cagr_pct": 11.432,
+      "ann_return_pct": 11.606,
+      "ann_vol_pct": 12.464,
+      "sharpe": 0.9312,
+      "mdd_pct": -23.237,
+      "calmar": 0.492,
+      "cdar95_pct": 18.185,
+      "left_tail_days_2pct": 29,
+      "left_tail_freq_2pct": 0.01372,
+      "cvar5_daily_pct": -1.908,
+      "mean_exposure": 1.2169,
+      "turnover_ann": 0.608
+    }
+  },
+  "stress_periods": {
+    "gfc": {
+      "buy_hold": {
+        "n_days": 125,
+        "start": "2008-12-31",
+        "end": "2009-06-30",
+        "cagr_pct": 1.386,
+        "ann_return_pct": 2.602,
+        "ann_vol_pct": 15.725,
+        "sharpe": 0.1655,
+        "mdd_pct": -12.156,
+        "calmar": 0.114,
+        "cdar95_pct": 11.406,
+        "left_tail_days_2pct": 3,
+        "left_tail_freq_2pct": 0.024,
+        "cvar5_daily_pct": -2.024,
+        "mean_exposure": 1.0,
+        "turnover_ann": 0.0
+      },
+      "vol_target": {
+        "n_days": 125,
+        "start": "2008-12-31",
+        "end": "2009-06-30",
+        "cagr_pct": 4.361,
+        "ann_return_pct": 4.64,
+        "ann_vol_pct": 8.655,
+        "sharpe": 0.5362,
+        "mdd_pct": -5.41,
+        "calmar": 0.8062,
+        "cdar95_pct": 4.979,
+        "left_tail_days_2pct": 0,
+        "left_tail_freq_2pct": 0.0,
+        "cvar5_daily_pct": -0.995,
+        "mean_exposure": 0.5521,
+        "turnover_ann": 1.8088
+      },
+      "cdar_target": {
+        "n_days": 125,
+        "start": "2008-12-31",
+        "end": "2009-06-30",
+        "cagr_pct": 0.483,
+        "ann_return_pct": 0.604,
+        "ann_vol_pct": 4.972,
+        "sharpe": 0.1215,
+        "mdd_pct": -4.045,
+        "calmar": 0.1193,
+        "cdar95_pct": 3.784,
+        "left_tail_days_2pct": 0,
+        "left_tail_freq_2pct": 0.0,
+        "cvar5_daily_pct": -0.647,
+        "mean_exposure": 0.3157,
+        "turnover_ann": 0.021
+      }
+    },
+    "covid_crash": {
+      "buy_hold": {
+        "n_days": 50,
+        "start": "2020-02-20",
+        "end": "2020-04-30",
+        "cagr_pct": -23.889,
+        "ann_return_pct": -24.398,
+        "ann_vol_pct": 24.163,
+        "sharpe": -1.0097,
+        "mdd_pct": -16.499,
+        "calmar": -1.4479,
+        "cdar95_pct": 15.803,
+        "left_tail_days_2pct": 5,
+        "left_tail_freq_2pct": 0.1,
+        "cvar5_daily_pct": -3.805,
+        "mean_exposure": 1.0,
+        "turnover_ann": 0.0
+      },
+      "vol_target": {
+        "n_days": 50,
+        "start": "2020-02-20",
+        "end": "2020-04-30",
+        "cagr_pct": -41.308,
+        "ann_return_pct": -51.18,
+        "ann_vol_pct": 20.331,
+        "sharpe": -2.5174,
+        "mdd_pct": -16.258,
+        "calmar": -2.5408,
+        "cdar95_pct": 15.853,
+        "left_tail_days_2pct": 6,
+        "left_tail_freq_2pct": 0.12,
+        "cvar5_daily_pct": -3.559,
+        "mean_exposure": 0.7814,
+        "turnover_ann": 5.4677
+      },
+      "cdar_target": {
+        "n_days": 50,
+        "start": "2020-02-20",
+        "end": "2020-04-30",
+        "cagr_pct": -55.675,
+        "ann_return_pct": -76.892,
+        "ann_vol_pct": 29.431,
+        "sharpe": -2.6126,
+        "mdd_pct": -23.237,
+        "calmar": -2.396,
+        "cdar95_pct": 22.57,
+        "left_tail_days_2pct": 6,
+        "left_tail_freq_2pct": 0.12,
+        "cvar5_daily_pct": -5.433,
+        "mean_exposure": 1.0256,
+        "turnover_ann": 4.1685
+      }
+    },
+    "rates_2022": {
+      "buy_hold": {
+        "n_days": 209,
+        "start": "2022-01-03",
+        "end": "2022-10-31",
+        "cagr_pct": -13.684,
+        "ann_return_pct": -13.838,
+        "ann_vol_pct": 13.241,
+        "sharpe": -1.0451,
+        "mdd_pct": -18.003,
+        "calmar": -0.7601,
+        "cdar95_pct": 17.3,
+        "left_tail_days_2pct": 3,
+        "left_tail_freq_2pct": 0.01435,
+        "cvar5_daily_pct": -1.867,
+        "mean_exposure": 1.0,
+        "turnover_ann": 0.0
+      },
+      "vol_target": {
+        "n_days": 209,
+        "start": "2022-01-03",
+        "end": "2022-10-31",
+        "cagr_pct": -10.153,
+        "ann_return_pct": -10.077,
+        "ann_vol_pct": 11.223,
+        "sharpe": -0.8978,
+        "mdd_pct": -15.576,
+        "calmar": -0.6519,
+        "cdar95_pct": 14.969,
+        "left_tail_days_2pct": 1,
+        "left_tail_freq_2pct": 0.00478,
+        "cvar5_daily_pct": -1.562,
+        "mean_exposure": 0.8597,
+        "turnover_ann": 2.2967
+      },
+      "cdar_target": {
+        "n_days": 209,
+        "start": "2022-01-03",
+        "end": "2022-10-31",
+        "cagr_pct": -13.224,
+        "ann_return_pct": -13.071,
+        "ann_vol_pct": 14.901,
+        "sharpe": -0.8772,
+        "mdd_pct": -19.071,
+        "calmar": -0.6934,
+        "cdar95_pct": 18.667,
+        "left_tail_days_2pct": 7,
+        "left_tail_freq_2pct": 0.03349,
+        "cvar5_daily_pct": -2.408,
+        "mean_exposure": 1.0886,
+        "turnover_ann": 1.2327
+      }
+    },
+    "post_2024": {
+      "buy_hold": {
+        "n_days": 604,
+        "start": "2024-01-02",
+        "end": "2026-05-29",
+        "cagr_pct": 19.332,
+        "ann_return_pct": 18.177,
+        "ann_vol_pct": 9.978,
+        "sharpe": 1.8216,
+        "mdd_pct": -7.742,
+        "calmar": 2.497,
+        "cdar95_pct": 4.121,
+        "left_tail_days_2pct": 3,
+        "left_tail_freq_2pct": 0.00497,
+        "cvar5_daily_pct": -1.444,
+        "mean_exposure": 1.0,
+        "turnover_ann": 0.0
+      },
+      "vol_target": {
+        "n_days": 604,
+        "start": "2024-01-02",
+        "end": "2026-05-29",
+        "cagr_pct": 20.257,
+        "ann_return_pct": 19.034,
+        "ann_vol_pct": 10.778,
+        "sharpe": 1.766,
+        "mdd_pct": -8.699,
+        "calmar": 2.3287,
+        "cdar95_pct": 4.718,
+        "left_tail_days_2pct": 7,
+        "left_tail_freq_2pct": 0.01159,
+        "cvar5_daily_pct": -1.575,
+        "mean_exposure": 1.0984,
+        "turnover_ann": 3.2372
+      },
+      "cdar_target": {
+        "n_days": 604,
+        "start": "2024-01-02",
+        "end": "2026-05-29",
+        "cagr_pct": 28.796,
+        "ann_return_pct": 26.381,
+        "ann_vol_pct": 14.59,
+        "sharpe": 1.8082,
+        "mdd_pct": -11.444,
+        "calmar": 2.5163,
+        "cdar95_pct": 6.133,
+        "left_tail_days_2pct": 12,
+        "left_tail_freq_2pct": 0.01987,
+        "cvar5_daily_pct": -2.11,
+        "mean_exposure": 1.4394,
+        "turnover_ann": 0.1047
+      }
+    }
+  },
+  "formal_tests": {
+    "paired_moving_block_bootstrap_oos": {
+      "sharpe_diff_cdar_minus_vol": {
+        "mean": -0.05518,
+        "ci_2p5": -0.26997,
+        "ci_97p5": 0.15863,
+        "p_gt_0": 0.311
+      },
+      "mdd_diff_pp_cdar_minus_vol": {
+        "mean": -5.08654,
+        "ci_2p5": -12.01999,
+        "ci_97p5": 1.35104,
+        "p_gt_0": 0.076
+      },
+      "cagr_diff_pp_cdar_minus_vol": {
+        "mean": 1.06186,
+        "ci_2p5": -1.95847,
+        "ci_97p5": 4.01499,
+        "p_gt_0": 0.754
+      },
+      "left_tail_freq_diff_cdar_minus_vol": {
+        "mean": 0.00525,
+        "ci_2p5": 0.00095,
+        "ci_97p5": 0.01041,
+        "p_gt_0": 0.988
+      }
+    }
+  },
+  "verdict": {
+    "overall": "NULL",
+    "plain_english": "The simple trailing-CDaR scaler does not beat traditional realized-vol targeting OOS. It earns higher CAGR through higher exposure, but Sharpe is lower, MDD is deeper, and the paired block bootstrap shows 2% left-tail day frequency reliably worsens."
+  },
+  "figures": [
+    "experiments/k1494_cdar_vs_vol_target/k1494_equity_curves.png",
+    "experiments/k1494_cdar_vs_vol_target/k1494_exposure_and_risk_signals.png"
+  ],
+  "references": [
+    {
+      "citation": "Chekhlov, Uryasev, Zabarankin (2004/2005)",
+      "note": "Introduced CDaR / CDD as worst-tail drawdown path risk measures."
+    },
+    {
+      "citation": "Rockafellar and Uryasev (2000, 2002)",
+      "note": "CVaR optimization foundation; CDaR parallels expected shortfall on drawdown paths."
+    },
+    {
+      "citation": "scikit-portfolio Efficient Conditional Drawdown at Risk docs",
+      "note": "Practical CDaR frontier implementation reference."
+    }
+  ]
+}

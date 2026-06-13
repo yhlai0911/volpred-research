@@ -33863,5 +33863,16 @@
       "experiments/k_vrp_short_vol_edge_erosion_2026_06_14/README.md"
     ],
     "confidence": 0.7
+  },
+  {
+    "item_id": "2d5d425f",
+    "category": "experiment_null",
+    "content": "K1494 NULL: trailing CDaR95 exposure scaling did not beat realized-vol targeting on equal-weight SPY/TLT/GLD/DBC. OOS 2018-2026: CDaR CAGR 11.432% vs vol-target 10.441%, but Sharpe 0.9312 vs 0.9966, MDD -23.237% vs -16.258%, and 2% left-tail days 29 vs 18. Paired moving-block bootstrap (1000 reps, block=21, seed=42) shows left-tail frequency worsens: diff +0.00525, 95% CI [0.00095, 0.01041]. Mechanism: CDaR is backward-looking; during COVID mean exposure stayed 1.0256 vs vol-target 0.7814.",
+    "evidence": [
+      "K1494",
+      "experiments/k1494_cdar_vs_vol_target/k1494_cdar_vs_vol_target_results.json"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-14T07:24:30.921910"
   }
 ]
