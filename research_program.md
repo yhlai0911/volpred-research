@@ -523,6 +523,23 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] Stablecoin redemption pressure 作 crypto-to-Treasury vol channel — DefiLlama stablecoin supply net flow、CoinGecko USDT/USDC peg deviation、BTC/ETH/T-bill/TLT RV，測試穩定幣流出或脫鉤是否領先 crypto RV 與短債/長債波動（來源：CFA 2025 stablecoins and Treasuries funding link；IMF/Fed digital finance concern）
 - [ ] Inventory surprise 作 commodity RV regime feature — EIA crude/natgas inventory surprise、USDA WASDE/crop report dates、CL=F/NG=F/USO/UNG/DBA RV，把 inventory/carry/momentum 加入 HAR 或 gradient boosting，與 price-only baseline 做 QLIKE/DM（來源：CFA 2025 ML in commodity futures；J.Futures Markets inventory/liquidity/speculation trend）
 
+### 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；WebSearch JPM/FAJ/RFS/JoE/JBF/JFM/J.Index Investing/J.Alt Inv 2025-26 趨勢層級，全免費資料 yfinance/FRED/^VIX 系列可啟動）
+> 來源：backlog refill discovery（WebSearch 趨勢層級，非捏造論文標題+作者）。已對 06-10/06-11/06-14 三批與既有 K（K1257 BMA、K1301 semivar TX1、K731/K489 VIX term structure level、K43 SKEW/VIX3M）逐一去重。刻意挑與既有題不同的「結構/asymmetry/timing-signal/concentration」軸，避開純 vol-forecast level。
+- [ ] VIX 期限結構斜率作為 drawdown 擇時訊號（非 level 預測）— 用 ^VIX 對 ^VIX3M（或 VIXM/VXX proxy）算 VX-slope，檢定斜率跌破 1.0（backwardation）是否領先 SPY ≥5% drawdown，做含成本的進出場 timing 回測；與 K731/K489（term structure 預測 level）不同，這是 regime-flip 交易訊號（來源：2025-26 desk research，backwardation 領先 21/22 次 ≥5% 回撤；明確 lag）
+- [ ] 已實現偏度的「橫斷面離散度」預測大盤報酬 — yfinance 美股大樣本日內或日報酬算 firm-level realized skewness，取橫斷面 dispersion（高−低分位差）檢定對次月 SPY 報酬/RV 的預測力；與 K1301（TX1 單一資產 HAR-RS 預測自身 vol，NULL）正交：這裡是 cross-sectional dispersion 預測 market-level（來源：arXiv 2026 skewness dispersion & market returns；明確 lag）
+- [ ] Signed jump variation 的「大跳 vs 小跳」分離預測力 — 用日 OHLC/range 或可得日內代理拆 signed semivariance → signed jump，再分 small/large jump，檢定 large 與 small jump 對次日 RV 與極端報酬的不對稱預測（與 K1301 整體 RS+/RS− NULL 不同，聚焦 jump-size 分層）（來源：Econometrics/JFM 2025-26 small vs large signed jump cross-section）
+- [ ] 市場集中度 risk 與大盤 vol：cap-weight vs equal-weight 波動裂口 — yfinance SPY vs RSP（等權）RV 與相關，建 top-10 集中度 proxy（用前十大成分權重或 SPY/RSP return spread），檢定集中度升高 regime 下大盤 tail vol 是否系統性放大（來源：J.Index Investing/SPGI 2025；2025 末前十大佔 S&P 41% 創高）
+- [ ] 防禦因子的 drawdown 分解：low-vol/quality/value 各自只保護「哪一半」— yfinance USMV/QUAL/VLUE/SPLV vs SPY，把 drawdown 拆 frequency × depth，檢定哪個防禦因子降深度、哪個降頻率，並對比加 trend overlay 的互補性；與既有 factor-ETF RV 題不同，聚焦 drawdown 機制分解（來源：FAJ 2026「Best Defensive Strategies, 220 years」；DAR+trend 最 robust）
+- [ ] 跳躍 × 非對稱外溢同時控制是否仍改善 HAR — yfinance 多市場指數 ETF（SPY/EWJ/EWG/EWU/EEM）日 RV+jump proxy，比較 HAR-RV vs 加 jump、加 sign-asymmetry spillover、兩者皆加，檢定 1/5/22 日 horizon QLIKE+DM 是否真有增量（來源：J.Forecasting 2025 jump & sign-asymmetry spillover；20 市場樣本）
+- [ ] 極端尾部下的跨資產 quantile connectedness（非均值 VAR）— yfinance 股/債/金/油/加密 ETF RV，用 quantile-VAR 或 CoVaR 算「尾部 vs 中位」連結度差異，檢定危機期尾部外溢是否遠高於均值外溢、誰是淨尾部傳染源；與既有 level-VAR/Granger spillover 題正交（來源：JBF/SEF 2025-26 quantile connectedness；極端期 total connectedness >80%）
+- [ ] 黃金 safe-haven 屬性的 regime 依賴與美元/實質利率脫鉤 — yfinance GLD/SPY/UUP + FRED 實質利率，滾動檢定 gold-equity 與 gold-dollar 相關在 risk-off vs 一般期是否變號，量化 gold 作 tail hedge 的條件有效性（與既有 alt-asset/DXY 題不同，聚焦 safe-haven 相關 regime 切換）（來源：LSEG/WGC 2025；2025 gold +50% 與股脫鉤但對 vol hedge 落後）
+- [ ] EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carry 報酬分佈左尾是否在 risk-off 急速放大、unwind 是否領先 EM 股 vol；明確標示 leveraged/crowded position 數據 blocked 用 proxy（來源：BIS/IMF GFSR 2025；EM drawdown 為 EUR 的 3-5 倍）
+- [ ] Conditional Drawdown-at-Risk（CDaR）目標 vs 傳統 vol-target — yfinance 股/債/商品 ETF，比較以 CDaR 為風控目標 vs 固定 vol-target 的 net Sharpe、MDD 與左尾頻率，檢定 drawdown-aware 風控在壓力期是否真優於 vol-aware（與既有 VT 跨資產題不同，目標函數換成 drawdown）（來源：ITOR 2026 drawdown MINLP；JPM drawdown control trend）
+- [ ] LSTM 波動預測 + 可微風險預算層的「壓力期增益」邊界 — yfinance 多資產 RV，誠實對比 LSTM-vol→risk-budget allocation vs 等權/HAR-vol-target，檢定 MDD 改善是否只在 stress regime 出現、平時是否被複雜度拖累；接 K1487/ensemble 線的 ML-ceiling 誠實檢定（來源：Sci Rep 2025 ML risk-based allocation；宣稱 stress 期 MDD −41%）
+- [ ] 日內 diurnal pattern 是否「足夠」解釋 RV 變異 — yfinance 或可得 5-min 代理，用無母數方法檢定剔除已知日內 U 型季節後是否仍有顯著 intraday vol 變異，量化季節成分占 RV 的比例（方法論基礎題，校準我方所有日內 RV 估計）（來源：arXiv 2601 diurnal sufficiency nonparametric assessment）
+- [ ] 價格存續期（price-duration）拆解 interday vs intraday vol 動態 — 用可得高頻或日 OHLC 代理，以自適應價格變動門檻建 price-duration 測度，檢定加入存續期季節成分是否降低 RV 估計 RMSE；與既有 range-based/realized illiquidity 題不同（來源：JTSA 2025 price-duration interday/intraday decoupling）
+- [ ] VIX 的 vol-of-vol（VVIX 代理）對 VIX 自身可預測性 — 用 ^VIX 日內或日報酬算 realized vol-of-vol（VVIX blocked 則自建），檢定拆短期/長期 vol-of-vol + jump 是否改善 VIX 次日預測；與既有 crypto vol-of-vol 題（外溢角度）正交，聚焦 VIX 自我預測（來源：JFM 2025 vol-of-vol & VIX forecasting wavelet+HAR）
+
 ## 決策框架
 
 ### 何時深入某面向
