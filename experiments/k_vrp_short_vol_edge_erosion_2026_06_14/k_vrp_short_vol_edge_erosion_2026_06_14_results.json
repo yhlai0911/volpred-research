@@ -1,0 +1,163 @@
+{
+  "experiment_id": "k_vrp_short_vol_edge_erosion_2026_06_14",
+  "k_id": "K1476",
+  "title": "VRP decline (post-2018) and short-vol strategy edge erosion",
+  "created_at": "2026-06-13T18:22:51.975403+00:00",
+  "data_sources": [
+    "yfinance: ^VIX",
+    "yfinance: ^GSPC",
+    "yfinance: VXX (history starts 2009-01-30)",
+    "yfinance: SVXY (history starts 2011-10-04)"
+  ],
+  "regime_boundary": "2018-03-01",
+  "seed": 42,
+  "bootstrap_n": 1000,
+  "regimes": {
+    "A_pre_2018": {
+      "period": "2006-02-28 to 2018-02-28",
+      "n_months_vrp": 145,
+      "n_months_svxy": 76,
+      "n_months_short_vxx": 1,
+      "vrp_mean": 72.89127080455387,
+      "vrp_median": 105.141567671077,
+      "vrp_std": 539.2865285786559,
+      "vrp_share_positive": 0.8,
+      "sharpe_svxy": 0.7121184988179191,
+      "sharpe_svxy_ci95": [
+        -0.06537889369485925,
+        1.774700657409199
+      ],
+      "mdd_svxy": -0.9046096333999057,
+      "sharpe_short_vxx": null,
+      "mdd_short_vxx": null
+    },
+    "B_post_2018": {
+      "period": "2018-03-31 to 2026-05-31",
+      "n_months_vrp": 99,
+      "n_months_svxy": 99,
+      "n_months_short_vxx": 99,
+      "vrp_mean": 71.38534032539656,
+      "vrp_median": 120.08520824617867,
+      "vrp_std": 779.5925855176447,
+      "vrp_share_positive": 0.8282828282828283,
+      "sharpe_svxy": 0.4771515900544028,
+      "sharpe_svxy_ci95": [
+        -0.22624642401032224,
+        1.2818952298827138
+      ],
+      "mdd_svxy": -0.5246052639427675,
+      "sharpe_short_vxx": 0.6169095595259103,
+      "mdd_short_vxx": -1.0
+    }
+  },
+  "tests": {
+    "H1_vrp_mean_decline": {
+      "description": "Welch t-test and HAC (Newey-West 1994 auto lag) difference of mean VRP, A vs B",
+      "nw_lag": 3,
+      "welch_t": 0.01668651993484612,
+      "welch_p_two_sided": 0.9867073854415889,
+      "nw_diff_mean": 1.505930479157314,
+      "nw_se": 93.50262995828929,
+      "nw_t": 0.016105755312220593,
+      "nw_p_two_sided": 0.9871500220361429,
+      "direction": "A_minus_B (positive = VRP declined post-2018)"
+    },
+    "H2_svxy_monthly_return_diff": {
+      "description": "HAC (Newey-West 1994 auto lag) test of mean SVXY monthly return, A vs B",
+      "nw_lag": 3,
+      "nw_diff_mean": 0.027660478129058565,
+      "nw_se": 0.021931875486793036,
+      "nw_t": 1.2611998525030468,
+      "nw_p_two_sided": 0.2072368517831613,
+      "interpretation": "Negative diff = SVXY return weaker pre-2018 vs post-2018; positive diff = SVXY edge eroded."
+    },
+    "H3_predictive_correlation_vrp_strategy_next_month": {
+      "description": "corr(VRP_t, strategy_ret_{t+1}) with 1000-bootstrap 95% CI",
+      "svxy": {
+        "A_corr": 0.020488619693106717,
+        "A_ci95": [
+          -0.18576629087862037,
+          0.23202556713117498
+        ],
+        "B_corr": -0.05200523330000904,
+        "B_ci95": [
+          -0.16237680140106145,
+          0.1593476499325955
+        ]
+      },
+      "short_vxx": {
+        "A_corr": null,
+        "A_ci95": [
+          null,
+          null
+        ],
+        "B_corr": -0.05155832241404058,
+        "B_ci95": [
+          -0.1816987230821967,
+          0.2115518740191189
+        ]
+      }
+    }
+  },
+  "figures": [
+    "fig_vrp_regime.png",
+    "fig_short_vol_sharpe.png"
+  ],
+  "codex_review": {
+    "status": "PASS",
+    "reviewer": "Codex GPT-5.4",
+    "round1_verdict": "CONDITIONAL_PASS",
+    "round2_verdict": "FAIL",
+    "round3_verdict": "PASS",
+    "fixes_applied": [
+      "H3 regime-by-return-month",
+      "collateralized short-VXX floor at -100%",
+      "boundary moved to 2018-03-01 + 3 robustness boundaries",
+      "Newey-West 1994 auto lag",
+      "drop partial last month via month_obs>=15",
+      "short-VXX A regime NaN when n<12"
+    ]
+  },
+  "boundary_robustness": {
+    "2018-01-01": {
+      "n_A": 143,
+      "n_B": 101,
+      "vrp_diff_A_minus_B": 12.625961466449212,
+      "vrp_nw_t": 0.13600818231778466,
+      "vrp_nw_p_two_sided": 0.891814812520912,
+      "svxy_sharpe_A": 1.1441342296427341,
+      "svxy_sharpe_B": 0.07968769687619075,
+      "svxy_n_A": 74,
+      "svxy_n_B": 101
+    },
+    "2019-01-01": {
+      "n_A": 155,
+      "n_B": 89,
+      "vrp_diff_A_minus_B": -10.59536945344064,
+      "vrp_nw_t": -0.10842649510609785,
+      "vrp_nw_p_two_sided": 0.9136573849698861,
+      "svxy_sharpe_A": 0.6367347856455509,
+      "svxy_sharpe_B": 0.5710578933010075,
+      "svxy_n_A": 86,
+      "svxy_n_B": 89
+    },
+    "2020-04-01": {
+      "n_A": 170,
+      "n_B": 74,
+      "vrp_diff_A_minus_B": -144.4117127149628,
+      "vrp_nw_t": -1.803609252429354,
+      "vrp_nw_p_two_sided": 0.07129258458193077,
+      "svxy_sharpe_A": 0.5336906813313488,
+      "svxy_sharpe_B": 0.8594242758255423,
+      "svxy_n_A": 101,
+      "svxy_n_B": 74
+    }
+  },
+  "verdict": "MIXED",
+  "verdict_breakdown": {
+    "H1_vrp_declined_p_lt_0p05_and_positive_diff": false,
+    "H2_svxy_sharpe_A_gt_B_directionally": true,
+    "H3_predictive_corr_weaker_in_B_for_svxy": false
+  },
+  "summary": "VRP A(72.9) vs B(71.4) | SVXY Sharpe A=0.71 vs B=0.48 | verdict=MIXED"
+}

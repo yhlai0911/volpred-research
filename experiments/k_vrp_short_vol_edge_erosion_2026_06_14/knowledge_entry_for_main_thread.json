@@ -1,0 +1,32 @@
+{
+  "_note": "Worktree agent cannot write knowledge.json (no .env.local + worktree rule prohibits). Main thread should ingest via volpred.memory.system.MemorySystem._append_to_index('knowledge.json', <this record>) after merge_worktree.sh.",
+  "k_id": "K1476",
+  "experiment_id": "k_vrp_short_vol_edge_erosion_2026_06_14",
+  "experiment_path": "experiments/k_vrp_short_vol_edge_erosion_2026_06_14/",
+  "category": "vrp_regime_decomposition",
+  "title": "K1476: VRP Decline Thesis NOT Supported — Short-Vol Edge Erosion is XIV-Event Artifact",
+  "verdict": "NULL",
+  "reviewer": "Codex GPT-5.4",
+  "reviewer_source": "Codex review (round-3 PASS after 2 revision rounds)",
+  "codex_review": "PASS (round 3)",
+  "content": "K1476 tested Chicago Fed 2025 thesis that VRP declined post-2018 eroding short-vol edge. Primary boundary 2018-03-01 (post-XIV blowup). VRP A=72.9 vs B=71.4 vol-pts^2 (NW p=0.99, NULL). SVXY Sharpe A=0.71 vs B=0.47 (HAC p=0.20, directional only). H3 predictive corr indistinguishable from zero. Boundary robustness: 2020-04-01 split shows VRP INCREASE of +144 (p=0.07). Apparent edge erosion at 2018-01-01 (Sharpe 1.14 -> 0.08) is Feb 2018 XIV blowup artifact, not structural decline. Short-VXX collateralized hit -100% MDD in B (single event). Consistent with K430 (IS sig OOS null), K734 (not tradeable), K913 (NULL all horizons).",
+  "summary": "VRP decline thesis NOT supported: NW p=0.99, A=72.9 vs B=71.4 vol-pts^2. SVXY Sharpe 0.71->0.47 directional only (p=0.20). Edge erosion is XIV-event artifact not structural.",
+  "sample_period": "2006-02-28 to 2026-05-31",
+  "sample_size": {"A_pre_2018_n_months_vrp": 145, "B_post_2018_n_months_vrp": 99, "A_svxy": 76, "B_svxy": 100},
+  "methodology": "Monthly VRP=VIX^2_{t-1}-RV^2_t (ann); Newey-West 1994 auto-lag HAC; 1000-bootstrap CI seed=42; 4 boundary robustness checks",
+  "key_numbers": {
+    "vrp_diff_A_minus_B": 1.5,
+    "vrp_nw_p_two_sided": 0.987,
+    "svxy_sharpe_A": 0.71,
+    "svxy_sharpe_B": 0.47,
+    "svxy_return_diff_nw_p": 0.20,
+    "short_vxx_mdd_B": -1.0
+  },
+  "related_k": ["K430", "K734", "K913", "K1040", "K539"],
+  "tags": ["vrp", "short_vol", "regime", "null_result", "robustness", "xiv"],
+  "evidence": [
+    "experiments/k_vrp_short_vol_edge_erosion_2026_06_14/k_vrp_short_vol_edge_erosion_2026_06_14_results.json",
+    "experiments/k_vrp_short_vol_edge_erosion_2026_06_14/README.md"
+  ],
+  "confidence": 0.7
+}
