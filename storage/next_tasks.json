@@ -28949,5 +28949,75 @@
     "started_at": "2026-06-13T03:10:23.521295+00:00",
     "completed_at": "2026-06-13T03:17:06.260734+00:00",
     "result": "Codex 24h-rule review NEEDS_REVISION: 主結論 PC1=77.4% 成立、無 lookahead、數字一致；high-corr regime 證據 borderline (HAC p=0.052)，10-test Bonferroni 0/5 高 regime asset 存活。Errata 寫入 README，knowledge entry 已建。Review file: storage/paper_reviews/k1441_mile_39b81aa5/codex_24h_review.md"
+  },
+  {
+    "id": "gen_article_k1446",
+    "title": "K1446: write general-audience article (auto-discovered, verdict=PASS)",
+    "description": "K1446 has a non-null verdict in experiments/k1446/ but no published feed article and no existing task. Verdict: PASS. Write a general-audience article summarising key findings.",
+    "task_type": "daily_article",
+    "priority": 4,
+    "status": "blocked",
+    "tags": [
+      "auto-generated",
+      "audience-general",
+      "uncovered-k"
+    ],
+    "source": "task_generator_v2_daily_article",
+    "created_at": "2026-06-13T03:54:35.380282+00:00",
+    "generated_at": "2026-06-13T03:54:35.380543+00:00",
+    "k_id": "K1446",
+    "claimed_by": "codex-hourly",
+    "claimed_at": "2026-06-13T03:54:44.733334+00:00",
+    "claim_session_id": "fa4d74ad189c",
+    "started_at": "2026-06-13T03:54:51.288544+00:00",
+    "completed_at": "2026-06-13T03:58:20.759741+00:00",
+    "result": "Generated K1446 general draft and ran formal publish_draft gates. Anti-AI gate PASS and image/audience checks PASS, but publisher blocked publication: narrative duplicate gate was a false positive vs K699 and required dup_waiver; after waiver, topic_cluster_cooldown blocked cluster=spy (98 articles in 30d, cap=10). No feed draft was created; local draft retained at storage/drafts/k1446_general_draft.md for future cooldown/waiver decision."
+  },
+  {
+    "id": "platform_ops_k1446_cluster_waiver_decision",
+    "title": "K1446 USMV 文章 cluster_waiver 決議 (orphan draft retain)",
+    "description": "K1446 草稿 storage/drafts/k1446_general_draft.md 已過 anti-AI gate + image gate + 數字 verified（n=3242 公共樣本、5 ETF 比較、Bonferroni α=0.00625），但被 publisher topic_cluster_cooldown blocked: cluster=spy 98/10 over cap。實際主題是「低波動 / 因子 ETF 風險帳本」(MTUM/QUAL/USMV/VLUE)，SPY 只是 baseline，classifier 把 tag '美股 ETF' 命中 '美股' 歸 spy 是 false positive。決議：(a) 用 details.cluster_waiver='factor_etf_not_spy_commentary' 強推 publish，或 (b) 修 src/volpred/topic_clusters.py 把 factor ETF 變數抽出獨立 cluster (例 'factor_etf')，或 (c) 放棄 publish 留 draft。建議 (a) + 同時建 (b) backlog（taxonomy refinement 影響面廣需 audit）。讀 src/volpred/publisher/publisher.py:706 cluster_waiver path。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "taxonomy",
+      "publisher-gate",
+      "cluster-cooldown",
+      "K1446"
+    ],
+    "source": "hourly-12-discovered",
+    "created_at": "2026-06-13T04:09:00+00:00",
+    "k_id": "K1446"
+  },
+  {
+    "id": "platform_ops_topic_cluster_factor_etf_split",
+    "title": "Refactor topic_clusters: 把 factor ETF 從 spy cluster 抽出",
+    "description": "src/volpred/topic_clusters.py:14 spy cluster 變數含 '美股' 過於寬鬆，把所有 US-equity 相關文章都歸 spy → 30 天 spy=98 vs cap=10 → 所有 discretionary 美股文章被 blocked。Action: (1) 新增 'factor_etf' cluster: ['MTUM','QUAL','USMV','VLUE','SPLV','SPHQ','USHY','因子 ETF','低波動 ETF','smart beta'] (2) 從 spy variants 移除 '美股 ETF'（保留 'SPY','QQQ','S&P 500','標普','美股' 單獨）(3) 重 audit feed.json 過去 90d 文章看 cluster 分佈合理性 (4) test: scripts/audit_topic_clusters.py（新建）跑歷史驗證 false positive 率。Mission #1（文章品質）+ #4（運營）。",
+    "task_type": "platform_ops",
+    "priority": 4,
+    "status": "pending",
+    "tags": [
+      "taxonomy",
+      "refactor",
+      "publisher-gate"
+    ],
+    "source": "hourly-12-discovered",
+    "created_at": "2026-06-13T04:09:00+00:00"
+  },
+  {
+    "id": "platform_ops_arc_dedup_too_strict_diagnose",
+    "title": "Diagnose: refill_task_pool arc-dedup 過嚴致 pool 0",
+    "description": "12:07 hourly fire 抓到 storage/next_tasks.json pending=0 + refill 全部被 arc-dedup 擋（3 candidates 全 hit 'arc already covered by mile_xxx', shared 鍵如 ['LONG_BOND','USD'] 或 ['BITCOIN','ETHEREUM']）。Action: (1) 跑 scripts/refill_task_pool.py --dry-run --verbose 看完整 candidate list + 各 arc-dedup 判斷 (2) 檢視 src/volpred/publisher/arc_dedup.py shared-key threshold（是否 shared ≥2 keys 就 dedup 太嚴）(3) 評估降 threshold 或加 'methodology variant' 例外（不同 method 對同 asset 不算 dup）(4) 重 generate publication_candidates (last gen 2026-06-09，4 天前) (5) 驗證 pool 回升 ≥4。Mission #2 (research throughput) + #4 (運營).",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "arc-dedup",
+      "refill",
+      "pool-empty"
+    ],
+    "source": "hourly-12-discovered",
+    "created_at": "2026-06-13T04:09:00+00:00"
   }
 ]
