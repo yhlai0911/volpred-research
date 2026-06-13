@@ -1,0 +1,616 @@
+{
+  "experiment_id": "K1491",
+  "title": "Crypto VoV tail-spillover methodology fix for K1490",
+  "started_utc": "2026-06-13T08:36:57.564529+00:00",
+  "finished_utc": "2026-06-13T08:37:14.438636+00:00",
+  "git_rev": "287e074b",
+  "seed": 42,
+  "data_source": "local snapshot CSV: experiments/k1090b/data",
+  "sample_request": {
+    "start": "2018-01-01",
+    "end": "2025-12-31"
+  },
+  "tickers": [
+    "BTC-USD",
+    "ETH-USD",
+    "SPY",
+    "GLD",
+    "USO",
+    "TLT"
+  ],
+  "crypto_predictors": [
+    "BTC-USD",
+    "ETH-USD"
+  ],
+  "traditional_targets": [
+    "SPY",
+    "GLD",
+    "USO",
+    "TLT"
+  ],
+  "methodology": {
+    "return": "log close-to-close return per asset using pairwise valid non-missing closes",
+    "crypto_vov": "20-day rolling std of 20-day rolling return std",
+    "tail_signal": "max(0, |r_t| - rolling q0.95(|r|) over t-20:t-1)",
+    "lookahead_control": "crypto_vov predictor shifted by .shift(1); tail threshold shifted by one target trading day",
+    "granger": "statsmodels grangercausalitytests y=tail_signal, x=lagged crypto_vov, maxlag=5",
+    "granger_main_p": "best raw lag p-value multiplied by MAX_LAG to reduce lag-mining overclaim",
+    "quantile_regression": "QuantReg q=0.95 of target |r| on lagged crypto_vov z-score"
+  },
+  "sample_by_ticker": {
+    "BTC-USD": {
+      "first_return_date": "2018-01-02",
+      "last_return_date": "2024-12-30",
+      "return_obs": 2555
+    },
+    "ETH-USD": {
+      "first_return_date": "2017-11-10",
+      "last_return_date": "2026-06-07",
+      "return_obs": 3132
+    },
+    "SPY": {
+      "first_return_date": "2018-01-03",
+      "last_return_date": "2024-12-30",
+      "return_obs": 1759
+    },
+    "GLD": {
+      "first_return_date": "2018-01-03",
+      "last_return_date": "2024-12-30",
+      "return_obs": 1759
+    },
+    "USO": {
+      "first_return_date": "2018-01-03",
+      "last_return_date": "2024-12-30",
+      "return_obs": 1759
+    },
+    "TLT": {
+      "first_return_date": "2018-01-03",
+      "last_return_date": "2024-12-30",
+      "return_obs": 1759
+    }
+  },
+  "crypto_vov_descriptive": {
+    "BTC-USD": {
+      "n": 2517,
+      "mean": 0.0049432139673302325,
+      "std": 0.004558206924036474,
+      "min": 0.00033512033023756413,
+      "p50": 0.003920375699225574,
+      "p95": 0.011668229044712859,
+      "max": 0.04374589515342324,
+      "nonzero_n": 2517,
+      "nonzero_rate": 1.0
+    },
+    "ETH-USD": {
+      "n": 3094,
+      "mean": 0.006242622468423386,
+      "std": 0.005305799801195728,
+      "min": 0.0005869495952340089,
+      "p50": 0.004980612766932563,
+      "p95": 0.013500315916431823,
+      "max": 0.04740012913916762,
+      "nonzero_n": 3094,
+      "nonzero_rate": 1.0
+    }
+  },
+  "tail_signal_descriptive": {
+    "SPY": {
+      "n": 1739,
+      "mean": 0.0005834374261098651,
+      "std": 0.003016138213034143,
+      "min": 0.0,
+      "p50": 0.0,
+      "p95": 0.003129342283242923,
+      "max": 0.0485751781183534,
+      "nonzero_n": 171,
+      "nonzero_rate": 0.09833237492811961
+    },
+    "GLD": {
+      "n": 1739,
+      "mean": 0.0004894740863294429,
+      "std": 0.0021814854809416827,
+      "min": 0.0,
+      "p50": 0.0,
+      "p95": 0.004019785118251374,
+      "max": 0.03555386383187376,
+      "nonzero_n": 162,
+      "nonzero_rate": 0.09315698677400805
+    },
+    "USO": {
+      "n": 1739,
+      "mean": 0.0013110568241268342,
+      "std": 0.008640987409131683,
+      "min": 0.0,
+      "p50": 0.0,
+      "p95": 0.00715195223289733,
+      "max": 0.2409777036282332,
+      "nonzero_n": 158,
+      "nonzero_rate": 0.09085681426106958
+    },
+    "TLT": {
+      "n": 1739,
+      "mean": 0.00044697917884434706,
+      "std": 0.002002321278649285,
+      "min": 0.0,
+      "p50": 0.0,
+      "p95": 0.003371251219737989,
+      "max": 0.028289834260573916,
+      "nonzero_n": 161,
+      "nonzero_rate": 0.09258194364577343
+    }
+  },
+  "granger_lag1_to_5_tail_signal": {
+    "BTC-USD__to__SPY": {
+      "n": 1732,
+      "y_nonzero_n": 168,
+      "y_nonzero_rate": 0.09699769053117784,
+      "per_lag": {
+        "1": {
+          "F": 0.5812053428772014,
+          "p_value": 0.44594429991653933
+        },
+        "2": {
+          "F": 2.7021925717328634,
+          "p_value": 0.06734218363735746
+        },
+        "3": {
+          "F": 3.5944246506486084,
+          "p_value": 0.013140688971510626
+        },
+        "4": {
+          "F": 2.8189335787493217,
+          "p_value": 0.023939713338559522
+        },
+        "5": {
+          "F": 2.2761367428231756,
+          "p_value": 0.04481292901807737
+        }
+      },
+      "best_lag": 3,
+      "best_raw_p_value": 0.013140688971510626,
+      "pair_p_value_lag_bonferroni": 0.06570344485755314
+    },
+    "BTC-USD__to__GLD": {
+      "n": 1732,
+      "y_nonzero_n": 161,
+      "y_nonzero_rate": 0.09295612009237875,
+      "per_lag": {
+        "1": {
+          "F": 0.37523887441649795,
+          "p_value": 0.5402429911846426
+        },
+        "2": {
+          "F": 0.3496048577897797,
+          "p_value": 0.7050165348937442
+        },
+        "3": {
+          "F": 0.26429800892038174,
+          "p_value": 0.851154543128017
+        },
+        "4": {
+          "F": 0.2909241426592646,
+          "p_value": 0.8839928244626835
+        },
+        "5": {
+          "F": 0.23548256635489886,
+          "p_value": 0.9469669341286581
+        }
+      },
+      "best_lag": 1,
+      "best_raw_p_value": 0.5402429911846426,
+      "pair_p_value_lag_bonferroni": 1.0
+    },
+    "BTC-USD__to__USO": {
+      "n": 1732,
+      "y_nonzero_n": 154,
+      "y_nonzero_rate": 0.08891454965357967,
+      "per_lag": {
+        "1": {
+          "F": 2.156461872563558,
+          "p_value": 0.1421532690371917
+        },
+        "2": {
+          "F": 4.770796250796682,
+          "p_value": 0.008585760407963805
+        },
+        "3": {
+          "F": 4.951936207734623,
+          "p_value": 0.001999184496684092
+        },
+        "4": {
+          "F": 3.8096738059446165,
+          "p_value": 0.004341383936894281
+        },
+        "5": {
+          "F": 4.89238944212241,
+          "p_value": 0.0001892285065205831
+        }
+      },
+      "best_lag": 5,
+      "best_raw_p_value": 0.0001892285065205831,
+      "pair_p_value_lag_bonferroni": 0.0009461425326029155
+    },
+    "BTC-USD__to__TLT": {
+      "n": 1732,
+      "y_nonzero_n": 160,
+      "y_nonzero_rate": 0.09237875288683603,
+      "per_lag": {
+        "1": {
+          "F": 0.5665779502563343,
+          "p_value": 0.4517244878358224
+        },
+        "2": {
+          "F": 12.350590650864127,
+          "p_value": 4.723320323618594e-06
+        },
+        "3": {
+          "F": 8.198981847022528,
+          "p_value": 2.0313638256756935e-05
+        },
+        "4": {
+          "F": 7.8492107553399055,
+          "p_value": 2.8778320057830923e-06
+        },
+        "5": {
+          "F": 6.581138331046534,
+          "p_value": 4.471803937735815e-06
+        }
+      },
+      "best_lag": 4,
+      "best_raw_p_value": 2.8778320057830923e-06,
+      "pair_p_value_lag_bonferroni": 1.4389160028915462e-05
+    },
+    "ETH-USD__to__SPY": {
+      "n": 1739,
+      "y_nonzero_n": 171,
+      "y_nonzero_rate": 0.09833237492811961,
+      "per_lag": {
+        "1": {
+          "F": 0.200488036718553,
+          "p_value": 0.6543831047053688
+        },
+        "2": {
+          "F": 1.3611408797448845,
+          "p_value": 0.2566422188762512
+        },
+        "3": {
+          "F": 1.8803019311467934,
+          "p_value": 0.13087672999685035
+        },
+        "4": {
+          "F": 1.4937782761113294,
+          "p_value": 0.20153208661954108
+        },
+        "5": {
+          "F": 1.454791831899106,
+          "p_value": 0.20166864839837023
+        }
+      },
+      "best_lag": 3,
+      "best_raw_p_value": 0.13087672999685035,
+      "pair_p_value_lag_bonferroni": 0.6543836499842517
+    },
+    "ETH-USD__to__GLD": {
+      "n": 1739,
+      "y_nonzero_n": 162,
+      "y_nonzero_rate": 0.09315698677400805,
+      "per_lag": {
+        "1": {
+          "F": 0.007515131906134943,
+          "p_value": 0.9309280394150414
+        },
+        "2": {
+          "F": 0.00912054639868344,
+          "p_value": 0.9909209672161453
+        },
+        "3": {
+          "F": 0.007212309269009874,
+          "p_value": 0.9991586468091398
+        },
+        "4": {
+          "F": 0.3725564678864711,
+          "p_value": 0.8283325464965773
+        },
+        "5": {
+          "F": 0.32629969167398676,
+          "p_value": 0.8973349139601642
+        }
+      },
+      "best_lag": 4,
+      "best_raw_p_value": 0.8283325464965773,
+      "pair_p_value_lag_bonferroni": 1.0
+    },
+    "ETH-USD__to__USO": {
+      "n": 1739,
+      "y_nonzero_n": 158,
+      "y_nonzero_rate": 0.09085681426106958,
+      "per_lag": {
+        "1": {
+          "F": 0.8334946084781185,
+          "p_value": 0.3613908108144326
+        },
+        "2": {
+          "F": 6.582718337231634,
+          "p_value": 0.0014189674481265777
+        },
+        "3": {
+          "F": 5.329626442160113,
+          "p_value": 0.0011776221796451958
+        },
+        "4": {
+          "F": 4.036255710170718,
+          "p_value": 0.002914605041696079
+        },
+        "5": {
+          "F": 4.878160516259192,
+          "p_value": 0.0001951549266490646
+        }
+      },
+      "best_lag": 5,
+      "best_raw_p_value": 0.0001951549266490646,
+      "pair_p_value_lag_bonferroni": 0.0009757746332453229
+    },
+    "ETH-USD__to__TLT": {
+      "n": 1739,
+      "y_nonzero_n": 161,
+      "y_nonzero_rate": 0.09258194364577343,
+      "per_lag": {
+        "1": {
+          "F": 1.45099570702498,
+          "p_value": 0.2285325393298025
+        },
+        "2": {
+          "F": 7.396611636934118,
+          "p_value": 0.0006328971215165882
+        },
+        "3": {
+          "F": 5.133034189122109,
+          "p_value": 0.0015513706109713437
+        },
+        "4": {
+          "F": 4.902635904730399,
+          "p_value": 0.0006234762615425238
+        },
+        "5": {
+          "F": 4.583272963178364,
+          "p_value": 0.0003710376041327004
+        }
+      },
+      "best_lag": 5,
+      "best_raw_p_value": 0.0003710376041327004,
+      "pair_p_value_lag_bonferroni": 0.001855188020663502
+    }
+  },
+  "quantile_reg_q95_abs_return": {
+    "BTC-USD__to__SPY": {
+      "n": 1732,
+      "q": 0.95,
+      "target": "absolute log return",
+      "predictor": "lagged crypto VoV z-score",
+      "intercept": 0.023018047960486884,
+      "slope_per_1sd_vov": 0.00503092589809118,
+      "t_stat": 4.1539608352287765,
+      "p_value": 3.427021723466386e-05,
+      "bootstrap_ci95": [
+        0.002557133859446962,
+        0.008046788645032115
+      ],
+      "n_bootstrap": 500
+    },
+    "BTC-USD__to__GLD": {
+      "n": 1732,
+      "q": 0.95,
+      "target": "absolute log return",
+      "predictor": "lagged crypto VoV z-score",
+      "intercept": 0.01827749831955973,
+      "slope_per_1sd_vov": 0.002084689226149964,
+      "t_stat": 3.1561221632822867,
+      "p_value": 0.0016263564771867205,
+      "bootstrap_ci95": [
+        0.0001647332978705625,
+        0.003394591894469196
+      ],
+      "n_bootstrap": 500
+    },
+    "BTC-USD__to__USO": {
+      "n": 1732,
+      "q": 0.95,
+      "target": "absolute log return",
+      "predictor": "lagged crypto VoV z-score",
+      "intercept": 0.04815955331878358,
+      "slope_per_1sd_vov": 0.014622860798616678,
+      "t_stat": 6.706864415029838,
+      "p_value": 2.68457266037153e-11,
+      "bootstrap_ci95": [
+        0.005406992842704656,
+        0.019359313475291805
+      ],
+      "n_bootstrap": 500
+    },
+    "BTC-USD__to__TLT": {
+      "n": 1732,
+      "q": 0.95,
+      "target": "absolute log return",
+      "predictor": "lagged crypto VoV z-score",
+      "intercept": 0.02006021489294957,
+      "slope_per_1sd_vov": 0.0031533545726561973,
+      "t_stat": 3.3066620627420806,
+      "p_value": 0.0009634831839014571,
+      "bootstrap_ci95": [
+        0.000972797569332333,
+        0.006308338463878113
+      ],
+      "n_bootstrap": 500
+    },
+    "ETH-USD__to__SPY": {
+      "n": 1759,
+      "q": 0.95,
+      "target": "absolute log return",
+      "predictor": "lagged crypto VoV z-score",
+      "intercept": 0.02347474928470805,
+      "slope_per_1sd_vov": 0.0050156498596318575,
+      "t_stat": 4.469748688273028,
+      "p_value": 8.331382618073726e-06,
+      "bootstrap_ci95": [
+        0.002554947552715038,
+        0.008490200242138592
+      ],
+      "n_bootstrap": 500
+    },
+    "ETH-USD__to__GLD": {
+      "n": 1759,
+      "q": 0.95,
+      "target": "absolute log return",
+      "predictor": "lagged crypto VoV z-score",
+      "intercept": 0.018545623315933114,
+      "slope_per_1sd_vov": 0.00156988131207088,
+      "t_stat": 1.9480456714509247,
+      "p_value": 0.051568545564113076,
+      "bootstrap_ci95": [
+        0.00014834733220243817,
+        0.0038019623356522463
+      ],
+      "n_bootstrap": 500
+    },
+    "ETH-USD__to__USO": {
+      "n": 1759,
+      "q": 0.95,
+      "target": "absolute log return",
+      "predictor": "lagged crypto VoV z-score",
+      "intercept": 0.04672657958720349,
+      "slope_per_1sd_vov": 0.00894147124709144,
+      "t_stat": 4.379961147462214,
+      "p_value": 1.257029068810823e-05,
+      "bootstrap_ci95": [
+        0.004704485325028175,
+        0.018537234120271796
+      ],
+      "n_bootstrap": 500
+    },
+    "ETH-USD__to__TLT": {
+      "n": 1759,
+      "q": 0.95,
+      "target": "absolute log return",
+      "predictor": "lagged crypto VoV z-score",
+      "intercept": 0.020176517559846445,
+      "slope_per_1sd_vov": 0.0027185834479268346,
+      "t_stat": 2.951768093082375,
+      "p_value": 0.003201484469160517,
+      "bootstrap_ci95": [
+        0.0008477729615422472,
+        0.0070381096901839715
+      ],
+      "n_bootstrap": 500
+    }
+  },
+  "granger_pair_p_lag_adjusted_grid": {
+    "SPY": {
+      "BTC-USD": 0.065703,
+      "ETH-USD": 0.654384
+    },
+    "GLD": {
+      "BTC-USD": 1.0,
+      "ETH-USD": 1.0
+    },
+    "USO": {
+      "BTC-USD": 0.000946,
+      "ETH-USD": 0.000976
+    },
+    "TLT": {
+      "BTC-USD": 1.4e-05,
+      "ETH-USD": 0.001855
+    }
+  },
+  "granger_best_raw_p_grid": {
+    "SPY": {
+      "BTC-USD": 0.013141,
+      "ETH-USD": 0.130877
+    },
+    "GLD": {
+      "BTC-USD": 0.540243,
+      "ETH-USD": 0.828333
+    },
+    "USO": {
+      "BTC-USD": 0.000189,
+      "ETH-USD": 0.000195
+    },
+    "TLT": {
+      "BTC-USD": 3e-06,
+      "ETH-USD": 0.000371
+    }
+  },
+  "quantreg_p_grid": {
+    "SPY": {
+      "BTC-USD": 3.4e-05,
+      "ETH-USD": 8e-06
+    },
+    "GLD": {
+      "BTC-USD": 0.001626,
+      "ETH-USD": 0.051569
+    },
+    "USO": {
+      "BTC-USD": 0.0,
+      "ETH-USD": 1.3e-05
+    },
+    "TLT": {
+      "BTC-USD": 0.000963,
+      "ETH-USD": 0.003201
+    }
+  },
+  "quantreg_slope_grid": {
+    "SPY": {
+      "BTC-USD": 0.005031,
+      "ETH-USD": 0.005016
+    },
+    "GLD": {
+      "BTC-USD": 0.002085,
+      "ETH-USD": 0.00157
+    },
+    "USO": {
+      "BTC-USD": 0.014623,
+      "ETH-USD": 0.008941
+    },
+    "TLT": {
+      "BTC-USD": 0.003153,
+      "ETH-USD": 0.002719
+    }
+  },
+  "verdict_summary": {
+    "granger": {
+      "label": "granger_tail_signal_lag_adjusted",
+      "n_tests": 8,
+      "min_p": 1.4389160028915462e-05,
+      "n_p_lt_0_10": 5,
+      "n_p_lt_0_05": 4,
+      "bonferroni_alpha_pairs": 0.00625,
+      "n_bonferroni_pair_pass": 4
+    },
+    "quantile_regression": {
+      "label": "quantreg_abs_return_q95",
+      "n_tests": 8,
+      "min_p": 2.68457266037153e-11,
+      "n_p_lt_0_10": 8,
+      "n_p_lt_0_05": 7,
+      "bonferroni_alpha_pairs": 0.00625,
+      "n_bonferroni_pair_pass": 7
+    },
+    "n_granger_pairs": 8,
+    "n_granger_errors": 0,
+    "interpretation": "PARTIAL: at least one crypto -> traditional tail pair survives pairwise Bonferroni."
+  },
+  "k1490_comparison": {
+    "k1490_failure": "traditional rolling sigma/vov were all NaN and binary tail indicators were all zero; Granger failed with constant-column errors",
+    "k1491_fix": "pairwise valid trading-day returns plus continuous quantile-crossing tail_signal",
+    "granger_valid_pairs": 8,
+    "granger_total_pairs": 8
+  },
+  "figures": [
+    "experiments/k1491/k1491_spillover_heatmap.png",
+    "experiments/k1491/k1491_tail_signal_timeseries.png"
+  ],
+  "literature": [
+    "Diebold & Yilmaz (2012), Better to Give than to Receive: Predictive Directional Measurement of Volatility Spillovers.",
+    "Mazzarisi et al. (2020), Tail Granger causalities and where to find them.",
+    "Patton (2011), Volatility forecast comparison using imperfect volatility proxies."
+  ]
+}

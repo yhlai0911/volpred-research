@@ -29237,11 +29237,33 @@
     "id": "K1491_fix_k1490_methodology",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent_discovered",
     "created_at": "2026-06-13T08:16:34Z",
     "title": "K1491: fix K1490 tail-event Granger via quantile-crossing continuous signal",
     "description": "K1490 8/8 Granger 失敗於 constant-column (binary tail indicator + sparse events). K1491 改用 rolling 0.95 quantile-crossing 連續 signal,resilient. Brief: scripts/agent_prompts/k1491_brief.md. Worktree experiment, opus high, 50min cap.",
-    "needs_close_reply": false
+    "needs_close_reply": false,
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T08:31:36.120887+00:00",
+    "claim_session_id": "be51fa1925c9",
+    "started_at": "2026-06-13T08:32:02.106573+00:00",
+    "completed_at": "2026-06-13T08:39:24.481302+00:00",
+    "result": "K1491 completed in experiments/k1491: replaced K1490 sparse binary tail indicator with pairwise valid rolling q95 crossing signal and lagged crypto VoV. All 8 Granger pairs now return valid p-values (0 constant-column errors); verdict PARTIAL with USO/TLT Granger passes and 7/8 QuantReg q95 passes. Used local snapshot experiments/k1090b/data because live yfinance DNS failed; no knowledge.json write.\n\nPost-completion note: attempted git commit '[codex] K1491 crypto vov tail spillover fix' but sandbox denied writing .git/index.lock (Operation not permitted). Worktree files remain uncommitted for a session with .git write access."
+  },
+  {
+    "id": "paper_review_mile_40c66bef",
+    "title": "Paper review (Codex 24h-rule): 風險模型愈花俏愈準嗎？這次市場給了相反答案",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_40c66bef needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_40c66bef",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-13T09:08:17+00:00"
   }
 ]
