@@ -1,0 +1,414 @@
+{
+  "experiment_id": "K1490",
+  "title": "Crypto Vol-of-Vol Cross-Market Tail Spillover",
+  "started_utc": "2026-06-13T07:12:53.320233+00:00",
+  "data_source": "yfinance daily close, 2018-01-01 to 2025-12-31",
+  "seed": 42,
+  "roll_window": 20,
+  "tickers": [
+    "BTC-USD",
+    "ETH-USD",
+    "SPY",
+    "GLD",
+    "USO",
+    "TLT"
+  ],
+  "crypto": [
+    "BTC-USD",
+    "ETH-USD"
+  ],
+  "traditional": [
+    "SPY",
+    "GLD",
+    "USO",
+    "TLT"
+  ],
+  "price_panel_shape": [
+    2921,
+    6
+  ],
+  "price_panel_start": "2018-01-01",
+  "price_panel_end": "2025-12-30",
+  "lag_policy": "All cross-asset predictors lagged by .shift(1); tail indicator threshold uses sigma_{t-1}",
+  "descriptive_returns": {
+    "BTC-USD": {
+      "n_obs": 2920,
+      "mean": 0.0006397075037965399,
+      "std": 0.0342566780211378,
+      "min": -0.46473017533977296,
+      "max": 0.17182056188812328,
+      "median": 0.000741482193728943,
+      "skew": -0.9625829410330193,
+      "kurtosis": 14.666519746698707
+    },
+    "ETH-USD": {
+      "n_obs": 2920,
+      "mean": 0.0004612943947228182,
+      "std": 0.04498483005571783,
+      "min": -0.5507317438220107,
+      "max": 0.23069522900113032,
+      "median": 0.000601011696675123,
+      "skew": -0.8571436802196357,
+      "kurtosis": 10.995248435875357
+    },
+    "GLD": {
+      "n_obs": 1569,
+      "mean": 0.0005655759420368148,
+      "std": 0.00933418104890123,
+      "min": -0.066427122202817,
+      "max": 0.047389520259250466,
+      "median": 0.0006853819629941132,
+      "skew": -0.46145643729156743,
+      "kurtosis": 3.8891379021026773
+    },
+    "SPY": {
+      "n_obs": 1569,
+      "mean": 0.0005836367011593774,
+      "std": 0.012111386169451115,
+      "min": -0.10056888185437844,
+      "max": 0.09986278391659298,
+      "median": 0.0008412999352017468,
+      "skew": -0.07548087960601482,
+      "kurtosis": 11.119925648794485
+    },
+    "TLT": {
+      "n_obs": 1569,
+      "mean": 0.0002821672948717534,
+      "std": 0.009861761195740264,
+      "min": -0.06900992513636017,
+      "max": 0.0725023082512619,
+      "median": 0.0006645613590609887,
+      "skew": -0.09136370647761936,
+      "kurtosis": 5.082892829926022
+    },
+    "USO": {
+      "n_obs": 1569,
+      "mean": 0.00017667571194995786,
+      "std": 0.023919518005010215,
+      "min": -0.2885713769998179,
+      "max": 0.15415067982725836,
+      "median": 0.0015503494532850275,
+      "skew": -1.3890222468349283,
+      "kurtosis": 19.40367391155875
+    }
+  },
+  "descriptive_sigma_20d": {
+    "BTC-USD": {
+      "n_obs": 2901,
+      "mean": 0.030745988694781776,
+      "std": 0.014652267083488909,
+      "min": 0.005823009589443934,
+      "max": 0.12453452799773138,
+      "median": 0.028025891911666934,
+      "skew": 2.0499088372014533,
+      "kurtosis": 8.330617045251453
+    },
+    "ETH-USD": {
+      "n_obs": 2901,
+      "mean": 0.040902101266574474,
+      "std": 0.01808945839694445,
+      "min": 0.007284263693436598,
+      "max": 0.1492061977623804,
+      "median": 0.037948149439893435,
+      "skew": 1.9579784633158412,
+      "kurtosis": 7.518286520097192
+    },
+    "GLD": {
+      "n_obs": 0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "max": NaN,
+      "median": NaN,
+      "skew": NaN,
+      "kurtosis": NaN
+    },
+    "SPY": {
+      "n_obs": 0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "max": NaN,
+      "median": NaN,
+      "skew": NaN,
+      "kurtosis": NaN
+    },
+    "TLT": {
+      "n_obs": 0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "max": NaN,
+      "median": NaN,
+      "skew": NaN,
+      "kurtosis": NaN
+    },
+    "USO": {
+      "n_obs": 0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "max": NaN,
+      "median": NaN,
+      "skew": NaN,
+      "kurtosis": NaN
+    }
+  },
+  "descriptive_vov_20d": {
+    "BTC-USD": {
+      "n_obs": 2882,
+      "mean": 0.004680964058653261,
+      "std": 0.004373542308686306,
+      "min": 0.00033512033023756413,
+      "max": 0.04374589515342324,
+      "median": 0.0037160827349470163,
+      "skew": 4.6147927401925735,
+      "kurtosis": 30.22400373575231
+    },
+    "ETH-USD": {
+      "n_obs": 2882,
+      "mean": 0.006278264419027102,
+      "std": 0.005414137478222965,
+      "min": 0.0005869495952329715,
+      "max": 0.04740012913916772,
+      "median": 0.004955291072195596,
+      "skew": 3.5117822407573698,
+      "kurtosis": 18.420305472719964
+    },
+    "GLD": {
+      "n_obs": 0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "max": NaN,
+      "median": NaN,
+      "skew": NaN,
+      "kurtosis": NaN
+    },
+    "SPY": {
+      "n_obs": 0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "max": NaN,
+      "median": NaN,
+      "skew": NaN,
+      "kurtosis": NaN
+    },
+    "TLT": {
+      "n_obs": 0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "max": NaN,
+      "median": NaN,
+      "skew": NaN,
+      "kurtosis": NaN
+    },
+    "USO": {
+      "n_obs": 0,
+      "mean": NaN,
+      "std": NaN,
+      "min": NaN,
+      "max": NaN,
+      "median": NaN,
+      "skew": NaN,
+      "kurtosis": NaN
+    }
+  },
+  "tail_event_freq_per_asset": {
+    "SPY": {
+      "n": 2921,
+      "n_tail": 0,
+      "freq": 0.0
+    },
+    "GLD": {
+      "n": 2921,
+      "n_tail": 0,
+      "freq": 0.0
+    },
+    "USO": {
+      "n": 2921,
+      "n_tail": 0,
+      "freq": 0.0
+    },
+    "TLT": {
+      "n": 2921,
+      "n_tail": 0,
+      "freq": 0.0
+    }
+  },
+  "vov_corr_matrix": {
+    "error": "insufficient_samples",
+    "n": 0
+  },
+  "granger_lag1_to_5": {
+    "BTC-USD__to__SPY": {
+      "error": "granger_failed: The x values include a column with constant values and so the test statistic cannot be computed.",
+      "n": 2881
+    },
+    "BTC-USD__to__GLD": {
+      "error": "granger_failed: The x values include a column with constant values and so the test statistic cannot be computed.",
+      "n": 2881
+    },
+    "BTC-USD__to__USO": {
+      "error": "granger_failed: The x values include a column with constant values and so the test statistic cannot be computed.",
+      "n": 2881
+    },
+    "BTC-USD__to__TLT": {
+      "error": "granger_failed: The x values include a column with constant values and so the test statistic cannot be computed.",
+      "n": 2881
+    },
+    "ETH-USD__to__SPY": {
+      "error": "granger_failed: The x values include a column with constant values and so the test statistic cannot be computed.",
+      "n": 2881
+    },
+    "ETH-USD__to__GLD": {
+      "error": "granger_failed: The x values include a column with constant values and so the test statistic cannot be computed.",
+      "n": 2881
+    },
+    "ETH-USD__to__USO": {
+      "error": "granger_failed: The x values include a column with constant values and so the test statistic cannot be computed.",
+      "n": 2881
+    },
+    "ETH-USD__to__TLT": {
+      "error": "granger_failed: The x values include a column with constant values and so the test statistic cannot be computed.",
+      "n": 2881
+    }
+  },
+  "quantile_reg_q05": {
+    "BTC-USD__to__SPY": {
+      "n": 1547,
+      "q": 0.05,
+      "intercept": -0.014956335102376414,
+      "slope": -0.6924027652471951,
+      "t_stat": -3.1054474511019388,
+      "p_value_asymptotic": 0.0019344464238931043,
+      "bootstrap_ci95_low": -1.0177746333590112,
+      "bootstrap_ci95_high": -0.1112724101525185,
+      "n_bootstrap": 1000
+    },
+    "BTC-USD__to__GLD": {
+      "n": 1547,
+      "q": 0.05,
+      "intercept": -0.01461346962056509,
+      "slope": -0.14303142095210575,
+      "t_stat": -0.6164982775506181,
+      "p_value_asymptotic": 0.5376565332138316,
+      "bootstrap_ci95_low": -0.4854996366879692,
+      "bootstrap_ci95_high": 0.04920264146091323,
+      "n_bootstrap": 1000
+    },
+    "BTC-USD__to__USO": {
+      "n": 1547,
+      "q": 0.05,
+      "intercept": -0.026522781471012627,
+      "slope": -1.9666836589339098,
+      "t_stat": -4.737291487990733,
+      "p_value_asymptotic": 2.364717541017865e-06,
+      "bootstrap_ci95_low": -4.532630194990793,
+      "bootstrap_ci95_high": -1.2460364288025292,
+      "n_bootstrap": 1000
+    },
+    "BTC-USD__to__TLT": {
+      "n": 1547,
+      "q": 0.05,
+      "intercept": -0.014425214439691074,
+      "slope": -0.14174998663321503,
+      "t_stat": -0.7331562599554213,
+      "p_value_asymptotic": 0.4635743520642017,
+      "bootstrap_ci95_low": -1.2425236939187885,
+      "bootstrap_ci95_high": 0.1740084344610198,
+      "n_bootstrap": 1000
+    },
+    "ETH-USD__to__SPY": {
+      "n": 1547,
+      "q": 0.05,
+      "intercept": -0.014460494130814495,
+      "slope": -0.6587857333407194,
+      "t_stat": -3.535906564474801,
+      "p_value_asymptotic": 0.000418374159825383,
+      "bootstrap_ci95_low": -0.9688955648535639,
+      "bootstrap_ci95_high": -0.1329386380800106,
+      "n_bootstrap": 1000
+    },
+    "ETH-USD__to__GLD": {
+      "n": 1547,
+      "q": 0.05,
+      "intercept": -0.01414844322650009,
+      "slope": -0.14839401823663256,
+      "t_stat": -1.0415996977359065,
+      "p_value_asymptotic": 0.2977602693480114,
+      "bootstrap_ci95_low": -0.8451387248254734,
+      "bootstrap_ci95_high": -0.08231795629919264,
+      "n_bootstrap": 1000
+    },
+    "ETH-USD__to__USO": {
+      "n": 1547,
+      "q": 0.05,
+      "intercept": -0.027541880937864693,
+      "slope": -1.2450107602896279,
+      "t_stat": -3.720054148460168,
+      "p_value_asymptotic": 0.0002063084348397246,
+      "bootstrap_ci95_low": -2.6290030047539834,
+      "bootstrap_ci95_high": -0.6860607996248884,
+      "n_bootstrap": 1000
+    },
+    "ETH-USD__to__TLT": {
+      "n": 1547,
+      "q": 0.05,
+      "intercept": -0.014516532151761206,
+      "slope": -0.09119248243718436,
+      "t_stat": -0.5541927329075135,
+      "p_value_asymptotic": 0.5795271546294125,
+      "bootstrap_ci95_low": -0.6864403984516091,
+      "bootstrap_ci95_high": 0.22655670994947247,
+      "n_bootstrap": 1000
+    }
+  },
+  "p_value_grid": {
+    "SPY": {
+      "BTC-USD": NaN,
+      "ETH-USD": NaN
+    },
+    "GLD": {
+      "BTC-USD": NaN,
+      "ETH-USD": NaN
+    },
+    "USO": {
+      "BTC-USD": NaN,
+      "ETH-USD": NaN
+    },
+    "TLT": {
+      "BTC-USD": NaN,
+      "ETH-USD": NaN
+    }
+  },
+  "slope_grid": {
+    "SPY": {
+      "BTC-USD": -0.6924,
+      "ETH-USD": -0.6588
+    },
+    "GLD": {
+      "BTC-USD": -0.143,
+      "ETH-USD": -0.1484
+    },
+    "USO": {
+      "BTC-USD": -1.9667,
+      "ETH-USD": -1.245
+    },
+    "TLT": {
+      "BTC-USD": -0.1417,
+      "ETH-USD": -0.0912
+    }
+  },
+  "verdict_summary": {
+    "n_tests": 0,
+    "n_sig_p_lt_0_10": 0,
+    "n_sig_p_lt_0_05": 0,
+    "bonferroni_alpha": 0.05,
+    "n_sig_bonferroni": 0,
+    "interpretation": "NULL-LEAN: crypto VoV does not robustly predict traditional-market tails after Bonferroni"
+  },
+  "finished_utc": "2026-06-13T07:13:44.951366+00:00"
+}
