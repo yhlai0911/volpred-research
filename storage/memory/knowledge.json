@@ -33686,5 +33686,45 @@
       "spy",
       "article-correction"
     ]
+  },
+  {
+    "item_id": "012f69e5",
+    "k_id": "K1475",
+    "category": "empirical_finding",
+    "title": "Treasury daily signed-volume imbalance vs next-day RV (TLT/IEF/ZN=F × SPY)",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k_treasury_signed_vol_imbalance_2026_06_14",
+    "experiment_path": "experiments/k_treasury_signed_vol_imbalance_2026_06_14/",
+    "reviewer": "feature-dev:code-reviewer subagent (fallback per K1259/K1261/K1262 protocol; Codex CLI hung at 8min+, killed)",
+    "reviewer_source": "subagent_fallback",
+    "codex_review": null,
+    "content": "K1475 Treasury daily signed-volume imbalance vs next-day RV — CONDITIONAL_PASS (subagent review). Tested 6 hypotheses: H1 self-predict (3 Treasury proxies × own RV_{t+1}) + H2 spillover (3 Treasury × SPY RV_{t+1}). Only TLT H1 marginal: β=-0.0965, HAC t=-2.45, boot p=0.012, n=2848 — fails Bonferroni α=0.00833. IEF/ZN=F H1 NS; H2 spillover uniformly null (TLT β≈0, IEF/ZN=F boot_p > 0.22). Mechanism limitation: daily signed_vol_imb = sign(return)×vol/vol = sign(return) (magnitude info lost). TLT marginal effect ≈ classical leverage effect (Black 1976) — not novel signal. Recommended follow-up: intraday OFI on TLT 1-min (Lee-Ready) OR TRACE dealer/customer flow when access available.",
+    "evidence": [
+      "experiments/k_treasury_signed_vol_imbalance_2026_06_14/README.md",
+      "experiments/k_treasury_signed_vol_imbalance_2026_06_14/k_treasury_signed_vol_imbalance_2026_06_14.py",
+      "experiments/k_treasury_signed_vol_imbalance_2026_06_14/results.json",
+      "experiments/k_treasury_signed_vol_imbalance_2026_06_14/fig_h1_self_predict.png",
+      "experiments/k_treasury_signed_vol_imbalance_2026_06_14/fig_h2_spillover.png",
+      "yfinance daily 2015-01-02 to 2026-06-12 (n=2763-2877)",
+      "Newey-West HAC L=5; block bootstrap block_len=20 B=5000 seed=42; Bonferroni α=0.05/6"
+    ],
+    "caveats": [
+      "HAC_LAGS=5 vs Newey-West rule-of-thumb ≈12; inflates HAC t-stat (conservative direction; does not change verdict)",
+      "signed_vol_imb collapses to sign(return) at daily horizon; magnitude info lost",
+      "TLT marginal effect overlaps with leverage effect (GJR-GARCH 1{r<0}·r²); not novel",
+      "ZN=F has CBOT futures holidays; inner join drops mismatched dates"
+    ],
+    "tags": [
+      "treasury",
+      "spillover",
+      "signed_volume",
+      "daily",
+      "null_result",
+      "leverage_effect_confounder",
+      "rates"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-06-14T02:01:27.987579",
+    "source": "hourly-01 dispatch (research backlog fallback auto-refill 2026-06-14)"
   }
 ]

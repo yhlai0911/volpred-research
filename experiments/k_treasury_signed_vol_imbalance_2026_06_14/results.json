@@ -1,0 +1,156 @@
+{
+  "experiment_id": "k_treasury_signed_vol_imbalance_2026_06_14",
+  "run_timestamp_utc": "2026-06-13T17:40:21.611788+00:00",
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_justification": "1 marginal test(s) at uncorrected \u03b1=0.05 but fail Bonferroni: ['H1_TLT']",
+  "config": {
+    "treasury_proxies": [
+      "TLT",
+      "IEF",
+      "ZN=F"
+    ],
+    "equity": "SPY",
+    "data_start": "2015-01-01",
+    "data_end_exclusive": "2026-06-14",
+    "cap_date": "2026-06-13",
+    "n_bootstrap": 5000,
+    "block_len": 20,
+    "hac_lags": 5,
+    "seed": 42,
+    "bonferroni_m_tests": 6,
+    "bonferroni_alpha": 0.008333333333333333
+  },
+  "data_summary": {
+    "TLT": {
+      "rows": 2877,
+      "start": "2015-01-05",
+      "end": "2026-06-12",
+      "mean_signed_vol_imb": 0.0170316301703163,
+      "std_signed_vol_imb": 1.000028763515686,
+      "mean_rv": 8.786883990189951e-05
+    },
+    "IEF": {
+      "rows": 2877,
+      "start": "2015-01-05",
+      "end": "2026-06-12",
+      "mean_signed_vol_imb": 0.009384775808133473,
+      "std_signed_vol_imb": 1.0001297918296796,
+      "mean_rv": 1.735740084513764e-05
+    },
+    "ZN=F": {
+      "rows": 2869,
+      "start": "2015-01-05",
+      "end": "2026-06-12",
+      "mean_signed_vol_imb": -0.010805158591843849,
+      "std_signed_vol_imb": 1.0001159347167485,
+      "mean_rv": 1.1776601905894117e-05
+    },
+    "SPY": {
+      "rows": 2877,
+      "start": "2015-01-05",
+      "end": "2026-06-12",
+      "mean_signed_vol_imb": 0.09350017379214459,
+      "std_signed_vol_imb": 0.9957923392506401,
+      "mean_rv": 0.0001253559807187272
+    }
+  },
+  "H1_self_predict": {
+    "TLT": {
+      "n": 2848,
+      "beta": -0.09645927241648831,
+      "hac_se": 0.03934282391059155,
+      "hac_t": -2.4517628077663316,
+      "hac_p": 0.014215833433478285,
+      "boot_p": 0.012,
+      "boot_ci_lo": -0.16845015830188997,
+      "boot_ci_hi": -0.021287603952134613,
+      "intercept": -9.715715543147338,
+      "coef_log_rv": 0.09530323456543133,
+      "r2": 0.01139036420027828,
+      "bonferroni_alpha": 0.008333333333333333,
+      "bonferroni_pass": false
+    },
+    "IEF": {
+      "n": 2831,
+      "beta": -0.050764703340318795,
+      "hac_se": 0.037213091990975146,
+      "hac_t": -1.364162466065173,
+      "hac_p": 0.17251643834952823,
+      "boot_p": 0.1896,
+      "boot_ci_lo": -0.12350088787895169,
+      "boot_ci_hi": 0.023618708817133013,
+      "intercept": -11.088116800434399,
+      "coef_log_rv": 0.10289225908982651,
+      "r2": 0.011346363941590276,
+      "bonferroni_alpha": 0.008333333333333333,
+      "bonferroni_pass": false
+    },
+    "ZN=F": {
+      "n": 2763,
+      "beta": 0.025459618769612672,
+      "hac_se": 0.036979226623140744,
+      "hac_t": 0.6884843490393775,
+      "hac_p": 0.49114782283833025,
+      "boot_p": 0.49860000000000004,
+      "boot_ci_lo": -0.04830825379096278,
+      "boot_ci_hi": 0.09735737367623265,
+      "intercept": -11.775289921786955,
+      "coef_log_rv": 0.07232760643185931,
+      "r2": 0.005406703334191354,
+      "bonferroni_alpha": 0.008333333333333333,
+      "bonferroni_pass": false
+    }
+  },
+  "H2_spillover_to_SPY": {
+    "TLT": {
+      "n": 2864,
+      "beta": -1.6236615130761634e-06,
+      "hac_se": 0.04509258871850669,
+      "hac_t": -3.600728100158481e-05,
+      "hac_p": 0.9999712703464185,
+      "boot_p": 1.0,
+      "boot_ci_lo": -0.07731659584512586,
+      "boot_ci_hi": 0.07568473210323112,
+      "intercept": -9.53633064464335,
+      "coef_log_rv": 0.13374635652064756,
+      "r2": 0.017902834784936483,
+      "bonferroni_alpha": 0.008333333333333333,
+      "bonferroni_pass": false
+    },
+    "IEF": {
+      "n": 2864,
+      "beta": 0.04422593740989609,
+      "hac_se": 0.04530472998042671,
+      "hac_t": 0.9761880807810421,
+      "hac_p": 0.3289712687424474,
+      "boot_p": 0.316,
+      "boot_ci_lo": -0.042269009719745024,
+      "boot_ci_hi": 0.12937542690532647,
+      "intercept": -9.536276606276692,
+      "coef_log_rv": 0.1337961512824496,
+      "r2": 0.018216229414945273,
+      "bonferroni_alpha": 0.008333333333333333,
+      "bonferroni_pass": false
+    },
+    "ZN=F": {
+      "n": 2854,
+      "beta": 0.052995017307928535,
+      "hac_se": 0.04493680258310084,
+      "hac_t": 1.1793232776169549,
+      "hac_p": 0.23826947262915743,
+      "boot_p": 0.229,
+      "boot_ci_lo": -0.03695316513498342,
+      "boot_ci_hi": 0.13450053156086275,
+      "intercept": -9.535062192546192,
+      "coef_log_rv": 0.1340136273768111,
+      "r2": 0.018252292925337144,
+      "bonferroni_alpha": 0.008333333333333333,
+      "bonferroni_pass": false
+    }
+  },
+  "runtime_seconds": 11.502377033233643,
+  "differentiation_from_prior": {
+    "K1124": "TAIFEX TX intraday 5-min OFI (Lee-Ready tick rule). This work: US Treasury DAILY signed-volume imbalance.",
+    "K1127": "TAIFEX TX \u00d7 ES intraday 1h OFI cross-market lead-lag. This work: US Treasury \u2192 US equity DAILY spillover via daily volume sign."
+  }
+}

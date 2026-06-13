@@ -10474,5 +10474,19 @@
     "verdict": "NULL",
     "fire": "hourly-01",
     "notes": "LETF EOD vol amplification NULL on SPY/QQQ 59-day 5min sample; Codex caught overnight-gap bug"
+  },
+  {
+    "timestamp": "2026-06-14T01:33+08:00",
+    "task_type": "experiment",
+    "task_id": "research_treasury_signed_volume_imbalance",
+    "title": "K1475 Treasury daily signed-volume imbalance (TLT/IEF/ZN=F × SPY)",
+    "verdict": "CONDITIONAL_PASS",
+    "summary": "TLT H1 marginal (HAC t=-2.45, boot p=0.012) fails Bonferroni α=0.00833; effect overlaps known leverage effect. H2 spillover null. Variable degenerates to sign(return) at daily horizon — next step intraday OFI / TRACE.",
+    "files": [
+      "experiments/k_treasury_signed_vol_imbalance_2026_06_14/"
+    ],
+    "knowledge_id": "K1475",
+    "reviewer": "feature-dev:code-reviewer subagent (Codex CLI hung; fallback per K1259 protocol)",
+    "dispatch": "hourly-01"
   }
 ]
