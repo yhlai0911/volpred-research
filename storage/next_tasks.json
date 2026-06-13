@@ -29702,7 +29702,7 @@
     "title": "研究 backlog fallback: explainable ensemble vol model 的「特徵穩定性 gate」",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: explainable ensemble vol model 的「特徵穩定性 gate」 — RandomForest/XGBoost/LightGBM ensemble 加 HAR/GJR features、macro/ETF/credit proxies，追蹤 walk-forward feature importance / SHAP rank drift；若 QLIKE 改善但特徵不穩，標為不可上架（來源：CFA 2025 ensemble learning / XAI in finance；回應本專案 ML ceiling） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "explainable_ensemble_vol_model_gate",
@@ -29714,6 +29714,8 @@
     "claimed_by": "codex-desktop",
     "claimed_at": "2026-06-13T18:11:57.014414+00:00",
     "claim_session_id": "97dfc06cf069",
-    "started_at": "2026-06-13T18:11:57.259714+00:00"
+    "started_at": "2026-06-13T18:11:57.259714+00:00",
+    "completed_at": "2026-06-13T18:27:33.639976+00:00",
+    "result": "完成 k_explainable_ensemble_vol_gate_2026_06_14：yfinance SPY/VIX/ETF panel 2006-2026，2016-2025 年度 walk-forward，target=t+1..t+5 SPY mean r²，train target_end 嚴格早於 OOS start。Tree ensemble 平均 QLIKE 0.704 vs HAR/Ridge 10.668，但 DM t=-1.45 p=0.148 未過 Harvey；排除 2020 後改善 8.1% 仍未過。Feature stability gate failed (Spearman 0.159, Jaccard 0.371, drift 0.289)，Codex review PASS；verdict=NOT_DEPLOYABLE_AVERAGE_GAIN_UNSTABLE_NOT_HARVEY_SIGNIFICANT。未直接寫 knowledge.json，留給主線程/knowledge-index gate。"
   }
 ]
