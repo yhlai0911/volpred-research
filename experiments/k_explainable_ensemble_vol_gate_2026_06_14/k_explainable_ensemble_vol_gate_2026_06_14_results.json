@@ -1,0 +1,548 @@
+{
+  "experiment_id": "k_explainable_ensemble_vol_gate_2026_06_14",
+  "created_at": "2026-06-13T18:21:42.287329+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance",
+    "data_pulled_at": "2026-06-13T18:21:42.287368+00:00",
+    "tickers": {
+      "SPY": "SPY",
+      "VIX": "^VIX",
+      "TLT": "TLT",
+      "HYG": "HYG",
+      "LQD": "LQD",
+      "GLD": "GLD",
+      "EEM": "EEM",
+      "XLK": "XLK",
+      "XLF": "XLF"
+    },
+    "start": "2006-01-01",
+    "end": "2026-06-14",
+    "first_feature_date": "2007-05-11",
+    "last_feature_date": "2026-06-05",
+    "n_feature_rows": 4799,
+    "target": "SPY forward 5-trading-day mean squared log return",
+    "target_horizon": 5,
+    "train_window": 2000,
+    "test_years": [
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "leakage_control": "For each OOS year, training rows require target_end_date < OOS start, so forward 5-day targets never cross the test boundary.",
+    "forecast_bounds": "Each fold applies the same train-only 1% target quantile floor and 5x 99% target quantile cap to all model variance forecasts to prevent near-zero QLIKE artifacts.",
+    "packages": {
+      "numpy": "2.4.3",
+      "pandas": "3.0.1",
+      "sklearn": "1.8.0",
+      "xgboost_available": true,
+      "yfinance": "1.2.0"
+    }
+  },
+  "literature": [
+    {
+      "title": "Ensemble Learning in Investment: An Overview",
+      "source": "CFA Institute Research and Policy Center",
+      "year": 2025,
+      "takeaway": "Ensembles can improve supervised finance models, but investment use still requires explainability, governance, and risk controls rather than accuracy alone.",
+      "url": "https://rpc.cfainstitute.org/research/foundation/2025/chapter-4-ensemble-learning-investment"
+    },
+    {
+      "title": "Explainable AI in Finance: Meeting Stakeholder Needs",
+      "source": "CFA Institute Research and Policy Center",
+      "year": 2025,
+      "takeaway": "Financial AI systems need transparent explanations that are stable enough for oversight, model validation, and stakeholder trust.",
+      "url": "https://rpc.cfainstitute.org/research/reports/2025/explainable-ai-in-finance"
+    },
+    {
+      "title": "Volatility Forecast Comparison Using Imperfect Volatility Proxies",
+      "source": "Journal of Econometrics",
+      "year": 2011,
+      "takeaway": "QLIKE is a proxy-robust loss for volatility forecast comparison under Patton's assumptions.",
+      "url": "https://ideas.repec.org/a/eee/econom/v160y2011i1p246-256.html"
+    },
+    {
+      "title": "A Simple Approximate Long-Memory Model of Realized Volatility",
+      "source": "Journal of Financial Econometrics",
+      "year": 2009,
+      "takeaway": "HAR-RV motivates parsimonious daily/weekly/monthly realized-volatility features.",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=626064"
+    }
+  ],
+  "methods": {
+    "baseline": "Ridge on HAR/GJR-style features, trained on log variance",
+    "ensemble_members": [
+      "random_forest",
+      "xgboost",
+      "hist_gradient_boosting"
+    ],
+    "importance_method": "Walk-forward permutation importance on the ensemble. SHAP and LightGBM were not available in this environment, so this is an XAI rank-stability proxy rather than literal SHAP.",
+    "primary_loss": "Patton QLIKE on forward 5-day mean squared return",
+    "dm_test": "volpred.stats.model_evaluation.dm_test with h=5 HAC for overlapping target"
+  },
+  "performance": {
+    "ensemble": {
+      "qlike": 0.7035821077230141,
+      "mse": 1.4018143178651427e-07,
+      "spearman": {
+        "rho": 0.6977822554642263,
+        "p": 0.0
+      }
+    },
+    "har_ridge": {
+      "qlike": 10.668061206146403,
+      "mse": 1.4549620862638498e-07,
+      "spearman": {
+        "rho": 0.5433668371987197,
+        "p": 3.984450055043425e-193
+      }
+    },
+    "hist_gradient_boosting": {
+      "qlike": 0.7990124971091709,
+      "mse": 1.4064836320988886e-07,
+      "spearman": {
+        "rho": 0.6600886713336278,
+        "p": 0.0
+      }
+    },
+    "random_forest": {
+      "qlike": 0.6743543640762286,
+      "mse": 1.3915210160062942e-07,
+      "spearman": {
+        "rho": 0.6990915508875791,
+        "p": 0.0
+      }
+    },
+    "xgboost": {
+      "qlike": 0.7367046230570706,
+      "mse": 1.4133647732827564e-07,
+      "spearman": {
+        "rho": 0.6868294493696068,
+        "p": 0.0
+      }
+    },
+    "ensemble_vs_har_ridge_dm": {
+      "dm_t_ensemble_minus_har": -1.4483156141457612,
+      "p_value": 0.14765355497483834,
+      "mean_loss_har_minus_ensemble": 9.964479098423388,
+      "qlike_improvement_pct": 93.4047799864736,
+      "harvey_pass_abs_t_gt_3": false
+    }
+  },
+  "yearly_performance": [
+    {
+      "year": 2016,
+      "n": 252,
+      "qlike_ensemble": 0.3735443376946095,
+      "qlike_har_ridge": 0.375377748465454,
+      "qlike_hist_gradient_boosting": 0.3731075437817221,
+      "qlike_random_forest": 0.40257777740643136,
+      "qlike_xgboost": 0.3722336827759427,
+      "ensemble_improvement_pct": 0.48841754162028156
+    },
+    {
+      "year": 2017,
+      "n": 251,
+      "qlike_ensemble": 0.41411211251302965,
+      "qlike_har_ridge": 0.4287014435989738,
+      "qlike_hist_gradient_boosting": 0.40465158071357693,
+      "qlike_random_forest": 0.4725546309279093,
+      "qlike_xgboost": 0.390788155090355,
+      "ensemble_improvement_pct": 3.403144846787973
+    },
+    {
+      "year": 2018,
+      "n": 251,
+      "qlike_ensemble": 1.1440319989294532,
+      "qlike_har_ridge": 1.1649969415978974,
+      "qlike_hist_gradient_boosting": 1.2630452021437817,
+      "qlike_random_forest": 1.0655357594651702,
+      "qlike_xgboost": 1.2421044943828505,
+      "ensemble_improvement_pct": 1.7995706185879665
+    },
+    {
+      "year": 2019,
+      "n": 252,
+      "qlike_ensemble": 0.2954083812444132,
+      "qlike_har_ridge": 0.3522550159827751,
+      "qlike_hist_gradient_boosting": 0.3077323901654482,
+      "qlike_random_forest": 0.32363861476436734,
+      "qlike_xgboost": 0.2849562261316984,
+      "ensemble_improvement_pct": 16.13792058567638
+    },
+    {
+      "year": 2020,
+      "n": 253,
+      "qlike_ensemble": 2.8773980057777773,
+      "qlike_har_ridge": 101.53119293264763,
+      "qlike_hist_gradient_boosting": 3.496529958020319,
+      "qlike_random_forest": 2.455188308369004,
+      "qlike_xgboost": 3.1685970880158902,
+      "ensemble_improvement_pct": 97.16599606222833
+    },
+    {
+      "year": 2021,
+      "n": 252,
+      "qlike_ensemble": 0.36662555855773005,
+      "qlike_har_ridge": 0.5230694936194635,
+      "qlike_hist_gradient_boosting": 0.37358210054186614,
+      "qlike_random_forest": 0.4203262953981663,
+      "qlike_xgboost": 0.3679599774397182,
+      "ensemble_improvement_pct": 29.908824156269276
+    },
+    {
+      "year": 2022,
+      "n": 251,
+      "qlike_ensemble": 0.4593871480739006,
+      "qlike_har_ridge": 0.3492569848923915,
+      "qlike_hist_gradient_boosting": 0.619371129969839,
+      "qlike_random_forest": 0.4091790091531305,
+      "qlike_xgboost": 0.44338565393340545,
+      "ensemble_improvement_pct": -31.53270169111749
+    },
+    {
+      "year": 2023,
+      "n": 250,
+      "qlike_ensemble": 0.24369430974452927,
+      "qlike_har_ridge": 0.3294581566421251,
+      "qlike_hist_gradient_boosting": 0.2701259678625901,
+      "qlike_random_forest": 0.25482115326638016,
+      "qlike_xgboost": 0.2490932822597563,
+      "ensemble_improvement_pct": 26.031787396527278
+    },
+    {
+      "year": 2024,
+      "n": 252,
+      "qlike_ensemble": 0.3669614534748474,
+      "qlike_har_ridge": 0.39339893573521406,
+      "qlike_hist_gradient_boosting": 0.38377743346709087,
+      "qlike_random_forest": 0.39547143432906945,
+      "qlike_xgboost": 0.3560465211123733,
+      "ensemble_improvement_pct": 6.720272949126895
+    },
+    {
+      "year": 2025,
+      "n": 250,
+      "qlike_ensemble": 0.48023915029716896,
+      "qlike_har_ridge": 0.591016889603751,
+      "qlike_hist_gradient_boosting": 0.48033413737238545,
+      "qlike_random_forest": 0.5324270517971303,
+      "qlike_xgboost": 0.4757587587904168,
+      "ensemble_improvement_pct": 18.74358267169882
+    }
+  ],
+  "robustness": {
+    "positive_improvement_years": 9,
+    "total_years": 10,
+    "median_yearly_improvement_pct": 11.429096767401637,
+    "worst_har_year": 2020,
+    "excluding_2020": {
+      "n": 2261,
+      "years": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "qlike_har_ridge": 0.500713870098278,
+      "qlike_ensemble": 0.4603377812268377,
+      "qlike_improvement_pct": 8.063704898671048,
+      "dm_t_ensemble_minus_har": -1.653610706583345,
+      "p_value": 0.09834551565438221,
+      "harvey_pass_abs_t_gt_3": false
+    }
+  },
+  "feature_stability": {
+    "n_folds": 10,
+    "years": [
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "aggregate_top10": [
+      {
+        "feature": "vix_daily_var",
+        "mean_importance": 0.11551168680092902,
+        "aggregate_rank": 1
+      },
+      {
+        "feature": "spy_ret_10d",
+        "mean_importance": 0.03412952286976605,
+        "aggregate_rank": 2
+      },
+      {
+        "feature": "vix_z_63d",
+        "mean_importance": 0.03148335537254528,
+        "aggregate_rank": 3
+      },
+      {
+        "feature": "spy_ret_126d",
+        "mean_importance": 0.027159657164370764,
+        "aggregate_rank": 4
+      },
+      {
+        "feature": "hyg_ret_22d",
+        "mean_importance": 0.025220472707592777,
+        "aggregate_rank": 5
+      },
+      {
+        "feature": "spy_ret_63d",
+        "mean_importance": 0.017940645161688473,
+        "aggregate_rank": 6
+      },
+      {
+        "feature": "xlk_ret_22d",
+        "mean_importance": 0.014932589278712594,
+        "aggregate_rank": 7
+      },
+      {
+        "feature": "vix_rv22_spread",
+        "mean_importance": 0.011711283560737626,
+        "aggregate_rank": 8
+      },
+      {
+        "feature": "xlf_rv_22d",
+        "mean_importance": 0.008184977353741203,
+        "aggregate_rank": 9
+      },
+      {
+        "feature": "spy_rv_10d",
+        "mean_importance": 0.0064765532931418705,
+        "aggregate_rank": 10
+      }
+    ],
+    "adjacent_fold_stability": [
+      {
+        "left_year": 2016,
+        "right_year": 2017,
+        "spearman_importance": 0.06615384615384615,
+        "top5_jaccard": 0.6666666666666666,
+        "mean_abs_rank_drift_normalized": 0.3075740099961553,
+        "left_top5": [
+          "spy_ret_10d",
+          "spy_ret_63d",
+          "vix_daily_var",
+          "vix_rv22_spread",
+          "vix_z_63d"
+        ],
+        "right_top5": [
+          "credit_hyg_lqd_ret_22d",
+          "spy_ret_10d",
+          "vix_daily_var",
+          "vix_rv22_spread",
+          "vix_z_63d"
+        ]
+      },
+      {
+        "left_year": 2017,
+        "right_year": 2018,
+        "spearman_importance": 0.11167420814479638,
+        "top5_jaccard": 0.42857142857142855,
+        "mean_abs_rank_drift_normalized": 0.30603613994617457,
+        "left_top5": [
+          "credit_hyg_lqd_ret_22d",
+          "spy_ret_10d",
+          "vix_daily_var",
+          "vix_rv22_spread",
+          "vix_z_63d"
+        ],
+        "right_top5": [
+          "spy_rv_10d",
+          "vix_daily_var",
+          "vix_rv22_spread",
+          "vix_z_63d",
+          "xlf_rv_22d"
+        ]
+      },
+      {
+        "left_year": 2018,
+        "right_year": 2019,
+        "spearman_importance": 0.3590950226244343,
+        "top5_jaccard": 0.42857142857142855,
+        "mean_abs_rank_drift_normalized": 0.22683583237216454,
+        "left_top5": [
+          "spy_rv_10d",
+          "vix_daily_var",
+          "vix_rv22_spread",
+          "vix_z_63d",
+          "xlf_rv_22d"
+        ],
+        "right_top5": [
+          "eem_rv_22d",
+          "spy_ret_10d",
+          "vix_daily_var",
+          "vix_rv22_spread",
+          "vix_z_63d"
+        ]
+      },
+      {
+        "left_year": 2019,
+        "right_year": 2020,
+        "spearman_importance": 0.2564705882352941,
+        "top5_jaccard": 0.42857142857142855,
+        "mean_abs_rank_drift_normalized": 0.2760476739715494,
+        "left_top5": [
+          "eem_rv_22d",
+          "spy_ret_10d",
+          "vix_daily_var",
+          "vix_rv22_spread",
+          "vix_z_63d"
+        ],
+        "right_top5": [
+          "hyg_ret_22d",
+          "spy_ret_10d",
+          "spy_ret_126d",
+          "vix_daily_var",
+          "vix_z_63d"
+        ]
+      },
+      {
+        "left_year": 2020,
+        "right_year": 2021,
+        "spearman_importance": -0.18823529411764706,
+        "top5_jaccard": 0.25,
+        "mean_abs_rank_drift_normalized": 0.3652441368704345,
+        "left_top5": [
+          "hyg_ret_22d",
+          "spy_ret_10d",
+          "spy_ret_126d",
+          "vix_daily_var",
+          "vix_z_63d"
+        ],
+        "right_top5": [
+          "eem_ret_22d",
+          "spy_rv_126d",
+          "vix_daily_var",
+          "vix_z_63d",
+          "xlk_ret_22d"
+        ]
+      },
+      {
+        "left_year": 2021,
+        "right_year": 2022,
+        "spearman_importance": -0.19846153846153844,
+        "top5_jaccard": 0.1111111111111111,
+        "mean_abs_rank_drift_normalized": 0.36601307189542487,
+        "left_top5": [
+          "eem_ret_22d",
+          "spy_rv_126d",
+          "vix_daily_var",
+          "vix_z_63d",
+          "xlk_ret_22d"
+        ],
+        "right_top5": [
+          "lqd_ret_5d",
+          "spy_abs_126d",
+          "spy_rv_126d",
+          "tlt_rv_22d",
+          "vix_log_chg_5d"
+        ]
+      },
+      {
+        "left_year": 2022,
+        "right_year": 2023,
+        "spearman_importance": 0.46977375565610857,
+        "top5_jaccard": 0.1111111111111111,
+        "mean_abs_rank_drift_normalized": 0.2229911572472126,
+        "left_top5": [
+          "lqd_ret_5d",
+          "spy_abs_126d",
+          "spy_rv_126d",
+          "tlt_rv_22d",
+          "vix_log_chg_5d"
+        ],
+        "right_top5": [
+          "gld_rv_22d",
+          "rv_ratio_22_63",
+          "spy_abs_126d",
+          "vix_daily_var",
+          "xlf_rv_22d"
+        ]
+      },
+      {
+        "left_year": 2023,
+        "right_year": 2024,
+        "spearman_importance": 0.1427149321266968,
+        "top5_jaccard": 0.25,
+        "mean_abs_rank_drift_normalized": 0.28681276432141484,
+        "left_top5": [
+          "gld_rv_22d",
+          "rv_ratio_22_63",
+          "spy_abs_126d",
+          "vix_daily_var",
+          "xlf_rv_22d"
+        ],
+        "right_top5": [
+          "spy_ret_10d",
+          "spy_ret_63d",
+          "vix_daily_var",
+          "vix_z_63d",
+          "xlf_rv_22d"
+        ]
+      },
+      {
+        "left_year": 2024,
+        "right_year": 2025,
+        "spearman_importance": 0.4136651583710407,
+        "top5_jaccard": 0.6666666666666666,
+        "mean_abs_rank_drift_normalized": 0.23990772779700115,
+        "left_top5": [
+          "spy_ret_10d",
+          "spy_ret_63d",
+          "vix_daily_var",
+          "vix_z_63d",
+          "xlf_rv_22d"
+        ],
+        "right_top5": [
+          "spy_ret_10d",
+          "spy_ret_63d",
+          "vix_daily_var",
+          "vix_z_63d",
+          "xlk_ret_22d"
+        ]
+      }
+    ],
+    "mean_adjacent_spearman": 0.15920563097033685,
+    "mean_top5_jaccard": 0.37125220458553787,
+    "mean_abs_rank_drift_normalized": 0.2886069460463924
+  },
+  "gate": {
+    "verdict": "NOT_DEPLOYABLE_AVERAGE_GAIN_UNSTABLE_NOT_HARVEY_SIGNIFICANT",
+    "average_gain": true,
+    "performance_pass": false,
+    "stability_pass": false,
+    "rules": {
+      "performance_pass": "ensemble QLIKE improvement > 2% and DM t(ensemble - HAR) < -3",
+      "stability_pass": "mean adjacent Spearman >= 0.35, top5 Jaccard >= 0.35, normalized rank drift <= 0.25"
+    }
+  },
+  "files": {
+    "results": "k_explainable_ensemble_vol_gate_2026_06_14_results.json",
+    "predictions": "walk_forward_predictions.csv",
+    "importance_by_fold": "feature_importance_by_fold.csv",
+    "figures": [
+      "fig_qlike_by_year.png",
+      "fig_mean_permutation_importance.png",
+      "fig_feature_rank_drift.png"
+    ]
+  }
+}
