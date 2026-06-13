@@ -29583,7 +29583,7 @@
     "title": "研究 backlog fallback: ETF 宏觀效率 vs ETF fragility 的雙面檢定",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 shock 日更快反映資訊但後續 co-volatility / reversal 更強（來源：JPM 2025 ETF macroefficiency + JFM 2025 ETF-based fragility） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "etf_vs_etf_fragility",
@@ -29595,7 +29595,9 @@
     "claimed_by": "codex-desktop",
     "claimed_at": "2026-06-13T17:58:03.513614+00:00",
     "claim_session_id": "80a668e88be7",
-    "started_at": "2026-06-13T17:58:03.776526+00:00"
+    "started_at": "2026-06-13T17:58:03.776526+00:00",
+    "completed_at": "2026-06-13T18:09:49.300894+00:00",
+    "result": "完成 k_etf_vs_etf_fragility_2026_06_14：yfinance ETF panel 2012-2026，SPY/VIX lagged-threshold shock day ETF basket abs return 2.09% vs 0.66%，Mann-Whitney p=9.83e-103；next-day decay p=1.83e-22。H2 reversal interaction -0.183 (date-clustered p=0.0449)，non-overlapping 21d PC1 share delta +0.085 (p=4.79e-05)。Codex review PASS；結論降級為 reduced-form support with caveats，不聲稱 causal ETF ownership/create-redeem fragility。"
   },
   {
     "id": "trending_repost_2026_06_14_0dte",
