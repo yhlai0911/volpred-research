@@ -23,18 +23,33 @@
       "DBB"
     ],
     "regime_proxy": "UUP",
-    "method": "Welch t-test with Bonferroni correction (alpha=0.01)",
-    "verdict": "PASS (4/5 Bonferroni-significant)",
-    "conclusion_class": "positive_significant",
-    "codex_review": "CONDITIONAL_PASS 2026-06-10",
+    "method": "OLS-HAC / Newey-West (maxlags=21) with Bonferroni alpha=0.01; Welch t-test retained as descriptive only",
+    "verdict": "CONDITIONAL_PASS (HAC/Newey-West + Bonferroni leaves USO as the only robust asset, 1/5)",
+    "conclusion_class": "conditional_positive_us_oil_only",
+    "codex_review": "CONDITIONAL_PASS 2026-06-10; HAC follow-up integrated 2026-06-13",
     "dup_waiver": "K1437 是 TWD→TWN 單市場 Granger spillover (NULL); K1439 是 USD regime cross-asset RV conditioning (PASS 4/5); 僅共享 USD entity，方法/資產宇宙/結論完全不同；narrative-arc classifier 將 K1439 誤判為 null_no_info，實為 positive_significant",
     "image_urls": [
-      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/rv_by_regime_level.png"
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/rv_by_regime_level.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/rv_by_regime_trend.png"
     ],
     "supabase_storage_urls": [
-      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/rv_by_regime_level.png"
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/rv_by_regime_level.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/rv_by_regime_trend.png"
     ],
-    "content_type": "research_article"
+    "content_type": "research_article",
+    "inference_policy": "HAC/Newey-West is canonical after 2026-06-13 follow-up; naive Welch is descriptive only because 21d rolling RV overlap induces ACF(1) about 0.98-0.99.",
+    "naive_welch_bonferroni_significant_count": 4,
+    "hac_bonferroni_significant_count": 1,
+    "hac_bonferroni_significant_assets": [
+      "USO"
+    ],
+    "welch_descriptive_only": true,
+    "hac_canonical": true,
+    "errata": {
+      "update_action": "hac_inference_correction",
+      "update_summary": "K1439 article downscoped from naive Welch 4/5 significant to HAC-robust USO-only 1/5; title/body/metadata updated in place.",
+      "update_at": "2026-06-13T12:42:57.960379+00:00"
+    }
   },
   "tags": [
     "研究",
