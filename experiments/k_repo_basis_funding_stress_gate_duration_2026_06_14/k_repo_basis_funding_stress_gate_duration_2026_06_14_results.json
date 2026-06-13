@@ -1,0 +1,110 @@
+{
+  "experiment_id": "k_repo_basis_funding_stress_gate_duration_2026_06_14",
+  "title": "Repo-basis funding stress gate predicts duration-asset volatility",
+  "timestamp_utc": "2026-06-13T21:03:07.671526+00:00",
+  "status": "NULL",
+  "data": {
+    "sample_start": "2023-02-03",
+    "sample_end": "2026-06-05",
+    "n_weekly_obs": 173,
+    "train_weeks": 104,
+    "sources": {
+      "nyfed_rates_api": [
+        "SOFR secured search.json",
+        "EFFR unsecured search.json",
+        "TGCR secured search.json"
+      ],
+      "cftc": [
+        "com_fin_txt_2018.zip",
+        "com_fin_txt_2019.zip",
+        "com_fin_txt_2020.zip",
+        "com_fin_txt_2021.zip",
+        "com_fin_txt_2022.zip",
+        "com_fin_txt_2023.zip",
+        "com_fin_txt_2024.zip",
+        "com_fin_txt_2025.zip",
+        "com_fin_txt_2026.zip"
+      ],
+      "yfinance_assets": [
+        "TLT",
+        "IEF",
+        "ZN=F"
+      ]
+    }
+  },
+  "design": {
+    "signal_timing_guard": "CFTC Traders in Financial Futures report_date is Tuesday but becomes usable only on Friday release_date = report_date + 3 calendar days; next-week RV starts after release_date.",
+    "features": [
+      "weekly mean SOFR-EFFR",
+      "weekly mean SOFR-TGCR",
+      "basis short proxy = mean(UST 10Y leveraged short share, UST Bond leveraged short share)",
+      "stress index = mean(expanding z-scored feature components)"
+    ],
+    "target": "next 5 trading-day annualized realized variance",
+    "baseline_model": "AR(1) on log weekly RV",
+    "full_model": "AR(1) on log weekly RV + stress index",
+    "tests": [
+      "full-sample OLS with Newey-West HAC(4)",
+      "block bootstrap for stress coefficient sign (block=8, B=2000, seed=42)",
+      "expanding-window OOS QLIKE + HAC Diebold-Mariano vs baseline"
+    ],
+    "seed": 42
+  },
+  "summary": {
+    "overall_verdict": "NULL",
+    "headline": "After lookahead-safe expanding standardization, the repo-basis stress proxy does not robustly predict next-week duration RV."
+  },
+  "asset_results": [
+    {
+      "asset": "TLT",
+      "n_obs": 173,
+      "is_mean_ann_rv": 0.0205469418271902,
+      "oos_n": 69,
+      "stress_coef": 0.04029253815460182,
+      "stress_t_hac": 0.3487535965687148,
+      "stress_p_hac": 0.7272743031784512,
+      "stress_boot_p": 0.948,
+      "baseline_qlike": -3.373478656317951,
+      "full_qlike": -3.3680653421008473,
+      "qlike_delta": -0.005413314217103782,
+      "dm_t_qlike": -1.1145112846138248,
+      "dm_p_qlike": 0.2650599060408362,
+      "oos_r2": -0.024012037253195784,
+      "verdict": "NULL"
+    },
+    {
+      "asset": "IEF",
+      "n_obs": 173,
+      "is_mean_ann_rv": 0.004903998202898884,
+      "oos_n": 69,
+      "stress_coef": -0.03507902859545725,
+      "stress_t_hac": -0.3732681662497678,
+      "stress_p_hac": 0.7089488667366182,
+      "stress_boot_p": 0.524,
+      "baseline_qlike": -4.85531738834428,
+      "full_qlike": -4.854217981597396,
+      "qlike_delta": -0.001099406746884135,
+      "dm_t_qlike": -0.3267000637312817,
+      "dm_p_qlike": 0.7438947520420537,
+      "oos_r2": -0.021607072558501805,
+      "verdict": "NULL"
+    },
+    {
+      "asset": "ZN=F",
+      "n_obs": 173,
+      "is_mean_ann_rv": 0.0036838431230859486,
+      "oos_n": 69,
+      "stress_coef": -0.056728754421556005,
+      "stress_t_hac": -0.574747171606809,
+      "stress_p_hac": 0.5654622997714717,
+      "stress_boot_p": 0.497,
+      "baseline_qlike": -5.085307650327083,
+      "full_qlike": -5.083521429929595,
+      "qlike_delta": -0.001786220397487881,
+      "dm_t_qlike": -0.4143265742892248,
+      "dm_p_qlike": 0.678634954557757,
+      "oos_r2": -0.016802201896623847,
+      "verdict": "NULL"
+    }
+  ]
+}

@@ -29701,7 +29701,7 @@
     "title": "研究 backlog fallback: variance risk premium 下降後，短波策略是否失去經濟 edge",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: variance risk premium 下降後，短波策略是否失去經濟 edge — 用 ^VIX vs SPY realized variance、SVXY/VXX proxy、分段 2006-2017/2018-2026，檢定 VRP 均值、tail loss、short-vol Sharpe 與 drawdown 是否結構性惡化；不使用 options chain 先做免期權版（來源：Chicago Fed 2025 VRP decline） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "variance_risk_premium_edge",
@@ -29710,10 +29710,9 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-13T18:08:19+00:00",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-06-13T18:09:08.677331+00:00",
-    "claim_session_id": "f634e28ffdde",
-    "started_at": "2026-06-13T18:09:09.550363+00:00"
+    "started_at": "2026-06-13T18:09:09.550363+00:00",
+    "last_released_at": "2026-06-13T20:50:10.007816+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "research_explainable_ensemble_vol_model_gate",
@@ -29741,7 +29740,7 @@
     "title": "研究 backlog fallback: BNPL / 消費信貸平台作 credit-cycle 前哨",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: BNPL / 消費信貸平台作 credit-cycle 前哨 — 用 AFRM/UPST/SOFI/ALLY RV + FRED 信用卡/汽車貸款 delinquency、消費者信心，檢定 consumer-credit proxy 是否領先 IWM/HYG/金融股 RV（來源：CFA 2025 Alternative Credit: Rise of Consumer Lending；BNPL/consumer lending 風險透明度） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "bnpl_credit_cycle",
@@ -29749,14 +29748,20 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-13T20:08:10+00:00"
+    "created_at": "2026-06-13T20:08:10+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T20:46:34.311534+00:00",
+    "claim_session_id": "9e517e26095b",
+    "started_at": "2026-06-13T20:47:04.847340+00:00",
+    "completed_at": "2026-06-13T20:58:42.422304+00:00",
+    "result": "Produced experiments/k_bnpl_credit_cycle_2026_06_14 with README/script/results JSON/3 figures/codex_review. Result: NULL_NO_ROBUST_OOS_EDGE; lagged BNPL stress has descriptive next-day RV association but no Harvey |t|>3 OOS QLIKE improvement for IWM/HYG/XLF. Knowledge write intentionally left to main-thread/K1259 gate."
   },
   {
     "id": "research_repo_basis_funding_stress_gate_duration",
     "title": "研究 backlog fallback: Repo-basis funding stress gate 預測 duration 資產波動",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Repo-basis funding stress gate 預測 duration 資產波動 — FRED/NY Fed SOFR-EFFR/TGCR spread、CFTC leveraged funds Treasury futures shorts、ZN=F/TLT/IEF RV，檢定 repo funding 壓力與 basis-trade proxy 是否領先長債 RV（來源：NY Fed / Dallas Fed 2025 Treasury funding liquidity and basis trade） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "repo_basis_funding_stress_gate_duration",
@@ -29764,7 +29769,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-13T20:08:10+00:00"
+    "created_at": "2026-06-13T20:08:10+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T20:49:23.520494+00:00",
+    "claim_session_id": "bd32d498b2e9",
+    "started_at": "2026-06-13T20:49:29.897803+00:00",
+    "completed_at": "2026-06-13T21:03:58.467100+00:00",
+    "result": "Built weekly experiment with NY Fed SOFR/EFFR/TGCR + CFTC leveraged-fund Treasury shorts + TLT/IEF/ZN RV.\nResult is REVERSE_SIGN_MIXED: all three assets show significant negative stress coefficients, so the hypothesized positive stress->duration-RV channel is not supported.\nArtifacts saved under experiments/k_repo_basis_funding_stress_gate_duration_2026_06_14/ with README, script, results JSON, and charts.\n\nRepo-basis artifacts were Codex-reviewed and rerun after fixing full-sample z-score lookahead to expanding z-score. Corrected result: NULL; TLT/IEF/ZN=F coefficients are non-significant and OOS QLIKE/R2 are worse than baseline. See experiments/k_repo_basis_funding_stress_gate_duration_2026_06_14/codex_review.md."
   },
   {
     "id": "daily_article_k1487_gdelt_novel_risk_null_1781040",

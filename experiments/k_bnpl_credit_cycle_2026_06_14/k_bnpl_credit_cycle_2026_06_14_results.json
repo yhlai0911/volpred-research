@@ -1,0 +1,500 @@
+{
+  "experiment_id": "k_bnpl_credit_cycle_2026_06_14",
+  "title": "BNPL / consumer-lending public proxy as credit-cycle early warning",
+  "status": "NULL_NO_ROBUST_OOS_EDGE",
+  "seed": 42,
+  "n_bootstrap": 1000,
+  "data_sources": {
+    "prices": "yfinance adjusted close",
+    "fred": {
+      "DRCLACBS": {
+        "name": "consumer_loan_delinquency",
+        "first_obs": "1987-01-01",
+        "last_obs": "2026-01-01",
+        "n_obs": 157,
+        "conservative_trading_day_lag": 63
+      },
+      "DRCCLACBS": {
+        "name": "credit_card_delinquency",
+        "first_obs": "1991-01-01",
+        "last_obs": "2026-01-01",
+        "n_obs": 141,
+        "conservative_trading_day_lag": 63
+      },
+      "UMCSENT": {
+        "name": "consumer_sentiment",
+        "first_obs": "1952-11-01",
+        "last_obs": "2026-04-01",
+        "n_obs": 672,
+        "conservative_trading_day_lag": 21
+      }
+    }
+  },
+  "sample_start": "2021-01-13",
+  "sample_end": "2026-06-12",
+  "n_price_obs": 1360,
+  "tickers": {
+    "bnpl_consumer_lender_proxy": [
+      "AFRM",
+      "UPST",
+      "SOFI",
+      "ALLY"
+    ],
+    "targets": [
+      "IWM",
+      "HYG",
+      "XLF"
+    ],
+    "market_controls": [
+      "SPY",
+      "^VIX"
+    ]
+  },
+  "methodology": {
+    "signal_alignment": "Every predictive BNPL/market/macro feature is lagged with shift(1) or a conservative FRED lag before target-day RV.",
+    "target": "Close-to-close squared daily return as noisy daily realized-variance proxy.",
+    "event_test": "Lagged BNPL stress signal = prior-day BNPL log RV above its own lagged rolling 252-day 90th percentile; moving-block bootstrap, block=5, seed=42.",
+    "oos_test": "Expanding-window OOS log-RV regressions; QLIKE on target-day r^2; DM HAC test with Harvey |t|>3 threshold.",
+    "macro_lag": "FRED quarterly delinquency shifted 63 trading days and UMCSENT shifted 21 trading days to avoid revised/release timing lookahead."
+  },
+  "event_study": [
+    {
+      "target": "IWM",
+      "horizon": "next_day",
+      "n_event": 134,
+      "n_non_event": 1225,
+      "event_mean": 0.00027145308127948353,
+      "non_event_mean": 0.00019685098397540635,
+      "ratio": 1.3789775179045973,
+      "diff": 7.460209730407718e-05,
+      "bootstrap_p_value": 0.049,
+      "ci95_low": 7.167890159734344e-06,
+      "ci95_high": 0.0001546700374654663
+    },
+    {
+      "target": "IWM",
+      "horizon": "next_5d_mean",
+      "n_event": 134,
+      "n_non_event": 1221,
+      "event_mean": 0.00024609048432019904,
+      "non_event_mean": 0.0001993492654728014,
+      "ratio": 1.2344689795397057,
+      "diff": 4.6741218847397634e-05,
+      "bootstrap_p_value": 0.096,
+      "ci95_low": -1.5491410677455871e-06,
+      "ci95_high": 0.00010720509247405623
+    },
+    {
+      "target": "HYG",
+      "horizon": "next_day",
+      "n_event": 134,
+      "n_non_event": 1225,
+      "event_mean": 3.3476059831583016e-05,
+      "non_event_mean": 2.0037645819185102e-05,
+      "ratio": 1.6706583265151471,
+      "diff": 1.3438414012397914e-05,
+      "bootstrap_p_value": 0.081,
+      "ci95_low": 1.720798715244041e-08,
+      "ci95_high": 3.1089262876385976e-05
+    },
+    {
+      "target": "HYG",
+      "horizon": "next_5d_mean",
+      "n_event": 134,
+      "n_non_event": 1221,
+      "event_mean": 2.5268968955418508e-05,
+      "non_event_mean": 2.0981026877082087e-05,
+      "ratio": 1.2043723647778273,
+      "diff": 4.287942078336421e-06,
+      "bootstrap_p_value": 0.276,
+      "ci95_low": -2.629626952452639e-06,
+      "ci95_high": 1.311119481700088e-05
+    },
+    {
+      "target": "XLF",
+      "horizon": "next_day",
+      "n_event": 134,
+      "n_non_event": 1225,
+      "event_mean": 0.0002178599078637912,
+      "non_event_mean": 0.00012891988490155957,
+      "ratio": 1.6898859941594295,
+      "diff": 8.894002296223164e-05,
+      "bootstrap_p_value": 0.047,
+      "ci95_low": 1.312187871084004e-05,
+      "ci95_high": 0.00018987108323955662
+    },
+    {
+      "target": "XLF",
+      "horizon": "next_5d_mean",
+      "n_event": 134,
+      "n_non_event": 1221,
+      "event_mean": 0.00016416778271329934,
+      "non_event_mean": 0.00013491115580040902,
+      "ratio": 1.2168584705935908,
+      "diff": 2.9256626912890326e-05,
+      "bootstrap_p_value": 0.255,
+      "ci95_low": -1.3926807927824723e-05,
+      "ci95_high": 8.514057076136496e-05
+    }
+  ],
+  "hac_regressions": {
+    "IWM": {
+      "n_obs": 1234,
+      "baseline_r2": 0.012096292027122924,
+      "augmented_r2": 0.016490465747207472,
+      "delta_r2": 0.004394173720084549,
+      "augmented_params": {
+        "const": {
+          "coef": -6.456312488018815,
+          "std_err": 1.0865620045448625,
+          "z_stat": -5.9419641594436445,
+          "p_value": 2.8162700373583698e-09
+        },
+        "IWM_log_rv_lag1": {
+          "coef": 0.0010800968815812707,
+          "std_err": 0.03319500147723153,
+          "z_stat": 0.03253793744585641,
+          "p_value": 0.9740430623291892
+        },
+        "IWM_log_rv_lag5": {
+          "coef": 0.17109860550158498,
+          "std_err": 0.08708136804871698,
+          "z_stat": 1.9648130172445755,
+          "p_value": 0.04943588301627733
+        },
+        "IWM_log_rv_lag22": {
+          "coef": 0.22628090393387085,
+          "std_err": 0.14173422220150722,
+          "z_stat": 1.5965156503428044,
+          "p_value": 0.11037371443188695
+        },
+        "bnpl_log_rv_lag1": {
+          "coef": 0.0234133630759059,
+          "std_err": 0.028951438413195026,
+          "z_stat": 0.8087115652683746,
+          "p_value": 0.41868107421910006
+        },
+        "bnpl_downside_lag1": {
+          "coef": 1.542047704174751,
+          "std_err": 2.713566075140614,
+          "z_stat": 0.5682735048546197,
+          "p_value": 0.5698492668487771
+        },
+        "VIX_log_rv_lag1": {
+          "coef": 0.037098714672108006,
+          "std_err": 0.02471339015571125,
+          "z_stat": 1.5011584585668232,
+          "p_value": 0.1333145816413079
+        },
+        "SPY_log_rv_lag1": {
+          "coef": -0.04229009604341808,
+          "std_err": 0.028828012987533902,
+          "z_stat": -1.4669792212770818,
+          "p_value": 0.1423817079096217
+        },
+        "consumer_loan_delinquency_chg63": {
+          "coef": -0.3697765763222023,
+          "std_err": 2.074579616833209,
+          "z_stat": -0.1782416897003242,
+          "p_value": 0.8585331702521877
+        },
+        "credit_card_delinquency_chg63": {
+          "coef": 0.7448295823818682,
+          "std_err": 1.2591470618941736,
+          "z_stat": 0.5915350199534264,
+          "p_value": 0.5541619978867933
+        },
+        "consumer_sentiment_chg63": {
+          "coef": -0.005094320087294416,
+          "std_err": 0.00898815301852715,
+          "z_stat": -0.5667816376505348,
+          "p_value": 0.5708625475693732
+        }
+      }
+    },
+    "HYG": {
+      "n_obs": 1234,
+      "baseline_r2": 0.12497833429673044,
+      "augmented_r2": 0.12889064119181326,
+      "delta_r2": 0.003912306895082818,
+      "augmented_params": {
+        "const": {
+          "coef": -4.028068139309731,
+          "std_err": 1.1898411224077226,
+          "z_stat": -3.3853831939836367,
+          "p_value": 0.0007107895316813651
+        },
+        "HYG_log_rv_lag1": {
+          "coef": 0.08192607364717261,
+          "std_err": 0.049101484109731135,
+          "z_stat": 1.668505038749657,
+          "p_value": 0.09521551251317739
+        },
+        "HYG_log_rv_lag5": {
+          "coef": 0.14060565524908908,
+          "std_err": 0.10948938324523404,
+          "z_stat": 1.2841944221583648,
+          "p_value": 0.19907393637857562
+        },
+        "HYG_log_rv_lag22": {
+          "coef": 0.5575996337074401,
+          "std_err": 0.13791439223870117,
+          "z_stat": 4.043085167952239,
+          "p_value": 5.275244785394028e-05
+        },
+        "bnpl_log_rv_lag1": {
+          "coef": -0.03784751543227151,
+          "std_err": 0.03548418183515072,
+          "z_stat": -1.0666024542456736,
+          "p_value": 0.2861513917823201
+        },
+        "bnpl_downside_lag1": {
+          "coef": 3.9586240406827753,
+          "std_err": 3.3994207259369715,
+          "z_stat": 1.1644995897327985,
+          "p_value": 0.24422160951566196
+        },
+        "VIX_log_rv_lag1": {
+          "coef": 0.04122166542721047,
+          "std_err": 0.035269523344136515,
+          "z_stat": 1.1687616252988995,
+          "p_value": 0.2424996854438939
+        },
+        "SPY_log_rv_lag1": {
+          "coef": -0.017501425377625564,
+          "std_err": 0.03163422869144623,
+          "z_stat": -0.5532433095913567,
+          "p_value": 0.5800968141989982
+        },
+        "consumer_loan_delinquency_chg63": {
+          "coef": 2.378594481507676,
+          "std_err": 2.992854014867461,
+          "z_stat": 0.7947579366356139,
+          "p_value": 0.4267543234764971
+        },
+        "credit_card_delinquency_chg63": {
+          "coef": -0.5208480472588093,
+          "std_err": 1.7380443399532348,
+          "z_stat": -0.29967477542766463,
+          "p_value": 0.7644252410984027
+        },
+        "consumer_sentiment_chg63": {
+          "coef": 0.002258442842132103,
+          "std_err": 0.009634639142609876,
+          "z_stat": 0.23440865907929848,
+          "p_value": 0.8146677369237054
+        }
+      }
+    },
+    "XLF": {
+      "n_obs": 1234,
+      "baseline_r2": 0.030209201453481715,
+      "augmented_r2": 0.03659260011786081,
+      "delta_r2": 0.006383398664379092,
+      "augmented_params": {
+        "const": {
+          "coef": -5.313367914458288,
+          "std_err": 1.0327367319971017,
+          "z_stat": -5.144939411793092,
+          "p_value": 2.6760716556547103e-07
+        },
+        "XLF_log_rv_lag1": {
+          "coef": -0.026820301007487023,
+          "std_err": 0.027253238036452285,
+          "z_stat": -0.9841142902584202,
+          "p_value": 0.3250593213873766
+        },
+        "XLF_log_rv_lag5": {
+          "coef": 0.3156117299149784,
+          "std_err": 0.10002110687688219,
+          "z_stat": 3.1554512819326286,
+          "p_value": 0.0016025002649058676
+        },
+        "XLF_log_rv_lag22": {
+          "coef": 0.36054474366215206,
+          "std_err": 0.13507170696298326,
+          "z_stat": 2.6692839808484856,
+          "p_value": 0.007601315144594001
+        },
+        "bnpl_log_rv_lag1": {
+          "coef": -0.05244869807274876,
+          "std_err": 0.037600000376355525,
+          "z_stat": -1.3949121688235602,
+          "p_value": 0.1630423270895941
+        },
+        "bnpl_downside_lag1": {
+          "coef": 7.79580979831449,
+          "std_err": 3.201528095585008,
+          "z_stat": 2.4350277634811697,
+          "p_value": 0.01489064712688361
+        },
+        "VIX_log_rv_lag1": {
+          "coef": 0.03831819640472886,
+          "std_err": 0.027257148762724517,
+          "z_stat": 1.4058035467426022,
+          "p_value": 0.15978246858208245
+        },
+        "SPY_log_rv_lag1": {
+          "coef": -0.04213404430977391,
+          "std_err": 0.033589820546423454,
+          "z_stat": -1.254369437655725,
+          "p_value": 0.20970775580098866
+        },
+        "consumer_loan_delinquency_chg63": {
+          "coef": 0.7930683239758523,
+          "std_err": 1.941516754794961,
+          "z_stat": 0.40847874323886857,
+          "p_value": 0.6829222333679101
+        },
+        "credit_card_delinquency_chg63": {
+          "coef": -0.525128567925293,
+          "std_err": 1.2894347133979815,
+          "z_stat": -0.40725487104457464,
+          "p_value": 0.6838208045895384
+        },
+        "consumer_sentiment_chg63": {
+          "coef": 0.007549470039255461,
+          "std_err": 0.011097156583101432,
+          "z_stat": 0.6803067058413567,
+          "p_value": 0.4963102793718832
+        }
+      }
+    }
+  },
+  "oos_model_comparison": {
+    "IWM": {
+      "n_oos": 468,
+      "oos_start": "2024-08-01",
+      "oos_end": "2026-06-12",
+      "qlike": {
+        "har": 2.8808125712060324,
+        "har_market": 2.8696283690040336,
+        "har_bnpl": 2.893189416754022,
+        "har_market_bnpl": 2.8846501341183255
+      },
+      "dm_vs_base": {
+        "har_bnpl": {
+          "baseline": "har",
+          "t_stat": 0.5793859599861741,
+          "p_value": 0.5626081500552815,
+          "harvey_abs_t_gt_3": false
+        },
+        "har_market_bnpl": {
+          "baseline": "har_market",
+          "t_stat": 0.7230001080722677,
+          "p_value": 0.4700417558031078,
+          "harvey_abs_t_gt_3": false
+        }
+      },
+      "best_model": "har_market"
+    },
+    "HYG": {
+      "n_oos": 468,
+      "oos_start": "2024-08-01",
+      "oos_end": "2026-06-12",
+      "qlike": {
+        "har": 3.0893881082631722,
+        "har_market": 3.0627366766362747,
+        "har_bnpl": 3.1215756872312084,
+        "har_market_bnpl": 3.094308869457617
+      },
+      "dm_vs_base": {
+        "har_bnpl": {
+          "baseline": "har",
+          "t_stat": 1.6403584255732695,
+          "p_value": 0.10160400207017628,
+          "harvey_abs_t_gt_3": false
+        },
+        "har_market_bnpl": {
+          "baseline": "har_market",
+          "t_stat": 1.6331944275622559,
+          "p_value": 0.10310209660535907,
+          "harvey_abs_t_gt_3": false
+        }
+      },
+      "best_model": "har_market"
+    },
+    "XLF": {
+      "n_oos": 468,
+      "oos_start": "2024-08-01",
+      "oos_end": "2026-06-12",
+      "qlike": {
+        "har": 3.7085591672705043,
+        "har_market": 3.820220362485031,
+        "har_bnpl": 3.727048272283054,
+        "har_market_bnpl": 3.8162414594959326
+      },
+      "dm_vs_base": {
+        "har_bnpl": {
+          "baseline": "har",
+          "t_stat": 0.20282470818792764,
+          "p_value": 0.839360381276768,
+          "harvey_abs_t_gt_3": false
+        },
+        "har_market_bnpl": {
+          "baseline": "har_market",
+          "t_stat": -0.042279058172437954,
+          "p_value": 0.9662943095592857,
+          "harvey_abs_t_gt_3": false
+        }
+      },
+      "best_model": "har"
+    }
+  },
+  "macro_context": {
+    "n_months": 63,
+    "spearman": {
+      "consumer_loan_delinquency": {
+        "rho": -0.30017931699157735,
+        "p_value": 0.01683476823535556
+      },
+      "credit_card_delinquency": {
+        "rho": -0.3180675129980786,
+        "p_value": 0.011073394117714434
+      },
+      "consumer_sentiment": {
+        "rho": -0.12412071592160027,
+        "p_value": 0.3324433992013354
+      }
+    }
+  },
+  "summary": {
+    "verdict": "NULL_NO_ROBUST_OOS_EDGE",
+    "best_models": {
+      "IWM": "har_market",
+      "HYG": "har_market",
+      "XLF": "har"
+    },
+    "har_bnpl_dm_t": {
+      "IWM": 0.5793859599861741,
+      "HYG": 1.6403584255732695,
+      "XLF": 0.20282470818792764
+    },
+    "har_market_bnpl_dm_t": {
+      "IWM": 0.7230001080722677,
+      "HYG": 1.6331944275622559,
+      "XLF": -0.042279058172437954
+    },
+    "event_next_day_ratios": {
+      "IWM": 1.3789775179045973,
+      "HYG": 1.6706583265151471,
+      "XLF": 1.6898859941594295
+    },
+    "event_next_5d_ratios": {
+      "IWM": 1.2344689795397057,
+      "HYG": 1.2043723647778273,
+      "XLF": 1.2168584705935908
+    }
+  },
+  "research_honesty_notes": [
+    "This experiment uses listed lender equity volatility as a public-market proxy, not private BNPL loan-level performance.",
+    "FRED delinquency data are slow-moving macro context; the primary forecasting claim rests on daily price-based proxies.",
+    "The BNPL public ticker sample starts in 2021, so OOS evidence is short and includes one rate-hike cycle.",
+    "Same-day BNPL stress is never multiplied by same-day target returns; the event flag is explicitly lagged one trading day."
+  ],
+  "artifacts": {
+    "event_figure": "fig_bnpl_stress_event.png",
+    "oos_figure": "fig_oos_qlike_delta.png",
+    "macro_figure": "fig_macro_credit_context.png"
+  }
+}
