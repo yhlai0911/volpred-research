@@ -29599,13 +29599,75 @@
     "description": "從 0DTE 期權交易量占整體期權交易比重飆升切入，分析日內對沖流如何壓制日內波幅卻可能放大極端尾部風險。可量化：比較 0DTE 普及前後，SPY/QQQ 日內 Realized Volatility 與隔夜 Gap Volatility 的比例轉變與風險溢酬變化。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-13T17:08:57+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T17:46:53.098507+00:00",
+    "claim_session_id": "cbf7281ff96e",
+    "started_at": "2026-06-13T17:47:09.893685+00:00",
+    "completed_at": "2026-06-13T17:52:51.448940+00:00",
+    "result": "Published mile_74d12ac6 from experiment_0dte_intraday_overnight_vol_2026_06_13 with two real charts and a dup-waiver explaining the false-positive narrative-arc match. Logged trending_repost receipt and marked fb_post_status=awaiting_interactive_session with draft at storage/drafts/trending_0dte_2026_06_14_fb.md. Mirror sync failed with SSL EOF, so remote propagation may need a later sync retry."
+  },
+  {
+    "id": "email-11741-487c07",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-06-14 01:01 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11741\nMessage-ID: <BCC45879-0DF1-4B10-A73B-418011F2DE9B@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 14 Jun 2026 01:17:55 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-14 01:01 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n解決warning的部分\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月14日 01:01 寫道：\r\n> \r\n> VolPred Boss Report · 2026-06-14 01:01 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\twarn\t1 pending tasks (top types: [('experiment', 1)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t9 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t9/9 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample report URLs ok; 3/3 core pages content-ok\t—\r\n> verification_fb_pipeline\tok\t2 FB posts awaiting interactive session\tinteractive session / Chrome MCP available時接手貼文與留言\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\tok\t0 current warn/critical alert conditions\t—\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。全部正常\r\n> \r\n> === cron 成果掌握 review — 2026-06-14 01:01:32（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=474 exit=0 idle | last: 2026-06-14 00:18:07 (log-mtime)\r\n>   compute_worker    runs=1866 exit=0 idle | last: 2026-06-14 01:00:08 (log-mtime)\r\n>   check_alerts      runs=473 exit=0 running | last: 2026-06-14 01:00:07 (log-mtime)\r\n>   collect_tw        runs=15 exit=0 idle | last: 2026-06-12 15:00:22 (log-mtime)\r\n>   collect_us        runs=15 exit=0 idle | last: 2026-06-13 07:03:33 (log-mtime)\r\n>   daily_update      runs=17 exit=0 idle | last: 2026-06-13 08:18:57 (log-mtime)\r\n>   release_pool      runs=79 exit=0 idle | last: 2026-06-14 01:00:45 (log-mtime)\r\n>   market_cal        runs=2 exit=0 idle | last: 2026-06-08 08:00:10 (log-mtime)\r\n>   memory_health     runs=19 exit=0 idle | last: 2026-06-13 05:30:07 (log-mtime)\r\n>   work_summary      runs=79 exit=0 idle | last: 2026-06-14 00:05:17 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：8 筆\r\n>   7b117170 [codex] complete journal discovery backlog refill\r\n>   9bddbfee ops: radar sprint state + email reply complete\r\n>   8274fc53 hourly-00 | refill Tier-3 journal-discovery fallback (3-strike pool-dry root)\r\n>   b815f42e feat(radar): P1 daily strategy snapshot backend (migration+job+cron+tests)\r\n>   12c87314 feat(radar-migration): radar_notification_events table for daily notification log\r\n>   1073ef65 feat(radar): radar_user_preferences migration (P0 member profile persistence)\r\n>   162869b5 ops: 清 pool-empty critical — 補 refill-fallback-fix + 2 research backlog experiment 任務（journal-discovery batch）\r\n>   76655b46 ops: refill empty pool (pool-empty critical)\r\n> \r\n> ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 18 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 7b117170\t[codex] complete journal discovery backlog refill\t00:52\r\n> 9bddbfee\tops: radar sprint state + email reply complete\t00:31\r\n> 8274fc53\thourly-00 \tr-3 j\r\n> b815f42e\tfeat(radar): P1 daily strategy snapshot backend (migration+job+cron+tests)\t00:10\r\n> 12c87314\tfeat(radar-migration): radar_notification_events table for daily notification log\t00:06\r\n> 1073ef65\tfeat(radar): radar_user_preferences migration (P0 member profile pe\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-13T17:30:14.842876+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11741,
+    "email_message_id": "<BCC45879-0DF1-4B10-A73B-418011F2DE9B@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-06-14 01:01 台灣時間 平台運營報告",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-13T17:31:35.959381+00:00",
+    "claim_session_id": "57bdd0f94a96",
+    "completed_at": "2026-06-13T17:32:25.818665+00:00"
+  },
+  {
+    "id": "research_treasury_signed_volume_imbalance",
+    "title": "研究 backlog fallback: Treasury signed-volume imbalance 免訂單簿代理",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Treasury signed-volume imbalance 免訂單簿代理 — 用 ZN=F/TLT/IEF intraday 或日頻 signed volume = sign(return)×volume 建流動性需求 proxy，檢定大單邊需求日是否預測 TLT RV、SPY RV 與股債相關升高；若 intraday 不足則先做日頻 pilot（來源：Fed 2025 Treasury order-flow imbalance / market-depth volatility） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "treasury_signed_volume_imbalance",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T17:34:10+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-13T17:36:18.527222+00:00",
+    "claim_session_id": "9eb3f38d7beb",
+    "started_at": "2026-06-13T17:36:21.095024+00:00"
+  },
+  {
+    "id": "research_rp_0d5c960aa1",
+    "title": "研究 backlog fallback: AI 基建資金鏈的波動傳導",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_0d5c960aa1",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T17:34:10+00:00"
   }
 ]
