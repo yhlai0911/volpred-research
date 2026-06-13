@@ -19,7 +19,7 @@ phase: general
 
 先看預測誤差，會讓人有點心動。
 
-![模型的預測誤差與風險檢查通過率](storage/reports/assets/model-switch-safety-tradeoff.png)
+![模型的預測誤差與風險檢查通過率](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/model-switch-safety-tradeoff.png)
 
 如果只看波動率預測分數，**兩套模型各拿一半的混合做法** 平均排名最好，是 **1.8**；看市場緊張程度分三段切換的做法排名第二，是 **2.0**。固定用其中一套老牌模型，反而只排到 **4.2**。
 
@@ -31,7 +31,7 @@ phase: general
 
 固定用 **GJR** 的通過率是 **7/10**。看起來比較靈活的三段式切換，最好也只有 **5/10**。預測分數拿第一的 50/50 混合模型，更只過了 **3/10**。
 
-![各模型在不同樣本外區段的風險檢查通過情況](storage/reports/assets/model-switch-risk-check-heatmap.png)
+![各模型在不同樣本外區段的風險檢查通過情況](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/model-switch-risk-check-heatmap.png)
 
 這張圖更直白。你會看到有些模型平常分數不差，但到了真正要守住大跌風險的時候，常常沒過。
 
@@ -52,3 +52,13 @@ phase: general
 ---
 
 *本文基於內部實驗。資料來源：yfinance（SPY、^VIX）。樣本外評估拆成 5 段，比較固定模型、混合模型與依市場緊張度切換的做法，在波動率預測與極端風險檢查上的差異。*
+
+---
+
+## 修訂紀錄（Errata）
+
+**2026-06-12**（Codex source-code 24h 審查觸發）：
+
+1. **Regime 訊號時間點限制**：K480 腳本用同一天的 `^VIX` 收盤值決定該天要用 HAR、GJR 或混合模型。這是診斷式 regime 分組，不能直接視為交易前已知的 ex-ante 訊號；真正可交易版本需要改用前一日 VIX 或其他事前可得訊號。
+
+2. **結論方向不變**：這個限制沒有推翻文章主結論。因為同日 VIX 其實給了切換模型較有利的資訊，但切換模型仍沒有同時拿到較好的預測排名與 GJR 等級的風險檢查通過率。文中數字仍可追溯到 `experiments/k480/k480_regime_tool_selection_results.json`。

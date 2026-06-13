@@ -1,11 +1,15 @@
 {
-  "date": "2026-06-11",
+  "date": "2026-06-13",
   "scanned": true,
-  "scanned_at": "2026-06-10T21:12:37+00:00",
-  "trending_added": 1,
+  "scanned_at": "2026-06-12T18:23:18+00:00",
+  "trending_added": 0,
   "event_added": 0,
   "member_qa_added": 0,
   "errors": [],
+  "trending_skipped": {
+    "reason": "no_scan_cmd_configured",
+    "hint": "set VOLPRED_TRENDING_SCAN_CMD to enable batch refill"
+  },
   "event_skipped": [
     {
       "id": "nfp-2026-06-05-t7",
@@ -36,20 +40,12 @@
       "reason": "out_of_horizon"
     },
     {
-      "id": "event_article_cpi_us_2026-06-11_tminus2",
-      "reason": "already_exists"
+      "id": "cpi-us-2026-06-11-t2",
+      "reason": "out_of_horizon"
     },
     {
       "id": "cpi-us-2026-06-11-t0",
-      "reason": "not_yet_in_window"
-    },
-    {
-      "id": "cpi-us-2026-06-13-t2",
-      "reason": "not_yet_in_window"
-    },
-    {
-      "id": "cpi-us-2026-06-13-t0",
-      "reason": "not_yet_in_window"
+      "reason": "out_of_horizon"
     },
     {
       "id": "nfp-2026-07-03-t7",
@@ -66,6 +62,7 @@
   ],
   "member_qa_result": {
     "created": false,
-    "reason": "no_pending_member_qa_work"
+    "reason": "no_pending_member_qa_work",
+    "gated_min_age": 0
   }
 }

@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -37,8 +38,9 @@ def test_gen_platform_ops_tasks_prefers_fresh_log_over_stale_last_run(tmp_path, 
         ),
         encoding="utf-8",
     )
+    fresh_ts = (datetime.now(timezone.utc) - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%S+0000")
     (cron_logs / "daily_update.log").write_text(
-        "=== [daily_update] exit 0 at 2026-05-27T08:15:44+0800 (duration=759s) ===\n",
+        f"=== [daily_update] exit 0 at {fresh_ts} (duration=759s) ===\n",
         encoding="utf-8",
     )
 
@@ -203,3 +205,11 @@ def test_latest_cron_log_ts_picks_latest_hhmm_banner_over_old_seconds_banner(
     ts = generate_diverse_tasks._latest_cron_log_ts("x", "cron/x.log")
     assert ts is not None
     assert ts.year == 2026 and ts.month == 6 and ts.day == 11
+
+
+def test_experiment_dir_with_descriptive_suffix_covers_kid() -> None:
+    assert generate_diverse_tasks._experiment_dir_covers_kid(
+        "k1458_h1_trough_decomposition",
+        "k1458",
+    )
+    assert not generate_diverse_tasks._experiment_dir_covers_kid("k14580", "k1458")

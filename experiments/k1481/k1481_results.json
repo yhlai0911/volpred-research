@@ -1,0 +1,133 @@
+{
+  "experiment_id": "k1481",
+  "title": "Feasibility audit for Taiwan country-GPR and Taiwan volatility study",
+  "run_timestamp": "2026-06-11T21:12:53.777806+00:00",
+  "verdict": {
+    "overall": "BLOCKED_ON_DATA",
+    "can_honestly_run_full_study_now": false,
+    "plain_english": "Local Taiwan market price inputs exist, but the repo lacks a canonical Taiwan country-GPR time series and publication-lag metadata. Any predictive regression or event-window claim would currently rely on fabricated or timing-ambiguous inputs."
+  },
+  "research_question": {
+    "core": "Can Taiwan-specific geopolitical risk pricing explain or predict Taiwan equity and FX volatility?",
+    "proposed_design": [
+      "Monthly Taiwan country-GPR vs 0050.TW realized volatility",
+      "Monthly Taiwan country-GPR vs USD/TWD volatility",
+      "Event windows around August 2022 and January 2024"
+    ]
+  },
+  "available_local_inputs": {
+    "price_series": [
+      {
+        "label": "0050.TW",
+        "path": "storage/macro/yf_0050.TW.csv",
+        "rows": 4208,
+        "start": "2009-01-02",
+        "end": "2026-03-17",
+        "close_first": 20.467866897583008,
+        "close_last": 76.6500015258789
+      },
+      {
+        "label": "USD/TWD",
+        "path": "storage/macro/yf_TWDX.csv",
+        "rows": 5288,
+        "start": "2004-03-24",
+        "end": "2026-03-17",
+        "close_first": 32.02299880981445,
+        "close_last": 31.913000106811523
+      }
+    ],
+    "event_window_coverage": {
+      "0050.TW": {
+        "pelosi_taiwan_visit": {
+          "event_date": "2022-08-02",
+          "has_full_pre_window": true,
+          "has_full_post_window": true,
+          "available_pre_obs": 3332,
+          "available_post_obs": 875
+        },
+        "taiwan_presidential_election": {
+          "event_date": "2024-01-13",
+          "has_full_pre_window": true,
+          "has_full_post_window": true,
+          "available_pre_obs": 3687,
+          "available_post_obs": 521
+        }
+      },
+      "USD/TWD": {
+        "pelosi_taiwan_visit": {
+          "event_date": "2022-08-02",
+          "has_full_pre_window": true,
+          "has_full_post_window": true,
+          "available_pre_obs": 4347,
+          "available_post_obs": 940
+        },
+        "taiwan_presidential_election": {
+          "event_date": "2024-01-13",
+          "has_full_pre_window": true,
+          "has_full_post_window": true,
+          "available_pre_obs": 4726,
+          "available_post_obs": 562
+        }
+      }
+    },
+    "local_gpr_related_files": [
+      "experiments/k264/__pycache__/k264_geopolitical_proxy.cpython-312.pyc",
+      "experiments/k264/k264_geopolitical_proxy.py",
+      "experiments/k446/__pycache__/k446_gpr_vol.cpython-312.pyc",
+      "experiments/k446/k446_gpr_vol.py",
+      "experiments/k446/k446_gpr_vol_results.json",
+      "storage/experiments/geopolitical_vol.json"
+    ],
+    "has_taiwan_country_gpr_raw_series": false
+  },
+  "blocking_conditions": [
+    {
+      "type": "missing_core_series",
+      "detail": "No local file contains a canonical Taiwan country-GPR monthly series. Existing GPR artifacts are either prior experiment outputs or non-Taiwan proxy studies."
+    },
+    {
+      "type": "release_timing_unknown",
+      "detail": "Even if a monthly country-GPR level were obtained, the study needs release dates or a conservative publication-lag rule. Using same-month GPR to explain same-month volatility would violate the project's no-lookahead discipline."
+    },
+    {
+      "type": "event_source_missing",
+      "detail": "Taiwan-specific geopolitical event windows can be specified, but without the country-GPR series the design collapses into pure narrative event study rather than the intended country-risk measurement test."
+    }
+  ],
+  "required_canonical_inputs": {
+    "taiwan_country_gpr_monthly_csv": {
+      "required_columns": [
+        "period",
+        "country",
+        "gpr_value",
+        "source_url",
+        "publication_date"
+      ],
+      "why_needed": "The publication date is required to enforce signal_t -> return_t+1 timing rather than same-period leakage."
+    },
+    "optional_event_table": {
+      "required_columns": [
+        "event_date",
+        "event_name",
+        "event_type",
+        "source_url"
+      ],
+      "why_needed": "Supports a reproducible event-window appendix once the core GPR series exists."
+    }
+  },
+  "related_prior_findings": [
+    {
+      "reference": "K100",
+      "lesson": "Generic geopolitical proxies added little incremental volatility information beyond VIX."
+    },
+    {
+      "reference": "K446",
+      "lesson": "Broad GPR daily index study found weak or reversed predictive content in general US-volatility tests, so a Taiwan-specific extension needs genuinely distinct data rather than recycled proxies."
+    }
+  ],
+  "recommended_next_step": {
+    "phase_1": "Build and pin a canonical Taiwan country-GPR monthly file with publication dates.",
+    "phase_2": "Run lag-respected monthly regressions on 0050.TW RV and USD/TWD volatility.",
+    "phase_3": "Add August 2022 and January 2024 event windows as descriptive supplements only."
+  }
+}

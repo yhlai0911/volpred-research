@@ -93,6 +93,17 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def _experiment_dir_covers_kid(dirname: str, kid_lower: str) -> bool:
+    """Return True when an experiment directory belongs to a K-id.
+
+    Experiment folders commonly use descriptive suffixes, e.g.
+    `k1458_h1_trough_decomposition`; treating only exact `k1458` as present
+    causes false scaffold tasks for completed experiments.
+    """
+    name = dirname.lower()
+    return name == kid_lower or name.startswith(f"{kid_lower}_")
+
+
 def gen_paper_review_tasks(existing: set[str], rng: random.Random) -> list[dict]:
     """Sample articles published in last 24h that lack Codex review tag."""
     if not FEED.exists():
@@ -457,7 +468,7 @@ def gen_experiment_tasks(existing: set[str], rng: random.Random) -> list[dict]:
     backlog: list[str] = []
     for kid in mentioned:
         kid_lower = f"k{kid.lower()}"
-        if kid_lower in existing_dirs:
+        if any(_experiment_dir_covers_kid(dirname, kid_lower) for dirname in existing_dirs):
             continue
         if kid_lower in completed_ids:
             continue

@@ -1,0 +1,127 @@
+{
+  "experiment_id": "k1478",
+  "title": "Leveraged ETF mechanical rebalancing and end-of-day volatility",
+  "run_timestamp": "2026-06-11T17:59:42.171765+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance auto_adjust=True 1h bars",
+    "tickers": [
+      "QQQ",
+      "TQQQ",
+      "SQQQ",
+      "SSO"
+    ],
+    "sample_start": "2023-07-17",
+    "sample_end": "2026-06-09",
+    "n_days": 719,
+    "interval": "1h",
+    "size_proxy": "same-day traded dollar volume of TQQQ/SQQQ/SSO"
+  },
+  "methodology": {
+    "pressure_proxy": "sum_i |k_i^2-k_i| * |r_QQQ,t| * dollar_volume_i,t",
+    "primary_outcomes": [
+      "same_sign_last_hour",
+      "last_hour_range_var",
+      "overnight_cont"
+    ],
+    "primary_regression": "y_t = const + beta1*log_pressure + beta2*|daily_ret| + error_t, HAC(5)",
+    "top_quartile_definition": "Q4 of pressure_proxy vs Q1-Q3 pooled"
+  },
+  "top_quartile_tests": {
+    "same_sign_last_hour": {
+      "high_mean": 0.0009466085289582715,
+      "low_mean": 0.0001750675124078623,
+      "mean_diff": 0.0007715410165504092,
+      "welch_t": 2.883839830763739,
+      "welch_p": 0.0042860908767707465,
+      "n_high": 180,
+      "n_low": 539
+    },
+    "last_hour_range_var": {
+      "high_mean": 1.131350062541064e-05,
+      "low_mean": 4.766359889253109e-06,
+      "mean_diff": 6.547140736157531e-06,
+      "welch_t": 4.263254280601175,
+      "welch_p": 3.114294139446534e-05,
+      "n_high": 180,
+      "n_low": 539
+    },
+    "overnight_cont": {
+      "high_mean": 0.00025125827399996933,
+      "low_mean": -5.2089075997687515e-05,
+      "mean_diff": 0.00030334734999765687,
+      "welch_t": 0.3708361689414944,
+      "welch_p": 0.7110857545076584,
+      "n_high": 180,
+      "n_low": 539
+    }
+  },
+  "hac_regressions": {
+    "same_sign_last_hour": {
+      "const": 6.989833454819415e-05,
+      "beta_log_pressure": -1.3380928848227632e-05,
+      "t_log_pressure": -0.1863118978527165,
+      "p_log_pressure": 0.8522001776818097,
+      "beta_abs_daily_ret": 0.07916831579528363,
+      "t_abs_daily_ret": 4.924770861556357,
+      "p_abs_daily_ret": 8.445926443099795e-07,
+      "r_squared": 0.049610913619238306
+    },
+    "last_hour_range_var": {
+      "const": 3.05395518419548e-06,
+      "beta_log_pressure": -8.151093806961717e-08,
+      "t_log_pressure": -0.2524101983019867,
+      "p_log_pressure": 0.8007240181922144,
+      "beta_abs_daily_ret": 0.0006937623455379691,
+      "t_abs_daily_ret": 3.8816011950854143,
+      "p_abs_daily_ret": 0.00010377095393959236,
+      "r_squared": 0.1702134226525054
+    },
+    "overnight_cont": {
+      "const": -0.010396778620951222,
+      "beta_log_pressure": 0.0005539985256122683,
+      "t_log_pressure": 2.4757190097733255,
+      "p_log_pressure": 0.013296818133851786,
+      "beta_abs_daily_ret": -0.13846755275409456,
+      "t_abs_daily_ret": -2.598053298922869,
+      "p_abs_daily_ret": 0.009375394035711864,
+      "r_squared": 0.011240648587030888
+    }
+  },
+  "pressure_bucket_means": [
+    {
+      "pressure_bucket": "Q1",
+      "same_sign_last_hour": 6.0317320612824455e-05,
+      "last_hour_range_var": 3.600852689806426e-06,
+      "overnight_cont": -0.0005396637467561849
+    },
+    {
+      "pressure_bucket": "Q2",
+      "same_sign_last_hour": 8.789571072240028e-05,
+      "last_hour_range_var": 4.790905810166674e-06,
+      "overnight_cont": -0.00013856791030608453
+    },
+    {
+      "pressure_bucket": "Q3",
+      "same_sign_last_hour": 0.00037811756171786214,
+      "last_hour_range_var": 5.913695253141162e-06,
+      "overnight_cont": 0.0005251714318908098
+    },
+    {
+      "pressure_bucket": "Q4",
+      "same_sign_last_hour": 0.0009466085289582715,
+      "last_hour_range_var": 1.1313500625410642e-05,
+      "overnight_cont": 0.00025125827399996933
+    }
+  ],
+  "figures": [
+    "k1478_pressure_bins.png",
+    "k1478_scatter.png"
+  ],
+  "verdict": {
+    "overall": "NULL_PRIMARY_EFFECT",
+    "same_day_tail_amplification_supported": false,
+    "overnight_continuation_signal_supported": true,
+    "plain_english": "High-pressure days are descriptively more volatile into the close, but after controlling for the day's own absolute move the LETF pressure proxy does not explain extra last-hour volatility. A weaker overnight continuation relation remains."
+  }
+}

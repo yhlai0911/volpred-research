@@ -1198,7 +1198,7 @@ for g, gname in enumerate(['omega', 'alpha', 'beta']):
     }
 results["ess_diagnostics"] = ess_results
 
-output_path = 'experiments/k484_ssvs_variance_eq_results.json'
+output_path = 'experiments/k484/k484_ssvs_variance_eq_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 print(f"  Results saved to {output_path}")

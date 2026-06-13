@@ -10327,5 +10327,59 @@
     "knowledge_item_id": "e3a4631e",
     "completed_at": "2026-06-11T11:22:39.075364+00:00",
     "summary": "K1474 酒店娛樂業×股市相關性實證（2875 交易日）+ 3000字文章 + 發佈 mile_9b76989e；question answered"
+  },
+  {
+    "timestamp": "2026-06-12T03:30:21+00:00",
+    "task_id": "trending_repost_2026_06_12_fed降息",
+    "task_type": "trending_repost",
+    "owner": "codex-claude-override",
+    "status": "completed",
+    "article_id": "mile_c1f5a8f6",
+    "experiment_id": "trending_2026_06_12_fed_move_vix",
+    "anti_ai_gate": "PASS (warn=0/3)",
+    "fb_post_status": "awaiting_interactive_session",
+    "summary": "Published Fed/MOVE/VIX cross-asset volatility article; Supabase single-article sync succeeded; Mirror full feed sync skipped due ISS-009 whole-feed timeout; FB draft prepared."
+  },
+  {
+    "timestamp": "2026-06-12T03:34:00+00:00",
+    "task_id": "trending_repost_2026_06_12_地緣波動",
+    "task_type": "trending_repost",
+    "owner": "codex-claude-override",
+    "status": "blocked_duplicate",
+    "audit_file": "storage/ops/duplicate_audits/trending_repost_2026_06_12_geopolitical_oil_duplicate.md",
+    "duplicate_mile_ids": [
+      "mile_dab6cc06",
+      "mile_8d61b9b3"
+    ],
+    "summary": "Blocked duplicate: existing 2026-05-18 and 2026-05-20 articles already cover Iran/oil OVX-VIX divergence and spillover framing."
+  },
+  {
+    "timestamp": "2026-06-12T03:39:30+00:00",
+    "task_id": "trending_repost_2026_06_12_地緣波動",
+    "task_type": "trending_repost",
+    "owner": "codex-claude-override",
+    "status": "completed_followup",
+    "article_id": "mile_37df0259",
+    "experiment_id": "trending_2026_06_12_oil_vix_spillover",
+    "anti_ai_gate": "PASS (warn=0/3)",
+    "fb_post_status": "awaiting_interactive_session",
+    "summary": "Published intentional 6/11 follow-up to May Iran/OVX articles: OVX/VIX compressed 4.17→2.90 with new same-day/next-day spillover diagnostics; Supabase single-article sync succeeded; FB draft prepared."
+  },
+  {
+    "id": "paper_review_mile_862223de_codex_20260613",
+    "timestamp": "2026-06-13T10:17:29+08:00",
+    "task_type": "paper_review",
+    "title": "Paper review (Codex 24h-rule): mile_862223de K880 PRG SPY cross-market",
+    "status": "succeeded",
+    "verdict": "NEEDS_REVISION",
+    "result": "Codex 24h review: PASS on lookahead-walk-forward + session-timing + sample, NEEDS_REVISION on timing-disclosure / DM-Harvey / MCS / README. Article errata appended to feed.json mile_862223de + revisions[]. knowledge.json entry 53f18865 written. Code fixes pending K880b followup.",
+    "owner": "hourly-10",
+    "files_touched": [
+      "experiments/k880/reviews/codex_24h_review_mile_862223de.md",
+      "experiments/k880/reviews/codex_24h_review_mile_862223de.txt",
+      "storage/reports/feed.json",
+      "storage/memory/knowledge.json",
+      "storage/next_tasks.json"
+    ]
   }
 ]

@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-13 Task generator v2 — hard-coded event calendar duplicated canonical FOMC event series
+
+**問題**：任務池空時，`scripts/task_generator_v2.py --source all --commit` 從硬編碼 FOMC/BLS 日曆補出 `event_fomc_20260618`，但 canonical `config/runtime_schedules.json::event_jobs` 已有同一場 FOMC 的 `2026-06-17` T-7/T-2/T+0 series，且 T-7 已發布為 `mile_0e1eb5aa`。
+
+**現象**：hourly tick 在 production_pending=0 時 materialize 7 筆新任務，其中 priority 2 的 `event_fomc_20260618` 看似可接，但 feed-publisher dedup 顯示它是同一場 FOMC 的重複前瞻題；若直接發文會繞過正式 event series 的 slot/dedupe 設計。
+
+**根因**：`task_generator_v2` 的 Source 4 使用 legacy hard-coded calendar，只用自身 `task_id=event_<type>_<date>` 去重；它沒有讀 canonical `runtime_schedules.json::event_jobs`，也沒有把美國事件日 `2026-06-17` 與台灣公告日 `2026-06-18` 視為同一場事件。
+
+**解決方法**：`scripts/task_generator_v2.py` 新增 canonical event dedup helper，讀 `runtime_schedules.json::event_jobs` 與既有 `event_article` tasks；同類 FOMC/CPI/NFP 在 +/-1 日內已被管理時，legacy hard-coded calendar 不再生成泛化 event task。新增 `tests/test_task_generator_v2.py` 覆蓋 runtime-managed adjacent FOMC date 與 existing event task 兩種 regression。已用 `python3 scripts/task_generator_v2.py --source event_article --dry-run` 驗證不再產生 `event_fomc_20260618`。
+
 ## 2026-06-08 Cron staleness detector — piggy_back_skip + log-name mismatch false-positive
 
 **問題**：`market_calendar_sync` 被反覆報 stale（last fire 337.1h ago，超過 168h cadence 2x），但 host crontab 實際每週一 08:00 正常 fire（log mtime + 內容已驗證 2026-06-08 08:00 PASS）。

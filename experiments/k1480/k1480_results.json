@@ -1,0 +1,36 @@
+{
+  "experiment_id": "k1480",
+  "title": "Feasibility audit for 0050 constituent-change fragility event study",
+  "run_timestamp": "2026-06-11T20:07:13.532238+00:00",
+  "verdict": {
+    "overall": "BLOCKED_ON_DATA",
+    "can_honestly_run_event_study_now": false,
+    "plain_english": "The repo contains 0050 price history but not a canonical historical constituent-change event table. Without official add/delete events, any event study would be fabricated or hand-assembled from unstable secondary sources."
+  },
+  "available_local_inputs": {
+    "price_series_examples": [
+      "storage/macro/yf_0050.TW.csv",
+      "experiments/k1090b/data/0050.TW.csv",
+      "experiments/k1406/data/0050.TW.csv",
+      "experiments/k1411/data/T0050.csv"
+    ],
+    "historical_constituent_change_event_table_found": false,
+    "official_review_archive_found_locally": false
+  },
+  "minimum_required_canonical_input": {
+    "table_name": "0050_constituent_change_events.csv",
+    "required_columns": [
+      "announcement_date",
+      "effective_date",
+      "ticker",
+      "event_type",
+      "source_url",
+      "source_title"
+    ],
+    "why_needed": "Event-study / DiD design requires exact announcement dates, effective dates, and add/delete membership events before any volatility inference can be trusted."
+  },
+  "recommended_next_step": {
+    "phase_1": "Build canonical historical event table from official FTSE/TWSE/Yuanta sources",
+    "phase_2": "Run add/delete event-study on abs_ret, park_var, and idiosyncratic volatility"
+  }
+}

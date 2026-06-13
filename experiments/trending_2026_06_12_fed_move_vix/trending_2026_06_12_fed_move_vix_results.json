@@ -1,0 +1,138 @@
+{
+  "experiment_id": "trending_2026_06_12_fed_move_vix",
+  "task_id": "trending_repost_2026_06_12_fed降息",
+  "generated_at": "2026-06-12T03:25:13.602023+00:00",
+  "data_source": {
+    "price_source": "Yahoo Finance via yfinance",
+    "tickers": [
+      "^VIX",
+      "^MOVE",
+      "SPY",
+      "TLT",
+      "^TNX",
+      "^IRX",
+      "ZQ=F",
+      "ZN=F"
+    ],
+    "start_date": "2003-01-01",
+    "end_date_exclusive": "2026-06-12",
+    "latest_common_move_vix_date": "2026-06-11",
+    "public_methodology_refs": [
+      "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html",
+      "https://cdn.cboe.com/resources/indices/Volatility_Index_Methodology_Cboe_Volatility_Index.pdf",
+      "https://developer.ice.com/fixed-income-data-services/catalog/ice-data-indices-move-index"
+    ]
+  },
+  "sample": {
+    "move_vix_common_days": 5796,
+    "first_common_date": "2003-01-02",
+    "last_common_date": "2026-06-11"
+  },
+  "latest": {
+    "date": "2026-06-11",
+    "VIX": 19.440000534057617,
+    "MOVE": 69.44519805908203,
+    "MOVE_VIX_RATIO": 3.5722837526376896,
+    "^IRX_13w_tbill_yield_pct": 3.622999906539917,
+    "^TNX_10y_yield_pct": 4.463000297546387,
+    "ZQ_front_implied_rate_pct": 3.6500015258789062,
+    "ZQ_front_implied_rate_pct_5d_ago": 3.6175003051757812,
+    "ZQ_front_implied_rate_pct_20d_ago": 3.6324996948242188,
+    "ZN_front_10y_futures_price": 109.625,
+    "SPY_close": 737.760009765625,
+    "SPY_5d_return": -0.02553199276726692,
+    "TLT_close": 85.9800033569336,
+    "TLT_5d_return": 0.005614074350100529
+  },
+  "summary_table": [
+    {
+      "metric": "VIX",
+      "latest": 19.440000534057617,
+      "change_1d": -0.12511246018023325,
+      "change_5d": 0.26233772828579505,
+      "change_20d": 0.08785672194134997,
+      "full_sample_percentile": 0.6511387163561076,
+      "one_year_percentile": 0.75
+    },
+    {
+      "metric": "MOVE",
+      "latest": 69.44519805908203,
+      "change_1d": -0.060916823192204816,
+      "change_5d": -0.024097885255456086,
+      "change_20d": -0.011315487312926975,
+      "full_sample_percentile": 0.3435127674258109,
+      "one_year_percentile": 0.2896825396825397
+    },
+    {
+      "metric": "MOVE/VIX",
+      "latest": 3.5722837526376896,
+      "change_1d": 0.0733758729736318,
+      "change_5d": -0.22690885895505908,
+      "change_20d": -0.09116293281462451,
+      "full_sample_percentile": 0.18978605935127674,
+      "one_year_percentile": 0.20634920634920634
+    }
+  ],
+  "correlations": {
+    "20d": 0.36797181648419464,
+    "60d": 0.4751345247583821,
+    "120d": 0.5905327949916132,
+    "252d": 0.525381703272394,
+    "full_sample": 0.29499332455508803
+  },
+  "recent_checkpoint_dates": {
+    "2026-06-04": {
+      "VIX": 15.399999618530273,
+      "MOVE": 71.16000366210938,
+      "MOVE_VIX_RATIO": 4.620779573038759,
+      "ZQ_front_implied_rate_pct": 3.6175003051757812
+    },
+    "2026-06-05": {
+      "VIX": 21.510000228881836,
+      "MOVE": 75.19999694824219,
+      "MOVE_VIX_RATIO": 3.4960481705281388,
+      "ZQ_front_implied_rate_pct": 3.62249755859375
+    },
+    "2026-06-09": {
+      "VIX": 19.8700008392334,
+      "MOVE": 77.02999877929688,
+      "MOVE_VIX_RATIO": 3.8766983153418306,
+      "ZQ_front_implied_rate_pct": 3.62249755859375
+    },
+    "2026-06-10": {
+      "VIX": 22.219999313354492,
+      "MOVE": 73.94999694824219,
+      "MOVE_VIX_RATIO": 3.3280827737828655,
+      "ZQ_front_implied_rate_pct": 3.6200027465820312
+    },
+    "2026-06-11": {
+      "VIX": 19.440000534057617,
+      "MOVE": 69.44519805908203,
+      "MOVE_VIX_RATIO": 3.5722837526376896,
+      "ZQ_front_implied_rate_pct": 3.6500015258789062
+    }
+  },
+  "charts": [
+    "fig_1_move_vix_normalized_1y.png",
+    "fig_2_move_vix_ratio_history.png"
+  ],
+  "article_ready_numbers": {
+    "latest_date": "2026-06-11",
+    "vix_latest": "19.44",
+    "move_latest": "69.45",
+    "ratio_latest": "3.57",
+    "ratio_full_percentile": "P19",
+    "ratio_one_year_percentile": "P21",
+    "move_full_percentile": "P34",
+    "vix_full_percentile": "P65",
+    "move_5d_change": "-2.41%",
+    "vix_5d_change": "26.23%",
+    "ratio_5d_change": "-22.69%",
+    "zq_implied_rate_latest": "3.65%",
+    "zq_implied_rate_5d_ago": "3.62%",
+    "spy_5d_return": "-2.55%",
+    "tlt_5d_return": "0.56%",
+    "corr_20d": "0.37",
+    "corr_60d": "0.48"
+  }
+}

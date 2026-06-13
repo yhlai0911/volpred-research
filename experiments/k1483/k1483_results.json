@@ -1,0 +1,162 @@
+{
+  "experiment_id": "k1483",
+  "title": "Feasibility audit for extreme-weather ETF volatility event study",
+  "run_timestamp": "2026-06-11T23:18:53.609983+00:00",
+  "verdict": {
+    "overall": "BLOCKED_ON_DATA",
+    "can_honestly_run_full_study_now": false,
+    "plain_english": "The repo currently lacks local KIE/KBWP/XLU price caches and lacks a canonical NOAA-style event table. K148 provides a hand-curated precedent, but not a reusable canonical input for the requested insurance/utilities ETF event study."
+  },
+  "research_question": {
+    "core": "Do extreme heat and hurricane events raise insurance and utilities ETF volatility?",
+    "proposed_design": [
+      "NOAA event-date table with event severity metadata",
+      "ETF realized-volatility event study for KIE, KBWP, and XLU",
+      "Dose-response by damage/severity and sector sensitivity"
+    ]
+  },
+  "available_local_inputs": {
+    "target_ticker_files": {
+      "KIE": {
+        "local_price_file_found": false,
+        "matching_files": []
+      },
+      "KBWP": {
+        "local_price_file_found": false,
+        "matching_files": []
+      },
+      "XLU": {
+        "local_price_file_found": false,
+        "matching_files": []
+      }
+    },
+    "related_weather_or_climate_artifacts": [
+      "experiments/K1033/k1033_improvement_heatmap.png",
+      "experiments/K1034/k1034_trinity_heatmap.png",
+      "experiments/K1035/k1035_trinity_heatmap.png",
+      "experiments/K1036/k1036_trinity_heatmap.png",
+      "experiments/K1039/k1039_trinity_heatmap.png",
+      "experiments/K1043/k1043_trinity_heatmap.png",
+      "experiments/K1046/k1046_trinity_heatmap.png",
+      "experiments/K1129/k1129_dm_heatmap.png",
+      "experiments/charts/k572_transition_heatmap.png",
+      "experiments/climate_event_vol/__pycache__/climate_event_vol.cpython-312.pyc",
+      "experiments/climate_event_vol/climate_event_vol.py",
+      "experiments/climate_event_vol/climate_event_vol_results.json",
+      "experiments/k1011/k1011_granger_heatmap.png",
+      "experiments/k1100b/k1100b_fz_heatmap.png",
+      "experiments/k1100e/k1100e_dm_heatmap.png",
+      "experiments/k1116c/k1116c_dm_heatmap.png",
+      "experiments/k1116f/k1116f_dm_heatmap.png",
+      "experiments/k1118b/k1118b_dm_heatmap.png",
+      "experiments/k1122/k1122_sharpe_heatmap.png",
+      "experiments/k1133/k1133_dm_heatmap.png",
+      "experiments/k1133b/k1133b_dm_heatmap.png",
+      "experiments/k1134/k1134_dm_heatmap.png",
+      "experiments/k1136/k1136_dm_heatmap.png",
+      "experiments/k1137/regime_conditional_heatmap.png",
+      "experiments/k1138/dm_heatmap_equity.png",
+      "experiments/k1201/k1201_dm_heatmap_7asset.png",
+      "experiments/k1203/k1203_dm_heatmap_7asset.png",
+      "experiments/k1206/figures/k1206_reconstruction_heatmap.png",
+      "experiments/k1247/k1247_cheatsheet.md",
+      "experiments/k1263/k1263_dm_heatmap.png",
+      "experiments/k1266/k1266_dm_heatmap.png",
+      "experiments/k1441/figures/rv_corr_heatmap.png",
+      "experiments/k1459_ponzi_collapse_math/k1459_collapse_heatmaps.png",
+      "experiments/k1465/figures/d_pvalue_heatmap.png",
+      "experiments/k148/__pycache__/k148_climate_vol.cpython-312.pyc",
+      "experiments/k148/k148_climate_vol.py",
+      "experiments/k148/k148_climate_vol_results.json",
+      "experiments/k1480/k1480.py",
+      "experiments/k1480/k1480_results.json",
+      "experiments/k1481/k1481.py",
+      "experiments/k1481/k1481_results.json",
+      "experiments/k1482/k1482.py",
+      "experiments/k1482/k1482_results.json",
+      "experiments/k1483/k1483.py",
+      "experiments/k222b/fig_wr_sweep_heatmap.png",
+      "experiments/k319/figures/fig2_cagr_heatmap.png",
+      "experiments/k455/figures/fig2_heatmap.png",
+      "experiments/k465/k465_dm_heatmap.png",
+      "experiments/k480/k480_var1_heatmap.png",
+      "experiments/k489/fig2_cross_tenor_heatmap.png",
+      "experiments/k497/k497_ranking_heatmap.png",
+      "experiments/k517/k517_fig2_cross_oos_heatmap.png",
+      "experiments/k544/fig2_oos_heatmap.png",
+      "experiments/k550/k550_crossoos_heatmap.png",
+      "experiments/k574_charts/k574_yearly_heatmap.png",
+      "experiments/k663/k663_sharpe_heatmap.png",
+      "experiments/k674/k674_dd_heatmap.png",
+      "experiments/k678/k678_corr_heatmap.png",
+      "experiments/k774/__pycache__/k774_all_weather_vt.cpython-312.pyc",
+      "experiments/k774/k774_all_weather_vt.py",
+      "experiments/k774/k774_all_weather_vt_results.json",
+      "experiments/k802/k802_trinity_heatmap.png",
+      "experiments/k808/__pycache__/k808_allweather_vt.cpython-312.pyc",
+      "experiments/k808/k808_allweather_vt.py",
+      "experiments/k808/k808_allweather_vt_results.json",
+      "experiments/k874e_charts/layer1_rankings_heatmap.png",
+      "experiments/k881_charts/dm_heatmap.png",
+      "experiments/k883_charts/dm_heatmap.png",
+      "experiments/k884_charts/dm_heatmap.png",
+      "experiments/k945/k945_he_heatmap.png",
+      "experiments/paper3_E1_individual_stocks_copula/paper3_E1_fz_heatmap.png",
+      "experiments/paper3_E2_cross_market_copula/paper3_E2_fz_heatmap.png",
+      "storage/experiments/k148_climate_vol_results.json",
+      "storage/reports/assets/model-switch-risk-check-heatmap.png"
+    ],
+    "has_all_three_price_series_locally": false,
+    "has_canonical_noaa_event_table_locally": false,
+    "has_prior_manual_event_list_example": true
+  },
+  "blocking_conditions": [
+    {
+      "type": "missing_core_price_series",
+      "detail": "No local cached price histories were found for KIE, KBWP, and XLU. Without synchronized sector ETF histories the requested event study cannot be reproduced offline."
+    },
+    {
+      "type": "missing_canonical_event_table",
+      "detail": "K148 embeds a manual named-disaster list in code, but the repo does not contain a canonical NOAA-style event table with exact dates, categories, and source provenance."
+    },
+    {
+      "type": "methodology_drift_risk",
+      "detail": "Reusing K148 directly would silently change the target universe (SPY/XLE/DBA/KIE/USO) and reuse a hand-curated event list, which is not the same as the requested KIE/KBWP/XLU design."
+    }
+  ],
+  "required_canonical_inputs": {
+    "price_cache": {
+      "required_files": [
+        "storage/macro/yf_KIE.csv",
+        "storage/macro/yf_KBWP.csv",
+        "storage/macro/yf_XLU.csv"
+      ],
+      "why_needed": "Required to compute the sector RV panels before any event-window inference."
+    },
+    "noaa_event_table": {
+      "required_columns": [
+        "event_date",
+        "event_name",
+        "event_category",
+        "damage_usd_billion",
+        "source_url"
+      ],
+      "why_needed": "Needed for a reproducible event window and dose-response design instead of manual date picking."
+    }
+  },
+  "related_prior_findings": [
+    {
+      "reference": "K148",
+      "lesson": "Physical-climate events can correlate with contemporaneous volatility, but the old study was mostly absorbed by VIX and relied on online downloads plus a hand-built event list."
+    },
+    {
+      "reference": "K861",
+      "lesson": "Climate/macro shock proxies can produce publishable asymmetries, but proxy-based results are not interchangeable with a true ETF event-study design."
+    }
+  ],
+  "recommended_next_step": {
+    "phase_1": "Pin local ETF price caches for KIE, KBWP, and XLU.",
+    "phase_2": "Build a canonical NOAA-derived event table with severity metadata.",
+    "phase_3": "Run lag-respected event windows and damage-dose stratification once both inputs exist."
+  }
+}

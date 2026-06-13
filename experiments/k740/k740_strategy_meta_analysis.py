@@ -16,19 +16,45 @@ References:
 """
 
 import json
+import shutil
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy import stats
 import warnings
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 warnings.filterwarnings('ignore')
 
 # ── Paths ──────────────────────────────────────────────────────────────
-BASE = Path(__file__).resolve().parent.parent
-STORAGE = BASE / "storage"
+ROOT = Path(__file__).resolve().parents[2]
+EXPERIMENT_DIR = Path(__file__).resolve().parent
+STORAGE = ROOT / "storage"
 PT_FILE = STORAGE / "paper_trading.json"
 METRICS_FILE = STORAGE / "strategy_metrics.json"
-RESULTS_FILE = BASE / "experiments" / "k740_strategy_meta_analysis_results.json"
+RESULTS_FILE = EXPERIMENT_DIR / "k740_strategy_meta_analysis_results.json"
+ASSETS_DIR = ROOT / "storage" / "reports" / "assets"
+
+# Published article mile_2fb1dfb3 cites this fixed window.  Paper-trading
+# history is append-only, so the experiment must pin the end date to reproduce
+# the published numbers after new forward-tracked rows arrive.
+COMMON_START = "2023-01-04"
+COMMON_END = "2026-03-27"
+
+plt.rcParams["font.sans-serif"] = [
+    "PingFang HK",
+    "PingFang TC",
+    "Heiti TC",
+    "Arial Unicode MS",
+    "STHeiti",
+    "sans-serif",
+]
+plt.rcParams["axes.unicode_minus"] = False
+plt.rcParams["figure.facecolor"] = "white"
+plt.rcParams["axes.facecolor"] = "white"
+plt.rcParams["axes.grid"] = True
+plt.rcParams["grid.alpha"] = 0.25
 
 # ── Load Data ──────────────────────────────────────────────────────────
 pt = json.loads(PT_FILE.read_text())
@@ -67,7 +93,10 @@ strat_data = {}
 for strat_key, info in STRATEGY_INFO.items():
     if strat_key not in pt or strat_key == "_market_daily":
         continue
-    entries = pt[strat_key]["entries"]
+    entries = [
+        e for e in pt[strat_key]["entries"]
+        if COMMON_START <= e.get("data_date", "") <= COMMON_END
+    ]
 
     # Filter to entries with actual returns
     rets = [e["portfolio_return"] for e in entries if e.get("portfolio_return") is not None]
@@ -558,7 +587,7 @@ results = {
     "proposer": "用戶",
     "executor": "Claude",
     "data_source": "storage/paper_trading.json (actual forward-tracked paper trading)",
-    "period": "2023-01-04 ~ 2026-03-27",
+    "period": f"{COMMON_START} ~ {COMMON_END}",
     "n_strategies": len(strat_data),
     "strategy_metrics": strat_data,
     "composite_ranking": [
@@ -583,7 +612,7 @@ results = {
         f"Complexity does NOT predict Sharpe (rho={rho_sharpe:.3f}, p={p_sharpe:.3f}). Simpler strategies (12/VIX, Piecewise) compete with or beat complex ones (GARCH VT).",
         f"Multi-asset diversification premium: {div_premium:+.3f} Sharpe units. SPY+GLD strategies dominate SPY-only in risk-adjusted terms.",
         f"Efficient frontier has {len(frontier_strats)} strategies. Most dominated strategies share: single-asset + daily rebalancing.",
-        f"VIX-based signals (mean Sharpe {np.mean([d['sharpe'] for d in vix_strats]):.3f}) outperform momentum/hybrid (mean {np.mean([d['sharpe'] for d in other_strats]):.3f}). Simplicity wins.",
+        f"VIX-based signals are competitive but do not beat momentum/hybrid on mean Sharpe ({np.mean([d['sharpe'] for d in vix_strats]):.3f} vs {np.mean([d['sharpe'] for d in other_strats]):.3f}); their practical appeal is simpler implementation and risk-control framing.",
         f"Monthly rebalancing (mean Sharpe {np.mean([d['sharpe'] for d in monthly_strats]):.3f}) slightly outperforms daily ({np.mean([d['sharpe'] for d in daily_strats]):.3f}), likely due to TX cost savings.",
         f"Best overall composite: {strat_data[strat_keys_ordered[composite_rank[0]]]['display']} (score {composite_scores[composite_rank[0]]:.4f})",
         f"Best for conservative: {strat_data[best_calmar_k]['display']} (Calmar={strat_data[best_calmar_k]['calmar']:.3f})",
@@ -609,6 +638,108 @@ results = {
     },
 }
 
+
+def save_charts():
+    """Regenerate the two article figures from the current results."""
+    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+
+    top_rows = [
+        (
+            strat_data[strat_keys_ordered[idx]]["display"],
+            float(composite_scores[idx]),
+        )
+        for idx in composite_rank[:6]
+    ]
+    labels = [r[0] for r in top_rows][::-1]
+    scores = [r[1] for r in top_rows][::-1]
+    colors = ["#b56576", "#e9c46a", "#2a9d8f", "#457b9d", "#277da1", "#1d3557"][::-1]
+
+    fig, ax = plt.subplots(figsize=(12, 6.2))
+    bars = ax.barh(labels, scores, color=colors, edgecolor="none")
+    ax.set_title("14 個策略放在一起看，前段班其實很集中", fontsize=17, pad=14)
+    ax.set_xlabel("綜合分數")
+    ax.set_xlim(0, max(scores) * 1.12)
+    ax.grid(axis="x", alpha=0.25)
+    ax.grid(axis="y", visible=False)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    for bar, score in zip(bars, scores):
+        ax.text(
+            bar.get_width() + 0.01,
+            bar.get_y() + bar.get_height() / 2,
+            f"{score:.3f}",
+            va="center",
+            fontsize=11,
+        )
+    fig.tight_layout()
+    top_path = EXPERIMENT_DIR / "k740_top_strategy_ranking.png"
+    fig.savefig(top_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    shutil.copy2(top_path, ASSETS_DIR / "top-strategy-ranking.png")
+
+    asset_colors = {
+        "SPY-only": "#c23b4b",
+        "SPY+GLD": "#2a9d8f",
+        "0050.TW": "#457b9d",
+        "multi-Asia": "#6d597a",
+        "global": "#8d99ae",
+    }
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+    for k in strat_keys_ordered:
+        d = strat_data[k]
+        ax.scatter(
+            d["complexity"],
+            d["sharpe"],
+            s=135,
+            color=asset_colors.get(d["asset_class"], "#555555"),
+            alpha=0.85,
+            label=d["asset_class"],
+        )
+
+    label_keys = {"piecewise_conservative", "taiwan_spy_momentum", "simple_12vix", "tz_tw_jp_5050"}
+    for k in label_keys:
+        d = strat_data[k]
+        ax.annotate(
+            d["display"],
+            (d["complexity"], d["sharpe"]),
+            xytext=(12, 8),
+            textcoords="offset points",
+            fontsize=11,
+        )
+
+    handles = []
+    seen = set()
+    for k in strat_keys_ordered:
+        ac = strat_data[k]["asset_class"]
+        if ac in seen:
+            continue
+        seen.add(ac)
+        handles.append(plt.Line2D([0], [0], marker="o", color="w", label=ac,
+                                  markerfacecolor=asset_colors.get(ac, "#555555"), markersize=9))
+    ax.legend(handles=handles, title="資產類型", frameon=False, loc="lower right")
+    ax.set_title("策略做得更複雜，Sharpe 並沒有自然變高", fontsize=17, pad=14)
+    ax.text(
+        0.02,
+        0.95,
+        f"Spearman rho = {rho_sharpe:.3f}, p = {p_sharpe:.3f}",
+        transform=ax.transAxes,
+        fontsize=11,
+        va="top",
+    )
+    ax.set_xlabel("策略複雜度")
+    ax.set_ylabel("Sharpe")
+    ax.set_xticks([1, 2, 3])
+    ax.set_xlim(0.9, 3.1)
+    ax.set_ylim(min(sharpes) - 0.15, max(sharpes) + 0.25)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    fig.tight_layout()
+    complexity_path = EXPERIMENT_DIR / "k740_complexity_vs_sharpe.png"
+    fig.savefig(complexity_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    shutil.copy2(complexity_path, ASSETS_DIR / "complexity-vs-sharpe.png")
+
+
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (np.integer,)):
@@ -619,6 +750,7 @@ class NumpyEncoder(json.JSONEncoder):
             return obj.tolist()
         return super().default(obj)
 
+save_charts()
 RESULTS_FILE.write_text(json.dumps(results, indent=2, ensure_ascii=False, cls=NumpyEncoder))
 print(f"\n\nResults saved to: {RESULTS_FILE}")
 print(f"Total strategies analyzed: {len(strat_data)}")

@@ -251,7 +251,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
   - K687 分析：**不矛盾**——VT 打敗 BH(SPY) 但打不過 BH(50/50)，支持 insurance 論述
 - [x] 修正 review_v2 的 5 HIGH（A.1+B.1+C.1 done 2026-05-18; B.2→K1371 PASS; B.3→K1376 PASS 2026-05-19）
 - [x] Gemini 審查 → `paper/vt-trend-following/review_history/v4/gemini_review_v1.md`（2026-06-05；Major Revision；2 HIGH NEW：MDD retention >100% mechanical artifact + block bootstrap 252-day insufficient）
-- [ ] 修正 Gemini v4 的 2 HIGH（MDD trough decomposition 顯示是否 rebound 驅動 + stationary bootstrap K1192 re-run mean block 3-5y）
+- [x] 修正 Gemini v4 的 2 HIGH（H2 stationary bootstrap → K1417 rejects block-length concern; H1 trough decomposition → K1458 finds 2020 mechanical rebound hedge present but PureVT still underperforms BH in trough window, 2009 absent due beta clipping；需落地 paper body / appendix）
 - [ ] `/citation-verifier` 引用驗證
 
 **第三篇相關方向探索：Copula-GARCH for Portfolio Risk Management**（2026-04-17 narrative state machine triggered, user decision pending）
@@ -352,7 +352,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - 本土指標（外資買賣超/融資融券/PUT-CALL）全 null（G8）
 
 **開放議題：**
-- [ ] VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）
+- [x] VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）— K1323 readiness update: 116/252 days, NOT_READY_AND_UNSTABLE；一般讀者敘事已由 `mile_02c71e74` 覆蓋，252-day formal gate 需等資料自然累積後再重開
 - [ ] 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）
 - [ ] **金融股早期預警系統**：K757 發現 Fubon→TSMC Granger (F=6.11)。可建立金融股壓力指標作為 TSMC vol 早期預警
 - [x] ~~K1059: TSMC → 0050.TW ETF event study~~ — NULL at T+0 but A4f advantage concentrated in event window (DM t=2.50)

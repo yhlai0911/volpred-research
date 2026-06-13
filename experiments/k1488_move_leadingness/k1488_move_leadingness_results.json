@@ -1,0 +1,173 @@
+{
+  "experiment_id": "k1488_move_leadingness",
+  "title": "MOVE leadingness for SPY volatility and stock-bond allocation",
+  "generated_at_utc": "2026-06-12T07:54:28.848419+00:00",
+  "seed": 42,
+  "data_source": {
+    "source": "Yahoo Finance via yfinance, auto_adjust=True",
+    "tickers": [
+      "SPY",
+      "TLT",
+      "IEF",
+      "^VIX",
+      "^MOVE"
+    ],
+    "start": "2003-01-01",
+    "end_exclusive": "2026-06-13",
+    "snapshot_file": "close_prices.csv"
+  },
+  "related_prior_work": {
+    "K1442": "MOVE/VIX ratio around CPI; event-study NULL for vol-crush pattern",
+    "K1460": "Lagged stock-bond correlation regime 60/40 switching underperformed static 60/40 IEF"
+  },
+  "forecast_test": {
+    "target": "SPY close-to-close squared log return at t",
+    "information_set": "all model features explicitly shifted by 1 trading day",
+    "oos_start": "2010-01-04",
+    "oos_end": "2026-06-11",
+    "n_oos_days": 4052,
+    "rolling_window_days": 1260,
+    "qlike": {
+      "HAR_RV": 4.069561785315706,
+      "HAR_VIX": 3.619520239775121,
+      "HAR_VIX_MOVE": 3.6618641837877397
+    },
+    "dm_tests": {
+      "HAR_VIX_MOVE_vs_HAR_VIX": {
+        "t": 1.5719925724260302,
+        "p": 0.1160303683562307
+      },
+      "HAR_VIX_vs_HAR_RV": {
+        "t": -3.0133106339755478,
+        "p": 0.0026001321131372546
+      }
+    },
+    "hac_full_sample_diagnostic": {
+      "n": 4052,
+      "r2": 0.148251411500272,
+      "params": {
+        "const": 1.7742792365367164,
+        "log_rv1_lag": -0.07295495218162093,
+        "log_rv5_lag": 0.2057497442206211,
+        "log_rv22_lag": -0.15831947416395653,
+        "log_vix_var_lag": 1.4542836598007427,
+        "move_z_lag": 0.08924416092749776,
+        "move_chg5_lag": 0.8113326338431215
+      },
+      "tvalues_hac": {
+        "const": 3.300840511812851,
+        "log_rv1_lag": -4.650546589405873,
+        "log_rv5_lag": 3.8101356722024255,
+        "log_rv22_lag": -2.1333592840845608,
+        "log_vix_var_lag": 13.515140540129767,
+        "move_z_lag": 2.5595021370007576,
+        "move_chg5_lag": 1.8490443779025814
+      },
+      "pvalues_hac": {
+        "const": 0.0009639566181705876,
+        "log_rv1_lag": 3.3105644497777632e-06,
+        "log_rv5_lag": 0.00013889055092721747,
+        "log_rv22_lag": 0.03289526440420491,
+        "log_vix_var_lag": 1.2731234268710849e-41,
+        "move_z_lag": 0.01048222113800049,
+        "move_chg5_lag": 0.06445140496439405
+      }
+    },
+    "verdict": "NULL"
+  },
+  "allocation_test": {
+    "sample": {
+      "start": "2010-01-31",
+      "end": "2026-06-30"
+    },
+    "signal": "MOVE log z-score using trailing 252 trading days; month-end signal shifted 1 month",
+    "metrics": {
+      "static_60_40_tlt": {
+        "n_months": 198,
+        "cumulative_return": 3.7792549995722995,
+        "annual_return": 0.09944458758373131,
+        "annual_vol": 0.09805028380712437,
+        "sharpe": 1.014220293123778,
+        "max_drawdown": -0.26211937451297984
+      },
+      "static_60_40_ief": {
+        "n_months": 198,
+        "cumulative_return": 3.6313840187667177,
+        "annual_return": 0.09735237683060816,
+        "annual_vol": 0.08912550154972634,
+        "sharpe": 1.0923066365723815,
+        "max_drawdown": -0.20507481759648638
+      },
+      "move_duration_switch": {
+        "n_months": 198,
+        "cumulative_return": 4.200664513196237,
+        "annual_return": 0.10508963463350951,
+        "annual_vol": 0.09672196843780193,
+        "sharpe": 1.0865125713512387,
+        "max_drawdown": -0.21937980563186998
+      },
+      "move_defensive_switch": {
+        "n_months": 198,
+        "cumulative_return": 3.6552584259643286,
+        "annual_return": 0.09769438356487248,
+        "annual_vol": 0.09219874444659514,
+        "sharpe": 1.0596064420536726,
+        "max_drawdown": -0.21114971268477312
+      },
+      "spy_bh": {
+        "n_months": 198,
+        "cumulative_return": 7.847926604604753,
+        "annual_return": 0.1412593116910814,
+        "annual_vol": 0.14421614118381296,
+        "sharpe": 0.9794972361036698,
+        "max_drawdown": -0.23927170341386117
+      }
+    },
+    "diagnostics": {
+      "n_months": 198,
+      "move_stress_month_share": 0.18686868686868688,
+      "move_z_threshold": 1.0,
+      "best_static_oos": "static_60_40_ief"
+    },
+    "bootstrap_tests": {
+      "move_duration_switch_vs_static_60_40_ief": {
+        "observed_sharpe_diff": -0.005794065221142786,
+        "bootstrap_mean": -0.008274293191144174,
+        "ci_95": [
+          -0.21242290993066085,
+          0.21627416373919034
+        ],
+        "p_two_sided": 0.95,
+        "reps": 1000,
+        "block_size_months": 6
+      },
+      "move_defensive_switch_vs_static_60_40_ief": {
+        "observed_sharpe_diff": -0.03270019451870887,
+        "bootstrap_mean": -0.036805954485043396,
+        "ci_95": [
+          -0.2834771739772995,
+          0.23938571566742195
+        ],
+        "p_two_sided": 0.817,
+        "reps": 1000,
+        "block_size_months": 6
+      }
+    }
+  },
+  "verdicts": {
+    "forecast": "NULL",
+    "allocation": "NULL",
+    "overall": "NULL",
+    "best_static_allocation_benchmark": "static_60_40_ief"
+  },
+  "charts": [
+    "fig_a_forecast_loss_diff.png",
+    "fig_b_allocation_nav.png"
+  ],
+  "methodology_flags": {
+    "lookahead_guard": "features use shift(1); month-end MOVE signal shifted 1 month before allocation",
+    "bootstrap_seed": 42,
+    "dm_harvey_threshold": "|t| > 3.0",
+    "null_results_reported": true
+  }
+}

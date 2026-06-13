@@ -1,0 +1,272 @@
+{
+  "experiment_id": "trending_2026_06_12_oil_vix_spillover",
+  "task_id": "trending_repost_2026_06_12_地緣波動",
+  "generated_at": "2026-06-12T03:35:30.376759+00:00",
+  "data_source": {
+    "price_source": "Yahoo Finance via yfinance",
+    "tickers": [
+      "^OVX",
+      "^VIX",
+      "CL=F",
+      "BZ=F",
+      "USO",
+      "XLE",
+      "SPY",
+      "^TNX",
+      "DX-Y.NYB"
+    ],
+    "start_date": "2007-01-01",
+    "end_date_exclusive": "2026-06-12",
+    "latest_common_date": "2026-06-11",
+    "public_refs": [
+      "https://fred.stlouisfed.org/series/OVXCLS",
+      "https://www.cboe.com/us/indices/dashboard/ovx/",
+      "https://www.cmegroup.com/videos/2026/06/10/wti-crude-oil-futures-climbed-past-91-amid-middle-east-conflict.html"
+    ]
+  },
+  "sample": {
+    "common_days": 4693,
+    "first_common_date": "2007-07-30",
+    "last_common_date": "2026-06-11"
+  },
+  "latest": {
+    "date": "2026-06-11",
+    "OVX": 56.29999923706055,
+    "VIX": 19.440000534057617,
+    "OVX_VIX_RATIO": 2.896090416171883,
+    "WTI": 86.86000061035156,
+    "Brent": 89.44999694824219,
+    "USO": 128.8300018310547,
+    "XLE": 57.119998931884766,
+    "SPY": 737.760009765625
+  },
+  "summary_table": [
+    {
+      "metric": "OVX",
+      "latest": 56.29999923706055,
+      "change_1d": -0.06602520940334289,
+      "change_5d": -0.05837099222322395,
+      "change_20d": -0.2063716196857731,
+      "change_since_2026_05_20": -0.2263295061945717,
+      "full_sample_percentile": 0.9134881738759855,
+      "one_year_percentile": 0.6746031746031746
+    },
+    {
+      "metric": "VIX",
+      "latest": 19.440000534057617,
+      "change_1d": -0.12511246018023325,
+      "change_5d": 0.26233772828579505,
+      "change_20d": 0.08785672194134997,
+      "change_since_2026_05_20": 0.11467889557080624,
+      "full_sample_percentile": 0.6044108246324312,
+      "one_year_percentile": 0.75
+    },
+    {
+      "metric": "OVX_VIX_RATIO",
+      "latest": 2.896090416171883,
+      "change_1d": 0.06753696685297728,
+      "change_5d": -0.2540593640851794,
+      "change_20d": -0.27046607856782245,
+      "change_since_2026_05_20": -0.3059252338232832,
+      "full_sample_percentile": 0.9015555082037077,
+      "one_year_percentile": 0.6507936507936508
+    },
+    {
+      "metric": "WTI",
+      "latest": 86.86000061035156,
+      "change_1d": -0.035210465532898305,
+      "change_5d": -0.06642304647854325,
+      "change_20d": -0.14017022869983164,
+      "change_since_2026_05_20": -0.11601873883610969,
+      "full_sample_percentile": 0.7110590240784147,
+      "one_year_percentile": 0.7420634920634921
+    },
+    {
+      "metric": "Brent",
+      "latest": 89.44999694824219,
+      "change_1d": -0.03920517277874602,
+      "change_5d": -0.058718319506811834,
+      "change_20d": -0.15317618788115828,
+      "change_since_2026_05_20": -0.14825747659983546,
+      "full_sample_percentile": 0.6888983592584701,
+      "one_year_percentile": 0.7380952380952381
+    },
+    {
+      "metric": "USO",
+      "latest": 128.8300018310547,
+      "change_1d": -0.0407297177692173,
+      "change_5d": -0.05784703337974351,
+      "change_20d": -0.09300191551309933,
+      "change_since_2026_05_20": -0.10702157055632333,
+      "full_sample_percentile": 0.5746857021095249,
+      "one_year_percentile": 0.8452380952380952
+    },
+    {
+      "metric": "XLE",
+      "latest": 57.119998931884766,
+      "change_1d": -0.01939915996764352,
+      "change_5d": -0.0277446990317487,
+      "change_20d": -0.008849594426133645,
+      "change_since_2026_05_20": -0.044816059186751134,
+      "full_sample_percentile": 0.9904112507990624,
+      "one_year_percentile": 0.8214285714285714
+    },
+    {
+      "metric": "SPY",
+      "latest": 737.760009765625,
+      "change_1d": 0.016996839411566045,
+      "change_5d": -0.02553199276726692,
+      "change_20d": -0.006129498198775951,
+      "change_since_2026_05_20": -0.004708249894603722,
+      "full_sample_percentile": 0.996164500319625,
+      "one_year_percentile": 0.9285714285714286
+    }
+  ],
+  "same_day_correlations": {
+    "20": {
+      "OVX_VIX": 0.10481822290090835,
+      "WTI_VIX": 0.09083759978323012,
+      "OVX_SPY": -0.33340954721085203,
+      "WTI_SPY": -0.29631216385878195
+    },
+    "60": {
+      "OVX_VIX": 0.39954807819562416,
+      "WTI_VIX": 0.32600126270892915,
+      "OVX_SPY": -0.4819441664132501,
+      "WTI_SPY": -0.5128804546410536
+    },
+    "120": {
+      "OVX_VIX": 0.38819641311859654,
+      "WTI_VIX": 0.33222810055901464,
+      "OVX_SPY": -0.37516065653608016,
+      "WTI_SPY": -0.4248297728165085
+    },
+    "252": {
+      "OVX_VIX": 0.3923213880979199,
+      "WTI_VIX": 0.2368097324417961,
+      "OVX_SPY": -0.35293314216144656,
+      "WTI_SPY": -0.3242539949675873
+    }
+  },
+  "next_day_correlations": {
+    "20": {
+      "OVX_to_next_VIX": 0.0008929807596900538,
+      "WTI_to_next_VIX": -0.1489481230771882,
+      "WTI_to_next_SPY": 0.09960455904926654,
+      "WTI_to_next_XLE": 0.2197713679912754
+    },
+    "60": {
+      "OVX_to_next_VIX": -0.08340148853712949,
+      "WTI_to_next_VIX": -0.09389812952247961,
+      "WTI_to_next_SPY": 0.07786089651971217,
+      "WTI_to_next_XLE": 0.17478903819674074
+    },
+    "120": {
+      "OVX_to_next_VIX": -0.002555761537821986,
+      "WTI_to_next_VIX": -0.02021702089624863,
+      "WTI_to_next_SPY": 0.007879728121734129,
+      "WTI_to_next_XLE": 0.004206177232931305
+    },
+    "252": {
+      "OVX_to_next_VIX": -0.04757805765044603,
+      "WTI_to_next_VIX": -0.018842603198432003,
+      "WTI_to_next_SPY": 0.02444162654384879,
+      "WTI_to_next_XLE": 0.0004600738873139833
+    }
+  },
+  "ytd_peaks": {
+    "OVX": {
+      "date": "2026-03-11",
+      "value": 120.91000366210938
+    },
+    "VIX": {
+      "date": "2026-03-27",
+      "value": 31.049999237060547
+    },
+    "OVX_VIX_RATIO": {
+      "date": "2026-03-11",
+      "value": 4.990095169062883
+    },
+    "WTI": {
+      "date": "2026-04-07",
+      "value": 112.94999694824219
+    },
+    "Brent": {
+      "date": "2026-03-31",
+      "value": 118.3499984741211
+    }
+  },
+  "checkpoint_values": {
+    "2026-05-20": {
+      "OVX": 72.7699966430664,
+      "VIX": 17.440000534057617,
+      "OVX_VIX_RATIO": 4.172591422859069,
+      "WTI": 98.26000213623047,
+      "Brent": 105.0199966430664,
+      "SPY": 741.25
+    },
+    "2026-06-04": {
+      "OVX": 59.790000915527344,
+      "VIX": 15.399999618530273,
+      "OVX_VIX_RATIO": 3.882467688089041,
+      "WTI": 93.04000091552734,
+      "Brent": 95.02999877929688,
+      "SPY": 757.0900268554688
+    },
+    "2026-06-05": {
+      "OVX": 57.75,
+      "VIX": 21.510000228881836,
+      "OVX_VIX_RATIO": 2.6847977399116023,
+      "WTI": 90.54000091552734,
+      "Brent": 93.08999633789062,
+      "SPY": 737.5499877929688
+    },
+    "2026-06-10": {
+      "OVX": 60.279998779296875,
+      "VIX": 22.219999313354492,
+      "OVX_VIX_RATIO": 2.7128713160251023,
+      "WTI": 90.02999877929688,
+      "Brent": 93.0999984741211,
+      "SPY": 725.4299926757812
+    },
+    "2026-06-11": {
+      "OVX": 56.29999923706055,
+      "VIX": 19.440000534057617,
+      "OVX_VIX_RATIO": 2.896090416171883,
+      "WTI": 86.86000061035156,
+      "Brent": 89.44999694824219,
+      "SPY": 737.760009765625
+    }
+  },
+  "charts": [
+    "fig_1_oil_vix_2026_path.png",
+    "fig_2_spillover_correlations.png"
+  ],
+  "article_ready_numbers": {
+    "latest_date": "2026-06-11",
+    "ovx_latest": "56.30",
+    "vix_latest": "19.44",
+    "wti_latest": "86.86",
+    "brent_latest": "89.45",
+    "ratio_latest": "2.90",
+    "ovx_full_percentile": "P91",
+    "vix_full_percentile": "P60",
+    "ratio_full_percentile": "P90",
+    "ovx_5d_change": "-5.84%",
+    "vix_5d_change": "26.23%",
+    "wti_5d_change": "-6.64%",
+    "brent_5d_change": "-5.87%",
+    "ovx_since_may20": "-22.63%",
+    "vix_since_may20": "11.47%",
+    "ratio_since_may20": "-30.59%",
+    "wti_since_may20": "-11.60%",
+    "brent_since_may20": "-14.83%",
+    "spy_since_may20": "-0.47%",
+    "ytd_ovx_peak": "120.91 on 2026-03-11",
+    "ytd_vix_peak": "31.05 on 2026-03-27",
+    "same_day_20d_ovx_vix_corr": "0.10",
+    "same_day_60d_ovx_vix_corr": "0.40",
+    "next_day_60d_ovx_to_vix_corr": "-0.08",
+    "next_day_60d_wti_to_spy_corr": "0.08"
+  }
+}

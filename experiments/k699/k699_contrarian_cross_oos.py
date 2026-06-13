@@ -547,7 +547,7 @@ class NumpyEncoder(json.JSONEncoder):
             return obj.tolist()
         return super().default(obj)
 
-out_path = "experiments/k699_results.json"
+out_path = "experiments/k699/k699_results.json"
 with open(out_path, "w") as f:
     json.dump(results, f, indent=2, ensure_ascii=False, cls=NumpyEncoder)
 

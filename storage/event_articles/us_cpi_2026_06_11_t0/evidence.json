@@ -1,0 +1,98 @@
+{
+  "event": "US CPI 2026-06-11",
+  "article_slot": "T+0",
+  "sources": {
+    "bls": {
+      "release": "BLS Consumer Price Index Summary, 2026-06-10 (USDL-26-0824)",
+      "headline_mom_pct": 0.5,
+      "headline_yoy_pct": 4.2,
+      "core_mom_pct": 0.2,
+      "core_yoy_pct": 2.9,
+      "energy_mom_pct": 3.9,
+      "energy_yoy_pct": 23.5,
+      "gasoline_mom_pct": 7.0,
+      "gasoline_yoy_pct": 40.5
+    },
+    "consensus": {
+      "headline_yoy_pct": 4.2,
+      "core_yoy_pct": 2.9,
+      "core_mom_pct": 0.3,
+      "source": "WSJ live coverage / MarketWatch snippets retrieved 2026-06-12"
+    },
+    "market_data": "yfinance (^VIX, ^VIX9D, SPY), downloaded 2026-06-12"
+  },
+  "event_window_closes": {
+    "2026-06-09": {
+      "VIX": 19.87,
+      "VIX9D": 22.14,
+      "SPY": 737.05
+    },
+    "2026-06-10": {
+      "VIX": 22.22,
+      "VIX9D": 25.67,
+      "SPY": 725.43
+    },
+    "2026-06-11": {
+      "VIX": 19.44,
+      "VIX9D": 20.66,
+      "SPY": 737.76
+    }
+  },
+  "day_over_day_reaction_pct": [
+    {
+      "date": "2026-06-10",
+      "VIX_pct": 11.826866506623453,
+      "VIX9D_pct": 15.943996314182197,
+      "SPY_pct": -1.5765545498457372
+    },
+    {
+      "date": "2026-06-11",
+      "VIX_pct": -12.511246018023328,
+      "VIX9D_pct": -19.51694668481335,
+      "SPY_pct": 1.6996839411565996
+    }
+  ],
+  "headline_vs_consensus": {
+    "headline_yoy_surprise_pctpt": 0.0,
+    "core_yoy_surprise_pctpt": 0.0,
+    "core_mom_surprise_pctpt": -0.1
+  },
+  "release_day_vix_rank": {
+    "date": "2026-06-10",
+    "vix_pct": 11.827,
+    "rank_among_14_cpi_days": 4,
+    "sample_n": 14
+  },
+  "recent5_cpi_vix_moves": [
+    {
+      "date": "2026-02-12",
+      "vix_prev": 17.649999618530273,
+      "vix_close": 20.81999969482422,
+      "vix_pct": 17.960340763780216
+    },
+    {
+      "date": "2026-03-12",
+      "vix_prev": 24.229999542236328,
+      "vix_close": 27.290000915527344,
+      "vix_pct": 12.628978254650805
+    },
+    {
+      "date": "2026-04-10",
+      "vix_prev": 19.489999771118164,
+      "vix_close": 19.229999542236328,
+      "vix_pct": -1.3340186348648655
+    },
+    {
+      "date": "2026-05-13",
+      "vix_prev": 17.989999771118164,
+      "vix_close": 17.8700008392334,
+      "vix_pct": -0.667031314127177
+    },
+    {
+      "date": "2026-06-10",
+      "vix_prev": 19.8700008392334,
+      "vix_close": 22.219999313354492,
+      "vix_pct": 11.826866506623453
+    }
+  ]
+}

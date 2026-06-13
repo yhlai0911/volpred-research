@@ -1,0 +1,102 @@
+{
+  "experiment_id": "k1486",
+  "title": "Feasibility audit for BTC ETF intraday volatility-structure study",
+  "run_timestamp": "2026-06-12T02:29:05.769822+00:00",
+  "verdict": {
+    "overall": "BLOCKED_ON_DATA",
+    "can_honestly_run_full_study_now": false,
+    "plain_english": "The repo has BTC daily history but no reusable 24/7 hourly BTC panel and no local spot-BTC-ETF dataset. Without intraday timestamps, the requested US-session versus non-US-session versus weekend volatility-structure study cannot be executed honestly."
+  },
+  "research_question": {
+    "core": "Did the 2024 spot-BTC-ETF launch change when Bitcoin volatility occurs across the trading day and weekend?",
+    "proposed_design": [
+      "Use 24/7 BTC hourly data to split US cash-session / non-cash-session / weekend realized volatility",
+      "Run a 2024-01 structural-break test around spot-BTC-ETF launch",
+      "Assess whether volatility share shifted toward the traditional US market clock"
+    ]
+  },
+  "available_local_inputs": {
+    "btc_daily_files": [
+      "experiments/k1090/data/BTC-USD.csv",
+      "experiments/k1090b/data/BTC-USD.csv",
+      "experiments/k1186/data/BTC_USD.csv",
+      "experiments/k1206/data/BTC_USD.csv"
+    ],
+    "btc_intraday_hourly_files": [],
+    "spot_btc_etf_files": [],
+    "related_prior_experiment_files": [
+      "experiments/k916/__pycache__/k916_mfgjr_bitcoin.cpython-312.pyc",
+      "experiments/k916/k916_mfgjr_bitcoin.py",
+      "experiments/k916/k916_mfgjr_bitcoin_results.json"
+    ],
+    "has_btc_daily_data": true,
+    "has_btc_hourly_panel": false,
+    "has_local_spot_btc_etf_panel": false
+  },
+  "blocking_conditions": [
+    {
+      "type": "missing_intraday_btc_panel",
+      "detail": "BTC daily files exist, but no canonical 24/7 hourly BTC panel was found, so the session-share decomposition cannot be constructed."
+    },
+    {
+      "type": "missing_session_classification_layer",
+      "detail": "There is no reusable local panel or rule layer that labels US cash-session, non-cash-session, and weekend intervals with fixed timezone handling."
+    },
+    {
+      "type": "missing_spot_etf_local_context",
+      "detail": "No local IBIT/FBTC/ARKB/BITB dataset or canonical ETF event metadata was found. Existing daily BTC studies cannot substitute for the event-context layer required by this question."
+    }
+  ],
+  "related_prior_findings": [
+    {
+      "reference": "K916",
+      "lesson": "The repo already studied daily BTC structural behavior and ETF-era subsamples, but K916 used business-day daily data and cannot identify intraday or weekend volatility-share shifts."
+    },
+    {
+      "reference": "BTC daily compendium in repo",
+      "lesson": "There is enough daily BTC history for daily-vol questions, but this topic is specifically about time-of-day structure, so daily files are insufficient."
+    }
+  ],
+  "required_canonical_inputs": {
+    "btc_hourly_price_panel": {
+      "required_columns": [
+        "timestamp_utc",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume"
+      ],
+      "why_needed": "Needed to construct realized volatility by trading-time segment."
+    },
+    "session_classification_layer": {
+      "required_columns": [
+        "timestamp_utc",
+        "is_us_cash_session",
+        "is_us_non_cash_session",
+        "is_weekend"
+      ],
+      "why_needed": "Needed to split BTC volatility into market-clock regimes with stable timezone rules."
+    },
+    "spot_btc_etf_event_context": {
+      "required_columns": [
+        "event_date",
+        "event_name",
+        "event_type",
+        "source_url"
+      ],
+      "optional_extensions": [
+        "IBIT local price history",
+        "FBTC local price history",
+        "ARKB local price history",
+        "BITB local price history"
+      ],
+      "why_needed": "Needed to define the institutionalization breakpoint instead of using a vague date split."
+    }
+  },
+  "recommended_next_step": {
+    "phase_1": "Pin a canonical 24/7 BTC hourly panel into local storage.",
+    "phase_2": "Build a timezone-stable session-classification layer for US cash / non-cash / weekend.",
+    "phase_3": "Add spot-BTC-ETF event metadata and run structural-break tests on volatility shares."
+  }
+}

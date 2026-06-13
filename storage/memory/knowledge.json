@@ -33568,5 +33568,24 @@
       "補 article errata: 註明 OOS evaluation 實為 week t+1 vs week t-1 info（horizon nuance），三條核心結論方向不變",
       "K457 script 留 timing offset fix 給 followup (low-priority — 影響評估 horizon 標籤但不影響 ranking / DM test 結論方向)"
     ]
+  },
+  {
+    "item_id": "53f18865",
+    "category": "paper_review",
+    "content": "K880 Codex 24h-rule review (mile_862223de): VERDICT=NEEDS_REVISION. PRG forecast on SPY uses same-day overnight observation → valid as at-open forecast but NOT strict t-1 day-ahead horserace; PRG info set larger than GJR/HAR/Separate. DM test mislabel (k880_prg_spy_validation.py:888 — dm_test returns tuple but code uses .get()), Harvey check uses |t|>3 heuristic without HLN small-sample correction or Bonferroni/BH. MCS is iid bootstrap not HLN block bootstrap. README placeholder despite publish. Article core conclusion (cross-market PRG validity, session-decomposition + cross-session state) unchanged; errata appended to mile_862223de description disclosing timing asymmetry, Harvey heuristic, and MCS caveat. Code fixes pending in K880b followup.",
+    "evidence": [
+      "experiment_id=K880",
+      "k_id=K880",
+      "experiment_path=experiments/k880/",
+      "reviewer=Codex CLI 0.137.0 (GPT-5.4)",
+      "reviewer_source=codex_review",
+      "codex_review=experiments/k880/reviews/codex_24h_review_mile_862223de.md",
+      "verdict=NEEDS_REVISION",
+      "article=mile_862223de",
+      "closure_status=requires_revision",
+      "core_conclusion_unchanged=true"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-13T10:17:06.383569"
   }
 ]

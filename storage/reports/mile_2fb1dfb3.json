@@ -1,0 +1,71 @@
+{
+  "id": "mile_2fb1dfb3",
+  "title": "投資策略是不是越複雜越厲害？我們把 14 套方法排在一起，答案有點反直覺",
+  "description": "14 套 forward-tracked 紙上交易策略的後設比較：複雜度與 Sharpe 沒有穩定關係，分散配置與風險控制比規則花俏更重要。",
+  "content": "# 投資策略是不是越複雜越厲害？我們把 14 套方法排在一起，答案有點反直覺\n\n很多人看投資策略，第一眼常常先看「酷不酷」。\n\n名字越長、條件越多、公式越難，一般就越容易讓人覺得它比較高級。這次做的事情很簡單，就是把 **14 套紙上交易策略** 放在同一張桌上，一次比較。\n\n結果第一個被打臉的直覺，就是複雜度。\n\n![14 個策略放在一起看，前段班其實很集中](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/top-strategy-ranking.png)\n\n把風險、報酬、最大回撤、恢復速度、換手這些指標一起算進去，排在最前面的，是幾個相對樸素的做法；花俏模型沒有自動勝出。\n\n第一名是 **保守型 VT（Piecewise）**。它不是報酬衝最快的那個，但綜合表現最完整：綜合分數 **0.790**、Sharpe **3.158**、最大回撤只有 **-2.48%**，而且月勝率高達 **87.2%**。這種組合很少見，因為大多數策略通常只能在「賺得快」和「跌得少」之間選一邊。\n\n第二個值得記的點，是**分散配置的優勢比複雜度更穩**。\n\n把 14 個策略拆開後發現，只做 **SPY** 的策略，平均 Sharpe 大約只有 **1.173**；把 **SPY + GLD** 放在一起，平均 Sharpe 直接拉到 **2.544**。差了 **1.371**，已經超過小數點後面的修飾，接近等級上的差別。\n\n意思很直白。你可以花很多力氣把進出場規則弄得很精細，但如果資產本身還是太單一，很多風險根本沒地方分散。\n\n![策略做得更複雜，表現分數並沒有跟著變高](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/complexity-vs-sharpe.png)\n\n第二張圖更直接。這份比較算出策略複雜度和 Sharpe 的 Spearman rho 只有 **0.294**，p-value **0.308**，談不上有穩定關係。簡單說，策略做得更複雜，沒有自然保證你拿到更好的風險調整後報酬。\n\n這點其實很值得一般投資人記住。很多人會把研究重點放在「要不要再加一個訊號」「要不要再多一條規則」，但這次比較比較像在提醒你：**先把大方向做對，比把機械結構做得更花更重要。**\n\n大方向是什麼？\n\n第一，資產不要太單一。  \n第二，調整頻率不用迷信越快越好。這次比較裡月頻策略的平均 Sharpe 是 **2.339**，日頻是 **2.213**，至少在這批紙上交易策略裡，交易成本和來回折騰沒有白白消失。  \n第三，真正能長期活下來的策略，通常靠完整風險控制，不靠神奇預測。\n\n所以如果你今天不是在做學術研究，只是想知道「到底該選哪種策略」，這次比較給的答案其實比想像中樸素：\n\n**先找能分散風險、規則夠清楚、自己做得到的策略，比追求一套看起來很聰明但你根本守不住的系統更重要。**\n\n這也是為什麼這次比較最後讓人印象最深的，未必是「哪個模型贏了」；更基本的是：\n\n**投資世界裡，複雜度常常比你想像中便宜，真正稀缺的是穩定。**\n\n---\n\n*本文基於實驗 K740（腳本：`experiments/k740/k740_strategy_meta_analysis.py`，結果：`experiments/k740/k740_strategy_meta_analysis_results.json`）。資料來源：`storage/paper_trading.json` 與 `storage/strategy_metrics.json` 的 forward-tracked 紙上交易紀錄。比較期間：2023-01-04 至 2026-03-27，共 14 套策略。*\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "general",
+  "details": {
+    "experiment_refs": [
+      "K740"
+    ]
+  },
+  "tags": [
+    "一般讀者",
+    "experiment",
+    "investing",
+    "strategy",
+    "risk",
+    "asset-allocation"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-01T01:36:28.348742+00:00",
+  "published_at": "2026-06-12T19:01:15.894013+00:00",
+  "status": "published",
+  "verified_live_at": "2026-06-12T19:01:34.682524+00:00",
+  "errata": {
+    "update_at": "2026-06-13T00:19:28.710712+00:00",
+    "update_action": "codex_review_style_fix",
+    "update_summary": "K740 review follow-up: removed anti-ai-style false-philosophy patterns from the corrected article body.",
+    "update_history": [
+      {
+        "at": "2026-06-13T00:17:45.761742+00:00",
+        "action": "codex_review_fix",
+        "summary": "K740 review corrected reproducibility path/date pin, regenerated local figures, and fixed published article numeric drift: composite score, SPY-only vs SPY+GLD difference, complexity rho, and rebalancing averages. Remote chart re-upload is pending network access.",
+        "old_content_chars": 1465,
+        "new_content_chars": 1671,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "preserved (--no-update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      },
+      {
+        "at": "2026-06-13T00:17:59.364588+00:00",
+        "action": "codex_review_metadata_fix",
+        "summary": "K740 review follow-up: replace stale full-content description containing old numeric claims with a short corrected summary.",
+        "old_content_chars": 1671,
+        "new_content_chars": 1671,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      },
+      {
+        "at": "2026-06-13T00:19:28.710712+00:00",
+        "action": "codex_review_style_fix",
+        "summary": "K740 review follow-up: removed anti-ai-style false-philosophy patterns from the corrected article body.",
+        "old_content_chars": 1671,
+        "new_content_chars": 1662,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "cli override (--update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-13T00:19:28.710712+00:00"
+}

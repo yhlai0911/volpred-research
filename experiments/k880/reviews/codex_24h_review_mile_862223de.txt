@@ -1,0 +1,40 @@
+ exited 5 in 0ms:
+jq: error (at <stdin>:1): Cannot index string with string "id"
+jq: error (at <stdin>:2): Cannot index string with string "id"
+jq: error (at <stdin>:29871): Cannot index array with string "id"
+
+codex
+=== K880 CODEX 24H REVIEW ===
+VERDICT: NEEDS_REVISION
+LOOKAHEAD: concern (experiments/k880/k880_prg_spy_validation.py:511-518)
+DM_HARVEY: concern
+CROSS_MARKET_FAIRNESS: concern
+SESSION_TIMING: ok
+SAMPLE: ok
+MCS_SPEARMAN: concern
+KEY_FINDINGS:
+- PRG refit is walk-forward clean (`[:t]`, no future refit leak), but the PRG forecast uses same-day `r2_overnight[t]` / `r_overnight[t]`; valid only as an at-open forecast, not a pure t-1 day-ahead forecast.
+- PRG has a richer/open-time information set than GJR/HAR/Separate, so “PRG beats GJR” is not apples-to-apples unless the article states this timing asymmetry clearly.
+- DM path is mislabeled: `dm_test()` returns a tuple, but K880 calls `.get()`, so it falls into the manual fallback; Harvey pass is only `abs(t)>3`, with no explicit HLN small-sample correction or pair-family adjustment.
+- MCS is not HLN-style block/bootstrap MCS; it uses iid resampling and returns all models surviving, so it does not support a PRG-superior-set claim.
+- README remains placeholder/planning despite publication, so reproducibility documentation is incomplete.
+RECOMMENDED_FIXES:
+- experiments/k880/k880_prg_spy_validation.py:511 clarify forecast horizon; either label PRG as at-open or add a strict `t-1` variant.
+- experiments/k880/k880_prg_spy_validation.py:888 fix DM call to tuple unpacking and report Bonferroni/BH-adjusted p-values across pairs.
+- experiments/k880/k880_prg_spy_validation.py:708 replace simplified MCS with `src/volpred/stats/mcs.py` block/stationary bootstrap implementation.
+- experiments/k880/k880_prg_spy_validation.py:778 add rolling-window Spearman stability, not only full-sample iid bootstrap CI.
+- experiments/k880/README.md:1 replace placeholder README with data, sample, method, results, and limitations.
+=== END ===
+tokens used
+267,957
+=== K880 CODEX 24H REVIEW ===
+VERDICT: NEEDS_REVISION
+LOOKAHEAD: concern (experiments/k880/k880_prg_spy_validation.py:511-518)
+DM_HARVEY: concern
+CROSS_MARKET_FAIRNESS: concern
+SESSION_TIMING: ok
+SAMPLE: ok
+MCS_SPEARMAN: concern
+KEY_FINDINGS:
+- PRG refit is walk-forward clean (`[:t]`, no future refit leak), but the PRG forecast uses same-day `r2_overnight[t]` / `r_overnight[t]`; valid only as an at-open forecast, not a pure t-1 day-ahead forecast.
+- PRG has a richer/open-time information set than GJR/HAR/Separate, so “PRG beats GJR” is not apples-to-apples unless the article states this timing asymmetry clearly.

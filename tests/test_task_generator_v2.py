@@ -1,0 +1,72 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+from datetime import date
+from pathlib import Path
+
+
+MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "task_generator_v2.py"
+SPEC = importlib.util.spec_from_file_location("task_generator_v2", MODULE_PATH)
+MODULE = importlib.util.module_from_spec(SPEC)
+assert SPEC and SPEC.loader
+SPEC.loader.exec_module(MODULE)
+
+
+def test_event_article_skips_runtime_managed_adjacent_fomc_date(tmp_path, monkeypatch) -> None:
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    runtime_schedules.write_text(
+        json.dumps(
+            {
+                "event_jobs": {
+                    "items": [
+                        {
+                            "id": "fomc-2026-06-17-t7",
+                            "event_key": "FOMC_2026_06_17",
+                            "task_template": {
+                                "payload_patch": {
+                                    "event_type": "FOMC",
+                                    "event_date": "2026-06-17",
+                                }
+                            },
+                        }
+                    ]
+                }
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(MODULE, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(
+        MODULE,
+        "EVENT_CALENDAR",
+        [("fomc", "2026-06-18", "FOMC meeting June 2026")],
+    )
+
+    tasks = MODULE.generate_event_article_tasks(existing=[], reference_date=date(2026, 6, 13))
+
+    assert tasks == []
+
+
+def test_event_article_skips_existing_adjacent_event_task(tmp_path, monkeypatch) -> None:
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    runtime_schedules.write_text(json.dumps({"event_jobs": {"items": []}}), encoding="utf-8")
+    monkeypatch.setattr(MODULE, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(
+        MODULE,
+        "EVENT_CALENDAR",
+        [("fomc", "2026-06-18", "FOMC meeting June 2026")],
+    )
+    existing = [
+        {
+            "id": "event_article_fomc_2026-06-17_tminus7",
+            "task_type": "event_article",
+            "event_type": "FOMC",
+            "event_date": "2026-06-17",
+        }
+    ]
+
+    tasks = MODULE.generate_event_article_tasks(existing=existing, reference_date=date(2026, 6, 13))
+
+    assert tasks == []

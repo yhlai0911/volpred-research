@@ -1,0 +1,144 @@
+{
+  "experiment_id": "k1479",
+  "title": "Single-stock leveraged ETF launch and underlying tail-vol proxies",
+  "run_timestamp": "2026-06-11T19:04:42.695649+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance auto_adjust=True daily OHLC",
+    "start": "2021-01-01",
+    "end": "2026-06-11",
+    "event_window_calendar_days_each_side": 126
+  },
+  "feasibility": {
+    "TSLL": {
+      "etf_launch_date_from_yfinance": "2022-08-09",
+      "exact_intraday_launch_did_feasible_with_free_data": false,
+      "reason": "1h yfinance history starts after the ETF launch, so pre-launch intraday window is unavailable."
+    },
+    "NVDL": {
+      "etf_launch_date_from_yfinance": "2022-12-13",
+      "exact_intraday_launch_did_feasible_with_free_data": false,
+      "reason": "1h yfinance history starts after the ETF launch, so pre-launch intraday window is unavailable."
+    },
+    "CONL": {
+      "etf_launch_date_from_yfinance": "2022-08-10",
+      "exact_intraday_launch_did_feasible_with_free_data": false,
+      "reason": "1h yfinance history starts after the ETF launch, so pre-launch intraday window is unavailable."
+    }
+  },
+  "methodology": {
+    "daily_proxies": {
+      "abs_ret": "|log(Close/Open)|",
+      "park_var": "log(High/Low)^2 / (4 log 2)",
+      "signed_clv": "sign(log(Close/Open)) * (2*(Close-Low)/(High-Low)-1)"
+    },
+    "did_spec": "y_it = intercept + treated_i + post_t + treated_i*post_t + error_it, HAC(5)"
+  },
+  "event_results": {
+    "TSLL": {
+      "abs_ret": {
+        "intercept": 0.020384611474164628,
+        "treated_beta": 0.010125959289321798,
+        "post_beta": -0.0053061209074165075,
+        "did_beta": 3.9043237860854276e-05,
+        "did_t": 0.01070814406520116,
+        "did_p": 0.9914563004521267,
+        "r_squared": 0.10598337055857165,
+        "n_obs": 525
+      },
+      "park_var": {
+        "intercept": 0.000622222925378201,
+        "treated_beta": 0.0007472869924231779,
+        "post_beta": -0.00021200149600279148,
+        "did_beta": -0.00023655301599262234,
+        "did_t": -1.1890872445600784,
+        "did_p": 0.23440533720922963,
+        "r_squared": 0.2120744535576694,
+        "n_obs": 525
+      },
+      "signed_clv": {
+        "intercept": 0.5101514196885377,
+        "treated_beta": -0.004166904675814383,
+        "post_beta": -0.046731658997267445,
+        "did_beta": 0.040811014783106836,
+        "did_t": 0.6293461596704503,
+        "did_p": 0.5291224577865306,
+        "r_squared": 0.0028287289479412836,
+        "n_obs": 525
+      }
+    },
+    "NVDL": {
+      "abs_ret": {
+        "intercept": 0.018555825516239428,
+        "treated_beta": 0.005017549688032342,
+        "post_beta": -0.0037270311187874825,
+        "did_beta": 0.00015092714782509345,
+        "did_t": 0.04692284912072018,
+        "did_p": 0.9625747171842888,
+        "r_squared": 0.03574430597162381,
+        "n_obs": 522
+      },
+      "park_var": {
+        "intercept": 0.0005653919598204429,
+        "treated_beta": 0.0002789880575114368,
+        "post_beta": -0.00015178316953327078,
+        "did_beta": -4.9687130383189624e-05,
+        "did_t": -0.36281881654216813,
+        "did_p": 0.7167402347492531,
+        "r_squared": 0.06579089277003614,
+        "n_obs": 522
+      },
+      "signed_clv": {
+        "intercept": 0.485249296870273,
+        "treated_beta": 0.04295963853534452,
+        "post_beta": 0.011530095038334957,
+        "did_beta": 0.022036075759073077,
+        "did_t": 0.28969143941364356,
+        "did_p": 0.7720523060007727,
+        "r_squared": 0.0045784671075128625,
+        "n_obs": 522
+      }
+    },
+    "CONL": {
+      "abs_ret": {
+        "intercept": 0.04131149197031212,
+        "treated_beta": 0.017593653525378308,
+        "post_beta": -0.00706858019765436,
+        "did_beta": -0.010399659844993664,
+        "did_t": -1.3004179221990753,
+        "did_p": 0.19345777060103986,
+        "r_squared": 0.0502930577818147,
+        "n_obs": 525
+      },
+      "park_var": {
+        "intercept": 0.0034792787592510094,
+        "treated_beta": 0.0017814463695836672,
+        "post_beta": -0.0013192190015795732,
+        "did_beta": -0.0009235412047622132,
+        "did_t": -0.6901983331123839,
+        "did_p": 0.4900694714649655,
+        "r_squared": 0.04124877202748001,
+        "n_obs": 525
+      },
+      "signed_clv": {
+        "intercept": 0.5020893683636175,
+        "treated_beta": -0.0067054163376347115,
+        "post_beta": -0.018848156943168562,
+        "did_beta": 0.009118827639150971,
+        "did_t": 0.13329090122036427,
+        "did_p": 0.89396332316749,
+        "r_squared": 0.00042310034431214394,
+        "n_obs": 525
+      }
+    }
+  },
+  "figures": [
+    "k1479_did_coefficients.png"
+  ],
+  "verdict": {
+    "overall": "NULL",
+    "exact_intraday_launch_did_feasible": false,
+    "daily_proxy_did_any_significant": false,
+    "plain_english": "Using daily honest-proxy outcomes around TSLL, NVDL, and CONL launch dates, none of the treated underlyings shows a significant post-launch tail-vol shift relative to matched controls."
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "id": "mile_5e0786d0",
+  "title": "波動率模型是不是加越多料越好？SPY 這次給的答案是：先學會刪",
+  "description": "K484 用 SPY 2015-2025 資料檢查五個波動率模型零件，2023-2024 樣本外顯示先挑再加優於全部硬塞。",
+  "content": "# 波動率模型是不是加越多料越好？SPY 這次給的答案是：先學會刪\n\n做市場模型時，很容易走到一條熟悉的路。\n\n既然一個指標不夠，那就多加幾個。怕還不夠，就把高低價區間、恐慌指數、壞消息衝擊、下跌風險，全都塞進去。直覺上，看的東西越多，應該越容易把波動抓準。\n\n但 K484 想問的，剛好是反過來的問題。\n\n如果我們先準備 5 個常見線索，再讓模型自己決定哪些值得留，結果會不會比「通通加進去」更好？\n\n這次用的是 **SPY**，資料期間從 **2015 到 2025 年**，樣本外測試放在 **2023 到 2024 年**。模型面前擺了 5 種可能有用的線索：跌的時候會不會特別放大、市場恐慌高不高、盤中高低價拉得多不多、最近幾天負報酬累得多不多，還有前一天的衝擊到底有多大。\n\n結果沒有走向「全都很重要」。\n\n![5 個波動率零件裡，只有 4 個真的被模型留下](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/model-parts-keep-rates.png)\n\n5 個線索裡，有 **4 個幾乎次次都被留下**。真正被排除的，是很多人原本以為不會太差的「最近幾天負報酬累積」。它被留下的機率只有 **9.4%**。\n\n這個訊號很乾脆。看起來合理的想法，進了模型之後仍然可能被淘汰。\n\n更值得看的是，刪過之後，表現真的比較好。\n\n![挑過再加的版本表現最好](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/model-parts-oos-scores.png)\n\n和最基礎的版本相比，這個「先挑再加」的版本，樣本外預測誤差大約改善 **7.4%**。把 5 個線索全部硬塞進去，也有進步，但只改善 **7.0%**，還是略輸一點。只加最常見的那個壞消息不對稱效果，改善幅度則大約 **2.9%**。\n\n這裡最有意思的，不在那零點幾個百分點的差距；真正重要的是方向很清楚：\n\n**多看幾個東西可以有幫助，但前提是先刪掉沒貢獻的。**\n\n這個結果對一般投資人其實很有啟發。很多人以為做風險模型就是一直加料，彷彿儀表板上的燈越多越高級。K484 的答案比較像整理工具箱：先分清楚哪些真的會用到，哪些只是看起來很忙。\n\n還有一個細節也很值得記。這次被留下來的，除了大家比較熟悉的恐慌高低與壞消息放大，還包括盤中高低價拉開的幅度，以及前一天衝擊的絕對大小。換句話說，市場的「不安」不只在收盤漲跌裡；有些壓力，藏在盤中的拉扯，也藏在前一天那根特別大的波動裡。\n\n所以 K484 最後留下來的結論，比「複雜模型一定比較好」更克制：\n\n**複雜可以有用，但要先學會刪，才不會把模型做成一台看起來很厲害、其實只是很吵的機器。**\n\n這個結論也要放在它的範圍裡看。這次只測 SPY，樣本外期間是 2023 到 2024 年；它支持的是「這一段期間、這組候選零件裡，先挑再加比全部硬塞更好」。如果要說它在不同市場、不同危機期間也穩定勝出，還需要看後續跨期間驗證。\n\n---\n\n*本文基於內部實驗。資料來源：yfinance（SPY、^VIX）。期間：2015-01-01 至 2025-12-31。樣本外測試：2023-01-01 至 2024-12-31。比較的是基礎波動率模型、只加單一延伸、全部都加，以及先由模型挑出值得保留的版本。*\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "general",
+  "details": {
+    "experiment_refs": [
+      "K484"
+    ],
+    "cluster_waiver": "K484 model-selection angle: asks whether a volatility model should keep all candidate components or prune them first; distinct from K457 weekly-frequency article and other SPY pieces focused on regime switching or forecasting-vs-risk tradeoffs.",
+    "topic_cluster": "spy",
+    "topic_cluster_30d": {
+      "count": 58,
+      "cap": 10,
+      "ratio": 0.183,
+      "exempt": false
+    }
+  },
+  "tags": [
+    "一般讀者",
+    "experiment",
+    "model-selection",
+    "stock-market",
+    "risk-models",
+    "investing"
+  ],
+  "related_articles": [],
+  "created_at": "2026-05-31T21:27:46.921271+00:00",
+  "published_at": "2026-06-12T07:01:06.412531+00:00",
+  "status": "published",
+  "verified_live_at": "2026-06-12T07:01:47.215208+00:00",
+  "errata": {
+    "update_at": "2026-06-12T16:20:26.141605+00:00",
+    "update_action": "codex_review_style_final",
+    "update_summary": "Removed the remaining anti-ai-style not-but construction while preserving K484 scope caveat and numeric claims.",
+    "update_history": [
+      {
+        "at": "2026-06-12T16:18:42.968752+00:00",
+        "action": "codex_review_scope_fix",
+        "summary": "Codex 24h review verified K484 numbers and timing; added SPY 2023-2024 single-window caveat and kept existing HTTPS figures.",
+        "old_content_chars": 1467,
+        "new_content_chars": 1509,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      },
+      {
+        "at": "2026-06-12T16:19:43.510212+00:00",
+        "action": "codex_review_style_scope_fix",
+        "summary": "Codex review kept K484 numeric claims, added single-window scope caveat, and removed anti-ai-style not-but phrasing.",
+        "old_content_chars": 1509,
+        "new_content_chars": 1476,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      },
+      {
+        "at": "2026-06-12T16:20:26.141605+00:00",
+        "action": "codex_review_style_final",
+        "summary": "Removed the remaining anti-ai-style not-but construction while preserving K484 scope caveat and numeric claims.",
+        "old_content_chars": 1476,
+        "new_content_chars": 1483,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "cli override (--update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-12T16:20:26.141605+00:00"
+}

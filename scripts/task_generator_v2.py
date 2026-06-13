@@ -35,6 +35,7 @@ RESEARCH_PROGRAM = ROOT / "research_program.md"
 FEED_JSON = ROOT / "storage" / "reports" / "feed.json"
 EXPERIMENTS_DIR = ROOT / "experiments"
 PAPER_DIR = ROOT / "paper"
+RUNTIME_SCHEDULES = ROOT / "config" / "runtime_schedules.json"
 GENERATOR_SOURCE_TAG = "task_generator_v2"
 
 
@@ -429,6 +430,69 @@ EVENT_CALENDAR: list[tuple[str, str, str]] = [
 EVENT_WINDOW_DAYS = 7  # Generate task if event is within this many days
 
 
+def _normalize_event_type(raw: str | None) -> str:
+    text = str(raw or "").lower()
+    if "fomc" in text:
+        return "fomc"
+    if "cpi" in text:
+        return "cpi"
+    if "nfp" in text or "jobs" in text or "employment" in text:
+        return "jobs"
+    return text.strip()
+
+
+def _iter_managed_event_dates(existing: list[dict]) -> set[tuple[str, date]]:
+    """Return event dates already managed by canonical schedules or tasks.
+
+    The legacy hard-coded event calendar can use Taiwan announcement dates
+    while runtime_schedules stores US event dates. Treat +/- 1 day as the same
+    event to avoid duplicate FOMC/CPI/NFP briefs.
+    """
+    managed: set[tuple[str, date]] = set()
+
+    if RUNTIME_SCHEDULES.exists():
+        try:
+            payload = json.loads(RUNTIME_SCHEDULES.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            payload = {}
+        items = ((payload.get("event_jobs") or {}).get("items") or [])
+        if isinstance(items, list):
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                patch = ((item.get("task_template") or {}).get("payload_patch") or {})
+                event_type = _normalize_event_type(patch.get("event_type") or item.get("event_key"))
+                event_date_raw = patch.get("event_date")
+                if not event_type or not event_date_raw:
+                    continue
+                try:
+                    managed.add((event_type, date.fromisoformat(str(event_date_raw))))
+                except ValueError:
+                    continue
+
+    for task in existing:
+        if not isinstance(task, dict) or task.get("task_type") != "event_article":
+            continue
+        event_type = _normalize_event_type(task.get("event_type") or task.get("event_key") or task.get("id"))
+        event_date_raw = task.get("event_date")
+        if not event_type or not event_date_raw:
+            continue
+        try:
+            managed.add((event_type, date.fromisoformat(str(event_date_raw))))
+        except ValueError:
+            continue
+
+    return managed
+
+
+def _is_managed_event(event_type: str, event_date: date, managed: set[tuple[str, date]]) -> bool:
+    event_type = _normalize_event_type(event_type)
+    return any(
+        managed_type == event_type and abs((managed_date - event_date).days) <= 1
+        for managed_type, managed_date in managed
+    )
+
+
 def generate_event_article_tasks(
     existing: list[dict],
     limit: int | None = None,
@@ -437,6 +501,7 @@ def generate_event_article_tasks(
     """Generate event_article tasks for upcoming macro events."""
     today = reference_date or date.today()
     ex_ids = existing_ids(existing)
+    managed_events = _iter_managed_event_dates(existing)
     results: list[dict] = []
 
     for event_type, date_str, description in EVENT_CALENDAR:
@@ -449,6 +514,9 @@ def generate_event_article_tasks(
         # Only generate for events within window (0 = today, up to 7 days ahead)
         # Also allow past events that were very recent (up to 2 days ago)
         if not (-2 <= days_until <= EVENT_WINDOW_DAYS):
+            continue
+
+        if _is_managed_event(event_type, event_date, managed_events):
             continue
 
         date_compact = date_str.replace("-", "")
