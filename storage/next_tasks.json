@@ -29255,7 +29255,7 @@
     "title": "Paper review (Codex 24h-rule): 風險模型愈花俏愈準嗎？這次市場給了相反答案",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_40c66bef needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_40c66bef",
@@ -29264,6 +29264,30 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-13T09:08:17+00:00"
+    "created_at": "2026-06-13T09:08:17+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T09:47:26.659442+00:00",
+    "claim_session_id": "e8a59e1038d1",
+    "started_at": "2026-06-13T09:47:35.098853+00:00",
+    "completed_at": "2026-06-13T09:54:43.706649+00:00",
+    "result": "Codex 24h-rule review complete: CONDITIONAL_PASS_AFTER_CORRECTION. K905 article numbers/lookahead pass; corrected 5% VaR wording to distinguish strict Trinity + Basel-style screen from Kupiec/Christoffersen coverage. Completed K905 README provenance and added review report experiments/k905/reviews/paper_review_mile_40c66bef_codex_20260613.md."
+  },
+  {
+    "id": "K1439_article_research",
+    "task_type": "daily_article",
+    "priority": "P3",
+    "status": "succeeded",
+    "title": "K1439: research-audience article on USD regime conditioning of cross-asset RV",
+    "description": "Write research-audience feed article based on K1439 experiment (DXY/UUP regime conditioning, 5 assets EEM/GLD/DBC/USO/DBB, 2010-2026 N=4131, PASS verdict 4/5 Bonferroni-sig). Evidence package: results table + figure refs at experiments/k1439/. Audience=research. Style: anti-AI; must include ≥3 verifiable numbers + table + figure ref + interpretation.",
+    "source": "auto_discovered",
+    "created_at": "2026-06-13T10:10:40+00:00",
+    "blocked_until": null,
+    "blocked_reason": null,
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-13T10:10:47.761169+00:00",
+    "claim_session_id": "accd55610487",
+    "started_at": "2026-06-13T10:10:48.209311+00:00",
+    "completed_at": "2026-06-13T10:17:50.154140+00:00",
+    "result": "K1439 USD regime cross-asset RV article published as mile_2c758888 (research audience, 8 tags, anti-AI gate PASS, content-vs-source gate PASS after rephrasing 3 numbers, dup_waiver applied for K1437 USD-only entity overlap). Body 75 lines / ~3.1KB; sample period 2010-2026 N=4131; 4/5 Bonferroni-sig PASS verdict."
   }
 ]
