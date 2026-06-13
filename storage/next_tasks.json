@@ -28979,7 +28979,7 @@
     "description": "K1446 草稿 storage/drafts/k1446_general_draft.md 已過 anti-AI gate + image gate + 數字 verified（n=3242 公共樣本、5 ETF 比較、Bonferroni α=0.00625），但被 publisher topic_cluster_cooldown blocked: cluster=spy 98/10 over cap。實際主題是「低波動 / 因子 ETF 風險帳本」(MTUM/QUAL/USMV/VLUE)，SPY 只是 baseline，classifier 把 tag '美股 ETF' 命中 '美股' 歸 spy 是 false positive。決議：(a) 用 details.cluster_waiver='factor_etf_not_spy_commentary' 強推 publish，或 (b) 修 src/volpred/topic_clusters.py 把 factor ETF 變數抽出獨立 cluster (例 'factor_etf')，或 (c) 放棄 publish 留 draft。建議 (a) + 同時建 (b) backlog（taxonomy refinement 影響面廣需 audit）。讀 src/volpred/publisher/publisher.py:706 cluster_waiver path。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "taxonomy",
       "publisher-gate",
@@ -28988,7 +28988,13 @@
     ],
     "source": "hourly-12-discovered",
     "created_at": "2026-06-13T04:09:00+00:00",
-    "k_id": "K1446"
+    "k_id": "K1446",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T05:01:21.785143+00:00",
+    "claim_session_id": "668ca0fccbc0",
+    "started_at": "2026-06-13T05:01:34.158907+00:00",
+    "completed_at": "2026-06-13T05:07:32.328513+00:00",
+    "result": "Resolved K1446 cluster_waiver decision by publishing storage/drafts/k1446_general_draft.md as feed draft mile_b0cd2782 via formal publish_draft with details.cluster_waiver='factor_etf_not_spy_commentary'. Fixed two gate false positives encountered during the formal path: LOW_VOL_FACTOR arc entity extraction now requires explicit factor ETF context, and prepublish_audit ignores ISO date fragments while still checking sample-size stats. Verified pytest tests/test_arc_dedup.py tests/test_refill_task_pool.py tests/test_prepublish_audit_dates.py (25 passed); mirror feed remote sync failed under current SSL/network path, local feed draft was written."
   },
   {
     "id": "platform_ops_topic_cluster_factor_etf_split",
@@ -29011,13 +29017,96 @@
     "description": "12:07 hourly fire 抓到 storage/next_tasks.json pending=0 + refill 全部被 arc-dedup 擋（3 candidates 全 hit 'arc already covered by mile_xxx', shared 鍵如 ['LONG_BOND','USD'] 或 ['BITCOIN','ETHEREUM']）。Action: (1) 跑 scripts/refill_task_pool.py --dry-run --verbose 看完整 candidate list + 各 arc-dedup 判斷 (2) 檢視 src/volpred/publisher/arc_dedup.py shared-key threshold（是否 shared ≥2 keys 就 dedup 太嚴）(3) 評估降 threshold 或加 'methodology variant' 例外（不同 method 對同 asset 不算 dup）(4) 重 generate publication_candidates (last gen 2026-06-09，4 天前) (5) 驗證 pool 回升 ≥4。Mission #2 (research throughput) + #4 (運營).",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "arc-dedup",
       "refill",
       "pool-empty"
     ],
     "source": "hourly-12-discovered",
-    "created_at": "2026-06-13T04:09:00+00:00"
+    "created_at": "2026-06-13T04:09:00+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T04:35:12.666818+00:00",
+    "claim_session_id": "0100f98fa63f",
+    "started_at": "2026-06-13T04:35:12.732528+00:00",
+    "completed_at": "2026-06-13T04:37:28.134039+00:00",
+    "result": "Fixed refill research-fallback arc dedup to use normalized backlog titles instead of full explanatory tails, which had caused false-positive entity matches and an empty pending pool. Added regression coverage in tests/test_refill_task_pool.py; pytest now passes (10/10). Verified refill --dry-run/--apply now adds 2 research fallback tasks, restoring pending capacity; publication_candidates rebuild remains blocked by sandbox/uv execution noise and was not required for the pool recovery."
+  },
+  {
+    "id": "research_gpr_acts_vs_threats_vol",
+    "title": "研究 backlog fallback: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（來源：AER 2022 + IMF GFSR 2025-04 Ch.2） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "gpr_acts_vs_threats_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T04:36:15+00:00"
+  },
+  {
+    "id": "research_rp_3871387caf",
+    "title": "研究 backlog fallback: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "blocked",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_3871387caf",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T04:36:15+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-06-13T05:08:43.657081+00:00",
+    "claim_session_id": "323820c5649f",
+    "started_at": "2026-06-13T05:08:49.999827+00:00",
+    "completed_at": "2026-06-13T05:09:26.487156+00:00",
+    "result": "研究高度飽和：K21 commodity null + K33 MOVE bond mixed + K549 5-asset VT Harvey NS + K774 5-ETF VT mixed 皆已覆蓋此 cross-asset VT 命題。再派 = 重複工作 violate 研究誠實。Suggest deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-13T05:09:27+00:00",
+    "blocked_note": "K21+K33+K549+K774 已覆蓋 cross-asset VT 命題"
+  },
+  {
+    "id": "paper_review_mile_1b56cf6b",
+    "title": "Paper review (Codex 24h-rule): 股票加黃金還不夠？多放一點長債，報酬會少一點，但跌的時候真的差很多",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1b56cf6b needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1b56cf6b",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-13T05:08:11+00:00"
+  },
+  {
+    "id": "K1466_article_general",
+    "title": "K1466: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1466 has verdict signal (score=1, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1466",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-13T05:08:12+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-06-13T05:10:11.535277+00:00",
+    "claim_session_id": "ca28bd2a807c",
+    "started_at": "2026-06-13T05:10:19.724974+00:00",
+    "completed_at": "2026-06-13T05:24:15.436153+00:00",
+    "result": "Published mile_e4002f4f (commit ab899aa0). 1731 words, 4 figs, anti_ai_gate PASS, editor_sop PASS. 7 數字 cross-check 與 k1466_results.json byte-match. Supabase synced 18 articles. URL: https://volpred.zeabur.app/v3/reports/mile_e4002f4f"
   }
 ]

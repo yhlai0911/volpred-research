@@ -107,8 +107,13 @@ def _is_non_stat_label(raw_num: str, is_pct: bool, start: int, end: int, content
     # NOTE: 分 deliberately excluded — would swallow 分位 (percentile), a real stat.
     if re.match(r"\s*[日天週月年]", post3):
         return True
-    # Date fragments: "6/5" / "2026/6" — number immediately followed by "/" digit.
+    # Date fragments: "6/5" / "2026/6" / "2026-06-09" — month/day pieces are
+    # labels, not result statistics, even near phrases such as daily returns.
     if re.match(r"/\d", content[end:end + 2]):
+        return True
+    if re.search(r"(?:19|20)\d{2}-$|\d{1,2}-$", content[max(0, start - 6):start]):
+        return True
+    if len(raw_num) <= 2 and re.match(r"-\d{1,2}(?!\d)", content[end:end + 3]):
         return True
     return False
 

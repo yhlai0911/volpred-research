@@ -746,7 +746,12 @@ def _research_backlog_candidates(tasks: list, existing_ids: set[str], limit: int
         # direction stage, so we block on entity-arc overlap with ANY conclusion
         # class (conservative: a covered asset-pair needs a genuinely new angle,
         # which a one-line backlog item can't establish).
-        arc_hits = _arc_covered_by_recent_article(title_raw)
+        # Direction-level arc dedup should compare the normalized backlog title,
+        # not the entire explanatory tail after "—". The tail often contains
+        # example assets / citations used to motivate the idea; feeding that
+        # whole line into entity extraction over-blocks unrelated directions and
+        # can drain the pool to zero.
+        arc_hits = _arc_covered_by_recent_article(title)
         if arc_hits:
             print(
                 f"  [refill] skip research direction (arc already covered by "

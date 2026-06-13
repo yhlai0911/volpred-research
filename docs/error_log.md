@@ -1667,3 +1667,19 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 
 **症狀 B（研究誠實）**：K1474 `results.json` `key_findings.corr_rises_during_crisis` 寫「All hotel/leisure tickers show elevated corr vs SPY during COVID crash」— **偽**。檔內自身數字打臉：covid corr vs 2018-2019 baseline，只有 PEJ/XLY/CCL 上升，HLT/MAR/H/RCL 下降（3/7 升、4/7 降）。Codex 24h review (mile_9b76989e) 抓到。已用檔內既有數字重算更正摘要 + 留 `_correction_2026_06_12` provenance（數字未動，只修偽英文摘要）。發佈文章正文未犯此錯（正文談 co-movement/drawdown，HLT 確實隨大盤跌 -43.7%，非宣稱 corr 上升）→ 正文 CONDITIONAL_PASS 維持，不改文。
 **防再發**：實驗 `key_findings` 的 universal quantifier 字串（All/全部/每個）必須能被同檔數字逐一驗證；agent 寫 summary 字串時禁止用 all-claim 除非程式碼實算過 min/全員通過。
+
+## 2026-06-13 — K1446 factor ETF draft 被兩個 publish gate false-positive 擋住
+
+**症狀**：K1446 USMV / factor ETF 風險帳本文已通過 anti-AI、image、數字驗證，但發佈時先被 `topic_cluster_cooldown` 誤歸到 `spy` cluster 擋住；加 `cluster_waiver` 後又被 `arc_dedup` 誤判成多篇一般美股/低波動文章的 narrative duplicate；最後 `prepublish_audit` 又把 ISO 日期 `2026-06-09` 拆成 `06`、`09` 當成未在 results.json 出現的統計量。
+
+**根因**：
+1. topic cluster taxonomy 過粗：`美股 ETF` 命中 `美股` → `spy`，但本文主題是 factor ETF / low-vol ETF，SPY 只是 baseline。
+2. `arc_dedup` 把任何「低波動」字面都映射成 `LOW_VOL_FACTOR`，導致一般市場低波動語境和 USMV/SPLV 因子 ETF 語境混在一起。
+3. `prepublish_audit` 只排除 slash date fragment（如 `6/5`），未排除 ISO date fragment（如 `YYYY-MM-DD` 中的月/日）。
+
+**修法**：
+1. K1446 依任務決議用 `details.cluster_waiver='factor_etf_not_spy_commentary'` 進 feed draft（`mile_b0cd2782`）。
+2. `src/volpred/publisher/arc_dedup.py` 收窄 `LOW_VOL_FACTOR` entity extraction：只承認 `USMV` / `SPLV` / `低波動 ETF` / `低波動因子` 等明確 factor ETF 語境，不再把一般「低波動」都當成 factor。
+3. `src/volpred/publisher/prepublish_audit.py` 排除 ISO date 的月/日片段，保留真正統計數字（如 `3,242` 樣本數）驗證。
+
+**防再發**：語意 gate 的 entity 詞典不可把一般市場狀態詞直接當成資產/因子 entity；日期 parser 要同時覆蓋 slash date 與 ISO date。遇到 gate false-positive 時優先修 gate，再用 waiver 補單篇決策。

@@ -43,6 +43,7 @@ def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):
     monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
 
     result = MODULE.refill(target=3, dry_run=False)
 
@@ -393,6 +394,7 @@ def test_refill_skips_general_retry_v2_when_feed_already_has_k_coverage(tmp_path
     monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
 
     result = MODULE.refill(target=3, dry_run=False)
 
@@ -550,3 +552,54 @@ def test_refill_skips_research_saturated_k(tmp_path, monkeypatch):
     assert "K159_article_general" not in ids, (
         f"K159 with 3 research articles should be skipped as saturated; got {ids}"
     )
+
+
+def test_research_backlog_arc_dedup_ignores_explanatory_tail(tmp_path, monkeypatch):
+    """Regression: 2026-06-13 pool=0 due to backlog tail entity false positives.
+
+    research_program fallback stores open directions as:
+      `<short title> — <motivation/assets/citation tail>`
+    The short title may contain no asset entities, while the explanatory tail
+    mentions tickers only as examples. Arc dedup must not treat that tail as
+    the canonical direction text, or unrelated recent articles can block every
+    fallback candidate and drain the task pool.
+    """
+    rp = tmp_path / "research_program.md"
+    reports = tmp_path / "storage" / "reports"
+    reports.mkdir(parents=True, exist_ok=True)
+    rp.write_text(
+        "\n".join(
+            [
+                "## 面向 A",
+                "### 開放方向",
+                "- [ ] 加密「vol-of-vol」與跨市場尾部外溢的免期權版 — yfinance BTC/ETH 算 RV 與 vol-of-vol，檢定對股/金/油尾部外溢",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (reports / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_existing",
+                    "title": "比特幣與以太幣的波動率結構變了嗎？",
+                    "description": "舊文只談 BTC/ETH 自身波動結構。",
+                    "status": "published",
+                    "published_at": "2099-01-01T00:00:00+00:00",
+                }
+            ],
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "RESEARCH_PROGRAM", rp)
+    monkeypatch.setattr(MODULE, "_ARC_FEED_CACHE", None)
+
+    tasks = MODULE._research_backlog_candidates(tasks=[], existing_ids=set(), limit=2)
+
+    assert len(tasks) == 1
+    assert tasks[0]["id"].startswith("research_")

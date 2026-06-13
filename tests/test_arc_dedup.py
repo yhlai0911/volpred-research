@@ -54,6 +54,13 @@ class TestEntityExtraction:
     def test_no_entities_returns_empty(self):
         assert extract_entities("一篇關於方法論的文章") == set()
 
+    def test_low_vol_factor_requires_factor_etf_context(self):
+        # Generic market-regime wording should not collide with USMV/factor ETF
+        # articles in arc dedup.
+        assert "LOW_VOL_FACTOR" not in extract_entities("近期低波動環境讓 VIX 降到 14")
+        assert "LOW_VOL_FACTOR" in extract_entities("USMV 是低波動 ETF")
+        assert "LOW_VOL_FACTOR" in extract_entities("低波動因子和品質因子比較")
+
 
 class TestConclusionClassification:
     def test_null_class(self):

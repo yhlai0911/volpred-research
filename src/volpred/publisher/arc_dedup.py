@@ -74,7 +74,13 @@ _ENTITY_SURFACE: dict[str, str] = {
     "xlk": "TECH_SECTOR", "xle": "ENERGY_SECTOR", "xlu": "UTILITIES", "xlp": "STAPLES",
     "xlf": "FIN_SECTOR", "金融股": "FIN_SECTOR",
     "smh": "SEMIS", "半導體": "SEMIS", "費半": "SEMIS",
-    "低波動": "LOW_VOL_FACTOR", "動量": "MOMENTUM", "momentum": "MOMENTUM",
+    # Style/factor ETF terms. Keep "低波動" out: in this repo it often means
+    # a generic low-volatility market regime, not the low-vol factor product.
+    "usmv": "LOW_VOL_FACTOR", "splv": "LOW_VOL_FACTOR",
+    "低波動 etf": "LOW_VOL_FACTOR", "低波動ETF": "LOW_VOL_FACTOR",
+    "低波動因子": "LOW_VOL_FACTOR", "low-vol etf": "LOW_VOL_FACTOR",
+    "low volatility etf": "LOW_VOL_FACTOR",
+    "動量": "MOMENTUM", "momentum": "MOMENTUM",
     # EM / regional
     "vnm": "VIETNAM", "越南": "VIETNAM", "eido": "INDONESIA", "印尼": "INDONESIA",
     "thd": "THAILAND", "泰國": "THAILAND", "ephe": "PHILIPPINES", "菲律賓": "PHILIPPINES",
