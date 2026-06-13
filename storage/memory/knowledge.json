@@ -33627,5 +33627,18 @@
       "mile_39b81aa5"
     ],
     "timestamp": "2026-06-13T11:16:00+08:00"
+  },
+  {
+    "item_id": "e95f1209",
+    "category": "spillover_tail_events",
+    "content": "K1491 (experiment_id=K1491, reviewer=codex_review, verdict=PARTIAL): Crypto vol-of-vol → traditional ETF tail-event spillover, 2018-01-01 to 2024-12-30 (snapshot data ex-K1090b). After fixing K1490 sparse-binary methodology with continuous quantile-crossing tail signal (max(0, |r_t| - lagged rolling q95)), 4/8 Granger pairs survive pair-level Bonferroni (BTC→USO, BTC→TLT, ETH→USO, ETH→TLT; min_p=1.4e-5 lag-adjusted) and 7/8 QuantReg q95 pairs pass Bonferroni (min_p=2.7e-11). SPY/GLD Granger do not pass — the spillover is asymmetric to oil/long-bond tails. Interpretation: PARTIAL — narrow tail-spillover from crypto VoV to commodity/duration tails, NOT broad crypto→equity spillover. Codex review PASS_with_caveats: methodology sound, lookahead explicit (.shift(1)), figures present. Caveat: local snapshot ends 2024-12-30 (live yfinance DNS failed); reduced-form predictive only. Reviewer source: Codex (experiments/k1491/reviews/codex_review_20260613.md).",
+    "evidence": [
+      "experiments/k1491/k1491_results.json",
+      "experiments/k1491/reviews/codex_review_20260613.md",
+      "k_id=K1491",
+      "experiment_path=experiments/k1491"
+    ],
+    "confidence": 0.65,
+    "created_at": "2026-06-13T17:11:52.357048"
   }
 ]
