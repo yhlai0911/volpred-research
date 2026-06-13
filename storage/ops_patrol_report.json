@@ -1,43 +1,37 @@
 {
-  "timestamp": "2026-06-13T12:03:15Z",
-  "timestamp_tw": "2026-06-13T20:03:15+08:00",
+  "timestamp": "2026-06-13T18:03:24Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "140 drafts total (general=93 >=8 OK, research=47 >=4 OK). All thresholds met (total>=12, research>=4, general>=8). By category: general=84, milestone=54, research=2."
+      "detail": "total_drafts=140 (research=47, general=93); all above thresholds (total>=12, research>=4, general>=8)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime epoch 1781352183, age ~13 seconds at check time. Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json age=11s (well within 26h limit)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md contain entries from 2026-06-11 (2 days ago). No entries dated today (2026-06-13) or yesterday (2026-06-12). Most recent issues resolved: (1) matplotlib CJK font fallback k202 — fixed with scripts/plot_style.py. (2) Mirror sync silent 401 ~1 month — fixed with OPS_ADMIN_TOKEN propagation.",
-      "recent_entries": [
-        "2026-06-11: matplotlib CJK font fallback in k202/mile_872abdc3 — fixed with scripts/plot_style.py apply_cjk_style()",
-        "2026-06-11: Mirror sync silent 401 for ~1 month — fixed with mirror_auth.py + OPS_ADMIN_TOKEN propagation to callers"
-      ]
+      "detail": "Last 30 lines: most recent entries dated 2026-06-11 (CJK font fix + Mirror sync 401 fix). No entries from today (2026-06-14) or yesterday (2026-06-13)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies found in paper_trading.json. No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "All 15 strategies have 0 entries (empty lists). No null portfolio_return gaps. Note: all strategies have no paper trading data recorded yet."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Clean working tree. Threshold: 50 files."
+      "detail": "0 uncommitted files"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2237 entries in storage/memory/knowledge.json."
+      "detail": "storage/memory/knowledge.json contains 2237 entries"
     }
   ],
-  "alerts": [],
-  "summary": "All 6 checks passed. Platform is healthy. No alerts generated."
+  "alerts": []
 }
