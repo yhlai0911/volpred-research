@@ -1,44 +1,295 @@
 {
   "tlt_0": {
     "sharpe": 0.86,
-    "cagr": 11.4,
-    "mdd": -36.8,
-    "calmar": 0.31
+    "cagr": 11.3,
+    "mdd": -32.6,
+    "calmar": 0.35,
+    "legacy_like_mdd": -37.3
   },
   "tlt_5": {
-    "sharpe": 0.879,
-    "cagr": 11.1,
-    "mdd": -34.2,
-    "calmar": 0.33
+    "sharpe": 0.881,
+    "cagr": 11.0,
+    "mdd": -30.3,
+    "calmar": 0.36,
+    "legacy_like_mdd": -34.2
   },
   "tlt_10": {
-    "sharpe": 0.898,
-    "cagr": 10.8,
-    "mdd": -31.6,
-    "calmar": 0.34
+    "sharpe": 0.9,
+    "cagr": 10.7,
+    "mdd": -27.9,
+    "calmar": 0.38,
+    "legacy_like_mdd": -31.2
   },
   "tlt_15": {
-    "sharpe": 0.914,
-    "cagr": 10.4,
-    "mdd": -29.0,
-    "calmar": 0.36
+    "sharpe": 0.917,
+    "cagr": 10.3,
+    "mdd": -25.8,
+    "calmar": 0.4,
+    "legacy_like_mdd": -28.5
   },
   "tlt_20": {
-    "sharpe": 0.926,
-    "cagr": 10.1,
-    "mdd": -26.4,
-    "calmar": 0.38
+    "sharpe": 0.929,
+    "cagr": 10.0,
+    "mdd": -23.9,
+    "calmar": 0.42,
+    "legacy_like_mdd": -26.3
   },
   "tlt_25": {
-    "sharpe": 0.933,
-    "cagr": 9.7,
-    "mdd": -23.8,
-    "calmar": 0.41
+    "sharpe": 0.935,
+    "cagr": 9.6,
+    "mdd": -22.2,
+    "calmar": 0.43,
+    "legacy_like_mdd": -24.2
   },
   "tlt_30": {
-    "sharpe": 0.932,
-    "cagr": 9.3,
-    "mdd": -24.3,
-    "calmar": 0.38
-  }
+    "sharpe": 0.933,
+    "cagr": 9.2,
+    "mdd": -22.3,
+    "calmar": 0.42,
+    "legacy_like_mdd": -24.5
+  },
+  "metadata": {
+    "experiment_id": "k713",
+    "title": "SPY/GLD baseline with TLT allocation sweep",
+    "generated_at": "2026-06-13T07:42:20.592673+00:00",
+    "data_source": "yfinance adjusted close",
+    "tickers": [
+      "SPY",
+      "GLD",
+      "TLT"
+    ],
+    "requested_start_date": "2006-01-01",
+    "effective_start_date": "2006-01-03",
+    "effective_end_date": "2026-06-12",
+    "sample_size": 5143,
+    "return_observations": 5142,
+    "rebalance_frequency": "annual",
+    "sharpe_definition": "daily mean / daily std * sqrt(252), rf=0",
+    "mdd_definition": "primary mdd uses compounded wealth curve; legacy_like_mdd uses cumulative-return convention for audit comparison",
+    "figures": [
+      "experiments/k713/k713_tlt_peak.png",
+      "experiments/k713/k713_return_vs_drawdown.png"
+    ]
+  },
+  "reconstructed_grid": [
+    {
+      "tlt_weight": 0.0,
+      "spy_weight_at_rebalance": 0.5,
+      "gld_weight_at_rebalance": 0.5,
+      "rebalance_frequency": "annual",
+      "n_days": 5142,
+      "date_start": "2006-01-04",
+      "date_end": "2026-06-12",
+      "sharpe": 0.86,
+      "cagr": 11.3,
+      "mdd": -32.6,
+      "calmar": 0.35,
+      "annual_vol": 13.5,
+      "legacy_like_mdd": -37.3
+    },
+    {
+      "tlt_weight": 0.05,
+      "spy_weight_at_rebalance": 0.475,
+      "gld_weight_at_rebalance": 0.475,
+      "rebalance_frequency": "annual",
+      "n_days": 5142,
+      "date_start": "2006-01-04",
+      "date_end": "2026-06-12",
+      "sharpe": 0.881,
+      "cagr": 11.0,
+      "mdd": -30.3,
+      "calmar": 0.36,
+      "annual_vol": 12.8,
+      "legacy_like_mdd": -34.2
+    },
+    {
+      "tlt_weight": 0.1,
+      "spy_weight_at_rebalance": 0.45,
+      "gld_weight_at_rebalance": 0.45,
+      "rebalance_frequency": "annual",
+      "n_days": 5142,
+      "date_start": "2006-01-04",
+      "date_end": "2026-06-12",
+      "sharpe": 0.9,
+      "cagr": 10.7,
+      "mdd": -27.9,
+      "calmar": 0.38,
+      "annual_vol": 12.1,
+      "legacy_like_mdd": -31.2
+    },
+    {
+      "tlt_weight": 0.15,
+      "spy_weight_at_rebalance": 0.425,
+      "gld_weight_at_rebalance": 0.425,
+      "rebalance_frequency": "annual",
+      "n_days": 5142,
+      "date_start": "2006-01-04",
+      "date_end": "2026-06-12",
+      "sharpe": 0.917,
+      "cagr": 10.3,
+      "mdd": -25.8,
+      "calmar": 0.4,
+      "annual_vol": 11.5,
+      "legacy_like_mdd": -28.5
+    },
+    {
+      "tlt_weight": 0.2,
+      "spy_weight_at_rebalance": 0.4,
+      "gld_weight_at_rebalance": 0.4,
+      "rebalance_frequency": "annual",
+      "n_days": 5142,
+      "date_start": "2006-01-04",
+      "date_end": "2026-06-12",
+      "sharpe": 0.929,
+      "cagr": 10.0,
+      "mdd": -23.9,
+      "calmar": 0.42,
+      "annual_vol": 10.9,
+      "legacy_like_mdd": -26.3
+    },
+    {
+      "tlt_weight": 0.25,
+      "spy_weight_at_rebalance": 0.375,
+      "gld_weight_at_rebalance": 0.375,
+      "rebalance_frequency": "annual",
+      "n_days": 5142,
+      "date_start": "2006-01-04",
+      "date_end": "2026-06-12",
+      "sharpe": 0.935,
+      "cagr": 9.6,
+      "mdd": -22.2,
+      "calmar": 0.43,
+      "annual_vol": 10.4,
+      "legacy_like_mdd": -24.2
+    },
+    {
+      "tlt_weight": 0.3,
+      "spy_weight_at_rebalance": 0.35,
+      "gld_weight_at_rebalance": 0.35,
+      "rebalance_frequency": "annual",
+      "n_days": 5142,
+      "date_start": "2006-01-04",
+      "date_end": "2026-06-12",
+      "sharpe": 0.933,
+      "cagr": 9.2,
+      "mdd": -22.3,
+      "calmar": 0.42,
+      "annual_vol": 10.0,
+      "legacy_like_mdd": -24.5
+    }
+  ],
+  "best_configuration": {
+    "tlt_weight": 0.25,
+    "spy_weight_at_rebalance": 0.375,
+    "gld_weight_at_rebalance": 0.375,
+    "rebalance_frequency": "annual",
+    "n_days": 5142,
+    "date_start": "2006-01-04",
+    "date_end": "2026-06-12",
+    "sharpe": 0.935,
+    "cagr": 9.6,
+    "mdd": -22.2,
+    "calmar": 0.43,
+    "annual_vol": 10.4,
+    "legacy_like_mdd": -24.2
+  },
+  "legacy_retained_results": {
+    "tlt_0": {
+      "sharpe": 0.86,
+      "cagr": 11.4,
+      "mdd": -36.8,
+      "calmar": 0.31
+    },
+    "tlt_5": {
+      "sharpe": 0.879,
+      "cagr": 11.1,
+      "mdd": -34.2,
+      "calmar": 0.33
+    },
+    "tlt_10": {
+      "sharpe": 0.898,
+      "cagr": 10.8,
+      "mdd": -31.6,
+      "calmar": 0.34
+    },
+    "tlt_15": {
+      "sharpe": 0.914,
+      "cagr": 10.4,
+      "mdd": -29.0,
+      "calmar": 0.36
+    },
+    "tlt_20": {
+      "sharpe": 0.926,
+      "cagr": 10.1,
+      "mdd": -26.4,
+      "calmar": 0.38
+    },
+    "tlt_25": {
+      "sharpe": 0.933,
+      "cagr": 9.7,
+      "mdd": -23.8,
+      "calmar": 0.41
+    },
+    "tlt_30": {
+      "sharpe": 0.932,
+      "cagr": 9.3,
+      "mdd": -24.3,
+      "calmar": 0.38
+    }
+  },
+  "legacy_vs_reconstructed_delta": {
+    "tlt_0": {
+      "sharpe_diff": 0.0,
+      "cagr_diff": -0.1,
+      "mdd_diff": 4.2,
+      "legacy_like_mdd_diff": -0.5
+    },
+    "tlt_5": {
+      "sharpe_diff": 0.002,
+      "cagr_diff": -0.1,
+      "mdd_diff": 3.9,
+      "legacy_like_mdd_diff": 0.0
+    },
+    "tlt_10": {
+      "sharpe_diff": 0.002,
+      "cagr_diff": -0.1,
+      "mdd_diff": 3.7,
+      "legacy_like_mdd_diff": 0.4
+    },
+    "tlt_15": {
+      "sharpe_diff": 0.003,
+      "cagr_diff": -0.1,
+      "mdd_diff": 3.2,
+      "legacy_like_mdd_diff": 0.5
+    },
+    "tlt_20": {
+      "sharpe_diff": 0.003,
+      "cagr_diff": -0.1,
+      "mdd_diff": 2.5,
+      "legacy_like_mdd_diff": 0.1
+    },
+    "tlt_25": {
+      "sharpe_diff": 0.002,
+      "cagr_diff": -0.1,
+      "mdd_diff": 1.6,
+      "legacy_like_mdd_diff": -0.4
+    },
+    "tlt_30": {
+      "sharpe_diff": 0.001,
+      "cagr_diff": -0.1,
+      "mdd_diff": 2.0,
+      "legacy_like_mdd_diff": -0.2
+    }
+  },
+  "conclusion": "Using reproducible annual rebalancing on adjusted-close data through 2026-06-12, 25% TLT remains the peak Sharpe point (0.935). Relative to 0% TLT, CAGR falls from 11.3% to 9.6% while standard MDD improves from -32.6% to -22.2%.",
+  "reconstruction_notes": [
+    "Legacy artifact preserved only summary metrics and two figures; no original source script exists in git history.",
+    "Reconstruction prioritizes a transparent, current, reproducible convention rather than guessing every legacy implementation detail.",
+    "Legacy retained MDD values align more closely with a cumulative-return drawdown convention than with compounded-wealth MDD."
+  ],
+  "literature": [
+    "Markowitz (1952) Portfolio Selection.",
+    "DeMiguel, Garlappi, Uppal (2009) Optimal Versus Naive Diversification.",
+    "Asness, Frazzini, Pedersen (2012) Leverage Aversion and Risk Parity."
+  ]
 }

@@ -2,6 +2,26 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-13 K713 retained JSON mixed reproducible return metrics with legacy drawdown convention
+
+**問題**：`experiment_reconstruct_k713_tlt_allocation` 重建 K713 後，Sharpe / CAGR 幾乎能貼住 retained JSON，但標準財富曲線 MDD 系統性比 retained `mdd` 小約 1.6% 到 4.2%，顯示舊 artifact 很可能不是用同一套 drawdown 定義。
+
+**現象**：重建後 `tlt_25` 為 `sharpe=0.935`, `cagr=9.6`, `mdd=-22.2`；retained JSON 為 `0.933 / 9.7 / -23.8`。若改用 cumulative-return drawdown，重建值變成 `legacy_like_mdd=-24.2`，與 retained `-23.8` 明顯更接近。`tlt_0` 也同樣出現 `standard mdd=-32.6` vs retained `-36.8`, `legacy_like_mdd=-37.3` 的 pattern。
+
+**根因**：原始 K713 script 遺失，舊版 artifact 只留下 summary metrics，沒有記錄 drawdown 的數學定義。結果導致 reader-facing 文章把 retained `mdd` 當成標準 maximum drawdown 使用，但 retained 值更像是 cumulative-return 口徑。
+
+**解決方法**：新增 `experiments/k713/k713.py`，正式把 `mdd` 定義為 compounded wealth maximum drawdown，並額外輸出 `legacy_like_mdd` 只供 audit 比對。同步更新 K713 README、results JSON 與 `mile_1b56cf6b` 修正文稿，明示峰值結論保留，但 legacy drawdown 數字不再當成唯一口徑。
+
+## 2026-06-13 K713 production article relied on legacy results without source script
+
+**問題**：Codex 24h-rule review for `mile_1b56cf6b` found the article's numeric claims match `experiments/k713/k713_results.json`, but K713 itself is a legacy migrated artifact with no `k713.py`, a placeholder `README.md`, and a results JSON that lacks data source, sample period, and rebalance convention.
+
+**現象**：Published article correctly quoted `tlt_25.sharpe=0.933`, `tlt_0.mdd=-36.8`, `tlt_25.mdd=-23.8`, and CAGR 11.4% to 9.7%; however the repo cannot independently recompute those numbers, so lookahead / same-day return timing / sample window cannot be verified.
+
+**根因**：Legacy K713 predates the current experiment three-piece standard. Migration commit `76aa426d` moved only README/results stubs into canonical layout, while original commit `f84d76a7` added only `experiments/k713_results.json` and knowledge. The publication pipeline treated the retained JSON as enough for a general article, but did not distinguish "numeric JSON backing exists" from "full reproducible experiment exists."
+
+**解決方法**：Updated `mile_1b56cf6b` via formal `scripts/publish_draft.py --update` to remove user-facing K-id wording and add an explicit caveat: K713 is a legacy migrated result, suitable only as a descriptive配置筆記 until the script/data/sample are reconstructed and rerun. Added review record `experiments/k713/reviews/paper_review_mile_1b56cf6b_codex_20260613.md`. Follow-up required: reconstruct K713 as a full three-piece experiment before using it for paper-grade or strategy-grade claims.
+
 ## 2026-06-13 Task generator v2 — hard-coded event calendar duplicated canonical FOMC event series
 
 **問題**：任務池空時，`scripts/task_generator_v2.py --source all --commit` 從硬編碼 FOMC/BLS 日曆補出 `event_fomc_20260618`，但 canonical `config/runtime_schedules.json::event_jobs` 已有同一場 FOMC 的 `2026-06-17` T-7/T-2/T+0 series，且 T-7 已發布為 `mile_0e1eb5aa`。

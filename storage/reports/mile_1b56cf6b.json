@@ -1,0 +1,59 @@
+{
+  "id": "mile_1b56cf6b",
+  "title": "股票加黃金還不夠？多放一點長債，報酬會少一點，但跌的時候真的差很多",
+  "description": "做資產配置的人，常常會卡在一個很現實的問題。",
+  "content": "# 股票加黃金還不夠？多放一點長債，報酬會少一點，但跌的時候真的差很多\n\n做資產配置的人，常常會卡在一個很現實的問題。\n\n股票加黃金，已經比單壓股票穩不少了。那如果再放一點長天期公債，會不會更好？還是只是把報酬稀釋掉？\n\n這份回測把問題拆得很直接：起點是 **50/50 的 SPY + GLD**，然後逐步加入 **0% 到 30% 的 TLT**，看每往上加 5%，組合會發生什麼事。\n\n第一張圖先把最核心的答案講完。\n\n![長債不是越多越好，大約 25% 附近最順](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k713_tlt_peak.png)\n\n如果你看的是整體順手程度，那條曲線不是一路往上，也不是一路往下。它比較像一個小山丘。\n\n這次把 K713 用可重跑腳本重建之後，答案沒有翻盤。\n\n在 **25% TLT** 左右，風險調整後分數大約來到 **0.935**，仍然是這一輪裡最高的位置。再往上加到 30%，分數幾乎沒有更好，反而開始微微往下。\n\n也就是說，長債有幫助，但不是越多越神。\n\n第二張圖更接近一般投資人真的在乎的事。\n\n![回撤一路變小，但報酬也跟著慢慢讓出去](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k713_return_vs_drawdown.png)\n\n如果用這次重建採用的標準財富曲線口徑，TLT 比重從 **0%** 拉到 **25%**，最大回撤會從 **-32.6%** 縮到 **-22.2%**。這不是小修小補，還是把最痛的那一段明顯削掉。\n\n代價也很清楚。年化報酬從 **11.3%** 慢慢掉到 **9.6%**。\n\n這個結果最值得看的地方是：**你不是在找免費午餐，而是在做交換。**\n\n你少賺了一點，但換來的是跌的時候沒那麼深、比較不容易在最糟的時候把自己趕下車。\n\n很多人看到這種結果，第一反應會是「那是不是乾脆多放一點債？」這份回測給的答案是否定的。加到 **30%** 後，報酬繼續掉，可是整體表現沒有再變更好。\n\n這種形狀其實很像很多配置問題的真相：**少量有用，過量就開始鈍化。**\n\n對一般投資人來說，這個結果很實用，因為它把一個常見誤解拆開了。長債不是拿來讓你衝更高報酬的，它比較像保險。保險買太少，出事時不夠；買太多，又會壓到平常的成長。\n\n所以如果你本來就有股票加黃金的配置，又很在意大跌時帳面不要太難看，這份回測比較像是在說：\n\n**可以考慮放一點長債，但重點是「一點」。大約 20% 到 25% 附近，可能是比較像樣的平衡點。**\n\n## 這次修正了什麼\n\n這篇文章發佈後，Codex 做了來源審查，發現舊版 K713 只有保留結果，沒有原始重算腳本。這次已經把它補成完整的可重跑實驗，重新下載資料、固定再平衡規則、重新畫圖。\n\n也因為真的重跑了，現在可以更清楚地講一件事：**舊文的 drawdown 數字很可能混用了不同定義。**\n\n保留 artifact 寫的是 **-36.8% 到 -23.8%**。這次重建如果用一般投資研究比較常見的標準財富曲線口徑，會變成 **-32.6% 到 -22.2%**。如果改用比較接近舊 artifact 的累積報酬口徑，則大約是 **-37.3% 到 -24.2%**。\n\n也就是說，**方向沒有變，峰值位置也沒有變，但舊版回撤數字不能再直接當成最終口徑。**\n\n## 結論\n\n這篇不是要告訴你從此長債一定是標配。它比較像提醒你，投資組合的升級，很多時候不是再找一個更會賺的資產，而是找到一個能把最難熬那一段削平一點的零件。\n\n在這次可重跑的版本裡，20% 到 25% 的 TLT 仍然是比較平衡的位置。這個判斷現在可以保留，但前提是你要知道：它是一個**描述性配置結果**，不是保證未來照著配就一定最好。\n\n---\n\n*本文基於重建後的 K713 實驗。資料來源：yfinance adjusted close（SPY / GLD / TLT），有效期間 2006-01-03 至 2026-06-12，共 5,143 筆價格資料；比較基準是 annual rebalance 的 SPY/GLD 靜態配置，並逐步加入 0% 到 30% 的 TLT。*\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "general",
+  "details": {
+    "experiment_refs": [
+      "K713"
+    ]
+  },
+  "tags": [
+    "一般讀者",
+    "experiment",
+    "investing",
+    "bonds",
+    "portfolio",
+    "drawdown"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-01T04:43:36.792349+00:00",
+  "published_at": "2026-06-13T04:01:14.933126+00:00",
+  "status": "published",
+  "verified_live_at": "2026-06-13T04:01:24.133241+00:00",
+  "errata": {
+    "update_at": "2026-06-13T07:43:25.073267+00:00",
+    "update_action": "k713_reconstruction_errata",
+    "update_summary": "Rebuilt K713 as a reproducible experiment, regenerated figures, and corrected the article to use reconstructed metrics. Peak remains near 25% TLT, but standard MDD is smaller than the legacy retained artifact because the old drawdown convention differed.",
+    "update_history": [
+      {
+        "at": "2026-06-13T07:20:50.748693+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex 24h review: numbers match retained K713 JSON, but K713 is a legacy artifact without source script or sample provenance. Added explicit caveat and softened article conclusion pending reconstruction.",
+        "old_content_chars": 1332,
+        "new_content_chars": 1631,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      },
+      {
+        "at": "2026-06-13T07:43:25.073267+00:00",
+        "action": "k713_reconstruction_errata",
+        "summary": "Rebuilt K713 as a reproducible experiment, regenerated figures, and corrected the article to use reconstructed metrics. Peak remains near 25% TLT, but standard MDD is smaller than the legacy retained artifact because the old drawdown convention differed.",
+        "old_content_chars": 1631,
+        "new_content_chars": 1863,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "image_paths_normalized": 2,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-13T07:43:25.073267+00:00"
+}

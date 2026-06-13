@@ -29088,7 +29088,7 @@
     "title": "Paper review (Codex 24h-rule): 股票加黃金還不夠？多放一點長債，報酬會少一點，但跌的時候真的差很多",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1b56cf6b needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_1b56cf6b",
@@ -29097,7 +29097,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-13T05:08:11+00:00"
+    "created_at": "2026-06-13T05:08:11+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T07:17:33.618900+00:00",
+    "claim_session_id": "2f84f9497fc2",
+    "started_at": "2026-06-13T07:17:44.161990+00:00",
+    "completed_at": "2026-06-13T07:25:26.938338+00:00",
+    "result": "Codex source-level review completed for mile_1b56cf6b / K713. Numbers match retained k713_results.json, but K713 is a legacy non-reproducible artifact with no script, placeholder README, and missing sample/source provenance. Updated published article with explicit caveat, added review report and error_log entry, and materialized follow-up experiment_reconstruct_k713_tlt_allocation."
   },
   {
     "id": "K1466_article_general",
@@ -29199,5 +29205,30 @@
     "claimed_at": "2026-06-13T07:09:19.548621+00:00",
     "claim_session_id": "98be09289936",
     "started_at": "2026-06-13T07:09:19.990596+00:00"
+  },
+  {
+    "id": "experiment_reconstruct_k713_tlt_allocation",
+    "title": "Reconstruct K713 SPY/GLD/TLT allocation experiment artifact",
+    "description": "Follow-up from paper_review_mile_1b56cf6b: K713 article numbers match retained JSON, but experiment package lacks k713.py, meaningful README, data source, sample period, and rebalance convention. Rebuild canonical experiments/k713/ three-piece package, rerun SPY/GLD/TLT allocation sweep, regenerate figures, and update/errata mile_1b56cf6b if numbers change. Must read docs/error_log.md 2026-06-13 K713 entry first.",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "codex_review_followup",
+    "tags": [
+      "codex-review-followup",
+      "K713",
+      "reproducibility",
+      "three-piece-experiment"
+    ],
+    "created_at": "2026-06-13T07:22:08.237060+00:00",
+    "parent_task_id": "paper_review_mile_1b56cf6b",
+    "article_id": "mile_1b56cf6b",
+    "k_id": "K713",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T07:37:11.583401+00:00",
+    "claim_session_id": "32eaa5ca9d7a",
+    "started_at": "2026-06-13T07:37:16.327815+00:00",
+    "completed_at": "2026-06-13T07:44:30.300129+00:00",
+    "result": "Rebuilt K713 into a full three-piece experiment with README, k713.py, regenerated figures, and detailed results JSON. Reproducible rerun confirms 25% TLT remains the peak Sharpe point (0.935), but standard MDD is -32.6% to -22.2%, not the legacy article's -36.8% to -23.8%. Updated mile_1b56cf6b via publish_draft errata and logged the legacy drawdown-definition mismatch in docs/error_log.md."
   }
 ]
