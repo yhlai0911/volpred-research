@@ -29723,7 +29723,7 @@
     "title": "研究 backlog fallback: variance risk premium 下降後，短波策略是否失去經濟 edge",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: variance risk premium 下降後，短波策略是否失去經濟 edge — 用 ^VIX vs SPY realized variance、SVXY/VXX proxy、分段 2006-2017/2018-2026，檢定 VRP 均值、tail loss、short-vol Sharpe 與 drawdown 是否結構性惡化；不使用 options chain 先做免期權版（來源：Chicago Fed 2025 VRP decline） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "variance_risk_premium_edge",
@@ -29737,7 +29737,9 @@
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-13T22:07:47.445513+00:00",
-    "claim_session_id": "f3c03c542108"
+    "claim_session_id": "f3c03c542108",
+    "completed_at": "2026-06-13T22:15:19.516711+00:00",
+    "result": "新增 K1493 正式實驗：用 ^VIX vs SPY forward RV21 量 public VRP proxy，並用 SVXY/VIXY/VXX proxy 比較 2006/2011-2017 vs 2018-2026 短波經濟 edge。\n結果 MIXED_EDGE_EROSION：VRP proxy 均值 0.00873→0.00711 但 pre/post 差異不顯著（p=0.407）；SVXY Sharpe 0.81→-0.25、MDD -67.9%→-95.2%。\n已產出 README / script / results JSON / close price snapshot / 3 張圖 / Codex review；未寫 knowledge.json，待主線程審查後 promote。"
   },
   {
     "id": "research_explainable_ensemble_vol_model_gate",
