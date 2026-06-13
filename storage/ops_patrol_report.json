@@ -1,16 +1,17 @@
 {
-  "timestamp": "2026-06-13T06:03:33Z",
+  "timestamp": "2026-06-13T12:03:15Z",
+  "timestamp_tw": "2026-06-13T20:03:15+08:00",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "140 drafts total (general=93 >=8 OK, research=47 >=4 OK). All thresholds met (total>=12, research>=4, general>=8). Total feed items: 1606."
+      "detail": "140 drafts total (general=93 >=8 OK, research=47 >=4 OK). All thresholds met (total>=12, research>=4, general>=8). By category: general=84, milestone=54, research=2."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime epoch 1781321419, age ~26 seconds at check time. Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json mtime epoch 1781352183, age ~13 seconds at check time. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
@@ -24,7 +25,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "10 active strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage). No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "15 strategies found in paper_trading.json. No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -37,5 +38,6 @@
       "detail": "2237 entries in storage/memory/knowledge.json."
     }
   ],
-  "alerts": []
+  "alerts": [],
+  "summary": "All 6 checks passed. Platform is healthy. No alerts generated."
 }
