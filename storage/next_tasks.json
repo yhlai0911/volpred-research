@@ -29043,7 +29043,7 @@
     "title": "研究 backlog fallback: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（來源：AER 2022 + IMF GFSR 2025-04 Ch.2） | 來源 section: 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/etf flow/gpr/氣候/retail，全免費資料 yfinance/fred/taifex tick/twse/finra/noaa/cwb/gpr 官網）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "gpr_acts_vs_threats_vol",
@@ -29055,7 +29055,9 @@
     "claimed_by": "codex-desktop",
     "claimed_at": "2026-06-13T06:10:41.500774+00:00",
     "claim_session_id": "4212799ba898",
-    "started_at": "2026-06-13T06:10:58.763749+00:00"
+    "started_at": "2026-06-13T06:10:58.763749+00:00",
+    "completed_at": "2026-06-13T06:15:27.015796+00:00",
+    "result": "Created experiments/k1489 feasibility-audit three-piece set for GPR Acts vs Threats HAR-RV design.\nVerdict BLOCKED_ON_DATA: no local canonical GPRD_ACT/GPRD_THREAT raw file, official GPR/yfinance downloads fail DNS, and local reusable snapshots lack XLE/ITA prices.\nNo regression claims produced; results specify pinned data artifacts required to unlock the full experiment."
   },
   {
     "id": "research_rp_3871387caf",
@@ -29156,7 +29158,7 @@
     "title": "K1452: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1452 has verdict signal (score=2, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1452",
@@ -29169,6 +29171,8 @@
     "claimed_by": "hourly-14",
     "claimed_at": "2026-06-13T06:11:33.557356+00:00",
     "claim_session_id": "1423c76ab4ae",
-    "started_at": "2026-06-13T06:11:34.028488+00:00"
+    "started_at": "2026-06-13T06:11:34.028488+00:00",
+    "completed_at": "2026-06-13T06:22:25.615755+00:00",
+    "result": "Published mile_4fa8ec29 as research draft. K1452 NULL story article (VRP intraday/overnight decomposition). Anti-AI gate PASS. cluster_waiver + dup_waiver applied with documented reasons. 3 key numbers verified: overnight VRP mean +0.00252, intraday VRP mean +0.00679, overnight 22d predictive coef -0.0041 (wrong sign)."
   }
 ]
