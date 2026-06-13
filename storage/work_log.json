@@ -10438,5 +10438,11 @@
     "result": "CONDITIONAL_PASS / PUBLISHABLE_AS_IS=YES / LOOKAHEAD_RISK=NONE. Welch + Bonferroni statistically correct; lookahead confirmed at k1439.py:105,116. Caveats: 21d overlapping RV → p-values optimistic, no time clustering correction; missing reproduce.py. Followup: HAC/Newey-West + reproduce.py.",
     "owner": "hourly-19",
     "reviewer_source": "codex exec"
+  },
+  {
+    "timestamp": "2026-06-13T20:11+08:00",
+    "task_type": "experiment",
+    "task_id": "K1439_reproduce_and_hac_followup",
+    "summary": "Verified reproduce.py + HAC canonical (1/5 USO robust); committed; queued K1439_article_correction_hac P2 for in-place correction of mile_2c758888"
   }
 ]
