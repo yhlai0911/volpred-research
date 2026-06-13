@@ -1,0 +1,208 @@
+{
+  "experiment_id": "k1489",
+  "title": "GPR daily Acts vs Threats decomposition feasibility for volatility forecasting",
+  "run_timestamp": "2026-06-13T06:14:48.757966+00:00",
+  "verdict": {
+    "overall": "BLOCKED_ON_DATA",
+    "can_honestly_run_full_har_rv_now": false,
+    "plain_english": "The design is valid and differentiated from K446, but the current local environment lacks a reproducible raw GPRD/Acts/Threats file and lacks XLE/ITA price snapshots. Running HAR-RV forecasts now would require live downloads, which fail under the current DNS-restricted sandbox."
+  },
+  "proposed_design": {
+    "research_question": "Do daily GPR Acts and Threats components add asymmetric predictive power for SPY/GLD/XLE/ITA realized volatility beyond own RV and VIX?",
+    "target_assets": [
+      "SPY",
+      "GLD",
+      "XLE",
+      "ITA"
+    ],
+    "candidate_models": [
+      "HAR-RV baseline: RV_1d, RV_5d, RV_22d, all lagged one trading day",
+      "HAR-RV + VIX_lag1 where VIX is available",
+      "HAR-RV + GPRD_ACT_lag1 + GPRD_THREAT_lag1",
+      "HAR-RV + VIX_lag1 + ACT_lag1 + THREAT_lag1"
+    ],
+    "forecast_horizons": [
+      1,
+      5,
+      22
+    ],
+    "tests": [
+      "DM test on QLIKE/MSE loss differentials",
+      "stationary block bootstrap with fixed seed",
+      "Harvey-style high-threshold screen for multiple testing caution"
+    ],
+    "lookahead_rule": "All predictors must be shifted by at least one trading day before forecasting RV_t or forward RV.",
+    "random_seed": 42
+  },
+  "literature_checked": [
+    {
+      "source": "Caldara and Iacoviello (2022), American Economic Review",
+      "url": "https://www.aeaweb.org/articles?id=10.1257/aer.20191823",
+      "use_in_design": "Primary GPR index and Acts/Threats decomposition motivation."
+    },
+    {
+      "source": "IMF Global Financial Stability Report, April 2025, Chapter 2",
+      "url": "https://www.imf.org/en/publications/gfsr/issues/2025/04/22/global-financial-stability-report-april-2025",
+      "use_in_design": "Motivates asset-price and financial-stability relevance of major geopolitical events."
+    },
+    {
+      "source": "Dai, Dai, and Zhou (2024), GJR-GARCH-MIDAS geopolitical risk and agricultural volatility",
+      "url": "https://arxiv.org/abs/2404.01641",
+      "use_in_design": "Supports testing geopolitical risk as a low-frequency volatility driver, while keeping OOS tests strict."
+    }
+  ],
+  "local_input_audit": {
+    "official_gpr_download": {
+      "url": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.xls",
+      "ok": false,
+      "sample_bytes": 0,
+      "error": "URLError: <urlopen error [Errno 8] nodename nor servname provided, or not known>"
+    },
+    "local_gpr_related_files": [
+      "experiments/k264/__pycache__/k264_geopolitical_proxy.cpython-312.pyc",
+      "experiments/k264/k264_geopolitical_proxy.py",
+      "experiments/k446/__pycache__/k446_gpr_vol.cpython-312.pyc",
+      "experiments/k446/k446_gpr_vol.py",
+      "experiments/k446/k446_gpr_vol_results.json",
+      "storage/experiments/geopolitical_vol.json",
+      "storage/ops/duplicate_audits/trending_repost_2026_06_12_geopolitical_oil_duplicate.md"
+    ],
+    "has_canonical_raw_gpr_acts_threats": false,
+    "price_availability": {
+      "snapshots": [
+        {
+          "path": "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+          "exists": true,
+          "assets": {
+            "SPY": true,
+            "GLD": true,
+            "XLE": false,
+            "ITA": false
+          },
+          "columns_checked": 37
+        },
+        {
+          "path": "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv",
+          "exists": true,
+          "assets": {
+            "SPY": true,
+            "GLD": true,
+            "XLE": false,
+            "ITA": false
+          },
+          "columns_checked": 55
+        },
+        {
+          "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+          "exists": true,
+          "assets": {
+            "SPY": true,
+            "GLD": false,
+            "XLE": false,
+            "ITA": false
+          },
+          "columns_checked": 31
+        }
+      ],
+      "by_asset": {
+        "SPY": {
+          "available": true,
+          "paths": [
+            "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+            "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv",
+            "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv"
+          ]
+        },
+        "GLD": {
+          "available": true,
+          "paths": [
+            "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+            "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv"
+          ]
+        },
+        "XLE": {
+          "available": false,
+          "paths": []
+        },
+        "ITA": {
+          "available": false,
+          "paths": []
+        }
+      }
+    }
+  },
+  "prior_evidence": {
+    "knowledge_hits": [
+      "K100: generic geopolitical proxies added little incremental volatility information beyond VIX.",
+      "K446: broad daily GPR showed weak/reversed predictive content; VIX->GPR stronger than GPR->RV."
+    ],
+    "k446_results_summary": {
+      "available": true,
+      "path": "experiments/k446/k446_gpr_vol_results.json",
+      "sample_period": "2000-02-03 to 2026-02-23",
+      "n_observations": 6552,
+      "gpr_act_corr_vix": 0.0877,
+      "gpr_threat_corr_vix": 0.0234,
+      "gpr_act_corr_rv21": 0.0442,
+      "gpr_threat_corr_rv21": -0.0173,
+      "gpr_adds_to_vix_for_5d_rv": false,
+      "partial_corr_gpr_controlling_vix_5d": -0.079175,
+      "gpr_decomposed_rv5_oos": {
+        "n_oos": 502,
+        "r2_oos": -0.6241,
+        "dm_vs_baseline": {
+          "dm_statistic": -3.2168,
+          "dm_pvalue": 0.00138,
+          "bootstrap_pvalue": 0.0072,
+          "better_than_baseline": false
+        }
+      },
+      "gpr_decomposed_rv21_oos": {
+        "n_oos": 502,
+        "r2_oos": -1.6425,
+        "dm_vs_baseline": {
+          "dm_statistic": -3.4314,
+          "dm_pvalue": 0.00065,
+          "bootstrap_pvalue": 0.0098,
+          "better_than_baseline": false
+        }
+      }
+    }
+  },
+  "blocking_conditions": [
+    {
+      "type": "missing_raw_gpr_acts_threats",
+      "detail": "No canonical local GPRD/GPRA/GPRT raw file was found, and the official daily XLS could not be downloaded in this sandbox."
+    },
+    {
+      "type": "missing_requested_asset_prices",
+      "detail": "Local reusable snapshots lack close prices for: XLE, ITA."
+    }
+  ],
+  "required_to_unlock": [
+    {
+      "artifact": "experiments/k1489/data/gpr_daily_recent.csv",
+      "columns": [
+        "date",
+        "GPRD",
+        "GPRD_ACT",
+        "GPRD_THREAT"
+      ],
+      "source": "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.xls",
+      "rule": "Pin the downloaded file locally; do not rely on live download inside the experiment."
+    },
+    {
+      "artifact": "experiments/k1489/data/prices_spy_gld_xle_ita_vix.csv",
+      "columns": [
+        "date",
+        "spy_close",
+        "gld_close",
+        "xle_close",
+        "ita_close",
+        "vix_close"
+      ],
+      "rule": "Use adjusted closes if available; document vendor and download timestamp."
+    }
+  ],
+  "honesty_note": "No regression coefficients, DM statistics, or article-ready claims were produced in this run. The only empirical quantities reused are from the already committed K446 results artifact."
+}
