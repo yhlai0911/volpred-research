@@ -29735,5 +29735,69 @@
     "started_at": "2026-06-13T18:11:57.259714+00:00",
     "completed_at": "2026-06-13T18:27:33.639976+00:00",
     "result": "完成 k_explainable_ensemble_vol_gate_2026_06_14：yfinance SPY/VIX/ETF panel 2006-2026，2016-2025 年度 walk-forward，target=t+1..t+5 SPY mean r²，train target_end 嚴格早於 OOS start。Tree ensemble 平均 QLIKE 0.704 vs HAR/Ridge 10.668，但 DM t=-1.45 p=0.148 未過 Harvey；排除 2020 後改善 8.1% 仍未過。Feature stability gate failed (Spearman 0.159, Jaccard 0.371, drift 0.289)，Codex review PASS；verdict=NOT_DEPLOYABLE_AVERAGE_GAIN_UNSTABLE_NOT_HARVEY_SIGNIFICANT。未直接寫 knowledge.json，留給主線程/knowledge-index gate。"
+  },
+  {
+    "id": "research_bnpl_credit_cycle",
+    "title": "研究 backlog fallback: BNPL / 消費信貸平台作 credit-cycle 前哨",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: BNPL / 消費信貸平台作 credit-cycle 前哨 — 用 AFRM/UPST/SOFI/ALLY RV + FRED 信用卡/汽車貸款 delinquency、消費者信心，檢定 consumer-credit proxy 是否領先 IWM/HYG/金融股 RV（來源：CFA 2025 Alternative Credit: Rise of Consumer Lending；BNPL/consumer lending 風險透明度） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "bnpl_credit_cycle",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T20:08:10+00:00"
+  },
+  {
+    "id": "research_repo_basis_funding_stress_gate_duration",
+    "title": "研究 backlog fallback: Repo-basis funding stress gate 預測 duration 資產波動",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Repo-basis funding stress gate 預測 duration 資產波動 — FRED/NY Fed SOFR-EFFR/TGCR spread、CFTC leveraged funds Treasury futures shorts、ZN=F/TLT/IEF RV，檢定 repo funding 壓力與 basis-trade proxy 是否領先長債 RV（來源：NY Fed / Dallas Fed 2025 Treasury funding liquidity and basis trade） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "repo_basis_funding_stress_gate_duration",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T20:08:10+00:00"
+  },
+  {
+    "id": "daily_article_k1487_gdelt_novel_risk_null_1781040",
+    "title": "K1487 daily_article: GDELT 新聞風險強度能不能預測 RV？AI 基建/私募信貸/網路安全三主題 4 資產實測（NULL）",
+    "description": "K1487 (commit 2f542dc3) NULL_NEGATIVE 結果：用 GDELT DOC 2.0 TimelineVol 抓 3 個 novel-risk theme (ai_infrastructure / private_credit / cyber) 對 SPY/QQQ/HYG/TLT 做 RV 預測 (h=1, 5)，HAR + Novel 與 HAR-VIX + Novel 對 baseline 全 NULL，3/12 顯著 worse（VIX 已 absorb 這些 signal）。寫一篇 reader-facing daily_article（中文，anti-ai-style 9-checklist + programmatic gate）。",
+    "task_type": "daily_article",
+    "priority": 2,
+    "status": "failed",
+    "created_at": "2026-06-14T04:10:00+08:00",
+    "source": "hourly_dispatch_main_thread",
+    "k_id": "K1487",
+    "experiment_path": "experiments/k1487",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-13T20:13:07.669069+00:00",
+    "claim_session_id": "0f1b5a3f0732",
+    "started_at": "2026-06-13T20:13:12.145366+00:00",
+    "completed_at": "2026-06-13T20:14:13.846161+00:00",
+    "result": "ARC dedup gate 擋下：36 篇同 narrative arc（vol forecast NULL + 股債資產 entities）。Alt-data signal validation angle 雖 distinct 但 entity overlap + null_no_info class 觸發。改寫文章需 dup_waiver 或主題 pivot；本 fire rotate 換 task type。"
+  },
+  {
+    "id": "trending_repost_2026_06_14_0414_hourly04",
+    "title": "[trending_repost] (待選題) VolPred 角度改寫 — hourly-04 派工",
+    "description": "走 .claude/skills/trending-repost/SKILL.md 完整 SOP。掃 trending sources（havingchien Substack / Stratechery / 凱基/Ranger/元大新聞 / 美股 forums / X-twitter financial trending）→ 選 1 個與 vol/risk/strategy 真有 angle 的主題（避開今天已寫的 0DTE/SPY-vol-split mile_74d12ac6 + 6/13 之前所有 trending 主題）→ 30 日查重 + arc-dedup gate → 寫 reader-facing 中文文章（≥3 primary-source 數字、表 ≥1、圖 ≥1、anti-ai-style 9-checklist + programmatic gate）→ feed-publisher published（不進 draft pool）→ FB 標 awaiting_interactive。",
+    "task_type": "trending_repost",
+    "priority": 2,
+    "status": "succeeded",
+    "created_at": "2026-06-13T20:14:54+08:00",
+    "source": "hourly_dispatch_main_thread",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-13T20:14:55.610745+00:00",
+    "claim_session_id": "226f9c993bc8",
+    "started_at": "2026-06-13T20:14:56.051344+00:00",
+    "completed_at": "2026-06-13T20:26:12.827774+00:00",
+    "result": "trending_repost published: mile_312204b2 「砍人和燒錢同時進行：為什麼大型科技股的波動率是 SPY 的兩倍半」. 6 verifiable primary-source 數字 (MSFT 30d RV 36.6%=2.45x SPY, META 34.9%=2.33x SPY, META DD -32.6%, 2026 tech layoffs 247 events / 183,966 workers / 55% cite AI, Mag7 AI capex $725B). Arc-dedup PASS, anti_ai_gate PASS (2 WARN non-blocking), 2 PNG embedded, Supabase synced, URL 200. FB awaiting_interactive (Ivan Lai personal account)."
   }
 ]
