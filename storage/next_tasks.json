@@ -29476,21 +29476,33 @@
     "id": "experiment_0dte_intraday_overnight_vol_2026_06_13",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "0DTE 時代的日內 vs 隔夜波動結構轉變",
     "created_at": "2026-06-13T15:52:27.837440+00:00",
     "source": "journal_discovery_batch",
-    "description": "0DTE 選擇權普及後，SPY 日內 vs 隔夜 realized vol 占比是否結構性轉變？描述統計 + 結構斷點檢定。資料 yfinance/TAIFEX。實驗三件套 + lookahead lag 明確。"
+    "description": "0DTE 選擇權普及後，SPY 日內 vs 隔夜 realized vol 占比是否結構性轉變？描述統計 + 結構斷點檢定。資料 yfinance/TAIFEX。實驗三件套 + lookahead lag 明確。",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T16:46:43.883562+00:00",
+    "claim_session_id": "21e7a05e0cc7",
+    "started_at": "2026-06-13T16:46:56.386775+00:00",
+    "completed_at": "2026-06-13T16:51:48.239967+00:00",
+    "result": "SPY 2010-2026 日頻拆隔夜/日內變異完成。2022-04-18 後 overnight share 0.4379→0.4151（HAC p=0.048），但 Tue/Thu DiD interaction p=0.637，不支持 0DTE rollout 單獨驅動。已補齊 experiments/experiment_0dte_intraday_overnight_vol_2026_06_13 三件套與 3 張圖。"
   },
   {
     "id": "experiment_leverage_etf_eod_vol_amplification_2026_06_13",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "槓桿 ETF 機械再平衡與尾盤波動放大",
     "created_at": "2026-06-13T15:52:27.837440+00:00",
     "source": "journal_discovery_batch",
-    "description": "槓桿 ETF 收盤前機械再平衡是否放大標的尾盤波動？事件研究 + 描述統計。實驗三件套 + seed 固定。"
+    "description": "槓桿 ETF 收盤前機械再平衡是否放大標的尾盤波動？事件研究 + 描述統計。實驗三件套 + seed 固定。",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-13T17:09:36.776940+00:00",
+    "claim_session_id": "b54e77860998",
+    "started_at": "2026-06-13T17:09:50.298897+00:00",
+    "completed_at": "2026-06-13T17:24:57.024165+00:00",
+    "result": "NULL verdict: 槓桿 ETF EOD 機械再平衡 vs SPY/QQQ 尾盤 vol 放大假設不成立。59 RTH days 5min intraday, between-group MW p=0.628(SPY)/0.667(QQQ). Codex review caught overnight-gap bug 修正後重跑。worktree merged via cherry-pick (commit 4e4658a1). experiments/k_leveraged_etf_eod_vol_amplification_2026_06_14/ 7 files."
   },
   {
     "id": "journal_discovery_20260613",
@@ -29534,5 +29546,66 @@
     "claimed_at": "2026-06-13T16:23:19.558634+00:00",
     "claim_session_id": "6144ff7b935c",
     "completed_at": "2026-06-13T16:25:05.462792+00:00"
+  },
+  {
+    "id": "paper_review_mile_47ff52c7",
+    "title": "Paper review (Codex 24h-rule): 量今天的波動，選哪種方法差很多？五種工具實測 20 年 SPY 資料",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_47ff52c7 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_47ff52c7",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-13T17:08:18+00:00"
+  },
+  {
+    "id": "research_llm_novel_risk_intensity_rv",
+    "title": "研究 backlog fallback: LLM novel-risk intensity 作為 RV 先行訊號",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: LLM novel-risk intensity 作為 RV 先行訊號 — 用 GDELT/新聞 RSS + 開源 LLM/關鍵詞分類建立 daily novel-risk intensity（AI、private credit、tariff、cyber、supply-chain），加入 HAR-RV/GJR-X 檢定 SPY/QQQ/HYG/TLT 次日與 5 日 RV 增量 QLIKE+DM（來源：JPM 2025 novel risks / LLM novel-risk measurement；CFA AI risk oversight） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "llm_novel_risk_intensity_rv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T17:08:19+00:00"
+  },
+  {
+    "id": "research_etf_vs_etf_fragility",
+    "title": "研究 backlog fallback: ETF 宏觀效率 vs ETF fragility 的雙面檢定",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 shock 日更快反映資訊但後續 co-volatility / reversal 更強（來源：JPM 2025 ETF macroefficiency + JFM 2025 ETF-based fragility） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "etf_vs_etf_fragility",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T17:08:19+00:00"
+  },
+  {
+    "id": "trending_repost_2026_06_14_0dte",
+    "title": "[trending_repost] 零日到期期權爆發，日內波動率如何蠶食隔夜風險溢酬？",
+    "description": "從 0DTE 期權交易量占整體期權交易比重飆升切入，分析日內對沖流如何壓制日內波幅卻可能放大極端尾部風險。可量化：比較 0DTE 普及前後，SPY/QQQ 日內 Realized Volatility 與隔夜 Gap Volatility 的比例轉變與風險溢酬變化。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-13T17:08:57+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   }
 ]

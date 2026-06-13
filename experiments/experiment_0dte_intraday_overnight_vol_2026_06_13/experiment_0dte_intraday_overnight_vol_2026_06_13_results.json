@@ -1,0 +1,371 @@
+{
+  "experiment_id": "experiment_0dte_intraday_overnight_vol_2026_06_13",
+  "title": "0DTE 時代的日內 vs 隔夜波動結構轉變",
+  "created_at": "2026-06-13T16:51:11.728496+00:00",
+  "seed": 42,
+  "data": {
+    "ticker": "SPY",
+    "source": "yfinance",
+    "start_date": "2010-01-01",
+    "end_date": "2026-06-15",
+    "n_obs": 4135,
+    "break_date": "2022-04-18",
+    "full_rollout_date": "2022-05-11"
+  },
+  "literature": [
+    {
+      "title": "A tug of war: Overnight versus intraday expected returns",
+      "source": "Journal of Financial Economics",
+      "year": 2019,
+      "takeaway": "美股報酬在隔夜與日內之間存在明顯分解，證明把兩段拆開看不是多餘細分。",
+      "url": "https://doi.org/10.1016/j.jfineco.2019.05.001"
+    },
+    {
+      "title": "Does 0DTE Options Trading Increase Volatility?",
+      "source": "SSRN 4426358",
+      "year": 2026,
+      "takeaway": "利用 weekly options rollout 的工具變數設計，發現 0DTE 交易與較高的 close-to-close / intraday volatility 正相關。",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4426358"
+    },
+    {
+      "title": "The Market for 0DTE: The Role of Liquidity Providers in Volatility Management",
+      "source": "SSRN 4881008",
+      "year": 2024,
+      "takeaway": "以 expiration-day variation 辨識，指出流動性提供者的中介行為平均反而壓低指數波動。",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4881008"
+    },
+    {
+      "title": "Cboe to Add Tuesday and Thursday Expirations for SPX Weeklys Options",
+      "source": "Cboe press release",
+      "year": 2022,
+      "takeaway": "2022-04-18 新增週二到期、2022-05-11 新增週四到期，讓 SPXW 達成每個交易日都有到期日。",
+      "url": "https://ir.cboe.com/news/news-details/2022/Cboe-to-Add-Tuesday-and-Thursday-Expirations-for-SPX-Weeklys-Options-04-13-2022/default.aspx"
+    }
+  ],
+  "descriptive_stats": {
+    "full_sample": {
+      "label": "full_sample",
+      "start": "2010-01-05",
+      "end": "2026-06-12",
+      "n": 4135,
+      "overnight_var_mean": 4.727389595762986e-05,
+      "intraday_var_mean": 6.650904432748736e-05,
+      "total_var_mean": 0.00011378294028511723,
+      "overnight_share_mean": 0.43212547925815004,
+      "intraday_share_mean": 0.56787452074185,
+      "overnight_to_intraday_var_ratio_mean": 170.0392136653878,
+      "overnight_share_median": 0.3726265103323937,
+      "overnight_share_std": 0.3503813455441138
+    },
+    "pre_0dte": {
+      "label": "pre_0dte",
+      "start": "2010-01-05",
+      "end": "2022-04-14",
+      "n": 3092,
+      "overnight_var_mean": 4.871447257504567e-05,
+      "intraday_var_mean": 6.104552952079879e-05,
+      "total_var_mean": 0.00010976000209584446,
+      "overnight_share_mean": 0.43788218493261705,
+      "intraday_share_mean": 0.5621178150673829,
+      "overnight_to_intraday_var_ratio_mean": 137.77031409366026,
+      "overnight_share_median": 0.38896251483496674,
+      "overnight_share_std": 0.35082544370300967
+    },
+    "post_0dte": {
+      "label": "post_0dte",
+      "start": "2022-04-18",
+      "end": "2026-06-12",
+      "n": 1043,
+      "overnight_var_mean": 4.300326997388134e-05,
+      "intraday_var_mean": 8.270577278605024e-05,
+      "total_var_mean": 0.00012570904275993158,
+      "overnight_share_mean": 0.4150595790228173,
+      "intraday_share_mean": 0.5849404209771827,
+      "overnight_to_intraday_var_ratio_mean": 265.1426595240971,
+      "overnight_share_median": 0.32414269613466906,
+      "overnight_share_std": 0.34867074700776884
+    },
+    "post_full_week": {
+      "label": "post_full_week",
+      "start": "2022-05-11",
+      "end": "2026-06-12",
+      "n": 1026,
+      "overnight_var_mean": 4.267922614434821e-05,
+      "intraday_var_mean": 7.91846036026828e-05,
+      "total_var_mean": 0.00012186382974703102,
+      "overnight_share_mean": 0.41696374016724186,
+      "intraday_share_mean": 0.5830362598327581,
+      "overnight_to_intraday_var_ratio_mean": 267.9953759943109,
+      "overnight_share_median": 0.32580745365580993,
+      "overnight_share_std": 0.34892441167620264
+    },
+    "tue_thu_pre": {
+      "label": "tue_thu_pre",
+      "start": "2010-01-05",
+      "end": "2022-04-14",
+      "n": 1260,
+      "overnight_var_mean": 4.276958587471957e-05,
+      "intraday_var_mean": 6.455785662543149e-05,
+      "total_var_mean": 0.00010732744250015107,
+      "overnight_share_mean": 0.438629406343724,
+      "intraday_share_mean": 0.5613705936562761,
+      "overnight_to_intraday_var_ratio_mean": 59.55044538448307,
+      "overnight_share_median": 0.3926043769023122,
+      "overnight_share_std": 0.34961065346211284
+    },
+    "tue_thu_post": {
+      "label": "tue_thu_post",
+      "start": "2022-04-19",
+      "end": "2026-06-11",
+      "n": 424,
+      "overnight_var_mean": 4.702788053758591e-05,
+      "intraday_var_mean": 7.441541330465897e-05,
+      "total_var_mean": 0.00012144329384224486,
+      "overnight_share_mean": 0.4088725686573747,
+      "intraday_share_mean": 0.5911274313426254,
+      "overnight_to_intraday_var_ratio_mean": 424.29266184039597,
+      "overnight_share_median": 0.3113278239788524,
+      "overnight_share_std": 0.3469060936904473
+    }
+  },
+  "weekday_panel": [
+    {
+      "regime": "post_0dte",
+      "weekday": "Fri",
+      "mean_overnight_share": 0.4001374265344889,
+      "median_overnight_share": 0.3105711752705184,
+      "n": 212
+    },
+    {
+      "regime": "post_0dte",
+      "weekday": "Mon",
+      "mean_overnight_share": 0.4790089152843014,
+      "median_overnight_share": 0.44020893607809974,
+      "n": 193
+    },
+    {
+      "regime": "post_0dte",
+      "weekday": "Thu",
+      "mean_overnight_share": 0.415550495087883,
+      "median_overnight_share": 0.3164549643047432,
+      "n": 208
+    },
+    {
+      "regime": "post_0dte",
+      "weekday": "Tue",
+      "mean_overnight_share": 0.40244197283540367,
+      "median_overnight_share": 0.3015033800906401,
+      "n": 216
+    },
+    {
+      "regime": "post_0dte",
+      "weekday": "Wed",
+      "mean_overnight_share": 0.38442671371443793,
+      "median_overnight_share": 0.29146235670811227,
+      "n": 214
+    },
+    {
+      "regime": "pre_0dte",
+      "weekday": "Fri",
+      "mean_overnight_share": 0.45084745143634564,
+      "median_overnight_share": 0.4061098983184554,
+      "n": 619
+    },
+    {
+      "regime": "pre_0dte",
+      "weekday": "Mon",
+      "mean_overnight_share": 0.47120460577714646,
+      "median_overnight_share": 0.43736413929379614,
+      "n": 579
+    },
+    {
+      "regime": "pre_0dte",
+      "weekday": "Thu",
+      "mean_overnight_share": 0.42310936117552467,
+      "median_overnight_share": 0.3613009934393885,
+      "n": 625
+    },
+    {
+      "regime": "pre_0dte",
+      "weekday": "Tue",
+      "mean_overnight_share": 0.45390504135179416,
+      "median_overnight_share": 0.42955261042105436,
+      "n": 635
+    },
+    {
+      "regime": "pre_0dte",
+      "weekday": "Wed",
+      "mean_overnight_share": 0.3933069789187602,
+      "median_overnight_share": 0.29663617481948956,
+      "n": 634
+    }
+  ],
+  "tests": {
+    "mann_whitney": {
+      "overnight_share_pre_vs_post": {
+        "u_stat": 1674318.0,
+        "p_value": 0.06362031191427298
+      },
+      "log_var_ratio_pre_vs_post": {
+        "u_stat": 1674276.0,
+        "p_value": 0.06380047340150952
+      }
+    },
+    "hac_regressions": {
+      "overnight_share_post_dummy": {
+        "n": 4135,
+        "r2": 0.0008004354554997928,
+        "aic": 3061.287198277948,
+        "params": {
+          "const": {
+            "coef": 0.43788218493261705,
+            "t": 66.25184000451628,
+            "p": 0.0
+          },
+          "post_0dte": {
+            "coef": -0.02282260590980029,
+            "t": -1.9755959038699942,
+            "p": 0.04820056294267582
+          }
+        }
+      },
+      "log_var_ratio_post_dummy": {
+        "n": 4135,
+        "r2": 0.0007362606369178959,
+        "aic": 22022.798355357983,
+        "params": {
+          "const": {
+            "coef": -0.5087806720793837,
+            "t": -7.40504887133306,
+            "p": 1.3110217902378468e-13
+          },
+          "post_0dte": {
+            "coef": -0.2167490496605786,
+            "t": -1.8721228539871542,
+            "p": 0.0611896088681404
+          }
+        }
+      },
+      "overnight_var_post_dummy": {
+        "n": 4135,
+        "r2": 9.580082544324853e-05,
+        "aic": -56741.41843356797,
+        "params": {
+          "const": {
+            "coef": 4.8714472575045693e-05,
+            "t": 5.673240220734079,
+            "p": 1.4012152250775525e-08
+          },
+          "post_0dte": {
+            "coef": -5.7112026011644125e-06,
+            "t": -0.5673173373136313,
+            "p": 0.5704986000234671
+          }
+        }
+      },
+      "intraday_var_post_dummy": {
+        "n": 4135,
+        "r2": 0.0013984334908473395,
+        "aic": -56807.754351712116,
+        "params": {
+          "const": {
+            "coef": 6.104552952079879e-05,
+            "t": 13.823030476908325,
+            "p": 1.8510981203646337e-43
+          },
+          "post_0dte": {
+            "coef": 2.1660243265251458e-05,
+            "t": 1.270343015312235,
+            "p": 0.20396247207385387
+          }
+        }
+      },
+      "overnight_share_tue_thu_did": {
+        "n": 4135,
+        "r2": 0.0008566601076166469,
+        "aic": 3065.054516553456,
+        "params": {
+          "const": {
+            "coef": 0.4373682662765064,
+            "t": 52.698557624364234,
+            "p": 0.0
+          },
+          "post_0dte": {
+            "coef": -0.018070735080914883,
+            "t": -1.2229002286905,
+            "p": 0.22136738218791951
+          },
+          "is_tue_thu": {
+            "coef": 0.0012611400672175414,
+            "t": 0.1021602090296597,
+            "p": 0.9186295110494451
+          },
+          "post_x_tue_thu": {
+            "coef": -0.011686102605434843,
+            "t": -0.47149007326592607,
+            "p": 0.6372908068401388
+          }
+        }
+      }
+    },
+    "chow": {
+      "overnight_share": {
+        "break_date": "2022-04-18",
+        "n_pre": 3092,
+        "n_post": 1043,
+        "k": 1,
+        "f_stat": 3.31084985919575,
+        "p_value": 0.06889620410505592
+      },
+      "log_var_ratio": {
+        "break_date": "2022-04-18",
+        "n_pre": 3092,
+        "n_post": 1043,
+        "k": 1,
+        "f_stat": 3.0452072786293116,
+        "p_value": 0.08105009835389083
+      }
+    },
+    "cusum": {
+      "overnight_share": {
+        "stat": 1.3719201696783772,
+        "p_value": 0.0463657062048294,
+        "critical_values": {
+          "1pct": 1.63,
+          "5pct": 1.36,
+          "10pct": 1.22
+        }
+      },
+      "log_var_ratio": {
+        "stat": 1.188608736304545,
+        "p_value": 0.11852367461052223,
+        "critical_values": {
+          "1pct": 1.63,
+          "5pct": 1.36,
+          "10pct": 1.22
+        }
+      }
+    }
+  },
+  "verdict": {
+    "headline": "mixed_but_small_shift",
+    "summary": "SPY 的隔夜變異占比在 2022-04-18 後小幅下降，代表日內占比略升；但 Tue/Thu 相對 Mon/Wed/Fri 的增量不顯著，不支持『0DTE 普及單獨改寫波動結構』的強敘事。",
+    "evidence": {
+      "overnight_share_mean_pre": 0.43788218493261705,
+      "overnight_share_mean_post": 0.4150595790228173,
+      "share_shift_pct_points": -2.2822605909799734,
+      "post_dummy_p": 0.04820056294267582,
+      "did_interaction_p": 0.6372908068401388
+    },
+    "research_honesty": "目前比較像 2022 後整體市場結構與波動環境一起改變，而不是 Tue/Thu 新增到期日單獨造成的可辨識斷裂。"
+  },
+  "files": {
+    "script": "experiment_0dte_intraday_overnight_vol_2026_06_13.py",
+    "readme": "README.md",
+    "figures": [
+      "a_rolling_overnight_share.png",
+      "b_rolling_variance_components.png",
+      "c_weekday_boxplot.png"
+    ]
+  }
+}

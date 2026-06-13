@@ -10465,5 +10465,14 @@
     "task_type": "platform_ops",
     "task_id": "platform_ops_refill_research_backlog_fallback_2026_06_13",
     "notes": "hourly-00 Tier-3 journal-discovery fallback added (3-tier: article→research-backlog→journal-discovery dispatch, 24h idempotent); 14 tests pass; journal_discovery_20260613 queued P2"
+  },
+  {
+    "timestamp": "",
+    "task_type": "experiment",
+    "task_id": "experiment_leverage_etf_eod_vol_amplification_2026_06_13",
+    "status": "succeeded",
+    "verdict": "NULL",
+    "fire": "hourly-01",
+    "notes": "LETF EOD vol amplification NULL on SPY/QQQ 59-day 5min sample; Codex caught overnight-gap bug"
   }
 ]
