@@ -79,6 +79,38 @@ def existing_k_ids_in_tasks(tasks: list[dict]) -> set[str]:
     return ks
 
 
+def completed_experiment_ids() -> set[str]:
+    """Return K-ids that already have an experiment receipt on disk."""
+    if not EXPERIMENTS_DIR.exists():
+        return set()
+
+    done: set[str] = set()
+    for path in EXPERIMENTS_DIR.iterdir():
+        if not path.is_dir():
+            continue
+        match = re.fullmatch(r"k(\d+[a-z]*)", path.name, re.IGNORECASE)
+        if not match:
+            continue
+        has_receipt = (path / "README.md").exists() or any(path.glob("*_results.json"))
+        if has_receipt:
+            done.add(f"K{match.group(1).upper()}")
+    return done
+
+
+def experiment_readme_corpus() -> str:
+    """Concatenate experiment READMEs for conservative stale-backlog checks."""
+    if not EXPERIMENTS_DIR.exists():
+        return ""
+
+    chunks: list[str] = []
+    for readme in EXPERIMENTS_DIR.glob("k*/README.md"):
+        try:
+            chunks.append(readme.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+    return "\n".join(chunks)
+
+
 def k_ids_with_feed_articles() -> set[str]:
     """Extract K-ids that already appear in feed.json content."""
     if not FEED_JSON.exists():
@@ -147,6 +179,8 @@ def generate_experiment_tasks(
     lines = text.splitlines()
 
     ex_ids = existing_ids(existing)
+    done_experiment_ids = completed_experiment_ids()
+    readme_corpus = experiment_readme_corpus()
     results: list[dict] = []
 
     # Patterns to SKIP (blocked / conditional / already known)
@@ -177,9 +211,16 @@ def generate_experiment_tasks(
         k_matches = k_extract.findall(content)
         if k_matches:
             kid = k_matches[0].upper()
+            if f"K{kid}" in done_experiment_ids:
+                continue
             task_id = f"gen_exp_{kid}"
             title = f"Experiment {kid}: {content[:80]}"
         else:
+            # Some old backlog items have no K-id but were later materialized as
+            # continuation experiments. If a README quotes the same line, do not
+            # re-seed it as a fresh task.
+            if len(content) >= 20 and content in readme_corpus:
+                continue
             # Create slug from content
             slug = re.sub(r"[^\w一-鿿]", "_", content[:40]).strip("_")
             slug = re.sub(r"_+", "_", slug)[:40]
