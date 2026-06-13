@@ -354,7 +354,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 **開放議題：**
 - [x] VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）— K1323 readiness update: 116/252 days, NOT_READY_AND_UNSTABLE；一般讀者敘事已由 `mile_02c71e74` 覆蓋，252-day formal gate 需等資料自然累積後再重開
 - [ ] 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）
-- [ ] **金融股早期預警系統**：K757 發現 Fubon→TSMC Granger (F=6.11)。可建立金融股壓力指標作為 TSMC vol 早期預警
+- [x] ~~**金融股早期預警系統**：K757 發現 Fubon→TSMC Granger (F=6.11)。可建立金融股壓力指標作為 TSMC vol 早期預警~~ — 已由 K1029 + K1432 收尾：K1029 確認金融股/金融 ETF 對 0050/TSMC 有 in-sample Granger 與弱 regime signal，但 GARCH-X OOS 變差；K1432 以 5 檔金融股 stress index + HAR-RV / HAR-RV+VIX baseline 做 2021-2026 OOS，結論為 NULL，多個 stress-augmented spec 顯著 worse。除非有新資料（如 intraday/private flow），此題不再作為新 experiment 重派。
 - [x] ~~K1059: TSMC → 0050.TW ETF event study~~ — NULL at T+0 but A4f advantage concentrated in event window (DM t=2.50)
 - [x] ~~K1060: Individual Taiwan stock EAV~~ — **★★ 重大發現**：T+0 ratio=0.936 (NULL) but T+1 ratio=1.466 (p=0.034). Taiwan 盤後公告 → vol shock 在 T+1。解開 K1059 謎題。
 - [ ] **K1061**: Extend to full TWSE 50 constituents (N≥50 for binomial power)

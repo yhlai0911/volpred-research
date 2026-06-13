@@ -1703,3 +1703,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 3. `src/volpred/publisher/prepublish_audit.py` 排除 ISO date 的月/日片段，保留真正統計數字（如 `3,242` 樣本數）驗證。
 
 **防再發**：語意 gate 的 entity 詞典不可把一般市場狀態詞直接當成資產/因子 entity；日期 parser 要同時覆蓋 slash date 與 ISO date。遇到 gate false-positive 時優先修 gate，再用 waiver 補單篇決策。
+
+## 2026-06-13 — task_generator_v2 補出已完成的金融股早期預警舊題
+
+**症狀**：任務池 pending=0 時，`task_generator_v2 --source experiment` 從 `research_program.md` 補出「金融股早期預警系統：K757 發現 Fubon→TSMC Granger」；但同題已由 K1029（in-sample Granger / 弱 VT regime signal）與 K1432（OOS HAR-RV/HAR-RV+VIX 嚴格比較，結論 NULL 且多個 stress spec worse）完成。
+
+**根因**：`research_program.md` 的 open checkbox 未回填完成狀態；該行沒有自己的 K-id，且與 K1029/K1432 的 README 標題不是逐字相同，所以較保守的 stale-line dedupe 無法攔截。
+
+**修法**：將 `research_program.md` 該行改為 `[x]`，明確記錄 K1029 + K1432 的 closure 與重開條件（需新資料如 intraday/private flow）。本次 claimed task 視為 stale-queue cleanup，不重跑已完成實驗。
+
+**防再發**：用 generator 補 no-K research_program checkbox 前，若 dry-run 顯示的是舊 K 發現延伸，必先查 `experiments/index.json` / README / knowledge；若已有完整 OOS closure，優先回填母本而不是重派實驗。
