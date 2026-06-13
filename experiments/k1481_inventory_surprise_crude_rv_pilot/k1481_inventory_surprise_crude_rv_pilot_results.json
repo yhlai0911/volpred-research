@@ -1,0 +1,123 @@
+{
+  "experiment_id": "k1481_inventory_surprise_crude_rv_pilot",
+  "title": "Inventory-surprise commodity RV regime feature (Crude pilot)",
+  "run_timestamp_utc": "2026-06-13T21:23:52.078740+00:00",
+  "runtime_seconds": 6.9,
+  "verdict": "NULL",
+  "passing_models": [],
+  "data": {
+    "asset": "CL=F (WTI futures, yfinance)",
+    "ohlc_rows": 4126,
+    "ohlc_start": "2010-01-04",
+    "ohlc_end": "2026-05-29",
+    "eia_series": "WCESTUS1 (Weekly U.S. Ending Stocks excluding SPR of Crude Oil, kbbl)",
+    "eia_source_url": "https://www.eia.gov/dnav/pet/hist_xls/WCESTUS1w.xls",
+    "eia_rows": 2280,
+    "eia_start": "1982-08-20",
+    "eia_end": "2026-06-05"
+  },
+  "design": {
+    "rv_proxy": "Garman-Klass daily range estimator",
+    "target": "log(RV_{t+1})",
+    "models": [
+      "HAR-RV",
+      "HAR-INV",
+      "HAR-INV-REGIME"
+    ],
+    "features": {
+      "HAR-RV": [
+        "log_rv_d",
+        "log_rv_w",
+        "log_rv_m"
+      ],
+      "HAR-INV": [
+        "log_rv_d",
+        "log_rv_w",
+        "log_rv_m",
+        "surprise_z_lag"
+      ],
+      "HAR-INV-REGIME": [
+        "log_rv_d",
+        "log_rv_w",
+        "log_rv_m",
+        "surprise_z_lag",
+        "surprise_regime"
+      ]
+    },
+    "consensus_proxy": "rolling 52-week AR(1) on weekly delta-stocks; surprise standardised by 52-wk rolling std",
+    "publication_lag_business_days": 5,
+    "lookahead_guard": "surprise_z (period_end Friday) shifted +5 BD then signal.shift(1); HAR features all lag<=t-1",
+    "train_window": "expanding from 2010-01-04 up to fit-date",
+    "first_oos_date": "2015-01-02",
+    "last_oos_date": "2026-05-28",
+    "oos_rows": 2843,
+    "refit_frequency_days": 252,
+    "seed": 42,
+    "n_boot": 1000
+  },
+  "metrics": {
+    "HAR-RV": {
+      "qlike": -6.554128954787705,
+      "mse_log": 0.46073518573112,
+      "r2_oos": 0.6723336404521212
+    },
+    "HAR-INV": {
+      "qlike": -6.554019219325882,
+      "mse_log": 0.46083227263827853,
+      "r2_oos": 0.6722645940358422
+    },
+    "HAR-INV-REGIME": {
+      "qlike": -6.552999592260926,
+      "mse_log": 0.4610746754399749,
+      "r2_oos": 0.6720922016377013
+    }
+  },
+  "improvements_vs_HAR-RV_pct": {
+    "HAR-INV": {
+      "qlike_pct": -0.0016742951287672583,
+      "mse_log_pct": -0.02107217120925464
+    },
+    "HAR-INV-REGIME": {
+      "qlike_pct": -0.01723131379577132,
+      "mse_log_pct": -0.07368434609919554
+    }
+  },
+  "diebold_mariano": {
+    "HAR-INV_vs_HAR-RV_qlike": {
+      "stat": 0.25921358288096596,
+      "p_hac": 0.7954704515632054,
+      "p_boot": 0.798,
+      "n": 2843
+    },
+    "HAR-INV_vs_HAR-RV_mse": {
+      "stat": 0.34031683626710524,
+      "p_hac": 0.7336179395254911,
+      "p_boot": 0.755,
+      "n": 2843
+    },
+    "HAR-INV-REGIME_vs_HAR-RV_qlike": {
+      "stat": 0.6315002579999986,
+      "p_hac": 0.5277134805920591,
+      "p_boot": 0.58,
+      "n": 2843
+    },
+    "HAR-INV-REGIME_vs_HAR-RV_mse": {
+      "stat": 0.41560494048056634,
+      "p_hac": 0.6776991109005035,
+      "p_boot": 0.707,
+      "n": 2843
+    }
+  },
+  "lookahead_audit": {
+    "signal_shift_1_used": true,
+    "weekly_to_daily_lag_business_days": 5,
+    "feature_lag_check": "har['surprise_z_lag'] = lag_inventory_to_daily(...).shift(1) \u2014 see run.py"
+  },
+  "figure": "figure_har_vs_inv.png",
+  "notes": [
+    "Consensus is a naive AR(1) proxy of inventory delta because public consensus survey history is paywalled.",
+    "Garman-Klass RV proxy chosen over RV5 because intraday data not readily available for CL=F 2010-2026.",
+    "5-business-day publication lag is conservative (real EIA release is Wed of following week, ~3-4 BD).",
+    "Pilot scope: single asset (WTI). NG=F / heating oil extensions are future work pending PASS verdict."
+  ]
+}
