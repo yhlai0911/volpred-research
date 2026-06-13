@@ -33661,5 +33661,30 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-13T19:08:00+08:00"
+  },
+  {
+    "id": "K536_codex_24h_review_1781363587",
+    "k_id": "K536",
+    "experiment_id": "k536",
+    "experiment_path": "experiments/k536",
+    "title": "K536 mile_483425f2 article — Codex 24h-rule review",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex-cli-0.137.0",
+    "reviewer_source": "codex-cli",
+    "codex_review": true,
+    "task_id": "paper_review_mile_483425f2",
+    "article_id": "mile_483425f2",
+    "timestamp": "2026-06-13T15:13:07.517306+00:00",
+    "summary": "Codex review on SPY 6-model VaR/ES backtest article (HAR-EVT vs GJR-EVT). PASS items: no lookahead (rolling window only uses ≤t-1; full-sample GPD diagnostics not used for prediction), all article numbers match results.json (HAR-Normal 1% 4.58%, HAR-EVT 1% 0.60%, GJR-Normal/EVT 1% 0.40%, n_oos=502), GPD ξ=0.056 sane, threshold 0.90 reasonable. CONDITIONAL issue: article phrased 'HAR-EVT 拿到滿分 10' which is the composite VaR-side ranking score (Kupiec+CC+DQ+Trinity+ES point), but HAR-EVT's ES backtest at 1% (t=3.34 p=0.0008) and 2.5% (t=7.12 p≈0) both FAIL. Reader could mistake this for full tail-risk pass.",
+    "fix_applied": "Updated feed.json content (and Supabase synced) to: (1) reword '滿分 10' as 'VaR 校準排名拿到 10 (VaR 校準面滿格)'; (2) add explicit warning paragraph stating ES backtest failed at both 1% and 2.5% with t-stat / p-value, and that VaR calibration full mark ≠ full tail-risk pass.",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "evt",
+      "var",
+      "es-backtest",
+      "spy",
+      "article-correction"
+    ]
   }
 ]
