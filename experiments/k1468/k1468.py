@@ -33,6 +33,7 @@ EXPERIMENT_ID = "k1468"
 OUT_DIR = Path(__file__).parent
 RESULTS_PATH = OUT_DIR / f"{EXPERIMENT_ID}_results.json"
 FIG_PATH = OUT_DIR / f"{EXPERIMENT_ID}_drawdown_comparison.png"
+SUMMARY_FIG_PATH = OUT_DIR / f"{EXPERIMENT_ID}_summary_bars.png"
 
 TICKERS = ["SPY", "KMLM", "DBMF"]
 DD_THRESHOLD = -0.05  # 5%
@@ -140,6 +141,43 @@ def make_plot(dd_dict: dict[str, pd.Series], window_label: str) -> None:
     plt.close(fig)
 
 
+def make_summary_plot(overlap_stats: dict[str, dict]) -> None:
+    labels = ["SPY", "KMLM", "DBMF"]
+    mean_depth = [abs(overlap_stats[label]["mean_depth"]) * 100 for label in labels]
+    pct_time = [overlap_stats[label]["pct_time_below_threshold"] * 100 for label in labels]
+    mean_recovery = [overlap_stats[label]["mean_recovery_days"] for label in labels]
+
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.8))
+    colors = ["#1f77b4", "#d62728", "#2ca02c"]
+    titles = [
+        "平均回撤深度 (%)",
+        "時間在 -5% 以下 (%)",
+        "平均回補天數",
+    ]
+    series = [mean_depth, pct_time, mean_recovery]
+    ylabels = ["Percent", "Percent", "Days"]
+
+    for ax, title, values, ylabel in zip(axes, titles, series, ylabels):
+        bars = ax.bar(labels, values, color=colors, alpha=0.85)
+        ax.set_title(title)
+        ax.set_ylabel(ylabel)
+        ax.grid(axis="y", alpha=0.25)
+        for bar, value in zip(bars, values):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                value,
+                f"{value:.1f}",
+                ha="center",
+                va="bottom",
+                fontsize=9,
+            )
+
+    fig.suptitle("SPY vs CTA proxies: drawdown shape summary")
+    fig.tight_layout()
+    fig.savefig(SUMMARY_FIG_PATH, dpi=130)
+    plt.close(fig)
+
+
 def main() -> dict:
     prices = fetch_prices(TICKERS)
     overlap = prices.dropna(how="any")
@@ -158,6 +196,7 @@ def main() -> dict:
     overlap_stats = {col: episode_stats(dd, threshold=DD_THRESHOLD) for col, dd in dd_overlap.items()}
 
     make_plot(dd_overlap, f"{overlap_start} ~ {overlap_end}")
+    make_summary_plot(overlap_stats)
 
     out = {
         "experiment_id": EXPERIMENT_ID,
@@ -176,7 +215,7 @@ def main() -> dict:
             "stats": spy_full_stats,
         },
         "overlap_window_comparison": overlap_stats,
-        "figure": FIG_PATH.name,
+        "figures": [FIG_PATH.name, SUMMARY_FIG_PATH.name],
         "methodology_notes": [
             f"Drawdown threshold: {DD_THRESHOLD * 100:.0f}%",
             "Episode = drawdown crosses below threshold; ends when recovers to running max (dd>=0).",

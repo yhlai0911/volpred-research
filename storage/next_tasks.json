@@ -29142,7 +29142,7 @@
     "title": "K1468: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1468 has verdict signal (score=0, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1468",
@@ -29151,7 +29151,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-13T06:08:12+00:00"
+    "created_at": "2026-06-13T06:08:12+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T06:36:14.722871+00:00",
+    "claim_session_id": "bccd12252b6e",
+    "started_at": "2026-06-13T06:36:20.085741+00:00",
+    "completed_at": "2026-06-13T06:41:39.043926+00:00",
+    "result": "Published general draft mile_21a40d5a for K1468 via formal publish_draft flow with 2 real charts and audience gate passing. Applied cluster_waiver because managed-futures drawdown angle was misclassified into over-cap spy cluster. Local canonical feed.json updated; publisher mirror sync hit SSL/network failure, so remote projection may need a later retry."
   },
   {
     "id": "K1452_article_general",
@@ -29174,5 +29180,24 @@
     "started_at": "2026-06-13T06:11:34.028488+00:00",
     "completed_at": "2026-06-13T06:22:25.615755+00:00",
     "result": "Published mile_4fa8ec29 as research draft. K1452 NULL story article (VRP intraday/overnight decomposition). Anti-AI gate PASS. cluster_waiver + dup_waiver applied with documented reasons. 3 key numbers verified: overnight VRP mean +0.00252, intraday VRP mean +0.00679, overnight 22d predictive coef -0.0041 (wrong sign)."
+  },
+  {
+    "id": "research_vol_of_vol",
+    "title": "研究 backlog fallback: 加密「vol-of-vol」與跨市場尾部外溢的免期權版",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 加密「vol-of-vol」與跨市場尾部外溢的免期權版 — yfinance BTC/ETH 算 RV 與 vol-of-vol，檢定對股/金/油尾部外溢（CoVaR/quantile spillover），加密能否當尾部避險（來源：J.Futures Markets 2025 crypto vol-of-vol；BTC vol 200%→50% 結構轉變） | 來源 section: 期刊主題挖掘 batch（2026-06-10；掃 jbf/jfe/joe/jfqa + jpm/faj/j.fixed income/j.futures markets 2025-26 熱門趨勢，全 yfinance/fred/taifex 可跑，contrarian/under-explored）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "vol_of_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-13T07:08:26+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-13T07:09:19.548621+00:00",
+    "claim_session_id": "98be09289936",
+    "started_at": "2026-06-13T07:09:19.990596+00:00"
   }
 ]
