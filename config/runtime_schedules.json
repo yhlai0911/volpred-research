@@ -89,6 +89,19 @@
         "host_crontab_managed_note": "2026-05-22: LaunchAgent com.volpred.daily-update 為 canonical;移除 host crontab 重複源（雙 fire 致 08:03 文章重複發兩篇）"
       },
       {
+        "id": "radar_strategy_snapshot",
+        "label": "VolPred Radar 每日策略配置 snapshot",
+        "cron": "30 8 * * 1-6",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_radar_strategy_snapshot.sh",
+        "log_path": "storage/logs/cron/radar_strategy_snapshot.log",
+        "command_deprecated": "radar_strategy_snapshot_daily.py",
+        "description": "08:30 台股收盤後（daily_update 08:03 刷新 strategy_signals/metrics 之後）為當日 (Asia/Taipei) 落地一份 active 策略配置 snapshot 到 radar_strategy_snapshots，供 Radar strategy-diff API 算今日 vs 前次配置變動。冪等：unique(snapshot_date, strategy_id)，重跑 skip。經 piggy-back run_due_jobs.py 觸發。",
+        "matchers": [
+          "radar_strategy_snapshot_daily.py",
+          "cron_radar_strategy_snapshot.sh"
+        ]
+      },
+      {
         "id": "release_pool",
         "label": "文章池定時釋出",
         "cron": "7 */3 * * *",
