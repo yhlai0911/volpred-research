@@ -33587,5 +33587,45 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-13T10:17:06.383569"
+  },
+  {
+    "k_id": "K1441",
+    "experiment_id": "K1441",
+    "experiment_path": "experiments/k1441",
+    "title": "EM 5-ETF 風險集中：PC1=77.4% 共同 vol factor；高同步 regime 證據降為 borderline",
+    "tags": [
+      "emerging_markets",
+      "etf",
+      "vol_factor",
+      "PCA",
+      "diversification",
+      "multiple_testing_review"
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI (gpt-5.4 medium) 24h-rule",
+    "reviewer_source": "codex_24h_review",
+    "codex_review": "storage/paper_reviews/k1441_mile_39b81aa5/codex_24h_review.md",
+    "summary": "K1441 EM 5-ETF (EEM/INDA/EWZ/EWY/EWW, 2012-2026, 3586 obs) Codex 24h-rule review: 主結論 PC1=77.4% 共同 vol factor + basket RV corr 0.998 成立，但發布文章對 high-correlation regime 語氣過強。Errata: HAC high-vs-mid basket RV p=0.052 borderline; asset-level 高 regime 0/5 通過 10-test Bonferroni; low regime 1/5 INDA_low 存活。多重檢定 family 原設 5-test (alpha=0.01)，10-test 校正後 alpha=0.005 僅 INDA_low 存活。修正：補 errata 到 README + 建議 article correction note。",
+    "primary_findings": [
+      "PC1 explains 77.4% of EM 5-ETF RV variance (共同 vol factor 成立)",
+      "Basket RV corr with PC1-weighted basket = 0.998",
+      "High-corr regime basket RV vs mid HAC p=0.052 (borderline, NOT robust significance)",
+      "High regime asset-level 0/5 pass 10-test Bonferroni (alpha=0.005)",
+      "Low regime INDA_low p=0.000251 robustly survives 10-test Bonferroni"
+    ],
+    "limitations": [
+      "Multiple-testing family definition narrow (5-test vs 10-test makes EWZ_low borderline)",
+      "Descriptive correlation regime, not trading signal",
+      "ETF proxy not local cash index or HF realized measure",
+      "yfinance live data, no raw price snapshot saved"
+    ],
+    "follow_up": [
+      "Update article mile_39b81aa5 with correction note: high-corr regime evidence is borderline not 'clear'",
+      "Future variant: lagged/expanding-threshold version if to be used as signal"
+    ],
+    "feed_articles": [
+      "mile_39b81aa5"
+    ],
+    "timestamp": "2026-06-13T11:16:00+08:00"
   }
 ]

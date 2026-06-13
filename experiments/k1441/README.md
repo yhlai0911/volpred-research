@@ -233,3 +233,10 @@ uv run python experiments/k1441/k1441.py
 - `INDA` 上市較晚，使 joint sample 從 2012 開始
 - correlation regime 是 **descriptive state variable**，不是交易訊號
 - rolling 63d correlation 天生重疊，所以我們已用 HAC，但仍不把這題包裝成「可預測 future vol」的 claim
+
+## Errata（2026-06-13，Codex 24h-rule review NEEDS_REVISION）
+
+- 高同步 regime 的證據強度被高估：HAC high-vs-mid basket RV `p=0.052`（borderline，非顯著）；asset-level 高 regime 5 檔 0/5 通過 Bonferroni（low regime 1/5 INDA_low 存活 10-test Bonferroni）。
+- 多重檢定 family 定義偏窄：原設定 `alpha=0.05/5=0.01`（k1441.py line 199）；若按 10 asset contrasts (5×{high, low}) 校正，`alpha=0.005`，僅 `INDA_low` 存活；`EWZ_low p=0.005118` 剛好不過。Holm/FDR 下 `INDA_low + EWZ_low` 仍存活。
+- 主結論（PC1 = 77.4%、共同 EM vol factor、basket RV correlation 0.998）不受影響；需下修的是「高同步期分散效果通常會變差」的語氣，改為「樣本內平均較高、統計上屬中度證據（borderline）」。
+- Review 紀錄：`storage/paper_reviews/k1441_mile_39b81aa5/codex_24h_review.md`

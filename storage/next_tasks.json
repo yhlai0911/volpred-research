@@ -28917,10 +28917,37 @@
     "title": "K880b: code fix DM tuple unpacking + HLN MCS + rolling Spearman + README",
     "description": "Codex 24h review of mile_862223de surfaced 4 source-code fixes for K880: (1) k880_prg_spy_validation.py:888 DM call uses .get() on tuple — fix tuple unpack + report Bonferroni/BH p-values; (2) :708 MCS uses iid bootstrap — replace with src/volpred/stats/mcs.py block/stationary bootstrap HLN MCS; (3) :778 Spearman uses full-sample iid bootstrap — add rolling-window stability; (4) experiments/k880/README.md placeholder — fill data/sample/method/results/limitations. Also add strict t-1 day-ahead PRG variant for fair horserace alongside at-open variant. Cross-ref: experiments/k880/reviews/codex_24h_review_mile_862223de.md",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "codex_24h_review_followup",
     "created_at": "2026-06-13T10:17:29+08:00",
     "parent_task_id": "paper_review_mile_862223de",
-    "linked_review": "experiments/k880/reviews/codex_24h_review_mile_862223de.md"
+    "linked_review": "experiments/k880/reviews/codex_24h_review_mile_862223de.md",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T02:31:53.774971+00:00",
+    "claim_session_id": "c744a8d629dc",
+    "started_at": "2026-06-13T02:31:57.995552+00:00",
+    "completed_at": "2026-06-13T02:38:59.997672+00:00",
+    "result": "Patched experiments/k880/k880_prg_spy_validation.py to use HLN stationary-bootstrap MCS, tuple-safe DM with Bonferroni/BH p-values, stationary-bootstrap Spearman + rolling stability, and a strict t-1 PRG fairness variant.\nRe-ran K880 end-to-end: PRG_Basic is now best QLIKE, at-open PRG_Extended still beats GJR, but strict PRG_Extended_tminus1 does not.\nUpdated experiments/k880/README.md and regenerated experiments/k880/k880_results.json + charts."
+  },
+  {
+    "id": "paper_review_mile_39b81aa5",
+    "task_type": "paper_review",
+    "title": "Paper review (Codex 24h-rule): 新興市場 5 ETF 風險集中 — K1441 mile_39b81aa5",
+    "description": "Codex 24h-rule review of feed article mile_39b81aa5 (K1441: 新興市場 5 ETF, EEM/INDA/EWZ/EWY/EWW, 2012-2026)。檢查 lookahead, 數字一致, 多重檢定, methodology rigor。對標既有 reviews 如 storage/paper_reviews/k193_mile_6a601155/codex_24h_review.md。",
+    "priority": 4,
+    "status": "succeeded",
+    "source": "hourly_dispatch_11",
+    "created_at": "2026-06-13T03:10:16Z",
+    "preferred_agent": "codex-hourly",
+    "related": [
+      "mile_39b81aa5",
+      "K1441"
+    ],
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-13T03:10:22.785755+00:00",
+    "claim_session_id": "d409575b275e",
+    "started_at": "2026-06-13T03:10:23.521295+00:00",
+    "completed_at": "2026-06-13T03:17:06.260734+00:00",
+    "result": "Codex 24h-rule review NEEDS_REVISION: 主結論 PC1=77.4% 成立、無 lookahead、數字一致；high-corr regime 證據 borderline (HAC p=0.052)，10-test Bonferroni 0/5 高 regime asset 存活。Errata 寫入 README，knowledge entry 已建。Review file: storage/paper_reviews/k1441_mile_39b81aa5/codex_24h_review.md"
   }
 ]

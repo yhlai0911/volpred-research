@@ -68,6 +68,11 @@ warnings.filterwarnings('ignore')
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 from volpred.stats.model_evaluation import dm_test
+from volpred.stats.mcs import (
+    _auto_block_length,
+    _stationary_bootstrap_indices,
+    model_confidence_set as hln_model_confidence_set,
+)
 
 
 # ============================================================
@@ -450,13 +455,17 @@ def estimate_prg_spy(r_overnight, r_intra, r2_overnight, r2_intra,
 
 
 def prg_oos_forecast(r_overnight, r_intra, r2_overnight, r2_intra,
-                     is_end, extended=False, refit_freq=126):
+                     is_end, extended=False, refit_freq=126,
+                     use_same_day_overnight=True):
     """
     PRG OOS forecast on SPY. Predicts σ²_fullday = h_overnight + h_intraday.
 
     OPTIMIZED: Only rebuild state from scratch on refit. Between refits,
     propagate h incrementally (O(n) total instead of O(n²)).
     Uses numba-accelerated state propagation.
+
+    use_same_day_overnight=True  -> at-open forecast using realized overnight_t
+    use_same_day_overnight=False -> strict t-1 day-ahead fairness variant
     """
     n_days = len(r_overnight)
     forecasts = np.full(n_days, np.nan)
@@ -508,9 +517,13 @@ def prg_oos_forecast(r_overnight, r_intra, r2_overnight, r2_intra,
         h_ov_t = o0 + a0 * x_prev + lev + b0 * h_state
         if h_ov_t < 1e-12: h_ov_t = 1e-12
 
-        # Intraday forecast (s=1) — uses observed overnight of day t
-        x_prev_in = r2_overnight[t]
-        r_prev_in = r_overnight[t]
+        # Intraday forecast (s=1)
+        if use_same_day_overnight:
+            x_prev_in = r2_overnight[t]
+            r_prev_in = r_overnight[t]
+        else:
+            x_prev_in = r2_overnight[t-1]
+            r_prev_in = r_overnight[t-1]
         lev = g1 * x_prev_in * (1.0 if r_prev_in < 0 else 0.0)
         h_in_t = o1 + a1 * x_prev_in + lev + b1 * h_ov_t
         if h_in_t < 1e-12: h_in_t = 1e-12
@@ -703,79 +716,45 @@ def compute_all_losses(realized_oos, forecast_oos):
 
 
 # ============================================================
-# LAYER 2: Model Confidence Set (simplified bootstrap)
+# LAYER 2: Model Confidence Set (HLN stationary bootstrap)
 # ============================================================
 def model_confidence_set(loss_dict, alpha=0.10, n_boot=5000):
     """
-    Simplified MCS using bootstrap elimination.
+    Hansen-Lunde-Nason MCS using stationary bootstrap.
     loss_dict: {model_name: loss_array}
-    Returns surviving models at significance level alpha.
     """
     model_names = list(loss_dict.keys())
-    n_models = len(model_names)
+    if len(model_names) < 2:
+        return model_names, {}, {name: 1.0 for name in model_names}
 
-    # Align to common valid observations
     n_obs = min(len(v) for v in loss_dict.values())
-    losses = {}
-    for name in model_names:
-        arr = loss_dict[name][:n_obs]
-        valid = np.isfinite(arr)
-        losses[name] = arr
-
-    # Find common valid indices
     common_valid = np.ones(n_obs, dtype=bool)
-    for name in model_names:
-        common_valid &= np.isfinite(losses[name])
+    for arr in loss_dict.values():
+        common_valid &= np.isfinite(arr[:n_obs])
 
-    idx = np.where(common_valid)[0]
-    if len(idx) < 100:
-        return model_names, {}  # Not enough data
+    if common_valid.sum() < 100:
+        return model_names, {}, {}
 
-    aligned_losses = {name: losses[name][idx] for name in model_names}
-    T = len(idx)
-
-    surviving = list(model_names)
-    eliminated = {}
-    rng = np.random.RandomState(42)
-
-    while len(surviving) > 1:
-        # Compute mean loss differences
-        mean_losses = {name: np.mean(aligned_losses[name]) for name in surviving}
-
-        # T_R statistic: max relative performance
-        worst_name = max(surviving, key=lambda n: mean_losses[n])
-
-        # Bootstrap test: is the worst model significantly worse?
-        d_arrays = {}
-        for name in surviving:
-            if name != worst_name:
-                d_arrays[name] = aligned_losses[worst_name] - aligned_losses[name]
-
-        # Bootstrap p-value for T_R
-        observed_max_d = max(np.mean(d) for d in d_arrays.values())
-
-        boot_count = 0
-        for b in range(n_boot):
-            boot_idx = rng.randint(0, T, T)
-            boot_max = max(np.mean(d_arrays[name][boot_idx]) for name in d_arrays)
-            if boot_max >= observed_max_d:
-                boot_count += 1
-
-        p_value = boot_count / n_boot
-
-        if p_value < alpha:
-            surviving.remove(worst_name)
-            eliminated[worst_name] = float(p_value)
-        else:
-            break  # Cannot eliminate more
-
-    return surviving, eliminated
+    aligned_losses = {
+        name: np.asarray(loss_dict[name][:n_obs][common_valid], dtype=np.float64)
+        for name in model_names
+    }
+    mcs_result = hln_model_confidence_set(
+        aligned_losses,
+        alpha=alpha,
+        n_boot=n_boot,
+        seed=42,
+    )
+    surviving = mcs_result['mcs_models']
+    eliminated = {name: float(p_val) for name, p_val in mcs_result['eliminated']}
+    p_values = {name: float(p_val) for name, p_val in mcs_result['p_values'].items()}
+    return surviving, eliminated, p_values
 
 
 # ============================================================
-# LAYER 3: Spearman with bootstrap CI
+# LAYER 3: Spearman with stationary-bootstrap CI + rolling stability
 # ============================================================
-def spearman_with_bootstrap(realized, forecast, n_boot=5000):
+def spearman_with_bootstrap(realized, forecast, n_boot=2000, seed=42):
     valid = np.isfinite(realized) & np.isfinite(forecast) & (forecast > 0) & (realized > 0)
     r = realized[valid]
     f = forecast[valid]
@@ -785,17 +764,94 @@ def spearman_with_bootstrap(realized, forecast, n_boot=5000):
 
     rho, p = sp_stats.spearmanr(r, f)
 
-    rng = np.random.RandomState(42)
+    rng = np.random.default_rng(seed)
+    block_length = _auto_block_length(r)
     boot_rhos = []
     for _ in range(n_boot):
-        idx = rng.randint(0, n, n)
+        idx = _stationary_bootstrap_indices(n, block_length, rng)
         br, _ = sp_stats.spearmanr(r[idx], f[idx])
-        boot_rhos.append(br)
+        if np.isfinite(br):
+            boot_rhos.append(br)
     boot_rhos = np.array(boot_rhos)
+    if len(boot_rhos) == 0:
+        return {'rho': float(rho), 'p': float(p), 'ci_lo': np.nan, 'ci_hi': np.nan, 'n': n}
     ci_lo = np.percentile(boot_rhos, 2.5)
     ci_hi = np.percentile(boot_rhos, 97.5)
 
-    return {'rho': float(rho), 'p': float(p), 'ci_lo': float(ci_lo), 'ci_hi': float(ci_hi), 'n': n}
+    return {
+        'rho': float(rho),
+        'p': float(p),
+        'ci_lo': float(ci_lo),
+        'ci_hi': float(ci_hi),
+        'n': n,
+        'bootstrap': 'stationary',
+        'block_length': float(block_length),
+    }
+
+
+def rolling_spearman_stability(realized, forecast, dates, window=252, min_periods=126):
+    valid = np.isfinite(realized) & np.isfinite(forecast) & (forecast > 0) & (realized > 0)
+    if valid.sum() < min_periods:
+        return {
+            'window': int(window),
+            'min_periods': int(min_periods),
+            'n_windows': 0,
+            'mean_rho': np.nan,
+            'std_rho': np.nan,
+            'min_rho': np.nan,
+            'max_rho': np.nan,
+            'pct_positive': np.nan,
+            'pct_negative': np.nan,
+            'first_window_end': None,
+            'last_window_end': None,
+        }
+
+    series = pd.DataFrame({
+        'realized': realized[valid],
+        'forecast': forecast[valid],
+    }, index=pd.Index(dates[valid]))
+
+    rolling_rho = []
+    rolling_dates = []
+    for end_idx in range(min_periods, len(series) + 1):
+        start_idx = max(0, end_idx - window)
+        window_df = series.iloc[start_idx:end_idx]
+        if len(window_df) < min_periods:
+            continue
+        rho, _ = sp_stats.spearmanr(window_df['realized'], window_df['forecast'])
+        if np.isfinite(rho):
+            rolling_rho.append(float(rho))
+            rolling_dates.append(str(window_df.index[-1].date()))
+
+    if not rolling_rho:
+        return {
+            'window': int(window),
+            'min_periods': int(min_periods),
+            'n_windows': 0,
+            'mean_rho': np.nan,
+            'std_rho': np.nan,
+            'min_rho': np.nan,
+            'max_rho': np.nan,
+            'pct_positive': np.nan,
+            'pct_negative': np.nan,
+            'first_window_end': None,
+            'last_window_end': None,
+        }
+
+    rho_arr = np.asarray(rolling_rho, dtype=np.float64)
+    return {
+        'window': int(window),
+        'min_periods': int(min_periods),
+        'n_windows': int(len(rho_arr)),
+        'mean_rho': float(np.mean(rho_arr)),
+        'std_rho': float(np.std(rho_arr, ddof=1)) if len(rho_arr) > 1 else 0.0,
+        'min_rho': float(np.min(rho_arr)),
+        'max_rho': float(np.max(rho_arr)),
+        'pct_positive': float(np.mean(rho_arr > 0)),
+        'pct_negative': float(np.mean(rho_arr < 0)),
+        'first_window_end': rolling_dates[0],
+        'last_window_end': rolling_dates[-1],
+    }
 
 
 # ============================================================
@@ -888,6 +944,8 @@ def var_backtest(returns, sigma2_forecasts, alpha_levels=[0.01, 0.05]):
 def pairwise_dm_tests(model_losses, model_names):
     """Pairwise DM tests between all model pairs using QLIKE loss."""
     results = {}
+    pair_keys = []
+    raw_pvals = []
     for i in range(len(model_names)):
         for j in range(i+1, len(model_names)):
             name_i = model_names[i]
@@ -903,14 +961,18 @@ def pairwise_dm_tests(model_losses, model_names):
             if len(li) < 100:
                 results[f"{name_i}_vs_{name_j}"] = {
                     't_stat': np.nan, 'p_value': np.nan, 'n': len(li),
-                    'winner': 'N/A', 'harvey_pass': False
+                    'winner': 'N/A', 'harvey_pass': False,
+                    'bonferroni_p_value': np.nan,
+                    'bh_p_value': np.nan,
+                    'formal_reject_5pct': False,
+                    'bonferroni_reject_5pct': False,
+                    'bh_reject_5pct': False,
+                    'interpretation': 'N/A',
                 }
                 continue
 
             try:
-                dm_result = dm_test(li, lj)
-                t_stat = dm_result.get('t_statistic', dm_result.get('t_stat', np.nan))
-                p_val = dm_result.get('p_value', np.nan)
+                t_stat, p_val = dm_test(li, lj)
             except Exception:
                 # Fallback manual DM
                 d = li - lj
@@ -942,8 +1004,44 @@ def pairwise_dm_tests(model_losses, model_names):
                 'n': int(len(li)),
                 'winner': winner,
                 'harvey_pass': bool(harvey_pass),
-                'interpretation': f"{winner} wins {'(Harvey PASS)' if harvey_pass else '(Harvey FAIL, NS)'}"
+                'bonferroni_p_value': np.nan,
+                'bh_p_value': np.nan,
+                'formal_reject_5pct': bool(np.isfinite(p_val) and p_val < 0.05),
+                'bonferroni_reject_5pct': False,
+                'bh_reject_5pct': False,
+                'interpretation': '',
             }
+            pair_keys.append(f"{name_i}_vs_{name_j}")
+            raw_pvals.append(float(p_val))
+
+    if raw_pvals:
+        n_tests = len(raw_pvals)
+        bonf = np.minimum(np.asarray(raw_pvals) * n_tests, 1.0)
+
+        order = np.argsort(raw_pvals)
+        ordered = np.asarray(raw_pvals)[order]
+        bh_ordered = ordered * n_tests / (np.arange(1, n_tests + 1))
+        bh_ordered = np.minimum.accumulate(bh_ordered[::-1])[::-1]
+        bh_ordered = np.clip(bh_ordered, 0.0, 1.0)
+        bh = np.empty(n_tests)
+        bh[order] = bh_ordered
+
+        for idx, pair_key in enumerate(pair_keys):
+            result = results[pair_key]
+            result['bonferroni_p_value'] = float(bonf[idx])
+            result['bh_p_value'] = float(bh[idx])
+            result['bonferroni_reject_5pct'] = bool(bonf[idx] < 0.05)
+            result['bh_reject_5pct'] = bool(bh[idx] < 0.05)
+            winner = result['winner']
+            if winner == 'tie':
+                result['interpretation'] = 'tie'
+            else:
+                result['interpretation'] = (
+                    f"{winner} wins "
+                    f"(Harvey heuristic {'PASS' if result['harvey_pass'] else 'FAIL'}; "
+                    f"Bonf {result['bonferroni_p_value']:.3g}, "
+                    f"BH {result['bh_p_value']:.3g})"
+                )
 
     return results
 
@@ -1120,6 +1218,15 @@ def main():
     n_prg_e = np.sum(np.isfinite(prg_ext_fc[is_end:]))
     print(f"    PRG Extended: {n_prg_e} valid forecasts")
 
+    print("  PRG Extended strict t-1 day-ahead...")
+    prg_ext_tminus1_fc = prg_oos_forecast(
+        r_overnight, r_intra, r2_overnight, r2_intra,
+        is_end, extended=True, refit_freq=PRG_REFIT_FREQ,
+        use_same_day_overnight=False
+    )
+    n_prg_e_tminus1 = np.sum(np.isfinite(prg_ext_tminus1_fc[is_end:]))
+    print(f"    PRG Extended t-1: {n_prg_e_tminus1} valid forecasts")
+
     # Separate GARCH
     print("  Separate GARCH (no cross-recursion)...")
     sep_fc = separate_garch_oos(
@@ -1131,7 +1238,8 @@ def main():
 
     # Sanity check: all forecasts > 0
     for name, fc in [('GJR', gjr_fc), ('HAR', har_fc), ('PRG_Basic', prg_basic_fc),
-                      ('PRG_Extended', prg_ext_fc), ('Separate', sep_fc)]:
+                      ('PRG_Extended', prg_ext_fc), ('PRG_Extended_tminus1', prg_ext_tminus1_fc),
+                      ('Separate', sep_fc)]:
         valid_fc = fc[is_end:][np.isfinite(fc[is_end:])]
         if len(valid_fc) > 0:
             print(f"    {name}: min={valid_fc.min():.2e}, mean={valid_fc.mean():.2e}, max={valid_fc.max():.2e}")
@@ -1141,12 +1249,13 @@ def main():
     print("\n[3/6] Layer 1: Multiple Statistical Loss Functions...")
     target_oos = sigma2_fullday[is_end:]
 
-    model_names_list = ['GJR', 'HAR', 'PRG_Basic', 'PRG_Extended', 'Separate']
+    model_names_list = ['GJR', 'HAR', 'PRG_Basic', 'PRG_Extended', 'PRG_Extended_tminus1', 'Separate']
     forecasts_oos = {
         'GJR': gjr_fc[is_end:],
         'HAR': har_fc[is_end:],
         'PRG_Basic': prg_basic_fc[is_end:],
         'PRG_Extended': prg_ext_fc[is_end:],
+        'PRG_Extended_tminus1': prg_ext_tminus1_fc[is_end:],
         'Separate': sep_fc[is_end:],
     }
 
@@ -1175,14 +1284,16 @@ def main():
         ql = qlike_loss_array(target_oos, forecasts_oos[name])
         qlike_losses[name] = ql
 
-    surviving, eliminated = model_confidence_set(qlike_losses, alpha=0.10, n_boot=5000)
+    surviving, eliminated, mcs_pvalues = model_confidence_set(qlike_losses, alpha=0.10, n_boot=5000)
     print(f"    Surviving models (α=0.10): {surviving}")
     print(f"    Eliminated: {eliminated}")
 
     layer2 = {
         'surviving': surviving,
         'eliminated': {k: float(v) for k, v in eliminated.items()},
+        'p_values': mcs_pvalues,
         'alpha': 0.10,
+        'bootstrap': 'stationary',
     }
 
     # ---- Layer 3: Spearman ----
@@ -1190,6 +1301,8 @@ def main():
     layer3 = {}
     for name in model_names_list:
         sp = spearman_with_bootstrap(target_oos, forecasts_oos[name])
+        stability = rolling_spearman_stability(target_oos, forecasts_oos[name], df.index[is_end:])
+        sp['rolling_252d'] = stability
         layer3[name] = sp
         print(f"    {name}: ρ={sp['rho']:.3f} [{sp['ci_lo']:.3f}, {sp['ci_hi']:.3f}]")
 
@@ -1239,6 +1352,7 @@ def main():
         'HAR': har_fc[is_end:],
         'PRG_Basic': prg_basic_fc[is_end:],
         'PRG_Extended': prg_ext_fc[is_end:],
+        'PRG_Extended_tminus1': prg_ext_tminus1_fc[is_end:],
         'Separate': sep_fc[is_end:],
     }
     make_charts(df_oos, forecasts_full, target_oos, CHARTS_DIR)
@@ -1281,6 +1395,11 @@ def main():
             'mean_r2_overnight': float(df['r2_overnight'].mean()),
             'mean_r2_intraday': float(df['r2_intra'].mean()),
         },
+        'forecast_timing': {
+            'PRG_Extended': 'at_open_uses_realized_overnight_t',
+            'PRG_Extended_tminus1': 'strict_t_minus_1_day_ahead_fairness_variant',
+            'baselines': 'close_t_minus_1_information_only',
+        },
         'descriptive_stats': {
             'c2c_return_mean': float(df['r_c2c'].mean()),
             'c2c_return_std': float(df['r_c2c'].std()),
@@ -1303,6 +1422,7 @@ def main():
             },
             'spy_k880': {
                 'PRG_Extended_QLIKE': float(prg_ext_qlike),
+                'PRG_Extended_tminus1_QLIKE': float(layer1['PRG_Extended_tminus1']['QLIKE']),
                 'GJR_QLIKE': float(gjr_qlike),
                 'DM_t_PRGExt_vs_GJR': float(t_val) if prg_vs_gjr_key else None,
                 'overnight_var_share_pct': float(ov_share_spy),
@@ -1332,7 +1452,18 @@ def main():
     # 2. PRG vs GJR
     if prg_vs_gjr_key:
         r = dm_results[prg_vs_gjr_key[0]]
-        findings.append(f"PRG_Extended vs GJR: DM t={r['t_stat']:.2f} ({'Harvey PASS' if r['harvey_pass'] else 'Harvey FAIL (NS)'})")
+        findings.append(
+            f"PRG_Extended vs GJR: DM t={r['t_stat']:.2f} "
+            f"(Bonf p={r['bonferroni_p_value']:.3g}, BH p={r['bh_p_value']:.3g})"
+        )
+
+    prg_tminus1_vs_gjr_key = [k for k in dm_results if 'PRG_Extended_tminus1' in k and 'GJR' in k]
+    if prg_tminus1_vs_gjr_key:
+        r = dm_results[prg_tminus1_vs_gjr_key[0]]
+        findings.append(
+            f"PRG_Extended_tminus1 vs GJR: DM t={r['t_stat']:.2f} "
+            f"(Bonf p={r['bonferroni_p_value']:.3g}, BH p={r['bh_p_value']:.3g})"
+        )
 
     # 3. Cross-recursion value
     prg_vs_sep_key = [k for k in dm_results if 'PRG_Extended' in k and 'Separate' in k]
@@ -1341,7 +1472,7 @@ def main():
         findings.append(f"Cross-recursion value (PRG vs Separate): DM t={r['t_stat']:.2f} ({'Harvey PASS' if r['harvey_pass'] else 'NS'})")
 
     # 4. MCS
-    findings.append(f"MCS surviving: {surviving}")
+    findings.append(f"HLN MCS surviving: {surviving}")
 
     # 5. Cross-market
     findings.append(f"SPY overnight var share: {ov_share_spy:.1f}% (vs TAIFEX 27-50%)")
