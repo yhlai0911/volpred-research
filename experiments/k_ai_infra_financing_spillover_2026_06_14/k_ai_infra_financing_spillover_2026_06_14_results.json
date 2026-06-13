@@ -1,0 +1,232 @@
+{
+  "experiment_id": "k_ai_infra_financing_spillover_2026_06_14",
+  "title": "AI infrastructure financing spillover pilot",
+  "status": "NULL_FOR_LEAD_LAG_TRANSMISSION",
+  "data_source": "yfinance adjusted close",
+  "sample_start": "2017-03-08",
+  "sample_end": "2026-06-12",
+  "n_price_obs": 2330,
+  "shock_days": 108,
+  "shock_definition": "AI basket same-day return above its own lagged 252-day 95th percentile; descriptive event label, not a tradable same-day signal.",
+  "baskets": {
+    "ai": [
+      "MSFT",
+      "NVDA",
+      "SMH"
+    ],
+    "infra": [
+      "XLU",
+      "PAVE"
+    ],
+    "credit": [
+      "HYG",
+      "LQD"
+    ],
+    "nasdaq_target": [
+      "QQQ"
+    ]
+  },
+  "event_study": {
+    "infra_rv": [
+      {
+        "horizon_days": 0,
+        "event_mean": 0.0006032781295223284,
+        "normal_mean": 0.00012280088789409451,
+        "ratio": 4.912652830675013,
+        "t_stat": 2.873799459077318,
+        "p_value": 0.004884215834379879
+      },
+      {
+        "horizon_days": 1,
+        "event_mean": 0.0004245023454844742,
+        "normal_mean": 0.00013152370835706946,
+        "ratio": 3.2275728139599478,
+        "t_stat": 1.7173973559572093,
+        "p_value": 0.08877230171856079
+      },
+      {
+        "horizon_days": 2,
+        "event_mean": 0.0003865864634155559,
+        "normal_mean": 0.00013350483643899508,
+        "ratio": 2.895673847682711,
+        "t_stat": 1.665644562729771,
+        "p_value": 0.09869801797100579
+      },
+      {
+        "horizon_days": 5,
+        "event_mean": 0.0005222748560698757,
+        "normal_mean": 0.00012696945156756958,
+        "ratio": 4.113389871515163,
+        "t_stat": 2.213721289638851,
+        "p_value": 0.02897239637066542
+      }
+    ],
+    "credit_rv": [
+      {
+        "horizon_days": 0,
+        "event_mean": 6.878765765131061e-05,
+        "normal_mean": 2.1229296252643246e-05,
+        "ratio": 3.2402231723882937,
+        "t_stat": 2.494987562790222,
+        "p_value": 0.01407425963709398
+      },
+      {
+        "horizon_days": 1,
+        "event_mean": 7.213562148237488e-05,
+        "normal_mean": 2.1068614694398866e-05,
+        "ratio": 3.423842645978631,
+        "t_stat": 1.8076767486951808,
+        "p_value": 0.073432226328145
+      },
+      {
+        "horizon_days": 2,
+        "event_mean": 6.179110302186378e-05,
+        "normal_mean": 2.1599172216860616e-05,
+        "ratio": 2.8608088495923365,
+        "t_stat": 1.6976348569334931,
+        "p_value": 0.09245399168908446
+      },
+      {
+        "horizon_days": 5,
+        "event_mean": 5.187216914851047e-05,
+        "normal_mean": 2.2049633422750468e-05,
+        "ratio": 2.352518436655259,
+        "t_stat": 1.8059566037395136,
+        "p_value": 0.07363645210563723
+      }
+    ],
+    "qqq_rv": [
+      {
+        "horizon_days": 0,
+        "event_mean": 0.0010707390327479938,
+        "normal_mean": 0.0001692833940527452,
+        "ratio": 6.32512739208415,
+        "t_stat": 5.662610162485177,
+        "p_value": 1.244099684433109e-07
+      },
+      {
+        "horizon_days": 1,
+        "event_mean": 0.00044177364646245395,
+        "normal_mean": 0.0001999577008610824,
+        "ratio": 2.20933549725784,
+        "t_stat": 1.5414454147691043,
+        "p_value": 0.12612784321136067
+      },
+      {
+        "horizon_days": 2,
+        "event_mean": 0.00041783210834631324,
+        "normal_mean": 0.0002013027101960373,
+        "ratio": 2.075640749890601,
+        "t_stat": 2.0512283837801446,
+        "p_value": 0.04263545358770566
+      },
+      {
+        "horizon_days": 5,
+        "event_mean": 0.00046455337757046473,
+        "normal_mean": 0.00019929918092699,
+        "ratio": 2.3309347053495735,
+        "t_stat": 2.588718909386213,
+        "p_value": 0.010940165616717028
+      }
+    ]
+  },
+  "harx_regression": {
+    "n_obs": 2306,
+    "baseline_r2": 0.08423733095990316,
+    "augmented_r2": 0.08623843812787191,
+    "delta_r2": 0.002001107167968752,
+    "augmented_params": {
+      "const": {
+        "coef": -2.983447651825725,
+        "std_err": 0.5400831747821445,
+        "z_stat": -5.524052203679869,
+        "p_value": 3.3126896444124596e-08
+      },
+      "log_qqq_rv_lag1": {
+        "coef": -0.011047276702208309,
+        "std_err": 0.021224634300775896,
+        "z_stat": -0.5204931470505695,
+        "p_value": 0.6027199030651414
+      },
+      "log_qqq_rv_lag5": {
+        "coef": 0.3342570264426929,
+        "std_err": 0.07444142774883017,
+        "z_stat": 4.490201713627741,
+        "p_value": 7.115575672711617e-06
+      },
+      "log_qqq_rv_lag22": {
+        "coef": 0.42154782861423373,
+        "std_err": 0.08615373689718671,
+        "z_stat": 4.8929720729037705,
+        "p_value": 9.932450510559812e-07
+      },
+      "log_infra_rv_lag1": {
+        "coef": 0.0318849038666142,
+        "std_err": 0.022328789043814266,
+        "z_stat": 1.427972820382181,
+        "p_value": 0.1532996817973325
+      },
+      "log_credit_rv_lag1": {
+        "coef": 0.021135109773531974,
+        "std_err": 0.02048732235336374,
+        "z_stat": 1.0316189401911702,
+        "p_value": 0.3022506640970376
+      },
+      "ai_positive_shock_int": {
+        "coef": -0.3141533496154534,
+        "std_err": 0.2649456581743175,
+        "z_stat": -1.1857274875920418,
+        "p_value": 0.2357299356554804
+      }
+    }
+  },
+  "oos_model_comparison": {
+    "n_oos": 577,
+    "qlike": {
+      "har": 3.8649028638728655,
+      "har_ai": 3.8776694235587414,
+      "har_infra": 3.900414043433927,
+      "har_credit": 3.871618708336804,
+      "har_all": 3.912487298976603
+    },
+    "dm_vs_har": {
+      "har_ai": {
+        "t_stat": 0.3311593941617553,
+        "p_value": 0.7406445299983195
+      },
+      "har_infra": {
+        "t_stat": 0.9373856157408056,
+        "p_value": 0.3489531045802208
+      },
+      "har_credit": {
+        "t_stat": 0.18281317397416633,
+        "p_value": 0.8550089377340153
+      },
+      "har_all": {
+        "t_stat": 0.833449172143981,
+        "p_value": 0.40493692277140436
+      }
+    }
+  },
+  "summary": {
+    "same_day_ratio_infra": 4.912652830675013,
+    "same_day_ratio_credit": 3.2402231723882937,
+    "same_day_ratio_qqq": 6.32512739208415,
+    "t_plus_1_ratio_infra": 3.2275728139599478,
+    "t_plus_1_ratio_credit": 3.423842645978631,
+    "t_plus_1_ratio_qqq": 2.20933549725784,
+    "baseline_qlike": 3.8649028638728655,
+    "best_model": "har",
+    "best_model_qlike": 3.8649028638728655,
+    "delta_r2_harx": 0.002001107167968752
+  },
+  "research_honesty_notes": [
+    "This is a public-market proxy for AI infrastructure financing stress, not direct private-credit or project-finance exposure.",
+    "AI positive shocks are defined from same-day basket returns, so same-day event-window evidence is descriptive rather than ex-ante tradable.",
+    "Daily close-to-close squared returns are a noisy RV proxy; no intraday or options data are used."
+  ],
+  "artifacts": {
+    "event_figure": "fig_event_window_ratios.png",
+    "oos_figure": "fig_oos_qlike.png"
+  }
+}

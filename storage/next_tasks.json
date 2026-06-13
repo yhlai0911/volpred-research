@@ -29668,7 +29668,7 @@
     "title": "研究 backlog fallback: AI 基建資金鏈的波動傳導",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift） | 來源 section: 期刊主題挖掘 batch（2026-06-14；jpm novel risk / cfa ai / jfm etf / fed treasury ofi / private credit，可由免費代理資料啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "rp_0d5c960aa1",
@@ -29676,7 +29676,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-13T17:34:10+00:00"
+    "created_at": "2026-06-13T17:34:10+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T18:47:07.737942+00:00",
+    "claim_session_id": "a376dd31758d",
+    "started_at": "2026-06-13T18:47:07.843478+00:00",
+    "completed_at": "2026-06-13T18:53:39.005989+00:00",
+    "result": "完成 k_ai_infra_financing_spillover_2026_06_14：2017-03-08~2026-06-12 的 AI/基建/信用/QQQ 日頻 public-market proxy pilot。AI 正向 shock 同日共振明顯（QQQ 6.33x、infra 4.91x、credit 3.24x），但 proper HAR-X 僅 ΔR²=+0.002、OOS QLIKE 最佳仍為 baseline HAR，所有 DM vs HAR 不顯著。結論如實降級為 NULL_FOR_LEAD_LAG_TRANSMISSION，已附 README、script、results、兩張真圖與 codex_review。"
   },
   {
     "id": "research_variance_risk_premium_edge",
