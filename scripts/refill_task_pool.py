@@ -765,6 +765,74 @@ def _research_backlog_candidates(tasks: list, existing_ids: set[str], limit: int
     return out
 
 
+def _journal_discovery_dispatch_task(tasks: list, existing_ids: set[str]) -> list[dict]:
+    """Tier 3 fallback: when article candidates AND research-backlog both dry,
+    queue a platform_ops task to dispatch a journal-discovery agent.
+
+    The agent runs `scripts/agent_prompts/journal_topic_scan.md` to scan top-tier
+    journals (JBF/JFE/RFS/JoE/JPM/FAJ/CFA Institute) for 1-2 year hot topics and
+    append 5-10 new directions to research_program.md so subsequent refills have
+    fresh inventory. This breaks the dry-pool cycle when the research-program.md
+    backlog saturates with succeeded slugs (e.g. 54/67 slugs = succeeded → all
+    visible open items are slug-dedup'd; only new directions help).
+
+    Idempotency: skip if any `journal_discovery_*` task is currently live
+    (pending/claimed/in_progress/blocked) OR completed within the last 24h —
+    avoids agent-flood when refill fires every hour with same dry state.
+
+    Returns: empty list if dispatch task already exists / recently completed,
+             else a single-element list with the new dispatch task.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    LIVE = {"pending", "claimed", "in_progress", "blocked", "pending_main_thread"}
+    now_utc = datetime.now(timezone.utc)
+    cutoff = now_utc - timedelta(hours=24)
+    for t in tasks:
+        tid = str(t.get("id") or "")
+        if not tid.startswith("journal_discovery_"):
+            continue
+        status = str(t.get("status") or "").lower()
+        if status in LIVE:
+            return []  # already pending — don't double-queue
+        completed_at = t.get("completed_at") or t.get("created_at")
+        if completed_at and isinstance(completed_at, str):
+            try:
+                ts = datetime.fromisoformat(completed_at)
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
+                if ts >= cutoff:
+                    return []  # recent dispatch within 24h
+            except ValueError:
+                pass
+
+    today = now_utc.strftime("%Y%m%d")
+    task_id = f"journal_discovery_{today}"
+    # Daily cap: only one journal-discovery dispatch per calendar day even if
+    # task object isn't found via the LIVE/recent scan above (e.g. archived).
+    if task_id in existing_ids:
+        return []
+
+    return [{
+        "id": task_id,
+        "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
+        "description": (
+            "Article candidate pool + research-backlog 都 dry "
+            "(refill no_new_candidates_passing_filter). "
+            "派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，"
+            "從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，"
+            "補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。"
+            " 24h 內 idempotent；勿手動重派。"
+        ),
+        "priority": 2,
+        "status": "pending",
+        "task_type": "platform_ops",
+        "source": "auto_journal_discovery_fallback",
+        "tags": ["auto-journal-discovery", "research-backlog-refresh", "tier3-fallback"],
+        "created_at": now_utc.isoformat(timespec="seconds"),
+    }]
+
+
 def _make_research_task(title: str, full_line: str, header: str, slug: str, task_id: str) -> dict:
     return {
         "id": task_id,
@@ -966,6 +1034,16 @@ def refill(target: int, dry_run: bool = False) -> dict:
         if research_tasks:
             new_entries.extend(research_tasks)
             fallback_reason = "research_backlog_fallback"
+
+    # Tier-3 journal-discovery fallback (2026-06-14): when even research-backlog
+    # is dry (e.g. 54/67 known directions are succeeded → slug-deduped), kick a
+    # platform_ops task that dispatches a journal-discovery agent to populate
+    # research_program.md from top-tier journals. 24h idempotent.
+    if not new_entries:
+        journal_tasks = _journal_discovery_dispatch_task(tasks, existing)
+        if journal_tasks:
+            new_entries.extend(journal_tasks)
+            fallback_reason = "journal_discovery_dispatch"
 
     if not new_entries:
         return {"ok": True, "added": 0, "reason": "no_new_candidates_passing_filter"}

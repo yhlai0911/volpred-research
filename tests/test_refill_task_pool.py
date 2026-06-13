@@ -44,6 +44,7 @@ def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
     monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
 
     result = MODULE.refill(target=3, dry_run=False)
 
@@ -395,6 +396,7 @@ def test_refill_skips_general_retry_v2_when_feed_already_has_k_coverage(tmp_path
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
     monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
 
     result = MODULE.refill(target=3, dry_run=False)
 
@@ -603,3 +605,63 @@ def test_research_backlog_arc_dedup_ignores_explanatory_tail(tmp_path, monkeypat
 
     assert len(tasks) == 1
     assert tasks[0]["id"].startswith("research_")
+
+
+def test_journal_discovery_tier3_dispatched_on_empty_pool():
+    """Tier-3 fallback fires when no live or recent journal_discovery_* exists."""
+    out = MODULE._journal_discovery_dispatch_task(tasks=[], existing_ids=set())
+    assert len(out) == 1
+    t = out[0]
+    assert t["id"].startswith("journal_discovery_")
+    assert t["task_type"] == "platform_ops"
+    assert t["status"] == "pending"
+    assert t["source"] == "auto_journal_discovery_fallback"
+    assert t["priority"] == 2
+
+
+def test_journal_discovery_tier3_idempotent_when_live_task_exists():
+    """Don't double-queue when an existing journal_discovery_* is still live."""
+    existing_live = [
+        {
+            "id": "journal_discovery_20260101",
+            "status": "pending",
+            "task_type": "platform_ops",
+        }
+    ]
+    out = MODULE._journal_discovery_dispatch_task(tasks=existing_live, existing_ids={"journal_discovery_20260101"})
+    assert out == []
+
+
+def test_journal_discovery_tier3_skips_when_recent_completed_within_24h():
+    """24h cap: a journal_discovery_* completed within the last 24h blocks new dispatch."""
+    from datetime import datetime, timedelta, timezone
+
+    recent_ts = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat(timespec="seconds")
+    existing_recent = [
+        {
+            "id": "journal_discovery_20260101",
+            "status": "succeeded",
+            "task_type": "platform_ops",
+            "completed_at": recent_ts,
+        }
+    ]
+    out = MODULE._journal_discovery_dispatch_task(tasks=existing_recent, existing_ids=set())
+    assert out == []
+
+
+def test_journal_discovery_tier3_allows_after_24h():
+    """A journal_discovery_* completed >24h ago doesn't block a new dispatch."""
+    from datetime import datetime, timedelta, timezone
+
+    stale_ts = (datetime.now(timezone.utc) - timedelta(hours=30)).isoformat(timespec="seconds")
+    existing_stale = [
+        {
+            "id": "journal_discovery_20260101",
+            "status": "succeeded",
+            "task_type": "platform_ops",
+            "completed_at": stale_ts,
+        }
+    ]
+    out = MODULE._journal_discovery_dispatch_task(tasks=existing_stale, existing_ids=set())
+    assert len(out) == 1
+    assert out[0]["id"].startswith("journal_discovery_")
