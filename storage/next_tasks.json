@@ -29373,7 +29373,7 @@
     "title": "K1439 mile_2c758888 HAC correction Supabase sync verification",
     "description": "Codex-desktop session updated mile_2c758888 in-place via publish_draft --update but feed-sync did not return completion signal in sandboxed run, so remote Supabase propagation is unverified. Action: (a) curl https://volpred.zeabur.app/api/articles/mile_2c758888 (or read via supabase MCP) and compare title/content_updated_at/details.errata against local storage/reports/mile_2c758888.json; (b) if stale, run `uv run volpred ops supabase-sync --article mile_2c758888 --force`; (c) verify Supabase mirror reflects USO-only HAC robust conclusion (not the old 4/5 Welch claim); (d) confirm content_updated_at >= 2026-06-13T12:43:47+00:00. Light verification task — main-thread can claim and finish in <15min. Skill: admin-ops / sync. Reason: research honesty principle #6 — corrected conclusions must reach all surfaces (local + Mirror + Supabase).",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "platform_ops",
     "source": "hourly_21_followup_sync_verify",
     "parent_task_id": "K1439_article_correction_hac",
@@ -29384,6 +29384,10 @@
       "research-honesty-trace",
       "in-place-update"
     ],
-    "created_at": "2026-06-13T21:15:00+08:00"
+    "created_at": "2026-06-13T21:15:00+08:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T13:17:11.445569+00:00",
+    "claim_session_id": "b62d9cb287e7",
+    "started_at": "2026-06-13T13:17:21.966289+00:00"
   }
 ]
