@@ -1,0 +1,577 @@
+:root {
+  color-scheme: light;
+  --bg: #f3f4f1;
+  --panel: #ffffff;
+  --ink: #171a1c;
+  --muted: #687076;
+  --line: #dfe3df;
+  --soft: #eef1ed;
+  --green: #13795b;
+  --green-soft: #e4f4ec;
+  --amber: #a16207;
+  --amber-soft: #fff2cf;
+  --red: #b42318;
+  --red-soft: #fae3df;
+  --blue: #215a8f;
+  --blue-soft: #e5eef7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: #121716;
+  color: #f7faf8;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px 22px;
+}
+
+.brand span {
+  color: #89d3b3;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.brand strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.sidebar nav {
+  display: grid;
+  gap: 6px;
+}
+
+.sidebar nav a {
+  align-items: center;
+  border-radius: 6px;
+  color: #bdc9c3;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+}
+
+.sidebar nav a.active,
+.sidebar nav a:hover {
+  background: #1f2a27;
+  color: #ffffff;
+}
+
+.powered {
+  border-top: 1px solid #2b3733;
+  color: #9eaaa5;
+  display: grid;
+  gap: 4px;
+  margin-top: auto;
+  padding: 18px 10px 4px;
+}
+
+.powered span {
+  font-size: 11px;
+}
+
+.powered strong {
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.main-panel {
+  min-width: 0;
+  padding: 24px;
+}
+
+.topbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0 auto 18px;
+  max-width: 1180px;
+}
+
+.eyebrow {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 800;
+  margin: 0 0 6px;
+}
+
+.topbar h1 {
+  font-size: 34px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.top-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.top-actions button,
+.top-actions a {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: inline-flex;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.top-actions button {
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.risk-board,
+.content-band,
+.architecture-note {
+  margin: 0 auto 18px;
+  max-width: 1180px;
+}
+
+.risk-board {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) 330px;
+}
+
+.risk-summary,
+.operator-note,
+.content-band,
+.architecture-note {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.risk-summary {
+  padding: 20px;
+}
+
+.risk-head {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.risk-head p {
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.risk-head h2 {
+  font-size: 32px;
+  margin: 0;
+}
+
+.status-dot {
+  background: var(--amber);
+  border-radius: 999px;
+  display: inline-block;
+  height: 10px;
+  margin-right: 8px;
+  width: 10px;
+}
+
+.score-ring {
+  align-items: baseline;
+  aspect-ratio: 1;
+  background: var(--amber-soft);
+  border: 1px solid #ecc45e;
+  border-radius: 999px;
+  display: flex;
+  justify-content: center;
+  min-width: 96px;
+}
+
+.score-ring strong {
+  font-size: 32px;
+}
+
+.score-ring span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.market-message {
+  color: #3b4348;
+  font-size: 17px;
+  line-height: 1.65;
+  margin: 18px 0;
+  max-width: 760px;
+}
+
+.metrics-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metric {
+  background: var(--soft);
+  border-radius: 6px;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.metric span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.metric strong {
+  font-size: 22px;
+}
+
+.metric-green {
+  background: var(--green-soft);
+}
+
+.metric-amber {
+  background: var(--amber-soft);
+}
+
+.metric-red {
+  background: var(--red-soft);
+}
+
+.operator-note {
+  padding: 18px;
+}
+
+.operator-note svg {
+  color: var(--amber);
+}
+
+.operator-note h3 {
+  font-size: 18px;
+  margin: 12px 0 8px;
+}
+
+.operator-note p {
+  color: #3b4348;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.operator-note button {
+  background: var(--amber);
+  color: #ffffff;
+  height: 36px;
+  padding: 0 12px;
+}
+
+.content-band {
+  padding: 18px;
+}
+
+.section-title {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.section-title div {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.section-title h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.section-title a {
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.prediction-grid,
+.pricing-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.prediction,
+.strategy,
+.price-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill-row span {
+  background: var(--blue-soft);
+  border-radius: 999px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+
+.pill-row .pending {
+  align-items: center;
+  background: var(--amber-soft);
+  color: var(--amber);
+  display: inline-flex;
+  gap: 4px;
+}
+
+.prediction h3,
+.strategy h3,
+.price-card h3 {
+  font-size: 16px;
+  line-height: 1.35;
+  margin: 12px 0 8px;
+}
+
+.prediction p,
+.strategy p {
+  color: #3b4348;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.prediction dl {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+}
+
+.prediction dl div {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.prediction dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.prediction dd {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+  text-align: right;
+}
+
+.split {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+}
+
+.strategy-list,
+.evidence-list {
+  display: grid;
+  gap: 10px;
+}
+
+.strategy {
+  display: grid;
+  gap: 10px;
+}
+
+.strategy span {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.strategy h3 {
+  margin: 4px 0;
+}
+
+.strategy-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.strategy-stats span {
+  background: var(--soft);
+  border-radius: 6px;
+  color: var(--ink);
+  padding: 6px 8px;
+}
+
+.evidence {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 1fr auto;
+  padding: 13px;
+}
+
+.evidence span {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  grid-column: 1 / -1;
+}
+
+.evidence strong {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.price-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
+}
+
+.price-card.featured {
+  border-color: var(--green);
+  box-shadow: inset 0 3px 0 var(--green);
+}
+
+.price-card > strong {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.price-card ul {
+  display: grid;
+  gap: 9px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.price-card li {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  color: #3b4348;
+}
+
+.price-card li svg {
+  color: var(--green);
+  flex: 0 0 auto;
+}
+
+.price-card button {
+  background: var(--ink);
+  color: #ffffff;
+  height: 38px;
+  margin-top: auto;
+}
+
+.architecture-note {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  padding: 14px 18px;
+}
+
+.architecture-note p {
+  color: #3b4348;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    height: auto;
+    position: static;
+  }
+
+  .sidebar nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .risk-board,
+  .split,
+  .prediction-grid,
+  .pricing-grid,
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .main-panel {
+    padding: 14px;
+  }
+
+  .topbar h1,
+  .risk-head h2 {
+    font-size: 26px;
+  }
+
+  .top-actions {
+    width: 100%;
+  }
+
+  .top-actions button,
+  .top-actions a {
+    flex: 1;
+    justify-content: center;
+  }
+}
