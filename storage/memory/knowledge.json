@@ -33758,5 +33758,61 @@
     ],
     "confidence": 0.86,
     "created_at": "2026-06-14T03:44:05.313516"
+  },
+  {
+    "id": "k1481_inventory_surprise_crude_rv_regime_feature",
+    "experiment_id": "k1481_inventory_surprise_crude_rv_pilot",
+    "title": "K1481: Inventory-surprise (EIA crude WCESTUS1) as commodity RV regime feature — NULL",
+    "verdict": "NULL",
+    "verdict_rationale": "HAR-INV/INV-REGIME vs HAR-RV baseline on CL=F 2010-2026 (OOS n=2843): ΔQLIKE all < 0.02%, DM p_boot all > 0.5 (qlike 0.798/0.580). HAR-RV R²_oos=0.67 baseline already strong; weekly inventory surprise z-score (52w AR(1) baseline, +5BD lag + .shift(1)) shows no incremental information. Mechanism: EIA Wed-10:30-ET release absorbed by CL=F futures within minutes; T+1 close-to-close RV already reflects shock.",
+    "tags": [
+      "K1481",
+      "commodity",
+      "crude",
+      "WTI",
+      "EIA-inventory",
+      "HAR-RV",
+      "regime-feature",
+      "fundamental-feature",
+      "NULL",
+      "K1129-K1136-K1135-lineage",
+      "exog-feature-vs-model-spec-change",
+      "Garman-Klass-proxy",
+      "WCESTUS1"
+    ],
+    "metrics": {
+      "HAR-RV": {
+        "qlike": -6.5541,
+        "r2_oos": 0.6723
+      },
+      "HAR-INV": {
+        "qlike": -6.554,
+        "dm_p_boot_qlike": 0.798
+      },
+      "HAR-INV-REGIME": {
+        "qlike": -6.553,
+        "dm_p_boot_qlike": 0.58
+      }
+    },
+    "design": {
+      "asset": "CL=F (WTI)",
+      "period": "2010-2026 (OOS 2015-2026, n=2843)",
+      "rv_proxy": "Garman-Klass range (no intraday)",
+      "inventory_source": "EIA WCESTUS1 weekly",
+      "surprise_proxy": "Δstocks − rolling 52w AR(1), z-scored",
+      "lookahead_guard": "weekly +5BD lag then .shift(1)",
+      "bootstrap_seed": 42,
+      "bootstrap_n": 1000
+    },
+    "differentiation": "Prior commodity NULLs (K1129/K1136/K1135) compared vol-model families (GAS, robust-GARCH); this K adds exogenous fundamental feature. Still NULL but for different reason (information absorbed) — not model misspec.",
+    "next_steps": [
+      "Skip NG=F extension (same mechanism)",
+      "Reader-facing NULL article (audience=general)",
+      "Brick for Paper 4/5 'commodity fundamental feature null result' section",
+      "Rescue path (future): intraday minute event-study at release minute"
+    ],
+    "reviewer_source": "main_thread_audit (agent self-audit; Codex CLI stalled at exec)",
+    "experiment_path": "experiments/k1481_inventory_surprise_crude_rv_pilot/",
+    "commit": "591bb4a5"
   }
 ]
