@@ -34,6 +34,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import statsmodels.formula.api as smf
 import yfinance as yf
 from scipy import stats
 
@@ -53,6 +54,7 @@ DXY_MA_WINDOW = 100   # for regime A
 TREND_WINDOW = 60     # for regime B
 Z_THRESH = 0.5
 ANNUALIZER = float(np.sqrt(252.0))
+HAC_LAGS = RV_WINDOW
 
 
 def fetch_prices(tickers: List[str]) -> pd.DataFrame:
@@ -167,6 +169,45 @@ def welch_levene(rv: pd.Series, regime: pd.Series) -> Dict[str, float]:
     }
 
 
+def hac_contrast(rv: pd.Series, regime: pd.Series) -> Dict[str, float]:
+    aligned = pd.concat([rv.rename("rv"), regime.rename("regime")], axis=1).dropna()
+    aligned = aligned.loc[aligned["regime"].isin(["strong", "weak"])].copy()
+    if len(aligned) < 60:
+        return {
+            "coef_strong_minus_weak": float("nan"),
+            "se_hac": float("nan"),
+            "t_hac": float("nan"),
+            "p_hac": float("nan"),
+            "n_obs": int(len(aligned)),
+            "hac_maxlags": HAC_LAGS,
+        }
+
+    model = smf.ols(
+        'rv ~ C(regime, Treatment(reference="weak"))',
+        data=aligned,
+    ).fit(cov_type="HAC", cov_kwds={"maxlags": HAC_LAGS})
+    key = 'C(regime, Treatment(reference="weak"))[T.strong]'
+    return {
+        "coef_strong_minus_weak": float(model.params[key]),
+        "se_hac": float(model.bse[key]),
+        "t_hac": float(model.tvalues[key]),
+        "p_hac": float(model.pvalues[key]),
+        "n_obs": int(model.nobs),
+        "hac_maxlags": HAC_LAGS,
+        "r2": float(model.rsquared),
+    }
+
+
+def rv_autocorr_diagnostics(rv: pd.Series) -> Dict[str, float]:
+    clean = rv.dropna()
+    return {
+        "n_obs": int(len(clean)),
+        "acf_1": float(clean.autocorr(1)),
+        "acf_5": float(clean.autocorr(5)),
+        "acf_21": float(clean.autocorr(21)),
+    }
+
+
 def make_bar_figure(rv_by_asset_regime: pd.DataFrame, out_path: Path, title: str) -> None:
     fig, ax = plt.subplots(figsize=(10, 5.5))
     assets = list(rv_by_asset_regime.index)
@@ -205,12 +246,16 @@ def main() -> Dict:
 
     regime_stats_out: Dict[str, Dict[str, dict]] = {}
     tests_out: Dict[str, dict] = {}
+    hac_level_out: Dict[str, dict] = {}
+    hac_trend_out: Dict[str, dict] = {}
+    rv_autocorr_out: Dict[str, dict] = {}
 
     n_tests = len(asset_list)
     bonf_alpha = 0.05 / max(n_tests, 1)
 
     for asset in asset_list:
         rvs_a = rv[asset]
+        rv_autocorr_out[asset] = rv_autocorr_diagnostics(rvs_a)
         rstats = regime_stats(rvs_a, reg_level)
         regime_stats_out[asset] = {k: vars(v) for k, v in rstats.items()}
         tres = welch_levene(rvs_a, reg_level)
@@ -218,6 +263,11 @@ def main() -> Dict:
         p = tres.get("welch_p", float("nan"))
         tres["bonferroni_significant"] = bool((p == p) and (p < bonf_alpha))
         tests_out[asset] = tres
+        hres = hac_contrast(rvs_a, reg_level)
+        p_hac = hres.get("p_hac", float("nan"))
+        hres["bonferroni_alpha"] = bonf_alpha
+        hres["bonferroni_significant"] = bool((p_hac == p_hac) and (p_hac < bonf_alpha))
+        hac_level_out[asset] = hres
 
     trend_tests: Dict[str, dict] = {}
     for asset in asset_list:
@@ -226,18 +276,28 @@ def main() -> Dict:
         p = tres.get("welch_p", float("nan"))
         tres["bonferroni_significant"] = bool((p == p) and (p < bonf_alpha))
         trend_tests[asset] = tres
+        hres = hac_contrast(rv[asset], reg_trend)
+        p_hac = hres.get("p_hac", float("nan"))
+        hres["bonferroni_alpha"] = bonf_alpha
+        hres["bonferroni_significant"] = bool((p_hac == p_hac) and (p_hac < bonf_alpha))
+        hac_trend_out[asset] = hres
 
     concord_sig = 0
     concord_sign = 0
+    concord_hac_sig = 0
     for asset in asset_list:
         sig_l = tests_out[asset]["bonferroni_significant"]
         sig_t = trend_tests[asset]["bonferroni_significant"]
         sign_l = np.sign(tests_out[asset]["diff_mean_rv"])
         sign_t = np.sign(trend_tests[asset]["diff_mean_rv"])
+        hac_sig_l = hac_level_out[asset]["bonferroni_significant"]
+        hac_sig_t = hac_trend_out[asset]["bonferroni_significant"]
         if sig_l == sig_t:
             concord_sig += 1
         if sign_l == sign_t:
             concord_sign += 1
+        if hac_sig_l == hac_sig_t:
+            concord_hac_sig += 1
 
     mean_table = pd.DataFrame(
         {reg: {a: regime_stats_out[a][reg]["mean_rv"] for a in asset_list}
@@ -262,33 +322,36 @@ def main() -> Dict:
 
     n_sig = sum(1 for a in asset_list if tests_out[a]["bonferroni_significant"])
     n_sig_trend = sum(1 for a in asset_list if trend_tests[a]["bonferroni_significant"])
+    n_hac_sig = sum(1 for a in asset_list if hac_level_out[a]["bonferroni_significant"])
+    n_hac_sig_trend = sum(1 for a in asset_list if hac_trend_out[a]["bonferroni_significant"])
     most_sensitive = None
     if asset_list:
         most_sensitive = max(
             asset_list,
-            key=lambda a: abs(tests_out[a].get("welch_t", 0.0))
-                          if tests_out[a].get("welch_t") == tests_out[a].get("welch_t")
+            key=lambda a: abs(hac_level_out[a].get("t_hac", 0.0))
+                          if hac_level_out[a].get("t_hac") == hac_level_out[a].get("t_hac")
                           else 0.0,
         )
 
-    if n_sig >= 2 and concord_sign >= max(2, n_tests - 1):
+    if n_hac_sig >= 2 and concord_sign >= max(2, n_tests - 1):
         verdict = "PASS"
         verdict_reason = (
-            f"{n_sig}/{n_tests} assets show Bonferroni-significant RV difference "
-            f"between strong vs weak USD level regime, with sign concordant across "
-            f"trend regime in {concord_sign}/{n_tests} assets."
+            f"{n_hac_sig}/{n_tests} assets show Bonferroni-significant HAC mean-RV "
+            f"differences in the level regime, with sign concordant across trend "
+            f"regime in {concord_sign}/{n_tests} assets."
         )
-    elif n_sig >= 1:
+    elif n_hac_sig >= 1:
         verdict = "CONDITIONAL_PASS"
         verdict_reason = (
-            f"{n_sig}/{n_tests} assets pass Bonferroni; trend-regime sign concordance "
-            f"{concord_sign}/{n_tests}. Effect not universal but isolated to {most_sensitive}."
+            f"{n_hac_sig}/{n_tests} assets pass HAC+Bonferroni; trend-regime sign "
+            f"concordance {concord_sign}/{n_tests}. Effect not universal but isolated "
+            f"to {most_sensitive}."
         )
     else:
         verdict = "NULL"
         verdict_reason = (
-            f"0/{n_tests} assets pass Bonferroni alpha={bonf_alpha:.4f}. "
-            f"USD regime does not systematically condition cross-asset RV at significance."
+            f"0/{n_tests} assets pass HAC+Bonferroni alpha={bonf_alpha:.4f}. "
+            f"Naive overlap-sensitive Welch differences do not survive robust inference."
         )
 
     period = {
@@ -324,18 +387,29 @@ def main() -> Dict:
             },
         },
         "rv_definition": "21d rolling std of daily log returns, annualized by sqrt(252)",
+        "inference_policy": {
+            "primary": f"OLS-HAC (Newey-West, maxlags={HAC_LAGS}) on mean RV difference strong-weak",
+            "secondary": "Welch t-test and Levene reported descriptively only",
+            "overlap_risk": "21d rolling RV induces serial correlation; HAC is required for paper-grade inference",
+        },
+        "rv_autocorr_diagnostics": rv_autocorr_out,
         "regime_stats_level": regime_stats_out,
         "tests_level": tests_out,
+        "hac_level": hac_level_out,
         "tests_trend": trend_tests,
+        "hac_trend": hac_trend_out,
         "bonferroni_alpha": bonf_alpha,
         "robustness": {
             "n_tests": n_tests,
             "n_bonferroni_sig_level": n_sig,
             "n_bonferroni_sig_trend": n_sig_trend,
+            "n_hac_bonferroni_sig_level": n_hac_sig,
+            "n_hac_bonferroni_sig_trend": n_hac_sig_trend,
             "level_vs_trend_sig_concordance": f"{concord_sig}/{n_tests}",
+            "level_vs_trend_hac_sig_concordance": f"{concord_hac_sig}/{n_tests}",
             "level_vs_trend_sign_concordance": f"{concord_sign}/{n_tests}",
         },
-        "most_sensitive_asset_by_abs_welch_t": most_sensitive,
+        "most_sensitive_asset_by_abs_hac_t": most_sensitive,
         "verdict": verdict,
         "verdict_reason": verdict_reason,
         "lookahead_protected": True,

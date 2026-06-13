@@ -32,24 +32,61 @@
     }
   },
   "rv_definition": "21d rolling std of daily log returns, annualized by sqrt(252)",
+  "inference_policy": {
+    "primary": "OLS-HAC (Newey-West, maxlags=21) on mean RV difference strong-weak",
+    "secondary": "Welch t-test and Levene reported descriptively only",
+    "overlap_risk": "21d rolling RV induces serial correlation; HAC is required for paper-grade inference"
+  },
+  "rv_autocorr_diagnostics": {
+    "EEM": {
+      "n_obs": 4110,
+      "acf_1": 0.9894237696197519,
+      "acf_5": 0.9165456151256681,
+      "acf_21": 0.47025684905791215
+    },
+    "GLD": {
+      "n_obs": 4110,
+      "acf_1": 0.9837644211798734,
+      "acf_5": 0.9044208558080612,
+      "acf_21": 0.4685493461102862
+    },
+    "DBC": {
+      "n_obs": 4110,
+      "acf_1": 0.9843216191665274,
+      "acf_5": 0.8993220838930392,
+      "acf_21": 0.42838893008364315
+    },
+    "USO": {
+      "n_obs": 4110,
+      "acf_1": 0.9899425389313727,
+      "acf_5": 0.9354327842411068,
+      "acf_21": 0.592382758962218
+    },
+    "DBB": {
+      "n_obs": 4110,
+      "acf_1": 0.9840109803411167,
+      "acf_5": 0.9090721440471345,
+      "acf_21": 0.5013327599636952
+    }
+  },
   "regime_stats_level": {
     "EEM": {
       "strong": {
-        "mean_rv": 0.2036182055974268,
-        "median_rv": 0.17541547603724322,
-        "std_rv": 0.10761055326505375,
+        "mean_rv": 0.20361820012179455,
+        "median_rv": 0.17541528030085515,
+        "std_rv": 0.10761057411143517,
         "n_days": 1887
       },
       "weak": {
-        "mean_rv": 0.1903749388918193,
-        "median_rv": 0.1830767827602415,
-        "std_rv": 0.07285121093519542,
+        "mean_rv": 0.19037500471367047,
+        "median_rv": 0.18307624978619919,
+        "std_rv": 0.07285137919539432,
         "n_days": 1356
       },
       "neutral": {
-        "mean_rv": 0.1883029048444248,
-        "median_rv": 0.1723125291167802,
-        "std_rv": 0.07541055140718879,
+        "mean_rv": 0.1883029805156862,
+        "median_rv": 0.1723136889866086,
+        "std_rv": 0.07541067796693866,
         "n_days": 867
       }
     },
@@ -75,21 +112,21 @@
     },
     "DBC": {
       "strong": {
-        "mean_rv": 0.1714262483113313,
-        "median_rv": 0.15826746083488633,
-        "std_rv": 0.07275418098098028,
+        "mean_rv": 0.17142624092710895,
+        "median_rv": 0.15826738835791992,
+        "std_rv": 0.07275417119557862,
         "n_days": 1887
       },
       "weak": {
-        "mean_rv": 0.15351584351042427,
-        "median_rv": 0.15097255159346318,
-        "std_rv": 0.052298958114364164,
+        "mean_rv": 0.15351578765470408,
+        "median_rv": 0.1509725126531022,
+        "std_rv": 0.05229893801657049,
         "n_days": 1356
       },
       "neutral": {
-        "mean_rv": 0.1524730888467126,
-        "median_rv": 0.14757847765986273,
-        "std_rv": 0.05307245699394743,
+        "mean_rv": 0.1524730414986379,
+        "median_rv": 0.14757850600820913,
+        "std_rv": 0.05307245324902967,
         "n_days": 867
       }
     },
@@ -115,36 +152,36 @@
     },
     "DBB": {
       "strong": {
-        "mean_rv": 0.18905695143058465,
-        "median_rv": 0.17222692496571343,
-        "std_rv": 0.06604553209482909,
+        "mean_rv": 0.18905692343723818,
+        "median_rv": 0.17222692496571243,
+        "std_rv": 0.0660455486164358,
         "n_days": 1887
       },
       "weak": {
-        "mean_rv": 0.17932125073598057,
-        "median_rv": 0.17519439528619396,
-        "std_rv": 0.053451700055661716,
+        "mean_rv": 0.17932125458303122,
+        "median_rv": 0.1751941067440858,
+        "std_rv": 0.05345161870556634,
         "n_days": 1356
       },
       "neutral": {
-        "mean_rv": 0.1863321923563326,
-        "median_rv": 0.1712192646532865,
-        "std_rv": 0.06897840527303378,
+        "mean_rv": 0.1863322105890735,
+        "median_rv": 0.17121926465328546,
+        "std_rv": 0.06897835063428064,
         "n_days": 867
       }
     }
   },
   "tests_level": {
     "EEM": {
-      "welch_t": 4.177316962427681,
-      "welch_p": 0.000030277523529130927,
-      "levene_stat": 31.309220489394843,
-      "levene_p": 2.383286163708681E-8,
+      "welch_t": 4.177290221855171,
+      "welch_p": 3.028106262781861e-05,
+      "levene_stat": 31.308398885082813,
+      "levene_p": 2.3842853003839772e-08,
       "n_strong": 1887,
       "n_weak": 1356,
-      "mean_strong_rv": 0.2036182055974268,
-      "mean_weak_rv": 0.1903749388918193,
-      "diff_mean_rv": 0.013243266705607493,
+      "mean_strong_rv": 0.20361820012179455,
+      "mean_weak_rv": 0.19037500471367047,
+      "diff_mean_rv": 0.013243195408124075,
       "bonferroni_alpha": 0.01,
       "bonferroni_significant": true
     },
@@ -162,23 +199,23 @@
       "bonferroni_significant": false
     },
     "DBC": {
-      "welch_t": 8.156132491089071,
-      "welch_p": 4.893385283864603E-16,
-      "levene_stat": 72.0601410599457,
-      "levene_p": 3.131584376596918E-17,
+      "welch_t": 8.156156513485346,
+      "welch_p": 4.892432178864656e-16,
+      "levene_stat": 72.06073588432187,
+      "levene_p": 3.130661091254327e-17,
       "n_strong": 1887,
       "n_weak": 1356,
-      "mean_strong_rv": 0.1714262483113313,
-      "mean_weak_rv": 0.15351584351042427,
-      "diff_mean_rv": 0.017910404800907026,
+      "mean_strong_rv": 0.17142624092710895,
+      "mean_weak_rv": 0.15351578765470408,
+      "diff_mean_rv": 0.01791045327240487,
       "bonferroni_alpha": 0.01,
       "bonferroni_significant": true
     },
     "USO": {
       "welch_t": 10.003153989366552,
-      "welch_p": 3.3395195370966934E-23,
+      "welch_p": 3.3395195370966934e-23,
       "levene_stat": 67.71364808154432,
-      "levene_p": 2.7072820032933404E-16,
+      "levene_p": 2.7072820032933404e-16,
       "n_strong": 1887,
       "n_weak": 1356,
       "mean_strong_rv": 0.3493921029197189,
@@ -188,30 +225,87 @@
       "bonferroni_significant": true
     },
     "DBB": {
-      "welch_t": 4.63153072221924,
-      "welch_p": 0.0000037745537583612795,
-      "levene_stat": 34.06778754500031,
-      "levene_p": 5.847503827816802E-9,
+      "welch_t": 4.631518330000375,
+      "welch_p": 3.7747781553358074e-06,
+      "levene_stat": 34.06832661223323,
+      "levene_p": 5.845900946143531e-09,
       "n_strong": 1887,
       "n_weak": 1356,
-      "mean_strong_rv": 0.18905695143058465,
-      "mean_weak_rv": 0.17932125073598057,
-      "diff_mean_rv": 0.009735700694604082,
+      "mean_strong_rv": 0.18905692343723818,
+      "mean_weak_rv": 0.17932125458303122,
+      "diff_mean_rv": 0.009735668854206958,
       "bonferroni_alpha": 0.01,
       "bonferroni_significant": true
     }
   },
+  "hac_level": {
+    "EEM": {
+      "coef_strong_minus_weak": 0.013243195408123786,
+      "se_hac": 0.01198496314834622,
+      "t_hac": 1.1049842410196469,
+      "p_hac": 0.2691664176984976,
+      "n_obs": 3243,
+      "hac_maxlags": 21,
+      "r2": 0.00474392173449345,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    },
+    "GLD": {
+      "coef_strong_minus_weak": 0.001642622638371569,
+      "se_hac": 0.008079293643670393,
+      "t_hac": 0.20331265464753323,
+      "p_hac": 0.8388906651087026,
+      "n_obs": 3243,
+      "hac_maxlags": 21,
+      "r2": 0.0001570078393738905,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    },
+    "DBC": {
+      "coef_strong_minus_weak": 0.01791045327240468,
+      "se_hac": 0.008405164506640268,
+      "t_hac": 2.130886701652897,
+      "p_hac": 0.03309847720801909,
+      "n_obs": 3243,
+      "hac_maxlags": 21,
+      "r2": 0.018153770976132133,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    },
+    "USO": {
+      "coef_strong_minus_weak": 0.05876343169591428,
+      "se_hac": 0.022539309504756043,
+      "t_hac": 2.6071531465289364,
+      "p_hac": 0.009129851609960054,
+      "n_obs": 3243,
+      "hac_maxlags": 21,
+      "r2": 0.02527248546694505,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    },
+    "DBB": {
+      "coef_strong_minus_weak": 0.009735668854206776,
+      "se_hac": 0.007940689072638776,
+      "t_hac": 1.2260483649653227,
+      "p_hac": 0.22018047512034677,
+      "n_obs": 3243,
+      "hac_maxlags": 21,
+      "r2": 0.006143598367447267,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    }
+  },
   "tests_trend": {
     "EEM": {
-      "welch_t": 5.587229807223617,
-      "welch_p": 2.4594204801493955E-8,
-      "levene_stat": 48.65294101990798,
-      "levene_p": 3.5531535646885528E-12,
+      "welch_t": 5.587204891182486,
+      "welch_p": 2.4597705007587418e-08,
+      "levene_stat": 48.652158877392985,
+      "levene_p": 3.5545540190609037e-12,
       "n_strong": 2398,
       "n_weak": 1650,
-      "mean_strong_rv": 0.20194585321665134,
-      "mean_weak_rv": 0.18684763934370247,
-      "diff_mean_rv": 0.015098213872948879,
+      "mean_strong_rv": 0.20194586916101712,
+      "mean_weak_rv": 0.18684770522719404,
+      "diff_mean_rv": 0.015098163933823072,
       "bonferroni_alpha": 0.01,
       "bonferroni_significant": true
     },
@@ -229,23 +323,23 @@
       "bonferroni_significant": false
     },
     "DBC": {
-      "welch_t": 8.351980840235052,
-      "welch_p": 9.134180223525104E-17,
-      "levene_stat": 69.23194600057406,
-      "levene_p": 1.1831285995448795E-16,
+      "welch_t": 8.352011531708557,
+      "welch_p": 9.131846687189723e-17,
+      "levene_stat": 69.23275518216238,
+      "levene_p": 1.1826514546975265e-16,
       "n_strong": 2398,
       "n_weak": 1650,
-      "mean_strong_rv": 0.1677610349684092,
-      "mean_weak_rv": 0.15179455837420636,
-      "diff_mean_rv": 0.015966476594202833,
+      "mean_strong_rv": 0.1677610286395282,
+      "mean_weak_rv": 0.15179449770307576,
+      "diff_mean_rv": 0.015966530936452422,
       "bonferroni_alpha": 0.01,
       "bonferroni_significant": true
     },
     "USO": {
       "welch_t": 11.2999977648794,
-      "welch_p": 3.7667710255027686E-29,
+      "welch_p": 3.7667710255027686e-29,
       "levene_stat": 85.51087682510189,
-      "levene_p": 3.635419943714533E-20,
+      "levene_p": 3.635419943714533e-20,
       "n_strong": 2398,
       "n_weak": 1650,
       "mean_strong_rv": 0.3419251598783671,
@@ -255,17 +349,74 @@
       "bonferroni_significant": true
     },
     "DBB": {
-      "welch_t": 4.366423816917631,
-      "welch_p": 0.000012957832701172634,
-      "levene_stat": 27.461020351477824,
-      "levene_p": 1.684641610044858E-7,
+      "welch_t": 4.366427780378249,
+      "welch_p": 1.2957598610822101e-05,
+      "levene_stat": 27.461614785393078,
+      "levene_p": 1.684127384567267e-07,
       "n_strong": 2398,
       "n_weak": 1650,
-      "mean_strong_rv": 0.187619126681538,
-      "mean_weak_rv": 0.17927229754737786,
-      "diff_mean_rv": 0.008346829134160128,
+      "mean_strong_rv": 0.18761911753654026,
+      "mean_weak_rv": 0.17927228772149625,
+      "diff_mean_rv": 0.008346829815044005,
       "bonferroni_alpha": 0.01,
       "bonferroni_significant": true
+    }
+  },
+  "hac_trend": {
+    "EEM": {
+      "coef_strong_minus_weak": 0.01509816393382271,
+      "se_hac": 0.010131057049370902,
+      "t_hac": 1.4902851558574775,
+      "p_hac": 0.1361492738749149,
+      "n_obs": 4048,
+      "hac_maxlags": 21,
+      "r2": 0.00659584842754235,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    },
+    "GLD": {
+      "coef_strong_minus_weak": -0.0012995480838783845,
+      "se_hac": 0.007917240844983627,
+      "t_hac": -0.16414153735158626,
+      "p_hac": 0.8696197231598046,
+      "n_obs": 4048,
+      "hac_maxlags": 21,
+      "r2": 9.158439390177797e-05,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    },
+    "DBC": {
+      "coef_strong_minus_weak": 0.01596653093645204,
+      "se_hac": 0.00724110994057959,
+      "t_hac": 2.204983913719456,
+      "p_hac": 0.0274552233615087,
+      "n_obs": 4048,
+      "hac_maxlags": 21,
+      "r2": 0.015310480546433358,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
+    },
+    "USO": {
+      "coef_strong_minus_weak": 0.05691029523762339,
+      "se_hac": 0.019657695765499354,
+      "t_hac": 2.8950644020803793,
+      "p_hac": 0.00379080749927622,
+      "n_obs": 4048,
+      "hac_maxlags": 21,
+      "r2": 0.025049780709820668,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": true
+    },
+    "DBB": {
+      "coef_strong_minus_weak": 0.008346829815043727,
+      "se_hac": 0.007303744965609078,
+      "t_hac": 1.1428150701244624,
+      "p_hac": 0.2531153804529396,
+      "n_obs": 4048,
+      "hac_maxlags": 21,
+      "r2": 0.004394385651919186,
+      "bonferroni_alpha": 0.01,
+      "bonferroni_significant": false
     }
   },
   "bonferroni_alpha": 0.01,
@@ -273,35 +424,19 @@
     "n_tests": 5,
     "n_bonferroni_sig_level": 4,
     "n_bonferroni_sig_trend": 4,
+    "n_hac_bonferroni_sig_level": 1,
+    "n_hac_bonferroni_sig_trend": 1,
     "level_vs_trend_sig_concordance": "5/5",
+    "level_vs_trend_hac_sig_concordance": "5/5",
     "level_vs_trend_sign_concordance": "4/5"
   },
-  "most_sensitive_asset_by_abs_welch_t": "USO",
+  "most_sensitive_asset_by_abs_hac_t": "USO",
   "verdict": "CONDITIONAL_PASS",
-  "verdict_reason": "Codex review CONDITIONAL_PASS: 4/5 assets show large mean RV difference between strong vs weak USD regime, sign-concordant across level + trend regime definitions, Bonferroni alpha=0.01 cleared. Caveat: standard Welch t-test does not account for 21d-RV serial autocorrelation (acf1≈0.98, acf21≈0.47-0.59), so p-values are likely optimistic; HAC/Newey-West or block-bootstrap correction recommended as follow-up before promoting to strong inference.",
+  "verdict_reason": "1/5 assets pass HAC+Bonferroni; trend-regime sign concordance 4/5. Effect not universal but isolated to USO.",
   "lookahead_protected": true,
   "seed": 42,
   "figures": [
     "figures/rv_by_regime_level.png",
     "figures/rv_by_regime_trend.png"
-  ],
-  "codex_review": {
-    "verdict": "CONDITIONAL_PASS",
-    "timestamp": "2026-06-10T01:25:00+08:00",
-    "tool": "codex-cli 0.137.0 gpt-5.4",
-    "high_risk": "Welch t-test ignores strong serial autocorrelation in 21d rolling RV (acf1 ~0.98, acf21 ~0.47-0.59); SE under-estimated, p-values optimistic",
-    "medium_risk_1": "README line numbers stale (shift(1) at lines 105/116 not 90/100); lookahead protection itself is correct",
-    "medium_risk_2": "yfinance fetch not version-locked / no raw cache; strict reproducibility weakened (seed=42 unused since no randomness)",
-    "passed_checks": [
-      "lookahead_protection_via_shift1",
-      "bonferroni_alpha_correct",
-      "regime_balance_adequate",
-      "data_integrity_general"
-    ],
-    "followup_recommended": [
-      "add_hac_newey_west_or_block_bootstrap",
-      "fix_readme_line_numbers",
-      "consider_raw_data_snapshot"
-    ]
-  }
+  ]
 }

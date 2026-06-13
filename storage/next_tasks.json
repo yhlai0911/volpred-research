@@ -29323,7 +29323,7 @@
     "title": "K1439 followup: add reproduce.py + HAC/Newey-West or block-bootstrap robustness",
     "description": "Per Codex 24h review (CONDITIONAL_PASS 2026-06-13 paper_review_mile_2c758888): K1439 published article mile_2c758888 (USD regime × cross-asset RV) remains in feed. Two non-blocking followups: (1) add experiments/K1439/reproduce.py wrapper + pin a raw yfinance snapshot for replication-package compliance; (2) rerun robustness with HAC/Newey-West or block-bootstrap over regime-conditioned mean RV differences (21d rolling RV creates overlapping observations → standard Welch t-test p-values optimistic). Both stay grounded in current findings (4/5 Bonferroni positive); paper-grade inference requires the HAC layer. heavy compute → consider compute_queue if MLE-bootstrap heavy.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "codex_review_followup",
     "parent_task_id": "paper_review_mile_2c758888",
@@ -29335,6 +29335,31 @@
       "reproduce-py",
       "hac-newey-west"
     ],
-    "created_at": "2026-06-13T19:08:00+08:00"
+    "created_at": "2026-06-13T19:08:00+08:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T11:40:15.283563+00:00",
+    "claim_session_id": "01d9d32a126a",
+    "started_at": "2026-06-13T11:40:26.762370+00:00",
+    "completed_at": "2026-06-13T11:43:33.520544+00:00",
+    "result": "Added experiments/k1439/reproduce.py and upgraded K1439 inference to HAC/Newey-West (maxlags=21) because 21d RV overlap creates acf1≈0.98-0.99. Re-ran experiment: naive Welch 4/5 Bonferroni-significant shrank to HAC 1/5, with only USO robust in both level/trend regimes. README and results were updated to downscope the conclusion and treat Welch as descriptive only."
+  },
+  {
+    "id": "K1439_article_correction_hac",
+    "title": "K1439 article mile_2c758888 correction: 4/5 Welch → 1/5 HAC (only USO robust)",
+    "description": "K1439 HAC follow-up（task K1439_reproduce_and_hac_followup, 2026-06-13）顯示原文宣稱「4/5 資產在強美元下波動率顯著偏高」是 naive Welch 結果。21d rolling RV 自相關 ACF(1)≈0.98-0.99，OLS-HAC/Newey-West (maxlags=21) Bonferroni 後只剩 USO 1/5 robust。Published article mile_2c758888 主標+section title+結論段落+表格需全面更新：(a) section 標題從『4/5 顯著』改成『naive Welch 4/5 顯著但 HAC 後僅 USO robust』；(b) 加 HAC 表格（level + trend 兩個 regime）；(c) 結論段落重寫成『USO 是唯一在嚴格推論下保持顯著的資產』；(d) 開口段落（原來『一個讓我想繼續追的問題』）改成『HAC 結果已收歸 canonical』。完整鏈：feed_publisher → arc-dedup gate (--update-existing) → anti-ai-style 9-checklist → 3-model gate → published 直接更新 in-place。研究誠實原則 #6: 推翻舊結論必回溯更正。Skill canonical: feed-publisher + anti-ai-style + arc-dedup gate。Inputs: experiments/k1439/{README.md,k1439_results.json} (HAC results table)、原 article body (storage/reports/feed.json id=mile_2c758888)。Output: 同 article id 內文 updated + feed.json content_updated_at bumped + Supabase sync。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "research_honesty_correction",
+    "parent_task_id": "K1439_reproduce_and_hac_followup",
+    "parent_article_id": "mile_2c758888",
+    "k_id": "K1439",
+    "tags": [
+      "k1439-correction",
+      "research-honesty",
+      "hac-canonical",
+      "article-update-in-place"
+    ],
+    "created_at": "2026-06-13T20:10:00+08:00"
   }
 ]

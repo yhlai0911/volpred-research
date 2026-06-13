@@ -1,8 +1,8 @@
 # K1439: USD Regime Conditional Cross-Asset Realized Volatility
 
 - **K id**: K1439
-- **Status**: completed, awaiting Codex review
-- **Verdict**: **PASS** (4/5 assets Bonferroni-significant, sign concordant 4/5 across robustness regime)
+- **Status**: completed, Codex follow-up integrated
+- **Verdict**: **CONDITIONAL_PASS** (naive Welch = 4/5 significant, but HAC/Newey-West + Bonferroni leaves only USO robustly significant)
 - **Created**: 2026-06-10
 
 ## Hypothesis
@@ -38,8 +38,9 @@ differ systematically? Which asset is most regime-sensitive?
   Same `shift(1)` protection.
 
 ### Tests
-- **Welch t-test** (strong vs weak) per asset, two-sided
-- **Levene** (equality of variances) per asset
+- **Primary inference**: OLS-HAC / Newey-West (`maxlags=21`) on strong-minus-weak mean RV
+- **Welch t-test** (strong vs weak) per asset, two-sided, **descriptive only**
+- **Levene** (equality of variances) per asset, descriptive variance check
 - **Bonferroni correction**: α = 0.05 / 5 = **0.01**
 
 ### Lookahead protection
@@ -47,12 +48,12 @@ differ systematically? Which asset is most regime-sensitive?
 - 21-day rolling RV is backward-looking by construction.
 - `seed=42` (no random ops in current pipeline, fixed for any future bootstrap).
 
-### Codex 24h-rule review (2026-06-13)
-- **VERDICT**: CONDITIONAL_PASS, PUBLISHABLE_AS_IS=YES, LOOKAHEAD_RISK=NONE.
-- **Caveat**: 21d rolling RV creates overlapping observations → Welch t-test p-values are
-  optimistic under serial autocorrelation. Result interpretation is
-  **association/conditioning, not causation**. Paper-grade inference requires HAC/Newey-West
-  or block-bootstrap over regime-conditioned mean RV differences (follow-up tracked).
+### Codex follow-up (2026-06-13)
+- **VERDICT**: follow-up completed, LOOKAHEAD_RISK=NONE.
+- `reproduce.py` added; `uv run python experiments/k1439/reproduce.py` now regenerates
+  the outputs and checks the saved verdict.
+- 21d rolling RV has extreme overlap autocorrelation, so **HAC/Newey-West is now the
+  canonical inference path** and Welch is downgraded to descriptive output only.
 - `yf.download(auto_adjust=True)` → "Adj Close" is dividend/split-adjusted.
 
 ## Results
@@ -67,6 +68,16 @@ differ systematically? Which asset is most regime-sensitive?
 | USO   | 1,887 | 1,356 | 0.349 | 0.291 | +10.00 | 3.3e-23 | ✔ |
 | DBB   | 1,887 | 1,356 | 0.189 | 0.179 | +4.63  | 3.8e-06 | ✔ |
 
+### Level regime — robust HAC inference (canonical)
+
+| Asset | strong-weak RV diff | HAC t | HAC p | Bonferroni sig |
+|-------|--------|--------|---------|------|
+| EEM   | +0.0132 | +1.10 | 0.269 | ✘ |
+| GLD   | +0.0016 | +0.20 | 0.839 | ✘ |
+| DBC   | +0.0179 | +2.13 | 0.033 | ✘ |
+| USO   | +0.0588 | +2.61 | 0.0091 | ✔ |
+| DBB   | +0.0097 | +1.23 | 0.220 | ✘ |
+
 ### Trend regime — robustness
 
 | Asset | Welch t | p-value | Bonferroni sig |
@@ -77,32 +88,55 @@ differ systematically? Which asset is most regime-sensitive?
 | USO   | +11.30  | 3.8e-29 | ✔ |
 | DBB   | +4.37   | 1.3e-05 | ✔ |
 
-- Bonferroni-sig assets concordant across two regime definitions: **5/5** (same sig/non-sig pattern)
+### Trend regime — HAC robustness
+
+| Asset | strong-weak RV diff | HAC t | HAC p | Bonferroni sig |
+|-------|--------|--------|---------|------|
+| EEM   | +0.0151 | +1.49 | 0.136 | ✘ |
+| GLD   | -0.0013 | -0.16 | 0.870 | ✘ |
+| DBC   | +0.0160 | +2.20 | 0.027 | ✘ |
+| USO   | +0.0569 | +2.90 | 0.0038 | ✔ |
+| DBB   | +0.0083 | +1.14 | 0.253 | ✘ |
+
+- HAC Bonferroni-sig assets concordant across two regime definitions: **5/5** (only USO survives in both)
 - Sign of `mean(strong) − mean(weak)` concordant across two definitions: **4/5** (GLD flips sign but both null)
-- **Most sensitive asset**: **USO** (|t| ≈ 10–11 under both definitions; ~6 vol-points higher under strong USD)
+- **Most sensitive asset**: **USO** (~5.7-5.9 vol-points higher under strong USD; HAC t ≈ 2.6-2.9)
+
+### Overlap diagnostics
+
+21d rolling RV is highly persistent for every asset, which is why the Welch p-values were too optimistic:
+
+| Asset | ACF(1) | ACF(5) | ACF(21) |
+|-------|--------|--------|---------|
+| EEM | 0.989 | 0.917 | 0.470 |
+| GLD | 0.984 | 0.904 | 0.469 |
+| DBC | 0.984 | 0.899 | 0.428 |
+| USO | 0.990 | 0.935 | 0.592 |
+| DBB | 0.984 | 0.909 | 0.501 |
 
 ## Interpretation
 
-1. **Strong USD lifts EM/commodity/oil/industrial-metal vol uniformly** — 4 of 5 assets show
-   higher RV when USD is strong, sign consistent across two independent regime definitions.
-2. **Gold (GLD) is the lone exception** — vol is statistically indistinguishable across
-   USD regimes. Consistent with GLD's dual role as USD-hedge AND safe-haven: flows in both
-   directions stabilize its vol.
-3. **Oil (USO) is by far the most sensitive** — strong USD adds ~20% to its annualized RV
-   (0.349 vs 0.291). Mechanism candidates: dollar-denominated pricing, commodity flow
-   reversal, financialization linkage to risk-off.
+1. **Naive broad signal shrinks materially after robust inference** — the 4/5 Welch result is
+   mostly an overlap-autocorrelation artifact once HAC is applied.
+2. **Oil (USO) remains genuinely regime-sensitive** — it is the only asset that survives
+   HAC + Bonferroni under both level and trend definitions.
+3. **Gold (GLD) remains null** — both descriptive and HAC inference support the safe-haven
+   offset story.
+4. **DBC/DBB/EEM are directionally positive but not paper-grade significant** — these can be
+   discussed as suggestive conditioning evidence, not strong cross-asset facts.
 
 ## Verdict & Reason
 
-**PASS** — 4/5 assets show Bonferroni-significant RV difference between strong vs weak USD
-level regime; sign concordant 4/5 across the orthogonal trend-regime robustness check; the
-single non-significant asset (GLD) has a theoretically motivated explanation.
+**CONDITIONAL_PASS** — after correcting for overlap with HAC/Newey-West, only USO remains
+Bonferroni-significant under both regime definitions. The broader 4/5 pattern still points in
+the same direction, but the paper-grade claim must be narrowed from "uniform cross-asset effect"
+to "oil stands out; other commodities/EM are suggestive only."
 
 ## Mission Contribution
 
 - **Mission #2** (research rigor): adds a clean conditioning-based cross-asset
-  finding with proper Bonferroni + 2-definition robustness; new factor for the
-  vol-prediction model library (USD regime indicator).
+  finding, but now with overlap-aware HAC inference; new factor for the
+  vol-prediction model library (USD regime indicator), with honest downscoping.
 - **Mission #1/5** (article quality / exposure): clear publishable finding —
   "強美元下哪些波動率最敏感" is reader-facing and concrete.
 - **Mission #3** (paper): potential covariate for cross-asset vol-prediction paper —
@@ -111,14 +145,14 @@ single non-significant asset (GLD) has a theoretically motivated explanation.
 ## Files
 
 - `k1439.py` — self-contained script (`uv run python experiments/k1439/k1439.py`)
+- `reproduce.py` — rerun + verify saved verdict (`uv run python experiments/k1439/reproduce.py`)
 - `k1439_results.json` — full structured results (period, n_obs, per-asset stats, tests, verdict)
 - `figures/rv_by_regime_level.png` — primary bar chart
 - `figures/rv_by_regime_trend.png` — robustness bar chart
 
 ## Next Steps
 
-1. **Codex review** (recommended) — verify lookahead protection in `build_regime_level` /
-   `build_regime_trend` and regime-stat alignment.
-2. Main thread to write `knowledge.json` entry (worktree禁止寫 shared state).
-3. Candidate for general-reader article (Mission #1).
-4. Potential for HAR-RV+UUP-regime-dummy extension in cross-asset vol-prediction paper.
+1. Main thread to update `knowledge.json` with the **downscoped** conclusion: only USO is
+   robust after HAC; broad commodity/EM effect is suggestive only.
+2. Any article or paper text must cite **HAC** as the canonical test and avoid causal wording.
+3. If stronger inference is needed later, add moving-block bootstrap as a second robustness layer.
