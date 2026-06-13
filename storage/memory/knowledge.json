@@ -33726,5 +33726,23 @@
     "confidence": 0.6,
     "created_at": "2026-06-14T02:01:27.987579",
     "source": "hourly-01 dispatch (research backlog fallback auto-refill 2026-06-14)"
+  },
+  {
+    "item_id": "55643366",
+    "category": "paper-review-24h",
+    "content": "K969 24h-rule review (mile_47ff52c7): CONDITIONAL_PASS. PASS items: QLIKE table 5 numbers all match results.json oos_results (1.45/1.54/1.56/1.58/1.76); OLS 14,009 catastrophic failure verified (~7,939x baseline, article claim '8000x' OK); lookahead-clean (AR1/OLS/HAR all have .shift / iloc[:t-1] equivalent lag); HAR_Bespoke DM vs AR1_r2 p=8.08e-14 (18% improvement statistically significant). FAIL→Fixed in published article: (a) Equal_Weight 13%→12% (raw 12.48%), (b) GK 11%→10% (raw 10.47%), (c) improvement range 9-11%→10-12%, (d) correlation 0.95-0.98→0.89-0.98 (Park-RS=0.889 was outside). Methodological note (code-only, not article-facing): final OLS/Ridge weights in results.json line 737-738 use full-sample target (lines 187-193, 230-232) — diagnostic-only; not used for OOS QLIKE forecast which is the headline claim. Article re-synced to Supabase incremental sync.",
+    "evidence": [
+      "experiments/k969/k969_bespoke_rv.py",
+      "experiments/k969/k969_bespoke_rv_results.json",
+      "storage/reports/feed.json#mile_47ff52c7"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-06-14T03:13:45.835069",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K969",
+    "reviewer": "Codex CLI (gpt-5.4 medium, 24h-rule review)",
+    "reviewer_source": "codex_cli_0.135",
+    "task_id": "paper_review_mile_47ff52c7",
+    "article_id": "mile_47ff52c7"
   }
 ]

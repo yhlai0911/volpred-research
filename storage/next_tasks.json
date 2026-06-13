@@ -29552,7 +29552,7 @@
     "title": "Paper review (Codex 24h-rule): 量今天的波動，選哪種方法差很多？五種工具實測 20 年 SPY 資料",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_47ff52c7 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_47ff52c7",
@@ -29561,7 +29561,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-13T17:08:18+00:00"
+    "created_at": "2026-06-13T17:08:18+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-13T19:08:10.940589+00:00",
+    "claim_session_id": "81cc21e7766b",
+    "started_at": "2026-06-13T19:08:15.884154+00:00",
+    "completed_at": "2026-06-13T19:13:57.250855+00:00",
+    "result": "Codex 24h-rule review CONDITIONAL_PASS. 4 article fixes (Equal_Weight 13→12, GK 11→10, range 9-11→10-12, corr 0.95-0.98→0.89-0.98). Supabase re-synced. Knowledge entry 55643366."
   },
   {
     "id": "research_llm_novel_risk_intensity_rv",
