@@ -1,0 +1,207 @@
+{
+  "experiment_id": "K1492",
+  "title": "Stablecoin Redemption Pressure to Crypto/Treasury Vol Pilot",
+  "seed": 42,
+  "data_sources": {
+    "stablecoin_supply": "DefiLlama stablecoin/{id} chainBalances (USDT id=1, USDC id=2)",
+    "stablecoin_prices": "DefiLlama stablecoinprices (tether, usd-coin)",
+    "market_prices": "yfinance adjusted close for BTC-USD, ETH-USD, SHY, TLT"
+  },
+  "sample": {
+    "requested_start": "2021-01-01",
+    "requested_end": "2026-06-14",
+    "oos_start": "2024-01-01"
+  },
+  "literature": [
+    {
+      "title": "Stablecoin Shocks",
+      "source": "IMF Working Paper 2026/044",
+      "link": "https://www.imf.org/en/publications/wp/issues/2026/03/06/stablecoin-shocks-574528",
+      "note": "Stablecoin shocks affect Treasury yields and broader financial markets."
+    },
+    {
+      "title": "Stablecoins and Safe Asset Prices",
+      "source": "BIS Working Paper 1270 (2026)",
+      "link": "https://www.bis.org/publ/work1270.pdf",
+      "note": "Stablecoin inflows compress short-term T-bill yields."
+    },
+    {
+      "title": "Primary and Secondary Markets for Stablecoins",
+      "source": "Federal Reserve FEDS Notes (2024-02-23)",
+      "link": "https://www.federalreserve.gov/econres/notes/feds-notes/primary-and-secondary-markets-for-stablecoins-20240223.html",
+      "note": "Peg stress differs across primary vs secondary market dynamics."
+    }
+  ],
+  "signal_summary": {
+    "combined_supply_latest_usd": 261483076573.38184,
+    "redemption_pressure_mean": 0.0005661288366007356,
+    "redemption_pressure_p95": 0.00262518691594806,
+    "peg_dev_max_mean_bps": 12.021929650351922,
+    "peg_dev_max_p95_bps": 44.87653869242691
+  },
+  "asset_results": [
+    {
+      "asset": "BTC-USD",
+      "sample_start": "2021-06-01",
+      "sample_end": "2026-06-13",
+      "n_obs": 1839,
+      "oos_start": "2024-01-01",
+      "oos_n": 895,
+      "qlike_baseline": -1.159111515608877,
+      "qlike_full": -1.1644656069442134,
+      "qlike_improvement": 0.005354091335336486,
+      "dm_hln_stat": 5.100042216730724,
+      "dm_hln_pvalue": 4.1464707201122053e-07,
+      "event_threshold_q90": 0.002384043874439712,
+      "event_n": 184,
+      "event_forward_rv5_mean": 0.3265656398300722,
+      "baseline_forward_rv5_mean": 0.2011999043999532,
+      "event_forward_rv5_ratio": 1.623090432393606,
+      "in_sample_full_coefficients": {
+        "const": 0.028995674453678125,
+        "rv5_lag1": 0.8464729151896783,
+        "redemption_pressure": -0.9576877544278548,
+        "peg_dev_max": 5.696589471285762
+      },
+      "in_sample_full_pvalues": {
+        "const": 5.547943941392557e-06,
+        "rv5_lag1": 1.608722041458479e-96,
+        "redemption_pressure": 0.6821540668477772,
+        "peg_dev_max": 0.07104899918802772
+      },
+      "verdict": "PASS"
+    },
+    {
+      "asset": "ETH-USD",
+      "sample_start": "2021-06-01",
+      "sample_end": "2026-06-13",
+      "n_obs": 1839,
+      "oos_start": "2024-01-01",
+      "oos_n": 895,
+      "qlike_baseline": -0.40644999946189236,
+      "qlike_full": -0.4043760243324252,
+      "qlike_improvement": -0.002073975129467165,
+      "dm_hln_stat": -0.7342282381312992,
+      "dm_hln_pvalue": 0.46300216793328475,
+      "event_threshold_q90": 0.002384043874439712,
+      "event_n": 184,
+      "event_forward_rv5_mean": 0.4764337925158379,
+      "baseline_forward_rv5_mean": 0.3529829499163588,
+      "event_forward_rv5_ratio": 1.3497359932788011,
+      "in_sample_full_coefficients": {
+        "const": 0.043888310397093365,
+        "rv5_lag1": 0.8746110804569462,
+        "redemption_pressure": -0.6222170855636457,
+        "peg_dev_max": 1.582075242080684
+      },
+      "in_sample_full_pvalues": {
+        "const": 3.845861906833016e-05,
+        "rv5_lag1": 5.296675367633314e-76,
+        "redemption_pressure": 0.8547231364803338,
+        "peg_dev_max": 0.6583923086767924
+      },
+      "verdict": "NULL"
+    },
+    {
+      "asset": "SHY",
+      "sample_start": "2021-06-01",
+      "sample_end": "2026-06-12",
+      "n_obs": 1265,
+      "oos_start": "2024-01-01",
+      "oos_n": 614,
+      "qlike_baseline": -7.538315170976502,
+      "qlike_full": -7.402550433100369,
+      "qlike_improvement": -0.13576473787613352,
+      "dm_hln_stat": -1.7569152292862162,
+      "dm_hln_pvalue": 0.07943147794816574,
+      "event_threshold_q90": 0.0023834213781597892,
+      "event_n": 127,
+      "event_forward_rv5_mean": 0.0004437443344188173,
+      "baseline_forward_rv5_mean": 0.0003931143495773256,
+      "event_forward_rv5_ratio": 1.128792003893851,
+      "in_sample_full_coefficients": {
+        "const": -3.032187093314034e-05,
+        "rv5_lag1": 0.8810942235010227,
+        "redemption_pressure": 0.021867884766117472,
+        "peg_dev_max": 0.0544364643115751
+      },
+      "in_sample_full_pvalues": {
+        "const": 0.6094382452136997,
+        "rv5_lag1": 3.586733612629005e-49,
+        "redemption_pressure": 0.12875917563358252,
+        "peg_dev_max": 0.09282988485023697
+      },
+      "verdict": "NULL"
+    },
+    {
+      "asset": "TLT",
+      "sample_start": "2021-06-01",
+      "sample_end": "2026-06-12",
+      "n_obs": 1265,
+      "oos_start": "2024-01-01",
+      "oos_n": 614,
+      "qlike_baseline": -3.3461867046021503,
+      "qlike_full": -3.345629892504064,
+      "qlike_improvement": -0.0005568120980861124,
+      "dm_hln_stat": -0.6989426306785617,
+      "dm_hln_pvalue": 0.4848529787857454,
+      "event_threshold_q90": 0.0023834213781597892,
+      "event_n": 127,
+      "event_forward_rv5_mean": 0.02514625394855745,
+      "baseline_forward_rv5_mean": 0.025090632273944907,
+      "event_forward_rv5_ratio": 1.002216830329553,
+      "in_sample_full_coefficients": {
+        "const": 0.005622806151440299,
+        "rv5_lag1": 0.8339498718599339,
+        "redemption_pressure": 0.5455556525033665,
+        "peg_dev_max": -0.28022177995304187
+      },
+      "in_sample_full_pvalues": {
+        "const": 2.2209070754853325e-12,
+        "rv5_lag1": 1.6051963805099608e-252,
+        "redemption_pressure": 0.03713100253299016,
+        "peg_dev_max": 0.09802570244795811
+      },
+      "verdict": "NULL"
+    }
+  ],
+  "btc_horse_race": {
+    "baseline": {
+      "mean_qlike": -1.159111515608877
+    },
+    "flow_only": {
+      "mean_qlike": -1.1591090593328839,
+      "qlike_improvement_vs_baseline": -2.4562759930457645e-06,
+      "dm_hln_stat_vs_baseline": -0.021357904234227676,
+      "dm_hln_pvalue_vs_baseline": 0.9829649192921601
+    },
+    "peg_only": {
+      "mean_qlike": -1.1643211371674378,
+      "qlike_improvement_vs_baseline": 0.005209621558560862,
+      "dm_hln_stat_vs_baseline": 5.233573472414556,
+      "dm_hln_pvalue_vs_baseline": 2.072768974237249e-07
+    },
+    "full": {
+      "mean_qlike": -1.1644656069442134,
+      "qlike_improvement_vs_baseline": 0.005354091335336486,
+      "dm_hln_stat_vs_baseline": 5.100042216730724,
+      "dm_hln_pvalue_vs_baseline": 4.1464707201122053e-07
+    }
+  },
+  "best_assets": [
+    "BTC-USD"
+  ],
+  "verdict": "BTC_ONLY",
+  "interpretation": "Peg deviation carries incremental information for BTC 5-day realized variance, while stablecoin redemption pressure itself is mostly null and Treasury proxies do not benefit.",
+  "limitations": [
+    "SHY and TLT are ETF proxies, not direct Treasury yield or bill microstructure series.",
+    "DefiLlama peg prices are end-of-day snapshots and may miss intraday depeg severity.",
+    "Supply data aggregates circulating balances by chain and does not identify reserve-sale composition.",
+    "This is reduced-form forecasting evidence, not causal identification of Treasury funding stress."
+  ],
+  "artifacts": {
+    "fig_signal_timeseries": "experiments/k1492/fig_signal_timeseries.png",
+    "fig_qlike_improvement": "experiments/k1492/fig_qlike_improvement.png",
+    "fig_event_study": "experiments/k1492/fig_event_study.png"
+  }
+}
