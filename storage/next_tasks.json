@@ -29456,5 +29456,35 @@
     "started_at": "2026-06-13T14:28:21.424585+00:00",
     "completed_at": "2026-06-13T14:30:27.137948+00:00",
     "result": "Stale duplicate closed instead of rerun. Existing K1029 and K1432 already cover K757 financial early-warning extension; K1432 OOS HAR-RV/HAR-RV+VIX comparison concludes NULL/worse. Updated research_program.md completion state, logged lesson in docs/error_log.md, and wrote duplicate audit receipt."
+  },
+  {
+    "id": "platform_ops_refill_research_backlog_fallback_2026_06_13",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "title": "refill_task_pool 加 research-backlog fallback source",
+    "created_at": "2026-06-13T15:52:27.837440+00:00",
+    "source": "ops_discovered",
+    "description": "pool-empty critical 根因：refill 只 source 自 publication_candidates missing gaps，全覆蓋後就空。dashboard 一直建議 'research-backlog fallback' 但 script 沒實作。需在 scripts/refill_task_pool.py 加 fallback：當 article candidates 耗盡時，從 research_program.md backlog 或 journal-discovery batch 產 experiment 任務，確保池永不空（CLAUDE.md 硬規則）。"
+  },
+  {
+    "id": "experiment_0dte_intraday_overnight_vol_2026_06_13",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "title": "0DTE 時代的日內 vs 隔夜波動結構轉變",
+    "created_at": "2026-06-13T15:52:27.837440+00:00",
+    "source": "journal_discovery_batch",
+    "description": "0DTE 選擇權普及後，SPY 日內 vs 隔夜 realized vol 占比是否結構性轉變？描述統計 + 結構斷點檢定。資料 yfinance/TAIFEX。實驗三件套 + lookahead lag 明確。"
+  },
+  {
+    "id": "experiment_leverage_etf_eod_vol_amplification_2026_06_13",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "title": "槓桿 ETF 機械再平衡與尾盤波動放大",
+    "created_at": "2026-06-13T15:52:27.837440+00:00",
+    "source": "journal_discovery_batch",
+    "description": "槓桿 ETF 收盤前機械再平衡是否放大標的尾盤波動？事件研究 + 描述統計。實驗三件套 + seed 固定。"
   }
 ]
