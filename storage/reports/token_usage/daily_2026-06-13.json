@@ -1,0 +1,172 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-13",
+  "week_range": "2026-06-12 → 2026-06-19",
+  "totals": {
+    "input_tokens": 12,
+    "output_tokens": 901,
+    "cache_read_tokens": 98278,
+    "cache_create_tokens": 99706,
+    "billable_total": 100619,
+    "assistant_messages": 6,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.4169
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 12,
+      "output_tokens": 901,
+      "cache_read_tokens": 98278,
+      "cache_create_tokens": 99706,
+      "messages": 6,
+      "estimated_cost_usd": 0.4169
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 7,
+      "output_tokens": 480,
+      "cache_read_tokens": 32822,
+      "cache_create_tokens": 66076,
+      "messages": 3,
+      "billable_total": 66563,
+      "estimated_cost_usd": 0.2649,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "investigation": {
+      "input_tokens": 3,
+      "output_tokens": 165,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 32634,
+      "messages": 1,
+      "billable_total": 32802,
+      "estimated_cost_usd": 0.1249,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "token_report": {
+      "input_tokens": 1,
+      "output_tokens": 150,
+      "cache_read_tokens": 32822,
+      "cache_create_tokens": 808,
+      "messages": 1,
+      "billable_total": 959,
+      "estimated_cost_usd": 0.0151,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "bash_other": {
+      "input_tokens": 1,
+      "output_tokens": 106,
+      "cache_read_tokens": 32634,
+      "cache_create_tokens": 188,
+      "messages": 1,
+      "billable_total": 295,
+      "estimated_cost_usd": 0.0121,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 3,
+      "billable_total": 66563,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 3,
+          "billable_total": 66563
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 33761
+        },
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 32802
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 32802
+        },
+        {
+          "name": "今日是週六，執行每日 Token 用量報告。",
+          "messages": 1,
+          "billable_total": 32802
+        },
+        {
+          "name": "⏱ 開始 2026-06-13 22:44:13（台灣時間）",
+          "messages": 1,
+          "billable_total": 959
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 295,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 295
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 295
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 295
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 99706,
+      "billable_total": 100619,
+      "cache_create_share_pct": 99.1,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "91ffa016-c877-5c42-91ae-9ec7011912b1",
+          "messages": 6,
+          "billable_total": 100619,
+          "cache_create_tokens": 99706,
+          "cache_read_tokens": 98278,
+          "duration_minutes": 0.2,
+          "cache_create_share_pct": 99.1,
+          "first_ts": "2026-06-13T14:44:08.316000+00:00",
+          "last_ts": "2026-06-13T14:44:17.766000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "e65712e",
+      "message": "Ops patrol report 2026-06-13T12:03Z"
+    },
+    {
+      "sha": "cf9558f",
+      "message": "Ops patrol report 2026-06-13T06:04Z"
+    },
+    {
+      "sha": "409bed9",
+      "message": "Ops patrol report 2026-06-13T11:31Z"
+    }
+  ]
+}
