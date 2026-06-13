@@ -70,6 +70,14 @@ class TestClusterClassification:
     def test_tag_with_garch_classified(self):
         assert classify_topic_cluster("某文章", ["GARCH", "VolatilityModel"], "") == "garch"
 
+    def test_factor_etf_classified_before_spy_cluster(self):
+        cluster = classify_topic_cluster(
+            "美股 ETF 低波動配置還有用嗎",
+            ["USMV", "一般讀者"],
+            "",
+        )
+        assert cluster == "factor_etf"
+
 
 class TestTypeLockedExemption:
     """daily / member_qa / event / trending_repost must bypass cluster cap
@@ -168,3 +176,34 @@ class TestClusterCapEnforcement:
             status="published",
         )
         assert pub_id.startswith("mile_")
+
+
+def test_recent_cluster_counts_split_factor_etf_from_spy(tmp_path):
+    feed_path = tmp_path / "feed.json"
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "title": "SPY 估值觀察",
+                    "tags": ["SPY"],
+                    "status": "published",
+                    "published_at": "2026-06-10T00:00:00+00:00",
+                },
+                {
+                    "title": "USMV 的低波動配置",
+                    "tags": ["USMV", "美股 ETF"],
+                    "status": "published",
+                    "published_at": "2026-06-11T00:00:00+00:00",
+                },
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    import volpred.topic_clusters as tc
+
+    counts, total = tc.recent_cluster_counts(days=30, feed_path=feed_path)
+    assert total == 2
+    assert counts["spy"] == 1
+    assert counts["factor_etf"] == 1

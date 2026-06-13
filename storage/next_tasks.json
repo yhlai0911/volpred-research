@@ -29002,14 +29002,20 @@
     "description": "src/volpred/topic_clusters.py:14 spy cluster 變數含 '美股' 過於寬鬆，把所有 US-equity 相關文章都歸 spy → 30 天 spy=98 vs cap=10 → 所有 discretionary 美股文章被 blocked。Action: (1) 新增 'factor_etf' cluster: ['MTUM','QUAL','USMV','VLUE','SPLV','SPHQ','USHY','因子 ETF','低波動 ETF','smart beta'] (2) 從 spy variants 移除 '美股 ETF'（保留 'SPY','QQQ','S&P 500','標普','美股' 單獨）(3) 重 audit feed.json 過去 90d 文章看 cluster 分佈合理性 (4) test: scripts/audit_topic_clusters.py（新建）跑歷史驗證 false positive 率。Mission #1（文章品質）+ #4（運營）。",
     "task_type": "platform_ops",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "taxonomy",
       "refactor",
       "publisher-gate"
     ],
     "source": "hourly-12-discovered",
-    "created_at": "2026-06-13T04:09:00+00:00"
+    "created_at": "2026-06-13T04:09:00+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T05:34:48.109851+00:00",
+    "claim_session_id": "c9724db50796",
+    "started_at": "2026-06-13T05:34:56.082605+00:00",
+    "completed_at": "2026-06-13T05:37:42.832638+00:00",
+    "result": "Split factor ETF terms out of spy cluster in topic_clusters and set cap=6.\nAdded targeted tests for classification priority and recent-count split.\nRan 90d/30d audits: factor_etf now counts separately (90d=4, 30d=2); spy false positives reduced for new items."
   },
   {
     "id": "platform_ops_arc_dedup_too_strict_diagnose",
@@ -29108,5 +29114,53 @@
     "started_at": "2026-06-13T05:10:19.724974+00:00",
     "completed_at": "2026-06-13T05:24:15.436153+00:00",
     "result": "Published mile_e4002f4f (commit ab899aa0). 1731 words, 4 figs, anti_ai_gate PASS, editor_sop PASS. 7 數字 cross-check 與 k1466_results.json byte-match. Supabase synced 18 articles. URL: https://volpred.zeabur.app/v3/reports/mile_e4002f4f"
+  },
+  {
+    "id": "paper_review_mile_e4002f4f",
+    "title": "Paper review (Codex 24h-rule): 東南亞前沿 ETF 真的能分散風險嗎：VNM/EIDO/THD/EPHE 的解耦事實與危機失效",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e4002f4f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_e4002f4f",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-13T06:08:12+00:00"
+  },
+  {
+    "id": "K1468_article_general",
+    "title": "K1468: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1468 has verdict signal (score=0, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1468",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-13T06:08:12+00:00"
+  },
+  {
+    "id": "K1452_article_general",
+    "title": "K1452: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1452 has verdict signal (score=2, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1452",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-13T06:08:12+00:00"
   }
 ]

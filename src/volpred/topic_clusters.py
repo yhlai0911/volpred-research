@@ -11,6 +11,20 @@ FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 
 CLUSTER_VARIANTS: dict[str, list[str]] = {
     "vix": ["VIX", "VVIX", "VIX9D", "12/VIX", "恐慌指數", "VIX 條件槓桿"],
+    "factor_etf": [
+        "MTUM",
+        "QUAL",
+        "USMV",
+        "VLUE",
+        "SPLV",
+        "SPHQ",
+        "USHY",
+        "因子 ETF",
+        "低波動 ETF",
+        "smart beta",
+        "smart-beta",
+        "美股 ETF",
+    ],
     "spy": ["SPY", "QQQ", "美股", "S&P 500", "標普"],
     "garch": ["GARCH", "GJR-GARCH", "GJR", "EGARCH", "EWMA", "GARCH-MIDAS", "MF-GJR"],
     "vt": ["VT", "VT策略", "Hybrid-VT", "波動率目標", "volatility targeting", "risk parity", "Risk-Parity"],
@@ -20,6 +34,7 @@ CLUSTER_VARIANTS: dict[str, list[str]] = {
 CLUSTER_HARD_CAPS: dict[str, int] = {
     "vix": 15,
     "spy": 10,
+    "factor_etf": 6,
     "garch": 10,
     "vt": 8,
     "taiwan": 8,
