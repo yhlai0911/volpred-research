@@ -1,0 +1,89 @@
+{
+  "id": "mile_e4002f4f",
+  "title": "東南亞前沿 ETF 真的能分散風險嗎：VNM/EIDO/THD/EPHE 的解耦事實與危機失效",
+  "description": "K1466 檢視 VNM/EIDO/THD/EPHE 與 SPY 的相關性、VIX 體制與分散比；本次更正將 EEM 差異改為描述性比較，避免超出實驗檢定範圍。",
+  "content": "# 東南亞前沿 ETF 真的能分散風險嗎：VNM/EIDO/THD/EPHE 的解耦事實與危機失效\n\n*本文基於實驗（腳本：experiments/k1466/k1466.py，結果：experiments/k1466/k1466_results.json）。數據來源：yfinance（Yahoo Finance 複權收盤價），期間 2010-09-29 至 2026-06-09，3,946 個交易日。[提出：Claude，執行：Claude]*\n\n---\n\n大約有這樣一種說法在投資圈流傳：「買東南亞 ETF 可以分散美股風險，因為越南、印尼、泰國、菲律賓跟美國經濟關聯不高。」\n\n這句話是真的，但只說了一半。\n\nVolPred 針對四支東南亞前沿市場 ETF（VNM 越南、EIDO 印尼、THD 泰國、EPHE 菲律賓），橫跨近 16 年、3,946 個交易日，做了系統性的相關性與分散效益分析。結論分兩段讀：**平常日子裡，分散效果確實存在；但市場真正崩跌的時候，這四支 ETF 跟美股的相關性會明顯跳升，接近廣泛新興市場 EEM 的高相關區間。**\n\n---\n\n## 波動率：比 SPY 高出一截\n\n首先看各 ETF 的年化波動率。\n\n### 表一：年化已實現波動率（2010-2026）\n\n| 代碼 | 平均年化波動率 | 中位數年化波動率 | 峰態（超額） |\n|------|-------------|----------------|------------|\n| VNM（越南） | 22.9% | 20.6% | 4.8 |\n| EIDO（印尼） | 23.5% | 20.5% | 8.6 |\n| THD（泰國） | 20.2% | 18.0% | 14.8 |\n| EPHE（菲律賓） | 19.9% | 17.9% | 29.5 |\n| SPY（美股） | 14.5% | 12.2% | 13.3 |\n| EEM（廣泛新興市場） | 19.3% | 17.6% | 6.9 |\n\n四支東南亞 ETF 的平均波動率比 SPY 高 5-9 個百分點。菲律賓 EPHE 的峰態高達 29.5，遠超其他標的，反映出流動性較薄、個股風險集中的特性。買這些 ETF 等於承接更大的單日跳動幅度，和「穩健替代品」沾不上邊。\n\n下圖是各標的 21 日滾動波動率時間序列，可以看到 2020 年疫情期間，EIDO 和 EPHE 的年化波動率一度突破 130%，遠超 SPY 的 94% 高峰。\n\n![fig1_vol_series](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig1_vol_series.png)\n\n---\n\n## 平均相關性：確實比 EEM 低很多\n\n接著看關鍵問題：這四支 ETF 跟 SPY 的相關性有多高？\n\n計算方式是 60 天滾動 Pearson 相關係數，取全樣本中位數。\n\n### 表二：與 SPY 的 60 日滾動相關性（中位數，2010-2026）\n\n| 代碼 | 中位數相關性 | 四分位距（低） | 四分位距（高） |\n|------|------------|-------------|-------------|\n| VNM | **0.45** | 0.32 | 0.60 |\n| EIDO | **0.55** | 0.42 | 0.66 |\n| THD | **0.54** | 0.42 | 0.68 |\n| EPHE | **0.51** | 0.36 | 0.64 |\n| EEM（基準） | **0.75** | — | — |\n\n四支 ETF 的中位數相關性落在 0.45 至 0.55 之間，比廣泛新興市場 EEM 的 0.75 低了 20-30 個百分點。這是全樣本描述統計上的明顯差距；本文沒有另外對「ETF 與 EEM 的中位數差」做成對顯著性檢定。\n\n等權重組合四支 ETF 的分散比（Diversification Ratio）點估計為 1.254，透過 stationary block bootstrap（B=1000，block=20，seed=42）計算的 95% 信賴區間為 [1.21, 1.31]，嚴格大於 1.0，確認了統計意義上的分散效益。\n\n下圖顯示 60 日滾動相關性的時間變化，橫軸跨越 2010 至 2026 年。多數時期四支 ETF 的相關性確實低於 EEM。\n\n![fig2_rolling_corr_spy](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig2_rolling_corr_spy.png)\n\n---\n\n## 危機時期：分散效果幾乎歸零\n\n這裡是整篇分析最關鍵的部分。\n\n把樣本依照 VIX 水準分成兩個區間：VIX 低於 15 的「低恐慌」時期（1,438 個交易日），以及 VIX 高於 25 的「高恐慌」時期（490 個交易日，約佔總樣本 12.4%）。然後分別計算兩種環境下，四支 ETF 與 SPY 的相關性。\n\n### 表三：依 VIX 體制區分的條件相關性\n\n| 組合 | 低 VIX 相關性（VIX < 15） | 高 VIX 相關性（VIX > 25） | 差值 Δ | Fisher z p 值 |\n|------|------------------------|------------------------|-------|-------------|\n| VNM-SPY | 0.29 | 0.68 | +0.39 | < 0.001 |\n| EIDO-SPY | 0.40 | 0.75 | +0.35 | < 0.001 |\n| THD-SPY | 0.44 | 0.74 | +0.31 | < 0.001 |\n| EPHE-SPY | 0.41 | 0.72 | +0.31 | < 0.001 |\n\n四個組合的相關性跳幅介於 +0.31 到 +0.39 之間，全部通過 Fisher z 雙尾檢定（p < 0.001）。\n\nVNM 的例子最直接：市場平靜時，越南 ETF 與 SPY 的相關性只有 0.29，分散效果相當可觀；但當 VIX 超過 25，相關性跳升至 0.68，已經接近廣泛新興市場常見的高相關區間。\n\n這個規律符合 Bekaert、Ehrmann、Fratzscher 和 Mehl（2014, *Journal of Finance*）的研究發現：原本看似分割的市場，在系統性危機期間會急速整合。資金恐慌出逃的時候，市場不分東南亞還是廣泛新興市場，全部同步下跌。\n\n下圖以長條圖呈現各 ETF 在高低 VIX 環境下的相關性對比。\n\n![fig3_regime_corr_bar](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig3_regime_corr_bar.png)\n\n---\n\n## 分散比的時間軌跡\n\n把分散比換算成滾動 252 日窗口，可以看到它隨時間的變化。\n\n![fig4_diversification_ratio](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig4_diversification_ratio.png)\n\n2020 年疫情期間，分散比明顯下滑，印證了「危機時期分散效益萎縮」的結論。其他市場動盪期間（2015 年中國股災、2018 年 Q4 美股回調）也有類似的收斂跡象。\n\n---\n\n## 實務意涵：適合日常配置，不適合危機對沖\n\n分析到這裡，可以給出幾個具體結論。\n\n**第一，平均而言，東南亞前沿 ETF 確實比 EEM 提供更好的分散效益。** 0.45-0.55 的中位數相關性比 0.75 的 EEM 低了一截，等權重組合的分散比 [1.21, 1.31] 統計上顯著大於 1.0。如果目的是在長期投資組合裡增加一些非美股的分散配置，東南亞 ETF 的邏輯是成立的。\n\n**第二，當市場真正需要你的時候，這些 ETF 的保護力會變弱。** VIX 超過 25 的環境，往往對應系統性股市下跌（2020 疫情、2008 金融危機等大幅回撤時期）。正是在這種時候，投資人最希望非美股資產能夠抗跌，但資料顯示相關性反而跳升到 0.68-0.75，已接近 EEM 的高相關水準。把東南亞 ETF 當成「系統性下跌的避險工具」，依據目前的數據，是錯誤的定位。\n\n**第三，高波動率需要注意倉位控制。** 這四支 ETF 的年化波動率本身就比 SPY 高 5-9 個百分點，EPHE 的尾端風險（峰態 29.5）尤為突出。在組合配置時，不宜依照市值權重比照美股部位，建議基於波動率調整後的倉位計算。\n\n---\n\n## 研究限制\n\n這份分析有幾點需要誠實說明。\n\n**流動性偏差：** VNM、EIDO、THD、EPHE 的交易量遠低於 EEM，盤中成交稀疏時可能出現報價延遲（stale price）。這種現象會讓同步相關性被低估，意思是「平靜期的低相關性」可能略微高估了實際分散效果。危機時期因為成交量相對增加，此偏差影響較小。\n\n**VIX 體制是同期資料：** 本文用 VIX 當日水準切割高低體制，做的是描述性分析，不是預測信號。若要做策略應用，VIX 必須滯後一期（用 VIX_{t-1} 決定 t 日的倉位），避免前瞻偏誤。\n\n**DCC-GARCH 尚未完成：** Engle（2002）提出的動態條件相關（DCC-GARCH）模型能估計連續時變相關性，推論也更嚴謹。本研究使用固定窗口滾動相關係數，是計算上的簡化，未來工作將引入 DCC-GARCH 做更精確的時變分析。\n\n**等權重配置：** 本文的分散比計算採等權重（各 25%）。逆波動率或最小方差權重可能得到不同的分散比數字，未在此比較。\n\n---\n\n## 結論\n\n東南亞前沿 ETF 的「分散神話」，說它是神話未免苛刻，但說它是完整事實也嫌不足。\n\n把樣本期間全部攤開來看，VNM/EIDO/THD/EPHE 與 SPY 的 60 日滾動相關性中位數低於 EEM-SPY，等權重配置的分散比統計上顯著大於 1.0。這部分支持「平均狀態下有分散效益」的結論。\n\n但每次 VIX 超過 25，這些 ETF 與 SPY 的相關性就跳升到 0.68-0.75，低高 VIX 的差幅高達 +0.31 到 +0.39，全部通過 Fisher z 檢定。投資人最需要非相關資產的時候，正好是相關性最高的時候。\n\n這個發現呼應了 Bekaert et al.（2014）的研究主軸：全球危機期間，市場整合速度遠快於平時。東南亞前沿 ETF 的分散效益，是一把晴天傘，不是雨天傘。\n\n---\n\n## 2026-06-13 更正說明\n\nCodex 24 小時審查後，本文保留原始統計數字，但調整兩處推論語氣：第一，VNM/EIDO/THD/EPHE 相對 EEM 的相關性差距在本文中是描述性比較，並非另做成對顯著性檢定；第二，危機期 0.68-0.75 的相關性應解讀為接近高相關區間，不應寫成已直接證明與 EEM 沒有統計差異。\n\n---\n\n## 學術引用\n\n- Bekaert, G., & Harvey, C. R. (2003). Emerging markets finance. *Journal of Empirical Finance*, 10(1-2), 3-55.\n- Carrieri, F., Errunza, V., & Hogan, K. (2007). Characterizing world market integration through time. *Journal of Financial and Quantitative Analysis*, 42(4), 915-940.\n- Bekaert, G., Ehrmann, M., Fratzscher, M., & Mehl, A. (2014). The global crisis and equity market contagion. *Journal of Finance*, 69(6), 2597-2649.\n- Engle, R. (2002). Dynamic conditional correlation. *Journal of Business & Economic Statistics*, 20(3), 339-350.\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1466"
+    ],
+    "figs": [
+      "experiments/k1466/figs/fig1_vol_series.png",
+      "experiments/k1466/figs/fig2_rolling_corr_spy.png",
+      "experiments/k1466/figs/fig3_regime_corr_bar.png",
+      "experiments/k1466/figs/fig4_diversification_ratio.png"
+    ],
+    "dup_waiver": "K1466 is about SE Asia ETF rolling correlation and VIX-regime decoupling; mile_5b6f9e1b (K1173) is about institutional ownership proxy validation. False positive on EIDO/INDONESIA entity match.",
+    "cluster_waiver": "Primary topic is SE Asia frontier ETF diversification ratio and correlation structure. VIX is used only as a regime classifier variable, not as the subject. This article belongs in emerging_market / ETF / diversification cluster, not VIX cluster.",
+    "image_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig1_vol_series.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig2_rolling_corr_spy.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig3_regime_corr_bar.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig4_diversification_ratio.png"
+    ],
+    "supabase_storage_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig1_vol_series.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig2_rolling_corr_spy.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig3_regime_corr_bar.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig4_diversification_ratio.png"
+    ],
+    "topic_cluster": "vix",
+    "topic_cluster_30d": {
+      "count": 148,
+      "cap": 15,
+      "ratio": 0.3601,
+      "exempt": false
+    },
+    "content_type": "member_qa"
+  },
+  "tags": [
+    "新興市場",
+    "ETF",
+    "分散投資",
+    "波動率",
+    "相關性",
+    "VIX",
+    "東南亞"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-13T05:16:50.706695+00:00",
+  "published_at": "2026-06-13T05:16:50.706695+00:00",
+  "status": "published",
+  "proposer": "Claude",
+  "verified_live_at": "2026-06-13T05:16:58.800186+00:00",
+  "errata": {
+    "update_at": "2026-06-13T11:02:56.880865+00:00",
+    "update_action": "codex_24h_rule_errata_format_fix",
+    "update_summary": "Format-only follow-up: inserted blank line before the references separator after the Codex errata note to avoid Markdown setext-heading ambiguity.",
+    "update_history": [
+      {
+        "at": "2026-06-13T11:00:11.419346+00:00",
+        "action": "codex_24h_rule_errata",
+        "summary": "Codex review follow-up: softened unsupported EEM equality/statistical-noise language; preserved K1466 numeric findings; added explicit errata note.",
+        "old_content_chars": 5109,
+        "new_content_chars": 5364,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      },
+      {
+        "at": "2026-06-13T11:02:56.880865+00:00",
+        "action": "codex_24h_rule_errata_format_fix",
+        "summary": "Format-only follow-up: inserted blank line before the references separator after the Codex errata note to avoid Markdown setext-heading ambiguity.",
+        "old_content_chars": 5364,
+        "new_content_chars": 5365,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "cli override (--update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-13T11:02:56.880865+00:00"
+}

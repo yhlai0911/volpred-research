@@ -33640,5 +33640,26 @@
     ],
     "confidence": 0.65,
     "created_at": "2026-06-13T17:11:52.357048"
+  },
+  {
+    "item_id": "k1439rev2606",
+    "category": "paper_review",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1439",
+    "experiment_path": "experiments/K1439/",
+    "k_id": "K1439",
+    "reviewer": "Codex CLI 0.135 gpt-5.4",
+    "reviewer_source": "codex exec (paper_review_mile_2c758888)",
+    "codex_review": "CONDITIONAL_PASS 2026-06-13",
+    "article_id": "mile_2c758888",
+    "title": "Codex 24h-rule review: K1439 USD regime × cross-asset RV (mile_2c758888)",
+    "content": "Codex source-code review of K1439 (USD regime conditioning of cross-asset RV: EEM/GLD/DBC/USO/DBB). VERDICT=CONDITIONAL_PASS, PUBLISHABLE_AS_IS=YES, LOOKAHEAD_RISK=NONE. Welch t-test + Bonferroni statistically correct; lookahead protection confirmed (bucket.shift(1) at k1439.py:105,116); seed=42 fixed; auto_adjust=True so 'Adj Close' is dividend/split-adjusted. PASS for feed publication. Caveats: 21d rolling RV overlapping observations → p-values optimistic under serial autocorrelation; standard ttest_ind does not handle time clustering/regime persistence; README causal wording 'Strong USD lifts' should be conditioning/association; missing reproduce.py wrapper. Followup: add reproduce.py + HAC/Newey-West or block-bootstrap for paper-grade inference.",
+    "evidence": [
+      "experiments/K1439/k1439.py:105,116 (bucket.shift(1) lookahead protection)",
+      "experiments/K1439/k1439_results.json (Bonferroni 4/5 significant)",
+      "Codex review log: tool-results/bfoxuin9z.txt"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-13T19:08:00+08:00"
   }
 ]

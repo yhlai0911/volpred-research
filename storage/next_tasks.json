@@ -29132,7 +29132,7 @@
     "title": "Paper review (Codex 24h-rule): 東南亞前沿 ETF 真的能分散風險嗎：VNM/EIDO/THD/EPHE 的解耦事實與危機失效",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e4002f4f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_e4002f4f",
@@ -29141,7 +29141,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-13T06:08:12+00:00"
+    "created_at": "2026-06-13T06:08:12+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T10:39:46.576662+00:00",
+    "claim_session_id": "8c3f11b3dcbc",
+    "started_at": "2026-06-13T10:39:53.931706+00:00",
+    "completed_at": "2026-06-13T10:40:41.027684+00:00",
+    "result": "Codex review follow-up verdict: ERRATA_APPLIED.\nCorrection: article VIX regime counts 1438/490 match k1466_results.json; README had stale 1201/463 and was fixed.\nArticle overstatements on untested EEM equality/statistical-noise claims were softened via publish_draft --update with errata history."
   },
   {
     "id": "K1468_article_general",
@@ -29289,5 +29295,46 @@
     "started_at": "2026-06-13T10:10:48.209311+00:00",
     "completed_at": "2026-06-13T10:17:50.154140+00:00",
     "result": "K1439 USD regime cross-asset RV article published as mile_2c758888 (research audience, 8 tags, anti-AI gate PASS, content-vs-source gate PASS after rephrasing 3 numbers, dup_waiver applied for K1437 USD-only entity overlap). Body 75 lines / ~3.1KB; sample period 2010-2026 N=4131; 4/5 Bonferroni-sig PASS verdict."
+  },
+  {
+    "id": "paper_review_mile_2c758888",
+    "title": "Paper review (Codex 24h-rule): 強美元環境下，哪些資產的波動率真的會被拉高？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_2c758888 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_2c758888",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-13T11:08:03+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-13T11:08:27.772619+00:00",
+    "claim_session_id": "4b832d8422c9",
+    "started_at": "2026-06-13T11:08:45.830271+00:00",
+    "completed_at": "2026-06-13T11:13:47.709456+00:00",
+    "result": "Codex 24h-rule review: CONDITIONAL_PASS / PUBLISHABLE_AS_IS=YES / LOOKAHEAD_RISK=NONE. Welch+Bonferroni correct; lookahead OK (k1439.py:105,116). Caveats: 21d overlapping RV → optimistic p; no time clustering correction; missing reproduce.py. README line refs fixed (90,100→105,116). knowledge.json+work_log written. Followup task K1439_reproduce_and_hac_followup created."
+  },
+  {
+    "id": "K1439_reproduce_and_hac_followup",
+    "title": "K1439 followup: add reproduce.py + HAC/Newey-West or block-bootstrap robustness",
+    "description": "Per Codex 24h review (CONDITIONAL_PASS 2026-06-13 paper_review_mile_2c758888): K1439 published article mile_2c758888 (USD regime × cross-asset RV) remains in feed. Two non-blocking followups: (1) add experiments/K1439/reproduce.py wrapper + pin a raw yfinance snapshot for replication-package compliance; (2) rerun robustness with HAC/Newey-West or block-bootstrap over regime-conditioned mean RV differences (21d rolling RV creates overlapping observations → standard Welch t-test p-values optimistic). Both stay grounded in current findings (4/5 Bonferroni positive); paper-grade inference requires the HAC layer. heavy compute → consider compute_queue if MLE-bootstrap heavy.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "codex_review_followup",
+    "parent_task_id": "paper_review_mile_2c758888",
+    "parent_article_id": "mile_2c758888",
+    "k_id": "K1439",
+    "tags": [
+      "k1439-followup",
+      "robustness",
+      "reproduce-py",
+      "hac-newey-west"
+    ],
+    "created_at": "2026-06-13T19:08:00+08:00"
   }
 ]

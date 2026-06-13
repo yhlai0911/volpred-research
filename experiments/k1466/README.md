@@ -62,7 +62,7 @@ All 4 EM ETFs sit 20-30 pp below EEM's median correlation with SPY. This is the 
 
 ### Table 3 — Regime-conditional correlation (concurrent VIX)
 
-n_low (VIX<15) = 1,201; n_high (VIX>25) = 463.
+n_low (VIX<15) = 1,438; n_high (VIX>25) = 490.
 
 | Pair | ρ (VIX<15) | ρ (VIX>25) | Δ | Fisher z p-value | Sig 5% |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -99,7 +99,7 @@ CI strictly excludes 1.0 → there *is* statistically meaningful diversification
 **`CONDITIONAL_PASS`** — partial decoupling:
 
 1. **Decoupling exists on average**: all 4 EM medians (0.45-0.55) sit well below the EEM-SPY benchmark (0.75), and the DR bootstrap CI [1.21, 1.31] excludes 1.0.
-2. **Decoupling vanishes in crisis**: VIX > 25 regimes show every EM-SPY pair jumping +0.31 to +0.39, with Fisher z p < 0.001 in all 4 cases. Crisis-time correlation lands at 0.68-0.75 — indistinguishable from EEM.
+2. **Decoupling weakens sharply in crisis**: VIX > 25 regimes show every EM-SPY pair jumping +0.31 to +0.39, with Fisher z p < 0.001 in all 4 cases. Crisis-time correlation lands at 0.68-0.75, close to the broad-EM benchmark range, but the experiment does not run a direct equality test against EEM.
 3. **Practical implication**: SE Asia frontier ETFs do offer real diversification in normal-vol regimes but should not be sized as a hedge against systemic equity drawdowns. The "decoupling" headline is true on average but breaks when investors most need it.
 
 ## Limitations

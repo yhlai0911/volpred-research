@@ -10413,5 +10413,30 @@
     "task_type": "daily_article",
     "task_id": "K1439_article_research",
     "summary": "K1439 USD regime cross-asset RV research article published mile_2c758888 (anti-AI+content-vs-source gates PASS, dup_waiver K1437)"
+  },
+  {
+    "timestamp": "2026-06-13T19:01:02+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_e4002f4f_followup",
+    "title": "K1466 mile_e4002f4f Codex errata follow-up",
+    "status": "succeeded",
+    "verdict": "ERRATA_APPLIED",
+    "summary": "Corrected K1466 README stale VIX regime counts and updated mile_e4002f4f via publish_draft --update to soften unsupported EEM equality/statistical-noise language.",
+    "files": [
+      "experiments/k1466/README.md",
+      "storage/reports/feed.json",
+      "storage/reports/mile_e4002f4f.json",
+      "storage/next_tasks.json"
+    ]
+  },
+  {
+    "timestamp": "2026-06-13T19:08:00+08:00",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_2c758888",
+    "title": "Paper review (Codex 24h-rule): K1439 mile_2c758888 USD regime × cross-asset RV",
+    "status": "succeeded",
+    "result": "CONDITIONAL_PASS / PUBLISHABLE_AS_IS=YES / LOOKAHEAD_RISK=NONE. Welch + Bonferroni statistically correct; lookahead confirmed at k1439.py:105,116. Caveats: 21d overlapping RV → p-values optimistic, no time clustering correction; missing reproduce.py. Followup: HAC/Newey-West + reproduce.py.",
+    "owner": "hourly-19",
+    "reviewer_source": "codex exec"
   }
 ]

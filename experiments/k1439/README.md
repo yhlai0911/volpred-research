@@ -43,9 +43,17 @@ differ systematically? Which asset is most regime-sensitive?
 - **Bonferroni correction**: α = 0.05 / 5 = **0.01**
 
 ### Lookahead protection
-- `bucket.shift(1)` embedded in both regime constructors (see `k1439.py:90,100`).
+- `bucket.shift(1)` embedded in both regime constructors (see `k1439.py:105,116`).
 - 21-day rolling RV is backward-looking by construction.
 - `seed=42` (no random ops in current pipeline, fixed for any future bootstrap).
+
+### Codex 24h-rule review (2026-06-13)
+- **VERDICT**: CONDITIONAL_PASS, PUBLISHABLE_AS_IS=YES, LOOKAHEAD_RISK=NONE.
+- **Caveat**: 21d rolling RV creates overlapping observations → Welch t-test p-values are
+  optimistic under serial autocorrelation. Result interpretation is
+  **association/conditioning, not causation**. Paper-grade inference requires HAC/Newey-West
+  or block-bootstrap over regime-conditioned mean RV differences (follow-up tracked).
+- `yf.download(auto_adjust=True)` → "Adj Close" is dividend/split-adjusted.
 
 ## Results
 
