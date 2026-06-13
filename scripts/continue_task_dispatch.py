@@ -20,6 +20,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import re
 import sys
@@ -38,6 +39,7 @@ SLOT_CAP = 4
 # auto-runs refill_task_pool.py to top up. Keeps the rule "任務池永遠要有
 # 待辦任務" enforceable by mechanism, not by main-thread discipline.
 REFILL_FLOOR = 4
+POOL_DRY_DIAGNOSTIC_PREFIX = "platform_ops_dispatch_pool_dry_diagnostic"
 
 MAIN_THREAD_MARKERS = re.compile(
     r"main\s*thread|NOT\s*agent|main-thread|主線程",
@@ -273,6 +275,68 @@ def _current_agentable_count() -> int:
     return len(cats["agentable"])
 
 
+def _materialize_pool_dry_diagnostic_task(now: datetime | None = None) -> dict:
+    """Create one daily platform_ops task when all refill sources are dry.
+
+    This is a last-resort breaker, not a content generator. If every refill
+    source adds zero tasks, hourly dispatch should surface an actionable
+    platform task instead of silently no-oping with an empty pool.
+    """
+    now = now or datetime.now(timezone.utc)
+    task_id = f"{POOL_DRY_DIAGNOSTIC_PREFIX}_{now.strftime('%Y%m%d')}"
+    task = {
+        "id": task_id,
+        "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
+        "description": (
+            "continue_task_dispatch saw agentable=0, and diverse/event/article/"
+            "research refill all added 0 tasks. Diagnose why the pool is dry, "
+            "verify publication_candidates/research_program/backlog freshness, "
+            "and either fix the generator or explicitly document that the pool "
+            "is intentionally exhausted."
+        ),
+        "task_type": "platform_ops",
+        "priority": 3,
+        "status": "pending",
+        "created_at": now.isoformat(),
+        "source": "continue_task_dispatch_pool_dry_breaker",
+        "tags": ["dispatch", "refill", "pool-dry", "platform_ops"],
+    }
+
+    NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
+    if not NEXT_TASKS.exists():
+        NEXT_TASKS.write_text("[]\n", encoding="utf-8")
+
+    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            payload = json.load(fh)
+            tasks = payload.get("tasks", payload) if isinstance(payload, dict) else payload
+            if not isinstance(tasks, list):
+                return {"ok": False, "added": 0, "error": "next_tasks.json is not a list"}
+
+            if any(item.get("id") == task_id for item in tasks if isinstance(item, dict)):
+                return {
+                    "ok": True,
+                    "added": 0,
+                    "reason": "pool_dry_diagnostic_already_exists_today",
+                    "added_ids": [],
+                }
+
+            tasks.insert(0, task)
+            fh.seek(0)
+            fh.truncate()
+            json.dump(payload if isinstance(payload, dict) else tasks, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+            return {
+                "ok": True,
+                "added": 1,
+                "added_ids": [task_id],
+                "by_type": {"platform_ops": 1},
+            }
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
 def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
     """Auto-trigger pool refill when agentable < REFILL_FLOOR.
 
@@ -347,6 +411,21 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
                     combined["by_type"]["experiment_autonomous"] = research["added"]
             except Exception as exc:  # noqa: BLE001
                 combined.setdefault("warnings", []).append(f"research_backlog: {exc}")
+
+        # Last-resort breaker: if every refill source returned zero additions,
+        # leave an agentable diagnostic task instead of letting hourly no-op.
+        if agentable_count == 0 and combined["added"] == 0:
+            diagnostic = _materialize_pool_dry_diagnostic_task()
+            if diagnostic.get("added"):
+                combined["added"] += diagnostic["added"]
+                combined["added_ids"].extend(diagnostic.get("added_ids") or [])
+                combined["by_type"].update(diagnostic.get("by_type") or {})
+            elif diagnostic.get("ok") is False:
+                combined.setdefault("warnings", []).append(
+                    f"pool_dry_diagnostic: {diagnostic.get('error') or diagnostic.get('reason')}"
+                )
+            else:
+                combined["reason"] = diagnostic.get("reason") or "pool_dry_diagnostic_not_added"
     except Exception as exc:  # noqa: BLE001
         combined.setdefault("warnings", []).append(f"article_refill: {exc}")
         combined["ok"] = combined.get("ok", True)

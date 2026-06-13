@@ -1,5 +1,27 @@
 [
   {
+    "id": "platform_ops_dispatch_pool_dry_diagnostic",
+    "title": "Dispatcher pool-dry diagnostic task when all refill sources return no_new_signal",
+    "description": "When continue_task_dispatch sees agentable=0 and all refill sources add 0 tasks, materialize a small platform_ops diagnostic task or otherwise surface actionable warnings so hourly ticks do not silently no-op with an empty pool. Keep fix minimal and test with dry-run/report.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "succeeded",
+    "created_at": "2026-06-13T15:36:00.439717+00:00",
+    "source": "interactive_pool_refill",
+    "tags": [
+      "dispatch",
+      "refill",
+      "pool-dry",
+      "platform_ops"
+    ],
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T15:36:23.572704+00:00",
+    "claim_session_id": "775b9862b5e0",
+    "started_at": "2026-06-13T15:36:31.651352+00:00",
+    "completed_at": "2026-06-13T15:40:00.573219+00:00",
+    "result": "Fixed continue_task_dispatch pool-dry no-op: when agentable=0 and diverse/event/article/research refill all add zero tasks, dispatcher now materializes one daily platform_ops diagnostic task. Added regression test in tests/test_dispatch_type_rotation.py; pytest tests/test_dispatch_type_rotation.py passes (6/6) and py_compile passes."
+  },
+  {
     "id": "fb_followup_cpi_20260611_mile_71dd116b",
     "task_type": "platform_ops",
     "priority": 2,

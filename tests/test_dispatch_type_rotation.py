@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from collections import Counter
 from pathlib import Path
@@ -149,3 +150,44 @@ def test_maybe_refill_runs_event_refill_before_article_backfill(monkeypatch):
 
     assert result["by_type"]["event_article"] == 1
     assert "event_article_cpi_us_2026-06-11_tminus2" in result["added_ids"]
+
+
+def test_maybe_refill_materializes_pool_dry_diagnostic(monkeypatch, tmp_path):
+    """Regression: pool empty + every refill source dry must not no-op.
+
+    2026-06-13 hourly handoff showed pending=0 while diverse/event/article/
+    research refill all added zero. The dispatcher used to return
+    `no_new_signal`, leaving the next hourly tick with nothing to claim.
+    """
+    diverse_mod = ModuleType("generate_diverse_tasks")
+    article_mod = ModuleType("refill_task_pool")
+    research_mod = ModuleType("generate_research_backlog")
+    event_mod = ModuleType("refill_reader_facing_pool")
+
+    diverse_mod.generate = lambda dry_run=False: {"ok": True, "added": 0, "added_ids": [], "by_type": {}}
+    event_mod.refill_event_candidates = lambda horizon_days=14: {"added": []}
+    article_mod.refill = lambda target, dry_run=False: {"ok": True, "added": 0, "reason": "no_new_candidates_passing_filter"}
+    research_mod.generate = lambda dry_run=False, max_new=0: {
+        "ok": True,
+        "added": 0,
+        "reason": "all_already_covered_or_in_progress",
+    }
+
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(dispatch, "NEXT_TASKS", next_tasks)
+    monkeypatch.setitem(sys.modules, "generate_diverse_tasks", diverse_mod)
+    monkeypatch.setitem(sys.modules, "refill_reader_facing_pool", event_mod)
+    monkeypatch.setitem(sys.modules, "refill_task_pool", article_mod)
+    monkeypatch.setitem(sys.modules, "generate_research_backlog", research_mod)
+    monkeypatch.setattr(dispatch, "_current_agentable_count", lambda: 0)
+
+    result = dispatch._maybe_refill(0, auto_refill=True)
+
+    assert result["added"] == 1
+    assert result["by_type"]["platform_ops"] == 1
+    assert result["added_ids"][0].startswith("platform_ops_dispatch_pool_dry_diagnostic_")
+
+    tasks = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert tasks[0]["task_type"] == "platform_ops"
+    assert tasks[0]["status"] == "pending"
