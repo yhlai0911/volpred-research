@@ -1,0 +1,515 @@
+{
+  "experiment_id": "K1493",
+  "title": "VRP Decline and Short-Vol Edge",
+  "seed": 42,
+  "data_sources": {
+    "market_prices": "yfinance adjusted close",
+    "symbols": [
+      "SPY",
+      "^VIX",
+      "SVXY",
+      "VIXY",
+      "VXX",
+      "BIL"
+    ],
+    "price_snapshot": "experiments/k1493/close_prices.csv"
+  },
+  "sample": {
+    "requested_start": "2006-01-01",
+    "requested_end": "2026-06-14",
+    "vrp_pre": "2006-01-01 to 2017-12-31",
+    "vrp_post": "2018-01-01 to latest date with forward 21 trading-day RV",
+    "strategy_pre": "2011-10-04 to 2017-12-31 (SVXY available sample)",
+    "strategy_post": "2018-01-01 to 2026-06-12"
+  },
+  "literature": [
+    {
+      "title": "The Decline of the Variance Risk Premium: Evidence from Traded and Synthetic Options",
+      "source": "Chicago Fed Working Paper 2025-17",
+      "link": "https://www.chicagofed.org/publications/working-papers/2025/2025-17"
+    },
+    {
+      "title": "Expected Stock Returns and Variance Risk Premia",
+      "source": "Bollerslev, Tauchen, and Zhou (2009), Review of Financial Studies",
+      "link": "https://academic.oup.com/rfs/article-abstract/22/11/4463/1565787"
+    },
+    {
+      "title": "Variance Risk Premia",
+      "source": "Carr and Wu (2009), Review of Financial Studies",
+      "link": "https://academic.oup.com/rfs/article-abstract/22/3/1311/1581057"
+    },
+    {
+      "title": "SVXY product description",
+      "source": "ProShares",
+      "link": "https://www.proshares.com/our-etfs/strategic/svxy"
+    }
+  ],
+  "vrp_proxy": {
+    "definition": "VRP_t = (VIX_t/100)^2 - annualized forward SPY RV over t+1..t+21",
+    "summary": {
+      "pre_2006_2017": {
+        "n": 3020,
+        "mean": 0.008728364534559725,
+        "median": 0.010588752358033063,
+        "positive_share": 0.8496688741721854,
+        "nw_t_mean_gt_zero": 1.9723176685721477,
+        "nw_pvalue": 0.048664482378645735
+      },
+      "post_2018_2026": {
+        "n": 2088,
+        "mean": 0.007110452610715179,
+        "median": 0.013336290571482369,
+        "positive_share": 0.8165708812260536,
+        "nw_t_mean_gt_zero": 1.1822772953520402,
+        "nw_pvalue": 0.2372303724309548
+      },
+      "post_minus_pre_mean": -0.0016179119238445465,
+      "welch_t_post_minus_pre": -0.8287966143893796,
+      "welch_pvalue": 0.40727041287501864
+    },
+    "verdict": "DECLINE_NOT_SIGNIFICANT"
+  },
+  "strategy_results": {
+    "SVXY_actual": {
+      "pre_2011_2017": {
+        "n": 1570,
+        "sample_start": "2011-10-05",
+        "sample_end": "2017-12-29",
+        "ann_return": 0.6694883264921698,
+        "ann_vol": 0.6341167781769292,
+        "sharpe": 0.8082378605919777,
+        "max_drawdown": -0.6793634594149505,
+        "worst_day": -0.26445431622627125,
+        "worst_5d": -0.45382725688604386,
+        "skew": -1.2454909972375092
+      },
+      "post_2018_2026": {
+        "n": 2122,
+        "sample_start": "2018-01-02",
+        "sample_end": "2026-06-12",
+        "ann_return": -0.16880610532866447,
+        "ann_vol": 0.741099314685334,
+        "sharpe": -0.2494836802010863,
+        "max_drawdown": -0.9524817321799465,
+        "worst_day": -0.8295739372998041,
+        "worst_5d": -0.9212624306083763,
+        "skew": -26.25316480499074
+      },
+      "post_after_volmageddon": {
+        "n": 2082,
+        "sample_start": "2018-03-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.10072245785584677,
+        "ann_vol": 0.3801368660664639,
+        "sharpe": 0.2524531363684914,
+        "max_drawdown": -0.6218511588289016,
+        "worst_day": -0.21434289544703022,
+        "worst_5d": -0.33839402786221995,
+        "skew": -2.1672415546485233
+      },
+      "post_after_covid": {
+        "n": 1536,
+        "sample_start": "2020-05-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.2141841051102722,
+        "ann_vol": 0.3678225488714522,
+        "sharpe": 0.5276248924670724,
+        "max_drawdown": -0.4644705978094362,
+        "worst_day": -0.21434289544703022,
+        "worst_5d": -0.33839402786221995,
+        "skew": -2.1002986864781543
+      },
+      "recent_2023_2026": {
+        "n": 863,
+        "sample_start": "2023-01-03",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.1953055139521076,
+        "ann_vol": 0.36018961551408146,
+        "sharpe": 0.4952997122482717,
+        "max_drawdown": -0.4644705978094361,
+        "worst_day": -0.21434289544703022,
+        "worst_5d": -0.33839402786222006,
+        "skew": -2.29046262026589
+      }
+    },
+    "short_VIXY_naive": {
+      "pre_2011_2017": {
+        "n": 1571,
+        "sample_start": "2011-10-04",
+        "sample_end": "2017-12-29",
+        "ann_return": 1.732559818525337,
+        "ann_vol": 0.6140368922826264,
+        "sharpe": 1.6370984300188187,
+        "max_drawdown": -0.4933920704845809,
+        "worst_day": -0.19389587073608616,
+        "worst_5d": -0.3976244343891403,
+        "skew": -0.5974866280485268
+      },
+      "post_2018_2026": {
+        "n": 2122,
+        "sample_start": "2018-01-02",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.6751918581035325,
+        "ann_vol": 0.7260885704800956,
+        "sharpe": 0.7105575295418928,
+        "max_drawdown": -0.8058614510625972,
+        "worst_day": -0.30094889951668136,
+        "worst_5d": -0.48395840445669724,
+        "skew": -1.3845121859341056
+      },
+      "post_after_volmageddon": {
+        "n": 2082,
+        "sample_start": "2018-03-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.7888603684157407,
+        "ann_vol": 0.7147979189183251,
+        "sharpe": 0.8136268111769955,
+        "max_drawdown": -0.8058614510625971,
+        "worst_day": -0.30094889951668136,
+        "worst_5d": -0.48395840445669724,
+        "skew": -1.3023058744412632
+      },
+      "post_after_covid": {
+        "n": 1536,
+        "sample_start": "2020-05-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 1.1404895243497872,
+        "ann_vol": 0.6957533011929754,
+        "sharpe": 1.0938281590123824,
+        "max_drawdown": -0.5463172009670677,
+        "worst_day": -0.30094889951668136,
+        "worst_5d": -0.48395840445669724,
+        "skew": -1.1498297905380357
+      },
+      "recent_2023_2026": {
+        "n": 863,
+        "sample_start": "2023-01-03",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.9278945505033565,
+        "ann_vol": 0.6826447374409459,
+        "sharpe": 0.9615960762124214,
+        "max_drawdown": -0.5463172009670678,
+        "worst_day": -0.30094889951668136,
+        "worst_5d": -0.48395840445669713,
+        "skew": -1.0442757727052183
+      }
+    },
+    "short_VXX_naive": {
+      "pre_2011_2017": {
+        "n": 0,
+        "ann_return": null,
+        "ann_vol": null,
+        "sharpe": null,
+        "max_drawdown": null,
+        "worst_day": null,
+        "worst_5d": null,
+        "skew": null
+      },
+      "post_2018_2026": {
+        "n": 2105,
+        "sample_start": "2018-01-26",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.6657759099148817,
+        "ann_vol": 0.7139595411241394,
+        "sharpe": 0.7147338153643625,
+        "max_drawdown": -0.8073913049006809,
+        "worst_day": -0.2816869267626232,
+        "worst_5d": -0.4738712041774038,
+        "skew": -1.3261368313247053
+      },
+      "post_after_volmageddon": {
+        "n": 2082,
+        "sample_start": "2018-03-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.7727880128871323,
+        "ann_vol": 0.7009647990607435,
+        "sharpe": 0.8168077150685126,
+        "max_drawdown": -0.8073913049006809,
+        "worst_day": -0.2816869267626232,
+        "worst_5d": -0.4738712041774038,
+        "skew": -1.2407294222365017
+      },
+      "post_after_covid": {
+        "n": 1536,
+        "sample_start": "2020-05-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 1.118839309127845,
+        "ann_vol": 0.6769511290760639,
+        "sharpe": 1.109191507049905,
+        "max_drawdown": -0.5342654321025435,
+        "worst_day": -0.2816869267626232,
+        "worst_5d": -0.4738712041774038,
+        "skew": -1.1020989030995911
+      },
+      "recent_2023_2026": {
+        "n": 863,
+        "sample_start": "2023-01-03",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.9032015730054948,
+        "ann_vol": 0.6729743262276684,
+        "sharpe": 0.956258628942375,
+        "max_drawdown": -0.5342654321025437,
+        "worst_day": -0.2816869267626232,
+        "worst_5d": -0.4738712041774038,
+        "skew": -0.9970616963242946
+      }
+    },
+    "SPY": {
+      "pre_2011_2017": {
+        "n": 1571,
+        "sample_start": "2011-10-04",
+        "sample_end": "2017-12-29",
+        "ann_return": 0.17689373202681158,
+        "ann_vol": 0.12840580026511128,
+        "sharpe": 1.2684671309063247,
+        "max_drawdown": -0.13022933789097613,
+        "worst_day": -0.042107177611687696,
+        "worst_5d": -0.10815292443886504,
+        "skew": -0.2067470603671269
+      },
+      "post_2018_2026": {
+        "n": 2122,
+        "sample_start": "2018-01-02",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.14542478335000975,
+        "ann_vol": 0.1924905092574303,
+        "sharpe": 0.7053623503600772,
+        "max_drawdown": -0.33717287775391547,
+        "worst_day": -0.10942352787716525,
+        "worst_5d": -0.17969310232097657,
+        "skew": -0.5701363682786754
+      },
+      "post_after_volmageddon": {
+        "n": 2082,
+        "sample_start": "2018-03-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.1459463894086075,
+        "ann_vol": 0.19232577560771263,
+        "sharpe": 0.7083337433429072,
+        "max_drawdown": -0.3371728777539156,
+        "worst_day": -0.10942352787716525,
+        "worst_5d": -0.17969310232097657,
+        "skew": -0.5475205279539146
+      },
+      "post_after_covid": {
+        "n": 1536,
+        "sample_start": "2020-05-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.18120418917982017,
+        "ann_vol": 0.17116945427050534,
+        "sharpe": 0.972921355254744,
+        "max_drawdown": -0.24496382573917064,
+        "worst_day": -0.05854306726048053,
+        "worst_5d": -0.11496158259165024,
+        "skew": -0.08430827117734564
+      },
+      "recent_2023_2026": {
+        "n": 863,
+        "sample_start": "2023-01-03",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.22610584190705896,
+        "ann_vol": 0.15109001122664523,
+        "sharpe": 1.3491505044920378,
+        "max_drawdown": -0.18755246925491054,
+        "worst_day": -0.05854306726048053,
+        "worst_5d": -0.11496158259165024,
+        "skew": 0.5321698172118364
+      }
+    },
+    "BIL": {
+      "pre_2011_2017": {
+        "n": 1571,
+        "sample_start": "2011-10-04",
+        "sample_end": "2017-12-29",
+        "ann_return": 0.0006885424510096882,
+        "ann_vol": 0.0026699870249712303,
+        "sharpe": 0.2577935802583121,
+        "max_drawdown": -0.003882718983405753,
+        "worst_day": -0.0004379939153350554,
+        "worst_5d": -0.0008744094268956504,
+        "skew": -0.08352991092220019
+      },
+      "post_2018_2026": {
+        "n": 2122,
+        "sample_start": "2018-01-02",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.025183577485459407,
+        "ann_vol": 0.0024263209742674337,
+        "sharpe": 10.25078577957199,
+        "max_drawdown": -0.0020851817238987103,
+        "worst_day": -0.00032778278611822476,
+        "worst_5d": -0.0005457129778513314,
+        "skew": 0.7702187503329735
+      },
+      "post_after_volmageddon": {
+        "n": 2082,
+        "sample_start": "2018-03-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.025407623982992122,
+        "ann_vol": 0.00243129434822547,
+        "sharpe": 10.31969472919162,
+        "max_drawdown": -0.0020851817238987103,
+        "worst_day": -0.00032778278611822476,
+        "worst_5d": -0.0005457129778513314,
+        "skew": 0.7795342677554342
+      },
+      "post_after_covid": {
+        "n": 1536,
+        "sample_start": "2020-05-01",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.02792340823193662,
+        "ann_vol": 0.0025623625667019444,
+        "sharpe": 10.748150556142328,
+        "max_drawdown": -0.0016058640371043875,
+        "worst_day": -0.00027369219909467724,
+        "worst_5d": -0.0003170480996403935,
+        "skew": 0.8155949271205527
+      },
+      "recent_2023_2026": {
+        "n": 863,
+        "sample_start": "2023-01-03",
+        "sample_end": "2026-06-12",
+        "ann_return": 0.04634769852198062,
+        "ann_vol": 0.0024384360075585367,
+        "sharpe": 18.579826590434863,
+        "max_drawdown": -0.00021829751944679732,
+        "worst_day": -0.00021829751944679732,
+        "worst_5d": 0.00010912673547203156,
+        "skew": 0.8679626391573578
+      }
+    }
+  },
+  "strategy_dm": {
+    "pre_2011_2017": {
+      "SVXY_actual": {
+        "SPY": {
+          "n": 1570,
+          "dm_t_negative_means_candidate_better": -1.7616368837834424,
+          "pvalue": 0.07832539982258058
+        },
+        "BIL": {
+          "n": 1570,
+          "dm_t_negative_means_candidate_better": -2.193354301126214,
+          "pvalue": 0.028428159527003283
+        }
+      },
+      "short_VIXY_naive": {
+        "SPY": {
+          "n": 1571,
+          "dm_t_negative_means_candidate_better": -4.621938701638268,
+          "pvalue": 4.1128078531738055e-06
+        },
+        "BIL": {
+          "n": 1571,
+          "dm_t_negative_means_candidate_better": -4.637335632431952,
+          "pvalue": 3.821940210757546e-06
+        }
+      }
+    },
+    "post_2018_2026": {
+      "SVXY_actual": {
+        "SPY": {
+          "n": 2122,
+          "dm_t_negative_means_candidate_better": 1.1356068515675086,
+          "pvalue": 0.25624944380767434
+        },
+        "BIL": {
+          "n": 2122,
+          "dm_t_negative_means_candidate_better": 0.6915451220375504,
+          "pvalue": 0.48929872128973506
+        }
+      },
+      "short_VIXY_naive": {
+        "SPY": {
+          "n": 2122,
+          "dm_t_negative_means_candidate_better": -2.028258325425535,
+          "pvalue": 0.04265863206122944
+        },
+        "BIL": {
+          "n": 2122,
+          "dm_t_negative_means_candidate_better": -2.0935335528386716,
+          "pvalue": 0.03642003369808
+        }
+      }
+    },
+    "post_after_volmageddon": {
+      "SVXY_actual": {
+        "SPY": {
+          "n": 2082,
+          "dm_t_negative_means_candidate_better": 0.46771144235222534,
+          "pvalue": 0.6400399316721685
+        },
+        "BIL": {
+          "n": 2082,
+          "dm_t_negative_means_candidate_better": -0.548997961730205,
+          "pvalue": 0.5830657475452043
+        }
+      },
+      "short_VIXY_naive": {
+        "SPY": {
+          "n": 2082,
+          "dm_t_negative_means_candidate_better": -2.442904064119545,
+          "pvalue": 0.01465224484456562
+        },
+        "BIL": {
+          "n": 2082,
+          "dm_t_negative_means_candidate_better": -2.4149622891063043,
+          "pvalue": 0.01582255643212882
+        }
+      }
+    },
+    "post_after_covid": {
+      "SVXY_actual": {
+        "SPY": {
+          "n": 1536,
+          "dm_t_negative_means_candidate_better": -0.3103300468956481,
+          "pvalue": 0.7563521126795567
+        },
+        "BIL": {
+          "n": 1536,
+          "dm_t_negative_means_candidate_better": -1.3338687991247091,
+          "pvalue": 0.18244472999813155
+        }
+      },
+      "short_VIXY_naive": {
+        "SPY": {
+          "n": 1536,
+          "dm_t_negative_means_candidate_better": -3.297526634244847,
+          "pvalue": 0.000997703921122639
+        },
+        "BIL": {
+          "n": 1536,
+          "dm_t_negative_means_candidate_better": -3.2845426098399217,
+          "pvalue": 0.0010444923159740327
+        }
+      }
+    }
+  },
+  "headline_numbers": {
+    "vrp_mean_pre": 0.008728364534559725,
+    "vrp_mean_post": 0.007110452610715179,
+    "vrp_post_minus_pre": -0.0016179119238445465,
+    "vrp_diff_pvalue": 0.40727041287501864,
+    "svxy_sharpe_pre": 0.8082378605919777,
+    "svxy_sharpe_post": -0.2494836802010863,
+    "svxy_mdd_pre": -0.6793634594149505,
+    "svxy_mdd_post": -0.9524817321799465,
+    "short_vixy_sharpe_pre": 1.6370984300188187,
+    "short_vixy_sharpe_post": 0.7105575295418928,
+    "short_vixy_mdd_pre": -0.4933920704845809,
+    "short_vixy_mdd_post": -0.8058614510625972
+  },
+  "verdict": "MIXED_EDGE_EROSION",
+  "interpretation": "The VIX-minus-forward-RV proxy shows only a small, statistically insignificant mean decline after 2018, but actual short-vol product economics deteriorate sharply. SVXY's post-2018 full-sample Sharpe turns negative and MDD reaches about -95%. A naive short-VIXY proxy remains profitable on average but its drawdown deepens materially. The evidence supports edge erosion in tradable ETF proxies, not a clean public-data proof that the underlying VRP mean vanished.",
+  "limitations": [
+    "No option chain, variance swap, or delta-hedged option PnL data are used.",
+    "VIX versus 21-trading-day forward RV is a rough annualized proxy, not the Chicago Fed paper's traded-option alpha.",
+    "SVXY changed exposure after the 2018 Volmageddon event, so actual product returns mix premium, tail loss, and product design.",
+    "Naive short VIXY/VXX ignores borrow cost, margin calls, recalls, path-dependent rebalancing constraints, and capital survival."
+  ],
+  "artifacts": {
+    "fig_vrp_periods": "experiments/k1493/fig_vrp_periods.png",
+    "fig_short_vol_nav": "experiments/k1493/fig_short_vol_nav.png",
+    "fig_strategy_metrics": "experiments/k1493/fig_strategy_metrics.png"
+  }
+}

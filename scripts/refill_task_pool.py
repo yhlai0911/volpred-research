@@ -32,6 +32,7 @@ import argparse
 import fcntl
 import json
 import re
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -855,7 +856,56 @@ def _make_research_task(title: str, full_line: str, header: str, slug: str, task
     }
 
 
+CANDIDATES_STALE_HOURS = 6
+
+
+def _ensure_candidates_fresh(max_age_hours: float = CANDIDATES_STALE_HOURS) -> dict | None:
+    """Rebuild publication_candidates.json if older than max_age_hours.
+
+    2026-06-14 K1481 incident: candidates was 14h stale → refill saw 0 new K's
+    (uncovered=1 already in-flight) → pool dried → diagnostic task triggered.
+    Stale candidates is the canonical source of pool-dry false positives, so
+    auto-rebuild on demand removes the structural root cause.
+    Returns {'rebuilt': bool, 'reason': str | None} for the caller log.
+    """
+    if not CANDIDATES.exists():
+        age_hours = None
+    else:
+        try:
+            data = json.loads(CANDIDATES.read_text(encoding="utf-8"))
+            gen = data.get("generated_at")
+            if not gen:
+                age_hours = None
+            else:
+                gen_dt = datetime.fromisoformat(gen.replace("Z", "+00:00"))
+                age_hours = (datetime.now(timezone.utc) - gen_dt).total_seconds() / 3600
+        except Exception:  # noqa: BLE001
+            age_hours = None
+
+    if age_hours is not None and age_hours < max_age_hours:
+        return {"rebuilt": False, "age_hours": round(age_hours, 1)}
+
+    builder = ROOT / "scripts" / "build_publication_candidates.py"
+    if not builder.exists():
+        return {"rebuilt": False, "reason": "builder_missing"}
+    try:
+        proc = subprocess.run(
+            ["uv", "run", "python", str(builder)],
+            capture_output=True,
+            timeout=900,  # 15 min cap; observed ~3min on this host
+            check=False,
+        )
+        return {
+            "rebuilt": proc.returncode == 0,
+            "exit_code": proc.returncode,
+            "reason": "stale_rebuilt" if proc.returncode == 0 else "rebuild_failed",
+        }
+    except subprocess.TimeoutExpired:
+        return {"rebuilt": False, "reason": "rebuild_timeout"}
+
+
 def refill(target: int, dry_run: bool = False) -> dict:
+    freshness = _ensure_candidates_fresh()
     if not CANDIDATES.exists():
         return {"ok": False, "reason": "publication_candidates.json missing", "added": 0}
 
@@ -1046,7 +1096,12 @@ def refill(target: int, dry_run: bool = False) -> dict:
             fallback_reason = "journal_discovery_dispatch"
 
     if not new_entries:
-        return {"ok": True, "added": 0, "reason": "no_new_candidates_passing_filter"}
+        return {
+            "ok": True,
+            "added": 0,
+            "reason": "no_new_candidates_passing_filter",
+            **({"candidates_freshness": freshness} if freshness else {}),
+        }
 
     if dry_run:
         return {
@@ -1055,6 +1110,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
             "would_add": len(new_entries),
             "preview_ids": [e["id"] for e in new_entries],
             **({"fallback": fallback_reason} if fallback_reason else {}),
+        **({"candidates_freshness": freshness} if freshness else {}),
         }
 
     tasks.extend(new_entries)
@@ -1064,6 +1120,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
         "added": len(new_entries),
         "added_ids": [e["id"] for e in new_entries],
         **({"fallback": fallback_reason} if fallback_reason else {}),
+        **({"candidates_freshness": freshness} if freshness else {}),
     }
 
 

@@ -1713,3 +1713,16 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **修法**：將 `research_program.md` 該行改為 `[x]`，明確記錄 K1029 + K1432 的 closure 與重開條件（需新資料如 intraday/private flow）。本次 claimed task 視為 stale-queue cleanup，不重跑已完成實驗。
 
 **防再發**：用 generator 補 no-K research_program checkbox 前，若 dry-run 顯示的是舊 K 發現延伸，必先查 `experiments/index.json` / README / knowledge；若已有完整 OOS closure，優先回填母本而不是重派實驗。
+
+## 2026-06-14 — publication_candidates stale → refill 跑乾誤報
+
+**症狀**：hourly-06 dispatch 觸發 `platform_ops_dispatch_pool_dry_diagnostic_20260613` — `continue_task_dispatch` 看到 `agentable=0`，refill 各 source 全回 0。實際 publication_candidates.json `generated_at` 是 14h 前（2026-06-13T15:51Z），未反映 hourly-05 剛完成的 K1481 inventory-surprise 實驗。
+
+**根因**：`publication_candidates.json` rebuild **沒有任何排程觸發**（grep 過 `runtime_schedules.json` 沒有對應 cron）。完全靠手動或 ad-hoc 觸發 → 自然衰減 → 14h 後 refill 永遠看不到新完成 K → pool-dry 誤報。
+
+**修法**：在 `scripts/refill_task_pool.py` 加入 `_ensure_candidates_fresh()`：refill 開頭檢查 `generated_at` 年齡，超過 `CANDIDATES_STALE_HOURS=6` 就自動 invoke `build_publication_candidates.py`（15min timeout）。執行結果寫入 refill return 的 `candidates_freshness` 欄位（`age_hours` / `rebuilt` / `reason`）便於下次 audit。
+
+驗證後 rebuild 找到 K1481，dry-run 即正確回 `K1481_article_general` 可派；apply 後 pool 補進去。
+
+**防再發**：refill 是 pool-dry 的唯一守門員，必須自帶 freshness 保證 — 不能假設外部會替它 rebuild。相同 staleness pattern 也應該套用到 `_journal_discovery_dispatch_task` 依賴的任何 backlog source（後續觀察）。
+
