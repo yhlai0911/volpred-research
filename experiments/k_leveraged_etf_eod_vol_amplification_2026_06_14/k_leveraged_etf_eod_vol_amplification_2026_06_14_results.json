@@ -1,0 +1,359 @@
+{
+  "experiment_id": "k_leveraged_etf_eod_vol_amplification_2026_06_14",
+  "generated_at": "2026-06-13T17:20:18.382443+00:00",
+  "seed": 20260614,
+  "tickers": [
+    "SPY",
+    "QQQ"
+  ],
+  "params": {
+    "interval_primary": "5m",
+    "period": "60d",
+    "bucket_minutes": 30,
+    "bootstrap_B": 1000,
+    "rth_start": "09:30",
+    "rth_end": "16:00"
+  },
+  "results": {
+    "SPY": {
+      "ticker": "SPY",
+      "interval_used": "5m",
+      "first_bucket": "09:30",
+      "last_bucket": "15:30",
+      "all_buckets": [
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30"
+      ],
+      "sample_period": {
+        "start": "2026-03-20",
+        "end": "2026-06-12"
+      },
+      "n_total_days": 59,
+      "median_abs_ret": 0.0055411958673330375,
+      "q25_abs_ret": 0.0026400614468253814,
+      "q75_abs_ret": 0.009880497942376998,
+      "groups": {
+        "high_abs_ret_median_split": {
+          "n": 29,
+          "mean_open": 0.002537036189667168,
+          "mean_close": 0.001779508860230158,
+          "mean_diff": -0.0007575273294370105,
+          "median_open": 0.0028018629382707814,
+          "median_close": 0.001468319503968162,
+          "paired_t_stat": -3.314703301919783,
+          "paired_t_pvalue": 0.002543000379927894,
+          "wilcoxon_stat": 63.0,
+          "wilcoxon_pvalue": 0.0004513449966907501,
+          "mannwhitney_stat": 255.0,
+          "mannwhitney_pvalue": 0.010288949823561655,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.001178953654609834,
+            "ci_high": -0.00028821288144936335,
+            "mean": -0.0007575273294370105,
+            "B": 1000,
+            "n": 29
+          },
+          "amplification_ratio_close_over_open": 0.7014124857492121
+        },
+        "low_abs_ret_median_split": {
+          "n": 30,
+          "mean_open": 0.002138440789502242,
+          "mean_close": 0.0012828063729405958,
+          "mean_diff": -0.0008556344165616463,
+          "median_open": 0.0018272413516261742,
+          "median_close": 0.0011222391012486788,
+          "paired_t_stat": -4.3282440874222505,
+          "paired_t_pvalue": 0.00016304514938696502,
+          "wilcoxon_stat": 49.0,
+          "wilcoxon_pvalue": 4.968419671058655e-05,
+          "mannwhitney_stat": 233.0,
+          "mannwhitney_pvalue": 0.0013703325610487655,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.0012567279123258514,
+            "ci_high": -0.0005070506442342847,
+            "mean": -0.0008556344165616463,
+            "B": 1000,
+            "n": 30
+          },
+          "amplification_ratio_close_over_open": 0.5998793042285686
+        },
+        "top_quartile_abs_ret": {
+          "n": 15,
+          "mean_open": 0.002879687191968,
+          "mean_close": 0.0020867137378031927,
+          "mean_diff": -0.000792973454164807,
+          "median_open": 0.0031100834276277804,
+          "median_close": 0.0018668562117084427,
+          "paired_t_stat": -2.9163025888257064,
+          "paired_t_pvalue": 0.011272872153109598,
+          "wilcoxon_stat": 18.0,
+          "wilcoxon_pvalue": 0.01507568359375,
+          "mannwhitney_stat": 73.0,
+          "mannwhitney_pvalue": 0.10573920209087935,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.0013021608088516498,
+            "ci_high": -0.0003037173019146454,
+            "mean": -0.000792973454164807,
+            "B": 1000,
+            "n": 15
+          },
+          "amplification_ratio_close_over_open": 0.7246320862986222
+        },
+        "bottom_quartile_abs_ret": {
+          "n": 15,
+          "mean_open": 0.0022424893318087175,
+          "mean_close": 0.0011631036810002147,
+          "mean_diff": -0.001079385650808503,
+          "median_open": 0.0019236665446552502,
+          "median_close": 0.0010769443748321207,
+          "paired_t_stat": -3.9054487035360017,
+          "paired_t_pvalue": 0.0015846704698930522,
+          "wilcoxon_stat": 3.0,
+          "wilcoxon_pvalue": 0.00030517578125,
+          "mannwhitney_stat": 43.0,
+          "mannwhitney_pvalue": 0.0042099460286678944,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.001598238053595684,
+            "ci_high": -0.0005990649394424523,
+            "mean": -0.001079385650808503,
+            "B": 1000,
+            "n": 15
+          },
+          "amplification_ratio_close_over_open": 0.5186663162683115
+        },
+        "all_days": {
+          "n": 59,
+          "mean_open": 0.002334360562464664,
+          "mean_close": 0.0015269482734727538,
+          "mean_diff": -0.00080741228899191,
+          "median_open": 0.0020899816009795954,
+          "median_close": 0.0013127551034943612,
+          "paired_t_stat": -5.398338872383905,
+          "paired_t_pvalue": 1.3049981381156217e-06,
+          "wilcoxon_stat": 228.0,
+          "wilcoxon_pvalue": 7.084959520718766e-07,
+          "mannwhitney_stat": 980.0,
+          "mannwhitney_pvalue": 4.304035511148121e-05,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.001103549882869145,
+            "ci_high": -0.0005172439590520844,
+            "mean": -0.00080741228899191,
+            "B": 1000,
+            "n": 59
+          },
+          "amplification_ratio_close_over_open": 0.6541184331269595
+        }
+      },
+      "intraday_vol_path_mean": {
+        "09:30": 0.002334170030131795,
+        "10:00": 0.0018658557722739462,
+        "10:30": 0.002016385980992497,
+        "11:00": 0.0016736954289697798,
+        "11:30": 0.0015226114430736744,
+        "12:00": 0.001433593506012509,
+        "12:30": 0.001395242228692251,
+        "13:00": 0.0015749117897607817,
+        "13:30": 0.0013887869589055094,
+        "14:00": 0.0012482642221581582,
+        "14:30": 0.0011739132688509968,
+        "15:00": 0.0012554912344944283,
+        "15:30": 0.0015173224609812922
+      },
+      "between_group_high_vs_low": {
+        "last_bucket_only": {
+          "mannwhitney_U": 569.0,
+          "mannwhitney_pvalue_one_sided_high_gt_low": 0.021478811763898754,
+          "mean_high": 0.001779508860230158,
+          "mean_low": 0.0012828063729405958
+        },
+        "amplification_close_minus_open": {
+          "mannwhitney_U": 414.0,
+          "mannwhitney_pvalue_one_sided_high_amp_gt_low_amp": 0.6277810731262096,
+          "mean_high_amp": -0.0007575273294370105,
+          "mean_low_amp": -0.0008556344165616463
+        }
+      }
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "interval_used": "5m",
+      "first_bucket": "09:30",
+      "last_bucket": "15:30",
+      "all_buckets": [
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30"
+      ],
+      "sample_period": {
+        "start": "2026-03-20",
+        "end": "2026-06-12"
+      },
+      "n_total_days": 59,
+      "median_abs_ret": 0.008300072358687238,
+      "q25_abs_ret": 0.004565283813214194,
+      "q75_abs_ret": 0.015820011328713246,
+      "groups": {
+        "high_abs_ret_median_split": {
+          "n": 29,
+          "mean_open": 0.004101571195631295,
+          "mean_close": 0.0021658806891985557,
+          "mean_diff": -0.0019356905064327394,
+          "median_open": 0.004030978261773862,
+          "median_close": 0.0016050690737434087,
+          "paired_t_stat": -7.846627067342198,
+          "paired_t_pvalue": 1.511755156790043e-08,
+          "wilcoxon_stat": 9.0,
+          "wilcoxon_pvalue": 1.2293457984924316e-07,
+          "mannwhitney_stat": 150.0,
+          "mannwhitney_pvalue": 2.682736828510571e-05,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.002388820284505975,
+            "ci_high": -0.0014708745661322653,
+            "mean": -0.0019356905064327394,
+            "B": 1000,
+            "n": 29
+          },
+          "amplification_ratio_close_over_open": 0.5280612199309132
+        },
+        "low_abs_ret_median_split": {
+          "n": 30,
+          "mean_open": 0.0034457076194123067,
+          "mean_close": 0.001715953669003184,
+          "mean_diff": -0.0017297539504091228,
+          "median_open": 0.0032549742221766494,
+          "median_close": 0.0014211769161612587,
+          "paired_t_stat": -5.8171153918764835,
+          "paired_t_pvalue": 2.6336124824177086e-06,
+          "wilcoxon_stat": 32.0,
+          "wilcoxon_pvalue": 5.144625902175903e-06,
+          "mannwhitney_stat": 101.0,
+          "mannwhitney_pvalue": 2.572118175546942e-07,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.002309375162469381,
+            "ci_high": -0.0011440858031898282,
+            "mean": -0.0017297539504091228,
+            "B": 1000,
+            "n": 30
+          },
+          "amplification_ratio_close_over_open": 0.49799746772938724
+        },
+        "top_quartile_abs_ret": {
+          "n": 15,
+          "mean_open": 0.004225905570419811,
+          "mean_close": 0.0023235615000076044,
+          "mean_diff": -0.0019023440704122065,
+          "median_open": 0.004030978261773862,
+          "median_close": 0.0018265305041051006,
+          "paired_t_stat": -5.7248158673490295,
+          "paired_t_pvalue": 5.251421660594138e-05,
+          "wilcoxon_stat": 1.0,
+          "wilcoxon_pvalue": 0.0001220703125,
+          "mannwhitney_stat": 48.0,
+          "mannwhitney_pvalue": 0.00794033626424658,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.002562456040248748,
+            "ci_high": -0.0012781605169536415,
+            "mean": -0.0019023440704122065,
+            "B": 1000,
+            "n": 15
+          },
+          "amplification_ratio_close_over_open": 0.5498375345326935
+        },
+        "bottom_quartile_abs_ret": {
+          "n": 15,
+          "mean_open": 0.0032316077658757062,
+          "mean_close": 0.0019033470448251372,
+          "mean_diff": -0.001328260721050568,
+          "median_open": 0.0027463094970738714,
+          "median_close": 0.0014345144594116249,
+          "paired_t_stat": -2.740481658214083,
+          "paired_t_pvalue": 0.015940055704867822,
+          "wilcoxon_stat": 17.0,
+          "wilcoxon_pvalue": 0.012451171875,
+          "mannwhitney_stat": 45.0,
+          "mannwhitney_pvalue": 0.005452139856940548,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.0021678807982927215,
+            "ci_high": -0.0003570029002709165,
+            "mean": -0.001328260721050568,
+            "B": 1000,
+            "n": 15
+          },
+          "amplification_ratio_close_over_open": 0.5889783608405722
+        },
+        "all_days": {
+          "n": 59,
+          "mean_open": 0.00376808124162164,
+          "mean_close": 0.001937104238251757,
+          "mean_diff": -0.0018309770033698835,
+          "median_open": 0.0036124031049064834,
+          "median_close": 0.0014345144594116249,
+          "paired_t_stat": -9.50556935612925,
+          "paired_t_pvalue": 1.963687594112001e-13,
+          "wilcoxon_stat": 79.0,
+          "wilcoxon_pvalue": 1.174632459176685e-09,
+          "mannwhitney_stat": 533.0,
+          "mannwhitney_pvalue": 8.2267670889131e-11,
+          "bootstrap_ci_mean_diff": {
+            "ci_low": -0.002196267986965774,
+            "ci_high": -0.0014620403990266092,
+            "mean": -0.0018309770033698835,
+            "B": 1000,
+            "n": 59
+          },
+          "amplification_ratio_close_over_open": 0.5140823973896328
+        }
+      },
+      "intraday_vol_path_mean": {
+        "09:30": 0.0037629799323298362,
+        "10:00": 0.003010988215635717,
+        "10:30": 0.0028511494646637787,
+        "11:00": 0.002357900968043086,
+        "11:30": 0.0021913794321647135,
+        "12:00": 0.0020506486640166272,
+        "12:30": 0.0019317870573609924,
+        "13:00": 0.0021487453687604008,
+        "13:30": 0.0018729306953662098,
+        "14:00": 0.001696252621782932,
+        "14:30": 0.0015758605654705579,
+        "15:00": 0.0017177789996068308,
+        "15:30": 0.0019234150554119308
+      },
+      "between_group_high_vs_low": {
+        "last_bucket_only": {
+          "mannwhitney_U": 505.0,
+          "mannwhitney_pvalue_one_sided_high_gt_low": 0.14599725721087797,
+          "mean_high": 0.0021658806891985557,
+          "mean_low": 0.001715953669003184
+        },
+        "amplification_close_minus_open": {
+          "mannwhitney_U": 407.0,
+          "mannwhitney_pvalue_one_sided_high_amp_gt_low_amp": 0.6671714049380869,
+          "mean_high_amp": -0.0019356905064327394,
+          "mean_low_amp": -0.0017297539504091228
+        }
+      }
+    }
+  }
+}
