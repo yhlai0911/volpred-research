@@ -1,0 +1,1094 @@
+{
+  "experiment_id": "K1487",
+  "title": "GDELT novel-risk intensity as daily RV leading signal",
+  "created_at_utc": "2026-06-13T19:42:45.871472+00:00",
+  "seed": 42,
+  "data_sources": {
+    "market": "yfinance adjusted close for SPY, QQQ, HYG, TLT, ^VIX",
+    "novel_risk": "GDELT DOC 2.0 TimelineVol daily volume intensity, sourceCountry:US",
+    "gdelt_fetch_failures": {
+      "tariff_trade": "RuntimeError('HTTP 429 rate limit for tariff_trade')",
+      "supply_chain": "RuntimeError('HTTP 429 rate limit for supply_chain')"
+    }
+  },
+  "method": {
+    "taxonomy": {
+      "ai_infrastructure": "\"artificial intelligence\" OR \"generative AI\" OR \"AI chips\" OR Nvidia OR \"data center\"",
+      "private_credit": "\"private credit\" OR \"direct lending\" OR \"shadow banking\"",
+      "tariff_trade": "tariff OR tariffs OR \"trade war\" OR \"import duties\"",
+      "cyber": "cyberattack OR cybersecurity OR ransomware OR \"data breach\"",
+      "supply_chain": "\"supply chain\" OR \"shipping disruption\" OR \"port strike\" OR \"Red Sea\""
+    },
+    "active_gdelt_themes": [
+      "ai_infrastructure",
+      "private_credit",
+      "cyber"
+    ],
+    "unavailable_gdelt_themes": [
+      "supply_chain",
+      "tariff_trade"
+    ],
+    "classification": "Transparent keyword taxonomy proxy; no LLM inference was used in this pilot.",
+    "target": "close-to-close squared log return; h=5 uses forward 5-trading-day mean r^2",
+    "models": {
+      "HAR": [
+        "log_rv_lag1",
+        "log_rv_week",
+        "log_rv_month"
+      ],
+      "HAR_NovelComposite": [
+        "log_rv_lag1",
+        "log_rv_week",
+        "log_rv_month",
+        "novel_avg_z_lag1"
+      ],
+      "HAR_VIX": [
+        "log_rv_lag1",
+        "log_rv_week",
+        "log_rv_month",
+        "log_vix_var_lag1"
+      ],
+      "HAR_VIX_NovelComposite": [
+        "log_rv_lag1",
+        "log_rv_week",
+        "log_rv_month",
+        "log_vix_var_lag1",
+        "novel_avg_z_lag1"
+      ],
+      "HAR_VIX_NovelThemes": [
+        "log_rv_lag1",
+        "log_rv_week",
+        "log_rv_month",
+        "log_vix_var_lag1",
+        "ai_infrastructure_z_lag1",
+        "private_credit_z_lag1",
+        "cyber_z_lag1"
+      ]
+    },
+    "lookahead_control": [
+      "All GDELT theme features use explicit .shift(1) via expanding_z_lagged().",
+      "VIX and HAR realized-vol features use .shift(1).",
+      "For h=5, expanding training excludes forecast origins whose 5-day target is not fully observed before t."
+    ],
+    "evaluation": "OOS QLIKE, MSE, Spearman rank correlation, DM test with volpred.stats.model_evaluation.dm_test; Harvey |t|>3 gate."
+  },
+  "references": [
+    {
+      "name": "GDELT DOC 2.0 API TimelineVol",
+      "url": "https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/",
+      "use": "Daily volume intensity proxy for theme-specific news coverage."
+    },
+    {
+      "name": "Tetlock (2007), Journal of Finance",
+      "url": "https://doi.org/10.1111/j.1540-6261.2007.01232.x",
+      "use": "Foundational media-content and market activity link."
+    },
+    {
+      "name": "Baker, Bloom, Davis (2016), QJE",
+      "url": "https://academic.oup.com/qje/article/131/4/1593/2468873",
+      "use": "Newspaper-frequency uncertainty index precedent."
+    },
+    {
+      "name": "RiskLabs, arXiv:2404.07452",
+      "url": "https://arxiv.org/abs/2404.07452",
+      "use": "LLM-based financial risk prediction motivation."
+    }
+  ],
+  "theme_descriptive_stats": {
+    "ai_infrastructure": {
+      "mean_volume_intensity_pct": 0.43277139403706677,
+      "std_volume_intensity_pct": 0.17092653032735627,
+      "max_volume_intensity_pct": 1.2146,
+      "max_date": "2025-12-06"
+    },
+    "private_credit": {
+      "mean_volume_intensity_pct": 0.007031829170024173,
+      "std_volume_intensity_pct": 0.006903112478684831,
+      "max_volume_intensity_pct": 0.1401,
+      "max_date": "2024-09-11"
+    },
+    "cyber": {
+      "mean_volume_intensity_pct": 0.11286551168412572,
+      "std_volume_intensity_pct": 0.06041986470964928,
+      "max_volume_intensity_pct": 1.052,
+      "max_date": "2024-07-19"
+    }
+  },
+  "model_summary": [
+    {
+      "horizon": 1,
+      "model": "HAR",
+      "mean_qlike": 3.734884314552975,
+      "median_qlike": 3.944991097713191,
+      "mean_n_oos": 359.75
+    },
+    {
+      "horizon": 1,
+      "model": "HAR_NovelComposite",
+      "mean_qlike": 4.0342412235772835,
+      "median_qlike": 4.215757931875634,
+      "mean_n_oos": 359.75
+    },
+    {
+      "horizon": 1,
+      "model": "HAR_VIX",
+      "mean_qlike": 2.550176014626766,
+      "median_qlike": 2.5945129425812063,
+      "mean_n_oos": 359.75
+    },
+    {
+      "horizon": 1,
+      "model": "HAR_VIX_NovelComposite",
+      "mean_qlike": 2.6897846186444827,
+      "median_qlike": 2.6682715417022456,
+      "mean_n_oos": 359.75
+    },
+    {
+      "horizon": 1,
+      "model": "HAR_VIX_NovelThemes",
+      "mean_qlike": 2.8046624352479776,
+      "median_qlike": 2.8320162882137936,
+      "mean_n_oos": 359.75
+    },
+    {
+      "horizon": 5,
+      "model": "HAR",
+      "mean_qlike": 0.650196366454057,
+      "median_qlike": 0.7317911793564327,
+      "mean_n_oos": 358.0
+    },
+    {
+      "horizon": 5,
+      "model": "HAR_NovelComposite",
+      "mean_qlike": 0.6878636189757088,
+      "median_qlike": 0.7613372000604921,
+      "mean_n_oos": 358.0
+    },
+    {
+      "horizon": 5,
+      "model": "HAR_VIX",
+      "mean_qlike": 0.48184770755432393,
+      "median_qlike": 0.5484138570465777,
+      "mean_n_oos": 358.0
+    },
+    {
+      "horizon": 5,
+      "model": "HAR_VIX_NovelComposite",
+      "mean_qlike": 0.5009764586447227,
+      "median_qlike": 0.5669918341574676,
+      "mean_n_oos": 358.0
+    },
+    {
+      "horizon": 5,
+      "model": "HAR_VIX_NovelThemes",
+      "mean_qlike": 0.50754290974411,
+      "median_qlike": 0.5764525878916453,
+      "mean_n_oos": 358.0
+    }
+  ],
+  "asset_horizon_results": [
+    {
+      "asset": "SPY",
+      "horizon_days": 1,
+      "oos_period": "2025-01-02 to 2026-06-12",
+      "metrics": {
+        "HAR": {
+          "n_oos": 362,
+          "qlike": 5.03139972045988,
+          "mse": 3.5688639496099436e-07,
+          "spearman_rho": 0.21580352583857274,
+          "spearman_p": 3.463486363159994e-05
+        },
+        "HAR_NovelComposite": {
+          "n_oos": 362,
+          "qlike": 5.379043637843996,
+          "mse": 3.5806447085525635e-07,
+          "spearman_rho": 0.17653818916425854,
+          "spearman_p": 0.0007414167463186452
+        },
+        "HAR_VIX": {
+          "n_oos": 362,
+          "qlike": 2.9869980373376466,
+          "mse": 3.366517005163271e-07,
+          "spearman_rho": 0.34246946818477153,
+          "spearman_p": 2.127758297664291e-11
+        },
+        "HAR_VIX_NovelComposite": {
+          "n_oos": 362,
+          "qlike": 3.061421225333891,
+          "mse": 3.376605880077615e-07,
+          "spearman_rho": 0.3137330022370878,
+          "spearman_p": 1.038953868613169e-09
+        },
+        "HAR_VIX_NovelThemes": {
+          "n_oos": 362,
+          "qlike": 3.2359694186311536,
+          "mse": 3.421356177721767e-07,
+          "spearman_rho": 0.2914218237925614,
+          "spearman_p": 1.6178538434057806e-08
+        }
+      },
+      "dm_tests": {
+        "HAR_NovelComposite_vs_HAR": {
+          "dm_t_stat": 1.0197137987119615,
+          "p_value": 0.30854709512734124,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -6.909487154646909,
+          "n_pairwise": 362,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelComposite_vs_HAR_VIX": {
+          "dm_t_stat": 0.9264831692459767,
+          "p_value": 0.35481390332606777,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -2.4915713725268693,
+          "n_pairwise": 362,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelThemes_vs_HAR_VIX": {
+          "dm_t_stat": 1.9145063756086016,
+          "p_value": 0.05634568782076044,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -8.335170568622761,
+          "n_pairwise": 362,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        }
+      }
+    },
+    {
+      "asset": "SPY",
+      "horizon_days": 5,
+      "oos_period": "2025-01-02 to 2026-06-08",
+      "metrics": {
+        "HAR": {
+          "n_oos": 358,
+          "qlike": 0.8795300228386745,
+          "mse": 1.1830276946503968e-07,
+          "spearman_rho": 0.3949106447328313,
+          "spearman_p": 8.245294657357068e-15
+        },
+        "HAR_NovelComposite": {
+          "n_oos": 358,
+          "qlike": 0.9671223049136317,
+          "mse": 1.2005081071611055e-07,
+          "spearman_rho": 0.352455107251036,
+          "spearman_p": 6.554575671581565e-12
+        },
+        "HAR_VIX": {
+          "n_oos": 358,
+          "qlike": 0.5710854666100537,
+          "mse": 1.0062905925825588e-07,
+          "spearman_rho": 0.49355327322569365,
+          "spearman_p": 2.224260361338565e-23
+        },
+        "HAR_VIX_NovelComposite": {
+          "n_oos": 358,
+          "qlike": 0.5962753215077977,
+          "mse": 1.013888424440154e-07,
+          "spearman_rho": 0.47432025828491714,
+          "spearman_p": 1.7517900129042277e-21
+        },
+        "HAR_VIX_NovelThemes": {
+          "n_oos": 358,
+          "qlike": 0.6026085858474083,
+          "mse": 1.0153821105839153e-07,
+          "spearman_rho": 0.47594048901675795,
+          "spearman_p": 1.2254955732692451e-21
+        }
+      },
+      "dm_tests": {
+        "HAR_NovelComposite_vs_HAR": {
+          "dm_t_stat": 1.2473425487986332,
+          "p_value": 0.21308955424116394,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -9.958987163650644,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelComposite_vs_HAR_VIX": {
+          "dm_t_stat": 1.4131537857986431,
+          "p_value": 0.15848178922002987,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -4.410873042746174,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelThemes_vs_HAR_VIX": {
+          "dm_t_stat": 1.6609012070865148,
+          "p_value": 0.0976112261948332,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -5.5198601751284135,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "horizon_days": 1,
+      "oos_period": "2025-01-02 to 2026-06-12",
+      "metrics": {
+        "HAR": {
+          "n_oos": 362,
+          "qlike": 4.853539152125344,
+          "mse": 6.061173666020857e-07,
+          "spearman_rho": 0.12457102035968708,
+          "spearman_p": 0.01773181653512483
+        },
+        "HAR_NovelComposite": {
+          "n_oos": 362,
+          "qlike": 5.365331978228794,
+          "mse": 6.081058726180111e-07,
+          "spearman_rho": 0.08710931753960563,
+          "spearman_p": 0.09796861122327301
+        },
+        "HAR_VIX": {
+          "n_oos": 362,
+          "qlike": 3.085538847113687,
+          "mse": 5.768181141255539e-07,
+          "spearman_rho": 0.22207399932787447,
+          "spearman_p": 2.0080510736835193e-05
+        },
+        "HAR_VIX_NovelComposite": {
+          "n_oos": 362,
+          "qlike": 3.220406637812274,
+          "mse": 5.805103365502083e-07,
+          "spearman_rho": 0.17357395613425866,
+          "spearman_p": 0.0009123256665361024
+        },
+        "HAR_VIX_NovelThemes": {
+          "n_oos": 362,
+          "qlike": 3.3718546641101144,
+          "mse": 5.854998967826836e-07,
+          "spearman_rho": 0.1471566648255098,
+          "spearman_p": 0.005024609724126157
+        }
+      },
+      "dm_tests": {
+        "HAR_NovelComposite_vs_HAR": {
+          "dm_t_stat": 1.4023642916817427,
+          "p_value": 0.1616658208139925,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -10.544734678391096,
+          "n_pairwise": 362,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelComposite_vs_HAR_VIX": {
+          "dm_t_stat": 1.4625505436473678,
+          "p_value": 0.1444604280445958,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -4.370963950907539,
+          "n_pairwise": 362,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelThemes_vs_HAR_VIX": {
+          "dm_t_stat": 2.306606699455264,
+          "p_value": 0.02164239108225341,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -9.279280903050584,
+          "n_pairwise": 362,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        }
+      }
+    },
+    {
+      "asset": "QQQ",
+      "horizon_days": 5,
+      "oos_period": "2025-01-02 to 2026-06-08",
+      "metrics": {
+        "HAR": {
+          "n_oos": 358,
+          "qlike": 0.7411847651541907,
+          "mse": 1.7955847245473384e-07,
+          "spearman_rho": 0.4157934442509205,
+          "spearman_p": 2.1291942733999199e-16
+        },
+        "HAR_NovelComposite": {
+          "n_oos": 358,
+          "qlike": 0.7710254020489447,
+          "mse": 1.8105136503728975e-07,
+          "spearman_rho": 0.3898857063872529,
+          "spearman_p": 1.9139062582569124e-14
+        },
+        "HAR_VIX": {
+          "n_oos": 358,
+          "qlike": 0.5409306149768247,
+          "mse": 1.523223379077798e-07,
+          "spearman_rho": 0.4322884131010366,
+          "spearman_p": 9.844070714546657e-18
+        },
+        "HAR_VIX_NovelComposite": {
+          "n_oos": 358,
+          "qlike": 0.5427470397333275,
+          "mse": 1.4986969324506927e-07,
+          "spearman_rho": 0.41514875195810574,
+          "spearman_p": 2.392878330379579e-16
+        },
+        "HAR_VIX_NovelThemes": {
+          "n_oos": 358,
+          "qlike": 0.5591350170504267,
+          "mse": 1.5145472177093116e-07,
+          "spearman_rho": 0.4026804291689131,
+          "spearman_p": 2.1794524174738563e-15
+        }
+      },
+      "dm_tests": {
+        "HAR_NovelComposite_vs_HAR": {
+          "dm_t_stat": 1.356219202715961,
+          "p_value": 0.17588655978873824,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -4.026072620171313,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelComposite_vs_HAR_VIX": {
+          "dm_t_stat": 0.6352216533417883,
+          "p_value": 0.5256907889735531,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -0.33579625671226054,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelThemes_vs_HAR_VIX": {
+          "dm_t_stat": 2.9344599467172956,
+          "p_value": 0.0035574064857668564,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -3.365385794328151,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        }
+      }
+    },
+    {
+      "asset": "HYG",
+      "horizon_days": 1,
+      "oos_period": "2025-01-02 to 2026-06-12",
+      "metrics": {
+        "HAR": {
+          "n_oos": 354,
+          "qlike": 3.0364430433010376,
+          "mse": 1.9287801541659956e-09,
+          "spearman_rho": 0.2636154431537414,
+          "spearman_p": 4.863255670749463e-07
+        },
+        "HAR_NovelComposite": {
+          "n_oos": 354,
+          "qlike": 3.0661838855224737,
+          "mse": 1.9260868141712543e-09,
+          "spearman_rho": 0.2563933671920325,
+          "spearman_p": 1.0139396425990966e-06
+        },
+        "HAR_VIX": {
+          "n_oos": 354,
+          "qlike": 2.202027847824766,
+          "mse": 1.8167118003680925e-09,
+          "spearman_rho": 0.320931380946003,
+          "spearman_p": 6.361786086175036e-10
+        },
+        "HAR_VIX_NovelComposite": {
+          "n_oos": 354,
+          "qlike": 2.2751218580706007,
+          "mse": 1.7916626257944902e-09,
+          "spearman_rho": 0.3077231660628327,
+          "spearman_p": 3.3511866233855164e-09
+        },
+        "HAR_VIX_NovelThemes": {
+          "n_oos": 354,
+          "qlike": 2.4280631577964336,
+          "mse": 1.8025230070743863e-09,
+          "spearman_rho": 0.2937825590727527,
+          "spearman_p": 1.7739718787638552e-08
+        }
+      },
+      "dm_tests": {
+        "HAR_NovelComposite_vs_HAR": {
+          "dm_t_stat": 0.5505676646796365,
+          "p_value": 0.5822783206157893,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -0.9794632007687382,
+          "n_pairwise": 354,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelComposite_vs_HAR_VIX": {
+          "dm_t_stat": 1.6213386309448554,
+          "p_value": 0.10583786396652584,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -3.3193953617816065,
+          "n_pairwise": 354,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelThemes_vs_HAR_VIX": {
+          "dm_t_stat": 3.5037373810100827,
+          "p_value": 0.0005177836187855167,
+          "harvey_abs_t_gt_3": true,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -10.264870637079017,
+          "n_pairwise": 354,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        }
+      }
+    },
+    {
+      "asset": "HYG",
+      "horizon_days": 5,
+      "oos_period": "2025-01-02 to 2026-06-08",
+      "metrics": {
+        "HAR": {
+          "n_oos": 358,
+          "qlike": 0.7223975935586746,
+          "mse": 7.173649782446035e-10,
+          "spearman_rho": 0.4608805816719866,
+          "spearman_p": 3.1570313328101026e-20
+        },
+        "HAR_NovelComposite": {
+          "n_oos": 358,
+          "qlike": 0.7516489980720396,
+          "mse": 7.232631660389337e-10,
+          "spearman_rho": 0.4453867820295358,
+          "spearman_p": 7.5827247674379935e-19
+        },
+        "HAR_VIX": {
+          "n_oos": 358,
+          "qlike": 0.5558970991163309,
+          "mse": 6.85712975849481e-10,
+          "spearman_rho": 0.5385784260328056,
+          "spearman_p": 2.5613094041649886e-28
+        },
+        "HAR_VIX_NovelComposite": {
+          "n_oos": 358,
+          "qlike": 0.5912366285816075,
+          "mse": 6.889987948201055e-10,
+          "spearman_rho": 0.507773903666756,
+          "spearman_p": 7.344589693144845e-25
+        },
+        "HAR_VIX_NovelThemes": {
+          "n_oos": 358,
+          "qlike": 0.5937701587328639,
+          "mse": 6.793942978745628e-10,
+          "spearman_rho": 0.49035596560717004,
+          "spearman_p": 4.68581499994253e-23
+        }
+      },
+      "dm_tests": {
+        "HAR_NovelComposite_vs_HAR": {
+          "dm_t_stat": 1.1162258108030685,
+          "p_value": 0.2650762233207271,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -4.049211234116477,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelComposite_vs_HAR_VIX": {
+          "dm_t_stat": 1.3259253321188909,
+          "p_value": 0.18571216725959516,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -6.357207030123615,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelThemes_vs_HAR_VIX": {
+          "dm_t_stat": 1.6064444090726984,
+          "p_value": 0.10906039871699824,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -6.812962268869008,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        }
+      }
+    },
+    {
+      "asset": "TLT",
+      "horizon_days": 1,
+      "oos_period": "2025-01-02 to 2026-06-12",
+      "metrics": {
+        "HAR": {
+          "n_oos": 361,
+          "qlike": 2.0181553423256386,
+          "mse": 8.638330789904767e-09,
+          "spearman_rho": 0.15916961769211385,
+          "spearman_p": 0.0024206053600034235
+        },
+        "HAR_NovelComposite": {
+          "n_oos": 361,
+          "qlike": 2.3264053927138715,
+          "mse": 8.74253644774497e-09,
+          "spearman_rho": 0.15626855450672295,
+          "spearman_p": 0.0029097398864247302
+        },
+        "HAR_VIX": {
+          "n_oos": 361,
+          "qlike": 1.9261393262309636,
+          "mse": 8.493225644020831e-09,
+          "spearman_rho": 0.16052137259174712,
+          "spearman_p": 0.0022193633876594157
+        },
+        "HAR_VIX_NovelComposite": {
+          "n_oos": 361,
+          "qlike": 2.202188753361164,
+          "mse": 8.588986178333115e-09,
+          "spearman_rho": 0.16568071712517143,
+          "spearman_p": 0.0015837926390556171
+        },
+        "HAR_VIX_NovelThemes": {
+          "n_oos": 361,
+          "qlike": 2.1827625004542086,
+          "mse": 8.578613101598159e-09,
+          "spearman_rho": 0.1593684464390266,
+          "spearman_p": 0.002389997388735536
+        }
+      },
+      "dm_tests": {
+        "HAR_NovelComposite_vs_HAR": {
+          "dm_t_stat": 4.349624142512557,
+          "p_value": 1.7780589518956447e-05,
+          "harvey_abs_t_gt_3": true,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -15.273851517942036,
+          "n_pairwise": 361,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelComposite_vs_HAR_VIX": {
+          "dm_t_stat": 4.411645501408024,
+          "p_value": 1.3570674063823063e-05,
+          "harvey_abs_t_gt_3": true,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -14.331747624423894,
+          "n_pairwise": 361,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelThemes_vs_HAR_VIX": {
+          "dm_t_stat": 4.06587708188447,
+          "p_value": 5.880730283869262e-05,
+          "harvey_abs_t_gt_3": true,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -13.323188552792844,
+          "n_pairwise": 361,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        }
+      }
+    },
+    {
+      "asset": "TLT",
+      "horizon_days": 5,
+      "oos_period": "2025-01-02 to 2026-06-08",
+      "metrics": {
+        "HAR": {
+          "n_oos": 358,
+          "qlike": 0.2576730842646882,
+          "mse": 2.1251560223560103e-09,
+          "spearman_rho": 0.3834743526890534,
+          "spearman_p": 5.489877697065696e-14
+        },
+        "HAR_NovelComposite": {
+          "n_oos": 358,
+          "qlike": 0.2616577708682191,
+          "mse": 2.146540988345588e-09,
+          "spearman_rho": 0.37035793760712454,
+          "spearman_p": 4.4167703335055867e-13
+        },
+        "HAR_VIX": {
+          "n_oos": 358,
+          "qlike": 0.2594776495140866,
+          "mse": 2.162306064752061e-09,
+          "spearman_rho": 0.38576778340535883,
+          "spearman_p": 3.7757632689959576e-14
+        },
+        "HAR_VIX_NovelComposite": {
+          "n_oos": 358,
+          "qlike": 0.273646844756158,
+          "mse": 2.2304506357439736e-09,
+          "spearman_rho": 0.35400812259981257,
+          "spearman_p": 5.2216493722518125e-12
+        },
+        "HAR_VIX_NovelThemes": {
+          "n_oos": 358,
+          "qlike": 0.2746578773457412,
+          "mse": 2.2470799085733846e-09,
+          "spearman_rho": 0.33377419998982616,
+          "spearman_p": 9.173504093596528e-11
+        }
+      },
+      "dm_tests": {
+        "HAR_NovelComposite_vs_HAR": {
+          "dm_t_stat": 1.6068044598049003,
+          "p_value": 0.10898134136444049,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -1.5464116537052577,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelComposite_vs_HAR_VIX": {
+          "dm_t_stat": 1.020447222311691,
+          "p_value": 0.30820741938804685,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -5.460661166233596,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        },
+        "HAR_VIX_NovelThemes_vs_HAR_VIX": {
+          "dm_t_stat": 1.351202292206132,
+          "p_value": 0.17748629928191617,
+          "harvey_abs_t_gt_3": false,
+          "challenger_better_by_qlike": false,
+          "qlike_improvement_pct": -5.850302660010228,
+          "n_pairwise": 358,
+          "interpretation": "Negative t means challenger has lower QLIKE loss."
+        }
+      }
+    }
+  ],
+  "dm_summary_rows": [
+    {
+      "asset": "SPY",
+      "horizon": 1,
+      "comparison": "HAR_NovelComposite_vs_HAR",
+      "dm_t_stat": 1.0197137987119615,
+      "p_value": 0.30854709512734124,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -6.909487154646909,
+      "n_pairwise": 362,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "SPY",
+      "horizon": 1,
+      "comparison": "HAR_VIX_NovelComposite_vs_HAR_VIX",
+      "dm_t_stat": 0.9264831692459767,
+      "p_value": 0.35481390332606777,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -2.4915713725268693,
+      "n_pairwise": 362,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "SPY",
+      "horizon": 1,
+      "comparison": "HAR_VIX_NovelThemes_vs_HAR_VIX",
+      "dm_t_stat": 1.9145063756086016,
+      "p_value": 0.05634568782076044,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -8.335170568622761,
+      "n_pairwise": 362,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "SPY",
+      "horizon": 5,
+      "comparison": "HAR_NovelComposite_vs_HAR",
+      "dm_t_stat": 1.2473425487986332,
+      "p_value": 0.21308955424116394,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -9.958987163650644,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "SPY",
+      "horizon": 5,
+      "comparison": "HAR_VIX_NovelComposite_vs_HAR_VIX",
+      "dm_t_stat": 1.4131537857986431,
+      "p_value": 0.15848178922002987,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -4.410873042746174,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "SPY",
+      "horizon": 5,
+      "comparison": "HAR_VIX_NovelThemes_vs_HAR_VIX",
+      "dm_t_stat": 1.6609012070865148,
+      "p_value": 0.0976112261948332,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -5.5198601751284135,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 1,
+      "comparison": "HAR_NovelComposite_vs_HAR",
+      "dm_t_stat": 1.4023642916817427,
+      "p_value": 0.1616658208139925,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -10.544734678391096,
+      "n_pairwise": 362,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 1,
+      "comparison": "HAR_VIX_NovelComposite_vs_HAR_VIX",
+      "dm_t_stat": 1.4625505436473678,
+      "p_value": 0.1444604280445958,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -4.370963950907539,
+      "n_pairwise": 362,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 1,
+      "comparison": "HAR_VIX_NovelThemes_vs_HAR_VIX",
+      "dm_t_stat": 2.306606699455264,
+      "p_value": 0.02164239108225341,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -9.279280903050584,
+      "n_pairwise": 362,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 5,
+      "comparison": "HAR_NovelComposite_vs_HAR",
+      "dm_t_stat": 1.356219202715961,
+      "p_value": 0.17588655978873824,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -4.026072620171313,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 5,
+      "comparison": "HAR_VIX_NovelComposite_vs_HAR_VIX",
+      "dm_t_stat": 0.6352216533417883,
+      "p_value": 0.5256907889735531,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -0.33579625671226054,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "QQQ",
+      "horizon": 5,
+      "comparison": "HAR_VIX_NovelThemes_vs_HAR_VIX",
+      "dm_t_stat": 2.9344599467172956,
+      "p_value": 0.0035574064857668564,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -3.365385794328151,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "HYG",
+      "horizon": 1,
+      "comparison": "HAR_NovelComposite_vs_HAR",
+      "dm_t_stat": 0.5505676646796365,
+      "p_value": 0.5822783206157893,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -0.9794632007687382,
+      "n_pairwise": 354,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "HYG",
+      "horizon": 1,
+      "comparison": "HAR_VIX_NovelComposite_vs_HAR_VIX",
+      "dm_t_stat": 1.6213386309448554,
+      "p_value": 0.10583786396652584,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -3.3193953617816065,
+      "n_pairwise": 354,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "HYG",
+      "horizon": 1,
+      "comparison": "HAR_VIX_NovelThemes_vs_HAR_VIX",
+      "dm_t_stat": 3.5037373810100827,
+      "p_value": 0.0005177836187855167,
+      "harvey_abs_t_gt_3": true,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -10.264870637079017,
+      "n_pairwise": 354,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "HYG",
+      "horizon": 5,
+      "comparison": "HAR_NovelComposite_vs_HAR",
+      "dm_t_stat": 1.1162258108030685,
+      "p_value": 0.2650762233207271,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -4.049211234116477,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "HYG",
+      "horizon": 5,
+      "comparison": "HAR_VIX_NovelComposite_vs_HAR_VIX",
+      "dm_t_stat": 1.3259253321188909,
+      "p_value": 0.18571216725959516,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -6.357207030123615,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "HYG",
+      "horizon": 5,
+      "comparison": "HAR_VIX_NovelThemes_vs_HAR_VIX",
+      "dm_t_stat": 1.6064444090726984,
+      "p_value": 0.10906039871699824,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -6.812962268869008,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "TLT",
+      "horizon": 1,
+      "comparison": "HAR_NovelComposite_vs_HAR",
+      "dm_t_stat": 4.349624142512557,
+      "p_value": 1.7780589518956447e-05,
+      "harvey_abs_t_gt_3": true,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -15.273851517942036,
+      "n_pairwise": 361,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "TLT",
+      "horizon": 1,
+      "comparison": "HAR_VIX_NovelComposite_vs_HAR_VIX",
+      "dm_t_stat": 4.411645501408024,
+      "p_value": 1.3570674063823063e-05,
+      "harvey_abs_t_gt_3": true,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -14.331747624423894,
+      "n_pairwise": 361,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "TLT",
+      "horizon": 1,
+      "comparison": "HAR_VIX_NovelThemes_vs_HAR_VIX",
+      "dm_t_stat": 4.06587708188447,
+      "p_value": 5.880730283869262e-05,
+      "harvey_abs_t_gt_3": true,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -13.323188552792844,
+      "n_pairwise": 361,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "TLT",
+      "horizon": 5,
+      "comparison": "HAR_NovelComposite_vs_HAR",
+      "dm_t_stat": 1.6068044598049003,
+      "p_value": 0.10898134136444049,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -1.5464116537052577,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "TLT",
+      "horizon": 5,
+      "comparison": "HAR_VIX_NovelComposite_vs_HAR_VIX",
+      "dm_t_stat": 1.020447222311691,
+      "p_value": 0.30820741938804685,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -5.460661166233596,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    },
+    {
+      "asset": "TLT",
+      "horizon": 5,
+      "comparison": "HAR_VIX_NovelThemes_vs_HAR_VIX",
+      "dm_t_stat": 1.351202292206132,
+      "p_value": 0.17748629928191617,
+      "harvey_abs_t_gt_3": false,
+      "challenger_better_by_qlike": false,
+      "qlike_improvement_pct": -5.850302660010228,
+      "n_pairwise": 358,
+      "interpretation": "Negative t means challenger has lower QLIKE loss."
+    }
+  ],
+  "summary": {
+    "n_assets": 4,
+    "assets": [
+      "SPY",
+      "QQQ",
+      "HYG",
+      "TLT"
+    ],
+    "horizons": [
+      1,
+      5
+    ],
+    "sample_period": "2023-01-03 to 2026-06-12",
+    "gdelt_period": "2023-01-01 to 2026-06-12",
+    "oos_start": "2025-01-01",
+    "novel_composite_vs_har_wins": 0,
+    "novel_composite_vs_har_harvey_passes": 1,
+    "novel_composite_vs_har_significant_wins": 0,
+    "novel_composite_vs_har_significant_losses": 1,
+    "novel_beyond_vix_wins": 0,
+    "novel_beyond_vix_harvey_passes": 3,
+    "novel_beyond_vix_significant_wins": 0,
+    "novel_beyond_vix_significant_losses": 3,
+    "best_dm_abs_t": 4.411645501408024,
+    "active_gdelt_themes": [
+      "ai_infrastructure",
+      "private_credit",
+      "cyber"
+    ],
+    "unavailable_gdelt_themes": [
+      "supply_chain",
+      "tariff_trade"
+    ]
+  },
+  "conclusion": "NULL_NEGATIVE: no novel-risk augmentation improves OOS QLIKE; at least one comparison is Harvey-significantly worse. Daily GDELT keyword intensity should not be treated as an RV leading signal in this pilot.",
+  "limitations": [
+    "Keyword taxonomy is a transparent proxy, not a validated LLM classifier.",
+    "GDELT TimelineVol is normalized news-share coverage, not raw article counts or sentiment.",
+    "Daily close-to-close r^2 is a noisy volatility proxy; no intraday RV is used.",
+    "Sample starts in 2023 to keep live GDELT API collection tractable for this hourly run."
+  ],
+  "figures": [
+    "figures/k1487_qlike_by_asset.png",
+    "figures/k1487_signal_vs_spy_rv.png"
+  ]
+}

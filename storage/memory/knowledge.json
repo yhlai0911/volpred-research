@@ -33744,5 +33744,19 @@
     "reviewer_source": "codex_cli_0.135",
     "task_id": "paper_review_mile_47ff52c7",
     "article_id": "mile_47ff52c7"
+  },
+  {
+    "item_id": "0f6ad083",
+    "category": "vol_forecasting",
+    "content": "K1487 NULL_NEGATIVE: GDELT DOC daily novel-risk keyword intensity was tested as a lagged RV leading signal for SPY/QQQ/HYG/TLT, 2023-01-03 to 2026-06-12, OOS from 2025-01-01, horizons 1d and 5d. Active themes fetched: AI infrastructure, private credit, cyber; tariff_trade and supply_chain were unavailable due to GDELT HTTP 429 and are explicitly logged. Models used log-HAR, HAR+novel, HAR+VIX, and HAR+VIX+novel; all GDELT/VIX/RV features use explicit shift(1), and h=5 training excludes overlapping targets not fully observed before forecast origin. Result: no novel-risk augmentation improves QLIKE in any asset/horizon comparison. Mean QLIKE worsens vs HAR and HAR+VIX at both horizons. Significant deterioration examples: TLT h=1 HAR+VIX+novel composite vs HAR+VIX DM t=+4.412, p=1.36e-5, QLIKE -14.33%; HYG h=1 HAR+VIX+novel themes vs HAR+VIX DM t=+3.504, p=0.00052, QLIKE -10.26%. Conclusion: coarse daily GDELT keyword intensity should not be treated as a reliable RV leading signal; consistent with prior K531/K446 VIX-sufficiency/null evidence.",
+    "evidence": [
+      "experiments/k1487/k1487.py",
+      "experiments/k1487/k1487_results.json",
+      "experiments/k1487/README.md",
+      "experiments/k1487/figures/k1487_qlike_by_asset.png",
+      "experiments/k1487/figures/k1487_signal_vs_spy_rv.png"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-14T03:44:05.313516"
   }
 ]
