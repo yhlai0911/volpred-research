@@ -29918,7 +29918,7 @@
     "title": "研究 backlog fallback: 市場集中度 risk 與大盤 vol：cap-weight vs equal-weight 波動裂口",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 市場集中度 risk 與大盤 vol：cap-weight vs equal-weight 波動裂口 — yfinance SPY vs RSP（等權）RV 與相關，建 top-10 集中度 proxy（用前十大成分權重或 SPY/RSP return spread），檢定集中度升高 regime 下大盤 tail vol 是否系統性放大（來源：J.Index Investing/SPGI 2025；2025 末前十大佔 S&P 41% 創高） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "risk_vol_cap_weight_vs_equal_weight",
@@ -29926,7 +29926,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-13T23:08:13+00:00"
+    "created_at": "2026-06-13T23:08:13+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T00:52:06.143707+00:00",
+    "claim_session_id": "d3190dc1e95d",
+    "started_at": "2026-06-14T00:52:06.241606+00:00",
+    "completed_at": "2026-06-14T00:59:40.090663+00:00",
+    "result": "K1495 completed: lagged SPY-RSP concentration pulse predicts higher next-21d market vol (SPY 18.16% vs 14.41%; HAC high-regime coef +2.03pp, p=0.041).\nNot a unique cap-weight fragility spread: forward SPY-RSP vol gap did not widen robustly, so verdict is PARTIAL_PASS.\nArtifacts: experiments/k1495/ README + script + results + figures + codex review."
   },
   {
     "id": "research_drawdown_low_vol_quality_value_yfinance_usmv_qua",
@@ -30035,5 +30041,27 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-14T00:44:21+00:00"
+  },
+  {
+    "id": "paper_review_mile_cea70f87",
+    "title": "Paper review (Codex 24h-rule): 台股 VT 參數一定要調到最準嗎？這份實驗給了一個很務實的答案",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cea70f87 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_cea70f87",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-14T01:08:24+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-14T01:08:43.179485+00:00",
+    "claim_session_id": "0ec9549a4a39",
+    "started_at": "2026-06-14T01:09:23.059595+00:00",
+    "completed_at": "2026-06-14T01:15:26.190752+00:00",
+    "result": "Codex CONDITIONAL_PASS: lookahead/numbers OK; CRITICAL cost-threshold inconsistency + yfinance auto_adjust unpinned. knowledge=b7e7f9de"
   }
 ]

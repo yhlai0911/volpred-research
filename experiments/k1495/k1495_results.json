@@ -1,0 +1,215 @@
+{
+  "experiment_id": "K1495",
+  "title": "Lagged concentration pulse (SPY-RSP) and forward market volatility",
+  "date_run": "2026-06-14",
+  "seed": 42,
+  "data": {
+    "source": "yfinance adjusted daily close",
+    "tickers": [
+      "SPY",
+      "RSP"
+    ],
+    "period": {
+      "start": "2004-05-28",
+      "end": "2026-05-13"
+    },
+    "n_obs": 5524
+  },
+  "methodology": {
+    "concentration_proxy_primary": "21-day cumulative log return spread of SPY minus RSP",
+    "regime_rule_primary": "high if proxy >= expanding 80th percentile computed with history through t only",
+    "robustness_proxy": "63-day log price spread change of SPY relative to RSP",
+    "target": "forward 21-day realized volatility from t+1 to t+21",
+    "lookahead_protection": "proxy and regime use data through t; outcomes start at t+1",
+    "bootstrap": {
+      "type": "stationary bootstrap",
+      "mean_block": 21,
+      "draws": 1000
+    },
+    "regression": "OLS with HAC(21) standard errors"
+  },
+  "descriptive": {
+    "high_regime_share": 0.29055032585083274,
+    "tail_event_threshold_top_decile": 0.26151849295581353,
+    "corr_proxy_with_future_spy_vol": 0.1317061403976038,
+    "corr_proxy_with_future_gap": 0.0417119212728606
+  },
+  "group_means": {
+    "high_regime": {
+      "fwd_rv21_spy": 0.18157775086458572,
+      "fwd_rv21_rsp": 0.1945262928341327,
+      "fwd_rv_gap": -0.012948541969546968,
+      "tail_event_rate": 0.13707165109034267
+    },
+    "non_high_regime": {
+      "fwd_rv21_spy": 0.14412405655593458,
+      "fwd_rv21_rsp": 0.15316795260205177,
+      "fwd_rv_gap": -0.00904389604611721,
+      "tail_event_rate": 0.0849706557795356
+    }
+  },
+  "tests": {
+    "fwd_rv21_spy": {
+      "metric": "fwd_rv21_spy",
+      "high_mean": 0.18157775086458572,
+      "non_high_mean": 0.14412405655593458,
+      "diff_high_minus_non_high": 0.03745369430865114,
+      "ratio_high_to_non_high": 1.2598712193069264,
+      "welch_t": 9.469171844281428,
+      "welch_p": 7.500199810106269e-21,
+      "bootstrap_ci_95": [
+        0.009504605738824947,
+        0.07392047148971412
+      ],
+      "bootstrap_p_two_sided": 0.001998001998001998
+    },
+    "fwd_rv21_rsp": {
+      "metric": "fwd_rv21_rsp",
+      "high_mean": 0.1945262928341327,
+      "non_high_mean": 0.15316795260205177,
+      "diff_high_minus_non_high": 0.04135834023208093,
+      "ratio_high_to_non_high": 1.2700195408339414,
+      "welch_t": 9.801272558203086,
+      "welch_p": 3.4189635296798345e-22,
+      "bootstrap_ci_95": [
+        0.01112766171467797,
+        0.08059447729569769
+      ],
+      "bootstrap_p_two_sided": 0.005994005994005994
+    },
+    "fwd_rv_gap": {
+      "metric": "fwd_rv_gap",
+      "high_mean": -0.012948541969546968,
+      "non_high_mean": -0.00904389604611721,
+      "diff_high_minus_non_high": -0.003904645923429758,
+      "ratio_high_to_non_high": 1.4317437864742075,
+      "welch_t": -5.0201996550216474,
+      "welch_p": 5.472015238175071e-07,
+      "bootstrap_ci_95": [
+        -0.008313529916000735,
+        0.0006904404623499267
+      ],
+      "bootstrap_p_two_sided": 0.0999000999000999
+    },
+    "fwd_min_ret21_spy": {
+      "metric": "fwd_min_ret21_spy",
+      "high_mean": -0.022243730490002108,
+      "non_high_mean": -0.018626015435192027,
+      "diff_high_minus_non_high": -0.0036177150548100806,
+      "ratio_high_to_non_high": 1.1942291451114533,
+      "welch_t": -6.942048572997405,
+      "welch_p": 5.09939845989953e-12,
+      "bootstrap_ci_95": [
+        -0.00808942770240833,
+        -9.538893104612162e-05
+      ],
+      "bootstrap_p_two_sided": 0.04995004995004995
+    },
+    "tail_event_top_decile": {
+      "metric": "tail_event_top_decile",
+      "high_mean": 0.13707165109034267,
+      "non_high_mean": 0.0849706557795356,
+      "diff_high_minus_non_high": 0.05210099531080707,
+      "ratio_high_to_non_high": 1.6131645664355942,
+      "welch_t": 5.385651629491774,
+      "welch_p": 7.88900383510082e-08,
+      "bootstrap_ci_95": [
+        -0.007604472960878313,
+        0.13270217722384722
+      ],
+      "bootstrap_p_two_sided": 0.11988011988011989
+    }
+  },
+  "regressions": {
+    "primary_hac_forward_spy_vol": {
+      "n_obs": 5524,
+      "r_squared": 0.41895784752179466,
+      "params": {
+        "const": {
+          "coef": 0.050282418834505904,
+          "t": 5.222812768159784,
+          "p": 1.7622555185062746e-07
+        },
+        "rv21_spy": {
+          "coef": 0.6387155162103973,
+          "t": 8.275540004696785,
+          "p": 1.2787475526689253e-16
+        },
+        "conc_proxy_21d": {
+          "coef": -0.3017809414989924,
+          "t": -0.9421500950318906,
+          "p": 0.34611579996807995
+        },
+        "high_regime": {
+          "coef": 0.02026977959559429,
+          "t": 2.045416371083327,
+          "p": 0.0408138263082385
+        }
+      }
+    },
+    "robustness_63d_proxy_hac_forward_spy_vol": {
+      "n_obs": 5273,
+      "r_squared": 0.41860428872100974,
+      "params": {
+        "const": {
+          "coef": 0.04814302064476862,
+          "t": 4.903980668471704,
+          "p": 9.391373609186043e-07
+        },
+        "rv21_spy": {
+          "coef": 0.6439427429047342,
+          "t": 8.290720834377124,
+          "p": 1.1256419468846128e-16
+        },
+        "conc_proxy_63d": {
+          "coef": -0.2929188648164681,
+          "t": -1.6480221739904755,
+          "p": 0.09934812104201723
+        },
+        "high_regime_63d": {
+          "coef": 0.026268693580930157,
+          "t": 2.5076158112115534,
+          "p": 0.012154874316015172
+        }
+      }
+    }
+  },
+  "figures": [
+    "fig_concentration_proxy_and_forward_vol.png",
+    "fig_high_vs_nonhigh_forward_vol_box.png"
+  ],
+  "literature": [
+    {
+      "title": "Granular Stock Market",
+      "year": 2025,
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6880183",
+      "note": "Rising concentration can transmit firm-specific risk into aggregate volatility."
+    },
+    {
+      "title": "Actively Passive: The Rise of Market Volatility",
+      "year": 2026,
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5655370",
+      "note": "Index trading growth can structurally raise aggregate volatility."
+    },
+    {
+      "title": "Volatility-Weighted Concentration and Effective Fragility in U.S. Equity Markets",
+      "year": 2025,
+      "url": "https://ssrn.com/abstract=5395228",
+      "note": "Equal-weight vs cap-weight divergence is a practical concentration-risk lens."
+    },
+    {
+      "title": "The S&P Equal Weight Index Uses, Properties and Historical Experience",
+      "year": 2023,
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4359253",
+      "note": "Equal-weight index is lower-concentration benchmark with distinct exposure profile."
+    }
+  ],
+  "research_honesty_notes": [
+    "This is a lagged relative-performance proxy for concentration, not exact historical constituent-weight HHI.",
+    "High regime increases future SPY volatility in simple regime comparisons, but the SPY-RSP forward volatility gap itself is not significantly wider.",
+    "The primary HAC result is modest in magnitude; it should be treated as conditional evidence, not a standalone forecasting breakthrough.",
+    "Because forward 21-day windows overlap, naive iid inference would be overstated; HAC and stationary bootstrap are the primary inferential tools here."
+  ],
+  "verdict": "PARTIAL_PASS",
+  "verdict_rationale": "High lagged SPY-over-RSP concentration regimes are followed by higher next-21d SPY realized volatility, and the high-regime dummy remains positive in a HAC regression after controlling for current SPY volatility. However, the forward SPY-minus-RSP volatility gap and forward tail-event rate do not show comparably strong incremental amplification. Conclusion: concentration pulse is a useful regime descriptor for broader market turbulence, not clean evidence that cap-weight tail volatility uniquely widens versus equal-weight."
+}
