@@ -30852,7 +30852,7 @@
     "title": "Paper review (Codex 24h-rule): 模型學不會的時候，最常做的事其實是少做決定",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b70e8480 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_b70e8480",
@@ -30861,7 +30861,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-14T16:08:09+00:00"
+    "created_at": "2026-06-14T16:08:09+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-14T17:09:19.617569+00:00",
+    "claim_session_id": "a7cd6d00097c",
+    "started_at": "2026-06-14T17:09:29.510387+00:00",
+    "completed_at": "2026-06-14T17:16:12.129993+00:00",
+    "result": "Codex source-review verdict=FAIL with 3 HIGH issues (embargo 20-21 trad days not 22, walk-forward label/return off-by-one, cost flat per switch not per turnover) + 1 MISMATCH (max |r| 0.0201 not <0.02). NULL qualitative conclusion preserved. Errata appended to feed.json[252], synced to Supabase. Knowledge cd5ed33d. K538 code fix queued as experiment_fix_k538_embargo_alignment_cost."
   },
   {
     "id": "research_long_vol_vs_gold_vs_treasury_crash",
@@ -30877,5 +30883,16 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-14T16:08:21+00:00"
+  },
+  {
+    "id": "experiment_fix_k538_embargo_alignment_cost",
+    "task_type": "experiment",
+    "title": "Fix K538 meta-labeling: embargo (calendar→22 trading days), label/return alignment, cost ∝ |Δposition|",
+    "description": "Codex review of mile_b70e8480 (paper_review_mile_b70e8480, 2026-06-15) found 3 HIGH issues in K538: (1) cross-OOS embargo uses calendar-month gap → only 20-21 trading rows, not 22; (2) walk-forward signal applies prediction (trained on excess_ret.shift(-1)) to same-index returns — alignment off by one; (3) 10 bps cost flat per binary switch, not per actual turnover ∝ |Δposition|. Refit K538 with these corrections, re-evaluate AUC + walk-forward Sharpe/MDD, compare to mile_b70e8480 article numbers, decide if errata needs strengthening or article needs full revision. NULL qualitative conclusion likely preserved (3 models degenerate same way), but magnitudes will shift. Reviewer source: codex review verdict FAIL (knowledge cd5ed33d).",
+    "priority": 4,
+    "status": "pending",
+    "created_at": "2026-06-14T17:15:48.925670+00:00",
+    "source": "codex_review_followup",
+    "parent_task_id": "paper_review_mile_b70e8480"
   }
 ]

@@ -34043,5 +34043,18 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-06-15T00:10:48.001944"
+  },
+  {
+    "item_id": "cd5ed33d",
+    "category": "article_review",
+    "content": "K538 meta-labeling article (mile_b70e8480) Codex source-code review verdict = FAIL with 3 HIGH findings, but NULL qualitative conclusion holds.\n\nFindings (Codex):\n1. HIGH: cross-OOS 22-day embargo not enforced — actual gaps 20-21 rows; 19-20 rows after train-label outcome materializes. Calendar-day vs trading-day mismatch.\n2. HIGH: strategy evaluation applies predictions trained on `excess_ret.shift(-1)` to same-index returns → label/return alignment off by one in walk-forward score computation.\n3. HIGH: 10 bps transaction cost flat per binary switch, not per actual position turnover; excludes VT rebalancing baseline cost.\n4. MISMATCH: article claims max |r| < 0.02; verified value is 0.0201 (spy_ret_lag1). Borderline overclaim.\n\nQualitative conclusion preserved: all 3 models (Logistic, XGBoost, RF) degenerate to BH-only / over-switch / VT-locked — no learnable predictive signal at daily horizon. Numbers in article (AUC 0.483/0.507/0.521, vt_usage_pct 0.0%/48.2%/82.1%, switches 0/1360/668, walk-forward scores) all match results.json.\n\nAction taken: errata footnote appended to mile_b70e8480 (storage/reports/feed.json[252]); K538 code fix queued as followup (embargo true 22 trading days + signal-return alignment + cost ∝ |Δposition|).\n\nReviewer source: Codex CLI 0.135 source-code review (paper_review_mile_b70e8480, 2026-06-15 01:13 台灣時間). Review prompt included 12 claim-verification items + 4 hard criteria (lookahead/embargo/DM/number-match). Codex re-ran feature pipeline minimal rebuild on yfinance data to verify embargo gaps and max correlation.\n",
+    "evidence": [
+      "experiments/k538/k538_meta_labeling.py",
+      "experiments/k538/k538_meta_labeling_results.json",
+      "storage/reports/feed.json[252] errata appended",
+      "codex_review prompt /tmp/codex_paper_review_mile_b70e8480.md"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-15T01:15:30.671117"
   }
 ]
