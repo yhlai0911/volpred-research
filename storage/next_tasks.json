@@ -30020,5 +30020,20 @@
     "started_at": "2026-06-13T23:52:11.456062+00:00",
     "completed_at": "2026-06-13T23:56:19.123260+00:00",
     "result": "Built experiment_diurnal_pattern_rv_2026_06_14 with README/script/results plus 2 figures using local 5-minute SPY and 0050.TW data.\nProxy holdout test: raw diurnal bin effect is significant in both markets (p=0.001), but deseasonalized residual bin effect is not significant at 5% (SPY p=0.113, 0050.TW p=0.101); deterministic diurnal pattern removes about 53% of bin effect.\nConclusion is intentionally limited: local 2026-01 to 2026-06 proxy evidence cannot reject diurnal sufficiency, but daily allocation R^2 versus uniform is only 0.08 to 0.10, so this is not a full CHP paper-grade verdict."
+  },
+  {
+    "id": "research_price_duration_interday_vs_intraday_vol",
+    "title": "研究 backlog fallback: 價格存續期（price-duration）拆解 interday vs intraday vol 動態",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 價格存續期（price-duration）拆解 interday vs intraday vol 動態 — 用可得高頻或日 OHLC 代理，以自適應價格變動門檻建 price-duration 測度，檢定加入存續期季節成分是否降低 RV 估計 RMSE；與既有 range-based/realized illiquidity 題不同（來源：JTSA 2025 price-duration interday/intraday decoupling） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "price_duration_interday_vs_intraday_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-14T00:44:21+00:00"
   }
 ]
