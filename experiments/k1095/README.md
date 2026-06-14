@@ -49,6 +49,15 @@ Hypothesis (ex ante):
 - Baseline event window **[T-5, T+5]** around every T+0; sensitivity
   **[-3, +3]** and **[-10, +10]** also reported.
 
+> **2026-06-14 disclaimer (Codex review mile_c11a2ced)**: 本實驗使用 `財報公告日.txt`
+> 內**事後**已知的 actual announce dates 建構 `[T-5, T+5]` window。**沒有**保存當時
+> 已公布的「預告/排程公告日」資料 (known-in-advance schedule)。因此 pre-event
+> branch (T-5 ~ T-1) 嚴格而言含有 ex-post 資訊，**不可視為 verified tradable signal**，
+> 本研究只能解讀為 **ex-post descriptive regime partition** — 結論「switching destroys
+> A4f-VT advantage」在 descriptive 框架下仍成立，但若要主張 tradable 需 K1095-v2
+> 用 known-in-advance schedule source 重做。後續 announcement-day mapping (Taiwan
+> after-close release 應為 `T+1`) 亦待 v2 修正。
+
 ### A4f implementation
 
 Multiplicative GARCH-X with VIX² long-run component (reuse of the K1058 /
@@ -82,16 +91,20 @@ VIX_{t-1}.
 **Headline**: Event-switching reduces Sharpe from 0.929 (pure VIX) and 0.966
 (pure A4f) down to **0.777** — a ~20% Sharpe destruction.
 
-### Table 2 — DM tests on daily net returns (Newey-West, bandwidth = n^0.25)
+### Table 2 — HAC t-test on daily net-return differences (Newey-West, bandwidth = n^0.25)
 
-| Comparison | Mean diff (daily) | t | p (two-sided) |
-|------------|-------------------|---|----------------|
-| Switch vs Pure 8.63/VIX | +6.4 bp/y | +0.89 | 0.372 (NS) |
-| **Switch vs Pure A4f-VT** | **-21.1 bp/y** | **-2.89** | **0.004** (switch WORSE) |
-| Pure A4f-VT vs Pure 8.63/VIX | +27.5 bp/y | +2.71 | 0.007 |
+> **2026-06-14 correction (per Codex review mile_c11a2ced)**: 此處非 Diebold-Mariano
+> 或 HLN forecast-comparison test，僅為日報酬差的 Newey-West HAC t-test。Mean diff
+> 欄位以年化基點 (bp/y) 報告，請勿誤讀為日均值。
 
-Switching statistically **destroys** A4f-VT's advantage (t = -2.89) and does
-not rescue 8.63/VIX.
+| Comparison | Mean diff (ann., bp/y) | t (HAC) | p (two-sided) |
+|------------|-----------------------|---------|----------------|
+| Switch vs Pure 8.63/VIX | +6.4 | +0.89 | 0.372 (NS) |
+| **Switch vs Pure A4f-VT** | **-21.1** | **-2.89** | **0.004** (switch WORSE) |
+| Pure A4f-VT vs Pure 8.63/VIX | +27.5 | +2.71 | 0.007 |
+
+樣本內以 HAC t-test 觀察到 switching 顯著拉低相對 A4f-VT 的日報酬差（t = -2.89），
+惟此非 forecast-comparison 推論，僅顯示策略報酬差顯著為負。
 
 ### Table 3 — Sharpe decomposition, event vs non-event days
 

@@ -536,11 +536,16 @@ for (lo, hi) in WINDOWS_TO_TEST:
 
 
 # -----------------------------------------------------------------------------
-# DM test: Switched vs Pure 8.63/VIX, Switched vs Pure A4f-VT
+# HAC t-test on daily return differences: Switched vs Pure 8.63/VIX, Switched vs Pure A4f-VT
+# NOTE: 2026-06-14 Codex review (mile_c11a2ced) 指出原 dm_test() 並非 Diebold-Mariano 或
+# Harvey-Leybourne-Newbold forecast-comparison test (不比較 forecast loss differentials)，
+# 而是日報酬差的 Newey-West HAC t-test。已 rename 並修正 docstring，避免在 README/article
+# 過度宣稱 "DM test"。後續若需正式 forecast-comparison 比較請用 dm.dm_test 或 hln_test。
 # -----------------------------------------------------------------------------
-def dm_test(r1: pd.Series, r2: pd.Series) -> dict:
-    """DM test on daily return differences (positive t favors r1).
-    Use Newey-West correction for autocorrelation (simple version)."""
+def hac_diff_return_test(r1: pd.Series, r2: pd.Series) -> dict:
+    """HAC t-test on daily return differences (positive t favors r1).
+    Newey-West correction for autocorrelation (bandwidth = n^(1/4)).
+    NOT a Diebold-Mariano / HLN forecast-comparison test."""
     diff = (r1 - r2).dropna()
     if len(diff) < 10:
         return {"n": len(diff), "t": None, "p": None}
@@ -567,11 +572,12 @@ def dm_test(r1: pd.Series, r2: pd.Series) -> dict:
     }
 
 
-dm = {
-    "switch_vs_vix": dm_test(strat_df["retC_n"], strat_df["retA_n"]),
-    "switch_vs_a4f": dm_test(strat_df["retC_n"], strat_df["retB_n"]),
-    "a4f_vs_vix": dm_test(strat_df["retB_n"], strat_df["retA_n"]),
+hac_diff = {
+    "switch_vs_vix": hac_diff_return_test(strat_df["retC_n"], strat_df["retA_n"]),
+    "switch_vs_a4f": hac_diff_return_test(strat_df["retC_n"], strat_df["retB_n"]),
+    "a4f_vs_vix": hac_diff_return_test(strat_df["retB_n"], strat_df["retA_n"]),
 }
+dm = hac_diff  # backward-compatible alias (results JSON key)
 
 
 # -----------------------------------------------------------------------------

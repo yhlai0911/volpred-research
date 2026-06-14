@@ -30493,7 +30493,7 @@
     "title": "Paper review (Codex 24h-rule): 把兩個工具換著用，反而更差？台股波動率策略的一場假設破功",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c11a2ced needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c11a2ced",
@@ -30502,7 +30502,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-14T10:08:10+00:00"
+    "created_at": "2026-06-14T10:08:10+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T10:59:59.496770+00:00",
+    "claim_session_id": "e4fc7292375c",
+    "started_at": "2026-06-14T11:00:11.114070+00:00",
+    "completed_at": "2026-06-14T11:02:26.797838+00:00",
+    "result": "Codex 24h review completed for mile_c11a2ced / K1095. Verdict FAIL: pre-event event-window uses ex-post announce dates (lookahead risk), and reported DM test is actually a HAC return-difference t-test. Report saved to storage/ops/paper_reviews/mile_c11a2ced_codex_review.md."
   },
   {
     "id": "research_realized_volatility_roughness_hurst_0_5",
@@ -30553,7 +30559,7 @@
     "id": "k864_v2_fix_critical_issues_20260614",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "title": "K864-v2: 修 Codex review FAIL 7 critical issues + revise article mile_1a6d9369",
     "description": "Codex 24h-rule review (見 storage/ops/paper_reviews/mile_1a6d9369_codex_review.md) verdict=FAIL. 修 7 個 critical: (1) 加 DM/Harvey correction (2) flash_crash 改 rolling t-1 sigma 或固定門檻重算 6.9x (3) price clamp 後 rolling buffer 寫 clamped value (4) noise trader clip 與 net_demand 對齊 (5) 加 linear-demand sensitivity 對比 n_vt^2 quadratic (6) 輸出 per-type trade flow + lag correlation 支持 A→C→D 機制敘事 (7) 改用 per-type sharpe + correct article claim 從『每個人帳戶』到『aggregate portfolio』. 完成後 revise article mile_1a6d9369（加 caveat 或更新數字）+ update README.md 補方法/結論. Codex 必 re-verify.",
     "source": "auto_discovered",
@@ -30563,6 +30569,40 @@
       "review_report": "storage/ops/paper_reviews/mile_1a6d9369_codex_review.md",
       "article_id": "mile_1a6d9369",
       "k_id": "K864"
-    }
+    },
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-14T10:58:35.717317+00:00",
+    "claim_session_id": "32a5425a6710",
+    "started_at": "2026-06-14T10:58:52.127570+00:00"
+  },
+  {
+    "id": "k1095_article_correction_codex_fail_20260614",
+    "task_type": "governance",
+    "priority": "P2",
+    "title": "K1095 mile_c11a2ced 文章修正: Codex FAIL → 軟化 DM/causal claim + pre-event 加 ex-post disclaimer + 重命名 dm_test→hac_diff_test + README 單位修正",
+    "description": "對應 storage/ops/paper_reviews/mile_c11a2ced_codex_review.md (verdict=FAIL)。修 4 點: (1) feed.json 10758 改 DM 描述→「以 HAC t-test 比較日報酬差」+ 軟化 causal claim「整體預測準確度」→ 「樣本內觀察到」; (2) experiments/k1095/k1095.py:541 函式 dm_test rename → hac_diff_return_test 並更新 docstring; (3) experiments/k1095/README.md:85 Table 2 column rename + line 87 unit 改 bp/y 或 daily 對應; (4) 加 disclaimer: pre-event window 使用 ex-post 公告日, 不視為已 verified tradable signal; 後續若無 known-in-advance schedule source 需重 frame 為 descriptive partition. 另排 K1095-v2 follow-up task: rebuild event overlay with known-in-advance schedule.",
+    "source": "auto_discovered_from_codex_review",
+    "created_at": "2026-06-14T11:09:37+00:00",
+    "status": "succeeded",
+    "linked_review": "storage/ops/paper_reviews/mile_c11a2ced_codex_review.md",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-14T11:09:42.411909+00:00",
+    "claim_session_id": "1e7ba468d1a4",
+    "started_at": "2026-06-14T11:09:42.581301+00:00",
+    "completed_at": "2026-06-14T11:12:30.524581+00:00",
+    "result": "K1095 mile_c11a2ced 文章修正 done: (1) feed.json content 改 DM→HAC t-test 標示 + causal claim 軟化 + 補 ex-post window disclaimer (2) experiments/k1095/k1095.py: dm_test() rename → hac_diff_return_test() + 加 docstring NOTE (3) README.md Table 2 column rename + 補 unit 說明 + Event-window disclaimer + T+1 mapping note (4) details.corrections metadata 加 2026-06-14 entry (5) supabase sync 3 articles. 另建 K1095-v2 follow-up task (blocked: awaiting known-in-advance schedule source decision)."
+  },
+  {
+    "id": "k1095_v2_known_in_advance_schedule",
+    "task_type": "experiment",
+    "priority": "P3",
+    "title": "K1095-v2: 用 known-in-advance schedule 重做台股事件切換 VT (修 lookahead + T+1 mapping)",
+    "description": "對應 K1095 Codex review (mile_c11a2ced) FAIL 後續. 目標: (1) 找 known-in-advance schedule source (FinMind earnings_announcement_schedule 或 TWSE 預告 RSS, 不可用事後 announce date); (2) 將 announcement-day mapping 改為 T+1 (台股盤後揭露慣例); (3) 重跑 K1095 流程 + Sharpe / HAC t-test / event-window decomposition; (4) 比較 v2 結論是否仍為 switch 輸給純 A4f, 若是則升格為 tradable claim, 若否則維持 descriptive 結論. 完成後更新 mile_c11a2ced corrections 或發 v2 mile article.",
+    "source": "auto_discovered_from_k1095_correction",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-06-14T11:12:03+00:00",
+    "blocked_note": "需確認 FinMind/TWSE 是否提供 historical earnings schedule snapshot (預告排程 != 實際公告日). 若無 free source 可能需 paid_data_source_decision.",
+    "created_at": "2026-06-14T11:12:03+00:00",
+    "status": "blocked"
   }
 ]
