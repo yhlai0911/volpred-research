@@ -10598,5 +10598,12 @@
     "errors_found": 3,
     "followup_task_id": "k860_article_correction_mile_28e6123e",
     "notes": "CE rank table internal inconsistency + 0.17pp claim wrong by 11.7x"
+  },
+  {
+    "timestamp": "2026-06-14T21:14",
+    "task_type": "platform_ops",
+    "task_id": "hourly_21_k1327_article_block",
+    "title": "K1327_article_general blocked + refill guard followup",
+    "summary": "K1327_article_general blocked (reason=prior_attempts_failed): K1327 source experiment status=failed (Codex review FAIL hourly-14). Refill script gap: only checks verdict-signal score, not K-experiment status — refill regenerated this task at 21:12. Opened platform_ops_refill_guard_failed_k_20260614 followup. Also PHASE-Z committed K1332 publish residual (mile_1b511caa) + arc_dedup descriptive-both false-positive fix + test (commit 80b2e9be)."
   }
 ]

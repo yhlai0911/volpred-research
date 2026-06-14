@@ -30678,5 +30678,39 @@
     "started_at": "2026-06-14T12:26:53.603796+00:00",
     "completed_at": "2026-06-14T12:37:02.111016+00:00",
     "result": "K860 文章 mile_28e6123e 已用 publish_draft update 修正 PT-CE 排名、CE 差距與開場敘述。單篇 Supabase sync_article 同步成功，遠端內容驗證包含 BH 第四、0.014pp 與 VT 12/VIX never-preferred 修正。"
+  },
+  {
+    "id": "K1327_article_general",
+    "title": "K1327: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1327 has verdict signal (score=2, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "blocked",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1327",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-14T13:12:35+00:00",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_at": "2026-06-14T13:14:02+00:00",
+    "blocked_note": "K1327 source experiment status=failed (Codex review FAIL: HAR3 baseline rolling/w=1000/refit=21 vs MF_ElasticNet_static expanding — unmatched train window + refit cadence + summary overstates). Cannot write article on failed verdict (research-honesty). Awaiting K1327_v2_fix_methodology to PASS before re-enabling. Refill script gap: scripts/refill_task_pool.py only checks verdict-signal score, not experiment status=failed — see hourly-21 21:07 fire."
+  },
+  {
+    "id": "platform_ops_refill_guard_failed_k_20260614",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "title": "scripts/refill_task_pool.py: skip K with experiment status=failed",
+    "description": "Gap caught hourly-21 (21:07 fire 2026-06-14): refill_task_pool.py re-added K1327_article_general to pool after K1327 source experiment was status=failed (Codex review FAIL). Refill only checks verdict-signal score from publication_candidates.json, not the K-experiment task status. Fix: before emitting <K>_article_<audience> task, look up <K> task in next_tasks.json; if status==failed, skip and log. Test: K1327 case (status=failed) must not regenerate K1327_article_general. See storage/ops/next_tasks.json blocked entry K1327_article_general for full context.",
+    "source": "hourly-21-21:07-fire",
+    "tags": [
+      "platform_ops",
+      "dispatcher",
+      "refill-guard"
+    ],
+    "created_at": "2026-06-14T13:14:32+00:00"
   }
 ]
