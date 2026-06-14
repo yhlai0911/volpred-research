@@ -1,0 +1,397 @@
+{
+  "experiment_id": "K1331",
+  "title": "Realized dispersion / correlation proxy without options data",
+  "generated_at": "2026-06-14T07:33:02.364482+00:00",
+  "seed": 42,
+  "data_source": "yfinance adjusted close",
+  "period": {
+    "start": "2014-01-31",
+    "end": "2026-05-14",
+    "n_obs": 3090
+  },
+  "tickers": {
+    "index": "SPY",
+    "vix": "^VIX",
+    "components_requested": [
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "AMZN",
+      "META",
+      "GOOGL",
+      "BRK-B",
+      "JPM",
+      "XOM",
+      "UNH",
+      "JNJ",
+      "PG",
+      "HD",
+      "MA",
+      "V",
+      "BAC",
+      "WMT",
+      "KO",
+      "PEP",
+      "COST"
+    ],
+    "components_used": [
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "AMZN",
+      "META",
+      "GOOGL",
+      "BRK-B",
+      "JPM",
+      "XOM",
+      "UNH",
+      "JNJ",
+      "PG",
+      "HD",
+      "MA",
+      "V",
+      "BAC",
+      "WMT",
+      "KO",
+      "PEP",
+      "COST"
+    ],
+    "n_components_used": 20
+  },
+  "methodology": {
+    "rv_window_days": 21,
+    "future_target": "next 21 trading days SPY realized variance from t+1..t+21",
+    "dispersion_proxy": "mean component 21d realized variance minus SPY 21d realized variance",
+    "corr_proxy": "SPY 21d realized variance divided by mean component 21d realized variance",
+    "lookahead_policy": "Forecast features use information through close t for t+1..t+21 target; trading signals use explicit signal.shift(1).",
+    "limitations": [
+      "Fixed current mega-cap basket creates survivorship bias and is not a historical S&P 500 constituent file.",
+      "This is realized dispersion, not option-implied DSPX or a tradable correlation risk premium.",
+      "21d targets overlap, so DM tests use h=21 HAC and descriptive claims are downscoped."
+    ]
+  },
+  "descriptive_stats": {
+    "index_var": {
+      "mean": 0.03001772726989417,
+      "std": 0.06817566980157941,
+      "p05": 0.0037746610936546902,
+      "p50": 0.014993352434047258,
+      "p95": 0.08146643591393549
+    },
+    "avg_component_var": {
+      "mean": 0.0727774142323566,
+      "std": 0.09040821406529659,
+      "p05": 0.02319804590146431,
+      "p50": 0.052363557526552335,
+      "p95": 0.16145106796613165
+    },
+    "dispersion_var": {
+      "mean": 0.042759686962462434,
+      "std": 0.02893639964738831,
+      "p05": 0.01586302145391917,
+      "p50": 0.035949232064656084,
+      "p95": 0.09320445824075953
+    },
+    "dispersion_vol": {
+      "mean": 0.10553165185019613,
+      "std": 0.03499321856650353,
+      "p05": 0.0528777491576989,
+      "p50": 0.10251986099921681,
+      "p95": 0.17085157420919964
+    },
+    "realized_corr_proxy": {
+      "mean": 0.32566590613109747,
+      "std": 0.16060410919843762,
+      "p05": 0.11570469068927039,
+      "p50": 0.29399884000975796,
+      "p95": 0.62622758189583
+    },
+    "dispersion_ratio": {
+      "mean": 4.000394783887127,
+      "std": 2.354412322732345,
+      "p05": 1.5968649670961617,
+      "p50": 3.4013760841561442,
+      "p95": 8.6426922039709
+    }
+  },
+  "correlations": {
+    "index_var": {
+      "index_var": 1.0,
+      "avg_component_var": 0.972173,
+      "dispersion_var": 0.681383,
+      "realized_corr_proxy": 0.521695,
+      "log_vix_var": 0.562125,
+      "future_index_var_21d": 0.31378
+    },
+    "avg_component_var": {
+      "index_var": 0.972173,
+      "avg_component_var": 1.0,
+      "dispersion_var": 0.833886,
+      "realized_corr_proxy": 0.435171,
+      "log_vix_var": 0.597833,
+      "future_index_var_21d": 0.315747
+    },
+    "dispersion_var": {
+      "index_var": 0.681383,
+      "avg_component_var": 0.833886,
+      "dispersion_var": 1.0,
+      "realized_corr_proxy": 0.130496,
+      "log_vix_var": 0.543459,
+      "future_index_var_21d": 0.24723
+    },
+    "realized_corr_proxy": {
+      "index_var": 0.521695,
+      "avg_component_var": 0.435171,
+      "dispersion_var": 0.130496,
+      "realized_corr_proxy": 1.0,
+      "log_vix_var": 0.61864,
+      "future_index_var_21d": 0.242926
+    },
+    "log_vix_var": {
+      "index_var": 0.562125,
+      "avg_component_var": 0.597833,
+      "dispersion_var": 0.543459,
+      "realized_corr_proxy": 0.61864,
+      "log_vix_var": 1.0,
+      "future_index_var_21d": 0.370389
+    },
+    "future_index_var_21d": {
+      "index_var": 0.31378,
+      "avg_component_var": 0.315747,
+      "dispersion_var": 0.24723,
+      "realized_corr_proxy": 0.242926,
+      "log_vix_var": 0.370389,
+      "future_index_var_21d": 1.0
+    }
+  },
+  "mean_reversion": {
+    "dispersion_z_21d_change_on_current": {
+      "n_obs": 3069,
+      "intercept": 0.06383001025969773,
+      "slope": -0.8534432391600877,
+      "t_hac": -11.308803813620408,
+      "p_hac": 1.1869665822066913e-29,
+      "r2": 0.42787146408586496,
+      "hac_lags": 21
+    },
+    "corr_proxy_z_21d_change_on_current": {
+      "n_obs": 3069,
+      "intercept": 0.018460399453565396,
+      "slope": -0.8296184762421153,
+      "t_hac": -12.70143506874327,
+      "p_hac": 5.805526636092584e-37,
+      "r2": 0.41429930955032457,
+      "hac_lags": 21
+    },
+    "dispersion_quintile_forward_change": {
+      "low_q20_threshold": -0.8510631310665534,
+      "high_q80_threshold": 0.8578611217182425,
+      "low_mean_forward_change": 1.052350096542908,
+      "high_mean_forward_change": -1.7989600906802243,
+      "high_minus_low": -2.8513101872231323,
+      "n_low": 618,
+      "n_high": 615
+    }
+  },
+  "forecast_results": {
+    "oos_start": "2022-01-01",
+    "oos_end": "2026-05-14",
+    "oos_n": 1095,
+    "horizon_days": 21,
+    "dm_hac_lags": 21,
+    "models": {
+      "M0_index_rv": {
+        "features": [
+          "log_index_var"
+        ],
+        "qlike": 0.3315546016430051,
+        "mse": 0.0012877513990838228,
+        "oos_r2_vs_expanding_mean": 0.0716868029544393,
+        "dm_t_vs_M0": 0.0,
+        "dm_p_vs_M0": 1.0,
+        "harvey_pass_vs_M0": false,
+        "forecast_mean": 0.020923814467458335,
+        "forecast_std": 0.011497036415914739
+      },
+      "M1_index_rv_dispersion": {
+        "features": [
+          "log_index_var",
+          "dispersion_z"
+        ],
+        "qlike": 0.32810748886164814,
+        "mse": 0.0012794909328476079,
+        "oos_r2_vs_expanding_mean": 0.07764160123793029,
+        "dm_t_vs_M0": -0.2412128756226043,
+        "dm_p_vs_M0": 0.8094353321402741,
+        "harvey_pass_vs_M0": false,
+        "forecast_mean": 0.020402063388777755,
+        "forecast_std": 0.010079007780749875
+      },
+      "M2_index_rv_corr": {
+        "features": [
+          "log_index_var",
+          "corr_proxy_z"
+        ],
+        "qlike": 0.3327688369056662,
+        "mse": 0.00129605557205054,
+        "oos_r2_vs_expanding_mean": 0.06570049739807404,
+        "dm_t_vs_M0": 0.11965889603992239,
+        "dm_p_vs_M0": 0.9047753321661203,
+        "harvey_pass_vs_M0": false,
+        "forecast_mean": 0.021262715691494693,
+        "forecast_std": 0.010886716915377254
+      },
+      "M3_index_rv_disp_corr": {
+        "features": [
+          "log_index_var",
+          "dispersion_z",
+          "corr_proxy_z"
+        ],
+        "qlike": 0.3303702422125839,
+        "mse": 0.0012879558221867138,
+        "oos_r2_vs_expanding_mean": 0.07153943859177603,
+        "dm_t_vs_M0": -0.07888554296555254,
+        "dm_p_vs_M0": 0.9371380886873606,
+        "harvey_pass_vs_M0": false,
+        "forecast_mean": 0.020758376543887652,
+        "forecast_std": 0.01013123028861458
+      },
+      "M4_vix_index_rv": {
+        "features": [
+          "log_vix_var",
+          "log_index_var"
+        ],
+        "qlike": 0.27315805769469764,
+        "mse": 0.0011388100305299088,
+        "oos_r2_vs_expanding_mean": 0.1790555374112559,
+        "dm_t_vs_M0": -2.7436715075378957,
+        "dm_p_vs_M0": 0.006174948774600786,
+        "harvey_pass_vs_M0": false,
+        "forecast_mean": 0.02240313798651975,
+        "forecast_std": 0.014317052543790489
+      },
+      "M5_vix_index_rv_disp_corr": {
+        "features": [
+          "log_vix_var",
+          "log_index_var",
+          "dispersion_z",
+          "corr_proxy_z"
+        ],
+        "qlike": 0.2734912471871809,
+        "mse": 0.0011440075133791,
+        "oos_r2_vs_expanding_mean": 0.17530878013826456,
+        "dm_t_vs_M0": -2.347525852339569,
+        "dm_p_vs_M0": 0.019076020059441534,
+        "harvey_pass_vs_M0": false,
+        "forecast_mean": 0.02172415227334967,
+        "forecast_std": 0.014471248131980741
+      }
+    }
+  },
+  "strategy_results": {
+    "BH_SPY": {
+      "n_days": 1095,
+      "cagr": 0.12524066401705825,
+      "vol": 0.17684238710543573,
+      "sharpe": 0.7555254062924753,
+      "max_drawdown": -0.24496391141213703,
+      "daily_q01": -0.029936406255536285,
+      "daily_es05": -0.025441657498145552
+    },
+    "S1_de_risk_high_dispersion": {
+      "n_days": 1095,
+      "cagr": 0.1180736900731707,
+      "vol": 0.15966236909202106,
+      "sharpe": 0.7787027603004274,
+      "max_drawdown": -0.24196430072033337,
+      "daily_q01": -0.027957979436382778,
+      "daily_es05": -0.02289438230914556,
+      "dm_negative_return_vs_BH": {
+        "t": 0.5037990220274714,
+        "p": 0.6145040473469039
+      },
+      "dm_downside_vs_BH": {
+        "t": -3.410900202900993,
+        "p": 0.0006711353598420899
+      },
+      "harvey_pass_negative_return": false,
+      "harvey_pass_downside": true,
+      "average_exposure": 0.9054794520547945,
+      "turnover": 13.0
+    },
+    "S2_de_risk_low_corr_proxy": {
+      "n_days": 1095,
+      "cagr": 0.12979554845514274,
+      "vol": 0.17092408446872365,
+      "sharpe": 0.7992983707634042,
+      "max_drawdown": -0.24496391141213703,
+      "daily_q01": -0.02963135876729814,
+      "daily_es05": -0.024995787899700247,
+      "dm_negative_return_vs_BH": {
+        "t": -0.25650505633535814,
+        "p": 0.7976091039256252
+      },
+      "dm_downside_vs_BH": {
+        "t": -3.7839628359718267,
+        "p": 0.00016271998783068398
+      },
+      "harvey_pass_negative_return": false,
+      "harvey_pass_downside": true,
+      "average_exposure": 0.9155251141552512,
+      "turnover": 19.0
+    },
+    "S3_de_risk_either": {
+      "n_days": 1095,
+      "cagr": 0.11345883043155847,
+      "vol": 0.15399297375859752,
+      "sharpe": 0.7747194187844001,
+      "max_drawdown": -0.24196430072033337,
+      "daily_q01": -0.027466511570870607,
+      "daily_es05": -0.022393841503394206,
+      "dm_negative_return_vs_BH": {
+        "t": 0.6737294455001759,
+        "p": 0.5006256518413417
+      },
+      "dm_downside_vs_BH": {
+        "t": -4.454228837316346,
+        "p": 9.283677164795279e-06
+      },
+      "harvey_pass_negative_return": false,
+      "harvey_pass_downside": true,
+      "average_exposure": 0.828310502283105,
+      "turnover": 27.0
+    }
+  },
+  "summary": {
+    "best_forecast_model": "M4_vix_index_rv",
+    "best_forecast_qlike": 0.27315805769469764,
+    "baseline_qlike": 0.3315546016430051,
+    "best_strategy_by_sharpe": "S2_de_risk_low_corr_proxy",
+    "best_strategy_sharpe": 0.7992983707634042,
+    "bh_spy_sharpe": 0.7555254062924753,
+    "mean_reversion_pass": true,
+    "dispersion_forecast_harvey_pass_vs_M0": false,
+    "any_strategy_harvey_pass_vs_BH": true,
+    "interpretation": "Realized dispersion/correlation proxy mean-reverts strongly, but does not deliver Harvey-level OOS QLIKE forecast improvement over current SPY RV. Timing value appears only as downside-risk reduction from lower exposure."
+  },
+  "verdict": "MIXED",
+  "verdict_reason": "Realized dispersion is strongly mean-reverting and simple de-risking improves downside loss metrics, but dispersion/correlation features do not pass the Harvey OOS QLIKE forecast gate versus current SPY RV.",
+  "figures": [
+    "figures/k1331_dispersion_timeseries.png",
+    "figures/k1331_oos_qlike.png"
+  ],
+  "references": [
+    {
+      "label": "Cboe S&P 500 Dispersion Index (DSPX)",
+      "url": "https://www.cboe.com/us/indices/dispersion/"
+    },
+    {
+      "label": "Driessen, Maenhout, Vilkov - Option-Implied Correlations and the Price of Correlation Risk",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2166829"
+    },
+    {
+      "label": "Dispersion Trading and Correlation Risk Premium",
+      "url": "https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID1889147_code850132.pdf?abstractid=1889147&mirid=1"
+    }
+  ]
+}

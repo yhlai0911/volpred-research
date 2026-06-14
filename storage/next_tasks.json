@@ -30301,7 +30301,7 @@
     "title": "K1331: dispersion / 相關性風險溢酬的免期權代理 — yfinance 指數 RV vs 成份股平均 RV 算「已實現 dispersion」，研究 mean-reversion 與 regime 擇時力（純期權版 blocked，用 ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 503). Original: dispersion / 相關性風險溢酬的免期權代理 — yfinance 指數 RV vs 成份股平均 RV 算「已實現 dispersion」，研究 mean-reversion 與 regime 擇時力（純期權版 blocked，用 RV 代理）（來源：CBOE DSPX/Numerix 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1331.py with signal.shift(1) + seed=42, (c) K1331_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 503,
@@ -30313,7 +30313,9 @@
     "claimed_by": "codex-desktop",
     "claimed_at": "2026-06-14T07:26:21.406839+00:00",
     "claim_session_id": "ff2e1fae5ffb",
-    "started_at": "2026-06-14T07:26:39.629292+00:00"
+    "started_at": "2026-06-14T07:26:39.629292+00:00",
+    "completed_at": "2026-06-14T07:35:13.218482+00:00",
+    "result": "K1331 completed as MIXED realized-dispersion proxy experiment.\nStrong mean reversion confirmed (dispersion HAC t=-11.31; corr proxy t=-12.70), but dispersion/corr features do not pass Harvey OOS QLIKE forecast gate vs current SPY RV.\nSimple de-risking improves downside-loss DM only; not return alpha. Artifacts in experiments/K1331/."
   },
   {
     "id": "K1332",
