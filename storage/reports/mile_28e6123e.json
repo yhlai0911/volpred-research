@@ -1,0 +1,65 @@
+{
+  "id": "mile_28e6123e",
+  "title": "同一筆數據，兩種評估框架，排名就對調了",
+  "description": "K860 文章已修正 PT-CE 排名與 CE 差距：VT 12/VIX 應為第 3，BH 50/50 應為第 4；VT Robust 對 BH 50/50 的月均 CE 優勢為約 0.014 個百分點。",
+  "content": "# 同一筆數據，兩種評估框架，排名就對調了\n\n**提出：Claude | 資料：實驗 K860，SPY/GLD/VIX 2006-2026，5094 個交易日**\n\n風險平價策略用 Sharpe ratio 排第一，VT Robust 排第三。換成前景理論的確定性等值計算，VT Robust 升到第二，而 BH 50/50 滑到第四。前後兩份排名，只差在「你怎麼定義損失的重量」。\n\n---\n\n## 你用什麼框架，就得到什麼答案\n\n多數人評估策略，靠 Sharpe ratio。這沒什麼問題。它計算簡單、直覺，幾十年來是業界標準。\n\n但 Sharpe ratio 有一個隱含前提：虧 1% 和賺 1%，在數學上的「痛苦程度」一樣。\n\n現實裡，這個前提不成立。大量心理學與行為財務學的研究從 1979 年就在說：人類感受虧損的痛苦，大約是同等幅度獲利的 2 到 2.5 倍。Kahneman 和 Tversky 把這個非對稱稱為「損失厭惡」，它是前景理論（Prospect Theory）的核心。\n\n當你把這個心理現實納入評估公式，VT 策略的排名就不一樣了。\n\n---\n\n## 什麼是 VT 策略\n\nVT（Volatility Targeting，波動率目標化）不預測市場漲跌方向，它做的事很單純：當 VIX 高（市場恐慌）時降低倉位，當 VIX 低時提高倉位。目標是讓投資組合的每日波動度盡量維持在某個水準附近。\n\nVT 策略有個已知的特徵：它大幅削減了極端虧損的頻率，代價是拿掉部分牛市漲幅。從 Sharpe ratio 的角度，這個交換有時合算，有時不合算。\n\n用傳統 Sharpe 評估，「VT 是否比 BH 50/50 好」要視具體實作版本而定，差距也不大。\n\n---\n\n## 前景理論框架下，算法不同\n\n這次實驗用的是 Tversky & Kahneman（1992）的累積前景理論（CPT）參數：\n- 損益感知曲線的彎曲程度 α = β = 0.88（非線性，但兩側對稱）\n- 損失厭惡係數 λ = 2.25（標準估計值）\n- 參考點設在「零報酬」\n\n每個策略的每日報酬都透過這組參數轉換成「心理效用」，再計算確定性等值（CE）。CE 的意思是：投資人願意以多少確定收益換掉這個策略的不確定報酬。CE 越高，代表策略從損失厭惡投資人的視角看越有價值。\n\n---\n\n## 排名翻轉的細節\n\n下表是五個策略的雙框架排名對照：\n\n| 策略 | Sharpe 排名 | Sharpe 值 | PT-CE 月均排名 | CE（%/月） |\n|---|---|---|---|---|\n| 風險平價 | #1 | 0.603 | #1 | -0.029% |\n| **BH 50/50** | **#2** | **0.587** | **#4** | **-0.045%** |\n| **VT Robust** | **#3** | **0.579** | **#2** | **-0.031%** |\n| VT 12/VIX | #4 | 0.566 | #3 | -0.040% |\n| BH SPY | #5 | 0.411 | #5 | -0.176% |\n\n傳統 Sharpe 排名裡，BH 50/50 排第二、VT Robust 排第三；換成前景理論 CE 後，VT Robust 升到第二，BH 50/50 跌兩階到第四。換算成月均 CE 差距：VT Robust 比 BH 50/50 多出約 0.014 個百分點，也就是約 1.4 bps/月。\n\n![K860 Sharpe vs Prospect Theory CE](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k860_sharpe_vs_ptce_comparison_1.png)\n\n兩種方法對「哪個策略對投資人更友善」這個問題給出了不同答案。差距雖小，但方向相反。\n\n---\n\n## 翻轉的機制在哪裡\n\n差距的關鍵在**損失頻率**與**損失幅度**。\n\nVT Robust 每日虧損的頻率：44.2%；BH 50/50 是 43.8%。頻率上 VT Robust 略高，這在 Sharpe 計算裡拉低了它的評分。\n\n但在前景理論框架下，損失幅度比頻率更重要。BH 50/50 的日均虧損是 -0.622%；VT Robust 是 -0.615%。每次虧損的金額更小，乘上損失厭惡係數後，感知負效用也更低。\n\n兩個框架各自抓住了「風險的不同面向」，才會給出不同排名。\n\n---\n\n## λ 要多高，結論才成立\n\n這個結論有多穩定？取決於 λ 的設定。\n\n實驗跑了從 λ=1 到 λ=4 的完整敏感度分析。在 λ < 1.52 的範圍內，BH 50/50 仍勝出；λ 一旦超過 1.52，VT Robust 就開始領先。到了 K-T 標準值 λ=2.25，VT Robust 的月均 CE 已高出 BH 50/50 達 0.014 個百分點，也就是約 1.4 bps/月。\n\n![K860 lambda sensitivity](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k860_lambda_sensitivity_2.png)\n\nλ=1.52 代表「損失的痛苦大約是等幅獲利的 1.5 倍」。這個水準其實相當保守，很多心理學實驗的估計值落在 1.5 到 2.5 之間。只要你對虧損的敏感度稍微超過這個門檻，VT Robust 在效用計算上就已勝出。\n\nVT 12/VIX 版本則是另一種情況。它從 Sharpe #4 上升到 PT-CE #3，但仍未在任何 λ 下超越 BH 50/50，實驗標注為「never_preferred」。\n\n---\n\n## 這對實際投資代表什麼\n\n如果你只看 Sharpe ratio 挑策略，BH 50/50 會贏過 VT Robust。\n\n但 Sharpe 隱含的前提是你對每次虧損沒有特別強烈的心理反應。這種人存在，但屬少數。\n\n如果你屬於「看到帳面虧損會坐立難安」、「下跌市場讓你睡不好」的投資人，損失厭惡係數大概落在 1.5 以上。這種情況下，VT Robust 這類在虧損幅度上更收斂的策略，從效用的角度對你更有利。\n\n**兩份排名都是真的，各自回答不同問題。** Sharpe 回答「長期報酬除以波動的效率如何」；前景理論 CE 回答「考慮人類對損失的心理感知，哪個策略的主觀效用更高」。Sharpe 計算沒有錯，只是它的前提是你對虧損沒有特別強烈的心理反應。\n\n你是哪種投資人，決定哪份排名更貼近你。\n\n---\n\n## 這個結論的邊界\n\n幾點需要說清楚：\n\n**樣本期**只涵蓋 2006-2026，共 20 年。這個期間包含了 2008 金融危機、2020 疫情崩盤，以及多個牛市。不同子期間的結果可能有差異。\n\n**λ 參數不可觀測**。實驗用的 λ=2.25 是 Kahneman-Tversky 1992 年基於實驗室研究的估計，對具體投資人的適用性有差距。每個人的真實 λ 需要另外估計。\n\n**資產範圍**只有 SPY、GLD、VIX，是美股加黃金的框架。台股或其他市場的結果需要另外驗證。\n\n---\n\n*數據來源：yfinance（SPY, GLD, ^VIX），期間 2006-2026，5094 個交易日。前景理論參數：α=β=0.88，λ=2.25，參考點為零報酬（Tversky & Kahneman 1992）。對應實驗：experiments/k860/，腳本 k860_prospect_theory_vt.py，結果 k860_results.json。*\n",
+  "category": "research",
+  "audience": "research",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K860"
+    ],
+    "image_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k860_sharpe_vs_ptce_comparison_1.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k860_lambda_sensitivity_2.png"
+    ],
+    "cluster_waiver": "K860 is behavioral finance / prospect theory angle — not a standard SPY strategy article; unique evaluation framework",
+    "supabase_storage_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k860_sharpe_vs_ptce_comparison_1.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k860_lambda_sensitivity_2.png"
+    ],
+    "topic_cluster": "vt",
+    "topic_cluster_30d": {
+      "count": 10,
+      "cap": 8,
+      "ratio": 0.0304,
+      "exempt": false
+    }
+  },
+  "tags": [
+    "研究",
+    "prospect_theory",
+    "behavioral_finance",
+    "VT策略",
+    "損失厭惡",
+    "utility",
+    "Kahneman"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-01T10:15:12.093872+00:00",
+  "published_at": "2026-06-14T11:00:12.074952+00:00",
+  "status": "published",
+  "proposer": "Claude",
+  "verified_live_at": "2026-06-14T11:00:23.497778+00:00",
+  "errata": {
+    "update_at": "2026-06-14T12:28:59.060776+00:00",
+    "update_action": "codex_review_fix",
+    "update_summary": "Fix K860 Codex 24h review findings: PT-CE rank table corrected, 0.17pp CE gap corrected to 0.014pp / 1.4bps per month, and opening narrative updated from BH 50/50 #3 to #4.",
+    "update_history": [
+      {
+        "at": "2026-06-14T12:28:59.060776+00:00",
+        "action": "codex_review_fix",
+        "summary": "Fix K860 Codex 24h review findings: PT-CE rank table corrected, 0.17pp CE gap corrected to 0.014pp / 1.4bps per month, and opening narrative updated from BH 50/50 #3 to #4.",
+        "old_content_chars": 2853,
+        "new_content_chars": 3281,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "image_paths_normalized": 0,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-14T12:28:59.060776+00:00"
+}
