@@ -148,3 +148,48 @@ Key results:
 - `paper/garch-x-vix/main.tex` lines 723 + 745 — `K1393` (case-sensitive FS hazard) → `k1393` for Linux/Docker reproducibility
 
 **No errata for journal**: Paper main.tex was always cite-faithful to K1393 (the correct experiment); the bug was confined to a draft-pool article based on a superseded experiment. Article never published to readers.
+
+## R1 Wording Patch Queue (v7 Codex adversarial review, 2026-06-05)
+
+**Source**: `paper/garch-x-vix/review_history/v7/codex_adversarial_review_2026-06-05.md` + `decision_next_action_2026-06-06.md`.
+
+**Policy**: Body frozen until R1 reviewer response arrives. The following three wording adjustments are **prepared** here and will be applied to `main.tex` only after reviewer engagement (or earlier if user explicitly authorises a shelf-errata-to-revised-manuscript conversion).
+
+### Patch 1 — Soften "statistically non-inferior"
+
+- **Issue**: Phrase overstates what a non-significant DM test supports (failing to reject equality ≠ proving non-inferiority).
+- **Current body wording**: any sentence containing "statistically non-inferior" in §4 cross-asset / §5 robustness / §7 conclusion.
+- **Replacement wording**: "not statistically distinguishable under these comparisons" (or, where context demands: "we do not reject equality of forecast loss under the DM test at the Harvey–Diebold–Mariano threshold").
+- **Rationale**: aligns claim strength with frequentist null-hypothesis logic; avoids the equivalence-test gap (no TOST procedure ran).
+- **Apply scope**: search-and-replace at R1 time; verify each occurrence keeps surrounding grammar coherent.
+
+### Patch 2 — Distinguish `g_t` (latent component) vs `g`-proxy (estimated time series)
+
+- **Issue**: Body uses `g_t` interchangeably for (a) the latent multiplicative component in σ²_t = τ_t × g_t and (b) the realised g̃_t = r_t² / τ_t proxy used in the empirical VRP-correlation results (ρ ≈ 0.78–0.82).
+- **Current README usage** (lines 13, 18, 68): conflated.
+- **Replacement convention**:
+  - When referring to the model object: `g_t` (latent component).
+  - When referring to the empirical regressor / Spearman input: `ĝ_t` or "the g-proxy ĝ_t = r²_t / τ_t".
+  - VRP correlation table: explicitly cite "g-proxy" not "g_t".
+- **Rationale**: prevents reviewer from claiming circularity (using r_t² inside τ_t to build a "g_t" then correlating with VRP).
+- **Apply scope**: §2 model setup, §3 estimation, §4.3 VRP narrative, README first paragraph.
+
+### Patch 3 — Dual-threshold framing of cross-asset generalisation (Bonferroni 4/7 vs Harvey 5/7)
+
+- **Issue**: Conclusion currently states "A4f extends to 5 of 7 cross-asset experiments" using the Harvey screen alone. Codex v7 flagged this as inconsistent with the paper's own Bonferroni caveat (m = 7 ⇒ threshold inflates ~ √log 7 ≈ 1.4×, dropping one or two assets).
+- **Current claim**: "five of seven" (Harvey screen).
+- **Replacement framing**: **dual-threshold reporting**, both numbers stated together:
+  - "Under the Harvey–Diebold–Mariano screen, A4f outperforms GJR on **five of seven** cross-asset experiments (SPY, QQQ, GLD, FEZ, STOXX50E); under the more conservative Bonferroni-corrected threshold the count is **four of seven**."
+  - Add one-sentence footnote: "The reduction reflects multiple-testing correction across m = 7 assets; the qualitative cross-asset generalisation is robust under either criterion in the sense that no asset reverses sign of the QLIKE differential."
+- **Rationale**: pre-empts referee asking why cross-asset count uses a less conservative threshold than the rest of the paper.
+- **Apply scope**: §4.4 cross-asset summary paragraph; abstract one-line claim; §7 conclusion bullet on generalisation; data-availability table caption if listing pass count.
+
+### Application checklist (R1-time, do not run pre-emptively)
+
+1. Branch from current `main.tex`; do not edit in place.
+2. For each patch above: search-and-replace; eyeball-verify each hit; rebuild `main.pdf`.
+3. Update `reproduce_report.json`'s `paper` block where the patched claims are auto-bound (Patch 3's "five/four of seven" count is a table-row-mapped claim).
+4. Run `paper-update --paper-id garch-x-vix` to push to Supabase + Mirror.
+5. Record diff under `review_history/v8/wording_patch_diff.md` for reviewer-response packet.
+
+**Status**: PREPARED, NOT DEPLOYED. Next trigger: R1 reviewer response.
