@@ -30214,7 +30214,7 @@
     "title": "K1327: Adaptive Multi-Factor HAR — FoFI 2026, Cinquetti et al.（287 個高頻因子）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 390). Original: Adaptive Multi-Factor HAR — FoFI 2026, Cinquetti et al.（287 個高頻因子）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1327.py with signal.shift(1) + seed=42, (c) K1327_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 390,
@@ -30222,7 +30222,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-14T03:16:04Z"
+    "created_at": "2026-06-14T03:16:04Z",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T05:09:36.565473+00:00",
+    "claim_session_id": "cc3d04a03428",
+    "started_at": "2026-06-14T05:09:53.911742+00:00",
+    "completed_at": "2026-06-14T05:14:19.077414+00:00",
+    "result": "Built experiments/k1327 as an Adaptive Multi-Factor HAR public-proxy stress test. Uses 156 shifted daily factor features from local OHLC/risk-proxy files, log-variance target, OOS 2021-01-04..2026-04-16 (1327 obs). Best model MF_ElasticNet_static QLIKE=3.0714 vs HAR3=3.5971, but DM t=2.954 < Harvey 3, so verdict CONDITIONAL_PASS not strong replication."
   },
   {
     "id": "K1328",
