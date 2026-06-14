@@ -1741,3 +1741,10 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 - (b) 結構（durable）：`scripts/refill_task_pool.py` research-backlog fallback cap `min(2,target)` → `max(1,target)`，讓 dry pool 一次補到 floor(4)。品質 gate 仍由 arc-dedup/done-exp/non-research/slug-dup 多層 filter 把關。驗證：refill 一次補 4、pool 2→6、arc-dedup 仍正確擋已覆蓋題、dashboard 0/0。
 
 **防再發**：pool 補到 floor 而非僅 +2 → 消化緩衝變大、dry 頻率大降。後續若仍反覆，下一層 fix = journal-discovery critical-idle 時 auto-override 24h cap（目前靠主線程手動）。
+
+## 2026-06-14 — pool warn 反覆復現（boss「還是沒解決！？」）→ journal-discovery 冷卻對齊消耗
+
+**症狀**：production_pending warn/critical 一晚反覆，boss 在 report 連續看到、明確不滿。我先前當「benign 自我修復」處理 = 沒根治。
+**根因（前次 3-strike 之上的第二層）**：平台 ~3-4h 消化完一批研究方向，但 backlog 補充源 journal-discovery 有 **24h 冷卻 + 每日一次 cap** → 補充速度 << 消耗速度 → backlog 反覆抽乾 → refill 無料 → warn/critical。前次 fix（refill cap min(2,target)→max(1,target)）只解「補得到時補滿」，沒解「源頭跟不上」。
+**修法**：`_journal_discovery_dispatch_task` 冷卻 24h→6h、daily-cap 改 6h bucket（每日最多 4 次 dispatch，對齊消耗）。效果：backlog dry 時 refill 自動建 journal_discovery dispatch 任務（任務本身即 pool item → pool 不會空）+ 補充頻率對齊消耗 → 不再反覆乾涸。dashboard threshold 也已對齊（>=3 trough 為健康，6-14 fix）。
+**防再發**：消耗/補充速率匹配是關鍵；若未來消耗再升，調 bucket 粒度（6h→4h）或批量。token 成本：每日最多 4 次 websearch agent，可接受（換 pool 永不空 + 持續研究產出）。

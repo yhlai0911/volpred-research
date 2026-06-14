@@ -786,9 +786,13 @@ def _journal_discovery_dispatch_task(tasks: list, existing_ids: set[str]) -> lis
     """
     from datetime import datetime, timedelta, timezone
 
+    # 2026-06-14 (boss「Warn 還是沒解決！？」根治)：原 24h 冷卻 + 每日一次 cap
+    # 跟不上平台 ~3-4h 消耗一批方向的速度 → backlog 反覆抽乾 → pool warn/critical
+    # 反覆復現。改 6h 冷卻 + 6h bucket cap（每日最多 4 次），讓 backlog dry 時 refill
+    # 能自動建 dispatch 任務（任務本身即 pool item → pool 不會空），補充頻率對齊消耗。
     LIVE = {"pending", "claimed", "in_progress", "blocked", "pending_main_thread"}
     now_utc = datetime.now(timezone.utc)
-    cutoff = now_utc - timedelta(hours=24)
+    cutoff = now_utc - timedelta(hours=6)
     for t in tasks:
         tid = str(t.get("id") or "")
         if not tid.startswith("journal_discovery_"):
@@ -803,14 +807,13 @@ def _journal_discovery_dispatch_task(tasks: list, existing_ids: set[str]) -> lis
                 if ts.tzinfo is None:
                     ts = ts.replace(tzinfo=timezone.utc)
                 if ts >= cutoff:
-                    return []  # recent dispatch within 24h
+                    return []  # recent dispatch within 6h
             except ValueError:
                 pass
 
-    today = now_utc.strftime("%Y%m%d")
-    task_id = f"journal_discovery_{today}"
-    # Daily cap: only one journal-discovery dispatch per calendar day even if
-    # task object isn't found via the LIVE/recent scan above (e.g. archived).
+    # 6h bucket cap: 每日最多 4 次 dispatch（00-06/06-12/12-18/18-24），對齊消耗
+    bucket = now_utc.hour // 6
+    task_id = f"journal_discovery_{now_utc.strftime('%Y%m%d')}_{bucket}"
     if task_id in existing_ids:
         return []
 
