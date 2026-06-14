@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-14T06:04:50Z",
+  "timestamp": "2026-06-14T12:03:59Z",
   "all_ok": true,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime: 1781417000 (epoch). Age at check time: ~14 seconds. Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json mtime: 1781438584 (epoch). Age at check time: ~12 seconds. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 15 strategies. All strategies with iterable entries have exactly 1 null portfolio_return in last 3 entries (trade_date 2026-06-11 entry is null, consistent across strategies — awaiting settlement data). No strategy exceeds >2 nulls threshold. NOTE: strategy '_market_daily' has null/missing 'entries' field — cannot verify. Anomaly worth investigating separately but does not trigger the >2 null alert."
+      "detail": "Checked 15 strategies. All 14 active strategies have exactly 1 null portfolio_return in last 3 entries (weekend settlement lag — expected). No strategy exceeds >2 nulls threshold. _market_daily has 0 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -36,7 +36,7 @@
   "alerts": [],
   "notes": [
     "All 6 checks passed. No alerts triggered.",
-    "Minor anomaly: strategy '_market_daily' in paper_trading.json has null entries field — not counted as >2 nulls but should be investigated.",
-    "Paper trading: 2026-06-11 portfolio_return universally null across all strategies — likely normal T+1 settlement lag."
+    "Paper trading 1 null per strategy = weekend settlement lag, not a gap issue.",
+    "Previous patrol run at 2026-06-14T06:04:50Z also all-clear."
   ]
 }
