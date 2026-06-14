@@ -81,6 +81,14 @@ _ENTITY_SURFACE: dict[str, str] = {
     "低波動因子": "LOW_VOL_FACTOR", "low-vol etf": "LOW_VOL_FACTOR",
     "low volatility etf": "LOW_VOL_FACTOR",
     "動量": "MOMENTUM", "momentum": "MOMENTUM",
+    # Strategy / mechanism entities (2026-06-14): VT crowding 類文章原本抽不到
+    # 資產實體 → arc-dedup 漏判（mile_ec28b1cc/mile_1a6d9369 同 arc）。這些是
+    # distinctive 策略實體，搭配 conclusion class 才觸發 dedup，不會誤擋。
+    "波動率目標": "VOL_TARGETING", "波動率目標策略": "VOL_TARGETING",
+    "vol target": "VOL_TARGETING", "vol-target": "VOL_TARGETING",
+    "volatility target": "VOL_TARGETING", "volatility-target": "VOL_TARGETING",
+    "vt 策略": "VOL_TARGETING", "vt策略": "VOL_TARGETING",
+    "風險平價": "RISK_PARITY", "risk parity": "RISK_PARITY", "risk-parity": "RISK_PARITY",
     # EM / regional
     "vnm": "VIETNAM", "越南": "VIETNAM", "eido": "INDONESIA", "印尼": "INDONESIA",
     "thd": "THAILAND", "泰國": "THAILAND", "ephe": "PHILIPPINES", "菲律賓": "PHILIPPINES",
@@ -108,6 +116,14 @@ _CONCLUSION_KEYWORDS: dict[str, list[str]] = {
     ],
     "mixed": [
         "部分成立", "條件成立", "mixed", "好壞參半", "視情況", "regime 而定", "並不總是",
+    ],
+    # 2026-06-14: crowding / 系統性風險 arc class（mile_ec28b1cc + mile_1a6d9369
+    # 同日同 arc「VT crowding → 市場更不安全」漏判教訓）。與 strategy 實體
+    # (VOL_TARGETING/RISK_PARITY) 同時匹配才擋 → 不誤擋不同結論的 VT 研究。
+    "systemic_crowding": [
+        "集體陷阱", "群聚風險", "群聚", "擁擠交易", "擁擠", "系統性風險", "系統風險",
+        "閃崩", "踩踏", "同步賣壓", "連鎖", "共振", "herding", "crowding",
+        "集體避險", "都用同一套", "同一套規則", "更不安全", "放大波動",
     ],
 }
 

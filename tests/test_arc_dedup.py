@@ -173,3 +173,39 @@ class TestPublisherGateWiring:
             audit_strict=False,
         )
         assert returned != "mile_232ce5d4"
+
+
+def test_vt_crowding_arc_caught():
+    """2026-06-14 regression: ï¿½…ï¿½ï¿½‡ï¿½€VT crowding ï¿½†’ ï¿½‚å ´ï¿½›ï¿½ï¿½ï¿½‰ï¿½…ï¿½ï¿½€ï¿½Œ arc ï¿½ï¿½Œ K/audience
+    ï¿½ˆmile_ec28b1cc K1047 ï¿½€ï¿½ˆï¿½ï¿½€ï¿½€… + mile_1a6d9369 K864 ï¿½”ç©¶ï¿½‰ï¿½Œï¿½—ï¿½ï¿½™ï¿½ï¿½ˆï¿½ï¿½ï¿½ï¿½ˆï¿½ï¿½€‚
+    ä¿®ï¿½œï¿½Œ VOL_TARGETING å¯¦ï¿½” + systemic_crowding conclusion class ï¿½‡‰ï¿½Š“ï¿½ˆï¿½ï¿½€‚"""
+    from volpred.publisher.arc_dedup import find_arc_duplicates, extract_entities, classify_conclusion
+    existing = [{
+        "id": "mile_1a6d9369", "status": "published",
+        "published_at": "2026-06-14T04:00:00+00:00",
+        "title": "ï¿½ˆ†ï¿½•ï¿½ï¿½­–ï¿½•ï¿½ï¿½•‘ï¿½ï¿½†ï¿½‚å ´ï¿½šæ³¢ï¿½‹•ï¿½‡ï¿½›ï¿½ï¿½™ï¿½š„ï¿½›†ï¿½”ï¿½™ï¿½ï¿½˜ï¿½",
+        "content": "æ³¢ï¿½‹•ï¿½‡ï¿½›ï¿½ï¿½™ï¿½­–ï¿½•ï¿½ç¾¤ï¿½šä½¿ï¿½”ï¿½ï¿½Œ1000 agents ä»£ï¿½†äººæ¨¡ï¿½“ï¿½é¡¯ç¤ºï¿½›†ï¿½”ï¿½™ï¿½ï¿½˜ï¿½ï¿½€ç³»çµ±ï¿½€ï¿½é¢¨ï¿½šï¿½ï¿½€ï¿½–ƒå´©ï¿½”ï¿½å¤§æ³¢ï¿½‹•ï¿½€‚é¢¨ï¿½šï¿½å¹³ï¿½ƒï¿½ï¿½Œï¿½†ï¿½€‚",
+    }]
+    new_title = "ï¿½‚ï¿½œï¿½„ˆï¿½†ï¿½„ˆï¿½šäººï¿½ƒï¿½ï¿½”ï¿½ï¿½Œï¿½€ï¿½—ï¿½ï¿½ï¿½šï¿½ï¿½ï¿½‰‡ï¿½Œï¿½‚å ´ï¿½œƒï¿½›ï¿½ï¿½‰ï¿½…ï¿½ï¿½—ï¿½Ÿ"
+    new_content = "ï¿½„ˆï¿½†ï¿½„ˆï¿½šäººï¿½…ï¿½ï¿½Œï¿½€ï¿½—æ³¢ï¿½‹•ï¿½‡ï¿½›ï¿½ï¿½™ï¿½ï¿½‰‡ï¿½šï¿½Œï¿½‚å ´ï¿½›†ï¿½”ï¿½ï¿½ï¿½šï¿½ï¿½ï¿½€Œï¿½›ï¿½ï¿½ï¿½‰ï¿½…ï¿½ï¿½Œæ¨¡ï¿½“ï¿½ï¿½”ç©¶é¡¯ç¤ºç¾¤ï¿½šï¿½”ï¿½å¤§æ³¢ï¿½‹•ï¿½€‚"
+    assert "VOL_TARGETING" in extract_entities(new_title + "\n" + new_content)
+    assert classify_conclusion(new_title + "\n" + new_content) == "systemic_crowding"
+    dups = find_arc_duplicates(new_title, new_content, existing, days=3650)
+    assert any(d["id"] == "mile_1a6d9369" for d in dups), "VT-crowding arc ï¿½‡‰è¢«ï¿½Š“ï¿½ˆï¿½"
+
+
+def test_vt_different_conclusion_not_blocked():
+    """ï¿½èª¤ï¿½“‹ï¿½šï¿½Œæ¨£ VT å¯¦ï¿½”ï¿½†ï¿½ï¿½Œï¿½ï¿½–ï¿½ˆcrowding vs ï¿½­ï¿½ï¿½‘ï¿½‰ï¿½ï¿½‡‰ dedupï¿½€‚"""
+    from volpred.publisher.arc_dedup import find_arc_duplicates
+    existing = [{
+        "id": "mile_vtpos", "status": "published",
+        "published_at": "2026-06-14T04:00:00+00:00",
+        "title": "æ³¢ï¿½‹•ï¿½‡ï¿½›ï¿½ï¿½™é¡¯ï¿½‘—ï¿½™ï¿½ï¿½›ï¿½’ï¿½ï¿½šè·¨ï¿½‡ï¿½”ï¿½å¯¦ï¿½­‰",
+        "content": "æ³¢ï¿½‹•ï¿½‡ï¿½›ï¿½ï¿½™ï¿½­–ï¿½•ï¿½ï¿½œ‰ï¿½•ˆï¿½™ï¿½ MDDï¿½Œï¿½€šï¿½ DM æª¢ï¿½šé¡¯ï¿½‘—ï¿½”ï¿½ï¿½–„ï¿½Œç©©ï¿½ï¿½ï¿½ˆï¿½‹ï¿½€‚",
+    }]
+    dups = find_arc_duplicates(
+        "æ³¢ï¿½‹•ï¿½‡ï¿½›ï¿½ï¿½™ï¿½š„ï¿½›†ï¿½”ï¿½™ï¿½ï¿½˜ï¿½ï¿½šç¾¤ï¿½šï¿½”ï¿½å¤§ç³»çµ±ï¿½€ï¿½é¢¨ï¿½šï¿½",
+        "æ³¢ï¿½‹•ï¿½‡ï¿½›ï¿½ï¿½™ç¾¤ï¿½šä½¿ï¿½”ï¿½ï¿½ï¿½‡ï¿½ï¿½›†ï¿½”ï¿½™ï¿½ï¿½˜ï¿½ï¿½€ç³»çµ±ï¿½€ï¿½é¢¨ï¿½šï¿½ï¿½€ï¿½–ƒå´©ï¿½€‚",
+        existing, days=3650,
+    )
+    assert not dups, "ï¿½ï¿½Œï¿½ï¿½–ï¿½š„ VT ï¿½–‡ç« ï¿½ï¿½‡‰è¢«èª¤ï¿½“‹"
