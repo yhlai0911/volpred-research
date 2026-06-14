@@ -5,7 +5,7 @@
     "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-06-14T03:08:20.836416+00:00",
     "source": "continue_task_dispatch_pool_dry_breaker",
     "tags": [
@@ -17,7 +17,9 @@
     "claimed_by": "hourly-11",
     "claimed_at": "2026-06-14T03:08:48.726890+00:00",
     "claim_session_id": "d586164fc581",
-    "started_at": "2026-06-14T03:08:52.526345+00:00"
+    "started_at": "2026-06-14T03:08:52.526345+00:00",
+    "completed_at": "2026-06-14T03:16:19.533296+00:00",
+    "result": "診斷完成: pool-dry 起因為 3-stage refill 都正當回 0 (diverse quota 已滿 / article arc-dedup 卡 / research backlog 全覆蓋). 派 journal-discovery agent 從 JPM/CFA/JFE/JFQA/J.Futures Markets/Index Investing 2025-26 趨勢層級挖 15 個新方向貼 research_program.md 2026-06-14d batch (line 559-575). 同時抓 generate_research_backlog.py 兩個 bug: (1) extract_unchecked_items limit=20 truncate (檔內 106 items 但只掃前 20, 新方向永遠不到 dedup); (2) keyword fallback dedup 過鬆, 對 paper_review/article/rewrite 等非研究 task 撞詞觸發假陰. Fix 後成功新增 K1327-K1334 (8 experiment tasks). Pool 從 0 pending experiment → 8. "
   },
   {
     "id": "platform_ops_dispatch_pool_dry_diagnostic_20260613",
@@ -30184,5 +30186,143 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-14T03:12:18+00:00"
+  },
+  {
+    "id": "email-11742-dbd5ad",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-06-14 09:00 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11742\nMessage-ID: <26A7D7FF-18D5-430D-B9EF-D138087D0FFA@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Sun, 14 Jun 2026 11:06:26 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-14 09:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\nWarn的問題還是沒解決！？\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月14日 09:01 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-06-14 09:00 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\twarn\t3 pending tasks (top types: [('experiment', 3)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t10 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t10/10 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample report URLs ok; 3/3 core pages content-ok\t—\r\n> verification_fb_pipeline\tok\t4 FB posts awaiting interactive session\tinteractive session / Chrome MCP available時接手貼文與留言\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\tok\t0 current warn/critical alert conditions\t—\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\r\n> \r\n> === cron 成果掌握 review — 2026-06-14 09:01:00（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=482 exit=0 idle | last: 2026-06-14 08:13:34 (log-mtime)\r\n>   compute_worker    runs=1898 exit=0 idle | last: 2026-06-14 09:00:02 (log-mtime)\r\n>   check_alerts      runs=481 exit=0 running | last: 2026-06-14 09:00:01 (log-mtime)\r\n>   collect_tw        runs=15 exit=0 idle | last: 2026-06-12 15:00:22 (log-mtime)\r\n>   collect_us        runs=15 exit=0 idle | last: 2026-06-13 07:03:33 (log-mtime)\r\n>   daily_update      runs=17 exit=0 idle | last: 2026-06-13 08:18:57 (log-mtime)  ⚠️ 上次完成 24.7h 前；預期 2026-06-14 06:00 該 fire（已 miss 21.7h）\r\n>   release_pool      runs=80 exit=0 idle | last: 2026-06-14 08:01:17 (log-mtime)\r\n>   market_cal        runs=2 exit=0 idle | last: 2026-06-08 08:00:10 (log-mtime)\r\n>   memory_health     runs=20 exit=0 idle | last: 2026-06-14 05:30:14 (log-mtime)\r\n>   work_summary      runs=80 exit=0 idle | last: 2026-06-14 06:05:23 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：3 筆\r\n>   4cc578e6 ops: refill pool to floor (Three-Strike fix in effect)\r\n>   3f78d9da [codex] complete defensive factor drawdown experiment\r\n>   8aba2668 hourly-08 | mile_faaddb06 corrigendum finalize + orphan experiment commit\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - daily_update: ⚠️ 上次完成 24.7h 前；預期 2026-06-14 06:00 該 fire（已 miss 21.7h）\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 14 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 4cc578e6\tops: refill pool to floor (Three-Strike fix in effect)\t08:44\r\n> 3f78d9da\t[codex] complete defensive factor drawdown experiment\t08:34\r\n> 8aba2668\thourly-08\tb06 c\r\n> 712510c0\t[codex] complete K1494 CDaR target experiment\t07:27\r\n> 15c0e7ab\thourly-07\tedge\r\n> 7586ce90\trefactor(3-strike): pool-empty critical 根因修復 — research-backlog refill cap min(2,target)→max(1,target) 補到 floor + journal-discovery batch 2026-06-14b 補抽乾 backlog；error_log 三層診斷\t07:10\r\n> 2bbcf8e6\tresearch(journal-discovery): batch 2026-06-14b — 14 個新方向補抽乾的 backlog（pool-empty critical 根因修復；WebSearch 趨勢層級非捏造、已去重既有 K）\t07:08\r\n> f1b2fec6\thourly-06\tstate\r\n> 36dc1b35\t[codex] complete K1493 VRP edge review\t06:16\r\n> ad34ba29\thourly-06\tps di\r\n> 23e1750c\t[codex] add K1492 stablecoin stress exp\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-14T03:15:12.166774+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11742,
+    "email_message_id": "<26A7D7FF-18D5-430D-B9EF-D138087D0FFA@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-06-14 09:00 台灣時間 平台運營報告",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+  },
+  {
+    "id": "K1327",
+    "title": "K1327: Adaptive Multi-Factor HAR — FoFI 2026, Cinquetti et al.（287 個高頻因子）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 390). Original: Adaptive Multi-Factor HAR — FoFI 2026, Cinquetti et al.（287 個高頻因子）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1327.py with signal.shift(1) + seed=42, (c) K1327_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 390,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-14T03:16:04Z"
+  },
+  {
+    "id": "K1328",
+    "title": "K1328: 「HAR ceiling」驗證 — Los Flamingos 2025",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 451). Original: 「HAR ceiling」驗證 — Los Flamingos 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1328.py with signal.shift(1) + seed=42, (c) K1328_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 451,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-14T03:16:04Z"
+  },
+  {
+    "id": "K1329",
+    "title": "K1329: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 463). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1329.py with signal.shift(1) + seed=42, (c) K1329_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 463,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-14T03:16:04Z"
+  },
+  {
+    "id": "K1330",
+    "title": "K1330: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 465). Original: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1330.py with signal.shift(1) + seed=42, (c) K1330_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 465,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-14T03:16:04Z"
+  },
+  {
+    "id": "K1331",
+    "title": "K1331: dispersion / 相關性風險溢酬的免期權代理 — yfinance 指數 RV vs 成份股平均 RV 算「已實現 dispersion」，研究 mean-reversion 與 regime 擇時力（純期權版 blocked，用 ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 503). Original: dispersion / 相關性風險溢酬的免期權代理 — yfinance 指數 RV vs 成份股平均 RV 算「已實現 dispersion」，研究 mean-reversion 與 regime 擇時力（純期權版 blocked，用 RV 代理）（來源：CBOE DSPX/Numerix 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1331.py with signal.shift(1) + seed=42, (c) K1331_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 503,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-14T03:16:04Z"
+  },
+  {
+    "id": "K1332",
+    "title": "K1332: Private credit 壓力的公開市場影子指標 — 用 BIZD/BDC 個股 basket、BKLN、HYG、KRE、LQD 建 private-credit stress proxy，檢定 BDC/loan ETF vol 或 d",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 516). Original: Private credit 壓力的公開市場影子指標 — 用 BIZD/BDC 個股 basket、BKLN、HYG、KRE、LQD 建 private-credit stress proxy，檢定 BDC/loan ETF vol 或 drawdown 是否領先高收益信用與小型股 RV；明確標示 private-credit 真實 NAV/loan tape blocked（來源：FSB 2026 private-credit vulnerabilities；IMF/academic private-credit systemic-risk frontier）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1332.py with signal.shift(1) + seed=42, (c) K1332_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 516,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-14T03:16:04Z"
+  },
+  {
+    "id": "K1333",
+    "title": "K1333: VIX 的 vol-of-vol（VVIX 代理）對 VIX 自身可預測性 — 用 ^VIX 日內或日報酬算 realized vol-of-vol（VVIX blocked 則自建），檢定拆短期/長期 vol-of-vol + jump ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 541). Original: VIX 的 vol-of-vol（VVIX 代理）對 VIX 自身可預測性 — 用 ^VIX 日內或日報酬算 realized vol-of-vol（VVIX blocked 則自建），檢定拆短期/長期 vol-of-vol + jump 是否改善 VIX 次日預測；與既有 crypto vol-of-vol 題（外溢角度）正交，聚焦 VIX 自我預測（來源：JFM 2025 vol-of-vol & VIX forecasting wavelet+HAR）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1333.py with signal.shift(1) + seed=42, (c) K1333_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 541,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-14T03:16:04Z"
+  },
+  {
+    "id": "K1334",
+    "title": "K1334: Downside-CVaR 動態對沖 ratio vs 固定 vol-target 的左尾改善 — yfinance SPY+TLT+GLD，比較以 1-day 99% CVaR 為目標動態縮放曝險 vs 固定 vol-target，檢定壓",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 554). Original: Downside-CVaR 動態對沖 ratio vs 固定 vol-target 的左尾改善 — yfinance SPY+TLT+GLD，比較以 1-day 99% CVaR 為目標動態縮放曝險 vs 固定 vol-target，檢定壓力期左尾頻率/深度與淨 Sharpe；與既有 CDaR-target（drawdown 目標）正交，這裡目標函數是 conditional VaR/ES（來源：arXiv 2025 deep hedging to manage tail risk；CVaR-parameterized convex-risk）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1334.py with signal.shift(1) + seed=42, (c) K1334_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 554,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-14T03:16:04Z"
   }
 ]

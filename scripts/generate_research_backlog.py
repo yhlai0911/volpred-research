@@ -80,8 +80,14 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
     raise SystemExit(f"failed to parse {NEXT_TASKS} after {max_retries} retries: {last_err}")
 
 
-def extract_unchecked_items(text: str, *, limit: int = 20) -> list[dict]:
-    """Find `- [ ]` items in research_program.md. Returns up to limit."""
+def extract_unchecked_items(text: str, *, limit: int = 500) -> list[dict]:
+    """Find `- [ ]` items in research_program.md. Returns up to limit.
+
+    Default raised 20→500 (2026-06-14): the prior 20 cap silently truncated
+    new journal-discovery batches (research_program.md has 100+ unchecked
+    items); items appended at end of file never reached dedup → refill returned
+    `all_already_covered_or_in_progress` even when 15 fresh directions existed.
+    """
     items = []
     for m in UNCHECKED_RE.finditer(text):
         body = m.group(1).strip()
@@ -141,11 +147,19 @@ def already_in_next_tasks(item: dict, existing_tasks: list) -> bool:
             m = re.search(r"unchecked item \(line (\d+)\)", t.get("description") or "")
             if m and int(m.group(1)) == src_line:
                 return True
-    # Secondary keyword fallback (Latin-heavy briefs only)
+    # Secondary keyword fallback (Latin-heavy briefs only).
+    # 2026-06-14 fix: limit scope to research-type tasks. Prior version looped
+    # over ALL tasks including paper_review/article/rewrite, where generic words
+    # like "skew", "regime", "factor", "drawdown" trivially hit ≥3 → false-positive
+    # dedup of fresh journal-discovery directions. Restricting to experiments
+    # (+ research_backlog_auto source) keeps real research dedup while
+    # letting new directions through.
     brief_lower = brief_text.lower()
     keywords = [w for w in re.findall(r"[a-z]{4,}", brief_lower)][:5]
     if len(keywords) >= 3:
         for t in existing_tasks:
+            if t.get("task_type") != "experiment" and t.get("source") != "research_backlog_auto":
+                continue
             combined = ((t.get("title") or "") + " " + (t.get("description") or "")).lower()
             if sum(1 for k in keywords if k in combined) >= 3:
                 return True
@@ -181,7 +195,7 @@ def generate(*, dry_run: bool = False, max_new: int = 5) -> dict:
     if not RESEARCH_PROGRAM.exists():
         return {"ok": False, "reason": "research_program_missing", "added": 0}
     text = RESEARCH_PROGRAM.read_text(encoding="utf-8")
-    items = extract_unchecked_items(text, limit=20)
+    items = extract_unchecked_items(text, limit=500)
     if not items:
         return {"ok": True, "added": 0, "reason": "no_unchecked_items"}
 
