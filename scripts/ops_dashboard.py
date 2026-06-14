@@ -132,7 +132,11 @@ def main():
             + (f" + {len(in_flight)} in-flight" if in_flight else "")
             + f" (top types: {sorted(by_type.items(), key=lambda x:-x[1])[:3]})"
         )
-        pending_status = "ok" if total_active >= 4 else "warn"
+        # 2026-06-14: threshold 對齊 dispatcher auto-refill 設計。REFILL_FLOOR=4，
+        # 消耗 1 後自然在 3 振盪 → 原 `>=4 else warn` 讓「3 pending」永遠假警報
+        # （benign、自我修復，但連續多 tick 噪音）。trough=3 視為健康 ok；warn 留給
+        # 真正低（≤2 = refill 跟不上消耗）；critical 維持 0-idle（下方 else 分支）。
+        pending_status = "ok" if total_active >= 3 else "warn"
         pending_next = "dispatch top P1-P3 if slots free"
     elif pending_main:
         pending_tldr = (
