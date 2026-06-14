@@ -486,6 +486,76 @@ def _is_invalidated_artifact_candidate(cand: dict) -> bool:
 _SATURATION_THRESHOLD = 2
 
 
+_FEED_CACHE: dict | None = None
+
+
+def _load_feed_for_dedup() -> dict | None:
+    """Lazy-load feed.json once per refill run for arc-dedup checks."""
+    global _FEED_CACHE
+    if _FEED_CACHE is not None:
+        return _FEED_CACHE
+    feed_path = ROOT / "storage" / "reports" / "feed.json"
+    if not feed_path.exists():
+        _FEED_CACHE = {}
+        return _FEED_CACHE
+    try:
+        _FEED_CACHE = json.loads(feed_path.read_text(encoding="utf-8"))
+    except Exception:
+        _FEED_CACHE = {}
+    return _FEED_CACHE
+
+
+def _is_arc_duplicate_candidate(cand: dict) -> bool:
+    """9th belt (2026-06-14): True if the planned article would hit the
+    publisher's narrative-arc duplicate gate.
+
+    Why: refill belts 1-8 catch K-level / cluster-level / audience-coverage
+    duplicates, but the publisher hard-blocks "same entities × same conclusion
+    class" duplicates even when the K is uncovered (K1333/K1334 incident:
+    16/50 arc-dups despite K being uncovered + research-unsaturated).
+
+    Reads experiments/<k>/README.md + results JSON, scans feed.json for
+    narrative-arc twins. Skip on any arc duplicate hit — saves an agent slot
+    that would otherwise produce a draft the publisher rejects.
+
+    Safe degradation: if arc_dedup module fails to import or experiment
+    directory missing, return False (don't block refill on infra hiccup).
+    """
+    k_id = str(cand.get("k_id") or "").strip()
+    if not k_id:
+        return False
+    try:
+        src = str(ROOT / "src")
+        if src not in sys.path:
+            sys.path.insert(0, src)
+        from volpred.publisher.arc_dedup import find_arc_duplicates  # noqa: E402
+    except Exception:
+        return False
+    feed = _load_feed_for_dedup() or {}
+    if not feed:
+        return False
+    kdir = ROOT / "experiments" / k_id.lower()
+    if not kdir.exists():
+        return False
+    text_parts: list[str] = []
+    for name in ("README.md", f"{k_id.lower()}_results.json", f"{k_id}_results.json"):
+        f = kdir / name
+        if f.exists():
+            try:
+                text_parts.append(f.read_text(encoding="utf-8", errors="replace"))
+            except Exception:
+                pass
+    text = "\n".join(text_parts)
+    if not text:
+        return False
+    title_hint = str(cand.get("title") or "")
+    try:
+        dups = find_arc_duplicates(title_hint, text, feed, days=90)
+    except Exception:
+        return False
+    return bool(dups)
+
+
 def _is_research_saturated(cand: dict) -> bool:
     """True if K already has >= _SATURATION_THRESHOLD research articles in
     feed.json (published+archived combined). Adding a "general companion" in
@@ -1074,6 +1144,12 @@ def refill(target: int, dry_run: bool = False) -> dict:
         # narrative-arc dedup will reject any new general draft.
         if _is_research_saturated(cand):
             continue
+        # 9th belt (2026-06-14 K1333/K1334 incident): publisher-side arc-dedup
+        # gate will reject the draft if entities × conclusion class match an
+        # existing article. Pre-check at refill time so we don't waste an agent.
+        if _is_arc_duplicate_candidate(cand):
+            print(f"  [refill] skip {kid}: narrative-arc duplicate (publisher would reject)")
+            continue
         priority = _score_to_priority(int(cand.get("score") or 0))
         # Pick retry suffix if base id already used by terminal task
         retry_suffix = _next_retry_suffix(kid, needed_audience, tasks)
@@ -1097,6 +1173,10 @@ def refill(target: int, dry_run: bool = False) -> dict:
             continue
         # 8th belt also applies to deferred dominant pool (2026-06-08).
         if _is_research_saturated(cand):
+            continue
+        # 9th belt also applies to deferred dominant pool.
+        if _is_arc_duplicate_candidate(cand):
+            print(f"  [refill] skip {kid}: narrative-arc duplicate (publisher would reject)")
             continue
         audiences_covered = cand.get("audiences_covered") or []
         needed_audience = "general" if "general" not in audiences_covered else "research"

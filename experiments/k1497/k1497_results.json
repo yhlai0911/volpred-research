@@ -1,0 +1,434 @@
+{
+  "experiment_id": "K1497",
+  "title": "Realized Volatility Roughness Stability and OOS Predictive Gain Re-Check",
+  "timestamp": "2026-06-14T14:06:52.548071+00:00",
+  "seed": 42,
+  "data_source": "Local OHLC CSV under paper/garch-x-vix/data",
+  "rv_proxy": "Parkinson range variance",
+  "oos_start": "2022-01-03",
+  "rolling_h_window": 504,
+  "references": [
+    {
+      "title": "Volatility is Rough",
+      "authors": "Gatheral, Jaisson, Rosenbaum",
+      "year": 2018,
+      "url": "https://arxiv.org/abs/1410.3394"
+    },
+    {
+      "title": "A Simple Approximate Long-Memory Model of Realized Volatility",
+      "authors": "Corsi",
+      "year": 2009,
+      "url": "https://academic.oup.com/jfec/article-abstract/7/2/174/787440"
+    },
+    {
+      "title": "Volatility forecast comparison using imperfect volatility proxies",
+      "authors": "Patton",
+      "year": 2011,
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0304407610001700"
+    },
+    {
+      "title": "Rough volatility: fact or artefact?",
+      "authors": "Cont, Das",
+      "year": 2024,
+      "url": "https://arxiv.org/abs/2203.13820"
+    }
+  ],
+  "asset_results": {
+    "SPY": {
+      "sample": {
+        "start": "2000-01-03",
+        "end": "2026-06-05",
+        "n_obs": 6656
+      },
+      "roughness": {
+        "full_sample": {
+          "H": 0.087355,
+          "r2": 0.992046,
+          "se_H": 0.001844,
+          "t_vs_half": -223.8224,
+          "is_rough": true
+        },
+        "subperiods": {
+          "tercile_1": {
+            "H": 0.057693,
+            "r2": 0.914267,
+            "is_rough": true
+          },
+          "tercile_2": {
+            "H": 0.080244,
+            "r2": 0.982134,
+            "is_rough": true
+          },
+          "tercile_3": {
+            "H": 0.11531,
+            "r2": 0.992152,
+            "is_rough": true
+          }
+        },
+        "rolling_504d": {
+          "mean_H": 0.083997,
+          "std_H": 0.034308,
+          "min_H": 0.01364,
+          "max_H": 0.168226,
+          "frac_rough": 1.0,
+          "n_obs": 6153
+        }
+      },
+      "oos": {
+        "n_oos": 1120,
+        "start": "2022-01-03",
+        "end": "2026-06-05",
+        "qlike": {
+          "HAR": 0.3731879492189948,
+          "HAR_Rough": 0.37773403237190156
+        },
+        "mse_log": {
+          "HAR": 0.8619185899774998,
+          "HAR_Rough": 0.8822417755176996
+        },
+        "dm_har_rough_vs_har": {
+          "t_stat": 1.7113044607665682,
+          "p_value": 0.08730204585857382,
+          "sign_convention": "negative => HAR-Rough lower loss (better)",
+          "harvey_sig": false
+        },
+        "improvement_pct": -1.2181752284393934,
+        "loss_diff_mean": 0.004546083152906806
+      }
+    },
+    "QQQ": {
+      "sample": {
+        "start": "2000-01-03",
+        "end": "2026-06-05",
+        "n_obs": 6656
+      },
+      "roughness": {
+        "full_sample": {
+          "H": 0.075789,
+          "r2": 0.98837,
+          "se_H": 0.001938,
+          "t_vs_half": -218.914,
+          "is_rough": true
+        },
+        "subperiods": {
+          "tercile_1": {
+            "H": 0.045481,
+            "r2": 0.86118,
+            "is_rough": true
+          },
+          "tercile_2": {
+            "H": 0.077263,
+            "r2": 0.982591,
+            "is_rough": true
+          },
+          "tercile_3": {
+            "H": 0.09714,
+            "r2": 0.984652,
+            "is_rough": true
+          }
+        },
+        "rolling_504d": {
+          "mean_H": 0.070954,
+          "std_H": 0.033796,
+          "min_H": 0.004796,
+          "max_H": 0.144835,
+          "frac_rough": 1.0,
+          "n_obs": 6153
+        }
+      },
+      "oos": {
+        "n_oos": 1120,
+        "start": "2022-01-03",
+        "end": "2026-06-05",
+        "qlike": {
+          "HAR": 0.34387325319686374,
+          "HAR_Rough": 0.33838764076324607
+        },
+        "mse_log": {
+          "HAR": 0.8194344908616928,
+          "HAR_Rough": 0.7250713558785364
+        },
+        "dm_har_rough_vs_har": {
+          "t_stat": -0.9849512391221623,
+          "p_value": 0.3248609360326604,
+          "sign_convention": "negative => HAR-Rough lower loss (better)",
+          "harvey_sig": false
+        },
+        "improvement_pct": 1.5952425443444467,
+        "loss_diff_mean": -0.005485612433617653
+      }
+    },
+    "EEM": {
+      "sample": {
+        "start": "2003-04-14",
+        "end": "2026-06-05",
+        "n_obs": 5833
+      },
+      "roughness": {
+        "full_sample": {
+          "H": 0.067494,
+          "r2": 0.983171,
+          "se_H": 0.002081,
+          "t_vs_half": -207.7975,
+          "is_rough": true
+        },
+        "subperiods": {
+          "tercile_1": {
+            "H": 0.069562,
+            "r2": 0.942318,
+            "is_rough": true
+          },
+          "tercile_2": {
+            "H": 0.058065,
+            "r2": 0.932686,
+            "is_rough": true
+          },
+          "tercile_3": {
+            "H": 0.074514,
+            "r2": 0.98456,
+            "is_rough": true
+          }
+        },
+        "rolling_504d": {
+          "mean_H": 0.068432,
+          "std_H": 0.020816,
+          "min_H": 0.021837,
+          "max_H": 0.11559,
+          "frac_rough": 1.0,
+          "n_obs": 5330
+        }
+      },
+      "oos": {
+        "n_oos": 1120,
+        "start": "2022-01-03",
+        "end": "2026-06-05",
+        "qlike": {
+          "HAR": 0.3681024039061612,
+          "HAR_Rough": 0.36122110181523986
+        },
+        "mse_log": {
+          "HAR": 0.8992184383890705,
+          "HAR_Rough": 0.8471038838314965
+        },
+        "dm_har_rough_vs_har": {
+          "t_stat": -1.5609054090082164,
+          "p_value": 0.11882882408018558,
+          "sign_convention": "negative => HAR-Rough lower loss (better)",
+          "harvey_sig": false
+        },
+        "improvement_pct": 1.869398846054692,
+        "loss_diff_mean": -0.006881302090921346
+      }
+    },
+    "FEZ": {
+      "sample": {
+        "start": "2002-10-21",
+        "end": "2026-06-05",
+        "n_obs": 5948
+      },
+      "roughness": {
+        "full_sample": {
+          "H": 0.058907,
+          "r2": 0.97729,
+          "se_H": 0.002117,
+          "t_vs_half": -208.4025,
+          "is_rough": true
+        },
+        "subperiods": {
+          "tercile_1": {
+            "H": 0.036669,
+            "r2": 0.841428,
+            "is_rough": true
+          },
+          "tercile_2": {
+            "H": 0.050986,
+            "r2": 0.92318,
+            "is_rough": true
+          },
+          "tercile_3": {
+            "H": 0.096209,
+            "r2": 0.986195,
+            "is_rough": true
+          }
+        },
+        "rolling_504d": {
+          "mean_H": 0.062647,
+          "std_H": 0.035148,
+          "min_H": 0.0,
+          "max_H": 0.16048,
+          "frac_rough": 1.0,
+          "n_obs": 5445
+        }
+      },
+      "oos": {
+        "n_oos": 1120,
+        "start": "2022-01-03",
+        "end": "2026-06-05",
+        "qlike": {
+          "HAR": 0.3835423379043654,
+          "HAR_Rough": 0.3819392350263937
+        },
+        "mse_log": {
+          "HAR": 0.894717068073982,
+          "HAR_Rough": 0.856183230860156
+        },
+        "dm_har_rough_vs_har": {
+          "t_stat": -0.3873455080688923,
+          "p_value": 0.6985740982235977,
+          "sign_convention": "negative => HAR-Rough lower loss (better)",
+          "harvey_sig": false
+        },
+        "improvement_pct": 0.4179728597189301,
+        "loss_diff_mean": -0.001603102877971711
+      }
+    },
+    "GLD": {
+      "sample": {
+        "start": "2004-11-18",
+        "end": "2026-06-05",
+        "n_obs": 5430
+      },
+      "roughness": {
+        "full_sample": {
+          "H": 0.032978,
+          "r2": 0.93429,
+          "se_H": 0.002061,
+          "t_vs_half": -226.5533,
+          "is_rough": true
+        },
+        "subperiods": {
+          "tercile_1": {
+            "H": 0.033532,
+            "r2": 0.820066,
+            "is_rough": true
+          },
+          "tercile_2": {
+            "H": 0.020091,
+            "r2": 0.625397,
+            "is_rough": true
+          },
+          "tercile_3": {
+            "H": 0.047369,
+            "r2": 0.939155,
+            "is_rough": true
+          }
+        },
+        "rolling_504d": {
+          "mean_H": 0.031472,
+          "std_H": 0.015698,
+          "min_H": 0.0,
+          "max_H": 0.077562,
+          "frac_rough": 1.0,
+          "n_obs": 4927
+        }
+      },
+      "oos": {
+        "n_oos": 1120,
+        "start": "2022-01-03",
+        "end": "2026-06-05",
+        "qlike": {
+          "HAR": 0.39931329029931645,
+          "HAR_Rough": 0.41067687288479404
+        },
+        "mse_log": {
+          "HAR": 0.880627399607361,
+          "HAR_Rough": 0.7474183931310812
+        },
+        "dm_har_rough_vs_har": {
+          "t_stat": 1.2985809040977845,
+          "p_value": 0.1943553389450754,
+          "sign_convention": "negative => HAR-Rough lower loss (better)",
+          "harvey_sig": false
+        },
+        "improvement_pct": -2.8457812102771993,
+        "loss_diff_mean": 0.011363582585477637
+      }
+    },
+    "USO": {
+      "sample": {
+        "start": "2006-04-10",
+        "end": "2026-06-05",
+        "n_obs": 5081
+      },
+      "roughness": {
+        "full_sample": {
+          "H": 0.047643,
+          "r2": 0.949893,
+          "se_H": 0.002579,
+          "t_vs_half": -175.3924,
+          "is_rough": true
+        },
+        "subperiods": {
+          "tercile_1": {
+            "H": 0.038635,
+            "r2": 0.884715,
+            "is_rough": true
+          },
+          "tercile_2": {
+            "H": 0.037617,
+            "r2": 0.745535,
+            "is_rough": true
+          },
+          "tercile_3": {
+            "H": 0.067365,
+            "r2": 0.976797,
+            "is_rough": true
+          }
+        },
+        "rolling_504d": {
+          "mean_H": 0.044839,
+          "std_H": 0.019488,
+          "min_H": 0.001554,
+          "max_H": 0.087294,
+          "frac_rough": 1.0,
+          "n_obs": 4578
+        }
+      },
+      "oos": {
+        "n_oos": 1120,
+        "start": "2022-01-03",
+        "end": "2026-06-05",
+        "qlike": {
+          "HAR": 0.3682156635123226,
+          "HAR_Rough": 0.37595522795633673
+        },
+        "mse_log": {
+          "HAR": 0.7753431162784292,
+          "HAR_Rough": 0.6564986418646466
+        },
+        "dm_har_rough_vs_har": {
+          "t_stat": 0.7967720706199495,
+          "p_value": 0.4257524331865987,
+          "sign_convention": "negative => HAR-Rough lower loss (better)",
+          "harvey_sig": false
+        },
+        "improvement_pct": -2.101910703686055,
+        "loss_diff_mean": 0.00773956444401412
+      }
+    }
+  },
+  "pooled_dm_har_rough_vs_har": {
+    "t_stat": 0.605871,
+    "p_value": 0.544621,
+    "harvey_sig": false
+  },
+  "summary": {
+    "all_assets_full_sample_rough": true,
+    "all_assets_rolling_mostly_rough": true,
+    "assets_where_har_rough_beats_har_on_qlike": [
+      "QQQ",
+      "EEM",
+      "FEZ"
+    ],
+    "assets_where_har_rough_beats_har_with_harvey_sig": [],
+    "n_assets_har_rough_better": 3,
+    "n_assets_har_rough_harvey_better": 0
+  },
+  "conclusion": "Roughness remains a stable descriptive fact across all tested assets, but HAR-Rough does not deliver robust OOS forecast gains over plain HAR. Any occasional asset-level improvement stays below the Harvey multiple-testing bar.",
+  "limitations": [
+    "Not the intended multi-year 5-minute RV design; local repo lacks a multi-asset high-frequency archive.",
+    "Parkinson RV is a daily proxy and does not settle the Cont-Das artefact critique.",
+    "HAR-Rough weighting is a conservative replication of the repo's prior rough-vol design, not a unique structural model.",
+    "No options-implied measure is used here; the exercise isolates realized-vol path roughness only."
+  ]
+}

@@ -1792,3 +1792,19 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 2. Any crash frequency headline must state whether the threshold is fixed, rolling t-1, or ex-post; ex-post sigma is not acceptable for production headlines.
 3. Strong nonlinear demand assumptions require at least one linear or turnover-matched sensitivity before article claims generalize beyond "inside this model".
 4. Aggregate strategy metrics must be labeled aggregate; never translate them into "each account" or "every investor" without per-type/per-agent evidence.
+
+## 2026-06-14 22:10 CST — Refill 沒檢查 publisher 端 arc-dedup gate
+
+**Symptom**：連續 3 個 hourly fire（K1327, K1333, K1334）派工 K-article task 都被 publisher 端 arc-dedup gate 擋（16/50 arc dup hits）；refill 自動再生同類 task → 浪費 agent slot + 增 noise。
+
+**Root cause**：`scripts/refill_task_pool.py` 1-8 belts 檢查 K-level / cluster-level / audience-coverage / saturation / failed-source 等，但都不知道 publisher 端 narrative-arc gate（entities × conclusion_class）會 reject "uncovered K"。即便 K 未被研究文章覆蓋，若同一 entities/conclusion 已有 ≥1 篇 → publisher block。
+
+**Fix（scripts/refill_task_pool.py）**：
+- 加 9th belt `_is_arc_duplicate_candidate(cand)`：讀 experiments/<k>/README.md + results json → 餵 `find_arc_duplicates(title, text, feed, days=90)` → 任一 hit 即 skip。
+- `_load_feed_for_dedup` 用 cache（refill run 只讀一次 feed.json）。
+- 對主 pool + deferred dominant pool 都應用。
+- Safe degradation：arc_dedup 模組 import 失敗 / experiment dir 缺 → return False（不卡 refill）。
+
+**驗證**：dry-run 顯示 K1333/K1334 正確被 9th belt skip；apply 後 pool 補入 4 個 fresh research direction tasks。
+
+**Lesson**：refill belts 應與 publisher gate 等價 — refill 端錯放的 task 一定被 publisher 攔下，這時應該往「**永遠修流程**」的精神回頭補 refill 端 gate，不是讓 dispatcher 反覆派出註定被拒的 task。新增 publisher gate 必同步補 refill 端的 pre-check。
