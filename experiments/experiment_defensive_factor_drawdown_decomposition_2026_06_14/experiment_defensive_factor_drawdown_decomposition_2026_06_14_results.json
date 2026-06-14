@@ -1,0 +1,981 @@
+{
+  "experiment_id": "experiment_defensive_factor_drawdown_decomposition_2026_06_14",
+  "title": "Defensive factor ETF drawdown frequency-depth decomposition",
+  "created_at": "2026-06-14T00:33:47.974163+00:00",
+  "seed": 42,
+  "data_source": "yfinance adjusted close",
+  "tickers": {
+    "SPY": "S&P 500",
+    "USMV": "MSCI USA Minimum Volatility ETF",
+    "SPLV": "S&P 500 Low Volatility ETF",
+    "QUAL": "MSCI USA Quality ETF",
+    "VLUE": "MSCI USA Value ETF"
+  },
+  "sample": {
+    "requested_start": "2010-01-01",
+    "requested_end": "2026-06-14",
+    "analysis_start": "2013-07-22",
+    "analysis_end": "2026-06-12",
+    "n_days": 3244
+  },
+  "methodology": {
+    "drawdown_definition": "compounded wealth drawdown: wealth / cumulative peak - 1",
+    "frequency_metric": "share of days with drawdown < 0",
+    "depth_metric": "mean absolute drawdown conditional on drawdown < 0",
+    "burden_metric": "frequency * conditional depth",
+    "block_tests": "non-overlapping 21-trading-day paired Wilcoxon tests versus SPY",
+    "multiple_testing": "Bonferroni alpha = 0.00625 for 8 primary tests",
+    "trend_overlay": "MA200, signal.shift(1), cash return 0, transaction cost 5.0 bps on signal changes"
+  },
+  "literature": [
+    {
+      "name": "The Best Defensive Strategies: Two Centuries of Evidence",
+      "url": "https://rpc.cfainstitute.org/research/financial-analysts-journal/2026/best-defensive-strategies"
+    },
+    {
+      "name": "Frazzini and Pedersen (2014), Betting Against Beta",
+      "url": "https://www.aqr.com/Insights/Research/Journal-Article/Betting-Against-Beta"
+    },
+    {
+      "name": "Asness, Frazzini, and Pedersen (2019), Quality Minus Junk",
+      "url": "https://research.cbs.dk/en/publications/quality-minus-junk-2/"
+    },
+    {
+      "name": "Blitz and van Vliet (2007), The Volatility Effect",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=980865"
+    }
+  ],
+  "risk_metrics": {
+    "SPY": {
+      "ann_return_pct": 14.084863571694184,
+      "ann_vol_pct": 17.01882196769746,
+      "sharpe": 0.8276050832676862,
+      "max_drawdown_pct": -33.7172812333445,
+      "underwater_share_pct": 84.3094944512947,
+      "avg_underwater_depth_pct": 4.514636996115826,
+      "drawdown_burden_pct": 3.8062676277363696,
+      "episodes_ge_5pct": 17,
+      "mean_episode_depth_pct": 11.34401698653889,
+      "mean_episode_duration_days": 135.0,
+      "worst_day_pct": -10.942363830266588
+    },
+    "USMV": {
+      "ann_return_pct": 10.472452614045636,
+      "ann_vol_pct": 13.795969906699913,
+      "sharpe": 0.7590950607220276,
+      "max_drawdown_pct": -33.09890933053642,
+      "underwater_share_pct": 86.92971639950679,
+      "avg_underwater_depth_pct": 3.559849633711085,
+      "drawdown_burden_pct": 3.094567190833928,
+      "episodes_ge_5pct": 12,
+      "mean_episode_depth_pct": 10.890207906149664,
+      "mean_episode_duration_days": 182.08333333333334,
+      "worst_day_pct": -10.081690672517729
+    },
+    "SPLV": {
+      "ann_return_pct": 8.96104414947889,
+      "ann_vol_pct": 14.727564250829909,
+      "sharpe": 0.6084539165377555,
+      "max_drawdown_pct": -36.261457226494734,
+      "underwater_share_pct": 89.76572133168928,
+      "avg_underwater_depth_pct": 4.301333683307812,
+      "drawdown_burden_pct": 3.8611232077041766,
+      "episodes_ge_5pct": 16,
+      "mean_episode_depth_pct": 10.175064071872363,
+      "mean_episode_duration_days": 180.75,
+      "worst_day_pct": -12.389045418994883
+    },
+    "QUAL": {
+      "ann_return_pct": 13.74172102830411,
+      "ann_vol_pct": 17.149803955527187,
+      "sharpe": 0.8012756917769494,
+      "max_drawdown_pct": -34.05673729915127,
+      "underwater_share_pct": 85.72749691738595,
+      "avg_underwater_depth_pct": 4.784403509780791,
+      "drawdown_burden_pct": 4.101549371362633,
+      "episodes_ge_5pct": 17,
+      "mean_episode_depth_pct": 12.034049446225245,
+      "mean_episode_duration_days": 138.64705882352942,
+      "worst_day_pct": -10.181465509377663
+    },
+    "VLUE": {
+      "ann_return_pct": 13.227097589297632,
+      "ann_vol_pct": 18.70971245309568,
+      "sharpe": 0.7069642370216703,
+      "max_drawdown_pct": -39.47052369299905,
+      "underwater_share_pct": 89.67324290998768,
+      "avg_underwater_depth_pct": 6.83939604607573,
+      "drawdown_burden_pct": 6.1331082299735815,
+      "episodes_ge_5pct": 17,
+      "mean_episode_depth_pct": 12.475480984597082,
+      "mean_episode_duration_days": 184.88235294117646,
+      "worst_day_pct": -12.687899288794346
+    }
+  },
+  "episodes_ge_5pct": {
+    "SPY": [
+      {
+        "start": "2013-12-31",
+        "trough": "2014-02-03",
+        "recovery": "2014-02-24",
+        "max_drawdown_pct": -5.69605234397188,
+        "duration_days": 55
+      },
+      {
+        "start": "2014-09-18",
+        "trough": "2014-10-16",
+        "recovery": "2014-10-31",
+        "max_drawdown_pct": -7.273461247514668,
+        "duration_days": 43
+      },
+      {
+        "start": "2015-07-20",
+        "trough": "2016-02-11",
+        "recovery": "2016-04-18",
+        "max_drawdown_pct": -13.022936025603848,
+        "duration_days": 273
+      },
+      {
+        "start": "2016-06-08",
+        "trough": "2016-06-27",
+        "recovery": "2016-07-08",
+        "max_drawdown_pct": -5.524324693690752,
+        "duration_days": 30
+      },
+      {
+        "start": "2018-01-26",
+        "trough": "2018-02-08",
+        "recovery": "2018-08-06",
+        "max_drawdown_pct": -10.10190876738919,
+        "duration_days": 192
+      },
+      {
+        "start": "2018-09-20",
+        "trough": "2018-12-24",
+        "recovery": "2019-04-12",
+        "max_drawdown_pct": -19.34891430287187,
+        "duration_days": 204
+      },
+      {
+        "start": "2019-05-03",
+        "trough": "2019-06-03",
+        "recovery": "2019-06-20",
+        "max_drawdown_pct": -6.6183596196992545,
+        "duration_days": 48
+      },
+      {
+        "start": "2019-07-26",
+        "trough": "2019-08-05",
+        "recovery": "2019-10-25",
+        "max_drawdown_pct": -6.022999329892276,
+        "duration_days": 91
+      },
+      {
+        "start": "2020-02-19",
+        "trough": "2020-03-23",
+        "recovery": "2020-08-10",
+        "max_drawdown_pct": -33.7172812333445,
+        "duration_days": 173
+      },
+      {
+        "start": "2020-09-02",
+        "trough": "2020-09-23",
+        "recovery": "2020-11-11",
+        "max_drawdown_pct": -9.44047139752735,
+        "duration_days": 70
+      },
+      {
+        "start": "2021-09-02",
+        "trough": "2021-10-04",
+        "recovery": "2021-10-20",
+        "max_drawdown_pct": -5.1141335737620475,
+        "duration_days": 48
+      },
+      {
+        "start": "2022-01-03",
+        "trough": "2022-10-12",
+        "recovery": "2023-12-13",
+        "max_drawdown_pct": -24.496382573917074,
+        "duration_days": 709
+      },
+      {
+        "start": "2024-03-27",
+        "trough": "2024-04-19",
+        "recovery": "2024-05-14",
+        "max_drawdown_pct": -5.353893646317398,
+        "duration_days": 48
+      },
+      {
+        "start": "2024-07-16",
+        "trough": "2024-08-05",
+        "recovery": "2024-09-19",
+        "max_drawdown_pct": -8.405611559573567,
+        "duration_days": 65
+      },
+      {
+        "start": "2025-02-19",
+        "trough": "2025-04-08",
+        "recovery": "2025-06-26",
+        "max_drawdown_pct": -18.755225458981716,
+        "duration_days": 127
+      },
+      {
+        "start": "2025-10-29",
+        "trough": "2025-11-20",
+        "recovery": "2025-12-10",
+        "max_drawdown_pct": -5.0713604177726745,
+        "duration_days": 42
+      },
+      {
+        "start": "2026-01-27",
+        "trough": "2026-03-30",
+        "recovery": "2026-04-14",
+        "max_drawdown_pct": -8.884972579331041,
+        "duration_days": 77
+      }
+    ],
+    "USMV": [
+      {
+        "start": "2013-12-31",
+        "trough": "2014-02-03",
+        "recovery": "2014-02-18",
+        "max_drawdown_pct": -5.126778080292905,
+        "duration_days": 49
+      },
+      {
+        "start": "2015-08-17",
+        "trough": "2015-08-25",
+        "recovery": "2015-12-29",
+        "max_drawdown_pct": -9.5003337103307,
+        "duration_days": 134
+      },
+      {
+        "start": "2015-12-29",
+        "trough": "2016-01-20",
+        "recovery": "2016-03-03",
+        "max_drawdown_pct": -7.139512687454797,
+        "duration_days": 65
+      },
+      {
+        "start": "2016-07-22",
+        "trough": "2016-11-04",
+        "recovery": "2017-02-13",
+        "max_drawdown_pct": -7.3079275084075075,
+        "duration_days": 206
+      },
+      {
+        "start": "2018-01-26",
+        "trough": "2018-02-08",
+        "recovery": "2018-07-25",
+        "max_drawdown_pct": -9.166520902501462,
+        "duration_days": 180
+      },
+      {
+        "start": "2018-09-21",
+        "trough": "2018-12-24",
+        "recovery": "2019-02-15",
+        "max_drawdown_pct": -12.702277953240593,
+        "duration_days": 147
+      },
+      {
+        "start": "2020-02-14",
+        "trough": "2020-03-23",
+        "recovery": "2021-01-08",
+        "max_drawdown_pct": -33.09890933053642,
+        "duration_days": 329
+      },
+      {
+        "start": "2021-09-02",
+        "trough": "2021-10-04",
+        "recovery": "2021-11-03",
+        "max_drawdown_pct": -6.033807105346856,
+        "duration_days": 62
+      },
+      {
+        "start": "2021-12-29",
+        "trough": "2022-10-12",
+        "recovery": "2024-01-02",
+        "max_drawdown_pct": -17.9314578231662,
+        "duration_days": 734
+      },
+      {
+        "start": "2024-11-26",
+        "trough": "2025-01-10",
+        "recovery": "2025-02-28",
+        "max_drawdown_pct": -6.859128148183514,
+        "duration_days": 94
+      },
+      {
+        "start": "2025-02-28",
+        "trough": "2025-04-08",
+        "recovery": "2025-05-19",
+        "max_drawdown_pct": -9.359462879564905,
+        "duration_days": 80
+      },
+      {
+        "start": "2026-02-27",
+        "trough": "2026-03-27",
+        "recovery": null,
+        "max_drawdown_pct": -6.456378744770119,
+        "duration_days": 105
+      }
+    ],
+    "SPLV": [
+      {
+        "start": "2013-08-01",
+        "trough": "2013-09-03",
+        "recovery": "2013-10-22",
+        "max_drawdown_pct": -5.953805617187924,
+        "duration_days": 82
+      },
+      {
+        "start": "2015-01-22",
+        "trough": "2015-06-29",
+        "recovery": "2015-08-10",
+        "max_drawdown_pct": -5.052359561609032,
+        "duration_days": 200
+      },
+      {
+        "start": "2015-08-18",
+        "trough": "2015-08-25",
+        "recovery": "2015-10-28",
+        "max_drawdown_pct": -11.297858101009295,
+        "duration_days": 71
+      },
+      {
+        "start": "2015-12-29",
+        "trough": "2016-01-20",
+        "recovery": "2016-03-11",
+        "max_drawdown_pct": -7.526952747003401,
+        "duration_days": 73
+      },
+      {
+        "start": "2016-07-22",
+        "trough": "2016-11-04",
+        "recovery": "2017-02-16",
+        "max_drawdown_pct": -7.724558700750938,
+        "duration_days": 209
+      },
+      {
+        "start": "2018-01-26",
+        "trough": "2018-02-08",
+        "recovery": "2018-07-26",
+        "max_drawdown_pct": -8.9137211666658,
+        "duration_days": 181
+      },
+      {
+        "start": "2018-09-13",
+        "trough": "2018-10-26",
+        "recovery": "2018-11-30",
+        "max_drawdown_pct": -6.02769553475464,
+        "duration_days": 78
+      },
+      {
+        "start": "2018-12-03",
+        "trough": "2018-12-24",
+        "recovery": "2019-02-08",
+        "max_drawdown_pct": -11.520524122310805,
+        "duration_days": 67
+      },
+      {
+        "start": "2020-02-14",
+        "trough": "2020-03-23",
+        "recovery": "2021-04-21",
+        "max_drawdown_pct": -36.261457226494734,
+        "duration_days": 432
+      },
+      {
+        "start": "2021-09-02",
+        "trough": "2021-09-30",
+        "recovery": "2021-11-15",
+        "max_drawdown_pct": -5.9223829590898225,
+        "duration_days": 74
+      },
+      {
+        "start": "2021-12-31",
+        "trough": "2022-02-24",
+        "recovery": "2022-04-06",
+        "max_drawdown_pct": -9.022350651475296,
+        "duration_days": 96
+      },
+      {
+        "start": "2022-04-20",
+        "trough": "2022-10-12",
+        "recovery": "2024-06-24",
+        "max_drawdown_pct": -17.258271582287698,
+        "duration_days": 796
+      },
+      {
+        "start": "2024-11-29",
+        "trough": "2025-01-10",
+        "recovery": "2025-03-03",
+        "max_drawdown_pct": -8.591418388962268,
+        "duration_days": 94
+      },
+      {
+        "start": "2025-03-03",
+        "trough": "2025-04-08",
+        "recovery": "2025-08-20",
+        "max_drawdown_pct": -9.10049629734001,
+        "duration_days": 170
+      },
+      {
+        "start": "2025-08-20",
+        "trough": "2025-11-03",
+        "recovery": "2026-02-03",
+        "max_drawdown_pct": -5.215211300423384,
+        "duration_days": 167
+      },
+      {
+        "start": "2026-03-02",
+        "trough": "2026-06-01",
+        "recovery": null,
+        "max_drawdown_pct": -7.411961192592775,
+        "duration_days": 102
+      }
+    ],
+    "QUAL": [
+      {
+        "start": "2014-01-21",
+        "trough": "2014-02-03",
+        "recovery": "2014-02-26",
+        "max_drawdown_pct": -6.456754419064037,
+        "duration_days": 36
+      },
+      {
+        "start": "2014-09-19",
+        "trough": "2014-10-16",
+        "recovery": "2014-10-30",
+        "max_drawdown_pct": -6.627697981505721,
+        "duration_days": 41
+      },
+      {
+        "start": "2015-07-20",
+        "trough": "2015-08-25",
+        "recovery": "2015-10-28",
+        "max_drawdown_pct": -11.487588318894726,
+        "duration_days": 100
+      },
+      {
+        "start": "2015-11-03",
+        "trough": "2016-02-11",
+        "recovery": "2016-04-13",
+        "max_drawdown_pct": -11.203653273728886,
+        "duration_days": 162
+      },
+      {
+        "start": "2016-04-19",
+        "trough": "2016-06-27",
+        "recovery": "2016-07-08",
+        "max_drawdown_pct": -5.533317777930636,
+        "duration_days": 80
+      },
+      {
+        "start": "2018-01-26",
+        "trough": "2018-02-08",
+        "recovery": "2018-08-20",
+        "max_drawdown_pct": -9.919877399408117,
+        "duration_days": 206
+      },
+      {
+        "start": "2018-09-21",
+        "trough": "2018-12-24",
+        "recovery": "2019-04-05",
+        "max_drawdown_pct": -20.470742485591064,
+        "duration_days": 196
+      },
+      {
+        "start": "2019-04-23",
+        "trough": "2019-06-03",
+        "recovery": "2019-06-20",
+        "max_drawdown_pct": -6.9168150702276225,
+        "duration_days": 58
+      },
+      {
+        "start": "2019-07-26",
+        "trough": "2019-08-05",
+        "recovery": "2019-10-24",
+        "max_drawdown_pct": -6.3336928312286656,
+        "duration_days": 90
+      },
+      {
+        "start": "2020-02-19",
+        "trough": "2020-03-23",
+        "recovery": "2020-08-12",
+        "max_drawdown_pct": -34.05673729915127,
+        "duration_days": 175
+      },
+      {
+        "start": "2020-09-02",
+        "trough": "2020-09-23",
+        "recovery": "2020-11-09",
+        "max_drawdown_pct": -8.701426637719988,
+        "duration_days": 68
+      },
+      {
+        "start": "2021-08-30",
+        "trough": "2021-10-04",
+        "recovery": "2021-10-29",
+        "max_drawdown_pct": -7.398786627005006,
+        "duration_days": 60
+      },
+      {
+        "start": "2021-12-29",
+        "trough": "2022-10-14",
+        "recovery": "2023-12-11",
+        "max_drawdown_pct": -28.230343586084793,
+        "duration_days": 712
+      },
+      {
+        "start": "2024-03-21",
+        "trough": "2024-04-19",
+        "recovery": "2024-05-15",
+        "max_drawdown_pct": -6.576410494242213,
+        "duration_days": 55
+      },
+      {
+        "start": "2024-07-16",
+        "trough": "2024-08-05",
+        "recovery": "2024-08-21",
+        "max_drawdown_pct": -7.632895590352962,
+        "duration_days": 36
+      },
+      {
+        "start": "2024-12-04",
+        "trough": "2025-04-08",
+        "recovery": "2025-07-23",
+        "max_drawdown_pct": -17.99753361230464,
+        "duration_days": 231
+      },
+      {
+        "start": "2026-02-25",
+        "trough": "2026-03-30",
+        "recovery": "2026-04-17",
+        "max_drawdown_pct": -9.03456718138884,
+        "duration_days": 51
+      }
+    ],
+    "VLUE": [
+      {
+        "start": "2014-01-15",
+        "trough": "2014-02-05",
+        "recovery": "2014-02-28",
+        "max_drawdown_pct": -5.780815841682541,
+        "duration_days": 44
+      },
+      {
+        "start": "2014-09-18",
+        "trough": "2014-10-15",
+        "recovery": "2014-11-07",
+        "max_drawdown_pct": -8.177217222077559,
+        "duration_days": 50
+      },
+      {
+        "start": "2014-11-25",
+        "trough": "2014-12-16",
+        "recovery": "2014-12-23",
+        "max_drawdown_pct": -5.123163600449354,
+        "duration_days": 28
+      },
+      {
+        "start": "2014-12-29",
+        "trough": "2015-02-02",
+        "recovery": "2015-02-13",
+        "max_drawdown_pct": -5.594599073863105,
+        "duration_days": 46
+      },
+      {
+        "start": "2015-05-22",
+        "trough": "2016-02-11",
+        "recovery": "2016-11-09",
+        "max_drawdown_pct": -19.658150593971545,
+        "duration_days": 537
+      },
+      {
+        "start": "2018-01-26",
+        "trough": "2018-02-08",
+        "recovery": "2018-08-27",
+        "max_drawdown_pct": -10.213609203158969,
+        "duration_days": 213
+      },
+      {
+        "start": "2018-09-20",
+        "trough": "2018-12-24",
+        "recovery": "2019-11-04",
+        "max_drawdown_pct": -22.16632645572707,
+        "duration_days": 410
+      },
+      {
+        "start": "2020-02-12",
+        "trough": "2020-03-23",
+        "recovery": "2021-01-06",
+        "max_drawdown_pct": -39.47052369299905,
+        "duration_days": 329
+      },
+      {
+        "start": "2021-06-04",
+        "trough": "2021-09-21",
+        "recovery": "2021-11-12",
+        "max_drawdown_pct": -7.092921053991219,
+        "duration_days": 161
+      },
+      {
+        "start": "2021-11-12",
+        "trough": "2021-12-01",
+        "recovery": "2021-12-22",
+        "max_drawdown_pct": -5.602525136799441,
+        "duration_days": 40
+      },
+      {
+        "start": "2022-01-14",
+        "trough": "2022-09-30",
+        "recovery": "2024-03-27",
+        "max_drawdown_pct": -27.123894757864107,
+        "duration_days": 803
+      },
+      {
+        "start": "2024-03-28",
+        "trough": "2024-05-01",
+        "recovery": "2024-07-16",
+        "max_drawdown_pct": -7.524699583660411,
+        "duration_days": 110
+      },
+      {
+        "start": "2024-07-16",
+        "trough": "2024-08-07",
+        "recovery": "2024-09-26",
+        "max_drawdown_pct": -9.170860553538308,
+        "duration_days": 72
+      },
+      {
+        "start": "2024-11-25",
+        "trough": "2025-04-08",
+        "recovery": "2025-06-30",
+        "max_drawdown_pct": -17.889373844883394,
+        "duration_days": 217
+      },
+      {
+        "start": "2025-11-12",
+        "trough": "2025-11-20",
+        "recovery": "2025-11-28",
+        "max_drawdown_pct": -6.030005297622654,
+        "duration_days": 16
+      },
+      {
+        "start": "2026-02-11",
+        "trough": "2026-03-30",
+        "recovery": "2026-04-09",
+        "max_drawdown_pct": -9.038375688895483,
+        "duration_days": 57
+      },
+      {
+        "start": "2026-06-02",
+        "trough": "2026-06-10",
+        "recovery": null,
+        "max_drawdown_pct": -6.426115136966182,
+        "duration_days": 10
+      }
+    ]
+  },
+  "paired_block_tests_vs_spy": {
+    "USMV": {
+      "underwater_share": {
+        "n_blocks": 154,
+        "mean_diff_factor_minus_spy": 0.02566481137909709,
+        "wilcoxon_stat": 2729.5,
+        "wilcoxon_pvalue_one_sided_factor_less": 0.9816520259971689,
+        "bootstrap_ci_95": [
+          0.0012368583797155175,
+          0.050092764378478656
+        ],
+        "bootstrap_prob_factor_less": 0.0196,
+        "bonferroni_pass": false
+      },
+      "avg_underwater_depth": {
+        "n_blocks": 154,
+        "mean_diff_factor_minus_spy": -0.007717121202991415,
+        "wilcoxon_stat": 4015.0,
+        "wilcoxon_pvalue_one_sided_factor_less": 0.0002141398701395525,
+        "bootstrap_ci_95": [
+          -0.01140371660131693,
+          -0.004196721673443431
+        ],
+        "bootstrap_prob_factor_less": 1.0,
+        "bonferroni_pass": true
+      }
+    },
+    "SPLV": {
+      "underwater_share": {
+        "n_blocks": 154,
+        "mean_diff_factor_minus_spy": 0.054112554112554105,
+        "wilcoxon_stat": 3823.0,
+        "wilcoxon_pvalue_one_sided_factor_less": 0.9998074286620304,
+        "bootstrap_ci_95": [
+          0.022881880024737167,
+          0.0847247990105133
+        ],
+        "bootstrap_prob_factor_less": 0.0002,
+        "bonferroni_pass": false
+      },
+      "avg_underwater_depth": {
+        "n_blocks": 154,
+        "mean_diff_factor_minus_spy": -0.0002335492520200541,
+        "wilcoxon_stat": 6075.0,
+        "wilcoxon_pvalue_one_sided_factor_less": 0.57687829683695,
+        "bootstrap_ci_95": [
+          -0.0063314091066961585,
+          0.0054974352856779285
+        ],
+        "bootstrap_prob_factor_less": 0.5388,
+        "bonferroni_pass": false
+      }
+    },
+    "QUAL": {
+      "underwater_share": {
+        "n_blocks": 154,
+        "mean_diff_factor_minus_spy": 0.014223871366728506,
+        "wilcoxon_stat": 1964.0,
+        "wilcoxon_pvalue_one_sided_factor_less": 0.9515395144472534,
+        "bootstrap_ci_95": [
+          0.0015460729746443992,
+          0.027829313543599257
+        ],
+        "bootstrap_prob_factor_less": 0.014,
+        "bonferroni_pass": false
+      },
+      "avg_underwater_depth": {
+        "n_blocks": 154,
+        "mean_diff_factor_minus_spy": 0.002823944057403556,
+        "wilcoxon_stat": 7558.0,
+        "wilcoxon_pvalue_one_sided_factor_less": 0.997941282771385,
+        "bootstrap_ci_95": [
+          0.0014145428906273702,
+          0.004301642315207855
+        ],
+        "bootstrap_prob_factor_less": 0.0,
+        "bonferroni_pass": false
+      }
+    },
+    "VLUE": {
+      "underwater_share": {
+        "n_blocks": 154,
+        "mean_diff_factor_minus_spy": 0.053803339517625226,
+        "wilcoxon_stat": 2696.5,
+        "wilcoxon_pvalue_one_sided_factor_less": 0.9999771991717638,
+        "bootstrap_ci_95": [
+          0.031230674087816938,
+          0.07730364873222013
+        ],
+        "bootstrap_prob_factor_less": 0.0,
+        "bonferroni_pass": false
+      },
+      "avg_underwater_depth": {
+        "n_blocks": 154,
+        "mean_diff_factor_minus_spy": 0.02294748339204814,
+        "wilcoxon_stat": 10935.0,
+        "wilcoxon_pvalue_one_sided_factor_less": 1.0,
+        "bootstrap_ci_95": [
+          0.017994129797029,
+          0.028342600734006164
+        ],
+        "bootstrap_prob_factor_less": 0.0,
+        "bonferroni_pass": false
+      }
+    }
+  },
+  "protection_channel_vs_spy": {
+    "USMV": {
+      "underwater_frequency_reduction_vs_spy": -0.031078610603290757,
+      "conditional_depth_reduction_vs_spy": 0.21148707265416755,
+      "drawdown_burden_reduction_vs_spy": 0.18698118642952544,
+      "frequency_test_pass": false,
+      "depth_test_pass": true,
+      "dominant_channel": "depth"
+    },
+    "SPLV": {
+      "underwater_frequency_reduction_vs_spy": -0.06471663619744072,
+      "conditional_depth_reduction_vs_spy": 0.04724705729198819,
+      "drawdown_burden_reduction_vs_spy": -0.014411908287287334,
+      "frequency_test_pass": false,
+      "depth_test_pass": false,
+      "dominant_channel": "no_defensive_edge_vs_spy"
+    },
+    "QUAL": {
+      "underwater_frequency_reduction_vs_spy": -0.016819012797075095,
+      "conditional_depth_reduction_vs_spy": -0.05975375515175618,
+      "drawdown_burden_reduction_vs_spy": -0.07757776712140219,
+      "frequency_test_pass": false,
+      "depth_test_pass": false,
+      "dominant_channel": "no_defensive_edge_vs_spy"
+    },
+    "VLUE": {
+      "underwater_frequency_reduction_vs_spy": -0.06361974405850113,
+      "conditional_depth_reduction_vs_spy": -0.5149382003381475,
+      "drawdown_burden_reduction_vs_spy": -0.6113181809081067,
+      "frequency_test_pass": false,
+      "depth_test_pass": false,
+      "dominant_channel": "no_defensive_edge_vs_spy"
+    }
+  },
+  "trend_overlay_metrics": {
+    "SPY": {
+      "ann_return_pct": 9.440543111967603,
+      "ann_vol_pct": 11.348488531569162,
+      "sharpe": 0.8318766931566219,
+      "max_drawdown_pct": -20.684696396574253,
+      "underwater_share_pct": 82.79901356350184,
+      "avg_underwater_depth_pct": 5.587627961033785,
+      "drawdown_burden_pct": 4.6265008333343856,
+      "episodes_ge_5pct": 12,
+      "mean_episode_depth_pct": 9.735728833776163,
+      "mean_episode_duration_days": 224.33333333333334,
+      "worst_day_pct": -5.764868992265648
+    },
+    "USMV": {
+      "ann_return_pct": 4.70794694425094,
+      "ann_vol_pct": 9.51496451876565,
+      "sharpe": 0.49479395692604106,
+      "max_drawdown_pct": -24.650448299458372,
+      "underwater_share_pct": 86.80641183723797,
+      "avg_underwater_depth_pct": 7.491167794438304,
+      "drawdown_burden_pct": 6.50281396705865,
+      "episodes_ge_5pct": 8,
+      "mean_episode_depth_pct": 12.137699995258739,
+      "mean_episode_duration_days": 393.375,
+      "worst_day_pct": -6.045492170964916
+    },
+    "SPLV": {
+      "ann_return_pct": 2.683039911453222,
+      "ann_vol_pct": 9.869929857816592,
+      "sharpe": 0.2718398154905185,
+      "max_drawdown_pct": -24.735280716491825,
+      "underwater_share_pct": 89.45745992601726,
+      "avg_underwater_depth_pct": 9.1014785702576,
+      "drawdown_burden_pct": 8.141951544663241,
+      "episodes_ge_5pct": 4,
+      "mean_episode_depth_pct": 14.043001117122326,
+      "mean_episode_duration_days": 889.5,
+      "worst_day_pct": -6.2224700460321465
+    },
+    "QUAL": {
+      "ann_return_pct": 9.171817868743393,
+      "ann_vol_pct": 11.564510797012744,
+      "sharpe": 0.7931003766378589,
+      "max_drawdown_pct": -19.189425077378573,
+      "underwater_share_pct": 83.81627620221948,
+      "avg_underwater_depth_pct": 5.394208002919161,
+      "drawdown_burden_pct": 4.521224278648951,
+      "episodes_ge_5pct": 11,
+      "mean_episode_depth_pct": 10.521043548317069,
+      "mean_episode_duration_days": 253.72727272727272,
+      "worst_day_pct": -5.930680109516285
+    },
+    "VLUE": {
+      "ann_return_pct": 6.791582265780827,
+      "ann_vol_pct": 11.889939288318365,
+      "sharpe": 0.5712041164460298,
+      "max_drawdown_pct": -28.95555714446908,
+      "underwater_share_pct": 88.62515413070284,
+      "avg_underwater_depth_pct": 11.436353473351705,
+      "drawdown_burden_pct": 10.135485892689934,
+      "episodes_ge_5pct": 10,
+      "mean_episode_depth_pct": 12.025039049317803,
+      "mean_episode_duration_days": 368.8,
+      "worst_day_pct": -4.99813736361282
+    }
+  },
+  "trend_overlay_same_sample_baseline_metrics": {
+    "SPY": {
+      "ann_return_pct": 14.084863571694184,
+      "ann_vol_pct": 17.01882196769746,
+      "sharpe": 0.8276050832676862,
+      "max_drawdown_pct": -33.7172812333445,
+      "underwater_share_pct": 84.3094944512947,
+      "avg_underwater_depth_pct": 4.514636996115826,
+      "drawdown_burden_pct": 3.8062676277363696,
+      "episodes_ge_5pct": 17,
+      "mean_episode_depth_pct": 11.34401698653889,
+      "mean_episode_duration_days": 135.0,
+      "worst_day_pct": -10.942363830266588
+    },
+    "USMV": {
+      "ann_return_pct": 10.472452614045636,
+      "ann_vol_pct": 13.795969906699913,
+      "sharpe": 0.7590950607220276,
+      "max_drawdown_pct": -33.09890933053642,
+      "underwater_share_pct": 86.92971639950679,
+      "avg_underwater_depth_pct": 3.559849633711085,
+      "drawdown_burden_pct": 3.094567190833928,
+      "episodes_ge_5pct": 12,
+      "mean_episode_depth_pct": 10.890207906149664,
+      "mean_episode_duration_days": 182.08333333333334,
+      "worst_day_pct": -10.081690672517729
+    },
+    "SPLV": {
+      "ann_return_pct": 8.96104414947889,
+      "ann_vol_pct": 14.727564250829909,
+      "sharpe": 0.6084539165377555,
+      "max_drawdown_pct": -36.261457226494734,
+      "underwater_share_pct": 89.76572133168928,
+      "avg_underwater_depth_pct": 4.301333683307812,
+      "drawdown_burden_pct": 3.8611232077041766,
+      "episodes_ge_5pct": 16,
+      "mean_episode_depth_pct": 10.175064071872363,
+      "mean_episode_duration_days": 180.75,
+      "worst_day_pct": -12.389045418994883
+    },
+    "QUAL": {
+      "ann_return_pct": 13.74172102830411,
+      "ann_vol_pct": 17.149803955527187,
+      "sharpe": 0.8012756917769494,
+      "max_drawdown_pct": -34.05673729915127,
+      "underwater_share_pct": 85.72749691738595,
+      "avg_underwater_depth_pct": 4.784403509780791,
+      "drawdown_burden_pct": 4.101549371362633,
+      "episodes_ge_5pct": 17,
+      "mean_episode_depth_pct": 12.034049446225245,
+      "mean_episode_duration_days": 138.64705882352942,
+      "worst_day_pct": -10.181465509377663
+    },
+    "VLUE": {
+      "ann_return_pct": 13.227097589297632,
+      "ann_vol_pct": 18.70971245309568,
+      "sharpe": 0.7069642370216703,
+      "max_drawdown_pct": -39.47052369299905,
+      "underwater_share_pct": 89.67324290998768,
+      "avg_underwater_depth_pct": 6.83939604607573,
+      "drawdown_burden_pct": 6.1331082299735815,
+      "episodes_ge_5pct": 17,
+      "mean_episode_depth_pct": 12.475480984597082,
+      "mean_episode_duration_days": 184.88235294117646,
+      "worst_day_pct": -12.687899288794346
+    }
+  },
+  "trend_overlay_improvement": {
+    "SPY": {
+      "max_drawdown_delta_pct": 13.032584836770248,
+      "drawdown_burden_delta_pct": 0.8202332055980159
+    },
+    "USMV": {
+      "max_drawdown_delta_pct": 8.44846103107805,
+      "drawdown_burden_delta_pct": 3.408246776224722
+    },
+    "SPLV": {
+      "max_drawdown_delta_pct": 11.526176510002909,
+      "drawdown_burden_delta_pct": 4.280828336959065
+    },
+    "QUAL": {
+      "max_drawdown_delta_pct": 14.8673122217727,
+      "drawdown_burden_delta_pct": 0.41967490728631773
+    },
+    "VLUE": {
+      "max_drawdown_delta_pct": 10.514966548529973,
+      "drawdown_burden_delta_pct": 4.002377662716352
+    }
+  },
+  "figures": [
+    "experiments/experiment_defensive_factor_drawdown_decomposition_2026_06_14/fig_drawdown_decomposition_bars.png",
+    "experiments/experiment_defensive_factor_drawdown_decomposition_2026_06_14/fig_wealth_drawdown_paths.png",
+    "experiments/experiment_defensive_factor_drawdown_decomposition_2026_06_14/fig_trend_overlay_effect.png"
+  ]
+}

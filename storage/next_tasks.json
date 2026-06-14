@@ -29933,7 +29933,7 @@
     "title": "研究 backlog fallback: 防禦因子的 drawdown 分解：low-vol/quality/value 各自只保護「哪一半」— yfinance USMV/QUAL/VLUE/SPLV vs SPY，把 drawdown 拆 frequency × depth，檢定哪個防禦因子降深度、哪個降頻率，並對比加 trend overlay 的互補性；與既有 factor-ETF RV 題不同，聚焦 drawdown 機制分解（來源：FAJ 2026「Best Defensive Strategies, 220 years」；DAR+trend 最 robust）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 防禦因子的 drawdown 分解：low-vol/quality/value 各自只保護「哪一半」— yfinance USMV/QUAL/VLUE/SPLV vs SPY，把 drawdown 拆 frequency × depth，檢定哪個防禦因子降深度、哪個降頻率，並對比加 trend overlay 的互補性；與既有 factor-ETF RV 題不同，聚焦 drawdown 機制分解（來源：FAJ 2026「Best Defensive Strategies, 220 years」；DAR+trend 最 robust） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "drawdown_low_vol_quality_value_yfinance_usmv_qua",
@@ -29941,7 +29941,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-13T23:08:15+00:00"
+    "created_at": "2026-06-13T23:08:15+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T00:28:56.918339+00:00",
+    "claim_session_id": "0a27920884b9",
+    "started_at": "2026-06-14T00:29:05.641380+00:00",
+    "completed_at": "2026-06-14T00:33:57.640691+00:00",
+    "result": "Built experiment_defensive_factor_drawdown_decomposition_2026_06_14 with README/script/results and 3 figures.\nCommon yfinance sample 2013-07-22 to 2026-06-12: USMV is the only ETF with Bonferroni-pass defensive protection versus SPY, and the channel is lower conditional drawdown depth, not lower underwater frequency.\nSPLV/QUAL/VLUE show no robust drawdown protection vs SPY; MA200 overlay lowers MDD but often raises drawdown burden, so trend is complementary for tail depth only."
   },
   {
     "id": "research_rp_f2b1b83d49",
