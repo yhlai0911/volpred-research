@@ -1808,3 +1808,19 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **驗證**：dry-run 顯示 K1333/K1334 正確被 9th belt skip；apply 後 pool 補入 4 個 fresh research direction tasks。
 
 **Lesson**：refill belts 應與 publisher gate 等價 — refill 端錯放的 task 一定被 publisher 攔下，這時應該往「**永遠修流程**」的精神回頭補 refill 端 gate，不是讓 dispatcher 反覆派出註定被拒的 task。新增 publisher gate 必同步補 refill 端的 pre-check。
+
+## 2026-06-14 mile_1b511caa K1332/K1499 commit-msg mislabel + missing follow-up caveat
+
+**Symptom**: paper_review subagent flagged mile_1b511caa as FAIL because article body / images / footnote / numbers all reference K1332 but two commits (65423a2a, 836f6e81) labeled the work as "K1499 BDC private-credit shadow stress PARTIAL".
+
+**Root cause**:
+- mile_1b511caa article (published 2026-06-14 20:13 UTC) is a K1332 article (verdict PASS_NARROW_CREDIT_ONLY: BKLN/HYG only)
+- K1499 is a follow-up multi-horizon forward-RV experiment that partially overturned K1332: after SPY-vol control, BDC-RV stress signal becomes pure beta; only NAV-discount → HYG 5d survives (HAC t=3.18)
+- Commit messages mislabel the article as K1499; feed.json details.experiment_refs correctly = ["K1332"]
+- Article never references K1499 follow-up caveat — violates research-honesty rule "推翻舊結論必回溯更正"
+
+**Fix**:
+- Verdict revised CONDITIONAL_PASS (article quality OK against K1332; not FAIL since article content is internally consistent)
+- Followup task `platform_ops_mile_1b511caa_k1499_caveat_footnote` built to add K1499 caveat footnote (BDC-RV 12.5x lift partly SPY beta; NAV-discount → HYG 5d is the robust kernel)
+- Future commits: distinguish K-experiment label from article milestone — use `paper_review_mile_<id> | <verdict>` not `K<num> | <result>` when committing article-level changes
+- Subagent reviewer should check feed.json details.experiment_refs before assuming K-id mismatch is a FAIL

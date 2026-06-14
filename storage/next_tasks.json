@@ -31000,5 +31000,58 @@
     "started_at": "2026-06-14T19:10:55.861759+00:00",
     "completed_at": "2026-06-14T19:13:36.808223+00:00",
     "result": "PASS — 13/13 numeric claims trace K541. Anti-AI 9/9. Methodology rigorous (964 weeks, 3-period validation, tx cost, NULL honest report). Review at storage/ops/review_history/mile_6ccb9715_review.md"
+  },
+  {
+    "id": "trending_repost_2026_06_15_美股集中度",
+    "title": "[trending_repost] 美股集中度破32%但VIX僅14，指數是否低估尾部風險？",
+    "description": "分析 AI 巨頭高集中度與指數低波動的背後成因。可量化：利用 HHI 指數與成份股動態相關性 breakdown 早期指標，評估 SPY 的隱含尾部風險與實際 VaR 的偏離程度。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-14T21:08:52+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "paper_review_mile_1b511caa",
+    "title": "Paper review (Codex 24h-rule): 私募信貸看不到帳本，市場還是會先動：一個只對高收益債有用的影子訊號",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1b511caa (K1499 BDC private-credit shadow stress PARTIAL) needs source-level review within 24h of publish. Verify: (1) all numeric claims trace K1499 results.json (sample N, lift ratios, p-values), (2) PARTIAL framing matches actual evidence (NAV-discount → HYG 5d t=3.18 only survives SPY-control), (3) lookahead — signal lag +1d explicit, (4) anti-AI style 9-checklist, (5) no overclaim re cross-asset transferability.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "hourly_dispatch_codex_24h",
+    "article_id": "mile_1b511caa",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-14T21:08:00+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-06-14T21:10:45.240888+00:00",
+    "claim_session_id": "faae85fce8d5",
+    "started_at": "2026-06-14T21:10:45.348580+00:00",
+    "completed_at": "2026-06-14T21:16:27.230895+00:00",
+    "result": "CONDITIONAL_PASS — Article body traces K1332 (13/15 PASS, anti-AI 9/9, lookahead explicit, conclusion 'PASS_NARROW_CREDIT_ONLY' matches). FAIL flag in raw subagent verdict was due to commit msg mislabel (K1499 instead of K1332); feed.json details.experiment_refs already correctly = ['K1332']. Action: built followup task platform_ops_mile_1b511caa_k1499_caveat_footnote to add K1499 multi-horizon SPY-control caveat per research-honesty 'overturn old conclusion → update article' rule. Review at storage/ops/review_history/mile_1b511caa_review.md"
+  },
+  {
+    "id": "platform_ops_mile_1b511caa_k1499_caveat_footnote",
+    "title": "Add K1499 PARTIAL caveat footnote to mile_1b511caa article (research-honesty rule)",
+    "description": "Per paper_review_mile_1b511caa: article body (K1332 PASS_NARROW_CREDIT_ONLY content) is numerically PASS but missing K1499 follow-up caveat. K1499 multi-horizon forward-RV + SPY-vol control shows: (a) BDC-RV stress signal in article becomes pure SPY beta after SPY-vol control (HYG 12.5x lift not incremental), (b) only NAV-discount proxy → HYG 5d survives (HAC t=3.18), (c) KRE/IWM totally null after SPY control. Action: append a footnote/box to mile_1b511caa body explaining K1499 finds the BDC-RV 12.5x lift partly explained by overall market vol, and the narrower NAV-discount → HYG 5d signal is the most robust kernel. Update feed.json + storage/reports JSON consistently. Reference experiments/k1499/k1499_results.json verdict_rationale.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "paper_review_followup",
+    "article_id": "mile_1b511caa",
+    "tags": [
+      "article-correction",
+      "research-honesty",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-14T21:15:00+00:00"
   }
 ]
