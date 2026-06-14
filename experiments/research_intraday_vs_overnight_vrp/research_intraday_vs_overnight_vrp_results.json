@@ -1,0 +1,313 @@
+{
+  "experiment_id": "research_intraday_vs_overnight_vrp",
+  "title": "Intraday vs overnight pseudo-VRP decomposition across SPY/QQQ/IWM/EFA",
+  "date_run_utc": "2026-06-14",
+  "seed": 42,
+  "data": {
+    "source": "yfinance adjusted OHLC; auto_adjust=True",
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "EFA"
+    ],
+    "download_start": "2003-01-01",
+    "download_end": "2026-06-15",
+    "analysis_start": "2007-01-03",
+    "oos_start": "2018-01-02",
+    "cached_ohlc_dir": "experiments/research_intraday_vs_overnight_vrp/data/"
+  },
+  "method": {
+    "returns": {
+      "overnight": "log(Open_t / Close_{t-1})",
+      "intraday": "log(Close_t / Open_t)",
+      "close_to_close": "log(Close_t / Close_{t-1})"
+    },
+    "pseudo_vrp_definition": "GARCH one-step expected component variance minus realized component variance; not an option-implied model-free VRP.",
+    "garch_proxy": {
+      "model": "Zero-mean GARCH(1,1) on close-to-close log returns in percent units",
+      "window": 1000,
+      "refit_every": 21,
+      "forecast_timing": "forecast for day t uses returns through t-1"
+    },
+    "component_allocation": "total GARCH variance is allocated by trailing 252d overnight share shifted by one day",
+    "predictive_regression": {
+      "target": "current-day log(session variance)",
+      "features": [
+        "overnight_pseudo_vrp.shift(1)",
+        "intraday_pseudo_vrp.shift(1)",
+        "log_session_var.shift(1)",
+        "log_garch_total_var.shift(1)"
+      ],
+      "standard_errors": "Newey-West HAC maxlags=5",
+      "success_rule": "overall support requires overnight variance-share CI lower > 0.5 and lagged overnight pseudo-VRP HAC t > 3 in at least 3 of 4 assets"
+    },
+    "bootstrap": {
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    },
+    "lookahead_protection": [
+      "GARCH forecast for day t uses close-to-close returns through t-1",
+      "component allocation share is shifted by one day",
+      "predictive features use explicit .shift(1)"
+    ]
+  },
+  "asset_results": {
+    "SPY": {
+      "ticker": "SPY",
+      "n_oos": 2123,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-12",
+      "realized_session_variance": {
+        "overnight_share": 0.425943,
+        "intraday_share": 0.574057,
+        "covariance_residual_share_of_close_to_close_var": 0.015815,
+        "mean_daily_overnight_var_pct2": 0.617098,
+        "mean_daily_intraday_var_pct2": 0.831684,
+        "mean_daily_close_to_close_var_pct2": 1.472062
+      },
+      "garch_proxy": {
+        "mean_expected_total_var_pct2": 1.399383,
+        "mean_realized_session_var_pct2": 1.448781,
+        "expected_minus_realized_total_var_pct2": -0.049398,
+        "mean_overnight_pseudo_vrp_pct2": -0.013971,
+        "mean_intraday_pseudo_vrp_pct2": -0.035427,
+        "mean_premium_diff_overnight_minus_intraday_pct2": 0.021456
+      },
+      "bootstrap_oos": {
+        "overnight_share": {
+          "mean": 0.420784,
+          "ci_2p5": 0.332803,
+          "ci_97p5": 0.524344,
+          "p_gt_0": 1.0,
+          "p_gt_half": 0.075
+        },
+        "intraday_share": {
+          "mean": 0.579216,
+          "ci_2p5": 0.475656,
+          "ci_97p5": 0.667197,
+          "p_gt_0": 1.0,
+          "p_gt_half": 0.925
+        },
+        "premium_diff_overnight_minus_intraday": {
+          "mean": 2e-06,
+          "ci_2p5": -1.8e-05,
+          "ci_97p5": 2.1e-05,
+          "p_gt_0": 0.596,
+          "p_gt_half": null
+        }
+      },
+      "predictive_regression_oos": {
+        "nobs": 2123,
+        "coef_overnight": -0.021797,
+        "t_overnight": -0.653,
+        "p_overnight": 0.513744,
+        "coef_intraday": -0.091682,
+        "t_intraday": -3.091,
+        "p_intraday": 0.001995,
+        "r2": 0.21265
+      }
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "n_oos": 2123,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-12",
+      "realized_session_variance": {
+        "overnight_share": 0.378555,
+        "intraday_share": 0.621445,
+        "covariance_residual_share_of_close_to_close_var": 0.010889,
+        "mean_daily_overnight_var_pct2": 0.849422,
+        "mean_daily_intraday_var_pct2": 1.394432,
+        "mean_daily_close_to_close_var_pct2": 2.268557
+      },
+      "garch_proxy": {
+        "mean_expected_total_var_pct2": 2.16461,
+        "mean_realized_session_var_pct2": 2.243854,
+        "expected_minus_realized_total_var_pct2": -0.079244,
+        "mean_overnight_pseudo_vrp_pct2": -0.024723,
+        "mean_intraday_pseudo_vrp_pct2": -0.054521,
+        "mean_premium_diff_overnight_minus_intraday_pct2": 0.029799
+      },
+      "bootstrap_oos": {
+        "overnight_share": {
+          "mean": 0.377476,
+          "ci_2p5": 0.317805,
+          "ci_97p5": 0.450523,
+          "p_gt_0": 1.0,
+          "p_gt_half": 0.003
+        },
+        "intraday_share": {
+          "mean": 0.622524,
+          "ci_2p5": 0.549477,
+          "ci_97p5": 0.682195,
+          "p_gt_0": 1.0,
+          "p_gt_half": 0.997
+        },
+        "premium_diff_overnight_minus_intraday": {
+          "mean": 3e-06,
+          "ci_2p5": -2.1e-05,
+          "ci_97p5": 2.5e-05,
+          "p_gt_0": 0.603,
+          "p_gt_half": null
+        }
+      },
+      "predictive_regression_oos": {
+        "nobs": 2123,
+        "coef_overnight": -0.073753,
+        "t_overnight": -2.286,
+        "p_overnight": 0.022252,
+        "coef_intraday": -0.031027,
+        "t_intraday": -0.8822,
+        "p_intraday": 0.377675,
+        "r2": 0.170048
+      }
+    },
+    "IWM": {
+      "ticker": "IWM",
+      "n_oos": 2123,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-12",
+      "realized_session_variance": {
+        "overnight_share": 0.396797,
+        "intraday_share": 0.603203,
+        "covariance_residual_share_of_close_to_close_var": 0.004227,
+        "mean_daily_overnight_var_pct2": 0.942805,
+        "mean_daily_intraday_var_pct2": 1.433235,
+        "mean_daily_close_to_close_var_pct2": 2.386126
+      },
+      "garch_proxy": {
+        "mean_expected_total_var_pct2": 2.242553,
+        "mean_realized_session_var_pct2": 2.37604,
+        "expected_minus_realized_total_var_pct2": -0.133487,
+        "mean_overnight_pseudo_vrp_pct2": -0.063834,
+        "mean_intraday_pseudo_vrp_pct2": -0.069653,
+        "mean_premium_diff_overnight_minus_intraday_pct2": 0.005819
+      },
+      "bootstrap_oos": {
+        "overnight_share": {
+          "mean": 0.395346,
+          "ci_2p5": 0.332066,
+          "ci_97p5": 0.460724,
+          "p_gt_0": 1.0,
+          "p_gt_half": 0.001
+        },
+        "intraday_share": {
+          "mean": 0.604654,
+          "ci_2p5": 0.539276,
+          "ci_97p5": 0.667934,
+          "p_gt_0": 1.0,
+          "p_gt_half": 0.999
+        },
+        "premium_diff_overnight_minus_intraday": {
+          "mean": 0.0,
+          "ci_2p5": -2.2e-05,
+          "ci_97p5": 2.1e-05,
+          "p_gt_0": 0.522,
+          "p_gt_half": null
+        }
+      },
+      "predictive_regression_oos": {
+        "nobs": 2123,
+        "coef_overnight": -0.017045,
+        "t_overnight": -0.5231,
+        "p_overnight": 0.600894,
+        "coef_intraday": -0.107714,
+        "t_intraday": -3.9341,
+        "p_intraday": 8.4e-05,
+        "r2": 0.156798
+      }
+    },
+    "EFA": {
+      "ticker": "EFA",
+      "n_oos": 2123,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-12",
+      "realized_session_variance": {
+        "overnight_share": 0.646186,
+        "intraday_share": 0.353814,
+        "covariance_residual_share_of_close_to_close_var": -0.026442,
+        "mean_daily_overnight_var_pct2": 0.865598,
+        "mean_daily_intraday_var_pct2": 0.473952,
+        "mean_daily_close_to_close_var_pct2": 1.305042
+      },
+      "garch_proxy": {
+        "mean_expected_total_var_pct2": 1.281572,
+        "mean_realized_session_var_pct2": 1.339549,
+        "expected_minus_realized_total_var_pct2": -0.057977,
+        "mean_overnight_pseudo_vrp_pct2": -0.031682,
+        "mean_intraday_pseudo_vrp_pct2": -0.026296,
+        "mean_premium_diff_overnight_minus_intraday_pct2": -0.005386
+      },
+      "bootstrap_oos": {
+        "overnight_share": {
+          "mean": 0.642924,
+          "ci_2p5": 0.565849,
+          "ci_97p5": 0.715369,
+          "p_gt_0": 1.0,
+          "p_gt_half": 1.0
+        },
+        "intraday_share": {
+          "mean": 0.357076,
+          "ci_2p5": 0.284631,
+          "ci_97p5": 0.434151,
+          "p_gt_0": 1.0,
+          "p_gt_half": 0.0
+        },
+        "premium_diff_overnight_minus_intraday": {
+          "mean": -1e-06,
+          "ci_2p5": -1.8e-05,
+          "ci_97p5": 1.5e-05,
+          "p_gt_0": 0.483,
+          "p_gt_half": null
+        }
+      },
+      "predictive_regression_oos": {
+        "nobs": 2123,
+        "coef_overnight": -0.039053,
+        "t_overnight": -1.2796,
+        "p_overnight": 0.200679,
+        "coef_intraday": -0.078891,
+        "t_intraday": -2.6466,
+        "p_intraday": 0.00813,
+        "r2": 0.153007
+      }
+    }
+  },
+  "figures": [
+    "fig_session_variance_shares.png",
+    "fig_predictive_tstats.png"
+  ],
+  "literature": [
+    {
+      "citation": "Papagelis and Dotsis (2025), The Variance Risk Premium Over Trading and Nontrading Periods",
+      "url": "https://onlinelibrary.wiley.com/doi/full/10.1002/fut.22589"
+    },
+    {
+      "citation": "Carr and Wu (2009), Variance Risk Premia",
+      "url": "https://doi.org/10.1093/rfs/hhn038"
+    },
+    {
+      "citation": "Bollerslev, Tauchen, and Zhou (2009), Expected Stock Returns and Variance Risk Premia",
+      "url": "https://www.federalreserve.gov/pubs/feds/2007/200711/"
+    },
+    {
+      "citation": "Corsi (2009), A Simple Approximate Long-Memory Model of Realized Volatility",
+      "url": "https://doi.org/10.1093/jjfinec/nbp001"
+    }
+  ],
+  "research_honesty_notes": [
+    "Daily yfinance OHLC cannot identify true option-implied VRP; this is a pseudo-VRP proxy only.",
+    "No same-day realized pseudo-VRP is used as a predictor; predictive regressions use lagged features.",
+    "Because GARCH is a physical-measure forecast, mean pseudo-premia should not be interpreted as investable option carry."
+  ],
+  "verdict": {
+    "overall": "NULL",
+    "overnight_majority_assets": [
+      "EFA"
+    ],
+    "predictive_assets": [],
+    "plain_english": "The yfinance-only pseudo-VRP proxy does not support a broad cross-asset overnight-dominance plus next-day-RV prediction claim."
+  }
+}

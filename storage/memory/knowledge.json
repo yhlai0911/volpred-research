@@ -34140,5 +34140,18 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-06-15T05:13:50.220822"
+  },
+  {
+    "item_id": "6f3c0c6a",
+    "category": "empirical_null",
+    "content": "research_intraday_vs_overnight_vrp NULL: yfinance-only intraday/overnight pseudo-VRP decomposition on SPY/QQQ/IWM/EFA does not support a broad overnight-dominance plus next-day realized-variance prediction claim. Data: adjusted OHLC, OOS 2018-01-02 to 2026-06-12, n=2,123 days per asset after rolling GARCH warmup. Overnight realized session-variance shares were SPY 0.4259, QQQ 0.3786, IWM 0.3968, EFA 0.6462; only EFA had bootstrap CI lower bound > 0.5. Lagged overnight pseudo-VRP, defined as rolling GARCH expected component variance minus realized component variance, did not predict next-day/current session variance with positive HAC t>3 in any asset (SPY -0.65, QQQ -2.29, IWM -0.52, EFA -1.28). Treat this as an OHLC/GARCH free-data diagnostic, not as a replication of option-implied Papagelis-Dotsis VRP decomposition; do not publish as true overnight VRP evidence without option-chain/model-free implied variance data.",
+    "evidence": [
+      "experiments/research_intraday_vs_overnight_vrp/README.md",
+      "experiments/research_intraday_vs_overnight_vrp/research_intraday_vs_overnight_vrp.py",
+      "experiments/research_intraday_vs_overnight_vrp/research_intraday_vs_overnight_vrp_results.json",
+      "experiments/research_intraday_vs_overnight_vrp/codex_review.md"
+    ],
+    "confidence": 0.84,
+    "created_at": "2026-06-15T06:23:18.625567"
   }
 ]
