@@ -30942,7 +30942,7 @@
     "title": "研究 backlog fallback: Risk-regime correlation breakdown 早期偵測",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Risk-regime correlation breakdown 早期偵測 — 用 SPY/TLT 60d rolling correlation + DCC-GARCH，建 regime classifier（low-corr / decoupled / inverted）並檢驗 regime 轉換前 N 日 vol-of-correlation 是否異常上升（yfinance）（來源：CFA Institute \"Risk Regimes and Portfolio Resilience\" 2026 系列；2020/2022 都是 corr breakdown 觸發配置失敗） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "risk_regime_correlation_breakdown",
@@ -30950,7 +30950,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-14T18:15:56+00:00"
+    "created_at": "2026-06-14T18:15:56+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-14T19:52:17.222056+00:00",
+    "claim_session_id": "104c5a7b6181",
+    "started_at": "2026-06-14T19:52:27.727201+00:00",
+    "completed_at": "2026-06-14T20:02:00.827850+00:00",
+    "result": "Completed SPY/TLT risk-regime correlation breakdown experiment. Verdict=NULL: raw high corr-vol transition rate is higher, but stationary bootstrap CI crosses zero and HAC(21) high-signal coefficient is negative/non-significant after controls; no 60/40 drawdown worsening. Wrote experiment artifacts, Codex review, knowledge entry 6c9d9cb8, and research_program closure."
   },
   {
     "id": "research_ai_mega_cap_hhi_spy_tail_risk",

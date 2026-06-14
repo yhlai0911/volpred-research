@@ -34080,5 +34080,18 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-15T02:47:32.816877"
+  },
+  {
+    "item_id": "6c9d9cb8",
+    "category": "empirical_null",
+    "content": "research_risk_regime_correlation_breakdown NULL: SPY/TLT 60d rolling-correlation breakdown regimes are real, but lagged 21d correlation-volatility is not a robust early-warning signal for future positive stock-bond correlation transitions. Data: yfinance adjusted SPY/TLT daily closes, effective 2005-04-29 to 2026-05-13, n=5,293 analysis rows and n=4,810 at-risk transition rows. Raw transition rate was higher after high corr-vol signals (9.60% vs 6.08%, diff +3.53pp), but stationary-bootstrap 95% CI crossed zero [-1.36pp,+8.90pp], p=0.188; HAC(21) LPM controlling corr60_lag1 and SPY/TLT RV gave high-signal coef=-2.11pp, p=0.459. No evidence of worse next-21d 60/40 drawdown: diff +0.084pp, bootstrap CI [-0.426pp,+0.558pp], HAC coef +0.415pp p=0.103. DCC-GARCH descriptive check tracks rolling correlation (rho corr=0.843) but is not used predictively because full-sample DCC parameters would leak future information. Do not publish as a working early-warning detector; useful only as a NULL/methodology lesson.",
+    "evidence": [
+      "experiments/research_risk_regime_correlation_breakdown/README.md",
+      "experiments/research_risk_regime_correlation_breakdown/research_risk_regime_correlation_breakdown.py",
+      "experiments/research_risk_regime_correlation_breakdown/research_risk_regime_correlation_breakdown_results.json",
+      "experiments/research_risk_regime_correlation_breakdown/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-15T04:01:35.040505"
   }
 ]

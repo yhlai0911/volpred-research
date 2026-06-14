@@ -1,0 +1,293 @@
+{
+  "experiment_id": "research_risk_regime_correlation_breakdown",
+  "title": "Risk-regime correlation breakdown early detection",
+  "date_run": "2026-06-14",
+  "seed": 42,
+  "data": {
+    "source": "yfinance adjusted daily close; auto_adjust=True intentionally used as total-return ETF proxy",
+    "tickers": [
+      "SPY",
+      "TLT"
+    ],
+    "download_period": {
+      "start": "2003-01-01",
+      "end": "2026-06-14"
+    },
+    "effective_period": {
+      "start": "2005-04-29",
+      "end": "2026-05-13"
+    },
+    "n_obs_analysis": 5293,
+    "n_obs_at_risk_event_sample": 4810
+  },
+  "methodology": {
+    "rolling_corr_window": 60,
+    "corr_vol_window": 21,
+    "forward_horizon": 21,
+    "positive_corr_breakdown_threshold": 0.2,
+    "high_corr_vol_rule": "corr_vol21.shift(1) >= expanding_q80(corr_vol21).shift(1)",
+    "lookahead_protection": [
+      "corr60_lag1 = corr60.shift(1)",
+      "corr_vol21_lag1 = corr_vol21.shift(1)",
+      "corr_vol_q80_lag1 = corr_vol_q80.shift(1)",
+      "rv controls use shift(1)",
+      "forward outcomes use t+1..t+21 windows"
+    ],
+    "inference": {
+      "hac_maxlags": 21,
+      "stationary_bootstrap_draws": 1000,
+      "stationary_bootstrap_mean_block": 21
+    },
+    "dcc_garch": {
+      "role": "descriptive sanity check only",
+      "leakage_note": "DCC parameters and univariate GARCH parameters are estimated on the full sample; using them as predictors would introduce estimation-window leakage."
+    }
+  },
+  "related_knowledge": [
+    "research_program.md line 81: K534 and eight prior checks support that SPY/GLD correlation dynamics are not easily predictable.",
+    "knowledge K1460: simple stock-bond correlation-regime adaptation failed to beat the best static 60/40 benchmark.",
+    "knowledge K1387: Gaussian vs Student-t DCC ERC on SPY/TLT/GLD was NULL for allocation improvement."
+  ],
+  "literature": [
+    {
+      "title": "Why Static Portfolios Fail When Risk Regimes Change",
+      "source": "CFA Institute Enterprising Investor, 2026",
+      "url": "https://rpc.cfainstitute.org/blogs/enterprising-investor/2026/why-static-portfolios-fail-when-risk-regimes-change",
+      "use": "Motivates regime-dependent diversification failure and 2022 stock-bond co-movement risk."
+    },
+    {
+      "title": "A Changing Stock-Bond Correlation: Drivers and Implications",
+      "source": "AQR / Journal of Portfolio Management, 2023",
+      "url": "https://www.aqr.com/Insights/Research/Journal-Article/A-Changing-Stock-Bond-Correlation",
+      "use": "Frames stock-bond correlation as a key portfolio-risk parameter driven by growth vs inflation uncertainty."
+    },
+    {
+      "title": "Flight-to-quality or Contagion? An Empirical Analysis of Stock-bond Correlations",
+      "source": "IIIS Discussion Paper, 2006",
+      "url": "https://ideas.repec.org/p/iis/dispap/iiisdp122.html",
+      "use": "Defines stock-bond negative-correlation flight-to-quality vs positive-correlation contagion regimes."
+    },
+    {
+      "title": "The Performance of the 60/40 Portfolio: A Historical Perspective",
+      "source": "CFA Institute Research Foundation, 2024",
+      "url": "https://rpc.cfainstitute.org/sites/default/files/docs/research-reports/monash-report-1_performance-of-the-6040_online.pdf",
+      "use": "Documents 2022 as a difficult 60/40 episode because bonds did not protect when stocks fell."
+    }
+  ],
+  "descriptive": {
+    "corr60_mean": -0.2633899758379374,
+    "corr60_median": -0.2992763171114003,
+    "corr60_min": -0.8513338619318496,
+    "corr60_max": 0.43515719764878064,
+    "positive_breakdown_share": 0.09144152654449272,
+    "lagged_high_corr_vol_share": 0.25694313243907047,
+    "at_risk_transition_base_rate": 0.06923076923076923
+  },
+  "tests": {
+    "transition_to_positive_corr_21": {
+      "metric": "transition_to_positive_corr_21",
+      "n_high": 1156,
+      "n_non_high": 3654,
+      "high_mean": 0.09602076124567474,
+      "non_high_mean": 0.060755336617405585,
+      "diff_high_minus_non_high": 0.035265424628269156,
+      "welch_t": 3.701433295577588,
+      "welch_p": 0.00022137521797188547,
+      "bootstrap_ci_95": [
+        -0.013576199791477435,
+        0.08896488753559571
+      ],
+      "bootstrap_p_two_sided": 0.1878121878121878
+    },
+    "fwd_corr60_mean_21": {
+      "metric": "fwd_corr60_mean_21",
+      "n_high": 1156,
+      "n_non_high": 3654,
+      "high_mean": -0.20482672534200919,
+      "non_high_mean": -0.3473318531657407,
+      "diff_high_minus_non_high": 0.14250512782373154,
+      "welch_t": 16.850258320888805,
+      "welch_p": 1.2931694007021893e-59,
+      "bootstrap_ci_95": [
+        0.0829617625428078,
+        0.20005976027842912
+      ],
+      "bootstrap_p_two_sided": 0.001998001998001998
+    },
+    "fwd_6040_worst_cumret_21": {
+      "metric": "fwd_6040_worst_cumret_21",
+      "n_high": 1156,
+      "n_non_high": 3654,
+      "high_mean": -0.014913494386228897,
+      "non_high_mean": -0.01575307136249616,
+      "diff_high_minus_non_high": 0.0008395769762672613,
+      "welch_t": 1.0296310971945934,
+      "welch_p": 0.3033109468693755,
+      "bootstrap_ci_95": [
+        -0.004259743599304876,
+        0.005580643513948232
+      ],
+      "bootstrap_p_two_sided": 0.7532467532467533
+    },
+    "fwd_spy_worst_cumret_21": {
+      "metric": "fwd_spy_worst_cumret_21",
+      "n_high": 1156,
+      "n_non_high": 3654,
+      "high_mean": -0.024812122515539894,
+      "non_high_mean": -0.027112814896380358,
+      "diff_high_minus_non_high": 0.0023006923808404633,
+      "welch_t": 1.724444995142432,
+      "welch_p": 0.08478538695833826,
+      "bootstrap_ci_95": [
+        -0.005969366549587842,
+        0.00967401373925039
+      ],
+      "bootstrap_p_two_sided": 0.5594405594405595
+    }
+  },
+  "regressions": {
+    "transition_lpm_hac21": {
+      "n_obs": 4810,
+      "r_squared": 0.14824976675897716,
+      "maxlags": 21,
+      "params": {
+        "const": {
+          "coef": 0.19574323512305397,
+          "t": 4.752303667669149,
+          "p": 2.0111201999510636e-06
+        },
+        "high_corr_vol_signal": {
+          "coef": -0.021063576156528013,
+          "t": -0.7396948560676938,
+          "p": 0.4594851700309902
+        },
+        "corr60_lag1": {
+          "coef": 0.38890357313092855,
+          "t": 4.854676095223239,
+          "p": 1.2058367531470172e-06
+        },
+        "rv21_spy_lag1": {
+          "coef": -0.03202769021856548,
+          "t": -0.34432783381036625,
+          "p": 0.7305997542780457
+        },
+        "rv21_tlt_lag1": {
+          "coef": 0.05621087078160558,
+          "t": 0.20552520302224847,
+          "p": 0.8371618092011719
+        }
+      }
+    },
+    "forward_corr_mean_hac21": {
+      "n_obs": 4810,
+      "r_squared": 0.8753375803240507,
+      "maxlags": 21,
+      "params": {
+        "const": {
+          "coef": -0.006993169357940537,
+          "t": -0.5563055612401594,
+          "p": 0.5780019860558387
+        },
+        "high_corr_vol_signal": {
+          "coef": 0.007824493845666698,
+          "t": 0.7182604230498774,
+          "p": 0.47259672796154584
+        },
+        "corr60_lag1": {
+          "coef": 0.9428864997838468,
+          "t": 51.224652130261596,
+          "p": 0.0
+        },
+        "rv21_spy_lag1": {
+          "coef": -0.06453245070797324,
+          "t": -1.3895142806578413,
+          "p": 0.16467642146413752
+        },
+        "rv21_tlt_lag1": {
+          "coef": 0.02030779162753335,
+          "t": 0.1858072194280189,
+          "p": 0.8525959428402488
+        }
+      }
+    },
+    "forward_6040_drawdown_hac21": {
+      "n_obs": 4810,
+      "r_squared": 0.06514162656167788,
+      "maxlags": 21,
+      "params": {
+        "const": {
+          "coef": -0.011143846010241673,
+          "t": -2.9424153707351555,
+          "p": 0.003256627853382359
+        },
+        "high_corr_vol_signal": {
+          "coef": 0.004145764964321128,
+          "t": 1.6302617323836484,
+          "p": 0.1030461917281776
+        },
+        "corr60_lag1": {
+          "coef": -0.006872773545577282,
+          "t": -1.2738338254757893,
+          "p": 0.20272231463990165
+        },
+        "rv21_spy_lag1": {
+          "coef": -0.06098562933935668,
+          "t": -3.3325192463596984,
+          "p": 0.0008606351747684736
+        },
+        "rv21_tlt_lag1": {
+          "coef": 0.015869559854333113,
+          "t": 0.43636564204015865,
+          "p": 0.6625714628696904
+        }
+      }
+    }
+  },
+  "dcc_garch_descriptive": {
+    "garch_spy": {
+      "mu": 0.06896584149103784,
+      "omega": 0.02177371797064887,
+      "alpha[1]": 5.324806472127949e-10,
+      "gamma[1]": 0.22470215001493954,
+      "beta[1]": 0.8663150749909223,
+      "nu": 6.162882492071756,
+      "convergence_flag": 0
+    },
+    "garch_tlt": {
+      "mu": 0.022635200069436524,
+      "omega": 0.004426617353964954,
+      "alpha[1]": 0.053754794087298774,
+      "gamma[1]": -0.012210457098646694,
+      "beta[1]": 0.9473906815791209,
+      "nu": 14.85267690463675,
+      "convergence_flag": 0
+    },
+    "dcc": {
+      "descriptive_only": true,
+      "reason_not_used_as_predictive_feature": "DCC parameters and univariate GARCH parameters are estimated on the full sample; using them as predictors would introduce estimation-window leakage.",
+      "n_obs": 5898,
+      "a": 0.059542252677937564,
+      "b": 0.9223571680318428,
+      "persistence": 0.9818994207097803,
+      "success": true,
+      "message": "Optimization terminated successfully",
+      "q_bar_spy_tlt": -0.23460966506936673,
+      "corr_with_rolling60": 0.8431684142667262,
+      "mean_rho": -0.24251863648838498,
+      "positive_breakdown_share": 0.06990364632533534
+    }
+  },
+  "figures": [
+    "fig_correlation_breakdown_signal.png",
+    "fig_event_rate_and_drawdown.png",
+    "fig_dcc_vs_rolling_correlation.png"
+  ],
+  "research_honesty_notes": [
+    "The DCC-GARCH series is not used as a predictive feature because full-sample DCC parameter estimation would leak future information.",
+    "The experiment tests an early-warning state variable, not a tradable allocation rule.",
+    "Overlapping 21-day outcomes make iid t-statistics insufficient; HAC(21) and stationary bootstrap are the primary inference tools.",
+    "A positive result should be phrased as conditional association with regime transition risk, not proof that correlation regimes are reliably forecastable."
+  ],
+  "verdict": "NULL",
+  "verdict_rationale": "H1 transition diff=0.035265, CI=[-0.013576,0.088965], HAC high-signal coef=-0.021064, p=0.4595; H2 60/40 worst-return diff=0.000840, CI=[-0.004260,0.005581], HAC coef=0.004146, p=0.1030."
+}
