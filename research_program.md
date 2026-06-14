@@ -574,6 +574,28 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] FinBERT-style 中文財經新聞情緒對 0050 vol 預測增量 — 抓 鉅亨網/工商時報 RSS 日頻標題，用免費中文 sentiment lexicon（NTUSD/CNSenti）算每日 sentiment z-score，加入 HAR-RV(0050) 檢定 OOS QLIKE 增量 + DM 顯著（yfinance + RSS）（來源：arXiv 2025-05 interpretable macro alpha + Frontiers 2025；中文圈 FinBERT-style vol forecast 缺，VolPred 角度差異化高）
 - [ ] 商品 backwardation→contango 轉換點作為通膨資產 vol regime switch — 用 USO/UNG/CPER 月頻代理近月-遠月 spread（用前後月 ETF 收益代理 roll yield），標記 regime switch 日期，event study 檢定後續 30/60/90 日這些 ETF 與 SPY 的 vol jump 與相關性變化（yfinance）（來源：Schwab 2026 backwardation guide + arXiv 2026-03 rough vol commodity；2025 backwardation→extreme contango 切換是新事件）
 
+### 期刊主題挖掘 batch（2026-06-15；用戶糾正「文章鬼打牆、回收舊 cluster」後觸發 → WebSearch JPM/FAJ/JFE/JFM/JBF/J.Fixed Income/CFA/FSB/arXiv 2025-26，**硬約束跳出 8 飽和 cluster**：VT / VIX-MOVE / GARCH-HAR 賽馬 / 風險模型比較 / ETF 分散 / 50-50+長債 / N 套策略 meta / proxy 測量比較。全免費資料 yfinance/FRED/EIA/FINRA，options/BDC 折溢價用成交量·股價動能 proxy 代理）
+> 來源：journal-topic-discovery（WebSearch 趨勢層級，未捏造論文標題+作者；唯二指名 "Seeking Gamma"(AFA wp) 與 "Factor MAX and Predictable Factor Returns"(SBFC 2025) 為搜尋真實出現標題）。6 個全新主題軸，每軸 ≤3，與既有 6 batch + feed 近 120 篇正交。
+> **新軸 1 — retail/dealer-gamma 微結構**
+- [ ] Gamma-squeeze 候選股「散戶驅動波動」事件研究 — yfinance 2024-26 meme/gamma 候選（OPEN/KSS/GME 等），用「成交量 z-score × 報酬」代理 dealer-hedging 壓力，事件窗檢定 RV 與後續 CAR/reversal 不對稱（來源：JFE/AFA 2025-26 "Seeking Gamma"，squeeze 後一月 CAR +5.13%）
+- [ ] 散戶交易強度 proxy 對次日 idio-vol 的領先力 — 免費 FINRA off-exchange volume + 高 retail-tilt 籃（IWM/低價股），檢定 retail-flow proxy 是否領先個股 idio RV，明確 lag（來源：JFM/JFE 2025 retail order-flow & PFOF）
+> **新軸 2 — closing-auction / index-rebalance 微結構**
+- [ ] Russell/標普 reconstitution 日尾盤波動「dislocation 但收斂」 — 重組日 vs 一般日 close-to-close vs intraday-range vol 拆解，檢定重組日尾盤 RV 系統升高但隔日均值回歸（來源：BMLL/Traders 2025 closing auction，重組日量 9%→20%）
+- [ ] MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025 MOC imbalance）
+> **新軸 3 — 私募信貸 / BDC 影子訊號（2025-26 危機熱點）**
+- [ ] BDC 股價壓力作私募信貸危機前哨 vol 訊號 — yfinance 上市 BDC（ARCC/BXSL/OBDC/FSK）+ BIZD 的 RV + 折溢價/動能 proxy，檢定是否領先 HYG/KRE/IWM vol（來源：FSB 2026-05 Private Credit Vulnerabilities，違約率升 9.2%；BCRED 贖回潮）
+- [ ] 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）
+> **新軸 4 — AI 電力 × 能源轉型 vol**
+- [ ] 資料中心電力需求衝擊對公用/電網 ETF 的 vol 重定價 — yfinance XLU/VPU/GRID/PAVE RV + EIA 電力負載，檢定 AI 電力事件後公用事業從「低 vol 防禦」轉「高 vol 成長」結構斷點（來源：S&P Global 2026 資料中心電力 +22%/年）
+- [ ] 鈾物理囤積基金放大現貨波動 — yfinance URA/URNM/SRUUF + 物理鈾基金 proxy，檢定囤積 AUM 變化放大現貨 vol（與 K1445 URA 分散題正交，聚焦 supply-shock vol 放大）（來源：2026 鈾供給衝擊 + 物理基金抽現貨）
+- [ ] 天然氣季節性波動與 Samuelson effect 到期遞增 — yfinance UNG/天然氣 ETF 月度 RV，檢定冬季 heating regime vol pattern + 接近交割月 vol 系統升高（來源：CME 天然氣季節性 + arXiv seasonal stochastic vol）
+> **新軸 5 — lottery / 行為橫斷面（backlog 零行為軸）**
+- [ ] Factor-MAX：因子層級彩券需求預測因子報酬 — yfinance 因子 ETF（MTUM/QUAL/VLUE/USMV/SIZE）月度 MAX，檢定高 factor-MAX 預測次月該因子低報酬/高 vol（來源：SBFC 2025 "Factor MAX and Predictable Factor Returns"）
+- [ ] 彩券型個股籃 vol-of-vol 與危機放大 — 低價×高 idio-vol×高 MAX 籃，檢定其 RV 與 vol-of-vol 在 risk-off 放大、是否領先大盤 tail vol（來源：Bali MAX 框架 + 2025 lottery-momentum 延伸）
+> **新軸 6 — 退休 decumulation（全新讀者群，改用 ruin/shortfall 非 Sharpe；FAJ/JPM 2025-26 熱點）**
+- [ ] 提領期 sequence-of-returns risk 下 vol-aware 提領法則 — yfinance 股債 ETF + FRED 模擬退休提領，固定 vs 條件於已實現 vol/drawdown 的動態提領，比 ruin probability / shortfall（不比 Sharpe）（來源：FAJ 2025-26 decumulation benchmark；NAPA 2026）
+- [ ] TIPS 階梯 + 遞延年金 decumulation benchmark 的波動暴露分解 — yfinance TIP/STIP/LTPZ + 名目國債 RV，分解 FAJ 提領 benchmark 在通膨/利率 regime 的波動暴露與尾部保護（來源：FAJ 2025 decumulation benchmark；T. Rowe Price 2026）
+
 ## 決策框架
 
 ### 何時深入某面向
