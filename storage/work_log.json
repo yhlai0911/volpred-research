@@ -10552,5 +10552,12 @@
     "task_type": "platform_ops",
     "task_id": "hourly_13_codex_loop_review_gate_enforcement",
     "result": "K1328 orphan recovery + Codex review enforcement: codex_loop daemon 跑完 K1328 PASS 並標 next_tasks succeeded，但跳過 Codex code review。Hourly-13 補 review → verdict FAIL（refit cadence asymmetric + in-sample selection on OOS）。導正: K1328 next_tasks status reverted to failed + 開 K1328-v2 fix task + experiments/k1328/codex_review.md 留 audit。Lesson 待寫入 error_log: codex_loop daemon dispatch K-experiment 必須串 Codex review gate 才能 mark succeeded。"
+  },
+  {
+    "timestamp": "2026-06-14T14:12",
+    "task_type": "platform_ops",
+    "task_id": "hourly_14_k1327_codex_fail_closure",
+    "title": "K1327 Codex review FAIL closure",
+    "summary": "K1327 reverted to failed (Codex review verdict=FAIL: unmatched train/refit + overstates). K1327_v2 fix task opened. codex_review.md committed. error_log extended with new daemon gap. commit b73bd7c1."
   }
 ]

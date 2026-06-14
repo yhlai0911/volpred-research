@@ -30382,7 +30382,7 @@
     "id": "hourly_14_k1327_codex_fail_closure",
     "task_type": "platform_ops",
     "priority": "P2",
-    "status": "in_progress",
+    "status": "succeeded",
     "title": "K1327 Codex review FAIL closure + same-root extension of K1328 lesson",
     "description": "codex_loop daemon 在 K1327_codex_review_followup 跑 Codex review → verdict=FAIL（baseline vs challenger 沒有 matched training/refit cadence + 結論 overstates）。Followup task succeeded（review 完成）但**源頭 K1327 仍 succeeded**未 revert，與 hourly-13 K1328 同 root cause 的延伸 pattern。本 fire 補：(1) K1327 status → failed (2) K1327-v2 開 fix task (3) commit experiments/k1327/codex_review.md (4) error_log 補 K1327 case 到 hourly-13 entry。Source codex_review.md verdict=FAIL 載入 audit。",
     "source": "hourly-14",
@@ -30390,7 +30390,9 @@
     "claimed_by": "hourly-14",
     "claimed_at": "2026-06-14T06:10:42.635290+00:00",
     "claim_session_id": "89cfedf080bc",
-    "started_at": "2026-06-14T06:10:42.893902+00:00"
+    "started_at": "2026-06-14T06:10:42.893902+00:00",
+    "completed_at": "2026-06-14T06:12:45.430952+00:00",
+    "result": "K1327 Codex review FAIL closure: K1327 reverted to failed (codex_loop daemon gap同 K1328); K1327_v2_fix_methodology opened; codex_review.md committed; error_log extended with daemon gap (review-task succeeded ≠ revert source K). commit b73bd7c1."
   },
   {
     "id": "K1327_v2_fix_methodology",
