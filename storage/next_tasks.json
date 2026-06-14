@@ -30371,13 +30371,17 @@
   {
     "id": "K1328_v2_fix_methodology",
     "task_type": "experiment",
-    "status": "pending",
+    "status": "in_progress",
     "priority": "P3",
     "title": "K1328-v2: 修正 HAR ceiling validation methodology (Codex FAIL → matched refit + nested OOS)",
     "description": "K1328 v1 Codex review FAIL (experiments/k1328/codex_review.md). 修正兩處：(1) HAR 與 ML 同 refit cadence（建議都 21d 或都 1d），不可不對稱。(2) Stage A 在 burn-in/holdout 期間選 best HAR scheme（≤ 2020-12-31），Stage B 才用 2021-01-04+ 獨立 OOS evaluate ceiling claim。修完 re-run + 重跑 Codex review，PASS 才寫 knowledge.json。",
     "created_at": "2026-06-14T05:19:45+00:00",
     "source": "codex_review_followup",
-    "related_k_id": "K1328"
+    "related_k_id": "K1328",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T07:57:07.701734+00:00",
+    "claim_session_id": "6328b667abcc",
+    "started_at": "2026-06-14T07:57:12.449152+00:00"
   },
   {
     "id": "K1327_codex_review_followup",
