@@ -30214,7 +30214,7 @@
     "title": "K1327: Adaptive Multi-Factor HAR — FoFI 2026, Cinquetti et al.（287 個高頻因子）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 390). Original: Adaptive Multi-Factor HAR — FoFI 2026, Cinquetti et al.（287 個高頻因子）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1327.py with signal.shift(1) + seed=42, (c) K1327_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "succeeded",
+    "status": "failed",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 390,
@@ -30228,7 +30228,10 @@
     "claim_session_id": "cc3d04a03428",
     "started_at": "2026-06-14T05:09:53.911742+00:00",
     "completed_at": "2026-06-14T05:14:19.077414+00:00",
-    "result": "Built experiments/k1327 as an Adaptive Multi-Factor HAR public-proxy stress test. Uses 156 shifted daily factor features from local OHLC/risk-proxy files, log-variance target, OOS 2021-01-04..2026-04-16 (1327 obs). Best model MF_ElasticNet_static QLIKE=3.0714 vs HAR3=3.5971, but DM t=2.954 < Harvey 3, so verdict CONDITIONAL_PASS not strong replication."
+    "result": "Built experiments/k1327 as an Adaptive Multi-Factor HAR public-proxy stress test. Uses 156 shifted daily factor features from local OHLC/risk-proxy files, log-variance target, OOS 2021-01-04..2026-04-16 (1327 obs). Best model MF_ElasticNet_static QLIKE=3.0714 vs HAR3=3.5971, but DM t=2.954 < Harvey 3, so verdict CONDITIONAL_PASS not strong replication.",
+    "failure_reason": "Codex review verdict=FAIL: HAR3 baseline (rolling, w=1000, refit=21) vs best challenger MF_ElasticNet_static (static, expanding) — comparison混合 model class / sample window / refit cadence 三變化, not apples-to-apples. Summary overstates findings. CONDITIONAL_PASS verdict 不可採信. 同 hourly-13 K1328 root cause (codex_loop daemon 缺 review gate).",
+    "failed_at": "2026-06-14T06:11:00.363380+00:00",
+    "failed_by": "hourly-14"
   },
   {
     "id": "K1328",
@@ -30361,12 +30364,44 @@
   {
     "id": "K1327_codex_review_followup",
     "task_type": "experiment",
-    "status": "pending",
+    "status": "succeeded",
     "priority": "P3",
     "title": "K1327 補 Codex review (codex_loop daemon 跳過 review gate)",
     "description": "K1327 (Adaptive Multi-Factor HAR) 被 codex-desktop daemon mark succeeded 但 experiments/k1327/codex_review.md 不存在 — daemon 跳過 .claude/rules/experiments.md 強制 Codex review gate（K1328 同 pattern 已 hourly-13 catch FAIL）。補 review 重點：(1) lookahead safety (156 shifted daily features), (2) seed 固定, (3) HAR vs adaptive multi-factor 公平比較 (same window + cadence), (4) verdict 是否如實. 若 PASS 才寫 knowledge.json；FAIL 同 K1328 處理（revert status + 開 v2 fix task）。完整 SOP: hourly-13 fire K1328 範例 (experiments/k1328/codex_review.md)。",
     "created_at": "2026-06-14T05:21:24+00:00",
     "source": "codex_review_gap_recovery",
-    "related_k_id": "K1327"
+    "related_k_id": "K1327",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T05:55:10.980722+00:00",
+    "claim_session_id": "6d4b99366244",
+    "started_at": "2026-06-14T05:55:16.649182+00:00",
+    "completed_at": "2026-06-14T05:56:43.678770+00:00",
+    "result": "Codex review補檔完成：K1327可重跑、lookahead/seed合格，但HAR3與最佳ElasticNet未用matched window。正式verdict=FAIL；現階段不得寫knowledge，需K1327-v2重做公平比較。"
+  },
+  {
+    "id": "hourly_14_k1327_codex_fail_closure",
+    "task_type": "platform_ops",
+    "priority": "P2",
+    "status": "in_progress",
+    "title": "K1327 Codex review FAIL closure + same-root extension of K1328 lesson",
+    "description": "codex_loop daemon 在 K1327_codex_review_followup 跑 Codex review → verdict=FAIL（baseline vs challenger 沒有 matched training/refit cadence + 結論 overstates）。Followup task succeeded（review 完成）但**源頭 K1327 仍 succeeded**未 revert，與 hourly-13 K1328 同 root cause 的延伸 pattern。本 fire 補：(1) K1327 status → failed (2) K1327-v2 開 fix task (3) commit experiments/k1327/codex_review.md (4) error_log 補 K1327 case 到 hourly-13 entry。Source codex_review.md verdict=FAIL 載入 audit。",
+    "source": "hourly-14",
+    "created_at": "2026-06-14T06:10:42.139965+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-14T06:10:42.635290+00:00",
+    "claim_session_id": "89cfedf080bc",
+    "started_at": "2026-06-14T06:10:42.893902+00:00"
+  },
+  {
+    "id": "K1327_v2_fix_methodology",
+    "task_type": "experiment",
+    "priority": "P3",
+    "status": "pending",
+    "title": "K1327-v2: Adaptive Multi-Factor HAR — matched training/refit + 修正 summary overstating",
+    "description": "K1327 Codex review FAIL → 修正：(1) baseline HAR3 與 challenger 跑相同 rolling/window/refit_every（推薦 rolling=True, window=1000, refit_every=21 for all）；或同跑 static expanding for both. (2) 若多 challenger 必須有不同 refit cadence，至少做 ablation 分離 model class effect / sample effect / refit effect. (3) Summary 改寫：明確點出 CONDITIONAL_PASS 是「在當前 setup 下 multifactor 略優但 not Harvey |t|>3」，**不宣稱**「Cinquetti 因子賽贏 HAR」(4) 重跑後寫 results + 重新 Codex review.",
+    "source": "hourly-14",
+    "created_at": "2026-06-14T06:11:00.363380+00:00",
+    "predecessor": "K1327",
+    "predecessor_codex_review": "experiments/k1327/codex_review.md"
   }
 ]
