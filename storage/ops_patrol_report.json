@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-13T18:03:24Z",
+  "timestamp": "2026-06-14T00:05:39Z",
   "all_ok": true,
   "checks": [
     {
@@ -20,12 +20,12 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies have 0 entries (empty lists). No null portfolio_return gaps. Note: all strategies have no paper trading data recorded yet."
+      "detail": "14 portfolio strategies checked (excluding _market_daily which uses date-keyed market-data schema). All 14 have exactly 1 null portfolio_return in last 3 entries (most recent entry pending). No strategy exceeds the >2 null threshold."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files (threshold >50). Working tree is clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
