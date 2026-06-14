@@ -1,0 +1,238 @@
+{
+  "experiment_id": "K1327_v2",
+  "predecessor": "K1327",
+  "title": "Matched Adaptive Multi-Factor HAR public-proxy test",
+  "seed": 42,
+  "data_source": {
+    "local_files": [
+      "experiments/k1206/data/*.csv",
+      "storage/sentiment/vix_historical.csv",
+      "storage/sentiment/vvix_historical.csv",
+      "storage/sentiment/skew_index.csv",
+      "storage/sentiment/credit_spread_proxy.csv"
+    ],
+    "sample_start": "2014-12-22",
+    "sample_end": "2026-04-16",
+    "oos_start": "2021-01-04",
+    "n_total": 2845,
+    "n_train_pre_oos": 1518,
+    "n_features_multifactor": 156
+  },
+  "literature": [
+    "Cinquetti, Hong, Nolte & Nolte (2025/2026), Volatility Forecasting Factors",
+    "Corsi (2009), HAR-RV",
+    "Patton (2011), volatility forecast comparison with imperfect proxies"
+  ],
+  "method": {
+    "target": "SPY daily squared log return",
+    "model_space": "log(rv_t)",
+    "evaluation": "QLIKE on positive variance forecasts exp(pred_log)",
+    "lookahead_policy": "all factor features are shifted by one day before rolling aggregation",
+    "hyperparam_selection": "pre-OOS train/validation split only",
+    "primary_comparison": "HAR3 and multi-factor challengers all use rolling=True, window=1000, refit_every=21",
+    "sensitivity_comparison": "HAR3 and multi-factor challengers all use expanding window, refit_every=21"
+  },
+  "hyperparams": {
+    "ridge": {
+      "qlike": 2.3414865217896157,
+      "alpha": 100.0
+    },
+    "elasticnet": {
+      "qlike": 2.089296141458934,
+      "alpha": 0.05,
+      "l1_ratio": 0.9
+    }
+  },
+  "evaluation": {
+    "primary_matched_rolling": {
+      "models": {
+        "HAR3": {
+          "qlike": 3.597126010990133,
+          "mse": 1.320952749026992e-07,
+          "mean_pred_rv": 2.8377789121875892e-05,
+          "n_oos": 1327,
+          "feature_set": "har3",
+          "model_type": "ols",
+          "rolling": true,
+          "window": 1000,
+          "refit_every": 21,
+          "alpha": null,
+          "l1_ratio": null,
+          "selection_refits": 0
+        },
+        "MF_Ridge_rolling_matched": {
+          "qlike": 3.6218036036570527,
+          "mse": 1.2137718305440738e-07,
+          "mean_pred_rv": 3.6767049693723416e-05,
+          "n_oos": 1327,
+          "feature_set": "multifactor",
+          "model_type": "ridge",
+          "rolling": true,
+          "window": 1000,
+          "refit_every": 21,
+          "alpha": 100.0,
+          "l1_ratio": null,
+          "selection_refits": 0
+        },
+        "MF_ElasticNet_rolling_matched": {
+          "qlike": 3.1605507849253,
+          "mse": 1.2138176793890563e-07,
+          "mean_pred_rv": 3.1983253044792783e-05,
+          "n_oos": 1327,
+          "feature_set": "multifactor",
+          "model_type": "elasticnet",
+          "rolling": true,
+          "window": 1000,
+          "refit_every": 21,
+          "alpha": 0.05,
+          "l1_ratio": 0.9,
+          "selection_refits": 64
+        }
+      },
+      "pairwise_vs_har3": {
+        "MF_Ridge_rolling_matched": {
+          "dm_t_stat_har3_minus_model": -0.11155656557789859,
+          "p_value": 0.9111918960005272,
+          "harvey_pass": false,
+          "favored_model": "HAR3",
+          "lower_qlike_model": "HAR3"
+        },
+        "MF_ElasticNet_rolling_matched": {
+          "dm_t_stat_har3_minus_model": 2.5160743562547006,
+          "p_value": 0.011984328552262502,
+          "harvey_pass": false,
+          "favored_model": "MF_ElasticNet_rolling_matched",
+          "lower_qlike_model": "MF_ElasticNet_rolling_matched"
+        }
+      }
+    },
+    "sensitivity_expanding": {
+      "models": {
+        "HAR3": {
+          "qlike": 4.034245652164525,
+          "mse": 1.3241484955341207e-07,
+          "mean_pred_rv": 2.5018270695615903e-05,
+          "n_oos": 1327,
+          "feature_set": "har3",
+          "model_type": "ols",
+          "rolling": false,
+          "window": null,
+          "refit_every": 21,
+          "alpha": null,
+          "l1_ratio": null,
+          "selection_refits": 0
+        },
+        "MF_Ridge_expanding_matched": {
+          "qlike": 3.407423723381064,
+          "mse": 1.1192443753712738e-07,
+          "mean_pred_rv": 3.6327515109667485e-05,
+          "n_oos": 1327,
+          "feature_set": "multifactor",
+          "model_type": "ridge",
+          "rolling": false,
+          "window": null,
+          "refit_every": 21,
+          "alpha": 100.0,
+          "l1_ratio": null,
+          "selection_refits": 0
+        },
+        "MF_ElasticNet_expanding_matched": {
+          "qlike": 3.071436913966627,
+          "mse": 1.2075093836225763e-07,
+          "mean_pred_rv": 3.1265401498966404e-05,
+          "n_oos": 1327,
+          "feature_set": "multifactor",
+          "model_type": "elasticnet",
+          "rolling": false,
+          "window": null,
+          "refit_every": 21,
+          "alpha": 0.05,
+          "l1_ratio": 0.9,
+          "selection_refits": 64
+        }
+      },
+      "pairwise_vs_har3": {
+        "MF_Ridge_expanding_matched": {
+          "dm_t_stat_har3_minus_model": 2.7666567700879696,
+          "p_value": 0.005742103921215103,
+          "harvey_pass": false,
+          "favored_model": "MF_Ridge_expanding_matched",
+          "lower_qlike_model": "MF_Ridge_expanding_matched"
+        },
+        "MF_ElasticNet_expanding_matched": {
+          "dm_t_stat_har3_minus_model": 5.125318614455443,
+          "p_value": 3.410135123171898e-07,
+          "harvey_pass": true,
+          "favored_model": "MF_ElasticNet_expanding_matched",
+          "lower_qlike_model": "MF_ElasticNet_expanding_matched"
+        }
+      }
+    }
+  },
+  "rolling_elasticnet_family_selection": {
+    "BTC": {
+      "mean_selection_frequency": 0.18125,
+      "max_selection_frequency": 1.0,
+      "n_features": 20
+    },
+    "EEM": {
+      "mean_selection_frequency": 0.1484375,
+      "max_selection_frequency": 0.65625,
+      "n_features": 20
+    },
+    "GLD": {
+      "mean_selection_frequency": 0.11875,
+      "max_selection_frequency": 0.59375,
+      "n_features": 20
+    },
+    "IWM": {
+      "mean_selection_frequency": 0.128125,
+      "max_selection_frequency": 0.671875,
+      "n_features": 20
+    },
+    "QQQ": {
+      "mean_selection_frequency": 0.1234375,
+      "max_selection_frequency": 0.59375,
+      "n_features": 20
+    },
+    "SPY": {
+      "mean_selection_frequency": 0.16953125,
+      "max_selection_frequency": 0.953125,
+      "n_features": 20
+    },
+    "TLT": {
+      "mean_selection_frequency": 0.16015625,
+      "max_selection_frequency": 0.78125,
+      "n_features": 20
+    },
+    "credit": {
+      "mean_selection_frequency": 0.12890625,
+      "max_selection_frequency": 0.1875,
+      "n_features": 4
+    },
+    "skew": {
+      "mean_selection_frequency": 0.30859375,
+      "max_selection_frequency": 0.78125,
+      "n_features": 4
+    },
+    "vix": {
+      "mean_selection_frequency": 0.30078125,
+      "max_selection_frequency": 1.0,
+      "n_features": 4
+    },
+    "vvix": {
+      "mean_selection_frequency": 0.03515625,
+      "max_selection_frequency": 0.09375,
+      "n_features": 4
+    }
+  },
+  "conclusion": {
+    "verdict": "CONDITIONAL_PASS",
+    "best_model": "MF_ElasticNet_rolling_matched",
+    "summary": "MF_ElasticNet_rolling_matched lowers QLIKE under matched rolling window/refit, but DM-HLN t=2.516 remains below Harvey |t|>3."
+  },
+  "artifacts": {
+    "chart": "k1327_v2_qlike_comparison.png",
+    "base_helper_script": "experiments/k1327/k1327.py"
+  }
+}

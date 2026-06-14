@@ -33912,5 +33912,26 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-06-14T12:04:16.018584"
+  },
+  {
+    "item_id": "adad0468",
+    "category": "volatility_forecasting",
+    "experiment_id": "K1327_v2",
+    "related_experiments": [
+      "K1327",
+      "K986"
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1327-v2 repaired the K1327 Adaptive Multi-Factor HAR comparison by matching the primary rolling setup: HAR3, MF_Ridge_rolling_matched, and MF_ElasticNet_rolling_matched all use rolling=True, window=1000, refit_every=21. Local daily public proxy data span 2014-12-22 to 2026-04-16 with OOS 2021-01-04 to 2026-04-16 (n=1327) and 156 shifted factor features. Primary QLIKE: HAR3=3.5971, Ridge=3.6218, ElasticNet=3.1606; ElasticNet DM-HLN t=2.516, p=0.012, below Harvey |t|>3, so verdict=CONDITIONAL_PASS. Expanding-window sensitivity is stronger (ElasticNet QLIKE=3.0714 vs HAR3=4.0342, DM t=5.125), showing sample-window choice matters and must not be mixed into the primary model-class claim. Conclusion: weak public-proxy evidence that matched rolling multifactor log-HAR can improve QLIKE, but not paper-grade proof that the original 287 high-frequency Cinquetti factor design beats HAR.",
+    "evidence": [
+      "experiments/k1327_v2/README.md",
+      "experiments/k1327_v2/k1327_v2.py",
+      "experiments/k1327_v2/k1327_v2_results.json",
+      "experiments/k1327_v2/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-14T14:22:48.166376",
+    "reviewer": "Codex",
+    "codex_review": "experiments/k1327_v2/codex_review.md"
   }
 ]

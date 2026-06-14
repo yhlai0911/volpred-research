@@ -387,7 +387,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 
 ### 需 5-min 數據（ETA 2026 Q2）
 - [ ] HAR-PD (Path-Dependent) — arXiv:2503.00851
-- [ ] Adaptive Multi-Factor HAR — FoFI 2026, Cinquetti et al.（287 個高頻因子）
+- [x] Adaptive Multi-Factor HAR public-proxy — **K1327-v2 完成 CONDITIONAL_PASS (2026-06-14)**：daily OHLC/risk-proxy 156 shifted factors，matched rolling 1000d/refit 21d 後 ElasticNet QLIKE 3.1606 vs HAR3 3.5971，但 DM-HLN t=2.516 未達 Harvey |t|>3。Expanding sensitivity 較強，顯示 sample-window choice 重要；仍非原 FoFI 287 高頻因子 replication。
 - [ ] HAR + Wavelet Decomposition — ScienceDirect 2026
 - [ ] HAR-GNN（Graph Neural Network）— ScienceDirect 2024
 - [ ] Graph Signal Processing HAR — arXiv:2410.22706

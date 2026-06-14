@@ -30398,12 +30398,18 @@
     "id": "K1327_v2_fix_methodology",
     "task_type": "experiment",
     "priority": "P3",
-    "status": "pending",
+    "status": "succeeded",
     "title": "K1327-v2: Adaptive Multi-Factor HAR — matched training/refit + 修正 summary overstating",
     "description": "K1327 Codex review FAIL → 修正：(1) baseline HAR3 與 challenger 跑相同 rolling/window/refit_every（推薦 rolling=True, window=1000, refit_every=21 for all）；或同跑 static expanding for both. (2) 若多 challenger 必須有不同 refit cadence，至少做 ablation 分離 model class effect / sample effect / refit effect. (3) Summary 改寫：明確點出 CONDITIONAL_PASS 是「在當前 setup 下 multifactor 略優但 not Harvey |t|>3」，**不宣稱**「Cinquetti 因子賽贏 HAR」(4) 重跑後寫 results + 重新 Codex review.",
     "source": "hourly-14",
     "created_at": "2026-06-14T06:11:00.363380+00:00",
     "predecessor": "K1327",
-    "predecessor_codex_review": "experiments/k1327/codex_review.md"
+    "predecessor_codex_review": "experiments/k1327/codex_review.md",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T06:17:39.301709+00:00",
+    "claim_session_id": "2a04c3a80ee6",
+    "started_at": "2026-06-14T06:17:50.806898+00:00",
+    "completed_at": "2026-06-14T06:23:57.482718+00:00",
+    "result": "K1327-v2 completed as matched methodology repair. Primary rolling 1000d/refit21d comparison: ElasticNet QLIKE 3.1606 vs HAR3 3.5971, DM-HLN t=2.516 < Harvey gate, verdict CONDITIONAL_PASS. Wrote experiments/k1327_v2 artifacts, Codex review PASS, knowledge entry adad0468, and research_program update."
   }
 ]
