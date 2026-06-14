@@ -30280,7 +30280,7 @@
     "title": "K1330: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 465). Original: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1330.py with signal.shift(1) + seed=42, (c) K1330_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 465,
@@ -30288,7 +30288,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-14T03:16:04Z"
+    "created_at": "2026-06-14T03:16:04Z",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T06:56:00.117563+00:00",
+    "claim_session_id": "fe800fa707e9",
+    "started_at": "2026-06-14T06:56:02.915718+00:00",
+    "completed_at": "2026-06-14T06:58:44.741171+00:00",
+    "result": "K1330 closed as duplicate/superseded by experiments/k1439 after live reproduction on 2026-06-14.\nAdded experiments/K1330/{README,K1330.py,K1330_results.json} to document coverage audit and canonical findings.\nConclusion: strong/weak USD regime question already answered; only USO remains HAC+Bonferroni robust, so no same-topic rerun."
   },
   {
     "id": "K1331",
@@ -30340,7 +30346,7 @@
     "title": "K1334: Downside-CVaR 動態對沖 ratio vs 固定 vol-target 的左尾改善 — yfinance SPY+TLT+GLD，比較以 1-day 99% CVaR 為目標動態縮放曝險 vs 固定 vol-target，檢定壓",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 554). Original: Downside-CVaR 動態對沖 ratio vs 固定 vol-target 的左尾改善 — yfinance SPY+TLT+GLD，比較以 1-day 99% CVaR 為目標動態縮放曝險 vs 固定 vol-target，檢定壓力期左尾頻率/深度與淨 Sharpe；與既有 CDaR-target（drawdown 目標）正交，這裡目標函數是 conditional VaR/ES（來源：arXiv 2025 deep hedging to manage tail risk；CVaR-parameterized convex-risk）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1334.py with signal.shift(1) + seed=42, (c) K1334_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 554,
@@ -30348,7 +30354,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-14T03:16:04Z"
+    "created_at": "2026-06-14T03:16:04Z",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-14T07:09:30.631067+00:00",
+    "claim_session_id": "4ac2a3b5e08f",
+    "started_at": "2026-06-14T07:09:34.246077+00:00"
   },
   {
     "id": "K1328_v2_fix_methodology",

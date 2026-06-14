@@ -1,0 +1,80 @@
+{
+  "k_id": "K1330",
+  "title": "USD regime cross-asset vol task dedup closure",
+  "generated_at": "2026-06-14T06:58:35.867041+00:00",
+  "seed": 42,
+  "task_resolution": "duplicate_of_existing_experiment",
+  "verdict": "SUPERSEDED_BY_K1439",
+  "canonical_experiment": {
+    "k_id": "K1439",
+    "path": "experiments/k1439",
+    "results_path": "experiments/k1439/k1439_results.json",
+    "verdict": "CONDITIONAL_PASS",
+    "period": {
+      "start": "2010-01-04",
+      "end": "2026-06-05",
+      "n_obs": 4131
+    }
+  },
+  "coverage_audit": {
+    "requested_buckets": {
+      "usd_proxy": [
+        "UUP",
+        "DXY"
+      ],
+      "em": [
+        "EEM"
+      ],
+      "gold": [
+        "GLD"
+      ],
+      "commodities": [
+        "DBC",
+        "DBB",
+        "USO"
+      ]
+    },
+    "canonical_tickers": [
+      "DBB",
+      "DBC",
+      "EEM",
+      "GLD",
+      "USO"
+    ],
+    "overlap_checks": {
+      "covers_em": true,
+      "covers_gold": true,
+      "covers_commodities": true,
+      "uses_usd_proxy_uup": true,
+      "uses_shift_1": true,
+      "uses_hac_inference": true,
+      "acknowledges_overlap_risk": true
+    },
+    "all_overlap_checks_pass": true,
+    "robust_assets_across_both_regime_defs": [
+      "USO"
+    ]
+  },
+  "canonical_findings": {
+    "sample_start": "2010-01-04",
+    "sample_end": "2026-06-05",
+    "n_obs": 4131,
+    "naive_welch_significant_assets": [
+      "DBB",
+      "DBC",
+      "EEM",
+      "USO"
+    ],
+    "hac_level_significant_assets": [
+      "USO"
+    ],
+    "most_sensitive_asset_by_abs_hac_t": "USO",
+    "verdict_reason": "1/5 assets pass HAC+Bonferroni; trend-regime sign concordance 4/5. Effect not universal but isolated to USO."
+  },
+  "closure_reason": "K1439 already tests strong-vs-weak USD regime effects on EM, gold, and commodities with the stricter HAC inference path; rerunning K1330 would duplicate evidence rather than add a new empirical result.",
+  "notes": [
+    "This artifact is a governance / dedup closure, not a new empirical experiment.",
+    "Direct vol prediction by DXY was already a NULL in adjacent K878.",
+    "Canonical underlying experiment K1439 has explicit shift(1) lookahead protection."
+  ]
+}
