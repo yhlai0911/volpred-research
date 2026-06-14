@@ -11,6 +11,8 @@
       "GLD",
       "TLT"
     ],
+    "selection_start": "2017-01-03",
+    "selection_end": "2020-12-31",
     "oos_start": "2021-01-04"
   },
   "literature": [
@@ -36,156 +38,92 @@
     ],
     "target": "log(rv_t)",
     "lookahead_policy": "all features constructed from t-1 and earlier only",
-    "stage_b_schedule_rule": "HAR uses best stage-A scheme; ML challengers use same window with practical 21-day refit cadence",
+    "stage_a_selection_rule": "HAR schemes with a common 21-day refit cadence are selected only on 2017-01-03 to 2020-12-31 holdout; 2021-01-04+ kept untouched for final evaluation",
+    "stage_b_schedule_rule": "HAR and all ML challengers use the exact same selected window and the same 21-day refit cadence",
     "success_rule": "Harvey |t| > 3 and lower QLIKE required for strong challenger win"
   },
   "stage_a_har_scheme_audit": {
     "per_scheme_asset": {
-      "expanding_refit_1d": {
-        "SPY": {
-          "n_oos": 1327,
-          "qlike": 3.8606096898913838,
-          "mean_pred_rv": 2.602377763845873e-05
-        },
-        "QQQ": {
-          "n_oos": 1327,
-          "qlike": 3.6071066653091854,
-          "mean_pred_rv": 4.6027863896253116e-05
-        },
-        "GLD": {
-          "n_oos": 1327,
-          "qlike": 3.9708215809823955,
-          "mean_pred_rv": 2.6103817677857112e-05
-        },
-        "TLT": {
-          "n_oos": 1327,
-          "qlike": 2.8155591272742155,
-          "mean_pred_rv": 2.590425538832874e-05
-        }
-      },
       "expanding_refit_21d": {
         "SPY": {
-          "n_oos": 1327,
-          "qlike": 3.859508069890559,
-          "mean_pred_rv": 2.6011579230469885e-05
+          "n_selection": 1007,
+          "qlike": 4.2018550681615086,
+          "mean_pred_rv": 3.204868440342121e-05
         },
         "QQQ": {
-          "n_oos": 1327,
-          "qlike": 3.6070547949550855,
-          "mean_pred_rv": 4.60246642598234e-05
+          "n_selection": 1007,
+          "qlike": 4.01255930068132,
+          "mean_pred_rv": 4.617110727336932e-05
         },
         "GLD": {
-          "n_oos": 1327,
-          "qlike": 3.97479609812257,
-          "mean_pred_rv": 2.6056179367273922e-05
+          "n_selection": 1007,
+          "qlike": 3.4311660473522316,
+          "mean_pred_rv": 1.669524227718956e-05
         },
         "TLT": {
-          "n_oos": 1327,
-          "qlike": 2.8171568803105225,
-          "mean_pred_rv": 2.5866107268322493e-05
-        }
-      },
-      "rolling_252_refit_1d": {
-        "SPY": {
-          "n_oos": 1327,
-          "qlike": 3.8655680289051917,
-          "mean_pred_rv": 2.986213247553969e-05
-        },
-        "QQQ": {
-          "n_oos": 1327,
-          "qlike": 3.579553219844566,
-          "mean_pred_rv": 5.426764100167535e-05
-        },
-        "GLD": {
-          "n_oos": 1327,
-          "qlike": 3.742364529565405,
-          "mean_pred_rv": 2.8179609091258417e-05
-        },
-        "TLT": {
-          "n_oos": 1327,
-          "qlike": 2.341775006653764,
-          "mean_pred_rv": 3.316718687200816e-05
+          "n_selection": 1007,
+          "qlike": 2.9007083614409463,
+          "mean_pred_rv": 1.8749053686815704e-05
         }
       },
       "rolling_252_refit_21d": {
         "SPY": {
-          "n_oos": 1327,
-          "qlike": 3.879240816308101,
-          "mean_pred_rv": 2.8443574583959085e-05
+          "n_selection": 1007,
+          "qlike": 6.603496086325844,
+          "mean_pred_rv": 2.7172950634196375e-05
         },
         "QQQ": {
-          "n_oos": 1327,
-          "qlike": 3.639238557939403,
-          "mean_pred_rv": 5.435581192817733e-05
+          "n_selection": 1007,
+          "qlike": 4.552790856020899,
+          "mean_pred_rv": 4.384226238813254e-05
         },
         "GLD": {
-          "n_oos": 1327,
-          "qlike": 3.908273190555994,
-          "mean_pred_rv": 2.7125395008382986e-05
+          "n_selection": 1007,
+          "qlike": 3.8914429452614567,
+          "mean_pred_rv": 1.7192722113139792e-05
         },
         "TLT": {
-          "n_oos": 1327,
-          "qlike": 2.332921232543148,
-          "mean_pred_rv": 3.319668717525732e-05
-        }
-      },
-      "rolling_1000_refit_1d": {
-        "SPY": {
-          "n_oos": 1327,
-          "qlike": 3.609476396093703,
-          "mean_pred_rv": 2.8464691397561298e-05
-        },
-        "QQQ": {
-          "n_oos": 1327,
-          "qlike": 3.452629672382647,
-          "mean_pred_rv": 4.966949924170624e-05
-        },
-        "GLD": {
-          "n_oos": 1327,
-          "qlike": 3.929457320832273,
-          "mean_pred_rv": 2.5026451146511127e-05
-        },
-        "TLT": {
-          "n_oos": 1327,
-          "qlike": 2.5056217508046847,
-          "mean_pred_rv": 2.954435585709792e-05
+          "n_selection": 1007,
+          "qlike": 3.5100169956081815,
+          "mean_pred_rv": 1.5631946393627396e-05
         }
       },
       "rolling_1000_refit_21d": {
         "SPY": {
-          "n_oos": 1327,
-          "qlike": 3.597126010990133,
-          "mean_pred_rv": 2.8377789121875892e-05
+          "n_selection": 1007,
+          "qlike": 4.783620582934211,
+          "mean_pred_rv": 2.398017103497259e-05
         },
         "QQQ": {
-          "n_oos": 1327,
-          "qlike": 3.4515473277265882,
-          "mean_pred_rv": 4.985177927735234e-05
+          "n_selection": 1007,
+          "qlike": 4.563926118210666,
+          "mean_pred_rv": 3.648757964993434e-05
         },
         "GLD": {
-          "n_oos": 1327,
-          "qlike": 3.975944088197979,
-          "mean_pred_rv": 2.453381662258047e-05
+          "n_selection": 1007,
+          "qlike": 3.5444071842789593,
+          "mean_pred_rv": 1.5788934170507993e-05
         },
         "TLT": {
-          "n_oos": 1327,
-          "qlike": 2.506731346660626,
-          "mean_pred_rv": 2.94113188889162e-05
+          "n_selection": 1007,
+          "qlike": 3.2473839549794183,
+          "mean_pred_rv": 1.5116402182884088e-05
         }
       }
     },
     "cross_asset_mean_qlike": {
-      "expanding_refit_1d": 3.563524265864295,
-      "expanding_refit_21d": 3.564628960819684,
-      "rolling_252_refit_1d": 3.3823151962422315,
-      "rolling_252_refit_21d": 3.4399184493366612,
-      "rolling_1000_refit_1d": 3.3742962850283273,
-      "rolling_1000_refit_21d": 3.3828371933938315
+      "expanding_refit_21d": 3.6365721944090015,
+      "rolling_252_refit_21d": 4.639436720804095,
+      "rolling_1000_refit_21d": 4.0348344601008135
+    },
+    "selection_window": {
+      "start": "2017-01-03",
+      "end": "2020-12-31"
     },
     "best_scheme": {
-      "name": "rolling_1000_refit_1d",
-      "window": 1000,
-      "refit_every": 1
+      "name": "expanding_refit_21d",
+      "window": null,
+      "refit_every": 21
     }
   },
   "stage_b_model_comparison": {
@@ -193,60 +131,60 @@
       "SPY": {
         "models": {
           "HAR_OLS": {
-            "qlike": 3.609476396093703,
-            "mean_pred_rv": 2.8464691397561298e-05,
+            "qlike": 3.859508069890559,
+            "mean_pred_rv": 2.6011579230469885e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
-              "refit_every": 1
+              "window": null,
+              "refit_every": 21
             }
           },
           "ElasticNet": {
-            "qlike": 3.5959062241257196,
-            "mean_pred_rv": 2.8362397247096997e-05,
+            "qlike": 3.858599573003785,
+            "mean_pred_rv": 2.599907749412394e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           },
           "RandomForest": {
-            "qlike": 3.7383625226030603,
-            "mean_pred_rv": 2.703496789301207e-05,
+            "qlike": 3.963836578448731,
+            "mean_pred_rv": 2.6503103560995595e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           },
           "XGBoost": {
-            "qlike": 4.249227815706414,
-            "mean_pred_rv": 2.836502164574883e-05,
+            "qlike": 4.027752599032397,
+            "mean_pred_rv": 2.7956870422365367e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           }
         },
         "pairwise_vs_har": {
           "ElasticNet": {
-            "dm_t_stat_har_minus_challenger": 1.384281967753546,
-            "p_value": 0.16650504855446413,
+            "dm_t_stat_har_minus_challenger": 2.610640759481153,
+            "p_value": 0.009139161084321223,
             "harvey_pass": false,
             "favored_model": "ElasticNet",
             "lower_qlike_model": "ElasticNet"
           },
           "RandomForest": {
-            "dm_t_stat_har_minus_challenger": -0.845501366813931,
-            "p_value": 0.3979835078527505,
+            "dm_t_stat_har_minus_challenger": -1.1696737427647703,
+            "p_value": 0.2423424887847354,
             "harvey_pass": false,
             "favored_model": "HAR_OLS",
             "lower_qlike_model": "HAR_OLS"
           },
           "XGBoost": {
-            "dm_t_stat_har_minus_challenger": -2.008475661505991,
-            "p_value": 0.04479521597347813,
+            "dm_t_stat_har_minus_challenger": -1.9982838091410629,
+            "p_value": 0.04588980212611049,
             "harvey_pass": false,
             "favored_model": "HAR_OLS",
             "lower_qlike_model": "HAR_OLS"
@@ -256,60 +194,60 @@
       "QQQ": {
         "models": {
           "HAR_OLS": {
-            "qlike": 3.452629672382647,
-            "mean_pred_rv": 4.966949924170624e-05,
+            "qlike": 3.6070547949550855,
+            "mean_pred_rv": 4.60246642598234e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
-              "refit_every": 1
+              "window": null,
+              "refit_every": 21
             }
           },
           "ElasticNet": {
-            "qlike": 3.4504266773941374,
-            "mean_pred_rv": 4.982565392658682e-05,
+            "qlike": 3.6065250518479015,
+            "mean_pred_rv": 4.600917177099505e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           },
           "RandomForest": {
-            "qlike": 3.5456578991204126,
-            "mean_pred_rv": 5.10529446975786e-05,
+            "qlike": 3.6734376694111224,
+            "mean_pred_rv": 4.868833713171251e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           },
           "XGBoost": {
-            "qlike": 3.9593618238840733,
-            "mean_pred_rv": 5.2438387000036694e-05,
+            "qlike": 3.6631222264437646,
+            "mean_pred_rv": 5.089985103438291e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           }
         },
         "pairwise_vs_har": {
           "ElasticNet": {
-            "dm_t_stat_har_minus_challenger": 0.33076291594575824,
-            "p_value": 0.7408758310763846,
+            "dm_t_stat_har_minus_challenger": 2.1357276867464554,
+            "p_value": 0.0328843664381806,
             "harvey_pass": false,
             "favored_model": "ElasticNet",
             "lower_qlike_model": "ElasticNet"
           },
           "RandomForest": {
-            "dm_t_stat_har_minus_challenger": -1.0368496954787112,
-            "p_value": 0.2999949507538664,
+            "dm_t_stat_har_minus_challenger": -1.0861755114408447,
+            "p_value": 0.2775987631422927,
             "harvey_pass": false,
             "favored_model": "HAR_OLS",
             "lower_qlike_model": "HAR_OLS"
           },
           "XGBoost": {
-            "dm_t_stat_har_minus_challenger": -2.9368598266952373,
-            "p_value": 0.0033727689103433267,
+            "dm_t_stat_har_minus_challenger": -0.7681219748817681,
+            "p_value": 0.44255148957069923,
             "harvey_pass": false,
             "favored_model": "HAR_OLS",
             "lower_qlike_model": "HAR_OLS"
@@ -319,123 +257,123 @@
       "GLD": {
         "models": {
           "HAR_OLS": {
-            "qlike": 3.929457320832273,
-            "mean_pred_rv": 2.5026451146511127e-05,
+            "qlike": 3.97479609812257,
+            "mean_pred_rv": 2.6056179367273922e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
-              "refit_every": 1
+              "window": null,
+              "refit_every": 21
             }
           },
           "ElasticNet": {
-            "qlike": 3.976478136694706,
-            "mean_pred_rv": 2.4518785128525373e-05,
+            "qlike": 3.973760052321351,
+            "mean_pred_rv": 2.6041516761681654e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           },
           "RandomForest": {
-            "qlike": 4.013892434452153,
-            "mean_pred_rv": 2.40481380164325e-05,
+            "qlike": 3.934357813407831,
+            "mean_pred_rv": 2.6342356133649504e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           },
           "XGBoost": {
-            "qlike": 7.838203082514065,
-            "mean_pred_rv": 2.8593748149426534e-05,
+            "qlike": 3.9287930133326507,
+            "mean_pred_rv": 2.659262803746423e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           }
         },
         "pairwise_vs_har": {
           "ElasticNet": {
-            "dm_t_stat_har_minus_challenger": -2.0351586266489385,
-            "p_value": 0.04203345259436553,
+            "dm_t_stat_har_minus_challenger": 2.422831725420778,
+            "p_value": 0.01553328928569031,
             "harvey_pass": false,
-            "favored_model": "HAR_OLS",
-            "lower_qlike_model": "HAR_OLS"
+            "favored_model": "ElasticNet",
+            "lower_qlike_model": "ElasticNet"
           },
           "RandomForest": {
-            "dm_t_stat_har_minus_challenger": -0.7994871621377151,
-            "p_value": 0.42415117669022817,
+            "dm_t_stat_har_minus_challenger": 0.5480496048861293,
+            "p_value": 0.583750087876274,
             "harvey_pass": false,
-            "favored_model": "HAR_OLS",
-            "lower_qlike_model": "HAR_OLS"
+            "favored_model": "RandomForest",
+            "lower_qlike_model": "RandomForest"
           },
           "XGBoost": {
-            "dm_t_stat_har_minus_challenger": -1.2679428334003795,
-            "p_value": 0.20504095336719974,
+            "dm_t_stat_har_minus_challenger": 0.47303410763861403,
+            "p_value": 0.636266700694335,
             "harvey_pass": false,
-            "favored_model": "HAR_OLS",
-            "lower_qlike_model": "HAR_OLS"
+            "favored_model": "XGBoost",
+            "lower_qlike_model": "XGBoost"
           }
         }
       },
       "TLT": {
         "models": {
           "HAR_OLS": {
-            "qlike": 2.5056217508046847,
-            "mean_pred_rv": 2.954435585709792e-05,
+            "qlike": 2.8171568803105225,
+            "mean_pred_rv": 2.5866107268322493e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
-              "refit_every": 1
+              "window": null,
+              "refit_every": 21
             }
           },
           "ElasticNet": {
-            "qlike": 2.506530629918314,
-            "mean_pred_rv": 2.9405895615065614e-05,
+            "qlike": 2.817685829293988,
+            "mean_pred_rv": 2.5852512489000963e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           },
           "RandomForest": {
-            "qlike": 2.5040815460791683,
-            "mean_pred_rv": 3.399094174544087e-05,
+            "qlike": 2.7912672355590713,
+            "mean_pred_rv": 2.8654779056965454e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           },
           "XGBoost": {
-            "qlike": 2.6493597276019645,
-            "mean_pred_rv": 3.53948497271401e-05,
+            "qlike": 2.8200063910070257,
+            "mean_pred_rv": 2.8563680067951793e-05,
             "n_oos": 1327,
             "scheme": {
-              "window": 1000,
+              "window": null,
               "refit_every": 21
             }
           }
         },
         "pairwise_vs_har": {
           "ElasticNet": {
-            "dm_t_stat_har_minus_challenger": -0.16667207148859672,
-            "p_value": 0.8676534930451936,
+            "dm_t_stat_har_minus_challenger": -2.744912393701048,
+            "p_value": 0.006134417662776004,
             "harvey_pass": false,
             "favored_model": "HAR_OLS",
             "lower_qlike_model": "HAR_OLS"
           },
           "RandomForest": {
-            "dm_t_stat_har_minus_challenger": 0.025994968242851052,
-            "p_value": 0.9792652632500061,
+            "dm_t_stat_har_minus_challenger": 0.6361522756996802,
+            "p_value": 0.5247869606356628,
             "harvey_pass": false,
             "favored_model": "RandomForest",
             "lower_qlike_model": "RandomForest"
           },
           "XGBoost": {
-            "dm_t_stat_har_minus_challenger": -1.7998102516103895,
-            "p_value": 0.07211784228890505,
+            "dm_t_stat_har_minus_challenger": -0.07030704295811424,
+            "p_value": 0.9439598782901844,
             "harvey_pass": false,
             "favored_model": "HAR_OLS",
             "lower_qlike_model": "HAR_OLS"
@@ -445,47 +383,47 @@
     },
     "pooled": {
       "HAR_OLS": {
-        "qlike": 3.3745796596665802,
+        "qlike": 3.5648553454738905,
         "n_oos": 5308
       },
       "ElasticNet": {
-        "qlike": 3.3826255582833866,
+        "qlike": 3.564368707855816,
         "n_oos": 5308
       },
       "RandomForest": {
-        "qlike": 3.450801368001338,
+        "qlike": 3.590956064241221,
         "n_oos": 5308
       },
       "XGBoost": {
-        "qlike": 4.674882135642318,
+        "qlike": 3.6101377595462654,
         "n_oos": 5308
       },
       "HAR_OLS_vs_ElasticNet": {
-        "dm_t_stat_har_minus_challenger": -1.130867767732085,
-        "p_value": 0.25816185347055143,
+        "dm_t_stat_har_minus_challenger": 2.8144841481590785,
+        "p_value": 0.004903553693558216,
         "harvey_pass": false,
-        "favored_model": "HAR_OLS"
+        "favored_model": "ElasticNet"
       },
       "HAR_OLS_vs_RandomForest": {
-        "dm_t_stat_har_minus_challenger": -1.3841752494364161,
-        "p_value": 0.16636300220554845,
+        "dm_t_stat_har_minus_challenger": -0.7154282351995804,
+        "p_value": 0.4743759440055566,
         "harvey_pass": false,
         "favored_model": "HAR_OLS"
       },
       "HAR_OLS_vs_XGBoost": {
-        "dm_t_stat_har_minus_challenger": -1.6376709038251305,
-        "p_value": 0.10154964873963168,
+        "dm_t_stat_har_minus_challenger": -1.1394685114323,
+        "p_value": 0.2545592218918058,
         "harvey_pass": false,
         "favored_model": "HAR_OLS"
       }
     }
   },
   "conclusion": {
-    "verdict": "PASS",
-    "best_scheme": "rolling_1000_refit_1d",
-    "worst_scheme": "expanding_refit_21d",
-    "tuning_gain_qlike": 0.19033267579135682,
-    "summary": "Best HAR remains the pooled QLIKE leader; ceiling supported in this local proxy setup."
+    "verdict": "CONDITIONAL_PASS",
+    "best_scheme": "expanding_refit_21d",
+    "worst_scheme": "rolling_252_refit_21d",
+    "tuning_gain_qlike": 1.002864526395094,
+    "summary": "Some challengers edge HAR on pooled QLIKE (ElasticNet), but none clear the Harvey |t|>3 bar."
   },
   "artifacts": {
     "chart_model_comparison": "k1328_model_comparison.png"

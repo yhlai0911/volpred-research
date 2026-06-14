@@ -30337,7 +30337,7 @@
     "title": "K1333: VIX 的 vol-of-vol（VVIX 代理）對 VIX 自身可預測性 — 用 ^VIX 日內或日報酬算 realized vol-of-vol（VVIX blocked 則自建），檢定拆短期/長期 vol-of-vol + jump ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 541). Original: VIX 的 vol-of-vol（VVIX 代理）對 VIX 自身可預測性 — 用 ^VIX 日內或日報酬算 realized vol-of-vol（VVIX blocked 則自建），檢定拆短期/長期 vol-of-vol + jump 是否改善 VIX 次日預測；與既有 crypto vol-of-vol 題（外溢角度）正交，聚焦 VIX 自我預測（來源：JFM 2025 vol-of-vol & VIX forecasting wavelet+HAR）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1333.py with signal.shift(1) + seed=42, (c) K1333_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 541,
@@ -30345,7 +30345,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-14T03:16:04Z"
+    "created_at": "2026-06-14T03:16:04Z",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-14T08:09:47.178556+00:00",
+    "claim_session_id": "1d8912b71e46",
+    "started_at": "2026-06-14T08:09:51.143352+00:00"
   },
   {
     "id": "K1334",
@@ -30371,7 +30375,7 @@
   {
     "id": "K1328_v2_fix_methodology",
     "task_type": "experiment",
-    "status": "in_progress",
+    "status": "succeeded",
     "priority": "P3",
     "title": "K1328-v2: 修正 HAR ceiling validation methodology (Codex FAIL → matched refit + nested OOS)",
     "description": "K1328 v1 Codex review FAIL (experiments/k1328/codex_review.md). 修正兩處：(1) HAR 與 ML 同 refit cadence（建議都 21d 或都 1d），不可不對稱。(2) Stage A 在 burn-in/holdout 期間選 best HAR scheme（≤ 2020-12-31），Stage B 才用 2021-01-04+ 獨立 OOS evaluate ceiling claim。修完 re-run + 重跑 Codex review，PASS 才寫 knowledge.json。",
@@ -30381,7 +30385,9 @@
     "claimed_by": "codex-desktop",
     "claimed_at": "2026-06-14T07:57:07.701734+00:00",
     "claim_session_id": "6328b667abcc",
-    "started_at": "2026-06-14T07:57:12.449152+00:00"
+    "started_at": "2026-06-14T07:57:12.449152+00:00",
+    "completed_at": "2026-06-14T08:06:54.487065+00:00",
+    "result": "K1328-v2 fixed methodology: Stage A now selects HAR only on 2017-01-03..2020-12-31 holdout, Stage B evaluates 2021-01-04+ final OOS with matched 21d refit across HAR/ElasticNet/RF/XGBoost. Re-run result = CONDITIONAL_PASS, not PASS: best HAR scheme is expanding_refit_21d, but ElasticNet edges pooled QLIKE (3.56437 vs 3.56486) without clearing Harvey |t|>3 (t=2.81). codex_review.md updated; no knowledge write."
   },
   {
     "id": "K1327_codex_review_followup",

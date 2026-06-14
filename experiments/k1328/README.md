@@ -69,22 +69,24 @@ target：
 
 ### Stage A: HAR fit-scheme audit
 
-只比較 HAR 本身的 fitting scheme：
+v2 為了讓 Stage B 能做真正 matched comparison，Stage A 只在**共同 21 交易日 re-fit cadence**下比較 window：
 
-- `expanding_refit_1d`
 - `expanding_refit_21d`
-- `rolling_252_refit_1d`
 - `rolling_252_refit_21d`
-- `rolling_1000_refit_1d`
 - `rolling_1000_refit_21d`
+
+**v2 methodology fix**：
+
+- Stage A **只**用獨立 selection / holdout window `2017-01-03` 至 `2020-12-31` 選 best HAR scheme
+- `2021-01-04+` 的 final OOS 完全不參與 scheme selection
 
 ### Stage B: Best HAR vs matched-feature ML
 
 先用 Stage A 選出 cross-asset 平均 QLIKE 最佳的 HAR scheme。Stage B 的比較規則是：
 
 - `HAR_OLS`：直接用 Stage A 選出的最佳 scheme
-- ML challengers：沿用同一個 training window，但固定用 **21 交易日 re-fit**
-  - 理由：daily tree re-fit 在這種 walk-forward 設定下既昂貴，也不是常見實務；這裡要驗證的是「最佳 HAR baseline 是否已足夠強」，不是替每個 ML 模型做大規模超參數搜尋
+- ML challengers：**完全沿用同一個 training window 與同一個 21 交易日 re-fit cadence**
+  - 這次不再允許 HAR 與 ML 有不同 re-fit 頻率，避免把比較結果混進 schedule advantage
 
 - `HAR_OLS`
 - `ElasticNet`
@@ -93,7 +95,8 @@ target：
 
 ## 評估
 
-- OOS 起點：`2021-01-04`
+- selection window：`2017-01-03` 至 `2020-12-31`
+- final OOS 起點：`2021-01-04`
 - primary metric：Patton-style `QLIKE` on `rv_t`
 - pairwise test：DM-HLN (`src/volpred/stats/model_evaluation.py`)
 - threshold：Harvey `|t| > 3`

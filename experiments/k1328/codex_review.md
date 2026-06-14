@@ -1,37 +1,38 @@
 # K1328 Codex Code Review
 
-**Date**: 2026-06-14 13:18 台灣時間
+**Date**: 2026-06-14 16:09 台灣時間
 **Reviewer**: Codex CLI 0.137.0 (ChatGPT auth, gpt-5.4 default)
-**Verdict**: **FAIL**
-**Triggered by**: hourly-13 dispatch fire (orphan recovery; codex_loop daemon 標 succeeded 但未跑 Codex review)
+**Verdict**: **CONDITIONAL_PASS**
+**Triggered by**: `K1328_v2_fix_methodology`
 
 ## Verdict
 
-特徵 lag、seed、proxy 揭露皆合格；但 Stage B 未用同一 walk-forward cadence，且 HAR scheme 用同段 OOS 先挑再下結論，公平比較不成立。**`verdict=PASS` 不能寫入 knowledge.json**。
+v2 已修掉 v1 的兩個核心方法論錯誤：Stage A 改成只在 `2017-01-03` 至 `2020-12-31` 的獨立 holdout 選 HAR scheme，Stage B 才用 `2021-01-04+` 做 final OOS；且 HAR、ElasticNet、RandomForest、XGBoost 全部共用同一個 `expanding + refit_every=21` schedule。lookahead、seed、proxy 揭露都合格。
 
-## Issues
+但結果本身只能到 **CONDITIONAL_PASS**：pooled OOS 下 ElasticNet 的 QLIKE 略優於 HAR（`3.56437 < 3.56486`），DM-HLN `t=2.81`、`p=0.0049`，仍**未達**專案硬門檻 Harvey `|t| > 3`。因此可說「HAR 仍是強 benchmark，沒有被統計強度明確打破」，**不能**說「HAR ceiling confirmed / PASS」。
 
-1. **不對稱 refit cadence** (`k1328.py:194-197`)
-   - HAR 用 `rolling_1000_refit_1d`（每日 refit）
-   - ML challengers 固定 21-day refit
-   - 違反「同 train window + 同 cadence」公平比較原則
+## Checks
 
-2. **In-sample selection on OOS data** (`k1328.py:157-184`)
-   - Stage A 在 `OOS 起點 2021-01-04` 之後的同一 OOS 期間選最佳 HAR scheme
-   - Stage B 用「同段 OOS」宣稱 HAR ceiling supported
-   - 等同對 OOS 做 in-sample selection — overstated ceiling claim
+1. **Lookahead safety**
+   - `load_asset_frame()` 只用 `shift(1)` 後的 `rv_lag1`, `rv_mean5`, `rv_mean22`
+   - target 仍是當期 `log(rv_t)`，無 same-day leakage
 
-3. **Verdict / summary 不可採信**
-   - results.json `verdict="PASS"` + `summary="ceiling supported"` 必須降級
-   - 除非改成 matched refit 或 nested/holdout validation
+2. **Seed discipline**
+   - `SEED = 42`
+   - ElasticNet / RandomForest / XGBoost 均固定 seed
 
-## 後續 (K1328-v2)
+3. **Fair comparison**
+   - Stage A 僅在 selection window 選 scheme
+   - Stage B final OOS 與 selection window 完全分離
+   - 四個模型共用同一個 expanding / 21d refit cadence
 
-派 v2 task 修正：
-- (a) 改 matched refit cadence（HAR 與 ML 同 21d 或同 1d）
-- (b) Stage A 在 burn-in / holdout 上選 best HAR，Stage B 才用獨立 OOS evaluate
-- (c) Re-run 後再寫 knowledge.json
+4. **Conclusion strength**
+   - `k1328_results.json` 已把 verdict 降為 `CONDITIONAL_PASS`
+   - summary 與 pooled DM 結果一致，未再 overstate
 
-## 為什麼這次 review 是必要的
+5. **Honest disclosure**
+   - README 與 results 都明示這是 daily squared-return proxy，不是假裝 5-min RV 複現
 
-codex_loop daemon 跑完 K1328 但**沒跑** Codex code review（per `.claude/rules/experiments.md` 強制流程），直接 mark next_tasks `succeeded`。hourly-13 fire 補做這層 gate。Lesson: codex_loop daemon 派 K-experiment 後必須串 Codex review 才能 mark succeeded（記入 error_log）。
+## Residual limitation
+
+- 這仍是 daily squared-return proxy 測試，不是 paper-grade intraday RV。可用來回答「fit scheme + matched schedule 下，HAR 是否還是很難被常見 ML 明顯打破」，但不該外推成對高頻 RV 文獻的完整 replication。

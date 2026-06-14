@@ -36,6 +36,8 @@ OUT_DIR = Path(__file__).resolve().parent
 RESULTS_PATH = OUT_DIR / "k1328_results.json"
 CHART_PATH = OUT_DIR / "k1328_model_comparison.png"
 OOS_START = pd.Timestamp("2021-01-04")
+SELECTION_START = pd.Timestamp("2017-01-03")
+SELECTION_END = pd.Timestamp("2020-12-31")
 MIN_TRAIN = 252
 
 
@@ -54,6 +56,7 @@ SCHEMES = [
     Scheme("rolling_1000_refit_1d", 1000, 1),
     Scheme("rolling_1000_refit_21d", 1000, 21),
 ]
+STAGE_A_SCHEMES = [scheme for scheme in SCHEMES if scheme.refit_every == 21]
 
 
 def load_asset_frame(asset: str) -> pd.DataFrame:
@@ -118,16 +121,22 @@ def walk_forward_predict(
     dates: pd.Series,
     scheme: Scheme,
     model_name: str,
+    eval_start: pd.Timestamp,
+    eval_end: pd.Timestamp | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    oos_idx = np.flatnonzero(dates >= OOS_START)
-    if len(oos_idx) == 0:
-        raise ValueError("No OOS observations found.")
-    oos_start_idx = int(oos_idx[0])
+    mask = dates >= eval_start
+    if eval_end is not None:
+        mask &= dates <= eval_end
+    eval_idx = np.flatnonzero(mask.to_numpy())
+    if len(eval_idx) == 0:
+        raise ValueError("No evaluation observations found.")
+    eval_start_idx = int(eval_idx[0])
+    eval_end_idx = int(eval_idx[-1])
     preds = np.full(len(x), np.nan)
     refit_counter = 0
     model = None
 
-    for t in range(oos_start_idx, len(x)):
+    for t in range(eval_start_idx, eval_end_idx + 1):
         if scheme.window is None:
             train_start = 0
         else:
@@ -156,14 +165,22 @@ def summarize_scheme(stage_a: dict[str, dict[str, dict]]) -> dict[str, float]:
 
 def run_stage_a(asset_frames: dict[str, pd.DataFrame]) -> tuple[dict, Scheme]:
     stage_a: dict[str, dict[str, dict]] = {}
-    for scheme in SCHEMES:
+    for scheme in STAGE_A_SCHEMES:
         stage_a[scheme.name] = {}
         for asset, df in asset_frames.items():
             x, y_log, y_rv = build_xy(df)
-            preds, valid_mask, valid_idx = walk_forward_predict(x, y_log, df["date"], scheme, "HAR_OLS")
+            preds, _, valid_idx = walk_forward_predict(
+                x,
+                y_log,
+                df["date"],
+                scheme,
+                "HAR_OLS",
+                eval_start=SELECTION_START,
+                eval_end=SELECTION_END,
+            )
             actual = y_rv[valid_idx]
             stage_a[scheme.name][asset] = {
-                "n_oos": int(len(actual)),
+                "n_selection": int(len(actual)),
                 "qlike": float(qlike(actual, preds)),
                 "mean_pred_rv": float(np.mean(preds)),
             }
@@ -174,6 +191,10 @@ def run_stage_a(asset_frames: dict[str, pd.DataFrame]) -> tuple[dict, Scheme]:
         {
             "per_scheme_asset": stage_a,
             "cross_asset_mean_qlike": scheme_scores,
+            "selection_window": {
+                "start": str(SELECTION_START.date()),
+                "end": str(SELECTION_END.date()),
+            },
             "best_scheme": {
                 "name": best_scheme.name,
                 "window": best_scheme.window,
@@ -190,12 +211,7 @@ def run_stage_b(asset_frames: dict[str, pd.DataFrame], best_scheme: Scheme) -> d
     pooled_losses: dict[str, list[np.ndarray]] = {m: [] for m in models}
     pooled_preds: dict[str, list[float]] = {m: [] for m in models}
     pooled_actual: list[float] = []
-    model_schemes = {
-        "HAR_OLS": best_scheme,
-        "ElasticNet": Scheme("practical_21d_refit", best_scheme.window, max(21, best_scheme.refit_every)),
-        "RandomForest": Scheme("practical_21d_refit", best_scheme.window, max(21, best_scheme.refit_every)),
-        "XGBoost": Scheme("practical_21d_refit", best_scheme.window, max(21, best_scheme.refit_every)),
-    }
+    model_schemes = {model_name: best_scheme for model_name in models}
 
     for asset, df in asset_frames.items():
         x, y_log, y_rv = build_xy(df)
@@ -204,7 +220,12 @@ def run_stage_b(asset_frames: dict[str, pd.DataFrame], best_scheme: Scheme) -> d
 
         for model_name in models:
             preds, _, valid_idx = walk_forward_predict(
-                x, y_log, df["date"], model_schemes[model_name], model_name
+                x,
+                y_log,
+                df["date"],
+                model_schemes[model_name],
+                model_name,
+                eval_start=OOS_START,
             )
             pred_store[model_name] = (preds, valid_idx)
         shared_valid_idx = sorted(
@@ -340,6 +361,8 @@ def main() -> None:
             "type": "local_snapshot",
             "base_dir": str(DATA_DIR),
             "assets": ASSETS,
+            "selection_start": str(SELECTION_START.date()),
+            "selection_end": str(SELECTION_END.date()),
             "oos_start": str(OOS_START.date()),
         },
         "literature": [
@@ -361,7 +384,8 @@ def main() -> None:
             "features": ["log_rv_lag1", "log_rv_mean5", "log_rv_mean22"],
             "target": "log(rv_t)",
             "lookahead_policy": "all features constructed from t-1 and earlier only",
-            "stage_b_schedule_rule": "HAR uses best stage-A scheme; ML challengers use same window with practical 21-day refit cadence",
+            "stage_a_selection_rule": "HAR schemes with a common 21-day refit cadence are selected only on 2017-01-03 to 2020-12-31 holdout; 2021-01-04+ kept untouched for final evaluation",
+            "stage_b_schedule_rule": "HAR and all ML challengers use the exact same selected window and the same 21-day refit cadence",
             "success_rule": "Harvey |t| > 3 and lower QLIKE required for strong challenger win",
         },
         "stage_a_har_scheme_audit": stage_a,
