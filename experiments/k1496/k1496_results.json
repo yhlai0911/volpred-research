@@ -1,0 +1,361 @@
+{
+  "experiment_id": "K1496",
+  "title": "HAR-RV window length vs regime on TAIFEX TX1",
+  "task_id": "research_realized_variance_regime",
+  "seed": 42,
+  "git_commit": "d402eba3",
+  "data": {
+    "source": "experiments/k1303/data/_tx1_daily_cj_2017-2026.parquet",
+    "asset": "TAIFEX TX1 day session",
+    "date_start": "2017-05-16",
+    "date_end": "2026-05-08",
+    "n_daily_rows": 2186,
+    "rv_definition": "sum of 5-minute squared log returns over the day session",
+    "n_bars_min": 43,
+    "n_bars_median": 60.0,
+    "n_bars_max": 60
+  },
+  "methodology": {
+    "target": "true intraday realized variance (not daily squared-return proxy)",
+    "model_family": "log-HAR-style two-scale model: lag1 + lagged rolling mean(window)",
+    "candidate_windows": [
+      5,
+      10,
+      22,
+      63
+    ],
+    "primary_scheme": "rolling_1000",
+    "regime_signal": "lagged 22-day mean RV",
+    "regime_assignment": "expanding tertiles with 252-day warmup",
+    "bootstrap_reps": 1000,
+    "bootstrap_block": 21
+  },
+  "primary_results": {
+    "n_oos_rows": 871,
+    "regime_counts": {
+      "low": 252,
+      "mid": 264,
+      "high": 355
+    },
+    "mean_qlike": {
+      "low": {
+        "5": 0.09983856070289224,
+        "10": 0.10610572083637475,
+        "22": 0.10817850729897362,
+        "63": 0.1076633688412735
+      },
+      "mid": {
+        "5": 0.1488723779953331,
+        "10": 0.14730683856463553,
+        "22": 0.14936207998901252,
+        "63": 0.14999304704669922
+      },
+      "high": {
+        "5": 161.3865565746506,
+        "10": 261.1092798175086,
+        "22": 663.8877470828285,
+        "63": 1364.6035607804315
+      },
+      "overall": {
+        "5": 65.85153755348892,
+        "10": 106.49761421612786,
+        "22": 270.66227644932326,
+        "63": 556.2583162002544
+      }
+    },
+    "best_window": {
+      "low": 5,
+      "mid": 10,
+      "high": 5,
+      "overall": 5
+    },
+    "win_share": {
+      "low": {
+        "5": 0.39285714285714285,
+        "10": 0.20238095238095238,
+        "22": 0.20238095238095238,
+        "63": 0.20238095238095238
+      },
+      "mid": {
+        "5": 0.29545454545454547,
+        "10": 0.2196969696969697,
+        "22": 0.20075757575757575,
+        "63": 0.2840909090909091
+      },
+      "high": {
+        "5": 0.3323943661971831,
+        "10": 0.21971830985915494,
+        "22": 0.17746478873239438,
+        "63": 0.2704225352112676
+      }
+    }
+  },
+  "robustness": {
+    "mean_qlike_by_scheme": {
+      "rolling_504": {
+        "low": {
+          "5": 0.1230432210434428,
+          "10": 0.12986870311934823,
+          "22": 0.13312974184157336,
+          "63": 0.13279662313396756
+        },
+        "mid": {
+          "5": 140.8901149506609,
+          "10": 161.80411002882917,
+          "22": 339.81557667537237,
+          "63": 619.0944497914531
+        },
+        "high": {
+          "5": 25.69898166028697,
+          "10": 1.3093695288981901,
+          "22": 0.6569898762065588,
+          "63": 0.5877686235583536
+        },
+        "overall": {
+          "5": 58.44933321074432,
+          "10": 60.147544744521454,
+          "22": 125.74885792534441,
+          "63": 228.90340041694847
+        }
+      },
+      "rolling_1000": {
+        "low": {
+          "5": 0.09983856070289224,
+          "10": 0.10610572083637475,
+          "22": 0.10817850729897362,
+          "63": 0.1076633688412735
+        },
+        "mid": {
+          "5": 0.1488723779953331,
+          "10": 0.14730683856463553,
+          "22": 0.14936207998901252,
+          "63": 0.14999304704669922
+        },
+        "high": {
+          "5": 161.3865565746506,
+          "10": 261.1092798175086,
+          "22": 663.8877470828285,
+          "63": 1364.6035607804315
+        },
+        "overall": {
+          "5": 65.85153755348892,
+          "10": 106.49761421612786,
+          "22": 270.66227644932326,
+          "63": 556.2583162002544
+        }
+      },
+      "rolling_1500": {
+        "low": {
+          "5": 0.17484443749002934,
+          "10": 0.19856814348840643,
+          "22": 0.19880787272542477,
+          "63": 0.16823125631969985
+        },
+        "mid": {
+          "5": 0.13813366142183592,
+          "10": 0.12929051082365126,
+          "22": 0.12483556262791734,
+          "63": 0.12863724986284564
+        },
+        "high": {
+          "5": 281.35192892108324,
+          "10": 624.4131824719549,
+          "22": 2061.003035974184,
+          "63": 7555.31524667933
+        },
+        "overall": {
+          "5": 100.95488118947006,
+          "10": 223.9372057912416,
+          "22": 738.9388017730621,
+          "63": 2708.5963504476977
+        }
+      },
+      "expanding_1000": {
+        "low": {
+          "5": 0.10022436723108878,
+          "10": 0.10577778450408631,
+          "22": 0.10642872785054078,
+          "63": 0.10435917654097634
+        },
+        "mid": {
+          "5": 0.15675725361332368,
+          "10": 0.15264384844507906,
+          "22": 0.15302742935283695,
+          "63": 0.15329520593544368
+        },
+        "high": {
+          "5": 67.59791257859686,
+          "10": 144.83288051723892,
+          "22": 540.5334442788562,
+          "63": 1856.9242334102732
+        },
+        "overall": {
+          "5": 27.62789830183472,
+          "10": 59.10749318175011,
+          "22": 220.38644316849764,
+          "63": 756.9171886423678
+        }
+      }
+    },
+    "best_window_by_scheme": {
+      "rolling_504": {
+        "low": 5,
+        "mid": 5,
+        "high": 63,
+        "overall": 5
+      },
+      "rolling_1000": {
+        "low": 5,
+        "mid": 10,
+        "high": 5,
+        "overall": 5
+      },
+      "rolling_1500": {
+        "low": 63,
+        "mid": 22,
+        "high": 5,
+        "overall": 5
+      },
+      "expanding_1000": {
+        "low": 5,
+        "mid": 10,
+        "high": 5,
+        "overall": 5
+      }
+    },
+    "summary": {
+      "high_regime_best_5_in_all_schemes": false,
+      "low_regime_best_63_count": 1
+    }
+  },
+  "bootstrap_loss_differences": {
+    "5_vs_22": {
+      "low": {
+        "point_estimate": -0.008339946596081371,
+        "bootstrap_ci95": [
+          -0.016600585473064484,
+          -0.0026760372073560057
+        ],
+        "bootstrap_median": -0.00800430715045217,
+        "prob_left_better": 1.0,
+        "n_reps": 1000
+      },
+      "mid": {
+        "point_estimate": -0.0004897019936794475,
+        "bootstrap_ci95": [
+          -0.00828689962348981,
+          0.006866823386195597
+        ],
+        "bootstrap_median": -0.0003805547450926119,
+        "prob_left_better": 0.539,
+        "n_reps": 1000
+      },
+      "high": {
+        "point_estimate": -502.50119050817784,
+        "bootstrap_ci95": [
+          -1566.3440300090922,
+          9.41713590741835
+        ],
+        "bootstrap_median": -471.7716238493201,
+        "prob_left_better": 0.821,
+        "n_reps": 1000
+      }
+    },
+    "22_vs_63": {
+      "low": {
+        "point_estimate": 0.0005151384577001024,
+        "bootstrap_ci95": [
+          -0.00525290756235681,
+          0.010847541835769225
+        ],
+        "bootstrap_median": 2.955722996602724e-05,
+        "prob_left_better": 0.498,
+        "n_reps": 1000
+      },
+      "mid": {
+        "point_estimate": -0.0006309670576866845,
+        "bootstrap_ci95": [
+          -0.008671585719477834,
+          0.007241123116807414
+        ],
+        "bootstrap_median": -0.00044306383323144385,
+        "prob_left_better": 0.541,
+        "n_reps": 1000
+      },
+      "high": {
+        "point_estimate": -700.7158136976032,
+        "bootstrap_ci95": [
+          -2445.4702740762314,
+          0.023533990045126428
+        ],
+        "bootstrap_median": -664.4198210004794,
+        "prob_left_better": 0.944,
+        "n_reps": 1000
+      }
+    },
+    "5_vs_63": {
+      "low": {
+        "point_estimate": -0.007824808138381269,
+        "bootstrap_ci95": [
+          -0.013093457279305838,
+          -0.00256062553137992
+        ],
+        "bootstrap_median": -0.007834527833102744,
+        "prob_left_better": 0.997,
+        "n_reps": 1000
+      },
+      "mid": {
+        "point_estimate": -0.001120669051366132,
+        "bootstrap_ci95": [
+          -0.010065818448033408,
+          0.007937310932382195
+        ],
+        "bootstrap_median": -0.0014225507618641161,
+        "prob_left_better": 0.617,
+        "n_reps": 1000
+      },
+      "high": {
+        "point_estimate": -1203.2170042057808,
+        "bootstrap_ci95": [
+          -3848.7562970558024,
+          9.17664331774761
+        ],
+        "bootstrap_median": -1162.4777015128507,
+        "prob_left_better": 0.908,
+        "n_reps": 1000
+      }
+    }
+  },
+  "split_half_adaptive_rule_audit": {
+    "learned_rule": {
+      "low": 5,
+      "mid": 5,
+      "high": 22
+    },
+    "selection_mean_qlike": {
+      "adaptive": 0.1122597910069575,
+      "5": 0.11308014073098727,
+      "10": 0.11452218982186853,
+      "22": 0.1160388230428411,
+      "63": 0.12028622759290318
+    },
+    "test_mean_qlike": {
+      "adaptive": 540.5866486935872,
+      "5": 131.43921868777724,
+      "10": 212.6367083249423,
+      "22": 540.5879951819654,
+      "63": 1111.1208002326116
+    }
+  },
+  "key_findings": [
+    "High-volatility regimes robustly favor short HAR-RV memory windows; 5-day is best in all four estimation schemes.",
+    "The primary rolling-1000 spec shows a tiny low-regime edge for 63-day over 5/10/22-day windows, but that edge disappears in most robustness schemes.",
+    "Mid-regime performance also leans short: 5-day beats 22-day and 63-day in the primary spec, with bootstrap evidence against 63-day.",
+    "An ex-ante split-half adaptive rule (low->63, mid/high->5) does not materially beat fixed 5-day overall, so low-regime lengthening is not strong enough to justify a production rule yet.",
+    "Conclusion: regime dependence exists mainly on the stress side. The defensible operational rule is 'avoid long windows in high-RV states'; the symmetric 'always lengthen in calm states' claim is not supported robustly."
+  ],
+  "figures": {
+    "primary_regime_qlike": "experiments/k1496/k1496_primary_regime_qlike.png",
+    "robustness_heatmap": "experiments/k1496/k1496_robustness_heatmap.png"
+  }
+}

@@ -30545,7 +30545,7 @@
     "title": "研究 backlog fallback: Realized variance 估計的「最適窗長」是否 regime 依賴",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Realized variance 估計的「最適窗長」是否 regime 依賴 — yfinance/TAIFEX RV，系統掃 rolling-window 長度（5/10/22/63 日）對 HAR-RV OOS QLIKE 的影響，檢定最適窗長是否在高 vol regime 縮短、低 vol regime 拉長，產出 adaptive-window 規則；方法論校準題，影響我方所有 HAR baseline（來源：J.Forecasting 2025 Feng window-size choice for RV forecasting） | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "realized_variance_regime",
@@ -30553,7 +30553,11 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-14T10:08:13+00:00"
+    "created_at": "2026-06-14T10:08:13+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T12:00:37.253239+00:00",
+    "claim_session_id": "6d828d853044",
+    "started_at": "2026-06-14T12:00:49.222828+00:00"
   },
   {
     "id": "k864_v2_fix_critical_issues_20260614",
@@ -30606,5 +30610,59 @@
     "blocked_note": "需確認 FinMind/TWSE 是否提供 historical earnings schedule snapshot (預告排程 != 實際公告日). 若無 free source 可能需 paid_data_source_decision.",
     "created_at": "2026-06-14T11:12:03+00:00",
     "status": "blocked"
+  },
+  {
+    "id": "paper_review_mile_28e6123e",
+    "title": "Paper review (Codex 24h-rule): 同一筆數據，兩種評估框架，排名就對調了",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_28e6123e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_28e6123e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-14T12:08:00+00:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-14T12:10:59.452421+00:00",
+    "claim_session_id": "d6289ea7b465",
+    "started_at": "2026-06-14T12:11:05.589009+00:00",
+    "completed_at": "2026-06-14T12:13:40.605303+00:00",
+    "result": "FAIL: 3 errors found. (1) CE rank table swap BH_5050<->VT_12VIX. (2) line 54+76 '0.17pp' overstates by 11.7x (actual 0.0145pp). (3) Opening narrative misstates BH_5050 drop. Followup task k860_article_correction_mile_28e6123e P2 added. Review archive: storage/ops/paper_reviews/k860_review_findings_20260614.md"
+  },
+  {
+    "id": "K1332_article_general",
+    "title": "K1332: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1332 has verdict signal (score=3, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1332",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-14T12:11:05+00:00"
+  },
+  {
+    "id": "k860_article_correction_mile_28e6123e",
+    "title": "K860 文章修正: mile_28e6123e CE 排名表錯位 + 0.17pp 倍數錯誤",
+    "description": "Per paper_review_mile_28e6123e (Codex 24h-rule) findings: (1) 表格 BH_5050/VT_12VIX 排名互換 — JSON 真值 BH_5050 CE -0.0452% 應為 #4, VT_12VIX -0.0401% 應為 #3 (less negative=better). (2) line 54+76 兩處 '0.17 個百分點' 高估 11.7x, 正確差距 0.0145pp. (3) line 5 opening 'BH 50/50 滑到第三' 應改 '滑到第四'. 修正細節 + JSON 真值見 /tmp/k860_review_findings.md (auto-saved 到 storage/ops/paper_reviews/k860_review_findings_20260614.md). 修文章後重 sync supabase.",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "paper_review",
+    "article_id": "mile_28e6123e",
+    "tags": [
+      "article-correction",
+      "k860",
+      "codex-24h-rule-followup"
+    ],
+    "created_at": "2026-06-14T12:15:00+00:00"
   }
 ]
