@@ -1,0 +1,369 @@
+{
+  "experiment_id": "research_trend_following_vol_managed_alpha",
+  "title": "Trend-following explains embedded exposure in vol-managed SPY, but local alpha is already weak",
+  "status": "done",
+  "seed": 42,
+  "sample": {
+    "data_source": "yfinance SPY and ^VIX cached locally under experiment/data/",
+    "calendar_frequency": "daily -> monthly compounded",
+    "in_sample_calibration_end": "2003-12-31",
+    "out_of_sample_start": "2004-01-01",
+    "out_of_sample_end": "2026-04-30",
+    "monthly_obs_raw": 268
+  },
+  "methodology": {
+    "vol_managed_specs": {
+      "mm_rv": "w_t = clip(c_rv / RV_{t-1}^2, 0, 5), monthly rebalance",
+      "mm_vix": "w_t = clip(c_vix / VIX_{t-1}^2, 0, 5), monthly rebalance"
+    },
+    "trend_factor": "TSMOM_k = sign(sum_{i=1..k} log(1+r_{t-i})) * r_t, shifted 1 month",
+    "lookahead_control": [
+      "Vol signals are lagged one trading day before weight formation.",
+      "Weights are frozen at first trading day of each month and applied through month.",
+      "Trend signal uses trailing monthly returns shifted by one month."
+    ],
+    "evaluation": "Monthly spanning regressions with Newey-West HAC standard errors",
+    "trend_lookbacks_months": [
+      12,
+      6
+    ]
+  },
+  "calibration": {
+    "c_rv": 0.015155111197330748,
+    "c_vix": 0.031187017854931512
+  },
+  "strategy_metrics": {
+    "market": {
+      "annual_return": 0.11307615613628497,
+      "annual_vol": 0.14636540170999462,
+      "sharpe": 0.7725606927266302
+    },
+    "mm_rv": {
+      "annual_return": 0.12900839981897938,
+      "annual_vol": 0.16928729318089958,
+      "sharpe": 0.7620678279799866
+    },
+    "mm_vix": {
+      "annual_return": 0.11709831930770087,
+      "annual_vol": 0.1347849170618609,
+      "sharpe": 0.8687791027386051
+    }
+  },
+  "regressions": {
+    "lookback_12m": {
+      "mm_rv": {
+        "market_only": {
+          "alpha_annual": 0.050176076409020165,
+          "alpha_t": 1.4087244884330115,
+          "alpha_p": 0.1589166509254173,
+          "beta_mkt": 0.693317415675228,
+          "beta_mkt_t": 6.3127526655342825,
+          "beta_trend": null,
+          "beta_trend_t": null,
+          "beta_trend_p": null,
+          "r_squared": 0.3606983588806767,
+          "n_obs": 256,
+          "max_lag": 4
+        },
+        "market_plus_trend": {
+          "alpha_annual": 0.02732238889224101,
+          "alpha_t": 0.8737364076401808,
+          "alpha_p": 0.3822618189800929,
+          "beta_mkt": 0.5970462814792235,
+          "beta_mkt_t": 8.481613485861025,
+          "beta_trend": 0.39075833297803686,
+          "beta_trend_t": 6.119590296537418,
+          "beta_trend_p": 9.381625628979913e-10,
+          "r_squared": 0.4706545770524324,
+          "n_obs": 256,
+          "max_lag": 4
+        },
+        "alpha_drop_annual": 0.022853687516779155,
+        "alpha_drop_pct": 0.4554698005974565
+      },
+      "mm_vix": {
+        "market_only": {
+          "alpha_annual": 0.03721014076447596,
+          "alpha_t": 1.6448718474669775,
+          "alpha_p": 0.09999624168724987,
+          "beta_mkt": 0.6987226348617417,
+          "beta_mkt_t": 8.273642274128553,
+          "beta_trend": null,
+          "beta_trend_t": null,
+          "beta_trend_p": null,
+          "r_squared": 0.583538881655931,
+          "n_obs": 256,
+          "max_lag": 4
+        },
+        "market_plus_trend": {
+          "alpha_annual": 0.021577773292033427,
+          "alpha_t": 1.191421299366595,
+          "alpha_p": 0.2334882354641844,
+          "beta_mkt": 0.6328713036209586,
+          "beta_mkt_t": 10.113714349344901,
+          "beta_trend": 0.2672863120906369,
+          "beta_trend_t": 5.140002688883851,
+          "beta_trend_p": 2.7473453714709793e-07,
+          "r_squared": 0.6654866181808745,
+          "n_obs": 256,
+          "max_lag": 4
+        },
+        "alpha_drop_annual": 0.01563236747244253,
+        "alpha_drop_pct": 0.4201104094550094
+      }
+    },
+    "lookback_6m": {
+      "mm_rv": {
+        "market_only": {
+          "alpha_annual": 0.05016064258377558,
+          "alpha_t": 1.4365539179800844,
+          "alpha_p": 0.1508447854869964,
+          "beta_mkt": 0.6977671893452354,
+          "beta_mkt_t": 6.365936883123253,
+          "beta_trend": null,
+          "beta_trend_t": null,
+          "beta_trend_p": null,
+          "r_squared": 0.3642644460815755,
+          "n_obs": 262,
+          "max_lag": 4
+        },
+        "market_plus_trend": {
+          "alpha_annual": 0.029957403902108277,
+          "alpha_t": 0.9702707956331041,
+          "alpha_p": 0.3319115303349284,
+          "beta_mkt": 0.6746478699424703,
+          "beta_mkt_t": 9.213832925242514,
+          "beta_trend": 0.43874546541253073,
+          "beta_trend_t": 6.869053333921104,
+          "beta_trend_p": 6.462934231351691e-12,
+          "r_squared": 0.5135551150705617,
+          "n_obs": 262,
+          "max_lag": 4
+        },
+        "alpha_drop_annual": 0.020203238681667304,
+        "alpha_drop_pct": 0.4027707310153564
+      },
+      "mm_vix": {
+        "market_only": {
+          "alpha_annual": 0.03795667919483344,
+          "alpha_t": 1.706761942520745,
+          "alpha_p": 0.08786630877282822,
+          "beta_mkt": 0.7040522767684867,
+          "beta_mkt_t": 8.324075009057124,
+          "beta_trend": null,
+          "beta_trend_t": null,
+          "beta_trend_p": null,
+          "r_squared": 0.5858052129393112,
+          "n_obs": 262,
+          "max_lag": 4
+        },
+        "market_plus_trend": {
+          "alpha_annual": 0.023946312423121528,
+          "alpha_t": 1.2749835038444997,
+          "alpha_p": 0.20231508084209293,
+          "beta_mkt": 0.6880196916246497,
+          "beta_mkt_t": 11.114989409711912,
+          "beta_trend": 0.304257400841027,
+          "beta_trend_t": 6.287354026273923,
+          "beta_trend_p": 3.229224057788884e-10,
+          "r_squared": 0.6992115715209,
+          "n_obs": 262,
+          "max_lag": 4
+        },
+        "alpha_drop_annual": 0.014010366771711913,
+        "alpha_drop_pct": 0.36911466094797263
+      }
+    }
+  },
+  "subperiod_regressions": {
+    "lookback_12m": {
+      "2004-2009": {
+        "mm_rv": {
+          "alpha_annual": 0.02132602321456388,
+          "alpha_t": 0.5937797198035932,
+          "alpha_p": 0.5526594549749088,
+          "beta_mkt": 0.7119643981484297,
+          "beta_mkt_t": 5.577565143412252,
+          "beta_trend": 0.5231292454357753,
+          "beta_trend_t": 4.074632024793502,
+          "beta_trend_p": 4.608716168067257e-05,
+          "r_squared": 0.5786328984847904,
+          "n_obs": 60,
+          "max_lag": 3
+        },
+        "mm_vix": {
+          "alpha_annual": 4.827422048465403e-06,
+          "alpha_t": 0.0001665715141121067,
+          "alpha_p": 0.999867095161235,
+          "beta_mkt": 0.8079236389120938,
+          "beta_mkt_t": 6.822936142769962,
+          "beta_trend": 0.49593703934187894,
+          "beta_trend_t": 4.172633880956115,
+          "beta_trend_p": 3.0109856538151884e-05,
+          "r_squared": 0.7250055010448464,
+          "n_obs": 60,
+          "max_lag": 3
+        }
+      },
+      "2010-2019": {
+        "mm_rv": {
+          "alpha_annual": 0.03543881407382743,
+          "alpha_t": 0.5966151945787604,
+          "alpha_p": 0.5507643242564653,
+          "beta_mkt": 0.7435606246876907,
+          "beta_mkt_t": 5.332162897678905,
+          "beta_trend": 0.4503762510788314,
+          "beta_trend_t": 3.722693915529018,
+          "beta_trend_p": 0.00019710841842232685,
+          "r_squared": 0.4490216624536233,
+          "n_obs": 120,
+          "max_lag": 4
+        },
+        "mm_vix": {
+          "alpha_annual": 0.02799290835526446,
+          "alpha_t": 0.9431368070896513,
+          "alpha_p": 0.34561093118147945,
+          "beta_mkt": 0.7774211288775787,
+          "beta_mkt_t": 9.153315999502608,
+          "beta_trend": 0.22785818812201897,
+          "beta_trend_t": 2.8372557223484627,
+          "beta_trend_p": 0.004550315116252961,
+          "r_squared": 0.6821783401978918,
+          "n_obs": 120,
+          "max_lag": 4
+        }
+      },
+      "2020-2026": {
+        "mm_rv": {
+          "alpha_annual": 0.0038494400846281803,
+          "alpha_t": 0.11898080074079184,
+          "alpha_p": 0.905290566510161,
+          "beta_mkt": 0.46571873748536174,
+          "beta_mkt_t": 6.82062091460747,
+          "beta_trend": 0.2602854211145748,
+          "beta_trend_t": 6.009323268744065,
+          "beta_trend_p": 1.86299323260668e-09,
+          "r_squared": 0.6442430619965522,
+          "n_obs": 76,
+          "max_lag": 3
+        },
+        "mm_vix": {
+          "alpha_annual": 0.006832207422028915,
+          "alpha_t": 0.2414585946675928,
+          "alpha_p": 0.8091997038432674,
+          "beta_mkt": 0.5492496151686725,
+          "beta_mkt_t": 6.523588366165396,
+          "beta_trend": 0.16457934127423166,
+          "beta_trend_t": 3.060707792680985,
+          "beta_trend_p": 0.0022081447984770783,
+          "r_squared": 0.6998158784163255,
+          "n_obs": 76,
+          "max_lag": 3
+        }
+      }
+    },
+    "lookback_6m": {
+      "2004-2009": {
+        "mm_rv": {
+          "alpha_annual": 0.008664787506641954,
+          "alpha_t": 0.26222667424564533,
+          "alpha_p": 0.7931466896535004,
+          "beta_mkt": 0.647246688146899,
+          "beta_mkt_t": 5.322447169555655,
+          "beta_trend": 0.43151396675299136,
+          "beta_trend_t": 3.653361099303082,
+          "beta_trend_p": 0.0002588298310093572,
+          "r_squared": 0.506106281180325,
+          "n_obs": 66,
+          "max_lag": 3
+        },
+        "mm_vix": {
+          "alpha_annual": -0.008497072230951672,
+          "alpha_t": -0.31813697471692043,
+          "alpha_p": 0.750381037706447,
+          "beta_mkt": 0.748340774495635,
+          "beta_mkt_t": 6.168180615553415,
+          "beta_trend": 0.40731572443400155,
+          "beta_trend_t": 3.4937905680383436,
+          "beta_trend_p": 0.00047621444095929553,
+          "r_squared": 0.6525160195152765,
+          "n_obs": 66,
+          "max_lag": 3
+        }
+      },
+      "2010-2019": {
+        "mm_rv": {
+          "alpha_annual": 0.03836786425339404,
+          "alpha_t": 0.6730224959041242,
+          "alpha_p": 0.5009329793300412,
+          "beta_mkt": 0.8768937306090299,
+          "beta_mkt_t": 6.783834738017129,
+          "beta_trend": 0.5928669754651315,
+          "beta_trend_t": 5.297508902672114,
+          "beta_trend_p": 1.173931835250494e-07,
+          "r_squared": 0.5339261099667901,
+          "n_obs": 120,
+          "max_lag": 4
+        },
+        "mm_vix": {
+          "alpha_annual": 0.03174685633364484,
+          "alpha_t": 1.0916804154702553,
+          "alpha_p": 0.2749735963250751,
+          "beta_mkt": 0.8154925471397949,
+          "beta_mkt_t": 9.372433657007047,
+          "beta_trend": 0.3811490065578116,
+          "beta_trend_t": 5.710801235018058,
+          "beta_trend_p": 1.1244551333492176e-08,
+          "r_squared": 0.7666898715723858,
+          "n_obs": 120,
+          "max_lag": 4
+        }
+      },
+      "2020-2026": {
+        "mm_rv": {
+          "alpha_annual": 0.01831346231582206,
+          "alpha_t": 0.5497143373211942,
+          "alpha_p": 0.5825153214873608,
+          "beta_mkt": 0.5058795448705043,
+          "beta_mkt_t": 6.8916394972352615,
+          "beta_trend": 0.2859895887918469,
+          "beta_trend_t": 5.954508260933868,
+          "beta_trend_p": 2.6085495343014163e-09,
+          "r_squared": 0.6836172709273394,
+          "n_obs": 76,
+          "max_lag": 3
+        },
+        "mm_vix": {
+          "alpha_annual": 0.01603194358595261,
+          "alpha_t": 0.5439101882516163,
+          "alpha_p": 0.5865032776377477,
+          "beta_mkt": 0.5736573384410887,
+          "beta_mkt_t": 6.777221881058891,
+          "beta_trend": 0.1858155544809825,
+          "beta_trend_t": 3.243513648707152,
+          "beta_trend_p": 0.001180651538957294,
+          "r_squared": 0.7193870663111992,
+          "n_obs": 76,
+          "max_lag": 3
+        }
+      }
+    }
+  },
+  "primary_findings": {
+    "lookback_12m": {
+      "rv_alpha_annual_before": 0.050176076409020165,
+      "rv_alpha_annual_after": 0.02732238889224101,
+      "vix_alpha_annual_before": 0.03721014076447596,
+      "vix_alpha_annual_after": 0.021577773292033427,
+      "rv_trend_beta_t": 6.119590296537418,
+      "vix_trend_beta_t": 5.140002688883851
+    }
+  },
+  "verdict": "Embedded trend loading is robust, but vol-managed alpha is already statistically weak; adding a 12M trend factor compresses annual alpha by 45.6% (RV-managed) and 41.9% (VIX-managed) without revealing any residual significant intercept.",
+  "references": [
+    "Moreira and Muir (2017), Journal of Finance, Volatility-Managed Portfolios.",
+    "Cederburg, O'Doherty, Wang, and Yan (2020), Journal of Financial Economics, On the Performance of Volatility-Managed Portfolios.",
+    "Hood and Raughtigan (2024/2025 rev.), SSRN 4773781, Volatility Targeting Is Trendy: How Trend Following Explains Alpha in Volatility-Managed Strategies.",
+    "Schwarz (2025), Journal of Empirical Finance, On the performance of volatility-managed equity factors."
+  ]
+}

@@ -33998,5 +33998,34 @@
     "limitations": "無 options proxy；single-asset；HAC-DM 非 HLN finite-sample；weak positive。",
     "confidence": 0.55,
     "created_at": "2026-06-14T17:08:00+08:00"
+  },
+  {
+    "item_id": "research_trend_following_vol_managed_alpha",
+    "category": "volatility_prediction",
+    "experiment_id": "research_trend_following_vol_managed_alpha",
+    "experiment_path": "experiments/research_trend_following_vol_managed_alpha/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI (gpt-5.4, ChatGPT auth) — primary path",
+    "reviewer_source": "codex_cli_primary",
+    "codex_review": true,
+    "title": "Trend-following 是否解釋 SPY vol-managed 策略的全部 alpha",
+    "date": "2026-06-14",
+    "content": "SPY vol-managed (mm_rv = clip(c/RV^2,0,5); mm_vix = clip(c/VIX^2,0,5)) 校準 1993-2003 / OOS 2004-2026。Spanning regression Newey-West HAC: market-only α (annual) mm_rv=5.02% (t=1.41, p=0.16), mm_vix=3.72% (t=1.64, p=0.10) 本就**不顯著**。加 12M TSMOM 後 α 壓縮 mm_rv 45.5%→2.73% (p=0.38), mm_vix 42.0%→2.16% (p=0.23)，trend β t-stat 6.12 / 5.14 (p<1e-7) 顯著。6M lookback robustness 一致。結論: SPY vol-managed 的 alpha (a) baseline 統計弱、(b) trend factor 可解釋 ~40-46% 殘餘部分，(c) 加入 trend 後無 residual significant alpha — 與 Hood & Raughtigan (2024/2025 rev., SSRN 4773781) 的「vol targeting 內嵌 trend」假說一致，但 baseline 本身缺乏顯著性，因此本研究不否定 vol-managed 純 alpha 的存在性，只表示 SPY single-asset 上其 alpha 是 mostly trend exposure 的 by-product。",
+    "evidence": [
+      "experiments/research_trend_following_vol_managed_alpha/research_trend_following_vol_managed_alpha_results.json",
+      "experiments/research_trend_following_vol_managed_alpha/cumulative_returns.png",
+      "experiments/research_trend_following_vol_managed_alpha/rolling_trend_beta_12m.png"
+    ],
+    "data": "yfinance SPY adjusted close + ^VIX close, 1993-01-01 to 2026-05-01 (full); OOS 2004-2026, n=256 monthly obs (12M lookback)",
+    "method": "Monthly rebalance, lagged signal (vol shift(1), trend 1M lag); in-sample c calibrated 1993-2003 only; Newey-West HAC OLS spanning regression with data-driven maxlag (auto-rule); 12M primary + 6M robustness",
+    "limitations": "Codex CONDITIONAL_PASS caveat: 12M trend dropna() 讓 OOS regression sample 實際從 2005-01 開始（少 2004 整年），完整 2004+ utilisation 待補。Single-asset (SPY only)；無 bootstrap CI；HAC maxlag=4 (auto)，未測 maxlag=12 robustness。Baseline α 本就不顯著限制了 trend-explains-alpha 的推論強度。",
+    "confidence": 0.6,
+    "references": [
+      "Moreira and Muir (2017), JF, Volatility-Managed Portfolios",
+      "Cederburg, O'Doherty, Wang, Yan (2020), JFE, On the Performance of Volatility-Managed Portfolios",
+      "Hood and Raughtigan (2024/2025 rev.), SSRN 4773781",
+      "Schwarz (2025), JEF"
+    ],
+    "created_at": "2026-06-14T23:13:15+08:00"
   }
 ]

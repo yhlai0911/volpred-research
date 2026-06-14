@@ -30536,7 +30536,7 @@
     "title": "研究 backlog fallback: Trend-following 是否「解釋」vol-managed 策略的全部 alpha",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Trend-following 是否「解釋」vol-managed 策略的全部 alpha — yfinance SPY 構 Moreira-Muir vol-managed portfolio + time-series momentum factor，做 vol-managed 報酬對 trend factor 的 spanning regression，檢定 vol-managed alpha 在控制 trend 後是否消失；與既有「VT impact / CTA drawdown」（策略表現）正交，這裡是 alpha 歸因分解（來源：SSRN/JPM 2025 Volatility T | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "trend_following_vol_managed_alpha",
@@ -30544,7 +30544,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-14T10:08:13+00:00"
+    "created_at": "2026-06-14T10:08:13+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T15:01:13.922264+00:00",
+    "claim_session_id": "ba139afcc2cf",
+    "started_at": "2026-06-14T15:01:23.326322+00:00",
+    "completed_at": "2026-06-14T15:07:58.648372+00:00",
+    "result": "完成 experiments/research_trend_following_vol_managed_alpha 三件套 + 圖表。SPY OOS 2004-2026 顯示 mm_rv/mm_vix 對 12M TSMOM trend beta 顯著 (t=6.12/5.14)，加入 trend 後 annual alpha 分別縮 45.6%/41.9%。但 market-only alpha 本來就不強 (t=1.41/1.64)，因此誠實結論是 embedded trend loading robust、非『強 alpha 被 trend 完全解釋』。"
   },
   {
     "id": "research_realized_variance_regime",
