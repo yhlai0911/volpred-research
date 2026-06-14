@@ -1,0 +1,258 @@
+{
+  "experiment_id": "research_horizon",
+  "title": "Skew-premium term-structure proxy for long-horizon SPY tail outcomes",
+  "seed": 42,
+  "data_source": "yfinance (SPY, ^VIX, ^SKEW)",
+  "sample": {
+    "start": "2010-01-04",
+    "end": "2026-06-12",
+    "n_obs": 4074,
+    "oos_start": "2018-01-01"
+  },
+  "methodology": {
+    "signal_timing": "All predictors lagged by one trading day; targets begin at t+1.",
+    "controls": [
+      "vix_lag1",
+      "ret_21_lag1",
+      "rv_21_lag1"
+    ],
+    "short_window": 22,
+    "long_window": 126,
+    "target_horizons": [
+      126,
+      252
+    ],
+    "proxy_definition": {
+      "implied_tail_fear": "((SKEW - 100)/100) * (VIX/100)",
+      "realized_tail_22": "- rolling 22d realized skewness",
+      "realized_tail_126": "- rolling 126d realized skewness",
+      "short_skew_premium": "implied_tail_fear - realized_tail_22",
+      "long_skew_premium": "implied_tail_fear - realized_tail_126",
+      "term_structure_gap": "long_skew_premium - short_skew_premium"
+    }
+  },
+  "full_sample_descriptives": {
+    "corr_vix_skew": -0.19653162988811293,
+    "corr_short_long_proxy": 0.2977048102286281,
+    "mean_short_proxy": -0.09571484586006715,
+    "mean_long_proxy": -0.3140111044877905
+  },
+  "per_target_results": {
+    "return_126": {
+      "M1_short": {
+        "oos_r2": -0.01925318463347958,
+        "mse": 0.009398431705399562,
+        "coef_full": 0.008488033663962787,
+        "tstat_full": 1.1436726507471064,
+        "pvalue_full": 0.25275941966101345,
+        "n_oos": 1946
+      },
+      "M2_long": {
+        "oos_r2": -0.03687988285548971,
+        "mse": 0.00956096572729798,
+        "coef_full": 0.013899379045689182,
+        "tstat_full": 1.260603058126131,
+        "pvalue_full": 0.2074518962959424,
+        "n_oos": 1946
+      },
+      "M3_gap": {
+        "oos_r2": 0.002592801232054076,
+        "mse": 0.009196992054006004,
+        "coef_full": 0.0025992480360693985,
+        "tstat_full": 0.4046801488006019,
+        "pvalue_full": 0.6857126358275536,
+        "n_oos": 1946
+      }
+    },
+    "drawdown_126": {
+      "M1_short": {
+        "oos_r2": -0.180589393385171,
+        "mse": 0.006742392253656845,
+        "coef_full": 0.01061841476826639,
+        "tstat_full": 1.6918859153927017,
+        "pvalue_full": 0.09066772796982923,
+        "n_oos": 1946
+      },
+      "M2_long": {
+        "oos_r2": -0.19889212065517237,
+        "mse": 0.0068469198457709905,
+        "coef_full": 0.028216006854197458,
+        "tstat_full": 1.9176861050629468,
+        "pvalue_full": 0.05515082464656495,
+        "n_oos": 1946
+      },
+      "M3_gap": {
+        "oos_r2": -0.17092103377177414,
+        "mse": 0.006687175873323275,
+        "coef_full": 0.010117813361697805,
+        "tstat_full": 1.3876441938716513,
+        "pvalue_full": 0.16524541709303653,
+        "n_oos": 1946
+      }
+    },
+    "return_252": {
+      "M1_short": {
+        "oos_r2": 0.02536266154961908,
+        "mse": 0.017944686311431462,
+        "coef_full": 0.004226202216959853,
+        "tstat_full": 0.403129599827312,
+        "pvalue_full": 0.6868528863950645,
+        "n_oos": 1820
+      },
+      "M2_long": {
+        "oos_r2": 0.012264077058046663,
+        "mse": 0.018185852928543387,
+        "coef_full": 0.017077835068017418,
+        "tstat_full": 0.7271409746756426,
+        "pvalue_full": 0.4671396001874669,
+        "n_oos": 1820
+      },
+      "M3_gap": {
+        "oos_r2": 0.029083189741978432,
+        "mse": 0.017876185230372044,
+        "coef_full": 0.006841459926525784,
+        "tstat_full": 0.5686472976518933,
+        "pvalue_full": 0.5695955201157703,
+        "n_oos": 1820
+      }
+    },
+    "drawdown_252": {
+      "M1_short": {
+        "oos_r2": -0.5580601322259435,
+        "mse": 0.010937982133692953,
+        "coef_full": 0.018621215842964788,
+        "tstat_full": 1.8558745871996163,
+        "pvalue_full": 0.0634714359996043,
+        "n_oos": 1820
+      },
+      "M2_long": {
+        "oos_r2": -0.5819777088186036,
+        "mse": 0.011105889661804848,
+        "coef_full": 0.017079797303404844,
+        "tstat_full": 0.9371368060828917,
+        "pvalue_full": 0.3486881909105404,
+        "n_oos": 1820
+      },
+      "M3_gap": {
+        "oos_r2": -0.5647631904376011,
+        "mse": 0.010985039323235099,
+        "coef_full": -0.005166723561480875,
+        "tstat_full": -0.5216620452370865,
+        "pvalue_full": 0.6019056554311095,
+        "n_oos": 1820
+      }
+    }
+  },
+  "primary_tests_long_vs_short": [
+    {
+      "target": "return_126",
+      "horizon": 126,
+      "target_type": "return",
+      "null": "long proxy is not better than short proxy",
+      "alternative": "long proxy has lower OOS squared error than short proxy",
+      "dm_stat": -0.9878996722907336,
+      "p_value": 0.32320178597449234,
+      "mean_loss_short_minus_long": -0.0001625340218984161,
+      "long_better": false,
+      "short_oos_r2": -0.01925318463347958,
+      "long_oos_r2": -0.03687988285548971,
+      "bh_fdr_p": 0.608283836884608,
+      "harvey_like_pass": false
+    },
+    {
+      "target": "drawdown_126",
+      "horizon": 126,
+      "target_type": "drawdown",
+      "null": "long proxy is not better than short proxy",
+      "alternative": "long proxy has lower OOS squared error than short proxy",
+      "dm_stat": -0.27772209508682405,
+      "p_value": 0.7812256981432935,
+      "mean_loss_short_minus_long": -0.00010452759211414605,
+      "long_better": false,
+      "short_oos_r2": -0.180589393385171,
+      "long_oos_r2": -0.19889212065517237,
+      "bh_fdr_p": 0.7812256981432935,
+      "harvey_like_pass": false
+    },
+    {
+      "target": "return_252",
+      "horizon": 252,
+      "target_type": "return",
+      "null": "long proxy is not better than short proxy",
+      "alternative": "long proxy has lower OOS squared error than short proxy",
+      "dm_stat": -0.7450973390014649,
+      "p_value": 0.456212877663456,
+      "mean_loss_short_minus_long": -0.0002411666171119262,
+      "long_better": false,
+      "short_oos_r2": 0.02536266154961908,
+      "long_oos_r2": 0.012264077058046663,
+      "bh_fdr_p": 0.608283836884608,
+      "harvey_like_pass": false
+    },
+    {
+      "target": "drawdown_252",
+      "horizon": 252,
+      "target_type": "drawdown",
+      "null": "long proxy is not better than short proxy",
+      "alternative": "long proxy has lower OOS squared error than short proxy",
+      "dm_stat": -0.7525317175690609,
+      "p_value": 0.4517313632355854,
+      "mean_loss_short_minus_long": -0.00016790752811189484,
+      "long_better": false,
+      "short_oos_r2": -0.5580601322259435,
+      "long_oos_r2": -0.5819777088186036,
+      "bh_fdr_p": 0.608283836884608,
+      "harvey_like_pass": false
+    }
+  ],
+  "key_findings": [
+    {
+      "target": "return_126",
+      "long_better": false,
+      "dm_stat": -0.9878996722907336,
+      "p_value": 0.32320178597449234,
+      "bh_fdr_p": 0.608283836884608,
+      "short_oos_r2": -0.01925318463347958,
+      "long_oos_r2": -0.03687988285548971
+    },
+    {
+      "target": "drawdown_126",
+      "long_better": false,
+      "dm_stat": -0.27772209508682405,
+      "p_value": 0.7812256981432935,
+      "bh_fdr_p": 0.7812256981432935,
+      "short_oos_r2": -0.180589393385171,
+      "long_oos_r2": -0.19889212065517237
+    },
+    {
+      "target": "return_252",
+      "long_better": false,
+      "dm_stat": -0.7450973390014649,
+      "p_value": 0.456212877663456,
+      "bh_fdr_p": 0.608283836884608,
+      "short_oos_r2": 0.02536266154961908,
+      "long_oos_r2": 0.012264077058046663
+    },
+    {
+      "target": "drawdown_252",
+      "long_better": false,
+      "dm_stat": -0.7525317175690609,
+      "p_value": 0.4517313632355854,
+      "bh_fdr_p": 0.608283836884608,
+      "short_oos_r2": -0.5580601322259435,
+      "long_oos_r2": -0.5819777088186036
+    }
+  ],
+  "verdict": "NULL",
+  "summary": "Long-end skew-premium proxy does not robustly outperform the short-end proxy for 6-12 month SPY tail outcomes.",
+  "figures": [
+    "proxy_timeseries.png",
+    "oos_r2_bars.png"
+  ],
+  "limitations": [
+    "Only one free implied skew measure (^SKEW) is available, so the horizon dimension comes from realized-skew anchors rather than separate option maturities.",
+    "Targets are overlapping 126d/252d windows; HAC helps inference but finite-sample power remains limited.",
+    "Single asset (SPY) only; cross-asset replication is still required.",
+    "Drawdown is path-dependent and forecasted here with simple linear models."
+  ]
+}

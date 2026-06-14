@@ -30147,7 +30147,7 @@
     "title": "研究 backlog fallback: 偏度風險溢酬「期限結構」作長 horizon 尾部訊號",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 偏度風險溢酬「期限結構」作長 horizon 尾部訊號 — 用 ^VIX、^SKEW（CBOE SKEW free）與 realized skewness 建 skew-premium term-structure proxy，檢定長端 skew-premium 是否對 6-12 個月 SPY 報酬/drawdown 有比短端更強的預測力；與 K43（SKEW/VIX3M level）不同，聚焦 term-structure slope 而非 level（來源：JFQA 2025 crash-risk premium / skewness swap；skew premium 長 horizon | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "horizon",
@@ -30155,7 +30155,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-14T03:12:18+00:00"
+    "created_at": "2026-06-14T03:12:18+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T09:59:36.129437+00:00",
+    "claim_session_id": "78cbb0ba0001",
+    "started_at": "2026-06-14T09:59:36.232979+00:00",
+    "completed_at": "2026-06-14T10:03:14.571572+00:00",
+    "result": "Built experiments/research_horizon with README/script/results/figures using SPY+^VIX+^SKEW free-data skew-premium proxies. OOS 126d/252d return and drawdown tests are clean NULL: long-end proxy loses to short-end in all 4 cells, DM stats all negative, BH-FDR p>=0.608. Main limit is single free implied-skew measure, so horizon dimension comes from realized-skew anchors rather than true option-maturity term structure."
   },
   {
     "id": "research_graph_network_spillover_rv_var",
@@ -30459,5 +30465,104 @@
     "started_at": "2026-06-14T06:17:50.806898+00:00",
     "completed_at": "2026-06-14T06:23:57.482718+00:00",
     "result": "K1327-v2 completed as matched methodology repair. Primary rolling 1000d/refit21d comparison: ElasticNet QLIKE 3.1606 vs HAR3 3.5971, DM-HLN t=2.516 < Harvey gate, verdict CONDITIONAL_PASS. Wrote experiments/k1327_v2 artifacts, Codex review PASS, knowledge entry adad0468, and research_program update."
+  },
+  {
+    "id": "paper_review_mile_1a6d9369",
+    "title": "Paper review (Codex 24h-rule): 分散策略救不了市場：波動率目標的集體陷阱",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1a6d9369 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1a6d9369",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-14T10:08:10+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-14T10:08:43.678257+00:00",
+    "claim_session_id": "f50ef7e53389",
+    "started_at": "2026-06-14T10:08:51.946587+00:00",
+    "completed_at": "2026-06-14T10:13:51.850397+00:00",
+    "result": "Codex 24h-rule review FAIL; 7 critical issues; report=storage/ops/paper_reviews/mile_1a6d9369_codex_review.md; follow-up K864-v2 task created P2"
+  },
+  {
+    "id": "paper_review_mile_c11a2ced",
+    "title": "Paper review (Codex 24h-rule): 把兩個工具換著用，反而更差？台股波動率策略的一場假設破功",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c11a2ced needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c11a2ced",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-14T10:08:10+00:00"
+  },
+  {
+    "id": "research_realized_volatility_roughness_hurst_0_5",
+    "title": "研究 backlog fallback: Realized volatility 的 roughness（Hurst<0.5）穩定性與預測增益再驗證",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Realized volatility 的 roughness（Hurst<0.5）穩定性與預測增益再驗證 — yfinance 多資產 5-min RV 估 log-RV 的 roughness exponent，檢定 roughness 是否跨資產/跨期穩定、把 rough-vol 特徵（fractional kernel weighting）加入 HAR 是否改善 OOS QLIKE；接 K1423/K1424（time-varying Hurst on level）但聚焦「RV 自身路徑 roughness」而非 H 作 covariate（來源：JFE/Quant Finance 2 | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "realized_volatility_roughness_hurst_0_5",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-14T10:08:13+00:00"
+  },
+  {
+    "id": "research_trend_following_vol_managed_alpha",
+    "title": "研究 backlog fallback: Trend-following 是否「解釋」vol-managed 策略的全部 alpha",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Trend-following 是否「解釋」vol-managed 策略的全部 alpha — yfinance SPY 構 Moreira-Muir vol-managed portfolio + time-series momentum factor，做 vol-managed 報酬對 trend factor 的 spanning regression，檢定 vol-managed alpha 在控制 trend 後是否消失；與既有「VT impact / CTA drawdown」（策略表現）正交，這裡是 alpha 歸因分解（來源：SSRN/JPM 2025 Volatility T | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "trend_following_vol_managed_alpha",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-14T10:08:13+00:00"
+  },
+  {
+    "id": "research_realized_variance_regime",
+    "title": "研究 backlog fallback: Realized variance 估計的「最適窗長」是否 regime 依賴",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Realized variance 估計的「最適窗長」是否 regime 依賴 — yfinance/TAIFEX RV，系統掃 rolling-window 長度（5/10/22/63 日）對 HAR-RV OOS QLIKE 的影響，檢定最適窗長是否在高 vol regime 縮短、低 vol regime 拉長，產出 adaptive-window 規則；方法論校準題，影響我方所有 HAR baseline（來源：J.Forecasting 2025 Feng window-size choice for RV forecasting） | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "realized_variance_regime",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-14T10:08:13+00:00"
+  },
+  {
+    "id": "k864_v2_fix_critical_issues_20260614",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "title": "K864-v2: 修 Codex review FAIL 7 critical issues + revise article mile_1a6d9369",
+    "description": "Codex 24h-rule review (見 storage/ops/paper_reviews/mile_1a6d9369_codex_review.md) verdict=FAIL. 修 7 個 critical: (1) 加 DM/Harvey correction (2) flash_crash 改 rolling t-1 sigma 或固定門檻重算 6.9x (3) price clamp 後 rolling buffer 寫 clamped value (4) noise trader clip 與 net_demand 對齊 (5) 加 linear-demand sensitivity 對比 n_vt^2 quadratic (6) 輸出 per-type trade flow + lag correlation 支持 A→C→D 機制敘事 (7) 改用 per-type sharpe + correct article claim 從『每個人帳戶』到『aggregate portfolio』. 完成後 revise article mile_1a6d9369（加 caveat 或更新數字）+ update README.md 補方法/結論. Codex 必 re-verify.",
+    "source": "auto_discovered",
+    "created_at": "2026-06-14T18:13:49+08:00",
+    "context": {
+      "trigger": "paper_review_mile_1a6d9369 Codex FAIL",
+      "review_report": "storage/ops/paper_reviews/mile_1a6d9369_codex_review.md",
+      "article_id": "mile_1a6d9369",
+      "k_id": "K864"
+    }
   }
 ]
