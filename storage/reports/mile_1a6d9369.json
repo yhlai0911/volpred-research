@@ -1,0 +1,76 @@
+{
+  "id": "mile_1a6d9369",
+  "title": "分散策略不一定救得了市場：波動率目標的模型陷阱",
+  "description": "K864-v2 重跑後，分散 VT 策略在 primary quadratic herding 模型下仍會放大市場風險；但 linear demand sensitivity 顯示此結論高度依賴群聚放大假設，不能直接外推為一般市場定律。",
+  "content": "# 分散策略不一定救得了市場：波動率目標的模型陷阱\n\n*2026-06-14 修訂：本文已依 Codex source-code review 重跑 K864-v2。新版本修正 rolling crash 口徑、price clamp、noise trader demand、common-random-number paired tests，並新增 linear-demand sensitivity 與 per-type performance。本文所有數字改用 `experiments/k864/k864_results.json` 新版結果。*\n\n---\n\n一個直覺聽起來很合理：如果市場上的投資人使用不同版本的波動率目標策略，彼此調倉時間不同，群聚風險應該下降。\n\nK864-v2 給出的答案比較精確：**在 K827v3 沿用的 quadratic herding 模型裡，分散策略沒有降低市場風險，反而放大了風險；但在線性 demand sensitivity 裡，這個效果幾乎消失。**\n\n所以這不是「分散策略永遠沒用」的實證結論，而是一個模型警訊：如果市場衝擊會隨採用人數非線性放大，策略多樣化未必能抵銷群聚風險。\n\n---\n\n## 實驗設計\n\nK864-v2 是代理人模擬，不是真實市場回測。設定如下：\n\n| 項目 | 設定 |\n|---|---|\n| 代理人數 | 1000 |\n| 噪音交易者 | 固定 200 |\n| 模擬長度 | 2520 交易日，約 10 年 |\n| Monte Carlo | 每組 200 次 |\n| VT 採用率 | 0%, 10%, 20%, 30%, 50%, 70%, 100% |\n| Primary demand | quadratic，沿用 K827v3 herding amplification |\n| Sensitivity | linear demand，同樣 seed 重跑 |\n| Crash 定義 | rolling t-1 22 日波動率，`r_t < -3 * sigma_{t-1}` |\n\n異質型 VT 代理人平均分成四類：\n\n| 類型 | 規則 |\n|---|---|\n| A | 12/VIX 標準版 |\n| B | 12/VIX 加 30% floor 與 90% cap |\n| C | 風險平價，目標 10% 波動率 |\n| D | EWMA(22) 目標波動率 |\n\n---\n\n## Primary 結果：quadratic herding 下更脆弱\n\n在 primary quadratic demand 模型下，異質型市場的風險明顯高於同質型。\n\n**表1：50% 採用率，quadratic demand**\n\n| 指標 | 同質型 | 異質型 | 變化 |\n|---|---:|---:|---:|\n| rolling crash 頻率 | 0.756 次/年 | 5.563 次/年 | +636% |\n| 固定 -5% crash 頻率 | 0.044 次/年 | 4.015 次/年 | +9126% |\n| 年化市場波動率 | 19.0% | 29.0% | +52.2% |\n| 最大回撤 | -41.1% | -53.6% | 惡化 12.5 個百分點 |\n| VT aggregate Sharpe | 0.313 | 0.419 | +33.7% |\n\n![K864-v2 rolling crash frequency](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k864_v2_flash_crash.png)\n\n70% 採用率時，差距更大：rolling crash 頻率從 0.797 次/年升到 9.020 次/年，市場年化波動率從 23.6% 升到 51.8%，最大回撤從 -64.7% 惡化到 -84.4%。\n\n這裡的悖論仍然存在：市場更脆弱，但 VT aggregate Sharpe 變高。50% 採用率下，aggregate Sharpe 從 0.313 升到 0.419；70% 採用率下，從 0.083 升到 0.375。\n\n但舊版文章把這點解讀成個體層級全面改善是不精確的。K864-v2 補上 per-type performance 後，50% 採用率下各類型差異很大：\n\n| 類型 | Sharpe |\n|---|---:|\n| A 12/VIX | -0.245 |\n| B Floor/Cap | -0.170 |\n| C Risk Parity | 0.773 |\n| D EWMA | 1.173 |\n\n也就是說，aggregate 改善主要來自 C/D 類型的組合效果，不代表每一類 agent 都變好。\n\n---\n\n## Sensitivity：linear demand 下結果消失\n\n最重要的修訂是 linear demand sensitivity。若把每個 agent 的 demand impact 改成線性加總，而不是 K827v3 的 quadratic herding amplification，異質型與同質型幾乎沒有市場層級差異。\n\n**表2：50% 採用率，linear demand sensitivity**\n\n| 指標 | 同質型 | 異質型 | 變化 |\n|---|---:|---:|---:|\n| rolling crash 頻率 | 0.987 次/年 | 0.987 次/年 | -0.05% |\n| 年化市場波動率 | 16.008% | 16.008% | 約 0 |\n| 最大回撤 | -33.25% | -33.25% | 約 0 |\n| VT aggregate Sharpe | 0.474 | 0.472 | -0.3% |\n\n![K864-v2 demand sensitivity](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k864_v2_demand_sensitivity.png)\n\n這表示本文的正確解讀不是「策略分散一定有害」，而是：\n\n> 當市場衝擊隨採用人數非線性放大時，策略多樣化無法保證降低系統風險；若衝擊只是線性加總，K864-v2 找不到同樣的惡化效果。\n\n---\n\n## 機制修訂：不是已證明的 A→C→D 連鎖\n\n舊版文章用明確的 A/C/D lead-lag cascade 解釋結果。K864-v2 加入 per-type flow diagnostics 後，這個敘事不能保留為結論。\n\n50% 採用率下，A 類 sell flow 對 C/D 類未來 1-5 日 sell flow 的平均 lag correlation 是小幅負值；C 與 D 則主要是同日相關，lag 0 correlation 約 0.80。這不支持「A 明確領先，C/D 延後接力」的簡單 cascade 版本。\n\n較保守的解釋是：primary 模型裡的 quadratic demand amplification 讓不同策略權重變化的總市場衝擊被非線性放大；同時 C/D 類策略在個體組合上表現較好，讓 aggregate VT Sharpe 看起來改善。這兩件事可以同時成立。\n\n---\n\n## 對投資人的意涵\n\nK864-v2 不是用來預測真實市場會在某個採用率崩盤。它的用途是提醒我們：評估群聚風險時，不能只問「大家是不是用同一套策略」，還要問「市場衝擊函數是不是非線性的」。\n\n如果流動性足夠深、需求衝擊接近線性，策略多樣化未必造成系統性惡化。若市場處於壓力期、做市能力下降、同方向調倉的價格衝擊開始隨資金規模非線性上升，分散成多個 VT 版本也不一定能救場。\n\n因此本文更新後的結論是：\n\n1. K864-v2 primary quadratic model 仍顯示異質 VT 會放大 crash、波動率與回撤。\n2. 這個結果通過 common-random-number paired HLN 檢定與 3-sigma gate，但它是模型內結論。\n3. Linear demand sensitivity 幾乎完全否定「異質性本身必然有害」。\n4. 舊版 A→C→D cascade 敘事未被新增 flow diagnostics 支持，已撤回。\n\n---\n\n*資料與程式：`experiments/k864/k864_heterogeneous_abm.py`、`experiments/k864/k864_results.json`。本研究為 Monte Carlo ABM simulation，非實證市場資料。*\n",
+  "category": "milestone",
+  "audience": "research",
+  "phase": "ABM_crowding",
+  "details": {
+    "experiment_refs": [
+      "K864"
+    ],
+    "data_source": "Monte Carlo ABM (1000 agents, 2520 days, 200 sims; common-random-number paired comparisons)",
+    "figures": [
+      "storage/reports/assets/k864_v2/k864_v2_flash_crash.png",
+      "storage/reports/assets/k864_v2/k864_v2_demand_sensitivity.png"
+    ],
+    "key_numbers": {
+      "rolling_crash_amplification_50pct": "+636% (5.563 vs 0.756/yr at 50% adoption; primary quadratic demand)",
+      "market_vol_50pct": "29.0% vs 19.0% (+52.2%; primary quadratic demand)",
+      "linear_demand_sensitivity_50pct": "rolling crash 0.987 vs 0.987/yr; annual vol both ~16.008%; effect essentially null",
+      "vt_aggregate_sharpe_note": "aggregate Sharpe 0.419 vs 0.313 at 50%, but per-type Sharpe ranges from -0.245 to 1.173; not every agent improves"
+    },
+    "cluster_waiver": "K864-v2 is ABM model-conditional evidence: primary quadratic demand amplifies crowding, but linear demand sensitivity is essentially null. Keep ABM_crowding separate from empirical VT claims.",
+    "image_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k864_v2_flash_crash.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k864_v2_demand_sensitivity.png"
+    ],
+    "supabase_storage_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k864_v2_flash_crash.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k864_v2_demand_sensitivity.png"
+    ],
+    "topic_cluster": "vt",
+    "topic_cluster_30d": {
+      "count": 9,
+      "cap": 8,
+      "ratio": 0.0276,
+      "exempt": false
+    }
+  },
+  "tags": [
+    "研究",
+    "波動率目標",
+    "VT策略",
+    "群聚風險",
+    "代理人模擬",
+    "閃崩",
+    "風險平價",
+    "市場系統性風險"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-01T08:16:58.262717+00:00",
+  "published_at": "2026-06-14T04:00:41.039243+00:00",
+  "status": "published",
+  "verified_live_at": "2026-06-14T04:00:49.698538+00:00",
+  "errata": {
+    "update_at": "2026-06-14T11:11:55.902415+00:00",
+    "update_action": "k864_v2_codex_fix",
+    "update_summary": "K864-v2 修正 Codex review 7 個 critical issue：更新 rolling t-1 crash 口徑、paired HLN 檢定、linear demand sensitivity、per-type performance 與 flow diagnostics，並將文章結論降調為模型內結果。",
+    "update_history": [
+      {
+        "at": "2026-06-14T11:11:55.902415+00:00",
+        "action": "k864_v2_codex_fix",
+        "summary": "K864-v2 修正 Codex review 7 個 critical issue：更新 rolling t-1 crash 口徑、paired HLN 檢定、linear demand sensitivity、per-type performance 與 flow diagnostics，並將文章結論降調為模型內結果。",
+        "old_content_chars": 2696,
+        "new_content_chars": 3704,
+        "title_changed": true,
+        "description_changed": true,
+        "description_source": "frontmatter override",
+        "image_paths_normalized": 2,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-14T11:11:55.902415+00:00"
+}

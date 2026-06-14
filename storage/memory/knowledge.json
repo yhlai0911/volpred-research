@@ -21512,21 +21512,23 @@
   {
     "id": "K864",
     "experiment_id": "K864",
-    "title": "K864: Heterogeneous ABM ★★ — Strategy Diversity AMPLIFIES Crowding (Flash Crashes +592%, Vol +53%), Opposite of Hypothesis",
-    "content": "[提出: Claude, 執行: Claude] K864 tests whether strategy heterogeneity reduces VT crowding (K827 extension). 1000 agents, 200 noise fixed, 4 VT types (12/VIX, Floor+Cap, Risk Parity, EWMA), 2600 sims. SHOCKING RESULT: Heterogeneity makes crowding WORSE. At 50% adoption: flash crashes +592% (3.2/yr vs 0.46/yr), market vol +53% (0.29 vs 0.19), MDD -31% worse. Tipping point unchanged at 50%. MECHANISM: Diverse strategies create asynchronous multi-wave selling cascades — Type A sells first (aggressive), then Type D days later (EWMA lag), then Type C (risk parity reacts to realized vol). Persistent sequential selling is harder for market to absorb than one sharp simultaneous impact. PARADOX: Individual VT agents have BETTER Sharpe in heterogeneous regime (0.376 vs 0.083 at 70%) because diverse responses smooth individual portfolios even as they destroy the market. PAPER 5 IMPLICATION: This was Limitation #4 of K827v3. Relaxing homogeneity assumption makes crowding WORSE — 'diverse strategies cancel out' intuition is WRONG.",
+    "title": "K864-v2: Heterogeneous ABM revised — quadratic herding amplifies crowding; linear demand null",
+    "content": "[2026-06-14 Codex修訂] K864-v2 修正 source review FAIL 7 issues後重跑。ABM simulation: 1000 agents, 200 fixed noise traders, 4 VT types (12/VIX, floor-cap, risk parity, EWMA), 2520 days, 200 MC per cell, common-random-number homo/hetero pairing。V2 fixes: rolling t-1 crash metric, price-clamp buffer, clipped noise demand, paired HLN-style tests, linear-demand sensitivity, per-type Sharpe and flow diagnostics。Primary K827v3-style quadratic demand still shows heterogeneity worsens market stability: at 50% VT rolling crash 0.756→5.563/yr (+636%), ann vol 19.0%→29.0% (+52.2%), MDD -41.1%→-53.6%; at 70% crash 0.797→9.020/yr, ann vol 23.6%→51.8%。Aggregate VT Sharpe rises (50%: 0.313→0.419; 70%: 0.083→0.375), but per-type results show this is not \"every account improves\" (50% Sharpe A=-0.245, B=-0.170, C=0.773, D=1.173). Critical boundary: linear-demand sensitivity nearly eliminates the market effect (50% ann vol both ~16.008%, rolling crash both ~0.987/yr, VT Sharpe -0.3%). Therefore supported claim is model-conditional: under quadratic herding amplification, strategy heterogeneity can amplify crowding; under linear demand, K864-v2 finds no such effect. Old A→C→D asynchronous cascade mechanism is WITHDRAWN: flow diagnostics show A-to-C/A-to-D lag correlations small/negative and C-D mostly contemporaneous.",
     "tags": [
       "ABM",
       "crowding",
       "heterogeneous",
       "VT策略",
       "flash_crash",
-      "Paper_5",
-      "counterintuitive"
+      "quadratic_demand",
+      "linear_sensitivity",
+      "revised",
+      "model_dependent"
     ],
-    "data_source": "Monte Carlo simulation (2600 sims, 1000 agents, 2520 days)",
+    "data_source": "Monte Carlo simulation (K864-v2: 2 demand modes, 1000 agents, 2520 days, 200 MC/cell)",
     "category": "knowledge",
     "created_at": "2026-04-05T09:37:56.269321",
-    "updated_at": "2026-04-05T09:37:56.269328"
+    "updated_at": "2026-06-14T11:16:48.657642+00:00"
   },
   {
     "id": "K865",

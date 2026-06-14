@@ -30559,7 +30559,7 @@
     "id": "k864_v2_fix_critical_issues_20260614",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "title": "K864-v2: 修 Codex review FAIL 7 critical issues + revise article mile_1a6d9369",
     "description": "Codex 24h-rule review (見 storage/ops/paper_reviews/mile_1a6d9369_codex_review.md) verdict=FAIL. 修 7 個 critical: (1) 加 DM/Harvey correction (2) flash_crash 改 rolling t-1 sigma 或固定門檻重算 6.9x (3) price clamp 後 rolling buffer 寫 clamped value (4) noise trader clip 與 net_demand 對齊 (5) 加 linear-demand sensitivity 對比 n_vt^2 quadratic (6) 輸出 per-type trade flow + lag correlation 支持 A→C→D 機制敘事 (7) 改用 per-type sharpe + correct article claim 從『每個人帳戶』到『aggregate portfolio』. 完成後 revise article mile_1a6d9369（加 caveat 或更新數字）+ update README.md 補方法/結論. Codex 必 re-verify.",
     "source": "auto_discovered",
@@ -30573,7 +30573,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-14T10:58:35.717317+00:00",
     "claim_session_id": "32a5425a6710",
-    "started_at": "2026-06-14T10:58:52.127570+00:00"
+    "started_at": "2026-06-14T10:58:52.127570+00:00",
+    "completed_at": "2026-06-14T11:24:18.116465+00:00",
+    "result": "K864-v2 critical review fixes completed: source code adds rolling t-1 crash metric, clipped noise demand, clamp-buffer fix, paired HLN tests, linear demand sensitivity, per-type performance, and flow diagnostics. Article mile_1a6d9369 revised to model-conditional conclusion; local feed/report/knowledge/error log updated. Remote feed-sync apply was attempted earlier but hung, so Supabase projection still needs separate confirmation."
   },
   {
     "id": "k1095_article_correction_codex_fail_20260614",

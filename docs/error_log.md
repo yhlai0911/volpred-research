@@ -1770,3 +1770,25 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **2026-06-14 14:07 — K1327 同 root 延伸（hourly-14 closure）**：hourly-13 K1328 closure 同時開了 `K1327_codex_review_followup` 補做 review；codex_loop daemon (codex-desktop) 14:02 picked up 跑 Codex review → **VERDICT=FAIL**：(1) baseline HAR3 用 `rolling=True, window=1000, refit_every=21`，最佳 challenger MF_ElasticNet_static 用 `rolling=False` (expanding)，其他 rolling challengers `refit_every=63` → QLIKE 差異混合 model class / sample window / refit cadence 三變化，非 apples-to-apples model test；(2) results.json 自填 `verdict=CONDITIONAL_PASS` + summary overstates 學到的東西（其實只證明 multifactor 在 unmatched setup 下 QLIKE 略低，沒 Harvey |t|>3 強度）。但 followup task 自身被 daemon mark `succeeded`（review 完成），**源頭 K1327 仍掛 succeeded** 未 revert — 揭示 codex_loop daemon 的第二個 gap：「review 完成 ≠ verdict PASS」**review 完成自動 mark succeeded 是 valid（task = run-review），但 daemon 不會回頭根據 verdict revert 源 K 的 status**。hourly-14 fire 處理：(a) K1327 → failed 並寫 failure_reason；(b) 開 K1327_v2_fix_methodology task（matched training/refit + 改寫 summary）；(c) commit `experiments/k1327/codex_review.md`；(d) knowledge.json 未污染（從未寫入 K1327，整 entry skip）。
 
 **追加防再發 (c)**：codex_loop daemon 跑 `<k>_codex_review_followup` 任務時，verdict=FAIL 必須額外**主動**：(c1) 找對應源 K 任務在 next_tasks 並 set status=failed + failure_reason 引用 review 結果；(c2) 自動產生 `<k>_v2_fix_methodology` follow-up task。不可只把自己 succeeded 然後讓源 K 繼續掛 succeeded — 否則 follow-up 任務有效，但治理意義為零。
+## 2026-06-14 — K864 published article source review FAIL → K864-v2 model-conditional correction
+
+**Context**: Published article `mile_1a6d9369` ("分散策略救不了市場") was reviewed source-code-level against `experiments/k864/k864_heterogeneous_abm.py`. Codex verdict was FAIL because the article's production claims exceeded the original simulation evidence.
+
+**Root causes**:
+1. **Crash metric was ex-post**: original `flash_crash_freq` used full-sample path sigma (`return < -3 * sigma_full_path`), so the headline crash ratio was not based on a t-1 available threshold.
+2. **Simulation accounting bugs**: price clamp rewrote `returns[t]` but rolling-vol buffer still consumed the unclamped local return; noise trader market demand used raw `noise_changes` after clipping weights instead of actual clipped delta.
+3. **Model assumption hidden as conclusion**: K827v3-compatible `n_vt^2` quadratic demand amplification was treated as if it were a generic market fact. K864-v2 linear-demand sensitivity shows the heterogeneity harm nearly disappears under linear demand.
+4. **Mechanism story unsupported**: article claimed A→C→D asynchronous cascade, but original code had no per-type flow diagnostics. K864-v2 diagnostics show A-to-C/A-to-D lag correlations are small/negative; C-D flow is mostly contemporaneous.
+5. **Aggregate vs individual claim drift**: `vt_sharpe` was an aggregate average-weight portfolio, not each agent's account. Per-type K864-v2 Sharpe at 50% is A=-0.245, B=-0.170, C=0.773, D=1.173, so "everyone improves" was false.
+
+**Fix**:
+- Updated `experiments/k864/k864_heterogeneous_abm.py` to use rolling t-1 crash metric, fixed -5% crash metric, clamp/noise accounting fixes, common-random-number paired HLN-style tests, linear-demand sensitivity, per-type performance, and flow lag diagnostics.
+- Reran full `N_SIMS=200`; wrote updated `experiments/k864/k864_results.json`.
+- Revised `storage/reports/feed.json` / `storage/reports/mile_1a6d9369.json` through `scripts/publish_draft.py --update`; title changed to "分散策略不一定救得了市場：波動率目標的模型陷阱" and conclusion downgraded to model-conditional.
+- Updated `experiments/k864/README.md` and corrected K864 entry in `storage/memory/knowledge.json`.
+
+**Lesson / prevention**:
+1. Published ABM mechanism articles need **mechanism diagnostics**, not only aggregate outcome tables.
+2. Any crash frequency headline must state whether the threshold is fixed, rolling t-1, or ex-post; ex-post sigma is not acceptable for production headlines.
+3. Strong nonlinear demand assumptions require at least one linear or turnover-matched sensitivity before article claims generalize beyond "inside this model".
+4. Aggregate strategy metrics must be labeled aggregate; never translate them into "each account" or "every investor" without per-type/per-agent evidence.

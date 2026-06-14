@@ -66,7 +66,7 @@ N_NOISE_FIXED = 200        # Fixed noise traders (K827v3 correction)
 N_POOL = N_AGENTS - N_NOISE_FIXED  # = 800, split between BH and VT
 
 N_DAYS = 2520              # 10 years (matches K827v3)
-N_SIMS = 200               # Monte Carlo runs per config
+N_SIMS = int(os.environ.get("K864_N_SIMS", "200"))  # Monte Carlo runs per config
 N_BOOTSTRAP = 1000
 
 # VT adoption rates (fraction of N_POOL that are VT agents)
@@ -87,12 +87,95 @@ VIX_MEAN = 18.0
 VIX_NOISE_STD = 0.3
 VT_CAP = 1.5
 NOISE_TRADER_STD = 0.02
+FIXED_CRASH_THRESHOLD = -0.05
+PRIMARY_DEMAND_SCALING = "quadratic"
+DEMAND_SCALING_MODES = ["quadratic", "linear"]
+HARVEY_T_THRESHOLD = 3.0
 
 # EWMA lookback for Type D agents
 EWMA_LOOKBACK = 22
 EWMA_LAMBDA = 2.0 / (EWMA_LOOKBACK + 1)  # ~0.087
 
 N_WORKERS = min(cpu_count(), 8)
+
+
+def weighted_std(values, weights):
+    """Population std for a small weighted cross-section."""
+    values = np.asarray(values, dtype=float)
+    weights = np.asarray(weights, dtype=float)
+    if len(values) == 0 or np.sum(weights) <= 0:
+        return 0.0
+    mean = np.average(values, weights=weights)
+    var = np.average((values - mean) ** 2, weights=weights)
+    return float(np.sqrt(max(var, 0.0)))
+
+
+def portfolio_metrics(port_returns):
+    """Return basic annualized metrics for a daily simple-return path."""
+    port_returns = np.asarray(port_returns, dtype=float)
+    if len(port_returns) == 0:
+        return None
+    ann_ret = float(np.mean(port_returns) * 252)
+    ann_vol = float(np.std(port_returns) * np.sqrt(252))
+    sharpe = float(ann_ret / ann_vol) if ann_vol > 0 else 0.0
+    cum = np.cumprod(1 + port_returns)
+    running_max = np.maximum.accumulate(cum)
+    dd = cum / running_max - 1
+    return {
+        "ann_return": ann_ret,
+        "ann_vol": ann_vol,
+        "sharpe": sharpe,
+        "mdd": float(np.min(dd)),
+    }
+
+
+def safe_corr(x, y):
+    """Correlation that returns None for degenerate series."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    mask = np.isfinite(x) & np.isfinite(y)
+    if np.sum(mask) < 3:
+        return None
+    x = x[mask]
+    y = y[mask]
+    if np.std(x) <= 1e-12 or np.std(y) <= 1e-12:
+        return None
+    return float(np.corrcoef(x, y)[0, 1])
+
+
+def lagged_sell_flow_diagnostics(type_flows, max_lag=5):
+    """Summarize whether A-type sell flow leads C/D sell flow."""
+    diagnostics = {}
+    sell = {k: np.maximum(-np.asarray(v, dtype=float), 0.0) for k, v in type_flows.items()}
+    pairs = [("A", "C"), ("A", "D"), ("C", "D")]
+    for src, dst in pairs:
+        lag_rows = []
+        for lag in range(0, max_lag + 1):
+            if lag == 0:
+                corr = safe_corr(sell[src], sell[dst])
+            else:
+                corr = safe_corr(sell[src][:-lag], sell[dst][lag:])
+            lag_rows.append({"lag": lag, "corr": corr})
+        valid = [r for r in lag_rows if r["corr"] is not None]
+        if valid:
+            best = max(valid, key=lambda r: abs(r["corr"]))
+            best_lag = int(best["lag"])
+            best_corr = float(best["corr"])
+        else:
+            best_lag = None
+            best_corr = None
+        diagnostics[f"{src}_to_{dst}"] = {
+            "lag_corr": lag_rows,
+            "best_abs_corr_lag": best_lag,
+            "best_abs_corr": best_corr,
+        }
+    diagnostics["avg_abs_flow"] = {
+        k: float(np.mean(np.abs(v[1:]))) for k, v in type_flows.items()
+    }
+    diagnostics["avg_sell_flow"] = {
+        k: float(np.mean(sell[k][1:])) for k in type_flows
+    }
+    return diagnostics
 
 
 # ============================================================
@@ -139,11 +222,17 @@ def run_single_simulation(args):
     """Run one simulation with optional heterogeneous VT agents.
 
     Args:
-        args: (vt_fraction, seed, heterogeneous: bool)
+        args: (vt_fraction, seed, heterogeneous: bool, demand_scaling)
 
     Returns: dict of metrics
     """
-    vt_fraction, seed, heterogeneous = args
+    if len(args) == 3:
+        vt_fraction, seed, heterogeneous = args
+        demand_scaling = PRIMARY_DEMAND_SCALING
+    else:
+        vt_fraction, seed, heterogeneous, demand_scaling = args
+    if demand_scaling not in ("quadratic", "linear"):
+        raise ValueError(f"Unsupported demand_scaling={demand_scaling}")
     rng = np.random.RandomState(seed)
 
     # Agent allocation
@@ -179,19 +268,17 @@ def run_single_simulation(args):
     prices[0] = INITIAL_PRICE
     vix_series[0] = INITIAL_VIX
 
-    # Per-agent VT weights (track individually for heterogeneous)
-    vt_weights = np.zeros(n_vt) if n_vt > 0 else np.array([])
+    type_counts = {'A': n_type_a, 'B': n_type_b, 'C': n_type_c, 'D': n_type_d}
+
+    # Per-type VT weights. Agents of the same type are intentionally identical
+    # in this stylized ABM; heterogeneity is across strategy types.
+    vt_weights_by_type = {atype: 0.0 for atype in ['A', 'B', 'C', 'D']}
     if n_vt > 0:
         # Initialize weights based on type
-        for i, atype in enumerate(agent_types):
-            if atype == 'A':
-                vt_weights[i] = weight_type_a(INITIAL_VIX)
-            elif atype == 'B':
-                vt_weights[i] = weight_type_b(INITIAL_VIX)
-            elif atype == 'C':
-                vt_weights[i] = weight_type_c(0.16)  # initial guess
-            elif atype == 'D':
-                vt_weights[i] = weight_type_d(0.16, INITIAL_VIX)
+        vt_weights_by_type['A'] = weight_type_a(INITIAL_VIX)
+        vt_weights_by_type['B'] = weight_type_b(INITIAL_VIX)
+        vt_weights_by_type['C'] = weight_type_c(0.16)  # initial guess
+        vt_weights_by_type['D'] = weight_type_d(0.16, INITIAL_VIX)
 
     noise_weights = np.ones(n_noise) * 0.5
 
@@ -207,13 +294,20 @@ def run_single_simulation(args):
     weight_dispersion_sum = 0.0
     weight_dispersion_count = 0
 
+    rolling_flash_crashes = 0
+    fixed_5pct_crashes = 0
+    type_flows = {atype: np.zeros(N_DAYS) for atype in ['A', 'B', 'C', 'D']}
+    type_port_returns = {atype: np.zeros(N_DAYS - 1) for atype in ['A', 'B', 'C', 'D']}
+    vt_port_returns_path = np.zeros(N_DAYS - 1) if n_vt > 0 else None
+
     for t in range(1, N_DAYS):
         # Realized vol (rolling 22-day)
+        rolling_sigma_daily = FUNDAMENTAL_VOL
         if t > 1:
             n_filled = min(buffer_idx, 22)
             if n_filled > 1:
-                realized_vol_daily = np.std(ret_buffer[:n_filled])
-                realized_vol_ann = realized_vol_daily * np.sqrt(252)
+                rolling_sigma_daily = float(np.std(ret_buffer[:n_filled]))
+                realized_vol_ann = rolling_sigma_daily * np.sqrt(252)
             else:
                 realized_vol_ann = FUNDAMENTAL_VOL * np.sqrt(252)
         else:
@@ -237,37 +331,54 @@ def run_single_simulation(args):
         # VT agents: rebalance based on their strategy type
         # Signal from t-1 (no lookahead)
         if n_vt > 0:
-            new_weights = np.zeros(n_vt)
-            for i, atype in enumerate(agent_types):
+            new_weights_by_type = {}
+            dispersion_values = []
+            dispersion_counts = []
+            demand_multiplier = n_vt if demand_scaling == "quadratic" else 1.0
+
+            for atype, count in type_counts.items():
+                if count <= 0:
+                    continue
                 if atype == 'A':
-                    new_weights[i] = weight_type_a(vix_series[t-1])
+                    new_weight = weight_type_a(vix_series[t-1])
                 elif atype == 'B':
-                    new_weights[i] = weight_type_b(vix_series[t-1])
+                    new_weight = weight_type_b(vix_series[t-1])
                 elif atype == 'C':
-                    new_weights[i] = weight_type_c(realized_vol_ann)
-                elif atype == 'D':
-                    new_weights[i] = weight_type_d(ewma_vol_ann, vix_series[t-1])
+                    new_weight = weight_type_c(realized_vol_ann)
+                else:
+                    new_weight = weight_type_d(ewma_vol_ann, vix_series[t-1])
+
+                new_weights_by_type[atype] = new_weight
+                dispersion_values.append(new_weight)
+                dispersion_counts.append(count)
+
+                demand_change = (
+                    (new_weight - vt_weights_by_type[atype])
+                    * count
+                    * demand_multiplier
+                )
+                type_flows[atype][t] = demand_change
+                net_demand += demand_change
 
             # Track weight dispersion (std of target weights across agents)
             if n_vt > 1 and heterogeneous:
-                weight_dispersion_sum += np.std(new_weights)
+                weight_dispersion_sum += weighted_std(dispersion_values, dispersion_counts)
                 weight_dispersion_count += 1
 
             # K827v3 demand model: each agent's impact scales by n_vt
             # (herding amplification — more VT agents → each has MORE impact)
             # K827v3: demand_change = (target - weights) * n_vt → sum over n_vt agents
             # This creates quadratic scaling: total_demand ~ n_vt^2 * delta_weight
-            # We replicate this: each agent's demand_change * n_vt
-            demand_change = (new_weights - vt_weights) * n_vt
-            net_demand += np.sum(demand_change)
-            vt_weights[:] = new_weights
+            # V2 also runs a linear-demand sensitivity where demand_multiplier=1.
+            vt_weights_by_type.update(new_weights_by_type)
 
         # BH agents: no demand (buy and hold = 0 net flow)
 
         # Noise traders: random demand (FIXED count = 200)
         noise_changes = rng.normal(0, NOISE_TRADER_STD, size=n_noise)
+        old_noise_weights = noise_weights.copy()
         noise_weights = np.clip(noise_weights + noise_changes, 0.0, 1.5)
-        net_demand += np.sum(noise_changes)
+        net_demand += np.sum(noise_weights - old_noise_weights)
 
         # Price formation (Kyle model)
         fundamental_shock = rng.normal(DAILY_DRIFT, FUNDAMENTAL_VOL)
@@ -285,7 +396,23 @@ def run_single_simulation(args):
         if prices[t] <= 0:
             prices[t] = 0.01
             returns[t] = (prices[t] / prices[t-1]) - 1
+            daily_return = returns[t]
             n_price_clamp += 1
+
+        if rolling_sigma_daily > 0 and daily_return < -3 * rolling_sigma_daily:
+            rolling_flash_crashes += 1
+        if daily_return < FIXED_CRASH_THRESHOLD:
+            fixed_5pct_crashes += 1
+
+        if n_vt > 0:
+            weighted_vt_return = 0.0
+            for atype, count in type_counts.items():
+                if count <= 0:
+                    continue
+                type_ret = vt_weights_by_type[atype] * daily_return
+                type_port_returns[atype][t - 1] = type_ret
+                weighted_vt_return += count * type_ret
+            vt_port_returns_path[t - 1] = weighted_vt_return / n_vt
 
         ret_buffer[buffer_idx % 22] = daily_return
         buffer_idx += 1
@@ -303,8 +430,10 @@ def run_single_simulation(args):
     max_dd = float(np.min(drawdowns))
 
     sigma_daily = np.std(valid_returns)
-    flash_crashes = int(np.sum(valid_returns < -3 * sigma_daily)) if sigma_daily > 0 else 0
-    flash_crash_freq = float(flash_crashes / len(valid_returns) * 252)
+    expost_flash_crashes = int(np.sum(valid_returns < -3 * sigma_daily)) if sigma_daily > 0 else 0
+    expost_flash_crash_freq = float(expost_flash_crashes / len(valid_returns) * 252)
+    flash_crash_freq = float(rolling_flash_crashes / len(valid_returns) * 252)
+    fixed_crash_freq_5pct = float(fixed_5pct_crashes / len(valid_returns) * 252)
 
     kurtosis = float(sp_stats.kurtosis(valid_returns, fisher=True))
     skewness = float(sp_stats.skew(valid_returns))
@@ -318,68 +447,21 @@ def run_single_simulation(args):
     vt_return_val = None
     vt_vol_val = None
     vt_mdd_val = None
+    per_type_performance = {}
+    flow_diagnostics = None
     if n_vt > 0:
-        # Average weight across all VT agents at each time step
-        # Re-compute weights for performance measurement
-        avg_weights = np.zeros(N_DAYS - 1)
-        for t_idx in range(N_DAYS - 1):
-            # Weight at time t applies to return t+1
-            # For simplicity, use the aggregate strategy
-            t = t_idx + 1
-            if t < N_DAYS:
-                # Reconstruct weights at each step
-                pass
+        vt_metrics = portfolio_metrics(vt_port_returns_path)
+        vt_return_val = vt_metrics["ann_return"]
+        vt_vol_val = vt_metrics["ann_vol"]
+        vt_sharpe = vt_metrics["sharpe"]
+        vt_mdd_val = vt_metrics["mdd"]
 
-        # Simpler: use the tracked vt_weights trajectory isn't stored,
-        # so we use the VIX series to reconstruct average VT portfolio
-        # This is exact for homogeneous, approximate for heterogeneous
-        vt_port_returns = np.zeros(N_DAYS - 1)
-        _ewma_var = FUNDAMENTAL_VOL ** 2
-        _ret_buf = np.zeros(22)
-        _buf_idx = 0
-
-        for t in range(1, N_DAYS):
-            # Reconstruct each agent's weight at t-1
-            if t > 1:
-                _n_filled = min(_buf_idx, 22)
-                if _n_filled > 1:
-                    _rv_ann = np.std(_ret_buf[:_n_filled]) * np.sqrt(252)
-                else:
-                    _rv_ann = FUNDAMENTAL_VOL * np.sqrt(252)
-            else:
-                _rv_ann = FUNDAMENTAL_VOL * np.sqrt(252)
-
-            if t > 1:
-                _ewma_var = EWMA_LAMBDA * returns[t-1]**2 + (1 - EWMA_LAMBDA) * _ewma_var
-            _ewma_vol_ann = np.sqrt(_ewma_var * 252)
-
-            w_sum = 0.0
-            for atype in agent_types:
-                if atype == 'A':
-                    w_sum += weight_type_a(vix_series[t-1])
-                elif atype == 'B':
-                    w_sum += weight_type_b(vix_series[t-1])
-                elif atype == 'C':
-                    w_sum += weight_type_c(_rv_ann)
-                elif atype == 'D':
-                    w_sum += weight_type_d(_ewma_vol_ann, vix_series[t-1])
-
-            avg_w = w_sum / n_vt
-            vt_port_returns[t-1] = avg_w * valid_returns[t-1]
-
-            _ret_buf[_buf_idx % 22] = returns[t]
-            _buf_idx += 1
-
-        vt_return_val = float(np.mean(vt_port_returns) * 252)
-        vt_vol_calc = float(np.std(vt_port_returns) * np.sqrt(252))
-        vt_sharpe = float(vt_return_val / vt_vol_calc) if vt_vol_calc > 0 else 0.0
-        vt_vol_val = vt_vol_calc
-
-        # VT MDD
-        vt_cum = np.cumprod(1 + vt_port_returns)
-        vt_running_max = np.maximum.accumulate(vt_cum)
-        vt_dd = vt_cum / vt_running_max - 1
-        vt_mdd_val = float(np.min(vt_dd))
+        for atype, count in type_counts.items():
+            if count <= 0:
+                continue
+            per_type_performance[atype] = portfolio_metrics(type_port_returns[atype])
+        if heterogeneous:
+            flow_diagnostics = lagged_sell_flow_diagnostics(type_flows)
 
     # Weight dispersion (heterogeneous only)
     avg_weight_dispersion = (float(weight_dispersion_sum / weight_dispersion_count)
@@ -390,6 +472,9 @@ def run_single_simulation(args):
         'ann_vol': ann_vol,
         'max_dd': max_dd,
         'flash_crash_freq': flash_crash_freq,
+        'rolling_flash_crash_freq': flash_crash_freq,
+        'fixed_crash_freq_5pct': fixed_crash_freq_5pct,
+        'expost_flash_crash_freq': expost_flash_crash_freq,
         'kurtosis': kurtosis,
         'skewness': skewness,
         'vix_mean': vix_mean_val,
@@ -399,6 +484,8 @@ def run_single_simulation(args):
         'vt_return': vt_return_val,
         'vt_vol': vt_vol_val,
         'vt_mdd': vt_mdd_val,
+        'per_type_performance': per_type_performance,
+        'flow_diagnostics': flow_diagnostics,
         'weight_dispersion': avg_weight_dispersion,
         'final_price': float(prices[-1]),
         'n_nan_events': n_nan_events,
@@ -407,6 +494,8 @@ def run_single_simulation(args):
         'n_bh': n_bh,
         'n_noise': n_noise,
         'heterogeneous': heterogeneous,
+        'demand_scaling': demand_scaling,
+        'seed': seed,
         'n_type_a': n_type_a if n_vt > 0 else 0,
         'n_type_b': n_type_b if n_vt > 0 else 0,
         'n_type_c': n_type_c if n_vt > 0 else 0,
@@ -434,6 +523,8 @@ def aggregate_metrics(sim_results):
         return {}
 
     metric_keys = ['ann_return', 'ann_vol', 'max_dd', 'flash_crash_freq',
+                   'rolling_flash_crash_freq', 'fixed_crash_freq_5pct',
+                   'expost_flash_crash_freq',
                    'kurtosis', 'skewness', 'vix_mean', 'vix_std', 'vix_spike_pct',
                    'vt_sharpe', 'vt_return', 'vt_vol', 'vt_mdd', 'weight_dispersion']
 
@@ -471,6 +562,66 @@ def aggregate_metrics(sim_results):
                           m.get('n_type_c', 0), m.get('n_type_d', 0)))
     agg['_agent_composition'] = [list(c) for c in compositions]
 
+    per_type_agg = {}
+    for atype in ['A', 'B', 'C', 'D']:
+        rows = [
+            m.get('per_type_performance', {}).get(atype)
+            for m in sim_results
+            if m.get('per_type_performance', {}).get(atype) is not None
+        ]
+        if not rows:
+            continue
+        per_type_agg[atype] = {}
+        for metric in ['ann_return', 'ann_vol', 'sharpe', 'mdd']:
+            vals = [r[metric] for r in rows if r.get(metric) is not None]
+            if vals:
+                ci_lo, ci_hi = bootstrap_ci(vals)
+                per_type_agg[atype][metric] = {
+                    'mean': float(np.mean(vals)),
+                    'std': float(np.std(vals)),
+                    'bootstrap_ci_95': [ci_lo, ci_hi],
+                    'n_valid': len(vals),
+                }
+    agg['_per_type_performance'] = per_type_agg
+
+    flow_rows = [
+        m.get('flow_diagnostics') for m in sim_results
+        if m.get('flow_diagnostics') is not None
+    ]
+    if flow_rows:
+        flow_agg = {'avg_abs_flow': {}, 'avg_sell_flow': {}, 'lag_pairs': {}}
+        for flow_key in ['avg_abs_flow', 'avg_sell_flow']:
+            for atype in ['A', 'B', 'C', 'D']:
+                vals = [r[flow_key][atype] for r in flow_rows if atype in r.get(flow_key, {})]
+                if vals:
+                    flow_agg[flow_key][atype] = float(np.mean(vals))
+        for pair in ['A_to_C', 'A_to_D', 'C_to_D']:
+            pair_rows = [r.get(pair) for r in flow_rows if r.get(pair)]
+            if not pair_rows:
+                continue
+            lag_corr = []
+            for lag in range(0, 6):
+                vals = [
+                    item['corr']
+                    for row in pair_rows
+                    for item in row.get('lag_corr', [])
+                    if item.get('lag') == lag and item.get('corr') is not None
+                ]
+                lag_corr.append({
+                    'lag': lag,
+                    'mean_corr': float(np.mean(vals)) if vals else None,
+                    'n_valid': len(vals),
+                })
+            best_lags = [
+                row.get('best_abs_corr_lag') for row in pair_rows
+                if row.get('best_abs_corr_lag') is not None
+            ]
+            flow_agg['lag_pairs'][pair] = {
+                'lag_corr': lag_corr,
+                'median_best_abs_corr_lag': float(np.median(best_lags)) if best_lags else None,
+            }
+        agg['_flow_diagnostics'] = flow_agg
+
     return agg
 
 
@@ -499,6 +650,79 @@ def welch_t_test(values_homo, values_hetero, metric_name):
         'n_homo': len(v1),
         'n_hetero': len(v2),
     }
+
+
+def paired_hln_test(values_homo, values_hetero, metric_name, horizon=1):
+    """Common-random-number paired test with HLN small-sample correction.
+
+    This is DM-HLN-like only in the sense of testing paired loss/metric
+    differentials with the Harvey-Leybourne-Newbold small-sample factor.
+    K864 is an ABM Monte Carlo regime comparison, not a forecast-loss panel.
+    """
+    v1 = np.array(values_homo, dtype=float)
+    v2 = np.array(values_hetero, dtype=float)
+    n = min(len(v1), len(v2))
+    if n < 3:
+        return None
+    v1 = v1[:n]
+    v2 = v2[:n]
+    diffs = v2 - v1
+    diffs = diffs[np.isfinite(diffs)]
+    n = len(diffs)
+    if n < 3:
+        return None
+    diff_std = np.std(diffs, ddof=1)
+    if diff_std <= 1e-12:
+        t_stat = 0.0
+    else:
+        t_stat = float(np.mean(diffs) / (diff_std / np.sqrt(n)))
+    h = max(1, int(horizon))
+    hln_factor = np.sqrt((n + 1 - 2 * h + h * (h - 1) / n) / n)
+    hln_t = float(t_stat * hln_factor)
+    p_val = float(2 * (1 - sp_stats.t.cdf(abs(hln_t), df=n - 1)))
+    diff = float(np.mean(diffs))
+    base_mean = float(np.mean(v1))
+    return {
+        'metric': metric_name,
+        'test': 'paired_hln_common_random_numbers',
+        'homo_mean': base_mean,
+        'hetero_mean': float(np.mean(v2)),
+        'difference': diff,
+        'pct_change': float(diff / abs(base_mean) * 100) if abs(base_mean) > 1e-10 else None,
+        'paired_t_stat': t_stat,
+        'hln_t_stat': hln_t,
+        'hln_factor': float(hln_factor),
+        'p_value': p_val,
+        'significant_5pct': bool(p_val < 0.05),
+        'significant_1pct': bool(p_val < 0.01),
+        'harvey_3sigma_pass': bool(abs(hln_t) >= HARVEY_T_THRESHOLD),
+        'n_pairs': n,
+    }
+
+
+def build_statistical_tests(homo_results, hetero_results, test_metrics):
+    all_tests = {}
+    all_welch = {}
+    for vf in VT_FRACTIONS:
+        if vf == 0:
+            continue
+        key = f"{int(vf*100)}%"
+        tests_for_level = {}
+        welch_for_level = {}
+        homo_sims = homo_results.get(key, [])
+        hetero_sims = hetero_results.get(key, [])
+        for metric in test_metrics:
+            h_vals = [m[metric] for m in homo_sims if m[metric] is not None]
+            e_vals = [m[metric] for m in hetero_sims if m[metric] is not None]
+            test = paired_hln_test(h_vals, e_vals, metric)
+            if test:
+                tests_for_level[metric] = test
+            wtest = welch_t_test(h_vals, e_vals, metric)
+            if wtest:
+                welch_for_level[metric] = wtest
+        all_tests[key] = tests_for_level
+        all_welch[key] = welch_for_level
+    return all_tests, all_welch
 
 
 # ============================================================
@@ -545,42 +769,55 @@ def run_experiment():
     # ====================================
     # Run all configs
     # ====================================
-    homo_results = {}  # vt_fraction -> [sim_results]
-    hetero_results = {}
+    def run_config_set(demand_scaling):
+        homo = {}
+        hetero = {}
+        all_args = []
+        all_labels = []
 
-    all_args = []
-    all_labels = []
-
-    for vf in VT_FRACTIONS:
-        base_seed = int(vf * 100000) + 42
-        # Homogeneous
-        for sim_idx in range(N_SIMS):
-            all_args.append((vf, base_seed + sim_idx, False))
-            all_labels.append(('homo', vf))
-        # Heterogeneous (skip 0% — identical to homo)
-        if vf > 0:
+        for vf in VT_FRACTIONS:
+            base_seed = int(vf * 100000) + 42
+            # Homogeneous and heterogeneous use common random numbers.
             for sim_idx in range(N_SIMS):
-                all_args.append((vf, base_seed + 10000 + sim_idx, True))
-                all_labels.append(('hetero', vf))
+                seed = base_seed + sim_idx
+                all_args.append((vf, seed, False, demand_scaling))
+                all_labels.append(('homo', vf))
+            if vf > 0:
+                for sim_idx in range(N_SIMS):
+                    seed = base_seed + sim_idx
+                    all_args.append((vf, seed, True, demand_scaling))
+                    all_labels.append(('hetero', vf))
 
-    print(f"Total simulations: {len(all_args)}")
-    print(f"Running with {N_WORKERS} workers...")
+        print(f"Demand scaling: {demand_scaling}")
+        print(f"Total simulations: {len(all_args)}")
+        print(f"Running with {N_WORKERS} workers...")
 
-    t0 = time.time()
-    with Pool(N_WORKERS) as pool:
-        all_sim_results = pool.map(run_single_simulation, all_args)
-    elapsed = time.time() - t0
-    print(f"All simulations completed in {elapsed:.1f}s")
-    print()
+        t0 = time.time()
+        with Pool(N_WORKERS) as pool:
+            sim_results = pool.map(run_single_simulation, all_args)
+        elapsed = time.time() - t0
+        print(f"{demand_scaling} simulations completed in {elapsed:.1f}s")
+        print()
 
-    # Organize results
-    for label, result in zip(all_labels, all_sim_results):
-        regime, vf = label
-        key = f"{int(vf*100)}%"
-        if regime == 'homo':
-            homo_results.setdefault(key, []).append(result)
-        else:
-            hetero_results.setdefault(key, []).append(result)
+        for label, result in zip(all_labels, sim_results):
+            regime, vf = label
+            key = f"{int(vf*100)}%"
+            if regime == 'homo':
+                homo.setdefault(key, []).append(result)
+            else:
+                hetero.setdefault(key, []).append(result)
+
+        homo_agg_local = {}
+        hetero_agg_local = {}
+        for vf in VT_FRACTIONS:
+            key = f"{int(vf*100)}%"
+            homo_agg_local[key] = aggregate_metrics(homo.get(key, []))
+            if key in hetero:
+                hetero_agg_local[key] = aggregate_metrics(hetero[key])
+        return homo, hetero, homo_agg_local, hetero_agg_local
+
+    homo_results, hetero_results, homo_agg, hetero_agg = run_config_set(PRIMARY_DEMAND_SCALING)
+    linear_homo_results, linear_hetero_results, linear_homo_agg, linear_hetero_agg = run_config_set("linear")
 
     # ====================================
     # Aggregate and compare
@@ -588,15 +825,6 @@ def run_experiment():
     print("=" * 72)
     print("RESULTS")
     print("=" * 72)
-
-    homo_agg = {}
-    hetero_agg = {}
-
-    for vf in VT_FRACTIONS:
-        key = f"{int(vf*100)}%"
-        homo_agg[key] = aggregate_metrics(homo_results.get(key, []))
-        if key in hetero_results:
-            hetero_agg[key] = aggregate_metrics(hetero_results[key])
 
     # Print comparison table
     print("\n--- Market Volatility (annualized) ---")
@@ -670,36 +898,32 @@ def run_experiment():
     # ====================================
     print("\n" + "=" * 72)
     print("STATISTICAL TESTS: Homogeneous vs Heterogeneous")
+    print("(paired common-random-number differences with HLN small-sample correction)")
     print("=" * 72)
 
     test_metrics = ['ann_vol', 'max_dd', 'flash_crash_freq', 'kurtosis',
                     'vt_sharpe', 'vt_mdd']
 
-    all_tests = {}
+    all_tests, welch_reference_tests = build_statistical_tests(homo_results, hetero_results, test_metrics)
+    linear_tests, linear_welch_reference_tests = build_statistical_tests(
+        linear_homo_results, linear_hetero_results, test_metrics
+    )
     for vf in VT_FRACTIONS:
         if vf == 0:
             continue
         key = f"{int(vf*100)}%"
-        tests_for_level = {}
-
-        homo_sims = homo_results.get(key, [])
-        hetero_sims = hetero_results.get(key, [])
 
         print(f"\n--- VT = {key} ---")
         for metric in test_metrics:
-            h_vals = [m[metric] for m in homo_sims if m[metric] is not None]
-            e_vals = [m[metric] for m in hetero_sims if m[metric] is not None]
-
-            test = welch_t_test(h_vals, e_vals, metric)
+            test = all_tests.get(key, {}).get(metric)
             if test:
-                tests_for_level[metric] = test
-                sig = "***" if test['significant_1pct'] else ("*" if test['significant_5pct'] else "")
+                sig = "***" if test['harvey_3sigma_pass'] else (
+                    "**" if test['significant_1pct'] else ("*" if test['significant_5pct'] else "")
+                )
                 pct_str = f"{test['pct_change']:+.1f}%" if test['pct_change'] is not None else "N/A"
                 print(f"  {metric:>20}: homo={test['homo_mean']:.4f}, hetero={test['hetero_mean']:.4f}, "
-                      f"diff={test['difference']:+.4f} ({pct_str}), t={test['t_stat']:.2f}, "
+                      f"diff={test['difference']:+.4f} ({pct_str}), HLN t={test['hln_t_stat']:.2f}, "
                       f"p={test['p_value']:.4f} {sig}")
-
-        all_tests[key] = tests_for_level
 
     # ====================================
     # Tipping point analysis
@@ -821,28 +1045,28 @@ def run_experiment():
         if vol_test:
             advantages['vol_reduced'] = vol_test['difference'] < 0
             advantages['vol_pct_change'] = vol_test.get('pct_change')
-            advantages['vol_significant'] = vol_test['significant_5pct']
+            advantages['vol_significant'] = vol_test.get('harvey_3sigma_pass', False)
 
         # Less negative MDD = better
         mdd_test = tests.get('max_dd')
         if mdd_test:
             advantages['mdd_improved'] = mdd_test['difference'] > 0  # less negative
             advantages['mdd_pct_change'] = mdd_test.get('pct_change')
-            advantages['mdd_significant'] = mdd_test['significant_5pct']
+            advantages['mdd_significant'] = mdd_test.get('harvey_3sigma_pass', False)
 
         # Higher VT Sharpe = better
         sr_test = tests.get('vt_sharpe')
         if sr_test:
             advantages['sharpe_improved'] = sr_test['difference'] > 0
             advantages['sharpe_pct_change'] = sr_test.get('pct_change')
-            advantages['sharpe_significant'] = sr_test['significant_5pct']
+            advantages['sharpe_significant'] = sr_test.get('harvey_3sigma_pass', False)
 
         # Fewer flash crashes = better
         fc_test = tests.get('flash_crash_freq')
         if fc_test:
             advantages['crashes_reduced'] = fc_test['difference'] < 0
             advantages['crashes_pct_change'] = fc_test.get('pct_change')
-            advantages['crashes_significant'] = fc_test['significant_5pct']
+            advantages['crashes_significant'] = fc_test.get('harvey_3sigma_pass', False)
 
         hetero_advantage[key] = advantages
 
@@ -867,7 +1091,7 @@ def run_experiment():
         fc_s = fmt(adv.get('crashes_reduced'), adv.get('crashes_significant'))
         print(f"  {key:>5} {vol_s:>12} {mdd_s:>12} {sr_s:>12} {fc_s:>12}")
 
-    print(f"\n  (* = statistically significant at 5%)")
+    print(f"\n  (* = passes Harvey-style |HLN t| >= {HARVEY_T_THRESHOLD:.1f})")
 
     # Final summary
     n_levels = len([vf for vf in VT_FRACTIONS if vf > 0])
@@ -883,6 +1107,36 @@ def run_experiment():
     print(f"    Crashes reduced: {fc_wins}/{n_levels}")
 
     print(f"\n  Total runtime: {total_elapsed:.1f}s")
+
+    def metric_change_table(homo_source, hetero_source):
+        table = {}
+        for vf in VT_FRACTIONS:
+            if vf == 0:
+                continue
+            key = f"{int(vf*100)}%"
+            row = {}
+            for metric in ['ann_vol', 'max_dd', 'flash_crash_freq',
+                           'fixed_crash_freq_5pct', 'vt_sharpe', 'vt_mdd']:
+                h_metric = homo_source.get(key, {}).get(metric)
+                e_metric = hetero_source.get(key, {}).get(metric)
+                if not isinstance(h_metric, dict) or not isinstance(e_metric, dict):
+                    continue
+                h_mean = h_metric.get('mean')
+                e_mean = e_metric.get('mean')
+                if h_mean is None or e_mean is None:
+                    continue
+                diff = e_mean - h_mean
+                row[metric] = {
+                    'homo_mean': h_mean,
+                    'hetero_mean': e_mean,
+                    'difference': diff,
+                    'pct_change': diff / abs(h_mean) * 100 if abs(h_mean) > 1e-10 else None,
+                }
+            table[key] = row
+        return table
+
+    primary_metric_changes = metric_change_table(homo_agg, hetero_agg)
+    linear_metric_changes = metric_change_table(linear_homo_agg, linear_hetero_agg)
 
     # ====================================
     # Save results
@@ -910,6 +1164,12 @@ def run_experiment():
             'n_bootstrap': N_BOOTSTRAP,
             'n_workers': N_WORKERS,
             'vt_fractions': VT_FRACTIONS,
+            'primary_demand_scaling': PRIMARY_DEMAND_SCALING,
+            'demand_scaling_modes': DEMAND_SCALING_MODES,
+            'fixed_crash_threshold': FIXED_CRASH_THRESHOLD,
+            'flash_crash_definition': 'rolling t-1 sigma: r_t < -3 * sigma_{t-1,22d}',
+            'seed_formula': 'base_seed=int(vt_fraction*100000)+42; homo and hetero share sim_idx seed',
+            'harvey_t_threshold': HARVEY_T_THRESHOLD,
             'kyle_lambda': KYLE_LAMBDA,
             'vix_vol_sensitivity': VIX_VOL_SENSITIVITY,
             'vix_mr_speed': VIX_MR_SPEED,
@@ -923,7 +1183,22 @@ def run_experiment():
         },
         'homogeneous_results': {k: v for k, v in homo_agg.items()},
         'heterogeneous_results': {k: v for k, v in hetero_agg.items()},
+        'linear_demand_sensitivity': {
+            'homogeneous_results': {k: v for k, v in linear_homo_agg.items()},
+            'heterogeneous_results': {k: v for k, v in linear_hetero_agg.items()},
+            'metric_changes': linear_metric_changes,
+        },
+        'primary_metric_changes': primary_metric_changes,
         'statistical_tests': all_tests,
+        'welch_reference_tests': welch_reference_tests,
+        'linear_demand_statistical_tests': linear_tests,
+        'linear_demand_welch_reference_tests': linear_welch_reference_tests,
+        'statistical_test_note': (
+            'Primary tests use common-random-number paired differences with '
+            'Harvey-Leybourne-Newbold small-sample correction and a Harvey-style '
+            '|t|>=3 reporting gate. This is an ABM Monte Carlo regime comparison, '
+            'not a forecast-loss DM panel.'
+        ),
         'tipping_point_analysis': conclusions,
         'heterogeneity_advantage': hetero_advantage,
         'summary': {
@@ -948,6 +1223,9 @@ def run_experiment():
             'No transaction costs',
             'Equal type proportions only (not tested: unequal mixes)',
             'No adaptive learning (agents do not switch strategies)',
+            'Heterogeneity is across 4 deterministic strategy types, not within-type beliefs',
+            'Primary K827v3-compatible demand model is quadratic in n_vt; linear-demand sensitivity is reported separately',
+            'Flash-crash metric uses rolling t-1 sigma; fixed -5% crash frequency is also reported',
             'N=1000 (same as K827v3)',
             'T=2520 (same as K827v3)',
             '200 sims per config (fewer than K827v3 500 sims but sufficient for CI)',
