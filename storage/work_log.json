@@ -10559,5 +10559,17 @@
     "task_id": "hourly_14_k1327_codex_fail_closure",
     "title": "K1327 Codex review FAIL closure",
     "summary": "K1327 reverted to failed (Codex review verdict=FAIL: unmatched train/refit + overstates). K1327_v2 fix task opened. codex_review.md committed. error_log extended with new daemon gap. commit b73bd7c1."
+  },
+  {
+    "timestamp": "2026-06-14T15:25",
+    "task_type": "experiment",
+    "task_id": "K1334",
+    "actor": "hourly-15",
+    "summary": "K1334 NULL: Downside-CVaR 1-day 99% target vs vol-target on SPY+TLT+GLD+DBC. Sharpe 0.9863 vs 0.9836, MDD -17.87% vs -16.30%, paired bootstrap CI all cross 0. Same backward-looking pathology as K1494 (CDaR NULL). Codex CONDITIONAL_PASS.",
+    "verdict": "NULL",
+    "reviewer": "Codex 0.137.0",
+    "evidence": [
+      "experiments/K1334/K1334_results.json"
+    ]
   }
 ]

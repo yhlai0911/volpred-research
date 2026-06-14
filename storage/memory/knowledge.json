@@ -33933,5 +33933,26 @@
     "created_at": "2026-06-14T14:22:48.166376",
     "reviewer": "Codex",
     "codex_review": "experiments/k1327_v2/codex_review.md"
+  },
+  {
+    "k_id": "K1334",
+    "experiment_id": "K1334_cvar_vs_vol_target",
+    "experiment_path": "experiments/K1334/",
+    "category": "experiment_null",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex 0.137.0",
+    "reviewer_source": "codex_exec primary path",
+    "codex_review_verdict": "CONDITIONAL_PASS",
+    "codex_review": "核心無 applied-return lookahead, seed=42, CVaR=worst tail mean, 公平比較在 K1334 內部成立。Issues 屬文檔口徑（10bp vs K1494 5bp; anti-lookahead doc off-by-one; calibration raw signal — K1494 同做法）非 root bug。",
+    "content": "K1334 NULL: Downside-CVaR (1-day 99% historical ES, 252d window) exposure target 在 SPY+TLT+GLD+DBC equal-weight portfolio 上不能可靠擊敗 63d realized vol target. OOS 2018-2026: cvar_target Sharpe 0.9863 vs vol_target Sharpe 0.9836 (近相等), MDD -17.87% vs -16.30% (微差), CAGR 10.44% vs 10.29%. Paired moving-block bootstrap (1000 reps, block=21, seed=42, 10bp cost) 三 risk metric CI 全 cross 0: sharpe_diff CI [-0.141, +0.128], MDD_diff CI [-2.57, +2.76], left_tail_freq_diff CI [-0.0038, +0.0019]. 機制與 K1494 (CDaR NULL) 一致: backward-looking tail estimate 無法 anticipate fast crashes; CVaR-target mean_exposure 1.13 在 COVID 期間沒及時降下. 結論: risk-target family (drawdown-aware K1494 + tail-aware K1334) 在此 4-ETF base 皆無法改進 63d realized-vol target.",
+    "evidence": [
+      "K1334",
+      "experiments/K1334/K1334_results.json",
+      "experiments/K1334/K1334.py",
+      "experiments/k1494_cdar_vs_vol_target/k1494_cdar_vs_vol_target_results.json"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-14T15:28:52.479170",
+    "item_id": "211364bf"
   }
 ]

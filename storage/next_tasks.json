@@ -30301,7 +30301,7 @@
     "title": "K1331: dispersion / 相關性風險溢酬的免期權代理 — yfinance 指數 RV vs 成份股平均 RV 算「已實現 dispersion」，研究 mean-reversion 與 regime 擇時力（純期權版 blocked，用 ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 503). Original: dispersion / 相關性風險溢酬的免期權代理 — yfinance 指數 RV vs 成份股平均 RV 算「已實現 dispersion」，研究 mean-reversion 與 regime 擇時力（純期權版 blocked，用 RV 代理）（來源：CBOE DSPX/Numerix 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1331.py with signal.shift(1) + seed=42, (c) K1331_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 503,
@@ -30309,7 +30309,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-14T03:16:04Z"
+    "created_at": "2026-06-14T03:16:04Z",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T07:26:21.406839+00:00",
+    "claim_session_id": "ff2e1fae5ffb",
+    "started_at": "2026-06-14T07:26:39.629292+00:00"
   },
   {
     "id": "K1332",
@@ -30346,7 +30350,7 @@
     "title": "K1334: Downside-CVaR 動態對沖 ratio vs 固定 vol-target 的左尾改善 — yfinance SPY+TLT+GLD，比較以 1-day 99% CVaR 為目標動態縮放曝險 vs 固定 vol-target，檢定壓",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 554). Original: Downside-CVaR 動態對沖 ratio vs 固定 vol-target 的左尾改善 — yfinance SPY+TLT+GLD，比較以 1-day 99% CVaR 為目標動態縮放曝險 vs 固定 vol-target，檢定壓力期左尾頻率/深度與淨 Sharpe；與既有 CDaR-target（drawdown 目標）正交，這裡目標函數是 conditional VaR/ES（來源：arXiv 2025 deep hedging to manage tail risk；CVaR-parameterized convex-risk）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1334.py with signal.shift(1) + seed=42, (c) K1334_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 554,
@@ -30358,7 +30362,9 @@
     "claimed_by": "hourly-15",
     "claimed_at": "2026-06-14T07:09:30.631067+00:00",
     "claim_session_id": "4ac2a3b5e08f",
-    "started_at": "2026-06-14T07:09:34.246077+00:00"
+    "started_at": "2026-06-14T07:09:34.246077+00:00",
+    "completed_at": "2026-06-14T07:29:04.332269+00:00",
+    "result": "NULL: CVaR-target vs vol-target indistinguishable (Sharpe 0.986 vs 0.984, CI cross 0). Same backward-looking pathology as K1494 (CDaR NULL). Codex CONDITIONAL_PASS. Risk-target family (drawdown-aware + tail-aware) NULL on 4-ETF base. knowledge item_id=211364bf"
   },
   {
     "id": "K1328_v2_fix_methodology",
