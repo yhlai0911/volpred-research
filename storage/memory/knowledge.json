@@ -34056,5 +34056,18 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-15T01:15:30.671117"
+  },
+  {
+    "item_id": "6aaf9e4b",
+    "category": "experiment_result",
+    "content": "K538 v2 corrected refit (experiment_id=k538_v2_embargo_alignment_cost) fixes the mile_b70e8480 Codex review issues: true 22-trading-row embargo, aligned row t feature/label/return convention, and 10 bps cost proportional to absolute SPY exposure turnover.\n\nData: yfinance adjusted-close snapshots pinned in experiments/k538_v2_embargo_alignment_cost/data/, sample 2007-07-18 to 2025-12-31, n=4,645, 16 features, seed=42, tree models n_jobs=1. Label is VT_return_t > B&H_return_t with features shifted to t-1.\n\nCorrected result preserves the qualitative NULL conclusion: daily meta-labeling still does not learn a stable useful switch. Cross-OOS RF has Meta Sharpe 1.342 vs VT-net 1.054 vs B&H 1.328, but beats B&H only 1/3 segments. Walk-forward RF degenerates to B&H-only (vt_usage=0.0%, switches=0, Meta Sharpe 0.890 = B&H 0.890; VT-net 0.868). Logistic and XGBoost over-switch / underperform in walk-forward (0.771 and 0.701 vs B&H 0.890).\n\nImportant correction to article wording: max absolute feature-label correlation is 0.030977 under corrected alignment, so the old strict |r| < 0.02 statement should be removed in any full revision. Existing errata is directionally sufficient; no retraction needed.\n",
+    "evidence": [
+      "experiments/k538_v2_embargo_alignment_cost/README.md",
+      "experiments/k538_v2_embargo_alignment_cost/k538_v2_embargo_alignment_cost.py",
+      "experiments/k538_v2_embargo_alignment_cost/k538_v2_embargo_alignment_cost_results.json",
+      "storage/memory/knowledge.json:cd5ed33d"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-06-15T01:37:27.035722"
   }
 ]

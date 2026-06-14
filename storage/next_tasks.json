@@ -30890,9 +30890,15 @@
     "title": "Fix K538 meta-labeling: embargo (calendar→22 trading days), label/return alignment, cost ∝ |Δposition|",
     "description": "Codex review of mile_b70e8480 (paper_review_mile_b70e8480, 2026-06-15) found 3 HIGH issues in K538: (1) cross-OOS embargo uses calendar-month gap → only 20-21 trading rows, not 22; (2) walk-forward signal applies prediction (trained on excess_ret.shift(-1)) to same-index returns — alignment off by one; (3) 10 bps cost flat per binary switch, not per actual turnover ∝ |Δposition|. Refit K538 with these corrections, re-evaluate AUC + walk-forward Sharpe/MDD, compare to mile_b70e8480 article numbers, decide if errata needs strengthening or article needs full revision. NULL qualitative conclusion likely preserved (3 models degenerate same way), but magnitudes will shift. Reviewer source: codex review verdict FAIL (knowledge cd5ed33d).",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-14T17:15:48.925670+00:00",
     "source": "codex_review_followup",
-    "parent_task_id": "paper_review_mile_b70e8480"
+    "parent_task_id": "paper_review_mile_b70e8480",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-14T17:20:46.118770+00:00",
+    "claim_session_id": "f25d205b50df",
+    "started_at": "2026-06-14T17:21:03.752001+00:00",
+    "completed_at": "2026-06-14T17:38:00.341419+00:00",
+    "result": "K538 v2 corrected refit completed in experiments/k538_v2_embargo_alignment_cost with pinned yfinance snapshots. True 22-trading-row embargo, label/return alignment, and per-turnover 10 bps cost implemented; JSON/py_compile/stability checks passed. NULL conclusion preserved: RF cross-OOS Meta Sharpe 1.342 vs B&H 1.328 but beats B&H only 1/3; walk-forward RF degenerates to B&H-only. Knowledge 6aaf9e4b written."
   }
 ]
