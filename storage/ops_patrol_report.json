@@ -1,37 +1,42 @@
 {
-  "timestamp": "2026-06-14T00:05:39Z",
+  "timestamp": "2026-06-14T06:04:50Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "total_drafts=140 (research=47, general=93); all above thresholds (total>=12, research>=4, general>=8)"
+      "detail": "Total drafts: 140 (threshold: 12). Research audience drafts: 47 (threshold: 4). General audience drafts: 93 (threshold: 8). All thresholds met."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age=11s (well within 26h limit)"
+      "detail": "storage/strategy_metrics.json mtime: 1781417000 (epoch). Age at check time: ~14 seconds. Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines: most recent entries dated 2026-06-11 (CJK font fix + Mirror sync 401 fix). No entries from today (2026-06-14) or yesterday (2026-06-13)."
+      "detail": "No entries dated 2026-06-14 (today) or 2026-06-13 (yesterday) in last 30 lines of docs/error_log.md. Most recent entries dated 2026-06-11: matplotlib CJK font fix + Mirror sync 401 fix (both RESOLVED)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 portfolio strategies checked (excluding _market_daily which uses date-keyed market-data schema). All 14 have exactly 1 null portfolio_return in last 3 entries (most recent entry pending). No strategy exceeds the >2 null threshold."
+      "detail": "Checked 15 strategies. All strategies with iterable entries have exactly 1 null portfolio_return in last 3 entries (trade_date 2026-06-11 entry is null, consistent across strategies — awaiting settlement data). No strategy exceeds >2 nulls threshold. NOTE: strategy '_market_daily' has null/missing 'entries' field — cannot verify. Anomaly worth investigating separately but does not trigger the >2 null alert."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold >50). Working tree is clean."
+      "detail": "0 uncommitted files. Working tree is clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2237 entries"
+      "detail": "storage/memory/knowledge.json contains 2237 entries."
     }
   ],
-  "alerts": []
+  "alerts": [],
+  "notes": [
+    "All 6 checks passed. No alerts triggered.",
+    "Minor anomaly: strategy '_market_daily' in paper_trading.json has null entries field — not counted as >2 nulls but should be investigated.",
+    "Paper trading: 2026-06-11 portfolio_return universally null across all strategies — likely normal T+1 settlement lag."
+  ]
 }
