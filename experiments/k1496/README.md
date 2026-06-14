@@ -91,16 +91,16 @@ Best window by regime:
 | Regime | Best window | Key nuance |
 |---|---:|---|
 | Low RV tertile | `63d` | only by a hair; all four windows are nearly tied |
-| Mid RV tertile | `5d` | clear advantage over `22d` and `63d` |
+| Mid RV tertile | `5d` | short windows dominate, but `5d` vs `10d` is close |
 | High RV tertile | `5d` | long windows fail badly when vol spikes |
 
 Primary mean QLIKE by regime:
 
 | Regime | 5d | 10d | 22d | 63d |
 |---|---:|---:|---:|---:|
-| Low | 4.3496 | 4.3530 | 4.3504 | 4.3486 |
-| Mid | 1.7546 | 1.7547 | 1.8882 | 2.0092 |
-| High | 77.4911 | 122.6482 | 304.8198 | 622.0476 |
+| Low | 0.1081 | 0.1126 | 0.1098 | 0.1071 |
+| Mid | 0.1378 | 0.1388 | 0.1424 | 0.1449 |
+| High | 156.5328 | 253.2593 | 643.9330 | 1323.5875 |
 
 Interpretation:
 
@@ -116,8 +116,8 @@ The "low vol -> longer window" conclusion is **not** robust.
 Across robustness schemes:
 
 - high regime best window = `5d` in **4/4**
-- mid regime best window = `5d` in **4/4**
-- low regime best window flips between `5d` and `63d`
+- mid regime best window is unstable (`5d`, `10d`, or `63d` depending on estimation scheme)
+- low regime flips between `5d` and `63d`
 
 So the honest conclusion is:
 
@@ -131,11 +131,14 @@ An ex-ante rule was learned on the first half of OOS:
 
 - low -> `63d`
 - mid -> `5d`
-- high -> `5d`
+- high -> `10d`
 
-Applied to the second half of OOS, it performs essentially the same as fixed `5d`, not better.
+Applied to the second half of OOS, it performs materially worse than fixed `5d`.
 
-That means the low-regime extension is too weak to produce a meaningful overall gain.
+That means:
+
+1. the low-regime extension is too weak to carry the rule, and
+2. regime-specific selection itself is unstable unless the stress-state choice is handled very conservatively.
 
 ## Practical Takeaway
 
