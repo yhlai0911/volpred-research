@@ -31067,5 +31067,24 @@
     "started_at": "2026-06-14T22:08:52.438935+00:00",
     "completed_at": "2026-06-14T22:11:14.518074+00:00",
     "result": "K1499 後續查核 footnote 已 append 至 mile_1b511caa（804 chars），新段「## 後續查核：K1499 拉長 horizon、再加 SPY 控制之後」清楚說明：BDC realized-vol stress signal 在 SPY-vol control 後沒有任何 horizon 通過 |t|>3（pure SPY beta）；只有 NAV-discount proxy → HYG 5d survives（HAC t=3.18）；KRE/IWM 全 null。details.experiment_refs 加 K1499、k1499_caveat_added=true、k1499_caveat_summary 已寫。Supabase sync incremental 2 articles 推送完成。研究誠實 § 推翻舊結論必更新文章 ✓。"
+  },
+  {
+    "id": "daily_article_k593_window_cross_oos_1781478615",
+    "task_type": "daily_article",
+    "title": "K593 daily article：回測 window 沒有 universal 最佳值（regime-dependent）",
+    "description": "Write zh-Hant reader-facing article from K593 evidence (experiments/k593/k593_window_cross_oos_v2_results.json). 主要洞見：4 個 window (252/504/1000/2000) 跨 5 個 OOS period，mean_ranks 504=2.4 最佳但 W=252 才 1.8、W=2000 最差 3.8；pooled DM 504 vs 2000 p=0.083（marginal）→ 沒有 universal winner，regime-dependent。Audience=general（missing_general_top5 score=4）。3-canon hard rule：讀 .claude/skills/trending-repost/SKILL.md + .claude/skills/anti-ai-style/SKILL.md + .claude/rules/publishing.md。Evidence package first（≥3 數字 + ≥1 表 + ≥1 圖 + 量化分析），跑 anti_ai_gate.py + check_arc_dedup.py 必 PASS。非時效性 → draft pool。",
+    "priority": 2,
+    "status": "succeeded",
+    "source": "hourly_dispatch_diversity_rotation",
+    "created_at": "2026-06-15T07:10:15+08:00",
+    "experiment_refs": [
+      "K593"
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-06-14T23:10:21.344285+00:00",
+    "claim_session_id": "18f22fde263e",
+    "started_at": "2026-06-14T23:10:21.585787+00:00",
+    "completed_at": "2026-06-14T23:17:47.886184+00:00",
+    "result": "K593 daily_article published as mile_be63fc46 (draft pool). Anti-ai gate PASS, arc-dedup PASS, 1421 zh-Hant chars, dual-subplot PNG embedded. Commit 51d52daf."
   }
 ]

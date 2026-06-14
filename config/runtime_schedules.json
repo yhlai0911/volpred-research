@@ -810,6 +810,90 @@
             "event_type": "NFP_US"
           }
         }
+      },
+      {
+        "id": "cpi-us-2026-07-13-t2",
+        "event_key": "CPI_US_2026_07_13",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "cpi-us-2026-07-13-t2:one_shot",
+        "not_before": "2026-07-11T08:00:00+08:00",
+        "deadline": "2026-07-12T20:00:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: CPI_US 2026-07-13 T-2",
+          "description": "Auto-populated by populate_upcoming_events.py. CPI_US 2026-07-13 T-2 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+          "task_family": "content",
+          "priority": 20,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "general",
+            "event_series_slot": "T-2",
+            "event_date": "2026-07-13",
+            "event_type": "CPI_US"
+          }
+        }
+      },
+      {
+        "id": "cpi-us-2026-07-13-t0",
+        "event_key": "CPI_US_2026_07_13",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "cpi-us-2026-07-13-t0:one_shot",
+        "not_before": "2026-07-13T21:30:00+08:00",
+        "deadline": "2026-07-15T09:30:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: CPI_US 2026-07-13 T+0",
+          "description": "Auto-populated by populate_upcoming_events.py. CPI_US 2026-07-13 T+0 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+          "task_family": "content",
+          "priority": 15,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "general",
+            "event_series_slot": "T+0",
+            "event_date": "2026-07-13",
+            "event_type": "CPI_US"
+          }
+        }
+      },
+      {
+        "id": "tsmc-revenue-2026-07-10-t0",
+        "event_key": "TSMC_REVENUE_2026_07_10",
+        "trigger_mode": "one_shot",
+        "dedupe_key": "tsmc-revenue-2026-07-10-t0:one_shot",
+        "not_before": "2026-07-10T15:00:00+08:00",
+        "deadline": "2026-07-12T03:00:00+08:00",
+        "preferred_agent": "claude",
+        "public_effect": "published",
+        "task_template": {
+          "title": "Event article: TSMC_REVENUE 2026-07-10 T+0",
+          "description": "Auto-populated by populate_upcoming_events.py. TSMC_REVENUE 2026-07-10 T+0 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+          "task_family": "content",
+          "priority": 15,
+          "preferred_agent": "claude",
+          "fallback_allowed": false,
+          "approval_mode": "auto",
+          "risk_level": "safe",
+          "public_effect": "published",
+          "preconditions": [],
+          "payload_patch": {
+            "audience": "general",
+            "event_series_slot": "T+0",
+            "event_date": "2026-07-10",
+            "event_type": "TSMC_REVENUE"
+          }
+        }
       }
     ]
   },
