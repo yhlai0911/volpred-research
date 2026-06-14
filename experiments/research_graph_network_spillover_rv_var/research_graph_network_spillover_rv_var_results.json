@@ -1,0 +1,779 @@
+{
+  "experiment_id": "research_graph_network_spillover_rv_var",
+  "title": "Graph/network spillover RV forecast vs linear VAR baseline",
+  "timestamp_utc": "2026-06-14T09:56:54.218777+00:00",
+  "data": {
+    "source": "yfinance auto-adjusted close",
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "TLT",
+      "GLD",
+      "HYG",
+      "EEM",
+      "CL=F"
+    ],
+    "asset_labels": {
+      "SPY": "US equity",
+      "QQQ": "US growth",
+      "TLT": "Treasury",
+      "GLD": "Gold",
+      "HYG": "Credit",
+      "EEM": "EM equity",
+      "CL=F": "Oil futures"
+    },
+    "period": [
+      "2007-04-12",
+      "2026-06-12"
+    ],
+    "n_price_days": 4823,
+    "n_positive_price_days": 4822,
+    "n_return_days": 4821,
+    "nonpositive_price_counts": {
+      "SPY": 0,
+      "QQQ": 0,
+      "TLT": 0,
+      "GLD": 0,
+      "HYG": 0,
+      "EEM": 0,
+      "CL=F": 1
+    },
+    "proxy": "daily close-to-close squared log return; not intraday realized volatility",
+    "nonpositive_price_handling": "rows with any nonpositive close are removed before log-return construction; this mainly handles CL=F negative settlement during April 2020"
+  },
+  "design": {
+    "target": "future average daily variance proxy over t+1..t+h",
+    "horizons": [
+      1,
+      5,
+      22
+    ],
+    "oos_start": "2018-01-02",
+    "train_window_days": 1260,
+    "refit_every_days": 21,
+    "models": {
+      "own_har": "own log RV lag1, 5-day mean, 22-day mean",
+      "spillover_var": "all assets log RV lag1 plus own 5/22-day means",
+      "graph_har": "own HAR features plus row-normalized lagged-correlation neighbor aggregate"
+    },
+    "anti_lookahead": [
+      "feature at date t uses only variance proxy through close t",
+      "target at date t is t+1..t+h future average variance",
+      "rolling model refits only use training targets fully observed before the first forecast date in the block"
+    ],
+    "statistics": "Patton QLIKE on same target; DM test on date-level mean QLIKE losses, Harvey |t|>3 threshold"
+  },
+  "literature": [
+    {
+      "title": "Forecasting realized volatility with spillover effects",
+      "year": 2025,
+      "url": "https://ideas.repec.org/a/eee/intfor/v41y2025i1p377-397.html",
+      "note": "International Journal of Forecasting paper motivating GNN spillover RV forecasts and QLIKE evaluation."
+    },
+    {
+      "title": "Predictive directional measurement of volatility spillovers",
+      "year": 2012,
+      "url": "https://econpapers.repec.org/RePEc%3Aeee%3Aintfor%3Av%3A28%3Ay%3A2012%3Ai%3A1%3Ap%3A57-66",
+      "note": "Diebold-Yilmaz generalized VAR connectedness foundation for directional spillover measurement."
+    },
+    {
+      "title": "Do Better Volatility Forecasts Lead to Better Portfolios? Evidence from Graph Neural Networks",
+      "year": 2026,
+      "url": "https://arxiv.org/abs/2605.19278",
+      "note": "Recent GNN volatility paper emphasizing that forecast accuracy and portfolio value need not align."
+    },
+    {
+      "title": "Volatility Spillovers in High-Dimensional Financial Systems: A Machine Learning Approach",
+      "year": 2026,
+      "url": "https://arxiv.org/abs/2601.03146",
+      "note": "Hybrid HAR/ElasticNet evidence that network structure can be interpretable even when forecast gains are limited."
+    }
+  ],
+  "related_repo_priors": [
+    "K357 built volatility spillover network diagnostics but did not test forecast horse races.",
+    "research_quantile_connectedness_var_yfinance_etf_rv_quant found tail connectedness but explicitly avoided forecasting claims.",
+    "K816v2 showed QLIKE training can matter, but neural/graph additions need OOS DM validation."
+  ],
+  "results_by_horizon": {
+    "1": {
+      "metrics": {
+        "own_har": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2121,
+              "qlike": 4.65837283,
+              "mse": 3.4e-07,
+              "spearman_rho": 0.29229309,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2121,
+              "qlike": 4.44657671,
+              "mse": 4.8e-07,
+              "spearman_rho": 0.26955138,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2121,
+              "qlike": 2.93450756,
+              "mse": 7e-08,
+              "spearman_rho": 0.2578897,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2121,
+              "qlike": 4.23006779,
+              "mse": 1.4e-07,
+              "spearman_rho": 0.22977667,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2121,
+              "qlike": 3.60998648,
+              "mse": 3e-08,
+              "spearman_rho": 0.39284657,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2121,
+              "qlike": 3.41000776,
+              "mse": 4e-07,
+              "spearman_rho": 0.17419989,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2121,
+              "qlike": 4.83065754,
+              "mse": 8.295e-05,
+              "spearman_rho": 0.24298165,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 4.0171681,
+          "mean_spearman": 0.26564842
+        },
+        "spillover_var": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2121,
+              "qlike": 4.6031823,
+              "mse": 3.4e-07,
+              "spearman_rho": 0.28721534,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2121,
+              "qlike": 4.45718523,
+              "mse": 4.8e-07,
+              "spearman_rho": 0.26684239,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2121,
+              "qlike": 2.82366695,
+              "mse": 7e-08,
+              "spearman_rho": 0.25828479,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2121,
+              "qlike": 4.21164626,
+              "mse": 1.4e-07,
+              "spearman_rho": 0.22470816,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2121,
+              "qlike": 3.54003051,
+              "mse": 3e-08,
+              "spearman_rho": 0.39469806,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2121,
+              "qlike": 3.35018854,
+              "mse": 4e-07,
+              "spearman_rho": 0.17264231,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2121,
+              "qlike": 4.61644695,
+              "mse": 8.276e-05,
+              "spearman_rho": 0.25415163,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 3.94319239,
+          "mean_spearman": 0.2655061
+        },
+        "graph_har": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2121,
+              "qlike": 4.56183758,
+              "mse": 3.4e-07,
+              "spearman_rho": 0.2953978,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2121,
+              "qlike": 4.40059299,
+              "mse": 4.8e-07,
+              "spearman_rho": 0.27035284,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2121,
+              "qlike": 2.80909971,
+              "mse": 7e-08,
+              "spearman_rho": 0.25988353,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2121,
+              "qlike": 4.13350744,
+              "mse": 1.4e-07,
+              "spearman_rho": 0.23040266,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2121,
+              "qlike": 3.48361434,
+              "mse": 3e-08,
+              "spearman_rho": 0.39795774,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2121,
+              "qlike": 3.27323261,
+              "mse": 4e-07,
+              "spearman_rho": 0.18099062,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2121,
+              "qlike": 4.58155519,
+              "mse": 8.276e-05,
+              "spearman_rho": 0.25838426,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 3.89191998,
+          "mean_spearman": 0.27048135
+        }
+      },
+      "dm_tests": {
+        "graph_har_vs_spillover_var": {
+          "n": 2121,
+          "dm_t": -4.343957,
+          "p_value": 1.465e-05,
+          "significant_abs_t_gt_3": true,
+          "interpretation": "negative means graph_har lower QLIKE than spillover_var"
+        },
+        "graph_har_vs_own_har": {
+          "n": 2121,
+          "dm_t": -1.46804,
+          "p_value": 0.14224164,
+          "significant_abs_t_gt_3": false,
+          "interpretation": "negative means graph_har lower QLIKE than own_har"
+        },
+        "spillover_var_vs_own_har": {
+          "n": 2121,
+          "dm_t": -0.890156,
+          "p_value": 0.37348337,
+          "significant_abs_t_gt_3": false,
+          "interpretation": "negative means spillover_var lower QLIKE than own_har"
+        }
+      },
+      "improvements": {
+        "graph_har_vs_spillover_var_qlike_improvement_pct": 1.3003,
+        "graph_har_vs_own_har_qlike_improvement_pct": 3.1178
+      }
+    },
+    "5": {
+      "metrics": {
+        "own_har": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2117,
+              "qlike": 0.80796565,
+              "mse": 1.6e-07,
+              "spearman_rho": 0.49773956,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2117,
+              "qlike": 0.69723702,
+              "mse": 2e-07,
+              "spearman_rho": 0.52259988,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2117,
+              "qlike": 0.47573907,
+              "mse": 3e-08,
+              "spearman_rho": 0.50184146,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2117,
+              "qlike": 0.61224029,
+              "mse": 4e-08,
+              "spearman_rho": 0.41471517,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2117,
+              "qlike": 0.77244607,
+              "mse": 1e-08,
+              "spearman_rho": 0.64492839,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2117,
+              "qlike": 0.55523469,
+              "mse": 1.9e-07,
+              "spearman_rho": 0.38488647,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2117,
+              "qlike": 0.9876673,
+              "mse": 2.853e-05,
+              "spearman_rho": 0.42669694,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 0.70121858,
+          "mean_spearman": 0.48477255
+        },
+        "spillover_var": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2117,
+              "qlike": 0.783276,
+              "mse": 1.6e-07,
+              "spearman_rho": 0.49985553,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2117,
+              "qlike": 0.68578239,
+              "mse": 1.9e-07,
+              "spearman_rho": 0.52210607,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2117,
+              "qlike": 0.45558051,
+              "mse": 3e-08,
+              "spearman_rho": 0.4976605,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2117,
+              "qlike": 0.59461746,
+              "mse": 4e-08,
+              "spearman_rho": 0.41675447,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2117,
+              "qlike": 0.73061366,
+              "mse": 1e-08,
+              "spearman_rho": 0.64902655,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2117,
+              "qlike": 0.5321879,
+              "mse": 1.9e-07,
+              "spearman_rho": 0.38028264,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2117,
+              "qlike": 0.89540479,
+              "mse": 2.834e-05,
+              "spearman_rho": 0.4358629,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 0.66820896,
+          "mean_spearman": 0.48593552
+        },
+        "graph_har": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2117,
+              "qlike": 0.7738947,
+              "mse": 1.6e-07,
+              "spearman_rho": 0.50227511,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2117,
+              "qlike": 0.67980391,
+              "mse": 1.9e-07,
+              "spearman_rho": 0.52370184,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2117,
+              "qlike": 0.44786514,
+              "mse": 3e-08,
+              "spearman_rho": 0.50064398,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2117,
+              "qlike": 0.59393173,
+              "mse": 4e-08,
+              "spearman_rho": 0.42337346,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2117,
+              "qlike": 0.72542333,
+              "mse": 1e-08,
+              "spearman_rho": 0.65254266,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2117,
+              "qlike": 0.52681894,
+              "mse": 1.9e-07,
+              "spearman_rho": 0.38505683,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2117,
+              "qlike": 0.89048986,
+              "mse": 2.835e-05,
+              "spearman_rho": 0.43752771,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 0.66260394,
+          "mean_spearman": 0.48930308
+        }
+      },
+      "dm_tests": {
+        "graph_har_vs_spillover_var": {
+          "n": 2117,
+          "dm_t": -2.388127,
+          "p_value": 0.01702172,
+          "significant_abs_t_gt_3": false,
+          "interpretation": "negative means graph_har lower QLIKE than spillover_var"
+        },
+        "graph_har_vs_own_har": {
+          "n": 2117,
+          "dm_t": -1.468201,
+          "p_value": 0.14219833,
+          "significant_abs_t_gt_3": false,
+          "interpretation": "negative means graph_har lower QLIKE than own_har"
+        },
+        "spillover_var_vs_own_har": {
+          "n": 2117,
+          "dm_t": -1.355,
+          "p_value": 0.17556235,
+          "significant_abs_t_gt_3": false,
+          "interpretation": "negative means spillover_var lower QLIKE than own_har"
+        }
+      },
+      "improvements": {
+        "graph_har_vs_spillover_var_qlike_improvement_pct": 0.8388,
+        "graph_har_vs_own_har_qlike_improvement_pct": 5.5068
+      }
+    },
+    "22": {
+      "metrics": {
+        "own_har": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2100,
+              "qlike": 0.72665123,
+              "mse": 1e-07,
+              "spearman_rho": 0.42524868,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2100,
+              "qlike": 0.56681235,
+              "mse": 1.1e-07,
+              "spearman_rho": 0.47801474,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2100,
+              "qlike": 0.29639838,
+              "mse": 2e-08,
+              "spearman_rho": 0.60430077,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2100,
+              "qlike": 0.36997475,
+              "mse": 2e-08,
+              "spearman_rho": 0.45535816,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2100,
+              "qlike": 1.0167542,
+              "mse": 1e-08,
+              "spearman_rho": 0.63662562,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2100,
+              "qlike": 0.34403078,
+              "mse": 1e-07,
+              "spearman_rho": 0.43162838,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2100,
+              "qlike": 0.82429753,
+              "mse": 1.26e-05,
+              "spearman_rho": 0.3643256,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 0.59213132,
+          "mean_spearman": 0.48507171
+        },
+        "spillover_var": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2100,
+              "qlike": 0.73858978,
+              "mse": 1e-07,
+              "spearman_rho": 0.42249247,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2100,
+              "qlike": 0.57482499,
+              "mse": 1.1e-07,
+              "spearman_rho": 0.47203864,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2100,
+              "qlike": 0.28940078,
+              "mse": 2e-08,
+              "spearman_rho": 0.6045924,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2100,
+              "qlike": 0.36012451,
+              "mse": 2e-08,
+              "spearman_rho": 0.45216508,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2100,
+              "qlike": 1.00234889,
+              "mse": 1e-08,
+              "spearman_rho": 0.63579765,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2100,
+              "qlike": 0.33706223,
+              "mse": 9e-08,
+              "spearman_rho": 0.4158328,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2100,
+              "qlike": 0.74449884,
+              "mse": 1.238e-05,
+              "spearman_rho": 0.39407108,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 0.57812143,
+          "mean_spearman": 0.4852843
+        },
+        "graph_har": {
+          "asset_metrics": {
+            "SPY": {
+              "n": 2100,
+              "qlike": 0.72386614,
+              "mse": 1e-07,
+              "spearman_rho": 0.4300573,
+              "spearman_p": 0.0
+            },
+            "QQQ": {
+              "n": 2100,
+              "qlike": 0.56545614,
+              "mse": 1.1e-07,
+              "spearman_rho": 0.47578542,
+              "spearman_p": 0.0
+            },
+            "TLT": {
+              "n": 2100,
+              "qlike": 0.28773891,
+              "mse": 2e-08,
+              "spearman_rho": 0.60028125,
+              "spearman_p": 0.0
+            },
+            "GLD": {
+              "n": 2100,
+              "qlike": 0.35892548,
+              "mse": 2e-08,
+              "spearman_rho": 0.45819801,
+              "spearman_p": 0.0
+            },
+            "HYG": {
+              "n": 2100,
+              "qlike": 0.99463275,
+              "mse": 1e-08,
+              "spearman_rho": 0.63957186,
+              "spearman_p": 0.0
+            },
+            "EEM": {
+              "n": 2100,
+              "qlike": 0.33473641,
+              "mse": 9e-08,
+              "spearman_rho": 0.42274045,
+              "spearman_p": 0.0
+            },
+            "CL=F": {
+              "n": 2100,
+              "qlike": 0.74192997,
+              "mse": 1.239e-05,
+              "spearman_rho": 0.39624056,
+              "spearman_p": 0.0
+            }
+          },
+          "mean_qlike": 0.5724694,
+          "mean_spearman": 0.48898212
+        }
+      },
+      "dm_tests": {
+        "graph_har_vs_spillover_var": {
+          "n": 2100,
+          "dm_t": -1.623392,
+          "p_value": 0.10465583,
+          "significant_abs_t_gt_3": false,
+          "interpretation": "negative means graph_har lower QLIKE than spillover_var"
+        },
+        "graph_har_vs_own_har": {
+          "n": 2100,
+          "dm_t": -1.162151,
+          "p_value": 0.24530634,
+          "significant_abs_t_gt_3": false,
+          "interpretation": "negative means graph_har lower QLIKE than own_har"
+        },
+        "spillover_var_vs_own_har": {
+          "n": 2100,
+          "dm_t": -0.934312,
+          "p_value": 0.35025055,
+          "significant_abs_t_gt_3": false,
+          "interpretation": "negative means spillover_var lower QLIKE than own_har"
+        }
+      },
+      "improvements": {
+        "graph_har_vs_spillover_var_qlike_improvement_pct": 0.9777,
+        "graph_har_vs_own_har_qlike_improvement_pct": 3.3205
+      }
+    }
+  },
+  "average_adjacency": {
+    "SPY": {
+      "SPY": 0.0,
+      "QQQ": 0.240658,
+      "TLT": 0.139308,
+      "GLD": 0.192974,
+      "HYG": 0.189366,
+      "EEM": 0.241181,
+      "CL=F": 0.198521
+    },
+    "QQQ": {
+      "SPY": 0.228096,
+      "QQQ": 0.0,
+      "TLT": 0.181857,
+      "GLD": 0.178617,
+      "HYG": 0.179615,
+      "EEM": 0.208722,
+      "CL=F": 0.172727
+    },
+    "TLT": {
+      "SPY": 0.098348,
+      "QQQ": 0.095681,
+      "TLT": 0.0,
+      "GLD": 0.108628,
+      "HYG": 0.146216,
+      "EEM": 0.103666,
+      "CL=F": 0.13203
+    },
+    "GLD": {
+      "SPY": 0.07684,
+      "QQQ": 0.076482,
+      "TLT": 0.114439,
+      "GLD": 0.0,
+      "HYG": 0.113922,
+      "EEM": 0.080994,
+      "CL=F": 0.073469
+    },
+    "HYG": {
+      "SPY": 0.239606,
+      "QQQ": 0.244134,
+      "TLT": 0.23114,
+      "GLD": 0.279392,
+      "HYG": 0.0,
+      "EEM": 0.234197,
+      "CL=F": 0.274524
+    },
+    "EEM": {
+      "SPY": 0.174013,
+      "QQQ": 0.174954,
+      "TLT": 0.082549,
+      "GLD": 0.061494,
+      "HYG": 0.16155,
+      "EEM": 0.0,
+      "CL=F": 0.14873
+    },
+    "CL=F": {
+      "SPY": 0.183096,
+      "QQQ": 0.168091,
+      "TLT": 0.250707,
+      "GLD": 0.178896,
+      "HYG": 0.209331,
+      "EEM": 0.131239,
+      "CL=F": 0.0
+    }
+  },
+  "summary": {
+    "verdict": "short_horizon_graph_vs_var_only_not_robust",
+    "headline": "Graph propagation beats the linear spillover-VAR baseline at the 1-day horizon, but the edge does not survive across 5/22-day horizons and is not significant versus own-HAR.",
+    "horizon_takeaways": {
+      "1": {
+        "graph_vs_var_qlike_improvement_pct": 1.3003,
+        "dm_t": -4.343957,
+        "significant_abs_t_gt_3": true
+      },
+      "5": {
+        "graph_vs_var_qlike_improvement_pct": 0.8388,
+        "dm_t": -2.388127,
+        "significant_abs_t_gt_3": false
+      },
+      "22": {
+        "graph_vs_var_qlike_improvement_pct": 0.9777,
+        "dm_t": -1.623392,
+        "significant_abs_t_gt_3": false
+      }
+    }
+  },
+  "limitations": [
+    "Daily yfinance data cannot produce intraday realized volatility; this is a daily variance-proxy experiment.",
+    "The graph model is intentionally lightweight and interpretable, not a full trained GNN.",
+    "DM tests average losses across assets by date; cross-sectional dependence is not fully modeled.",
+    "CL=F futures are aligned to ETF common trading days, so commodity futures holiday effects are suppressed."
+  ]
+}
