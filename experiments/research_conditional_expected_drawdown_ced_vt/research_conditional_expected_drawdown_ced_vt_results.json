@@ -1,0 +1,317 @@
+{
+  "experiment_id": "research_conditional_expected_drawdown_ced_vt",
+  "title": "Conditional Expected Drawdown risk target vs realized-vol target on SPY/QQQ/IWM",
+  "date_run": "2026-06-14",
+  "seed": 42,
+  "data": {
+    "source": "yfinance adjusted OHLC; auto_adjust=True",
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "IWM"
+    ],
+    "download_start": "2003-01-01",
+    "download_end": "2026-06-14",
+    "analysis_start": "2006-01-03",
+    "analysis_end": "2026-06-12",
+    "oos_start": "2018-01-02",
+    "n_days_analysis": 5143,
+    "n_days_oos": 2123,
+    "cached_ohlc_dir": "experiments/research_conditional_expected_drawdown_ced_vt/data/"
+  },
+  "method": {
+    "base_portfolio": "equal-weight daily close returns of SPY/QQQ/IWM",
+    "ohlc_usage": "daily adjusted Low versus previous adjusted Close is used inside each horizon drawdown path",
+    "vol_target": {
+      "target_ann_vol": 0.12,
+      "lookback_days": 63,
+      "exposure_rule": "TARGET_VOL / ann_vol_63, clipped [0,1.5], then shift(1)"
+    },
+    "ced_target": {
+      "lookback_days": 252,
+      "horizons": [
+        20,
+        60
+      ],
+      "alpha": 0.95,
+      "rule": "target_ced / trailing fixed-horizon CED, clipped [0,1.5], then shift(1)",
+      "calibrations": {
+        "ced20": {
+          "target_ced": 0.08399999999999998,
+          "ced_is_mean_exposure": 0.8151225619477053,
+          "vol_target_is_mean_exposure": 0.8132136927158222,
+          "absolute_gap": 0.001908869231883048,
+          "calibration_period": [
+            "2005-01-03",
+            "2017-12-29"
+          ]
+        },
+        "ced60": {
+          "target_ced": 0.09799999999999998,
+          "ced_is_mean_exposure": 0.8103741973255122,
+          "vol_target_is_mean_exposure": 0.8132136927158222,
+          "absolute_gap": 0.0028394953903100317,
+          "calibration_period": [
+            "2005-01-03",
+            "2017-12-29"
+          ]
+        }
+      }
+    },
+    "transaction_cost_one_way": 0.0005,
+    "bootstrap": {
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    },
+    "lookahead_protection": [
+      "vol_exposure = vol_exposure_raw.shift(1)",
+      "ced20/ced60 exposures are shifted by one trading day",
+      "CED signals use only trailing 252 trading days ending at t before shift"
+    ]
+  },
+  "metrics_full": {
+    "buy_hold": {
+      "n_days": 5143,
+      "start": "2006-01-03",
+      "end": "2026-06-12",
+      "sharpe": 0.657,
+      "calmar": 0.2236,
+      "left_tail_days_2pct": 265,
+      "mean_exposure": 1.0,
+      "turnover_ann": 0.0,
+      "cagr_pct": 12.2586,
+      "ann_return_pct": 13.7661,
+      "ann_vol_pct": 20.9527,
+      "mdd_pct": -54.814,
+      "cdar95_pct": 38.7582,
+      "left_tail_freq_2pct_pct": 5.1526,
+      "cvar5_daily_pct": -3.1779
+    },
+    "vol_target": {
+      "n_days": 5143,
+      "start": "2006-01-03",
+      "end": "2026-06-12",
+      "sharpe": 0.6765,
+      "calmar": 0.3209,
+      "left_tail_days_2pct": 83,
+      "mean_exposure": 0.7704,
+      "turnover_ann": 2.4706,
+      "cagr_pct": 8.1931,
+      "ann_return_pct": 8.7062,
+      "ann_vol_pct": 12.869,
+      "mdd_pct": -25.5315,
+      "cdar95_pct": 19.4392,
+      "left_tail_freq_2pct_pct": 1.6138,
+      "cvar5_daily_pct": -1.9658
+    },
+    "ced20_target": {
+      "n_days": 5143,
+      "start": "2006-01-03",
+      "end": "2026-06-12",
+      "sharpe": 0.6572,
+      "calmar": 0.2783,
+      "left_tail_days_2pct": 110,
+      "mean_exposure": 0.761,
+      "turnover_ann": 0.585,
+      "cagr_pct": 8.4177,
+      "ann_return_pct": 9.0305,
+      "ann_vol_pct": 13.7419,
+      "mdd_pct": -30.2434,
+      "cdar95_pct": 24.7268,
+      "left_tail_freq_2pct_pct": 2.1388,
+      "cvar5_daily_pct": -2.143
+    },
+    "ced60_target": {
+      "n_days": 5143,
+      "start": "2006-01-03",
+      "end": "2026-06-12",
+      "sharpe": 0.5926,
+      "calmar": 0.2492,
+      "left_tail_days_2pct": 114,
+      "mean_exposure": 0.7456,
+      "turnover_ann": 0.6613,
+      "cagr_pct": 7.4097,
+      "ann_return_pct": 8.0829,
+      "ann_vol_pct": 13.6406,
+      "mdd_pct": -29.7327,
+      "cdar95_pct": 24.9978,
+      "left_tail_freq_2pct_pct": 2.2166,
+      "cvar5_daily_pct": -2.1627
+    }
+  },
+  "metrics_oos": {
+    "buy_hold": {
+      "n_days": 2123,
+      "start": "2018-01-02",
+      "end": "2026-06-12",
+      "sharpe": 0.7673,
+      "calmar": 0.4419,
+      "left_tail_days_2pct": 113,
+      "mean_exposure": 1.0,
+      "turnover_ann": 0.0,
+      "cagr_pct": 15.1343,
+      "ann_return_pct": 16.3853,
+      "ann_vol_pct": 21.3536,
+      "mdd_pct": -34.2474,
+      "cdar95_pct": 25.8052,
+      "left_tail_freq_2pct_pct": 5.3227,
+      "cvar5_daily_pct": -3.1986
+    },
+    "vol_target": {
+      "n_days": 2123,
+      "start": "2018-01-02",
+      "end": "2026-06-12",
+      "sharpe": 0.6258,
+      "calmar": 0.3746,
+      "left_tail_days_2pct": 39,
+      "mean_exposure": 0.7239,
+      "turnover_ann": 2.4324,
+      "cagr_pct": 7.7025,
+      "ann_return_pct": 8.3048,
+      "ann_vol_pct": 13.2715,
+      "mdd_pct": -20.5611,
+      "cdar95_pct": 16.8557,
+      "left_tail_freq_2pct_pct": 1.837,
+      "cvar5_daily_pct": -2.0593
+    },
+    "ced20_target": {
+      "n_days": 2123,
+      "start": "2018-01-02",
+      "end": "2026-06-12",
+      "sharpe": 0.6088,
+      "calmar": 0.3225,
+      "left_tail_days_2pct": 45,
+      "mean_exposure": 0.6843,
+      "turnover_ann": 0.6497,
+      "cagr_pct": 7.8779,
+      "ann_return_pct": 8.5809,
+      "ann_vol_pct": 14.0941,
+      "mdd_pct": -24.429,
+      "cdar95_pct": 20.3836,
+      "left_tail_freq_2pct_pct": 2.1196,
+      "cvar5_daily_pct": -2.2288
+    },
+    "ced60_target": {
+      "n_days": 2123,
+      "start": "2018-01-02",
+      "end": "2026-06-12",
+      "sharpe": 0.5132,
+      "calmar": 0.25,
+      "left_tail_days_2pct": 45,
+      "mean_exposure": 0.6537,
+      "turnover_ann": 0.6816,
+      "cagr_pct": 6.3026,
+      "ann_return_pct": 7.0648,
+      "ann_vol_pct": 13.767,
+      "mdd_pct": -25.214,
+      "cdar95_pct": 21.1613,
+      "left_tail_freq_2pct_pct": 2.1196,
+      "cvar5_daily_pct": -2.2246
+    }
+  },
+  "formal_tests": {
+    "paired_moving_block_bootstrap_oos": {
+      "ced20_target_vs_vol_target": {
+        "sharpe_diff_ced20_minus_vol": {
+          "mean": -0.01456,
+          "ci_2p5": -0.223289,
+          "ci_97p5": 0.207027,
+          "p_gt_0": 0.436
+        },
+        "mdd_diff_pp_ced20_minus_vol": {
+          "mean": -2.497874,
+          "ci_2p5": -10.058184,
+          "ci_97p5": 5.246991,
+          "p_gt_0": 0.238
+        },
+        "calmar_diff_ced20_minus_vol": {
+          "mean": -0.016316,
+          "ci_2p5": -0.219644,
+          "ci_97p5": 0.22872,
+          "p_gt_0": 0.383
+        },
+        "cagr_diff_pp_ced20_minus_vol": {
+          "mean": 0.088727,
+          "ci_2p5": -2.9218,
+          "ci_97p5": 3.244678,
+          "p_gt_0": 0.513
+        },
+        "left_tail_freq_diff_ced20_minus_vol": {
+          "mean": 0.002959,
+          "ci_2p5": -0.004251,
+          "ci_97p5": 0.010363,
+          "p_gt_0": 0.777
+        }
+      },
+      "ced60_target_vs_vol_target": {
+        "sharpe_diff_ced60_minus_vol": {
+          "mean": -0.107022,
+          "ci_2p5": -0.326882,
+          "ci_97p5": 0.133539,
+          "p_gt_0": 0.167
+        },
+        "mdd_diff_pp_ced60_minus_vol": {
+          "mean": -3.624858,
+          "ci_2p5": -12.870589,
+          "ci_97p5": 4.758089,
+          "p_gt_0": 0.194
+        },
+        "calmar_diff_ced60_minus_vol": {
+          "mean": -0.08082,
+          "ci_2p5": -0.315966,
+          "ci_97p5": 0.153458,
+          "p_gt_0": 0.156
+        },
+        "cagr_diff_pp_ced60_minus_vol": {
+          "mean": -1.449881,
+          "ci_2p5": -4.450901,
+          "ci_97p5": 1.725559,
+          "p_gt_0": 0.174
+        },
+        "left_tail_freq_diff_ced60_minus_vol": {
+          "mean": 0.002823,
+          "ci_2p5": -0.004239,
+          "ci_97p5": 0.010363,
+          "p_gt_0": 0.772
+        }
+      }
+    }
+  },
+  "figures": [
+    "fig_equity_curves.png",
+    "fig_exposures_and_risk_signals.png"
+  ],
+  "related_knowledge": [
+    "K1494: CDaR scaler did not beat realized-vol targeting on SPY/TLT/GLD/DBC.",
+    "K1334: CVaR target did not reliably improve on realized-vol targeting."
+  ],
+  "literature": [
+    {
+      "citation": "Chekhlov, Uryasev, Zabarankin (2005), Drawdown Measure in Portfolio Optimization",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=544742"
+    },
+    {
+      "citation": "Chekhlov, Uryasev, Zabarankin (2003), Portfolio Optimization with Drawdown Constraints",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323"
+    },
+    {
+      "citation": "PyPortfolioOpt EfficientCDaR documentation",
+      "url": "https://pyportfolioopt.readthedocs.io/en/latest/GeneralEfficientFrontier.html"
+    },
+    {
+      "citation": "scikit-portfolio Efficient Conditional Drawdown at Risk documentation",
+      "url": "https://scikit-portfolio.github.io/scikit-portfolio/efficient_cdar/"
+    }
+  ],
+  "research_honesty_notes": [
+    "CED is backward-looking and path-dependent; it should not be described as anticipating fast crashes unless the OOS evidence supports that.",
+    "This is an equity-only robustness check, not an investable strategy launch gate.",
+    "All exposure signals are explicitly shifted by one trading day before returns are applied."
+  ],
+  "verdict": {
+    "overall": "NULL",
+    "winning_ced_variants": [],
+    "plain_english": "Fixed-horizon CED targeting does not pass the pre-specified gate versus 63d realized-vol targeting."
+  }
+}

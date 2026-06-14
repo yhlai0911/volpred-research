@@ -3892,5 +3892,23 @@
       "regime_breakdown",
       "NULL"
     ]
+  },
+  {
+    "entry_id": "5865caba",
+    "timestamp": "2026-06-15T05:13:50.635170",
+    "phase": "experiment",
+    "action": "Completed Conditional Expected Drawdown risk-target experiment",
+    "observation": "NULL result: CED20/CED60 reduced turnover but had worse OOS MDD, Calmar, and left-tail day counts than the 63d realized-vol target.",
+    "decision": "Record as NULL; do not promote CED as a vol-target upgrade without intraday-data retest and stronger OOS evidence.",
+    "experiment_ids": [
+      "research_conditional_expected_drawdown_ced_vt"
+    ],
+    "tags": [
+      "CED",
+      "drawdown",
+      "risk_targeting",
+      "NULL",
+      "codex"
+    ]
   }
 ]

@@ -34127,5 +34127,18 @@
     "data_source": "yfinance auto-adjusted close 2005-2026",
     "item_id": "f45ccf97",
     "created_at": "2026-06-15T04:12:02.488669"
+  },
+  {
+    "item_id": "4336a0d0",
+    "category": "empirical_null",
+    "content": "research_conditional_expected_drawdown_ced_vt NULL: fixed-horizon CED20/CED60 targeting on an equal-weight SPY/QQQ/IWM basket does not beat a 63d realized-vol target OOS from 2018-01-02 to 2026-06-12 (n=2,123). Vol target: Sharpe 0.6258, MDD -20.5611%, Calmar 0.3746, left-tail days <= -2% = 39, mean exposure 0.7239. CED20: Sharpe 0.6088, MDD -24.4290%, Calmar 0.3225, left-tail days 45, turnover lower at 0.6497. CED60: Sharpe 0.5132, MDD -25.2140%, Calmar 0.2500, left-tail days 45. Paired 21d moving-block bootstrap with seed 42 does not support drawdown improvement: CED20 MDD diff mean -2.4979pp, 95% CI [-10.0582,+5.2470]; CED60 MDD diff mean -3.6249pp, 95% CI [-12.8706,+4.7581]. Interpret as another backward-looking tail/drawdown scaler NULL result; do not publish as evidence that CED anticipates fast equity crashes.",
+    "evidence": [
+      "experiments/research_conditional_expected_drawdown_ced_vt/README.md",
+      "experiments/research_conditional_expected_drawdown_ced_vt/research_conditional_expected_drawdown_ced_vt.py",
+      "experiments/research_conditional_expected_drawdown_ced_vt/research_conditional_expected_drawdown_ced_vt_results.json",
+      "experiments/research_conditional_expected_drawdown_ced_vt/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-15T05:13:50.220822"
   }
 ]
