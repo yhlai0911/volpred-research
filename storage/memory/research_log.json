@@ -3842,5 +3842,22 @@
       "VIX-sufficiency",
       "NULL_NEGATIVE"
     ]
+  },
+  {
+    "entry_id": "5a21649d",
+    "timestamp": "2026-06-14T09:42:16.341371",
+    "phase": "experiment",
+    "action": "Ran local 5-minute price-duration proxy pilot for SPY and 0050.TW",
+    "observation": "Seasonality-augmented duration RMSE improvement: SPY 0.776% p=0.360; 0050.TW 0.045% p=0.495.",
+    "decision": "Record as weak_positive_not_significant; do not publish strong claim without longer tick-level estimator.",
+    "experiment_ids": [
+      "experiment_price_duration_interday_intraday_vol_2026_06_14"
+    ],
+    "tags": [
+      "price-duration",
+      "intraday",
+      "overnight",
+      "null-result"
+    ]
   }
 ]

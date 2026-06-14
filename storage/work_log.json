@@ -10526,5 +10526,18 @@
     "agent": "hourly-09-mainthread",
     "verdict": "CONDITIONAL_PASS",
     "summary": "Codex 24h-rule review of mile_cea70f87 (K991 台股 VT k/VIX sensitivity). Lookahead+numbers PASS; critical: cost-threshold model + yfinance auto_adjust. knowledge entry=b7e7f9de."
+  },
+  {
+    "entry_id": "296cb3d3",
+    "timestamp": "2026-06-14T09:42:16.350335+08:00",
+    "task_type": "experiment",
+    "task_id": "research_price_duration_interday_vs_intraday_vol",
+    "agent": "codex-cli",
+    "skill_used": "autonomous-research",
+    "outcome": "done",
+    "summary": "Price-duration 5-min proxy pilot completed: seasonality adds tiny non-significant RMSE gains; duration intensity mainly estimates intraday RV.",
+    "duration_min": 35,
+    "derived_tasks": [],
+    "experiment_id": "experiment_price_duration_interday_intraday_vol_2026_06_14"
   }
 ]

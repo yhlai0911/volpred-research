@@ -1,0 +1,254 @@
+{
+  "experiment_id": "experiment_price_duration_interday_intraday_vol_2026_06_14",
+  "title": "Price-duration proxy for interday vs intraday volatility dynamics",
+  "created_at": "2026-06-14",
+  "seed": 42,
+  "data_source": "local 5-minute bars in data/intraday",
+  "method_scope": "5-minute bar proxy, not tick-level price-duration estimator",
+  "literature": [
+    {
+      "citation": "Li, Nolte, Nolte and Yu (2025), Journal of Time Series Analysis",
+      "role": "Direct motivation: adaptive price-duration framework decoupling interday and intraday volatility dynamics.",
+      "url": "https://doi.org/10.1111/jtsa.12849"
+    },
+    {
+      "citation": "Engle and Russell (1998), Econometrica",
+      "role": "Foundational autoregressive conditional duration framework for irregularly spaced financial events.",
+      "url": "https://www.jstor.org/stable/2999632"
+    },
+    {
+      "citation": "Andersen and Bollerslev (1998), Journal of Finance",
+      "role": "Intraday volatility periodicity and longer-run dependencies motivate seasonality separation.",
+      "url": "https://econ.duke.edu/~boller/Published_Papers/jf_98.pdf"
+    }
+  ],
+  "hypothesis": "Adding train-estimated duration seasonality to a plain adaptive-threshold duration count should reduce holdout intraday RV RMSE if price-duration seasonality contains incremental information.",
+  "tickers": {
+    "SPY": {
+      "sample": {
+        "ticker": "SPY",
+        "start_date": "2026-01-14",
+        "end_date": "2026-06-12",
+        "n_days_total": 99,
+        "n_days_train": 69,
+        "n_days_test": 30,
+        "bars_per_day": 78,
+        "threshold_log_price": 0.000781037695257638
+      },
+      "train_test_dates": {
+        "train_start": "2026-01-15",
+        "train_end": "2026-04-29",
+        "test_start": "2026-04-30",
+        "test_end": "2026-06-12"
+      },
+      "duration_threshold": {
+        "definition": "median train daily intraday sigma divided by sqrt(bars_per_day)",
+        "value_log_price": 0.000781037695257638
+      },
+      "holdout_metrics": {
+        "plain_duration": {
+          "rmse": 1.8515791427712653e-05,
+          "mae": 9.915821009229501e-06,
+          "log_rmse": 0.23585612161369948,
+          "qlike": -9.38478973825627
+        },
+        "seasonality_augmented_duration": {
+          "rmse": 1.837210670812355e-05,
+          "mae": 9.754524177867141e-06,
+          "log_rmse": 0.22881715477720938,
+          "qlike": -9.38629758197266
+        },
+        "parkinson_range": {
+          "rmse": 3.236684948522971e-05,
+          "mae": 2.1662107819983624e-05,
+          "log_rmse": 0.535507497064777,
+          "qlike": -9.27787675575917
+        }
+      },
+      "rmse_delta_test": {
+        "observed_rmse_delta_seasonal_minus_plain": -1.436847195891014e-07,
+        "observed_rmse_reduction_pct": 0.7760117635266076,
+        "bootstrap_ci_95": [
+          -9.075162328831572e-07,
+          4.802416435995602e-07
+        ],
+        "one_sided_p_seasonal_better": 0.3596403596403596,
+        "n_bootstrap": 1000
+      },
+      "correlations": {
+        "event_count_vs_intraday_rv_train": 0.9627500007259084,
+        "event_count_vs_overnight_var_train": 0.12274163232628368,
+        "event_count_vs_intraday_rv_test": 0.9736582114032969,
+        "event_count_vs_overnight_var_test": 0.29238864225830086,
+        "season_weighted_count_vs_intraday_rv_test": 0.9745491338757044
+      },
+      "models": {
+        "plain_duration": {
+          "features": [
+            "log_pd_iv_plain"
+          ],
+          "params": {
+            "const": 3.0067039675485194,
+            "log_pd_iv_plain": 1.1982536156072507
+          },
+          "train_r2": 0.9441229941762007,
+          "train_n": 68
+        },
+        "seasonality_augmented_duration": {
+          "features": [
+            "log_pd_iv_plain",
+            "log_pd_iv_season_weighted",
+            "seasonal_alignment"
+          ],
+          "params": {
+            "const": 3.8820873246096514,
+            "log_pd_iv_plain": 2.0951765134485387,
+            "log_pd_iv_season_weighted": -0.8914375824674727,
+            "seasonal_alignment": -0.702775907159003
+          },
+          "train_r2": 0.9453829194646207,
+          "train_n": 68
+        },
+        "parkinson_range": {
+          "features": [
+            "log_parkinson_var"
+          ],
+          "params": {
+            "const": -3.492174431339638,
+            "log_parkinson_var": 0.6459674144718544
+          },
+          "train_r2": 0.6547527027937283,
+          "train_n": 68
+        }
+      },
+      "descriptive": {
+        "train_intraday_rv_mean": 5.166678004863982e-05,
+        "test_intraday_rv_mean": 4.8115774092018244e-05,
+        "train_overnight_share_mean": 0.3283257923185423,
+        "test_overnight_share_mean": 0.2866940177202198,
+        "train_event_count_mean": 34.05882352941177,
+        "test_event_count_mean": 29.8
+      },
+      "verdict": "weak_positive_not_significant"
+    },
+    "0050.TW": {
+      "sample": {
+        "ticker": "0050.TW",
+        "start_date": "2026-01-20",
+        "end_date": "2026-06-11",
+        "n_days_total": 81,
+        "n_days_train": 56,
+        "n_days_test": 25,
+        "bars_per_day": 53,
+        "threshold_log_price": 0.0013375308244236812
+      },
+      "train_test_dates": {
+        "train_start": "2026-01-22",
+        "train_end": "2026-05-04",
+        "test_start": "2026-05-05",
+        "test_end": "2026-06-11"
+      },
+      "duration_threshold": {
+        "definition": "median train daily intraday sigma divided by sqrt(bars_per_day)",
+        "value_log_price": 0.0013375308244236812
+      },
+      "holdout_metrics": {
+        "plain_duration": {
+          "rmse": 5.513642348416653e-05,
+          "mae": 2.9857393983357205e-05,
+          "log_rmse": 0.22552096235422636,
+          "qlike": -8.105957730181478
+        },
+        "seasonality_augmented_duration": {
+          "rmse": 5.511140053788267e-05,
+          "mae": 2.9217689352939567e-05,
+          "log_rmse": 0.21112332313955193,
+          "qlike": -8.108317095161581
+        },
+        "parkinson_range": {
+          "rmse": 9.219244645121936e-05,
+          "mae": 5.277197618501865e-05,
+          "log_rmse": 0.39429823166142824,
+          "qlike": -8.045205004504295
+        }
+      },
+      "rmse_delta_test": {
+        "observed_rmse_delta_seasonal_minus_plain": -2.5022946283864234e-08,
+        "observed_rmse_reduction_pct": 0.04538369502884068,
+        "bootstrap_ci_95": [
+          -2.0281664251245975e-05,
+          2.095437666904525e-05
+        ],
+        "one_sided_p_seasonal_better": 0.4945054945054945,
+        "n_bootstrap": 1000
+      },
+      "correlations": {
+        "event_count_vs_intraday_rv_train": 0.9553064949931365,
+        "event_count_vs_overnight_var_train": 0.11340768291942713,
+        "event_count_vs_intraday_rv_test": 0.9549638329662443,
+        "event_count_vs_overnight_var_test": 0.5322728877381012,
+        "season_weighted_count_vs_intraday_rv_test": 0.8752619243357188
+      },
+      "models": {
+        "plain_duration": {
+          "features": [
+            "log_pd_iv_plain"
+          ],
+          "params": {
+            "const": 2.69098242676351,
+            "log_pd_iv_plain": 1.1735026685482601
+          },
+          "train_r2": 0.8633331666751571,
+          "train_n": 55
+        },
+        "seasonality_augmented_duration": {
+          "features": [
+            "log_pd_iv_plain",
+            "log_pd_iv_season_weighted",
+            "seasonal_alignment"
+          ],
+          "params": {
+            "const": 2.229395665683022,
+            "log_pd_iv_plain": 0.992353509737931,
+            "log_pd_iv_season_weighted": 0.2128747803290416,
+            "seasonal_alignment": 0.5457952423646146
+          },
+          "train_r2": 0.8875882957424589,
+          "train_n": 55
+        },
+        "parkinson_range": {
+          "features": [
+            "log_parkinson_var"
+          ],
+          "params": {
+            "const": -4.313338223457607,
+            "log_parkinson_var": 0.5262478247948618
+          },
+          "train_r2": 0.6567016153353504,
+          "train_n": 55
+        }
+      },
+      "descriptive": {
+        "train_intraday_rv_mean": 0.00010915547360886488,
+        "test_intraday_rv_mean": 0.00014548760934366984,
+        "train_overnight_share_mean": 0.548615443939148,
+        "test_overnight_share_mean": 0.49921866574139456,
+        "train_event_count_mean": 22.69090909090909,
+        "test_event_count_mean": 27.04
+      },
+      "verdict": "weak_positive_not_significant"
+    }
+  },
+  "overall_conclusion": {
+    "rmse_reduction_pct_by_ticker": {
+      "SPY": 0.7760117635266076,
+      "0050.TW": 0.04538369502884068
+    },
+    "significant_by_ticker": {
+      "SPY": false,
+      "0050.TW": false
+    },
+    "verdict": "weak_positive_not_significant",
+    "interpretation": "Duration intensity is informative for intraday RV, but the added seasonality component is not uniformly or statistically significant across SPY and 0050.TW in this short 2026 local sample."
+  }
+}

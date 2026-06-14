@@ -5822,5 +5822,14 @@
     "thought": "\u2605\u2605\u2605 \u65b9\u6cd5\u8ad6\u4fee\u6b63\uff1a\u671f\u8ca8\u907f\u96aa\u4e0d\u8a72\u7528\u4ea4\u6613\u7b56\u7565\u6307\u6a19\u8a55\u4f30\uff01\n\n\u7528\u6236\u6307\u51fa\u6211\u5728 I3/I5/I6 \u4e2d\u72af\u4e86\u6839\u672c\u6027\u932f\u8aa4\uff1a\u7528 Sharpe/CAGR \u6bd4\u8f03\u907f\u96aa\u548c\u4ea4\u6613\u7b56\u7565\u3002\n\n\u907f\u96aa\u7684\u76ee\u7684\u662f\u964d\u4f4e\u98a8\u96aa\uff0c\u4e0d\u662f\u6700\u5927\u5316\u5831\u916c\u3002\u4e00\u500b 95% variance reduction + CAGR 2.2% \u7684\u907f\u96aa\u7d44\u5408\u505a\u7684\u6b63\u662f\u5b83\u8a72\u505a\u7684\u4e8b\u2014\u2014\u4f4e CAGR \u4e0d\u662f\u5931\u6557\uff0c\u662f\u76ee\u6a19\u3002\n\n\u6b63\u78ba\u7684\u907f\u96aa\u8a55\u4f30\u6846\u67b6\uff1a\n1. Variance Reduction (HE = 1 - Var_hedged/Var_unhedged) \u2014 Ederington (1979)\n2. Basis Risk \u2014 \u6b98\u5dee\u98a8\u96aa\u7684\u7a69\u5b9a\u6027\n3. VaR/ES Reduction \u2014 \u5c3e\u90e8\u4fdd\u8b77\n4. Utility-based \u2014 mean-variance utility with risk aversion \u03bb\n5. \u6210\u672c = \u5be6\u969b\u907f\u96aa\u6210\u672c\uff08margin + roll + basis\uff09\uff0c\u4e0d\u662f vs B&H \u7684\u6a5f\u6703\u6210\u672c\n6. \u907f\u96aa\u7a69\u5b9a\u6027 \u2014 OHR \u5728\u4e0d\u540c regime \u7684\u6ce2\u52d5\n\n\u6211\u5728 I6 \u4e2d\u8aaa\u300c50/50+VT \u52dd\u6240\u6709\u671f\u8ca8\u65b9\u6848\u300d\u662f\u932f\u8aa4\u6bd4\u8f03\u2014\u2014VT \u662f\u4ea4\u6613\u7b56\u7565\uff08\u90e8\u5206\u66dd\u96aa\uff09\uff0cfutures hedge \u662f\u98a8\u96aa\u7ba1\u7406\u5de5\u5177\uff08\u964d\u4f4e\u7279\u5b9a\u98a8\u96aa\uff09\u3002\n\n\u9700\u8981\u505a\u7684\u4fee\u6b63\uff1a\n1. \u7528\u6b63\u78ba\u7684 HE \u6307\u6a19\u91cd\u65b0\u8a55\u4f30 I-series\n2. \u5728 research_program.md \u52a0\u5165\u907f\u96aa\u8a55\u4f30\u6846\u67b6\n3. \u5206\u6e05\u300c\u6295\u8cc7\u7b56\u7565\u300d\u548c\u300c\u98a8\u96aa\u7ba1\u7406\u300d\u662f\u5169\u500b\u4e0d\u540c\u554f\u984c\n",
     "context": "",
     "experiment_ids": []
+  },
+  {
+    "id": "4319e600",
+    "timestamp": "2026-06-14T09:42:16.328369",
+    "thought": "Price-duration proxy produced a useful null-ish boundary: duration event counts are almost mechanically close to intraday RV, but train-estimated seasonality adds only tiny non-significant holdout RMSE gains. Keep claims as proxy evidence, not a literature replication.",
+    "context": "hourly task research_price_duration_interday_vs_intraday_vol",
+    "experiment_ids": [
+      "experiment_price_duration_interday_intraday_vol_2026_06_14"
+    ]
   }
 ]
