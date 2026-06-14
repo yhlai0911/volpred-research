@@ -1748,3 +1748,21 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **根因（前次 3-strike 之上的第二層）**：平台 ~3-4h 消化完一批研究方向，但 backlog 補充源 journal-discovery 有 **24h 冷卻 + 每日一次 cap** → 補充速度 << 消耗速度 → backlog 反覆抽乾 → refill 無料 → warn/critical。前次 fix（refill cap min(2,target)→max(1,target)）只解「補得到時補滿」，沒解「源頭跟不上」。
 **修法**：`_journal_discovery_dispatch_task` 冷卻 24h→6h、daily-cap 改 6h bucket（每日最多 4 次 dispatch，對齊消耗）。效果：backlog dry 時 refill 自動建 journal_discovery dispatch 任務（任務本身即 pool item → pool 不會空）+ 補充頻率對齊消耗 → 不再反覆乾涸。dashboard threshold 也已對齊（>=3 trough 為健康，6-14 fix）。
 **防再發**：消耗/補充速率匹配是關鍵；若未來消耗再升，調 bucket 粒度（6h→4h）或批量。token 成本：每日最多 4 次 websearch agent，可接受（換 pool 永不空 + 持續研究產出）。
+
+---
+
+## 2026-06-14 13:18 — codex_loop daemon 跳過 Codex review gate（hourly-13 攔截）
+
+**症狀**：codex_loop daemon 完成 K1328（HAR ceiling validation）後直接 mark next_tasks `succeeded` by `codex-desktop`，experiments/k1328/ 三件套齊全 + verdict=PASS。但跳過 `.claude/rules/experiments.md` 強制流程「Codex code review → 通過才寫 knowledge.json」。hourly-13 fire 補做 review → **VERDICT=FAIL**：(1) HAR refit 1d、ML refit 21d 不對稱 → 公平比較不成立；(2) Stage A 在 OOS 同一期間選 best HAR scheme 再於 Stage B 同段 OOS 宣稱 ceiling → in-sample selection on OOS。
+
+**根因**：codex_loop daemon 流程把 `experiment 跑完且 results.json verdict=PASS` 當作 task done 的 signal，但 verdict 是 experiment 自填 — 缺獨立第三方 Codex review gate。研究誠實原則 §3「Codex 審代碼 → 通過才寫 knowledge.json」靠主線程 hourly fire 補做，daemon 沒實作。若無 hourly-13 攔截，K1328 PASS 會以「真實發現」流入 knowledge.json，污染下游論文 / 文章引用。
+
+**修法**：
+1. (本 fire 應急) Revert K1328 next_tasks status → failed；開 K1328-v2 fix task；experiments/k1328/codex_review.md 留 audit；knowledge.json 不寫入。
+2. (待 v2 task) codex_loop daemon 流程修：每個 K-experiment finish 後**強制串** Codex review subprocess，verdict 非 PASS → mark failed (不是 succeeded)、留 codex_review.md。流程在 `codex_loop/` 配置或 hourly_dispatch_pipeline 上補。
+
+**防再發**：
+- (a) `scripts/sync_next_tasks_status.py` 或同等 reaper 加 check：任何 status=succeeded by codex-desktop 的 K 任務若 `experiments/<id>/codex_review.md` 不存在 → flip status to `awaiting_review` 並通知 hourly fire 補做
+- (b) `_append_to_index` knowledge.json provenance gate 已 enforce reviewer 欄位（K1259 process gate 2026-05-17），這層 catch 寫入端；hourly review 補做 catch 流程端
+
+**為什麼這條會發生**：codex_loop daemon 是 2026-05-29 重構 autonomy overhaul 引入，原意是 codex 跑 K-experiment 卸載主線程 token 負擔。但 daemon 把「實驗跑完」=「任務 done」短路了「Codex review gate」。本次是 hourly fire 多樣性 rotation 偶然檢查 experiments untracked orphan 才發現 — 若無此巡檢，類似 K 可能持續 silent FAIL 累積到 knowledge.json + 論文。

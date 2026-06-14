@@ -30235,7 +30235,7 @@
     "title": "K1328: 「HAR ceiling」驗證 — Los Flamingos 2025",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 451). Original: 「HAR ceiling」驗證 — Los Flamingos 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1328.py with signal.shift(1) + seed=42, (c) K1328_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "succeeded",
+    "status": "failed",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 451,
@@ -30249,7 +30249,7 @@
     "claim_session_id": "5b21bedf491c",
     "started_at": "2026-06-14T04:53:29.922211+00:00",
     "completed_at": "2026-06-14T04:59:48.481617+00:00",
-    "result": "Built experiments/k1328 with local-snapshot HAR ceiling validation. Best HAR scheme = rolling_1000_refit_1d; pooled QLIKE 3.3746 beats ElasticNet 3.3826, RandomForest 3.4508, XGBoost 4.6749. No challenger cleared Harvey |t|>3, so ceiling supported in this local proxy setup."
+    "result": "Codex review FAIL: (1) HAR/ML refit cadence asymmetric (daily vs 21d), (2) Stage A best-HAR selection on same OOS window as Stage B ceiling claim → in-sample selection on OOS. Verdict downgraded; v2 task K1328_v2_fix opened. See experiments/k1328/codex_review.md"
   },
   {
     "id": "K1329",
@@ -30346,5 +30346,27 @@
       "autonomous-research"
     ],
     "created_at": "2026-06-14T03:16:04Z"
+  },
+  {
+    "id": "K1328_v2_fix_methodology",
+    "task_type": "experiment",
+    "status": "pending",
+    "priority": "P3",
+    "title": "K1328-v2: 修正 HAR ceiling validation methodology (Codex FAIL → matched refit + nested OOS)",
+    "description": "K1328 v1 Codex review FAIL (experiments/k1328/codex_review.md). 修正兩處：(1) HAR 與 ML 同 refit cadence（建議都 21d 或都 1d），不可不對稱。(2) Stage A 在 burn-in/holdout 期間選 best HAR scheme（≤ 2020-12-31），Stage B 才用 2021-01-04+ 獨立 OOS evaluate ceiling claim。修完 re-run + 重跑 Codex review，PASS 才寫 knowledge.json。",
+    "created_at": "2026-06-14T05:19:45+00:00",
+    "source": "codex_review_followup",
+    "related_k_id": "K1328"
+  },
+  {
+    "id": "K1327_codex_review_followup",
+    "task_type": "experiment",
+    "status": "pending",
+    "priority": "P3",
+    "title": "K1327 補 Codex review (codex_loop daemon 跳過 review gate)",
+    "description": "K1327 (Adaptive Multi-Factor HAR) 被 codex-desktop daemon mark succeeded 但 experiments/k1327/codex_review.md 不存在 — daemon 跳過 .claude/rules/experiments.md 強制 Codex review gate（K1328 同 pattern 已 hourly-13 catch FAIL）。補 review 重點：(1) lookahead safety (156 shifted daily features), (2) seed 固定, (3) HAR vs adaptive multi-factor 公平比較 (same window + cadence), (4) verdict 是否如實. 若 PASS 才寫 knowledge.json；FAIL 同 K1328 處理（revert status + 開 v2 fix task）。完整 SOP: hourly-13 fire K1328 範例 (experiments/k1328/codex_review.md)。",
+    "created_at": "2026-06-14T05:21:24+00:00",
+    "source": "codex_review_gap_recovery",
+    "related_k_id": "K1327"
   }
 ]

@@ -10546,5 +10546,11 @@
     "task_type": "experiment",
     "title": "K1329 oil volatility spillover forecast test",
     "summary": "Completed K1329: Granger spillover exists, but no OOS HAR+VIX forecast edge; knowledge item 045a0841."
+  },
+  {
+    "timestamp": "2026-06-14T13:18",
+    "task_type": "platform_ops",
+    "task_id": "hourly_13_codex_loop_review_gate_enforcement",
+    "result": "K1328 orphan recovery + Codex review enforcement: codex_loop daemon 跑完 K1328 PASS 並標 next_tasks succeeded，但跳過 Codex code review。Hourly-13 補 review → verdict FAIL（refit cadence asymmetric + in-sample selection on OOS）。導正: K1328 next_tasks status reverted to failed + 開 K1328-v2 fix task + experiments/k1328/codex_review.md 留 audit。Lesson 待寫入 error_log: codex_loop daemon dispatch K-experiment 必須串 Codex review gate 才能 mark succeeded。"
   }
 ]
