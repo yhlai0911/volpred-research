@@ -42,6 +42,7 @@ def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):
 
     monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
     monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
     monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
@@ -53,6 +54,90 @@ def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):
     assert result["reason"] == "no_new_candidates_passing_filter"
     data = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert data == []
+
+
+def test_refill_skips_failed_source_experiment_k(tmp_path, monkeypatch, capsys):
+    """Regression: K1327 failed experiment must not become an article task.
+
+    publication_candidates can retain a stale verdict signal after a Codex
+    review or follow-up marks the source K experiment failed. Refill must trust
+    the task receipt and skip the K before creating `<K>_article_<audience>`.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    candidates = tmp_path / "storage" / "publication_candidates.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "K1327",
+                    "task_type": "experiment",
+                    "status": "failed",
+                    "title": "K1327 source experiment failed",
+                },
+                {
+                    "id": "K1327_v2_fix_methodology",
+                    "task_type": "experiment",
+                    "status": "succeeded",
+                    "title": "K1327-v2 follow-up should not revive K1327",
+                },
+            ],
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    candidates.write_text(
+        json.dumps(
+            {
+                "top_10_uncovered": [
+                    {
+                        "k_id": "K1327",
+                        "title": "Adaptive Multi-Factor HAR",
+                        "score": 4,
+                        "reasons": ["stale PASS"],
+                        "verdict_preview": "stale candidate after failed source",
+                        "audiences_covered": [],
+                        "covered_by": [],
+                    },
+                    {
+                        "k_id": "K1056",
+                        "title": "legitimate publishable K",
+                        "score": 4,
+                        "reasons": ["PASS"],
+                        "verdict_preview": "ok",
+                        "audiences_covered": [],
+                        "covered_by": [],
+                    },
+                ],
+                "missing_research_top5": [],
+                "missing_general_top5": [],
+                "candidates": [],
+            },
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
+    monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
+    monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
+
+    result = MODULE.refill(target=3, dry_run=False)
+
+    assert result["ok"] is True
+    assert result["added"] == 1
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    ids = [t["id"] for t in data]
+    assert "K1327_article_general" not in ids
+    assert "K1056_article_general" in ids
+    assert "skip K1327: source experiment task status=failed" in capsys.readouterr().out
 
 
 def test_archived_articles_count_as_feed_coverage(tmp_path, monkeypatch):
@@ -468,6 +553,7 @@ def test_refill_fallback_audience_gap_requires_score_threshold(tmp_path, monkeyp
 
     monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
     monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
     monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
@@ -540,6 +626,7 @@ def test_refill_skips_research_saturated_k(tmp_path, monkeypatch):
 
     monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
     monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
     monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())

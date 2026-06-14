@@ -241,6 +241,32 @@ def _kids_with_succeeded_article_attempt(tasks: list, audience: str) -> set[str]
     return kids
 
 
+def _failed_experiment_kids(tasks: list) -> set[str]:
+    """K-ids whose source experiment task ended failed.
+
+    A failed source experiment is not a publishable finding, even when
+    publication_candidates still carries a stale verdict signal. Only exact K-id
+    experiment tasks (or explicit k_id / experiment_id fields) are mapped here;
+    follow-up task ids such as K1327_v2_fix_methodology should not back-map to
+    the original K1327 candidate.
+    """
+    kids: set[str] = set()
+    exact_kid_re = re.compile(r"^K\d{2,5}[A-Z]?$", re.IGNORECASE)
+    for t in tasks:
+        if str(t.get("task_type") or "") != "experiment":
+            continue
+        if str(t.get("status") or "").lower() != "failed":
+            continue
+        for key in ("k_id", "experiment_id"):
+            v = t.get(key)
+            if v:
+                kids.add(str(v).upper())
+        tid = str(t.get("id") or "")
+        if exact_kid_re.match(tid):
+            kids.add(tid.upper())
+    return kids
+
+
 def _any_feed_coverage_kids() -> set[str]:
     """K-ids referenced by ANY feed article regardless of audience.
 
@@ -922,6 +948,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
     succeeded_general_kids = _kids_with_succeeded_article_attempt(tasks, "general")
     any_feed_kids = _any_feed_coverage_kids()
     audit_pending_kids = terminal_article_kids & any_feed_kids
+    failed_experiment_kids = _failed_experiment_kids(tasks)
 
     # Compose ranked candidate list: top_10_uncovered first (highest signal),
     # then missing_research_top5 (prefer research over general for novelty),
@@ -1000,6 +1027,12 @@ def refill(target: int, dry_run: bool = False) -> dict:
         needed_audience = "general" if "general" not in audiences_covered else "research"
         if _is_invalidated_artifact_candidate(cand):
             continue
+        # 2026-06-14 K1327 incident: publication_candidates can retain a stale
+        # verdict signal after the source K experiment task is failed. Never
+        # materialize a reader-facing article from a failed source experiment.
+        if kid.upper() in failed_experiment_kids:
+            print(f"  [refill] skip {kid}: source experiment task status=failed")
+            continue
         # Skip if K has a LIVE task (pending/in_progress/blocked) — don't dup.
         # Terminal tasks (succeeded/failed/superseded) eligible for retry if
         # feed.json still lacks coverage (2026-05-29 fix; see _live_kids).
@@ -1059,6 +1092,9 @@ def refill(target: int, dry_run: bool = False) -> dict:
         if len(new_entries) >= target:
             break
         kid = cand["k_id"]
+        if kid.upper() in failed_experiment_kids:
+            print(f"  [refill] skip {kid}: source experiment task status=failed")
+            continue
         # 8th belt also applies to deferred dominant pool (2026-06-08).
         if _is_research_saturated(cand):
             continue
