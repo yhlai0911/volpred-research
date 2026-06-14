@@ -23201,12 +23201,23 @@
     "description": "Codex review FAIL 觸發。當 K593_fix_forecast_bug 完成後（forecast engine + DM date-align 修好、results.json 重跑），對比新舊數字決定 corrigendum scope: (a) 若 5 段 QLIKE / DM stats 實質改變 → 更新 article 表格 + per-period stats; (b) 「事先把判讀規則寫死」改寫為 ex-post documentation 表述; (c) 補 Bonferroni 校正說明（OOS1/OOS2 顯著性下調為 n.s.）; (d)「沒有萬靈丹」/「市場環境會挑視窗嗎」限定 SPY 這 5 段; (e) 移除/降調 Feng & Zhang (2025, JoF) 引文。不下架。details 加 corrigendum note + linked review path.",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "blocked",
-    "blocked_reason": "prior_attempts_failed",
-    "blocked_until": "2026-06-14",
-    "blocked_note": "等 K593_fix_forecast_bug 完成 + 新舊數字比對才動文章。先處理 script bug。",
+    "status": "succeeded",
     "source": "codex_review_followup",
-    "parent_review": "mile_faaddb06"
+    "parent_review": "mile_faaddb06",
+    "status_history": [
+      {
+        "at": "2026-06-14T00:08:05.502776+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-06-14)"
+      }
+    ],
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-14T00:09:16.448118+00:00",
+    "claim_session_id": "986ad8ea41c6",
+    "started_at": "2026-06-14T00:09:21.452273+00:00",
+    "completed_at": "2026-06-14T00:11:27.426840+00:00",
+    "result": "Corrigendum finalize: (1) OOS5 DM stat typo −0.65→−0.46 fixed in feed.json (2) details.corrigendum_pending true→false, finalized_at=2026-06-14T00:08:00Z (3) Supabase sync 3 articles, emdash_normalizer auto-cleaned 5 em-dashes. Article 5 段 QLIKE+DM+Bonferroni v2 數字、ex-post documentation 改寫、SPY scope limit、Feng & Zhang removal 均在 corrigendum_published 2026-06-07 已完成；本輪僅 cleanup typo + flag finalize。"
   },
   {
     "id": "trending_repost_2026_06_07_ai晶片",
@@ -29988,7 +29999,7 @@
     "title": "研究 backlog fallback: 日內 diurnal pattern 是否「足夠」解釋 RV 變異",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 日內 diurnal pattern 是否「足夠」解釋 RV 變異 — yfinance 或可得 5-min 代理，用無母數方法檢定剔除已知日內 U 型季節後是否仍有顯著 intraday vol 變異，量化季節成分占 RV 的比例（方法論基礎題，校準我方所有日內 RV 估計）（來源：arXiv 2601 diurnal sufficiency nonparametric assessment） | 來源 section: 期刊主題挖掘 batch（2026-06-14b；refill fallback 0 候選 → backlog 抽乾後系統補充；websearch jpm/faj/rfs/joe/jbf/jfm/j.index investing/j.alt inv 2025-26 趨勢層級，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "diurnal_pattern_rv",
@@ -29996,6 +30007,12 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-13T23:09:41+00:00"
+    "created_at": "2026-06-13T23:09:41+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-13T23:51:48.450636+00:00",
+    "claim_session_id": "819b78c4f5e5",
+    "started_at": "2026-06-13T23:52:11.456062+00:00",
+    "completed_at": "2026-06-13T23:56:19.123260+00:00",
+    "result": "Built experiment_diurnal_pattern_rv_2026_06_14 with README/script/results plus 2 figures using local 5-minute SPY and 0050.TW data.\nProxy holdout test: raw diurnal bin effect is significant in both markets (p=0.001), but deseasonalized residual bin effect is not significant at 5% (SPY p=0.113, 0050.TW p=0.101); deterministic diurnal pattern removes about 53% of bin effect.\nConclusion is intentionally limited: local 2026-01 to 2026-06 proxy evidence cannot reject diurnal sufficiency, but daily allocation R^2 versus uniform is only 0.08 to 0.10, so this is not a full CHP paper-grade verdict."
   }
 ]
