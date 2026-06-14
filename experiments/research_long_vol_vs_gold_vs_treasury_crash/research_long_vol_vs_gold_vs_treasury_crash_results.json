@@ -1,0 +1,475 @@
+{
+  "experiment_id": "research_long_vol_vs_gold_vs_treasury_crash",
+  "created_at_utc": "2026-06-14T18:49:42.083428+00:00",
+  "verdict": "NULL",
+  "data": {
+    "source": "yfinance",
+    "tickers": {
+      "SPY": "SPY",
+      "VXX": "VXX",
+      "GLD": "GLD",
+      "TLT": "TLT",
+      "VIX": "^VIX",
+      "TNX": "^TNX"
+    },
+    "requested_start": "2018-01-25",
+    "requested_end_exclusive": "2026-06-14",
+    "common_sample_start": "2018-01-26",
+    "common_sample_end": "2026-06-12",
+    "n_daily_common": 2106,
+    "train_end": "2021-12-31",
+    "oos_start": "2022-01-01",
+    "train_n": 991,
+    "oos_n": 1115,
+    "snapshot_files": [
+      "data/GLD.csv",
+      "data/SPY.csv",
+      "data/TLT.csv",
+      "data/VXX.csv",
+      "data/index_TNX.csv",
+      "data/index_VIX.csv"
+    ]
+  },
+  "design": {
+    "lookahead_guard": "Primary rule uses lagged_signal and lagged_shock_type: shock classification at t-1, defensive return at t.",
+    "event_signal": "SPY_ret <= -1.5% OR SPY drawdown <= -8% and SPY_ret < 0.",
+    "shock_classification": {
+      "liquidity_shock": "event day with TLT_ret < 0, GLD_ret < 0, and VIX_chg > 5%",
+      "rate_shock": "event day with TLT_ret < 0 and TNX_chg > 0",
+      "growth_shock": "event day with TLT_ret > 0 and TNX_chg < 0",
+      "mixed_shock": "event days not captured by the above rules"
+    },
+    "transaction_cost": "10.0 bps per absolute change in traded asset weights.",
+    "selection_rule": "For each lagged shock type, choose the training asset with highest mean next-day return; fallback to all training event days when type-specific n < 5."
+  },
+  "event_counts": {
+    "train_lagged_signal_by_type": {
+      "growth_shock": 69,
+      "rate_shock": 13,
+      "liquidity_shock": 8,
+      "mixed_shock": 6
+    },
+    "oos_lagged_signal_by_type": {
+      "growth_shock": 89,
+      "rate_shock": 76,
+      "liquidity_shock": 39,
+      "mixed_shock": 25
+    },
+    "train_total_lagged_events": 96,
+    "oos_total_lagged_events": 229
+  },
+  "asset_selection": {
+    "growth_shock": {
+      "train_events": 69,
+      "selected_asset": "GLD",
+      "selection_source": "type_specific_train",
+      "train_mean_return_VXX": -0.01836748660114324,
+      "train_mean_return_GLD": 0.0021479443416146824,
+      "train_mean_return_TLT": -0.00023496801873570266
+    },
+    "rate_shock": {
+      "train_events": 13,
+      "selected_asset": "TLT",
+      "selection_source": "type_specific_train",
+      "train_mean_return_VXX": -0.01508570353206971,
+      "train_mean_return_GLD": 0.0034769046775393183,
+      "train_mean_return_TLT": 0.004872597985108742
+    },
+    "liquidity_shock": {
+      "train_events": 8,
+      "selected_asset": "VXX",
+      "selection_source": "type_specific_train",
+      "train_mean_return_VXX": 0.06430328460565593,
+      "train_mean_return_GLD": -0.004428762908860004,
+      "train_mean_return_TLT": 0.008335338976005302
+    },
+    "mixed_shock": {
+      "train_events": 6,
+      "selected_asset": "GLD",
+      "selection_source": "type_specific_train",
+      "train_mean_return_VXX": -0.04629289045673766,
+      "train_mean_return_GLD": -0.002765070377599673,
+      "train_mean_return_TLT": -0.005324358926596291
+    }
+  },
+  "matrices": {
+    "train_lagged_signal": {
+      "growth_shock": {
+        "VXX": {
+          "n": 69,
+          "mean_asset_return": -0.01836748660114324,
+          "mean_protection_vs_spy": -0.026219019095075406,
+          "win_rate_vs_spy": 0.2898550724637681,
+          "positive_return_rate": 0.2898550724637681
+        },
+        "GLD": {
+          "n": 69,
+          "mean_asset_return": 0.0021479443416146824,
+          "mean_protection_vs_spy": -0.005703588152317486,
+          "win_rate_vs_spy": 0.3333333333333333,
+          "positive_return_rate": 0.6086956521739131
+        },
+        "TLT": {
+          "n": 69,
+          "mean_asset_return": -0.00023496801873570266,
+          "mean_protection_vs_spy": -0.008086500512667872,
+          "win_rate_vs_spy": 0.391304347826087,
+          "positive_return_rate": 0.4492753623188406
+        }
+      },
+      "rate_shock": {
+        "VXX": {
+          "n": 13,
+          "mean_asset_return": -0.01508570353206971,
+          "mean_protection_vs_spy": -0.014983335338699931,
+          "win_rate_vs_spy": 0.3076923076923077,
+          "positive_return_rate": 0.3076923076923077
+        },
+        "GLD": {
+          "n": 13,
+          "mean_asset_return": 0.0034769046775393183,
+          "mean_protection_vs_spy": 0.003579272870909098,
+          "win_rate_vs_spy": 0.5384615384615384,
+          "positive_return_rate": 0.5384615384615384
+        },
+        "TLT": {
+          "n": 13,
+          "mean_asset_return": 0.004872597985108742,
+          "mean_protection_vs_spy": 0.004974966178478522,
+          "win_rate_vs_spy": 0.5384615384615384,
+          "positive_return_rate": 0.5384615384615384
+        }
+      },
+      "liquidity_shock": {
+        "VXX": {
+          "n": 8,
+          "mean_asset_return": 0.06430328460565593,
+          "mean_protection_vs_spy": 0.08495427566076381,
+          "win_rate_vs_spy": 0.625,
+          "positive_return_rate": 0.625
+        },
+        "GLD": {
+          "n": 8,
+          "mean_asset_return": -0.004428762908860004,
+          "mean_protection_vs_spy": 0.01622222814624788,
+          "win_rate_vs_spy": 0.5,
+          "positive_return_rate": 0.625
+        },
+        "TLT": {
+          "n": 8,
+          "mean_asset_return": 0.008335338976005302,
+          "mean_protection_vs_spy": 0.028986330031113186,
+          "win_rate_vs_spy": 0.75,
+          "positive_return_rate": 1.0
+        }
+      },
+      "mixed_shock": {
+        "VXX": {
+          "n": 6,
+          "mean_asset_return": -0.04629289045673766,
+          "mean_protection_vs_spy": -0.06747717762505889,
+          "win_rate_vs_spy": 0.0,
+          "positive_return_rate": 0.0
+        },
+        "GLD": {
+          "n": 6,
+          "mean_asset_return": -0.002765070377599673,
+          "mean_protection_vs_spy": -0.023949357545920907,
+          "win_rate_vs_spy": 0.5,
+          "positive_return_rate": 0.6666666666666666
+        },
+        "TLT": {
+          "n": 6,
+          "mean_asset_return": -0.005324358926596291,
+          "mean_protection_vs_spy": -0.026508646094917526,
+          "win_rate_vs_spy": 0.3333333333333333,
+          "positive_return_rate": 0.3333333333333333
+        }
+      }
+    },
+    "oos_lagged_signal": {
+      "growth_shock": {
+        "VXX": {
+          "n": 89,
+          "mean_asset_return": 0.0008948908947969758,
+          "mean_protection_vs_spy": 0.0013699058380254238,
+          "win_rate_vs_spy": 0.4606741573033708,
+          "positive_return_rate": 0.449438202247191
+        },
+        "GLD": {
+          "n": 89,
+          "mean_asset_return": 0.0009518603224660617,
+          "mean_protection_vs_spy": 0.0014268752656945098,
+          "win_rate_vs_spy": 0.4943820224719101,
+          "positive_return_rate": 0.4606741573033708
+        },
+        "TLT": {
+          "n": 89,
+          "mean_asset_return": -0.001741808320392937,
+          "mean_protection_vs_spy": -0.0012667933771644889,
+          "win_rate_vs_spy": 0.48314606741573035,
+          "positive_return_rate": 0.48314606741573035
+        }
+      },
+      "rate_shock": {
+        "VXX": {
+          "n": 76,
+          "mean_asset_return": -0.008919151691120362,
+          "mean_protection_vs_spy": -0.012848738346725334,
+          "win_rate_vs_spy": 0.35526315789473684,
+          "positive_return_rate": 0.3684210526315789
+        },
+        "GLD": {
+          "n": 76,
+          "mean_asset_return": 0.0009554236102212863,
+          "mean_protection_vs_spy": -0.0029741630453836857,
+          "win_rate_vs_spy": 0.4605263157894737,
+          "positive_return_rate": 0.5
+        },
+        "TLT": {
+          "n": 76,
+          "mean_asset_return": -0.0008338740426810697,
+          "mean_protection_vs_spy": -0.004763460698286042,
+          "win_rate_vs_spy": 0.39473684210526316,
+          "positive_return_rate": 0.47368421052631576
+        }
+      },
+      "liquidity_shock": {
+        "VXX": {
+          "n": 39,
+          "mean_asset_return": -0.0008703495265118764,
+          "mean_protection_vs_spy": 0.0012990428123692127,
+          "win_rate_vs_spy": 0.5128205128205128,
+          "positive_return_rate": 0.48717948717948717
+        },
+        "GLD": {
+          "n": 39,
+          "mean_asset_return": -0.0001865575858329978,
+          "mean_protection_vs_spy": 0.0019828347530480915,
+          "win_rate_vs_spy": 0.48717948717948717,
+          "positive_return_rate": 0.5641025641025641
+        },
+        "TLT": {
+          "n": 39,
+          "mean_asset_return": -8.644817759861638e-05,
+          "mean_protection_vs_spy": 0.002082944161282473,
+          "win_rate_vs_spy": 0.48717948717948717,
+          "positive_return_rate": 0.46153846153846156
+        }
+      },
+      "mixed_shock": {
+        "VXX": {
+          "n": 25,
+          "mean_asset_return": -0.016947219052590355,
+          "mean_protection_vs_spy": -0.02236287336015684,
+          "win_rate_vs_spy": 0.28,
+          "positive_return_rate": 0.32
+        },
+        "GLD": {
+          "n": 25,
+          "mean_asset_return": 0.0009464604909622131,
+          "mean_protection_vs_spy": -0.004469193816604271,
+          "win_rate_vs_spy": 0.4,
+          "positive_return_rate": 0.48
+        },
+        "TLT": {
+          "n": 25,
+          "mean_asset_return": -0.0009964501939877214,
+          "mean_protection_vs_spy": -0.006412104501554205,
+          "win_rate_vs_spy": 0.32,
+          "positive_return_rate": 0.44
+        }
+      }
+    },
+    "oos_same_day_nontradable_diagnostic": {
+      "growth_shock": {
+        "VXX": {
+          "n": 89,
+          "same_day_nontradable_mean_asset_return": 0.042787851851484746,
+          "same_day_nontradable_mean_protection_vs_spy": 0.055149583640861206,
+          "same_day_nontradable_win_rate_vs_spy": 0.7865168539325843,
+          "same_day_nontradable_positive_return_rate": 0.7528089887640449
+        },
+        "GLD": {
+          "n": 89,
+          "same_day_nontradable_mean_asset_return": 0.0035939207571836274,
+          "same_day_nontradable_mean_protection_vs_spy": 0.015955652546560083,
+          "same_day_nontradable_win_rate_vs_spy": 0.898876404494382,
+          "same_day_nontradable_positive_return_rate": 0.6292134831460674
+        },
+        "TLT": {
+          "n": 89,
+          "same_day_nontradable_mean_asset_return": 0.011741637797168705,
+          "same_day_nontradable_mean_protection_vs_spy": 0.024103369586545156,
+          "same_day_nontradable_win_rate_vs_spy": 1.0,
+          "same_day_nontradable_positive_return_rate": 1.0
+        }
+      },
+      "rate_shock": {
+        "VXX": {
+          "n": 76,
+          "same_day_nontradable_mean_asset_return": 0.011990366884949056,
+          "same_day_nontradable_mean_protection_vs_spy": 0.020744211247815537,
+          "same_day_nontradable_win_rate_vs_spy": 0.6447368421052632,
+          "same_day_nontradable_positive_return_rate": 0.5921052631578947
+        },
+        "GLD": {
+          "n": 76,
+          "same_day_nontradable_mean_asset_return": -8.757443205357967e-05,
+          "same_day_nontradable_mean_protection_vs_spy": 0.0086662699308129,
+          "same_day_nontradable_win_rate_vs_spy": 0.7105263157894737,
+          "same_day_nontradable_positive_return_rate": 0.5
+        },
+        "TLT": {
+          "n": 76,
+          "same_day_nontradable_mean_asset_return": -0.01202511618078434,
+          "same_day_nontradable_mean_protection_vs_spy": -0.003271271817917859,
+          "same_day_nontradable_win_rate_vs_spy": 0.34210526315789475,
+          "same_day_nontradable_positive_return_rate": 0.0
+        }
+      },
+      "liquidity_shock": {
+        "VXX": {
+          "n": 39,
+          "same_day_nontradable_mean_asset_return": 0.06015291018832878,
+          "same_day_nontradable_mean_protection_vs_spy": 0.07757803318574218,
+          "same_day_nontradable_win_rate_vs_spy": 1.0,
+          "same_day_nontradable_positive_return_rate": 1.0
+        },
+        "GLD": {
+          "n": 39,
+          "same_day_nontradable_mean_asset_return": -0.010132094222810832,
+          "same_day_nontradable_mean_protection_vs_spy": 0.007293028774602552,
+          "same_day_nontradable_win_rate_vs_spy": 0.7435897435897436,
+          "same_day_nontradable_positive_return_rate": 0.0
+        },
+        "TLT": {
+          "n": 39,
+          "same_day_nontradable_mean_asset_return": -0.010450416989001569,
+          "same_day_nontradable_mean_protection_vs_spy": 0.0069747060084118144,
+          "same_day_nontradable_win_rate_vs_spy": 0.7948717948717948,
+          "same_day_nontradable_positive_return_rate": 0.0
+        }
+      },
+      "mixed_shock": {
+        "VXX": {
+          "n": 25,
+          "same_day_nontradable_mean_asset_return": 0.01673784413080806,
+          "same_day_nontradable_mean_protection_vs_spy": 0.029031566422086534,
+          "same_day_nontradable_win_rate_vs_spy": 0.68,
+          "same_day_nontradable_positive_return_rate": 0.64
+        },
+        "GLD": {
+          "n": 25,
+          "same_day_nontradable_mean_asset_return": -0.0003451701725996337,
+          "same_day_nontradable_mean_protection_vs_spy": 0.01194855211867884,
+          "same_day_nontradable_win_rate_vs_spy": 0.84,
+          "same_day_nontradable_positive_return_rate": 0.44
+        },
+        "TLT": {
+          "n": 25,
+          "same_day_nontradable_mean_asset_return": -0.0006664261292671369,
+          "same_day_nontradable_mean_protection_vs_spy": 0.011627296162011337,
+          "same_day_nontradable_win_rate_vs_spy": 0.8,
+          "same_day_nontradable_positive_return_rate": 0.56
+        }
+      }
+    }
+  },
+  "oos_strategy_results": {
+    "crash_type_rule": {
+      "name": "crash_type_rule",
+      "total_return": -0.3408897443574377,
+      "annual_return": -0.08991302272421431,
+      "annual_vol": 0.1452119068510721,
+      "sharpe": -0.5773354928438571,
+      "max_drawdown": -0.49753729282167436,
+      "active_days": 229,
+      "switches": 319,
+      "total_cost": 0.382,
+      "gross_mean_active_return": 4.8292673344149966e-05,
+      "net_mean_active_return": -0.0010608776323327068
+    },
+    "static_VXX": {
+      "name": "static_VXX",
+      "total_return": -0.8019208768307979,
+      "annual_return": -0.30644766068733464,
+      "annual_vol": 0.37982129442190493,
+      "sharpe": -0.7805942743264828,
+      "max_drawdown": -0.849835946630931,
+      "active_days": 229,
+      "switches": 256,
+      "total_cost": 0.256,
+      "gross_mean_active_return": -0.004610630335095802,
+      "net_mean_active_return": -0.0051695823001613045
+    },
+    "static_GLD": {
+      "name": "static_GLD",
+      "total_return": -0.09295704936932458,
+      "annual_return": -0.02180933353433423,
+      "annual_vol": 0.0833460573280695,
+      "sharpe": -0.22313569380252124,
+      "max_drawdown": -0.2630525924227173,
+      "active_days": 229,
+      "switches": 256,
+      "total_cost": 0.256,
+      "gross_mean_active_return": 0.0007585743646413348,
+      "net_mean_active_return": 0.00019962239957583213
+    },
+    "static_TLT": {
+      "name": "static_TLT",
+      "total_return": -0.40556556516056574,
+      "annual_return": -0.11091052544751778,
+      "annual_vol": 0.08850837778669163,
+      "sharpe": -1.2836045819802806,
+      "max_drawdown": -0.41813604749300304,
+      "active_days": 229,
+      "switches": 256,
+      "total_cost": 0.256,
+      "gross_mean_active_return": -0.001077196949933501,
+      "net_mean_active_return": -0.001636148914999004
+    },
+    "equal_weight_defense": {
+      "name": "equal_weight_defense",
+      "total_return": -0.48847179709028343,
+      "annual_return": -0.14058700790048184,
+      "annual_vol": 0.13194810950811,
+      "sharpe": -1.082985245460971,
+      "max_drawdown": -0.5291711840157275,
+      "active_days": 229,
+      "switches": 256,
+      "total_cost": 0.256,
+      "gross_mean_active_return": -0.0016430843067959894,
+      "net_mean_active_return": -0.0022020362718614926
+    }
+  },
+  "bootstrap": {
+    "rule_vs_equal_weight_event_gross": {
+      "n": 229,
+      "mean_diff": 0.0016913769801401393,
+      "ci_low": -0.001123698182755969,
+      "ci_high": 0.004403560971165136,
+      "p_two_sided": 0.25
+    },
+    "rule_vs_best_static_oos_event_gross": {
+      "n": 229,
+      "mean_diff": -0.0007102816912971849,
+      "ci_low": -0.0031354084259177344,
+      "ci_high": 0.0018073204756959224,
+      "p_two_sided": 0.563
+    },
+    "best_static_oos_by_sharpe": "static_GLD",
+    "B": 2000,
+    "seed": 42
+  },
+  "interpretation": {
+    "main_result": "Crash-type-aware defensive rotation does not beat the best static event-gated hedge after lagging the signal and charging turnover costs.",
+    "rule_beats_best_static_by_sharpe": false,
+    "significant_vs_best_static_event_bootstrap": false,
+    "best_static_oos_by_sharpe": "static_GLD",
+    "figures": [
+      "fig_oos_protection_matrix.png",
+      "fig_oos_strategy_cumulative.png"
+    ]
+  }
+}

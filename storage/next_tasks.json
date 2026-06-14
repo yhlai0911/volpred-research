@@ -30874,7 +30874,7 @@
     "title": "研究 backlog fallback: 防禦資產輪動：long-vol vs gold vs Treasury 誰在「哪種 crash」最有效",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 防禦資產輪動：long-vol vs gold vs Treasury 誰在「哪種 crash」最有效 — yfinance VXX/GLD/TLT vs SPY，把 SPY drawdown 分類為 rate-shock（2022 型）/ growth-shock（2020 型）/ liquidity-shock（2018Q4 型），檢定三種防禦資產在不同 crash 類型的條件保護力差異，產出 crash-type-aware 防禦輪動規則；與既有 gold safe-haven regime 題（單一資產）正交，聚焦三資產 × crash-type 矩陣（來源：FAJ 2026 best | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "long_vol_vs_gold_vs_treasury_crash",
@@ -30882,7 +30882,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-14T16:08:21+00:00"
+    "created_at": "2026-06-14T16:08:21+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-14T18:40:14.139875+00:00",
+    "claim_session_id": "cc7b6b335db2",
+    "started_at": "2026-06-14T18:40:28.072087+00:00",
+    "completed_at": "2026-06-14T18:48:07.669606+00:00",
+    "result": "Completed lagged crash-type defensive rotation experiment for VXX/GLD/TLT vs SPY. Verdict NULL: crash-type rule underperforms static GLD after 10 bps turnover cost; same-day VXX protection is diagnostic-only, not tradable."
   },
   {
     "id": "experiment_fix_k538_embargo_alignment_cost",
