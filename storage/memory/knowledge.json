@@ -34153,5 +34153,19 @@
     ],
     "confidence": 0.84,
     "created_at": "2026-06-15T06:23:18.625567"
+  },
+  {
+    "item_id": "73ae20fb",
+    "category": "empirical_null",
+    "content": "research_inventory_seasonality_surprise_regime_conditiona (2026-06-15) returned NULL. Using yfinance CL=F/USO/NG=F/UNG/DBA prices and public EIA crude/gas weekly inventory data, the OOS 2018-2026 seasonal x low-inventory forward-5d RV interaction failed the paired gate: HAC t-stats were CL=F -1.12, USO -0.64, NG=F -1.85, UNG -2.24, all below the pre-specified positive t>3 threshold. DBA seasonality-only placebo was positive (t=5.32), but without a matched inventory proxy it cannot support a supply-tightness conclusion. Conclusion: low-inventory regimes did not robustly amplify seasonal commodity forward-RV predictability in this free-data test.",
+    "evidence": [
+      "research_inventory_seasonality_surprise_regime_conditiona",
+      "experiments/research_inventory_seasonality_surprise_regime_conditiona/README.md",
+      "experiments/research_inventory_seasonality_surprise_regime_conditiona/research_inventory_seasonality_surprise_regime_conditiona.py",
+      "experiments/research_inventory_seasonality_surprise_regime_conditiona/research_inventory_seasonality_surprise_regime_conditiona_results.json",
+      "experiments/research_inventory_seasonality_surprise_regime_conditiona/codex_review.md"
+    ],
+    "confidence": 0.83,
+    "created_at": "2026-06-15T07:35:24.381211"
   }
 ]

@@ -30837,7 +30837,7 @@
     "title": "研究 backlog fallback: 商品 inventory/seasonality surprise 的「regime-conditional」預測力",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 商品 inventory/seasonality surprise 的「regime-conditional」預測力 — yfinance CL=F/NG=F/USO/UNG/DBA RV + FRED 季節 dummy，檢定供給中斷/低庫存 regime 下季節性對 commodity RV 的預測力是否被放大（供給彈性低時 surprise 衝擊更大）；與既有 inventory-surprise feature（全期 baseline）正交，聚焦 supply-tightness regime 交互（來源：Oxford Economics/BIS 2026 commodity suppl | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "inventory_seasonality_surprise_regime_conditiona",
@@ -30845,7 +30845,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-14T14:12:12+00:00"
+    "created_at": "2026-06-14T14:12:12+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-14T23:25:38.908929+00:00",
+    "claim_session_id": "732079301a4d",
+    "started_at": "2026-06-14T23:25:47.531668+00:00",
+    "completed_at": "2026-06-14T23:36:27.024726+00:00",
+    "result": "Completed commodity inventory/seasonality regime experiment. Verdict NULL: oil/gas seasonal*low_inventory interactions fail positive t>3 gate; DBA seasonality-only placebo is not inventory evidence. README/results/figures/Codex review/memory/research_program updated."
   },
   {
     "id": "paper_review_mile_b70e8480",

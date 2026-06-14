@@ -1,0 +1,323 @@
+{
+  "experiment_id": "research_inventory_seasonality_surprise_regime_conditiona",
+  "title": "Commodity inventory/seasonality regime-conditional forward-RV test",
+  "date_run_utc": "2026-06-14",
+  "seed": 42,
+  "data": {
+    "price_source": "yfinance adjusted close; auto_adjust=True",
+    "price_tickers": [
+      "CL=F",
+      "USO",
+      "NG=F",
+      "UNG",
+      "DBA"
+    ],
+    "price_start": "2006-01-01",
+    "price_end": "2026-06-15",
+    "inventory_sources": {
+      "crude": {
+        "url": "https://www.eia.gov/dnav/pet/hist_xls/WCESTUS1w.xls",
+        "series": "Weekly U.S. Ending Stocks excluding SPR of Crude Oil (WCESTUS1)",
+        "unit": "thousand barrels"
+      },
+      "natural_gas": {
+        "url": "https://www.eia.gov/dnav/ng/xls/NG_STOR_WKLY_S1_W.xls",
+        "series": "Weekly Lower 48 States Natural Gas Working Underground Storage",
+        "unit": "billion cubic feet"
+      }
+    },
+    "oos_start": "2018-01-02",
+    "cached_data_dir": "experiments/research_inventory_seasonality_surprise_regime_conditiona/data/"
+  },
+  "method": {
+    "target": "forward 5-trading-day annualized realized variance from simple close-to-close returns",
+    "seasonal_stress_months": {
+      "oil": [
+        8,
+        9,
+        10
+      ],
+      "gas": [
+        1,
+        2,
+        7,
+        8,
+        12
+      ],
+      "agriculture": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    "inventory_feature_policy": [
+      "weekly EIA as-of dates are delayed by 7 calendar days before daily alignment",
+      "inventory z-score and surprise z-score use rolling historical windows shifted by one observation",
+      "daily regression features are shifted by one trading day",
+      "DBA has no matched inventory proxy and is treated as seasonality-only placebo"
+    ],
+    "regression": {
+      "inventory_assets": "log(fwd5_RV) ~ lagged log trailing5_RV + seasonal + low_inventory + abs_surprise + seasonal*low_inventory + seasonal*abs_surprise",
+      "dba_placebo": "log(fwd5_RV) ~ lagged log trailing5_RV + seasonal",
+      "standard_errors": "Newey-West HAC maxlags=5"
+    },
+    "bootstrap": {
+      "reps": 1000,
+      "block_length": 5,
+      "seed": 42
+    },
+    "success_rule": "PARTIAL requires both tickers in either oil or gas group to have seasonal*low_inventory HAC t > 3; SUPPORT requires both oil and gas groups to pass"
+  },
+  "asset_results": {
+    "CL=F": {
+      "ticker": "CL=F",
+      "group": "oil",
+      "has_inventory_proxy": true,
+      "n_oos": 2121,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-08",
+      "mean_fwd5_ann_var_pct2": 15378.083678,
+      "seasonal_stress_share": 0.244224,
+      "low_inventory_share": 0.262465,
+      "regression_oos_hac": {
+        "nobs": 2121,
+        "coef_seasonal": 0.140074,
+        "t_seasonal": 0.9313,
+        "p_seasonal": 0.351701,
+        "coef_low_inventory": -0.035715,
+        "t_low_inventory": -0.319,
+        "p_low_inventory": 0.749707,
+        "coef_season_low_interaction": -0.191143,
+        "t_season_low_interaction": -1.1161,
+        "p_season_low_interaction": 0.264358,
+        "coef_abs_surprise": 0.045571,
+        "t_abs_surprise": 0.6561,
+        "p_abs_surprise": 0.511752,
+        "coef_season_abs_surprise": -0.120024,
+        "t_season_abs_surprise": -1.8872,
+        "p_season_abs_surprise": 0.059131,
+        "r2": 0.284357
+      },
+      "bootstrap_regime_means": {
+        "seasonal_low_minus_seasonal_normal": {
+          "mean_ann_var_pct2": -677.176528,
+          "ci_2p5_ann_var_pct2": -1053.311819,
+          "ci_97p5_ann_var_pct2": -353.748999,
+          "p_gt_0": 0.0
+        },
+        "low_season_interaction_diff": {
+          "mean_ann_var_pct2": 23843.326863,
+          "ci_2p5_ann_var_pct2": -159.315155,
+          "ci_97p5_ann_var_pct2": 70262.975004,
+          "p_gt_0": 0.964
+        }
+      }
+    },
+    "USO": {
+      "ticker": "USO",
+      "group": "oil",
+      "has_inventory_proxy": true,
+      "n_oos": 2118,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-05",
+      "mean_fwd5_ann_var_pct2": 1643.907235,
+      "seasonal_stress_share": 0.24457,
+      "low_inventory_share": 0.261894,
+      "regression_oos_hac": {
+        "nobs": 2118,
+        "coef_seasonal": 0.091736,
+        "t_seasonal": 0.6731,
+        "p_seasonal": 0.500853,
+        "coef_low_inventory": -0.046857,
+        "t_low_inventory": -0.4268,
+        "p_low_inventory": 0.669561,
+        "coef_season_low_interaction": -0.105061,
+        "t_season_low_interaction": -0.6394,
+        "p_season_low_interaction": 0.522571,
+        "coef_abs_surprise": -0.005308,
+        "t_abs_surprise": -0.0981,
+        "p_abs_surprise": 0.921861,
+        "coef_season_abs_surprise": -0.08677,
+        "t_season_abs_surprise": -1.6211,
+        "p_season_abs_surprise": 0.104994,
+        "r2": 0.228534
+      },
+      "bootstrap_regime_means": {
+        "seasonal_low_minus_seasonal_normal": {
+          "mean_ann_var_pct2": -399.358438,
+          "ci_2p5_ann_var_pct2": -691.794876,
+          "ci_97p5_ann_var_pct2": -141.202191,
+          "p_gt_0": 0.0
+        },
+        "low_season_interaction_diff": {
+          "mean_ann_var_pct2": 290.118282,
+          "ci_2p5_ann_var_pct2": -457.597806,
+          "ci_97p5_ann_var_pct2": 1075.351702,
+          "p_gt_0": 0.778
+        }
+      }
+    },
+    "NG=F": {
+      "ticker": "NG=F",
+      "group": "gas",
+      "has_inventory_proxy": true,
+      "n_oos": 2122,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-08",
+      "mean_fwd5_ann_var_pct2": 5303.955603,
+      "seasonal_stress_share": 0.411404,
+      "low_inventory_share": 0.245416,
+      "regression_oos_hac": {
+        "nobs": 2122,
+        "coef_seasonal": -0.009482,
+        "t_seasonal": -0.0747,
+        "p_seasonal": 0.940473,
+        "coef_low_inventory": -0.262817,
+        "t_low_inventory": -2.6234,
+        "p_low_inventory": 0.008707,
+        "coef_season_low_interaction": -0.381457,
+        "t_season_low_interaction": -1.8544,
+        "p_season_low_interaction": 0.063689,
+        "coef_abs_surprise": -0.033969,
+        "t_abs_surprise": -0.5246,
+        "p_abs_surprise": 0.599847,
+        "coef_season_abs_surprise": 0.038521,
+        "t_season_abs_surprise": 0.4166,
+        "p_season_abs_surprise": 0.676948,
+        "r2": 0.351093
+      },
+      "bootstrap_regime_means": {
+        "seasonal_low_minus_seasonal_normal": {
+          "mean_ann_var_pct2": -5276.82836,
+          "ci_2p5_ann_var_pct2": -8353.093982,
+          "ci_97p5_ann_var_pct2": -2809.432131,
+          "p_gt_0": 0.0
+        },
+        "low_season_interaction_diff": {
+          "mean_ann_var_pct2": -3773.408169,
+          "ci_2p5_ann_var_pct2": -7164.878192,
+          "ci_97p5_ann_var_pct2": -1108.543194,
+          "p_gt_0": 0.001
+        }
+      }
+    },
+    "UNG": {
+      "ticker": "UNG",
+      "group": "gas",
+      "has_inventory_proxy": true,
+      "n_oos": 2118,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-05",
+      "mean_fwd5_ann_var_pct2": 3306.725053,
+      "seasonal_stress_share": 0.411237,
+      "low_inventory_share": 0.245878,
+      "regression_oos_hac": {
+        "nobs": 2118,
+        "coef_seasonal": 0.006672,
+        "t_seasonal": 0.0565,
+        "p_seasonal": 0.954976,
+        "coef_low_inventory": -0.21953,
+        "t_low_inventory": -2.4386,
+        "p_low_inventory": 0.014745,
+        "coef_season_low_interaction": -0.422178,
+        "t_season_low_interaction": -2.2384,
+        "p_season_low_interaction": 0.025193,
+        "coef_abs_surprise": -0.01103,
+        "t_abs_surprise": -0.1771,
+        "p_abs_surprise": 0.859431,
+        "coef_season_abs_surprise": 0.000903,
+        "t_season_abs_surprise": 0.0109,
+        "p_season_abs_surprise": 0.991317,
+        "r2": 0.403564
+      },
+      "bootstrap_regime_means": {
+        "seasonal_low_minus_seasonal_normal": {
+          "mean_ann_var_pct2": -2753.253701,
+          "ci_2p5_ann_var_pct2": -3631.648821,
+          "ci_97p5_ann_var_pct2": -1887.358416,
+          "p_gt_0": 0.0
+        },
+        "low_season_interaction_diff": {
+          "mean_ann_var_pct2": -2097.449549,
+          "ci_2p5_ann_var_pct2": -3310.249333,
+          "ci_97p5_ann_var_pct2": -888.767233,
+          "p_gt_0": 0.0
+        }
+      }
+    },
+    "DBA": {
+      "ticker": "DBA",
+      "group": "agriculture",
+      "has_inventory_proxy": false,
+      "n_oos": 2118,
+      "oos_start": "2018-01-02",
+      "oos_end": "2026-06-05",
+      "mean_fwd5_ann_var_pct2": 181.571313,
+      "seasonal_stress_share": 0.422096,
+      "low_inventory_share": null,
+      "regression_oos_hac": {
+        "nobs": 2118,
+        "coef_seasonal": 0.373866,
+        "t_seasonal": 5.3213,
+        "p_seasonal": 0.0,
+        "coef_low_inventory": null,
+        "t_low_inventory": null,
+        "p_low_inventory": null,
+        "coef_season_low_interaction": null,
+        "t_season_low_interaction": null,
+        "p_season_low_interaction": null,
+        "coef_abs_surprise": null,
+        "t_abs_surprise": null,
+        "p_abs_surprise": null,
+        "coef_season_abs_surprise": null,
+        "t_season_abs_surprise": null,
+        "p_season_abs_surprise": null,
+        "r2": 0.15355
+      },
+      "bootstrap_regime_means": {
+        "seasonal_minus_normal": {
+          "mean_ann_var_pct2": 93.451539,
+          "ci_2p5_ann_var_pct2": 60.59995,
+          "ci_97p5_ann_var_pct2": 127.429625,
+          "p_gt_0": 1.0
+        }
+      }
+    }
+  },
+  "figures": [
+    "fig_inventory_seasonality_interaction_tstats.png",
+    "fig_forward_rv_by_regime.png"
+  ],
+  "literature": [
+    {
+      "citation": "Gorton, Hayashi, and Rouwenhorst (2013), The Fundamentals of Commodity Futures Returns",
+      "url": "https://www.nber.org/papers/w13249"
+    },
+    {
+      "citation": "Futures basis, inventory and commodity price volatility",
+      "url": "https://mpra.ub.uni-muenchen.de/39903/"
+    },
+    {
+      "citation": "Pindyck (2004), Volatility and Commodity Price Dynamics",
+      "url": "https://web.mit.edu/rpindyck/www/Papers/Volatility_Comm_Price.pdf"
+    },
+    {
+      "citation": "EIA weekly crude oil and natural gas storage data",
+      "url": "https://www.eia.gov/"
+    }
+  ],
+  "research_honesty_notes": [
+    "Only oil and natural gas have matched public weekly inventory proxies in this experiment.",
+    "DBA is not assigned a fake inventory proxy; it is included only as a seasonality placebo.",
+    "Inventory values are conservatively delayed and shifted before prediction to avoid report-date lookahead.",
+    "This is a forward-RV diagnostic, not a tradable futures inventory-surprise strategy."
+  ],
+  "verdict": {
+    "overall": "NULL",
+    "interaction_pass_assets": [],
+    "group_passes": [],
+    "plain_english": "The inventory-low regime does not robustly amplify seasonal forward-RV predictability across paired commodity futures/ETFs."
+  }
+}
