@@ -30240,7 +30240,7 @@
     "title": "K1329: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 463). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1329.py with signal.shift(1) + seed=42, (c) K1329_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 463,
@@ -30248,7 +30248,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-14T03:16:04Z"
+    "created_at": "2026-06-14T03:16:04Z",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T03:52:46.144429+00:00",
+    "claim_session_id": "4f430952bc00",
+    "started_at": "2026-06-14T03:52:58.496492+00:00",
+    "completed_at": "2026-06-14T04:04:37.780240+00:00",
+    "result": "已核對 K1329 題意與 experiments/k1444 完整重疊：CL=F/USO → SPY/XLE 的 oil vol-of-vol spillover 已於 K1444 完成。\nK1444 已有 README/script/results/figures，並寫入 knowledge；目前結論為 PRELIMINARY：Granger 4/4 pass，但 Diebold-Yilmaz 方向與原假說相反，暫不宜部署交易敘事。\n\nK1329 completed with reproducible experiment package. Daily yfinance CL/USO oil-vol shocks show family-adjusted lag-1 Granger spillover into SPY and selected energy equities, but OOS HAR+VIX forecast extension has no Harvey-pass edge. Results, figures, Codex review, knowledge item 045a0841, and work_log updated."
   },
   {
     "id": "K1330",

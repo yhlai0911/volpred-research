@@ -33899,5 +33899,18 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-06-14T09:42:16.140850"
+  },
+  {
+    "item_id": "045a0841",
+    "category": "volatility_spillover",
+    "content": "K1329 oil volatility spillover: Yahoo Finance daily close-to-close proxy, 2007-11-07 to 2026-06-12, targets SPY/XLE/XOP/OIH/XOM/CVX. Lag-1 CL/USO oil-volatility shocks show family-adjusted Granger evidence (14 passing pairs including SPY, XOM, CVX), but no OOS forecast edge beyond own-vol HAR + VIX. Best SPY QLIKE improvement is only +0.297% with DM-HLN t=-0.522, p=0.602; all targets fail Harvey |t|>3. CL/USO vol-of-vol itself does not pass. Treat as statistical spillover without tradable forecast value.",
+    "evidence": [
+      "experiments/K1329/K1329.py",
+      "experiments/K1329/K1329_results.json",
+      "experiments/K1329/README.md",
+      "experiments/K1329/reviews/codex_review_20260614.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-14T12:04:16.018584"
   }
 ]
