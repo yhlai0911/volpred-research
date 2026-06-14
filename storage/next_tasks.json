@@ -1,5 +1,25 @@
 [
   {
+    "id": "platform_ops_dispatch_pool_dry_diagnostic_20260614",
+    "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
+    "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "in_progress",
+    "created_at": "2026-06-14T03:08:20.836416+00:00",
+    "source": "continue_task_dispatch_pool_dry_breaker",
+    "tags": [
+      "dispatch",
+      "refill",
+      "pool-dry",
+      "platform_ops"
+    ],
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-14T03:08:48.726890+00:00",
+    "claim_session_id": "d586164fc581",
+    "started_at": "2026-06-14T03:08:52.526345+00:00"
+  },
+  {
     "id": "platform_ops_dispatch_pool_dry_diagnostic_20260613",
     "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
     "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
@@ -30104,5 +30124,65 @@
     "started_at": "2026-06-14T02:12:24.481792+00:00",
     "completed_at": "2026-06-14T02:13:39.073198+00:00",
     "result": "Closure verify done. K713 reconstruction PASS: number alignment / source reproducibility / no lookahead. feed.json synced verdict=PASS_AFTER_RECONSTRUCTION, prior NEEDS_REVISION kept in history."
+  },
+  {
+    "id": "research_vrp_vrp_horizon",
+    "title": "研究 backlog fallback: 下行 VRP 與上行 VRP 反號分解 + 跨 horizon 預測力差異",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 下行 VRP 與上行 VRP 反號分解 + 跨 horizon 預測力差異 — 用 ^VIX/realized variance 拆 upside/downside semivariance 算 downside-VRP vs upside-VRP（免期權版用 RV 半變異代理），檢定下行 VRP 是否顯著大於整體、對 SPY 1/3/6 個月報酬與 RV 的預測力是否集中在 3-5 個月；與既有「隔夜 vs 日內 VRP 反號」（時段切割）正交，這裡切上行/下行（來源：JFE/SSRN 2025 downside variance premium 主導；明確 lag） | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "vrp_vrp_horizon",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-14T03:12:18+00:00"
+  },
+  {
+    "id": "research_horizon",
+    "title": "研究 backlog fallback: 偏度風險溢酬「期限結構」作長 horizon 尾部訊號",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 偏度風險溢酬「期限結構」作長 horizon 尾部訊號 — 用 ^VIX、^SKEW（CBOE SKEW free）與 realized skewness 建 skew-premium term-structure proxy，檢定長端 skew-premium 是否對 6-12 個月 SPY 報酬/drawdown 有比短端更強的預測力；與 K43（SKEW/VIX3M level）不同，聚焦 term-structure slope 而非 level（來源：JFQA 2025 crash-risk premium / skewness swap；skew premium 長 horizon | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "horizon",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-14T03:12:18+00:00"
+  },
+  {
+    "id": "research_graph_network_spillover_rv_var",
+    "title": "研究 backlog fallback: Graph/network spillover 學習 RV 是否贏線性 VAR",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Graph/network spillover 學習 RV 是否贏線性 VAR — yfinance 多資產 ETF（SPY/QQQ/TLT/GLD/HYG/EEM/CL=F）日 RV，建 lagged-correlation 鄰接矩陣 → 簡化 graph propagation（或 GNN-lite）vs 線性 spillover-VAR baseline，誠實檢定 1/5/22 日 horizon QLIKE+DM 增量是否真存在；與既有 quantile-connectedness（連結度測度）正交，這裡是「用網路結構做預測」（來源：J.Forecasting 2025 GNN rea | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "graph_network_spillover_rv_var",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-14T03:12:18+00:00"
+  },
+  {
+    "id": "research_naive_estimation_heavy_robustness",
+    "title": "研究 backlog fallback: 危機期 naive 對沖優於 estimation-heavy 對沖的 robustness 賽馬",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 危機期 naive 對沖優於 estimation-heavy 對沖的 robustness 賽馬 — yfinance VXX/put-proxy/inverse-equity 疊 SPY，比較固定比例 naive hedge vs 依估計 beta/vol/CVaR 動態調整的複雜 hedge，檢定 stress regime（2018Q4/2020/2022/2025）下 naive 是否因免 estimation-error 而淨值更穩；與既有「tail-hedge 成本 vs crisis-alpha」（成本核算）正交，這裡比 naive vs complex（來源：JFM 2025 | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "naive_estimation_heavy_robustness",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-14T03:12:18+00:00"
   }
 ]
