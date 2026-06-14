@@ -30966,5 +30966,27 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-14T18:15:58+00:00"
+  },
+  {
+    "id": "paper_review_mile_6ccb9715",
+    "title": "Paper review (Codex 24h-rule): 用機器學習「挑出好週」，結果 VT 輸更慘？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_6ccb9715 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_6ccb9715",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-14T19:10:11+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-14T19:10:30.347492+00:00",
+    "claim_session_id": "096c580aae96",
+    "started_at": "2026-06-14T19:10:55.861759+00:00",
+    "completed_at": "2026-06-14T19:13:36.808223+00:00",
+    "result": "PASS — 13/13 numeric claims trace K541. Anti-AI 9/9. Methodology rigorous (964 weeks, 3-period validation, tx cost, NULL honest report). Review at storage/ops/review_history/mile_6ccb9715_review.md"
   }
 ]
