@@ -31007,14 +31007,16 @@
     "description": "分析 AI 巨頭高集中度與指數低波動的背後成因。可量化：利用 HHI 指數與成份股動態相關性 breakdown 早期指標，評估 SPY 的隱含尾部風險與實際 VaR 的偏離程度。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-14T21:08:52+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "completed_at": "2026-06-14T22:09:07.624924+00:00",
+    "result": "arc-dup with mile_123a3855 (6/4 published, S&P 500 集中度突破 32%，指數波動率卻跌到 14%): 同 narrative arc (HHI + VIX low + tail-risk gap) 10 天內已覆蓋。skip per CLAUDE.md feedback_narrative_arc_dedup."
   },
   {
     "id": "paper_review_mile_1b511caa",
@@ -31043,7 +31045,7 @@
     "title": "Add K1499 PARTIAL caveat footnote to mile_1b511caa article (research-honesty rule)",
     "description": "Per paper_review_mile_1b511caa: article body (K1332 PASS_NARROW_CREDIT_ONLY content) is numerically PASS but missing K1499 follow-up caveat. K1499 multi-horizon forward-RV + SPY-vol control shows: (a) BDC-RV stress signal in article becomes pure SPY beta after SPY-vol control (HYG 12.5x lift not incremental), (b) only NAV-discount proxy → HYG 5d survives (HAC t=3.18), (c) KRE/IWM totally null after SPY control. Action: append a footnote/box to mile_1b511caa body explaining K1499 finds the BDC-RV 12.5x lift partly explained by overall market vol, and the narrower NAV-discount → HYG 5d signal is the most robust kernel. Update feed.json + storage/reports JSON consistently. Reference experiments/k1499/k1499_results.json verdict_rationale.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "paper_review_followup",
     "article_id": "mile_1b511caa",
@@ -31052,6 +31054,12 @@
       "research-honesty",
       "main-thread-only"
     ],
-    "created_at": "2026-06-14T21:15:00+00:00"
+    "created_at": "2026-06-14T21:15:00+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-14T22:08:52.063758+00:00",
+    "claim_session_id": "ff57f11126b8",
+    "started_at": "2026-06-14T22:08:52.438935+00:00",
+    "completed_at": "2026-06-14T22:11:14.518074+00:00",
+    "result": "K1499 後續查核 footnote 已 append 至 mile_1b511caa（804 chars），新段「## 後續查核：K1499 拉長 horizon、再加 SPY 控制之後」清楚說明：BDC realized-vol stress signal 在 SPY-vol control 後沒有任何 horizon 通過 |t|>3（pure SPY beta）；只有 NAV-discount proxy → HYG 5d survives（HAC t=3.18）；KRE/IWM 全 null。details.experiment_refs 加 K1499、k1499_caveat_added=true、k1499_caveat_summary 已寫。Supabase sync incremental 2 articles 推送完成。研究誠實 § 推翻舊結論必更新文章 ✓。"
   }
 ]
