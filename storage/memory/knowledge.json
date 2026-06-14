@@ -34027,5 +34027,34 @@
       "Schwarz (2025), JEF"
     ],
     "created_at": "2026-06-14T23:13:15+08:00"
+  },
+  {
+    "item_id": "1d9af39a",
+    "category": "empirical_finding",
+    "content": "research_em_ai_vol_regime NULL: EM ETFs (EEM/INDA/EWZ/EWY/EWT/EWW/FXI), 2012-02-03 to 2026-06-12 yfinance adjusted closes, do not show robust future-vol regime switching from ex-ante AI-trade coupling. AI proxy = equal-weight SMH/SOXX/NVDA/MSFT/QQQ; coupling = 126d rolling partial correlation net of SPY, using returns through t-1; regimes use recursive expanding 30/70 quantiles shifted before assignment; target = future 21d RV; controls = lagged 21d RV + log(VIX_{t-1}); Newey-West HAC maxlags=21 and Bonferroni alpha=0.00714 across 7 ETFs. High-minus-low effect positive in only 3/7 ETFs and 0/7 significant; continuous coupling 0/7 significant; lagged AI-shock effects positive 7/7 directionally but 0/7 significant. Conclusion: public-market AI/semi coupling is visible but not a standalone next-month EM volatility regime signal after standard controls. Caveat: proxy is not observed AI order flow or capex surprises, and USD ETFs mix local equity and FX effects.",
+    "evidence": [
+      "experiments/research_em_ai_vol_regime/README.md",
+      "experiments/research_em_ai_vol_regime/research_em_ai_vol_regime.py",
+      "experiments/research_em_ai_vol_regime/research_em_ai_vol_regime_results.json",
+      "experiments/research_em_ai_vol_regime/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-15T00:09:53.217627"
+  },
+  {
+    "item_id": "2950f08a",
+    "category": "volatility_prediction",
+    "content": "EM equity 與 AI-trade 公開市場耦合度（126D partial correlation, controls SPY）不能 robust 預測未來 21D realized vol regime。7 個 EM ETF（EEM/INDA/EWZ/EWY/EWT/EWW/FXI）的 high-minus-low 耦合 contrast: 3/7 正號、0/7 Bonferroni (α=0.0071) significant。連續耦合 spec、lagged AI shock spec 同樣 0/7 survive。Sample 2012-02-03 to 2026-06-12, OLS + Newey-West HAC maxlags=21, expanding 30/70 quantile regime + 504D warm-up + shift(1)。Codex review PASS_WITH_CAVEATS: lookahead/target alignment/regime-threshold/HAC/multiple testing/seed 全 PASS。Caveats: regression study 不是 trading strategy; AI proxy 是公開 ETF basket 非 order flow; USD-denominated 混 FX。Implication: 'EM equities can balance AI-trade volatility' 的 practitioner 宣稱在透明公開 proxy + lookahead-free 設計下站不住。與 K1441 (EM common factor) / K1466 (frontier decoupling) / K1487 (coarse AI/news intensity) 一致 — AI/EM 條件預測 null 累積 4 個。",
+    "evidence": [
+      "experiments/research_em_ai_vol_regime/research_em_ai_vol_regime_results.json",
+      "experiments/research_em_ai_vol_regime/codex_review.md",
+      "experiment_id=research_em_ai_vol_regime",
+      "verdict=NULL",
+      "reviewer=codex_review (PASS_WITH_CAVEATS)",
+      "sample=2012-02-03 to 2026-06-12 (n_ETFs=7)",
+      "method=OLS Newey-West HAC maxlags=21; Bonferroni α=0.0071"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-06-15T00:10:48.001944"
   }
 ]

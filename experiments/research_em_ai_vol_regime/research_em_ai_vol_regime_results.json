@@ -1,0 +1,983 @@
+{
+  "experiment_id": "research_em_ai_vol_regime",
+  "title": "EM equity volatility regimes conditional on AI-trade coupling",
+  "created_at": "2026-06-14T16:09:22.743680+00:00",
+  "status": "done",
+  "seed": 42,
+  "data": {
+    "source": "yfinance adjusted close, cached under experiments/research_em_ai_vol_regime/data/",
+    "sample_start": "2012-02-03",
+    "sample_end": "2026-06-12",
+    "joint_price_obs": 3610,
+    "em_tickers": [
+      "EEM",
+      "INDA",
+      "EWZ",
+      "EWY",
+      "EWT",
+      "EWW",
+      "FXI"
+    ],
+    "ai_proxy_tickers": [
+      "SMH",
+      "SOXX",
+      "NVDA",
+      "MSFT",
+      "QQQ"
+    ],
+    "controls": [
+      "SPY",
+      "^VIX"
+    ]
+  },
+  "methodology": {
+    "ai_proxy": "Equal-weight daily log return of SMH, SOXX, NVDA, MSFT, and QQQ.",
+    "coupling_signal": "126d rolling partial correlation between each EM ETF and AI proxy, controlling for SPY; signal at t uses returns through t-1.",
+    "regime_assignment": "Recursive expanding 30/70 quantiles of the coupling signal with 504-observation warm-up; thresholds are shifted one additional day before assignment.",
+    "target": "Future 21 trading-day realized volatility from returns t..t+20, annualized.",
+    "controls": "Lagged 21d own realized volatility and log(VIX_{t-1}).",
+    "inference": "OLS with Newey-West HAC standard errors, maxlags=21, because target RV overlaps.",
+    "multiple_testing": "Bonferroni alpha across 7 EM ETFs = 0.007143.",
+    "randomness": "No bootstrap or Monte Carlo; seed fixed for reproducibility."
+  },
+  "summary": {
+    "bonferroni_alpha": 0.0071428571428571435,
+    "high_minus_low_positive_count": 3,
+    "high_minus_low_bonferroni_significant": [],
+    "continuous_coupling_bonferroni_significant": [],
+    "lagged_ai_shock_positive_count": 7,
+    "lagged_ai_shock_bonferroni_significant": [],
+    "high_minus_low_effects": {
+      "EEM": -0.009110492373107284,
+      "INDA": 0.0013232455998196963,
+      "EWZ": 0.04536491618014477,
+      "EWY": 0.01588454626185376,
+      "EWT": -0.0066674175381286685,
+      "EWW": -0.008587161645023326,
+      "FXI": -0.022605030202285277
+    },
+    "high_minus_low_t_hac": {
+      "EEM": -0.7186199179710029,
+      "INDA": 0.12541440437275686,
+      "EWZ": 1.4814736273701685,
+      "EWY": 1.2016489809860533,
+      "EWT": -0.58768732839125,
+      "EWW": -0.5606474369947692,
+      "FXI": -1.1550914453863643
+    },
+    "continuous_coupling_t_hac": {
+      "EEM": 0.23127176139718536,
+      "INDA": 0.4919457015280474,
+      "EWZ": 1.8689893980011354,
+      "EWY": 1.6146678024642105,
+      "EWT": 0.04317198375376073,
+      "EWW": -0.4565323314311597,
+      "FXI": -1.5763438083873103
+    }
+  },
+  "asset_results": {
+    "EEM": {
+      "ticker": "EEM",
+      "sample": {
+        "first_date": "2012-08-06",
+        "last_date": "2026-05-14",
+        "n_signal_obs": 3483,
+        "n_regression_obs": 2959,
+        "regime_counts": {
+          "high": 1487,
+          "mid": 1008,
+          "low": 484
+        }
+      },
+      "regime_forward_rv_mean": {
+        "high": 0.19178417634622807,
+        "low": 0.18373831322255438,
+        "mid": 0.18517703355326323
+      },
+      "regime_regression_hac": {
+        "const": {
+          "coef": -0.11010136532843745,
+          "se_hac": 0.0738284213896939,
+          "t_hac": -1.4913140936236664,
+          "p_hac": 0.13587905042883175
+        },
+        "high": {
+          "coef": 0.006595688356807629,
+          "se_hac": 0.0113223960831132,
+          "t_hac": 0.582534678030278,
+          "p_hac": 0.5602065902395826
+        },
+        "low": {
+          "coef": 0.015706180729914913,
+          "se_hac": 0.011513979300366226,
+          "t_hac": 1.3640966619955055,
+          "p_hac": 0.1725371452209774
+        },
+        "lag_rv": {
+          "coef": 0.2011412622209425,
+          "se_hac": 0.060605327899436436,
+          "t_hac": 3.3188709506646017,
+          "p_hac": 0.0009038218808871724
+        },
+        "log_vix_lag1": {
+          "coef": 0.08945737951115879,
+          "se_hac": 0.026749743537710705,
+          "t_hac": 3.3442331656393414,
+          "p_hac": 0.0008251035941299044
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.22253399536376772,
+          "hac_maxlags": 21
+        }
+      },
+      "high_minus_low_contrast": {
+        "coef": -0.009110492373107284,
+        "se_hac": 0.0126777621177415,
+        "t_hac": -0.7186199179710029,
+        "p_hac": 0.4723751375787705
+      },
+      "continuous_coupling_regression_hac": {
+        "const": {
+          "coef": -0.09850231506134849,
+          "se_hac": 0.06998494477010066,
+          "t_hac": -1.4074786425127133,
+          "p_hac": 0.15928550597001678
+        },
+        "coupling_z_lag1": {
+          "coef": 0.0012263293790442695,
+          "se_hac": 0.005302546976058073,
+          "t_hac": 0.23127176139718536,
+          "p_hac": 0.8171036831865738
+        },
+        "lag_rv": {
+          "coef": 0.19900493988530235,
+          "se_hac": 0.05926365506377668,
+          "t_hac": 3.357959269828074,
+          "p_hac": 0.0007852018220520303
+        },
+        "log_vix_lag1": {
+          "coef": 0.08734525843266577,
+          "se_hac": 0.026305271966678114,
+          "t_hac": 3.3204468877306925,
+          "p_hac": 0.000898734580310585
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.21919978147693175,
+          "hac_maxlags": 21
+        }
+      },
+      "ai_shock_regression_hac": {
+        "const": {
+          "coef": -0.09120545291111781,
+          "se_hac": 0.0599631686799302,
+          "t_hac": -1.5210245708987102,
+          "p_hac": 0.12825367143127403
+        },
+        "ai_shock_lag1": {
+          "coef": 0.02586527552329144,
+          "se_hac": 0.018560205453344056,
+          "t_hac": 1.393587780496859,
+          "p_hac": 0.16344212060887298
+        },
+        "lag_rv": {
+          "coef": 0.19502293308349652,
+          "se_hac": 0.05795941200435557,
+          "t_hac": 3.3648190404147096,
+          "p_hac": 0.0007659387558909054
+        },
+        "log_vix_lag1": {
+          "coef": 0.08404668292729145,
+          "se_hac": 0.02312837833230498,
+          "t_hac": 3.6339202740339873,
+          "p_hac": 0.00027914715172765734
+        },
+        "meta": {
+          "n_obs": 3084,
+          "r_squared": 0.2365154256420985,
+          "hac_maxlags": 21
+        }
+      }
+    },
+    "INDA": {
+      "ticker": "INDA",
+      "sample": {
+        "first_date": "2012-08-06",
+        "last_date": "2026-05-14",
+        "n_signal_obs": 3483,
+        "n_regression_obs": 2959,
+        "regime_counts": {
+          "low": 1229,
+          "mid": 1158,
+          "high": 592
+        }
+      },
+      "regime_forward_rv_mean": {
+        "high": 0.16840796032019847,
+        "low": 0.18737040574536534,
+        "mid": 0.18433737344506243
+      },
+      "regime_regression_hac": {
+        "const": {
+          "coef": -0.06848623848505075,
+          "se_hac": 0.1160889944816308,
+          "t_hac": -0.5899460047083755,
+          "p_hac": 0.5552268499524573
+        },
+        "high": {
+          "coef": -0.003741309745520076,
+          "se_hac": 0.011836414838884755,
+          "t_hac": -0.3160847094704048,
+          "p_hac": 0.7519382123103724
+        },
+        "low": {
+          "coef": -0.0050645553453397725,
+          "se_hac": 0.010989121805988602,
+          "t_hac": -0.46086988885497715,
+          "p_hac": 0.6448919561584412
+        },
+        "lag_rv": {
+          "coef": 0.3546799136690456,
+          "se_hac": 0.05622215860894162,
+          "t_hac": 6.308543151750083,
+          "p_hac": 2.816742024020983e-10
+        },
+        "log_vix_lag1": {
+          "coef": 0.06636667520789748,
+          "se_hac": 0.04384157993901891,
+          "t_hac": 1.513783839455824,
+          "p_hac": 0.1300806726803501
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.23085638007136433,
+          "hac_maxlags": 21
+        }
+      },
+      "high_minus_low_contrast": {
+        "coef": 0.0013232455998196963,
+        "se_hac": 0.010550985801333825,
+        "t_hac": 0.12541440437275686,
+        "p_hac": 0.9001954851094729
+      },
+      "continuous_coupling_regression_hac": {
+        "const": {
+          "coef": -0.07624246278793156,
+          "se_hac": 0.11706792012220182,
+          "t_hac": -0.6512669116214379,
+          "p_hac": 0.5148742038208776
+        },
+        "coupling_z_lag1": {
+          "coef": 0.0017908093584576021,
+          "se_hac": 0.0036402581685237114,
+          "t_hac": 0.4919457015280474,
+          "p_hac": 0.6227577292834195
+        },
+        "lag_rv": {
+          "coef": 0.35082021960463394,
+          "se_hac": 0.05770721596928829,
+          "t_hac": 6.079312850430006,
+          "p_hac": 1.2069866332592962e-09
+        },
+        "log_vix_lag1": {
+          "coef": 0.06851587171643019,
+          "se_hac": 0.04422307449765639,
+          "t_hac": 1.5493240235945422,
+          "p_hac": 0.12130384752525078
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.230716374791875,
+          "hac_maxlags": 21
+        }
+      },
+      "ai_shock_regression_hac": {
+        "const": {
+          "coef": -0.04074327629896121,
+          "se_hac": 0.09434746717915729,
+          "t_hac": -0.43184282013202774,
+          "p_hac": 0.6658556554403235
+        },
+        "ai_shock_lag1": {
+          "coef": 0.04228050342223611,
+          "se_hac": 0.029281519489966004,
+          "t_hac": 1.443931331388882,
+          "p_hac": 0.1487582922803538
+        },
+        "lag_rv": {
+          "coef": 0.3472846367585804,
+          "se_hac": 0.05611171556809927,
+          "t_hac": 6.1891644773737635,
+          "p_hac": 6.048394722079508e-10
+        },
+        "log_vix_lag1": {
+          "coef": 0.05496236307837985,
+          "se_hac": 0.03533846802717928,
+          "t_hac": 1.5553125572989632,
+          "p_hac": 0.11987164812050863
+        },
+        "meta": {
+          "n_obs": 3084,
+          "r_squared": 0.23844699501985278,
+          "hac_maxlags": 21
+        }
+      }
+    },
+    "EWZ": {
+      "ticker": "EWZ",
+      "sample": {
+        "first_date": "2012-08-06",
+        "last_date": "2026-05-14",
+        "n_signal_obs": 3483,
+        "n_regression_obs": 2959,
+        "regime_counts": {
+          "low": 1308,
+          "mid": 1080,
+          "high": 591
+        }
+      },
+      "regime_forward_rv_mean": {
+        "high": 0.34721086405205065,
+        "low": 0.29308545016107795,
+        "mid": 0.3301424645590973
+      },
+      "regime_regression_hac": {
+        "const": {
+          "coef": -0.08133467664050448,
+          "se_hac": 0.13694676368016334,
+          "t_hac": -0.5939145581450915,
+          "p_hac": 0.5525692614151323
+        },
+        "high": {
+          "coef": 0.0170999673296476,
+          "se_hac": 0.022731879983789463,
+          "t_hac": 0.7522460677181964,
+          "p_hac": 0.4519030945081225
+        },
+        "low": {
+          "coef": -0.02826494885049717,
+          "se_hac": 0.020038608831291747,
+          "t_hac": -1.4105245073879278,
+          "p_hac": 0.15838486519683237
+        },
+        "lag_rv": {
+          "coef": 0.26814606623468173,
+          "se_hac": 0.06936612958100014,
+          "t_hac": 3.8656627932738057,
+          "p_hac": 0.00011078792148626962
+        },
+        "log_vix_lag1": {
+          "coef": 0.11324132242531802,
+          "se_hac": 0.05608259251507512,
+          "t_hac": 2.0191884388168844,
+          "p_hac": 0.04346763749622533
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.19959707684666128,
+          "hac_maxlags": 21
+        }
+      },
+      "high_minus_low_contrast": {
+        "coef": 0.04536491618014477,
+        "se_hac": 0.030621480762147688,
+        "t_hac": 1.4814736273701685,
+        "p_hac": 0.1384804075174453
+      },
+      "continuous_coupling_regression_hac": {
+        "const": {
+          "coef": -0.08571913278608706,
+          "se_hac": 0.13683925418074308,
+          "t_hac": -0.6264220986827771,
+          "p_hac": 0.5310381185149143
+        },
+        "coupling_z_lag1": {
+          "coef": 0.019927028419522125,
+          "se_hac": 0.01066192694342401,
+          "t_hac": 1.8689893980011354,
+          "p_hac": 0.061624289413472345
+        },
+        "lag_rv": {
+          "coef": 0.26061431569231186,
+          "se_hac": 0.0684194141404976,
+          "t_hac": 3.8090696765854606,
+          "p_hac": 0.00013949064881656935
+        },
+        "log_vix_lag1": {
+          "coef": 0.11507771018288729,
+          "se_hac": 0.055471379709699384,
+          "t_hac": 2.074542057275808,
+          "p_hac": 0.03802899701891306
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.20357469065358524,
+          "hac_maxlags": 21
+        }
+      },
+      "ai_shock_regression_hac": {
+        "const": {
+          "coef": -0.050418612787705284,
+          "se_hac": 0.11004023097180568,
+          "t_hac": -0.45818345111092557,
+          "p_hac": 0.6468206482245431
+        },
+        "ai_shock_lag1": {
+          "coef": 0.04633116732780983,
+          "se_hac": 0.03700904262170458,
+          "t_hac": 1.2518877562273962,
+          "p_hac": 0.21061076682196767
+        },
+        "lag_rv": {
+          "coef": 0.29832109506307686,
+          "se_hac": 0.06314620329643271,
+          "t_hac": 4.724291873299844,
+          "p_hac": 2.309185677369354e-06
+        },
+        "log_vix_lag1": {
+          "coef": 0.09363184130598036,
+          "se_hac": 0.042959441232290195,
+          "t_hac": 2.179540483305974,
+          "p_hac": 0.029291540669222117
+        },
+        "meta": {
+          "n_obs": 3084,
+          "r_squared": 0.20358307896753314,
+          "hac_maxlags": 21
+        }
+      }
+    },
+    "EWY": {
+      "ticker": "EWY",
+      "sample": {
+        "first_date": "2012-08-06",
+        "last_date": "2026-05-14",
+        "n_signal_obs": 3483,
+        "n_regression_obs": 2959,
+        "regime_counts": {
+          "high": 1493,
+          "mid": 820,
+          "low": 666
+        }
+      },
+      "regime_forward_rv_mean": {
+        "high": 0.2606942703308719,
+        "low": 0.21771172563873992,
+        "mid": 0.2045697002505003
+      },
+      "regime_regression_hac": {
+        "const": {
+          "coef": -0.05851744068000658,
+          "se_hac": 0.08800279603443988,
+          "t_hac": -0.6649497892897153,
+          "p_hac": 0.5060826086527515
+        },
+        "high": {
+          "coef": 0.028380945367765982,
+          "se_hac": 0.011547276835948386,
+          "t_hac": 2.4578041880326182,
+          "p_hac": 0.013978936997753301
+        },
+        "low": {
+          "coef": 0.012496399105912223,
+          "se_hac": 0.00840980732273302,
+          "t_hac": 1.4859316779033105,
+          "p_hac": 0.13729719355637185
+        },
+        "lag_rv": {
+          "coef": 0.43109305010088883,
+          "se_hac": 0.14603948527893795,
+          "t_hac": 2.9518937928156457,
+          "p_hac": 0.003158315421576707
+        },
+        "log_vix_lag1": {
+          "coef": 0.06225286995952825,
+          "se_hac": 0.036491456008532146,
+          "t_hac": 1.7059574149349583,
+          "p_hac": 0.0880160086210463
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.3022755938818702,
+          "hac_maxlags": 21
+        }
+      },
+      "high_minus_low_contrast": {
+        "coef": 0.01588454626185376,
+        "se_hac": 0.013218957044193692,
+        "t_hac": 1.2016489809860533,
+        "p_hac": 0.22949955571312863
+      },
+      "continuous_coupling_regression_hac": {
+        "const": {
+          "coef": -0.04611961849553031,
+          "se_hac": 0.08500350291249048,
+          "t_hac": -0.5425613876525723,
+          "p_hac": 0.5874318302701962
+        },
+        "coupling_z_lag1": {
+          "coef": 0.011694928915149576,
+          "se_hac": 0.0072429318880957855,
+          "t_hac": 1.6146678024642105,
+          "p_hac": 0.10638265370327363
+        },
+        "lag_rv": {
+          "coef": 0.43256701633662303,
+          "se_hac": 0.1475935511090926,
+          "t_hac": 2.9307988938954015,
+          "p_hac": 0.0033809157440072473
+        },
+        "log_vix_lag1": {
+          "coef": 0.061768561345851763,
+          "se_hac": 0.03581957540943181,
+          "t_hac": 1.724435888471956,
+          "p_hac": 0.08462918343435274
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.3037614195943682,
+          "hac_maxlags": 21
+        }
+      },
+      "ai_shock_regression_hac": {
+        "const": {
+          "coef": -0.05093352269541224,
+          "se_hac": 0.075336401672557,
+          "t_hac": -0.676081171447374,
+          "p_hac": 0.49898911028516724
+        },
+        "ai_shock_lag1": {
+          "coef": 0.017173103215086607,
+          "se_hac": 0.022549134560887144,
+          "t_hac": 0.7615859122537859,
+          "p_hac": 0.44630718551292936
+        },
+        "lag_rv": {
+          "coef": 0.4596483728069488,
+          "se_hac": 0.15104711221434014,
+          "t_hac": 3.0430795138585287,
+          "p_hac": 0.0023417044896140047
+        },
+        "log_vix_lag1": {
+          "coef": 0.061992817687798574,
+          "se_hac": 0.032635786980141156,
+          "t_hac": 1.8995349407544897,
+          "p_hac": 0.05749417708402174
+        },
+        "meta": {
+          "n_obs": 3084,
+          "r_squared": 0.31010269205812235,
+          "hac_maxlags": 21
+        }
+      }
+    },
+    "EWT": {
+      "ticker": "EWT",
+      "sample": {
+        "first_date": "2012-08-06",
+        "last_date": "2026-05-14",
+        "n_signal_obs": 3483,
+        "n_regression_obs": 2959,
+        "regime_counts": {
+          "high": 1662,
+          "mid": 1028,
+          "low": 289
+        }
+      },
+      "regime_forward_rv_mean": {
+        "high": 0.20152577204775324,
+        "low": 0.18965074141061924,
+        "mid": 0.19303436349125322
+      },
+      "regime_regression_hac": {
+        "const": {
+          "coef": -0.05716004510792311,
+          "se_hac": 0.05983868049212228,
+          "t_hac": -0.9552357210725626,
+          "p_hac": 0.3394585052997061
+        },
+        "high": {
+          "coef": -0.003444107451989767,
+          "se_hac": 0.009348928479548168,
+          "t_hac": -0.3683959567691783,
+          "p_hac": 0.7125780118394216
+        },
+        "low": {
+          "coef": 0.0032233100861389016,
+          "se_hac": 0.010819861873347483,
+          "t_hac": 0.29790676848462055,
+          "p_hac": 0.7657743218790484
+        },
+        "lag_rv": {
+          "coef": 0.22635715903272335,
+          "se_hac": 0.07897514521768226,
+          "t_hac": 2.8661822451710135,
+          "p_hac": 0.004154549996443
+        },
+        "log_vix_lag1": {
+          "coef": 0.07436659577107782,
+          "se_hac": 0.023534445540971588,
+          "t_hac": 3.1599043045909676,
+          "p_hac": 0.0015782096531073181
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.19935676007793812,
+          "hac_maxlags": 21
+        }
+      },
+      "high_minus_low_contrast": {
+        "coef": -0.0066674175381286685,
+        "se_hac": 0.011345178321915199,
+        "t_hac": -0.58768732839125,
+        "p_hac": 0.556742182497254
+      },
+      "continuous_coupling_regression_hac": {
+        "const": {
+          "coef": -0.05382914861665279,
+          "se_hac": 0.05841274354421726,
+          "t_hac": -0.9215309083351858,
+          "p_hac": 0.3567733119054397
+        },
+        "coupling_z_lag1": {
+          "coef": 0.00022769549708471625,
+          "se_hac": 0.005274149512874344,
+          "t_hac": 0.04317198375376073,
+          "p_hac": 0.9655644379850058
+        },
+        "lag_rv": {
+          "coef": 0.22771945752842973,
+          "se_hac": 0.07917384707749164,
+          "t_hac": 2.8761954349085577,
+          "p_hac": 0.0040250041677657895
+        },
+        "log_vix_lag1": {
+          "coef": 0.07248579633064514,
+          "se_hac": 0.023434022059460182,
+          "t_hac": 3.0931863146123066,
+          "p_hac": 0.0019801977245864394
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.1986853849907929,
+          "hac_maxlags": 21
+        }
+      },
+      "ai_shock_regression_hac": {
+        "const": {
+          "coef": -0.05224587177366492,
+          "se_hac": 0.05251458697096539,
+          "t_hac": -0.994883037022665,
+          "p_hac": 0.3197931539076828
+        },
+        "ai_shock_lag1": {
+          "coef": 0.016226732126471747,
+          "se_hac": 0.015139131416009956,
+          "t_hac": 1.071840363926799,
+          "p_hac": 0.2837917398940242
+        },
+        "lag_rv": {
+          "coef": 0.2315133641650913,
+          "se_hac": 0.07952219194857318,
+          "t_hac": 2.9113051148641684,
+          "p_hac": 0.0035992235832198144
+        },
+        "log_vix_lag1": {
+          "coef": 0.07070858364155803,
+          "se_hac": 0.021388811889898697,
+          "t_hac": 3.305867759534208,
+          "p_hac": 0.0009468276212604563
+        },
+        "meta": {
+          "n_obs": 3084,
+          "r_squared": 0.2142771634374374,
+          "hac_maxlags": 21
+        }
+      }
+    },
+    "EWW": {
+      "ticker": "EWW",
+      "sample": {
+        "first_date": "2012-08-06",
+        "last_date": "2026-05-14",
+        "n_signal_obs": 3483,
+        "n_regression_obs": 2959,
+        "regime_counts": {
+          "mid": 1356,
+          "high": 963,
+          "low": 660
+        }
+      },
+      "regime_forward_rv_mean": {
+        "high": 0.21473524564729937,
+        "low": 0.25234729979139453,
+        "mid": 0.21996303108693646
+      },
+      "regime_regression_hac": {
+        "const": {
+          "coef": -0.06637177654410274,
+          "se_hac": 0.088236796080456,
+          "t_hac": -0.752200663355724,
+          "p_hac": 0.45193039478493013
+        },
+        "high": {
+          "coef": -0.011683631369512374,
+          "se_hac": 0.013106843807118703,
+          "t_hac": -0.8914145572686735,
+          "p_hac": 0.3727068109285522
+        },
+        "low": {
+          "coef": -0.003096469724489048,
+          "se_hac": 0.018027142978407018,
+          "t_hac": -0.1717670807957762,
+          "p_hac": 0.8636206465489908
+        },
+        "lag_rv": {
+          "coef": 0.28192424016993306,
+          "se_hac": 0.05124846041294468,
+          "t_hac": 5.501126041607344,
+          "p_hac": 3.7737330541623864e-08
+        },
+        "log_vix_lag1": {
+          "coef": 0.08175504623028969,
+          "se_hac": 0.03323524770514678,
+          "t_hac": 2.459889781944643,
+          "p_hac": 0.013897968978098385
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.2167341412844045,
+          "hac_maxlags": 21
+        }
+      },
+      "high_minus_low_contrast": {
+        "coef": -0.008587161645023326,
+        "se_hac": 0.01531650923270598,
+        "t_hac": -0.5606474369947692,
+        "p_hac": 0.5750379064546263
+      },
+      "continuous_coupling_regression_hac": {
+        "const": {
+          "coef": -0.06673490278474292,
+          "se_hac": 0.09091631059105287,
+          "t_hac": -0.7340256368840196,
+          "p_hac": 0.46293311337816834
+        },
+        "coupling_z_lag1": {
+          "coef": -0.00259331447461281,
+          "se_hac": 0.005680461811944758,
+          "t_hac": -0.4565323314311597,
+          "p_hac": 0.6480072268824257
+        },
+        "lag_rv": {
+          "coef": 0.2784327704649004,
+          "se_hac": 0.050934397317199696,
+          "t_hac": 5.466497791873907,
+          "p_hac": 4.5901414098089805e-08
+        },
+        "log_vix_lag1": {
+          "coef": 0.08064600146684306,
+          "se_hac": 0.033041291184273625,
+          "t_hac": 2.440764224892865,
+          "p_hac": 0.014656219993808974
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.21508890221412258,
+          "hac_maxlags": 21
+        }
+      },
+      "ai_shock_regression_hac": {
+        "const": {
+          "coef": -0.07150899126356677,
+          "se_hac": 0.0712668137151209,
+          "t_hac": -1.0033981812265935,
+          "p_hac": 0.3156687813004121
+        },
+        "ai_shock_lag1": {
+          "coef": 0.02320833877256803,
+          "se_hac": 0.021653888723617534,
+          "t_hac": 1.0717861844027619,
+          "p_hac": 0.28381607986394597
+        },
+        "lag_rv": {
+          "coef": 0.28752298203717913,
+          "se_hac": 0.04978672783747222,
+          "t_hac": 5.775092972082684,
+          "p_hac": 7.691060555099224e-09
+        },
+        "log_vix_lag1": {
+          "coef": 0.08005494878897268,
+          "se_hac": 0.02612849837183131,
+          "t_hac": 3.0638939769795024,
+          "p_hac": 0.0021847632269250874
+        },
+        "meta": {
+          "n_obs": 3084,
+          "r_squared": 0.23596561027962693,
+          "hac_maxlags": 21
+        }
+      }
+    },
+    "FXI": {
+      "ticker": "FXI",
+      "sample": {
+        "first_date": "2012-08-06",
+        "last_date": "2026-05-14",
+        "n_signal_obs": 3483,
+        "n_regression_obs": 2959,
+        "regime_counts": {
+          "high": 1247,
+          "mid": 890,
+          "low": 842
+        }
+      },
+      "regime_forward_rv_mean": {
+        "high": 0.24485306869313148,
+        "low": 0.2538760578496011,
+        "mid": 0.26775180520897657
+      },
+      "regime_regression_hac": {
+        "const": {
+          "coef": -0.11309245435232804,
+          "se_hac": 0.08945081987318981,
+          "t_hac": -1.2642975717008949,
+          "p_hac": 0.2061232408502498
+        },
+        "high": {
+          "coef": -0.018255242349330326,
+          "se_hac": 0.012955563583601722,
+          "t_hac": -1.409065860510814,
+          "p_hac": 0.15881569451279587
+        },
+        "low": {
+          "coef": 0.0043497878529549505,
+          "se_hac": 0.017881426250343186,
+          "t_hac": 0.24325732142711312,
+          "p_hac": 0.8078060640383894
+        },
+        "lag_rv": {
+          "coef": 0.22036291140329184,
+          "se_hac": 0.06867259448136757,
+          "t_hac": 3.2088915974054437,
+          "p_hac": 0.001332477196723995
+        },
+        "log_vix_lag1": {
+          "coef": 0.11153695133869643,
+          "se_hac": 0.03487988123595195,
+          "t_hac": 3.197744584741627,
+          "p_hac": 0.0013850689863744484
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.22437943275462724,
+          "hac_maxlags": 21
+        }
+      },
+      "high_minus_low_contrast": {
+        "coef": -0.022605030202285277,
+        "se_hac": 0.019569905302799784,
+        "t_hac": -1.1550914453863643,
+        "p_hac": 0.24805298101490825
+      },
+      "continuous_coupling_regression_hac": {
+        "const": {
+          "coef": -0.12009259860954877,
+          "se_hac": 0.08329715399589123,
+          "t_hac": -1.4417371164382462,
+          "p_hac": 0.14937654862807279
+        },
+        "coupling_z_lag1": {
+          "coef": -0.009209808745504762,
+          "se_hac": 0.005842512716135779,
+          "t_hac": -1.5763438083873103,
+          "p_hac": 0.11494659070498857
+        },
+        "lag_rv": {
+          "coef": 0.22159353271837579,
+          "se_hac": 0.06877809363135634,
+          "t_hac": 3.221862093271948,
+          "p_hac": 0.0012736042022847818
+        },
+        "log_vix_lag1": {
+          "coef": 0.112449712711016,
+          "se_hac": 0.03461468862748128,
+          "t_hac": 3.2486125737309095,
+          "p_hac": 0.0011596931051350932
+        },
+        "meta": {
+          "n_obs": 2959,
+          "r_squared": 0.22749102173175362,
+          "hac_maxlags": 21
+        }
+      },
+      "ai_shock_regression_hac": {
+        "const": {
+          "coef": -0.10799402507792306,
+          "se_hac": 0.07756568940807675,
+          "t_hac": -1.3922911779944533,
+          "p_hac": 0.16383424188880236
+        },
+        "ai_shock_lag1": {
+          "coef": 0.012324842861241185,
+          "se_hac": 0.012809698141664622,
+          "t_hac": 0.9621493594102422,
+          "p_hac": 0.33597458276452585
+        },
+        "lag_rv": {
+          "coef": 0.24642155069923902,
+          "se_hac": 0.06738025788911271,
+          "t_hac": 3.6571773160140393,
+          "p_hac": 0.0002550079814665311
+        },
+        "log_vix_lag1": {
+          "coef": 0.10409419870725968,
+          "se_hac": 0.03180278731661093,
+          "t_hac": 3.273115581692746,
+          "p_hac": 0.0010636897140353983
+        },
+        "meta": {
+          "n_obs": 3084,
+          "r_squared": 0.23353967251005114,
+          "hac_maxlags": 21
+        }
+      }
+    }
+  },
+  "figures": [
+    "figures/median_ai_coupling.png",
+    "figures/future_rv_by_coupling_regime.png",
+    "figures/high_minus_low_hac_effects.png",
+    "figures/coupling_vs_future_rv.png"
+  ],
+  "references": [
+    {
+      "title": "Volatility spillovers and contagion from mature to emerging stock markets",
+      "url": "https://www.ecb.europa.eu/pub/pdf/scpwps/ecbwp1113.pdf",
+      "use": "Motivates mature-market-to-EM volatility transmission and contagion tests."
+    },
+    {
+      "title": "Exploring volatility interconnections between AI tokens, AI stocks, and fossil fuel markets",
+      "url": "https://ideas.repec.org/a/eee/eneeco/v133y2024ics0140988324001981.html",
+      "use": "Motivates AI-stock volatility connectedness as an empirical object."
+    },
+    {
+      "title": "IMF Global Financial Stability Report, October 2024, Chapter 3",
+      "url": "https://www.imf.org/-/media/files/publications/gfsr/2024/october/english/ch3.pdf",
+      "use": "Motivates AI-driven trading as a possible source of faster stress transmission."
+    },
+    {
+      "title": "Goldman Sachs: Emerging Markets Stocks Can Balance Volatility from the AI Trade",
+      "url": "https://www.goldmansachs.com/insights/articles/emerging-markets-stocks-can-balance-volatility-from-the-ai-trade",
+      "use": "Practitioner claim tested here with transparent ETF proxies."
+    }
+  ],
+  "verdict": "NULL",
+  "verdict_reason": "Lagged AI-specific coupling does not provide robust evidence of a distinct future EM volatility regime after controls.",
+  "limitations": [
+    "The AI proxy is a transparent public-market proxy, not observed AI-trading flow or AI capex surprises.",
+    "ETF prices are USD-denominated; local-currency EM effects and FX translation are not separated.",
+    "The design tests conditioning and forecast association, not structural causality."
+  ]
+}
