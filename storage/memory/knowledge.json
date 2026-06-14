@@ -33954,5 +33954,23 @@
     "confidence": 0.85,
     "created_at": "2026-06-14T15:28:52.479170",
     "item_id": "211364bf"
+  },
+  {
+    "item_id": "162ee69d",
+    "category": "empirical_result",
+    "experiment_id": "K1332",
+    "experiment_path": "experiments/k1332/",
+    "reviewer": "Codex desktop GPT-5",
+    "codex_review": "experiments/k1332/codex_review.md",
+    "verdict": "PASS_NARROW_CREDIT_ONLY",
+    "content": "K1332: Public BDC/private-credit shadow-stress proxy (BIZD + ARCC/MAIN/GBDC/PSEC/HTGC) was tested on yfinance adjusted-close data, 2013-02-12 to 2026-06-12, with OOS from 2021-01-04. Lagged private-credit features improve BKLN and HYG RV forecasts at Harvey strength versus own-HAR and HAR+market controls (BKLN QLIKE improvement 10.89% / 9.03%, DM t=3.64 / 3.34; HYG improvement 7.14% / 6.63%, DM t=3.45 / 3.23). They do not improve KRE or IWM (QLIKE worsens about 1.6%). Conclusion: listed BDC/private-credit proxies contain useful lagged information for public loan/high-yield credit volatility, but not for broader regional-bank or small-cap RV. This is not private loan-tape or NAV evidence.",
+    "evidence": [
+      "experiments/k1332/k1332.py",
+      "experiments/k1332/k1332_results.json",
+      "experiments/k1332/codex_review.md",
+      "experiments/k1332/README.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-14T16:48:05.286864"
   }
 ]

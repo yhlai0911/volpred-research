@@ -30322,7 +30322,7 @@
     "title": "K1332: Private credit 壓力的公開市場影子指標 — 用 BIZD/BDC 個股 basket、BKLN、HYG、KRE、LQD 建 private-credit stress proxy，檢定 BDC/loan ETF vol 或 d",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 516). Original: Private credit 壓力的公開市場影子指標 — 用 BIZD/BDC 個股 basket、BKLN、HYG、KRE、LQD 建 private-credit stress proxy，檢定 BDC/loan ETF vol 或 drawdown 是否領先高收益信用與小型股 RV；明確標示 private-credit 真實 NAV/loan tape blocked（來源：FSB 2026 private-credit vulnerabilities；IMF/academic private-credit systemic-risk frontier）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1332.py with signal.shift(1) + seed=42, (c) K1332_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 516,
@@ -30330,7 +30330,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-14T03:16:04Z"
+    "created_at": "2026-06-14T03:16:04Z",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T08:37:30.838102+00:00",
+    "claim_session_id": "7c98c30a03e5",
+    "started_at": "2026-06-14T08:37:31.119606+00:00",
+    "completed_at": "2026-06-14T08:48:23.952665+00:00",
+    "result": "K1332 completed as PASS_NARROW_CREDIT_ONLY. Built experiments/k1332 three-piece package + figures, ran yfinance 2013-02-12..2026-06-12 OOS from 2021-01-04, and Codex-reviewed methodology. Private-credit BDC proxy improves BKLN/HYG RV forecasts at Harvey strength, but worsens KRE/IWM; knowledge entry 162ee69d written via MemorySystem and research_program updated."
   },
   {
     "id": "K1333",

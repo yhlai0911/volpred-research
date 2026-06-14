@@ -1,0 +1,593 @@
+{
+  "experiment_id": "K1332",
+  "title": "Private-credit public-market shadow stress proxy",
+  "seed": 42,
+  "data_source": {
+    "type": "yfinance_adjusted_close",
+    "start_requested": "2013-02-11",
+    "end_requested": "2026-06-14",
+    "sample_start_after_required_dropna": "2013-02-12",
+    "sample_end_after_required_dropna": "2026-06-12",
+    "n_required_panel_days": 3354,
+    "download_meta": {
+      "ARCC": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "BIZD": {
+        "available": true,
+        "first_obs": "2013-02-12",
+        "last_obs": "2026-06-12",
+        "n_obs": 3354
+      },
+      "BKLN": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "GBDC": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "HTGC": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "HYG": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "IWM": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "KRE": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "LQD": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "MAIN": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "PSEC": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "SPY": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3355
+      },
+      "^VIX": {
+        "available": true,
+        "first_obs": "2013-02-11",
+        "last_obs": "2026-06-12",
+        "n_obs": 3356
+      }
+    }
+  },
+  "literature": [
+    {
+      "citation": "Financial Stability Board (2026), Report on Vulnerabilities in Private Credit",
+      "role": "documents private-credit size, bank/nonbank interlinkages, opacity, valuation, leverage, and data gaps",
+      "url": "https://www.fsb.org/2026/05/report-on-vulnerabilities-in-private-credit/"
+    },
+    {
+      "citation": "Federal Reserve FEDS Notes (2025), Bank Lending to Private Credit",
+      "role": "defines private credit as nonbank lending including BDC vehicles and documents bank links to private credit funds",
+      "url": "https://www.federalreserve.gov/econres/notes/feds-notes/bank-lending-to-private-credit-size-characteristics-and-financial-stability-implications-20250523.html"
+    },
+    {
+      "citation": "IMF Global Financial Stability Report (2024), The Rise and Risks of Private Credit",
+      "role": "motivates private-credit risk monitoring under borrower fragility and opaque valuations",
+      "url": "https://www.elibrary.imf.org/display/book/9798400257704/CH002.xml"
+    },
+    {
+      "citation": "VanEck BIZD product materials",
+      "role": "BIZD as public BDC ETF proxy for listed private-credit exposure",
+      "url": "https://www.vaneck.com/us/en/investments/bdc-income-etf-bizd/"
+    }
+  ],
+  "method": {
+    "private_credit_proxy": {
+      "members": [
+        "BIZD",
+        "ARCC",
+        "MAIN",
+        "GBDC",
+        "PSEC",
+        "HTGC"
+      ],
+      "features": [
+        "pc_log_rv_lag1",
+        "pc_log_rv_lag5",
+        "pc_downside_lag1",
+        "pc_drawdown63_lag1",
+        "pc_vs_lqd_20d_lag1"
+      ]
+    },
+    "targets": [
+      "BKLN",
+      "HYG",
+      "KRE",
+      "IWM"
+    ],
+    "lookahead_policy": "all predictive private-credit and market features are shifted by one trading day; stress signal uses raw_signal.shift(1)",
+    "target_proxy": "daily squared close-to-close log return",
+    "oos_start": "2021-01-04",
+    "minimum_training_observations": 756,
+    "success_rule": "incremental private-credit features must lower QLIKE and pass Harvey |t| > 3 in DM-HLN comparison",
+    "limitations": [
+      "true private-credit loan tape, NAV marks, non-traded BDC flows, and borrower-level defaults are not available",
+      "BIZD and listed BDC equities are liquid market proxies and can reflect equity discount-rate shocks as well as loan-credit stress"
+    ]
+  },
+  "event_study": [
+    {
+      "target": "BKLN",
+      "horizon": "next_day",
+      "n_event": 640,
+      "n_non_event": 2713,
+      "event_mean": 5.207711980663569e-05,
+      "non_event_mean": 4.160688309151008e-06,
+      "ratio": 12.516467453737738,
+      "diff": 4.791643149748468e-05,
+      "bootstrap_p_value": 0.009,
+      "ci95_low": 1.5959583251730754e-05,
+      "ci95_high": 8.759564879832623e-05
+    },
+    {
+      "target": "BKLN",
+      "horizon": "next_5d_mean",
+      "n_event": 640,
+      "n_non_event": 2709,
+      "event_mean": 5.1482247402736894e-05,
+      "non_event_mean": 4.305347210172669e-06,
+      "ratio": 11.957745772767106,
+      "diff": 4.7176900192564225e-05,
+      "bootstrap_p_value": 0.012,
+      "ci95_low": 1.763569825709557e-05,
+      "ci95_high": 8.661935606178066e-05
+    },
+    {
+      "target": "HYG",
+      "horizon": "next_day",
+      "n_event": 640,
+      "n_non_event": 2713,
+      "event_mean": 6.780928908959242e-05,
+      "non_event_mean": 1.4644787499018114e-05,
+      "ratio": 4.630267874773794,
+      "diff": 5.316450159057431e-05,
+      "bootstrap_p_value": 0.001,
+      "ci95_low": 2.506224320810726e-05,
+      "ci95_high": 8.956333425561144e-05
+    },
+    {
+      "target": "HYG",
+      "horizon": "next_5d_mean",
+      "n_event": 640,
+      "n_non_event": 2709,
+      "event_mean": 6.822756664243898e-05,
+      "non_event_mean": 1.4558516856533387e-05,
+      "ratio": 4.68643662776821,
+      "diff": 5.366904978590559e-05,
+      "bootstrap_p_value": 0.0,
+      "ci95_low": 2.732965145062352e-05,
+      "ci95_high": 8.728208346479877e-05
+    },
+    {
+      "target": "KRE",
+      "horizon": "next_day",
+      "n_event": 640,
+      "n_non_event": 2713,
+      "event_mean": 0.0006303600682321701,
+      "non_event_mean": 0.00027540807039647044,
+      "ratio": 2.2888220643814825,
+      "diff": 0.00035495199783569964,
+      "bootstrap_p_value": 0.005,
+      "ci95_low": 0.00014838720237130826,
+      "ci95_high": 0.0006049632971249508
+    },
+    {
+      "target": "KRE",
+      "horizon": "next_5d_mean",
+      "n_event": 640,
+      "n_non_event": 2709,
+      "event_mean": 0.0006091504345404344,
+      "non_event_mean": 0.00028072227364597016,
+      "ratio": 2.1699398007464765,
+      "diff": 0.0003284281608944642,
+      "bootstrap_p_value": 0.008,
+      "ci95_low": 0.00012779507247110032,
+      "ci95_high": 0.0005796728582139133
+    },
+    {
+      "target": "IWM",
+      "horizon": "next_day",
+      "n_event": 640,
+      "n_non_event": 2713,
+      "event_mean": 0.0003904794649746298,
+      "non_event_mean": 0.00013892983314070837,
+      "ratio": 2.8106235798840378,
+      "diff": 0.00025154963183392145,
+      "bootstrap_p_value": 0.001,
+      "ci95_low": 0.00012833958967559432,
+      "ci95_high": 0.0004215569968448932
+    },
+    {
+      "target": "IWM",
+      "horizon": "next_5d_mean",
+      "n_event": 640,
+      "n_non_event": 2709,
+      "event_mean": 0.00038831381487307765,
+      "non_event_mean": 0.000139406051047698,
+      "ratio": 2.7854875161783,
+      "diff": 0.0002489077638253796,
+      "bootstrap_p_value": 0.001,
+      "ci95_low": 0.00013188779542953937,
+      "ci95_high": 0.0004084747127068085
+    }
+  ],
+  "hac_regressions": {
+    "BKLN": {
+      "n_obs": 3331,
+      "baseline_r2": 0.08414733586072987,
+      "augmented_r2": 0.08647063848700243,
+      "delta_r2": 0.002323302626272561,
+      "private_credit_terms": {
+        "pc_log_rv_lag1": {
+          "coef": -0.04036459088743005,
+          "t_stat": -1.0206333658503755,
+          "p_value": 0.3074281752123167
+        },
+        "pc_log_rv_lag5": {
+          "coef": 0.13199637895582805,
+          "t_stat": 1.525174728455943,
+          "p_value": 0.12721552211721485
+        },
+        "pc_downside_lag1": {
+          "coef": 9.02336629458791,
+          "t_stat": 0.9708451601781141,
+          "p_value": 0.3316253902372548
+        },
+        "pc_drawdown63_lag1": {
+          "coef": 0.4166509538796091,
+          "t_stat": 0.20251356380303778,
+          "p_value": 0.8395152557079766
+        },
+        "pc_vs_lqd_20d_lag1": {
+          "coef": 2.352979994542326,
+          "t_stat": 1.4306706497073465,
+          "p_value": 0.15252462878694398
+        }
+      }
+    },
+    "HYG": {
+      "n_obs": 3331,
+      "baseline_r2": 0.11576256405358987,
+      "augmented_r2": 0.12354254075190696,
+      "delta_r2": 0.007779976698317093,
+      "private_credit_terms": {
+        "pc_log_rv_lag1": {
+          "coef": -0.04649824255551705,
+          "t_stat": -2.2150769869365647,
+          "p_value": 0.026754780715976274
+        },
+        "pc_log_rv_lag5": {
+          "coef": 0.19262248787473102,
+          "t_stat": 2.9688456298409394,
+          "p_value": 0.0029892072334866886
+        },
+        "pc_downside_lag1": {
+          "coef": 17.370321895146677,
+          "t_stat": 2.768296208502976,
+          "p_value": 0.005635021490461699
+        },
+        "pc_drawdown63_lag1": {
+          "coef": 0.7428050477290451,
+          "t_stat": 0.5941761540121666,
+          "p_value": 0.5523943001646155
+        },
+        "pc_vs_lqd_20d_lag1": {
+          "coef": 0.5332274162030289,
+          "t_stat": 0.516611967339709,
+          "p_value": 0.6054270599597558
+        }
+      }
+    },
+    "KRE": {
+      "n_obs": 3331,
+      "baseline_r2": 0.055953431672658205,
+      "augmented_r2": 0.06152376664012227,
+      "delta_r2": 0.005570334967464063,
+      "private_credit_terms": {
+        "pc_log_rv_lag1": {
+          "coef": -0.006599631713644286,
+          "t_stat": -0.3331613916546768,
+          "p_value": 0.7390124598932701
+        },
+        "pc_log_rv_lag5": {
+          "coef": 0.06087869847281248,
+          "t_stat": 1.193329725218191,
+          "p_value": 0.23274026532973813
+        },
+        "pc_downside_lag1": {
+          "coef": 5.330299884470965,
+          "t_stat": 0.8583377476223838,
+          "p_value": 0.39070599150491847
+        },
+        "pc_drawdown63_lag1": {
+          "coef": -2.023462169856364,
+          "t_stat": -1.8662663150470264,
+          "p_value": 0.06200411511499221
+        },
+        "pc_vs_lqd_20d_lag1": {
+          "coef": 0.7289714036041356,
+          "t_stat": 0.7763987958800772,
+          "p_value": 0.43751355540238934
+        }
+      }
+    },
+    "IWM": {
+      "n_obs": 3331,
+      "baseline_r2": 0.07260566520285106,
+      "augmented_r2": 0.07821371815104694,
+      "delta_r2": 0.005608052948195885,
+      "private_credit_terms": {
+        "pc_log_rv_lag1": {
+          "coef": -0.011900273961779822,
+          "t_stat": -0.6045781041061999,
+          "p_value": 0.5454593588964272
+        },
+        "pc_log_rv_lag5": {
+          "coef": 0.10164745997706298,
+          "t_stat": 2.118593096269789,
+          "p_value": 0.03412486967928872
+        },
+        "pc_downside_lag1": {
+          "coef": -1.042502751976029,
+          "t_stat": -0.2045843846829914,
+          "p_value": 0.8378968565725544
+        },
+        "pc_drawdown63_lag1": {
+          "coef": -1.5418258050993414,
+          "t_stat": -1.8056299860839324,
+          "p_value": 0.0709761555571968
+        },
+        "pc_vs_lqd_20d_lag1": {
+          "coef": 1.2373323078022929,
+          "t_stat": 1.5335679508230577,
+          "p_value": 0.12513597788739655
+        }
+      }
+    }
+  },
+  "rolling_oos": {
+    "BKLN": {
+      "models": {
+        "har": {
+          "qlike": 13.620675490150543,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_market": {
+          "qlike": 13.515273496386687,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_pc": {
+          "qlike": 12.138374517366245,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_market_pc": {
+          "qlike": 12.294987806708823,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        }
+      },
+      "pairwise": {
+        "har_vs_har_pc": {
+          "dm_t_stat_base_minus_challenger": 3.6389948581627642,
+          "p_value": 0.00028390717391779674,
+          "harvey_pass": true,
+          "lower_qlike_model": "har_pc",
+          "qlike_improvement_pct": 10.88272732036078
+        },
+        "har_market_vs_har_market_pc": {
+          "dm_t_stat_base_minus_challenger": 3.3431731016715704,
+          "p_value": 0.0008506824175840144,
+          "harvey_pass": true,
+          "lower_qlike_model": "har_market_pc",
+          "qlike_improvement_pct": 9.02893818614997
+        }
+      }
+    },
+    "HYG": {
+      "models": {
+        "har": {
+          "qlike": 3.5754810604819376,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_market": {
+          "qlike": 3.6035973436226993,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_pc": {
+          "qlike": 3.3203727832132595,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_market_pc": {
+          "qlike": 3.364685637654488,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        }
+      },
+      "pairwise": {
+        "har_vs_har_pc": {
+          "dm_t_stat_base_minus_challenger": 3.4522405156723353,
+          "p_value": 0.0005729298195351618,
+          "harvey_pass": true,
+          "lower_qlike_model": "har_pc",
+          "qlike_improvement_pct": 7.134935773769479
+        },
+        "har_market_vs_har_market_pc": {
+          "dm_t_stat_base_minus_challenger": 3.231054619733442,
+          "p_value": 0.0012627358035308678,
+          "harvey_pass": true,
+          "lower_qlike_model": "har_market_pc",
+          "qlike_improvement_pct": 6.629811357559532
+        }
+      }
+    },
+    "KRE": {
+      "models": {
+        "har": {
+          "qlike": 3.965910858908744,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_market": {
+          "qlike": 3.9749054448140337,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_pc": {
+          "qlike": 4.0280678720800545,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_market_pc": {
+          "qlike": 4.037751974762832,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        }
+      },
+      "pairwise": {
+        "har_vs_har_pc": {
+          "dm_t_stat_base_minus_challenger": -0.8759633680369241,
+          "p_value": 0.38120395419269104,
+          "harvey_pass": false,
+          "lower_qlike_model": "har",
+          "qlike_improvement_pct": -1.5672821549098899
+        },
+        "har_market_vs_har_market_pc": {
+          "dm_t_stat_base_minus_challenger": -0.8804174512456042,
+          "p_value": 0.3787880730144717,
+          "harvey_pass": false,
+          "lower_qlike_model": "har_market",
+          "qlike_improvement_pct": -1.5810823885331153
+        }
+      }
+    },
+    "IWM": {
+      "models": {
+        "har": {
+          "qlike": 3.1874639547398833,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_market": {
+          "qlike": 3.18734195685449,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_pc": {
+          "qlike": 3.2356945237770134,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        },
+        "har_market_pc": {
+          "qlike": 3.237757130035112,
+          "n_oos": 1367,
+          "first_oos": "2021-01-04",
+          "last_oos": "2026-06-12"
+        }
+      },
+      "pairwise": {
+        "har_vs_har_pc": {
+          "dm_t_stat_base_minus_challenger": -0.9449184541524079,
+          "p_value": 0.34486761217292106,
+          "harvey_pass": false,
+          "lower_qlike_model": "har",
+          "qlike_improvement_pct": -1.513133002348445
+        },
+        "har_market_vs_har_market_pc": {
+          "dm_t_stat_base_minus_challenger": -1.0123561735941948,
+          "p_value": 0.3115470653355308,
+          "harvey_pass": false,
+          "lower_qlike_model": "har_market",
+          "qlike_improvement_pct": -1.5817309175817287
+        }
+      }
+    }
+  },
+  "context": {
+    "monthly_return_correlations_with_pc_proxy": {
+      "HYG": 0.6731555470078185,
+      "BKLN": 0.7580602381110507,
+      "KRE": 0.64737636459243,
+      "IWM": 0.7312945689557192,
+      "LQD": 0.3813089402913035
+    },
+    "stress_signal_share": 0.19081693500298152
+  },
+  "conclusion": {
+    "verdict": "PASS_NARROW_CREDIT_ONLY",
+    "summary": "Private-credit proxy adds Harvey-strength OOS RV forecasting value only for BKLN, HYG; it does not improve all target markets.",
+    "event_targets_with_ratio_gt_1": 4,
+    "weak_oos_private_credit_wins": [],
+    "strong_oos_private_credit_wins": [
+      "BKLN:har_vs_har_pc",
+      "BKLN:har_market_vs_har_market_pc",
+      "HYG:har_vs_har_pc",
+      "HYG:har_market_vs_har_market_pc"
+    ]
+  },
+  "artifacts": {
+    "event_figure": "k1332_private_credit_event.png",
+    "oos_figure": "k1332_oos_qlike_delta.png"
+  }
+}
