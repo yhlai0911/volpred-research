@@ -30640,7 +30640,7 @@
     "title": "K1332: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1332 has verdict signal (score=3, reasons=None) but no general article in feed.json.  Verdict preview: ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1332",
@@ -30649,7 +30649,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-14T12:11:05+00:00"
+    "created_at": "2026-06-14T12:11:05+00:00",
+    "claimed_by": "codex-desktop",
+    "claimed_at": "2026-06-14T13:01:03.770157+00:00",
+    "claim_session_id": "01959b28f317",
+    "started_at": "2026-06-14T13:01:03.970257+00:00",
+    "completed_at": "2026-06-14T13:06:02.106148+00:00",
+    "result": "Published general draft mile_1b511caa for K1332 via publish_draft with 2 real charts and anti-AI gate PASS.\nNeeded dup_waiver + cluster_waiver because narrative-arc and spy-cluster gates false-positively matched generic US_EQUITY/VIX overlap.\nVerified feed.json contains the new draft entry; first publish attempt exposed a publisher stdout quirk that surfaced an unrelated existing mile id before waiver retry."
   },
   {
     "id": "k860_article_correction_mile_28e6123e",

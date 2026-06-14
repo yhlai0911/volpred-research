@@ -854,11 +854,16 @@ class Publisher:
             or '每日建議' in tag_list
             or 'daily-update' in tag_list
         )
-        # 2026-06-11 fix (mile_9b76989e incident): proposer 是 member-questions 流程
-        # 專用欄位（回答發佈時掛會員名）。會員回答文必含學術詞 → _infer_audience 會
-        # 強制改 research → badge 變「研究」、不進會員提問 tab、提問會員看不到回覆。
-        # proposer 非空 = member_qa 文，整段 inference 跳過。
-        if proposer:
+        # 2026-06-11 fix (mile_9b76989e incident): member 回答文必含學術詞 →
+        # _infer_audience 會強制改 research → badge 變「研究」、不進會員提問 tab。
+        # 故 member_qa 必須跳過 inference 保留原 audience。
+        # 2026-06-14 fix (mile_6159728d incident): 原條件是 `if proposer:` —— 過廣。
+        # proposer 是通用署名欄位（一般文也可 proposer='用戶'/'Claude'），用它當
+        # member_qa 的 proxy 會把帶署名的一般讀者文錯分成會員提問。改以「顯式
+        # member_qa（audience/category）」判斷；僅保留 proposer-only(無 audience)
+        # 的 legacy member_qa 呼叫相容性。
+        if (audience == 'member_qa' or category == 'member_qa'
+                or (proposer and audience is None)):
             audience = 'member_qa'
             category = 'member_qa'
         elif is_daily_signal:

@@ -190,6 +190,15 @@ def find_arc_duplicates(
     if not new_ents:
         return []
     new_cls = classify_conclusion(new_text)
+    # "descriptive" is the fallback class meaning "no identifiable conclusion".
+    # Two articles that both fail to classify are NOT the same narrative arc —
+    # matching on it produces false positives whenever unrelated pieces happen
+    # to share one distinctive entity (2026-06-14: SpaceX IPO capital-structure
+    # piece mile_6159728d falsely blocked against big-tech-vol mile_312204b2 on
+    # shared USD+US_EQUITY, both descriptive). An arc needs a real conclusion
+    # class on the *new* side to be a defined arc.
+    if new_cls == "descriptive":
+        return []
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     dups: list[dict] = []
