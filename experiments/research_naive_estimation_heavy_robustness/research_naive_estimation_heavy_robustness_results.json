@@ -1,0 +1,999 @@
+{
+  "experiment_id": "research_naive_estimation_heavy_robustness",
+  "title": "Naive hedge vs estimation-heavy hedge robustness horse race",
+  "timestamp_utc": "2026-06-14T09:06:22.416787+00:00",
+  "data": {
+    "source": "yfinance auto-adjusted close",
+    "tickers": [
+      "SPY",
+      "SH",
+      "TLT",
+      "GLD"
+    ],
+    "period": [
+      "2006-06-22",
+      "2026-06-12"
+    ],
+    "n_obs": 5025
+  },
+  "design": {
+    "is_period": [
+      "2007-06-01",
+      "2017-12-29"
+    ],
+    "oos_period": [
+      "2018-01-02",
+      "2026-06-12"
+    ],
+    "stress_periods": {
+      "2018Q4": [
+        "2018-10-01",
+        "2018-12-31"
+      ],
+      "2020_crash": [
+        "2020-02-19",
+        "2020-04-30"
+      ],
+      "2022_bear": [
+        "2022-01-03",
+        "2022-10-31"
+      ],
+      "2025_correction": [
+        "2025-02-19",
+        "2025-04-30"
+      ]
+    },
+    "transaction_cost_one_way_bps": 5.0,
+    "bootstrap": {
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    },
+    "panel_a": "SPY + SH with naive fixed, rolling-beta, inverse-vol, rolling-CVaR rules under common 25% hedge budget.",
+    "panel_b": "75% SPY core plus 25% defensive sleeve allocated across SH/TLT/GLD by naive equal, negative-beta, inverse-vol, or rolling-CVaR rules."
+  },
+  "literature": [
+    {
+      "title": "Tail Risk Hedging: The Superiority of the Naive Hedging Strategy",
+      "year": 2025,
+      "url": "https://onlinelibrary.wiley.com/doi/full/10.1002/fut.22602",
+      "note": "Motivates the naive-vs-complex tail-hedge comparison and the estimation-error channel."
+    },
+    {
+      "title": "Hedging with Futures: Does Anything Beat the Naive Hedging Strategy?",
+      "year": 2015,
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2462728",
+      "note": "Classic benchmark that estimation-heavy hedge ratios often fail to beat naive rules once estimation error is counted."
+    },
+    {
+      "title": "Estimation of Optimal Hedge Ratio: A Wild Bootstrap Approach",
+      "year": 2024,
+      "url": "https://www.mdpi.com/1911-8074/17/7/310",
+      "note": "Recent reminder that hedge-ratio estimation uncertainty remains first-order even when models become more elaborate."
+    }
+  ],
+  "related_repo_priors": [
+    "I5: SPY/ES futures hedge ratio nearly constant across VIX regimes; dynamic ratio adds zero value.",
+    "I1b: Static hedges beat or tie rolling/EWMA methods in 5 of 6 cross-asset pairs.",
+    "K544: tail-hedge overlays on already-defensive portfolios are usually NPV-negative.",
+    "K1334/K1494: backward-looking tail controls often fail to beat simpler volatility-aware baselines."
+  ],
+  "summary": {
+    "panel_a": {
+      "headline": "With the same SH hedge budget, naive fixed 25% is effectively tied with rolling-CVaR and slightly ahead of rolling-beta / inverse-vol after turnover costs.",
+      "key_numbers": {
+        "naive_fixed_sharpe": 0.924204,
+        "rolling_beta_sharpe": 0.921387,
+        "inverse_vol_sharpe": 0.920785,
+        "rolling_cvar_sharpe": 0.924193,
+        "naive_fixed_mdd": -0.178986,
+        "rolling_cvar_mdd": -0.178993
+      }
+    },
+    "panel_b": {
+      "headline": "Across SH/TLT/GLD, apparent gains from complex methods mostly come from structurally concentrating the sleeve into SH rather than from superior time variation.",
+      "key_numbers": {
+        "naive_equal_cagr": 0.116953,
+        "beta_negative_beta_cagr": 0.093707,
+        "rolling_cvar_cagr": 0.0877,
+        "naive_equal_mdd": -0.226186,
+        "rolling_cvar_mdd": -0.178986
+      }
+    },
+    "bottom_line": "The evidence does not support a broad claim that estimation-heavy hedges are more robust. On the clean single-instrument test, complexity adds no value. On the multi-asset sleeve test, differences are mostly asset-choice effects, not timing skill."
+  },
+  "panel_a_single_asset": {
+    "description": "Single inverse-equity hedge (SH) with common 25% hedge budget to isolate estimation error.",
+    "calibration": {
+      "target_mean_hedge_budget": 0.25,
+      "is_period": [
+        "2007-06-01",
+        "2017-12-29"
+      ],
+      "rolling_beta": {
+        "raw_is_mean": 0.499439,
+        "scale_factor": 0.500561,
+        "scaled_is_mean": 0.25
+      },
+      "inverse_vol": {
+        "raw_is_mean": 0.499447,
+        "scale_factor": 0.500554,
+        "scaled_is_mean": 0.25
+      },
+      "rolling_cvar": {
+        "raw_is_mean": 0.500023,
+        "scale_factor": 0.499977,
+        "scaled_is_mean": 0.25
+      }
+    },
+    "oos_metrics": {
+      "naive_fixed": {
+        "n_days": 2123,
+        "start": "2018-01-02",
+        "end": "2026-06-12",
+        "cagr": 0.0877,
+        "ann_return": 0.088686,
+        "ann_vol": 0.095959,
+        "sharpe": 0.924204,
+        "mdd": -0.178986,
+        "cvar5_daily": -0.01454,
+        "left_tail_days_2pct": 15,
+        "left_tail_freq_2pct": 0.007065,
+        "mean_hedge_budget": 0.25,
+        "turnover_ann": 0.0
+      },
+      "rolling_beta": {
+        "n_days": 2123,
+        "start": "2018-01-02",
+        "end": "2026-06-12",
+        "cagr": 0.087483,
+        "ann_return": 0.088494,
+        "ann_vol": 0.096045,
+        "sharpe": 0.921387,
+        "mdd": -0.180048,
+        "cvar5_daily": -0.014549,
+        "left_tail_days_2pct": 15,
+        "left_tail_freq_2pct": 0.007065,
+        "mean_hedge_budget": 0.250595,
+        "turnover_ann": 0.037272
+      },
+      "inverse_vol": {
+        "n_days": 2123,
+        "start": "2018-01-02",
+        "end": "2026-06-12",
+        "cagr": 0.087434,
+        "ann_return": 0.088451,
+        "ann_vol": 0.096061,
+        "sharpe": 0.920785,
+        "mdd": -0.180547,
+        "cvar5_daily": -0.01455,
+        "left_tail_days_2pct": 15,
+        "left_tail_freq_2pct": 0.007065,
+        "mean_hedge_budget": 0.25059,
+        "turnover_ann": 0.037245
+      },
+      "rolling_cvar": {
+        "n_days": 2123,
+        "start": "2018-01-02",
+        "end": "2026-06-12",
+        "cagr": 0.087703,
+        "ann_return": 0.088689,
+        "ann_vol": 0.095963,
+        "sharpe": 0.924193,
+        "mdd": -0.178993,
+        "cvar5_daily": -0.014541,
+        "left_tail_days_2pct": 15,
+        "left_tail_freq_2pct": 0.007065,
+        "mean_hedge_budget": 0.249989,
+        "turnover_ann": 0.0
+      }
+    },
+    "stress_metrics": {
+      "2018Q4": {
+        "naive_fixed": {
+          "n_days": 63,
+          "start": "2018-10-01",
+          "end": "2018-12-31",
+          "cagr": -0.24071,
+          "ann_return": -0.268294,
+          "ann_vol": 0.118708,
+          "sharpe": -2.260126,
+          "mdd": -0.097919,
+          "cvar5_daily": -0.015097,
+          "left_tail_days_2pct": 0,
+          "left_tail_freq_2pct": 0.0,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        },
+        "rolling_beta": {
+          "n_days": 63,
+          "start": "2018-10-01",
+          "end": "2018-12-31",
+          "cagr": -0.240257,
+          "ann_return": -0.267714,
+          "ann_vol": 0.118581,
+          "sharpe": -2.257639,
+          "mdd": -0.097743,
+          "cvar5_daily": -0.01508,
+          "left_tail_days_2pct": 0,
+          "left_tail_freq_2pct": 0.0,
+          "mean_hedge_budget": 0.250211,
+          "turnover_ann": 0.040839
+        },
+        "inverse_vol": {
+          "n_days": 63,
+          "start": "2018-10-01",
+          "end": "2018-12-31",
+          "cagr": -0.240274,
+          "ann_return": -0.267735,
+          "ann_vol": 0.118577,
+          "sharpe": -2.257912,
+          "mdd": -0.097738,
+          "cvar5_daily": -0.015073,
+          "left_tail_days_2pct": 0,
+          "left_tail_freq_2pct": 0.0,
+          "mean_hedge_budget": 0.250234,
+          "turnover_ann": 0.039036
+        },
+        "rolling_cvar": {
+          "n_days": 63,
+          "start": "2018-10-01",
+          "end": "2018-12-31",
+          "cagr": -0.24072,
+          "ann_return": -0.268307,
+          "ann_vol": 0.118713,
+          "sharpe": -2.260133,
+          "mdd": -0.097924,
+          "cvar5_daily": -0.015098,
+          "left_tail_days_2pct": 0,
+          "left_tail_freq_2pct": 0.0,
+          "mean_hedge_budget": 0.249989,
+          "turnover_ann": 0.0
+        }
+      },
+      "2020_crash": {
+        "naive_fixed": {
+          "n_days": 51,
+          "start": "2020-02-19",
+          "end": "2020-04-30",
+          "cagr": -0.255927,
+          "ann_return": -0.244461,
+          "ann_vol": 0.321951,
+          "sharpe": -0.759312,
+          "mdd": -0.178986,
+          "cvar5_daily": -0.046704,
+          "left_tail_days_2pct": 8,
+          "left_tail_freq_2pct": 0.156863,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        },
+        "rolling_beta": {
+          "n_days": 51,
+          "start": "2020-02-19",
+          "end": "2020-04-30",
+          "cagr": -0.2511,
+          "ann_return": -0.237043,
+          "ann_vol": 0.325015,
+          "sharpe": -0.729328,
+          "mdd": -0.180048,
+          "cvar5_daily": -0.046826,
+          "left_tail_days_2pct": 8,
+          "left_tail_freq_2pct": 0.156863,
+          "mean_hedge_budget": 0.246892,
+          "turnover_ann": 0.071749
+        },
+        "inverse_vol": {
+          "n_days": 51,
+          "start": "2020-02-19",
+          "end": "2020-04-30",
+          "cagr": -0.253393,
+          "ann_return": -0.239973,
+          "ann_vol": 0.325414,
+          "sharpe": -0.737439,
+          "mdd": -0.180547,
+          "cvar5_daily": -0.04695,
+          "left_tail_days_2pct": 8,
+          "left_tail_freq_2pct": 0.156863,
+          "mean_hedge_budget": 0.246811,
+          "turnover_ann": 0.071752
+        },
+        "rolling_cvar": {
+          "n_days": 51,
+          "start": "2020-02-19",
+          "end": "2020-04-30",
+          "cagr": -0.255938,
+          "ann_return": -0.244472,
+          "ann_vol": 0.321966,
+          "sharpe": -0.759311,
+          "mdd": -0.178993,
+          "cvar5_daily": -0.046706,
+          "left_tail_days_2pct": 8,
+          "left_tail_freq_2pct": 0.156863,
+          "mean_hedge_budget": 0.249989,
+          "turnover_ann": 0.0
+        }
+      },
+      "2022_bear": {
+        "naive_fixed": {
+          "n_days": 209,
+          "start": "2022-01-03",
+          "end": "2022-10-31",
+          "cagr": -0.099084,
+          "ann_return": -0.096898,
+          "ann_vol": 0.122062,
+          "sharpe": -0.793846,
+          "mdd": -0.122274,
+          "cvar5_daily": -0.017319,
+          "left_tail_days_2pct": 2,
+          "left_tail_freq_2pct": 0.009569,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        },
+        "rolling_beta": {
+          "n_days": 209,
+          "start": "2022-01-03",
+          "end": "2022-10-31",
+          "cagr": -0.099286,
+          "ann_return": -0.09712,
+          "ann_vol": 0.122087,
+          "sharpe": -0.795495,
+          "mdd": -0.122552,
+          "cvar5_daily": -0.017324,
+          "left_tail_days_2pct": 2,
+          "left_tail_freq_2pct": 0.009569,
+          "mean_hedge_budget": 0.250087,
+          "turnover_ann": 0.024994
+        },
+        "inverse_vol": {
+          "n_days": 209,
+          "start": "2022-01-03",
+          "end": "2022-10-31",
+          "cagr": -0.099356,
+          "ann_return": -0.097198,
+          "ann_vol": 0.122085,
+          "sharpe": -0.79615,
+          "mdd": -0.122617,
+          "cvar5_daily": -0.017322,
+          "left_tail_days_2pct": 2,
+          "left_tail_freq_2pct": 0.009569,
+          "mean_hedge_budget": 0.250076,
+          "turnover_ann": 0.025081
+        },
+        "rolling_cvar": {
+          "n_days": 209,
+          "start": "2022-01-03",
+          "end": "2022-10-31",
+          "cagr": -0.099089,
+          "ann_return": -0.096903,
+          "ann_vol": 0.122067,
+          "sharpe": -0.793851,
+          "mdd": -0.122279,
+          "cvar5_daily": -0.01732,
+          "left_tail_days_2pct": 2,
+          "left_tail_freq_2pct": 0.009569,
+          "mean_hedge_budget": 0.249989,
+          "turnover_ann": 0.0
+        }
+      },
+      "2025_correction": {
+        "naive_fixed": {
+          "n_days": 50,
+          "start": "2025-02-19",
+          "end": "2025-04-30",
+          "cagr": -0.182674,
+          "ann_return": -0.184101,
+          "ann_vol": 0.190201,
+          "sharpe": -0.967925,
+          "mdd": -0.095044,
+          "cvar5_daily": -0.026029,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.06,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        },
+        "rolling_beta": {
+          "n_days": 50,
+          "start": "2025-02-19",
+          "end": "2025-04-30",
+          "cagr": -0.18463,
+          "ann_return": -0.186737,
+          "ann_vol": 0.188893,
+          "sharpe": -0.98859,
+          "mdd": -0.094617,
+          "cvar5_daily": -0.025892,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.06,
+          "mean_hedge_budget": 0.25292,
+          "turnover_ann": 0.07004
+        },
+        "inverse_vol": {
+          "n_days": 50,
+          "start": "2025-02-19",
+          "end": "2025-04-30",
+          "cagr": -0.182383,
+          "ann_return": -0.184066,
+          "ann_vol": 0.188477,
+          "sharpe": -0.976597,
+          "mdd": -0.09451,
+          "cvar5_daily": -0.0257,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.06,
+          "mean_hedge_budget": 0.253077,
+          "turnover_ann": 0.070028
+        },
+        "rolling_cvar": {
+          "n_days": 50,
+          "start": "2025-02-19",
+          "end": "2025-04-30",
+          "cagr": -0.182683,
+          "ann_return": -0.184111,
+          "ann_vol": 0.19021,
+          "sharpe": -0.967938,
+          "mdd": -0.095048,
+          "cvar5_daily": -0.02603,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.06,
+          "mean_hedge_budget": 0.249989,
+          "turnover_ann": 0.0
+        }
+      }
+    },
+    "bootstrap_vs_naive_fixed": {
+      "rolling_beta": {
+        "sharpe_diff_alt_minus_base": {
+          "mean": -0.002327,
+          "ci_2p5": -0.007418,
+          "ci_97p5": 0.002479,
+          "p_gt_0": 0.188
+        },
+        "cagr_diff_pp_alt_minus_base": {
+          "mean": -0.017965,
+          "ci_2p5": -0.08002,
+          "ci_97p5": 0.046664,
+          "p_gt_0": 0.286
+        },
+        "mdd_diff_pp_alt_minus_base": {
+          "mean": -0.037525,
+          "ci_2p5": -0.166976,
+          "ci_97p5": 0.073028,
+          "p_gt_0": 0.341
+        },
+        "cvar5_diff_pp_alt_minus_base": {
+          "mean": -0.000634,
+          "ci_2p5": -0.011773,
+          "ci_97p5": 0.009417,
+          "p_gt_0": 0.438
+        },
+        "left_tail_freq_diff_alt_minus_base": {
+          "mean": 0.0,
+          "ci_2p5": 0.0,
+          "ci_97p5": 0.0,
+          "p_gt_0": 0.0
+        }
+      },
+      "inverse_vol": {
+        "sharpe_diff_alt_minus_base": {
+          "mean": -0.00283,
+          "ci_2p5": -0.008721,
+          "ci_97p5": 0.002797,
+          "p_gt_0": 0.173
+        },
+        "cagr_diff_pp_alt_minus_base": {
+          "mean": -0.022672,
+          "ci_2p5": -0.087277,
+          "ci_97p5": 0.04057,
+          "p_gt_0": 0.239
+        },
+        "mdd_diff_pp_alt_minus_base": {
+          "mean": -0.066147,
+          "ci_2p5": -0.228557,
+          "ci_97p5": 0.077515,
+          "p_gt_0": 0.289
+        },
+        "cvar5_diff_pp_alt_minus_base": {
+          "mean": -0.000745,
+          "ci_2p5": -0.012242,
+          "ci_97p5": 0.009748,
+          "p_gt_0": 0.445
+        },
+        "left_tail_freq_diff_alt_minus_base": {
+          "mean": 0.0,
+          "ci_2p5": 0.0,
+          "ci_97p5": 0.0,
+          "p_gt_0": 0.0
+        }
+      },
+      "rolling_cvar": {
+        "sharpe_diff_alt_minus_base": {
+          "mean": -1.1e-05,
+          "ci_2p5": -1.4e-05,
+          "ci_97p5": -8e-06,
+          "p_gt_0": 0.0
+        },
+        "cagr_diff_pp_alt_minus_base": {
+          "mean": 0.000278,
+          "ci_2p5": -2.3e-05,
+          "ci_97p5": 0.000581,
+          "p_gt_0": 0.963
+        },
+        "mdd_diff_pp_alt_minus_base": {
+          "mean": -0.000757,
+          "ci_2p5": -0.001394,
+          "ci_97p5": -0.000388,
+          "p_gt_0": 0.0
+        },
+        "cvar5_diff_pp_alt_minus_base": {
+          "mean": -6.6e-05,
+          "ci_2p5": -8.4e-05,
+          "ci_97p5": -5.3e-05,
+          "p_gt_0": 0.0
+        },
+        "left_tail_freq_diff_alt_minus_base": {
+          "mean": 0.0,
+          "ci_2p5": 0.0,
+          "ci_97p5": 0.0,
+          "p_gt_0": 0.0
+        }
+      }
+    },
+    "weights_oos_mean": {
+      "naive_fixed": 0.25,
+      "rolling_beta": 0.250595,
+      "inverse_vol": 0.25059,
+      "rolling_cvar": 0.249989
+    },
+    "turnover_oos_ann": {
+      "naive_fixed": 0.0,
+      "rolling_beta": 0.037272,
+      "inverse_vol": 0.037245,
+      "rolling_cvar": 0.0
+    }
+  },
+  "panel_b_multi_asset": {
+    "description": "25% defensive sleeve across SH/TLT/GLD to test whether method gains come from timing or asset selection.",
+    "oos_metrics": {
+      "naive_equal": {
+        "n_days": 2123,
+        "start": "2018-01-02",
+        "end": "2026-06-12",
+        "cagr": 0.116953,
+        "ann_return": 0.119022,
+        "ann_vol": 0.129517,
+        "sharpe": 0.918971,
+        "mdd": -0.226186,
+        "cvar5_daily": -0.019318,
+        "left_tail_days_2pct": 30,
+        "left_tail_freq_2pct": 0.014131,
+        "mean_hedge_budget": 0.25,
+        "turnover_ann": 0.0
+      },
+      "beta_negative_beta": {
+        "n_days": 2123,
+        "start": "2018-01-02",
+        "end": "2026-06-12",
+        "cagr": 0.093707,
+        "ann_return": 0.094858,
+        "ann_vol": 0.102594,
+        "sharpe": 0.924596,
+        "mdd": -0.203287,
+        "cvar5_daily": -0.015593,
+        "left_tail_days_2pct": 16,
+        "left_tail_freq_2pct": 0.007537,
+        "mean_hedge_budget": 0.25,
+        "turnover_ann": 1.124479
+      },
+      "inverse_vol": {
+        "n_days": 2123,
+        "start": "2018-01-02",
+        "end": "2026-06-12",
+        "cagr": 0.118322,
+        "ann_return": 0.120623,
+        "ann_vol": 0.13238,
+        "sharpe": 0.911186,
+        "mdd": -0.235261,
+        "cvar5_daily": -0.019741,
+        "left_tail_days_2pct": 32,
+        "left_tail_freq_2pct": 0.015073,
+        "mean_hedge_budget": 0.25,
+        "turnover_ann": 0.668974
+      },
+      "rolling_cvar": {
+        "n_days": 2123,
+        "start": "2018-01-02",
+        "end": "2026-06-12",
+        "cagr": 0.0877,
+        "ann_return": 0.088686,
+        "ann_vol": 0.095959,
+        "sharpe": 0.924204,
+        "mdd": -0.178986,
+        "cvar5_daily": -0.01454,
+        "left_tail_days_2pct": 15,
+        "left_tail_freq_2pct": 0.007065,
+        "mean_hedge_budget": 0.25,
+        "turnover_ann": 0.0
+      }
+    },
+    "stress_metrics": {
+      "2018Q4": {
+        "naive_equal": {
+          "n_days": 63,
+          "start": "2018-10-01",
+          "end": "2018-12-31",
+          "cagr": -0.286754,
+          "ann_return": -0.326171,
+          "ann_vol": 0.153185,
+          "sharpe": -2.129259,
+          "mdd": -0.12306,
+          "cvar5_daily": -0.019123,
+          "left_tail_days_2pct": 1,
+          "left_tail_freq_2pct": 0.015873,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        },
+        "beta_negative_beta": {
+          "n_days": 63,
+          "start": "2018-10-01",
+          "end": "2018-12-31",
+          "cagr": -0.248504,
+          "ann_return": -0.277437,
+          "ann_vol": 0.128316,
+          "sharpe": -2.162134,
+          "mdd": -0.103571,
+          "cvar5_daily": -0.015933,
+          "left_tail_days_2pct": 0,
+          "left_tail_freq_2pct": 0.0,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 1.68807
+        },
+        "inverse_vol": {
+          "n_days": 63,
+          "start": "2018-10-01",
+          "end": "2018-12-31",
+          "cagr": -0.286991,
+          "ann_return": -0.325785,
+          "ann_vol": 0.157914,
+          "sharpe": -2.063051,
+          "mdd": -0.125282,
+          "cvar5_daily": -0.019361,
+          "left_tail_days_2pct": 2,
+          "left_tail_freq_2pct": 0.031746,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.855142
+        },
+        "rolling_cvar": {
+          "n_days": 63,
+          "start": "2018-10-01",
+          "end": "2018-12-31",
+          "cagr": -0.24071,
+          "ann_return": -0.268294,
+          "ann_vol": 0.118708,
+          "sharpe": -2.260126,
+          "mdd": -0.097919,
+          "cvar5_daily": -0.015097,
+          "left_tail_days_2pct": 0,
+          "left_tail_freq_2pct": 0.0,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        }
+      },
+      "2020_crash": {
+        "naive_equal": {
+          "n_days": 51,
+          "start": "2020-02-19",
+          "end": "2020-04-30",
+          "cagr": -0.278348,
+          "ann_return": -0.236914,
+          "ann_vol": 0.425312,
+          "sharpe": -0.557036,
+          "mdd": -0.226186,
+          "cvar5_daily": -0.061423,
+          "left_tail_days_2pct": 10,
+          "left_tail_freq_2pct": 0.196078,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        },
+        "beta_negative_beta": {
+          "n_days": 51,
+          "start": "2020-02-19",
+          "end": "2020-04-30",
+          "cagr": -0.298084,
+          "ann_return": -0.290108,
+          "ann_vol": 0.359323,
+          "sharpe": -0.807373,
+          "mdd": -0.203287,
+          "cvar5_daily": -0.05238,
+          "left_tail_days_2pct": 7,
+          "left_tail_freq_2pct": 0.137255,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 2.176084
+        },
+        "inverse_vol": {
+          "n_days": 51,
+          "start": "2020-02-19",
+          "end": "2020-04-30",
+          "cagr": -0.279447,
+          "ann_return": -0.228657,
+          "ann_vol": 0.448044,
+          "sharpe": -0.510344,
+          "mdd": -0.235261,
+          "cvar5_daily": -0.064541,
+          "left_tail_days_2pct": 11,
+          "left_tail_freq_2pct": 0.215686,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 1.384583
+        },
+        "rolling_cvar": {
+          "n_days": 51,
+          "start": "2020-02-19",
+          "end": "2020-04-30",
+          "cagr": -0.255927,
+          "ann_return": -0.244461,
+          "ann_vol": 0.321951,
+          "sharpe": -0.759312,
+          "mdd": -0.178986,
+          "cvar5_daily": -0.046704,
+          "left_tail_days_2pct": 8,
+          "left_tail_freq_2pct": 0.156863,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        }
+      },
+      "2022_bear": {
+        "naive_equal": {
+          "n_days": 209,
+          "start": "2022-01-03",
+          "end": "2022-10-31",
+          "cagr": -0.1814,
+          "ann_return": -0.18632,
+          "ann_vol": 0.166127,
+          "sharpe": -1.121548,
+          "mdd": -0.193897,
+          "cvar5_daily": -0.023754,
+          "left_tail_days_2pct": 9,
+          "left_tail_freq_2pct": 0.043062,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        },
+        "beta_negative_beta": {
+          "n_days": 209,
+          "start": "2022-01-03",
+          "end": "2022-10-31",
+          "cagr": -0.120126,
+          "ann_return": -0.119624,
+          "ann_vol": 0.129214,
+          "sharpe": -0.925785,
+          "mdd": -0.137909,
+          "cvar5_daily": -0.018475,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.014354,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 1.15665
+        },
+        "inverse_vol": {
+          "n_days": 209,
+          "start": "2022-01-03",
+          "end": "2022-10-31",
+          "cagr": -0.184791,
+          "ann_return": -0.189643,
+          "ann_vol": 0.171026,
+          "sharpe": -1.108861,
+          "mdd": -0.197966,
+          "cvar5_daily": -0.024502,
+          "left_tail_days_2pct": 10,
+          "left_tail_freq_2pct": 0.047847,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.581277
+        },
+        "rolling_cvar": {
+          "n_days": 209,
+          "start": "2022-01-03",
+          "end": "2022-10-31",
+          "cagr": -0.099084,
+          "ann_return": -0.096898,
+          "ann_vol": 0.122062,
+          "sharpe": -0.793846,
+          "mdd": -0.122274,
+          "cvar5_daily": -0.017319,
+          "left_tail_days_2pct": 2,
+          "left_tail_freq_2pct": 0.009569,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        }
+      },
+      "2025_correction": {
+        "naive_equal": {
+          "n_days": 50,
+          "start": "2025-02-19",
+          "end": "2025-04-30",
+          "cagr": -0.211611,
+          "ann_return": -0.206698,
+          "ann_vol": 0.253206,
+          "sharpe": -0.816322,
+          "mdd": -0.125518,
+          "cvar5_daily": -0.034425,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.06,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        },
+        "beta_negative_beta": {
+          "n_days": 50,
+          "start": "2025-02-19",
+          "end": "2025-04-30",
+          "cagr": -0.184594,
+          "ann_return": -0.186151,
+          "ann_vol": 0.191868,
+          "sharpe": -0.970199,
+          "mdd": -0.096193,
+          "cvar5_daily": -0.02614,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.06,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.414608
+        },
+        "inverse_vol": {
+          "n_days": 50,
+          "start": "2025-02-19",
+          "end": "2025-04-30",
+          "cagr": -0.208243,
+          "ann_return": -0.200544,
+          "ann_vol": 0.260917,
+          "sharpe": -0.768614,
+          "mdd": -0.127861,
+          "cvar5_daily": -0.035506,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.06,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.806448
+        },
+        "rolling_cvar": {
+          "n_days": 50,
+          "start": "2025-02-19",
+          "end": "2025-04-30",
+          "cagr": -0.182674,
+          "ann_return": -0.184101,
+          "ann_vol": 0.190201,
+          "sharpe": -0.967925,
+          "mdd": -0.095044,
+          "cvar5_daily": -0.026029,
+          "left_tail_days_2pct": 3,
+          "left_tail_freq_2pct": 0.06,
+          "mean_hedge_budget": 0.25,
+          "turnover_ann": 0.0
+        }
+      }
+    },
+    "bootstrap_vs_naive_equal": {
+      "beta_negative_beta": {
+        "sharpe_diff_alt_minus_base": {
+          "mean": 0.003136,
+          "ci_2p5": -0.10121,
+          "ci_97p5": 0.116616,
+          "p_gt_0": 0.512
+        },
+        "cagr_diff_pp_alt_minus_base": {
+          "mean": -2.409224,
+          "ci_2p5": -4.951127,
+          "ci_97p5": -0.088287,
+          "p_gt_0": 0.023
+        },
+        "mdd_diff_pp_alt_minus_base": {
+          "mean": 3.674483,
+          "ci_2p5": 1.463753,
+          "ci_97p5": 7.673583,
+          "p_gt_0": 0.999
+        },
+        "cvar5_diff_pp_alt_minus_base": {
+          "mean": 0.369108,
+          "ci_2p5": 0.304294,
+          "ci_97p5": 0.443048,
+          "p_gt_0": 1.0
+        },
+        "left_tail_freq_diff_alt_minus_base": {
+          "mean": -0.006324,
+          "ci_2p5": -0.010363,
+          "ci_97p5": -0.002826,
+          "p_gt_0": 0.0
+        }
+      },
+      "inverse_vol": {
+        "sharpe_diff_alt_minus_base": {
+          "mean": -0.007723,
+          "ci_2p5": -0.03342,
+          "ci_97p5": 0.020723,
+          "p_gt_0": 0.277
+        },
+        "cagr_diff_pp_alt_minus_base": {
+          "mean": 0.124637,
+          "ci_2p5": -0.327517,
+          "ci_97p5": 0.610796,
+          "p_gt_0": 0.703
+        },
+        "mdd_diff_pp_alt_minus_base": {
+          "mean": -0.606801,
+          "ci_2p5": -1.508934,
+          "ci_97p5": 0.417755,
+          "p_gt_0": 0.107
+        },
+        "cvar5_diff_pp_alt_minus_base": {
+          "mean": -0.043784,
+          "ci_2p5": -0.080887,
+          "ci_97p5": -0.012237,
+          "p_gt_0": 0.005
+        },
+        "left_tail_freq_diff_alt_minus_base": {
+          "mean": 0.001338,
+          "ci_2p5": 0.0,
+          "ci_97p5": 0.003297,
+          "p_gt_0": 0.918
+        }
+      },
+      "rolling_cvar": {
+        "sharpe_diff_alt_minus_base": {
+          "mean": 0.000402,
+          "ci_2p5": -0.10372,
+          "ci_97p5": 0.108471,
+          "p_gt_0": 0.505
+        },
+        "cagr_diff_pp_alt_minus_base": {
+          "mean": -2.999179,
+          "ci_2p5": -6.08311,
+          "ci_97p5": -0.199439,
+          "p_gt_0": 0.018
+        },
+        "mdd_diff_pp_alt_minus_base": {
+          "mean": 5.489813,
+          "ci_2p5": 2.344276,
+          "ci_97p5": 10.032827,
+          "p_gt_0": 1.0
+        },
+        "cvar5_diff_pp_alt_minus_base": {
+          "mean": 0.473044,
+          "ci_2p5": 0.384918,
+          "ci_97p5": 0.593127,
+          "p_gt_0": 1.0
+        },
+        "left_tail_freq_diff_alt_minus_base": {
+          "mean": -0.006802,
+          "ci_2p5": -0.011776,
+          "ci_97p5": -0.002826,
+          "p_gt_0": 0.0
+        }
+      }
+    },
+    "mean_oos_weights": {
+      "naive_equal": {
+        "SH": 0.083333,
+        "TLT": 0.083333,
+        "GLD": 0.083333
+      },
+      "beta_negative_beta": {
+        "SH": 0.211989,
+        "TLT": 0.026494,
+        "GLD": 0.011518
+      },
+      "inverse_vol": {
+        "SH": 0.079051,
+        "TLT": 0.087059,
+        "GLD": 0.08389
+      },
+      "rolling_cvar": {
+        "SH": 0.25,
+        "TLT": 0.0,
+        "GLD": 0.0
+      }
+    },
+    "turnover_oos_ann": {
+      "naive_equal": 0.0,
+      "beta_negative_beta": 1.124479,
+      "inverse_vol": 0.668974,
+      "rolling_cvar": 0.0
+    }
+  },
+  "limitations": [
+    "This is an ETF-proxy study, not an options-chain or futures-margin implementation study.",
+    "SH is engineered to deliver inverse daily SPY exposure, so Panel A is intentionally a clean identification test and partly mechanical by construction.",
+    "Panel B broadens realism with TLT/GLD, but still uses daily close rebalancing and simple linear transaction costs.",
+    "A true put-overlay comparison would need option surface data and explicit carry assumptions."
+  ]
+}

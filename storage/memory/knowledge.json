@@ -33972,5 +33972,29 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-14T16:48:05.286864"
+  },
+  {
+    "item_id": "k1333_vix_vov",
+    "category": "volatility_prediction",
+    "k_id": "K1333",
+    "experiment_id": "K1333",
+    "experiment_path": "experiments/k1333/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI (gpt-5.4, ChatGPT auth) — primary path",
+    "reviewer_source": "codex_cli_primary",
+    "codex_review": true,
+    "title": "VIX vol-of-vol (self-constructed) as next-day VIX predictor",
+    "date": "2026-06-14",
+    "content": "K1333: 自建 VIX dlog 的 realized vol-of-vol (5d 短 + 22d 長) + jump proxy 預測下日 VIX/|dVIX|，OOS 2024-01 到 2026-06 (n=615)。M1/M2 在 |dVIX| 兩 cell 達 unadjusted p≤0.041 勝 AR(1) baseline，但 Bonferroni (α=0.0125, 4 cells) 後皆不顯著 → CONDITIONAL_PASS。Realized vol-of-vol 單通道（無 options）僅帶來 marginal 增量訊號，options-implied 通道對 VRP-style edge 仍必要。",
+    "evidence": [
+      "experiments/k1333/k1333_results.json",
+      "experiments/k1333/codex_review.md",
+      "experiments/k1333/k1333_vix_volofvol.png"
+    ],
+    "data": "yfinance ^VIX daily 2010-01-04 to 2026-06-12 (4,137 raw / 4,115 features)",
+    "method": "OOS 2024-01 to 2026-06 (n=615); paired stationary bootstrap B=2000 block=10; HAC-DM (Newey-West)",
+    "limitations": "無 options proxy；single-asset；HAC-DM 非 HLN finite-sample；weak positive。",
+    "confidence": 0.55,
+    "created_at": "2026-06-14T17:08:00+08:00"
   }
 ]
