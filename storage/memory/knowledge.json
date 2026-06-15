@@ -34360,13 +34360,13 @@
   {
     "item_id": "f3a5ca0b",
     "category": "experiment_result",
-    "content": "K1501 NULL: FINRA CNMS public off-exchange short-volume ratio and off-exchange volume do not provide robust next-day idiosyncratic-volatility forecasting power in a retail-tilted US equity basket. Data: FINRA CNMS daily files + yfinance OHLC, 22 tickers, 2023-01-03 to 2026-06-12; OOS 2024-07-19 to 2026-06-12, 477 observations per ticker. Method: rolling 252-day HAR-log CAPM-residual variance baseline; full model adds lagged FINRA short-ratio z-score and lagged log off-exchange volume z-score, all features shift(1). Result: 0/22 tickers pass Harvey |DM t|>3, median QLIKE improvement +1.91%, sign-test p=0.416, pooled DM t=-0.69 p=0.493. Caveat: FINRA short-volume is a public off-exchange proxy, not true retail order flow; conclusion is only about this public proxy. Codex review: CONDITIONAL_PASS under that wording constraint.",
+    "content": "K1502 NULL: FINRA CNMS public off-exchange short-volume ratio and off-exchange volume do not provide robust next-day idiosyncratic-volatility forecasting power in a retail-tilted US equity basket. Data: FINRA CNMS daily files + yfinance OHLC, 22 tickers, 2023-01-03 to 2026-06-12; OOS 2024-07-19 to 2026-06-12, 477 observations per ticker. Method: rolling 252-day HAR-log CAPM-residual variance baseline; full model adds lagged FINRA short-ratio z-score and lagged log off-exchange volume z-score, all features shift(1). Result: 0/22 tickers pass Harvey |DM t|>3, median QLIKE improvement +1.91%, sign-test p=0.416, pooled DM t=-0.69 p=0.493. Caveat: FINRA short-volume is a public off-exchange proxy, not true retail order flow; conclusion is only about this public proxy. Codex review: CONDITIONAL_PASS under that wording constraint.",
     "evidence": [
-      "experiment_id=K1501",
-      "experiments/k1501_proxy_idio_vol/README.md",
-      "experiments/k1501_proxy_idio_vol/k1501.py",
-      "experiments/k1501_proxy_idio_vol/k1501_results.json",
-      "experiments/k1501_proxy_idio_vol/codex_review.md"
+      "experiment_id=K1502",
+      "experiments/k1502_proxy_idio_vol/README.md",
+      "experiments/k1502_proxy_idio_vol/k1502.py",
+      "experiments/k1502_proxy_idio_vol/k1502_results.json",
+      "experiments/k1502_proxy_idio_vol/codex_review.md"
     ],
     "confidence": 0.84,
     "created_at": "2026-06-15T22:28:49.518050"
