@@ -1,0 +1,120 @@
+{
+  "experiment_id": "K1338",
+  "title": "Chinese financial-news sentiment vs 0050.TW volatility",
+  "date_run_utc": "2026-06-15T04:46:21.916862+00:00",
+  "seed": 42,
+  "verdict": "NULL_DATA_LIMITATION",
+  "conclusion": "Public machine-readable CNYES/CTEE history available at run time is too short for an honest HAR+sentiment OOS QLIKE/DM test.",
+  "data": {
+    "news_sources_attempted": {
+      "cnyes_api_categories": [
+        "tw_stock",
+        "headline"
+      ],
+      "ctee_endpoints": [
+        "https://www.ctee.com.tw/livenews/rss",
+        "https://www.ctee.com.tw/wp-json/wp/v2/posts?per_page=10",
+        "https://www.ctee.com.tw/category/stock/feed"
+      ]
+    },
+    "news_article_rows": 1300,
+    "news_unique_days_taipei": 11,
+    "news_first_date_taipei": "2026-06-05",
+    "news_last_date_taipei": "2026-06-15",
+    "article_scores_csv": "K1338_article_scores.csv",
+    "daily_sentiment_csv": "K1338_daily_sentiment.csv",
+    "price_diagnostics": {
+      "ticker": "0050.TW",
+      "primary_source": "yfinance",
+      "fallback_source": "storage/macro/yf_0050.TW.csv",
+      "used_source": "yfinance_live",
+      "rows": 4268,
+      "first_date": "2009-01-05",
+      "last_date": "2026-06-15",
+      "news_price_overlap_possible": true
+    },
+    "source_diagnostics": [
+      {
+        "source": "cnyes",
+        "category": "tw_stock",
+        "ok": true,
+        "items": 524,
+        "pages": 18,
+        "min_date": "2026-06-05",
+        "max_date": "2026-06-15",
+        "unique_days": 11
+      },
+      {
+        "source": "cnyes",
+        "category": "headline",
+        "ok": true,
+        "items": 1263,
+        "pages": 43,
+        "min_date": "2026-06-05",
+        "max_date": "2026-06-15",
+        "unique_days": 11
+      },
+      {
+        "source": "ctee",
+        "url": "https://www.ctee.com.tw/livenews/rss",
+        "ok": false,
+        "error": "URLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)'))"
+      },
+      {
+        "source": "ctee",
+        "url": "https://www.ctee.com.tw/wp-json/wp/v2/posts?per_page=10",
+        "ok": false,
+        "error": "URLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)'))"
+      },
+      {
+        "source": "ctee",
+        "url": "https://www.ctee.com.tw/category/stock/feed",
+        "ok": false,
+        "error": "URLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)'))"
+      }
+    ]
+  },
+  "lexicon": {
+    "source": "NTUSD GitHub + small finance-domain augmentation",
+    "positive_terms": 9376,
+    "negative_terms": 11236,
+    "diagnostics": [
+      {
+        "source": "https://raw.githubusercontent.com/ntunlplab/NTUSD/main/data/%E6%AD%A3%E9%9D%A2%E8%A9%9E%E7%84%A1%E9%87%8D%E8%A4%87_9365%E8%A9%9E.txt",
+        "polarity": "positive",
+        "ok": true,
+        "words": 9362,
+        "bytes": 75594
+      },
+      {
+        "source": "https://raw.githubusercontent.com/ntunlplab/NTUSD/main/data/%E8%B2%A0%E9%9D%A2%E8%A9%9E%E7%84%A1%E9%87%8D%E8%A4%87_11230%E8%A9%9E.txt",
+        "polarity": "negative",
+        "ok": true,
+        "words": 11228,
+        "bytes": 90647
+      }
+    ],
+    "scoring": "(positive_title_hits - negative_title_hits) / sqrt(total_hits + 1)"
+  },
+  "design": {
+    "baseline_if_enough_data": "log-HAR daily variance: log(rv_t) ~ log_rv_d_lag1 + log_rv_w_lag1 + log_rv_m_lag1",
+    "augmented_if_enough_data": "same baseline plus sentiment_z_lag1",
+    "lookahead_policy": "model_df['sentiment_z_lag1'] = model_df['sentiment_z_raw'].shift(1); date-t target uses only prior-date news and prior realized variance.",
+    "oos_gate": "requires at least 252+60 usable rows before DM/QLIKE is reported",
+    "qlike_dm": "Patton QLIKE and Newey-West DM via volpred.stats.model_evaluation if gate passes"
+  },
+  "model_result": {
+    "status": "skipped",
+    "reason": "insufficient_news_price_overlap_for_oos_qlike_dm",
+    "min_model_obs": 252,
+    "min_test_obs": 60,
+    "har_warmup": 252,
+    "usable_rows": 3,
+    "first_usable_date": "2026-06-11",
+    "last_usable_date": "2026-06-15"
+  },
+  "artifacts": {
+    "figure": "K1338_sentiment_coverage.png",
+    "results_json": "K1338_results.json"
+  }
+}

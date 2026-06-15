@@ -31167,7 +31167,7 @@
     "title": "K1338: FinBERT-style 中文財經新聞情緒對 0050 vol 預測增量 — 抓 鉅亨網/工商時報 RSS 日頻標題，用免費中文 sentiment lexicon（NTUSD/CNSenti）算每日 sentiment z-score，",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 574). Original: FinBERT-style 中文財經新聞情緒對 0050 vol 預測增量 — 抓 鉅亨網/工商時報 RSS 日頻標題，用免費中文 sentiment lexicon（NTUSD/CNSenti）算每日 sentiment z-score，加入 HAR-RV(0050) 檢定 OOS QLIKE 增量 + DM 顯著（yfinance + RSS）（來源：arXiv 2025-05 interpretable macro alpha + Frontiers 2025；中文圈 FinBERT-style vol forecast 缺，VolPred 角度差異化高）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1338.py with signal.shift(1) + seed=42, (c) K1338_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 574,
@@ -31175,7 +31175,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T00:00:06Z"
+    "created_at": "2026-06-15T00:00:06Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-15T04:34:20.137867+00:00",
+    "claim_session_id": "f2c68eee12f2",
+    "started_at": "2026-06-15T04:34:20.421428+00:00",
+    "completed_at": "2026-06-15T04:48:38.994112+00:00",
+    "result": "K1338 completed as NULL_DATA_LIMITATION: built CNYES/CTEE+NTUSD sentiment pipeline, saved README/script/results/CSV/PNG/review; public machine-readable news history was only 11 Taipei days so OOS QLIKE/DM correctly skipped."
   },
   {
     "id": "K1339",

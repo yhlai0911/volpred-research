@@ -10707,5 +10707,14 @@
     "title": "dispatch_supervisor refactor Deliverable 5: fix #1 (signal exit classification) + #6 (schedule field) + 7 regression tests",
     "actor": "hourly-12",
     "outcome": "succeeded"
+  },
+  {
+    "timestamp": "2026-06-15T12:48:17+08:00",
+    "task_type": "experiment",
+    "task_id": "K1338",
+    "title": "K1338 Chinese financial-news sentiment vs 0050.TW volatility",
+    "verdict": "NULL_DATA_LIMITATION",
+    "reviewer": "Codex",
+    "summary": "Public machine-readable CNYES/CTEE history was only 11 Taipei-calendar days; pipeline built with NTUSD scoring, prior-only z-score, signal.shift(1), and OOS QLIKE/DM skipped honestly."
   }
 ]
