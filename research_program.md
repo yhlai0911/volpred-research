@@ -590,7 +590,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 鈾物理囤積基金放大現貨波動 — yfinance URA/URNM/SRUUF + 物理鈾基金 proxy，檢定囤積 AUM 變化放大現貨 vol（與 K1445 URA 分散題正交，聚焦 supply-shock vol 放大）（來源：2026 鈾供給衝擊 + 物理基金抽現貨）
 - [ ] 天然氣季節性波動與 Samuelson effect 到期遞增 — yfinance UNG/天然氣 ETF 月度 RV，檢定冬季 heating regime vol pattern + 接近交割月 vol 系統升高（來源：CME 天然氣季節性 + arXiv seasonal stochastic vol）
 > **新軸 5 — lottery / 行為橫斷面（backlog 零行為軸）**
-- [ ] Factor-MAX：因子層級彩券需求預測因子報酬 — yfinance 因子 ETF（MTUM/QUAL/VLUE/USMV/SIZE）月度 MAX，檢定高 factor-MAX 預測次月該因子低報酬/高 vol（來源：SBFC 2025 "Factor MAX and Predictable Factor Returns"）
+- [x] Factor-MAX：因子層級彩券需求預測因子報酬 — K1503 MIXED：yfinance 因子 ETF（MTUM/QUAL/VLUE/USMV/SIZE）月度 MAX 不支持次月低報酬 anomaly（0/4 return tests pass Harvey），但強烈預測次月 realized vol 較高（4/4 vol tests pass Harvey）。可寫成風險狀態訊號，不可寫成報酬 anomaly。
 - [ ] 彩券型個股籃 vol-of-vol 與危機放大 — 低價×高 idio-vol×高 MAX 籃，檢定其 RV 與 vol-of-vol 在 risk-off 放大、是否領先大盤 tail vol（來源：Bali MAX 框架 + 2025 lottery-momentum 延伸）
 > **新軸 6 — 退休 decumulation（全新讀者群，改用 ruin/shortfall 非 Sharpe；FAJ/JPM 2025-26 熱點）**
 - [ ] 提領期 sequence-of-returns risk 下 vol-aware 提領法則 — yfinance 股債 ETF + FRED 模擬退休提領，固定 vs 條件於已實現 vol/drawdown 的動態提領，比 ruin probability / shortfall（不比 Sharpe）（來源：FAJ 2025-26 decumulation benchmark；NAPA 2026）

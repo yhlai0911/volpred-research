@@ -34396,5 +34396,22 @@
       "Hoffmann, Jank (2024) value of retail order flow",
       "FINRA Short Sale Volume documentation; Info Notice 5/10/19"
     ]
+  },
+  {
+    "item_id": "2d8455cd",
+    "experiment_id": "K1503",
+    "category": "factor_etf_volatility",
+    "verdict": "MIXED",
+    "reviewer": "Codex CLI CONDITIONAL_PASS (methodology PASS; return anomaly NULL; volatility persistence supported)",
+    "reviewer_source": "Codex CLI primary path",
+    "content": "K1503 MIXED: ETF-level Factor-MAX on MTUM/QUAL/VLUE/USMV/SIZE, yfinance adjusted close, complete monthly sample 2013-06 to 2026-05 (777 ETF-month rows, 156 months). Prior-month MAX is explicitly lagged with groupby(ticker).shift(1); partial 2026-06 is excluded. Return hypothesis NULL: low-MAX minus high-MAX next-month excess return is -3.06% annualized for single-name sort (HAC t=-1.01) and -0.75% annualized for top2/bottom2 sort (t=-0.31); Fama-MacBeth return beta +0.00059 (t=0.63) and pooled FE coef -0.00012 (t=-0.11), 0/4 return tests pass Harvey. Volatility hypothesis PASS: high-MAX minus low-MAX next-month annualized RV is +5.21pp (t=8.70) single-name and +3.72pp (t=9.94) top2/bottom2; Fama-MacBeth RV beta +1.83pp (t=9.47), pooled FE +1.09pp (t=7.67), 4/4 vol tests pass Harvey. Interpretation: do not cite K1503 as evidence for a factor ETF return anomaly; cite it as strong ETF-level volatility persistence / risk-state signal.",
+    "evidence": [
+      "experiments/k1503_factor_max/README.md",
+      "experiments/k1503_factor_max/k1503.py",
+      "experiments/k1503_factor_max/k1503_results.json",
+      "experiments/k1503_factor_max/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-16T00:59:36.058612"
   }
 ]

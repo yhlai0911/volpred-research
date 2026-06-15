@@ -1,0 +1,201 @@
+{
+  "experiment_id": "K1503",
+  "title": "Factor-MAX as a predictor of next-month factor ETF returns and volatility",
+  "run_timestamp": "2026-06-15T17:00:14.950633+00:00",
+  "seed": 42,
+  "task_id": "research_factor_max",
+  "data": {
+    "tickers": [
+      "MTUM",
+      "QUAL",
+      "VLUE",
+      "USMV",
+      "SIZE"
+    ],
+    "benchmark": "SPY",
+    "price_source": "yfinance adjusted close via yf.download(auto_adjust=True)",
+    "price_start_by_ticker": {
+      "MTUM": "2013-04-18",
+      "QUAL": "2013-07-18",
+      "VLUE": "2013-04-18",
+      "USMV": "2011-10-20",
+      "SIZE": "2013-04-18",
+      "SPY": "2010-01-04"
+    },
+    "price_end_by_ticker": {
+      "MTUM": "2026-06-15",
+      "QUAL": "2026-06-15",
+      "VLUE": "2026-06-15",
+      "USMV": "2026-06-15",
+      "SIZE": "2026-06-15",
+      "SPY": "2026-06-15"
+    },
+    "analysis_start": "2013-06-30",
+    "analysis_end": "2026-05-31",
+    "last_complete_month_end_rule": "2026-05-31",
+    "panel_rows": 777,
+    "months": 156,
+    "assets": 5
+  },
+  "literature_checked": [
+    {
+      "title": "Factor MAX and Predictable Factor Returns",
+      "authors": "Liyao Wang and Ming Zeng",
+      "source": "SSRN / HKBU Scholars, 2026 working paper",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6053114"
+    },
+    {
+      "title": "Maxing out: Stocks as lotteries and the cross-section of expected returns",
+      "authors": "Turan G. Bali, Nusret Cakici, Robert F. Whitelaw",
+      "source": "Journal of Financial Economics 99(2), 2011",
+      "url": "https://econpapers.repec.org/RePEc:eee:jfinec:v:99:y:2011:i:2:p:427-446"
+    },
+    {
+      "title": "A lottery-demand-based explanation of the beta anomaly",
+      "authors": "Turan G. Bali, Stephen J. Brown, Scott Murray, Yi Tang",
+      "source": "Journal of Financial and Quantitative Analysis 52(6), 2017",
+      "url": "https://doi.org/10.1017/S0022109017000928"
+    }
+  ],
+  "related_prior_findings": [
+    "K89: factor tilts did not improve the 50/50 VT framework.",
+    "K566: factor timing plus VT was null; factor ETF correlations with SPY were high.",
+    "K876: MTUM crash risk is partly distinct from SPY crashes, but VIX overlays did not pass.",
+    "K1446: USMV is lower-risk than MTUM/QUAL/VLUE/SPY on descriptive risk metrics."
+  ],
+  "methodology": {
+    "max_definition": "maximum daily simple return during the prior calendar month",
+    "top5_robustness_definition": "average of the five highest daily simple returns during the prior calendar month; computed but not used as main signal",
+    "outcome_return": "current-month factor ETF log return minus current-month SPY log return",
+    "outcome_volatility": "current-month realized volatility from daily log returns, annualized",
+    "main_tests": [
+      "Monthly sort: low prior-MAX ETF(s) minus high prior-MAX ETF(s) next-month excess return.",
+      "Monthly sort: high prior-MAX ETF(s) minus low prior-MAX ETF(s) next-month realized volatility.",
+      "Fama-MacBeth monthly cross-sectional beta of outcome on prior-MAX z-score.",
+      "Pooled OLS with ticker and month fixed effects, clustered by month."
+    ],
+    "statistical_gate": "Harvey-style internal threshold |t| > 3 for main tests; bootstrap CI with fixed seed for sort spreads."
+  },
+  "lookahead_controls": {
+    "feature_lag": "panel[f'{col}_lag1'] = panel.groupby('ticker')[col].shift(1)",
+    "signal_timing": "month t-1 daily returns form MAX; month t return and volatility are outcomes",
+    "same_day_rule": "No same-month MAX is used to predict same-month outcome.",
+    "forward_label_overlap": "Monthly outcomes are one non-overlapping calendar month, so K1337 forward-label training leakage does not apply."
+  },
+  "sort_tests": {
+    "low1_minus_high1_excess_return": {
+      "n_months": 156,
+      "mean": -0.0025488186792064125,
+      "annualized_mean": -0.030585824150476948,
+      "hac_t": -1.0057215131859083,
+      "hac_p_two_sided": 0.31611701458412295,
+      "ci_95_low": -0.007689949078978769,
+      "ci_95_high": 0.0023397748728923944,
+      "prob_mean_gt_zero": 0.1446,
+      "harvey_pass_abs_t_gt_3": false
+    },
+    "low2_minus_high2_excess_return": {
+      "n_months": 156,
+      "mean": -0.0006271045506420877,
+      "annualized_mean": -0.0075252546077050515,
+      "hac_t": -0.3075192364375281,
+      "hac_p_two_sided": 0.7588609918868983,
+      "ci_95_low": -0.004270241915991123,
+      "ci_95_high": 0.0029751740561736956,
+      "prob_mean_gt_zero": 0.368,
+      "harvey_pass_abs_t_gt_3": false
+    },
+    "high1_minus_low1_rv": {
+      "n_months": 156,
+      "mean": 0.05207339371743265,
+      "annualized_mean": 0.05207339371743265,
+      "hac_t": 8.6996045454877,
+      "hac_p_two_sided": 4.5663514437513826e-15,
+      "ci_95_low": 0.04449537497177116,
+      "ci_95_high": 0.060290952059465115,
+      "prob_mean_gt_zero": 1.0,
+      "harvey_pass_abs_t_gt_3": true
+    },
+    "high2_minus_low2_rv": {
+      "n_months": 156,
+      "mean": 0.037165999944130314,
+      "annualized_mean": 0.037165999944130314,
+      "hac_t": 9.939520585012344,
+      "hac_p_two_sided": 2.571010179362369e-18,
+      "ci_95_low": 0.031922245721652955,
+      "ci_95_high": 0.04267750496062849,
+      "prob_mean_gt_zero": 1.0,
+      "harvey_pass_abs_t_gt_3": true
+    }
+  },
+  "fama_macbeth": {
+    "monthly_excess_vs_spy": {
+      "n_months": 156,
+      "annualized_mean": 0.0005896063569818707,
+      "hac_t": 0.6338850974025455,
+      "hac_p_two_sided": 0.5270901387740667,
+      "ci_95_low": -0.0011087214147925692,
+      "ci_95_high": 0.0022487774259797636,
+      "prob_mean_gt_zero": 0.7612,
+      "harvey_pass_abs_t_gt_3": false,
+      "expected_sign": "negative",
+      "mean_beta": 0.0005896063569818707,
+      "beta_series_path": "data/fama_macbeth_monthly_excess_vs_spy_max_daily_return_lag1_z.csv"
+    },
+    "monthly_rv_ann": {
+      "n_months": 156,
+      "annualized_mean": 0.018315117366189633,
+      "hac_t": 9.46605934942614,
+      "hac_p_two_sided": 4.612583335151479e-17,
+      "ci_95_low": 0.01584596882728058,
+      "ci_95_high": 0.0208972484091183,
+      "prob_mean_gt_zero": 1.0,
+      "harvey_pass_abs_t_gt_3": true,
+      "expected_sign": "positive",
+      "mean_beta": 0.018315117366189633,
+      "beta_series_path": "data/fama_macbeth_monthly_rv_ann_max_daily_return_lag1_z.csv"
+    }
+  },
+  "pooled_fixed_effect": {
+    "monthly_excess_vs_spy": {
+      "n_obs": 777,
+      "n_months": 156,
+      "n_assets": 5,
+      "coef": -0.00011566094143198617,
+      "cluster_t_by_month": -0.10726518549408086,
+      "cluster_p_two_sided": 0.9145786031033313,
+      "harvey_pass_abs_t_gt_3": false,
+      "expected_sign": "negative"
+    },
+    "monthly_rv_ann": {
+      "n_obs": 777,
+      "n_months": 156,
+      "n_assets": 5,
+      "coef": 0.010878020572307448,
+      "cluster_t_by_month": 7.673159840713754,
+      "cluster_p_two_sided": 1.6781015857669657e-14,
+      "harvey_pass_abs_t_gt_3": true,
+      "expected_sign": "positive"
+    }
+  },
+  "verdict": {
+    "overall": "MIXED",
+    "harvey_pass_count_across_8_main_tests": 4,
+    "return_harvey_pass_count": 0,
+    "vol_harvey_pass_count": 4,
+    "return_directional_count": 0,
+    "vol_directional_count": 4,
+    "plain_english": "Prior-month factor-MAX does not support the next-month underperformance hypothesis, but it strongly predicts higher next-month realized volatility in this small factor ETF universe."
+  },
+  "figures": [
+    "figures/k1503_factor_max_by_ticker.png",
+    "figures/k1503_sort_spread_distributions.png",
+    "figures/k1503_rolling_sort_spreads.png"
+  ],
+  "limitations": [
+    "Only five liquid factor ETFs are used; this is not the original stock-level MAX anomaly universe.",
+    "ETF-level MAX may mix underlying factor lottery demand with ETF trading microstructure.",
+    "The common ETF sample begins after the newest ETF has enough observations, so it cannot test pre-2013 factor cycles.",
+    "No options or short-sale borrow-fee data are used."
+  ]
+}
