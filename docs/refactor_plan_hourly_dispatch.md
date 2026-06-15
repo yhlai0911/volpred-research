@@ -179,3 +179,19 @@ That's the test for "structural fix" vs "patch": does the change make *future* s
 **Phase C（cutover）高 blast radius（替換核心 runtime）— 動前需用戶確認。** review + shadow（5-6）是可逆、低風險，可自主先推。
 
 *Updated 2026-06-15 台灣時間 by interactive main thread (email-11745 reply). Strike 8 logged; Phase A severity calibration shipped; refactor un-stalled — next action Deliverable 5 Codex review.*
+
+### Deliverable 5 — Codex review 結果：**FAIL**（2026-06-15）
+
+Review 抓到 7 個真 bug（**這就是它停 18 天的真因：本來就還沒 review-ready**）。進 shadow run（Deliverable 6）前**全部必修**：
+
+1. **🔴 致命 — signal exit 分類**：worker timeout `_kill_pgid()` 後 `Popen.wait()` 回負號（-15/-9），但 `HANG_EXIT_CODES={137,142,143}`（worker.py:48）不含負號 → 被分類成 hard_failure 然後 **retry**（worker.py:251-260），**直接破壞 hang-abort 承諾**。修：把 `-SIGTERM/-SIGKILL/137/143/142/timeout sentinel` 全歸 hang；`TimeoutExpired` 後強制 category=hang。
+2. **PID-reuse 身分**：state 只存 pid/pgid + supervisor-generated started_at（state.py:152-160），health 只 `os.kill(pid,0)`（health.py:31-41）。修：persist OS process start_time，killpg 前驗 pid+start_time（plan §5 #2）。
+3. **restart orphan cleanup**：`mark_supervisor_started()` 直接清 current_job（state.py:120-128），沒偵測/清 orphan。修：驗身分 → 殺舊 PGID → record completion → resume。
+4. **state 非 atomic**：seek/truncate/dump/fsync（state.py:94-98）無 `os.replace()`（違 §7）。修：temp file + fsync + os.replace under LOCK_EX。
+5. **fire claim 非 atomic**：scheduler 讀 snapshot 判 current_job is None（scheduler.py:145-151）後才 spawn，begin_fire 在 spawn 之後（worker.py:151-157）→ 兩 tick 可 double-spawn orphan（違 §5 #9/#10）。修：spawn 前 lock 內 reserve/claim。
+6. **schedule 讀錯欄位**：`load_cron_expr()` 只讀 `cron`（scheduler.py:65-68），canonical 是 `schedule`（runtime_schedules.json:937）→ source drift；且 last_fire_at 空值會補跑上個 fire（fidelity 風險）。修：讀 `schedule`、明確決定是否允許 startup catch-up。
+7. **broad except 吞例外**：scheduler/health loop 只 log 不 alert（scheduler.py:132-134/health.py:109-111）；supervisor crash 無 alert（supervisor.py:83-88）。修：加 escalation alert + 對應測試（負號 exit / PID reuse / concurrent tick / atomic write / schedule field）。
+
+**狀態**：Deliverable 5 = review done(FAIL)。下一步 = 修這 7 項 → 重 review → 過了才 Deliverable 6 shadow。Phase A 已止 alert noise，**平台無立即風險**，可從容做。**email-11745 task 留 in_progress，close email 等 supervisor 上線。**
+
+*Updated 2026-06-15 台灣時間 — Codex review FAIL with 7 must-fix; logged for next scoped fix session.*
