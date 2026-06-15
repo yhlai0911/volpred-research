@@ -34255,5 +34255,19 @@
     "reviewer": "Codex CLI 0.139.0 (gpt-5.4)",
     "reviewer_source": "Codex review primary path",
     "codex_review": "CONDITIONAL_PASS"
+  },
+  {
+    "item_id": "8b0ee30a",
+    "category": "empirical_null",
+    "content": "K1340 NULL_INVERSE_VOL_COMPRESSION: yfinance daily price-volume proxy for retail/gamma-squeeze candidate pressure was tested on 15 meme/gamma candidate stocks (GME/AMC/KOSS/BB/OPEN/KSS/BYND/GPRO/DNUT/HOOD/CHWY/LCID/RIVN/PLTR/SOFI) plus SPY, 2024-01-02 to 2026-06-12. The signal is lookahead-safe: raw pressure return_t * prior-only 60d volume_z_t is observed after close t, then event_signal = raw_event.shift(1); forward CAR/RV windows start on the next tradable day. After 21d per-symbol cooldown there were 172 events (103 positive-pressure, 69 negative). The ex-ante primary positive-pressure H=21 matched CAR test was not significant: +1.88% date-clustered mean, p=0.5322, 85 event-date clusters. No direction-supportive test had raw p<0.10 or Bonferroni significance. The only Bonferroni-surviving cells were inverse short-window RV compression: positive H5 RV diff -0.3413, negative H5 -0.4868, negative H10 -0.2254. Interpretation: daily price-volume data captures the shock after it has happened, not a tradable gamma-squeeze early-warning signal. True dealer-gamma evidence would require options flow/OI/dealer exposure data.",
+    "evidence": [
+      "K1340",
+      "experiments/K1340/README.md",
+      "experiments/K1340/K1340.py",
+      "experiments/K1340/K1340_results.json",
+      "experiments/K1340/codex_review.md"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-15T15:12:10.489816"
   }
 ]

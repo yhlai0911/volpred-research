@@ -31209,7 +31209,7 @@
     "title": "K1340: Gamma-squeeze 候選股「散戶驅動波動」事件研究 — yfinance 2024-26 meme/gamma 候選（OPEN/KSS/GME 等），用「成交量 z-score × 報酬」代理 dealer-hedging 壓力，事",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 580). Original: Gamma-squeeze 候選股「散戶驅動波動」事件研究 — yfinance 2024-26 meme/gamma 候選（OPEN/KSS/GME 等），用「成交量 z-score × 報酬」代理 dealer-hedging 壓力，事件窗檢定 RV 與後續 CAR/reversal 不對稱（來源：JFE/AFA 2025-26 \"Seeking Gamma\"，squeeze 後一月 CAR +5.13%）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1340.py with signal.shift(1) + seed=42, (c) K1340_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 580,
@@ -31217,7 +31217,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T00:00:10Z"
+    "created_at": "2026-06-15T00:00:10Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-15T07:00:53.298445+00:00",
+    "claim_session_id": "325916371ff1",
+    "started_at": "2026-06-15T07:01:04.364753+00:00",
+    "completed_at": "2026-06-15T07:12:19.040719+00:00",
+    "result": "K1340 completed. yfinance 2024-01-02..2026-06-12, 15 tickers, 172 events. Verdict NULL_INVERSE_VOL_COMPRESSION: primary positive-pressure H21 CAR +1.88% p=0.532; no direction-supportive raw p<0.10; inverse short-window RV compression survives Bonferroni."
   },
   {
     "id": "K1341",
