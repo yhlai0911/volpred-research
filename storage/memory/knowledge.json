@@ -34180,5 +34180,19 @@
     ],
     "confidence": 0.55,
     "created_at": "2026-06-15T08:22:00.074171"
+  },
+  {
+    "item_id": "edaa21b2",
+    "category": "empirical_null",
+    "content": "research_vrp_vrp_horizon (2026-06-15) returned NULL. Using SPY and ^VIX yfinance data, the free-data downside/upside VRP proxy split VIX^2 total implied variance by lagged 252-day realized semivariance shares. All predictors were shifted by one trading day. In the 2010-2026 sample, total/down/up VRP means were positive (91.84/49.44/42.40 vol-points squared; HAC t=4.07/4.00/3.68), but downside-minus-upside was only 7.04 with HAC t=0.88 and bootstrap 95% CI [-8.81,+23.18]. Predictive gates failed: 63d return downside t=2.26 (<3), while 63d/126d RV downside t=-0.53/-1.27. Conclusion: this reduced-form proxy does not support downside VRP dominance or medium-horizon SPY return/RV prediction; true option-chain/model-free decomposition is needed for a stronger test.",
+    "evidence": [
+      "research_vrp_vrp_horizon",
+      "experiments/research_vrp_vrp_horizon/README.md",
+      "experiments/research_vrp_vrp_horizon/research_vrp_vrp_horizon.py",
+      "experiments/research_vrp_vrp_horizon/research_vrp_vrp_horizon_results.json",
+      "experiments/research_vrp_vrp_horizon/codex_review.md"
+    ],
+    "confidence": 0.84,
+    "created_at": "2026-06-15T08:46:47.282218"
   }
 ]

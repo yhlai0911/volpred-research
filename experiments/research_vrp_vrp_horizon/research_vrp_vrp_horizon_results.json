@@ -1,0 +1,308 @@
+{
+  "experiment_id": "research_vrp_vrp_horizon",
+  "title": "Downside/upside VRP proxy and cross-horizon SPY predictability",
+  "date_run_utc": "2026-06-15",
+  "seed": 42,
+  "data": {
+    "source": "yfinance adjusted close",
+    "tickers": [
+      "SPY",
+      "^VIX"
+    ],
+    "start": "2004-01-01",
+    "end": "2026-06-15",
+    "analysis_start": "2010-01-04",
+    "n_analysis_rows": 4136,
+    "cached_data_dir": "experiments/research_vrp_vrp_horizon/data/"
+  },
+  "method": {
+    "total_implied_variance_proxy": "(VIX / 100)^2, shifted by one trading day before prediction",
+    "down_up_split": "VIX gives only total implied variance; downside/upside IV proxies allocate total IV with trailing 252-day realized semivariance shares shifted by one day",
+    "realized_vrp_leg": "trailing 22-trading-day annualized realized semivariance, shifted by one day",
+    "targets": {
+      "return": "forward cumulative SPY log return over 21/63/126 trading days",
+      "rv": "log forward annualized realized variance over 21/63/126 trading days"
+    },
+    "regression_controls": [
+      "lagged log 22d realized variance",
+      "lagged 21d SPY return"
+    ],
+    "standard_errors": "Newey-West HAC maxlags equal to the overlapping target horizon",
+    "bootstrap": {
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    },
+    "success_rule": "SUPPORT requires a positive downside VRP mean/spread gate and positive downside-VRP predictive t-stats > 3 at medium horizons for both returns and RV; PARTIAL requires at least one leg"
+  },
+  "mean_tests": {
+    "total": {
+      "nobs": 4136,
+      "mean": 0.00918361,
+      "mean_vol_pts2": 91.8361,
+      "hac_t": 4.0744,
+      "hac_p": 4.6e-05
+    },
+    "down": {
+      "nobs": 4136,
+      "mean": 0.00494362,
+      "mean_vol_pts2": 49.4362,
+      "hac_t": 3.9952,
+      "hac_p": 6.5e-05
+    },
+    "up": {
+      "nobs": 4136,
+      "mean": 0.00423999,
+      "mean_vol_pts2": 42.3999,
+      "hac_t": 3.6755,
+      "hac_p": 0.000237
+    },
+    "down_minus_up": {
+      "nobs": 4136,
+      "mean": 0.00070363,
+      "mean_vol_pts2": 7.0363,
+      "hac_t": 0.8772,
+      "hac_p": 0.380392
+    }
+  },
+  "bootstrap_mean_tests": {
+    "down_minus_up": {
+      "mean_vol_pts2": 7.383,
+      "ci_2p5_vol_pts2": -8.8115,
+      "ci_97p5_vol_pts2": 23.1789,
+      "p_gt_0": 0.807,
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    },
+    "down": {
+      "mean_vol_pts2": 49.8927,
+      "ci_2p5_vol_pts2": 23.2609,
+      "ci_97p5_vol_pts2": 69.9208,
+      "p_gt_0": 0.999,
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    },
+    "up": {
+      "mean_vol_pts2": 42.5097,
+      "ci_2p5_vol_pts2": 17.7775,
+      "ci_97p5_vol_pts2": 61.3117,
+      "p_gt_0": 0.999,
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    }
+  },
+  "horizon_results": {
+    "21": {
+      "return_split": {
+        "nobs": 4115,
+        "coef_down_vrp": 0.00688722,
+        "t_down_vrp": 1.5579,
+        "p_down_vrp": 0.119264,
+        "coef_up_vrp": -0.00930753,
+        "t_up_vrp": -2.464,
+        "p_up_vrp": 0.013741,
+        "coef_total_vrp": null,
+        "t_total_vrp": null,
+        "p_total_vrp": null,
+        "r2": 0.040934,
+        "hac_lags": 21
+      },
+      "return_total": {
+        "nobs": 4115,
+        "coef_down_vrp": null,
+        "t_down_vrp": null,
+        "p_down_vrp": null,
+        "coef_up_vrp": null,
+        "t_up_vrp": null,
+        "p_up_vrp": null,
+        "coef_total_vrp": -0.00182252,
+        "t_total_vrp": -0.8196,
+        "p_total_vrp": 0.412422,
+        "r2": 0.032703,
+        "hac_lags": 21
+      },
+      "rv_split": {
+        "nobs": 4115,
+        "coef_down_vrp": 0.10381309,
+        "t_down_vrp": 1.4596,
+        "p_down_vrp": 0.144408,
+        "coef_up_vrp": 0.03971259,
+        "t_up_vrp": 0.5599,
+        "p_up_vrp": 0.575525,
+        "coef_total_vrp": null,
+        "t_total_vrp": null,
+        "p_total_vrp": null,
+        "r2": 0.308536,
+        "hac_lags": 21
+      },
+      "rv_total": {
+        "nobs": 4115,
+        "coef_down_vrp": null,
+        "t_down_vrp": null,
+        "p_down_vrp": null,
+        "coef_up_vrp": null,
+        "t_up_vrp": null,
+        "p_up_vrp": null,
+        "coef_total_vrp": 0.13547172,
+        "t_total_vrp": 2.1195,
+        "p_total_vrp": 0.034051,
+        "r2": 0.308341,
+        "hac_lags": 21
+      }
+    },
+    "63": {
+      "return_split": {
+        "nobs": 4073,
+        "coef_down_vrp": 0.01392266,
+        "t_down_vrp": 2.2649,
+        "p_down_vrp": 0.023521,
+        "coef_up_vrp": -0.01838875,
+        "t_up_vrp": -2.9263,
+        "p_up_vrp": 0.003431,
+        "coef_total_vrp": null,
+        "t_total_vrp": null,
+        "p_total_vrp": null,
+        "r2": 0.092869,
+        "hac_lags": 63
+      },
+      "return_total": {
+        "nobs": 4073,
+        "coef_down_vrp": null,
+        "t_down_vrp": null,
+        "p_down_vrp": null,
+        "coef_up_vrp": null,
+        "t_up_vrp": null,
+        "p_up_vrp": null,
+        "coef_total_vrp": -0.00327053,
+        "t_total_vrp": -0.9242,
+        "p_total_vrp": 0.355377,
+        "r2": 0.078035,
+        "hac_lags": 63
+      },
+      "rv_split": {
+        "nobs": 4073,
+        "coef_down_vrp": -0.03486458,
+        "t_down_vrp": -0.5256,
+        "p_down_vrp": 0.599185,
+        "coef_up_vrp": 0.13787014,
+        "t_up_vrp": 1.284,
+        "p_up_vrp": 0.199156,
+        "coef_total_vrp": null,
+        "t_total_vrp": null,
+        "p_total_vrp": null,
+        "r2": 0.181871,
+        "hac_lags": 63
+      },
+      "rv_total": {
+        "nobs": 4073,
+        "coef_down_vrp": null,
+        "t_down_vrp": null,
+        "p_down_vrp": null,
+        "coef_up_vrp": null,
+        "t_up_vrp": null,
+        "p_up_vrp": null,
+        "coef_total_vrp": 0.09122412,
+        "t_total_vrp": 1.5964,
+        "p_total_vrp": 0.110401,
+        "r2": 0.17906,
+        "hac_lags": 63
+      }
+    },
+    "126": {
+      "return_split": {
+        "nobs": 4010,
+        "coef_down_vrp": 0.01843161,
+        "t_down_vrp": 1.8953,
+        "p_down_vrp": 0.058058,
+        "coef_up_vrp": -0.02492427,
+        "t_up_vrp": -2.0398,
+        "p_up_vrp": 0.041374,
+        "coef_total_vrp": null,
+        "t_total_vrp": null,
+        "p_total_vrp": null,
+        "r2": 0.099483,
+        "hac_lags": 126
+      },
+      "return_total": {
+        "nobs": 4010,
+        "coef_down_vrp": null,
+        "t_down_vrp": null,
+        "p_down_vrp": null,
+        "coef_up_vrp": null,
+        "t_up_vrp": null,
+        "p_up_vrp": null,
+        "coef_total_vrp": -0.00483888,
+        "t_total_vrp": -0.8493,
+        "p_total_vrp": 0.39574,
+        "r2": 0.082447,
+        "hac_lags": 126
+      },
+      "rv_split": {
+        "nobs": 4010,
+        "coef_down_vrp": -0.10149624,
+        "t_down_vrp": -1.2739,
+        "p_down_vrp": 0.202695,
+        "coef_up_vrp": 0.17919198,
+        "t_up_vrp": 1.407,
+        "p_up_vrp": 0.159426,
+        "coef_total_vrp": null,
+        "t_total_vrp": null,
+        "p_total_vrp": null,
+        "r2": 0.090314,
+        "hac_lags": 126
+      },
+      "rv_total": {
+        "nobs": 4010,
+        "coef_down_vrp": null,
+        "t_down_vrp": null,
+        "p_down_vrp": null,
+        "coef_up_vrp": null,
+        "t_up_vrp": null,
+        "p_up_vrp": null,
+        "coef_total_vrp": 0.06455901,
+        "t_total_vrp": 1.1654,
+        "p_total_vrp": 0.243868,
+        "r2": 0.081675,
+        "hac_lags": 126
+      }
+    }
+  },
+  "figures": [
+    "fig_vrp_component_means.png",
+    "fig_vrp_horizon_tstats.png"
+  ],
+  "literature": [
+    {
+      "citation": "Bollerslev, Tauchen, and Zhou (2009), Expected Stock Returns and Variance Risk Premia",
+      "url": "https://academic.oup.com/rfs/article-abstract/22/11/4463/1565787"
+    },
+    {
+      "citation": "Bekaert and Hoerova (2014), The VIX, the Variance Premium and Stock Market Volatility",
+      "url": "https://ideas.repec.org/p/nbr/nberwo/18995.html"
+    },
+    {
+      "citation": "Downside Variance Risk Premium, Federal Reserve FEDS working paper",
+      "url": "https://www.federalreserve.gov/econresdata/feds/2015/files/2015020pap.pdf"
+    },
+    {
+      "citation": "Variance and Skewness Risk Premium and Expected Equity Returns",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6712647"
+    }
+  ],
+  "research_honesty_notes": [
+    "This is not a true option-implied downside/upside variance decomposition.",
+    "All predictors use explicit one-trading-day lags before forward targets.",
+    "VIX is a roughly 30-calendar-day implied variance proxy, so long-horizon tests are reduced-form.",
+    "The free-data proxy can reject or motivate follow-up work but cannot prove option-market component premia."
+  ],
+  "verdict": {
+    "overall": "NULL",
+    "sign_support": false,
+    "return_medium_pass": false,
+    "rv_medium_pass": false,
+    "plain_english": "The free-data downside/upside VRP proxy does not pass the pre-specified sign plus medium-horizon prediction gate."
+  }
+}
