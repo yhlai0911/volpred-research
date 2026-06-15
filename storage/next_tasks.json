@@ -31710,7 +31710,7 @@
     "title": "Paper review (Codex 24h-rule): 台海風險當然重要，但沒有這一欄資料，我們不能假裝自己量得到",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_624871ea needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_624871ea",
@@ -31719,7 +31719,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-15T15:08:12+00:00"
+    "created_at": "2026-06-15T15:08:12+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-15T16:09:05.766694+00:00",
+    "claim_session_id": "8d32d661e699",
+    "started_at": "2026-06-15T16:09:10.651301+00:00",
+    "completed_at": "2026-06-15T16:13:03.607451+00:00",
+    "result": "Codex 24h-rule PASS — 數字一致、K100/K446 引用準確、無 over-claim、lookahead 邏輯自洽。Review 存於 storage/paper_reviews/mile_624871ea_codex_review.md"
   },
   {
     "id": "paper_review_mile_b97c5c33",
