@@ -1,0 +1,79 @@
+{
+  "experiment_id": "K1506",
+  "k_id": "K1506",
+  "title": "K1506: Treasury auction bid-to-cover weakness \u2192 MOVE realized vol event study",
+  "run_at": "2026-06-16T05:15:06",
+  "seed": 42,
+  "start_date": "2015-01-01",
+  "end_date": "2026-06-16",
+  "signal_lag": 1,
+  "weak_z_threshold": -1.5,
+  "benign_z_threshold": 0.5,
+  "post_window_days": 5,
+  "bootstrap_reps": 5000,
+  "n_auctions_total": 278,
+  "n_events_with_post_window": 276,
+  "n_events_weak": 26,
+  "n_events_benign": 97,
+  "n_events_other": 141,
+  "n_events_skip": 12,
+  "mean_post_cum_vol_weak": 0.08792134751345874,
+  "mean_post_cum_vol_benign": 0.09204197827396683,
+  "std_post_cum_vol_weak": 0.03940573046130961,
+  "std_post_cum_vol_benign": 0.04144379397790186,
+  "primary_descriptive_t": -0.46828186839455993,
+  "primary_descriptive_p": 0.6420581998887185,
+  "primary_descriptive_cohen_d": -0.10042724532550419,
+  "verdict_primary": "INSUFFICIENT_SAMPLE",
+  "note_insufficient": "weak=26 benign=97; primary requires >=30 each",
+  "secondary_spec_z_lt_neg1": {
+    "weak_z_threshold": -1.0,
+    "n_weak": 45,
+    "n_benign": 97,
+    "mean_weak": 0.08649158059270252,
+    "mean_benign": 0.09204197827396683,
+    "t_stat": -0.7733380082951589,
+    "p_value_two_sided": 0.4413320307567881,
+    "cohen_d": -0.13639875282464262,
+    "bootstrap_95ci_mean_diff": [
+      -0.019521317113277252,
+      0.008431911327527125
+    ],
+    "verdict": "FAIL"
+  },
+  "verdict": "INSUFFICIENT_SAMPLE",
+  "robustness_per_maturity": {
+    "10-Year": {
+      "n_weak": 14,
+      "n_benign": 45,
+      "mean_weak": 0.086646312804092,
+      "mean_benign": 0.09540470798829989
+    },
+    "30-Year": {
+      "n_weak": 12,
+      "n_benign": 52,
+      "mean_weak": 0.08940888800771991,
+      "mean_benign": 0.08913192371348627
+    }
+  },
+  "robustness_per_vix_regime": {
+    "high": {
+      "n_weak": 13,
+      "n_benign": 51,
+      "mean_weak": 0.10168360480417832,
+      "mean_benign": 0.09748024888322934,
+      "t": 0.3309956133941901,
+      "p": 0.7443299299817155
+    },
+    "low": {
+      "n_weak": 13,
+      "n_benign": 46,
+      "mean_weak": 0.07415909022273917,
+      "mean_benign": 0.08601259129413227,
+      "t": -1.0540474225096825,
+      "p": 0.3027613786023968
+    }
+  },
+  "reviewer": "CONDITIONAL_PASS (methodology); verdict itself is INSUFFICIENT_SAMPLE+FAIL null finding",
+  "reviewer_source": "main-thread source-level audit (Codex CLI stdin stall fallback; see codex_review.md)"
+}
