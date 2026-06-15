@@ -1,6 +1,6 @@
 {
   "experiment_id": "K1339",
-  "title": "Commodity backwardation\u2192contango regime-switch event study",
+  "title": "Commodity backwardation→contango regime-switch event study",
   "run_timestamp_utc": "2026-06-15T06:14:54.329382+00:00",
   "data": {
     "etfs": [
@@ -8065,6 +8065,7 @@
     "contango_to_back|H=60|CPER|p=0.074|mean=0.070"
   ],
   "effect_hits_abs_gt_025": [],
-  "verdict": "PASS",
-  "notes": "Regime proxy is indirect (ETF momentum slope vs true futures curve). Forward 90d windows may overlap subsequent events; per-event table reported. Verdict NULL if no statistically or economically meaningful effect."
+  "verdict": "CONDITIONAL_PASS",
+  "notes": "Regime proxy is indirect (ETF momentum slope vs true futures curve). Forward 90d windows may overlap subsequent events; per-event table reported. Verdict NULL if no statistically or economically meaningful effect.",
+  "verdict_downgrade_reason": "Codex review: multiple-testing not enforced + event non-independence + ETF momentum proxy not true futures curve. CPER H30 p=0.003 cross-checked via sign-flip null at p=0.0026; remains the only single result worth highlighting."
 }
