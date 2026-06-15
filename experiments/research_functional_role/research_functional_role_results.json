@@ -1,0 +1,415 @@
+{
+  "bootstrap_tests": {
+    "multi_layer_vt_vs_spy": {
+      "cvar5_improvement": {
+        "block_size_days": 21,
+        "ci_95": [
+          0.0051030765868881195,
+          0.017271522153962018
+        ],
+        "observed": 0.010352829451882307,
+        "one_sided_p_against_zero": 0.0,
+        "reps": 1000,
+        "seed": 42
+      },
+      "left_tail_frequency_reduction": {
+        "block_size_days": 21,
+        "ci_95": [
+          0.014814814814814815,
+          0.0382716049382716
+        ],
+        "observed": 0.025308641975308643,
+        "one_sided_p_against_zero": 0.0,
+        "reps": 1000,
+        "seed": 42
+      },
+      "mdd_improvement": {
+        "block_size_days": 21,
+        "ci_95": [
+          -0.014886425166562873,
+          0.1996237292033132
+        ],
+        "observed": 0.14201087004970325,
+        "one_sided_p_against_zero": 0.038,
+        "reps": 1000,
+        "seed": 42
+      }
+    },
+    "multi_layer_vt_vs_unscaled_multi_layer": {
+      "cvar5_improvement": {
+        "block_size_days": 21,
+        "ci_95": [
+          -0.0014020276204176462,
+          0.005166866385472578
+        ],
+        "observed": 0.0015756143219501431,
+        "one_sided_p_against_zero": 0.197,
+        "reps": 1000,
+        "seed": 42
+      },
+      "left_tail_frequency_reduction": {
+        "block_size_days": 21,
+        "ci_95": [
+          -0.004938271604938271,
+          0.009259259259259259
+        ],
+        "observed": 0.001851851851851851,
+        "one_sided_p_against_zero": 0.354,
+        "reps": 1000,
+        "seed": 42
+      },
+      "mdd_improvement": {
+        "block_size_days": 21,
+        "ci_95": [
+          -0.048730353710225806,
+          0.07848246365711996
+        ],
+        "observed": 0.040299291578307916,
+        "one_sided_p_against_zero": 0.375,
+        "reps": 1000,
+        "seed": 42
+      }
+    }
+  },
+  "crisis_windows": {
+    "2020_covid_liquidity": {
+      "description": "Fast liquidity crash from SPY pre-COVID peak to trough.",
+      "end": "2020-03-23",
+      "expected_first_responder": "TLT",
+      "expected_second_responder": "DBMF",
+      "multi_layer_arithmetic_contribution": {
+        "DBMF": -0.008657422095287914,
+        "SPY": -0.2637886723729084,
+        "TLT": 0.022188112487353157,
+        "note": "Arithmetic contribution approximation; strategy metrics use compounded returns.",
+        "vol_target_overlay_incremental": 0.04657071931720519
+      },
+      "start": "2020-02-19",
+      "strategy_metrics": {
+        "MULTI_LAYER_70_15_15": {
+          "compound_return": -0.2320902745545259,
+          "max_drawdown": -0.23546108581333203,
+          "n_days": 24
+        },
+        "MULTI_LAYER_VT_70_15_15": {
+          "compound_return": -0.18983906120894367,
+          "max_drawdown": -0.195161794235024,
+          "n_days": 24
+        },
+        "SPY": {
+          "compound_return": -0.334003531282714,
+          "max_drawdown": -0.33717266428472714,
+          "n_days": 24
+        },
+        "SPY_DBMF_80_20": {
+          "compound_return": -0.28394558899097877,
+          "max_drawdown": -0.2876887091981568,
+          "n_days": 24
+        },
+        "SPY_TLT_80_20": {
+          "compound_return": -0.2500835465024066,
+          "max_drawdown": -0.2529307703275633,
+          "n_days": 24
+        }
+      },
+      "vt_scale": {
+        "max": 1.5,
+        "mean": 0.8829021579805131,
+        "min": 0.5
+      }
+    },
+    "2022_rate_shock": {
+      "description": "Persistent inflation/rate-hiking drawdown; long duration is expected to struggle.",
+      "end": "2022-10-12",
+      "expected_first_responder": "DBMF",
+      "expected_second_responder": "vol_target_overlay",
+      "multi_layer_arithmetic_contribution": {
+        "DBMF": 0.04389193399494878,
+        "SPY": -0.17664569028729596,
+        "TLT": -0.05375511609616741,
+        "note": "Arithmetic contribution approximation; strategy metrics use compounded returns.",
+        "vol_target_overlay_incremental": 0.010895638404794206
+      },
+      "start": "2022-01-03",
+      "strategy_metrics": {
+        "MULTI_LAYER_70_15_15": {
+          "compound_return": -0.17895569440101022,
+          "max_drawdown": -0.1801611092977149,
+          "n_days": 196
+        },
+        "MULTI_LAYER_VT_70_15_15": {
+          "compound_return": -0.166699975378221,
+          "max_drawdown": -0.16817469493291626,
+          "n_days": 196
+        },
+        "SPY": {
+          "compound_return": -0.24059227433316777,
+          "max_drawdown": -0.24496392800105893,
+          "n_days": 196
+        },
+        "SPY_DBMF_80_20": {
+          "compound_return": -0.1451564876065219,
+          "max_drawdown": -0.1513650602253006,
+          "n_days": 196
+        },
+        "SPY_TLT_80_20": {
+          "compound_return": -0.2510260798851399,
+          "max_drawdown": -0.25056293129672313,
+          "n_days": 196
+        }
+      },
+      "vt_scale": {
+        "max": 1.2458040029789597,
+        "mean": 0.8034026683865235,
+        "min": 0.6004657453670713
+      }
+    },
+    "2025_policy_shock": {
+      "description": "Sharp policy/tariff shock window; used only as an ex-post stress label.",
+      "end": "2025-04-08",
+      "expected_first_responder": "vol_target_overlay",
+      "expected_second_responder": "DBMF",
+      "multi_layer_arithmetic_contribution": {
+        "DBMF": -0.011804678993552024,
+        "SPY": -0.1399626753713859,
+        "TLT": 0.0016814889685119855,
+        "note": "Arithmetic contribution approximation; strategy metrics use compounded returns.",
+        "vol_target_overlay_incremental": -0.0010900495386279374
+      },
+      "start": "2025-02-19",
+      "strategy_metrics": {
+        "MULTI_LAYER_70_15_15": {
+          "compound_return": -0.14177942946503375,
+          "max_drawdown": -0.14273011282596315,
+          "n_days": 35
+        },
+        "MULTI_LAYER_VT_70_15_15": {
+          "compound_return": -0.14268224148531472,
+          "max_drawdown": -0.14383707262313494,
+          "n_days": 35
+        },
+        "SPY": {
+          "compound_return": -0.1856391191159198,
+          "max_drawdown": -0.18755246925491054,
+          "n_days": 35
+        },
+        "SPY_DBMF_80_20": {
+          "compound_return": -0.16438106104085837,
+          "max_drawdown": -0.16514491091260874,
+          "n_days": 35
+        },
+        "SPY_TLT_80_20": {
+          "compound_return": -0.1487303119411919,
+          "max_drawdown": -0.15054280072607684,
+          "n_days": 35
+        }
+      },
+      "vt_scale": {
+        "max": 1.2448331270036048,
+        "mean": 1.04535283543878,
+        "min": 0.7540833636410873
+      }
+    }
+  },
+  "data": {
+    "aligned_price_end": "2026-06-12",
+    "aligned_price_start": "2019-05-08",
+    "data_end_parameter": "2026-06-16",
+    "data_start": "2019-05-01",
+    "oos_days": 1620,
+    "oos_end": "2026-06-12",
+    "oos_start": "2020-01-02",
+    "source": "yfinance auto_adjust=True close prices",
+    "tickers": [
+      "SPY",
+      "TLT",
+      "DBMF"
+    ]
+  },
+  "experiment_id": "research_functional_role",
+  "figures": {
+    "crisis_contributions": "fig_crisis_contributions.png",
+    "drawdowns": "fig_strategy_drawdowns.png"
+  },
+  "limitations": [
+    "DBMF is an ETF proxy for managed futures and starts only in May 2019.",
+    "Crisis windows are ex-post labels for decomposition, not train/test selectors or trading signals.",
+    "No direct option-based tail hedge is included; vol targeting is only a risk-budget overlay.",
+    "Transaction costs, taxes, and daily rebalancing frictions are not modeled."
+  ],
+  "literature_context": [
+    {
+      "title": "Schwalbach and Auret (2025), Enhancing global equity returns with trend-following and tail risk hedging overlays",
+      "url": "https://www.tandfonline.com/doi/full/10.1080/10293523.2025.2553254"
+    },
+    {
+      "title": "J.P. Morgan Asset Management 2026 Long-Term Capital Market Assumptions",
+      "url": "https://am.jpmorgan.com/content/dam/jpm-am-aem/global/en/insights/portfolio-insights/ltcma/noindex/ltcma-full-report.pdf"
+    },
+    {
+      "title": "Eastspring Investments, Smarter risk management overlays for multi-asset portfolios",
+      "url": "https://www.eastspring.com/insights/deep-dives/smarter-risk-management-overlays-for-multi-asset-portfolios"
+    },
+    {
+      "title": "Goldman Sachs Asset Management (2026), Finding the True Value of Tail-Risk Hedging",
+      "url": "https://am.gs.com/en-us/advisors/insights/article/2026/finding-true-value-tail-risk-hedging"
+    }
+  ],
+  "method": {
+    "anti_lookahead": "vt_scale = (target / rolling_63d_vol).clip(0.50, 1.50).shift(1)",
+    "bootstrap": {
+      "block_size_days": 21,
+      "reps": 1000,
+      "seed": 42,
+      "type": "paired moving block bootstrap on OOS daily returns"
+    },
+    "crisis_windows_are_ex_post_descriptive": true,
+    "dynamic_signal": "vol target scale only",
+    "scale_bounds": [
+      0.5,
+      1.5
+    ],
+    "transaction_costs": "Not subtracted; static ETF prices include fund-level expenses but not rebalancing costs/taxes.",
+    "vol_lookback_days": 63,
+    "vol_target": 0.12
+  },
+  "performance": {
+    "MULTI_LAYER_70_15_15": {
+      "annual_vol": 0.14583419520270677,
+      "best_day": 0.0773829597638045,
+      "cagr": 0.12066510401680786,
+      "calmar": 0.5124630407610891,
+      "daily_cvar_5pct": -0.021806854268435507,
+      "daily_var_5pct": -0.01305642629194032,
+      "left_tail_days_le_minus_2pct": 30,
+      "left_tail_frequency_le_minus_2pct": 0.018518518518518517,
+      "max_drawdown": -0.23546108581333203,
+      "n_days": 1620,
+      "sharpe": 0.8543516726830209,
+      "worst_day": -0.0719015590588505
+    },
+    "MULTI_LAYER_VT_70_15_15": {
+      "annual_vol": 0.13245136661687976,
+      "best_day": 0.058118709319292985,
+      "cagr": 0.10958552371184238,
+      "calmar": 0.561511150998508,
+      "daily_cvar_5pct": -0.020231239946485364,
+      "daily_var_5pct": -0.014200464042821992,
+      "left_tail_days_le_minus_2pct": 27,
+      "left_tail_frequency_le_minus_2pct": 0.016666666666666666,
+      "max_drawdown": -0.1951617942350241,
+      "n_days": 1620,
+      "sharpe": 0.8515909726029173,
+      "worst_day": -0.04238418424397629
+    },
+    "SPY": {
+      "annual_vol": 0.20344446399926008,
+      "best_day": 0.1050193499563612,
+      "cagr": 0.15474954123426388,
+      "calmar": 0.4589622992200363,
+      "daily_cvar_5pct": -0.03058406939836767,
+      "daily_var_5pct": -0.017756484943419797,
+      "left_tail_days_le_minus_2pct": 68,
+      "left_tail_frequency_le_minus_2pct": 0.04197530864197531,
+      "max_drawdown": -0.33717266428472736,
+      "n_days": 1620,
+      "sharpe": 0.8093944215529085,
+      "worst_day": -0.10942369351540593
+    },
+    "SPY_DBMF_80_20": {
+      "annual_vol": 0.1693823243378148,
+      "best_day": 0.08799761023749589,
+      "cagr": 0.14486088318076007,
+      "calmar": 0.5035334323147915,
+      "daily_cvar_5pct": -0.025530778845519745,
+      "daily_var_5pct": -0.015420204886781195,
+      "left_tail_days_le_minus_2pct": 45,
+      "left_tail_frequency_le_minus_2pct": 0.027777777777777776,
+      "max_drawdown": -0.28768870919815726,
+      "n_days": 1620,
+      "sharpe": 0.883772275073842,
+      "worst_day": -0.08806010305655657
+    },
+    "SPY_TLT_80_20": {
+      "annual_vol": 0.1625654399217767,
+      "best_day": 0.08519256941848426,
+      "cagr": 0.11958473081923082,
+      "calmar": 0.4682576818544731,
+      "daily_cvar_5pct": -0.024262101409219933,
+      "daily_var_5pct": -0.014629035378370587,
+      "left_tail_days_le_minus_2pct": 39,
+      "left_tail_frequency_le_minus_2pct": 0.024074074074074074,
+      "max_drawdown": -0.2553823150228549,
+      "n_days": 1620,
+      "sharpe": 0.7763482338909417,
+      "worst_day": -0.07530230260559861
+    }
+  },
+  "role_score": {
+    "expected_pair_hits": 1,
+    "first_responder_hits": 1,
+    "n_windows": 3,
+    "windows": {
+      "2020_covid_liquidity": {
+        "expected_first": "TLT",
+        "expected_second": "DBMF",
+        "observed_positive_rank": [
+          "vol_target_overlay",
+          "TLT"
+        ],
+        "top_matches_first": false,
+        "top_two_include_expected_pair": false
+      },
+      "2022_rate_shock": {
+        "expected_first": "DBMF",
+        "expected_second": "vol_target_overlay",
+        "observed_positive_rank": [
+          "DBMF",
+          "vol_target_overlay"
+        ],
+        "top_matches_first": true,
+        "top_two_include_expected_pair": true
+      },
+      "2025_policy_shock": {
+        "expected_first": "vol_target_overlay",
+        "expected_second": "DBMF",
+        "observed_positive_rank": [
+          "TLT"
+        ],
+        "top_matches_first": false,
+        "top_two_include_expected_pair": false
+      }
+    }
+  },
+  "seed": 42,
+  "strategy_weights": {
+    "MULTI_LAYER_70_15_15": {
+      "DBMF": 0.15,
+      "SPY": 0.7,
+      "TLT": 0.15
+    },
+    "SPY": {
+      "DBMF": 0.0,
+      "SPY": 1.0,
+      "TLT": 0.0
+    },
+    "SPY_DBMF_80_20": {
+      "DBMF": 0.2,
+      "SPY": 0.8,
+      "TLT": 0.0
+    },
+    "SPY_TLT_80_20": {
+      "DBMF": 0.0,
+      "SPY": 0.8,
+      "TLT": 0.2
+    }
+  },
+  "verdict": "NULL_MIXED_RESPONDER_EVIDENCE",
+  "verdict_reasons": [
+    "Expected responder pair positive in 1/3 crisis windows.",
+    "Top first responder matched in 1/3 crisis windows.",
+    "SPY MDD -33.7%; multi-layer VT MDD -19.5%.",
+    "SPY Sharpe 0.81; multi-layer VT Sharpe 0.85.",
+    "Bootstrap vs SPY: MDD improvement p=0.038, CVaR5 improvement p=0.000, left-tail reduction p=0.000."
+  ]
+}
