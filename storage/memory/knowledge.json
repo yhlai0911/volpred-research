@@ -34167,5 +34167,18 @@
     ],
     "confidence": 0.83,
     "created_at": "2026-06-15T07:35:24.381211"
+  },
+  {
+    "item_id": "3b5d737e",
+    "category": "strategy_candidate",
+    "content": "K1335 CONDITIONAL_PASS (Codex review primary path 2026-06-15): VIX/VIX3M term-slope binary VT overlay. OOS 2018-2026 (n=2123). slope_1_05 (close 0 when VIX/VIX3M>1.05) Sharpe 0.917 / MDD -0.245 / turnover 4.99 vs IS-tuned VIX-level th=22 Sharpe 0.536 / MDD -0.230 / turnover 14.72. Raw Sharpe diff +0.381, bootstrap p=0.096 marginal — Bonferroni-adj p≈0.29 across 3 slope thresholds FAILS multi-test honesty (Codex flag). Buy&Hold benchmark 0.807/-0.337 — only slope_1_05 beats B&H on both. Caveats: (a) multi-test Bonferroni failed, (b) IS-tuning asymmetric (level IS-tuned, slope grid OOS-selected), (c) TC=10bps per side not round-trip. Direction supportive (slope rule >= level rule + 3x lower turnover for th=1.05) but headline OOS edge NOT statistically significant after honest correction. Strategy lifecycle pipeline DEFERRED — needs walk-forward CV with rolling threshold re-tune + 5bps per side TC + multi-test framework before listing candidate 'slope_vt_overlay_v1'. Monetization angle: differentiated vs incumbent VIX-level VTs (lower friction, regime-aware), worth the followup K.",
+    "evidence": [
+      "experiments/K1335/K1335_results.json",
+      "experiments/K1335/K1335.py",
+      "experiments/K1335/README.md",
+      "codex_review:gpt-5.4:2026-06-15T08:21+08:00:CONDITIONAL_PASS"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-15T08:22:00.074171"
   }
 ]

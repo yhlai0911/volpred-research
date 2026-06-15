@@ -31092,5 +31092,161 @@
     "started_at": "2026-06-14T23:10:21.585787+00:00",
     "completed_at": "2026-06-14T23:17:47.886184+00:00",
     "result": "K593 daily_article published as mile_be63fc46 (draft pool). Anti-ai gate PASS, arc-dedup PASS, 1421 zh-Hant chars, dual-subplot PNG embedded. Commit 51d52daf."
+  },
+  {
+    "id": "K1335",
+    "title": "K1335: VIX 期限結構斜率作為 vol-targeting overlay 開關 — 用 VIX/VIX3M 比率（^VIX、^VIX3M）construct slope signal，當 backwardation 時降股票曝險，比較 vs 純",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 566). Original: VIX 期限結構斜率作為 vol-targeting overlay 開關 — 用 VIX/VIX3M 比率（^VIX、^VIX3M）construct slope signal，當 backwardation 時降股票曝險，比較 vs 純 VIX-level threshold 策略的 OOS Sharpe / MDD（yfinance）（來源：sixfigureinvesting / Cboe 2026 term structure；slope predictive content 學術已証但 trading rule 比較少完整 OOS audit）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1335.py with signal.shift(1) + seed=42, (c) K1335_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 566,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:06Z",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-15T00:09:19.553231+00:00",
+    "claim_session_id": "89552210efa3",
+    "started_at": "2026-06-15T00:09:40.222609+00:00",
+    "completed_at": "2026-06-15T00:21:01.656925+00:00",
+    "result": "Codex CONDITIONAL_PASS: slope_1_05 OOS Sharpe 0.917 vs VIX-level 0.536 (+0.381), bootstrap p=0.096 marginal, Bonferroni-adj p≈0.29 fails multi-test. MDD comparable. 3 caveats logged. Strategy lifecycle DEFERRED awaiting walk-forward + honest multi-test framework."
+  },
+  {
+    "id": "K1336",
+    "title": "K1336: EM FX carry × FX vol regime 的雙閥門進出場 — 用 USDBRL/USDMXN/USDZAR/USDIDR daily 算 carry signal（rate diff via FRED），FX vol 用 60",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 568). Original: EM FX carry × FX vol regime 的雙閥門進出場 — 用 USDBRL/USDMXN/USDZAR/USDIDR daily 算 carry signal（rate diff via FRED），FX vol 用 60d realized；只在 carry > threshold 且 FX vol < threshold 時開倉，OOS Sharpe / MDD vs 純 carry baseline（yfinance + FRED）（來源：Bloomberg 2025-12 carry 17% 報酬 + ING 2026 outlook；2026 大議題但學術完整 OOS validation 缺）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1336.py with signal.shift(1) + seed=42, (c) K1336_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 568,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:06Z"
+  },
+  {
+    "id": "K1337",
+    "title": "K1337: 收益率曲線 steepener regime 預測股市 vol 與 sector rotation — 用 ^TNX-^IRX 或 ^TNX-^FVX 曲線斜率變化 dV/dt（steepening rate）而非斜率水平，檢定 fast-",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 572). Original: 收益率曲線 steepener regime 預測股市 vol 與 sector rotation — 用 ^TNX-^IRX 或 ^TNX-^FVX 曲線斜率變化 dV/dt（steepening rate）而非斜率水平，檢定 fast-steepening 期 SPY vol jump、XLF/XLU sector vol 差異（yfinance）（來源：Nuveen / LPL 2026 outlook 一致預期 steepener；多數研究只看 level 不看 dV/dt）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1337.py with signal.shift(1) + seed=42, (c) K1337_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 572,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:06Z"
+  },
+  {
+    "id": "K1338",
+    "title": "K1338: FinBERT-style 中文財經新聞情緒對 0050 vol 預測增量 — 抓 鉅亨網/工商時報 RSS 日頻標題，用免費中文 sentiment lexicon（NTUSD/CNSenti）算每日 sentiment z-score，",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 574). Original: FinBERT-style 中文財經新聞情緒對 0050 vol 預測增量 — 抓 鉅亨網/工商時報 RSS 日頻標題，用免費中文 sentiment lexicon（NTUSD/CNSenti）算每日 sentiment z-score，加入 HAR-RV(0050) 檢定 OOS QLIKE 增量 + DM 顯著（yfinance + RSS）（來源：arXiv 2025-05 interpretable macro alpha + Frontiers 2025；中文圈 FinBERT-style vol forecast 缺，VolPred 角度差異化高）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1338.py with signal.shift(1) + seed=42, (c) K1338_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 574,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:06Z"
+  },
+  {
+    "id": "K1339",
+    "title": "K1339: 商品 backwardation→contango 轉換點作為通膨資產 vol regime switch — 用 USO/UNG/CPER 月頻代理近月-遠月 spread（用前後月 ETF 收益代理 roll yield），標記 reg",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 575). Original: 商品 backwardation→contango 轉換點作為通膨資產 vol regime switch — 用 USO/UNG/CPER 月頻代理近月-遠月 spread（用前後月 ETF 收益代理 roll yield），標記 regime switch 日期，event study 檢定後續 30/60/90 日這些 ETF 與 SPY 的 vol jump 與相關性變化（yfinance）（來源：Schwab 2026 backwardation guide + arXiv 2026-03 rough vol commodity；2025 backwardation→extreme contango 切換是新事件）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1339.py with signal.shift(1) + seed=42, (c) K1339_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 575,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:06Z"
+  },
+  {
+    "id": "K1340",
+    "title": "K1340: Gamma-squeeze 候選股「散戶驅動波動」事件研究 — yfinance 2024-26 meme/gamma 候選（OPEN/KSS/GME 等），用「成交量 z-score × 報酬」代理 dealer-hedging 壓力，事",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 580). Original: Gamma-squeeze 候選股「散戶驅動波動」事件研究 — yfinance 2024-26 meme/gamma 候選（OPEN/KSS/GME 等），用「成交量 z-score × 報酬」代理 dealer-hedging 壓力，事件窗檢定 RV 與後續 CAR/reversal 不對稱（來源：JFE/AFA 2025-26 \"Seeking Gamma\"，squeeze 後一月 CAR +5.13%）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1340.py with signal.shift(1) + seed=42, (c) K1340_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 580,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:10Z"
+  },
+  {
+    "id": "K1341",
+    "title": "K1341: Russell/標普 reconstitution 日尾盤波動「dislocation 但收斂」 — 重組日 vs 一般日 close-to-close vs intraday-range vol 拆解，檢定重組日尾盤 RV 系統升高但隔日",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 583). Original: Russell/標普 reconstitution 日尾盤波動「dislocation 但收斂」 — 重組日 vs 一般日 close-to-close vs intraday-range vol 拆解，檢定重組日尾盤 RV 系統升高但隔日均值回歸（來源：BMLL/Traders 2025 closing auction，重組日量 9%→20%）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1341.py with signal.shift(1) + seed=42, (c) K1341_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 583,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:10Z"
+  },
+  {
+    "id": "K1342",
+    "title": "K1342: MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 584). Original: MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025 MOC imbalance）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1342.py with signal.shift(1) + seed=42, (c) K1342_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 584,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:10Z"
+  },
+  {
+    "id": "K1343",
+    "title": "K1343: BDC 股價壓力作私募信貸危機前哨 vol 訊號 — yfinance 上市 BDC（ARCC/BXSL/OBDC/FSK）+ BIZD 的 RV + 折溢價/動能 proxy，檢定是否領先 HYG/KRE/IWM vol（來源：FSB 2",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 586). Original: BDC 股價壓力作私募信貸危機前哨 vol 訊號 — yfinance 上市 BDC（ARCC/BXSL/OBDC/FSK）+ BIZD 的 RV + 折溢價/動能 proxy，檢定是否領先 HYG/KRE/IWM vol（來源：FSB 2026-05 Private Credit Vulnerabilities，違約率升 9.2%；BCRED 贖回潮）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1343.py with signal.shift(1) + seed=42, (c) K1343_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 586,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:10Z"
+  },
+  {
+    "id": "K1344",
+    "title": "K1344: 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 587). Original: 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1344.py with signal.shift(1) + seed=42, (c) K1344_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 587,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T00:00:10Z"
   }
 ]

@@ -10657,5 +10657,20 @@
     "summary": "mile_1b511caa (K1332 BDC private-credit shadow stress article) — CONDITIONAL_PASS: 13/15 numeric trace + anti-AI 9/9 + lookahead OK; commit msg mislabel K1499. Followup task built to add K1499 SPY-control caveat footnote per research-honesty.",
     "verdict": "CONDITIONAL_PASS",
     "claimed_by": "hourly-05"
+  },
+  {
+    "timestamp": "2026-06-15T08:22",
+    "task_type": "experiment",
+    "task_id": "K1335",
+    "title": "K1335 VIX/VIX3M term-slope VT overlay binary switch — CONDITIONAL_PASS (Codex)",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI gpt-5.4",
+    "headline": "slope_1_05 OOS Sharpe 0.917 vs VIX-level 0.536 (+0.381 raw, p=0.096 marginal, Bonferroni-adj p≈0.29 fails)",
+    "caveats": [
+      "multi_test_bonferroni_failed",
+      "is_tuning_asymmetric",
+      "tc_per_side_not_round_trip"
+    ],
+    "next_step": "K-followup: walk-forward CV + 5bps/side TC + honest multi-test framework before strategy lifecycle listing"
   }
 ]
