@@ -131,10 +131,10 @@
     "weight_cap": 1.0,
     "lag": "shift(1) on signal; ret_t = close_t/close_{t-1}-1"
   },
-  "verdict": "PENDING_REVIEW",
+  "verdict": "CONDITIONAL_PASS",
   "agent_proposed_verdict": "PASS",
-  "verdict_reason": "slope Sharpe 0.917 >= level 0.536; MDD diff -0.015; bootstrap p=0.096<0.10",
-  "reviewer": "PENDING_REVIEW (awaiting Codex review per K1259 protocol)",
+  "verdict_reason": "OOS Sharpe slope_1_05=0.917 > VIX-level=0.536 (+0.381) with comparable MDD (-0.245 vs -0.230). BUT (a) bootstrap p=0.096 marginal, Bonferroni-adj p≈0.29 across 3 slope thresholds — does NOT survive multi-test penalty (Codex FAIL on this). (b) IS-tuning asymmetric: VIX-level IS-tuned to 22 vs slope grid fixed-then-OOS-selected — partial data-snooping. (c) TC=10bps per side not round-trip — net Sharpe slightly overstated, esp. slope_0_95 (turnover 22.8). Verdict CONDITIONAL_PASS: result direction supportive (slope rule >= level rule + cheaper turnover for th=1.05) but headline outperformance not statistically significant after honest correction. Strategy lifecycle pipeline DEFERRED until walk-forward + multi-test honest framework added.",
+  "reviewer": "Codex CLI gpt-5.4 (2026-06-15 08:21 CST)",
   "monetization_angle": "If PASS, candidate `slope_vt_overlay_v1` for strategy_lifecycle pipeline; differentiated vs incumbent VIX-level VTs.",
   "files": {
     "script": "experiments/K1335/K1335.py",
@@ -145,5 +145,11 @@
       "experiments/K1335/K1335_fig_drawdown.png",
       "experiments/K1335/K1335_fig_regime_returns.png"
     ]
-  }
+  },
+  "reviewer_source": "codex_review_primary_path",
+  "caveats": [
+    "multi_test_bonferroni_failed",
+    "is_tuning_asymmetric",
+    "tc_per_side_not_round_trip"
+  ]
 }
