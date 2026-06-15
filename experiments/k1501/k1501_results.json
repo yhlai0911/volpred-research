@@ -1,0 +1,414 @@
+{
+  "experiment_id": "k1501",
+  "k_id": "K1501",
+  "title": "K1501 \u2014 VRP upside/downside decomposition and horizon predictability on SPY",
+  "started_utc": "2026-06-15T14:17:30.297470+00:00",
+  "finished_utc": "2026-06-15T14:17:59.932675+00:00",
+  "seed": 42,
+  "n_bootstrap": 1000,
+  "sample_period": {
+    "requested_start": "2006-01-01",
+    "requested_end": "2026-05-31",
+    "actual_start": "2006-02-28",
+    "actual_end": "2026-05-31"
+  },
+  "n_obs_monthly": 244,
+  "data_provenance": {
+    "spx_source": "yfinance ^GSPC daily Close",
+    "vix_source": "yfinance ^VIX daily Close",
+    "fetched_utc": "2026-06-15T14:17:30.297470+00:00",
+    "aggregation": "monthly (month-end resample, ME)",
+    "lookahead_controls": [
+      "IV at month t uses VIX_{t-1} (shift(1))",
+      "theta_dn at month t uses rolling 12m TRAILING shares (shift(1).rolling(12))",
+      "forward returns ret_{t->t+h} use h trading days AFTER month-end close",
+      "HAC NW lag = h+1 for horizon-h overlapping returns"
+    ]
+  },
+  "hypothesis_results": {
+    "H1_semivariance_asymmetry": {
+      "mean_a": 0.0016619640612163843,
+      "mean_b": 0.0014855342606305572,
+      "diff_mean_a_minus_b": 0.0001764298005858271,
+      "t": 0.5397771319456062,
+      "p_two_sided": 0.5896145315053227,
+      "n_a": 244,
+      "n_b": 244,
+      "mean_diff_dn_minus_up_HAC": {
+        "mean": 0.00017642980058582696,
+        "se_HAC_NW_lag3": 0.00010998046744260237,
+        "t": 1.6041921323702666,
+        "p_two_sided": 0.10867170841633689,
+        "n": 244
+      }
+    },
+    "H2_predictive_power_horizon": {
+      "horizons": {
+        "1": {
+          "n_obs": 232,
+          "regressions": {
+            "rv_up2": {
+              "alpha": 0.0029008814707327485,
+              "beta": -1.2269554747637976,
+              "se_alpha": 0.0009354887492798522,
+              "se_beta": 0.40163486846879065,
+              "t_beta": -3.05490277634881,
+              "p_beta": 0.002251334907028335,
+              "r2": 0.08280415445782863,
+              "n": 232,
+              "hac_lag": 2
+            },
+            "rv_dn2": {
+              "alpha": 0.00284800757092276,
+              "beta": -1.0596545904891668,
+              "se_alpha": 0.0008095359973013911,
+              "se_beta": 0.22094013203912302,
+              "t_beta": -4.796116399086465,
+              "p_beta": 1.6177130048866672e-06,
+              "r2": 0.10492248522359704,
+              "n": 232,
+              "hac_lag": 2
+            },
+            "vrp_total": {
+              "alpha": 0.0006965621993915373,
+              "beta": 0.5472600755323749,
+              "se_alpha": 0.0008055747243105724,
+              "se_beta": 0.14399441015687145,
+              "t_beta": 3.800564722867886,
+              "p_beta": 0.00014436670320483458,
+              "r2": 0.05542325767467082,
+              "n": 232,
+              "hac_lag": 2
+            },
+            "vrp_down": {
+              "alpha": 0.0007249581919302685,
+              "beta": 0.911654433146912,
+              "se_alpha": 0.0008058106382169407,
+              "se_beta": 0.2172908589843135,
+              "t_beta": 4.195548940292631,
+              "p_beta": 2.722114986886126e-05,
+              "r2": 0.05440791247231325,
+              "n": 232,
+              "hac_lag": 2
+            },
+            "vrp_up": {
+              "alpha": 0.0007031437937400951,
+              "beta": 1.1823085687918506,
+              "se_alpha": 0.0008188128142685907,
+              "se_beta": 0.4697885440148104,
+              "t_beta": 2.51668241777002,
+              "p_beta": 0.011846555740330889,
+              "r2": 0.0491765432224579,
+              "n": 232,
+              "hac_lag": 2
+            }
+          },
+          "bootstrap_beta_vrp_down_minus_up": {
+            "mean_diff": -0.16828190831926676,
+            "std_diff": 0.6103281981717471,
+            "ci95": [
+              -1.0581237051685377,
+              1.5759585043168425
+            ],
+            "p_one_sided_a_gt_b": 0.281,
+            "p_two_sided": 0.562,
+            "n_boot": 1000,
+            "block_len": 4
+          },
+          "bootstrap_beta_rv_dn_minus_up": {
+            "mean_diff": 0.06811572129220159,
+            "std_diff": 0.4200681884610164,
+            "ci95": [
+              -1.08024734521279,
+              0.6407884800532748
+            ],
+            "p_one_sided_a_gt_b": 0.686,
+            "p_two_sided": 0.6279999999999999,
+            "n_boot": 1000,
+            "block_len": 4
+          }
+        },
+        "21": {
+          "n_obs": 231,
+          "regressions": {
+            "rv_up2": {
+              "alpha": 0.008767654080754013,
+              "beta": -0.7771735641595758,
+              "se_alpha": 0.0030573258049388795,
+              "se_beta": 2.662772608604237,
+              "t_beta": -0.2918662906657103,
+              "p_beta": 0.7703888579866127,
+              "r2": 0.002607271506042119,
+              "n": 231,
+              "hac_lag": 22
+            },
+            "rv_dn2": {
+              "alpha": 0.009492861625229448,
+              "beta": -1.1053421065366997,
+              "se_alpha": 0.0031664333303891156,
+              "se_beta": 2.4953288932732676,
+              "t_beta": -0.44296449639019664,
+              "p_beta": 0.6577914150632198,
+              "r2": 0.008953521703489176,
+              "n": 231,
+              "hac_lag": 22
+            },
+            "vrp_total": {
+              "alpha": 0.007042921540954802,
+              "beta": 0.9334864223208356,
+              "se_alpha": 0.003948952749300263,
+              "se_beta": 1.7120178936374777,
+              "t_beta": 0.5452550617549227,
+              "p_beta": 0.5855781065180763,
+              "r2": 0.012638978879310647,
+              "n": 231,
+              "hac_lag": 22
+            },
+            "vrp_down": {
+              "alpha": 0.00700021535739112,
+              "beta": 1.8528688537207039,
+              "se_alpha": 0.003913837722517518,
+              "se_beta": 3.0272192513966747,
+              "t_beta": 0.6120695925363985,
+              "p_beta": 0.5404917147040758,
+              "r2": 0.01761134253586527,
+              "n": 231,
+              "hac_lag": 22
+            },
+            "vrp_up": {
+              "alpha": 0.007194505992257327,
+              "beta": 1.4626352439069412,
+              "se_alpha": 0.003914309319907794,
+              "se_beta": 3.40554659012252,
+              "t_beta": 0.4294861941249556,
+              "p_beta": 0.6675694388351365,
+              "r2": 0.005901202594680632,
+              "n": 231,
+              "hac_lag": 22
+            }
+          },
+          "bootstrap_beta_vrp_down_minus_up": {
+            "mean_diff": 0.5375354217118328,
+            "std_diff": 1.806797092594184,
+            "ci95": [
+              -3.7044451738205657,
+              3.29639727967663
+            ],
+            "p_one_sided_a_gt_b": 0.722,
+            "p_two_sided": 0.556,
+            "n_boot": 1000,
+            "block_len": 4
+          },
+          "bootstrap_beta_rv_dn_minus_up": {
+            "mean_diff": -0.5556160577683559,
+            "std_diff": 1.0356327360298963,
+            "ci95": [
+              -2.5917622396375855,
+              1.4341853163660387
+            ],
+            "p_one_sided_a_gt_b": 0.226,
+            "p_two_sided": 0.452,
+            "n_boot": 1000,
+            "block_len": 4
+          }
+        },
+        "63": {
+          "n_obs": 230,
+          "regressions": {
+            "rv_up2": {
+              "alpha": 0.024126911860930435,
+              "beta": -1.093679228281509,
+              "se_alpha": 0.005392511229720792,
+              "se_beta": 4.276782592605539,
+              "t_beta": -0.25572476612967326,
+              "p_beta": 0.7981633702656132,
+              "r2": 0.0019031196218183277,
+              "n": 230,
+              "hac_lag": 64
+            },
+            "rv_dn2": {
+              "alpha": 0.024438976992151775,
+              "beta": -1.1482365247789625,
+              "se_alpha": 0.005501472380293562,
+              "se_beta": 3.8338251010931925,
+              "t_beta": -0.2995015407592667,
+              "p_beta": 0.7645573965976737,
+              "r2": 0.0035613671400538394,
+              "n": 230,
+              "hac_lag": 64
+            },
+            "vrp_total": {
+              "alpha": 0.021730488238656313,
+              "beta": 1.2556217194928743,
+              "se_alpha": 0.008580025942128611,
+              "se_beta": 2.646785039373714,
+              "t_beta": 0.4743950493954663,
+              "p_beta": 0.6352182226815799,
+              "r2": 0.008428835105545929,
+              "n": 230,
+              "hac_lag": 64
+            },
+            "vrp_down": {
+              "alpha": 0.021728364340062745,
+              "beta": 2.303305950619077,
+              "se_alpha": 0.008504752547591008,
+              "se_beta": 4.510921779982108,
+              "t_beta": 0.5106064930765022,
+              "p_beta": 0.6096266283291651,
+              "r2": 0.010030880790556584,
+              "n": 230,
+              "hac_lag": 64
+            },
+            "vrp_up": {
+              "alpha": 0.02184665333707859,
+              "beta": 2.319087095280332,
+              "se_alpha": 0.008544762597121537,
+              "se_beta": 5.512410756632412,
+              "t_beta": 0.4207028825800141,
+              "p_beta": 0.673972055983318,
+              "r2": 0.005468140604897198,
+              "n": 230,
+              "hac_lag": 64
+            }
+          },
+          "bootstrap_beta_vrp_down_minus_up": {
+            "mean_diff": 0.16403249443913295,
+            "std_diff": 2.237733455197329,
+            "ci95": [
+              -5.687455765929762,
+              3.270094945595349
+            ],
+            "p_one_sided_a_gt_b": 0.595,
+            "p_two_sided": 0.81,
+            "n_boot": 1000,
+            "block_len": 8
+          },
+          "bootstrap_beta_rv_dn_minus_up": {
+            "mean_diff": -0.3723252655709556,
+            "std_diff": 1.2327681409300264,
+            "ci95": [
+              -2.3822190027297956,
+              2.0057057488464167
+            ],
+            "p_one_sided_a_gt_b": 0.398,
+            "p_two_sided": 0.796,
+            "n_boot": 1000,
+            "block_len": 8
+          }
+        },
+        "126": {
+          "n_obs": 226,
+          "regressions": {
+            "rv_up2": {
+              "alpha": 0.03763386656495961,
+              "beta": 2.881067700282955,
+              "se_alpha": 0.01227823877785962,
+              "se_beta": 2.417283447855628,
+              "t_beta": 1.1918617582223343,
+              "p_beta": 0.23331545515098284,
+              "r2": 0.006090259118648245,
+              "n": 226,
+              "hac_lag": 127
+            },
+            "rv_dn2": {
+              "alpha": 0.03913996009595179,
+              "beta": 1.6961414634392424,
+              "se_alpha": 0.011414659772788808,
+              "se_beta": 2.6081915408995062,
+              "t_beta": 0.650313229240166,
+              "p_beta": 0.5154899134369815,
+              "r2": 0.003585818846372324,
+              "n": 226,
+              "hac_lag": 127
+            },
+            "vrp_total": {
+              "alpha": 0.0419466457085004,
+              "beta": 0.31261153453701146,
+              "se_alpha": 0.01614640547894709,
+              "se_beta": 2.7161508224241437,
+              "t_beta": 0.11509358462576393,
+              "p_beta": 0.9083709448403152,
+              "r2": 0.00024135111216427863,
+              "n": 226,
+              "hac_lag": 127
+            },
+            "vrp_down": {
+              "alpha": 0.04181285167188724,
+              "beta": 1.0010880392432977,
+              "se_alpha": 0.016111596397919023,
+              "se_beta": 4.836913667567761,
+              "t_beta": 0.2069683496639075,
+              "p_beta": 0.8360345766091892,
+              "r2": 0.0008754513457716051,
+              "n": 226,
+              "hac_lag": 127
+            },
+            "vrp_up": {
+              "alpha": 0.042175382317515504,
+              "beta": -0.21820619737306704,
+              "se_alpha": 0.016016567819593718,
+              "se_beta": 5.397063419179784,
+              "t_beta": -0.040430541653006705,
+              "p_beta": 0.9677498814309913,
+              "r2": 2.2355628327197508e-05,
+              "n": 226,
+              "hac_lag": 127
+            }
+          },
+          "bootstrap_beta_vrp_down_minus_up": {
+            "mean_diff": 1.766197473869221,
+            "std_diff": 2.3975801429090637,
+            "ci95": [
+              -1.8409466716975191,
+              6.26646944207533
+            ],
+            "p_one_sided_a_gt_b": 0.898,
+            "p_two_sided": 0.20399999999999996,
+            "n_boot": 1000,
+            "block_len": 14
+          },
+          "bootstrap_beta_rv_dn_minus_up": {
+            "mean_diff": -1.2971617394265031,
+            "std_diff": 1.8205764642315327,
+            "ci95": [
+              -3.4526755004160954,
+              1.3872830994710168
+            ],
+            "p_one_sided_a_gt_b": 0.089,
+            "p_two_sided": 0.178,
+            "n_boot": 1000,
+            "block_len": 14
+          }
+        }
+      }
+    },
+    "H3_vrp_sign_decomposition": {
+      "n": 233,
+      "corr_vrp_down_vrp_up": 0.8794905694757834,
+      "fisher_z": 1.3735140169703568,
+      "fisher_se": 0.0659380473395787,
+      "p_two_sided_corr_ne_zero": 0.0,
+      "mean_abs_diff_total_minus_sum": 2.366166543814931e-19,
+      "corr_total_sum": 1.0,
+      "additivity_note": "vrp_total uses iv*1 - rv_total; vrp_sum uses theta_dn*iv + theta_up*iv - rv_dn - rv_up = iv - rv_total since theta_dn+theta_up=1; expected ~identity modulo rolling theta NaN handling."
+    }
+  },
+  "verdict": "MIXED",
+  "verdict_rule": "Harvey (2016) bar + Bonferroni across H2 tests; PASS = H1 strong AND (H2 or H3) strong; CONDITIONAL_PASS = >=2 hypotheses with strong; MIXED = any weak signal; NULL otherwise.",
+  "figures": [
+    "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa5e0c3b9e3b12a0b/experiments/k1501/figs/H1_semivariance_dist.png",
+    "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa5e0c3b9e3b12a0b/experiments/k1501/figs/H2_horizon_betas.png"
+  ],
+  "reviewer": "Codex CLI 0.139.0 (gpt-5.4)",
+  "references": [
+    "Bollerslev, T., Tauchen, G., Zhou, H. (2009). Expected stock returns and variance risk premia. RFS 22(11), 4463-4492.",
+    "Feunou, B., Jahan-Parvar, M. R., Tedongap, R. (2013). Modeling market downside volatility. Review of Finance 17(1), 443-481.",
+    "Bekaert, G., Hoerova, M. (2014). The VIX, the variance premium and stock market volatility. Journal of Econometrics 183(2), 181-192.",
+    "Barndorff-Nielsen, O. E., Kinnebrock, S., Shephard, N. (2010). Measuring downside risk: realised semivariance. In: Volatility and Time Series Econometrics (eds. Bollerslev, Russell, Watson).",
+    "Kilic, M., Shaliastovich, I. (2019). Good and bad variance premia and expected returns. Management Science 65(6), 2522-2544."
+  ],
+  "reviewer_verdict": "CONDITIONAL_PASS",
+  "reviewer_notes": "Lookahead/seed/HAC/semivariance/forward-alignment all PASS. CONDITIONAL on interpretive caveat: VRP_down/VRP_up are proxy decompositions using trailing realized down/up shares of total RV to allocate implied variance \u2014 not directly observed option-implied sign-specific premia. Conclusions should not imply observed option-implied sign-specific VRP.",
+  "reviewer_timestamp_utc": "2026-06-15T14:30:00Z",
+  "final_verdict": "MIXED"
+}
