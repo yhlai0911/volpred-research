@@ -31188,7 +31188,7 @@
     "title": "K1339: 商品 backwardation→contango 轉換點作為通膨資產 vol regime switch — 用 USO/UNG/CPER 月頻代理近月-遠月 spread（用前後月 ETF 收益代理 roll yield），標記 reg",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 575). Original: 商品 backwardation→contango 轉換點作為通膨資產 vol regime switch — 用 USO/UNG/CPER 月頻代理近月-遠月 spread（用前後月 ETF 收益代理 roll yield），標記 regime switch 日期，event study 檢定後續 30/60/90 日這些 ETF 與 SPY 的 vol jump 與相關性變化（yfinance）（來源：Schwab 2026 backwardation guide + arXiv 2026-03 rough vol commodity；2025 backwardation→extreme contango 切換是新事件）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1339.py with signal.shift(1) + seed=42, (c) K1339_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 575,
@@ -31200,7 +31200,9 @@
     "claimed_by": "hourly-14",
     "claimed_at": "2026-06-15T06:10:00.142226+00:00",
     "claim_session_id": "e4a4533fcb12",
-    "started_at": "2026-06-15T06:10:04.184326+00:00"
+    "started_at": "2026-06-15T06:10:04.184326+00:00",
+    "completed_at": "2026-06-15T06:41:02.666188+00:00",
+    "result": "CONDITIONAL_PASS: CPER contango→back H30 vol jump p=0.003 (sign-flip null cross-check p=0.0026); 5 caveats per Codex review (multiple-testing, event-independence, proxy validity, hash-seed reproducibility, p-value form). Knowledge entry f4f924da. Commits 59f5a2f4 + f27c58c2."
   },
   {
     "id": "K1340",

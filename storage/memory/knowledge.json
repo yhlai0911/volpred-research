@@ -34235,5 +34235,25 @@
     ],
     "confidence": 0.88,
     "created_at": "2026-06-15T12:48:02.971577"
+  },
+  {
+    "item_id": "f4f924da",
+    "category": "experiment",
+    "content": "K1339 (CONDITIONAL_PASS): commodity ETF 21d-vs-63d momentum-regime switch as event-study signal for vol jump.\n\nMethod: USO/UNG/CPER 21d-63d momentum slope sign as backwardation/contango proxy; sustained-10d filter + cross-asset confirmation; forward [event+1, event+H] vol jump at H=30/60/90; paired bootstrap B=5000 seed=42. 2015-01 to 2026-06, n_events=95 (52 contango_to_back, 43 back_to_contango).\n\nResult (CPER strongest): contango→backwardation in CPER → H=30 vol jump mean=+18.0%, p=0.003 (sign-flip null cross-check p=0.0026). UNG H=30 p=0.079; CPER H=60 p=0.074. δρ_SPY null across all cells.\n\nCaveats (Codex review):\n1. Multiple testing: 18 vol cells; CPER H30 p=0.003 survives Bonferroni at 18 but borderline at 36 (vol+δρ).\n2. Event non-independence: 60/90d windows overlap → bootstrap CI/p biased narrow.\n3. Proxy is ETF momentum not real futures-curve roll yield — should NOT label as \"true backwardation/contango regime switch\"; better called \"momentum-regime switch in inflation-sensitive ETFs.\"\n4. PYTHONHASHSEED dependency in per-cell seed via Python hash().\n5. p-value is centered bootstrap not sign-flip null (README comment misleading).\n\nVerdict downgraded from agent PASS → CONDITIONAL_PASS. Lookahead clean (regime_state shift(1), event_date=day-10, forward window event+1 onward). For paper claim would need block bootstrap + FDR correction over 36-cell grid + explicit independence-filtered subset.",
+    "evidence": [
+      "experiments/K1339/K1339.py",
+      "experiments/K1339/K1339_results.json",
+      "experiments/K1339/codex_review.md",
+      "experiments/K1339/README.md"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-15T14:40:54.417431",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K1339",
+    "experiment_id": "K1339",
+    "experiment_path": "experiments/K1339",
+    "reviewer": "Codex CLI 0.139.0 (gpt-5.4)",
+    "reviewer_source": "Codex review primary path",
+    "codex_review": "CONDITIONAL_PASS"
   }
 ]
