@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-15 K1337 expanding-OLS forward-label lookahead — fwd_var(H) training row overlaps prediction date when H>1
+
+**問題**：K1337 agent 設計 expanding-window OLS 預測 SPY `fwd_var(H)`：在預測 index `i` 時用 `df.iloc[:i]` 訓練。乍看「嚴格用 i 之前的資料」，但訓練列 `j` 的目標欄位 `fwd_var(H)` 需要看到報酬 `j..j+H-1`；當 `H>1` 且 `j` 落在訓練尾端（`j+H-1 >= i`），訓練 row 已看見「預測日 i 及之後」的報酬 — coefficient contaminated。
+
+**現象**：18/18 specs (2 slope × 3 dslope window N × 3 horizon H) augmented (HAR + dslope) 比 HAR baseline 顯著更差，DM_t > +2 全部 cell。直覺上「baseline 永遠勝」太乾淨，懷疑設計 bug — Codex review 確認。
+
+**根因**：「`signal.shift(1)` + training set ends at i」這個常見保護**不足以**處理 forward-label OLS：因為 target 本身 inherently leaks H-1 步未來，訓練尾端 H-1 列必須 drop 才嚴格 causal。是 K1259 process gate 之外的 lookahead failure mode — `shift(1)` audit 不會抓到，因為問題在 target 不在 feature。
+
+**解決方法**：
+- K1337 v1 標 failed，knowledge.json 不寫（Codex FAIL 不過 K1259 gate）
+- K1337-v2 task filed：training cutoff 限制 `j + H < i`（drop 訓練尾端 H-1 列）+ regime label 用 `dslope.shift(1)` 後計 rolling-quantile + baseline / augmented 同 log-variance space + clipping 對齊
+- **規則延伸**：Forward-label regression（target 是 `fwd_*` aggregated over future H steps）的 expanding OLS / rolling refit 都要把 training cutoff 設為 `j + H < i`，不是 `j < i`。這條應加進 `.claude/skills/autonomous-research/references/experiment-preamble.md` 的 lookahead audit checklist
+- 實驗保留 `experiments/k1337/` 作為「flawed-design preliminary」存證；commits 19f7036b（產出）+ 78291514（Codex FAIL verdict）
+
 ## 2026-06-13 K713 retained JSON mixed reproducible return metrics with legacy drawdown convention
 
 **問題**：`experiment_reconstruct_k713_tlt_allocation` 重建 K713 後，Sharpe / CAGR 幾乎能貼住 retained JSON，但標準財富曲線 MDD 系統性比 retained `mdd` 小約 1.6% 到 4.2%，顯示舊 artifact 很可能不是用同一套 drawdown 定義。

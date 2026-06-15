@@ -31146,7 +31146,7 @@
     "title": "K1337: 收益率曲線 steepener regime 預測股市 vol 與 sector rotation — 用 ^TNX-^IRX 或 ^TNX-^FVX 曲線斜率變化 dV/dt（steepening rate）而非斜率水平，檢定 fast-",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 572). Original: 收益率曲線 steepener regime 預測股市 vol 與 sector rotation — 用 ^TNX-^IRX 或 ^TNX-^FVX 曲線斜率變化 dV/dt（steepening rate）而非斜率水平，檢定 fast-steepening 期 SPY vol jump、XLF/XLU sector vol 差異（yfinance）（來源：Nuveen / LPL 2026 outlook 一致預期 steepener；多數研究只看 level 不看 dV/dt）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1337.py with signal.shift(1) + seed=42, (c) K1337_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "failed",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 572,
@@ -31154,7 +31154,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T00:00:06Z"
+    "created_at": "2026-06-15T00:00:06Z",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-15T02:13:21.575123+00:00",
+    "claim_session_id": "a1bfc7fae226",
+    "started_at": "2026-06-15T02:13:27.090862+00:00",
+    "completed_at": "2026-06-15T02:42:10.315028+00:00",
+    "result": "Codex review FAIL: expanding OLS has forward-label lookahead (training row j with fwd_var(H) sees returns j..j+H-1 — overlaps prediction date i when H>1). Other caveats: regime label uses raw dslope (not shift(1)); HAR baseline level-space vs augmented log-space stacking (model-class mismatch). 18/18 specs augmented WORSE under flawed design — NOT publishable. Direction matches K749/K871 NULL but requires K1337-v2 redesign before claim. Knowledge.json NOT written per K1259 gate. Files preserved at experiments/k1337/ as flawed-design preliminary. Commits 19f7036b + 78291514 on main."
   },
   {
     "id": "K1338",
@@ -31260,5 +31266,106 @@
       "autonomous-research"
     ],
     "created_at": "2026-06-15T00:00:10Z"
+  },
+  {
+    "id": "research_pre_fomc_implied_vol_drift",
+    "title": "研究 backlog fallback: Pre-FOMC implied vol 兩週前 drift 的可交易性",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Pre-FOMC implied vol 兩週前 drift 的可交易性 — 用 SPY ATM IV 代理（GARCH/realized 衍生）在 FOMC 前 14 / 7 / 3 / 0 日的 IV path，檢定 long-vol 進場時點與 post-announcement IV crush 的風險報酬比（yfinance + FOMC 日曆）（來源：iPresage 2026 + JFQA 2025-08 disagreement 模型；老議題但 2025 解釋升級） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "pre_fomc_implied_vol_drift",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T02:11:50+00:00"
+  },
+  {
+    "id": "research_move_vix_vol_regime",
+    "title": "研究 backlog fallback: MOVE-VIX 跨資產 vol 分歧 regime 與配置",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: MOVE-VIX 跨資產 vol 分歧 regime 與配置 — 用 ^MOVE（債券 implied vol）/^VIX 比率建跨資產 vol 分歧指標，檢定分歧期 60/40 股債組合 vs risk-parity 表現差異（yfinance；MOVE 從 2024 起 yfinance ticker `^MOVE` 可抓）（來源：BondBloxx 2026 outlook + LPL Research 2026；MOVE 創 2021 來新低是 2026 macro 焦點） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "move_vix_vol_regime",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T02:11:53+00:00"
+  },
+  {
+    "id": "research_volatility_skew_cross_section",
+    "title": "研究 backlog fallback: Volatility skew 作為股票借券費代理的 cross-section 預測",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Volatility skew 作為股票借券費代理的 cross-section 預測 — 用 ETF skew（SPY put-call IV spread 從歷史 GARCH 推）的横截面排序，檢驗高 skew 個股次月 returns underperformance（小範圍 ETF universe，yfinance；無 options 用 ML-based skew proxy）（來源：JFE 2025-26 Why does options market info predict stock returns；borrow fee 作為 limit-to-arbitrage 新解釋） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "volatility_skew_cross_section",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T02:11:53+00:00"
+  },
+  {
+    "id": "research_functional_role",
+    "title": "研究 backlog fallback: 多層次避險的 functional role 分工驗證",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 多層次避險的 functional role 分工驗證 — 把 TLT（First Responder long-duration）+ 趨勢跟隨（DBMF 代理 Second Responder）+ vol-target overlay 組合，跨 2020/2022/2025 三類危機檢驗各 responder 在不同 drawdown 形態下的貢獻分解（yfinance）（來源：Taylor & Francis 2025「trend-following + tail risk overlays」+ JPM 2025-26 multi-layered framework；practitione | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "functional_role",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T02:11:53+00:00"
+  },
+  {
+    "id": "research_google_trends_retail_attention_shock_vol_0050_et",
+    "title": "研究 backlog fallback: Google Trends retail attention shock → 個股 vol（台股版）— 抓「台積電」「0050」「ETF」「定期定額」Google Trends 週頻 z-score，檢定 attention spike 後 N 週 0050.TW / 個股 realized vol（yfinance + pytrends 免費）（來源：Review of Behavioral Finance 2026 retail investor 研究 + SJP 行為報告；retail crowding 是 2026 議題但中文圈缺數據）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Google Trends retail attention shock → 個股 vol（台股版）— 抓「台積電」「0050」「ETF」「定期定額」Google Trends 週頻 z-score，檢定 attention spike 後 N 週 0050.TW / 個股 realized vol（yfinance + pytrends 免費）（來源：Review of Behavioral Finance 2026 retail investor 研究 + SJP 行為報告；retail crowding 是 2026 議題但中文圈缺數據） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "google_trends_retail_attention_shock_vol_0050_et",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T02:11:55+00:00"
+  },
+  {
+    "id": "research_factor_etf_flows_factor_crash",
+    "title": "研究 backlog fallback: Factor ETF flows 擁擠度與 factor crash 風險",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Factor ETF flows 擁擠度與 factor crash 風險 — 用 MTUM/QUAL/USMV/VLUE 的 30d AUM 變化 z-score 建 crowding score，檢定 crowding 高峰後 factor reversal 與 vol spike 的時序關係（yfinance 算近似 flow = ΔAUM − price return）（來源：Journal of Index Investing 2026 + ETF Educator 2026；smart beta $1.1T 規模下 crowding risk 新題） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "factor_etf_flows_factor_crash",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T02:11:55+00:00"
+  },
+  {
+    "id": "K1337_v2_lookahead_fix",
+    "priority": 3,
+    "task_type": "experiment",
+    "title": "K1337-v2: redesign with j+H<i training cutoff + symmetric model-class baseline",
+    "description": "K1337 (yield curve dV/dt → SPY forward RV) Codex FAIL on v1 due to forward-label lookahead in expanding OLS (training row j has fwd_var(H) covering returns j..j+H-1, overlapping prediction date i when H>1). v2 fixes: (a) training cutoff j+H<i (drop last H-1 training rows), (b) regime label uses dslope.shift(1) before rolling-quantile classification, (c) augmented and HAR baseline both in log-variance space with same clipping, (d) rerun 18 specs (2 slope × 3 N × 3 H) + DM-HAC + stationary block bootstrap. Preserve experiments/k1337/ v1 as flawed-design preliminary. Output experiments/k1337_v2/. NULL direction expected (matches K749/K871) but must be validated under correct design before claim. Codex review required pre-knowledge.json.",
+    "status": "pending",
+    "source": "codex_review_failure_followup",
+    "created_at": "2026-06-15T10:45:00+08:00",
+    "parent_task_id": "K1337"
   }
 ]
