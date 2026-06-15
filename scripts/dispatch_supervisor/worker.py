@@ -47,6 +47,15 @@ CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "/Users/yhlai0911/.local/bin/claude")
 # Exit codes from `claude -p` that we recognise
 HANG_EXIT_CODES = {137, 142, 143}  # SIGKILL / SIGALRM / SIGTERM
 
+# Sentinel value `_run_one_attempt` returns when our own timeout fired and we
+# killed the child via _kill_pgid. Distinct from any legitimate POSIX status so
+# `_classify` can deterministically map it to "hang" regardless of how the
+# child raced with SIGTERM/SIGKILL. Fixes the Codex-review §10 #1 bug where a
+# negative wait()-return from a signal-killed child (e.g. -15 SIGTERM, -9
+# SIGKILL) was misclassified as `hard_failure` and triggered a retry that
+# violated the no-retry-on-hang contract.
+TIMEOUT_KILLED_SENTINEL = -1000
+
 # stderr/stdout regex classifiers
 _AUTH_RE = re.compile(r"(Not logged in|Please run /login|invalid_api_key|authentication)", re.I)
 _TRANSIENT_RE = re.compile(r"(529|Overloaded|ECONNRESET|ETIMEDOUT|Connection reset|rate.?limit)", re.I)
@@ -62,8 +71,24 @@ class WorkerResult:
     log_tail: str            # last ~2KB of combined stdout+stderr
 
 
+def _normalize_signal_exit(exit_code: int) -> int:
+    """`subprocess.Popen.wait()` returns negative N when child died from signal N.
+
+    Normalize to POSIX shell convention (128 + signum) so HANG_EXIT_CODES set
+    membership works: -15 SIGTERM → 143, -9 SIGKILL → 137, -14 SIGALRM → 142.
+    Positive codes pass through unchanged.
+    """
+    if exit_code is None:
+        return 1
+    if exit_code < 0:
+        return 128 + abs(exit_code)
+    return exit_code
+
+
 def _classify(exit_code: int, output: str) -> str:
     """Return one of: success | hang | auth | transient | hard_failure."""
+    if exit_code == TIMEOUT_KILLED_SENTINEL:
+        return "hang"
     if exit_code == 0:
         return "success"
     if exit_code in HANG_EXIT_CODES:
@@ -158,14 +183,21 @@ def _run_one_attempt(
     try:
         exit_code = proc.wait(timeout=timeout_s)
     except subprocess.TimeoutExpired:
+        # Codex-review §10 #1 fix: our own watchdog timeout fired. Whatever
+        # POSIX signal status we observe next (raw negative wait() return,
+        # 137 fallback if SIGKILL also raced), this MUST be classified as
+        # "hang" and short-circuit retry. Returning the sentinel makes the
+        # classification path single-source and impossible to misread.
         LOG.warning("worker attempt=%d timeout=%ds — SIGTERM→SIGKILL pgid=%d", attempt, timeout_s, pgid)
         _kill_pgid(pgid)
         try:
-            exit_code = proc.wait(timeout=GRACE_PERIOD_S + 5)
+            proc.wait(timeout=GRACE_PERIOD_S + 5)
         except subprocess.TimeoutExpired:
-            exit_code = 137  # treat as SIGKILL outcome
+            pass  # child stuck past SIGKILL grace — still a hang
+        duration = time.time() - started
+        return TIMEOUT_KILLED_SENTINEL, duration
     duration = time.time() - started
-    return exit_code, duration
+    return _normalize_signal_exit(exit_code), duration
 
 
 def run_worker(
@@ -222,8 +254,11 @@ def run_worker(
             )
 
         if category == "hang":
+            # Sanitize sentinel to canonical SIGKILL hang code before persisting:
+            # state file readers + alerts expect a real POSIX exit code, not -1000.
+            persisted_exit = 137 if exit_code == TIMEOUT_KILLED_SENTINEL else exit_code
             entry = state.record_completion(
-                exit_code=exit_code, outcome="killed_timeout", final_model=model,
+                exit_code=persisted_exit, outcome="killed_timeout", final_model=model,
                 path=state_path,
             )
             alerts.send_hang_alert(
@@ -232,7 +267,7 @@ def run_worker(
                 log_tail=log_tail, state_path=state_path,
             )
             return WorkerResult(
-                exit_code=exit_code, outcome="killed_timeout", final_model=model,
+                exit_code=persisted_exit, outcome="killed_timeout", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,
             )
 

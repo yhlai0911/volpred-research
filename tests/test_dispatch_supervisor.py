@@ -299,6 +299,174 @@ def test_supervisor_set_runtime_env_raises_soft_limit(monkeypatch) -> None:
     assert calls == [(resource.RLIMIT_NOFILE, (65536, 65536))]
 
 
+def test_classify_normalizes_negative_signal_codes() -> None:
+    # Codex-review §10 #1: signal-killed children return negative codes from
+    # subprocess.Popen.wait(); pre-fix `_classify` only checked positive codes
+    # so -15 (SIGTERM) was misclassified as hard_failure → unwanted retry.
+    # After the fix `_normalize_signal_exit` maps -N → 128+N before classify.
+    assert worker._normalize_signal_exit(-15) == 143
+    assert worker._normalize_signal_exit(-9) == 137
+    assert worker._normalize_signal_exit(-14) == 142
+    assert worker._normalize_signal_exit(0) == 0
+    assert worker._normalize_signal_exit(1) == 1
+    assert worker._normalize_signal_exit(None) == 1
+    assert worker._classify(worker._normalize_signal_exit(-15), "") == "hang"
+    assert worker._classify(worker._normalize_signal_exit(-9), "") == "hang"
+    assert worker._classify(worker._normalize_signal_exit(-14), "") == "hang"
+
+
+def test_classify_timeout_sentinel_is_hang() -> None:
+    # Belt-and-suspenders: even if our normalisation path was bypassed, the
+    # explicit sentinel `_run_one_attempt` returns on TimeoutExpired must
+    # classify as hang so the no-retry-on-hang contract holds.
+    assert worker._classify(worker.TIMEOUT_KILLED_SENTINEL, "") == "hang"
+    # Must NOT be misread as success despite being negative (sentinel uses
+    # -1000, far outside any real POSIX status range).
+    assert worker.TIMEOUT_KILLED_SENTINEL != 0
+
+
+def test_worker_timeout_path_short_circuits_retry(tmp_path: Path, monkeypatch) -> None:
+    """Real timeout path regression: signal-killed child must abort retry.
+
+    Pre-fix, after `_kill_pgid` the child's negative exit code (-15 / -9) was
+    classified as `hard_failure` → retry loop ran (worker.py:251-260 pre-fix).
+    Post-fix, `_run_one_attempt` returns TIMEOUT_KILLED_SENTINEL on
+    TimeoutExpired, which `_classify` maps to "hang" → record_completion
+    outcome=killed_timeout, alert sent, NO retry.
+    """
+    state_path = _tmp_state(tmp_path)
+    log_path = tmp_path / "worker.log"
+    attempts: list[int] = []
+    hang_alerts: list[dict] = []
+
+    def fake_run_one_attempt(**kwargs):
+        attempts.append(kwargs["attempt"])
+        log_path.write_text("timed out — SIGKILL'd by watchdog", encoding="utf-8")
+        # Simulate what real `_run_one_attempt` returns when our timeout fires
+        return worker.TIMEOUT_KILLED_SENTINEL, 12.0
+
+    monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
+    monkeypatch.setattr(
+        worker.alerts,
+        "send_hang_alert",
+        lambda **kwargs: hang_alerts.append(kwargs) or True,
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt",
+        log_path=log_path,
+        state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    assert result.outcome == "killed_timeout"
+    assert result.attempts == 1, "hang must NOT trigger retry"
+    assert attempts == [1]
+    assert len(hang_alerts) == 1
+    # Persisted exit code must be canonical SIGKILL hang code (137), not the
+    # internal sentinel — external observers/state readers see a real POSIX code.
+    assert result.exit_code == 137
+    # Note: record_completion no-ops if `current_job` is absent (the mocked
+    # `_run_one_attempt` skips `state.begin_fire`); WorkerResult.exit_code is
+    # the authoritative check for sentinel→137 sanitisation.
+
+
+def test_worker_signal_killed_outside_timeout_also_classified_as_hang(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """If the child dies from SIGTERM/SIGKILL/SIGALRM by external means (not
+    our own watchdog), `_run_one_attempt` still receives a negative wait()
+    return. `_normalize_signal_exit` converts to 128+signum so HANG_EXIT_CODES
+    set membership triggers and `_classify` returns "hang" → no retry.
+    """
+    state_path = _tmp_state(tmp_path)
+    log_path = tmp_path / "worker.log"
+    attempts: list[int] = []
+    hang_alerts: list[dict] = []
+
+    def fake_run_one_attempt(**kwargs):
+        attempts.append(kwargs["attempt"])
+        log_path.write_text("external SIGTERM (e.g. launchd kill)", encoding="utf-8")
+        # Externally signal-killed → negative is normalized at the boundary
+        return worker._normalize_signal_exit(-15), 7.0  # → 143 SIGTERM
+
+    monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
+    monkeypatch.setattr(
+        worker.alerts,
+        "send_hang_alert",
+        lambda **kwargs: hang_alerts.append(kwargs) or True,
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt",
+        log_path=log_path,
+        state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    assert result.outcome == "killed_timeout"
+    assert result.attempts == 1
+    assert attempts == [1]
+    assert len(hang_alerts) == 1
+    assert result.exit_code == 143  # not sentinel — normalized POSIX code
+
+
+def test_load_cron_expr_reads_schedule_field_first(tmp_path: Path) -> None:
+    """Codex-review §10 #6 fix: canonical field is `schedule`, not `cron`.
+
+    Pre-fix `load_cron_expr` only read `cron`; `volpred-hourly-dispatch` has
+    `"cron": null, "schedule": "7 * * * *"` so the supervisor silently fell
+    back to its hardcoded default — source drift latent.
+    """
+    sched_path = tmp_path / "runtime_schedules.json"
+    sched_path.write_text(
+        json.dumps(
+            {
+                "cron_jobs": [
+                    {
+                        "id": "volpred-hourly-dispatch",
+                        "cron": None,
+                        "schedule": "*/15 * * * *",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert scheduler.load_cron_expr(schedules_path=sched_path) == "*/15 * * * *"
+
+
+def test_load_cron_expr_falls_back_to_legacy_cron_field(tmp_path: Path) -> None:
+    """Legacy schedules with only `cron` populated still work."""
+    sched_path = tmp_path / "runtime_schedules.json"
+    sched_path.write_text(
+        json.dumps(
+            {
+                "cron_jobs": [
+                    {"id": "volpred-hourly-dispatch", "cron": "5 * * * *"}
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert scheduler.load_cron_expr(schedules_path=sched_path) == "5 * * * *"
+
+
+def test_load_cron_expr_returns_fallback_when_both_fields_empty(tmp_path: Path) -> None:
+    sched_path = tmp_path / "runtime_schedules.json"
+    sched_path.write_text(
+        json.dumps(
+            {
+                "cron_jobs": [
+                    {"id": "volpred-hourly-dispatch", "cron": None, "schedule": None}
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert scheduler.load_cron_expr(schedules_path=sched_path) == scheduler.FALLBACK_CRON
+
+
 def test_cli_unblock_auth_and_status(tmp_path: Path, capsys) -> None:
     state_path = _tmp_state(tmp_path)
     state.set_auth_blocked(True, path=state_path)

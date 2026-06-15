@@ -46,9 +46,17 @@ SCHEDULE_ID = "volpred-hourly-dispatch"
 
 
 def load_cron_expr(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = SCHEDULE_ID) -> str:
-    """Read `cron` field for the named schedule. Fallback to FALLBACK_CRON on any failure.
+    """Read the schedule cron expression for the named schedule.
 
-    Looks in `cron_jobs[]` (canonical). Also accepts legacy `items[]` shape.
+    Codex-review §10 #6 fix: canonical field is `schedule` (the `cron` field
+    is `null` for `volpred-hourly-dispatch` because legacy scheduling lived
+    in the LaunchAgent plist — see config/runtime_schedules.json). Reading
+    only `cron` worked by coincidence (fallback `7 * * * *` matched), but if
+    ops bumped `schedule` in config the supervisor would silently ignore it.
+
+    Tries `schedule` first (canonical), falls back to `cron` (legacy),
+    then FALLBACK_CRON. Looks in `cron_jobs[]` (canonical) and legacy
+    `items[]`.
     """
     try:
         data = json.loads(schedules_path.read_text(encoding="utf-8"))
@@ -62,11 +70,15 @@ def load_cron_expr(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = 
         for item in entries:
             if not isinstance(item, dict):
                 continue
-            if item.get("id") == schedule_id:
-                cron_expr = item.get("cron")
+            if item.get("id") != schedule_id:
+                continue
+            for field in ("schedule", "cron"):
+                cron_expr = item.get(field)
                 if isinstance(cron_expr, str) and cron_expr.strip():
+                    LOG.debug("schedule id=%s using field=%r expr=%r",
+                              schedule_id, field, cron_expr.strip())
                     return cron_expr.strip()
-    LOG.info("schedule id=%s has no cron field; supervisor using fallback %r",
+    LOG.info("schedule id=%s has no schedule/cron field; supervisor using fallback %r",
              schedule_id, FALLBACK_CRON)
     return FALLBACK_CRON
 

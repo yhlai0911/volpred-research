@@ -195,3 +195,34 @@ Review 抓到 7 個真 bug（**這就是它停 18 天的真因：本來就還沒
 **狀態**：Deliverable 5 = review done(FAIL)。下一步 = 修這 7 項 → 重 review → 過了才 Deliverable 6 shadow。Phase A 已止 alert noise，**平台無立即風險**，可從容做。**email-11745 task 留 in_progress，close email 等 supervisor 上線。**
 
 *Updated 2026-06-15 台灣時間 — Codex review FAIL with 7 must-fix; logged for next scoped fix session.*
+
+### Deliverable 5 修整進度（hourly-12 fire，2026-06-15 12:07 台灣時間）
+
+**完成 fix #1 + #6 / 7**（剩 5 個給後續 fires；每 fire 5-7 個 50min cap 內收 1-2 個）：
+
+- **#1 致命 — signal exit 分類**（`scripts/dispatch_supervisor/worker.py`）：
+  - 新增 `TIMEOUT_KILLED_SENTINEL = -1000` — `_run_one_attempt` 在 `subprocess.TimeoutExpired` 路徑無條件回此值（不再依賴從 `_kill_pgid` 後的 `proc.wait()` 解讀），`_classify` 認 sentinel 直接回 `hang`
+  - 新增 `_normalize_signal_exit()` — 正常 wait() 收到負號（外部 SIGTERM/SIGKILL）統一 +128+signum 落入 `HANG_EXIT_CODES = {137, 142, 143}`
+  - hang 分支寫 state 前把 sentinel 轉成 137（canonical SIGKILL），external observers 不會看到 `-1000`
+  - **結果**：watchdog timeout 或外部 signal kill 都正確走 `killed_timeout` 路徑、無 retry、發 hang alert
+- **#6 trivial — schedule 欄位 source drift**（`scripts/dispatch_supervisor/scheduler.py`）：
+  - `load_cron_expr` 先讀 `schedule`（canonical），再讀 `cron`（legacy），再 fallback
+  - 修正 `config/runtime_schedules.json` 的 `volpred-hourly-dispatch.cron = null` 但 `.schedule = "7 * * * *"` 的情況：ops 改 `schedule` supervisor 真會接到
+- **Regression tests**（`tests/test_dispatch_supervisor.py` 新增 7 test）：
+  - `test_classify_normalizes_negative_signal_codes` — -15/-9/-14 → 143/137/142、全 `hang`
+  - `test_classify_timeout_sentinel_is_hang` — sentinel 路徑 hang
+  - `test_worker_timeout_path_short_circuits_retry` — TimeoutExpired → 1 attempt + 1 hang alert + result.exit_code=137（非 -1000）
+  - `test_worker_signal_killed_outside_timeout_also_classified_as_hang` — 外部 SIGTERM 走 normalize 路徑、無 retry
+  - `test_load_cron_expr_reads_schedule_field_first` — canonical `schedule` 欄位讀對
+  - `test_load_cron_expr_falls_back_to_legacy_cron_field` — legacy `cron` 還在
+  - `test_load_cron_expr_returns_fallback_when_both_fields_empty` — defensive
+- **pytest**: 18/18 PASS（11 既有 + 7 新加 regression）
+
+**剩餘 5 個 must-fix（後續 hourly fires 推進）**：#2 PID-reuse 身分 / #3 restart orphan cleanup / #4 state 非 atomic / #5 fire claim 非 atomic / #7 broad except 吞例外。
+
+**檔案改動**：
+- `scripts/dispatch_supervisor/worker.py` — sentinel + normalize + sanitise hang exit code
+- `scripts/dispatch_supervisor/scheduler.py` — schedule field priority
+- `tests/test_dispatch_supervisor.py` — 7 regression tests
+
+*Updated 2026-06-15 12:25 台灣時間 by hourly-12 fire — Deliverable 5 fix #1 + #6 / 7 landed (致命 + trivial); 5 remaining for future fires.*
