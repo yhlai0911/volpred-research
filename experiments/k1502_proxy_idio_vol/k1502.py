@@ -9,7 +9,7 @@ All forecasting features are explicit lag-1 values. A row dated t predicts
 the idiosyncratic variance observed on t using information through t-1 only.
 
 Data:
-  - FINRA CNMS daily short-sale volume files, 2024-01-02..2026-06-12.
+  - FINRA CNMS daily short-sale volume files, 2023-01-03..2026-06-12.
   - yfinance daily OHLC for retail-tilted tickers plus SPY.
 
 This is a reduced-form public-data pilot. FINRA short-sale volume is not true

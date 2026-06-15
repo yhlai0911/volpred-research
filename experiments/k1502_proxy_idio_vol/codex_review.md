@@ -1,4 +1,4 @@
-# Codex Review — K1501 FINRA off-exchange proxy -> idiosyncratic volatility
+# Codex Review — K1502 FINRA off-exchange proxy -> idiosyncratic volatility
 
 VERDICT: CONDITIONAL_PASS
 
@@ -6,9 +6,9 @@ Condition: results are valid only as a **FINRA public off-exchange / short-volum
 
 ## Scope Reviewed
 
-- `experiments/k1501_proxy_idio_vol/k1501.py`
-- `experiments/k1501_proxy_idio_vol/k1501_results.json`
-- `experiments/k1501_proxy_idio_vol/README.md`
+- `experiments/k1502_proxy_idio_vol/k1502.py`
+- `experiments/k1502_proxy_idio_vol/k1502_results.json`
+- `experiments/k1502_proxy_idio_vol/README.md`
 
 ## Checks
 
