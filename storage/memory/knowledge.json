@@ -34440,5 +34440,29 @@
       "Ho, Lee, and Tsai (2023) competing hypotheses on Samuelson effect",
       "CME Rulebook Chapter 220 Henry Hub Natural Gas Futures"
     ]
+  },
+  {
+    "item_id": "a753935d",
+    "category": "paper_review",
+    "verdict": "PASS",
+    "experiment_id": "K491",
+    "experiment_path": "experiments/k491",
+    "experiment_script": "experiments/k491/k491_persistence_law.py",
+    "k_id": "K491",
+    "article_id": "mile_bf13d810",
+    "reviewer": "Codex CLI 0.135 (gpt-5.4)",
+    "reviewer_source": "codex_review",
+    "codex_review_verdict": "PASS",
+    "content": "Codex 24h-rule review of mile_bf13d810 (14 cross-asset GJR-GARCH persistence). VERDICT PASS — 6 dimensions all clean: (A) descriptive in-sample only no lookahead, (B) persistence formula α+γ/2+β correct, (C) Hillebrand paired t-test correct, (D) KW 4-group classification consistent with code, (E) no DM/Harvey overclaim, (F) numbers reproduce from results.json (mean 0.9802±0.0141, gap +0.0336 t=5.03 p=0.0002, KW p=0.062, SPY-QQQ ρ=0.835). Article scope properly bounded — limitations section explicit on in-sample MLE, no Bonferroni, 'universal law' = phenomenon description not physical constant. Review report: storage/paper_reviews/mile_bf13d810_codex_review.md",
+    "evidence": [
+      "experiments/k491/k491_persistence_law.py:31 (descriptive only)",
+      "experiments/k491/k491_persistence_law.py:183 (persistence formula)",
+      "experiments/k491/k491_persistence_law.py:516,631 (Hillebrand paired t)",
+      "experiments/k491/k491_persistence_law.py:389,431 (KW 4-group)",
+      "experiments/k491/k491_persistence_law_results.json:600,678,694,3535",
+      "storage/paper_reviews/mile_bf13d810_codex_review.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-06-16T04:15:44.697240"
   }
 ]

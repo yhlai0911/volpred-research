@@ -31700,7 +31700,7 @@
     "title": "Paper review (Codex 24h-rule): 14 個跨市場資產的波動率慣性幾乎一樣高：GJR-GARCH persistence 均值 0.9802",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_bf13d810 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_bf13d810",
@@ -31709,7 +31709,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-15T15:08:12+00:00"
+    "created_at": "2026-06-15T15:08:12+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-15T20:08:25.655865+00:00",
+    "claim_session_id": "1c73993d24bd",
+    "started_at": "2026-06-15T20:08:33.391539+00:00",
+    "completed_at": "2026-06-15T20:15:52.176983+00:00",
+    "result": "Codex 24h-rule review PASS — 6 dimensions all clean (lookahead/persistence formula/Hillebrand t-test/KW 4-group/no overclaim/numbers reproduce). Report storage/paper_reviews/mile_bf13d810_codex_review.md, knowledge.json item_id=a753935d (verdict=PASS, K491 provenance + Codex reviewer)."
   },
   {
     "id": "paper_review_mile_624871ea",
