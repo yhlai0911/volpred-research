@@ -44,6 +44,7 @@ from __future__ import annotations
 import fcntl
 import json
 import os
+import tempfile
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -75,12 +76,51 @@ def _empty_state() -> dict[str, Any]:
     }
 
 
+def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
+    """Write JSON atomically: temp file in same dir → fsync → os.replace.
+
+    Codex review fix #4 (2026-06-15): the previous seek/truncate/dump/fsync
+    pattern was non-atomic — a crash between truncate() and dump() leaves
+    the canonical state file empty, and a crash mid-dump leaves a partial
+    JSON that fails to parse on next boot (the `_empty_state()` fallback
+    would silently nuke completion history / auth_blocked flag / dedup).
+    os.replace() is POSIX-atomic on same filesystem; downstream readers
+    never observe a partially-written file.
+    """
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=f".{path.name}.tmp.",
+        dir=str(path.parent),
+    )
+    tmp_path = Path(tmp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_fh:
+            json.dump(data, tmp_fh, indent=2, ensure_ascii=False)
+            tmp_fh.flush()
+            os.fsync(tmp_fh.fileno())
+        os.replace(tmp_path, path)
+    except Exception:
+        # Best-effort cleanup; never mask the original error.
+        try:
+            tmp_path.unlink()
+        except FileNotFoundError:
+            pass
+        raise
+
+
 @contextmanager
 def _locked_state(path: Path = STATE_PATH) -> Iterator[tuple[Any, dict[str, Any]]]:
-    """Open state file under LOCK_EX, yield (fh, data). Writes on context exit."""
+    """Open state file under LOCK_EX, yield (fh, data). Writes atomically on context exit.
+
+    Lock is held on the original inode for the full read-modify-write cycle so
+    concurrent _locked_state() / read_state() callers serialize correctly. The
+    persist step goes through `_atomic_write_json` (temp file + os.replace) so
+    a crash mid-write never leaves a partial/empty canonical file. After
+    os.replace() the path points at a new inode — the next _locked_state()
+    call will open & lock that new inode, which is the intended semantics.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     if not path.exists():
-        path.write_text(json.dumps(_empty_state(), indent=2), encoding="utf-8")
+        _atomic_write_json(path, _empty_state())
     fh = path.open("r+", encoding="utf-8")
     fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
     try:
@@ -91,11 +131,7 @@ def _locked_state(path: Path = STATE_PATH) -> Iterator[tuple[Any, dict[str, Any]
         if not isinstance(data, dict) or data.get("version") != SCHEMA_VERSION:
             data = _empty_state()
         yield fh, data
-        fh.seek(0)
-        fh.truncate()
-        json.dump(data, fh, indent=2, ensure_ascii=False)
-        fh.flush()
-        os.fsync(fh.fileno())
+        _atomic_write_json(path, data)
     finally:
         fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         fh.close()

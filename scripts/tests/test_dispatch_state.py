@@ -191,3 +191,124 @@ def test_get_supervisor_age_seconds_when_alive(tmp_state: Path) -> None:
 
 def test_get_supervisor_age_seconds_none_when_unset(tmp_state: Path) -> None:
     assert st.get_supervisor_age_seconds(tmp_state) is None
+
+
+# ---------------------------------------------------------------------------
+# Codex review fix #4 — atomic write regression tests
+# ---------------------------------------------------------------------------
+
+
+def test_atomic_write_replaces_file_via_os_replace(tmp_state: Path, monkeypatch) -> None:
+    """Writes must go through os.replace() — not seek/truncate/dump on the
+    canonical file directly. Spy on os.replace to prove the new pattern.
+    """
+    import os as _os
+
+    calls: list[tuple[str, str]] = []
+    real_replace = _os.replace
+
+    def spy_replace(src, dst):
+        calls.append((str(src), str(dst)))
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(st.os, "replace", spy_replace)
+    st.mark_supervisor_started(tmp_state)
+    assert calls, "expected at least one os.replace() call from _atomic_write_json"
+    # last replace destination must be the canonical state path
+    assert calls[-1][1] == str(tmp_state)
+    # src is the temp file (same dir, name starts with .<canonical>.tmp.)
+    assert calls[-1][0].startswith(str(tmp_state.parent / f".{tmp_state.name}.tmp."))
+
+
+def test_write_failure_does_not_corrupt_existing_state(tmp_state: Path, monkeypatch) -> None:
+    """If os.replace() raises mid-write, the canonical file must still hold
+    the prior valid state (the old seek/truncate path would leave it empty).
+    """
+    # Bootstrap with a non-empty state so we can detect corruption.
+    st.mark_supervisor_started(tmp_state)
+    st.begin_fire(
+        pid=4242,
+        pgid=4242,
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/log",
+        path=tmp_state,
+    )
+    before = st.read_state(tmp_state)
+    assert before["current_job"]["pid"] == 4242
+
+    # Force os.replace to fail on the next write.
+    def boom(src, dst):
+        # Clean up the temp file so we don't leak it.
+        try:
+            Path(src).unlink()
+        except FileNotFoundError:
+            pass
+        raise OSError("simulated atomic-write failure")
+
+    monkeypatch.setattr(st.os, "replace", boom)
+
+    with pytest.raises(OSError):
+        st.heartbeat(tmp_state)
+
+    # Canonical state must be intact — neither empty nor partially written.
+    after = st.read_state(tmp_state)
+    assert after["current_job"] is not None
+    assert after["current_job"]["pid"] == 4242
+    # Heartbeat must NOT have updated because the write failed.
+    assert after["last_heartbeat_at"] == before["last_heartbeat_at"]
+
+
+def test_no_temp_files_left_on_success(tmp_state: Path) -> None:
+    """Successful writes must leave zero `.dispatch_state.json.tmp.*` siblings."""
+    st.mark_supervisor_started(tmp_state)
+    st.heartbeat(tmp_state)
+    st.heartbeat(tmp_state)
+    leftover = list(tmp_state.parent.glob(f".{tmp_state.name}.tmp.*"))
+    assert leftover == [], f"unexpected temp files: {leftover}"
+
+
+def test_no_temp_files_left_on_failure(tmp_state: Path, monkeypatch) -> None:
+    """Failed writes must also clean up their temp file (exception path)."""
+    st.mark_supervisor_started(tmp_state)
+
+    def boom(src, dst):
+        raise OSError("simulated atomic-write failure")
+
+    monkeypatch.setattr(st.os, "replace", boom)
+    with pytest.raises(OSError):
+        st.heartbeat(tmp_state)
+    leftover = list(tmp_state.parent.glob(f".{tmp_state.name}.tmp.*"))
+    assert leftover == [], f"temp files leaked after failure: {leftover}"
+
+
+def test_concurrent_writes_serialized_under_lock(tmp_state: Path) -> None:
+    """fcntl.LOCK_EX must still serialize writes after the atomic-write switch.
+
+    Spawn N threads each calling heartbeat() and verify the final file parses
+    cleanly with version intact — i.e. no torn writes and no schema reset.
+    """
+    import threading
+
+    st.mark_supervisor_started(tmp_state)
+    errors: list[BaseException] = []
+
+    def worker():
+        try:
+            for _ in range(20):
+                st.heartbeat(tmp_state)
+        except BaseException as exc:  # noqa: BLE001
+            errors.append(exc)
+
+    threads = [threading.Thread(target=worker) for _ in range(8)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert not errors, f"concurrent heartbeat raised: {errors}"
+    snap = st.read_state(tmp_state)
+    assert snap["version"] == st.SCHEMA_VERSION
+    assert snap["supervisor_started_at"] is not None
+    assert snap["last_heartbeat_at"] is not None

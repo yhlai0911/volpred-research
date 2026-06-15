@@ -226,3 +226,33 @@ Review 抓到 7 個真 bug（**這就是它停 18 天的真因：本來就還沒
 - `tests/test_dispatch_supervisor.py` — 7 regression tests
 
 *Updated 2026-06-15 12:25 台灣時間 by hourly-12 fire — Deliverable 5 fix #1 + #6 / 7 landed (致命 + trivial); 5 remaining for future fires.*
+
+### Deliverable 5 修整進度（interactive-20 fire，2026-06-15 ~20:10 台灣時間）
+
+**完成 fix #4 — state 非 atomic** (`scripts/dispatch_supervisor/state.py`)：
+
+- 新增 `_atomic_write_json(path, data)` helper — 走 `tempfile.mkstemp(dir=same parent)` → `fdopen` write JSON → `flush + fsync` → `os.replace(tmp, canonical)`（POSIX-atomic on same fs）；exception 路徑保證清掉 temp file
+- `_locked_state()` context manager 寫回階段：**移除** `fh.seek(0) / fh.truncate() / json.dump(fh) / fsync`（torn-write 路徑）→ **改用** `_atomic_write_json(path, data)`；lock 仍持有舊 inode 至 unlock 後 close，確保 read-modify-write 全程 serialize
+- 既有 `_empty_state()` bootstrap path 同步改走 `_atomic_write_json`（一致性 + 同樣 crash-safe）
+
+**為何符合 Codex review #4 修整要求**：
+- 違反 plan §7（state file corruption mitigation）的 `fcntl.LOCK_EX + atomic rename(os.replace)` 承諾已恢復
+- crash 在 truncate 後 dump 前 → 舊版會留空檔；新版 canonical 仍指向舊 inode 全內容
+- crash 在 dump 中途 → 舊版會留 partial JSON（下次 boot 走 `_empty_state()` fallback **silently nuke** completion history / auth_blocked / dedup state）；新版 partial 內容只在 temp file，os.replace 沒跑就 canonical 不動
+
+**Regression tests**（`scripts/tests/test_dispatch_state.py` 新增 5 test）：
+- `test_atomic_write_replaces_file_via_os_replace` — monkeypatch `os.replace` spy 驗證確實走新 pattern + temp file name + dest path 對
+- `test_write_failure_does_not_corrupt_existing_state` — 注入 `os.replace` raise OSError；驗證 canonical 仍保留 prior `current_job.pid=4242`、`last_heartbeat_at` 未被推進（rollback 完整）
+- `test_no_temp_files_left_on_success` — 連續 heartbeat 後驗證無 `.dispatch_state.json.tmp.*` siblings
+- `test_no_temp_files_left_on_failure` — `os.replace` raise 後 temp file cleanup 也乾淨（exception path 不漏）
+- `test_concurrent_writes_serialized_under_lock` — 8 threads × 20 heartbeat 並發；驗證 `fcntl.LOCK_EX` 在 atomic write 切換後仍 serialize（無 torn JSON、schema version 不被 reset）
+
+**pytest**: `scripts/tests/test_dispatch_state.py` + `tests/test_dispatch_supervisor.py` 39/39 PASS（既有 16 + atomic 5 + supervisor 11 + classifier/schedule 7）。
+
+**剩餘 4 個 must-fix**：#2 PID-reuse 身分 / #3 restart orphan cleanup / #5 fire claim 非 atomic / #7 broad except 吞例外。
+
+**檔案改動**：
+- `scripts/dispatch_supervisor/state.py` — `_atomic_write_json` helper + `_locked_state` 走 atomic rename
+- `scripts/tests/test_dispatch_state.py` — 5 regression tests
+
+*Updated 2026-06-15 ~20:10 台灣時間 by interactive-20 main thread (email-11745-9834c9 follow-on) — Deliverable 5 fix #4 (state atomic write) landed; 4 must-fix remaining.*
