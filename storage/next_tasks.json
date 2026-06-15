@@ -31732,7 +31732,7 @@
     "title": "Paper review (Codex 24h-rule): 模型看起來更聰明，為什麼 7 年後還是沒贏老方法？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b97c5c33 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_b97c5c33",
@@ -31741,7 +31741,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-15T15:08:12+00:00"
+    "created_at": "2026-06-15T15:08:12+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-15T17:09:22.553416+00:00",
+    "claim_session_id": "5a37492bd7bb",
+    "started_at": "2026-06-15T17:09:28.265307+00:00",
+    "completed_at": "2026-06-15T17:11:30.619238+00:00",
+    "result": "Codex 24h-rule review FAIL — 三模型 (GARCH/GJR/GAS-t) 命名與 QLIKE/VaR 數字錯配：文章把 GJR 數字 (SPY QLIKE 1.496, QQQ 1.492, VaR 2.02%) 標成「老方法」，但老方法應為 GARCH (1.514/1.501/2.30%)。GJR 是文章前段定義的「會多看下跌衝擊的版本」。Followup article_rewrite_mile_b97c5c33_1781578800 P1 已建。Review report: storage/paper_review_history/review_mile_b97c5c33_20260616_0111.md"
   },
   {
     "id": "research_factor_max",
@@ -31802,5 +31808,24 @@
     "started_at": "2026-06-15T15:35:20.861702+00:00",
     "completed_at": "2026-06-15T15:49:31.715340+00:00",
     "result": "Rewrote mile_48c8328b from corrected K189 JSON: fixed DM sign/stale numbers, corrected conclusion to attention loses EWMA but beats this GJR in 5/6 Bonferroni. Regenerated corrected K189 charts, rebuilt feed index, anti_ai_gate PASS, JSON validation PASS. publish_draft full --sync-supabase hung at feed-sync, so synced this article via single sync_article and read-back verified title/status/content hash."
+  },
+  {
+    "id": "article_rewrite_mile_b97c5c33_1781578800",
+    "title": "Article rewrite: mile_b97c5c33 GAS-t vs GARCH — 模型命名與 QLIKE/VaR 數字錯配，三組 (GARCH/GJR/GAS-t) 對應不對",
+    "description": "Per paper_review_mile_b97c5c33 FAIL verdict (storage/paper_review_history/review_mile_b97c5c33_20260616_0111.md): 文章把 GJR-GARCH 的 QLIKE (SPY 1.496, QQQ 1.492) 和 VaR (SPY 2.02%) 標成「老方法」，但真正老方法 GARCH 數字是 1.514 / 1.501 / 2.30%。三模型對照串錯。重寫需正確區分三者，並把結論改成「新版本 GAS-t 沒贏老方法 GARCH 也沒贏 GJR；GJR 反而是 SPY/QQQ 上最佳 QLIKE，但 DM-test 過不了 0.005 門檻」。讀 experiments/K1038/k1038_results.json 真值；保留 published_at 與 mile id；hash-based sync 自動更新。Anti-AI-style gate 強制。",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "paper_review_fail",
+    "article_id": "mile_b97c5c33",
+    "tags": [
+      "article-rewrite",
+      "paper-review-fail",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T01:15:00+00:00",
+    "linked_task_ids": [
+      "paper_review_mile_b97c5c33"
+    ]
   }
 ]
