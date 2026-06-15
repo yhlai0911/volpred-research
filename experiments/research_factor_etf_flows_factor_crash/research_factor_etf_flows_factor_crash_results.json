@@ -1,0 +1,209 @@
+{
+  "experiment_id": "research_factor_etf_flows_factor_crash",
+  "seed": 42,
+  "completed_at_utc": "2026-06-15T11:59:00.997327+00:00",
+  "data": {
+    "source": "yfinance auto_adjust=True daily close/volume",
+    "start": "2013-01-01",
+    "end_exclusive": "2026-06-15",
+    "actual_last_date": "2026-06-12",
+    "factor_etfs": [
+      "MTUM",
+      "QUAL",
+      "USMV",
+      "VLUE"
+    ],
+    "controls": [
+      "SPY",
+      "^VIX"
+    ],
+    "flow_data_limitation": "Historical AUM/shares outstanding unavailable or incomplete for most ETFs; proxy uses signed dollar-volume pressure, not true AUM flow."
+  },
+  "method": {
+    "proxy": "30d sum(sign(ETF excess return vs SPY) * close * volume) / 252d average dollar volume, rolling z-scored per ETF then averaged.",
+    "oos_start": "2020-01-02",
+    "feature_lag": "crowding_z_l1 = crowding_z.shift(1); all controls also shift(1)",
+    "targets": {
+      "reversal": "forward sum of equal-weight factor ETF excess return vs SPY",
+      "vol_spike": "forward annualized variance of equal-weight factor ETF basket return"
+    },
+    "controls": "21d factor excess return, 21/63d factor RV, 21/63d SPY RV, VIX log level, VIX 5d change",
+    "primary_tests": 6,
+    "bonferroni_alpha": 0.008333333333333333,
+    "hac_maxlags": "horizon + 5"
+  },
+  "primary_results": [
+    {
+      "outcome": "reversal",
+      "horizon": 5,
+      "n_oos": 1607,
+      "coefficient": 4.876273053627522e-06,
+      "hac_t": 0.017274927470201873,
+      "hac_p_two_sided": 0.9862172875992833,
+      "expected_sign": "negative",
+      "direction_supportive": false,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "outcome": "reversal",
+      "horizon": 21,
+      "n_oos": 1607,
+      "coefficient": -0.0006772776435122655,
+      "hac_t": -0.7105239885243417,
+      "hac_p_two_sided": 0.4773792605684125,
+      "expected_sign": "negative",
+      "direction_supportive": true,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "outcome": "reversal",
+      "horizon": 63,
+      "n_oos": 1607,
+      "coefficient": -0.001545071157860622,
+      "hac_t": -0.6857963943086941,
+      "hac_p_two_sided": 0.492841510372067,
+      "expected_sign": "negative",
+      "direction_supportive": true,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "outcome": "vol_spike",
+      "horizon": 5,
+      "n_oos": 1607,
+      "coefficient": -0.003753434231268522,
+      "hac_t": -1.281610383978092,
+      "hac_p_two_sided": 0.19997935570416414,
+      "expected_sign": "positive",
+      "direction_supportive": false,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "outcome": "vol_spike",
+      "horizon": 21,
+      "n_oos": 1607,
+      "coefficient": -0.006837118275982915,
+      "hac_t": -1.5291469197294163,
+      "hac_p_two_sided": 0.12622802595407948,
+      "expected_sign": "positive",
+      "direction_supportive": false,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "outcome": "vol_spike",
+      "horizon": 63,
+      "n_oos": 1607,
+      "coefficient": -0.005234550240314138,
+      "hac_t": -1.1432358265009483,
+      "hac_p_two_sided": 0.2529406911385341,
+      "expected_sign": "positive",
+      "direction_supportive": false,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    }
+  ],
+  "event_study": {
+    "n_events": 19,
+    "cooldown_days": 21,
+    "horizons": {
+      "5": {
+        "return_event_minus_non_event": {
+          "diff": -0.000171160915324738,
+          "ci95": [
+            -0.004168038272768757,
+            0.0038629441640800587
+          ],
+          "p_gt_0": 0.5224775224775224,
+          "p_lt_0": 0.4785214785214785
+        },
+        "variance_event_minus_non_event": {
+          "diff": -0.0008406427538619268,
+          "ci95": [
+            -0.09040871476559452,
+            0.03746025723423319
+          ],
+          "p_gt_0": 0.4125874125874126,
+          "p_lt_0": 0.5884115884115884
+        }
+      },
+      "21": {
+        "return_event_minus_non_event": {
+          "diff": 0.002331650920840069,
+          "ci95": [
+            -0.005036031325761825,
+            0.009309490713052964
+          ],
+          "p_gt_0": 0.26873126873126874,
+          "p_lt_0": 0.7322677322677322
+        },
+        "variance_event_minus_non_event": {
+          "diff": -0.006947374054469831,
+          "ci95": [
+            -0.06374748415267716,
+            0.025747218943833583
+          ],
+          "p_gt_0": 0.5324675324675324,
+          "p_lt_0": 0.46853146853146854
+        }
+      },
+      "63": {
+        "return_event_minus_non_event": {
+          "diff": 0.0006731874683537577,
+          "ci95": [
+            -0.013799427480371232,
+            0.014358681313556656
+          ],
+          "p_gt_0": 0.4515484515484515,
+          "p_lt_0": 0.5494505494505495
+        },
+        "variance_event_minus_non_event": {
+          "diff": -0.0050725486882032475,
+          "ci95": [
+            -0.04131158996233135,
+            0.018621001026119997
+          ],
+          "p_gt_0": 0.5744255744255744,
+          "p_lt_0": 0.42657342657342656
+        }
+      }
+    }
+  },
+  "verdict": "NULL",
+  "verdict_rationale": {
+    "any_bonferroni_pass": false,
+    "any_conditional_pass": false,
+    "supportive_cells": 2
+  },
+  "literature_sources": [
+    {
+      "name": "Smart beta, smarter flows, Journal of Empirical Finance, 2025",
+      "url": "https://ideas.repec.org/a/eee/empfin/v81y2025ics0927539825000027.html"
+    },
+    {
+      "name": "Competition for Attention in the ETF Space, Review of Financial Studies",
+      "url": "https://academic.oup.com/rfs/advance-article/doi/10.1093/rfs/hhac048/6655702"
+    },
+    {
+      "name": "The Smart Beta Mirage, 2025",
+      "url": "https://ira.lib.polyu.edu.hk/bitstream/10397/102732/1/Huang_Smart_Beta_Mirage.pdf"
+    },
+    {
+      "name": "iShares ETF and ETP Market Trends Q1 2026",
+      "url": "https://www.ishares.com/us/insights/inside-the-market/2026-etf-market-trends-and-flows"
+    }
+  ],
+  "figures": [
+    "fig_primary_hac_tests.png",
+    "fig_crowding_proxy_events.png"
+  ],
+  "caveats": [
+    "This is not a true AUM-flow study; historical ETF shares/AUM were unavailable for most tickers through yfinance.",
+    "Signed dollar-volume pressure mixes investor flow, liquidity demand, and price impact.",
+    "The ETF set is narrow: MTUM/QUAL/USMV/VLUE only.",
+    "Regression study is not a tradable strategy backtest."
+  ]
+}
