@@ -1,0 +1,149 @@
+{
+  "k_id": "K1335",
+  "experiment_id": "K1335",
+  "date_run": "2026-06-15",
+  "data": {
+    "start": "2010-01-01",
+    "end": "2026-06-13",
+    "n_obs_full": 4136,
+    "n_obs_is": 2013,
+    "n_obs_oos": 2123,
+    "source": "yfinance",
+    "tickers": [
+      "SPY",
+      "^VIX",
+      "^VIX3M"
+    ]
+  },
+  "is_period": {
+    "start": "2010-01-01",
+    "end": "2017-12-31"
+  },
+  "oos_period": {
+    "start": "2018-01-01",
+    "end": "2026-06-13"
+  },
+  "tuning": {
+    "vix_level_grid": [
+      18.0,
+      20.0,
+      22.0,
+      25.0
+    ],
+    "vix_level_is_sharpe": {
+      "18.0": 0.4811943092848912,
+      "20.0": 0.6924833208741522,
+      "22.0": 0.9212746915089067,
+      "25.0": 0.9063342794376396
+    },
+    "vix_level_tuned_threshold": 22.0
+  },
+  "strategies": {
+    "buy_hold": {
+      "ann_ret": 0.16762103470822165,
+      "ann_vol": 0.19202515701890144,
+      "sharpe": 0.8072694044342054,
+      "mdd": -0.33717269642655867,
+      "calmar": 0.49713703536707354,
+      "turnover": 0.0,
+      "var95": -0.017735732829873608,
+      "es95": -0.02915384316861195,
+      "hit_rate": 0.5544041450777202,
+      "n_obs": 2123
+    },
+    "vix_level": {
+      "ann_ret": 0.06120587808493494,
+      "ann_vol": 0.11083499951146727,
+      "sharpe": 0.5360480468409202,
+      "mdd": -0.2304281180348715,
+      "calmar": 0.26561809646717,
+      "turnover": 14.718794159208668,
+      "var95": -0.012480849872042954,
+      "es95": -0.018680797806039286,
+      "hit_rate": 0.4036740461610928,
+      "n_obs": 2123,
+      "threshold": 22.0
+    },
+    "slope_1_0": {
+      "ann_ret": 0.12106519010829087,
+      "ann_vol": 0.14372286183103555,
+      "sharpe": 0.7953168383137365,
+      "mdd": -0.30116687850428825,
+      "calmar": 0.4019870668034534,
+      "turnover": 13.294394724446539,
+      "var95": -0.015261058865259369,
+      "es95": -0.02238785457579393,
+      "hit_rate": 0.504003768252473,
+      "n_obs": 2123,
+      "slope_threshold": 1.0
+    },
+    "slope_0_95": {
+      "ann_ret": 0.08795415148714025,
+      "ann_vol": 0.12424092495855424,
+      "sharpe": 0.6786258941290333,
+      "mdd": -0.2902264043819841,
+      "calmar": 0.3030535821660754,
+      "turnover": 22.790390956194067,
+      "var95": -0.01287134078377442,
+      "es95": -0.020023686701813335,
+      "hit_rate": 0.4276966556759303,
+      "n_obs": 2123,
+      "slope_threshold": 0.95
+    },
+    "slope_1_05": {
+      "ann_ret": 0.1545440645502516,
+      "ann_vol": 0.1567888453814415,
+      "sharpe": 0.9168158546344082,
+      "mdd": -0.24496409798276852,
+      "calmar": 0.6308845492988229,
+      "turnover": 4.985398021667452,
+      "var95": -0.016587456088092454,
+      "es95": -0.024235022219444676,
+      "hit_rate": 0.5355628827131418,
+      "n_obs": 2123,
+      "slope_threshold": 1.05
+    }
+  },
+  "best_slope_name": "slope_1_05",
+  "comparison": {
+    "headline_slope_strategy": "slope_1_05",
+    "slope_vs_level_sharpe_diff_oos": 0.38076780779348796,
+    "slope_vs_level_mdd_diff_oos": -0.014535979947897015,
+    "sharpe_diff_bootstrap_95ci": [
+      -0.07641757806404137,
+      0.8790219242200726
+    ],
+    "sharpe_diff_p_value_two_sided": 0.096,
+    "bootstrap": {
+      "obs_diff": 0.38076780779348796,
+      "ci_lo": -0.07641757806404137,
+      "ci_hi": 0.8790219242200726,
+      "p_value_two_sided": 0.096,
+      "n_iter": 2000,
+      "mean_block": 5.0,
+      "seed": 42
+    }
+  },
+  "config": {
+    "tc_per_side": 0.001,
+    "seed": 42,
+    "rf": 0.0,
+    "weight_cap": 1.0,
+    "lag": "shift(1) on signal; ret_t = close_t/close_{t-1}-1"
+  },
+  "verdict": "PENDING_REVIEW",
+  "agent_proposed_verdict": "PASS",
+  "verdict_reason": "slope Sharpe 0.917 >= level 0.536; MDD diff -0.015; bootstrap p=0.096<0.10",
+  "reviewer": "PENDING_REVIEW (awaiting Codex review per K1259 protocol)",
+  "monetization_angle": "If PASS, candidate `slope_vt_overlay_v1` for strategy_lifecycle pipeline; differentiated vs incumbent VIX-level VTs.",
+  "files": {
+    "script": "experiments/K1335/K1335.py",
+    "readme": "experiments/K1335/README.md",
+    "figs": [
+      "experiments/K1335/K1335_fig_equity.png",
+      "experiments/K1335/K1335_fig_slope_dist.png",
+      "experiments/K1335/K1335_fig_drawdown.png",
+      "experiments/K1335/K1335_fig_regime_returns.png"
+    ]
+  }
+}
