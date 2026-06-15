@@ -1,0 +1,305 @@
+{
+  "experiment_id": "K1343_bdc_pressure_private_credit_vol_signal",
+  "seed": 42,
+  "completed_at_utc": "2026-06-15T10:50:58.535119+00:00",
+  "data": {
+    "source": "yfinance auto_adjust=True daily close",
+    "start": "2013-01-01",
+    "end_exclusive": "2026-06-15",
+    "actual_last_date": "2026-06-12",
+    "bdc_proxy_tickers": [
+      "BIZD",
+      "ARCC",
+      "BXSL",
+      "OBDC",
+      "FSK"
+    ],
+    "targets": [
+      "HYG",
+      "KRE",
+      "IWM"
+    ],
+    "controls": [
+      "SPY",
+      "^VIX"
+    ],
+    "bdc_basket_rule": "Equal-weight daily log return over available BDC proxy tickers; require at least 2 members.",
+    "bdc_member_count_oos": {
+      "min": 0,
+      "median": 5.0,
+      "max": 5
+    }
+  },
+  "split": {
+    "oos_start": "2021-01-04",
+    "min_train_rows": 504
+  },
+  "lookahead_controls": {
+    "feature_lag": "All predictive features enter as *_l1 via explicit .shift(1).",
+    "forward_label_training_cutoff": "For horizon H, expanding OLS only trains on rows with target_end_pos < forecast_pos.",
+    "target_definition": "Forward variance at row t uses returns t..t+H-1; feature row uses information through t-1."
+  },
+  "multiple_testing": {
+    "n_tests": 9,
+    "bonferroni_alpha": 0.005555555555555556
+  },
+  "bootstrap": {
+    "method": "moving block bootstrap of OOS loss diff",
+    "block_size": 21,
+    "reps": 1000
+  },
+  "forecast_results": [
+    {
+      "target": "HYG",
+      "horizon": 5,
+      "n_oos": 1354,
+      "baseline_qlike": 0.4691770459236799,
+      "augmented_qlike": 0.48226503015403294,
+      "qlike_improvement_pct": -2.7895619242382983,
+      "dm_t": -0.9150503455403313,
+      "dm_p_two_sided": 0.36016520056496926,
+      "bootstrap_mean_diff": -0.013087984230353069,
+      "bootstrap_ci95": [
+        -0.04572461924066772,
+        0.016164971028812487
+      ],
+      "bootstrap_p_improve": 0.8061938061938062,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "target": "HYG",
+      "horizon": 10,
+      "n_oos": 1354,
+      "baseline_qlike": 0.3464866423181077,
+      "augmented_qlike": 0.3535280224995819,
+      "qlike_improvement_pct": -2.032222695329622,
+      "dm_t": -0.5267143123123271,
+      "dm_p_two_sided": 0.5983919951087616,
+      "bootstrap_mean_diff": -0.007041380181474097,
+      "bootstrap_ci95": [
+        -0.03466728307077273,
+        0.018448243529624566
+      ],
+      "bootstrap_p_improve": 0.7022977022977023,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "target": "HYG",
+      "horizon": 21,
+      "n_oos": 1354,
+      "baseline_qlike": 0.2932508378453152,
+      "augmented_qlike": 0.29548295011798464,
+      "qlike_improvement_pct": -0.7611614306271316,
+      "dm_t": -0.14114425715955042,
+      "dm_p_two_sided": 0.8877559814310266,
+      "bootstrap_mean_diff": -0.0022321122726694635,
+      "bootstrap_ci95": [
+        -0.035045243729311344,
+        0.031030056833937135
+      ],
+      "bootstrap_p_improve": 0.5624375624375625,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "target": "KRE",
+      "horizon": 5,
+      "n_oos": 1354,
+      "baseline_qlike": 0.5855952229686582,
+      "augmented_qlike": 0.5987765964878072,
+      "qlike_improvement_pct": -2.2509359711519603,
+      "dm_t": -1.1301628142833535,
+      "dm_p_two_sided": 0.25840762555671426,
+      "bootstrap_mean_diff": -0.013181373519148934,
+      "bootstrap_ci95": [
+        -0.03919615424573048,
+        0.006275024336259594
+      ],
+      "bootstrap_p_improve": 0.8841158841158842,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "target": "KRE",
+      "horizon": 10,
+      "n_oos": 1354,
+      "baseline_qlike": 0.3910889902662305,
+      "augmented_qlike": 0.4067195823923323,
+      "qlike_improvement_pct": -3.9966842624389405,
+      "dm_t": -1.3926660942828046,
+      "dm_p_two_sided": 0.16372078612136076,
+      "bootstrap_mean_diff": -0.0156305921261018,
+      "bootstrap_ci95": [
+        -0.0407552720109097,
+        0.005526811874291688
+      ],
+      "bootstrap_p_improve": 0.9230769230769231,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "target": "KRE",
+      "horizon": 21,
+      "n_oos": 1354,
+      "baseline_qlike": 0.24848246644003985,
+      "augmented_qlike": 0.25690011366439414,
+      "qlike_improvement_pct": -3.3876222113182815,
+      "dm_t": -1.8207954284525116,
+      "dm_p_two_sided": 0.06863795949044885,
+      "bootstrap_mean_diff": -0.008417647224354305,
+      "bootstrap_ci95": [
+        -0.01761974544113968,
+        -0.00037582482325774114
+      ],
+      "bootstrap_p_improve": 0.978021978021978,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "target": "IWM",
+      "horizon": 5,
+      "n_oos": 1354,
+      "baseline_qlike": 0.37809907819579425,
+      "augmented_qlike": 0.3798271969349616,
+      "qlike_improvement_pct": -0.4570544703291905,
+      "dm_t": -0.2549417358897624,
+      "dm_p_two_sided": 0.7987681004635612,
+      "bootstrap_mean_diff": -0.001728118739167328,
+      "bootstrap_ci95": [
+        -0.01659201153645035,
+        0.011410085740758887
+      ],
+      "bootstrap_p_improve": 0.6233766233766234,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "target": "IWM",
+      "horizon": 10,
+      "n_oos": 1354,
+      "baseline_qlike": 0.2437043354689296,
+      "augmented_qlike": 0.24550360465066937,
+      "qlike_improvement_pct": -0.7383000299431058,
+      "dm_t": -0.31477397309502914,
+      "dm_p_two_sided": 0.7529332743883057,
+      "bootstrap_mean_diff": -0.001799269181739787,
+      "bootstrap_ci95": [
+        -0.01332727437152594,
+        0.009426944334208497
+      ],
+      "bootstrap_p_improve": 0.6383616383616384,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    {
+      "target": "IWM",
+      "horizon": 21,
+      "n_oos": 1354,
+      "baseline_qlike": 0.158081217386244,
+      "augmented_qlike": 0.16141920346975736,
+      "qlike_improvement_pct": -2.111564004063532,
+      "dm_t": -0.7960612718605976,
+      "dm_p_two_sided": 0.42599642289520423,
+      "bootstrap_mean_diff": -0.003337986083513334,
+      "bootstrap_ci95": [
+        -0.011947593149473799,
+        0.004271045709572213
+      ],
+      "bootstrap_p_improve": 0.7992007992007992,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    }
+  ],
+  "event_study": {
+    "n_events": 13,
+    "cooldown_days": 21,
+    "target_h21": {
+      "HYG": {
+        "n_event_obs": 13,
+        "event_mean_var": 0.011182350551620139,
+        "non_event_mean_var": 0.005309176075749466,
+        "event_minus_non_event": 0.005873174475870673,
+        "bootstrap_ci95": [
+          -0.0003154098461404064,
+          0.01204595521916176
+        ],
+        "bootstrap_p_gt_0": 0.03196803196803197
+      },
+      "KRE": {
+        "n_event_obs": 13,
+        "event_mean_var": 0.08816406107009045,
+        "non_event_mean_var": 0.08895899767910019,
+        "event_minus_non_event": -0.0007949366090097415,
+        "bootstrap_ci95": [
+          -0.05007849839688331,
+          0.046406240941454756
+        ],
+        "bootstrap_p_gt_0": 0.4825174825174825
+      },
+      "IWM": {
+        "n_event_obs": 13,
+        "event_mean_var": 0.08155906651615491,
+        "non_event_mean_var": 0.05134059362246331,
+        "event_minus_non_event": 0.030218472893691603,
+        "bootstrap_ci95": [
+          0.0021887143315768936,
+          0.059899778021622406
+        ],
+        "bootstrap_p_gt_0": 0.01998001998001998
+      }
+    }
+  },
+  "verdict": "NULL",
+  "verdict_rationale": {
+    "any_bonferroni_pass": false,
+    "any_conditional_pass": false,
+    "best_spec": {
+      "target": "IWM",
+      "horizon": 5,
+      "n_oos": 1354,
+      "baseline_qlike": 0.37809907819579425,
+      "augmented_qlike": 0.3798271969349616,
+      "qlike_improvement_pct": -0.4570544703291905,
+      "dm_t": -0.2549417358897624,
+      "dm_p_two_sided": 0.7987681004635612,
+      "bootstrap_mean_diff": -0.001728118739167328,
+      "bootstrap_ci95": [
+        -0.01659201153645035,
+        0.011410085740758887
+      ],
+      "bootstrap_p_improve": 0.6233766233766234,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    }
+  },
+  "literature_sources": [
+    {
+      "name": "Financial Stability Board, Report on vulnerabilities in private credit, 2026-05-06",
+      "url": "https://www.fsb.org/2026/05/fsb-warns-on-private-credit-vulnerabilities/"
+    },
+    {
+      "name": "J.P. Morgan Private Bank, Private Credit Under the Microscope, 2026",
+      "url": "https://privatebank.jpmorgan.com/nam/en/insights/markets-and-investing/private-credit-under-the-microscope-separating-headlines-from-fundamentals"
+    },
+    {
+      "name": "European Parliament briefing on private credit market structure and risks, 2026",
+      "url": "https://www.europarl.europa.eu/RegData/etudes/BRIE/2026/784039/ECTI_BRI%282026%29784039_EN.pdf"
+    },
+    {
+      "name": "Boston Fed, Could the Growth of Private Credit Pose a Risk to Financial System Stability?, 2025",
+      "url": "https://www.bostonfed.org/publications/current-policy-perspectives/2025/could-the-growth-of-private-credit-pose-a-risk-to-financial-system-stability.aspx"
+    }
+  ],
+  "figures": [
+    "fig_qlike_improvement.png",
+    "fig_cumulative_lossdiff.png"
+  ],
+  "caveats": [
+    "Listed BDC prices are liquid public proxies, not true private loan marks or non-traded BDC redemption flow.",
+    "BDC basket has survivorship and dynamic-composition bias because BXSL/OBDC histories start later.",
+    "SPY/VIX controls reduce but do not eliminate common beta confounding.",
+    "Forecast exercise measures incremental public-market predictive content, not private-credit causality."
+  ]
+}
