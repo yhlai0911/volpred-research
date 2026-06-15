@@ -31578,7 +31578,7 @@
     "title": "Paper review (Codex 24h-rule): 跨資產注意力加權預測波動率：聽起來高科技，實測沒贏 GJR",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_48c8328b needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_48c8328b",
@@ -31587,7 +31587,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-15T13:07:59+00:00"
+    "created_at": "2026-06-15T13:07:59+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-15T15:09:11.932054+00:00",
+    "claim_session_id": "ad0390c94d1f",
+    "started_at": "2026-06-15T15:09:12.367380+00:00",
+    "completed_at": "2026-06-15T15:16:19.805958+00:00",
+    "result": "Codex source review: FAIL. Article mile_48c8328b 與 2026-06-11 rerun source 不一致 — 核心 GJR 結論方向反轉（attention 反而 5/6 顯著勝 GJR）、DM 符號解釋反向、數字 stale。Review report: paper/k189_audit/codex_review_mile_48c8328b_2026_06_15.md。Followup task article_rewrite_mile_48c8328b 建立中。"
   },
   {
     "id": "paper_review_mile_d9381a94",
@@ -31683,5 +31689,103 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-15T13:11:18+00:00"
+  },
+  {
+    "id": "paper_review_mile_bf13d810",
+    "title": "Paper review (Codex 24h-rule): 14 個跨市場資產的波動率慣性幾乎一樣高：GJR-GARCH persistence 均值 0.9802",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_bf13d810 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_bf13d810",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-15T15:08:12+00:00"
+  },
+  {
+    "id": "paper_review_mile_624871ea",
+    "title": "Paper review (Codex 24h-rule): 台海風險當然重要，但沒有這一欄資料，我們不能假裝自己量得到",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_624871ea needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_624871ea",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-15T15:08:12+00:00"
+  },
+  {
+    "id": "paper_review_mile_b97c5c33",
+    "title": "Paper review (Codex 24h-rule): 模型看起來更聰明，為什麼 7 年後還是沒贏老方法？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b97c5c33 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_b97c5c33",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-15T15:08:12+00:00"
+  },
+  {
+    "id": "research_factor_max",
+    "title": "研究 backlog fallback: Factor-MAX：因子層級彩券需求預測因子報酬",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Factor-MAX：因子層級彩券需求預測因子報酬 — yfinance 因子 ETF（MTUM/QUAL/VLUE/USMV/SIZE）月度 MAX，檢定高 factor-MAX 預測次月該因子低報酬/高 vol（來源：SBFC 2025 \"Factor MAX and Predictable Factor Returns\"） | 來源 section: 期刊主題挖掘 batch（2026-06-15；用戶糾正「文章鬼打牆、回收舊 cluster」後觸發 → websearch jpm/faj/jfe/jfm/jbf/j.fixed income/cfa/fsb/arxiv 2025-26，**硬約束跳出 8 飽和 cluster**：vt / vix-move / garch-har 賽馬 / 風險模型比較 / etf 分散 / 50-50+長債 / n 套策略 meta / proxy 測量比較。全免費資料 yfinance/fred/eia/finra，options/bdc 折溢價用成交量·股價動能 proxy 代理）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "factor_max",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T15:08:26+00:00"
+  },
+  {
+    "id": "research_sequence_of_returns_risk_vol_aware",
+    "title": "研究 backlog fallback: 提領期 sequence-of-returns risk 下 vol-aware 提領法則",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 提領期 sequence-of-returns risk 下 vol-aware 提領法則 — yfinance 股債 ETF + FRED 模擬退休提領，固定 vs 條件於已實現 vol/drawdown 的動態提領，比 ruin probability / shortfall（不比 Sharpe）（來源：FAJ 2025-26 decumulation benchmark；NAPA 2026） | 來源 section: 期刊主題挖掘 batch（2026-06-15；用戶糾正「文章鬼打牆、回收舊 cluster」後觸發 → websearch jpm/faj/jfe/jfm/jbf/j.fixed income/cfa/fsb/arxiv 2025-26，**硬約束跳出 8 飽和 cluster**：vt / vix-move / garch-har 賽馬 / 風險模型比較 / etf 分散 / 50-50+長債 / n 套策略 meta / proxy 測量比較。全免費資料 yfinance/fred/eia/finra，options/bdc 折溢價用成交量·股價動能 proxy 代理）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "sequence_of_returns_risk_vol_aware",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T15:08:26+00:00"
+  },
+  {
+    "id": "article_rewrite_mile_48c8328b_1781536593",
+    "title": "Article rewrite: mile_48c8328b 跨資產注意力 vol — 核心結論反轉需重寫",
+    "task_type": "daily_article",
+    "priority": 1,
+    "status": "pending",
+    "claimed_by": null,
+    "claimed_at": null,
+    "created_at": "2026-06-15T15:16:33Z",
+    "description": "Codex 24h-rule review verdict=FAIL (paper/k189_audit/codex_review_mile_48c8328b_2026_06_15.md). mile_48c8328b 已 published 但與 2026-06-11 K189 rerun 嚴重不一致：(1) 文章說 GJR 全勝 → 實際 6/6 attention QLIKE 更低，DM vs GJR 5/6 顯著勝 (Bonferroni-12 < 0.05) (2) DM 符號解釋反向 (loss_model-loss_baseline → 正 DM=model worse，文章寫成相反) (3) 整張數字表 stale (4) α=0.9 描述需從 OOS hindsight 改 rolling ex-ante。研究誠實 § 6『推翻舊結論必回溯更正』強制。要做：依當前 experiments/k189/k189_attention_vol_results.json 重寫文章 → 改新標題反映 attention 小勝 GJR 但輸 single-asset EWMA → 重生圖 (plot script 也 stale) → 補揭露 22-day RV proxy + overlap caveat → 走 feed-publisher 流程取代舊文（同 mile_48c8328b id update content 或新 mile + 舊文標 retracted）。寫前查 3-layer dedup。寫後跑 anti_ai_gate.py。",
+    "payload": {
+      "source_article_id": "mile_48c8328b",
+      "experiment_refs": [
+        "K189"
+      ],
+      "review_report": "paper/k189_audit/codex_review_mile_48c8328b_2026_06_15.md",
+      "results_json": "experiments/k189/k189_attention_vol_results.json",
+      "blocker": "research_honesty_section_6_retraction_required"
+    }
   }
 ]
