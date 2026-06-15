@@ -34477,5 +34477,25 @@
     ],
     "confidence": 0.86,
     "created_at": "2026-06-16T04:34:29.424974"
+  },
+  {
+    "item_id": "de3a1d05",
+    "category": "null_finding",
+    "content": "K1506 null finding: Treasury auction weak demand (bid-to-cover z<-1.5, N=26) does NOT lead 5d ^MOVE realized vol elevation. Primary INSUFFICIENT_SAMPLE (t=-0.47, p=0.642, d=-0.10); secondary spec z<-1.0 (N=45) FAIL (t=-0.77, p=0.44, d=-0.14, 95% bootstrap CI [-0.020, +0.008]). Direction opposite to dealer-stress hypothesis. Robustness: 10Y/30Y subsamples + VIX-regime split both null. Implication: refutes simple primary-dealer inventory-stress → MOVE channel at daily-event frequency; auction-side demand stress is not a leading signal for MOVE realized vol in 2015-2026 sample. Methodology CONDITIONAL_PASS (main-thread source-level audit; Codex CLI stdin stall fallback; lookahead defended via signal_lag=1 + trailing 12M rolling stats; seed=42; bootstrap 5000 reps). Complements but does not overturn K1086/K1442/K1488 MOVE-VIX arc — those are level/regime relationships, this tests event-driven channel. Sample limitation: 11 years × ~25 auctions/year × ~10% extreme = ~26 weak events, near power threshold for d≈0.2 small-effect detection.",
+    "evidence": [
+      "experiments/k1506/k1506_results.json",
+      "experiments/k1506/k1506.py",
+      "experiments/k1506/codex_review.md",
+      "TreasuryDirect API 2015-2026 N=278 auctions",
+      "yfinance ^MOVE daily close"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-16T05:35:42.322047",
+    "experiment_id": "K1506",
+    "k_id": "K1506",
+    "experiment_path": "experiments/k1506/",
+    "verdict": "NULL_FINDING",
+    "reviewer": "main-thread source-level audit",
+    "reviewer_source": "main-thread (Codex CLI stdin stall fallback; see codex_review.md)"
   }
 ]
