@@ -578,7 +578,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 > 來源：journal-topic-discovery（WebSearch 趨勢層級，未捏造論文標題+作者；唯二指名 "Seeking Gamma"(AFA wp) 與 "Factor MAX and Predictable Factor Returns"(SBFC 2025) 為搜尋真實出現標題）。6 個全新主題軸，每軸 ≤3，與既有 6 batch + feed 近 120 篇正交。
 > **新軸 1 — retail/dealer-gamma 微結構**
 - [ ] Gamma-squeeze 候選股「散戶驅動波動」事件研究 — yfinance 2024-26 meme/gamma 候選（OPEN/KSS/GME 等），用「成交量 z-score × 報酬」代理 dealer-hedging 壓力，事件窗檢定 RV 與後續 CAR/reversal 不對稱（來源：JFE/AFA 2025-26 "Seeking Gamma"，squeeze 後一月 CAR +5.13%）
-- [ ] 散戶交易強度 proxy 對次日 idio-vol 的領先力 — 免費 FINRA off-exchange volume + 高 retail-tilt 籃（IWM/低價股），檢定 retail-flow proxy 是否領先個股 idio RV，明確 lag（來源：JFM/JFE 2025 retail order-flow & PFOF）
+- [x] ~~散戶交易強度 proxy 對次日 idio-vol 的領先力~~ → **K1502 completed 2026-06-15，NULL (renamed from K1501 — K1501 reserved for VRP up/down decomposition this fire)**：FINRA CNMS public off-exchange short-volume ratio / off-exchange volume proxy + 22 檔 retail-tilted basket，OOS 2024-07-19 to 2026-06-12（477 obs/ticker）。Rolling 252-day HAR-log idio variance baseline；full model 加 lagged FINRA short-ratio z 與 lagged off-exchange volume z，全部 `.shift(1)`。0/22 tickers pass Harvey `|DM t|>3`，median QLIKE improvement +1.91%，sign-test p=0.416，pooled DM t=-0.69 p=0.493。限制：FINRA short-volume 只是 public off-exchange proxy，不是真 retail order flow；不可上架為獨立 vol signal。
 > **新軸 2 — closing-auction / index-rebalance 微結構**
 - [ ] Russell/標普 reconstitution 日尾盤波動「dislocation 但收斂」 — 重組日 vs 一般日 close-to-close vs intraday-range vol 拆解，檢定重組日尾盤 RV 系統升高但隔日均值回歸（來源：BMLL/Traders 2025 closing auction，重組日量 9%→20%）
 - [ ] MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025 MOC imbalance）

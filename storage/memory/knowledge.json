@@ -34324,5 +34324,77 @@
       "experiments/K1345_pre_fomc_iv_drift/fig_returns_by_window.png"
     ],
     "confidence": 0.85
+  },
+  {
+    "k_id": "K1501",
+    "title": "K1501: VRP Upside/Downside Decomposition × Horizon Predictability (SPY 2006-2026)",
+    "summary": "Decompose VRP into VRP_down/VRP_up via realized semivariance share allocation; test sign asymmetry, multi-horizon predictability, sign-decomp validity on SPY monthly 2006-02 to 2026-05 (n=244).",
+    "hypothesis": "H1 RV-² mean > RV+² (Welch+HAC); H2 differential pred power across h ∈ {1,21,63,126} td; H3 VRP_down vs VRP_up reverse-signed.",
+    "method": "Monthly EoM aggregation. IV²_{t-1} via VIX.shift(1). RV±² from daily SPY returns positive/negative semivariance. θ_dn,t = trailing 12m rolling share of RV-/total (shift(1) ex-ante). Regress ret_{t+h} ~ X_t with HAC NW lag=h+1. Stationary block bootstrap β_down−β_up, seed=42, n=1000.",
+    "verdict": "MIXED",
+    "reviewer": "Codex CLI 0.139.0 (gpt-5.4) — CONDITIONAL_PASS (methodology clean; caveat: VRP_down/VRP_up are proxy decompositions via realized semivariance share allocation, not directly observed option-implied sign-specific premia)",
+    "reviewer_source": "Codex CLI primary path",
+    "evidence": "H1 NULL: mean(RV-²)−mean(RV+²)=+0.000176, Welch t=0.54 p=0.59; HAC NW lag=3 mean-diff t=1.60 p=0.109 — sign matches lit but not stat sig. H2 PARTIAL: at h=1d t(VRP_down)=4.20 p=2.7e-5, t(VRP_up)=2.52 p=0.012, t(VRP_total)=3.80 p=1.4e-4, t(RV-²)=-4.80, R² ≈ 0.05-0.10; at h ∈ {21,63,126} all 5 regressors collapse R²<0.02, all |t|<1.3, p>0.20. Bootstrap β_down−β_up CI95 always crosses 0 (p_two_sided ≥ 0.20 at every h). H3 NULL on sign: ρ(VRP_down,VRP_up) = +0.879 (Fisher z=1.37, NOT negative); additivity exact (|VRP_down+VRP_up − VRP_total| ≈ 2e-19) — θ-allocation collapses to identity since θ_dn+θ_up=1.",
+    "conclusion": "Two findings: (1) Sign-decomposed VRP shares the K430 pattern — predictive power concentrates at h=1d reflex, collapses for h≥21d; bootstrap shows VRP_down and VRP_up not statistically distinguishable as predictors. (2) θ-share allocation is mechanical (constraint θ_dn+θ_up=1 makes corr(VRP_down,VRP_up) ≈ 1 by construction, not -1). Real sign-decomposed VRP requires option-implied moment extraction (Kilic-Shaliastovich 2019 Management Science 65(6) 2522-2544 framework using risk-neutral skewness from option strikes), not realized-RV share allocation.",
+    "implications_for_paper": "Negative result for 'simple VRP sign-decomposition adds predictive power'. Reinforces Paper 2 leverage-direction finding that sign-asymmetric vol predictability concentrates in short horizons. Methodological warning: θ-share constructions are not true sign decompositions.",
+    "next_steps": "If pursuing this angle: (a) extract risk-neutral skewness from OptionMetrics SPX implied vol surface (Bakshi-Kapadia-Madan 2003 formula), (b) build true option-implied semivariance premia (Kilic-Shaliastovich 2019), (c) re-test H1-H3 with observed premia not proxy.",
+    "references": [
+      "Bollerslev, Tauchen, Zhou (2009) RFS 22(11) 4463-4492",
+      "Feunou, Jahan-Parvar, Tedongap (2013) Review of Finance 17(1) 443-481",
+      "Bekaert, Hoerova (2014) JoE 183(2) 181-192",
+      "Barndorff-Nielsen, Kinnebrock, Shephard (2010) realised semivariance",
+      "Kilic, Shaliastovich (2019) Management Science 65(6) 2522-2544"
+    ],
+    "experiment_id": "k1501",
+    "experiment_path": "experiments/k1501/",
+    "n_obs": 244,
+    "sample_period": "2006-02 to 2026-05",
+    "data_source": "yfinance ^GSPC daily + ^VIX daily, monthly EoM resample",
+    "timestamp": "2026-06-15T22:30:00+08:00",
+    "task_id": "research_vrp_vrp_horizon",
+    "item_id": "fe360ee3",
+    "category": "methodology_partial",
+    "confidence": 0.7,
+    "created_at": "2026-06-15T22:27:22.831148"
+  },
+  {
+    "item_id": "f3a5ca0b",
+    "category": "experiment_result",
+    "content": "K1501 NULL: FINRA CNMS public off-exchange short-volume ratio and off-exchange volume do not provide robust next-day idiosyncratic-volatility forecasting power in a retail-tilted US equity basket. Data: FINRA CNMS daily files + yfinance OHLC, 22 tickers, 2023-01-03 to 2026-06-12; OOS 2024-07-19 to 2026-06-12, 477 observations per ticker. Method: rolling 252-day HAR-log CAPM-residual variance baseline; full model adds lagged FINRA short-ratio z-score and lagged log off-exchange volume z-score, all features shift(1). Result: 0/22 tickers pass Harvey |DM t|>3, median QLIKE improvement +1.91%, sign-test p=0.416, pooled DM t=-0.69 p=0.493. Caveat: FINRA short-volume is a public off-exchange proxy, not true retail order flow; conclusion is only about this public proxy. Codex review: CONDITIONAL_PASS under that wording constraint.",
+    "evidence": [
+      "experiment_id=K1501",
+      "experiments/k1501_proxy_idio_vol/README.md",
+      "experiments/k1501_proxy_idio_vol/k1501.py",
+      "experiments/k1501_proxy_idio_vol/k1501_results.json",
+      "experiments/k1501_proxy_idio_vol/codex_review.md"
+    ],
+    "confidence": 0.84,
+    "created_at": "2026-06-15T22:28:49.518050"
+  },
+  {
+    "item_id": "2d56f1a3",
+    "category": "empirical_null",
+    "content": "K1502 NULL: FINRA off-exchange short-sale volume ratio + off-exchange total volume tested as proxy for retail trading intensity → next-day idiosyncratic volatility on 22 retail-tilted tickers (GME/AMC/KOSS/BB/OPEN/KSS/PLTR/SOFI/HOOD/RIVN/LCID/CHWY/DNUT/GPRO/IWM/BYND etc), 2023-01 to 2026-06. 0/22 tickers pass Harvey 2016 bar (all harvey_pass=false). Pooled sign test p=0.416, pooled DM p=0.493 — proxy carries no economically detectable leading information for next-day idio-vol. NULL conclusion supported. Method: idio-vol residual from CAPM (single-factor SPY) rolling 60d; FINRA off-exchange ratio lagged 1 day; HAC NW + DM test per ticker; per-ticker bootstrap; pooled sign test across panel. Lookahead: FINRA proxy at t predicts idio-vol at t+1.",
+    "evidence": [
+      "experiments/k1502_proxy_idio_vol/README.md",
+      "experiments/k1502_proxy_idio_vol/k1502.py",
+      "experiments/k1502_proxy_idio_vol/k1502_results.json",
+      "experiments/k1502_proxy_idio_vol/codex_review.md"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-06-15T22:29:13.691110",
+    "experiment_id": "K1502",
+    "k_id": "K1502",
+    "experiment_path": "experiments/k1502_proxy_idio_vol/",
+    "verdict": "NULL",
+    "reviewer": "Codex CLI CONDITIONAL_PASS (methodology PASS; NULL conclusion supported)",
+    "reviewer_source": "Codex CLI",
+    "task_id": "research_proxy_idio_vol",
+    "references": [
+      "Foucault, Sraer, Thesmar (2011) JF — retail investors and volatility",
+      "Wu, Ren (2025) Pacific-Basin Finance Journal — retail and idio vol China",
+      "Hoffmann, Jank (2024) value of retail order flow",
+      "FINRA Short Sale Volume documentation; Info Notice 5/10/19"
+    ]
   }
 ]

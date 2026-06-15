@@ -10752,5 +10752,18 @@
     "source": "hourly-18",
     "status": "succeeded",
     "result": "Promoted mile_624871ea K1481 台海風險 draft → published. ARC-DEDUP PASS, anti-AI gate PASS, sync-all OK."
+  },
+  {
+    "timestamp": "2026-06-15T22:33+08:00",
+    "task_type": "experiment",
+    "task_id": "K1501",
+    "actor": "hourly-22",
+    "result": "MIXED",
+    "verdict": "MIXED",
+    "reviewer": "Codex CLI 0.139.0 (CONDITIONAL_PASS)",
+    "k_id": "K1501",
+    "title": "VRP upside/downside decomposition × horizon predictability on SPY (2006-2026, n=244)",
+    "summary": "H1 semivar asymmetry NULL; H2 PARTIAL (h=1d strong, h>=21d collapse); H3 sign decomp NULL (ρ=+0.879 — θ-share is identity by construction). Methodological warning: realized-share VRP decomposition is mechanical, not true sign decomp.",
+    "task_pool_id": "research_vrp_vrp_horizon"
   }
 ]

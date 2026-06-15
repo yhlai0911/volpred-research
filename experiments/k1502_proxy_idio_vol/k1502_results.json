@@ -1,0 +1,725 @@
+{
+  "experiment_id": "K1502",
+  "title": "FINRA off-exchange proxy -> next-day idiosyncratic volatility",
+  "seed": 42,
+  "data_window": {
+    "start": "2023-01-03",
+    "end": "2026-06-15"
+  },
+  "universe_requested": [
+    "IWM",
+    "GME",
+    "AMC",
+    "BB",
+    "KOSS",
+    "OPEN",
+    "KSS",
+    "PLTR",
+    "SOFI",
+    "HOOD",
+    "RIVN",
+    "LCID",
+    "F",
+    "CHWY",
+    "DKNG",
+    "AFRM",
+    "UPST",
+    "MARA",
+    "RIOT",
+    "COIN",
+    "CVNA",
+    "TLRY"
+  ],
+  "data_sources": {
+    "finra": "https://cdn.finra.org/equity/regsho/daily/CNMSshvolYYYYMMDD.txt",
+    "prices": "yfinance daily OHLC",
+    "finra_proxy_caveat": "FINRA short-volume ratio/off-exchange volume are public off-exchange activity proxies, not direct retail order-flow."
+  },
+  "sample": {
+    "tickers_available": [
+      "AFRM",
+      "AMC",
+      "BB",
+      "CHWY",
+      "COIN",
+      "CVNA",
+      "DKNG",
+      "F",
+      "GME",
+      "HOOD",
+      "IWM",
+      "KOSS",
+      "KSS",
+      "LCID",
+      "MARA",
+      "OPEN",
+      "PLTR",
+      "RIOT",
+      "RIVN",
+      "SOFI",
+      "TLRY",
+      "UPST"
+    ],
+    "n_panel_rows": 19008,
+    "panel_date_start": "2023-01-03",
+    "panel_date_end": "2026-06-12",
+    "finra_date_start": "2023-01-03",
+    "finra_date_end": "2026-06-12",
+    "finra_rows_filtered": 19008
+  },
+  "method": {
+    "target": "next-day CAPM-residual squared return, clipped at 1e-10",
+    "baseline": "rolling 252-day HAR-log idiosyncratic variance + SPY variance lag",
+    "full_model": "baseline + lagged FINRA short-ratio z + lagged log off-exchange volume z + FINRA-present indicator",
+    "timing": "all predictors use explicit shift(1); row t uses information through t-1",
+    "oos": {
+      "window": 252,
+      "refit_step": 21,
+      "horizon": 1
+    },
+    "evaluation": "Patton QLIKE on residual variance, canonical volpred.stats.model_evaluation.dm_test, Harvey |t|>3 gate"
+  },
+  "oos_by_ticker": [
+    {
+      "ticker": "AFRM",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 3.798170116577173,
+      "qlike_full": 3.4701067904962617,
+      "qlike_improvement_pct": 8.637404750489553,
+      "log_mse_base": 4.775075585651664,
+      "log_mse_full": 4.754496185361049,
+      "log_mse_improvement_pct": 0.4309753829332721,
+      "dm_full_vs_base": {
+        "stat": -1.4445261553396849,
+        "p_value": 0.14924894283463574,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "AMC",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 4.784306503131705,
+      "qlike_full": 4.334676468193424,
+      "qlike_improvement_pct": 9.398019015795985,
+      "log_mse_base": 5.018292203668071,
+      "log_mse_full": 5.08833944729507,
+      "log_mse_improvement_pct": -1.395838280915545,
+      "dm_full_vs_base": {
+        "stat": -0.9951043030793751,
+        "p_value": 0.32019112024019414,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "BB",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 6.81595322061896,
+      "qlike_full": 6.43652224315894,
+      "qlike_improvement_pct": 5.566807241461136,
+      "log_mse_base": 5.842442500559524,
+      "log_mse_full": 5.803691707211585,
+      "log_mse_improvement_pct": 0.6632635810147489,
+      "dm_full_vs_base": {
+        "stat": -0.8302593723628212,
+        "p_value": 0.4068083677776402,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "CHWY",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 3.7419702243999633,
+      "qlike_full": 3.6026591756231943,
+      "qlike_improvement_pct": 3.722933118718442,
+      "log_mse_base": 5.641484803391374,
+      "log_mse_full": 5.66629934834709,
+      "log_mse_improvement_pct": -0.43985840289419864,
+      "dm_full_vs_base": {
+        "stat": -0.8860497865290922,
+        "p_value": 0.3760381062275817,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "COIN",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 3.7125530674099796,
+      "qlike_full": 3.9338046129851767,
+      "qlike_improvement_pct": -5.959552403908148,
+      "log_mse_base": 5.675112092884799,
+      "log_mse_full": 5.683540564339787,
+      "log_mse_improvement_pct": -0.1485163872896097,
+      "dm_full_vs_base": {
+        "stat": 1.3187084808642953,
+        "p_value": 0.18790069082550032,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "CVNA",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 5.90555906028374,
+      "qlike_full": 4.84748296235738,
+      "qlike_improvement_pct": 17.91661190965252,
+      "log_mse_base": 7.615609624162564,
+      "log_mse_full": 7.459168894782876,
+      "log_mse_improvement_pct": 2.054211508995129,
+      "dm_full_vs_base": {
+        "stat": -2.127971151050225,
+        "p_value": 0.033852661485048285,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "DKNG",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 5.7109811109146476,
+      "qlike_full": 4.808485758900661,
+      "qlike_improvement_pct": 15.802807512165751,
+      "log_mse_base": 6.2004783213746775,
+      "log_mse_full": 5.9909056812976935,
+      "log_mse_improvement_pct": 3.379943114300263,
+      "dm_full_vs_base": {
+        "stat": -2.252381133104592,
+        "p_value": 0.024753014183387823,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "F",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 6.629262570938407,
+      "qlike_full": 6.622519494179087,
+      "qlike_improvement_pct": 0.10171684538309551,
+      "log_mse_base": 6.471323912607014,
+      "log_mse_full": 6.464178267219396,
+      "log_mse_improvement_pct": 0.1104201471618017,
+      "dm_full_vs_base": {
+        "stat": -0.024275284772299913,
+        "p_value": 0.9806432002594145,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "GME",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 4.67051719494768,
+      "qlike_full": 4.206778460260763,
+      "qlike_improvement_pct": 9.929065996985624,
+      "log_mse_base": 5.607963147735847,
+      "log_mse_full": 5.559494047882555,
+      "log_mse_improvement_pct": 0.8642906270320531,
+      "dm_full_vs_base": {
+        "stat": -0.7180300769990158,
+        "p_value": 0.47309099956008427,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "HOOD",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 4.495817899662547,
+      "qlike_full": 4.528814803183172,
+      "qlike_improvement_pct": -0.7339466201044743,
+      "log_mse_base": 5.7219521318894895,
+      "log_mse_full": 5.786546584453548,
+      "log_mse_improvement_pct": -1.1288883771687284,
+      "dm_full_vs_base": {
+        "stat": 0.18651187094296517,
+        "p_value": 0.8521228325024301,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "IWM",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 2.3927082336775007,
+      "qlike_full": 2.4933397677378797,
+      "qlike_improvement_pct": -4.2057586731213,
+      "log_mse_base": 4.766670203103198,
+      "log_mse_full": 4.808842616930607,
+      "log_mse_improvement_pct": -0.8847352980274251,
+      "dm_full_vs_base": {
+        "stat": 1.7612992093823867,
+        "p_value": 0.07882975825946303,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "KOSS",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 3.1294103921718284,
+      "qlike_full": 3.518132542316803,
+      "qlike_improvement_pct": -12.421577915039752,
+      "log_mse_base": 5.443675849921064,
+      "log_mse_full": 5.505847325394048,
+      "log_mse_improvement_pct": -1.142086288511932,
+      "dm_full_vs_base": {
+        "stat": 2.3214029894190595,
+        "p_value": 0.02068647019168801,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "KSS",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 8.98132011080841,
+      "qlike_full": 8.036753444529662,
+      "qlike_improvement_pct": 10.517013697596925,
+      "log_mse_base": 6.177539395532739,
+      "log_mse_full": 6.135408907754439,
+      "log_mse_improvement_pct": 0.6819946435107661,
+      "dm_full_vs_base": {
+        "stat": -1.3687115766006164,
+        "p_value": 0.17173503230570142,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "LCID",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 4.6789292923148,
+      "qlike_full": 4.84397434384437,
+      "qlike_improvement_pct": -3.5274106792051465,
+      "log_mse_base": 6.2496043418396034,
+      "log_mse_full": 6.29522862295113,
+      "log_mse_improvement_pct": -0.7300347128550609,
+      "dm_full_vs_base": {
+        "stat": 0.4918592568458953,
+        "p_value": 0.6230455865136064,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "MARA",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 3.470227837501077,
+      "qlike_full": 3.51242542519276,
+      "qlike_improvement_pct": -1.2159889686686902,
+      "log_mse_base": 6.111264164554571,
+      "log_mse_full": 6.249936492894309,
+      "log_mse_improvement_pct": -2.26912672412428,
+      "dm_full_vs_base": {
+        "stat": 0.4405371915088659,
+        "p_value": 0.6597480724419373,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "OPEN",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 6.132478158615974,
+      "qlike_full": 6.2928138253074035,
+      "qlike_improvement_pct": -2.614533024730997,
+      "log_mse_base": 5.358787834993163,
+      "log_mse_full": 5.365499459746313,
+      "log_mse_improvement_pct": -0.1252452039493434,
+      "dm_full_vs_base": {
+        "stat": 0.39570440066480134,
+        "p_value": 0.6925004007068811,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "PLTR",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 5.831150227119959,
+      "qlike_full": 5.610604224387825,
+      "qlike_improvement_pct": 3.7822040959672414,
+      "log_mse_base": 5.861026534487845,
+      "log_mse_full": 5.835674149447705,
+      "log_mse_improvement_pct": 0.4325587828507486,
+      "dm_full_vs_base": {
+        "stat": -1.3753129234493426,
+        "p_value": 0.16968135356647185,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "RIOT",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 2.899869961090457,
+      "qlike_full": 3.3628419770840154,
+      "qlike_improvement_pct": -15.965268174282693,
+      "log_mse_base": 5.482875546948485,
+      "log_mse_full": 5.5295590481962975,
+      "log_mse_improvement_pct": -0.8514419276540888,
+      "dm_full_vs_base": {
+        "stat": 1.8878178929196527,
+        "p_value": 0.05965839504474246,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "RIVN",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 4.762391180950638,
+      "qlike_full": 4.516986953020287,
+      "qlike_improvement_pct": 5.152962421733798,
+      "log_mse_base": 6.561694562061891,
+      "log_mse_full": 6.546931608356868,
+      "log_mse_improvement_pct": 0.22498690796093038,
+      "dm_full_vs_base": {
+        "stat": -1.0752986606342827,
+        "p_value": 0.2827857720675111,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "SOFI",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 3.1527891347552477,
+      "qlike_full": 3.1682826914740225,
+      "qlike_improvement_pct": -0.4914238173425324,
+      "log_mse_base": 4.621172951594416,
+      "log_mse_full": 4.587046030873602,
+      "log_mse_improvement_pct": 0.7384904455705191,
+      "dm_full_vs_base": {
+        "stat": 0.1190754522965662,
+        "p_value": 0.9052658146426711,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "TLRY",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 6.049050630255934,
+      "qlike_full": 8.474061523151724,
+      "qlike_improvement_pct": -40.08911548477464,
+      "log_mse_base": 6.2593275526736685,
+      "log_mse_full": 6.37038616222462,
+      "log_mse_improvement_pct": -1.7742897877826058,
+      "dm_full_vs_base": {
+        "stat": 1.4625271712425272,
+        "p_value": 0.144256726881552,
+        "harvey_pass": false
+      }
+    },
+    {
+      "ticker": "UPST",
+      "status": "ok",
+      "n_model": 729,
+      "n_oos": 477,
+      "oos_start": "2024-07-19",
+      "oos_end": "2026-06-12",
+      "qlike_base": 5.856925545909248,
+      "qlike_full": 5.08443124541199,
+      "qlike_improvement_pct": 13.189416434306638,
+      "log_mse_base": 5.41821406878298,
+      "log_mse_full": 5.40630498543797,
+      "log_mse_improvement_pct": 0.2197972098153949,
+      "dm_full_vs_base": {
+        "stat": -1.118111064623145,
+        "p_value": 0.26408353677615204,
+        "harvey_pass": false
+      }
+    }
+  ],
+  "in_sample_hac_by_ticker": [
+    {
+      "ticker": "AFRM",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.07550270738857032,
+      "short_ratio_z_lag1_t": 1.1648951703671477,
+      "offex_volume_z_lag1_beta": 0.23894096298803358,
+      "offex_volume_z_lag1_t": 2.7428676411570354,
+      "r2": 0.020344108044554554
+    },
+    {
+      "ticker": "AMC",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.050465634060993074,
+      "short_ratio_z_lag1_t": -0.7057317710032766,
+      "offex_volume_z_lag1_beta": 0.30408848553479395,
+      "offex_volume_z_lag1_t": 3.518406786584287,
+      "r2": 0.07792967920293647
+    },
+    {
+      "ticker": "BB",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.06528073441808266,
+      "short_ratio_z_lag1_t": -0.786415697608967,
+      "offex_volume_z_lag1_beta": 0.2287858399384909,
+      "offex_volume_z_lag1_t": 3.1934571403857697,
+      "r2": 0.03140161062021685
+    },
+    {
+      "ticker": "CHWY",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.026953322910789487,
+      "short_ratio_z_lag1_t": -0.32876494991969096,
+      "offex_volume_z_lag1_beta": 0.14474410741906502,
+      "offex_volume_z_lag1_t": 1.9588031652941467,
+      "r2": 0.014429387195384002
+    },
+    {
+      "ticker": "COIN",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.04008761194753291,
+      "short_ratio_z_lag1_t": 0.5909889333039031,
+      "offex_volume_z_lag1_beta": 0.12132283593934545,
+      "offex_volume_z_lag1_t": 1.730643827503831,
+      "r2": 0.01532467130266213
+    },
+    {
+      "ticker": "CVNA",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.02379825262523705,
+      "short_ratio_z_lag1_t": -0.27641057026348587,
+      "offex_volume_z_lag1_beta": 0.28412419676482314,
+      "offex_volume_z_lag1_t": 2.9849250020885605,
+      "r2": 0.045949395949384964
+    },
+    {
+      "ticker": "DKNG",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.12103013492199813,
+      "short_ratio_z_lag1_t": 1.602506935495398,
+      "offex_volume_z_lag1_beta": 0.43952027259604015,
+      "offex_volume_z_lag1_t": 5.05791449903737,
+      "r2": 0.046380180004937044
+    },
+    {
+      "ticker": "F",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.11637890266150458,
+      "short_ratio_z_lag1_t": 1.3123263950875033,
+      "offex_volume_z_lag1_beta": 0.2510604694159809,
+      "offex_volume_z_lag1_t": 2.865943483865031,
+      "r2": 0.03281091077097564
+    },
+    {
+      "ticker": "GME",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.1510656869174125,
+      "short_ratio_z_lag1_t": -2.011808452859596,
+      "offex_volume_z_lag1_beta": 0.4425059005697509,
+      "offex_volume_z_lag1_t": 4.869600779946617,
+      "r2": 0.12288283725317084
+    },
+    {
+      "ticker": "HOOD",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.018485082385821666,
+      "short_ratio_z_lag1_t": -0.2646752657336515,
+      "offex_volume_z_lag1_beta": 0.12152478910556441,
+      "offex_volume_z_lag1_t": 1.603472614609095,
+      "r2": 0.021847149605573768
+    },
+    {
+      "ticker": "IWM",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.0679930841079776,
+      "short_ratio_z_lag1_t": -0.8775714954225953,
+      "offex_volume_z_lag1_beta": 0.07433710331435671,
+      "offex_volume_z_lag1_t": 1.0460116878631402,
+      "r2": 0.014579267878238267
+    },
+    {
+      "ticker": "KOSS",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.07697363752297673,
+      "short_ratio_z_lag1_t": -0.9350503875710688,
+      "offex_volume_z_lag1_beta": 0.28894293488452527,
+      "offex_volume_z_lag1_t": 3.296410914880364,
+      "r2": 0.052870781851504844
+    },
+    {
+      "ticker": "KSS",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.14999480069644283,
+      "short_ratio_z_lag1_t": 2.0374167584808043,
+      "offex_volume_z_lag1_beta": 0.18107514536670716,
+      "offex_volume_z_lag1_t": 1.960368276119212,
+      "r2": 0.04087906616820869
+    },
+    {
+      "ticker": "LCID",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.08679959855602926,
+      "short_ratio_z_lag1_t": 1.0645091012574872,
+      "offex_volume_z_lag1_beta": 0.24492011109472522,
+      "offex_volume_z_lag1_t": 3.190929374845582,
+      "r2": 0.02586701978384298
+    },
+    {
+      "ticker": "MARA",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.013453658345571967,
+      "short_ratio_z_lag1_t": -0.17384961545273067,
+      "offex_volume_z_lag1_beta": 0.10026022328215692,
+      "offex_volume_z_lag1_t": 1.1565123424798474,
+      "r2": 0.011703201939324281
+    },
+    {
+      "ticker": "OPEN",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.033444643936063334,
+      "short_ratio_z_lag1_t": -0.4324268978977002,
+      "offex_volume_z_lag1_beta": 0.17823750365870794,
+      "offex_volume_z_lag1_t": 2.3196920104669005,
+      "r2": 0.0764311859274649
+    },
+    {
+      "ticker": "PLTR",
+      "n": 729,
+      "short_ratio_z_lag1_beta": -0.002114855743348465,
+      "short_ratio_z_lag1_t": -0.02876966889227188,
+      "offex_volume_z_lag1_beta": 0.2894200635267915,
+      "offex_volume_z_lag1_t": 3.0870844100231056,
+      "r2": 0.03678463673828525
+    },
+    {
+      "ticker": "RIOT",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.08061402177783758,
+      "short_ratio_z_lag1_t": 1.038709890771156,
+      "offex_volume_z_lag1_beta": 0.1903740865832274,
+      "offex_volume_z_lag1_t": 2.8463380902050024,
+      "r2": 0.018479594454946957
+    },
+    {
+      "ticker": "RIVN",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.1052750889807233,
+      "short_ratio_z_lag1_t": 1.4215645487287005,
+      "offex_volume_z_lag1_beta": 0.2208885969185646,
+      "offex_volume_z_lag1_t": 2.1355260835260013,
+      "r2": 0.024154742113632555
+    },
+    {
+      "ticker": "SOFI",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.014010960907295755,
+      "short_ratio_z_lag1_t": 0.20832599654503303,
+      "offex_volume_z_lag1_beta": 0.3064576590479708,
+      "offex_volume_z_lag1_t": 4.500599404832014,
+      "r2": 0.024252751296116037
+    },
+    {
+      "ticker": "TLRY",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.058966843687212556,
+      "short_ratio_z_lag1_t": 0.7118147723404712,
+      "offex_volume_z_lag1_beta": 0.2511002655334543,
+      "offex_volume_z_lag1_t": 3.107897243959561,
+      "r2": 0.07701793085148123
+    },
+    {
+      "ticker": "UPST",
+      "n": 729,
+      "short_ratio_z_lag1_beta": 0.05634188636005533,
+      "short_ratio_z_lag1_t": 0.7221425801405463,
+      "offex_volume_z_lag1_beta": 0.3677518291791778,
+      "offex_volume_z_lag1_t": 4.244178146238952,
+      "r2": 0.026106944336769633
+    }
+  ],
+  "summary": {
+    "n_tickers_ok": 22,
+    "n_tickers_harvey_pass": 0,
+    "harvey_pass_tickers": [],
+    "median_qlike_improvement_pct": 1.9123249820507688,
+    "mean_qlike_improvement_pct": 0.7496539672308341,
+    "positive_improvement_count": 12,
+    "sign_test_positive_improvement_p": 0.4159059524536133,
+    "best_ticker_by_qlike_improvement": "CVNA",
+    "worst_ticker_by_qlike_improvement": "TLRY",
+    "pooled_dm_full_vs_base": {
+      "stat": -0.6854893235857651,
+      "p_value": 0.493050338874472
+    },
+    "median_dm_stat": -0.37115268088565784,
+    "is_short_ratio_t_median": 0.08977816382638057,
+    "is_offex_volume_t_median": 2.9254342429767957,
+    "verdict": "NULL"
+  },
+  "figures": [
+    "figures/k1502_qlike_improvement_by_ticker.png",
+    "figures/k1502_short_ratio_bucket_nextday_idio_var.png"
+  ]
+}
