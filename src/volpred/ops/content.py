@@ -685,7 +685,7 @@ def preview_release_pool_by_settings(
     candidates = [item for item in pool_items if item.get("status") in eligible_statuses and is_due(item)]
     candidates.sort(key=sort_key)
 
-    due_now = settings["mode"] == "scheduled" and (
+    due_now = settings["mode"] in ("scheduled", "auto") and (
         next_release_at is None or next_release_at <= now
     )
 

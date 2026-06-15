@@ -34413,5 +34413,32 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-06-16T00:59:36.058612"
+  },
+  {
+    "item_id": "2d9f1504",
+    "experiment_id": "K1504",
+    "k_id": "K1504",
+    "experiment_path": "experiments/k1504_samuelson_natgas/",
+    "category": "commodity_volatility",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI CONDITIONAL_PASS (seasonality supported; Samuelson proxy failed; no blocking code issues)",
+    "reviewer_source": "Codex CLI self-review",
+    "task_id": "research_samuelson_effect",
+    "content": "K1504 CONDITIONAL_PASS: Natural-gas-linked calendar-month realized-volatility seasonality is present in both NG=F and UNG using local yfinance close snapshot 2006-01-03 to 2026-06-12. Seasonality ANOVA/permutation passes: NG=F n=246 months, F=3.204, permutation p=0.0012, peak Jan RV=81.2% vs trough Mar 43.7% (1.86x), winter/non-winter ratio=1.21x; UNG n=230 months, F=2.450, permutation p=0.0084, peak Jan 60.3% vs trough Aug 39.0% (1.55x), winter/non-winter ratio=1.22x. However, the free-data Samuelson maturity proxy FAILS: NG=F daily log_abs_ret regression on business-days-to-expiry has wrong-sign coefficient +0.0036 (HAC t=1.28), near-expiry<=5bd dummy is +0.0217 (t=0.58), near bucket annualized RMS vol 57.3% vs far>=15bd 72.0%, bootstrap P(near>far)=0.199. Interpretation: cite K1504 only as a descriptive natural-gas seasonality result and as a negative screen for Yahoo NG=F expiry-distance proxy; do not cite it as evidence that true contract-level Samuelson effect holds or fails. Proper test needs multi-maturity futures settlement or implied-vol panel.",
+    "evidence": [
+      "experiments/k1504_samuelson_natgas/README.md",
+      "experiments/k1504_samuelson_natgas/k1504.py",
+      "experiments/k1504_samuelson_natgas/k1504_results.json",
+      "experiments/k1504_samuelson_natgas/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-16T03:20:25.795992",
+    "references": [
+      "Samuelson (1965) maturity-effect hypothesis",
+      "Mu (2004) Weather, Storage, and Natural Gas Price Dynamics",
+      "Ergen and Rizvanoghlu (2016) natural gas futures volatility fundamentals",
+      "Ho, Lee, and Tsai (2023) competing hypotheses on Samuelson effect",
+      "CME Rulebook Chapter 220 Henry Hub Natural Gas Futures"
+    ]
   }
 ]

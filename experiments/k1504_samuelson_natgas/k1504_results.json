@@ -1,0 +1,221 @@
+{
+  "experiment_id": "K1504",
+  "title": "Natural gas seasonality and front-month Samuelson proxy",
+  "created_at": "2026-06-15T19:20:54.207630+00:00",
+  "seed": 42,
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_reasons": [
+    "seasonality_pass=True: both NG=F and UNG permutation p<0.01 and peak/trough ratio>1.2",
+    "samuelson_proxy_pass=False: bdays coef=0.0036 t=1.28, near bucket coef=0.0217 t=0.58, bootstrap P(near>far)=0.199"
+  ],
+  "data": {
+    "raw_rows": 5149,
+    "weekend_rows_dropped": 1,
+    "clean_rows": 5146,
+    "start": "2006-01-03",
+    "end": "2026-06-12",
+    "source": "local snapshot experiments/research_inventory_seasonality_surprise_regime_conditiona/data/close.csv",
+    "tickers": [
+      "NG=F",
+      "UNG"
+    ],
+    "ngf_non_null": 5144,
+    "ung_non_null": 4820,
+    "ngf_ung_overlap": 4818,
+    "monthly_panel_rows": 476,
+    "samuelson_panel_rows": 5141
+  },
+  "methodology": {
+    "seasonality": "Monthly realized volatility from daily log returns; one-way ANOVA across calendar months plus 5,000-label permutation test.",
+    "monthly_regression": "log monthly RV on winter and summer dummies with lagged log RV; HAC maxlags=3.",
+    "samuelson_proxy": "NG=F continuous front-month proxy; expiry approximated as three business days before first day of delivery month, per CME rule. Daily log absolute return regressed on business days to expiry or near-expiry dummy, controlling for lagged log abs return, calendar-month FE, and year FE; HAC maxlags=5.",
+    "lookahead_controls": [
+      "Monthly persistence control uses lag_log_rv_ann = t-1.",
+      "Daily persistence control uses lag_log_abs_ret = t-1.",
+      "No future returns are used to construct current month or daily predictors.",
+      "Samuelson expiry proxy uses exchange calendar rule, not realized future volatility."
+    ],
+    "limitations": [
+      "NG=F is a Yahoo continuous front-month proxy, not a contract-level panel.",
+      "Yahoo roll timing may differ from the CME active-contract convention.",
+      "Expiry and business-day counts use a standard weekday calendar, not a full CME holiday calendar.",
+      "Weekend-labelled futures rows are dropped to keep business-day expiry counts coherent.",
+      "No options-implied vol or full term-structure curve is used."
+    ]
+  },
+  "literature_sources": [
+    {
+      "source": "Samuelson (1965), Proof that properly anticipated prices fluctuate randomly",
+      "role": "Original maturity-effect hypothesis."
+    },
+    {
+      "source": "Mu (2007), Weather, Storage, and Natural Gas Price Dynamics",
+      "role": "Documents natural gas volatility effects from weather, storage, and contract horizon."
+    },
+    {
+      "source": "CME Rulebook Chapter 220, Henry Hub Natural Gas Futures",
+      "role": "Defines NG last trading day as three business days before delivery month."
+    },
+    {
+      "source": "CME Introduction to Natural Gas Seasonality",
+      "role": "Describes storage/consumption seasonality and heating/cooling demand mechanism."
+    }
+  ],
+  "related_k": {
+    "K1461": "UNG month-of-year RV seasonality already found strong February-vs-September pattern; K1504 differentiates by adding NG=F and expiry-distance proxy.",
+    "inventory_seasonality_surprise_regime_conditiona": "Low-inventory seasonal interaction was NULL for NG=F/UNG; K1504 does not use inventory regimes.",
+    "K1339": "Commodity ETF momentum-regime switch event study; K1504 avoids calling ETF momentum a true futures-curve regime."
+  },
+  "seasonality_anova": {
+    "NG=F": {
+      "ticker": "NG=F",
+      "n_months": 246,
+      "f_stat": 3.203977901764173,
+      "p_value": 0.00044462649106357267,
+      "permutation_p": 0.0011997600479904018,
+      "peak_month": 1,
+      "trough_month": 3,
+      "peak_rv_ann": 0.8115295674943798,
+      "trough_rv_ann": 0.43700513287455617,
+      "peak_trough_ratio": 1.8570252531274778,
+      "winter_mean_rv_ann": 0.6026176051450268,
+      "non_winter_mean_rv_ann": 0.4993271899541506,
+      "winter_ratio": 1.2068591842562402,
+      "summer_mean_rv_ann": 0.4648065984541478,
+      "non_summer_mean_rv_ann": 0.568217291825288,
+      "summer_ratio": 0.8180085420509584
+    },
+    "UNG": {
+      "ticker": "UNG",
+      "n_months": 230,
+      "f_stat": 2.450059605189722,
+      "p_value": 0.006653419044890093,
+      "permutation_p": 0.008398320335932814,
+      "peak_month": 1,
+      "trough_month": 8,
+      "peak_rv_ann": 0.6033830119518774,
+      "trough_rv_ann": 0.3895734447300459,
+      "peak_trough_ratio": 1.5488299321068724,
+      "winter_mean_rv_ann": 0.5143469292049242,
+      "non_winter_mean_rv_ann": 0.4208312476822257,
+      "winter_ratio": 1.2222165821519824,
+      "summer_mean_rv_ann": 0.41321357227264616,
+      "non_summer_mean_rv_ann": 0.4750511018590395,
+      "summer_ratio": 0.8698297312764844
+    }
+  },
+  "monthly_regressions": {
+    "NG=F": [
+      {
+        "ticker": "NG=F",
+        "n_obs": 245,
+        "model": "log_rv_ann ~ is_winter + other season dummy + lag_log_rv_ann",
+        "coefficient": -0.08034255881116667,
+        "hac_t": -1.8643641294007371,
+        "hac_p": 0.062270586649673665,
+        "r_squared": 0.5077897760382435,
+        "expected_direction": "positive",
+        "harvey_pass_abs_t_gt_3": false
+      },
+      {
+        "ticker": "NG=F",
+        "n_obs": 245,
+        "model": "log_rv_ann ~ is_summer + other season dummy + lag_log_rv_ann",
+        "coefficient": -0.11178547064458436,
+        "hac_t": -2.9702244687115207,
+        "hac_p": 0.0029758222012138584,
+        "r_squared": 0.5077897760382435,
+        "expected_direction": "positive",
+        "harvey_pass_abs_t_gt_3": false
+      }
+    ],
+    "UNG": [
+      {
+        "ticker": "UNG",
+        "n_obs": 229,
+        "model": "log_rv_ann ~ is_winter + other season dummy + lag_log_rv_ann",
+        "coefficient": 0.008464646423305827,
+        "hac_t": 0.22006215814734184,
+        "hac_p": 0.8258227458021594,
+        "r_squared": 0.5385957473354046,
+        "expected_direction": "positive",
+        "harvey_pass_abs_t_gt_3": false
+      },
+      {
+        "ticker": "UNG",
+        "n_obs": 229,
+        "model": "log_rv_ann ~ is_summer + other season dummy + lag_log_rv_ann",
+        "coefficient": -0.0632174337488368,
+        "hac_t": -1.793880188960319,
+        "hac_p": 0.07283229416845428,
+        "r_squared": 0.5385957473354046,
+        "expected_direction": "positive",
+        "harvey_pass_abs_t_gt_3": false
+      }
+    ]
+  },
+  "samuelson_regressions": [
+    {
+      "ticker": "NG=F",
+      "n_obs": 5140,
+      "model": "daily log_abs_ret ~ bdays_to_expiry + lag_log_abs_ret + month FE + year FE",
+      "coefficient": 0.0036053538783888555,
+      "hac_t": 1.281141742857343,
+      "hac_p": 0.20014388417329365,
+      "r_squared": 0.06420959635662937,
+      "expected_direction": "negative",
+      "harvey_pass_abs_t_gt_3": false
+    },
+    {
+      "ticker": "NG=F",
+      "n_obs": 5140,
+      "model": "daily log_abs_ret ~ near_expiry_5bd + lag_log_abs_ret + month FE + year FE",
+      "coefficient": 0.02172582038169659,
+      "hac_t": 0.5773935159657052,
+      "hac_p": 0.5636736533721021,
+      "r_squared": 0.06396570045973615,
+      "expected_direction": "positive",
+      "harvey_pass_abs_t_gt_3": false
+    }
+  ],
+  "samuelson_buckets": [
+    {
+      "bucket": "near_0_5bd",
+      "n_obs": 1405,
+      "rms_vol_ann": 0.5733429449166332,
+      "mean_abs_return": 0.025867172759240213,
+      "mean_log_abs_return": -4.132906650572
+    },
+    {
+      "bucket": "mid_6_14bd",
+      "n_obs": 2160,
+      "rms_vol_ann": 0.5381765281340618,
+      "mean_abs_return": 0.024849386857300176,
+      "mean_log_abs_return": -4.197059525021068
+    },
+    {
+      "bucket": "far_15plus_bd",
+      "n_obs": 1576,
+      "rms_vol_ann": 0.7199380939800136,
+      "mean_abs_return": 0.029676932347925476,
+      "mean_log_abs_return": -4.092593229897865
+    }
+  ],
+  "near_far_bootstrap": {
+    "n_near": 1405,
+    "n_far": 1576,
+    "mean_log_abs_near_minus_far": -0.0403134206741349,
+    "ci_95_low": -0.1338739657624735,
+    "ci_95_high": 0.05231475129618633,
+    "prob_gt_zero": 0.1994
+  },
+  "figures": [
+    "figures/k1504_monthly_seasonality.png",
+    "figures/k1504_samuelson_bdays_to_expiry.png"
+  ],
+  "artifacts": {
+    "close_cache": "data/natgas_close.csv",
+    "monthly_panel": "data/monthly_realized_vol.csv",
+    "samuelson_panel": "data/ng_front_month_expiry_panel.csv"
+  }
+}

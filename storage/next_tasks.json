@@ -31679,7 +31679,7 @@
     "title": "研究 backlog fallback: 天然氣季節性波動與 Samuelson effect 到期遞增",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 天然氣季節性波動與 Samuelson effect 到期遞增 — yfinance UNG/天然氣 ETF 月度 RV，檢定冬季 heating regime vol pattern + 接近交割月 vol 系統升高（來源：CME 天然氣季節性 + arXiv seasonal stochastic vol） | 來源 section: 期刊主題挖掘 batch（2026-06-15；用戶糾正「文章鬼打牆、回收舊 cluster」後觸發 → websearch jpm/faj/jfe/jfm/jbf/j.fixed income/cfa/fsb/arxiv 2025-26，**硬約束跳出 8 飽和 cluster**：vt / vix-move / garch-har 賽馬 / 風險模型比較 / etf 分散 / 50-50+長債 / n 套策略 meta / proxy 測量比較。全免費資料 yfinance/fred/eia/finra，options/bdc 折溢價用成交量·股價動能 proxy 代理）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "samuelson_effect",
@@ -31687,7 +31687,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-15T13:11:18+00:00"
+    "created_at": "2026-06-15T13:11:18+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-15T19:11:46.595418+00:00",
+    "claim_session_id": "410e845173b1",
+    "started_at": "2026-06-15T19:11:46.972446+00:00",
+    "completed_at": "2026-06-15T19:21:05.054262+00:00",
+    "result": "Completed K1504 natural gas seasonality / Samuelson proxy experiment. Output: experiments/k1504_samuelson_natgas/ with reproducible script, results JSON, cached data, figures, README, and Codex review. Verdict CONDITIONAL_PASS: NG=F/UNG calendar-month RV seasonality passes ANOVA/permutation, but Yahoo NG=F front-month expiry-distance Samuelson proxy fails (wrong-sign bdays coef +0.0036 t=1.28; near-expiry t=0.58; P near>far=0.199). Knowledge.json and research_program.md updated; validation passed."
   },
   {
     "id": "paper_review_mile_bf13d810",
@@ -31839,12 +31845,18 @@
     "title": "Fix pre-existing test fail: test_preview_release_pool_self_heals_ignores_daily_audience_articles (due_now=False expected True)",
     "description": "tests/test_content_release_pool.py:210 — frozen now=2026-04-25T08:00 + last_released_at=04-24T13:00 + 12h interval → expected due_now=True but actual False. Pre-existing fail (stash content.py 仍 fail，與 anti-flood gate a967f2eb 無關). 可能與 release_pool_articles 在 daily-audience self-heal 路徑的 due_now 計算 OR include_drafts default 邊界相關. 修：(a) reproduce locally, (b) decide whether test 或 implementation 該調，(c) commit fix + verify。先讀 test 240-260 line + content.py release_pool_by_settings_keeps_legacy 流程。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "hourly_fire_2026_06_16_02",
     "created_at": "2026-06-16T02:21:00+08:00",
     "linked_task_ids": [
       "article_rewrite_mile_b97c5c33_1781578800"
-    ]
+    ],
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-15T19:08:50.545400+00:00",
+    "claim_session_id": "b9d0d89945fd",
+    "started_at": "2026-06-15T19:11:08.792804+00:00",
+    "completed_at": "2026-06-15T19:22:07.148683+00:00",
+    "result": "preview_release_pool_by_settings due_now 條件補上 auto mode（content.py:688）— 與 release_pool_by_settings line 598 ('scheduled','auto') 一致。5 tests 全綠。Root cause: 兩函式對 'auto' mode 不一致；release execution 接受 auto 但 preview 只看 scheduled。"
   }
 ]

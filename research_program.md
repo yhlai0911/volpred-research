@@ -588,7 +588,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 > **新軸 4 — AI 電力 × 能源轉型 vol**
 - [ ] 資料中心電力需求衝擊對公用/電網 ETF 的 vol 重定價 — yfinance XLU/VPU/GRID/PAVE RV + EIA 電力負載，檢定 AI 電力事件後公用事業從「低 vol 防禦」轉「高 vol 成長」結構斷點（來源：S&P Global 2026 資料中心電力 +22%/年）
 - [ ] 鈾物理囤積基金放大現貨波動 — yfinance URA/URNM/SRUUF + 物理鈾基金 proxy，檢定囤積 AUM 變化放大現貨 vol（與 K1445 URA 分散題正交，聚焦 supply-shock vol 放大）（來源：2026 鈾供給衝擊 + 物理基金抽現貨）
-- [ ] 天然氣季節性波動與 Samuelson effect 到期遞增 — yfinance UNG/天然氣 ETF 月度 RV，檢定冬季 heating regime vol pattern + 接近交割月 vol 系統升高（來源：CME 天然氣季節性 + arXiv seasonal stochastic vol）
+- [x] ~~天然氣季節性波動與 Samuelson effect 到期遞增~~ → **K1504 completed 2026-06-16，CONDITIONAL_PASS**：local yfinance close snapshot `NG=F`/`UNG` 2006-01-03 to 2026-06-12。Calendar-month realized-vol seasonality passes descriptive ANOVA/permutation：`NG=F` F=3.204、perm p=0.0012、Jan/Mar peak-trough 1.86x；`UNG` F=2.450、perm p=0.0084、Jan/Aug 1.55x。**但 Samuelson proxy FAILS**：`NG=F` business-days-to-expiry coef wrong-sign +0.0036 (HAC t=1.28)，near-expiry<=5bd dummy t=0.58，near bucket RMS vol 57.3% vs far 72.0%，bootstrap P(near>far)=0.199。只可引用為天然氣月度季節性 + Yahoo continuous front-month proxy negative screen；不可宣稱合約級 Samuelson effect，重開需 multi-maturity futures / implied-vol panel。
 > **新軸 5 — lottery / 行為橫斷面（backlog 零行為軸）**
 - [x] Factor-MAX：因子層級彩券需求預測因子報酬 — K1503 MIXED：yfinance 因子 ETF（MTUM/QUAL/VLUE/USMV/SIZE）月度 MAX 不支持次月低報酬 anomaly（0/4 return tests pass Harvey），但強烈預測次月 realized vol 較高（4/4 vol tests pass Harvey）。可寫成風險狀態訊號，不可寫成報酬 anomaly。
 - [ ] 彩券型個股籃 vol-of-vol 與危機放大 — 低價×高 idio-vol×高 MAX 籃，檢定其 RV 與 vol-of-vol 在 risk-off 放大、是否領先大盤 tail vol（來源：Bali MAX 框架 + 2025 lottery-momentum 延伸）
