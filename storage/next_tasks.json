@@ -31251,7 +31251,7 @@
     "title": "K1342: MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 584). Original: MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025 MOC imbalance）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1342.py with signal.shift(1) + seed=42, (c) K1342_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 584,
@@ -31263,7 +31263,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-15T08:15:53.136204+00:00",
     "claim_session_id": "863d4d9897f9",
-    "started_at": "2026-06-15T08:16:16.249961+00:00"
+    "started_at": "2026-06-15T08:16:16.249961+00:00",
+    "completed_at": "2026-06-15T08:26:18.448170+00:00",
+    "result": "K1342 completed as a conservative public-data MOC proxy study: yfinance 2m OHLCV, 10 tickers, 290 ticker-days / 29 dates, causal 15:30-15:48 signed-volume signal, 15:52+ targets, 3.4bp cost. No tradable late-close drift; all net bootstrap/Bonferroni tests fail to support positive alpha; README/results/CSV/figures written."
   },
   {
     "id": "K1343",

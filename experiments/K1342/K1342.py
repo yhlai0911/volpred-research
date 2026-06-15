@@ -2,11 +2,11 @@
 
 This is a conservative proxy study, not a proprietary NYSE/Nasdaq imbalance-feed
 study. Free Yahoo minute bars do not contain true MOC imbalance messages, so the
-signal uses only pre-publication signed-volume pressure from 15:30-15:49 ET.
+signal uses only pre-publication signed-volume pressure from 15:30-15:48 ET.
 
 Lookahead policy
 ----------------
-- Signal window ends at 15:49 ET; targets start no earlier than 15:51 ET.
+- Signal window ends at 15:48 ET; targets start no earlier than 15:52 ET.
 - High-pressure filter uses each ticker's prior 20 trading days only
   (`shift(1).rolling(...).quantile(...)`).
 - Next-day targets use the next observed trading day, not calendar-day offsets.
@@ -18,7 +18,6 @@ from __future__ import annotations
 import json
 import math
 import warnings
-from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import matplotlib
@@ -38,9 +37,14 @@ FIG_DIR = OUT_DIR / "figures"
 FIG_DIR.mkdir(exist_ok=True)
 
 TICKERS = ["SPY", "QQQ", "IWM", "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA"]
-PERIOD_DAYS = 30
-PERIOD = f"{PERIOD_DAYS}d_chunked"
-INTERVAL = "1m"
+PERIOD = "60d"
+INTERVAL = "2m"
+SIGNAL_START_ET = "15:30"
+SIGNAL_END_ET = "15:48"
+ENTRY_START_ET = "15:52"
+ENTRY_END_ET = "15:52"
+CLOSE_START_ET = "15:54"
+CLOSE_END_ET = "15:58"
 ROUND_TRIP_COST_BPS = 3.4  # task assumption: 1.7bp per side liquidity/impact cost
 BOOTSTRAP_B = 5000
 BOOTSTRAP_BLOCK_DAYS = 5
@@ -49,21 +53,6 @@ HIGH_PRESSURE_MIN_PERIODS = 10
 HIGH_PRESSURE_Q = 0.70
 
 TARGETS = ["late_close", "overnight_open", "next_close"]
-
-
-@dataclass
-class DailySignal:
-    ticker: str
-    date: str
-    signal_pressure: float
-    abs_pressure: float
-    signal_side: int
-    signal_volume: float
-    late_close_return: float
-    overnight_open_return: float
-    next_close_return: float
-    high_pressure_threshold: float | None
-    is_high_pressure: bool
 
 
 def flatten_yfinance_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
@@ -80,27 +69,14 @@ def flatten_yfinance_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
 
 
 def fetch_minute_bars(ticker: str) -> pd.DataFrame:
-    chunks = []
-    # Use the current New York date as exclusive end to avoid querying today's
-    # incomplete or pre-open session.
-    end = pd.Timestamp.now(tz="America/New_York").normalize().tz_convert("UTC")
-    start = end - pd.Timedelta(days=PERIOD_DAYS)
-    chunk_start = start
-    while chunk_start < end:
-        chunk_end = min(chunk_start + pd.Timedelta(days=7), end)
-        part = yf.download(
-            ticker,
-            start=chunk_start.strftime("%Y-%m-%d"),
-            end=chunk_end.strftime("%Y-%m-%d"),
-            interval=INTERVAL,
-            auto_adjust=False,
-            progress=False,
-            threads=False,
-        )
-        if not part.empty:
-            chunks.append(part)
-        chunk_start = chunk_end
-    raw = pd.concat(chunks).sort_index() if chunks else pd.DataFrame()
+    raw = yf.download(
+        ticker,
+        period=PERIOD,
+        interval=INTERVAL,
+        auto_adjust=False,
+        progress=False,
+        threads=False,
+    )
     if raw.empty:
         raise ValueError(f"{ticker}: yfinance returned no data")
     raw = raw[~raw.index.duplicated(keep="last")]
@@ -114,11 +90,11 @@ def fetch_minute_bars(ticker: str) -> pd.DataFrame:
     df = df.between_time("09:30", "15:59").copy()
     df["date"] = df.index.date
     df["time"] = df.index.time
-    df["ret_1m"] = np.log(df["Close"] / df["Close"].shift(1))
+    df["ret_bar"] = np.log(df["Close"] / df["Close"].shift(1))
     # Do not let the overnight jump contaminate the first regular-session minute.
     first_bar = df.groupby("date", sort=True).head(1).index
-    df.loc[first_bar, "ret_1m"] = np.nan
-    df["signed_volume"] = np.sign(df["ret_1m"].fillna(0.0)) * df["Volume"]
+    df.loc[first_bar, "ret_bar"] = np.nan
+    df["signed_volume"] = np.sign(df["ret_bar"].fillna(0.0)) * df["Volume"]
     return df
 
 
@@ -132,10 +108,10 @@ def build_daily_signals(ticker: str, bars: pd.DataFrame) -> pd.DataFrame:
 
     for i, (day, intraday) in enumerate(days[:-1]):
         next_day, next_intraday = days[i + 1]
-        signal_window = minute_slice(intraday, "15:30", "15:49")
-        entry_window = minute_slice(intraday, "15:51", "15:51")
-        close_window = minute_slice(intraday, "15:55", "15:59")
-        if len(signal_window) < 15 or entry_window.empty or close_window.empty:
+        signal_window = minute_slice(intraday, SIGNAL_START_ET, SIGNAL_END_ET)
+        entry_window = minute_slice(intraday, ENTRY_START_ET, ENTRY_END_ET)
+        close_window = minute_slice(intraday, CLOSE_START_ET, CLOSE_END_ET)
+        if len(signal_window) < 8 or entry_window.empty or close_window.empty:
             continue
 
         signal_volume = float(signal_window["Volume"].sum())
@@ -160,7 +136,7 @@ def build_daily_signals(ticker: str, bars: pd.DataFrame) -> pd.DataFrame:
                 "abs_pressure": abs(pressure),
                 "signal_side": side,
                 "signal_volume": signal_volume,
-                "entry_price_1551": entry_price,
+                "entry_price_after_publication": entry_price,
                 "close_price": close_price,
                 "next_open_price": next_open_price,
                 "next_close_price": next_close_price,
@@ -379,10 +355,10 @@ def main() -> None:
         "round_trip_cost_bps": ROUND_TRIP_COST_BPS,
         "bootstrap": {"B": BOOTSTRAP_B, "block_days": BOOTSTRAP_BLOCK_DAYS},
         "signal_definition": {
-            "proxy": "sum(sign(1m return) * volume) / sum(volume)",
-            "signal_window_et": "15:30-15:49",
-            "entry_for_late_close_target_et": "15:51 close",
-            "close_exit_proxy_et": "last available 15:55-15:59 close",
+            "proxy": "sum(sign(bar return) * volume) / sum(volume)",
+            "signal_window_et": f"{SIGNAL_START_ET}-{SIGNAL_END_ET}",
+            "entry_for_late_close_target_et": f"{ENTRY_START_ET} close",
+            "close_exit_proxy_et": f"last available {CLOSE_START_ET}-{CLOSE_END_ET} close",
             "high_pressure_filter": (
                 "abs(proxy) >= prior 20-trading-day rolling 70th percentile "
                 "with shift(1), min_periods=10"

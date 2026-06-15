@@ -4,8 +4,8 @@
   "seed": 42,
   "status": "completed_proxy_study",
   "data_source": "yfinance 1-minute OHLCV; no proprietary MOC imbalance feed",
-  "period": "30d_chunked",
-  "interval": "1m",
+  "period": "60d",
+  "interval": "2m",
   "tickers": [
     "SPY",
     "QQQ",
@@ -24,458 +24,458 @@
     "block_days": 5
   },
   "signal_definition": {
-    "proxy": "sum(sign(1m return) * volume) / sum(volume)",
-    "signal_window_et": "15:30-15:49",
-    "entry_for_late_close_target_et": "15:51 close",
-    "close_exit_proxy_et": "last available 15:55-15:59 close",
+    "proxy": "sum(sign(bar return) * volume) / sum(volume)",
+    "signal_window_et": "15:30-15:48",
+    "entry_for_late_close_target_et": "15:52 close",
+    "close_exit_proxy_et": "last available 15:54-15:58 close",
     "high_pressure_filter": "abs(proxy) >= prior 20-trading-day rolling 70th percentile with shift(1), min_periods=10"
   },
   "lookahead_policy": "Signal excludes 15:50 and later bars; targets begin at 15:51 or at the next session. High-pressure thresholds use shifted prior data only.",
   "data_audit": {
     "SPY": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "QQQ": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "IWM": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "AAPL": {
       "ok": true,
-      "minute_rows": 5459,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "MSFT": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "NVDA": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "AMZN": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "GOOGL": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "META": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     },
     "TSLA": {
       "ok": true,
-      "minute_rows": 5460,
-      "regular_session_dates": 14,
-      "usable_signal_days": 13,
-      "first_date": "2026-05-26",
+      "minute_rows": 5850,
+      "regular_session_dates": 30,
+      "usable_signal_days": 29,
+      "first_date": "2026-05-01",
       "last_date": "2026-06-12"
     }
   },
   "sample": {
-    "n_observations_all": 130,
-    "n_observations_high_pressure": 9,
-    "n_dates_all": 13,
-    "n_dates_high_pressure": 3,
-    "first_signal_date": "2026-05-26",
+    "n_observations_all": 290,
+    "n_observations_high_pressure": 58,
+    "n_dates_all": 29,
+    "n_dates_high_pressure": 17,
+    "first_signal_date": "2026-05-01",
     "last_signal_date": "2026-06-11"
   },
   "pooled_daily_equal_weight": {
     "all_days": {
       "late_close": {
         "label": "all_days",
-        "n_observations": 130,
-        "n_dates": 13,
-        "gross_mean_bps": -2.530216301527246,
-        "net_mean_bps": -5.930216301527247,
-        "gross_hit_rate": 0.5384615384615384,
-        "net_hit_rate": 0.23076923076923078,
-        "gross_newey_west_t": -1.0279365380255832,
-        "net_newey_west_t": -2.409235135768946,
-        "gross_block_bootstrap_p_one_sided": 0.9328,
-        "net_block_bootstrap_p_one_sided": 1.0,
+        "n_observations": 290,
+        "n_dates": 29,
+        "gross_mean_bps": -0.7310393316797413,
+        "net_mean_bps": -4.131039331679742,
+        "gross_hit_rate": 0.4827586206896552,
+        "net_hit_rate": 0.2413793103448276,
+        "gross_newey_west_t": -0.5501401928607953,
+        "net_newey_west_t": -3.1087941184010632,
+        "gross_block_bootstrap_p_one_sided": 0.8708,
+        "net_block_bootstrap_p_one_sided": 0.9996,
         "gross_block_bootstrap_p_bonferroni_6": 1.0,
         "net_block_bootstrap_p_bonferroni_6": 1.0
       },
       "overnight_open": {
         "label": "all_days",
-        "n_observations": 130,
-        "n_dates": 13,
-        "gross_mean_bps": 15.447901287996201,
-        "net_mean_bps": 12.0479012879962,
-        "gross_hit_rate": 0.6153846153846154,
-        "net_hit_rate": 0.6153846153846154,
-        "gross_newey_west_t": 2.3245211639720798,
-        "net_newey_west_t": 1.8129065562553417,
-        "gross_block_bootstrap_p_one_sided": 0.0126,
-        "net_block_bootstrap_p_one_sided": 0.063,
-        "gross_block_bootstrap_p_bonferroni_6": 0.0756,
-        "net_block_bootstrap_p_bonferroni_6": 0.378
+        "n_observations": 290,
+        "n_dates": 29,
+        "gross_mean_bps": 5.013360072177321,
+        "net_mean_bps": 1.6133600721773198,
+        "gross_hit_rate": 0.6206896551724138,
+        "net_hit_rate": 0.4827586206896552,
+        "gross_newey_west_t": 0.6597498816714953,
+        "net_newey_west_t": 0.21231551322628675,
+        "gross_block_bootstrap_p_one_sided": 0.2164,
+        "net_block_bootstrap_p_one_sided": 0.3824,
+        "gross_block_bootstrap_p_bonferroni_6": 1.0,
+        "net_block_bootstrap_p_bonferroni_6": 1.0
       },
       "next_close": {
         "label": "all_days",
-        "n_observations": 130,
-        "n_dates": 13,
-        "gross_mean_bps": 39.50044054435011,
-        "net_mean_bps": 36.100440544350114,
-        "gross_hit_rate": 0.7692307692307693,
-        "net_hit_rate": 0.6923076923076923,
-        "gross_newey_west_t": 1.3914532511847402,
-        "net_newey_west_t": 1.2716839273789378,
-        "gross_block_bootstrap_p_one_sided": 0.0342,
-        "net_block_bootstrap_p_one_sided": 0.0396,
-        "gross_block_bootstrap_p_bonferroni_6": 0.2052,
-        "net_block_bootstrap_p_bonferroni_6": 0.23760000000000003
+        "n_observations": 290,
+        "n_dates": 29,
+        "gross_mean_bps": 19.971928438144317,
+        "net_mean_bps": 16.571928438144315,
+        "gross_hit_rate": 0.5517241379310345,
+        "net_hit_rate": 0.5517241379310345,
+        "gross_newey_west_t": 0.9768643343031764,
+        "net_newey_west_t": 0.8105639819402375,
+        "gross_block_bootstrap_p_one_sided": 0.177,
+        "net_block_bootstrap_p_one_sided": 0.2232,
+        "gross_block_bootstrap_p_bonferroni_6": 1.0,
+        "net_block_bootstrap_p_bonferroni_6": 1.0
       }
     },
     "high_pressure_days": {
       "late_close": {
         "label": "high_pressure_days",
-        "n_observations": 9,
-        "n_dates": 3,
-        "gross_mean_bps": 0.5125024156507633,
-        "net_mean_bps": -2.8874975843492368,
-        "gross_hit_rate": 0.6666666666666666,
-        "net_hit_rate": 0.6666666666666666,
-        "gross_newey_west_t": NaN,
-        "net_newey_west_t": NaN,
-        "gross_block_bootstrap_p_one_sided": NaN,
-        "net_block_bootstrap_p_one_sided": NaN,
-        "gross_block_bootstrap_p_bonferroni_6": NaN,
-        "net_block_bootstrap_p_bonferroni_6": NaN
+        "n_observations": 58,
+        "n_dates": 17,
+        "gross_mean_bps": -3.286846977267261,
+        "net_mean_bps": -6.686846977267261,
+        "gross_hit_rate": 0.35294117647058826,
+        "net_hit_rate": 0.23529411764705882,
+        "gross_newey_west_t": -2.4164132826911815,
+        "net_newey_west_t": -4.916014030146963,
+        "gross_block_bootstrap_p_one_sided": 1.0,
+        "net_block_bootstrap_p_one_sided": 1.0,
+        "gross_block_bootstrap_p_bonferroni_6": 1.0,
+        "net_block_bootstrap_p_bonferroni_6": 1.0
       },
       "overnight_open": {
         "label": "high_pressure_days",
-        "n_observations": 9,
-        "n_dates": 3,
-        "gross_mean_bps": 23.151058253416405,
-        "net_mean_bps": 19.751058253416407,
-        "gross_hit_rate": 1.0,
-        "net_hit_rate": 1.0,
-        "gross_newey_west_t": NaN,
-        "net_newey_west_t": NaN,
-        "gross_block_bootstrap_p_one_sided": NaN,
-        "net_block_bootstrap_p_one_sided": NaN,
-        "gross_block_bootstrap_p_bonferroni_6": NaN,
-        "net_block_bootstrap_p_bonferroni_6": NaN
+        "n_observations": 58,
+        "n_dates": 17,
+        "gross_mean_bps": 1.764429771209789,
+        "net_mean_bps": -1.6355702287902119,
+        "gross_hit_rate": 0.4117647058823529,
+        "net_hit_rate": 0.4117647058823529,
+        "gross_newey_west_t": 0.2098775236529001,
+        "net_newey_west_t": -0.19454978315375668,
+        "gross_block_bootstrap_p_one_sided": 0.0756,
+        "net_block_bootstrap_p_one_sided": 0.1882,
+        "gross_block_bootstrap_p_bonferroni_6": 0.4536,
+        "net_block_bootstrap_p_bonferroni_6": 1.0
       },
       "next_close": {
         "label": "high_pressure_days",
-        "n_observations": 9,
-        "n_dates": 3,
-        "gross_mean_bps": 77.89920707323066,
-        "net_mean_bps": 74.49920707323066,
-        "gross_hit_rate": 1.0,
-        "net_hit_rate": 1.0,
-        "gross_newey_west_t": NaN,
-        "net_newey_west_t": NaN,
-        "gross_block_bootstrap_p_one_sided": NaN,
-        "net_block_bootstrap_p_one_sided": NaN,
-        "gross_block_bootstrap_p_bonferroni_6": NaN,
-        "net_block_bootstrap_p_bonferroni_6": NaN
+        "n_observations": 58,
+        "n_dates": 17,
+        "gross_mean_bps": 6.091158259545126,
+        "net_mean_bps": 2.691158259545122,
+        "gross_hit_rate": 0.47058823529411764,
+        "net_hit_rate": 0.47058823529411764,
+        "gross_newey_west_t": 0.16420328639780626,
+        "net_newey_west_t": 0.0725472909428082,
+        "gross_block_bootstrap_p_one_sided": 0.3198,
+        "net_block_bootstrap_p_one_sided": 0.3586,
+        "gross_block_bootstrap_p_bonferroni_6": 1.0,
+        "net_block_bootstrap_p_bonferroni_6": 1.0
       }
     }
   },
   "by_ticker": {
     "AAPL": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": 7.293818066632539,
-        "net_mean_bps": 3.89381806663254,
-        "hit_rate": 0.6923076923076923,
-        "mean_abs_pressure": 0.16375187736400207,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": -1.7209616341852878,
+        "net_mean_bps": -5.120961634185288,
+        "hit_rate": 0.4827586206896552,
+        "mean_abs_pressure": 0.2723513753604136,
+        "high_pressure_n": 5
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": -19.487426213347433,
-        "net_mean_bps": -22.887426213347435,
-        "hit_rate": 0.23076923076923078,
-        "mean_abs_pressure": 0.16375187736400207,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 12.620470649516127,
+        "net_mean_bps": 9.220470649516127,
+        "hit_rate": 0.6206896551724138,
+        "mean_abs_pressure": 0.2723513753604136,
+        "high_pressure_n": 5
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": 20.12838683719752,
-        "net_mean_bps": 16.728386837197522,
-        "hit_rate": 0.5384615384615384,
-        "mean_abs_pressure": 0.16375187736400207,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": -6.583772810511172,
+        "net_mean_bps": -9.983772810511173,
+        "hit_rate": 0.4482758620689655,
+        "mean_abs_pressure": 0.2723513753604136,
+        "high_pressure_n": 5
       }
     },
     "AMZN": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": 3.266199528723632,
-        "net_mean_bps": -0.13380047127636766,
-        "hit_rate": 0.6153846153846154,
-        "mean_abs_pressure": 0.22916356519730208,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 2.1875161479064027,
+        "net_mean_bps": -1.2124838520935968,
+        "hit_rate": 0.4827586206896552,
+        "mean_abs_pressure": 0.34045528793935587,
+        "high_pressure_n": 3
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": 30.717431882471608,
-        "net_mean_bps": 27.31743188247161,
-        "hit_rate": 0.6923076923076923,
-        "mean_abs_pressure": 0.22916356519730208,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 14.641813800336184,
+        "net_mean_bps": 11.241813800336184,
+        "hit_rate": 0.4482758620689655,
+        "mean_abs_pressure": 0.34045528793935587,
+        "high_pressure_n": 3
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": 57.373549794383855,
-        "net_mean_bps": 53.97354979438386,
-        "hit_rate": 0.6153846153846154,
-        "mean_abs_pressure": 0.22916356519730208,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 62.03318826192906,
+        "net_mean_bps": 58.63318826192906,
+        "hit_rate": 0.5862068965517241,
+        "mean_abs_pressure": 0.34045528793935587,
+        "high_pressure_n": 3
       }
     },
     "GOOGL": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": -1.7064026273271025,
-        "net_mean_bps": -5.1064026273271015,
-        "hit_rate": 0.5384615384615384,
-        "mean_abs_pressure": 0.25232340900011346,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 5.885557343210411,
+        "net_mean_bps": 2.485557343210411,
+        "hit_rate": 0.6206896551724138,
+        "mean_abs_pressure": 0.33176995498362677,
+        "high_pressure_n": 6
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": -25.132905880982975,
-        "net_mean_bps": -28.532905880982977,
-        "hit_rate": 0.5384615384615384,
-        "mean_abs_pressure": 0.25232340900011346,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": -0.813166404720021,
+        "net_mean_bps": -4.21316640472002,
+        "hit_rate": 0.5172413793103449,
+        "mean_abs_pressure": 0.33176995498362677,
+        "high_pressure_n": 6
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": -40.227286365095445,
-        "net_mean_bps": -43.62728636509544,
-        "hit_rate": 0.38461538461538464,
-        "mean_abs_pressure": 0.25232340900011346,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": -0.7518831346606148,
+        "net_mean_bps": -4.151883134660615,
+        "hit_rate": 0.5172413793103449,
+        "mean_abs_pressure": 0.33176995498362677,
+        "high_pressure_n": 6
       }
     },
     "IWM": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": -3.7695412328162528,
-        "net_mean_bps": -7.169541232816252,
-        "hit_rate": 0.46153846153846156,
-        "mean_abs_pressure": 0.15191746007217916,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": 0.03730525018094005,
+        "net_mean_bps": -3.3626947498190596,
+        "hit_rate": 0.4827586206896552,
+        "mean_abs_pressure": 0.26842717953643946,
+        "high_pressure_n": 4
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": 0.05430876563837653,
-        "net_mean_bps": -3.3456912343616234,
-        "hit_rate": 0.6153846153846154,
-        "mean_abs_pressure": 0.15191746007217916,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": 16.30827446189267,
+        "net_mean_bps": 12.908274461892669,
+        "hit_rate": 0.5862068965517241,
+        "mean_abs_pressure": 0.26842717953643946,
+        "high_pressure_n": 4
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": -5.134257191477452,
-        "net_mean_bps": -8.534257191477451,
-        "hit_rate": 0.46153846153846156,
-        "mean_abs_pressure": 0.15191746007217916,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": 19.3903579516137,
+        "net_mean_bps": 15.990357951613703,
+        "hit_rate": 0.6206896551724138,
+        "mean_abs_pressure": 0.26842717953643946,
+        "high_pressure_n": 4
       }
     },
     "META": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": 6.4717845709125035,
-        "net_mean_bps": 3.071784570912504,
-        "hit_rate": 0.5384615384615384,
-        "mean_abs_pressure": 0.22304163817473274,
-        "high_pressure_n": 2
+        "n": 29,
+        "gross_mean_bps": -1.511982889292608,
+        "net_mean_bps": -4.911982889292607,
+        "hit_rate": 0.41379310344827586,
+        "mean_abs_pressure": 0.31713689255667005,
+        "high_pressure_n": 7
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": -22.82147438470601,
-        "net_mean_bps": -26.22147438470601,
-        "hit_rate": 0.38461538461538464,
-        "mean_abs_pressure": 0.22304163817473274,
-        "high_pressure_n": 2
+        "n": 29,
+        "gross_mean_bps": -9.583287793359762,
+        "net_mean_bps": -12.983287793359763,
+        "hit_rate": 0.3103448275862069,
+        "mean_abs_pressure": 0.31713689255667005,
+        "high_pressure_n": 7
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": -49.80382684479518,
-        "net_mean_bps": -53.20382684479519,
-        "hit_rate": 0.6153846153846154,
-        "mean_abs_pressure": 0.22304163817473274,
-        "high_pressure_n": 2
+        "n": 29,
+        "gross_mean_bps": 11.881755152164615,
+        "net_mean_bps": 8.481755152164615,
+        "hit_rate": 0.5517241379310345,
+        "mean_abs_pressure": 0.31713689255667005,
+        "high_pressure_n": 7
       }
     },
     "MSFT": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": 7.616661736834068,
-        "net_mean_bps": 4.216661736834068,
-        "hit_rate": 0.6153846153846154,
-        "mean_abs_pressure": 0.25911944848014923,
-        "high_pressure_n": 2
+        "n": 29,
+        "gross_mean_bps": -2.292255081187678,
+        "net_mean_bps": -5.692255081187678,
+        "hit_rate": 0.4482758620689655,
+        "mean_abs_pressure": 0.248250764311648,
+        "high_pressure_n": 7
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": 87.98252874173873,
-        "net_mean_bps": 84.58252874173873,
-        "hit_rate": 0.6923076923076923,
-        "mean_abs_pressure": 0.25911944848014923,
-        "high_pressure_n": 2
+        "n": 29,
+        "gross_mean_bps": 35.01327811976023,
+        "net_mean_bps": 31.613278119760228,
+        "hit_rate": 0.6206896551724138,
+        "mean_abs_pressure": 0.248250764311648,
+        "high_pressure_n": 7
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": 32.59092463166571,
-        "net_mean_bps": 29.190924631665705,
-        "hit_rate": 0.6153846153846154,
-        "mean_abs_pressure": 0.25911944848014923,
-        "high_pressure_n": 2
+        "n": 29,
+        "gross_mean_bps": -5.732153649933408,
+        "net_mean_bps": -9.132153649933407,
+        "hit_rate": 0.5517241379310345,
+        "mean_abs_pressure": 0.248250764311648,
+        "high_pressure_n": 7
       }
     },
     "NVDA": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": -30.31437430141324,
-        "net_mean_bps": -33.71437430141324,
-        "hit_rate": 0.46153846153846156,
-        "mean_abs_pressure": 0.1613955300143569,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": -10.998497067418485,
+        "net_mean_bps": -14.398497067418486,
+        "hit_rate": 0.41379310344827586,
+        "mean_abs_pressure": 0.26145300449843195,
+        "high_pressure_n": 5
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": 60.32775656610553,
-        "net_mean_bps": 56.92775656610553,
-        "hit_rate": 0.6153846153846154,
-        "mean_abs_pressure": 0.1613955300143569,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": -6.148566800876116,
+        "net_mean_bps": -9.548566800876117,
+        "hit_rate": 0.4482758620689655,
+        "mean_abs_pressure": 0.26145300449843195,
+        "high_pressure_n": 5
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": 186.13092228446433,
-        "net_mean_bps": 182.73092228446433,
-        "hit_rate": 0.6923076923076923,
-        "mean_abs_pressure": 0.1613955300143569,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": 42.26369124310356,
+        "net_mean_bps": 38.86369124310356,
+        "hit_rate": 0.5517241379310345,
+        "mean_abs_pressure": 0.26145300449843195,
+        "high_pressure_n": 5
       }
     },
     "QQQ": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": -1.529976781153327,
-        "net_mean_bps": -4.929976781153327,
-        "hit_rate": 0.46153846153846156,
-        "mean_abs_pressure": 0.23128192085286042,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": -3.6191182005119655,
+        "net_mean_bps": -7.019118200511966,
+        "hit_rate": 0.4482758620689655,
+        "mean_abs_pressure": 0.382368203930235,
+        "high_pressure_n": 7
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": 13.478239620486104,
-        "net_mean_bps": 10.078239620486103,
-        "hit_rate": 0.6923076923076923,
-        "mean_abs_pressure": 0.23128192085286042,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": 2.765289711719548,
+        "net_mean_bps": -0.6347102882804521,
+        "hit_rate": 0.5172413793103449,
+        "mean_abs_pressure": 0.382368203930235,
+        "high_pressure_n": 7
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": 56.08602498339087,
-        "net_mean_bps": 52.686024983390865,
-        "hit_rate": 0.46153846153846156,
-        "mean_abs_pressure": 0.23128192085286042,
-        "high_pressure_n": 0
+        "n": 29,
+        "gross_mean_bps": 38.96747648656953,
+        "net_mean_bps": 35.56747648656953,
+        "hit_rate": 0.5862068965517241,
+        "mean_abs_pressure": 0.382368203930235,
+        "high_pressure_n": 7
       }
     },
     "SPY": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": -6.821179082308153,
-        "net_mean_bps": -10.221179082308153,
-        "hit_rate": 0.23076923076923078,
-        "mean_abs_pressure": 0.2489134280163621,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": -1.960183553931619,
+        "net_mean_bps": -5.360183553931618,
+        "hit_rate": 0.41379310344827586,
+        "mean_abs_pressure": 0.31834711989976705,
+        "high_pressure_n": 7
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": 6.27308510004311,
-        "net_mean_bps": 2.87308510004311,
-        "hit_rate": 0.5384615384615384,
-        "mean_abs_pressure": 0.2489134280163621,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 4.298017454958608,
+        "net_mean_bps": 0.8980174549586082,
+        "hit_rate": 0.4827586206896552,
+        "mean_abs_pressure": 0.31834711989976705,
+        "high_pressure_n": 7
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": -7.172974364540103,
-        "net_mean_bps": -10.572974364540103,
-        "hit_rate": 0.38461538461538464,
-        "mean_abs_pressure": 0.2489134280163621,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 16.217650168306704,
+        "net_mean_bps": 12.817650168306704,
+        "hit_rate": 0.5517241379310345,
+        "mean_abs_pressure": 0.31834711989976705,
+        "high_pressure_n": 7
       }
     },
     "TSLA": {
       "late_close": {
-        "n": 13,
-        "gross_mean_bps": -5.80915289335713,
-        "net_mean_bps": -9.20915289335713,
-        "hit_rate": 0.38461538461538464,
-        "mean_abs_pressure": 0.18061067639180656,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 6.682226368432483,
+        "net_mean_bps": 3.282226368432483,
+        "hit_rate": 0.5862068965517241,
+        "mean_abs_pressure": 0.2247585276769741,
+        "high_pressure_n": 7
       },
       "overnight_open": {
-        "n": 13,
-        "gross_mean_bps": 23.087468682514984,
-        "net_mean_bps": 19.687468682514986,
-        "hit_rate": 0.5384615384615384,
-        "mean_abs_pressure": 0.18061067639180656,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": -18.96852247745426,
+        "net_mean_bps": -22.368522477454263,
+        "hit_rate": 0.4482758620689655,
+        "mean_abs_pressure": 0.2247585276769741,
+        "high_pressure_n": 7
       },
       "next_close": {
-        "n": 13,
-        "gross_mean_bps": 145.032941678307,
-        "net_mean_bps": 141.63294167830702,
-        "hit_rate": 0.6153846153846154,
-        "mean_abs_pressure": 0.18061067639180656,
-        "high_pressure_n": 1
+        "n": 29,
+        "gross_mean_bps": 22.03297471286118,
+        "net_mean_bps": 18.63297471286118,
+        "hit_rate": 0.5172413793103449,
+        "mean_abs_pressure": 0.2247585276769741,
+        "high_pressure_n": 7
       }
     }
   },
