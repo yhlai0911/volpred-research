@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
@@ -205,6 +206,90 @@ def _article_audience(item: dict) -> str:
     return "uncategorized"
 
 
+# --- Release-time anti-flood dedup gate -------------------------------------
+# 2026-06-16 incident: release_pool promoted drafts with ZERO dedup vs
+# already-published → 2026-06-15 dumped 5 "model-comparison / complexity-
+# doesn't-win" general articles in one day on top of a 36-article corpus of the
+# same theme. Neither arc_dedup (method articles, no distinctive ASSET entity)
+# nor topic_cluster (spread across spy/vix/None) caught it. This gate compares a
+# candidate draft's title+body bigram profile against recently-published
+# general/research articles; a near-duplicate is skipped (stays draft) instead
+# of flooding the live feed. Daily/event/member_qa audiences are exempt (their
+# repetition is by design — e.g. the templated daily VIX bulletin).
+_RELEASE_DEDUP_WINDOW_DAYS = 21
+_RELEASE_DEDUP_JACCARD = 0.45
+_RELEASE_DEDUP_AUDIENCES = {"general", "research"}
+
+
+def _bigram_profile(text: str) -> set[str]:
+    s = re.sub(r"[\s0-9A-Za-z，,。.：:；;？?！!（）()「」、\-—~%]+", "", text or "")
+    return {s[i : i + 2] for i in range(len(s) - 1)}
+
+
+def _release_content_dup(item: dict, recent_pub: list[dict]) -> dict | None:
+    """Return the most-similar recently-published article if `item` is a
+    near-duplicate by title+body bigram Jaccard, else None."""
+    title = str(item.get("title") or "")
+    body = str(item.get("content") or item.get("description") or "")[:2000]
+    prof = _bigram_profile(title + "\n" + body)
+    if len(prof) < 20:  # too short to judge — don't block
+        return None
+    best, best_j = None, 0.0
+    for other in recent_pub:
+        if other.get("id") == item.get("id"):
+            continue
+        oprof = _bigram_profile(
+            str(other.get("title") or "")
+            + "\n"
+            + str(other.get("content") or other.get("description") or "")[:2000]
+        )
+        if not oprof:
+            continue
+        j = len(prof & oprof) / len(prof | oprof)
+        if j > best_j:
+            best, best_j = other, j
+    if best is not None and best_j >= _RELEASE_DEDUP_JACCARD:
+        return {"id": best.get("id"), "title": best.get("title"), "jaccard": round(best_j, 3)}
+    return None
+
+
+# Theme-flood gate: content-bigram catches near-COPIES, but the 2026-06-15
+# incident was same-THEME-different-wording (36 "complex model doesn't beat
+# simple" articles, bigram Jaccard < 0.45 between them). A theme signature +
+# recency cap throttles saturated themes regardless of wording. Add a theme
+# here when a topic visibly over-publishes; cap is per rolling window.
+_THEME_CAP = 3
+_SATURATED_THEMES = {
+    "model_complexity": re.compile(
+        r"模型.{0,12}(擂台|投票|加在一起|更聰明|花俏|更準|沒贏|沒更準|只贏|不能算真的贏|疊|複雜|淘汰)"
+        r"|擂台賽|越複雜|複雜.{0,6}(不一定|沒|更強|更厲害|更準)|老方法|沒被淘汰|加更多數學|更花俏|愈花俏"
+        r"|模型.{0,6}(投票|加權|ensemble|集成)|加在一起.{0,6}(打敗|贏|更強)"
+    ),
+    "vix_sufficiency": re.compile(r"VIX.{0,14}(就夠|夠不夠|足夠|充分|多餘|還需要|是不是最|打敗|比.{0,4}準)|只看\s*VIX"),
+    "vt_strategy": re.compile(r"波動率目標|目標波動率|vol[\s-]?target|VT\s*(策略|參數|保險|成本)"),
+    "fifty_fifty": re.compile(r"50/50|股(票)?加黃金|SPY.{0,6}GLD|股債(金|再平衡|配置)"),
+    "overnight_gap": re.compile(r"夜盤|隔夜|overnight|跳空|盤前|盤後.{0,4}波動"),
+}
+
+
+def _release_theme_flood(item: dict, recent_pub: list[dict]) -> dict | None:
+    """Skip if `item` belongs to a saturated theme that already has >= _THEME_CAP
+    articles in the recent window."""
+    text = str(item.get("title") or "") + "\n" + str(item.get("content") or item.get("description") or "")
+    for name, rx in _SATURATED_THEMES.items():
+        if not rx.search(text):
+            continue
+        cnt = sum(
+            1
+            for o in recent_pub
+            if o.get("id") != item.get("id")
+            and rx.search(str(o.get("title") or "") + "\n" + str(o.get("content") or o.get("description") or ""))
+        )
+        if cnt >= _THEME_CAP:
+            return {"theme": name, "recent_count": cnt}
+    return None
+
+
 def release_pool_articles(
     *,
     pub_id: str | None = None,
@@ -246,9 +331,15 @@ def release_pool_articles(
         # Sort: scheduled first, then audience priority, then FIFO (oldest created_at first)
         return (preferred_rank, 0 if status == "scheduled" else 1, created_at)
 
+    def _dedup_flagged(item: dict) -> bool:
+        d = item.get("details")
+        return isinstance(d, dict) and bool(d.get("release_dedup_skipped"))
+
     candidates = [
         item for item in feed
-        if item.get("status") in ({"scheduled", "draft"} if effective_include_drafts else {"scheduled"}) and is_due(item)
+        if item.get("status") in ({"scheduled", "draft"} if effective_include_drafts else {"scheduled"})
+        and is_due(item)
+        and not _dedup_flagged(item)
     ]
     candidates.sort(key=sort_key)
 
@@ -258,7 +349,18 @@ def release_pool_articles(
     selected = candidates[: max(int(limit), 1)]
     released: list[dict] = []
     audit_skipped: list[dict] = []
+    dedup_skipped: list[dict] = []
     released_at = now.isoformat()
+
+    # Recently-published general/research corpus for the anti-flood dedup gate.
+    _dedup_cutoff = (now - timedelta(days=_RELEASE_DEDUP_WINDOW_DAYS)).isoformat()
+    recent_pub_for_dedup = [
+        a
+        for a in feed
+        if a.get("status") == "published"
+        and str(a.get("published_at") or "") >= _dedup_cutoff
+        and _article_audience(a) in _RELEASE_DEDUP_AUDIENCES
+    ]
 
     # Re-audit at release time (2026-04-26 hardening): pre-d9921152 drafts
     # were built before publish_milestone gained audience-content gates, so
@@ -311,6 +413,43 @@ def release_pool_articles(
                 }
             )
             continue
+
+        # Anti-flood dedup gate (2026-06-16): skip near-duplicate of a
+        # recently-published general/research article — don't flood live feed.
+        if _article_audience(item) in _RELEASE_DEDUP_AUDIENCES:
+            dup = _release_content_dup(item, recent_pub_for_dedup)
+            flood = _release_theme_flood(item, recent_pub_for_dedup)
+            if dup is not None or flood is not None:
+                # Flag so it's excluded from future candidate selection (no
+                # infinite re-skip / slot block); left as draft for review, not
+                # destructively unpublished.
+                _d = item.get("details")
+                if not isinstance(_d, dict):
+                    _d = {}
+                    item["details"] = _d
+                _d["release_dedup_skipped"] = True
+                if dup is not None:
+                    _d["release_dedup_of"] = dup["id"]
+                    _d["release_dedup_jaccard"] = dup["jaccard"]
+                if flood is not None:
+                    _d["release_theme_flood"] = flood["theme"]
+                    _d["release_theme_recent_count"] = flood["recent_count"]
+                dedup_skipped.append(
+                    {
+                        "id": item.get("id"),
+                        "title": item.get("title"),
+                        "dup_of": dup["id"] if dup else None,
+                        "jaccard": dup["jaccard"] if dup else None,
+                        "theme_flood": flood["theme"] if flood else None,
+                        "theme_recent_count": flood["recent_count"] if flood else None,
+                    }
+                )
+                reason = (
+                    f"near-dup of {dup['id']} (J={dup['jaccard']})" if dup
+                    else f"theme '{flood['theme']}' saturated (recent={flood['recent_count']})"
+                )
+                print(f"  [release_pool] DEDUP-SKIP {item.get('id')} — {reason}; kept as draft.")
+                continue
 
         item["status"] = "published"
         item["published_at"] = released_at
@@ -365,6 +504,14 @@ def release_pool_articles(
             )
         except Exception:
             pass
+
+    if dedup_skipped and not released:
+        # Persist the release_dedup_skipped flags even when nothing was released,
+        # so flagged drafts are excluded from future candidate selection (no
+        # infinite re-skip / slot block).
+        from volpred.ops.shared_lock import shared_state_lock
+        with shared_state_lock("publisher_feed", storage_dir=storage_dir):
+            dump_json(_feed_path(storage_dir), feed)
 
     if released:
         # 2026-05-04 finding #17 修整：feed.json 寫入須與 publisher._append_to_feed
@@ -423,6 +570,7 @@ def release_pool_articles(
         "released_count": len(released),
         "released": released,
         "audit_skipped": audit_skipped,
+        "dedup_skipped": dedup_skipped,
         "due_only": due_only,
         "include_drafts": effective_include_drafts,
         "preferred_audiences": list(preferred_audiences or []),

@@ -250,3 +250,50 @@ def test_release_pool_by_settings_keeps_legacy_missing_last_released_first_run_b
 
     assert result["released_count"] == 1
     assert settings["last_released_at"] == frozen_now.isoformat()
+
+
+def test_release_pool_theme_flood_gate_skips_saturated_theme(tmp_path: Path, monkeypatch):
+    """2026-06-16 incident regression: release_pool must NOT flood the feed with
+    same-theme general articles. 4 published 'model-comparison' articles already
+    out — a 5th same-theme draft is dedup-skipped (flagged, kept draft), while a
+    distinct-theme draft releases normally."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 16, 8, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
+
+    model_body = "模型擂台賽：越複雜的模型不一定更準，老方法 GARCH 沒被淘汰，花俏的新版本沒贏。" * 4
+    feed = []
+    for i in range(4):
+        feed.append({
+            "id": f"mile_pubmodel{i}", "status": "published", "audience": "general",
+            "published_at": (frozen_now - timedelta(days=1)).isoformat(),
+            "title": f"模型擂台賽第{i}場：複雜模型沒更準", "content": model_body,
+        })
+    feed.append({
+        "id": "mile_draftmodel", "status": "draft", "audience": "general",
+        "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+        "title": "又一場模型擂台賽：花俏不等於更準", "content": model_body,
+    })
+    feed.append({
+        "id": "mile_draftdistinct", "status": "draft", "audience": "general",
+        "created_at": (frozen_now - timedelta(days=3)).isoformat(),
+        "title": "鈾礦 ETF 的流動性與庫存週期",
+        "content": "URA 基金 AUM 與鈾礦現貨庫存的關係，鈾礦 ETF 投資人結構與流動性主因。" * 4,
+    })
+    _write_json(storage_dir / "reports" / "feed.json", feed)
+
+    res = content.release_pool_articles(
+        limit=5, due_only=False, include_drafts=True, storage_dir=str(storage_dir),
+    )
+    skipped_ids = {s["id"] for s in res["dedup_skipped"]}
+    released_ids = {r["id"] for r in res["released"]}
+    assert "mile_draftmodel" in skipped_ids, "saturated-theme draft must be dedup-skipped"
+    assert "mile_draftdistinct" in released_ids, "distinct-theme draft must release normally"
+
+    # flag persisted — excluded from a subsequent release run (no infinite re-skip)
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    flagged = next(a for a in feed_after if a["id"] == "mile_draftmodel")
+    assert flagged.get("details", {}).get("release_dedup_skipped") is True
+    assert flagged.get("status") == "draft"
