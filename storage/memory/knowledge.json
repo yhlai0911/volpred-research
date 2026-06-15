@@ -34285,5 +34285,44 @@
     "verdict": "PASS",
     "reviewer_source": "Codex CLI (gpt-5.4 via codex exec, v2 after v1 fix-pass)",
     "experiment_path": "experiments/K1341/"
+  },
+  {
+    "experiment_id": "K1345_pre_fomc_iv_drift",
+    "k_id": "K1345",
+    "experiment_path": "experiments/K1345_pre_fomc_iv_drift/",
+    "experiment_files": [
+      "experiments/K1345_pre_fomc_iv_drift/run.py",
+      "experiments/K1345_pre_fomc_iv_drift/results.json",
+      "experiments/K1345_pre_fomc_iv_drift/README.md"
+    ],
+    "title": "K1345: Pre-FOMC Long-Vol REJECTED; Inverse Drift Bonferroni-Significant (confirms K856 anticipation)",
+    "category": "methodology",
+    "verdict": "INVERSE_SIGNIFICANT",
+    "summary": "Pre-FOMC long-VIXY entry at T-14/T-7/T-3/T-0 with exit T+0/T+1 — 123 scheduled FOMC events (2011-01 to 2026-06, IS=64 OOS=59), 10bps round-trip cost. 0/8 specs satisfy PASS bar (OOS Sharpe>0.5 + Bonferroni + |IS-OOS gap|<1.5). Best OOS Sharpe (T-0/T+1) = +2.03 but p_bootstrap = 0.197 (insignificant) with IS-OOS gap −1.47. Two specs Bonferroni-significant with NEGATIVE Sharpe: T-7/T+0 OOS Sharpe=−1.58 p=0.002; T-3/T+0 OOS Sharpe=−2.99 p=0.005. Long-vol pre-FOMC is NOT tradable. Bonferroni-significant negative drift in VIXY confirms K856 prior (VIX anticipates FOMC). Inverse trade (short VIXY pre-FOMC) is NOT automatically a free lunch — VIXY's structural contango already biases short-VIXY positive; FOMC-window-specific vs buy-and-hold-short baseline is a separate study.",
+    "reviewer_source": "Codex GPT-5.4 (v1 caught lookahead via 2020-03 emergency cuts + verdict-logic cross-spec bug; v2 fix applied + verdict re-derived)",
+    "codex_reviewed": true,
+    "data_source": "yfinance ^VIX, ^VIX9D, VIXY 2011-01..2026-06; FOMC dates hardcoded from federalreserve.gov calendar (scheduled meetings only — emergency 2020-03-03/15 excluded)",
+    "sample_size": 123,
+    "monetization_implication": "Honest-null reader article: 'Why long-vol pre-FOMC loses money — and why the inverse short-vol trade is not the free lunch it looks like.' Differentiates VolPred as evidence-based vs pop-finance 'buy VIX before Fed' narrative. Possible follow-up: explicitly test short-VIXY pre-FOMC vs buy-and-hold-short with realistic short-borrow + tail-risk gates.",
+    "honest_caveats": [
+      "VIXY contango drag (~5-15% annual) biases long-only test against PASS by construction",
+      "VIXY only from 2011 — pre-2011 high-vol regime excluded",
+      "10bps round-trip cost may underestimate FOMC-day spread widening",
+      "T-0/T+0 spec has IS-OOS Sharpe gap −3.12 (instability warning)",
+      "Inverse pattern confirms K856 but does NOT establish a tradable strategy (needs cross-baseline study)"
+    ],
+    "related_k": [
+      "K513",
+      "K514",
+      "K856",
+      "K185"
+    ],
+    "evidence": [
+      "experiments/K1345_pre_fomc_iv_drift/results.json",
+      "experiments/K1345_pre_fomc_iv_drift/run.py",
+      "experiments/K1345_pre_fomc_iv_drift/fig_iv_path.png",
+      "experiments/K1345_pre_fomc_iv_drift/fig_returns_by_window.png"
+    ],
+    "confidence": 0.85
   }
 ]

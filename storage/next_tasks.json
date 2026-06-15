@@ -31291,7 +31291,7 @@
     "title": "K1344: 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 587). Original: 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1344.py with signal.shift(1) + seed=42, (c) K1344_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 587,
@@ -31299,14 +31299,18 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T00:00:10Z"
+    "created_at": "2026-06-15T00:00:10Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-15T09:30:25.197378+00:00",
+    "claim_session_id": "76aa4834fe0e",
+    "started_at": "2026-06-15T09:30:31.930316+00:00"
   },
   {
     "id": "research_pre_fomc_implied_vol_drift",
     "title": "研究 backlog fallback: Pre-FOMC implied vol 兩週前 drift 的可交易性",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Pre-FOMC implied vol 兩週前 drift 的可交易性 — 用 SPY ATM IV 代理（GARCH/realized 衍生）在 FOMC 前 14 / 7 / 3 / 0 日的 IV path，檢定 long-vol 進場時點與 post-announcement IV crush 的風險報酬比（yfinance + FOMC 日曆）（來源：iPresage 2026 + JFQA 2025-08 disagreement 模型；老議題但 2025 解釋升級） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "pre_fomc_implied_vol_drift",
@@ -31314,7 +31318,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-15T02:11:50+00:00"
+    "created_at": "2026-06-15T02:11:50+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-15T09:11:30.823299+00:00",
+    "claim_session_id": "3ff2e1249cd0",
+    "started_at": "2026-06-15T09:11:34.777849+00:00",
+    "completed_at": "2026-06-15T09:31:38.536205+00:00",
+    "result": "K1345 Pre-FOMC long-vol REJECTED (0/8 specs PASS); 2 specs Bonferroni-significant NEGATIVE Sharpe (T-7/T+0=-1.58 p=0.002; T-3/T+0=-2.99 p=0.005) confirm K856 anticipation. Verdict INVERSE_SIGNIFICANT. Codex v1 caught emergency-cut lookahead + cross-spec verdict bug, v2 fixed. knowledge.json + work_log written. Honest-null article candidate."
   },
   {
     "id": "research_move_vix_vol_regime",
@@ -31443,11 +31453,11 @@
     "email_subject": "Re: [VolPred Alert][CRITICAL] Host cron failure detected",
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
     "started_at": "2026-06-15T03:45:50.371847+00:00",
-    "last_released_at": "2026-06-15T05:50:08.815701+00:00",
+    "last_released_at": "2026-06-15T08:50:05.956321+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-15T06:07:23.204073+00:00",
-    "claim_session_id": "edf11d702558"
+    "claimed_at": "2026-06-15T09:07:57.976276+00:00",
+    "claim_session_id": "bf6cf7f2c7b9"
   },
   {
     "id": "platform_ops_release_pool_throughput_bump_1781495209",

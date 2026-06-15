@@ -1,0 +1,343 @@
+{
+  "experiment_id": "K1345_pre_fomc_iv_drift",
+  "data_source": {
+    "vix": "yfinance ^VIX 2010-01..2026-06",
+    "vix9d": "yfinance ^VIX9D 2011-01..2026-06",
+    "vixy": "yfinance VIXY 2011-01..2026-06 (ProShares VIX Short-Term Futures ETF)",
+    "spy": "yfinance SPY",
+    "fomc_dates": "Hardcoded from federalreserve.gov calendar 2011-01..2026-06 (incl. 2 March-2020 emergency cuts)"
+  },
+  "sample_size_fomc_events": 123,
+  "period": {
+    "is": "2011-01-04..2018-12-31",
+    "oos": "2019-01-01..2026-06-12"
+  },
+  "cost_assumption": {
+    "per_side_bps": 5.0,
+    "round_trip_bps": 10.0
+  },
+  "multiple_test_correction": {
+    "method": "Bonferroni",
+    "n_tests": 8,
+    "alpha": 0.00625
+  },
+  "bootstrap": {
+    "method": "block-bootstrap",
+    "block_size": 5,
+    "reps": 1000
+  },
+  "specs": [
+    {
+      "entry_window_cal_days": 14,
+      "exit_horizon_trading_days": 0,
+      "n_trades_total": 122,
+      "n_trades_is": 64,
+      "n_trades_oos": 58,
+      "is": {
+        "mean_return_bp": -402.7032354747964,
+        "sharpe_annualized": -1.4176318183640664,
+        "t_stat": -2.6716200834635644,
+        "p_value_bootstrap": 0.009,
+        "pct_positive": 0.328125
+      },
+      "oos_net": {
+        "mean_return_bp": -273.82702857024566,
+        "sharpe_annualized": -1.0735291562330824,
+        "t_stat": -1.927043810526398,
+        "p_value_bootstrap": 0.012,
+        "pct_positive": 0.29310344827586204,
+        "return_ci95_bp": [
+          -1628.6888833489402,
+          2274.765660487849
+        ]
+      },
+      "oos_gross": {
+        "mean_return_bp": -263.82702857024566,
+        "sharpe_annualized": -1.0343245108100798
+      },
+      "baseline_random_oos": {
+        "n": 58,
+        "mean_return_bp": -268.92670042871225,
+        "sharpe_annualized": -7.749012541075925,
+        "pct_positive": 0.25862068965517243
+      },
+      "passes_bonferroni_oos": false,
+      "is_oos_sharpe_gap": -0.34410266213098395
+    },
+    {
+      "entry_window_cal_days": 14,
+      "exit_horizon_trading_days": 1,
+      "n_trades_total": 122,
+      "n_trades_is": 64,
+      "n_trades_oos": 58,
+      "is": {
+        "mean_return_bp": -296.9568736693617,
+        "sharpe_annualized": -0.8809853593707174,
+        "t_stat": -1.7186115428619562,
+        "p_value_bootstrap": 0.091,
+        "pct_positive": 0.3125
+      },
+      "oos_net": {
+        "mean_return_bp": -151.82524299799672,
+        "sharpe_annualized": -0.47086090463030694,
+        "t_stat": -0.875389715037113,
+        "p_value_bootstrap": 0.266,
+        "pct_positive": 0.3103448275862069,
+        "return_ci95_bp": [
+          -1844.1873851348982,
+          3425.554846287868
+        ]
+      },
+      "oos_gross": {
+        "mean_return_bp": -141.82524299799672,
+        "sharpe_annualized": -0.4398475569594904
+      },
+      "baseline_random_oos": {
+        "n": 58,
+        "mean_return_bp": -23.261517601482588,
+        "sharpe_annualized": -0.3336281905138298,
+        "pct_positive": 0.4482758620689655
+      },
+      "passes_bonferroni_oos": false,
+      "is_oos_sharpe_gap": -0.4101244547404105
+    },
+    {
+      "entry_window_cal_days": 7,
+      "exit_horizon_trading_days": 0,
+      "n_trades_total": 122,
+      "n_trades_is": 64,
+      "n_trades_oos": 58,
+      "is": {
+        "mean_return_bp": -179.8983982186059,
+        "sharpe_annualized": -1.1087004921976829,
+        "t_stat": -1.4782673229302437,
+        "p_value_bootstrap": 0.167,
+        "pct_positive": 0.28125
+      },
+      "oos_net": {
+        "mean_return_bp": -242.9642163635874,
+        "sharpe_annualized": -1.5784488119373028,
+        "t_stat": -2.0035180018224916,
+        "p_value_bootstrap": 0.002,
+        "pct_positive": 0.27586206896551724,
+        "return_ci95_bp": [
+          -1836.8852309247407,
+          2393.7336380243205
+        ]
+      },
+      "oos_gross": {
+        "mean_return_bp": -232.96421636358744,
+        "sharpe_annualized": -1.513482503912124
+      },
+      "baseline_random_oos": {
+        "n": 58,
+        "mean_return_bp": -39.570381638149044,
+        "sharpe_annualized": -0.989001670967642,
+        "pct_positive": 0.3620689655172414
+      },
+      "passes_bonferroni_oos": true,
+      "is_oos_sharpe_gap": 0.46974831973961995
+    },
+    {
+      "entry_window_cal_days": 7,
+      "exit_horizon_trading_days": 1,
+      "n_trades_total": 122,
+      "n_trades_is": 64,
+      "n_trades_oos": 58,
+      "is": {
+        "mean_return_bp": -75.65928321814049,
+        "sharpe_annualized": -0.3744733980308637,
+        "t_stat": -0.5337718689114361,
+        "p_value_bootstrap": 0.624,
+        "pct_positive": 0.34375
+      },
+      "oos_net": {
+        "mean_return_bp": -125.21319789872278,
+        "sharpe_annualized": -0.6161246160519022,
+        "t_stat": -0.8369408516414543,
+        "p_value_bootstrap": 0.166,
+        "pct_positive": 0.3275862068965517,
+        "return_ci95_bp": [
+          -1742.2909005816173,
+          2849.323625593642
+        ]
+      },
+      "oos_gross": {
+        "mean_return_bp": -115.21319789872277,
+        "sharpe_annualized": -0.5669185717697134
+      },
+      "baseline_random_oos": {
+        "n": 58,
+        "mean_return_bp": 25.600186124042683,
+        "sharpe_annualized": 0.35765996325943866,
+        "pct_positive": 0.39655172413793105
+      },
+      "passes_bonferroni_oos": false,
+      "is_oos_sharpe_gap": 0.24165121802103845
+    },
+    {
+      "entry_window_cal_days": 3,
+      "exit_horizon_trading_days": 0,
+      "n_trades_total": 122,
+      "n_trades_is": 64,
+      "n_trades_oos": 58,
+      "is": {
+        "mean_return_bp": -216.82277010241052,
+        "sharpe_annualized": -4.039409902507417,
+        "t_stat": -2.8676062343008812,
+        "p_value_bootstrap": 0.001,
+        "pct_positive": 0.3125
+      },
+      "oos_net": {
+        "mean_return_bp": -196.23227020184717,
+        "sharpe_annualized": -2.98984471133226,
+        "t_stat": -2.045923380764875,
+        "p_value_bootstrap": 0.005,
+        "pct_positive": 0.3275862068965517,
+        "return_ci95_bp": [
+          -1536.4959661765677,
+          1649.6516630850256
+        ]
+      },
+      "oos_gross": {
+        "mean_return_bp": -186.23227020184717,
+        "sharpe_annualized": -2.8374821713556866
+      },
+      "baseline_random_oos": {
+        "n": 58,
+        "mean_return_bp": -82.68814057736462,
+        "sharpe_annualized": -1.8495696497720329,
+        "pct_positive": 0.3103448275862069
+      },
+      "passes_bonferroni_oos": true,
+      "is_oos_sharpe_gap": -1.0495651911751573
+    },
+    {
+      "entry_window_cal_days": 3,
+      "exit_horizon_trading_days": 1,
+      "n_trades_total": 122,
+      "n_trades_is": 64,
+      "n_trades_oos": 58,
+      "is": {
+        "mean_return_bp": -120.94427228125859,
+        "sharpe_annualized": -1.6506821906837938,
+        "t_stat": -1.4370764713229478,
+        "p_value_bootstrap": 0.108,
+        "pct_positive": 0.3125
+      },
+      "oos_net": {
+        "mean_return_bp": -76.1226218495736,
+        "sharpe_annualized": -0.673847613147142,
+        "t_stat": -0.5647393598030309,
+        "p_value_bootstrap": 0.358,
+        "pct_positive": 0.3275862068965517,
+        "return_ci95_bp": [
+          -1799.2557848807733,
+          2710.308506403658
+        ]
+      },
+      "oos_gross": {
+        "mean_return_bp": -66.12262184957359,
+        "sharpe_annualized": -0.585326277862772
+      },
+      "baseline_random_oos": {
+        "n": 58,
+        "mean_return_bp": 35.198760356062095,
+        "sharpe_annualized": 0.5606685293582536,
+        "pct_positive": 0.41379310344827586
+      },
+      "passes_bonferroni_oos": false,
+      "is_oos_sharpe_gap": -0.9768345775366518
+    },
+    {
+      "entry_window_cal_days": 0,
+      "exit_horizon_trading_days": 0,
+      "n_trades_total": 122,
+      "n_trades_is": 64,
+      "n_trades_oos": 58,
+      "is": {
+        "mean_return_bp": -82.60738736485533,
+        "sharpe_annualized": -3.7844507619619443,
+        "t_stat": -1.9071839171657528,
+        "p_value_bootstrap": 0.012,
+        "pct_positive": 0.390625
+      },
+      "oos_net": {
+        "mean_return_bp": -18.963617921175512,
+        "sharpe_annualized": -0.6627359716570802,
+        "t_stat": -0.31794666214009343,
+        "p_value_bootstrap": 0.673,
+        "pct_positive": 0.3793103448275862,
+        "return_ci95_bp": [
+          -747.2636501201273,
+          1104.4922069419558
+        ]
+      },
+      "oos_gross": {
+        "mean_return_bp": -8.963617921175505,
+        "sharpe_annualized": -0.3132583696447321
+      },
+      "baseline_random_oos": {
+        "n": 58,
+        "mean_return_bp": -80.5402495453081,
+        "sharpe_annualized": -2.583534152156124,
+        "pct_positive": 0.3103448275862069
+      },
+      "passes_bonferroni_oos": false,
+      "is_oos_sharpe_gap": -3.121714790304864
+    },
+    {
+      "entry_window_cal_days": 0,
+      "exit_horizon_trading_days": 1,
+      "n_trades_total": 122,
+      "n_trades_is": 64,
+      "n_trades_oos": 58,
+      "is": {
+        "mean_return_bp": 18.80917178494819,
+        "sharpe_annualized": 0.5600447312378162,
+        "t_stat": 0.282236015605194,
+        "p_value_bootstrap": 0.731,
+        "pct_positive": 0.484375
+      },
+      "oos_net": {
+        "mean_return_bp": 97.69602465157834,
+        "sharpe_annualized": 2.031541811095607,
+        "t_stat": 0.9829954336383054,
+        "p_value_bootstrap": 0.197,
+        "pct_positive": 0.43103448275862066,
+        "return_ci95_bp": [
+          -769.884455668457,
+          2194.526843758449
+        ]
+      },
+      "oos_gross": {
+        "mean_return_bp": 107.69602465157836,
+        "sharpe_annualized": 2.2394869980508463
+      },
+      "baseline_random_oos": {
+        "n": 58,
+        "mean_return_bp": -98.99642024390567,
+        "sharpe_annualized": -1.3901062766553447,
+        "pct_positive": 0.27586206896551724
+      },
+      "passes_bonferroni_oos": false,
+      "is_oos_sharpe_gap": -1.4714970798577909
+    }
+  ],
+  "verdict": "INVERSE_SIGNIFICANT",
+  "verdict_rationale": "Best OOS net Sharpe = 2.032; Bonferroni pass with positive Sharpe = False; Bonferroni pass with negative Sharpe (inverse) = True; Same-spec significant + positive = False.",
+  "monetization_implication": "Long-vol pre-FOMC REJECTED (NOT tradable). However, VIXY shows Bonferroni-significant NEGATIVE drift T-7\u2192T+0 (OOS Sharpe -1.58, p=0.002) and T-3\u2192T+0 (OOS Sharpe -2.99, p=0.005), consistent with K856 (VIX anticipates FOMC). High-quality honest-null article: 'Why long-vol pre-FOMC loses money \u2014 and why the inverse short-vol trade is not the free lunch it looks like (contango + hawkish-tail).' Possible secondary study: explicitly test short-VIXY pre-FOMC with realistic short-cost + tail-risk gates.",
+  "honest_caveats": [
+    "VIXY contango drag (~5-15% annual) structurally biases long-only against PASS.",
+    "VIXY only from 2011 \u2014 high-vol 2008-2010 regime excluded.",
+    "Cost assumption (10 bps round-trip) may underestimate FOMC-day spread widening.",
+    "Bonferroni applied across 8 specs to guard against data snooping (K514 lesson).",
+    "Holding 14 trading days (T-14 spec) carries non-FOMC volatility risk beyond pure event premium."
+  ],
+  "lookahead_audit": {
+    "signal_lag_method": "Entry calendar-driven from FOMC schedule (known ex-ante); no price signal used. Position vector built strictly from FOMC date list.",
+    "verified": true
+  },
+  "seed": 42,
+  "completed_at_utc": "2026-06-15T09:29:26.068420+00:00"
+}

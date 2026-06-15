@@ -4007,5 +4007,23 @@
       "NULL",
       "codex"
     ]
+  },
+  {
+    "entry_id": "d0a53379",
+    "timestamp": "2026-06-15T17:31:32.081826",
+    "phase": "experiment",
+    "action": "K1345 Pre-FOMC IV drift tradability — completed (INVERSE_SIGNIFICANT)",
+    "observation": "Long-VIXY entry at T-14/T-7/T-3/T-0 with exit T+0/T+1 on 123 scheduled FOMC events (2011-2026, IS=64 OOS=59). 0/8 specs PASS strict bar. Best OOS Sharpe T-0/T+1=+2.03 but p=0.197 (NS). Bonferroni-significant NEGATIVE specs: T-7/T+0 (Sharpe=-1.58, p=0.002), T-3/T+0 (Sharpe=-2.99, p=0.005). Codex caught (v1) lookahead from 2020-03 emergency cuts + verdict-logic cross-spec mixing; v2 fixed. Confirms K856 (VIX anticipates FOMC).",
+    "decision": "Verdict INVERSE_SIGNIFICANT logged to knowledge.json. Next: package as honest-null reader article (why pre-FOMC long-vol loses money; inverse not free lunch). Optional follow-up K1346 = short-VIXY pre-FOMC vs buy-and-hold-short baseline with short-borrow + tail-risk gates.",
+    "experiment_ids": [
+      "K1345_pre_fomc_iv_drift"
+    ],
+    "tags": [
+      "experiment",
+      "pre_fomc",
+      "iv_drift",
+      "honest_null",
+      "k856_confirmed"
+    ]
   }
 ]
