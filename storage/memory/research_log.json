@@ -4042,5 +4042,22 @@
       "sequence-risk",
       "vol-aware-withdrawal"
     ]
+  },
+  {
+    "entry_id": "bd5f8233",
+    "timestamp": "2026-06-16T05:45:37.795951",
+    "phase": "experiment",
+    "action": "completed K1507 returns-only skew proxy cross-section test",
+    "observation": "High skew-proxy ETF basket underperformed low proxy by only -0.81% annualized with HAC t=-0.23; Fama-MacBeth controlled proxy t=+1.08, so no Harvey-level support.",
+    "decision": "Record as NULL: cheap yfinance returns-only proxy is not enough for the option-smirk / borrow-fee mechanism; future work requires real IV or securities-lending data.",
+    "experiment_ids": [
+      "k1507"
+    ],
+    "tags": [
+      "cross-section",
+      "volatility-skew",
+      "borrow-fee-proxy",
+      "null-result"
+    ]
   }
 ]

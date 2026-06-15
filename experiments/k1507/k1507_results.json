@@ -1,0 +1,393 @@
+{
+  "experiment_id": "k1507",
+  "title": "Returns-only volatility-skew proxy as ETF cross-section predictor",
+  "generated_at": "2026-06-15T21:43:33.870099+00:00",
+  "methodology_type": "empirical_proxy_test",
+  "verdict": "NULL",
+  "data": {
+    "source": "yfinance adjusted close, auto_adjust=True",
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "DIA",
+      "EFA",
+      "EEM",
+      "XLF",
+      "XLK",
+      "XLE",
+      "XLV",
+      "XLY",
+      "XLP",
+      "XLI",
+      "XLU",
+      "XLB",
+      "GLD",
+      "TLT",
+      "IEF",
+      "HYG",
+      "LQD",
+      "VNQ",
+      "USO"
+    ],
+    "n_tickers_configured": 22,
+    "monthly_start": "2007-03-31",
+    "monthly_end": "2026-04-30",
+    "n_months": 230,
+    "n_panel_rows": 5057,
+    "min_assets_per_month": 21,
+    "max_assets_per_month": 22,
+    "rolling_window_days": 63,
+    "min_rolling_obs": 50,
+    "oos_start": "2018-01-31"
+  },
+  "config": {
+    "seed": 20260616,
+    "start": "2007-01-01",
+    "rolling_window_days": 63,
+    "min_rolling_obs": 50,
+    "tercile_quantile": 0.3,
+    "bootstrap_reps": 5000,
+    "bootstrap_block_months": 6,
+    "oos_start": "2018-01-31",
+    "timing_rule": "month-end t features predict month t+1 returns; no month t+1 return is used in feature construction",
+    "proxy_definition": "cross-sectional z-score average of lagged negative realized skewness, downside-upside realized-vol spread, and 5% left-tail loss",
+    "harvey_threshold": "|t| > 3 for cross-sectional return predictor claims"
+  },
+  "literature": [
+    {
+      "citation": "Xing, Zhang, and Zhao (2010), What Does Individual Option Volatility Smirk Tell Us About Future Equity Returns?, JFQA",
+      "url": "https://ideas.repec.org/a/cup/jfinqa/v45y2010i03p641-662_00.html",
+      "role": "option smirk predicts lower future stock returns in individual-stock cross-section"
+    },
+    {
+      "citation": "Muravyev, Pearson, and Pollet (2025), Why Does Options Market Information Predict Stock Returns?",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2851560",
+      "role": "borrow fees explain much of option-signal return predictability"
+    },
+    {
+      "citation": "Ofek, Richardson, and Whitelaw (2004), Limited Arbitrage and Short Sales Restrictions, NBER WP 9423",
+      "url": "https://www.nber.org/papers/w9423",
+      "role": "short-sale constraints and options-market parity deviations"
+    },
+    {
+      "citation": "Harvey, Liu, and Zhu (2016), ... and the Cross-Section of Expected Returns, RFS",
+      "url": "https://academic.oup.com/rfs/article/29/1/5/1843824",
+      "role": "multiple-testing t-stat threshold for cross-sectional return predictors"
+    }
+  ],
+  "tests": {
+    "full": {
+      "n_months": 230,
+      "n_panel_rows": 5057,
+      "tercile_spread": {
+        "high_minus_low": {
+          "mean_monthly": -0.0006717038220893792,
+          "ann_mean": -0.00806044586507255,
+          "t_hac": -0.22644310552016472,
+          "ci95": [
+            -0.006744117845063515,
+            0.004459985125887851
+          ],
+          "n_months": 230
+        },
+        "low_minus_high": {
+          "mean_monthly": 0.0006717038220893792,
+          "ann_mean": 0.00806044586507255,
+          "t_hac": 0.22644310552016472,
+          "ci95": [
+            -0.0043527727625126715,
+            0.006683134155170647
+          ],
+          "n_months": 230
+        },
+        "mean_high_proxy_next_ret": 0.00589240917952553,
+        "mean_low_proxy_next_ret": 0.00656411300161491,
+        "avg_assets_per_month": 21.98695652173913
+      },
+      "fama_macbeth_simple": {
+        "intercept": {
+          "mean_monthly_coef": 0.007576831404433248,
+          "ann_coef": 0.09092197685319897,
+          "hac_t": 3.1404103478524914,
+          "ci95_monthly_mean": [
+            0.002158624707635747,
+            0.011949095989435592
+          ],
+          "n_months": 230
+        },
+        "skew_proxy_z": {
+          "mean_monthly_coef": 0.00020045301025928034,
+          "ann_coef": 0.002405436123111364,
+          "hac_t": 0.16480605203884183,
+          "ci95_monthly_mean": [
+            -0.0022099201762386432,
+            0.0023893578014733525
+          ],
+          "n_months": 230
+        }
+      },
+      "fama_macbeth_controls": {
+        "intercept": {
+          "mean_monthly_coef": 0.007576936355044731,
+          "ann_coef": 0.09092323626053678,
+          "hac_t": 3.140453991053911,
+          "ci95_monthly_mean": [
+            0.0020046227841557175,
+            0.011922452972001828
+          ],
+          "n_months": 230
+        },
+        "skew_proxy_z": {
+          "mean_monthly_coef": 0.001490492787111471,
+          "ann_coef": 0.017885913445337652,
+          "hac_t": 1.0767923515737572,
+          "ci95_monthly_mean": [
+            -0.0010393208325144186,
+            0.004537012075988824
+          ],
+          "n_months": 230
+        },
+        "realized_vol_z": {
+          "mean_monthly_coef": 0.0005648737624374825,
+          "ann_coef": 0.00677848514924979,
+          "hac_t": 0.4486820890360009,
+          "ci95_monthly_mean": [
+            -0.0018158633380679586,
+            0.0028443837846731435
+          ],
+          "n_months": 230
+        },
+        "momentum_21_z": {
+          "mean_monthly_coef": 0.0023062256525222245,
+          "ann_coef": 0.027674707830266695,
+          "hac_t": 1.3487962761224077,
+          "ci95_monthly_mean": [
+            -0.0008200742696198853,
+            0.005885774241173952
+          ],
+          "n_months": 230
+        }
+      },
+      "rank_ic": {
+        "mean_monthly_ic": 0.029130434782608697,
+        "hac_t": 1.281063274978933,
+        "ci95_mean_ic": [
+          -0.015158102766798413,
+          0.07248166106105616
+        ],
+        "n_months": 230
+      }
+    },
+    "pre_2018": {
+      "n_months": 130,
+      "n_panel_rows": 2857,
+      "tercile_spread": {
+        "high_minus_low": {
+          "mean_monthly": -0.0004381993715404153,
+          "ann_mean": -0.005258392458484983,
+          "t_hac": -0.0989247645150416,
+          "ci95": [
+            -0.010132052055314499,
+            0.006749673439411409
+          ],
+          "n_months": 130
+        },
+        "low_minus_high": {
+          "mean_monthly": 0.0004381993715404153,
+          "ann_mean": 0.005258392458484983,
+          "t_hac": 0.0989247645150416,
+          "ci95": [
+            -0.0067952179477411565,
+            0.010434557580436538
+          ],
+          "n_months": 130
+        },
+        "mean_high_proxy_next_ret": 0.0052465910900139235,
+        "mean_low_proxy_next_ret": 0.0056847904615543385,
+        "avg_assets_per_month": 21.976923076923075
+      },
+      "fama_macbeth_simple": {
+        "intercept": {
+          "mean_monthly_coef": 0.006646593275727448,
+          "ann_coef": 0.07975911930872938,
+          "hac_t": 1.8899985875540652,
+          "ci95_monthly_mean": [
+            -0.0021071547813694066,
+            0.013073757806006473
+          ],
+          "n_months": 130
+        },
+        "skew_proxy_z": {
+          "mean_monthly_coef": -0.0004416303229340751,
+          "ann_coef": -0.005299563875208901,
+          "hac_t": -0.25742698418476423,
+          "ci95_monthly_mean": [
+            -0.003892499115204846,
+            0.0024460122607269648
+          ],
+          "n_months": 130
+        }
+      },
+      "fama_macbeth_controls": {
+        "intercept": {
+          "mean_monthly_coef": 0.006646778957578532,
+          "ann_coef": 0.07976134749094238,
+          "hac_t": 1.890050674127893,
+          "ci95_monthly_mean": [
+            -0.0018477348158666845,
+            0.012943000139574286
+          ],
+          "n_months": 130
+        },
+        "skew_proxy_z": {
+          "mean_monthly_coef": -0.00018664942727030637,
+          "ann_coef": -0.0022397931272436764,
+          "hac_t": -0.16181549024754244,
+          "ci95_monthly_mean": [
+            -0.002288242422397094,
+            0.0020275491945058004
+          ],
+          "n_months": 130
+        },
+        "realized_vol_z": {
+          "mean_monthly_coef": -0.0007296481950693887,
+          "ann_coef": -0.008755778340832663,
+          "hac_t": -0.45491760217015553,
+          "ci95_monthly_mean": [
+            -0.004025632893055752,
+            0.0021453156483279595
+          ],
+          "n_months": 130
+        },
+        "momentum_21_z": {
+          "mean_monthly_coef": 0.000728279993999475,
+          "ann_coef": 0.008739359927993701,
+          "hac_t": 0.5387446515738908,
+          "ci95_monthly_mean": [
+            -0.001888510605057365,
+            0.003240466582965009
+          ],
+          "n_months": 130
+        }
+      },
+      "rank_ic": {
+        "mean_monthly_ic": 0.01967467315293403,
+        "hac_t": 0.6032316371901612,
+        "ci95_mean_ic": [
+          -0.0505363223732789,
+          0.07964566954784336
+        ],
+        "n_months": 130
+      }
+    },
+    "post_2018": {
+      "n_months": 100,
+      "n_panel_rows": 2200,
+      "tercile_spread": {
+        "high_minus_low": {
+          "mean_monthly": -0.0009752596078030323,
+          "ann_mean": -0.011703115293636388,
+          "t_hac": -0.26771940807291655,
+          "ci95": [
+            -0.007396579648042405,
+            0.006512908655878581
+          ],
+          "n_months": 100
+        },
+        "low_minus_high": {
+          "mean_monthly": 0.0009752596078030323,
+          "ann_mean": 0.011703115293636388,
+          "t_hac": 0.26771940807291655,
+          "ci95": [
+            -0.006275426194226304,
+            0.007273430743491502
+          ],
+          "n_months": 100
+        },
+        "mean_high_proxy_next_ret": 0.006731972695890619,
+        "mean_low_proxy_next_ret": 0.007707232303693654,
+        "avg_assets_per_month": 22.0
+      },
+      "fama_macbeth_simple": {
+        "intercept": {
+          "mean_monthly_coef": 0.008786140971750787,
+          "ann_coef": 0.10543369166100944,
+          "hac_t": 2.7700766477041965,
+          "ci95_monthly_mean": [
+            0.0027472392284509143,
+            0.01441617254470995
+          ],
+          "n_months": 100
+        },
+        "skew_proxy_z": {
+          "mean_monthly_coef": 0.0010351613434106425,
+          "ann_coef": 0.01242193612092771,
+          "hac_t": 0.6229178043325486,
+          "ci95_monthly_mean": [
+            -0.0017826365474678304,
+            0.004538490224966408
+          ],
+          "n_months": 100
+        }
+      },
+      "fama_macbeth_controls": {
+        "intercept": {
+          "mean_monthly_coef": 0.008786140971750789,
+          "ann_coef": 0.10543369166100947,
+          "hac_t": 2.770076647704196,
+          "ci95_monthly_mean": [
+            0.002930960477170045,
+            0.014617114090019763
+          ],
+          "n_months": 100
+        },
+        "skew_proxy_z": {
+          "mean_monthly_coef": 0.0036707776658077805,
+          "ann_coef": 0.044049331989693366,
+          "hac_t": 1.341782959495506,
+          "ci95_monthly_mean": [
+            -0.0007069784349030412,
+            0.010102243203968192
+          ],
+          "n_months": 100
+        },
+        "realized_vol_z": {
+          "mean_monthly_coef": 0.002247752307196415,
+          "ann_coef": 0.026973027686356982,
+          "hac_t": 1.139327656282518,
+          "ci95_monthly_mean": [
+            -0.0010680089679627482,
+            0.005470814770285008
+          ],
+          "n_months": 100
+        },
+        "momentum_21_z": {
+          "mean_monthly_coef": 0.004357555008601799,
+          "ann_coef": 0.05229066010322159,
+          "hac_t": 1.2525739075499331,
+          "ci95_monthly_mean": [
+            -0.0015122667147660289,
+            0.012076512188402687
+          ],
+          "n_months": 100
+        }
+      },
+      "rank_ic": {
+        "mean_monthly_ic": 0.04142292490118577,
+        "hac_t": 1.3791414846096473,
+        "ci95_mean_ic": [
+          -0.004405420666290235,
+          0.10680039525691698
+        ],
+        "n_months": 100
+      }
+    }
+  },
+  "limitations": [
+    "No option IV surface and no stock-borrow fee data are used; the skew_proxy_z variable is a returns-only proxy, not observed option-implied skew or lending fee.",
+    "The universe is liquid ETFs, not individual stocks; ETF borrow constraints are generally weaker than hard-to-borrow single names.",
+    "Monthly factor returns are reported before transaction costs and are used only as a hypothesis test, not as a launch-ready strategy.",
+    "Full-sample standardization is cross-sectional within each month, but no fitted prediction model is trained on future returns."
+  ]
+}

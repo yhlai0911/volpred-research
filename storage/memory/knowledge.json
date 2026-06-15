@@ -34497,5 +34497,18 @@
     "verdict": "NULL_FINDING",
     "reviewer": "main-thread source-level audit",
     "reviewer_source": "main-thread (Codex CLI stdin stall fallback; see codex_review.md)"
+  },
+  {
+    "item_id": "10650fc3",
+    "category": "cross_sectional_returns",
+    "content": "K1507 NULL. Tested whether a returns-only downside-skew proxy can stand in for the option volatility-smirk / borrow-fee channel in a 22-ETF yfinance universe. Data: adjusted-close ETF monthly panel, 2007-03 to 2026-04, 230 months / 5,057 ETF-month rows. Proxy: month-end t cross-sectional z-score average of lagged 63d negative realized skewness, downside-upside realized-vol spread, and 5% left-tail loss; target: month t+1 return. High-minus-low proxy annualized spread = -0.81% but HAC t=-0.23; pre-2018 t=-0.10 and post-2018 t=-0.27. Fama-MacBeth skew proxy coefficient is insignificant and turns positive after vol/momentum controls (ann coef +1.79%, t=+1.08); rank IC=+0.029 t=1.28. Conclusion: yfinance-only realized-skew proxy does not reproduce option-smirk / borrow-fee underperformance. This does not refute the true options/stock-loan literature; a real test needs option IV surface or borrow-fee/short-fee data.",
+    "evidence": [
+      "experiments/k1507/README.md",
+      "experiments/k1507/k1507.py",
+      "experiments/k1507/k1507_results.json",
+      "experiments/k1507/codex_review.md"
+    ],
+    "confidence": 0.84,
+    "created_at": "2026-06-16T05:45:37.337022"
   }
 ]
