@@ -10794,5 +10794,13 @@
     "summary": "K1506 honest null: Treasury auction BTC z<-1.5 (N=26) does NOT lead 5d MOVE vol. Secondary z<-1.0 N=45 t=-0.77 p=0.44 d=-0.14 direction opposite. Methodology CONDITIONAL_PASS. Knowledge item de3a1d05 (null_finding). Commit 947c30fe merged from worktree.",
     "verdict": "NULL_FINDING",
     "owner": "hourly-05"
+  },
+  {
+    "timestamp": "2026-06-16T06:25+08:00",
+    "task_id": "paper_review_mile_d9381a94",
+    "task_type": "paper_review",
+    "summary": "Codex 24h-rule review mile_d9381a94 (K1005 VIX-aware A4f vs GJR + parametric/conformal/ACI VaR) → CONDITIONAL PASS — no lookahead, scorecards 7/14/13/14/14/14 + violation rates 1.81/1.46/1.01% verified vs k1005_results.json. Caveat: conformal/ACI effective T=1776 (W=500 warm-up) vs n_oos=1826 non-material. Knowledge 7a32f870.",
+    "verdict": "CONDITIONAL_PASS",
+    "owner": "hourly-06"
   }
 ]

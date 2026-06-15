@@ -31610,7 +31610,7 @@
     "title": "Paper review (Codex 24h-rule): 同一套風險線，為什麼有的老是失真，有的從一開始就很穩？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d9381a94 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d9381a94",
@@ -31619,7 +31619,9 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-15T13:07:59+00:00"
+    "created_at": "2026-06-15T13:07:59+00:00",
+    "completed_at": "2026-06-15T22:17:36.043267+00:00",
+    "result": "Codex CLI (gpt-5.4) review CONDITIONAL PASS — no lookahead, all numerical claims match k1005_results.json (7/14, 13/14, 14/14 scorecards + 1.81%/1.46%/1.01% violation rates verified). Caveat: conformal/ACI effective T=1776 (warm-up) vs n_oos=1826 — non-material. Knowledge item_id=7a32f870."
   },
   {
     "id": "paper_review_mile_f4f62c9b",
@@ -31881,5 +31883,128 @@
     "started_at": "2026-06-15T19:11:08.792804+00:00",
     "completed_at": "2026-06-15T19:22:07.148683+00:00",
     "result": "preview_release_pool_by_settings due_now 條件補上 auto mode（content.py:688）— 與 release_pool_by_settings line 598 ('scheduled','auto') 一致。5 tests 全綠。Root cause: 兩函式對 'auto' mode 不一致；release execution 接受 auto 但 preview 只看 scheduled。"
+  },
+  {
+    "id": "trending_repost_2026_06_16_聯準會變革",
+    "title": "[trending_repost] 若取消點陣圖，債市與 VIX 波動率將如何重定價？",
+    "description": "分析新任 Fed 主席可能改革前瞻指引與點陣圖的市場衝擊。從利率期權隱含波動率切入，探討政策不確定性溢價的上升空間。可量化：美債 MOVE 指數與 VIX 在政策轉折期的相關性變化。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-15T22:00:50+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_16_fed點陣圖",
+    "title": "[trending_repost] Fed 點陣圖指引分歧，如何用利率 VIX 進行尾部對沖？",
+    "description": "分析 6 月 FOMC 會後點陣圖透露的降息路徑不確定性。可量化：利用 MOVE 指數與超短期國債期權隱含波動率，驗證政策拐點的尾部風險定價是否偏低。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-15T22:00:54+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "paper_review_mile_8a5e7f5c",
+    "title": "Paper review (Codex 24h-rule): 為什麼平滑策略在真實交易裡比理論更耐用",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_8a5e7f5c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_8a5e7f5c",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-15T22:08:35+00:00"
+  },
+  {
+    "id": "paper_review_mile_95ae93fa",
+    "title": "Paper review (Codex 24h-rule): 同一個 VIX，為什麼 COVID 之後對美股越來越有力，對台股卻變弱了？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_95ae93fa needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_95ae93fa",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-15T22:08:35+00:00"
+  },
+  {
+    "id": "paper_review_mile_67b3714d",
+    "title": "Paper review (Codex 24h-rule): 市場真的會短線反彈，但想賺到它，關鍵反而是少出手",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_67b3714d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_67b3714d",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-15T22:08:35+00:00"
+  },
+  {
+    "id": "research_tips_decumulation_benchmark",
+    "title": "研究 backlog fallback: TIPS 階梯 + 遞延年金 decumulation benchmark 的波動暴露分解",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: TIPS 階梯 + 遞延年金 decumulation benchmark 的波動暴露分解 — yfinance TIP/STIP/LTPZ + 名目國債 RV，分解 FAJ 提領 benchmark 在通膨/利率 regime 的波動暴露與尾部保護（來源：FAJ 2025 decumulation benchmark；T. Rowe Price 2026） | 來源 section: 期刊主題挖掘 batch（2026-06-15；用戶糾正「文章鬼打牆、回收舊 cluster」後觸發 → websearch jpm/faj/jfe/jfm/jbf/j.fixed income/cfa/fsb/arxiv 2025-26，**硬約束跳出 8 飽和 cluster**：vt / vix-move / garch-har 賽馬 / 風險模型比較 / etf 分散 / 50-50+長債 / n 套策略 meta / proxy 測量比較。全免費資料 yfinance/fred/eia/finra，options/bdc 折溢價用成交量·股價動能 proxy 代理）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "tips_decumulation_benchmark",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-15T22:11:59+00:00"
+  },
+  {
+    "id": "K1345",
+    "title": "K1345: 資料中心電力需求衝擊對公用/電網 ETF 的 vol 重定價 — yfinance XLU/VPU/GRID/PAVE RV + EIA 電力負載，檢定 AI 電力事件後公用事業從「低 vol 防禦」轉「高 vol 成長」結構斷點（來源：S",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 589). Original: 資料中心電力需求衝擊對公用/電網 ETF 的 vol 重定價 — yfinance XLU/VPU/GRID/PAVE RV + EIA 電力負載，檢定 AI 電力事件後公用事業從「低 vol 防禦」轉「高 vol 成長」結構斷點（來源：S&P Global 2026 資料中心電力 +22%/年）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1345.py with signal.shift(1) + seed=42, (c) K1345_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 589,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T22:11:59Z"
+  },
+  {
+    "id": "K1346",
+    "title": "K1346: 彩券型個股籃 vol-of-vol 與危機放大 — 低價×高 idio-vol×高 MAX 籃，檢定其 RV 與 vol-of-vol 在 risk-off 放大、是否領先大盤 tail vol（來源：Bali MAX 框架 + 2025 ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 594). Original: 彩券型個股籃 vol-of-vol 與危機放大 — 低價×高 idio-vol×高 MAX 籃，檢定其 RV 與 vol-of-vol 在 risk-off 放大、是否領先大盤 tail vol（來源：Bali MAX 框架 + 2025 lottery-momentum 延伸）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1346.py with signal.shift(1) + seed=42, (c) K1346_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 594,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-15T22:11:59Z"
   }
 ]

@@ -34510,5 +34510,33 @@
     ],
     "confidence": 0.84,
     "created_at": "2026-06-16T05:45:37.337022"
+  },
+  {
+    "item_id": "7a32f870",
+    "category": "paper_review",
+    "title": "K1005 article (mile_d9381a94) Codex paper_review — CONDITIONAL PASS",
+    "content": "Source-code & numerical claim review of production article mile_d9381a94 (K1005 VIX-aware A4f vs. GJR + parametric/conformal/ACI VaR backtest, SPY 2019-2026, n_oos=1826). Codex (gpt-5.4) confirmed: (1) no lookahead — returns[t-1]/vix2[t-1] used throughout, conformal/ACI calibrate on z_all[t-W:t] excluding current return; (2) all numerical claims match k1005_results.json — scorecards 7/14, 13/14, 14/14 (GJR parametric/conformal/aci), violation rates 1.81%/1.46%/1.01% @α=0.01, A4f parametric 1.20%/2.74%/5.42%; (3) no DM/Harvey overclaim — article describes pass rates only. Caveat: conformal/ACI effective T=1776 days (vs n_oos=1826) due to W=500 calibration warm-up — does not change conclusion.",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1005",
+    "experiment_path": "experiments/k1005/",
+    "k_id": "K1005",
+    "reviewer": "codex-cli",
+    "reviewer_source": "Codex CLI (gpt-5.4) — 24h-rule paper_review",
+    "codex_review": true,
+    "task_id": "paper_review_mile_d9381a94",
+    "article_id": "mile_d9381a94",
+    "evidence": [
+      "experiments/k1005/k1005.py",
+      "experiments/k1005/k1005_results.json"
+    ],
+    "confidence": 0.85,
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "K1005",
+      "VaR-backtest",
+      "VIX-aware"
+    ],
+    "created_at": "2026-06-16T06:17:27.928907"
   }
 ]
