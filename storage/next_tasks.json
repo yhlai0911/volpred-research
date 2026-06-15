@@ -31555,7 +31555,7 @@
     "title": "研究 backlog new: Treasury auction bid-to-cover ratio 弱勢作為 MOVE vol leading signal",
     "description": "Article pool fallback audit (hourly-19) 後補入：grep 既有 K 無 Treasury auction / bid-to-cover / TreasuryDirect 主題覆蓋。方向: 從 TreasuryDirect 公開 API（無需 auth, https://www.treasurydirect.gov/TA_WS/securities/announced）抓 10Y / 30Y note auction 2015-至今 monthly schedule (~120 events)；計算每場 bid-to-cover ratio 與 12-month rolling mean 的 z-score 作 demand-stress proxy（z < -1.5 = weak demand stress）；DM-HLN 檢定 weak-auction event 後 5d cumulative ^MOVE realized vol vs benign-auction control 是否系統性升高。Hypothesis: 弱需求拍賣 → primary dealer 庫存壓力 → 後續 MOVE vol regime 跳升（Treasury vol spillover 通道）。Literature: Lou Yan Zhang 2013 RFS auction price impact; Fleming Garbade 2003 NY Fed auction demand; Greenwood Hanson 2014 JFE government debt supply。Sample 充足（120 events, 30Y 額外 40+）、TreasuryDirect 完全 free、互補既有 K1086/K1442/K1488 MOVE-VIX arc 但角度不同（事件-event-driven, 非 ratio level）。主線程派 experiment agent 前先讀 docs/error_log.md + 至少 3 篇 lit + lag=event_day_signal_used_at_T+1 開始 forward window 防 lookahead；完成後 Codex review → knowledge → 可發 feed published（rates 受眾 + monetization angle）。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "source": "hourly_19_audit_refill",
     "research_slug": "treasury_auction_btc_move_vol_signal",
@@ -31568,10 +31568,9 @@
       "monetization-fit"
     ],
     "created_at": "2026-06-15T11:16:16+00:00",
-    "claimed_by": "hourly-21",
-    "claimed_at": "2026-06-15T13:12:40.981846+00:00",
-    "claim_session_id": "722e8972686b",
-    "started_at": "2026-06-15T13:12:41.505126+00:00"
+    "started_at": "2026-06-15T13:12:41.505126+00:00",
+    "last_released_at": "2026-06-15T15:50:14.432773+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "paper_review_mile_48c8328b",
@@ -31773,9 +31772,9 @@
     "title": "Article rewrite: mile_48c8328b 跨資產注意力 vol — 核心結論反轉需重寫",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "pending",
-    "claimed_by": null,
-    "claimed_at": null,
+    "status": "succeeded",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-15T15:35:07.500474+00:00",
     "created_at": "2026-06-15T15:16:33Z",
     "description": "Codex 24h-rule review verdict=FAIL (paper/k189_audit/codex_review_mile_48c8328b_2026_06_15.md). mile_48c8328b 已 published 但與 2026-06-11 K189 rerun 嚴重不一致：(1) 文章說 GJR 全勝 → 實際 6/6 attention QLIKE 更低，DM vs GJR 5/6 顯著勝 (Bonferroni-12 < 0.05) (2) DM 符號解釋反向 (loss_model-loss_baseline → 正 DM=model worse，文章寫成相反) (3) 整張數字表 stale (4) α=0.9 描述需從 OOS hindsight 改 rolling ex-ante。研究誠實 § 6『推翻舊結論必回溯更正』強制。要做：依當前 experiments/k189/k189_attention_vol_results.json 重寫文章 → 改新標題反映 attention 小勝 GJR 但輸 single-asset EWMA → 重生圖 (plot script 也 stale) → 補揭露 22-day RV proxy + overlap caveat → 走 feed-publisher 流程取代舊文（同 mile_48c8328b id update content 或新 mile + 舊文標 retracted）。寫前查 3-layer dedup。寫後跑 anti_ai_gate.py。",
     "payload": {
@@ -31786,6 +31785,10 @@
       "review_report": "paper/k189_audit/codex_review_mile_48c8328b_2026_06_15.md",
       "results_json": "experiments/k189/k189_attention_vol_results.json",
       "blocker": "research_honesty_section_6_retraction_required"
-    }
+    },
+    "claim_session_id": "b345702717c1",
+    "started_at": "2026-06-15T15:35:20.861702+00:00",
+    "completed_at": "2026-06-15T15:49:31.715340+00:00",
+    "result": "Rewrote mile_48c8328b from corrected K189 JSON: fixed DM sign/stale numbers, corrected conclusion to attention loses EWMA but beats this GJR in 5/6 Bonferroni. Regenerated corrected K189 charts, rebuilt feed index, anti_ai_gate PASS, JSON validation PASS. publish_draft full --sync-supabase hung at feed-sync, so synced this article via single sync_article and read-back verified title/status/content hash."
   }
 ]
