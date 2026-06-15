@@ -445,9 +445,48 @@ def _latest_cron_exit(log_path: Path) -> dict[str, Any] | None:
     return last_exit
 
 
+def _trailing_authoritative_exit_codes(log_path: Path, n: int = 6) -> list[int]:
+    """Last n authoritative `=== ... exit N at ... ===` exit codes (oldest→newest).
+
+    Used to distinguish a single self-recovering hang from a sustained outage.
+    """
+    if not log_path.exists():
+        return []
+    codes: list[int] = []
+    try:
+        for raw_line in log_path.read_text(encoding="utf-8").splitlines():
+            m = _CRON_EXIT_RE.match(raw_line.strip())
+            if m:
+                codes.append(int(m.group(1)))
+    except OSError:
+        return []
+    return codes[-n:]
+
+
+def _trailing_consecutive_failures(codes: list[int]) -> int:
+    consec = 0
+    for c in reversed(codes):
+        if c != 0:
+            consec += 1
+        else:
+            break
+    return consec
+
+
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     logs_dir = _cron_logs_dir(storage_dir)
     failing_logs: list[dict[str, Any]] = []
+    # 2026-06-15 (host_cron_fail severity calibration — email-11745 incident):
+    # A single hourly-dispatch SIGALRM hang (exit=142) is killed by the perl-alarm
+    # cap and the NEXT hourly cron self-recovers by design (no-retry abort). Firing
+    # CRITICAL on one transient self-healing hang = noise (44 historical 142s, each
+    # recovered next hour). Severity is now: CRITICAL only when the failure is
+    # SUSTAINED (>=2 consecutive authoritative failures = automation actually down
+    # ~2h) OR a NON-hang failure (exit != 142: permission/path/FDA errors don't
+    # self-heal). A lone exit=142 → WARN. The underlying recurring hang itself is
+    # tracked structurally in docs/refactor_plan_hourly_dispatch.md (Three-Strike).
+    max_consec_fail = 0
+    any_non_hang_fail = False
     # 2026-06-07 (strike-2 structural fix): audit_* scripts use the exit code as a
     # FINDINGS signal by convention — audit_fb_pipeline.py returns 1 when it finds
     # stale-pending FB posts (scripts/audit_fb_pipeline.py:132); audit_publish_sync.py
@@ -470,6 +509,16 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
             latest = _latest_cron_exit(log_path)
             if latest and int(latest.get("exit_code", 0)) != 0:
                 failing_logs.append(latest)
+                codes = _trailing_authoritative_exit_codes(log_path)
+                consec = _trailing_consecutive_failures(codes)
+                max_consec_fail = max(max_consec_fail, consec)
+                latest_code = int(latest.get("exit_code", 0))
+                # exit=142 = SIGALRM hang-kill that self-recovers next hourly fire.
+                # A NON-142 failure (126 perm / 1 error / FDA) does not self-heal.
+                if latest_code != 142:
+                    any_non_hang_fail = True
+                latest["trailing_exit_codes"] = codes
+                latest["consecutive_failures"] = consec
 
     # v12 (2026-04-19): shared_scheduler_tick cron removed; scheduler-tick now advisory-only.
     # scheduler_state staleness 不再視為 host_cron_fail — checker 改只看實際 cron log exit codes。
@@ -484,9 +533,15 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         scheduler_age_minutes = round(scheduler_age.total_seconds() / 60.0, 1)
 
     breached = bool(failing_logs)  # v12: 只看 cron log exit codes，不看 scheduler staleness
+    # Severity calibration (2026-06-15): a lone self-recovering SIGALRM hang → warn;
+    # sustained (>=2 consecutive) or any non-hang failure → critical.
+    host_cron_level = "critical" if (max_consec_fail >= 2 or any_non_hang_fail) else "warn"
     body_lines = [
         "## 觸發條件",
-        "偵測到 host cron 失敗（最新 exit code != 0）。",
+        f"偵測到 host cron 失敗（最新 exit code != 0）。severity={host_cron_level}"
+        f"（max_consecutive_failures={max_consec_fail}；non_hang_failure={any_non_hang_fail}）。",
+        "註：exit=142 = SIGALRM hang-kill，單次會由下一輪 hourly fire 自我恢復（→warn）；"
+        "≥2 連續失敗或非-142 失敗才升 critical。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。",
         f"- scheduler_last_tick_at: {scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else 'missing'}（僅供參考，v12 後不作為 breach 判準）",
         f"- scheduler_last_status: {scheduler_last_status}",
         f"- scheduler_age_minutes: {scheduler_age_minutes if scheduler_age_minutes is not None else 'missing'}",
@@ -521,7 +576,7 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     return {
         "id": "host_cron_fail",
         "breached": breached,
-        "level": "critical" if breached else "info",
+        "level": host_cron_level if breached else "info",
         "title": "Host cron failure detected",
         "body": "\n".join(body_lines) if breached else "",
         "details": {

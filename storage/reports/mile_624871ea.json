@@ -1,0 +1,55 @@
+{
+  "id": "mile_624871ea",
+  "title": "台海風險當然重要，但沒有這一欄資料，我們不能假裝自己量得到",
+  "description": "很多人直覺上都會同意一句話：台海緊張升溫，台股和台幣的波動應該會先反應。",
+  "content": "# 台海風險當然重要，但沒有這一欄資料，我們不能假裝自己量得到\n\n很多人直覺上都會同意一句話：台海緊張升溫，台股和台幣的波動應該會先反應。\n\n這個直覺不奇怪。真正麻煩的地方在下一步。\n\n如果你想把這句話變成一個可以驗證的研究命題，你需要的不只是幾段新聞截圖，也不只是事後回頭看 2022 年 8 月或 2024 年 1 月的盤勢。你需要一條可以被對齊、可以被 lag、可以明確知道「當時市場看不看得到」的風險序列。\n\n`K1481` 沒有直接跑回歸。它先把一個更基本的問題擺到前面：\n\n**在目前這個 repo 裡，我們到底有沒有資格誠實地研究「台海風險能不能預測台股波動」？**\n\n答案是：**還沒有。**\n\n## 我們手上其實已經有兩塊重要資料\n\n第一塊是市場價格。\n\n![K1481 已具備的市場資料](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1481_market_coverage.png)\n\n本地資料裡已經有：\n\n- `0050.TW` 歷史價格，從 `2009-01-02` 到 `2026-03-17`，共 `4,208` 筆交易日\n- `USD/TWD` 歷史價格，從 `2004-03-24` 到 `2026-03-17`，共 `5,288` 筆交易日\n\n這代表兩件事已經能做：\n\n- 算 `0050.TW` 的 realized volatility\n- 算 `USD/TWD` 的波動，外加 2022 年 8 月與 2024 年 1 月這兩個事件窗的描述統計\n\n換句話說，**因變數不是問題**。如果今天只是要看「那兩次事件之後，市場有沒有比較震」，repo 內部資料其實撐得住。\n\n## 缺的不是圖，是那條核心自變數\n\n![K1481 研究 gate 狀態](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1481_research_gate.png)\n\n卡住的地方有兩個，而且都不能假裝沒看到：\n\n- 沒有 canonical 的 `Taiwan country-GPR` 月頻序列\n- 沒有這條序列對應的 `publication_date`\n\n這兩個欄位一缺，很多看起來像研究的東西其實都不合法。\n\n最常見的偷跑方式是這樣：\n\n1. 先在事後整理好的月資料裡看到某個月份台灣地緣政治風險很高\n2. 再回頭拿同一個月份的 `0050` 或 `USD/TWD` 波動來配\n3. 然後寫一句「地緣政治風險可以解釋同月市場波動」\n\n問題是，如果那條風險指標其實是月底才整理完，甚至是次月才發布，你就等於用市場當時看不到的資訊去解釋市場當時的反應。這不是小瑕疵，這是標準的 lookahead bias。\n\n## 這篇研究最重要的結論，其實是一個停手\n\n很多人看到「BLOCKED_ON_DATA」會覺得這是沒有做完。\n\n我反而會說，這正是 `K1481` 有價值的地方。\n\n因為它把一個很容易被硬寫成內容、很容易被硬湊成回歸、很容易在社群上講得頭頭是道的題目，先踩了煞車。\n\n`K1481` 的誠實版本是：\n\n- 我們已經有台灣市場的價格資料\n- 我們也知道兩個很自然的事件窗\n- 但我們沒有一條能代表「台灣 country-GPR」且帶有發布時點的標準化序列\n\n所以目前最多只能說：\n\n> 這題值得做，但現在不能算完成。\n\n這種結論聽起來不熱血，可是它比一篇充滿回歸表、實際上 timing 不合法的文章有用得多。\n\n## 為什麼不能直接拿別的 GPR proxy 先頂著用\n\nrepo 裡不是完全沒有 GPR 相關研究。`K1481` 明確回顧了兩個既有經驗：\n\n- `K100`：generic geopolitical proxy 對波動率的增量資訊很弱\n- `K446`：broad GPR 指數在一般美股波動測試裡也偏弱，甚至有 reversed-causality 的味道\n\n這代表你不能只是把一條「跟地緣政治有關」的 proxy 換個標題，然後說它現在就代表台海風險。\n\n如果這題要成立，重點不是「找得到任何 geopolitics 指標」，而是**找得到真正台灣特定、而且發布時點清楚的風險衡量**。\n\n## 下一步很無聊，但這才是研究真正的起點\n\n要把這個題目從「不能做」推進到「可以做」，至少要先有一份像下面這樣的檔案：\n\n- `taiwan_country_gpr_monthly.csv`\n\n欄位至少要有：\n\n- `period`\n- `country`\n- `gpr_value`\n- `source_url`\n- `publication_date`\n\n有了它之後，後面的月頻回歸才有意義：\n\n- `GPR_t` 到底能不能預測 `t+1` 的 `0050.TW` 波動\n- `USD/TWD` 的波動有沒有同步訊號\n- 2022 年 8 月和 2024 年 1 月能不能當成事件窗附錄，而不是拿來替代核心風險序列\n\n少了這一層，任何漂亮故事都只是把直覺講得更大聲，不是把研究做得更嚴謹。\n\n## 這篇文章真正想提醒的事\n\n市場研究裡最危險的，往往不是模型太差。題目太合理的時候，人會自動忘記先問一句：資料能不能支撐它？\n\n台海風險影響台股波動，這件事可能是真的。\n\n但在 `K1481` 的狀態下，我們頂多知道它**值得被測**，還不知道它**已經被證明**。\n\n這兩句話差很多。\n\n## 資料來源\n\n- 實驗編號：`K1481`\n- 腳本：`experiments/k1481/k1481.py`\n- 結果：`experiments/k1481/k1481_results.json`\n- 價格資料：`storage/macro/yf_0050.TW.csv`、`storage/macro/yf_TWDX.csv`\n- 樣本期間：`0050.TW` 為 `2009-01-02` 至 `2026-03-17`；`USD/TWD` 為 `2004-03-24` 至 `2026-03-17`\n- 樣本數：`0050.TW` `4,208` 筆交易日；`USD/TWD` `5,288` 筆交易日\n\n---\n\n*本文基於實驗 K1481（腳本：`experiments/k1481/k1481.py`，結果：`experiments/k1481/k1481_results.json`）。數據來源：yfinance 本地快取 `0050.TW` 與 `TWDX`；本文結論為 feasibility audit，不宣稱已完成台灣 country-GPR 對波動率的正式預測檢定。*\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1481"
+    ],
+    "cluster_waiver": "K1481 feasibility audit: blocked-on-data / publication-date governance angle, not another Taiwan allocation or 0050 strategy article.",
+    "topic_cluster": "taiwan",
+    "topic_cluster_30d": {
+      "count": 20,
+      "cap": 8,
+      "ratio": 0.0483,
+      "exempt": false
+    },
+    "content_type": "general_article"
+  },
+  "tags": [
+    "一般讀者",
+    "台灣市場",
+    "0050",
+    "美元台幣",
+    "地緣政治風險",
+    "研究誠實"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-13T22:53:56.881368+00:00",
+  "published_at": "2026-06-13T22:53:56.881368+00:00",
+  "status": "draft",
+  "errata": {
+    "update_at": "2026-06-15T03:47:57.888092+00:00",
+    "update_action": "anti_ai_style_fix",
+    "update_summary": "Removed 3 instances of 不是...而是 套路對比 per anti-AI-style gate; re-passed --no-fb-mode.",
+    "update_history": [
+      {
+        "at": "2026-06-15T03:47:57.888092+00:00",
+        "action": "anti_ai_style_fix",
+        "summary": "Removed 3 instances of 不是...而是 套路對比 per anti-AI-style gate; re-passed --no-fb-mode.",
+        "old_content_chars": 2836,
+        "new_content_chars": 2840,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "image_paths_normalized": 2,
+        "image_url_changed": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-15T03:47:57.888092+00:00"
+}

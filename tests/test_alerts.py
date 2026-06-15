@@ -152,3 +152,46 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
         "Draft pool below threshold (<4)",
         "Host cron failure detected",
     ]
+
+
+def test_host_cron_fail_severity_calibration(tmp_path: Path):
+    """2026-06-15 email-11745: a single self-recovering SIGALRM hang (exit=142)
+    must be WARN, not CRITICAL noise; sustained (>=2 consec) or non-hang failure
+    stays CRITICAL."""
+    from datetime import datetime, timezone
+
+    from volpred.ops.alerts import _parse_host_cron_state
+
+    storage = tmp_path / "storage"
+    _write_json(
+        storage / "ops" / "scheduler_state.json",
+        {"last_tick_at": "2026-06-15T00:00:00+00:00", "last_status": "ok"},
+    )
+    now = datetime.now(timezone.utc)
+
+    def write_exits(codes):
+        lines = []
+        for i, c in enumerate(codes):
+            lines.append(f"=== [hourly_dispatch] fire run {i} ===")
+            lines.append(f"=== exit {c} at Sun Jun 15 1{i}:00:00 CST 2026 ===")
+        _write_text(storage / "logs" / "cron" / "hourly_dispatch.log", "\n".join(lines))
+
+    # 1) lone hang (latest=142, consec=1) → breached WARN
+    write_exits([0, 0, 0, 142])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "warn"
+
+    # 2) recovered (142 then 0) → not breached
+    write_exits([0, 142, 0])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is False
+
+    # 3) sustained (2 consecutive 142) → CRITICAL
+    write_exits([0, 142, 142])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "critical"
+
+    # 4) non-hang failure (exit 1: perm/path/FDA) even single → CRITICAL
+    write_exits([0, 0, 1])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "critical"

@@ -16,6 +16,7 @@
 | 5 | 2026-05-21 09:07+ | launchd `EX_CONFIG/78` — plist `StandardOutPath` blocked by TCC under `Desktop/` | env | move logs to `~/.volpred/logs/` |
 | 6 | 2026-05-25 17:07/18:07 | Anthropic API `529 Overloaded` → exit 1 single-shot | upstream | 3-attempt retry + sonnet fallback |
 | 7 | 2026-05-27 ?? | auth failure in launchd env (`Not logged in / Please run /login`) — keychain partition list not unlocked for launchd-spawned process | env | auth preflight + zshrc source + hotfix `security set-generic-password-partition-list ...` |
+| 8 | 2026-06-15 10:57 (+ 2026-06-14 15:57; 44 historical) | exit=142 SIGALRM recurrence — refactor STALLED at Deliverable 4/8 since 2026-05-28 (~18 days), so the structural fix never shipped → hang class still live | hang | Phase A only: `alerts.py` severity calibration (lone 142→warn) — symptom noise止血, NOT the fix |
 
 **Pattern signal**: each new failure adds another bolt-on (alarm → watchdog → trap → ulimit → log path → retry+fallback → auth preflight). Wrapper has grown from ~30 lines to **313 lines**, each layer guarding the layer below. Same architectural root: **stateless shell wrapper + opaque headless CLI subprocess + launchd env isolation**. Continuing to patch each new failure class would add a ~9th layer for the next environmental edge case.
 
@@ -154,3 +155,27 @@ That's the test for "structural fix" vs "patch": does the change make *future* s
 *Updated 2026-05-28 01:07-01:13 台灣時間 by main thread under hourly-01 claim. Deliverable 2/8 — package scaffold + state module + 16-test unit suite.*
 *Updated 2026-05-28 05:07-05:14 台灣時間 by main thread under hourly-05 claim. Deliverable 3/8 — alerts/worker/health/scheduler/supervisor real impl. Version 0.2.0-d3.*
 *Updated 2026-05-28 07:12 台灣時間 by Codex hourly tick. Deliverable 4/8 — regression tests + ops CLI. Version 0.3.0-d4.*
+
+---
+
+## 10. 2026-06-15 復發 + 停滯診斷（email-11745：用戶要求「徹底從底層了解並解決」）
+
+**核心發現：結構解法已設計+半完成，但停了 18 天。** 這份 plan 的 supervisor daemon（§3-8）在 2026-05-28 做到 Deliverable 4/8（`scripts/dispatch_supervisor/` + `tests/test_dispatch_supervisor.py`），之後**卡在 Deliverable 5（Codex review）前未推進**。期間 hourly_dispatch 繼續用舊 shell+perl-alarm 路徑 → exit=142 hang 自然持續復發（2026-06-14、06-15…）。
+
+**所以「徹底解決」不是再診斷或再設計（都已完成），是把停滯的 refactor 推完。**
+
+### 本次（2026-06-15）實際做的 — Phase A 症狀層
+- `src/volpred/ops/alerts.py` `host_cron_fail` severity 校準：單次自我恢復的 142 → `warn`；≥2 連續失敗 或 非-142 失敗 → `critical`。
+- 新增 helper `_trailing_authoritative_exit_codes` / `_trailing_consecutive_failures`；body 加 severity 說明 + 指回本 plan。
+- 回歸測試 `tests/test_alerts.py::test_host_cron_fail_severity_calibration`（4 cases）。
+- **這只是止住 CRITICAL email noise，不是 fix**。hang class 仍 live，直到 supervisor 上線。
+
+### 復跑 supervisor refactor 的剩餘步驟（Deliverable 5-8，§8）
+5. Codex review `scripts/dispatch_supervisor/*`（需 ≥ CONDITIONAL_PASS）— **下一步**
+6. Phase 2 shadow run 7 天（新舊並行 dry-run diff）
+7. Phase 3 cutover + 14 天觀察
+8. Phase 5 deprecate 舊 shell + retro 寫 error_log
+
+**Phase C（cutover）高 blast radius（替換核心 runtime）— 動前需用戶確認。** review + shadow（5-6）是可逆、低風險，可自主先推。
+
+*Updated 2026-06-15 台灣時間 by interactive main thread (email-11745 reply). Strike 8 logged; Phase A severity calibration shipped; refactor un-stalled — next action Deliverable 5 Codex review.*
