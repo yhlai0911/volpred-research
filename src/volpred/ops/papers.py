@@ -295,19 +295,27 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     if citations > 0:
         metrics["citations"] = citations
 
-    # Count pages from PDF
+    # Count pages from PDF. Keep this in-process: invoking `python3 -c
+    # import fitz` from a uv-managed command can inherit an environment where
+    # the system fitz package is not importable, silently preserving stale page
+    # counts in Supabase metadata.
     pdf_name = tex.stem + ".pdf"
     pdf = paper_dir / pdf_name
     if pdf.exists():
         try:
-            result = subprocess.run(
-                ["python3", "-c", f"import fitz; print(fitz.open('{pdf}').page_count)"],
-                capture_output=True, text=True, timeout=10,
-            )
-            if result.returncode == 0 and result.stdout.strip().isdigit():
-                metrics["pages"] = int(result.stdout.strip())
+            from PyPDF2 import PdfReader
+
+            metrics["pages"] = len(PdfReader(str(pdf)).pages)
         except Exception:
-            pass
+            try:
+                result = subprocess.run(
+                    ["python3", "-c", f"import fitz; print(fitz.open('{pdf}').page_count)"],
+                    capture_output=True, text=True, timeout=10,
+                )
+                if result.returncode == 0 and result.stdout.strip().isdigit():
+                    metrics["pages"] = int(result.stdout.strip())
+            except Exception:
+                pass
 
     # Extract abstract from \begin{abstract} … \end{abstract}. main_v*.tex
     # often only `\input{body_v*}` and has no \begin{abstract}; resolve \input
@@ -376,6 +384,25 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
             break
 
     return metrics
+
+
+def _select_current_main_artifact(paper_dir: Path, suffix: str) -> Path | None:
+    """Pick the current main artifact by mtime, not version suffix.
+
+    Some paper folders keep stale `main_v3.*` files beside actively edited
+    `main.*` files. Suffix priority can therefore upload an old PDF while
+    metrics come from the current TeX source.
+    """
+    candidates = [
+        paper_dir / f"main_v4{suffix}",
+        paper_dir / f"main_v3{suffix}",
+        paper_dir / f"main_v2{suffix}",
+        paper_dir / f"main{suffix}",
+    ]
+    existing = [candidate for candidate in candidates if candidate.exists()]
+    if not existing:
+        return None
+    return max(existing, key=lambda candidate: candidate.stat().st_mtime)
 
 
 def sync_all_papers(
@@ -487,13 +514,9 @@ def update_paper_full(
     # 1. Auto-detect metrics
     metrics = _count_tex_metrics(paper_dir)
 
-    # 2. Find best PDF (v3 > v2 > v1)
-    pdf_path = None
-    for name in ["main_v4.pdf", "main_v3.pdf", "main_v2.pdf", "main.pdf"]:
-        candidate = paper_dir / name
-        if candidate.exists():
-            pdf_path = candidate
-            break
+    # 2. Find current PDF by mtime, matching _count_tex_metrics' current-TeX
+    # semantics. Do not prefer stale versioned PDFs over fresh main.pdf.
+    pdf_path = _select_current_main_artifact(paper_dir, ".pdf")
 
     if not pdf_path:
         raise RuntimeError(f"No PDF found in {paper_dir}")

@@ -1838,3 +1838,19 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 - Followup task `platform_ops_mile_1b511caa_k1499_caveat_footnote` built to add K1499 caveat footnote (BDC-RV 12.5x lift partly SPY beta; NAV-discount → HYG 5d is the robust kernel)
 - Future commits: distinguish K-experiment label from article milestone — use `paper_review_mile_<id> | <verdict>` not `K<num> | <result>` when committing article-level changes
 - Subagent reviewer should check feed.json details.experiment_refs before assuming K-id mismatch is a FAIL
+
+## 2026-06-15 — paper-update uploaded stale versioned PDF and preserved stale page count
+
+**Symptom**: Running `uv run volpred ops paper-update --paper-id leverage-direction` after a fresh `main.tex` compile uploaded `paper/leverage-direction/main_v3.pdf` (old 63-page PDF from 2026-05-30) instead of the current `main.pdf` (49 pages, compiled 2026-06-15). Supabase metadata showed `storage_path=leverage-direction/main_v3.pdf` and `pages=63`, while the current source/PDF pair was `main.tex`/`main.pdf`.
+
+**Root cause**:
+1. `_count_tex_metrics()` had already been fixed to pick the newest `main*.tex` by mtime, but `update_paper_full()` still used hard-coded PDF suffix priority `main_v4.pdf > main_v3.pdf > main_v2.pdf > main.pdf`, so upload/copy could use a stale versioned PDF while metadata text came from current TeX.
+2. Page counting used a subprocess `python3 -c "import fitz ..."`. Under `uv run`, that subprocess did not have `fitz`, so page counting silently failed and `upsert_paper_metadata()` retained the existing stale page count.
+
+**Fix**:
+- Added `_select_current_main_artifact(paper_dir, suffix)` and made `paper-update` choose the current PDF by mtime, matching the current-TeX selection semantics.
+- Replaced the primary page-count path with in-process `PyPDF2.PdfReader`, leaving `fitz` subprocess only as a fallback.
+- Added regression tests in `tests/test_paper_update_pdf_selection.py`.
+- Re-ran `paper-update`; output now uses `storage_path=leverage-direction/main.pdf` and `pages=49`.
+
+**Lesson / prevention**: Any paper folder with multiple `main_v*.{tex,pdf}` files must select current artifacts consistently by mtime or explicit config. Never let TeX metrics and uploaded PDF use different selection policies; paper-update output must be checked for both `storage_path` and `pages` after manuscript-version changes.

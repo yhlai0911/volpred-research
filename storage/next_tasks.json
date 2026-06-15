@@ -31403,7 +31403,7 @@
     "description": "Gmail UID: 11745\nMessage-ID: <D78C4EBE-549D-4FA0-9AF6-E23D3A316BE0@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Mon, 15 Jun 2026 11:18:24 +0800\nSubject: Re: [VolPred Alert][CRITICAL] Host cron failure detected\n\n--- 用戶回信內容 ---\n徹底從底層了解並解決問題\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月15日 11:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Host cron failure detected\r\n> Alert level: critical\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> 偵測到 host cron 失敗（最新 exit code != 0）。\r\n> scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\r\n> scheduler_last_status: ok\r\n> scheduler_age_minutes: 81975.5\r\n> failing_logs:\r\n> storage/logs/cron/hourly_dispatch.log exit=142 at unknown\r\n> 影響\r\n> \r\n> 資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\r\n> Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\r\n> release_pool_gap alert，發文節奏中斷。\r\n> 建議行動\r\n> \r\n> 查失敗 log： tail -20 <failing_log 路徑>\r\n> 權限問題（exit=126）： chmod +x scripts/<script>.sh\r\n> macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\r\n> System Settings > Privacy & Security > Full Disk Access 加 script 路徑\r\n> 手動跑 failed command 驗證修復： uv run <command>\r\n> 比對 canonical schedule： crontab -l vs config/runtime_schedules.json\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "tags": [
       "email_reply",
       "user_input"
@@ -31414,10 +31414,9 @@
     "email_message_id": "<D78C4EBE-549D-4FA0-9AF6-E23D3A316BE0@gmail.com>",
     "email_subject": "Re: [VolPred Alert][CRITICAL] Host cron failure detected",
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-15T03:33:43.651166+00:00",
-    "claim_session_id": "57be6eae0dae",
-    "started_at": "2026-06-15T03:45:50.371847+00:00"
+    "started_at": "2026-06-15T03:45:50.371847+00:00",
+    "last_released_at": "2026-06-15T05:50:08.815701+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "platform_ops_release_pool_throughput_bump_1781495209",
@@ -31459,8 +31458,14 @@
     "title": "leverage-direction v12 H5 HIGH issue (body.tex:187 TLT/BTC QLIKE prose) — clear final block to submission",
     "description": "Agent (hourly-13) closing v10 citation cleanup revealed paper has progressed to v12 with one HIGH-severity issue still blocking final submission: body.tex line 187 TLT/BTC QLIKE prose (H5). Read paper/leverage-direction/review_history/v12/ academic_review_report.md to confirm exact issue; revise body.tex; recompile xelatex; archive v13 round; run paper-update; commit. Goal: final ready_for_submission with 0 HIGH unresolved.",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-15T13:17:15+08:00",
-    "source": "hourly_13_followup"
+    "source": "hourly_13_followup",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-15T05:50:41.760182+00:00",
+    "claim_session_id": "75f588300348",
+    "started_at": "2026-06-15T05:50:46.561340+00:00",
+    "completed_at": "2026-06-15T05:58:28.441470+00:00",
+    "result": "Verified v12 H5 TLT/BTC QLIKE blocker is closed in current body.tex; archived v13 confirmation with 0 HIGH unresolved. Re-ran reproduce.py green (171/171 match), xelatex twice (49 pages), fixed paper-update stale-PDF/page-count bug, synced main.pdf/pages=49, and promoted paper status to ready_for_submission via CLI."
   }
 ]
