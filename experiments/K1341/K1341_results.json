@@ -1,0 +1,268 @@
+{
+  "k_id": "K1341",
+  "run_date": "2026-06-15",
+  "seed": 42,
+  "window_half_width": 5,
+  "bootstrap_B": 1000,
+  "bootstrap_block": 5,
+  "tickers": [
+    "IWM",
+    "IWB",
+    "SPY",
+    "QQQ"
+  ],
+  "period": {
+    "start": "2014-01-01",
+    "end": "2026-06-14"
+  },
+  "event_sets": {
+    "russell_recon_jun_last_fri": [
+      "2014-06-27",
+      "2015-06-26",
+      "2016-06-24",
+      "2017-06-30",
+      "2018-06-29",
+      "2019-06-28",
+      "2020-06-26",
+      "2021-06-25",
+      "2022-06-24",
+      "2023-06-30",
+      "2024-06-28",
+      "2025-06-27"
+    ],
+    "sp500_quarterly_third_fri": [
+      "2014-03-21",
+      "2014-06-20",
+      "2014-09-19",
+      "2014-12-19",
+      "2015-03-20",
+      "2015-06-19",
+      "2015-09-18",
+      "2015-12-18",
+      "2016-03-18",
+      "2016-06-17",
+      "2016-09-16",
+      "2016-12-16",
+      "2017-03-17",
+      "2017-06-16",
+      "2017-09-15",
+      "2017-12-15",
+      "2018-03-16",
+      "2018-06-15",
+      "2018-09-21",
+      "2018-12-21",
+      "2019-03-15",
+      "2019-06-21",
+      "2019-09-20",
+      "2019-12-20",
+      "2020-03-20",
+      "2020-06-19",
+      "2020-09-18",
+      "2020-12-18",
+      "2021-03-19",
+      "2021-06-18",
+      "2021-09-17",
+      "2021-12-17",
+      "2022-03-18",
+      "2022-06-17",
+      "2022-09-16",
+      "2022-12-16",
+      "2023-03-17",
+      "2023-06-16",
+      "2023-09-15",
+      "2023-12-15",
+      "2024-03-15",
+      "2024-06-21",
+      "2024-09-20",
+      "2024-12-20",
+      "2025-03-21",
+      "2025-06-20",
+      "2025-09-19",
+      "2025-12-19",
+      "2026-03-20"
+    ]
+  },
+  "lookahead_policy": "Event dates are publicly known. Baselines exclude [t_e-5, t_e+5] to prevent event leakage. All vol measures use only same-day OHLC.",
+  "results": [
+    {
+      "ticker": "IWM",
+      "event_set": "russell_recon_jun_last_fri",
+      "measures": {
+        "r2_cc": {
+          "n_events": 12,
+          "event_mean": 0.0002850169284372786,
+          "baseline_mean": 0.00017533416531873046,
+          "diff_mean": 0.00010968276311854815,
+          "wilcoxon_stat": 28.0,
+          "wilcoxon_p_one_sided_greater": 0.809814453125,
+          "block_bootstrap_p_one_sided_greater": 0.1848151848151848,
+          "t_plus_1_z_score": 2.196797067534581
+        },
+        "parkinson": {
+          "n_events": 12,
+          "event_mean": 8.705763300971709e-05,
+          "baseline_mean": 0.00010047070264368478,
+          "diff_mean": -1.3413069633967693e-05,
+          "wilcoxon_stat": 29.0,
+          "wilcoxon_p_one_sided_greater": 0.7880859375,
+          "block_bootstrap_p_one_sided_greater": 0.5384615384615384,
+          "t_plus_1_z_score": 1.280453985385648
+        },
+        "r2_co": {
+          "n_events": 12,
+          "event_mean": 0.00010371680406877187,
+          "baseline_mean": 9.833729817456944e-05,
+          "diff_mean": 5.379505894202426e-06,
+          "wilcoxon_stat": 31.0,
+          "wilcoxon_p_one_sided_greater": 0.74072265625,
+          "block_bootstrap_p_one_sided_greater": 0.38461538461538464,
+          "t_plus_1_z_score": 2.096276883888045
+        }
+      }
+    },
+    {
+      "ticker": "IWB",
+      "event_set": "russell_recon_jun_last_fri",
+      "measures": {
+        "r2_cc": {
+          "n_events": 12,
+          "event_mean": 0.00025697296040336134,
+          "baseline_mean": 9.092036968800348e-05,
+          "diff_mean": 0.0001660525907153579,
+          "wilcoxon_stat": 43.0,
+          "wilcoxon_p_one_sided_greater": 0.3955078125,
+          "block_bootstrap_p_one_sided_greater": 0.017982017982017984,
+          "t_plus_1_z_score": 1.4428858451837387
+        },
+        "parkinson": {
+          "n_events": 12,
+          "event_mean": 5.691985343185963e-05,
+          "baseline_mean": 4.5046551364467404e-05,
+          "diff_mean": 1.1873302067392226e-05,
+          "wilcoxon_stat": 48.0,
+          "wilcoxon_p_one_sided_greater": 0.25927734375,
+          "block_bootstrap_p_one_sided_greater": 0.029970029970029972,
+          "t_plus_1_z_score": 0.6431173896853558
+        },
+        "r2_co": {
+          "n_events": 12,
+          "event_mean": 8.301083507502228e-05,
+          "baseline_mean": 4.5462989167580595e-05,
+          "diff_mean": 3.7547845907441693e-05,
+          "wilcoxon_stat": 37.0,
+          "wilcoxon_p_one_sided_greater": 0.574951171875,
+          "block_bootstrap_p_one_sided_greater": 0.1838161838161838,
+          "t_plus_1_z_score": 0.6880702904526325
+        }
+      }
+    },
+    {
+      "ticker": "QQQ",
+      "event_set": "russell_recon_jun_last_fri",
+      "measures": {
+        "r2_cc": {
+          "n_events": 12,
+          "event_mean": 0.0003185122936770921,
+          "baseline_mean": 0.00013038599290127715,
+          "diff_mean": 0.00018812630077581492,
+          "wilcoxon_stat": 42.0,
+          "wilcoxon_p_one_sided_greater": 0.425048828125,
+          "block_bootstrap_p_one_sided_greater": 0.029970029970029972,
+          "t_plus_1_z_score": 1.2669461471418024
+        },
+        "parkinson": {
+          "n_events": 12,
+          "event_mean": 8.51869369191273e-05,
+          "baseline_mean": 7.766044408151208e-05,
+          "diff_mean": 7.526492837615226e-06,
+          "wilcoxon_stat": 38.0,
+          "wilcoxon_p_one_sided_greater": 0.545166015625,
+          "block_bootstrap_p_one_sided_greater": 0.22677322677322678,
+          "t_plus_1_z_score": 0.7546176536915699
+        },
+        "r2_co": {
+          "n_events": 12,
+          "event_mean": 0.0001069699716927652,
+          "baseline_mean": 7.797435447325898e-05,
+          "diff_mean": 2.8995617219506217e-05,
+          "wilcoxon_stat": 33.0,
+          "wilcoxon_p_one_sided_greater": 0.68896484375,
+          "block_bootstrap_p_one_sided_greater": 0.25374625374625376,
+          "t_plus_1_z_score": 1.274307823574734
+        }
+      }
+    },
+    {
+      "ticker": "SPY",
+      "event_set": "sp500_quarterly_third_fri",
+      "measures": {
+        "r2_cc": {
+          "n_events": 49,
+          "event_mean": 0.00015673131807793345,
+          "baseline_mean": 0.00014240881059509873,
+          "diff_mean": 1.4322507482834716e-05,
+          "wilcoxon_stat": 643.0,
+          "wilcoxon_p_one_sided_greater": 0.383701812137625,
+          "block_bootstrap_p_one_sided_greater": 0.2217782217782218,
+          "t_plus_1_z_score": 0.24416019599609448
+        },
+        "parkinson": {
+          "n_events": 49,
+          "event_mean": 9.237544342630792e-05,
+          "baseline_mean": 7.151174738039551e-05,
+          "diff_mean": 2.086369604591242e-05,
+          "wilcoxon_stat": 478.0,
+          "wilcoxon_p_one_sided_greater": 0.909533347228928,
+          "block_bootstrap_p_one_sided_greater": 0.19480519480519481,
+          "t_plus_1_z_score": 0.6408577964048605
+        },
+        "r2_co": {
+          "n_events": 49,
+          "event_mean": 0.0001245815254825947,
+          "baseline_mean": 6.765775668687561e-05,
+          "diff_mean": 5.6923768795719106e-05,
+          "wilcoxon_stat": 505.0,
+          "wilcoxon_p_one_sided_greater": 0.857282845913474,
+          "block_bootstrap_p_one_sided_greater": 0.24075924075924077,
+          "t_plus_1_z_score": -0.1046365910154949
+        }
+      }
+    },
+    {
+      "ticker": "QQQ",
+      "event_set": "sp500_quarterly_third_fri",
+      "measures": {
+        "r2_cc": {
+          "n_events": 49,
+          "event_mean": 0.00013655390336185408,
+          "baseline_mean": 0.0002016876563284636,
+          "diff_mean": -6.513375296660952e-05,
+          "wilcoxon_stat": 372.0,
+          "wilcoxon_p_one_sided_greater": 0.992211993470633,
+          "block_bootstrap_p_one_sided_greater": 0.8851148851148851,
+          "t_plus_1_z_score": -0.2421850704391135
+        },
+        "parkinson": {
+          "n_events": 49,
+          "event_mean": 0.00013487129974470681,
+          "baseline_mean": 0.0001138156111513989,
+          "diff_mean": 2.1055688593307958e-05,
+          "wilcoxon_stat": 501.0,
+          "wilcoxon_p_one_sided_greater": 0.866079140898016,
+          "block_bootstrap_p_one_sided_greater": 0.21678321678321677,
+          "t_plus_1_z_score": -0.2726976492930107
+        },
+        "r2_co": {
+          "n_events": 49,
+          "event_mean": 0.00018560309575101956,
+          "baseline_mean": 0.00011164988075561872,
+          "diff_mean": 7.395321499540086e-05,
+          "wilcoxon_stat": 526.0,
+          "wilcoxon_p_one_sided_greater": 0.8049496675924317,
+          "block_bootstrap_p_one_sided_greater": 0.16183816183816183,
+          "t_plus_1_z_score": -0.3021728775802405
+        }
+      }
+    }
+  ]
+}

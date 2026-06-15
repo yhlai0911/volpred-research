@@ -1,0 +1,483 @@
+{
+  "k_id": "K1342",
+  "run_date": "2026-06-15",
+  "seed": 42,
+  "status": "completed_proxy_study",
+  "data_source": "yfinance 1-minute OHLCV; no proprietary MOC imbalance feed",
+  "period": "30d_chunked",
+  "interval": "1m",
+  "tickers": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "AMZN",
+    "GOOGL",
+    "META",
+    "TSLA"
+  ],
+  "round_trip_cost_bps": 3.4,
+  "bootstrap": {
+    "B": 5000,
+    "block_days": 5
+  },
+  "signal_definition": {
+    "proxy": "sum(sign(1m return) * volume) / sum(volume)",
+    "signal_window_et": "15:30-15:49",
+    "entry_for_late_close_target_et": "15:51 close",
+    "close_exit_proxy_et": "last available 15:55-15:59 close",
+    "high_pressure_filter": "abs(proxy) >= prior 20-trading-day rolling 70th percentile with shift(1), min_periods=10"
+  },
+  "lookahead_policy": "Signal excludes 15:50 and later bars; targets begin at 15:51 or at the next session. High-pressure thresholds use shifted prior data only.",
+  "data_audit": {
+    "SPY": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "QQQ": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "IWM": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "AAPL": {
+      "ok": true,
+      "minute_rows": 7409,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "MSFT": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "NVDA": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "AMZN": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "GOOGL": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "META": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    },
+    "TSLA": {
+      "ok": true,
+      "minute_rows": 7410,
+      "regular_session_dates": 19,
+      "usable_signal_days": 18,
+      "first_date": "2026-05-18",
+      "last_date": "2026-06-12"
+    }
+  },
+  "sample": {
+    "n_observations_all": 180,
+    "n_observations_high_pressure": 20,
+    "n_dates_all": 18,
+    "n_dates_high_pressure": 8,
+    "first_signal_date": "2026-05-18",
+    "last_signal_date": "2026-06-11"
+  },
+  "pooled_daily_equal_weight": {
+    "all_days": {
+      "late_close": {
+        "label": "all_days",
+        "n_observations": 180,
+        "n_dates": 18,
+        "gross_mean_bps": -1.1931287953413692,
+        "net_mean_bps": -4.593128795341369,
+        "gross_hit_rate": 0.5555555555555556,
+        "net_hit_rate": 0.2777777777777778,
+        "gross_newey_west_t": -0.533884442064288,
+        "net_newey_west_t": -2.0552684788138373,
+        "gross_block_bootstrap_p_one_sided": 0.8508,
+        "net_block_bootstrap_p_one_sided": 0.9966,
+        "gross_block_bootstrap_p_bonferroni_6": 1.0,
+        "net_block_bootstrap_p_bonferroni_6": 1.0
+      },
+      "overnight_open": {
+        "label": "all_days",
+        "n_observations": 180,
+        "n_dates": 18,
+        "gross_mean_bps": 5.274550357638927,
+        "net_mean_bps": 1.874550357638927,
+        "gross_hit_rate": 0.4444444444444444,
+        "net_hit_rate": 0.4444444444444444,
+        "gross_newey_west_t": 0.6339357936340744,
+        "net_newey_west_t": 0.2252977956605984,
+        "gross_block_bootstrap_p_one_sided": 0.3284,
+        "net_block_bootstrap_p_one_sided": 0.4912,
+        "gross_block_bootstrap_p_bonferroni_6": 1.0,
+        "net_block_bootstrap_p_bonferroni_6": 1.0
+      },
+      "next_close": {
+        "label": "all_days",
+        "n_observations": 180,
+        "n_dates": 18,
+        "gross_mean_bps": 17.49091978067866,
+        "net_mean_bps": 14.090919780678663,
+        "gross_hit_rate": 0.6111111111111112,
+        "net_hit_rate": 0.5555555555555556,
+        "gross_newey_west_t": 0.6959009017700573,
+        "net_newey_west_t": 0.5606271085283854,
+        "gross_block_bootstrap_p_one_sided": 0.1418,
+        "net_block_bootstrap_p_one_sided": 0.175,
+        "gross_block_bootstrap_p_bonferroni_6": 0.8508,
+        "net_block_bootstrap_p_bonferroni_6": 1.0
+      }
+    },
+    "high_pressure_days": {
+      "late_close": {
+        "label": "high_pressure_days",
+        "n_observations": 20,
+        "n_dates": 8,
+        "gross_mean_bps": -8.616248821878127,
+        "net_mean_bps": -12.016248821878127,
+        "gross_hit_rate": 0.5,
+        "net_hit_rate": 0.5,
+        "gross_newey_west_t": -1.8087853268991536,
+        "net_newey_west_t": -2.522537939966867,
+        "gross_block_bootstrap_p_one_sided": NaN,
+        "net_block_bootstrap_p_one_sided": NaN,
+        "gross_block_bootstrap_p_bonferroni_6": NaN,
+        "net_block_bootstrap_p_bonferroni_6": NaN
+      },
+      "overnight_open": {
+        "label": "high_pressure_days",
+        "n_observations": 20,
+        "n_dates": 8,
+        "gross_mean_bps": 29.785053760651707,
+        "net_mean_bps": 26.385053760651704,
+        "gross_hit_rate": 0.75,
+        "net_hit_rate": 0.75,
+        "gross_newey_west_t": 2.7838838975187326,
+        "net_newey_west_t": 2.4661001752657974,
+        "gross_block_bootstrap_p_one_sided": NaN,
+        "net_block_bootstrap_p_one_sided": NaN,
+        "gross_block_bootstrap_p_bonferroni_6": NaN,
+        "net_block_bootstrap_p_bonferroni_6": NaN
+      },
+      "next_close": {
+        "label": "high_pressure_days",
+        "n_observations": 20,
+        "n_dates": 8,
+        "gross_mean_bps": 72.87361102633851,
+        "net_mean_bps": 69.4736110263385,
+        "gross_hit_rate": 0.75,
+        "net_hit_rate": 0.75,
+        "gross_newey_west_t": 1.680803629410299,
+        "net_newey_west_t": 1.6023838522164728,
+        "gross_block_bootstrap_p_one_sided": NaN,
+        "net_block_bootstrap_p_one_sided": NaN,
+        "gross_block_bootstrap_p_bonferroni_6": NaN,
+        "net_block_bootstrap_p_bonferroni_6": NaN
+      }
+    }
+  },
+  "by_ticker": {
+    "AAPL": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": 4.994113237021956,
+        "net_mean_bps": 1.5941132370219566,
+        "hit_rate": 0.6111111111111112,
+        "mean_abs_pressure": 0.1699432581739616,
+        "high_pressure_n": 3
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": -12.914117837489183,
+        "net_mean_bps": -16.314117837489185,
+        "hit_rate": 0.3333333333333333,
+        "mean_abs_pressure": 0.1699432581739616,
+        "high_pressure_n": 3
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": -2.450239310476644,
+        "net_mean_bps": -5.850239310476644,
+        "hit_rate": 0.4444444444444444,
+        "mean_abs_pressure": 0.1699432581739616,
+        "high_pressure_n": 3
+      }
+    },
+    "AMZN": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": 4.021587908431874,
+        "net_mean_bps": 0.6215879084318742,
+        "hit_rate": 0.6666666666666666,
+        "mean_abs_pressure": 0.2246357066818259,
+        "high_pressure_n": 2
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": 16.638892150863633,
+        "net_mean_bps": 13.238892150863633,
+        "hit_rate": 0.6111111111111112,
+        "mean_abs_pressure": 0.2246357066818259,
+        "high_pressure_n": 2
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": 50.94006844119384,
+        "net_mean_bps": 47.54006844119384,
+        "hit_rate": 0.6111111111111112,
+        "mean_abs_pressure": 0.2246357066818259,
+        "high_pressure_n": 2
+      }
+    },
+    "GOOGL": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": 0.11982771336413175,
+        "net_mean_bps": -3.2801722866358682,
+        "hit_rate": 0.5555555555555556,
+        "mean_abs_pressure": 0.25123879460414766,
+        "high_pressure_n": 1
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": -27.59080345516569,
+        "net_mean_bps": -30.99080345516569,
+        "hit_rate": 0.5,
+        "mean_abs_pressure": 0.25123879460414766,
+        "high_pressure_n": 1
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": -47.46017716703565,
+        "net_mean_bps": -50.86017716703565,
+        "hit_rate": 0.3333333333333333,
+        "mean_abs_pressure": 0.25123879460414766,
+        "high_pressure_n": 1
+      }
+    },
+    "IWM": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": -3.341148345262303,
+        "net_mean_bps": -6.741148345262303,
+        "hit_rate": 0.4444444444444444,
+        "mean_abs_pressure": 0.16893860467070426,
+        "high_pressure_n": 1
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": -18.937290010477444,
+        "net_mean_bps": -22.337290010477442,
+        "hit_rate": 0.4444444444444444,
+        "mean_abs_pressure": 0.16893860467070426,
+        "high_pressure_n": 1
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": -33.7045972641405,
+        "net_mean_bps": -37.10459726414051,
+        "hit_rate": 0.3888888888888889,
+        "mean_abs_pressure": 0.16893860467070426,
+        "high_pressure_n": 1
+      }
+    },
+    "META": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": 6.397274202228957,
+        "net_mean_bps": 2.9972742022289567,
+        "hit_rate": 0.6111111111111112,
+        "mean_abs_pressure": 0.20774428800149025,
+        "high_pressure_n": 3
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": -26.45384967958503,
+        "net_mean_bps": -29.853849679585032,
+        "hit_rate": 0.3333333333333333,
+        "mean_abs_pressure": 0.20774428800149025,
+        "high_pressure_n": 3
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": -40.033100664463035,
+        "net_mean_bps": -43.43310066446304,
+        "hit_rate": 0.6111111111111112,
+        "mean_abs_pressure": 0.20774428800149025,
+        "high_pressure_n": 3
+      }
+    },
+    "MSFT": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": 5.321056277733855,
+        "net_mean_bps": 1.9210562777338556,
+        "hit_rate": 0.6111111111111112,
+        "mean_abs_pressure": 0.23128869186964807,
+        "high_pressure_n": 4
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": 80.9266536021751,
+        "net_mean_bps": 77.52665360217509,
+        "hit_rate": 0.6666666666666666,
+        "mean_abs_pressure": 0.23128869186964807,
+        "high_pressure_n": 4
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": 5.547399878611586,
+        "net_mean_bps": 2.147399878611586,
+        "hit_rate": 0.5,
+        "mean_abs_pressure": 0.23128869186964807,
+        "high_pressure_n": 4
+      }
+    },
+    "NVDA": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": -20.151413784442024,
+        "net_mean_bps": -23.551413784442026,
+        "hit_rate": 0.5555555555555556,
+        "mean_abs_pressure": 0.20336769326730186,
+        "high_pressure_n": 0
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": 27.606788187980097,
+        "net_mean_bps": 24.2067881879801,
+        "hit_rate": 0.5,
+        "mean_abs_pressure": 0.20336769326730186,
+        "high_pressure_n": 0
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": 123.00100995299076,
+        "net_mean_bps": 119.60100995299075,
+        "hit_rate": 0.5555555555555556,
+        "mean_abs_pressure": 0.20336769326730186,
+        "high_pressure_n": 0
+      }
+    },
+    "QQQ": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": -0.7047334423329776,
+        "net_mean_bps": -4.104733442332978,
+        "hit_rate": 0.4444444444444444,
+        "mean_abs_pressure": 0.22313794000725462,
+        "high_pressure_n": 2
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": -9.321909683819037,
+        "net_mean_bps": -12.721909683819035,
+        "hit_rate": 0.5,
+        "mean_abs_pressure": 0.22313794000725462,
+        "high_pressure_n": 2
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": 17.0826669945302,
+        "net_mean_bps": 13.6826669945302,
+        "hit_rate": 0.3888888888888889,
+        "mean_abs_pressure": 0.22313794000725462,
+        "high_pressure_n": 2
+      }
+    },
+    "SPY": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": -5.241650247005059,
+        "net_mean_bps": -8.641650247005058,
+        "hit_rate": 0.3333333333333333,
+        "mean_abs_pressure": 0.2592720261368305,
+        "high_pressure_n": 2
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": 2.8671392815569714,
+        "net_mean_bps": -0.5328607184430285,
+        "hit_rate": 0.5,
+        "mean_abs_pressure": 0.2592720261368305,
+        "high_pressure_n": 2
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": -14.018686724226008,
+        "net_mean_bps": -17.41868672422601,
+        "hit_rate": 0.3333333333333333,
+        "mean_abs_pressure": 0.2592720261368305,
+        "high_pressure_n": 2
+      }
+    },
+    "TSLA": {
+      "late_close": {
+        "n": 18,
+        "gross_mean_bps": -3.3462014731520986,
+        "net_mean_bps": -6.746201473152099,
+        "hit_rate": 0.3888888888888889,
+        "mean_abs_pressure": 0.18414069730645133,
+        "high_pressure_n": 2
+      },
+      "overnight_open": {
+        "n": 18,
+        "gross_mean_bps": 19.92400102034987,
+        "net_mean_bps": 16.524001020349868,
+        "hit_rate": 0.5555555555555556,
+        "mean_abs_pressure": 0.18414069730645133,
+        "high_pressure_n": 2
+      },
+      "next_close": {
+        "n": 18,
+        "gross_mean_bps": 116.00485366980203,
+        "net_mean_bps": 112.60485366980204,
+        "hit_rate": 0.6111111111111112,
+        "mean_abs_pressure": 0.18414069730645133,
+        "high_pressure_n": 2
+      }
+    }
+  },
+  "interpretation": "This tests whether a free pre-close signed-volume proxy predicts drift. It cannot validate true exchange-published MOC imbalance alpha without the proprietary imbalance feed."
+}

@@ -31230,7 +31230,7 @@
     "title": "K1341: Russell/標普 reconstitution 日尾盤波動「dislocation 但收斂」 — 重組日 vs 一般日 close-to-close vs intraday-range vol 拆解，檢定重組日尾盤 RV 系統升高但隔日",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 583). Original: Russell/標普 reconstitution 日尾盤波動「dislocation 但收斂」 — 重組日 vs 一般日 close-to-close vs intraday-range vol 拆解，檢定重組日尾盤 RV 系統升高但隔日均值回歸（來源：BMLL/Traders 2025 closing auction，重組日量 9%→20%）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1341.py with signal.shift(1) + seed=42, (c) K1341_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 583,
@@ -31238,14 +31238,20 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T00:00:10Z"
+    "created_at": "2026-06-15T00:00:10Z",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-15T08:09:25.614066+00:00",
+    "claim_session_id": "4a472c1a25ce",
+    "started_at": "2026-06-15T08:09:26.082442+00:00",
+    "completed_at": "2026-06-15T08:21:46.768457+00:00",
+    "result": "K1341 reconstitution event study PASS (Codex v2). NULL/REVERSED finding: Russell IWM persistence (t+1 z=+2.20, not reversion); S&P quarterly noise. Daily ETF too coarse for BMLL closing-auction proxy. Knowledge written item_id=32d79e7c."
   },
   {
     "id": "K1342",
     "title": "K1342: MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 584). Original: MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025 MOC imbalance）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1342.py with signal.shift(1) + seed=42, (c) K1342_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 584,
@@ -31253,7 +31259,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T00:00:10Z"
+    "created_at": "2026-06-15T00:00:10Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-15T08:15:53.136204+00:00",
+    "claim_session_id": "863d4d9897f9",
+    "started_at": "2026-06-15T08:16:16.249961+00:00"
   },
   {
     "id": "K1343",
