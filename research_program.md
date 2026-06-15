@@ -593,7 +593,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [x] Factor-MAX：因子層級彩券需求預測因子報酬 — K1503 MIXED：yfinance 因子 ETF（MTUM/QUAL/VLUE/USMV/SIZE）月度 MAX 不支持次月低報酬 anomaly（0/4 return tests pass Harvey），但強烈預測次月 realized vol 較高（4/4 vol tests pass Harvey）。可寫成風險狀態訊號，不可寫成報酬 anomaly。
 - [ ] 彩券型個股籃 vol-of-vol 與危機放大 — 低價×高 idio-vol×高 MAX 籃，檢定其 RV 與 vol-of-vol 在 risk-off 放大、是否領先大盤 tail vol（來源：Bali MAX 框架 + 2025 lottery-momentum 延伸）
 > **新軸 6 — 退休 decumulation（全新讀者群，改用 ruin/shortfall 非 Sharpe；FAJ/JPM 2025-26 熱點）**
-- [ ] 提領期 sequence-of-returns risk 下 vol-aware 提領法則 — yfinance 股債 ETF + FRED 模擬退休提領，固定 vs 條件於已實現 vol/drawdown 的動態提領，比 ruin probability / shortfall（不比 Sharpe）（來源：FAJ 2025-26 decumulation benchmark；NAPA 2026）
+- [x] ~~提領期 sequence-of-returns risk 下 vol-aware 提領法則~~ → **K1505 completed 2026-06-16，PASS**：SPY/IEF 60/40 + FRED CPI，2006-02 to 2026-05 共 242 月；12m block bootstrap 10,000 條 30 年路徑。4% 固定實質提領 ruin=4.06%；lagged vol cut=2.95%、drawdown cut=2.50%、combined=2.17%（paired Δ=-1.89pp, 95% CI [-2.16,-1.62]pp）。代價是 combined 平均少領 4.95%（約 50.7k 實質美元），所以只可寫成「有成本地降低破產率」，不可宣稱免費提高安全提領率或 OOS volatility timing signal。
 - [ ] TIPS 階梯 + 遞延年金 decumulation benchmark 的波動暴露分解 — yfinance TIP/STIP/LTPZ + 名目國債 RV，分解 FAJ 提領 benchmark 在通膨/利率 regime 的波動暴露與尾部保護（來源：FAJ 2025 decumulation benchmark；T. Rowe Price 2026）
 
 ## 決策框架

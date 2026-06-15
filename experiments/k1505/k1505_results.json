@@ -1,0 +1,897 @@
+{
+  "experiment_id": "k1505",
+  "title": "Vol-aware withdrawal rules for sequence-of-returns risk",
+  "generated_at": "2026-06-15T20:32:10.627910+00:00",
+  "methodology_type": "simulation_with_empirical_inputs",
+  "not_an_oos_forecast": true,
+  "data": {
+    "tickers": {
+      "stock": "SPY",
+      "bond": "IEF"
+    },
+    "source": "yfinance adjusted close for SPY/IEF; storage/macro/fred_CPIAUCSL.csv for FRED CPIAUCSL",
+    "monthly_start": "2006-02-28",
+    "monthly_end": "2026-05-31",
+    "n_months": 242,
+    "stock_weight": 0.6,
+    "bond_weight": 0.4,
+    "ann_real_mean_arithmetic": 0.05868968249545148,
+    "ann_real_vol": 0.09407530403247513,
+    "real_nav_max_drawdown": -0.3062534300423637,
+    "vol_window_months": 12,
+    "vol_threshold_quantile": 0.75,
+    "vol_threshold_ann": 0.10644732418361857,
+    "share_high_vol_months_after_window": 0.2510822510822511,
+    "drawdown_threshold": -0.15,
+    "share_drawdown_breach_months": 0.10743801652892562,
+    "inflation_ann_mean": 0.025560254493075973
+  },
+  "config": {
+    "seed": 20260616,
+    "n_paths": 10000,
+    "horizon_months": 360,
+    "block_size_months": 12,
+    "initial_wealth": 1000000.0,
+    "withdrawal_rates": [
+      0.035,
+      0.04,
+      0.045,
+      0.05,
+      0.055
+    ],
+    "main_withdrawal_rate": 0.04,
+    "stock_weight": 0.6,
+    "bond_weight": 0.4,
+    "vol_window_months": 12,
+    "vol_threshold_quantile": 0.75,
+    "vol_threshold_ann": 0.10644732418361857,
+    "drawdown_threshold": -0.15,
+    "withdrawal_cut": 0.15,
+    "withdrawal_timing": "beginning_of_month_before_return",
+    "timing_rule": "month-t withdrawal signal uses returns and wealth through t-1 only"
+  },
+  "policy_definitions": {
+    "fixed": {
+      "label": "Fixed real withdrawal",
+      "use_lagged_realized_vol": false,
+      "use_lagged_drawdown": false,
+      "withdrawal_cut_when_triggered": 0.0
+    },
+    "vol_cut": {
+      "label": "Lagged-vol cut",
+      "use_lagged_realized_vol": true,
+      "use_lagged_drawdown": false,
+      "withdrawal_cut_when_triggered": 0.15
+    },
+    "drawdown_cut": {
+      "label": "Lagged-drawdown cut",
+      "use_lagged_realized_vol": false,
+      "use_lagged_drawdown": true,
+      "withdrawal_cut_when_triggered": 0.15
+    },
+    "combined_cut": {
+      "label": "Vol or drawdown cut",
+      "use_lagged_realized_vol": true,
+      "use_lagged_drawdown": true,
+      "withdrawal_cut_when_triggered": 0.15
+    }
+  },
+  "literature": [
+    {
+      "citation": "Bengen (1994), Determining Withdrawal Rates Using Historical Data, Journal of Financial Planning",
+      "url": "https://www.financialplanningassociation.org/sites/default/files/2020-05/7%20Determining%20Withdrawal%20Rates%20Using%20Historical%20Data.pdf",
+      "role": "constant real withdrawal benchmark"
+    },
+    {
+      "citation": "Guyton and Klinger (2006), Decision Rules and Maximum Initial Withdrawal Rates, Journal of Financial Planning",
+      "url": "https://www.financialplanningassociation.org/article/journal/MAR06-decision-rules-and-maximum-initial-withdrawal-rates",
+      "role": "flexible withdrawal guardrail motivation"
+    },
+    {
+      "citation": "Finke, Pfau, and Blanchett (2013), The 4 Percent Rule Is Not Safe in a Low-Yield World, Journal of Financial Planning",
+      "url": "https://www.financialplanningassociation.org/article/4-percent-rule-not-safe-low-yield-world",
+      "role": "forward-looking caveat for fixed 4% rule"
+    },
+    {
+      "citation": "CFA Institute FAJ summary (2017), Managing Sequence Risk to Optimize Retirement Income",
+      "url": "https://rpc.cfainstitute.org/research/financial-analysts-journal/2017/managing-sequence-risk",
+      "role": "sequence risk framing"
+    }
+  ],
+  "main_results_4pct": {
+    "fixed": {
+      "ruin_probability": 0.0406,
+      "ruin_probability_ci95": [
+        0.0367315172821565,
+        0.0444684827178435
+      ],
+      "terminal_wealth_mean": 2358639.3771924675,
+      "terminal_wealth_median": 1942676.5365822308,
+      "terminal_wealth_p05": 70186.45462444781,
+      "terminal_wealth_expected_shortfall_5pct": 6539.028509030136,
+      "terminal_wealth_p95": 6033722.817651843,
+      "total_withdrawn_mean": 1191293.0790236252,
+      "total_withdrawn_p05": 1200000.0000000014,
+      "spending_shortfall_vs_full_plan": 0.007255767480312314,
+      "prob_spending_below_90pct_plan": 0.0273,
+      "avg_cut_months": 0.0,
+      "avg_max_drawdown": -0.42015173327590355,
+      "median_ruin_month_if_ruined": 302.0
+    },
+    "vol_cut": {
+      "ruin_probability": 0.0295,
+      "ruin_probability_ci95": [
+        0.026183449878191035,
+        0.03281655012180896
+      ],
+      "terminal_wealth_mean": 2469374.940428366,
+      "terminal_wealth_median": 2051427.1157326568,
+      "terminal_wealth_p05": 173339.66701717293,
+      "terminal_wealth_expected_shortfall_5pct": 37535.82173780071,
+      "terminal_wealth_p95": 6183223.613591212,
+      "total_withdrawn_mean": 1149930.5434191339,
+      "total_withdrawn_p05": 1128000.000000003,
+      "spending_shortfall_vs_full_plan": 0.041724547150721825,
+      "prob_spending_below_90pct_plan": 0.0241,
+      "avg_cut_months": 88.4346,
+      "avg_max_drawdown": -0.4057797633262616,
+      "median_ruin_month_if_ruined": 309.0
+    },
+    "drawdown_cut": {
+      "ruin_probability": 0.025,
+      "ruin_probability_ci95": [
+        0.021939797966857685,
+        0.028060202033142318
+      ],
+      "terminal_wealth_mean": 2421253.588994934,
+      "terminal_wealth_median": 2001892.0405017147,
+      "terminal_wealth_p05": 202978.04210448955,
+      "terminal_wealth_expected_shortfall_5pct": 55730.393662455055,
+      "terminal_wealth_p95": 6055081.081616718,
+      "total_withdrawn_mean": 1167709.36227831,
+      "total_withdrawn_p05": 1120000.0000000042,
+      "spending_shortfall_vs_full_plan": 0.02690886476807486,
+      "prob_spending_below_90pct_plan": 0.0221,
+      "avg_cut_months": 56.01,
+      "avg_max_drawdown": -0.40455291177224917,
+      "median_ruin_month_if_ruined": 315.5
+    },
+    "combined_cut": {
+      "ruin_probability": 0.0217,
+      "ruin_probability_ci95": [
+        0.018844095499381736,
+        0.024555904500618266
+      ],
+      "terminal_wealth_mean": 2492963.7534505664,
+      "terminal_wealth_median": 2071468.4141350728,
+      "terminal_wealth_p05": 239689.97250055318,
+      "terminal_wealth_expected_shortfall_5pct": 71797.98192892507,
+      "terminal_wealth_p95": 6189729.400440456,
+      "total_withdrawn_mean": 1140617.639380396,
+      "total_withdrawn_p05": 1100000.000000004,
+      "spending_shortfall_vs_full_plan": 0.049485300516336594,
+      "prob_spending_below_90pct_plan": 0.026,
+      "avg_cut_months": 110.9869,
+      "avg_max_drawdown": -0.3995290482441742,
+      "median_ruin_month_if_ruined": 311.0
+    }
+  },
+  "paired_deltas_vs_fixed_4pct": {
+    "vol_cut": {
+      "delta_ruin_probability": -0.0111,
+      "delta_ruin_probability_ci95": [
+        -0.013153598152740038,
+        -0.009046401847259963
+      ],
+      "delta_terminal_wealth_mean": 110735.56323589855,
+      "delta_terminal_wealth_ci95": [
+        109714.87766859758,
+        111756.24880319952
+      ],
+      "delta_total_withdrawn_mean": -41362.53560449108,
+      "delta_total_withdrawn_ci95": [
+        -41731.0762133389,
+        -40993.99499564326
+      ]
+    },
+    "drawdown_cut": {
+      "delta_ruin_probability": -0.0156,
+      "delta_ruin_probability_ci95": [
+        -0.01802899090613411,
+        -0.013171009093865888
+      ],
+      "delta_terminal_wealth_mean": 62614.21180246643,
+      "delta_terminal_wealth_ci95": [
+        61611.0393283414,
+        63617.38427659146
+      ],
+      "delta_total_withdrawn_mean": -23583.716745314767,
+      "delta_total_withdrawn_ci95": [
+        -24070.688503990106,
+        -23096.744986639427
+      ]
+    },
+    "combined_cut": {
+      "delta_ruin_probability": -0.0189,
+      "delta_ruin_probability_ci95": [
+        -0.021569102961195342,
+        -0.01623089703880466
+      ],
+      "delta_terminal_wealth_mean": 134324.37625809904,
+      "delta_terminal_wealth_ci95": [
+        133119.76754261125,
+        135528.98497358683
+      ],
+      "delta_total_withdrawn_mean": -50675.43964322883,
+      "delta_total_withdrawn_ci95": [
+        -51204.6668299196,
+        -50146.21245653805
+      ]
+    }
+  },
+  "sensitivity_by_withdrawal_rate": {
+    "3.5%": {
+      "fixed": {
+        "ruin_probability": 0.0175,
+        "ruin_probability_ci95": [
+          0.014929822655699008,
+          0.020070177344300996
+        ],
+        "terminal_wealth_mean": 2749488.9365353896,
+        "terminal_wealth_median": 2311164.482581873,
+        "terminal_wealth_p05": 332094.9834689154,
+        "terminal_wealth_expected_shortfall_5pct": 119137.94923764985,
+        "terminal_wealth_p95": 6651305.615301598,
+        "total_withdrawn_mean": 1047055.0665106884,
+        "total_withdrawn_p05": 1049999.9999999944,
+        "spending_shortfall_vs_full_plan": 0.002804698561249097,
+        "prob_spending_below_90pct_plan": 0.0113,
+        "avg_cut_months": 0.0,
+        "avg_max_drawdown": -0.3874821161647129,
+        "median_ruin_month_if_ruined": 310.0
+      },
+      "vol_cut": {
+        "ruin_probability": 0.0126,
+        "ruin_probability_ci95": [
+          0.010413700672626255,
+          0.014786299327373745
+        ],
+        "terminal_wealth_mean": 2848443.5247626347,
+        "terminal_wealth_median": 2405384.626363948,
+        "terminal_wealth_p05": 419205.29544113646,
+        "terminal_wealth_expected_shortfall_5pct": 181643.97228622876,
+        "terminal_wealth_p95": 6783934.374574583,
+        "total_withdrawn_mean": 1009342.3685669639,
+        "total_withdrawn_p05": 989624.9999999949,
+        "spending_shortfall_vs_full_plan": 0.038721553745748594,
+        "prob_spending_below_90pct_plan": 0.0093,
+        "avg_cut_months": 88.733,
+        "avg_max_drawdown": -0.3777561653811067,
+        "median_ruin_month_if_ruined": 318.5
+      },
+      "drawdown_cut": {
+        "ruin_probability": 0.0083,
+        "ruin_probability_ci95": [
+          0.006521691968317762,
+          0.010078308031682238
+        ],
+        "terminal_wealth_mean": 2807274.567120289,
+        "terminal_wealth_median": 2366390.5343305836,
+        "terminal_wealth_p05": 451728.1844157984,
+        "terminal_wealth_expected_shortfall_5pct": 213758.90187167216,
+        "terminal_wealth_p95": 6664028.646206767,
+        "total_withdrawn_mean": 1024236.0595280651,
+        "total_withdrawn_p05": 983478.1249999945,
+        "spending_shortfall_vs_full_plan": 0.0245370861637475,
+        "prob_spending_below_90pct_plan": 0.0107,
+        "avg_cut_months": 56.2817,
+        "avg_max_drawdown": -0.37608322035283787,
+        "median_ruin_month_if_ruined": 322.0
+      },
+      "combined_cut": {
+        "ruin_probability": 0.0074,
+        "ruin_probability_ci95": [
+          0.005720110241307443,
+          0.009079889758692557
+        ],
+        "terminal_wealth_mean": 2870383.6723489854,
+        "terminal_wealth_median": 2424912.335532026,
+        "terminal_wealth_p05": 484471.4902239446,
+        "terminal_wealth_expected_shortfall_5pct": 232977.66636396415,
+        "terminal_wealth_p95": 6794575.417460088,
+        "total_withdrawn_mean": 1000227.2539649822,
+        "total_withdrawn_p05": 964249.9999999951,
+        "spending_shortfall_vs_full_plan": 0.047402615271445514,
+        "prob_spending_below_90pct_plan": 0.0164,
+        "avg_cut_months": 111.3462,
+        "avg_max_drawdown": -0.37316980087780816,
+        "median_ruin_month_if_ruined": 321.0
+      }
+    },
+    "4.0%": {
+      "fixed": {
+        "ruin_probability": 0.0406,
+        "ruin_probability_ci95": [
+          0.0367315172821565,
+          0.0444684827178435
+        ],
+        "terminal_wealth_mean": 2358639.3771924675,
+        "terminal_wealth_median": 1942676.5365822308,
+        "terminal_wealth_p05": 70186.45462444781,
+        "terminal_wealth_expected_shortfall_5pct": 6539.028509030136,
+        "terminal_wealth_p95": 6033722.817651843,
+        "total_withdrawn_mean": 1191293.0790236252,
+        "total_withdrawn_p05": 1200000.0000000014,
+        "spending_shortfall_vs_full_plan": 0.007255767480312314,
+        "prob_spending_below_90pct_plan": 0.0273,
+        "avg_cut_months": 0.0,
+        "avg_max_drawdown": -0.42015173327590355,
+        "median_ruin_month_if_ruined": 302.0
+      },
+      "vol_cut": {
+        "ruin_probability": 0.0295,
+        "ruin_probability_ci95": [
+          0.026183449878191035,
+          0.03281655012180896
+        ],
+        "terminal_wealth_mean": 2469374.940428366,
+        "terminal_wealth_median": 2051427.1157326568,
+        "terminal_wealth_p05": 173339.66701717293,
+        "terminal_wealth_expected_shortfall_5pct": 37535.82173780071,
+        "terminal_wealth_p95": 6183223.613591212,
+        "total_withdrawn_mean": 1149930.5434191339,
+        "total_withdrawn_p05": 1128000.000000003,
+        "spending_shortfall_vs_full_plan": 0.041724547150721825,
+        "prob_spending_below_90pct_plan": 0.0241,
+        "avg_cut_months": 88.4346,
+        "avg_max_drawdown": -0.4057797633262616,
+        "median_ruin_month_if_ruined": 309.0
+      },
+      "drawdown_cut": {
+        "ruin_probability": 0.025,
+        "ruin_probability_ci95": [
+          0.021939797966857685,
+          0.028060202033142318
+        ],
+        "terminal_wealth_mean": 2421253.588994934,
+        "terminal_wealth_median": 2001892.0405017147,
+        "terminal_wealth_p05": 202978.04210448955,
+        "terminal_wealth_expected_shortfall_5pct": 55730.393662455055,
+        "terminal_wealth_p95": 6055081.081616718,
+        "total_withdrawn_mean": 1167709.36227831,
+        "total_withdrawn_p05": 1120000.0000000042,
+        "spending_shortfall_vs_full_plan": 0.02690886476807486,
+        "prob_spending_below_90pct_plan": 0.0221,
+        "avg_cut_months": 56.01,
+        "avg_max_drawdown": -0.40455291177224917,
+        "median_ruin_month_if_ruined": 315.5
+      },
+      "combined_cut": {
+        "ruin_probability": 0.0217,
+        "ruin_probability_ci95": [
+          0.018844095499381736,
+          0.024555904500618266
+        ],
+        "terminal_wealth_mean": 2492963.7534505664,
+        "terminal_wealth_median": 2071468.4141350728,
+        "terminal_wealth_p05": 239689.97250055318,
+        "terminal_wealth_expected_shortfall_5pct": 71797.98192892507,
+        "terminal_wealth_p95": 6189729.400440456,
+        "total_withdrawn_mean": 1140617.639380396,
+        "total_withdrawn_p05": 1100000.000000004,
+        "spending_shortfall_vs_full_plan": 0.049485300516336594,
+        "prob_spending_below_90pct_plan": 0.026,
+        "avg_cut_months": 110.9869,
+        "avg_max_drawdown": -0.3995290482441742,
+        "median_ruin_month_if_ruined": 311.0
+      }
+    },
+    "4.5%": {
+      "fixed": {
+        "ruin_probability": 0.0834,
+        "ruin_probability_ci95": [
+          0.0779806058407138,
+          0.0888193941592862
+        ],
+        "terminal_wealth_mean": 1977360.6112111274,
+        "terminal_wealth_median": 1558922.6914663021,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 5445129.192141502,
+        "total_withdrawn_mean": 1328372.2916959252,
+        "total_withdrawn_p05": 1164832.1641394205,
+        "spending_shortfall_vs_full_plan": 0.016020524669685066,
+        "prob_spending_below_90pct_plan": 0.0581,
+        "avg_cut_months": 0.0,
+        "avg_max_drawdown": -0.46445477256180145,
+        "median_ruin_month_if_ruined": 298.0
+      },
+      "vol_cut": {
+        "ruin_probability": 0.0626,
+        "ruin_probability_ci95": [
+          0.05785181722315071,
+          0.0673481827768493
+        ],
+        "terminal_wealth_mean": 2096922.9064366613,
+        "terminal_wealth_median": 1688555.6877674123,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 5605667.799590382,
+        "total_withdrawn_mean": 1285541.328091257,
+        "total_withdrawn_p05": 1213819.0901530762,
+        "spending_shortfall_vs_full_plan": 0.047747164376846674,
+        "prob_spending_below_90pct_plan": 0.0505,
+        "avg_cut_months": 87.868,
+        "avg_max_drawdown": -0.44439425326372095,
+        "median_ruin_month_if_ruined": 305.0
+      },
+      "drawdown_cut": {
+        "ruin_probability": 0.0569,
+        "ruin_probability_ci95": [
+          0.05235940472592587,
+          0.061440595274074125
+        ],
+        "terminal_wealth_mean": 2041463.9181206697,
+        "terminal_wealth_median": 1636035.7899217801,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 5454209.282179491,
+        "total_withdrawn_mean": 1306325.6682624985,
+        "total_withdrawn_p05": 1224833.3463513055,
+        "spending_shortfall_vs_full_plan": 0.032351356842593715,
+        "prob_spending_below_90pct_plan": 0.0477,
+        "avg_cut_months": 55.4605,
+        "avg_max_drawdown": -0.4448851754678062,
+        "median_ruin_month_if_ruined": 311.0
+      },
+      "combined_cut": {
+        "ruin_probability": 0.051,
+        "ruin_probability_ci95": [
+          0.04668782893174074,
+          0.05531217106825925
+        ],
+        "terminal_wealth_mean": 2120888.9243974946,
+        "terminal_wealth_median": 1715232.1080601518,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 5607782.642028988,
+        "total_withdrawn_mean": 1276845.9086657634,
+        "total_withdrawn_p05": 1217567.7026379313,
+        "spending_shortfall_vs_full_plan": 0.05418821580313815,
+        "prob_spending_below_90pct_plan": 0.0489,
+        "avg_cut_months": 110.2284,
+        "avg_max_drawdown": -0.43652743520734294,
+        "median_ruin_month_if_ruined": 310.0
+      }
+    },
+    "5.0%": {
+      "fixed": {
+        "ruin_probability": 0.1497,
+        "ruin_probability_ci95": [
+          0.14270681887237086,
+          0.15669318112762914
+        ],
+        "terminal_wealth_mean": 1613534.9993445412,
+        "terminal_wealth_median": 1188662.813759863,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 4817989.681058338,
+        "total_withdrawn_mean": 1452873.3792161942,
+        "total_withdrawn_p05": 1102935.560425903,
+        "spending_shortfall_vs_full_plan": 0.03141774718920387,
+        "prob_spending_below_90pct_plan": 0.1115,
+        "avg_cut_months": 0.0,
+        "avg_max_drawdown": -0.5200893040802237,
+        "median_ruin_month_if_ruined": 291.0
+      },
+      "vol_cut": {
+        "ruin_probability": 0.1188,
+        "ruin_probability_ci95": [
+          0.11245804360384802,
+          0.125141956396152
+        ],
+        "terminal_wealth_mean": 1737529.0726107575,
+        "terminal_wealth_median": 1326355.0409290253,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 4990826.599860549,
+        "total_withdrawn_mean": 1411387.7321265128,
+        "total_withdrawn_p05": 1134985.3771770804,
+        "spending_shortfall_vs_full_plan": 0.059074845248991426,
+        "prob_spending_below_90pct_plan": 0.0978,
+        "avg_cut_months": 86.836,
+        "avg_max_drawdown": -0.4940781658713286,
+        "median_ruin_month_if_ruined": 298.0
+      },
+      "drawdown_cut": {
+        "ruin_probability": 0.118,
+        "ruin_probability_ci95": [
+          0.1116765646406819,
+          0.12432343535931809
+        ],
+        "terminal_wealth_mean": 1674927.7325513326,
+        "terminal_wealth_median": 1266116.4175617446,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 4850614.926042693,
+        "total_withdrawn_mean": 1434838.447762224,
+        "total_withdrawn_p05": 1149678.1018444004,
+        "spending_shortfall_vs_full_plan": 0.04344103482518402,
+        "prob_spending_below_90pct_plan": 0.0948,
+        "avg_cut_months": 54.515,
+        "avg_max_drawdown": -0.4983046488775634,
+        "median_ruin_month_if_ruined": 304.0
+      },
+      "combined_cut": {
+        "ruin_probability": 0.103,
+        "ruin_probability_ci95": [
+          0.09704210807351955,
+          0.10895789192648044
+        ],
+        "terminal_wealth_mean": 1760027.2218609548,
+        "terminal_wealth_median": 1354683.0275684441,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 4993464.367548617,
+        "total_withdrawn_mean": 1404535.5386019787,
+        "total_withdrawn_p05": 1159390.915454664,
+        "spending_shortfall_vs_full_plan": 0.0636429742653476,
+        "prob_spending_below_90pct_plan": 0.09,
+        "avg_cut_months": 108.9104,
+        "avg_max_drawdown": -0.4857429719808245,
+        "median_ruin_month_if_ruined": 303.0
+      }
+    },
+    "5.5%": {
+      "fixed": {
+        "ruin_probability": 0.2371,
+        "ruin_probability_ci95": [
+          0.22876362252214158,
+          0.24543637747785843
+        ],
+        "terminal_wealth_mean": 1275052.539069261,
+        "terminal_wealth_median": 821894.6268163375,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 4225022.434035498,
+        "total_withdrawn_mean": 1559773.1106789848,
+        "total_withdrawn_p05": 1067624.2226064075,
+        "spending_shortfall_vs_full_plan": 0.05468296322485766,
+        "prob_spending_below_90pct_plan": 0.1847,
+        "avg_cut_months": 0.0,
+        "avg_max_drawdown": -0.5858679150429794,
+        "median_ruin_month_if_ruined": 282.0
+      },
+      "vol_cut": {
+        "ruin_probability": 0.1924,
+        "ruin_probability_ci95": [
+          0.18467357708383056,
+          0.20012642291616942
+        ],
+        "terminal_wealth_mean": 1397944.354533808,
+        "terminal_wealth_median": 972817.6517493711,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 4396383.734990252,
+        "total_withdrawn_mean": 1523345.501365682,
+        "total_withdrawn_p05": 1088283.1983905705,
+        "spending_shortfall_vs_full_plan": 0.07676030220261687,
+        "prob_spending_below_90pct_plan": 0.1612,
+        "avg_cut_months": 85.1798,
+        "avg_max_drawdown": -0.5550119335824045,
+        "median_ruin_month_if_ruined": 287.0
+      },
+      "drawdown_cut": {
+        "ruin_probability": 0.1992,
+        "ruin_probability_ci95": [
+          0.19137139309671225,
+          0.20702860690328773
+        ],
+        "terminal_wealth_mean": 1330326.4939841856,
+        "terminal_wealth_median": 905196.3710941916,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 4242967.345628538,
+        "total_withdrawn_mean": 1547554.142600791,
+        "total_withdrawn_p05": 1099700.9776256122,
+        "spending_shortfall_vs_full_plan": 0.062088398423763014,
+        "prob_spending_below_90pct_plan": 0.1638,
+        "avg_cut_months": 52.9625,
+        "avg_max_drawdown": -0.5634571240346373,
+        "median_ruin_month_if_ruined": 292.0
+      },
+      "combined_cut": {
+        "ruin_probability": 0.1756,
+        "ruin_probability_ci95": [
+          0.1681422291576508,
+          0.1830577708423492
+        ],
+        "terminal_wealth_mean": 1418095.7249038469,
+        "terminal_wealth_median": 1001212.9702254694,
+        "terminal_wealth_p05": 0.0,
+        "terminal_wealth_expected_shortfall_5pct": 0.0,
+        "terminal_wealth_p95": 4406108.243034114,
+        "total_withdrawn_mean": 1518548.8055073563,
+        "total_withdrawn_p05": 1104960.8930518785,
+        "spending_shortfall_vs_full_plan": 0.07966739060160222,
+        "prob_spending_below_90pct_plan": 0.1548,
+        "avg_cut_months": 106.657,
+        "avg_max_drawdown": -0.5464440683296881,
+        "median_ruin_month_if_ruined": 292.0
+      }
+    }
+  },
+  "paired_deltas_by_withdrawal_rate": {
+    "3.5%": {
+      "vol_cut": {
+        "delta_ruin_probability": -0.0049,
+        "delta_ruin_probability_ci95": [
+          -0.0062687029090220114,
+          -0.0035312970909779887
+        ],
+        "delta_terminal_wealth_mean": 98954.58822724466,
+        "delta_terminal_wealth_ci95": [
+          98093.62418133466,
+          99815.55227315467
+        ],
+        "delta_total_withdrawn_mean": -37712.697943724284,
+        "delta_total_withdrawn_ci95": [
+          -37989.639088402975,
+          -37435.756799045594
+        ]
+      },
+      "drawdown_cut": {
+        "delta_ruin_probability": -0.0092,
+        "delta_ruin_probability_ci95": [
+          -0.011071391703596773,
+          -0.007328608296403228
+        ],
+        "delta_terminal_wealth_mean": 57785.630584898805,
+        "delta_terminal_wealth_ci95": [
+          56861.70027484438,
+          58709.56089495323
+        ],
+        "delta_total_withdrawn_mean": -22819.00698262315,
+        "delta_total_withdrawn_ci95": [
+          -23229.912338828697,
+          -22408.1016264176
+        ]
+      },
+      "combined_cut": {
+        "delta_ruin_probability": -0.0101,
+        "delta_ruin_probability_ci95": [
+          -0.012059901007601138,
+          -0.008140098992398861
+        ],
+        "delta_terminal_wealth_mean": 120894.73581359592,
+        "delta_terminal_wealth_ci95": [
+          119852.9398898098,
+          121936.53173738204
+        ],
+        "delta_total_withdrawn_mean": -46827.8125457061,
+        "delta_total_withdrawn_ci95": [
+          -47238.87874315996,
+          -46416.74634825224
+        ]
+      }
+    },
+    "4.0%": {
+      "vol_cut": {
+        "delta_ruin_probability": -0.0111,
+        "delta_ruin_probability_ci95": [
+          -0.013153598152740038,
+          -0.009046401847259963
+        ],
+        "delta_terminal_wealth_mean": 110735.56323589855,
+        "delta_terminal_wealth_ci95": [
+          109714.87766859758,
+          111756.24880319952
+        ],
+        "delta_total_withdrawn_mean": -41362.53560449108,
+        "delta_total_withdrawn_ci95": [
+          -41731.0762133389,
+          -40993.99499564326
+        ]
+      },
+      "drawdown_cut": {
+        "delta_ruin_probability": -0.0156,
+        "delta_ruin_probability_ci95": [
+          -0.01802899090613411,
+          -0.013171009093865888
+        ],
+        "delta_terminal_wealth_mean": 62614.21180246643,
+        "delta_terminal_wealth_ci95": [
+          61611.0393283414,
+          63617.38427659146
+        ],
+        "delta_total_withdrawn_mean": -23583.716745314767,
+        "delta_total_withdrawn_ci95": [
+          -24070.688503990106,
+          -23096.744986639427
+        ]
+      },
+      "combined_cut": {
+        "delta_ruin_probability": -0.0189,
+        "delta_ruin_probability_ci95": [
+          -0.021569102961195342,
+          -0.01623089703880466
+        ],
+        "delta_terminal_wealth_mean": 134324.37625809904,
+        "delta_terminal_wealth_ci95": [
+          133119.76754261125,
+          135528.98497358683
+        ],
+        "delta_total_withdrawn_mean": -50675.43964322883,
+        "delta_total_withdrawn_ci95": [
+          -51204.6668299196,
+          -50146.21245653805
+        ]
+      }
+    },
+    "4.5%": {
+      "vol_cut": {
+        "delta_ruin_probability": -0.0208,
+        "delta_ruin_probability_ci95": [
+          -0.023597339365960597,
+          -0.0180026606340394
+        ],
+        "delta_terminal_wealth_mean": 119562.2952255333,
+        "delta_terminal_wealth_ci95": [
+          118344.39451003866,
+          120780.19594102792
+        ],
+        "delta_total_withdrawn_mean": -42830.96360466813,
+        "delta_total_withdrawn_ci95": [
+          -43344.989184172795,
+          -42316.93802516347
+        ]
+      },
+      "drawdown_cut": {
+        "delta_ruin_probability": -0.0265,
+        "delta_ruin_probability_ci95": [
+          -0.029648246303178732,
+          -0.023351753696821267
+        ],
+        "delta_terminal_wealth_mean": 64103.306909541985,
+        "delta_terminal_wealth_ci95": [
+          63045.25230695644,
+          65161.36151212753
+        ],
+        "delta_total_withdrawn_mean": -22046.623433426787,
+        "delta_total_withdrawn_ci95": [
+          -22628.844157253912,
+          -21464.40270959966
+        ]
+      },
+      "combined_cut": {
+        "delta_ruin_probability": -0.0324,
+        "delta_ruin_probability_ci95": [
+          -0.03587054933255053,
+          -0.028929450667449463
+        ],
+        "delta_terminal_wealth_mean": 143528.31318636684,
+        "delta_terminal_wealth_ci95": [
+          142126.1679545896,
+          144930.4584181441
+        ],
+        "delta_total_withdrawn_mean": -51526.383030161676,
+        "delta_total_withdrawn_ci95": [
+          -52227.562799050145,
+          -50825.20326127321
+        ]
+      }
+    },
+    "5.0%": {
+      "vol_cut": {
+        "delta_ruin_probability": -0.0309,
+        "delta_ruin_probability_ci95": [
+          -0.03429188659596219,
+          -0.027508113404037807
+        ],
+        "delta_terminal_wealth_mean": 123994.07326621647,
+        "delta_terminal_wealth_ci95": [
+          122534.7978104708,
+          125453.34872196213
+        ],
+        "delta_total_withdrawn_mean": -41485.64708968163,
+        "delta_total_withdrawn_ci95": [
+          -42176.69203751145,
+          -40794.602141851814
+        ]
+      },
+      "drawdown_cut": {
+        "delta_ruin_probability": -0.0317,
+        "delta_ruin_probability_ci95": [
+          -0.03513409562459695,
+          -0.028265904375403054
+        ],
+        "delta_terminal_wealth_mean": 61392.73320679139,
+        "delta_terminal_wealth_ci95": [
+          60303.81968280743,
+          62481.64673077535
+        ],
+        "delta_total_withdrawn_mean": -18034.93145397069,
+        "delta_total_withdrawn_ci95": [
+          -18728.87024915717,
+          -17340.99265878421
+        ]
+      },
+      "combined_cut": {
+        "delta_ruin_probability": -0.0467,
+        "delta_ruin_probability_ci95": [
+          -0.050835719008198145,
+          -0.04256428099180185
+        ],
+        "delta_terminal_wealth_mean": 146492.2225164135,
+        "delta_terminal_wealth_ci95": [
+          144844.26396808025,
+          148140.18106474672
+        ],
+        "delta_total_withdrawn_mean": -48337.84061421578,
+        "delta_total_withdrawn_ci95": [
+          -49264.81847405971,
+          -47410.86275437184
+        ]
+      }
+    },
+    "5.5%": {
+      "vol_cut": {
+        "delta_ruin_probability": -0.0447,
+        "delta_ruin_probability_ci95": [
+          -0.04875043285911945,
+          -0.04064956714088054
+        ],
+        "delta_terminal_wealth_mean": 122891.81546454706,
+        "delta_terminal_wealth_ci95": [
+          121181.14117113415,
+          124602.48975795998
+        ],
+        "delta_total_withdrawn_mean": -36427.60931330296,
+        "delta_total_withdrawn_ci95": [
+          -37320.9472820503,
+          -35534.271344555615
+        ]
+      },
+      "drawdown_cut": {
+        "delta_ruin_probability": -0.0379,
+        "delta_ruin_probability_ci95": [
+          -0.04164289375480603,
+          -0.034157106245193976
+        ],
+        "delta_terminal_wealth_mean": 55273.95491492461,
+        "delta_terminal_wealth_ci95": [
+          54177.710184090116,
+          56370.1996457591
+        ],
+        "delta_total_withdrawn_mean": -12218.968078194082,
+        "delta_total_withdrawn_ci95": [
+          -12997.744698320847,
+          -11440.191458067318
+        ]
+      },
+      "combined_cut": {
+        "delta_ruin_probability": -0.0615,
+        "delta_ruin_probability_ci95": [
+          -0.06620904112817405,
+          -0.056790958871825954
+        ],
+        "delta_terminal_wealth_mean": 143043.1858345859,
+        "delta_terminal_wealth_ci95": [
+          141144.94673961474,
+          144941.42492955705
+        ],
+        "delta_total_withdrawn_mean": -41224.30517162898,
+        "delta_total_withdrawn_ci95": [
+          -42368.616421976,
+          -40079.99392128195
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "ETF/CPI sample starts in 2006 because local CPIAUCSL cache starts there; the 30-year horizon is bootstrapped, not a true 30-year historical cohort.",
+    "The vol threshold is calibrated on the full empirical sample for descriptive simulation, so this is not marketed as an OOS timing signal.",
+    "Withdrawal cuts improve solvency only by reducing spending; the simulation reports spending shortfall explicitly and does not model utility or essential-expense floors.",
+    "Taxes, fees, advisor behavior, annuities, Social Security, and required minimum distributions are excluded."
+  ]
+}

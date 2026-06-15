@@ -34464,5 +34464,18 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-06-16T04:15:44.697240"
+  },
+  {
+    "item_id": "f5332cb0",
+    "category": "retirement_decumulation",
+    "content": "K1505 PASS (Codex self-review). Vol-aware retirement withdrawal simulation using SPY/IEF 60/40 adjusted-close ETF returns plus FRED CPIAUCSL real returns, 2006-02 to 2026-05 (242 monthly obs), 12-month moving-block bootstrap, 10,000 30-year paths, seed=20260616. At 4% real withdrawal, fixed rule ruin probability=4.06%; lagged-vol 15% cut=2.95%; lagged-market-drawdown cut=2.50%; combined vol-or-drawdown cut=2.17%. Paired path delta for combined vs fixed=-1.89pp (95% CI [-2.16,-1.62]pp), but average real withdrawals fall by $50.7k / 4.95% of the full plan. Finding: realized vol/drawdown conditional withdrawal cuts can reduce sequence-of-returns ruin risk, but only by accepting explicit spending shortfall; do not claim a free higher SWR or OOS volatility forecast.",
+    "evidence": [
+      "experiments/k1505/README.md",
+      "experiments/k1505/k1505_vol_aware_withdrawal.py",
+      "experiments/k1505/k1505_results.json",
+      "experiments/k1505/codex_review.md"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-16T04:34:29.424974"
   }
 ]
