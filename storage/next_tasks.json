@@ -31363,9 +31363,28 @@
     "task_type": "experiment",
     "title": "K1337-v2: redesign with j+H<i training cutoff + symmetric model-class baseline",
     "description": "K1337 (yield curve dV/dt → SPY forward RV) Codex FAIL on v1 due to forward-label lookahead in expanding OLS (training row j has fwd_var(H) covering returns j..j+H-1, overlapping prediction date i when H>1). v2 fixes: (a) training cutoff j+H<i (drop last H-1 training rows), (b) regime label uses dslope.shift(1) before rolling-quantile classification, (c) augmented and HAR baseline both in log-variance space with same clipping, (d) rerun 18 specs (2 slope × 3 N × 3 H) + DM-HAC + stationary block bootstrap. Preserve experiments/k1337/ v1 as flawed-design preliminary. Output experiments/k1337_v2/. NULL direction expected (matches K749/K871) but must be validated under correct design before claim. Codex review required pre-knowledge.json.",
-    "status": "pending",
+    "status": "in_progress",
     "source": "codex_review_failure_followup",
     "created_at": "2026-06-15T10:45:00+08:00",
-    "parent_task_id": "K1337"
+    "parent_task_id": "K1337",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-15T03:07:38.615030+00:00",
+    "claim_session_id": "8f0dae4647f7",
+    "started_at": "2026-06-15T03:07:38.905999+00:00"
+  },
+  {
+    "id": "daily_article_k1335_vix_slope_vt_1781493064",
+    "task_type": "daily_article",
+    "title": "K1335 daily article：VIX 期限結構斜率作 VT overlay — 閾值極端才贏 VIX 水準",
+    "description": "把 K1335 (CONDITIONAL_PASS) 的 5 個策略對比寫成讀者向 feed 文章。slope_1_05 Sharpe 0.92 > Buy&Hold 0.81 + MDD 從 -33.7% 改到 -24.5%；slope_1_0 ties B&H；VIX level th=22 過度保守 (Sharpe 0.54)。Anti-AI gate 必過。嵌真圖：K1335_fig_equity.png + K1335_fig_drawdown.png。",
+    "priority": 2,
+    "status": "in_progress",
+    "source": "hourly-11-discovery",
+    "created_at": "2026-06-15T03:11:04Z",
+    "estimated_minutes": 30,
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-15T03:11:05.546114+00:00",
+    "claim_session_id": "6f5b4b517c89",
+    "started_at": "2026-06-15T03:11:05.824795+00:00"
   }
 ]
