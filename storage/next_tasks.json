@@ -31125,7 +31125,7 @@
     "title": "K1336: EM FX carry × FX vol regime 的雙閥門進出場 — 用 USDBRL/USDMXN/USDZAR/USDIDR daily 算 carry signal（rate diff via FRED），FX vol 用 60",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 568). Original: EM FX carry × FX vol regime 的雙閥門進出場 — 用 USDBRL/USDMXN/USDZAR/USDIDR daily 算 carry signal（rate diff via FRED），FX vol 用 60d realized；只在 carry > threshold 且 FX vol < threshold 時開倉，OOS Sharpe / MDD vs 純 carry baseline（yfinance + FRED）（來源：Bloomberg 2025-12 carry 17% 報酬 + ING 2026 outlook；2026 大議題但學術完整 OOS validation 缺）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1336.py with signal.shift(1) + seed=42, (c) K1336_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 568,
@@ -31133,7 +31133,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T00:00:06Z"
+    "created_at": "2026-06-15T00:00:06Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-15T01:49:32.163230+00:00",
+    "claim_session_id": "2195c84ed1b5",
+    "started_at": "2026-06-15T01:49:44.389747+00:00",
+    "completed_at": "2026-06-15T02:04:44.415749+00:00",
+    "result": "Completed K1336 EM FX carry x FX-vol double-gate experiment. Verdict NULL: gate cuts MDD/exposure but fails statistical return and bootstrap Sharpe gates after yfinance FX outlier filtering. README/results/figures/Codex review/memory/research_program updated."
   },
   {
     "id": "K1337",

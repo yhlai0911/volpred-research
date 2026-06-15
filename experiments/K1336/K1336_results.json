@@ -1,0 +1,327 @@
+{
+  "experiment_id": "K1336",
+  "title": "EM FX carry x FX-vol regime double-gate",
+  "date_run_utc": "2026-06-15",
+  "seed": 42,
+  "data": {
+    "fx_source": "yfinance adjusted close; spot tickers are USD per local-currency pairs shown as local currency per USD",
+    "rate_source": "FRED/OECD monthly or quarterly short-rate proxies",
+    "currencies": {
+      "BRL": {
+        "fx_ticker": "BRL=X",
+        "fred_rate": "IRSTCB01BRM156N",
+        "rate_frequency": "monthly",
+        "name": "Brazilian real"
+      },
+      "MXN": {
+        "fx_ticker": "MXN=X",
+        "fred_rate": "IR3TIB01MXM156N",
+        "rate_frequency": "monthly",
+        "name": "Mexican peso"
+      },
+      "ZAR": {
+        "fx_ticker": "ZAR=X",
+        "fred_rate": "IR3TIB01ZAM156N",
+        "rate_frequency": "monthly",
+        "name": "South African rand"
+      },
+      "IDR": {
+        "fx_ticker": "IDR=X",
+        "fred_rate": "IR3TIB01IDQ156N",
+        "rate_frequency": "quarterly",
+        "name": "Indonesian rupiah"
+      }
+    },
+    "us_rate": "TB3MS",
+    "start": "2004-01-01",
+    "end": "2026-06-15",
+    "oos_start": "2012-01-03",
+    "oos_rows": 3763,
+    "cached_data_dir": "experiments/K1336/data/",
+    "data_quality": {
+      "BRL": {
+        "fx_ticker": "BRL=X",
+        "fred_rate": "IRSTCB01BRM156N",
+        "rate_frequency": "monthly",
+        "rate_obs_start": "1996-10-01",
+        "rate_obs_end": "2023-12-01",
+        "rate_available_end": "2024-01-15",
+        "valid_return_days": 4130,
+        "spot_logret_outliers_removed": 0
+      },
+      "MXN": {
+        "fx_ticker": "MXN=X",
+        "fred_rate": "IR3TIB01MXM156N",
+        "rate_frequency": "monthly",
+        "rate_obs_start": "1997-01-01",
+        "rate_obs_end": "2026-04-01",
+        "rate_available_end": "2026-05-16",
+        "valid_return_days": 5661,
+        "spot_logret_outliers_removed": 0
+      },
+      "ZAR": {
+        "fx_ticker": "ZAR=X",
+        "fred_rate": "IR3TIB01ZAM156N",
+        "rate_frequency": "monthly",
+        "rate_obs_start": "1980-12-01",
+        "rate_obs_end": "2026-04-01",
+        "rate_available_end": "2026-05-16",
+        "valid_return_days": 5060,
+        "spot_logret_outliers_removed": 5
+      },
+      "IDR": {
+        "fx_ticker": "IDR=X",
+        "fred_rate": "IR3TIB01IDQ156N",
+        "rate_frequency": "quarterly",
+        "rate_obs_start": "1998-01-01",
+        "rate_obs_end": "2026-01-01",
+        "rate_available_end": "2026-04-01",
+        "valid_return_days": 5167,
+        "spot_logret_outliers_removed": 14
+      }
+    }
+  },
+  "method": {
+    "return_proxy": "long EM currency funded in USD: rate_diff_lag1/252 - dlog(USDLC)",
+    "rate_availability_lag_days": {
+      "monthly": 45,
+      "quarterly": 90
+    },
+    "max_stale_days_after_available_rate": {
+      "monthly": 120,
+      "quarterly": 210
+    },
+    "pure_carry_baseline": "1/4 notional per currency when lagged EM-USD short-rate differential is positive",
+    "double_gate": "1/4 notional only when lagged carry is positive, above its rolling 756d 60th percentile, and lagged 60d FX realized volatility is below its rolling 756d median",
+    "lookahead_policy": [
+      "FRED rate observations are shifted to conservative availability dates before daily alignment",
+      "carry, realized-volatility, and threshold signals use explicit .shift(1)",
+      "strategy returns at date t use only signals available before date t"
+    ],
+    "transaction_cost": "5.0 bps per one-way notional change",
+    "spot_outlier_filter": "abs(dlog USDLC) > 0.15 treated as FX spot data error and set to NaN",
+    "success_rule": "SUPPORT requires gate Sharpe improvement >=0.15, HAC t>3 for gate-minus-pure mean return, MDD improvement >=20%, and bootstrap Sharpe-diff 95% CI lower bound >0. PARTIAL requires positive Sharpe and MDD improvement with bootstrap p_gt_0 >=0.80."
+  },
+  "strategy_metrics": {
+    "pure_carry": {
+      "nobs": 3763,
+      "ann_return": 0.001828,
+      "ann_vol": 0.083992,
+      "sharpe": 0.0218,
+      "max_drawdown": -0.335268,
+      "active_share": 1.0,
+      "avg_gross_exposure": 0.871446,
+      "turnover_per_year": 0.552485,
+      "cost_drag_ann": 0.000276,
+      "skew": -0.3411
+    },
+    "carry_vol_gate": {
+      "nobs": 3763,
+      "ann_return": 0.003722,
+      "ann_vol": 0.022426,
+      "sharpe": 0.166,
+      "max_drawdown": -0.092809,
+      "active_share": 0.416423,
+      "avg_gross_exposure": 0.132142,
+      "turnover_per_year": 1.356099,
+      "cost_drag_ann": 0.000678,
+      "skew": -0.4034
+    }
+  },
+  "per_currency_metrics": {
+    "BRL": {
+      "pure": {
+        "nobs": 3763,
+        "ann_return": -0.001129,
+        "ann_vol": 0.037375,
+        "sharpe": -0.0302,
+        "max_drawdown": -0.134372,
+        "active_share": 0.79139,
+        "avg_gross_exposure": 0.197847,
+        "turnover_per_year": 0.150678,
+        "cost_drag_ann": 7.5e-05,
+        "skew": -0.1179
+      },
+      "gate": {
+        "nobs": 3763,
+        "ann_return": 0.005865,
+        "ann_vol": 0.014464,
+        "sharpe": 0.4055,
+        "max_drawdown": -0.043014,
+        "active_share": 0.14244,
+        "avg_gross_exposure": 0.03561,
+        "turnover_per_year": 0.217645,
+        "cost_drag_ann": 0.000109,
+        "skew": 0.1178
+      },
+      "gate_minus_pure_hac": {
+        "nobs": 3763,
+        "mean_daily": 2.533e-05,
+        "mean_ann": 0.006383,
+        "hac_t": 0.7907,
+        "hac_p": 0.429105,
+        "maxlags": 21
+      }
+    },
+    "MXN": {
+      "pure": {
+        "nobs": 3763,
+        "ann_return": 0.008751,
+        "ann_vol": 0.029834,
+        "sharpe": 0.2933,
+        "max_drawdown": -0.110547,
+        "active_share": 1.0,
+        "avg_gross_exposure": 0.25,
+        "turnover_per_year": 0.0,
+        "cost_drag_ann": 0.0,
+        "skew": -0.8111
+      },
+      "gate": {
+        "nobs": 3763,
+        "ann_return": 0.002377,
+        "ann_vol": 0.011045,
+        "sharpe": 0.2152,
+        "max_drawdown": -0.025932,
+        "active_share": 0.196386,
+        "avg_gross_exposure": 0.049096,
+        "turnover_per_year": 0.636195,
+        "cost_drag_ann": 0.000318,
+        "skew": -1.1834
+      },
+      "gate_minus_pure_hac": {
+        "nobs": 3763,
+        "mean_daily": -2.668e-05,
+        "mean_ann": -0.006723,
+        "hac_t": -0.9172,
+        "hac_p": 0.359049,
+        "maxlags": 21
+      }
+    },
+    "ZAR": {
+      "pure": {
+        "nobs": 3763,
+        "ann_return": -0.003737,
+        "ann_vol": 0.035075,
+        "sharpe": -0.1065,
+        "max_drawdown": -0.16309,
+        "active_share": 0.88945,
+        "avg_gross_exposure": 0.222362,
+        "turnover_per_year": 0.200904,
+        "cost_drag_ann": 0.0001,
+        "skew": -0.3532
+      },
+      "gate": {
+        "nobs": 3763,
+        "ann_return": -0.0037,
+        "ann_vol": 0.0096,
+        "sharpe": -0.3854,
+        "max_drawdown": -0.060841,
+        "active_share": 0.104704,
+        "avg_gross_exposure": 0.026176,
+        "turnover_per_year": 0.301355,
+        "cost_drag_ann": 0.000151,
+        "skew": -2.0
+      },
+      "gate_minus_pure_hac": {
+        "nobs": 3763,
+        "mean_daily": -2.11e-06,
+        "mean_ann": -0.000533,
+        "hac_t": -0.0664,
+        "hac_p": 0.94707,
+        "maxlags": 21
+      }
+    },
+    "IDR": {
+      "pure": {
+        "nobs": 3763,
+        "ann_return": -0.000545,
+        "ann_vol": 0.024617,
+        "sharpe": -0.0222,
+        "max_drawdown": -0.063054,
+        "active_share": 0.804943,
+        "avg_gross_exposure": 0.201236,
+        "turnover_per_year": 0.200904,
+        "cost_drag_ann": 0.0001,
+        "skew": -0.2976
+      },
+      "gate": {
+        "nobs": 3763,
+        "ann_return": -0.000777,
+        "ann_vol": 0.005992,
+        "sharpe": -0.1297,
+        "max_drawdown": -0.025231,
+        "active_share": 0.085039,
+        "avg_gross_exposure": 0.02126,
+        "turnover_per_year": 0.200904,
+        "cost_drag_ann": 0.0001,
+        "skew": 1.4394
+      },
+      "gate_minus_pure_hac": {
+        "nobs": 3763,
+        "mean_daily": -2.05e-06,
+        "mean_ann": -0.000517,
+        "hac_t": -0.1117,
+        "hac_p": 0.911044,
+        "maxlags": 21
+      }
+    }
+  },
+  "tests": {
+    "gate_minus_pure_hac_mean": {
+      "nobs": 3763,
+      "mean_daily": -5.51e-06,
+      "mean_ann": -0.00139,
+      "hac_t": -0.0652,
+      "hac_p": 0.947994,
+      "maxlags": 21
+    },
+    "gate_minus_pure_sharpe_bootstrap": {
+      "mean": 0.134551,
+      "ci_2p5": -0.428956,
+      "ci_97p5": 0.688855,
+      "p_gt_0": 0.67,
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    }
+  },
+  "figures": [
+    "K1336_fig_equity.png",
+    "K1336_fig_drawdown.png",
+    "K1336_fig_currency_metrics.png"
+  ],
+  "literature": [
+    {
+      "citation": "Menkhoff, Sarno, Schmeling, and Schrimpf (2012), Carry Trades and Global Foreign Exchange Volatility",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1540-6261.2012.01728.x"
+    },
+    {
+      "citation": "Lustig, Roussanov, and Verdelhan (2011), Common Risk Factors in Currency Markets",
+      "url": "https://academic.oup.com/rfs/article-abstract/24/11/3731/1589752"
+    },
+    {
+      "citation": "Brunnermeier, Nagel, and Pedersen (2008), Carry Trades and Currency Crashes",
+      "url": "https://www.nber.org/papers/w14473"
+    },
+    {
+      "citation": "FRED/OECD short-rate proxies and yfinance USD/EM FX spot data",
+      "url": "https://fred.stlouisfed.org/"
+    }
+  ],
+  "research_honesty_notes": [
+    "This is a spot-plus-rate-differential proxy, not a fully collateralized institutional FX forward carry book.",
+    "Brazil's FRED/OECD rate series ends in 2023; stale-rate masking limits later BRL contribution.",
+    "Monthly and quarterly macro-rate releases are conservatively availability-lagged before daily use.",
+    "The gate lowers exposure; lower drawdown can come from sitting in cash rather than superior timing.",
+    "Extreme yfinance FX spot glitches are removed with a pre-specified absolute log-return filter."
+  ],
+  "verdict": {
+    "overall": "NULL",
+    "sharpe_diff": 0.1442,
+    "mdd_improvement": 0.242459,
+    "mdd_improvement_pct": 0.72318,
+    "support": false,
+    "partial": false,
+    "plain_english": "The carry x low-FX-vol gate does not beat the pure carry baseline under the pre-specified gate."
+  }
+}

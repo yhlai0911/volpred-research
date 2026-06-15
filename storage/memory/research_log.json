@@ -3968,5 +3968,24 @@
       "NULL",
       "codex"
     ]
+  },
+  {
+    "entry_id": "40030145",
+    "timestamp": "2026-06-15T10:04:25.080747",
+    "phase": "experiment_closure",
+    "action": "Completed K1336 EM FX carry x FX-vol double-gate experiment with Codex review.",
+    "observation": "NULL result: carry x low-vol gate cut drawdown and exposure but failed HAC mean-return and bootstrap Sharpe-diff gates after FX bad-tick filtering.",
+    "decision": "Record NULL; treat own-FX-vol gate as a conservative exposure filter, not publishable EM carry timing alpha. Any follow-up needs investable forward-return data and vintage-aware rate inputs.",
+    "experiment_ids": [
+      "K1336"
+    ],
+    "tags": [
+      "FX",
+      "carry",
+      "EM",
+      "vol_regime",
+      "NULL",
+      "codex"
+    ]
   }
 ]

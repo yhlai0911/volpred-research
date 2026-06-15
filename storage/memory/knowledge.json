@@ -34194,5 +34194,19 @@
     ],
     "confidence": 0.84,
     "created_at": "2026-06-15T08:46:47.282218"
+  },
+  {
+    "item_id": "cb250a45",
+    "category": "empirical_null",
+    "content": "K1336 NULL: EM FX carry x own-FX-vol double gate was tested on yfinance BRL/MXN/ZAR/IDR spot and FRED/OECD short-rate proxies, with 45/90-day availability lags for monthly/quarterly rates, stale-rate masking, explicit signal.shift(1) treatment for carry/vol/thresholds, fixed seed=42 bootstrap, and removal of yfinance FX spot abs(logret)>15% bad ticks (ZAR 5, IDR 14). OOS 2012-2026 pure carry Sharpe was 0.022 with MDD -33.5%; carry x low-vol gate Sharpe was 0.166 with MDD -9.3% and much lower exposure. The improvement is risk/exposure reduction, not statistically defensible timing alpha: gate-minus-pure HAC mean diff was -0.14% annualized (t=-0.07, p=0.948), bootstrap Sharpe-diff 95% CI was [-0.429, +0.689] with p_gt_0=0.67, and Sharpe diff +0.144 missed the pre-set +0.15 gate. Do not promote this as EM carry timing evidence without forward points and vintage-aware policy-rate data.",
+    "evidence": [
+      "K1336",
+      "experiments/K1336/README.md",
+      "experiments/K1336/K1336.py",
+      "experiments/K1336/K1336_results.json",
+      "experiments/K1336/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-15T10:04:24.866933"
   }
 ]
