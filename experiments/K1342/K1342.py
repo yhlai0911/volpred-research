@@ -81,7 +81,9 @@ def flatten_yfinance_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
 
 def fetch_minute_bars(ticker: str) -> pd.DataFrame:
     chunks = []
-    end = pd.Timestamp.now(tz="UTC").normalize() + pd.Timedelta(days=1)
+    # Use the current New York date as exclusive end to avoid querying today's
+    # incomplete or pre-open session.
+    end = pd.Timestamp.now(tz="America/New_York").normalize().tz_convert("UTC")
     start = end - pd.Timedelta(days=PERIOD_DAYS)
     chunk_start = start
     while chunk_start < end:
@@ -207,8 +209,9 @@ def block_bootstrap_pvalue(x: np.ndarray, block: int = BOOTSTRAP_BLOCK_DAYS) -> 
     x = np.asarray(x, dtype=float)
     x = x[~np.isnan(x)]
     n = len(x)
-    if n < max(8, block * 2):
+    if n < 8:
         return float("nan")
+    block = min(block, max(2, n // 2))
     observed = float(x.mean())
     centred = x - observed
     rng = np.random.default_rng(SEED)
