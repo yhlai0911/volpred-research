@@ -45,12 +45,8 @@ START_DATE = "2014-01-01"
 END_DATE = "2026-06-15"
 
 MARKET_TICKERS = ["^VIX", "SPY", "XLF", "XLU"]
-FRED_YIELD_SERIES = {
-    "^TNX": "DGS10",
-    "^IRX": "DGS3MO",
-    "^FVX": "DGS5",
-}
-TICKERS = [*FRED_YIELD_SERIES.keys(), *MARKET_TICKERS]
+YIELD_TICKERS = ["^TNX", "^IRX", "^FVX"]
+TICKERS = [*YIELD_TICKERS, *MARKET_TICKERS]
 SLOPE_SPECS = [
     ("TNX_minus_IRX", "^TNX", "^IRX"),
     ("TNX_minus_FVX", "^TNX", "^FVX"),
@@ -137,12 +133,12 @@ def cache_is_usable(close: pd.DataFrame) -> bool:
     if not all(col in close.columns for col in TICKERS):
         return False
     min_market_obs = close[MARKET_TICKERS].notna().sum().min()
-    min_yield_obs = close[list(FRED_YIELD_SERIES.keys())].notna().sum().min()
+    min_yield_obs = close[YIELD_TICKERS].notna().sum().min()
     return bool(min_market_obs > 1000 and min_yield_obs > 1000)
 
 
 def fetch_data() -> pd.DataFrame:
-    """Load cached closes/yields or download yfinance market data plus FRED yields."""
+    """Load cached closes/yields or download each yfinance ticker separately."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     cache_path = DATA_DIR / "close.csv"
     if cache_path.exists():
@@ -159,7 +155,7 @@ def fetch_data() -> pd.DataFrame:
         if s.notna().sum() < 1000:
             raise RuntimeError(f"yfinance download failed for {ticker}: obs={s.notna().sum()}")
         pieces.append(s)
-    close = pd.concat(pieces, axis=1).sort_index()
+    close = pd.concat(pieces, axis=1, sort=True).sort_index()
     close = close.loc[START_DATE:END_DATE]
     # Align yield observations to equity trading dates without using future data.
     equity_index = close["SPY"].dropna().index
@@ -576,7 +572,10 @@ def make_plots(feats: pd.DataFrame, results: list[SpecResult]) -> None:
         (axes2[1], "dm_t", "DM t-stat (positive = augmented worse)"),
     ]:
         labels = [f"{row.spec}\nN{row.N}/H{row.H}" for row in plot_df.itertuples()]
-        colors = ["C2" if v > 0 else "C3" for v in plot_df[value_col]]
+        if value_col == "dm_t":
+            colors = ["C3" if v > 0 else "C2" for v in plot_df[value_col]]
+        else:
+            colors = ["C2" if v > 0 else "C3" for v in plot_df[value_col]]
         ax.barh(range(len(plot_df)), plot_df[value_col], color=colors, alpha=0.85)
         ax.axvline(0, color="black", lw=0.8)
         ax.set_yticks(range(len(plot_df)))
@@ -677,7 +676,7 @@ def main() -> None:
         "experiment_id": EXP_ID,
         "parent_experiment_id": "K1337",
         "title": "Yield-curve steepening rate dV/dt vs SPY forward realized variance, corrected lookahead-free design",
-        "date_run_utc": pd.Timestamp.utcnow().isoformat(),
+        "date_run_utc": pd.Timestamp.now(tz="UTC").isoformat(),
         "seed": SEED,
         "data": {
             "source": "yfinance daily Close, auto_adjust=False",

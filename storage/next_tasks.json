@@ -31363,14 +31363,16 @@
     "task_type": "experiment",
     "title": "K1337-v2: redesign with j+H<i training cutoff + symmetric model-class baseline",
     "description": "K1337 (yield curve dV/dt → SPY forward RV) Codex FAIL on v1 due to forward-label lookahead in expanding OLS (training row j has fwd_var(H) covering returns j..j+H-1, overlapping prediction date i when H>1). v2 fixes: (a) training cutoff j+H<i (drop last H-1 training rows), (b) regime label uses dslope.shift(1) before rolling-quantile classification, (c) augmented and HAR baseline both in log-variance space with same clipping, (d) rerun 18 specs (2 slope × 3 N × 3 H) + DM-HAC + stationary block bootstrap. Preserve experiments/k1337/ v1 as flawed-design preliminary. Output experiments/k1337_v2/. NULL direction expected (matches K749/K871) but must be validated under correct design before claim. Codex review required pre-knowledge.json.",
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "codex_review_failure_followup",
     "created_at": "2026-06-15T10:45:00+08:00",
     "parent_task_id": "K1337",
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-15T03:07:38.615030+00:00",
     "claim_session_id": "8f0dae4647f7",
-    "started_at": "2026-06-15T03:07:38.905999+00:00"
+    "started_at": "2026-06-15T03:07:38.905999+00:00",
+    "completed_at": "2026-06-15T03:31:41.286316+00:00",
+    "result": "Completed K1337-v2 corrected lookahead-free rerun. Fixed forward-label overlap with target_end_pos<forecast_pos, lagged regime labels, and symmetric log-HAR baseline. Verdict NULL: 0/18 specs pass; only +0.052% QLIKE cell is insignificant. README/results/figures/Codex review/memory/research_program/work_log updated."
   },
   {
     "id": "daily_article_k1335_vix_slope_vt_1781493064",
@@ -31388,5 +31390,26 @@
     "started_at": "2026-06-15T03:11:05.824795+00:00",
     "completed_at": "2026-06-15T03:20:53.578796+00:00",
     "result": "K1335 daily article published mile_0ed5ec2a; anti-ai gate PASS 1 round; commit 85a7db9e; audience=research; cluster-waiver applied"
+  },
+  {
+    "id": "email-11745-9834c9",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] Host cron failure detected",
+    "description": "Gmail UID: 11745\nMessage-ID: <D78C4EBE-549D-4FA0-9AF6-E23D3A316BE0@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Mon, 15 Jun 2026 11:18:24 +0800\nSubject: Re: [VolPred Alert][CRITICAL] Host cron failure detected\n\n--- 用戶回信內容 ---\n徹底從底層了解並解決問題\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月15日 11:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Host cron failure detected\r\n> Alert level: critical\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> 偵測到 host cron 失敗（最新 exit code != 0）。\r\n> scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\r\n> scheduler_last_status: ok\r\n> scheduler_age_minutes: 81975.5\r\n> failing_logs:\r\n> storage/logs/cron/hourly_dispatch.log exit=142 at unknown\r\n> 影響\r\n> \r\n> 資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\r\n> Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\r\n> release_pool_gap alert，發文節奏中斷。\r\n> 建議行動\r\n> \r\n> 查失敗 log： tail -20 <failing_log 路徑>\r\n> 權限問題（exit=126）： chmod +x scripts/<script>.sh\r\n> macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\r\n> System Settings > Privacy & Security > Full Disk Access 加 script 路徑\r\n> 手動跑 failed command 驗證修復： uv run <command>\r\n> 比對 canonical schedule： crontab -l vs config/runtime_schedules.json\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-15T03:30:02.759704+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11745,
+    "email_message_id": "<D78C4EBE-549D-4FA0-9AF6-E23D3A316BE0@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] Host cron failure detected",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-15T03:31:25.861885+00:00",
+    "claim_session_id": "8d313aaa0332"
   }
 ]
