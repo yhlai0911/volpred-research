@@ -31833,5 +31833,18 @@
     "started_at": "2026-06-15T18:02:29.682321+00:00",
     "completed_at": "2026-06-15T18:09:00.487966+00:00",
     "result": "Rewrote mile_b97c5c33 against K1038: separated GARCH/GJR/GAS-t/GAS-t-Lev QLIKE and SPY 1% VaR values, removed stale GJR-as-GARCH claims, restored published status with original published_at, and synced Supabase successfully. Validation passed: publish_draft update gate, anti-ai-style validator, and source-bound content assertions."
+  },
+  {
+    "id": "fix_test_preview_release_pool_self_heals_due_now",
+    "title": "Fix pre-existing test fail: test_preview_release_pool_self_heals_ignores_daily_audience_articles (due_now=False expected True)",
+    "description": "tests/test_content_release_pool.py:210 — frozen now=2026-04-25T08:00 + last_released_at=04-24T13:00 + 12h interval → expected due_now=True but actual False. Pre-existing fail (stash content.py 仍 fail，與 anti-flood gate a967f2eb 無關). 可能與 release_pool_articles 在 daily-audience self-heal 路徑的 due_now 計算 OR include_drafts default 邊界相關. 修：(a) reproduce locally, (b) decide whether test 或 implementation 該調，(c) commit fix + verify。先讀 test 240-260 line + content.py release_pool_by_settings_keeps_legacy 流程。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "source": "hourly_fire_2026_06_16_02",
+    "created_at": "2026-06-16T02:21:00+08:00",
+    "linked_task_ids": [
+      "article_rewrite_mile_b97c5c33_1781578800"
+    ]
   }
 ]
