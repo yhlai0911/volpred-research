@@ -31291,7 +31291,7 @@
     "title": "K1344: 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 587). Original: 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1344.py with signal.shift(1) + seed=42, (c) K1344_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 587,
@@ -31303,7 +31303,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-15T09:30:25.197378+00:00",
     "claim_session_id": "76aa4834fe0e",
-    "started_at": "2026-06-15T09:30:31.930316+00:00"
+    "started_at": "2026-06-15T09:30:31.930316+00:00",
+    "completed_at": "2026-06-15T09:39:55.455150+00:00",
+    "result": "K1344 completed as NULL. BDC stress augmentation improved OOS QLIKE directionally for IGV/HYG (best IGV h=21 +7.19%) but no cell passed Bonferroni alpha=0.0125; best p=0.178. Artifacts in experiments/K1344_private_credit_software_spillover; no knowledge write because task gate requires CONDITIONAL_PASS minimum."
   },
   {
     "id": "research_pre_fomc_implied_vol_drift",
