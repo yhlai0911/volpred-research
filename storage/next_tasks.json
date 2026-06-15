@@ -30828,7 +30828,7 @@
     "title": "研究 backlog fallback: Markov-regime GARCH 對「不穩定相關」的配置 robustness",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Markov-regime GARCH 對「不穩定相關」的配置 robustness — yfinance 股/債/金多資產，比較單 regime DCC-GARCH vs 2-regime Markov-switching GARCH 在弱成長/危機期的相關估計穩定性與配置 drawdown，檢定 regime-switching 是否真降低 misleading-correlation 風險；與既有 stock-bond correlation 60/40 題（單一相關 regime 訊號）正交，聚焦多資產 RS-GARCH 配置（來源：arXiv 2025 MRS-MNTS-GARCH； | 來源 section: 期刊主題挖掘 batch（2026-06-14c；backlog 再度抽乾 0 pending/0 in-flight platform idle critical → websearch jfe/rof/jfqa/jfm/j.forecasting/jpm/faj 2025-26 趨勢層級補 13 軸，全免費資料 yfinance/fred/^vix 系列可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "markov_regime_garch_robustness",
@@ -30836,7 +30836,12 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-14T14:12:12+00:00"
+    "created_at": "2026-06-14T14:12:12+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-15T11:14:43.851682+00:00",
+    "claim_session_id": "94d1143b02e2",
+    "completed_at": "2026-06-15T11:14:44.269553+00:00",
+    "result": "arc-covered by K1019/K1020/K1029/K1048 (regime-GARCH family experiments). Additional methodological caution: K1213 lesson warns pooled-MLE requires 100+ multistart and package convergence ≠ model validity — re-running RS-GARCH robustness without dedicating multi-day compute would silently inherit K1213 fragility risk. Closing as arc-covered + technically intensive."
   },
   {
     "id": "research_inventory_seasonality_surprise_regime_conditiona",
@@ -30987,7 +30992,7 @@
     "title": "研究 backlog fallback: AI mega-cap 集中度 HHI 作為 SPY tail-risk 預測因子",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: AI mega-cap 集中度 HHI 作為 SPY tail-risk 預測因子 — 從 S&P 500 top-10 持股權重（可由 SPY/IVV holdings 月頻代理）算 HHI / top-10 share，檢定 HHI 上升期 SPY 之後 N 月 realized vol、max drawdown、jump intensity 是否系統性放大（yfinance + 公開 holdings）（來源：JPM Global Research 2026-01「Fragile Fifty Percent」+ Deutsche Bank 2026-04 集中度 45%；2026 最熱  | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "ai_mega_cap_hhi_spy_tail_risk",
@@ -30995,7 +31000,12 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-14T18:15:58+00:00"
+    "created_at": "2026-06-14T18:15:58+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-15T11:14:38.386035+00:00",
+    "claim_session_id": "e789d1a004b7",
+    "completed_at": "2026-06-15T11:14:38.980953+00:00",
+    "result": "arc-covered by K1418 (S&P 500 集中度 × Dispersion Trading vol 結構不對稱, contemporaneous) + K1495 (lagged concentration pulse → forward 21d market vol). The HHI/top-10-share → SPY tail-risk question is fully addressed by these two K's; re-running would duplicate. Closing to keep pool actionable."
   },
   {
     "id": "paper_review_mile_6ccb9715",
@@ -31337,7 +31347,7 @@
     "title": "研究 backlog fallback: MOVE-VIX 跨資產 vol 分歧 regime 與配置",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: MOVE-VIX 跨資產 vol 分歧 regime 與配置 — 用 ^MOVE（債券 implied vol）/^VIX 比率建跨資產 vol 分歧指標，檢定分歧期 60/40 股債組合 vs risk-parity 表現差異（yfinance；MOVE 從 2024 起 yfinance ticker `^MOVE` 可抓）（來源：BondBloxx 2026 outlook + LPL Research 2026；MOVE 創 2021 來新低是 2026 macro 焦點） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "move_vix_vol_regime",
@@ -31345,7 +31355,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-15T02:11:53+00:00"
+    "created_at": "2026-06-15T02:11:53+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-15T11:10:54.733726+00:00",
+    "claim_session_id": "465d7712e710",
+    "started_at": "2026-06-15T11:10:57.869530+00:00",
+    "completed_at": "2026-06-15T11:12:05.202891+00:00",
+    "result": "arc-covered by K1442 (MOVE/VIX CPI event study, 2003-2026, n=5794) + K1488 (MOVE leadingness for SPY vol & stock-bond allocation; incremental OOS test beyond VIX/RV). Both K's directly answer the brief; no new research value in re-running. Closing to avoid arc-dup; backlog dispatcher should skip if re-emitted."
   },
   {
     "id": "research_volatility_skew_cross_section",
@@ -31382,7 +31398,7 @@
     "title": "研究 backlog fallback: Google Trends retail attention shock → 個股 vol（台股版）— 抓「台積電」「0050」「ETF」「定期定額」Google Trends 週頻 z-score，檢定 attention spike 後 N 週 0050.TW / 個股 realized vol（yfinance + pytrends 免費）（來源：Review of Behavioral Finance 2026 retail investor 研究 + SJP 行為報告；retail crowding 是 2026 議題但中文圈缺數據）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Google Trends retail attention shock → 個股 vol（台股版）— 抓「台積電」「0050」「ETF」「定期定額」Google Trends 週頻 z-score，檢定 attention spike 後 N 週 0050.TW / 個股 realized vol（yfinance + pytrends 免費）（來源：Review of Behavioral Finance 2026 retail investor 研究 + SJP 行為報告；retail crowding 是 2026 議題但中文圈缺數據） | 來源 section: 期刊主題挖掘 batch（2026-06-14d；pool-dry diagnostic 觸發 → websearch jpm/cfa/jfe/jfqa/j.futures markets/jfm/index investing/behavioral finance 2025-26 趨勢層級補 15 軸，全免費資料 yfinance/fred/^vix/^move/google trends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "google_trends_retail_attention_shock_vol_0050_et",
@@ -31390,7 +31406,12 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-15T02:11:55+00:00"
+    "created_at": "2026-06-15T02:11:55+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-15T11:14:40.507399+00:00",
+    "claim_session_id": "39dcf4262d26",
+    "completed_at": "2026-06-15T11:14:40.995877+00:00",
+    "result": "arc-covered by k1116/k1117b/k1118/k1157/k1306 (multiple retail attention / Google Trends → vol K experiments across asset universes). Adding a 0050.TW-specific replica would not produce incremental research value beyond the cross-section already done. Closing."
   },
   {
     "id": "research_factor_etf_flows_factor_crash",
@@ -31514,5 +31535,24 @@
     "started_at": "2026-06-15T05:50:46.561340+00:00",
     "completed_at": "2026-06-15T05:58:28.441470+00:00",
     "result": "Verified v12 H5 TLT/BTC QLIKE blocker is closed in current body.tex; archived v13 confirmation with 0 HIGH unresolved. Re-ran reproduce.py green (171/171 match), xelatex twice (49 pages), fixed paper-update stale-PDF/page-count bug, synced main.pdf/pages=49, and promoted paper status to ready_for_submission via CLI."
+  },
+  {
+    "id": "research_treasury_auction_btc_move_vol_signal",
+    "title": "研究 backlog new: Treasury auction bid-to-cover ratio 弱勢作為 MOVE vol leading signal",
+    "description": "Article pool fallback audit (hourly-19) 後補入：grep 既有 K 無 Treasury auction / bid-to-cover / TreasuryDirect 主題覆蓋。方向: 從 TreasuryDirect 公開 API（無需 auth, https://www.treasurydirect.gov/TA_WS/securities/announced）抓 10Y / 30Y note auction 2015-至今 monthly schedule (~120 events)；計算每場 bid-to-cover ratio 與 12-month rolling mean 的 z-score 作 demand-stress proxy（z < -1.5 = weak demand stress）；DM-HLN 檢定 weak-auction event 後 5d cumulative ^MOVE realized vol vs benign-auction control 是否系統性升高。Hypothesis: 弱需求拍賣 → primary dealer 庫存壓力 → 後續 MOVE vol regime 跳升（Treasury vol spillover 通道）。Literature: Lou Yan Zhang 2013 RFS auction price impact; Fleming Garbade 2003 NY Fed auction demand; Greenwood Hanson 2014 JFE government debt supply。Sample 充足（120 events, 30Y 額外 40+）、TreasuryDirect 完全 free、互補既有 K1086/K1442/K1488 MOVE-VIX arc 但角度不同（事件-event-driven, 非 ratio level）。主線程派 experiment agent 前先讀 docs/error_log.md + 至少 3 篇 lit + lag=event_day_signal_used_at_T+1 開始 forward window 防 lookahead；完成後 Codex review → knowledge → 可發 feed published（rates 受眾 + monetization angle）。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "hourly_19_audit_refill",
+    "research_slug": "treasury_auction_btc_move_vol_signal",
+    "tags": [
+      "uncovered-angle",
+      "rates",
+      "treasury-auction",
+      "MOVE",
+      "event-study",
+      "monetization-fit"
+    ],
+    "created_at": "2026-06-15T11:16:16+00:00"
   }
 ]
