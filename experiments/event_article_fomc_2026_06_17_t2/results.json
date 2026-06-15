@@ -1,0 +1,332 @@
+{
+  "experiment_id": "event_article_fomc_2026_06_17_t2",
+  "run_date": "2026-06-15",
+  "data_through": "2026-06-12",
+  "no_lookahead": true,
+  "description": "FOMC June 17 2026 T-2 market positioning evidence package",
+  "data_sources": [
+    "yfinance (SPY, ^VIX, ^VIX9D, ^IRX, SR3 futures)",
+    "FRED FOMC calendar (public)"
+  ],
+  "current_readings": {
+    "vix": 17.68,
+    "vix9d": 17.26,
+    "vix9d_vix_ratio": 0.976,
+    "tbill_3m_pct": 3.618,
+    "sofr_curve": {
+      "Jun 2026": 3.67,
+      "Sep 2026": 3.81,
+      "Dec 2026": 3.96,
+      "Mar 2027": 4.06
+    },
+    "implied_cut_prob_pct": 0
+  },
+  "sofr_interpretation": {
+    "jun26": "3.670% — near current level, hold confirmed",
+    "sep26": "3.810% — market pricing NO cut in Q3",
+    "dec26": "3.960% — market pricing NO cut year-end",
+    "mar27": "4.060% — slight SOFR rise, implying no easing",
+    "summary": "Market is pricing 0 cuts in 2026, vs Fed dot plot implying 1-2 cuts"
+  },
+  "vix_term_structure": {
+    "vix9d_above_vix": false,
+    "ratio": 0.976,
+    "fomc_t7_comparison": {
+      "2026-01": 0.94,
+      "2026-03": 1.009,
+      "2026-04": 0.915,
+      "2026-06_t2": 0.976
+    },
+    "interpretation": "VIX9D/VIX > 1 means short-term event premium elevated; buyers hedging the 9-day FOMC window"
+  },
+  "historical_fomc_moves": {
+    "n_meetings": 19,
+    "spy_ret_mean_pct": -0.22,
+    "spy_ret_std_pct": 1.44,
+    "spy_positive_freq": 0.368,
+    "vix_chg_mean_pts": 0.65,
+    "spy_range_mean_pct": 1.2,
+    "data": [
+      {
+        "label": "2024-01",
+        "fomc_date": "2024-01-31",
+        "t2_date": "2024-01-29",
+        "spy_t2": 478.11,
+        "spy_t0": 469.95,
+        "spy_ret_pct": -1.71,
+        "vix_t2": 13.6,
+        "vix_t0": 14.35,
+        "vix_chg_pts": 0.75,
+        "spy_range_pct": 1.29
+      },
+      {
+        "label": "2024-03",
+        "fomc_date": "2024-03-20",
+        "t2_date": "2024-03-18",
+        "spy_t2": 500.68,
+        "spy_t0": 508.11,
+        "spy_ret_pct": 1.49,
+        "vix_t2": 14.33,
+        "vix_t0": 13.04,
+        "vix_chg_pts": -1.29,
+        "spy_range_pct": 1.08
+      },
+      {
+        "label": "2024-05",
+        "fomc_date": "2024-05-01",
+        "t2_date": "2024-04-29",
+        "spy_t2": 497.94,
+        "spy_t0": 488.46,
+        "spy_ret_pct": -1.9,
+        "vix_t2": 14.67,
+        "vix_t0": 15.39,
+        "vix_chg_pts": 0.72,
+        "spy_range_pct": 1.66
+      },
+      {
+        "label": "2024-06",
+        "fomc_date": "2024-06-12",
+        "t2_date": "2024-06-10",
+        "spy_t2": 522.93,
+        "spy_t0": 528.5,
+        "spy_ret_pct": 1.06,
+        "vix_t2": 12.74,
+        "vix_t0": 12.04,
+        "vix_chg_pts": -0.7,
+        "spy_range_pct": 0.71
+      },
+      {
+        "label": "2024-07",
+        "fomc_date": "2024-07-31",
+        "t2_date": "2024-07-29",
+        "spy_t2": 533.53,
+        "spy_t0": 539.46,
+        "spy_ret_pct": 1.11,
+        "vix_t2": 16.6,
+        "vix_t0": 16.36,
+        "vix_chg_pts": -0.24,
+        "spy_range_pct": 1.08
+      },
+      {
+        "label": "2024-09",
+        "fomc_date": "2024-09-18",
+        "t2_date": "2024-09-16",
+        "spy_t2": 551.24,
+        "spy_t0": 549.83,
+        "spy_ret_pct": -0.26,
+        "vix_t2": 17.14,
+        "vix_t0": 18.23,
+        "vix_chg_pts": 1.09,
+        "spy_range_pct": 1.4
+      },
+      {
+        "label": "2024-11",
+        "fomc_date": "2024-11-07",
+        "t2_date": "2024-11-05",
+        "spy_t2": 566.55,
+        "spy_t0": 585.12,
+        "spy_ret_pct": 3.28,
+        "vix_t2": 20.49,
+        "vix_t0": 15.2,
+        "vix_chg_pts": -5.29,
+        "spy_range_pct": 0.62
+      },
+      {
+        "label": "2024-12",
+        "fomc_date": "2024-12-18",
+        "t2_date": "2024-12-16",
+        "spy_t2": 596.11,
+        "spy_t0": 575.96,
+        "spy_ret_pct": -3.38,
+        "vix_t2": 14.69,
+        "vix_t0": 27.62,
+        "vix_chg_pts": 12.93,
+        "spy_range_pct": 3.5
+      },
+      {
+        "label": "2025-01",
+        "fomc_date": "2025-01-29",
+        "t2_date": "2025-01-27",
+        "spy_t2": 590.8,
+        "spy_t0": 593.2,
+        "spy_ret_pct": 0.41,
+        "vix_t2": 17.9,
+        "vix_t0": 16.56,
+        "vix_chg_pts": -1.34,
+        "spy_range_pct": 0.82
+      },
+      {
+        "label": "2025-03",
+        "fomc_date": "2025-03-19",
+        "t2_date": "2025-03-17",
+        "spy_t2": 559.04,
+        "spy_t0": 559.02,
+        "spy_ret_pct": -0.0,
+        "vix_t2": 20.51,
+        "vix_t0": 19.9,
+        "vix_chg_pts": -0.61,
+        "spy_range_pct": 1.66
+      },
+      {
+        "label": "2025-05",
+        "fomc_date": "2025-05-07",
+        "t2_date": "2025-05-05",
+        "spy_t2": 557.12,
+        "spy_t0": 554.79,
+        "spy_ret_pct": -0.42,
+        "vix_t2": 23.64,
+        "vix_t0": 23.55,
+        "vix_chg_pts": -0.09,
+        "spy_range_pct": 1.4
+      },
+      {
+        "label": "2025-06",
+        "fomc_date": "2025-06-18",
+        "t2_date": "2025-06-16",
+        "spy_t2": 595.85,
+        "spy_t0": 590.67,
+        "spy_ret_pct": -0.87,
+        "vix_t2": 19.11,
+        "vix_t0": 20.14,
+        "vix_chg_pts": 1.03,
+        "spy_range_pct": 0.8
+      },
+      {
+        "label": "2025-07",
+        "fomc_date": "2025-07-30",
+        "t2_date": "2025-07-28",
+        "spy_t2": 631.58,
+        "spy_t0": 629.12,
+        "spy_ret_pct": -0.39,
+        "vix_t2": 15.03,
+        "vix_t0": 15.48,
+        "vix_chg_pts": 0.45,
+        "spy_range_pct": 0.97
+      },
+      {
+        "label": "2025-09",
+        "fomc_date": "2025-09-17",
+        "t2_date": "2025-09-15",
+        "spy_t2": 655.35,
+        "spy_t0": 653.64,
+        "spy_ret_pct": -0.26,
+        "vix_t2": 15.69,
+        "vix_t0": 15.72,
+        "vix_chg_pts": 0.03,
+        "spy_range_pct": 1.13
+      },
+      {
+        "label": "2025-10",
+        "fomc_date": "2025-10-29",
+        "t2_date": "2025-10-27",
+        "spy_t2": 681.36,
+        "spy_t0": 683.5,
+        "spy_ret_pct": 0.31,
+        "vix_t2": 15.79,
+        "vix_t0": 16.92,
+        "vix_chg_pts": 1.13,
+        "spy_range_pct": 1.0
+      },
+      {
+        "label": "2025-12",
+        "fomc_date": "2025-12-17",
+        "t2_date": "2025-12-15",
+        "spy_t2": 676.88,
+        "spy_t0": 667.6,
+        "spy_ret_pct": -1.37,
+        "vix_t2": 16.5,
+        "vix_t0": 17.62,
+        "vix_chg_pts": 1.12,
+        "spy_range_pct": 1.38
+      },
+      {
+        "label": "2026-01",
+        "fomc_date": "2026-01-28",
+        "t2_date": "2026-01-26",
+        "spy_t2": 690.84,
+        "spy_t0": 693.53,
+        "spy_ret_pct": 0.39,
+        "vix_t2": 16.15,
+        "vix_t0": 16.35,
+        "vix_chg_pts": 0.2,
+        "spy_range_pct": 0.56
+      },
+      {
+        "label": "2026-03",
+        "fomc_date": "2026-03-18",
+        "t2_date": "2026-03-16",
+        "spy_t2": 667.21,
+        "spy_t0": 659.63,
+        "spy_ret_pct": -1.14,
+        "vix_t2": 23.51,
+        "vix_t0": 25.09,
+        "vix_chg_pts": 1.58,
+        "spy_range_pct": 1.29
+      },
+      {
+        "label": "2026-04",
+        "fomc_date": "2026-04-29",
+        "t2_date": "2026-04-27",
+        "spy_t2": 715.17,
+        "spy_t0": 711.58,
+        "spy_ret_pct": -0.5,
+        "vix_t2": 18.02,
+        "vix_t0": 18.81,
+        "vix_chg_pts": 0.79,
+        "spy_range_pct": 0.54
+      }
+    ]
+  },
+  "scenarios": {
+    "HOLD": {
+      "probability_pct": 85,
+      "spy_t2_t0_central_pct": -0.18,
+      "spy_range": "-1.7% to +1.3%",
+      "vix_change_pts": 0.62,
+      "vol_regime": "VIX9D compresses post-event (vol selling window)",
+      "sizing": "neutral position, watch Powell language on dot plot vs SOFR divergence",
+      "historical_basis": "16 hold/pause meetings; avg SPY -0.18%, VIX +0.62pt"
+    },
+    "CUT_25bp": {
+      "probability_pct": 10,
+      "spy_t2_t0_central_pct": -0.44,
+      "spy_range": "-1.4% to +0.3%",
+      "vix_change_pts": 0.76,
+      "vol_regime": "Historical: 2025 cuts were buy-rumor sell-news; VIX did NOT compress on cut days",
+      "sizing": "Surprise cut not necessarily positive for T-2->T+0 SPY; watch SOFR repricing",
+      "historical_basis": "3 actual cut meetings (Sep/Oct/Dec 2025): avg SPY -0.44%, VIX +0.76pt"
+    },
+    "HAWKISH": {
+      "probability_pct": 5,
+      "spy_t2_t0_central_pct": -0.9,
+      "spy_range": "-1.4% to -0.9%",
+      "vix_change_pts": 0.8,
+      "vol_regime": "VIX9D stays elevated or spikes; inversion deepens",
+      "sizing": "reduce equity 20-30%; avoid naked short VIX"
+    }
+  },
+  "key_numbers_for_article": {
+    "vix": 17.68,
+    "vix9d": 17.26,
+    "ratio": 0.976,
+    "tbill": 3.618,
+    "sofr_jun26": 3.67,
+    "sofr_sep26": 3.81,
+    "sofr_dec26": 3.96,
+    "sofr_mar27": 4.06,
+    "n_fomc_hist": 19,
+    "spy_ret_mean": -0.22,
+    "spy_positive_freq_pct": 37.0,
+    "vix_chg_mean": 0.65,
+    "hold_spy_range_low": -1.6,
+    "hold_spy_range_high": 1.3,
+    "cut_spy_central": -0.44,
+    "hawk_spy_central": -0.9,
+    "cut_vix_central": 0.76,
+    "hold_spy_central_excl_cut": -0.18,
+    "vix9d_below_vix_now": true,
+    "ratio_t7_was": 1.114,
+    "ratio_t2_is": 0.976
+  },
+  "key_insight": "Counterintuitive finding: SPY T-2->T+0 is negative on average (-0.22%) even for hold meetings. The 9-day event window is not a clean buy signal. VIX9D/VIX ratio at 0.976 (below 1) means market is NOT pricing special FOMC fear this time — contrast with T-7 (ratio=1.114). Market has already absorbed the hold expectation."
+}
