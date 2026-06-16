@@ -34948,5 +34948,31 @@
     "k_id": "K824",
     "reviewer_source": "Codex review (gpt-5.5 xhigh, source-code level, 2026-06-17 hourly-02)",
     "title": "K824 quantile forecasting: HistSim/QuantReg tie at 1% VaR; Student-t df scaling caveat"
+  },
+  {
+    "item_id": "fbe6d8fc",
+    "category": "strategy_decomposition",
+    "title": "research_rp_05c316a53f: 12-1M momentum payoff concentrates overnight for cross-sectional momentum",
+    "content": "research_rp_05c316a53f CONDITIONAL_PASS. Tested 12-1M momentum overnight vs intraday decomposition with yfinance daily OHLC, SPY/QQQ + 30 large-cap stocks, actual sample 2010-01-04 to 2026-06-16; post-warmup n=3866 daily strategy returns. Lookahead guard: signal = log(adj_close.shift(21)/adj_close.shift(252)); month-end weights forward-filled then weights.shift(1) before applying day-t close->open/open->close returns. Stocks-only TSMOM: overnight ann mean 5.43%, Sharpe 0.779 vs intraday ann mean 1.03%, Sharpe 0.125; overnight-intraday diff +4.39%, DM t=-1.52 p=0.128, bootstrap CI [-1.74%, +9.82%] -> directional but not Harvey-significant. Stocks-only CSMOM top/bottom 30%: overnight ann mean 5.81%, Sharpe 0.982 vs intraday ann mean -2.84%, Sharpe -0.349; diff +8.64%, DM t=-3.32 p=0.0009, bootstrap CI [+3.32%, +14.01%] -> Harvey-significant overnight dominance. Early/late halves both show overnight > intraday for TSMOM and CSMOM. Verdict is CONDITIONAL_PASS rather than PASS because only CSMOM clears Harvey |t|>3, universe is current-large-cap survivorship-biased, yfinance daily data cannot test the retail-flow mechanism directly, and transaction/open-auction costs are not modeled.",
+    "evidence": [
+      "experiments/research_rp_05c316a53f/research_rp_05c316a53f.py",
+      "experiments/research_rp_05c316a53f/research_rp_05c316a53f_results.json",
+      "experiments/research_rp_05c316a53f/README.md",
+      "experiments/research_rp_05c316a53f/fig_overnight_intraday_momentum.png"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-17T02:49:24.175767",
+    "experiment_id": "research_rp_05c316a53f",
+    "k_id": "research_rp_05c316a53f",
+    "experiment_path": "experiments/research_rp_05c316a53f",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "Codex CLI self-audit 2026-06-17",
+    "tags": [
+      "momentum",
+      "overnight",
+      "intraday",
+      "strategy",
+      "conditional_pass"
+    ]
   }
 ]

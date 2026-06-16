@@ -1,0 +1,588 @@
+{
+  "experiment_id": "research_rp_05c316a53f",
+  "title": "12-1M momentum overnight vs intraday decomposition",
+  "status": "completed",
+  "timestamp_utc": "2026-06-16T18:50:03.592497+00:00",
+  "data_source": "yfinance daily OHLC; adjusted open reconstructed from Adj Close / Close factor",
+  "sample": {
+    "start_requested": "2010-01-01",
+    "end_requested": "2026-06-17",
+    "actual_start": "2010-01-04",
+    "actual_end": "2026-06-16",
+    "n_trading_days": 4138
+  },
+  "parameters": {
+    "lookback_days": 252,
+    "skip_days": 21,
+    "rebalance": "month-end signal, daily forward-fill, weights.shift(1)",
+    "top_bottom_frac": 0.3,
+    "bootstrap_reps": 5000,
+    "bootstrap_block": 20,
+    "seed": 42
+  },
+  "universe_meta": {
+    "requested_tickers": [
+      "SPY",
+      "QQQ",
+      "AAPL",
+      "MSFT",
+      "AMZN",
+      "GOOGL",
+      "META",
+      "NVDA",
+      "JPM",
+      "XOM",
+      "JNJ",
+      "PG",
+      "HD",
+      "WMT",
+      "BAC",
+      "KO",
+      "PEP",
+      "CSCO",
+      "INTC",
+      "ORCL",
+      "IBM",
+      "DIS",
+      "MCD",
+      "V",
+      "MA",
+      "UNH",
+      "CVX",
+      "MRK",
+      "PFE",
+      "T",
+      "VZ",
+      "ADBE"
+    ],
+    "used_tickers": [
+      "SPY",
+      "QQQ",
+      "AAPL",
+      "MSFT",
+      "AMZN",
+      "GOOGL",
+      "META",
+      "NVDA",
+      "JPM",
+      "XOM",
+      "JNJ",
+      "PG",
+      "HD",
+      "WMT",
+      "BAC",
+      "KO",
+      "PEP",
+      "CSCO",
+      "INTC",
+      "ORCL",
+      "IBM",
+      "DIS",
+      "MCD",
+      "V",
+      "MA",
+      "UNH",
+      "CVX",
+      "MRK",
+      "PFE",
+      "T",
+      "VZ",
+      "ADBE"
+    ],
+    "dropped_tickers": {},
+    "start": "2010-01-04",
+    "end": "2026-06-16",
+    "n_trading_days": 4138
+  },
+  "lookahead_audit": {
+    "momentum_signal": "log(adj_close.shift(21) / adj_close.shift(252)); excludes most recent month",
+    "trading_weights": "monthly weights are forward-filled and shifted one trading day before applying returns",
+    "return_timing": "overnight_t = log(adj_open_t / adj_close_{t-1}); intraday_t = log(adj_close_t / adj_open_t)",
+    "same_day_signal_return": "blocked by daily_weights(...).shift(1)"
+  },
+  "literature_context": [
+    {
+      "source": "Lou, Polk & Skouras, A tug of war: Overnight versus intraday expected returns",
+      "url": "https://personal.lse.ac.uk/polk/research/TugOfWar.pdf",
+      "role": "benchmark finding: momentum-related profits can concentrate overnight with intraday reversal"
+    },
+    {
+      "source": "Ahn, Fan, Noh & Park (2024), Retail Ebb and Flow and the Overnight-Intraday Return Gap",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4752520",
+      "role": "mechanism prior: investor-type flow can drive overnight-intraday gap"
+    },
+    {
+      "source": "He (2025), Decoding Momentum Spillover Effects, JFQA",
+      "url": "https://www.cambridge.org/core/journals/journal-of-financial-and-quantitative-analysis/article/decoding-momentum-spillover-effects/EB6BE5A096753108881E1514E54035DF",
+      "role": "mechanism prior: retail/professional split in overnight continuation vs daytime reversal"
+    },
+    {
+      "source": "Perreten & Wallmeier (2025), Overnight Returns and the Timing of Trading Volume",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5004991",
+      "role": "recent challenge: volume timing predicts overnight returns beyond simple retail-pressure story"
+    }
+  ],
+  "universes": {
+    "stocks_only": {
+      "tickers": [
+        "AAPL",
+        "MSFT",
+        "AMZN",
+        "GOOGL",
+        "META",
+        "NVDA",
+        "JPM",
+        "XOM",
+        "JNJ",
+        "PG",
+        "HD",
+        "WMT",
+        "BAC",
+        "KO",
+        "PEP",
+        "CSCO",
+        "INTC",
+        "ORCL",
+        "IBM",
+        "DIS",
+        "MCD",
+        "V",
+        "MA",
+        "UNH",
+        "CVX",
+        "MRK",
+        "PFE",
+        "T",
+        "VZ",
+        "ADBE"
+      ],
+      "n_tickers": 30,
+      "strategies": {
+        "TSMOM_12_1": {
+          "component_metrics": {
+            "overnight": {
+              "n_days": 3866,
+              "ann_mean": 0.054271,
+              "ann_vol": 0.069692,
+              "sharpe": 0.778732,
+              "skew": -3.542438,
+              "max_drawdown": -0.244087,
+              "hit_rate": 0.569322
+            },
+            "intraday": {
+              "n_days": 3866,
+              "ann_mean": 0.010325,
+              "ann_vol": 0.082502,
+              "sharpe": 0.125143,
+              "skew": -0.165098,
+              "max_drawdown": -0.161738,
+              "hit_rate": 0.520435
+            },
+            "close_to_close": {
+              "n_days": 3866,
+              "ann_mean": 0.064652,
+              "ann_vol": 0.110026,
+              "sharpe": 0.587608,
+              "skew": -0.794998,
+              "max_drawdown": -0.232363,
+              "hit_rate": 0.550957
+            }
+          },
+          "overnight_vs_intraday": {
+            "n": 3866,
+            "dm_negative_return_loss": {
+              "t_stat": -1.522063,
+              "p_value": 0.128075,
+              "significant_harvey": false,
+              "winner": "overnight",
+              "interpretation": "negative t means overnight has higher mean return"
+            },
+            "bootstrap_ann_mean_diff_overnight_minus_intraday": {
+              "n": 3866,
+              "ann_mean_diff": 0.043947,
+              "ci95": [
+                -0.017419,
+                0.098247
+              ],
+              "reps": 5000,
+              "block": 20,
+              "seed": 42
+            }
+          },
+          "subperiods": {
+            "early": {
+              "start": "2011-02-01",
+              "end": "2018-10-05",
+              "n": 1934,
+              "ann_mean_overnight": 0.074943,
+              "ann_mean_intraday": 0.010897,
+              "ann_mean_diff": 0.064046,
+              "overnight_gt_intraday": true
+            },
+            "late": {
+              "start": "2018-10-05",
+              "end": "2026-06-16",
+              "n": 1933,
+              "ann_mean_overnight": 0.033602,
+              "ann_mean_intraday": 0.008868,
+              "ann_mean_diff": 0.024734,
+              "overnight_gt_intraday": true
+            }
+          }
+        },
+        "CSMOM_top_bottom_30pct_12_1": {
+          "component_metrics": {
+            "overnight": {
+              "n_days": 3866,
+              "ann_mean": 0.05805,
+              "ann_vol": 0.059132,
+              "sharpe": 0.981699,
+              "skew": -0.910878,
+              "max_drawdown": -0.106576,
+              "hit_rate": 0.551474
+            },
+            "intraday": {
+              "n_days": 3866,
+              "ann_mean": -0.028411,
+              "ann_vol": 0.081443,
+              "sharpe": -0.348844,
+              "skew": -0.298552,
+              "max_drawdown": -0.47266,
+              "hit_rate": 0.511123
+            },
+            "close_to_close": {
+              "n_days": 3866,
+              "ann_mean": 0.029701,
+              "ann_vol": 0.099815,
+              "sharpe": 0.297566,
+              "skew": -0.504138,
+              "max_drawdown": -0.196343,
+              "hit_rate": 0.526643
+            }
+          },
+          "overnight_vs_intraday": {
+            "n": 3866,
+            "dm_negative_return_loss": {
+              "t_stat": -3.319988,
+              "p_value": 0.000909,
+              "significant_harvey": true,
+              "winner": "overnight",
+              "interpretation": "negative t means overnight has higher mean return"
+            },
+            "bootstrap_ann_mean_diff_overnight_minus_intraday": {
+              "n": 3866,
+              "ann_mean_diff": 0.086461,
+              "ci95": [
+                0.033217,
+                0.140083
+              ],
+              "reps": 5000,
+              "block": 20,
+              "seed": 42
+            }
+          },
+          "subperiods": {
+            "early": {
+              "start": "2011-02-01",
+              "end": "2018-10-05",
+              "n": 1934,
+              "ann_mean_overnight": 0.070396,
+              "ann_mean_intraday": -0.038873,
+              "ann_mean_diff": 0.109269,
+              "overnight_gt_intraday": true
+            },
+            "late": {
+              "start": "2018-10-05",
+              "end": "2026-06-16",
+              "n": 1933,
+              "ann_mean_overnight": 0.045742,
+              "ann_mean_intraday": -0.018881,
+              "ann_mean_diff": 0.064623,
+              "overnight_gt_intraday": true
+            }
+          }
+        }
+      }
+    },
+    "large_cap_plus_etf": {
+      "tickers": [
+        "SPY",
+        "QQQ",
+        "AAPL",
+        "MSFT",
+        "AMZN",
+        "GOOGL",
+        "META",
+        "NVDA",
+        "JPM",
+        "XOM",
+        "JNJ",
+        "PG",
+        "HD",
+        "WMT",
+        "BAC",
+        "KO",
+        "PEP",
+        "CSCO",
+        "INTC",
+        "ORCL",
+        "IBM",
+        "DIS",
+        "MCD",
+        "V",
+        "MA",
+        "UNH",
+        "CVX",
+        "MRK",
+        "PFE",
+        "T",
+        "VZ",
+        "ADBE"
+      ],
+      "n_tickers": 32,
+      "strategies": {
+        "TSMOM_12_1": {
+          "component_metrics": {
+            "overnight": {
+              "n_days": 3866,
+              "ann_mean": 0.057972,
+              "ann_vol": 0.071568,
+              "sharpe": 0.810027,
+              "skew": -3.451899,
+              "max_drawdown": -0.245655,
+              "hit_rate": 0.568805
+            },
+            "intraday": {
+              "n_days": 3866,
+              "ann_mean": 0.010333,
+              "ann_vol": 0.084853,
+              "sharpe": 0.121772,
+              "skew": -0.166633,
+              "max_drawdown": -0.170166,
+              "hit_rate": 0.523021
+            },
+            "close_to_close": {
+              "n_days": 3866,
+              "ann_mean": 0.068358,
+              "ann_vol": 0.11297,
+              "sharpe": 0.605093,
+              "skew": -0.799996,
+              "max_drawdown": -0.237377,
+              "hit_rate": 0.551733
+            }
+          },
+          "overnight_vs_intraday": {
+            "n": 3866,
+            "dm_negative_return_loss": {
+              "t_stat": -1.627963,
+              "p_value": 0.103614,
+              "significant_harvey": false,
+              "winner": "overnight",
+              "interpretation": "negative t means overnight has higher mean return"
+            },
+            "bootstrap_ann_mean_diff_overnight_minus_intraday": {
+              "n": 3866,
+              "ann_mean_diff": 0.047639,
+              "ci95": [
+                -0.013685,
+                0.102458
+              ],
+              "reps": 5000,
+              "block": 20,
+              "seed": 42
+            }
+          },
+          "subperiods": {
+            "early": {
+              "start": "2011-02-01",
+              "end": "2018-10-05",
+              "n": 1934,
+              "ann_mean_overnight": 0.076782,
+              "ann_mean_intraday": 0.011511,
+              "ann_mean_diff": 0.065271,
+              "overnight_gt_intraday": true
+            },
+            "late": {
+              "start": "2018-10-05",
+              "end": "2026-06-16",
+              "n": 1933,
+              "ann_mean_overnight": 0.039164,
+              "ann_mean_intraday": 0.008249,
+              "ann_mean_diff": 0.030915,
+              "overnight_gt_intraday": true
+            }
+          }
+        },
+        "CSMOM_top_bottom_30pct_12_1": {
+          "component_metrics": {
+            "overnight": {
+              "n_days": 3866,
+              "ann_mean": 0.054842,
+              "ann_vol": 0.059647,
+              "sharpe": 0.919439,
+              "skew": -0.950698,
+              "max_drawdown": -0.107824,
+              "hit_rate": 0.550181
+            },
+            "intraday": {
+              "n_days": 3866,
+              "ann_mean": -0.030682,
+              "ann_vol": 0.081806,
+              "sharpe": -0.375057,
+              "skew": -0.319861,
+              "max_drawdown": -0.485037,
+              "hit_rate": 0.506725
+            },
+            "close_to_close": {
+              "n_days": 3866,
+              "ann_mean": 0.024222,
+              "ann_vol": 0.100719,
+              "sharpe": 0.240487,
+              "skew": -0.522094,
+              "max_drawdown": -0.196227,
+              "hit_rate": 0.532074
+            }
+          },
+          "overnight_vs_intraday": {
+            "n": 3866,
+            "dm_negative_return_loss": {
+              "t_stat": -3.290179,
+              "p_value": 0.00101,
+              "significant_harvey": true,
+              "winner": "overnight",
+              "interpretation": "negative t means overnight has higher mean return"
+            },
+            "bootstrap_ann_mean_diff_overnight_minus_intraday": {
+              "n": 3866,
+              "ann_mean_diff": 0.085524,
+              "ci95": [
+                0.032801,
+                0.137745
+              ],
+              "reps": 5000,
+              "block": 20,
+              "seed": 42
+            }
+          },
+          "subperiods": {
+            "early": {
+              "start": "2011-02-01",
+              "end": "2018-10-05",
+              "n": 1934,
+              "ann_mean_overnight": 0.066609,
+              "ann_mean_intraday": -0.045472,
+              "ann_mean_diff": 0.112081,
+              "overnight_gt_intraday": true
+            },
+            "late": {
+              "start": "2018-10-05",
+              "end": "2026-06-16",
+              "n": 1933,
+              "ann_mean_overnight": 0.043107,
+              "ann_mean_intraday": -0.016861,
+              "ann_mean_diff": 0.059968,
+              "overnight_gt_intraday": true
+            }
+          }
+        }
+      }
+    },
+    "etf_only": {
+      "tickers": [
+        "SPY",
+        "QQQ"
+      ],
+      "n_tickers": 2,
+      "strategies": {
+        "TSMOM_12_1": {
+          "component_metrics": {
+            "overnight": {
+              "n_days": 3866,
+              "ann_mean": 0.113241,
+              "ann_vol": 0.115107,
+              "sharpe": 0.983784,
+              "skew": -1.790607,
+              "max_drawdown": -0.284295,
+              "hit_rate": 0.570098
+            },
+            "intraday": {
+              "n_days": 3866,
+              "ann_mean": 0.01044,
+              "ann_vol": 0.141937,
+              "sharpe": 0.073552,
+              "skew": 0.029117,
+              "max_drawdown": -0.318103,
+              "hit_rate": 0.538282
+            },
+            "close_to_close": {
+              "n_days": 3866,
+              "ann_mean": 0.12368,
+              "ann_vol": 0.183909,
+              "sharpe": 0.672508,
+              "skew": -0.494325,
+              "max_drawdown": -0.308778,
+              "hit_rate": 0.557424
+            }
+          },
+          "overnight_vs_intraday": {
+            "n": 3866,
+            "dm_negative_return_loss": {
+              "t_stat": -2.4711,
+              "p_value": 0.013513,
+              "significant_harvey": false,
+              "winner": "overnight",
+              "interpretation": "negative t means overnight has higher mean return"
+            },
+            "bootstrap_ann_mean_diff_overnight_minus_intraday": {
+              "n": 3866,
+              "ann_mean_diff": 0.102801,
+              "ci95": [
+                0.023489,
+                0.177407
+              ],
+              "reps": 5000,
+              "block": 20,
+              "seed": 42
+            }
+          },
+          "subperiods": {
+            "early": {
+              "start": "2011-02-01",
+              "end": "2018-10-05",
+              "n": 1934,
+              "ann_mean_overnight": 0.10388,
+              "ann_mean_intraday": 0.020694,
+              "ann_mean_diff": 0.083185,
+              "overnight_gt_intraday": true
+            },
+            "late": {
+              "start": "2018-10-05",
+              "end": "2026-06-16",
+              "n": 1933,
+              "ann_mean_overnight": 0.122597,
+              "ann_mean_intraday": -0.001042,
+              "ann_mean_diff": 0.123639,
+              "overnight_gt_intraday": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "verdict": "CONDITIONAL_PASS",
+  "key_findings": [
+    "TSMOM_12_1: ann overnight-intraday diff=0.043947, DM t=-1.522063, p=0.128075, winner=overnight",
+    "CSMOM_top_bottom_30pct_12_1: ann overnight-intraday diff=0.086461, DM t=-3.319988, p=0.000909, winner=overnight"
+  ],
+  "limitations": [
+    "Daily yfinance OHLC cannot observe investor-type retail/institutional flow.",
+    "Current-large-cap universe is survivorship-biased and should not be read as CRSP cross-section evidence.",
+    "Adjusted open is reconstructed with same-day AdjClose/Close factor; this is standard for split/dividend adjustment but remains vendor-dependent.",
+    "Transaction costs, borrow constraints, and opening auction fill uncertainty are not modeled.",
+    "This is a return decomposition pilot, not a volatility forecasting experiment."
+  ],
+  "artifacts": {
+    "results_json": "experiments/research_rp_05c316a53f/research_rp_05c316a53f_results.json",
+    "figure": "experiments/research_rp_05c316a53f/fig_overnight_intraday_momentum.png"
+  }
+}
