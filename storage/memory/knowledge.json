@@ -34761,5 +34761,51 @@
     "reviewer_source": "Codex CLI primary path",
     "codex_review": "CONDITIONAL_PASS",
     "verdict": "NULL"
+  },
+  {
+    "item_id": "c89f3e6d",
+    "category": "factor_causality",
+    "content": "K1512 [PoC, CONDITIONAL_PASS] Double-ML 因果 factor 檢定 — 動能/品質/價值對下月超額報酬的非零效應\n\n**結論**: CONDITIONAL_PASS — DML PLR with repeated cross-fitting (n_rep=20, n_folds=2) 對 3 個 US factor ETF (MTUM 動能 / QUAL 品質 / VLUE 價值) × next-month SPY-excess return × controls {VIX, term spread, lag-1 returns} 估計。**所有 3 factor 皆 NULL or EXPLORATORY**：MTUM θ̂=−0.0064 (NW-p=0.322), QUAL θ̂=−0.0065 (NW-p=0.286), VLUE θ̂=+0.0030 (NW-p=0.593)。0/3 過 Bonferroni α=0.0167。Single-rep DML 初看 QUAL NW-p=0.0357 似有 marginal signal，但 n_rep=20 後 signal 消失，confirm Codex 警告的 fold-randomness artifact。\n\n**Hypothesis tested**: prior-12m momentum 對 next-month SPY-excess return 是否有 robust non-zero 因果關聯（after controlling VIX/term-spread/lag-1 returns via DML）。\n\n**Falsification**: 不能在 ETF-level monthly panel + 142-145 月樣本下找到任何 factor 的 robust DML 非零 partial association。與動能/價值/品質「因果性 alpha」的強宣稱不一致。\n\n**Methodology**: Y_{t+1} = (1+ret_factor_{t+1})-(1+ret_SPY_{t+1}); D_t = 12-month rolling product (signal strictly historical, no shift bug); X_t = [VIX_t, term_spread_t, ret_SPY_{t-1}, ret_factor_{t-1}]; RandomForest nuisance (n_est=100, max_depth=4); 2-fold cross-fitting × 20 repetitions; Newey-West HAC SE at lag {1,3,6,12} reported; verdict gate per-factor PASS_PRELIMINARY 需 bonferroni_pass AND ci_excl_zero (從 too-loose initial gate 收緊)。\n\n**Limitations**: (a) 142-145 monthly obs 對 DML 偏小；(b) ETF proxy 不是 academic factor portfolios (Fama-French 等)；(c) term-spread series 雖納入但 single control set；(d) 2-fold cross-fitting 在小樣本本身 fold-instability 已用 n_rep=20 緩解；(e) DML 結果限定 partial association 不主張 do-operator 結構因果。\n\n**Codex review (CONDITIONAL_PASS)**: 5 個 finding 全 fix — (1) lookahead 注解修正 (2) n_rep=1→20 stabilization (3) NW psi mean-center + lag sensitivity {1,3,6,12} (4) verdict gate 收緊（per-factor 需 Bonferroni-pass + CI excl 0；aggregate downgrade 至 CONDITIONAL_PASS）(5) sample dates 改 per-factor first/last (因 Y=shift(-1) 排除末月)。Codex 預測 n_rep=1 marginal signal 是 fold-randomness artifact，n_rep=20 後 confirm signal vanish。\n\n**Next**: 若要強化，改 (i) Fama-French academic factors (KF Library) 不用 ETF；(ii) panel pooled DML across factors；(iii) blocked/time-series CV 而非 random 2-fold；(iv) Lasso/Ridge nuisance 對比 RF。\n\n**Provenance**: experiment_id=research_double_ml_factor (K1512); reviewer=Codex CLI 0.132.0 gpt-5.4 primary path; codex_review verdict=CONDITIONAL_PASS。\n",
+    "evidence": [
+      "experiments/k1512/k1512_results.json",
+      "experiments/k1512/codex_review.md",
+      "experiments/k1512/README.md",
+      "experiments/k1512/fig_a_dml_theta_with_ci.png"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-16T18:12:48.011370",
+    "experiment_id": "K1512",
+    "experiment_ids": [
+      "K1512"
+    ],
+    "k_id": "K1512",
+    "experiment_path": "experiments/k1512/",
+    "reviewer": "codex-cli",
+    "reviewer_source": "Codex CLI 0.132.0 (gpt-5.4) primary path",
+    "codex_review": "CONDITIONAL_PASS",
+    "verdict": "CONDITIONAL_PASS"
+  },
+  {
+    "item_id": "b98ae160",
+    "category": "risk_parity",
+    "content": "K1347 [FAIL, Codex PASS] CVaR-RP vs Sigma-RP (ERC) on SPY/TLT/GLD/PDBC — 用 tail-risk 重定義 risk parity 沒能 robust 改善 stress MDD\n\n**結論**: FAIL — CVaR-based equal risk contribution (α=0.05) 對比 sigma-based ERC，在 SPY/TLT/GLD/PDBC 4-asset 2019-01-02 至 2025-12-30 共 1759 OOS days 下：(a) full-period net Sharpe 0.949 vs 0.966 (CVaR 落後 0.018)；(b) MDD -19.80% vs -20.35% (微幅 0.55pp 改善，不過顯著)；(c) stress periods 3 可評估 (COVID 2020 / inflation 2022 / Trump tariff 2025)，CVaR-RP 僅 1/3 改善；(d) DM test mean_d=7.2e-6, t=0.258, p=0.796 (no significant difference)。\n\n**Hypothesis tested**: 把 risk parity 從 sigma contribution 改成 CVaR (tail-risk) contribution，是否能在不犧牲 Sharpe 下顯著改善 stress-period MDD（特別 inflationary regime 加 PDBC 商品基金）。\n\n**Falsification**: 不推翻 risk parity 的價值；不否定 CVaR-aware allocator 在其他 universe / 其他 tail-α 可能有效。本實驗下 sigma-RP baseline 已經 hard-to-beat（沿 K1387 / K1123 線索），切換 risk definition 不足以改善。\n\n**Methodology**: M1 sigma-RP = 60D rolling Σ + scipy SLSQP equalize RC_i；M2 CVaR-RP = last 250D historical returns + Euler CVaR contribution (α=0.05) + SLSQP equalize CRC_i / total CVaR。Constraint w_i≥0.02, sum=1, 5bp/side cost。Lookahead: weights formed M-end, applied M+1 trading days (w.shift(1))。DM HAC lag=4, bandwidth_h=5。Bootstrap stationary block, block=20, seed=42, 1000 reps。\n\n**Codex review (PASS)**: lookahead/cvar_math/optimizer/dm_bootstrap/stress_accounting 全 PASS。caveat: SLSQP/BLAS floating-point 末位小變化跨 rerun，但 sign/significance/verdict 穩定。Optimizer success rate 1.0。2018Q4 不可評估（CVaR 250D warmup 後 OOS 從 2019-01-02 開始）。\n\n**Limitations**: (a) 4-asset universe limited; (b) α=0.05 single tail prob — 未試 α=0.01/0.10; (c) 250D CVaR window vs 60D sigma window 兩個 spec 同時變化（risk-def + window 雙因子）；(d) 8-year sample 含 1 COVID + 1 inflation + 1 tariff stress event，stress-period 統計力低；(e) cost 假設 flat 5bp/side，未檢驗 sensitivity。\n\n**Next**: K1387 NULL + K1123 NULL + K1347 FAIL → 累積結論「sigma-based ERC 在 multi-asset rotation 是 hard-to-beat baseline」。下一步應跳出 sigma/CVaR 維度，改試 (i) regime-conditional allocator (HMM trigger), (ii) drawdown-targeted volatility throttle, (iii) multi-objective (MDD + return) Pareto frontier 而非 single contribution-equalize formulation。\n\n**Provenance**: experiment_id=K1347; reviewer=Codex CLI; codex_review verdict=PASS。\n",
+    "evidence": [
+      "experiments/k1347/k1347_results.json",
+      "experiments/k1347/codex_review.md",
+      "experiments/k1347/README.md",
+      "experiments/k1347/k1347_fig.png"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-16T18:15:41.010699",
+    "experiment_id": "K1347",
+    "experiment_ids": [
+      "K1347"
+    ],
+    "k_id": "K1347",
+    "experiment_path": "experiments/k1347/",
+    "reviewer": "codex-cli",
+    "reviewer_source": "Codex CLI primary path",
+    "codex_review": "PASS",
+    "verdict": "FAIL"
   }
 ]

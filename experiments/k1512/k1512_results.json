@@ -1,0 +1,106 @@
+{
+  "k_id": "K1512",
+  "experiment_id": "k1512",
+  "method": "DML_PLR_RF",
+  "nuisance_learner": "RandomForestRegressor(n_estimators=100, max_depth=4, min_samples_leaf=5)",
+  "n_folds": 2,
+  "seed": 42,
+  "sample_per_factor": {
+    "MTUM": {
+      "n_months": 145,
+      "first_date": "2014-04-30",
+      "last_date": "2026-04-30"
+    },
+    "VLUE": {
+      "n_months": 145,
+      "first_date": "2014-04-30",
+      "last_date": "2026-04-30"
+    },
+    "QUAL": {
+      "n_months": 142,
+      "first_date": "2014-07-31",
+      "last_date": "2026-04-30"
+    }
+  },
+  "term_spread_available": false,
+  "verdict": "CONDITIONAL_PASS",
+  "per_factor_verdict": {
+    "MTUM": "NULL",
+    "VLUE": "NULL",
+    "QUAL": "EXPLORATORY_SIGNAL"
+  },
+  "per_factor": {
+    "MTUM": {
+      "factor": "MTUM",
+      "n_months": 145,
+      "first_date": "2014-04-30",
+      "last_date": "2026-04-30",
+      "theta_hat": 0.016408343884115672,
+      "se": 0.016691199290916153,
+      "t_stat": 0.9830536199424317,
+      "p_value": 0.3255810493503337,
+      "ci95_low": -0.015963068559845358,
+      "ci95_high": 0.049122483195182115,
+      "nw_se": 0.016581679850953247,
+      "nw_t": 0.9895465376007961,
+      "nw_p": 0.3223958124422379,
+      "nw_ci95_low": -0.016091748623752695,
+      "nw_ci95_high": 0.04890843639198404,
+      "nw_se_lag1": 0.01660656912395926,
+      "nw_se_lag6": 0.016028864856734548,
+      "nw_se_lag12": 0.01581968547316516,
+      "ols_theta": 0.008317519397977362,
+      "ols_p": 0.6085674047601604,
+      "bonferroni_alpha": 0.016666666666666666,
+      "bonferroni_pass": false
+    },
+    "VLUE": {
+      "factor": "VLUE",
+      "n_months": 145,
+      "first_date": "2014-04-30",
+      "last_date": "2026-04-30",
+      "theta_hat": 0.01777739534619148,
+      "se": 0.02835008692237277,
+      "t_stat": 0.6270666962986368,
+      "p_value": 0.5306155165994724,
+      "ci95_low": -0.03726078402651563,
+      "ci95_high": 0.07334254268707428,
+      "nw_se": 0.033269182761833806,
+      "nw_t": 0.5343502265581827,
+      "nw_p": 0.5930992484260877,
+      "nw_ci95_low": -0.04743020286700278,
+      "nw_ci95_high": 0.08298499355938574,
+      "nw_se_lag1": 0.03100836703223264,
+      "nw_se_lag6": 0.036144063009968884,
+      "nw_se_lag12": 0.037805870758665726,
+      "ols_theta": 0.023199485174933934,
+      "ols_p": 0.46034924824590673,
+      "bonferroni_alpha": 0.016666666666666666,
+      "bonferroni_pass": false
+    },
+    "QUAL": {
+      "factor": "QUAL",
+      "n_months": 142,
+      "first_date": "2014-07-31",
+      "last_date": "2026-04-30",
+      "theta_hat": -0.006538160028148729,
+      "se": 0.005628493201000028,
+      "t_stat": -1.1616181799752514,
+      "p_value": 0.2453905940564306,
+      "ci95_low": -0.017174768990638994,
+      "ci95_high": 0.00449348393303989,
+      "nw_se": 0.006134003015069508,
+      "nw_t": -1.0658879710502787,
+      "nw_p": 0.286474287269326,
+      "nw_ci95_low": -0.018560805937684964,
+      "nw_ci95_high": 0.005484485881387505,
+      "nw_se_lag1": 0.005907189776846726,
+      "nw_se_lag6": 0.006416027149820335,
+      "nw_se_lag12": 0.005707936579755044,
+      "ols_theta": -0.007172665625591719,
+      "ols_p": 0.26134305318890505,
+      "bonferroni_alpha": 0.016666666666666666,
+      "bonferroni_pass": false
+    }
+  }
+}
