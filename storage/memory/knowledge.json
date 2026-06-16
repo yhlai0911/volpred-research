@@ -34974,5 +34974,21 @@
       "strategy",
       "conditional_pass"
     ]
+  },
+  {
+    "item_id": "719e2fbb",
+    "category": "paper-review",
+    "content": "K1075 mile_9c7f4c7f 24h Codex review — verdict=CONDITIONAL_PASS.\n\nArticle 引用數字皆對齊 k1075_results.json: full OOS 2007-2026 n=4848、QLIKE diff -0.8905%、NW-HAC DM t=7.915；三段子窗口 DM = 4.47 / 6.08 / 4.24；GFC n=505 VIX mean 32.09 max 80.86、改善 -0.612% DM 3.14；Euro_Crisis DM 0.456（文章已正確標示統計不夠）；COVID_Crash 5.11% DM 1.95（文章已標 n=104 太短不能正式 claim）。\n\nLookahead audit: rolling refit 訓練窗只到 abs_idx-1 (k1075.py:354)、forecast 用 ret/vix[abs_idx-1] (k1075.py:413,421)、78/78 refit 全收斂、theta1 全為正、persist 0.84-0.96 穩定。\n\nConditional issues:\n1. 'Harvey PASS' 實為 NW-HAC DM + |t|>3 內部門檻 (k1075.py:531)，建議文案收緊或補真 HLN(1996) 校正因子。\n2. hypothesis_verdicts H2/H3/H4 用 sign-only / 5%-only 過寬，Euro DM 0.456 卻被 H3 標 PASS — 未來 K1075 系列文章/論文勿引這些 flag 當 formal evidence，回到原始 DM 數字。\n3. A4f 訓練首筆 vix_lag[0]=vix_vals[0] (k1075.py:219) 非 OOS peek 但非最嚴格 lag — 建議下一輪改成嚴格 t-1。\n\nArticle 結論「2007-2026 全樣本、三段子期間、GFC 都正式過門檻」可成立。No retraction needed.\n\nEXP_ID=K1075 | ARTICLE=mile_9c7f4c7f | REVIEWER=Codex(gpt-5.4 medium) | VERDICT=CONDITIONAL_PASS",
+    "evidence": [
+      "experiments/k1075/k1075_results.json:96 (full_oos)",
+      "experiments/k1075/k1075_results.json:165 (GFC)",
+      "experiments/k1075/k1075.py:354 (rolling refit lag)",
+      "experiments/k1075/k1075.py:413,421 (forecast lag)",
+      "experiments/k1075/k1075.py:531 (|t|>3 gate)",
+      "experiments/k1075/k1075.py:689 (H2 sign-only)",
+      "experiments/k1075/k1075.py:702 (H4 5%-only)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-17T03:20:48.148438"
   }
 ]

@@ -32721,5 +32721,27 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-16T18:08:34+00:00"
+  },
+  {
+    "id": "paper_review_mile_9c7f4c7f",
+    "title": "Paper review (Codex 24h-rule): 一個波動率模型如果連 2008 金融海嘯都撐得住，才比較像真的有用",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_9c7f4c7f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_9c7f4c7f",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T19:08:32+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-16T19:14:53.020481+00:00",
+    "claim_session_id": "4c643f7f9f27",
+    "started_at": "2026-06-16T19:14:53.432132+00:00",
+    "completed_at": "2026-06-16T19:21:04.473099+00:00",
+    "result": "Codex 24h review CONDITIONAL_PASS; 數字對齊+lookahead pass+3 收緊建議；knowledge 719e2fbb"
   }
 ]
