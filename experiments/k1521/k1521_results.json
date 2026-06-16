@@ -1,0 +1,140 @@
+{
+  "experiment_id": "K1521",
+  "title": "Realized kurtosis as an incremental HAR-RV predictor",
+  "date": "2026-06-17",
+  "seed": 42,
+  "verdict": "NULL_INSUFFICIENT_DATA",
+  "summary": "Local 5-minute panels cover only 2026 year-to-date and produce fewer than 252 OOS forecasts per market. Treat as a pipeline feasibility pilot, not evidence for or against realized kurtosis.",
+  "forecast_timing": {
+    "features": "RV/RK at date t computed from local 5-minute bars through that day's close",
+    "target": "average RV over t+1 through t+5",
+    "oos_fit": "expanding OLS; each forecast uses only rows strictly before the forecast row",
+    "lookahead": "CLEAN for the implemented forecast target; no same-day target data enters predictors"
+  },
+  "data": {
+    "source": "local data/intraday yfinance-style 5-minute CSV snapshots",
+    "markets": [
+      "SPY",
+      "0050.TW"
+    ],
+    "taiwan_proxy_note": "0050.TW is used as a Taiwan index ETF proxy; no long TAIEX 5-minute panel was found locally.",
+    "sample_limitation": "2026 year-to-date only; below the project's 252-day minimum OOS threshold."
+  },
+  "models": {
+    "HAR": [
+      "log RV daily",
+      "log RV weekly",
+      "log RV monthly"
+    ],
+    "HAR_RK": [
+      "HAR features",
+      "log RK daily",
+      "log RK weekly"
+    ],
+    "estimator": "log-linear OLS with expanding window and lognormal bias correction",
+    "loss": "Patton QLIKE on 5-day average realized variance"
+  },
+  "literature_context": [
+    {
+      "title": "Corsi (2009), A Simple Approximate Long-Memory Model of Realized Volatility",
+      "url": "https://ideas.repec.org/a/oup/jfinec/v7y2009i2p174-196.html",
+      "use": "HAR-RV baseline and daily/weekly/monthly realized-volatility components."
+    },
+    {
+      "title": "Mei et al. (2017), Forecasting stock market volatility: Do realized skewness and kurtosis help?",
+      "url": "https://ideas.repec.org/a/eee/phsmap/v481y2017icp153-159.html",
+      "use": "Motivates testing realized skewness/kurtosis as HAR-RV extensions; reports mixed horizon-specific evidence."
+    },
+    {
+      "title": "Bonato et al. (2022), Forecasting realized volatility of international REITs",
+      "url": "https://ideas.repec.org/a/wly/jforec/v41y2022i2p303-315.html",
+      "use": "Documents cases where realized higher moments improve HAR-RV forecasts across horizons."
+    }
+  ],
+  "markets": [
+    {
+      "market": "SPY",
+      "role": "US equity ETF",
+      "n_intraday_days": 105,
+      "date_start": "2026-01-14",
+      "date_end": "2026-06-16",
+      "n_oos": 51,
+      "min_train": 40,
+      "median_5min_returns_per_day": 77.0,
+      "mean_rv": 4.803598779486656e-05,
+      "mean_rk": 4.901871340532954,
+      "median_rk": 4.1773999810694,
+      "qlike_har": 0.29527097791054213,
+      "qlike_har_rk": 0.320956378503137,
+      "qlike_improvement_pct": -8.698924890741127,
+      "dm_t_har_rk_vs_har": 0.2948972764694649,
+      "dm_p": 0.7692933778588227,
+      "harvey_pass_abs_t_gt_3": false,
+      "regime_split": {
+        "low_lagged_rv": {
+          "n": 26,
+          "qlike_har": 0.3189740463819115,
+          "qlike_har_rk": 0.44714746979002634,
+          "qlike_improvement_pct": -40.183025817295245,
+          "dm_t_har_rk_vs_har": 0.8279569328562055,
+          "dm_p": 0.4155291383061739
+        },
+        "high_lagged_rv": {
+          "n": 25,
+          "qlike_har": 0.27061978670031805,
+          "qlike_har_rk": 0.18971764356477197,
+          "qlike_improvement_pct": 29.895132252519435,
+          "dm_t_har_rk_vs_har": -3.3959036667797027,
+          "dm_p": 0.0023814475923120693
+        }
+      },
+      "oos_forecast_file": "experiments/k1521/SPY_oos_forecasts.csv"
+    },
+    {
+      "market": "0050.TW",
+      "role": "Taiwan index ETF proxy",
+      "n_intraday_days": 92,
+      "date_start": "2026-01-20",
+      "date_end": "2026-06-15",
+      "n_oos": 38,
+      "min_train": 40,
+      "median_5min_returns_per_day": 52.0,
+      "mean_rv": 0.00010063416505125943,
+      "mean_rk": 4.841995878443083,
+      "median_rk": 4.0573659771306705,
+      "qlike_har": 0.12639336067410786,
+      "qlike_har_rk": 0.12719425694349437,
+      "qlike_improvement_pct": -0.6336537497816331,
+      "dm_t_har_rk_vs_har": 0.1421222334423519,
+      "dm_p": 0.8877545377060736,
+      "harvey_pass_abs_t_gt_3": false,
+      "regime_split": {
+        "low_lagged_rv": {
+          "n": 19,
+          "qlike_har": 0.20932533644068282,
+          "qlike_har_rk": 0.20487120919641405,
+          "qlike_improvement_pct": 2.127849079335389,
+          "dm_t_har_rk_vs_har": -0.5173956103907167,
+          "dm_p": 0.6111800453879019
+        },
+        "high_lagged_rv": {
+          "n": 19,
+          "qlike_har": 0.04346138490753288,
+          "qlike_har_rk": 0.04951730469057472,
+          "qlike_improvement_pct": -13.934023952357316,
+          "dm_t_har_rk_vs_har": 0.728768891292211,
+          "dm_p": 0.47551890435434085
+        }
+      },
+      "oos_forecast_file": "experiments/k1521/0050_TW_oos_forecasts.csv"
+    }
+  ],
+  "next_steps": [
+    "Acquire or build a multi-year SPY and TAIEX/TAIFEX 5-minute panel before drawing a publication-grade conclusion.",
+    "Add realized skewness and jump controls in a matched horse race once the long panel exists.",
+    "Keep the target as future RV t+1:t+5; do not compare HAR-RV forecasts against close-to-close r^2 without Hansen-Lunde adjustment."
+  ],
+  "figures": [
+    "experiments/k1521/k1521_cumulative_qlike_diff.png"
+  ]
+}
