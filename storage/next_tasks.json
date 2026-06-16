@@ -32556,7 +32556,7 @@
     "title": "Paper review (Codex 24h-rule): 真正先變吵的，是除息前那 10 天",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c725b44c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c725b44c",
@@ -32565,7 +32565,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-16T12:08:18+00:00"
+    "created_at": "2026-06-16T12:08:18+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-16T22:13:49.443069+00:00",
+    "claim_session_id": "887f6399aea5",
+    "started_at": "2026-06-16T22:13:55.246275+00:00",
+    "completed_at": "2026-06-16T22:16:53.725018+00:00",
+    "result": "Codex 24h review completed for mile_c725b44c / K1373. Verdict CONDITIONAL_PASS: all article numbers match k1373_results.json and K512/K1374 cross-refs are supported; no lookahead bug or DM/Harvey overclaim. Caveats: pooled tests are not cluster/bootstrap robust and operational pre-window wording assumes ex-date schedule known before t-10."
   },
   {
     "id": "research_illiquidity_vol_feature",
