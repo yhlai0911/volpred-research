@@ -1,0 +1,319 @@
+{
+  "experiment_id": "k1509",
+  "title": "TIPS regime-conditional volatility decomposition",
+  "started_at": "2026-06-16T02:14:58.497160+00:00",
+  "finished_at": "2026-06-16T02:15:03.345114+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance + FRED CPIAUCSL (local CSV)",
+    "period": {
+      "start": "2015-01-01",
+      "end": "2026-06-15"
+    },
+    "assets_primary": [
+      "TIP",
+      "STIP",
+      "LTPZ",
+      "IEF"
+    ],
+    "assets_context": [
+      "AGG",
+      "^TNX"
+    ],
+    "price_n_obs": 2878
+  },
+  "regime": {
+    "rule": "CPI YoY > 3.0%",
+    "release_lag_months": 2,
+    "extra_trading_day_lag": 21,
+    "n_high_days": 847,
+    "n_normal_days": 2031,
+    "high_share": 0.2943015983321751
+  },
+  "bonferroni_alpha_rv_family": 0.008333333333333333,
+  "rv_by_regime": {
+    "TIP_w5": {
+      "asset": "TIP",
+      "window": 5,
+      "mean_a": 0.06220947621732812,
+      "mean_b": 0.040849617624172926,
+      "diff": 0.021359858593155194,
+      "t": 15.736083851050827,
+      "p": 2.569831133238083e-51,
+      "n_a": 847,
+      "n_b": 2029,
+      "ci95": {
+        "lo": 0.018700556014906215,
+        "hi": 0.0240747715774319,
+        "reps": 5000
+      },
+      "verdict": "SIG_BONF"
+    },
+    "STIP_w5": {
+      "asset": "STIP",
+      "window": 5,
+      "mean_a": 0.026702638099862716,
+      "mean_b": 0.015483668502666659,
+      "diff": 0.011218969597196057,
+      "t": 17.800644822440145,
+      "p": 2.08830887189375e-63,
+      "n_a": 847,
+      "n_b": 2029,
+      "ci95": {
+        "lo": 0.009990126443857692,
+        "hi": 0.01251140386304474,
+        "reps": 5000
+      },
+      "verdict": "SIG_BONF"
+    },
+    "LTPZ_w5": {
+      "asset": "LTPZ",
+      "window": 5,
+      "mean_a": 0.161498117731104,
+      "mean_b": 0.11493380187195057,
+      "diff": 0.04656431585915344,
+      "t": 14.35810625869823,
+      "p": 6.823998341300054e-44,
+      "n_a": 847,
+      "n_b": 2029,
+      "ci95": {
+        "lo": 0.040230114289989606,
+        "hi": 0.05280369214553063,
+        "reps": 5000
+      },
+      "verdict": "SIG_BONF"
+    },
+    "IEF_w5": {
+      "asset": "IEF",
+      "window": 5,
+      "mean_a": 0.07837046084536123,
+      "mean_b": 0.04939771024987632,
+      "diff": 0.02897275059548491,
+      "t": 21.079079011885888,
+      "p": 9.982309933912708e-85,
+      "n_a": 847,
+      "n_b": 2029,
+      "ci95": {
+        "lo": 0.026212929491080464,
+        "hi": 0.03161960633499173,
+        "reps": 5000
+      },
+      "verdict": "SIG_NOMINAL"
+    },
+    "TIP_w21": {
+      "asset": "TIP",
+      "window": 21,
+      "mean_a": 0.0652217112744671,
+      "mean_b": 0.04363878129489685,
+      "diff": 0.021582929979570252,
+      "t": 20.7039596177175,
+      "p": 6.099762880936482e-85,
+      "n_a": 847,
+      "n_b": 2021,
+      "ci95": {
+        "lo": 0.01958471392925145,
+        "hi": 0.02362240495410295,
+        "reps": 5000
+      },
+      "verdict": "SIG_BONF"
+    },
+    "STIP_w21": {
+      "asset": "STIP",
+      "window": 21,
+      "mean_a": 0.02838370673289451,
+      "mean_b": 0.01675940776851299,
+      "diff": 0.01162429896438152,
+      "t": 23.415613683340887,
+      "p": 1.6994517942227967e-103,
+      "n_a": 847,
+      "n_b": 2021,
+      "ci95": {
+        "lo": 0.010650236613495883,
+        "hi": 0.012608094942526035,
+        "reps": 5000
+      },
+      "verdict": "SIG_BONF"
+    },
+    "LTPZ_w21": {
+      "asset": "LTPZ",
+      "window": 21,
+      "mean_a": 0.16753153452074165,
+      "mean_b": 0.12222202618483834,
+      "diff": 0.04530950833590332,
+      "t": 18.390432869512964,
+      "p": 1.546229744463899e-69,
+      "n_a": 847,
+      "n_b": 2021,
+      "ci95": {
+        "lo": 0.04042795890513458,
+        "hi": 0.05003698212380727,
+        "reps": 5000
+      },
+      "verdict": "SIG_BONF"
+    },
+    "IEF_w21": {
+      "asset": "IEF",
+      "window": 21,
+      "mean_a": 0.08139361486055599,
+      "mean_b": 0.05217430151760846,
+      "diff": 0.029219313342947528,
+      "t": 30.08916922507303,
+      "p": 4.586095116766849e-152,
+      "n_a": 847,
+      "n_b": 2021,
+      "ci95": {
+        "lo": 0.027379934489535986,
+        "hi": 0.0311137337014781,
+        "reps": 5000
+      },
+      "verdict": "SIG_NOMINAL"
+    }
+  },
+  "es5_by_regime": {
+    "TIP": {
+      "asset": "TIP",
+      "es5_high": -0.009571104221042083,
+      "es5_normal": -0.00693998498508164,
+      "es_diff_high_minus_normal": -0.0026311192359604425,
+      "n_high": 847,
+      "n_normal": 2030
+    },
+    "STIP": {
+      "asset": "STIP",
+      "es5_high": -0.004283946730222791,
+      "es5_normal": -0.0026012564856637155,
+      "es_diff_high_minus_normal": -0.0016826902445590758,
+      "n_high": 847,
+      "n_normal": 2030
+    },
+    "LTPZ": {
+      "asset": "LTPZ",
+      "es5_high": -0.023404473220323397,
+      "es5_normal": -0.018912699343766454,
+      "es_diff_high_minus_normal": -0.004491773876556943,
+      "n_high": 847,
+      "n_normal": 2030
+    },
+    "IEF": {
+      "asset": "IEF",
+      "es5_high": -0.011105623292730016,
+      "es5_normal": -0.007580425846393188,
+      "es_diff_high_minus_normal": -0.0035251974463368276,
+      "n_high": 847,
+      "n_normal": 2030
+    }
+  },
+  "gap_vs_IEF": {
+    "TIP_minus_IEF_w5": {
+      "pair": "TIP-IEF",
+      "window": 5,
+      "mean_a": -0.016160984628033104,
+      "mean_b": -0.008548092625703402,
+      "diff": -0.007612892002329702,
+      "t": -8.636058663051257,
+      "p": 1.647778102424515e-17,
+      "n_a": 847,
+      "n_b": 2029,
+      "ci95": {
+        "lo": -0.00936179018121673,
+        "hi": -0.005824650084218252,
+        "reps": 5000
+      },
+      "verdict": "SIG_NOMINAL"
+    },
+    "STIP_minus_IEF_w5": {
+      "pair": "STIP-IEF",
+      "window": 5,
+      "mean_a": -0.051667822745498505,
+      "mean_b": -0.03391404174720966,
+      "diff": -0.017753780998288844,
+      "t": -17.300811029447004,
+      "p": 2.1975563852740305e-60,
+      "n_a": 847,
+      "n_b": 2029,
+      "ci95": {
+        "lo": -0.019755686328655337,
+        "hi": -0.01572031071837167,
+        "reps": 5000
+      },
+      "verdict": "SIG_NOMINAL"
+    },
+    "LTPZ_minus_IEF_w5": {
+      "pair": "LTPZ-IEF",
+      "window": 5,
+      "mean_a": 0.08312765688574279,
+      "mean_b": 0.06553609162207424,
+      "diff": 0.01759156526366855,
+      "t": 7.363825529896432,
+      "p": 2.8937229666903407e-13,
+      "n_a": 847,
+      "n_b": 2029,
+      "ci95": {
+        "lo": 0.01288839559271642,
+        "hi": 0.0223190601909316,
+        "reps": 5000
+      },
+      "verdict": "SIG_NOMINAL"
+    },
+    "TIP_minus_IEF_w21": {
+      "pair": "TIP-IEF",
+      "window": 21,
+      "mean_a": -0.016171903586088898,
+      "mean_b": -0.008535520222711616,
+      "diff": -0.0076363833633772814,
+      "t": -15.082692826856462,
+      "p": 2.6072938187291115e-48,
+      "n_a": 847,
+      "n_b": 2021,
+      "ci95": {
+        "lo": -0.008596721023226861,
+        "hi": -0.006630177596554646,
+        "reps": 5000
+      },
+      "verdict": "SIG_NOMINAL"
+    },
+    "STIP_minus_IEF_w21": {
+      "pair": "STIP-IEF",
+      "window": 21,
+      "mean_a": -0.05300990812766148,
+      "mean_b": -0.03541489374909548,
+      "diff": -0.017595014378565997,
+      "t": -28.718650962882265,
+      "p": 6.323907447176274e-141,
+      "n_a": 847,
+      "n_b": 2021,
+      "ci95": {
+        "lo": -0.018780295193919435,
+        "hi": -0.016428544215255584,
+        "reps": 5000
+      },
+      "verdict": "SIG_NOMINAL"
+    },
+    "LTPZ_minus_IEF_w21": {
+      "pair": "LTPZ-IEF",
+      "window": 21,
+      "mean_a": 0.08613791966018565,
+      "mean_b": 0.07004772466722986,
+      "diff": 0.01609019499295579,
+      "t": 9.148458460343276,
+      "p": 1.371738308554208e-19,
+      "n_a": 847,
+      "n_b": 2021,
+      "ci95": {
+        "lo": 0.01264920622182788,
+        "hi": 0.01946901616563395,
+        "reps": 5000
+      },
+      "verdict": "SIG_NOMINAL"
+    }
+  },
+  "overall_verdict": "PASS",
+  "one_line_summary": "K1509 PASS: high-CPI regime n=847 days; TIP 21d RV diff=+0.0216 (p=6.1e-85); TIP-IEF RV gap diff in high regime=-0.0076.",
+  "limitations": [
+    "Only one high-CPI episode in sample (2021-2023 post-COVID); cannot disentangle CPI regime from Fed hike cycle / COVID dislocation.",
+    "Daily RV is noisy; intraday TIPS data not used.",
+    "LTPZ liquidity is thin and may inject idiosyncratic vol unrelated to CPI.",
+    "ES5 estimates depend on regime sample size; high regime has fewer obs.",
+    "Bonferroni applied only to RV family (6 tests); ES & gap tests are descriptive."
+  ]
+}
