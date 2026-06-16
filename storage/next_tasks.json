@@ -32532,7 +32532,7 @@
     "title": "研究 backlog fallback: 企業債 illiquidity 的機器學習預測：用股票 vol 作跨市場 feature",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 企業債 illiquidity 的機器學習預測：用股票 vol 作跨市場 feature — yfinance HYG/LQD/VCIT（bond ETF）代理 illiquidity（bid-ask proxy = `high-low/close`），以 SPY/VIX/信用利差（HYG-LQD spread）為 feature，XGBoost vs 線性 OLS，誠實 OOS R² + DM 檢定，明確 lag；把債券流動性當 vol 預測的橋梁（來源：FAJ 2024 \"Predicting Corporate Bond Illiquidity via Machine Learning\" | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "illiquidity_vol_feature",
@@ -32540,7 +32540,11 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-16T12:11:58+00:00"
+    "created_at": "2026-06-16T12:11:58+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-16T15:10:54.291820+00:00",
+    "claim_session_id": "f321dbe721e9",
+    "started_at": "2026-06-16T15:11:27.715458+00:00"
   },
   {
     "id": "research_google_trends_vol",
