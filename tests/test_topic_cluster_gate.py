@@ -25,6 +25,13 @@ def pub(tmp_path, monkeypatch):
     monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
     monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
     monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+    from volpred.publisher.email_notifier import EmailNotifier
+    from volpred.publisher import live_verify
+
+    monkeypatch.setattr(EmailNotifier, "notify_article_published", lambda *a, **kw: None)
+    monkeypatch.setattr(live_verify, "verify_article_live", lambda *a, **kw: True)
+    monkeypatch.setattr(live_verify, "stamp_verified", lambda *a, **kw: None)
+    monkeypatch.setattr(live_verify, "emit_verify_alert", lambda *a, **kw: None)
     for mod_name in ("supabase_sync", "scripts.supabase_sync"):
         try:
             mod = sys.modules.get(mod_name) or importlib.import_module(mod_name)

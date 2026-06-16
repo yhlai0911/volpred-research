@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
 from scripts.article_backups import ensure_local_article_backups
+from volpred.publisher.arc_dedup import find_arc_duplicates
 from volpred.publisher.publisher import (
     Publisher,
     _audit_general_content,
     _extract_experiment_refs,
 )
+from volpred.topic_clusters import classify_topic_cluster
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
 from scripts.supabase_sync import _delete_where, _get_article_id, _patch_where, _select_rows, delete_article, sync_article
@@ -219,6 +222,17 @@ def _article_audience(item: dict) -> str:
 _RELEASE_DEDUP_WINDOW_DAYS = 21
 _RELEASE_DEDUP_JACCARD = 0.45
 _RELEASE_DEDUP_AUDIENCES = {"general", "research"}
+_RELEASE_LAST_N_CLUSTER_WINDOW = 3
+_RELEASE_LAST_N_CLUSTER_THRESHOLD = 2
+
+_NARRATIVE_CLUSTER_PATTERNS = {
+    "garch": re.compile(r"\b(ST)?GARCH\b|GJR|EGARCH|GARCH-MIDAS|MF-GJR|EWMA", re.I),
+    "vix": re.compile(r"\bVIX\b|VVIX|VIX9D|恐慌指數|12/VIX", re.I),
+    "vrp": re.compile(r"\bVRP\b|variance risk premium|波動率風險溢酬", re.I),
+    "har": re.compile(r"\bHAR(?:-RV)?\b|heterogeneous autoregressive", re.I),
+    "copula": re.compile(r"\bcopula\b|copula-based|DCC|BEKK", re.I),
+    "vt": re.compile(r"波動率目標|vol(?:atility)?[\s-]?target|VT\s*(策略|參數|保險|成本)", re.I),
+}
 
 
 def _bigram_profile(text: str) -> set[str]:
@@ -251,6 +265,125 @@ def _release_content_dup(item: dict, recent_pub: list[dict]) -> dict | None:
     if best is not None and best_j >= _RELEASE_DEDUP_JACCARD:
         return {"id": best.get("id"), "title": best.get("title"), "jaccard": round(best_j, 3)}
     return None
+
+
+def _extract_k_ids_from_item(item: dict) -> set[str]:
+    refs: set[str] = set()
+    details = item.get("details")
+    if isinstance(details, dict):
+        raw_refs = details.get("experiment_refs") or details.get("experiment_ids") or []
+        if isinstance(raw_refs, str):
+            raw_refs = [raw_refs]
+        if isinstance(raw_refs, list):
+            refs.update(str(r).upper() for r in raw_refs if re.fullmatch(r"K\d+", str(r).upper()))
+    raw_tags = item.get("tags") or []
+    if isinstance(raw_tags, list):
+        refs.update(str(t).upper() for t in raw_tags if re.fullmatch(r"K\d+", str(t).upper()))
+    return refs
+
+
+def _narrative_cluster_from_text(text: str) -> str | None:
+    for cluster, pattern in _NARRATIVE_CLUSTER_PATTERNS.items():
+        if pattern.search(text or ""):
+            return cluster
+    return None
+
+
+def _knowledge_experiment_clusters(storage_dir: str) -> dict[str, str]:
+    knowledge = load_json(project_path(storage_dir, "memory", "knowledge.json"), [])
+    out: dict[str, str] = {}
+    if not isinstance(knowledge, list):
+        return out
+    for item in knowledge:
+        if not isinstance(item, dict):
+            continue
+        text = "\n".join(
+            str(v)
+            for v in (
+                item.get("title"),
+                item.get("category"),
+                item.get("content"),
+                " ".join(str(t) for t in (item.get("tags") or [])) if isinstance(item.get("tags"), list) else "",
+            )
+            if v
+        )
+        cluster = _narrative_cluster_from_text(text)
+        if cluster is None:
+            continue
+        refs: set[str] = set()
+        for key in ("experiment_id", "k_id"):
+            value = item.get(key)
+            if isinstance(value, str) and re.fullmatch(r"K\d+", value.upper()):
+                refs.add(value.upper())
+        for key in ("experiment_ids", "related_experiments", "source_experiments"):
+            value = item.get(key)
+            if isinstance(value, list):
+                refs.update(str(v).upper() for v in value if re.fullmatch(r"K\d+", str(v).upper()))
+        evidence = item.get("evidence") or []
+        if isinstance(evidence, list):
+            for ev in evidence:
+                refs.update(match.upper() for match in re.findall(r"\bK\d+\b", str(ev), flags=re.I))
+        if not refs:
+            refs.update(match.upper() for match in re.findall(r"\bK\d+\b", text, flags=re.I))
+        for ref in refs:
+            out.setdefault(ref, cluster)
+    return out
+
+
+def _article_narrative_cluster(item: dict, k_cluster: dict[str, str]) -> str | None:
+    title = str(item.get("title") or "")
+    tags = item.get("tags") if isinstance(item.get("tags"), list) else []
+    topic_cluster = classify_topic_cluster(title, tags, "")
+    if topic_cluster:
+        return topic_cluster
+    # Keep article-side cluster detection title/tags/ref-based. Body scanning is
+    # too broad for release ordering and would preempt the stricter
+    # release_theme_flood gate on generic articles that merely mention a model.
+    text = "\n".join(str(v) for v in (title, " ".join(str(t) for t in tags)) if v)
+    text_cluster = _narrative_cluster_from_text(text)
+    if text_cluster:
+        return text_cluster
+    for ref in sorted(_extract_k_ids_from_item(item)):
+        if ref in k_cluster:
+            return k_cluster[ref]
+    return None
+
+
+def _recent_narrative_cluster_pressure(
+    feed: list[dict],
+    *,
+    k_cluster: dict[str, str],
+) -> dict:
+    recent = sorted(
+        [
+            item
+            for item in feed
+            if item.get("status") == "published"
+            and _article_audience(item) in _RELEASE_DEDUP_AUDIENCES
+            and item.get("published_at")
+        ],
+        key=lambda item: str(item.get("published_at") or ""),
+        reverse=True,
+    )[:_RELEASE_LAST_N_CLUSTER_WINDOW]
+    clusters = [
+        cluster
+        for item in recent
+        if (cluster := _article_narrative_cluster(item, k_cluster))
+    ]
+    counts = Counter(clusters)
+    blocked = sorted(
+        cluster
+        for cluster, count in counts.items()
+        if count >= _RELEASE_LAST_N_CLUSTER_THRESHOLD
+    )
+    return {
+        "window": _RELEASE_LAST_N_CLUSTER_WINDOW,
+        "threshold": _RELEASE_LAST_N_CLUSTER_THRESHOLD,
+        "clusters": clusters,
+        "counts": dict(counts),
+        "blocked_clusters": blocked,
+        "recent_ids": [item.get("id") for item in recent],
+    }
 
 
 # Theme-flood gate: content-bigram catches near-COPIES, but the 2026-06-15
@@ -343,6 +476,31 @@ def release_pool_articles(
     ]
     candidates.sort(key=sort_key)
 
+    k_cluster = _knowledge_experiment_clusters(storage_dir)
+    narrative_pressure = _recent_narrative_cluster_pressure(feed, k_cluster=k_cluster)
+    blocked_narrative_clusters = set(narrative_pressure["blocked_clusters"])
+    narrative_cluster_filtered: list[dict] = []
+    if blocked_narrative_clusters:
+        filtered_candidates: list[dict] = []
+        for item in candidates:
+            candidate_cluster = _article_narrative_cluster(item, k_cluster)
+            if (
+                _article_audience(item) in _RELEASE_DEDUP_AUDIENCES
+                and candidate_cluster in blocked_narrative_clusters
+            ):
+                narrative_cluster_filtered.append(
+                    {
+                        "id": item.get("id"),
+                        "title": item.get("title"),
+                        "cluster": candidate_cluster,
+                        "last_n_counts": narrative_pressure["counts"],
+                        "recent_ids": narrative_pressure["recent_ids"],
+                    }
+                )
+                continue
+            filtered_candidates.append(item)
+        candidates = filtered_candidates
+
     if pub_id:
         candidates = [item for item in candidates if item.get("id") == pub_id]
 
@@ -417,9 +575,15 @@ def release_pool_articles(
         # Anti-flood dedup gate (2026-06-16): skip near-duplicate of a
         # recently-published general/research article — don't flood live feed.
         if _article_audience(item) in _RELEASE_DEDUP_AUDIENCES:
+            arc_dups = find_arc_duplicates(
+                str(item.get("title") or ""),
+                str(item.get("content") or item.get("description") or ""),
+                recent_pub_for_dedup,
+                days=_RELEASE_DEDUP_WINDOW_DAYS,
+            )
             dup = _release_content_dup(item, recent_pub_for_dedup)
             flood = _release_theme_flood(item, recent_pub_for_dedup)
-            if dup is not None or flood is not None:
+            if arc_dups or dup is not None or flood is not None:
                 # Flag so it's excluded from future candidate selection (no
                 # infinite re-skip / slot block); left as draft for review, not
                 # destructively unpublished.
@@ -434,10 +598,15 @@ def release_pool_articles(
                 if flood is not None:
                     _d["release_theme_flood"] = flood["theme"]
                     _d["release_theme_recent_count"] = flood["recent_count"]
+                if arc_dups:
+                    _d["release_arc_dedup_of"] = arc_dups[0]["id"]
+                    _d["release_arc_dedup_class"] = arc_dups[0]["conclusion_class"]
                 dedup_skipped.append(
                     {
                         "id": item.get("id"),
                         "title": item.get("title"),
+                        "arc_dup_of": arc_dups[0]["id"] if arc_dups else None,
+                        "arc_conclusion_class": arc_dups[0]["conclusion_class"] if arc_dups else None,
                         "dup_of": dup["id"] if dup else None,
                         "jaccard": dup["jaccard"] if dup else None,
                         "theme_flood": flood["theme"] if flood else None,
@@ -445,7 +614,8 @@ def release_pool_articles(
                     }
                 )
                 reason = (
-                    f"near-dup of {dup['id']} (J={dup['jaccard']})" if dup
+                    f"arc-dup of {arc_dups[0]['id']} ({arc_dups[0]['conclusion_class']})" if arc_dups
+                    else f"near-dup of {dup['id']} (J={dup['jaccard']})" if dup
                     else f"theme '{flood['theme']}' saturated (recent={flood['recent_count']})"
                 )
                 print(f"  [release_pool] DEDUP-SKIP {item.get('id')} — {reason}; kept as draft.")
@@ -571,6 +741,8 @@ def release_pool_articles(
         "released": released,
         "audit_skipped": audit_skipped,
         "dedup_skipped": dedup_skipped,
+        "narrative_cluster_pressure": narrative_pressure,
+        "narrative_cluster_filtered": narrative_cluster_filtered,
         "due_only": due_only,
         "include_drafts": effective_include_drafts,
         "preferred_audiences": list(preferred_audiences or []),
@@ -685,6 +857,31 @@ def preview_release_pool_by_settings(
     candidates = [item for item in pool_items if item.get("status") in eligible_statuses and is_due(item)]
     candidates.sort(key=sort_key)
 
+    k_cluster = _knowledge_experiment_clusters(storage_dir)
+    narrative_pressure = _recent_narrative_cluster_pressure(feed, k_cluster=k_cluster)
+    blocked_narrative_clusters = set(narrative_pressure["blocked_clusters"])
+    narrative_cluster_filtered: list[dict] = []
+    if blocked_narrative_clusters:
+        filtered_candidates: list[dict] = []
+        for item in candidates:
+            candidate_cluster = _article_narrative_cluster(item, k_cluster)
+            if (
+                _article_audience(item) in _RELEASE_DEDUP_AUDIENCES
+                and candidate_cluster in blocked_narrative_clusters
+            ):
+                narrative_cluster_filtered.append(
+                    {
+                        "id": item.get("id"),
+                        "title": item.get("title"),
+                        "cluster": candidate_cluster,
+                        "last_n_counts": narrative_pressure["counts"],
+                        "recent_ids": narrative_pressure["recent_ids"],
+                    }
+                )
+                continue
+            filtered_candidates.append(item)
+        candidates = filtered_candidates
+
     due_now = settings["mode"] in ("scheduled", "auto") and (
         next_release_at is None or next_release_at <= now
     )
@@ -711,6 +908,8 @@ def preview_release_pool_by_settings(
             "scheduled": sum(1 for item in pool_items if item.get("status") == "scheduled"),
             "eligible": len(candidates),
         },
+        "narrative_cluster_pressure": narrative_pressure,
+        "narrative_cluster_filtered": narrative_cluster_filtered,
         "next_candidates": next_candidates,
     }
 

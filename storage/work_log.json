@@ -10898,5 +10898,14 @@
     "reviewer": "codex-cli",
     "knowledge_item_id": "32df19ba",
     "summary": "K1514 Liberation Day cross-asset correlation event study completed: SPY-TLT 30d corr -0.205→+0.208 and SPY-PDBC avg delta +0.270 were visible but bootstrap CIs crossed zero; no primary pair passed 2/3 window robust gate. Verdict NULL."
+  },
+  {
+    "timestamp": "2026-06-16T11:54:41+00:00",
+    "task_id": "platform_ops_narrative_cluster_gate",
+    "task_type": "platform_ops",
+    "fire": "interactive-hourly",
+    "verdict": "succeeded",
+    "reviewer": "codex-cli",
+    "summary": "Release-pool narrative cluster gate added: last-3 published general/research items are clustered via title/tags plus experiment_refs→knowledge.json; clusters with >=2/3 are filtered before candidate selection. Also wired release-time arc_dedup and added regression coverage."
   }
 ]

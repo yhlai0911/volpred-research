@@ -28,6 +28,13 @@ def _stub_release_side_effects(monkeypatch) -> None:
     monkeypatch.setattr(content, "_mark_questions_answered_on_publish", lambda *args, **kwargs: 0)
     monkeypatch.setattr(content, "_patch_where", lambda *args, **kwargs: True)
     monkeypatch.setattr(content.Publisher, "_sync_feed_to_remote", lambda self: None)
+    from volpred.publisher.email_notifier import EmailNotifier
+    from volpred.publisher import live_verify
+
+    monkeypatch.setattr(EmailNotifier, "notify_article_published", lambda *args, **kwargs: None)
+    monkeypatch.setattr(live_verify, "verify_article_live", lambda *args, **kwargs: True)
+    monkeypatch.setattr(live_verify, "stamp_verified", lambda *args, **kwargs: None)
+    monkeypatch.setattr(live_verify, "emit_verify_alert", lambda *args, **kwargs: None)
 
 
 def test_release_pool_by_settings_updates_last_released_and_gates_followup_run(
@@ -297,3 +304,88 @@ def test_release_pool_theme_flood_gate_skips_saturated_theme(tmp_path: Path, mon
     flagged = next(a for a in feed_after if a["id"] == "mile_draftmodel")
     assert flagged.get("details", {}).get("release_dedup_skipped") is True
     assert flagged.get("status") == "draft"
+
+
+def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path: Path, monkeypatch):
+    """Boss email-11752 regression: if 2 of last 3 published general/research
+    articles are the same narrative cluster, release_pool should filter that
+    cluster out of the next pick and backfill with a different-cluster draft.
+
+    This intentionally uses generic titles and details.experiment_refs so the
+    gate must consult knowledge.json K-id provenance rather than title keywords.
+    """
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 16, 11, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+
+    _write_json(
+        storage_dir / "memory" / "knowledge.json",
+        [
+            {"experiment_id": "K431", "content": "GARCH model comparison result."},
+            {"experiment_id": "K998", "content": "GJR-GARCH and EGARCH forecast comparison."},
+            {"experiment_id": "K491", "content": "STGARCH model complexity follow-up."},
+            {"experiment_id": "K800", "content": "VRP variance risk premium regime study."},
+        ],
+    )
+    feed = [
+        {
+            "id": "mile_recent_garch_1",
+            "status": "published",
+            "audience": "general",
+            "published_at": (frozen_now - timedelta(minutes=10)).isoformat(),
+            "title": "近期模型文章一",
+            "details": {"experiment_refs": ["K431"]},
+        },
+        {
+            "id": "mile_recent_vrp",
+            "status": "published",
+            "audience": "general",
+            "published_at": (frozen_now - timedelta(minutes=20)).isoformat(),
+            "title": "近期風險溢酬文章",
+            "details": {"experiment_refs": ["K800"]},
+        },
+        {
+            "id": "mile_recent_garch_2",
+            "status": "published",
+            "audience": "research",
+            "published_at": (frozen_now - timedelta(minutes=30)).isoformat(),
+            "title": "近期模型文章二",
+            "details": {"experiment_refs": ["K998"]},
+        },
+        {
+            "id": "mile_draft_garch",
+            "status": "draft",
+            "audience": "general",
+            "created_at": (frozen_now - timedelta(days=3)).isoformat(),
+            "title": "下一篇候選一",
+            "details": {"experiment_refs": ["K491"]},
+        },
+        {
+            "id": "mile_draft_vrp",
+            "status": "draft",
+            "audience": "general",
+            "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+            "title": "下一篇候選二",
+            "details": {"experiment_refs": ["K800"]},
+        },
+    ]
+    _write_json(storage_dir / "reports" / "feed.json", feed)
+
+    res = content.release_pool_articles(
+        limit=1,
+        due_only=False,
+        include_drafts=True,
+        storage_dir=str(storage_dir),
+    )
+
+    assert res["narrative_cluster_pressure"]["blocked_clusters"] == ["garch"]
+    assert [item["id"] for item in res["narrative_cluster_filtered"]] == ["mile_draft_garch"]
+    assert [item["id"] for item in res["released"]] == ["mile_draft_vrp"]
+
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    garch = next(item for item in feed_after if item["id"] == "mile_draft_garch")
+    vrp = next(item for item in feed_after if item["id"] == "mile_draft_vrp")
+    assert garch["status"] == "draft"
+    assert not garch.get("details", {}).get("release_dedup_skipped")
+    assert vrp["status"] == "published"
