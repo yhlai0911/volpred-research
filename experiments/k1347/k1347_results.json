@@ -1,0 +1,342 @@
+{
+  "experiment_id": "K1347",
+  "title": "CVaR-RP vs Sigma-RP (ERC) on SPY/TLT/GLD/PDBC",
+  "created_at": "2026-06-16T09:18:08.998218+00:00",
+  "seed": 42,
+  "config": {
+    "tickers": [
+      "SPY",
+      "TLT",
+      "GLD",
+      "PDBC"
+    ],
+    "period": [
+      "2018-01-01",
+      "2025-12-31"
+    ],
+    "cost_bps_one_way": 5.0,
+    "alpha": 0.05,
+    "sigma_window": 60,
+    "cvar_window": 250,
+    "min_weight": 0.02,
+    "boot_reps": 1000,
+    "boot_block": 20,
+    "rebalance": "monthly_last_business_day",
+    "lookahead_guard": "weights.shift(1) on daily series; weights formed at t use data <= t, applied from t+1"
+  },
+  "sample": {
+    "first_oos_day": "2019-01-02",
+    "last_oos_day": "2025-12-30",
+    "n_obs": 1759
+  },
+  "full_period_metrics": {
+    "EW": {
+      "ann_return": 0.11443823168435849,
+      "ann_vol": 0.10196829081951846,
+      "sharpe": 1.1222923397520856,
+      "sortino": 1.4818361215797482,
+      "max_drawdown": -0.18095842031819875,
+      "calmar": 0.6324007000234052,
+      "n_obs": 1759
+    },
+    "Sigma_RP": {
+      "ann_return": 0.09443015883820387,
+      "ann_vol": 0.09771834022617597,
+      "sharpe": 0.9663504171237316,
+      "sortino": 1.2995335077000012,
+      "max_drawdown": -0.20354640373184296,
+      "calmar": 0.46392447671346965,
+      "n_obs": 1759
+    },
+    "CVaR_RP": {
+      "ann_return": 0.09624687163188561,
+      "ann_vol": 0.10144430060464484,
+      "sharpe": 0.9487656877539629,
+      "sortino": 1.2467180577607029,
+      "max_drawdown": -0.19796261361070722,
+      "calmar": 0.48618711319479113,
+      "n_obs": 1759
+    }
+  },
+  "stress_periods": {
+    "EW": {
+      "2018Q4_selloff": {
+        "n": 0,
+        "note": "insufficient data"
+      },
+      "2020_covid": {
+        "n": 52,
+        "total_return": -0.0397097130673949,
+        "max_drawdown": -0.16428958345779576,
+        "ann_vol": 0.22944014568599883
+      },
+      "2022_inflation": {
+        "n": 209,
+        "total_return": -0.11488938814449234,
+        "max_drawdown": -0.18095842031819875,
+        "ann_vol": 0.13153172269351363
+      },
+      "2025_tariff": {
+        "n": 21,
+        "total_return": -0.012696810279810289,
+        "max_drawdown": -0.07761619645346796,
+        "ann_vol": 0.2391900579762314
+      }
+    },
+    "Sigma_RP": {
+      "2018Q4_selloff": {
+        "n": 0,
+        "note": "insufficient data"
+      },
+      "2020_covid": {
+        "n": 52,
+        "total_return": -0.03148880678390131,
+        "max_drawdown": -0.1542359935913009,
+        "ann_vol": 0.20912165258827722
+      },
+      "2022_inflation": {
+        "n": 209,
+        "total_return": -0.1478710519673061,
+        "max_drawdown": -0.2035464037318424,
+        "ann_vol": 0.13126520967303595
+      },
+      "2025_tariff": {
+        "n": 21,
+        "total_return": -0.013897906757192602,
+        "max_drawdown": -0.07314003640724254,
+        "ann_vol": 0.21846230810648679
+      }
+    },
+    "CVaR_RP": {
+      "2018Q4_selloff": {
+        "n": 0,
+        "note": "insufficient data"
+      },
+      "2020_covid": {
+        "n": 52,
+        "total_return": -0.05483727246043335,
+        "max_drawdown": -0.17434249447044892,
+        "ann_vol": 0.2272249992615845
+      },
+      "2022_inflation": {
+        "n": 209,
+        "total_return": -0.153565535153799,
+        "max_drawdown": -0.19796261361070666,
+        "ann_vol": 0.1275080092875223
+      },
+      "2025_tariff": {
+        "n": 21,
+        "total_return": -0.02164424608770965,
+        "max_drawdown": -0.08165475516804188,
+        "ann_vol": 0.24988578599348635
+      }
+    }
+  },
+  "stress_mdd_diff_cvar_minus_sigma": {
+    "2018Q4_selloff": null,
+    "2020_covid": {
+      "sigma_mdd": -0.1542359935913009,
+      "cvar_mdd": -0.17434249447044892,
+      "cvar_minus_sigma": -0.020106500879148004,
+      "improvement": false
+    },
+    "2022_inflation": {
+      "sigma_mdd": -0.2035464037318424,
+      "cvar_mdd": -0.19796261361070666,
+      "cvar_minus_sigma": 0.0055837901211357455,
+      "improvement": true
+    },
+    "2025_tariff": {
+      "sigma_mdd": -0.07314003640724254,
+      "cvar_mdd": -0.08165475516804188,
+      "cvar_minus_sigma": -0.008514718760799345,
+      "improvement": false
+    }
+  },
+  "n_stress_periods_improved": 1,
+  "n_stress_periods_evaluable": 3,
+  "dm_test_cvar_vs_sigma": {
+    "mean_d": 7.2091777527053355e-06,
+    "t_stat": 0.2580308694364413,
+    "p_value": 0.7963830833253334,
+    "n": 1759,
+    "hac_lags": 4,
+    "bandwidth_h": 5
+  },
+  "bootstrap_ci": {
+    "reps": 1000,
+    "block": 20,
+    "seed": 42,
+    "sharpe_diff_mean": -0.0172181716302564,
+    "sharpe_diff_ci95": [
+      -0.15225631501773815,
+      0.1152297693543403
+    ],
+    "mdd_diff_mean": -0.01469758206113803,
+    "mdd_diff_ci95": [
+      -0.04517688352469304,
+      0.010658730707425382
+    ]
+  },
+  "verdict": "FAIL",
+  "verdict_reason": "CVaR-RP underperforms: Sharpe diff -0.018, MDD improved in only 1/3 evaluable stress periods.",
+  "sigma_rp_weight_diagnostics_sample": [
+    {
+      "date": "2018-03-29",
+      "alloc": "sigma",
+      "w": [
+        0.15971713832093673,
+        0.38423997018122175,
+        0.2600550747444529,
+        0.1959878167533887
+      ]
+    },
+    {
+      "date": "2018-04-30",
+      "alloc": "sigma",
+      "w": [
+        0.16213482916680902,
+        0.37716291508913763,
+        0.2837476730707906,
+        0.1769545826732629
+      ]
+    },
+    {
+      "date": "2018-05-31",
+      "alloc": "sigma",
+      "w": [
+        0.17472073183148787,
+        0.3014316940279836,
+        0.2859380625502044,
+        0.23790951159032422
+      ]
+    },
+    {
+      "date": "2025-10-31",
+      "alloc": "sigma",
+      "w": [
+        0.2988811295793722,
+        0.3591026638792658,
+        0.1111560828606969,
+        0.23086012368066514
+      ]
+    },
+    {
+      "date": "2025-11-28",
+      "alloc": "sigma",
+      "w": [
+        0.255095814214529,
+        0.4240998318171901,
+        0.10885168590809158,
+        0.21195266806018945
+      ]
+    },
+    {
+      "date": "2025-12-30",
+      "alloc": "sigma",
+      "w": [
+        0.22959344978045765,
+        0.471560792917204,
+        0.10980939621494137,
+        0.189036361087397
+      ]
+    }
+  ],
+  "cvar_rp_weight_diagnostics_sample": [
+    {
+      "date": "2018-12-31",
+      "alloc": "cvar",
+      "w": [
+        0.18659634919606352,
+        0.3191088169324617,
+        0.3495514809397302,
+        0.14474335293174456
+      ],
+      "success": true,
+      "nit": 16,
+      "fun": 2.5709067218713796e-06
+    },
+    {
+      "date": "2019-01-31",
+      "alloc": "cvar",
+      "w": [
+        0.18659634919606352,
+        0.3191088169324617,
+        0.3495514809397302,
+        0.14474335293174456
+      ],
+      "success": true,
+      "nit": 16,
+      "fun": 2.5709067218713796e-06
+    },
+    {
+      "date": "2019-02-28",
+      "alloc": "cvar",
+      "w": [
+        0.2796269999208472,
+        0.28483936183046954,
+        0.28939165713716897,
+        0.1461419811115143
+      ],
+      "success": true,
+      "nit": 14,
+      "fun": 4.700498497706032e-06
+    },
+    {
+      "date": "2025-10-31",
+      "alloc": "cvar",
+      "w": [
+        0.24503521305169254,
+        0.2869621462556939,
+        0.21961555611441366,
+        0.24838708457819994
+      ],
+      "success": true,
+      "nit": 10,
+      "fun": 2.872512216748682e-07
+    },
+    {
+      "date": "2025-11-28",
+      "alloc": "cvar",
+      "w": [
+        0.17167262873427738,
+        0.3519550835895735,
+        0.23893961697695346,
+        0.23743267069919577
+      ],
+      "success": true,
+      "nit": 31,
+      "fun": 1.1255403316935324e-07
+    },
+    {
+      "date": "2025-12-30",
+      "alloc": "cvar",
+      "w": [
+        0.1809222172016351,
+        0.35770151991710286,
+        0.2379851576374063,
+        0.2233911052438557
+      ],
+      "success": true,
+      "nit": 38,
+      "fun": 5.748151424867585e-09
+    }
+  ],
+  "cvar_rp_n_rebalances": 85,
+  "cvar_rp_optimizer_success_rate": 1.0,
+  "runtime_seconds": 3.29,
+  "codex_review": {
+    "verdict": "PASS",
+    "reviewer": "Codex CLI",
+    "reviewed_at": "2026-06-16T09:18:37Z",
+    "source": "experiments/k1347/codex_review.md",
+    "findings": {
+      "lookahead": "PASS — build_daily_weights() forms rebalance weights using data through the rebalance-day close; backtest() applies w.shift(1) before multiplying by daily returns.",
+      "cvar_math": "PASS — historical tail scenarios and CRC_i = w_i * (-E[R_i | tail]) implement Euler CVaR contribution under historical simulation.",
+      "optimizer": "PASS — SLSQP has equal-weight fallback, clipped/renormalized weights, diagnostics, and observed CVaR optimizer success rate is 1.0.",
+      "dm_bootstrap": "PASS — DM uses aligned net returns after turnover costs; HAC lag label now reports actual nonzero lags; bootstrap uses seed 42.",
+      "stress_accounting": "PASS — 2018Q4 is insufficient after CVaR warmup, so result reports 1/3 evaluable stress periods."
+    },
+    "caveat": "SLSQP/BLAS floating-point path can move the last few decimals across reruns, but sign, significance, and verdict are stable: CVaR-RP remains worse on Sharpe and improves stress MDD in only 1/3 evaluable periods."
+  }
+}

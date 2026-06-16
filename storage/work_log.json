@@ -10869,5 +10869,14 @@
     "verdict": "CONDITIONAL_PASS",
     "reviewer": "codex-cli gpt-5.4",
     "summary": "K1511 follow-up review completed: lag PASS, HAC maxlags=3 PASS, TWSE 5-attempt backoff PASS, but N=144/focus=39 underpowered for EFM +40bp (power 6.6%, MDE80 ~303bp). Patched README/results/code, added codex_review.md, wrote knowledge c1c212a0 as underpowered null."
+  },
+  {
+    "timestamp": "2026-06-16T09:18:37+00:00",
+    "task_id": "K1347",
+    "task_type": "experiment",
+    "fire": "interactive-hourly",
+    "verdict": "FAIL",
+    "reviewer": "codex-cli",
+    "summary": "K1347 completed from stale worktree: CVaR-RP vs Sigma-RP on SPY/TLT/GLD/PDBC FAIL. CVaR-RP Sharpe 0.949 vs Sigma-RP 0.966; stress MDD improved only 1/3 evaluable periods; DM p=0.796. Knowledge skipped per task brief because result did not reach CONDITIONAL_PASS."
   }
 ]
