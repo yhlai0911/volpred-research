@@ -31989,7 +31989,7 @@
     "title": "研究 backlog fallback: TIPS 階梯 + 遞延年金 decumulation benchmark 的波動暴露分解",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: TIPS 階梯 + 遞延年金 decumulation benchmark 的波動暴露分解 — yfinance TIP/STIP/LTPZ + 名目國債 RV，分解 FAJ 提領 benchmark 在通膨/利率 regime 的波動暴露與尾部保護（來源：FAJ 2025 decumulation benchmark；T. Rowe Price 2026） | 來源 section: 期刊主題挖掘 batch（2026-06-15；用戶糾正「文章鬼打牆、回收舊 cluster」後觸發 → websearch jpm/faj/jfe/jfm/jbf/j.fixed income/cfa/fsb/arxiv 2025-26，**硬約束跳出 8 飽和 cluster**：vt / vix-move / garch-har 賽馬 / 風險模型比較 / etf 分散 / 50-50+長債 / n 套策略 meta / proxy 測量比較。全免費資料 yfinance/fred/eia/finra，options/bdc 折溢價用成交量·股價動能 proxy 代理）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "tips_decumulation_benchmark",
@@ -32001,7 +32001,9 @@
     "claimed_by": "hourly-10",
     "claimed_at": "2026-06-16T02:09:34.771182+00:00",
     "claim_session_id": "29b3eb0f39aa",
-    "started_at": "2026-06-16T02:09:45.447684+00:00"
+    "started_at": "2026-06-16T02:09:45.447684+00:00",
+    "completed_at": "2026-06-16T02:52:47.423297+00:00",
+    "result": "K1509 CONDITIONAL_PASS — TIPS regime-conditional vol decomposition. High CPI (CPIYoY>3%, n=847) → 所有債券類 RV 顯著上升; TIP/STIP-IEF vol gap 更負, LTPZ-IEF 更正; subagent fallback verdict CONDITIONAL_PASS (Welch p anti-conservative on overlap); commits 8b760cb8 + 01d0a855; knowledge a0912397"
   },
   {
     "id": "K1345",

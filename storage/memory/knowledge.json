@@ -34598,5 +34598,25 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-06-16T08:20:13.801254"
+  },
+  {
+    "item_id": "a0912397",
+    "experiment_id": "k1509",
+    "k_id": "K1509",
+    "category": "experiment_result",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "code-reviewer subagent",
+    "reviewer_source": "code-reviewer subagent (fallback after codex-cli 0.139.0 stdin-hang on Chinese prompt-as-arg)",
+    "codex_review": null,
+    "content": "K1509 TIPS regime-conditional vol decomposition (yfinance TIP/STIP/LTPZ + IEF; FRED CPIAUCSL; 2015-01 ~ 2026-06; n=2,878 trading days; high-CPI regime CPI YoY > 3%, n=847 days ≈ 29.4%, 主要落 2021–2023 post-COVID). CONDITIONAL_PASS verdict (subagent review): directional 結論 robust — 高 CPI regime 下**所有**債券類資產 21d RV 顯著上升 (TIP +0.0216, STIP +0.0116, LTPZ +0.0453, IEF +0.0292); **TIP-IEF / STIP-IEF gap 變得更負** (短 duration TIPS 相對 IEF 的 vol 折扣加大；TIP -0.0162 vs normal -0.0085) ; **LTPZ-IEF gap 變得更正** (長 duration TIPS vol 補貼放大；+0.0861 vs +0.0700)。ES5 在 high regime 全面變深 (TIP -0.00957 vs -0.00694)。解讀：「通膨保護」≠「vol 保護」；高 CPI 期想保通膨曝險又壓 vol → TIP/STIP > LTPZ。限制：(1) 只 1 次 high-CPI episode 無法分離 Fed 升息 / COVID dislocation；(2) **Welch t-test p-values anti-conservative due to ~20-day overlap on 21d rolling RV, effective N ~1/21 of nominal**，directional 結論可信但 p-value 不可直接 cite；(3) iid bootstrap CI 同 root cause 應改 block bootstrap (block_size=window)；(4) LTPZ 流動性偏薄注入 idiosyncratic vol；(5) Bonferroni 只套 RV family (6 tests)。",
+    "evidence": [
+      "experiments/k1509/k1509_results.json",
+      "experiments/k1509/README.md",
+      "experiments/k1509/k1509.py",
+      "experiments/k1509/figures/fig_a_rv_by_regime.png",
+      "experiments/k1509/figures/fig_b_rv_gap_vs_nominal.png"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-16T10:52:38.499865"
   }
 ]
