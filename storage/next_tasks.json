@@ -32793,7 +32793,7 @@
     "title": "K1509: write research-audience article (auto-discovered uncovered K)",
     "description": "K K1509 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1509 TIPS regime-conditional vol decomposition (yfinance TIP/STIP/LTPZ + IEF; FRED CPIAUCSL; 2015-01 ~ 2026-06; n=2,878 trading days; high-CPI regime CPI YoY > 3%, n=847 days ≈ 29.4%, 主要落 2021–2023 post-COVID). CONDITIONAL_PASS verdict (subagent review): directional 結論 robust — ",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1509",
@@ -32802,6 +32802,58 @@
       "audience-research"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-16T21:18:39+00:00"
+    "created_at": "2026-06-16T21:18:39+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-16T22:09:57.233019+00:00",
+    "claim_session_id": "8e2ac706295f",
+    "started_at": "2026-06-16T22:09:57.759366+00:00",
+    "completed_at": "2026-06-16T22:21:37.860923+00:00",
+    "result": "K1509 TIPS regime-conditional vol research article published: mile_5a61e96f, 2551 中文字元, 2 真實 PNG 圖, anti-ai-gate PASS, Supabase synced. Status=draft, audience=research, 進 release pool 節奏釋出。"
+  },
+  {
+    "id": "trending_repost_2026_06_17_fed新政",
+    "title": "[trending_repost] 聯準會首秀鷹風起，MOVE與VIX跨資產波動率如何定價？",
+    "description": "從 Kevin Warsh 首場 FOMC 的鷹派預期切入，探討市場重新定價升息風險對債市波動率的衝擊。可量化：追蹤 MOVE 與 VIX 的發散程度，驗證跨資產波動率套利策略。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-16T22:00:45+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_17_聯準會首秀",
+    "title": "[trending_repost] 新主席首秀與4.2%通膨，利率波動率如何重新定價？",
+    "description": "針對新任 Fed 主席 Warsh 首次亮相與五月 CPI 達 4.2% 攀升，分析利率選擇權市場（如 MOVE 指數）對年內升息機率的異常波動。可量化：比較 SEP 點陣圖公佈前後，SOFR 期貨隱含波動率與美債殖利率曲線的陡峭化特徵。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-16T22:00:51+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "paper_review_mile_ec0e72ee",
+    "title": "Paper review (Codex 24h-rule): 風險模型該回頭看 1 年還是 8 年？答案其實要先看市場現在安不安靜",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_ec0e72ee needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_ec0e72ee",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T22:08:41+00:00"
   }
 ]
