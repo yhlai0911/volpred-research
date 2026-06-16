@@ -1,0 +1,682 @@
+{
+  "experiment_id": "K1520",
+  "title": "Regime-aware in-context analog volatility forecasting vs HAR",
+  "created_at": "2026-06-16T21:09:12.369281+00:00",
+  "task_id": "research_regime_aware_in_context_llm_vol_vs_har_regime_ll",
+  "random_seed": 42,
+  "data": {
+    "source": "yfinance SPY and ^VIX daily close",
+    "start": "2007-02-06",
+    "end": "2026-06-15",
+    "oos_start": "2020-01-02",
+    "n_panel": 4870
+  },
+  "methods": {
+    "target": "SPY one-day-ahead daily variance r[t+1]^2",
+    "baseline": "Rolling HAR-log OLS; stricter primary baseline adds log(VIX_lag1)",
+    "icl_surrogate": "nearest-neighbor analog retrieval over lagged volatility/VIX features",
+    "regime_aware": "restrict analog demonstrations to current causal regime label when >=20 neighbors exist",
+    "combo": "geometric mean of HAR and regime-aware analog predictions",
+    "window": 2000,
+    "k_neighbors": 50,
+    "inference": "QLIKE + Newey-West HAC DM maxlags=5; primary verdict compares vs HAR+VIX with Harvey-style |t|>3 and BH correction"
+  },
+  "lookahead_audit": {
+    "feature_timing": "forecast origin t uses SPY returns through t and VIX shifted by 1 day",
+    "forward_label_training_cutoff": "training rows require target_date <= current forecast origin date",
+    "regime_labels": "regime thresholds are expanding quantiles shifted by one day",
+    "external_llm": "no non-reproducible API output is used as experimental data"
+  },
+  "literature": [
+    "Asaad, Hamidi, and Bereyhi (2026), Regime-aware financial volatility forecasting via in-context learning, arXiv:2603.10299",
+    "Corsi (2009), A Simple Approximate Long-Memory Model of Realized Volatility",
+    "In-Context Learning Under Regime Change, arXiv:2604.16988",
+    "Project K149: non-parametric regime matching ICL vs GJR failed to beat GJR on daily r^2 QLIKE"
+  ],
+  "summary": {
+    "n_oos": 1621,
+    "regime_counts": {
+      "high": 334,
+      "low": 104,
+      "mid": 1038,
+      "trend_break": 145
+    },
+    "fallback_share": 0.0,
+    "models": {
+      "analog_all": {
+        "mean_qlike": -5.660153105511046,
+        "qlike_improvement_pct_vs_har": 9.09710155722486,
+        "dm_vs_har": {
+          "n": 1621,
+          "dm_t": -1.870341622848956,
+          "p": 0.061436392998387435,
+          "mean_diff": -0.47197392868652055,
+          "hac_lags": 5,
+          "direction": "negative favors model"
+        },
+        "qlike_improvement_pct_vs_har_vix": -11.918353460081981,
+        "dm_vs_har_vix": {
+          "n": 1621,
+          "dm_t": 4.4188488909171175,
+          "p": 9.92279931977258e-06,
+          "mean_diff": 0.7658769789128426,
+          "hac_lags": 5,
+          "direction": "negative favors model"
+        }
+      },
+      "analog_regime": {
+        "mean_qlike": -5.8500419729645,
+        "qlike_improvement_pct_vs_har": 12.757130653785035,
+        "dm_vs_har": {
+          "n": 1621,
+          "dm_t": -2.48395180975335,
+          "p": 0.012993339013276817,
+          "mean_diff": -0.661862796139973,
+          "hac_lags": 5,
+          "direction": "negative favors model"
+        },
+        "qlike_improvement_pct_vs_har_vix": -8.96335846381318,
+        "dm_vs_har_vix": {
+          "n": 1621,
+          "dm_t": 2.6268219329799525,
+          "p": 0.008618642235385998,
+          "mean_diff": 0.57598811145939,
+          "hac_lags": 5,
+          "direction": "negative favors model"
+        }
+      },
+      "combo_har_regime": {
+        "mean_qlike": -5.889845209359129,
+        "qlike_improvement_pct_vs_har": 13.524321512813753,
+        "dm_vs_har": {
+          "n": 1621,
+          "dm_t": -3.8117111836531326,
+          "p": 0.00013800807468511422,
+          "mean_diff": -0.7016660325346027,
+          "hac_lags": 5,
+          "direction": "negative favors model"
+        },
+        "qlike_improvement_pct_vs_har_vix": -8.34395214495531,
+        "dm_vs_har_vix": {
+          "n": 1621,
+          "dm_t": 3.249072971320834,
+          "p": 0.0011578177285334057,
+          "mean_diff": 0.5361848750647605,
+          "hac_lags": 5,
+          "direction": "negative favors model"
+        }
+      },
+      "combo_harvix_regime": {
+        "mean_qlike": -6.36845439431426,
+        "qlike_improvement_pct_vs_har": 22.749314880295486,
+        "dm_vs_har": {
+          "n": 1621,
+          "dm_t": -4.264852991801523,
+          "p": 2.0003386385081257e-05,
+          "mean_diff": -1.1802752174897335,
+          "hac_lags": 5,
+          "direction": "negative favors model"
+        },
+        "qlike_improvement_pct_vs_har_vix": -0.8959760435791926,
+        "dm_vs_har_vix": {
+          "n": 1621,
+          "dm_t": 0.7714759446255051,
+          "p": 0.4404248754467295,
+          "mean_diff": 0.05757569010962965,
+          "hac_lags": 5,
+          "direction": "negative favors model"
+        }
+      }
+    },
+    "by_regime": {
+      "high": {
+        "n": 334,
+        "har_mean_qlike": -1.8756871752599096,
+        "har_vix_mean_qlike": -6.222166037283267,
+        "har_vix_vs_har": {
+          "qlike_improvement_pct": 231.72727943939137,
+          "dm_vs_har": {
+            "n": 334,
+            "dm_t": -3.9999194096164485,
+            "p": 6.336405800189127e-05,
+            "mean_diff": -4.346478862023358,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "analog_all": {
+          "mean_qlike": -4.5203616491618925,
+          "qlike_improvement_pct_vs_har": 140.9976305636102,
+          "dm_vs_har": {
+            "n": 334,
+            "dm_t": -3.2356470524917684,
+            "p": 0.0012136735206655924,
+            "mean_diff": -2.644674473901983,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -27.350674635233922,
+          "dm_vs_har_vix": {
+            "n": 334,
+            "dm_t": 3.0382646528414567,
+            "p": 0.0023794488364687894,
+            "mean_diff": 1.701804388121375,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "analog_regime": {
+          "mean_qlike": -5.105493076144745,
+          "qlike_improvement_pct_vs_har": 172.1932070275678,
+          "dm_vs_har": {
+            "n": 334,
+            "dm_t": -3.8777193233420384,
+            "p": 0.00010544026054026823,
+            "mean_diff": -3.229805900884836,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -17.946691786227,
+          "dm_vs_har_vix": {
+            "n": 334,
+            "dm_t": 1.2876217764038358,
+            "p": 0.197877655167912,
+            "mean_diff": 1.1166729611385222,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "combo_har_regime": {
+          "mean_qlike": -4.47510344312944,
+          "qlike_improvement_pct_vs_har": 138.5847438824299,
+          "dm_vs_har": {
+            "n": 334,
+            "dm_t": -4.026549550361028,
+            "p": 5.660131605766949e-05,
+            "mean_diff": -2.5994162678695303,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -28.078045228709982,
+          "dm_vs_har_vix": {
+            "n": 334,
+            "dm_t": 3.029759651373914,
+            "p": 0.002447484238321751,
+            "mean_diff": 1.7470625941538276,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "combo_harvix_regime": {
+          "mean_qlike": -6.082730132504206,
+          "qlike_improvement_pct_vs_har": 224.29342231128362,
+          "dm_vs_har": {
+            "n": 334,
+            "dm_t": -4.251230666943431,
+            "p": 2.1259906702653097e-05,
+            "mean_diff": -4.207042957244296,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -2.240954419145362,
+          "dm_vs_har_vix": {
+            "n": 334,
+            "dm_t": 0.8929242328143413,
+            "p": 0.3718977489304849,
+            "mean_diff": 0.1394359047790622,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        }
+      },
+      "low": {
+        "n": 104,
+        "har_mean_qlike": -8.141718015584571,
+        "har_vix_mean_qlike": -6.821597252200333,
+        "har_vix_vs_har": {
+          "qlike_improvement_pct": -16.214277635964695,
+          "dm_vs_har": {
+            "n": 104,
+            "dm_t": 3.2951791437995905,
+            "p": 0.0009835895483136792,
+            "mean_diff": 1.32012076338424,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "analog_all": {
+          "mean_qlike": -6.543341389185178,
+          "qlike_improvement_pct_vs_har": -19.63193300652074,
+          "dm_vs_har": {
+            "n": 104,
+            "dm_t": 2.9605163927857454,
+            "p": 0.003071237768415669,
+            "mean_diff": 1.5983766263993942,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -4.07904267472552,
+          "dm_vs_har_vix": {
+            "n": 104,
+            "dm_t": 0.7784516149084854,
+            "p": 0.43630282043384794,
+            "mean_diff": 0.2782558630151542,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "analog_regime": {
+          "mean_qlike": -5.111809228456502,
+          "qlike_improvement_pct_vs_har": -37.21461221487076,
+          "dm_vs_har": {
+            "n": 104,
+            "dm_t": 5.1329115049523155,
+            "p": 2.8529406903565757e-07,
+            "mean_diff": 3.029908787128071,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -25.064335529224223,
+          "dm_vs_har_vix": {
+            "n": 104,
+            "dm_t": 5.12968828771258,
+            "p": 2.9022235303877153e-07,
+            "mean_diff": 1.7097880237438305,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "combo_har_regime": {
+          "mean_qlike": -7.1127016807255625,
+          "qlike_improvement_pct_vs_har": -12.638810787714633,
+          "dm_vs_har": {
+            "n": 104,
+            "dm_t": 4.707014807524656,
+            "p": 2.5137065537972347e-06,
+            "mean_diff": 1.0290163348590105,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": 4.267393951340831,
+          "dm_vs_har_vix": {
+            "n": 104,
+            "dm_t": -1.1912945018416252,
+            "p": 0.23353799157798982,
+            "mean_diff": -0.29110442852522955,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "combo_harvix_regime": {
+          "mean_qlike": -6.107688567203325,
+          "qlike_improvement_pct_vs_har": -24.98280393017522,
+          "dm_vs_har": {
+            "n": 104,
+            "dm_t": 4.356885557128019,
+            "p": 1.3192620196278426e-05,
+            "mean_diff": 2.034029448381248,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -10.465418267939146,
+          "dm_vs_har_vix": {
+            "n": 104,
+            "dm_t": 5.074799173681323,
+            "p": 3.879054688571415e-07,
+            "mean_diff": 0.7139086849970079,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        }
+      },
+      "mid": {
+        "n": 1038,
+        "har_mean_qlike": -6.103377093591875,
+        "har_vix_mean_qlike": -6.543290962331161,
+        "har_vix_vs_har": {
+          "qlike_improvement_pct": 7.207712418771663,
+          "dm_vs_har": {
+            "n": 1038,
+            "dm_t": -2.3986782114745577,
+            "p": 0.0164543675001394,
+            "mean_diff": -0.4399138687392882,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "analog_all": {
+          "mean_qlike": -5.9763553399931535,
+          "qlike_improvement_pct_vs_har": -2.081171647284998,
+          "dm_vs_har": {
+            "n": 1038,
+            "dm_t": 0.7841220968739879,
+            "p": 0.432968470737811,
+            "mean_diff": 0.12702175359872026,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -8.664380441001008,
+          "dm_vs_har_vix": {
+            "n": 1038,
+            "dm_t": 3.505164890985873,
+            "p": 0.00045632456607602734,
+            "mean_diff": 0.5669356223380085,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "analog_regime": {
+          "mean_qlike": -6.261566251152388,
+          "qlike_improvement_pct_vs_har": 2.591829984200074,
+          "dm_vs_har": {
+            "n": 1038,
+            "dm_t": -1.0219638353630285,
+            "p": 0.30679801732001755,
+            "mean_diff": -0.15818915756051477,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -4.305550720587305,
+          "dm_vs_har_vix": {
+            "n": 1038,
+            "dm_t": 1.9481064737739073,
+            "p": 0.0514022243620984,
+            "mean_diff": 0.28172471117877346,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "combo_har_regime": {
+          "mean_qlike": -6.327276681438615,
+          "qlike_improvement_pct_vs_har": 3.6684541101322345,
+          "dm_vs_har": {
+            "n": 1038,
+            "dm_t": -2.8514055126071303,
+            "p": 0.00435264203830199,
+            "mean_diff": -0.22389958784674124,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -3.3013094196194386,
+          "dm_vs_har_vix": {
+            "n": 1038,
+            "dm_t": 1.5271634784869457,
+            "p": 0.1267203653591238,
+            "mean_diff": 0.21601428089254698,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "combo_harvix_regime": {
+          "mean_qlike": -6.544976579972844,
+          "qlike_improvement_pct_vs_har": 7.2353302050535,
+          "dm_vs_har": {
+            "n": 1038,
+            "dm_t": -2.8626171306929047,
+            "p": 0.004201579310977754,
+            "mean_diff": -0.4415994863809706,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": 0.02576100698236894,
+          "dm_vs_har_vix": {
+            "n": 1038,
+            "dm_t": -0.025583160527989188,
+            "p": 0.979589817626731,
+            "mean_diff": -0.0016856176416822969,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        }
+      },
+      "trend_break": {
+        "n": 145,
+        "har_mean_qlike": -4.148378153976464,
+        "har_vix_mean_qlike": -5.772477084620228,
+        "har_vix_vs_har": {
+          "qlike_improvement_pct": 39.15021414060263,
+          "dm_vs_har": {
+            "n": 145,
+            "dm_t": -2.109657642436164,
+            "p": 0.03488785544086004,
+            "mean_diff": -1.6240989306437645,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "analog_all": {
+          "mean_qlike": -5.38857272982885,
+          "qlike_improvement_pct_vs_har": 29.89589014838454,
+          "dm_vs_har": {
+            "n": 145,
+            "dm_t": -1.4051443507678512,
+            "p": 0.1599783581412948,
+            "mean_diff": -1.2401945758523862,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -6.650599892621921,
+          "dm_vs_har_vix": {
+            "n": 145,
+            "dm_t": 0.5643399862355524,
+            "p": 0.5725227733112339,
+            "mean_diff": 0.38390435479137835,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "analog_regime": {
+          "mean_qlike": -5.148616705430714,
+          "qlike_improvement_pct_vs_har": 24.11155671754426,
+          "dm_vs_har": {
+            "n": 145,
+            "dm_t": -1.1188896088472415,
+            "p": 0.2631872365336114,
+            "mean_diff": -1.0002385514542504,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -10.807498584129192,
+          "dm_vs_har_vix": {
+            "n": 145,
+            "dm_t": 0.7473673255771783,
+            "p": 0.45484186296289963,
+            "mean_diff": 0.6238603791895141,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "combo_har_regime": {
+          "mean_qlike": -5.140140443014999,
+          "qlike_improvement_pct_vs_har": 23.9072295780912,
+          "dm_vs_har": {
+            "n": 145,
+            "dm_t": -1.5120316898645942,
+            "p": 0.13052580096067445,
+            "mean_diff": -0.9917622890385348,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": -10.954337840335151,
+          "dm_vs_har_vix": {
+            "n": 145,
+            "dm_t": 0.9681806699044396,
+            "p": 0.33295414702069137,
+            "mean_diff": 0.6323366416052296,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        },
+        "combo_harvix_regime": {
+          "mean_qlike": -5.94998212362795,
+          "qlike_improvement_pct_vs_har": 43.429116217974084,
+          "dm_vs_har": {
+            "n": 145,
+            "dm_t": -2.3082313732936632,
+            "p": 0.020986271083967445,
+            "mean_diff": -1.8016039696514863,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          },
+          "qlike_improvement_pct_vs_har_vix": 3.0750237100231037,
+          "dm_vs_har_vix": {
+            "n": 145,
+            "dm_t": -0.3448788327157749,
+            "p": 0.7301854644775416,
+            "mean_diff": -0.17750503900772213,
+            "hac_lags": 5,
+            "direction": "negative favors model"
+          }
+        }
+      }
+    },
+    "har": {
+      "mean_qlike": -5.1881791768245265
+    },
+    "har_vix": {
+      "mean_qlike": -6.42603008442389,
+      "qlike_improvement_pct_vs_har": 23.859062407266393,
+      "dm_vs_har": {
+        "n": 1621,
+        "dm_t": -4.237693496925558,
+        "p": 2.2582777074120486e-05,
+        "mean_diff": -1.2378509075993633,
+        "hac_lags": 5,
+        "direction": "negative favors model"
+      }
+    }
+  },
+  "multiple_test_correction": {
+    "low:analog_regime": {
+      "raw_p": 2.9022235303877153e-07,
+      "bonferroni_p": 5.804447060775431e-06,
+      "bh_p": 3.879054688571415e-06,
+      "rank": 1
+    },
+    "low:combo_harvix_regime": {
+      "raw_p": 3.879054688571415e-07,
+      "bonferroni_p": 7.75810937714283e-06,
+      "bh_p": 3.879054688571415e-06,
+      "rank": 2
+    },
+    "overall:analog_all": {
+      "raw_p": 9.92279931977258e-06,
+      "bonferroni_p": 0.0001984559863954516,
+      "bh_p": 6.615199546515053e-05,
+      "rank": 3
+    },
+    "mid:analog_all": {
+      "raw_p": 0.00045632456607602734,
+      "bonferroni_p": 0.009126491321520547,
+      "bh_p": 0.0022816228303801367,
+      "rank": 4
+    },
+    "overall:combo_har_regime": {
+      "raw_p": 0.0011578177285334057,
+      "bonferroni_p": 0.023156354570668114,
+      "bh_p": 0.004631270914133623,
+      "rank": 5
+    },
+    "high:analog_all": {
+      "raw_p": 0.0023794488364687894,
+      "bonferroni_p": 0.04758897672937579,
+      "bh_p": 0.006992812109490717,
+      "rank": 6
+    },
+    "high:combo_har_regime": {
+      "raw_p": 0.002447484238321751,
+      "bonferroni_p": 0.04894968476643502,
+      "bh_p": 0.006992812109490717,
+      "rank": 7
+    },
+    "overall:analog_regime": {
+      "raw_p": 0.008618642235385998,
+      "bonferroni_p": 0.17237284470771996,
+      "bh_p": 0.021546605588464995,
+      "rank": 8
+    },
+    "mid:analog_regime": {
+      "raw_p": 0.0514022243620984,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.11422716524910756,
+      "rank": 9
+    },
+    "mid:combo_har_regime": {
+      "raw_p": 0.1267203653591238,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.2534407307182476,
+      "rank": 10
+    },
+    "high:analog_regime": {
+      "raw_p": 0.197877655167912,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.3597775548507491,
+      "rank": 11
+    },
+    "low:combo_har_regime": {
+      "raw_p": 0.23353799157798982,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.38922998596331637,
+      "rank": 12
+    },
+    "trend_break:combo_har_regime": {
+      "raw_p": 0.33295414702069137,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.5122371492626021,
+      "rank": 13
+    },
+    "high:combo_harvix_regime": {
+      "raw_p": 0.3718977489304849,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.5312824984721213,
+      "rank": 14
+    },
+    "low:analog_all": {
+      "raw_p": 0.43630282043384794,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.5351080740739995,
+      "rank": 15
+    },
+    "overall:combo_harvix_regime": {
+      "raw_p": 0.4404248754467295,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.5351080740739995,
+      "rank": 16
+    },
+    "trend_break:analog_regime": {
+      "raw_p": 0.45484186296289963,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.5351080740739995,
+      "rank": 17
+    },
+    "trend_break:analog_all": {
+      "raw_p": 0.5725227733112339,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.63613641479026,
+      "rank": 18
+    },
+    "trend_break:combo_harvix_regime": {
+      "raw_p": 0.7301854644775416,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.7686162783974122,
+      "rank": 19
+    },
+    "mid:combo_harvix_regime": {
+      "raw_p": 0.979589817626731,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.9795898176267311,
+      "rank": 20
+    }
+  },
+  "verdict": "NULL",
+  "verdict_reason": "No analog in-context or regime-aware retrieval variant beats the stricter HAR+VIX baseline under Harvey-style |t|>3 plus BH correction.",
+  "honest_limits": [
+    "This is not a live LLM API benchmark; it tests the transparent retrieval/demonstration mechanism behind regime-aware ICL.",
+    "Target is daily close-to-close squared return, not high-frequency realized variance.",
+    "A true LLM follow-up must freeze prompts, model version, temperature, raw responses, and retry policy before claims are credible."
+  ],
+  "figures": [
+    "figures/k1520_rolling_qlike.png",
+    "figures/k1520_regime_improvement.png"
+  ]
+}
