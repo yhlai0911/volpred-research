@@ -32068,7 +32068,7 @@
     "title": "Paper review (Codex 24h-rule): 點陣圖分歧，MOVE 卻跌到 P34：債市選擇權在打折賣保險嗎？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_53caca1a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_53caca1a",
@@ -32077,7 +32077,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-16T01:08:49+00:00"
+    "created_at": "2026-06-16T01:08:49+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-16T03:23:14.089688+00:00",
+    "claim_session_id": "b9172f0f6dcf",
+    "started_at": "2026-06-16T03:23:14.355894+00:00",
+    "completed_at": "2026-06-16T03:27:05.209894+00:00",
+    "result": "Source-code review complete. Verdict FAIL for article/source consistency: no lookahead found and core MOVE table mostly matches, but published article has false FOMC sample/relative MOVE statements, unsupported SOFR/dot-plot/skew claims, VIX percentile mismatch, and chart interpretation error. Amend/errata required; no full retract if corrected quickly."
   },
   {
     "id": "paper_review_mile_0ed5ec2a",
