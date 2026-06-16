@@ -34538,5 +34538,30 @@
       "VIX-aware"
     ],
     "created_at": "2026-06-16T06:17:27.928907"
+  },
+  {
+    "item_id": "4a7abc86",
+    "category": "experiment_result",
+    "experiment_id": "K1508",
+    "k_id": "K1508",
+    "experiment_path": "experiments/k1508_ai_power_utility_vol/",
+    "experiment_files": [
+      "experiments/k1508_ai_power_utility_vol/README.md",
+      "experiments/k1508_ai_power_utility_vol/k1508.py",
+      "experiments/k1508_ai_power_utility_vol/k1508_results.json",
+      "experiments/k1508_ai_power_utility_vol/codex_review.md"
+    ],
+    "verdict": "NULL",
+    "reviewer_source": "Codex self-review in main thread; methodology CONDITIONAL_PASS, empirical verdict NULL",
+    "content": "K1508 NULL: AI/data-center power-demand narrative did not robustly reprice utility/grid ETFs into a higher relative-volatility regime in this free-data specification. The queue originally reused stale id K1345, but that K id already belongs to K1345_pre_fomc_iv_drift, so the experiment was remapped to K1508. Data: yfinance adjusted close for XLU/VPU/GRID/PAVE plus SPY/QQQ, 2016-01-01 to 2026-06-15, and FRED IPG2211S monthly power-activity proxy through 2026-05-01. EIA v2 load data requires an API key and the public ELEC bulk file is about 226MB, so no direct EIA load series was used. Method: all signals explicitly shift(1); monthly power proxy is shifted two months plus one trading day; target is forward t+1..t+21 RV. Primary regression log(fwd_rv21 ETF)-log(fwd_rv21 SPY) on post-AI dummy, lagged VIX, and lagged power-growth proxy had 0/4 ETFs pass the Harvey/Bonferroni gate: XLU t=2.10, VPU t=2.04, GRID t=-0.93, PAVE t=-0.21. Conclusion: do not claim a robust AI-power high-vol regime shift for these ETFs from this free-data design; reopening requires direct EIA/API-key load data, regional utility load, or data-center interconnection queue data.",
+    "evidence": [
+      "experiments/k1508_ai_power_utility_vol/k1508_results.json",
+      "experiments/k1508_ai_power_utility_vol/k1508.py",
+      "experiments/k1508_ai_power_utility_vol/README.md",
+      "experiments/k1508_ai_power_utility_vol/codex_review.md",
+      "research_program.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-16T08:02:22.781251"
   }
 ]

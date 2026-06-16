@@ -31994,7 +31994,7 @@
     "title": "K1345: 資料中心電力需求衝擊對公用/電網 ETF 的 vol 重定價 — yfinance XLU/VPU/GRID/PAVE RV + EIA 電力負載，檢定 AI 電力事件後公用事業從「低 vol 防禦」轉「高 vol 成長」結構斷點（來源：S",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 589). Original: 資料中心電力需求衝擊對公用/電網 ETF 的 vol 重定價 — yfinance XLU/VPU/GRID/PAVE RV + EIA 電力負載，檢定 AI 電力事件後公用事業從「低 vol 防禦」轉「高 vol 成長」結構斷點（來源：S&P Global 2026 資料中心電力 +22%/年）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1345.py with signal.shift(1) + seed=42, (c) K1345_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 589,
@@ -32002,7 +32002,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T22:11:59Z"
+    "created_at": "2026-06-15T22:11:59Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-15T23:54:03.692326+00:00",
+    "claim_session_id": "0b0747b9e8b1",
+    "started_at": "2026-06-15T23:54:08.889737+00:00",
+    "completed_at": "2026-06-16T00:02:46.094610+00:00",
+    "result": "Completed as K1508 because K1345 was already used by K1345_pre_fomc_iv_drift. Built experiments/k1508_ai_power_utility_vol with README, k1508.py, results JSON, panel CSV, figure, codex_review. Verdict NULL: 0/4 ETFs pass post-AI relative-vol Harvey/Bonferroni gate (XLU t=2.10, VPU t=2.04, GRID t=-0.93, PAVE t=-0.21); EIA direct load limited by API key/bulk size, so FRED IPG2211S used as proxy. knowledge item_id=4a7abc86; research_program updated."
   },
   {
     "id": "K1346",

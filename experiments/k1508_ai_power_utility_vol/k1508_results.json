@@ -1,0 +1,442 @@
+{
+  "experiment_id": "K1508",
+  "remapped_from_stale_task_id": "K1345",
+  "title": "AI power-demand narrative and utility/grid ETF forward volatility",
+  "timestamp": "2026-06-16T00:00:34.545472+00:00",
+  "seed": 42,
+  "data": {
+    "price_source": "yfinance adjusted close",
+    "power_proxy_source": "FRED IPG2211S (Federal Reserve G.17, not EIA load)",
+    "eia_status": "EIA v2 API requires api_key; public ELEC bulk zip observed as ~226MB, not downloaded in hourly run",
+    "tickers": [
+      "XLU",
+      "VPU",
+      "GRID",
+      "PAVE",
+      "SPY",
+      "QQQ"
+    ],
+    "start": "2016-01-01",
+    "last_price_date": "2026-06-15",
+    "last_power_proxy_date": "2026-05-01",
+    "lookahead_policy": "post_ai_signal_shift1, log_vix_lag1, power_yoy_z_lagged; target is forward t+1..t+21 RV"
+  },
+  "design": {
+    "ai_date": "2022-11-30",
+    "horizon_trading_days": 21,
+    "hac_lag": 21,
+    "target": "forward realized volatility over t+1..t+21",
+    "primary_regression": "log(fwd_rv21 ETF) - log(fwd_rv21 SPY) ~ post_ai_signal_shift1 + log_vix_lag1 + power_yoy_z_lagged",
+    "primary_gate": ">=3 of 4 ETFs have post_ai_signal_shift1 HAC t>3 and p<0.0125"
+  },
+  "literature": [
+    {
+      "citation": "Lawrence Berkeley National Laboratory / DOE (2024), 2024 Report on U.S. Data Center Energy Use",
+      "url": "https://www.energy.gov/articles/doe-releases-new-report-evaluating-increase-electricity-demand-data-centers",
+      "role": "data-center electricity load growth tripled over the past decade and may double or triple by 2028"
+    },
+    {
+      "citation": "IEA (2025), Energy and AI",
+      "url": "https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai",
+      "role": "global data-center electricity demand projected to roughly double by 2030"
+    },
+    {
+      "citation": "Grid Strategies (2025), Power Demand Forecasts Revised Up",
+      "url": "https://gridstrategiesllc.com/wp-content/uploads/Grid-Strategies-National-Load-Growth-Report-2025.pdf",
+      "role": "data centers are a large driver of utility load-forecast revisions"
+    },
+    {
+      "citation": "EIA Today in Energy (2026), Data center server energy use grows across the commercial sector",
+      "url": "https://www.eia.gov/todayinenergy/detail.php?id=67704",
+      "role": "EIA context for server electricity demand and commercial-sector load share"
+    }
+  ],
+  "results": {
+    "GRID": {
+      "regression": {
+        "n": 2354,
+        "params": {
+          "const": 1.2453217288112293,
+          "post_ai_signal_shift1": -0.03647718635911181,
+          "log_vix_lag1": -0.30833382321134895,
+          "power_yoy_z_lagged": -0.05247923577113978
+        },
+        "se_hac": {
+          "const": 0.17182311620523308,
+          "post_ai_signal_shift1": 0.0393047622660627,
+          "log_vix_lag1": 0.05528091659407596,
+          "power_yoy_z_lagged": 0.017288024113706384
+        },
+        "t_hac": {
+          "const": 7.247696097676184,
+          "post_ai_signal_shift1": -0.9280602211047507,
+          "log_vix_lag1": -5.577581599730399,
+          "power_yoy_z_lagged": -3.0355832121689903
+        },
+        "p_norm": {
+          "const": 4.2388315080188477e-13,
+          "post_ai_signal_shift1": 0.353376332360392,
+          "log_vix_lag1": 2.4388538966135798e-08,
+          "power_yoy_z_lagged": 0.002400709681473767
+        },
+        "r2": 0.19848850273867769
+      },
+      "post_minus_pre_bootstrap": {
+        "mean_diff": -0.012200396713954786,
+        "ci95": [
+          -0.03293026305993902,
+          0.009112470947625576
+        ],
+        "p_gt_0": 0.1288,
+        "n_post": 865,
+        "n_pre": 1489
+      }
+    },
+    "PAVE": {
+      "regression": {
+        "n": 2310,
+        "params": {
+          "const": 0.9610356394290482,
+          "post_ai_signal_shift1": -0.007802940265651781,
+          "log_vix_lag1": -0.19924971048457657,
+          "power_yoy_z_lagged": -0.06073027734494648
+        },
+        "se_hac": {
+          "const": 0.15343736399442903,
+          "post_ai_signal_shift1": 0.036507421602284575,
+          "log_vix_lag1": 0.05176976580769432,
+          "power_yoy_z_lagged": 0.017330791158335603
+        },
+        "t_hac": {
+          "const": 6.263374281273115,
+          "post_ai_signal_shift1": -0.2137357261396813,
+          "log_vix_lag1": -3.8487659230431155,
+          "power_yoy_z_lagged": -3.5041837842317425
+        },
+        "p_norm": {
+          "const": 3.767348655259184e-10,
+          "post_ai_signal_shift1": 0.8307531496246965,
+          "log_vix_lag1": 0.00011871437824817477,
+          "power_yoy_z_lagged": 0.0004580091511201534
+        },
+        "r2": 0.13800664495008896
+      },
+      "post_minus_pre_bootstrap": {
+        "mean_diff": 0.012892530493415932,
+        "ci95": [
+          -0.006442262197589105,
+          0.03200595604120313
+        ],
+        "p_gt_0": 0.9084,
+        "n_post": 865,
+        "n_pre": 1445
+      }
+    },
+    "VPU": {
+      "regression": {
+        "n": 2354,
+        "params": {
+          "const": 0.9010081036433959,
+          "post_ai_signal_shift1": 0.10002495113056868,
+          "log_vix_lag1": -0.28362534506161974,
+          "power_yoy_z_lagged": -0.06464723056208364
+        },
+        "se_hac": {
+          "const": 0.23058457526353482,
+          "post_ai_signal_shift1": 0.0489518901826711,
+          "log_vix_lag1": 0.07741964318326464,
+          "power_yoy_z_lagged": 0.025162052867429813
+        },
+        "t_hac": {
+          "const": 3.9074951245703877,
+          "post_ai_signal_shift1": 2.043331743826664,
+          "log_vix_lag1": -3.663480395927857,
+          "power_yoy_z_lagged": -2.5692351455856017
+        },
+        "p_norm": {
+          "const": 9.325792270997724e-05,
+          "post_ai_signal_shift1": 0.04101960924827597,
+          "log_vix_lag1": 0.0002488112673417753,
+          "power_yoy_z_lagged": 0.010192327025613679
+        },
+        "r2": 0.15633928256811924
+      },
+      "post_minus_pre_bootstrap": {
+        "mean_diff": 0.12470143810967842,
+        "ci95": [
+          0.09784728273275689,
+          0.1506223423916253
+        ],
+        "p_gt_0": 1.0,
+        "n_post": 865,
+        "n_pre": 1489
+      }
+    },
+    "XLU": {
+      "regression": {
+        "n": 2354,
+        "params": {
+          "const": 0.9464963222371346,
+          "post_ai_signal_shift1": 0.10355045691822179,
+          "log_vix_lag1": -0.2951304032837181,
+          "power_yoy_z_lagged": -0.058861595445331746
+        },
+        "se_hac": {
+          "const": 0.23479482088794387,
+          "post_ai_signal_shift1": 0.04922438292843863,
+          "log_vix_lag1": 0.07838396991799365,
+          "power_yoy_z_lagged": 0.025295115533902093
+        },
+        "t_hac": {
+          "const": 4.031163543802575,
+          "post_ai_signal_shift1": 2.1036415442477208,
+          "log_vix_lag1": -3.7651882596975814,
+          "power_yoy_z_lagged": -2.3269945285065714
+        },
+        "p_norm": {
+          "const": 5.5501405750835175e-05,
+          "post_ai_signal_shift1": 0.03540972713664625,
+          "log_vix_lag1": 0.0001664236432463717,
+          "power_yoy_z_lagged": 0.019965556462793854
+        },
+        "r2": 0.15550934932049254
+      },
+      "post_minus_pre_bootstrap": {
+        "mean_diff": 0.12802366944562654,
+        "ci95": [
+          0.10112959878467156,
+          0.15424310770392333
+        ],
+        "p_gt_0": 1.0,
+        "n_post": 865,
+        "n_pre": 1489
+      }
+    }
+  },
+  "event_study": [
+    {
+      "event": "ChatGPT launch",
+      "requested_date": "2022-11-30",
+      "trading_date": "2022-11-30",
+      "ticker": "GRID",
+      "log_fwd_rv21": -1.6336257261125111,
+      "pre63_mean_log_fwd_rv21": -1.2634085680571905,
+      "event_minus_pre63": -0.3702171580553206
+    },
+    {
+      "event": "ChatGPT launch",
+      "requested_date": "2022-11-30",
+      "trading_date": "2022-11-30",
+      "ticker": "PAVE",
+      "log_fwd_rv21": -1.6152061842314074,
+      "pre63_mean_log_fwd_rv21": -1.2859466630380236,
+      "event_minus_pre63": -0.32925952119338375
+    },
+    {
+      "event": "ChatGPT launch",
+      "requested_date": "2022-11-30",
+      "trading_date": "2022-11-30",
+      "ticker": "VPU",
+      "log_fwd_rv21": -1.9422936417264212,
+      "pre63_mean_log_fwd_rv21": -1.3674636106465432,
+      "event_minus_pre63": -0.574830031079878
+    },
+    {
+      "event": "ChatGPT launch",
+      "requested_date": "2022-11-30",
+      "trading_date": "2022-11-30",
+      "ticker": "XLU",
+      "log_fwd_rv21": -1.925156970546839,
+      "pre63_mean_log_fwd_rv21": -1.3523069683385915,
+      "event_minus_pre63": -0.5728500022082474
+    },
+    {
+      "event": "NVDA AI guidance shock",
+      "requested_date": "2023-05-24",
+      "trading_date": "2023-05-24",
+      "ticker": "GRID",
+      "log_fwd_rv21": -1.8361982011366358,
+      "pre63_mean_log_fwd_rv21": -1.7481512848497973,
+      "event_minus_pre63": -0.08804691628683847
+    },
+    {
+      "event": "NVDA AI guidance shock",
+      "requested_date": "2023-05-24",
+      "trading_date": "2023-05-24",
+      "ticker": "PAVE",
+      "log_fwd_rv21": -1.5336066302343283,
+      "pre63_mean_log_fwd_rv21": -1.5450162505697462,
+      "event_minus_pre63": 0.011409620335417925
+    },
+    {
+      "event": "NVDA AI guidance shock",
+      "requested_date": "2023-05-24",
+      "trading_date": "2023-05-24",
+      "ticker": "VPU",
+      "log_fwd_rv21": -1.9824113927802323,
+      "pre63_mean_log_fwd_rv21": -1.8527992392357653,
+      "event_minus_pre63": -0.12961215354446698
+    },
+    {
+      "event": "NVDA AI guidance shock",
+      "requested_date": "2023-05-24",
+      "trading_date": "2023-05-24",
+      "ticker": "XLU",
+      "log_fwd_rv21": -1.9987027835300737,
+      "pre63_mean_log_fwd_rv21": -1.8524454541642918,
+      "event_minus_pre63": -0.14625732936578184
+    },
+    {
+      "event": "NVIDIA GTC 2024",
+      "requested_date": "2024-03-18",
+      "trading_date": "2024-03-18",
+      "ticker": "GRID",
+      "log_fwd_rv21": -2.0987304462517375,
+      "pre63_mean_log_fwd_rv21": -1.9348581256011872,
+      "event_minus_pre63": -0.16387232065055035
+    },
+    {
+      "event": "NVIDIA GTC 2024",
+      "requested_date": "2024-03-18",
+      "trading_date": "2024-03-18",
+      "ticker": "PAVE",
+      "log_fwd_rv21": -1.901876556783647,
+      "pre63_mean_log_fwd_rv21": -1.9062169257659314,
+      "event_minus_pre63": 0.004340368982284293
+    },
+    {
+      "event": "NVIDIA GTC 2024",
+      "requested_date": "2024-03-18",
+      "trading_date": "2024-03-18",
+      "ticker": "VPU",
+      "log_fwd_rv21": -1.8050895464169112,
+      "pre63_mean_log_fwd_rv21": -1.8465792358908268,
+      "event_minus_pre63": 0.041489689473915625
+    },
+    {
+      "event": "NVIDIA GTC 2024",
+      "requested_date": "2024-03-18",
+      "trading_date": "2024-03-18",
+      "ticker": "XLU",
+      "log_fwd_rv21": -1.8098818518923407,
+      "pre63_mean_log_fwd_rv21": -1.8406982718784772,
+      "event_minus_pre63": 0.03081641998613649
+    },
+    {
+      "event": "DOE/LBNL data-center energy report",
+      "requested_date": "2024-12-20",
+      "trading_date": "2024-12-20",
+      "ticker": "GRID",
+      "log_fwd_rv21": -1.8410209191050038,
+      "pre63_mean_log_fwd_rv21": -1.9150985901242201,
+      "event_minus_pre63": 0.07407767101921636
+    },
+    {
+      "event": "DOE/LBNL data-center energy report",
+      "requested_date": "2024-12-20",
+      "trading_date": "2024-12-20",
+      "ticker": "PAVE",
+      "log_fwd_rv21": -1.7916658890819932,
+      "pre63_mean_log_fwd_rv21": -1.672260843630451,
+      "event_minus_pre63": -0.11940504545154229
+    },
+    {
+      "event": "DOE/LBNL data-center energy report",
+      "requested_date": "2024-12-20",
+      "trading_date": "2024-12-20",
+      "ticker": "VPU",
+      "log_fwd_rv21": -1.8118270893477668,
+      "pre63_mean_log_fwd_rv21": -1.8448484398704534,
+      "event_minus_pre63": 0.03302135052268662
+    },
+    {
+      "event": "DOE/LBNL data-center energy report",
+      "requested_date": "2024-12-20",
+      "trading_date": "2024-12-20",
+      "ticker": "XLU",
+      "log_fwd_rv21": -1.7766179166283245,
+      "pre63_mean_log_fwd_rv21": -1.8037350227715014,
+      "event_minus_pre63": 0.027117106143176972
+    },
+    {
+      "event": "DeepSeek AI power-efficiency shock",
+      "requested_date": "2025-01-27",
+      "trading_date": "2025-01-27",
+      "ticker": "GRID",
+      "log_fwd_rv21": -1.804299732495297,
+      "pre63_mean_log_fwd_rv21": -1.7174474744685864,
+      "event_minus_pre63": -0.0868522580267106
+    },
+    {
+      "event": "DeepSeek AI power-efficiency shock",
+      "requested_date": "2025-01-27",
+      "trading_date": "2025-01-27",
+      "ticker": "PAVE",
+      "log_fwd_rv21": -1.8346604869248067,
+      "pre63_mean_log_fwd_rv21": -1.6332445895701935,
+      "event_minus_pre63": -0.20141589735461318
+    },
+    {
+      "event": "DeepSeek AI power-efficiency shock",
+      "requested_date": "2025-01-27",
+      "trading_date": "2025-01-27",
+      "ticker": "VPU",
+      "log_fwd_rv21": -2.115851236017005,
+      "pre63_mean_log_fwd_rv21": -1.8191615561581398,
+      "event_minus_pre63": -0.2966896798588654
+    },
+    {
+      "event": "DeepSeek AI power-efficiency shock",
+      "requested_date": "2025-01-27",
+      "trading_date": "2025-01-27",
+      "ticker": "XLU",
+      "log_fwd_rv21": -2.1120059300335057,
+      "pre63_mean_log_fwd_rv21": -1.7792483085083124,
+      "event_minus_pre63": -0.3327576215251933
+    },
+    {
+      "event": "EIA server-energy article",
+      "requested_date": "2025-05-29",
+      "trading_date": "2025-05-29",
+      "ticker": "GRID",
+      "log_fwd_rv21": -1.9169950674523768,
+      "pre63_mean_log_fwd_rv21": -1.4500360744388217,
+      "event_minus_pre63": -0.46695899301355515
+    },
+    {
+      "event": "EIA server-energy article",
+      "requested_date": "2025-05-29",
+      "trading_date": "2025-05-29",
+      "ticker": "PAVE",
+      "log_fwd_rv21": -2.013606990617375,
+      "pre63_mean_log_fwd_rv21": -1.3153192414369517,
+      "event_minus_pre63": -0.6982877491804234
+    },
+    {
+      "event": "EIA server-energy article",
+      "requested_date": "2025-05-29",
+      "trading_date": "2025-05-29",
+      "ticker": "VPU",
+      "log_fwd_rv21": -2.1512999389806984,
+      "pre63_mean_log_fwd_rv21": -1.6602570506163985,
+      "event_minus_pre63": -0.4910428883642999
+    },
+    {
+      "event": "EIA server-energy article",
+      "requested_date": "2025-05-29",
+      "trading_date": "2025-05-29",
+      "ticker": "XLU",
+      "log_fwd_rv21": -2.1063639606672786,
+      "pre63_mean_log_fwd_rv21": -1.6483812138798466,
+      "event_minus_pre63": -0.457982746787432
+    }
+  ],
+  "verdict": "NULL",
+  "pass_count": 0,
+  "n_assets": 4,
+  "outputs": {
+    "panel_csv": "k1508_panel.csv",
+    "figure": "figures/k1508_relative_forward_vol.png"
+  },
+  "interpretation": "Free-data test does not support a broad, statistically robust post-AI relative-volatility repricing of utility/grid ETFs unless verdict is PASS. EIA load-series access is a limitation; IPG2211S is a reproducible power-activity proxy."
+}
