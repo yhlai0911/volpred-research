@@ -32396,7 +32396,7 @@
     "title": "研究 backlog fallback: 財政赤字擴張 regime 下股債相關係數轉正的可預測性",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 財政赤字擴張 regime 下股債相關係數轉正的可預測性 — yfinance SPY/TLT + FRED 財政赤字/GDP、聯邦基金利率，建滾動 regime indicator，檢定「高赤字 × 緊縮」vs「低赤字 × 寬鬆」下股債相關切換的提前預測力，量化配置頭寸轉換的 Sharpe 增益；與既有「股債 60/40 相關 regime」（只看 rolling correlation 訊號）不同，這裡加入財政赤字作機制變數（來源：Li/Zha/Zhang/Zhou SSRN 2021-2025 \"Fiscal-Monetary Regime & Stock-Bond Correlatio | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "regime",
@@ -32404,7 +32404,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-16T10:08:54+00:00"
+    "created_at": "2026-06-16T10:08:54+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-16T15:57:16.812311+00:00",
+    "claim_session_id": "dee22b49cf6a",
+    "started_at": "2026-06-16T15:57:25.213308+00:00",
+    "completed_at": "2026-06-16T16:09:17.848249+00:00",
+    "result": "K1516 completed as NULL. Built experiments/k1516_fiscal_regime_stock_bond_corr with README/script/results/plot. yfinance SPY/TLT + FRED MTSDS133FMS/GDP/FEDFUNDS with release lags and shift(1); augmented fiscal-monetary model significantly worse than corr60 baseline (DM t=+5.99), regime label descriptive only; knowledge entry 583f9af7 and research_program updated."
   },
   {
     "id": "research_2025_liberation_day_event_study",
@@ -32594,5 +32600,36 @@
     "started_at": "2026-06-16T14:10:15.361599+00:00",
     "completed_at": "2026-06-16T14:30:31.566041+00:00",
     "result": "K431 v2 setup+review+enqueue 完成。寫 experiments/k431/k431_stgarch_v2.py 含 3 fix：(A) compute_walkforward_lagvol helper 取代 full-sample GJR cond_vol = lagvol_arr 的 lookahead；(B) rolling_baseline_oos 切片 iloc[idx-lookback:idx] 不含 r[idx] + arch_model.forecast(horizon=1).variance 真 1-step-ahead；(C) STGARCH OOS state update 修 v1 double-advance (h_t = h_forecast 而非再 step 一次)。Codex 0.139 silent no-output 復發 → fallback 派 feature-dev:code-reviewer subagent，verdict=PASS（3 fix 全對；Q1 IS-backfill peek 是 dead code 無 runtime effect；估反轉概率 10-15%；headline robust）。Heavy compute (5-model rolling OOS + walk-fwd helper) 走 compute_queue enqueue id=k431-v2-lookahead-rerun (timeout=3600s)，followup_task_type=paper_review priority=2 brief 含 compare 規則 + ranking reversal alert + knowledge.json provenance 要求。Interpretation + knowledge 寫入由下輪 hourly 從 compute_queue followup 派 interpretation agent 完成。"
+  },
+  {
+    "id": "paper_review_mile_328ced24",
+    "title": "Paper review (Codex 24h-rule): 風險模型不是愈高級愈安全：最土的方法反而最少踩線",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_328ced24 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_328ced24",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T16:08:37+00:00"
+  },
+  {
+    "id": "research_vol_leading_indicator",
+    "title": "研究 backlog fallback: 外資法人流量作台股板塊 vol 的 leading indicator",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 外資法人流量作台股板塊 vol 的 leading indicator — TWSE 免費三大法人買賣超（外資/投信/自營），算日頻淨買超 z-score，加入 0050 成分股板塊（半導體/金融/傳產）realized vol HAR 模型，檢定外資大量賣出前是否預測後續 vol 升高；台灣數據完整、機構 flow → vol 通道學術文件空白（來源：JFQA 2025 institutional trading & vol；EFM 2026 institutional role in momentum） | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "vol_leading_indicator",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-16T16:09:12+00:00"
   }
 ]

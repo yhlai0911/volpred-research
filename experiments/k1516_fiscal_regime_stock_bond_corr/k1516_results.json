@@ -1,0 +1,164 @@
+{
+  "experiment_id": "K1516",
+  "title": "Fiscal-monetary regime predictability for SPY/TLT stock-bond correlation",
+  "seed": 42,
+  "data": {
+    "prices": "yfinance adjusted close: SPY, TLT",
+    "macro": {
+      "deficit_monthly": "MTSDS133FMS",
+      "gdp": "GDP",
+      "fedfunds": "FEDFUNDS"
+    },
+    "start": "2003-01-01",
+    "end": "2026-06-16",
+    "oos_start": "2020-01-01",
+    "target": "forward 60-trading-day SPY/TLT return correlation",
+    "n_usable": 5081,
+    "n_train": 3461,
+    "n_oos": 1560,
+    "train_start": "2006-01-05",
+    "train_end": "2019-10-04",
+    "oos_start_actual": "2020-01-02",
+    "oos_end": "2026-03-18"
+  },
+  "lookahead_defenses": [
+    "FRED MTSDS133FMS monthly deficit uses 45-calendar-day release lag.",
+    "FRED GDP quarterly level uses 120-calendar-day release lag from quarter start.",
+    "FRED FEDFUNDS monthly rate uses 35-calendar-day release lag.",
+    "All macro/regime features are shifted by one trading day before use.",
+    "Forward-correlation target at t uses returns from t+1 through t+60.",
+    "Training rows require target_end < OOS_START.",
+    "Allocation signal is shifted again before applying to same-day returns."
+  ],
+  "prediction": {
+    "baseline_cols": [
+      "corr60_lag1"
+    ],
+    "augmented_cols": [
+      "corr60_lag1",
+      "deficit_gdp_lag1",
+      "fedfunds_lag1",
+      "fedfunds_yoy_chg_lag1",
+      "high_deficit_lag1",
+      "tightening_lag1",
+      "high_deficit_x_tightening_lag1",
+      "low_deficit_x_easing_lag1"
+    ],
+    "baseline_metrics": {
+      "oos_r2": -0.5452066408075151,
+      "oos_rmse": 0.3276368450269141,
+      "positive_corr_auc": 0.6930476491671939,
+      "positive_corr_accuracy_pred_gt0": 0.47692307692307695
+    },
+    "augmented_metrics": {
+      "oos_r2": -2.3805488924606437,
+      "oos_rmse": 0.4846107714902747,
+      "positive_corr_auc": 0.6978046594982078,
+      "positive_corr_accuracy_pred_gt0": 0.47692307692307695
+    },
+    "dm_augmented_vs_baseline": {
+      "loss": "squared_error_forward_corr60",
+      "t_stat": 5.9877506444479085,
+      "p_value": 2.636026286140236e-09,
+      "direction_note": "negative t means augmented model has lower loss"
+    },
+    "ols_augmented_coefficients": {
+      "corr60_lag1": 0.20293985089825864,
+      "deficit_gdp_lag1": -2.8585681707594093,
+      "fedfunds_lag1": -0.002361156911583286,
+      "fedfunds_yoy_chg_lag1": 0.014164714030307288,
+      "high_deficit_lag1": 0.019355164564711588,
+      "tightening_lag1": 0.13883467577361708,
+      "high_deficit_x_tightening_lag1": -0.21566490765166205,
+      "low_deficit_x_easing_lag1": -0.1342409621861057
+    },
+    "ols_augmented_intercept": -0.19794926224743825
+  },
+  "regime_descriptives": {
+    "high_deficit_x_tightening": {
+      "n_days": 181,
+      "share": 0.11602564102564103,
+      "mean_fwd_corr60": 0.19513557703285792,
+      "positive_corr_rate": 0.7790055248618785,
+      "non_regime_mean_fwd_corr60": -0.02762281848742665,
+      "non_regime_positive_corr_rate": 0.4894851341551849,
+      "hac_lpm_positive_corr": {
+        "regressor": "high_deficit_x_tightening_lag1",
+        "coef_probability_points": 0.2895203907066868,
+        "hac_t": 1.6912485932227075,
+        "hac_p": 0.09078933369860015,
+        "group_rates": {
+          "0.0": {
+            "mean": 0.4894851341551849,
+            "count": 1379
+          },
+          "1.0": {
+            "mean": 0.7790055248618785,
+            "count": 181
+          }
+        }
+      }
+    },
+    "low_deficit_x_easing": {
+      "n_days": 0,
+      "share": 0.0,
+      "mean_fwd_corr60": null,
+      "positive_corr_rate": null,
+      "non_regime_mean_fwd_corr60": -0.0017771328533423586,
+      "non_regime_positive_corr_rate": 0.5230769230769231,
+      "hac_lpm_positive_corr": {
+        "regressor": "low_deficit_x_easing_lag1",
+        "coef_probability_points": 0.0,
+        "hac_t": NaN,
+        "hac_p": NaN,
+        "group_rates": {
+          "0.0": {
+            "mean": 0.5230769230769231,
+            "count": 1560
+          }
+        }
+      }
+    }
+  },
+  "allocation": {
+    "strategy": "If high_deficit_x_tightening_lag1 then move 40% TLT sleeve to cash for next trading day; otherwise 60/40.",
+    "oos_start": "2020-01-01",
+    "n_days": 1560,
+    "signal_days": 181,
+    "signal_share": 0.11602564102564103,
+    "static_60_40": {
+      "annual_return": 0.06115698759408296,
+      "annual_vol": 0.13349785749574572,
+      "sharpe": 0.4581121280993734,
+      "max_drawdown": -0.287363464276316
+    },
+    "regime_switch": {
+      "annual_return": 0.07204829831662699,
+      "annual_vol": 0.1310588718060598,
+      "sharpe": 0.5497399552106909,
+      "max_drawdown": -0.287363464276316
+    },
+    "strategy_dm_vs_static": {
+      "loss": "negative_return",
+      "t_stat": -1.4211745064401815,
+      "p_value": 0.15546602260362574,
+      "direction_note": "negative t means regime_switch has higher average return/lower loss"
+    }
+  },
+  "references": [
+    {
+      "citation": "Li, Zha, Zhang, and Zhou, Does Fiscal Policy Matter for Stock-Bond Return Correlation?, NBER WP 27861.",
+      "url": "https://www.nber.org/papers/w27861"
+    },
+    {
+      "citation": "Campbell, Sunderam, and Viceira, Inflation Bets or Deflation Hedges?, Critical Finance Review 2017 / NBER WP 14701.",
+      "url": "https://www.nber.org/papers/w14701"
+    },
+    {
+      "citation": "CFA Institute Research Foundation, Macroeconomic Drivers of Stocks and Bonds, 2025.",
+      "url": "https://rpc.cfainstitute.org/research/foundation/2025/macroeconomic-drivers"
+    }
+  ],
+  "timestamp_utc": "2026-06-16T16:07:12.932788Z",
+  "verdict": "NULL"
+}

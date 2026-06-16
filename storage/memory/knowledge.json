@@ -34904,5 +34904,17 @@
       "Corwin & Schultz (2012) JoF — Bid-ask spreads from H-L",
       "Diebold & Mariano (1995) JBES — Predictive accuracy"
     ]
+  },
+  {
+    "item_id": "583f9af7",
+    "category": "cross_asset_macro_regime",
+    "content": "K1516 (2026-06-16) tested whether lagged fiscal-deficit x Fed-tightening regimes predict SPY/TLT forward 60-day stock-bond correlation. Data: yfinance SPY/TLT adjusted close plus FRED MTSDS133FMS/GDP/FEDFUNDS; macro series use 35-120 day release lags, all regime features shift(1), target uses t+1..t+60, and training rows require target_end < 2020-01-01. OOS 2020-2026 n=1560. Verdict NULL: augmented fiscal-monetary OLS is significantly worse than lagged corr60 baseline (R2 -2.381 vs -0.545; DM t=+5.99 where negative would favor augmented). High-deficit x tightening is descriptive of positive correlation episodes (77.9% positive vs 48.9% outside), but HAC LPM t=1.69/p=0.091 does not clear Harvey. A simple TLT-to-cash switch improves Sharpe 0.550 vs 0.458 but is not significant (strategy DM t=-1.42/p=0.155). Conclusion: useful macro label for 2023-2024, not a robust predictor or tradable allocation rule.",
+    "evidence": [
+      "experiments/k1516_fiscal_regime_stock_bond_corr/README.md",
+      "experiments/k1516_fiscal_regime_stock_bond_corr/k1516.py",
+      "experiments/k1516_fiscal_regime_stock_bond_corr/k1516_results.json"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-17T00:08:51.454762"
   }
 ]
