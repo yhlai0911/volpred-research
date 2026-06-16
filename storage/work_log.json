@@ -10955,5 +10955,13 @@
     "verdict": "NULL",
     "commit": "66dce4e4",
     "note": "TAIEX overnight share 0.420, ov pseudo-VRP -0.027, HAC t_ov -2.68, fails both gates"
+  },
+  {
+    "timestamp": "2026-06-17T01:25:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "journal_discovery_20260616_2",
+    "summary": "Journal-discovery 14→3 selectivity gate; agent 自報 dedup ~11 條與既有重疊，主線程 grep 驗證後只入 3 條真正交軸 (動能 overnight/intraday 拆解 / realized kurtosis / EPU regime-switching)",
+    "verdict": "succeeded",
+    "owner": "hourly-01"
   }
 ]
