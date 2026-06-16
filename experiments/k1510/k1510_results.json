@@ -1,0 +1,177 @@
+{
+  "meta": {
+    "k_id": "K1510",
+    "seed": 42,
+    "tickers_attempted": 50,
+    "period": [
+      "2017-06-01",
+      "2026-04-01"
+    ],
+    "panel_rows": 4739,
+    "unique_firms": 50,
+    "unique_months": 98,
+    "wall_seconds_data": 85.1,
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex_review",
+    "reviewer_verdict_notes": "Codex 2026-06-16: SUE/IV/outcome timing non-leaky; SEED=42 fixed; n/F/weak_iv all reported; DML cross-fit correct. Caveats: (1) static top-50 universe + snapshot log_mcap \u2192 minor measurement error in controls; (2) 2SLS second-stage SE is OLS HC1 on D_hat, NOT proper 2SLS covariance \u2014 under weak-IV (F<10 for all h) IV inference unreliable; (3) wording softened from causal/ATE to associational/exploratory.",
+    "headline_finding": "NULL: SUE has no detectable incremental effect on next-month realized vol (OLS \u03b2\u2248+0.001, p\u22480.17; DML \u03b2\u2248+0.001, p\u22480.17). IV instrument (pre-announce 5d RV slope) is weak (F=3.9-5.2 < 10), so IV identification fails. Result: rejects folk claim that high SUE \u2192 vol spike once past60d RV is controlled.",
+    "limitations": [
+      "S&P 500 top-50 by current market cap (survivorship)",
+      "log_mcap is snapshot not historical (level control only)",
+      "IV second-stage SE underestimated (not proper 2SLS cov)",
+      "Sample 2018-2026 (~98 months), includes COVID shock",
+      "No analyst revision IV available from free yfinance source"
+    ]
+  },
+  "h1": {
+    "ols": {
+      "beta": 0.000981999454726911,
+      "se": 0.000822237383360112,
+      "ci_low": -0.000629556203401362,
+      "ci_high": 0.002593555112855184,
+      "pval": 0.23235999667559826,
+      "n": 4739
+    },
+    "dml": {
+      "beta": 0.0009220000616377672,
+      "se": 0.0006748777640722738,
+      "ci_low": -0.00040073604991080905,
+      "ci_high": 0.0022447361731863435,
+      "pval": 0.17188453876328214,
+      "n": 4739,
+      "k_folds": 5
+    },
+    "iv": {
+      "beta": 0.0031222531971527405,
+      "se": 0.020023462376619082,
+      "ci_low": -0.036123011906813454,
+      "ci_high": 0.04236751830111894,
+      "pval": 0.8760884062482406,
+      "first_stage_F": 5.18350991916675,
+      "first_stage_Zbeta": -0.11928260082270396,
+      "first_stage_Zpval": 0.022802217069675477,
+      "n": 4739,
+      "weak_iv": true
+    },
+    "hausman": {
+      "stat": 0.01144419147205603,
+      "pval": 0.9148068075840541
+    }
+  },
+  "h2": {
+    "ols": {
+      "beta": 0.00041197138037602567,
+      "se": 0.0006135844336766377,
+      "ci_low": -0.0007906320111045896,
+      "ci_high": 0.001614574771856641,
+      "pval": 0.5019545437422985,
+      "n": 4698
+    },
+    "dml": {
+      "beta": 0.0005717069231800493,
+      "se": 0.000523909896876295,
+      "ci_low": -0.00045513760584158284,
+      "ci_high": 0.0015985514522016814,
+      "pval": 0.2751710804140881,
+      "n": 4698,
+      "k_folds": 5
+    },
+    "iv": {
+      "beta": 0.02305677187265125,
+      "se": 0.025661563340834973,
+      "ci_low": -0.027238968062378643,
+      "ci_high": 0.07335251180768114,
+      "pval": 0.36892201037878614,
+      "first_stage_F": 4.456011395754093,
+      "first_stage_Zbeta": -0.10980327968141813,
+      "first_stage_Zpval": 0.0347786155122079,
+      "n": 4698,
+      "weak_iv": true
+    },
+    "hausman": {
+      "stat": 0.7791465310296551,
+      "pval": 0.3774022880717063
+    }
+  },
+  "h3": {
+    "ols": {
+      "beta": 0.0007993596056563786,
+      "se": 0.0005696816405936558,
+      "ci_low": -0.0003171958925608779,
+      "ci_high": 0.0019159151038736352,
+      "pval": 0.16056645580341078,
+      "n": 4648
+    },
+    "dml": {
+      "beta": 0.0008577895343211123,
+      "se": 0.0005525102607546824,
+      "ci_low": -0.00022511067784689932,
+      "ci_high": 0.0019406897464891238,
+      "pval": 0.12053512304309859,
+      "n": 4648,
+      "k_folds": 5
+    },
+    "iv": {
+      "beta": 0.06005983962642292,
+      "se": 0.03008653313225508,
+      "ci_low": 0.0010913182675318933,
+      "ci_high": 0.11902836098531394,
+      "pval": 0.04590817165922972,
+      "first_stage_F": 3.8648559901611397,
+      "first_stage_Zbeta": -0.1018083820008462,
+      "first_stage_Zpval": 0.04930742505858011,
+      "n": 4648,
+      "weak_iv": true
+    },
+    "hausman": {
+      "stat": 3.8809832628980616,
+      "pval": 0.04883594865454233
+    }
+  },
+  "robust_vix_high_h1": {
+    "ols": {
+      "beta": 0.00036407248666010567,
+      "se": 0.0008081203702265356,
+      "ci_low": -0.0012198143341570786,
+      "ci_high": 0.00194795930747729,
+      "pval": 0.6523372335771085,
+      "n": 2388
+    },
+    "iv": {
+      "beta": 0.007247852187414711,
+      "se": 0.023060044050538346,
+      "ci_low": -0.0379490036335476,
+      "ci_high": 0.052444708008377014,
+      "pval": 0.7532905523238098,
+      "first_stage_F": 3.3080758665699777,
+      "first_stage_Zbeta": -0.18453039835593882,
+      "first_stage_Zpval": 0.06894016837887977,
+      "n": 2388,
+      "weak_iv": true
+    },
+    "n_sub": 2388
+  },
+  "robust_vix_low_h1": {
+    "ols": {
+      "beta": 0.0015658198680543064,
+      "se": 0.0016040371451598212,
+      "ci_low": -0.0015780351663233897,
+      "ci_high": 0.004709674902432003,
+      "pval": 0.3289780871690853,
+      "n": 2351
+    },
+    "iv": {
+      "beta": -0.0032038910025995937,
+      "se": 0.05349071951284727,
+      "ci_low": -0.10804377475491414,
+      "ci_high": 0.10163599274971497,
+      "pval": 0.9522383039147195,
+      "first_stage_F": 0.9527066284960142,
+      "first_stage_Zbeta": -0.048451050634149936,
+      "first_stage_Zpval": 0.3290313039265742,
+      "n": 2351,
+      "weak_iv": true
+    },
+    "n_sub": 2351
+  }
+}

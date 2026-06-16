@@ -34618,5 +34618,36 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-16T10:52:38.499865"
+  },
+  {
+    "item_id": "98f677e0",
+    "k_id": "K1510",
+    "category": "methodology",
+    "experiment_id": "k1510",
+    "experiment_path": "experiments/k1510/",
+    "reviewer": "codex_review",
+    "reviewer_source": "Codex CLI 0.132.0 (gpt-5.4)",
+    "verdict": "CONDITIONAL_PASS",
+    "title": "K1510 | SUE → next-month realized vol | DML+IV exploratory causal scan",
+    "content": "NULL result. SUE (standardized unexpected earnings) has no detectable incremental association with next-month realized volatility on a 50-firm S&P panel (2018-2026, 4,739 monthly obs). OLS β=+0.00098 (p=0.23), DML cross-fit β=+0.00092 (p=0.17) — both CIs straddle zero. IV identification fails: pre-announcement 5-day RV slope is weak instrument (first-stage F=3.9-5.2, all <10 Stock-Yogo threshold). Hausman cannot reject OLS=IV at h=1,2. Robustness: VIX-high and VIX-low subsamples both NULL. Wording softened to associational/exploratory per Codex review. Implication: rejects folk claim that high SUE → next-month vol spike once past60d RV controlled. Caveats: static top-50 universe (survivorship), snapshot log_mcap, 2SLS SE under-stated but moot under weak-IV.",
+    "evidence": [
+      "experiments/k1510/k1510_results.json",
+      "experiments/k1510/k1510.py",
+      "experiments/k1510/README.md",
+      "experiments/k1510/k1510_fig_a.png",
+      "experiments/k1510/k1510_fig_b.png"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-16T11:23:58.465623",
+    "tags": [
+      "causal-inference",
+      "DML",
+      "IV-2SLS",
+      "earnings-surprise",
+      "SUE",
+      "realized-vol",
+      "NULL-result",
+      "weak-IV"
+    ]
   }
 ]
