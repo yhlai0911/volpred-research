@@ -32121,5 +32121,85 @@
     "started_at": "2026-06-16T01:09:57.887394+00:00",
     "completed_at": "2026-06-16T01:15:55.602190+00:00",
     "result": "Journal-discovery 完成：寫入 13 個新方向到 research_program.md (期刊主題挖掘 batch 2026-06-16)，掃 JFE/JFQA/FAJ/JPM/EFM/JFI/JoE/RFS/arXiv 等。8 個新軸（因果 ML/LLM 文字/CVaR/股債財政 regime/另類數據台股）正交既有 7 batch。全免費資料可跑。"
+  },
+  {
+    "id": "paper_review_mile_a95a2285",
+    "title": "Paper review (Codex 24h-rule): 比特幣「漲時更波動」是真的嗎？11 年 4,101 天告訴你：時有時無",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a95a2285 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_a95a2285",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T03:08:25+00:00"
+  },
+  {
+    "id": "research_double_ml_factor",
+    "title": "研究 backlog fallback: Double-ML 因果 factor 檢定：價值/動能/品質是否有真正因果效應",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Double-ML 因果 factor 檢定：價值/動能/品質是否有真正因果效應 — yfinance 美股月度橫斷面，用 DoubleML 框架（`econml`/`doubleml` 免費套件）對低/高 book-to-market、12-1M 動能、ROE 做 debiased ML，檢定控制高維 confounders 後 factor return 是否仍顯著；與既有純預測 factor ETF 題不同，聚焦因果識別（來源：López de Prado/JFQA 2026 causal factor investing；FAJ 2025 causal ML 趨勢） | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "double_ml_factor",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-16T03:08:45+00:00"
+  },
+  {
+    "id": "research_sue_vol_dml_instrumental_variable",
+    "title": "研究 backlog fallback: 財報盈餘驚喜（SUE）對次月 vol 的因果增量：DML + instrumental variable",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 財報盈餘驚喜（SUE）對次月 vol 的因果增量：DML + instrumental variable — yfinance 美股月度橫斷面 + FRED 宏觀控制，用 SUE 作處理變數、IV 做識別，估計 earnings surprise 對後續 1-3 個月 realized vol 的 ATE，明確 lag（來源：JFE 2025-26 event-driven causal inference；因果 ML 在盈餘波動的應用空白） | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "sue_vol_dml_instrumental_variable",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-16T03:08:45+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-16T03:09:32.171977+00:00",
+    "claim_session_id": "c45740d8898a",
+    "started_at": "2026-06-16T03:09:32.672256+00:00"
+  },
+  {
+    "id": "research_1_1_realized_vol_har",
+    "title": "研究 backlog fallback: 財經新聞文字回歸預測長期（1 週-1 月）realized vol 是否顯著優於 HAR",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 財經新聞文字回歸預測長期（1 週-1 月）realized vol 是否顯著優於 HAR — yfinance SPY 5-min 或日 RV + 免費 RSS 新聞標題（Yahoo Finance RSS），用預訓練 FinBERT/BERT embedding 作文字 feature，LM 回歸 vs HAR baseline，誠實 DM 檢定 1/5/22 日 horizon；文字 LM 在長期 horizon 比 HAR 強這一熱點已在 SSRN 2025 出現，中文/台股版空白（來源：Parvini & Assa SSRN 2025 textual regression for RV | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "1_1_realized_vol_har",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-16T03:08:45+00:00"
+  },
+  {
+    "id": "research_regime_aware_in_context_llm_vol_vs_har_regime_ll",
+    "title": "研究 backlog fallback: Regime-aware in-context LLM vol 預測 vs HAR 的邊界：哪個 regime 下 LLM 真正增量",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Regime-aware in-context LLM vol 預測 vs HAR 的邊界：哪個 regime 下 LLM 真正增量 — yfinance SPY realized vol 序列 + 免費 LLM API（OpenAI/Anthropic），實作 few-shot in-context 學習，誠實比較 LLM / HAR / 結合在 high-vol / low-vol / trend-break regime 的 QLIKE，定位增量真正出現的條件（來源：arXiv:2603.10299 2026-03 regime-aware ICL for vol；backlog 已有  | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "regime_aware_in_context_llm_vol_vs_har_regime_ll",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-16T03:08:45+00:00"
   }
 ]
