@@ -31896,14 +31896,18 @@
     "description": "分析新任 Fed 主席可能改革前瞻指引與點陣圖的市場衝擊。從利率期權隱含波動率切入，探討政策不確定性溢價的上升空間。可量化：美債 MOVE 指數與 VIX 在政策轉折期的相關性變化。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-15T22:00:50+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-16T00:11:34+00:00",
+    "blocked_note": "同日已有 mile_53caca1a (點陣圖分歧 × MOVE P34, 07:19 published) 覆蓋 FOMC dot-plot 主題；本任務若取消點陣圖角度與其 narrative overlap 高，避免同日 over-coverage。FOMC 6/17 後（T+1 起）若有新 angle 可重啟。",
+    "blocked_until": "2026-06-19"
   },
   {
     "id": "trending_repost_2026_06_16_fed點陣圖",
@@ -31963,7 +31967,7 @@
     "title": "Paper review (Codex 24h-rule): 市場真的會短線反彈，但想賺到它，關鍵反而是少出手",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_67b3714d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_67b3714d",
@@ -31972,7 +31976,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-15T22:08:35+00:00"
+    "created_at": "2026-06-15T22:08:35+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-16T00:11:35.432058+00:00",
+    "claim_session_id": "3f25d2ffe494",
+    "started_at": "2026-06-16T00:11:35.970446+00:00",
+    "completed_at": "2026-06-16T00:21:19.383901+00:00",
+    "result": "Codex review (codex-cli 0.139.0) CONDITIONAL_PASS: lookahead PASS, framing 過度樂觀 vs K699 (DM p=0.137 fail, Harvey fail), TX 漏 GLD leg, BH 措辭不準. 加 errata footnote 到 mile_67b3714d + 寫 knowledge ed29be15 + supabase sync 1 article + 2 knowledge."
   },
   {
     "id": "research_tips_decumulation_benchmark",

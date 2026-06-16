@@ -34563,5 +34563,40 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-16T08:02:22.781251"
+  },
+  {
+    "item_id": "ed29be15",
+    "category": "article_review",
+    "title": "K698 article mile_67b3714d 24h-rule Codex review: CONDITIONAL_PASS — framing too optimistic vs K699 follow-up; lookahead clean, but in-sample best 不揭露 + TX 漏 GLD leg + baseline 措辭不準",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K698",
+    "experiment_path": "experiments/k698/",
+    "experiment_script": "experiments/k698/k698_contrarian_vt.py",
+    "experiment_files": [
+      "experiments/k698/k698_contrarian_vt.py",
+      "experiments/k698/k698_results.json",
+      "experiments/k698/k698_article_figures.py"
+    ],
+    "related_experiments": [
+      "K699"
+    ],
+    "article_mile_id": "mile_67b3714d",
+    "article_title": "市場真的會短線反彈，但想賺到它，關鍵反而是少出手",
+    "article_published_at": "2026-06-15T07:00:47.725264+00:00",
+    "review_run_at": "2026-06-16T08:14:00+08:00",
+    "reviewer": "codex-cli 0.139.0 (ChatGPT auth, gpt-5.4)",
+    "reviewer_source": "Codex CLI primary path (24h-rule per .claude/rules/agent-delegation.md)",
+    "content": "K698 article mile_67b3714d 24h-rule Codex source-code review.\n\n**Verdict: CONDITIONAL_PASS** (數字真實、lag 邏輯乾淨，但 framing 過度樂觀, 需 errata footnote).\n\n**Lookahead audit: PASS**. 主要權重邏輯都用 t-1 或更早:\n- Daily contra: `ret_spy.shift(1)` (k698_contrarian_vt.py:145)\n- VIX base: `vix.shift(1)` (line 177)\n- Weekly / 5d MR: `rolling().shift(1)` (lines 210, 241)\n- Strategy D expanding z-score 對 lagged 5d return 做 expanding, 無 future leak (line 243)\nCaveat: 理想化 close-to-close 執行, overnight gap/slippage 未建模.\n\n**Overclaim audit (主要問題)**:\n- '0.878 比 0.843 高一點' → 數字對, 但無 DM test. K699 follow-up DM: default t=1.487, p=0.137 (NOT significant).\n- 'Sharpe 0.941 最佳點' → 是 35 組 (7 thresh × 5 tilt) 樣本內最大值; 未做 Bonferroni/FDR/Harvey haircut. K699 optimized 為 MARGINAL + Harvey fail.\n- '前一天 +1% 隔天 -26.9%' → big-up p=0.0557 邊緣未達 5%; 未做 multiple-conditioning correction.\n- '市場小反轉可以賺' → 過度樂觀; knowledge.json 17962 行已標 K699 +0.035 alpha 不可信.\n\n**TX/Baseline audit**:\n- TX 只計 `Δw_spy` (line 89), 漏 GLD leg → 低估約 2x. 真實 SPY/GLD daily TX 應 5-10bps 量級.\n- 'BH 50/50' 是每天固定 w=0.5 + turnover=0 constant-mix, NOT literal buy-and-hold (line 132). 文章用「買進持有」措辭不準.\n- 12/VIX no-overlay net Sharpe 0.859 高於 VIX+contra 0.857 — overlay 邏輯該變數其實無增益.\n\n**Sub-period robustness**: Contra Tilt 5/2 期勝 BH, 文章誠實揭露但 framing 仍偏正面.\n\n**建議修正 (立即)**:\n1. Article 加 errata footnote: 'K699 後續驗證: default DM p=0.137 不顯著, optimized Harvey fail. 本文為 in-sample exploratory backtest, 不構成策略推薦.'\n2. '短線反轉是真的' → 改 'SPY lag-1 negative autocorrelation 顯著, 但可交易 alpha 不穩健'.\n3. '最佳點' → 改 '35 組 daily sensitivity 樣本內最佳點'.\n4. big-up p=0.0557 註明未達 5%.\n\n**建議修正 (程式碼後續)**:\n- 加 DM test 輸出 (`src/volpred/stats/model_evaluation.py:114` `strategy_dm_test`).\n- TX 改 `|Δw_spy|+|Δw_gld|` + 0/5/10/20 bps sensitivity.\n- 補 SPY 100%, true buy-hold 50/50, 12/VIX baseline 對照.\n- Sensitivity 改 nested OOS / walk-forward; 不要全樣本 grid max 當推薦.\n- Output path 修正 (line 531 寫 experiments/k698_results.json 而非子目錄).\n\n**是否 Retract**: 不需 full retract — 數字真實、lookahead 乾淨. 加 errata footnote + 降級 framing 即可.\n\n**對照既存 knowledge K698 標題** ('BH baseline wrong, TX undercount, optimization snooping') — 本次 Codex 全部 reproduce + 補 DM test 缺漏 + K699 cross-reference. 本文已知 caveats 未在 article 揭露 → 必補 errata.",
+    "evidence": [
+      "experiments/k698/k698_contrarian_vt.py:145,177,210,241,243 (lag clean)",
+      "experiments/k698/k698_contrarian_vt.py:89 (TX missing GLD leg)",
+      "experiments/k698/k698_contrarian_vt.py:132 (constant-mix not buy-hold)",
+      "experiments/k698/k698_contrarian_vt.py:286 (35-config in-sample sweep)",
+      "experiments/k698/k698_results.json:110,469,888 (verdict + best config + autocorr)",
+      "experiments/k699/k699_results.json:262,280 (DM p=0.137, Harvey fail)",
+      "storage/memory/knowledge.json:17962 (K699 +0.035 alpha 不可信標記)"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-06-16T08:20:13.801254"
   }
 ]
