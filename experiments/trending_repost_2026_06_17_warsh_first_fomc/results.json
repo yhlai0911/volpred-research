@@ -1,0 +1,46 @@
+{
+  "experiment_id": "trending_repost_2026_06_17_warsh_first_fomc",
+  "task_type": "trending_repost",
+  "as_of_date": "2026-06-16",
+  "fomc_date": "2026-06-17",
+  "scenario": {
+    "cpi_may2026_yoy_pct": 4.2,
+    "fed_funds_upper_pct": 4.5,
+    "note": "CPI 4.2% per task brief scenario; Fed Funds upper 4.50% (hold scenario)"
+  },
+  "vol_metrics": {
+    "vix": 16.41,
+    "vix9d": 15.77,
+    "vix9d_vix_ratio": 0.961,
+    "vix9d_inverted": false,
+    "move": 67.28,
+    "vix_30d_mean": 17.5,
+    "vix_30d_std": 1.65,
+    "move_30d_mean": 74.15,
+    "move_30d_std": 4.94
+  },
+  "cross_asset_ratio": {
+    "move_vix_ratio_latest": 4.0997,
+    "move_vix_ratio_30d_mean": 4.2419,
+    "move_vix_ratio_30d_std": 0.3997,
+    "move_vix_30d_z": -0.356,
+    "move_vix_90d_mean": 3.8173,
+    "move_vix_90d_std": 0.4676,
+    "move_vix_90d_percentile": 74.7
+  },
+  "rates": {
+    "us_10y_yield_pct": 4.43,
+    "us_3m_yield_pct": 3.63,
+    "us_5y_yield_pct": 4.15,
+    "yield_curve_10y3m_spread_pct": 0.8,
+    "yield_curve_status": "normal"
+  },
+  "figures": [
+    "figs/cross_asset_vol.png",
+    "figs/move_vix_ratio_yields.png"
+  ],
+  "data_sources": [
+    "yfinance: ^VIX, ^VIX9D, ^MOVE, ^TNX, ^IRX, ^FVX",
+    "Task brief: CPI May 2026 YoY = 4.2% (scenario parameter)"
+  ]
+}
