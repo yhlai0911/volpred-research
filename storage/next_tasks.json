@@ -32740,10 +32740,12 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-16T18:08:32+00:00",
-    "claimed_by": "hourly-04",
-    "claimed_at": "2026-06-16T20:08:58.169978+00:00",
-    "claim_session_id": "bc0bafbdfbee",
-    "started_at": "2026-06-16T20:08:58.906103+00:00"
+    "started_at": "2026-06-16T23:19:37.028471+00:00",
+    "last_released_at": "2026-06-16T22:50:12.202390+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-16T23:19:29.994709+00:00",
+    "claim_session_id": "617bc3e99ed1"
   },
   {
     "id": "research_epu_vol_regime_switching_trigger_incremental_pre",
@@ -32816,14 +32818,17 @@
     "description": "從 Kevin Warsh 首場 FOMC 的鷹派預期切入，探討市場重新定價升息風險對債市波動率的衝擊。可量化：追蹤 MOVE 與 VIX 的發散程度，驗證跨資產波動率套利策略。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-16T22:00:45+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-16T23:10:39+00:00",
+    "blocked_note": "Merged into trending_repost_2026_06_17_聯準會首秀 (主題重疊：Warsh 首秀 + MOVE/VIX + 升息預期)"
   },
   {
     "id": "trending_repost_2026_06_17_聯準會首秀",
@@ -32831,14 +32836,20 @@
     "description": "針對新任 Fed 主席 Warsh 首次亮相與五月 CPI 達 4.2% 攀升，分析利率選擇權市場（如 MOVE 指數）對年內升息機率的異常波動。可量化：比較 SEP 點陣圖公佈前後，SOFR 期貨隱含波動率與美債殖利率曲線的陡峭化特徵。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-16T22:00:51+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-06-16T23:10:40.783120+00:00",
+    "claim_session_id": "00daf782d4a1",
+    "started_at": "2026-06-16T23:10:40.938892+00:00",
+    "completed_at": "2026-06-16T23:20:30.523841+00:00",
+    "result": "Published mile_21b09f22 (Warsh FOMC 首秀 + 跨資產 vol 重新定價); evidence: VIX=16.41 MOVE=67.28 MOVE/VIX 75th pctile; anti-ai gate PASS; commit 4ed74f6d; FB awaiting_interactive_session"
   },
   {
     "id": "paper_review_mile_ec0e72ee",
