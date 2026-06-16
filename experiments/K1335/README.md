@@ -41,7 +41,7 @@ slope_t = VIX_t / VIX3M_t
 | Strategy | Rule | Threshold |
 |---|---|---|
 | A — Buy & Hold | weight = 1.0 always | — |
-| B — VIX level | weight = 1.0 if VIX_{t-1} < th; else 0.0 | th = 20 (IS-tuned grid 18/20/22/25) |
+| B — VIX level | weight = 1.0 if VIX_{t-1} < th; else 0.0 | th selected on IS grid 18/20/22/25 (result: 22) |
 | C1 — Slope 1.0 | weight = 1.0 if slope_{t-1} < 1.0; else 0.0 | 1.0 (textbook backwardation cutoff) |
 | C2 — Slope 0.95 | as C1 with th = 0.95 | 0.95 (early-warning sensitivity) |
 | C3 — Slope 1.05 | as C1 with th = 1.05 | 1.05 (late-trigger sensitivity) |
