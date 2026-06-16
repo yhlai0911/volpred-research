@@ -1,0 +1,63 @@
+{
+  "experiment_id": "K1515",
+  "title": "Bond illiquidity prediction via cross-market vol features",
+  "verdict": "NULL",
+  "period": {
+    "data_start": "2014-01-01",
+    "data_end": "2026-06-15",
+    "train_end": "2022-12-31",
+    "oos_start": "2023-01-01"
+  },
+  "target": "HYG daily illiquidity proxy = (High-Low)/Close",
+  "features": [
+    "hyg_illiq_lag1",
+    "hyg_illiq_ma5",
+    "hyg_illiq_ma22",
+    "spy_rv22",
+    "vix_lag1",
+    "credit_spread_ma5",
+    "spy_vix_corr22"
+  ],
+  "seed": 42,
+  "metrics": {
+    "ols_oos_r2": 0.4314512124042258,
+    "xgb_oos_r2": 0.434722095760924,
+    "ols_oos_rmse": 0.002034543037298579,
+    "xgb_oos_rmse": 0.002028682192988242,
+    "dm_stat_xgb_vs_ols": 0.049283098152922415,
+    "dm_pvalue": 0.9606936888693609,
+    "n_train": 2243,
+    "n_oos": 864,
+    "feature_importance_xgb": {
+      "hyg_illiq_lag1": 0.0712050050497055,
+      "hyg_illiq_ma5": 0.28075969219207764,
+      "hyg_illiq_ma22": 0.051488012075424194,
+      "spy_rv22": 0.029523774981498718,
+      "vix_lag1": 0.4607166647911072,
+      "credit_spread_ma5": 0.038319528102874756,
+      "spy_vix_corr22": 0.06798733025789261
+    },
+    "ols_coefs": {
+      "hyg_illiq_lag1": 0.20544801726299017,
+      "hyg_illiq_ma5": 0.4781217268087867,
+      "hyg_illiq_ma22": 0.03465044495657245,
+      "spy_rv22": -0.0014142124057012772,
+      "vix_lag1": 0.00012679891601694504,
+      "credit_spread_ma5": -0.15398809378321934,
+      "spy_vix_corr22": 5.934404605653003e-06
+    },
+    "ols_intercept": -0.0007589470212696911
+  },
+  "lookahead_defenses": [
+    "All non-target columns built with .shift(1) explicitly",
+    "Rolling stats use trailing windows only (pandas default)",
+    "Train/OOS split is strictly temporal: train<=2022-12-31, oos>=2023-01-01"
+  ],
+  "reproducibility": {
+    "random_seed": 42,
+    "xgboost_version": "3.2.0",
+    "yfinance_version": "1.2.0",
+    "python": "3.12.10"
+  },
+  "timestamp_utc": "2026-06-16T15:15:33.417553Z"
+}
