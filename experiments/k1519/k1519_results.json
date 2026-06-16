@@ -1,0 +1,258 @@
+{
+  "experiment_id": "K1519",
+  "title": "EPU as a cross-asset volatility-regime switching trigger",
+  "created_at": "2026-06-16T20:00:10.041646+00:00",
+  "random_seed": 42,
+  "task_id": "research_epu_vol_regime_switching_trigger_incremental_pre",
+  "data_sources": {
+    "prices": "yfinance SPY and ^TWII adjusted close / index close",
+    "epu": "FRED USEPUINDXD daily Baker-Bloom-Davis EPU, monthly mean transformed to lagged monthly signal"
+  },
+  "literature": [
+    "Baker, Bloom, and Davis (2016), Measuring Economic Policy Uncertainty, QJE",
+    "Economic Policy Uncertainty and Stock Market Volatility, OeNB WP 234",
+    "Tzika and Pantelidis, Economic policy uncertainty as an indicator of abrupt movements in the US stock market",
+    "GARCH-MIDAS and regime-switching volatility literature motivating macro-to-volatility state links"
+  ],
+  "methodology": {
+    "state_model": "2-state MarkovRegression on winsorized daily log squared returns with switching variance",
+    "trigger": "monthly log EPU 3-month change; high shock if above expanding historical 75th percentile",
+    "publication_lag": "month-M EPU signal applies only after month-end + 2 business days, then forward-filled",
+    "inference": "OLS linear probability / conditional mean tests with Newey-West HAC maxlags=21",
+    "multiple_testing": "BH and Bonferroni across 2 assets x 4 tests"
+  },
+  "lookahead_audit": {
+    "epu_signal": "uses only completed monthly EPU data, delayed by two business days before use",
+    "state_outcome": "filtered high-vol state is the realized outcome being explained, not a trading signal",
+    "no_same_day_predictor": "no EPU value from the target day or target month is used before its release lag"
+  },
+  "asset_results": [
+    {
+      "asset": "SPY",
+      "sample": {
+        "sample_start": "2003-05-02",
+        "sample_end": "2026-06-16",
+        "n": 5818,
+        "epu_shock_days": 1290,
+        "epu_shock_share": 0.22172567892746647,
+        "high_prob_normal": 0.5435198179575952,
+        "high_prob_epu_shock": 0.5757108899000898,
+        "transition_rate_normal": 0.1687279151943463,
+        "transition_rate_epu_shock": 0.15891472868217055,
+        "ann_vol_normal": 0.15590014034561173,
+        "ann_vol_epu_shock": 0.2648634370089168
+      },
+      "markov_model": {
+        "converged": true,
+        "fit_spec": {
+          "switching_variance": true,
+          "search_reps": 8,
+          "search_iter": 8,
+          "em_iter": 12
+        },
+        "llf": -8987.520601906743,
+        "aic": 17987.041203813485,
+        "bic": 18027.857240855363,
+        "high_state": 0,
+        "state_log_r2_scores": {
+          "0": -9.625526321801122,
+          "1": -12.468748589493762
+        },
+        "params": {
+          "p[0->0]": 0.7766466689719673,
+          "p[1->0]": 0.2957092195986369,
+          "const[0]": 0.48661179623229867,
+          "const[1]": -0.6441066076638864,
+          "sigma2[0]": 0.3786266107510001,
+          "sigma2[1]": 1.0938143315294404
+        }
+      },
+      "tests": {
+        "high_prob_on_epu_shock": {
+          "formula": "high_prob ~ epu_shock_high",
+          "n": 5818,
+          "coef": 0.03219107194249542,
+          "se_hac": 0.02234912482736185,
+          "t_hac": 1.4403728195693888,
+          "p_hac": 0.14976194929288095,
+          "r2": 0.0017914825046673188,
+          "hac_lags": 21
+        },
+        "transition_on_epu_shock": {
+          "formula": "low_to_high ~ epu_shock_high",
+          "n": 5818,
+          "coef": -0.009813186512175852,
+          "se_hac": 0.010120149258739799,
+          "t_hac": -0.9696681601510123,
+          "p_hac": 0.33221192608104744,
+          "r2": 0.00011971271318134136,
+          "hac_lags": 21
+        },
+        "log_r2_on_epu_shock": {
+          "formula": "log_r2_winsor ~ epu_shock_high",
+          "n": 5818,
+          "coef": 0.36449936416527773,
+          "se_hac": 0.17731865938604932,
+          "t_hac": 2.055617640170107,
+          "p_hac": 0.03981938611462892,
+          "r2": 0.0036006257002816344,
+          "hac_lags": 21
+        },
+        "high_prob_on_epu_z": {
+          "formula": "high_prob ~ epu_chg3m_z",
+          "n": 5818,
+          "coef": 0.01686304921368189,
+          "se_hac": 0.009622567568985895,
+          "t_hac": 1.7524479919509732,
+          "p_hac": 0.07969680529773394,
+          "r2": 0.002654686283947494,
+          "hac_lags": 21
+        }
+      }
+    },
+    {
+      "asset": "TAIEX",
+      "sample": {
+        "sample_start": "2003-05-02",
+        "sample_end": "2026-06-15",
+        "n": 5668,
+        "epu_shock_days": 1234,
+        "epu_shock_share": 0.2177134791813691,
+        "high_prob_normal": 0.7208079114884248,
+        "high_prob_epu_shock": 0.7173805125976371,
+        "transition_rate_normal": 0.15832205683355885,
+        "transition_rate_epu_shock": 0.16369529983792544,
+        "ann_vol_normal": 0.18206554731454,
+        "ann_vol_epu_shock": 0.21415504419229145
+      },
+      "markov_model": {
+        "converged": true,
+        "fit_spec": {
+          "switching_variance": true,
+          "search_reps": 8,
+          "search_iter": 8,
+          "em_iter": 12
+        },
+        "llf": -8785.550536112652,
+        "aic": 17583.101072225305,
+        "bic": 17623.762704096356,
+        "high_state": 0,
+        "state_log_r2_scores": {
+          "0": -9.629454471178981,
+          "1": -12.896882674496462
+        },
+        "params": {
+          "p[0->0]": 0.7375091618682759,
+          "p[1->0]": 0.7220075096182907,
+          "const[0]": 0.35565420415141213,
+          "const[1]": -0.9782577449967274,
+          "sigma2[0]": 0.44225663866642495,
+          "sigma2[1]": 1.2286193737399411
+        }
+      },
+      "tests": {
+        "high_prob_on_epu_shock": {
+          "formula": "high_prob ~ epu_shock_high",
+          "n": 5668,
+          "coef": -0.0034273988907873106,
+          "se_hac": 0.012137003983635793,
+          "t_hac": -0.28239249945113637,
+          "p_hac": 0.7776425656337719,
+          "r2": 2.34130123059062e-05,
+          "hac_lags": 21
+        },
+        "transition_on_epu_shock": {
+          "formula": "low_to_high ~ epu_shock_high",
+          "n": 5668,
+          "coef": 0.005373243004366624,
+          "se_hac": 0.010888413294876442,
+          "t_hac": 0.4934826460798481,
+          "p_hac": 0.6216715988349486,
+          "r2": 3.6681207960520545e-05,
+          "hac_lags": 21
+        },
+        "log_r2_on_epu_shock": {
+          "formula": "log_r2_winsor ~ epu_shock_high",
+          "n": 5668,
+          "coef": 0.05575483843314999,
+          "se_hac": 0.12893622887215025,
+          "t_hac": 0.43242181752062103,
+          "p_hac": 0.665434863952413,
+          "r2": 9.078948240093254e-05,
+          "hac_lags": 21
+        },
+        "high_prob_on_epu_z": {
+          "formula": "high_prob ~ epu_chg3m_z",
+          "n": 5668,
+          "coef": 0.0013195964432335977,
+          "se_hac": 0.005106309746414226,
+          "t_hac": 0.258424676286089,
+          "p_hac": 0.7960791742963791,
+          "r2": 1.8917616610769628e-05,
+          "hac_lags": 21
+        }
+      }
+    }
+  ],
+  "multiple_test_correction": {
+    "SPY:log_r2_on_epu_shock": {
+      "raw_p": 0.03981938611462892,
+      "bonferroni_p": 0.3185550889170314,
+      "bh_p": 0.3185550889170314,
+      "rank": 1
+    },
+    "SPY:high_prob_on_epu_z": {
+      "raw_p": 0.07969680529773394,
+      "bonferroni_p": 0.6375744423818716,
+      "bh_p": 0.3187872211909358,
+      "rank": 2
+    },
+    "SPY:high_prob_on_epu_shock": {
+      "raw_p": 0.14976194929288095,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.3993651981143492,
+      "rank": 3
+    },
+    "SPY:transition_on_epu_shock": {
+      "raw_p": 0.33221192608104744,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.6644238521620949,
+      "rank": 4
+    },
+    "TAIEX:transition_on_epu_shock": {
+      "raw_p": 0.6216715988349486,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.7960791742963791,
+      "rank": 5
+    },
+    "TAIEX:log_r2_on_epu_shock": {
+      "raw_p": 0.665434863952413,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.7960791742963791,
+      "rank": 6
+    },
+    "TAIEX:high_prob_on_epu_shock": {
+      "raw_p": 0.7776425656337719,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.7960791742963791,
+      "rank": 7
+    },
+    "TAIEX:high_prob_on_epu_z": {
+      "raw_p": 0.7960791742963791,
+      "bonferroni_p": 1.0,
+      "bh_p": 0.7960791742963791,
+      "rank": 8
+    }
+  },
+  "verdict": "NULL",
+  "verdict_reason": "Lagged EPU shocks do not provide consistent positive cross-asset evidence as high-volatility regime triggers.",
+  "honest_limits": [
+    "This is a Markov volatility-state proxy, not a full Markov-switching GARCH likelihood.",
+    "State labels are estimated on the full sample; use them for mechanism identification, not tradable forecast claims.",
+    "USEPUINDXD is a US EPU measure; TAIEX cross-asset evidence is a spillover test, not Taiwan-specific EPU."
+  ],
+  "figures": [
+    "figures/spy_epu_regime_trigger.png",
+    "figures/taiex_epu_regime_trigger.png"
+  ]
+}
