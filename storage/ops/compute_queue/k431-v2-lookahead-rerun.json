@@ -1,0 +1,23 @@
+{
+  "id": "k431-v2-lookahead-rerun",
+  "title": "K431 v2: STGARCH lookahead fix rerun (A walk-fwd IS-only lagvol + B baseline 1-step-ahead + C state propagation)",
+  "script_path": "experiments/k431/k431_stgarch_v2.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "running",
+  "queued_at": "2026-06-16T14:29:42Z",
+  "started_at": "2026-06-16T14:30:01Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k431-v2-lookahead-rerun.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k431-v2-lookahead-rerun.stderr",
+  "result_artifact": "experiments/k431/k431_stgarch_v2_results.json",
+  "claude_followup": {
+    "brief": "K431 v2 lookahead-fix rerun 完成。對比 experiments/k431/k431_stgarch_results.json (v1) 與 experiments/k431/k431_stgarch_v2_results.json (v2) 的 5-model OOS QLIKE + 4 DM p-values。預期 (per code-reviewer PASS): STGARCH-VIX/|ret|/lagvol 仍輸 GJR (DM stat>0 sig)，但 STGARCH-lagvol margin 可能縮小 (v1 用 full-sample lagvol 有後視優勢)；Fix C 修 v1 state double-advance bug 後 STGARCH 三條 OOS h 整體 magnitude 可能改變。**必跑檢查**: (1) v2 vs v1 每 model QLIKE diff 與符號 (2) 4 DM p-value 是否仍 <0.05 (3) **若 STGARCH-lagvol DM stat<-1.96 + p<0.05 (反轉, 顯著贏 GJR) → 立即 send-alert critical + 標記 mile_764012ef 文章需修改 headline + 開 followup paper-update task**. 寫 knowledge.json K431_v2 entry (provenance: parent_review=paper_review_mile_764012ef, reviewer=code-reviewer fallback for Codex 0.139 silent fail)。寫 work_log 並 commit。",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}

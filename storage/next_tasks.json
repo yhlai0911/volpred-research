@@ -32562,7 +32562,7 @@
     "title": "K431 STGARCH rerun: fix STGARCH-lagvol transition var lookahead + baseline OOS slice symmetry",
     "description": "Per paper_review_mile_764012ef CONDITIONAL_PASS (2026-06-16 by code-reviewer subagent fallback): rerun K431 with 2 fixes — (A) STGARCH-lagvol: rolling GJR conditional vol from IS window only (replace full-sample lagvol_arr at experiments/k431/k431_stgarch.py:280-283 + 377); (B) rolling_baseline_oos at line 203: change `returns_s.iloc[idx-lookback:idx+1]` to `iloc[idx-lookback:idx]` + use `res2.forecast(horizon=1).variance.iloc[-1,0]` so GJR/GARCH 也是真正 1-step-ahead forecast，與 STGARCH 用 tv[idx-1] 對稱。Compare new vs old 5-model QLIKE + DM. Expect headline (STGARCH<GJR) unchanged but STGARCH-lagvol margin may shrink. 若 ranking 反轉則同步修文章 + send-alert critical。",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "paper_review_followup",
     "experiment_ids": [
@@ -32575,6 +32575,12 @@
       "stgarch-rerun",
       "paper-review-followup"
     ],
-    "created_at": "2026-06-16T13:11:30+00:00"
+    "created_at": "2026-06-16T13:11:30+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-16T14:10:08.915609+00:00",
+    "claim_session_id": "1923aaae6ba5",
+    "started_at": "2026-06-16T14:10:15.361599+00:00",
+    "completed_at": "2026-06-16T14:30:31.566041+00:00",
+    "result": "K431 v2 setup+review+enqueue 完成。寫 experiments/k431/k431_stgarch_v2.py 含 3 fix：(A) compute_walkforward_lagvol helper 取代 full-sample GJR cond_vol = lagvol_arr 的 lookahead；(B) rolling_baseline_oos 切片 iloc[idx-lookback:idx] 不含 r[idx] + arch_model.forecast(horizon=1).variance 真 1-step-ahead；(C) STGARCH OOS state update 修 v1 double-advance (h_t = h_forecast 而非再 step 一次)。Codex 0.139 silent no-output 復發 → fallback 派 feature-dev:code-reviewer subagent，verdict=PASS（3 fix 全對；Q1 IS-backfill peek 是 dead code 無 runtime effect；估反轉概率 10-15%；headline robust）。Heavy compute (5-model rolling OOS + walk-fwd helper) 走 compute_queue enqueue id=k431-v2-lookahead-rerun (timeout=3600s)，followup_task_type=paper_review priority=2 brief 含 compare 規則 + ranking reversal alert + knowledge.json provenance 要求。Interpretation + knowledge 寫入由下輪 hourly 從 compute_queue followup 派 interpretation agent 完成。"
   }
 ]
