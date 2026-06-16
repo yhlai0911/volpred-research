@@ -32305,7 +32305,7 @@
     "title": "Paper review (Codex 24h-rule): 把 GARCH 改聰明反而更笨：3 種 STGARCH 在 SPY 上全輸給老派 GJR",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_764012ef needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_764012ef",
@@ -32318,7 +32318,9 @@
     "claimed_by": "hourly-21",
     "claimed_at": "2026-06-16T13:08:48.557714+00:00",
     "claim_session_id": "9a4e257f144b",
-    "started_at": "2026-06-16T13:09:32.413346+00:00"
+    "started_at": "2026-06-16T13:09:32.413346+00:00",
+    "completed_at": "2026-06-16T13:17:51.784600+00:00",
+    "result": "Codex 24h-rule review for mile_764012ef. Verdict=CONDITIONAL_PASS by code-reviewer subagent fallback (Codex 0.139 silent no-output). 5 QLIKE + 4 DM p-values 與 results JSON 全 match (4+ dp). 2 article-level fixes applied (params 7→5, ceiling claim self-consistent). 2 code-level issues (STGARCH-lagvol lookahead, baseline OOS slice asymmetry) 開 followup task paper_review_mile_764012ef_rerun_lookahead 重跑驗證。headline conclusion (STGARCH<GJR, QLIKE ceiling) robust to all issues found."
   },
   {
     "id": "research_rp_f89df7aba7",
@@ -32554,5 +32556,25 @@
     "started_at": "2026-06-16T12:58:46.511476+00:00",
     "completed_at": "2026-06-16T13:13:33.186897+00:00",
     "result": "Completed research_google_trends_vol as a partial-panel NULL experiment. Real TW Google Trends cache has iPhone/TSMC/HBM only for 2018-2022 (261 weeks); AI server unavailable and later chunks hit HTTP 429. HAR+lagged attention vs HAR on 2330/2303/2454/2382 produced 0/4 Harvey |t|>3 passes with explicit attention.shift(1). Artifacts in experiments/research_google_trends_vol/, knowledge item 35917dfd."
+  },
+  {
+    "id": "paper_review_mile_764012ef_rerun_lookahead",
+    "title": "K431 STGARCH rerun: fix STGARCH-lagvol transition var lookahead + baseline OOS slice symmetry",
+    "description": "Per paper_review_mile_764012ef CONDITIONAL_PASS (2026-06-16 by code-reviewer subagent fallback): rerun K431 with 2 fixes — (A) STGARCH-lagvol: rolling GJR conditional vol from IS window only (replace full-sample lagvol_arr at experiments/k431/k431_stgarch.py:280-283 + 377); (B) rolling_baseline_oos at line 203: change `returns_s.iloc[idx-lookback:idx+1]` to `iloc[idx-lookback:idx]` + use `res2.forecast(horizon=1).variance.iloc[-1,0]` so GJR/GARCH 也是真正 1-step-ahead forecast，與 STGARCH 用 tv[idx-1] 對稱。Compare new vs old 5-model QLIKE + DM. Expect headline (STGARCH<GJR) unchanged but STGARCH-lagvol margin may shrink. 若 ranking 反轉則同步修文章 + send-alert critical。",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "paper_review_followup",
+    "experiment_ids": [
+      "K431"
+    ],
+    "parent_review_task_id": "paper_review_mile_764012ef",
+    "tags": [
+      "experiment",
+      "lookahead-fix",
+      "stgarch-rerun",
+      "paper-review-followup"
+    ],
+    "created_at": "2026-06-16T13:11:30+00:00"
   }
 ]

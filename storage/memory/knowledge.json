@@ -34833,5 +34833,37 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-16T21:12:18.771155"
+  },
+  {
+    "category": "paper_review",
+    "content": "Paper review (Codex 24h-rule) mile_764012ef CONDITIONAL_PASS: K431 3 STGARCH variants (VIX/|ret|/lagvol) lose to GJR-GARCH(1,1) on SPY 2023-2024 OOS QLIKE. GJR 0.5588 vs STGARCH 0.6111-0.6241 (+9.36-11.69% diff), DM two-sided p<0.001 全部 (STGARCH-|ret| p=4.2e-6). 5 QLIKE numbers + 4 DM p-values exact match results JSON to 4+ dp. Reviewer source: code-reviewer subagent fallback (Codex CLI 0.139 silent no-output on 3 invocations 2026-06-16 21:07 CST). FIXED in this update: (C) article '~7 extra params' corrected to 5 (STGARCH 9 - GJR 4); (D) '100 多個 GARCH 變體 ... 都卡在 0.55-0.60' rewritten as 'GJR baseline family 0.55-0.60, STGARCH/dual-regime variants land in 0.60+' (resolves contradiction with K431 own STGARCH 0.61-0.62). FOLLOWUP (open task paper_review_mile_764012ef_rerun_lookahead): (A) STGARCH-lagvol lagvol_arr built from full-sample GJR fit (k431_stgarch.py:280-283,377) — mild lookahead, headline conclusion unaffected (STGARCH-lagvol still loses) but needs rolling-IS-only rerun for clean OOS; (B) rolling_baseline_oos slice idx+1 includes same-period return (line 203) creating asymmetry vs STGARCH using tv[idx-1] — rerun with `forecast(horizon=1).variance` for genuine 1-step-ahead. Lessons: (1) paper review 必驗證 parameter-count 主張數值 (2) article '卡在 X-Y' 類聲明必與本文 result table 自洽 (3) STGARCH transition variable 由 GARCH fit 構成者必 rolling 不可 full-sample (4) baseline 與 alternative model OOS forecast 用法必對稱 (filter vs forecast).",
+    "evidence": [
+      "experiments/k431/k431_stgarch.py:280-283 (lagvol_arr full-sample contamination)",
+      "experiments/k431/k431_stgarch.py:203 (rolling_baseline_oos idx+1 slice)",
+      "experiments/k431/k431_stgarch_results.json (5 QLIKE + 4 DM exact match)",
+      "storage/reports/feed.json mile_764012ef.paper_review_24h (verdict metadata)"
+    ],
+    "confidence": 0.85,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K431",
+    "k_id": "paper_review_mile_764012ef",
+    "experiment_path": "experiments/k431/",
+    "reviewer": "code-reviewer subagent fallback",
+    "reviewer_source": "code-reviewer subagent fallback (Codex CLI 0.139 unavailable 2026-06-16 21:07 CST)",
+    "codex_review": false,
+    "article_id": "mile_764012ef",
+    "followup_task_ids": [
+      "paper_review_mile_764012ef_rerun_lookahead"
+    ],
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "stgarch",
+      "garch",
+      "spy",
+      "qlike",
+      "dm-test",
+      "lookahead-risk"
+    ]
   }
 ]
