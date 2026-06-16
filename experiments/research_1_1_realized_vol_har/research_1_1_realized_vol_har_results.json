@@ -1,0 +1,152 @@
+{
+  "experiment_id": "research_1_1_realized_vol_har",
+  "title": "Free financial-news text vs HAR realized-volatility baseline",
+  "run_at_utc": "2026-06-16T04:34:23.816509+00:00",
+  "verdict": "NULL_DATA_LIMITATION",
+  "random_seed": 20260616,
+  "data_sources": {
+    "market": "yfinance SPY adjusted close",
+    "news": {
+      "spy": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=SPY&region=US&lang=en-US",
+      "sp500": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EGSPC&region=US&lang=en-US",
+      "market_index": "https://finance.yahoo.com/news/rssindex"
+    },
+    "news_snapshot_file": "data/yahoo_rss_headlines.csv"
+  },
+  "sample": {
+    "market_start": "2006-01-04",
+    "market_end": "2026-06-12",
+    "market_rows": 5142,
+    "oos_start": "2015-01-02",
+    "news_items": 82,
+    "unique_news_days": 4,
+    "news_span_days": 4,
+    "news_start": "2026-06-13",
+    "news_end": "2026-06-16"
+  },
+  "dependency_status": {
+    "transformers": false,
+    "torch": true,
+    "feedparser": false,
+    "bs4": true,
+    "sklearn": true,
+    "statsmodels": true,
+    "yfinance": true
+  },
+  "feed_status": {
+    "spy": {
+      "url": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=SPY&region=US&lang=en-US",
+      "ok": true,
+      "items": 20,
+      "bytes": 16635
+    },
+    "sp500": {
+      "url": "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EGSPC&region=US&lang=en-US",
+      "ok": true,
+      "items": 20,
+      "bytes": 18200
+    },
+    "market_index": {
+      "url": "https://finance.yahoo.com/news/rssindex",
+      "ok": true,
+      "items": 42,
+      "bytes": 24379
+    }
+  },
+  "news_daily_summary": [
+    {
+      "date_utc": "2026-06-13",
+      "headline_count": 1,
+      "feed_count": 1,
+      "avg_word_count": 13.0,
+      "stress_hits": 0,
+      "stress_share": 0.0
+    },
+    {
+      "date_utc": "2026-06-14",
+      "headline_count": 42,
+      "feed_count": 2,
+      "avg_word_count": 13.523809523809524,
+      "stress_hits": 5,
+      "stress_share": 0.03295793925682555
+    },
+    {
+      "date_utc": "2026-06-15",
+      "headline_count": 21,
+      "feed_count": 3,
+      "avg_word_count": 12.238095238095237,
+      "stress_hits": 7,
+      "stress_share": 0.08951903153965986
+    },
+    {
+      "date_utc": "2026-06-16",
+      "headline_count": 18,
+      "feed_count": 1,
+      "avg_word_count": 11.555555555555555,
+      "stress_hits": 1,
+      "stress_share": 0.011584134114281932
+    }
+  ],
+  "lookahead_controls": {
+    "market_features": "rv_d/rv_w/rv_m are shifted by one trading day.",
+    "forward_label_guard": "For horizon h, expanding training keeps only rows with target_end_pos < forecast_pos.",
+    "news_features": "No predictive news model was fit; a future run must use publication timestamp <= t-1 close for date-t forecasts."
+  },
+  "har_baseline_sanity": [
+    {
+      "horizon": 1,
+      "n_forecasts": 2878,
+      "qlike": -5.84491,
+      "mse": 2.460028944881071e-07,
+      "mean_actual_var": 0.00012440974400850598,
+      "mean_pred_var": 2.448062533911188e-05,
+      "oos_start": "2015-01-02",
+      "oos_end": "2026-06-12"
+    },
+    {
+      "horizon": 5,
+      "n_forecasts": 2874,
+      "qlike": -8.207472,
+      "mse": 1.0233293808682709e-07,
+      "mean_actual_var": 0.00012438718916204098,
+      "mean_pred_var": 7.930955254623017e-05,
+      "oos_start": "2015-01-02",
+      "oos_end": "2026-06-08"
+    },
+    {
+      "horizon": 22,
+      "n_forecasts": 2857,
+      "qlike": -8.084284,
+      "mse": 6.648237420978863e-08,
+      "mean_actual_var": 0.00012450419527839236,
+      "mean_pred_var": 8.944591118635127e-05,
+      "oos_start": "2015-01-02",
+      "oos_end": "2026-05-13"
+    }
+  ],
+  "text_model_attempted": false,
+  "can_fit_text_model": false,
+  "skipped_reason": [
+    "Yahoo public RSS snapshot has too few historical headline days for a 252-row train + 60-row OOS text regression gate.",
+    "transformers/FinBERT is not installed in the current runtime; no pretrained embedding result is claimed."
+  ],
+  "success_criteria": {
+    "minimum_news_days": 334,
+    "minimum_train_rows": 252,
+    "minimum_oos_rows": 60,
+    "dm_harvey_gate": "|DM t| > 3.0 if a challenger is evaluated"
+  },
+  "related_project_findings": [
+    "K1487: GDELT daily novel-risk intensity did not improve RV forecasts beyond HAR/VIX.",
+    "K1338: Chinese financial-news sentiment pipeline was blocked by only 11 public API days.",
+    "K531: FRED sentiment/uncertainty proxies did not improve volatility prediction beyond VIX."
+  ],
+  "external_literature": [
+    "Corsi (2009), A Simple Approximate Long-Memory Model of Realized Volatility.",
+    "Tetlock (2007), Giving Content to Investor Sentiment.",
+    "Manela and Moreira (2017), News Implied Volatility and Disaster Concerns.",
+    "Parvini and Assa (2025), Textual Regression for Realized Volatility."
+  ],
+  "figure": "figures/news_coverage_and_har_baseline.png",
+  "conclusion": "The requested Yahoo-RSS plus FinBERT/BERT horserace cannot be made honestly from the current public RSS snapshot. The HAR baseline is reproducible and lookahead-safe, but the text leg needs either a persistent daily collector or a historical/licensed headline archive before any claim that text beats HAR can be tested."
+}
