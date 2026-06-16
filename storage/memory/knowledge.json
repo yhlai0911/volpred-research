@@ -34711,5 +34711,18 @@
       "overclaim-patched",
       "post-publish-correction"
     ]
+  },
+  {
+    "item_id": "c1c212a0",
+    "category": "null_finding",
+    "content": "K1511 underpowered null: Taiwan 0050 month-level role-reversal PoC (foreign sell × margin-buy) finds no statistically significant next-month return difference: focus N=39, other N=105, mean diff=-20.6bp, Newey-West t=-0.22, p=0.83. Crucial caveat: N=144 is not powered for the EFM +40bp/month reference effect; approximate power for +40bp is 6.6%, 95% CI is [-232bp,+191bp], so +40bp cannot be rejected. Treat as no-detection / underpowered null, not evidence that the effect is absent in Taiwan.",
+    "evidence": [
+      "experiments/k1511/k1511.py",
+      "experiments/k1511/k1511_results.json",
+      "experiments/k1511/README.md",
+      "experiments/k1511/codex_review.md"
+    ],
+    "confidence": 0.64,
+    "created_at": "2026-06-16T16:07:23.690875"
   }
 ]

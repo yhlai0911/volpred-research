@@ -9,6 +9,18 @@
   "mean_diff_bp": -20.571254619339978,
   "std_focus_bp": 585.5381155520688,
   "std_other_bp": 548.9471764118741,
+  "power_analysis": {
+    "se_diff_bp": 107.98650030649443,
+    "mean_diff_ci95_bp": [
+      -232.22479522006907,
+      191.0822859813891
+    ],
+    "efm_reference_effect_bp": 40.0,
+    "approx_power_for_40bp": 0.06586146121745148,
+    "approx_power_for_50bp": 0.0749008110793813,
+    "mde80_two_sided_bp": 302.5333830144263,
+    "can_reject_plus_40bp": false
+  },
   "t_stat_welch": -0.1904983915670318,
   "p_value_welch": 0.8495182710801968,
   "beta_NW_bp": -20.571254619340067,
@@ -20,7 +32,7 @@
   "any_reversal_p_NW": 0.11811432459494263,
   "verdict": "NULL",
   "verdict_rule": "PASS_PRELIMINARY if |t_NW|>1.96 AND N_focus>=24; else INCONCLUSIVE/NULL",
-  "generated_at_utc": "2026-06-16T07:40:05.560734",
+  "generated_at_utc": "2026-06-16T08:06:05.809365+00:00",
   "seed": 42,
   "data_sources": [
     "TWSE BFI82U monthly aggregate (三大法人月度買賣)",

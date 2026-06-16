@@ -65,18 +65,21 @@ EFM 2026 "Who Drives Momentum Returns" 工作論文發現美股「角色反轉�
 | mean_focus（focus 月後 1M 報酬均值） | 152.2 bp |
 | mean_other | 172.8 bp |
 | **mean_diff_bp（focus − other）** | **−20.6 bp** |
+| 95% CI（focus − other） | [−232.2, +191.1] bp |
 | Welch t-stat | −0.19 (p = 0.85) |
 | **OLS dummy + Newey-West t-stat** | **−0.22 (p = 0.83)** |
+| Approx power for +40bp/month | 6.6% |
+| 80% power MDE（two-sided 5%） | ~303bp/month |
 | 任何 sign-mismatch 月份 N | 59 |
 | any_reversal β | −125.3 bp |
 | any_reversal NW t-stat | −1.56 (p = 0.12) |
-| **Verdict** | **NULL** |
+| **Verdict** | **NULL（underpowered for EFM +40bp）** |
 
 **結論摘要**：
 
-1. 「外資作空 × 散戶融資加碼」月份在下一月的 0050 報酬上**沒有顯著差異**（mean diff −21bp, p = 0.83）。
+1. 「外資作空 × 散戶融資加碼」月份在下一月的 0050 報酬上**未檢出顯著差異**（mean diff −21bp, p = 0.83）。
 2. 廣義 sign-mismatch（任一方向反轉）effect 為 −125bp t = −1.56（p = 0.12），方向上 reversal 月份 underperform，但 underpowered。
-3. 結果與 EFM 2026 美股「機構作空 × 散戶跟漲後 +40bp」**方向相反**，且**統計上 indistinguishable from zero**。可能解釋：
+3. 點估計與 EFM 2026 美股「機構作空 × 散戶跟漲後 +40bp」方向相反，但 95% CI 為 [−232bp, +191bp]，**無法排除 +40bp 這種小效果**；本文只能說台股 0050 PoC 沒有檢出同方向效應，不能說已否定 EFM 規模的效果。可能解釋：
    - 台股機構結構差異（外資 ≠ 美股 institutional total；融資戶 ≠ 散戶 total）
    - 樣本期含 2020 疫情、2022 升息 cycle 等 regime 變化
    - 0050 偏權值股，role-reversal 效應可能在中小型股更明顯
@@ -91,7 +94,7 @@ EFM 2026 "Who Drives Momentum Returns" 工作論文發現美股「角色反轉�
 1. **散戶 proxy**：TWSE 融資餘額是有融資戶的散戶行為，不代表所有散戶；ETF / 海外複委託 / option 散戶不在內。
 2. **機構 proxy**：用「外資及陸資」代表機構不含投信、自營（保留 cleanness — 外資是台股最大機構淨買賣者）。可延伸 robust check 加投信。
 3. **0050 不是台股 broad market**：0050 偏大型權值股 weighting，role-reversal 也可能在中小型股更顯著（PoC 不擴張）。
-4. **樣本 ~144 月，N_focus 估計 30-60**：powered for medium effect (~50bp/month) 但 underpowered for small effect。
+4. **樣本 ~144 月，N_focus=39**：對 EFM +40bp/month 的 approximate power 只有 6.6%，50bp/month 約 7.5%；two-sided 5% test 要 80% power 需約 303bp/month。此 PoC 是「未檢出 / 方向相反點估計」，不是「已否定小效果」。
 5. **單一 holding horizon**：只測 t+1 月；EFM 美股版本還測 1-3 月 + cumulative。
 
 ## Next step（不在本 PoC scope）

@@ -10860,5 +10860,14 @@
     "t_NW": -0.22,
     "N": 144,
     "summary": "K1511 角色反轉台股 PoC: NULL. EFM 美股 +40bp 不複現. Bootstrap 進 compute_queue. Codex review followup task."
+  },
+  {
+    "timestamp": "2026-06-16T08:08:53.260679+00:00",
+    "task_id": "k1511_codex_review_followup",
+    "task_type": "paper_review",
+    "fire": "interactive-hourly",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex-cli gpt-5.4",
+    "summary": "K1511 follow-up review completed: lag PASS, HAC maxlags=3 PASS, TWSE 5-attempt backoff PASS, but N=144/focus=39 underpowered for EFM +40bp (power 6.6%, MDE80 ~303bp). Patched README/results/code, added codex_review.md, wrote knowledge c1c212a0 as underpowered null."
   }
 ]

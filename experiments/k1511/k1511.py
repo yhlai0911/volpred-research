@@ -21,7 +21,7 @@ from __future__ import annotations
 import io
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -267,8 +267,32 @@ def run_tests(panel: pd.DataFrame) -> dict:
     out["std_focus_bp"] = float(ret_focus.std() * 1e4)
     out["std_other_bp"] = float(ret_other.std() * 1e4)
 
-    # Welch t-test
     from scipy import stats
+
+    se_diff_bp = float(np.sqrt(out["std_focus_bp"] ** 2 / n_focus + out["std_other_bp"] ** 2 / n_other))
+    ci95_low = float(mean_diff_bp - 1.96 * se_diff_bp)
+    ci95_high = float(mean_diff_bp + 1.96 * se_diff_bp)
+    # Approximate two-sided z-test power. This is enough to show whether the
+    # PoC can detect EFM-scale +40bp/month effects; exact small-sample power is
+    # not needed for the research-honesty gate.
+    zcrit = float(stats.norm.ppf(1 - 0.05 / 2))
+    z80 = float(stats.norm.ppf(0.80))
+
+    def approx_two_sided_power(effect_bp: float) -> float:
+        mu = abs(effect_bp) / se_diff_bp if se_diff_bp > 0 else 0.0
+        return float(1 - stats.norm.cdf(zcrit - mu) + stats.norm.cdf(-zcrit - mu))
+
+    out["power_analysis"] = {
+        "se_diff_bp": se_diff_bp,
+        "mean_diff_ci95_bp": [ci95_low, ci95_high],
+        "efm_reference_effect_bp": 40.0,
+        "approx_power_for_40bp": approx_two_sided_power(40.0),
+        "approx_power_for_50bp": approx_two_sided_power(50.0),
+        "mde80_two_sided_bp": float((zcrit + z80) * se_diff_bp),
+        "can_reject_plus_40bp": bool(ci95_high < 40.0),
+    }
+
+    # Welch t-test
     t_stat, p_val = stats.ttest_ind(ret_focus, ret_other, equal_var=False, nan_policy="omit")
     out["t_stat_welch"] = float(t_stat)
     out["p_value_welch"] = float(p_val)
@@ -353,7 +377,7 @@ def main():
 
     print("[K1511] running tests...")
     results = run_tests(panel)
-    results["generated_at_utc"] = datetime.utcnow().isoformat()
+    results["generated_at_utc"] = datetime.now(timezone.utc).isoformat()
     results["seed"] = SEED
     results["data_sources"] = [
         "TWSE BFI82U monthly aggregate (三大法人月度買賣)",
