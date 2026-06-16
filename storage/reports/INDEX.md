@@ -1,12 +1,12 @@
 # Feed Index
 
-_Last built: 2026-06-16 05:49 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-06-16 06:59 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
 - Total articles: **1626**  (with thumbnail: 61)
-- Last 30 days: **453**
-- Total chars (content): 6,764,793
+- Last 30 days: **451**
+- Total chars (content): 6,765,348
 
 **Status**: published=1364, archived=122, draft=95, unpublished=34, retracted=10, wont_fix=1
 
@@ -14,12 +14,12 @@ _Last built: 2026-06-16 05:49 UTC — source: `storage/reports/feed.json` (do NO
 
 **Category**: milestone=831, general=681, unknown=73, member_qa=11, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
 
-## 最近 30 天 (453)
+## 最近 30 天 (451)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
 | 2026-06-16 | `mile_6f3e2b1a` | 抗通膨債券真的比較穩嗎？高通膨時，答案要看期限 | general | milestone | draft | 2158 |  | 一般讀者, TIPS, 通膨, 債券, 美國公債, 波動率 |
-| 2026-06-16 | `mile_a95a2285` | 比特幣「漲時更波動」是真的嗎？11 年 4,101 天告訴你：時有時無 | research | milestone | published | 2147 |  | 研究, btc, 波動率, leverage-effect, 時變性, 非對稱效應 |
+| 2026-06-16 | `mile_a95a2285` | 比特幣「漲時更波動」是真的嗎？11 年 4,101 天告訴你：時有時無 | research | milestone | published | 2702 |  | 研究, btc, 波動率, leverage-effect, 時變性, 非對稱效應 |
 | 2026-06-15 | `mile_53caca1a` | 點陣圖分歧，MOVE 卻跌到 P34：債市選擇權在打折賣保險嗎？ | general | general | published | 3361 |  | 一般讀者, FOMC, MOVE, VIX, 利率, 尾部對沖 |
 | 2026-06-15 | `mile_b722be0e` | 看起來很準，卻完全沒用：一個 GARCH 指標的預測失敗紀錄 | research | milestone | published | 4090 |  | 研究, VRP, GARCH, 波動率, NULL結果, 研究誠實 |
 | 2026-06-15 | `mile_95ae93fa` | 同一個 VIX，為什麼 COVID 之後對美股越來越有力，對台股卻變弱了？ | general | general | published | 3201 |  | 一般讀者, VIX, 波動率, 美股, 台股, 風險模型 |
@@ -469,13 +469,13 @@ _Last built: 2026-06-16 05:49 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-05-17 | `mile_6fba99d4` | 美國國會議員的股票交易，能預測美股波動率嗎？一份誠實的「沒有」 | general | general | published | 5881 |  | 一般讀者, 美股, 國會交易, 波動率預測, VIX, 資訊不對稱 |
 | 2026-05-17 | `mile_b274dbfa` | 不假設分配的風險值估計：Conformal VaR 在 SPY 13 年外樣本表現 | research | general | published | 6637 |  | 研究, 風險管理, VaR, SPY, GARCH, 美股 |
 | 2026-05-17 | `mile_d3d2e5d0` | 我們把恐慌指數直接塞進比特幣的波動率方程式：11 年 4,120 筆得出一個接近零的數字 | research | milestone | archived | 2204 |  | 研究, 比特幣, BTC, VIX, GARCH-X, 波動率預測 |
-| 2026-05-17 | `mile_490999f6` | 1399 筆研究紀錄盤點：被引用 260 次以上的 16 個結論 | research | milestone | retracted | 3611 |  | 研究, meta-review, knowledge-base, VIX, leverage, QLIKE |
-| 2026-05-17 | `mile_de900ba0` | 美國 VIX 預測台灣 0050 的波動率？跨市場時差讓訊號被稀釋的真實案例 | research | general | published | 5460 |  | 研究, 台股, 0050, VIX, 波動率, 跨市場 |
 
-<details><summary>## 2026-Q2 (501)</summary>
+<details><summary>## 2026-Q2 (503)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-05-17 | `mile_490999f6` | 1399 筆研究紀錄盤點：被引用 260 次以上的 16 個結論 | research | milestone | retracted | 3611 |  | 研究, meta-review, knowledge-base, VIX, leverage, QLIKE |
+| 2026-05-17 | `mile_de900ba0` | 美國 VIX 預測台灣 0050 的波動率？跨市場時差讓訊號被稀釋的真實案例 | research | general | published | 5460 |  | 研究, 台股, 0050, VIX, 波動率, 跨市場 |
 | 2026-05-17 | `mile_b5a91c4d` | 用「動態切點」救一個失敗故事：K1199 為何仍救不回 VIX 三段論 | general | general | retracted | 5699 |  | 一般讀者, 訂單流, OFI, VIX, 跳動預測, 台指期 |
 | 2026-05-17 | `mile_30c68d4e` | 重寫一次發現數字微微跑掉：研究結論可信度其實是漸層、不是黑白 | research | general | archived | 3819 |  | 研究, 研究方法, 可復現性, 波動率模型, SPY, 論文驗證 |
 | 2026-05-17 | `mile_4dccf655` | 一個冷門的對沖實驗：TSMOM 沒讓 VT 賺更多，但把回撤砍掉了三分之一 | research | general | archived | 3482 |  | 研究, VT 波動率目標, TSMOM 趨勢動能, MDD 下檔保護, SPY, 對沖策略 |

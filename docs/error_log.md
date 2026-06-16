@@ -1854,3 +1854,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 - Re-ran `paper-update`; output now uses `storage_path=leverage-direction/main.pdf` and `pages=49`.
 
 **Lesson / prevention**: Any paper folder with multiple `main_v*.{tex,pdf}` files must select current artifacts consistently by mtime or explicit config. Never let TeX metrics and uploaded PDF use different selection policies; paper-update output must be checked for both `storage_path` and `pages` after manuscript-version changes.
+
+## 2026-06-16 — K445 article OOS forecast comparison used origin-aligned forecasts against same-index realized variance
+
+**Symptom**: Published article `mile_a95a2285` claimed the 2023-2024 BTC volatility forecast comparison showed the no-asymmetry model winning and the asymmetry assumption adding no predictive value.
+
+**Root cause**: `experiments/k445/k445_btc_leverage.py` calls `res.forecast(horizon=1, start=oos_start, reindex=False)` using `arch` defaults. The local docstring confirms `align='origin'`: row `t` contains forecasts for `t+1`. K445 then intersects that forecast index with OOS dates and compares row `t` forecasts directly to `realized_sq.loc[t]`, creating a forecast/realization alignment risk. This is not a valid basis for production claims about one-step OOS forecast ranking.
+
+**Fix**: Article `mile_a95a2285` was downgraded to `CONDITIONAL_PASS`: the supported subperiod/full-sample gamma findings remain, the rolling-window chronology was corrected, and the OOS model-ranking/predictive-value claim was removed pending a target-aligned rerun.
+
+**Lesson / prevention**: For `arch` one-step OOS loss evaluation, use `forecast(..., align='target')` or explicitly shift origin-aligned `h.1` forecasts to the target return date before computing QLIKE/MSE/DM tests. Reviewers should treat same-index comparison of origin-aligned forecasts and realized variance as a potential lookahead/off-by-one error.

@@ -32145,7 +32145,7 @@
     "title": "Paper review (Codex 24h-rule): 比特幣「漲時更波動」是真的嗎？11 年 4,101 天告訴你：時有時無",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_a95a2285 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_a95a2285",
@@ -32154,7 +32154,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-16T03:08:25+00:00"
+    "created_at": "2026-06-16T03:08:25+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-16T06:55:02.350205+00:00",
+    "claim_session_id": "ab242154c5bb",
+    "started_at": "2026-06-16T06:55:02.459590+00:00",
+    "completed_at": "2026-06-16T07:00:13.811391+00:00",
+    "result": "K445 article mile_a95a2285 reviewed as CONDITIONAL_PASS. Verified sample/subperiod/full-sample gamma claims against k445_btc_leverage_results.json; corrected rolling-window chronology and removed unsupported 2023-2024 OOS forecast-ranking claim because arch forecasts were origin-aligned but evaluated against same-index realized variance. Updated feed.json, feed index, work_log, and docs/error_log.md. Prior K1509 feed-sync remains unconfirmed: feed-sync --apply timed out again at 90s."
   },
   {
     "id": "research_double_ml_factor",
