@@ -36,7 +36,11 @@ coexistence + return PnL framing (not event-study), and vol regime as the
 ## 3. Design
 
 * **Universe**: GLD, SLV, USO, UNG, CPER, PDBC (yfinance, adjusted close).
-* **Sample**: 2010-01-01 → 2026-06-15 (16.5 years).
+* **Sample**: 2010-01-01 → 2026-06-15 (16.5 years intended). **Actual per-ticker
+  weekly observations**: GLD ~858, SLV ~858, USO ~858, UNG ~858, CPER ~683,
+  PDBC ~528 (newer launch); **monthly**: GLD ~197, SLV ~197, USO ~197, UNG ~197,
+  CPER ~157, PDBC ~122. PDBC monthly is the shortest cell — see results.json
+  per-cell `n_obs` for ground truth.
 * **Frequencies**: weekly (W-FRI close), monthly (month-end close).
 * **Signal**: `position_t = sign(past_N_return_{t-1})` for momentum; reversal
   is the same signal negated. N ∈ {1, 2, 4} bars.
@@ -47,7 +51,10 @@ coexistence + return PnL framing (not event-study), and vol regime as the
   not drive verdict).
 * **Statistical test**: Diebold-Mariano on `r_rev - r_mom` series, HAC standard
   error (Newey-West, lag = round(T^{1/3})), within each regime.
-* **Multiple testing**: 36 cells (6 ETFs × 3 N × 2 freq); Bonferroni α = 0.05/36
+* **Multiple testing**: per-regime family of 36 cells (6 ETFs × 3 N × 2 freq);
+  Bonferroni α = 0.05/36 ≈ 0.001389. Across both regimes the inference space is
+  72 tests; under that family threshold becomes α = 0.05/72 ≈ 0.000694. Both
+  thresholds yield the same NULL verdict (0 cells pass either way).
   ≈ 0.00139. Two regimes evaluated separately (conservative).
 * **Seed**: 42 (preserved for the bootstrap diagnostics; DM uses analytical HAC).
 
@@ -85,10 +92,22 @@ Full per-cell grid (Sharpe mom/rev, MDD, DM t/p in three slices) is in
 
 ## 6. Verdict
 
-**NULL** — sign-consistent direction in half the grid but no cell survives
-Bonferroni. Raw-α positives (4/36) are fewer than expected by chance under H0
-at 5%, suggesting the regime split *does* carry some signal — but it is too
-weak to claim regime separation as a robust effect on yfinance ETF proxies.
+**NULL** — sign-consistent direction in half the grid (18/36, directionally
+suggestive) but no cell survives Bonferroni. Raw-α positives total 4 across
+both regimes (1 high + 3 low); under H0 the expected count is ~1.8 per
+regime-family (36 tests) or ~3.6 across both (72 tests), so the raw-α tally is
+**statistically indistinguishable from noise**. Direction is consistent with
+the H1 hypothesis but magnitude/power are insufficient to claim regime
+separation as a robust effect on yfinance ETF proxies.
+
+**Codex review (2026-06-16, primary path)**: `CONDITIONAL_PASS` — lookahead,
+seed-fixing, fair comparison, vol-regime construction all PASS; CONDITIONAL on
+(a) Bonferroni multiplicity family disclosure (we Bonferroni-correct per regime
+family of 36, not across 72; under 72-test family threshold is α = 0.05/72 ≈
+0.000694 — verdict NULL unchanged either way), (b) absence of a per-ticker
+data-audit table (CPER/PDBC weekly samples are ~683/528, monthly PDBC ~122 —
+shorter than full 2010-2026), (c) the original raw-α overclaim now corrected
+above.
 
 The result does **not** falsify the JFEM/SSRN 2025-26 thesis; it shows that
 when proxied with broad commodity ETFs and `signal.shift(1)`-strict design, the

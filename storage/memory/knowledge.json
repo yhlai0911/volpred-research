@@ -34738,5 +34738,28 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-16T16:10:23.593993"
+  },
+  {
+    "item_id": "d0ed8de3",
+    "category": "commodity_momentum_reversal",
+    "content": "K1513 [PoC, NULL] 商品 ETF 短期動能-反轉並存與 vol regime 分離\n\n**結論**: NULL — 商品 ETF 6 檔 (GLD/SLV/USO/UNG/CPER/PDBC) × lookback {1,2,4} bars × {週,月} freq = 36 cells，sign-consistent 18/36 與 H1 一致，但 0/36 過 Bonferroni（α=0.05/36≈0.001389；甚至 72-test family α=0.000694 亦同 verdict）；raw-α 顯著 4 cells (1 high + 3 low)，與 H0 noise (~1.8 per 36-family / ~3.6 per 72-family) **統計上不可區分**。Sharpe magnitude ≤|0.62|。\n\n**Hypothesis tested**: H1 = 高 vol regime 反轉占優 / 低 vol regime 動能占優（基於 JFEM/SSRN 2025-26 commodity short-term momentum-reversal coexistence 文獻）\n\n**Falsification**: 不推翻 JFEM 文獻；本實驗用 yfinance ETF proxy（缺 basis/roll-yield 信號），16-year × 6-asset 樣本對 Bonferroni 36-cell 檢定力不足。Directionally suggestive but statistically indistinguishable from noise。\n\n**Methodology**: signal.shift(1) 嚴格 lag；vol regime 用 trailing 26-week/6-month realized vol + past-only expanding median split (no lookahead)；DM test with Newey-West HAC SE；Bonferroni multiplicity correction。\n\n**Limitations**: (a) ETF proxy vs futures, (b) 6-asset universe Bonferroni headroom 不足, (c) 單一 vol-regime metric (未試 GARCH/HMM/VIX), (d) time-series only no cross-sectional spread, (e) DM normal-approx p-value 對 monthly small T。\n\n**Next**: 改 continuous futures (CHRIS/CME_GC/SI/CL/NG/HG) + 擴 universe (DBA/CORN/WEAT/SOYB) + HMM vol regime + cross-sectional spread 重跑。\n",
+    "evidence": [
+      "experiments/k1513/k1513_results.json",
+      "experiments/k1513/README.md",
+      "experiments/k1513/references.md",
+      "experiments/k1513/k1513_regime_split.png"
+    ],
+    "confidence": 0.35,
+    "created_at": "2026-06-16T17:26:20.287768",
+    "experiment_id": "K1513",
+    "experiment_ids": [
+      "K1513"
+    ],
+    "k_id": "K1513",
+    "experiment_path": "experiments/k1513/",
+    "reviewer": "codex-cli",
+    "reviewer_source": "Codex CLI primary path",
+    "codex_review": "CONDITIONAL_PASS",
+    "verdict": "NULL"
   }
 ]

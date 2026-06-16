@@ -32355,5 +32355,26 @@
     "started_at": "2026-06-16T08:03:52.573358+00:00",
     "completed_at": "2026-06-16T08:10:31.018558+00:00",
     "result": "K1511 review CONDITIONAL_PASS. Lag ret_next shift(-1), HAC Newey-West maxlags=3, and TWSE 5-attempt backoff passed. Added power analysis: N=144/focus=39 has only 6.6% power for +40bp/month and MDE80 ~303bp, so K1511 is underpowered null/no-detection, not rejection of EFM-scale effect. Patched k1511.py/results/README, added codex_review.md, wrote knowledge c1c212a0. knowledge-index update failed due pre-existing LanceDB schema type conflict ('high' string in double column).\n\nCodex review CONDITIONAL_PASS; patches applied (power_analysis to results.json, README verdict→NULL underpowered, conclusion wording corrected); knowledge.json entry 795d4bba written"
+  },
+  {
+    "id": "research_1_4_vol",
+    "title": "研究 backlog fallback: 商品期貨短期（1-4 週）動能與反轉「共存」驗證及 vol 條件",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 商品期貨短期（1-4 週）動能與反轉「共存」驗證及 vol 條件 — yfinance 商品 ETF 代理（GLD/SLV/USO/UNG/CPER/PDBC），月/週 return series，檢定同 horizon 下動能與反轉是否因 vol 高低 regime 分離（JFEM 2026 commodity markets 發現短期動能-反轉並存，顛覆傳統 horizon 區分）；美股商品 ETF 代理版，免 tick（來源：JFEM/SSRN 2026 commodity short-term momentum-reversal coexistence） | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "1_4_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-16T09:09:13+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-16T09:10:11.078036+00:00",
+    "claim_session_id": "236c41f05281",
+    "started_at": "2026-06-16T09:10:15.496570+00:00",
+    "completed_at": "2026-06-16T09:26:30.856503+00:00",
+    "result": "K1513 [NULL, PoC] commodity ETF 6×3×2=36 cells: 18/36 sign-consistent (H1 dir), 0/36 Bonferroni, 4/36 raw-α (noise-indistinguishable); Codex review CONDITIONAL_PASS; knowledge.json item d0ed8de3; commit 826f01df + README revisions"
   }
 ]
