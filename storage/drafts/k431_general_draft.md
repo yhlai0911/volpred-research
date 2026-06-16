@@ -31,11 +31,11 @@ experiment_refs:
 |---|---:|---:|---|
 | GJR-GARCH(1,1) | 0.5588 | — | baseline |
 | STGARCH-lagvol | 0.5870 | +5.05% | GJR 勝（p=0.014）|
-| STGARCH-VIX | 0.5883 | +5.28% | GJR 勝（p=0.013）|
+| STGARCH-VIX | 0.5882 | +5.26% | GJR 勝（p=0.013）|
 | GARCH(1,1) | 0.5890 | +5.40% | GJR 勝（p=0.008）|
-| STGARCH-\|ret\| | 0.5957 | +6.60% | GJR 勝（p=0.001）|
+| STGARCH-\|ret\| | 0.5955 | +6.56% | GJR 勝（p=0.001）|
 
-QLIKE 是波動率預測常用的 loss function，越低越準。GJR 仍是第一，三種 STGARCH 全敗，但 v2 後的差距是 5.05-6.60%，不是初版的 9-12%。
+QLIKE 是波動率預測常用的 loss function，越低越準。GJR 仍是第一，三種 STGARCH 全敗，但 v2 後的差距是 5.05-6.56%，不是初版的 9-12%。
 
 ![DM 顯著性檢定 — 所有候選模型都顯著輸給 GJR](storage/drafts/article_images/k431_dm_diffpct.png)
 
@@ -71,6 +71,6 @@ K431 v2 等於再多一筆證據：複雜化的邊際報酬在 SPY 已經很薄�
 
 **數據來源**：SPY 日收盤資料 2005-01-04 到 2026-03-24，OOS 2023-01-01 到 2024-12-31 共 502 筆。v2 完整實驗腳本與 results JSON 在 `experiments/k431/k431_stgarch_v2.py` 與 `experiments/k431/k431_stgarch_v2_results.json`。
 
-**K431 v2 結論**：STGARCH does NOT beat GJR. Best ST: STGARCH-lagvol diff=5.050%. QLIKE ceiling confirmed.
+**K431 v2 結論**：STGARCH does NOT beat GJR. Best ST: STGARCH-lagvol diff=5.051%. QLIKE ceiling confirmed.
 
 **2026-06-16 v2 更正**：初版引用的 STGARCH 數字受 lagvol transition lookahead、baseline forecast slice 不對稱、STGARCH state propagation 與 likelihood 尺度問題影響。v2 修正後，headline 結論不變，但 STGARCH 與 GJR 的差距從 9-12% 改為 5-7%，DM 強度也改為 conventional 5% 到 1% 等級。
