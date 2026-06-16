@@ -1,0 +1,210 @@
+{
+  "experiment_id": "k1517_taiex_overnight_intraday_vrp",
+  "title": "K1517 — TAIEX overnight vs intraday pseudo-VRP decomposition and cross-market comparison vs SPY/QQQ/IWM/EFA",
+  "date_run_utc": "2026-06-16",
+  "seed": 42,
+  "data": {
+    "ticker": "^TWII",
+    "source": "Local CSV at storage/macro/yf_TWII.csv (pre-fetched yfinance daily OHLC).",
+    "raw_rows": 7033,
+    "raw_first_date": "1997-07-02",
+    "raw_last_date": "2026-03-17",
+    "analysis_start": "2001-01-01",
+    "oos_start": "2007-01-03",
+    "n_oos": 4691,
+    "vix_taiwan_note": "VIXTWN only has 129 daily obs from 2025-12-01 — too short for true option-IV-based VRP over 2007-2026. We use the same GARCH-based pseudo-VRP proxy as the parent SPY/QQQ/IWM/EFA study for like-for-like comparison. See data_constraints.md."
+  },
+  "method": {
+    "returns": {
+      "overnight": "log(Open_t / Close_{t-1})",
+      "intraday": "log(Close_t / Open_t)",
+      "close_to_close": "log(Close_t / Close_{t-1})"
+    },
+    "pseudo_vrp_definition": "GARCH one-step expected component variance minus realized component variance; NOT an option-implied model-free VRP.",
+    "garch_proxy": {
+      "model": "Zero-mean GARCH(1,1) on close-to-close log returns in percent units",
+      "window": 1000,
+      "refit_every": 21,
+      "forecast_timing": "forecast for day t uses returns through t-1"
+    },
+    "component_allocation": "total GARCH variance is allocated by trailing 252d overnight share shifted by one day",
+    "predictive_regression": {
+      "target": "current-day log(session variance)",
+      "features": [
+        "overnight_pseudo_vrp.shift(1)",
+        "intraday_pseudo_vrp.shift(1)",
+        "log_session_var.shift(1)",
+        "log_garch_total_var.shift(1)"
+      ],
+      "standard_errors": "Newey-West HAC maxlags=5",
+      "success_rule": "Joint gate: overnight variance-share CI lower > 0.5 AND lagged overnight pseudo-VRP HAC t > 3."
+    },
+    "bootstrap": {
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    },
+    "lookahead_protection": [
+      "GARCH forecast for day t uses close-to-close returns through t-1",
+      "component allocation share is shifted by one day",
+      "predictive features use explicit .shift(1)"
+    ]
+  },
+  "asset_results": {
+    "^TWII": {
+      "ticker": "^TWII",
+      "n_oos": 4691,
+      "oos_start": "2007-01-03",
+      "oos_end": "2026-03-17",
+      "realized_session_variance": {
+        "overnight_share": 0.419937,
+        "intraday_share": 0.580063,
+        "covariance_residual_share_of_close_to_close_var": 0.030147,
+        "mean_daily_overnight_var_pct2": 0.577637,
+        "mean_daily_intraday_var_pct2": 0.797894,
+        "mean_daily_close_to_close_var_pct2": 1.418287
+      },
+      "garch_proxy": {
+        "mean_expected_total_var_pct2": 1.374976,
+        "mean_realized_session_var_pct2": 1.375531,
+        "expected_minus_realized_total_var_pct2": -0.000555,
+        "mean_overnight_pseudo_vrp_pct2": -0.027086,
+        "mean_intraday_pseudo_vrp_pct2": 0.02653,
+        "mean_premium_diff_overnight_minus_intraday_pct2": -0.053616
+      },
+      "bootstrap_oos": {
+        "overnight_share": {
+          "mean": 0.41756215,
+          "ci_2p5": 0.37784263,
+          "ci_97p5": 0.46033947,
+          "p_gt_0": 1.0,
+          "p_gt_half": 0.0
+        },
+        "intraday_share": {
+          "mean": 0.58243785,
+          "ci_2p5": 0.53966053,
+          "ci_97p5": 0.62215737,
+          "p_gt_0": 1.0,
+          "p_gt_half": 1.0
+        },
+        "premium_diff_overnight_minus_intraday": {
+          "mean": -5.08e-06,
+          "ci_2p5": -1.362e-05,
+          "ci_97p5": 3.14e-06,
+          "p_gt_0": 0.108,
+          "p_gt_half": null
+        },
+        "mean_overnight_premium": {
+          "mean": -2.39e-06,
+          "ci_2p5": -1.213e-05,
+          "ci_97p5": 5.54e-06,
+          "p_gt_0": 0.322,
+          "p_gt_half": null
+        },
+        "mean_intraday_premium": {
+          "mean": 2.69e-06,
+          "ci_2p5": -3.79e-06,
+          "ci_97p5": 8.68e-06,
+          "p_gt_0": 0.814,
+          "p_gt_half": null
+        }
+      },
+      "predictive_regression_oos": {
+        "nobs": 4691,
+        "coef_overnight": -0.068117,
+        "t_overnight": -2.6758,
+        "p_overnight": 0.007455,
+        "coef_intraday": -0.091032,
+        "t_intraday": -2.4435,
+        "p_intraday": 0.014547,
+        "r2": 0.188314
+      }
+    }
+  },
+  "cross_asset_comparison_table": [
+    {
+      "ticker": "SPY",
+      "overnight_share": 0.425943,
+      "mean_overnight_pseudo_vrp_pct2": -0.013971,
+      "mean_intraday_pseudo_vrp_pct2": -0.035427,
+      "t_overnight": -0.653,
+      "t_intraday": -3.091
+    },
+    {
+      "ticker": "QQQ",
+      "overnight_share": 0.378555,
+      "mean_overnight_pseudo_vrp_pct2": -0.024723,
+      "mean_intraday_pseudo_vrp_pct2": -0.054521,
+      "t_overnight": -2.286,
+      "t_intraday": -0.8822
+    },
+    {
+      "ticker": "IWM",
+      "overnight_share": 0.396797,
+      "mean_overnight_pseudo_vrp_pct2": -0.063834,
+      "mean_intraday_pseudo_vrp_pct2": -0.069653,
+      "t_overnight": -0.5231,
+      "t_intraday": -3.9341
+    },
+    {
+      "ticker": "EFA",
+      "overnight_share": 0.646186,
+      "mean_overnight_pseudo_vrp_pct2": -0.031682,
+      "mean_intraday_pseudo_vrp_pct2": -0.026296,
+      "t_overnight": -1.2796,
+      "t_intraday": -2.6466
+    },
+    {
+      "ticker": "^TWII",
+      "overnight_share": 0.419937,
+      "mean_overnight_pseudo_vrp_pct2": -0.027086,
+      "mean_intraday_pseudo_vrp_pct2": 0.02653,
+      "t_overnight": -2.6758,
+      "t_intraday": -2.4435
+    }
+  ],
+  "figures": [
+    "fig_session_variance_shares.png",
+    "fig_predictive_tstats.png",
+    "fig_taiex_vs_spy_overnight_vrp.png"
+  ],
+  "literature": [
+    {
+      "citation": "Papagelis and Dotsis (2025), The Variance Risk Premium Over Trading and Nontrading Periods",
+      "url": "https://onlinelibrary.wiley.com/doi/full/10.1002/fut.22589"
+    },
+    {
+      "citation": "Carr and Wu (2009), Variance Risk Premia",
+      "url": "https://doi.org/10.1093/rfs/hhn038"
+    },
+    {
+      "citation": "Bollerslev, Tauchen, and Zhou (2009), Expected Stock Returns and Variance Risk Premia",
+      "url": "https://www.federalreserve.gov/pubs/feds/2007/200711/"
+    },
+    {
+      "citation": "Corsi (2009), A Simple Approximate Long-Memory Model of Realized Volatility",
+      "url": "https://doi.org/10.1093/jjfinec/nbp001"
+    }
+  ],
+  "related_experiments": [
+    "experiments/research_intraday_vs_overnight_vrp/ (parent SPY/QQQ/IWM/EFA study, verdict=NULL)",
+    "experiments/experiment_0dte_intraday_overnight_vol_2026_06_13/",
+    "experiments/research_vrp_vrp_horizon/"
+  ],
+  "research_honesty_notes": [
+    "Daily yfinance OHLC cannot identify true option-implied VRP; this is a pseudo-VRP proxy only.",
+    "No same-day realized pseudo-VRP is used as a predictor; predictive regressions use lagged features.",
+    "Because GARCH is a physical-measure forecast, mean pseudo-premia should not be interpreted as investable option carry.",
+    "Cross-market sign of pseudo-VRP is interpretable but magnitude is dominated by GARCH bias relative to realized — not the option-implied premium.",
+    "TAIEX has only day-session trading (no formal overnight session in cash index); 'overnight' here is the close-to-open gap captured by ^TWII Open vs prior Close, which is the natural analog used in the literature."
+  ],
+  "verdict": {
+    "overall": "NULL",
+    "overnight_majority_pass": false,
+    "overnight_predict_pass": false,
+    "taiex_overnight_pseudo_vrp_pct2": -0.027086,
+    "spy_overnight_pseudo_vrp_pct2": -0.013971,
+    "sign_comparison": "TAIEX (-0.0271) and SPY (-0.0140) overnight pseudo-VRP have SAME sign",
+    "plain_english": "Like SPY/QQQ/IWM (US ETFs), TAIEX does not satisfy both gates of the overnight-dominance + next-day predictability test. Cross-market finding: the pseudo-VRP framework (GARCH-based) yields NULL across SPY-family AND TAIEX, suggesting the option-implied VRP literature's overnight finding may not survive the model-implied VRP proxy."
+  }
+}
