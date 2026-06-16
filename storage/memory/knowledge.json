@@ -34683,5 +34683,33 @@
     ],
     "confidence": 0.86,
     "created_at": "2026-06-16T12:34:51.395709"
+  },
+  {
+    "item_id": "c22b6cb8",
+    "category": "paper_review",
+    "content": "Codex 24h-rule review of mile_95ae93fa (K930 VIX-augmented vol parameter stability, SPY/QQQ/0050.TW). Verdict CONDITIONAL_PASS. Lookahead clean (log_vix_lag=np.roll, OOS uses vix_idx=idx+tt-1). N counts byte-exact (SPY/QQQ n_total=54, 0050.TW=36, 100% converged). Article β_VIX means 2.42/1.84/1.44 are rounded-match to results.json mfgjr_stability.theta_1.mean (2.4153/1.8356/1.4408). COVID split +7.5%/+21.4%/-10.8% rounded-match to chow_test.theta_1.mean_change_pct (7.542/21.414/-10.768). Issue 1 overclaim FAIL: article '改善不消失' claim not supported by K930's parameter_performance test (p=0.239/0.524/0.308 only show theta1-drift uncorrelated with ΔQLIKE, NOT that improvement persists for 0050.TW). Patched 2026-06-16 with humble caveat redirecting 0050.TW improvement question to K889v2/K889b. Minor issues (rounding not byte-exact, SPY/QQQ/regime jargon for general audience) left as-is.",
+    "evidence": [
+      "experiments/k930/k930_parameter_stability_results.json",
+      "experiments/k930/k930_parameter_stability.py:195",
+      "experiments/k930/k930_parameter_stability.py:409",
+      "storage/reports/feed.json[mile_95ae93fa]"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-16T13:19:35.874272",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K930",
+    "k_id": "K930",
+    "article_id": "mile_95ae93fa",
+    "reviewer": "codex-cli 0.139.0 gpt-5.4",
+    "reviewer_source": "codex_review",
+    "codex_review": true,
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "K930",
+      "mile_95ae93fa",
+      "overclaim-patched",
+      "post-publish-correction"
+    ]
   }
 ]

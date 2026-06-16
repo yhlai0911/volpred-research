@@ -31957,7 +31957,7 @@
     "title": "Paper review (Codex 24h-rule): 同一個 VIX，為什麼 COVID 之後對美股越來越有力，對台股卻變弱了？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_95ae93fa needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_95ae93fa",
@@ -31966,7 +31966,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-15T22:08:35+00:00"
+    "created_at": "2026-06-15T22:08:35+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-06-16T05:12:18.158342+00:00",
+    "claim_session_id": "c160d2ca0ecb",
+    "started_at": "2026-06-16T05:12:26.762269+00:00",
+    "completed_at": "2026-06-16T05:19:44.428299+00:00",
+    "result": "Codex review CONDITIONAL_PASS. 1 overclaim FAIL (0050.TW improvement claim not supported by K930 alone, p_value range 0.239-0.524) patched with humble caveat redirecting to K889v2/K889b. N/β_VIX/COVID-split byte-checked rounded-match. Lookahead clean (np.roll lag). Knowledge entry c22b6cb8. Supabase synced."
   },
   {
     "id": "paper_review_mile_67b3714d",
@@ -32221,5 +32227,36 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-16T03:08:45+00:00"
+  },
+  {
+    "id": "K1509_article_general",
+    "title": "K1509: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1509 has verdict signal (score=4, reasons=None) but no general article in feed.json.  Verdict preview: ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1509",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-16T05:11:28+00:00"
+  },
+  {
+    "id": "K1347",
+    "title": "K1347: CVaR-based risk contribution 等化配置 vs sigma-based risk parity 的左尾改善 — yfinance 股/債/金/商品 ETF（SPY/TLT/GLD/PDBC），按 CVaR cont",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 610). Original: CVaR-based risk contribution 等化配置 vs sigma-based risk parity 的左尾改善 — yfinance 股/債/金/商品 ETF（SPY/TLT/GLD/PDBC），按 CVaR contribution 等化建組（月度 rebalance，`scipy` 凸優化），比較 sigma-based risk parity vs CVaR-RP 在 2018Q4/2020/2022/2025 壓力期的 MDD 與淨 Sharpe，DM 差異顯著性；與既有「Downside-CVaR 動態對沖」（CVaR 目標 + SPY+TLT+GLD 雙邊）不同，這裡是橫斷面 CVaR risk contribution 等化建組（來源：ScienceDirect 2025 CVaR-RP model；J.Risk Fin.Mgmt 2026 Dynamic RP vs Markowitz）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1347.py with signal.shift(1) + seed=42, (c) K1347_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 610,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-16T05:11:39Z"
   }
 ]
