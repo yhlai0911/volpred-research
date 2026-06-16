@@ -97,9 +97,20 @@ Corwin-Schultz alternatives are left to v2 sensitivity.
 The OLS autoregressive baseline already captures ~43% of OOS variance — the
 HYG illiquidity proxy is highly persistent at daily horizon, and 1-day +
 5-day + 22-day MAs explain nearly everything that cross-market vol features
-could plausibly add.  After conditioning on that AR structure, **SPY
-realized vol, VIX, credit-spread proxy, and SPY-VIX correlation provide no
-incremental information at daily frequency.**
+could plausibly add.  **Important framing caveat** (Codex review 2026-06-16): the DM test compares
+XGBoost vs OLS *given the same 7-feature set* (AR + cross-market). It
+therefore tests **model-class power** (gradient boosting vs linear), not
+**feature-set power** (cross-market vs AR-only). The legitimate claim is
+narrower: XGBoost does not extract significantly more signal than OLS from
+the joint AR+XMKT feature set at daily frequency. Whether the XMKT subset
+adds incremental power *over AR-only OLS* requires a separate AR-only
+baseline run — flagged for v2.
+
+With that caveat, on the joint feature set the result indicates **the linear
+mapping already saturates whatever predictive content these 7 daily-lagged
+features carry**; non-linear interactions XGB might exploit do not materialize
+in OOS. The VIX feature importance (0.46) is an in-sample split-gain
+statistic and does not translate into OOS forecast improvement.
 
 This is consistent with two narratives:
 - (a) Bond microstructure illiquidity is dominated by own-process inertia

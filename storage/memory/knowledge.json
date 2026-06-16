@@ -34865,5 +34865,44 @@
       "dm-test",
       "lookahead-risk"
     ]
+  },
+  {
+    "item_id": "c93e5c4c",
+    "category": "volatility_prediction",
+    "title": "K1515 PoC: bond illiquidity ML with cross-market vol features (CONDITIONAL_PASS, NULL on joint feature set)",
+    "content": "K1515 tests whether SPY realized vol / VIX / credit-spread / SPY-VIX corr (t-1 lagged) add OOS power for predicting next-day HYG illiquidity proxy (high-low)/close, on top of AR structure (lag1+5d/22d MA). Result: OLS R²=0.4315, XGB R²=0.4347 (Δ=+0.32pp), DM=0.049 p=0.961 — XGB does not significantly beat OLS on joint 7-feature set. Critical framing caveat (Codex review): DM tests model-class (linear vs XGB), NOT feature-set power (AR-only vs AR+XMKT). Legitimate claim is narrower: linear mapping saturates predictive content at daily horizon. VIX importance=0.46 is IS split gain, not OOS power. v2 needs AR-only baseline (3-way DM), HAC/HLN DM, weekly/monthly, panel HYG+LQD+VCIT+EMB+MUB, multi-illiq-proxy robustness.",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1515_bond_illiquidity_xmkt_vol",
+    "experiment_path": "experiments/k1515_bond_illiquidity_xmkt_vol/",
+    "k_id": "k1515",
+    "reviewer": "Codex CLI (gpt-5.4, ChatGPT auth) — primary path",
+    "reviewer_source": "codex_cli_primary",
+    "codex_review": true,
+    "parent_task": "research_illiquidity_vol_feature",
+    "commit": "7df716ce",
+    "evidence": [
+      "OOS 2023-01-03 → 2026-06-12, n_oos=864, n_train=2243",
+      "OLS R²=0.4315 RMSE=0.002035; XGB R²=0.4347 RMSE=0.002029",
+      "DM stat=0.049 p=0.961 (two-sided, iid normal, no HAC)",
+      "XGB feature importance: vix_lag1=0.46, hyg_illiq_ma5=0.28, hyg_illiq_lag1=0.071",
+      "OLS shows highly persistent AR structure dominates daily mapping"
+    ],
+    "limitations": "Single-name HYG only; range-based (H-L)/C proxy crude; daily frequency mismatch with FAJ 2024 monthly TRACE features; no XGB HPO; no AR-only baseline → cannot isolate XMKT increment; iid normal DM without HAC/HLN finite-sample correction.",
+    "confidence": 0.6,
+    "created_at": "2026-06-16T15:24:31.485422+00:00",
+    "tags": [
+      "bond-illiquidity",
+      "cross-market",
+      "xgboost",
+      "null-result",
+      "poc"
+    ],
+    "references": [
+      "Bali, Subrahmanyam, Wen (2024) FAJ — Predicting Corporate Bond Illiquidity via ML",
+      "Bao, Pan, Wang (2011) JoF — Illiquidity of corporate bonds",
+      "Dick-Nielsen et al. (2012) JFE — Corporate bond liquidity",
+      "Corwin & Schultz (2012) JoF — Bid-ask spreads from H-L",
+      "Diebold & Mariano (1995) JBES — Predictive accuracy"
+    ]
   }
 ]
