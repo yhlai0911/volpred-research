@@ -1,0 +1,120 @@
+{
+  "experiment_id": "K1518",
+  "title": "TWSE foreign institutional flow as Taiwan sector-vol leading indicator",
+  "verdict": "NULL",
+  "seed": 42,
+  "data": {
+    "price_source": "yfinance adjusted close",
+    "flow_source": "TWSE official T86 three-institution daily report, sampled at each week's actual last trading day",
+    "period": {
+      "start": "2018-01-01",
+      "end": "2026-06-17",
+      "oos_start": "2022-01-01"
+    },
+    "sectors": {
+      "semiconductor": [
+        "2330",
+        "2454",
+        "2303"
+      ],
+      "financial": [
+        "2881",
+        "2882",
+        "2891"
+      ],
+      "traditional": [
+        "1301",
+        "1303",
+        "2002",
+        "2603"
+      ]
+    },
+    "n_panel_rows": 1221,
+    "n_weeks": 407,
+    "flow_cache": "k1518_weekly_t86_flows.csv"
+  },
+  "lookahead_defenses": [
+    "Weekly target uses returns from t+1 through t+5 only.",
+    "Foreign net-selling z-score uses trailing 52-week rolling mean/std only.",
+    "Primary flow signal is explicitly shifted one additional week via foreign_sell_z.shift(1).",
+    "Train/OOS split is strictly temporal: train < 2022-01-01, OOS >= 2022-01-01.",
+    "Models fit on train only; OOS predictions use fixed train coefficients."
+  ],
+  "results": {
+    "models": {
+      "financial": {
+        "sector": "financial",
+        "n_train": 181,
+        "n_oos": 226,
+        "qlike_base": 0.9498463898979729,
+        "qlike_aug": 0.9663677230932982,
+        "qlike_improvement_pct": -1.7393689517628177,
+        "dm_t_aug_vs_base": 0.47205042387090235,
+        "dm_p_aug_vs_base": 0.6373482783545137,
+        "flow_coef": 0.12438714385329981,
+        "flow_sell_z_oos_mean": -0.04502536530384879,
+        "flow_sell_z_oos_std": 1.1184612823319136
+      },
+      "semiconductor": {
+        "sector": "semiconductor",
+        "n_train": 181,
+        "n_oos": 226,
+        "qlike_base": 0.5819373554538452,
+        "qlike_aug": 0.5715708082347803,
+        "qlike_improvement_pct": 1.7813854226594705,
+        "dm_t_aug_vs_base": -0.6450264038011874,
+        "dm_p_aug_vs_base": 0.5195672246781433,
+        "flow_coef": 0.08708657467857202,
+        "flow_sell_z_oos_mean": 0.06484598404391986,
+        "flow_sell_z_oos_std": 1.0583743086081847
+      },
+      "traditional": {
+        "sector": "traditional",
+        "n_train": 181,
+        "n_oos": 226,
+        "qlike_base": 0.6426640251312239,
+        "qlike_aug": 0.6451808547570745,
+        "qlike_improvement_pct": -0.3916244767764529,
+        "dm_t_aug_vs_base": 0.6947239894984923,
+        "dm_p_aug_vs_base": 0.48794505630879925,
+        "flow_coef": -0.026456764065426876,
+        "flow_sell_z_oos_mean": 0.009813243572744653,
+        "flow_sell_z_oos_std": 1.0183994665242009
+      },
+      "pooled": {
+        "sector": "pooled",
+        "n_train": 543,
+        "n_oos": 678,
+        "qlike_base": 0.7085073987714765,
+        "qlike_aug": 0.7059296003613554,
+        "qlike_improvement_pct": 0.3638350728010558,
+        "dm_t_aug_vs_base": -0.4771464196893015,
+        "dm_p_aug_vs_base": 0.6334118506370496,
+        "flow_coef": 0.04933486719743212,
+        "flow_sell_z_oos_mean": 0.009877954104271908,
+        "flow_sell_z_oos_std": 1.0652425992734795
+      }
+    },
+    "sector_directional_passes": 1,
+    "verdict": "NULL"
+  },
+  "references": [
+    {
+      "citation": "TWSE T86 三大法人買賣超日報 official data page.",
+      "url": "https://www.twse.com.tw/zh/trading/foreign/t86.html"
+    },
+    {
+      "citation": "Wei (2009), Taiwan institutional trading volume volatility spillover on stock market index return.",
+      "url": "https://ideas.repec.org/a/ebl/ecbull/eb-08c30093.html"
+    },
+    {
+      "citation": "Lin, Lee, and Chiu (2009), foreign investors' trading behavior and Taiwan stock market impact.",
+      "url": "https://ideas.repec.org/a/eee/riibaf/v23y2009i1p78-89.html"
+    },
+    {
+      "citation": "Structural changes in foreign investors' trading behavior and impact on Taiwan stock market (PMC full text).",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7148904/"
+    }
+  ],
+  "timestamp_utc": "2026-06-16T17:37:11.652380Z"
+}

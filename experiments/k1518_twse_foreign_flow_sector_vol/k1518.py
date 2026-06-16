@@ -131,19 +131,18 @@ def fetch_t86_date(date: pd.Timestamp) -> list[dict]:
         f"?date={date:%Y%m%d}&selectType=ALLBUT0999&response=json"
     )
     payload = None
-    for attempt in range(1, 6):
-        resp = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0"})
-        resp.raise_for_status()
+    for attempt in range(1, 9):
         try:
+            resp = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
             payload = resp.json()
             break
-        except ValueError:
-            if attempt == 5:
+        except (requests.RequestException, ValueError):
+            if attempt == 8:
                 raise RuntimeError(
-                    f"T86 returned non-JSON for {date:%Y%m%d}: "
-                    f"{resp.text[:120]!r}"
+                    f"T86 request failed or returned non-JSON for {date:%Y%m%d}"
                 )
-            time.sleep(0.5 * attempt)
+            time.sleep(5.0 * attempt)
     if payload is None:
         raise RuntimeError(f"T86 returned no payload for {date:%Y%m%d}")
     if payload.get("stat") != "OK":
@@ -200,9 +199,11 @@ def load_or_fetch_t86(week_dates: Iterable[pd.Timestamp]) -> pd.DataFrame:
     week_dates = pd.DatetimeIndex(sorted(pd.Timestamp(d) for d in week_dates))
     cached = pd.DataFrame()
     if T86_CACHE.exists():
-        cached = pd.read_csv(T86_CACHE, parse_dates=["date"])
+        cached = pd.read_csv(T86_CACHE)
+        cached["date"] = pd.to_datetime(cached["date"], format="mixed")
+        cached["code"] = cached["code"].astype(str).str.strip()
 
-    cached_dates = set(pd.to_datetime(cached["date"]).dt.normalize()) if not cached.empty else set()
+    cached_dates = set(pd.to_datetime(cached["date"], format="mixed").dt.normalize()) if not cached.empty else set()
     needed = [d for d in week_dates if d.normalize() not in cached_dates]
 
     rows: list[dict] = []
@@ -224,13 +225,13 @@ def load_or_fetch_t86(week_dates: Iterable[pd.Timestamp]) -> pd.DataFrame:
         if i == 1 or i % 25 == 0 or i == len(needed):
             print(f"[t86] fetched {i}/{len(needed)} missing week dates", flush=True)
             flush_rows()
-        time.sleep(0.15)
+        time.sleep(1.0)
     flush_rows()
 
     if cached.empty:
         raise RuntimeError("No T86 rows fetched")
 
-    cached["date"] = pd.to_datetime(cached["date"])
+    cached["date"] = pd.to_datetime(cached["date"], format="mixed")
     keep = cached["date"].isin(week_dates.normalize())
     out = cached.loc[keep].copy()
     if out.empty:

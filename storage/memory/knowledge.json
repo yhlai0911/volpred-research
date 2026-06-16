@@ -34916,5 +34916,18 @@
     ],
     "confidence": 0.86,
     "created_at": "2026-06-17T00:08:51.454762"
+  },
+  {
+    "item_id": "22cb1804",
+    "category": "experiment_result",
+    "content": "K1518 (2026-06-17) tested whether lagged TWSE official T86 foreign institutional net-selling shocks predict next-week Taiwan sector realized variance. Data: weekly last-trading-day T86 three-institution flows plus yfinance adjusted close for small semiconductor/financial/traditional Taiwan stock baskets, 2018-01-01 to 2026-06-17. Lookahead defenses: target uses t+1..t+5 returns, foreign_sell_z uses trailing 52-week rolling window, primary signal is foreign_sell_z.shift(1), train rows are < 2022-01-01, and OOS predictions use fixed train coefficients. Verdict NULL: pooled augmented HAR+flow has tiny QLIKE improvement vs HAR baseline (0.7085 -> 0.7059, +0.36%) but DM t=-0.477/p=0.633 where negative favors augmented. Semiconductor alone improves +1.78% but p=0.520; financial (-1.74%) and traditional (-0.39%) worsen. Conclusion: in this weekly public-data spec, foreign net-selling pressure is not a robust Taiwan sector-vol leading indicator; v2 would need full daily T86, complete sector universe, and better order-imbalance/holding flow.",
+    "evidence": [
+      "experiments/k1518_twse_foreign_flow_sector_vol/README.md",
+      "experiments/k1518_twse_foreign_flow_sector_vol/k1518.py",
+      "experiments/k1518_twse_foreign_flow_sector_vol/k1518_results.json",
+      "experiments/k1518_twse_foreign_flow_sector_vol/k1518_plots.png"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-17T01:39:08.906811"
   }
 ]

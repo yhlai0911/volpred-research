@@ -624,7 +624,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 企業債 illiquidity 的機器學習預測：用股票 vol 作跨市場 feature — yfinance HYG/LQD/VCIT（bond ETF）代理 illiquidity（bid-ask proxy = `high-low/close`），以 SPY/VIX/信用利差（HYG-LQD spread）為 feature，XGBoost vs 線性 OLS，誠實 OOS R² + DM 檢定，明確 lag；把債券流動性當 vol 預測的橋梁（來源：FAJ 2024 "Predicting Corporate Bond Illiquidity via Machine Learning"；J.Fixed Income 2025 ML bond vol）
 > **新軸 H — 另類數據 × 台股個股（JFQA 2025 衛星/替代數據熱點）**
 - [ ] Google Trends 特定產品關鍵字對台股供應鏈個股的 vol 預測增量 — pytrends 免費抓「iPhone demand」「AI server」「TSMC」「HBM」等週頻關鍵字 z-score，加入 TAIFEX 或 yfinance 台股個股 HAR-RV（2330/2303/2454/2382），檢定 attention shock 是否在次週 realized vol 有增量 DM，明確 lag；台股供應鏈 × attention 研究空白（來源：JFQA 2025 satellite TIR/alternative data cross-section；Review of Behavioral Finance 2026 retail attention shock）
-- [ ] 外資法人流量作台股板塊 vol 的 leading indicator — TWSE 免費三大法人買賣超（外資/投信/自營），算日頻淨買超 z-score，加入 0050 成分股板塊（半導體/金融/傳產）realized vol HAR 模型，檢定外資大量賣出前是否預測後續 vol 升高；台灣數據完整、機構 flow → vol 通道學術文件空白（來源：JFQA 2025 institutional trading & vol；EFM 2026 institutional role in momentum）
+- [x] ~~外資法人流量作台股板塊 vol 的 leading indicator~~ → **K1518 完成 2026-06-17，NULL**：TWSE 官方 T86 三大法人買賣超每週最後交易日 + yfinance 台股調整收盤價，半導體/金融/傳產小型 basket，target 為 t+1..t+5 next-week realized variance；外資賣超 z-score 用 trailing 52-week window 並 `shift(1)`，train < 2022-01-01、OOS 2022-2026。Pooled HAR baseline vs augmented flow OLS：QLIKE 0.7085→0.7059，改善僅 +0.36%，DM t=-0.477/p=0.633（負才代表 augmented 較好）。半導體單一 basket +1.78% 但 p=0.520，金融/傳產反而變差。結論：weekly public-data spec 不支持外資法人賣超是台股板塊 vol 的 robust leading indicator；日頻完整 T86、完整 sector universe、order-imbalance/holding-based flow 可列 v2。
 
 ## 決策框架
 
