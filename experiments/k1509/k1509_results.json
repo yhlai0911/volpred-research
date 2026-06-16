@@ -39,7 +39,7 @@
       "mean_b": 0.040849617624172926,
       "diff": 0.021359858593155194,
       "t": 15.736083851050827,
-      "p": 2.569831133238083e-51,
+      "p": 2.569831133238083E-51,
       "n_a": 847,
       "n_b": 2029,
       "ci95": {
@@ -56,7 +56,7 @@
       "mean_b": 0.015483668502666659,
       "diff": 0.011218969597196057,
       "t": 17.800644822440145,
-      "p": 2.08830887189375e-63,
+      "p": 2.08830887189375E-63,
       "n_a": 847,
       "n_b": 2029,
       "ci95": {
@@ -73,7 +73,7 @@
       "mean_b": 0.11493380187195057,
       "diff": 0.04656431585915344,
       "t": 14.35810625869823,
-      "p": 6.823998341300054e-44,
+      "p": 6.823998341300054E-44,
       "n_a": 847,
       "n_b": 2029,
       "ci95": {
@@ -90,7 +90,7 @@
       "mean_b": 0.04939771024987632,
       "diff": 0.02897275059548491,
       "t": 21.079079011885888,
-      "p": 9.982309933912708e-85,
+      "p": 9.982309933912708E-85,
       "n_a": 847,
       "n_b": 2029,
       "ci95": {
@@ -107,7 +107,7 @@
       "mean_b": 0.04363878129489685,
       "diff": 0.021582929979570252,
       "t": 20.7039596177175,
-      "p": 6.099762880936482e-85,
+      "p": 6.099762880936482E-85,
       "n_a": 847,
       "n_b": 2021,
       "ci95": {
@@ -124,7 +124,7 @@
       "mean_b": 0.01675940776851299,
       "diff": 0.01162429896438152,
       "t": 23.415613683340887,
-      "p": 1.6994517942227967e-103,
+      "p": 1.6994517942227967E-103,
       "n_a": 847,
       "n_b": 2021,
       "ci95": {
@@ -141,7 +141,7 @@
       "mean_b": 0.12222202618483834,
       "diff": 0.04530950833590332,
       "t": 18.390432869512964,
-      "p": 1.546229744463899e-69,
+      "p": 1.546229744463899E-69,
       "n_a": 847,
       "n_b": 2021,
       "ci95": {
@@ -158,7 +158,7 @@
       "mean_b": 0.05217430151760846,
       "diff": 0.029219313342947528,
       "t": 30.08916922507303,
-      "p": 4.586095116766849e-152,
+      "p": 4.586095116766849E-152,
       "n_a": 847,
       "n_b": 2021,
       "ci95": {
@@ -211,7 +211,7 @@
       "mean_b": -0.008548092625703402,
       "diff": -0.007612892002329702,
       "t": -8.636058663051257,
-      "p": 1.647778102424515e-17,
+      "p": 1.647778102424515E-17,
       "n_a": 847,
       "n_b": 2029,
       "ci95": {
@@ -228,7 +228,7 @@
       "mean_b": -0.03391404174720966,
       "diff": -0.017753780998288844,
       "t": -17.300811029447004,
-      "p": 2.1975563852740305e-60,
+      "p": 2.1975563852740305E-60,
       "n_a": 847,
       "n_b": 2029,
       "ci95": {
@@ -245,7 +245,7 @@
       "mean_b": 0.06553609162207424,
       "diff": 0.01759156526366855,
       "t": 7.363825529896432,
-      "p": 2.8937229666903407e-13,
+      "p": 2.8937229666903407E-13,
       "n_a": 847,
       "n_b": 2029,
       "ci95": {
@@ -262,7 +262,7 @@
       "mean_b": -0.008535520222711616,
       "diff": -0.0076363833633772814,
       "t": -15.082692826856462,
-      "p": 2.6072938187291115e-48,
+      "p": 2.6072938187291115E-48,
       "n_a": 847,
       "n_b": 2021,
       "ci95": {
@@ -279,7 +279,7 @@
       "mean_b": -0.03541489374909548,
       "diff": -0.017595014378565997,
       "t": -28.718650962882265,
-      "p": 6.323907447176274e-141,
+      "p": 6.323907447176274E-141,
       "n_a": 847,
       "n_b": 2021,
       "ci95": {
@@ -296,7 +296,7 @@
       "mean_b": 0.07004772466722986,
       "diff": 0.01609019499295579,
       "t": 9.148458460343276,
-      "p": 1.371738308554208e-19,
+      "p": 1.371738308554208E-19,
       "n_a": 847,
       "n_b": 2021,
       "ci95": {
@@ -314,6 +314,18 @@
     "Daily RV is noisy; intraday TIPS data not used.",
     "LTPZ liquidity is thin and may inject idiosyncratic vol unrelated to CPI.",
     "ES5 estimates depend on regime sample size; high regime has fewer obs.",
-    "Bonferroni applied only to RV family (6 tests); ES & gap tests are descriptive."
-  ]
+    "Bonferroni applied only to RV family (6 tests); ES & gap tests are descriptive.",
+    "Welch t-test p-values for 21d rolling RV are anti-conservative due to ~20-day window overlap (effective N ~1/21 of nominal); directional conclusions remain robust given effect-size magnitude but reported p-values should not be cited verbatim — Newey-West / block-bootstrap correction recommended.",
+    "iid bootstrap CI on overlapping rolling RV understates uncertainty; should use block bootstrap with block_size = window."
+  ],
+  "review": {
+    "reviewer_source": "code-reviewer subagent (fallback after codex-cli 0.139.0 stdin-hang)",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewed_at": "2026-06-16T10:50:00+08:00",
+    "key_issues": [
+      "RV uses current-day return (acceptable for descriptive)",
+      "Welch p-values anti-conservative on overlapping 21d rolling RV",
+      "Bootstrap CI iid resample on serially-correlated obs"
+    ]
+  }
 }

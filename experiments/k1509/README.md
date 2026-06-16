@@ -109,6 +109,18 @@ Treasury（IEF）在高通膨（>3%）vs 正常 regime 下：
 3. LTPZ 流動性偏薄，可能注入與 CPI 無關的 idiosyncratic vol。
 4. ES5 估計依賴 regime 樣本數；高 regime n=847 仍夠用但比 normal 少。
 5. Bonferroni 只套用在 RV family（6 tests）；gap 與 ES 檢定為 descriptive。
+6. **Welch t-test on overlapping 21d rolling RV is anti-conservative**：rolling
+   window 之間有 ~20 天重疊 → 樣本非獨立，effective N ~1/21 of nominal。報告 p-value
+   不可直接照用；directional 結論在 effect-size 量級上仍可信，但嚴格推論需 Newey-West
+   / block bootstrap 修正。
+7. **iid bootstrap CI** on serially-correlated rolling RV understates uncertainty；
+   應改用 block bootstrap，block_size = window。
+
+## Review
+
+- Reviewer: code-reviewer subagent (Codex CLI 0.139.0 stdin-hang fallback)
+- Verdict: **CONDITIONAL_PASS**（補 limitations 後可寫 knowledge.json）
+- Reviewed at: 2026-06-16T10:50 +08:00
 
 ## 重跑
 
