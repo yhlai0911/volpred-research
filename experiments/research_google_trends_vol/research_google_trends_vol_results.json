@@ -1,0 +1,203 @@
+{
+  "experiment_id": "research_google_trends_vol",
+  "title": "Google Trends product-keyword attention vs Taiwan supply-chain weekly volatility",
+  "created_at": "2026-06-16T13:11:58.153289+00:00",
+  "finished_at": "2026-06-16T13:11:59.645991+00:00",
+  "seed": 42,
+  "task_origin": "research_google_trends_vol",
+  "data": {
+    "price_panel": {
+      "source": "yfinance adjusted close",
+      "start": "2018-01-01",
+      "end_exclusive": "2026-06-15",
+      "n_trading_days": 2048,
+      "first_date": "2018-01-02",
+      "last_date": "2026-06-12",
+      "non_null_counts": {
+        "2303.TW": 2048,
+        "2330.TW": 2048,
+        "2382.TW": 2048,
+        "2454.TW": 2048
+      },
+      "tickers": {
+        "2330.TW": "TSMC",
+        "2303.TW": "UMC",
+        "2454.TW": "MediaTek",
+        "2382.TW": "Quanta"
+      }
+    },
+    "google_trends": {
+      "available": true,
+      "source": "local_cache",
+      "cache_path": "experiments/research_google_trends_vol/google_trends_weekly.csv",
+      "geo": "TW",
+      "terms_requested": [
+        "iPhone",
+        "AI server",
+        "TSMC",
+        "HBM"
+      ],
+      "terms_available": [
+        "iPhone",
+        "TSMC",
+        "HBM"
+      ],
+      "n_weeks": 261,
+      "first_week": "2018-01-05",
+      "last_week": "2022-12-30",
+      "errors": {}
+    }
+  },
+  "related_prior_experiments": {
+    "K750": "Real Google Trends fear index did not add robust volatility value beyond VIX; fear was reactive.",
+    "K789": "Return/tail-risk follow-up fell back to VIX-proxy and concluded no genuine Google Trends evidence.",
+    "K1472": "Rolling HAR framework template for honest low-frequency volatility proxy tests."
+  },
+  "literature": [
+    {
+      "citation": "Da, Engelberg & Gao (2011), Journal of Finance",
+      "note": "Introduces Google Search Volume Index as a direct investor-attention proxy.",
+      "url": "https://www3.nd.edu/~zda/Google.pdf"
+    },
+    {
+      "citation": "Vlastakis & Markellos (2012), Journal of Banking & Finance",
+      "note": "Studies Google Trends information demand and stock-market volatility.",
+      "url": "https://ideas.repec.org/a/eee/jbfina/v36y2012i6p1808-1821.html"
+    },
+    {
+      "citation": "Andrei & Hasler (2015), Review of Financial Studies",
+      "note": "Models investor attention and uncertainty as drivers of return variance.",
+      "url": "https://ideas.repec.org/a/oup/rfinst/v28y2015i1p33-72..html"
+    },
+    {
+      "citation": "Investor attention fluctuation and stock market volatility (2023), PLOS ONE",
+      "note": "Uses investor attention inside HAR-style volatility forecasting for China.",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10681240/"
+    }
+  ],
+  "methodology": {
+    "frequency": "weekly",
+    "target": "current-week close-to-close realized variance, sum of daily log-return squared",
+    "baseline": "log-HAR weekly RV model with rv_lag1 / rv_lag4 / rv_lag13",
+    "candidate_increment": "Google Trends composite attention lagged one week",
+    "lookahead_guard": "attention_lag1 = attention.shift(1); no same-week search volume predicts same-week RV",
+    "evaluation": "rolling expanding OOS, QLIKE, HAC DM-style loss-difference t-stat; Harvey |t|>3 gate"
+  },
+  "limitations": [
+    "Google Trends is accessed through unofficial pytrends endpoints and may return HTTP 429.",
+    "Only real Google Trends terms that pass the minimum-week gate are used; no VIX/price proxy fills missing terms.",
+    "If Google only returns a partial historical panel, the conclusion is limited to that available panel.",
+    "Weekly Google Trends values are normalized by Google; stitched chunks are approximate even with overlap scaling."
+  ],
+  "hypothesis_tested": true,
+  "predictive_results": {
+    "attention_feature": "mean rolling 52-week z-score across available Google Trends terms",
+    "timing": "attention_composite.shift(1) predicts current-week realized variance",
+    "assets": {
+      "2330.TW": {
+        "ok": true,
+        "n": 230,
+        "oos_n": 69,
+        "oos_start": "2021-09-03",
+        "oos_end": "2022-12-30",
+        "models": {
+          "har": {
+            "qlike": 0.48215333656947357,
+            "relative_improvement_pct": 0.0,
+            "dm_hac_t_vs_har": null,
+            "dm_hac_p_vs_har": null,
+            "harvey_pass_vs_har": null
+          },
+          "har_attention": {
+            "qlike": 0.48137727926396356,
+            "relative_improvement_pct": 0.16095653532788123,
+            "dm_hac_t_vs_har": 0.17585232484311705,
+            "dm_hac_p_vs_har": 0.8604099608252854,
+            "harvey_pass_vs_har": false
+          }
+        }
+      },
+      "2303.TW": {
+        "ok": true,
+        "n": 230,
+        "oos_n": 69,
+        "oos_start": "2021-09-03",
+        "oos_end": "2022-12-30",
+        "models": {
+          "har": {
+            "qlike": 0.5577848730912819,
+            "relative_improvement_pct": 0.0,
+            "dm_hac_t_vs_har": null,
+            "dm_hac_p_vs_har": null,
+            "harvey_pass_vs_har": null
+          },
+          "har_attention": {
+            "qlike": 0.5589673015859585,
+            "relative_improvement_pct": -0.21198647573992938,
+            "dm_hac_t_vs_har": -0.7716324912048841,
+            "dm_hac_p_vs_har": 0.4403321248357487,
+            "harvey_pass_vs_har": false
+          }
+        }
+      },
+      "2454.TW": {
+        "ok": true,
+        "n": 230,
+        "oos_n": 69,
+        "oos_start": "2021-09-03",
+        "oos_end": "2022-12-30",
+        "models": {
+          "har": {
+            "qlike": 0.403885001168794,
+            "relative_improvement_pct": 0.0,
+            "dm_hac_t_vs_har": null,
+            "dm_hac_p_vs_har": null,
+            "harvey_pass_vs_har": null
+          },
+          "har_attention": {
+            "qlike": 0.4075135873259661,
+            "relative_improvement_pct": -0.8984206263345782,
+            "dm_hac_t_vs_har": -1.338683143368431,
+            "dm_hac_p_vs_har": 0.18067384616290783,
+            "harvey_pass_vs_har": false
+          }
+        }
+      },
+      "2382.TW": {
+        "ok": true,
+        "n": 230,
+        "oos_n": 69,
+        "oos_start": "2021-09-03",
+        "oos_end": "2022-12-30",
+        "models": {
+          "har": {
+            "qlike": 0.5893728835144492,
+            "relative_improvement_pct": 0.0,
+            "dm_hac_t_vs_har": null,
+            "dm_hac_p_vs_har": null,
+            "harvey_pass_vs_har": null
+          },
+          "har_attention": {
+            "qlike": 0.5869873189904201,
+            "relative_improvement_pct": 0.4047631967395331,
+            "dm_hac_t_vs_har": 0.22591180954750978,
+            "dm_hac_p_vs_har": 0.8212700125618984,
+            "harvey_pass_vs_har": false
+          }
+        }
+      }
+    },
+    "primary_family": {
+      "tests": 4,
+      "pass_count_harvey_abs_t_gt_3": 0,
+      "verdict": "NULL"
+    }
+  },
+  "verdict": "NULL",
+  "conclusion": "In the available real Google Trends panel, the lagged product-keyword composite did not robustly improve weekly RV forecasts versus HAR across the Taiwan supply-chain ticker family. This is a partial-panel NULL, not evidence that all product-search attention data are useless.",
+  "review": {
+    "self_review": "No replacement proxy is used when Google Trends is unavailable.",
+    "lookahead": "Predictive branch uses explicit attention.shift(1).",
+    "codex_review_path": "experiments/research_google_trends_vol/codex_review.md"
+  }
+}

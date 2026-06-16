@@ -34820,5 +34820,18 @@
     ],
     "confidence": 0.74,
     "created_at": "2026-06-16T18:33:51.899631"
+  },
+  {
+    "item_id": "35917dfd",
+    "category": "knowledge",
+    "content": "research_google_trends_vol NULL (partial-panel): Real Taiwan Google Trends panel was cached for iPhone/TSMC/HBM only, 2018-01-05 to 2022-12-30 (261 weeks); AI server unavailable and 2021-2026 chunks mostly hit HTTP 429. Using weekly Taiwan yfinance adjusted closes for 2330/2303/2454/2382, log-HAR baseline vs HAR+lagged attention composite with explicit attention.shift(1), rolling OOS n=69 weeks per ticker, QLIKE + HAC loss-difference tests. Result: 0/4 Harvey |t|>3 passes; relative QLIKE improvements were small/mixed (2330 +0.16%, 2382 +0.40%, 2303 -0.21%, 2454 -0.90%). Conclusion is narrow: in the available 2018-2022 TW product-keyword panel, Google Trends attention does not robustly improve next-week supply-chain RV forecasts beyond HAR. Do not generalize to all product-search attention without stable 2023-2026 Trends export.",
+    "evidence": [
+      "experiments/research_google_trends_vol/research_google_trends_vol.py",
+      "experiments/research_google_trends_vol/research_google_trends_vol_results.json",
+      "experiments/research_google_trends_vol/google_trends_weekly.csv",
+      "experiments/research_google_trends_vol/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-16T21:12:18.771155"
   }
 ]
