@@ -1,0 +1,31 @@
+{
+  "N_total": 144,
+  "sample_start": "2014-03",
+  "sample_end": "2026-04",
+  "N_inst_sell_retail_buy": 39,
+  "N_other": 105,
+  "mean_focus_bp": 152.22937461503508,
+  "mean_other_bp": 172.80062923437507,
+  "mean_diff_bp": -20.571254619339978,
+  "std_focus_bp": 585.5381155520688,
+  "std_other_bp": 548.9471764118741,
+  "t_stat_welch": -0.1904983915670318,
+  "p_value_welch": 0.8495182710801968,
+  "beta_NW_bp": -20.571254619340067,
+  "t_stat_NW": -0.22012682386112348,
+  "p_value_NW": 0.8257723847052826,
+  "any_reversal_N": 59,
+  "any_reversal_beta_bp": -125.28075712747484,
+  "any_reversal_t_NW": -1.5627376086348426,
+  "any_reversal_p_NW": 0.11811432459494263,
+  "verdict": "NULL",
+  "verdict_rule": "PASS_PRELIMINARY if |t_NW|>1.96 AND N_focus>=24; else INCONCLUSIVE/NULL",
+  "generated_at_utc": "2026-06-16T07:40:05.560734",
+  "seed": 42,
+  "data_sources": [
+    "TWSE BFI82U monthly aggregate (三大法人月度買賣)",
+    "TWSE MI_MARGN month-end last trading day (融資餘額)",
+    "yfinance 0050.TW month-end Close"
+  ],
+  "lag_protocol": "signal at end-of-month t, return = log(Close_t+1 / Close_t)"
+}
