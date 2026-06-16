@@ -34724,5 +34724,19 @@
     ],
     "confidence": 0.64,
     "created_at": "2026-06-16T16:07:23.690875"
+  },
+  {
+    "item_id": "795d4bba",
+    "category": "K1511_role_reversal_TWN_PoC_NULL_underpowered",
+    "content": "K1511 (台股 0050 月度 PoC, 2014-03 ~ 2026-04, N=144): 機構作空 × 散戶跟漲「角色反轉」(top-quartile foreign-sell ∩ top-quartile margin-buy, N_focus=39) → 次月 0050 報酬與其他月份差 −20.6bp (HAC Newey-West maxlags=3, t=−0.22, p=0.83). Verdict: NULL.\n重點：PoC underpowered — SE 108bp, 95% CI [−232, +191] bp, approx power @ EFM +40bp ref effect = 6.6%, 80%-power MDE = 302bp. 不可宣稱台股拒絕 EFM 規模效應；只能說此月度 PoC 沒檢出同方向 +40bp 效應，CI 仍含 +40。\nCodex verdict: CONDITIONAL_PASS (codex-cli gpt-5.4) — 已套用 patches: results.json 加 power_analysis 區塊; README verdict 改 NULL (underpowered for EFM +40bp); 結論用詞由「does not replicate / direction opposite」修正為「not detected; cannot reject +40bp」.\nFollow-ups: (1) 改 daily / weekly 頻率拉高 N 再判定 (2) 用 2020+ 子期對齊 EFM 美股窗 (3) 嘗試 dealer/trust 分離的機構 proxy 而非 foreign total.\nProvenance: experiment_path=experiments/k1511/; codex_review=experiments/k1511/codex_review.md.",
+    "evidence": [
+      "experiments/k1511/k1511.py",
+      "experiments/k1511/k1511_results.json",
+      "experiments/k1511/README.md",
+      "experiments/k1511/codex_review.md",
+      "experiments/k1511/fig_a_role_reversal_returns.png"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-16T16:10:23.593993"
   }
 ]
