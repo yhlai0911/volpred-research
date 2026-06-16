@@ -1,0 +1,1740 @@
+{
+  "experiment_id": "K1514",
+  "title": "Liberation Day 2025 cross-asset correlation event study",
+  "created_at": "2026-06-16T10:31:30.725827+00:00",
+  "seed": 42,
+  "config": {
+    "tickers": {
+      "SPY": "SPY",
+      "TLT": "TLT",
+      "GLD": "GLD",
+      "PDBC": "PDBC",
+      "BTC": "BTC-USD",
+      "VIX": "^VIX"
+    },
+    "period": [
+      "2019-01-01",
+      "2025-08-31"
+    ],
+    "event_date": "2025-04-02",
+    "event_timing": "post window starts on first trading day after event date",
+    "windows_trading_days": [
+      30,
+      60,
+      90
+    ],
+    "control_years": [
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "bootstrap_reps": 1000,
+    "bootstrap_block": 5,
+    "lookahead_policy": "ex-post event study; pre windows end on/before event date, post windows start strictly after event date"
+  },
+  "sample": {
+    "first_return_day": "2019-01-03",
+    "last_return_day": "2025-08-29",
+    "n_obs": 1674
+  },
+  "results_by_window": {
+    "30": {
+      "event_window": {
+        "event_date": "2025-04-02",
+        "pre_start": "2025-02-20",
+        "pre_end": "2025-04-02",
+        "post_start": "2025-04-03",
+        "post_end": "2025-05-15",
+        "n_pre": 30,
+        "n_post": 30
+      },
+      "pairs": {
+        "stock_bond": {
+          "assets": [
+            "SPY",
+            "TLT"
+          ],
+          "event": {
+            "corr_pre": -0.20539925659979674,
+            "corr_post": 0.20796515296427642,
+            "delta_corr": 0.41336440956407317,
+            "z_stat": 1.5409987742836575,
+            "p_value": 0.1233170843001854,
+            "n_pre": 30,
+            "n_post": 30
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 82,
+            "mean": 0.40615799924797646,
+            "ci95": [
+              -0.18907904897706554,
+              0.9192973304536808
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": 0.16660650771303262,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-02-19",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.32265846122255004,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-02-18",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-05-16",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.11374571201961048,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-02-17",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-05-15",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.13855807008795984,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-02-20",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              }
+            ],
+            "mean_delta": 0.128519331750983,
+            "std_delta": 0.1806781321072622,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.28484507781309015,
+            "placebo_mean_delta": 0.128519331750983,
+            "placebo_std_delta": 0.1806781321072622,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 3.153066444631913,
+            "p_vs_placebo_mean": 0.05114408502706014
+          }
+        },
+        "stock_gold": {
+          "assets": [
+            "SPY",
+            "GLD"
+          ],
+          "event": {
+            "corr_pre": -0.0366565808804049,
+            "corr_post": 0.062041335475653034,
+            "delta_corr": 0.09869791635605793,
+            "z_stat": 0.3629928274074265,
+            "p_value": 0.7166102423385263,
+            "n_pre": 30,
+            "n_post": 30
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 82,
+            "mean": 0.018176593624037254,
+            "ci95": [
+              -0.728610759236955,
+              0.5410722333948793
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": 0.02797673258126948,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-02-19",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.6458733099112799,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-02-18",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-05-16",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.011771128324299385,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-02-17",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-05-15",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.32647824967750244,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-02-20",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              }
+            ],
+            "mean_delta": 0.2471392909614381,
+            "std_delta": 0.30569610206243464,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": -0.14844137460538018,
+            "placebo_mean_delta": 0.2471392909614381,
+            "placebo_std_delta": 0.30569610206243464,
+            "n_controls": 4,
+            "t_vs_placebo_mean": -0.9711695609063596,
+            "p_vs_placebo_mean": 0.4030961650553355
+          }
+        },
+        "stock_commodity": {
+          "assets": [
+            "SPY",
+            "PDBC"
+          ],
+          "event": {
+            "corr_pre": 0.4474184636070537,
+            "corr_post": 0.7641785085530612,
+            "delta_corr": 0.31676004494600757,
+            "z_stat": 1.9279249520105946,
+            "p_value": 0.05386446160489933,
+            "n_pre": 30,
+            "n_post": 30
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 87,
+            "mean": 0.24345754618571044,
+            "ci95": [
+              -0.3613748675456383,
+              0.6229884627793857
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.47784635545827747,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-02-19",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.8155274996416289,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-02-18",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-05-16",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2023,
+                "delta_corr": 0.306653288272025,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-02-17",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-05-15",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.2671628483922198,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-02-20",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              }
+            ],
+            "mean_delta": 0.22787432021189905,
+            "std_delta": 0.5326436099361482,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.08888572473410852,
+            "placebo_mean_delta": 0.22787432021189905,
+            "placebo_std_delta": 0.5326436099361482,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 0.33375308771568246,
+            "p_vs_placebo_mean": 0.7605334843868092
+          }
+        },
+        "stock_btc": {
+          "assets": [
+            "SPY",
+            "BTC"
+          ],
+          "event": {
+            "corr_pre": 0.44966995642532526,
+            "corr_post": 0.5090759706577115,
+            "delta_corr": 0.05940601423238623,
+            "z_stat": 0.2836332709880897,
+            "p_value": 0.7766914371910938,
+            "n_pre": 30,
+            "n_post": 30
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 81,
+            "mean": 0.0036088208467332777,
+            "ci95": [
+              -0.5544588052705995,
+              0.4598887833429927
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.036832846400884134,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-02-19",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.28411953947613167,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-02-18",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-05-16",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.033118701100598946,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-02-17",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-05-15",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.32865680456553936,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-02-20",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              }
+            ],
+            "mean_delta": 0.135706199135047,
+            "std_delta": 0.19792930126791747,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": -0.07630018490266077,
+            "placebo_mean_delta": 0.135706199135047,
+            "placebo_std_delta": 0.19792930126791747,
+            "n_controls": 4,
+            "t_vs_placebo_mean": -0.7709842293575392,
+            "p_vs_placebo_mean": 0.496872326228889
+          }
+        },
+        "stock_vol": {
+          "assets": [
+            "SPY",
+            "VIX"
+          ],
+          "event": {
+            "corr_pre": -0.9115808402320127,
+            "corr_post": -0.9097883657093169,
+            "delta_corr": 0.0017924745226958194,
+            "z_stat": 0.038593882159320164,
+            "p_value": 0.9692141799901957,
+            "n_pre": 30,
+            "n_post": 30
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 81,
+            "mean": -0.007154835656879838,
+            "ci95": [
+              -0.07766703680321888,
+              0.055713927000151195
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": 0.004674694860442585,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-02-19",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2022,
+                "delta_corr": -0.016573375718094918,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-02-18",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-05-16",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.04700660224347519,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-02-17",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-05-15",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2024,
+                "delta_corr": -0.037608283805707354,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-02-20",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              }
+            ],
+            "mean_delta": -0.02412839172670872,
+            "std_delta": 0.023034872626435193,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.02592086624940454,
+            "placebo_mean_delta": -0.02412839172670872,
+            "placebo_std_delta": 0.023034872626435193,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 2.250576043529525,
+            "p_vs_placebo_mean": 0.109879486868115
+          }
+        },
+        "bond_gold": {
+          "assets": [
+            "TLT",
+            "GLD"
+          ],
+          "event": {
+            "corr_pre": -0.012069897730794995,
+            "corr_post": 0.027261924538078477,
+            "delta_corr": 0.039331822268873474,
+            "z_stat": 0.14454132268637113,
+            "p_value": 0.8850730282431252,
+            "n_pre": 30,
+            "n_post": 30
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 81,
+            "mean": 0.020747905631817862,
+            "ci95": [
+              -0.5371874527296631,
+              0.49767390299195646
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": 0.4677407868363429,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-02-19",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2022,
+                "delta_corr": -0.08376890677292356,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-02-18",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-05-16",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.1313134067008938,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-02-17",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-05-15",
+                "n_pre": 30,
+                "n_post": 30
+              },
+              {
+                "year": 2024,
+                "delta_corr": -0.18260177641242004,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-02-20",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-05-14",
+                "n_pre": 30,
+                "n_post": 30
+              }
+            ],
+            "mean_delta": 0.017514174237526367,
+            "std_delta": 0.30285216841647783,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.021817648031347107,
+            "placebo_mean_delta": 0.017514174237526367,
+            "placebo_std_delta": 0.30285216841647783,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 0.14408117429322018,
+            "p_vs_placebo_mean": 0.8945707632945712
+          }
+        }
+      }
+    },
+    "60": {
+      "event_window": {
+        "event_date": "2025-04-02",
+        "pre_start": "2025-01-06",
+        "pre_end": "2025-04-02",
+        "post_start": "2025-04-03",
+        "post_end": "2025-06-30",
+        "n_pre": 60,
+        "n_post": 60
+      },
+      "pairs": {
+        "stock_bond": {
+          "assets": [
+            "SPY",
+            "TLT"
+          ],
+          "event": {
+            "corr_pre": 0.00542660448393116,
+            "corr_post": 0.2070966695868204,
+            "delta_corr": 0.20167006510288926,
+            "z_stat": 1.0928488280298332,
+            "p_value": 0.2744601790192125,
+            "n_pre": 60,
+            "n_post": 60
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 112,
+            "mean": 0.1984704718871609,
+            "ci95": [
+              -0.22600908476917367,
+              0.5930409590713321
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": 0.011606476714453168,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-01-06",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.18421699854364568,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-01-06",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-06-29",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.1542888358363918,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-01-05",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.06643683556830265,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-01-05",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-06-27",
+                "n_pre": 60,
+                "n_post": 60
+              }
+            ],
+            "mean_delta": 0.026992868747502424,
+            "std_delta": 0.1406829188700034,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.17467719635538684,
+            "placebo_mean_delta": 0.026992868747502424,
+            "placebo_std_delta": 0.1406829188700034,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 2.4832751233544634,
+            "p_vs_placebo_mean": 0.08901163551378333
+          }
+        },
+        "stock_gold": {
+          "assets": [
+            "SPY",
+            "GLD"
+          ],
+          "event": {
+            "corr_pre": 0.09367298552627412,
+            "corr_post": -0.009637636539301234,
+            "delta_corr": -0.10331062206557536,
+            "z_stat": -0.5529998032522947,
+            "p_value": 0.5802635448918081,
+            "n_pre": 60,
+            "n_post": 60
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 112,
+            "mean": -0.1659630499045678,
+            "ci95": [
+              -0.8183836672124478,
+              0.3258473600068995
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": 0.12840773995063387,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-01-06",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.49130219831328237,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-01-06",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-06-29",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.11848236572118089,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-01-05",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.15950960157477656,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-01-05",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-06-27",
+                "n_pre": 60,
+                "n_post": 60
+              }
+            ],
+            "mean_delta": 0.16518429352937797,
+            "std_delta": 0.25046914541377896,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": -0.2684949155949533,
+            "placebo_mean_delta": 0.16518429352937797,
+            "placebo_std_delta": 0.25046914541377896,
+            "n_controls": 4,
+            "t_vs_placebo_mean": -2.1439360536915273,
+            "p_vs_placebo_mean": 0.12140079238675483
+          }
+        },
+        "stock_commodity": {
+          "assets": [
+            "SPY",
+            "PDBC"
+          ],
+          "event": {
+            "corr_pre": 0.2730867543684072,
+            "corr_post": 0.5118130643296376,
+            "delta_corr": 0.2387263099612304,
+            "z_stat": 1.521414008659954,
+            "p_value": 0.12815597562310632,
+            "n_pre": 60,
+            "n_post": 60
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 117,
+            "mean": 0.14735536328608162,
+            "ci95": [
+              -0.5294271986403779,
+              0.6189493854388427
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.35802985876264737,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-01-06",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.6222975825588141,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-01-06",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-06-29",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2023,
+                "delta_corr": 0.055821887469801934,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-01-05",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.4112561869297517,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-01-05",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-06-27",
+                "n_pre": 60,
+                "n_post": 60
+              }
+            ],
+            "mean_delta": 0.18283644954893008,
+            "std_delta": 0.42971724280748513,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.05588986041230032,
+            "placebo_mean_delta": 0.18283644954893008,
+            "placebo_std_delta": 0.42971724280748513,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 0.2601238900592089,
+            "p_vs_placebo_mean": 0.8115997020848524
+          }
+        },
+        "stock_btc": {
+          "assets": [
+            "SPY",
+            "BTC"
+          ],
+          "event": {
+            "corr_pre": 0.4445626306143476,
+            "corr_post": 0.43826507331918,
+            "delta_corr": -0.006297557295167566,
+            "z_stat": -0.041756031127305145,
+            "p_value": 0.9666931864962685,
+            "n_pre": 60,
+            "n_post": 60
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 111,
+            "mean": -0.04449369390565757,
+            "ci95": [
+              -0.44944911116041664,
+              0.3369656424557582
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.09424257973216668,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-01-06",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.12324469159692614,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-01-06",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-06-29",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.20640084082045349,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-01-05",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.24963736007709017,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-01-05",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-06-27",
+                "n_pre": 60,
+                "n_post": 60
+              }
+            ],
+            "mean_delta": 0.018059657780349035,
+            "std_delta": 0.20630594717754414,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": -0.0243572150755166,
+            "placebo_mean_delta": 0.018059657780349035,
+            "placebo_std_delta": 0.20630594717754414,
+            "n_controls": 4,
+            "t_vs_placebo_mean": -0.23612712487202425,
+            "p_vs_placebo_mean": 0.828537049777015
+          }
+        },
+        "stock_vol": {
+          "assets": [
+            "SPY",
+            "VIX"
+          ],
+          "event": {
+            "corr_pre": -0.8898448110185407,
+            "corr_post": -0.8923009913608606,
+            "delta_corr": -0.002456180342319869,
+            "z_stat": -0.06365842315748245,
+            "p_value": 0.9492422110774967,
+            "n_pre": 60,
+            "n_post": 60
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 111,
+            "mean": -0.004612163968371301,
+            "ci95": [
+              -0.07433253332741617,
+              0.061801810470129254
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.06182730695167349,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-01-06",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.008167302480544092,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-01-06",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-06-29",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2023,
+                "delta_corr": 0.002152705234250929,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-01-05",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2024,
+                "delta_corr": -0.05022292616155499,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-01-05",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-06-27",
+                "n_pre": 60,
+                "n_post": 60
+              }
+            ],
+            "mean_delta": -0.025432556349608365,
+            "std_delta": 0.03572598250039557,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.022976376007288496,
+            "placebo_mean_delta": -0.025432556349608365,
+            "placebo_std_delta": 0.03572598250039557,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 1.286255794758568,
+            "p_vs_placebo_mean": 0.2886330927916241
+          }
+        },
+        "bond_gold": {
+          "assets": [
+            "TLT",
+            "GLD"
+          ],
+          "event": {
+            "corr_pre": 0.0034584990171831363,
+            "corr_post": -0.004098416457241001,
+            "delta_corr": -0.007556915474424137,
+            "z_stat": -0.0403430850523661,
+            "p_value": 0.9678196048164451,
+            "n_pre": 60,
+            "n_post": 60
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 111,
+            "mean": -0.011142836725388608,
+            "ci95": [
+              -0.35193776619079836,
+              0.3414345459295376
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.05344489877260017,
+                "event_date": "2021-04-02",
+                "pre_start": "2021-01-06",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.10949188788534991,
+                "event_date": "2022-04-02",
+                "pre_start": "2022-01-06",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-06-29",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2023,
+                "delta_corr": 0.0231903546469307,
+                "event_date": "2023-04-02",
+                "pre_start": "2023-01-05",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-06-28",
+                "n_pre": 60,
+                "n_post": 60
+              },
+              {
+                "year": 2024,
+                "delta_corr": -0.19347572357811627,
+                "event_date": "2024-04-02",
+                "pre_start": "2024-01-05",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-06-27",
+                "n_pre": 60,
+                "n_post": 60
+              }
+            ],
+            "mean_delta": -0.028559594954608955,
+            "std_delta": 0.1285209153203637,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.02100267948018482,
+            "placebo_mean_delta": -0.028559594954608955,
+            "placebo_std_delta": 0.1285209153203637,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 0.326836755369062,
+            "p_vs_placebo_mean": 0.7652671662272557
+          }
+        }
+      }
+    },
+    "90": {
+      "event_window": {
+        "event_date": "2025-04-02",
+        "pre_start": "2024-11-20",
+        "pre_end": "2025-04-02",
+        "post_start": "2025-04-03",
+        "post_end": "2025-08-12",
+        "n_pre": 90,
+        "n_post": 90
+      },
+      "pairs": {
+        "stock_bond": {
+          "assets": [
+            "SPY",
+            "TLT"
+          ],
+          "event": {
+            "corr_pre": 0.09030957880196372,
+            "corr_post": 0.16367125934334323,
+            "delta_corr": 0.07336168054137951,
+            "z_stat": 0.49202340376363113,
+            "p_value": 0.6227027988094407,
+            "n_pre": 90,
+            "n_post": 90
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 142,
+            "mean": 0.06259821091588735,
+            "ci95": [
+              -0.3280246009967883,
+              0.40234665689476584
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.1292443493760807,
+                "event_date": "2021-04-02",
+                "pre_start": "2020-11-20",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.28253365127019736,
+                "event_date": "2022-04-02",
+                "pre_start": "2021-11-23",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-08-11",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.07853326313792452,
+                "event_date": "2023-04-02",
+                "pre_start": "2022-11-21",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2024,
+                "delta_corr": -0.07925976988658033,
+                "event_date": "2024-04-02",
+                "pre_start": "2023-11-21",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-08-09",
+                "n_pre": 90,
+                "n_post": 90
+              }
+            ],
+            "mean_delta": -0.0011259327825970493,
+            "std_delta": 0.1905902057546123,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.07448761332397656,
+            "placebo_mean_delta": -0.0011259327825970493,
+            "placebo_std_delta": 0.1905902057546123,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 0.7816520584471215,
+            "p_vs_placebo_mean": 0.4914345776227331
+          }
+        },
+        "stock_gold": {
+          "assets": [
+            "SPY",
+            "GLD"
+          ],
+          "event": {
+            "corr_pre": 0.15898432392601838,
+            "corr_post": -0.028030014389070525,
+            "delta_corr": -0.1870143383150889,
+            "z_stat": -1.242463751238006,
+            "p_value": 0.21406550674468305,
+            "n_pre": 90,
+            "n_post": 90
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 142,
+            "mean": -0.24362418380760112,
+            "ci95": [
+              -0.823866930223669,
+              0.24684548435446102
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": 0.12107230946492517,
+                "event_date": "2021-04-02",
+                "pre_start": "2020-11-20",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.4209981175074168,
+                "event_date": "2022-04-02",
+                "pre_start": "2021-11-23",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-08-11",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.11087054538871267,
+                "event_date": "2023-04-02",
+                "pre_start": "2022-11-21",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.11208163142668565,
+                "event_date": "2024-04-02",
+                "pre_start": "2023-11-21",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-08-09",
+                "n_pre": 90,
+                "n_post": 90
+              }
+            ],
+            "mean_delta": 0.13582037825257876,
+            "std_delta": 0.21829932692469384,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": -0.32283471656766766,
+            "placebo_mean_delta": 0.13582037825257876,
+            "placebo_std_delta": 0.21829932692469384,
+            "n_controls": 4,
+            "t_vs_placebo_mean": -2.957725258392896,
+            "p_vs_placebo_mean": 0.05965289828853271
+          }
+        },
+        "stock_commodity": {
+          "assets": [
+            "SPY",
+            "PDBC"
+          ],
+          "event": {
+            "corr_pre": 0.22804708796121037,
+            "corr_post": 0.4816520389746507,
+            "delta_corr": 0.2536049510134403,
+            "z_stat": 1.9324984932384341,
+            "p_value": 0.0532980078492542,
+            "n_pre": 90,
+            "n_post": 90
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 147,
+            "mean": 0.16481128090036132,
+            "ci95": [
+              -0.4817608057184624,
+              0.6286652449551325
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.14337634242687664,
+                "event_date": "2021-04-02",
+                "pre_start": "2020-11-20",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.314458133843477,
+                "event_date": "2022-04-02",
+                "pre_start": "2021-11-23",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-08-11",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.05033706526013815,
+                "event_date": "2023-04-02",
+                "pre_start": "2022-11-21",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.27418789654388376,
+                "event_date": "2024-04-02",
+                "pre_start": "2023-11-21",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-08-09",
+                "n_pre": 90,
+                "n_post": 90
+              }
+            ],
+            "mean_delta": 0.09873315567508649,
+            "std_delta": 0.22960877751801398,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.15487179533835382,
+            "placebo_mean_delta": 0.09873315567508649,
+            "placebo_std_delta": 0.22960877751801398,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 1.3490058787164907,
+            "p_vs_placebo_mean": 0.2701221990914
+          }
+        },
+        "stock_btc": {
+          "assets": [
+            "SPY",
+            "BTC"
+          ],
+          "event": {
+            "corr_pre": 0.4528976376237061,
+            "corr_post": 0.4281880792810698,
+            "delta_corr": -0.02470955834263633,
+            "z_stat": -0.202241578565784,
+            "p_value": 0.8397278696609161,
+            "n_pre": 90,
+            "n_post": 90
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 141,
+            "mean": -0.043697608527099197,
+            "ci95": [
+              -0.3778936369056698,
+              0.28218310824555737
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.010199767456294084,
+                "event_date": "2021-04-02",
+                "pre_start": "2020-11-20",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.11324584017562789,
+                "event_date": "2022-04-02",
+                "pre_start": "2021-11-23",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-08-11",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.24015593605036456,
+                "event_date": "2023-04-02",
+                "pre_start": "2022-11-21",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2024,
+                "delta_corr": 0.38003083634310464,
+                "event_date": "2024-04-02",
+                "pre_start": "2023-11-21",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-08-09",
+                "n_pre": 90,
+                "n_post": 90
+              }
+            ],
+            "mean_delta": 0.06073024325301847,
+            "std_delta": 0.2583758992777961,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": -0.0854398015956548,
+            "placebo_mean_delta": 0.06073024325301847,
+            "placebo_std_delta": 0.2583758992777961,
+            "n_controls": 4,
+            "t_vs_placebo_mean": -0.661360458421032,
+            "p_vs_placebo_mean": 0.5556393398390191
+          }
+        },
+        "stock_vol": {
+          "assets": [
+            "SPY",
+            "VIX"
+          ],
+          "event": {
+            "corr_pre": -0.7927815115101595,
+            "corr_post": -0.880388353411141,
+            "delta_corr": -0.08760684190098145,
+            "z_stat": -1.969512785978825,
+            "p_value": 0.04889423578284724,
+            "n_pre": 90,
+            "n_post": 90
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 141,
+            "mean": -0.0612442585820737,
+            "ci95": [
+              -0.14682903805287698,
+              0.044988295014086646
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": -0.08613899613328968,
+                "event_date": "2021-04-02",
+                "pre_start": "2020-11-20",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2022,
+                "delta_corr": -0.030084685319039406,
+                "event_date": "2022-04-02",
+                "pre_start": "2021-11-23",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-08-11",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2023,
+                "delta_corr": -0.02658990677110673,
+                "event_date": "2023-04-02",
+                "pre_start": "2022-11-21",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2024,
+                "delta_corr": -0.12047469760996687,
+                "event_date": "2024-04-02",
+                "pre_start": "2023-11-21",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-08-09",
+                "n_pre": 90,
+                "n_post": 90
+              }
+            ],
+            "mean_delta": -0.06582207145835067,
+            "std_delta": 0.0455192651069586,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": -0.021784770442630774,
+            "placebo_mean_delta": -0.06582207145835067,
+            "placebo_std_delta": 0.0455192651069586,
+            "n_controls": 4,
+            "t_vs_placebo_mean": -0.9571670540568769,
+            "p_vs_placebo_mean": 0.40909543055298414
+          }
+        },
+        "bond_gold": {
+          "assets": [
+            "TLT",
+            "GLD"
+          ],
+          "event": {
+            "corr_pre": -0.021260249514360976,
+            "corr_post": 0.059335355805150695,
+            "delta_corr": 0.08059560531951167,
+            "z_stat": 0.5320458958047248,
+            "p_value": 0.594694208480238,
+            "n_pre": 90,
+            "n_post": 90
+          },
+          "bootstrap_delta_corr": {
+            "reps": 1000,
+            "block": 5,
+            "seed": 141,
+            "mean": 0.08921508441244462,
+            "ci95": [
+              -0.28663732632394956,
+              0.47458284921343113
+            ]
+          },
+          "calendar_placebo": {
+            "control_years": [
+              2021,
+              2022,
+              2023,
+              2024
+            ],
+            "deltas": [
+              {
+                "year": 2021,
+                "delta_corr": 0.09273204166494016,
+                "event_date": "2021-04-02",
+                "pre_start": "2020-11-20",
+                "pre_end": "2021-04-01",
+                "post_start": "2021-04-05",
+                "post_end": "2021-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2022,
+                "delta_corr": 0.10272969339576937,
+                "event_date": "2022-04-02",
+                "pre_start": "2021-11-23",
+                "pre_end": "2022-04-01",
+                "post_start": "2022-04-04",
+                "post_end": "2022-08-11",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2023,
+                "delta_corr": 0.10653593152849994,
+                "event_date": "2023-04-02",
+                "pre_start": "2022-11-21",
+                "pre_end": "2023-03-31",
+                "post_start": "2023-04-03",
+                "post_end": "2023-08-10",
+                "n_pre": 90,
+                "n_post": 90
+              },
+              {
+                "year": 2024,
+                "delta_corr": -0.1694904275890779,
+                "event_date": "2024-04-02",
+                "pre_start": "2023-11-21",
+                "pre_end": "2024-04-02",
+                "post_start": "2024-04-03",
+                "post_end": "2024-08-09",
+                "n_pre": 90,
+                "n_post": 90
+              }
+            ],
+            "mean_delta": 0.03312680975003289,
+            "std_delta": 0.1352035368258429,
+            "n_controls": 4
+          },
+          "did_vs_calendar_placebo": {
+            "did_delta": 0.04746879556947878,
+            "placebo_mean_delta": 0.03312680975003289,
+            "placebo_std_delta": 0.1352035368258429,
+            "n_controls": 4,
+            "t_vs_placebo_mean": 0.7021827488229665,
+            "p_vs_placebo_mean": 0.5331424182601201
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "pair_hits": {
+      "stock_bond": 0,
+      "stock_gold": 0,
+      "stock_commodity": 0,
+      "stock_btc": 0,
+      "stock_vol": 0,
+      "bond_gold": 0
+    },
+    "robust_primary_pairs": {},
+    "average_delta_corr_by_pair": {
+      "stock_bond": 0.22946538506944733,
+      "stock_gold": -0.06387568134153544,
+      "stock_commodity": 0.26969710197355945,
+      "stock_btc": 0.009466299531527445,
+      "stock_vol": -0.029423515906868498,
+      "bond_gold": 0.037456837371320335
+    },
+    "verdict": "NULL",
+    "verdict_reason": "No primary cross-asset correlation shift is significant in >=2 windows."
+  },
+  "verdict": "NULL",
+  "verdict_reason": "No primary cross-asset correlation shift is significant in >=2 windows.",
+  "runtime_seconds": 3.66,
+  "codex_review": {
+    "verdict": "PASS",
+    "reviewer": "Codex CLI",
+    "reviewed_at": "2026-06-16T10:32:15Z",
+    "source": "experiments/k1514/codex_review.md",
+    "findings": {
+      "event_timing": "PASS — post-event windows start strictly after 2025-04-02 and pre windows end on or before event date.",
+      "sample_completeness": "PASS — after extending END to 2025-08-31, the 30/60/90 post windows contain 30/60/90 observations.",
+      "tests": "PASS — Fisher z tests, fixed-seed block bootstrap, and calendar-placebo DiD are reported separately.",
+      "overclaim": "PASS — visible stock-bond and stock-commodity shifts are kept descriptive; verdict remains NULL because bootstrap CIs cross zero and the primary-pair gate is not met.",
+      "reproducibility": "PASS — prices.csv cache, seed=42, and full config are recorded."
+    },
+    "caveat": "Daily adjusted closes cannot identify intraday announcement-window effects; K1514 tests close-to-close correlation regimes only."
+  }
+}

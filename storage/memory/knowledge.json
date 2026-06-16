@@ -34807,5 +34807,18 @@
     "reviewer_source": "Codex CLI primary path",
     "codex_review": "PASS",
     "verdict": "FAIL"
+  },
+  {
+    "item_id": "32df19ba",
+    "category": "null_result",
+    "content": "K1514 NULL: 2025-04-02 Liberation Day tariff event-study on SPY/TLT/GLD/PDBC/BTC-USD/^VIX found visible short-window correlation moves but no robust primary-pair regime break. SPY-TLT 30d corr moved -0.205→+0.208 (delta +0.413, Fisher p=0.123, bootstrap CI crosses zero); SPY-PDBC avg delta +0.270 with borderline Fisher p around 0.054/0.053 but bootstrap CIs cross zero and it is secondary; SPY-BTC avg delta +0.009; SPY-VIX 90d Fisher p=0.049 but bootstrap CI crosses zero. Verdict: close-to-close ETF data do not support a statistically robust diversification-regime break claim.",
+    "evidence": [
+      "experiments/k1514/k1514.py",
+      "experiments/k1514/k1514_results.json",
+      "experiments/k1514/README.md",
+      "experiments/k1514/codex_review.md"
+    ],
+    "confidence": 0.74,
+    "created_at": "2026-06-16T18:33:51.899631"
   }
 ]
