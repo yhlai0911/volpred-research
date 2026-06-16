@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1511-block-bootstrap-1000-iter-1781595671",
+  "title": "K1511 角色反轉 block bootstrap (1000 iter)",
+  "script_path": ".claude/worktrees/agent-k1511-rolereversal/scripts/k1511_bootstrap.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-06-16T07:41:11Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1511-block-bootstrap-1000-iter-1781595671.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1511-block-bootstrap-1000-iter-1781595671.stderr",
+  "result_artifact": ".claude/worktrees/agent-k1511-rolereversal/experiments/k1511/k1511_bootstrap.json",
+  "claude_followup": {
+    "brief": "讀 k1511_bootstrap.json 看 bootstrap CI/p-value 是否確認 main t-test NULL 結論。Main t_NW=-0.22 p=0.83，bootstrap 應顯示 95% CI 跨 0。若 bootstrap p<0.05 反駁 main 結論則 escalate。否則 PoC 收 NULL 並考慮排 daily_article null-result 文章",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1800
+}
