@@ -32460,5 +32460,89 @@
     "started_at": "2026-06-16T11:39:07.522739+00:00",
     "completed_at": "2026-06-16T11:54:41.272263+00:00",
     "result": "Implemented release-pool narrative-cluster gate. Last-3 published general/research items are clustered via title/tags plus details.experiment_refs→knowledge.json; clusters with >=2/3 are filtered before candidate selection so next pick backfills a different cluster. Also wired release-time arc_dedup and added regression tests (21 related tests passed)."
+  },
+  {
+    "id": "paper_review_mile_cbf8ba62",
+    "title": "Paper review (Codex 24h-rule): 統計檢定通過了，監管機關還是會亮黃燈：換個分配假設，差距就出來了",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cbf8ba62 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_cbf8ba62",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T12:08:18+00:00"
+  },
+  {
+    "id": "paper_review_mile_6f3e2b1a",
+    "title": "Paper review (Codex 24h-rule): 抗通膨債券真的比較穩嗎？高通膨時，答案要看期限",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_6f3e2b1a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_6f3e2b1a",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T12:08:18+00:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-16T12:12:30.758583+00:00",
+    "claim_session_id": "b7d50f778c9e",
+    "started_at": "2026-06-16T12:12:37.814332+00:00",
+    "completed_at": "2026-06-16T12:30:06.281831+00:00",
+    "result": "Codex CLI 0.139.0 primary-path review: CONDITIONAL_PASS. No fatal lookahead (CPI regime ≥42d lag confirmed); all 4 article RV numbers (TIP/STIP/LTPZ/IEF) match results.json 21d means; Bonferroni 6 RV tests SIG_BONF survive. Non-fatal gaps: rolling-overlap iid bootstrap underestimates uncertainty (already self-acknowledged); gap tests multiple-testing family undefined; high regime extends 2024/2026 not just 2021-2023. Directional conclusion robust. Feed mile_6f3e2b1a.details.codex_review_status set to codex_pass_conditional."
+  },
+  {
+    "id": "paper_review_mile_c725b44c",
+    "title": "Paper review (Codex 24h-rule): 真正先變吵的，是除息前那 10 天",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c725b44c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c725b44c",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T12:08:18+00:00"
+  },
+  {
+    "id": "research_illiquidity_vol_feature",
+    "title": "研究 backlog fallback: 企業債 illiquidity 的機器學習預測：用股票 vol 作跨市場 feature",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 企業債 illiquidity 的機器學習預測：用股票 vol 作跨市場 feature — yfinance HYG/LQD/VCIT（bond ETF）代理 illiquidity（bid-ask proxy = `high-low/close`），以 SPY/VIX/信用利差（HYG-LQD spread）為 feature，XGBoost vs 線性 OLS，誠實 OOS R² + DM 檢定，明確 lag；把債券流動性當 vol 預測的橋梁（來源：FAJ 2024 \"Predicting Corporate Bond Illiquidity via Machine Learning\" | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "illiquidity_vol_feature",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-16T12:11:58+00:00"
+  },
+  {
+    "id": "research_google_trends_vol",
+    "title": "研究 backlog fallback: Google Trends 特定產品關鍵字對台股供應鏈個股的 vol 預測增量",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Google Trends 特定產品關鍵字對台股供應鏈個股的 vol 預測增量 — pytrends 免費抓「iPhone demand」「AI server」「TSMC」「HBM」等週頻關鍵字 z-score，加入 TAIFEX 或 yfinance 台股個股 HAR-RV（2330/2303/2454/2382），檢定 attention shock 是否在次週 realized vol 有增量 DM，明確 lag；台股供應鏈 × attention 研究空白（來源：JFQA 2025 satellite TIR/alternative data cross-section；Review  | 來源 section: 期刊主題挖掘 batch（2026-06-16；websearch jfe/jfqa/faj/jpm/efm/jfi/joe/rfs/j.forecasting/arxiv 2025-26 趨勢層級；新軸：因果 ml 資產定價 / llm 文字 rv / 隔夜 vrp 拆解 / cvar 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / esg vol 分化 / 另類數據跨境；全免費資料 yfinance/fred/taifex/pytrends 可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "google_trends_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-16T12:14:30+00:00"
   }
 ]
