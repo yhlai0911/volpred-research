@@ -1,8 +1,8 @@
 {
   "id": "mile_b722be0e",
   "title": "看起來很準，卻完全沒用：一個 GARCH 指標的預測失敗紀錄",
-  "description": "數據：SPY 2005-01-05 至 2026-04-07，共 5,345 個交易日 OOS 樣本：2019-01-01 起，共 1,825 天 實驗編號：K998",
-  "content": "# 看起來很準，卻完全沒用：一個 GARCH 指標的預測失敗紀錄\n\n**數據**：SPY 2005-01-05 至 2026-04-07，共 5,345 個交易日  \n**OOS 樣本**：2019-01-01 起，共 1,825 天  \n**實驗編號**：K998\n\n---\n\n## 故事從一個好消息開始\n\n在上一個實驗（K988b）裡，我們發現 MF-GJR-X 模型的 g 成分（一個捕捉市場恐慌時期的 variance 分量）跟 VRP 有高度同期相關。\n\nVRP（Variance Risk Premium，變異風險溢酬）是一個衡量市場參與者願意為波動率保險付多少錢的指標。簡單說：VIX 預測的隱含波動率 vs 實際波動率，這中間的差距叫 VRP。長期而言，VRP 是正值，市場參與者願意多付一筆保費給賣選擇權的人。\n\ng 成分和 VRP 同期連動。這個發現很有意思。如果 g 能提前看出 VRP 的方向，那就能設計一個相當有利可圖的交易策略。\n\n我們決定測試看看。\n\n---\n\n## 方法：三層檢驗，讓數字說話\n\n### Granger 因果檢定\n\n第一步，我們跑 Granger causality test，問的是：「知道昨天的 g，能不能讓我對今天的 VRP 有更好的預測？」\n\n| 預測期間 | F 統計量 | p 值 | 顯著？ |\n|---------|---------|------|-------|\n| 1 天後（h=1） | 65.81 | < 0.001 | ✓ 是 |\n| 5 天後（h=5） | 31.78 | < 0.001 | ✓ 是 |\n| 10 天後（h=10）| 17.83 | < 0.001 | ✓ 是 |\n| 22 天後（h=22）| 2.10 | 0.147 | ✗ 否 |\n\n*數據來源：K998 實驗，SPY 2005-2026，n = 1,824*\n\n![K998 圖一：Granger F 統計量（顯著）vs Harvey NW t 統計量（未達門檻）](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k998_fig1_granger_vs_harvey.png)\n\n短期（1-10 天）Granger 檢定全部顯著。如果你只看到這一張表，你會覺得這個指標很有價值。\n\n但這只是第一步。\n\n### 預測迴歸 + Harvey 門檻\n\n接下來我們跑預測迴歸，控制 VRP 的自身 lag 後，看 g 的係數還剩多少預測力。我們用的是 Newey-West 修正的 t 統計量，並套用 Harvey et al.（2016）的嚴格門檻：t > 3.0。\n\n這個 3.0 的門檻不是隨便設的。Harvey 等學者分析金融研究的 p-hacking 問題後，建議任何新的金融預測因子，統計顯著性標準要比傳統 1.96 嚴格得多，才能抵抗多重比較問題。\n\n結果：\n\n| 預測期間 | NW t 統計量（g 係數） | 通過 Harvey 門檻？ |\n|---------|-------------------|----------------|\n| h=1 | -2.15 | ✗ 未通過（需 > 3.0）|\n| h=5 | -1.91 | ✗ 未通過 |\n| h=10 | -1.61 | ✗ 未通過 |\n| h=22 | -1.40 | ✗ 未通過 |\n\n*數據來源：K998 實驗，控制 VRP lag 後的 g 係數 t 統計量*\n\n所有預測期間，t 統計量都沒有超過 3.0。g 在樣本內的「解釋力」，控制了 VRP 的自我相關之後，就消失了大半。\n\n### 樣本外 R²：最終判決\n\n但光看樣本內係數還不夠。真正的考驗是：把模型拿到 **沒看過的數據** 上，預測力還剩幾成？\n\n我們用 Campbell & Thompson（2008）的 OOS R² 標準，比較 g 模型 vs 純歷史均值。\n\n| 預測期間 | OOS R²（純 g 模型） | OOS R²（AR1 + g）|\n|---------|--------------------|------------------|\n| h=1 | +0.011 | -0.053 |\n| h=5 | **-0.004** | -0.412 |\n| h=10 | **-0.012** | -0.434 |\n| h=22 | **-0.002** | -0.006 |\n\n*數據來源：K998 實驗，2019-2026 OOS 期間（原始 1,825 天；不同 horizon/lag 下有效評估樣本為 1,551-1,573 天）*\n\nh=1 的純 g 模型 OOS R² 有微小正值（+0.011），但 Clark-West 檢定不顯著，沒有統計支撐。h=5 以上幾乎全部落入負值，AR1+g 模型在 h=5 和 h=10 分別達到 -0.41 和 -0.43。\n\n整體結論：Granger 顯著不等於穩健可交易的預測力。g 成分沒有能撐過嚴格樣本外測試的 VRP 預測能力，這是教科書級別的過度擬合（overfitting）。\n\n---\n\n## 策略測試：實際交易會發生什麼\n\n理論測完，實戰測試。我們設計了一個簡單的 variance swap 策略：\n\n- 用前一天的 g 值作為訊號（signal.shift(1) — 嚴格無前視偏誤）\n- g 高 → 預測 VRP 高 → 做多波動率\n- g 低 → 預測 VRP 低 → 做空波動率\n\n策略在 OOS 期間（2019-2026，n = 1,573 天）的成績：\n\n| 策略 | 年化 Sharpe |\n|------|------------|\n| **g 訊號策略** | **-1.06** |\n| Naive 永遠賣波動率 | **+0.85** |\n\n*數據來源：K998 實驗，OOS 2019-2026*\n\n![K998 圖二：樣本外 R² 各期間 + 策略 Sharpe 比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k998_fig2_oos_r2_sharpe.png)\n\ng 訊號策略 Sharpe = -1.06，是反指標。它告訴你的方向，大概率是錯的。\n\n相比之下，不看任何訊號、永遠賣波動率（因為 VRP 長期正值的特性）的 Sharpe 是 +0.85。\n\n一個「統計顯著」的指標，在真實交易中表現比「什麼都不看」還要差上這麼多。\n\n---\n\n## 為什麼 Granger 顯著，預測卻失效？\n\n這個悖論值得停下來想。\n\n**同期相關 ≠ 前瞻預測能力**。g 成分確實能追蹤當下 VRP，但追蹤「今天的狀態」和「預測明天的走向」是兩件完全不同的事。GARCH 模型的 g 成分，功能是即時分解當期的 variance。它反映的是市場**現在有多恐慌**，而非**明天會更恐慌還是更平靜**。\n\nVRP 本身也不是容易預測的對象。OOS 期間的 VRP 日頻一階自相關只有 0.20，均值 79 bps（年化），但標準差高達 1,362 bps——標準差是均值的 17 倍。這個訊雜比（signal-to-noise ratio）極低，任何指標加進來都很難在這種雜訊中擠出穩定的 OOS 預測力。\n\nGranger 顯著，是因為樣本內有足夠數據讓模型「記住」歷史相關性，但這段相關性可能是隨機的，也可能是 regime-dependent（只在特定市場環境下有效）。帶出 OOS 期間，相關性消失，模型就成了障礙而非幫助。\n\n---\n\n## 為什麼 NULL result 值得讀\n\n金融研究有發表偏差（publication bias）：只有「發現正面效果」的研究才容易被發表，「沒發現預測能力」的研究通常被丟在抽屜裡。\n\n這造成兩個問題：\n\n1. **讀者以為現有指標比實際上更有效**，因為失敗的實驗根本看不到\n2. **研究者浪費時間在別人已嘗試過的死路上**，因為失敗紀錄不公開\n\nK998 記錄的是一個明確的失敗：g 成分在嚴格標準（Harvey t > 3.0 + 負 OOS R²）下沒有可利用的 VRP 預測能力。這個結論本身有價值：告訴你**不要**把 MF-GJR-X 的 g 成分用在 VRP 交易策略上，能省掉很多無謂的測試時間。\n\n在這個平台，我們選擇把失敗也公開記錄。一方面是研究誠實的要求，另一方面是因為好的投資決策很大程度上建立在知道**什麼東西不管用**。\n\n---\n\n## 限制與下一步\n\nK998 的結論有幾個邊界條件：\n\n- **VRP proxy 是日頻近似值**：這裡用的是 VIX²/252 - r²，非選擇權市場的 model-free IV。更精確的 VRP 量測可能給出不同結果。\n- **OOS 含 COVID 極端期**：2020 年 3 月的極端波動主導了 OOS 期間的雜訊，可能壓低了所有模型的 OOS R²。\n- **單一資產**：只測 SPY，未跨資產驗證。\n\n下一個方向是看 g 成分能否在 VRP **截面差異**（跨資產預測，誰的 VRP 高誰低）上有表現，而非時間序列預測。截面問題的 signal-to-noise ratio 通常比時間序列好。這是 K998 留下來的開放問題。\n\n---\n\n*本文所有統計數字均來自 K998 實驗（`experiments/K998/k998_results.json`），資料期間 SPY 2005-01-05 至 2026-04-07，OOS 自 2019-01-01，n = 5,345 天。*\n",
+  "description": "數據：SPY 2005-01-05 至 2026-04-07，共 5,346 個交易日 OOS 樣本：2019-01-01 起，共 1,825 天 實驗編號：K998",
+  "content": "# 看起來很準，卻完全沒用：一個 GARCH 指標的預測失敗紀錄\n\n**數據**：SPY 2005-01-05 至 2026-04-07，共 5,346 個交易日  \n**OOS 樣本**：2019-01-01 起，共 1,825 天  \n**實驗編號**：K998\n\n---\n\n## 故事從一個好消息開始\n\n在上一個實驗 K988b 裡，我們發現 MF-GJR-X 類模型的 g proxy 和 VRP 有很高的同期 rank correlation。這很容易讓人產生一個想法：如果 g 能提前看出 VRP 的方向，或許可以設計一個 variance swap 交易訊號。\n\nK998 專門測這件事。它不問「g 是否和當下狀態一起動」，而是問更嚴格的問題：g 能不能預測未來 VRP，並在樣本外變成有用的交易訊號？\n\n---\n\n## 三層檢驗\n\n第一層是 Granger causality test。短期 horizon 看起來很漂亮：\n\n| 預測期間 | F 統計量 | p 值 | 顯著？ |\n|---------|---------:|------:|-------|\n| 1 天後（h=1） | 66.17 | < 0.001 | 是 |\n| 5 天後（h=5） | 32.03 | < 0.001 | 是 |\n| 10 天後（h=10） | 17.95 | < 0.001 | 是 |\n| 22 天後（h=22） | 2.12 | 0.146 | 否 |\n\n![K998 圖一：Granger F 統計量顯著，但 Newey-West t 統計量未達 Harvey 門檻](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k998_fig1_granger_vs_harvey.png)\n\n如果只看這張表，你會覺得這個指標很有用。但這只是樣本內線性關係，不等於可靠預測。\n\n第二層是預測迴歸。我們控制 VRP 自身 lag 後，看 g 的係數是否還有增量，並用 Newey-West 標準誤與 Harvey et al.（2016）建議的 `|t| > 3.0` 門檻。\n\n| 預測期間 | NW t 統計量（g 係數） | 通過 Harvey 門檻？ |\n|---------|----------------------:|-------------------|\n| h=1 | -2.15 | 否 |\n| h=5 | -1.91 | 否 |\n| h=10 | -1.61 | 否 |\n| h=22 | -1.40 | 否 |\n\n所有 horizon 都沒有過 `|t| > 3.0`。g 在 Granger 表裡看起來強，但控制 VRP 自身 lag 後，沒有達到金融預測因子該有的保守門檻。\n\n第三層是樣本外 R²。2026-06-16 的 code review 修正了 h-step expanding OOS R² 的 target-alignment：每次預測 `t+h` 時，訓練資料只包含 target date 已經實現的 pair，避免 h>1 時偷看到 `t+1` 到 `t+h-1` 的 outcome。\n\n| 預測期間 | OOS R²（純 g 模型） | OOS R²（AR1 + g） |\n|---------|--------------------:|------------------:|\n| h=1 | +0.011 | -0.053 |\n| h=5 | -0.033 | -1.241 |\n| h=10 | -0.068 | -3.859 |\n| h=22 | -0.011 | -0.018 |\n\n有效評估樣本為 1,530-1,572 天。h=1 的純 g 模型有微小正值，但簡化 CW-style 一側檢定不顯著（p=0.452）。h=5 以上全部為負，AR1+g 在 h=5 和 h=10 甚至大幅輸給歷史均值。\n\n---\n\n## 策略測試\n\n最後看交易。K998 的 variance swap 訊號實作如下：\n\n- 用前一天的 g 值作為訊號（`signal.shift(1)`）\n- g 高於 expanding median -> 賣波動率，收 VRP\n- g 低於 expanding median -> 買波動率\n\n策略在 OOS 期間（2019-2026，n=1,573 天）的成績：\n\n| 策略 | 年化 Sharpe |\n|------|------------:|\n| g 訊號策略 | -1.06 |\n| Naive 永遠賣波動率 | +0.85 |\n\n![K998 圖二：lookahead-clean OOS R² 與策略 Sharpe](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k998_fig2_oos_r2_sharpe.png)\n\n這是最直接的判決。用 g 做訊號，結果比什麼都不看、永遠賣波動率還差很多。統計上看起來有關係的東西，搬到交易上反而變成負貢獻。\n\n---\n\n## 為什麼 Granger 顯著，預測卻失效？\n\n同期狀態 proxy 不等於前瞻預測能力。MF-GJR-X 的 g component 反映的是模型裡的 variance decomposition，它可以和市場壓力同時變化，但這不代表它知道明天或下週的 VRP 會往哪裡走。\n\nVRP 本身也很吵。K998 的 OOS 期間裡，VRP 日頻一階自相關只有 0.20；年化均值約 79 bps，但年化標準差高達 1,362 bps。訊噪比太低時，樣本內 Granger 顯著很容易在樣本外消失。\n\n這也是 NULL result 值得公開的原因。K998 記錄的是一個明確失敗：g 成分沒有通過 Harvey 門檻，lookahead-clean OOS R² 幾乎全負，交易 Sharpe 也輸給 naive baseline。它告訴我們不要把 MF-GJR-X 的 g 成分拿去當 VRP timing signal。\n\n---\n\n## 限制\n\n- VRP proxy 是日頻近似：`(VIX_{t-1}/100)^2/252 - r_t^2`，不是 option-level model-free VRP。\n- OOS 含 COVID 極端期，會放大 VRP 雜訊。\n- 只測 SPY，未跨資產驗證。\n- results JSON 的 `CW_*` 欄位是簡化 DM-style/CW-style 一側檢定，不是完整 Clark-West nested-model adjustment。\n\n下一步若要繼續，應該改測截面 VRP 差異，而不是單一資產的日頻時間序列 timing。\n\n---\n\n*本文所有統計數字均來自 K998 實驗（`experiments/k998/k998.py`，結果：`experiments/k998/k998_results.json`）。資料來源：yfinance SPY 與 ^VIX；資料期間 2005-01-05 至 2026-04-07，OOS 自 2019-01-01。*\n",
   "category": "milestone",
   "audience": "research",
   "phase": "null-result",
@@ -31,12 +31,12 @@
   ],
   "related_articles": [],
   "created_at": "2026-06-02T00:15:22.730884+00:00",
-  "published_at": "2026-06-02T00:15:22.730884+00:00",
-  "status": "draft",
+  "published_at": "2026-06-15T23:00:12.760418+00:00",
+  "status": "published",
   "errata": {
-    "update_at": "2026-06-02T00:26:06.304837+00:00",
-    "update_action": "codex_review_fix",
-    "update_summary": "Codex review CONDITIONAL_PASS fixes: (1) README numbers synced to k998_results.json; (2) sample size footnote added for n_eval=1551-1573; (3) OOS conclusion language softened to note h=1 small positive R2 but CW not significant",
+    "update_at": "2026-06-16T14:52:21.133040+00:00",
+    "update_action": "codex_review_k998_alignment_fix",
+    "update_summary": "Codex review fixed K998 h-step OOS R2 target-alignment lookahead, corrected variance-swap signal direction, refreshed figures/results, and downgraded Clark-West wording to simplified CW-style.",
     "update_history": [
       {
         "at": "2026-06-02T00:26:06.304837+00:00",
@@ -49,8 +49,21 @@
         "description_source": "auto (first paragraph)",
         "image_paths_normalized": 0,
         "image_url_changed": false
+      },
+      {
+        "at": "2026-06-16T14:52:21.133040+00:00",
+        "action": "codex_review_k998_alignment_fix",
+        "summary": "Codex review fixed K998 h-step OOS R2 target-alignment lookahead, corrected variance-swap signal direction, refreshed figures/results, and downgraded Clark-West wording to simplified CW-style.",
+        "old_content_chars": 4090,
+        "new_content_chars": 3070,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "image_paths_normalized": 2,
+        "image_url_changed": false
       }
     ]
   },
-  "last_updated_at": "2026-06-02T00:26:06.304837+00:00"
+  "last_updated_at": "2026-06-16T14:52:21.133040+00:00",
+  "verified_live_at": "2026-06-15T23:00:24.698627+00:00"
 }

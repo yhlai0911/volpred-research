@@ -32064,7 +32064,7 @@
     "title": "Paper review (Codex 24h-rule): 看起來很準，卻完全沒用：一個 GARCH 指標的預測失敗紀錄",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b722be0e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_b722be0e",
@@ -32073,7 +32073,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-16T01:08:49+00:00"
+    "created_at": "2026-06-16T01:08:49+00:00",
+    "claimed_by": "codex-review-k431-next",
+    "claimed_at": "2026-06-16T14:43:44.808363+00:00",
+    "claim_session_id": "7ec70a6d99bc",
+    "started_at": "2026-06-16T14:43:45.118474+00:00",
+    "completed_at": "2026-06-16T14:55:14.759460+00:00",
+    "result": "Codex review completed and resolved for mile_b722be0e/K998. Fixed h-step OOS R2 target-overlap lookahead in k998.py, reran results, updated README/figures/article, corrected variance-swap signal direction, and downgraded Clark-West wording to simplified CW-style. Local feed/report/index updated; feed-sync not retried due earlier timeout."
   },
   {
     "id": "paper_review_mile_53caca1a",

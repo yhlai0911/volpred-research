@@ -306,6 +306,7 @@ results['metadata'] = {
     'data_source': 'yfinance (SPY, ^VIX)',
     'period': f'{df.index[0].strftime("%Y-%m-%d")} to {df.index[-1].strftime("%Y-%m-%d")}',
     'oos_start': OOS_START,
+    'oos_r2_alignment': 'h-step expanding forecasts train only on pairs whose target date is already realized at the forecast origin',
 }
 
 results['contemporaneous'] = {
@@ -519,31 +520,30 @@ for h in horizons:
 
     # Minimum training window: 252 observations
     min_train = 252
-    n_eval = n_pr - min_train
+    first_eval = min_train + h - 1
+    n_eval = n_pr - first_eval
 
     if n_eval < 100:
         continue
 
-    # Historical mean forecast (benchmark)
-    mse_hm = 0.0
-    # g-augmented forecast
-    mse_g = 0.0
-    # VRP AR(1) forecast
-    mse_ar = 0.0
-    # VRP AR(1) + g forecast
-    mse_ar_g = 0.0
+    errors_hm = []
+    errors_g = []
+    errors_ar = []
+    errors_ar_g = []
 
-    for t in range(min_train, n_pr):
-        # Training data: 0..t-1
-        y_train = y[:t]
-        g_train = g_for_pred[:t]
-        vrp_train = vrp_for_pred[:t]
+    for t in range(first_eval, n_pr):
+        # Forecast origin is t. For h-step targets, only pairs whose realized
+        # target date is <= t are known: j+h <= t, so j <= t-h.
+        train_n = t - h + 1
+        y_train = y[:train_n]
+        g_train = g_for_pred[:train_n]
+        vrp_train = vrp_for_pred[:train_n]
 
         # Historical mean forecast
         yhat_hm = np.mean(y_train)
 
         # g-only model
-        X_g = np.column_stack([np.ones(t), g_train])
+        X_g = np.column_stack([np.ones(train_n), g_train])
         try:
             beta_g = np.linalg.lstsq(X_g, y_train, rcond=None)[0]
             yhat_g = beta_g[0] + beta_g[1] * g_for_pred[t]
@@ -551,7 +551,7 @@ for h in horizons:
             yhat_g = yhat_hm
 
         # AR(1) model
-        X_ar = np.column_stack([np.ones(t), vrp_train])
+        X_ar = np.column_stack([np.ones(train_n), vrp_train])
         try:
             beta_ar = np.linalg.lstsq(X_ar, y_train, rcond=None)[0]
             yhat_ar = beta_ar[0] + beta_ar[1] * vrp_for_pred[t]
@@ -559,7 +559,7 @@ for h in horizons:
             yhat_ar = yhat_hm
 
         # AR(1) + g model
-        X_ar_g = np.column_stack([np.ones(t), vrp_train, g_train])
+        X_ar_g = np.column_stack([np.ones(train_n), vrp_train, g_train])
         try:
             beta_ar_g = np.linalg.lstsq(X_ar_g, y_train, rcond=None)[0]
             yhat_ar_g = beta_ar_g[0] + beta_ar_g[1] * vrp_for_pred[t] + beta_ar_g[2] * g_for_pred[t]
@@ -567,50 +567,26 @@ for h in horizons:
             yhat_ar_g = yhat_hm
 
         actual = y[t]
-        mse_hm += (actual - yhat_hm) ** 2
-        mse_g += (actual - yhat_g) ** 2
-        mse_ar += (actual - yhat_ar) ** 2
-        mse_ar_g += (actual - yhat_ar_g) ** 2
+        errors_hm.append((actual - yhat_hm) ** 2)
+        errors_g.append((actual - yhat_g) ** 2)
+        errors_ar.append((actual - yhat_ar) ** 2)
+        errors_ar_g.append((actual - yhat_ar_g) ** 2)
+
+    errors_hm = np.asarray(errors_hm)
+    errors_g = np.asarray(errors_g)
+    errors_ar = np.asarray(errors_ar)
+    errors_ar_g = np.asarray(errors_ar_g)
 
     # R²_OOS = 1 - MSE_model / MSE_benchmark
-    r2_oos_g = 1 - mse_g / mse_hm
-    r2_oos_ar = 1 - mse_ar / mse_hm
-    r2_oos_ar_g = 1 - mse_ar_g / mse_hm
+    mse_hm = np.mean(errors_hm)
+    r2_oos_g = 1 - np.mean(errors_g) / mse_hm
+    r2_oos_ar = 1 - np.mean(errors_ar) / mse_hm
+    r2_oos_ar_g = 1 - np.mean(errors_ar_g) / mse_hm
 
     # Clark-West (2007) test: H0: R²_OOS <= 0
     # CW statistic: mean of f_t = (e_hm^2 - (e_g^2 - (yhat_hm - yhat_g)^2))
     # Simplified: we test if the model MSE < benchmark MSE using t-test on loss diff
     # For simplicity, use DM-style test on squared errors
-    errors_hm = np.zeros(n_eval)
-    errors_g = np.zeros(n_eval)
-    errors_ar_g = np.zeros(n_eval)
-
-    for t in range(min_train, n_pr):
-        y_train = y[:t]
-        g_train = g_for_pred[:t]
-        vrp_train = vrp_for_pred[:t]
-
-        yhat_hm = np.mean(y_train)
-        X_g = np.column_stack([np.ones(t), g_train])
-        try:
-            beta_g = np.linalg.lstsq(X_g, y_train, rcond=None)[0]
-            yhat_g = beta_g[0] + beta_g[1] * g_for_pred[t]
-        except Exception:
-            yhat_g = yhat_hm
-
-        X_ar_g = np.column_stack([np.ones(t), vrp_train, g_train])
-        try:
-            beta_ar_g = np.linalg.lstsq(X_ar_g, y_train, rcond=None)[0]
-            yhat_ar_g = beta_ar_g[0] + beta_ar_g[1] * vrp_for_pred[t] + beta_ar_g[2] * g_for_pred[t]
-        except Exception:
-            yhat_ar_g = yhat_hm
-
-        actual = y[t]
-        idx = t - min_train
-        errors_hm[idx] = (actual - yhat_hm) ** 2
-        errors_g[idx] = (actual - yhat_g) ** 2
-        errors_ar_g[idx] = (actual - yhat_ar_g) ** 2
-
     # Clark-West adjustment
     # d_t = e_hm^2 - e_g^2 + (yhat_hm - yhat_g)^2 ... but needs paired forecasts
     # Use simpler DM-style: d_t = e_hm^2 - e_model^2
@@ -632,6 +608,7 @@ for h in horizons:
         'CW_t_ARg_vs_HM': float(t_cw_ar_g),
         'CW_p_ARg_vs_HM': float(p_cw_ar_g),
         'n_eval': int(n_eval),
+        'alignment': 'no target-overlap lookahead: training responses satisfy target_date <= forecast_origin',
     }
     print(f"  h={h}: R²_OOS(g)={r2_oos_g:.4f}, R²_OOS(AR1)={r2_oos_ar:.4f}, R²_OOS(AR1+g)={r2_oos_ar_g:.4f}")
     print(f"         CW_t(g vs HM)={t_cw_g:.3f} (p={p_cw_g:.4f}), CW_t(AR+g vs HM)={t_cw_ar_g:.3f} (p={p_cw_ar_g:.4f})")
