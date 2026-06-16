@@ -34649,5 +34649,39 @@
       "NULL-result",
       "weak-IV"
     ]
+  },
+  {
+    "title": "K690 24h-rule paper review (mile_8a5e7f5c): 4 critical fixes (target_vol typo, portfolio scope, sig overclaim, turnover ranking error)",
+    "content": "[24h paper review of mile_8a5e7f5c, K690 weight-smoothness vs lag-robustness article]\nCodex (gpt-5.4) verdict: FAIL → post-fix CONDITIONAL_PASS. 4 critical claim-evidence mismatches found:\n(1) target_vol stated 15% in article but source=0.10 (10%) and applies only to EWMA VT, not all 5 strategies. (2) Article said 'SPY 2007-2026/3' but underlying is 50/50 SPY+GLD portfolio (code line 137,305,310). (3) Significance overclaim: corr(turnover, robustness)=-0.80 with p=0.1035 (n=5), article wrote '達顯著水準（顯著性 0.10）' — strictly p>0.10, not significant. (4) Article said 'Piecewise 換手率最高 (15.7x)' but actual highest turnover is VIX Pctile (17.22x). Borderline: lag-0 was framed as 'theoretical benchmark' achievable via perfect intraday execution — but code line 301 explicitly marks lag=0 as same-day lookahead biased in close-to-close return semantics; not tradeable as 'just execute intraday'. n=5 caveat missing. Fixes applied to feed.json content (7 edits) + details.review_24h_codex log + Supabase sync. Lesson: pre-publish content gate (prepublish_audit.py) should verify (a) target_vol/portfolio matches results.json, (b) significance language matches actual p-value, (c) ranking adjectives ('最高/最低') verified vs full results dict, (d) lag-0 framing under c2c return semantics explicitly clarified.",
+    "tags": [
+      "audit",
+      "K690",
+      "paper_review",
+      "24h_rule",
+      "claim_evidence_mismatch",
+      "lag_robustness"
+    ],
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "codex_cli_gpt_5_4_via_hourly_12",
+    "reviewer_source": "Codex review",
+    "codex_review": "FAIL → CONDITIONAL_PASS post-fix",
+    "experiment_id": "K690",
+    "k_id": "K690",
+    "experiment_path": "experiments/k690/",
+    "source_task_id": "paper_review_mile_8a5e7f5c",
+    "mile_id": "mile_8a5e7f5c"
+  },
+  {
+    "item_id": "a156b166",
+    "category": "volatility_forecasting",
+    "content": "research_1_1_realized_vol_har NULL_DATA_LIMITATION: free Yahoo Finance RSS headline snapshots are not sufficient to test whether FinBERT/BERT text features beat a HAR realized-volatility baseline. The run fetched 82 deduped Yahoo RSS headlines across only 4 UTC dates (2026-06-13 to 2026-06-16), while the declared gate requires at least 252 training days plus 60 OOS days and 22-day horizon coverage. The SPY HAR baseline pipeline is reproducible for h=1/5/22 with explicit lagged RV features and target_end_pos < forecast_pos training cutoff, but no text model was fit and no text-beats-HAR claim is supported. Follow-up needs a persistent daily headline collector or a historical/licensed archive.",
+    "evidence": [
+      "experiments/research_1_1_realized_vol_har/research_1_1_realized_vol_har_results.json",
+      "experiments/research_1_1_realized_vol_har/research_1_1_realized_vol_har.py",
+      "experiments/research_1_1_realized_vol_har/codex_review.md",
+      "Related priors: K1487 GDELT novel-risk NULL_NEGATIVE; K1338 Chinese news NULL_DATA_LIMITATION; K531 sentiment/VIX sufficiency null."
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-16T12:34:51.395709"
   }
 ]
