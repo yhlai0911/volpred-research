@@ -32025,7 +32025,7 @@
     "title": "K1346: 彩券型個股籃 vol-of-vol 與危機放大 — 低價×高 idio-vol×高 MAX 籃，檢定其 RV 與 vol-of-vol 在 risk-off 放大、是否領先大盤 tail vol（來源：Bali MAX 框架 + 2025 ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 594). Original: 彩券型個股籃 vol-of-vol 與危機放大 — 低價×高 idio-vol×高 MAX 籃，檢定其 RV 與 vol-of-vol 在 risk-off 放大、是否領先大盤 tail vol（來源：Bali MAX 框架 + 2025 lottery-momentum 延伸）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1346.py with signal.shift(1) + seed=42, (c) K1346_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 594,
@@ -32033,6 +32033,79 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-15T22:11:59Z"
+    "created_at": "2026-06-15T22:11:59Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-16T01:04:37.972374+00:00",
+    "claim_session_id": "2652868ae194",
+    "started_at": "2026-06-16T01:04:50.831105+00:00",
+    "completed_at": "2026-06-16T01:12:52.921466+00:00",
+    "result": "K1346 completed as NULL. yfinance current-name lottery proxy basket 2018-05..2026-05: own RV/VoV mildly higher in risk-off, but excess vs SPY/IWM not amplified and 6 lagged lead tests all fail Harvey/Bonferroni. Artifacts in experiments/k1346/."
+  },
+  {
+    "id": "paper_review_mile_b722be0e",
+    "title": "Paper review (Codex 24h-rule): 看起來很準，卻完全沒用：一個 GARCH 指標的預測失敗紀錄",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b722be0e needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_b722be0e",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T01:08:49+00:00"
+  },
+  {
+    "id": "paper_review_mile_53caca1a",
+    "title": "Paper review (Codex 24h-rule): 點陣圖分歧，MOVE 卻跌到 P34：債市選擇權在打折賣保險嗎？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_53caca1a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_53caca1a",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T01:08:49+00:00"
+  },
+  {
+    "id": "paper_review_mile_0ed5ec2a",
+    "title": "Paper review (Codex 24h-rule): VIX 切太早，反而吃掉報酬：用 VIX 期限結構斜率重新校準「保守 VT」",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_0ed5ec2a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_0ed5ec2a",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-16T01:08:49+00:00"
+  },
+  {
+    "id": "journal_discovery_20260616_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
+    "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "in_progress",
+    "task_type": "platform_ops",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "tier3-fallback"
+    ],
+    "created_at": "2026-06-16T01:09:10+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-16T01:09:48.792963+00:00",
+    "claim_session_id": "2fc25fe8a630",
+    "started_at": "2026-06-16T01:09:57.887394+00:00"
   }
 ]
