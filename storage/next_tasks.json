@@ -5,7 +5,7 @@
     "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-06-16T21:08:57.301340+00:00",
     "source": "continue_task_dispatch_pool_dry_breaker",
     "tags": [
@@ -17,7 +17,9 @@
     "claimed_by": "hourly-05",
     "claimed_at": "2026-06-16T21:09:19.204727+00:00",
     "claim_session_id": "0c60b0b78312",
-    "started_at": "2026-06-16T21:09:19.855590+00:00"
+    "started_at": "2026-06-16T21:09:19.855590+00:00",
+    "completed_at": "2026-06-16T21:19:06.680536+00:00",
+    "result": "Root cause: 3-layer audience-agnostic bug in refill_task_pool.py — (1) _kids_with_general_article applied to missing_research candidates blocked all research refills; (2) missing_research_top5 trimmed candidate dicts dropped audiences_covered, refill defaulted needed_audience=general; (3) audit_pending_kids audience-agnostic blocked K1509 research refill even though general task+coverage perfectly aligned. Fixed: added _kids_with_audience_article(audience), enrichment from full candidates table, audience-aware mismatch gate. K1509_article_research now refilled successfully."
   },
   {
     "id": "platform_ops_dispatch_pool_dry_diagnostic_20260614",
@@ -32779,5 +32781,21 @@
     "started_at": "2026-06-16T19:14:53.432132+00:00",
     "completed_at": "2026-06-16T19:21:04.473099+00:00",
     "result": "Codex 24h review CONDITIONAL_PASS; 數字對齊+lookahead pass+3 收緊建議；knowledge 719e2fbb"
+  },
+  {
+    "id": "K1509_article_research",
+    "title": "K1509: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1509 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1509 TIPS regime-conditional vol decomposition (yfinance TIP/STIP/LTPZ + IEF; FRED CPIAUCSL; 2015-01 ~ 2026-06; n=2,878 trading days; high-CPI regime CPI YoY > 3%, n=847 days ≈ 29.4%, 主要落 2021–2023 post-COVID). CONDITIONAL_PASS verdict (subagent review): directional 結論 robust — ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1509",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-16T21:18:39+00:00"
   }
 ]

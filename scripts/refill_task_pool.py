@@ -321,13 +321,26 @@ def _next_retry_suffix(k_id: str, audience: str, tasks: list) -> str:
     return "v20"
 
 
-def _kids_with_general_article() -> set[str]:
-    """Return set of K-ids that already have a non-unpublished general article.
+def _kids_with_audience_article(audience: str) -> set[str]:
+    """Return set of K-ids that already have a non-unpublished article for the
+    given audience.
+
+    audience="general": include articles with audience in {None, "", "general"}
+      (pre-2026-04-14 articles default to general; see 2026-05-11 K622/K630).
+    audience="research": include only articles explicitly tagged
+      audience="research".
 
     Without this guard, refill_task_pool reads publication_candidates' uncovered
     flag and proposes article tasks for K-ids that DO have an article — that
     flag is computed against covered_by metadata which can lag feed.json reality
     (2026-05-04 K518 incident). Belt-and-suspenders dedup.
+
+    2026-06-17: audience-aware (was: general-only). The old general-only set was
+    applied to both missing_general_top5 AND missing_research_top5 candidates at
+    line 1113, silently skipping every K that already had a general article from
+    ever getting a research-audience refill. K1509 incident: had general article
+    mile_6f3e2b1a but missing_research_top5 candidate never produced a research
+    task → pool dry → dispatcher fell back to platform_ops diagnostic.
     """
     import re
     kids: set[str] = set()
@@ -338,17 +351,17 @@ def _kids_with_general_article() -> set[str]:
         feed = json.loads(feed_path.read_text(encoding="utf-8"))
     except Exception:
         return kids
+    audience = (audience or "general").lower()
     for art in feed:
         if not isinstance(art, dict):
             continue
-        # Pre-2026-04-14 articles have audience=None (metadata gap); treat
-        # them as 'general' for dedup purposes since they were the platform's
-        # default-audience tone before explicit research/general split.
-        # 2026-05-11 K622/K630 incidents: dropped audience=None coverage and
-        # auto-discovery re-queued already-covered Ks two days in a row.
-        audience = art.get("audience")
-        if audience not in (None, "", "general"):
-            continue
+        art_audience = art.get("audience")
+        if audience == "general":
+            if art_audience not in (None, "", "general"):
+                continue
+        else:
+            if art_audience != audience:
+                continue
         # 2026-05-31 fix: archived articles still represent K coverage (the
         # general-audience article was published then archived; refill must
         # not auto-recreate it). See _any_feed_coverage_kids same-date fix.
@@ -363,6 +376,11 @@ def _kids_with_general_article() -> set[str]:
         for m in re.findall(r"\bK\d{2,5}[a-z_]*\b", title):
             kids.add(m.upper())
     return kids
+
+
+def _kids_with_general_article() -> set[str]:
+    """Back-compat shim. Prefer _kids_with_audience_article('general')."""
+    return _kids_with_audience_article("general")
 
 
 def _score_to_priority(score: int) -> int:
@@ -1012,10 +1030,15 @@ def refill(target: int, dry_run: bool = False) -> dict:
     payload, tasks = _load_tasks()
     existing = _existing_ids(tasks)
     live_kids = _live_kids(tasks)
-    already_covered = _kids_with_general_article()
+    already_covered_general = _kids_with_audience_article("general")
+    already_covered_research = _kids_with_audience_article("research")
+    # Back-compat alias (2026-06-17): legacy name kept for any downstream
+    # references; new code below uses audience-specific sets.
+    already_covered = already_covered_general
     # 2026-05-29 audience-mismatch retry-loop guard (see helper docstrings).
     terminal_article_kids = _kids_with_terminal_article_attempts(tasks)
     succeeded_general_kids = _kids_with_succeeded_article_attempt(tasks, "general")
+    succeeded_research_kids_cache = _kids_with_succeeded_article_attempt(tasks, "research")
     any_feed_kids = _any_feed_coverage_kids()
     audit_pending_kids = terminal_article_kids & any_feed_kids
     failed_experiment_kids = _failed_experiment_kids(tasks)
@@ -1026,6 +1049,43 @@ def refill(target: int, dry_run: bool = False) -> dict:
     # guards (e.g. audit_pending, already_covered), continue scanning the full
     # candidate table for audience-gap rows before falling back to low-score
     # fully-uncovered experiments.
+    # Build a kid → full-candidate-row map so we can enrich the slim
+    # audience_gap_row entries (2026-06-17: missing_research_top5 /
+    # missing_general_top5 only carry k_id+score+title+missing_target_audience;
+    # they drop audiences_covered / covered_by / topic_family_collisions which
+    # the dispatch loop below relies on to compute needed_audience and apply
+    # belts. Without enrichment, every missing_research row gets
+    # needed_audience=general → skipped by already_covered_general → silent
+    # pool-dry. K1509 incident).
+    full_cand_by_kid: dict[str, dict] = {}
+    for c in cand_data.get("candidates", []) or []:
+        kk = c.get("k_id")
+        if kk:
+            full_cand_by_kid[kk] = c
+
+    def _enrich(cand: dict) -> dict:
+        kid = cand.get("k_id")
+        full = full_cand_by_kid.get(kid) if kid else None
+        if not full:
+            # Fall back: synthesize audiences_covered from already_covered_for
+            # if present (audience_gap_row has it). Preserves needed_audience.
+            covered_for = cand.get("already_covered_for")
+            if isinstance(covered_for, list) and not cand.get("audiences_covered"):
+                cand = {**cand, "audiences_covered": list(covered_for)}
+            return cand
+        merged = dict(full)
+        for k, v in cand.items():
+            if v is not None:
+                merged[k] = v
+        # audience_gap_row's already_covered_for is the source of truth for
+        # already-covered audiences when the candidate row was trimmed.
+        covered_for = cand.get("already_covered_for")
+        if isinstance(covered_for, list):
+            merged["audiences_covered"] = list(set(
+                (merged.get("audiences_covered") or []) + covered_for
+            ))
+        return merged
+
     pool = []
     seen_in_pool: set[str] = set()
     for source_key in ("top_10_uncovered", "missing_research_top5", "missing_general_top5"):
@@ -1034,7 +1094,7 @@ def refill(target: int, dry_run: bool = False) -> dict:
             if not kid or kid in seen_in_pool:
                 continue
             seen_in_pool.add(kid)
-            pool.append(cand)
+            pool.append(_enrich(cand))
 
     # Fallback tier 1: full candidate table audience-gap rows beyond top5.
     # 2026-05-30 incident: top5 missing_general was fully occupied by
@@ -1108,16 +1168,32 @@ def refill(target: int, dry_run: bool = False) -> dict:
         # feed.json still lacks coverage (2026-05-29 fix; see _live_kids).
         if kid.upper() in live_kids:
             continue
-        # Belt-and-suspenders: skip if a general article already exists in
-        # feed.json (publication_candidates' uncovered flag can lag).
-        if kid.upper() in already_covered:
+        # Belt-and-suspenders: skip if the NEEDED-audience article already
+        # exists in feed.json (publication_candidates' uncovered flag can lag).
+        # 2026-06-17 fix: was general-only (already_covered). Made audience-aware
+        # so missing_research_top5 candidates that have a general article but
+        # no research article can still refill a research task. See K1509
+        # incident docs in _kids_with_audience_article.
+        if needed_audience == "general" and kid.upper() in already_covered_general:
             continue
-        # 5th belt (2026-05-29): K had a terminal article task AND feed has
-        # coverage under some audience → audience-tag mismatch (publisher bug),
-        # not a missing-article case. Don't blind-retry; let
-        # platform_ops_audience_tag_audit_K1151_K672_K957 (or equivalent) sort.
-        if kid.upper() in audit_pending_kids:
+        if needed_audience == "research" and kid.upper() in already_covered_research:
             continue
+        # 5th belt (2026-05-29; audience-aware 2026-06-17): K had a succeeded
+        # article task for the NEEDED audience but feed lacks that audience's
+        # coverage → audience-tag mismatch (publisher bug). Don't blind-retry;
+        # let platform_ops_audience_tag_audit_K1151_K672_K957 sort.
+        # Pre-2026-06-17 this was audience-agnostic and silently blocked all
+        # K's with any terminal article task + any feed coverage from getting
+        # cross-audience refills (K1509 incident: succeeded general task +
+        # general coverage perfectly aligned, yet research refill blocked).
+        kid_u = kid.upper()
+        if needed_audience == "general":
+            if kid_u in succeeded_general_kids and kid_u not in already_covered_general:
+                continue
+        else:
+            succeeded_research_kids = succeeded_research_kids_cache
+            if kid_u in succeeded_research_kids and kid_u not in already_covered_research:
+                continue
         # 3rd belt: candidates may have populated `covered_by` but stale
         # `audiences_covered=[]` (pre-2026-04-14 audience metadata gap).
         # Legit audience-gap candidates (e.g. research exists, missing general)
