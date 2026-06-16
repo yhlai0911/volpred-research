@@ -32094,7 +32094,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
     "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "auto_journal_discovery_fallback",
     "tags": [
@@ -32106,6 +32106,8 @@
     "claimed_by": "hourly-09",
     "claimed_at": "2026-06-16T01:09:48.792963+00:00",
     "claim_session_id": "2fc25fe8a630",
-    "started_at": "2026-06-16T01:09:57.887394+00:00"
+    "started_at": "2026-06-16T01:09:57.887394+00:00",
+    "completed_at": "2026-06-16T01:15:55.602190+00:00",
+    "result": "Journal-discovery 完成：寫入 13 個新方向到 research_program.md (期刊主題挖掘 batch 2026-06-16)，掃 JFE/JFQA/FAJ/JPM/EFM/JFI/JoE/RFS/arXiv 等。8 個新軸（因果 ML/LLM 文字/CVaR/股債財政 regime/另類數據台股）正交既有 7 batch。全免費資料可跑。"
   }
 ]

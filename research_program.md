@@ -596,6 +596,30 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [x] ~~提領期 sequence-of-returns risk 下 vol-aware 提領法則~~ → **K1505 completed 2026-06-16，PASS**：SPY/IEF 60/40 + FRED CPI，2006-02 to 2026-05 共 242 月；12m block bootstrap 10,000 條 30 年路徑。4% 固定實質提領 ruin=4.06%；lagged vol cut=2.95%、drawdown cut=2.50%、combined=2.17%（paired Δ=-1.89pp, 95% CI [-2.16,-1.62]pp）。代價是 combined 平均少領 4.95%（約 50.7k 實質美元），所以只可寫成「有成本地降低破產率」，不可宣稱免費提高安全提領率或 OOS volatility timing signal。
 - [ ] TIPS 階梯 + 遞延年金 decumulation benchmark 的波動暴露分解 — yfinance TIP/STIP/LTPZ + 名目國債 RV，分解 FAJ 提領 benchmark 在通膨/利率 regime 的波動暴露與尾部保護（來源：FAJ 2025 decumulation benchmark；T. Rowe Price 2026）
 
+### 期刊主題挖掘 batch（2026-06-16；WebSearch JFE/JFQA/FAJ/JPM/EFM/JFI/JoE/RFS/J.Forecasting/arXiv 2025-26 趨勢層級；新軸：因果 ML 資產定價 / LLM 文字 RV / 隔夜 VRP 拆解 / CVaR 風險平價 / 動態 factor 機制 / 股債相關財政 regime / 商品短期 momentum / 台股隔夜-日內動能 / ESG vol 分化 / 另類數據跨境；全免費資料 yfinance/FRED/TAIFEX/pytrends 可啟動）
+> 來源：journal-topic-discovery WebSearch 趨勢層級（不捏造論文標題+作者）；與既有 7 batch + backlog 460+ 條去重，確認正交新軸。
+> **新軸 A — 因果機器學習 × 資產定價（FAJ/JFQA 2025-26 熱點）**
+- [ ] Double-ML 因果 factor 檢定：價值/動能/品質是否有真正因果效應 — yfinance 美股月度橫斷面，用 DoubleML 框架（`econml`/`doubleml` 免費套件）對低/高 book-to-market、12-1M 動能、ROE 做 debiased ML，檢定控制高維 confounders 後 factor return 是否仍顯著；與既有純預測 factor ETF 題不同，聚焦因果識別（來源：López de Prado/JFQA 2026 causal factor investing；FAJ 2025 causal ML 趨勢）
+- [ ] 財報盈餘驚喜（SUE）對次月 vol 的因果增量：DML + instrumental variable — yfinance 美股月度橫斷面 + FRED 宏觀控制，用 SUE 作處理變數、IV 做識別，估計 earnings surprise 對後續 1-3 個月 realized vol 的 ATE，明確 lag（來源：JFE 2025-26 event-driven causal inference；因果 ML 在盈餘波動的應用空白）
+> **新軸 B — LLM 長期 horizon 文字 RV 預測（JoE/arXiv 2025-26 熱點）**
+- [ ] 財經新聞文字回歸預測長期（1 週-1 月）realized vol 是否顯著優於 HAR — yfinance SPY 5-min 或日 RV + 免費 RSS 新聞標題（Yahoo Finance RSS），用預訓練 FinBERT/BERT embedding 作文字 feature，LM 回歸 vs HAR baseline，誠實 DM 檢定 1/5/22 日 horizon；文字 LM 在長期 horizon 比 HAR 強這一熱點已在 SSRN 2025 出現，中文/台股版空白（來源：Parvini & Assa SSRN 2025 textual regression for RV；arXiv 2025-06 LLM-guided semantic feature selection）
+- [ ] Regime-aware in-context LLM vol 預測 vs HAR 的邊界：哪個 regime 下 LLM 真正增量 — yfinance SPY realized vol 序列 + 免費 LLM API（OpenAI/Anthropic），實作 few-shot in-context 學習，誠實比較 LLM / HAR / 結合在 high-vol / low-vol / trend-break regime 的 QLIKE，定位增量真正出現的條件（來源：arXiv:2603.10299 2026-03 regime-aware ICL for vol；backlog 已有 K id 留存但尚未執行正式誠實 DM 比較）
+> **新軸 C — 隔夜 vs 日內 VRP 不對稱拆解（J.Futures Markets 2025 實測）**
+- [ ] 台股 TAIEX 隔夜段 vs 日內段 realized vol 的 VRP 方向分歧 — TAIFEX/yfinance 0050/TAIEX open-close 拆隔夜 gap vol 與日內 range vol，建 VRP proxy（implied by VIXTWN - realized），檢定兩段 VRP 符號是否與 SPY 同樣反號（隔夜負/日內正），量化 horizon 預測力差異；台灣版隔夜 VRP 研究空白（來源：Papagelis J.Futures Markets 2025 VRP 隔夜/日內分解；JFQA 2025 skewness-VRP term structure）
+> **新軸 D — CVaR 風險平價 vs 傳統 vol-target（JFM/Sci Reports 2025 熱點，與既有 CDaR 題正交）**
+- [ ] CVaR-based risk contribution 等化配置 vs sigma-based risk parity 的左尾改善 — yfinance 股/債/金/商品 ETF（SPY/TLT/GLD/PDBC），按 CVaR contribution 等化建組（月度 rebalance，`scipy` 凸優化），比較 sigma-based risk parity vs CVaR-RP 在 2018Q4/2020/2022/2025 壓力期的 MDD 與淨 Sharpe，DM 差異顯著性；與既有「Downside-CVaR 動態對沖」（CVaR 目標 + SPY+TLT+GLD 雙邊）不同，這裡是橫斷面 CVaR risk contribution 等化建組（來源：ScienceDirect 2025 CVaR-RP model；J.Risk Fin.Mgmt 2026 Dynamic RP vs Markowitz）
+> **新軸 E — 動態 factor 角色反轉：機構 vs 散戶驅動動能（EFM 2026 + JFQA 2025）**
+- [ ] 機構作空 × 散戶跟漲的「角色反轉」月份識別與台股驗證 — yfinance 台股 0050 成分股 + TWSE 融資融券餘額（散戶 proxy）+ 外資買賣超（機構 proxy），建月度 role-reversal indicator，檢定角色反轉月後續 1M 報酬動能是否系統升高（EFM 2026 US 結果：角色反轉時月動能 +40bp）；台股版 with TWSE 免費數據，國際空白（來源：EFM 2026 "Who Drives Momentum Returns" 角色反轉結果；JFQA momentum spillover 2025）
+- [ ] 商品期貨短期（1-4 週）動能與反轉「共存」驗證及 vol 條件 — yfinance 商品 ETF 代理（GLD/SLV/USO/UNG/CPER/PDBC），月/週 return series，檢定同 horizon 下動能與反轉是否因 vol 高低 regime 分離（JFEM 2026 commodity markets 發現短期動能-反轉並存，顛覆傳統 horizon 區分）；美股商品 ETF 代理版，免 tick（來源：JFEM/SSRN 2026 commodity short-term momentum-reversal coexistence）
+> **新軸 F — 股債相關的財政/貨幣 regime 機制（RFS/SSRN 2025-26 熱點）**
+- [ ] 財政赤字擴張 regime 下股債相關係數轉正的可預測性 — yfinance SPY/TLT + FRED 財政赤字/GDP、聯邦基金利率，建滾動 regime indicator，檢定「高赤字 × 緊縮」vs「低赤字 × 寬鬆」下股債相關切換的提前預測力，量化配置頭寸轉換的 Sharpe 增益；與既有「股債 60/40 相關 regime」（只看 rolling correlation 訊號）不同，這裡加入財政赤字作機制變數（來源：Li/Zha/Zhang/Zhou SSRN 2021-2025 "Fiscal-Monetary Regime & Stock-Bond Correlation"；SSRN 2026-01 G7 vol regime switching evidence）
+- [ ] 2025 Liberation Day 關稅衝擊前後多資產相關結構的 event study — yfinance 股/債/金/商品/BTC ETF（SPY/TLT/GLD/PDBC/BTC-USD），以 2025-04 「Liberation Day」為事件，DiD 比較衝擊前後 30/60/90 日股-債相關、股-金相關、stock-vol 相關的結構性轉變；與既有「cross-asset quantile connectedness」（尾部 vs 中位連結）不同，這裡是 event-driven 結構斷裂（來源：Tang SSRN 2025-12 "Portfolio Diversification Should Follow Dynamic Regimes" 含 Liberation Day 事件）
+> **新軸 G — 企業債流動性 ML 預測與 vol 通道（JFI 2025 熱點）**
+- [ ] 企業債 illiquidity 的機器學習預測：用股票 vol 作跨市場 feature — yfinance HYG/LQD/VCIT（bond ETF）代理 illiquidity（bid-ask proxy = `high-low/close`），以 SPY/VIX/信用利差（HYG-LQD spread）為 feature，XGBoost vs 線性 OLS，誠實 OOS R² + DM 檢定，明確 lag；把債券流動性當 vol 預測的橋梁（來源：FAJ 2024 "Predicting Corporate Bond Illiquidity via Machine Learning"；J.Fixed Income 2025 ML bond vol）
+> **新軸 H — 另類數據 × 台股個股（JFQA 2025 衛星/替代數據熱點）**
+- [ ] Google Trends 特定產品關鍵字對台股供應鏈個股的 vol 預測增量 — pytrends 免費抓「iPhone demand」「AI server」「TSMC」「HBM」等週頻關鍵字 z-score，加入 TAIFEX 或 yfinance 台股個股 HAR-RV（2330/2303/2454/2382），檢定 attention shock 是否在次週 realized vol 有增量 DM，明確 lag；台股供應鏈 × attention 研究空白（來源：JFQA 2025 satellite TIR/alternative data cross-section；Review of Behavioral Finance 2026 retail attention shock）
+- [ ] 外資法人流量作台股板塊 vol 的 leading indicator — TWSE 免費三大法人買賣超（外資/投信/自營），算日頻淨買超 z-score，加入 0050 成分股板塊（半導體/金融/傳產）realized vol HAR 模型，檢定外資大量賣出前是否預測後續 vol 升高；台灣數據完整、機構 flow → vol 通道學術文件空白（來源：JFQA 2025 institutional trading & vol；EFM 2026 institutional role in momentum）
+
 ## 決策框架
 
 ### 何時深入某面向
