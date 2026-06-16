@@ -34929,5 +34929,24 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-06-17T01:39:08.906811"
+  },
+  {
+    "item_id": "63b324c7",
+    "category": "risk_management",
+    "content": "K824 Codex-reviewed CONDITIONAL_PASS (2026-06-17): SPY OOS 2023-01-01→2024-12-31 (n=502), GJR-GARCH(1,1)+4 tail methods. 1% VaR violations: Normal=10 (Kupiec p=0.049, Trinity FAIL), Student-t=8 (p=0.219, Trinity FAIL), QuantReg=4 (p=0.635, PASS), HistSim=4 (p=0.635, PASS). avg pinball loss spread <0.00000359, DM tests all not significant (Harvey). Verdict: HistSim & QuantReg tie at 1% VaR; HistSim 點估計 slight edge in pinball/coverage but not statistically distinguishable. Caveats per Codex: (a) HistSim daily update vs others 63-day refit asymmetric, (b) Student-t df MLE 用未標準化 t.logpdf 與 forecast scaling 口徑可能不一致, (c) Basel traffic light 是 alpha*1.5/2.0 heuristic 非官方 250-day count rule.",
+    "evidence": [
+      "experiments/K824/k824_quantile_forecasting.py",
+      "experiments/K824/k824_quantile_forecasting_results.json",
+      "experiments/K824/README.md",
+      "Article mile_328ced24 (revised 2026-06-17 to soften HistSim claim)",
+      "Codex source-code review 2026-06-17"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-06-17T02:18:07.704188",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K824",
+    "k_id": "K824",
+    "reviewer_source": "Codex review (gpt-5.5 xhigh, source-code level, 2026-06-17 hourly-02)",
+    "title": "K824 quantile forecasting: HistSim/QuantReg tie at 1% VaR; Student-t df scaling caveat"
   }
 ]
