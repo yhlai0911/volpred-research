@@ -33012,7 +33012,7 @@
     "title": "Paper review (Codex 24h-rule): 跟單國會議員的股票交易能打敗市場嗎？實證告訴你不能",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_5acc24ee needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_5acc24ee",
@@ -33021,7 +33021,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-17T03:08:18+00:00"
+    "created_at": "2026-06-17T03:08:18+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T03:58:09.597742+00:00",
+    "claim_session_id": "55d25134f5f4",
+    "started_at": "2026-06-17T03:58:09.913684+00:00",
+    "completed_at": "2026-06-17T04:03:51.739340+00:00",
+    "result": "Codex review artifact added: experiments/k858/reviews/paper_review_mile_5acc24ee_codex_20260617.md. Verdict CONDITIONAL_PASS: headline numbers match JSON and no direct future-return lookahead, but article must narrow wording around monthly month-end strategy vs per-disclosure +1, net-dollar vs member-count ranking, and full-sample active ticker universe."
   },
   {
     "id": "event_fomc_2026_06_17_t0",
