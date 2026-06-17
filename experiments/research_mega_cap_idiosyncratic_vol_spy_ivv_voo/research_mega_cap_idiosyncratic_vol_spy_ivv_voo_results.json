@@ -1,0 +1,149 @@
+{
+  "experiment_id": "research_mega_cap_idiosyncratic_vol_spy_ivv_voo",
+  "title": "Passive ETF-flow proxy and mega-cap idiosyncratic volatility",
+  "verdict": "NULL_PROXY",
+  "seed": 42,
+  "timestamp_utc": "2026-06-17T18:44:24.973054+00:00",
+  "data": {
+    "source": "yfinance auto_adjust=True daily close/volume",
+    "requested_start": "2010-09-01",
+    "requested_end_exclusive": "2026-06-18",
+    "actual_monthly_panel_start": "2010-09-30",
+    "actual_monthly_panel_end": "2026-05-31",
+    "n_panel_rows": 7539,
+    "n_months": 189,
+    "n_stocks": 40,
+    "etfs": [
+      "SPY",
+      "IVV",
+      "VOO"
+    ],
+    "top10_tickers": [
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "AMZN",
+      "META",
+      "GOOGL",
+      "BRK-B",
+      "AVGO",
+      "TSLA",
+      "JPM"
+    ],
+    "control_tickers": [
+      "JNJ",
+      "XOM",
+      "PG",
+      "KO",
+      "WMT",
+      "V",
+      "MA",
+      "UNH",
+      "HD",
+      "MRK",
+      "CVX",
+      "BAC",
+      "PFE",
+      "CSCO",
+      "IBM",
+      "MCD",
+      "DIS",
+      "ORCL",
+      "CRM",
+      "CMCSA",
+      "INTC",
+      "QCOM",
+      "TXN",
+      "AMGN",
+      "ADBE",
+      "NKE",
+      "ABT",
+      "COST",
+      "PEP",
+      "TMO"
+    ],
+    "flow_data_limitation": "SPY/IVV/VOO dollar volume is a liquidity/attention proxy, not historical AUM flow or creation-redemption flow."
+  },
+  "method": {
+    "target": "monthly CAPM residual realized variance, annualized, log-transformed",
+    "flow_proxy": "rolling 36-month z-score of monthly change in aggregate SPY+IVV+VOO dollar volume",
+    "primary_spec": "log_idio_rv_t ~ top10 * flow_shock_{t-1} + lag_log_idio_rv + stock FE + month FE, clustered by month",
+    "lookahead_guard": "primary uses flow_shock_l1; target month t does not use ETF volume from month t",
+    "harvey_threshold": "|t| > 3.0 with expected positive sign",
+    "bootstrap_reps": 1000
+  },
+  "regressions": {
+    "primary_lagged_monthFE": {
+      "name": "lagged_monthFE",
+      "coefficient": 0.007415573583049388,
+      "t_stat": 0.2869039671365809,
+      "p_value": 0.7741858528002475,
+      "n_obs": 6560,
+      "n_months": 164,
+      "n_stocks": 40,
+      "expected_sign": "positive",
+      "harvey_pass_abs_t_gt_3": false
+    },
+    "lagged_pooled_controls": {
+      "name": "lagged_pooled_controls",
+      "coefficient": 0.007987489572952082,
+      "t_stat": 2.8742262923881093e-05,
+      "p_value": 0.9999770669921737,
+      "n_obs": 6560,
+      "n_months": 164,
+      "n_stocks": 40,
+      "expected_sign": "positive",
+      "harvey_pass_abs_t_gt_3": false
+    },
+    "contemporaneous_monthFE_diagnostic": {
+      "name": "contemporaneous_monthFE",
+      "coefficient": -0.005300683829795101,
+      "t_stat": -0.20723571551751682,
+      "p_value": 0.835825775748668,
+      "n_obs": 6600,
+      "n_months": 165,
+      "n_stocks": 40,
+      "expected_sign": "positive",
+      "harvey_pass_abs_t_gt_3": false
+    }
+  },
+  "event_study": {
+    "threshold_flow_shock_l1": 1.2514942332280732,
+    "n_high_shock_months": 17,
+    "n_normal_months": 147,
+    "spread_diff_high_minus_normal": -0.023722972125430508,
+    "ci95": [
+      -0.24135618793439942,
+      0.19721853192699013
+    ],
+    "p_gt_0": 0.5814185814185814
+  },
+  "interpretation": "Primary lagged month-FE interaction is positive (coef=0.007416, t=0.287, p=0.7742). Verdict=NULL_PROXY. Because the flow measure is ETF dollar volume, not AUM flow, the result should be read as a free-data proxy diagnostic rather than causal evidence.",
+  "references": [
+    {
+      "title": "Passive Investing and the Rise of Mega-Firms",
+      "authors": "Hao Jiang, Dimitri Vayanos, Lu Zheng",
+      "venue": "The Review of Financial Studies, 2025",
+      "url": "https://academic.oup.com/rfs/article/38/12/3461/8280528"
+    },
+    {
+      "title": "Do ETFs Increase Volatility?",
+      "authors": "Itzhak Ben-David, Francesco Franzoni, Rabih Moussawi",
+      "venue": "Journal of Finance / NBER working paper lineage",
+      "url": "https://www.nber.org/papers/w20071"
+    },
+    {
+      "title": "The implications of passive investing for securities markets",
+      "authors": "Vladyslav Sushko, Grant Turner",
+      "venue": "BIS Quarterly Review, 2018",
+      "url": "https://www.bis.org/publ/qtrpdf/r_qt1803j.htm"
+    }
+  ],
+  "artifacts": [
+    "README.md",
+    "research_mega_cap_idiosyncratic_vol_spy_ivv_voo.py",
+    "research_mega_cap_idiosyncratic_vol_spy_ivv_voo_results.json",
+    "fig_flow_shock_idio_spread.png",
+    "fig_interaction_tstats.png"
+  ]
+}

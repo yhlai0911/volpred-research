@@ -33443,7 +33443,7 @@
     "title": "研究 backlog fallback: 被動資金流對 mega-cap idiosyncratic vol 的放大：SPY/IVV/VOO 代理版",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 被動資金流對 mega-cap idiosyncratic vol 的放大：SPY/IVV/VOO 代理版 — 用 SPY/IVV/VOO 成交額/AUM proxy 與 top-10 mega-cap idio-vol（CAPM residual RV）建 monthly panel，檢定 passive-flow shock 是否主要放大最大權重股票的 residual RV，而非等比例提高所有成分股波動；與 AI HHI concentration 題不同，這裡識別的是 flow shock → idio-vol amplification 機制（來源：Review of Financi | 來源 section: 期刊主題挖掘 batch（2026-06-17d；journal_discovery_20260617_2；websearch faj/rfs/jfqa/j.derivatives/rpc 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "mega_cap_idiosyncratic_vol_spy_ivv_voo",
@@ -33451,7 +33451,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-17T13:55:34+00:00"
+    "created_at": "2026-06-17T13:55:34+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T18:39:14.274527+00:00",
+    "claim_session_id": "8bb8afc8dd1f",
+    "started_at": "2026-06-17T18:39:32.663094+00:00",
+    "completed_at": "2026-06-17T18:46:49.621379+00:00",
+    "result": "Completed NULL_PROXY free-data experiment. Built three-piece artifact under experiments/research_mega_cap_idiosyncratic_vol_spy_ivv_voo, wrote knowledge 08b56499, and updated research_program.md. Primary Top10 x lagged SPY/IVV/VOO dollar-volume shock: coef=+0.007416, clustered t=0.287, p=0.774; event bootstrap CI crosses zero."
   },
   {
     "id": "k1529_v2_codex_remediation",

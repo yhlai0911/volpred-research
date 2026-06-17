@@ -35285,5 +35285,19 @@
     "related_articles": [
       "mile_05102b5c"
     ]
+  },
+  {
+    "item_id": "08b56499",
+    "category": "experiment_result",
+    "content": "[提出: research_program.md 2026-06-17d backlog; 執行: Codex] research_mega_cap_idiosyncratic_vol_spy_ivv_voo tested whether a free SPY/IVV/VOO passive-flow proxy amplifies mega-cap CAPM residual volatility. Data: yfinance daily adjusted close/volume, 2010-09-01 to 2026-06-18 request; monthly panel 2010-09-30 to 2026-05-31, 7,539 stock-month rows, 40 current-name large-cap stocks. Proxy: rolling 36-month z-score of monthly change in aggregate SPY+IVV+VOO dollar volume, explicitly not true AUM flow or creation/redemption flow. Method: monthly CAPM residual RV, log target; primary panel spec log_idio_rv_t ~ Top10_i x flow_shock_{t-1} + lag_log_idio_rv + stock FE + month FE, clustered by month. Lookahead guard: primary uses flow_shock_l1, so target month t does not use ETF volume from t. Result: NULL_PROXY. Primary interaction coef=+0.007416, clustered t=0.287, p=0.774; contemporaneous diagnostic coef=-0.005301, t=-0.207; high-shock event spread top10-control=-0.0237 with seeded bootstrap 95% CI [-0.241,+0.197]. Interpretation: yfinance dollar-volume proxy does not support a robust passive-flow -> mega-cap residual-vol amplification claim; true replication needs historical passive AUM/ETF ownership/index weights.",
+    "evidence": [
+      "experiments/research_mega_cap_idiosyncratic_vol_spy_ivv_voo/README.md",
+      "experiments/research_mega_cap_idiosyncratic_vol_spy_ivv_voo/research_mega_cap_idiosyncratic_vol_spy_ivv_voo.py",
+      "experiments/research_mega_cap_idiosyncratic_vol_spy_ivv_voo/research_mega_cap_idiosyncratic_vol_spy_ivv_voo_results.json",
+      "experiments/research_mega_cap_idiosyncratic_vol_spy_ivv_voo/fig_flow_shock_idio_spread.png",
+      "experiments/research_mega_cap_idiosyncratic_vol_spy_ivv_voo/fig_interaction_tstats.png"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-18T02:46:14.729819"
   }
 ]
