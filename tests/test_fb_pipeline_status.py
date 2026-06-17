@@ -141,6 +141,47 @@ def test_ops_dashboard_production_pending_counts_pending_main_thread(tmp_path, m
     assert section["pending_main_thread_count"] == 2
 
 
+def test_ops_dashboard_marks_claude_only_pending_hint(tmp_path, monkeypatch) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    tasks = [
+        {"id": "trend-1", "status": "pending", "task_type": "trending_repost"},
+    ]
+    (repo / "storage" / "next_tasks.json").write_text(json.dumps(tasks, ensure_ascii=False), encoding="utf-8")
+    (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text('{"system_crontab":{"items":[]}}\n', encoding="utf-8")
+
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    import io
+    import contextlib
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = ops_dashboard.main()
+    payload = json.loads(buf.getvalue())
+    section = next(s for s in payload["sections"] if s["section"] == "production_pending")
+
+    assert rc == 0
+    assert section["status"] == "warn"
+    assert section["pending_count"] == 1
+    assert section["pending_claude_only_count"] == 1
+    assert "Claude-only" in section["next"]
+
+
 def test_audit_terminal_or_handoff_statuses_include_interactive() -> None:
     assert "awaiting_interactive_session" in audit_fb_pipeline.TERMINAL_OR_HANDOFF_STATUSES
 

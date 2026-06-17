@@ -32,6 +32,7 @@ TERMINAL_STATUSES = {
 HANDOFF_STATUSES = {
     "awaiting_interactive_session",
 }
+TERMINAL_OR_HANDOFF_STATUSES = TERMINAL_STATUSES | HANDOFF_STATUSES
 
 
 def _auto_expire_stale_awaiting(data: list, expire_cutoff_iso: str) -> list[dict]:

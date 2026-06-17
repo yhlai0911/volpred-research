@@ -26,6 +26,15 @@ from volpred.ops.alerts import build_alert_condition_report
 
 FB_POST_TERMINAL_STATUSES = {"success", "wont_fix", "fb_silent_reject", "expired_skip"}
 FB_POST_HANDOFF_STATUSES = {"awaiting_interactive_session"}
+CLAUDE_ONLY_TASK_TYPES = {
+    "paper_body",
+    "paper_decision",
+    "event_article",
+    "member_qa",
+    "trending_repost",
+    "strategy_lifecycle",
+    "email_reply",
+}
 
 
 def load_env():
@@ -119,6 +128,10 @@ def main():
     by_type = {}
     for t in actionable:
         by_type[t.get("task_type", "?")] = by_type.get(t.get("task_type", "?"), 0) + 1
+    pending_claude_only = [
+        t for t in pending
+        if str(t.get("task_type") or "").strip().lower() in CLAUDE_ONLY_TASK_TYPES
+    ]
     # Health threshold counts ALL active pipeline work, not just dispatchable
     # `pending`: pending + pending_main + in_flight (compute_queued/claimed/in_progress).
     # A platform with 2 pending + 2 compute_queued experiments has 4 work items
@@ -137,7 +150,10 @@ def main():
         # （benign、自我修復，但連續多 tick 噪音）。trough=3 視為健康 ok；warn 留給
         # 真正低（≤2 = refill 跟不上消耗）；critical 維持 0-idle（下方 else 分支）。
         pending_status = "ok" if total_active >= 3 else "warn"
-        pending_next = "dispatch top P1-P3 if slots free"
+        if len(pending_claude_only) == len(pending):
+            pending_next = "Claude-only pending backlog; Codex should skip and Claude main thread should claim"
+        else:
+            pending_next = "dispatch top P1-P3 if slots free"
     elif pending_main:
         pending_tldr = (
             f"0 pending tasks, but {len(pending_main)} pending_main_thread tasks"
@@ -167,6 +183,7 @@ def main():
         pending_next,
         pending_count=len(pending),
         pending_main_thread_count=len(pending_main),
+        pending_claude_only_count=len(pending_claude_only),
         in_flight_count=len(in_flight),
         stale_inflight_count=len(stale_inflight),
     ))

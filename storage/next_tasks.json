@@ -1,5 +1,27 @@
 [
   {
+    "id": "platform_ops_dashboard_claude_only_pending_hint_20260618",
+    "title": "Dashboard hint for Claude-only pending tasks",
+    "description": "When production_pending contains only Claude-only task types such as trending_repost, ops_dashboard currently says dispatch top P1-P3 if slots free. This causes Codex hourly sessions to loop on unclaimable tasks. Add an explicit Claude-only pending hint while preserving warn status.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "succeeded",
+    "source": "codex_hourly_tick",
+    "created_at": "2026-06-17T23:27:31+00:00",
+    "tags": [
+      "dashboard",
+      "routing",
+      "codex",
+      "platform_ops"
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T23:27:38.742076+00:00",
+    "claim_session_id": "e8856097a1ac",
+    "started_at": "2026-06-17T23:27:44.516677+00:00",
+    "completed_at": "2026-06-17T23:29:55.747759+00:00",
+    "result": "Updated ops_dashboard production_pending guidance: when all pending tasks are Claude-only types such as trending_repost, dashboard now says Codex should skip and Claude main thread should claim. Added regression test and verified live dashboard output.\n\nAlso restored audit_fb_pipeline TERMINAL_OR_HANDOFF_STATUSES compatibility constant so the existing FB pipeline regression suite passes."
+  },
+  {
     "id": "platform_ops_paper_review_agentable_tag_fix_20260618",
     "title": "Fix paper_review refill tasks incorrectly tagged main-thread-only",
     "description": "generate_diverse_tasks emits paper_review tasks for Codex 24h review but tags them main-thread-only, so continue_task_dispatch categorizes them into main_thread instead of agentable. Remove the bad tag and add regression coverage.",
