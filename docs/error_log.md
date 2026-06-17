@@ -1864,3 +1864,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **Fix**: Article `mile_a95a2285` was downgraded to `CONDITIONAL_PASS`: the supported subperiod/full-sample gamma findings remain, the rolling-window chronology was corrected, and the OOS model-ranking/predictive-value claim was removed pending a target-aligned rerun.
 
 **Lesson / prevention**: For `arch` one-step OOS loss evaluation, use `forecast(..., align='target')` or explicitly shift origin-aligned `h.1` forecasts to the target return date before computing QLIKE/MSE/DM tests. Reviewers should treat same-index comparison of origin-aligned forecasts and realized variance as a potential lookahead/off-by-one error.
+
+## 2026-06-17 — K802 article source review FAIL: Basel traffic-light rule and Student-t scaling do not support Trinity PASS
+
+**Symptom**: Published article `mile_cbf8ba62` copied K802 results correctly, but the central narrative said changing GJR VaR from Normal to Student-t/Skewed-t turns the model from Basel yellow to green and achieves Trinity PASS.
+
+**Root cause**: `experiments/k802/k802_gjr_skewt.py` used a custom rate-based traffic-light rule (`green <= 1.5%`, `yellow <= 2.0%`) over `n=502`, so `6/502=1.20%` was labeled green. The article text simultaneously described a count rule where `5-9` violations in `500` days are yellow, which would make the `6`-violation Student-t/Skewed-t rows yellow. The standard Basel traffic-light table is a 250-day count table (`0-4` green, `5-9` yellow, `>=10` red), so K802's custom rule must not be presented as canonical Basel. A second blocker is that the Student-t VaR path uses raw `scipy.stats.t.ppf()` on standardized residuals without the unit-variance scale factor `sqrt((df-2)/df)`; df around 16 makes the VaR threshold roughly 6.8-7.0% wider than a standardized-t innovation. Skewed-t is likewise not centered/variance-standardized.
+
+**Fix required**: Treat K802 / `mile_cbf8ba62` as source-review FAIL pending K802-v2. Rerun with canonical 250-day Basel traffic-light windows or a clearly disclosed custom 500-day/binomial rule, standardized Student-t and skewed-t quantiles, regenerated charts, and article language that does not claim Trinity PASS unless it survives the corrected implementation.
+
+**Lesson / prevention**: VaR/ES articles must distinguish exact regulatory rules from custom convenience thresholds. If a script says "Basel", the review must inspect the zone formula, not just violation counts. Student-t innovations in GARCH-style VaR need explicit unit-variance scaling unless the fitted distribution includes a free scale parameter and that scale is reported.

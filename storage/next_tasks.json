@@ -32518,7 +32518,7 @@
     "title": "Paper review (Codex 24h-rule): 統計檢定通過了，監管機關還是會亮黃燈：換個分配假設，差距就出來了",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cbf8ba62 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_cbf8ba62",
@@ -32527,7 +32527,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-16T12:08:18+00:00"
+    "created_at": "2026-06-16T12:08:18+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T00:27:44.141659+00:00",
+    "claim_session_id": "07e3f4872c0e",
+    "started_at": "2026-06-17T00:27:49.852417+00:00",
+    "completed_at": "2026-06-17T00:32:17.819982+00:00",
+    "result": "Codex 24h review completed for mile_cbf8ba62 / K802. Verdict FAIL: article numbers match JSON and OOS loop is lookahead-clean, but K802 uses a custom/nonstandard Basel traffic-light rate rule that contradicts the article's count-rule prose; Student-t/Skewed-t VaR quantiles are not unit-variance standardized (~6.8-7.0% too wide at df~16). Requires K802-v2 rerun/errata before downstream citation."
   },
   {
     "id": "paper_review_mile_6f3e2b1a",
