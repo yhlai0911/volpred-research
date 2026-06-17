@@ -33219,5 +33219,27 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-17T07:38:32+00:00"
+  },
+  {
+    "id": "paper_review_mile_103338aa",
+    "title": "Paper review (Codex 24h-rule): mile_103338aa Russell reconstitution ETF vol article",
+    "description": "Codex source-level review of article mile_103338aa (K1341 Russell reconstitution ETF vol). Verify: (a) article claims match K1341_results.json (no overclaim); (b) no lookahead in narrative; (c) Bonferroni / multiple-testing caveat properly disclosed per existing codex_review.md PASS verdict; (d) tone matches null result honesty.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "hourly-16-manual",
+    "article_id": "mile_103338aa",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-17T08:12:13.6N+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-17T08:12:19.929108+00:00",
+    "claim_session_id": "e7161b1efe17",
+    "started_at": "2026-06-17T08:12:23.973224+00:00",
+    "completed_at": "2026-06-17T08:16:47.988291+00:00",
+    "result": "Codex 24h-rule review: 數字/lookahead/sample 全通過；MT disclosure missing → FAIL → 已 append Bonferroni note + codex-24h-rule-reviewed tag + Supabase resync OK (mirror SSL EOF, replica wait)"
   }
 ]
