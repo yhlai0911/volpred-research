@@ -1035,3 +1035,20 @@ Codex CLI 0.121.0 production-path proven 2026-04-28; daily quota fully consumed 
 - **Table 2 individual gamma** (3): Hon Hai 0.052/MediaTek 0.044/0056 0.112 — paper spec doesn't match any existing K (K1060 Hon Hai=0.105)
 
 Each cat needs dedicated session work; not iterative one-cycle fixes.
+
+### 期刊主題挖掘 batch（2026-06-17b；WebSearch 11 期刊 學術5/實務6 趨勢層級；selectivity gate 後初稿 10 → 7 條入單；新軸：vol forecast–portfolio translation gap / idiosyncratic vol × ICAPM equity premium / 關稅板塊 vol / breakeven inflation vol regime / earnings announcement jump / 高頻 tail risk premium / 企業債 factor bias-correction）
+> 來源：journal-topic-discovery (task `journal_discovery_20260617_0`, agent sonnet). WebSearch 掃 JFE/JFQA/FAJ/JPM/RFS/JFM/J.Fixed Income/J.Alternative Inv/J.Derivatives/J.Empirical Finance/arXiv 2025-26 趨勢層級，每條 grep research_program.md 確認正交後入單。不捏造論文標題+作者+具體期號；趨勢層級來源在括號標明。主線程驗收：7/7 dedup_check 關鍵字 grep 確認 0 matches，全部入單。
+
+- [ ] **Vol forecast 統計精度 vs 投組 Sharpe 的「translation gap」** — yfinance SPY + 465 大型股週 RV 2015-2025，系統比較 HAR/GARCH/ML 在 QLIKE 精度最優 vs cross-rank accuracy 最優 vs portfolio Sharpe 最優是否為三個不同模型；min-var/vol-target 框架下，量化 QLIKE 改善不換算為淨 Sharpe 改善的 translation gap；與既有 ML-vs-HAR 系列（QLIKE+DM 角度）正交，這裡聚焦「統計精度→投組盈虧」的斷點機制本身（來源：arXiv 2605.19278 May 2026 "Do Better Volatility Forecasts Lead to Better Portfolios?" GNN/S&P 500；JFQA 2025 implied vol ML economic value trend）
+
+- [ ] **橫斷面 idiosyncratic vol 作為 ICAPM covariance risk proxy 預測股市 excess return** — yfinance 美股大樣本月度，按 CBIV（cross-sectional bivariate idiosyncratic vol）分五組，Fama-MacBeth + 時序 OOS R² 預測市場溢酬，檢定是否 Harvey-significant；與既有 low-vol anomaly（06-14d 飽和）正交——這裡是 ICAPM 機制（hedge portfolio covariance），非 anomaly label（來源：JFQA Dec 2024 / Jan 2025 "Idiosyncratic Volatility and the ICAPM Covariance Risk"，Han & Li；兩百年樣本驗證 1815-2018；OOS R² ~1% 月/12% 年）
+
+- [ ] **2025 關稅衝擊板塊 realized vol 分化：高/低曝險板塊 RV 的不對稱動態** — yfinance 板塊 ETF（XLK/XLY/XLI/XLC 高曝險 vs XLV/XLP/XLU 低曝險）+ FRED T10YIE，以 Liberation Day 2025-04-02 及 05-14 豁免為事件窗做 RV event study，比較板塊分化 + 窗口前後 SPY 成分 vol 截面分化；與 K1514（相關結構 NULL）正交——那是 SPY-TLT 相關，這是 disclosed-exposure 的板塊 RV 截面（來源：SSRN/ScienceDirect 2025 "Tariff exposure and sectoral vulnerability"；2025 trade shock 是新的外生事件數據）
+
+- [ ] **Breakeven 通膨預期 regime 對 SPY/TLT 波動的機制驗證** — FRED T10YIE/T5YIE 免費日頻（breakeven inflation），標「高通膨預期（BEI>2.5%）」vs「通縮恐慌（BEI<1.5%）」月份，比較兩 regime 下 SPY-TLT realized 相關方向 + SPY/TLT RV，DM 檢定系統差異；與 K1516（財政赤字 → 相關，NULL）正交——機制是通膨預期而非財政；與 TIPS decumulation（K1509）正交——那是退休提領，這是波動機制（來源：SSRN Ceballos "Inflation Volatility Risk and Corporate Bond Returns"；Fed FEDS 2025002 inflation regime；2026 關稅再通膨使此機制回歸前台）
+
+- [ ] **盈餘公告 jump intensity 的橫斷面預測因子（timeliness × size × coverage）** — yfinance earnings_dates 公告日，標 [-1,+1] 窗口 price jump（5σ filter），按 filing timeliness（early/on-time/late）、市值十分位、analyst 覆蓋代理（price level proxy）分組橫斷面，Fama-MacBeth 檢定 jump intensity / post-announcement RV 差異，明確 shift(1) lag；與 K1145/K1147/K1150（EAV 跨市場 universal regularity，論文 arc）正交——那是 aggregate EAV，這是 jump 截面拆解（來源：JFE Feb 2025 "Warp speed price moves: Jumps after earnings announcements"，Christensen/Kim/Timmermann/Veliyev；AEA 2025 tail risk short-term）
+
+- [ ] **高頻 tail risk premium 作為市場 excess return 與 VRP 的 time-varying predictor** — yfinance SPY 5-min OHLC（本機有 2026 YTD 105d）代理 tail risk（downside return 分布截斷）建 TRP proxy，月頻滾動預測 SPY excess return + 下月 VIX；免 options，用 realized 截斷代理；與既有 VRP 隔夜/日內題（06-16 新軸 C，台股版）正交——那是 VRP 方向拆解，這是 tail risk premium 的時序預測力（來源：JFQA Dec 2024 Vol.59(8) "High-Frequency Tail Risk Premium and Stock Return Predictability"，Almeida et al.；cross-section portfolio hedge；VRP return predictability arises from tail asymmetry）
+
+- [ ] **企業債 factor zoo 的 bias-corrected 再審計：ETF proxy 版誠實 OOS** — yfinance HYG/LQD/VCIT/VCSH ETF 代理 carry/momentum/illiquidity/vol-beta 等 4-6 類信號，套用開源 Open Bond Asset Pricing 的 bias-correction 邏輯（剔除 prices-as-denominator 的 EIV bias），誠實 OOS Sharpe + DM 檢定；聚焦「方法論修正前後因子 premium 是否消失」的研究誠實審計；與既有 ML bond vol（06-16 新軸 G）正交——那是 ML 預測 illiquidity，這是 factor premia 是否為 artifact（來源：arXiv 2604.07880 Apr 2026 "The Corporate Bond Factor Replication Crisis"，108 signals 9 clusters 2002-2024 open-source TRACE；EFA 2025 working paper）

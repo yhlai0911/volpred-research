@@ -32868,5 +32868,26 @@
       "main-thread-only"
     ],
     "created_at": "2026-06-16T22:08:41+00:00"
+  },
+  {
+    "id": "journal_discovery_20260617_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
+    "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "tier3-fallback"
+    ],
+    "created_at": "2026-06-17T00:08:49+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-17T00:09:25.605053+00:00",
+    "claim_session_id": "3f676a2cc88b",
+    "started_at": "2026-06-17T00:09:25.757172+00:00",
+    "completed_at": "2026-06-17T00:18:15.850557+00:00",
+    "result": "Journal-discovery agent (sonnet/low) 掃 11 期刊 (學術5/實務6) 2025-26 趨勢層級；selectivity gate 後 7 條真正正交新軸入單 research_program.md（vol-forecast→portfolio translation gap / CBIV ICAPM idiosyncratic vol / 2025 關稅板塊 RV / breakeven inflation regime / earnings jump cross-section / 高頻 tail risk premium / 企業債 factor bias-correction）。主線程驗收：grep 7 個 dedup_check keyword 全 0 matches 確認正交，與既有 7 batch + K1145/K1487/K1516/K1509 等正交。Backlog refill 完成，下輪 dispatch 自動取用。"
   }
 ]
