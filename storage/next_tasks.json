@@ -33247,5 +33247,65 @@
     "started_at": "2026-06-17T08:12:23.973224+00:00",
     "completed_at": "2026-06-17T08:16:47.988291+00:00",
     "result": "Codex 24h-rule review: 數字/lookahead/sample 全通過；MT disclosure missing → FAIL → 已 append Bonferroni note + codex-24h-rule-reviewed tag + Supabase resync OK (mirror SSL EOF, replica wait)"
+  },
+  {
+    "id": "paper_review_mile_e46449ca",
+    "title": "Paper review (Codex 24h-rule): 財報季來了，股市真的比較動盪？20年數據說：沒這回事",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e46449ca needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_e46449ca",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-17T09:08:21+00:00"
+  },
+  {
+    "id": "K1341_article_research",
+    "title": "K1341: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1341 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1341 NULL/REVERSED: Russell/S&P reconstitution day intraday 'dislocate then mean-revert' hypothesis NOT supported at daily ETF frequency (2014-2025). Russell reconstitution (last Friday of June, n=12): IWM r2_cc event_mean=2.85e-4 vs baseline=1.75e-4 (1.6x), Wilcoxon p=0.81, blo",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1341",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-17T09:11:45+00:00"
+  },
+  {
+    "id": "K1528_article_general",
+    "title": "K1528: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1528 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1528 (2026-06-17) tested a free-proxy version of the market emotion-beta cross-sectional return idea using yfinance adjusted closes for a fixed current 52-stock U.S. large-cap universe plus SPY/^VIX and FRED UMCSENT, 2004-01-01 to 2026-06-14. Rolling sentiment betas for month t ",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1528",
+    "tags": [
+      "sentiment-beta",
+      "cross-section",
+      "emotion-beta",
+      "null-result",
+      "yfinance",
+      "fred",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-17T09:11:53+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-17T09:13:56.939693+00:00",
+    "claim_session_id": "6ff2c230cbae",
+    "started_at": "2026-06-17T09:14:00.853606+00:00",
+    "completed_at": "2026-06-17T09:18:39.047662+00:00",
+    "result": "K1528 一般讀者文章發佈 (mile_f1c0a52f, draft, audience=general)"
   }
 ]
