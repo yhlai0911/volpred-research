@@ -33259,7 +33259,7 @@
     "title": "Paper review (Codex 24h-rule): 財報季來了，股市真的比較動盪？20年數據說：沒這回事",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e46449ca needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_e46449ca",
@@ -33268,7 +33268,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-17T09:08:21+00:00"
+    "created_at": "2026-06-17T09:08:21+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-17T11:08:43.502113+00:00",
+    "claim_session_id": "a85cc9c4e0a3",
+    "started_at": "2026-06-17T11:08:49.946817+00:00",
+    "completed_at": "2026-06-17T11:16:14.593481+00:00",
+    "result": "Codex 24h-rule review VERDICT=CONDITIONAL_PASS (tokens=118892). No fatal lookahead (vix_lag1 lagged before OLS). Headline stats match results.json. 6 caveats: same-day VIX in cond buckets (descriptive only); RV20 = variance not vol; VIX level not log; HC1 not HAC; per-quarter cancellation exploratory; earnings window broad (41% sample). Article patched (per-quarter heading + claim → exploratory; VIX-sufficiency → softer with broad-proxy + HAC caveat). Supabase synced (1 article). Review at experiments/K964/reviews/codex_review_mile_e46449ca_2026-06-17.md. Knowledge entry 51e27362."
   },
   {
     "id": "K1341_article_research",

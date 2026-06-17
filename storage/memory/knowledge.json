@@ -35133,5 +35133,34 @@
     "experiment_path": "experiments/k1530_tw_retail_interaction_rv/",
     "verdict": "MIXED_PROXY_WEAK_OOS",
     "reviewer_source": "codex_cli_primary_self_review"
+  },
+  {
+    "item_id": "51e27362",
+    "category": "paper_review",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K964",
+    "k_id": "K964",
+    "experiment_path": "experiments/K964/",
+    "reviewer": "Codex CLI (gpt-5.4 medium)",
+    "reviewer_source": "codex_review",
+    "codex_review": "experiments/K964/reviews/codex_review_mile_e46449ca_2026-06-17.md",
+    "article_id": "mile_e46449ca",
+    "task_id": "paper_review_mile_e46449ca",
+    "tags": [
+      "earnings-season",
+      "spy",
+      "vix-control",
+      "null-result",
+      "codex-24h-rule",
+      "paper-review"
+    ],
+    "content": "K964 Codex 24h-rule review (mile_e46449ca '財報季來了，股市真的比較動盪？20年數據說：沒這回事'): VERDICT=CONDITIONAL_PASS. Headline OLS uses vix_lag1.shift(1) (no fatal lookahead). Stats match results.json: Welch |ret| p=0.5777, RV20 p=0.7633, OLS earnings dummy t=1.795 p=0.0726. Six caveats: (1) high/low VIX conditional buckets use same-day VIX (descriptive only); (2) RV20 = mean(sq_return)*252 = annualized variance (no sqrt); (3) VIX as level not log or (VIX/100)^2; (4) HC1 only — no HAC/Newey-West for overlapping RV20; (5) per-quarter cancellation = exploratory (no month FE); (6) earnings-window proxy broad (41% sample). Approve keeping live with softened wording. Article patched (2026-06-17 19:14 台灣): per-quarter heading + claim labeled exploratory; VIX-sufficiency heading + claim softened with broad-proxy + HAC caveat. Supabase synced.",
+    "evidence": [
+      "experiments/K964/reviews/codex_review_mile_e46449ca_2026-06-17.md",
+      "experiments/K964/k964_earnings_vol_results.json",
+      "storage/reports/feed.json (mile_e46449ca details.errata_log)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-17T19:16:06.232884"
   }
 ]
