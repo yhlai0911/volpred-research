@@ -35247,5 +35247,18 @@
     "codex_reviewed": true,
     "codex_review_verdict": "CONDITIONAL_PASS methodology; empirical NULL",
     "task_id": "research_factor_timing_regime"
+  },
+  {
+    "item_id": "e7c9450b",
+    "category": "cross_section_risk_premium",
+    "content": "K1531 (verdict=NULL, experiment_id=k1531, experiment_path=experiments/k1531/, reviewer=Codex gpt-5.5 xhigh session 019ed6a7, reviewer_source=Codex CONDITIONAL_PASS no bugs): FX realized skewness 不是 implied crash-risk premium 的免期權代理。230 months 2007-04..2026-05 across 8 FX ETFs (FXY/FXE/FXB/FXA/FXC/FXF/CEW/UUP). 60d rolling realized skewness, lagged 1m (.shift(1) L423), quintile-sorted. Q1 (most -skew) strictly dominated by Q5: ann ret 0.64% vs 1.50%, Sharpe 0.09 vs 0.21, MDD -35.9% vs -21.8%, ES95 -4.84% vs -4.18%. Q1-Q5 spread NW t=-0.44 (p=0.66), boot95=[-0.51,+0.33]. Left-tail asymmetry leg HOLDS (Q1 crashes harder), but BNP(2008)/CGZ(2018) carry-premium leg FAILS. Pattern consistent with K447/K535/K979 — realized higher-moment proxies never deliver robust forward returns. Related K: K1527 (yen carry vol), K1135 (skew-t GAS), K1184 (Hansen skew-t).",
+    "evidence": [
+      "experiments/k1531/k1531.py",
+      "experiments/k1531/k1531_results.json",
+      "experiments/k1531/README.md",
+      "git commit 3b9ee512"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-18T01:42:53.506756"
   }
 ]

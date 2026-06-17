@@ -11052,5 +11052,14 @@
     "task_type": "platform_ops",
     "task_id": "hourly-21_twse_orderflow_collector",
     "note": "add scripts/collect_twse_orderflow.py (TWSE MI_5MINS 5-sec order/trade flow, backfill 2012-now), wire into collect_tw_data daily pipeline, ignore data/intraday/**/*.csv (538 backfill CSVs guarded). PHASE Z hygiene — folded in prior-fire untracked. Pool empty 0/0/0 + refill blocked by arc-dedup; no agent dispatched this fire."
+  },
+  {
+    "timestamp": "2026-06-18T01:43",
+    "task_type": "experiment",
+    "task_id": "research_fx_realized_skewness_risk_premium_crash_risk",
+    "fire": "hourly-01",
+    "verdict": "NULL",
+    "k_id": "K1531",
+    "note": "hourly-01 | K1531 FX realized-skew NULL + K1348 cleanup-merge from hourly-00"
   }
 ]
