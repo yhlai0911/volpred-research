@@ -1,0 +1,1533 @@
+{
+  "k_id": "k1530",
+  "title": "Thematic ETF coherence decay as crash precursor",
+  "verdict": "FAIL",
+  "date_run": "2026-06-17T15:33:46Z",
+  "data_period": {
+    "start": "2018-01-01",
+    "end": "2026-06-17"
+  },
+  "data_sources": [
+    "yfinance daily adj close"
+  ],
+  "seed": 42,
+  "config": {
+    "window": 90,
+    "baseline": 252,
+    "event_k_sd": 1.5,
+    "horizons": [
+      21,
+      63
+    ],
+    "n_bootstrap": 1000,
+    "oos_split": "2022-01-01",
+    "harvey_threshold": 3.0
+  },
+  "themes": [
+    {
+      "theme": "AIQ",
+      "n_components": 10,
+      "n_dates": 1940,
+      "n_events_full": 9,
+      "event_study": {
+        "rv_21": {
+          "n_events": 9,
+          "n_nonevents": 2001,
+          "mean_event": 0.19194789247022515,
+          "mean_nonevent": 0.2347087741181536,
+          "diff": -0.04276088164792846,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 9,
+          "n_nonevents": 2001,
+          "mean_event": -0.05533373436131797,
+          "mean_nonevent": -0.061544420038214614,
+          "diff": 0.006210685676896643,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 9,
+          "n_nonevents": 2001,
+          "mean_event": 0.016231548378779024,
+          "mean_nonevent": 0.004849492931089679,
+          "diff": 0.011382055447689346,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 9,
+          "n_nonevents": 1959,
+          "mean_event": 0.27211763274574224,
+          "mean_nonevent": 0.2412010568724054,
+          "diff": 0.03091657587333685,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 9,
+          "n_nonevents": 1959,
+          "mean_event": -0.14536817209221564,
+          "mean_nonevent": -0.11255892135752582,
+          "diff": -0.03280925073468982,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 9,
+          "n_nonevents": 1959,
+          "mean_event": 0.03031238878871096,
+          "mean_nonevent": 0.012734148791989214,
+          "diff": 0.017578239996721746,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "oos_event_study": {
+        "rv_21": {
+          "n_events": 6,
+          "n_nonevents": 1089,
+          "mean_event": 0.18141338815961902,
+          "mean_nonevent": 0.2450930474730978,
+          "diff": -0.06367965931347877,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 6,
+          "n_nonevents": 1089,
+          "mean_event": -0.0479980152483949,
+          "mean_nonevent": -0.06467172782646291,
+          "diff": 0.01667371257806801,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 6,
+          "n_nonevents": 1089,
+          "mean_event": 0.015860736544400806,
+          "mean_nonevent": 0.006408609889215996,
+          "diff": 0.00945212665518481,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 6,
+          "n_nonevents": 1047,
+          "mean_event": 0.207831568219069,
+          "mean_nonevent": 0.24594420317786025,
+          "diff": -0.03811263495879125,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 6,
+          "n_nonevents": 1047,
+          "mean_event": -0.09780771717122545,
+          "mean_nonevent": -0.11408883334684386,
+          "diff": 0.016281116175618407,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 6,
+          "n_nonevents": 1047,
+          "mean_event": 0.03073975065469033,
+          "mean_nonevent": 0.016768580511651764,
+          "diff": 0.013971170143038565,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "is_event_study": {
+        "rv_21": {
+          "n_events": 3,
+          "n_nonevents": 912,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 3,
+          "n_nonevents": 912,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 3,
+          "n_nonevents": 912,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 3,
+          "n_nonevents": 912,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 3,
+          "n_nonevents": 912,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 3,
+          "n_nonevents": 912,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "pass_harvey_full": false
+    },
+    {
+      "theme": "BOTZ",
+      "n_components": 8,
+      "n_dates": 2033,
+      "n_events_full": 13,
+      "event_study": {
+        "rv_21": {
+          "n_events": 13,
+          "n_nonevents": 2090,
+          "mean_event": 0.2117364534704311,
+          "mean_nonevent": 0.250055376118251,
+          "diff": -0.038318922647819914,
+          "harvey_t": -4.966710510898141,
+          "p": 6.809812547192706e-07,
+          "ci_lo": -0.05797837134826977,
+          "ci_hi": -0.01745647418833282
+        },
+        "mdd_21": {
+          "n_events": 13,
+          "n_nonevents": 2090,
+          "mean_event": -0.06087653267102737,
+          "mean_nonevent": -0.07042973091304323,
+          "diff": 0.009553198242015865,
+          "harvey_t": 1.5963306538357653,
+          "p": 0.11041498964501195,
+          "ci_lo": -0.00373698864318825,
+          "ci_hi": 0.02141158522147366
+        },
+        "rel_21": {
+          "n_events": 13,
+          "n_nonevents": 2090,
+          "mean_event": -0.012806527433874653,
+          "mean_nonevent": -0.004827531090998725,
+          "diff": -0.007978996342875928,
+          "harvey_t": -0.8376051665430165,
+          "p": 0.4022524901986675,
+          "ci_lo": -0.029607331502624935,
+          "ci_hi": 0.01397516640672545
+        },
+        "rv_63": {
+          "n_events": 13,
+          "n_nonevents": 2048,
+          "mean_event": 0.3312676094837256,
+          "mean_nonevent": 0.2559703515493098,
+          "diff": 0.07529725793441577,
+          "harvey_t": 1.0995881186401013,
+          "p": 0.2715116210492825,
+          "ci_lo": -0.01386884612514136,
+          "ci_hi": 0.18210462496781546
+        },
+        "mdd_63": {
+          "n_events": 13,
+          "n_nonevents": 2048,
+          "mean_event": -0.1810886599915125,
+          "mean_nonevent": -0.13137518861340675,
+          "diff": -0.04971347137810575,
+          "harvey_t": -1.2563319767961614,
+          "p": 0.2089956329540672,
+          "ci_lo": -0.10965021514279255,
+          "ci_hi": 0.005322938497969392
+        },
+        "rel_63": {
+          "n_events": 13,
+          "n_nonevents": 2048,
+          "mean_event": -0.015461570749639445,
+          "mean_nonevent": -0.014083438502107422,
+          "diff": -0.0013781322475320233,
+          "harvey_t": -0.08329468336958679,
+          "p": 0.9336172276621539,
+          "ci_lo": -0.043003837418531476,
+          "ci_hi": 0.03544891754026417
+        }
+      },
+      "oos_event_study": {
+        "rv_21": {
+          "n_events": 8,
+          "n_nonevents": 1087,
+          "mean_event": 0.2121777407167002,
+          "mean_nonevent": 0.2595308448465532,
+          "diff": -0.047353104129852996,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 8,
+          "n_nonevents": 1087,
+          "mean_event": -0.05947059743089565,
+          "mean_nonevent": -0.07353239251481593,
+          "diff": 0.014061795083920275,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 8,
+          "n_nonevents": 1087,
+          "mean_event": -0.0025207449060395265,
+          "mean_nonevent": -0.00425067777186309,
+          "diff": 0.0017299328658235639,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 8,
+          "n_nonevents": 1045,
+          "mean_event": 0.237715398552765,
+          "mean_nonevent": 0.26068778751437666,
+          "diff": -0.02297238896161166,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 8,
+          "n_nonevents": 1045,
+          "mean_event": -0.1319222311631621,
+          "mean_nonevent": -0.13400434885287688,
+          "diff": 0.0020821176897147797,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 8,
+          "n_nonevents": 1045,
+          "mean_event": 0.004156453109173286,
+          "mean_nonevent": -0.011715970050108965,
+          "diff": 0.01587242315928225,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "is_event_study": {
+        "rv_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.21103039387640057,
+          "mean_nonevent": 0.2397863486928626,
+          "diff": -0.028755954816462037,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": -0.06312602905523812,
+          "mean_nonevent": -0.06706722526884891,
+          "diff": 0.00394119621361079,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": -0.029263779478410856,
+          "mean_nonevent": -0.00545269515670205,
+          "diff": -0.023811084321708805,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.48095114697326247,
+          "mean_nonevent": 0.2510553758927845,
+          "diff": 0.22989577108047798,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": -0.2597549461168732,
+          "mean_nonevent": -0.12863593392721903,
+          "diff": -0.1311190121896542,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": -0.04685040892373982,
+          "mean_nonevent": -0.016550043220291265,
+          "diff": -0.030300365703448552,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "pass_harvey_full": false
+    },
+    {
+      "theme": "ARKK",
+      "n_components": 10,
+      "n_dates": 1641,
+      "n_events_full": 8,
+      "event_study": {
+        "rv_21": {
+          "n_events": 8,
+          "n_nonevents": 2095,
+          "mean_event": 0.37771655793358344,
+          "mean_nonevent": 0.39803794296381717,
+          "diff": -0.02032138503023373,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 8,
+          "n_nonevents": 2095,
+          "mean_event": -0.12401415865283892,
+          "mean_nonevent": -0.10792516234172071,
+          "diff": -0.01608899631111821,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 8,
+          "n_nonevents": 2095,
+          "mean_event": -0.03995796490051631,
+          "mean_nonevent": 0.002126186141534941,
+          "diff": -0.04208415104205125,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 8,
+          "n_nonevents": 2053,
+          "mean_event": 0.3926971363680657,
+          "mean_nonevent": 0.4088908342273041,
+          "diff": -0.01619369785923841,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 8,
+          "n_nonevents": 2053,
+          "mean_event": -0.2180640973294451,
+          "mean_nonevent": -0.1969636661424415,
+          "diff": -0.021100431187003582,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 8,
+          "n_nonevents": 2053,
+          "mean_event": -0.07319096922182224,
+          "mean_nonevent": 0.007389648989568969,
+          "diff": -0.0805806182113912,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "oos_event_study": {
+        "rv_21": {
+          "n_events": 7,
+          "n_nonevents": 1088,
+          "mean_event": 0.36306445362923095,
+          "mean_nonevent": 0.44800241995764994,
+          "diff": -0.08493796632841899,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 7,
+          "n_nonevents": 1088,
+          "mean_event": -0.10969216600180158,
+          "mean_nonevent": -0.11940220875873866,
+          "diff": 0.009710042756937085,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 7,
+          "n_nonevents": 1088,
+          "mean_event": -0.018919115690830695,
+          "mean_nonevent": -0.0043703812583862685,
+          "diff": -0.014548734432444426,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 7,
+          "n_nonevents": 1046,
+          "mean_event": 0.37172127543459643,
+          "mean_nonevent": 0.4519445582025028,
+          "diff": -0.08022328276790636,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 7,
+          "n_nonevents": 1046,
+          "mean_event": -0.18559874906882648,
+          "mean_nonevent": -0.2093169021988824,
+          "diff": 0.02371815313005593,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 7,
+          "n_nonevents": 1046,
+          "mean_event": -0.03422922794670802,
+          "mean_nonevent": -0.008576095988248664,
+          "diff": -0.025653131958459356,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "is_event_study": {
+        "rv_21": {
+          "n_events": 1,
+          "n_nonevents": 1007,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 1,
+          "n_nonevents": 1007,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 1,
+          "n_nonevents": 1007,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 1,
+          "n_nonevents": 1007,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 1,
+          "n_nonevents": 1007,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 1,
+          "n_nonevents": 1007,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "pass_harvey_full": false
+    },
+    {
+      "theme": "ICLN",
+      "n_components": 10,
+      "n_dates": 2033,
+      "n_events_full": 19,
+      "event_study": {
+        "rv_21": {
+          "n_events": 19,
+          "n_nonevents": 2085,
+          "mean_event": 0.26374959208676324,
+          "mean_nonevent": 0.2592493561408181,
+          "diff": 0.004500235945945119,
+          "harvey_t": 0.21908977123893003,
+          "p": 0.8265801185903523,
+          "ci_lo": -0.028124624492527898,
+          "ci_hi": 0.03672129097712384
+        },
+        "mdd_21": {
+          "n_events": 19,
+          "n_nonevents": 2085,
+          "mean_event": -0.069376609164482,
+          "mean_nonevent": -0.06923046242142368,
+          "diff": -0.00014614674305832298,
+          "harvey_t": -0.021836836965219233,
+          "p": 0.9825781095370212,
+          "ci_lo": -0.014405308720363075,
+          "ci_hi": 0.016191211630473285
+        },
+        "rel_21": {
+          "n_events": 19,
+          "n_nonevents": 2085,
+          "mean_event": 0.017352484478840812,
+          "mean_nonevent": 0.0008970779479759935,
+          "diff": 0.01645540653086482,
+          "harvey_t": 1.408304596623608,
+          "p": 0.15904089514330289,
+          "ci_lo": -0.0033118926434915867,
+          "ci_hi": 0.03660007566878864
+        },
+        "rv_63": {
+          "n_events": 17,
+          "n_nonevents": 2045,
+          "mean_event": 0.288543778386711,
+          "mean_nonevent": 0.26671507541872314,
+          "diff": 0.02182870296798789,
+          "harvey_t": 0.49825098192365386,
+          "p": 0.6183071527170325,
+          "ci_lo": -0.04120807103661039,
+          "ci_hi": 0.10730302764728171
+        },
+        "mdd_63": {
+          "n_events": 17,
+          "n_nonevents": 2045,
+          "mean_event": -0.1299812737255771,
+          "mean_nonevent": -0.13095432098612564,
+          "diff": 0.0009730472605485319,
+          "harvey_t": 0.03211626612558352,
+          "p": 0.9743793316092868,
+          "ci_lo": -0.05778991506262014,
+          "ci_hi": 0.04512892056771282
+        },
+        "rel_63": {
+          "n_events": 17,
+          "n_nonevents": 2045,
+          "mean_event": 0.021062397732426436,
+          "mean_nonevent": 0.0031262356929229887,
+          "diff": 0.017936162039503448,
+          "harvey_t": 0.5306394551972919,
+          "p": 0.595668648988521,
+          "ci_lo": -0.03023497208889301,
+          "ci_hi": 0.06244646533654139
+        }
+      },
+      "oos_event_study": {
+        "rv_21": {
+          "n_events": 16,
+          "n_nonevents": 1080,
+          "mean_event": 0.25895610759015675,
+          "mean_nonevent": 0.26660436209472144,
+          "diff": -0.007648254504564689,
+          "harvey_t": -0.31487854445624724,
+          "p": 0.7528538726245817,
+          "ci_lo": -0.04064862738625824,
+          "ci_hi": 0.02653874163439563
+        },
+        "mdd_21": {
+          "n_events": 16,
+          "n_nonevents": 1080,
+          "mean_event": -0.0664547656083537,
+          "mean_nonevent": -0.07156432249853253,
+          "diff": 0.005109556890178835,
+          "harvey_t": 0.7328767780315549,
+          "p": 0.4636335877023732,
+          "ci_lo": -0.010201306745450209,
+          "ci_hi": 0.020112039468113546
+        },
+        "rel_21": {
+          "n_events": 16,
+          "n_nonevents": 1080,
+          "mean_event": 0.006441760345747123,
+          "mean_nonevent": -0.005179535188917541,
+          "diff": 0.011621295534664663,
+          "harvey_t": 1.3332299318124647,
+          "p": 0.18245635957220152,
+          "ci_lo": -0.005408719548432493,
+          "ci_hi": 0.030066100706696366
+        },
+        "rv_63": {
+          "n_events": 14,
+          "n_nonevents": 1040,
+          "mean_event": 0.23824774356384035,
+          "mean_nonevent": 0.26638446676131317,
+          "diff": -0.028136723197472818,
+          "harvey_t": -1.9502242730915067,
+          "p": 0.05114939390987727,
+          "ci_lo": -0.046928079083628775,
+          "ci_hi": -0.00871952510536174
+        },
+        "mdd_63": {
+          "n_events": 14,
+          "n_nonevents": 1040,
+          "mean_event": -0.09545052157608376,
+          "mean_nonevent": -0.130504075739568,
+          "diff": 0.03505355416348423,
+          "harvey_t": 5.623083232448074,
+          "p": 1.875789656935467e-08,
+          "ci_lo": 0.02478817151024614,
+          "ci_hi": 0.04690026567964074
+        },
+        "rel_63": {
+          "n_events": 14,
+          "n_nonevents": 1040,
+          "mean_event": 0.022441935087187972,
+          "mean_nonevent": -0.021740640940617825,
+          "diff": 0.0441825760278058,
+          "harvey_t": 1.1020835281235417,
+          "p": 0.27042535976628224,
+          "ci_lo": -0.00802108672575717,
+          "ci_hi": 0.09565395046114347
+        }
+      },
+      "is_event_study": {
+        "rv_21": {
+          "n_events": 3,
+          "n_nonevents": 1005,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 3,
+          "n_nonevents": 1005,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 3,
+          "n_nonevents": 1005,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 3,
+          "n_nonevents": 1005,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 3,
+          "n_nonevents": 1005,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 3,
+          "n_nonevents": 1005,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "pass_harvey_full": false
+    },
+    {
+      "theme": "CIBR",
+      "n_components": 10,
+      "n_dates": 2033,
+      "n_events_full": 14,
+      "event_study": {
+        "rv_21": {
+          "n_events": 14,
+          "n_nonevents": 2089,
+          "mean_event": 0.22252600604121126,
+          "mean_nonevent": 0.23012867812999444,
+          "diff": -0.00760267208878318,
+          "harvey_t": -0.17627408761905117,
+          "p": 0.8600786183438685,
+          "ci_lo": -0.0644109746500692,
+          "ci_hi": 0.08933599976115912
+        },
+        "mdd_21": {
+          "n_events": 14,
+          "n_nonevents": 2089,
+          "mean_event": -0.05739021786886199,
+          "mean_nonevent": -0.061964394144592906,
+          "diff": 0.0045741762757309165,
+          "harvey_t": 0.2973118478729659,
+          "p": 0.766228437099149,
+          "ci_lo": -0.029702609943928687,
+          "ci_hi": 0.025999025433473596
+        },
+        "rel_21": {
+          "n_events": 14,
+          "n_nonevents": 2089,
+          "mean_event": 0.0152019554058879,
+          "mean_nonevent": 0.0031895973959340574,
+          "diff": 0.012012358009953842,
+          "harvey_t": 1.2514518513170596,
+          "p": 0.21076966984959222,
+          "ci_lo": -0.005841980327336478,
+          "ci_hi": 0.0318127630182898
+        },
+        "rv_63": {
+          "n_events": 14,
+          "n_nonevents": 2047,
+          "mean_event": 0.21463334916335067,
+          "mean_nonevent": 0.23583975665506887,
+          "diff": -0.021206407491718204,
+          "harvey_t": -0.853491905533956,
+          "p": 0.3933865745538645,
+          "ci_lo": -0.055580320120697246,
+          "ci_hi": 0.03415468536528545
+        },
+        "mdd_63": {
+          "n_events": 14,
+          "n_nonevents": 2047,
+          "mean_event": -0.09292013023451294,
+          "mean_nonevent": -0.10966781759401667,
+          "diff": 0.01674768735950373,
+          "harvey_t": 1.2764581918068272,
+          "p": 0.2017935968600264,
+          "ci_lo": -0.011497171331564505,
+          "ci_hi": 0.03759685269816562
+        },
+        "rel_63": {
+          "n_events": 14,
+          "n_nonevents": 2047,
+          "mean_event": 0.032365808538847234,
+          "mean_nonevent": 0.00414482158500449,
+          "diff": 0.028220986953842744,
+          "harvey_t": 3.0063150334817443,
+          "p": 0.0026443487769312046,
+          "ci_lo": 0.0003020823262027896,
+          "ci_hi": 0.05811266846695546
+        }
+      },
+      "oos_event_study": {
+        "rv_21": {
+          "n_events": 9,
+          "n_nonevents": 1086,
+          "mean_event": 0.1784942030392597,
+          "mean_nonevent": 0.24025723745123367,
+          "diff": -0.06176303441197398,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 9,
+          "n_nonevents": 1086,
+          "mean_event": -0.04211304884389371,
+          "mean_nonevent": -0.06453743211286751,
+          "diff": 0.0224243832689738,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 9,
+          "n_nonevents": 1086,
+          "mean_event": 0.01812459663489859,
+          "mean_nonevent": 0.0019964608935702437,
+          "diff": 0.016128135741328344,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 9,
+          "n_nonevents": 1044,
+          "mean_event": 0.18706382089701454,
+          "mean_nonevent": 0.24001045277819588,
+          "diff": -0.052946631881181344,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 9,
+          "n_nonevents": 1044,
+          "mean_event": -0.07730541474434233,
+          "mean_nonevent": -0.11059534392127263,
+          "diff": 0.0332899291769303,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 9,
+          "n_nonevents": 1044,
+          "mean_event": 0.0339696721968949,
+          "mean_nonevent": -0.004357801411830522,
+          "diff": 0.038327473608725425,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "is_event_study": {
+        "rv_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.301783251444724,
+          "mean_nonevent": 0.21916196285295975,
+          "diff": 0.08262128859176426,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": -0.08488912211380488,
+          "mean_nonevent": -0.0591784327950952,
+          "diff": -0.02571068931870968,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.009941201193668658,
+          "mean_nonevent": 0.004481468025612125,
+          "diff": 0.005459733168056533,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.2642585000427557,
+          "mean_nonevent": 0.231498573452133,
+          "diff": 0.032759926590622684,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": -0.1210266181168201,
+          "mean_nonevent": -0.10870237643184799,
+          "diff": -0.012324241684972106,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.02947885395436143,
+          "mean_nonevent": 0.012995009430164763,
+          "diff": 0.016483844524196666,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "pass_harvey_full": false
+    },
+    {
+      "theme": "ITA",
+      "n_components": 10,
+      "n_dates": 2034,
+      "n_events_full": 13,
+      "event_study": {
+        "rv_21": {
+          "n_events": 13,
+          "n_nonevents": 2091,
+          "mean_event": 0.22673373958531698,
+          "mean_nonevent": 0.21202703827730635,
+          "diff": 0.014706701308010633,
+          "harvey_t": 0.283930679858596,
+          "p": 0.776463504493448,
+          "ci_lo": -0.052492888165176985,
+          "ci_hi": 0.11008339279973921
+        },
+        "mdd_21": {
+          "n_events": 13,
+          "n_nonevents": 2091,
+          "mean_event": -0.06786858963809676,
+          "mean_nonevent": -0.056644295446926764,
+          "diff": -0.01122429419117,
+          "harvey_t": -0.4038707959847618,
+          "p": 0.6863077327167324,
+          "ci_lo": -0.06875573653087733,
+          "ci_hi": 0.023229214694852056
+        },
+        "rel_21": {
+          "n_events": 13,
+          "n_nonevents": 2091,
+          "mean_event": -0.009513866826209959,
+          "mean_nonevent": -0.000522766488436496,
+          "diff": -0.008991100337773464,
+          "harvey_t": -1.0096450426704908,
+          "p": 0.31266538136243316,
+          "ci_lo": -0.03185109245612489,
+          "ci_hi": 0.008710803424123349
+        },
+        "rv_63": {
+          "n_events": 13,
+          "n_nonevents": 2049,
+          "mean_event": 0.21962364372716617,
+          "mean_nonevent": 0.21927375588340972,
+          "diff": 0.00034988784375644677,
+          "harvey_t": 0.006905451841001245,
+          "p": 0.9944902903793928,
+          "ci_lo": -0.06442926028576726,
+          "ci_hi": 0.10818790369853105
+        },
+        "mdd_63": {
+          "n_events": 13,
+          "n_nonevents": 2049,
+          "mean_event": -0.10197073153125578,
+          "mean_nonevent": -0.10147562330979626,
+          "diff": -0.0004951082214595254,
+          "harvey_t": -0.014934868049644563,
+          "p": 0.988084142339779,
+          "ci_lo": -0.07784197958750866,
+          "ci_hi": 0.045968749723368826
+        },
+        "rel_63": {
+          "n_events": 13,
+          "n_nonevents": 2049,
+          "mean_event": -0.011527112413951613,
+          "mean_nonevent": -0.0025929600870025636,
+          "diff": -0.00893415232694905,
+          "harvey_t": -0.38157367446623186,
+          "p": 0.702777614072926,
+          "ci_lo": -0.059424376224691336,
+          "ci_hi": 0.04088749491927033
+        }
+      },
+      "oos_event_study": {
+        "rv_21": {
+          "n_events": 9,
+          "n_nonevents": 1087,
+          "mean_event": 0.1606494772606066,
+          "mean_nonevent": 0.18927566214636132,
+          "diff": -0.02862618488575472,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 9,
+          "n_nonevents": 1087,
+          "mean_event": -0.03455604856028242,
+          "mean_nonevent": -0.04845059231970686,
+          "diff": 0.013894543759424442,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 9,
+          "n_nonevents": 1087,
+          "mean_event": 0.002382452847467865,
+          "mean_nonevent": 0.005718647777796087,
+          "diff": -0.0033361949303282222,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 9,
+          "n_nonevents": 1045,
+          "mean_event": 0.15797777786812128,
+          "mean_nonevent": 0.19173789434925437,
+          "diff": -0.033760116481133084,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 9,
+          "n_nonevents": 1045,
+          "mean_event": -0.06546204247337795,
+          "mean_nonevent": -0.0836050863246319,
+          "diff": 0.018143043851253954,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 9,
+          "n_nonevents": 1045,
+          "mean_event": -0.005815774287374342,
+          "mean_nonevent": 0.01723933481455803,
+          "diff": -0.023055109101932373,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "is_event_study": {
+        "rv_21": {
+          "n_events": 4,
+          "n_nonevents": 1004,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 4,
+          "n_nonevents": 1004,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 4,
+          "n_nonevents": 1004,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 4,
+          "n_nonevents": 1004,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 4,
+          "n_nonevents": 1004,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 4,
+          "n_nonevents": 1004,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "pass_harvey_full": false
+    },
+    {
+      "theme": "URA",
+      "n_components": 10,
+      "n_dates": 2034,
+      "n_events_full": 8,
+      "event_study": {
+        "rv_21": {
+          "n_events": 8,
+          "n_nonevents": 2096,
+          "mean_event": 0.26915596478801107,
+          "mean_nonevent": 0.35966357730292065,
+          "diff": -0.09050761251490957,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 8,
+          "n_nonevents": 2096,
+          "mean_event": -0.06428353574099674,
+          "mean_nonevent": -0.09473826010099518,
+          "diff": 0.030454724359998436,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 8,
+          "n_nonevents": 2096,
+          "mean_event": 0.00913209395870751,
+          "mean_nonevent": 0.007983070730915304,
+          "diff": 0.001149023227792206,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 8,
+          "n_nonevents": 2054,
+          "mean_event": 0.29505580975594775,
+          "mean_nonevent": 0.3656352538433378,
+          "diff": -0.07057944408739003,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 8,
+          "n_nonevents": 2054,
+          "mean_event": -0.14055500953601463,
+          "mean_nonevent": -0.16688320416907604,
+          "diff": 0.026328194633061408,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 8,
+          "n_nonevents": 2054,
+          "mean_event": 0.09179855118296244,
+          "mean_nonevent": 0.027207681011977406,
+          "diff": 0.06459087017098504,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "oos_event_study": {
+        "rv_21": {
+          "n_events": 3,
+          "n_nonevents": 1093,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 3,
+          "n_nonevents": 1093,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 3,
+          "n_nonevents": 1093,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 3,
+          "n_nonevents": 1051,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 3,
+          "n_nonevents": 1051,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 3,
+          "n_nonevents": 1051,
+          "mean_event": NaN,
+          "mean_nonevent": NaN,
+          "diff": NaN,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "is_event_study": {
+        "rv_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.24644145678360246,
+          "mean_nonevent": 0.30600532554326476,
+          "diff": -0.0595638687596623,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": -0.06005790073543833,
+          "mean_nonevent": -0.0839034235712448,
+          "diff": 0.023845522835806474,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_21": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.02027002630057655,
+          "mean_nonevent": 0.0026992608313710616,
+          "diff": 0.01757076546920549,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rv_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.3039336809639192,
+          "mean_nonevent": 0.32060297324710313,
+          "diff": -0.016669292283183923,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "mdd_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": -0.1524153750388469,
+          "mean_nonevent": -0.15196518365367426,
+          "diff": -0.00045019138517263246,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        },
+        "rel_63": {
+          "n_events": 5,
+          "n_nonevents": 1003,
+          "mean_event": 0.07583563577026023,
+          "mean_nonevent": 0.015472602630855967,
+          "diff": 0.06036303313940426,
+          "harvey_t": NaN,
+          "p": NaN,
+          "ci_lo": NaN,
+          "ci_hi": NaN
+        }
+      },
+      "pass_harvey_full": false
+    }
+  ],
+  "n_themes_pass_harvey_full": 0,
+  "lookahead_guard": "pc_share signal explicitly .shift(1) before alignment with forward outcomes; see SIGNAL_SHIFT_1 marker",
+  "fairness_baseline": "Forward returns benchmarked vs SPY same window",
+  "codex_review": {
+    "reviewer": "codex-cli 0.139.0 / gpt-5.4",
+    "verdict": "CONDITIONAL_PASS (post-fix)",
+    "bugs_fixed_after_review": [
+      "MDD initial-peak bug: prepended wealth=1.0 so a t+1 drop is recorded as drawdown.",
+      "Overall verdict's OOS replication now requires hypothesis-right sign in both IS and OOS, not just same sign."
+    ],
+    "remaining_caveats": [
+      "Static top-10 holdings ignore time-varying ETF weights.",
+      "HARVEY t suppressed when n_events < 10; AIQ/ARKK/URA remain exploratory only."
+    ]
+  },
+  "limitations": [
+    "ETF holdings are hardcoded top-N from public factsheets; ignores rebalances and weight changes over time.",
+    "Some thematic components have shorter history (e.g. PLTR 2020+, COIN 2021+) which biases early-sample coherence toward fewer names.",
+    "Event detection uses fixed 1.5 SD threshold from 252d baseline; robustness over 1 SD / 2 SD reported but not all combinations swept.",
+    "OOS test is single split (pre-2022 vs post-2022); no rolling-origin.",
+    "Component returns include rare halts / corporate actions; minor outliers not winsorized to preserve drawdown realism."
+  ],
+  "next_followup": [
+    "Use ETF.holdings API / NPORT-P filings to reflect actual time-varying weights instead of static top-10.",
+    "Test alternative coherence measures (Brownian distance corr, graph-Laplacian connectivity) for non-linear regimes.",
+    "Build a tradable signal: short theme ETF on decay event, hedge with SPY long; report Sharpe & MDD vs buy-and-hold.",
+    "Cross-asset extension: include sector ETFs (XLK/XLE) as control for systematic vs thematic decomposition."
+  ]
+}
