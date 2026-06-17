@@ -122,6 +122,19 @@ def main():
         print(f"  0050.TW 5-min error: {e}")
         section_ok["tw50_5min"] = False
 
+    # 4. TWSE 每5秒委託成交 order-flow (MI_5MINS) — 當日只有今天才抓得到，每天存檔累積
+    print("\n--- TWSE order-flow (MI_5MINS) ---")
+    try:
+        result = subprocess.run(
+            [str(VENV_PYTHON), str(PROJECT / "scripts" / "collect_twse_orderflow.py"), "--date", "today"],
+            cwd=str(PROJECT),
+            timeout=120,
+        )
+        section_ok["twse_orderflow"] = result.returncode == 0
+    except Exception as e:
+        print(f"  TWSE order-flow error: {e}")
+        section_ok["twse_orderflow"] = False
+
     print("\n✓ 台股數據收集完成")
     if section_ok and not any(section_ok.values()):
         print(f"\n  [collect_tw_data] FAIL: all sections failed: {section_ok}",
