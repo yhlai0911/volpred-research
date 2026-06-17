@@ -38,6 +38,8 @@ _ENTITY_SURFACE: dict[str, str] = {
     "spy": "US_EQUITY", "s&p": "US_EQUITY", "標普": "US_EQUITY", "美股": "US_EQUITY",
     "qqq": "NASDAQ", "納斯達克": "NASDAQ", "那斯達克": "NASDAQ",
     "iwm": "US_SMALLCAP", "羅素": "US_SMALLCAP",
+    "reconstitution": "INDEX_RECONSTITUTION", "index reconstitution": "INDEX_RECONSTITUTION",
+    "成分股調整": "INDEX_RECONSTITUTION", "指數調整": "INDEX_RECONSTITUTION",
     "0050": "TW_EQUITY", "台股": "TW_EQUITY", "台指": "TW_EQUITY", "加權指數": "TW_EQUITY",
     "台積電": "TSMC", "tsm": "TSMC", "2330": "TSMC",
     # vol indices
@@ -98,6 +100,8 @@ _ENTITY_SURFACE: dict[str, str] = {
 
 # Entities too ubiquitous to be distinctive on their own.
 _CORE_ENTITIES = {"US_EQUITY", "VIX", "TW_EQUITY"}
+_BROAD_MARKET_ENTITIES = {"NASDAQ", "US_SMALLCAP", "LONG_BOND", "US_BOND", "MID_BOND"}
+_MECHANISM_ENTITIES = {"INDEX_RECONSTITUTION", "VOL_TARGETING", "RISK_PARITY", "YIELD_CURVE", "FOMC"}
 
 # Longest-first surface forms for greedy Chinese matching.
 _SURFACE_SORTED = sorted(_ENTITY_SURFACE, key=len, reverse=True)
@@ -168,6 +172,17 @@ def _is_significant_overlap(new_ents: set[str], old_ents: set[str]) -> bool:
     GJR-GARCH persistence") absorbs every subsequent single-asset NULL study
     as an arc-dup, draining the refill pool. Single-asset research is a
     different grain than a cross-asset survey and should be allowed.
+
+    Core+single-distinctive guard (2026-06-17): a shared core entity like
+    US_EQUITY must not make one distinctive entity look like "two overlaps".
+    K1341 Russell/S&P reconstitution was blocked by generic US_SMALLCAP NULL
+    articles because the overlap was {US_EQUITY, US_SMALLCAP}. For a single
+    distinctive overlap, require either a shared VIX mechanism or both sides
+    to be exactly that same narrow entity.
+
+    Broad-market mechanism guard (2026-06-17): sharing only broad ETF/index
+    proxies such as NASDAQ/IWM is not enough when one side is about a specific
+    mechanism such as index reconstitution.
     """
     overlap = new_ents & old_ents
     if not overlap:
@@ -183,10 +198,22 @@ def _is_significant_overlap(new_ents: set[str], old_ents: set[str]) -> bool:
     if bigger_distinctive >= 6 and smaller_distinctive <= 2:
         if len(distinctive_overlap) < 3:
             return False
-    if len(overlap) >= 2:
+    if (
+        distinctive_overlap
+        and distinctive_overlap <= _BROAD_MARKET_ENTITIES
+        and ((new_distinctive ^ old_distinctive) & _MECHANISM_ENTITIES)
+    ):
+        return False
+    if len(distinctive_overlap) >= 2:
         return True
-    # single distinctive entity: significant when it dominates either side
-    return smaller_distinctive <= 2
+    # Single distinctive entity: significant only when the common story also
+    # shares the VIX mechanism (e.g. copper × VIX null) or both sides are the
+    # exact same narrow asset/topic. Core US_EQUITY alone is not enough.
+    if len(distinctive_overlap) == 1:
+        if "VIX" in overlap:
+            return True
+        return new_distinctive == old_distinctive == distinctive_overlap
+    return False
 
 
 def find_arc_duplicates(

@@ -188,6 +188,25 @@ class TestArcDuplicates:
         dups = find_arc_duplicates(K1449_TITLE, K1449_CONTENT, [K1091_ARTICLE])
         assert dups, "narrow vs narrow same-arc must still trigger"
 
+    def test_core_plus_single_broad_market_entity_not_enough(self):
+        """2026-06-17 refill dry regression: K1341 Russell/S&P reconstitution
+        extracted {US_EQUITY, US_SMALLCAP} and was blocked by generic
+        US_SMALLCAP/NASDAQ NULL articles. A core entity plus one broad-market
+        distinctive entity is not a narrative arc unless the VIX mechanism or
+        exact same narrow entity set is shared."""
+        generic_smallcap = {
+            "id": "mile_generic_smallcap",
+            "title": "把 SPY 波動拆成平常和跳一下，IWM 版本也沒有改善",
+            "description": "SPY、IWM 和 QQQ 的波動分解結果不顯著，預測力歸零。",
+            "status": "published",
+            "published_at": _ts(days_ago=2),
+        }
+        title = "K1341 NULL/REVERSED: Russell/S&P reconstitution day intraday dislocate then mean-revert hypothesis NOT supported"
+        content = "Russell and S&P index reconstitution day effect at daily ETF frequency. IWM versus SPY event window is not significant."
+        assert "INDEX_RECONSTITUTION" in extract_entities(title + "\n" + content)
+        dups = find_arc_duplicates(title, content, [generic_smallcap])
+        assert dups == [], "core US_EQUITY + one US_SMALLCAP overlap should not block K1341"
+
     def test_two_broad_surveys_still_blocked(self):
         """Two broad cross-asset NULL surveys ARE the same arc. Not loosened."""
         broad_a = {
@@ -258,36 +277,38 @@ class TestPublisherGateWiring:
 
 
 def test_vt_crowding_arc_caught():
-    """2026-06-14 regression: ��������VT crowding ��� ��場���������������� arc ����� K/audience
-    ��mile_ec28b1cc K1047 ���������� + mile_1a6d9369 K864 ��究������������������������
-    修���� VOL_TARGETING 實�� + systemic_crowding conclusion class ������������"""
+    """2026-06-14 regression: VT crowding arc must dedupe across K/audience.
+
+    The production miss was two same-day articles telling the same reader story:
+    volatility-targeting/crowded risk-control rules can amplify market stress.
+    """
     from volpred.publisher.arc_dedup import find_arc_duplicates, extract_entities, classify_conclusion
     existing = [{
         "id": "mile_1a6d9369", "status": "published",
         "published_at": "2026-06-14T04:00:00+00:00",
-        "title": "���������������������場��波�������������������������",
-        "content": "波�����������������群���使�����1000 agents 代���人模���顯示��������������系統���風���������崩���大波������風���平������������",
+        "title": "當大家都用波動率目標策略，市場會更不安全",
+        "content": "波動率目標策略的群聚風險會造成同步賣壓，1000 agents 模擬顯示系統性風險與閃崩機率上升。",
     }]
-    new_title = "���������������人����������������������������場����������������"
-    new_content = "����������人����������波�����������������������場�����������������������������模�����究顯示群������大波������"
+    new_title = "自動風控變成集體陷阱：波動率目標如何放大市場波動"
+    new_content = "投資人都使用波動率目標策略時，群聚與同步賣壓會放大波動，代理人模擬顯示系統性風險增加。"
     assert "VOL_TARGETING" in extract_entities(new_title + "\n" + new_content)
     assert classify_conclusion(new_title + "\n" + new_content) == "systemic_crowding"
     dups = find_arc_duplicates(new_title, new_content, existing, days=3650)
-    assert any(d["id"] == "mile_1a6d9369" for d in dups), "VT-crowding arc ���被������"
+    assert any(d["id"] == "mile_1a6d9369" for d in dups), "VT-crowding arc should be blocked"
 
 
 def test_vt_different_conclusion_not_blocked():
-    """��誤��������樣 VT 實���������������crowding vs ������������� dedup���"""
+    """Same VT entity with different conclusion class should not be deduped."""
     from volpred.publisher.arc_dedup import find_arc_duplicates
     existing = [{
         "id": "mile_vtpos", "status": "published",
         "published_at": "2026-06-14T04:00:00+00:00",
-        "title": "波�����������顯����������������跨�����實���",
-        "content": "波���������������������������� MDD�������� DM 檢��顯�����������穩�����������",
+        "title": "波動率目標策略顯著改善跨市場實驗",
+        "content": "波動率目標策略降低 MDD 並顯著改善風險調整報酬，結果穩健成立。",
     }]
     dups = find_arc_duplicates(
-        "波���������������������������群������大系統���風���",
-        "波�����������群���使����������������������系統���風���������崩���",
+        "波動率目標策略的群聚風險可能放大系統性風險",
+        "波動率目標策略若被太多人採用，群聚與同步賣壓可能造成閃崩。",
         existing, days=3650,
     )
-    assert not dups, "������������ VT ���章�����被誤���"
+    assert not dups, "different VT conclusion classes should not be deduped"
