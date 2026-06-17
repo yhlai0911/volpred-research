@@ -11046,5 +11046,11 @@
     "task_type": "daily_article",
     "task_id": "hourly-20_release_ponzi",
     "note": "release mile_9fdad80e 龐氏崩潰數學 (K1459) — fresh cluster (Ponzi math, no VIX/SPY overlap), audience=general, all gates PASS"
+  },
+  {
+    "timestamp": "2026-06-17T21:13:30+08:00",
+    "task_type": "platform_ops",
+    "task_id": "hourly-21_twse_orderflow_collector",
+    "note": "add scripts/collect_twse_orderflow.py (TWSE MI_5MINS 5-sec order/trade flow, backfill 2012-now), wire into collect_tw_data daily pipeline, ignore data/intraday/**/*.csv (538 backfill CSVs guarded). PHASE Z hygiene — folded in prior-fire untracked. Pool empty 0/0/0 + refill blocked by arc-dedup; no agent dispatched this fire."
   }
 ]
