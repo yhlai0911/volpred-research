@@ -1,0 +1,144 @@
+{
+  "experiment_id": "K1530",
+  "task_id": "research_interaction_rv",
+  "title": "Taiwan retail participation x recent-return interaction for 0050 realized variance",
+  "timestamp": "2026-06-17T10:21:24.901091+00:00",
+  "seed": 42,
+  "verdict": "MIXED_PROXY_WEAK_OOS",
+  "summary": "0050 residual-retail and margin-activity interaction proxies show mixed in-sample interaction evidence but no Harvey-strength OOS QLIKE improvement. Treat as an ETF-proxy pilot, not evidence on the full TWSE retail share.",
+  "data": {
+    "sources": {
+      "0050_prices": "storage/macro/yf_0050.TW.csv",
+      "institutional_trades": "storage/sentiment/tw_institutional_0050.csv",
+      "margin_trades": "storage/sentiment/tw_margin_0050.csv"
+    },
+    "sample_start": "2009-01-05",
+    "sample_end": "2026-03-17",
+    "oos_start": "2022-01-01",
+    "n_price_days": 4208,
+    "n_retail_residual_valid": 3370,
+    "n_margin_valid": 3383,
+    "retail_residual_share_mean": 0.8177,
+    "retail_residual_share_p05_p95": [
+      0.4991,
+      0.9152
+    ],
+    "margin_activity_turnover_mean": 1.8e-05
+  },
+  "method": {
+    "target": "day-t 0050 annualized r^2 and Parkinson range variance",
+    "baseline_features": "lagged log RV 1/5/22, lagged 5-day return, lagged negative 5-day return",
+    "retail_proxy_1": "residual retail share = 1 - institutional participation, clipped by valid 0050 volume and institutional ratio",
+    "retail_proxy_2": "margin activity turnover = margin/short-sale buy+sell shares divided by 0050 volume",
+    "interaction": "lagged retail z-score x lagged max(-past 5-day return, 0)",
+    "lookahead_guard": "all retail, return, and HAR features are explicit .shift(1); target remains day t",
+    "inference": "HAC OLS maxlags=5 for interaction coefficient; fixed train/OOS log-RV model with Patton QLIKE and DM h=1",
+    "multiple_testing": "4 headline target x proxy interaction tests; Bonferroni alpha=0.0125"
+  },
+  "specs": [
+    {
+      "target": "r2_ann",
+      "signal": "retail_residual_x_negret5",
+      "n_train": 2130,
+      "n_oos": 976,
+      "hac_interaction_coef": -5.58410147,
+      "hac_interaction_t": -3.9515,
+      "hac_interaction_p": 7.8e-05,
+      "bonferroni_pass": true,
+      "baseline_qlike": 5.330575,
+      "augmented_qlike": 4.821515,
+      "qlike_improvement_pct": 9.5498,
+      "dm_t_augmented_vs_baseline": -1.7963,
+      "dm_p_augmented_vs_baseline": 0.072764,
+      "harvey_pass": false
+    },
+    {
+      "target": "r2_ann",
+      "signal": "margin_activity_x_negret5",
+      "n_train": 2140,
+      "n_oos": 977,
+      "hac_interaction_coef": 9.0561668,
+      "hac_interaction_t": 2.9518,
+      "hac_interaction_p": 0.00316,
+      "bonferroni_pass": true,
+      "baseline_qlike": 5.346168,
+      "augmented_qlike": 4.868901,
+      "qlike_improvement_pct": 8.9273,
+      "dm_t_augmented_vs_baseline": -1.5288,
+      "dm_p_augmented_vs_baseline": 0.126645,
+      "harvey_pass": false
+    },
+    {
+      "target": "parkinson_ann",
+      "signal": "retail_residual_x_negret5",
+      "n_train": 2232,
+      "n_oos": 1002,
+      "hac_interaction_coef": -1.32072006,
+      "hac_interaction_t": -0.8018,
+      "hac_interaction_p": 0.422694,
+      "bonferroni_pass": false,
+      "baseline_qlike": 0.478039,
+      "augmented_qlike": 0.421507,
+      "qlike_improvement_pct": 11.8256,
+      "dm_t_augmented_vs_baseline": -2.7765,
+      "dm_p_augmented_vs_baseline": 0.005598,
+      "harvey_pass": false
+    },
+    {
+      "target": "parkinson_ann",
+      "signal": "margin_activity_x_negret5",
+      "n_train": 2243,
+      "n_oos": 1003,
+      "hac_interaction_coef": 2.73267673,
+      "hac_interaction_t": 1.2609,
+      "hac_interaction_p": 0.20734,
+      "bonferroni_pass": false,
+      "baseline_qlike": 0.478172,
+      "augmented_qlike": 0.43232,
+      "qlike_improvement_pct": 9.589,
+      "dm_t_augmented_vs_baseline": -1.8738,
+      "dm_p_augmented_vs_baseline": 0.061242,
+      "harvey_pass": false
+    }
+  ],
+  "key_numbers": {
+    "bonferroni_interaction_passes": [
+      "r2_ann:retail_residual_x_negret5",
+      "r2_ann:margin_activity_x_negret5"
+    ],
+    "harvey_oos_passes": [],
+    "best_oos_spec": "parkinson_ann:retail_residual_x_negret5",
+    "best_oos_improvement_pct": 11.8256,
+    "best_oos_dm_t": -2.7765
+  },
+  "limitations": [
+    "Residual retail participation is inferred for 0050 only; it is not an official full-market retail-share series.",
+    "Local institutional and margin snapshots end in March 2026, so this does not include the latest 2026Q2 dates.",
+    "0050 ETF flow can reflect creation/redemption and institutional hedging mechanics, not only household retail trading.",
+    "Daily OHLC cannot identify intraday retail order imbalance or attention shocks.",
+    "This is an ETF-level pilot; stock-level cross-section could behave differently."
+  ],
+  "references": [
+    {
+      "title": "Chordia, Lin, Xiang (2025), Return Extrapolation and Volatility Expectations",
+      "url": "https://www.cambridge.org/core/journals/journal-of-financial-and-quantitative-analysis/issue/3DDD308732093871E6909F7D3A647F0C",
+      "use": "Motivates recent-return extrapolation as a channel for volatility expectations."
+    },
+    {
+      "title": "Foucault, Sraer, Thesmar (2011), Individual Investors and Volatility",
+      "url": "https://faculty.haas.berkeley.edu/dsraer/SRD.pdf",
+      "use": "Motivates retail trading activity as a volatility channel."
+    },
+    {
+      "title": "Boehmer, Jones, Zhang, Zhang (2021), Tracking Retail Investor Activity",
+      "url": "https://eng.pbcsf.tsinghua.edu.cn/__local/6/B0/AF/2A35AA5BBB6B2C05786716FA0DF_098DC0E7_107C03.pdf?e=.pdf",
+      "use": "Shows retail activity can be proxied from public transaction patterns; this experiment uses a weaker Taiwan ETF residual proxy."
+    }
+  ],
+  "artifacts": {
+    "script": "experiments/k1530_tw_retail_interaction_rv/k1530_tw_retail_interaction_rv.py",
+    "results_json": "experiments/k1530_tw_retail_interaction_rv/k1530_tw_retail_interaction_rv_results.json",
+    "figure": "experiments/k1530_tw_retail_interaction_rv/k1530_tw_retail_interaction_rv.png"
+  },
+  "elapsed_seconds": 0.52
+}

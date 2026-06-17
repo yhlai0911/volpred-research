@@ -35115,5 +35115,23 @@
     "experiment_path": "experiments/k1529_credit_spread_fomc_vol/",
     "verdict": "NULL_ETF_PROXY",
     "reviewer_source": "codex_cli_primary_self_review"
+  },
+  {
+    "item_id": "a1846d88",
+    "category": "experiment_result",
+    "content": "[提出: research_program.md 2026-06-17c backlog; 執行: Codex] K1530 Taiwan retail participation x recent-return interaction for 0050 RV. Data: local public snapshots storage/macro/yf_0050.TW.csv, storage/sentiment/tw_institutional_0050.csv, storage/sentiment/tw_margin_0050.csv; sample 2009-01-05 to 2026-03-17, OOS from 2022-01-01. Retail proxies: residual 0050 retail share = 1 - (institutional buy+sell)/(2*volume), and margin activity turnover. Method: target day-t annualized r2 and Parkinson variance; all retail/return/HAR features explicitly shift(1); interaction = lagged retail z x lagged max(-past5 return,0); HAC OLS maxlags=5 plus fixed train/OOS Patton QLIKE and DM h=1. Result: MIXED_PROXY_WEAK_OOS. r2_ann interactions pass Bonferroni for residual-retail (t=-3.9515, p=0.000078, opposite sign to simple amplification story) and margin activity (t=+2.9518, p=0.00316), but 0/4 OOS specs pass Harvey; best Parkinson+residual-retail QLIKE improvement +11.83% has DM t=-2.7765, below -3. Conclusion: public 0050 retail-like proxies contain suggestive but unstable information; do not claim robust TWSE retail-share x recent-loss RV prediction without official full-market/stock-level/intraday data.",
+    "evidence": [
+      "experiments/k1530_tw_retail_interaction_rv/k1530_tw_retail_interaction_rv.py",
+      "experiments/k1530_tw_retail_interaction_rv/k1530_tw_retail_interaction_rv_results.json",
+      "experiments/k1530_tw_retail_interaction_rv/README.md",
+      "experiments/k1530_tw_retail_interaction_rv/codex_review.md",
+      "experiments/k1530_tw_retail_interaction_rv/k1530_tw_retail_interaction_rv.png"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-06-17T18:21:52.411521",
+    "experiment_id": "K1530",
+    "experiment_path": "experiments/k1530_tw_retail_interaction_rv/",
+    "verdict": "MIXED_PROXY_WEAK_OOS",
+    "reviewer_source": "codex_cli_primary_self_review"
   }
 ]
