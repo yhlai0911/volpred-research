@@ -35049,5 +35049,17 @@
       "K1334"
     ],
     "created_at": "2026-06-17T05:21:10.761890+00:00"
+  },
+  {
+    "item_id": "fa7b04d5",
+    "category": "experiment_finding",
+    "content": "K1525 HF tail risk premium VRP — verdict NULL. In-sample VRP_side regression on n=197 months: vix_end t_HAC=1.97 (p=0.049) borderline, ES_d t_HAC=1.01 (p=0.31) not significant, R²=0.21. Focal OOS spec M3 (ES+VIX, 60m rolling): R²_OOS=-4.5%, DM_t=-0.85, DM_p=0.397 (n=137) → cannot reject baseline (VIX+VRP)。VIX 主導符合預期 (M4 t=3.48)。5-min channel n=4 months (yfinance intraday cap) — concept-only。命題：HF realized downside skewness (RDSV) 可顯著預測 VRP — IS borderline (RDSV t=+3.36 p=0.0008 在 M2 spec)，但 OOS 不收斂。reviewer=commit message+results.json verdict reconciled to NULL.",
+    "evidence": [
+      "experiments/k1525_hf_tail_risk_premium_vrp/k1525_hf_tail_risk_premium_vrp_results.json",
+      "experiments/k1525_hf_tail_risk_premium_vrp/README.md",
+      "Bollerslev-Tauchen-Zhou (2009), Kelly-Jiang (2014) — references.bib"
+    ],
+    "confidence": 0.35,
+    "created_at": "2026-06-17T14:13:34.623281"
   }
 ]
