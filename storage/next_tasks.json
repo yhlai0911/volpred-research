@@ -1,5 +1,27 @@
 [
   {
+    "id": "platform_ops_dispatch_pool_dry_diagnostic_20260617",
+    "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
+    "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "succeeded",
+    "created_at": "2026-06-17T05:13:44.279562+00:00",
+    "source": "continue_task_dispatch_pool_dry_breaker",
+    "tags": [
+      "dispatch",
+      "refill",
+      "pool-dry",
+      "platform_ops"
+    ],
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-06-17T05:14:28.600792+00:00",
+    "claim_session_id": "3defcdab6f77",
+    "started_at": "2026-06-17T05:14:28.918396+00:00",
+    "completed_at": "2026-06-17T05:19:48.857524+00:00",
+    "result": "Root cause: src/volpred/publisher/arc_dedup.py 的 _is_significant_overlap 缺乏 broad-survey asymmetry guard — mile_bf13d810 (14個跨市場 GJR-GARCH persistence) 抽到 8+ entities (BITCOIN/GOLD/OIL/COPPER/HIGH_YIELD/LONG_BOND/...) 把後續所有 single-asset NULL 研究都當成 arc-dup. Fix: 當 one side >=6 distinctive entities 且 other side <=2，要求 >=3 distinctive overlap 才算 arc-dup. 加 3 個 regression tests (broad_survey_does_not_absorb_narrow_study, two_narrow_same_asset_still_blocked, two_broad_surveys_still_blocked) 全 PASS. 19/20 全 test PASS (1 pre-existing 中文亂碼 test_vt_crowding_arc_caught 非我引入). Dry-run k1341 已可釋出, k1506 13→8 部分釋出, 其他 K 確實 narrative arc 飽和需另外處理 candidate sourcing."
+  },
+  {
     "id": "platform_ops_dispatch_pool_dry_diagnostic_20260616",
     "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
     "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
@@ -32992,7 +33014,7 @@
     "description": "Gmail UID: 11757\nMessage-ID: <F6BDE18D-2627-4894-9E19-2BD0D717FE2D@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 17 Jun 2026 10:04:32 +0800\nSubject: Re: [VolPred Alert][WARN] Host cron failure detected\n\n--- 用戶回信內容 ---\n確認是否已解決。\r\n此外 確認volpred所有數據都是最新的 包含策略績效和每日或定期要更新的數據\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月17日 05:01 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Host cron failure detected\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> 偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\r\n> 註：exit=142 = SIGALRM hang-kill，單次會由下一輪 hourly fire 自我恢復（→warn）；≥2 連續失敗或非-142 失敗才升 critical。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\r\n> \r\n> scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\r\n> scheduler_last_status: ok\r\n> scheduler_age_minutes: 84495.9\r\n> failing_logs:\r\n> storage/logs/cron/hourly_dispatch.log exit=142 at unknown\r\n> 影響\r\n> \r\n> 資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\r\n> Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\r\n> release_pool_gap alert，發文節奏中斷。\r\n> \r\n> 建議行動\r\n> \r\n> 查失敗 log： tail -20 <failing_log 路徑>\r\n> 權限問題（exit=126）： chmod +x scripts/<script>.sh\r\n> macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\r\n> System Settings > Privacy & Security > Full Disk Access 加 script 路徑\r\n> 手動跑 failed command 驗證修復： uv run <command>\r\n> 比對 canonical schedule： crontab -l vs config/runtime_schedules.json\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -33003,9 +33025,14 @@
     "email_message_id": "<F6BDE18D-2627-4894-9E19-2BD0D717FE2D@gmail.com>",
     "email_subject": "Re: [VolPred Alert][WARN] Host cron failure detected",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "last_released_at": "2026-06-17T04:50:07.955674+00:00",
+    "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-17T02:31:48.764077+00:00",
-    "claim_session_id": "ae1cb6fdbf27"
+    "claimed_at": "2026-06-17T05:07:36.917407+00:00",
+    "claim_session_id": "6050a7af6f45",
+    "started_at": "2026-06-17T05:10:21.954699+00:00",
+    "completed_at": "2026-06-17T05:13:01.729219+00:00",
+    "result": "確認回覆已寄出（notification d0f7a836）：1) cron failure 為 SIGALRM watchdog 設計，12:24+13:07 兩次 fire 均 exit=0 已恢復；2) 所有數據 fresh — daily_update 今早 08:20、collect_us 07:03、paper_trading + strategy_metrics 08:03/04、feed 12:20、Supabase audit 31/31 matched"
   },
   {
     "id": "paper_review_mile_5acc24ee",

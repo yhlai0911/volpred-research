@@ -159,18 +159,34 @@ def classify_conclusion(text: str) -> str:
 def _is_significant_overlap(new_ents: set[str], old_ents: set[str]) -> bool:
     """Overlap counts when it includes >=1 distinctive entity and >=2 total,
     OR >=1 distinctive entity when either article has few entities (narrow
-    topic — e.g. both articles are about copper)."""
+    topic — e.g. both articles are about copper).
+
+    Broad-survey asymmetry (2026-06-17): if one side is a broad cross-asset
+    survey (>=6 distinctive entities) and the other side is narrow (<=2
+    distinctive entities), require >=3 distinctive overlap entities to count
+    as a match. Otherwise a single mega-survey article (e.g. "14 assets ×
+    GJR-GARCH persistence") absorbs every subsequent single-asset NULL study
+    as an arc-dup, draining the refill pool. Single-asset research is a
+    different grain than a cross-asset survey and should be allowed.
+    """
     overlap = new_ents & old_ents
     if not overlap:
         return False
-    distinctive = overlap - _CORE_ENTITIES
-    if not distinctive:
+    distinctive_overlap = overlap - _CORE_ENTITIES
+    if not distinctive_overlap:
         return False  # only SPY/VIX/台股 in common — not a topic match
+    new_distinctive = new_ents - _CORE_ENTITIES
+    old_distinctive = old_ents - _CORE_ENTITIES
+    smaller_distinctive = min(len(new_distinctive), len(old_distinctive))
+    bigger_distinctive = max(len(new_distinctive), len(old_distinctive))
+    # Broad-survey vs narrow-study asymmetry guard.
+    if bigger_distinctive >= 6 and smaller_distinctive <= 2:
+        if len(distinctive_overlap) < 3:
+            return False
     if len(overlap) >= 2:
         return True
     # single distinctive entity: significant when it dominates either side
-    smaller = min(len(new_ents - _CORE_ENTITIES), len(old_ents - _CORE_ENTITIES))
-    return smaller <= 2
+    return smaller_distinctive <= 2
 
 
 def find_arc_duplicates(

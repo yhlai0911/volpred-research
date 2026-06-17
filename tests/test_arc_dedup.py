@@ -149,6 +149,65 @@ class TestArcDuplicates:
         unpub = dict(K1091_ARTICLE, status="unpublished")
         assert find_arc_duplicates(K1449_TITLE, K1449_CONTENT, [unpub]) == []
 
+    def test_broad_survey_does_not_absorb_narrow_study(self):
+        """2026-06-17 incident: a single cross-asset survey article
+        (mile_bf13d810 '14 個跨市場資產的 GJR-GARCH persistence ~0.98') was
+        absorbing every subsequent single-asset NULL study as an arc-dup,
+        because the survey extracts 8+ distinctive entities (BITCOIN, GOLD,
+        OIL, COPPER, US_EQUITY, US_SMALLCAP, HIGH_YIELD, LONG_BOND, MOMENTUM,
+        ...) and any narrow study sharing 1-2 of them was blocked. Refill
+        pool drained to zero. Fix: when one side is broad (>=6 distinctive
+        entities) and the other is narrow (<=2), require >=3 distinctive
+        overlap entities, not 1. Different research grains."""
+        broad_survey = {
+            "id": "mile_bf13d810",
+            "title": "14 個跨市場資產的波動率慣性幾乎一樣高：GJR-GARCH persistence 均值 0.9802",
+            "description": (
+                "GJR-GARCH persistence 均值 0.9802，跨 14 個資產差異很小。"
+                "BITCOIN、GOLD、OIL、COPPER、SILVER、LONG_BOND、HIGH_YIELD、"
+                "US_SMALLCAP、CARBON、URANIUM、JPY、EUR、TLT、HYG。"
+                "無增量資訊，預測力歸零。"
+            ),
+            "status": "published",
+            "published_at": _ts(days_ago=2),
+        }
+        narrow_title = "比特幣波動率對加密期權微結構的反應"
+        narrow_content = (
+            "BTC realized vol 與 perpetual funding rate，週期效應接近於零，"
+            "增量資訊幾乎沒有。"
+        )
+        dups = find_arc_duplicates(narrow_title, narrow_content, [broad_survey])
+        assert dups == [], (
+            "broad cross-asset survey should NOT absorb narrow single-asset "
+            "study as arc-dup — different research grains"
+        )
+
+    def test_two_narrow_same_asset_still_blocked(self):
+        """Regression guard: the broad-vs-narrow rule must NOT loosen the
+        original copper×VIX case. Both K1449 and K1091 are narrow → still dup."""
+        dups = find_arc_duplicates(K1449_TITLE, K1449_CONTENT, [K1091_ARTICLE])
+        assert dups, "narrow vs narrow same-arc must still trigger"
+
+    def test_two_broad_surveys_still_blocked(self):
+        """Two broad cross-asset NULL surveys ARE the same arc. Not loosened."""
+        broad_a = {
+            "id": "mile_aa",
+            "title": "14 個跨市場資產 GJR persistence",
+            "description": (
+                "BITCOIN、GOLD、OIL、COPPER、SILVER、LONG_BOND、HIGH_YIELD、"
+                "US_SMALLCAP、CARBON、URANIUM、JPY、EUR persistence 均值 0.98。無增量資訊。"
+            ),
+            "status": "published",
+            "published_at": _ts(days_ago=2),
+        }
+        broad_b_title = "12 個跨市場資產的 EGARCH 持續性"
+        broad_b_content = (
+            "BITCOIN、GOLD、OIL、COPPER、SILVER、LONG_BOND、HIGH_YIELD、"
+            "US_SMALLCAP、CARBON、URANIUM、JPY、EUR EGARCH 持續性 0.97 接近於零差異。無增量資訊。"
+        )
+        dups = find_arc_duplicates(broad_b_title, broad_b_content, [broad_a])
+        assert dups, "two broad surveys on same conclusion class should still be dup"
+
 
 class TestPublisherGateWiring:
     def test_publish_milestone_blocks_arc_dup(self, tmp_path, monkeypatch):
