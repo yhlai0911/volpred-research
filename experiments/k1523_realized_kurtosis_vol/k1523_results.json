@@ -1,0 +1,656 @@
+{
+  "experiment_id": "k1520",
+  "title": "Realized Kurtosis as Incremental Predictor for Vol Bursts (long sample, daily proxy)",
+  "run_at": "2026-06-16T20:56:28.433385+00:00",
+  "seed": 42,
+  "data_source": "yfinance daily close",
+  "sample_period": [
+    "2010-01-01",
+    "2026-06-15"
+  ],
+  "methodology": {
+    "rv_proxy": "rolling 22-day sum of squared daily log-returns",
+    "rkt_proxy": "rolling 22-day raw kurtosis (m4/m2^2) of daily log-returns",
+    "rsk_proxy": "rolling 22-day standardized skewness (m3/m2^1.5)",
+    "target": "forward 5-day sum of squared daily log-returns (weekly RV proxy)",
+    "lag": "all features .shift(1) explicit; target uses forward-only data",
+    "estimator": "expanding-window OLS, init_train=max(250, 20%)",
+    "loss": "Patton 2011 QLIKE",
+    "dm_test": "Diebold-Mariano with Newey-West HAC, lag=floor(4(n/100)^(2/9))",
+    "harvey_threshold": "|t| > 3.0 per Harvey (2016)"
+  },
+  "verdict": "NULL",
+  "multiple_testing": {
+    "family_size": 16,
+    "alpha_bonferroni": 0.003125
+  },
+  "per_asset_findings": {
+    "SPY": {
+      "H1_RKt_over_HAR": {
+        "t_stat": -2.273836773502417,
+        "p_value": 0.022975802340432727,
+        "harvey_sig": false,
+        "bonferroni_sig": false,
+        "supported": false
+      },
+      "H2_RKt_over_RSk": {
+        "t_stat": -2.438946142234899,
+        "p_value": 0.014730163428974041,
+        "harvey_sig": false,
+        "bonferroni_sig": false,
+        "supported": false
+      },
+      "H3_RKt_over_SV": {
+        "t_stat": -1.058904742837994,
+        "p_value": 0.28964316407034607,
+        "harvey_sig": false,
+        "bonferroni_sig": false,
+        "supported": false
+      },
+      "best_model": "HAR-Full"
+    },
+    "TWII": {
+      "H1_RKt_over_HAR": {
+        "t_stat": -2.8658915621955954,
+        "p_value": 0.004158366589473772,
+        "harvey_sig": false,
+        "bonferroni_sig": false,
+        "supported": false
+      },
+      "H2_RKt_over_RSk": {
+        "t_stat": -2.7084599038969706,
+        "p_value": 0.00675962794454521,
+        "harvey_sig": false,
+        "bonferroni_sig": false,
+        "supported": false
+      },
+      "H3_RKt_over_SV": {
+        "t_stat": -1.8205010877316434,
+        "p_value": 0.0686827307598954,
+        "harvey_sig": false,
+        "bonferroni_sig": false,
+        "supported": false
+      },
+      "best_model": "HAR-Full"
+    }
+  },
+  "spy": {
+    "ticker": "SPY",
+    "label": "SPY",
+    "n_train": 817,
+    "n_oos_common": 3271,
+    "date_range": [
+      "2010-03-08",
+      "2026-06-05"
+    ],
+    "descriptive": {
+      "rkt_mean": 3.2555270619011023,
+      "rkt_median": 2.947335252801215,
+      "rkt_std": 1.2952541137611349,
+      "rsk_mean": -0.15064356536534637,
+      "rsk_std": 0.6194603123693037,
+      "rv_mean": 0.0025952424737626704
+    },
+    "qlike_full_sample": {
+      "HAR-RV": 0.5107755637139073,
+      "HAR-RV+RSk": 0.5136749370362637,
+      "HAR-RV+RKt": 0.5049154887156538,
+      "HAR-RV+RSk+RKt": 0.5072124709195854,
+      "HAR-SV": 0.5344986999062242,
+      "HAR-SV+RKt": 0.5320889125678352,
+      "HAR-Full": 0.48835706119870204
+    },
+    "dm_full_sample": {
+      "HAR-RV+RSk_vs_HAR-RV": {
+        "mean_d": 0.0028993733223564018,
+        "t_stat": 1.9728428910604812,
+        "p_value": 0.04851346480603391,
+        "n": 3271,
+        "hac_lag": 8
+      },
+      "HAR-RV+RKt_vs_HAR-RV": {
+        "mean_d": -0.005860074998253524,
+        "t_stat": -2.273836773502417,
+        "p_value": 0.022975802340432727,
+        "n": 3271,
+        "hac_lag": 8
+      },
+      "HAR-RV+RSk+RKt_vs_HAR-RV": {
+        "mean_d": -0.003563092794321997,
+        "t_stat": -1.2396794196045027,
+        "p_value": 0.21509399225146808,
+        "n": 3271,
+        "hac_lag": 8
+      },
+      "HAR-SV_vs_HAR-RV": {
+        "mean_d": 0.0237231361923168,
+        "t_stat": 1.0600545990545864,
+        "p_value": 0.28911976079284507,
+        "n": 3271,
+        "hac_lag": 8
+      },
+      "HAR-SV+RKt_vs_HAR-RV": {
+        "mean_d": 0.021313348853927827,
+        "t_stat": 0.9497661604674837,
+        "p_value": 0.34223108391642576,
+        "n": 3271,
+        "hac_lag": 8
+      },
+      "HAR-Full_vs_HAR-RV": {
+        "mean_d": -0.02241850251520538,
+        "t_stat": -1.9952888314732975,
+        "p_value": 0.04601138730142851,
+        "n": 3271,
+        "hac_lag": 8
+      },
+      "RKt_incremental_over_RSk": {
+        "mean_d": -0.006462466116678399,
+        "t_stat": -2.438946142234899,
+        "p_value": 0.014730163428974041,
+        "n": 3271,
+        "hac_lag": 8
+      },
+      "RKt_incremental_over_SV": {
+        "mean_d": -0.0024097873383889783,
+        "t_stat": -1.058904742837994,
+        "p_value": 0.28964316407034607,
+        "n": 3271,
+        "hac_lag": 8
+      }
+    },
+    "period_sub_oos": {
+      "2010-2014": {
+        "n": 398,
+        "qlike": {
+          "HAR-RV": 0.48423066033021683,
+          "HAR-RV+RSk": 0.4997429793947058,
+          "HAR-RV+RKt": 0.48291360869922423,
+          "HAR-RV+RSk+RKt": 0.49928754071743014,
+          "HAR-SV": 0.4709633541686098,
+          "HAR-SV+RKt": 0.47461754340892554,
+          "HAR-Full": 0.4809809320794637
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.0013170516309927193,
+            "t_stat": -0.4029381906503358,
+            "p_value": 0.6869936953314244,
+            "n": 398,
+            "hac_lag": 5
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": 0.015056880387213213,
+            "t_stat": 1.7439734212378106,
+            "p_value": 0.08116372456018084,
+            "n": 398,
+            "hac_lag": 5
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": -0.00961311692129146,
+            "t_stat": -0.3954806648973049,
+            "p_value": 0.6924881882686273,
+            "n": 398,
+            "hac_lag": 5
+          },
+          "HAR-Full_vs_HAR-RV": {
+            "mean_d": -0.0032497282507532328,
+            "t_stat": -0.2868233741657795,
+            "p_value": 0.7742475645717704,
+            "n": 398,
+            "hac_lag": 5
+          }
+        }
+      },
+      "2015-2019": {
+        "n": 1258,
+        "qlike": {
+          "HAR-RV": 0.5780441863032326,
+          "HAR-RV+RSk": 0.5792336497964974,
+          "HAR-RV+RKt": 0.5695804577278378,
+          "HAR-RV+RSk+RKt": 0.5714665990034596,
+          "HAR-SV": 0.6105112667701272,
+          "HAR-SV+RKt": 0.6044581867834575,
+          "HAR-Full": 0.553636600242574
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.008463728575394862,
+            "t_stat": -1.591575884317799,
+            "p_value": 0.11148003225738701,
+            "n": 1258,
+            "hac_lag": 7
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": -0.006577587299772992,
+            "t_stat": -1.232179098785123,
+            "p_value": 0.2178821891458962,
+            "n": 1258,
+            "hac_lag": 7
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": 0.026414000480224978,
+            "t_stat": 0.7693856898549376,
+            "p_value": 0.4416643811944716,
+            "n": 1258,
+            "hac_lag": 7
+          },
+          "HAR-Full_vs_HAR-RV": {
+            "mean_d": -0.02440758606065861,
+            "t_stat": -1.806265897341425,
+            "p_value": 0.07087681601286322,
+            "n": 1258,
+            "hac_lag": 7
+          }
+        }
+      },
+      "2020-2026": {
+        "n": 1615,
+        "qlike": {
+          "HAR-RV": 0.46491856329863657,
+          "HAR-RV+RSk": 0.46604153671983406,
+          "HAR-RV+RKt": 0.45996701641176013,
+          "HAR-RV+RSk+RKt": 0.4591149037932348,
+          "HAR-SV": 0.4909465379797726,
+          "HAR-SV+RKt": 0.489880279726964,
+          "HAR-Full": 0.43932550656852604
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.0049515468868764345,
+            "t_stat": -1.68899826567178,
+            "p_value": 0.09121976231669282,
+            "n": 1615,
+            "hac_lag": 7
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": -0.005803659505401663,
+            "t_stat": -1.8655132735854596,
+            "p_value": 0.062109493404379545,
+            "n": 1615,
+            "hac_lag": 7
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": 0.02496171642832749,
+            "t_stat": 0.7206173777909105,
+            "p_value": 0.471144958992078,
+            "n": 1615,
+            "hac_lag": 7
+          },
+          "HAR-Full_vs_HAR-RV": {
+            "mean_d": -0.025593056730110517,
+            "t_stat": -1.2986304725463738,
+            "p_value": 0.19407077510120097,
+            "n": 1615,
+            "hac_lag": 7
+          }
+        }
+      }
+    },
+    "regime_split": {
+      "low_vix": {
+        "n": 2395,
+        "vix_mean": 14.793599170135307,
+        "qlike": {
+          "HAR-RV": 0.5398338381441719,
+          "HAR-RV+RSk": 0.5440617544182131,
+          "HAR-RV+RKt": 0.533985116472268,
+          "HAR-RV+RSk+RKt": 0.5377170509934042,
+          "HAR-SV": 0.5433468009071332,
+          "HAR-SV+RKt": 0.5386422622112419,
+          "HAR-Full": 0.520460790921661
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.005848721671903929,
+            "t_stat": -1.8550245993516243,
+            "p_value": 0.0635927138475465,
+            "n": 2395,
+            "hac_lag": 8
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": -0.0021167871507677782,
+            "t_stat": -0.5920542602079916,
+            "p_value": 0.5538142544746711,
+            "n": 2395,
+            "hac_lag": 8
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": -0.001191575932930051,
+            "t_stat": -0.0626584039039838,
+            "p_value": 0.9500385211477975,
+            "n": 2395,
+            "hac_lag": 8
+          }
+        }
+      },
+      "high_vix": {
+        "n": 876,
+        "vix_mean": 26.346084516342373,
+        "qlike": {
+          "HAR-RV": 0.43132971067682563,
+          "HAR-RV+RSk": 0.43059682330365096,
+          "HAR-RV+RKt": 0.4254385954769656,
+          "HAR-RV+RSk+RKt": 0.423812391836485,
+          "HAR-SV": 0.5103078301605886,
+          "HAR-SV+RKt": 0.5141719349468774,
+          "HAR-Full": 0.40058487776663954
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.005891115199860012,
+            "t_stat": -1.4756645677052438,
+            "p_value": 0.14003396233721288,
+            "n": 876,
+            "hac_lag": 6
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": -0.007517318840340666,
+            "t_stat": -1.810771044751737,
+            "p_value": 0.0701763002074185,
+            "n": 876,
+            "hac_lag": 6
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": 0.08284222427005183,
+            "t_stat": 1.3838229708811445,
+            "p_value": 0.16641266755722395,
+            "n": 876,
+            "hac_lag": 6
+          }
+        }
+      }
+    }
+  },
+  "twii": {
+    "ticker": "^TWII",
+    "label": "TAIEX",
+    "n_train": 793,
+    "n_oos_common": 3172,
+    "date_range": [
+      "2010-03-15",
+      "2026-06-05"
+    ],
+    "descriptive": {
+      "rkt_mean": 3.275390562619009,
+      "rkt_median": 2.925465890386285,
+      "rkt_std": 1.3189627283606893,
+      "rsk_mean": -0.17237785445948528,
+      "rsk_std": 0.6194729216097032,
+      "rv_mean": 0.002553095483421496
+    },
+    "qlike_full_sample": {
+      "HAR-RV": 0.4549573774459419,
+      "HAR-RV+RSk": 0.4550961202874621,
+      "HAR-RV+RKt": 0.4446754231880036,
+      "HAR-RV+RSk+RKt": 0.444747103541209,
+      "HAR-SV": 0.4713472238221022,
+      "HAR-SV+RKt": 0.4638200980126113,
+      "HAR-Full": 0.43764210286266547
+    },
+    "dm_full_sample": {
+      "HAR-RV+RSk_vs_HAR-RV": {
+        "mean_d": 0.0001387428415202209,
+        "t_stat": 0.12545872615400483,
+        "p_value": 0.9001603985648265,
+        "n": 3172,
+        "hac_lag": 8
+      },
+      "HAR-RV+RKt_vs_HAR-RV": {
+        "mean_d": -0.010281954257938196,
+        "t_stat": -2.8658915621955954,
+        "p_value": 0.004158366589473772,
+        "n": 3172,
+        "hac_lag": 8
+      },
+      "HAR-RV+RSk+RKt_vs_HAR-RV": {
+        "mean_d": -0.010210273904732888,
+        "t_stat": -2.6132677698038926,
+        "p_value": 0.008968100818736335,
+        "n": 3172,
+        "hac_lag": 8
+      },
+      "HAR-SV_vs_HAR-RV": {
+        "mean_d": 0.01638984637616034,
+        "t_stat": 1.2391742840741082,
+        "p_value": 0.21528096183763612,
+        "n": 3172,
+        "hac_lag": 8
+      },
+      "HAR-SV+RKt_vs_HAR-RV": {
+        "mean_d": 0.00886272056666942,
+        "t_stat": 0.6141775658893281,
+        "p_value": 0.5390979963368765,
+        "n": 3172,
+        "hac_lag": 8
+      },
+      "HAR-Full_vs_HAR-RV": {
+        "mean_d": -0.017315274583276363,
+        "t_stat": -1.3418870946459394,
+        "p_value": 0.17963260678809978,
+        "n": 3172,
+        "hac_lag": 8
+      },
+      "RKt_incremental_over_RSk": {
+        "mean_d": -0.010349016746253109,
+        "t_stat": -2.7084599038969706,
+        "p_value": 0.00675962794454521,
+        "n": 3172,
+        "hac_lag": 8
+      },
+      "RKt_incremental_over_SV": {
+        "mean_d": -0.007527125809490913,
+        "t_stat": -1.8205010877316434,
+        "p_value": 0.0686827307598954,
+        "n": 3172,
+        "hac_lag": 8
+      }
+    },
+    "period_sub_oos": {
+      "2010-2014": {
+        "n": 399,
+        "qlike": {
+          "HAR-RV": 0.30387753517189037,
+          "HAR-RV+RSk": 0.31155200907366365,
+          "HAR-RV+RKt": 0.30580870499245527,
+          "HAR-RV+RSk+RKt": 0.3136530486529267,
+          "HAR-SV": 0.3031694494723249,
+          "HAR-SV+RKt": 0.30397352691211593,
+          "HAR-Full": 0.2890180205410196
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": 0.001931169820564902,
+            "t_stat": 0.9799646950775802,
+            "p_value": 0.32710354613669845,
+            "n": 399,
+            "hac_lag": 5
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": 0.00977551348103631,
+            "t_stat": 2.8099366735071567,
+            "p_value": 0.004955124870049676,
+            "n": 399,
+            "hac_lag": 5
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": 9.599174022550907e-05,
+            "t_stat": 0.007936054457496875,
+            "p_value": 0.993668011140532,
+            "n": 399,
+            "hac_lag": 5
+          },
+          "HAR-Full_vs_HAR-RV": {
+            "mean_d": -0.01485951463087078,
+            "t_stat": -1.1527588277474703,
+            "p_value": 0.2490093879418196,
+            "n": 399,
+            "hac_lag": 5
+          }
+        }
+      },
+      "2015-2019": {
+        "n": 1215,
+        "qlike": {
+          "HAR-RV": 0.4309888626741951,
+          "HAR-RV+RSk": 0.429730744250419,
+          "HAR-RV+RKt": 0.42875902926951964,
+          "HAR-RV+RSk+RKt": 0.42634791482177525,
+          "HAR-SV": 0.418626625960686,
+          "HAR-SV+RKt": 0.41823679256825674,
+          "HAR-Full": 0.40999577691773387
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.002229833404675533,
+            "t_stat": -0.6861308262459591,
+            "p_value": 0.4926306135560179,
+            "n": 1215,
+            "hac_lag": 6
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": -0.004640947852419832,
+            "t_stat": -1.4486116943042489,
+            "p_value": 0.1474460535247788,
+            "n": 1215,
+            "hac_lag": 6
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": -0.012752070105938288,
+            "t_stat": -0.7525633394482092,
+            "p_value": 0.4517123545879347,
+            "n": 1215,
+            "hac_lag": 6
+          },
+          "HAR-Full_vs_HAR-RV": {
+            "mean_d": -0.020993085756461218,
+            "t_stat": -1.3847237111132387,
+            "p_value": 0.16613696592386784,
+            "n": 1215,
+            "hac_lag": 6
+          }
+        }
+      },
+      "2020-2026": {
+        "n": 1558,
+        "qlike": {
+          "HAR-RV": 0.5123403058894713,
+          "HAR-RV+RSk": 0.511638502995622,
+          "HAR-RV+RKt": 0.492651186455643,
+          "HAR-RV+RSk+RKt": 0.4926685041795509,
+          "HAR-SV": 0.5555310867021932,
+          "HAR-SV+RKt": 0.5403043714298055,
+          "HAR-Full": 0.4972642433436852
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.019689119433828353,
+            "t_stat": -2.9390179092010085,
+            "p_value": 0.0032925404807677694,
+            "n": 1558,
+            "hac_lag": 7
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": -0.01967180170992048,
+            "t_stat": -2.6863563772287766,
+            "p_value": 0.007223599624161192,
+            "n": 1558,
+            "hac_lag": 7
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": 0.02796406554033405,
+            "t_stat": 1.090013999054489,
+            "p_value": 0.2757069775061507,
+            "n": 1558,
+            "hac_lag": 7
+          },
+          "HAR-Full_vs_HAR-RV": {
+            "mean_d": -0.015076062545786134,
+            "t_stat": -0.669161909838208,
+            "p_value": 0.503392201075243,
+            "n": 1558,
+            "hac_lag": 7
+          }
+        }
+      }
+    },
+    "regime_split": {
+      "low_vix": {
+        "n": 2335,
+        "vix_mean": 14.73226124357105,
+        "qlike": {
+          "HAR-RV": 0.4375982242087544,
+          "HAR-RV+RSk": 0.43837347964569384,
+          "HAR-RV+RKt": 0.42974931012063844,
+          "HAR-RV+RSk+RKt": 0.4314161952052849,
+          "HAR-SV": 0.44675322680181945,
+          "HAR-SV+RKt": 0.43998212296114897,
+          "HAR-Full": 0.429966156957717
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.007848914088115914,
+            "t_stat": -2.17919686644351,
+            "p_value": 0.029317046625898957,
+            "n": 2335,
+            "hac_lag": 8
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": -0.006182029003469515,
+            "t_stat": -1.5591079785426236,
+            "p_value": 0.1189708255828601,
+            "n": 2335,
+            "hac_lag": 8
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": 0.0023838987523945466,
+            "t_stat": 0.21440041334553284,
+            "p_value": 0.8302348193560201,
+            "n": 2335,
+            "hac_lag": 8
+          }
+        }
+      },
+      "high_vix": {
+        "n": 837,
+        "vix_mean": 26.37559143987038,
+        "qlike": {
+          "HAR-RV": 0.5033846448400072,
+          "HAR-RV+RSk": 0.5017476924481896,
+          "HAR-RV+RKt": 0.4863151770856115,
+          "HAR-RV+RSk+RKt": 0.4819366745858717,
+          "HAR-SV": 0.5399577173016247,
+          "HAR-SV+RKt": 0.530321497947097,
+          "HAR-Full": 0.45905588265723496
+        },
+        "dm": {
+          "HAR-RV+RKt_vs_HAR-RV": {
+            "mean_d": -0.017069467754395815,
+            "t_stat": -2.1620221770564996,
+            "p_value": 0.030616466829068933,
+            "n": 837,
+            "hac_lag": 6
+          },
+          "HAR-RV+RSk+RKt_vs_HAR-RV": {
+            "mean_d": -0.02144797025413549,
+            "t_stat": -2.545607322387307,
+            "p_value": 0.01090878248372551,
+            "n": 837,
+            "hac_lag": 6
+          },
+          "HAR-SV+RKt_vs_HAR-RV": {
+            "mean_d": 0.026936853107089757,
+            "t_stat": 0.6045396621545647,
+            "p_value": 0.5454849082567357,
+            "n": 837,
+            "hac_lag": 6
+          }
+        }
+      }
+    }
+  },
+  "plots": {
+    "qlike_comparison": "figures/k1520_qlike_comparison.png",
+    "dm_tstats": "figures/k1520_dm_tstats.png",
+    "regime_qlike": "figures/k1520_regime_qlike.png"
+  }
+}

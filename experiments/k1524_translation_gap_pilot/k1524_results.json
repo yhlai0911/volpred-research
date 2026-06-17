@@ -1,0 +1,118 @@
+{
+  "k_id": "K1522",
+  "title": "Translation Gap Pilot: \u7d71\u8a08\u7cbe\u5ea6 \u2192 \u6295\u7d44 Sharpe \u7684\u65b7\u9ede",
+  "oos_period": "2022-01 to 2025-12",
+  "tickers": [
+    "SPY",
+    "AAPL",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "NVDA",
+    "META",
+    "TSLA",
+    "JPM",
+    "JNJ",
+    "V"
+  ],
+  "matrix": {
+    "HAR": {
+      "QLIKE": 0.34052696415036454,
+      "rank_rho": 0.8631917982217384,
+      "EW_sharpe": 1.148456049997651,
+      "single_sharpe_median": 0.6229765881718095,
+      "single_sharpe_by_ticker": {
+        "SPY": 0.8965694217816994,
+        "AAPL": 0.6058158865472941,
+        "MSFT": 0.6229765881718095,
+        "GOOGL": 0.8242320463181457,
+        "AMZN": 0.4044675419614186,
+        "NVDA": 1.3961588145533022,
+        "META": 0.9966789751493125,
+        "TSLA": 0.4074013858492217,
+        "JPM": 1.1660055839206136,
+        "JNJ": -0.016155433892470282,
+        "V": 0.5832060447941447
+      }
+    },
+    "GJR": {
+      "QLIKE": 0.557286482208598,
+      "rank_rho": 0.6946833605516239,
+      "EW_sharpe": 0.9388701817503123,
+      "single_sharpe_median": 0.5954585335514783,
+      "single_sharpe_by_ticker": {
+        "SPY": 0.6234776957555214,
+        "AAPL": 0.5954585335514783,
+        "MSFT": 0.39415880591256497,
+        "GOOGL": 0.7930112087233692,
+        "AMZN": 0.34088978626250716,
+        "NVDA": 1.209941091247561,
+        "META": 0.4748619566242627,
+        "TSLA": 0.3143565951583961,
+        "JPM": 0.8984192757650409,
+        "JNJ": 0.5209043520682128,
+        "V": 0.6562723567925215
+      }
+    },
+    "RF": {
+      "QLIKE": 0.23206300025394375,
+      "rank_rho": 0.8589185265831973,
+      "EW_sharpe": 1.1081577081571965,
+      "single_sharpe_median": 0.6695931643567936,
+      "single_sharpe_by_ticker": {
+        "SPY": 0.8360577632418476,
+        "AAPL": 0.6238997354380418,
+        "MSFT": 0.5191151743391808,
+        "GOOGL": 0.7633456905828809,
+        "AMZN": 0.4276289309898548,
+        "NVDA": 1.322998663236897,
+        "META": 0.9659942453522642,
+        "TSLA": 0.3003187707333374,
+        "JPM": 1.1334190476669415,
+        "JNJ": 0.1399890804176426,
+        "V": 0.6695931643567936
+      }
+    }
+  },
+  "winners": {
+    "QLIKE": "RF",
+    "rank_rho": "HAR",
+    "EW_sharpe": "HAR",
+    "single_sharpe_median": "RF"
+  },
+  "DM_test_QLIKE": {
+    "HAR_vs_GJR": {
+      "stat": -3.114653106094592,
+      "p": 0.0018416135252052879
+    },
+    "HAR_vs_RF": {
+      "stat": 1.598132382244604,
+      "p": 0.1100135182416504
+    },
+    "GJR_vs_RF": {
+      "stat": 24.024295631489352,
+      "p": 0.0
+    }
+  },
+  "translation_gap": {
+    "QLIKE_winner": "RF",
+    "Sharpe_winner": "HAR",
+    "rank_rho_winner": "HAR",
+    "are_different": true,
+    "Sharpe_difference_pct": "3.6%",
+    "ew_sharpe_by_model": {
+      "HAR": 1.148456049997651,
+      "GJR": 0.9388701817503123,
+      "RF": 1.1081577081571965
+    },
+    "qlike_by_model": {
+      "HAR": 0.34052696415036454,
+      "GJR": 0.557286482208598,
+      "RF": 0.23206300025394375
+    }
+  },
+  "narrative_arc_key": "translation_gap_phenomenon_systematic",
+  "seed": 42,
+  "data_source": "yfinance",
+  "verdict": "PASS"
+}
