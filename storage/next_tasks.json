@@ -33353,5 +33353,86 @@
     "started_at": "2026-06-17T12:39:52.821561+00:00",
     "completed_at": "2026-06-17T12:46:11.059632+00:00",
     "result": "Codex 24h review completed for mile_9fdad80e/K1459. Verdict CONDITIONAL_PASS_WITH_PATCH; patched g>r finite-world caveat and Madoff illustrative-scale wording; Supabase incremental sync succeeded."
+  },
+  {
+    "id": "journal_discovery_20260617_2",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
+    "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "tier3-fallback"
+    ],
+    "created_at": "2026-06-17T13:49:39+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T13:50:01.420287+00:00",
+    "claim_session_id": "3f7029530b63",
+    "started_at": "2026-06-17T13:50:23.890060+00:00",
+    "completed_at": "2026-06-17T13:55:43.163795+00:00",
+    "result": "Added 2026-06-17d journal-discovery batch to research_program.md with 7 deduped directions from FAJ/RFS/JFQA/J.Derivatives/RPC sources; refill apply materialized 4 pending research tasks."
+  },
+  {
+    "id": "research_factor_timing_regime",
+    "title": "研究 backlog fallback: 高維 factor timing 在波動 regime 下是否只是在過度換手",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 高維 factor timing 在波動 regime 下是否只是在過度換手 — 用 yfinance factor ETF（MTUM/VLUE/QUAL/USMV/RPV/IVE/IWF）與 FRED macro/vol proxies 建 shrinkage / elastic-net factor timing，與 equal-weight factor basket、12-1M momentum、vol-target baseline 比較；重點不是找最高 Sharpe，而是拆「vol regime 改善」是否被 turnover/cost 吃掉，OOS 用 DM + bootstra | 來源 section: 期刊主題挖掘 batch（2026-06-17d；journal_discovery_20260617_2；websearch faj/rfs/jfqa/j.derivatives/rpc 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "factor_timing_regime",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T13:55:29+00:00"
+  },
+  {
+    "id": "research_asset_allocation_drift_vt_risk_parity",
+    "title": "研究 backlog fallback: 稅務造成的 asset-allocation drift 會不會破壞 VT / risk-parity 風控",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 稅務造成的 asset-allocation drift 會不會破壞 VT / risk-parity 風控 — 用 SPY/TLT/GLD/HYG/SHY 日資料模擬 taxable rebalancing：無稅、定期再平衡、賣出需付 realized-gain tax 的三規格，量化權重漂移、target vol tracking error、drawdown 與 after-tax Sharpe；與退休提領 / TIPS decumulation 題不同，這裡檢定稅務 friction 對波動控制規則的機械破壞（來源：Financial Analysts Journal Q2 2025  | 來源 section: 期刊主題挖掘 batch（2026-06-17d；journal_discovery_20260617_2；websearch faj/rfs/jfqa/j.derivatives/rpc 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "asset_allocation_drift_vt_risk_parity",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T13:55:32+00:00"
+  },
+  {
+    "id": "research_etf_coherence_decay_thematic_crash",
+    "title": "研究 backlog fallback: 主題 ETF 的 coherence decay 作為 thematic crash 前哨",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 主題 ETF 的 coherence decay 作為 thematic crash 前哨 — 用 AIQ/BOTZ/ARKK/ICLN/CIBR/ITA/URA 等 thematic ETF 與各自主成分股，估 residual correlation / first-PC share / dispersion，檢定 coherence 下降後 1-3 月是否預測 theme ETF RV、max drawdown 或相對 SPY reversal；與 AI mega-cap HHI 題不同，這裡聚焦「主題本身是否還是一個共同風險」而非集中度（來源：Financial Analysts Jo | 來源 section: 期刊主題挖掘 batch（2026-06-17d；journal_discovery_20260617_2；websearch faj/rfs/jfqa/j.derivatives/rpc 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "etf_coherence_decay_thematic_crash",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T13:55:32+00:00"
+  },
+  {
+    "id": "research_mega_cap_idiosyncratic_vol_spy_ivv_voo",
+    "title": "研究 backlog fallback: 被動資金流對 mega-cap idiosyncratic vol 的放大：SPY/IVV/VOO 代理版",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 被動資金流對 mega-cap idiosyncratic vol 的放大：SPY/IVV/VOO 代理版 — 用 SPY/IVV/VOO 成交額/AUM proxy 與 top-10 mega-cap idio-vol（CAPM residual RV）建 monthly panel，檢定 passive-flow shock 是否主要放大最大權重股票的 residual RV，而非等比例提高所有成分股波動；與 AI HHI concentration 題不同，這裡識別的是 flow shock → idio-vol amplification 機制（來源：Review of Financi | 來源 section: 期刊主題挖掘 batch（2026-06-17d；journal_discovery_20260617_2；websearch faj/rfs/jfqa/j.derivatives/rpc 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "mega_cap_idiosyncratic_vol_spy_ivv_voo",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T13:55:34+00:00"
   }
 ]
