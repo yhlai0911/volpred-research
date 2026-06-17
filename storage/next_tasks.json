@@ -33529,7 +33529,7 @@
     "title": "Paper review (Codex 24h-rule): 地緣政治風險指數能預測美股波動嗎？六千個交易日的答案",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_eabd7e46 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_eabd7e46",
@@ -33538,7 +33538,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-17T16:08:32+00:00"
+    "created_at": "2026-06-17T16:08:32+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-17T19:09:21.543724+00:00",
+    "claim_session_id": "9311fe1b015f",
+    "started_at": "2026-06-17T19:09:21.829910+00:00",
+    "completed_at": "2026-06-17T19:17:39.220735+00:00",
+    "result": "Codex review FAIL: 4 critical (OOS leak / DM h=5-for-21d / Harvey no HAC / rolling leak). Article caveat appended + sync'd. K446_audit_20260618 in knowledge.json. Followup K446_rerun_with_embargo_hln_hac queued."
   },
   {
     "id": "K1528_article_research",
@@ -33588,5 +33594,17 @@
     "started_at": "2026-06-17T16:15:30.966223+00:00",
     "completed_at": "2026-06-17T17:11:43.731621+00:00",
     "result": "K1348 verdict=CONDITIONAL_PASS; commit 598ab53f merged main; results.json at experiments/k1348/"
+  },
+  {
+    "id": "K446_rerun_with_embargo_hln_hac",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "title": "K446 rerun: h-embargo + HLN DM + HAC partial-corr + AIC Granger + canonical QLIKE",
+    "description": "Per 2026-06-18 Codex source-code audit (FAIL verdict; see storage/audit_reports/k446/source_code_review_20260618.md). Rerun K446 GPR vs SPY RV with all 4 critical fixes: (1) drop train tail h days before each OOS test point (5d / 21d separately) to remove forward-label overlap; (2) DM test for 21d target uses h=21 with Harvey-Leybourne-Newbold small-sample correction; (3) partial-correlation t for Harvey threshold uses Newey-West HAC SE with bandwidth = h + buffer; (4) Granger F-test with AIC/BIC lag selection. Also fix QLIKE to canonical variance formula. Compare new t / DM p / Harvey-pass result against article claims; if claims still hold, article remains; if reversed, escalate to redaction.",
+    "source": "audit_followup",
+    "parent_audit": "K446_audit_20260618",
+    "parent_article": "mile_eabd7e46",
+    "created_at": "2026-06-18T03:18:00+08:00"
   }
 ]

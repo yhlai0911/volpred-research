@@ -35299,5 +35299,45 @@
     ],
     "confidence": 0.86,
     "created_at": "2026-06-18T02:46:14.729819"
+  },
+  {
+    "id": "K446_audit_20260618",
+    "k_id": "K446",
+    "experiment_id": "K446",
+    "experiment_path": "experiments/k446/k446_gpr_vol.py",
+    "experiment_ids": [
+      "K446"
+    ],
+    "title": "K446 GPR vs SPY RV — 24h-rule source-code audit (FAIL)",
+    "verdict": "FAIL",
+    "reviewer": "Codex CLI 0.139.0 (gpt-5.4, ChatGPT auth)",
+    "reviewer_source": "codex_review",
+    "codex_review": true,
+    "tags": [
+      "audit",
+      "K1018_24h_rule",
+      "lookahead",
+      "DM_test",
+      "Harvey_threshold",
+      "HAC",
+      "OOS_leak"
+    ],
+    "timestamp": "2026-06-18T03:18:00+08:00",
+    "summary": "Codex source-code review of K446 (article mile_eabd7e46) found 4 critical statistical issues: OOS forward-label leak (no h-step embargo), DM 21d test uses h=5 with no HLN correction, Harvey threshold partial-corr t has no HAC SE, rolling-OOS also leaks. Descriptive numbers (event/regime correlations) match results JSON and are unaffected; inferential claims (Harvey-pass, OOS significance, Granger lag-1 robustness) are OVERSTATED. z-score sensitivity claim holds for 21d only (5d still significant t=-3.10). Mixed-result narrative stays.",
+    "critical_issues": [
+      "OOS train/test split missing h-step embargo; train tail forward labels overlap into 2023 OOS",
+      "DM test for 21d target uses h=5 and no Harvey-Leybourne-Newbold small-sample correction",
+      "Harvey (1997) partial-corr threshold uses naive OLS SE, no Newey-West HAC for overlapping forward RV",
+      "Rolling-OOS expanding-window also leaks forward labels at train tail"
+    ],
+    "moderate_issues": [
+      "Granger no AIC/BIC lag selection; lag1 p=0.0499 is boundary",
+      "Regime/event cuts are ex-post descriptive without CI/bootstrap",
+      "z-score sensitivity holds for 21d only; 5d still significant",
+      "QLIKE uses volatility level ratio not canonical variance formula"
+    ],
+    "article_id": "mile_eabd7e46",
+    "follow_up_task_id": "K446_rerun_with_embargo_hln_hac",
+    "audit_report_path": "storage/audit_reports/k446/source_code_review_20260618.md"
   }
 ]
