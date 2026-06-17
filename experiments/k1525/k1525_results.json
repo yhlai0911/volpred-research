@@ -1,0 +1,163 @@
+{
+  "experiment_id": "K1525",
+  "title": "Idiosyncratic-volatility ICAPM covariance-risk proxy for market excess-return prediction",
+  "timestamp": "2026-06-17T02:53:35.990987+00:00",
+  "task_id": "research_idiosyncratic_vol_icapm_covariance_risk_proxy_ex",
+  "verdict": "MIXED_CROSS_SECTION_ONLY",
+  "summary": "Lagged idiosyncratic volatility is priced in Fama-MacBeth regressions (gamma t=4.06), but no idiosyncratic-volatility proxy improves next-month SPY excess-return forecasts OOS. Best idio timing model LWIV has OOS R2=-0.122%, DM t=0.77.",
+  "data": {
+    "source": "yfinance",
+    "daily_start": "2004-01-02",
+    "daily_end": "2026-06-16",
+    "universe_requested": 68,
+    "usable_stock_count": 68,
+    "market": "SPY",
+    "cash_proxy": "SHY",
+    "oos_start": "2012-01-31",
+    "oos_months": 173
+  },
+  "method": {
+    "scope": "current-name large-cap yfinance proxy; not CRSP/CRSP-Compustat and not Han-Li 1815-2018 replication",
+    "idio_vol": "annualized trailing 126d residual volatility from rolling CAPM against SPY",
+    "aggregate_proxies": [
+      "EWIV equal-weight average idio vol",
+      "LWIV dollar-volume-weighted idio vol",
+      "CBIV_spread = EWIV - LWIV",
+      "beta_weighted_IV",
+      "hedge_cov_36m = trailing covariance of known Q5-Q1 idio-vol hedge return with market excess return"
+    ],
+    "forecast_design": "month-end predictors at t forecast next-month SPY-SHY excess return; recursive expanding OLS vs historical mean baseline",
+    "lookahead_guard": "stock_excess_next and market target use shift(-1); all predictor construction uses only daily/monthly data available by month-end t",
+    "test": "OOS R2 and dm_test on squared forecast errors, h=1; Harvey pass if DM t < -3 and OOS R2 > 0"
+  },
+  "oos_results": [
+    {
+      "model": "EWIV",
+      "n_oos": 173,
+      "mse": 0.00167964,
+      "oos_r2": -0.003051,
+      "dm_t": 0.5257,
+      "dm_p": 0.5998,
+      "harvey_pass": false,
+      "directional_accuracy": 0.6763
+    },
+    {
+      "model": "LWIV",
+      "n_oos": 173,
+      "mse": 0.00167658,
+      "oos_r2": -0.001221,
+      "dm_t": 0.7686,
+      "dm_p": 0.4432,
+      "harvey_pass": false,
+      "directional_accuracy": 0.6763
+    },
+    {
+      "model": "CBIV_spread",
+      "n_oos": 173,
+      "mse": 0.00169055,
+      "oos_r2": -0.009567,
+      "dm_t": 0.95,
+      "dm_p": 0.3435,
+      "harvey_pass": false,
+      "directional_accuracy": 0.659
+    },
+    {
+      "model": "beta_weighted_IV",
+      "n_oos": 173,
+      "mse": 0.0016778,
+      "oos_r2": -0.001953,
+      "dm_t": 0.8217,
+      "dm_p": 0.4124,
+      "harvey_pass": false,
+      "directional_accuracy": 0.6763
+    },
+    {
+      "model": "hedge_cov_36m",
+      "n_oos": 153,
+      "mse": 0.0018242,
+      "oos_r2": -0.029726,
+      "dm_t": 2.7341,
+      "dm_p": 0.007,
+      "harvey_pass": false,
+      "directional_accuracy": 0.5948
+    },
+    {
+      "model": "market_vol_control",
+      "n_oos": 173,
+      "mse": 0.00167061,
+      "oos_r2": 0.002344,
+      "dm_t": -0.4864,
+      "dm_p": 0.6273,
+      "harvey_pass": false,
+      "directional_accuracy": 0.6763
+    },
+    {
+      "model": "CBIV_plus_market_vol",
+      "n_oos": 173,
+      "mse": 0.00170481,
+      "oos_r2": -0.018082,
+      "dm_t": 0.6257,
+      "dm_p": 0.5324,
+      "harvey_pass": false,
+      "directional_accuracy": 0.6474
+    },
+    {
+      "model": "all_idio_proxies",
+      "n_oos": 153,
+      "mse": 0.00192463,
+      "oos_r2": -0.086417,
+      "dm_t": 2.1798,
+      "dm_p": 0.0308,
+      "harvey_pass": false,
+      "directional_accuracy": 0.5817
+    }
+  ],
+  "fama_macbeth": {
+    "n_months": 261,
+    "mean_gamma_idio": 0.00514144,
+    "mean_gamma_beta": 0.00142416,
+    "hac_t_gamma_idio": 4.0631,
+    "hac_t_gamma_beta": 1.1033,
+    "mean_cross_section_n": 66.2,
+    "harvey_pass_idio": true
+  },
+  "quintile_summary": {
+    "Q1": 0.100514,
+    "Q2": 0.116933,
+    "Q3": 0.120341,
+    "Q4": 0.170332,
+    "Q5": 0.262302,
+    "Q5_minus_Q1": 0.161788
+  },
+  "key_numbers": {
+    "best_model": "market_vol_control",
+    "best_oos_r2": 0.002344,
+    "best_dm_t": -0.4864,
+    "best_idio_model": "LWIV",
+    "best_idio_oos_r2": -0.001221,
+    "best_idio_dm_t": 0.7686,
+    "harvey_pass_models": [],
+    "fmb_idio_t": 4.0631
+  },
+  "limitations": [
+    "Current-name large-cap universe creates survivorship bias and omits delisted/small stocks.",
+    "Dollar-volume-weighted IV is only a liquidity-weight proxy, not true value-weighted market capitalization IV.",
+    "Monthly yfinance adjusted returns and SHY cash proxy are not a CRSP excess-return construction.",
+    "CBIV_spread and hedge covariance are approximations of the Han-Li ICAPM covariance-risk object."
+  ],
+  "references": [
+    {
+      "title": "Han and Li, Idiosyncratic Volatility and the ICAPM Covariance Risk",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3475179"
+    },
+    {
+      "title": "Goyal and Santa-Clara (2003), Idiosyncratic Risk Matters!",
+      "url": "https://ideas.repec.org/a/bla/jfinan/v58y2003i3p975-1007.html"
+    },
+    {
+      "title": "Guo and Savickas (2006), Idiosyncratic Volatility, Stock Market Volatility, and Expected Stock Returns",
+      "url": "https://files.stlouisfed.org/files/htdocs/wp/2003/2003-028.pdf"
+    }
+  ],
+  "elapsed_seconds": 8.45
+}

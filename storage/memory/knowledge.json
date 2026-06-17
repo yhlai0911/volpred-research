@@ -35003,5 +35003,18 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-06-17T09:46:03.372981"
+  },
+  {
+    "item_id": "f1b9a735",
+    "category": "experiment_result",
+    "content": "[提出: research_program.md 2026-06-17b backlog; 執行: Codex] K1525 idiosyncratic-volatility ICAPM covariance-risk proxy. Data: yfinance current-name large-cap proxy, 68 stocks plus SPY/SHY, daily 2004-01-02 to 2026-06-16; monthly OOS from 2012-01-31, 173 forecasts. Method: trailing 126d CAPM residual idio vol, EWIV/LWIV/CBIV_spread/beta_weighted_IV/hedge_cov_36m features formed at month-end t to forecast next-month SPY-SHY excess return with recursive expanding OLS vs historical-mean baseline; dm_test on squared forecast errors h=1. Result: MIXED_CROSS_SECTION_ONLY. Fama-MacBeth lagged idio-vol gamma is positive and Harvey-strength (gamma=0.00514, HAC t=4.063; Q5-Q1 annualized +16.18%), but market-timing fails: best idio timing model LWIV has OOS R2=-0.122%, DM t=0.769, and 0/7 idio timing models pass Harvey. Interpretation: proxy supports further cross-sectional pricing investigation, not a market excess-return timing signal; not a Han-Li long-sample CBIV replication.",
+    "evidence": [
+      "experiments/k1525/k1525.py",
+      "experiments/k1525/k1525_results.json",
+      "experiments/k1525/codex_review.md",
+      "experiments/k1525/README.md"
+    ],
+    "confidence": 0.84,
+    "created_at": "2026-06-17T10:55:13.687940"
   }
 ]
