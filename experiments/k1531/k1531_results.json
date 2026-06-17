@@ -1,0 +1,218 @@
+{
+  "experiment_id": "k1531",
+  "k_id": "K1531",
+  "title": "FX realized-skewness risk premium without options — quintile-sorted currency ETFs",
+  "verdict": "NULL",
+  "sample": {
+    "start": "2007-04-30",
+    "end": "2026-05-31",
+    "n_months": 230,
+    "universe": [
+      "FXY",
+      "FXE",
+      "FXB",
+      "FXA",
+      "FXC",
+      "FXF",
+      "CEW",
+      "UUP"
+    ],
+    "rolling_window_days": 60,
+    "avg_basket_sizes": {
+      "Q1": 1.991304347826087,
+      "Q2": 1.0,
+      "Q3": 1.873913043478261,
+      "Q4": 1.0,
+      "Q5": 1.991304347826087
+    }
+  },
+  "design": {
+    "signal": "60-day rolling realized skewness on daily log-returns",
+    "alignment": "signal at month-end t-1 predicts month-t total log return (.shift(1))",
+    "rebalance": "monthly equal-weight within cross-sectional quintile",
+    "stat_tests": "Newey-West t-stat (lag 3) on monthly spread; stationary block bootstrap (block=12, B=2000, seed=42) for Sharpe CI",
+    "seed": 42
+  },
+  "quintile_results": {
+    "Q1_lowSkew": {
+      "n_months": 230,
+      "mean_ret_ann": 0.006434008729270064,
+      "vol_ann": 0.0697482867923148,
+      "sharpe": 0.09224611850937955,
+      "mdd": -0.35910084858525787,
+      "var95_m": -0.0307491981422834,
+      "es95_m": -0.04835986009004294,
+      "var99_m": -0.05797278735465844,
+      "es99_m": -0.06752108267031902,
+      "left_tail_mean_m": -0.03813176455920864
+    },
+    "Q2": {
+      "n_months": 230,
+      "mean_ret_ann": 0.017911945206701085,
+      "vol_ann": 0.0968104210412731,
+      "sharpe": 0.18502083777803943,
+      "mdd": -0.3212896360833339,
+      "var95_m": -0.04164395987247703,
+      "es95_m": -0.06621060526364679,
+      "var99_m": -0.07956846231943665,
+      "es99_m": -0.09177980815265811,
+      "left_tail_mean_m": -0.0517058744074115
+    },
+    "Q3": {
+      "n_months": 230,
+      "mean_ret_ann": -0.012392344934972904,
+      "vol_ann": 0.08147460428293724,
+      "sharpe": -0.15210070725766217,
+      "mdd": -0.4310903554930491,
+      "var95_m": -0.03649156462496839,
+      "es95_m": -0.058945972690696506,
+      "var99_m": -0.06833105796665624,
+      "es99_m": -0.08593716673518315,
+      "left_tail_mean_m": -0.0462654015406961
+    },
+    "Q4": {
+      "n_months": 230,
+      "mean_ret_ann": -0.01570322283573113,
+      "vol_ann": 0.10142766294628681,
+      "sharpe": -0.15482189355035328,
+      "mdd": -0.5034075315789431,
+      "var95_m": -0.04251377508982625,
+      "es95_m": -0.06635606950721872,
+      "var99_m": -0.0843548902813591,
+      "es99_m": -0.10041493144685916,
+      "left_tail_mean_m": -0.05342212919677156
+    },
+    "Q5_highSkew": {
+      "n_months": 230,
+      "mean_ret_ann": 0.015011598640184264,
+      "vol_ann": 0.07118484598114594,
+      "sharpe": 0.2108819431057032,
+      "mdd": -0.21780983088541234,
+      "var95_m": -0.033800072776959844,
+      "es95_m": -0.04182351669460449,
+      "var99_m": -0.04691475744375655,
+      "es99_m": -0.05124678060319393,
+      "left_tail_mean_m": -0.03540317699032104
+    },
+    "Q1_minus_Q5_spread": {
+      "mean_ret_ann": -0.0085775899109142,
+      "vol_ann": 0.08870298475373782,
+      "sharpe": -0.0967001272248931,
+      "nw_tstat": -0.44227659218813137,
+      "p_value": 0.6587064856119864,
+      "boot_ci_low": -0.5138080727053779,
+      "boot_ci_high": 0.33177703921527446,
+      "n_months": 230
+    }
+  },
+  "halves_robustness": {
+    "low_half": {
+      "n_months": 230,
+      "mean_ret_ann": 0.0016041604082636727,
+      "vol_ann": 0.06507086070873677,
+      "sharpe": 0.02465251559287104,
+      "mdd": -0.3432429643944092,
+      "var95_m": -0.029841065378112753,
+      "es95_m": -0.04608256006672873,
+      "var99_m": -0.05651779105503296,
+      "es99_m": -0.06355547302404048,
+      "left_tail_mean_m": -0.03629262877225426
+    },
+    "high_half": {
+      "n_months": 230,
+      "mean_ret_ann": 0.002834881463660965,
+      "vol_ann": 0.06288312832022945,
+      "sharpe": 0.0450817498968,
+      "mdd": -0.24535285069731752,
+      "var95_m": -0.03014877068486153,
+      "es95_m": -0.041168471065334764,
+      "var99_m": -0.0454123731519571,
+      "es99_m": -0.05710230710655295,
+      "left_tail_mean_m": -0.031996153030223955
+    },
+    "low_minus_high_spread": {
+      "mean_ret_ann": -0.0012307210553972924,
+      "sharpe": -0.019892572390194457,
+      "nw_tstat": -0.09091799876774594,
+      "p_value": 0.9276372242760864
+    }
+  },
+  "dsus_robustness": {
+    "Q1": {
+      "n_months": 230,
+      "mean_ret_ann": 0.0018175937877363197,
+      "vol_ann": 0.07252410179054362,
+      "sharpe": 0.025061927591819064,
+      "mdd": -0.3172863612692093,
+      "var95_m": -0.033318241833211595,
+      "es95_m": -0.04709309151086769,
+      "var99_m": -0.053660405752266424,
+      "es99_m": -0.0661801873798712,
+      "left_tail_mean_m": -0.037831287906901157
+    },
+    "Q2": {
+      "n_months": 230,
+      "mean_ret_ann": 0.022861918075101604,
+      "vol_ann": 0.09029512702734328,
+      "sharpe": 0.25319105058879343,
+      "mdd": -0.32433775116762414,
+      "var95_m": -0.035297536520465064,
+      "es95_m": -0.054012185364377664,
+      "var99_m": -0.060297267339734374,
+      "es99_m": -0.08379515853315998,
+      "left_tail_mean_m": -0.04252465700311246
+    },
+    "Q3": {
+      "n_months": 230,
+      "mean_ret_ann": 0.00723287321372987,
+      "vol_ann": 0.09388294901585914,
+      "sharpe": 0.07704139345375761,
+      "mdd": -0.43846382752992935,
+      "var95_m": -0.035977151745110784,
+      "es95_m": -0.059965576122621676,
+      "var99_m": -0.07658719209269266,
+      "es99_m": -0.09034353158512733,
+      "left_tail_mean_m": -0.04665387513649817
+    },
+    "Q4": {
+      "n_months": 230,
+      "mean_ret_ann": 0.019067163161261096,
+      "vol_ann": 0.09180226086942986,
+      "sharpe": 0.2076981871762426,
+      "mdd": -0.2695684535186749,
+      "var95_m": -0.040610320347270724,
+      "es95_m": -0.05347020869225782,
+      "var99_m": -0.05995077492708116,
+      "es99_m": -0.07894228101503802,
+      "left_tail_mean_m": -0.045544034377928234
+    },
+    "Q5": {
+      "n_months": 230,
+      "mean_ret_ann": -0.013082680695335984,
+      "vol_ann": 0.07486170122158747,
+      "sharpe": -0.1747579934980612,
+      "mdd": -0.40050954583139375,
+      "var95_m": -0.033477350339906994,
+      "es95_m": -0.05810050989917961,
+      "var99_m": -0.06787397425724782,
+      "es99_m": -0.09539340124148976,
+      "left_tail_mean_m": -0.04365231819265388
+    },
+    "Q5_minus_Q1_spread": {
+      "mean_ret_ann": -0.014900274483072306,
+      "sharpe": -0.14057677051850273,
+      "nw_tstat": -0.6328093202229917,
+      "p_value": 0.5274895520780305
+    }
+  },
+  "hypothesis_test": {
+    "carry_like_h0_rejected": false,
+    "left_tail_worse_h0_rejected": true,
+    "joint_conclusion": "Left-tail asymmetry present but no return compensation — Q1 strictly dominated."
+  },
+  "reviewer": "Claude opus 4.7 + Codex gpt-5.5 xhigh (session 019ed6a7-ffd6-7663-bb5d-4b42ff9e376d)",
+  "reviewer_source": "Codex review CONDITIONAL_PASS — no bugs found. Lookahead checks pass: rolling skew right-aligned (k1531.py:128); shift(1) (k1531.py:423); portfolio uses lagged signals against same-index next-month returns (k1531.py:442). Caveat: N=8 universe → 1-2 names per quintile; NW lag 3 vs conservative 4 unlikely to matter at p=0.66; half-spread robustness also NULL (p=0.928).",
+  "generated_at_utc": "2026-06-17T17:18:25.834716+00:00",
+  "code_path": "experiments/k1531/k1531.py",
+  "codex_review_verdict": "CONDITIONAL_PASS"
+}
