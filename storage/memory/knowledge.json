@@ -35061,5 +35061,41 @@
     ],
     "confidence": 0.35,
     "created_at": "2026-06-17T14:13:34.623281"
+  },
+  {
+    "item_id": "4b45cc27",
+    "category": "experiment_result",
+    "title": "K1528 free sentiment-beta cross-section proxy test is NULL",
+    "content": "K1528 (2026-06-17) tested a free-proxy version of the market emotion-beta cross-sectional return idea using yfinance adjusted closes for a fixed current 52-stock U.S. large-cap universe plus SPY/^VIX and FRED UMCSENT, 2004-01-01 to 2026-06-14. Rolling sentiment betas for month t use only months t-60..t-1; portfolios sort on beta at t and hold month-t returns. Verdict NULL: VIX_optimism high-minus-low annualized return is -9.51% with DM t=1.898 and Fama-MacBeth t=-2.129; UMCSENT_change has the desired sign but only +0.67% annualized with DM t=-0.180 and Fama-MacBeth t=-0.287. No proxy clears the Harvey |t|>3 or Fama-MacBeth gate. Interpretation is narrow: public VIX/UMCSENT proxies do not reproduce a robust emotion-beta premium in this survivorship-biased large-cap pilot; this does not falsify Hasan/Kumar/Taffler's proprietary emotion-index result.",
+    "evidence": [
+      "experiments/k1528/k1528.py",
+      "experiments/k1528/k1528_results.json",
+      "experiments/k1528/README.md",
+      "experiments/k1528/codex_review.md",
+      "experiments/k1528/figures/k1528_cumulative_long_short.png",
+      "experiments/k1528/figures/k1528_summary_bars.png"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-17T07:50:01.844337+00:00",
+    "experiment_id": "K1528",
+    "experiment_ids": [
+      "K1528"
+    ],
+    "k_id": "K1528",
+    "experiment_path": "experiments/k1528/",
+    "verdict": "NULL",
+    "reviewer": "codex-cli",
+    "reviewer_source": "Codex CLI self-audit 2026-06-17",
+    "codex_review": "PASS_IMPLEMENTATION_NULL_EMPIRICAL",
+    "parent_task": "research_beta_beta",
+    "tags": [
+      "sentiment-beta",
+      "cross-section",
+      "emotion-beta",
+      "null-result",
+      "yfinance",
+      "fred"
+    ],
+    "limitations": "Fixed current large-cap universe is survivorship-biased; VIX/UMCSENT are public proxies rather than the proprietary emotion dictionary; no CRSP delisting/constituent history."
   }
 ]

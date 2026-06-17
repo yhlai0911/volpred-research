@@ -33153,5 +33153,71 @@
     "started_at": "2026-06-17T07:09:17.058315+00:00",
     "completed_at": "2026-06-17T07:18:03.350097+00:00",
     "result": "Journal-discovery agent (sonnet/low) scanned FAJ/JPM/JFQA/JFE/RoF 2025-26 issues, proposed 14 directions. Selectivity gate at main thread: 9/14 overlap with existing 06-17/06-17b/cross-asset batches (CIV bond ETF #1+#14 merged; macro regime / multi-layer hedge / factor crowding / IV scaling redundant). 5/14 truly novel (grep=0): CIV three-factor bond ETF RV prediction (Kelly et al. FAJ 2025), IV term-structure asymmetric extrapolation (Chordia JFQA 2025), sticky-price credit FOMC vol channel (Augustin JFQA 2025), market-sentiment-beta cross-section strategy (FAJ 2025), TWSE retail-share × return interaction TW vol prediction. Appended as batch 2026-06-17c to research_program.md. Backlog 166 → 171 actionable directions."
+  },
+  {
+    "id": "research_rp_f1168bab52",
+    "title": "研究 backlog fallback: 報酬外推偏誤驅動的 IV-RV 不對稱期限結構",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 報酬外推偏誤驅動的 IV-RV 不對稱期限結構 — 用 ^VIX（1M）/^VIX3M（3M）+ 後驗 SPY realized vol，分「過去 20 日累積負報酬」vs「累積正報酬」月份，檢定短期 IV 對 RV 的 premium 是否在負報酬期顯著放大（不對稱外推）；Fama-MacBeth 條件回歸 with negative-past-return × IV interaction，明確 lag，OOS R²（yfinance SPY + ^VIX/^VIX3M；FRED macro controls）；不對稱期限結構效應為 trading rule 而非僅 academic pr | 來源 section: 期刊主題挖掘 batch（2026-06-17c；websearch 13 期刊 學術6/實務7 趨勢層級；selectivity gate 後 14→5 條入單 — 06-17/06-17b 已飽和當日多軸，本批只入 grep=0 真正零撞 5 軸）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "rp_f1168bab52",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T07:38:26+00:00"
+  },
+  {
+    "id": "research_credit_spread_fomc_vol",
+    "title": "研究 backlog fallback: 價格剛性行業 credit spread 對 FOMC 衝擊敏感度差異作 vol 前哨",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 價格剛性行業 credit spread 對 FOMC 衝擊敏感度差異作 vol 前哨 — 用 HYG/LQD/VCIT bond ETF + FRED FOMC 會議利率驚喜（Cleveland Fed 免費 surprise series），把 S&P 行業分高/低 price-setting power（NFIB 小企業調查 / 行業加成代理），event study FOMC 窗口 [-1,+5] spread response 差異 + rolling vol 比較，檢定 sticky-price 代理組 spread reaction 是否系統大於 flexible-price 組 | 來源 section: 期刊主題挖掘 batch（2026-06-17c；websearch 13 期刊 學術6/實務7 趨勢層級；selectivity gate 後 14→5 條入單 — 06-17/06-17b 已飽和當日多軸，本批只入 grep=0 真正零撞 5 軸）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "credit_spread_fomc_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T07:38:29+00:00"
+  },
+  {
+    "id": "research_beta_beta",
+    "title": "研究 backlog fallback: 市場情緒 beta 截面策略：高/低情緒 beta 股票的系統性報酬差",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 市場情緒 beta 截面策略：高/低情緒 beta 股票的系統性報酬差 — yfinance 美股月度，用 VIX 日變動或市場情緒指標（FRED 消費者信心 UMCSENT/AAII 散戶情緒月頻免費代理）計算個股報酬對情緒的 beta（rolling 60M），組高/低情緒 beta 五分位組合，Fama-MacBeth + DM 檢定報酬差異與 vol-adjusted return，明確 lag；與既有 retail attention / 散戶 flow 題正交——這裡是 cross-sectional sentiment beta 純截面策略，不是流量/流動性（來源：FAJ Q3  | 來源 section: 期刊主題挖掘 batch（2026-06-17c；websearch 13 期刊 學術6/實務7 趨勢層級；selectivity gate 後 14→5 條入單 — 06-17/06-17b 已飽和當日多軸，本批只入 grep=0 真正零撞 5 軸）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "beta_beta",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T07:38:29+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T07:38:57.989106+00:00",
+    "claim_session_id": "27e89812fa77",
+    "started_at": "2026-06-17T07:38:58.291455+00:00",
+    "completed_at": "2026-06-17T07:50:53.407312+00:00",
+    "result": "K1528 completed as NULL: free VIX/UMCSENT sentiment-beta proxies do not produce a robust high-minus-low premium. Outputs: experiments/k1528/{k1528.py,k1528_results.json,README.md,codex_review.md,figures}; knowledge entry K1528 written."
+  },
+  {
+    "id": "research_interaction_rv",
+    "title": "研究 backlog fallback: 台股散戶占比 × 近期報酬 interaction 預測台股 RV",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 台股散戶占比 × 近期報酬 interaction 預測台股 RV — TWSE 公開散戶日成交占比（每日免費）+ yfinance 0050.TW / 個股 daily，建散戶活躍度 z-score × 近 5 日 cumulative return interaction，檢定高散戶日後次日 RV 是否在負報酬時顯著放大（複製 Chordia 行為邏輯但用 TWSE 散戶占比替代 survey 資料）；台股版創新在 TWSE 散戶占比免費公開，台股行為 vol forecast 研究空白（來源：JFQA 2025 Chordia 行為 vol 邏輯；FAJ 2025 sentiment b | 來源 section: 期刊主題挖掘 batch（2026-06-17c；websearch 13 期刊 學術6/實務7 趨勢層級；selectivity gate 後 14→5 條入單 — 06-17/06-17b 已飽和當日多軸，本批只入 grep=0 真正零撞 5 軸）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "interaction_rv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T07:38:32+00:00"
   }
 ]
