@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-06-18T07:11:24.657525",
+  "data_date": "2026-06-17",
+  "asset": "NVDA",
+  "source": "yfinance",
+  "spot": 204.65,
+  "expiry_used": "2026-06-24",
+  "days_to_expiry": 6,
+  "risk_free_rate": 0.053,
+  "sample_N_price_history": 64,
+  "sample_N_rv30": 30,
+  "IV_ATM": 0.3242,
+  "IV_ATM_call": 0.3284,
+  "IV_ATM_put": 0.3201,
+  "ATM_strike": 205.0,
+  "strike_25p": 200.0,
+  "IV_25p": 0.3267,
+  "strike_25c": 210.0,
+  "IV_25c": 0.3191,
+  "skew_25delta": 0.0076,
+  "RV30": 0.4543,
+  "IV_RV_gap": -0.1301,
+  "fallback_approximation_used": false,
+  "skew_signal": "skew 接近對稱 → 市場對上下行風險看法均衡",
+  "n_calls_chain": 47,
+  "n_puts_chain": 37,
+  "chart_file": "skew_curve.png",
+  "term_structure": {
+    "2026-07-02": {
+      "atm_iv": 0.367,
+      "skew_10pct": 0.035,
+      "days": 14
+    },
+    "2026-07-10": {
+      "atm_iv": 0.369,
+      "skew_10pct": 0.025,
+      "days": 22
+    },
+    "2026-07-17": {
+      "atm_iv": 0.377,
+      "skew_10pct": 0.018,
+      "days": 29
+    },
+    "2026-07-24": {
+      "atm_iv": 0.386,
+      "skew_10pct": 0.012,
+      "days": 36
+    },
+    "2026-07-31": {
+      "atm_iv": 0.397,
+      "skew_10pct": 0.005,
+      "days": 43
+    },
+    "2026-08-21": {
+      "atm_iv": 0.41,
+      "skew_10pct": -0.01,
+      "days": 64
+    },
+    "2026-09-18": {
+      "atm_iv": 0.44,
+      "skew_10pct": -0.023,
+      "days": 92
+    },
+    "2026-10-16": {
+      "atm_iv": 0.452,
+      "skew_10pct": -0.032,
+      "days": 120
+    }
+  },
+  "skew_flip_point": "skew 由正轉負約在 2026-08-21 (64 天)，短期 put skew / 長期 call skew",
+  "analysis_note": "RV30(45.4%) > ATM IV(32.4%)，市場低估近期波動率 13pp；skew term structure 顯示近期謹慎、中長期偏多"
+}
