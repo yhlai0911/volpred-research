@@ -35260,5 +35260,30 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-18T01:42:53.506756"
+  },
+  {
+    "item_id": "d513f841",
+    "category": "paper_review_codex",
+    "content": "K970 MF2-GARCH (mile_05102b5c) — Codex 24h source-code review: no lookahead / no IS-OOS leakage (.shift(1) confirmed for tau_rv/tau_vix/tau_ema; GJR frozen IS params; OOS recursion h[t] uses r[t-1]). README ↔ results.json mismatch corrected (README claimed MF2-VIX DM t=4.171 / -17.73% QLIKE; actual results.json: DM t=2.939 / +9.55% QLIKE — does NOT pass Harvey |t|>3). Published article correctly uses results.json numbers and honestly notes Harvey threshold not passed. Methodological caveats raised by Codex: (a) VaR backtest uses baseline GJR Student-t df across all MF2 variants (unclean comparison), (b) Kupiec/Christoffersen p-value boundary handling returns p=1 at p_hat=0/1 / pi11=0 (false-pass risk), (c) DM function only implements lag=0 NW — fine for h=1 but no Bartlett kernel / HLN small-sample correction for h>1. Verdict CONDITIONAL_PASS — article publishable as-is (already aligned with truth); experiment script needs VaR backtest hardening before any re-publish.",
+    "evidence": [
+      "experiments/k970/k970_mf2_garch.py:74,80,86 (.shift(1) confirmed)",
+      "experiments/k970/k970_mf2_garch.py:131,162,175,202,220 (frozen IS params, OOS recursion)",
+      "experiments/k970/k970_mf2_garch.py:364,389 (VaR boundary handling)",
+      "experiments/k970/k970_mf2_garch.py:416 (shared nu across MF2 variants)",
+      "experiments/k970/k970_mf2_garch_results.json (qlike_improvements_pct, dm_tests)",
+      "storage/reports/feed.json id=mile_05102b5c (published 2026-06-17T16:07 UTC)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-18T02:16:53.065028",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K970",
+    "experiment_id": "k970",
+    "experiment_path": "experiments/k970/",
+    "reviewer": "Codex CLI 0.139.0 (ChatGPT auth, gpt-5.4)",
+    "reviewer_source": "codex exec --skip-git-repo-check",
+    "codex_review_verdict": "CONDITIONAL_PASS",
+    "related_articles": [
+      "mile_05102b5c"
+    ]
   }
 ]

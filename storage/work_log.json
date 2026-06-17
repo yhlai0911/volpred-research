@@ -11061,5 +11061,12 @@
     "verdict": "NULL",
     "k_id": "K1531",
     "note": "hourly-01 | K1531 FX realized-skew NULL + K1348 cleanup-merge from hourly-00"
+  },
+  {
+    "timestamp": "2026-06-18T02:17:06.685544",
+    "task_type": "paper_review",
+    "task_id": "paper_review_mile_05102b5c",
+    "owner": "hourly-02",
+    "summary": "Codex 24h source-code review on K970 (mile_05102b5c). Verdict CONDITIONAL_PASS — no lookahead/leakage; README↔results.json mismatch fixed (README claimed MF2-VIX DM=4.171 / -17.73% QLIKE; actual 2.939 / +9.55% — does NOT pass Harvey |t|>3). Article correctly used results.json numbers; only experiment README was stale. Codex flagged 3 methodological issues for future hardening: shared GJR nu across MF2 VaR, Kupiec/Christoffersen boundary p=1, no Bartlett kernel for h>1 DM. knowledge.json item_id=d513f841."
   }
 ]

@@ -33501,7 +33501,7 @@
     "title": "Paper review (Codex 24h-rule): 把波動拆成長期和短期之後，真正有幫助的不是歷史平均，而是市場現在有多怕",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_05102b5c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_05102b5c",
@@ -33510,7 +33510,13 @@
       "codex-24h-rule",
       "main-thread-only"
     ],
-    "created_at": "2026-06-17T16:08:32+00:00"
+    "created_at": "2026-06-17T16:08:32+00:00",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-06-17T18:09:22.355541+00:00",
+    "claim_session_id": "7e4b4bfba2e9",
+    "started_at": "2026-06-17T18:09:28.987449+00:00",
+    "completed_at": "2026-06-17T18:17:08.974774+00:00",
+    "result": "Codex 24h source-code review verdict CONDITIONAL_PASS. No lookahead/leakage. Fixed stale README (MF2-VIX DM 4.171→2.939, QLIKE -17.73%→+9.55% — DOES NOT pass Harvey |t|>3). Article mile_05102b5c independently verified to already report correct results.json numbers; only README was stale. Codex flagged 3 methodology caveats for future hardening (shared nu / boundary p / DM lag). knowledge.json d513f841."
   },
   {
     "id": "paper_review_mile_eabd7e46",
