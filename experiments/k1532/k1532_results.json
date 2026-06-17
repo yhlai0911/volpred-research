@@ -1,0 +1,784 @@
+{
+  "experiment_id": "k1532",
+  "title": "VT / dynamic risk parity turnover-cost dominance",
+  "created_at": "2026-06-17T21:10:21.539944+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance",
+    "auto_adjust": true,
+    "auto_adjust_reason": "ETF total-return-like strategy backtest; explicit to avoid yfinance default drift.",
+    "tickers": [
+      "SPY",
+      "TLT",
+      "GLD",
+      "HYG",
+      "SHY"
+    ],
+    "risky_tickers": [
+      "SPY",
+      "TLT",
+      "GLD",
+      "HYG"
+    ],
+    "cash_ticker": "SHY",
+    "download_start": "2007-01-01",
+    "download_end": "2026-06-18",
+    "common_price_start": "2007-04-11",
+    "common_price_end": "2026-06-17",
+    "n_price_days": 4828,
+    "n_return_days": 4827,
+    "cache_files": [
+      "data/SPY_adjusted_close.csv",
+      "data/TLT_adjusted_close.csv",
+      "data/GLD_adjusted_close.csv",
+      "data/HYG_adjusted_close.csv",
+      "data/SHY_adjusted_close.csv"
+    ]
+  },
+  "method": {
+    "lookback_days": 252,
+    "target_vol": 0.1,
+    "frequencies": [
+      "daily",
+      "weekly",
+      "monthly"
+    ],
+    "cost_bps_grid": [
+      0.0,
+      8.0,
+      15.0,
+      25.0,
+      35.0
+    ],
+    "turnover_definition": "L1 dollar turnover = sum(abs(new_weight - current_drifted_weight)); cost = turnover * cost_bps / 10000.",
+    "lookahead_guard": "For return date i, covariance window is returns.iloc[i-252:i], ending at i-1; target weights are applied to return i.",
+    "strategies": {
+      "drp_5asset": "Long-only ERC over SPY/TLT/GLD/HYG/SHY, fully invested.",
+      "vt_drp_4asset_shy": "Long-only ERC over SPY/TLT/GLD/HYG, scaled down to 10% annual vol; residual allocated to SHY; no leverage."
+    },
+    "hac_tests": "Newey-West HAC t-tests on mean daily return difference, maxlag=21; these are not Sharpe-ratio tests."
+  },
+  "diagnostics": {
+    "drp_5asset": {
+      "target_weight_start": "2008-04-11",
+      "first_target_uses_returns_through": "2008-04-10",
+      "optimizer_failures": 0,
+      "mean_estimated_vol": 0.02511137084279221,
+      "p10_estimated_vol": 0.012510466871661479,
+      "p90_estimated_vol": 0.04260626372352752
+    },
+    "vt_drp_4asset_shy": {
+      "target_weight_start": "2008-04-11",
+      "first_target_uses_returns_through": "2008-04-10",
+      "optimizer_failures": 0,
+      "mean_estimated_vol": 0.06920976411284605,
+      "p10_estimated_vol": 0.04551182680991246,
+      "p90_estimated_vol": 0.1
+    }
+  },
+  "metrics": {
+    "drp_5asset": {
+      "daily": {
+        "0.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.029413316286077906,
+          "ann_return_gross": 0.029413316286077906,
+          "ann_vol_net": 0.030499411694050706,
+          "sharpe_net": 0.9657752665200673,
+          "sharpe_gross": 0.9657752665200673,
+          "max_drawdown_net": -0.10741804767852448,
+          "annual_turnover_l1": 0.8868674475640961,
+          "annual_cost_drag": 0.0,
+          "cost_drag_pct_of_abs_gross_return": 0.0,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.003519315268111492,
+          "mean_weight_shy": 0.7114794763592998,
+          "mean_weight_spy": 0.06335397058133882
+        },
+        "8.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.0286832846767775,
+          "ann_return_gross": 0.029413316286077906,
+          "ann_vol_net": 0.030499660250045958,
+          "sharpe_net": 0.9425050398531074,
+          "sharpe_gross": 0.9657752665200673,
+          "max_drawdown_net": -0.10884536919640708,
+          "annual_turnover_l1": 0.8868674475640961,
+          "annual_cost_drag": 0.0007094939580512768,
+          "cost_drag_pct_of_abs_gross_return": 0.02412152207356159,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.003519315268111492,
+          "mean_weight_shy": 0.7114794763592998,
+          "mean_weight_spy": 0.06335397058133882
+        },
+        "15.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.028044927335226788,
+          "ann_return_gross": 0.029413316286077906,
+          "ann_vol_net": 0.030499963910227145,
+          "sharpe_net": 0.9221412972475702,
+          "sharpe_gross": 0.9657752665200673,
+          "max_drawdown_net": -0.11009241232081113,
+          "annual_turnover_l1": 0.8868674475640961,
+          "annual_cost_drag": 0.0013303011713461442,
+          "cost_drag_pct_of_abs_gross_return": 0.045227853887927986,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.003519315268111492,
+          "mean_weight_shy": 0.7114794763592998,
+          "mean_weight_spy": 0.06335397058133882
+        },
+        "25.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.02713366829588426,
+          "ann_return_gross": 0.029413316286077906,
+          "ann_vol_net": 0.030500537224731346,
+          "sharpe_net": 0.8930468548118095,
+          "sharpe_gross": 0.9657752665200673,
+          "max_drawdown_net": -0.11187089085840696,
+          "annual_turnover_l1": 0.8868674475640961,
+          "annual_cost_drag": 0.00221716861891024,
+          "cost_drag_pct_of_abs_gross_return": 0.07537975647987998,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.003519315268111492,
+          "mean_weight_shy": 0.7114794763592998,
+          "mean_weight_spy": 0.06335397058133882
+        },
+        "35.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.02622320865472494,
+          "ann_return_gross": 0.029413316286077906,
+          "ann_vol_net": 0.030501274665133127,
+          "sharpe_net": 0.8639488572317254,
+          "sharpe_gross": 0.9657752665200673,
+          "max_drawdown_net": -0.11364583260082894,
+          "annual_turnover_l1": 0.8868674475640961,
+          "annual_cost_drag": 0.003104036066474336,
+          "cost_drag_pct_of_abs_gross_return": 0.10553165907183196,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.003519315268111492,
+          "mean_weight_shy": 0.7114794763592998,
+          "mean_weight_spy": 0.06335397058133882
+        }
+      },
+      "weekly": {
+        "0.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.02900159633099819,
+          "ann_return_gross": 0.02900159633099819,
+          "ann_vol_net": 0.030657304107173593,
+          "sharpe_net": 0.9479093239680583,
+          "sharpe_gross": 0.9479093239680583,
+          "max_drawdown_net": -0.10812394403035608,
+          "annual_turnover_l1": 0.5026353614554576,
+          "annual_cost_drag": 0.0,
+          "cost_drag_pct_of_abs_gross_return": 0.0,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0019945847676803873,
+          "mean_weight_shy": 0.7113647640998572,
+          "mean_weight_spy": 0.0634069418386409
+        },
+        "8.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.028587849615490102,
+          "ann_return_gross": 0.02900159633099819,
+          "ann_vol_net": 0.030660619414869462,
+          "sharpe_net": 0.9346920143384759,
+          "sharpe_gross": 0.9479093239680583,
+          "max_drawdown_net": -0.1089927635124287,
+          "annual_turnover_l1": 0.5026353614554576,
+          "annual_cost_drag": 0.0004021082891643661,
+          "cost_drag_pct_of_abs_gross_return": 0.0138650398610843,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0019945847676803873,
+          "mean_weight_shy": 0.7113647640998572,
+          "mean_weight_spy": 0.0634069418386409
+        },
+        "15.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.02822595193373778,
+          "ann_return_gross": 0.02900159633099819,
+          "ann_vol_net": 0.030663685961412657,
+          "sharpe_net": 0.9231242259770017,
+          "sharpe_gross": 0.9479093239680583,
+          "max_drawdown_net": -0.10975229933706776,
+          "annual_turnover_l1": 0.5026353614554576,
+          "annual_cost_drag": 0.0007539530421831864,
+          "cost_drag_pct_of_abs_gross_return": 0.02599694973953306,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0019945847676803873,
+          "mean_weight_shy": 0.7113647640998572,
+          "mean_weight_spy": 0.0634069418386409
+        },
+        "25.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.027709166764263493,
+          "ann_return_gross": 0.02900159633099819,
+          "ann_vol_net": 0.030668334845044325,
+          "sharpe_net": 0.9065949014759842,
+          "sharpe_gross": 0.9479093239680583,
+          "max_drawdown_net": -0.110836248661625,
+          "annual_turnover_l1": 0.5026353614554576,
+          "annual_cost_drag": 0.0012565884036386439,
+          "cost_drag_pct_of_abs_gross_return": 0.04332824956588843,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0019945847676803873,
+          "mean_weight_shy": 0.7113647640998572,
+          "mean_weight_spy": 0.0634069418386409
+        },
+        "35.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.027192630336757784,
+          "ann_return_gross": 0.02900159633099819,
+          "ann_vol_net": 0.030673299014070794,
+          "sharpe_net": 0.8900614385591885,
+          "sharpe_gross": 0.9479093239680583,
+          "max_drawdown_net": -0.11191890305580765,
+          "annual_turnover_l1": 0.5026353614554576,
+          "annual_cost_drag": 0.0017592237650941017,
+          "cost_drag_pct_of_abs_gross_return": 0.06065954939224381,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0019945847676803873,
+          "mean_weight_shy": 0.7113647640998572,
+          "mean_weight_spy": 0.0634069418386409
+        }
+      },
+      "monthly": {
+        "0.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.028869213956867368,
+          "ann_return_gross": 0.028869213956867368,
+          "ann_vol_net": 0.03102897980735551,
+          "sharpe_net": 0.9327789401136821,
+          "sharpe_gross": 0.9327789401136821,
+          "max_drawdown_net": -0.10834795702291189,
+          "annual_turnover_l1": 0.33004482969034316,
+          "annual_cost_drag": 0.0,
+          "cost_drag_pct_of_abs_gross_return": 0.0,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.0013097017051204092,
+          "mean_weight_shy": 0.7112070194772088,
+          "mean_weight_spy": 0.06359803836609795
+        },
+        "8.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.028597641948131525,
+          "ann_return_gross": 0.028869213956867368,
+          "ann_vol_net": 0.031028324825944493,
+          "sharpe_net": 0.9242891195267311,
+          "sharpe_gross": 0.9327789401136821,
+          "max_drawdown_net": -0.10901007409592334,
+          "annual_turnover_l1": 0.33004482969034316,
+          "annual_cost_drag": 0.00026403586375227454,
+          "cost_drag_pct_of_abs_gross_return": 0.009145931861766748,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.0013097017051204092,
+          "mean_weight_shy": 0.7112070194772088,
+          "mean_weight_spy": 0.06359803836609795
+        },
+        "15.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.02836006587694717,
+          "ann_return_gross": 0.028869213956867368,
+          "ann_vol_net": 0.031028037802297976,
+          "sharpe_net": 0.9168517788408621,
+          "sharpe_gross": 0.9327789401136821,
+          "max_drawdown_net": -0.10958904939479175,
+          "annual_turnover_l1": 0.33004482969034316,
+          "annual_cost_drag": 0.0004950672445355146,
+          "cost_drag_pct_of_abs_gross_return": 0.017148622240812646,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.0013097017051204092,
+          "mean_weight_shy": 0.7112070194772088,
+          "mean_weight_spy": 0.06359803836609795
+        },
+        "25.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.02802075151341943,
+          "ann_return_gross": 0.028869213956867368,
+          "ann_vol_net": 0.031028090968183566,
+          "sharpe_net": 0.9062132392263686,
+          "sharpe_gross": 0.9327789401136821,
+          "max_drawdown_net": -0.11041554676952325,
+          "annual_turnover_l1": 0.33004482969034316,
+          "annual_cost_drag": 0.0008251120742258578,
+          "cost_drag_pct_of_abs_gross_return": 0.028581037068021082,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.0013097017051204092,
+          "mean_weight_shy": 0.7112070194772088,
+          "mean_weight_spy": 0.06359803836609795
+        },
+        "35.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.02768153127517281,
+          "ann_return_gross": 0.028869213956867368,
+          "ann_vol_net": 0.03102868907039399,
+          "sharpe_net": 0.8955590076833654,
+          "sharpe_gross": 0.9327789401136821,
+          "max_drawdown_net": -0.11124132679153154,
+          "annual_turnover_l1": 0.33004482969034316,
+          "annual_cost_drag": 0.001155156903916201,
+          "cost_drag_pct_of_abs_gross_return": 0.04001345189522952,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.0013097017051204092,
+          "mean_weight_shy": 0.7112070194772088,
+          "mean_weight_spy": 0.06359803836609795
+        }
+      }
+    },
+    "vt_drp_4asset_shy": {
+      "daily": {
+        "0.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06823950132327306,
+          "ann_return_gross": 0.06823950132327306,
+          "ann_vol_net": 0.0769071225626464,
+          "sharpe_net": 0.8968900376855552,
+          "sharpe_gross": 0.8968900376855552,
+          "max_drawdown_net": -0.2024732900906927,
+          "annual_turnover_l1": 1.6756649238493546,
+          "annual_cost_drag": 0.0,
+          "cost_drag_pct_of_abs_gross_return": 0.0,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.006649463983529185,
+          "mean_weight_shy": 0.026337340921409394,
+          "mean_weight_spy": 0.18990002199563724
+        },
+        "8.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06680882252963638,
+          "ann_return_gross": 0.06823950132327306,
+          "ann_vol_net": 0.07690667347990467,
+          "sharpe_net": 0.8794646427152152,
+          "sharpe_gross": 0.8968900376855552,
+          "max_drawdown_net": -0.20339527558421977,
+          "annual_turnover_l1": 1.6756649238493546,
+          "annual_cost_drag": 0.0013405319390794837,
+          "cost_drag_pct_of_abs_gross_return": 0.01964451546515472,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.006649463983529185,
+          "mean_weight_shy": 0.026337340921409394,
+          "mean_weight_spy": 0.18990002199563724
+        },
+        "15.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06555853567993575,
+          "ann_return_gross": 0.06823950132327306,
+          "ann_vol_net": 0.07690638504069838,
+          "sharpe_net": 0.8642160807916444,
+          "sharpe_gross": 0.8968900376855552,
+          "max_drawdown_net": -0.20420114531091993,
+          "annual_turnover_l1": 1.6756649238493546,
+          "annual_cost_drag": 0.002513497385774031,
+          "cost_drag_pct_of_abs_gross_return": 0.036833466497165096,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.006649463983529185,
+          "mean_weight_shy": 0.026337340921409394,
+          "mean_weight_spy": 0.18990002199563724
+        },
+        "25.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06377492916756755,
+          "ann_return_gross": 0.06823950132327306,
+          "ann_vol_net": 0.0769061421906418,
+          "sharpe_net": 0.8424303689980144,
+          "sharpe_gross": 0.8968900376855552,
+          "max_drawdown_net": -0.20535098478929037,
+          "annual_turnover_l1": 1.6756649238493546,
+          "annual_cost_drag": 0.004189162309623386,
+          "cost_drag_pct_of_abs_gross_return": 0.0613891108286085,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.006649463983529185,
+          "mean_weight_shy": 0.026337340921409394,
+          "mean_weight_spy": 0.18990002199563724
+        },
+        "35.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06199428010921326,
+          "ann_return_gross": 0.06823950132327306,
+          "ann_vol_net": 0.07690609840800441,
+          "sharpe_net": 0.8206423954209858,
+          "sharpe_gross": 0.8968900376855552,
+          "max_drawdown_net": -0.20649917580631738,
+          "annual_turnover_l1": 1.6756649238493546,
+          "annual_cost_drag": 0.00586482723347274,
+          "cost_drag_pct_of_abs_gross_return": 0.08594475516005189,
+          "n_rebalances": 4575,
+          "rebalances_per_year": 252.0,
+          "mean_daily_turnover": 0.006649463983529185,
+          "mean_weight_shy": 0.026337340921409394,
+          "mean_weight_spy": 0.18990002199563724
+        }
+      },
+      "weekly": {
+        "0.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06761980444599325,
+          "ann_return_gross": 0.06761980444599325,
+          "ann_vol_net": 0.07706665170912452,
+          "sharpe_net": 0.8876630643066085,
+          "sharpe_gross": 0.8876630643066085,
+          "max_drawdown_net": -0.20335213466845292,
+          "annual_turnover_l1": 0.8885533207999909,
+          "annual_cost_drag": 0.0,
+          "cost_drag_pct_of_abs_gross_return": 0.0,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0035260052412698054,
+          "mean_weight_shy": 0.026320004287154586,
+          "mean_weight_spy": 0.19001250006907522
+        },
+        "8.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06686120417675445,
+          "ann_return_gross": 0.06761980444599325,
+          "ann_vol_net": 0.07706827038072064,
+          "sharpe_net": 0.8784208756846187,
+          "sharpe_gross": 0.8876630643066085,
+          "max_drawdown_net": -0.20387788210072666,
+          "annual_turnover_l1": 0.8885533207999909,
+          "annual_cost_drag": 0.000710842656639993,
+          "cost_drag_pct_of_abs_gross_return": 0.010512344164019737,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0035260052412698054,
+          "mean_weight_shy": 0.026320004287154586,
+          "mean_weight_spy": 0.19001250006907522
+        },
+        "15.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06619785291521407,
+          "ann_return_gross": 0.06761980444599325,
+          "ann_vol_net": 0.07706988681818666,
+          "sharpe_net": 0.8703320194177733,
+          "sharpe_gross": 0.8876630643066085,
+          "max_drawdown_net": -0.2043376374270518,
+          "annual_turnover_l1": 0.8885533207999909,
+          "annual_cost_drag": 0.0013328299811999867,
+          "cost_drag_pct_of_abs_gross_return": 0.019710645307537005,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0035260052412698054,
+          "mean_weight_shy": 0.026320004287154586,
+          "mean_weight_spy": 0.19001250006907522
+        },
+        "25.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06525089422152308,
+          "ann_return_gross": 0.06761980444599325,
+          "ann_vol_net": 0.07707251996123615,
+          "sharpe_net": 0.8587734894779746,
+          "sharpe_gross": 0.8876630643066085,
+          "max_drawdown_net": -0.204993987935994,
+          "annual_turnover_l1": 0.8885533207999909,
+          "annual_cost_drag": 0.002221383301999978,
+          "cost_drag_pct_of_abs_gross_return": 0.032851075512561674,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0035260052412698054,
+          "mean_weight_shy": 0.026320004287154586,
+          "mean_weight_spy": 0.19001250006907522
+        },
+        "35.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06430474195137159,
+          "ann_return_gross": 0.06761980444599325,
+          "ann_vol_net": 0.07707553418247864,
+          "sharpe_net": 0.8472115604748665,
+          "sharpe_gross": 0.8876630643066085,
+          "max_drawdown_net": -0.20564981784440206,
+          "annual_turnover_l1": 0.8885533207999909,
+          "annual_cost_drag": 0.0031099366227999694,
+          "cost_drag_pct_of_abs_gross_return": 0.04599150571758635,
+          "n_rebalances": 950,
+          "rebalances_per_year": 52.32786885245901,
+          "mean_daily_turnover": 0.0035260052412698054,
+          "mean_weight_shy": 0.026320004287154586,
+          "mean_weight_spy": 0.19001250006907522
+        }
+      },
+      "monthly": {
+        "0.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06676246174686251,
+          "ann_return_gross": 0.06676246174686251,
+          "ann_vol_net": 0.07740099608157286,
+          "sharpe_net": 0.8737905562627273,
+          "sharpe_gross": 0.8737905562627273,
+          "max_drawdown_net": -0.20512874210818977,
+          "annual_turnover_l1": 0.5526641631862265,
+          "annual_cost_drag": 0.0,
+          "cost_drag_pct_of_abs_gross_return": 0.0,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.002193111758675502,
+          "mean_weight_shy": 0.02629875657669897,
+          "mean_weight_spy": 0.1905835042926894
+        },
+        "8.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06629138149374136,
+          "ann_return_gross": 0.06676246174686251,
+          "ann_vol_net": 0.07739671755987405,
+          "sharpe_net": 0.868126326402402,
+          "sharpe_gross": 0.8737905562627273,
+          "max_drawdown_net": -0.2054181933447704,
+          "annual_turnover_l1": 0.5526641631862265,
+          "annual_cost_drag": 0.00044213133054898127,
+          "cost_drag_pct_of_abs_gross_return": 0.006622453980582271,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.002193111758675502,
+          "mean_weight_shy": 0.02629875657669897,
+          "mean_weight_spy": 0.1905835042926894
+        },
+        "15.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06587933054131057,
+          "ann_return_gross": 0.06676246174686251,
+          "ann_vol_net": 0.07739328608088916,
+          "sharpe_net": 0.8631661292532097,
+          "sharpe_gross": 0.8737905562627273,
+          "max_drawdown_net": -0.20567138704584287,
+          "annual_turnover_l1": 0.5526641631862265,
+          "annual_cost_drag": 0.0008289962447793397,
+          "cost_drag_pct_of_abs_gross_return": 0.012417101213591757,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.002193111758675502,
+          "mean_weight_shy": 0.02629875657669897,
+          "mean_weight_spy": 0.1905835042926894
+        },
+        "25.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06529091982354318,
+          "ann_return_gross": 0.06676246174686251,
+          "ann_vol_net": 0.07738888955881354,
+          "sharpe_net": 0.8560737774004683,
+          "sharpe_gross": 0.8737905562627273,
+          "max_drawdown_net": -0.20603296910923508,
+          "annual_turnover_l1": 0.5526641631862265,
+          "annual_cost_drag": 0.0013816604079655663,
+          "cost_drag_pct_of_abs_gross_return": 0.020695168689319598,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.002193111758675502,
+          "mean_weight_shy": 0.02629875657669897,
+          "mean_weight_spy": 0.1905835042926894
+        },
+        "35.0": {
+          "n_days": 4575,
+          "years": 18.154761904761905,
+          "ann_return_net": 0.06470278371197113,
+          "ann_return_gross": 0.06676246174686251,
+          "ann_vol_net": 0.07738508793971315,
+          "sharpe_net": 0.8489740930634712,
+          "sharpe_gross": 0.8737905562627273,
+          "max_drawdown_net": -0.2063944062488019,
+          "annual_turnover_l1": 0.5526641631862265,
+          "annual_cost_drag": 0.001934324571151793,
+          "cost_drag_pct_of_abs_gross_return": 0.028973236165047437,
+          "n_rebalances": 219,
+          "rebalances_per_year": 12.062950819672132,
+          "mean_daily_turnover": 0.002193111758675502,
+          "mean_weight_shy": 0.02629875657669897,
+          "mean_weight_spy": 0.1905835042926894
+        }
+      }
+    }
+  },
+  "thresholds": {
+    "drp_5asset": {
+      "cost_bps_grid": [
+        0.0,
+        8.0,
+        15.0,
+        25.0,
+        35.0
+      ],
+      "monthly_minus_daily_sharpe": [
+        -0.03299632640638517,
+        -0.01821592032637631,
+        -0.005289518406708105,
+        0.013166384414559196,
+        0.03161015045163995
+      ],
+      "threshold_bps": 17.866030699193338,
+      "relation": "crosses_inside_grid"
+    },
+    "vt_drp_4asset_shy": {
+      "cost_bps_grid": [
+        0.0,
+        8.0,
+        15.0,
+        25.0,
+        35.0
+      ],
+      "monthly_minus_daily_sharpe": [
+        -0.023099481422827917,
+        -0.011338316312813235,
+        -0.0010499515384346791,
+        0.013643408402453927,
+        0.02833169764248533
+      ],
+      "threshold_bps": 15.714575524358374,
+      "relation": "crosses_inside_grid"
+    }
+  },
+  "pairwise_tests": {
+    "drp_5asset": {
+      "0.0": {
+        "daily_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": 2.0333276190998334e-06,
+          "hac_t": 1.078057306490545,
+          "p_value": 0.28100818281313944,
+          "maxlag": 21
+        },
+        "weekly_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": 4.649425134927485e-07,
+          "hac_t": 0.29922182723148083,
+          "p_value": 0.764770796077187,
+          "maxlag": 21
+        }
+      },
+      "8.0": {
+        "daily_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": 2.6563676870696754e-07,
+          "hac_t": 0.1441260588351524,
+          "p_value": 0.8854009275721109,
+          "maxlag": 21
+        },
+        "weekly_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": -8.296393655523443e-08,
+          "hac_t": -0.05393771327461333,
+          "p_value": 0.9569847895368464,
+          "maxlag": 21
+        }
+      },
+      "35.0": {
+        "daily_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": -5.7003198513689595e-06,
+          "hac_t": -3.2941865033323365,
+          "p_value": 0.0009870698191917853,
+          "maxlag": 21
+        },
+        "weekly_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": -1.9321482054671755e-06,
+          "hac_t": -1.2840653356604599,
+          "p_value": 0.19911909569402875,
+          "maxlag": 21
+        }
+      }
+    },
+    "vt_drp_4asset_shy": {
+      "0.0": {
+        "daily_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": 5.337192984495295e-06,
+          "hac_t": 1.4745916963387093,
+          "p_value": 0.14032234868144283,
+          "maxlag": 21
+        },
+        "weekly_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": 3.083177740336806e-06,
+          "hac_t": 0.8708725638750913,
+          "p_value": 0.3838237387775333,
+          "maxlag": 21
+        }
+      },
+      "8.0": {
+        "daily_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": 1.772111204612361e-06,
+          "hac_t": 0.5004735151248249,
+          "p_value": 0.6167417004164585,
+          "maxlag": 21
+        },
+        "weekly_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": 2.0168629542613683e-06,
+          "hac_t": 0.5760351262950807,
+          "p_value": 0.5645914392394094,
+          "maxlag": 21
+        }
+      },
+      "35.0": {
+        "daily_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": -1.0260039802492597e-05,
+          "hac_t": -3.083326331268815,
+          "p_value": 0.0020470054971937963,
+          "maxlag": 21
+        },
+        "weekly_minus_monthly_return_hac": {
+          "n": 4575,
+          "mean": -1.5819494487432586e-06,
+          "hac_t": -0.4666734852466402,
+          "p_value": 0.6407335026604536,
+          "maxlag": 21
+        }
+      }
+    }
+  },
+  "figures": [
+    "fig_drp_5asset_sharpe_cost.png",
+    "fig_vt_drp_4asset_shy_sharpe_cost.png",
+    "fig_annual_turnover.png"
+  ],
+  "verdict": "CONDITIONAL_PASS",
+  "verdict_reason": "Cost-frequency dominance is identifiable on the specified grid, but the result is a backtest engineering finding, not a new alpha claim. drp_5asset: monthly crosses daily at 17.87 bps | vt_drp_4asset_shy: monthly crosses daily at 15.71 bps"
+}

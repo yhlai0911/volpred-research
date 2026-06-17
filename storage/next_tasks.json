@@ -26225,7 +26225,10 @@
     "claim_session_id": "a055007291ad",
     "started_at": "2026-06-09T11:29:16.273039+00:00",
     "completed_at": "2026-06-09T11:32:12.414708+00:00",
-    "result": "Created experiments/k1436 feasibility audit: repo has BTC daily OHLCV CSVs but no canonical Binance funding-rate series and no local BTC intraday cache for HAR-RV target construction, so HAR-RV+funding cannot be run honestly yet. Added README + script + results.json documenting the double data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted)."
+    "result": "Created experiments/k1436 feasibility audit: repo has BTC daily OHLCV CSVs but no canonical Binance funding-rate series and no local BTC intraday cache for HAR-RV target construction, so HAR-RV+funding cannot be run honestly yet. Added README + script + results.json documenting the double data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted).",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-06-17T21:11:08+00:00",
+    "blocked_note": "Binance funding-rate + BTC intraday RV target not locally materialized; results.json verdict BLOCKED_DATA_UNAVAILABLE"
   },
   {
     "id": "K1437_usdtwd_twii_vol_spillover",
@@ -26273,7 +26276,10 @@
     "claim_session_id": "e9262abf8e75",
     "started_at": "2026-06-09T10:22:38.410321+00:00",
     "completed_at": "2026-06-09T10:28:11.725039+00:00",
-    "result": "Created experiments/k1438 feasibility audit: local SPY 5-min sample has 100 days but no canonical local VIX1D series/snapshot column, so HAR-RV+VIX1D cannot be run honestly. Added README + script + results.json documenting the data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted)."
+    "result": "Created experiments/k1438 feasibility audit: local SPY 5-min sample has 100 days but no canonical local VIX1D series/snapshot column, so HAR-RV+VIX1D cannot be run honestly. Added README + script + results.json documenting the data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted).",
+    "blocked_reason": "awaiting_external_data",
+    "blocked_at": "2026-06-17T21:11:08+00:00",
+    "blocked_note": "VIX1D + SPY intraday data gap; feasibility audit recorded no forecasting evidence yet"
   },
   {
     "id": "daily_article_k1432_oos_overfitting",
@@ -28920,7 +28926,10 @@
     "claim_session_id": "50aaae86f78c",
     "started_at": "2026-06-12T21:26:21.048073+00:00",
     "completed_at": "2026-06-12T21:28:14.971581+00:00",
-    "result": "Publisher narrative-arc dedup blocked K1443 article as too close to existing mile_872abdc3 (BTC vs US equity vol, same descriptive conclusion).\nReviewed existing article and confirmed overlap is reader-visible, so no dup_waiver applied.\nTask should be rewritten with a materially different angle or retired from queue."
+    "result": "Publisher narrative-arc dedup blocked K1443 article as too close to existing mile_872abdc3 (BTC vs US equity vol, same descriptive conclusion).\nReviewed existing article and confirmed overlap is reader-visible, so no dup_waiver applied.\nTask should be rewritten with a materially different angle or retired from queue.",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-17T21:11:09+00:00",
+    "blocked_note": "arc duplicate (mile_f8af30d0 covers BITCOIN/ETHEREUM/US_EQUITY null arc)"
   },
   {
     "id": "gen_article_k1444",
@@ -28943,7 +28952,10 @@
     "claim_session_id": "15292d953b30",
     "started_at": "2026-06-12T20:25:26.591219+00:00",
     "completed_at": "2026-06-12T20:28:30.968840+00:00",
-    "result": "完成 K1444 general draft 並通過 audience/image dry-run。正式 publish 被 narrative-arc duplicate gate 擋下，對應既有 mile_37df0259；草稿保留於 storage/drafts/k1444_general_draft.md，若要上線需改角度或加 dup_waiver。"
+    "result": "完成 K1444 general draft 並通過 audience/image dry-run。正式 publish 被 narrative-arc duplicate gate 擋下，對應既有 mile_37df0259；草稿保留於 storage/drafts/k1444_general_draft.md，若要上線需改角度或加 dup_waiver。",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-17T21:11:10+00:00",
+    "blocked_note": "arc duplicate per check_arc_dedup"
   },
   {
     "id": "paper_review_mile_9d646fae",
@@ -29092,7 +29104,10 @@
     "claim_session_id": "fa4d74ad189c",
     "started_at": "2026-06-13T03:54:51.288544+00:00",
     "completed_at": "2026-06-13T03:58:20.759741+00:00",
-    "result": "Generated K1446 general draft and ran formal publish_draft gates. Anti-AI gate PASS and image/audience checks PASS, but publisher blocked publication: narrative duplicate gate was a false positive vs K699 and required dup_waiver; after waiver, topic_cluster_cooldown blocked cluster=spy (98 articles in 30d, cap=10). No feed draft was created; local draft retained at storage/drafts/k1446_general_draft.md for future cooldown/waiver decision."
+    "result": "Generated K1446 general draft and ran formal publish_draft gates. Anti-AI gate PASS and image/audience checks PASS, but publisher blocked publication: narrative duplicate gate was a false positive vs K699 and required dup_waiver; after waiver, topic_cluster_cooldown blocked cluster=spy (98 articles in 30d, cap=10). No feed draft was created; local draft retained at storage/drafts/k1446_general_draft.md for future cooldown/waiver decision.",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-17T21:11:10+00:00",
+    "blocked_note": "arc duplicate per check_arc_dedup"
   },
   {
     "id": "platform_ops_k1446_cluster_waiver_decision",
@@ -29178,7 +29193,10 @@
     "claim_session_id": "4212799ba898",
     "started_at": "2026-06-13T06:10:58.763749+00:00",
     "completed_at": "2026-06-13T06:15:27.015796+00:00",
-    "result": "Created experiments/k1489 feasibility-audit three-piece set for GPR Acts vs Threats HAR-RV design.\nVerdict BLOCKED_ON_DATA: no local canonical GPRD_ACT/GPRD_THREAT raw file, official GPR/yfinance downloads fail DNS, and local reusable snapshots lack XLE/ITA prices.\nNo regression claims produced; results specify pinned data artifacts required to unlock the full experiment."
+    "result": "Created experiments/k1489 feasibility-audit three-piece set for GPR Acts vs Threats HAR-RV design.\nVerdict BLOCKED_ON_DATA: no local canonical GPRD_ACT/GPRD_THREAT raw file, official GPR/yfinance downloads fail DNS, and local reusable snapshots lack XLE/ITA prices.\nNo regression claims produced; results specify pinned data artifacts required to unlock the full experiment.",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-17T21:11:09+00:00",
+    "blocked_note": "Research-backlog fallback covered by existing GPR experiments; no new arc"
   },
   {
     "id": "research_rp_3871387caf",
@@ -31088,7 +31106,10 @@
       "auto_refill"
     ],
     "completed_at": "2026-06-14T22:09:07.624924+00:00",
-    "result": "arc-dup with mile_123a3855 (6/4 published, S&P 500 集中度突破 32%，指數波動率卻跌到 14%): 同 narrative arc (HHI + VIX low + tail-risk gap) 10 天內已覆蓋。skip per CLAUDE.md feedback_narrative_arc_dedup."
+    "result": "arc-dup with mile_123a3855 (6/4 published, S&P 500 集中度突破 32%，指數波動率卻跌到 14%): 同 narrative arc (HHI + VIX low + tail-risk gap) 10 天內已覆蓋。skip per CLAUDE.md feedback_narrative_arc_dedup.",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-17T21:11:10+00:00",
+    "blocked_note": "mile_123a3855 (S&P 500 集中度 32%) already published 2026-06-05"
   },
   {
     "id": "paper_review_mile_1b511caa",
@@ -33633,5 +33654,24 @@
     "started_at": "2026-06-17T20:10:17.604721+00:00",
     "completed_at": "2026-06-17T20:15:42.513079+00:00",
     "result": "Backlog 174→178 (+4 strict-selectivity axes): U-shape intraday HAR feature / VT turnover-cost dominance / SOFR-IORB reserve-side scarcity / stablecoin FX-EM spillover. 拒 5 軸級重複（AI IV-RV / RAG LLM / LOB HF / 氣候 insurance / capital market regime）。Scanned 10 期刊 trend-level, no fabricated citations."
+  },
+  {
+    "id": "research_vt_risk_parity_turnover_cost_dominance_monthly_r",
+    "title": "研究 backlog fallback: VT / 動態 risk parity 的「turnover-cost dominance」門檻：何時 monthly rebalance 反勝 daily",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: VT / 動態 risk parity 的「turnover-cost dominance」門檻：何時 monthly rebalance 反勝 daily — yfinance SPY/TLT/GLD/HYG/SHY 多頻率（daily / weekly / monthly）VT 與 dynamic risk parity 回測，明確套入 0.08-0.35 cost-to-turnover 區間，計算各 rebalance 頻率的 net-of-cost Sharpe / MDD / cost drag 百分比，找出 turnover cost 吞掉 risk-adjusted alpha | 來源 section: 期刊主題挖掘 batch（2026-06-18；journal_discovery_20260617_3；4 批 06-17 連跑後嚴格 selectivity gate；scanned 10 期刊×趨勢層級，拒 5 條軸級重複，4 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "experiment",
+    "source": "auto_research_fallback",
+    "research_slug": "vt_risk_parity_turnover_cost_dominance_monthly_r",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-17T21:01:54+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T21:02:23.781958+00:00",
+    "claim_session_id": "c27f48ed69b8",
+    "started_at": "2026-06-17T21:02:47.490338+00:00"
   }
 ]
