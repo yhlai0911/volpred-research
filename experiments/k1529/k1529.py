@@ -131,7 +131,7 @@ class Holding:
             take = min(lot.qty, remaining)
             gain = take * (price - lot.cost_basis)
             holding_days = (date - lot.acquired).days
-            if holding_days >= 365:
+            if holding_days > 365:
                 long_gain += gain
             else:
                 short_gain += gain
@@ -140,6 +140,51 @@ class Holding:
             if lot.qty <= 1e-12:
                 self.lots.pop(0)
         return short_gain, long_gain
+
+
+@dataclass
+class TaxLedger:
+    """Calendar-year realized capital gain ledger with loss carry-forward."""
+
+    year_short: float = 0.0
+    year_long: float = 0.0
+    carry_short: float = 0.0  # negative or zero
+    carry_long: float = 0.0   # negative or zero
+
+    def add_realized(self, short_gain: float, long_gain: float) -> None:
+        self.year_short += short_gain
+        self.year_long += long_gain
+
+    def annual_tax_due(self) -> Tuple[float, float, float]:
+        """Return (tax_due, next_carry_short, next_carry_long)."""
+        st = self.year_short + self.carry_short
+        lt = self.year_long + self.carry_long
+
+        if st >= 0.0 and lt >= 0.0:
+            return st * SHORT_RATE + lt * LONG_RATE, 0.0, 0.0
+        if st <= 0.0 and lt <= 0.0:
+            return 0.0, st, lt
+
+        net = st + lt
+        if st > 0.0 and lt < 0.0:
+            if net > 0.0:
+                return net * SHORT_RATE, 0.0, 0.0
+            return 0.0, 0.0, net
+
+        if st < 0.0 and lt > 0.0:
+            if net > 0.0:
+                return net * LONG_RATE, 0.0, 0.0
+            return 0.0, net, 0.0
+
+        return 0.0, 0.0, 0.0
+
+    def close_year(self) -> float:
+        tax_due, next_carry_short, next_carry_long = self.annual_tax_due()
+        self.year_short = 0.0
+        self.year_long = 0.0
+        self.carry_short = next_carry_short
+        self.carry_long = next_carry_long
+        return tax_due
 
 
 # --------------------------------------------------------------------------
@@ -153,7 +198,7 @@ class SimResult:
     target_weights: pd.DataFrame      # target weights at each rebal
     realized_vol: pd.Series           # 60d rolling realized vol of portfolio (annualized)
     tax_paid_daily: pd.Series         # tax cash outflow per day
-    rebal_events: List[pd.Timestamp]  # dates where >=1 sell happened (taxable)
+    rebal_events: List[pd.Timestamp]  # taxable specs: dates where >=1 sell happened
     stat: Dict[str, float]            # summary numbers
 
 
@@ -235,6 +280,34 @@ def simulate(
     target_arr = np.full((n_days, n_assets), np.nan)
     tax_daily = np.zeros(n_days)
     rebal_events: List[pd.Timestamp] = []
+    tax_ledger = TaxLedger()
+
+    def position_values_at(px: np.ndarray) -> np.ndarray:
+        return np.array(
+            [holdings[a].total_qty() * px[k] for k, a in enumerate(assets)]
+        )
+
+    def sell_pro_rata_for_cash(
+        cash_needed: float, px: np.ndarray, today: pd.Timestamp
+    ) -> float:
+        """Raise cash for annual tax payment; realized gains stay in the year ledger."""
+        if cash_needed <= 1e-8:
+            return 0.0
+        pos_val = position_values_at(px)
+        total_pos = float(pos_val.sum())
+        if total_pos <= 1e-8:
+            return 0.0
+        fraction = min(cash_needed / total_pos * 1.001, 1.0)
+        proceeds = 0.0
+        for k, a in enumerate(assets):
+            sell_value = pos_val[k] * fraction
+            if sell_value <= 1e-8:
+                continue
+            sell_qty = min(sell_value / px[k], holdings[a].total_qty())
+            short_g, long_g = holdings[a].sell(sell_qty, px[k], today)
+            tax_ledger.add_realized(short_g, long_g)
+            proceeds += sell_qty * px[k]
+        return proceeds
 
     # Track month-end indices (last trading day per month)
     month_id = dates.to_period("M")
@@ -245,15 +318,14 @@ def simulate(
     wealth_arr[0] = prev_total
 
     for i in range(n_days):
+        prior_total = prev_total
         px = prices.iloc[i].values  # close prices today (apply mark-to-market)
+        today = dates[i]
 
         # 1. Mark-to-market: position values at today's close
-        position_value = np.array([holdings[a].total_qty() * px[k] for k, a in enumerate(assets)])
+        position_value = position_values_at(px)
         total = cash + position_value.sum()
         wealth_arr[i] = total
-        if i > 0:
-            daily_pnl[i] = total - prev_total
-        prev_total = total
 
         # Realized weights (today's close)
         if total > 0:
@@ -262,17 +334,14 @@ def simulate(
         # 2. Decide whether to rebalance at today's close (effective for tomorrow)
         do_rebal = False
         if i >= first_rebal_idx and bool(is_month_end[i]):
-            # Compute target weights using returns up to t-1 (strictly causal):
-            # signal evaluated *as of yesterday's close*; we still hold yesterday's
-            # positions today and rebalance at today's close.
-            # Use returns up to index i (i.e. rows 0..i-1 since returns[i] uses
-            # close[i] vs close[i-1] which is observable at close[i]).
-            # To strictly satisfy "signal at t-1": shift by one bar.
+            # Signal evaluated as of yesterday's close; trade executes at today's
+            # close. returns.iloc[i] is today's close-to-close return, so exclude it.
             t_signal = i  # use window [i-vol_window, i-1] of returns
             target_w = compute_target_weights(returns, rule, t_signal, vol_window)
             target_arr[i] = target_w
-            current_w = weights_arr[i]
-            max_drift = float(np.max(np.abs(current_w - target_w)))
+            # TAX_AWARE trigger must also be lagged: decide from t-1 close weights,
+            # not today's close drift.
+            current_w_for_trigger = weights_arr[i - 1] if i > 0 else np.zeros(n_assets)
 
             if spec == "NO_TAX":
                 do_rebal = True
@@ -280,7 +349,8 @@ def simulate(
                 do_rebal = True
             elif spec == "TAX_AWARE":
                 # First-time allocation OR drift over band
-                if np.all(current_w == 0) or max_drift > drift_band:
+                max_drift = float(np.max(np.abs(current_w_for_trigger - target_w)))
+                if np.all(current_w_for_trigger == 0) or max_drift > drift_band:
                     do_rebal = True
 
         # 3. Execute rebalance (sell winners → buy losers)
@@ -289,11 +359,10 @@ def simulate(
             target_arr[i] = target_w
             target_value = target_w * total  # may sum < total if VT leverage<1
 
-            today = dates[i]
-            tax_today = 0.0
             traded = False
+            sell_happened = False
 
-            # First pass: sells → realize gains → pay tax
+            # First pass: sells → realize gains into the calendar-year tax ledger.
             for k, a in enumerate(assets):
                 cur_val = holdings[a].total_qty() * px[k]
                 tgt_val = target_value[k]
@@ -301,29 +370,11 @@ def simulate(
                     sell_value = cur_val - tgt_val
                     sell_qty = sell_value / px[k]
                     short_g, long_g = holdings[a].sell(sell_qty, px[k], today)
-                    # Tax only on net gains (losses are deductible against gains).
-                    # Simplification: tax short and long separately, allow losses
-                    # to offset within same category (no negative tax).
-                    tax_short = max(short_g, 0.0) * SHORT_RATE if spec != "NO_TAX" else 0.0
-                    tax_long = max(long_g, 0.0) * LONG_RATE if spec != "NO_TAX" else 0.0
-                    # If losses exist, they reduce the gains within same category
-                    # but we already used max(.,0) per leg → conservatively allow
-                    # cross-leg offset:
                     if spec != "NO_TAX":
-                        net_gain = short_g + long_g
-                        if net_gain > 0:
-                            # weighted tax by mix
-                            wt_short = max(short_g, 0.0) / (max(short_g, 0.0) + max(long_g, 0.0) + 1e-12)
-                            tax_blended = net_gain * (SHORT_RATE * wt_short + LONG_RATE * (1 - wt_short))
-                            tax_today += tax_blended
-                        # else net loss, no tax this event
+                        tax_ledger.add_realized(short_g, long_g)
                     cash += sell_value
                     traded = True
-
-            # Pay tax from cash
-            if tax_today > 0:
-                cash -= tax_today
-                tax_daily[i] = tax_today
+                    sell_happened = True
 
             # Second pass: buys
             for k, a in enumerate(assets):
@@ -337,20 +388,39 @@ def simulate(
                         cash -= buy_value
                         traded = True
 
-            if traded:
+            if sell_happened and spec != "NO_TAX":
                 rebal_events.append(today)
 
-            # Recompute mark-to-market AFTER tax + trade for accurate wealth
-            position_value = np.array(
-                [holdings[a].total_qty() * px[k] for k, a in enumerate(assets)]
-            )
-            total_after = cash + position_value.sum()
-            wealth_arr[i] = total_after
-            # Tax reduces today's PnL
-            daily_pnl[i] -= tax_today
-            prev_total = total_after
-            if total_after > 0:
-                weights_arr[i] = position_value / total_after
+        # 4. Calendar-year tax settlement after all year-end realized trades.
+        is_year_end = i == n_days - 1 or dates[i + 1].year != today.year
+        if spec != "NO_TAX" and is_year_end:
+            tax_due, _, _ = tax_ledger.annual_tax_due()
+            # If the portfolio is fully invested, sell pro-rata to fund the tax bill.
+            # Additional realized gains from funding sales are included in the same
+            # calendar-year netting pass; repeat until cash covers the recomputed tax.
+            for _ in range(10):
+                if tax_due <= 1e-8 or cash + 1e-8 >= tax_due:
+                    break
+                proceeds = sell_pro_rata_for_cash(tax_due - cash, px, today)
+                cash += proceeds
+                new_tax_due, _, _ = tax_ledger.annual_tax_due()
+                if proceeds <= 1e-8 or abs(new_tax_due - tax_due) <= 1e-8:
+                    tax_due = new_tax_due
+                    break
+                tax_due = new_tax_due
+            tax_paid = tax_ledger.close_year()
+            if tax_paid > 1e-8:
+                cash -= tax_paid
+                tax_daily[i] = tax_paid
+
+        # Final end-of-day mark after trades and annual tax settlement.
+        position_value = position_values_at(px)
+        total_after = cash + position_value.sum()
+        wealth_arr[i] = total_after
+        if total_after > 0:
+            weights_arr[i] = position_value / total_after
+        daily_pnl[i] = 0.0 if i == 0 else total_after - prior_total
+        prev_total = total_after
 
     # Realized portfolio daily return for vol tracking
     wealth_series = pd.Series(wealth_arr, index=dates)
@@ -417,15 +487,13 @@ def simulate(
 # --------------------------------------------------------------------------
 # Diebold-Mariano test (Harvey small-sample correction)
 # --------------------------------------------------------------------------
-def dm_test(loss_a: np.ndarray, loss_b: np.ndarray, h: int = 1) -> Tuple[float, float]:
-    """Harvey-corrected DM t-stat and 2-sided p-value.
+def dm_test_pnl(pnl_a: np.ndarray, pnl_b: np.ndarray, h: int = 1) -> Tuple[float, float]:
+    """Harvey-corrected test on daily after-tax PnL differences.
 
-    Loss function: squared daily return diff is for forecast accuracy.
-    Here we use loss_a = -pnl_a, loss_b = -pnl_b (lower-is-better = lose more)
-    so that a positive t-stat means spec B has lower 'loss' (i.e. higher PnL).
-    Actually let's pass raw loss differential d_t directly.
+    Null: E[pnl_a - pnl_b] = 0. A positive t-stat means spec A has higher
+    after-tax daily PnL than spec B.
     """
-    d = loss_a - loss_b
+    d = pnl_a - pnl_b
     d = d[~np.isnan(d)]
     n = len(d)
     if n < 10:
@@ -586,15 +654,21 @@ def main() -> None:
     # DM tests on after-tax daily PnL: NO_TAX vs PERIODIC, NO_TAX vs TAX_AWARE, PERIODIC vs TAX_AWARE
     dm_tests: Dict[str, Dict[str, float]] = {}
     bootstraps: Dict[str, Dict[str, float]] = {}
-    for rule in ["VT", "RP"]:
-        for a, b in [("NO_TAX", "PERIODIC"), ("NO_TAX", "TAX_AWARE"), ("PERIODIC", "TAX_AWARE")]:
-            ra = results[(rule, a)].daily_pnl.values
-            rb = results[(rule, b)].daily_pnl.values
-            # DM: positive t means A > B in PnL
-            t_stat, p_val = dm_test(rb, ra)  # loss_a > loss_b → spec a is worse
+    comparison_pairs = [
+        ("NO_TAX", "PERIODIC"),
+        ("NO_TAX", "TAX_AWARE"),
+        ("PERIODIC", "TAX_AWARE"),
+    ]
+    for rule_idx, rule in enumerate(["VT", "RP"]):
+        for pair_idx, (a, b) in enumerate(comparison_pairs):
+            ra = results[(rule, a)].daily_pnl.values[1:]
+            rb = results[(rule, b)].daily_pnl.values[1:]
+            # DM: positive t means A > B in after-tax PnL.
+            t_stat, p_val = dm_test_pnl(ra, rb)
             dm_tests[f"{rule}_{a}_vs_{b}"] = {
                 "t_stat_harvey": t_stat,
                 "p_value": p_val,
+                "null": f"mean_daily_after_tax_pnl({a} - {b}) = 0",
                 "interpretation": (
                     f"positive t → {a} has higher PnL than {b}"
                     if not np.isnan(t_stat)
@@ -607,7 +681,7 @@ def main() -> None:
             ret_a = np.diff(wa) / wa[:-1]
             ret_b = np.diff(wb) / wb[:-1]
             bootstraps[f"{rule}_{a}_vs_{b}"] = stationary_bootstrap_sharpe_diff(
-                ret_a, ret_b, seed=SEED + hash((rule, a, b)) % 10000
+                ret_a, ret_b, seed=SEED + 100 * rule_idx + pair_idx
             )
 
     # Sub-period
@@ -623,6 +697,7 @@ def main() -> None:
     # Pack results JSON
     out = {
         "experiment_id": "k1529",
+        "revision": "v2_codex_remediation",
         "title": "Tax friction's mechanical degradation of VT / Risk-Parity rules",
         "data": {
             "assets": ASSETS,
@@ -639,7 +714,9 @@ def main() -> None:
             "long_term_tax_rate": LONG_RATE,
             "init_capital": INIT_CAPITAL,
             "seed": SEED,
-            "lookahead_defense": "signal at t-1 (vol window [t-60, t-1]); trade at t close; FIFO lot accounting",
+            "lookahead_defense": "target and TAX_AWARE drift trigger locked at t-1 close (vol window [t-60, t-1]); trade at t close",
+            "tax_model": "FIFO lots; holding_days > 365 for long-term; annual ST/LT netting with cross-leg offset and loss carry-forward; tax paid at calendar-year end",
+            "bootstrap_seed_schedule": "SEED + 100*rule_index + pair_index; no Python hash randomization",
             "fair_comparison_note": "All three specs use the same raw return series and same vol estimate. Differences are strictly from rebalancing trigger + tax friction.",
         },
         "summary_stats": {

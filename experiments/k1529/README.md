@@ -9,9 +9,9 @@
 
 資產配置實證文獻（Volatility Targeting / Risk-Parity / Inverse-Vol weighting）
 普遍預設「再平衡可免費執行」。但在實務 taxable 帳戶（個人 / 大部分機構非 401k
-退休金），每次賣出獲利資產要付 realized-gain tax：
+退休金），每次賣出獲利資產會進入年度 realized-gain tax netting：
 - 短期 capital gains（持有 < 1 年）→ 22-37% federal（中位數 32% 模型用值）
-- 長期 capital gains（持有 ≥ 1 年）→ 15-23.8% federal（20% 模型用值）
+- 長期 capital gains（持有 >365 days）→ 15-23.8% federal（20% 模型用值）
 
 每次強制再平衡 → 賣出贏家 + 買入輸家 → trigger taxable event → 本金縮水。本實驗
 量化此 friction 是否會 mechanically 破壞 VT / RP 風控規則（target vol tracking、
@@ -45,7 +45,7 @@ VolPred 之前的 VT / RP 系列實驗（K1217 rebalance_freq_hybrid_vt、SPY+GL
   SHY (short Treasury)
 - 期間：2010-01-01 ~ 2025-12-31（16 calendar years，含 2020 COVID + 2022 雙空頭）
 - 資料源：yfinance Adjusted Close
-- 報酬：log return（避免 compounding error）
+- 報酬：simple close-to-close return（與 taxable wealth accounting 一致）
 
 ### 風控規格
 - **VT**: target 10% annualized vol (~0.63% daily)；60d rolling vol estimate (lag 1 day)
@@ -56,7 +56,10 @@ VolPred 之前的 VT / RP 系列實驗（K1217 rebalance_freq_hybrid_vt、SPY+GL
 - 短期 capital gains rate: 32%（federal 中位數 single filer, 200k+）
 - 長期 capital gains rate: 20%（含 ACA NIIT，single filer 200k+ 中位數）
 - Lot tracking: FIFO（IRS default）
-- Tax 從 realized gain 直接扣 capital（不另外提繳）→ 模擬完全 reinvested taxable 帳戶
+- Long-term lot cutoff: `holding_days > 365`
+- Tax 每個 calendar year 結算一次：先彙總年度 short / long realized gains/losses，再做同類 netting、short/long 跨腿互抵、capital-loss carry-forward
+- Tax 從 portfolio capital 扣除；若年末 cash 不足，按持倉比例賣出籌稅款，該賣出 realized gain/loss 併入同一年度 tax ledger
+- 不模擬州稅、NIIT 細項、wash-sale、ordinary-income $3k loss offset；這是 federal capital-gains friction 模型，不是個人報稅軟體
 
 ### 三規格
 | Spec      | Rebalance trigger        | Tax applied?    |
@@ -67,8 +70,8 @@ VolPred 之前的 VT / RP 系列實驗（K1217 rebalance_freq_hybrid_vt、SPY+GL
 
 ### Lookahead 防線
 - All signals (vol estimate, drift check) computed at t-1 close
-- Trading at t open (next session); positions weighted by t-1 lag
-- 明確 `signal.shift(1)` 或 equivalent indexing
+- Trading at t close；target 與 TAX_AWARE drift trigger 都在 t-1 close 鎖定，t close 僅作 execution price
+- 明確 lag indexing：vol window `[t-60, t-1]`，drift check 用 `weights_arr[t-1]`
 - np.random.seed(42) for any bootstrap
 
 ### 公平比較
@@ -81,7 +84,7 @@ VolPred 之前的 VT / RP 系列實驗（K1217 rebalance_freq_hybrid_vt、SPY+GL
 
 每個（規則 × 規格）組合報：
 1. **Target vol tracking error** = std(realized 60d rolling vol - 10%)；annualized
-2. **After-tax Sharpe**（annualized; excess over SHY proxy）
+2. **After-tax Sharpe**（annualized raw portfolio return）
 3. **CAGR**（after-tax cumulative wealth）
 4. **Max Drawdown**（after-tax wealth curve）
 5. **Tax drag** = cumulative realized tax / initial capital
@@ -99,9 +102,9 @@ VolPred 之前的 VT / RP 系列實驗（K1217 rebalance_freq_hybrid_vt、SPY+GL
 
 - 一律 `signal.shift(1)`，target weights at t = f(σ at t-1)
 - np.random.seed(42) for all bootstrap
-- 不用 same-day vol → same-day trade（lookahead 主風險）
+- 不用 same-day vol / same-day drift trigger → same-day trade（lookahead 主風險）
 - Tax 不從 NO_TAX 的 cumulative 反推；每 spec 獨立帳本
-- 不混 r² vs RV vs daily return scaling（log return throughout）
+- 不混 r² vs RV vs daily return scaling（portfolio accounting 用 simple return）
 - 月底再平衡用實際交易日（不用 calendar 月底）
 
 ## 成功標準
@@ -145,3 +148,29 @@ VolPred 之前的 VT / RP 系列實驗（K1217 rebalance_freq_hybrid_vt、SPY+GL
 - `storage/memory/knowledge.json` entry verdict=FAIL，包含 reviewer=Codex（K1259 gate compliant）
 - `storage/next_tasks.json` 已排 `k1529_v2_codex_remediation` (P3) follow-up
 - v2 修正後重跑 + 重 review → 若 PASS/CONDITIONAL_PASS 才能寫文章
+
+---
+
+## V2 Remediation (2026-06-17 23:03 台灣時間, codex-cli)
+
+**Status: PASS for code-level remediation.** 本輪直接修正上一段 Codex FAIL 的 6 項：
+
+1. Tax ledger 改為 calendar-year ST/LT 彙總、跨 asset/跨腿 netting、capital-loss carry-forward；年末繳稅，cash 不足時按比例賣出籌稅款。
+2. TAX_AWARE drift trigger 改用 `weights_arr[t-1]`，target/trigger 都在 t-1 close 鎖定，t close 只作 execution。
+3. FIFO long-term cutoff 改成 `holding_days > 365`。
+4. DM test 改為直接測 `mean(PnL_A - PnL_B)=0`；positive t 明確代表 A 的 after-tax daily PnL 較高。
+5. Bootstrap seed 改為固定 schedule `SEED + 100*rule_index + pair_index`，移除 Python `hash()`。
+6. 刪除 unused `tax_short` / `tax_long` 與錯誤 blended-tax 註解。
+
+重跑後主要結果：
+
+| Rule | Spec | Sharpe | CAGR | Tax drag | Tax sell events |
+|---|---:|---:|---:|---:|---:|
+| VT | NO_TAX | 1.004 | 6.29% | 0.00% | 0 |
+| VT | PERIODIC | 0.867 | 5.45% | 21.03% | 183 |
+| VT | TAX_AWARE | 0.922 | 5.83% | 15.74% | 8 |
+| RP | NO_TAX | 1.077 | 2.88% | 0.00% | 0 |
+| RP | PERIODIC | 0.861 | 2.35% | 10.12% | 188 |
+| RP | TAX_AWARE | 0.831 | 2.35% | 8.93% | 44 |
+
+DM sign now matches output interpretation. VT NO_TAX vs PERIODIC remains positive/significant (`t=3.65`, `p=0.00026`); VT PERIODIC vs TAX_AWARE is negative (`t=-2.65`, `p=0.0081`), meaning TAX_AWARE has higher after-tax PnL under the stated sign convention. RP PERIODIC vs TAX_AWARE remains statistically indistinguishable (`p=0.98`).

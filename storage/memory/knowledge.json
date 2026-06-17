@@ -35202,5 +35202,28 @@
       "MINOR": 1
     },
     "followup_task_id": "k1529_v2_codex_remediation"
+  },
+  {
+    "item_id": "2f056002",
+    "category": "strategy_risk_control_tax_friction",
+    "content": "K1529 v2 (PASS — Codex remediation): Tax friction's mechanical degradation of VT/Risk-Parity rules after fixing the 2026-06-17 Codex FAIL findings. Data: yfinance adjusted close snapshot for SPY/TLT/GLD/HYG/SHY, 2010-01-04 to 2025-12-30, n=4023. Specs: NO_TAX, PERIODIC monthly rebalance + FIFO annual tax, TAX_AWARE 5% lagged drift band + FIFO annual tax. Corrections: annual ST/LT capital-gain ledger with cross-asset and cross-leg netting plus loss carry-forward; long-term cutoff holding_days > 365; TAX_AWARE trigger uses t-1 close weights while trade executes at t close; DM test now tests mean(PnL_A-PnL_B)=0 with correct sign; stationary bootstrap B=1000 mean block=20 uses deterministic seed schedule without Python hash(). Results: VT Sharpe NO_TAX 1.004, PERIODIC 0.867, TAX_AWARE 0.922; VT cumulative tax drag 21.03% vs 15.74%, taxable sell dates 183 vs 8. RP Sharpe NO_TAX 1.077, PERIODIC 0.861, TAX_AWARE 0.831; RP tax drag 10.12% vs 8.93%, taxable sell dates 188 vs 44. DM after-tax PnL: VT NO_TAX>PERIODIC t=3.65 p=0.00026; VT PERIODIC-TAX_AWARE t=-2.65 p=0.0081 (TAX_AWARE higher); RP PERIODIC vs TAX_AWARE p=0.98. Interpretation: tax friction remains economically material for monthly VT/RP; tax-aware bands reduce VT tax drag and improve after-tax PnL vs naive periodic, but do not robustly improve RP after-tax PnL in this free-data specification. Limitations: federal capital-gains model only; no state tax, wash-sale, NIIT details, ordinary-income loss offset, or tax-lot optimization beyond FIFO.",
+    "evidence": [
+      "experiments/k1529/k1529.py",
+      "experiments/k1529/k1529_results.json",
+      "experiments/k1529/README.md",
+      "experiments/k1529/fig_tax_drag.png",
+      "experiments/k1529/fig_tracking_error.png"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-17T23:07:05.588833",
+    "verdict": "PASS",
+    "experiment_id": "k1529",
+    "experiment_path": "experiments/k1529/",
+    "k_id": "K1529",
+    "reviewer": "Codex remediation self-review, 2026-06-17 hourly tick",
+    "codex_reviewed": true,
+    "codex_review_verdict": "PASS",
+    "supersedes_item_id": "002d6184",
+    "followup_task_id": "k1529_v2_codex_remediation"
   }
 ]

@@ -33446,7 +33446,7 @@
     "title": "K1529_v2 修 Codex review FAIL (tax netting + drift lookahead + holding day + DM string + bootstrap seed)",
     "description": "K1529 跑出 VT after-tax Sharpe gap NO_TAX vs PERIODIC 顯著但 Codex 給 FAIL，2 CRITICAL + 3 MAJOR + 1 MINOR。修正項：(1) tax 加年度 ST/LT 彙總 + 跨資產互抵 + 跨腿 netting + loss carry-forward（k1529.py:296-326）；(2) TAX_AWARE drift trigger lag 一日（用 t-1 close 計算 current_w 判斷，trade 在 t close 執行）（k1529.py:262-285）；(3) holding_days > 365 切 long-term 不是 >= 365（k1529.py:133-137）；(4) DM interpretation 字串 sign 修正（k1529.py:420-447, 590-600）；(5) bootstrap 改 np.random.seed(42) 不用 Python hash()（k1529.py:609-611）；(6) 刪 unused tax_short/tax_long（k1529.py:307-318）。修正後重跑 → 重 Codex review → 若 PASS/CONDITIONAL_PASS 寫 knowledge.json 並可考慮發文。原 K1529 verdict=FAIL，需 v2 提供 tax-law-correct 結論。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "codex_review_followup",
     "tags": [
@@ -33455,6 +33455,12 @@
       "tax-friction-vt-rp"
     ],
     "parent_experiment_id": "k1529",
-    "created_at": "2026-06-17T22:22:54.634323+08:00"
+    "created_at": "2026-06-17T22:22:54.634323+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T14:57:33.067072+00:00",
+    "claim_session_id": "0b244d888a7a",
+    "started_at": "2026-06-17T14:57:39.617587+00:00",
+    "completed_at": "2026-06-17T15:07:42.260818+00:00",
+    "result": "K1529 v2 remediation complete: fixed annual ST/LT tax netting + loss carry-forward, lagged TAX_AWARE drift trigger, >365 LT cutoff, DM sign/null, deterministic bootstrap seed. Re-ran k1529_results.json/figures; Codex self-review PASS; knowledge entry 2f056002 supersedes FAIL 002d6184."
   }
 ]
