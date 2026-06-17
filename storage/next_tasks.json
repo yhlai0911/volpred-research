@@ -33132,5 +33132,26 @@
     "started_at": "2026-06-17T06:20:13.589526+00:00",
     "completed_at": "2026-06-17T06:31:40.525416+00:00",
     "result": "Published K1341 general-audience draft mile_103338aa via scripts/publish_draft.py; article is audience=general, status=draft, experiment_refs=['K1341'], 3 charts uploaded to Supabase Storage. Local feed + anti-ai validation passed; feed-sync --apply hung on remote request after publish mirror SSL EOF, so Supabase projection may need retry."
+  },
+  {
+    "id": "journal_discovery_20260617_1",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
+    "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "tier3-fallback"
+    ],
+    "created_at": "2026-06-17T07:08:51+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-17T07:09:16.515109+00:00",
+    "claim_session_id": "387c09bf5077",
+    "started_at": "2026-06-17T07:09:17.058315+00:00",
+    "completed_at": "2026-06-17T07:18:03.350097+00:00",
+    "result": "Journal-discovery agent (sonnet/low) scanned FAJ/JPM/JFQA/JFE/RoF 2025-26 issues, proposed 14 directions. Selectivity gate at main thread: 9/14 overlap with existing 06-17/06-17b/cross-asset batches (CIV bond ETF #1+#14 merged; macro regime / multi-layer hedge / factor crowding / IV scaling redundant). 5/14 truly novel (grep=0): CIV three-factor bond ETF RV prediction (Kelly et al. FAJ 2025), IV term-structure asymmetric extrapolation (Chordia JFQA 2025), sticky-price credit FOMC vol channel (Augustin JFQA 2025), market-sentiment-beta cross-section strategy (FAJ 2025), TWSE retail-share × return interaction TW vol prediction. Appended as batch 2026-06-17c to research_program.md. Backlog 166 → 171 actionable directions."
   }
 ]
