@@ -35365,5 +35365,23 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-18T05:16:46.682250"
+  },
+  {
+    "item_id": "d6a6a666",
+    "category": "var_backtest_methodology",
+    "content": "K1390 24h post-publish review (mile_5c8ef549): VIX-regime split conformal VaR (CR) is the only method passing Kupiec + Christoffersen CC at both alpha=0.05 (Kupiec p=0.918, CC p=0.538) and alpha=0.01 (Kupiec p=0.662, CC p=0.123) on SPY OOS 2015-2026 (n=2864). Source code clean: VIX lag correct (vix[:-1]), HS-252 window excludes current day, IS/OOS calibration separated. CONDITIONAL_PASS with 4 WARNs: (a) no multiple-comparison correction caveat for 12 p-values, (b) CR alpha=0.01 independence sub-p=0.046 borderline not disclosed in article, (c) single OOS period, fixed cutoff/threshold sensitivity not swept, (d) verdict logic 0.05 tolerance in cr_cc_not_worse is ad hoc. None invalidate the published feed article; all must be addressed before paper body citation.",
+    "evidence": [
+      "experiments/k1390/k1390.py",
+      "experiments/k1390/k1390_results.json",
+      "experiments/k1390/REVIEW_24h_2026-06-18.md",
+      "storage/reports/feed.json (mile_5c8ef549)"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-18T06:15:37.680603",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1390",
+    "k_id": "K1390",
+    "reviewer_source": "feature-dev:code-reviewer subagent (Codex CLI fallback per .claude/rules/experiments.md K1259 path)",
+    "reviewer": "code-reviewer-subagent"
   }
 ]

@@ -33675,5 +33675,57 @@
     "started_at": "2026-06-17T21:02:47.490338+00:00",
     "completed_at": "2026-06-17T21:17:32.597912+00:00",
     "result": "K1532 completed: SPY/TLT/GLD/HYG/SHY dynamic RP + VT-RP cost-frequency grid. Monthly-vs-daily net Sharpe break-even 15.71-18.72 bps; 35 bps HAC daily-minus-monthly t=-2.595/-3.294/-3.083. README/results/knowledge/research_program updated."
+  },
+  {
+    "id": "trending_repost_2026_06_18_ai_波動",
+    "title": "[trending_repost] NVDA 創新高後的 Vol Skew：防泡沫還是搶買權？",
+    "description": "分析 AI 龍頭高檔震盪時 implied volatility skew 的不對稱性。可量化：個股 Call/Put IV 偏斜度對後續 30 天實現波動率的預測偏差。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-17T22:00:25+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_18_新主席鷹變",
+    "title": "[trending_repost] 新主席首秀即放鷹：如何用利率期權對沖二次通膨？",
+    "description": "探討 Kevin Warsh 主持 FOMC 首秀點陣圖意外放鷹、五月 CPI 攀升至 4.2% 對利率期權的衝擊。可量化分析：比較 MOVE 指數與 VIX 的基差走勢，驗證利率路徑重估對權益市場波動率的傳導效率。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-17T22:00:36+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "paper_review_mile_5c8ef549",
+    "title": "Paper review (Codex 24h-rule): K1390：VIX 體制拆分的 Conformal VaR — 唯一同時通過 Kupiec 與 Christoffersen 的方法",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_5c8ef549 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_5c8ef549",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-17T22:08:44+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-17T22:10:42.332534+00:00",
+    "claim_session_id": "cb87a8d01a8d",
+    "started_at": "2026-06-17T22:10:43.227119+00:00",
+    "completed_at": "2026-06-17T22:15:45.020241+00:00",
+    "result": "K1390 24h post-publish review: CONDITIONAL_PASS. Core methodology clean (no lookahead/leakage, numbers match). 4 WARNs (no MCP correction, CR alpha=0.01 ind-p=0.046 borderline, single OOS, ad hoc verdict tolerance). Reviewer: code-reviewer subagent (Codex CLI fallback). Report: experiments/k1390/REVIEW_24h_2026-06-18.md. Knowledge.json entry d6a6a666."
   }
 ]
