@@ -34990,5 +34990,18 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-17T03:20:48.148438"
+  },
+  {
+    "item_id": "8e2b1af3",
+    "category": "experiment_result",
+    "content": "[提出: research_program.md 2026-06-17b backlog; 執行: Codex] K1522 corporate-bond ETF factor-zoo bias-correction proxy audit. Data: yfinance HYG/JNK/LQD/VCIT/VCSH/VCLT/IGSB/IGIB daily OHLCV/adjusted close, 2009-01-02 to 2026-06-16; OOS 2015-01-02 to 2026-06-16 (n=2879). Signals: momentum_63, carry_252, illiquidity_amihud_21, range_vol_21, credit_beta_126, term_beta_126. Method: daily rank-weighted long-high/short-low ETF factor returns; headline uses extra-lag signal.shift(1) to reduce shared price-denominator EIV bias; strategy_dm_test h=5 vs zero. Result: NULL_ETF_PROXY. No bias-corrected signal passes Harvey; best carry_252 Sharpe=0.251, ann return=0.71%, DM t=-0.978. Interpretation: ETF proxy does not rescue a tradable corporate-bond factor-zoo premium; do not describe as TRACE bond-level replication.",
+    "evidence": [
+      "experiments/k1522/k1522.py",
+      "experiments/k1522/k1522_results.json",
+      "experiments/k1522/codex_review.md",
+      "experiments/k1522/README.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-17T09:46:03.372981"
   }
 ]
