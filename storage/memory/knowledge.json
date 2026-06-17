@@ -35339,5 +35339,19 @@
     "article_id": "mile_eabd7e46",
     "follow_up_task_id": "K446_rerun_with_embargo_hln_hac",
     "audit_report_path": "storage/audit_reports/k446/source_code_review_20260618.md"
+  },
+  {
+    "item_id": "5b7944c0",
+    "category": "experiment_result",
+    "content": "K446_v2 rerun after Codex FAIL audit: GPR vs SPY realized volatility claims were rerun with target-end h-embargo, HLN-HAC DM, HAC partial-corr t, AIC/BIC VAR Granger, and canonical variance QLIKE. Data: GPR + yfinance SPY/^VIX, cleaned sample 2000-02-03 to 2026-02-23, N=6552, OOS forecast origins 2023-2024 N=502. Fixed-OOS embargo drops 5 RV5fwd and 21 RV21fwd train rows so target_end < 2023-01-01. Result: production article mile_eabd7e46 inferential claims are weakened/reversed and article was soft-unpublished. Raw GPR partial-corr HAC t: RV5fwd=-3.32 (still clears internal |t|>3 caution bar), RV21fwd=-2.55 (no longer clears). z-score GPR HAC t: RV5fwd=-2.31, RV21fwd=-1.04 (neither clears). RV21 VIX+GPR vs VIX-only HLN-HAC DM p=0.200, still no significant OOS improvement. GPR->VIX is not supported by selected-lag VAR: AIC lag=10 p=0.589, BIC lag=5 p=0.341; raw lag1 p is only ~0.052. Descriptive event/regime numbers remain: seven event corr range -0.178 to 0.594; extreme GPR n=656 corr=0.204. Conclusion: GPR is not a robust incremental SPY vol forecaster beyond VIX in this daily setup; event/regime patterns are descriptive only.",
+    "evidence": [
+      "experiments/k446/k446_gpr_vol_v2.py",
+      "experiments/k446/k446_gpr_vol_v2_results.json",
+      "experiments/k446/README.md",
+      "storage/audit_reports/k446/source_code_review_20260618.md",
+      "docs/error_log.md#2026-06-18-k446-gpr-article-redacted-after-h-embargo--hln--hac-rerun-reversed-inferential-claims"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-18T03:56:45.059473"
   }
 ]

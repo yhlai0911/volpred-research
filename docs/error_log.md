@@ -2,6 +2,33 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-18 K446 GPR article redacted after h-embargo / HLN / HAC rerun reversed inferential claims
+
+**問題**：`mile_eabd7e46`（地緣政治風險指數能預測美股波動嗎）引用原始 K446 的 raw partial-correlation t 值、21d DM p 值與 Granger lag1 p 值作為 production 文章主張。Codex 24h source review 已判定原始 script 有 forward-label train-tail leak、21d DM horizon 錯誤、無 HLN correction、partial-corr t 無 HAC、Granger 無 AIC/BIC lag selection。依 follow-up task `K446_rerun_with_embargo_hln_hac` 重跑後，核心 inferential claims 不再成立。
+
+**現象**：v2 rerun 保留同一 cleaned sample（2000-02-03 to 2026-02-23，N=6552）與 OOS forecast origins（2023-2024，N=502），但修正統計流程後：
+- 固定 OOS train-tail embargo 丟 5 筆 RV5fwd、21 筆 RV21fwd 訓練列，確保 train target_end < 2023-01-01。
+- Raw GPR partial-corr：RV5fwd HAC t=-3.32 仍過內部 |t|>3 caution bar；RV21fwd HAC t=-2.55，不再通過。
+- z-score GPR：RV5fwd HAC t=-2.31、RV21fwd HAC t=-1.04，兩者皆不過 |t|>3。
+- RV21 VIX+GPR vs VIX-only：HLN-HAC DM p=0.200（仍無顯著改善，但原 p=0.148 不能沿用）。
+- GPR→VIX：raw lag1 p≈0.052 已不顯著；AIC lag=10 p=0.589、BIC lag=5 p=0.341，不支持文章的短暫 Granger 結論。
+- 描述性 event/regime 數字仍支持：事件相關 -0.178 到 0.594，extreme GPR n=656 corr=0.204。
+
+**根因**：原始 K446 把「features 有 shift(1)」誤當成足夠防線，但 forward-label target 使固定/expanding OOS 的訓練尾端仍看見 OOS / test-origin 之後的 realized returns。DM test 以固定 `h=5` 服務 5d 與 21d targets，沒有 Harvey-Leybourne-Newbold small-sample correction。Partial-corr t 用 iid OLS/closed-form formula，未處理 5/21d overlapping RV target 的自相關。Granger 結論以 raw lag1 p-value 呈現，沒有按 AIC/BIC 選 lag，也沒有把 lag1 邊界值當 exploratory。
+
+**解決方法**：
+- 新增 `experiments/k446/k446_gpr_vol_v2.py` 與 `k446_gpr_vol_v2_results.json`，實作 target-end embargo、HLN-HAC DM、HAC incremental regression、AIC/BIC VAR Granger、canonical variance QLIKE。
+- Pin v2 data snapshots：`experiments/k446/data/gpr_daily_recent.xls` 與 `experiments/k446/data/k446_v2_merged_dataset.csv`。
+- 更新 `experiments/k446/README.md`，明確標 K446-v2 對 production claims 的修正結論。
+- 以正式 CLI `uv run volpred ops unpublish mile_eabd7e46` 將文章軟下架；初次 mirror sync 因 SSL EOF 失敗，隨後 `uv run volpred ops sync-all` 成功同步。
+- 用 `MemorySystem.add_knowledge` 追加 K446-v2 rerun 知識條目，避免手改 `knowledge.json`。
+
+**教訓**：
+1. Forward-label forecasting 只檢查 `signal.shift(1)` 不夠；任何固定 OOS、expanding OOS、rolling OOS 都要以 `target_end < forecast_origin` 或等價 `j + H < i` 做 embargo。
+2. 多 horizon 實驗不可共用單一 DM `h`；每個 target 的 DM/HAC/HLN horizon 必須等於該 target 的 forecast horizon。
+3. Full-sample partial-corr t 若 target 是 overlapping forward RV，必須報 HAC t；naive OLS t 只能作為診斷，不可當 Harvey-style publication claim。
+4. Granger raw lag table 可做附錄，但 production 文字應以 AIC/BIC-selected lag test 為主；邊界 p≈0.05 不可寫成穩健 lead-lag finding。
+
 ## 2026-06-15 K1337 expanding-OLS forward-label lookahead — fwd_var(H) training row overlaps prediction date when H>1
 
 **問題**：K1337 agent 設計 expanding-window OLS 預測 SPY `fwd_var(H)`：在預測 index `i` 時用 `df.iloc[:i]` 訓練。乍看「嚴格用 i 之前的資料」，但訓練列 `j` 的目標欄位 `fwd_var(H)` 需要看到報酬 `j..j+H-1`；當 `H>1` 且 `j` 落在訓練尾端（`j+H-1 >= i`），訓練 row 已看見「預測日 i 及之後」的報酬 — coefficient contaminated。

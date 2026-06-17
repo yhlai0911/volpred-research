@@ -33599,12 +33599,18 @@
     "id": "K446_rerun_with_embargo_hln_hac",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "K446 rerun: h-embargo + HLN DM + HAC partial-corr + AIC Granger + canonical QLIKE",
     "description": "Per 2026-06-18 Codex source-code audit (FAIL verdict; see storage/audit_reports/k446/source_code_review_20260618.md). Rerun K446 GPR vs SPY RV with all 4 critical fixes: (1) drop train tail h days before each OOS test point (5d / 21d separately) to remove forward-label overlap; (2) DM test for 21d target uses h=21 with Harvey-Leybourne-Newbold small-sample correction; (3) partial-correlation t for Harvey threshold uses Newey-West HAC SE with bandwidth = h + buffer; (4) Granger F-test with AIC/BIC lag selection. Also fix QLIKE to canonical variance formula. Compare new t / DM p / Harvey-pass result against article claims; if claims still hold, article remains; if reversed, escalate to redaction.",
     "source": "audit_followup",
     "parent_audit": "K446_audit_20260618",
     "parent_article": "mile_eabd7e46",
-    "created_at": "2026-06-18T03:18:00+08:00"
+    "created_at": "2026-06-18T03:18:00+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T19:48:41.430748+00:00",
+    "claim_session_id": "d58ad6fc3391",
+    "started_at": "2026-06-17T19:48:53.389002+00:00",
+    "completed_at": "2026-06-17T19:58:14.369852+00:00",
+    "result": "K446-v2 rerun completed with h-step embargo, HLN-HAC DM, HAC partial-corr t, AIC/BIC Granger, and variance QLIKE. Core production claims weakened/reversed: RV21 raw GPR HAC t=-2.55, selected-lag GPR->VIX p>0.34, RV21 VIX+GPR DM p=0.200. Soft-unpublished mile_eabd7e46 and recorded README/error_log/knowledge."
   }
 ]
