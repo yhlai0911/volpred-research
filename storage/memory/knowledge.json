@@ -35016,5 +35016,17 @@
     ],
     "confidence": 0.84,
     "created_at": "2026-06-17T10:55:13.687940"
+  },
+  {
+    "item_id": "cb3fd15f",
+    "category": "experiment_result",
+    "content": "K1526 HF tail risk premium (RDSV/ES_d/5-min) as time-varying predictor of SPY excess return & VRP. Data: SPY daily 2010-01 to 2026-06 (n=197 months) + 5-min intraday (n=4 months, concept only, yfinance cap). Method: monthly RDSV/ES_d as downside HF proxy; OLS w/ HAC; rolling 60-mo OOS; bootstrap 1000x (seed=42). Verdict NULL (focal spec). Findings: M2 RDSV univariate t=+3.36 (HAC p=0.0008) in-sample — looks promising, BUT subsumed by VIX in M3/M4/M5 (VIX t=+3.48 dominates; ES_d t=-1.83 flips sign with controls). Focal OOS (ES+VIX): R2_OOS=-0.045, DM p=0.397, baseline mean beats model. Bootstrap t(ES_d) CI=[-3.06, +1.56] — sign-unstable. VRP sanity: VIX -> RV_next month t=+1.97, R2=0.21 (textbook IV-RV passes). Conclusion: HF realized downside semi-variance has univariate predictive content for next-month excess return, but contributes ZERO incremental information over VIX. Net null. Relate to: K447 SKEW null, K768 Conformal VaR, K789 Google Trends null — extends downside-proxy null pattern. Note: K-id collision avoided (K1525 already taken by Codex idio-vol study); renamed K1526.",
+    "evidence": [
+      "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp.py",
+      "experiments/k1526_hf_tail_risk_premium_vrp/k1526_hf_tail_risk_premium_vrp_results.json",
+      "experiments/k1526_hf_tail_risk_premium_vrp/README.md"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-17T11:19:32.789272"
   }
 ]

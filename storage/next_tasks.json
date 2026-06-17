@@ -32949,7 +32949,7 @@
     "title": "研究 backlog fallback: 高頻 tail risk premium 作為市場 excess return 與 VRP 的 time-varying predictor",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 高頻 tail risk premium 作為市場 excess return 與 VRP 的 time-varying predictor — yfinance SPY 5-min OHLC（本機有 2026 YTD 105d）代理 tail risk（downside return 分布截斷）建 TRP proxy，月頻滾動預測 SPY excess return + 下月 VIX；免 options，用 realized 截斷代理；與既有 VRP 隔夜/日內題（06-16 新軸 C，台股版）正交——那是 VRP 方向拆解，這是 tail risk premium 的時序預測力（來源：JF | 來源 section: 期刊主題挖掘 batch（2026-06-17b；websearch 11 期刊 學術5/實務6 趨勢層級；selectivity gate 後初稿 10 → 7 條入單；新軸：vol forecast–portfolio translation gap / idiosyncratic vol × icapm equity premium / 關稅板塊 vol / breakeven inflation vol regime / earnings announcement jump / 高頻 tail risk premium / 企業債 factor bias-correction）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "tail_risk_premium_excess_return_vrp_time_varying",
@@ -32957,7 +32957,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-17T01:08:55+00:00"
+    "created_at": "2026-06-17T01:08:55+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-17T02:39:18.318620+00:00",
+    "claim_session_id": "932f416b9143",
+    "started_at": "2026-06-17T02:39:45.761544+00:00",
+    "completed_at": "2026-06-17T03:19:49.016125+00:00",
+    "result": "K1526 (renamed from K1525 due to K-id collision w/ Codex idio-vol study) NULL verdict. RDSV univariate t=+3.36 IS-sig but subsumed by VIX (M4 VIX t=+3.48 dominates). Focal OOS R2=-0.045, DM p=0.397. 7 files committed. Knowledge entry cb3fd15f. Honest null."
   },
   {
     "id": "research_factor_zoo_bias_corrected_etf_proxy_oos",
@@ -32979,5 +32985,56 @@
     "started_at": "2026-06-17T01:37:44.299651+00:00",
     "completed_at": "2026-06-17T01:43:38.361544+00:00",
     "result": "K1522 completed. Corporate-bond ETF factor-zoo bias-correction proxy audit using yfinance HYG/JNK/LQD/VCIT/VCSH/VCLT/IGSB/IGIB, 6 signals, OOS 2015-2026. Verdict NULL_ETF_PROXY: no extra-lag bias-corrected factor passes Harvey; best corrected signal carry_252 Sharpe=0.251, ann return=0.71%, DM t=-0.978. Artifacts in experiments/k1522; research_program.md updated."
+  },
+  {
+    "id": "email-11757-c93932",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Host cron failure detected",
+    "description": "Gmail UID: 11757\nMessage-ID: <F6BDE18D-2627-4894-9E19-2BD0D717FE2D@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 17 Jun 2026 10:04:32 +0800\nSubject: Re: [VolPred Alert][WARN] Host cron failure detected\n\n--- 用戶回信內容 ---\n確認是否已解決。\r\n此外 確認volpred所有數據都是最新的 包含策略績效和每日或定期要更新的數據\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月17日 05:01 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Host cron failure detected\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> 偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\r\n> 註：exit=142 = SIGALRM hang-kill，單次會由下一輪 hourly fire 自我恢復（→warn）；≥2 連續失敗或非-142 失敗才升 critical。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\r\n> \r\n> scheduler_last_tick_at: 2026-04-19T04:45:13.375232+00:00（僅供參考，v12 後不作為 breach 判準）\r\n> scheduler_last_status: ok\r\n> scheduler_age_minutes: 84495.9\r\n> failing_logs:\r\n> storage/logs/cron/hourly_dispatch.log exit=142 at unknown\r\n> 影響\r\n> \r\n> 資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\r\n> Supabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\r\n> release_pool_gap alert，發文節奏中斷。\r\n> \r\n> 建議行動\r\n> \r\n> 查失敗 log： tail -20 <failing_log 路徑>\r\n> 權限問題（exit=126）： chmod +x scripts/<script>.sh\r\n> macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\r\n> System Settings > Privacy & Security > Full Disk Access 加 script 路徑\r\n> 手動跑 failed command 驗證修復： uv run <command>\r\n> 比對 canonical schedule： crontab -l vs config/runtime_schedules.json\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-17T02:30:11.241438+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11757,
+    "email_message_id": "<F6BDE18D-2627-4894-9E19-2BD0D717FE2D@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] Host cron failure detected",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-17T02:31:48.764077+00:00",
+    "claim_session_id": "ae1cb6fdbf27"
+  },
+  {
+    "id": "paper_review_mile_5acc24ee",
+    "title": "Paper review (Codex 24h-rule): 跟單國會議員的股票交易能打敗市場嗎？實證告訴你不能",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_5acc24ee needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_5acc24ee",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-17T03:08:18+00:00"
+  },
+  {
+    "id": "event_fomc_2026_06_17_t0",
+    "task_type": "event_article",
+    "title": "Event article FOMC 2026-06-17 T-0 (decision day morning)",
+    "description": "FOMC 6/17 同日決議前 ~15 小時。延續 T-7 (mile_0e1eb5aa)/T-2 (mile_a5e79b07) 序列補完 T-0。最新數據: VIX=16.41, VIX9D=15.77, ratio=0.961 (T-2 是 0.976、T-7 是 1.114)，SPY 6/16=750.33 (從 6/15 高點 754.83 微跌)。Pre-FOMC drift 已完成，term structure 倒掛變深。核心論述: 市場用 vol 結構表態「決議無 surprise」，短端比長端更鬆。",
+    "priority": 2,
+    "status": "in_progress",
+    "created_at": "2026-06-17T03:11:18+00:00",
+    "source": "hourly_dispatch_autogen",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-17T03:11:20.080517+00:00",
+    "claim_session_id": "ba3f261afde3",
+    "started_at": "2026-06-17T03:11:20.615927+00:00"
   }
 ]
