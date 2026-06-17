@@ -32956,7 +32956,7 @@
     "title": "研究 backlog fallback: 企業債 factor zoo 的 bias-corrected 再審計：ETF proxy 版誠實 OOS",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 企業債 factor zoo 的 bias-corrected 再審計：ETF proxy 版誠實 OOS — yfinance HYG/LQD/VCIT/VCSH ETF 代理 carry/momentum/illiquidity/vol-beta 等 4-6 類信號，套用開源 Open Bond Asset Pricing 的 bias-correction 邏輯（剔除 prices-as-denominator 的 EIV bias），誠實 OOS Sharpe + DM 檢定；聚焦「方法論修正前後因子 premium 是否消失」的研究誠實審計；與既有 ML bond vol（06-16 | 來源 section: 期刊主題挖掘 batch（2026-06-17b；websearch 11 期刊 學術5/實務6 趨勢層級；selectivity gate 後初稿 10 → 7 條入單；新軸：vol forecast–portfolio translation gap / idiosyncratic vol × icapm equity premium / 關稅板塊 vol / breakeven inflation vol regime / earnings announcement jump / 高頻 tail risk premium / 企業債 factor bias-correction）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "factor_zoo_bias_corrected_etf_proxy_oos",
@@ -32964,6 +32964,12 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-17T01:08:55+00:00"
+    "created_at": "2026-06-17T01:08:55+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T01:37:44.025773+00:00",
+    "claim_session_id": "7fe199777f67",
+    "started_at": "2026-06-17T01:37:44.299651+00:00",
+    "completed_at": "2026-06-17T01:43:38.361544+00:00",
+    "result": "K1522 completed. Corporate-bond ETF factor-zoo bias-correction proxy audit using yfinance HYG/JNK/LQD/VCIT/VCSH/VCLT/IGSB/IGIB, 6 signals, OOS 2015-2026. Verdict NULL_ETF_PROXY: no extra-lag bias-corrected factor passes Harvey; best corrected signal carry_252 Sharpe=0.251, ann return=0.71%, DM t=-0.978. Artifacts in experiments/k1522; research_program.md updated."
   }
 ]
