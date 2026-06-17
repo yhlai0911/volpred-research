@@ -1,5 +1,27 @@
 [
   {
+    "id": "platform_ops_paper_review_agentable_tag_fix_20260618",
+    "title": "Fix paper_review refill tasks incorrectly tagged main-thread-only",
+    "description": "generate_diverse_tasks emits paper_review tasks for Codex 24h review but tags them main-thread-only, so continue_task_dispatch categorizes them into main_thread instead of agentable. Remove the bad tag and add regression coverage.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "succeeded",
+    "source": "codex_hourly_tick",
+    "created_at": "2026-06-17T22:23:33+00:00",
+    "tags": [
+      "dispatch",
+      "paper_review",
+      "routing",
+      "platform_ops"
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T22:23:40.738416+00:00",
+    "claim_session_id": "b26ff45014e2",
+    "started_at": "2026-06-17T22:23:46.982006+00:00",
+    "completed_at": "2026-06-17T22:25:12.136569+00:00",
+    "result": "Fixed paper_review diverse-gen routing: generated 24h review tasks no longer carry main-thread-only tag, so dispatcher can keep them Codex-agentable. Added regression test and verified generate_diverse_tasks/dispatch tests pass."
+  },
+  {
     "id": "platform_ops_dispatch_pool_dry_diagnostic_20260617",
     "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
     "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",

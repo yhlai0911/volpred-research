@@ -159,7 +159,7 @@ def gen_paper_review_tasks(existing: set[str], rng: random.Random) -> list[dict]
         "task_type": "paper_review",
         "source": "diverse_gen",
         "article_id": aid,
-        "tags": ["paper-review", "codex-24h-rule", "main-thread-only"],
+        "tags": ["paper-review", "codex-24h-rule"],
         "created_at": _now_iso(),
     } for aid, title in sampled]
 

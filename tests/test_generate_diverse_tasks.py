@@ -213,3 +213,34 @@ def test_experiment_dir_with_descriptive_suffix_covers_kid() -> None:
         "k1458",
     )
     assert not generate_diverse_tasks._experiment_dir_covers_kid("k14580", "k1458")
+
+
+def test_paper_review_tasks_are_codex_agentable_not_main_thread_only(tmp_path, monkeypatch) -> None:
+    feed = tmp_path / "feed.json"
+    feed.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_review_me",
+                    "title": "Review target",
+                    "status": "published",
+                    "published_at": datetime.now(timezone.utc).isoformat(),
+                    "tags": ["research"],
+                    "audience": "research",
+                    "details": {"experiment_refs": ["K9999"]},
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(generate_diverse_tasks, "FEED", feed)
+
+    tasks = generate_diverse_tasks.gen_paper_review_tasks(
+        existing=set(),
+        rng=generate_diverse_tasks.random.Random(42),
+    )
+
+    assert len(tasks) == 1
+    assert tasks[0]["task_type"] == "paper_review"
+    assert "main-thread-only" not in tasks[0]["tags"]
