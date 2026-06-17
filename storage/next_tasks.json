@@ -33380,7 +33380,7 @@
     "title": "研究 backlog fallback: 高維 factor timing 在波動 regime 下是否只是在過度換手",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 高維 factor timing 在波動 regime 下是否只是在過度換手 — 用 yfinance factor ETF（MTUM/VLUE/QUAL/USMV/RPV/IVE/IWF）與 FRED macro/vol proxies 建 shrinkage / elastic-net factor timing，與 equal-weight factor basket、12-1M momentum、vol-target baseline 比較；重點不是找最高 Sharpe，而是拆「vol regime 改善」是否被 turnover/cost 吃掉，OOS 用 DM + bootstra | 來源 section: 期刊主題挖掘 batch（2026-06-17d；journal_discovery_20260617_2；websearch faj/rfs/jfqa/j.derivatives/rpc 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "factor_timing_regime",
@@ -33388,7 +33388,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-17T13:55:29+00:00"
+    "created_at": "2026-06-17T13:55:29+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T16:11:45.589191+00:00",
+    "claim_session_id": "112293c09960",
+    "started_at": "2026-06-17T16:11:52.337345+00:00",
+    "completed_at": "2026-06-17T16:20:33.345620+00:00",
+    "result": "Completed research_factor_timing_regime. Built monthly yfinance factor ETF timing experiment with EW, 12-1M momentum top-3, and ElasticNet vol-regime top-3; OOS 2018-2026 complete months n=100. Verdict NULL: momentum edge directionally positive but DM/bootstrap NS; ElasticNet regime timing high turnover and underperforms EW. Knowledge entry 0bd14e22 and research_program updated."
   },
   {
     "id": "research_asset_allocation_drift_vt_risk_parity",
@@ -33416,7 +33422,7 @@
     "title": "研究 backlog fallback: 主題 ETF 的 coherence decay 作為 thematic crash 前哨",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 主題 ETF 的 coherence decay 作為 thematic crash 前哨 — 用 AIQ/BOTZ/ARKK/ICLN/CIBR/ITA/URA 等 thematic ETF 與各自主成分股，估 residual correlation / first-PC share / dispersion，檢定 coherence 下降後 1-3 月是否預測 theme ETF RV、max drawdown 或相對 SPY reversal；與 AI mega-cap HHI 題不同，這裡聚焦「主題本身是否還是一個共同風險」而非集中度（來源：Financial Analysts Jo | 來源 section: 期刊主題挖掘 batch（2026-06-17d；journal_discovery_20260617_2；websearch faj/rfs/jfqa/j.derivatives/rpc 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "etf_coherence_decay_thematic_crash",
@@ -33428,7 +33434,9 @@
     "claimed_by": "hourly-23",
     "claimed_at": "2026-06-17T15:09:23.610044+00:00",
     "claim_session_id": "7d8ae9cb4bae",
-    "started_at": "2026-06-17T15:09:33.186719+00:00"
+    "started_at": "2026-06-17T15:09:33.186719+00:00",
+    "completed_at": "2026-06-17T16:13:57.381399+00:00",
+    "result": "K1530 FAIL — thematic ETF coherence decay 假設被否定（2 個 wrong-sign t>3）；worktree commit 431b60bf 合併 main；fig × 3 + results.json + 47 個 thematic ETF 成分股 CSV"
   },
   {
     "id": "research_mega_cap_idiosyncratic_vol_spy_ivv_voo",
@@ -33513,5 +33521,46 @@
       "main-thread-only"
     ],
     "created_at": "2026-06-17T16:08:32+00:00"
+  },
+  {
+    "id": "K1528_article_research",
+    "title": "K1528: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1528 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1528 (2026-06-17) tested a free-proxy version of the market emotion-beta cross-sectional return idea using yfinance adjusted closes for a fixed current 52-stock U.S. large-cap universe plus SPY/^VIX and FRED UMCSENT, 2004-01-01 to 2026-06-14. Rolling sentiment betas for month t ",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1528",
+    "tags": [
+      "sentiment-beta",
+      "cross-section",
+      "emotion-beta",
+      "null-result",
+      "yfinance",
+      "fred",
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-17T16:12:36+00:00"
+  },
+  {
+    "id": "K1348",
+    "title": "K1348: ETF heartbeat / tax-efficiency 交易是否在季末造成成分股短暫 liquidity-vol 壓力** — 用大型 equity ETF（SPY/IVV/VTI/QQQ）季末/年末高成交額日、公開 holdings",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1083). Original: ETF heartbeat / tax-efficiency 交易是否在季末造成成分股短暫 liquidity-vol 壓力** — 用大型 equity ETF（SPY/IVV/VTI/QQQ）季末/年末高成交額日、公開 holdings top constituents、分配/資本利得公告，檢定 suspected heartbeat window 內 top holdings 的成交額、range-vol、close-to-close RV 是否異常；若 N-PORT / holdings history 不足，先做 ETF-level volume + top-current-holdings diagnostic，不宣稱因果（來源：RFS 2025 \"The Role of Taxes in the Rise of ETFs\"；ETF tax efficiency/heartbeat trade 機制）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1348.py with signal.shift(1) + seed=42, (c) K1348_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "in_progress",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 1083,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-17T16:12:36Z",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-06-17T16:15:23.743163+00:00",
+    "claim_session_id": "0c45429a03f3",
+    "started_at": "2026-06-17T16:15:30.966223+00:00"
   }
 ]

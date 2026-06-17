@@ -35225,5 +35225,27 @@
     "codex_review_verdict": "PASS",
     "supersedes_item_id": "002d6184",
     "followup_task_id": "k1529_v2_codex_remediation"
+  },
+  {
+    "item_id": "0bd14e22",
+    "category": "factor_timing_regime",
+    "content": "research_factor_timing_regime NULL: tested whether high-dimensional factor timing under volatility regimes adds net value after turnover/cost. Data: yfinance adjusted close for MTUM/VLUE/QUAL/USMV/RPV/IVE/IWF plus SPY/^VIX, daily 2013-01-02 to 2026-06-17; complete monthly sample 2013-08-31 to 2026-05-31; OOS 2018-01-31 onward, 100 holding months. Strategies: EW factor basket, 12-1M momentum top-3, expanding panel ElasticNet regime top-3 with factor return/vol, SPY return/vol, VIX level/change/high-vol interactions. Lookahead guard: features at t, training feature_date < t, weights at t apply to t+1 returns; incomplete current month dropped. Results net of 10 bps one-way costs: EW Sharpe 0.799/CAGR 12.59%; MOM top-3 Sharpe 0.867/CAGR 13.88%; EN regime top-3 Sharpe 0.643/CAGR 10.62%. Momentum gross edge vs EW +1.44%/yr, net +1.13%/yr, but DM t=-0.63 p=0.529 and stationary-bootstrap Sharpe diff CI [-0.159,+0.251]. ElasticNet regime timing gross edge already negative (-0.64%/yr), net -1.46%/yr, turnover 0.706/month and annual cost drag 0.85%; DM p=0.494, bootstrap CI crosses zero. Verdict: NULL. In this ETF-level free-data spec, simple momentum rotation is directionally positive but not statistically robust, while high-dimensional volatility-regime timing mostly adds turnover without net edge. Do not claim broad factor-timing rejection; claim only this investable ETF proxy / monthly ElasticNet-regime design fails to beat EW under Harvey/bootstrap standards.",
+    "evidence": [
+      "experiments/research_factor_timing_regime/README.md",
+      "experiments/research_factor_timing_regime/research_factor_timing_regime.py",
+      "experiments/research_factor_timing_regime/research_factor_timing_regime_results.json",
+      "experiments/research_factor_timing_regime/codex_review.md",
+      "experiments/research_factor_timing_regime/figures/factor_timing_wealth_turnover.png"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-06-18T00:19:10.290409",
+    "verdict": "NULL",
+    "experiment_id": "research_factor_timing_regime",
+    "experiment_path": "experiments/research_factor_timing_regime/",
+    "k_id": "research_factor_timing_regime",
+    "reviewer": "Codex CLI self-review",
+    "codex_reviewed": true,
+    "codex_review_verdict": "CONDITIONAL_PASS methodology; empirical NULL",
+    "task_id": "research_factor_timing_regime"
   }
 ]

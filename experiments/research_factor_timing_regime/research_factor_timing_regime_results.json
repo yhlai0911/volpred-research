@@ -1,0 +1,167 @@
+{
+  "experiment_id": "research_factor_timing_regime",
+  "title": "High-dimensional factor timing under volatility regimes: turnover/cost audit",
+  "data": {
+    "source": "yfinance adjusted close (cached)",
+    "tickers": [
+      "MTUM",
+      "VLUE",
+      "QUAL",
+      "USMV",
+      "RPV",
+      "IVE",
+      "IWF"
+    ],
+    "extra_tickers": [
+      "SPY",
+      "^VIX"
+    ],
+    "daily_start": "2013-01-02",
+    "daily_end": "2026-06-17",
+    "monthly_start": "2013-08-31",
+    "monthly_end": "2026-05-31",
+    "oos_start": "2018-01-31",
+    "n_oos_months": 100
+  },
+  "config": {
+    "seed": 42,
+    "cost_bps_one_way": 10.0,
+    "top_k": 3,
+    "bootstrap_B": 1000,
+    "bootstrap_mean_block_months": 6.0,
+    "lookahead_guard": "features at t, training feature_date < t, weights at t applied to t+1 returns",
+    "model": "expanding panel ElasticNet(alpha=0.002,l1_ratio=0.35), long-only top-3"
+  },
+  "summary_stats": {
+    "EW": {
+      "n_months": 100,
+      "ann_return_net": 0.13297706705740042,
+      "ann_vol_net": 0.16636497151939106,
+      "sharpe_net": 0.7993092887459243,
+      "ann_return_gross": 0.1332917472885913,
+      "ann_vol_gross": 0.16633753362032447,
+      "sharpe_gross": 0.8013329546705785,
+      "cagr_net": 0.12591731462089806,
+      "cagr_gross": 0.12627360348471206,
+      "max_drawdown_net": -0.23367227781443978,
+      "avg_monthly_turnover": 0.02622335259924093,
+      "ann_cost_drag": 0.0003146802311908938,
+      "final_wealth_net": 2.686710147091583
+    },
+    "MOM_12_1_TOP3": {
+      "n_months": 100,
+      "ann_return_net": 0.1442348603745419,
+      "ann_vol_net": 0.16636094128351245,
+      "sharpe_net": 0.8669995448555242,
+      "ann_return_gross": 0.14767383057618783,
+      "ann_vol_gross": 0.16635900538789097,
+      "sharpe_gross": 0.8876816150220671,
+      "cagr_net": 0.13876634513334762,
+      "cagr_gross": 0.14265117719269216,
+      "max_drawdown_net": -0.21206593308615074,
+      "avg_monthly_turnover": 0.28658085013716417,
+      "ann_cost_drag": 0.0034389702016459746,
+      "final_wealth_net": 2.953170558699582
+    },
+    "EN_REGIME_TOP3": {
+      "n_months": 100,
+      "ann_return_net": 0.11842373758460452,
+      "ann_vol_net": 0.1841382432760909,
+      "sharpe_net": 0.643124076116246,
+      "ann_return_gross": 0.12689697923038884,
+      "ann_vol_gross": 0.1839435339331776,
+      "sharpe_gross": 0.6898692034289585,
+      "cagr_net": 0.10617823117616254,
+      "cagr_gross": 0.11555723635032034,
+      "max_drawdown_net": -0.30731855326967705,
+      "avg_monthly_turnover": 0.7061034704820266,
+      "ann_cost_drag": 0.00847324164578432,
+      "final_wealth_net": 2.3185113699633266
+    }
+  },
+  "dm_tests_net_returns": {
+    "MOM_12_1_TOP3_vs_EW_net": {
+      "t_stat": -0.631147173519089,
+      "p_value": 0.5293987935098037,
+      "interpretation": "negative t means strategy has higher net monthly return than EW",
+      "harvey_pass_abs_t_gt_3": false
+    },
+    "EN_REGIME_TOP3_vs_EW_net": {
+      "t_stat": 0.6858856941669534,
+      "p_value": 0.4943883077301565,
+      "interpretation": "negative t means strategy has higher net monthly return than EW",
+      "harvey_pass_abs_t_gt_3": false
+    }
+  },
+  "bootstrap_sharpe_diff": {
+    "MOM_12_1_TOP3_vs_EW_net": {
+      "mean_diff": 0.05835856628710791,
+      "ci_lower_2p5": -0.1591702684676091,
+      "ci_upper_97p5": 0.25129618119018915,
+      "p_value_two_sided": 0.562
+    },
+    "EN_REGIME_TOP3_vs_EW_net": {
+      "mean_diff": -0.15039720724408615,
+      "ci_lower_2p5": -0.3456252285634037,
+      "ci_upper_97p5": 0.04805884778556524,
+      "p_value_two_sided": 0.124
+    }
+  },
+  "cost_eats_edge": {
+    "MOM_12_1_TOP3": {
+      "gross_edge_vs_EW_ann": 0.014382083287596532,
+      "net_edge_vs_EW_ann": 0.01125779331714145,
+      "edge_lost_to_cost_ann": 0.0031242899704550815,
+      "avg_turnover_minus_EW": 0.26035749753792325
+    },
+    "EN_REGIME_TOP3": {
+      "gross_edge_vs_EW_ann": -0.0063947680582024675,
+      "net_edge_vs_EW_ann": -0.014553329472795893,
+      "edge_lost_to_cost_ann": 0.008158561414593426,
+      "avg_turnover_minus_EW": 0.6798801178827857
+    }
+  },
+  "regime_breakdown": {
+    "EW_high_vix_gt20": {
+      "n_months": 34,
+      "ann_return": 0.2517827823574824,
+      "ann_vol": 0.2172219540623667,
+      "sharpe": 1.159103753781687
+    },
+    "EW_low_vix_le20": {
+      "n_months": 66,
+      "ann_return": 0.07177412281190362,
+      "ann_vol": 0.13140318399078904,
+      "sharpe": 0.5462129655620427
+    },
+    "MOM_12_1_TOP3_high_vix_gt20": {
+      "n_months": 34,
+      "ann_return": 0.27892140999727255,
+      "ann_vol": 0.21365016013915,
+      "sharpe": 1.305505269996575
+    },
+    "MOM_12_1_TOP3_low_vix_le20": {
+      "n_months": 66,
+      "ann_return": 0.07485088026586241,
+      "ann_vol": 0.1333424552632356,
+      "sharpe": 0.5613431979941939
+    },
+    "EN_REGIME_TOP3_high_vix_gt20": {
+      "n_months": 34,
+      "ann_return": 0.2642559613106358,
+      "ann_vol": 0.2433174857556036,
+      "sharpe": 1.086054134128541
+    },
+    "EN_REGIME_TOP3_low_vix_le20": {
+      "n_months": 66,
+      "ann_return": 0.04329804657422483,
+      "ann_vol": 0.14206024291065467,
+      "sharpe": 0.3047865165305685
+    }
+  },
+  "figures": [
+    "figures/factor_timing_wealth_turnover.png"
+  ],
+  "verdict": "NULL",
+  "verdict_rationale": "No timing strategy clears Harvey |t|>3 vs equal-weight after costs; ElasticNet/regime timing increases turnover and does not deliver a robust net edge."
+}
