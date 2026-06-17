@@ -35162,5 +35162,18 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-17T19:16:06.232884"
+  },
+  {
+    "item_id": "9cf76942",
+    "category": "knowledge",
+    "content": "[Codex] research_rp_f1168bab52 tested whether lagged negative 20-day SPY returns amplify the short-horizon IV-RV premium in the VIX/VIX3M term structure. Data: yfinance SPY/^VIX/^VIX3M daily 2006-07-17 to 2026-06-16 (5012 daily rows, 240 monthly origins) plus local FRED DGS10/DGS2/T10YIE controls. All predictors use lag-1 values and OOS expanding forecasts train only on rows whose forward-label end date is before the forecast origin. Verdict=MIXED_DIAGNOSTIC_NOT_TRADABLE. Raw 1M-3M premium slope is lower after negative past20 returns (-185.8 vs +5.6 vol-pts^2; Welch p=0.024), but HAC slope t=-1.75 and controlled FMB-style neg20 t=0.55 fail. OOS augmented models show small MSE R2 gains (+4.50% for 21d, +1.56% for 63d) but Patton QLIKE strongly worsens (DM t=+3.97/+3.91). Monthly VT overlay that switches to VIX3M after negative past20 returns underperforms VIX1M VT (Sharpe 0.881 vs 0.909, MDD -26.5% vs -25.3%). Conclusion: reduced-form VIX/VIX3M asymmetry is diagnostic only; not a robust forecast or deployable trading rule without option-chain variance-swap data.",
+    "evidence": [
+      "experiments/research_rp_f1168bab52/README.md",
+      "experiments/research_rp_f1168bab52/research_rp_f1168bab52.py",
+      "experiments/research_rp_f1168bab52/research_rp_f1168bab52_results.json",
+      "experiments/research_rp_f1168bab52/codex_self_review.md"
+    ],
+    "confidence": 0.86,
+    "created_at": "2026-06-17T19:36:19.128522"
   }
 ]

@@ -1,0 +1,289 @@
+{
+  "experiment_id": "research_rp_f1168bab52",
+  "title": "Return-extrapolation-driven IV-RV asymmetric term structure",
+  "verdict": "MIXED_DIAGNOSTIC_NOT_TRADABLE",
+  "seed": 42,
+  "data": {
+    "market_source": "yfinance adjusted close: SPY, ^VIX, ^VIX3M",
+    "fred_controls_source": "local storage/macro/fred_DGS10.csv, fred_DGS2.csv, fred_T10YIE.csv",
+    "sample_start": "2006-07-17",
+    "sample_end": "2026-06-16",
+    "n_daily": 5012,
+    "n_monthly_origins": 240,
+    "monthly_first": "2006-07-31",
+    "monthly_last": "2026-06-16"
+  },
+  "design": {
+    "signal_timing": "All VIX/VIX3M, macro, and past-return predictors use lag-1 values at month-end. Future RV starts at t+1.",
+    "iv_1m": "(VIX_{t-1}/100)^2",
+    "iv_3m": "(VIX3M_{t-1}/100)^2",
+    "rv_1m": "mean squared SPY log return over t+1..t+21, annualized",
+    "rv_3m": "mean squared SPY log return over t+1..t+63, annualized",
+    "negative_return_regime": "sum SPY log returns over t-20..t-1 < 0",
+    "oos_cutoff": "Expanding forecasts train only on rows whose forward-label end date is strictly before the forecast origin."
+  },
+  "regime_tests": {
+    "premium_1m": {
+      "n_negative": 75,
+      "n_positive": 161,
+      "negative_mean": -0.0021966629779520503,
+      "positive_mean": 0.009692479693950781,
+      "negative_minus_positive": -0.01188914267190283,
+      "welch_t": -0.8742566649237129,
+      "welch_p": 0.3846626305283879,
+      "hac_coef_neg_minus_pos": -0.011889142671902837,
+      "hac_t_neg_minus_pos": -0.9843464119248257,
+      "hac_p_neg_minus_pos": 0.3249452167825754,
+      "negative_mean_volpts2": -21.966629779520503,
+      "positive_mean_volpts2": 96.92479693950781,
+      "negative_minus_positive_volpts2": -118.8914267190283
+    },
+    "premium_3m": {
+      "n_negative": 75,
+      "n_positive": 161,
+      "negative_mean": 0.016379471256472253,
+      "positive_mean": 0.009131909033620022,
+      "negative_minus_positive": 0.0072475622228522305,
+      "welch_t": 0.7910584291322608,
+      "welch_p": 0.4303010539469272,
+      "hac_coef_neg_minus_pos": 0.007247562222852225,
+      "hac_t_neg_minus_pos": 1.1430829945652476,
+      "hac_p_neg_minus_pos": 0.253004134070136,
+      "negative_mean_volpts2": 163.79471256472252,
+      "positive_mean_volpts2": 91.31909033620022,
+      "negative_minus_positive_volpts2": 72.47562222852231
+    },
+    "premium_slope_1m_minus_3m": {
+      "n_negative": 75,
+      "n_positive": 161,
+      "negative_mean": -0.018576134234424297,
+      "positive_mean": 0.0005605706603307556,
+      "negative_minus_positive": -0.019136704894755052,
+      "welch_t": -2.28361656712767,
+      "welch_p": 0.024261657492560963,
+      "hac_coef_neg_minus_pos": -0.01913670489475506,
+      "hac_t_neg_minus_pos": -1.7475033265038267,
+      "hac_p_neg_minus_pos": 0.08055006838982576,
+      "negative_mean_volpts2": -185.76134234424296,
+      "positive_mean_volpts2": 5.605706603307556,
+      "negative_minus_positive_volpts2": -191.36704894755053
+    }
+  },
+  "regression_tests": {
+    "fmb_style_slope_regression": {
+      "description": "Monthly two-maturity slope premium regression; slope = premium_1m - premium_3m.",
+      "n_months": 235,
+      "r_squared": 0.08493451145778952,
+      "neg20_lag1": {
+        "coef": 0.005855614714587304,
+        "t": 0.5508873881657752,
+        "p": 0.5817108735250336
+      },
+      "params": {
+        "const": {
+          "coef": -0.021823762569393987,
+          "t": -1.608528269736681,
+          "p": 0.10771952987486993
+        },
+        "neg20_lag1": {
+          "coef": 0.005855614714587304,
+          "t": 0.5508873881657752,
+          "p": 0.5817108735250336
+        },
+        "past20_ret_lag1": {
+          "coef": 0.15638117872154753,
+          "t": 1.6814727939034333,
+          "p": 0.0926711165809969
+        },
+        "term_slope_lag1": {
+          "coef": -0.1633674076300713,
+          "t": -1.487946179959572,
+          "p": 0.13676508767839185
+        },
+        "dgs10_chg21_lag1": {
+          "coef": -0.006533098142011191,
+          "t": -0.5401522141691822,
+          "p": 0.5890920643746032
+        },
+        "t10yie_chg21_lag1": {
+          "coef": -0.0069255616138574495,
+          "t": -0.23887420785240895,
+          "p": 0.8112031258182143
+        },
+        "term_spread_lag1": {
+          "coef": -0.0014110864850737342,
+          "t": -0.5504778247228496,
+          "p": 0.5819916825452849
+        }
+      }
+    },
+    "pooled_term_panel_regression": {
+      "description": "Two-row-per-month term panel. HAC is by row order, so this is secondary evidence.",
+      "n_rows": 470,
+      "n_months": 235,
+      "r_squared": 0.16061631953426414,
+      "short_x_neg": {
+        "coef": -0.023132257157309294,
+        "t": -1.816223934908116,
+        "p": 0.06933602794507597
+      },
+      "params": {
+        "const": {
+          "coef": -0.06072669420706323,
+          "t": -2.053273235343102,
+          "p": 0.04004608512681201
+        },
+        "short_maturity": {
+          "coef": 0.003971460691458652,
+          "t": 0.7163164253228532,
+          "p": 0.47379598684152424
+        },
+        "neg20_lag1": {
+          "coef": 0.0526667634498639,
+          "t": 2.237397810817729,
+          "p": 0.025260351497049617
+        },
+        "short_x_neg": {
+          "coef": -0.023132257157309294,
+          "t": -1.816223934908116,
+          "p": 0.06933602794507597
+        },
+        "iv_var": {
+          "coef": 0.42912779490757885,
+          "t": 2.850947950111024,
+          "p": 0.0043589104174475
+        },
+        "past20_ret_lag1": {
+          "coef": 0.2796373088748023,
+          "t": 2.2598142718439362,
+          "p": 0.023832780263670562
+        },
+        "term_slope_lag1": {
+          "coef": -0.3486020475139678,
+          "t": -2.039629173485733,
+          "p": 0.04138727409088108
+        },
+        "dgs10_chg21_lag1": {
+          "coef": -0.006452815679473121,
+          "t": -0.3495572831531289,
+          "p": 0.7266709738269008
+        },
+        "t10yie_chg21_lag1": {
+          "coef": 0.05045926455870879,
+          "t": 0.9609713882132811,
+          "p": 0.3365665541982461
+        },
+        "term_spread_lag1": {
+          "coef": 0.00038880776694423524,
+          "t": 0.09959372421722171,
+          "p": 0.9206668764031607
+        }
+      }
+    }
+  },
+  "oos_forecasts": {
+    "1m_21d": {
+      "n": 140,
+      "oos_start": "2014-09-30",
+      "oos_end": "2026-04-30",
+      "r2_vs_baseline": 0.044975754734164375,
+      "mse_baseline": 0.004582379912315369,
+      "mse_augmented": 0.0043762839172803115,
+      "qlike_baseline": 3.4033502751644034,
+      "qlike_augmented": 15.41753192695161,
+      "dm_t_qlike_aug_vs_base": 3.973816127919193,
+      "dm_p_qlike_aug_vs_base": 0.00011314489008285022,
+      "dm_t_mse_aug_vs_base": -0.3939323884482251,
+      "dm_p_mse_aug_vs_base": 0.6942346189092583
+    },
+    "3m_63d": {
+      "n": 137,
+      "oos_start": "2014-10-31",
+      "oos_end": "2026-02-27",
+      "r2_vs_baseline": 0.01559220335299838,
+      "mse_baseline": 0.0025304306218938257,
+      "mse_augmented": 0.002490975633066603,
+      "qlike_baseline": 0.4525489056232821,
+      "qlike_augmented": 6.142108172550345,
+      "dm_t_qlike_aug_vs_base": 3.9146930011903582,
+      "dm_p_qlike_aug_vs_base": 0.00014252913777546006,
+      "dm_t_mse_aug_vs_base": -0.14117161268063427,
+      "dm_p_mse_aug_vs_base": 0.8879432635973759
+    }
+  },
+  "trading_rule": {
+    "description": "Monthly VT overlay. Baseline uses 12%/VIX1M. Asymmetric rule uses 12%/VIX3M when lagged past20 return is negative, otherwise 12%/VIX1M. 1.5x cap, 10bp per 1x turnover.",
+    "results": {
+      "buy_hold": {
+        "n_months": 238,
+        "mean_monthly": 0.010754540447654285,
+        "ann_return_arithmetic": 0.12905448537185144,
+        "ann_vol": 0.16304620758752553,
+        "sharpe": 0.7915209269898114,
+        "cagr": 0.12187429219826718,
+        "max_drawdown": -0.5646811748758656,
+        "final_wealth": 9.784978876310392,
+        "avg_weight": 1.0,
+        "avg_turnover": 0.0
+      },
+      "vix1m_vt": {
+        "n_months": 238,
+        "mean_monthly": 0.006928523414034324,
+        "ann_return_arithmetic": 0.08314228096841189,
+        "ann_vol": 0.09148127531083758,
+        "sharpe": 0.9088447956798673,
+        "cagr": 0.08186086753156863,
+        "max_drawdown": -0.2527758276686073,
+        "final_wealth": 4.76138177255226,
+        "avg_weight": 0.6942015198382415,
+        "avg_turnover": 0.11289725087402198
+      },
+      "vix3m_vt": {
+        "n_months": 238,
+        "mean_monthly": 0.006330926432359945,
+        "ann_return_arithmetic": 0.07597111718831934,
+        "ann_vol": 0.08422673455051202,
+        "sharpe": 0.9019834093503688,
+        "cagr": 0.07486558254897568,
+        "max_drawdown": -0.25184313407990067,
+        "final_wealth": 4.186561208765436,
+        "avg_weight": 0.6222040421532716,
+        "avg_turnover": 0.069991080539746
+      },
+      "asym_vix3m_when_neg20": {
+        "n_months": 238,
+        "mean_monthly": 0.006708132496678898,
+        "ann_return_arithmetic": 0.08049758996014678,
+        "ann_vol": 0.09137838982374652,
+        "sharpe": 0.8809258963242078,
+        "cagr": 0.07902843346539279,
+        "max_drawdown": -0.2651415953989328,
+        "final_wealth": 4.520144275185797,
+        "avg_weight": 0.6859126859373947,
+        "avg_turnover": 0.12493454588650203
+      },
+      "comparison_asym_vs_vix1m": {
+        "return_dm_t_negative_means_asym_better_if_negative": 2.100611189174326,
+        "return_dm_p": 0.036732034983958384,
+        "strategy_dm_t_asym_better_if_negative": 2.100611189174326,
+        "strategy_dm_p": 0.036732034983958384,
+        "sharpe_delta": -0.0279188993556595,
+        "mdd_delta": -0.012365767730325494
+      }
+    }
+  },
+  "figures": [
+    "fig_premium_by_regime.png",
+    "fig_oos_and_strategy.png"
+  ],
+  "references": [
+    "Chordia, Lin, and Xiang (2025), Return Extrapolation and Volatility Expectations.",
+    "Bekaert and Hoerova (2014), The VIX, the variance premium and stock market volatility.",
+    "Bollerslev, Tauchen, and Zhou (2009), Expected stock returns and variance risk premia.",
+    "Carr and Wu (2009), Variance risk premiums."
+  ],
+  "conclusion": {
+    "primary": "The broad asymmetric-extrapolation story is not validated as a tradable rule under free monthly SPY/VIX/VIX3M data unless both OOS and strategy gates pass.",
+    "caveat": "VIX/VIX3M are index-implied variance proxies, not option-chain model-free variance swap rates; results are reduced-form."
+  }
+}

@@ -4059,5 +4059,23 @@
       "borrow-fee-proxy",
       "null-result"
     ]
+  },
+  {
+    "entry_id": "8ebf266a",
+    "timestamp": "2026-06-17T19:36:19.650936",
+    "phase": "hourly_experiment",
+    "action": "ran return-extrapolation IV-RV term-structure experiment",
+    "observation": "Raw 1M-3M premium slope differs by lagged return regime, but controlled/HAC/OOS QLIKE/trading gates fail.",
+    "decision": "Record as MIXED_DIAGNOSTIC_NOT_TRADABLE and do not queue an article unless framed as a null/methodology note.",
+    "experiment_ids": [
+      "research_rp_f1168bab52"
+    ],
+    "tags": [
+      "vrp",
+      "vix3m",
+      "term-structure",
+      "null-result",
+      "codex"
+    ]
   }
 ]

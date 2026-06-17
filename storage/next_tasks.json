@@ -33159,7 +33159,7 @@
     "title": "研究 backlog fallback: 報酬外推偏誤驅動的 IV-RV 不對稱期限結構",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 報酬外推偏誤驅動的 IV-RV 不對稱期限結構 — 用 ^VIX（1M）/^VIX3M（3M）+ 後驗 SPY realized vol，分「過去 20 日累積負報酬」vs「累積正報酬」月份，檢定短期 IV 對 RV 的 premium 是否在負報酬期顯著放大（不對稱外推）；Fama-MacBeth 條件回歸 with negative-past-return × IV interaction，明確 lag，OOS R²（yfinance SPY + ^VIX/^VIX3M；FRED macro controls）；不對稱期限結構效應為 trading rule 而非僅 academic pr | 來源 section: 期刊主題挖掘 batch（2026-06-17c；websearch 13 期刊 學術6/實務7 趨勢層級；selectivity gate 後 14→5 條入單 — 06-17/06-17b 已飽和當日多軸，本批只入 grep=0 真正零撞 5 軸）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "rp_f1168bab52",
@@ -33167,7 +33167,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-17T07:38:26+00:00"
+    "created_at": "2026-06-17T07:38:26+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-17T11:25:13.192871+00:00",
+    "claim_session_id": "9639d507f389",
+    "started_at": "2026-06-17T11:25:20.611587+00:00",
+    "completed_at": "2026-06-17T11:36:44.356890+00:00",
+    "result": "完成 research_rp_f1168bab52。產出三件套+2圖+Codex self-review，verdict=MIXED_DIAGNOSTIC_NOT_TRADABLE。VIX/VIX3M raw slope 有診斷訊號，但控制後不穩；OOS MSE 小幅改善但 QLIKE 顯著變差；月頻 asymmetric VT overlay Sharpe 0.881 < VIX1M 0.909，不可交易化。knowledge_id=9cf76942。"
   },
   {
     "id": "research_credit_spread_fomc_vol",
