@@ -11011,5 +11011,14 @@
     "timestamp": "2026-06-17T06:13:47.985633+00:00",
     "verdict": "succeeded",
     "summary": "K1525 HF tail risk premium VRP merged from worktree (commit 32a025d1). verdict NULL: focal OOS R²=-4.5%, DM p=0.40 (n=137). VIX dominates (M4 t=3.48). Knowledge fa7b04d5. Also cleaned 2 orphan branches (K1347/K1512 duplicates already in main)."
+  },
+  {
+    "task_id": "research_credit_spread_fomc_vol",
+    "task_type": "experiment",
+    "timestamp": "2026-06-17T09:10:05.231539+00:00",
+    "owner": "codex-cli",
+    "k_id": "K1529",
+    "verdict": "NULL_ETF_PROXY",
+    "summary": "K1529 credit-spread FOMC vol precursor ETF-proxy pilot completed. HYG-LQD event diff p=0.7376; pre-credit OOS QLIKE worsens -13.85%; post-response +5.92% but DM t=-1.294 Harvey FAIL. Knowledge d220af3b."
   }
 ]

@@ -1,0 +1,204 @@
+{
+  "experiment_id": "K1529",
+  "task_id": "research_credit_spread_fomc_vol",
+  "title": "Credit-spread FOMC volatility precursor ETF-proxy pilot",
+  "timestamp": "2026-06-17T09:10:37.177956+00:00",
+  "seed": 42,
+  "verdict": "NULL_ETF_PROXY",
+  "summary": "Corporate-bond ETF credit-stress proxies do not provide Harvey-strength OOS incremental information for SPY realized variance around FOMC meetings. Any event-window effects are small or statistically fragile after multiple-testing discipline.",
+  "data": {
+    "sources": {
+      "prices": "yfinance daily OHLC, auto_adjust=False",
+      "monetary_policy_surprises": "https://www.frbsf.org/wp-content/uploads/chart1-monetary-policy-surprises.csv?2026-06-16"
+    },
+    "price_start": "2012-01-03",
+    "price_end": "2026-06-17",
+    "tickers": [
+      "HYG",
+      "LQD",
+      "VCIT",
+      "VCSH",
+      "SPY",
+      "^VIX",
+      "XLP",
+      "XLU",
+      "XLV",
+      "XLE",
+      "XLB",
+      "XLK"
+    ],
+    "credit_tickers": [
+      "HYG",
+      "LQD",
+      "VCIT",
+      "VCSH"
+    ],
+    "sticky_sector_proxy": [
+      "XLP",
+      "XLU",
+      "XLV"
+    ],
+    "flexible_sector_proxy": [
+      "XLE",
+      "XLB",
+      "XLK"
+    ],
+    "n_fomc_events_after_alignment": 102,
+    "first_event": "2012-01-25",
+    "last_event": "2023-12-13",
+    "oos_start": "2019-01-01"
+  },
+  "method": {
+    "credit_stress_proxy": "-(log_return(HYG) - log_return(LQD)); positive means HY underperforms IG, a spread-stress proxy",
+    "event_window": "FOMC event date t; credit response t..t+5; pre-credit t-5..t-1",
+    "same_month_baseline": "same calendar month candidate windows excluding all FOMC +/-5 trading days",
+    "pre_fomc_oos_model": "predict SPY RV t..t+5 using only lagged SPY RV, lagged VIX variance, and credit stress t-5..t-1",
+    "post_response_oos_model": "predict SPY RV t+6..t+26; augmented model may use credit stress t..t+5 because target starts after response window",
+    "inference": "paired tests, HAC OLS, Patton QLIKE OOS loss, DM HAC h=5, Harvey pass if DM t < -3",
+    "multiple_testing": "5 headline tests; Bonferroni alpha=0.0100",
+    "lookahead_guard": "all predictor/target windows are non-overlapping where post-event predictors are used; no same-day signal times same-day return strategy"
+  },
+  "tests": {
+    "credit_stress_event_vs_same_month_baseline": {
+      "n_events": 97,
+      "event_mean": 0.000115,
+      "same_month_baseline_mean": -0.000342,
+      "diff_mean": 0.000457,
+      "diff_median": -0.000278,
+      "paired_t_stat": 0.3361,
+      "paired_t_p_two_sided": 0.737525,
+      "wilcoxon_p_one_sided_greater": 0.340171,
+      "block_bootstrap_p_one_sided_greater": 0.376623,
+      "bonferroni_alpha": 0.01
+    },
+    "surprise_to_credit_response_hac_ols": {
+      "const": {
+        "coef": 0.01078017001779162,
+        "t": 1.0094426808921904,
+        "p": 0.3127623780006311
+      },
+      "abs_orth_surprise_bp": {
+        "coef": 0.0012343905903822996,
+        "t": 1.922914262887904,
+        "p": 0.05449081821972656
+      },
+      "log_vix_var_lag1": {
+        "coef": 0.0038554488118323726,
+        "t": 1.3203334188299902,
+        "p": 0.18672372257579395
+      },
+      "credit_hyg_lqd_pre_m5_m1": {
+        "coef": -0.5851046111232199,
+        "t": -3.004182309256302,
+        "p": 0.0026629570412770465
+      },
+      "_model": {
+        "n": 102,
+        "r2": 0.3216404059867508,
+        "aic": -599.9494984178777
+      }
+    },
+    "sticky_flexible_sector_proxy_hac_ols": {
+      "const": {
+        "coef": -0.19759093809602513,
+        "t": -7.462661709995193,
+        "p": 8.479184993030168e-14
+      },
+      "abs_orth_surprise_bp": {
+        "coef": -0.006525675128925737,
+        "t": -1.189727810297148,
+        "p": 0.23415339108514188
+      },
+      "log_vix_var_lag1": {
+        "coef": -0.05245510207651792,
+        "t": -6.954899131665289,
+        "p": 3.5281438234957e-12
+      },
+      "credit_hyg_lqd_event_0_5": {
+        "coef": -0.9816632729345413,
+        "t": -2.0743316270302805,
+        "p": 0.038048522469452235
+      },
+      "_model": {
+        "n": 102,
+        "r2": 0.42495107411616806,
+        "aic": -244.6213017694721
+      }
+    },
+    "oos_models": [
+      {
+        "model": "pre_fomc_credit_to_event_spy_rv",
+        "target": "spy_rv_event_0_5",
+        "train_n": 55,
+        "oos_n": 46,
+        "baseline_qlike": 0.6127879190337939,
+        "augmented_qlike": 0.6976539460734417,
+        "qlike_improvement_pct": -13.849167779524644,
+        "dm_t_augmented_vs_baseline": 1.8492758896721317,
+        "dm_p_augmented_vs_baseline": 0.07099300174733436,
+        "harvey_pass": false
+      },
+      {
+        "model": "post_response_credit_to_next_month_spy_rv",
+        "target": "spy_rv_post_6_26",
+        "train_n": 55,
+        "oos_n": 46,
+        "baseline_qlike": 0.6739268832091213,
+        "augmented_qlike": 0.6340221488725769,
+        "qlike_improvement_pct": 5.921226075227192,
+        "dm_t_augmented_vs_baseline": -1.2939944095330875,
+        "dm_p_augmented_vs_baseline": 0.20226933222097299,
+        "harvey_pass": false
+      }
+    ]
+  },
+  "key_numbers": {
+    "credit_diff_mean": 0.000457,
+    "credit_diff_p_two_sided": 0.737525,
+    "surprise_abs_t_to_credit": 1.9229,
+    "sticky_gap_credit_t": -2.0743,
+    "oos_pass_models": [],
+    "best_oos_improvement_pct": 5.9212
+  },
+  "limitations": [
+    "ETF proxies blend duration, liquidity, credit quality, and fund microstructure; they are not bond-level credit spreads.",
+    "Sector sticky/flexible baskets are crude public-market proxies, not NFIB or firm-level markup/price-duration measures.",
+    "SF Fed surprise chart begins in 2012, limiting sample size and excluding older monetary-policy regimes.",
+    "Daily data cannot isolate the 2pm ET FOMC announcement window; intraday bond/ETF data would be needed for a true high-frequency shock response.",
+    "Five headline tests are reported with Bonferroni discipline; exploratory coefficients should not be marketed as standalone discoveries."
+  ],
+  "related_prior": [
+    "K513: FOMC raises event-day vol but exposure reduction did not improve strategy Sharpe.",
+    "K651/T14/G5/K730: credit-spread and cross-asset stress signals are usually absorbed by VIX or economically too small for daily SPY vol timing.",
+    "K1515: HYG illiquidity cross-market features needed AR-only feature-set testing before feature-power claims.",
+    "K1522: corporate-bond ETF factor proxies do not rescue factor-zoo premia after conservative lag discipline."
+  ],
+  "references": [
+    {
+      "title": "Augustin, Cong, Corhay, Weber, Price Rigidities and Credit Risk, JFQA",
+      "url": "https://jfqa.org/2025/12/04/price-rigidities-and-credit-risk/",
+      "use": "Motivates sticky-price firms' stronger credit-spread response to monetary shocks."
+    },
+    {
+      "title": "SF Fed Monetary Policy Surprises data",
+      "url": "https://www.frbsf.org/research-and-insights/data-and-indicators/monetary-policy-surprises/",
+      "use": "Public FOMC surprise series used for event-level shock size."
+    },
+    {
+      "title": "Bernanke and Kuttner (2005), What Explains the Stock Market's Reaction to Federal Reserve Policy?",
+      "url": "https://www.newyorkfed.org/research/staff_reports/sr174.html",
+      "use": "Canonical monetary-policy surprise event-study motivation."
+    },
+    {
+      "title": "Gilchrist and Zakrajsek (2012), Credit Spreads and Business Cycle Fluctuations",
+      "url": "https://www.aeaweb.org/articles?id=10.1257%2Faer.102.4.1692",
+      "use": "Credit spreads contain macro-financial stress information; ETF proxy here is narrower."
+    }
+  ],
+  "artifacts": {
+    "results_json": "experiments/k1529_credit_spread_fomc_vol/k1529_credit_spread_fomc_vol_results.json",
+    "figure": "experiments/k1529_credit_spread_fomc_vol/k1529_credit_spread_fomc_vol.png",
+    "script": "experiments/k1529_credit_spread_fomc_vol/k1529_credit_spread_fomc_vol.py"
+  },
+  "elapsed_seconds": 7.24
+}

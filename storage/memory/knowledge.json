@@ -35097,5 +35097,23 @@
       "fred"
     ],
     "limitations": "Fixed current large-cap universe is survivorship-biased; VIX/UMCSENT are public proxies rather than the proprietary emotion dictionary; no CRSP delisting/constituent history."
+  },
+  {
+    "item_id": "d220af3b",
+    "category": "experiment_result",
+    "content": "[提出: research_program.md 2026-06-17c backlog; 執行: Codex] K1529 credit-spread FOMC volatility precursor ETF-proxy pilot. Data: yfinance daily OHLC HYG/LQD/VCIT/VCSH/SPY/^VIX + sector ETFs, SF Fed monetary-policy-surprise chart CSV, 102 FOMC events 2012-01-25 to 2023-12-13, OOS from 2019-01-01. Method: HYG-LQD stress = -(HYG log return - LQD log return); same-month non-event baseline excluding FOMC +/-5 trading days; HAC OLS; OOS log-RV models with Patton QLIKE and DM HAC h=5. Lookahead guard: pre-FOMC model uses t-1 information to predict SPY RV t0..t+5; post-response model uses credit response t0..t+5 only for target t+6..t+26. Result: NULL_ETF_PROXY. Event-vs-baseline HYG-LQD stress diff mean 0.000457, paired t p=0.7376, Wilcoxon p=0.3402, bootstrap p=0.3766. Surprise-to-credit HAC t=1.9229 not Bonferroni-significant. Pre-FOMC credit worsens OOS QLIKE by -13.85%; post-response credit improves QLIKE by 5.92% but DM t=-1.294, Harvey FAIL. Conclusion: free daily ETF proxies do not support a publishable claim that FOMC-window credit-spread stress is a robust SPY RV precursor; firm-level or intraday credit-spread data required to reopen.",
+    "evidence": [
+      "experiments/k1529_credit_spread_fomc_vol/k1529_credit_spread_fomc_vol.py",
+      "experiments/k1529_credit_spread_fomc_vol/k1529_credit_spread_fomc_vol_results.json",
+      "experiments/k1529_credit_spread_fomc_vol/README.md",
+      "experiments/k1529_credit_spread_fomc_vol/codex_review.md",
+      "experiments/k1529_credit_spread_fomc_vol/k1529_credit_spread_fomc_vol.png"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-17T17:08:34.898654",
+    "experiment_id": "K1529",
+    "experiment_path": "experiments/k1529_credit_spread_fomc_vol/",
+    "verdict": "NULL_ETF_PROXY",
+    "reviewer_source": "codex_cli_primary_self_review"
   }
 ]
