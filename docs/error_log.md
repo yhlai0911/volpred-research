@@ -1874,3 +1874,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **Fix required**: Treat K802 / `mile_cbf8ba62` as source-review FAIL pending K802-v2. Rerun with canonical 250-day Basel traffic-light windows or a clearly disclosed custom 500-day/binomial rule, standardized Student-t and skewed-t quantiles, regenerated charts, and article language that does not claim Trinity PASS unless it survives the corrected implementation.
 
 **Lesson / prevention**: VaR/ES articles must distinguish exact regulatory rules from custom convenience thresholds. If a script says "Basel", the review must inspect the zone formula, not just violation counts. Student-t innovations in GARCH-style VaR need explicit unit-variance scaling unless the fitted distribution includes a free scale parameter and that scale is reported.
+
+## 2026-06-17 — K783c article source review FAIL: inverse QLIKE used for window-regime ranking
+
+**Symptom**: Published article `mile_ec0e72ee` accurately copied K783c JSON values and cautiously noted that only one pairwise comparison cleared the strict threshold, but its central conclusion said the best GJR-GARCH training window changes by regime (`2000` days in 2020-2021, `504` in 2018-2019, `252` in 2016-2017).
+
+**Root cause**: `experiments/k783c/k783c_cross_period_window.py` defined QLIKE as `sigma2_hat / r2 - log(sigma2_hat / r2) - 1`. The canonical project/Patton form is `actual / predicted - log(actual / predicted) - 1` (or `log(h) + y/h` up to constants). K783c therefore used the inverse ratio, which changes the loss asymmetry and makes the large scores driven by tiny realized squared returns. The DM tests were then applied to the same inverse-QLIKE pointwise losses. Secondary issues: the script metadata says refit every 21 days, but the non-refit branch refits anyway; README remains a planning placeholder; results output path is hard-coded to a stale worktree.
+
+**Fix required**: Treat K783c / `mile_ec0e72ee` as source-review FAIL pending K783c-v2. Rerun with `volpred.stats.model_evaluation.qlike_pointwise(actual, predicted)`, canonical DM or explicit custom-HAC disclosure, corrected refit cadence/metadata, a real README, and regenerated charts/article language.
+
+**Lesson / prevention**: Production article review must inspect local experiment metric helpers even when the article numbers match JSON. Any experiment claiming Patton QLIKE should import the canonical helper or have a unit test proving orientation; inverse QLIKE can silently reverse model/window preferences.
