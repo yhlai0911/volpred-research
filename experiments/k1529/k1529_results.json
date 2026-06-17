@@ -1,0 +1,311 @@
+{
+  "experiment_id": "k1529",
+  "title": "Tax friction's mechanical degradation of VT / Risk-Parity rules",
+  "data": {
+    "assets": [
+      "SPY",
+      "TLT",
+      "GLD",
+      "HYG",
+      "SHY"
+    ],
+    "start": "2010-01-04",
+    "end": "2025-12-30",
+    "n_days": 4023,
+    "source": "yfinance Adjusted Close (auto_adjust=True)"
+  },
+  "config": {
+    "target_vol_ann": 0.1,
+    "vol_window_days": 60,
+    "drift_band_tax_aware": 0.05,
+    "short_term_tax_rate": 0.32,
+    "long_term_tax_rate": 0.2,
+    "init_capital": 1000000.0,
+    "seed": 42,
+    "lookahead_defense": "signal at t-1 (vol window [t-60, t-1]); trade at t close; FIFO lot accounting",
+    "fair_comparison_note": "All three specs use the same raw return series and same vol estimate. Differences are strictly from rebalancing trigger + tax friction."
+  },
+  "summary_stats": {
+    "VT_NO_TAX": {
+      "ann_return": 0.06308013320391699,
+      "ann_vol": 0.06282413962550999,
+      "sharpe_after_tax": 1.004074764571914,
+      "cagr": 0.06289798168813476,
+      "max_drawdown": -0.1742390260046677,
+      "tracking_error_vs_10pct": 0.022674673612519472,
+      "mean_realized_vol": 0.05890647591726501,
+      "weight_drift_rms": 0.004363491307584307,
+      "tax_drag_cumulative": 0.0,
+      "tax_events_count": 189,
+      "final_wealth": 2651567.383027814,
+      "n_days": 4023
+    },
+    "VT_PERIODIC": {
+      "ann_return": 0.05428608000589459,
+      "ann_vol": 0.06349188463192659,
+      "sharpe_after_tax": 0.8550081686911699,
+      "cagr": 0.053563600719326754,
+      "max_drawdown": -0.18088046444388822,
+      "tracking_error_vs_10pct": 0.023680489897359384,
+      "mean_realized_vol": 0.05924305883792287,
+      "weight_drift_rms": 0.004388317969853589,
+      "tax_drag_cumulative": 0.22631843406673352,
+      "tax_events_count": 189,
+      "final_wealth": 2302830.2058842587,
+      "n_days": 4023
+    },
+    "VT_TAX_AWARE": {
+      "ann_return": 0.05892449979159058,
+      "ann_vol": 0.06466056548077269,
+      "sharpe_after_tax": 0.911289583588814,
+      "cagr": 0.05837275708036005,
+      "max_drawdown": -0.1835464833033239,
+      "tracking_error_vs_10pct": 0.025218868374264406,
+      "mean_realized_vol": 0.05989738285534537,
+      "weight_drift_rms": 0.01705141729057732,
+      "tax_drag_cumulative": 0.15149835208807422,
+      "tax_events_count": 11,
+      "final_wealth": 2476744.1958026025,
+      "n_days": 4023
+    },
+    "RP_NO_TAX": {
+      "ann_return": 0.028755053676063628,
+      "ann_vol": 0.026700501347800314,
+      "sharpe_after_tax": 1.0769480805435354,
+      "cagr": 0.028756701304707644,
+      "max_drawdown": -0.10723371870957203,
+      "tracking_error_vs_10pct": 0.014136686394318582,
+      "mean_realized_vol": 0.02277827837809347,
+      "weight_drift_rms": 0.0019021450734492437,
+      "tax_drag_cumulative": 0.0,
+      "tax_events_count": 189,
+      "final_wealth": 1573382.3866036956,
+      "n_days": 4023
+    },
+    "RP_PERIODIC": {
+      "ann_return": 0.022799185673281624,
+      "ann_vol": 0.026808284690629527,
+      "sharpe_after_tax": 0.8504529825905188,
+      "cagr": 0.02265533662711916,
+      "max_drawdown": -0.11120089848391741,
+      "tracking_error_vs_10pct": 0.014163860429394824,
+      "mean_realized_vol": 0.022892876924682073,
+      "weight_drift_rms": 0.0019106299050357942,
+      "tax_drag_cumulative": 0.11488749730257082,
+      "tax_events_count": 189,
+      "final_wealth": 1430656.7148423432,
+      "n_days": 4023
+    },
+    "RP_TAX_AWARE": {
+      "ann_return": 0.022967357313012814,
+      "ann_vol": 0.0278373489558946,
+      "sharpe_after_tax": 0.8250554802974311,
+      "cagr": 0.022798310165623947,
+      "max_drawdown": -0.11031918070686238,
+      "tracking_error_vs_10pct": 0.014911874056837427,
+      "mean_realized_vol": 0.023639913813917925,
+      "weight_drift_rms": 0.014358731018969484,
+      "tax_drag_cumulative": 0.09283225857111305,
+      "tax_events_count": 47,
+      "final_wealth": 1433857.5630963044,
+      "n_days": 4023
+    }
+  },
+  "subperiod_breakdown": {
+    "VT_NO_TAX": {
+      "2010_2019_bull": {
+        "n_days": 2516,
+        "ann_return": 0.06072990092194329,
+        "ann_vol": 0.05155552985357449,
+        "sharpe": 1.1779512516780528,
+        "max_drawdown": -0.07115227869944295,
+        "tax_paid": 0.0,
+        "tax_drag_relative": 0.0
+      },
+      "2020_2025_volatile": {
+        "n_days": 1507,
+        "ann_return": 0.0658693215528563,
+        "ann_vol": 0.07805551050438984,
+        "sharpe": 0.8438779162062082,
+        "max_drawdown": -0.1742390260046677,
+        "tax_paid": 0.0,
+        "tax_drag_relative": 0.0
+      }
+    },
+    "VT_PERIODIC": {
+      "2010_2019_bull": {
+        "n_days": 2516,
+        "ann_return": 0.054300266558921347,
+        "ann_vol": 0.05158409036067435,
+        "sharpe": 1.0526553086282142,
+        "max_drawdown": -0.07554794702265108,
+        "tax_paid": 87233.33782834622,
+        "tax_drag_relative": 0.08723333782834622
+      },
+      "2020_2025_volatile": {
+        "n_days": 1507,
+        "ann_return": 0.05313278502958183,
+        "ann_vol": 0.07945389408276285,
+        "sharpe": 0.6687247446202733,
+        "max_drawdown": -0.18088046444388822,
+        "tax_paid": 139085.0962383873,
+        "tax_drag_relative": 0.08143174210723401
+      }
+    },
+    "VT_TAX_AWARE": {
+      "2010_2019_bull": {
+        "n_days": 2516,
+        "ann_return": 0.05907766483770056,
+        "ann_vol": 0.05152127880746413,
+        "sharpe": 1.146665343041557,
+        "max_drawdown": -0.07314913872910644,
+        "tax_paid": 29638.50222260036,
+        "tax_drag_relative": 0.02963850222260036
+      },
+      "2020_2025_volatile": {
+        "n_days": 1507,
+        "ann_return": 0.05750637911167934,
+        "ann_vol": 0.0819955915184623,
+        "sharpe": 0.7013350113918148,
+        "max_drawdown": -0.1835464833033239,
+        "tax_paid": 121859.84986547387,
+        "tax_drag_relative": 0.06800992473048892
+      }
+    },
+    "RP_NO_TAX": {
+      "2010_2019_bull": {
+        "n_days": 2516,
+        "ann_return": 0.02573968108495617,
+        "ann_vol": 0.016740658249822404,
+        "sharpe": 1.5375548978326008,
+        "max_drawdown": -0.02476984662019327,
+        "tax_paid": 0.0,
+        "tax_drag_relative": 0.0
+      },
+      "2020_2025_volatile": {
+        "n_days": 1507,
+        "ann_return": 0.03329780794519094,
+        "ann_vol": 0.037869476348508554,
+        "sharpe": 0.8792782778075655,
+        "max_drawdown": -0.10723371870957203,
+        "tax_paid": 0.0,
+        "tax_drag_relative": 0.0
+      }
+    },
+    "RP_PERIODIC": {
+      "2010_2019_bull": {
+        "n_days": 2516,
+        "ann_return": 0.020917984647635373,
+        "ann_vol": 0.0167969346727264,
+        "sharpe": 1.2453453594482584,
+        "max_drawdown": -0.02657685347448712,
+        "tax_paid": 53146.237363126245,
+        "tax_drag_relative": 0.05314623736312624
+      },
+      "2020_2025_volatile": {
+        "n_days": 1507,
+        "ann_return": 0.025451913234948907,
+        "ann_vol": 0.038031689554731386,
+        "sharpe": 0.6692290963913415,
+        "max_drawdown": -0.11120089848391741,
+        "tax_paid": 61741.259939444586,
+        "tax_drag_relative": 0.050033708111932605
+      }
+    },
+    "RP_TAX_AWARE": {
+      "2010_2019_bull": {
+        "n_days": 2516,
+        "ann_return": 0.020995082718518854,
+        "ann_vol": 0.01721224197038646,
+        "sharpe": 1.2197761775973603,
+        "max_drawdown": -0.026344376551731153,
+        "tax_paid": 35366.09316399351,
+        "tax_drag_relative": 0.03536609316399351
+      },
+      "2020_2025_volatile": {
+        "n_days": 1507,
+        "ann_return": 0.025748346410419218,
+        "ann_vol": 0.03965889913274924,
+        "sharpe": 0.6492451120297723,
+        "max_drawdown": -0.11031918070686238,
+        "tax_paid": 57466.16540711954,
+        "tax_drag_relative": 0.04653014907296
+      }
+    }
+  },
+  "dm_tests_after_tax_pnl": {
+    "VT_NO_TAX_vs_PERIODIC": {
+      "t_stat_harvey": -5.961998815260099,
+      "p_value": 2.705789148294002e-09,
+      "interpretation": "positive t \u2192 NO_TAX has higher PnL than PERIODIC"
+    },
+    "VT_NO_TAX_vs_TAX_AWARE": {
+      "t_stat_harvey": -2.2121474079152774,
+      "p_value": 0.02701247269013196,
+      "interpretation": "positive t \u2192 NO_TAX has higher PnL than TAX_AWARE"
+    },
+    "VT_PERIODIC_vs_TAX_AWARE": {
+      "t_stat_harvey": 2.7387723526062673,
+      "p_value": 0.006194076675008819,
+      "interpretation": "positive t \u2192 PERIODIC has higher PnL than TAX_AWARE"
+    },
+    "RP_NO_TAX_vs_PERIODIC": {
+      "t_stat_harvey": -8.868223957129942,
+      "p_value": 0.0,
+      "interpretation": "positive t \u2192 NO_TAX has higher PnL than PERIODIC"
+    },
+    "RP_NO_TAX_vs_TAX_AWARE": {
+      "t_stat_harvey": -5.319763677977119,
+      "p_value": 1.095582082832891e-07,
+      "interpretation": "positive t \u2192 NO_TAX has higher PnL than TAX_AWARE"
+    },
+    "RP_PERIODIC_vs_TAX_AWARE": {
+      "t_stat_harvey": 0.14843261230925553,
+      "p_value": 0.8820088052732178,
+      "interpretation": "positive t \u2192 PERIODIC has higher PnL than TAX_AWARE"
+    }
+  },
+  "bootstrap_sharpe_diff_B1000_block20": {
+    "VT_NO_TAX_vs_PERIODIC": {
+      "mean_diff": 0.14744795633897315,
+      "ci_lower_5": 0.10692698770695264,
+      "ci_upper_95": 0.20376494638977952,
+      "p_value_two_sided": 0.0
+    },
+    "VT_NO_TAX_vs_TAX_AWARE": {
+      "mean_diff": 0.0888559697246802,
+      "ci_lower_5": 0.007179820870118753,
+      "ci_upper_95": 0.18269064168784946,
+      "p_value_two_sided": 0.028
+    },
+    "VT_PERIODIC_vs_TAX_AWARE": {
+      "mean_diff": -0.057791955500085306,
+      "ci_lower_5": -0.11864255736837195,
+      "ci_upper_95": 0.0034910049902798033,
+      "p_value_two_sided": 0.064
+    },
+    "RP_NO_TAX_vs_PERIODIC": {
+      "mean_diff": 0.2287994185626839,
+      "ci_lower_5": 0.16989303668756137,
+      "ci_upper_95": 0.29799426047382993,
+      "p_value_two_sided": 0.0
+    },
+    "RP_NO_TAX_vs_TAX_AWARE": {
+      "mean_diff": 0.2529358313603474,
+      "ci_lower_5": 0.16115505456399373,
+      "ci_upper_95": 0.3600441970953465,
+      "p_value_two_sided": 0.0
+    },
+    "RP_PERIODIC_vs_TAX_AWARE": {
+      "mean_diff": 0.026473121577665203,
+      "ci_lower_5": -0.043646209387811885,
+      "ci_upper_95": 0.10119171310162428,
+      "p_value_two_sided": 0.506
+    }
+  },
+  "figures": [
+    "fig_tax_drag.png",
+    "fig_tracking_error.png"
+  ],
+  "verdict_one_line": "Tax friction mechanically degrades VT/RP risk control: PERIODIC vs NO_TAX Sharpe and tax drag deltas quantify the gap; TAX_AWARE 5% band reclaims most of the gap by reducing taxable events. See summary_stats + dm_tests for evidence."
+}

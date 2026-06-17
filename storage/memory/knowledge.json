@@ -35175,5 +35175,32 @@
     ],
     "confidence": 0.86,
     "created_at": "2026-06-17T19:36:19.128522"
+  },
+  {
+    "item_id": "002d6184",
+    "category": "strategy_risk_control_tax_friction",
+    "content": "K1529 (FAIL — pending k1529_v2 fix): Tax friction's mechanical degradation of VT/Risk-Parity rules. SPY+TLT+GLD+HYG+SHY 2010-2025, three specs (NO_TAX/PERIODIC/TAX_AWARE 5% band) × two rules (VT 10% target / RP inverse-vol), 60d vol, FIFO lot, 32%/20% ST/LT tax. Headline numbers: VT after-tax Sharpe NO_TAX 1.00 → PERIODIC 0.86 → TAX_AWARE 0.91 (tax drag 22.6% cum); RP 1.08 → 0.85 → 0.83 (drag 11.5%). DM (Harvey) p<<0.01 NO_TAX vs PERIODIC both rules. Codex review FAIL: (i) tax 沒做年度 ST/LT 彙總/跨資產互抵/跨腿 netting (k1529.py:296-326 CRITICAL), (ii) TAX_AWARE drift trigger 用 close-t 判斷 close-t 執行 = lookahead-ish (k1529.py:262-285 CRITICAL), (iii) long-term holding 用 >=365 而非 >365 (MAJOR), (iv) DM interpretation string sign 寫反 (MAJOR), (v) bootstrap seed 用 Python hash() 不可復現 (MAJOR), (vi) tax_short/tax_long unused (MINOR). Direction-of-effect 與 PERIODIC vs NO_TAX gap 雖具經濟意義，但 CRITICAL 兩項可能 materially 改變 TAX_AWARE 結論 （band 對 RP 反效 vs 對 VT 有效的 asymmetry 可能是 trigger 同日執行所致）。Pending k1529_v2 修正後重跑判定。",
+    "evidence": [
+      "experiments/k1529/k1529_results.json (canonical)",
+      "experiments/k1529/k1529.py (Codex reviewed 2026-06-17 hourly-22)",
+      "experiments/k1529/fig_tax_drag.png",
+      "experiments/k1529/fig_tracking_error.png",
+      "experiments/k1529/data/prices.csv (yfinance snapshot, offline-rerunnable)"
+    ],
+    "confidence": 0.4,
+    "created_at": "2026-06-17T22:22:36.483362",
+    "verdict": "FAIL",
+    "experiment_id": "k1529",
+    "experiment_path": "experiments/k1529/",
+    "k_id": "K1529",
+    "reviewer": "Codex (codex-cli 0.139.0)",
+    "reviewer_source": "codex_review_primary_path",
+    "codex_review_verdict": "FAIL",
+    "codex_review_findings": {
+      "CRITICAL": 2,
+      "MAJOR": 3,
+      "MINOR": 1
+    },
+    "followup_task_id": "k1529_v2_codex_remediation"
   }
 ]
