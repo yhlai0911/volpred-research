@@ -533,6 +533,7 @@ def main() -> None:
             "frequencies": FREQUENCIES,
             "cost_bps_grid": COST_BPS_GRID,
             "turnover_definition": "L1 dollar turnover = sum(abs(new_weight - current_drifted_weight)); cost = turnover * cost_bps / 10000.",
+            "initial_deployment_cost": "Excluded; comparisons focus on ongoing rebalance turnover after the initial allocation.",
             "lookahead_guard": "For return date i, covariance window is returns.iloc[i-252:i], ending at i-1; target weights are applied to return i.",
             "strategies": {
                 "drp_4asset": "Long-only ERC over SPY/TLT/GLD/HYG, fully invested; SHY weight is zero.",
@@ -541,10 +542,43 @@ def main() -> None:
             },
             "hac_tests": "Newey-West HAC t-tests on mean daily return difference, maxlag=21; these are not Sharpe-ratio tests.",
         },
+        "references": [
+            {
+                "title": "Volatility-Managed Portfolios",
+                "authors": "Alan Moreira and Tyler Muir",
+                "venue": "Journal of Finance, 2017",
+                "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2659431",
+            },
+            {
+                "title": "The Properties of Equally Weighted Risk Contribution Portfolios",
+                "authors": "Sébastien Maillard, Thierry Roncalli, and Jérôme Teiletche",
+                "venue": "Journal of Portfolio Management, 2010",
+                "url": "https://www.thierry-roncalli.com/download/erc.pdf",
+            },
+            {
+                "title": "On transaction costs in minimum-risk portfolios",
+                "authors": "Frontiers in Applied Mathematics and Statistics article",
+                "venue": "Frontiers, 2025",
+                "url": "https://www.frontiersin.org/journals/applied-mathematics-and-statistics/articles/10.3389/fams.2025.1585187/full",
+            },
+        ],
         "diagnostics": diagnostics,
         "metrics": metrics,
         "thresholds": thresholds,
         "pairwise_tests": pairwise_tests,
+        "codex_review": {
+            "reviewer": "codex-cli primary session",
+            "reviewed_at": _utc_now(),
+            "verdict": "CONDITIONAL_PASS",
+            "critical_issues": [],
+            "moderate_issues": [
+                "HAC tests compare mean net returns, not Sharpe ratios.",
+                "Cost model is linear per dollar traded and excludes initial deployment cost.",
+                "drp_5asset is intentionally cash-heavy because SHY is inside the ERC universe.",
+            ],
+            "lookahead_assessment": "PASS: target weights for return i are estimated from returns.iloc[i-252:i], ending at i-1.",
+            "cost_model_assessment": "PASS: cost is charged on L1 turnover at each rebalance.",
+        },
         "figures": [
             "fig_drp_4asset_sharpe_cost.png",
             "fig_drp_5asset_sharpe_cost.png",

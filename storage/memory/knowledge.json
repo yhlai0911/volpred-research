@@ -35353,5 +35353,17 @@
     ],
     "confidence": 0.86,
     "created_at": "2026-06-18T03:56:45.059473"
+  },
+  {
+    "item_id": "48dd72f0",
+    "category": "experiment",
+    "content": "K1532 CONDITIONAL_PASS: VT / dynamic risk parity turnover-cost dominance. Data: yfinance adjusted-close SPY/TLT/GLD/HYG/SHY, common sample 2007-04-11 to 2026-06-17, 252d lagged ERC covariance, cost grid 0/8/15/25/35 bps per dollar traded. Monthly-vs-daily net Sharpe break-even is 18.72 bps for 4-asset DRP, 17.87 bps for 5-asset DRP, and 15.71 bps for VT-DRP+SHY. At 35 bps, daily-minus-monthly HAC return t-stats are -2.595, -3.294, and -3.083 respectively. Interpretation: daily has a small zero-cost edge, but about 16-19 bps of turnover cost can erase it; this is an execution-frequency/cost result, not a new alpha claim. Caveats: linear L1 turnover costs, initial deployment cost excluded, no leverage in VT overlay, and HAC tests are mean-return tests rather than Sharpe tests.",
+    "evidence": [
+      "experiments/k1532/k1532.py",
+      "experiments/k1532/k1532_results.json",
+      "experiments/k1532/README.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-18T05:16:46.682250"
   }
 ]
