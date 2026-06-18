@@ -1,0 +1,259 @@
+{
+  "experiment_id": "K1350",
+  "title": "HAR ceiling verification - Los Flamingos 2025 provenance and local coverage audit",
+  "created_by": "codex",
+  "seed": 42,
+  "data_sources": {
+    "local_receipts": [
+      "experiments/k1349/K1349_results.json",
+      "experiments/k1377/k1377_results.json",
+      "experiments/k1521/k1521_results.json",
+      "experiments/k530/k530_har_multiscale_results.json",
+      "experiments/k764/k764_rough_vol_multivariate_results.json",
+      "experiments/k966/k966_har_pd_results.json"
+    ],
+    "external_literature": [
+      {
+        "title": "Volatility Forecasting: Why a Well-Tuned HAR Model Still Reigns Supreme (Even Over ML)",
+        "url": "https://www.losflamingosresearch.com/deeep-dive-june-3-2025",
+        "role": "Backlog provenance source."
+      },
+      {
+        "title": "HARd to Beat: The Overlooked Impact of Rolling Windows in the Era of Machine Learning",
+        "url": "https://arxiv.org/html/2406.08041v1",
+        "role": "Primary academic source summarized by Los Flamingos."
+      },
+      {
+        "title": "A practical guide to harnessing the HAR volatility model",
+        "url": "https://ink.library.smu.edu.sg/soe_research/2489/",
+        "role": "HAR fitting/transformation/comparison background."
+      },
+      {
+        "title": "Linear and nonlinear econometric models against machine learning models: realized volatility prediction",
+        "url": "https://www.federalreserve.gov/econres/feds/linear-and-nonlinear-econometric-models-against-machine-learning-models.htm",
+        "role": "2025 ML/econometric comparison context."
+      }
+    ]
+  },
+  "method": {
+    "type": "reproducible evidence audit over prior OOS receipts",
+    "why_not_exact_replication": "Local storage does not contain the 1,445-stock 2015-2023 high-frequency RV panel and ML fitting grid needed to reproduce arXiv:2406.08041 exactly.",
+    "formal_gates": [
+      "paper-grade local OOS requires n_oos >= 252",
+      "Harvey-style significance requires |t| > 3 when DM/Harvey t is available",
+      "intraday pilots below threshold cannot become knowledge/article claims"
+    ],
+    "forecast_timing_guard": {
+      "strategy_returns_computed": false,
+      "required_pattern": "signal.shift(1)",
+      "note": "No new strategy PnL is computed in K1350. The source experiments are treated as frozen OOS receipts, and any future exact replication must enforce signal.shift(1) or equivalent one-step-ahead forecast timing."
+    }
+  },
+  "summary": {
+    "n_evidence_rows": 11,
+    "n_local_paper_grade_rows": 4,
+    "n_rows_supporting_har_ceiling": 5,
+    "gate_counts": {
+      "PASS_LOCAL_DAILY_PROXY": 2,
+      "NO_BREAK_LOCAL_DAILY_PROXY": 1,
+      "PASS_HAR_FAMILY_INCREMENT": 1,
+      "PILOT_ONLY_INSUFFICIENT_OOS": 2,
+      "NULL_INSUFFICIENT_OOS": 2,
+      "PILOT_NULL_INSUFFICIENT_OOS": 1,
+      "PROVENANCE_CONFIRMED": 1,
+      "EXACT_REPLICATION_DATA_UNAVAILABLE": 1
+    },
+    "min_paper_grade_oos": 252,
+    "harvey_abs_t_threshold": 3.0,
+    "seed": 42
+  },
+  "verdict": {
+    "overall": "PROVENANCE_CONFIRMED_LOCAL_CEILING_COVERED_EXACT_REPLICATION_DATA_UNAVAILABLE",
+    "generic_har_ceiling_open": false,
+    "exact_los_flamingos_replication_completed": false,
+    "exact_replication_blocker": "Local storage does not contain the 1,445-stock 2015-2023 high-frequency RV panel and ML fitting grid needed to reproduce arXiv:2406.08041 exactly.",
+    "intraday_followup_paper_grade": false,
+    "local_support_strength": "Strong for daily-proxy HAR ceiling versus GARCH/EWMA/rough-vol extensions; not sufficient for exact Los Flamingos/HARd-to-Beat replication.",
+    "knowledge_write": "skipped_null_or_scope_result"
+  },
+  "evidence_matrix": [
+    {
+      "evidence_id": "K530_SPY_daily_proxy_har_vs_garch_ewma",
+      "source_file": "experiments/k530/k530_har_multiscale_results.json",
+      "domain": "SPY daily proxy volatility",
+      "design": "HAR variants vs GJR-GARCH/EWMA on daily proxy target",
+      "oos_n": 500,
+      "benchmark": "GJR-GARCH and EWMA(0.94)",
+      "evaluated_model_or_family": "HAR-ABS/HAR-VIX/HAR-LEVERAGE/HAR-JUMP",
+      "metric": "Patton QLIKE + Harvey |t|>3",
+      "key_stat": "best=HAR-VIX, qlike=0.462929; HAR Harvey winners vs GJR=['HAR-ABS', 'HAR-VIX', 'HAR-LEVERAGE', 'HAR-JUMP']; vs EWMA=['HAR-ABS', 'HAR-VIX', 'HAR-LEVERAGE', 'HAR-JUMP']",
+      "gate_status": "PASS_LOCAL_DAILY_PROXY",
+      "supports_har_ceiling": true,
+      "paper_grade": true,
+      "interpretation": "Local daily proxy evidence says tuned HAR-class models beat classical conditional variance baselines under the project Harvey threshold."
+    },
+    {
+      "evidence_id": "K530_0050_TW_daily_proxy_har_vs_garch_ewma",
+      "source_file": "experiments/k530/k530_har_multiscale_results.json",
+      "domain": "0050.TW daily proxy volatility",
+      "design": "HAR variants vs GJR-GARCH/EWMA on daily proxy target",
+      "oos_n": 464,
+      "benchmark": "GJR-GARCH and EWMA(0.94)",
+      "evaluated_model_or_family": "HAR-ABS/HAR-VIX/HAR-LEVERAGE/HAR-JUMP",
+      "metric": "Patton QLIKE + Harvey |t|>3",
+      "key_stat": "best=HAR-ABS, qlike=0.511462; HAR Harvey winners vs GJR=['HAR-ABS', 'HAR-LEVERAGE', 'HAR-JUMP']; vs EWMA=['HAR-ABS', 'HAR-LEVERAGE', 'HAR-JUMP']",
+      "gate_status": "PASS_LOCAL_DAILY_PROXY",
+      "supports_har_ceiling": true,
+      "paper_grade": true,
+      "interpretation": "Local daily proxy evidence says tuned HAR-class models beat classical conditional variance baselines under the project Harvey threshold."
+    },
+    {
+      "evidence_id": "K764_rough_vol_extension_vs_har_abs",
+      "source_file": "experiments/k764/k764_rough_vol_multivariate_results.json",
+      "domain": "SPY/GLD/0050 daily proxy rough-vol extension",
+      "design": "HAR-ABS vs univariate and bivariate rough-vol HAR extensions",
+      "oos_n": 4828,
+      "benchmark": "HAR-ABS",
+      "evaluated_model_or_family": "HAR-Rough and HAR-Rough-Biv",
+      "metric": "Patton QLIKE + Harvey |t|>3",
+      "key_stat": "best=HAR-ABS; HAR-Rough vs HAR-ABS DM=1.345; HAR-Rough-Biv vs HAR-ABS DM=2.354; biv significant_harvey=False",
+      "gate_status": "NO_BREAK_LOCAL_DAILY_PROXY",
+      "supports_har_ceiling": true,
+      "paper_grade": true,
+      "interpretation": "Richer rough-vol structure did not beat the existing HAR-ABS ceiling OOS; added complexity looks like in-sample fit rather than robust forecast gain."
+    },
+    {
+      "evidence_id": "K1377_har_family_forecast_combination",
+      "source_file": "experiments/k1377/k1377_results.json",
+      "domain": "SPY/GLD/0050 daily proxy adaptive forecast combination",
+      "design": "Exp-QLIKE forecast combination vs HAR-VIX/EqWeight",
+      "oos_n": 500,
+      "benchmark": "HAR-VIX and equal-weight combination",
+      "evaluated_model_or_family": "HAR-family adaptive combination",
+      "metric": "Patton QLIKE + Harvey |t|>3",
+      "key_stat": "Exp-QLIKE combo beats HAR-VIX: 2/3 Harvey |t|>3; beats EqWeight in 2/3 assets",
+      "gate_status": "PASS_HAR_FAMILY_INCREMENT",
+      "supports_har_ceiling": true,
+      "paper_grade": true,
+      "interpretation": "A tuned HAR-family combination can improve on one HAR variant, but it does not supply a non-HAR/ML break of the ceiling."
+    },
+    {
+      "evidence_id": "K1349_0050_5min_intraday_rv",
+      "source_file": "experiments/k1349/K1349_results.json",
+      "domain": "0050.TW local 5-minute intraday_rv",
+      "design": "HAR-RV pilot with 0050.TW 5-minute bars",
+      "oos_n": 34,
+      "benchmark": "rv_lag1",
+      "evaluated_model_or_family": "expanding_mean/ar1_logrv/har_logrv/har_bpv",
+      "metric": "Patton QLIKE + HAC DM",
+      "key_stat": "best_by_qlike=expanding_mean; n_oos=34; verdict=PILOT_ONLY_INSUFFICIENT_OOS",
+      "gate_status": "PILOT_ONLY_INSUFFICIENT_OOS",
+      "supports_har_ceiling": null,
+      "paper_grade": false,
+      "interpretation": "Intraday pipeline is usable, but sample length is below the 252 OOS minimum, so it cannot confirm or refute the Los Flamingos/HARd-to-Beat claim."
+    },
+    {
+      "evidence_id": "K1349_0050_5min_total_rv",
+      "source_file": "experiments/k1349/K1349_results.json",
+      "domain": "0050.TW local 5-minute total_rv",
+      "design": "HAR-RV pilot with 0050.TW 5-minute bars",
+      "oos_n": 33,
+      "benchmark": "rv_lag1",
+      "evaluated_model_or_family": "expanding_mean/ar1_logrv/har_logrv/har_bpv",
+      "metric": "Patton QLIKE + HAC DM",
+      "key_stat": "best_by_qlike=expanding_mean; n_oos=33; verdict=PILOT_ONLY_INSUFFICIENT_OOS",
+      "gate_status": "PILOT_ONLY_INSUFFICIENT_OOS",
+      "supports_har_ceiling": null,
+      "paper_grade": false,
+      "interpretation": "Intraday pipeline is usable, but sample length is below the 252 OOS minimum, so it cannot confirm or refute the Los Flamingos/HARd-to-Beat claim."
+    },
+    {
+      "evidence_id": "K1521_SPY_realized_kurtosis_har_extension",
+      "source_file": "experiments/k1521/k1521_results.json",
+      "domain": "SPY local 5-minute realized kurtosis extension",
+      "design": "HAR vs HAR_RK on local 5-minute realized measures",
+      "oos_n": 51,
+      "benchmark": "HAR",
+      "evaluated_model_or_family": "HAR_RK",
+      "metric": "Patton QLIKE + Harvey |t|>3",
+      "key_stat": "qlike_improvement_pct=-8.699; dm_t=0.295; harvey_pass=False",
+      "gate_status": "NULL_INSUFFICIENT_OOS",
+      "supports_har_ceiling": null,
+      "paper_grade": false,
+      "interpretation": "Realized-kurtosis extension remains a local feasibility pilot; OOS length is below the project threshold."
+    },
+    {
+      "evidence_id": "K1521_0050_TW_realized_kurtosis_har_extension",
+      "source_file": "experiments/k1521/k1521_results.json",
+      "domain": "0050.TW local 5-minute realized kurtosis extension",
+      "design": "HAR vs HAR_RK on local 5-minute realized measures",
+      "oos_n": 38,
+      "benchmark": "HAR",
+      "evaluated_model_or_family": "HAR_RK",
+      "metric": "Patton QLIKE + Harvey |t|>3",
+      "key_stat": "qlike_improvement_pct=-0.634; dm_t=0.142; harvey_pass=False",
+      "gate_status": "NULL_INSUFFICIENT_OOS",
+      "supports_har_ceiling": null,
+      "paper_grade": false,
+      "interpretation": "Realized-kurtosis extension remains a local feasibility pilot; OOS length is below the project threshold."
+    },
+    {
+      "evidence_id": "K966_path_dependent_har_extension",
+      "source_file": "experiments/k966/k966_har_pd_results.json",
+      "domain": "5-minute path-dependent HAR pilot",
+      "design": "HAR-PD vs HAR-RV with bootstrap",
+      "oos_n": 17,
+      "benchmark": "HAR-RV",
+      "evaluated_model_or_family": "HAR-PD",
+      "metric": "Patton QLIKE + DM + bootstrap",
+      "key_stat": "n_oos=17; dm_t=-1.3714; bootstrap_pct_pd_better=10.6",
+      "gate_status": "PILOT_NULL_INSUFFICIENT_OOS",
+      "supports_har_ceiling": null,
+      "paper_grade": false,
+      "interpretation": "Path-dependent intraday features did not improve the pilot, but OOS size is too small for a paper-grade ceiling statement."
+    },
+    {
+      "evidence_id": "K1350_los_flamingos_provenance",
+      "source_file": "https://www.losflamingosresearch.com/deeep-dive-june-3-2025",
+      "domain": "External literature provenance",
+      "design": "Los Flamingos summary of HARd-to-Beat paper",
+      "oos_n": null,
+      "benchmark": "ML models and HAR variants",
+      "evaluated_model_or_family": "HAR/HAR-VIX vs LASSO/RF/GBT/FFN",
+      "metric": "QLIKE/MSE/realized utility",
+      "key_stat": "Source confirmed: Los Flamingos June 3 2025 article summarizes HARd to Beat and emphasizes daily re-estimation plus 2.5-4 year windows.",
+      "gate_status": "PROVENANCE_CONFIRMED",
+      "supports_har_ceiling": true,
+      "paper_grade": null,
+      "interpretation": "The backlog label refers to a practitioner summary, not a separate local dataset; the primary academic target is arXiv:2406.08041."
+    },
+    {
+      "evidence_id": "K1350_exact_replication_scope",
+      "source_file": "https://arxiv.org/html/2406.08041v1",
+      "domain": "Exact replication feasibility",
+      "design": "1,445 U.S. stocks, 2015-2023, high-frequency RV, tuned HAR vs ML",
+      "oos_n": null,
+      "benchmark": "HAR/HAR-VIX with tuned rolling window and daily refit",
+      "evaluated_model_or_family": "ML challenger suite",
+      "metric": "QLIKE/MSE/model confidence set/realized utility",
+      "key_stat": "Exact input panel is not present in local storage; local repo has daily proxies and short 2026 5-minute panels only.",
+      "gate_status": "EXACT_REPLICATION_DATA_UNAVAILABLE",
+      "supports_har_ceiling": null,
+      "paper_grade": false,
+      "interpretation": "Do not claim an exact Los Flamingos/HARd-to-Beat replication without acquiring the 1,445-stock high-frequency RV panel and reproducing the fitting-scheme grid."
+    }
+  ],
+  "outputs": {
+    "results_json": "experiments/k1350/K1350_results.json",
+    "matrix_csv": "experiments/k1350/K1350_har_ceiling_matrix.csv",
+    "figure": "experiments/k1350/K1350_har_ceiling_matrix.png"
+  },
+  "codex_review": {
+    "status": "PASS_WITH_SCOPE_LIMITATION",
+    "notes": [
+      "The audit does not fabricate a Los Flamingos replication from unavailable data.",
+      "Local daily-proxy experiments already cover the generic HAR ceiling claim.",
+      "5-minute follow-ups remain below the 252 OOS threshold and are not paper-grade."
+    ]
+  }
+}

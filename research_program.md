@@ -449,7 +449,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 
 ### 其他
 - [ ] Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting）
-- [ ] 「HAR ceiling」驗證 — Los Flamingos 2025
+- [x] ~~「HAR ceiling」驗證 — Los Flamingos 2025~~ → **K1350 完成 scope audit**。Los Flamingos 2025 來源確認為 HARd-to-Beat practitioner summary；本地 K530/K764/K1377 已覆蓋 generic HAR ceiling（日頻 proxy OOS 支持 tuned HAR/HAR-family hard-to-beat，rough-vol extension 未破 ceiling）。精確複現未做，因本地缺 1,445 檔美股 2015-2023 high-frequency RV + ML fitting grid；5-min follow-up 仍低於 252 OOS（K1349/K1521/K966 pilot-only）。
 - [ ] Financial Innovation 2025 review — realized volatility forecasting 綜述
 - [ ] RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025
 - [ ] Multiplicative Volatility Factor (MVF) — ScienceDirect 2025, J. Econometrics
