@@ -23,6 +23,7 @@ import argparse
 import fcntl
 import json
 import re
+import signal
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -40,6 +41,7 @@ SLOT_CAP = 4
 # 待辦任務" enforceable by mechanism, not by main-thread discipline.
 REFILL_FLOOR = 4
 POOL_DRY_DIAGNOSTIC_PREFIX = "platform_ops_dispatch_pool_dry_diagnostic"
+ARTICLE_REFILL_TIMEOUT_SECONDS = 45
 
 MAIN_THREAD_MARKERS = re.compile(
     r"main\s*thread|NOT\s*agent|main-thread|主線程",
@@ -337,6 +339,32 @@ def _materialize_pool_dry_diagnostic_task(now: datetime | None = None) -> dict:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
 
+class ArticleRefillTimeoutError(TimeoutError):
+    pass
+
+
+def _run_article_refill(target: int, *, dry_run: bool = False) -> dict:
+    """Run article refill with a hard timeout so dispatch cannot hang forever."""
+    from refill_task_pool import refill as _refill_fn  # type: ignore
+
+    timeout_s = ARTICLE_REFILL_TIMEOUT_SECONDS
+    if timeout_s <= 0:
+        return _refill_fn(target=target, dry_run=dry_run)
+
+    previous_handler = signal.getsignal(signal.SIGALRM)
+
+    def _handle_timeout(_signum, _frame):
+        raise ArticleRefillTimeoutError(f"timed out after {timeout_s}s")
+
+    signal.signal(signal.SIGALRM, _handle_timeout)
+    signal.setitimer(signal.ITIMER_REAL, timeout_s)
+    try:
+        return _refill_fn(target=target, dry_run=dry_run)
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+
+
 def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
     """Auto-trigger pool refill when agentable < REFILL_FLOOR.
 
@@ -379,19 +407,21 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
             except Exception as exc:  # noqa: BLE001
                 combined.setdefault("warnings", []).append(f"event_refill: {exc}")
 
-        from refill_task_pool import refill as _refill_fn  # type: ignore
         current_agentable = _current_agentable_count()
         gap = max(0, REFILL_FLOOR - current_agentable)
         if gap > 0:
-            article = _refill_fn(target=gap, dry_run=False)
-            if article.get("added"):
-                combined["added"] += article["added"]
-                combined["added_ids"].extend(article.get("added_ids") or [])
-                combined["by_type"]["daily_article"] = article["added"]
-            elif article.get("ok") is False:
-                combined.setdefault("warnings", []).append(
-                    f"article_refill: {article.get('reason') or article.get('error')}"
-                )
+            try:
+                article = _run_article_refill(target=gap, dry_run=False)
+                if article.get("added"):
+                    combined["added"] += article["added"]
+                    combined["added_ids"].extend(article.get("added_ids") or [])
+                    combined["by_type"]["daily_article"] = article["added"]
+                elif article.get("ok") is False:
+                    combined.setdefault("warnings", []).append(
+                        f"article_refill: {article.get('reason') or article.get('error')}"
+                    )
+            except Exception as exc:  # noqa: BLE001
+                combined.setdefault("warnings", []).append(f"article_refill: {exc}")
 
         # Stage 3 (2026-05-12 fix): If pool still below floor, auto-spawn
         # K-experiment briefs from research_program.md unchecked items. Closes

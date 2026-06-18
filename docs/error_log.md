@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-18 continue_task_dispatch article-refill hang blocked pool-dry breaker
+
+**問題**：`storage/ops/handoff_latest.md` 顯示 `production_pending=0` 時，`uv run python scripts/continue_task_dispatch.py --report` 應該自動補池或 materialize `platform_ops_dispatch_pool_dry_diagnostic_*`。實際上這輪 dispatcher report 連續 60 秒無輸出，必須人工 kill。
+
+**現象**：`generate_diverse_tasks.py --dry-run --json` 與 `generate_research_backlog.py --dry-run --json` 都快速返回 0 candidates；`refill_task_pool.py --dry-run --target 4 --json` 卡住。dispatcher 的 `_maybe_refill()` 在 pool-dry breaker 之前直接呼叫 `refill_task_pool.refill()`，所以 article refill 一卡住，後面的 research fallback 與 diagnostic task materializer 都走不到。
+
+**根因**：pool-dry breaker 只處理「各 refill source 正常返回 0」的 dry state，沒有隔離「其中一個 refill source 卡住」的 failure mode。任一 refill source hang 都會把 hourly dispatch report 變成 hang，讓 production idle critical 無法自我修復。
+
+**解決方法**：`scripts/continue_task_dispatch.py` 新增 article refill hard timeout（`ARTICLE_REFILL_TIMEOUT_SECONDS=45`，SIGALRM），並把 article refill exception/timeout 收斂成 `combined["warnings"]`，讓後續 research fallback 與 pool-dry diagnostic breaker 繼續執行。新增 regression test：模擬 `refill_task_pool.refill()` sleep，確認 `_maybe_refill()` 仍 materialize `platform_ops_dispatch_pool_dry_diagnostic_*`。真實 `continue_task_dispatch.py --report` 驗證 45.5 秒返回，`dispatch_report_latest.json.refill.warnings=["article_refill: timed out after 45s"]`。
+
+**教訓**：last-resort breaker 必須位在「可能 hang 的來源」之外；只在 source 回傳後才執行的 breaker，對 hang failure 沒有保護效果。Dispatcher 類控制面命令應該把每個外部/重型 refill source 當不可信依賴，設 timeout 後繼續降級路徑。
+
 ## 2026-06-18 K446 GPR article redacted after h-embargo / HLN / HAC rerun reversed inferential claims
 
 **問題**：`mile_eabd7e46`（地緣政治風險指數能預測美股波動嗎）引用原始 K446 的 raw partial-correlation t 值、21d DM p 值與 Granger lag1 p 值作為 production 文章主張。Codex 24h source review 已判定原始 script 有 forward-label train-tail leak、21d DM horizon 錯誤、無 HLN correction、partial-corr t 無 HAC、Granger 無 AIC/BIC lag selection。依 follow-up task `K446_rerun_with_embargo_hln_hac` 重跑後，核心 inferential claims 不再成立。

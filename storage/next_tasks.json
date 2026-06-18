@@ -34118,5 +34118,27 @@
     "email_message_id": "<AA97C465-10F5-46CD-BF0B-1B5012ADA397@gmail.com>",
     "email_subject": "Re: [VolPred Boss Report] 2026-06-18 16:10 台灣時間 平台運營報告",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+  },
+  {
+    "id": "platform_ops_dispatch_refill_timeout_20260618",
+    "title": "Fix dispatcher refill timeout when article refill hangs",
+    "description": "Hourly handoff production_pending=0. `continue_task_dispatch.py --report` hung with no output because auto-refill enters `refill_task_pool.refill()` before the pool-dry diagnostic breaker. Add timeout/subprocess isolation or equivalent guard so dispatcher report returns and can materialize diagnostic work instead of blocking the hourly tick.",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "source": "interactive_pool_dry_triage",
+    "created_at": "2026-06-18T08:48:26.172133+00:00",
+    "tags": [
+      "dispatch",
+      "refill",
+      "timeout",
+      "platform_ops"
+    ],
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-18T08:48:33.480182+00:00",
+    "claim_session_id": "85bdd57af1ca",
+    "started_at": "2026-06-18T08:48:39.540229+00:00",
+    "completed_at": "2026-06-18T08:51:43.023151+00:00",
+    "result": "Fixed continue_task_dispatch article-refill hang: wrapped article refill in 45s SIGALRM timeout, downgraded timeout/exception to refill warnings, and allowed research fallback/pool-dry diagnostic breaker to continue. Verified real --report returns in 45.5s with warning instead of hanging; added regression test and error_log entry."
   }
 ]

@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+import time
 from collections import Counter
 from pathlib import Path
 from types import ModuleType
@@ -191,3 +192,42 @@ def test_maybe_refill_materializes_pool_dry_diagnostic(monkeypatch, tmp_path):
     tasks = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert tasks[0]["task_type"] == "platform_ops"
     assert tasks[0]["status"] == "pending"
+
+
+def test_maybe_refill_materializes_diagnostic_when_article_refill_times_out(monkeypatch, tmp_path):
+    """Article refill must not block the dispatcher's last-resort breaker."""
+    diverse_mod = ModuleType("generate_diverse_tasks")
+    article_mod = ModuleType("refill_task_pool")
+    research_mod = ModuleType("generate_research_backlog")
+    event_mod = ModuleType("refill_reader_facing_pool")
+
+    diverse_mod.generate = lambda dry_run=False: {"ok": True, "added": 0, "added_ids": [], "by_type": {}}
+    event_mod.refill_event_candidates = lambda horizon_days=14: {"added": []}
+
+    def _slow_article_refill(target, dry_run=False):
+        time.sleep(1)
+        return {"ok": True, "added": 0}
+
+    article_mod.refill = _slow_article_refill
+    research_mod.generate = lambda dry_run=False, max_new=0: {
+        "ok": True,
+        "added": 0,
+        "reason": "all_already_covered_or_in_progress",
+    }
+
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(dispatch, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(dispatch, "ARTICLE_REFILL_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setitem(sys.modules, "generate_diverse_tasks", diverse_mod)
+    monkeypatch.setitem(sys.modules, "refill_reader_facing_pool", event_mod)
+    monkeypatch.setitem(sys.modules, "refill_task_pool", article_mod)
+    monkeypatch.setitem(sys.modules, "generate_research_backlog", research_mod)
+    monkeypatch.setattr(dispatch, "_current_agentable_count", lambda: 0)
+
+    result = dispatch._maybe_refill(0, auto_refill=True)
+
+    assert result["added"] == 1
+    assert result["by_type"]["platform_ops"] == 1
+    assert result["added_ids"][0].startswith("platform_ops_dispatch_pool_dry_diagnostic_")
+    assert any("article_refill:" in warning for warning in result.get("warnings", []))
