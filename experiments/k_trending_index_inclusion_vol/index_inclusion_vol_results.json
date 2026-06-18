@@ -1,0 +1,88 @@
+{
+  "experiment_id": "k_trending_index_inclusion_vol",
+  "generated_at": "2026-06-18T04:42:52.694465Z",
+  "data_source": "yfinance (Yahoo Finance), auto_adjust=False",
+  "timing_note": "20d realized vol = trailing window (no lookahead); volume multiple = day volume / trailing 60d mean known before event day",
+  "events": {
+    "tesla_sp500": {
+      "ticker": "TSLA",
+      "announce_date": "2020-11-16",
+      "effective_date": "2020-12-21",
+      "announce_trading_day": "2020-11-16",
+      "effective_trading_day": "2020-12-21",
+      "sample_days": 210,
+      "data_period": "2020-06-01..2021-03-31",
+      "price_at_announce": 136.03,
+      "price_at_effective": 216.62,
+      "price_day_before_effective": 231.67,
+      "runup_announce_to_effective_pct": 59.24,
+      "runup_announce_to_day_before_effective_pct": 70.31,
+      "rv20_before_announce_annualized": 0.4283,
+      "rv20_20d_after_effective_annualized": 0.5521,
+      "rv_change_pct": 28.92,
+      "effective_day_volume": 174135900,
+      "trailing_60d_mean_volume": 135720950,
+      "volume_multiple_effective_day": 1.28,
+      "max_volume_multiple_in_window": 5.15,
+      "max_volume_multiple_day": "2020-12-18"
+    },
+    "russell_rebalance_iwm": {
+      "ticker": "IWM",
+      "data_period": "2021-01-01..2024-12-31",
+      "sample_days": 1004,
+      "rebalance_rule": "last Friday of June (Russell reconstitution effective)",
+      "years": [
+        {
+          "year": 2022,
+          "rebalance_day": "2022-06-24",
+          "volume": 37138500,
+          "trailing_60d_mean": 32504561,
+          "volume_multiple": 1.14
+        },
+        {
+          "year": 2023,
+          "rebalance_day": "2023-06-30",
+          "volume": 30287300,
+          "trailing_60d_mean": 31317180,
+          "volume_multiple": 0.97
+        },
+        {
+          "year": 2024,
+          "rebalance_day": "2024-06-28",
+          "volume": 35026000,
+          "trailing_60d_mean": 27868296,
+          "volume_multiple": 1.26
+        }
+      ],
+      "mean_volume_multiple": 1.12
+    }
+  },
+  "facts": [
+    {
+      "id": "F1",
+      "statement": "TSLA announce->effective cumulative return",
+      "value_pct": 59.24,
+      "source": "yfinance TSLA Close 2020-11-16 -> 2020-12-21"
+    },
+    {
+      "id": "F2",
+      "statement": "TSLA effective-day volume as multiple of trailing 60d mean",
+      "value_x": 1.28,
+      "source": "yfinance TSLA Volume 2020-12-21 vs trailing-60d mean"
+    },
+    {
+      "id": "F3",
+      "statement": "TSLA 20d realized vol change, pre-announce vs 20d post-effective",
+      "value_before": 0.4283,
+      "value_after": 0.5521,
+      "change_pct": 28.92,
+      "source": "yfinance TSLA Close, trailing 20d annualized RV"
+    },
+    {
+      "id": "F4",
+      "statement": "IWM Russell rebalance-day mean volume multiple (2022-2024)",
+      "value_x": 1.12,
+      "source": "yfinance IWM Volume on last-Friday-of-June vs trailing 60d mean"
+    }
+  ]
+}
