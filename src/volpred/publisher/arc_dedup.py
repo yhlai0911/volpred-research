@@ -8,13 +8,15 @@ mile_5af5ec51 (K1449,「銅博士的波動率版本」) and mile_232ce5d4 (K1091
 「銅銀吃不到 VIX 紅利」) share ~0 title tokens and have different experiment
 refs, yet tell the reader the exact same thing: copper vol × equity-vol/VIX
 → no incremental information. The correct domain model for "duplicate" is
-the **(asset entities, conclusion class)** pair — the narrative arc — not
-surface text.
+the **(asset entities, conclusion class, mechanism, time horizon)** tuple —
+the narrative arc — not surface text.
 
-Arc key = (frozenset of canonical asset entities, conclusion class).
-Two articles whose entity overlap is significant AND whose conclusion class
-matches are arc-duplicates regardless of direction (A→B null vs B→A null is
-the same story to a reader) or wording.
+Arc key = (frozenset of canonical asset entities, conclusion class,
+mechanism axis, time-horizon axis). Two articles whose entity overlap is
+significant AND whose conclusion class matches are still allowed through when
+both sides identify different mechanisms or different horizons. This prevents
+one asset family from absorbing every later experiment that asks a genuinely
+different causal/mechanical question.
 
 Callers:
 - publisher.publish_milestone — hard gate (last line of defence)
@@ -132,6 +134,107 @@ _CONCLUSION_KEYWORDS: dict[str, list[str]] = {
 }
 
 
+# --- Mechanism and horizon axes ---------------------------------------------
+# These axes intentionally remain coarse. They are not used to create a duplicate
+# by themselves; they only prevent false-positive blocks after entity+conclusion
+# already matched.
+_MECHANISM_KEYWORDS: dict[str, list[str]] = {
+    "auction_liquidity": [
+        "auction", "treasury auction", "bid-to-cover", "bid to cover",
+        "弱標", "標售", "demand weakness",
+    ],
+    "factor_causality": [
+        "double-ml", "double ml", "dml", "causal", "causality", "因果",
+        "instrument", "instrumental", "sue", "factor", "因子",
+    ],
+    "event_study": [
+        "event study", "event-study", "event window", "事件研究", "事件窗",
+        "announcement", "公告", "財報", "reconstitution", "成分股調整",
+    ],
+    "carry_regime": [
+        "backwardation", "contango", "roll yield", "roll-yield",
+        "term structure", "期限結構", "regime switch", "regime-switch",
+        "regime-switching",
+    ],
+    "momentum_reversal": [
+        "momentum", "動能", "reversal", "反轉", "short-term momentum",
+        "短期動能", "mean-revert", "mean revert",
+    ],
+    "private_credit_stress": [
+        "bdc", "private credit", "私募信貸", "nav-discount", "nav discount",
+        "bizd", "arcc", "bxsl", "obdc", "fsk", "psec",
+    ],
+    "tax_friction": [
+        "tax friction", "tax", "稅務", "稅", "wash sale", "稅負",
+    ],
+    "crowding_flow": [
+        "crowding", "herding", "擁擠", "群聚", "同步賣壓", "踩踏",
+        "forced deleveraging", "volatility targeting", "vol target",
+    ],
+    "coherence_decay": [
+        "coherence", "coherence decay", "co-movement", "comovement",
+        "correlation decay", "interaction", "retail participation",
+    ],
+    "tail_risk_allocation": [
+        "cvar", "expected shortfall", "tail-risk", "tail risk",
+        "risk parity", "risk-parity", "erc", "sigma-rp", "cvar-rp",
+    ],
+    "vrp_decomposition": [
+        "vrp", "variance risk premium", "semivariance", "upside",
+        "downside", "上行", "下行",
+    ],
+    "macro_policy": [
+        "fomc", "fed", "cpi", "nfp", "sofr", "credit-spread",
+        "credit spread", "利率", "點陣圖",
+    ],
+    "vol_term_structure": [
+        "vix9d", "vix3m", "vvix", "move", "skew", "iv-rv",
+        "implied volatility", "option", "選擇權",
+    ],
+    "cross_asset_spillover": [
+        "lead-lag", "lead lag", "spillover", "傳導", "cross-asset",
+        "跨市場", "領先", "增量資訊", "incremental information",
+        "vix 紅利", "吃不到 vix", "拿同一個 vix",
+    ],
+    "model_forecast": [
+        "garch", "gjr-garch", "egarch", "har-rv", "har rv", "qlike",
+        "forecast model", "model comparison", "預測模型",
+    ],
+}
+
+_GENERIC_MECHANISMS = {"cross_asset_spillover", "model_forecast"}
+
+_MULTI_HORIZON_PATTERNS = [
+    r"multi[-\s]?horizon",
+    r"across horizons?",
+    r"multiple horizons?",
+    r"多期",
+    r"跨期",
+    r"t\s*\+\s*\d+\s*(?:\.\.|-|to|至|到)\s*t?\s*\+?\s*\d+",
+    r"h\s*=\s*\d+\s*[,/]\s*\d+",
+]
+
+_TIME_HORIZON_KEYWORDS: dict[str, list[str]] = {
+    "intraday": [
+        "intraday", "intra-day", "5-min", "5 min", "5分鐘", "分鐘",
+        "hourly", "小時", "盤中", "日內",
+    ],
+    "monthly": [
+        "next-month", "next month", "monthly", "month", "下月", "月度",
+        "1m", "one-month",
+    ],
+    "weekly": [
+        "weekly", "week", "1-week", "one-week", "5d", "5-day", "21d",
+        "21-day", "t+5", "t + 5", "t+21", "t + 21", "週", "一週",
+        "1-4 weeks", "短期",
+    ],
+    "daily": [
+        "next-day", "next day", "1-day", "one-day", "1d", "daily",
+        "t+1", "t + 1", "隔日", "日後",
+    ],
+}
+
+
 def extract_entities(text: str) -> set[str]:
     """Extract canonical asset entities from title+content text."""
     found: set[str] = set()
@@ -158,6 +261,100 @@ def classify_conclusion(text: str) -> str:
     if votes[best] == 0:
         return "descriptive"
     return best
+
+
+def classify_mechanisms(text: str) -> set[str]:
+    """Classify the article's mechanism axis.
+
+    Returns the strongest specific mechanism(s). Generic "model/forecast" and
+    "cross-asset" labels are only used when no more specific mechanism is
+    visible; otherwise they would over-link most volatility articles.
+    """
+    lower = (text or "").lower()
+    scores: dict[str, int] = {}
+    for mechanism, keywords in _MECHANISM_KEYWORDS.items():
+        score = 0
+        for keyword in keywords:
+            if keyword.lower() in lower:
+                score += 1
+        if score:
+            scores[mechanism] = score
+    if not scores:
+        return {"unspecified"}
+
+    specific = {m: s for m, s in scores.items() if m not in _GENERIC_MECHANISMS}
+    pool = specific or scores
+    best = max(pool.values())
+    return {mechanism for mechanism, score in pool.items() if score == best}
+
+
+def classify_time_horizon(text: str) -> str:
+    """Classify the primary forecast/event horizon."""
+    lower = (text or "").lower()
+    if any(re.search(pattern, lower) for pattern in _MULTI_HORIZON_PATTERNS):
+        return "multi_horizon"
+    for horizon in ("intraday", "monthly", "weekly", "daily"):
+        if any(keyword.lower() in lower for keyword in _TIME_HORIZON_KEYWORDS[horizon]):
+            return horizon
+    return "unspecified"
+
+
+def arc_signature(title: str, content: str | None = "") -> dict:
+    """Return the metadata schema used by the arc-dedup gate.
+
+    The schema is safe to persist in feed item details. Callers should still be
+    able to recompute it from title/content because historical articles may not
+    have been backfilled yet.
+    """
+    text = f"{title or ''}\n{content or ''}"
+    return {
+        "schema_version": "arc_dedup_v2",
+        "entities": sorted(extract_entities(text)),
+        "conclusion_class": classify_conclusion(text),
+        "mechanisms": sorted(classify_mechanisms(text)),
+        "time_horizon": classify_time_horizon(text),
+    }
+
+
+def _signature_from_feed_item(item: dict) -> dict:
+    details = item.get("details") or {}
+    sig = details.get("arc_signature") if isinstance(details, dict) else None
+    if isinstance(sig, dict):
+        entities = sig.get("entities")
+        conclusion = sig.get("conclusion_class")
+        mechanisms = sig.get("mechanisms")
+        horizon = sig.get("time_horizon")
+        if isinstance(entities, list) and isinstance(conclusion, str):
+            return {
+                "schema_version": str(sig.get("schema_version") or "arc_dedup_v2"),
+                "entities": sorted(str(e) for e in entities),
+                "conclusion_class": conclusion,
+                "mechanisms": sorted(_axis_values(mechanisms)),
+                "time_horizon": str(horizon or "unspecified"),
+            }
+    text = f"{item.get('title', '')}\n{item.get('content') or item.get('description') or ''}"
+    return arc_signature("", text)
+
+
+def _axis_values(raw) -> set[str]:
+    if isinstance(raw, str):
+        return {raw} if raw else {"unspecified"}
+    if isinstance(raw, (list, tuple, set)):
+        vals = {str(v) for v in raw if str(v)}
+        return vals or {"unspecified"}
+    return {"unspecified"}
+
+
+def _mechanisms_compatible(new_mechanisms: set[str], old_mechanisms: set[str]) -> bool:
+    if "unspecified" in new_mechanisms or "unspecified" in old_mechanisms:
+        return True
+    return bool(new_mechanisms & old_mechanisms)
+
+
+def _horizons_compatible(new_horizon: str, old_horizon: str) -> bool:
+    if new_horizon == "unspecified" or old_horizon == "unspecified":
+        return True
+    return new_horizon == old_horizon
 
 
 def _is_significant_overlap(new_ents: set[str], old_ents: set[str]) -> bool:
@@ -226,13 +423,14 @@ def find_arc_duplicates(
     """Return feed articles that are narrative-arc duplicates of the new piece.
 
     Arc duplicate = significant entity overlap (incl. >=1 distinctive entity)
-    AND same conclusion class, within `days`. Direction-agnostic by design.
+    AND same conclusion class AND compatible mechanism/horizon, within `days`.
+    Direction-agnostic by design.
     """
-    new_text = f"{title}\n{content or ''}"
-    new_ents = extract_entities(new_text)
+    new_sig = arc_signature(title, content)
+    new_ents = set(new_sig["entities"])
     if not new_ents:
         return []
-    new_cls = classify_conclusion(new_text)
+    new_cls = str(new_sig["conclusion_class"])
     # "descriptive" is the fallback class meaning "no identifiable conclusion".
     # Two articles that both fail to classify are NOT the same narrative arc —
     # matching on it produces false positives whenever unrelated pieces happen
@@ -242,6 +440,8 @@ def find_arc_duplicates(
     # class on the *new* side to be a defined arc.
     if new_cls == "descriptive":
         return []
+    new_mechanisms = _axis_values(new_sig.get("mechanisms"))
+    new_horizon = str(new_sig.get("time_horizon") or "unspecified")
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     dups: list[dict] = []
@@ -259,12 +459,18 @@ def find_arc_duplicates(
                 continue
         except Exception:
             pass  # unparseable timestamp → keep (conservative)
-        ex_text = f"{existing.get('title', '')}\n{existing.get('content') or existing.get('description') or ''}"
-        ex_ents = extract_entities(ex_text)
+        ex_sig = _signature_from_feed_item(existing)
+        ex_ents = set(ex_sig["entities"])
         if not _is_significant_overlap(new_ents, ex_ents):
             continue
-        ex_cls = classify_conclusion(ex_text)
+        ex_cls = str(ex_sig["conclusion_class"])
         if ex_cls != new_cls:
+            continue
+        ex_mechanisms = _axis_values(ex_sig.get("mechanisms"))
+        if not _mechanisms_compatible(new_mechanisms, ex_mechanisms):
+            continue
+        ex_horizon = str(ex_sig.get("time_horizon") or "unspecified")
+        if not _horizons_compatible(new_horizon, ex_horizon):
             continue
         dups.append(
             {
@@ -272,6 +478,11 @@ def find_arc_duplicates(
                 "title": existing.get("title", "?"),
                 "shared_entities": sorted(new_ents & ex_ents),
                 "conclusion_class": new_cls,
+                "shared_mechanisms": sorted(new_mechanisms & ex_mechanisms),
+                "new_mechanisms": sorted(new_mechanisms),
+                "existing_mechanisms": sorted(ex_mechanisms),
+                "time_horizon": new_horizon,
+                "existing_time_horizon": ex_horizon,
             }
         )
     return dups

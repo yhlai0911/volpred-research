@@ -10,7 +10,10 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from volpred.publisher.arc_dedup import (
+    arc_signature,
     classify_conclusion,
+    classify_mechanisms,
+    classify_time_horizon,
     extract_entities,
     find_arc_duplicates,
 )
@@ -69,6 +72,45 @@ class TestConclusionClassification:
 
     def test_descriptive_fallback(self):
         assert classify_conclusion("本文介紹三種模型的建構方式") == "descriptive"
+
+
+class TestArcAxes:
+    def test_mechanism_and_horizon_signature(self):
+        sig = arc_signature(
+            "K1499 BDC private-credit shadow stress multi-horizon lead-lag",
+            "BIZD NAV-discount proxy tests HYG forward RV across horizons t+1..t+21.",
+        )
+        assert "private_credit_stress" in sig["mechanisms"]
+        assert sig["time_horizon"] == "multi_horizon"
+        assert classify_time_horizon("盤中 5-min intraday event window") == "intraday"
+        assert classify_mechanisms("GJR-GARCH forecast model QLIKE") == {"model_forecast"}
+
+    def test_same_asset_different_mechanism_not_blocked(self):
+        """Same entity+conclusion can be publishable when the mechanism differs."""
+        existing = {
+            "id": "mile_copper_model",
+            "title": "銅與 VIX 的 GARCH 預測模型沒用",
+            "description": "CPER、VIX、SPY 的 GARCH forecast model QLIKE 無增量資訊。",
+            "status": "published",
+            "published_at": _ts(days_ago=2),
+        }
+        title = "銅礦罷工跳空事件研究：VIX 也吃不到"
+        content = "CPER 和 VIX 的 event study / event window 顯示 jump clustering 不顯著，無增量資訊。"
+        dups = find_arc_duplicates(title, content, [existing])
+        assert dups == []
+
+    def test_same_asset_different_horizon_not_blocked(self):
+        existing = {
+            "id": "mile_copper_intraday",
+            "title": "銅與 VIX 的日內 GARCH 預測沒用",
+            "description": "CPER、VIX、SPY 的 intraday 5-min GARCH forecast model 無增量資訊。",
+            "status": "published",
+            "published_at": _ts(days_ago=2),
+        }
+        title = "銅與 VIX 的下月 GARCH 預測也不成立"
+        content = "CPER、VIX、SPY 的 monthly GARCH forecast model 對 next-month volatility 無增量資訊。"
+        dups = find_arc_duplicates(title, content, [existing])
+        assert dups == []
 
 
 class TestArcDuplicates:
@@ -274,6 +316,35 @@ class TestPublisherGateWiring:
             audit_strict=False,
         )
         assert returned != "mile_232ce5d4"
+
+    def test_publish_milestone_persists_arc_signature(self, tmp_path):
+        import json as _json
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        (storage / "reports" / "feed.json").write_text("[]", encoding="utf-8")
+        from volpred.publisher.publisher import Publisher
+
+        pub = Publisher(storage_dir=str(storage))
+        returned = pub.publish_milestone(
+            title="K999 BDC tax friction multi-horizon RV test",
+            description=(
+                "BDC private credit tax friction tests HYG forward RV across "
+                "horizons t+1..t+21. Result is mixed."
+            ),
+            phase="Phase_X",
+            tags=["K999"],
+            audience="research",
+            status="draft",
+            audit_strict=False,
+        )
+
+        feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
+        assert feed[0]["id"] == returned
+        sig = feed[0]["details"]["arc_signature"]
+        assert sig["schema_version"] == "arc_dedup_v2"
+        assert "private_credit_stress" in sig["mechanisms"]
+        assert sig["time_horizon"] == "multi_horizon"
 
 
 def test_vt_crowding_arc_caught():

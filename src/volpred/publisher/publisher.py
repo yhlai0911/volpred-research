@@ -617,7 +617,9 @@ class Publisher:
                     d = arc_dups[0]
                     print(f"  🚫 BLOCKED narrative-arc duplicate of {d['id']} "
                           f"'{d['title'][:50]}' (shared entities={d['shared_entities']}, "
-                          f"conclusion_class={d['conclusion_class']}) — skipping publish. "
+                          f"conclusion_class={d['conclusion_class']}, "
+                          f"mechanisms={d.get('shared_mechanisms') or d.get('new_mechanisms')}, "
+                          f"time_horizon={d.get('time_horizon')}) — skipping publish. "
                           f"Set details['dup_waiver'] to override.")
                     return d['id']
             except ImportError:
@@ -931,6 +933,16 @@ class Publisher:
             ][:5]
 
         details_clean = {k: v for k, v in (details or {}).items() if k not in ('content', 'description', 'title')}
+        # 2026-06-18: persist release-layer arc schema for future dedup/backfill.
+        # Historical feed entries may lack this and are recomputed on demand by
+        # arc_dedup; new writes should carry the schema explicitly.
+        if not details_clean.get('arc_signature'):
+            try:
+                from volpred.publisher.arc_dedup import arc_signature
+
+                details_clean['arc_signature'] = arc_signature(title, description or '')
+            except Exception as _arc_sig_exc:
+                print(f"  [arc_dedup] arc_signature metadata skipped: {_arc_sig_exc}")
         # 2026-06-11: content_type 強制落地（boss badge-精確性 feedback 的底層修正）。
         # 歷史 1210/1320 篇 details.content_type 為空 → 前端 badge 只能靠 audience 猜。
         # 從本次起每篇必有 content_type：caller 顯式傳的優先，否則由 audience/category 推導。

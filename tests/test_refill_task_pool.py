@@ -44,6 +44,7 @@ def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
     monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
     monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
 
@@ -124,8 +125,10 @@ def test_refill_skips_failed_source_experiment_k(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
     monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
     monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_is_arc_duplicate_candidate", lambda cand: False)
     monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
     monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
 
@@ -263,7 +266,11 @@ def test_research_reader_friendly_still_allows_general_companion(tmp_path, monke
     monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
     monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
+    monkeypatch.setattr(MODULE, "_is_arc_duplicate_candidate", lambda cand: False)
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
 
     result = MODULE.refill(target=5, dry_run=False)
     assert result["ok"] is True
@@ -555,8 +562,12 @@ def test_refill_fallback_audience_gap_requires_score_threshold(tmp_path, monkeyp
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
     monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
     monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_is_arc_duplicate_candidate", lambda cand: False)
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
 
     result = MODULE.refill(target=5, dry_run=False)
 
@@ -628,8 +639,12 @@ def test_refill_skips_research_saturated_k(tmp_path, monkeypatch):
     monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
     monkeypatch.setattr(MODULE, "_ensure_candidates_fresh", lambda: {"rebuilt": False, "reason": "test"})
     monkeypatch.setattr(MODULE, "_kids_with_general_article", lambda: set())
+    monkeypatch.setattr(MODULE, "_kids_with_audience_article", lambda audience: set())
     monkeypatch.setattr(MODULE, "_any_feed_coverage_kids", lambda: set())
     monkeypatch.setattr(MODULE, "_breached_clusters", lambda: set())
+    monkeypatch.setattr(MODULE, "_is_arc_duplicate_candidate", lambda cand: False)
+    monkeypatch.setattr(MODULE, "_research_backlog_candidates", lambda *args, **kwargs: [])
+    monkeypatch.setattr(MODULE, "_journal_discovery_dispatch_task", lambda *args, **kwargs: [])
 
     result = MODULE.refill(target=5, dry_run=False)
 

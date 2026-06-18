@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.publisher.arc_dedup import (  # noqa: E402
-    classify_conclusion,
+    arc_signature,
     extract_entities,
     find_arc_duplicates,
 )
@@ -59,9 +59,13 @@ def main() -> int:
 
     feed = json.loads((ROOT / "storage" / "reports" / "feed.json").read_text(encoding="utf-8"))
     full = f"{args.title}\n{text}"
+    signature = arc_signature(args.title, text)
     report = {
         "entities": sorted(extract_entities(full)),
-        "conclusion_class": classify_conclusion(full),
+        "conclusion_class": signature["conclusion_class"],
+        "mechanisms": signature["mechanisms"],
+        "time_horizon": signature["time_horizon"],
+        "arc_signature": signature,
     }
     dups = find_arc_duplicates(args.title, text, feed, days=args.days)
     report["arc_duplicates"] = dups
