@@ -34140,5 +34140,60 @@
     "started_at": "2026-06-18T08:48:39.540229+00:00",
     "completed_at": "2026-06-18T08:51:43.023151+00:00",
     "result": "Fixed continue_task_dispatch article-refill hang: wrapped article refill in 45s SIGALRM timeout, downgraded timeout/exception to refill warnings, and allowed research fallback/pool-dry diagnostic breaker to continue. Verified real --report returns in 45.5s with warning instead of hanging; added regression test and error_log entry."
+  },
+  {
+    "id": "paper_review_mile_6000a480",
+    "title": "Paper review (Codex 24h-rule): 五個不同起點都過關，這個跨市場模型不是剛好猜中一次",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_6000a480 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_6000a480",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-18T09:53:03+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-18T09:53:57.052846+00:00",
+    "claim_session_id": "fef0455cca42",
+    "started_at": "2026-06-18T09:54:05.334347+00:00",
+    "completed_at": "2026-06-18T10:02:12.930487+00:00",
+    "result": "Codex source review completed for mile_6000a480 / K1416. Numeric K1416 five-start claims, HLN correction, and Paper3 forecast lag were verified; public wording/cluster waiver were corrected from 'only significant pair' to strongest/most visible pair, article was republished locally, indexed, Supabase-synced, and review report archived."
+  },
+  {
+    "id": "paper_review_mile_c9dc52b5",
+    "title": "Paper review (Codex 24h-rule): K1416：HLN(1997) 小樣本修正的正式套用 — Paper 3 TW0050-N225 主張的穩健性確認",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c9dc52b5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c9dc52b5",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-18T09:53:03+00:00"
+  },
+  {
+    "id": "member_qa_9ab8d3a7_evaluate",
+    "title": "[member_qa] yaoxk1431 提問：假設三個月後台股到達60,000點，你認為目前有哪些股票是還沒有達到他應該有的價值並且哪些產業是值得投資在60,000點的時候需要做哪些預先的投資準備幫我模擬並",
+    "description": "Member question id: 9ab8d3a7-a590-4f71-b728-435169fbbdfb\nProposer: yaoxk1431\nCreated: 2026-06-18T01:30:03.846431+00:00\n\n原題：\n假設三個月後台股到達60,000點，你認為目前有哪些股票是還沒有達到他應該有的價值並且哪些產業是值得投資在60,000點的時候需要做哪些預先的投資準備幫我模擬並產生摘要3000字\n\n執行流程：\n1. uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\n2. 主線程逐題做 4 維度評分（研究可行性 / 讀者價值 / 研究相關性 / 預期影響力）\n3. uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\n4. rerank 後如本題入榜，再 uv run volpred ops question-claim --question-id 9ab8d3a7-a590-4f71-b728-435169fbbdfb --actor claude\n5. 完成 research / write / question-answer / question-finish\n\n注意：member_qa 為 reader-facing published flow，不可只 review report 就停。",
+    "task_type": "member_qa",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "member_qa",
+      "user"
+    ],
+    "created_at": "2026-06-18T10:00:06.865840+00:00",
+    "source": "question_ops_maintain",
+    "question_id": "9ab8d3a7-a590-4f71-b728-435169fbbdfb",
+    "question_status": "evaluating",
+    "proposer": "yaoxk1431",
+    "question_score": null,
+    "task_mode": "evaluate"
   }
 ]

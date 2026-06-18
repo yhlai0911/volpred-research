@@ -1,0 +1,75 @@
+{
+  "id": "mile_6000a480",
+  "title": "五個不同起點都過關，這個跨市場模型不是剛好猜中一次",
+  "description": "做量化研究最怕模型只在某一段時間剛好贏。K1416 把 TW0050-N225 的外樣本起點改成 2014/2015/2016/2017/2018 五種版本，檢查 Paper 3 最醒目的跨市場結果是否只是樣本起點運氣。",
+  "content": "# 五個不同起點都過關，這個跨市場模型不是剛好猜中一次\n\n做量化研究最怕的一種情況，是模型只在某一段時間剛好贏。\n\n前一版 Paper 3 的結果裡，`TW0050` 和日本 `N225` 這一組，是跨市場配對裡最強、也最需要做起點敏感度壓力測試的案例。問題也正出在這裡：**如果最亮眼的那一組只在單一起點成立，會不會只是剛好挑到一段對它有利的樣本？**\n\n這次做的事很單純，就是把外樣本起點往前往後挪，從 `2014`、`2015`、`2016`、`2017`、`2018` 各跑一次，檢查同一個結論會不會一換起點就垮掉。\n\n答案沒有模糊空間：**五個起點全部過關。**\n\n- `2014` 起跑：統計值 `3.24`\n- `2015` 起跑：`3.89`\n- `2016` 起跑：`3.66`\n- `2017` 起跑：`3.04`\n- `2018` 起跑：`3.09`\n\n這五個數字不只都高過 `5%` 門檻，連 `1%` 門檻也全部跨過。換句話說，**你把起跑線挪了五次，結果都還在同一邊。**\n\n![HLN-adjusted t-statistics across five alternative OOS starts](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1416_hln_5starts.png)\n\n更重要的是，這五次不是勉強貼著門檻過。\n\n最弱的一次是 `2017` 起跑，統計值 `3.04`，離 `5%` 臨界值還多出大約 `1.08`。最強的一次是 `2015` 起跑，距離門檻更高出 `1.93`。這代表結果離翻盤還有一段距離。即使挑到最不利的那個起點，還是留有安全空間。\n\n![Distance from each OOS-start t-statistic to the 5% cutoff](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1416_hln_margin.png)\n\n這件事對一般讀者真正有用的地方，在於一個更基本的判斷標準：\n\n**一個研究結果如果只在單一樣本起點成立，你要先懷疑；如果換了五個起點還成立，可信度就高很多。**\n\n當然，這也不代表可以把它講成「已經被證明五次」。這五個外樣本區間彼此有重疊，所以它比較像**同一個發現的五次壓力測試**，不是五個完全獨立的新實驗。比較精確的說法是：這個優勢對外樣本起點的選擇，**目前看起來相當穩**。\n\n所以，這次最值得記住的地方是：\n\n**它不是只在一個剛好的起點贏。**\n\n這對 Paper 3 很重要，因為這一組是主要顯著案例中最醒目的一個；最容易被挑戰的地方，就是「會不會只是樣本起點運氣」。現在至少在起點敏感度這一關，這個質疑沒有被數據支持。\n\n*本文基於實驗 `K1416`（腳本：`experiments/k1416/k1416.py`，結果：`experiments/k1416/k1416_results.json`），並引用前一步敏感度實驗 `K1412`。資料來源：`TW0050` 與 `N225` 跨市場配對之外樣本比較；基準外樣本起點 `2015-06-01`，另檢查 `2014/2016/2017/2018` 四個替代起點；基準有效樣本約 `2,067` 個交易日。*\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1416",
+      "K1412"
+    ],
+    "cluster_waiver": "auto-discovered uncovered K1416; angle is cross-market robustness verification of the strongest Paper 3 TW0050-N225 pair across 5 alternative OOS starts, distinct from generic Taiwan market commentary",
+    "topic_cluster": "taiwan",
+    "topic_cluster_30d": {
+      "count": 24,
+      "cap": 8,
+      "ratio": 0.0619,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "JAPAN_EQ"
+      ],
+      "conclusion_class": "descriptive",
+      "mechanisms": [
+        "cross_asset_spillover"
+      ],
+      "time_horizon": "unspecified"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    }
+  },
+  "tags": [
+    "一般讀者",
+    "台股",
+    "日本股市",
+    "跨市場",
+    "波動率",
+    "風險管理",
+    "穩健性"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-04T12:28:05.630949+00:00",
+  "published_at": "2026-06-18T09:00:22.496888+00:00",
+  "status": "published",
+  "verified_live_at": "2026-06-18T09:00:33.157728+00:00",
+  "errata": {
+    "update_at": "2026-06-18T10:00:02.352168+00:00",
+    "update_action": "codex_review_fix",
+    "update_summary": "Codex source review found the article's K1416 five-start statistics matched source results, but the public wording and cluster waiver overstated TW0050-N225 as the only Harvey-significant Paper 3 pair. Updated wording to describe it as the strongest/most visible pair and kept the overlapping-window caveat.",
+    "update_history": [
+      {
+        "at": "2026-06-18T10:00:02.352168+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex source review found the article's K1416 five-start statistics matched source results, but the public wording and cluster waiver overstated TW0050-N225 as the only Harvey-significant Paper 3 pair. Updated wording to describe it as the strongest/most visible pair and kept the overlapping-window caveat.",
+        "old_content_chars": 1451,
+        "new_content_chars": 1472,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "details_waiver_changed": true,
+        "image_paths_normalized": 2,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-18T10:00:02.352168+00:00"
+}

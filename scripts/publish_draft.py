@@ -54,6 +54,8 @@ Update-mode flags:
                                  extracts first paragraph from new content)
   --no-update-description        optional preserve existing description verbatim
                                  (rare — for curated SEO meta differing from body)
+  --cluster-waiver "<text>"      optional update details.cluster_waiver
+  --dup-waiver "<text>"          optional update details.dup_waiver
   --sync-supabase                optional (auto-run feed-sync after patch)
 
 Description sync (2026-05-08, K703 fix):
@@ -834,8 +836,9 @@ def apply_update(args) -> int:
       3. Run TODO gate + IMAGE gate (NO dedup gate — same article by design)
       4. Replace .content; optionally .title (--update-title)
       5. Append errata audit-trail fields (update_action / update_at / update_summary)
-      6. Write feed.json + storage/reports/<mile_id>.json (parallel single-file)
-      7. Optionally invoke feed-sync (--sync-supabase) — default is decoupled
+      6. Optionally update details.cluster_waiver / details.dup_waiver
+      7. Write feed.json + storage/reports/<mile_id>.json (parallel single-file)
+      8. Optionally invoke feed-sync (--sync-supabase) — default is decoupled
     """
     draft_path = Path(args.draft_path)
     if not draft_path.is_absolute():
@@ -870,6 +873,8 @@ def apply_update(args) -> int:
     old_refs = old_details.get("experiment_refs", []) or []
     if not isinstance(old_refs, list):
         old_refs = []
+    old_cluster_waiver = old_details.get("cluster_waiver")
+    old_dup_waiver = old_details.get("dup_waiver")
 
     # Parse draft (frontmatter optional in update mode — fields inherited)
     info = parse_draft(draft_path, require_frontmatter=False)
@@ -976,6 +981,18 @@ def apply_update(args) -> int:
             new_description = old_description
             description_source = "preserved (no extractable paragraph)"
 
+    new_details = copy.deepcopy(old_details)
+    cluster_waiver_arg = getattr(args, "cluster_waiver", None)
+    dup_waiver_arg = getattr(args, "dup_waiver", None)
+    if cluster_waiver_arg is not None:
+        new_details["cluster_waiver"] = cluster_waiver_arg.strip()
+    if dup_waiver_arg is not None:
+        new_details["dup_waiver"] = dup_waiver_arg.strip()
+    details_waiver_changed = (
+        new_details.get("cluster_waiver") != old_cluster_waiver
+        or new_details.get("dup_waiver") != old_dup_waiver
+    )
+
     # Build errata update
     now_iso = datetime.now(timezone.utc).isoformat()
     errata = art.get("errata") or {}
@@ -1003,6 +1020,7 @@ def apply_update(args) -> int:
         "title_changed": new_title != old_title,
         "description_changed": new_description != old_description,
         "description_source": description_source,
+        "details_waiver_changed": details_waiver_changed,
         "image_paths_normalized": len(image_uploads),
         "image_url_changed": new_image_url != art.get("image_url", ""),
         "content_audit_flag_cleared": content_audit_flag_cleared,
@@ -1028,6 +1046,10 @@ def apply_update(args) -> int:
         print(f"[publish_draft] details.experiment_refs: {old_refs} -> {merged_refs}")
     else:
         print(f"[publish_draft] details.experiment_refs={merged_refs} (preserved)")
+    if cluster_waiver_arg is not None:
+        print("[publish_draft] details.cluster_waiver updated")
+    if dup_waiver_arg is not None:
+        print("[publish_draft] details.dup_waiver updated")
     if image_uploads:
         print(f"[publish_draft] image auto-uploads: {len(image_uploads)} local refs → HTTPS")
         for p in image_uploads:
@@ -1054,15 +1076,13 @@ def apply_update(args) -> int:
     art["last_updated_at"] = now_iso
     if clear_content_audit_flag:
         art.pop("content_audit_flagged", None)
-    # Persist merged experiment_refs (only if frontmatter actually contributed
-    # new entries — preserves backwards-compat for update-only-content rewrites
-    # that don't touch K provenance).
+    # Persist merged experiment_refs and explicit waiver updates through the
+    # same update entrypoint used for content rewrites.
+    details_changed = details_waiver_changed or merged_refs != list(old_refs)
     if merged_refs != list(old_refs):
-        details = art.get("details")
-        if not isinstance(details, dict):
-            details = {}
-        details["experiment_refs"] = merged_refs
-        art["details"] = details
+        new_details["experiment_refs"] = merged_refs
+    if details_changed:
+        art["details"] = new_details
 
     # Write feed.json — serialize with same lock + atomic-swap used by publisher.py
     # to avoid silent data loss on concurrent publisher appends (Codex review P2).

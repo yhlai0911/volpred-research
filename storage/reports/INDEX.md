@@ -1,23 +1,25 @@
 # Feed Index
 
-_Last built: 2026-06-18 07:41 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-06-18 10:00 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
 - Total articles: **1643**  (with thumbnail: 61)
-- Last 30 days: **442**
-- Total chars (content): 6,829,017
+- Last 30 days: **441**
+- Total chars (content): 6,829,038
 
-**Status**: published=1383, archived=122, draft=92, unpublished=35, retracted=10, wont_fix=1
+**Status**: published=1385, archived=122, draft=90, unpublished=35, retracted=10, wont_fix=1
 
 **Audience**: research=1091, general=347, daily=112, unknown=77, member_qa=11, event=5
 
 **Category**: milestone=836, general=693, unknown=73, member_qa=11, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
 
-## 最近 30 天 (442)
+## 最近 30 天 (441)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-18 | `mile_c9dc52b5` | K1416：HLN(1997) 小樣本修正的正式套用 — Paper 3 TW0050-N225 主張的穩健性確認 | research | milestone | published | 3516 |  | 研究, HLN, DM-test, small-sample, copula, Paper3 |
+| 2026-06-18 | `mile_6000a480` | 五個不同起點都過關，這個跨市場模型不是剛好猜中一次 | general | general | published | 1472 |  | 一般讀者, 台股, 日本股市, 跨市場, 波動率, 風險管理 |
 | 2026-06-18 | `mile_476d20ea` | 散戶越熱，0050 明天就越震？數字給的答案很保守 | general | general | draft | 2612 |  | 一般讀者, 0050, Taiwan, retail-flow, margin, realized-volatility |
 | 2026-06-18 | `mile_676cf7f1` | 買因子 ETF 前，先看一眼它真的有沒有超額報酬訊號 | general | general | draft | 2398 |  | 一般讀者, factor-etf, MTUM, QUAL, VLUE, SPY |
 | 2026-06-18 | `mile_9b9840e8` | 財報大超預期，為什麼不代表下個月會更震？ | general | general | draft | 2072 |  | 一般讀者, 財報, 波動率, S&P 500, 風險管理, 財報驚喜 |
@@ -220,11 +222,9 @@ _Last built: 2026-06-18 07:41 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-04 | `mile_8d8b8877` | NFP 前夕，VIX 跌到 15.4——市場算便宜了，但就業日波動還是會放大 1.5 倍 | general | general | published | 2069 |  | 一般讀者, VIX, NFP, 就業報告, 波動率, 事件研究 |
 | 2026-06-04 | `mile_567fdb92` | 你以為多看一層市場狀態，結果和直接看 VIX 幾乎一樣 | general | milestone | draft | 2553 | Y | 一般讀者, VIX, 市場狀態, 風險管理 |
 | 2026-06-04 | `mile_02190b48` | 夜盤最會嚇人，但不代表隔天更好猜 | general | general | published | 1474 |  | 一般讀者, 台股, 台指期, 夜盤, 波動率, 風險管理 |
-| 2026-06-04 | `mile_c9dc52b5` | K1416：HLN(1997) 小樣本修正的正式套用 — Paper 3 TW0050-N225 主張的穩健性確認 | research | milestone | draft | 3516 |  | 研究, HLN, DM-test, small-sample, copula, Paper3 |
 | 2026-06-04 | `mile_b0d66991` | 同一組資料沒對齊，10 倍恐慌放大可能被說太大了 | general | general | published | 1474 |  | 一般讀者, 台股, 波動率, 研究誠實, 風險管理, 統計 |
 | 2026-06-04 | `mile_7e70a8ea` | K1378：GJR-GARCH 在三段期間均優於 A4f，SF1 缺陷確認 | research | milestone | wont_fix | 4573 |  | 研究, 波動率, GARCH, robustness, leave-one-out, COVID |
 | 2026-06-04 | `mile_1fedb546` | K1378：拿掉 COVID 之後，A4f 對 GJR 的優勢幾乎歸零 | research | milestone | retracted | 4658 |  | 研究, 波動率, GARCH, robustness, leave-one-out, COVID |
-| 2026-06-04 | `mile_6000a480` | 五個不同起點都過關，這個跨市場模型不是剛好猜中一次 | general | general | draft | 1451 |  | 一般讀者, 台股, 日本股市, 跨市場, 波動率, 風險管理 |
 | 2026-06-04 | `mile_02c71e74` | 別再把美國 VIX 直接乘 1.4 來看台股風險了 | general | general | published | 2127 |  | 一般讀者, 台股, VIXTWN, VIX, 恐慌指數, 風險管理 |
 | 2026-06-04 | `mile_76bde651` | 只多 41 個交易日，最好的模型就換人了 | general | general | published | 2280 |  | 一般讀者, 波動率預測, 模型比較, 美股, 研究誠實, 風險管理 |
 | 2026-06-04 | `mile_c43717b0` | 台股波動有辦法「預測尾巴」嗎？一個對退休族有用的風險量化方法 | general | general | draft | 2525 |  | 一般讀者, 台灣加權指數, 波動率預測, 風險管理, 尾端風險, 停損 |
@@ -459,12 +459,12 @@ _Last built: 2026-06-18 07:41 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-05-19 | `mile_e4155e7c` | K1381：台灣科技股波動率格蘭傑領先 0050——統計顯著，OOS 預測增益趨近於零 | research | milestone | archived | 4579 |  | 研究, 0050.TW, TSMC, 聯發科, HAR-X, 格蘭傑因果 |
 | 2026-05-19 | `mile_32eb397f` | VIX 說平靜，NVDA 說不：指數波動率的隱藏盲點 | general | general | published | 4430 |  | 一般讀者, trending, 波動率, VIX, 科技股, 分散性 |
 | 2026-05-19 | `mile_ee6ba388` | K1376：VT-TSMOM 避險的 MDD 保護跨 22 種資產的 Bootstrap 驗證 | research | milestone | archived | 7566 |  | 研究, VT, TSMOM, MDD, bootstrap, 風險管理 |
-| 2026-05-19 | `mile_9b573fd2` | NVDA 倒數 24 小時：T+0 通常很無聊，T+5 才是戰場 | general | milestone | published | 3477 |  | 一般讀者, NVDA, earnings, event, 波動率, options |
 
-<details><summary>## 2026-Q2 (529)</summary>
+<details><summary>## 2026-Q2 (530)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-05-19 | `mile_9b573fd2` | NVDA 倒數 24 小時：T+0 通常很無聊，T+5 才是戰場 | general | milestone | published | 3477 |  | 一般讀者, NVDA, earnings, event, 波動率, options |
 | 2026-05-19 | `mile_db4bd206` | 穆迪降評美債整整一年：市場還給了什麼答案？ | general | milestone | published | 2804 |  | 一般讀者, VIX, SPY, GLD, TLT, 信用評等 |
 | 2026-05-19 | `mile_2252fc17` | K1377：HAR 族內 Exp-QLIKE 組合 — SPY/GLD 達 Harvey /t/>3，首次跨市場確認 | research | milestone | archived | 5540 |  | 研究, HAR, forecast-combination, QLIKE, SPY, GLD |
 | 2026-05-19 | `mile_8e0b4b6f` | 60 天 5 分鐘資料夠不夠用？三個波動率模型在 SPY 的真實對決 | research | general | published | 7003 |  | 研究, 波動率預測, SPY, 高頻資料, 模型比較, 樣本不足 |

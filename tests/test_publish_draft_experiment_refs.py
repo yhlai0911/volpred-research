@@ -325,3 +325,69 @@ def test_update_mode_no_frontmatter_refs_preserves_existing(tmp_path, monkeypatc
     refs = feed[0]["details"]["experiment_refs"]
     # Backwards-compat: no frontmatter contribution → existing untouched
     assert refs == ["K100"]
+
+
+def test_update_mode_can_refresh_waiver_metadata(tmp_path, monkeypatch):
+    """--update may refresh article details waivers along with content."""
+    feed_dir = tmp_path / "storage" / "reports"
+    feed_dir.mkdir(parents=True)
+    feed_path = feed_dir / "feed.json"
+    mile_id = "mile_waiver"
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": mile_id,
+                    "title": "Article with stale waiver",
+                    "audience": "research",
+                    "phase": "robustness",
+                    "tags": [],
+                    "status": "published",
+                    "content": "Old.",
+                    "details": {
+                        "experiment_refs": ["K100"],
+                        "cluster_waiver": "old cluster reason",
+                    },
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    draft = tmp_path / "draft.md"
+    draft.write_text(
+        "Updated body.\n\n"
+        "![chart](https://example.com/a.png)\n"
+        "![chart](https://example.com/b.png)\n",
+        encoding="utf-8",
+    )
+
+    import publish_draft
+
+    monkeypatch.setattr(publish_draft, "ROOT", tmp_path)
+
+    args = SimpleNamespace(
+        draft_path=str(draft),
+        update=mile_id,
+        update_action="metadata_fix",
+        update_summary="Fix stale waiver metadata.",
+        update_title=None,
+        audience=None,
+        no_sanitize=False,
+        no_image_gate=False,
+        dry_run=False,
+        sync_supabase=False,
+        cluster_waiver="new cluster reason",
+        dup_waiver="new dup reason",
+    )
+    rc = apply_update(args)
+    assert rc == 0
+
+    feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    details = feed[0]["details"]
+    assert details["experiment_refs"] == ["K100"]
+    assert details["cluster_waiver"] == "new cluster reason"
+    assert details["dup_waiver"] == "new dup reason"
+    assert feed[0]["errata"]["update_history"][-1]["details_waiver_changed"] is True
