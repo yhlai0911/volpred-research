@@ -2,6 +2,30 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-18 三連修：前端 metadata 洩漏 + mirror 22MB PUT + Codex sandbox .git
+
+**問題**：互動 session 中老闆截圖抓到三個獨立問題。
+
+**1. 前端報告頁洩漏內部 metadata（最嚴重，影響形象）**
+- 現象：`/reports/<id>` 的「詳情」區塊把 `arc_signature`（narrative-arc dedup 內部欄位）、`content_type`、`entities`（INDEX_RECONSTITUTION 等）顯示給一般讀者。影響全部 **1643 篇**帶 arc_signature 的文章。
+- 根因：`frontend-v2-fix/src/app/reports/[id]/ReportDetail.tsx` 的 details render 只 `filter(key !== "content")`，無條件 render 其餘所有 details 欄位。arc_dedup 把 signature 寫進 `details`（dedup 需要），但 details 同時是讀者可見區。
+- 解決：前端黑名單+prefix 過濾（`HIDDEN_DETAIL_KEYS` + `HIDDEN_DETAIL_PREFIXES`：arc_signature/audience/topic_cluster/*_waiver/release_dedup/release_theme/retracted/content_type），只留讀者相關（experiment_refs/data_source/period…）。**不改 publisher**（dedup 仍需 details.arc_signature）。commit 43ff348 + deploy volpred-v3 + 線上驗證 arc_signature 出現次數=0。
+
+**2. mirror sync SSL EOF（feed.json 22MB）**
+- 現象：發佈時 `[mirror-sync] feed.json remote sync FAILED: SSL EOF (_ssl.c:2427)`，retry 3 次都失敗。codex 也回報 `feed-sync --apply 卡住`。
+- 根因：feed.json 已 22MB；`publisher._sync_feed_to_remote` 整檔 PUT 到 `/api/sync/feed.json`，route handler 用 `await request.json()` 把整個 body 載入記憶體，超過 Next.js/Zeabur body limit → 上傳途中連線 reset = SSL EOF。retry 無用（每次都超 limit）。**curl 無 auth 是 401 快速回（沒讀 body）；帶 auth 22MB 才 SSL EOF**。
+- 解決：size guard（>8MB skip 整檔 PUT + log）+ transient retry（HTTPError 立即 surface、network error retry 3x backoff）。feed→Supabase 本就由 `supabase_sync.py sync_article()` 逐筆 `_post` 同步（canonical，前端讀此，今天 3 篇都 live），整檔 PUT 是冗餘舊路徑。commit dd5f1834（PHASE-Z 收走）。
+- **遺留治本方向**：Next.js 後端那份 feed.json copy 應改從 Supabase 拉，或 mirror PUT 改 gzip（22MB→6.9MB）+ 雙端 gunzip，徹底擺脫整檔 PUT 設計債。
+
+**3. Codex sandbox .git read-only（codex 無法 commit）**
+- 現象：codex_loop 跑的 hourly turn 完成 K1501 但 `git add` 失敗（.git/index.lock 不可寫），每 tick 工作沒 commit，靠 PHASE-Z safety-net 收尾。
+- 根因：`~/.codex/config.toml` 是 `sandbox_mode = "danger-full-access"`，但 `scripts/codex_loop.sh` 用 `codex exec -s workspace-write` 命令列覆蓋 → workspace-write 設計上 write-protect .git。
+- 解決：移除 `-s workspace-write`，繼承 config 的 full-access。commit dd5f1834。
+
+**附帶診斷（非故障）**：Codex CLI（0.139, ChatGPT auth）+ agy CLI（1.0.9, OAuth）smoke test 都過、都正常。之前「不能用」是 (a) Codex 透過 plugin companion runtime 派工被 codex_loop 佔住（直接 `codex exec` 正常）、(b) agy 卡在 WebFetch substack（純本地呼叫秒回）。**結論：不是沒啟動也不是沒登入。**
+
+**教訓**：(1) 任何 render 讀者可見區（details/metadata）必須**白/黑名單過濾**，不可無條件 dump 全欄位 — 內部 dedup/governance 欄位混在 reader-facing struct 是洩漏溫床。(2) 整檔 PUT 大型只增長 JSON（feed.json）是 size-limit 定時炸彈，逐筆同步才可持續。(3) 命令列 sandbox flag 覆蓋全局 config 要警覺一致性。
+
 ## 2026-06-18 continue_task_dispatch article-refill hang blocked pool-dry breaker
 
 **問題**：`storage/ops/handoff_latest.md` 顯示 `production_pending=0` 時，`uv run python scripts/continue_task_dispatch.py --report` 應該自動補池或 materialize `platform_ops_dispatch_pool_dry_diagnostic_*`。實際上這輪 dispatcher report 連續 60 秒無輸出，必須人工 kill。
