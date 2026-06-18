@@ -1,0 +1,349 @@
+{
+  "experiment_id": "K1351",
+  "title": "Oil-volatility spillover to SPY / XLE / XOP variance via OOS HAR-X",
+  "created_by": "codex",
+  "seed": 42,
+  "data_source": "Yahoo Finance via yfinance adjusted close; CL=F is aligned to SPY trading days with past-only ffill.",
+  "sample": {
+    "requested_start": "2010-01-01",
+    "requested_end_exclusive": "2026-06-19",
+    "actual_start": "2010-01-04",
+    "actual_end": "2026-06-17",
+    "n_common_trading_days": 4139,
+    "tickers": [
+      "CL=F",
+      "USO",
+      "SPY",
+      "XLE",
+      "XOP"
+    ]
+  },
+  "method": {
+    "target": "next-day close-to-close annualized squared simple return at date t; simple returns avoid invalid CL=F log returns during the April 2020 negative oil-price episode.",
+    "baseline": "Expanding-window log-HAR using target RV lag1, lag5, lag22, all shifted one trading day.",
+    "augmented": "Baseline plus oil RV lag1, lag5, lag22 and oil vol-of-vol lag22 from CL=F or USO, all shifted one trading day.",
+    "oos_start": "2018-01-01",
+    "min_train_obs": 756,
+    "refit_every_days": 21,
+    "loss": "Non-negative QLIKE ratio loss y/h - log(y/h) - 1; lower is better.",
+    "test": "Newey-West HAC t-stat on pointwise loss improvement (baseline loss - augmented loss); positive t means oil-vol HAR-X is better.",
+    "success_gate": "improvement >= 1.0%, HAC t > 3.0, bootstrap 95% CI lower bound > 0."
+  },
+  "lookahead_guard": [
+    "Every oil feature is created as oil_raw.shift(1) before target-date alignment.",
+    "Every target HAR feature is shifted one trading day before target-date alignment.",
+    "For forecast row t, expanding OLS training rows are df.iloc[:pos], strictly earlier than t."
+  ],
+  "related_prior_work": [
+    {
+      "id": "K628b",
+      "note": "Cross-asset Diebold-Yilmaz / Granger network included USO but used smoothed network spillovers, not OOS HAR-X forecasting."
+    },
+    {
+      "id": "trending_2026_06_12_oil_vix_spillover",
+      "note": "Descriptive Iran-war oil/VIX diagnostic found weak next-day oil-to-equity lead-lag correlations."
+    },
+    {
+      "id": "K1481",
+      "note": "Inventory-surprise crude-RV pilot focused on forecasting CL=F itself, not equity variance spillover."
+    }
+  ],
+  "literature": [
+    {
+      "citation": "Arouri, Jouini, and Nguyen (2011), Journal of International Money and Finance 30(7), 1387-1405.",
+      "url": "https://ideas.repec.org/a/eee/jimfin/v30y2011i7p1387-1405.html",
+      "role": "Sector-level oil-stock volatility transmission motivates testing XLE/XOP separately from SPY."
+    },
+    {
+      "citation": "Diebold and Yilmaz (2012), International Journal of Forecasting 28(1), 57-66.",
+      "url": "https://econpapers.repec.org/article/eeeintfor/v_3a28_3ay_3a2012_3ai_3a1_3ap_3a57-66.htm",
+      "role": "General directional volatility-spillover framing; K1351 uses a simpler forecasting test."
+    },
+    {
+      "citation": "Degiannakis, Filis, and Arora (2017), EIA working paper, Oil Prices and Stock Markets.",
+      "url": "https://www.eia.gov/workingpapers/pdf/oil_prices_stockmarkets.pdf",
+      "role": "Survey notes heterogeneous sector effects and evidence that oil volatility can transmit to stock volatility."
+    },
+    {
+      "citation": "Malik and Hammoudeh (2007), International Review of Economics & Finance 16(3), 357-368.",
+      "url": "https://www.sciencedirect.com/science/article/pii/S105905600500076X",
+      "role": "Early oil/equity shock and volatility-transmission evidence; used as background, not as a replicated model."
+    }
+  ],
+  "results": [
+    {
+      "oil_source": "CL=F",
+      "target": "SPY",
+      "n_obs": 2126,
+      "eval_start": "2018-01-02",
+      "eval_end": "2026-06-17",
+      "baseline_qlike": 4.529980854244367,
+      "augmented_qlike": 4.461705569589705,
+      "qlike_improvement_pct": 1.507187046733121,
+      "mean_loss_improvement": 0.06827528465466072,
+      "hac_t": 2.1832478882837347,
+      "hac_p": 0.02901755989225241,
+      "bootstrap_ci_low": 0.011768542557873811,
+      "bootstrap_ci_high": 0.12167215973915156,
+      "bootstrap_prob_improvement_positive": 0.994,
+      "first_forecast_date": "2018-01-02",
+      "first_train_count": 1990,
+      "min_train_count": 1990,
+      "max_train_count": 4111,
+      "n_refits_baseline": 102,
+      "n_refits_augmented": 102,
+      "high_oil_vol_regime": {
+        "n_high": 131,
+        "n_normal": 1995,
+        "mean_var_high": 0.10097736567580806,
+        "mean_var_normal": 0.03275540307911172,
+        "ratio_high_to_normal": 3.0827697473886935,
+        "hac_t_high_minus_normal": 2.185961781934554,
+        "hac_p_high_minus_normal": 0.028818401526406356
+      },
+      "pass_gate": false
+    },
+    {
+      "oil_source": "CL=F",
+      "target": "XLE",
+      "n_obs": 2126,
+      "eval_start": "2018-01-02",
+      "eval_end": "2026-06-17",
+      "baseline_qlike": 3.988669596660267,
+      "augmented_qlike": 3.995330693128929,
+      "qlike_improvement_pct": -0.16700045735147184,
+      "mean_loss_improvement": -0.006661096468661239,
+      "hac_t": -0.2827125327093845,
+      "hac_p": 0.777397208312139,
+      "bootstrap_ci_low": -0.048136984757651796,
+      "bootstrap_ci_high": 0.03525394782565205,
+      "bootstrap_prob_improvement_positive": 0.39,
+      "first_forecast_date": "2018-01-02",
+      "first_train_count": 1990,
+      "min_train_count": 1990,
+      "max_train_count": 4111,
+      "n_refits_baseline": 102,
+      "n_refits_augmented": 102,
+      "high_oil_vol_regime": {
+        "n_high": 131,
+        "n_normal": 1995,
+        "mean_var_high": 0.26710312080127624,
+        "mean_var_normal": 0.08778308008487429,
+        "ratio_high_to_normal": 3.0427631445948795,
+        "hac_t_high_minus_normal": 1.6149276023435242,
+        "hac_p_high_minus_normal": 0.10632637397063194
+      },
+      "pass_gate": false
+    },
+    {
+      "oil_source": "CL=F",
+      "target": "XOP",
+      "n_obs": 2126,
+      "eval_start": "2018-01-02",
+      "eval_end": "2026-06-17",
+      "baseline_qlike": 3.5393939120918896,
+      "augmented_qlike": 3.5727170252817912,
+      "qlike_improvement_pct": -0.9414920751278202,
+      "mean_loss_improvement": -0.03332311318990195,
+      "hac_t": -0.5281330892872204,
+      "hac_p": 0.5974069659919783,
+      "bootstrap_ci_low": -0.16658771543765372,
+      "bootstrap_ci_high": 0.048545282775244475,
+      "bootstrap_prob_improvement_positive": 0.337,
+      "first_forecast_date": "2018-01-02",
+      "first_train_count": 1990,
+      "min_train_count": 1990,
+      "max_train_count": 4111,
+      "n_refits_baseline": 102,
+      "n_refits_augmented": 102,
+      "high_oil_vol_regime": {
+        "n_high": 131,
+        "n_normal": 1995,
+        "mean_var_high": 0.5792515476451485,
+        "mean_var_normal": 0.15010871853183144,
+        "ratio_high_to_normal": 3.8588801057702375,
+        "hac_t_high_minus_normal": 1.2548875401506474,
+        "hac_p_high_minus_normal": 0.20951958775588264
+      },
+      "pass_gate": false
+    },
+    {
+      "oil_source": "USO",
+      "target": "SPY",
+      "n_obs": 2126,
+      "eval_start": "2018-01-02",
+      "eval_end": "2026-06-17",
+      "baseline_qlike": 4.529980854244367,
+      "augmented_qlike": 4.487493934710444,
+      "qlike_improvement_pct": 0.9379050574598985,
+      "mean_loss_improvement": 0.04248691953392171,
+      "hac_t": 1.0926591752969206,
+      "hac_p": 0.27454347061655904,
+      "bootstrap_ci_low": -0.02545378329198965,
+      "bootstrap_ci_high": 0.11878659908653635,
+      "bootstrap_prob_improvement_positive": 0.9,
+      "first_forecast_date": "2018-01-02",
+      "first_train_count": 1990,
+      "min_train_count": 1990,
+      "max_train_count": 4111,
+      "n_refits_baseline": 102,
+      "n_refits_augmented": 102,
+      "high_oil_vol_regime": {
+        "n_high": 126,
+        "n_normal": 2000,
+        "mean_var_high": 0.1520505691686154,
+        "mean_var_normal": 0.029708346165556596,
+        "ratio_high_to_normal": 5.118109514453568,
+        "hac_t_high_minus_normal": 1.9605561805200484,
+        "hac_p_high_minus_normal": 0.04993081829004353
+      },
+      "pass_gate": false
+    },
+    {
+      "oil_source": "USO",
+      "target": "XLE",
+      "n_obs": 2126,
+      "eval_start": "2018-01-02",
+      "eval_end": "2026-06-17",
+      "baseline_qlike": 3.988669596660267,
+      "augmented_qlike": 4.082047954536586,
+      "qlike_improvement_pct": -2.3410903213067566,
+      "mean_loss_improvement": -0.09337835787631775,
+      "hac_t": -1.548167619177619,
+      "hac_p": 0.12158194529603694,
+      "bootstrap_ci_low": -0.21310854090848388,
+      "bootstrap_ci_high": -0.0020808088708488296,
+      "bootstrap_prob_improvement_positive": 0.023,
+      "first_forecast_date": "2018-01-02",
+      "first_train_count": 1990,
+      "min_train_count": 1990,
+      "max_train_count": 4111,
+      "n_refits_baseline": 102,
+      "n_refits_augmented": 102,
+      "high_oil_vol_regime": {
+        "n_high": 126,
+        "n_normal": 2000,
+        "mean_var_high": 0.30810417347627544,
+        "mean_var_normal": 0.08564831386814034,
+        "ratio_high_to_normal": 3.597317443407193,
+        "hac_t_high_minus_normal": 1.6134603086770218,
+        "hac_p_high_minus_normal": 0.1066445397825968
+      },
+      "pass_gate": false
+    },
+    {
+      "oil_source": "USO",
+      "target": "XOP",
+      "n_obs": 2126,
+      "eval_start": "2018-01-02",
+      "eval_end": "2026-06-17",
+      "baseline_qlike": 3.5393939120918896,
+      "augmented_qlike": 3.6170045143252283,
+      "qlike_improvement_pct": -2.192765319739969,
+      "mean_loss_improvement": -0.0776106022333391,
+      "hac_t": -1.0511096953038943,
+      "hac_p": 0.29320821171349243,
+      "bootstrap_ci_low": -0.24301136456899633,
+      "bootstrap_ci_high": 0.024021135506057827,
+      "bootstrap_prob_improvement_positive": 0.118,
+      "first_forecast_date": "2018-01-02",
+      "first_train_count": 1990,
+      "min_train_count": 1990,
+      "max_train_count": 4111,
+      "n_refits_baseline": 102,
+      "n_refits_augmented": 102,
+      "high_oil_vol_regime": {
+        "n_high": 126,
+        "n_normal": 2000,
+        "mean_var_high": 0.6468102588021916,
+        "mean_var_normal": 0.14692537680172102,
+        "ratio_high_to_normal": 4.402304577207762,
+        "hac_t_high_minus_normal": 1.2972699366265033,
+        "hac_p_high_minus_normal": 0.19453832463286846
+      },
+      "pass_gate": false
+    }
+  ],
+  "summary": {
+    "verdict": "NULL_NO_HARVEY_PASS",
+    "verdict_notes": [
+      "No CL=F/USO -> SPY/XLE/XOP spec passed the pre-registered QLIKE + Harvey + bootstrap gate."
+    ],
+    "n_specs": 6,
+    "n_pass_gate": 0,
+    "best_spec": {
+      "oil_source": "CL=F",
+      "target": "SPY",
+      "n_obs": 2126,
+      "eval_start": "2018-01-02",
+      "eval_end": "2026-06-17",
+      "baseline_qlike": 4.529980854244367,
+      "augmented_qlike": 4.461705569589705,
+      "qlike_improvement_pct": 1.507187046733121,
+      "mean_loss_improvement": 0.06827528465466072,
+      "hac_t": 2.1832478882837347,
+      "hac_p": 0.02901755989225241,
+      "bootstrap_ci_low": 0.011768542557873811,
+      "bootstrap_ci_high": 0.12167215973915156,
+      "bootstrap_prob_improvement_positive": 0.994,
+      "first_forecast_date": "2018-01-02",
+      "first_train_count": 1990,
+      "min_train_count": 1990,
+      "max_train_count": 4111,
+      "n_refits_baseline": 102,
+      "n_refits_augmented": 102,
+      "high_oil_vol_regime": {
+        "n_high": 131,
+        "n_normal": 1995,
+        "mean_var_high": 0.10097736567580806,
+        "mean_var_normal": 0.03275540307911172,
+        "ratio_high_to_normal": 3.0827697473886935,
+        "hac_t_high_minus_normal": 2.185961781934554,
+        "hac_p_high_minus_normal": 0.028818401526406356
+      },
+      "pass_gate": false
+    },
+    "worst_spec": {
+      "oil_source": "USO",
+      "target": "XLE",
+      "n_obs": 2126,
+      "eval_start": "2018-01-02",
+      "eval_end": "2026-06-17",
+      "baseline_qlike": 3.988669596660267,
+      "augmented_qlike": 4.082047954536586,
+      "qlike_improvement_pct": -2.3410903213067566,
+      "mean_loss_improvement": -0.09337835787631775,
+      "hac_t": -1.548167619177619,
+      "hac_p": 0.12158194529603694,
+      "bootstrap_ci_low": -0.21310854090848388,
+      "bootstrap_ci_high": -0.0020808088708488296,
+      "bootstrap_prob_improvement_positive": 0.023,
+      "first_forecast_date": "2018-01-02",
+      "first_train_count": 1990,
+      "min_train_count": 1990,
+      "max_train_count": 4111,
+      "n_refits_baseline": 102,
+      "n_refits_augmented": 102,
+      "high_oil_vol_regime": {
+        "n_high": 126,
+        "n_normal": 2000,
+        "mean_var_high": 0.30810417347627544,
+        "mean_var_normal": 0.08564831386814034,
+        "ratio_high_to_normal": 3.597317443407193,
+        "hac_t_high_minus_normal": 1.6134603086770218,
+        "hac_p_high_minus_normal": 0.1066445397825968
+      },
+      "pass_gate": false
+    },
+    "figures": [
+      "fig_k1351_oos_qlike.png",
+      "fig_k1351_oil_vol_context.png"
+    ]
+  },
+  "limitations": [
+    "Daily close-to-close squared return is a noisy RV proxy and is not intraday realized variance.",
+    "USO is an ETF with roll/contango effects, so CL=F and USO are intentionally treated as separate proxies.",
+    "This experiment tests predictive incremental value, not a structural GARCH spillover model.",
+    "Positive sector results would still need crisis/regime robustness before entering strategy registry decisions."
+  ]
+}

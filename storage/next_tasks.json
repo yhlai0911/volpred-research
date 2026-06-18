@@ -34206,5 +34206,71 @@
     "proposer": "yaoxk1431",
     "question_score": null,
     "task_mode": "evaluate"
+  },
+  {
+    "id": "K1349",
+    "title": "K1349: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 357). Original: 台灣 5-min 數據 HAR-RV（0050.TW 47 天，ETA 2026 Q2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1349.py with signal.shift(1) + seed=42, (c) K1349_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 357,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-18T12:14:21Z"
+  },
+  {
+    "id": "K1350",
+    "title": "K1350: 「HAR ceiling」驗證 — Los Flamingos 2025",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 452). Original: 「HAR ceiling」驗證 — Los Flamingos 2025\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1350.py with signal.shift(1) + seed=42, (c) K1350_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 452,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-18T12:14:21Z"
+  },
+  {
+    "id": "K1351",
+    "title": "K1351: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 464). Original: 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1351.py with signal.shift(1) + seed=42, (c) K1351_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 464,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-18T12:14:21Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-18T12:14:43.195118+00:00",
+    "claim_session_id": "6ba98fb86477",
+    "started_at": "2026-06-18T12:14:43.286678+00:00",
+    "completed_at": "2026-06-18T12:22:45.185823+00:00",
+    "result": "Ran K1351 oil-volatility HAR-X OOS experiment (2010-01-04 to 2026-06-17, yfinance CL=F/USO/SPY/XLE/XOP). Verdict NULL_NO_HARVEY_PASS: no spec passed QLIKE >=1%, Harvey t>3, and bootstrap CI gate; CL=F->SPY was weak only (+1.51%, t=2.18). Outputs in experiments/k1351/."
+  },
+  {
+    "id": "K1352",
+    "title": "K1352: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 466). Original: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1352.py with signal.shift(1) + seed=42, (c) K1352_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 466,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-18T12:14:21Z"
   }
 ]
