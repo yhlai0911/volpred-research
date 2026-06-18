@@ -11104,5 +11104,24 @@
     "task_type": "governance",
     "task_id": "governance_release_layer_arc_upgrade_a2",
     "summary": "Phase A2 backfill 1636 articles arc metadata + rescore 10 reject K -> 6 unlocked (K1499/K1501/K1506/K1510/K1512/K1530); refill_task_pool added 6 daily_article tasks; pool 0->6"
+  },
+  {
+    "timestamp": "2026-06-18T03:18:00.119158Z",
+    "task_type": "daily_article",
+    "k_id": "K1506",
+    "mile_id": "mile_d341175c",
+    "status": "succeeded",
+    "title": "Treasury 拍賣冷清，MOVE 指數沒有跟著上去",
+    "audience": "research",
+    "feed_status": "draft",
+    "anti_ai_gate": "PASS (exit 0, warn=2/3)",
+    "images": [
+      "fig1_btc_zscore_timeseries.png",
+      "fig2_event_time_move_cum_vol.png"
+    ],
+    "fb_draft": "storage/drafts/fb_mile_d341175c.md",
+    "fb_status": "awaiting_interactive_session",
+    "word_count_chars": 3272,
+    "note": "Null finding: bid-to-cover weak auctions do NOT lead to higher MOVE vol in 5 days (t=-0.47, p=0.642, bootstrap CI crosses 0)"
   }
 ]
