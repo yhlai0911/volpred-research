@@ -101,6 +101,18 @@ class TestArcAxes:
         assert "coherence_decay" not in sig["mechanisms"]
         assert sig["time_horizon"] == "daily"
 
+    def test_hln_correction_factor_not_factor_causality(self):
+        """The word 'factor' in an HLN correction formula is not a factor model."""
+        sig = arc_signature(
+            "K1416 HLN small-sample correction for TW0050-N225",
+            (
+                "The HLN correction factor = sqrt((n-1)/n). "
+                "TW0050-N225 cross-market copula result is stable across five OOS starts."
+            ),
+        )
+        assert "factor_causality" not in sig["mechanisms"]
+        assert "cross_asset_spillover" in sig["mechanisms"]
+
     def test_same_asset_different_mechanism_not_blocked(self):
         """Same entity+conclusion can be publishable when the mechanism differs."""
         existing = {

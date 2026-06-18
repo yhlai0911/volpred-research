@@ -145,7 +145,8 @@ _MECHANISM_KEYWORDS: dict[str, list[str]] = {
     ],
     "factor_causality": [
         "double-ml", "double ml", "dml", "causal", "causality", "因果",
-        "instrument", "instrumental", "sue", "factor", "因子",
+        "instrument", "instrumental", "sue", "factor etf", "factor model",
+        "factor return", "因子 ETF", "因子模型", "因子報酬", "因子投資",
     ],
     "event_study": [
         "event study", "event-study", "event window", "事件研究", "事件窗",
@@ -199,6 +200,7 @@ _MECHANISM_KEYWORDS: dict[str, list[str]] = {
     ],
     "cross_asset_spillover": [
         "lead-lag", "lead lag", "spillover", "傳導", "cross-asset",
+        "cross-market",
         "跨市場", "領先", "增量資訊", "incremental information",
         "vix 紅利", "吃不到 vix", "拿同一個 vix",
     ],

@@ -1,8 +1,11 @@
-"""K1416 — Paper 3 HLN small-sample DM correction retrofit (TW0050-N225 唯一 Harvey sig).
+"""K1416 — Paper 3 HLN small-sample DM correction retrofit (TW0050-N225).
 
 Paper 3 submission blocker (research_program.md Open Question):
-TW0050-N225 是 cross-market copula 10 pairs 中原始 raw-DM 規則下唯一
-Harvey-sig pair (Student-t copula vs DCC, dm_t=3.92, oos_start=2015-06-01).
+TW0050-N225 是 cross-market copula 10 pairs 中最強、也最需要排除
+single-start type-I 的 pair (Student-t copula vs DCC, dm_t=3.92,
+oos_start=2015-06-01). 原始 raw-DM 口徑曾標成唯一 Harvey-sig；2026-06-02
+HLN retrofit 後 TW0050-HSI 也跨過臨界值，所以本實驗只驗證 TW0050-N225
+本身是否對 OOS_START 選擇穩健，不再宣稱它是唯一 significant pair.
 
 K1412 對 5 OOS starts (2014/2015/2016/2017/2018) 跑 OOS sensitivity:
 Student-t DM_t = {3.24, 3.89, 3.66, 3.04, 3.09} (all > 3) 且 K1412
@@ -22,7 +25,7 @@ K1416 retrofit (正式版本):
   (e) 重算 robust_ratio with explicit HLN-corrected critical_value
 
 如果 robust_ratio ≥ 0.8 (≥4/5 HLN-sig) → Paper 3 submission OK
-否則 → 撤回唯一 Harvey-sig 主張。
+否則 → 降級 TW0050-N225 robustness 主張。
 
 References:
   - Harvey, D., Leybourne, S., & Newbold, P. (1997). Testing the equality
@@ -30,7 +33,7 @@ References:
     13(2), 281-291.
   - K1412 (experiments/k1412/k1412_results.json)
   - Paper3_E2 (experiments/paper3_E2_cross_market_copula/paper3_E2.py:757-792)
-  - research_program.md Open Question (TW0050-N225 唯一 Harvey-sig)
+  - research_program.md Open Question (TW0050-N225 strongest significant pair)
 """
 
 import json

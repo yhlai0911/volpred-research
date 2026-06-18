@@ -282,11 +282,12 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 
 **2026-05-29 reframe extension audit — E1 + E2 results**（hourly-08/11 compute queue + hourly-10/12 主線程 synthesis）：
 - **Paper3_E1 個股 copula (K1373)**：12 pairs (6 same-sector + 6 cross-sector), **NULL 0/12 Harvey sig**, Spearman ρ(λ_L_mean, DM_t)=0.049 p=0.88. 個股 idiosyncratic noise 稀釋 tail dependence → 個股級別不可重現 K1100b ETF 結果
-- **Paper3_E2 跨股市 copula (Paper3_E2_cross_market_copula)**：10 pairs (5 markets: SPY/0050.TW/HSI/N225/STOXX50), **NULL 1/10 Harvey sig** (TW0050-N225 only, Student-t DM_t=3.92). By-region: developed_cross_region 0/3, developed_vs_emerging_asia 0/4, asia_intraregional 1/3. **Spearman ρ(λ_L_clayton, dm_clayton)=0.903 p=0.0003 highly sig** — aggregate pattern 存在但個別 pair Harvey 不過
+- **Paper3_E2 跨股市 copula (Paper3_E2_cross_market_copula)**：10 pairs (5 markets: SPY/0050.TW/HSI/N225/STOXX50), current HLN-retrofitted results show **2/10 Harvey sig**: TW0050-N225 strongest (Student-t vs DCC t=3.92, p=0.00009) and TW0050-HSI weaker (t=2.08, p=0.038). By-region: developed_cross_region 0/3, developed_vs_emerging_asia 0/4, asia_intraregional 2/3. **Spearman ρ(λ_L_clayton, dm_clayton)=0.903 p=0.0003 highly sig** — aggregate pattern 存在但多數 individual pairs Harvey 不過；舊「1/10 / TW0050-N225 only」是 pre-HLN-retrofit stale wording，不可再引用。
 - **E1+E2 統一 pattern**：copula advantage 不是「跨 equity 市場 universal」— K1100b ETF asset-class 結果是 asset-class boundary 效應，不是 cross-market 通則
 - **E3 commodities scope decision**：boss directive 2026-05-29 「需 E3 commodity results first before paper body rewrite」— E3 (gold/oil/copper 與 equity 配對) 仍待 enqueue。E3 之後再判定 paper narrative 是維持「asset-class-specific」框架 or 收斂為「Joe upper-tail mechanism 限 flight-to-safety pair」
-- **Open question**: TW0050-N225 唯一 Harvey sig — λ_L_clayton=0.444 + full_sample_corr=0.586 + Asian trading-hour overlap 三因子哪個是 driver？ 需 sensitivity (different OOS start / refit_every / window) 排除 type-I error
+- **Open question**: TW0050-N225 是最強 / 最醒目的 Harvey-sig pair（current HLN 另有較弱的 TW0050-HSI）— λ_L_clayton=0.444 + full_sample_corr=0.586 + Asian trading-hour overlap 三因子哪個是 driver？需 sensitivity (different OOS start / refit_every / window) 排除 single-start type-I
   - **K1412 (2026-06-02) partial update**：5 OOS starts (2014/2015/2016/2017/2018) raw 5/5 Student-t DM_t 3.04-3.89，**初步排除 single-start type-I**。但 Codex review FAIL：paper3_E2 系列 Harvey 判定為自製 `|t|>3`，**非** HLN small-sample correction，docstring mislabel。Paper 引用前須先 retrofit HLN correction 重跑。Open question 升級為「HLN-retrofitted 是否仍 robust + 三因子 driver identification」
+  - **K1416 (2026-06-04) formal HLN retrofit**：TW0050-N225 5/5 OOS starts pass 5% and 1% HLN gates；caveats = 4 non-baseline n 為比例估算、5 starts 是 overlapping sensitivity grid、80% gate 是 internal submission rule。結論只支持 TW0050-N225 robustness，不支持「唯一 significant pair」或「cross-market copula 普遍優越」。
 
 **未來可能的第四篇：VIX Sufficient Statistic**
 - 23+ 個指標全被 VIX 吸收的 comprehensive study

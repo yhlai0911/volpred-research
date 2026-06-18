@@ -25,6 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
+REPORTS_DIR = ROOT / "storage" / "reports"
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.publisher.arc_dedup import arc_signature  # noqa: E402
@@ -93,6 +94,26 @@ def _write_feed_atomic(feed: list[dict]) -> None:
     os.replace(tmp, FEED_PATH)
 
 
+def _write_existing_single_files(feed: list[dict], ids: set[str]) -> int:
+    """Keep storage/reports/<id>.json in sync when it already exists."""
+    written = 0
+    for item in feed:
+        if not isinstance(item, dict):
+            continue
+        item_id = str(item.get("id") or "")
+        if item_id not in ids:
+            continue
+        single = REPORTS_DIR / f"{item_id}.json"
+        if not single.exists():
+            continue
+        single.write_text(
+            json.dumps(item, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        written += 1
+    return written
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--apply", action="store_true", help="write metadata back to feed.json")
@@ -123,7 +144,13 @@ def main() -> int:
     if args.apply and plan["count"]:
         result = apply_backfill(feed, plan)
         _write_feed_atomic(feed)
+        single_written = _write_existing_single_files(
+            feed,
+            {entry["id"] for entry in plan.get("entries", [])},
+        )
         print(f"[backfill_arc_dedup_metadata] patched={result['patched_feed_entries']}")
+        if single_written:
+            print(f"[backfill_arc_dedup_metadata] single_files={single_written}")
     elif not args.apply:
         print("  (dry-run; add --apply to write metadata)")
     return 0

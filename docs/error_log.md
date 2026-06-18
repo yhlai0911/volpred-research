@@ -1923,3 +1923,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **Fix required**: Treat K783c / `mile_ec0e72ee` as source-review FAIL pending K783c-v2. Rerun with `volpred.stats.model_evaluation.qlike_pointwise(actual, predicted)`, canonical DM or explicit custom-HAC disclosure, corrected refit cadence/metadata, a real README, and regenerated charts/article language.
 
 **Lesson / prevention**: Production article review must inspect local experiment metric helpers even when the article numbers match JSON. Any experiment claiming Patton QLIKE should import the canonical helper or have a unit test proving orientation; inverse QLIKE can silently reverse model/window preferences.
+
+## 2026-06-18 — K1416 / Paper3_E2 uniqueness wording stayed stale after HLN retrofit
+
+**Symptom**: Published K1416 articles and K1416 source docs described `TW0050-N225` as the only Paper 3 cross-market Harvey-significant pair.
+
+**Root cause**: That statement was true only for the original pre-HLN / raw-DM summary. After the 2026-06-02 HLN retrofit, current `paper3_E2_results.json` marks both `TW0050-N225` (`t=3.92296`) and weaker `TW0050-HSI` (`t=2.07855`) as Harvey-significant. K1412 README had been corrected, but K1416 README/script docstring, research_program, and articles still quoted the stale uniqueness framing.
+
+**Fix**: Reframed K1416 as a robustness check for the strongest / most visible `TW0050-N225` pair, not the only significant pair. Updated public articles, K1416 docs, and `research_program.md`; source reviews should treat old "唯一 Harvey-sig" wording as stale unless explicitly scoped to the original raw-DM run.
+
+**Lesson / prevention**: When a retrofit changes the set of significant peers, update every downstream narrative source, not just the newest README. Article review must compare uniqueness claims against the current result table, not against old experiment motivation text.

@@ -1,6 +1,6 @@
 # K1416 — Paper 3 HLN Small-Sample DM Correction Retrofit
 
-**Pair**: TW0050-N225 (Paper 3 cross-market copula 10 pairs 中原始 raw-DM 規則下唯一 Harvey-sig pair, Student-t copula vs DCC, dm_t≈3.92 at OOS_START=2015-06-01)
+**Pair**: TW0050-N225 (Paper 3 cross-market copula 10 pairs 中最強、也最需要排除 single-start type-I 的 pair；原始 raw-DM 口徑曾標成唯一 Harvey-sig，但 2026-06-02 HLN retrofit 後 TW0050-HSI 也跨過臨界值)
 
 **Verdict**: `CONDITIONAL_PASS` (Codex 2026-06-04 review)
 **Robustness**: 5/5 HLN-sig @ 5% AND @ 1% across 5 OOS starts → Paper 3 OK to submit (caveats below)
@@ -65,7 +65,7 @@ OOS_START      n_est   factor      crit_5%   t_HLN     PASS@5%   PASS@1%
 
 ## Paper 3 Submission Recommendation
 
-- ✅ **Proceed**: TW0050-N225 唯一 Harvey-sig 主張 robust to OOS_START choice，HLN-corrected at 5% AND 1% 全 PASS
+- ✅ **Proceed**: TW0050-N225 這個最強 / 最醒目的 Paper3_E2 significant pair robust to OOS_START choice，HLN-corrected at 5% AND 1% 全 PASS
 - 📝 **Paper wording 須含** caveats 1-3 (見上)
 - 🔜 **Optional refinement** (post-submission): paper3_E2.dm_test 加 per-OOS exact n storage，K1412 重跑一次帶 metadata，K1416 補 exact-n verification
 
@@ -74,5 +74,5 @@ OOS_START      n_est   factor      crit_5%   t_HLN     PASS@5%   PASS@1%
 - Harvey, D., Leybourne, S., & Newbold, P. (1997). Testing the equality of prediction mean squared errors. *International Journal of Forecasting*, 13(2), 281-291.
 - K1412: `experiments/k1412/k1412_results.json` (5 OOS DM_t data)
 - Paper3_E2: `experiments/paper3_E2_cross_market_copula/paper3_E2.py:757-792` (內建 HLN 邏輯)
-- `research_program.md` Paper 3 Open Question (TW0050-N225 唯一 Harvey-sig)
+- `research_program.md` Paper 3 Open Question (TW0050-N225 strongest significant pair; original unique-pair wording superseded by HLN retrofit)
 - Codex review: `tokens used 39263` (2026-06-04)

@@ -1,12 +1,12 @@
 # Feed Index
 
-_Last built: 2026-06-18 10:00 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-06-18 11:10 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
 - Total articles: **1643**  (with thumbnail: 61)
 - Last 30 days: **441**
-- Total chars (content): 6,829,038
+- Total chars (content): 6,829,380
 
 **Status**: published=1385, archived=122, draft=90, unpublished=35, retracted=10, wont_fix=1
 
@@ -18,7 +18,7 @@ _Last built: 2026-06-18 10:00 UTC — source: `storage/reports/feed.json` (do NO
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
-| 2026-06-18 | `mile_c9dc52b5` | K1416：HLN(1997) 小樣本修正的正式套用 — Paper 3 TW0050-N225 主張的穩健性確認 | research | milestone | published | 3516 |  | 研究, HLN, DM-test, small-sample, copula, Paper3 |
+| 2026-06-18 | `mile_c9dc52b5` | K1416：HLN(1997) 小樣本修正的正式套用 — Paper 3 TW0050-N225 主張的穩健性確認 | research | milestone | published | 3858 |  | 研究, HLN, DM-test, small-sample, copula, Paper3 |
 | 2026-06-18 | `mile_6000a480` | 五個不同起點都過關，這個跨市場模型不是剛好猜中一次 | general | general | published | 1472 |  | 一般讀者, 台股, 日本股市, 跨市場, 波動率, 風險管理 |
 | 2026-06-18 | `mile_476d20ea` | 散戶越熱，0050 明天就越震？數字給的答案很保守 | general | general | draft | 2612 |  | 一般讀者, 0050, Taiwan, retail-flow, margin, realized-volatility |
 | 2026-06-18 | `mile_676cf7f1` | 買因子 ETF 前，先看一眼它真的有沒有超額報酬訊號 | general | general | draft | 2398 |  | 一般讀者, factor-etf, MTUM, QUAL, VLUE, SPY |
