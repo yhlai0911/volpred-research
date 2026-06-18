@@ -33928,5 +33928,117 @@
     "started_at": "2026-06-18T01:35:31.692848+00:00",
     "completed_at": "2026-06-18T01:54:24.936199+00:00",
     "result": "Arc dedup upgraded to v2 signature with mechanism/time_horizon axes; check CLI, publisher metadata, dry-run backfill tool, and regression tests updated. Validation: tests/test_arc_dedup.py 25 passed; tests/test_refill_task_pool.py 15 passed. Refill dry-run target=10 would add 6 tasks: K1506, K1512, K1499, K1530, K1510, K1501."
+  },
+  {
+    "id": "K1506_article_general",
+    "title": "K1506: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1506 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1506 null finding: Treasury auction weak demand (bid-to-cover z<-1.5, N=26) does NOT lead 5d ^MOVE realized vol elevation. Primary INSUFFICIENT_SAMPLE (t=-0.47, p=0.642, d=-0.10); secondary spec z<-1.0 (N=45) FAIL (t=-0.77, p=0.44, d=-0.14, 95% bootstrap CI [-0.020, +0.008]). Di",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1506",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-18T02:14:54+00:00"
+  },
+  {
+    "id": "K1512_article_general",
+    "title": "K1512: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1512 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1512 [PoC, CONDITIONAL_PASS] Double-ML 因果 factor 檢定 — 動能/品質/價值對下月超額報酬的非零效應\n\n**結論**: CONDITIONAL_PASS — DML PLR with repeated cross-fitting (n_rep=20, n_folds=2) 對 3 個 US factor ETF (MTUM 動能 / QUAL 品質 / VLUE 價值) × next-month SPY-excess return × controls {VIX, term spread, lag-1 r",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1512",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-18T02:14:54+00:00"
+  },
+  {
+    "id": "K1499_article_research",
+    "title": "K1499: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1499 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1499 BDC private-credit shadow stress — PARTIAL. Equal-weighted listed BDC basket (ARCC/BXSL/OBDC/FSK/PSEC) 21d RV z-score tested as multi-horizon lead signal for HYG/KRE/IWM forward RV at h=5/10/21. Raw lead-lag correlation 0.49-0.55 (full sample, all targets). After SPY-vol HA",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1499",
+    "tags": [
+      "k1499",
+      "experiment",
+      "private-credit",
+      "BDC",
+      "forward-RV",
+      "HAC",
+      "PARTIAL",
+      "NULL",
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-18T02:14:54+00:00"
+  },
+  {
+    "id": "K1530_article_general",
+    "title": "K1530: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1530 has verdict signal (score=3, reasons=['PASS/Harvey-significant', 'robust inference', 'mixed/non-novel']) but no general article in feed.json.  Verdict preview: [提出: research_program.md 2026-06-17c backlog; 執行: Codex] K1530 Taiwan retail participation x recent-return interaction for 0050 RV. Data: local public snapshots storage/macro/yf_0050.TW.csv, storage/sentiment/tw_institutional_0050.csv, storage/sentiment/tw_margin_0050.csv; sample",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1530",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-18T02:14:55+00:00"
+  },
+  {
+    "id": "K1510_article_general",
+    "title": "K1510: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1510 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: NULL result. SUE (standardized unexpected earnings) has no detectable incremental association with next-month realized volatility on a 50-firm S&P panel (2018-2026, 4,739 monthly obs). OLS β=+0.00098 (p=0.23), DML cross-fit β=+0.00092 (p=0.17) — both CIs straddle zero. IV identif",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1510",
+    "tags": [
+      "causal-inference",
+      "DML",
+      "IV-2SLS",
+      "earnings-surprise",
+      "SUE",
+      "realized-vol",
+      "NULL-result",
+      "weak-IV",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-18T02:14:55+00:00"
+  },
+  {
+    "id": "K1501_article_general",
+    "title": "K1501: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1501 has verdict signal (score=0, reasons=['cluster cooldown penalty (spy 30d=93>10)']) but no general article in feed.json.  Verdict preview: ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1501",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "spy",
+    "created_at": "2026-06-18T02:14:55+00:00"
   }
 ]
