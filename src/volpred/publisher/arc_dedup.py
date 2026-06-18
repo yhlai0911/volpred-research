@@ -173,7 +173,13 @@ _MECHANISM_KEYWORDS: dict[str, list[str]] = {
     ],
     "coherence_decay": [
         "coherence", "coherence decay", "co-movement", "comovement",
-        "correlation decay", "interaction", "retail participation",
+        "correlation decay",
+    ],
+    "retail_flow": [
+        "retail participation", "retail flow", "retail-flow", "retail proxy",
+        "retail-like", "order imbalance", "散戶 proxy", "散戶占比",
+        "散戶參與", "散戶活躍", "散戶交易", "散戶下單", "融資", "融券",
+        "margin activity", "margin turnover",
     ],
     "tail_risk_allocation": [
         "cvar", "expected shortfall", "tail-risk", "tail risk",
@@ -230,7 +236,7 @@ _TIME_HORIZON_KEYWORDS: dict[str, list[str]] = {
     ],
     "daily": [
         "next-day", "next day", "1-day", "one-day", "1d", "daily",
-        "t+1", "t + 1", "隔日", "日後",
+        "t+1", "t + 1", "隔日", "隔天", "明天", "今天", "日後",
     ],
 }
 

@@ -85,6 +85,21 @@ class TestArcAxes:
         assert classify_time_horizon("盤中 5-min intraday event window") == "intraday"
         assert classify_mechanisms("GJR-GARCH forecast model QLIKE") == {"model_forecast"}
 
+    def test_retail_interaction_path_not_coherence_decay(self):
+        """A generic 'interaction' token in an artifact path must not turn a
+        retail-flow article into the theme-coherence mechanism."""
+        sig = arc_signature(
+            "散戶越熱，0050 明天就越震？數字給的答案很保守",
+            (
+                "0050 散戶 proxy、融資融券活動、近期下跌，樣本外測試自 2022 起。"
+                "script: experiments/k1530_tw_retail_interaction_rv/"
+                "k1530_tw_retail_interaction_rv.py"
+            ),
+        )
+        assert "retail_flow" in sig["mechanisms"]
+        assert "coherence_decay" not in sig["mechanisms"]
+        assert sig["time_horizon"] == "daily"
+
     def test_same_asset_different_mechanism_not_blocked(self):
         """Same entity+conclusion can be publishable when the mechanism differs."""
         existing = {

@@ -34011,7 +34011,7 @@
     "title": "K1530: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1530 has verdict signal (score=3, reasons=['PASS/Harvey-significant', 'robust inference', 'mixed/non-novel']) but no general article in feed.json.  Verdict preview: [提出: research_program.md 2026-06-17c backlog; 執行: Codex] K1530 Taiwan retail participation x recent-return interaction for 0050 RV. Data: local public snapshots storage/macro/yf_0050.TW.csv, storage/sentiment/tw_institutional_0050.csv, storage/sentiment/tw_margin_0050.csv; sample",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1530",
@@ -34020,7 +34020,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-18T02:14:55+00:00"
+    "created_at": "2026-06-18T02:14:55+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-18T06:26:23.222230+00:00",
+    "claim_session_id": "f31cea9e2df7",
+    "started_at": "2026-06-18T06:26:23.326985+00:00",
+    "completed_at": "2026-06-18T06:33:36.274586+00:00",
+    "result": "Published general-audience draft mile_476d20ea for K1530 retail-interaction pilot with two real figures. Corrected arc_dedup retail-flow classification bug (generic interaction no longer maps to coherence_decay), added regression test, and single-article Supabase sync_article read-back succeeded."
   },
   {
     "id": "K1510_article_general",
