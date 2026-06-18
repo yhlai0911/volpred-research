@@ -1,5 +1,21 @@
 [
   {
+    "id": "platform_ops_dispatch_pool_dry_diagnostic_20260618",
+    "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
+    "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-06-18T00:12:02.509038+00:00",
+    "source": "continue_task_dispatch_pool_dry_breaker",
+    "tags": [
+      "dispatch",
+      "refill",
+      "pool-dry",
+      "platform_ops"
+    ]
+  },
+  {
     "id": "platform_ops_dashboard_claude_only_pending_hint_20260618",
     "title": "Dashboard hint for Claude-only pending tasks",
     "description": "When production_pending contains only Claude-only task types such as trending_repost, ops_dashboard currently says dispatch top P1-P3 if slots free. This causes Codex hourly sessions to loop on unclaimable tasks. Add an explicit Claude-only pending hint while preserving warn status.",
@@ -33747,14 +33763,20 @@
     "description": "探討 Kevin Warsh 主持 FOMC 首秀點陣圖意外放鷹、五月 CPI 攀升至 4.2% 對利率期權的衝擊。可量化分析：比較 MOVE 指數與 VIX 的基差走勢，驗證利率路徑重估對權益市場波動率的傳導效率。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-17T22:00:36+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-18T00:11:38.769685+00:00",
+    "claim_session_id": "58f11bdab71e",
+    "started_at": "2026-06-18T00:11:53.670522+00:00",
+    "completed_at": "2026-06-18T00:19:36.776295+00:00",
+    "result": "Published mile_7f189c12 「新主席首秀即放鷹：MOVE 指數說的話，VIX 還沒聽懂」; CPI 4.2% / FOMC 點陣圖中位數 3.8% / MOVE 70.66bp / VIX 18.44 / MOVE/VIX 比值 3.83 全 verified; anti-ai gate PASS (2 WARN/0 MUST); commit 3aa701da; FB awaiting_interactive (草稿 storage/drafts/fb_mile_7f189c12.md)"
   },
   {
     "id": "paper_review_mile_5c8ef549",
