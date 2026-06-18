@@ -1332,25 +1332,60 @@ class Publisher:
         """PUT full feed.json to remote for consistency."""
         if not self.REMOTE_URL:
             return
-        try:
-            import urllib.request
+        import time
+        import urllib.error
+        import urllib.request
 
-            from volpred.mirror_auth import ops_admin_headers
+        from volpred.mirror_auth import ops_admin_headers
 
-            data = self._feed_file.read_bytes()
-            req = urllib.request.Request(
-                f"{self.REMOTE_URL}/api/sync/feed.json",
-                data=data,
-                headers={"Content-Type": "application/json", **ops_admin_headers()},
-                method="PUT",
+        data = self._feed_file.read_bytes()
+        # 2026-06-18: the /api/sync/feed.json route handler does
+        # ``await request.json()`` — it buffers the ENTIRE body into memory
+        # before parsing, and Next.js/Zeabur caps request body size well below
+        # feed.json's current footprint (~22MB). Oversized PUTs get reset
+        # mid-upload and surface as ``SSL: EOF`` (_ssl.c) — retrying can't help
+        # because every attempt re-hits the same ceiling. feed→Supabase is
+        # already synced row-by-row by scripts/supabase_sync.py (the canonical
+        # path the frontend reads via FEED_RPC), so when feed.json outgrows the
+        # whole-file PUT ceiling we skip this redundant mirror and rely on it.
+        MAX_MIRROR_BYTES = 8 * 1024 * 1024
+        if len(data) > MAX_MIRROR_BYTES:
+            print(
+                f"[mirror-sync] feed.json {len(data) // 1024 // 1024}MB exceeds "
+                f"whole-file PUT ceiling ({MAX_MIRROR_BYTES // 1024 // 1024}MB) — "
+                f"skipping mirror; Supabase row-by-row sync (feed-sync) is canonical"
             )
-            urllib.request.urlopen(req, timeout=10)
-        except Exception as exc:
-            # 2026-06-11: was a bare ``except: pass`` that swallowed a month of
-            # 401s after the remote gated /api/sync (C1 fix). Mirror is a
-            # replica path (Supabase is canonical) so we don't raise, but we
-            # must be loud so silent failures surface in logs/dashboards.
-            print(f"[mirror-sync] feed.json remote sync FAILED: {exc}")
+            return
+        url = f"{self.REMOTE_URL}/api/sync/feed.json"
+        # 2026-06-18: transient SSL EOF (_ssl.c) / connection-reset blips were
+        # surfacing as hard FAILED even though the mirror endpoint is healthy.
+        # Retry network-level errors with backoff; HTTP status errors
+        # (401/404/5xx) are NOT transient — surface them immediately, no retry.
+        last_exc = None
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request(
+                    url,
+                    data=data,
+                    headers={"Content-Type": "application/json", **ops_admin_headers()},
+                    method="PUT",
+                )
+                urllib.request.urlopen(req, timeout=10)
+                if attempt > 0:
+                    print(f"[mirror-sync] feed.json remote sync OK on retry {attempt}")
+                return
+            except urllib.error.HTTPError as exc:
+                # 2026-06-11: was a bare ``except: pass`` that swallowed a month
+                # of 401s after the remote gated /api/sync (C1 fix). Mirror is a
+                # replica path (Supabase is canonical) so we don't raise, but we
+                # must be loud so silent failures surface in logs/dashboards.
+                print(f"[mirror-sync] feed.json remote sync FAILED (HTTP {exc.code}): {exc}")
+                return
+            except Exception as exc:
+                last_exc = exc
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+        print(f"[mirror-sync] feed.json remote sync FAILED after 3 attempts: {last_exc}")
 
     def _load_feed(self) -> list[dict]:
         if self._feed_file.exists():

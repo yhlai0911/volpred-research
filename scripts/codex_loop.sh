@@ -52,7 +52,13 @@ while true; do
   echo "════════════════════════════════════════════════════════"
 
   if [ "$TICK" -eq 1 ]; then
-    "$CODEX" exec --skip-git-repo-check -s workspace-write "$FIRST_PROMPT"
+    # 2026-06-18: dropped `-s workspace-write` — it overrode the global
+    # config.toml `sandbox_mode = "danger-full-access"` and downgraded to a
+    # mode that write-protects .git, so codex's own `git commit` silently
+    # failed (.git/index.lock unwritable) and left every tick's work
+    # uncommitted (K1501 incident). No flag = inherit config's full-access
+    # mode → codex can commit its own [codex] work as AGENTS.md instructs.
+    "$CODEX" exec --skip-git-repo-check "$FIRST_PROMPT"
   else
     # resume inherits sandbox from parent session; no -s flag needed (not accepted)
     "$CODEX" exec resume --last --skip-git-repo-check "$RESUME_PROMPT"
