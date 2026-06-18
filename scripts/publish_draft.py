@@ -985,6 +985,11 @@ def apply_update(args) -> int:
     errata["update_at"] = now_iso
     errata["update_action"] = args.update_action
     errata["update_summary"] = args.update_summary
+    content_audit_flag_was_set = bool(art.get("content_audit_flagged"))
+    clear_content_audit_flag = bool(getattr(args, "clear_content_audit_flag", False))
+    content_audit_flag_cleared = bool(
+        clear_content_audit_flag and content_audit_flag_was_set
+    )
     # If errata.history list exists, append; else create one for chronological audit
     history = errata.get("update_history")
     if not isinstance(history, list):
@@ -1000,6 +1005,7 @@ def apply_update(args) -> int:
         "description_source": description_source,
         "image_paths_normalized": len(image_uploads),
         "image_url_changed": new_image_url != art.get("image_url", ""),
+        "content_audit_flag_cleared": content_audit_flag_cleared,
     })
     errata["update_history"] = history
 
@@ -1028,6 +1034,9 @@ def apply_update(args) -> int:
             print(f"  - {p} → {image_cache[p]}")
     print(f"[publish_draft] errata.update_action={args.update_action}")
     print(f"[publish_draft] errata.update_summary={args.update_summary[:120]}")
+    if clear_content_audit_flag:
+        state = "will clear" if content_audit_flag_was_set else "not set"
+        print(f"[publish_draft] content_audit_flagged={state}")
 
     if args.dry_run:
         print("[publish_draft] dry-run: no files written, no CLI invoked")
@@ -1043,6 +1052,8 @@ def apply_update(args) -> int:
     if new_image_url:
         art["image_url"] = new_image_url
     art["last_updated_at"] = now_iso
+    if clear_content_audit_flag:
+        art.pop("content_audit_flagged", None)
     # Persist merged experiment_refs (only if frontmatter actually contributed
     # new entries — preserves backwards-compat for update-only-content rewrites
     # that don't touch K provenance).
@@ -1159,7 +1170,10 @@ def main() -> int:
                                    "that intentionally differs from body content)")
     update_group.add_argument("--sync-supabase", action="store_true",
                               help="auto-run `volpred ops feed-sync --apply` after "
-                                   "patch (default is decoupled — run manually)")
+                              "patch (default is decoupled — run manually)")
+    update_group.add_argument("--clear-content-audit-flag", action="store_true",
+                              help="clear an existing content_audit_flagged stamp "
+                              "after this update fixes the flagged issue")
 
     args = parser.parse_args()
 

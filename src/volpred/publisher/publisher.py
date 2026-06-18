@@ -283,9 +283,23 @@ def _audit_general_content(audience: str, tags: list[str], content: str) -> list
             f"general tag count {len(tags)} > {_GENERAL_MAX_TAG_COUNT} "
             f"(SKILL.md L308: ≤2-3 表格 → ≤8 tags)"
         )
+    audit_content = content or ''
+    try:
+        import sys
+
+        scripts_dir = Path(__file__).resolve().parents[3] / "scripts"
+        if str(scripts_dir) not in sys.path:
+            sys.path.insert(0, str(scripts_dir))
+        from publish_draft import _stash_citations  # noqa: WPS433
+
+        audit_content, _ = _stash_citations(audit_content)
+    except Exception:
+        # Citation masking is a false-positive reduction only. If it is
+        # unavailable, keep the stricter audit rather than silently weakening it.
+        audit_content = content or ''
     forbidden_hits = []
     for pattern, hint in _GENERAL_FORBIDDEN_PATTERNS:
-        if pattern.search(content or ''):
+        if pattern.search(audit_content):
             forbidden_hits.append(hint)
     if forbidden_hits:
         issues.append(

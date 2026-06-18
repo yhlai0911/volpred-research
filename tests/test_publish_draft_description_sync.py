@@ -419,6 +419,35 @@ def test_history_records_description_change(tmp_path, monkeypatch):
     assert entry["description_source"] == "auto (first paragraph)"
 
 
+def test_update_can_clear_content_audit_flag(tmp_path, monkeypatch):
+    """Explicit update flag clears stale content_audit_flagged after a fix."""
+    mile_id = "mile_flagged"
+    feed_path = _stage_feed(tmp_path, mile_id, content_audit_flagged=True)
+
+    draft = _write_draft(
+        tmp_path,
+        "Corrected first paragraph.\n\n"
+        "![chart](https://example.com/a.png)\n"
+        "![chart](https://example.com/b.png)\n",
+    )
+
+    import publish_draft
+    monkeypatch.setattr(publish_draft, "ROOT", tmp_path)
+
+    args = _make_args(draft, mile_id, clear_content_audit_flag=True)
+    rc = apply_update(args)
+    assert rc == 0
+
+    feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    assert "content_audit_flagged" not in feed[0]
+    history = feed[0]["errata"]["update_history"]
+    assert history[-1]["content_audit_flag_cleared"] is True
+
+    single_path = tmp_path / "storage" / "reports" / f"{mile_id}.json"
+    single = json.loads(single_path.read_text(encoding="utf-8"))
+    assert "content_audit_flagged" not in single
+
+
 def test_parse_draft_extracts_description_from_frontmatter(tmp_path):
     """parse_draft surfaces frontmatter description field."""
     draft = tmp_path / "draft.md"
