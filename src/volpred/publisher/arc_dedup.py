@@ -223,7 +223,8 @@ _MULTI_HORIZON_PATTERNS = [
 _TIME_HORIZON_KEYWORDS: dict[str, list[str]] = {
     "intraday": [
         "intraday", "intra-day", "5-min", "5 min", "5分鐘", "分鐘",
-        "hourly", "小時", "盤中", "日內",
+        "hourly", "每小時", "小時資料", "小時頻率", "小時級", "小時線",
+        "一小時", "盤中", "日內",
     ],
     "monthly": [
         "next-month", "next month", "monthly", "month", "下月", "月度",

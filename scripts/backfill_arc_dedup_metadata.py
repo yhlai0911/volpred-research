@@ -7,6 +7,9 @@ Dry-run by default:
 Apply locally (no remote sync):
     uv run python scripts/backfill_arc_dedup_metadata.py --apply
 
+Apply one article only:
+    uv run python scripts/backfill_arc_dedup_metadata.py --apply --id mile_xxxxxxxx
+
 This is a deterministic metadata backfill. It does not change article content,
 status, audience, or publication timestamps.
 """
@@ -31,10 +34,13 @@ def _article_text(item: dict) -> str:
     return str(item.get("content") or item.get("description") or "")
 
 
-def build_backfill_plan(feed: list[dict]) -> dict:
+def build_backfill_plan(feed: list[dict], ids: set[str] | None = None) -> dict:
     entries: list[dict] = []
     for item in feed:
         if not isinstance(item, dict):
+            continue
+        item_id = str(item.get("id") or "")
+        if ids is not None and item_id not in ids:
             continue
         title = str(item.get("title") or "")
         desired = arc_signature(title, _article_text(item))
@@ -44,7 +50,7 @@ def build_backfill_plan(feed: list[dict]) -> dict:
             continue
         entries.append(
             {
-                "id": item.get("id", "?"),
+                "id": item_id or "?",
                 "title": title,
                 "had_arc_signature": isinstance(existing, dict),
                 "arc_signature": desired,
@@ -91,13 +97,20 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--apply", action="store_true", help="write metadata back to feed.json")
     ap.add_argument("--limit", type=int, default=10, help="number of changed ids to print")
+    ap.add_argument(
+        "--id",
+        action="append",
+        dest="ids",
+        help="only backfill this article id; repeatable",
+    )
     args = ap.parse_args()
 
     feed = json.loads(FEED_PATH.read_text(encoding="utf-8"))
     if not isinstance(feed, list):
         raise SystemExit("feed.json is not a list")
 
-    plan = build_backfill_plan(feed)
+    ids = set(args.ids) if args.ids else None
+    plan = build_backfill_plan(feed, ids=ids)
     print(f"[backfill_arc_dedup_metadata] mode={'apply' if args.apply else 'dry-run'}")
     print(f"[backfill_arc_dedup_metadata] changed={plan['count']}")
     for entry in plan["entries"][: args.limit]:

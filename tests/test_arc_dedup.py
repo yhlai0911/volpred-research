@@ -83,6 +83,7 @@ class TestArcAxes:
         assert "private_credit_stress" in sig["mechanisms"]
         assert sig["time_horizon"] == "multi_horizon"
         assert classify_time_horizon("盤中 5-min intraday event window") == "intraday"
+        assert classify_time_horizon("完整重跑要多等好幾個小時") == "unspecified"
         assert classify_mechanisms("GJR-GARCH forecast model QLIKE") == {"model_forecast"}
 
     def test_retail_interaction_path_not_coherence_decay(self):

@@ -34079,5 +34079,26 @@
     "started_at": "2026-06-18T03:40:50.411564+00:00",
     "completed_at": "2026-06-18T04:03:20.782105+00:00",
     "result": "Published draft general article mile_886193e6 for K1501 using Publisher, with two Supabase chart URLs and source refs K1501/K430/K450/K459. Fixed the Tier-2 definition issue via publish_draft update and added clear-content-audit-flag support plus tests. Deterministic provenance/image/audience checks passed; feed-sync --apply hung without output and was not completed.\n\nPublished draft general article mile_886193e6 for K1501 using Publisher, with two Supabase chart URLs and source refs K1501/K430/K450/K459. Fixed Tier-2 definition issue via publish_draft update and added clear-content-audit-flag plus tests; deterministic provenance/image/audience checks passed. Commit failed because sandbox cannot write .git/index.lock; feed-sync --apply hung without output."
+  },
+  {
+    "id": "paper_review_mile_50616ca2",
+    "title": "Paper review (Codex 24h-rule): 把同一個模型算慢一點，答案真的會變嗎？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_50616ca2 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_50616ca2",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-18T07:37:44+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-18T07:37:54.158677+00:00",
+    "claim_session_id": "aa0ff6e280c3",
+    "started_at": "2026-06-18T07:38:01.709809+00:00",
+    "completed_at": "2026-06-18T07:44:09.722007+00:00",
+    "result": "Codex source review completed for mile_50616ca2/K1370c: article numbers match K1370c and no lookahead found; provenance caveat recorded for current K1370 replicate drift. Fixed arc-dedup false intraday metadata from generic '小時', scoped-backfilled the article, synced/read back Supabase, and archived review report."
   }
 ]
