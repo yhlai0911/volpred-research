@@ -463,7 +463,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 新興市場 ex-台 波動率景觀：EEM / INDA(印度) / EWZ(巴西) / EWY(韓國) / EWW(墨西哥) 的 realized vol 與彼此相關性結構，找跨 EM 共同 vol factor（yfinance，PCA + 相關 regime）
 - [ ] 原油波動率 spillover 到股市：CL=F / USO 的 vol 衝擊是否傳導到 SPY/能源股 vol，與一般「油價漲跌」分析不同（聚焦 vol-of-vol 傳導，yfinance，明確 lag）
 - [ ] 另類資產波動率特性：URA(鈾) / KRBN(碳權) / 比特幣 等非傳統資產的 vol clustering、尾部、與傳統股債的相關性 — 它們是分散工具還是高 beta 放大器（yfinance）
-- [ ] 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）
+- [x] ~~美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）~~ → **K1439 完成，K1330/K1352 duplicate closure**。canonical K1439：UUP regime × EEM/GLD/DBC/USO/DBB，bucket `shift(1)`；naive Welch 4/5 顯著但 21d RV overlap 使 p 值過樂觀，HAC+Bonferroni 後只有 **USO** 在 level/trend 兩種 regime 都穩健，GLD null，EEM/DBC/DBB 僅方向性。K1352 不重跑，避免同題 duplicate。
 
 ### 跨資產 / 另類 batch 2（2026-06-10 補；yfinance-doable，續補 backlog，diverse axes）
 - [ ] 信用利差作為股市 vol 領先指標：HYG−LQD（高收益−投資級）spread 與 SPY realized vol 的 lead-lag（yfinance，明確 lag）

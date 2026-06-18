@@ -1,0 +1,126 @@
+{
+  "experiment_id": "K1352",
+  "title": "USD regime cross-asset volatility duplicate closure",
+  "generated_at": "2026-06-18T15:43:20.710104+00:00",
+  "created_by": "codex",
+  "seed": 42,
+  "task_resolution": "duplicate_of_existing_experiment",
+  "verdict": "SUPERSEDED_BY_K1439_AND_K1330",
+  "canonical_experiment": {
+    "experiment_id": "K1439",
+    "path": "experiments/k1439",
+    "results_path": "experiments/k1439/k1439_results.json",
+    "verdict": "CONDITIONAL_PASS",
+    "period": {
+      "start": "2010-01-04",
+      "end": "2026-06-05",
+      "n_obs": 4131
+    },
+    "reproduction_check": "uv run python experiments/k1439/reproduce.py completed successfully in this tick"
+  },
+  "prior_duplicate_closure": {
+    "experiment_id": "K1330",
+    "path": "experiments/K1330",
+    "results_path": "experiments/K1330/K1330_results.json",
+    "verdict": "SUPERSEDED_BY_K1439",
+    "closure_reason": "K1439 already tests strong-vs-weak USD regime effects on EM, gold, and commodities with the stricter HAC inference path; rerunning K1330 would duplicate evidence rather than add a new empirical result."
+  },
+  "coverage_audit": {
+    "requested_scope": {
+      "usd_proxy": [
+        "DXY",
+        "UUP"
+      ],
+      "em": [
+        "EEM"
+      ],
+      "gold": [
+        "GLD"
+      ],
+      "commodities": [
+        "DBC",
+        "USO",
+        "DBB"
+      ],
+      "method_keywords": [
+        "strong USD regime",
+        "weak USD regime",
+        "cross-asset realized volatility"
+      ]
+    },
+    "canonical_tickers": [
+      "DBB",
+      "DBC",
+      "EEM",
+      "GLD",
+      "USO"
+    ],
+    "checks": {
+      "covers_usd_proxy": true,
+      "covers_em": true,
+      "covers_gold": true,
+      "covers_commodity_basket": true,
+      "uses_strong_weak_level_regime": true,
+      "uses_trend_robustness": true,
+      "explicit_shift_1": true,
+      "uses_hac_newey_west": true,
+      "acknowledges_overlap_autocorrelation": true
+    },
+    "all_checks_pass": true,
+    "robust_assets_across_level_and_trend": [
+      "USO"
+    ]
+  },
+  "canonical_findings": {
+    "sample_start": "2010-01-04",
+    "sample_end": "2026-06-05",
+    "n_obs": 4131,
+    "naive_welch_significant_assets": [
+      "DBB",
+      "DBC",
+      "EEM",
+      "USO"
+    ],
+    "hac_level_significant_assets": [
+      "USO"
+    ],
+    "hac_level_and_trend_robust_assets": [
+      "USO"
+    ],
+    "most_sensitive_asset_by_abs_hac_t": "USO",
+    "verdict_reason": "1/5 assets pass HAC+Bonferroni; trend-regime sign concordance 4/5. Effect not universal but isolated to USO."
+  },
+  "forecast_timing_guard": {
+    "strategy_returns_computed": false,
+    "required_pattern": "signal.shift(1)",
+    "actual_canonical_pattern": "K1439 uses bucket.shift(1) in both USD regime constructors",
+    "note": "K1352 performs no new strategy backtest. The canonical experiment's regime classification uses t-1 information; any future trading signal must use signal.shift(1) or equivalent one-step-ahead alignment."
+  },
+  "literature_checked": [
+    {
+      "title": "Common Risk Factors in Currency Markets",
+      "url": "https://www.nber.org/papers/w14082",
+      "role": "Dollar/currency global-risk factor framing."
+    },
+    {
+      "title": "Countercyclical Currency Risk Premia",
+      "url": "https://www.nber.org/papers/w16427",
+      "role": "Dollar risk premia and bad-times risk compensation framing."
+    },
+    {
+      "title": "Is gold the best hedge and a safe haven under changing stock market volatility?",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1016/j.rfe.2013.03.001",
+      "role": "Gold hedge/safe-haven channel framing."
+    }
+  ],
+  "closure_reason": "K1352 is the same research_program.md line as prior K1330 and canonical K1439. K1439 already covers UUP/DXY strong-vs-weak regimes for EEM, GLD, DBC, USO, and DBB with explicit shift(1) and HAC/Newey-West inference. Re-running would only duplicate evidence.",
+  "knowledge_write": "skipped_duplicate_governance_receipt",
+  "codex_review": {
+    "status": "PASS_DUPLICATE_CLOSURE",
+    "notes": [
+      "Canonical K1439 reproduction completed successfully in this tick.",
+      "K1330 had already closed the same line as SUPERSEDED_BY_K1439.",
+      "K1352 adds no new empirical claim and should not write a knowledge entry."
+    ]
+  }
+}
