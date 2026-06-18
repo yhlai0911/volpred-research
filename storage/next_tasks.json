@@ -33805,5 +33805,122 @@
     "started_at": "2026-06-17T22:10:43.227119+00:00",
     "completed_at": "2026-06-17T22:15:45.020241+00:00",
     "result": "K1390 24h post-publish review: CONDITIONAL_PASS. Core methodology clean (no lookahead/leakage, numbers match). 4 WARNs (no MCP correction, CR alpha=0.01 ind-p=0.046 borderline, single OOS, ad hoc verdict tolerance). Reviewer: code-reviewer subagent (Codex CLI fallback). Report: experiments/k1390/REVIEW_24h_2026-06-18.md. Knowledge.json entry d6a6a666."
+  },
+  {
+    "id": "email-11773-83462b",
+    "title": "[email_reply] Re: [VolPred 6h Summary] 6h 平台運營彙報 2026-06-18 00:05 → 06:05 台灣時間",
+    "description": "Gmail UID: 11773\nMessage-ID: <8663F9B9-0A19-4F48-BE06-BA899A674CA3@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Thu, 18 Jun 2026 08:51:06 +0800\nSubject: Re: [VolPred 6h Summary] 6h 平台運營彙報 2026-06-18 00:05 → 06:05 台灣時間\n\n--- 用戶回信內容 ---\n徹底解決底層問題\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月18日 06:05 寫道：\r\n> \r\n> ﻿\r\n> 6h 平台運營彙報 2026-06-18 00:05 → 06:05 台灣時間\r\n> \r\n> 窗口 2026-06-17 16:05 UTC → 22:05 UTC ｜ 寄送 2026-06-17 22:05 UTC ｜ 報告人：AI 平台運營經理（自主系統）\r\n> 執行摘要\r\n> \r\n> 本窗口 18 commits + 1 published + 1 drafts；4/5 Mission 目標有活動（M1/M2/M4/M5）。 主要產出類型：other (10 件)。 2 個值得關注事件（見下表）。\r\n> \r\n> Mission 5 大目標推進\r\n> \r\n> 目標\t狀態\t本期證據\t備註\r\n> M1 把文章寫好\t✅ active\t1 published + 1 drafts\tdraft pool 釋出節奏 + 新草稿補充\r\n> M2 把實驗與研究做好\t✅ active\t4 experiment commits + 0 knowledge updates\t新 K 實驗 + Codex review + knowledge entry\r\n> M3 把學術論文寫好\t⚪ idle\t0 paper-related commits\t本窗口無論文異動\r\n> M4 把網頁平台運營好\t✅ active\t2 ops/fix commits\tops 修復 / alert 處理 / cron 調整\r\n> M5 把曝光流量拉高\t✅ active\t1 published (流量 surface)\t新發佈進入索引 + Supabase mirror\r\n> 平台健康儀表板\r\n> \r\n> 指標\t當前值\t判讀\r\n> Draft pool 文章數\t88\t🟢 充足\r\n> Published 累積\t1378\t—\r\n> 釋出 gap (interval=180min)\t358 min\t🔴 已 due / 超期\r\n> Last release time\t00:07 台灣時間\t—\r\n> Alert breaches (current)\t1 / 5 checks\t🔴 1 breach\r\n> knowledge.json size\t2.31 MB\t🟢 正常\r\n> knowledge.json mtime\t2026-06-18 05:16 台灣時間\t—\r\n> Pending tasks queue\t2\t—\r\n> Active worktrees\t0\t🟢\r\n> 異常與值得關注事件\r\n> \r\n> ⚠️ 當前有 1 個 alert breach（總 check 5 個）\r\n> ⚠️ 釋出 gap 358min 超過 interval+60min (240min) — 應 review piggy-back\r\n> 下個 6h 建議行動\r\n> \r\n> 釋出已 due（gap=358min > interval=180min）— 跑 `VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings`\r\n> 原始數據（供查證）\r\n> \r\n> paper/experiment: 6 fix/ops: 2 other: 10\r\n> Git commits (18)\r\n> \r\n> SHA\tSubject\tTime\r\n> 56866ac7\t[codex] complete K1532 turnover-cost dominance\t05:18\r\n> 5516fed9\tops(hourly 05:13): PHASE-Z safety-net auto-commit (agent left uncommitted)\t05:13\r\n> 9e6b1744\thourly-05 blocked_reason hygiene + K1532 orphan commit\t05:11\r\n> 041f0ff2\thourly-04 journal_discovery_20260617_3\tresea\r\n> 1699a2e6\t[codex] rerun K446 with embargoed HAC tests\t03:58\r\n> 41c4270c\tpaper_review_mile_eabd7e46\tK446\r\n> 1da7e51e\t[codex] complete mega-cap passive-flow proxy experiment\t02:47\r\n> 53b37f2c\thourly-02 paper_review mile_05102b5c (K970) CONDITIONAL_PASS\tfix\r\n> 9b92dfb5\thourly-01\tK1531\r\n> 3b9ee512\tK1531: FX realized skewness risk premium without options (NULL)\t01:39\r\n> 4c2e20a6\t[codex] add K1528 research draft article\t01:37\r\n> ae492b0f\t[codex] record hourly task state\t01:23\r\n> d0c37fd1\tmerge K1348 ETF heartbeat quarter-end pressure (CONDITIONAL_PASS) from hourly-00 worktree\t01:11\r\n> 598ab53f\tK1348: ETF heartbeat / tax-efficiency quarter-end pressure test (CONDITIONAL_PASS)\t00:36\r\n> c1648dbe\t[codex] add factor timing regime experiment\t00:21\r\n> db16d577\t[codex] record publication candidates refresh\t00:19\r\n> 81770be3\tmerge K1530 thematic ETF coherence decay (FAIL) from hourly-23 worktree\t00:13\r\n> cddf43c1\t[codex] record hourly release state\t00:11\r\n> 文章 (published 1 / drafts 1)\r\n> \r\n> Status\tID\tAudience\tTitle\tTime\r\n> published\tmile_05102b5c\tgeneral\t把波動拆成長期和短期之後，真正有幫助的不是歷史平均，而是市場現在有多怕\t00:07\r\n> draft\tmile_d3a6f720\tresearch\tK1528：免費 sentiment-beta proxy 沒有重現情緒 beta 溢酬\t01:28\r\n> Work log task entries (6)\r\n> \r\n> Type\tResult\tTitle\r\n> experiment\t?\t\r\n> experiment\t?\t\r\n> paper_review\t?\t\r\n> paper_review\t?\t\r\n> platform_ops\tsucceeded\t\r\n> experiment\t?\t\r\n> Notifications (15)\r\n> \r\n> Time\tLevel\tTitle\r\n> 01:44\tinfo\t[VolPred Alert][INFO] 自主 loop fire 01:45 — K1531 FX skew NULL + K1348 cleanup merge\r\n> 04:10\tinfo\t[VolPred Boss Report] 2026-06-18 04:10 台灣時間 平台運營報告\r\n> 00:10\tinfo\t[VolPred Boss Report] 2026-06-18 00:10 台灣時間 平台運營報告\r\n> 00:07\tmilestone\t[VolPred] 新文章發布：地緣政治風險指數能預測美股波動嗎？六千個交易日的答案\r\n> 05:12\tinfo\t[VolPred Alert][INFO] 自主 loop fire 05:12 — blocked_reason hygiene 7 task\r\n> 00:07\tmilestone\t[VolPred] 新文章發布：地緣政治風險指數能預測美股波動嗎？六千個交易日的答案\r\n> 00:07\tmilestone\t[VolPred] 新文章發布：把波動拆成長期和短期之後，真正有幫助的不是歷史平均，而是市場現在有多怕\r\n> 03:19\twarn\t[VolPred Alert][WARN] Autonomous loop 03:08 — K446 文章 24h 審查 FAIL\r\n> 00:07\tmilestone\t[VolPred] 新文章發布：把波動拆成長期和短期之後，真正有幫助的不是歷史平均，而是市場現在有多怕\r\n> 02:18\tinfo\t[VolPred Alert][INFO] 自主 loop fire 02:08 — K970 paper review CONDITIONAL_PASS（修 stale README）\r\n> 00:05\tinfo\t[VolPred 6h Summary] 6h 平台運營彙報 2026-06-17 18:05 → 00:05 台灣時間\r\n> 05:01\tinfo\t[VolPred\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-18T01:00:09.740912+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11773,
+    "email_message_id": "<8663F9B9-0A19-4F48-BE06-BA899A674CA3@gmail.com>",
+    "email_subject": "Re: [VolPred 6h Summary] 6h 平台運營彙報 2026-06-18 00:05 → 06:05 台灣時間",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "last_released_at": "2026-06-18T01:17:54.109138+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-18T01:17:59.104525+00:00",
+    "claim_session_id": "1913886d3141",
+    "started_at": "2026-06-18T01:17:59.803583+00:00",
+    "completed_at": "2026-06-18T01:20:22.304417+00:00",
+    "result": "統一回覆: docs/governance/2026-06/release_layer_root_cause_20260618.md + governance_release_layer_arc_upgrade_a1 P1 已派入池 + email notification_id=2c4c36f5"
+  },
+  {
+    "id": "email-11772-36831d",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)",
+    "description": "Gmail UID: 11772\nMessage-ID: <CF94B4FE-21B4-4C9C-B014-78B3705513E8@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Thu, 18 Jun 2026 08:50:30 +0800\nSubject: Re: [VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)\n\n--- 用戶回信內容 ---\n徹底解決底層問題\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月18日 05:01 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Release pool cron gap > 4.0h (interval=180min)\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。\r\n> \r\n> last_fire_at: 2026-06-17T16:07:08.708304+00:00\r\n> gap_hours: 4.91\r\n> configured_interval_minutes: 180\r\n> log_path: storage/logs/cron/release_pool.log\r\n> 影響\r\n> \r\n> 文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）\r\n> 與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。\r\n> \r\n> 建議行動\r\n> \r\n> 立即手動釋出（最快復原）：\r\n> VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\r\n> 診斷 host cron 是否仍在跑：\r\n> tail -20 storage/logs/cron/release_pool.log\r\n> crontab -l | grep release_pool\r\n> 若 cron daemon 卡住：重新 install crontab 或 launchd job\r\n> 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist\r\n> 與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-18T01:00:21.310518+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11772,
+    "email_message_id": "<CF94B4FE-21B4-4C9C-B014-78B3705513E8@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "last_released_at": "2026-06-18T01:17:53.486368+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-18T01:17:57.768488+00:00",
+    "claim_session_id": "64275115bd04",
+    "started_at": "2026-06-18T01:17:58.418372+00:00",
+    "completed_at": "2026-06-18T01:20:22.142558+00:00",
+    "result": "統一回覆: docs/governance/2026-06/release_layer_root_cause_20260618.md + governance_release_layer_arc_upgrade_a1 P1 已派入池 + email notification_id=2c4c36f5"
+  },
+  {
+    "id": "email-11771-2d9306",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-06-18 05:01 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11771\nMessage-ID: <9EC60CAC-EAA2-4331-98BF-0E48C5DE0B30@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Thu, 18 Jun 2026 08:50:04 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-18 05:01 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n徹底解決底層邏輯問題\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月18日 05:01 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-06-18 05:01 台灣時間 · Overall CRITICAL\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tcritical\t0 pending tasks, 0 in-flight — platform idle (top types: [])\trefill pool (article candidates + research-backlog fallback)\r\n> production_throughput\tok\t8 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t8/8 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample report URLs ok; 3/3 core pages content-ok\t—\r\n> verification_fb_pipeline\tok\t4 FB posts awaiting interactive session\tinteractive session / Chrome MCP available時接手貼文與留言\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\twarn\t1 current warn/critical alert conditions\tingest alerts → run remediation per alert.md auto-action table\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。全部正常\r\n> \r\n> === cron 成果掌握 review — 2026-06-18 05:01:10（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=574 exit=0 idle | last: 2026-06-18 04:17:38 (log-mtime)\r\n>   compute_worker    runs=2266 exit=0 idle | last: 2026-06-18 05:00:03 (log-mtime)\r\n>   check_alerts      runs=573 exit=0 running | last: 2026-06-18 05:00:03 (log-mtime)\r\n>   collect_tw        runs=18 exit=0 idle | last: 2026-06-17 15:00:27 (log-mtime)\r\n>   collect_us        runs=17 exit=0 idle | last: 2026-06-17 07:03:23 (log-mtime)\r\n>   daily_update      runs=20 exit=0 idle | last: 2026-06-17 08:20:36 (log-mtime)\r\n>   release_pool      runs=95 exit=0 idle | last: 2026-06-18 04:00:58 (log-mtime)\r\n>   market_cal        runs=3 exit=0 idle | last: 2026-06-15 08:00:19 (log-mtime)\r\n>   memory_health     runs=23 exit=0 idle | last: 2026-06-17 05:30:10 (log-mtime)\r\n>   work_summary      runs=95 exit=0 idle | last: 2026-06-18 00:05:17 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：2 筆\r\n>   041f0ff2 hourly-04 journal_discovery_20260617_3 | research_program.md backlog 174→178 (+4 strict-selectivity axes after 06-17 4-batch saturation)\r\n>   1699a2e6 [codex] rerun K446 with embargoed HAC tests\r\n> \r\n> ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 10 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 041f0ff2\thourly-04 journal_discovery_20260617_3\trogra\r\n> 1699a2e6\t[codex] rerun K446 with embargoed HAC tests\t03:58\r\n> 41c4270c\tpaper_review_mile_eabd7e46\tFAIL\r\n> 1da7e51e\t[codex] complete mega-cap passive-flow proxy experiment\t02:47\r\n> 53b37f2c\thourly-02 paper_review mile_05102b5c (K970) CONDITIONAL_PASS\tREADM\r\n> 9b92dfb5\thourly-01\tealiz\r\n> 3b9ee512\tK1531: FX realized skewness risk premium without options (NULL)\t01:39\r\n> 4c2e20a6\t[codex] add K1528 research draft article\t01:37\r\n> ae492b0f\t[codex] record hourly task state\t01:23\r\n> d0c37fd1\tmerge K1348 ETF heartbeat quarter-end pressure (CONDITIONAL_PASS) from hourly-00 worktree\t01:11\r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 0\r\n> \r\n> By type:\r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> btc-gas-negative\t`major_revision` — 2026-06-10 a\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-18T01:00:31.795808+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11771,
+    "email_message_id": "<9EC60CAC-EAA2-4331-98BF-0E48C5DE0B30@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-06-18 05:01 台灣時間 平台運營報告",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "last_released_at": "2026-06-18T01:17:52.869352+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-18T01:17:56.033960+00:00",
+    "claim_session_id": "a330285d23c1",
+    "started_at": "2026-06-18T01:17:56.815512+00:00",
+    "completed_at": "2026-06-18T01:20:21.958498+00:00",
+    "result": "統一回覆: docs/governance/2026-06/release_layer_root_cause_20260618.md + governance_release_layer_arc_upgrade_a1 P1 已派入池 + email notification_id=2c4c36f5"
+  },
+  {
+    "id": "email-11770-f3d566",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 自主 loop fire 04:07 — backlog +4 嚴格 selectivity 入單，pool",
+    "description": "Gmail UID: 11770\nMessage-ID: <3BDFF343-DF18-4A9D-8FB3-2B179A133288@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Thu, 18 Jun 2026 08:49:26 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 04:07 — backlog +4 嚴格 selectivity 入單，pool 4 連跑 release-layer 飽和訊號\n\n--- 用戶回信內容 ---\n問題都要處理\r\n依照你的建議和判斷進行\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月18日 04:17 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 04:07 — backlog +4 嚴格 selectivity 入單，pool 4 連跑 release-layer 飽和訊號\r\n> Alert level: info\r\n> INFO\r\n> Hourly-04 摘要 — 2026-06-18 04:07-04:16 台灣時間\r\n> \r\n> 派工\r\n> \r\n> Task: journal_discovery_20260617_3 (P2 platform_ops, auto-refill fallback)\r\n> Owner: hourly-04\r\n> Agent: general-purpose subagent (sonnet medium per task-type router)\r\n> 耗時: ~9 分鐘（含 selectivity gate WebSearch + dedup）\r\n> Verdict: succeeded\r\n> 完成項目\r\n> \r\n> research_program.md backlog 174 → 178 條（+4 strict-selectivity 軸）\r\n> 06-17 連跑 4 批已加 22 條後，本批嚴格 axis-level dedup（不僅字面）只入零撞 4 條\r\n> 新增 4 axes（全 yfinance / FRED / DefiLlama 免費資料可啟動）\r\n> #\tAxis\t來源（趨勢層級，未捏造）\r\n> 1\t日內 U-shape RV 時段加權 → HAR feature\tJFEC 2024 + Andersen-Bollerslev periodicity\r\n> 2\tVT / dynamic risk parity turnover-cost dominance\tJ.Investment Management / arXiv 2025-26\r\n> 3\tSOFR-IORB reserve-side scarcity → Treasury vol regime\tFed FEDS Notes 2025-01\r\n> 4\tStablecoin supply shock → FX & EM 雙向 spillover\tBIS WP 1340 2025\r\n> 拒 5 軸（dedup 紀錄）\r\n> AI IV-RV divergence（與 line 504/518 過近）\r\n> RAG + 10-K LLM（與 line 611 FinBERT 過近）\r\n> LOB HF imbalance（無免費資料；K1530 已試代理）\r\n> 氣候 physical insurance vol（line 487 NOAA 已覆蓋）\r\n> Long-term capital market regime（不在 vol-pred 主軸）\r\n> Pool 狀態觀察（注意點，給老闆）\r\n> \r\n> Pool 4 連跑 journal_discovery 是 release-layer 飽和訊號 — 文章端 candidate K's 都被 narrative-arc dedup gate 擋掉 → fallback chain 一路掉到 backlog refill → journal_discovery 連派 5 班\r\n> Root cause = 釋出端 cluster 飽和（per memory feedback_recycling_is_release_layer_not_research），非研究端缺方向\r\n> 下班建議：optimal 是從現有 178 條 backlog 挑一條派 experiment（轉化研究成果）而非繼續 journal scan\r\n> 已 commit 041f0ff2\r\n> 系統狀態\r\n> \r\n> slot 0/4 occupied\r\n> compute_queue 無待 followup\r\n> email backlog 無未處理回信\r\n> reader-facing scan state date=2026-06-17（host cron 06:00 應會 refresh）\r\n> 4 個 FB awaiting interactive（個人帳號 Chrome 限定，hourly cron 無法處理）\r\n> ⏱ 時間\r\n> \r\n> 開始 2026-06-18 04:07:47（台灣時間）\r\n> 停止 2026-06-18 04:16:30（台灣時間）\r\n> 總時間 ~9 分鐘\r\n> ⏭ 下次任務 2026-06-18 05:07（台灣時間）— hourly cron 7 * * * *\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-18T01:00:46.040901+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11770,
+    "email_message_id": "<3BDFF343-DF18-4A9D-8FB3-2B179A133288@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 04:07 — backlog +4 嚴格 selectivity 入單，pool 4 連跑 release-layer 飽和訊號",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "last_released_at": "2026-06-18T01:17:52.272331+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-18T01:17:54.830473+00:00",
+    "claim_session_id": "11613c38d347",
+    "started_at": "2026-06-18T01:17:55.318782+00:00",
+    "completed_at": "2026-06-18T01:20:21.524905+00:00",
+    "result": "統一回覆: docs/governance/2026-06/release_layer_root_cause_20260618.md + governance_release_layer_arc_upgrade_a1 P1 已派入池 + email notification_id=2c4c36f5"
+  },
+  {
+    "id": "governance_release_layer_arc_upgrade_a1",
+    "title": "[governance] Release-layer arc 升維 schema + check_arc_dedup 改造 (Phase A1)",
+    "description": "Per docs/governance/2026-06/release_layer_root_cause_20260618.md Phase A1. 為 narrative-arc dedup 加 mechanism + time_horizon 兩軸，避免同 asset 不同機制誤判 dup（當前 K1506/K1512/K1339/K1499/K1513/K1529/K1530/K1510/K1347/K1501 等 10+ 候選被 silent reject 是 release-layer 飽和根因）。Touch: scripts/check_arc_dedup.py + 既有 mile metadata backfill + 對應 test。驗收: 重 score 上述 10 K 至少 5 個重新進池。完成後 sub-task A2 (refill 套用) 自動 unblock。",
+    "task_type": "governance",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-18T01:19:29+00:00",
+    "source": "boss_directive_email_11770_11771_11772_11773",
+    "tags": [
+      "release-layer",
+      "arc-dedup",
+      "governance",
+      "refactor",
+      "phase-A1"
+    ]
   }
 ]
