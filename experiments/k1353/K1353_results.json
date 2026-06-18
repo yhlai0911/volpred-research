@@ -1,0 +1,307 @@
+{
+  "experiment_id": "K1353",
+  "title": "Private-credit software spillover duplicate closure",
+  "generated_at": "2026-06-18T16:51:19.741337+00:00",
+  "created_by": "codex",
+  "seed": 42,
+  "task_resolution": "duplicate_of_existing_experiment",
+  "verdict": "SUPERSEDED_BY_K1344_NULL",
+  "canonical_experiment": {
+    "experiment_id": "K1344_private_credit_software_spillover",
+    "path": "experiments/K1344_private_credit_software_spillover",
+    "results_path": "experiments/K1344_private_credit_software_spillover/K1344_results.json",
+    "verdict": "NULL",
+    "data": {
+      "source": "yfinance auto_adjust=True daily close",
+      "start": "2013-01-01",
+      "end_exclusive": "2026-06-15",
+      "actual_last_date": "2026-06-12",
+      "tickers": {
+        "bdc_proxy": [
+          "BIZD",
+          "ARCC",
+          "BXSL",
+          "OBDC",
+          "FSK"
+        ],
+        "targets": [
+          "IGV",
+          "HYG"
+        ],
+        "controls": [
+          "SPY",
+          "QQQ"
+        ]
+      },
+      "bdc_basket_rule": "Equal-weight daily log return over available BDC proxy tickers; require at least 2 members.",
+      "bdc_member_count_oos": {
+        "min": 4,
+        "median": 5.0,
+        "max": 5
+      }
+    }
+  },
+  "coverage_audit": {
+    "requested_scope": {
+      "theme": "software/technology-concentrated private-credit stress spillover",
+      "proxy": [
+        "BDC basket",
+        "BIZD",
+        "listed BDCs"
+      ],
+      "targets": [
+        "IGV",
+        "HYG"
+      ],
+      "required_guard": "signal.shift(1) or equivalent lagged features"
+    },
+    "canonical_path": "experiments/K1344_private_credit_software_spillover",
+    "checks": {
+      "covers_bdc_basket": true,
+      "covers_igv_hyg": true,
+      "uses_market_tech_controls": true,
+      "forecast_family_igv_hyg_5_21": true,
+      "uses_hac_newey_west": true,
+      "uses_block_bootstrap_seeded": true,
+      "explicit_shift_1_features": true,
+      "explicit_signal_shift_guard": true
+    },
+    "all_checks_pass": true,
+    "passing_or_conditional_cells": [],
+    "best_directional_cell": {
+      "target": "IGV",
+      "horizon": 21,
+      "n_oos": 1367,
+      "baseline_qlike": 0.2758672682639059,
+      "augmented_qlike": 0.25602982540577,
+      "qlike_improvement_pct": 7.1909375051912905,
+      "dm_t": 1.3468186120015389,
+      "dm_p_two_sided": 0.17803865889726,
+      "bootstrap_mean_diff": 0.01983744285813585,
+      "bootstrap_ci95": [
+        -0.01077993140863262,
+        0.04715415348439368
+      ],
+      "bootstrap_p_improve": 0.0979020979020979,
+      "passes_bonferroni": false,
+      "conditional_pass": false
+    },
+    "bonferroni_alpha": 0.0125
+  },
+  "canonical_findings": {
+    "forecast_results": [
+      {
+        "target": "IGV",
+        "horizon": 5,
+        "n_oos": 1367,
+        "baseline_qlike": 0.47617312465893996,
+        "augmented_qlike": 0.46709534156828564,
+        "qlike_improvement_pct": 1.9064039149954768,
+        "dm_t": 0.4742365456755657,
+        "dm_p_two_sided": 0.635331235242497,
+        "bootstrap_mean_diff": 0.00907778309065424,
+        "bootstrap_ci95": [
+          -0.03866830402872741,
+          0.04649770334298354
+        ],
+        "bootstrap_p_improve": 0.3626373626373626,
+        "passes_bonferroni": false,
+        "conditional_pass": false
+      },
+      {
+        "target": "IGV",
+        "horizon": 21,
+        "n_oos": 1367,
+        "baseline_qlike": 0.2758672682639059,
+        "augmented_qlike": 0.25602982540577,
+        "qlike_improvement_pct": 7.1909375051912905,
+        "dm_t": 1.3468186120015389,
+        "dm_p_two_sided": 0.17803865889726,
+        "bootstrap_mean_diff": 0.01983744285813585,
+        "bootstrap_ci95": [
+          -0.01077993140863262,
+          0.04715415348439368
+        ],
+        "bootstrap_p_improve": 0.0979020979020979,
+        "passes_bonferroni": false,
+        "conditional_pass": false
+      },
+      {
+        "target": "HYG",
+        "horizon": 5,
+        "n_oos": 1367,
+        "baseline_qlike": 0.5618630212554904,
+        "augmented_qlike": 0.5451122482880466,
+        "qlike_improvement_pct": 2.9812912282452646,
+        "dm_t": 0.7356316610652419,
+        "dm_p_two_sided": 0.4619548890898185,
+        "bootstrap_mean_diff": 0.016750772967443765,
+        "bootstrap_ci95": [
+          -0.0316010553094561,
+          0.06476337889052994
+        ],
+        "bootstrap_p_improve": 0.26173826173826176,
+        "passes_bonferroni": false,
+        "conditional_pass": false
+      },
+      {
+        "target": "HYG",
+        "horizon": 21,
+        "n_oos": 1367,
+        "baseline_qlike": 0.342914164711124,
+        "augmented_qlike": 0.32425654959986444,
+        "qlike_improvement_pct": 5.440899511099818,
+        "dm_t": 0.8640913562546229,
+        "dm_p_two_sided": 0.38753770697074863,
+        "bootstrap_mean_diff": 0.018657615111259573,
+        "bootstrap_ci95": [
+          -0.021781729288891938,
+          0.05909871985498424
+        ],
+        "bootstrap_p_improve": 0.17382617382617382,
+        "passes_bonferroni": false,
+        "conditional_pass": false
+      }
+    ],
+    "tests": {
+      "primary_family": "2 targets (IGV,HYG) x 2 horizons (5,21)",
+      "n_tests": 4,
+      "bonferroni_alpha": 0.0125,
+      "dm_loss_diff": "QLIKE_baseline - QLIKE_augmented; positive means BDC augmentation helps.",
+      "dm_covariance": "Newey-West HAC with maxlags=horizon+5",
+      "bootstrap": {
+        "method": "moving block bootstrap of OOS loss diff",
+        "block_size": 21,
+        "reps": 1000
+      }
+    },
+    "verdict_rationale": {
+      "igv_pass_bonferroni": false,
+      "igv_conditional": false,
+      "hyg_credit_signal": false
+    },
+    "event_study": {
+      "n_events": 13,
+      "cooldown_days": 21,
+      "by_target": {
+        "IGV": {
+          "5": {
+            "n_event_obs": 13,
+            "event_mean_var": 0.12435834987898324,
+            "non_event_mean_var": 0.07615006599698704,
+            "event_minus_non_event": 0.0482082838819962,
+            "bootstrap_ci95": [
+              -0.018283649599951293,
+              0.10084678755686179
+            ],
+            "bootstrap_p_gt_0": 0.06893106893106893
+          },
+          "21": {
+            "n_event_obs": 13,
+            "event_mean_var": 0.15287055410432962,
+            "non_event_mean_var": 0.07649040833763898,
+            "event_minus_non_event": 0.07638014576669064,
+            "bootstrap_ci95": [
+              0.022186889622900205,
+              0.1329181049168828
+            ],
+            "bootstrap_p_gt_0": 0.004995004995004995
+          }
+        },
+        "HYG": {
+          "5": {
+            "n_event_obs": 13,
+            "event_mean_var": 0.009687502633461232,
+            "non_event_mean_var": 0.005323073513758749,
+            "event_minus_non_event": 0.004364429119702483,
+            "bootstrap_ci95": [
+              -0.0033956986997705856,
+              0.010210455448441812
+            ],
+            "bootstrap_p_gt_0": 0.08791208791208792
+          },
+          "21": {
+            "n_event_obs": 13,
+            "event_mean_var": 0.011186605631569426,
+            "non_event_mean_var": 0.005312775731632247,
+            "event_minus_non_event": 0.005873829899937179,
+            "bootstrap_ci95": [
+              -0.000572345477603853,
+              0.01240717161840765
+            ],
+            "bootstrap_p_gt_0": 0.03196803196803197
+          }
+        }
+      }
+    },
+    "caveats": [
+      "Public BDC prices are noisy proxies, not loan-level private-credit exposure or NAV marks.",
+      "BDC basket composition is dynamic because BXSL/OBDC histories start later; OOS median member count is reported.",
+      "Survivorship and ticker-selection bias remain possible in listed BDC proxies.",
+      "IGV is public software equity, not private SaaS borrower collateral.",
+      "Result should be interpreted as incremental public-market forecasting evidence, not causal private-credit transmission."
+    ]
+  },
+  "related_context": {
+    "K1332": {
+      "exists": true,
+      "path": "experiments/k1332/k1332_results.json",
+      "verdict": null,
+      "summary": {
+        "verdict": "PASS_NARROW_CREDIT_ONLY",
+        "summary": "Private-credit proxy adds Harvey-strength OOS RV forecasting value only for BKLN, HYG; it does not improve all target markets.",
+        "event_targets_with_ratio_gt_1": 4,
+        "weak_oos_private_credit_wins": [],
+        "strong_oos_private_credit_wins": [
+          "BKLN:har_vs_har_pc",
+          "BKLN:har_market_vs_har_market_pc",
+          "HYG:har_vs_har_pc",
+          "HYG:har_market_vs_har_market_pc"
+        ]
+      }
+    },
+    "K1499": {
+      "exists": true,
+      "path": "experiments/k1499/k1499_results.json",
+      "verdict": "PARTIAL",
+      "summary": "HYG: BDC-RV stress does NOT survive (pure beta); NAV-discount proxy survives at horizons [5] | KRE: NEITHER BDC-RV stress NOR NAV-discount proxy survives SPY-vol control at any horizon (no incremental signal) | IWM: NEITHER BDC-RV stress NOR NAV-discount proxy survives SPY-vol control at any horizon (no incremental signal)"
+    }
+  },
+  "forecast_timing_guard": {
+    "strategy_returns_computed": false,
+    "required_pattern": "signal.shift(1)",
+    "canonical_patterns": [
+      "K1344 creates *_l1 predictors with .shift(1)",
+      "K1344 event-study signal uses panel['bdc_pressure'].shift(1)",
+      "K1344 expanding training excludes rows whose forward target is not fully known before the forecast origin"
+    ]
+  },
+  "literature_checked": [
+    {
+      "name": "Financial Stability Board, Report on vulnerabilities in private credit, 2026-05-06",
+      "url": "https://www.fsb.org/2026/05/fsb-warns-on-private-credit-vulnerabilities/"
+    },
+    {
+      "name": "Morgan Stanley, The Risks of Private Credit's Software Exposure, 2026",
+      "url": "https://www.morganstanley.com/insights/podcasts/thoughts-on-the-market/private-credit-software-ai-disruption-vishy-tirupattur-vishwas-patkar"
+    },
+    {
+      "name": "J.P. Morgan Asset Management, Tech, Software, and BDCs, 2026",
+      "url": "https://am.jpmorgan.com/us/en/asset-management/institutional/insights/portfolio-insights/fixed-income/fixed-income-perspectives/tech-software-and-bdcs-navigating-volatility-and-ai-disruption-in-investment-grade-credit/"
+    },
+    {
+      "name": "MSCI, Private Capital in Focus presentation, 2026",
+      "url": "https://www.msci.com/downloads/web/msci-com/discover-msci/events/event-assets/2026/may/Presentation_%20Private%20Capital%20in%20Focus_USEurope_May132026.pdf"
+    }
+  ],
+  "closure_reason": "K1353 is textually the same research_program.md item already completed as K1344. K1344 directly tests BDC/software private-credit stress spillover to IGV/HYG with SPY/QQQ controls, lagged features, HAC tests, Bonferroni correction, and moving-block bootstrap. The canonical verdict is NULL, so rerunning K1353 would duplicate a completed null experiment.",
+  "knowledge_write": "skipped_duplicate_null_receipt",
+  "codex_review": {
+    "status": "PASS_DUPLICATE_CLOSURE",
+    "notes": [
+      "K1344 fully covers the requested K1353 scope.",
+      "K1344 result is NULL; no knowledge entry should be written for K1353.",
+      "Do not promote descriptive event-study positives as forecast evidence."
+    ]
+  }
+}

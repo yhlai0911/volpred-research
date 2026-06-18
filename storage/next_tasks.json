@@ -34290,5 +34290,41 @@
     "started_at": "2026-06-18T15:40:13.654611+00:00",
     "completed_at": "2026-06-18T15:43:52.606076+00:00",
     "result": "K1352 closed as duplicate/superseded by K1439 and prior K1330 closure. Reproduced K1439 successfully this tick: verdict remains CONDITIONAL_PASS; HAC+Bonferroni leaves only USO robust under both USD regime definitions. Added experiments/k1352 receipt and closed research_program checkbox; no knowledge write."
+  },
+  {
+    "id": "paper_review_mile_7d5d0e1f",
+    "title": "Paper review (Codex 24h-rule): VIX 報的是恐慌，不是真實波動——有辦法同時吸收兩者的優點嗎？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7d5d0e1f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_7d5d0e1f",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-18T16:47:53+00:00"
+  },
+  {
+    "id": "K1353",
+    "title": "K1353: 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 588). Original: 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1353.py with signal.shift(1) + seed=42, (c) K1353_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "source": "research_backlog_auto",
+    "source_line": 588,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-18T16:48:39Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-18T16:48:47.387966+00:00",
+    "claim_session_id": "1a40b7708cb3",
+    "started_at": "2026-06-18T16:48:58.049659+00:00",
+    "completed_at": "2026-06-18T16:51:48.361120+00:00",
+    "result": "K1353 closed as duplicate/superseded by K1344. Canonical K1344 already tests BDC software/private-credit stress spillover to IGV/HYG with shift(1), SPY/QQQ controls, HAC, bootstrap, Bonferroni; verdict NULL with 0/4 forecast cells passing. Added experiments/k1353 receipt and closed research_program checkbox; no knowledge write."
   }
 ]

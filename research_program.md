@@ -585,7 +585,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] MOC imbalance 公布後尾盤漂移可交易性 — ETF/大型股尾盤分鐘代理，檢定 imbalance 方向是否預測收盤前漂移與隔夜 gap，含成本（~1.7bp liquidity premium）（來源：NYSE/CFA 2025 MOC imbalance）
 > **新軸 3 — 私募信貸 / BDC 影子訊號（2025-26 危機熱點）**
 - [ ] BDC 股價壓力作私募信貸危機前哨 vol 訊號 — yfinance 上市 BDC（ARCC/BXSL/OBDC/FSK）+ BIZD 的 RV + 折溢價/動能 proxy，檢定是否領先 HYG/KRE/IWM vol（來源：FSB 2026-05 Private Credit Vulnerabilities，違約率升 9.2%；BCRED 贖回潮）
-- [ ] 軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）
+- [x] ~~軟體/科技集中型私募信貸壓力的板塊外溢 — BDC 籃 vs IGV/HYG RV，檢定產業曝險贖回是否在板塊 vol 留足跡（來源：MS/Lexology 2026 私募信貸軟體集中度）~~ → **K1344 完成 NULL；K1353 duplicate closure**。K1344 已用 BIZD/ARCC/BXSL/OBDC/FSK BDC 籃 × IGV/HYG，含 SPY/QQQ controls、全部 features `.shift(1)`、HAC + 1000-rep block bootstrap、Bonferroni alpha 0.0125。4 個 OOS forecast cells 皆未過：IGV h21 方向最佳 +7.19% 但 DM t=1.35 p=0.178；event-study 正向僅 diagnostic，不可升格為 forecast claim。
 > **新軸 4 — AI 電力 × 能源轉型 vol**
 - [x] ~~資料中心電力需求衝擊對公用/電網 ETF 的 vol 重定價~~ → **K1508 completed 2026-06-16，NULL**：queue 原派 `K1345` 但該 K id 已被 `K1345_pre_fomc_iv_drift` 使用，故 remap 為 K1508。yfinance XLU/VPU/GRID/PAVE + SPY/QQQ adjusted close，FRED `IPG2211S` 作可重現電力公用事業活動 proxy（EIA v2 需 API key；ELEC bulk 約 226MB，未在 hourly run 下載）。所有訊號明確 `.shift(1)`，target 為 `t+1..t+21` forward RV；post-AI dummy primary gate 0/4 ETF 通過 Harvey/Bonferroni（XLU t=2.10、VPU t=2.04、GRID t=-0.93、PAVE t=-0.21）。結論：free-data specification 不支持「AI 電力需求已使公用/電網 ETF 相對 SPY 進入 robust 高波動 regime」；若重開需 EIA/API key 或區域 utility load / data-center interconnection queue。
 - [ ] 鈾物理囤積基金放大現貨波動 — yfinance URA/URNM/SRUUF + 物理鈾基金 proxy，檢定囤積 AUM 變化放大現貨 vol（與 K1445 URA 分散題正交，聚焦 supply-shock vol 放大）（來源：2026 鈾供給衝擊 + 物理基金抽現貨）
