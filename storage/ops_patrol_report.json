@@ -1,37 +1,39 @@
 {
-  "timestamp": "2026-06-18T06:04:24.739428+00:00",
-  "all_ok": true,
+  "timestamp": "2026-06-18T12:03:31Z",
+  "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "total_drafts=125 (research=41, general=84); all thresholds met (total>=12, research>=4, general>=8)"
+      "detail": "total_drafts=129 (research=51, general=78); all thresholds met (total>=12, research>=4, general>=8)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
-      "status": "ok",
-      "detail": "strategy_metrics.json mtime ~18s old (well within 26h threshold)"
+      "status": "alert",
+      "detail": "storage/strategy_metrics.json does not exist on filesystem (not in git history either). File is missing entirely — effectively >26h stale. Previous patrol at 06:04 UTC saw it as fresh (~18s old), suggesting it is generated at patrol time but not persisted."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-18 or 2026-06-17; most recent: 2026-06-14 22:10 CST (K-article arc-dedup fix)"
+      "detail": "No entries dated 2026-06-18 or 2026-06-17. Most recent entries are from 2026-06-03 regarding auto-compact root cause fixes."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return in last 3 entries"
+      "detail": "All 15 strategies have at most 1 null portfolio_return in last 3 entries (threshold >2). _market_daily: 0 nulls; all others: 1 null (likely today's entry not yet filled)."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50)"
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "knowledge.json contains 2259 entries"
+      "detail": "storage/memory/knowledge.json contains 2191 entries."
     }
   ],
-  "alerts": []
+  "alerts": [
+    "STRATEGY_METRICS_MISSING: storage/strategy_metrics.json does not exist on filesystem. Strategy metrics unavailable. File appears to be regenerated ephemerally but not persisted between patrol runs."
+  ]
 }
