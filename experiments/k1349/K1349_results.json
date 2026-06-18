@@ -1,0 +1,250 @@
+{
+  "experiment_id": "K1349",
+  "title": "0050.TW 5-minute realized variance HAR-RV pilot",
+  "created_by": "codex",
+  "seed": 42,
+  "data_source": {
+    "raw_files": "/Users/yhlai0911/Desktop/volpred-research/data/intraday/0050_TW_5min_*.csv",
+    "source": "Local yfinance 5-minute CSV cache",
+    "ticker": "0050.TW"
+  },
+  "method": {
+    "rv_target": "sum of squared 5-minute log returns from observed 0050.TW bars",
+    "total_rv_target": "intraday RV plus squared overnight open-vs-previous-close return",
+    "models": [
+      "expanding_mean",
+      "rv_lag1",
+      "ar1_logrv",
+      "har_logrv",
+      "har_bpv"
+    ],
+    "first_oos_observation_index": 60,
+    "min_train_obs": 35,
+    "loss": "QLIKE actual/forecast - log(actual/forecast) - 1",
+    "dm_test": "volpred.stats.model_evaluation.dm_test on pointwise QLIKE losses; negative t means first model is better.",
+    "paper_grade_warning": "OOS N must be >= 252; this pilot has far fewer observations."
+  },
+  "lookahead_guard": [
+    "HAR features use target.shift(1), rolling(5).mean().shift(1), and rolling(22).mean().shift(1).",
+    "BPV features use bpv.shift(1), rolling(5).mean().shift(1), and rolling(22).mean().shift(1).",
+    "For forecast date t, OLS training rows are df.iloc[:pos], strictly earlier than t."
+  ],
+  "literature": [
+    {
+      "citation": "Corsi (2009), Journal of Financial Econometrics, A Simple Approximate Long-Memory Model of Realized Volatility.",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=626064",
+      "role": "Canonical HAR-RV model with daily / weekly / monthly realized-volatility components."
+    },
+    {
+      "citation": "Andersen, Bollerslev, Diebold, and Labys (2003), Econometrica, Modeling and Forecasting Realized Volatility.",
+      "url": "https://econ.duke.edu/~boller/Published_Papers/ecta_03.pdf",
+      "role": "High-frequency intraday returns as realized-volatility measurement framework."
+    },
+    {
+      "citation": "Hansen and Lunde (2005), Journal of Financial Econometrics, A Realized Variance for the Whole Day Based on Intermittent High-Frequency Data.",
+      "url": "https://ideas.repec.org/a/oup/jfinec/v3y2005i4p525-554.html",
+      "role": "Motivates reporting intraday RV separately from overnight/whole-day RV."
+    },
+    {
+      "citation": "Barndorff-Nielsen and Shephard (2002), JRSS-B, Econometric analysis of realized volatility.",
+      "url": "https://ideas.repec.org/a/bla/jorssb/v64y2002i2p253-280.html",
+      "role": "Realized-variance / power-variation foundations and BPV-style jump diagnostics."
+    }
+  ],
+  "related_prior_work": [
+    {
+      "id": "K196",
+      "note": "SPY 5-minute pilot found RV is more autocorrelated than daily r^2, but was preliminary."
+    },
+    {
+      "id": "K744",
+      "note": "SPY pre-HAR-RV validation documented bar-count and proxy-quality checks for 5-minute data."
+    },
+    {
+      "id": "research_program.md line 357",
+      "note": "Backlog requested Taiwan 5-minute HAR-RV for 0050.TW once enough data accumulated."
+    }
+  ],
+  "data_quality": {
+    "n_days": 94,
+    "start": "2026-01-20",
+    "end": "2026-06-17",
+    "bar_count": {
+      "min": 53,
+      "median": 53.0,
+      "max": 54,
+      "mean": 53.09574468085106
+    },
+    "gap_days": 0,
+    "zero_volume_bar_days": 90,
+    "clean_tw50_data_sanity": {
+      "applied_to_daily_close_path": "volpred.utils.clean_tw50_data(daily close_price)",
+      "n_adjusted_daily_closes": 0,
+      "max_abs_close_adjustment": 0.0,
+      "note": "Expected zero for 2026-only intraday bars; this is a 0050.TW split-artifact guard, not the RV estimator."
+    },
+    "intraday_rv": {
+      "mean": 0.00010010921451029055,
+      "median": 8.313969642458362e-05,
+      "p95": 0.0002623824516143695,
+      "max": 0.00047991523502345217,
+      "mean_annualized_vol": 0.15883174133841516
+    },
+    "overnight_share_of_total_rv": 0.7516801774117231,
+    "autocorrelation_lag1": {
+      "intraday_rv": 0.2648045009716483,
+      "total_rv": 0.01886316851831439,
+      "intraday_return_sq": -0.010949742947820392,
+      "abs_intraday_return": 0.069026634903893,
+      "bpv": 0.188882973112117
+    }
+  },
+  "forecast_evaluation": {
+    "intraday_rv": {
+      "n_oos": 34,
+      "start": "2026-04-30",
+      "end": "2026-06-17",
+      "metrics": {
+        "expanding_mean": {
+          "qlike": 0.20769106193982287,
+          "mse": 7.89523452275236e-09,
+          "spearman_rho": -0.025515660809778455,
+          "spearman_p": 0.8861016778383016
+        },
+        "rv_lag1": {
+          "qlike": 0.41189618208826506,
+          "mse": 1.4555595435733294e-08,
+          "spearman_rho": 0.09579831932773109,
+          "spearman_p": 0.589925704301456
+        },
+        "ar1_logrv": {
+          "qlike": 0.2523280619374104,
+          "mse": 8.521731239467706e-09,
+          "spearman_rho": 0.07807486631016042,
+          "spearman_p": 0.6607387153641414
+        },
+        "har_logrv": {
+          "qlike": 0.2871266471277294,
+          "mse": 9.001115002343127e-09,
+          "spearman_rho": 0.042933537051184106,
+          "spearman_p": 0.8094849744717368
+        },
+        "har_bpv": {
+          "qlike": 0.3150817295923245,
+          "mse": 9.218609164215648e-09,
+          "spearman_rho": -0.05576776165011458,
+          "spearman_p": 0.7540831994653219
+        }
+      },
+      "comparisons_vs_rv_lag1": {
+        "expanding_mean_vs_rv_lag1": {
+          "qlike_improvement_pct": 49.576842182208715,
+          "dm_t_model_minus_lag1": -1.8830702194807059,
+          "dm_p": 0.06853054183298535,
+          "interpretation": "negative DM t means the named model has lower QLIKE than rv_lag1"
+        },
+        "ar1_logrv_vs_rv_lag1": {
+          "qlike_improvement_pct": 38.739888129543495,
+          "dm_t_model_minus_lag1": -1.741897448357776,
+          "dm_p": 0.09084157663013315,
+          "interpretation": "negative DM t means the named model has lower QLIKE than rv_lag1"
+        },
+        "har_logrv_vs_rv_lag1": {
+          "qlike_improvement_pct": 30.291500719421297,
+          "dm_t_model_minus_lag1": -1.1482073110946178,
+          "dm_p": 0.2591384932844689,
+          "interpretation": "negative DM t means the named model has lower QLIKE than rv_lag1"
+        },
+        "har_bpv_vs_rv_lag1": {
+          "qlike_improvement_pct": 23.504576324330735,
+          "dm_t_model_minus_lag1": -1.1007781781602837,
+          "dm_p": 0.2789580787129937,
+          "interpretation": "negative DM t means the named model has lower QLIKE than rv_lag1"
+        }
+      },
+      "best_by_qlike": "expanding_mean"
+    },
+    "total_rv": {
+      "n_oos": 33,
+      "start": "2026-05-04",
+      "end": "2026-06-17",
+      "metrics": {
+        "expanding_mean": {
+          "qlike": 0.5395877365589488,
+          "mse": 4.714347859352351e-07,
+          "spearman_rho": -0.24364973262032086,
+          "spearman_p": 0.1718172423210968
+        },
+        "rv_lag1": {
+          "qlike": 1.2570221886798307,
+          "mse": 9.622951005185e-07,
+          "spearman_rho": -0.030080213903743314,
+          "spearman_p": 0.8680213839757225
+        },
+        "ar1_logrv": {
+          "qlike": 0.7120323273556327,
+          "mse": 5.021280669442641e-07,
+          "spearman_rho": -0.09491978609625669,
+          "spearman_p": 0.5992796260006483
+        },
+        "har_logrv": {
+          "qlike": 0.7286503835113243,
+          "mse": 5.058170657910971e-07,
+          "spearman_rho": -0.2466577540106952,
+          "spearman_p": 0.16642107693305483
+        },
+        "har_bpv": {
+          "qlike": 0.5540735202433487,
+          "mse": 4.7346095663374537e-07,
+          "spearman_rho": 0.21223262032085563,
+          "spearman_p": 0.23572477968135186
+        }
+      },
+      "comparisons_vs_rv_lag1": {
+        "expanding_mean_vs_rv_lag1": {
+          "qlike_improvement_pct": 57.074127933601325,
+          "dm_t_model_minus_lag1": -2.894126373427638,
+          "dm_p": 0.006793068506958377,
+          "interpretation": "negative DM t means the named model has lower QLIKE than rv_lag1"
+        },
+        "ar1_logrv_vs_rv_lag1": {
+          "qlike_improvement_pct": 43.3556277870135,
+          "dm_t_model_minus_lag1": -1.8424920169038326,
+          "dm_p": 0.07468554581623899,
+          "interpretation": "negative DM t means the named model has lower QLIKE than rv_lag1"
+        },
+        "har_logrv_vs_rv_lag1": {
+          "qlike_improvement_pct": 42.03361006088693,
+          "dm_t_model_minus_lag1": -1.7760877355738702,
+          "dm_p": 0.08522890413527251,
+          "interpretation": "negative DM t means the named model has lower QLIKE than rv_lag1"
+        },
+        "har_bpv_vs_rv_lag1": {
+          "qlike_improvement_pct": 55.9217390724617,
+          "dm_t_model_minus_lag1": -2.6779131638099587,
+          "dm_p": 0.011593459551790808,
+          "interpretation": "negative DM t means the named model has lower QLIKE than rv_lag1"
+        }
+      },
+      "best_by_qlike": "expanding_mean"
+    }
+  },
+  "verdict": {
+    "overall": "PILOT_ONLY_INSUFFICIENT_OOS",
+    "intraday_rv": "PILOT_ONLY_INSUFFICIENT_OOS",
+    "total_rv": "PILOT_ONLY_INSUFFICIENT_OOS",
+    "notes": [
+      "The 0050.TW 5-minute data pipeline is usable: 94 days, 53-54 bars/day, no large intraday gaps.",
+      "Forecast comparison is intentionally pilot-only because OOS length is below the project 252-day minimum.",
+      "Do not write a knowledge entry or article-grade claim from this pilot alone."
+    ]
+  },
+  "outputs": [
+    "K1349_daily_realized_measures.csv",
+    "K1349_oos_forecasts_intraday_rv.csv",
+    "K1349_oos_forecasts_total_rv.csv",
+    "fig_k1349_rv_timeseries.png",
+    "fig_k1349_oos_qlike.png",
+    "fig_k1349_intraday_pattern.png"
+  ]
+}
