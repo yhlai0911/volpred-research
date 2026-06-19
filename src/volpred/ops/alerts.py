@@ -558,8 +558,20 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     # false-positive recurred on audit_publish_sync.log (strike 2) — so exclude ANY
     # log whose script follows the audit-exit-as-findings convention via the
     # `audit_*.log` name prefix, instead of whack-a-mole adding each file.
+    # 2026-06-20 (STRIKE-3 — host_cron_fail false-critical on exit-as-findings jobs):
+    # Same class as audit_* (strike-1 audit_fb_pipeline, strike-2 audit_publish_sync):
+    # a daily pipeline that RAN FINE but returns non-zero to SIGNAL benign findings/
+    # skips (and self-sends its own WARN) is NOT a dispatch/collect/sync infra failure.
+    # indicator_arena_daily.py exits 1 when a signal is skipped — e.g. "^VIX stale"
+    # (data-timing: VIX lags SPY basis by a day) or a duplicate already-emitted signal.
+    # Those are findings, surfaced via the job's own WARN + report JSON; firing
+    # host_cron_fail CRITICAL on them is a false-critical (email-noise → erodes trust
+    # in alerting). Registry of jobs whose non-zero exit = findings, not infra-down.
+    # Long-term: jobs should declare exit-semantics; these aren't in config/cron_jobs
+    # (run via run_due_jobs / launchd), so a documented registry is the single home.
+    _FINDINGS_EXIT_LOGS = {"indicator_arena_daily.log"}
     def _is_audit_signal_log(name: str) -> bool:
-        return name.startswith("audit_")
+        return name.startswith("audit_") or name in _FINDINGS_EXIT_LOGS
     if logs_dir.exists():
         for log_path in sorted(logs_dir.glob("*.log")):
             if _is_audit_signal_log(log_path.name):

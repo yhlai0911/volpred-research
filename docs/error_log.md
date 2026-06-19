@@ -2,6 +2,21 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-20 host_cron_fail false-critical on exit-as-findings 工作（**3-STRIKE TRIGGER**）
+
+**問題**：`host_cron_fail` 對 `indicator_arena_daily` exit 1 報 CRITICAL，但該 job 跑正常——exit 1 只是良性 findings signal（`^VIX stale` 資料時間差 data_unavailable + 2 個 signal 已發過的 dedup skip），且 job 自己已寄 WARN。boss 晨間會看到假 CRITICAL。
+
+**3-STRIKE**：同一 false-critical 類別第 3 次：
+- strike-1（2026-06-07）：`audit_fb_pipeline.log` exit 1（stale-pending FB posts findings）→ 加 hardcoded set 排除。
+- strike-2（2026-06-07）：`audit_publish_sync.log` exit 1（mismatch findings）→ 改 `audit_` name-prefix 排除。
+- strike-3（2026-06-20）：`indicator_arena_daily.log` exit 1（skip findings）——不符 `audit_` prefix 故漏網。
+
+**根因**：`host_cron_fail` 量 infra health（dispatch/collect/sync），但部分 job 用 exit-nonzero 當 **findings signal**（非 infra-down）。原排除靠 `audit_` 名稱前綴，無法涵蓋同慣例但不同命名的 job。
+
+**修復**（`src/volpred/ops/alerts.py::_parse_host_cron_state`）：exit-as-findings job 做成有文件 registry `_FINDINGS_EXIT_LOGS={"indicator_arena_daily.log"}`，與 `audit_` prefix union 排除。驗證：check-alerts 後 host_cron_fail breached=False、breach_count=0；alerts 測試全綠。
+- 長期 debt：job 應自宣告 exit-semantics；但 indicator_arena/audit 不在 `config/runtime_schedules.json::cron_jobs`（走 run_due_jobs/launchd），registry 是目前單一 home。strike-4 再現 → 改 wrapper 在 log 行標 `exit N [findings]` 讓 alert 自動辨識，不再維護名單。
+- 兩個底層 skip 本身良性：VIX 資料時間差自會修正、dup signals 是預期 dedup，不需處理。
+
 ## 2026-06-19 鬼打牆：同 K1054 文章重發兩次（descriptive arc-skip 自傷 + 同 K-id 無防線）
 
 **問題**：老闆抓到 mile_bb520db8（06-19）是 mile_c481c8cf（06-07）的逐字複製，同 K1054、同標題、內文相同——同一篇發兩次。
