@@ -17,12 +17,17 @@ def mae(actual: np.ndarray, predicted: np.ndarray) -> float:
 def qlike(actual_var: np.ndarray, predicted_var: np.ndarray) -> float:
     """QLIKE loss function — preferred for variance forecasts.
 
-    QLIKE = mean(actual / predicted + log(predicted))
+    QLIKE = mean(actual / predicted - log(actual / predicted) - 1)
 
     Lower is better.  Both *actual_var* and *predicted_var* must be positive.
     """
-    predicted_var = np.maximum(predicted_var, 1e-12)
-    return float(np.mean(actual_var / predicted_var + np.log(predicted_var)))
+    actual = np.asarray(actual_var, dtype=np.float64)
+    predicted = np.asarray(predicted_var, dtype=np.float64)
+    valid = (actual > 0) & (predicted > 0) & np.isfinite(actual) & np.isfinite(predicted)
+    if valid.sum() == 0:
+        return float("nan")
+    ratio = actual[valid] / predicted[valid]
+    return float(np.mean(ratio - np.log(ratio) - 1))
 
 
 def hmse(actual_var: np.ndarray, predicted_var: np.ndarray) -> float:

@@ -76,6 +76,24 @@ def test_qlike_matches_stats_canonical_implementation():
     assert qlike(a, f) == pytest.approx(qlike_canonical(a, f), rel=1e-9)
 
 
+def test_stats_qlike_pointwise_uses_actual_over_predicted_orientation():
+    """K783c regression: DM pointwise losses must not use predicted/actual."""
+    from volpred.stats.model_evaluation import qlike_pointwise
+
+    actual = np.array([1.0, 1.0])
+    over_pred = np.array([2.0, 2.0])
+    under_pred = np.array([0.5, 0.5])
+
+    over_loss = qlike_pointwise(actual, over_pred)
+    under_loss = qlike_pointwise(actual, under_pred)
+    expected_over = 0.5 - np.log(0.5) - 1.0
+    expected_under = 2.0 - np.log(2.0) - 1.0
+
+    assert over_loss == pytest.approx(np.array([expected_over, expected_over]))
+    assert under_loss == pytest.approx(np.array([expected_under, expected_under]))
+    assert float(np.mean(under_loss)) > float(np.mean(over_loss))
+
+
 # ─── DM HAC — range(1, h+1) coverage ──────────────────────────────
 
 

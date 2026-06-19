@@ -1992,6 +1992,8 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 
 **Lesson / prevention**: Production article review must inspect local experiment metric helpers even when the article numbers match JSON. Any experiment claiming Patton QLIKE should import the canonical helper or have a unit test proving orientation; inverse QLIKE can silently reverse model/window preferences.
 
+**2026-06-20 落地**：`src/volpred/evaluation/metrics.py::qlike` 修回 Patton ratio form；`tests/test_evaluation_metrics.py` 新增 `qlike_pointwise` orientation regression，用解析值鎖定 DM pointwise loss 必須是 `actual / predicted - log(actual / predicted) - 1`，避免 K783c 類 `predicted / actual` 反向 QLIKE 再次混入 helper path。
+
 ## 2026-06-18 — K1416 / Paper3_E2 uniqueness wording stayed stale after HLN retrofit
 
 **Symptom**: Published K1416 articles and K1416 source docs described `TW0050-N225` as the only Paper 3 cross-market Harvey-significant pair.
