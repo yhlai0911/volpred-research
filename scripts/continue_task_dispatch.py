@@ -234,16 +234,25 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
         # Override only via explicit task_type=experiment (agent-runnable K-experiments).
         priority = t.get("priority", 999)
         is_p1 = priority == 1
-        explicit_experiment = (t.get("task_type") or "").lower() == "experiment"
-
-        # Explicit task_type=experiment overrides regex false positives.
-        # 2026-06-10: research backlog auto-fallback task descriptions contain
+        # Explicit task_type overrides MAIN_THREAD_MARKERS regex false positives.
+        # 2026-06-10 (strike 1): research backlog task descriptions contain
         # "主線程派 experiment agent 前先讀..." (= main thread DISPATCHES the
-        # agent, not main thread does it), triggering MAIN_THREAD_MARKERS
-        # regex on bare "主線程" → all 5 yfinance experiments mis-tagged
-        # main_thread → agentable=0, pool silently stuck. Explicit task_type
-        # is more authoritative than free-text inference.
-        if explicit_experiment:
+        # agent, not main thread does it), triggering MAIN_THREAD_MARKERS regex
+        # on bare "主線程" → 5 yfinance experiments mis-tagged → pool stuck.
+        # 2026-06-19 (strike 2, SAME ROOT): member_qa task descriptions contain
+        # "主線程逐題做 4 維度評分 / 主線程派..." → member_qa mis-tagged
+        # main_thread → hourly dispatch never picks it → member Q&A stale 28h.
+        # Root: task ownership must come from the task_type SCHEMA field, not
+        # free-text grep of the description (which legitimately describes
+        # workflow steps mentioning 主線程). These types are cron-materialized
+        # auto-flows that hourly dispatch should route (member_qa stays Claude-
+        # only via task-routing rule + model_router, agentable just means
+        # auto-dispatchable rather than waiting for an interactive session).
+        explicit_agentable = (t.get("task_type") or "").lower() in (
+            "experiment",
+            "member_qa",
+        )
+        if explicit_agentable:
             agentable.append(t)
         elif is_main_thread_only(t) or is_paper_task(t):
             main_thread.append(t)

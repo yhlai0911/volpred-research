@@ -466,7 +466,23 @@ def release_pool_articles(
 
     def _dedup_flagged(item: dict) -> bool:
         d = item.get("details")
-        return isinstance(d, dict) and bool(d.get("release_dedup_skipped"))
+        if not (isinstance(d, dict) and bool(d.get("release_dedup_skipped"))):
+            return False
+        # 2026-06-19: dedup flag must EXPIRE with the dedup window. The flag was
+        # write-once permanent, but the dedup BASE is a 21d sliding window — once
+        # the near-dup base scrolls out of the window the flag is stale and the
+        # draft must re-enter candidacy. Without TTL, 46/83 drafts got
+        # permanently flagged and the release pool starved toward 0 (boss
+        # complaint: "Release pool cron gap"). TTL = dedup window so flag
+        # lifetime matches the window that justified it.
+        flagged_at = d.get("release_dedup_skipped_at")
+        if not flagged_at:
+            return False  # legacy flag w/o timestamp -> re-evaluate (retrofit)
+        try:
+            flagged_dt = datetime.fromisoformat(flagged_at)
+            return (now - flagged_dt) < timedelta(days=_RELEASE_DEDUP_WINDOW_DAYS)
+        except (ValueError, TypeError):
+            return False
 
     candidates = [
         item for item in feed
@@ -592,6 +608,7 @@ def release_pool_articles(
                     _d = {}
                     item["details"] = _d
                 _d["release_dedup_skipped"] = True
+                _d["release_dedup_skipped_at"] = now.isoformat()
                 if dup is not None:
                     _d["release_dedup_of"] = dup["id"]
                     _d["release_dedup_jaccard"] = dup["jaccard"]
