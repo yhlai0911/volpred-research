@@ -34369,7 +34369,7 @@
     "description": "Gmail UID: 11794\nMessage-ID: <58AA4031-7835-4417-8F7D-F13B5CB77617@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 19 Jun 2026 10:14:31 +0800\nSubject: Re: [VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)\n\n--- 用戶回信內容 ---\n為什麼會出這種問題？從底層給我徹底解決\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月19日 08:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Release pool cron gap > 4.0h (interval=180min)\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。\r\n> \r\n> last_fire_at: 2026-06-18T20:00:01.174271+00:00\r\n> gap_hours: 4.0\r\n> configured_interval_minutes: 180\r\n> log_path: storage/logs/cron/release_pool.log\r\n> 影響\r\n> \r\n> 文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）\r\n> 與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。\r\n> \r\n> 建議行動\r\n> \r\n> 立即手動釋出（最快復原）：\r\n> VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\r\n> 診斷 host cron 是否仍在跑：\r\n> tail -20 storage/logs/cron/release_pool.log\r\n> crontab -l | grep release_pool\r\n> 若 cron daemon 卡住：重新 install crontab 或 launchd job\r\n> 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist\r\n> 與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -34379,7 +34379,9 @@
     "email_uid": 11794,
     "email_message_id": "<58AA4031-7835-4417-8F7D-F13B5CB77617@gmail.com>",
     "email_subject": "Re: [VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "completed_at": "2026-06-19T08:34:11.680178+00:00",
+    "result": "三根因從底層修復並回覆: release pool dedup TTL(c35509c8) / member_qa dispatch regex strike2(c35509c8) / M2 派 journal-discovery 補題. 前端詳情洩漏 deploy 驗證=0"
   },
   {
     "id": "email-11796-c4c20e",
@@ -34387,7 +34389,7 @@
     "description": "Gmail UID: 11796\nMessage-ID: <D9949D55-C094-418E-B2AC-3472185DCB92@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 19 Jun 2026 10:15:06 +0800\nSubject: Re: [VolPred Alert][WARN] Member Q&A pending stale (max 24h)\n\n--- 用戶回信內容 ---\n為什麼會出現這種問題？從底層給我徹底解決已經不是第一次了\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月19日 10:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Member Q&A pending stale (max 24h)\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> 有 1 個 member question pending 超過 24h 未進入 ranked。\r\n> \r\n> max_age_hours: 24.5\r\n> 9ab8d3a7-a590-4f71-b728-435169fbbdfb (proposer=yaoxk1431, age=24.5h, status=evaluating)\r\n> 影響\r\n> \r\n> Mission 第 1 條（內容產出）+ 第 4 條（平台運營）受損：member 提問長時間無回應 = 平台失信號。\r\n> Question pipeline 卡在 evaluating → 不進 researching → 不進 answered → user 看不到答覆。\r\n> \r\n> 建議行動\r\n> \r\n> 主線程立即跑 4 維度評分：\r\n> uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\r\n> 寫 evaluation JSON（每題 4 維度 1-10 score）→ /tmp/q_evals.json\r\n> uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\r\n> ranked>0 後 dispatch claude subagent 跑 research stage（claim → answer → finish）\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -34397,7 +34399,9 @@
     "email_uid": 11796,
     "email_message_id": "<D9949D55-C094-418E-B2AC-3472185DCB92@gmail.com>",
     "email_subject": "Re: [VolPred Alert][WARN] Member Q&A pending stale (max 24h)",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "completed_at": "2026-06-19T08:34:11.775076+00:00",
+    "result": "三根因從底層修復並回覆: release pool dedup TTL(c35509c8) / member_qa dispatch regex strike2(c35509c8) / M2 派 journal-discovery 補題. 前端詳情洩漏 deploy 驗證=0"
   },
   {
     "id": "email-11802-a7cd5d",
@@ -34405,7 +34409,7 @@
     "description": "Gmail UID: 11802\nMessage-ID: <B7AADBB5-3C9A-41C5-A413-EEF003F19964@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 19 Jun 2026 12:23:45 +0800\nSubject: Re: [VolPred Alert][WARN] Member Q&A pending stale (max 26h)\n\n--- 用戶回信內容 ---\n還不快處理\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月19日 11:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Member Q&A pending stale (max 26h)\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> 有 1 個 member question pending 超過 24h 未進入 ranked。\r\n> \r\n> max_age_hours: 25.5\r\n> 9ab8d3a7-a590-4f71-b728-435169fbbdfb (proposer=yaoxk1431, age=25.5h, status=evaluating)\r\n> 影響\r\n> \r\n> Mission 第 1 條（內容產出）+ 第 4 條（平台運營）受損：member 提問長時間無回應 = 平台失信號。\r\n> Question pipeline 卡在 evaluating → 不進 researching → 不進 answered → user 看不到答覆。\r\n> \r\n> 建議行動\r\n> \r\n> 主線程立即跑 4 維度評分：\r\n> uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\r\n> 寫 evaluation JSON（每題 4 維度 1-10 score）→ /tmp/q_evals.json\r\n> uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\r\n> ranked>0 後 dispatch claude subagent 跑 research stage（claim → answer → finish）\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -34415,7 +34419,9 @@
     "email_uid": 11802,
     "email_message_id": "<B7AADBB5-3C9A-41C5-A413-EEF003F19964@gmail.com>",
     "email_subject": "Re: [VolPred Alert][WARN] Member Q&A pending stale (max 26h)",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "completed_at": "2026-06-19T08:34:11.870528+00:00",
+    "result": "三根因從底層修復並回覆: release pool dedup TTL(c35509c8) / member_qa dispatch regex strike2(c35509c8) / M2 派 journal-discovery 補題. 前端詳情洩漏 deploy 驗證=0"
   },
   {
     "id": "email-11801-84436b",
@@ -34423,7 +34429,7 @@
     "description": "Gmail UID: 11801\nMessage-ID: <5DB04FBB-F77F-41F0-B656-4EAF7B6CAB4C@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 19 Jun 2026 12:23:26 +0800\nSubject: Re: [VolPred 6h Summary] 6h 平台運營彙報 2026-06-19 06:05 → 12:05 台灣時間\n\n--- 用戶回信內容 ---\nM2 m3已經很久都idle了\r\n是發生什麼事\r\n從底層搞清楚\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月19日 12:05 寫道：\r\n> \r\n> 推進\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -34433,7 +34439,9 @@
     "email_uid": 11801,
     "email_message_id": "<5DB04FBB-F77F-41F0-B656-4EAF7B6CAB4C@gmail.com>",
     "email_subject": "Re: [VolPred 6h Summary] 6h 平台運營彙報 2026-06-19 06:05 → 12:05 台灣時間",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "completed_at": "2026-06-19T08:34:11.972374+00:00",
+    "result": "三根因從底層修復並回覆: release pool dedup TTL(c35509c8) / member_qa dispatch regex strike2(c35509c8) / M2 派 journal-discovery 補題. 前端詳情洩漏 deploy 驗證=0"
   },
   {
     "id": "email-11807-6910bc",
@@ -34441,7 +34449,7 @@
     "description": "Gmail UID: 11807\nMessage-ID: <73A1774D-02B5-41C2-87E3-BE98FB497203@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 19 Jun 2026 13:06:10 +0800\nSubject: Re: [VolPred Alert][WARN] Member Q&A pending stale (max 28h)\n\n--- 用戶回信內容 ---\n依照建議 立刻執行 不要排程 直接執行\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月19日 13:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Member Q&A pending stale (max 28h)\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> 有 1 個 member question pending 超過 24h 未進入 ranked。\r\n> max_age_hours: 27.5\r\n> 9ab8d3a7-a590-4f71-b728-435169fbbdfb (proposer=yaoxk1431, age=27.5h, status=evaluating)\r\n> 影響\r\n> \r\n> Mission 第 1 條（內容產出）+ 第 4 條（平台運營）受損：member 提問長時間無回應 = 平台失信號。\r\n> Question pipeline 卡在 evaluating → 不進 researching → 不進 answered → user 看不到答覆。\r\n> 建議行動\r\n> \r\n> 主線程立即跑 4 維度評分：\r\n> uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\r\n> 寫 evaluation JSON（每題 4 維度 1-10 score）→ /tmp/q_evals.json\r\n> uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\r\n> ranked>0 後 dispatch claude subagent 跑 research stage（claim → answer → finish）\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -34451,6 +34459,57 @@
     "email_uid": 11807,
     "email_message_id": "<73A1774D-02B5-41C2-87E3-BE98FB497203@gmail.com>",
     "email_subject": "Re: [VolPred Alert][WARN] Member Q&A pending stale (max 28h)",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "completed_at": "2026-06-19T08:34:12.068799+00:00",
+    "result": "三根因從底層修復並回覆: release pool dedup TTL(c35509c8) / member_qa dispatch regex strike2(c35509c8) / M2 派 journal-discovery 補題. 前端詳情洩漏 deploy 驗證=0"
+  },
+  {
+    "id": "paper_review_mile_92acb943",
+    "title": "Paper review (Codex 24h-rule): 把上一個實驗再算一次，原本的『顯著』就不見了",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_92acb943 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_92acb943",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-19T08:23:31+00:00"
+  },
+  {
+    "id": "paper_review_mile_dcf3a192",
+    "title": "Paper review (Codex 24h-rule): 少做一點假設，反而更接近真實風險",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_dcf3a192 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_dcf3a192",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-19T08:23:31+00:00"
+  },
+  {
+    "id": "paper_review_mile_08407091",
+    "title": "Paper review (Codex 24h-rule): 40 次測試後，我們刪掉了五種最容易浪費時間的研究方向",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_08407091 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_08407091",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-19T08:23:31+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-19T09:06:22.671249+00:00",
+    "claim_session_id": "c4ba70022697",
+    "started_at": "2026-06-19T09:06:34.509037+00:00"
   }
 ]
