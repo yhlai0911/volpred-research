@@ -35,6 +35,19 @@ Canonical mapping of `task_type` → who can claim, concurrency rules, **model t
 
 ## Routing decision tree（dispatcher 用）
 
+Newly materialized tasks SHOULD set `dispatch_lane` as the schema-level
+ownership field before relying on title/description wording:
+
+- `dispatch_lane="agent"`: eligible for automatic worker dispatch (subject to
+  `task_type` capability rules and model routing).
+- `dispatch_lane="main_thread"`: keep in main-thread queue even if the type is
+  usually agentable.
+- `dispatch_lane="blocked"`: surface in blocked queue until explicitly fixed.
+
+Legacy tasks without `dispatch_lane` still fall back to the `task_type` decision
+tree below and then to free-text markers. Do not encode ownership solely in
+`description`; workflow prose often contains phrases such as `主線程派...`.
+
 ```
 任務 in pending:
   ├─ task_type == "email_reply"

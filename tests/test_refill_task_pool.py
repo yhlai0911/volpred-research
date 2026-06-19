@@ -716,6 +716,7 @@ def test_journal_discovery_tier3_dispatched_on_empty_pool():
     t = out[0]
     assert t["id"].startswith("journal_discovery_")
     assert t["task_type"] == "platform_ops"
+    assert t["dispatch_lane"] == "agent"
     assert t["status"] == "pending"
     assert t["source"] == "auto_journal_discovery_fallback"
     assert t["priority"] == 2

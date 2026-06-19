@@ -502,6 +502,7 @@ def gen_experiment_tasks(existing: set[str], rng: random.Random) -> list[dict]:
             "priority": 4,
             "status": "pending",
             "task_type": "experiment",
+            "dispatch_lane": "agent",
             "source": "diverse_gen",
             "tags": ["experiment", "scaffold", "research-program-backlog"],
             "created_at": _now_iso(),

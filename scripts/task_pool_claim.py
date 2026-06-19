@@ -7,6 +7,7 @@ Schema additions to storage/next_tasks.json task entries:
   - claim_session_id  : str  (unique per spawn; lets us detect orphans)
   - completed_at      : ISO timestamp  (already exists)
   - result            : str  (already exists)
+  - dispatch_lane     : agent | main_thread | blocked  (dispatcher ownership)
 
 Status machine:
   pending  --claim-->  claimed  --start-->  in_progress  --complete-->  succeeded / failed / blocked

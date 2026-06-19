@@ -33,8 +33,8 @@
 
 **根因2 — member Q&A pending stale 28h（**3-STRIKE: strike 2**）**
 - 根因：`scripts/continue_task_dispatch.py` 的 `MAIN_THREAD_MARKERS` regex 誤匹配 member_qa task description 裡「主線程逐題做 4 維度評分 / 主線程派…」（描述 workflow 步驟，非 ownership）→ 分到 main_thread bucket → hourly dispatch 永不派 → 只能等互動 session（不天天開）= stale 28h。
-- **Strike 記錄**：strike 1 = 2026-06-10 yfinance experiments（5 個因 description 含「主線程派 experiment agent」被誤分類，pool 卡死，當時只 patch explicit experiment override）；strike 2 = 本次 member_qa（同 root，patch 只救了 experiment 沒救 member_qa）。**下次同 root 再現即觸發 three-strike 重構：task ownership 改 schema 欄位 `dispatch_lane`，regex 降為僅 title fallback、不匹配 description。**
-- 修（本次）：explicit task_type override 擴到 member_qa（experiment + member_qa）。commit c35509c8。驗證：dry-run member_qa 進 agentable。
+- **Strike 記錄**：strike 1 = 2026-06-10 yfinance experiments（5 個因 description 含「主線程派 experiment agent」被誤分類，pool 卡死，當時只 patch explicit experiment override）；strike 2 = 本次 member_qa（同 root，patch 只救了 experiment 沒救 member_qa）。
+- 修（本次）：explicit task_type override 擴到 member_qa（experiment + member_qa）。commit c35509c8。驗證：dry-run member_qa 進 agentable。後續 2026-06-19 Codex 提前落地 three-strike 預備重構：新增 schema-first `dispatch_lane`（`agent` / `main_thread` / `blocked`），dispatcher 先看 schema，regex/free-text 只作 legacy fallback；member_qa、research backlog、journal-discovery、release-audit fix 等新任務產生端同步寫入 lane。
 
 **根因3 — M2（實驗）M3（論文）idle**
 - 根因：pending 池零 experiment/paper；`research_backlog.log` 連 4 天（6/15-19）`no add — all_already_covered`。research_program.md open questions 被既有 experiments 吃完，無新方向注入 → experiment 供給斷流。不是 dispatch 偏好文章，是沒 experiment 可派。

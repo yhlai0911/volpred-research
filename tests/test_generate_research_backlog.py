@@ -24,6 +24,16 @@ def _setup_paths(tmp_path: Path, monkeypatch) -> tuple[Path, Path, Path]:
     return research_program, next_tasks, experiments_dir
 
 
+def test_build_experiment_brief_marks_agent_dispatch_lane():
+    brief = MODULE.build_experiment_brief(
+        {"text": "GARCH model regime test for volatility forecasting", "source_line": 12},
+        1500,
+    )
+
+    assert brief["task_type"] == "experiment"
+    assert brief["dispatch_lane"] == "agent"
+
+
 def test_generate_backlog_all_covered_materializes_journal_discovery(
     tmp_path: Path,
     monkeypatch,
@@ -60,6 +70,7 @@ def test_generate_backlog_all_covered_materializes_journal_discovery(
     journal = data[1]
     assert journal["id"].startswith("journal_discovery_")
     assert journal["task_type"] == "platform_ops"
+    assert journal["dispatch_lane"] == "agent"
     assert journal["source"] == "auto_journal_discovery_fallback"
 
 

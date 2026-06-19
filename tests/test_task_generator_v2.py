@@ -13,6 +13,24 @@ assert SPEC and SPEC.loader
 SPEC.loader.exec_module(MODULE)
 
 
+def test_make_task_adds_default_dispatch_lanes() -> None:
+    experiment = MODULE.make_task(
+        task_id="gen_exp_vol",
+        title="vol",
+        description="experiment",
+        task_type="experiment",
+    )
+    paper_body = MODULE.make_task(
+        task_id="gen_paper_body",
+        title="paper",
+        description="paper edit",
+        task_type="paper_body",
+    )
+
+    assert experiment["dispatch_lane"] == "agent"
+    assert paper_body["dispatch_lane"] == "main_thread"
+
+
 def test_event_article_skips_runtime_managed_adjacent_fomc_date(tmp_path, monkeypatch) -> None:
     runtime_schedules = tmp_path / "runtime_schedules.json"
     runtime_schedules.write_text(

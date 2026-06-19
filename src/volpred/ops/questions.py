@@ -553,6 +553,7 @@ def ensure_member_qa_task(
                 "title": title,
                 "description": _build_member_qa_task_description(candidate, mode=mode),
                 "task_type": "member_qa",
+                "dispatch_lane": "agent",
                 "priority": 2,
                 "status": "pending",
                 "tags": ["member_qa", source],

@@ -488,6 +488,7 @@ def _materialize_release_audit_fix_task(
                 "title": f"Fix release-pool audit blockers: {title_text[:80]}",
                 "description": _build_release_audit_task_description(item, audit_issues, skip_count),
                 "task_type": "platform_ops",
+                "dispatch_lane": "agent",
                 "priority": 3,
                 "status": "pending",
                 "source": "release_pool_audit_skip_materializer",

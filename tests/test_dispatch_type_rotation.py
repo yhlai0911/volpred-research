@@ -58,6 +58,45 @@ def test_categorize_keeps_p1_non_experiment_on_main_thread():
     assert [t["id"] for t in cats["main_thread"]] == ["event-1", "trend-1"]
 
 
+def test_dispatch_lane_agent_overrides_main_thread_words():
+    task = _task("lane-agent", "platform_ops", priority=2)
+    task["dispatch_lane"] = "agent"
+    task["description"] = "主線程派 worker 前先檢查上下文，但任務本身可自動派工。"
+
+    cats = dispatch.categorize([task], recent_type_counts=Counter())
+
+    assert [t["id"] for t in cats["agentable"]] == ["lane-agent"]
+    assert cats["main_thread"] == []
+    assert cats["blocked"] == []
+
+
+def test_dispatch_lane_main_thread_overrides_agentable_default():
+    task = _task("lane-main", "experiment", priority=3)
+    task["dispatch_lane"] = "main-thread"
+
+    cats = dispatch.categorize([task], recent_type_counts=Counter())
+
+    assert cats["agentable"] == []
+    assert [t["id"] for t in cats["main_thread"]] == ["lane-main"]
+    assert cats["blocked"] == []
+
+
+def test_dispatch_lane_blocked_and_unknown_are_not_dispatched():
+    blocked_task = _task("lane-blocked", "platform_ops", priority=3)
+    blocked_task["dispatch_lane"] = "blocked"
+    unknown_task = _task("lane-typo", "platform_ops", priority=3)
+    unknown_task["dispatch_lane"] = "robot"
+
+    cats = dispatch.categorize([blocked_task, unknown_task], recent_type_counts=Counter())
+
+    assert cats["agentable"] == []
+    assert cats["main_thread"] == []
+    assert [(b["task"]["id"], b["reason"]) for b in cats["blocked"]] == [
+        ("lane-blocked", "dispatch_lane:blocked"),
+        ("lane-typo", "unknown_dispatch_lane:robot"),
+    ]
+
+
 def test_build_report_exposes_disambiguated_pending_summary(monkeypatch):
     tasks = [
         _task("platform-1", "platform_ops", priority=3),

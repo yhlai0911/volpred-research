@@ -460,6 +460,7 @@ def test_release_pool_audit_skip_materializes_fix_task_after_three_strikes(
     task = tasks[0]
     assert task["id"] == "platform_ops_release_audit_fix_mile_audit_bad"
     assert task["task_type"] == "platform_ops"
+    assert task["dispatch_lane"] == "agent"
     assert task["priority"] == 3
     assert task["status"] == "pending"
     assert task["article_id"] == "mile_audit_bad"

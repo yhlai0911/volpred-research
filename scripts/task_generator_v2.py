@@ -37,6 +37,13 @@ EXPERIMENTS_DIR = ROOT / "experiments"
 PAPER_DIR = ROOT / "paper"
 RUNTIME_SCHEDULES = ROOT / "config" / "runtime_schedules.json"
 GENERATOR_SOURCE_TAG = "task_generator_v2"
+DEFAULT_DISPATCH_LANES = {
+    "experiment": "agent",
+    "daily_article": "agent",
+    "paper_decision": "main_thread",
+    "paper_body": "main_thread",
+    "event_article": "main_thread",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +159,8 @@ def make_task(
         "created_at": now_iso(),
         "generated_at": now_iso(),
     }
+    if task_type in DEFAULT_DISPATCH_LANES:
+        t["dispatch_lane"] = DEFAULT_DISPATCH_LANES[task_type]
     if extra:
         t.update(extra)
     return t

@@ -10,8 +10,8 @@ count 當前 slot 占用（.claude/worktrees/ + storage/ops/agents/ active），
   --report     寫 report 到 storage/ops/dispatch_report_latest.json
   --execute    真的 spawn agent（需 cron-runtime；目前主線程 fallback = print 指令給人類）
 
-main-thread-only 任務（從 title/description 擷取「main thread」/「NOT agent」標記）
-不會被列為可派 agent，但會列在 main_thread_queue。
+main-thread-only 任務優先看 schema-level `dispatch_lane="main_thread"`；
+legacy title/description「main thread」/「NOT agent」標記仍作 fallback。
 
 Usage::
     uv run python scripts/continue_task_dispatch.py --dry-run
@@ -47,6 +47,9 @@ MAIN_THREAD_MARKERS = re.compile(
     r"main\s*thread|NOT\s*agent|main-thread|主線程",
     re.IGNORECASE,
 )
+AGENT_DISPATCH_LANES = {"agent", "agentable", "auto", "auto_dispatch", "headless", "worker"}
+MAIN_THREAD_DISPATCH_LANES = {"main", "main_thread", "manual", "interactive"}
+BLOCKED_DISPATCH_LANES = {"blocked", "blocked_on_user", "hold"}
 
 # 2026-05-04 finding: dispatcher previously had no concept of "blocked".
 # Tasks that can never be dispatched (awaiting external auth, prior compute
@@ -151,6 +154,18 @@ def is_main_thread_only(task: dict) -> bool:
     return bool(MAIN_THREAD_MARKERS.search(blob))
 
 
+def dispatch_lane(task: dict) -> str:
+    """Return normalized schema-level dispatch lane, if present.
+
+    `dispatch_lane` is the preferred ownership signal for newly materialized
+    tasks. Free-text regex remains only as a legacy fallback because workflow
+    descriptions often legitimately mention "main thread" without meaning the
+    task itself is main-thread-owned.
+    """
+    lane = str(task.get("dispatch_lane") or task.get("dispatchLane") or "").strip().lower()
+    return lane.replace("-", "_")
+
+
 def detect_block_reason(task: dict) -> str | None:
     """Return blocked reason if task should be filtered from dispatch, else None.
 
@@ -230,8 +245,23 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
             blocked.append({"task": t, "reason": block_reason})
             continue
 
+        lane = dispatch_lane(t)
+        if lane in BLOCKED_DISPATCH_LANES:
+            blocked.append({"task": t, "reason": f"dispatch_lane:{lane}"})
+            continue
+        if lane in AGENT_DISPATCH_LANES:
+            agentable.append(t)
+            continue
+        if lane in MAIN_THREAD_DISPATCH_LANES:
+            main_thread.append(t)
+            continue
+        if lane:
+            blocked.append({"task": t, "reason": f"unknown_dispatch_lane:{lane}"})
+            continue
+
         # P1 conservative default: P1 tasks are critical-tier, main-thread owns.
-        # Override only via explicit task_type=experiment (agent-runnable K-experiments).
+        # Legacy fallback still overrides via explicit task_type for known
+        # agent-runnable auto flows when dispatch_lane is absent.
         priority = t.get("priority", 999)
         is_p1 = priority == 1
         # Explicit task_type overrides MAIN_THREAD_MARKERS regex false positives.
