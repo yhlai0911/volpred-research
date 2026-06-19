@@ -34591,5 +34591,35 @@
     "started_at": "2026-06-19T11:10:33.654106+00:00",
     "completed_at": "2026-06-19T11:13:28.760176+00:00",
     "result": "Fixed release_pool_articles fall-through: no pre-truncate to first limit candidates; audit/dedup-skipped due drafts now continue scanning the sorted pool until target_limit articles are actually released or pool exhausted. Added regression test for release-pool-by-settings max_articles_per_run=1 where saturated oldest draft is skipped and later fresh-theme draft releases. Verified tests/test_content_release_pool.py and py_compile."
+  },
+  {
+    "id": "trending_repost_2026_06_20_ai_支出",
+    "title": "[trending_repost] Capex與現金流背離，AI科技股尾端風險如何定價？",
+    "description": "從超大型科技股 Capex 暴增 70% 但現金流僅增 23% 的背離切入，探討市場對 AI 泡沫破裂的隱含波動率定價。可量化：分析科技巨頭遠期 IV 偏斜度（Skewness）與 Capex/OCF 缺口的領先相關性。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-19T22:00:30+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_20_ai營收缺口",
+    "title": "[trending_repost] AI資本支出與營收缺口，如何以期權偏斜度度量科技股尾部風險？",
+    "description": "從各大雲端服務商持續擴大資本支出但軟體端營收尚未跟上切入。量化指標：分析科技巨頭的偏斜度與資本支出公布前後的隱含波動率變化，驗證市場對尾部風險定價是否偏低。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-19T22:00:36+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   }
 ]
