@@ -520,7 +520,7 @@ def release_pool_articles(
     if pub_id:
         candidates = [item for item in candidates if item.get("id") == pub_id]
 
-    selected = candidates[: max(int(limit), 1)]
+    target_limit = max(int(limit), 1)
     released: list[dict] = []
     audit_skipped: list[dict] = []
     dedup_skipped: list[dict] = []
@@ -542,10 +542,14 @@ def release_pool_articles(
     # research-density forbidden terms in audience='general' bodies. Auto-fix
     # K-id pollution (lossless) and skip-with-log on hard audit failures so
     # main thread can clean them up without polluting the live feed.
-    selected_ids = {id(item) for item in selected}
-    for item in feed:
-        if id(item) not in selected_ids:
-            continue
+    #
+    # 2026-06-19 fall-through fix: do not pre-truncate to the first `limit`
+    # candidates. If the oldest due drafts are correctly skipped by audit or
+    # dedup gates, keep scanning the sorted pool until `target_limit` articles
+    # are actually released or the pool is exhausted.
+    for item in candidates:
+        if len(released) >= target_limit:
+            break
 
         # Lossless auto-fix: relocate K-id tags to details.experiment_refs.
         raw_tags = item.get("tags") or []
@@ -775,7 +779,7 @@ def release_pool_articles(
         "due_only": due_only,
         "include_drafts": effective_include_drafts,
         "preferred_audiences": list(preferred_audiences or []),
-        "limit": max(int(limit), 1),
+        "limit": target_limit,
     }
 
 

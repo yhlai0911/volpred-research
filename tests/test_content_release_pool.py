@@ -306,6 +306,84 @@ def test_release_pool_theme_flood_gate_skips_saturated_theme(tmp_path: Path, mon
     assert flagged.get("status") == "draft"
 
 
+def test_release_pool_by_settings_falls_through_saturated_theme_to_fresh_draft(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """2026-06-19 release-starvation regression: max_articles_per_run=1 used
+    to inspect only the oldest due draft. If that draft was theme-saturated,
+    the run released 0 articles even when the pool had a later fresh-theme
+    draft. It must keep scanning until one article is actually released.
+    """
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 19, 10, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(
+        storage_dir / ".release_settings.json",
+        {
+            "mode": "auto",
+            "interval_minutes": 120,
+            "max_articles_per_run": 1,
+            "due_only": True,
+            "include_drafts": True,
+            "preferred_audiences": [],
+            "last_released_at": (frozen_now - timedelta(hours=3)).isoformat(),
+            "updated_at": (frozen_now - timedelta(hours=3)).isoformat(),
+        },
+    )
+
+    model_body = "模型擂台賽：越複雜的模型不一定更準，老方法沒被淘汰，花俏的新版本沒贏。" * 4
+    feed = []
+    for i in range(4):
+        feed.append({
+            "id": f"mile_pubmodel{i}",
+            "status": "published",
+            "audience": "general",
+            "published_at": (frozen_now - timedelta(days=1, minutes=i)).isoformat(),
+            "created_at": (frozen_now - timedelta(days=1, minutes=i)).isoformat(),
+            "title": f"模型擂台賽第{i}場：複雜模型沒更準",
+            "content": model_body,
+        })
+    feed.extend(
+        [
+            {
+                "id": "mile_old_saturated",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=5)).isoformat(),
+                "title": "又一場模型擂台賽：花俏不等於更準",
+                "content": model_body,
+            },
+            {
+                "id": "mile_fresh_theme",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=4)).isoformat(),
+                "title": "鈾礦 ETF 的庫存週期與流動性",
+                "content": "URA 基金 AUM、鈾礦現貨庫存、ETF 投資人結構與流動性條件的關係。" * 4,
+            },
+        ]
+    )
+    _write_json(storage_dir / "reports" / "feed.json", feed)
+
+    res = content.release_pool_by_settings(storage_dir=str(storage_dir))
+
+    assert res["released_count"] == 1
+    assert [item["id"] for item in res["released"]] == ["mile_fresh_theme"]
+    assert [item["id"] for item in res["dedup_skipped"]] == ["mile_old_saturated"]
+    assert res["settings"]["last_released_at"] == frozen_now.isoformat()
+
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    saturated = next(item for item in feed_after if item["id"] == "mile_old_saturated")
+    fresh = next(item for item in feed_after if item["id"] == "mile_fresh_theme")
+    assert saturated["status"] == "draft"
+    assert saturated["details"]["release_dedup_skipped"] is True
+    assert saturated["details"]["release_theme_flood"] == "model_complexity"
+    assert fresh["status"] == "published"
+    assert fresh["published_at"] == frozen_now.isoformat()
+
+
 def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path: Path, monkeypatch):
     """Boss email-11752 regression: if 2 of last 3 published general/research
     articles are the same narrative cluster, release_pool should filter that

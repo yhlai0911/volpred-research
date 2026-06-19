@@ -34566,12 +34566,18 @@
     "description": "根因（2026-06-19 commit 6b7c4ac1 已修 alert 誤判，但內容層 starvation 根因未修）：release-pool-by-settings 只取最早排程的前 N(=max_articles_per_run) 篇 due 草稿，若全落在已飽和主題（model_complexity recent=26 / vt_strategy=14）被 dedup 正確 skip 後就停，不 fall-through 到 pool 內其他非飽和主題草稿 → 0 釋出 → last_released_at 停滯 → 觸發 release-pool-starved WARN（83 篇 draft 卻釋不出）。\n\n修法：release 算法在 due 草稿被 theme/cluster dedup-skip 時，continue 掃描 pool 內下一篇非飽和主題草稿直到湊滿 limit 或掃完。維持 anti-鬼打牆（不釋飽和主題）+ 釋出連續性（永遠有 fresh-theme 可釋）。\n\n相關：src/volpred/ops/content.py release_article_pool_by_settings；參考 feedback_recycling_is_release_layer_not_research。完成後 Codex review + 加 regression test（模擬 due 全飽和 + pool 有 fresh-theme，斷言釋出 fresh 而非 0）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "release_layer"
     ],
     "created_at": "2026-06-19T10:16:47.577030+00:00",
-    "source": "agent_discovered"
+    "source": "agent_discovered",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-19T11:10:29.130927+00:00",
+    "claim_session_id": "b9110aeb101b",
+    "started_at": "2026-06-19T11:10:33.654106+00:00",
+    "completed_at": "2026-06-19T11:13:28.760176+00:00",
+    "result": "Fixed release_pool_articles fall-through: no pre-truncate to first limit candidates; audit/dedup-skipped due drafts now continue scanning the sorted pool until target_limit articles are actually released or pool exhausted. Added regression test for release-pool-by-settings max_articles_per_run=1 where saturated oldest draft is skipped and later fresh-theme draft releases. Verified tests/test_content_release_pool.py and py_compile."
   }
 ]
