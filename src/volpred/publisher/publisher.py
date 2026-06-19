@@ -785,7 +785,15 @@ class Publisher:
                     audit_k_ids.add(_ts.upper())
             for _r in ((details or {}).get('experiment_refs') or []):
                 _rs = str(_r).strip()
-                if _re_prov.fullmatch(r'[Kk]\d+[a-z]?', _rs):
+                # Accept K-id refs AND explicitly-declared named experiment dirs
+                # (e.g. a member_qa synthesis citing a multi-analysis experiment whose
+                # results live at experiments/<ref>/<ref>_results.json). This STRENGTHENS
+                # coverage — load_source_values resolves the path and skips if the file is
+                # absent, so a junk ref is harmless — letting the content-vs-source gate
+                # verify non-K-numbered experiments instead of silently flagging every
+                # number as un-sourced. (2026-06-19: member_qa synthesis articles cite a
+                # named experiment, not a K-number; previously only [Kk]\d+ refs loaded.)
+                if _rs:
                     audit_k_ids.add(_rs.upper())
             for _m in _re_prov.findall(r'[Kk]\d{2,}[a-z]?', f"{title} {description or ''}"):
                 audit_k_ids.add(_m.upper())
