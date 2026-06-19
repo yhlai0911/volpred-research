@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-06-18T18:03:21Z",
+  "timestamp": "2026-06-19T00:03:39Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 129 (threshold: 12). Research audience: 51 (threshold: 4). General audience: 78 (threshold: 8). All thresholds met."
+      "detail": "Total drafts: 129 (general: 78, research: 51). All thresholds met (total>=12, general>=8, research>=4)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (file missing). Cannot check mtime; treating as stale/missing."
+      "detail": "storage/strategy_metrics.json does not exist (persistent missing since ~2026-05-31)."
     },
     {
-      "name": "ERROR_LOG_RECENT",
+      "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md: most recent entry dated 2026-06-03. No entries dated today (2026-06-18) or yesterday (2026-06-17)."
+      "detail": "No entries dated 2026-06-19 (today) or 2026-06-18 (yesterday) found in docs/error_log.md. Last entry is 2026-06-03 compact threshold discussion."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategies found with >2 null portfolio_return values in the last 3 entries."
+      "detail": "All 15 strategies checked. No strategy has >2 null portfolio_return in the last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree is clean."
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
@@ -34,6 +34,6 @@
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is missing — file does not exist on disk."
+    "strategy_metrics.json missing — file does not exist at storage/strategy_metrics.json (persistent issue since ~2026-05-31)"
   ]
 }
