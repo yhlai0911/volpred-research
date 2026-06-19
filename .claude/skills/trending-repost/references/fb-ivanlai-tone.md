@@ -85,6 +85,18 @@
 
 ## 操作備註
 
+### 0. 發文前必查：FB 是否已被手動發過（2026-06-19 用戶硬性要求，FB dual-publish 恢復同時生效）
+
+**老闆可能臨時心血來潮自己先在 Ivan Lai FB 發了同主題** → 自動再發會造成重複貼文、傷個人帳號觀感。所以每次 trending_repost / event_article 要 dual-publish 到 FB 前，**第一步（先於寫文案、先於輸入）必做**：
+
+1. Claude in Chrome 開 Ivan Lai 個人 FB 動態（瀏覽器自選 MAC STUDIO Chrome，deviceId 見 memory `reference_fb_chrome_browser_autoselect`，不問用戶）。
+2. 掃最近 **~7–14 天**貼文，比對本篇主題/角度是否已出現（看主論點、關鍵數字、主圖、是否帶 volpred.zeabur.app 連結）。
+3. 判定與動作：
+   - **已發過**（老闆手動貼了同主題）→ **跳過 FB 主貼文**，只做 feed 發佈；`mark_fb_post_status.py --status skipped_already_posted` + 把既有貼文 URL 記到 `details.fb_existing_post_url`；**不重發、不在既有貼文下硬補東西**。
+   - **沒發過** → 照下面正常 dual-publish 流程。
+   - **不確定**（相近但不完全同主題）→ 偏保守跳過 FB，標 `fb_post_status: skipped_uncertain_dup`，回報裡點出讓老闆定奪（寧可漏發不要重發）。
+4. feed 端不受影響：無論 FB 跳過與否，feed 文章照常發。FB 跳過不算任務失敗。
+
 ### 中文文案輸入方式
 
 claude-in-chrome 在 FB 貼文輸入中文時：

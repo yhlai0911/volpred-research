@@ -73,6 +73,11 @@ paths:
    | `daily_article` | draft 進池 | ❌ | — |
    | 其他類型 | varies | ❌ | — |
 
+   **🔴 FB 發文前必查 pre-check（2026-06-19 用戶硬性要求；FB dual-publish 恢復同時生效）**：
+   - 老闆可能臨時自己先在 Ivan Lai FB 發了同主題 → **發 FB 前第一步**（先於寫文案）必用 Claude in Chrome 開 Ivan Lai FB 掃最近 7–14 天貼文比對主題。
+   - 已發過 → **跳過 FB 主貼文**只做 feed，`mark_fb_post_status.py --status skipped_already_posted` + 記既有 URL；不重發。不確定 → 偏保守跳過標 `skipped_uncertain_dup` 並回報老闆。feed 端不受影響。
+   - 完整步驟見 `fb-ivanlai-tone.md` §0。FB 個人帳號只能走 Chrome（無 headless API），故 FB 部分只能在 interactive session 執行。
+
    **event_article + FB 規則**（與 trending_repost 共用 SOP，但有差異）：
    - **共用**：FB 文案是改寫版 200-400 字、不直接貼 feed 內文、Ivan Lai 口吻、主貼文不放連結、連結放第一則留言、URL 必 `https://volpred.zeabur.app/v3/reports/<mile_id>`（pre-publish `curl -I` 驗 200）
    - **差異**：event_article **不算入 trending_repost daily cap**（不同 type）；event_article FB 文案語氣可更貼近「即時市場觀察」而非「專欄式 commentary」（事件驅動的時效感）
