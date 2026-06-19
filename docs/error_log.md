@@ -2,6 +2,27 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-19 三根因（老闆「從底層徹底解決」）：release pool 枯竭 / member_qa dispatch 誤分類(strike 2) / M2 供給斷流
+
+**共通病根**：黏性/枯竭狀態無自動回收 + 任務分類靠 free-text 推斷而非 schema。
+
+**根因1 — release pool released_count=0（gap > 4h alert）**
+- 根因：`src/volpred/ops/content.py` 的 `release_dedup_skipped` 是 write-once 永久 flag，但 dedup 判定 base 是 21 天滑動窗口——時間語義不一致。83 draft 有 46 篇被永久黏住，可釋出池單調遞減趨近 0。theme_flood gate 另把飽和主題（recent_count 26 >> cap 3）整類封死。
+- 修：`_dedup_flagged` 加 TTL=`_RELEASE_DEDUP_WINDOW_DAYS`（21天，對齊窗口）；flag 寫入蓋 `release_dedup_skipped_at` timestamp；legacy 無 timestamp 的 46 篇回流重評。commit c35509c8。驗證：46 篇全 legacy（無 timestamp）→ 全回流。
+- 遺留 follow-up：theme_flood 飽和主題應改「節流」非「封死」（保留每窗口釋出最舊 1 篇的 valve）；audit-skip 的 draft（禁用統計術語）應 N 次後 materialize 修稿 task，不 silent re-skip。
+
+**根因2 — member Q&A pending stale 28h（**3-STRIKE: strike 2**）**
+- 根因：`scripts/continue_task_dispatch.py` 的 `MAIN_THREAD_MARKERS` regex 誤匹配 member_qa task description 裡「主線程逐題做 4 維度評分 / 主線程派…」（描述 workflow 步驟，非 ownership）→ 分到 main_thread bucket → hourly dispatch 永不派 → 只能等互動 session（不天天開）= stale 28h。
+- **Strike 記錄**：strike 1 = 2026-06-10 yfinance experiments（5 個因 description 含「主線程派 experiment agent」被誤分類，pool 卡死，當時只 patch explicit experiment override）；strike 2 = 本次 member_qa（同 root，patch 只救了 experiment 沒救 member_qa）。**下次同 root 再現即觸發 three-strike 重構：task ownership 改 schema 欄位 `dispatch_lane`，regex 降為僅 title fallback、不匹配 description。**
+- 修（本次）：explicit task_type override 擴到 member_qa（experiment + member_qa）。commit c35509c8。驗證：dry-run member_qa 進 agentable。
+
+**根因3 — M2（實驗）M3（論文）idle**
+- 根因：pending 池零 experiment/paper；`research_backlog.log` 連 4 天（6/15-19）`no add — all_already_covered`。research_program.md open questions 被既有 experiments 吃完，無新方向注入 → experiment 供給斷流。不是 dispatch 偏好文章，是沒 experiment 可派。
+- 修：派 journal-discovery agent（journal_topic_scan）從頂尖期刊挖新方向寫回 research_program.md。M3 有 2 筆 `decision_made_awaiting_body_rewrite` 待主線程 body rewrite（CLAUDE.md 禁 background agent 寫 .tex）。
+- 遺留 follow-up：`generate_research_backlog` 加 fallback — 連續 N 天 all_covered 自動觸發 journal-discovery（把補題變流程責任）。
+
+**教訓**：(1) 任何「黏性 flag / skip 標記」必須帶 TTL，且 TTL ≤ 產生它的窗口期（flag 與其判定依據的時間語義要一致）。(2) task ownership / 路由用 schema 欄位，不可 grep free-text description（workflow 描述常含會誤觸的字眼）— 此 root 已 strike 2。(3) 供給側（research backlog 題源）枯竭要有自動補給流程，不靠主線程記得手動派。
+
 ## 2026-06-18 三連修：前端 metadata 洩漏 + mirror 22MB PUT + Codex sandbox .git
 
 **問題**：互動 session 中老闆截圖抓到三個獨立問題。
