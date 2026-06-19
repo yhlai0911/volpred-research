@@ -18,6 +18,8 @@ paths:
 - Lookahead 是最高優先風險：
   - `signal from t-1, return at t`
   - 代碼裡要有明確 `signal.shift(1)` 或等效 lag
+  - Forward-label target（例如 `fwd_*`, 未來 H 日 RV/variance/return）不可只檢查 feature lag；OOS/expanding/rolling refit 的訓練列必須滿足 `target_end < forecast_origin`，等價於 row `j` 的 label window `j + H < i`，否則訓練尾端會看見預測日或之後的 realized return。
+  - 多 horizon forward-label 實驗不可共用同一個 DM/HAC/HLN horizon；每個 target 的 inference horizon 必須等於該 target 的 H。
 - 所有隨機程序都要固定 seed。
 - 策略與風險管理比較遵守 `research_program.md` 的公平比較、VaR+ES、Harvey / Patton 規則。
 - Worktree agent 只應產出 `experiments/kXXX/` 內檔案；共享 JSON、Supabase、Mirror sync 由主線程負責。

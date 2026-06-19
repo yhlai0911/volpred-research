@@ -117,7 +117,7 @@
 **解決方法**：
 - K1337 v1 標 failed，knowledge.json 不寫（Codex FAIL 不過 K1259 gate）
 - K1337-v2 task filed：training cutoff 限制 `j + H < i`（drop 訓練尾端 H-1 列）+ regime label 用 `dslope.shift(1)` 後計 rolling-quantile + baseline / augmented 同 log-variance space + clipping 對齊
-- **規則延伸**：Forward-label regression（target 是 `fwd_*` aggregated over future H steps）的 expanding OLS / rolling refit 都要把 training cutoff 設為 `j + H < i`，不是 `j < i`。這條應加進 `.claude/skills/autonomous-research/references/experiment-preamble.md` 的 lookahead audit checklist
+- **規則延伸已落地（2026-06-19 Codex）**：Forward-label regression（target 是 `fwd_*` aggregated over future H steps）的 expanding OLS / rolling refit 都要把 training cutoff 設為 `j + H < i`，不是 `j < i`；多 horizon target 的 DM/HAC/HLN horizon 必須等於該 target 的 H。已寫入 `.claude/rules/experiments.md` 的 Lookahead 規則；`experiment-preamble.md` 是 `agent-specs/` 產物且本 repo canonical source 不完整，先不直接改生成檔。
 - 實驗保留 `experiments/k1337/` 作為「flawed-design preliminary」存證；commits 19f7036b（產出）+ 78291514（Codex FAIL verdict）
 
 ## 2026-06-13 K713 retained JSON mixed reproducible return metrics with legacy drawdown convention
