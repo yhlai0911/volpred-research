@@ -34498,7 +34498,7 @@
     "title": "Paper review (Codex 24h-rule): 40 次測試後，我們刪掉了五種最容易浪費時間的研究方向",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_08407091 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_08407091",
@@ -34510,6 +34510,8 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-19T09:06:22.671249+00:00",
     "claim_session_id": "c4ba70022697",
-    "started_at": "2026-06-19T09:06:34.509037+00:00"
+    "started_at": "2026-06-19T09:06:34.509037+00:00",
+    "completed_at": "2026-06-19T09:15:06.576880+00:00",
+    "result": "CONDITIONAL_PASS_AFTER_PATCH: verified K957 article's 40-test claim against 40 K526-K566 experiment dirs/results; fixed stale 37-count provenance in README/script/results/timeline, removed out-of-scope K569 marker, updated mile_08407091 audit trail and cleared stale content_audit_flag. Supabase single-article sync/readback succeeded; remote K957 PNG SHA matched local."
   }
 ]

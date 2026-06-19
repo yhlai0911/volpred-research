@@ -1,8 +1,9 @@
 """
-K957: K526-K566 Session Synthesis — 37 Experiments, 5 Meta-Lessons
+K957: K526-K566 Session Synthesis — 40 Experiments, 5 Meta-Lessons
 
-Pure synthesis script. 不做新模型估計，只讀既有 experiment JSON 與
-experiment_experiences.json E019-E023，輸出：
+Pure synthesis script. 不做新模型估計；以人工審核後的 CLASSIFICATION
+table 彙整既有 experiment JSON 與 experiment_experiences.json E019-E023
+的來源結論，輸出：
 
   1. k957_results.json  — meta-summary (counts / Harvey t-stats / map)
   2. k957_timeline.png  — K526-K566 timeline + verdict distribution
@@ -98,9 +99,8 @@ CLASSIFICATION: dict[str, dict] = {
     "K566": {"class": "E", "note": "factor rotation daily 2.091 → monthly 1.448"},
 }
 
-# K555 / K569 intentionally skipped in actual experiments directory (shown as
-# "missing" markers on the timeline).
-MISSING_IDS = ["K555", "K569"]
+# K555 is absent from the actual K526-K566 experiment directory sequence.
+MISSING_IDS = ["K555"]
 
 CLASS_TO_LESSON = {
     "A": "E021",  # portfolio-construction win
@@ -156,7 +156,7 @@ def build_summary() -> dict:
 
     return {
         "experiment_id": "K957",
-        "title": "K526-K566 Session Synthesis — 37 Experiments, 5 Meta-Lessons",
+        "title": "K526-K566 Session Synthesis — 40 Experiments, 5 Meta-Lessons",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "type": "meta-synthesis",
         "scope": {
@@ -277,7 +277,7 @@ def draw_timeline(summary: dict) -> None:
     ax_top.set_xticks(xs[::5])
     ax_top.set_xticklabels([ordered_ids[i] for i in xs[::5]], fontsize=8)
     ax_top.set_title(
-        "K957 Session Timeline — K526~K566 (37 experiments, * = Harvey-pass listable)",
+        "K957 Session Timeline — K526~K566 (40 experiments, * = Harvey-pass listable)",
         fontsize=11, pad=10,
     )
     for spine in ("top", "right", "left"):

@@ -18,6 +18,22 @@
       "cap": 15,
       "ratio": 0.408,
       "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "VIX"
+      ],
+      "conclusion_class": "null_no_info",
+      "mechanisms": [
+        "unspecified"
+      ],
+      "time_horizon": "weekly"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
     }
   },
   "tags": [
@@ -29,13 +45,12 @@
   ],
   "related_articles": [],
   "created_at": "2026-06-06T21:12:34.898964+00:00",
-  "published_at": "2026-06-06T21:12:34.898964+00:00",
-  "status": "draft",
-  "content_audit_flagged": true,
+  "published_at": "2026-06-19T01:07:01.879027+00:00",
+  "status": "published",
   "errata": {
-    "update_at": "2026-06-06T21:13:26.929952+00:00",
-    "update_action": "codex_consistency_fix",
-    "update_summary": "Added the missing fifth lesson on correlation regime shifts and aligned the body with the article's 'five lessons' framing after prepublish audit flagged the omission.",
+    "update_at": "2026-06-19T09:13:38.144674+00:00",
+    "update_action": "codex_review_closure",
+    "update_summary": "Codex 24h review closed the K957 count/provenance audit after verifying 40 classified experiments, refreshed local and Supabase PNGs, and aligned README/results/chart metadata.",
     "update_history": [
       {
         "at": "2026-06-06T21:13:26.929952+00:00",
@@ -48,9 +63,38 @@
         "description_source": "auto (first paragraph)",
         "image_paths_normalized": 2,
         "image_url_changed": true
+      },
+      {
+        "at": "2026-06-19T09:09:14.754563+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex 24h review fixed the K957 provenance/count presentation: source docs, results metadata, and the timeline figure now consistently use the verified 40-experiment K526-K566 scope; K569 was removed as an out-of-scope missing marker.",
+        "old_content_chars": 1961,
+        "new_content_chars": 1961,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "auto (first paragraph)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 2,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      },
+      {
+        "at": "2026-06-19T09:13:38.144674+00:00",
+        "action": "codex_review_closure",
+        "summary": "Codex 24h review closed the K957 count/provenance audit after verifying 40 classified experiments, refreshed local and Supabase PNGs, and aligned README/results/chart metadata.",
+        "old_content_chars": 1961,
+        "new_content_chars": 1961,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "auto (first paragraph)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 2,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": true
       }
     ]
   },
   "image_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k957_timeline.png",
-  "last_updated_at": "2026-06-06T21:13:26.929952+00:00"
+  "last_updated_at": "2026-06-19T09:13:38.144674+00:00",
+  "verified_live_at": "2026-06-19T01:07:10.988706+00:00"
 }
