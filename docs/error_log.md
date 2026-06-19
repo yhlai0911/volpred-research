@@ -29,7 +29,7 @@
 **根因1 — release pool released_count=0（gap > 4h alert）**
 - 根因：`src/volpred/ops/content.py` 的 `release_dedup_skipped` 是 write-once 永久 flag，但 dedup 判定 base 是 21 天滑動窗口——時間語義不一致。83 draft 有 46 篇被永久黏住，可釋出池單調遞減趨近 0。theme_flood gate 另把飽和主題（recent_count 26 >> cap 3）整類封死。
 - 修：`_dedup_flagged` 加 TTL=`_RELEASE_DEDUP_WINDOW_DAYS`（21天，對齊窗口）；flag 寫入蓋 `release_dedup_skipped_at` timestamp；legacy 無 timestamp 的 46 篇回流重評。commit c35509c8。驗證：46 篇全 legacy（無 timestamp）→ 全回流。
-- 遺留 follow-up：theme_flood 飽和主題應改「節流」非「封死」（保留每窗口釋出最舊 1 篇的 valve）；audit-skip 的 draft（禁用統計術語）應 N 次後 materialize 修稿 task，不 silent re-skip。
+- 遺留 follow-up：theme_flood 飽和主題已改「節流」非「封死」（2026-06-19 Codex：每次 release run 對每個 saturated theme 保留 FIFO 最舊 1 篇 valve，後續同 theme 仍 skip）；audit-skip 的 draft（禁用統計術語）仍應 N 次後 materialize 修稿 task，不 silent re-skip。
 
 **根因2 — member Q&A pending stale 28h（**3-STRIKE: strike 2**）**
 - 根因：`scripts/continue_task_dispatch.py` 的 `MAIN_THREAD_MARKERS` regex 誤匹配 member_qa task description 裡「主線程逐題做 4 維度評分 / 主線程派…」（描述 workflow 步驟，非 ownership）→ 分到 main_thread bucket → hourly dispatch 永不派 → 只能等互動 session（不天天開）= stale 28h。

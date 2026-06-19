@@ -524,6 +524,8 @@ def release_pool_articles(
     released: list[dict] = []
     audit_skipped: list[dict] = []
     dedup_skipped: list[dict] = []
+    theme_valves: list[dict] = []
+    theme_valves_used: set[str] = set()
     released_at = now.isoformat()
 
     # Recently-published general/research corpus for the anti-flood dedup gate.
@@ -615,6 +617,35 @@ def release_pool_articles(
             )
             dup = _release_content_dup(item, recent_pub_for_dedup)
             flood = _release_theme_flood(item, recent_pub_for_dedup)
+            if (
+                flood is not None
+                and not arc_dups
+                and dup is None
+                and flood["theme"] not in theme_valves_used
+            ):
+                theme_valves_used.add(flood["theme"])
+                _d = item.get("details")
+                if not isinstance(_d, dict):
+                    _d = {}
+                    item["details"] = _d
+                _d["release_theme_valve"] = True
+                _d["release_theme_valve_theme"] = flood["theme"]
+                _d["release_theme_valve_recent_count"] = flood["recent_count"]
+                _d["release_theme_valve_at"] = now.isoformat()
+                theme_valves.append(
+                    {
+                        "id": item.get("id"),
+                        "title": item.get("title"),
+                        "theme": flood["theme"],
+                        "recent_count": flood["recent_count"],
+                    }
+                )
+                print(
+                    f"  [release_pool] THEME-VALVE {item.get('id')} — "
+                    f"theme '{flood['theme']}' saturated "
+                    f"(recent={flood['recent_count']}); releasing oldest candidate this run."
+                )
+                flood = None
             if arc_dups or dup is not None or flood is not None:
                 # Flag so it's excluded from future candidate selection (no
                 # infinite re-skip / slot block); left as draft for review, not
@@ -774,6 +805,7 @@ def release_pool_articles(
         "released": released,
         "audit_skipped": audit_skipped,
         "dedup_skipped": dedup_skipped,
+        "theme_valves": theme_valves,
         "narrative_cluster_pressure": narrative_pressure,
         "narrative_cluster_filtered": narrative_cluster_filtered,
         "due_only": due_only,
