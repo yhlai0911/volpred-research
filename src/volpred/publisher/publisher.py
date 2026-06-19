@@ -269,6 +269,80 @@ def _extract_experiment_refs(tag_list: list[str]) -> tuple[list[str], list[str]]
     return cleaned, refs
 
 
+def _normalize_experiment_ref(raw: object) -> str:
+    s = str(raw or "").strip()
+    if not s:
+        return ""
+    if re.match(r"^[Kk]\d", s):
+        return "K" + s[1:]
+    return s.upper()
+
+
+def _iter_ref_values(raw: object):
+    if raw is None:
+        return
+    if isinstance(raw, (list, tuple, set)):
+        for val in raw:
+            yield val
+        return
+    yield raw
+
+
+def _item_experiment_refs(item: dict) -> set[str]:
+    """Return canonical experiment refs from current and legacy feed shapes."""
+    refs: set[str] = set()
+    details = item.get("details") or {}
+    if isinstance(details, dict):
+        for key in ("experiment_refs", "experiment_ids", "experiment_id"):
+            for raw in _iter_ref_values(details.get(key)):
+                ref = _normalize_experiment_ref(raw)
+                if ref:
+                    refs.add(ref)
+    for key in ("experiment_refs", "experiment_ids", "experiment_id"):
+        for raw in _iter_ref_values(item.get(key)):
+            ref = _normalize_experiment_ref(raw)
+            if ref:
+                refs.add(ref)
+    for raw in _iter_ref_values(item.get("tags") or []):
+        s = str(raw or "").strip()
+        if re.fullmatch(r"[Kk]\d+[a-z]?", s):
+            refs.add(_normalize_experiment_ref(s))
+    text = " ".join(
+        str(item.get(key) or "")
+        for key in ("title", "summary", "description", "content", "analysis")
+    )
+    for match in re.findall(r"[Kk]\d{2,}[a-z]?", text):
+        refs.add(_normalize_experiment_ref(match))
+    return refs
+
+
+def _find_same_ref_feed_duplicate(feed: list[dict], item: dict) -> dict | None:
+    """Last-resort same-experiment-ref duplicate gate for every feed writer.
+
+    `publish_milestone` has richer arc and near-duplicate gates before item
+    construction. Legacy entrypoints (`publish_experiment`, `publish_comparison`)
+    bypass those gates, so `_append_to_feed` needs a minimal choke-point guard:
+    same non-retracted experiment ref + same audience means "already covered".
+    """
+    details = item.get("details") or {}
+    if isinstance(details, dict) and details.get("dup_waiver"):
+        return None
+    refs = _item_experiment_refs(item)
+    if not refs:
+        return None
+    audience = item.get("audience")
+    for existing in feed:
+        if existing.get("status") in ("unpublished", "retracted"):
+            continue
+        existing_audience = existing.get("audience")
+        if audience and existing_audience and existing_audience != audience:
+            continue
+        shared = refs & _item_experiment_refs(existing)
+        if shared:
+            return existing
+    return None
+
+
 def _audit_general_content(audience: str, tags: list[str], content: str) -> list[str]:
     """Return list of audience-content consistency issues. Empty list = clean.
 
@@ -496,7 +570,9 @@ class Publisher:
         # Contentlayer pattern (2026-04-18): feed.json is canonical.
         # Individual mile_*.json snapshots are archived to
         # storage/reports/_archive_mile_files/ and no longer written.
-        self._append_to_feed(item)
+        actual_id = self._append_to_feed(item)
+        if actual_id != item['id']:
+            return actual_id
         try:
             from volpred.publisher.email_notifier import EmailNotifier
 
@@ -528,7 +604,9 @@ class Publisher:
         }
 
         # Contentlayer pattern: feed.json is canonical; no per-item mile_*.json.
-        self._append_to_feed(item)
+        actual_id = self._append_to_feed(item)
+        if actual_id != item['id']:
+            return actual_id
         self._sync_to_remote(title, analysis, 'comparison')
         try:
             from volpred.publisher.email_notifier import EmailNotifier
@@ -1051,7 +1129,9 @@ class Publisher:
             item['proposer'] = proposer
 
         # Contentlayer pattern: feed.json is canonical; no per-item mile_*.json.
-        self._append_to_feed(item)
+        actual_id = self._append_to_feed(item)
+        if actual_id != pub_id:
+            return actual_id
         self._sync_to_remote(title, description, phase, details)
 
         # Sync to Supabase DB (so website shows article immediately).
@@ -1155,7 +1235,7 @@ class Publisher:
             pass
         return True
 
-    def _append_to_feed(self, item: dict):
+    def _append_to_feed(self, item: dict) -> str:
         # Ensure both timestamp fields exist (frontend uses published_at, legacy uses created_at)
         now = datetime.now(timezone.utc).isoformat()
         if 'created_at' not in item:
@@ -1251,9 +1331,21 @@ class Publisher:
 
         storage_dir = str(self.reports_dir.parent)
         result_label = "ok"
+        log_record_id = item.get('id')
         try:
             with shared_state_lock("publisher_feed", storage_dir=storage_dir):
                 feed = self._load_feed()
+                duplicate = _find_same_ref_feed_duplicate(feed, item)
+                if duplicate is not None:
+                    existing_id = duplicate.get("id") or item.get("id")
+                    result_label = f"duplicate_same_ref:{existing_id}"[:200]
+                    log_record_id = existing_id
+                    print(
+                        "  🚫 BLOCKED same-experiment-ref duplicate at feed append "
+                        f"(new={item.get('id')}, existing={existing_id}, "
+                        f"refs={sorted(_item_experiment_refs(item) & _item_experiment_refs(duplicate))})"
+                    )
+                    return str(existing_id)
                 feed.append(item)
                 # Sort newest first — use published_at (consistent with frontend display)
                 feed.sort(key=lambda x: x.get('published_at') or x.get('created_at') or '', reverse=True)
@@ -1277,6 +1369,7 @@ class Publisher:
                             f"not present in persisted feed (entries={len(verify_feed)})"
                         )
                 self._sync_feed_to_remote()
+                return str(item.get('id'))
         except Exception as exc:
             result_label = f"error: {type(exc).__name__}: {exc}"[:200]
             raise
@@ -1284,7 +1377,7 @@ class Publisher:
             append_writer_log(
                 subsystem="publisher",
                 target="reports/feed.json",
-                record_id=item.get('id'),
+                record_id=log_record_id,
                 result=result_label,
                 storage_dir=storage_dir,
             )

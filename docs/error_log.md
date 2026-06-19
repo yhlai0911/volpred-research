@@ -20,7 +20,7 @@
 
 **教訓**：**修雙向風險邏輯（dedup：false-positive vs false-negative）必同時寫正反兩面 regression test**。2026-06-14 只顧著讓 SpaceX 過（false-positive），用最粗暴的 `descriptive→return []` 全關 descriptive 比對，沒寫「重複的 descriptive 仍要擋」的反面 test → 5 天後鬼打牆。dedup gate 的每次調整都要同時驗證「該擋的擋 + 不該擋的不擋」兩端。
 
-**遺留**：legacy `publish_experiment()`/`publish_comparison()`（pub_/cmp_ id，CLI DEPRECATED）仍繞過 dedup，未動（非本 incident 路徑）；若要徹底防線需改 `_append_to_feed` 唯一寫入點加 last-resort same-ref 防呆（影響回傳語意，待評估）。
+**遺留 follow-up 已收斂（2026-06-19 Codex）**：legacy `publish_experiment()`/`publish_comparison()`（pub_/cmp_ id，CLI DEPRECATED）原本仍繞過 dedup；已在 `_append_to_feed` 唯一寫入點加 last-resort same-ref 防呆，normalize `details.experiment_refs` + legacy `experiment_id(s)` + K-id tags/text，同 audience、同 ref、非 retracted/unpublished 即短路回既有 id。Regression 覆蓋 legacy experiment/comparison entrypoints。
 
 ## 2026-06-19 三根因（老闆「從底層徹底解決」）：release pool 枯竭 / member_qa dispatch 誤分類(strike 2) / M2 供給斷流
 

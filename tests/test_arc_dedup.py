@@ -518,6 +518,67 @@ class TestK1054GhostRecycle:
         )
         assert returned != "mile_c481c8cf", "research companion must not be blocked"
 
+    def test_append_choke_point_blocks_legacy_publish_experiment_same_ref(
+        self, tmp_path, monkeypatch
+    ):
+        """Legacy publish_experiment bypasses publish_milestone arc gates.
+
+        The append choke point must still block a same-audience same-K recycle.
+        """
+        import json as _json
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        existing = dict(self.C481_ARTICLE, audience="research")
+        (storage / "reports" / "feed.json").write_text(
+            _json.dumps([existing], ensure_ascii=False), encoding="utf-8"
+        )
+        from volpred.publisher.publisher import Publisher
+
+        monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None)
+        pub = Publisher(storage_dir=str(storage))
+        returned = pub.publish_experiment(
+            "K1054",
+            title="K1054 proxy robustness recycle",
+            summary="Same K1054 model robustness result through the legacy path.",
+            metrics={},
+        )
+
+        feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
+        assert returned == "mile_c481c8cf"
+        assert len(feed) == 1, "legacy publish_experiment must not append same-ref dup"
+
+    def test_append_choke_point_blocks_legacy_publish_comparison_same_ref(
+        self, tmp_path, monkeypatch
+    ):
+        """Legacy publish_comparison uses experiment_ids, not details refs."""
+        import json as _json
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        existing = dict(
+            self.C481_ARTICLE,
+            audience="research",
+            details={"experiment_refs": ["K1054", "K777"]},
+        )
+        (storage / "reports" / "feed.json").write_text(
+            _json.dumps([existing], ensure_ascii=False), encoding="utf-8"
+        )
+        from volpred.publisher.publisher import Publisher
+
+        monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None)
+        pub = Publisher(storage_dir=str(storage))
+        returned = pub.publish_comparison(
+            ["K1054", "K888"],
+            title="K1054 comparison recycle",
+            ranking=[],
+            analysis="Same K1054 comparison through the legacy comparison path.",
+        )
+
+        feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
+        assert returned == "mile_c481c8cf"
+        assert len(feed) == 1, "legacy publish_comparison must not append same-ref dup"
+
 
 def test_vt_crowding_arc_caught():
     """2026-06-14 regression: VT crowding arc must dedupe across K/audience.
