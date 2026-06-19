@@ -1,0 +1,108 @@
+{
+  "experiment_id": "k_taiex_60k_scenario_20260619",
+  "generated_at_utc": "2026-06-19T10:31:51.409405+00:00",
+  "seed": 42,
+  "data": {
+    "source": "local snapshot /Users/yhlai0911/Desktop/volpred-research/experiments/k_taiex_60k_scenario_20260619/path_sim/data/twii_close_snapshot.csv",
+    "ticker": "^TWII",
+    "period_start": "2012-01-03",
+    "period_end": "2026-06-18",
+    "n_trading_days": 3520,
+    "n_return_obs": 3519,
+    "last_close": 46465.19921875,
+    "target": 60000.0,
+    "needed_pct_to_target": 29.13
+  },
+  "historical_moments": {
+    "mean_daily_log_return": 0.0005357207190381895,
+    "annualized_drift_from_mean": 0.13500162119762377,
+    "uncond_daily_vol": 0.010605120046716893,
+    "annualized_uncond_vol": 0.16835106160559157
+  },
+  "garch": {
+    "spec": "GARCH(1,1), Constant mean",
+    "dist_candidates_aic": {
+      "t": 9364.816170639415,
+      "normal": 9601.013615038413
+    },
+    "chosen_dist": "t",
+    "params": {
+      "mu": 0.08087545149955391,
+      "omega": 0.023748155553259123,
+      "alpha[1]": 0.08165811133840822,
+      "beta[1]": 0.8979846523004035,
+      "nu": 5.67901802888458
+    },
+    "alpha+beta_persistence": 0.9796427636388116,
+    "student_t_dof_nu": 5.67901802888458,
+    "last_conditional_vol_daily_pct": 1.8465923713069943,
+    "uncond_daily_vol_from_garch_pct": 1.0800790267358935
+  },
+  "monte_carlo": {
+    "n_sims": 20000,
+    "horizon_trading_days": 63,
+    "seed": 42,
+    "innovation": "t",
+    "scenario_zero_drift": {
+      "drift_mode": "zero",
+      "drift_daily_log": 0.0,
+      "drift_annualized": 0.0,
+      "p_touch_60000_anytime": 0.0336,
+      "p_end_above_60000": 0.0196,
+      "final_level_median": 46474.20065570675,
+      "final_level_p05": 38553.64371946116,
+      "final_level_p25": 43274.570922753555,
+      "final_level_p75": 49852.4443287404,
+      "final_level_p95": 56014.786816710264,
+      "final_level_mean": 46802.48869235878,
+      "max_drawdown_median": 0.09969744307008416,
+      "max_drawdown_p05": 0.0416203404825244,
+      "max_drawdown_p95": 0.2306353997276042,
+      "max_drawdown_mean": 0.11350700304076472,
+      "max_dd_median_given_touch": 0.09178548257641045,
+      "max_dd_p95_given_touch": 0.2575651758288784,
+      "final_median_given_touch": 60520.99438963487
+    },
+    "scenario_historical_drift": {
+      "drift_mode": "historical",
+      "drift_daily_log": 0.0005357207190381895,
+      "drift_annualized": 0.13500162119762377,
+      "p_touch_60000_anytime": 0.0489,
+      "p_end_above_60000": 0.03115,
+      "final_level_median": 48069.49322019044,
+      "final_level_p05": 39877.05198236066,
+      "final_level_p25": 44760.03167840436,
+      "final_level_p75": 51563.699877773935,
+      "final_level_p95": 57937.57347358771,
+      "final_level_mean": 48409.05020728145,
+      "max_drawdown_median": 0.08821309511568914,
+      "max_drawdown_p05": 0.03693925198357301,
+      "max_drawdown_p95": 0.21479496284887667,
+      "max_drawdown_mean": 0.1025159644660565,
+      "max_dd_median_given_touch": 0.08109135497811876,
+      "max_dd_p95_given_touch": 0.23174525945710076,
+      "final_median_given_touch": 61023.126775563986
+    }
+  },
+  "empirical_benchmark": {
+    "description": "Rolling 63-day forward windows, real ^TWII 2012-2026; fraction where the window's max reaches the same +29.1% move.",
+    "n_windows": 3457,
+    "n_hits_ge_needed": 38,
+    "empirical_freq_ge_needed_pct": 0.010992189759907435,
+    "needed_move_pct": 29.13,
+    "freq_by_threshold": {
+      "+10.0%": 0.23633207983800983,
+      "+15.0%": 0.11946774660109923,
+      "+20.0%": 0.049464853919583454,
+      "+25.0%": 0.025455597338733007,
+      "+29.1%": 0.011281457911483946,
+      "+30.0%": 0.008967312698871854
+    },
+    "max_fwd63_move_ever_pct": 44.68562002392258
+  },
+  "honesty_notes": [
+    "Probabilities are MODEL-CONDITIONAL given a GARCH(1,1) return process; they are NOT a forecast that the event will or will not occur.",
+    "Drift assumption strongly affects touch probability: zero-drift is conservative; historical-mean drift extrapolates 2012-2026 average upward drift, which need not persist.",
+    "GARCH(1,1) is symmetric; TWII has documented leverage (GJR gamma=0.272, K-series), so a symmetric model may slightly understate downside-clustering tail risk."
+  ]
+}

@@ -1,0 +1,400 @@
+{
+  "experiment_id": "k_taiex_60k_scenario_rotation",
+  "title": "台股大漲段（126日報酬>=+20%）風險面與產業輪動實證",
+  "data_source": "yfinance (auto_adjust=True, dividend-adjusted close)",
+  "tickers": {
+    "index": "^TWII",
+    "semiconductor_2330": "2330.TW",
+    "electronics_2317": "2317.TW",
+    "shipping_2603": "2603.TW",
+    "financial_2882": "2882.TW",
+    "traditional_1301": "1301.TW",
+    "tech_etf_0052": "0052.TW",
+    "fin_etf_0055": "0055.TW"
+  },
+  "period": {
+    "start": "2012-07-12",
+    "end": "2026-06-18"
+  },
+  "sample_n": {
+    "total_index_days": 3394,
+    "rally_days": 480,
+    "other_days": 2914,
+    "rally_pct": 14.14
+  },
+  "definitions": {
+    "rally_regime": "trailing 126-trading-day TWII return >= +20% (no lookahead: uses past returns only)",
+    "realized_vol": "trailing 21-day std of daily returns, annualized x sqrt(252)",
+    "forward_mdd": "max drawdown over the NEXT 63 trading days (forward, descriptive only)",
+    "tail": "5% quantile of daily returns"
+  },
+  "seed": 42,
+  "bootstrap": {
+    "n_boot": 2000,
+    "block": 21,
+    "seed": 42
+  },
+  "risk": {
+    "realized_vol_annualized": {
+      "rally_mean": 0.19471289825284596,
+      "rally_median": 0.1652364669762839,
+      "rally_p90": 0.32642077919464657,
+      "other_mean": 0.14218592320645393,
+      "other_median": 0.12669155093261483,
+      "other_p90": 0.21057501946858873,
+      "welch_t": 13.61139176600323,
+      "welch_p": 5.251284435923e-37,
+      "n_rally": 480,
+      "n_other": 2914
+    },
+    "forward_63d_max_drawdown": {
+      "note": "forward-looking conditional stat: what happened in the 63d AFTER each day; descriptive only, not a tradable signal",
+      "rally_mean": -0.09505900494244975,
+      "rally_median": -0.09329708036821527,
+      "rally_p10_worst": -0.18692673067367516,
+      "rally_worst": -0.18692673067367516,
+      "other_mean": -0.07330570461206262,
+      "other_median": -0.0549003060449369,
+      "other_p10_worst": -0.14508585284481035,
+      "other_worst": -0.28723517443899893,
+      "welch_t": -9.057502654937727,
+      "welch_p": 1.756068037466735e-18,
+      "n_rally": 417,
+      "n_other": 2914
+    },
+    "daily_return_5pct_tail": {
+      "method": "block bootstrap (block=21, n_boot=2000, seed=42) of 5% quantile",
+      "rally_q05_ci": {
+        "lo": -0.02448670019784016,
+        "median": -0.018158067453737603,
+        "hi": -0.013884049513345058
+      },
+      "other_q05_ci": {
+        "lo": -0.016556880799181783,
+        "median": -0.014687911153775894,
+        "hi": -0.013661471384653812
+      },
+      "rally_empirical_q05": -0.01821980109986017,
+      "other_empirical_q05": -0.014860668836739893,
+      "n_rally": 480,
+      "n_other": 2914
+    }
+  },
+  "sector_rotation": {
+    "semiconductor_2330": {
+      "label_zh": "半導體(台積電2330)",
+      "ticker": "2330.TW",
+      "rally_mean_daily_excess_bps": 4.910007886742166,
+      "rally_ann_excess_pct": 12.373219874590259,
+      "rally_excess_info_ratio_ann": 0.8443456315402444,
+      "rally_excess_vol_ann_pct": 14.654211986647214,
+      "rally_sector_vol_ann_pct": 28.846509272689637,
+      "rally_cum_sector_ret_pct": 310.77921379778707,
+      "rally_cum_twii_ret_pct": 237.00933926875135,
+      "rally_cum_excess_pct": 73.76987452903575,
+      "cum_excess_caveat": "compounded over NON-CONTIGUOUS rally days; sensitive to single mega-episodes (e.g. 2021 shipping super-cycle). Use rally_ann_excess_pct as the stable metric.",
+      "other_ann_excess_pct": 17.38454513398262,
+      "n_rally_days": 480,
+      "n_other_days": 3038
+    },
+    "electronics_2317": {
+      "label_zh": "電子代工(鴻海2317)",
+      "ticker": "2317.TW",
+      "rally_mean_daily_excess_bps": 1.8062505245119522,
+      "rally_ann_excess_pct": 4.55175132177012,
+      "rally_excess_info_ratio_ann": 0.1596815692053623,
+      "rally_excess_vol_ann_pct": 28.50517654868629,
+      "rally_sector_vol_ann_pct": 38.17254124297195,
+      "rally_cum_sector_ret_pct": 234.03315984683476,
+      "rally_cum_twii_ret_pct": 237.00933926875135,
+      "rally_cum_excess_pct": -2.9761794219165694,
+      "cum_excess_caveat": "compounded over NON-CONTIGUOUS rally days; sensitive to single mega-episodes (e.g. 2021 shipping super-cycle). Use rally_ann_excess_pct as the stable metric.",
+      "other_ann_excess_pct": 2.0514662790441394,
+      "n_rally_days": 480,
+      "n_other_days": 3038
+    },
+    "shipping_2603": {
+      "label_zh": "航運(長榮2603)",
+      "ticker": "2603.TW",
+      "rally_mean_daily_excess_bps": 32.25009192761835,
+      "rally_ann_excess_pct": 81.27023165759825,
+      "rally_excess_info_ratio_ann": 1.3904157191262896,
+      "rally_excess_vol_ann_pct": 58.450311327512104,
+      "rally_sector_vol_ann_pct": 59.62805841592691,
+      "rally_cum_sector_ret_pct": 1075.1402204755539,
+      "rally_cum_twii_ret_pct": 237.00933926875135,
+      "rally_cum_excess_pct": 838.1308812068025,
+      "cum_excess_caveat": "compounded over NON-CONTIGUOUS rally days; sensitive to single mega-episodes (e.g. 2021 shipping super-cycle). Use rally_ann_excess_pct as the stable metric.",
+      "other_ann_excess_pct": 2.5503805781473576,
+      "n_rally_days": 480,
+      "n_other_days": 3038
+    },
+    "financial_2882": {
+      "label_zh": "金融(國泰金2882)",
+      "ticker": "2882.TW",
+      "rally_mean_daily_excess_bps": 4.307468811580418,
+      "rally_ann_excess_pct": 10.854821405182653,
+      "rally_excess_info_ratio_ann": 0.4414514092680115,
+      "rally_excess_vol_ann_pct": 24.588938164636225,
+      "rally_sector_vol_ann_pct": 26.777145894823924,
+      "rally_cum_sector_ret_pct": 303.62781243923064,
+      "rally_cum_twii_ret_pct": 237.00933926875135,
+      "rally_cum_excess_pct": 66.6184731704793,
+      "cum_excess_caveat": "compounded over NON-CONTIGUOUS rally days; sensitive to single mega-episodes (e.g. 2021 shipping super-cycle). Use rally_ann_excess_pct as the stable metric.",
+      "other_ann_excess_pct": 0.6479175444818731,
+      "n_rally_days": 480,
+      "n_other_days": 3038
+    },
+    "traditional_1301": {
+      "label_zh": "傳產塑化(台塑1301)",
+      "ticker": "1301.TW",
+      "rally_mean_daily_excess_bps": -16.198180477694645,
+      "rally_ann_excess_pct": -40.81941480379051,
+      "rally_excess_info_ratio_ann": -1.266581560430822,
+      "rally_excess_vol_ann_pct": 32.228019165150315,
+      "rally_sector_vol_ann_pct": 33.72541540288088,
+      "rally_cum_sector_ret_pct": 45.25930838176291,
+      "rally_cum_twii_ret_pct": 237.00933926875135,
+      "rally_cum_excess_pct": -191.75003088698844,
+      "cum_excess_caveat": "compounded over NON-CONTIGUOUS rally days; sensitive to single mega-episodes (e.g. 2021 shipping super-cycle). Use rally_ann_excess_pct as the stable metric.",
+      "other_ann_excess_pct": -6.052407155964396,
+      "n_rally_days": 480,
+      "n_other_days": 3038
+    },
+    "tech_etf_0052": {
+      "label_zh": "電子科技ETF(0052)",
+      "ticker": "0052.TW",
+      "rally_mean_daily_excess_bps": 2.6703175502873693,
+      "rally_ann_excess_pct": 6.729200226724171,
+      "rally_excess_info_ratio_ann": 0.49728658341026155,
+      "rally_excess_vol_ann_pct": 13.531835467140645,
+      "rally_sector_vol_ann_pct": 27.09695618649284,
+      "rally_cum_sector_ret_pct": 272.2444766368757,
+      "rally_cum_twii_ret_pct": 237.00933926875135,
+      "rally_cum_excess_pct": 35.235137368124335,
+      "cum_excess_caveat": "compounded over NON-CONTIGUOUS rally days; sensitive to single mega-episodes (e.g. 2021 shipping super-cycle). Use rally_ann_excess_pct as the stable metric.",
+      "other_ann_excess_pct": 7.301053210244428,
+      "n_rally_days": 480,
+      "n_other_days": 3037
+    },
+    "fin_etf_0055": {
+      "label_zh": "金融ETF(0055)",
+      "ticker": "0055.TW",
+      "rally_mean_daily_excess_bps": -7.814824274553146,
+      "rally_ann_excess_pct": -19.69335717187393,
+      "rally_excess_info_ratio_ann": -1.100144906853234,
+      "rally_excess_vol_ann_pct": 17.90069385332449,
+      "rally_sector_vol_ann_pct": 16.042934493874352,
+      "rally_cum_sector_ret_pct": 135.8080042628206,
+      "rally_cum_twii_ret_pct": 237.00933926875135,
+      "rally_cum_excess_pct": -101.20133500593073,
+      "cum_excess_caveat": "compounded over NON-CONTIGUOUS rally days; sensitive to single mega-episodes (e.g. 2021 shipping super-cycle). Use rally_ann_excess_pct as the stable metric.",
+      "other_ann_excess_pct": 2.242983172442066,
+      "n_rally_days": 480,
+      "n_other_days": 3039
+    }
+  },
+  "sector_rotation_rank_by_rally_ann_excess": [
+    [
+      "shipping_2603",
+      81.27023165759825
+    ],
+    [
+      "semiconductor_2330",
+      12.373219874590259
+    ],
+    [
+      "financial_2882",
+      10.854821405182653
+    ],
+    [
+      "tech_etf_0052",
+      6.729200226724171
+    ],
+    [
+      "electronics_2317",
+      4.55175132177012
+    ],
+    [
+      "fin_etf_0055",
+      -19.69335717187393
+    ],
+    [
+      "traditional_1301",
+      -40.81941480379051
+    ]
+  ],
+  "rally_episodes": [
+    {
+      "start": "2020-09-11",
+      "end": "2020-10-28",
+      "days": 31
+    },
+    {
+      "start": "2020-11-11",
+      "end": "2021-01-28",
+      "days": 56
+    },
+    {
+      "start": "2021-02-01",
+      "end": "2021-06-18",
+      "days": 87
+    },
+    {
+      "start": "2021-06-23",
+      "end": "2021-07-16",
+      "days": 18
+    },
+    {
+      "start": "2024-03-28",
+      "end": "2024-04-18",
+      "days": 14
+    },
+    {
+      "start": "2024-04-26",
+      "end": "2024-08-02",
+      "days": 67
+    },
+    {
+      "start": "2025-09-30",
+      "end": "2026-06-18",
+      "days": 172
+    }
+  ],
+  "sector_per_episode_robustness": {
+    "semiconductor_2330": {
+      "label_zh": "半導體(台積電2330)",
+      "episodes_outperformed": 5,
+      "episodes_total": 7,
+      "hit_rate": 0.71,
+      "per_episode_excess_pct": [
+        1.8,
+        16.1,
+        -11.5,
+        -2.9,
+        2.7,
+        9.4,
+        5.5
+      ]
+    },
+    "electronics_2317": {
+      "label_zh": "電子代工(鴻海2317)",
+      "episodes_outperformed": 3,
+      "episodes_total": 7,
+      "hit_rate": 0.43,
+      "per_episode_excess_pct": [
+        -1.1,
+        28.8,
+        -14.4,
+        5.3,
+        -0.8,
+        17.3,
+        -59.3
+      ]
+    },
+    "shipping_2603": {
+      "label_zh": "航運(長榮2603)",
+      "episodes_outperformed": 3,
+      "episodes_total": 7,
+      "hit_rate": 0.43,
+      "per_episode_excess_pct": [
+        -2.1,
+        48.6,
+        334.3,
+        11.5,
+        -4.8,
+        -9.5,
+        -64.7
+      ]
+    },
+    "financial_2882": {
+      "label_zh": "金融(國泰金2882)",
+      "episodes_outperformed": 4,
+      "episodes_total": 7,
+      "hit_rate": 0.57,
+      "per_episode_excess_pct": [
+        -3.7,
+        -18.6,
+        19.9,
+        8.9,
+        0.0,
+        21.7,
+        -4.2
+      ]
+    },
+    "traditional_1301": {
+      "label_zh": "傳產塑化(台塑1301)",
+      "episodes_outperformed": 2,
+      "episodes_total": 7,
+      "hit_rate": 0.29,
+      "per_episode_excess_pct": [
+        0.2,
+        -12.9,
+        2.8,
+        -2.3,
+        -1.1,
+        -23.2,
+        -47.0
+      ]
+    },
+    "tech_etf_0052": {
+      "label_zh": "電子科技ETF(0052)",
+      "episodes_outperformed": 3,
+      "episodes_total": 7,
+      "hit_rate": 0.43,
+      "per_episode_excess_pct": [
+        3.6,
+        14.2,
+        -11.0,
+        -1.2,
+        -1.3,
+        5.5,
+        -5.2
+      ]
+    },
+    "fin_etf_0055": {
+      "label_zh": "金融ETF(0055)",
+      "episodes_outperformed": 3,
+      "episodes_total": 7,
+      "hit_rate": 0.43,
+      "per_episode_excess_pct": [
+        -3.7,
+        -18.2,
+        6.6,
+        2.8,
+        -2.1,
+        6.5,
+        -33.8
+      ]
+    }
+  },
+  "data_quality_flags": [
+    {
+      "ticker": "2603.TW",
+      "date": "2022-09-19",
+      "raw_return": -0.1633663553518735,
+      "action": "clipped to +/-0.11",
+      "reason": "exceeds TWSE daily price limit -> adjustment artifact"
+    },
+    {
+      "ticker": "1301.TW",
+      "date": "2025-08-04",
+      "raw_return": -0.1125440300124092,
+      "action": "clipped to +/-0.11",
+      "reason": "exceeds TWSE daily price limit -> adjustment artifact"
+    },
+    {
+      "ticker": "0052.TW",
+      "date": "2025-11-17",
+      "raw_return": -0.8568554070619113,
+      "action": "clipped to +/-0.11",
+      "reason": "exceeds TWSE daily price limit -> adjustment artifact"
+    }
+  ],
+  "linkage_prior_research": {
+    "K178_vt_monthly": "台灣 VT 月頻最佳化：MDD 改善 7.0pp (-22.9%->-15.9%)，但 VT Sharpe 顯著低於 B&H (保險費 ~4%/yr, Harvey t=-3.06)。K=6 最保守(MDD -11.2%, 持倉36%)。",
+    "K177_hedge": "台灣最佳避險組合（hedge portfolio）。",
+    "K176_covar": "台灣 CoVaR 傳染結構（7 資產）。"
+  },
+  "generated_at": "2026-06-19T18:35:21.417552+08:00"
+}
