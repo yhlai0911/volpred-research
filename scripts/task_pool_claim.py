@@ -35,6 +35,7 @@ import argparse
 import fcntl
 import json
 import os
+import re
 import sys
 import uuid
 from contextlib import contextmanager
@@ -87,6 +88,165 @@ def _find(tasks: list[dict[str, Any]], task_id: str) -> dict[str, Any]:
             "Run scripts/dedupe_next_tasks.py first."
         )
     return matches[0]
+
+
+_K_ID_RE = re.compile(r"^K\d{2,5}[A-Z]?$", re.IGNORECASE)
+
+
+def _extract_review_verdict(result: str) -> str | None:
+    """Extract an explicit Codex review verdict from a compact completion note."""
+    if not result:
+        return None
+    upper = result.upper()
+    explicit = [
+        m.group(1)
+        for m in re.finditer(
+            (
+                r"(?:^|[^A-Z0-9_])(?:FINAL\s+|FORMAL\s+)?"
+                r"VERDICT\s*[:=：]?\s*(CONDITIONAL_PASS|FAIL|PASS)(?![A-Z_])"
+            ),
+            upper,
+        )
+    ]
+    if explicit:
+        return explicit[-1]
+    if re.search(r"\bCODEX\s+REVIEW\s+FAIL\b", upper):
+        return "FAIL"
+    # Fallback for short review-task summaries such as "review FAIL: ...".
+    # Avoid treating repair summaries like "FAIL -> CONDITIONAL_PASS" as FAIL.
+    if (
+        re.search(r"\bREVIEW\s+FAIL\b", upper)
+        and "CONDITIONAL_PASS" not in upper
+        and not re.search(r"\bPASS\b", upper)
+    ):
+        return "FAIL"
+    return None
+
+
+def _codex_review_followup_k_id(task: dict[str, Any]) -> str | None:
+    task_id = str(task.get("id") or "")
+    for key in ("related_k_id", "source_k_id", "predecessor", "k_id", "experiment_id"):
+        value = str(task.get(key) or "").upper()
+        if _K_ID_RE.fullmatch(value):
+            return value
+    match = re.match(
+        r"^(K\d{2,5}[A-Z]?)_CODEX_REVIEW_FOLLOWUP$",
+        task_id,
+        flags=re.IGNORECASE,
+    )
+    if match:
+        return match.group(1).upper()
+    return None
+
+
+def _find_source_experiment_task(
+    tasks: list[dict[str, Any]],
+    k_id: str,
+    review_task_id: str,
+) -> dict[str, Any] | None:
+    exact = [
+        t for t in tasks
+        if str(t.get("id") or "").upper() == k_id
+        and str(t.get("task_type") or "") == "experiment"
+    ]
+    if len(exact) == 1:
+        return exact[0]
+
+    keyed = []
+    for t in tasks:
+        if str(t.get("id") or "") == review_task_id:
+            continue
+        if str(t.get("task_type") or "") != "experiment":
+            continue
+        values = {str(t.get(key) or "").upper() for key in ("k_id", "experiment_id")}
+        if k_id in values:
+            keyed.append(t)
+    return keyed[0] if len(keyed) == 1 else None
+
+
+def _append_note(existing: Any, note: str) -> str:
+    current = str(existing or "").strip()
+    if note in current:
+        return current
+    return f"{current}\n\n{note}".strip() if current else note
+
+
+def _compact_note(text: str, limit: int = 360) -> str:
+    cleaned = " ".join(str(text or "").split())
+    return cleaned if len(cleaned) <= limit else cleaned[: limit - 3].rstrip() + "..."
+
+
+def _apply_codex_review_followup_fail(
+    tasks: list[dict[str, Any]],
+    review_task: dict[str, Any],
+    result: str,
+) -> dict[str, Any] | None:
+    """Propagate `<K>_codex_review_followup` verdict=FAIL to source K task.
+
+    The review task itself can succeed because the review was completed. The
+    source experiment must still be downgraded when the completed review says
+    the methodology or claims failed.
+    """
+    task_id = str(review_task.get("id") or "")
+    if not re.search(r"_codex_review_followup$", task_id, flags=re.IGNORECASE):
+        return None
+    verdict = _extract_review_verdict(result)
+    if verdict != "FAIL":
+        return None
+
+    k_id = _codex_review_followup_k_id(review_task)
+    if not k_id:
+        return {
+            "applied": False,
+            "reason": "source_k_id_not_found",
+            "review_task_id": task_id,
+            "verdict": verdict,
+        }
+
+    now = _now()
+    source_task = _find_source_experiment_task(tasks, k_id, task_id)
+    reason = f"Codex review follow-up {task_id} verdict=FAIL: {_compact_note(result)}"
+    effect: dict[str, Any] = {
+        "applied": True,
+        "review_task_id": task_id,
+        "source_k_id": k_id,
+        "verdict": verdict,
+    }
+    if source_task is None:
+        effect["source_status"] = "not_found"
+    else:
+        source_task["status"] = "failed"
+        source_task["failed_at"] = now
+        source_task["failed_by"] = "task_pool_claim:codex_review_followup"
+        source_task["failure_reason"] = _append_note(source_task.get("failure_reason"), reason)
+        effect["source_status"] = "failed"
+
+    v2_id = f"{k_id}_v2_fix_methodology"
+    if any(str(t.get("id") or "") == v2_id for t in tasks):
+        effect["v2_task"] = "already_exists"
+        return effect
+
+    tasks.append({
+        "id": v2_id,
+        "task_type": "experiment",
+        "status": "pending",
+        "priority": review_task.get("priority") or "P3",
+        "title": f"{k_id}-v2: fix methodology after Codex review FAIL",
+        "description": (
+            f"{k_id} Codex review follow-up task {task_id} returned verdict=FAIL. "
+            "Fix the methodology / claim issues identified by the review, rerun the "
+            "experiment, and rerun Codex review before any knowledge.json promotion. "
+            f"Review summary: {_compact_note(result)}"
+        ),
+        "source": "codex_review_followup",
+        "created_at": now,
+        "predecessor": k_id,
+        "predecessor_codex_review_task": task_id,
+        "dispatch_lane": "agent",
+    })
+    effect["v2_task"] = "created"
+    effect["v2_task_id"] = v2_id
+    return effect
 
 
 def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
@@ -154,10 +314,18 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
         task = _find(tasks, args.id)
         task["status"] = args.status
         task["completed_at"] = _now()
+        result_text = args.result or ""
         if args.result:
             existing = task.get("result") or ""
             task["result"] = (existing + "\n\n" + args.result).strip() if existing else args.result
-        return {"ok": True, "task_id": args.id, "status": args.status}
+            result_text = task["result"]
+        effect = None
+        if args.status == "succeeded":
+            effect = _apply_codex_review_followup_fail(tasks, task, result_text)
+        out = {"ok": True, "task_id": args.id, "status": args.status}
+        if effect:
+            out["review_followup_effect"] = effect
+        return out
 
 
 def cmd_list(args: argparse.Namespace) -> dict[str, Any]:

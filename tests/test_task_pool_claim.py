@@ -95,3 +95,112 @@ def test_handoff_main_thread_clears_claim_and_sets_note(tmp_path, monkeypatch) -
     assert "claimed_by" not in saved[0]
     assert "claimed_at" not in saved[0]
     assert "claim_session_id" not in saved[0]
+
+
+def test_codex_review_followup_fail_marks_source_failed_and_adds_v2_task(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "K2001",
+                    "task_type": "experiment",
+                    "status": "succeeded",
+                    "priority": 3,
+                    "result": "Original experiment self-verdict was PASS.",
+                },
+                {
+                    "id": "K2001_codex_review_followup",
+                    "task_type": "experiment",
+                    "status": "in_progress",
+                    "priority": "P3",
+                    "claimed_by": "codex-desktop",
+                },
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "complete",
+            "--id",
+            "K2001_codex_review_followup",
+            "--status",
+            "succeeded",
+            "--result",
+            "正式verdict=FAIL: unmatched refit cadence.",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    source = next(t for t in saved if t["id"] == "K2001")
+    review = next(t for t in saved if t["id"] == "K2001_codex_review_followup")
+    v2 = next(t for t in saved if t["id"] == "K2001_v2_fix_methodology")
+
+    assert source["status"] == "failed"
+    assert source["failed_by"] == "task_pool_claim:codex_review_followup"
+    assert "K2001_codex_review_followup" in source["failure_reason"]
+    assert "unmatched refit cadence" in source["failure_reason"]
+    assert review["status"] == "succeeded"
+    assert v2["status"] == "pending"
+    assert v2["task_type"] == "experiment"
+    assert v2["predecessor"] == "K2001"
+    assert v2["predecessor_codex_review_task"] == "K2001_codex_review_followup"
+    assert v2["dispatch_lane"] == "agent"
+
+
+def test_codex_review_followup_conditional_pass_does_not_mark_source_failed(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "K2002",
+                    "task_type": "experiment",
+                    "status": "succeeded",
+                    "priority": 3,
+                },
+                {
+                    "id": "K2002_codex_review_followup",
+                    "task_type": "experiment",
+                    "status": "in_progress",
+                    "priority": "P3",
+                },
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "complete",
+            "--id",
+            "K2002_codex_review_followup",
+            "--status",
+            "succeeded",
+            "--result",
+            "Review completed. final verdict=CONDITIONAL_PASS; do not promote yet.",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    source = next(t for t in saved if t["id"] == "K2002")
+    assert source["status"] == "succeeded"
+    assert all(t["id"] != "K2002_v2_fix_methodology" for t in saved)
