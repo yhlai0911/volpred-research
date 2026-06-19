@@ -591,11 +591,23 @@ def release_pool_articles(
         # Anti-flood dedup gate (2026-06-16): skip near-duplicate of a
         # recently-published general/research article — don't flood live feed.
         if _article_audience(item) in _RELEASE_DEDUP_AUDIENCES:
+            # Pass the draft's experiment_refs so the arc gate can catch a
+            # same-K recycle even when its conclusion class is 'descriptive'
+            # and surface entities are all core (2026-06-19 K1054 ghost fix).
+            _item_details = item.get("details") or {}
+            _item_refs = []
+            if isinstance(_item_details, dict):
+                _item_refs = (
+                    _item_details.get("experiment_refs")
+                    or _item_details.get("experiment_ids")
+                    or []
+                )
             arc_dups = find_arc_duplicates(
                 str(item.get("title") or ""),
                 str(item.get("content") or item.get("description") or ""),
                 recent_pub_for_dedup,
                 days=_RELEASE_DEDUP_WINDOW_DAYS,
+                new_refs=_item_refs,
             )
             dup = _release_content_dup(item, recent_pub_for_dedup)
             flood = _release_theme_flood(item, recent_pub_for_dedup)

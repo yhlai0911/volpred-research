@@ -590,15 +590,54 @@ class Publisher:
         #   (b) title-sim > 0.55 (very high regardless of ref)
         # within the last 14 days. Override with details['dup_waiver']=<reason> for a
         # genuinely differentiated same-topic piece.
+        # Canonical K-id refs for the NEW article — extracted once and reused
+        # by (1) the near-dup gate, (2) the same-experiment-refs gate, and
+        # (3) the narrative-arc gate. Sources: tags (K-id form), explicit
+        # details.experiment_refs, and K-ids embedded in title/description.
+        import re as _re
+        new_refs = set()
+        for _t in (tags or []):
+            _ts = str(_t).strip()
+            if _re.fullmatch(r'[Kk]\d+[a-z]?', _ts):
+                new_refs.add('K' + _ts[1:])
+        for _r in ((details or {}).get('experiment_refs') or []):
+            _rs = str(_r).strip()
+            if _re.match(r'^[Kk]\d', _rs):
+                new_refs.add('K' + _rs[1:])
+        for _m in _re.findall(r'[Kk]\d{2,}[a-z]?', f"{title} {description or ''}"):
+            new_refs.add('K' + _m[1:])
+
+        # --- HARD BLOCK same-experiment-ref recycle (2026-06-19 K1054 ghost
+        # incident). mile_bb520db8 byte-for-byte re-published mile_c481c8cf —
+        # both K1054, both 'descriptive' (so arc gate skipped them), titles only
+        # slightly reworded (so the title-sim near-dup gate missed). The most
+        # robust signal of a recycle is the SAME experiment_ref. Block when a
+        # NON-retracted article with the same audience already covers this K.
+        # Skips retracted/unpublished (those were intentionally pulled — a
+        # deliberate republish is allowed). Override with details['dup_waiver'].
+        if new_refs and not (details or {}).get('dup_waiver'):
+            inferred_aud = _infer_audience(title, description or '', tags or [])
+            for existing in feed:
+                if existing.get('status') in ('unpublished', 'retracted'):
+                    continue
+                erefs = set()
+                for _r in ((existing.get('details') or {}).get('experiment_refs') or []):
+                    _rs = str(_r).strip()
+                    if _rs:
+                        erefs.add(('K' + _rs[1:]) if _re.match(r'^[Kk]\d', _rs) else _rs.upper())
+                shared = new_refs & erefs
+                if not shared:
+                    continue
+                # Same audience covering the same K is a recycle. Different
+                # audience (general vs research) is a legitimate companion piece.
+                if existing.get('audience') == inferred_aud:
+                    print(f"  🚫 BLOCKED same-experiment-ref recycle of {existing.get('id')} "
+                          f"'{existing.get('title','')[:50]}' (shared_refs={sorted(shared)}, "
+                          f"audience={inferred_aud}) — skipping publish. "
+                          f"Set details['dup_waiver'] to override or use a different audience.")
+                    return existing.get('id')
+
         if not (details or {}).get('dup_waiver'):
-            import re as _re
-            new_refs = set()
-            for _t in (tags or []):
-                _ts = str(_t).strip()
-                if _re.fullmatch(r'[Kk]\d+[a-z]?', _ts):
-                    new_refs.add(_ts.upper())
-            for _m in _re.findall(r'[Kk]\d{2,}[a-z]?', f"{title} {description or ''}"):
-                new_refs.add(_m.upper())
             cutoff_dup = datetime.now(timezone.utc) - timedelta(days=14)
             for s in similar:
                 existing = next((a for a in feed if a.get('id') == s['id']), None)
@@ -626,7 +665,9 @@ class Publisher:
         if not (details or {}).get('dup_waiver'):
             try:
                 from volpred.publisher.arc_dedup import find_arc_duplicates
-                arc_dups = find_arc_duplicates(title, description or '', feed)
+                arc_dups = find_arc_duplicates(
+                    title, description or '', feed, new_refs=new_refs,
+                )
                 if arc_dups:
                     d = arc_dups[0]
                     print(f"  🚫 BLOCKED narrative-arc duplicate of {d['id']} "

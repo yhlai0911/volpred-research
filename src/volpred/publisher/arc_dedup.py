@@ -345,6 +345,37 @@ def _signature_from_feed_item(item: dict) -> dict:
     return arc_signature("", text)
 
 
+def _normalize_ref(raw: str) -> str:
+    """Canonicalize a K-id ref: 'k1054' / 'K1054' / 'k1054b' → 'K1054' / 'K1054b'."""
+    s = str(raw or "").strip()
+    if re.match(r"^[Kk]\d", s):
+        return "K" + s[1:]
+    return s.upper()
+
+
+def _refs_from_feed_item(item: dict) -> set[str]:
+    """Extract canonical experiment_refs (K-ids) from a feed item.
+
+    Reads details.experiment_refs / experiment_ids, then falls back to scanning
+    the title + content for K-id tokens (older articles pre-date the metadata
+    field). Used by the same-experiment-refs gate (vuln 2 / ghost recycle).
+    """
+    refs: set[str] = set()
+    details = item.get("details") or {}
+    if isinstance(details, dict):
+        for key in ("experiment_refs", "experiment_ids"):
+            raw = details.get(key) or []
+            if isinstance(raw, (list, tuple, set)):
+                for r in raw:
+                    nr = _normalize_ref(r)
+                    if nr:
+                        refs.add(nr)
+    text = f"{item.get('title', '')} {item.get('content') or item.get('description') or ''}"
+    for m in re.findall(r"[Kk]\d{2,}[a-z]?", text):
+        refs.add(_normalize_ref(m))
+    return refs
+
+
 def _axis_values(raw) -> set[str]:
     if isinstance(raw, str):
         return {raw} if raw else {"unspecified"}
@@ -364,6 +395,45 @@ def _horizons_compatible(new_horizon: str, old_horizon: str) -> bool:
     if new_horizon == "unspecified" or old_horizon == "unspecified":
         return True
     return new_horizon == old_horizon
+
+
+def _title_tokens(title: str) -> set[str]:
+    """Tokenize a title for Jaccard similarity.
+
+    Mixed zh-Hant/ASCII: split on whitespace/punctuation for ASCII words, and
+    emit individual CJK characters as tokens. Drops 1-char ASCII noise. This is
+    deliberately coarse — it only needs to separate "near-identical title"
+    (ghost-recycle: bb520db8 vs c481c8cf) from "unrelated title".
+    """
+    if not title:
+        return set()
+    lower = title.lower()
+    tokens: set[str] = set()
+    # ASCII word runs (>=2 chars, e.g. "spy", "garch", "vix")
+    for m in re.findall(r"[a-z0-9]{2,}", lower):
+        tokens.add(m)
+    # Individual CJK characters
+    for ch in re.findall(r"[一-鿿]", title):
+        tokens.add(ch)
+    return tokens
+
+
+def _title_jaccard(a: str, b: str) -> float:
+    """Jaccard overlap of title tokens. 0.0 when either is empty."""
+    ta, tb = _title_tokens(a), _title_tokens(b)
+    if not ta or not tb:
+        return 0.0
+    inter = len(ta & tb)
+    union = len(ta | tb)
+    return inter / union if union else 0.0
+
+
+# Title-token Jaccard at/above this counts a descriptive pair as the same
+# recycled article. bb520db8 ("波動率模型換一把尺子量還是贏，這才叫真的贏")
+# vs c481c8cf ("同一個模型，換一把尺子量還是贏，這才叫真的贏") share almost
+# every CJK token → ~0.8. Genuinely different descriptive articles share far
+# fewer tokens. Kept high to avoid false positives on the descriptive path.
+_DESCRIPTIVE_TITLE_JACCARD = 0.55
 
 
 def _is_significant_overlap(new_ents: set[str], old_ents: set[str]) -> bool:
@@ -428,29 +498,44 @@ def find_arc_duplicates(
     feed: list[dict],
     days: int = 90,
     max_scan: int = 300,
+    new_refs: set[str] | list[str] | None = None,
 ) -> list[dict]:
     """Return feed articles that are narrative-arc duplicates of the new piece.
 
     Arc duplicate = significant entity overlap (incl. >=1 distinctive entity)
     AND same conclusion class AND compatible mechanism/horizon, within `days`.
     Direction-agnostic by design.
+
+    `new_refs`: optional experiment_refs (K-ids) for the NEW article. Used by
+    the descriptive-mode gate and the same-experiment-refs short-circuit (vuln 2
+    of the 2026-06-19 K1054 ghost-recycle incident: mile_bb520db8 byte-for-byte
+    re-published mile_c481c8cf, both K1054, both 'descriptive', neither blocked).
     """
     new_sig = arc_signature(title, content)
     new_ents = set(new_sig["entities"])
-    if not new_ents:
-        return []
     new_cls = str(new_sig["conclusion_class"])
-    # "descriptive" is the fallback class meaning "no identifiable conclusion".
-    # Two articles that both fail to classify are NOT the same narrative arc —
-    # matching on it produces false positives whenever unrelated pieces happen
-    # to share one distinctive entity (2026-06-14: SpaceX IPO capital-structure
-    # piece mile_6159728d falsely blocked against big-tech-vol mile_312204b2 on
-    # shared USD+US_EQUITY, both descriptive). An arc needs a real conclusion
-    # class on the *new* side to be a defined arc.
-    if new_cls == "descriptive":
-        return []
     new_mechanisms = _axis_values(new_sig.get("mechanisms"))
     new_horizon = str(new_sig.get("time_horizon") or "unspecified")
+    new_ref_set = {_normalize_ref(r) for r in (new_refs or []) if str(r or "").strip()}
+    # Also harvest K-ids embedded in the new title/content (drafts often carry
+    # the K-id in the title even when no explicit refs are passed).
+    for m in re.findall(r"[Kk]\d{2,}[a-z]?", f"{title or ''} {content or ''}"):
+        new_ref_set.add(_normalize_ref(m))
+
+    # "descriptive" is the fallback class meaning "no identifiable conclusion".
+    # We do NOT match the arc on descriptive alone (2026-06-14: SpaceX IPO
+    # mile_6159728d was falsely blocked against big-tech-vol mile_312204b2 on
+    # incidental USD+US_EQUITY overlap, both descriptive). BUT returning [] for
+    # every descriptive article opened the 2026-06-19 ghost-recycle hole: a
+    # model-robustness piece whose conclusion wording isn't in _CONCLUSION_KEYWORDS
+    # falls to 'descriptive' and bypasses arc dedup entirely. So on the
+    # descriptive path we apply a STRICTER, separate test (`_descriptive_dup`):
+    # require significant entity overlap PLUS a strong same-article signal
+    # (near-identical title OR shared specific mechanism OR shared experiment_ref).
+    descriptive_mode = (new_cls == "descriptive")
+    # With no entities AND no refs there is nothing to anchor a match on.
+    if not new_ents and not new_ref_set:
+        return []
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     dups: list[dict] = []
@@ -470,17 +555,40 @@ def find_arc_duplicates(
             pass  # unparseable timestamp → keep (conservative)
         ex_sig = _signature_from_feed_item(existing)
         ex_ents = set(ex_sig["entities"])
-        if not _is_significant_overlap(new_ents, ex_ents):
-            continue
         ex_cls = str(ex_sig["conclusion_class"])
-        if ex_cls != new_cls:
-            continue
         ex_mechanisms = _axis_values(ex_sig.get("mechanisms"))
-        if not _mechanisms_compatible(new_mechanisms, ex_mechanisms):
-            continue
         ex_horizon = str(ex_sig.get("time_horizon") or "unspecified")
-        if not _horizons_compatible(new_horizon, ex_horizon):
-            continue
+        ex_refs = _refs_from_feed_item(existing)
+        shared_refs = new_ref_set & ex_refs
+
+        if descriptive_mode:
+            # Stricter descriptive-path test (vuln 1 fix). Avoids the SpaceX
+            # false positive (no shared ref, low title overlap, different
+            # mechanism sets) while catching the K1054 ghost recycle (shared
+            # ref K1054 AND ~identical title).
+            match = _descriptive_dup(
+                new_ents, ex_ents,
+                title, existing.get("title", ""),
+                new_mechanisms, ex_mechanisms,
+                shared_refs,
+            )
+            if not match:
+                continue
+        else:
+            if not _is_significant_overlap(new_ents, ex_ents):
+                # Same explicit experiment_ref is itself a duplicate signal even
+                # when the surface entities are all core (US_EQUITY/VIX). Without
+                # this, a recycled K-article with only core entities would slip
+                # through the entity gate. Require same conclusion class so a
+                # genuine follow-up with a different verdict is still allowed.
+                if not (shared_refs and ex_cls == new_cls):
+                    continue
+            if ex_cls != new_cls:
+                continue
+            if not _mechanisms_compatible(new_mechanisms, ex_mechanisms):
+                continue
+            if not _horizons_compatible(new_horizon, ex_horizon):
+                continue
         dups.append(
             {
                 "id": existing.get("id", "?"),
@@ -492,6 +600,68 @@ def find_arc_duplicates(
                 "existing_mechanisms": sorted(ex_mechanisms),
                 "time_horizon": new_horizon,
                 "existing_time_horizon": ex_horizon,
+                "shared_experiment_refs": sorted(shared_refs),
+                "match_reason": "descriptive_strict" if descriptive_mode else (
+                    "shared_experiment_ref"
+                    if (shared_refs and not _is_significant_overlap(new_ents, ex_ents))
+                    else "entity_conclusion_arc"
+                ),
             }
         )
     return dups
+
+
+def _descriptive_dup(
+    new_ents: set[str],
+    old_ents: set[str],
+    new_title: str,
+    old_title: str,
+    new_mechanisms: set[str],
+    old_mechanisms: set[str],
+    shared_refs: set[str],
+) -> bool:
+    """Stricter duplicate test for the 'descriptive' (unclassifiable) path.
+
+    'descriptive' means we could not read a conclusion arc, so we must NOT block
+    on entity+conclusion alone (that produced the SpaceX false positive). A
+    descriptive pair is a duplicate ONLY when there is a strong same-article
+    signal:
+
+      (A) shared experiment_ref (same K-id) AND (entity overlap OR near title) —
+          this is the K1054 ghost-recycle case (same K, ~identical title); OR
+      (B) significant entity overlap AND near-identical title (token Jaccard
+          >= threshold) — catches recycled descriptive pieces with no ref; OR
+      (C) significant entity overlap AND a shared *specific* (non-generic)
+          mechanism AND near-identical title.
+
+    SpaceX (mile_6159728d) vs big-tech-vol (mile_312204b2): no shared ref,
+    distinctive entity overlap is only {USD} (a core/incidental ratio), titles
+    share few tokens → none of (A)/(B)/(C) fire → NOT blocked. ✓
+    """
+    sig_overlap = _is_significant_overlap(new_ents, old_ents)
+    title_sim = _title_jaccard(new_title, old_title)
+    near_title = title_sim >= _DESCRIPTIVE_TITLE_JACCARD
+
+    # (A) Same experiment_ref is the most robust signal. Pair it with a weak
+    # corroboration (any entity overlap or a near-identical title) so a
+    # legitimately differentiated follow-up on the same K (different title AND
+    # different assets) is not blocked.
+    if shared_refs and (bool(new_ents & old_ents) or near_title):
+        return True
+    # (B) recycled descriptive piece, no ref, near-identical title. A title-token
+    # Jaccard >= _DESCRIPTIVE_TITLE_JACCARD (0.55) is itself a strong recycle
+    # signal — require only some entity overlap (even a core entity) so two
+    # genuinely unrelated titles that happen to score high without sharing any
+    # asset don't collide. The ghost case (bb520db8/c481c8cf) shares
+    # {US_EQUITY, VIX} with a ~0.8 title overlap.
+    if near_title and bool(new_ents & old_ents):
+        return True
+    if not sig_overlap:
+        return False
+    # (C) significant entity overlap + shared specific mechanism (no near-title
+    # requirement here: a distinctive entity + a specific mechanism is a strong
+    # arc even with reworded titles, mirroring the non-descriptive path).
+    specific_shared = (new_mechanisms & old_mechanisms) - _GENERIC_MECHANISMS - {"unspecified"}
+    if specific_shared:
+        return True
+    return False

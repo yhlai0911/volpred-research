@@ -375,6 +375,150 @@ class TestPublisherGateWiring:
         assert sig["time_horizon"] == "multi_horizon"
 
 
+class TestK1054GhostRecycle:
+    """2026-06-19 incident: mile_bb520db8 (06-19) byte-for-byte re-published
+    mile_c481c8cf (06-07). Both K1054, both classified 'descriptive' (their
+    model-robustness conclusion wording isn't in _CONCLUSION_KEYWORDS), titles
+    only slightly reworded. THREE gates missed it:
+      (1) arc_dedup returned [] for any 'descriptive' article (SpaceX false-pos fix);
+      (2) no same-experiment_refs gate independent of arc class;
+      (3) title-sim near-dup gate fell below threshold on the reworded title.
+    """
+
+    # The 06-07 original (retitled/unpublished now, reconstructed here as published).
+    C481_ARTICLE = {
+        "id": "mile_c481c8cf",
+        "status": "published",
+        "published_at": _ts(days_ago=12),
+        "title": "同一個模型，換一把尺子量還是贏，這才叫真的贏",
+        "content": (
+            "波動率模型比較：把 realized-vol proxy 換一把尺子重估，SPY 和 VIX 的"
+            "模型在 proxy-robust 檢驗下還是贏。短期動能與反轉的關係沒有改變。"
+        ),
+        "details": {"experiment_refs": ["K1054"]},
+        "audience": "general",
+    }
+    # The 06-19 recycle.
+    BB520_TITLE = "波動率模型換一把尺子量還是贏，這才叫真的贏"
+    BB520_CONTENT = (
+        "波動率模型比較：把 realized-vol proxy 換一把尺子重估，SPY 和 VIX 的"
+        "模型在 proxy-robust 檢驗下還是贏。短期動能與反轉的關係沒有改變。"
+    )
+
+    def test_descriptive_same_k_recycle_blocked(self):
+        """The exact incident: same K, near-identical title, both descriptive."""
+        dups = find_arc_duplicates(
+            self.BB520_TITLE, self.BB520_CONTENT, [self.C481_ARTICLE],
+            days=90, new_refs=["K1054"],
+        )
+        assert dups, "K1054 ghost recycle not detected — incident regression"
+        assert dups[0]["id"] == "mile_c481c8cf"
+        assert "K1054" in dups[0]["shared_experiment_refs"]
+        assert dups[0]["match_reason"] == "descriptive_strict"
+
+    def test_descriptive_same_k_recycle_blocked_without_explicit_refs(self):
+        """Even if the publisher forgot to pass new_refs, the K-id is harvested
+        from feed-item details + title. Here the new side has no explicit ref
+        and no K-id in its title — it must still block on near-identical title
+        + entity overlap (path B)."""
+        dups = find_arc_duplicates(
+            self.BB520_TITLE, self.BB520_CONTENT, [self.C481_ARTICLE], days=90,
+        )
+        assert dups, "recycle must block on near-title even without explicit refs"
+        assert dups[0]["id"] == "mile_c481c8cf"
+
+    def test_descriptive_same_k_different_angle_allowed(self):
+        """Guard against over-blocking: the SAME K but a genuinely different
+        descriptive article (different assets AND different title) is allowed.
+        This is what distinguishes a recycle from a legitimate companion."""
+        existing = dict(
+            self.C481_ARTICLE,
+            title="銅價這一年到底在反應什麼總經訊號",
+            content="銅價 CPER 與全球製造業 PMI 的關係，純敘述性的總經背景說明。",
+        )
+        new_title = "比特幣這一輪上漲的資金面拆解"
+        new_content = "BTC 這一輪上漲，從穩定幣供給與 ETF 淨流入的純敘述觀察。"
+        dups = find_arc_duplicates(
+            new_title, new_content, [existing], days=90, new_refs=["K1054"],
+        )
+        assert dups == [], "same K but different assets+title should not block"
+
+    def test_spacex_still_not_blocked_with_refs_threaded(self):
+        """Re-assert the SpaceX false-positive stays fixed under the new
+        descriptive path (no shared ref, low title overlap, distinct entities)."""
+        big_tech_vol = {
+            "id": "mile_312204b2",
+            "title": "砍人和燒錢同時進行：為什麼大型科技股的波動率是 SPY 的兩倍半",
+            "description": (
+                "大型科技股這一年一邊裁員一邊燒錢，美股七雄的波動率大約是 SPY 的 2.5 倍。"
+                "用美元計價的市值與成交量觀察整體市場。"
+            ),
+            "details": {},
+            "status": "published",
+            "published_at": _ts(days_ago=2),
+        }
+        spacex_title = "人類史上最大 IPO：SpaceX 招股書裡，最該看的不是那兩兆估值"
+        spacex_content = (
+            "SpaceX 以接近兩兆美元估值在美股掛牌，募資 750 億美元只釋出 4.2% 股權。"
+            "Starlink 在賺錢，xAI 在燒錢，馬斯克透過 B 類股掌握投票權。"
+        )
+        dups = find_arc_duplicates(spacex_title, spacex_content, [big_tech_vol], days=90)
+        assert dups == [], "SpaceX must remain unblocked under descriptive-strict path"
+
+    def test_publish_milestone_blocks_same_ref_recycle(self, tmp_path):
+        """End-to-end vuln-2 gate: publish_milestone refuses a same-K,
+        same-audience republish even when the arc class is descriptive."""
+        import json as _json
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        (storage / "reports" / "feed.json").write_text(
+            _json.dumps([self.C481_ARTICLE], ensure_ascii=False), encoding="utf-8"
+        )
+        from volpred.publisher.publisher import Publisher
+
+        pub = Publisher(storage_dir=str(storage))
+        returned = pub.publish_milestone(
+            title=self.BB520_TITLE,
+            description=self.BB520_CONTENT,
+            phase="Phase_X",
+            status="published",
+            audience="general",
+            details={"experiment_refs": ["K1054"]},
+            audit_strict=False,
+        )
+        assert returned == "mile_c481c8cf", "same-ref recycle was not blocked"
+        feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
+        assert len(feed) == 1, "blocked publish must not append a new article"
+
+    def test_publish_milestone_allows_different_audience_companion(self, tmp_path):
+        """A research companion to an existing general article on the same K is
+        a legitimate dual-audience piece, not a recycle. Must be allowed."""
+        import json as _json
+
+        storage = tmp_path / "storage"
+        (storage / "reports").mkdir(parents=True)
+        (storage / "reports" / "feed.json").write_text(
+            _json.dumps([self.C481_ARTICLE], ensure_ascii=False), encoding="utf-8"
+        )
+        from volpred.publisher.publisher import Publisher
+
+        pub = Publisher(storage_dir=str(storage))
+        returned = pub.publish_milestone(
+            title="K1054 proxy-robustness 模型比較：研究版完整檢定",
+            description=(
+                "K1054 在 QLIKE、Diebold-Mariano test、Harvey threshold 下的"
+                "完整 proxy-robust 檢定報告，t-stat 與 bootstrap p 值齊備。"
+            ),
+            phase="Phase_X",
+            status="draft",
+            audience="research",
+            details={"experiment_refs": ["K1054"]},
+            audit_strict=False,
+        )
+        assert returned != "mile_c481c8cf", "research companion must not be blocked"
+
+
 def test_vt_crowding_arc_caught():
     """2026-06-14 regression: VT crowding arc must dedupe across K/audience.
 
