@@ -56,7 +56,7 @@
 - 現象：發佈時 `[mirror-sync] feed.json remote sync FAILED: SSL EOF (_ssl.c:2427)`，retry 3 次都失敗。codex 也回報 `feed-sync --apply 卡住`。
 - 根因：feed.json 已 22MB；`publisher._sync_feed_to_remote` 整檔 PUT 到 `/api/sync/feed.json`，route handler 用 `await request.json()` 把整個 body 載入記憶體，超過 Next.js/Zeabur body limit → 上傳途中連線 reset = SSL EOF。retry 無用（每次都超 limit）。**curl 無 auth 是 401 快速回（沒讀 body）；帶 auth 22MB 才 SSL EOF**。
 - 解決：size guard（>8MB skip 整檔 PUT + log）+ transient retry（HTTPError 立即 surface、network error retry 3x backoff）。feed→Supabase 本就由 `supabase_sync.py sync_article()` 逐筆 `_post` 同步（canonical，前端讀此，今天 3 篇都 live），整檔 PUT 是冗餘舊路徑。commit dd5f1834（PHASE-Z 收走）。
-- **遺留治本方向**：Next.js 後端那份 feed.json copy 應改從 Supabase 拉，或 mirror PUT 改 gzip（22MB→6.9MB）+ 雙端 gunzip，徹底擺脫整檔 PUT 設計債。
+- **遺留治本方向已收斂（2026-06-19 Codex）**：mirror PUT 已支援 gzip 雙端路徑；publisher 對 >8MB feed 先 gzip，壓縮後仍 >8MB 才 skip；Next.js `/api/sync/[...path]` 依 `Content-Encoding: gzip` gunzip 後再 JSON parse。長期仍建議淘汰整檔 feed PUT、改逐筆/增量，但 22MB→約 6.9MB 的路徑已可用。
 
 **3. Codex sandbox .git read-only（codex 無法 commit）**
 - 現象：codex_loop 跑的 hourly turn 完成 K1501 但 `git add` 失敗（.git/index.lock 不可寫），每 tick 工作沒 commit，靠 PHASE-Z safety-net 收尾。

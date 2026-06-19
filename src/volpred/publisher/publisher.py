@@ -1474,6 +1474,7 @@ class Publisher:
         """PUT full feed.json to remote for consistency."""
         if not self.REMOTE_URL:
             return
+        import gzip
         import time
         import urllib.error
         import urllib.request
@@ -1485,19 +1486,29 @@ class Publisher:
         # ``await request.json()`` — it buffers the ENTIRE body into memory
         # before parsing, and Next.js/Zeabur caps request body size well below
         # feed.json's current footprint (~22MB). Oversized PUTs get reset
-        # mid-upload and surface as ``SSL: EOF`` (_ssl.c) — retrying can't help
-        # because every attempt re-hits the same ceiling. feed→Supabase is
-        # already synced row-by-row by scripts/supabase_sync.py (the canonical
-        # path the frontend reads via FEED_RPC), so when feed.json outgrows the
-        # whole-file PUT ceiling we skip this redundant mirror and rely on it.
+        # mid-upload and surface as ``SSL: EOF`` (_ssl.c). If gzip brings the
+        # payload back under the ceiling, send Content-Encoding:gzip; otherwise
+        # skip this redundant mirror and rely on canonical feed→Supabase sync.
         MAX_MIRROR_BYTES = 8 * 1024 * 1024
+        payload = data
+        headers = {"Content-Type": "application/json", **ops_admin_headers()}
         if len(data) > MAX_MIRROR_BYTES:
-            print(
-                f"[mirror-sync] feed.json {len(data) // 1024 // 1024}MB exceeds "
-                f"whole-file PUT ceiling ({MAX_MIRROR_BYTES // 1024 // 1024}MB) — "
-                f"skipping mirror; Supabase row-by-row sync (feed-sync) is canonical"
-            )
-            return
+            compressed = gzip.compress(data, compresslevel=6)
+            if len(compressed) <= MAX_MIRROR_BYTES:
+                payload = compressed
+                headers["Content-Encoding"] = "gzip"
+                print(
+                    f"[mirror-sync] feed.json {len(data) // 1024 // 1024}MB "
+                    f"compressed to {len(compressed) // 1024 // 1024}MB for mirror PUT"
+                )
+            else:
+                print(
+                    f"[mirror-sync] feed.json {len(data) // 1024 // 1024}MB "
+                    f"(gzip {len(compressed) // 1024 // 1024}MB) exceeds "
+                    f"whole-file PUT ceiling ({MAX_MIRROR_BYTES // 1024 // 1024}MB) — "
+                    f"skipping mirror; Supabase row-by-row sync (feed-sync) is canonical"
+                )
+                return
         url = f"{self.REMOTE_URL}/api/sync/feed.json"
         # 2026-06-18: transient SSL EOF (_ssl.c) / connection-reset blips were
         # surfacing as hard FAILED even though the mirror endpoint is healthy.
@@ -1508,8 +1519,8 @@ class Publisher:
             try:
                 req = urllib.request.Request(
                     url,
-                    data=data,
-                    headers={"Content-Type": "application/json", **ops_admin_headers()},
+                    data=payload,
+                    headers=headers,
                     method="PUT",
                 )
                 urllib.request.urlopen(req, timeout=10)
