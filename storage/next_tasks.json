@@ -34513,5 +34513,27 @@
     "started_at": "2026-06-19T09:06:34.509037+00:00",
     "completed_at": "2026-06-19T09:15:06.576880+00:00",
     "result": "CONDITIONAL_PASS_AFTER_PATCH: verified K957 article's 40-test claim against 40 K526-K566 experiment dirs/results; fixed stale 37-count provenance in README/script/results/timeline, removed out-of-scope K569 marker, updated mile_08407091 audit trail and cleared stale content_audit_flag. Supabase single-article sync/readback succeeded; remote K957 PNG SHA matched local."
+  },
+  {
+    "id": "paper_review_mile_1f1ef935",
+    "title": "Paper review (Codex 24h-rule): 同一個模型，只是把尾巴想厚一點，風險警報就差很多",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1f1ef935 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1f1ef935",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-19T09:31:03+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-19T10:03:29.923369+00:00",
+    "claim_session_id": "3112649ed356",
+    "started_at": "2026-06-19T10:03:35.771927+00:00",
+    "completed_at": "2026-06-19T10:06:53.737779+00:00",
+    "result": "PASS: reviewed mile_1f1ef935 against K1021 source/results. Article claims match stored OOS period, VaR violation rates, QQQ red/yellow flags, fixed-df5 scorecards, and no lookahead or DM/Harvey overclaim was found. Review record: experiments/k1021/reviews/paper_review_mile_1f1ef935_codex_20260619.md"
   }
+
 ]
