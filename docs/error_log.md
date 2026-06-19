@@ -39,7 +39,7 @@
 **根因3 — M2（實驗）M3（論文）idle**
 - 根因：pending 池零 experiment/paper；`research_backlog.log` 連 4 天（6/15-19）`no add — all_already_covered`。research_program.md open questions 被既有 experiments 吃完，無新方向注入 → experiment 供給斷流。不是 dispatch 偏好文章，是沒 experiment 可派。
 - 修：派 journal-discovery agent（journal_topic_scan）從頂尖期刊挖新方向寫回 research_program.md。M3 有 2 筆 `decision_made_awaiting_body_rewrite` 待主線程 body rewrite（CLAUDE.md 禁 background agent 寫 .tex）。
-- 遺留 follow-up：`generate_research_backlog` 加 fallback — 連續 N 天 all_covered 自動觸發 journal-discovery（把補題變流程責任）。
+- 遺留 follow-up 已收斂（2026-06-19 Codex）：`generate_research_backlog` 在 `no_unchecked_items` / `all_already_covered_or_in_progress` 時直接 materialize `journal_discovery_*` platform_ops fallback（6h idempotent，dry-run 只預覽），讓每日 research_backlog cron 不再只記 `no add — all_already_covered`。
 
 **教訓**：(1) 任何「黏性 flag / skip 標記」必須帶 TTL，且 TTL ≤ 產生它的窗口期（flag 與其判定依據的時間語義要一致）。(2) task ownership / 路由用 schema 欄位，不可 grep free-text description（workflow 描述常含會誤觸的字眼）— 此 root 已 strike 2。(3) 供給側（research backlog 題源）枯竭要有自動補給流程，不靠主線程記得手動派。
 

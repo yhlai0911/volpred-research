@@ -35,6 +35,8 @@ ROOT = Path(__file__).resolve().parents[1]
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 EXPERIMENTS_DIR = ROOT / "experiments"
+JOURNAL_DISCOVERY_LIVE_STATUSES = {"pending", "claimed", "in_progress", "blocked", "pending_main_thread"}
+JOURNAL_DISCOVERY_COOLDOWN_HOURS = 6
 
 # Look for unchecked items + open question patterns
 UNCHECKED_RE = re.compile(r"^[\s-]*\[ \]\s*\*?\*?(.+?)\*?\*?$", re.MULTILINE)
@@ -78,6 +80,38 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
         if attempt < max_retries - 1:
             time.sleep(sleep_s)
     raise SystemExit(f"failed to parse {NEXT_TASKS} after {max_retries} retries: {last_err}")
+
+
+def _save_tasks(payload: dict | list, tasks: list) -> None:
+    if isinstance(payload, dict) and "tasks" in payload:
+        payload["tasks"] = tasks
+        out = payload
+    else:
+        out = tasks
+    NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
+    if not NEXT_TASKS.exists():
+        NEXT_TASKS.write_text("[]\n", encoding="utf-8")
+    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            fh.seek(0)
+            fh.truncate()
+            json.dump(out, fh, ensure_ascii=False, indent=2)
+            fh.write("\n")
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
+def _existing_ids(tasks: list) -> set[str]:
+    ids: set[str] = set()
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        for key in ("id", "k_id", "experiment_id"):
+            value = task.get(key)
+            if value:
+                ids.add(str(value))
+    return ids
 
 
 def extract_unchecked_items(text: str, *, limit: int = 500) -> list[dict]:
@@ -191,21 +225,118 @@ def build_experiment_brief(item: dict, k_id: int) -> dict:
     }
 
 
+def _journal_discovery_dispatch_task(
+    tasks: list,
+    existing_ids: set[str],
+    *,
+    now_utc: datetime | None = None,
+) -> list[dict]:
+    """Queue one journal-discovery task when research_program.md is saturated."""
+    from datetime import timedelta
+
+    now_utc = now_utc or datetime.now(timezone.utc)
+    cutoff = now_utc - timedelta(hours=JOURNAL_DISCOVERY_COOLDOWN_HOURS)
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        task_id = str(task.get("id") or "")
+        if not task_id.startswith("journal_discovery_"):
+            continue
+        status = str(task.get("status") or "").lower()
+        if status in JOURNAL_DISCOVERY_LIVE_STATUSES:
+            return []
+        completed_at = task.get("completed_at") or task.get("created_at")
+        if isinstance(completed_at, str) and completed_at:
+            try:
+                ts = datetime.fromisoformat(completed_at.replace("Z", "+00:00"))
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
+                if ts >= cutoff:
+                    return []
+            except ValueError:
+                pass
+
+    bucket = now_utc.hour // JOURNAL_DISCOVERY_COOLDOWN_HOURS
+    task_id = f"journal_discovery_{now_utc.strftime('%Y%m%d')}_{bucket}"
+    if task_id in existing_ids:
+        return []
+
+    return [
+        {
+            "id": task_id,
+            "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+            "description": (
+                "generate_research_backlog.py found no unqueued research_program.md "
+                "directions because all visible items are already covered or in progress. "
+                "派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，"
+                "從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，"
+                "補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 "
+                "research_backlog/refill 自動取用。6h idempotent；勿手動重派。"
+            ),
+            "priority": 2,
+            "status": "pending",
+            "task_type": "platform_ops",
+            "source": "auto_journal_discovery_fallback",
+            "tags": ["auto-journal-discovery", "research-backlog-refresh", "all-covered-fallback"],
+            "created_at": now_utc.isoformat(timespec="seconds"),
+        }
+    ]
+
+
+def _journal_fallback_result(
+    *,
+    payload: dict | list,
+    tasks: list,
+    dry_run: bool,
+    reason: str,
+) -> dict:
+    journal_tasks = _journal_discovery_dispatch_task(tasks, _existing_ids(tasks))
+    if not journal_tasks:
+        return {
+            "ok": True,
+            "added": 0,
+            "reason": reason,
+            "journal_discovery": "skipped_recent_or_live",
+        }
+    preview = [{"id": task["id"], "title": task["title"][:80]} for task in journal_tasks]
+    if dry_run:
+        return {
+            "ok": True,
+            "dry_run": True,
+            "would_add": len(journal_tasks),
+            "fallback_reason": "journal_discovery_dispatch",
+            "reason": reason,
+            "preview": preview,
+        }
+    tasks.extend(journal_tasks)
+    _save_tasks(payload, tasks)
+    return {
+        "ok": True,
+        "added": len(journal_tasks),
+        "added_ids": [task["id"] for task in journal_tasks],
+        "fallback_reason": "journal_discovery_dispatch",
+        "reason": reason,
+    }
+
+
 def generate(*, dry_run: bool = False, max_new: int = 5) -> dict:
     if not RESEARCH_PROGRAM.exists():
         return {"ok": False, "reason": "research_program_missing", "added": 0}
     text = RESEARCH_PROGRAM.read_text(encoding="utf-8")
+    payload, tasks = _load_tasks()
     items = extract_unchecked_items(text, limit=500)
     if not items:
-        return {"ok": True, "added": 0, "reason": "no_unchecked_items"}
-
-    with NEXT_TASKS.open("r", encoding="utf-8") as f:
-        tasks = json.load(f)
+        return _journal_fallback_result(
+            payload=payload,
+            tasks=tasks,
+            dry_run=dry_run,
+            reason="no_unchecked_items",
+        )
 
     # K-id assignment must avoid collisions with in-flight next_tasks.json
     # entries, not just experiments/ dirs — otherwise every run re-assigns the
     # same id to the same recurring item (K1308 collided 5x before this fix).
-    in_flight_ids = {t.get("id") or t.get("k_id") for t in tasks}
+    in_flight_ids = _existing_ids(tasks)
     new_briefs = []
     next_k = find_next_k_id(start=1302, existing_task_ids=in_flight_ids)
     for item in items:
@@ -219,7 +350,12 @@ def generate(*, dry_run: bool = False, max_new: int = 5) -> dict:
         next_k = find_next_k_id(start=next_k + 1, existing_task_ids=in_flight_ids)
 
     if not new_briefs:
-        return {"ok": True, "added": 0, "reason": "all_already_covered_or_in_progress"}
+        return _journal_fallback_result(
+            payload=payload,
+            tasks=tasks,
+            dry_run=dry_run,
+            reason="all_already_covered_or_in_progress",
+        )
 
     if dry_run:
         return {
@@ -228,8 +364,7 @@ def generate(*, dry_run: bool = False, max_new: int = 5) -> dict:
         }
 
     tasks.extend(new_briefs)
-    with NEXT_TASKS.open("w", encoding="utf-8") as f:
-        json.dump(tasks, f, ensure_ascii=False, indent=2)
+    _save_tasks(payload, tasks)
     return {"ok": True, "added": len(new_briefs), "added_ids": [b["id"] for b in new_briefs]}
 
 
