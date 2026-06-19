@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-06-19T18:02:24Z",
+  "alert_type": "metrics_missing",
+  "severity": "warn",
+  "title": "strategy_metrics.json is MISSING",
+  "detail": "storage/strategy_metrics.json does not exist. This file is required for strategy performance monitoring. Issue has persisted across at least 3 consecutive patrol runs on 2026-06-19 (00:03, 06:02, 18:02 UTC). The file may need to be regenerated via the strategy metrics pipeline.",
+  "action_required": "Run strategy metrics recalculation or check if the metrics pipeline has failed."
+}

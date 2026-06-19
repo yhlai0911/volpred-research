@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-06-19T12:04:05Z",
+  "timestamp": "2026-06-19T18:02:24Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 129 (general: 78, research: 51). Well above thresholds (general>=8, research>=4, total>=12)."
+      "detail": "129 drafts total (research: 51, general: 78). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist. File missing — cannot check freshness."
+      "detail": "storage/strategy_metrics.json does not exist (file missing). Persistent issue — also flagged in 20260619_000339 and 20260619_060250 patrol runs."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-19 or 2026-06-18 in docs/error_log.md. Most recent entries are from 2026-06-03 (auto-compact threshold diagnosis)."
+      "detail": "No entries dated 2026-06-18 or 2026-06-19 found. Most recent entry is 2026-06-03 (compact root-cause analysis)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked. All have exactly 1 null in last 3 entries (2026-06-03 return null, likely market closed / not yet computed). No strategy exceeds 2 nulls threshold. Last data date: 2026-06-03 for all strategies."
+      "detail": "storage/paper_trading.json exists (3.5MB, last modified 2026-06-04). No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -34,6 +34,6 @@
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json does not exist — metrics stale (file missing)"
+    "strategy_metrics.json is MISSING — file does not exist at storage/strategy_metrics.json. Strategy metrics freshness cannot be assessed. Persistent across multiple patrol runs (20260619 00:03, 06:02, and now 18:02 UTC)."
   ]
 }
