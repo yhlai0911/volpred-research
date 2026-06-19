@@ -34194,7 +34194,7 @@
     "description": "Member question id: 9ab8d3a7-a590-4f71-b728-435169fbbdfb\nProposer: yaoxk1431\nCreated: 2026-06-18T01:30:03.846431+00:00\n\n原題：\n假設三個月後台股到達60,000點，你認為目前有哪些股票是還沒有達到他應該有的價值並且哪些產業是值得投資在60,000點的時候需要做哪些預先的投資準備幫我模擬並產生摘要3000字\n\n執行流程：\n1. uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\n2. 主線程逐題做 4 維度評分（研究可行性 / 讀者價值 / 研究相關性 / 預期影響力）\n3. uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\n4. rerank 後如本題入榜，再 uv run volpred ops question-claim --question-id 9ab8d3a7-a590-4f71-b728-435169fbbdfb --actor claude\n5. 完成 research / write / question-answer / question-finish\n\n注意：member_qa 為 reader-facing published flow，不可只 review report 就停。",
     "task_type": "member_qa",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "member_qa",
       "user"
@@ -34205,7 +34205,11 @@
     "question_status": "evaluating",
     "proposer": "yaoxk1431",
     "question_score": null,
-    "task_mode": "evaluate"
+    "task_mode": "evaluate",
+    "handoff_note": "4維evaluate完成,總分18/100(研究可行性4/讀者價值6/研究相關性3/預期影響力5)。已question-rerank寫入score=18 status=ranked留audit。誠實gate判定:原題踩3條紅線(個股價值判斷/產業配置建議/點位預測+投資準備模擬),VolPred無估值與選股框架,轉化波動率角度牽強且答非所問。verdict=low_relevance/declined,未硬產出文章。需主線程裁決:(1)是否對付費會員yaoxk1431做禮貌性回覆說明VolPred定位(不發投資建議文) (2)是否question-archive清出榜單。question_id=9ab8d3a7-a590-4f71-b728-435169fbbdfb",
+    "handoff_at": "2026-06-19T09:33:25.479621+00:00",
+    "completed_at": "2026-06-19T10:06:48.471355+00:00",
+    "result": "主線程裁決完成：原題踩 3 紅線（個股估值/產業配置/點位預測），超出 VolPred 波動率風險定位。已透過 question-answer CLI 對付費會員 yaoxk1431 寄禮貌定位回覆（說明平台只做波動率/風險、婉拒選股與個人化投資建議、並提供可改提的風險角度版本）。依老闆指示不 archive。question 現為 researching（answer 已存），pending_questions=0，不再觸發 member_qa_stale WARN。"
   },
   {
     "id": "K1349",
@@ -34515,6 +34519,21 @@
     "result": "CONDITIONAL_PASS_AFTER_PATCH: verified K957 article's 40-test claim against 40 K526-K566 experiment dirs/results; fixed stale 37-count provenance in README/script/results/timeline, removed out-of-scope K569 marker, updated mile_08407091 audit trail and cleared stale content_audit_flag. Supabase single-article sync/readback succeeded; remote K957 PNG SHA matched local."
   },
   {
+    "id": "paper_review_mile_30367280",
+    "title": "Paper review (Codex 24h-rule): 市場最危險的時候，VIX 不是變高而已，它會開始彎",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_30367280 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_30367280",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-19T09:31:03+00:00"
+  },
+  {
     "id": "paper_review_mile_1f1ef935",
     "title": "Paper review (Codex 24h-rule): 同一個模型，只是把尾巴想厚一點，風險警報就差很多",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1f1ef935 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
@@ -34535,5 +34554,4 @@
     "completed_at": "2026-06-19T10:06:53.737779+00:00",
     "result": "PASS: reviewed mile_1f1ef935 against K1021 source/results. Article claims match stored OOS period, VaR violation rates, QQQ red/yellow flags, fixed-df5 scorecards, and no lookahead or DM/Harvey overclaim was found. Review record: experiments/k1021/reviews/paper_review_mile_1f1ef935_codex_20260619.md"
   }
-
 ]

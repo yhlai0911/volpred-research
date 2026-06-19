@@ -294,9 +294,31 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
     if settings_last is not None and (last_fire_at is None or settings_last > last_fire_at):
         last_fire_at = settings_last
 
-    gap_hours = None
-    if last_fire_at is not None:
-        gap_hours = round((now - last_fire_at).total_seconds() / 3600.0, 2)
+    # 2026-06-19: separate "did the release machinery run" from "did an article
+    # get released". release-pool-by-settings rewrites `.release_settings.json`
+    # `updated_at` on EVERY run — even when the dedup gate correctly skips all
+    # due drafts (theme-saturated pool) and 0 articles are released. The legacy
+    # gap check keyed only on `last_released_at` (success-only) + an ancient log
+    # fire marker, so it false-positived CRITICAL whenever (a) the draft pool was
+    # theme-saturated and the cron was healthily releasing nothing, or (b) a
+    # targeted `release-pool --pub-id` release happened (does not touch settings).
+    # Decompose: machinery-staleness = genuine cron outage (critical); cron
+    # healthy but nothing released for >2x interval = release starvation (warn,
+    # a content problem routed to fresh-theme drafts, NOT a cron outage).
+    settings_updated = (
+        _parse_iso_datetime(settings_data.get("updated_at")) if isinstance(settings_data, dict) else None
+    )
+    machinery_last = last_fire_at  # log fire marker ∪ last_released fallback
+    if settings_updated is not None and (machinery_last is None or settings_updated > machinery_last):
+        machinery_last = settings_updated
+    release_last = settings_last  # last actual successful release
+
+    machinery_gap_hours = (
+        round((now - machinery_last).total_seconds() / 3600.0, 2) if machinery_last is not None else None
+    )
+    release_gap_hours = (
+        round((now - release_last).total_seconds() / 3600.0, 2) if release_last is not None else None
+    )
 
     # 2026-04-20: threshold derives from configured release interval + buffer
     # (was hardcoded 2h, which false-positived every fire after user changed
@@ -311,65 +333,101 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
     interval_td = timedelta(minutes=max(5, interval_minutes))
     warn_threshold = interval_td + RELEASE_POOL_GAP_BUFFER
     critical_threshold = interval_td * 2
-
-    breached = last_fire_at is None or (now - last_fire_at) > warn_threshold
     threshold_hours = round(warn_threshold.total_seconds() / 3600.0, 2)
-    title = f"Release pool cron gap > {threshold_hours}h (interval={interval_minutes}min)"
-    if not breached:
+    critical_hours = round(critical_threshold.total_seconds() / 3600.0, 1)
+
+    base_details = {
+        "machinery_last_at": machinery_last.isoformat() if machinery_last else None,
+        "machinery_gap_hours": machinery_gap_hours,
+        "last_released_at": release_last.isoformat() if release_last else None,
+        "release_gap_hours": release_gap_hours,
+        "interval_minutes": interval_minutes,
+        "warn_threshold_hours": threshold_hours,
+        "log_path": _relative_repo_path(log_path),
+    }
+
+    # 1) Genuine cron outage: the release machinery itself stopped firing.
+    machinery_stale = machinery_last is None or (now - machinery_last) > warn_threshold
+    if machinery_stale:
+        level = "critical" if machinery_last is None or (now - machinery_last) > critical_threshold else "warn"
+        title = f"Release pool cron gap > {threshold_hours}h (interval={interval_minutes}min)"
+        machinery_text = machinery_last.isoformat() if machinery_last else "missing"
+        body = "\n".join(
+            [
+                "## 觸發條件",
+                f"release_pool 機器 fire gap 已超過 {threshold_hours} 小時門檻 (interval={interval_minutes}min + 60min grace)。",
+                f"- machinery_last_at (updated_at ∪ log fire): {machinery_text}",
+                f"- machinery_gap_hours: {machinery_gap_hours if machinery_gap_hours is not None else 'missing'}",
+                f"- configured_interval_minutes: {interval_minutes}",
+                f"- log_path: {_relative_repo_path(log_path)}",
+                "",
+                "## 影響",
+                "釋出機器停擺（cron 未 fire）= 文章完全不釋出、讀者端平台停滯、搜尋索引停滯；",
+                f"Mission 第 1 條（內容）與第 5 條（流量）直接受損。若持續 >{critical_hours}h 會累積多篇 draft 排隊延遲。",
+                "",
+                "## 建議行動",
+                "1. 立即手動釋出（最快復原）：",
+                "   VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings",
+                "2. 診斷 host cron 是否仍在跑：",
+                f"   tail -20 {_relative_repo_path(log_path)}",
+                "   crontab -l | grep release_pool",
+                "3. 若 cron daemon 卡住：重新 install crontab 或 launchd job",
+            ]
+        )
         return {
             "id": "release_pool_gap",
-            "breached": False,
-            "level": "info",
+            "breached": True,
+            "level": level,
             "title": title,
-            "body": "",
-            "details": {
-                "last_fire_at": last_fire_at.isoformat() if last_fire_at else None,
-                "gap_hours": gap_hours,
-                "interval_minutes": interval_minutes,
-                "warn_threshold_hours": threshold_hours,
-                "log_path": _relative_repo_path(log_path),
-            },
+            "body": body,
+            "details": base_details,
         }
 
-    level = "critical" if last_fire_at is None or (now - last_fire_at) > critical_threshold else "warn"
-    last_fire_text = last_fire_at.isoformat() if last_fire_at else "missing"
-    body = "\n".join(
-        [
-            "## 觸發條件",
-            f"release_pool host cron fire gap 已超過 {threshold_hours} 小時門檻 (interval={interval_minutes}min + 30min grace)。",
-            f"- last_fire_at: {last_fire_text}",
-            f"- gap_hours: {gap_hours if gap_hours is not None else 'missing'}",
-            f"- configured_interval_minutes: {interval_minutes}",
-            f"- log_path: {_relative_repo_path(log_path)}",
-            "",
-            "## 影響",
-            "文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）",
-            f"與第 5 條（曝光流量）直接受損。若持續 >{round(critical_threshold.total_seconds() / 3600, 1)}h 會累積多篇 draft 排隊延遲。",
-            "",
-            "## 建議行動",
-            "1. 立即手動釋出（最快復原）：",
-            "   VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings",
-            "2. 診斷 host cron 是否仍在跑：",
-            f"   tail -20 {_relative_repo_path(log_path)}",
-            "   crontab -l | grep release_pool",
-            "3. 若 cron daemon 卡住：重新 install crontab 或 launchd job",
-            "4. 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist",
-            "   與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。",
-        ]
-    )
+    # 2) Machinery healthy but nothing released for >2x interval → release
+    #    starvation. Draft pool is theme-saturated (dedup correctly skipping) or
+    #    due-order keeps surfacing saturated themes without falling through to
+    #    fresh-theme drafts. Content problem (Mission #1/#5), surfaced as WARN.
+    release_starved = release_last is None or (now - release_last) > critical_threshold
+    if release_starved:
+        title = f"Release pool starved > {critical_hours}h (cron healthy)"
+        release_text = release_last.isoformat() if release_last else "missing"
+        body = "\n".join(
+            [
+                "## 觸發條件",
+                f"釋出機器 cron 正常 fire（machinery_gap={machinery_gap_hours}h），但已超過 {critical_hours}h 沒有任何文章成功釋出。",
+                f"- last_released_at: {release_text}",
+                f"- release_gap_hours: {release_gap_hours if release_gap_hours is not None else 'missing'}",
+                f"- machinery_last_at: {machinery_last.isoformat() if machinery_last else 'missing'}",
+                "",
+                "## 影響",
+                "通常是 due 草稿全落在已飽和主題、dedup 正確 skip 但釋出算法未 fall-through 到 fresh-theme 草稿；",
+                "讀者端看不到新內容（Mission 第 1/5 條），但這不是 cron 停擺，是內容釋出層問題。",
+                "",
+                "## 建議行動",
+                "1. 定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：",
+                "   jq '[.[]|select(.status==\"draft\")]|.[].title' storage/reports/feed.json 挑非飽和主題",
+                "   VOLPRED_ACTOR=claude uv run volpred ops release-pool --pub-id <id> --include-drafts",
+                "2. 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。",
+                "3. 結構修：release 算法應在 due 草稿被 dedup-skip 時 fall-through 到下一篇非飽和主題草稿。",
+            ]
+        )
+        return {
+            "id": "release_pool_gap",
+            "breached": True,
+            "level": "warn",
+            "title": title,
+            "body": body,
+            "details": base_details,
+        }
+
+    # 3) Healthy: machinery firing + content released within cadence.
     return {
         "id": "release_pool_gap",
-        "breached": True,
-        "level": level,
-        "title": title,
-        "body": body,
-        "details": {
-            "last_fire_at": last_fire_at.isoformat() if last_fire_at else None,
-            "gap_hours": gap_hours,
-            "interval_minutes": interval_minutes,
-            "warn_threshold_hours": threshold_hours,
-            "log_path": _relative_repo_path(log_path),
-        },
+        "breached": False,
+        "level": "info",
+        "title": f"Release pool cron gap > {threshold_hours}h (interval={interval_minutes}min)",
+        "body": "",
+        "details": base_details,
     }
 
 
