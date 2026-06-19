@@ -1891,6 +1891,8 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 
 **2026-06-20 落地**：`scripts/task_pool_claim.py complete` 加入 `<K>_codex_review_followup` hook；當 completion result 的最終 Codex verdict 明確為 `FAIL`，會自動把源 K experiment task 標成 `failed`、寫入 `failure_reason`，並去重建立 `<K>_v2_fix_methodology` pending task。Regression: `tests/test_task_pool_claim.py::test_codex_review_followup_fail_marks_source_and_opens_v2` 與 CONDITIONAL_PASS no-op case。
 
+**2026-06-20 落地 (a)**：`scripts/sync_next_tasks_status.py` 加入 Codex review-gate drift audit；`codex-desktop` 標成 terminal 的 K experiment 若沒有 `codex_review.md` 或 `reviews/*codex*review*.md`，`--apply` 會把源任務改成 `blocked/awaiting_codex_review` 並去重建立 `<K>_codex_review_followup` pending task。Dry-run against live pool found K1330 as the only current gap;本次 fallback 只修流程與測試，未 apply 真任務池。Regression: `tests/test_sync_next_tasks_status.py`。
+
 ## 2026-06-14 — K864 published article source review FAIL → K864-v2 model-conditional correction
 
 **Context**: Published article `mile_1a6d9369` ("分散策略救不了市場") was reviewed source-code-level against `experiments/k864/k864_heterogeneous_abm.py`. Codex verdict was FAIL because the article's production claims exceeded the original simulation evidence.
