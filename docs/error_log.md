@@ -2,6 +2,26 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-19 鬼打牆：同 K1054 文章重發兩次（descriptive arc-skip 自傷 + 同 K-id 無防線）
+
+**問題**：老闆抓到 mile_bb520db8（06-19）是 mile_c481c8cf（06-07）的逐字複製，同 K1054、同標題、內文相同——同一篇發兩次。
+
+**根因（三道防線全漏）**：
+1. **arc_dedup `descriptive → return []`（自傷）**：2026-06-14 我為修 SpaceX false-positive（mile_6159728d descriptive 被誤擋）加的 early-return，副作用是**所有 descriptive 類文章全跳過 arc dedup**。大量 model-robustness/方法論文（結論詞不匹配 _CONCLUSION_KEYWORDS）被歸 descriptive → 全放行 → 鬼打牆。
+2. **同 experiment_refs 重發無防線**：publish_milestone 沒檢查「同 K-id 已發過」。
+3. release pool / 直接 publish 都經 publish_milestone，第 1+2 漏則全線漏。
+
+**修復**（commit be88c2d1）：
+1. 移除 `descriptive → return []`，改 `_descriptive_dup()`：descriptive 只在強同篇訊號才擋（同 ref+資產/標題、標題 token Jaccard≥0.55、distinctive 資產+具體 mechanism）。SpaceX 仍不擋（mechanism 不同+僅 {USD} 重疊+標題低重疊），K1054 ghost 被擋。
+2. publish_milestone 加 same-experiment-ref recycle gate（同 K 同 audience 擋，跨 audience companion 放行，dup_waiver override）。
+3. content.py release 時傳 draft experiment_refs 進 arc gate。
+4. regression test：tests/test_arc_dedup.py TestK1054GhostRecycle 6 cases + SpaceX 非擋 case，全綠。
+- 止血：bb520db8 標 retracted（dup_of c481c8cf）+ sync 前端下架。
+
+**教訓**：**修雙向風險邏輯（dedup：false-positive vs false-negative）必同時寫正反兩面 regression test**。2026-06-14 只顧著讓 SpaceX 過（false-positive），用最粗暴的 `descriptive→return []` 全關 descriptive 比對，沒寫「重複的 descriptive 仍要擋」的反面 test → 5 天後鬼打牆。dedup gate 的每次調整都要同時驗證「該擋的擋 + 不該擋的不擋」兩端。
+
+**遺留**：legacy `publish_experiment()`/`publish_comparison()`（pub_/cmp_ id，CLI DEPRECATED）仍繞過 dedup，未動（非本 incident 路徑）；若要徹底防線需改 `_append_to_feed` 唯一寫入點加 last-resort same-ref 防呆（影響回傳語意，待評估）。
+
 ## 2026-06-19 三根因（老闆「從底層徹底解決」）：release pool 枯竭 / member_qa dispatch 誤分類(strike 2) / M2 供給斷流
 
 **共通病根**：黏性/枯竭狀態無自動回收 + 任務分類靠 free-text 推斷而非 schema。
