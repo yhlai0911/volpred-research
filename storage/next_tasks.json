@@ -34362,5 +34362,23 @@
       "reader_facing",
       "auto_refill"
     ]
+  },
+  {
+    "id": "email-11794-e3826f",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)",
+    "description": "Gmail UID: 11794\nMessage-ID: <58AA4031-7835-4417-8F7D-F13B5CB77617@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Fri, 19 Jun 2026 10:14:31 +0800\nSubject: Re: [VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)\n\n--- 用戶回信內容 ---\n為什麼會出這種問題？從底層給我徹底解決\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月19日 08:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Release pool cron gap > 4.0h (interval=180min)\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> release_pool host cron fire gap 已超過 4.0 小時門檻 (interval=180min + 30min grace)。\r\n> \r\n> last_fire_at: 2026-06-18T20:00:01.174271+00:00\r\n> gap_hours: 4.0\r\n> configured_interval_minutes: 180\r\n> log_path: storage/logs/cron/release_pool.log\r\n> 影響\r\n> \r\n> 文章釋出中斷 = 讀者端看到平台停滯、搜尋索引停滯；Mission 第 1 條（文章品質）\r\n> 與第 5 條（曝光流量）直接受損。若持續 >6.0h 會累積多篇 draft 排隊延遲。\r\n> \r\n> 建議行動\r\n> \r\n> 立即手動釋出（最快復原）：\r\n> VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\r\n> 診斷 host cron 是否仍在跑：\r\n> tail -20 storage/logs/cron/release_pool.log\r\n> crontab -l | grep release_pool\r\n> 若 cron daemon 卡住：重新 install crontab 或 launchd job\r\n> 若 draft 池也空（配合 draft_pool_low alert）：先補池，見 publish-checklist\r\n> 與 .claude/skills/publication-candidates/SKILL.md 的 5-step 選題流程。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-19T02:15:06.469289+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11794,
+    "email_message_id": "<58AA4031-7835-4417-8F7D-F13B5CB77617@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] Release pool cron gap > 4.0h (interval=180min)",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
   }
 ]
