@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-06-19T00:03:39Z",
+  "timestamp": "2026-06-19T06:02:50Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 129 (general: 78, research: 51). All thresholds met (total>=12, general>=8, research>=4)."
+      "detail": "Total drafts: 129 (general: 78, research: 51). Thresholds met: total>=12 ✓, general>=8 ✓, research>=4 ✓"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (persistent missing since ~2026-05-31)."
+      "detail": "storage/strategy_metrics.json is MISSING (file does not exist)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-19 (today) or 2026-06-18 (yesterday) found in docs/error_log.md. Last entry is 2026-06-03 compact threshold discussion."
+      "detail": "No entries dated 2026-06-19 or 2026-06-18 in docs/error_log.md. Last entries from 2026-06-03."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked. No strategy has >2 null portfolio_return in the last 3 entries."
+      "detail": "All 15 strategies have 0 null portfolio_return in last 3 entries. Strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files (threshold: >50)"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2191 entries."
+      "detail": "storage/memory/knowledge.json contains 2191 entries"
     }
   ],
   "alerts": [
-    "strategy_metrics.json missing — file does not exist at storage/strategy_metrics.json (persistent issue since ~2026-05-31)"
+    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json is MISSING"
   ]
 }
