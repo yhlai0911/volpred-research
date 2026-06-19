@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-06-19T12:04:10Z",
+  "level": "warn",
+  "check": "STRATEGY_METRICS_FRESHNESS",
+  "message": "storage/strategy_metrics.json does not exist — metrics stale (file missing)",
+  "action_required": "Regenerate strategy metrics file. Run: uv run volpred ops compute-metrics or equivalent."
+}
