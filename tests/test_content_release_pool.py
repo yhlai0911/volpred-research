@@ -399,6 +399,88 @@ def test_release_pool_by_settings_releases_oldest_saturated_theme_via_valve(
     assert fresh["status"] == "draft"
 
 
+def test_release_pool_audit_skip_materializes_fix_task_after_three_strikes(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """Repeated audit-skip drafts should become visible work, not cron noise."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 19, 12, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_audit_bad",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+                "title": "一般讀者文章仍混入研究術語",
+                "description": "本文仍寫 Harvey threshold、t=3.2、p=0.01，應先修稿再釋出。",
+                "tags": ["一般讀者", "FOMC"],
+                "details": {"release_audit_skipped_count": 2},
+            }
+        ],
+    )
+
+    res = content.release_pool_articles(
+        limit=1,
+        due_only=False,
+        include_drafts=True,
+        storage_dir=str(storage_dir),
+    )
+
+    assert res["released_count"] == 0
+    assert res["audit_materialized"] == [
+        {
+            "id": "mile_audit_bad",
+            "title": "一般讀者文章仍混入研究術語",
+            "task_id": "platform_ops_release_audit_fix_mile_audit_bad",
+            "skip_count": 3,
+        }
+    ]
+    skipped = res["audit_skipped"][0]
+    assert skipped["skip_count"] == 3
+    assert skipped["materialized_task"] == {
+        "created": True,
+        "task_id": "platform_ops_release_audit_fix_mile_audit_bad",
+    }
+
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    draft = feed_after[0]
+    assert draft["status"] == "draft"
+    assert draft["details"]["release_audit_skipped_count"] == 3
+    assert draft["details"]["release_audit_task_id"] == "platform_ops_release_audit_fix_mile_audit_bad"
+    assert "禁用統計術語" in draft["details"]["release_audit_issues"][0]
+
+    tasks = json.loads((storage_dir / "next_tasks.json").read_text(encoding="utf-8"))
+    assert len(tasks) == 1
+    task = tasks[0]
+    assert task["id"] == "platform_ops_release_audit_fix_mile_audit_bad"
+    assert task["task_type"] == "platform_ops"
+    assert task["priority"] == 3
+    assert task["status"] == "pending"
+    assert task["article_id"] == "mile_audit_bad"
+    assert "release_pool skipped draft `mile_audit_bad` 3 times" in task["description"]
+
+    rerun = content.release_pool_articles(
+        limit=1,
+        due_only=False,
+        include_drafts=True,
+        storage_dir=str(storage_dir),
+    )
+    tasks_after = json.loads((storage_dir / "next_tasks.json").read_text(encoding="utf-8"))
+    assert len(tasks_after) == 1
+    assert rerun["audit_skipped"][0]["skip_count"] == 4
+    assert rerun["audit_skipped"][0]["materialized_task"] == {
+        "created": False,
+        "reason": "task_already_exists",
+        "task_id": "platform_ops_release_audit_fix_mile_audit_bad",
+    }
+
+
 def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path: Path, monkeypatch):
     """Boss email-11752 regression: if 2 of last 3 published general/research
     articles are the same narrative cluster, release_pool should filter that

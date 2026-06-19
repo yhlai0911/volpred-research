@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fcntl
 import json
 import re
 from collections import Counter
@@ -392,6 +393,7 @@ def _recent_narrative_cluster_pressure(
 # recency cap throttles saturated themes regardless of wording. Add a theme
 # here when a topic visibly over-publishes; cap is per rolling window.
 _THEME_CAP = 3
+_RELEASE_AUDIT_MATERIALIZE_THRESHOLD = 3
 _SATURATED_THEMES = {
     "model_complexity": re.compile(
         r"模型.{0,12}(擂台|投票|加在一起|更聰明|花俏|更準|沒贏|沒更準|只贏|不能算真的贏|疊|複雜|淘汰)"
@@ -421,6 +423,97 @@ def _release_theme_flood(item: dict, recent_pub: list[dict]) -> dict | None:
         if cnt >= _THEME_CAP:
             return {"theme": name, "recent_count": cnt}
     return None
+
+
+def _safe_release_task_suffix(value: str | None, *, fallback: str = "draft") -> str:
+    suffix = re.sub(r"[^0-9A-Za-z]+", "_", str(value or "").strip()).strip("_").lower()
+    return (suffix or fallback)[:80]
+
+
+def _build_release_audit_task_description(item: dict, audit_issues: list[str], skip_count: int) -> str:
+    item_id = str(item.get("id") or "").strip() or "(missing id)"
+    title = " ".join(str(item.get("title") or "(untitled)").split())
+    issues = "\n".join(f"- {issue}" for issue in audit_issues)
+    return (
+        f"release_pool skipped draft `{item_id}` {skip_count} times because the "
+        "general-audience audit failed.\n\n"
+        f"Title: {title}\n\n"
+        "Issues:\n"
+        f"{issues}\n\n"
+        "Fix the draft through the publisher/feed-publisher workflow or a source "
+        "rewrite. Do not hand-edit historical feed data to bypass the audit."
+    )
+
+
+def _materialize_release_audit_fix_task(
+    *,
+    item: dict,
+    audit_issues: list[str],
+    skip_count: int,
+    storage_dir: str,
+    now: datetime,
+) -> dict:
+    item_id = str(item.get("id") or "").strip()
+    suffix_source = item_id or str(item.get("title") or "")
+    task_id = f"platform_ops_release_audit_fix_{_safe_release_task_suffix(suffix_source)}"
+    next_tasks_path = project_path(storage_dir, "next_tasks.json")
+    next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
+    if not next_tasks_path.exists():
+        next_tasks_path.write_text("[]\n", encoding="utf-8")
+
+    with next_tasks_path.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            tasks = json.load(fh)
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json is not a list")
+
+            for task in tasks:
+                if not isinstance(task, dict):
+                    continue
+                if task.get("id") == task_id or (
+                    task.get("source") == "release_pool_audit_skip_materializer"
+                    and str(task.get("article_id") or "") == item_id
+                    and item_id
+                ):
+                    return {
+                        "created": False,
+                        "reason": "task_already_exists",
+                        "task_id": task.get("id") or task_id,
+                    }
+
+            title_text = " ".join(str(item.get("title") or item_id or "untitled draft").split())
+            task = {
+                "id": task_id,
+                "title": f"Fix release-pool audit blockers: {title_text[:80]}",
+                "description": _build_release_audit_task_description(item, audit_issues, skip_count),
+                "task_type": "platform_ops",
+                "priority": 3,
+                "status": "pending",
+                "source": "release_pool_audit_skip_materializer",
+                "tags": ["release_pool", "audit_skip", "platform_ops"],
+                "created_at": now.isoformat(),
+                "article_id": item_id,
+                "release_audit_skipped_count": skip_count,
+                "release_audit_issues": audit_issues,
+            }
+            tasks.append(task)
+            fh.seek(0)
+            fh.truncate()
+            json.dump(tasks, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+    return {"created": True, "task_id": task_id}
+
+
+def _next_release_audit_skip_count(details: dict) -> int:
+    try:
+        previous = int(details.get("release_audit_skipped_count") or 0)
+    except (TypeError, ValueError):
+        previous = 0
+    return max(previous, 0) + 1
 
 
 def release_pool_articles(
@@ -523,6 +616,7 @@ def release_pool_articles(
     target_limit = max(int(limit), 1)
     released: list[dict] = []
     audit_skipped: list[dict] = []
+    audit_materialized: list[dict] = []
     dedup_skipped: list[dict] = []
     theme_valves: list[dict] = []
     theme_valves_used: set[str] = set()
@@ -584,14 +678,46 @@ def release_pool_articles(
             str(body_text),
         )
         if audit_issues:
-            audit_skipped.append(
-                {
-                    "id": item.get("id"),
-                    "title": item.get("title"),
-                    "audience": audience,
-                    "issues": audit_issues,
-                }
-            )
+            details = item.get("details")
+            if not isinstance(details, dict):
+                details = {}
+                item["details"] = details
+            skip_count = _next_release_audit_skip_count(details)
+            details["release_audit_skipped_count"] = skip_count
+            details["release_audit_skipped_at"] = now.isoformat()
+            details["release_audit_issues"] = audit_issues
+
+            materialized = None
+            if skip_count >= _RELEASE_AUDIT_MATERIALIZE_THRESHOLD:
+                materialized = _materialize_release_audit_fix_task(
+                    item=item,
+                    audit_issues=audit_issues,
+                    skip_count=skip_count,
+                    storage_dir=storage_dir,
+                    now=now,
+                )
+                details["release_audit_task_id"] = materialized.get("task_id")
+                details["release_audit_task_materialized_at"] = now.isoformat()
+                if materialized.get("created"):
+                    audit_materialized.append(
+                        {
+                            "id": item.get("id"),
+                            "title": item.get("title"),
+                            "task_id": materialized.get("task_id"),
+                            "skip_count": skip_count,
+                        }
+                    )
+
+            skipped_entry = {
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "audience": audience,
+                "issues": audit_issues,
+                "skip_count": skip_count,
+            }
+            if materialized is not None:
+                skipped_entry["materialized_task"] = materialized
+            audit_skipped.append(skipped_entry)
             continue
 
         # Anti-flood dedup gate (2026-06-16): skip near-duplicate of a
@@ -739,10 +865,9 @@ def release_pool_articles(
         except Exception:
             pass
 
-    if dedup_skipped and not released:
-        # Persist the release_dedup_skipped flags even when nothing was released,
-        # so flagged drafts are excluded from future candidate selection (no
-        # infinite re-skip / slot block).
+    if (dedup_skipped or audit_skipped) and not released:
+        # Persist release skip metadata even when nothing was released, so
+        # future runs see dedup TTLs and audit skip counters.
         from volpred.ops.shared_lock import shared_state_lock
         with shared_state_lock("publisher_feed", storage_dir=storage_dir):
             dump_json(_feed_path(storage_dir), feed)
@@ -804,6 +929,7 @@ def release_pool_articles(
         "released_count": len(released),
         "released": released,
         "audit_skipped": audit_skipped,
+        "audit_materialized": audit_materialized,
         "dedup_skipped": dedup_skipped,
         "theme_valves": theme_valves,
         "narrative_cluster_pressure": narrative_pressure,
