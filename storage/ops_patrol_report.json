@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-06-19T18:02:24Z",
+  "timestamp": "2026-06-20T00:03:00Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "129 drafts total (research: 51, general: 78). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "Total drafts: 129 (OK >=12). Research-audience: 51 (OK >=4). General-audience: 78 (OK >=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (file missing). Persistent issue — also flagged in 20260619_000339 and 20260619_060250 patrol runs."
+      "detail": "storage/strategy_metrics.json is MISSING. File has been absent for weeks (first flagged 2026-05-31). Cannot assess freshness."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-18 or 2026-06-19 found. Most recent entry is 2026-06-03 (compact root-cause analysis)."
+      "detail": "Last 30 lines checked. Most recent entry is 2026-06-03 (compact root-cause analysis). No entries dated 2026-06-19 or 2026-06-20."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "storage/paper_trading.json exists (3.5MB, last modified 2026-06-04). No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -34,6 +34,6 @@
     }
   ],
   "alerts": [
-    "strategy_metrics.json is MISSING — file does not exist at storage/strategy_metrics.json. Strategy metrics freshness cannot be assessed. Persistent across multiple patrol runs (20260619 00:03, 06:02, and now 18:02 UTC)."
+    "METRICS MISSING: storage/strategy_metrics.json does not exist — persistent issue since 2026-05-31. Strategy metrics cannot be verified until file is regenerated."
   ]
 }
