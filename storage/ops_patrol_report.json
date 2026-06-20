@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-20T14:03:46+08:00",
+  "timestamp": "2026-06-20T12:03:21Z",
   "all_ok": false,
   "checks": [
     {
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked. No strategy has >2 portfolio_return=null in last 3 entries."
+      "detail": "14 trading strategies checked (_market_daily is market data, not a strategy). All strategies have <=1 null in last 3 portfolio_return entries. No strategy exceeds threshold of >2 nulls."
     },
     {
       "name": "GIT_STATUS",
