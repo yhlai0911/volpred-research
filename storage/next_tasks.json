@@ -34621,5 +34621,53 @@
       "reader_facing",
       "auto_refill"
     ]
+  },
+  {
+    "id": "K1354",
+    "title": "K1354: 月度 OPEX「gamma cliff」前 72 小時 RV 壓抑 vs 釋放的事件研究 — yfinance SPY 日 OHLC（range-based RV proxy）+ 公開 OPEX/quad-witching 日曆（每月第三個",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 634). Original: 月度 OPEX「gamma cliff」前 72 小時 RV 壓抑 vs 釋放的事件研究 — yfinance SPY 日 OHLC（range-based RV proxy）+ 公開 OPEX/quad-witching 日曆（每月第三個週五 + 3/6/9/12 月 quad witching），event-window 檢定 dealer-long-gamma 假說：到期前 N 日 RV 是否系統性低於常日、到期週後是否反彈（mean-reversion），並比較 monthly OPEX vs quad-witching 強度差；與既有 0DTE intraday-share 軸（06-10/06-11）正交——這裡是 monthly gamma-cliff 的 daily RV 時序事件，不是 intraday 占比（來源：GEX/dealer-gamma practitioner 2025-26；witching-day abnormal return 學術文獻）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1354.py with signal.shift(1) + seed=42, (c) K1354_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 634,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "id": "K1355",
+    "title": "K1355: ML 強化的日頻流動性測度（CPQS proxy）作系統性流動性風險 → vol 通道 — yfinance 美股/ETF 日 OHLCV，建 Closing-Percent-Quoted-Spread proxy（非 Amihud，與 l",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 637). Original: ML 強化的日頻流動性測度（CPQS proxy）作系統性流動性風險 → vol 通道 — yfinance 美股/ETF 日 OHLCV，建 Closing-Percent-Quoted-Spread proxy（非 Amihud，與 line 481/554 正交）+ boosting/NN 學非線性映射估日頻 spread，再把估出的系統性流動性風險因子加入 HAR-RV / 跨資產 vol 檢定其 OOS 增量；明確 lag（來源：Dai-Shi-Zhang JBF 2025「Estimating Market Liquidity from Daily Data: Marrying Microstructure Models and Machine Learning」；CPQS 為最佳 percent-cost daily proxy，1000-10000× 計算節省）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1355.py with signal.shift(1) + seed=42, (c) K1355_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 637,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-20T00:00:00Z"
+  },
+  {
+    "id": "journal_discovery_20260620_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-06-20T00:00:01+00:00"
   }
 ]
