@@ -34695,10 +34695,10 @@
   },
   {
     "id": "research_knowledge_closure_backlog_20260620",
-    "title": "[experiment] knowledge.json closure backlog：近2天實驗 (k1349-k1353/k1439/k957 等) 有 results 未寫知識庫",
-    "description": "根因（boss 2026-06-20 email-11829「M2/M3 idle」延伸發現）：knowledge.json 最新 entry 停在 2026-06-18，但 k1349/k1350/k1351/k1352/k1353/k1439/k957 等近2天實驗已產 *_results.json 卻未 closure 寫入 knowledge.json → M2 即使修好測量仍真 lag。疑與 hourly 「agent left uncommitted」(dispatched agent 未跑完整 workflow 含 knowledge write，safety-net 只 commit 半成品) 有關。\n\n動作：(1) 逐一檢查上列 K 實驗是否 complete (README+results+chart)；(2) complete 者跑 Codex review (primary path)，PASS/CONDITIONAL_PASS 才依 provenance gate 寫 knowledge.json (experiment_id+reviewer 必填，見 .claude/rules/experiments.md K1259 gate)；(3) 若發現 agent-completion 是系統性 gap（agent 普遍不寫 knowledge），追到 dispatch/agent workflow 修流程，不只補這批。主線程驗證後再寫 canonical knowledge。",
+    "title": "[experiment] knowledge closure：k1439 (CONDITIONAL_PASS) Codex review+寫知識庫 (+可選 k1349/k1351 null 記錄)",
+    "description": "診斷修正 (2026-06-20 13:17 主線程實查)：knowledge.json 自 6/18 沒長，**非 pipeline 壞 / 非 agent-completion gap**——近2天實驗 agent 有跑完 (codex_review.md/results 齊)，只是結果多為 null/superseded：k1352/k1353=SUPERSEDED(正確不寫)、k1349=PILOT_INSUFFICIENT_OOS、k1351=NULL_NO_HARVEY、k957=無verdict。近2天無 PASS。M2 本身健康，knowledge 沒長是正常研究變異。\n\n唯一真 closure 候選：**k1439 verdict=CONDITIONAL_PASS、complete(README+results+figures+reproduce.py)、但無 codex_review.md** → 動作：(1) Codex review k1439 代碼 (primary path)；(2) 通過則依 provenance gate 寫 knowledge.json (CONDITIONAL_PASS 需 experiment_id 不需 reviewer，見 experiments.md K1259 gate)。可選：k1349/k1351 補 null 記錄 (null 如實報告原則，但低價值、不 gated、experiments/ 已有完整 record，斟酌)。非緊急。",
     "task_type": "experiment",
-    "priority": 1,
+    "priority": 2,
     "status": "pending_main_thread",
     "tags": [
       "experiment",
