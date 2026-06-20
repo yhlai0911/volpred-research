@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -243,7 +244,15 @@ def _mission_progress(commits: list[dict], articles: dict, work: list[dict]) -> 
     }
 
     # M2 研究 — experiment commits + knowledge.json entries
-    exp_commits = [c for c in commits if any(k in c["subject"].lower() for k in ["experiment", "k13", "k12", "k11", "k10"])]
+    # 2026-06-20 fix (email-11829 boss「M2,M3 為什麼一直 idle」)：原本用 hardcoded
+    # K-number 前綴 ["k10","k11","k12","k13"]，研究推進到 K14xx/K15xx 後全部不匹配 →
+    # M2 永遠誤報 idle（boss 反覆擔心研究停擺，其實 K1528/K1530/K1531/K1532 等正活躍）。
+    # 改用 robust 正則 \bk\d{3,4}\b 涵蓋所有 K 編號 + experiment/research( 關鍵字。
+    _knum_re = re.compile(r"\bk\d{3,4}\b", re.IGNORECASE)
+    exp_commits = [
+        c for c in commits
+        if _knum_re.search(c["subject"]) or any(k in c["subject"].lower() for k in ["experiment", "research("])
+    ]
     knowledge_commits = [c for c in commits if "knowledge" in c["subject"].lower()]
     m2_count = len(exp_commits) + len(knowledge_commits)
     progress["M2 把實驗與研究做好"] = {
@@ -253,7 +262,18 @@ def _mission_progress(commits: list[dict], articles: dict, work: list[dict]) -> 
     }
 
     # M3 論文 — paper/ commits
-    paper_commits = [c for c in commits if any(k in c["subject"].lower() for k in ["paper(", "paper:", "paper2", "paper3", "paper4", "paper8", "paper9", "paper10", "taiwan-vt", "vix-suff", "garch-x", "crypto-fear", "vol-absor", "vt-trend", "leverage-dir", "vt-crowd"])]
+    # 2026-06-20 fix (email-11829)：原本靠窄 slug allowlist，漏掉 paper_body_* /
+    # paper_review / paper-update 與未列入的論文 slug。改成「任何含 paper 的 commit」
+    # （涵蓋 paper(/paper_body/paper_review/paper-update/paper:）OR 已知 paper 目錄 slug，
+    # 讓 review-cycle / body alignment / citation cleanup 等真實論文工作都計入。
+    _paper_slugs = [
+        "taiwan-vt", "vix-suff", "garch-x", "crypto-fear", "vol-absor", "vt-trend",
+        "leverage-dir", "vt-crowd", "prg-periodic", "eav-universal", "btc-gas", "k189_audit",
+    ]
+    paper_commits = [
+        c for c in commits
+        if "paper" in c["subject"].lower() or any(k in c["subject"].lower() for k in _paper_slugs)
+    ]
     progress["M3 把學術論文寫好"] = {
         "evidence": f"{len(paper_commits)} paper-related commits",
         "status": "active" if len(paper_commits) > 0 else "idle",
