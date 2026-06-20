@@ -34709,5 +34709,26 @@
     "source": "agent_discovered",
     "completed_at": "2026-06-20T05:51:48.924728+00:00",
     "result": "調查結論：無實際 closure backlog。k1439（疑似唯一候選）實查發現已在 knowledge.json（c37e27f7 + k1439rev2606 Codex 24h review，CONDITIONAL_PASS）早已 closure+reviewed。其餘：k1352/k1353=SUPERSEDED(正確不寫)、k1349 PILOT/k1351 NULL(已 review,低價值選擇性,experiments/有完整 record)、k957 無 verdict。M2 closure 健康、agent 有跑完 workflow，knowledge.json 沒長純因近期實驗多 null/superseded(正常研究變異,近2天無 PASS)。任務基於不完整資訊(看 results 沒查 knowledge 已有)而建,實查後關閉。"
+  },
+  {
+    "id": "platform_ops_release_audit_fix_mile_eda69bfb",
+    "title": "Fix release-pool audit blockers: VIX 體制決定一切：195 次非農公佈日，波動率差距達 3 倍",
+    "description": "release_pool skipped draft `mile_eda69bfb` 3 times because the general-audience audit failed.\n\nTitle: VIX 體制決定一切：195 次非農公佈日，波動率差距達 3 倍\n\nIssues:\n- general 內容含禁用統計術語 (SKILL.md L306): ['t=value (use 「統計顯著」白話)', 'p=value (use 「達顯著水準」)']\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 3,
+    "status": "pending",
+    "source": "release_pool_audit_skip_materializer",
+    "tags": [
+      "release_pool",
+      "audit_skip",
+      "platform_ops"
+    ],
+    "created_at": "2026-06-20T17:00:05.018709+00:00",
+    "article_id": "mile_eda69bfb",
+    "release_audit_skipped_count": 3,
+    "release_audit_issues": [
+      "general 內容含禁用統計術語 (SKILL.md L306): ['t=value (use 「統計顯著」白話)', 'p=value (use 「達顯著水準」)']"
+    ]
   }
 ]
