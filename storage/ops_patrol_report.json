@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-06-20T12:03:21Z",
+  "timestamp": "2026-06-20T18:03:02Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 129 (OK >=12). Research-audience: 51 (OK >=4). General-audience: 78 (OK >=8)."
+      "detail": "Total drafts: 129 (research: 51, general: 78)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json is MISSING. File has been absent for weeks (first flagged 2026-05-31). Cannot assess freshness."
+      "detail": "storage/strategy_metrics.json not found"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines checked. Most recent entry is 2026-06-03 (compact root-cause analysis). No entries dated 2026-06-19 or 2026-06-20."
+      "detail": "Last 30 lines: most recent entry 2026-06-03 (not today/yesterday). No new incidents in last 2 days."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 trading strategies checked (_market_daily is market data, not a strategy). All strategies have <=1 null in last 3 portfolio_return entries. No strategy exceeds threshold of >2 nulls."
+      "detail": "All 15 strategies OK; no strategy has >2 portfolio_return=null in last 3 entries"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2191 entries."
+      "detail": "2191 entries in storage/memory/knowledge.json"
     }
   ],
   "alerts": [
-    "METRICS MISSING: storage/strategy_metrics.json does not exist — persistent issue since 2026-05-31. Strategy metrics cannot be verified until file is regenerated."
+    "metrics missing: storage/strategy_metrics.json does not exist"
   ]
 }
