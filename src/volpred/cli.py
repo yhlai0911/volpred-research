@@ -2085,7 +2085,16 @@ def ops_schedule_report() -> None:
     default=None,
     help="Asia/Taipei local date YYYY-MM-DD; defaults to today",
 )
-def ops_schedule_due(job_id: str, target_date: str | None) -> None:
+@click.option(
+    "--fail-if-not-scheduled",
+    is_flag=True,
+    help="Exit 75 when the job is not scheduled for the target date.",
+)
+def ops_schedule_due(
+    job_id: str,
+    target_date: str | None,
+    fail_if_not_scheduled: bool,
+) -> None:
     """Check whether a canonical schedule job should fire on a local date."""
     from volpred.ops import build_schedule_due_report
 
@@ -2106,6 +2115,8 @@ def ops_schedule_due(job_id: str, target_date: str | None) -> None:
     console.print(f"  cron={report['cron']}")
     console.print(f"  reason={report['reason']}")
     _print_json(report)
+    if fail_if_not_scheduled and report["scheduled"] is not True:
+        raise click.exceptions.Exit(75 if report["scheduled"] is False else 2)
 
 
 @ops.command("event-preview")

@@ -22,6 +22,26 @@ if ! mkdir "$LOCKDIR" 2>/dev/null; then
 fi
 trap 'rmdir "$LOCKDIR" 2>/dev/null' EXIT
 
+# Off-schedule guard. 2026-06-21 incident: an interactive session saw no
+# Sunday daily_update log and manually ran the wrapper, even though the
+# canonical cron is Monday-Saturday. Keep the schedule parser in Python as the
+# single source of truth; explicit override is required for emergency reruns.
+if [ "${VOLPRED_ALLOW_OFFSCHEDULE_DAILY_UPDATE:-}" != "1" ]; then
+  _guard_output=$(/opt/homebrew/bin/uv run volpred ops schedule-due daily_update --fail-if-not-scheduled 2>&1)
+  _guard_ec=$?
+  if [ "${_guard_ec}" -eq 75 ]; then
+    printf '%s\n' "${_guard_output}"
+    echo "=== [daily_update] $(date '+%Y-%m-%dT%H:%M:%S%z') skip — canonical schedule not due; set VOLPRED_ALLOW_OFFSCHEDULE_DAILY_UPDATE=1 to override ==="
+    exit 0
+  elif [ "${_guard_ec}" -ne 0 ]; then
+    printf '%s\n' "${_guard_output}"
+    echo "=== [daily_update] guard failure exit ${_guard_ec} at $(date '+%Y-%m-%dT%H:%M:%S%z') ==="
+    exit "${_guard_ec}"
+  fi
+else
+  echo "=== [daily_update] $(date '+%Y-%m-%dT%H:%M:%S%z') off-schedule guard override via VOLPRED_ALLOW_OFFSCHEDULE_DAILY_UPDATE=1 ==="
+fi
+
 # Emit the canonical exit banner the host_cron_fail alert reads
 # (src/volpred/ops/alerts.py _CRON_EXIT_RE). daily_update is in
 # run_due_jobs SKIP_JOB_IDS, so the piggy-back dispatcher never writes

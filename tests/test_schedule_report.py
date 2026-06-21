@@ -1,5 +1,8 @@
 from datetime import date
 
+from click.testing import CliRunner
+
+from volpred.cli import cli
 from volpred.ops import schedules
 
 
@@ -96,3 +99,49 @@ def test_build_schedule_due_report_for_daily_update():
     assert sunday["reason"] == "2026-06-21 (Sunday) does not match cron '3 8 * * 1-6'"
     assert monday["scheduled"] is True
     assert monday["log_path"] == "storage/logs/cron/daily_update.log"
+
+
+def test_ops_schedule_due_fail_if_not_scheduled(monkeypatch):
+    config = {
+        "system_crontab": {
+            "items": [
+                {
+                    "id": "daily_update",
+                    "label": "daily_update 每日更新與同步",
+                    "cron": "3 8 * * 1-6",
+                }
+            ]
+        },
+        "session_crons": {"items": []},
+        "remote_triggers": {"items": []},
+    }
+    monkeypatch.setattr(schedules, "load_runtime_schedules", lambda: config)
+    runner = CliRunner()
+
+    sunday = runner.invoke(
+        cli,
+        [
+            "ops",
+            "schedule-due",
+            "daily_update",
+            "--date",
+            "2026-06-21",
+            "--fail-if-not-scheduled",
+        ],
+    )
+    monday = runner.invoke(
+        cli,
+        [
+            "ops",
+            "schedule-due",
+            "daily_update",
+            "--date",
+            "2026-06-22",
+            "--fail-if-not-scheduled",
+        ],
+    )
+
+    assert sunday.exit_code == 75
+    assert '"scheduled": false' in sunday.output
+    assert monday.exit_code == 0
+    assert '"scheduled": true' in monday.output
