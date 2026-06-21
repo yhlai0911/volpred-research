@@ -34871,7 +34871,7 @@
     "description": "Gmail UID: 11869\nMessage-ID: <F624A72E-8A98-480F-8956-20CBCFBE65A8@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 21 Jun 2026 18:16:30 +0800\nSubject: Re: [VolPred Alert][INFO] 策略 lifecycle：3 檔高Sharpe候選 audit 完成 → 拒絕上架（c2c 假象、o2o FAIL Harvey）\n\n--- 用戶回信內容 ---\n重點是你也要持續開發並從平常實驗中找出新的潛在優秀交易策略\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月21日 18:06 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 策略 lifecycle：3 檔高Sharpe候選 audit 完成 → 拒絕上架（c2c 假象、o2o FAIL Harvey）\r\n> Alert level: info\r\n> INFO\r\n> 策略 lifecycle：3 檔候選 audit 完成 — 全部拒絕上架（誠實優先）\r\n> \r\n> 你要「表現好就上架」，我查了那 3 檔高 Sharpe 卻 inactive 的策略。結論：它們的「好表現」是假象，正確維持 inactive，我不上架。\r\n> 策略\tc2c Sharpe\t真相\r\n> tz_tw_jp_5050\t3.46\t高 Sharpe 來自無法捕捉的隔夜開盤跳空\r\n> taiwan_spy_momentum\t3.23\t78% alpha 被開盤跳空吸收（c2c 1.47 → 可交易 o2o 0.87），FAIL Harvey t>3\r\n> global_vt_tz\t2.91\t一半部位是上述 biased TZ momentum\r\n> 根據（不是我臆測，是我們自己跑過的實驗）：k274 直接寫「這不是交易策略，是 price discovery efficiency 的量度」；k286「uncapturable overnight gap，可實作的 o2o Sharpe~0.87，Gap R²=0.35」；k502/k238 同。daily_update.py 早就標 ⚠️ I8 BIASED。\r\n> 為什麼不上架：c2c（收盤對收盤）Sharpe 3+ 是測量假象 — 它把你實際下不到的開盤跳空算進報酬。真正能交易的 o2o 版只有 0.87 且過不了顯著性。上架它=把假象當策略賣給付費用戶，這正是會毀掉「誠實=護城河」的事。這也是我們自己「Sharpe 遠高於 baseline 先懷疑 bug」規則該擋下的。\r\n> lifecycle 我設成持續流程：每批新策略實驗都會跑 evaluate_new_strategy.py，過 gate（含 o2o/lagged Harvey）的才上架觀察。本次掃近期實驗多是研究/forecasting 性質、非可交易策略 backtest，暫無新的真候選 — 一有過 gate 的就立刻上架並回報。下架沿用現規則（績效異常掛卡注記、結構性問題才停用）。\r\n> 不上架不是不作為 — 是把假的擋掉、只放真的。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -34881,6 +34881,32 @@
     "email_uid": 11869,
     "email_message_id": "<F624A72E-8A98-480F-8956-20CBCFBE65A8@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] 策略 lifecycle：3 檔高Sharpe候選 audit 完成 → 拒絕上架（c2c 假象、o2o FAIL Harvey）",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-21T10:33:02.818575+00:00",
+    "claim_session_id": "40a1e6b1c03a",
+    "completed_at": "2026-06-21T10:39:00.814849+00:00",
+    "result": "directive=持續開發新策略；自主啟動 strategy-discovery workflow（mine experiments → 對抗式驗證 o2o/lagged Harvey/lookahead → 只留真可交易候選），不待用戶；投資觀念貼文本地查無，已請用戶補連結但不阻塞 sweep"
+  },
+  {
+    "id": "platform_ops_release_audit_fix_mile_103338aa",
+    "title": "Fix release-pool audit blockers: 指數調整日成交爆量，ETF 波動率真的會暴衝再回落嗎？",
+    "description": "release_pool skipped draft `mile_103338aa` 3 times because the general-audience audit failed.\n\nTitle: 指數調整日成交爆量，ETF 波動率真的會暴衝再回落嗎？\n\nIssues:\n- general tag count 9 > 8 (SKILL.md L308: ≤2-3 表格 → ≤8 tags)\n\nFix the draft through the publisher/feed-publisher workflow or a source rewrite. Do not hand-edit historical feed data to bypass the audit.",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "priority": 3,
+    "status": "pending",
+    "source": "release_pool_audit_skip_materializer",
+    "tags": [
+      "release_pool",
+      "audit_skip",
+      "platform_ops"
+    ],
+    "created_at": "2026-06-21T11:00:05.957143+00:00",
+    "article_id": "mile_103338aa",
+    "release_audit_skipped_count": 3,
+    "release_audit_issues": [
+      "general tag count 9 > 8 (SKILL.md L308: ≤2-3 表格 → ≤8 tags)"
+    ]
   }
 ]
