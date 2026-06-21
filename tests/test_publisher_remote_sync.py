@@ -135,3 +135,38 @@ def test_unpublish_supabase_sync_failure_is_queued(
     assert feed[0]["status"] == "unpublished"
     assert "Supabase unpublish sync exception for mile_unpublish_fail" in captured.out
     assert "recorded to .failed_supabase_syncs.json" in captured.out
+
+
+def test_publish_milestone_bad_existing_timestamp_keeps_exact_title_gate(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+):
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_bad_timestamp",
+                    "title": "Same Title",
+                    "status": "published",
+                    "published_at": "not-a-date",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+
+    result = Publisher(storage_dir=str(tmp_path)).publish_milestone(
+        title="Same Title",
+        description="新的文章不應穿過 exact-title duplicate gate。",
+        phase="research",
+        status="draft",
+    )
+
+    captured = capsys.readouterr()
+    assert result == "mile_bad_timestamp"
+    assert "Duplicate title timestamp parse failed" in captured.out

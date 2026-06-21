@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 publish_milestone exact-title gate 遇到壞 timestamp 會靜默放行
+
+**問題**：`publish_milestone()` 的 exact-title duplicate gate 只在既有文章 `published_at/created_at` 可解析且落在 24h 內時回收既有 id；若 timestamp 壞掉，原本 `except Exception: pass` 會靜默跳過這道 gate，讓同標題文章繼續往後走。
+
+**根因**：duplicate gate 把 timestamp parse 失敗當成「無法判斷是否 24h 內」，但沒有把錯誤可視化，也沒有採保守策略處理 exact-title duplicate。這與近期 publish/sync path silent fallback 同型。
+
+**解決方法**：timestamp parse 失敗時印出 `Duplicate title timestamp parse failed` warning；若既有文章不是 `retracted/unpublished`，直接回收 existing id，避免壞 metadata 讓 exact-title duplicate 放行。新增 regression test：既有同標題文章 `published_at="not-a-date"` 時，新 `publish_milestone()` 回傳既有 id 並輸出 warning。
+
 ## 2026-06-22 publisher unpublish Supabase sync 失敗被吞掉
 
 **問題**：`Publisher.unpublish()` 會先把本地 `feed.json` 文章標成 `unpublished`，再呼叫 `supabase_sync.sync_article()` 將下架狀態同步到 Supabase；但原本 `except Exception: pass`，如果 Supabase sync 失敗，前端 canonical DB 可能仍保留已發布狀態，且 ops 完全看不到失敗。

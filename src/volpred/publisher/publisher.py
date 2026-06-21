@@ -665,8 +665,14 @@ class Publisher:
                     if dtparse(existing_time) > cutoff_exact:
                         print(f"  ⚠️ Duplicate title within 24h: '{title[:50]}' (existing: {existing['id']}). Skipping.")
                         return existing['id']
-                except Exception:
-                    pass
+                except Exception as exc:
+                    existing_id = existing.get('id', '?')
+                    print(
+                        f"  ⚠️ Duplicate title timestamp parse failed: "
+                        f"'{title[:50]}' (existing: {existing_id}): {exc}. Skipping."
+                    )
+                    if existing.get('status') not in {'retracted', 'unpublished'}:
+                        return existing_id
 
         # --- Similar topic check: warn if keyword overlap with existing ---
         similar = self._find_similar_articles(title, feed, audience)
