@@ -1,16 +1,20 @@
 # Strategy Registry
 
-## 待審上架候選（2026-06-21，boss email-11862 standing directive「表現好就上架觀察」）
+## 上架候選 audit 結果（2026-06-21，boss email-11862 standing directive「表現好就上架觀察」）
 
-3 檔已計算但 `is_active=False` 的高 Sharpe 策略，走完整 gate 後決定是否上架（**禁盲目翻 active** — Sharpe 遠高於中位數~2.0，依規則先懷疑 bug + lookahead）：
+3 檔已計算但 `is_active=False` 的高 Sharpe 策略，audit **完成 → 全部維持 inactive（拒絕上架）**：
 
-| 策略 | Sharpe | gate 重點 |
+| 策略 | c2c Sharpe | audit verdict |
 |---|---|---|
-| `tz_tw_jp_5050`（TW+JP 跨時區）| 3.46 | **lookahead/timing audit 最關鍵**（跨時區用隔夜訊號 → 確認 realized overnight + signal.shift(1)，K880 session-boundary 合法性）|
-| `taiwan_spy_momentum`（台股動量）| 3.23 | 同期 vs 中位數 ✅；sensitivity / MDD / cross-OOS / Codex |
-| `global_vt_tz`（全球 VT+TW 時區）| 2.91 | lookahead audit + 同上 gate |
+| `tz_tw_jp_5050`（TW+JP 跨時區）| 3.46 | ❌ **timing 假象** — c2c 高 Sharpe 來自無法捕捉的隔夜開盤跳空；o2o 實作版 FAIL Harvey |
+| `taiwan_spy_momentum`（台股動量）| 3.23 | ❌ 同 — 78% alpha 被開盤跳空吸收（c2c 1.47→o2o 0.87），FAIL Harvey t>3 |
+| `global_vt_tz`（全球 VT+TW 時區）| 2.91 | ❌ 50% 部位是上述 biased TZ momentum；US VT 部分本身 OK 但整體不獨立達標 |
 
-audit clean → `list_new_strategy.py` 上架觀察；發現 lookahead → 記 `docs/error_log.md` 不上架。lifecycle 設為持續流程（每批新策略實驗都跑 `evaluate_new_strategy.py`）。下架：績效異常掛卡片注記、結構性問題才 `is_active=False`。
+**證據**：k274（"Not a trading strategy — a measure of price discovery efficiency"）、k286（"uncapturable overnight gap, implementable o2o Sharpe ~0.87, Gap R²=0.35"）、k502/k238（10d SPY Mom o2o=0.87 FAIL Harvey）。`daily_update.py:576-621` 已標 `⚠️ I8 BIASED`。
+
+**結論**：高 c2c Sharpe 是 measurement artifact，不是可交易 edge — 上架等於把假象當策略賣給付費用戶（違反研究誠實，誠實=護城河）。**正確維持 inactive，不上架。** 這是「Sharpe 遠高於 baseline 先懷疑 bug」規則如預期運作。
+
+**lifecycle（持續流程）**：每批新策略實驗跑 `evaluate_new_strategy.py`；真正過 gate（含 o2o/lagged Harvey）的才 `list_new_strategy.py` 上架觀察。本次 survey 近期實驗（多為研究/forecasting 非策略 backtest）無新真候選。下架：績效異常掛卡片注記、結構性問題才 `is_active=False`。
 
 ## 目前 STRATEGY_REGISTRY（14 筆，11 個 active / 3 個 disabled；verified 2026-04-19 18:48 UTC 對齊 `scripts/daily_update.py:29-48`）
 
