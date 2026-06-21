@@ -182,6 +182,7 @@ class Evaluator:
             composite_score,
             diebold_mariano_test,
         )
+        from volpred.stats.model_evaluation import qlike_pointwise
 
         n = len(results)
         if n < 2:
@@ -196,14 +197,22 @@ class Evaluator:
 
         model_losses: dict[str, np.ndarray] = {}
         for exp_result, _ in results:
-            losses = []
+            actual_var = []
+            predicted_var = []
             for f in exp_result.forecasts:
                 ts = pd.Timestamp(f.date).normalize()
                 if ts in actual_data.index and rv_col in actual_data.columns:
                     rv = float(actual_data.loc[ts, rv_col])
                     pred = max(f.variance_forecast, 1e-12)
-                    losses.append(rv / pred + np.log(pred))  # QLIKE loss
-            model_losses[exp_result.experiment_id] = np.array(losses)
+                    actual_var.append(rv)
+                    predicted_var.append(pred)
+            if actual_var:
+                model_losses[exp_result.experiment_id] = qlike_pointwise(
+                    np.array(actual_var, dtype=float),
+                    np.array(predicted_var, dtype=float),
+                )
+            else:
+                model_losses[exp_result.experiment_id] = np.array([], dtype=float)
 
         # Pairwise DM tests
         dm_results = {}

@@ -44,6 +44,9 @@ paths:
 ### `arch` forecast alignment 必須 target 對齊
 用 `arch` 做 one-step OOS loss evaluation 時，不可把 default origin-aligned `h.1` forecast 和 same-index realized variance / squared return 直接相比。必須用 `forecast(..., align='target')`，或明確把 origin-aligned forecast shift 到 target return date 後，才計算 QLIKE / MSE / DM tests。**K445 教訓**：same-index 比較 origin-aligned forecasts 會產生 lookahead / off-by-one 風險，不能支撐 production claim。
 
+### QLIKE / DM pointwise loss 必須用 actual over predicted
+Variance-forecast QLIKE 的 canonical 方向是 `actual / predicted - log(actual / predicted) - 1`。實驗與 review 不可手寫 `predicted / actual` 反向 QLIKE，也不可在 DM pointwise loss 另開自訂公式；優先用 `volpred.stats.model_evaluation.qlike_pointwise()` 或 `volpred.evaluation.metrics.qlike()`。**K783c 教訓**：反向 QLIKE 會改變 loss asymmetry，並把 DM tests 建在錯誤 pointwise losses 上。
+
 ### Pooled-MLE 必 100+ multistart
 所有 pooled / cross-entity MLE（多資產共用參數、多國 panel 估計）必須跑 **≥100 個 random init** + LR test 選 basin + 檢查 log-likelihood 分佈。**K1213→K1216b/K1216c 教訓**：9/9 markets all fragile 時才發現 single-start artifact，fix 後參數 magnitude 變化 5-10x。
 

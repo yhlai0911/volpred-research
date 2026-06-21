@@ -33,6 +33,21 @@ def test_arch_forecast_alignment_rule_is_documented() -> None:
     assert missing == []
 
 
+def test_qlike_pointwise_orientation_rule_is_documented() -> None:
+    section = _experiments_rule_section("### QLIKE / DM pointwise loss 必須用 actual over predicted")
+
+    required_phrases = [
+        "actual / predicted - log(actual / predicted) - 1",
+        "predicted / actual",
+        "DM pointwise loss",
+        "volpred.stats.model_evaluation.qlike_pointwise()",
+        "volpred.evaluation.metrics.qlike()",
+        "K783c",
+    ]
+    missing = [phrase for phrase in required_phrases if phrase not in section]
+    assert missing == []
+
+
 def test_cross_asset_pooled_inference_rule_is_documented() -> None:
     section = _experiments_rule_section("### 跨資產 pooled inference 不可把 asset-day 當 iid")
 
