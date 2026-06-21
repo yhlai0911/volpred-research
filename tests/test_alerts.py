@@ -115,6 +115,36 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
     assert conditions["host_cron_fail"]["breached"] is True
 
 
+def test_release_pool_fallback_fire_marker_counts_as_machinery_health(tmp_path: Path):
+    from volpred.ops.alerts import _parse_release_pool_state
+
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 6, 21, 22, 24, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / ".release_settings.json",
+        {
+            "mode": "auto",
+            "interval_minutes": 180,
+            "last_released_at": "2026-06-21T18:00:21.110935+00:00",
+            "updated_at": "2026-06-21T18:00:39.515139+00:00",
+        },
+    )
+    _write_text(
+        storage_dir / "logs" / "cron" / "release_pool.log",
+        "\n".join(
+            [
+                "=== [release_pool] check_alerts fallback fire at 2026-06-21T22:00:56+00:00 ===",
+                "=== [release_pool] exit 0 at 2026-06-21T22:00:56+00:00 (fallback) ===",
+            ]
+        ),
+    )
+
+    condition = _parse_release_pool_state(str(storage_dir), now)
+
+    assert condition["breached"] is False
+    assert condition["details"]["machinery_last_at"] == "2026-06-21T22:00:56+00:00"
+
+
 def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Path, monkeypatch):
     storage_dir = tmp_path / "storage"
     now = datetime(2026, 4, 19, 12, 0, tzinfo=timezone.utc)

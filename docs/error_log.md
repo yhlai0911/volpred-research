@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 release_pool fallback fire 被 alert parser 漏讀，造成 false WARN
+
+**問題**：handoff section 7 顯示 `Release pool cron gap > 4.0h (interval=180min)` WARN，但 `storage/logs/cron/release_pool.log` 22:00 UTC 已有 `check_alerts fallback fire`，`storage/ops/cron_last_run.json` 也已記錄 release_pool 22:00:56。實際 machinery 健康，WARN 是 false-positive。
+
+**根因**：`src/volpred/ops/alerts.py::_RELEASE_POOL_FIRE_RE` 只匹配舊格式 `=== [release-pool] fire at ... ===`，沒有匹配目前 fallback/piggy-back 寫入的 `=== [release_pool] check_alerts fallback fire at ... ===` / `piggy-back fire`。parser 因此退回 stale `settings.updated_at`，把健康 fallback fire 誤判成 gap。
+
+**解決方法**：release_pool fire regex 改為同時支援 `release-pool` / `release_pool` 與 `fire` / `piggy-back fire` / `check_alerts fallback fire` 三種 marker。新增 regression test 鎖住 fallback marker 會更新 `machinery_last_at` 並不 breach。live `ops_dashboard.py` 回到 overall_status=ok。
+
 ## 2026-06-22 Codex hourly handoff 缺 eligibility 訊號 + list 查詢會重寫任務池
 
 **問題**：Codex hourly tick 看到 handoff section 4 全是 `trending_repost` 時，每輪都要先人工判斷「這些是 Claude-only」再跑 `task_pool_claim.py list --codex-eligible`。同時發現 `list` 命令使用可寫 `_locked_load()`，即使只是查詢也會重寫 `storage/next_tasks.json`，造成檔尾 newline churn，增加不必要的資料檔 dirty risk。

@@ -27,7 +27,9 @@ RELEASE_POOL_GAP_BUFFER = timedelta(minutes=60)  # grace on top of configured in
 # Buffer must be ≥ check_alerts cadence (60min) to absorb the fence-post.
 
 _TAIPEI_TZ = ZoneInfo("Asia/Taipei")
-_RELEASE_POOL_FIRE_RE = re.compile(r"^=== \[release-pool\] fire at (.+) ===$")
+_RELEASE_POOL_FIRE_RE = re.compile(
+    r"^=== \[release[-_]pool\] (?:fire|piggy-back fire|check_alerts fallback fire) at (.+) ===$"
+)
 # Matches the canonical cron-wrapper end banner:
 #   === [<job>] exit <N> at <timestamp> (duration=<X>s) ===
 # The old pattern `^=== exit (\d+) at (.+) ===$` matched NOTHING — every
