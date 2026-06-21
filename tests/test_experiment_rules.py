@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 
@@ -98,3 +99,21 @@ def test_cross_asset_pooled_inference_rule_is_documented() -> None:
     ]
     missing = [phrase for phrase in required_phrases if phrase not in section]
     assert missing == []
+
+
+def test_k1355_pooled_dm_artifact_keeps_asset_day_dm_diagnostic_only() -> None:
+    payload = json.loads((ROOT / "experiments" / "k1355" / "K1355_results.json").read_text(encoding="utf-8"))
+    pooled_blocks = [
+        payload["vol_channel_primary_gb"]["pooled"],
+        payload["vol_channel_sensitivity"]["raw_proxy_signal_pooled"],
+        payload["vol_channel_sensitivity"]["ridge_signal_pooled"],
+        payload["vol_channel_sensitivity"]["mlp_signal_pooled"],
+    ]
+
+    for pooled in pooled_blocks:
+        assert pooled["dm_method"] == "date-clustered cross-asset mean loss differential, HAC h=1"
+        assert pooled["harvey_pass"] == (pooled["dm_t_augmented_vs_baseline"] < -3.0)
+
+        diagnostic = pooled["stacked_asset_day_dm_diagnostic"]
+        assert "diagnostic only" in diagnostic["note"]
+        assert "same-day dependence" in diagnostic["note"]
