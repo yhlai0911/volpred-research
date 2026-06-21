@@ -47,6 +47,9 @@ paths:
 ### QLIKE / DM pointwise loss 必須用 actual over predicted
 Variance-forecast QLIKE 的 canonical 方向是 `actual / predicted - log(actual / predicted) - 1`。實驗與 review 不可手寫 `predicted / actual` 反向 QLIKE，也不可在 DM pointwise loss 另開自訂公式；優先用 `volpred.stats.model_evaluation.qlike_pointwise()` 或 `volpred.evaluation.metrics.qlike()`。**K783c 教訓**：反向 QLIKE 會改變 loss asymmetry，並把 DM tests 建在錯誤 pointwise losses 上。
 
+### VaR / ES 的 Basel 與 Student-t 口徑必須明示
+VaR / ES 實驗或文章若寫 `Basel` / traffic-light，必須說清楚是標準 250-day count rule、exact-binomial sample-size rule，或自訂 500-day / rate threshold；自訂規則不可包裝成 canonical Basel。GARCH-style Student-t / skewed-t VaR 若用 standardized residual sigma，quantile 必須做 unit-variance scaling（Student-t: `sqrt((df - 2) / df)`），除非模型另有自由 scale parameter 且已報告。**K802 教訓**：rate-based green/yellow threshold 與 raw `t.ppf()` 會把 VaR/ES 結論推成錯誤的 Trinity PASS。
+
 ### Pooled-MLE 必 100+ multistart
 所有 pooled / cross-entity MLE（多資產共用參數、多國 panel 估計）必須跑 **≥100 個 random init** + LR test 選 basin + 檢查 log-likelihood 分佈。**K1213→K1216b/K1216c 教訓**：9/9 markets all fragile 時才發現 single-start artifact，fix 後參數 magnitude 變化 5-10x。
 

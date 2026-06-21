@@ -48,6 +48,25 @@ def test_qlike_pointwise_orientation_rule_is_documented() -> None:
     assert missing == []
 
 
+def test_var_es_basel_and_student_t_rule_is_documented() -> None:
+    section = _experiments_rule_section("### VaR / ES 的 Basel 與 Student-t 口徑必須明示")
+
+    required_phrases = [
+        "Basel",
+        "traffic-light",
+        "250-day count rule",
+        "exact-binomial sample-size rule",
+        "自訂 500-day / rate threshold",
+        "canonical Basel",
+        "unit-variance scaling",
+        "sqrt((df - 2) / df)",
+        "K802",
+        "Trinity PASS",
+    ]
+    missing = [phrase for phrase in required_phrases if phrase not in section]
+    assert missing == []
+
+
 def test_cross_asset_pooled_inference_rule_is_documented() -> None:
     section = _experiments_rule_section("### 跨資產 pooled inference 不可把 asset-day 當 iid")
 

@@ -230,6 +230,7 @@ def var_backtest(
     sigma_forecasts: np.ndarray,
     alpha: float = 0.01,
     distribution: str = "normal",
+    df: float = 5.0,
 ) -> Dict:
     """VaR backtesting: Kupiec + Christoffersen.
 
@@ -237,7 +238,8 @@ def var_backtest(
         returns: actual returns
         sigma_forecasts: forecasted sigma (NOT sigma²)
         alpha: VaR confidence level (e.g., 0.01 for 99% VaR)
-        distribution: 'normal' or 't' (Student-t with df=5)
+        distribution: 'normal' or 't'
+        df: Student-t degrees of freedom; used only when distribution == 't'.
     """
     r = np.asarray(returns, dtype=np.float64)
     sigma = np.asarray(sigma_forecasts, dtype=np.float64)
@@ -245,7 +247,9 @@ def var_backtest(
     if distribution == "normal":
         z = stats.norm.ppf(alpha)
     elif distribution == "t":
-        z = stats.t.ppf(alpha, df=5)
+        if df <= 2:
+            raise ValueError("Student-t VaR requires df > 2 for unit-variance scaling")
+        z = stats.t.ppf(alpha, df=df) * np.sqrt((df - 2) / df)
     else:
         z = stats.norm.ppf(alpha)
 
