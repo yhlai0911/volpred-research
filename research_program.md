@@ -749,6 +749,17 @@ K519-K521 + K527 完成結果：見 archive。
 ## 其他研究方向（詳細版）
 → MEM 文獻、Gemini/用戶建議（WVD/TE-VT/K770 修正版/Overnight component）、Hansen & Lunde Gold Standard 比較 → 見 `docs/research_archive/detailed_research_topics.md`
 
+## 候選新論文方向 — 從實驗語料庫挖掘（2026-06-21，boss email-11859 觸發）
+
+boss 點名「M3 不該只盯現有論文，實驗那麼多難道沒長出新論文主題？」。掃 knowledge.json(2341) + experiments/ 後得 4 條**不重複現有 11 theme** 的方向；每條 K-id 與關鍵統計量已主線程 spot-check（抓到初掃 agent 把方向 A 招牌數字灌水）。
+
+- **B（最扎實，可起草）— Forecast-loss ⊥ tail-coverage divergence**：模型 QLIKE 大勝（**DM t=−5.60，k850 實測確認**）卻過不了 1% VaR；CF/Conformal 只補一半。支撐 k850/k854/k824/k799/k800。方法論貢獻（loss 換排名反轉）→ IJF/J.Forecasting。**下一步：主線程起 .md 大綱。**
+- **A（cluster 真，thesis 待重驗）— 跨資產 VaR 尾部分布選擇**：k799/k800/k802/k883 真跨資產 VaR backtest（Normal/t/Skew-t/EVT/CF + Trinity + Acerbi-Szekely）。**但** agent 宣稱「skewness=唯一充分統計量 ρ=−0.873」未過查核（−0.876 是某資產 skew 值被誤當預測 rho；實測 rho 僅 0.10–0.21）。需先重估真正的 selection 預測子。
+- **C（誠實 null-result）— 日頻波動率 ML 天花板**：8+ ML（XGBoost/MLP/LSTM/KAN/GINN）無一顯著贏 GJR-GARCH；失敗結構性（loss degeneracy / 227-day overfit / LSTM 塌常數）。支撐 K618/k619/k816/k929/k940/k944 → FRL/IJF 負面結果。
+- **D（混合/null 避險，貼用戶 copula-GARCH 專長）— 動態相依 OOS 無加值**：時變 t-copula in-sample 更好（ΔAIC≈−144）但 DCC/copula OOS 少贏常數相關/naive hedge。支撐 k920/921/922/k931/k945/951/k965/K1320。用 HE/utility 不用 Sharpe；需補 1-2 OOS HE-ratio run → JFM/IJF。
+
+追蹤紀律：每個 idle tick 主動從新實驗找此類 cluster，不只維護舊 manuscript。狀態同步 memory [[project_papers_awaiting_submit_decision]]。
+
 ## Paper 4 vix-sufficiency Table 2 — K732/K736 Decision (2026-04-19)
 
 **Root cause report**（`task_7100e5d03ec2` + `task_27ea42d3e0eb` a750dc agent）：
