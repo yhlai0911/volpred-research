@@ -34999,7 +34999,7 @@
     "title": "K1359: tailasym5 joimskews 尾部不對稱估計法賽馬：多資產尾部溢酬是否穩健** — 用 ETF/期貨代理（SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM）月頻，測多種 robust asymmetry es",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1131). Original: tailasym5 joimskews 尾部不對稱估計法賽馬：多資產尾部溢酬是否穩健** — 用 ETF/期貨代理（SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM）月頻，測多種 robust asymmetry estimator（含修剪尾端與上下行半變異），檢定下一月報酬、RV 與 left-tail exposure；與 FX 單一橫斷面題正交，聚焦 estimator robustness（來源：JOIM 2026 Q2 A Tail of Five Skews）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1359.py with signal.shift(1) + seed=42, (c) K1359_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35012,14 +35012,16 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-21T13:22:13.933572+00:00",
     "claim_session_id": "62004df48022",
-    "started_at": "2026-06-21T13:22:17.712466+00:00"
+    "started_at": "2026-06-21T13:22:17.712466+00:00",
+    "completed_at": "2026-06-21T13:33:08.867008+00:00",
+    "result": "K1359 completed: six ETF tail-asymmetry estimators on 2007-05..2026-05 monthly data; 0/6 robust return premium, 4/6 risk-state signals for RV/left-tail. Artifacts in experiments/k1359; Codex review CONDITIONAL_PASS; knowledge item 023d6ea4."
   },
   {
     "id": "K1360",
     "title": "K1360: Prediction-market implied probability shock 作 macro event vol prior** — 用 Kalshi/Polymarket 公開 market price/API 建 FOMC、C",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1133). Original: Prediction-market implied probability shock 作 macro event vol prior** — 用 Kalshi/Polymarket 公開 market price/API 建 FOMC、CPI、NFP、election/geopolitical event-probability change，檢定是否領先 VIX9D/VIX、SPY RV 與 event-day tail move；所有 signal 用 `shift(1)`，並與 SOFR/FedWatch prior 比較；與 FOMC 單事件 prior 正交（來源：Pew Research Center 2026 prediction-market volume surge；event contracts 2025H2-2026 快速擴大）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1360.py with signal.shift(1) + seed=42, (c) K1360_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "claimed",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35028,6 +35030,9 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-21T12:21:15Z"
+    "created_at": "2026-06-21T12:21:15Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-21T13:34:41.670812+00:00",
+    "claim_session_id": "79f305265669"
   }
 ]

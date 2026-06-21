@@ -1129,7 +1129,7 @@ Each cat needs dedicated session work; not iterative one-cycle fixes.
 
 - [ ] **AI 勞動收入曝險 × sector ETF vol：人力資本 shock 是否改變投組風險承擔** — 用 O*NET/免費 AI exposure score 對行業做 AI-labor exposure，映射到 sector ETF 與 BLS wage/employment surprise，檢定高曝險行業在 AI adoption news / layoff shock 後 RV、downside semivariance、sector correlation 是否升高；與 AI capex/HHI/電力需求題正交，聚焦 household labor-income hedging channel（來源：JOIM 2026 Q2 Adapting to AI）
 
-- [ ] **tailasym5 joimskews 尾部不對稱估計法賽馬：多資產尾部溢酬是否穩健** — 用 ETF/期貨代理（SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM）月頻，測多種 robust asymmetry estimator（含修剪尾端與上下行半變異），檢定下一月報酬、RV 與 left-tail exposure；與 FX 單一橫斷面題正交，聚焦 estimator robustness（來源：JOIM 2026 Q2 A Tail of Five Skews）
+- [x] ~~**tailasym5 joimskews 尾部不對稱估計法賽馬：多資產尾部溢酬是否穩健**~~ → **K1359 completed 2026-06-21，RISK_SIGNAL_ONLY_NULL_PREMIUM**：SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM 月頻 2007-05 至 2026-05（229 months），6 種 returns-only tail-asymmetry estimator 全部 `signal.shift(1)`。0/6 estimator 有 next-month return premium（return HAC t range -1.01 到 +0.51，遠低於 Harvey |t|>=3），但 4/6 estimator 對下一月 RV 或 left-tail exposure 有 t>=3。結論：免費 ETF realized-return 尾部不對稱 proxy 可標記高風險狀態，但不可宣稱穩健尾部溢酬；不能否定 option-implied skew / skew-swap 文獻。
 
 - [ ] **Prediction-market implied probability shock 作 macro event vol prior** — 用 Kalshi/Polymarket 公開 market price/API 建 FOMC、CPI、NFP、election/geopolitical event-probability change，檢定是否領先 VIX9D/VIX、SPY RV 與 event-day tail move；所有 signal 用 `shift(1)`，並與 SOFR/FedWatch prior 比較；與 FOMC 單事件 prior 正交（來源：Pew Research Center 2026 prediction-market volume surge；event contracts 2025H2-2026 快速擴大）
 

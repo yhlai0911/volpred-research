@@ -35537,5 +35537,18 @@
     ],
     "confidence": 0.5,
     "created_at": "2026-06-21T15:29:13.094156"
+  },
+  {
+    "item_id": "023d6ea4",
+    "category": "tail_risk",
+    "content": "K1359 RISK_SIGNAL_ONLY_NULL_PREMIUM: Tested six returns-only tail-asymmetry estimators (negative skew, trimmed/winsorized skew, downside/upside semivariance, tail mean gap, max loss-gain gap) on SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM monthly data from 2007-05 to 2026-05 (229 months). All signals are month-end values shifted by one month via signal.shift(1); inference is monthly high-minus-low spreads and monthly Fama-MacBeth slopes, not pooled ticker-month tests. Result: 0/6 estimators produce a robust next-month return premium (return HAC t range -1.01 to +0.51, far below Harvey |t|>=3). However 4/6 estimators flag higher next-month realized volatility or left-tail exposure with t>=3. Interpretation: free ETF realized-return tail-asymmetry proxies are risk-state indicators, not robust tail-premium signals; this does not refute option-implied skew/skew-swap literature. Codex source review: CONDITIONAL_PASS with caveats about nine-ETF universe and 2-3 name legs.",
+    "evidence": [
+      "experiments/k1359/README.md",
+      "experiments/k1359/K1359.py",
+      "experiments/k1359/K1359_results.json",
+      "experiments/k1359/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-21T21:31:56.344347"
   }
 ]

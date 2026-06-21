@@ -1,0 +1,848 @@
+{
+  "experiment_id": "K1359",
+  "title": "tailasym5 joimskews tail-asymmetry estimator horse race",
+  "generated_at_utc": "2026-06-21T13:31:19.820163+00:00",
+  "methodology_type": "empirical_returns_only_proxy_test",
+  "verdict": "RISK_SIGNAL_ONLY_NULL_PREMIUM",
+  "data": {
+    "source": "yfinance adjusted close, auto_adjust=True; overlapping tickers reused from local K1507 cache when present",
+    "universe": [
+      "SPY",
+      "QQQ",
+      "TLT",
+      "GLD",
+      "USO",
+      "UUP",
+      "FXY",
+      "HYG",
+      "EEM"
+    ],
+    "coverage": {
+      "SPY": {
+        "first": "2007-01-03",
+        "last": "2026-05-29",
+        "n_daily_prices": 4882
+      },
+      "QQQ": {
+        "first": "2007-01-03",
+        "last": "2026-05-29",
+        "n_daily_prices": 4882
+      },
+      "TLT": {
+        "first": "2007-01-03",
+        "last": "2026-05-29",
+        "n_daily_prices": 4882
+      },
+      "GLD": {
+        "first": "2007-01-03",
+        "last": "2026-05-29",
+        "n_daily_prices": 4882
+      },
+      "USO": {
+        "first": "2007-01-03",
+        "last": "2026-05-29",
+        "n_daily_prices": 4882
+      },
+      "UUP": {
+        "first": "2007-03-01",
+        "last": "2026-05-29",
+        "n_daily_prices": 4843
+      },
+      "FXY": {
+        "first": "2007-02-13",
+        "last": "2026-05-29",
+        "n_daily_prices": 4854
+      },
+      "HYG": {
+        "first": "2007-04-11",
+        "last": "2026-05-29",
+        "n_daily_prices": 4815
+      },
+      "EEM": {
+        "first": "2007-01-03",
+        "last": "2026-05-29",
+        "n_daily_prices": 4882
+      }
+    },
+    "monthly_start": "2007-05-31",
+    "monthly_end": "2026-05-31",
+    "n_months": 229,
+    "n_panel_rows": 12348,
+    "min_assets_per_estimator_month": 7,
+    "max_assets_per_estimator_month": 9
+  },
+  "config": {
+    "seed": 42,
+    "start": "2006-01-01",
+    "rolling_window_days": 63,
+    "min_rolling_obs": 50,
+    "min_assets_per_month": 7,
+    "top_bottom_leg_max_n": 3,
+    "nw_lag_months": 3,
+    "bootstrap_reps": 1000,
+    "bootstrap_block_months": 6,
+    "timing_rule": "daily trailing estimator -> month-end value -> signal.shift(1) -> current-month outcomes",
+    "primary_inference_unit": "monthly high-minus-low spread or monthly Fama-MacBeth slope; no pooled ticker-month t-test",
+    "harvey_threshold": "|t| >= 3 for return-premium discovery claims"
+  },
+  "literature": [
+    {
+      "citation": "Kelly and Jiang (2014), Tail Risk and Asset Prices, Review of Financial Studies",
+      "url": "https://academic.oup.com/rfs/article-abstract/27/10/2841/1607080",
+      "role": "tail risk is priced, but canonical measure uses cross-section of individual-stock crashes rather than ETF trailing moments"
+    },
+    {
+      "citation": "Bali, Cakici, and Whitelaw (2011), Maxing out: Stocks as lotteries and the cross-section of expected returns, Journal of Financial Economics",
+      "url": "https://econpapers.repec.org/RePEc:eee:jfinec:v:99:y:2011:i:2:p:427-446",
+      "role": "lottery-like right-tail measures motivate testing whether tail-shape proxies forecast returns"
+    },
+    {
+      "citation": "Conrad, Dittmar, and Ghysels (2013), Ex Ante Skewness and Expected Stock Returns, Journal of Finance",
+      "url": "https://econpapers.repec.org/RePEc:bla:jfinan:v:68:y:2013:i:1:p:85-124",
+      "role": "option-implied skewness matters for expected returns; K1359 tests a cheaper realized-return proxy only"
+    },
+    {
+      "citation": "Kozhan, Neuberger, and Schneider (2013), The Skew Risk Premium in the Equity Index Market, Review of Financial Studies",
+      "url": "https://academic.oup.com/rfs/article-abstract/26/9/2174/1663145",
+      "role": "skew risk premium is option-surface based and tightly connected to variance risk; realized-return proxies may be insufficient"
+    },
+    {
+      "citation": "Harvey, Liu, and Zhu (2016), ... and the Cross-Section of Expected Returns, Review of Financial Studies",
+      "url": "https://academic.oup.com/rfs/article/29/1/5/1843824",
+      "role": "uses |t| > 3 as the discovery bar for return-predictor claims"
+    }
+  ],
+  "decision": {
+    "return_pass_estimators": [],
+    "return_weak_estimators": [],
+    "risk_signal_estimators": [
+      "bad_winsor_skew",
+      "max_loss_gain_gap",
+      "semivar_log_ratio",
+      "tail_mean_gap"
+    ],
+    "success_rule": "robust premium requires >=2 estimators with high-left-asymmetry minus low-left-asymmetry next-month return HAC t >= +3; risk targets are secondary confirmation only"
+  },
+  "estimators": {
+    "bad_skew": "negative 63d rolling realized skewness",
+    "bad_trimmed_skew": "negative skewness after dropping 5%/95% tail observations inside the rolling window",
+    "bad_winsor_skew": "negative skewness after 5%/95% winsorization inside the rolling window",
+    "semivar_log_ratio": "log downside semivariance / upside semivariance",
+    "tail_mean_gap": "left 5% average loss minus right 5% average gain",
+    "max_loss_gain_gap": "absolute worst daily loss minus best daily gain"
+  },
+  "targets": {
+    "ret": "same-month ETF return predicted by previous-month-end signal",
+    "rv_ann": "same-month realized volatility, annualized from daily squared log returns",
+    "downside_vol_ann": "same-month realized downside volatility, annualized",
+    "left_tail_loss": "same-month worst daily log-return loss"
+  },
+  "horse_race": {
+    "bad_skew": {
+      "ret": {
+        "high_low_spread": {
+          "mean": 0.001038164762973321,
+          "hac_se": 0.0027284119497461537,
+          "hac_t": 0.3805014719532767,
+          "p_value": 0.7039274593510481,
+          "bootstrap_ci95_mean": [
+            -0.004201081432397002,
+            0.006565753379501079
+          ],
+          "n_months": 229,
+          "ann_mean": 0.012457977155679853
+        },
+        "mean_high": 0.006024308329962321,
+        "mean_low": 0.004986143566989,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 9.675511708269875e-05,
+          "hac_se": 0.0012442596138627464,
+          "hac_t": 0.07776119710445875,
+          "p_value": 0.9380862113634718,
+          "bootstrap_ci95_mean": [
+            -0.00235396837761439,
+            0.002627254677553387
+          ],
+          "n_months": 229,
+          "ann_mean": 0.001161061404992385
+        }
+      },
+      "rv_ann": {
+        "high_low_spread": {
+          "mean": 0.023173752098775303,
+          "hac_se": 0.008269064626474762,
+          "hac_t": 2.8024635367561097,
+          "p_value": 0.0055077370581657625,
+          "bootstrap_ci95_mean": [
+            0.005466284990534082,
+            0.041156456913952505
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.17383455975088952,
+        "mean_low": 0.15066080765211423,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.010651085486862064,
+          "hac_se": 0.004078313369335044,
+          "hac_t": 2.6116397937804097,
+          "p_value": 0.009609194028912693,
+          "bootstrap_ci95_mean": [
+            0.0021922351462286397,
+            0.01998247920888604
+          ],
+          "n_months": 229
+        }
+      },
+      "downside_vol_ann": {
+        "high_low_spread": {
+          "mean": 0.017541856557207147,
+          "hac_se": 0.006084869244378991,
+          "hac_t": 2.8828649972079115,
+          "p_value": 0.004317544963999165,
+          "bootstrap_ci95_mean": [
+            0.004027455091932985,
+            0.030572911521106257
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.12098405555921282,
+        "mean_low": 0.10344219900200566,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.008224811282883555,
+          "hac_se": 0.0031106252772508617,
+          "hac_t": 2.6441022462700996,
+          "p_value": 0.00875966257276617,
+          "bootstrap_ci95_mean": [
+            0.0016366642565057634,
+            0.0144832255404696
+          ],
+          "n_months": 229
+        }
+      },
+      "left_tail_loss": {
+        "high_low_spread": {
+          "mean": 0.00298734213624265,
+          "hac_se": 0.001196540567058037,
+          "hac_t": 2.496649272483673,
+          "p_value": 0.013244660979102374,
+          "bootstrap_ci95_mean": [
+            0.00044250871585179444,
+            0.00544096166020332
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.02218358062898371,
+        "mean_low": 0.019196238492741057,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.0014795442051494549,
+          "hac_se": 0.000616961265930419,
+          "hac_t": 2.398115225140111,
+          "p_value": 0.017284942890213317,
+          "bootstrap_ci95_mean": [
+            0.00026550667352261424,
+            0.0027999131984671848
+          ],
+          "n_months": 229
+        }
+      }
+    },
+    "bad_trimmed_skew": {
+      "ret": {
+        "high_low_spread": {
+          "mean": -0.0005303809527748377,
+          "hac_se": 0.0032199418118898358,
+          "hac_t": -0.16471755819200612,
+          "p_value": 0.8693122367686987,
+          "bootstrap_ci95_mean": [
+            -0.006578467232404095,
+            0.0057375843448312204
+          ],
+          "n_months": 229,
+          "ann_mean": -0.006364571433298051
+        },
+        "mean_high": 0.0064753871791693954,
+        "mean_low": 0.007005768131944233,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 5.6221049058567656e-05,
+          "hac_se": 0.0012388666924086939,
+          "hac_t": 0.04538103203764292,
+          "p_value": 0.9638433211907671,
+          "bootstrap_ci95_mean": [
+            -0.002211078936290433,
+            0.002359429594278163
+          ],
+          "n_months": 229,
+          "ann_mean": 0.0006746525887028118
+        }
+      },
+      "rv_ann": {
+        "high_low_spread": {
+          "mean": 0.02708232384886149,
+          "hac_se": 0.010609588699549406,
+          "hac_t": 2.5526271202211346,
+          "p_value": 0.011344784024750698,
+          "bootstrap_ci95_mean": [
+            0.006885990779451811,
+            0.04888776617294464
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.17478456931024022,
+        "mean_low": 0.14770224546137872,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.011821300401374744,
+          "hac_se": 0.004302978585312456,
+          "hac_t": 2.7472366331835585,
+          "p_value": 0.0064903374483253895,
+          "bootstrap_ci95_mean": [
+            0.0025028630299886545,
+            0.021186197958497733
+          ],
+          "n_months": 229
+        }
+      },
+      "downside_vol_ann": {
+        "high_low_spread": {
+          "mean": 0.020640721956859686,
+          "hac_se": 0.008104346699712333,
+          "hac_t": 2.546870552513793,
+          "p_value": 0.011528250246830796,
+          "bootstrap_ci95_mean": [
+            0.0034963974671485764,
+            0.03985427678011097
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.1211463887193315,
+        "mean_low": 0.1005056667624718,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.008590463585276714,
+          "hac_se": 0.0032146081038640435,
+          "hac_t": 2.67232063994076,
+          "p_value": 0.00807674724793106,
+          "bootstrap_ci95_mean": [
+            0.001960268855690439,
+            0.015689040932157852
+          ],
+          "n_months": 229
+        }
+      },
+      "left_tail_loss": {
+        "high_low_spread": {
+          "mean": 0.003809021382275449,
+          "hac_se": 0.0015456601029276889,
+          "hac_t": 2.4643331189442286,
+          "p_value": 0.014465991574083459,
+          "bootstrap_ci95_mean": [
+            0.0010184369944328622,
+            0.0073891065119322955
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.022241168034452825,
+        "mean_low": 0.018432146652177375,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.0015513457652104926,
+          "hac_se": 0.0006139136634823508,
+          "hac_t": 2.526977093832172,
+          "p_value": 0.012182845055693559,
+          "bootstrap_ci95_mean": [
+            0.00030135554522008615,
+            0.0029395174854488755
+          ],
+          "n_months": 229
+        }
+      }
+    },
+    "bad_winsor_skew": {
+      "ret": {
+        "high_low_spread": {
+          "mean": 0.0012188811841390554,
+          "hac_se": 0.0029673432032899707,
+          "hac_t": 0.41076515274257797,
+          "p_value": 0.6816305267044696,
+          "bootstrap_ci95_mean": [
+            -0.004409355861651246,
+            0.006164036026964954
+          ],
+          "n_months": 229,
+          "ann_mean": 0.014626574209668664
+        },
+        "mean_high": 0.004814957815095401,
+        "mean_low": 0.003596076630956345,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.0007817169910982532,
+          "hac_se": 0.0011732224972650232,
+          "hac_t": 0.666299012267976,
+          "p_value": 0.5058936169787054,
+          "bootstrap_ci95_mean": [
+            -0.0015308657254474393,
+            0.0030504275946093267
+          ],
+          "n_months": 229,
+          "ann_mean": 0.009380603893179039
+        }
+      },
+      "rv_ann": {
+        "high_low_spread": {
+          "mean": 0.027502324825604087,
+          "hac_se": 0.009156524012682585,
+          "hac_t": 3.003576989205835,
+          "p_value": 0.00296602912428634,
+          "bootstrap_ci95_mean": [
+            0.008931637543792614,
+            0.04562712852387768
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.17592519421454633,
+        "mean_low": 0.1484228693889422,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.011217114570909353,
+          "hac_se": 0.0037153256791897372,
+          "hac_t": 3.0191470518287526,
+          "p_value": 0.0028233655590350626,
+          "bootstrap_ci95_mean": [
+            0.0030298944860289298,
+            0.01960009827099009
+          ],
+          "n_months": 229
+        }
+      },
+      "downside_vol_ann": {
+        "high_low_spread": {
+          "mean": 0.02017060425445718,
+          "hac_se": 0.007051978339973477,
+          "hac_t": 2.860275979595967,
+          "p_value": 0.004625686844777599,
+          "bootstrap_ci95_mean": [
+            0.004750238957592267,
+            0.034520807125822256
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.12267929083897071,
+        "mean_low": 0.10250868658451354,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.008004364321065525,
+          "hac_se": 0.0027830313642313747,
+          "hac_t": 2.8761315535070127,
+          "p_value": 0.004407378230673276,
+          "bootstrap_ci95_mean": [
+            0.0019033476316235155,
+            0.013795079465916299
+          ],
+          "n_months": 229
+        }
+      },
+      "left_tail_loss": {
+        "high_low_spread": {
+          "mean": 0.003922988687037204,
+          "hac_se": 0.0012994491142167158,
+          "hac_t": 3.018962915990681,
+          "p_value": 0.002825015231749717,
+          "bootstrap_ci95_mean": [
+            0.0013261007966445218,
+            0.006636296695904408
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.022435808520068302,
+        "mean_low": 0.0185128198330311,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.001497510938670901,
+          "hac_se": 0.0005224719914777284,
+          "hac_t": 2.8662032857214625,
+          "p_value": 0.004542948071092123,
+          "bootstrap_ci95_mean": [
+            0.00036191696368692783,
+            0.002548525350378208
+          ],
+          "n_months": 229
+        }
+      }
+    },
+    "max_loss_gain_gap": {
+      "ret": {
+        "high_low_spread": {
+          "mean": 0.0008656890897545351,
+          "hac_se": 0.0032746874830938857,
+          "hac_t": 0.2643577728329185,
+          "p_value": 0.7917430536665999,
+          "bootstrap_ci95_mean": [
+            -0.005599115152232097,
+            0.007147859370344985
+          ],
+          "n_months": 229,
+          "ann_mean": 0.01038826907705442
+        },
+        "mean_high": 0.00652105893418462,
+        "mean_low": 0.005655369844430086,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": -0.00031345389188847637,
+          "hac_se": 0.0017233097991267707,
+          "hac_t": -0.18189062236361017,
+          "p_value": 0.8558301716918923,
+          "bootstrap_ci95_mean": [
+            -0.003524685260045907,
+            0.003014811344508807
+          ],
+          "n_months": 229,
+          "ann_mean": -0.0037614467026617165
+        }
+      },
+      "rv_ann": {
+        "high_low_spread": {
+          "mean": 0.032736954697214424,
+          "hac_se": 0.00939254115209542,
+          "hac_t": 3.4854204168071177,
+          "p_value": 0.0005892099597437639,
+          "bootstrap_ci95_mean": [
+            0.013243597945498934,
+            0.05314682364910497
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.1866887629942313,
+        "mean_low": 0.1539518082970168,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.016331916989574563,
+          "hac_se": 0.004871133566155881,
+          "hac_t": 3.3527959699251504,
+          "p_value": 0.0009365578354032511,
+          "bootstrap_ci95_mean": [
+            0.006453595518998721,
+            0.02690314682615737
+          ],
+          "n_months": 229
+        }
+      },
+      "downside_vol_ann": {
+        "high_low_spread": {
+          "mean": 0.022624030203517498,
+          "hac_se": 0.007263471402094844,
+          "hac_t": 3.1147682631465368,
+          "p_value": 0.002076897514648124,
+          "bootstrap_ci95_mean": [
+            0.008542123800412731,
+            0.03928664013649481
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.1289935558412303,
+        "mean_low": 0.10636952563771279,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.011893397302965233,
+          "hac_se": 0.0038470646487556285,
+          "hac_t": 3.091551192624816,
+          "p_value": 0.002239182487594693,
+          "bootstrap_ci95_mean": [
+            0.004677580374518997,
+            0.020228959669694006
+          ],
+          "n_months": 229
+        }
+      },
+      "left_tail_loss": {
+        "high_low_spread": {
+          "mean": 0.003606708267414944,
+          "hac_se": 0.0013606723356416326,
+          "hac_t": 2.6506809706792347,
+          "p_value": 0.008595964853378657,
+          "bootstrap_ci95_mean": [
+            0.0010530870066972112,
+            0.00635872512705137
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.023369609215989698,
+        "mean_low": 0.019762900948574753,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.0019244397659151067,
+          "hac_se": 0.0007396595931998393,
+          "hac_t": 2.6017911260905753,
+          "p_value": 0.00988116696982777,
+          "bootstrap_ci95_mean": [
+            0.0004676419401165547,
+            0.003662121968259246
+          ],
+          "n_months": 229
+        }
+      }
+    },
+    "semivar_log_ratio": {
+      "ret": {
+        "high_low_spread": {
+          "mean": -0.003731263542779113,
+          "hac_se": 0.0037033425479849067,
+          "hac_t": -1.0075394037771093,
+          "p_value": 0.3147436989399681,
+          "bootstrap_ci95_mean": [
+            -0.010402326310714513,
+            0.0034060601345308017
+          ],
+          "n_months": 229,
+          "ann_mean": -0.044775162513349356
+        },
+        "mean_high": 0.0034772722221274636,
+        "mean_low": 0.007208535764906576,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": -0.001483783074823509,
+          "hac_se": 0.0016697190114962153,
+          "hac_t": -0.8886423791113863,
+          "p_value": 0.37513186399466525,
+          "bootstrap_ci95_mean": [
+            -0.004778362064810771,
+            0.0015548042238524218
+          ],
+          "n_months": 229,
+          "ann_mean": -0.017805396897882107
+        }
+      },
+      "rv_ann": {
+        "high_low_spread": {
+          "mean": 0.034498287194664565,
+          "hac_se": 0.010271752160581358,
+          "hac_t": 3.3585591489497193,
+          "p_value": 0.0009181532300379658,
+          "bootstrap_ci95_mean": [
+            0.014764822674006466,
+            0.05564633237306206
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.18114032916447612,
+        "mean_low": 0.1466420419698115,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.014740894967421007,
+          "hac_se": 0.005031838386249854,
+          "hac_t": 2.9295247255361776,
+          "p_value": 0.0037395573161778106,
+          "bootstrap_ci95_mean": [
+            0.005187764456943698,
+            0.025391147459196885
+          ],
+          "n_months": 229
+        }
+      },
+      "downside_vol_ann": {
+        "high_low_spread": {
+          "mean": 0.02414160139257764,
+          "hac_se": 0.007910299574741443,
+          "hac_t": 3.0519199891828035,
+          "p_value": 0.0025434640122359298,
+          "bootstrap_ci95_mean": [
+            0.010172347592168122,
+            0.03977464117635209
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.12540481401846648,
+        "mean_low": 0.10126321262588885,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.010128973073705019,
+          "hac_se": 0.0038922264812493775,
+          "hac_t": 2.6023596320771367,
+          "p_value": 0.009865281774320334,
+          "bootstrap_ci95_mean": [
+            0.0026115043686018805,
+            0.018439214637163467
+          ],
+          "n_months": 229
+        }
+      },
+      "left_tail_loss": {
+        "high_low_spread": {
+          "mean": 0.003843364581941614,
+          "hac_se": 0.0014751432977731399,
+          "hac_t": 2.6054177839830985,
+          "p_value": 0.009780223217363382,
+          "bootstrap_ci95_mean": [
+            0.0010811992384724973,
+            0.0071717888305711085
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.022712301005553565,
+        "mean_low": 0.018868936423611947,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.001544883084360485,
+          "hac_se": 0.0007273789665823392,
+          "hac_t": 2.123903983118,
+          "p_value": 0.03475535016058151,
+          "bootstrap_ci95_mean": [
+            0.0002584128785253365,
+            0.00303300092307173
+          ],
+          "n_months": 229
+        }
+      }
+    },
+    "tail_mean_gap": {
+      "ret": {
+        "high_low_spread": {
+          "mean": 0.0017292551872663293,
+          "hac_se": 0.003391340151404086,
+          "hac_t": 0.5099031975752657,
+          "p_value": 0.610612508733456,
+          "bootstrap_ci95_mean": [
+            -0.004843867461320709,
+            0.007690887798074506
+          ],
+          "n_months": 229,
+          "ann_mean": 0.020751062247195952
+        },
+        "mean_high": 0.006156408650022422,
+        "mean_low": 0.004427153462756093,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.0004652849110224045,
+          "hac_se": 0.001674141251635607,
+          "hac_t": 0.27792452433020765,
+          "p_value": 0.7813221572960838,
+          "bootstrap_ci95_mean": [
+            -0.0026274398427673326,
+            0.003527126375414113
+          ],
+          "n_months": 229,
+          "ann_mean": 0.005583418932268854
+        }
+      },
+      "rv_ann": {
+        "high_low_spread": {
+          "mean": 0.03828991107044216,
+          "hac_se": 0.009079436319763845,
+          "hac_t": 4.217212360099253,
+          "p_value": 3.568631454786697e-05,
+          "bootstrap_ci95_mean": [
+            0.02102045498516284,
+            0.05693788786961938
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.194467324300465,
+        "mean_low": 0.15617741323002282,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.01756620777079404,
+          "hac_se": 0.004943055743834223,
+          "hac_t": 3.553714277389133,
+          "p_value": 0.00046160093072367125,
+          "bootstrap_ci95_mean": [
+            0.008526468265915374,
+            0.027338175784645456
+          ],
+          "n_months": 229
+        }
+      },
+      "downside_vol_ann": {
+        "high_low_spread": {
+          "mean": 0.025801608467455096,
+          "hac_se": 0.007098016161194919,
+          "hac_t": 3.635045043784672,
+          "p_value": 0.00034351420265021915,
+          "bootstrap_ci95_mean": [
+            0.012848409463382239,
+            0.041317441553074666
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.13453782628118394,
+        "mean_low": 0.10873621781372886,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.012177884938237146,
+          "hac_se": 0.003905570949536716,
+          "hac_t": 3.1180805817089823,
+          "p_value": 0.0020546508579770695,
+          "bootstrap_ci95_mean": [
+            0.005321747110926679,
+            0.020673343060371645
+          ],
+          "n_months": 229
+        }
+      },
+      "left_tail_loss": {
+        "high_low_spread": {
+          "mean": 0.004223535957849687,
+          "hac_se": 0.001380180986765387,
+          "hac_t": 3.060131967002407,
+          "p_value": 0.0024774499453492638,
+          "bootstrap_ci95_mean": [
+            0.0016561744252230294,
+            0.0071664551127644995
+          ],
+          "n_months": 229
+        },
+        "mean_high": 0.02430431733698466,
+        "mean_low": 0.02008078137913498,
+        "avg_assets_per_month": 8.986899563318778,
+        "avg_leg_size": 2.9912663755458517,
+        "fama_macbeth_signal_slope": {
+          "mean": 0.002004046109616448,
+          "hac_se": 0.0007681621230421824,
+          "hac_t": 2.6088843090567213,
+          "p_value": 0.009684602269074416,
+          "bootstrap_ci95_mean": [
+            0.0005962897684484182,
+            0.0035892020299065457
+          ],
+          "n_months": 229
+        }
+      }
+    }
+  },
+  "figures": [
+    "figures/k1359_return_spreads.png",
+    "figures/k1359_tstat_heatmap.png"
+  ],
+  "limitations": [
+    "This is a returns-only proxy test. It does not observe option-implied skew, skew swaps, or securities-lending constraints.",
+    "ETF universe has only nine assets; cross-sectional legs contain two or three ETFs per month, so inference is based on time-series variation of basket spreads.",
+    "Monthly tests are before transaction costs and are not a launch-ready strategy backtest.",
+    "The sample starts only when ETF histories become available; UUP, FXY, and HYG inception dates limit early coverage."
+  ]
+}
