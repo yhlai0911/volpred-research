@@ -445,6 +445,17 @@ class Publisher:
             )
             return None
 
+    def _record_failed_supabase_sync(self, pub_id: str) -> None:
+        failed_path = self.reports_dir.parent / ".failed_supabase_syncs.json"
+        try:
+            failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
+        except Exception as exc:
+            print(f"  Failed to read .failed_supabase_syncs.json; starting fresh: {exc}")
+            failed = []
+        if pub_id not in failed:
+            failed.append(pub_id)
+            failed_path.write_text(json.dumps(failed))
+
     # Domain-specific compound terms for topic extraction (longest match first)
     _DOMAIN_TERMS = [
         # 4+ char compounds
@@ -1151,14 +1162,7 @@ class Publisher:
         except Exception as e:
             print(f"  Supabase sync exception for {pub_id}: {e}")
         if not sync_ok:
-            failed_path = self.reports_dir.parent / ".failed_supabase_syncs.json"
-            try:
-                failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
-            except Exception:
-                failed = []
-            if pub_id not in failed:
-                failed.append(pub_id)
-                failed_path.write_text(json.dumps(failed))
+            self._record_failed_supabase_sync(pub_id)
             print(f"  Supabase sync FAILED for {pub_id} -- recorded to .failed_supabase_syncs.json")
 
         if normalized_status == 'published':
@@ -1218,13 +1222,17 @@ class Publisher:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
         # Contentlayer pattern: no per-item mile_*.json to sync.
         self._sync_feed_to_remote()
+        sync_ok = False
         try:
             import sys
             sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
             from supabase_sync import sync_article
-            sync_article(target_item, storage_dir=self.reports_dir.parent)
-        except Exception:
-            pass
+            sync_ok = bool(sync_article(target_item, storage_dir=self.reports_dir.parent))
+        except Exception as exc:
+            print(f"  Supabase unpublish sync exception for {pub_id}: {exc}")
+        if not sync_ok:
+            self._record_failed_supabase_sync(pub_id)
+            print(f"  Supabase unpublish sync FAILED for {pub_id} -- recorded to .failed_supabase_syncs.json")
         return True
 
     def _append_to_feed(self, item: dict) -> str:

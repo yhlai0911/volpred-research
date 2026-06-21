@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import gzip
+import json
 import random
+import sys
+import types
 import urllib.request
 from pathlib import Path
 
@@ -92,3 +95,43 @@ def test_article_notification_failure_warns_without_blocking(
     assert "[email_notify] article notification failed" in captured.out
     assert "mile_notify_fail" in captured.out
     assert "smtp down" in captured.out
+
+
+def test_unpublish_supabase_sync_failure_is_queued(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+):
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_unpublish_fail",
+                    "title": "Unpublish failure",
+                    "status": "published",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    def fail_sync_article(*args, **kwargs):
+        raise RuntimeError("postgrest down")
+
+    fake_supabase_sync = types.SimpleNamespace(sync_article=fail_sync_article)
+    monkeypatch.setitem(sys.modules, "supabase_sync", fake_supabase_sync)
+    monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None)
+
+    assert Publisher(storage_dir=str(tmp_path)).unpublish("mile_unpublish_fail") is True
+
+    queue = json.loads((tmp_path / ".failed_supabase_syncs.json").read_text(encoding="utf-8"))
+    feed = json.loads((reports_dir / "feed.json").read_text(encoding="utf-8"))
+    captured = capsys.readouterr()
+
+    assert queue == ["mile_unpublish_fail"]
+    assert feed[0]["status"] == "unpublished"
+    assert "Supabase unpublish sync exception for mile_unpublish_fail" in captured.out
+    assert "recorded to .failed_supabase_syncs.json" in captured.out

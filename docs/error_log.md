@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 publisher unpublish Supabase sync 失敗被吞掉
+
+**問題**：`Publisher.unpublish()` 會先把本地 `feed.json` 文章標成 `unpublished`，再呼叫 `supabase_sync.sync_article()` 將下架狀態同步到 Supabase；但原本 `except Exception: pass`，如果 Supabase sync 失敗，前端 canonical DB 可能仍保留已發布狀態，且 ops 完全看不到失敗。
+
+**根因**：publish path 已經把 sync failure 寫入 `.failed_supabase_syncs.json` dead-letter queue，但 unpublish path 沒沿用同一套 queue，形成下架流程的 silent divergence。
+
+**解決方法**：新增 `Publisher._record_failed_supabase_sync()` helper，publish_milestone 與 unpublish 共用；unpublish 捕捉 exception / false return 後會印出 `Supabase unpublish sync ...` warning，並把 article id 寫入 `.failed_supabase_syncs.json` 供既有 drain/alert 流程接手。新增 regression test 用 fake `supabase_sync` 讓 sync 拋錯，確認本地下架保留、failed queue 記錄 id、warning 可見。
+
 ## 2026-06-22 publisher article notification failure 被吞掉
 
 **問題**：`src/volpred/publisher/publisher.py` 的 legacy `publish_experiment()`、`publish_comparison()` 與主要 `publish_milestone()` 都在發文後呼叫 `EmailNotifier.notify_article_published()`，但通知分支用 `except Exception: pass`。SMTP / notifier 設定錯誤時，文章仍會成功發佈，但通知缺失完全不可見。
