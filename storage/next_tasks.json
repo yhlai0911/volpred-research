@@ -34659,7 +34659,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "auto_journal_discovery_fallback",
@@ -34668,7 +34668,11 @@
       "research-backlog-refresh",
       "all-covered-fallback"
     ],
-    "created_at": "2026-06-20T00:00:01+00:00"
+    "created_at": "2026-06-20T00:00:01+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-21T08:02:06.196049+00:00",
+    "claim_session_id": "0432eef61cd6",
+    "started_at": "2026-06-21T08:02:06.293527+00:00"
   },
   {
     "id": "email-11829-db8606",

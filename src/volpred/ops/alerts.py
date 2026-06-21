@@ -878,6 +878,84 @@ def _parse_knowledge_stale_state(storage_dir: str, now: datetime) -> dict[str, A
     }
 
 
+def _parse_paper_stale_state(now: datetime) -> dict[str, Any]:
+    """M3 paper-line staleness — 整個 paper/ 目錄多天無 manuscript/review 活動 = 論文線停滯.
+
+    2026-06-21 (boss email-11851/11854 incident 的對稱補強): boss 同時點名 M2 *和* M3
+    閒置 6-10 天。M2 已有 knowledge_stale alert，但 M3（論文）停滯一樣完全無訊號 → 主線程
+    能反覆 deflect。此 alert 讓「所有論文連續多天無 .tex/.md 變動」變成 actionable breach。
+    與 knowledge_stale 對稱：研究與論文永遠不輸 ops（Mission L5-9）。
+
+    訊號 = paper/*/ 下所有 .tex / .md 檔的 max mtime（manuscript 編輯 + review 紀錄 +
+    decision/errata 文件都算 M3 活動；figure .pdf/.png 與 data .csv 會被 regen 故排除）。
+    取「整條論文線最近一次活動」而非 per-paper（單篇論文 review 等待期可合理靜置），
+    所以只要任一篇有動就不 breach。threshold 較 knowledge 寬（論文比 closure 慢）：
+    >7d warn、>14d critical。
+    """
+    paper_root = project_path("paper")
+    latest: datetime | None = None
+    latest_file: str | None = None
+    if paper_root.is_dir():
+        for path in paper_root.rglob("*"):
+            if path.suffix not in (".tex", ".md"):
+                continue
+            if not path.is_file():
+                continue
+            try:
+                mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+            except OSError:
+                continue
+            if latest is None or mtime > latest:
+                latest = mtime
+                latest_file = str(path.relative_to(paper_root))
+    gap_days = round((now - latest).total_seconds() / 86400.0, 2) if latest is not None else None
+    breached = latest is None or (now - latest) > timedelta(days=7)
+    details = {
+        "latest_activity_at": latest.isoformat() if latest else None,
+        "latest_file": latest_file,
+        "gap_days": gap_days,
+    }
+    if not breached:
+        return {
+            "id": "paper_stale",
+            "breached": False,
+            "level": "info",
+            "title": "Paper line fresh",
+            "body": "",
+            "details": details,
+        }
+    level = "critical" if latest is None or (now - latest) > timedelta(days=14) else "warn"
+    latest_text = latest.isoformat() if latest else "missing"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            f"paper/ 整條論文線已 {gap_days if gap_days is not None else '?'} 天無 .tex/.md 變動",
+            f"（最後活動: {latest_text}，檔案: {latest_file or 'none'}）。",
+            "",
+            "## 影響",
+            "M3（論文寫好）停滯 = 投稿 pipeline 沒前進，研究無法轉化為學術權威（→ 機構信任",
+            "→ premium tier 背書）。Mission L5-9：研究與論文永遠不輸 ops。**此 breach 不可用",
+            "「正常變異 / 等 review」解釋掉**，必須對最成熟的論文做實際下一步。",
+            "",
+            "## 建議行動（立即執行，不可 defer）",
+            "1. 找最成熟論文的 next step：`grep -l ready_for_submission paper/*/README.md`、",
+            "   各 paper README『下一步』段、`docs/paper_audit_*.md`。",
+            "2. 主線程做實際推進（禁 background agent 寫 .tex）：paper-review-cycle v-round 複審、",
+            "   reproduce gate 驗證、R1-track MEDIUM 修正、cover letter / submission package 定稿。",
+            "3. 跑完務必 commit（mtime 才會刷新清除此 alert）；review-only 也寫 review_history/*.md。",
+            "4. 若所有論文都已 submission-ready 且純等外部 → 在 README 標明並推進下一篇 draft。",
+        ]
+    )
+    return {
+        "id": "paper_stale",
+        "breached": True,
+        "level": level,
+        "title": f"M3 paper line stale > {gap_days}d",
+        "body": body,
+        "details": details,
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -891,6 +969,7 @@ def build_alert_condition_report(
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),
         _parse_knowledge_stale_state(storage_dir, current),
+        _parse_paper_stale_state(current),
     ]
     return {
         "generated_at": current.isoformat(),
