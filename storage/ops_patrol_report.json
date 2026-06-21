@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-06-21T12:03:35Z",
+  "timestamp": "2026-06-21T18:03:18Z",
   "all_ok": false,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "129 drafts total (78 general, 51 research). All thresholds met (total>=12, general>=8, research>=4)."
+      "detail": "129 total drafts (general=78, research=51). All thresholds met (total>=12, research>=4, general>=8)."
     },
     {
-      "name": "strategy_metrics_freshness",
+      "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (missing file). Cannot verify freshness."
+      "detail": "storage/strategy_metrics.json does not exist (FILE_NOT_FOUND). Cannot check freshness."
     },
     {
-      "name": "error_log_recent",
+      "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-20 or 2026-06-21 found in last 30 lines of docs/error_log.md."
+      "detail": "No entries dated 2026-06-21 or 2026-06-20 found in last 30 lines of docs/error_log.md. Most recent entries concern 2026-06-03 compact/auto-compact root cause analysis."
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return entries in last 3 records."
+      "detail": "All 15 strategies checked. Each has exactly 1 null (latest entry) in last 3 portfolio_return values — within acceptable limit (<=2). Total entries per strategy: 778-839."
     },
     {
-      "name": "git_status",
+      "name": "GIT_STATUS",
       "status": "ok",
       "detail": "0 uncommitted files. Working tree clean."
     },
     {
-      "name": "knowledge_size",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
       "detail": "2191 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": [
-    "strategy_metrics_missing: storage/strategy_metrics.json does not exist"
+    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json not found — metrics cannot be validated for staleness"
   ]
 }
