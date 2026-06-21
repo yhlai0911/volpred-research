@@ -637,12 +637,14 @@ def release_pool_articles(
         and not _dedup_flagged(item)
     ]
     candidates.sort(key=sort_key)
+    if pub_id:
+        candidates = [item for item in candidates if item.get("id") == pub_id]
 
     k_cluster = _knowledge_experiment_clusters(storage_dir)
     narrative_pressure = _recent_narrative_cluster_pressure(feed, k_cluster=k_cluster)
     blocked_narrative_clusters = set(narrative_pressure["blocked_clusters"])
     narrative_cluster_filtered: list[dict] = []
-    if blocked_narrative_clusters:
+    if blocked_narrative_clusters and not pub_id:
         filtered_candidates: list[dict] = []
         for item in candidates:
             candidate_cluster = _article_narrative_cluster(item, k_cluster)
@@ -662,9 +664,6 @@ def release_pool_articles(
                 continue
             filtered_candidates.append(item)
         candidates = filtered_candidates
-
-    if pub_id:
-        candidates = [item for item in candidates if item.get("id") == pub_id]
 
     target_limit = max(int(limit), 1)
     released: list[dict] = []

@@ -669,3 +669,77 @@ def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path
     assert garch["status"] == "draft"
     assert not garch.get("details", {}).get("release_dedup_skipped")
     assert vrp["status"] == "published"
+
+
+def test_release_pool_pub_id_bypasses_narrative_cluster_filter_for_manual_repair(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """A requested pub_id is an explicit repair/release target.
+
+    The last-3 narrative valve should still shape automatic pool selection, but
+    it must not hide a specific article from release-time audit resolution.
+    """
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 21, 11, 30, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+
+    feed = [
+        {
+            "id": "mile_recent_garch_1",
+            "status": "published",
+            "audience": "general",
+            "published_at": (frozen_now - timedelta(minutes=10)).isoformat(),
+            "title": "GARCH 模型近期文章一",
+        },
+        {
+            "id": "mile_recent_vrp",
+            "status": "published",
+            "audience": "general",
+            "published_at": (frozen_now - timedelta(minutes=20)).isoformat(),
+            "title": "VRP 近期文章",
+        },
+        {
+            "id": "mile_recent_garch_2",
+            "status": "published",
+            "audience": "research",
+            "published_at": (frozen_now - timedelta(minutes=30)).isoformat(),
+            "title": "GARCH 模型近期文章二",
+        },
+        {
+            "id": "mile_target_garch",
+            "status": "draft",
+            "audience": "general",
+            "created_at": (frozen_now - timedelta(days=3)).isoformat(),
+            "title": "GARCH 草稿已修正",
+            "description": "這篇一般讀者草稿已改成白話統計描述，可以重新釋出。",
+            "tags": ["一般讀者", "GARCH", "波動率"],
+            "details": {
+                "release_audit_skipped_count": 3,
+                "release_audit_issues": ["general 內容含禁用統計術語"],
+                "release_audit_task_id": "platform_ops_release_audit_fix_mile_target_garch",
+            },
+        },
+    ]
+    _write_json(storage_dir / "reports" / "feed.json", feed)
+
+    res = content.release_pool_articles(
+        pub_id="mile_target_garch",
+        limit=1,
+        due_only=False,
+        include_drafts=True,
+        storage_dir=str(storage_dir),
+    )
+
+    assert res["narrative_cluster_pressure"]["blocked_clusters"] == ["garch"]
+    assert res["narrative_cluster_filtered"] == []
+    assert res["audit_skipped"] == []
+    assert [item["id"] for item in res["released"]] == ["mile_target_garch"]
+
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    target = next(item for item in feed_after if item["id"] == "mile_target_garch")
+    assert target["status"] == "published"
+    assert target["details"]["release_audit_status"] == "resolved"
+    assert target["details"]["release_audit_resolved_issues"] == ["general 內容含禁用統計術語"]
+    assert "release_audit_issues" not in target["details"]
