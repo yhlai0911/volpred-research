@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-21 誤判 daily_update「漏跑」就補跑——沒先查 cron schedule 含不含今天
+
+**問題**：自主巡檢看到 daily_update.log 最後一筆是昨天(6/20)，今天(6/21)08:28 無紀錄，**直接下結論「漏跑」並背景補跑** `cron_daily_update.sh`（已開始改 paper_trading/feed/strategy_metrics）。
+
+**真相**：daily_update 的 cron = `3 8 * * 1-6`（**週一到週六**，週日不跑，見 `config/runtime_schedules.json`）。今天 6/21 是**週日** → 本來就不該跑，不是 gap。是 by-design。
+
+**根因（我的流程錯）**：判「missed fire」前**沒先驗證 schedule 是否涵蓋今天**。host_cron_fail 抓不到「沒 fire」是真的盲區，但這次不是盲區問題——是我把「正常的週日不跑」誤讀成「異常漏跑」。
+
+**教訓（硬規則）**：判定任何 cron「漏跑 / 該 fire 沒 fire」前，**必先查該 job 的 cron expression（含星期/日期欄位）確認今天真的在排程內**。`* * 1-6` 排除週日、`* * 1-5` 排除週末、`0 8 1 * *` 只跑每月 1 號等——不確認就補跑 = 製造 off-schedule 副作用。查法：`jq` runtime_schedules.json 對應 job 的 `cron` 欄位 + `date -j -f %Y-%m-%d <date> +%A` 確認星期。
+
+**副作用處置**：補跑的 recalc（paper_trading/metrics）idempotent 無害（recalc 是正式機制）；唯一風險是生一篇週日 daily 文章。讓 run 跑完（殺掉留半成品更糟）→ 驗證有無 inappropriate 週日文章 → 有則 unpublish。
+
 ## 2026-06-20 host_cron_fail false-critical on exit-as-findings 工作（**3-STRIKE TRIGGER**）
 
 **問題**：`host_cron_fail` 對 `indicator_arena_daily` exit 1 報 CRITICAL，但該 job 跑正常——exit 1 只是良性 findings signal（`^VIX stale` 資料時間差 data_unavailable + 2 個 signal 已發過的 dedup skip），且 job 自己已寄 WARN。boss 晨間會看到假 CRITICAL。
