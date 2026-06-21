@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""FB pipeline audit: detect stale fb_post_status > 24h + auto-expire >72h awaiting.
+"""FB pipeline audit: detect stale fb_post_status > 24h + auto-expire >72h pending/handoff states.
 
 Cron: every 6h. Alert if stale count >= 2.
 
 2026-06-03 改寫（email-11939 用戶抱怨「FB 一直發不出去」根因追蹤）：
 - awaiting_interactive_session 從 TERMINAL set 拿掉 — 它不是 terminal，是「無限期等」
   → 之前 4 篇 5/29-6/01 連續 4 天卡這狀態，audit 0 alert，dashboard 沒抓到
-- awaiting >72h 自動降為 expired_skip（時效已過，補發無 ROI）
-- 仍 awaiting >24h 計入 stale_pending，觸發 alert
+- pending/awaiting >72h 自動降為 expired_skip（時效已過，補發無 ROI）
+- 仍 pending/awaiting >24h 計入 stale_pending，觸發 alert
 """
 from __future__ import annotations
 import json, subprocess, sys, time
@@ -23,6 +23,7 @@ LOG = REPO / "storage" / "reports" / "trending_repost_log.json"
 FEED = REPO / "storage" / "reports" / "feed.json"
 STALE_HOURS = 24
 AUTO_EXPIRE_HOURS = 72
+AUTO_EXPIRE_STATUS_PREFIXES = ("awaiting_", "pending")
 TERMINAL_STATUSES = {
     "success",
     "wont_fix",
@@ -35,12 +36,17 @@ HANDOFF_STATUSES = {
 TERMINAL_OR_HANDOFF_STATUSES = TERMINAL_STATUSES | HANDOFF_STATUSES
 
 
-def _auto_expire_stale_awaiting(data: list, expire_cutoff_iso: str) -> list[dict]:
-    """awaiting_interactive_session > 72h → auto-mark expired_skip。回傳被處理的條目清單。"""
+def _is_auto_expirable_status(status: str) -> bool:
+    s = str(status or "").strip().lower()
+    return s not in TERMINAL_STATUSES and s.startswith(AUTO_EXPIRE_STATUS_PREFIXES)
+
+
+def _auto_expire_stale_pending(data: list, expire_cutoff_iso: str) -> list[dict]:
+    """pending*/awaiting* > 72h → auto-mark expired_skip。回傳被處理的條目清單。"""
     expired = []
     for e in data:
         s = str(e.get("fb_post_status", "")).strip().lower()
-        if s != "awaiting_interactive_session":
+        if not _is_auto_expirable_status(s):
             continue
         created = e.get("date") or e.get("created_at") or e.get("timestamp", "")
         if not created or created >= expire_cutoff_iso:
@@ -54,7 +60,10 @@ def _auto_expire_stale_awaiting(data: list, expire_cutoff_iso: str) -> list[dict
                     "uv", "run", "python", "scripts/mark_fb_post_status.py",
                     "--mile-id", mile_id,
                     "--status", "expired_skip",
-                    "--note", f"auto-expired by audit_fb_pipeline (>{AUTO_EXPIRE_HOURS}h awaiting, time-value lost)",
+                    "--note", (
+                        f"auto-expired by audit_fb_pipeline (>{AUTO_EXPIRE_HOURS}h "
+                        f"{s}, time-value lost)"
+                    ),
                 ],
                 cwd=REPO, check=True, capture_output=True,
             )
@@ -106,8 +115,8 @@ def main():
     stale_cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - STALE_HOURS * 3600))
     expire_cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - AUTO_EXPIRE_HOURS * 3600))
 
-    # 1) Auto-expire awaiting >72h（不再無限期等）
-    auto_expired = _auto_expire_stale_awaiting(data, expire_cutoff_iso)
+    # 1) Auto-expire pending/awaiting >72h（不再無限期等）
+    auto_expired = _auto_expire_stale_pending(data, expire_cutoff_iso)
     if auto_expired:
         # 重 load（mark_fb_post_status 已寫盤；feed 端 status 也可能已被改）
         data = _load_entries()
@@ -151,7 +160,7 @@ def main():
             )
         if auto_expired:
             sections.append(
-                f"## Auto-expired（awaiting >{AUTO_EXPIRE_HOURS}h → expired_skip）{len(auto_expired)} 篇\n"
+                f"## Auto-expired（pending/awaiting >{AUTO_EXPIRE_HOURS}h → expired_skip）{len(auto_expired)} 篇\n"
                 + "\n".join(f"- {p['mile_id']} ({p['date']})" for p in auto_expired)
             )
         sections.append(

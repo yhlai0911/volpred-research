@@ -19,14 +19,14 @@
 
 ## 二、流程修整（已做，保留）
 
-### Fix A：`awaiting_interactive_session` 不算 terminal
+### Fix A：`pending_*` / `awaiting_*` 不算 terminal
 
 `scripts/audit_fb_pipeline.py` 原把 awaiting 歸 terminal → audit 永遠 0 alert → 4 天累積看不見。
 
 **改**（已 commit）：
 - 移出 terminal set
-- `AUTO_EXPIRE_HOURS=72` — awaiting >72h 自動降 `expired_skip`（補無 ROI）
-- awaiting >24h 計 stale_pending + alert
+- `AUTO_EXPIRE_HOURS=72` — `pending_*` / `awaiting_*` >72h 自動降 `expired_skip`（補無 ROI）
+- `pending_*` / `awaiting_*` >24h 計 stale_pending + alert
 
 ### Fix B：`expired_skip` enum
 
@@ -56,7 +56,7 @@
 | 項目 | 狀態 |
 |---|---|
 | 24/7 自動發 FB | ❌ 物理不可能，**不再承諾** |
-| Cron-driven trending 雙發 | ❌ FB 段必 awaiting → 72h 後 expired_skip |
+| Cron-driven trending 雙發 | ❌ FB 段若 pending/awaiting → 72h 後 expired_skip |
 | 互動 session 內 trending 雙發 | ✅ 寫 feed + Claude in Chrome 同步發 FB |
 | 排程貼文（已發後補留言貼 VolPred 連結） | ✅ 只在互動 session 內做（handoff KEEP 區記 follow-up） |
 

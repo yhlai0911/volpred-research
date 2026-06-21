@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 FB pipeline `pending_permission_denied` 卡住 WARN
+
+**問題**：dashboard `verification_fb_pipeline` 持續 WARN 1 筆 pending sync，但實際唯一項目是 `mile_9def57ab` 的 `fb_post_status=pending_permission_denied`。它已超過 72h、且 FB 個人帳號發文依 2026-06-03 規則不能交回 boss，也不應無限期卡在 pending。
+
+**根因**：`scripts/audit_fb_pipeline.py` 只 auto-expire `awaiting_interactive_session`，沒有覆蓋同樣「被動等待」的 `pending_*` 狀態。這違反既有教訓：「任何 `awaiting_*` / `pending_*` 都應有 max-age 觸發升級或自動降級」。結果 permission-denied 這種不能 headless 自救的狀態反覆出現在 audit log 與 dashboard WARN。
+
+**解決方法**：將 audit auto-expire 泛化為 `pending*` / `awaiting_*` 且非 terminal 的狀態，超過 72h 一律透過 `mark_fb_post_status.py` 降為 `expired_skip`，note 保留原狀態。新增 regression test 覆蓋 `pending_permission_denied` 與 `awaiting_interactive_session` 都會被降級、recent pending 與 success 不受影響。用 canonical writer 將 live `mile_9def57ab` 標為 `expired_skip`；重跑 `audit_fb_pipeline.py` 後 stale_pending=0，live `ops_dashboard.py` overall_status=ok。
+
 ## 2026-06-22 論文頁：兩篇無作者 + 原始時間戳 + 「Citations」標籤誤導（boss 回報）
 
 **問題**：論文頁 `crypto-fear-channel` / `eav-universal-magnitude` 顯示無作者，且 Updated 欄是原始 ISO timestamp（`2026-06-11T16:00:11.388421+00:00`）。連帶查到所有論文的「X Citations」其實是誤導標籤。

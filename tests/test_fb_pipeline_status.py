@@ -186,6 +186,45 @@ def test_audit_terminal_or_handoff_statuses_include_interactive() -> None:
     assert "awaiting_interactive_session" in audit_fb_pipeline.TERMINAL_OR_HANDOFF_STATUSES
 
 
+def test_audit_auto_expires_stale_pending_and_handoff_statuses(monkeypatch) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd, cwd=None, check=False, capture_output=False):
+        calls.append(cmd)
+
+    monkeypatch.setattr(audit_fb_pipeline.subprocess, "run", fake_run)
+
+    expired = audit_fb_pipeline._auto_expire_stale_pending(
+        [
+            {
+                "mile_id": "mile_permission",
+                "fb_post_status": "pending_permission_denied",
+                "date": "2026-06-18",
+            },
+            {
+                "mile_id": "mile_wait",
+                "fb_post_status": "awaiting_interactive_session",
+                "date": "2026-06-18",
+            },
+            {
+                "mile_id": "mile_recent",
+                "fb_post_status": "pending",
+                "date": "2026-06-21T10:00:00",
+            },
+            {
+                "mile_id": "mile_done",
+                "fb_post_status": "success",
+                "date": "2026-06-18",
+            },
+        ],
+        "2026-06-19T00:00:00",
+    )
+
+    assert [item["mile_id"] for item in expired] == ["mile_permission", "mile_wait"]
+    assert len(calls) == 2
+    assert all("--status" in call and "expired_skip" in call for call in calls)
+
+
 def test_mark_fb_post_status_updates_feed_and_log(tmp_path, monkeypatch) -> None:
     feed_path = tmp_path / "feed.json"
     log_path = tmp_path / "trending_repost_log.json"
