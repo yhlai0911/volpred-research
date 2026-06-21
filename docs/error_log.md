@@ -2,6 +2,25 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-21 **3-STRIKE TRIGGER** 文章「詳情」區塊反覆洩漏內部 metadata（denylist 永遠輸）
+
+**問題**：`frontend-v2-fix/src/app/reports/[id]/ReportDetail.tsx` 的「詳情」區塊用 **denylist**（列出已知內部 key 去隱藏）渲染文章 `details`。每次出現新的內部 key 就洩漏到讀者頁。
+
+**三次 incident（同根因）**：
+- strike 1 — commit `43ff348` hide internal dedup/governance metadata（arc_signature 被老闆抓到曝光）
+- strike 2 — commit `11fcfd5` drop empty detail values
+- strike 3 — commit `110fd86` hide experiment_refs
+- **第 4 次復發（觸發重構）**：2026-06-21 我發 trending 文 `mile_7bddb047` 時，details 多塞了 `data_sources` + `source_inspiration`（後者含「boss own note」字樣），兩個都不在 denylist → 直接渲染 + 夾帶進 RSC payload。老闆看到「詳情區塊又跑出來」。
+
+**根因**：denylist 結構上贏不了「新 key 出現」這場賽跑；每加一個欄位就要記得補黑名單，silent failure。次要根因：我發文時往 `details` 塞了 reader 不該看的內部欄位（`source_inspiration` 純內部備註）。
+
+**修復（三層重構，廢棄 denylist）**：
+1. **render 層** `ReportDetail.tsx`（commit `11ae801`）：denylist → **allowlist**，預設全隱藏，只有 `data_source`/`data_sources`/`period` 才渲染（附中文標籤）。新內部 key 永遠不會再渲染。
+2. **資料源層** `data-server.ts::getArticle`（commit `bsfhifgf1` 部署）：新增 `stripInternalDetails()`，把內部治理 key（`source_inspiration`/`*_waiver`/`arc_signature`/`release_*`/`topic_cluster`/`experiment_refs` 等）在 server 端剝掉 → 連 page source／API JSON 都不夾帶。functional key（`question_id`/`image_url` 等）保留。
+3. **發文紀律**：trending/一般發文不可往 `details` 塞純內部備註（`source_inspiration` 這類）；治理欄位（waiver）可留在 feed.json 作 audit，但靠上述兩層擋住不外流。
+
+**驗證**：線上 `mile_7bddb047` page source 的 dup_waiver/cluster_waiver/source_inspiration/「boss own note」全部歸零，文章主體完好。`npm run build` 兩次 PASS。
+
 ## 2026-06-21 K1355 pooled asset-day DM 近失誤——多資產同日樣本不可當獨立觀測
 
 **問題**：K1355 初版把 8 檔 ETF 的 OOS QLIKE loss 直接串接成 asset-day array 做 pooled DM，得到 t≈-4.17，看似 Harvey pass。
