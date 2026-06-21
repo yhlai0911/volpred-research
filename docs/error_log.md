@@ -2,6 +2,19 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 論文頁：兩篇無作者 + 原始時間戳 + 「Citations」標籤誤導（boss 回報）
+
+**問題**：論文頁 `crypto-fear-channel` / `eav-universal-magnitude` 顯示無作者，且 Updated 欄是原始 ISO timestamp（`2026-06-11T16:00:11.388421+00:00`）。連帶查到所有論文的「X Citations」其實是誤導標籤。
+
+**三個根因**：
+1. **無作者** — `src/volpred/ops/papers.py::_count_tex_metrics` 同步時自動抽 `\title`/`\bibitem`/pages，但**從不抽 `\author`**。`update_paper_full` 也只 set title/citations/abstract/pages。新自動同步的論文 `authors=''`（這兩篇 2026-05 才建、純走 auto-sync），舊論文是早期手動設過 author 才有值。修：新增 brace-match `\author{}` 抽取（去 `\thanks{}`/`\footnote{}`、`\and`→逗號）→ wire 進 `update_paper_full` kwargs，`.tex` 成為作者單一真實來源。兩篇已 `paper-update` 補回 `Yi-Hao Lai`。
+2. **原始時間戳** — 前端 `paper/page.tsx` + `v3/paper/page.tsx` 直接渲染 `paper.updated_at`（完整 ISO）。修：加 `formatDate()` → `toLocaleDateString('en-CA')` = `YYYY-MM-DD`。
+3. **「Citations」誤導（研究誠實）** — 該數字是 `.tex` `\bibitem` 數＝**論文自己的參考文獻數**，非「被引用次數」。working paper 標「42 Citations」會被讀成學術影響力。修：前端兩處 label `Citations`→`References`、meta 行 `citations`→`references`。
+
+**驗證**：`_count_tex_metrics` 對全 11 篇論文抽 author 正確（單作者→`Yi-Hao Lai`、雙作者→`Yi-Hao Lai, VolPred Research System`）；線上 `/api/papers` 兩篇 authors 已補；線上 `/paper` 截圖確認作者顯示、日期 `2026-06-22`、stat box「References」。commit 前端 + 主 repo papers.py。
+
+**附帶（Zeabur 首頁慢）**：實測 warm TTFB 0.47–0.81s、`/api/papers` 0.22s — 暖機時快。慢來自 cold-start（容器 idle spin-down）+ 當天連續 4 次部署各觸發 restart。host cron 只可靠 hourly，無法做有效 5-min keep-warm；永久解需外部 uptime pinger（每 5 min）或 always-on 方案＝需 boss 決定，不擅自設外部服務。
+
 ## 2026-06-22 配色主題擴充：暗版黑底消失 + 主題 CSS 首頁不載入（老闆手機版回報）
 
 **問題**：替配色主題加「背景協調前景」後，老闆回報「手機版是不是沒改好」「原本的黑底色為什麼不見了」。暗版整站 body 變近白、淺字配淺底全糊（strategy-selector 等頁尤其明顯）。
