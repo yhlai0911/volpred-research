@@ -35445,5 +35445,41 @@
     ],
     "confidence": 0.5,
     "created_at": "2026-06-21T13:50:04.021225"
+  },
+  {
+    "item_id": "eb229bea",
+    "category": "experiment",
+    "content": "K1328: HAR ceiling validation — refit 頻率影響 (CONDITIONAL_PASS)。同一 HAR 模型,best_scheme=expanding window + 21d refit、worst=rolling 252 + 21d refit → 重估頻率/窗型對 HAR 預測有實質影響,不是模型本身差異。Codex reviewed。CONDITIONAL_PASS:方向穩健但需注意 spec 依賴。",
+    "evidence": [
+      "experiments/k1328/",
+      "experiments/k1328/codex_review.md",
+      "K1328"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T14:24:34.870366"
+  },
+  {
+    "item_id": "fc6de21e",
+    "category": "experiment",
+    "content": "K1346: 樂透型個股籃子的 vol-of-vol 與危機放大 — NULL。yfinance-only 樂透股 proxy 籃子未提供 risk-off 時 excess VoV 放大的穩健證據 → 該免費資料 proxy 下假設不成立。Codex reviewed。null 如實報告,可能受 proxy 品質限制。",
+    "evidence": [
+      "experiments/k1346/",
+      "experiments/k1346/codex_review.md",
+      "K1346"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T14:24:35.056025"
+  },
+  {
+    "item_id": "fdf49fb9",
+    "category": "experiment",
+    "content": "K1498: 無選擇權微結構的 option-liquidity 崩盤風險 proxy — NULL。免費資料 option-liquidity proxy 在控制 VIX+RV 後未穩健改善崩盤風險分類(Bonferroni AUC/Brier 通過數=0)。Codex reviewed。null:免費 proxy 不足以取代真實選擇權微結構資料。",
+    "evidence": [
+      "experiments/k1498/",
+      "experiments/k1498/codex_review.md",
+      "K1498"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T14:24:35.099920"
   }
 ]
