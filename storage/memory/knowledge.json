@@ -35493,5 +35493,49 @@
     ],
     "confidence": 0.55,
     "created_at": "2026-06-21T14:56:57.997609"
+  },
+  {
+    "item_id": "e0da1782",
+    "category": "experiment",
+    "content": "K_explainable_ensemble_vol_gate (2026-06-14): 可解釋 ensemble 波動 gate — verdict NOT_DEPLOYABLE_AVERAGE_GAIN_UNSTABLE_NOT_HARVEY_SIGNIFICANT(scientific NULL,code review PASS)。ensemble vol gate 的平均 gain 不穩定且未通過 Harvey 顯著 → 不可部署。Codex code-review PASS 但科學結論為 null。誠實:code 乾淨≠策略有效。",
+    "evidence": [
+      "experiments/k_explainable_ensemble_vol_gate_2026_06_14/",
+      "K_explainable_ensemble_vol_gate_2026_06_14"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T15:29:12.868432"
+  },
+  {
+    "item_id": "c2adb9ae",
+    "category": "experiment",
+    "content": "K_repo_basis_funding_stress (2026-06-14): repo-basis 資金壓力 gate 預測 duration 資產波動 — verdict NULL。lookahead-safe expanding 標準化後,repo-basis stress proxy 未穩健預測 duration 資產波動。code-integrity PASS,科學 null。",
+    "evidence": [
+      "experiments/k_repo_basis_funding_stress_gate_duration_2026_06_14/",
+      "K_repo_basis_funding_stress_gate_duration_2026_06_14"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T15:29:13.006266"
+  },
+  {
+    "item_id": "2fdd7f00",
+    "category": "experiment",
+    "content": "K_bnpl_credit_cycle (2026-06-14): BNPL 信用循環對 IWM/HYG/XLF 波動 — verdict NULL_NO_ROBUST_OOS_EDGE。HAC/DM 正式檢定下 BNPL proxy 無穩健 OOS 優勢,best models 皆退化為 plain HAR/har_market,har_bnpl DM 不顯著。code-review CONDITIONAL_PASS,科學 null。",
+    "evidence": [
+      "experiments/k_bnpl_credit_cycle_2026_06_14/",
+      "K_bnpl_credit_cycle_2026_06_14"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T15:29:13.049508"
+  },
+  {
+    "item_id": "a8df5d90",
+    "category": "experiment",
+    "content": "K_ai_infra_financing_spillover (2026-06-14): AI 基建融資對信用/QQQ 波動的 lead-lag spillover — verdict NULL_FOR_LEAD_LAG_TRANSMISSION。存在 same-day 共動(ratio infra 4.91/credit 3.24/qqq 6.33)但無 lead-lag 傳導 → 同期相關非預測性領先。Codex reviewed,科學 null。",
+    "evidence": [
+      "experiments/k_ai_infra_financing_spillover_2026_06_14/",
+      "K_ai_infra_financing_spillover_2026_06_14"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T15:29:13.094156"
   }
 ]
