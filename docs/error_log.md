@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 publisher article notification failure 被吞掉
+
+**問題**：`src/volpred/publisher/publisher.py` 的 legacy `publish_experiment()`、`publish_comparison()` 與主要 `publish_milestone()` 都在發文後呼叫 `EmailNotifier.notify_article_published()`，但通知分支用 `except Exception: pass`。SMTP / notifier 設定錯誤時，文章仍會成功發佈，但通知缺失完全不可見。
+
+**根因**：發文與通知耦合時，正確做法是「通知失敗不阻塞發佈」；舊實作只做到不阻塞，沒有做到可觀察，與 2026-06-11 mirror sync / 2026-06-22 boss report silent fallback 同型。
+
+**解決方法**：新增 `Publisher._notify_article_published()` helper，三個發文入口共用；通知成功回傳 notifier 結果，失敗時印出 `[email_notify] article notification failed for <id> (<reason>): <err>` 並回傳 `None`，保留發佈成功但讓 cron/log 可見。新增 regression test 讓 notifier 拋 `RuntimeError("smtp down")`，確認不阻塞且 warning 包含 article id 與錯誤。
+
 ## 2026-06-22 boss_report 局部資料讀取失敗被 bare except 吞掉
 
 **問題**：`scripts/boss_report.py` 裡多個資料來源讀取分支仍有 `except: pass`，包含 paper README status、pending task pool、autonomous decisions、cycle intent。這些欄位壞掉時，email 報告會照常寄出但缺段落，老闆與 ops loop 看不出是「沒有資料」還是「報告產生器讀取失敗」。

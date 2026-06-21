@@ -5,6 +5,7 @@ import random
 import urllib.request
 from pathlib import Path
 
+from volpred.publisher.email_notifier import EmailNotifier
 from volpred.publisher.publisher import Publisher
 
 
@@ -68,3 +69,26 @@ def test_sync_feed_to_remote_skips_large_incompressible_feed(
     Publisher(storage_dir=str(tmp_path))._sync_feed_to_remote()
 
     assert calls == []
+
+
+def test_article_notification_failure_warns_without_blocking(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+):
+    def fail_notify(self, *args, **kwargs):
+        raise RuntimeError("smtp down")
+
+    monkeypatch.setattr(EmailNotifier, "notify_article_published", fail_notify)
+    pub = Publisher(storage_dir=str(tmp_path))
+
+    result = pub._notify_article_published(
+        {"id": "mile_notify_fail", "title": "Notification failure"},
+        reason="publish_milestone",
+    )
+
+    captured = capsys.readouterr()
+    assert result is None
+    assert "[email_notify] article notification failed" in captured.out
+    assert "mile_notify_fail" in captured.out
+    assert "smtp down" in captured.out

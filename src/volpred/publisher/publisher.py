@@ -429,6 +429,22 @@ class Publisher:
         POST is no longer used to avoid duplicate/ordering conflicts."""
         pass
 
+    def _notify_article_published(self, item: dict, *, reason: str, force_send: bool = False):
+        try:
+            from volpred.publisher.email_notifier import EmailNotifier
+
+            return EmailNotifier(storage_dir=str(self.reports_dir.parent)).notify_article_published(
+                item,
+                reason=reason,
+                force_send=force_send,
+            )
+        except Exception as exc:
+            print(
+                f"  [email_notify] article notification failed for "
+                f"{item.get('id', '?')} ({reason}): {exc}"
+            )
+            return None
+
     # Domain-specific compound terms for topic extraction (longest match first)
     _DOMAIN_TERMS = [
         # 4+ char compounds
@@ -573,15 +589,7 @@ class Publisher:
         actual_id = self._append_to_feed(item)
         if actual_id != item['id']:
             return actual_id
-        try:
-            from volpred.publisher.email_notifier import EmailNotifier
-
-            EmailNotifier(storage_dir=str(self.reports_dir.parent)).notify_article_published(
-                item,
-                reason='publish_experiment',
-            )
-        except Exception:
-            pass
+        self._notify_article_published(item, reason='publish_experiment')
 
         return item['id']
 
@@ -608,15 +616,7 @@ class Publisher:
         if actual_id != item['id']:
             return actual_id
         self._sync_to_remote(title, analysis, 'comparison')
-        try:
-            from volpred.publisher.email_notifier import EmailNotifier
-
-            EmailNotifier(storage_dir=str(self.reports_dir.parent)).notify_article_published(
-                item,
-                reason='publish_comparison',
-            )
-        except Exception:
-            pass
+        self._notify_article_published(item, reason='publish_comparison')
         return pub_id
 
     def publish_milestone(self, title: str, description: str,
@@ -1162,15 +1162,7 @@ class Publisher:
             print(f"  Supabase sync FAILED for {pub_id} -- recorded to .failed_supabase_syncs.json")
 
         if normalized_status == 'published':
-            try:
-                from volpred.publisher.email_notifier import EmailNotifier
-
-                EmailNotifier(storage_dir=str(self.reports_dir.parent)).notify_article_published(
-                    item,
-                    reason='publish_milestone',
-                )
-            except Exception:
-                pass
+            self._notify_article_published(item, reason='publish_milestone')
 
             # 2026-05-19 post-publish live verify gate (Three-Strike fix):
             # 5 articles got published+synced this session but no code verified
