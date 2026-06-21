@@ -126,6 +126,11 @@ def _is_codex_eligible_task(task: dict[str, Any]) -> bool:
     return preferred_agent == "codex"
 
 
+def _is_codex_owner(owner: str) -> bool:
+    normalized = str(owner or "").strip().lower()
+    return normalized == "codex" or normalized.startswith("codex-") or normalized.startswith("codex_")
+
+
 _K_ID_RE = re.compile(r"^K\d{2,5}[A-Z]?$", re.IGNORECASE)
 
 
@@ -301,6 +306,14 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             }
         if existing_status not in {"pending", "pending_main_thread", "claimed", "blocked", ""}:
             return {"ok": False, "reason": "wrong_status", "status": existing_status}
+        if _is_codex_owner(args.owner) and not _is_codex_eligible_task(task):
+            return {
+                "ok": False,
+                "reason": "not_codex_eligible",
+                "task_type": task.get("task_type"),
+                "dispatch_lane": task.get("dispatch_lane"),
+                "status": existing_status,
+            }
         task["status"] = "claimed"
         task["claimed_by"] = args.owner
         task["claimed_at"] = _now()

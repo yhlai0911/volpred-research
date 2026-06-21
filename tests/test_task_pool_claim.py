@@ -297,3 +297,86 @@ def test_list_codex_eligible_filters_claude_only_tasks(tmp_path, monkeypatch, ca
         "code_review_spaced",
         "explicit_codex_task",
     ]
+
+
+def test_codex_owner_cannot_claim_claude_only_task(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "trending_repost_example",
+                    "task_type": "trending_repost",
+                    "status": "pending",
+                    "priority": 1,
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "claim",
+            "--id",
+            "trending_repost_example",
+            "--owner",
+            "codex-vscode",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is False
+    assert payload["reason"] == "not_codex_eligible"
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "pending"
+    assert "claimed_by" not in saved[0]
+
+
+def test_non_codex_owner_can_claim_reader_facing_task(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "trending_repost_example",
+                    "task_type": "trending_repost",
+                    "status": "pending",
+                    "priority": 1,
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "claim",
+            "--id",
+            "trending_repost_example",
+            "--owner",
+            "hourly-dispatch",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "claimed"
+    assert saved[0]["claimed_by"] == "hourly-dispatch"
