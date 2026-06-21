@@ -47,3 +47,32 @@ def test_count_tex_metrics_counts_pages_from_current_main_pdf(tmp_path):
 
     assert metrics["title"] == "Current"
     assert metrics["pages"] == 2
+
+
+def test_count_tex_metrics_extracts_author_from_current_main_tex(tmp_path):
+    (tmp_path / "main_v3.tex").write_text(
+        r"""
+        \title{Old}
+        \author{Stale Author}
+        \begin{abstract}Old\end{abstract}
+        """
+    )
+    (tmp_path / "main.tex").write_text(
+        r"""
+        \title{Current}
+        \author{
+          Yi-Hao Lai\thanks{Department of Finance, example@example.com}%
+          \and
+          VolPred Research System\footnote{Operational research system}\\[0.25em]
+        }
+        \begin{abstract}Current\end{abstract}
+        """
+    )
+
+    os.utime(tmp_path / "main_v3.tex", (100, 100))
+    os.utime(tmp_path / "main.tex", (200, 200))
+
+    metrics = _count_tex_metrics(tmp_path)
+
+    assert metrics["title"] == "Current"
+    assert metrics["authors"] == "Yi-Hao Lai, VolPred Research System"
