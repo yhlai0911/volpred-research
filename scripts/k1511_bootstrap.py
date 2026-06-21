@@ -13,7 +13,7 @@ Seed: 42
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -92,7 +92,7 @@ def main():
         "p_two_sided_bootstrap": float(2 * min(
             np.mean(betas_ok >= 0), np.mean(betas_ok <= 0))),
         "seed": SEED,
-        "generated_at_utc": datetime.utcnow().isoformat(),
+        "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
     OUT.write_text(json.dumps(out, indent=2, ensure_ascii=False))
     print(json.dumps(out, indent=2, ensure_ascii=False))

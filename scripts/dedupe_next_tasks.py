@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import fcntl
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +38,10 @@ STATUS_RANK = {
     "pending": 10,
     "": 0,
 }
+
+
+def _utc_iso_z() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _load_tasks(fh) -> list[dict[str, Any]]:
@@ -82,7 +87,7 @@ def dedupe(tasks: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict
             continue
         best_idx, best_task = max(entries, key=lambda pair: _score(pair[1], pair[0]))
         kept = dict(best_task)
-        kept["dedup_kept_at"] = kept.get("dedup_kept_at") or __import__("datetime").datetime.utcnow().isoformat() + "Z"
+        kept["dedup_kept_at"] = kept.get("dedup_kept_at") or _utc_iso_z()
         kept["dedup_kept_reason"] = (
             f"kept among {len(entries)} duplicates by status/receipt precedence; "
             f"statuses={[str(t.get('status') or '') for _, t in entries]}"

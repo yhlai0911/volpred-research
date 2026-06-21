@@ -10,7 +10,7 @@
 import sys
 import json
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import yfinance as yf
 import pandas as pd
@@ -383,7 +383,7 @@ try:
         "questions",
         updates={
             "status": "answered",
-            "answered_at": datetime.utcnow().isoformat() + "Z",
+            "answered_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         },
         id="df669347-41e9-4622-8c6d-2e6758674d04",
     )
