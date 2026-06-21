@@ -13,7 +13,9 @@
 
 **驗證**：`_count_tex_metrics` 對全 11 篇論文抽 author 正確（單作者→`Yi-Hao Lai`、雙作者→`Yi-Hao Lai, VolPred Research System`）；線上 `/api/papers` 兩篇 authors 已補；線上 `/paper` 截圖確認作者顯示、日期 `2026-06-22`、stat box「References」。commit 前端 + 主 repo papers.py。
 
-**附帶（Zeabur 首頁慢）**：實測 warm TTFB 0.47–0.81s、`/api/papers` 0.22s — 暖機時快。慢來自 cold-start（容器 idle spin-down）+ 當天連續 4 次部署各觸發 restart。host cron 只可靠 hourly，無法做有效 5-min keep-warm；永久解需外部 uptime pinger（每 5 min）或 always-on 方案＝需 boss 決定，不擅自設外部服務。
+**附帶（Zeabur 首頁慢）— 真根因（修正先前誤判）**：初判為「cold-start + 部署 churn + 需 keep-warm/always-on」是**錯的**（boss 指出他是專用伺服器，不 idle）。真根因＝**首頁 `force-dynamic` 關掉整頁快取，且三大資料源都未跨請求快取**：`getFeed(cluster)`→`getFeedFromQueries`（無快取）、`getDigestColumn`→`listDigestSlugsAsc()`（無快取）、`getIndicatorArenaData`（只有 React `cache()`＝單請求去重、不跨請求）→ **每位訪客進首頁都重跑一輪 live Supabase**，與伺服器方案無關。
+**修**：三者改 `unstable_cache`。feed/digest 用既有 tag `'article'`（發文流程 `record_and_publish.py`→`/api/sync/feed.json`→`revalidateTag('article')` 已存在 → 新文/事件文即時可見，不違反「事件文必須立即」）；arena `revalidate 300s`（每日更新）。本地 TTFB 冷 0.80s→快取命中 0.08s（~10x）；線上 cached TTFB ~0.25–0.32s（其餘為到資料中心的網路 RTT）。commit `perf(home)`。
+**教訓**：效能慢先看「該頁是否 cacheable + 資料層有無跨請求快取」，不要先跳到「伺服器方案/冷啟動」。`force-dynamic` + 逐請求 live query 是與硬體無關的自傷。
 
 ## 2026-06-22 配色主題擴充：暗版黑底消失 + 主題 CSS 首頁不載入（老闆手機版回報）
 
