@@ -1,5 +1,17 @@
 # Strategy Registry
 
+## 待審上架候選（2026-06-21，boss email-11862 standing directive「表現好就上架觀察」）
+
+3 檔已計算但 `is_active=False` 的高 Sharpe 策略，走完整 gate 後決定是否上架（**禁盲目翻 active** — Sharpe 遠高於中位數~2.0，依規則先懷疑 bug + lookahead）：
+
+| 策略 | Sharpe | gate 重點 |
+|---|---|---|
+| `tz_tw_jp_5050`（TW+JP 跨時區）| 3.46 | **lookahead/timing audit 最關鍵**（跨時區用隔夜訊號 → 確認 realized overnight + signal.shift(1)，K880 session-boundary 合法性）|
+| `taiwan_spy_momentum`（台股動量）| 3.23 | 同期 vs 中位數 ✅；sensitivity / MDD / cross-OOS / Codex |
+| `global_vt_tz`（全球 VT+TW 時區）| 2.91 | lookahead audit + 同上 gate |
+
+audit clean → `list_new_strategy.py` 上架觀察；發現 lookahead → 記 `docs/error_log.md` 不上架。lifecycle 設為持續流程（每批新策略實驗都跑 `evaluate_new_strategy.py`）。下架：績效異常掛卡片注記、結構性問題才 `is_active=False`。
+
 ## 目前 STRATEGY_REGISTRY（14 筆，11 個 active / 3 個 disabled；verified 2026-04-19 18:48 UTC 對齊 `scripts/daily_update.py:29-48`）
 
 | key | display_name | is_active | order |
