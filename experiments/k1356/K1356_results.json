@@ -1,0 +1,268 @@
+{
+  "experiment_id": "K1356",
+  "generated_utc": "2026-06-21T12:30:29.145299+00:00",
+  "seed": 42,
+  "data": {
+    "start": "2017-01-01",
+    "end_requested": "2026-06-21",
+    "oos_start": "2020-01-01",
+    "tickers": [
+      "CL=F",
+      "USO",
+      "XLE",
+      "XOP"
+    ],
+    "sources": [
+      "yfinance daily OHLCV auto_adjust=False",
+      "GDELT DOC 2.0 TimelineVolRaw oil-market query",
+      "EIA WCESTUS1 weekly crude stocks XLS"
+    ],
+    "n_panel_rows": 9515,
+    "n_usable_rows": 9323
+  },
+  "lookahead_policy": {
+    "target": "row t forecasts Garman-Klass RV[t+1]",
+    "news": "news_signal = news_z.shift(1)",
+    "inventory": "weekly stock-change z shifted +5 business days, then inventory_signal = inventory_z.shift(1)",
+    "har": "HAR features use RV through t only"
+  },
+  "model_design": {
+    "baseline": "HAR_INV = HAR range-variance features + lagged EIA inventory-control proxy",
+    "primary_challenger": "HAR_INV_NEWS = HAR_INV + lagged GDELT oil-news attention z-score",
+    "diagnostic_challenger": "HAR_INV_NEWS_ABS = HAR_INV + absolute attention shock",
+    "oos": "expanding OLS, annual refit, OOS 2020 onward"
+  },
+  "per_asset": [
+    {
+      "ticker": "CL=F",
+      "metrics": {
+        "HAR": {
+          "n_oos": 1602,
+          "qlike": 0.37205745096122667,
+          "mse_log": 0.5023442626252946
+        },
+        "HAR_INV": {
+          "n_oos": 1602,
+          "qlike": 0.3720711108760522,
+          "mse_log": 0.5024181958547141
+        },
+        "HAR_INV_NEWS": {
+          "n_oos": 1602,
+          "qlike": 0.37169608342717936,
+          "mse_log": 0.5028730932218034
+        },
+        "HAR_INV_NEWS_ABS": {
+          "n_oos": 1602,
+          "qlike": 0.37330418105226926,
+          "mse_log": 0.5043156069571562
+        }
+      },
+      "comparisons": {
+        "HAR_INV_vs_HAR_INV": {
+          "qlike_improvement_pct": 0.0,
+          "mse_log_improvement_pct": 0.0,
+          "dm_qlike_t": 0.0,
+          "dm_qlike_p": 1.0,
+          "dm_mse_t": 0.0,
+          "dm_mse_p": 1.0
+        },
+        "HAR_INV_NEWS_vs_HAR_INV": {
+          "qlike_improvement_pct": 0.10079456262805317,
+          "mse_log_improvement_pct": -0.09054157887641506,
+          "dm_qlike_t": -0.22510489561670816,
+          "dm_qlike_p": 0.8219264003650102,
+          "dm_mse_t": 0.351479265986897,
+          "dm_mse_p": 0.7252750749404342
+        },
+        "HAR_INV_NEWS_ABS_vs_HAR_INV": {
+          "qlike_improvement_pct": -0.3314071262651229,
+          "mse_log_improvement_pct": -0.37765572944947545,
+          "dm_qlike_t": 0.397865235137001,
+          "dm_qlike_p": 0.6907825709112181,
+          "dm_mse_t": 1.0896348150017303,
+          "dm_mse_p": 0.2760380194817711
+        }
+      }
+    },
+    {
+      "ticker": "USO",
+      "metrics": {
+        "HAR": {
+          "n_oos": 1623,
+          "qlike": 0.44632703135514507,
+          "mse_log": 0.5948197515333273
+        },
+        "HAR_INV": {
+          "n_oos": 1623,
+          "qlike": 0.44550126751806146,
+          "mse_log": 0.5948101431071237
+        },
+        "HAR_INV_NEWS": {
+          "n_oos": 1623,
+          "qlike": 0.44128336988091865,
+          "mse_log": 0.593431922683514
+        },
+        "HAR_INV_NEWS_ABS": {
+          "n_oos": 1623,
+          "qlike": 0.4459937515647161,
+          "mse_log": 0.5967976323898357
+        }
+      },
+      "comparisons": {
+        "HAR_INV_vs_HAR_INV": {
+          "qlike_improvement_pct": 0.0,
+          "mse_log_improvement_pct": 0.0,
+          "dm_qlike_t": 0.0,
+          "dm_qlike_p": 1.0,
+          "dm_mse_t": 0.0,
+          "dm_mse_p": 1.0
+        },
+        "HAR_INV_NEWS_vs_HAR_INV": {
+          "qlike_improvement_pct": 0.9467756760022703,
+          "mse_log_improvement_pct": 0.23170761957929065,
+          "dm_qlike_t": -1.8454895508707967,
+          "dm_qlike_p": 0.06514851391161436,
+          "dm_mse_t": -1.1821190396817167,
+          "dm_mse_p": 0.23733173820362063
+        },
+        "HAR_INV_NEWS_ABS_vs_HAR_INV": {
+          "qlike_improvement_pct": -0.11054604836442437,
+          "mse_log_improvement_pct": -0.33413843152203,
+          "dm_qlike_t": 0.1611535897307497,
+          "dm_qlike_p": 0.8719925025049522,
+          "dm_mse_t": 1.2051912795781652,
+          "dm_mse_p": 0.2283052670486716
+        }
+      }
+    },
+    {
+      "ticker": "XLE",
+      "metrics": {
+        "HAR": {
+          "n_oos": 1623,
+          "qlike": 0.2840096129479451,
+          "mse_log": 0.4605542888890527
+        },
+        "HAR_INV": {
+          "n_oos": 1623,
+          "qlike": 0.28677721927342503,
+          "mse_log": 0.46249306635599485
+        },
+        "HAR_INV_NEWS": {
+          "n_oos": 1623,
+          "qlike": 0.2882881671313113,
+          "mse_log": 0.4642071117299046
+        },
+        "HAR_INV_NEWS_ABS": {
+          "n_oos": 1623,
+          "qlike": 0.2917787217068114,
+          "mse_log": 0.4652456743372526
+        }
+      },
+      "comparisons": {
+        "HAR_INV_vs_HAR_INV": {
+          "qlike_improvement_pct": 0.0,
+          "mse_log_improvement_pct": 0.0,
+          "dm_qlike_t": 0.0,
+          "dm_qlike_p": 1.0,
+          "dm_mse_t": 0.0,
+          "dm_mse_p": 1.0
+        },
+        "HAR_INV_NEWS_vs_HAR_INV": {
+          "qlike_improvement_pct": -0.526871646818518,
+          "mse_log_improvement_pct": -0.37060996122920936,
+          "dm_qlike_t": 0.744568286161705,
+          "dm_qlike_p": 0.4566406046965852,
+          "dm_mse_t": 1.0760573389634627,
+          "dm_mse_p": 0.2820616396789961
+        },
+        "HAR_INV_NEWS_ABS_vs_HAR_INV": {
+          "qlike_improvement_pct": -1.7440375654865872,
+          "mse_log_improvement_pct": -0.595167404983104,
+          "dm_qlike_t": 1.3877332988869517,
+          "dm_qlike_p": 0.16540887631826462,
+          "dm_mse_t": 1.01915980504641,
+          "dm_mse_p": 0.30827909257048103
+        }
+      }
+    },
+    {
+      "ticker": "XOP",
+      "metrics": {
+        "HAR": {
+          "n_oos": 1623,
+          "qlike": 0.2882244642351511,
+          "mse_log": 0.45491605159385173
+        },
+        "HAR_INV": {
+          "n_oos": 1623,
+          "qlike": 0.2886979435653138,
+          "mse_log": 0.45523208025041506
+        },
+        "HAR_INV_NEWS": {
+          "n_oos": 1623,
+          "qlike": 0.2894467610579609,
+          "mse_log": 0.4563286006265921
+        },
+        "HAR_INV_NEWS_ABS": {
+          "n_oos": 1623,
+          "qlike": 0.2933792479361743,
+          "mse_log": 0.4582095338260843
+        }
+      },
+      "comparisons": {
+        "HAR_INV_vs_HAR_INV": {
+          "qlike_improvement_pct": 0.0,
+          "mse_log_improvement_pct": 0.0,
+          "dm_qlike_t": 0.0,
+          "dm_qlike_p": 1.0,
+          "dm_mse_t": 0.0,
+          "dm_mse_p": 1.0
+        },
+        "HAR_INV_NEWS_vs_HAR_INV": {
+          "qlike_improvement_pct": -0.25937749448419367,
+          "mse_log_improvement_pct": -0.24087062923461972,
+          "dm_qlike_t": 0.6917881771661457,
+          "dm_qlike_p": 0.4891693711909395,
+          "dm_mse_t": 1.3565982084318151,
+          "dm_mse_p": 0.17509769187735902
+        },
+        "HAR_INV_NEWS_ABS_vs_HAR_INV": {
+          "qlike_improvement_pct": -1.621523282448123,
+          "mse_log_improvement_pct": -0.6540517913481425,
+          "dm_qlike_t": 1.5019228869738663,
+          "dm_qlike_p": 0.13331167003732958,
+          "dm_mse_t": 1.3385263810890748,
+          "dm_mse_p": 0.18091249076997307
+        }
+      }
+    }
+  ],
+  "pooled": {
+    "HAR_INV_NEWS_vs_HAR_INV": {
+      "challenger": "HAR_INV_NEWS",
+      "base": "HAR_INV",
+      "n_dates": 1626,
+      "mean_loss_diff": -0.000570799456559402,
+      "dm_t": -0.744410410671257,
+      "dm_p": 0.4567358559292083,
+      "method": "date-clustered cross-asset mean QLIKE loss differential"
+    },
+    "HAR_INV_NEWS_ABS_vs_HAR_INV": {
+      "challenger": "HAR_INV_NEWS_ABS",
+      "base": "HAR_INV",
+      "n_dates": 1626,
+      "mean_loss_diff": 0.0029067654350744742,
+      "dm_t": 1.0699023050309746,
+      "dm_p": 0.2848221765308865,
+      "method": "date-clustered cross-asset mean QLIKE loss differential"
+    }
+  },
+  "verdict": {
+    "verdict": "NULL",
+    "summary": "GDELT oil-news attention does not add robust OOS information beyond HAR+inventory",
+    "positive_asset_count": 2,
+    "asset_count": 4,
+    "claim_ceiling": "GDELT volume proxy only; not true topic model, not Reuters full-text NLP, and inventory control is realized stock-change proxy rather than survey surprise"
+  }
+}

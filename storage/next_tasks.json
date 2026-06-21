@@ -34927,5 +34927,91 @@
     "started_at": "2026-06-21T11:07:55.524646+00:00",
     "completed_at": "2026-06-21T11:12:39.915999+00:00",
     "result": "Resolved release audit blocker for mile_103338aa by moving internal codex-24h-rule-reviewed tag out of public tags before general-audience audit. Added release_pool regressions; formal release now passes audit and stops only on separate arc-dedup gate versus mile_6606a448.\n\n修 release_pool 流程：codex-24h-rule-reviewed 等內部審查 tag 會在 release audit 前移到 details，不再算入 general tag cap。mile_103338aa 公開 tags 已降為 8、release_audit_status=resolved；指定 release_pool 驗證 audit_skipped=[]，目前若仍留 draft 是 arc-dedup of mile_6606a448，不是 audit blocker。"
+  },
+  {
+    "id": "K1356",
+    "title": "K1356: 能源新聞 topic shock 對原油與能源股 RV 的 OOS 增量** — 用免費新聞/RSS/GDELT 標題建 oil-market topic/sentiment 指標，加入 CL=F/USO/XLE/XOP HAR-RV 與 ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1125). Original: 能源新聞 topic shock 對原油與能源股 RV 的 OOS 增量** — 用免費新聞/RSS/GDELT 標題建 oil-market topic/sentiment 指標，加入 CL=F/USO/XLE/XOP HAR-RV 與 EIA inventory controls，比較 QLIKE/DM 與 event-window RV；與原油 vol spillover、inventory NULL 正交，測「文字 topic flow 是否提供非價格/庫存資訊」（來源：FAJ 2026 Big Data Meets the Turbulent Oil Market；能源 NLP 指標對 oil vol / energy equity 有 OOS 增量）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1356.py with signal.shift(1) + seed=42, (c) K1356_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1125,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-21T12:21:15Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-21T12:21:27.829817+00:00",
+    "claim_session_id": "f93237e604e0",
+    "started_at": "2026-06-21T12:21:31.943775+00:00",
+    "completed_at": "2026-06-21T12:30:36.157586+00:00",
+    "result": "K1356 completed: GDELT oil-news attention proxy vs HAR+EIA inventory for CL=F/USO/XLE/XOP. Verdict NULL: pooled QLIKE DM t=-0.744 p=0.457; 2/4 assets improve, below predeclared gate. Artifacts: README, K1356.py, results JSON, figure, Codex review.\n\nK1356 completed. Verdict NULL: GDELT oil-news attention does not robustly improve OOS RV beyond HAR+EIA inventory; pooled date-cluster DM t=-0.744 p=0.457, 2/4 assets positive. Artifacts under experiments/k1356; no knowledge promotion."
+  },
+  {
+    "id": "K1357",
+    "title": "K1357: RLMM 價差非對稱指紋：對稱成本衝擊下流動性是否單邊惡化** — 用日 OHLCV 建低頻價差代理，選 SPY/QQQ/IWM + 高電子化 mega-cap basket，在 VIX/成交量對稱 shock 後檢定 bid-ask pr",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1127). Original: RLMM 價差非對稱指紋：對稱成本衝擊下流動性是否單邊惡化** — 用日 OHLCV 建低頻價差代理，選 SPY/QQQ/IWM + 高電子化 mega-cap basket，在 VIX/成交量對稱 shock 後檢定 bid-ask proxy 是否有非對稱擴張、且是否預測 t+1..t+5 RV；與 generic CPQS liquidity predictor 正交，聚焦 reinforcement-learning market maker 的可觀測指紋（來源：RFS 2026 Algorithmic Pricing and Liquidity in Securities Markets）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1357.py with signal.shift(1) + seed=42, (c) K1357_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1127,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-21T12:21:15Z"
+  },
+  {
+    "id": "K1358",
+    "title": "K1358: AI 勞動收入曝險 × sector ETF vol：人力資本 shock 是否改變投組風險承擔** — 用 O*NET/免費 AI exposure score 對行業做 AI-labor exposure，映射到 sector ETF ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1129). Original: AI 勞動收入曝險 × sector ETF vol：人力資本 shock 是否改變投組風險承擔** — 用 O*NET/免費 AI exposure score 對行業做 AI-labor exposure，映射到 sector ETF 與 BLS wage/employment surprise，檢定高曝險行業在 AI adoption news / layoff shock 後 RV、downside semivariance、sector correlation 是否升高；與 AI capex/HHI/電力需求題正交，聚焦 household labor-income hedging channel（來源：JOIM 2026 Q2 Adapting to AI）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1358.py with signal.shift(1) + seed=42, (c) K1358_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1129,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-21T12:21:15Z"
+  },
+  {
+    "id": "K1359",
+    "title": "K1359: tailasym5 joimskews 尾部不對稱估計法賽馬：多資產尾部溢酬是否穩健** — 用 ETF/期貨代理（SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM）月頻，測多種 robust asymmetry es",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1131). Original: tailasym5 joimskews 尾部不對稱估計法賽馬：多資產尾部溢酬是否穩健** — 用 ETF/期貨代理（SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM）月頻，測多種 robust asymmetry estimator（含修剪尾端與上下行半變異），檢定下一月報酬、RV 與 left-tail exposure；與 FX 單一橫斷面題正交，聚焦 estimator robustness（來源：JOIM 2026 Q2 A Tail of Five Skews）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1359.py with signal.shift(1) + seed=42, (c) K1359_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1131,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-21T12:21:15Z"
+  },
+  {
+    "id": "K1360",
+    "title": "K1360: Prediction-market implied probability shock 作 macro event vol prior** — 用 Kalshi/Polymarket 公開 market price/API 建 FOMC、C",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1133). Original: Prediction-market implied probability shock 作 macro event vol prior** — 用 Kalshi/Polymarket 公開 market price/API 建 FOMC、CPI、NFP、election/geopolitical event-probability change，檢定是否領先 VIX9D/VIX、SPY RV 與 event-day tail move；所有 signal 用 `shift(1)`，並與 SOFR/FedWatch prior 比較；與 FOMC 單事件 prior 正交（來源：Pew Research Center 2026 prediction-market volume surge；event contracts 2025H2-2026 快速擴大）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1360.py with signal.shift(1) + seed=42, (c) K1360_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1133,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-21T12:21:15Z"
   }
 ]
