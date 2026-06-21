@@ -1,0 +1,382 @@
+{
+  "experiment_id": "K1357",
+  "generated_utc": "2026-06-21T12:37:49.877681+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance daily OHLCV auto_adjust=False",
+    "start": "2012-01-01",
+    "end_requested": "2026-06-21",
+    "oos_start": "2020-01-01",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "AMZN",
+      "GOOGL",
+      "META",
+      "TSLA"
+    ],
+    "n_panel_rows": 36380,
+    "n_usable_rows": 35415
+  },
+  "lookahead_policy": {
+    "event_response": "cost shock and market sign measured at t; spread response is t+1 and forward by design",
+    "forecast_target": "row t target is sum of close-to-close RV over t+1..t+5",
+    "forecast_signals": "all HAR/VIX/volume/spread/asymmetry predictors use explicit .shift(1)",
+    "pooled_dm": "same-date cross-asset QLIKE loss differentials are averaged before DM; h=5 for overlapping target"
+  },
+  "proxy_design": {
+    "spread_proxy": "Corwin-Schultz daily high-low effective-spread estimator, transformed as log1p(100*spread)",
+    "cost_shock": "0.5*abs(VIX return z) + 0.5*positive asset dollar-volume z >= 1.0",
+    "asymmetry_signal": "spread_z * cost_score * 1[SPY return < 0], then shifted one day for forecasts"
+  },
+  "event_asymmetry": {
+    "definition": "high_cost_shock = 0.5*abs(VIX return z) + 0.5*positive asset dollar-volume z >= 1.0; response is t+1 log(1+100*CS spread) change",
+    "pooled_by_date": {
+      "point": 0.045740633228515695,
+      "ci_lo": 0.0005753529798557037,
+      "ci_hi": 0.08956144111417366,
+      "n_neg": 908,
+      "n_pos": 1062
+    },
+    "per_asset": [
+      {
+        "point": 0.11504532556338438,
+        "ci_lo": 0.031101161293068218,
+        "ci_hi": 0.20611039814423626,
+        "n_neg": 326,
+        "n_pos": 287,
+        "asset": "AAPL"
+      },
+      {
+        "point": 0.07449855110639293,
+        "ci_lo": -0.01094485361753338,
+        "ci_hi": 0.16533799398018637,
+        "n_neg": 348,
+        "n_pos": 302,
+        "asset": "AMZN"
+      },
+      {
+        "point": 0.03354155569046585,
+        "ci_lo": -0.04962268694390361,
+        "ci_hi": 0.11652062570816604,
+        "n_neg": 365,
+        "n_pos": 306,
+        "asset": "GOOGL"
+      },
+      {
+        "point": 0.1590523669030428,
+        "ci_lo": 0.08056403224565957,
+        "ci_hi": 0.24086828027803803,
+        "n_neg": 363,
+        "n_pos": 251,
+        "asset": "IWM"
+      },
+      {
+        "point": 0.013152232195619784,
+        "ci_lo": -0.08076310663385111,
+        "ci_hi": 0.11306513511512394,
+        "n_neg": 325,
+        "n_pos": 309,
+        "asset": "META"
+      },
+      {
+        "point": -0.006301505465198906,
+        "ci_lo": -0.0931689462540258,
+        "ci_hi": 0.07800085398805451,
+        "n_neg": 378,
+        "n_pos": 305,
+        "asset": "MSFT"
+      },
+      {
+        "point": -0.004463491771121236,
+        "ci_lo": -0.11450660178926864,
+        "ci_hi": 0.09622499763194371,
+        "n_neg": 408,
+        "n_pos": 416,
+        "asset": "NVDA"
+      },
+      {
+        "point": 0.1220824028918091,
+        "ci_lo": 0.05104710029197393,
+        "ci_hi": 0.1936741109461936,
+        "n_neg": 433,
+        "n_pos": 303,
+        "asset": "QQQ"
+      },
+      {
+        "point": 0.1724752743103447,
+        "ci_lo": 0.09911872875011613,
+        "ci_hi": 0.24727245454944544,
+        "n_neg": 411,
+        "n_pos": 242,
+        "asset": "SPY"
+      },
+      {
+        "point": 0.01346776978498368,
+        "ci_lo": -0.10585340590664996,
+        "ci_hi": 0.13692465817518273,
+        "n_neg": 394,
+        "n_pos": 381,
+        "asset": "TSLA"
+      }
+    ],
+    "n_event_asset_days": 6853,
+    "n_event_dates": 1970
+  },
+  "forecast": {
+    "baseline": "HAR_VIX_VOL",
+    "challenger": "HAR_VIX_VOL_SPREAD_ASYM",
+    "per_asset": [
+      {
+        "asset": "AAPL",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.634132601313009,
+            "mse_log": 0.9108191197086306
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.6339977174838682,
+            "mse_log": 0.9095771597745699
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": 0.021270603161144163,
+          "mse_log_improvement_pct": 0.13635637495818415,
+          "dm_qlike_t": -0.06454602481852756,
+          "dm_qlike_p": 0.9485435239796918,
+          "dm_mse_t": -0.7317876835265512,
+          "dm_mse_p": 0.4644053345202408
+        }
+      },
+      {
+        "asset": "AMZN",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.7340145223013693,
+            "mse_log": 0.9241320587374959
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.7353994739333263,
+            "mse_log": 0.9255006234098354
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -0.18868177534344824,
+          "mse_log_improvement_pct": -0.1480918943780767,
+          "dm_qlike_t": 1.5807665471777503,
+          "dm_qlike_p": 0.11412907625458457,
+          "dm_mse_t": 1.682834881713943,
+          "dm_mse_p": 0.0926021605753522
+        }
+      },
+      {
+        "asset": "GOOGL",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.8330921375083116,
+            "mse_log": 1.0164787259097343
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.8352581001721291,
+            "mse_log": 1.0180952728898747
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -0.2599907700840488,
+          "mse_log_improvement_pct": -0.15903401998832462,
+          "dm_qlike_t": 1.5219773936654395,
+          "dm_qlike_p": 0.12821234352034172,
+          "dm_mse_t": 1.3118705041586585,
+          "dm_mse_p": 0.18975202182516737
+        }
+      },
+      {
+        "asset": "IWM",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.6467416165146741,
+            "mse_log": 0.8047565666093615
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.6438962754265782,
+            "mse_log": 0.8030105395830297
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": 0.4399502081572489,
+          "mse_log_improvement_pct": 0.2169633773462946,
+          "dm_qlike_t": -0.9474626572638725,
+          "dm_qlike_p": 0.34354614701467634,
+          "dm_mse_t": -0.7346593569350293,
+          "dm_mse_p": 0.4626546340500779
+        }
+      },
+      {
+        "asset": "META",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 1.166780169875617,
+            "mse_log": 1.0872592952635884
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 1.1677808843911872,
+            "mse_log": 1.0877649012739645
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -0.08576718574818044,
+          "mse_log_improvement_pct": -0.04650279952341126,
+          "dm_qlike_t": 0.41218958585496296,
+          "dm_qlike_p": 0.6802556867888614,
+          "dm_mse_t": 0.43127622426846274,
+          "dm_mse_p": 0.6663256352147346
+        }
+      },
+      {
+        "asset": "MSFT",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.7036325497480376,
+            "mse_log": 0.955554035635527
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.7040003629890894,
+            "mse_log": 0.9550157591985629
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -0.05227348296828356,
+          "mse_log_improvement_pct": 0.05633134463255496,
+          "dm_qlike_t": 0.21264682080737135,
+          "dm_qlike_p": 0.8316295365046695,
+          "dm_mse_t": -0.2787026199653091,
+          "dm_mse_p": 0.780509066929858
+        }
+      },
+      {
+        "asset": "NVDA",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.7722493181475547,
+            "mse_log": 0.8915950853774189
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.7725806807942494,
+            "mse_log": 0.8919528197877856
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -0.042908765201567986,
+          "mse_log_improvement_pct": -0.04012296795189846,
+          "dm_qlike_t": 0.22672634087225002,
+          "dm_qlike_p": 0.8206655057712977,
+          "dm_mse_t": 0.2842860396077603,
+          "dm_mse_p": 0.7762279697838192
+        }
+      },
+      {
+        "asset": "QQQ",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.6432965368581278,
+            "mse_log": 0.8555379537117139
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.6474472609383816,
+            "mse_log": 0.8570692630809743
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -0.6452271763386067,
+          "mse_log_improvement_pct": -0.17898789441390206,
+          "dm_qlike_t": 1.4313760267015343,
+          "dm_qlike_p": 0.15251776812801743,
+          "dm_mse_t": 0.5473061881209711,
+          "dm_mse_p": 0.5842447227041787
+        }
+      },
+      {
+        "asset": "SPY",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.7466531500513152,
+            "mse_log": 0.9082598689767737
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.7467802847606169,
+            "mse_log": 0.9072346708062728
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -0.017027278233938223,
+          "mse_log_improvement_pct": 0.11287498275750169,
+          "dm_qlike_t": 0.04131967405788031,
+          "dm_qlike_p": 0.9670462041228802,
+          "dm_mse_t": -0.3677357713863681,
+          "dm_mse_p": 0.7131189031208152
+        }
+      },
+      {
+        "asset": "TSLA",
+        "metrics": {
+          "HAR_VIX_VOL": {
+            "n_oos": 1601,
+            "qlike": 0.727265731146903,
+            "mse_log": 0.9435147731643152
+          },
+          "HAR_VIX_VOL_SPREAD_ASYM": {
+            "n_oos": 1601,
+            "qlike": 0.7270307976024066,
+            "mse_log": 0.9448367985798565
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": 0.032303673119017697,
+          "mse_log_improvement_pct": -0.1401170869966907,
+          "dm_qlike_t": -0.10940968976965917,
+          "dm_qlike_p": 0.9128912684372363,
+          "dm_mse_t": 0.8085168559332663,
+          "dm_mse_p": 0.41891330512563796
+        }
+      }
+    ],
+    "pooled": {
+      "n_dates": 1601,
+      "mean_loss_diff": 0.0006313505026913009,
+      "dm_t": 0.6261806825842647,
+      "dm_p": 0.5312857543171756,
+      "method": "date-clustered cross-asset mean QLIKE loss differential, h=5"
+    }
+  },
+  "verdict": {
+    "verdict": "EVENT_ONLY_WEAK",
+    "summary": "spread proxy widens asymmetrically after negative cost shocks, but OOS RV forecast gate fails",
+    "event_pass": true,
+    "forecast_pass": false,
+    "positive_asset_count": 3,
+    "asset_count": 10,
+    "claim_ceiling": "free daily OHLCV proxy only; not quote-level bid/ask, not direct RL market-maker behavior"
+  }
+}

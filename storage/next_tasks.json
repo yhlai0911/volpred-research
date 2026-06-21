@@ -34955,7 +34955,7 @@
     "title": "K1357: RLMM 價差非對稱指紋：對稱成本衝擊下流動性是否單邊惡化** — 用日 OHLCV 建低頻價差代理，選 SPY/QQQ/IWM + 高電子化 mega-cap basket，在 VIX/成交量對稱 shock 後檢定 bid-ask pr",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1127). Original: RLMM 價差非對稱指紋：對稱成本衝擊下流動性是否單邊惡化** — 用日 OHLCV 建低頻價差代理，選 SPY/QQQ/IWM + 高電子化 mega-cap basket，在 VIX/成交量對稱 shock 後檢定 bid-ask proxy 是否有非對稱擴張、且是否預測 t+1..t+5 RV；與 generic CPQS liquidity predictor 正交，聚焦 reinforcement-learning market maker 的可觀測指紋（來源：RFS 2026 Algorithmic Pricing and Liquidity in Securities Markets）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1357.py with signal.shift(1) + seed=42, (c) K1357_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34964,7 +34964,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-21T12:21:15Z"
+    "created_at": "2026-06-21T12:21:15Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-21T12:33:11.716958+00:00",
+    "claim_session_id": "b27bf96e8ef2",
+    "started_at": "2026-06-21T12:33:11.819575+00:00",
+    "completed_at": "2026-06-21T12:38:46.614245+00:00",
+    "result": "K1357 completed: daily OHLCV Corwin-Schultz spread-asymmetry proxy around VIX/volume cost shocks. Verdict EVENT_ONLY_WEAK: event asymmetry clears bootstrap CI barely (+0.0457, CI [+0.0006,+0.0896]) but OOS RV forecast fails (pooled QLIKE DM t=+0.626 p=0.531; 3/10 assets improve). No knowledge promotion."
   },
   {
     "id": "K1358",
