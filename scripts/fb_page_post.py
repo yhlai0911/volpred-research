@@ -1,34 +1,13 @@
 #!/usr/bin/env python3
-"""Post a VolPred article to a Facebook Page via the Graph API (headless-capable).
+"""Withdrawn FB Page Graph API publisher.
 
-WHY (2026-06-03): Facebook *personal profiles* have no posting API, so the
-autonomous (headless) content pipeline could never auto-post — articles needing
-FB piled up as `awaiting_interactive_session` and required a fragile manual
-Claude-in-Chrome session. A Facebook *Page* CAN be posted via the Graph API,
-so moving FB to a Page makes FB fully automatable from cron.
+This file is intentionally kept as a fail-fast historical stub. The Page /
+Graph API route was permanently rejected on 2026-06-03 because VolPred FB
+distribution must use the owner's personal account via an interactive Chrome
+session. See docs/fb_pipeline_permanent_fix.md.
 
-This script is the automation side. It reads credentials from the environment
-(never hardcoded): set these in `.env` / `.env.local` (or the shell):
-
-    FB_PAGE_ID=<numeric page id>
-    FB_PAGE_ACCESS_TOKEN=<long-lived Page access token>
-
-(The Page + token are created by the account owner — generating OAuth tokens /
-FB apps is the owner's step, not this script's.)
-
-Posting convention mirrors the personal-profile one: the post body carries the
-commentary (no link), and the VolPred article link goes in the FIRST COMMENT
-(reduces external-link reach penalty + matches our existing style). The Graph
-API supports this: create the feed post, then POST a comment with the link.
-
-Usage:
-    uv run python scripts/fb_page_post.py --mile-id mile_xxxx            # body from feed, link auto
-    uv run python scripts/fb_page_post.py --message "..." --link "https://..."
-    uv run python scripts/fb_page_post.py --mile-id mile_xxxx --dry-run  # show, don't post
-    uv run python scripts/fb_page_post.py --drain                         # post all awaiting FB
-
-On success, patches feed.json fb_post_status=success + fb_post_url/fb_comment_url
-via the canonical writer path so downstream audits see it (no manual JSON edits).
+Any CLI or direct function call exits before reading FB_PAGE_* credentials or
+attempting a Graph API request.
 """
 from __future__ import annotations
 
@@ -49,6 +28,14 @@ FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 SITE = "https://volpred.zeabur.app"
 # fb_post_status values that mean "still needs posting"
 PENDING_STATES = {"awaiting_interactive_session", "pending_manual", "pending_manual_post", "pending"}
+WITHDRAWN_MESSAGE = (
+    "FB Page Graph API path is permanently withdrawn. Use the personal-account "
+    "Claude-in-Chrome workflow; see docs/fb_pipeline_permanent_fix.md."
+)
+
+
+def _raise_withdrawn() -> None:
+    raise SystemExit(WITHDRAWN_MESSAGE)
 
 
 def _load_env() -> None:
@@ -68,6 +55,7 @@ def _load_env() -> None:
 
 
 def _creds() -> tuple[str, str]:
+    _raise_withdrawn()
     _load_env()
     page_id = os.environ.get("FB_PAGE_ID", "").strip()
     token = os.environ.get("FB_PAGE_ACCESS_TOKEN", "").strip()
@@ -89,6 +77,7 @@ def _graph_post(path: str, params: dict) -> dict:
 
 def post_article(message: str, link: str | None, token: str, page_id: str) -> dict:
     """Create the Page post (body only), then add the link as the first comment."""
+    _raise_withdrawn()
     post = _graph_post(f"{page_id}/feed", {"message": message, "access_token": token})
     post_id = post.get("id")
     comment = None
@@ -139,6 +128,7 @@ def _mark_success(mile_id: str, post_url: str, comment_link: str) -> None:
 
 
 def _post_one(mile_id: str, dry_run: bool) -> bool:
+    _raise_withdrawn()
     feed = _load_feed()
     art = _article(feed, mile_id)
     if not art:
@@ -162,6 +152,7 @@ def _post_one(mile_id: str, dry_run: bool) -> bool:
 
 
 def main() -> int:
+    _raise_withdrawn()
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--mile-id")
     ap.add_argument("--message")

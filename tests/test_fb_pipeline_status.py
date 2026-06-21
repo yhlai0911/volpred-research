@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 from datetime import UTC, datetime
+
+import pytest
 
 
 def _load_module(name: str, rel_path: str):
@@ -18,6 +22,7 @@ def _load_module(name: str, rel_path: str):
 ops_dashboard = _load_module("ops_dashboard", "scripts/ops_dashboard.py")
 audit_fb_pipeline = _load_module("audit_fb_pipeline", "scripts/audit_fb_pipeline.py")
 mark_fb_post_status = _load_module("mark_fb_post_status", "scripts/mark_fb_post_status.py")
+fb_page_post = _load_module("fb_page_post", "scripts/fb_page_post.py")
 
 
 def test_classify_fb_pipeline_separates_awaiting_interactive() -> None:
@@ -254,3 +259,24 @@ def test_mark_fb_post_status_updates_feed_and_log(tmp_path, monkeypatch) -> None
     assert log[0]["fb_post_status"] == "awaiting_interactive_session"
     assert feed[0]["fb_post_note"] == "Needs Chrome MCP session"
     assert log[0]["fb_post_note"] == "Needs Chrome MCP session"
+
+
+def test_fb_page_graph_api_script_is_withdrawn() -> None:
+    script = Path(__file__).resolve().parents[1] / "scripts" / "fb_page_post.py"
+    result = subprocess.run(
+        [sys.executable, str(script), "--dry-run", "--message", "hello"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "permanently withdrawn" in result.stderr
+    assert "fb_pipeline_permanent_fix.md" in result.stderr
+
+
+def test_fb_page_graph_api_direct_call_is_withdrawn() -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        fb_page_post.post_article("message", "https://example.com", "token", "page_id")
+
+    assert "permanently withdrawn" in str(excinfo.value)

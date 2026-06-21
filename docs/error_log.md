@@ -10,6 +10,8 @@
 
 **解決方法**：將 audit auto-expire 泛化為 `pending*` / `awaiting_*` 且非 terminal 的狀態，超過 72h 一律透過 `mark_fb_post_status.py` 降為 `expired_skip`，note 保留原狀態。新增 regression test 覆蓋 `pending_permission_denied` 與 `awaiting_interactive_session` 都會被降級、recent pending 與 success 不受影響。用 canonical writer 將 live `mile_9def57ab` 標為 `expired_skip`；重跑 `audit_fb_pipeline.py` 後 stale_pending=0，live `ops_dashboard.py` overall_status=ok。
 
+**同日 follow-up**：docs 已明確寫 Page / Graph API 路徑永久撤回，但 `scripts/fb_page_post.py` 仍保留可執行 Page publisher，若未來環境碰巧有 `FB_PAGE_*` token 就可能違反 boss 指令。已將該 script 改成 fail-fast historical stub，CLI 與直接 function call 都在讀 token / 打 Graph API 前退出；新增 regression test 鎖住撤回狀態。
+
 ## 2026-06-22 論文頁：兩篇無作者 + 原始時間戳 + 「Citations」標籤誤導（boss 回報）
 
 **問題**：論文頁 `crypto-fear-channel` / `eav-universal-magnitude` 顯示無作者，且 Updated 欄是原始 ISO timestamp（`2026-06-11T16:00:11.388421+00:00`）。連帶查到所有論文的「X Citations」其實是誤導標籤。

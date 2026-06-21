@@ -81,7 +81,7 @@
 
 下列方案 boss 已否決（2026-06-03），**永久不再提案**：
 - ❌ 建 VolPred FB Page
-- ❌ Page + Graph API headless publisher（`scripts/publish_to_fb_page.py` 骨架作廢）
+- ❌ Page + Graph API headless publisher（`scripts/fb_page_post.py` 已改為 fail-fast historical stub；舊 `scripts/publish_to_fb_page.py` 骨架作廢）
 - ❌ `_sync_fb_post` Graph API routing fork
 - ❌ Buffer / Make.com 第三方排程（仍需 Page）
 - ❌ 任何形式的「混合架構」— Page 連動個人帳號 / Page tag 個人 timeline 等
