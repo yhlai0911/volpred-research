@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from volpred.config import load_runtime_schedules
 from volpred.publisher.email_notifier import EmailNotifier
 
 from .common import dump_json, load_json, project_path
@@ -531,6 +532,39 @@ def _trailing_consecutive_failures(codes: list[int]) -> int:
     return consec
 
 
+def _findings_exit_logs_from_schedule_config(config: dict[str, Any] | None = None) -> set[str]:
+    """Return cron log names whose non-zero exit is a findings signal.
+
+    Audit jobs keep the historical `audit_*.log` convention. Non-audit jobs must
+    declare `exit_semantics: "findings"` in config/runtime_schedules.json so the
+    alert layer does not grow another hardcoded registry.
+    """
+    if config is None:
+        try:
+            config = load_runtime_schedules()
+        except Exception:
+            return set()
+
+    def iter_items() -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        for value in config.values():
+            if isinstance(value, dict) and isinstance(value.get("items"), list):
+                items.extend(item for item in value["items"] if isinstance(item, dict))
+        if isinstance(config.get("cron_jobs"), list):
+            items.extend(item for item in config["cron_jobs"] if isinstance(item, dict))
+        return items
+
+    logs: set[str] = set()
+    for item in iter_items():
+        if str(item.get("exit_semantics") or "").strip().lower() != "findings":
+            continue
+        for key in ("log_path", "log"):
+            raw = item.get(key)
+            if isinstance(raw, str) and raw.strip():
+                logs.add(Path(raw).name)
+    return logs
+
+
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     logs_dir = _cron_logs_dir(storage_dir)
     failing_logs: list[dict[str, Any]] = []
@@ -566,12 +600,12 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     # (data-timing: VIX lags SPY basis by a day) or a duplicate already-emitted signal.
     # Those are findings, surfaced via the job's own WARN + report JSON; firing
     # host_cron_fail CRITICAL on them is a false-critical (email-noise → erodes trust
-    # in alerting). Registry of jobs whose non-zero exit = findings, not infra-down.
-    # Long-term: jobs should declare exit-semantics; these aren't in config/cron_jobs
-    # (run via run_due_jobs / launchd), so a documented registry is the single home.
-    _FINDINGS_EXIT_LOGS = {"indicator_arena_daily.log"}
+    # in alerting). Non-audit jobs now self-declare this via runtime_schedules.json.
+    findings_exit_logs = _findings_exit_logs_from_schedule_config()
+
     def _is_audit_signal_log(name: str) -> bool:
-        return name.startswith("audit_") or name in _FINDINGS_EXIT_LOGS
+        return name.startswith("audit_") or name in findings_exit_logs
+
     if logs_dir.exists():
         for log_path in sorted(logs_dir.glob("*.log")):
             if _is_audit_signal_log(log_path.name):

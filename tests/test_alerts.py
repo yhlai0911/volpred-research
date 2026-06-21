@@ -213,6 +213,50 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
     r = _parse_host_cron_state(str(storage), now)
     assert r["breached"] is True and r["level"] == "critical"
 
+    # 5) non-audit jobs can explicitly declare exit_semantics=findings in
+    # config/runtime_schedules.json; indicator_arena_daily uses exit 1 for
+    # skip/findings signals and should not be counted as host-cron infra down.
+    write_exits([0])
+    _write_text(
+        storage / "logs" / "cron" / "indicator_arena_daily.log",
+        "=== [indicator_arena_daily] fire at Sun Jun 15 10:00:00 CST 2026 ===\n"
+        "=== [indicator_arena_daily] exit 1 at Sun Jun 15 10:01:00 CST 2026 ===\n",
+    )
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is False
+
+
+def test_findings_exit_logs_from_schedule_config():
+    from volpred.ops.alerts import _findings_exit_logs_from_schedule_config
+
+    config = {
+        "system_crontab": {
+            "items": [
+                {
+                    "id": "indicator_arena_daily",
+                    "log_path": "storage/logs/cron/indicator_arena_daily.log",
+                    "exit_semantics": "findings",
+                },
+                {
+                    "id": "daily_update",
+                    "log_path": "storage/logs/cron/daily_update.log",
+                },
+            ]
+        },
+        "cron_jobs": [
+            {
+                "id": "legacy_findings_job",
+                "log": "storage/logs/cron/legacy_findings.log",
+                "exit_semantics": "findings",
+            }
+        ],
+    }
+
+    assert _findings_exit_logs_from_schedule_config(config) == {
+        "indicator_arena_daily.log",
+        "legacy_findings.log",
+    }
+
 
 def test_paper_stale_severity_and_isolation(tmp_path: Path):
     """M3 paper-line staleness (2026-06-21 boss email-11851/11854 對稱補強): the whole

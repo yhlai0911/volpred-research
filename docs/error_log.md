@@ -55,7 +55,8 @@
 **根因**：`host_cron_fail` 量 infra health（dispatch/collect/sync），但部分 job 用 exit-nonzero 當 **findings signal**（非 infra-down）。原排除靠 `audit_` 名稱前綴，無法涵蓋同慣例但不同命名的 job。
 
 **修復**（`src/volpred/ops/alerts.py::_parse_host_cron_state`）：exit-as-findings job 做成有文件 registry `_FINDINGS_EXIT_LOGS={"indicator_arena_daily.log"}`，與 `audit_` prefix union 排除。驗證：check-alerts 後 host_cron_fail breached=False、breach_count=0；alerts 測試全綠。
-- 長期 debt：job 應自宣告 exit-semantics；但 indicator_arena/audit 不在 `config/runtime_schedules.json::cron_jobs`（走 run_due_jobs/launchd），registry 是目前單一 home。strike-4 再現 → 改 wrapper 在 log 行標 `exit N [findings]` 讓 alert 自動辨識，不再維護名單。
+- 原長期 debt：job 應自宣告 exit-semantics；若未來還有無 schedule config 的 findings-exit job，再改 wrapper 在 log 行標 `exit N [findings]` 讓 alert 自動辨識。
+- **2026-06-22 Codex 收斂 long-term debt**：`indicator_arena_daily` 已在 `config/runtime_schedules.json` 自宣告 `exit_semantics="findings"`；`alerts.py` 改由 schedule config 推導 findings-exit log，不再在 alert parser 內硬編 `_FINDINGS_EXIT_LOGS`。Regression：`tests/test_alerts.py` 覆蓋 config helper + `indicator_arena_daily.log` exit 1 不觸發 host_cron_fail。
 - 兩個底層 skip 本身良性：VIX 資料時間差自會修正、dup signals 是預期 dedup，不需處理。
 
 ## 2026-06-19 鬼打牆：同 K1054 文章重發兩次（descriptive arc-skip 自傷 + 同 K-id 無防線）
