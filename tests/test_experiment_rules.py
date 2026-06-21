@@ -6,15 +6,35 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_cross_asset_pooled_inference_rule_is_documented() -> None:
+def _experiments_rule_section(header: str) -> str:
     text = (ROOT / ".claude" / "rules" / "experiments.md").read_text(encoding="utf-8")
-    header = "### 跨資產 pooled inference 不可把 asset-day 當 iid"
     assert header in text
 
     section = text[text.index(header) :]
     next_header = section.find("\n### ", len(header))
     if next_header != -1:
         section = section[:next_header]
+    return section
+
+
+def test_arch_forecast_alignment_rule_is_documented() -> None:
+    section = _experiments_rule_section("### `arch` forecast alignment 必須 target 對齊")
+
+    required_phrases = [
+        "origin-aligned `h.1` forecast",
+        "same-index realized variance",
+        "forecast(..., align='target')",
+        "shift 到 target return date",
+        "QLIKE / MSE / DM tests",
+        "lookahead / off-by-one",
+        "K445",
+    ]
+    missing = [phrase for phrase in required_phrases if phrase not in section]
+    assert missing == []
+
+
+def test_cross_asset_pooled_inference_rule_is_documented() -> None:
+    section = _experiments_rule_section("### 跨資產 pooled inference 不可把 asset-day 當 iid")
 
     required_phrases = [
         "asset-day",

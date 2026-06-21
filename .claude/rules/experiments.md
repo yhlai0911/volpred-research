@@ -41,6 +41,9 @@ paths:
 ### 套件限制 ≠ 模型無效
 套件（arch, statsmodels, rugarch 等）在某些 spec 上收斂失敗 / 不支援時，**不可推論模型本身無效**。需自己寫 MLE（通常 scipy.optimize.minimize + analytic gradient）重估。套件 fail 常是 numerical/parameterization 問題，不是模型問題。**K1213 教訓**：用戶研究經驗多次遇到套件限制被誤讀為「模型失敗」。
 
+### `arch` forecast alignment 必須 target 對齊
+用 `arch` 做 one-step OOS loss evaluation 時，不可把 default origin-aligned `h.1` forecast 和 same-index realized variance / squared return 直接相比。必須用 `forecast(..., align='target')`，或明確把 origin-aligned forecast shift 到 target return date 後，才計算 QLIKE / MSE / DM tests。**K445 教訓**：same-index 比較 origin-aligned forecasts 會產生 lookahead / off-by-one 風險，不能支撐 production claim。
+
 ### Pooled-MLE 必 100+ multistart
 所有 pooled / cross-entity MLE（多資產共用參數、多國 panel 估計）必須跑 **≥100 個 random init** + LR test 選 basin + 檢查 log-likelihood 分佈。**K1213→K1216b/K1216c 教訓**：9/9 markets all fragile 時才發現 single-start artifact，fix 後參數 magnitude 變化 5-10x。
 
