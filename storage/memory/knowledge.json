@@ -35383,5 +35383,67 @@
     "k_id": "K1390",
     "reviewer_source": "feature-dev:code-reviewer subagent (Codex CLI fallback per .claude/rules/experiments.md K1259 path)",
     "reviewer": "code-reviewer-subagent"
+  },
+  {
+    "item_id": "6ba2cb3d",
+    "category": "experiment",
+    "content": "K1349: 0050.TW 5-minute HAR-RV pilot — verdict PILOT_ONLY_INSUFFICIENT_OOS（非 PASS）。台灣 intraday 5-min 資料解鎖後第一輪 HAR-RV pilot；驗證資料 pipeline 可行，但 OOS 樣本不足以支撐 paper-grade DM/Harvey 結論，僅止於 pilot。Prior: K196 (SPY 5-min pilot)。Lit: Corsi(2009), ABDL(2003), Hansen-Lunde(2005)。Codex reviewed (experiments/k1349/codex_review.md)。誠實記錄 pilot 狀態,不過度宣稱。",
+    "evidence": [
+      "experiments/k1349/",
+      "experiments/k1349/k1349_results.json",
+      "experiments/k1349/codex_review.md",
+      "K1349"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T13:46:49.246067"
+  },
+  {
+    "item_id": "7cafdde0",
+    "category": "experiment",
+    "content": "K1351: 油波動對股市波動的 spillover — verdict NULL_NO_HARVEY_PASS（null 如實報告）。檢定 CL=F/USO → SPY/XLE/XOP 波動 spillover,所有 spec 皆未過 Harvey → 油價波動未穩健 spill over 到股市(含能源股)波動。Prior: K1481。Lit: Arouri et al.(2011 JIMF), Diebold-Yilmaz(2012 IJF)。Codex reviewed。Null 不代表無關係,僅本 spec 集下未達顯著穩健。",
+    "evidence": [
+      "experiments/k1351/",
+      "experiments/k1351/k1351_results.json",
+      "experiments/k1351/codex_review.md",
+      "K1351"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T13:46:49.378956"
+  },
+  {
+    "item_id": "b0ce44d6",
+    "category": "experiment",
+    "content": "K1519: EPU(經濟政策不確定性)作為跨資產高波動 regime trigger — scientific verdict NULL（code review CONDITIONAL_PASS）。檢定 EPU 是否能觸發/預測跨資產高波動 regime,未通過 → EPU 在本 spec 集下非穩健的高波動 regime trigger。Codex reviewed。null 如實報告,不代表 EPU 全無資訊,僅本檢定未達穩健。",
+    "evidence": [
+      "experiments/k1519/",
+      "experiments/k1519/codex_review.md",
+      "K1519"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T13:50:03.843144"
+  },
+  {
+    "item_id": "d8aae1c8",
+    "category": "experiment",
+    "content": "K1520: Regime-aware in-context analog 波動預測 vs HAR — verdict NULL（code CONDITIONAL_PASS）。以 regime-aware in-context analog(類比樣本)法做波動預測,未顯著勝過 HAR baseline → 該 ICL-style analog 法在本設定下未提供 incremental 預測力。Codex reviewed。null 如實報告。",
+    "evidence": [
+      "experiments/k1520/",
+      "experiments/k1520/codex_review.md",
+      "K1520"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T13:50:03.977976"
+  },
+  {
+    "item_id": "702325d1",
+    "category": "experiment",
+    "content": "K1521: Realized kurtosis 作為 HAR-RV 的 incremental 預測子 — verdict NULL_INSUFFICIENT_DATA（code PASS_WITH_NULL_RESULT）。檢定已實現峰態是否對 HAR-RV 提供 incremental 預測力,資料不足以支撐穩健結論 → 暫列 null。Codex reviewed,code-integrity PASS。誠實標 insufficient data,不過度宣稱。",
+    "evidence": [
+      "experiments/k1521/",
+      "experiments/k1521/codex_review.md",
+      "K1521"
+    ],
+    "confidence": 0.5,
+    "created_at": "2026-06-21T13:50:04.021225"
   }
 ]

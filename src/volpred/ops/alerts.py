@@ -814,6 +814,70 @@ def _parse_supabase_sync_state(storage_dir: str) -> dict[str, Any]:
     }
 
 
+def _parse_knowledge_stale_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """M2 closure staleness — knowledge.json 多天無新 entry = 研究 closure 停滯.
+
+    2026-06-21 (boss email-11851/11854 incident): knowledge.json 連續 3 天無新
+    entry，但 host_cron/release/draft 全綠 → M2 停滯完全無 alert 訊號，主線程能反覆
+    用「正常研究變異 / 測量 bug」silent 解釋掉而不實際 closure。此 alert 讓 M2 closure
+    停滯變成 actionable breach（不可再 deflect）。Mission L5-9：研究永遠不輸 ops。
+    判定用 entries 的 max created_at（真實 closure 時間，非 mtime — mtime 會被 sync/
+    其他寫入 touch 而失真）。
+    """
+    kj_path = _storage_root(storage_dir).joinpath("memory", "knowledge.json")
+    entries = load_json(kj_path, [])
+    if not isinstance(entries, list):
+        entries = []
+    latest: datetime | None = None
+    for e in entries:
+        if not isinstance(e, dict):
+            continue
+        ts = _parse_iso_datetime(e.get("created_at"))
+        if ts is not None and (latest is None or ts > latest):
+            latest = ts
+    gap_days = round((now - latest).total_seconds() / 86400.0, 2) if latest is not None else None
+    # >2d warn (研究該每隔一兩天 close 點什麼), >4d critical (研究線真的斷了)
+    breached = latest is None or (now - latest) > timedelta(days=2)
+    if not breached:
+        return {
+            "id": "knowledge_stale",
+            "breached": False,
+            "level": "info",
+            "title": "Knowledge closure fresh",
+            "body": "",
+            "details": {"latest_entry_at": latest.isoformat() if latest else None, "gap_days": gap_days, "n_entries": len(entries)},
+        }
+    level = "critical" if latest is None or (now - latest) > timedelta(days=4) else "warn"
+    latest_text = latest.isoformat() if latest else "missing"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            f"knowledge.json 已 {gap_days if gap_days is not None else '?'} 天無新 entry（最後 closure: {latest_text}）。",
+            f"- n_entries: {len(entries)}",
+            "",
+            "## 影響",
+            "M2（研究與實驗做好）closure 停滯 = 實驗有跑但結論沒寫進知識庫，研究產出不可見、",
+            "不累積。Mission L5-9：研究與論文永遠不輸 ops。**此 breach 不可用「正常變異/測量 bug」"
+            "解釋掉**，必須實際 close 實驗到 knowledge.json。",
+            "",
+            "## 建議行動（立即執行，不可 defer）",
+            "1. 找已 review 但未 closure 的實驗：`for k in experiments/k*/; do test -f $k/codex_review.md && ! grep -ql $(basename $k) ...; done`",
+            "2. 對 complete + reviewed 實驗（含 NULL/PILOT — null 如實報告）寫 knowledge：",
+            "   MemorySystem(storage_dir='storage').add_knowledge(category, content, evidence, confidence)",
+            "3. PASS/CONDITIONAL_PASS 需符 provenance gate（experiment_id + reviewer，見 experiments.md K1259）。",
+            "4. 若無可 close 實驗 → 主線程 dispatch 新實驗並跑到 closure，不是空等。",
+        ]
+    )
+    return {
+        "id": "knowledge_stale",
+        "breached": True,
+        "level": level,
+        "title": f"M2 knowledge closure stale > {gap_days}d",
+        "body": body,
+        "details": {"latest_entry_at": latest.isoformat() if latest else None, "gap_days": gap_days, "n_entries": len(entries)},
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -826,6 +890,7 @@ def build_alert_condition_report(
         _parse_host_cron_state(storage_dir, current),
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),
+        _parse_knowledge_stale_state(storage_dir, current),
     ]
     return {
         "generated_at": current.isoformat(),
