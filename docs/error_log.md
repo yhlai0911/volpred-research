@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 boss_report 局部資料讀取失敗被 bare except 吞掉
+
+**問題**：`scripts/boss_report.py` 裡多個資料來源讀取分支仍有 `except: pass`，包含 paper README status、pending task pool、autonomous decisions、cycle intent。這些欄位壞掉時，email 報告會照常寄出但缺段落，老闆與 ops loop 看不出是「沒有資料」還是「報告產生器讀取失敗」。
+
+**根因**：boss report 為了避免單一輔助資料源讓整封信失敗，採用過度寬鬆的 silent fallback；但沒有把 fallback 原因帶進報告，重演近期 sync/dashboard 類 silent failure 的同型風險。
+
+**解決方法**：新增 `_REPORT_WARNINGS` / `_record_warning()`，局部讀取失敗時保留 report 可用性，但在 HTML 與 plain-text 報告中顯示 `Report generation warnings`。移除 `boss_report.py` 的 bare `except: pass`，新增 regression test：壞掉的 `storage/next_tasks.json` 會被顯示為 `next_tasks read failed`，並用 AST 檢查鎖住不再出現 bare `except: pass`。
+
 ## 2026-06-22 ops_dashboard Supabase parity 查詢失敗會冒充 sync missing
 
 **問題**：`distribution_supabase` section 若 Supabase REST 查詢因網路、key 或服務端錯誤失敗，原本會吞掉 exception，讓 `supa_synced` 保持空集合，接著把所有最近 24h 文章列為 missing sync。這會把「parity check unavailable」誤導成「需要 full sync」。
@@ -113,6 +121,8 @@
 **教訓（硬規則）**：判定任何 cron「漏跑 / 該 fire 沒 fire」前，**必先查該 job 的 cron expression（含星期/日期欄位）確認今天真的在排程內**。`* * 1-6` 排除週日、`* * 1-5` 排除週末、`0 8 1 * *` 只跑每月 1 號等——不確認就補跑 = 製造 off-schedule 副作用。查法優先用 `uv run volpred ops schedule-due <job_id> --date YYYY-MM-DD`；手動 fallback 才用 `jq` runtime_schedules.json 對應 job 的 `cron` 欄位 + `date -j -f %Y-%m-%d <date> +%A` 確認星期。
 
 **2026-06-22 Codex 防再發**：新增 `volpred ops schedule-due`，可直接回報某 canonical schedule job 在指定 Asia/Taipei 日期是否應 fire。Regression：`tests/test_schedule_report.py` 覆蓋 `daily_update` 2026-06-21 週日不跑、2026-06-22 週一會跑，以及 Sunday `0/7` cron 語義。
+
+**2026-06-22 Codex 第二道防線**：`volpred ops schedule-due` 新增 `--fail-if-not-scheduled`（off-schedule exit 75），`scripts/cron_daily_update.sh` 在真正跑 `daily_update.py` 前先查 canonical schedule；off-schedule 時記錄原因後 exit 0。真的需要緊急補跑必須顯式設 `VOLPRED_ALLOW_OFFSCHEDULE_DAILY_UPDATE=1`。
 
 **副作用處置**：補跑的 recalc（paper_trading/metrics）idempotent 無害（recalc 是正式機制）；唯一風險是生一篇週日 daily 文章。讓 run 跑完（殺掉留半成品更糟）→ 驗證有無 inappropriate 週日文章 → 有則 unpublish。
 

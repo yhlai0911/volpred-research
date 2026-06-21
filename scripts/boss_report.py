@@ -38,6 +38,11 @@ NOW = datetime.now(timezone.utc)        # 內部比較仍用 UTC（git log / ISO
 NOW_TW = NOW.astimezone(TW)             # 顯示用台灣時間
 WINDOW = timedelta(hours=4)
 SINCE = NOW - WINDOW
+_REPORT_WARNINGS: list[str] = []
+
+
+def _record_warning(source: str, exc: Exception) -> None:
+    _REPORT_WARNINGS.append(f"{source}: {type(exc).__name__}: {str(exc)[:200]}")
 
 
 def _git(args):
@@ -83,8 +88,11 @@ def _dashboard():
         return json.loads(out)
     except subprocess.CalledProcessError as e:
         # dashboard exits 1 on critical but still emits JSON
-        try: return json.loads(e.output)
-        except: return {"overall_status": "error", "sections": [], "_err": str(e)[:200]}
+        try:
+            return json.loads(e.output)
+        except Exception as parse_exc:
+            _record_warning("ops_dashboard JSON parse failed", parse_exc)
+            return {"overall_status": "error", "sections": [], "_err": str(e)[:200]}
     except Exception as e:
         return {"overall_status": "error", "sections": [], "_err": str(e)[:200]}
 
@@ -105,7 +113,8 @@ def _paper_portfolio():
                     if "status" in low and (":" in line or "：" in line):
                         status = line.split(":" if ":" in line else "：", 1)[1].strip()[:40]
                         break
-            except: pass
+            except Exception as exc:
+                _record_warning(f"paper README parse failed ({sub.name})", exc)
         out.append({"name": sub.name, "status": status})
     return out
 
@@ -121,7 +130,9 @@ def _pending_tasks():
             bt[t.get("task_type", "?")] = bt.get(t.get("task_type", "?"), 0) + 1
             bp[str(t.get("priority", "?"))] = bp.get(str(t.get("priority", "?")), 0) + 1
         return {"total": len(pending), "by_type": bt, "by_priority": bp}
-    except: return {"total": 0, "by_type": {}, "by_priority": {}}
+    except Exception as exc:
+        _record_warning("next_tasks read failed", exc)
+        return {"total": 0, "by_type": {}, "by_priority": {}}
 
 
 def _autonomous_decisions():
@@ -136,8 +147,10 @@ def _autonomous_decisions():
                     ts = d.get("timestamp", "")
                     if ts >= SINCE.isoformat():
                         out.append(d)
-                except: pass
-        except: pass
+                except Exception as exc:
+                    _record_warning("autonomous_decisions line parse failed", exc)
+        except Exception as exc:
+            _record_warning("autonomous_decisions read failed", exc)
     return out
 
 
@@ -146,7 +159,9 @@ def _cycle_intent():
     f = PROJECT_ROOT / "storage" / "ops" / "current_cycle_intent.json"
     if not f.exists(): return {}
     try: return json.loads(f.read_text())
-    except: return {}
+    except Exception as exc:
+        _record_warning("current_cycle_intent read failed", exc)
+        return {}
 
 
 def _blockers():
@@ -213,6 +228,7 @@ def _iso_to_tw(iso_str):
 
 
 def build_html():
+    _REPORT_WARNINGS.clear()
     dash = _dashboard()
     commits = _commits_in_window()
     papers = _paper_portfolio()
@@ -245,6 +261,12 @@ def build_html():
 
     parts = [f"<!DOCTYPE html><html><head><meta charset='utf-8'>{css}</head><body>"]
     parts.append(f"<h1 style='background:{overall_color}'>VolPred Boss Report · {_esc(NOW_TW.strftime('%Y-%m-%d %H:%M'))} 台灣時間 · Overall <strong>{_esc(dash.get('overall_status', '?').upper())}</strong></h1>")
+
+    if _REPORT_WARNINGS:
+        parts.append("<h2 style='color:#d97706'>ⓘ Report generation warnings</h2><ul>")
+        for warning in _REPORT_WARNINGS:
+            parts.append(f"<li class='small'>{_esc(warning)}</li>")
+        parts.append("</ul>")
 
     # 0. Current cycle intent / goal / plan
     if intent:
@@ -353,6 +375,10 @@ def build_html():
         "",
         "== State ==",
     ]
+    if _REPORT_WARNINGS:
+        plain_lines.append("\n== Report generation warnings ==")
+        for warning in _REPORT_WARNINGS:
+            plain_lines.append(f"  {warning}")
     for s in dash.get("sections", []):
         plain_lines.append(f"  [{s.get('status', '?')}] {s.get('section')}: {s.get('tldr')}")
     plain_lines.append(f"\n== {len(commits)} commits in window ==")
