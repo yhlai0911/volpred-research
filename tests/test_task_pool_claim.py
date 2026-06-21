@@ -204,3 +204,135 @@ def test_codex_review_followup_conditional_pass_does_not_mark_source_failed(tmp_
     source = next(t for t in saved if t["id"] == "K2002")
     assert source["status"] == "succeeded"
     assert all(t["id"] != "K2002_v2_fix_methodology" for t in saved)
+
+
+def test_list_codex_eligible_filters_claude_only_tasks(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "trending_repost_example",
+                    "task_type": "trending_repost",
+                    "status": "pending",
+                    "priority": 1,
+                },
+                {
+                    "id": "platform_ops_example",
+                    "task_type": "platform_ops",
+                    "status": "pending",
+                    "priority": 2,
+                },
+                {
+                    "id": "paper_body_example",
+                    "task_type": "paper_body",
+                    "status": "pending_main_thread",
+                    "priority": 2,
+                },
+                {
+                    "id": "custom_codex_example",
+                    "task_type": "custom",
+                    "status": "pending",
+                    "priority": 3,
+                    "preferred_agent": "codex",
+                },
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "list",
+            "--status",
+            "pending",
+            "--codex-eligible",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    output = json.loads(capsys.readouterr().out)
+    assert [task["id"] for task in output["tasks"]] == [
+        "platform_ops_example",
+        "custom_codex_example",
+    ]
+
+
+def test_list_codex_eligible_filters_claude_only_tasks(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "trending_repost_example",
+                    "task_type": "trending_repost",
+                    "status": "pending",
+                    "priority": 1,
+                },
+                {
+                    "id": "platform_ops_example",
+                    "task_type": "platform_ops",
+                    "status": "pending",
+                    "priority": 2,
+                },
+                {
+                    "id": "paper_review_example",
+                    "task_type": "paper_review",
+                    "status": "pending",
+                    "priority": 3,
+                },
+                {
+                    "id": "paper_body_example",
+                    "task_type": "paper_body",
+                    "status": "pending",
+                    "priority": 4,
+                },
+                {
+                    "id": "main_thread_governance",
+                    "task_type": "governance",
+                    "status": "pending",
+                    "priority": 5,
+                    "dispatch_lane": "main_thread",
+                },
+                {
+                    "id": "explicit_codex_task",
+                    "task_type": "custom_review",
+                    "status": "pending",
+                    "priority": 6,
+                    "preferred_agent": "codex",
+                },
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "list",
+            "--status",
+            "pending",
+            "--codex-eligible",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert [task["id"] for task in payload["tasks"]] == [
+        "platform_ops_example",
+        "paper_review_example",
+        "explicit_codex_task",
+    ]

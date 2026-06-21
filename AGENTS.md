@@ -245,6 +245,9 @@ cat storage/ops/handoff_latest.md
 # 列 pending top 10
 uv run python scripts/task_pool_claim.py list --status pending --limit 10
 
+# Codex 只看自己可接的 pending
+uv run python scripts/task_pool_claim.py list --status pending --codex-eligible --limit 10
+
 # claim（owner 命名建議：codex-vscode / codex-cli / codex-review-<topic>）
 uv run python scripts/task_pool_claim.py claim --id <task_id> --owner codex-vscode
 ```

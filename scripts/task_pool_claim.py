@@ -20,7 +20,7 @@ Commands:
   start    --id <task_id>
   handoff-main-thread --id <task_id> --note <text>
   complete --id <task_id> [--result <text>] [--status succeeded|failed|blocked]
-  list     [--status pending|claimed|in_progress|stale] [--owner <name>] [--limit N]
+  list     [--status pending|claimed|in_progress|stale] [--owner <name>] [--limit N] [--codex-eligible]
   cleanup  --stale-hours <N>   (auto-release claims older than N hours with no completion)
 
 File lock: fcntl.LOCK_EX on next_tasks.json across read-modify-write.
@@ -47,6 +47,14 @@ ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
 DEFAULT_STALE_HOURS = 6  # Claim older than this with no completion -> auto-release
+CODEX_ELIGIBLE_TASK_TYPES = {
+    "platform_ops",
+    "experiment",
+    "governance",
+    "code_review",
+    "paper_review",
+    "daily_article",
+}
 
 
 def _now() -> str:
@@ -88,6 +96,34 @@ def _find(tasks: list[dict[str, Any]], task_id: str) -> dict[str, Any]:
             "Run scripts/dedupe_next_tasks.py first."
         )
     return matches[0]
+
+
+def _normalized_task_type(task: dict[str, Any]) -> str:
+    return (
+        str(task.get("task_type") or "")
+        .strip()
+        .lower()
+        .replace("-", "_")
+        .replace(" ", "_")
+    )
+
+
+def _is_codex_eligible_task(task: dict[str, Any]) -> bool:
+    status = str(task.get("status") or "").strip().lower()
+    if status == "pending_main_thread":
+        return False
+    lane = str(task.get("dispatch_lane") or "").strip().lower()
+    if lane in {"main_thread", "blocked"}:
+        return False
+    task_type = _normalized_task_type(task)
+    if task_type in CODEX_ELIGIBLE_TASK_TYPES:
+        return True
+    preferred_agent = (
+        str(task.get("preferred_agent") or task.get("target_agent") or "")
+        .strip()
+        .lower()
+    )
+    return preferred_agent == "codex"
 
 
 _K_ID_RE = re.compile(r"^K\d{2,5}[A-Z]?$", re.IGNORECASE)
@@ -349,6 +385,8 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                 continue
             if args.owner and t.get("claimed_by") != args.owner:
                 continue
+            if args.codex_eligible and not _is_codex_eligible_task(t):
+                continue
             out.append({
                 "id": t.get("id"),
                 "title": t.get("title"),
@@ -357,6 +395,7 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                 "status": status,
                 "claimed_by": t.get("claimed_by"),
                 "claimed_at": t.get("claimed_at"),
+                "dispatch_lane": t.get("dispatch_lane"),
             })
         def _prio_key(x: dict[str, Any]) -> tuple[int, str]:
             p = x.get("priority")
@@ -405,7 +444,17 @@ def main() -> int:
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
     p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed", "blocked"], default="succeeded"); p.add_argument("--result"); p.set_defaults(fn=cmd_complete)
-    p = sub.add_parser("list"); p.add_argument("--status"); p.add_argument("--owner"); p.add_argument("--limit", type=int); p.add_argument("--stale-hours", type=int, default=DEFAULT_STALE_HOURS); p.set_defaults(fn=cmd_list)
+    p = sub.add_parser("list")
+    p.add_argument("--status")
+    p.add_argument("--owner")
+    p.add_argument("--limit", type=int)
+    p.add_argument("--stale-hours", type=int, default=DEFAULT_STALE_HOURS)
+    p.add_argument(
+        "--codex-eligible",
+        action="store_true",
+        help="Only show task types Codex is allowed to claim",
+    )
+    p.set_defaults(fn=cmd_list)
     p = sub.add_parser("cleanup"); p.add_argument("--stale-hours", type=int, default=DEFAULT_STALE_HOURS); p.set_defaults(fn=cmd_cleanup)
 
     args = ap.parse_args()
