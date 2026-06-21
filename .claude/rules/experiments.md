@@ -44,5 +44,8 @@ paths:
 ### Pooled-MLE 必 100+ multistart
 所有 pooled / cross-entity MLE（多資產共用參數、多國 panel 估計）必須跑 **≥100 個 random init** + LR test 選 basin + 檢查 log-likelihood 分佈。**K1213→K1216b/K1216c 教訓**：9/9 markets all fragile 時才發現 single-start artifact，fix 後參數 magnitude 變化 5-10x。
 
+### 跨資產 pooled inference 不可把 asset-day 當 iid
+多資產 forecast / strategy 檢定若把同一日期的多個資產樣本串成 pooled array，**不得**直接把 stacked asset-day DM / t-test 當 primary publication claim。除非已明確實作並揭露 cluster-robust / panel HAC，否則預設做法是先按日期聚合 cross-asset loss differential，再對日期序列做 HAC / DM；stacked asset-day 結果只能放 diagnostic。**K1355 教訓**：同日跨資產 loss differential 有共同市場 shock，直接串接會低估標準誤並誇大顯著性。
+
 ### 跨市場比較必 symmetric refinement
 若 benchmark 用 canonical spec（e.g. DEV refined EM）、alternative 用 unrefined EM-only，得到的係數差是 **asymmetric artifact 不是真效應**。必須**兩邊同步 refine** 或**兩邊同 EM-only**。**K1216b ρ=-0.071 教訓**：asymmetric refinement 下 spurious 負相關；K1216c 全 refine 後 ρ=+0.379 與 canonical +0.441 indistinguishable（null）。
