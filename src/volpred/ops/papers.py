@@ -283,6 +283,50 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
         if title:
             metrics["title"] = title
 
+    # Extract \author{...} — like \title above, the author was NEVER synced, so
+    # freshly auto-synced papers showed a BLANK author line on the public page
+    # (2026-06-22 boss report: crypto-fear-channel + eav-universal-magnitude had
+    # authors=''). Brace-match the \author{...} span, drop \thanks{...}/\footnote{...}
+    # footnotes (they hold the affiliation/email, not the name), turn \and into
+    # commas. Makes the .tex the single source of truth for the author string.
+    am = re.search(r"\\author\s*\{", content)
+    if am:
+        i, depth, buf = am.end(), 1, []
+        while i < len(content) and depth:
+            ch = content[i]
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            buf.append(ch)
+            i += 1
+        author = "".join(buf)
+        # Drop \thanks{...} / \footnote{...} (brace-matched; may contain braces/email)
+        for cmd in ("thanks", "footnote"):
+            while True:
+                fm = re.search(r"\\" + cmd + r"\s*\{", author)
+                if not fm:
+                    break
+                j, d = fm.end(), 1
+                while j < len(author) and d:
+                    if author[j] == "{":
+                        d += 1
+                    elif author[j] == "}":
+                        d -= 1
+                    j += 1
+                author = author[: fm.start()] + author[j:]
+        author = re.sub(r"%.*", "", author)               # strip line comments
+        author = re.sub(r"\\and\b", ",", author)           # \and → comma separator
+        author = re.sub(r"\\\\(\[[^\]]*\])?", " ", author)  # \\ and \\[..] line breaks
+        author = re.sub(r"\\[a-zA-Z]+", " ", author)       # other \commands
+        author = author.replace("{", " ").replace("}", " ")
+        author = re.sub(r"\s*,\s*", ", ", author)           # tidy comma spacing
+        author = re.sub(r"\s+", " ", author).strip(" ,")
+        if author:
+            metrics["authors"] = author
+
     # Count \bibitem entries (citations)
     citations = len(re.findall(r"\\bibitem", content))
     # Also check body files
@@ -528,6 +572,8 @@ def update_paper_full(
     kwargs: dict[str, Any] = {"paper_id": paper_id}
     if "title" in metrics:
         kwargs["title"] = metrics["title"]
+    if "authors" in metrics:
+        kwargs["authors"] = metrics["authors"]
     if "pages" in metrics:
         kwargs["pages"] = metrics["pages"]
     if "citations" in metrics:
