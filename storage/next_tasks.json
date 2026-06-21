@@ -34627,7 +34627,7 @@
     "title": "K1354: 月度 OPEX「gamma cliff」前 72 小時 RV 壓抑 vs 釋放的事件研究 — yfinance SPY 日 OHLC（range-based RV proxy）+ 公開 OPEX/quad-witching 日曆（每月第三個",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 634). Original: 月度 OPEX「gamma cliff」前 72 小時 RV 壓抑 vs 釋放的事件研究 — yfinance SPY 日 OHLC（range-based RV proxy）+ 公開 OPEX/quad-witching 日曆（每月第三個週五 + 3/6/9/12 月 quad witching），event-window 檢定 dealer-long-gamma 假說：到期前 N 日 RV 是否系統性低於常日、到期週後是否反彈（mean-reversion），並比較 monthly OPEX vs quad-witching 強度差；與既有 0DTE intraday-share 軸（06-10/06-11）正交——這裡是 monthly gamma-cliff 的 daily RV 時序事件，不是 intraday 占比（來源：GEX/dealer-gamma practitioner 2025-26；witching-day abnormal return 學術文獻）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1354.py with signal.shift(1) + seed=42, (c) K1354_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34640,7 +34640,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-21T08:57:49.849261+00:00",
     "claim_session_id": "bf9458acdcb3",
-    "started_at": "2026-06-21T08:57:49.945401+00:00"
+    "started_at": "2026-06-21T08:57:49.945401+00:00",
+    "completed_at": "2026-06-21T09:05:50.762604+00:00",
+    "result": "K1354 completed: SPY monthly OPEX gamma-cliff daily range-variance event study. Produced README, K1354.py, K1354_results.json, data panels, figures, and codex_review.md.\nResult NULL: no robust pre-72h RV suppression or post-OPEX release under Harvey/Bonferroni/bootstrap gate; knowledge.json not updated because verdict below CONDITIONAL_PASS."
   },
   {
     "id": "K1355",

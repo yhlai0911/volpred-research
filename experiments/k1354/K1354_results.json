@@ -1,0 +1,196 @@
+{
+  "experiment_id": "K1354",
+  "title": "Monthly OPEX gamma-cliff event study on SPY daily range variance",
+  "run_timestamp_utc": "2026-06-21T09:05:41+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance",
+    "ticker": "SPY",
+    "start_requested": "1993-01-29",
+    "end_requested": "2026-06-22",
+    "sample_start": "1993-02-01",
+    "sample_end": "2026-06-18",
+    "trading_days": 8403,
+    "ohlcv_cache": "data/SPY_ohlcv_auto_adjusted.csv",
+    "auto_adjust": true
+  },
+  "event_calendar": {
+    "rule": "third Friday monthly option expiration; if not a trading day, previous SPY trading day in same month",
+    "calendar_events": 401,
+    "evaluable_events": 399,
+    "quad_witching_events": 132,
+    "nonquad_events": 267,
+    "first_event": "1993-02-19",
+    "last_event": "2026-05-15"
+  },
+  "methodology": {
+    "primary_metric": "Parkinson range variance = log(High/Low)^2 / (4 log 2)",
+    "unit_of_inference": "one row per monthly OPEX event",
+    "control": "same calendar month trading days excluding offsets -5..+5 around OPEX",
+    "primary_windows": {
+      "pre3": "trading days -3,-2,-1",
+      "expiration": "trading day 0",
+      "post3": "trading days +1,+2,+3",
+      "post5": "trading days +1..+5"
+    },
+    "formal_tests": "paired event-level t/Wilcoxon plus 5000-rep bootstrap; quad-vs-nonquad Welch plus bootstrap",
+    "lookahead_policy": "Calendar events are known ex ante; code includes opex_pre3_calendar_signal_lag1 = signal.shift(1) for forecasting-style use."
+  },
+  "success_gate": {
+    "primary_pattern": "pre3_vs_control negative and post3_vs_pre3 positive",
+    "t_stat_threshold": "|t| > 3.0 in the pre-registered direction",
+    "bonferroni_alpha": 0.0125,
+    "bootstrap_reps": 5000,
+    "bootstrap_requirement": "95% CI excludes zero in the pre-registered direction and one-sided bootstrap p < Bonferroni alpha"
+  },
+  "descriptive": {
+    "mean_control_range_var": 9.457312905117341e-05,
+    "mean_pre3_range_var": 9.666178202602728e-05,
+    "mean_expiration_range_var": 7.944288890073086e-05,
+    "mean_post3_range_var": 9.274096266835448e-05,
+    "mean_pre3_ratio_control": 1.15863979390665,
+    "mean_expiration_ratio_control": 0.9435865247137296,
+    "mean_post3_ratio_control": 1.2030904509310938
+  },
+  "tests": {
+    "pre3_vs_control": {
+      "n": 399,
+      "mean": 2.0886529748538608e-06,
+      "median": -5.139245349494955e-06,
+      "std": 0.00013651041532461005,
+      "t_stat": 0.30562364342264126,
+      "t_p_two_sided": 0.7600510012755572,
+      "wilcoxon_p_two_sided": 0.0069764732026164405,
+      "cohen_d": 0.015300319538895426,
+      "share_positive": 0.44611528822055135,
+      "bootstrap_ci_low": -1.1004625753249146e-05,
+      "bootstrap_ci_high": 1.5867138032396865e-05,
+      "bootstrap_p_less": 0.5988,
+      "bootstrap_p_greater": 0.4012,
+      "bootstrap_p_two_sided": 0.8024
+    },
+    "expiration_vs_control": {
+      "n": 399,
+      "mean": -1.5130240150442547e-05,
+      "median": -1.3648607519146023e-05,
+      "std": 0.00013644441879897922,
+      "t_stat": -2.215014091154409,
+      "t_p_two_sided": 0.027324697490009178,
+      "wilcoxon_p_two_sided": 1.6715312889065162e-16,
+      "cohen_d": -0.11088940305234193,
+      "share_positive": 0.2882205513784461,
+      "bootstrap_ci_low": -2.834866334237127e-05,
+      "bootstrap_ci_high": -1.7496897272988866e-06,
+      "bootstrap_p_less": 0.0144,
+      "bootstrap_p_greater": 0.9856,
+      "bootstrap_p_two_sided": 0.0288
+    },
+    "post3_vs_pre3": {
+      "n": 399,
+      "mean": -3.920819357672794e-06,
+      "median": -1.2785605144952547e-06,
+      "std": 0.00015207923022251836,
+      "t_stat": -0.5149835728088572,
+      "t_p_two_sided": 0.6068503843817016,
+      "wilcoxon_p_two_sided": 0.38155896057433725,
+      "cohen_d": -0.02578142558938491,
+      "share_positive": 0.48120300751879697,
+      "bootstrap_ci_low": -1.9118175798452302e-05,
+      "bootstrap_ci_high": 1.0740984694627077e-05,
+      "bootstrap_p_less": 0.3006,
+      "bootstrap_p_greater": 0.6994,
+      "bootstrap_p_two_sided": 0.6012
+    },
+    "post3_vs_control": {
+      "n": 399,
+      "mean": -1.8321663828189329e-06,
+      "median": -5.636033463661338e-06,
+      "std": 0.00013354007603991324,
+      "t_stat": -0.2740562677411496,
+      "t_p_two_sided": 0.7841835594942819,
+      "wilcoxon_p_two_sided": 0.0001750122716522826,
+      "cohen_d": -0.01371997408681514,
+      "share_positive": 0.40601503759398494,
+      "bootstrap_ci_low": -1.4533498659785183e-05,
+      "bootstrap_ci_high": 1.1296754353080216e-05,
+      "bootstrap_p_less": 0.3744,
+      "bootstrap_p_greater": 0.6256,
+      "bootstrap_p_two_sided": 0.7488
+    },
+    "post5_vs_pre5": {
+      "n": 399,
+      "mean": -8.413581747708185e-06,
+      "median": -3.382451502773695e-07,
+      "std": 0.0001555084669882768,
+      "t_stat": -1.0807203430044792,
+      "t_p_two_sided": 0.2804759514863941,
+      "wilcoxon_p_two_sided": 0.9177640511604569,
+      "cohen_d": -0.054103689083003136,
+      "share_positive": 0.49373433583959897,
+      "bootstrap_ci_low": -2.4781136487455898e-05,
+      "bootstrap_ci_high": 6.1287549673791306e-06,
+      "bootstrap_p_less": 0.1396,
+      "bootstrap_p_greater": 0.8604,
+      "bootstrap_p_two_sided": 0.2792
+    },
+    "quad_vs_nonquad_post3_minus_pre3": {
+      "n_true": 132,
+      "n_false": 267,
+      "mean_true": -1.6433086767195124e-05,
+      "mean_false": 2.265020709956226e-06,
+      "mean_diff_true_minus_false": -1.869810747715135e-05,
+      "welch_t": -1.2264547514918873,
+      "welch_p_two_sided": 0.22097189928429736,
+      "bootstrap_ci_low": -4.9237308340603026e-05,
+      "bootstrap_ci_high": 1.004426240421694e-05,
+      "bootstrap_p_greater": 0.8966,
+      "bootstrap_p_less": 0.1034
+    },
+    "quad_vs_nonquad_pre3_minus_control": {
+      "n_true": 132,
+      "n_false": 267,
+      "mean_true": 1.4869033420635311e-05,
+      "mean_false": -4.229737357892023e-06,
+      "mean_diff_true_minus_false": 1.9098770778527334e-05,
+      "welch_t": 1.2632252250942393,
+      "welch_p_two_sided": 0.20776062533022446,
+      "bootstrap_ci_low": -8.051658407552813e-06,
+      "bootstrap_ci_high": 5.0780414910502384e-05,
+      "bootstrap_p_greater": 0.084,
+      "bootstrap_p_less": 0.916
+    }
+  },
+  "verdict": "NULL",
+  "verdict_reason": "Neither primary event-level Harvey/Bonferroni/bootstrap gate supports a robust monthly OPEX gamma-cliff effect.",
+  "research_honesty_notes": [
+    "This is a yfinance daily-OHLC range-variance proxy; it does not observe dealer gamma exposure or intraday hedging flow.",
+    "A significant pre/post window pattern would be consistent with, but not proof of, dealer-long-gamma mechanics.",
+    "Null results must not be interpreted as evidence that true options-market gamma exposure is irrelevant."
+  ],
+  "references": [
+    {
+      "citation": "Ni, Pearson, and Poteshman (2005), Journal of Financial Economics, Stock price clustering on option expiration dates.",
+      "url": "https://ideas.repec.org/a/eee/jfinec/v78y2005i1p49-87.html"
+    },
+    {
+      "citation": "Avellaneda and Lipkin (2003), Quantitative Finance, A market-induced mechanism for stock pinning.",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=458020"
+    },
+    {
+      "citation": "Feinstein and Goetzmann (1988), Federal Reserve Bank of Atlanta Economic Review, The effect of the triple witching hour on stock market volatility.",
+      "url": "https://fraser.stlouisfed.org/files/docs/publications/frbatlreview/pages/67107_1985-1989.pdf"
+    },
+    {
+      "citation": "Stoll and Whaley (1991), Financial Analysts Journal, Expiration-day effects: what has changed?",
+      "url": "https://www.whaley.info/research-articles/1990-1999"
+    }
+  ],
+  "artifacts": {
+    "event_panel": "data/K1354_event_panel.csv",
+    "offset_panel": "data/K1354_offset_panel.csv",
+    "figures": [
+      "figures/K1354_opex_offset_profile.png",
+      "figures/K1354_event_differences.png"
+    ]
+  }
+}
