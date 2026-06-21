@@ -228,24 +228,38 @@ def main():
     # L2 Distribution: Supabase parity for recent 24h
     recent_ids = [a.get("id") for a in pub_24h if a.get("id")]
     supa_synced = set()
-    if recent_ids and env.get("SUPABASE_URL") and (env.get("SUPABASE_SERVICE_ROLE_KEY") or env.get("SUPABASE_KEY")):
-        key = env.get("SUPABASE_SERVICE_ROLE_KEY") or env.get("SUPABASE_KEY")
-        try:
-            url = f"{env['SUPABASE_URL'].rstrip('/')}/rest/v1/articles?select=slug,status&slug=in.({quote(','.join(recent_ids), safe=',')})"
-            req = request.Request(url, headers={"apikey": key, "Authorization": f"Bearer {key}"})
-            with request.urlopen(req, timeout=15) as r:
-                data = json.loads(r.read())
-                supa_synced = {x["slug"] for x in data if x.get("status") == "published"}
-        except Exception as e:
-            pass
-    miss_supa = sorted(set(recent_ids) - supa_synced)
-    out.append(section(
-        "distribution_supabase",
-        "ok" if not miss_supa else "warn" if len(miss_supa) <= 2 else "critical",
-        f"{len(recent_ids) - len(miss_supa)}/{len(recent_ids)} last-24h articles synced",
-        f"uv run python scripts/supabase_sync.py full ({len(miss_supa)} missing)" if miss_supa else None,
-        missing=miss_supa[:5]
-    ))
+    supa_error = None
+    if recent_ids:
+        if env.get("SUPABASE_URL") and (env.get("SUPABASE_SERVICE_ROLE_KEY") or env.get("SUPABASE_KEY")):
+            key = env.get("SUPABASE_SERVICE_ROLE_KEY") or env.get("SUPABASE_KEY")
+            try:
+                url = f"{env['SUPABASE_URL'].rstrip('/')}/rest/v1/articles?select=slug,status&slug=in.({quote(','.join(recent_ids), safe=',')})"
+                req = request.Request(url, headers={"apikey": key, "Authorization": f"Bearer {key}"})
+                with request.urlopen(req, timeout=15) as r:
+                    data = json.loads(r.read())
+                    supa_synced = {x["slug"] for x in data if x.get("status") == "published"}
+            except Exception as e:
+                supa_error = f"{type(e).__name__}: {e}"
+        else:
+            supa_error = "missing Supabase URL or service key"
+    if supa_error:
+        out.append(section(
+            "distribution_supabase",
+            "warn",
+            f"parity check unavailable: {supa_error}",
+            "fix Supabase env/connectivity before running sync remediation",
+            recent_ids=recent_ids[:5],
+            error=supa_error,
+        ))
+    else:
+        miss_supa = sorted(set(recent_ids) - supa_synced)
+        out.append(section(
+            "distribution_supabase",
+            "ok" if not miss_supa else "warn" if len(miss_supa) <= 2 else "critical",
+            f"{len(recent_ids) - len(miss_supa)}/{len(recent_ids)} last-24h articles synced",
+            f"uv run python scripts/supabase_sync.py full ({len(miss_supa)} missing)" if miss_supa else None,
+            missing=miss_supa[:5]
+        ))
 
     # L3 Verification: live URL sample (3 newest reports + core pages)
     # 2026-06-11 incident: /paper full-page React render error (unknown

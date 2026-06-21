@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 ops_dashboard Supabase parity 查詢失敗會冒充 sync missing
+
+**問題**：`distribution_supabase` section 若 Supabase REST 查詢因網路、key 或服務端錯誤失敗，原本會吞掉 exception，讓 `supa_synced` 保持空集合，接著把所有最近 24h 文章列為 missing sync。這會把「parity check unavailable」誤導成「需要 full sync」。
+
+**根因**：`scripts/ops_dashboard.py` 在 Supabase parity query 的 `except Exception` 裡 `pass`，沒有保留錯誤狀態；後續缺同步判斷無法區分「查詢結果真的是空」和「查詢根本沒成功」。
+
+**解決方法**：加入 `supa_error` 分支；只要 recent_ids 非空且 Supabase env 缺失或 REST 查詢 exception，就回報 `distribution_supabase` status=`warn`、tldr=`parity check unavailable: <err>`，並提示先修 env/connectivity，不再建議 full sync。新增 regression test 覆蓋 urlopen 失敗時不產生 `missing` 欄位。
+
 ## 2026-06-22 ops_dashboard 只 print 不寫 dashboard_latest，handoff 會讀到舊 WARN
 
 **問題**：修掉 live `ops_dashboard.py` 的 release_pool false WARN 後，`storage/ops/handoff_latest.md` 仍顯示舊 WARN，因為 handoff 讀 `storage/ops/dashboard_latest.json`，而直接執行 `ops_dashboard.py` 只印 stdout，不會更新 latest snapshot。這是 2026-06-10 process audit 已標的 stale dashboard_latest 結構債。

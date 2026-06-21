@@ -136,6 +136,61 @@ def test_ops_dashboard_writes_latest_snapshot(tmp_path, monkeypatch) -> None:
     assert latest["overall_status"] in {"ok", "warn", "critical"}
 
 
+def test_ops_dashboard_supabase_query_failure_is_unavailable_not_missing(tmp_path, monkeypatch) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    (repo / "storage" / "next_tasks.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_recent",
+                    "status": "published",
+                    "published_at": "2999-01-01T00:00:00",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text('{"system_crontab":{"items":[]}}\n', encoding="utf-8")
+
+    def fail_urlopen(*args, **kwargs):
+        raise OSError("network down")
+
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "load_env", lambda: {"SUPABASE_URL": "https://example.invalid", "SUPABASE_KEY": "k"})
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(ops_dashboard.request, "urlopen", fail_urlopen)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    import io
+    import contextlib
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = ops_dashboard.main()
+    payload = json.loads(buf.getvalue())
+    section = next(s for s in payload["sections"] if s["section"] == "distribution_supabase")
+
+    assert rc == 0
+    assert section["status"] == "warn"
+    assert section["tldr"].startswith("parity check unavailable")
+    assert section["next"] == "fix Supabase env/connectivity before running sync remediation"
+    assert "missing" not in section
+
+
 def test_ops_dashboard_production_pending_counts_pending_main_thread(tmp_path, monkeypatch) -> None:
     repo = tmp_path
     (repo / "storage" / "reports").mkdir(parents=True)
