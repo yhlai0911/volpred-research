@@ -34649,7 +34649,7 @@
     "title": "K1355: ML 強化的日頻流動性測度（CPQS proxy）作系統性流動性風險 → vol 通道 — yfinance 美股/ETF 日 OHLCV，建 Closing-Percent-Quoted-Spread proxy（非 Amihud，與 l",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 637). Original: ML 強化的日頻流動性測度（CPQS proxy）作系統性流動性風險 → vol 通道 — yfinance 美股/ETF 日 OHLCV，建 Closing-Percent-Quoted-Spread proxy（非 Amihud，與 line 481/554 正交）+ boosting/NN 學非線性映射估日頻 spread，再把估出的系統性流動性風險因子加入 HAR-RV / 跨資產 vol 檢定其 OOS 增量；明確 lag（來源：Dai-Shi-Zhang JBF 2025「Estimating Market Liquidity from Daily Data: Marrying Microstructure Models and Machine Learning」；CPQS 為最佳 percent-cost daily proxy，1000-10000× 計算節省）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1355.py with signal.shift(1) + seed=42, (c) K1355_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34659,8 +34659,13 @@
       "autonomous-research"
     ],
     "created_at": "2026-06-20T00:00:00Z",
-    "started_at": "2026-06-21T11:07:37.900184+00:00",
-    "last_released_at": "2026-06-21T11:12:32.647483+00:00"
+    "started_at": "2026-06-21T11:14:33.460330+00:00",
+    "last_released_at": "2026-06-21T11:12:32.647483+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-21T11:14:27.670411+00:00",
+    "claim_session_id": "ab319f780faf",
+    "completed_at": "2026-06-21T11:17:03.476257+00:00",
+    "result": "K1355 completed as yfinance-only CPQS-like liquidity proxy experiment. Final verdict MIXED_WEAK: GB proxy OOS R2=0.562; lagged system factor improves pooled QLIKE 10.31% but date-clustered DM t=-2.24 fails Harvey -3. Artifacts in experiments/k1355; research_program and error_log updated; knowledge not promoted because verdict below CONDITIONAL_PASS."
   },
   {
     "id": "journal_discovery_20260620_0",

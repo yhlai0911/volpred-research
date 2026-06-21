@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-21 K1355 pooled asset-day DM 近失誤——多資產同日樣本不可當獨立觀測
+
+**問題**：K1355 初版把 8 檔 ETF 的 OOS QLIKE loss 直接串接成 asset-day array 做 pooled DM，得到 t≈-4.17，看似 Harvey pass。
+
+**根因**：多資產同日 loss differential 受共同市場 shock 影響，不能視為 8 個獨立時間序列觀測；直接串接會放大有效樣本數、低估標準誤。這與單資產 overlapping-window HAC 問題不同，是 cross-sectional dependence。
+
+**修復**：K1355 改為先按日期平均 cross-asset loss differential，再對日期序列做 HAC DM（h=1）；stacked asset-day DM 只保留 diagnostic。修後 pooled DM t=-2.24，不過 Harvey -3，verdict 降為 `MIXED_WEAK`。
+
+**教訓**：跨資產 pooled forecast/strategy 檢定若未做 cluster-robust / panel HAC，預設先用 date-clustered loss differential；不得把 asset-day 串接 DM 當 primary publication claim。
+
 ## 2026-06-21 誤判 daily_update「漏跑」就補跑——沒先查 cron schedule 含不含今天
 
 **問題**：自主巡檢看到 daily_update.log 最後一筆是昨天(6/20)，今天(6/21)08:28 無紀錄，**直接下結論「漏跑」並背景補跑** `cron_daily_update.sh`（已開始改 paper_trading/feed/strategy_metrics）。

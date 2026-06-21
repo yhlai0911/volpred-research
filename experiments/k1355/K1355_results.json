@@ -1,0 +1,510 @@
+{
+  "experiment_id": "K1355",
+  "generated_utc": "2026-06-21T11:15:28.564801+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance daily OHLCV, auto_adjust=False",
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "EEM",
+      "HYG",
+      "LQD",
+      "TLT",
+      "GLD",
+      "^VIX"
+    ],
+    "start_requested": "2010-01-01",
+    "end_requested": "2026-06-21",
+    "history_start": "2010-01-04",
+    "history_end": "2026-06-19",
+    "oos_start": "2020-01-01",
+    "panel_rows": 33136,
+    "raw_snapshot": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1355/data/yfinance_raw_ohlcv.csv",
+    "derived_panel": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1355/data/derived_panel.csv"
+  },
+  "literature_anchor": [
+    "Dai, Shi, Zhang (Journal of Financial Markets, forthcoming/2026): ML estimates daily market liquidity from low-frequency data.",
+    "Chung and Zhang (2014): closing percent quoted spread (CPQS) uses closing bid/ask quotes.",
+    "Corwin and Schultz (2012): high-low spread estimator from daily prices.",
+    "Goyenko, Holden, Trzcinka (2009) and Fong, Holden, Trzcinka (2017): low-frequency liquidity proxy validation."
+  ],
+  "related_memory": [
+    "K150 Amihud Fragility GARCH-X: daily Amihud proxy did not robustly beat GJR/VIX; endogenous to volatility.",
+    "K154 daily OFI proxies: in-sample partial signals did not translate to robust OOS vol gains.",
+    "K1515 bond illiquidity ML: joint cross-market features did not significantly beat OLS; model-class vs feature-set caveat."
+  ],
+  "honesty_constraints": {
+    "true_cpqs_available": false,
+    "proxy_note": "CPQS requires closing bid/ask. yfinance provides OHLCV only, so cpqs_like is a low-frequency percent-cost proxy, not true CPQS.",
+    "lookahead_policy": "all liquidity and HAR/VIX predictors enter volatility tests through explicit .shift(1) columns; OOS models train only on dates before 2020-01-01.",
+    "primary_test": "GB-estimated system liquidity factor added to HAR-style range-variance + VIX baseline; QLIKE plus date-clustered HAC DM h=1."
+  },
+  "liquidity_proxy_estimation": {
+    "ridge": {
+      "train_r2": 0.5053394309770631,
+      "oos_r2": 0.5378315638184763,
+      "train_n": 19497,
+      "oos_n": 12807
+    },
+    "gb": {
+      "train_r2": 0.5246743573175796,
+      "oos_r2": 0.5620800173162495,
+      "train_n": 19497,
+      "oos_n": 12807
+    },
+    "mlp": {
+      "train_r2": 0.5212293321484125,
+      "oos_r2": 0.5351372707322246,
+      "train_n": 19497,
+      "oos_n": 12807
+    }
+  },
+  "factor_diagnostics": {
+    "factor_start": "2010-03-31",
+    "factor_end": "2026-05-22",
+    "signal_policy": "system liquidity factor is shifted one trading day via factor.shift(1)"
+  },
+  "vol_channel_primary_gb": {
+    "per_asset": [
+      {
+        "asset": "SPY",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5690852623698154,
+        "augmented_qlike": 0.47656421159794543,
+        "qlike_improvement_pct": 16.257853943816578,
+        "dm_t_augmented_vs_baseline": -2.835468547943064,
+        "dm_p_augmented_vs_baseline": 0.0046332211135518,
+        "harvey_pass": false
+      },
+      {
+        "asset": "QQQ",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.6236342360718206,
+        "augmented_qlike": 0.5726853952090201,
+        "qlike_improvement_pct": 8.16966707660562,
+        "dm_t_augmented_vs_baseline": -3.619932358520359,
+        "dm_p_augmented_vs_baseline": 0.00030382827246322464,
+        "harvey_pass": true
+      },
+      {
+        "asset": "IWM",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.48921582101065714,
+        "augmented_qlike": 0.449394312438145,
+        "qlike_improvement_pct": 8.139865241938828,
+        "dm_t_augmented_vs_baseline": -2.4274292820434127,
+        "dm_p_augmented_vs_baseline": 0.015315635090758617,
+        "harvey_pass": false
+      },
+      {
+        "asset": "EEM",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.4157682017761538,
+        "augmented_qlike": 0.41791828355233557,
+        "qlike_improvement_pct": -0.5171347320445978,
+        "dm_t_augmented_vs_baseline": 0.14111604323462174,
+        "dm_p_augmented_vs_baseline": 0.8877959784960774,
+        "harvey_pass": false
+      },
+      {
+        "asset": "HYG",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.6590288251830065,
+        "augmented_qlike": 0.5031388096805256,
+        "qlike_improvement_pct": 23.654506380535274,
+        "dm_t_augmented_vs_baseline": -3.647448781221932,
+        "dm_p_augmented_vs_baseline": 0.0002733190813242192,
+        "harvey_pass": true
+      },
+      {
+        "asset": "LQD",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.8625521870862399,
+        "augmented_qlike": 0.7845761085137337,
+        "qlike_improvement_pct": 9.040157771312913,
+        "dm_t_augmented_vs_baseline": -1.103871753791988,
+        "dm_p_augmented_vs_baseline": 0.26981424243592445,
+        "harvey_pass": false
+      },
+      {
+        "asset": "TLT",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5225001401016672,
+        "augmented_qlike": 0.4633286121350786,
+        "qlike_improvement_pct": 11.324691311101876,
+        "dm_t_augmented_vs_baseline": -1.8976291295054142,
+        "dm_p_augmented_vs_baseline": 0.05792425878789298,
+        "harvey_pass": false
+      },
+      {
+        "asset": "GLD",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5930483524480734,
+        "augmented_qlike": 0.5803044637990223,
+        "qlike_improvement_pct": 2.1488785183273755,
+        "dm_t_augmented_vs_baseline": -1.0737499007597533,
+        "dm_p_augmented_vs_baseline": 0.28309619263471086,
+        "harvey_pass": false
+      }
+    ],
+    "pooled": {
+      "asset_count": 8,
+      "oos_asset_days": 12848,
+      "baseline_qlike": 0.5918541282559292,
+      "augmented_qlike": 0.5309887746157257,
+      "qlike_improvement_pct": 10.283843726757643,
+      "dm_t_augmented_vs_baseline": -2.2252880394790475,
+      "dm_p_augmented_vs_baseline": 0.026200413080106344,
+      "harvey_pass": false,
+      "dm_method": "date-clustered cross-asset mean loss differential, HAC h=1",
+      "stacked_asset_day_dm_diagnostic": {
+        "dm_t": -4.142799500861093,
+        "dm_p": 3.4528827789648275e-05,
+        "note": "diagnostic only; ignores cross-asset same-day dependence"
+      }
+    }
+  },
+  "vol_channel_sensitivity": {
+    "raw_proxy_signal_pooled": {
+      "asset_count": 8,
+      "oos_asset_days": 12848,
+      "baseline_qlike": 0.5918541282559292,
+      "augmented_qlike": 0.5555179272419357,
+      "qlike_improvement_pct": 6.139384567793537,
+      "dm_t_augmented_vs_baseline": -2.7017720727639865,
+      "dm_p_augmented_vs_baseline": 0.006969721487597891,
+      "harvey_pass": false,
+      "dm_method": "date-clustered cross-asset mean loss differential, HAC h=1",
+      "stacked_asset_day_dm_diagnostic": {
+        "dm_t": -5.38775034451471,
+        "dm_p": 7.260355294747001e-08,
+        "note": "diagnostic only; ignores cross-asset same-day dependence"
+      }
+    },
+    "ridge_signal_pooled": {
+      "asset_count": 8,
+      "oos_asset_days": 12848,
+      "baseline_qlike": 0.5918541282559292,
+      "augmented_qlike": 0.5577484015413716,
+      "qlike_improvement_pct": 5.762522399744014,
+      "dm_t_augmented_vs_baseline": -1.4683429082649646,
+      "dm_p_augmented_vs_baseline": 0.1422070485513749,
+      "harvey_pass": false,
+      "dm_method": "date-clustered cross-asset mean loss differential, HAC h=1",
+      "stacked_asset_day_dm_diagnostic": {
+        "dm_t": -2.9948369720509205,
+        "dm_p": 0.0027511482627380346,
+        "note": "diagnostic only; ignores cross-asset same-day dependence"
+      }
+    },
+    "mlp_signal_pooled": {
+      "asset_count": 8,
+      "oos_asset_days": 12848,
+      "baseline_qlike": 0.5918541282559292,
+      "augmented_qlike": 0.5270026803010978,
+      "qlike_improvement_pct": 10.957336421042656,
+      "dm_t_augmented_vs_baseline": -2.7665239756854287,
+      "dm_p_augmented_vs_baseline": 0.005730714538593418,
+      "harvey_pass": false,
+      "dm_method": "date-clustered cross-asset mean loss differential, HAC h=1",
+      "stacked_asset_day_dm_diagnostic": {
+        "dm_t": -5.090962209986168,
+        "dm_p": 3.612906729344445e-07,
+        "note": "diagnostic only; ignores cross-asset same-day dependence"
+      }
+    },
+    "raw_proxy_per_asset": [
+      {
+        "asset": "SPY",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5690852623698154,
+        "augmented_qlike": 0.5178964720953076,
+        "qlike_improvement_pct": 8.99492460257091,
+        "dm_t_augmented_vs_baseline": -2.7712257123215815,
+        "dm_p_augmented_vs_baseline": 0.005649006210679319,
+        "harvey_pass": false
+      },
+      {
+        "asset": "QQQ",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.6236342360718206,
+        "augmented_qlike": 0.5834129202333235,
+        "qlike_improvement_pct": 6.4495041343216135,
+        "dm_t_augmented_vs_baseline": -3.092717089096662,
+        "dm_p_augmented_vs_baseline": 0.00201750373689924,
+        "harvey_pass": true
+      },
+      {
+        "asset": "IWM",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.48921582101065714,
+        "augmented_qlike": 0.46696377576133025,
+        "qlike_improvement_pct": 4.548513006663811,
+        "dm_t_augmented_vs_baseline": -2.1622872193733103,
+        "dm_p_augmented_vs_baseline": 0.030743378849103165,
+        "harvey_pass": false
+      },
+      {
+        "asset": "EEM",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.4157682017761538,
+        "augmented_qlike": 0.4065092022669505,
+        "qlike_improvement_pct": 2.226961915232831,
+        "dm_t_augmented_vs_baseline": -1.0583754919219936,
+        "dm_p_augmented_vs_baseline": 0.29004354711789526,
+        "harvey_pass": false
+      },
+      {
+        "asset": "HYG",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.6590288251830065,
+        "augmented_qlike": 0.5510133407977634,
+        "qlike_improvement_pct": 16.390100137918573,
+        "dm_t_augmented_vs_baseline": -4.45657802365377,
+        "dm_p_augmented_vs_baseline": 8.904729140501999e-06,
+        "harvey_pass": true
+      },
+      {
+        "asset": "LQD",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.8625521870862399,
+        "augmented_qlike": 0.8345913915278103,
+        "qlike_improvement_pct": 3.2416352282269605,
+        "dm_t_augmented_vs_baseline": -1.1094425352224662,
+        "dm_p_augmented_vs_baseline": 0.26740552210677593,
+        "harvey_pass": false
+      },
+      {
+        "asset": "TLT",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5225001401016672,
+        "augmented_qlike": 0.49464170703596416,
+        "qlike_improvement_pct": 5.331756094894525,
+        "dm_t_augmented_vs_baseline": -2.0105003775710197,
+        "dm_p_augmented_vs_baseline": 0.044545258924423736,
+        "harvey_pass": false
+      },
+      {
+        "asset": "GLD",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5930483524480734,
+        "augmented_qlike": 0.589114608217036,
+        "qlike_improvement_pct": 0.663309191366797,
+        "dm_t_augmented_vs_baseline": -1.213859354213044,
+        "dm_p_augmented_vs_baseline": 0.22498002260207328,
+        "harvey_pass": false
+      }
+    ],
+    "ridge_per_asset": [
+      {
+        "asset": "SPY",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5690852623698154,
+        "augmented_qlike": 0.5044820746994436,
+        "qlike_improvement_pct": 11.352110473103398,
+        "dm_t_augmented_vs_baseline": -1.7813180422394226,
+        "dm_p_augmented_vs_baseline": 0.07504956598436019,
+        "harvey_pass": false
+      },
+      {
+        "asset": "QQQ",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.6236342360718206,
+        "augmented_qlike": 0.5941172689185238,
+        "qlike_improvement_pct": 4.7330575273127655,
+        "dm_t_augmented_vs_baseline": -1.6912329227646827,
+        "dm_p_augmented_vs_baseline": 0.09098646478670847,
+        "harvey_pass": false
+      },
+      {
+        "asset": "IWM",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.48921582101065714,
+        "augmented_qlike": 0.47102343474594444,
+        "qlike_improvement_pct": 3.7186831421619937,
+        "dm_t_augmented_vs_baseline": -0.9753160383116692,
+        "dm_p_augmented_vs_baseline": 0.32955048956124844,
+        "harvey_pass": false
+      },
+      {
+        "asset": "EEM",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.4157682017761538,
+        "augmented_qlike": 0.41108716141286755,
+        "qlike_improvement_pct": 1.1258774344187326,
+        "dm_t_augmented_vs_baseline": -0.2904108424885484,
+        "dm_p_augmented_vs_baseline": 0.7715394672598825,
+        "harvey_pass": false
+      },
+      {
+        "asset": "HYG",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.6590288251830065,
+        "augmented_qlike": 0.5480097863069462,
+        "qlike_improvement_pct": 16.845854784156266,
+        "dm_t_augmented_vs_baseline": -2.8499533906614305,
+        "dm_p_augmented_vs_baseline": 0.004428408368176484,
+        "harvey_pass": false
+      },
+      {
+        "asset": "LQD",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.8625521870862399,
+        "augmented_qlike": 0.8422587684643479,
+        "qlike_improvement_pct": 2.3527177747290398,
+        "dm_t_augmented_vs_baseline": -0.4834462783919748,
+        "dm_p_augmented_vs_baseline": 0.6288448397250532,
+        "harvey_pass": false
+      },
+      {
+        "asset": "TLT",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5225001401016672,
+        "augmented_qlike": 0.498681655648574,
+        "qlike_improvement_pct": 4.558560395497444,
+        "dm_t_augmented_vs_baseline": -1.2507040044627011,
+        "dm_p_augmented_vs_baseline": 0.2112247838072685,
+        "harvey_pass": false
+      },
+      {
+        "asset": "GLD",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5930483524480734,
+        "augmented_qlike": 0.5923270621343262,
+        "qlike_improvement_pct": 0.12162419991047717,
+        "dm_t_augmented_vs_baseline": -0.10312279234729824,
+        "dm_p_augmented_vs_baseline": 0.9178783985854486,
+        "harvey_pass": false
+      }
+    ],
+    "mlp_per_asset": [
+      {
+        "asset": "SPY",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5690852623698154,
+        "augmented_qlike": 0.4685589298772205,
+        "qlike_improvement_pct": 17.664546798133156,
+        "dm_t_augmented_vs_baseline": -3.331559961031548,
+        "dm_p_augmented_vs_baseline": 0.0008832219823244891,
+        "harvey_pass": true
+      },
+      {
+        "asset": "QQQ",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.6236342360718206,
+        "augmented_qlike": 0.55709636781372,
+        "qlike_improvement_pct": 10.669373874855355,
+        "dm_t_augmented_vs_baseline": -4.488491172163547,
+        "dm_p_augmented_vs_baseline": 7.683994596385801e-06,
+        "harvey_pass": true
+      },
+      {
+        "asset": "IWM",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.48921582101065714,
+        "augmented_qlike": 0.44552725988756586,
+        "qlike_improvement_pct": 8.930324663833707,
+        "dm_t_augmented_vs_baseline": -3.1153687718134417,
+        "dm_p_augmented_vs_baseline": 0.0018696691715951452,
+        "harvey_pass": true
+      },
+      {
+        "asset": "EEM",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.4157682017761538,
+        "augmented_qlike": 0.4228607065679169,
+        "qlike_improvement_pct": -1.7058795649749197,
+        "dm_t_augmented_vs_baseline": 0.5465466792342536,
+        "dm_p_augmented_vs_baseline": 0.5847661790338479,
+        "harvey_pass": false
+      },
+      {
+        "asset": "HYG",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.6590288251830065,
+        "augmented_qlike": 0.5102083113185333,
+        "qlike_improvement_pct": 22.581791293142164,
+        "dm_t_augmented_vs_baseline": -3.8895515887063947,
+        "dm_p_augmented_vs_baseline": 0.00010453013004818601,
+        "harvey_pass": true
+      },
+      {
+        "asset": "LQD",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.8625521870862399,
+        "augmented_qlike": 0.774539886565009,
+        "qlike_improvement_pct": 10.20370730477682,
+        "dm_t_augmented_vs_baseline": -1.504082309906543,
+        "dm_p_augmented_vs_baseline": 0.1327569170720695,
+        "harvey_pass": false
+      },
+      {
+        "asset": "TLT",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5225001401016672,
+        "augmented_qlike": 0.4632164970604075,
+        "qlike_improvement_pct": 11.3461487359074,
+        "dm_t_augmented_vs_baseline": -2.395961610115957,
+        "dm_p_augmented_vs_baseline": 0.016690728709141123,
+        "harvey_pass": false
+      },
+      {
+        "asset": "GLD",
+        "train_n": 2455,
+        "oos_n": 1606,
+        "baseline_qlike": 0.5930483524480734,
+        "augmented_qlike": 0.574013483318409,
+        "qlike_improvement_pct": 3.209665628626989,
+        "dm_t_augmented_vs_baseline": -1.899244128046576,
+        "dm_p_augmented_vs_baseline": 0.05771153162787446,
+        "harvey_pass": false
+      }
+    ]
+  },
+  "verdict": {
+    "verdict": "MIXED_WEAK",
+    "statistical_gate": "WEAK_PASS",
+    "summary": "directionally positive but not Harvey-strength; treat as exploratory only",
+    "positive_asset_count": 7,
+    "asset_count": 8,
+    "harvey_asset_pass_count": 2,
+    "claim_ceiling": "proxy-only; does not validate true CPQS or trade-level liquidity without bid/ask or high-frequency labels"
+  },
+  "artifacts": {
+    "results_json": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1355/K1355_results.json",
+    "figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1355/K1355_liquidity_vol_channel.png"
+  }
+}
