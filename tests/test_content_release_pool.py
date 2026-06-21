@@ -482,6 +482,110 @@ def test_release_pool_audit_skip_materializes_fix_task_after_three_strikes(
     }
 
 
+def test_release_pool_audit_skip_before_materialize_stays_draft(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """Audit failures below the materialize threshold must not fall through."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 21, 10, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_audit_first_strike",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+                "title": "第一次 audit fail 不能釋出",
+                "description": "本文仍寫 t=3.2、p=0.01，應該先留在草稿。",
+                "tags": ["一般讀者", "FOMC"],
+            }
+        ],
+    )
+
+    res = content.release_pool_articles(
+        limit=1,
+        due_only=False,
+        include_drafts=True,
+        storage_dir=str(storage_dir),
+    )
+
+    assert res["released_count"] == 0
+    assert res["audit_materialized"] == []
+    assert res["audit_skipped"][0]["id"] == "mile_audit_first_strike"
+    assert res["audit_skipped"][0]["skip_count"] == 1
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    assert feed_after[0]["status"] == "draft"
+    assert feed_after[0]["details"]["release_audit_skipped_count"] == 1
+
+
+def test_release_pool_relocates_internal_review_tag_before_general_audit(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """Internal workflow tags must not make a general draft fail tag-cap audit."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 21, 11, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_reviewed_general",
+                "status": "draft",
+                "audience": "general",
+                "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+                "title": "一般讀者審查標記不應卡住釋出",
+                "description": "這是一篇白話文章，沒有禁用統計術語，只有內部審查 tag 需要搬走。",
+                "tags": [
+                    "一般讀者",
+                    "指數調整",
+                    "成分股調整",
+                    "ETF",
+                    "Russell",
+                    "收盤競價",
+                    "流動性",
+                    "風險管理",
+                    "codex-24h-rule-reviewed",
+                ],
+                "details": {
+                    "release_audit_skipped_count": 3,
+                    "release_audit_issues": ["general tag count 9 > 8"],
+                    "release_audit_task_id": "platform_ops_release_audit_fix_mile_reviewed_general",
+                },
+            }
+        ],
+    )
+
+    res = content.release_pool_articles(
+        limit=1,
+        due_only=False,
+        include_drafts=True,
+        storage_dir=str(storage_dir),
+    )
+
+    assert res["released_count"] == 1
+    assert res["audit_skipped"] == []
+
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    article = feed_after[0]
+    assert article["status"] == "published"
+    assert "codex-24h-rule-reviewed" not in article["tags"]
+    assert len(article["tags"]) == 8
+    details = article["details"]
+    assert details["release_internal_tags"] == ["codex-24h-rule-reviewed"]
+    assert details["codex_24h_rule_reviewed"] is True
+    assert details["release_audit_status"] == "resolved"
+    assert details["release_audit_resolved_issues"] == ["general tag count 9 > 8"]
+    assert "release_audit_issues" not in details
+
+
 def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path: Path, monkeypatch):
     """Boss email-11752 regression: if 2 of last 3 published general/research
     articles are the same narrative cluster, release_pool should filter that

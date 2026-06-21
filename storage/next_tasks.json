@@ -34658,7 +34658,9 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-20T00:00:00Z"
+    "created_at": "2026-06-20T00:00:00Z",
+    "started_at": "2026-06-21T11:07:37.900184+00:00",
+    "last_released_at": "2026-06-21T11:12:32.647483+00:00"
   },
   {
     "id": "journal_discovery_20260620_0",
@@ -34895,7 +34897,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -34907,6 +34909,12 @@
     "release_audit_skipped_count": 3,
     "release_audit_issues": [
       "general tag count 9 > 8 (SKILL.md L308: ≤2-3 表格 → ≤8 tags)"
-    ]
+    ],
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-21T11:07:50.730698+00:00",
+    "claim_session_id": "9622d2ba6021",
+    "started_at": "2026-06-21T11:07:55.524646+00:00",
+    "completed_at": "2026-06-21T11:12:39.915999+00:00",
+    "result": "Resolved release audit blocker for mile_103338aa by moving internal codex-24h-rule-reviewed tag out of public tags before general-audience audit. Added release_pool regressions; formal release now passes audit and stops only on separate arc-dedup gate versus mile_6606a448.\n\n修 release_pool 流程：codex-24h-rule-reviewed 等內部審查 tag 會在 release audit 前移到 details，不再算入 general tag cap。mile_103338aa 公開 tags 已降為 8、release_audit_status=resolved；指定 release_pool 驗證 audit_skipped=[]，目前若仍留 draft 是 arc-dedup of mile_6606a448，不是 audit blocker。"
   }
 ]

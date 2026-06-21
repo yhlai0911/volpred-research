@@ -394,6 +394,7 @@ def _recent_narrative_cluster_pressure(
 # here when a topic visibly over-publishes; cap is per rolling window.
 _THEME_CAP = 3
 _RELEASE_AUDIT_MATERIALIZE_THRESHOLD = 3
+_RELEASE_INTERNAL_TAGS = {"codex-24h-rule-reviewed"}
 _SATURATED_THEMES = {
     "model_complexity": re.compile(
         r"模型.{0,12}(擂台|投票|加在一起|更聰明|花俏|更準|沒贏|沒更準|只贏|不能算真的贏|疊|複雜|淘汰)"
@@ -443,6 +444,57 @@ def _build_release_audit_task_description(item: dict, audit_issues: list[str], s
         "Fix the draft through the publisher/feed-publisher workflow or a source "
         "rewrite. Do not hand-edit historical feed data to bypass the audit."
     )
+
+
+def _relocate_release_internal_tags(item: dict, *, now: datetime) -> list[str]:
+    """Move workflow-only tags out of public tags before release audit."""
+    raw_tags = item.get("tags")
+    if not isinstance(raw_tags, list):
+        return []
+
+    public_tags = []
+    moved = []
+    for tag in raw_tags:
+        tag_text = str(tag).strip()
+        if tag_text in _RELEASE_INTERNAL_TAGS:
+            moved.append(tag_text)
+            continue
+        public_tags.append(tag)
+
+    if not moved:
+        return []
+
+    item["tags"] = public_tags
+    details = item.get("details")
+    if not isinstance(details, dict):
+        details = {}
+        item["details"] = details
+
+    existing = details.get("release_internal_tags")
+    if not isinstance(existing, list):
+        existing = []
+    merged = []
+    for tag in [*existing, *moved]:
+        tag_text = str(tag).strip()
+        if tag_text and tag_text not in merged:
+            merged.append(tag_text)
+    details["release_internal_tags"] = merged
+    details["release_internal_tags_moved_at"] = now.isoformat()
+    if "codex-24h-rule-reviewed" in moved:
+        details["codex_24h_rule_reviewed"] = True
+    return moved
+
+
+def _mark_release_audit_resolved(item: dict, *, now: datetime) -> None:
+    details = item.get("details")
+    if not isinstance(details, dict):
+        return
+    prior_issues = details.pop("release_audit_issues", None)
+    if prior_issues:
+        details["release_audit_resolved_issues"] = prior_issues
+    if prior_issues or details.get("release_audit_task_id"):
+        details["release_audit_status"] = "resolved"
+        details["release_audit_resolved_at"] = now.isoformat()
 
 
 def _materialize_release_audit_fix_task(
@@ -648,6 +700,8 @@ def release_pool_articles(
         if len(released) >= target_limit:
             break
 
+        _relocate_release_internal_tags(item, now=now)
+
         # Lossless auto-fix: relocate K-id tags to details.experiment_refs.
         raw_tags = item.get("tags") or []
         if isinstance(raw_tags, list):
@@ -720,6 +774,8 @@ def release_pool_articles(
                 skipped_entry["materialized_task"] = materialized
             audit_skipped.append(skipped_entry)
             continue
+
+        _mark_release_audit_resolved(item, now=now)
 
         # Anti-flood dedup gate (2026-06-16): skip near-duplicate of a
         # recently-published general/research article — don't flood live feed.
