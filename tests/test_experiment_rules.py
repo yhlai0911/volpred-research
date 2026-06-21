@@ -67,6 +67,22 @@ def test_var_es_basel_and_student_t_rule_is_documented() -> None:
     assert missing == []
 
 
+def test_retrofit_uniqueness_claim_rule_is_documented() -> None:
+    section = _experiments_rule_section("### Retrofit 後 uniqueness claims 必須重驗 current result table")
+
+    required_phrases = [
+        "唯一 significant pair",
+        "only Harvey-significant",
+        "current results JSON / table",
+        "舊 README",
+        "strongest / most visible",
+        "K1416",
+        "TW0050-HSI",
+    ]
+    missing = [phrase for phrase in required_phrases if phrase not in section]
+    assert missing == []
+
+
 def test_cross_asset_pooled_inference_rule_is_documented() -> None:
     section = _experiments_rule_section("### 跨資產 pooled inference 不可把 asset-day 當 iid")
 

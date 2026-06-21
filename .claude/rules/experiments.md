@@ -50,6 +50,9 @@ Variance-forecast QLIKE 的 canonical 方向是 `actual / predicted - log(actual
 ### VaR / ES 的 Basel 與 Student-t 口徑必須明示
 VaR / ES 實驗或文章若寫 `Basel` / traffic-light，必須說清楚是標準 250-day count rule、exact-binomial sample-size rule，或自訂 500-day / rate threshold；自訂規則不可包裝成 canonical Basel。GARCH-style Student-t / skewed-t VaR 若用 standardized residual sigma，quantile 必須做 unit-variance scaling（Student-t: `sqrt((df - 2) / df)`），除非模型另有自由 scale parameter 且已報告。**K802 教訓**：rate-based green/yellow threshold 與 raw `t.ppf()` 會把 VaR/ES 結論推成錯誤的 Trinity PASS。
 
+### Retrofit 後 uniqueness claims 必須重驗 current result table
+任何「唯一 significant pair」「only Harvey-significant」「唯一通過」等 uniqueness framing，在 HLN / HAC / multiple-testing retrofit 或結果表重算後，必須回到 current results JSON / table 重新驗證；不可只沿用舊 README、舊 motivation、舊文章敘事。若只想談最強或最可見 pair，必須明確寫成 strongest / most visible，不可寫成 only。**K1416 教訓**：Paper3_E2 HLN retrofit 後 `TW0050-HSI` 也變 Harvey-significant，舊的 `TW0050-N225` 唯一敘事必須同步降級。
+
 ### Pooled-MLE 必 100+ multistart
 所有 pooled / cross-entity MLE（多資產共用參數、多國 panel 估計）必須跑 **≥100 個 random init** + LR test 選 basin + 檢查 log-likelihood 分佈。**K1213→K1216b/K1216c 教訓**：9/9 markets all fragile 時才發現 single-start artifact，fix 後參數 magnitude 變化 5-10x。
 
