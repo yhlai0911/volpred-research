@@ -105,6 +105,37 @@ def test_ops_dashboard_health_alerts_reflect_current_breaches_not_old_notificati
     assert health_section["breaches"] == []
 
 
+def test_ops_dashboard_writes_latest_snapshot(tmp_path, monkeypatch) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    (repo / "storage" / "next_tasks.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text('{"system_crontab":{"items":[]}}\n', encoding="utf-8")
+
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    rc = ops_dashboard.main()
+
+    latest = json.loads((repo / "storage" / "ops" / "dashboard_latest.json").read_text(encoding="utf-8"))
+    assert rc == 0
+    assert latest["generated_by"] == "scripts/ops_dashboard.py"
+    assert latest["age_seconds"] == 0
+    assert latest["overall_status"] in {"ok", "warn", "critical"}
+
+
 def test_ops_dashboard_production_pending_counts_pending_main_thread(tmp_path, monkeypatch) -> None:
     repo = tmp_path
     (repo / "storage" / "reports").mkdir(parents=True)

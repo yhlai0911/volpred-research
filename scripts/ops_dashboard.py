@@ -67,6 +67,14 @@ def section(name, status, tldr, next_action=None, **details):
     return {"section": name, "status": status, "tldr": tldr, "next": next_action, **details}
 
 
+def write_dashboard_latest(payload: dict) -> None:
+    path = REPO / "storage" / "ops" / "dashboard_latest.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(path)
+
+
 def classify_fb_pipeline(entries: list[dict]) -> tuple[list[dict], list[dict]]:
     actionable = []
     awaiting = []
@@ -454,11 +462,17 @@ def main():
     critical = sum(1 for s in out if s["status"] == "critical")
     payload = {
         "dashboard_generated_at": now_iso,
+        "generated_by": "scripts/ops_dashboard.py",
+        "age_seconds": 0,
         "overall_status": "critical" if critical else "warn" if breaches else "ok",
         "section_breaches": breaches,
         "section_critical": critical,
         "sections": out,
     }
+    try:
+        write_dashboard_latest(payload)
+    except Exception as exc:
+        payload["dashboard_write_error"] = str(exc)
     print(json.dumps(payload, ensure_ascii=False, indent=2))
     # Dashboard is a reporting surface, not an execution gate. Non-zero exit
     # here would be misclassified by host_cron_fail as wrapper breakage.

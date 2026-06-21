@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 ops_dashboard 只 print 不寫 dashboard_latest，handoff 會讀到舊 WARN
+
+**問題**：修掉 live `ops_dashboard.py` 的 release_pool false WARN 後，`storage/ops/handoff_latest.md` 仍顯示舊 WARN，因為 handoff 讀 `storage/ops/dashboard_latest.json`，而直接執行 `ops_dashboard.py` 只印 stdout，不會更新 latest snapshot。這是 2026-06-10 process audit 已標的 stale dashboard_latest 結構債。
+
+**根因**：dashboard snapshot 寫檔責任只落在 cron wrapper 的 stdout redirect；interactive / Codex tick 的 live recompute 不會回寫 canonical snapshot，導致「現況已 ok、handoff 仍 warn」的 split-brain。
+
+**解決方法**：`scripts/ops_dashboard.py::main()` 產生 payload 後 atomic write `storage/ops/dashboard_latest.json`，並加入 `generated_by` / `age_seconds` 欄位；stdout 行為保留，寫檔失敗只加 `dashboard_write_error` 不讓 dashboard exit non-zero。新增 regression test 驗證 main() 會寫 latest snapshot。live 執行後 dashboard_latest 與 stdout 同為 `overall_status=ok`。
+
 ## 2026-06-22 release_pool fallback fire 被 alert parser 漏讀，造成 false WARN
 
 **問題**：handoff section 7 顯示 `Release pool cron gap > 4.0h (interval=180min)` WARN，但 `storage/logs/cron/release_pool.log` 22:00 UTC 已有 `check_alerts fallback fire`，`storage/ops/cron_last_run.json` 也已記錄 release_pool 22:00:56。實際 machinery 健康，WARN 是 false-positive。
