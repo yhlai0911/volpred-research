@@ -878,7 +878,7 @@ def _parse_knowledge_stale_state(storage_dir: str, now: datetime) -> dict[str, A
     }
 
 
-def _parse_paper_stale_state(now: datetime) -> dict[str, Any]:
+def _parse_paper_stale_state(now: datetime, paper_root: Path | None = None) -> dict[str, Any]:
     """M3 paper-line staleness — 整個 paper/ 目錄多天無 manuscript/review 活動 = 論文線停滯.
 
     2026-06-21 (boss email-11851/11854 incident 的對稱補強): boss 同時點名 M2 *和* M3
@@ -892,7 +892,7 @@ def _parse_paper_stale_state(now: datetime) -> dict[str, Any]:
     所以只要任一篇有動就不 breach。threshold 較 knowledge 寬（論文比 closure 慢）：
     >7d warn、>14d critical。
     """
-    paper_root = project_path("paper")
+    paper_root = paper_root if paper_root is not None else project_path("paper")
     latest: datetime | None = None
     latest_file: str | None = None
     if paper_root.is_dir():
@@ -960,6 +960,7 @@ def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
     now: datetime | None = None,
+    paper_root: Path | None = None,
 ) -> dict[str, Any]:
     current = now.astimezone(timezone.utc) if now is not None else _utc_now()
     conditions = [
@@ -969,7 +970,7 @@ def build_alert_condition_report(
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),
         _parse_knowledge_stale_state(storage_dir, current),
-        _parse_paper_stale_state(current),
+        _parse_paper_stale_state(current, paper_root),
     ]
     return {
         "generated_at": current.isoformat(),
@@ -983,8 +984,12 @@ def check_alert_conditions(
     *,
     storage_dir: str = "storage",
     recipient: str = ALERT_RECIPIENT,
+    now: datetime | None = None,
+    paper_root: Path | None = None,
 ) -> dict[str, Any]:
-    report = build_alert_condition_report(storage_dir=storage_dir)
+    report = build_alert_condition_report(
+        storage_dir=storage_dir, now=now, paper_root=paper_root
+    )
     alerts: list[dict[str, Any]] = []
     for condition in report["conditions"]:
         if not condition.get("breached"):

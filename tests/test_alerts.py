@@ -91,9 +91,9 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
         storage_dir / "logs" / "cron" / "daily_update.log",
         "\n".join(
             [
-                "=== [daily-update] fire at Sun Apr 19 13:00:00 CST 2026 ===",
+                "=== [daily_update] fire at Sun Apr 19 13:00:00 CST 2026 ===",
                 "ERROR: yfinance rate limit exceeded",
-                "=== exit 1 at Sun Apr 19 13:00:10 CST 2026 ===",
+                "=== [daily_update] exit 1 at Sun Apr 19 13:00:10 CST 2026 ===",
             ]
         ),
     )
@@ -117,16 +117,29 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
 
 def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Path, monkeypatch):
     storage_dir = tmp_path / "storage"
+    now = datetime(2026, 4, 19, 12, 0, tzinfo=timezone.utc)
     _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
     _write_json(storage_dir / "reports" / "feed.json", [])
+    # exit 1 in the NEW canonical wrapper format (`=== [job] exit N at ... ===`) so
+    # both release_pool_gap (no recent fire) and host_cron_fail (non-zero exit) breach.
     _write_text(
         storage_dir / "logs" / "cron" / "release_pool.log",
-        "=== [release-pool] fire at Sun Apr 19 09:00:00 CST 2026 ===\n=== exit 1 at Sun Apr 19 09:00:02 CST 2026 ===\n",
+        "=== [release-pool] fire at Sun Apr 19 09:00:00 CST 2026 ===\n"
+        "=== [release-pool] exit 1 at Sun Apr 19 09:00:02 CST 2026 ===\n",
     )
     _write_json(
         storage_dir / "ops" / "scheduler_state.json",
         {"last_tick_at": "2026-04-19T00:00:00+00:00", "last_status": "invalid_state"},
     )
+    # Isolate M2/M3 staleness conditions so this test asserts only the cron/pool set.
+    # Fresh knowledge entry (< 2d before `now`) keeps knowledge_stale quiet.
+    _write_json(
+        storage_dir / "memory" / "knowledge.json",
+        [{"id": "k-test", "created_at": "2026-04-19T10:00:00+00:00"}],
+    )
+    # Fresh paper-line activity (injected paper_root with a .tex) keeps paper_stale quiet.
+    paper_root = tmp_path / "paper"
+    _write_text(paper_root / "demo" / "body.tex", "\\documentclass{article}")
 
     sent_titles: list[str] = []
 
@@ -143,15 +156,17 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
 
     monkeypatch.setattr("volpred.ops.alerts.send_alert", fake_send_alert)
 
-    result = check_alert_conditions(storage_dir=str(storage_dir))
+    result = check_alert_conditions(
+        storage_dir=str(storage_dir), now=now, paper_root=paper_root
+    )
 
     assert result["breach_count"] == 3
     assert result["sent_count"] == 3
-    assert sent_titles == [
-        "Release pool cron gap > 2.5h (interval=120min)",
-        "Draft pool below threshold (<4)",
-        "Host cron failure detected",
-    ]
+    # each breached condition sends exactly once (unique titles), in condition order
+    assert len(sent_titles) == 3 and len(set(sent_titles)) == 3
+    assert sent_titles[0].startswith("Release pool cron gap")
+    assert sent_titles[1] == "Draft pool below threshold (<4)"
+    assert sent_titles[2] == "Host cron failure detected"
 
 
 def test_host_cron_fail_severity_calibration(tmp_path: Path):
@@ -173,7 +188,9 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
         lines = []
         for i, c in enumerate(codes):
             lines.append(f"=== [hourly_dispatch] fire run {i} ===")
-            lines.append(f"=== exit {c} at Sun Jun 15 1{i}:00:00 CST 2026 ===")
+            lines.append(
+                f"=== [hourly_dispatch] exit {c} at Sun Jun 15 1{i}:00:00 CST 2026 ==="
+            )
         _write_text(storage / "logs" / "cron" / "hourly_dispatch.log", "\n".join(lines))
 
     # 1) lone hang (latest=142, consec=1) → breached WARN
@@ -194,4 +211,43 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
     # 4) non-hang failure (exit 1: perm/path/FDA) even single → CRITICAL
     write_exits([0, 0, 1])
     r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "critical"
+
+
+def test_paper_stale_severity_and_isolation(tmp_path: Path):
+    """M3 paper-line staleness (2026-06-21 boss email-11851/11854 對稱補強): the whole
+    paper/ line going >7d without any .tex/.md edit = warn, >14d = critical. Signal is
+    max mtime across the injected paper_root so it is unit-testable."""
+    import os
+
+    from volpred.ops.alerts import _parse_paper_stale_state
+
+    paper_root = tmp_path / "paper"
+    tex = paper_root / "p1" / "body.tex"
+    _write_text(tex, "\\documentclass{article}")
+    base = datetime(2026, 6, 1, tzinfo=timezone.utc)
+    os.utime(tex, (base.timestamp(), base.timestamp()))
+
+    # fresh (3d) → not breached
+    r = _parse_paper_stale_state(base + timedelta(days=3), paper_root)
+    assert r["breached"] is False and r["id"] == "paper_stale"
+
+    # 8d → warn
+    r = _parse_paper_stale_state(base + timedelta(days=8), paper_root)
+    assert r["breached"] is True and r["level"] == "warn"
+
+    # 15d → critical
+    r = _parse_paper_stale_state(base + timedelta(days=15), paper_root)
+    assert r["breached"] is True and r["level"] == "critical"
+
+    # a non-manuscript file (figure/data) must NOT count as paper-line activity
+    _write_text(paper_root / "p1" / "fig.pdf", "binary-ish")
+    os.utime(paper_root / "p1" / "fig.pdf", (base.timestamp() + 86400 * 30, base.timestamp() + 86400 * 30))
+    r = _parse_paper_stale_state(base + timedelta(days=8), paper_root)
+    assert r["breached"] is True and r["level"] == "warn"  # still keyed off the .tex mtime
+
+    # empty paper line (no .tex/.md anywhere) → critical
+    empty_root = tmp_path / "empty_paper"
+    empty_root.mkdir()
+    r = _parse_paper_stale_state(base, empty_root)
     assert r["breached"] is True and r["level"] == "critical"
