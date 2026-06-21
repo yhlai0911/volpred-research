@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 配色主題擴充：暗版黑底消失 + 主題 CSS 首頁不載入（老闆手機版回報）
+
+**問題**：替配色主題加「背景協調前景」後，老闆回報「手機版是不是沒改好」「原本的黑底色為什麼不見了」。暗版整站 body 變近白、淺字配淺底全糊（strategy-selector 等頁尤其明顯）。
+
+**根因 1（黑底消失）**：`gen-themes.js::genDarkSurface` 對**全部** gray shade（含淺色 50~500）著色。站點 dark-first，元素普遍寫 `bg-gray-50 dark:bg-gray-950`（body 本身也是）。產生的 `html.theme-X.dark [class~="bg-gray-50"]`（特異度 0,3,1）**勝過** `dark:bg-gray-950`(0,2,0) 與本主題 body 大氣層 `html.theme-X.dark body`(0,2,2) → 暗版 body 被染成近白。屬性選擇器 `[class~]` 特異度永遠高於 element 選擇器 body，是這次自傷的關鍵。
+   **修復**：暗版只著色深色 shade（原始亮度 ≤0.40 → gray-600~950）；淺色 shade 暗版不動＝零回歸（`DARK_SURFACE_MAX_L` guard）。
+
+**根因 2（主題完全失效）**：`themes.generated.css` 原由 `layout.tsx` 單獨 `import`。Next.js CSS code-splitting 把它切成獨立 chunk（`b7d589…`），**首頁等頁面的 HTML 不 link 該 chunk** → 主題規則整組不載入。
+   **修復**：改由 `globals.css` 置頂 `@import './themes.generated.css'`，保證與 globals 同 chunk、每頁必載。主題規則皆 `html.theme-X` 高特異度，勝過所有 utility，不依賴 @import 置頂的 source order。
+
+**過程教訓（驗證被殭屍 server 蒙蔽，浪費多輪）**：本地 `next start -p 3137` 的舊 process 沒被 `pkill -f "next start"` 砍掉（running process 名為 `next-server`，pkill pattern 不匹配）→ port 被佔，新 server 起不來，我一直 curl 到**舊 build 的殭屍 server**，看到 css hash 永遠不變 / 首頁 link 到已不存在的 chunk，誤判成 build/chunking bug。**教訓**：驗證前務必 `kill -9 $(lsof -tiTCP:<port> -sTCP:LISTEN)` 依 port 砍，不要只靠 `pkill -f`；css hash 跨 rebuild 不變＝你在打舊 server。
+
+**驗證**：乾淨 build（`rm -rf .next`）+ 依 port 重啟 + 無快取 CDP；6 主題 × 暗/亮，暗版 body `rgb(7,14,12)`(emerald)/`rgb(7,12,14)`(sky) 深色帶 accent 調、亮版近白可讀；先前糊掉的 strategy-selector 全恢復。線上 `volpred.zeabur.app` 首頁 link 到 `b7d589…`(theme-emerald=239, bad-rule=0)、各頁 body 暗。commit `a70f495`。
+
 ## 2026-06-21 **3-STRIKE TRIGGER** 文章「詳情」區塊反覆洩漏內部 metadata（denylist 永遠輸）
 
 **問題**：`frontend-v2-fix/src/app/reports/[id]/ReportDetail.tsx` 的「詳情」區塊用 **denylist**（列出已知內部 key 去隱藏）渲染文章 `details`。每次出現新的內部 key 就洩漏到讀者頁。
