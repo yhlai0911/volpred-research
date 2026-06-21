@@ -39,7 +39,9 @@
 
 **根因（我的流程錯）**：判「missed fire」前**沒先驗證 schedule 是否涵蓋今天**。host_cron_fail 抓不到「沒 fire」是真的盲區，但這次不是盲區問題——是我把「正常的週日不跑」誤讀成「異常漏跑」。
 
-**教訓（硬規則）**：判定任何 cron「漏跑 / 該 fire 沒 fire」前，**必先查該 job 的 cron expression（含星期/日期欄位）確認今天真的在排程內**。`* * 1-6` 排除週日、`* * 1-5` 排除週末、`0 8 1 * *` 只跑每月 1 號等——不確認就補跑 = 製造 off-schedule 副作用。查法：`jq` runtime_schedules.json 對應 job 的 `cron` 欄位 + `date -j -f %Y-%m-%d <date> +%A` 確認星期。
+**教訓（硬規則）**：判定任何 cron「漏跑 / 該 fire 沒 fire」前，**必先查該 job 的 cron expression（含星期/日期欄位）確認今天真的在排程內**。`* * 1-6` 排除週日、`* * 1-5` 排除週末、`0 8 1 * *` 只跑每月 1 號等——不確認就補跑 = 製造 off-schedule 副作用。查法優先用 `uv run volpred ops schedule-due <job_id> --date YYYY-MM-DD`；手動 fallback 才用 `jq` runtime_schedules.json 對應 job 的 `cron` 欄位 + `date -j -f %Y-%m-%d <date> +%A` 確認星期。
+
+**2026-06-22 Codex 防再發**：新增 `volpred ops schedule-due`，可直接回報某 canonical schedule job 在指定 Asia/Taipei 日期是否應 fire。Regression：`tests/test_schedule_report.py` 覆蓋 `daily_update` 2026-06-21 週日不跑、2026-06-22 週一會跑，以及 Sunday `0/7` cron 語義。
 
 **副作用處置**：補跑的 recalc（paper_trading/metrics）idempotent 無害（recalc 是正式機制）；唯一風險是生一篇週日 daily 文章。讓 run 跑完（殺掉留半成品更糟）→ 驗證有無 inappropriate 週日文章 → 有則 unpublish。
 

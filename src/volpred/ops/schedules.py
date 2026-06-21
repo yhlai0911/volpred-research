@@ -1,10 +1,167 @@
 from __future__ import annotations
 
 import subprocess
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from volpred.config import get_runtime_schedules_path, load_runtime_schedules
+
+_TAIPEI_TZ = ZoneInfo("Asia/Taipei")
+
+
+def _expand_cron_field(
+    raw: str,
+    *,
+    min_value: int,
+    max_value: int,
+    normalize_sunday: bool = False,
+) -> set[int]:
+    values: set[int] = set()
+    field = str(raw or "").strip()
+    if not field:
+        raise ValueError("empty cron field")
+    if field == "?":
+        field = "*"
+
+    def normalize(value: int) -> int:
+        if normalize_sunday and value == 7:
+            return 0
+        return value
+
+    upper_bound = 7 if normalize_sunday and max_value == 6 else max_value
+    for part in field.split(","):
+        token = part.strip()
+        if not token:
+            continue
+        if "/" in token:
+            base, step_raw = token.split("/", 1)
+            step = int(step_raw)
+            if step <= 0:
+                raise ValueError(f"invalid cron step: {token}")
+        else:
+            base, step = token, 1
+
+        if base in ("", "*"):
+            start, end = min_value, upper_bound
+        elif "-" in base:
+            start_raw, end_raw = base.split("-", 1)
+            start, end = int(start_raw), int(end_raw)
+        else:
+            start = end = int(base)
+
+        if start < min_value or end > upper_bound or start > end:
+            raise ValueError(f"cron field out of range: {raw}")
+        values.update(normalize(value) for value in range(start, end + 1, step))
+
+    return values
+
+
+def cron_matches_date(cron_expr: str, target_date: date) -> bool:
+    """Return whether a standard 5-field cron can fire on target_date.
+
+    This is a date-level guard for missed-fire triage. It intentionally answers
+    "could this job fire on that local date?" before anyone manually reruns a job.
+    """
+    parts = str(cron_expr or "").split()
+    if len(parts) != 5:
+        raise ValueError(f"expected 5-field cron expression, got: {cron_expr!r}")
+
+    minute_values = _expand_cron_field(parts[0], min_value=0, max_value=59)
+    hour_values = _expand_cron_field(parts[1], min_value=0, max_value=23)
+    day_values = _expand_cron_field(parts[2], min_value=1, max_value=31)
+    month_values = _expand_cron_field(parts[3], min_value=1, max_value=12)
+    dow_values = _expand_cron_field(
+        parts[4],
+        min_value=0,
+        max_value=6,
+        normalize_sunday=True,
+    )
+    if not minute_values or not hour_values:
+        return False
+    if target_date.month not in month_values:
+        return False
+
+    day_of_month_matches = target_date.day in day_values
+    cron_dow = (target_date.weekday() + 1) % 7  # Python Monday=0; cron Sunday=0/7.
+    day_of_week_matches = cron_dow in dow_values
+    dom_restricted = parts[2].strip() not in ("*", "?")
+    dow_restricted = parts[4].strip() not in ("*", "?")
+
+    if dom_restricted and dow_restricted:
+        return day_of_month_matches or day_of_week_matches
+    if dom_restricted:
+        return day_of_month_matches
+    if dow_restricted:
+        return day_of_week_matches
+    return True
+
+
+def _iter_schedule_items(config: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+    items: list[tuple[str, dict[str, Any]]] = []
+    for section_name, section in config.items():
+        if isinstance(section, dict) and isinstance(section.get("items"), list):
+            items.extend(
+                (section_name, item)
+                for item in section["items"]
+                if isinstance(item, dict)
+            )
+    if isinstance(config.get("cron_jobs"), list):
+        items.extend(
+            ("cron_jobs", item)
+            for item in config["cron_jobs"]
+            if isinstance(item, dict)
+        )
+    return items
+
+
+def build_schedule_due_report(
+    job_id: str,
+    *,
+    target_date: str | date | None = None,
+    config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    config = config if config is not None else load_runtime_schedules()
+    if target_date is None:
+        local_date = datetime.now(_TAIPEI_TZ).date()
+    elif isinstance(target_date, date) and not isinstance(target_date, datetime):
+        local_date = target_date
+    else:
+        local_date = date.fromisoformat(str(target_date))
+
+    matches = [
+        (section, item)
+        for section, item in _iter_schedule_items(config)
+        if str(item.get("id") or "") == job_id
+    ]
+    if not matches:
+        raise ValueError(f"schedule job not found: {job_id}")
+
+    section, item = matches[0]
+    cron_expr = item.get("cron") or item.get("schedule")
+    if not isinstance(cron_expr, str) or not cron_expr.strip():
+        scheduled = None
+        reason = "schedule item has no cron/schedule expression"
+    else:
+        scheduled = cron_matches_date(cron_expr, local_date)
+        reason = (
+            f"{local_date.isoformat()} ({local_date.strftime('%A')}) "
+            f"{'matches' if scheduled else 'does not match'} cron {cron_expr!r}"
+        )
+
+    return {
+        "job_id": job_id,
+        "found": True,
+        "matched_items": len(matches),
+        "section": section,
+        "cron": cron_expr,
+        "date": local_date.isoformat(),
+        "timezone": "Asia/Taipei",
+        "scheduled": scheduled,
+        "reason": reason,
+        "log_path": item.get("log_path") or item.get("log"),
+        "label": item.get("label"),
+    }
 
 
 def _parse_crontab(raw: str) -> list[dict[str, str]]:

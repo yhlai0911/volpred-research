@@ -2077,6 +2077,37 @@ def ops_schedule_report() -> None:
     _print_json(report)
 
 
+@ops.command("schedule-due")
+@click.argument("job_id")
+@click.option(
+    "--date",
+    "target_date",
+    default=None,
+    help="Asia/Taipei local date YYYY-MM-DD; defaults to today",
+)
+def ops_schedule_due(job_id: str, target_date: str | None) -> None:
+    """Check whether a canonical schedule job should fire on a local date."""
+    from volpred.ops import build_schedule_due_report
+
+    try:
+        report = build_schedule_due_report(job_id, target_date=target_date)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    status = (
+        "yes" if report["scheduled"] is True
+        else "no" if report["scheduled"] is False
+        else "unknown"
+    )
+    console.print(
+        f"[green]Schedule due check[/green] job={job_id} "
+        f"date={report['date']} scheduled={status}"
+    )
+    console.print(f"  cron={report['cron']}")
+    console.print(f"  reason={report['reason']}")
+    _print_json(report)
+
+
 @ops.command("event-preview")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_event_preview(storage_dir: str) -> None:
