@@ -5,6 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "task_pool_claim.py"
 SPEC = importlib.util.spec_from_file_location("task_pool_claim", MODULE_PATH)
@@ -299,15 +301,30 @@ def test_list_codex_eligible_filters_claude_only_tasks(tmp_path, monkeypatch, ca
     ]
 
 
-def test_codex_owner_cannot_claim_claude_only_task(tmp_path, monkeypatch, capsys) -> None:
+@pytest.mark.parametrize(
+    ("task_id", "task_type", "status"),
+    [
+        ("trending_repost_example", "trending_repost", "pending"),
+        ("email_reply_example", "email_reply", "pending"),
+        ("paper_body_main_thread", "paper_body", "pending_main_thread"),
+    ],
+)
+def test_codex_owner_cannot_claim_claude_only_task(
+    task_id,
+    task_type,
+    status,
+    tmp_path,
+    monkeypatch,
+    capsys,
+) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(
         json.dumps(
             [
                 {
-                    "id": "trending_repost_example",
-                    "task_type": "trending_repost",
-                    "status": "pending",
+                    "id": task_id,
+                    "task_type": task_type,
+                    "status": status,
                     "priority": 1,
                 }
             ],
@@ -324,7 +341,7 @@ def test_codex_owner_cannot_claim_claude_only_task(tmp_path, monkeypatch, capsys
             "task_pool_claim.py",
             "claim",
             "--id",
-            "trending_repost_example",
+            task_id,
             "--owner",
             "codex-vscode",
         ],
@@ -337,7 +354,7 @@ def test_codex_owner_cannot_claim_claude_only_task(tmp_path, monkeypatch, capsys
     assert payload["ok"] is False
     assert payload["reason"] == "not_codex_eligible"
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
-    assert saved[0]["status"] == "pending"
+    assert saved[0]["status"] == status
     assert "claimed_by" not in saved[0]
 
 
