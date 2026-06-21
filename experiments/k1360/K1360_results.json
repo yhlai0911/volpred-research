@@ -1,0 +1,960 @@
+{
+  "experiment_id": "K1360",
+  "title": "Prediction-market implied probability shock as macro event volatility prior",
+  "generated_at_utc": "2026-06-21T13:57:45.044163+00:00",
+  "methodology_type": "empirical_public_api_feasibility_and_lagged_time_series_diagnostic",
+  "data": {
+    "polymarket_probe": {
+      "ok": false,
+      "blocked_domain_page_detected": true,
+      "all_endpoints_failed": true,
+      "probes": [
+        {
+          "url": "https://gamma-api.polymarket.com/events?limit=1",
+          "http_status": null,
+          "ok": false,
+          "blocked_domain_page_detected": true,
+          "error": null,
+          "bytes_saved": 1030,
+          "cache_path": "data/raw/polymarket_probe_1.html"
+        },
+        {
+          "url": "https://clob.polymarket.com/prices-history?market=0x0&interval=1d",
+          "http_status": null,
+          "ok": false,
+          "blocked_domain_page_detected": true,
+          "error": null,
+          "bytes_saved": 1030,
+          "cache_path": "data/raw/polymarket_probe_2.html"
+        }
+      ]
+    },
+    "kalshi": {
+      "kalshi_base_url": "https://external-api.kalshi.com/trade-api/v2",
+      "series_requested": {
+        "KXCPI": "headline_cpi",
+        "KXCPICORE": "core_cpi",
+        "KXFEDDECISION": "fomc",
+        "KXPAYROLLS": "payrolls",
+        "KXUSNFP": "us_nfp"
+      },
+      "probe_series_without_usable_events": {
+        "KXNFP": {
+          "events_returned": 0,
+          "first_event_ticker": null
+        },
+        "KXNONFARM": {
+          "events_returned": 0,
+          "first_event_ticker": null
+        },
+        "KXJOBS": {
+          "events_returned": 0,
+          "first_event_ticker": null
+        },
+        "KXUNEMPLOY": {
+          "events_returned": 0,
+          "first_event_ticker": null
+        },
+        "KXJOBLESSCLAIMS": {
+          "events_returned": 44,
+          "first_event_ticker": "KXJOBLESSCLAIMS-26JUN25"
+        }
+      },
+      "series_event_counts_2026": {
+        "KXCPI": 11,
+        "KXCPICORE": 11,
+        "KXFEDDECISION": 8,
+        "KXPAYROLLS": 11,
+        "KXUSNFP": 3
+      },
+      "selected_events": 32,
+      "selected_markets": 186,
+      "market_candle_rows": 21759,
+      "event_daily_rows": 4460,
+      "calendar_signal_days": 263,
+      "unavailable_events": [
+        {
+          "event_ticker": "KXCPI-26MAR",
+          "series_ticker": "KXCPI",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXCPI-26FEB",
+          "series_ticker": "KXCPI",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXCPI-26JAN",
+          "series_ticker": "KXCPI",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXCPICORE-26MAR",
+          "series_ticker": "KXCPICORE",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXCPICORE-26FEB",
+          "series_ticker": "KXCPICORE",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXCPICORE-26JAN",
+          "series_ticker": "KXCPICORE",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXFEDDECISION-26MAR",
+          "series_ticker": "KXFEDDECISION",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXFEDDECISION-26JAN",
+          "series_ticker": "KXFEDDECISION",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXPAYROLLS-26MAR",
+          "series_ticker": "KXPAYROLLS",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXPAYROLLS-26FEB",
+          "series_ticker": "KXPAYROLLS",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXPAYROLLS-26JAN",
+          "series_ticker": "KXPAYROLLS",
+          "reason": "no_markets"
+        },
+        {
+          "event_ticker": "KXUSNFP-26APR03",
+          "series_ticker": "KXUSNFP",
+          "reason": "no_markets"
+        }
+      ],
+      "market_selection": "top 6 markets per event by volume + 0.05*open_interest + 0.1*liquidity, requiring score >= 1.0",
+      "primary_shock_definition": "event-level max absolute daily close-probability change; calendar-day signal is max across events"
+    },
+    "market_targets": {
+      "source": "yfinance adjusted close; ZQ=F is 30-Day Fed Funds futures continuous ticker used as FedWatch-like baseline",
+      "coverage": {
+        "SPY": {
+          "first": "2025-09-02",
+          "last": "2026-06-18",
+          "n_obs": 201
+        },
+        "^VIX": {
+          "first": "2025-09-02",
+          "last": "2026-06-18",
+          "n_obs": 202
+        },
+        "^VIX9D": {
+          "first": "2025-09-02",
+          "last": "2026-06-18",
+          "n_obs": 201
+        },
+        "ZQ=F": {
+          "first": "2025-09-02",
+          "last": "2026-06-19",
+          "n_obs": 202
+        }
+      }
+    },
+    "analysis_panel": {
+      "start": "2025-09-03",
+      "end": "2026-06-18",
+      "n_market_trading_days": 200,
+      "nonzero_kalshi_signal_days": 165,
+      "nonzero_fedfunds_signal_days": 104
+    }
+  },
+  "config": {
+    "seed": 42,
+    "analysis_start": "2025-09-01",
+    "kalshi_series": {
+      "KXCPI": "headline_cpi",
+      "KXCPICORE": "core_cpi",
+      "KXFEDDECISION": "fomc",
+      "KXPAYROLLS": "payrolls",
+      "KXUSNFP": "us_nfp"
+    },
+    "max_markets_per_event": 6,
+    "min_event_market_score": 1.0,
+    "nw_lag_daily": 5,
+    "timing_rule": "Kalshi daily probability shock at calendar date t-1 predicts market target at trading date t via signal.shift(1)",
+    "primary_inference_unit": "daily time series after event-market shocks are aggregated to calendar days",
+    "baseline": "ZQ=F yfinance 30-Day Fed Funds futures absolute price change, lagged one calendar day; this is FedWatch-like, not the full CME FedWatch probability table",
+    "harvey_threshold": "|t| >= 3 required for discovery-style volatility-prior claims"
+  },
+  "literature": [
+    {
+      "citation": "Wolfers and Zitzewitz (2004), Prediction Markets, Journal of Economic Perspectives",
+      "url": "https://www.aeaweb.org/articles?id=10.1257/0895330041371321",
+      "role": "prediction-market prices as probabilistic summaries of dispersed information"
+    },
+    {
+      "citation": "Manski (2006), Interpreting the Predictions of Prediction Markets, Economics Letters",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0165176505003336",
+      "role": "market prices need not equal mean beliefs under all assumptions"
+    },
+    {
+      "citation": "Snowberg, Wolfers, and Zitzewitz (2013), Prediction Markets for Economic Forecasting, Handbook of Economic Forecasting",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/B978044453683900017X",
+      "role": "prediction markets as forecasting tools, with calibration and liquidity caveats"
+    },
+    {
+      "citation": "Bernanke and Kuttner (2005), What Explains the Stock Market's Reaction to Federal Reserve Policy?, Journal of Finance",
+      "url": "https://www.jstor.org/stable/3694737",
+      "role": "policy surprises can move equity prices and discount rates"
+    },
+    {
+      "citation": "Kuttner (2001), Monetary policy surprises and interest rates, Journal of Monetary Economics",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0304393201000551",
+      "role": "fed funds futures provide a conventional policy-surprise prior"
+    }
+  ],
+  "tests": {
+    "targets": {
+      "spy_abs_ret_1d": "next trading day's absolute SPY return, signal lagged one calendar day",
+      "spy_rv5_forward": "five-trading-day forward SPY realized volatility beginning on target date",
+      "spy_left_tail_1d": "next trading day's positive left-tail loss proxy",
+      "vix9d_vix_ratio_change": "one-day change in log(VIX9D/VIX)",
+      "vix_log_change_1d": "one-day log change in VIX",
+      "vix9d_log_change_1d": "one-day log change in VIX9D"
+    },
+    "models": {
+      "spy_abs_ret_1d": {
+        "description": "next trading day's absolute SPY return, signal lagged one calendar day",
+        "kalshi_only": {
+          "n": 200,
+          "target_mean": 0.0062511628091760875,
+          "target_sd": 0.005395303871538533,
+          "r2": 0.014418429431324764,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            }
+          },
+          "intercept": {
+            "beta": 0.006251162809176086,
+            "se": 0.0003930856489969586,
+            "t": 15.902800891172836,
+            "p": 0.0
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": 0.0006478506337037496,
+              "hac_se": 0.00037801428324282983,
+              "hac_t": 1.7138258061206157,
+              "p": 0.08812570754539895
+            }
+          }
+        },
+        "fedfunds_prior_only": {
+          "n": 200,
+          "target_mean": 0.0062511628091760875,
+          "target_sd": 0.005395303871538533,
+          "r2": 2.0017619526413455e-06,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": 0.006251162809176086,
+            "se": 0.0004203669056329973,
+            "t": 14.870730129820648,
+            "p": 0.0
+          },
+          "slopes": {
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": -7.633472142071185e-06,
+              "hac_se": 0.00036731036759383567,
+              "hac_t": -0.020782076455059726,
+              "p": 0.9834404232685654
+            }
+          }
+        },
+        "combined": {
+          "n": 200,
+          "target_mean": 0.0062511628091760875,
+          "target_sd": 0.005395303871538533,
+          "r2": 0.014489211663405221,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            },
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": 0.006251162809176087,
+            "se": 0.00039343273535469254,
+            "t": 15.88877144028307,
+            "p": 0.0
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": 0.0006515676615368406,
+              "hac_se": 0.00037563227700475435,
+              "hac_t": 1.7345891219262657,
+              "p": 0.08437773521284542
+            },
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 4.554380087205747e-05,
+              "hac_se": 0.0003548476386217808,
+              "hac_t": 0.12834748189095588,
+              "p": 0.8980049207735195
+            }
+          }
+        }
+      },
+      "spy_rv5_forward": {
+        "description": "five-trading-day forward SPY realized volatility beginning on target date",
+        "kalshi_only": {
+          "n": 196,
+          "target_mean": 0.12007067860520895,
+          "target_sd": 0.05199124464701887,
+          "r2": 0.08161816664134236,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.19816326530612247,
+              "raw_sd": 0.23496622396775307,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            }
+          },
+          "intercept": {
+            "beta": 0.12007067860520897,
+            "se": 0.007056510865465816,
+            "t": 17.015587574990978,
+            "p": 0.0
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": 0.014853323226989722,
+              "hac_se": 0.007022566116100537,
+              "hac_t": 2.115084853802333,
+              "p": 0.035699089859520194
+            }
+          }
+        },
+        "fedfunds_prior_only": {
+          "n": 196,
+          "target_mean": 0.12007067860520895,
+          "target_sd": 0.05199124464701887,
+          "r2": 0.002693803697159214,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.004081648223250448,
+              "raw_sd": 0.02040249993089862,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": 0.12007067860520897,
+            "se": 0.007619611845440097,
+            "t": 15.758109604633523,
+            "p": 0.0
+          },
+          "slopes": {
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": -0.0026984426142839303,
+              "hac_se": 0.004386482394489827,
+              "hac_t": -0.6151723343683395,
+              "p": 0.5391618512900713
+            }
+          }
+        },
+        "combined": {
+          "n": 196,
+          "target_mean": 0.12007067860520895,
+          "target_sd": 0.05199124464701887,
+          "r2": 0.08245949438957245,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.19816326530612247,
+              "raw_sd": 0.23496622396775307,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            },
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.004081648223250448,
+              "raw_sd": 0.02040249993089862,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": 0.12007067860520897,
+            "se": 0.007056195953403079,
+            "t": 17.016346966285848,
+            "p": 0.0
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": 0.014731571646103926,
+              "hac_se": 0.007009913070034819,
+              "hac_t": 2.101534141568285,
+              "p": 0.03689188227370832
+            },
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": -0.0015129466833066917,
+              "hac_se": 0.004113279313084456,
+              "hac_t": -0.36782006962035524,
+              "p": 0.7134104653304485
+            }
+          }
+        }
+      },
+      "spy_left_tail_1d": {
+        "description": "next trading day's positive left-tail loss proxy",
+        "kalshi_only": {
+          "n": 200,
+          "target_mean": 0.002712758683678979,
+          "target_sd": 0.005049971369998561,
+          "r2": 0.0004968989601324969,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            }
+          },
+          "intercept": {
+            "beta": 0.0027127586836789785,
+            "se": 0.00036039332353572813,
+            "t": 7.527216811523549,
+            "p": 1.786570891226802e-12
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": 0.00011257007615875816,
+              "hac_se": 0.0003531535482463962,
+              "hac_t": 0.31875674679677213,
+              "p": 0.7502469791232986
+            }
+          }
+        },
+        "fedfunds_prior_only": {
+          "n": 200,
+          "target_mean": 0.002712758683678979,
+          "target_sd": 0.005049971369998561,
+          "r2": 0.004787298581208521,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": 0.0027127586836789785,
+            "se": 0.00036723937689257905,
+            "t": 7.386894909345426,
+            "p": 4.101385897570253e-12
+          },
+          "slopes": {
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 0.00034940906937500304,
+              "hac_se": 0.0003809281517522935,
+              "hac_t": 0.9172571461775647,
+              "p": 0.3601238193244105
+            }
+          }
+        },
+        "combined": {
+          "n": 200,
+          "target_mean": 0.002712758683678979,
+          "target_sd": 0.005049971369998561,
+          "r2": 0.005573072923394151,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            },
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": 0.002712758683678979,
+            "se": 0.0003615280369641657,
+            "t": 7.503591440538441,
+            "p": 2.0872192862952943e-12
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": 0.00014203293879421443,
+              "hac_se": 0.0003525496976348296,
+              "hac_t": 0.4028735232141141,
+              "p": 0.6874781301840209
+            },
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 0.0003610009957536743,
+              "hac_se": 0.000378013515308305,
+              "hac_t": 0.9549949436576218,
+              "p": 0.340750642918334
+            }
+          }
+        }
+      },
+      "vix9d_vix_ratio_change": {
+        "description": "one-day change in log(VIX9D/VIX)",
+        "kalshi_only": {
+          "n": 200,
+          "target_mean": -0.0005161525041235348,
+          "target_sd": 0.06471172996335263,
+          "r2": 0.015858775552210935,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            }
+          },
+          "intercept": {
+            "beta": -0.0005161525041235359,
+            "se": 0.0033389952820443735,
+            "t": -0.15458317862836574,
+            "p": 0.8773073896111954
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": -0.008149253664659607,
+              "hac_se": 0.0036253867876579263,
+              "hac_t": -2.2478301328847152,
+              "p": 0.025689615757626072
+            }
+          }
+        },
+        "fedfunds_prior_only": {
+          "n": 200,
+          "target_mean": -0.0005161525041235348,
+          "target_sd": 0.06471172996335263,
+          "r2": 0.00038157179557196663,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": -0.0005161525041235359,
+            "se": 0.003222650057335905,
+            "t": -0.16016399389955108,
+            "p": 0.8729151702844304
+          },
+          "slopes": {
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 0.0012640700541289795,
+              "hac_se": 0.003274761638243277,
+              "hac_t": 0.386003683250388,
+              "p": 0.699908379521351
+            }
+          }
+        },
+        "combined": {
+          "n": 200,
+          "target_mean": -0.0005161525041235348,
+          "target_sd": 0.06471172996335263,
+          "r2": 0.01594502421660382,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            },
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": -0.0005161525041235359,
+            "se": 0.0033390755789102617,
+            "t": -0.15457946126873445,
+            "p": 0.877311115270923
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": -0.00810004098924649,
+              "hac_se": 0.003688228832780526,
+              "hac_t": -2.1961872097670074,
+              "p": 0.029245811073510097
+            },
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 0.0006029904509841309,
+              "hac_se": 0.0034663421767121036,
+              "hac_t": 0.17395583593425842,
+              "p": 0.8620787971646555
+            }
+          }
+        }
+      },
+      "vix_log_change_1d": {
+        "description": "one-day log change in VIX",
+        "kalshi_only": {
+          "n": 200,
+          "target_mean": -0.000229411838915127,
+          "target_sd": 0.07879525392220288,
+          "r2": 0.01403631924572235,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            }
+          },
+          "intercept": {
+            "beta": -0.00022941183891512525,
+            "se": 0.004571487640159814,
+            "t": -0.05018319133136829,
+            "p": 0.9600269934298999
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": -0.009335265587070433,
+              "hac_se": 0.005019033951241664,
+              "hac_t": -1.8599725918891166,
+              "p": 0.06437256309448092
+            }
+          }
+        },
+        "fedfunds_prior_only": {
+          "n": 200,
+          "target_mean": -0.000229411838915127,
+          "target_sd": 0.07879525392220288,
+          "r2": 0.004695403452824931,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": -0.00022941183891512525,
+            "se": 0.004509488459203938,
+            "t": -0.05087314026647347,
+            "p": 0.9594778934115915
+          },
+          "slopes": {
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 0.005399288290623224,
+              "hac_se": 0.0035210689509368813,
+              "hac_t": 1.5334230501753134,
+              "p": 0.1267679269958002
+            }
+          }
+        },
+        "combined": {
+          "n": 200,
+          "target_mean": -0.000229411838915127,
+          "target_sd": 0.07879525392220288,
+          "r2": 0.01752331032359067,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            },
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": -0.00022941183891512528,
+            "se": 0.00458882327295949,
+            "t": -0.04999360953100504,
+            "p": 0.9601781322574661
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": -0.00895424955154208,
+              "hac_se": 0.005049732202088554,
+              "hac_t": -1.7732127552899994,
+              "p": 0.07773857674091444
+            },
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 0.004668493008494157,
+              "hac_se": 0.0036794123684458146,
+              "hac_t": 1.2688148380786497,
+              "p": 0.20600425514389098
+            }
+          }
+        }
+      },
+      "vix9d_log_change_1d": {
+        "description": "one-day log change in VIX9D",
+        "kalshi_only": {
+          "n": 200,
+          "target_mean": -0.0007455643430386605,
+          "target_sd": 0.13155282974738078,
+          "r2": 0.017664729948683178,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            }
+          },
+          "intercept": {
+            "beta": -0.0007455643430386581,
+            "se": 0.00717403504226596,
+            "t": -0.10392538350400465,
+            "p": 0.9173337540706954
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": -0.017484519251730044,
+              "hac_se": 0.007862078087317374,
+              "hac_t": -2.2239055701996913,
+              "p": 0.027284749087420623
+            }
+          }
+        },
+        "fedfunds_prior_only": {
+          "n": 200,
+          "target_mean": -0.0007455643430386605,
+          "target_sd": 0.13155282974738078,
+          "r2": 0.002565582298201141,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": -0.0007455643430386581,
+            "se": 0.006976212531536153,
+            "t": -0.10687236658406189,
+            "p": 0.9149984426066189
+          },
+          "slopes": {
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 0.0066633583447522115,
+              "hac_se": 0.00668260697312417,
+              "hac_t": 0.9971195929299193,
+              "p": 0.31992347613173466
+            }
+          }
+        },
+        "combined": {
+          "n": 200,
+          "target_mean": -0.0007455643430386605,
+          "target_sd": 0.13155282974738078,
+          "r2": 0.01925973784366053,
+          "hac_lags": 5,
+          "predictor_stats": {
+            "kalshi_signal": {
+              "raw_mean": 0.20252499999999998,
+              "raw_sd": 0.23463269033747194,
+              "raw_min": 0.0,
+              "raw_max": 0.94
+            },
+            "fedfunds_prior_signal": {
+              "raw_mean": 0.0040375137329063905,
+              "raw_sd": 0.020201937186492838,
+              "raw_min": 0.0,
+              "raw_max": 0.2075042724609517
+            }
+          },
+          "intercept": {
+            "beta": -0.0007455643430386581,
+            "se": 0.007186847518544425,
+            "t": -0.10374010873541667,
+            "p": 0.9174811303592187
+          },
+          "slopes": {
+            "kalshi_signal": {
+              "beta_per_1sd_signal": -0.01705429054078858,
+              "hac_se": 0.007947944819426043,
+              "hac_t": -2.145748483193439,
+              "p": 0.0331165938797946
+            },
+            "fedfunds_prior_signal": {
+              "beta_per_1sd_signal": 0.005271483459478297,
+              "hac_se": 0.007034809801167584,
+              "hac_t": 0.7493427126634435,
+              "p": 0.45454452602493833
+            }
+          }
+        }
+      }
+    },
+    "top_quintile": {
+      "spy_abs_ret_1d": {
+        "n": 200,
+        "cutoff": 0.35100000000000003,
+        "top_quintile_n": 40,
+        "rest_n": 160,
+        "top_quintile_mean": 0.007002650583958078,
+        "rest_mean": 0.00606329086548059,
+        "difference": 0.0009393597184774883,
+        "welch_t": 1.0159477899875045,
+        "welch_p": 0.3135617603625348
+      },
+      "spy_rv5_forward": {
+        "n": 196,
+        "cutoff": 0.33999999999999997,
+        "top_quintile_n": 41,
+        "rest_n": 155,
+        "top_quintile_mean": 0.14229275342195277,
+        "rest_mean": 0.11419258139561866,
+        "difference": 0.028100172026334108,
+        "welch_t": 2.734401036578065,
+        "welch_p": 0.00844188829802146
+      },
+      "spy_left_tail_1d": {
+        "n": 200,
+        "cutoff": 0.35100000000000003,
+        "top_quintile_n": 40,
+        "rest_n": 160,
+        "top_quintile_mean": 0.0029127197006392725,
+        "rest_mean": 0.0026627684294389057,
+        "difference": 0.00024995127120036684,
+        "welch_t": 0.27121926869745844,
+        "welch_p": 0.7871833473979541
+      },
+      "vix9d_vix_ratio_change": {
+        "n": 200,
+        "cutoff": 0.35100000000000003,
+        "top_quintile_n": 40,
+        "rest_n": 160,
+        "top_quintile_mean": -0.011285131184715701,
+        "rest_mean": 0.0021760921660245068,
+        "difference": -0.013461223350740209,
+        "welch_t": -1.315522984110665,
+        "welch_p": 0.19260542862548616
+      },
+      "vix_log_change_1d": {
+        "n": 200,
+        "cutoff": 0.35100000000000003,
+        "top_quintile_n": 40,
+        "rest_n": 160,
+        "top_quintile_mean": -0.016162432906639837,
+        "rest_mean": 0.003753843428016053,
+        "difference": -0.01991627633465589,
+        "welch_t": -1.419123331815946,
+        "welch_p": 0.1610838455464069
+      },
+      "vix9d_log_change_1d": {
+        "n": 200,
+        "cutoff": 0.35100000000000003,
+        "top_quintile_n": 40,
+        "rest_n": 160,
+        "top_quintile_mean": -0.02744756409135556,
+        "rest_mean": 0.005929935594040563,
+        "difference": -0.03337749968539612,
+        "welch_t": -1.495242013974495,
+        "welch_p": 0.13982399835216358
+      }
+    }
+  },
+  "event_study": {
+    "n_events_with_market_target": 10,
+    "spearman": {
+      "spy_abs_ret_1d": {
+        "rho": 0.21605349900086046,
+        "p": 0.5488333000971757,
+        "n": 10
+      },
+      "spy_left_tail_1d": {
+        "rho": 0.13580505651482658,
+        "p": 0.7083450079619078,
+        "n": 10
+      },
+      "vix9d_vix_ratio_change": {
+        "rho": -0.11111322805758538,
+        "p": 0.7599185069346645,
+        "n": 10
+      }
+    }
+  },
+  "figures": [
+    "figures/k1360_signal_vix9d_ratio.png",
+    "figures/k1360_hac_tstats.png"
+  ],
+  "artifacts": {
+    "daily_panel": "K1360_daily_panel.csv",
+    "event_study": "K1360_event_study.csv",
+    "kalshi_selected_events": "data/kalshi_selected_events.csv",
+    "kalshi_market_panel": "data/kalshi_market_panel.csv",
+    "kalshi_event_daily": "data/kalshi_event_daily.csv",
+    "market_targets": "data/market_targets.csv"
+  },
+  "limitations": [
+    "Polymarket public endpoint returned a Taiwan domain-block HTML page in this environment, so Polymarket is excluded from empirical claims.",
+    "Kalshi public event-detail endpoints returned usable markets only for a subset of 2026 macro events; older 2025 events were listed but often had zero markets in the public detail response.",
+    "The FedWatch comparison uses yfinance ZQ=F 30-Day Fed Funds futures price changes as a free baseline, not CME's full historical FedWatch probability API.",
+    "Daily Kalshi candles are end-of-day public API aggregates; no intraday timestamp alignment with US equity close is attempted, so all signals are shifted by one calendar day.",
+    "Forward five-day SPY RV targets overlap; Newey-West lag 5 is used, but this remains a diagnostic rather than a launch-ready forecast model."
+  ],
+  "verdict": "WEAK_KALSHI_DIAGNOSTIC_UNDERPOWERED",
+  "decision": {
+    "kalshi_positive_t_ge_3_targets": [],
+    "kalshi_positive_t_ge_2_targets": [
+      "spy_rv5_forward"
+    ],
+    "polymarket_ok": false,
+    "minimum_daily_regression_n": 196,
+    "selected_kalshi_events": 32,
+    "claim_rule": "A support claim requires positive Kalshi lagged-shock slope with HAC t>=3, usable Polymarket or a pre-specified cross-market replication, >=20 events, and >=180 daily observations. Otherwise results stay diagnostic."
+  }
+}

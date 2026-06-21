@@ -35021,7 +35021,7 @@
     "title": "K1360: Prediction-market implied probability shock 作 macro event vol prior** — 用 Kalshi/Polymarket 公開 market price/API 建 FOMC、C",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1133). Original: Prediction-market implied probability shock 作 macro event vol prior** — 用 Kalshi/Polymarket 公開 market price/API 建 FOMC、CPI、NFP、election/geopolitical event-probability change，檢定是否領先 VIX9D/VIX、SPY RV 與 event-day tail move；所有 signal 用 `shift(1)`，並與 SOFR/FedWatch prior 比較；與 FOMC 單事件 prior 正交（來源：Pew Research Center 2026 prediction-market volume surge；event contracts 2025H2-2026 快速擴大）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1360.py with signal.shift(1) + seed=42, (c) K1360_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "claimed",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35033,6 +35033,9 @@
     "created_at": "2026-06-21T12:21:15Z",
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-21T13:34:41.670812+00:00",
-    "claim_session_id": "79f305265669"
+    "claim_session_id": "79f305265669",
+    "started_at": "2026-06-21T13:34:47.360602+00:00",
+    "completed_at": "2026-06-21T13:57:51.294176+00:00",
+    "result": "K1360 completed: Kalshi 2026 CPI/Core CPI/FOMC/Payrolls/NFP probability shocks are data-feasible but underpowered; Polymarket unavailable; only SPY 5d forward RV weak t=2.12, no t>=3 support. knowledge d4f5babd; artifacts in experiments/k1360."
   }
 ]

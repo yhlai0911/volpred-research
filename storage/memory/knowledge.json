@@ -35550,5 +35550,18 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-06-21T21:31:56.344347"
+  },
+  {
+    "item_id": "d4f5babd",
+    "category": "experiment",
+    "content": "K1360 WEAK_KALSHI_DIAGNOSTIC_UNDERPOWERED: Built a public-API prediction-market macro-event probability-shock panel from Kalshi 2026 CPI/Core CPI/FOMC/Payrolls/NFP markets (32 events, 186 markets, 21,759 market-candle rows) and joined it to SPY/^VIX/^VIX9D/ZQ=F daily targets from 2025-09-03 to 2026-06-18 (200 market trading days). All prediction-market and Fed funds futures baseline predictors are lagged via signal.shift(1); event-market rows are first aggregated to calendar-day shocks, so inference is daily time-series HAC rather than pooled market-row tests. Polymarket public endpoints returned domain-block/failed probes in this environment, so no cross-market replication is available. Result: 0 targets reach Harvey-style |t|>=3. The only positive weak diagnostic is SPY 5-day forward RV (Kalshi beta +0.01485 per 1sd, HAC t=+2.12; top-quintile RV 14.23% vs 11.42%, Welch p=0.008). Event-day study has n=10 and no significant tail-move relationship. Interpretation: Kalshi public data are feasible for constructing macro-event probability shocks, but K1360 does not support a robust prediction-market volatility prior, does not beat FedWatch, and requires CME FedWatch probability history plus external Polymarket/other prediction-market replication before any stronger claim. Codex source review: CONDITIONAL_PASS.",
+    "evidence": [
+      "experiments/k1360/K1360.py",
+      "experiments/k1360/K1360_results.json",
+      "experiments/k1360/README.md",
+      "experiments/k1360/codex_review.md"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-06-21T21:57:21.435499"
   }
 ]

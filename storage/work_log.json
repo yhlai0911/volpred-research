@@ -11135,5 +11135,20 @@
     "summary": "K1359 completed: 6 ETF tail-asymmetry estimators show no robust next-month return premium, but 4/6 flag higher next-month RV or left-tail exposure. knowledge 023d6ea4.",
     "duration_min": 10,
     "derived_tasks": []
+  },
+  {
+    "entry_id": "d4f5babd",
+    "timestamp": "2026-06-21T14:10:00Z",
+    "task_type": "experiment",
+    "task_id": "K1360",
+    "agent": "codex-vscode",
+    "skill_used": "autonomous-research",
+    "outcome": "done",
+    "summary": "K1360 completed: Kalshi macro prediction-market shocks are data-feasible but underpowered; only SPY 5d forward RV has weak t=2.12 diagnostic signal, no t>=3 target, Polymarket unavailable. knowledge d4f5babd.",
+    "duration_min": 35,
+    "derived_tasks": [
+      "Fetch CME FedWatch historical probability API or construct meeting-level Fed funds futures probabilities for K1360 follow-up.",
+      "Re-run K1360 from an environment with Polymarket public API access or another prediction-market replication source."
+    ]
   }
 ]
