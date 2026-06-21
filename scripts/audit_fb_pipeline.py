@@ -165,7 +165,7 @@ def main():
             )
         sections.append(
             "## 根因\n個人 FB 帳號無 headless API。stale 累積 = 等不到 interactive session。\n"
-            "## 永久解\n見 `docs/fb_pipeline_permanent_fix.md`（VolPred FB Page + Graph API）。"
+            "## 永久規則\n見 `docs/fb_pipeline_permanent_fix.md`（個人帳號 + Claude-in-Chrome；Page/Graph API 已撤回）。"
         )
         body = "\n\n".join(sections)
         try:

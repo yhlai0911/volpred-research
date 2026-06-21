@@ -1,6 +1,6 @@
 # Boss Direction Recommendations (我給老闆的方向建議)
 
-**Updated**: 2026-05-19 (rolling — 我每 cycle 更新)
+**Updated**: 2026-06-22 (rolling — 我每 cycle 更新)
 **目的**: 給老闆做平台方向決策用的當前建議，可隨時 ignore
 
 ---
@@ -38,14 +38,14 @@
 - ✅ audit_publish_sync / audit_fb_pipeline — 兩個 standing audit script（本 cycle 落地）
 - 🔄 Reader analytics ingestion — spec 撰寫中
 - 🔄 Monetization funnel — 規劃中
-- 🟡 FB MCP ext bug 短期繞 Playwright（cookie injection 已 work），長期需 escalate Anthropic OR FB Page + Graph API
+- 🟡 FB 個人帳號發文流程 — Page/Graph API 已永久撤回；保留 Claude-in-Chrome interactive path + 72h auto-expire/audit。
 
 ## 4. 需要你決策的策略性事項
 
 只標出來，你不回我也會自主走。
 
 - **目標期刊**：我預設 JBF（top-tier finance），如果你想往 RFS / JFE 衝需要拉高 contribution claim
-- **FB 路線**：personal account（現況）vs Page（可用 Graph API 自動發）
+- **FB 路線**：已決定 personal account only；Page/Graph API 不再作為 active 建議或 fallback。
 - **付費 tier 命名與定價**：你 vs 我寫 mock-up（我可以做但市場價格判斷你比較知道）
 - **策略上架節奏**：active 11 個都 healthy，是否擴張到 15-20 個 strategy universe
 

@@ -1,10 +1,12 @@
 # FB Post Handoff — 5 Trending Reposts Pending Manual / Sidepanel Push
 
+> Historical handoff only. Active rule is `docs/fb_pipeline_permanent_fix.md`: personal account + Claude-in-Chrome interactive posting; FB Page / Graph API was rejected and withdrawn.
+
 **Updated**: 2026-05-19 17:10 CST
 **Pending count**: 5 (was 4 in v1; +2 added 5/18; 2 marked wont_fix)
 **Wont-fix**: `mile_ed85d127` (4d stale, no draft) + `mile_57894028` (1d, no draft, ROI low)
 
-**Why not auto-posted**: Claude Code MCP claude-in-chrome NOT connected → cannot drive Chrome UI. Personal FB has no API. Standby fix: connect MCP browser extension OR pivot to FB Page + Graph API.
+**Why not auto-posted**: Claude Code MCP claude-in-chrome NOT connected → cannot drive Chrome UI. Personal FB has no API. Historical standby was to connect the MCP browser extension; later Page/Graph API fallback was rejected, so current active path stays personal-account interactive posting only.
 
 ---
 
@@ -131,4 +133,3 @@ Fisher z 檢定 p < 0.0001。不是噪音。
 我在觀察的是 MOVE 接下來怎麼走。那個訊號比 VIX 早說話。
 --- FIRST COMMENT (after posting) ---
 完整版分析 + 圖表在這裡 → https://volpred.zeabur.app/article/mile_50f44a46
-

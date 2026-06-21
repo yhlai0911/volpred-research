@@ -280,3 +280,23 @@ def test_fb_page_graph_api_direct_call_is_withdrawn() -> None:
         fb_page_post.post_article("message", "https://example.com", "token", "page_id")
 
     assert "permanently withdrawn" in str(excinfo.value)
+
+
+def test_active_fb_guidance_does_not_recommend_page_graph_api() -> None:
+    repo = Path(__file__).resolve().parents[1]
+    active_paths = [
+        repo / "docs" / "boss_direction_recommendations.md",
+        repo / "docs" / "fb_post_handoff_2026_05_18.md",
+        repo / "scripts" / "audit_fb_pipeline.py",
+    ]
+    forbidden_phrases = [
+        "OR FB Page + Graph API",
+        "pivot to FB Page + Graph API",
+        "Page（可用 Graph API 自動發）",
+        "VolPred FB Page + Graph API",
+    ]
+
+    for path in active_paths:
+        text = path.read_text(encoding="utf-8")
+        found = [phrase for phrase in forbidden_phrases if phrase in text]
+        assert found == [], f"{path} still recommends withdrawn FB Page/Graph flow: {found}"
