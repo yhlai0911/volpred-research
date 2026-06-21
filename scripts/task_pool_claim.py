@@ -76,6 +76,24 @@ def _locked_load() -> Iterator[tuple[Any, list[dict[str, Any]]]]:
         fh.seek(0)
         fh.truncate()
         json.dump(data, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+    finally:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        fh.close()
+
+
+@contextmanager
+def _locked_readonly() -> Iterator[list[dict[str, Any]]]:
+    if not NEXT_TASKS.exists():
+        yield []
+        return
+    fh = NEXT_TASKS.open("r", encoding="utf-8")
+    fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
+    try:
+        data = json.load(fh)
+        if not isinstance(data, list):
+            raise SystemExit("next_tasks.json is not a list")
+        yield data
     finally:
         fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         fh.close()
@@ -378,7 +396,7 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
-    with _locked_load() as (_fh, tasks):
+    with _locked_readonly() as tasks:
         out: list[dict[str, Any]] = []
         for t in tasks:
             status = (t.get("status") or "").lower()

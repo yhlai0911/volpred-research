@@ -1,0 +1,75 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _load_generate_handoff():
+    module_path = ROOT / "scripts" / "generate_handoff.py"
+    spec = importlib.util.spec_from_file_location("generate_handoff", module_path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(module)
+    return module
+
+
+def _write_fixture_files(tmp_path: Path, tasks: list[dict]) -> None:
+    (tmp_path / "ops" / "agents").mkdir(parents=True)
+    (tmp_path / "worktrees").mkdir()
+    (tmp_path / "next_tasks.json").write_text(json.dumps(tasks, ensure_ascii=False), encoding="utf-8")
+    (tmp_path / "dashboard_latest.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "work_log.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "gmail_inbox_state.json").write_text("{}", encoding="utf-8")
+
+
+def _patch_paths(monkeypatch, module, tmp_path: Path) -> None:
+    monkeypatch.setattr(module, "NEXT_TASKS", tmp_path / "next_tasks.json")
+    monkeypatch.setattr(module, "DASHBOARD", tmp_path / "dashboard_latest.json")
+    monkeypatch.setattr(module, "WORK_LOG", tmp_path / "work_log.json")
+    monkeypatch.setattr(module, "GMAIL_STATE", tmp_path / "gmail_inbox_state.json")
+    monkeypatch.setattr(module, "WORKTREES", tmp_path / "worktrees")
+    monkeypatch.setattr(module, "AGENTS_DIR", tmp_path / "ops" / "agents")
+    monkeypatch.setattr(module, "_now_local", lambda: "2026-06-22 06:50:00")
+
+
+def test_handoff_surfaces_codex_eligible_pending_counts(tmp_path, monkeypatch) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(
+        tmp_path,
+        [
+            {"id": "trend", "status": "pending", "task_type": "trending_repost", "priority": 1},
+            {"id": "ops", "status": "pending", "task_type": "platform_ops", "priority": 2},
+            {"id": "paper", "status": "pending_main_thread", "task_type": "paper_body", "priority": 1},
+        ],
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "Codex-eligible pending: 1" in handoff
+    assert "Codex-skip pending: 2" in handoff
+    assert "**Codex-eligible pending top 8**" in handoff
+    assert "`ops` P2 [platform_ops]" in handoff
+
+
+def test_handoff_warns_codex_when_only_skip_pending_exists(tmp_path, monkeypatch) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(
+        tmp_path,
+        [
+            {"id": "trend", "status": "pending", "task_type": "trending_repost", "priority": 1},
+            {"id": "reply", "status": "pending", "task_type": "email_reply", "priority": 1},
+        ],
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "Codex-eligible pending: 0" in handoff
+    assert "Codex-skip pending: 2" in handoff
+    assert "沒有可 claim 的 pending" in handoff
+    assert "task_pool_claim.py list --codex-eligible" in handoff

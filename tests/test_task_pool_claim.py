@@ -301,6 +301,45 @@ def test_list_codex_eligible_filters_claude_only_tasks(tmp_path, monkeypatch, ca
     ]
 
 
+def test_list_does_not_rewrite_next_tasks_file(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = (
+        json.dumps(
+            [
+                {
+                    "id": "platform_ops_example",
+                    "task_type": "platform_ops",
+                    "status": "pending",
+                    "priority": 3,
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n"
+    )
+    next_tasks.write_text(original, encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "list",
+            "--status",
+            "pending",
+            "--codex-eligible",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["count"] == 1
+    assert next_tasks.read_text(encoding="utf-8") == original
+
+
 @pytest.mark.parametrize(
     ("task_id", "task_type", "status"),
     [

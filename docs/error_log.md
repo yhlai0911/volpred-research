@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 Codex hourly handoff 缺 eligibility 訊號 + list 查詢會重寫任務池
+
+**問題**：Codex hourly tick 看到 handoff section 4 全是 `trending_repost` 時，每輪都要先人工判斷「這些是 Claude-only」再跑 `task_pool_claim.py list --codex-eligible`。同時發現 `list` 命令使用可寫 `_locked_load()`，即使只是查詢也會重寫 `storage/next_tasks.json`，造成檔尾 newline churn，增加不必要的資料檔 dirty risk。
+
+**根因**：handoff generator 只列全體 pending top 8，沒有直接顯示 Codex-eligible / Codex-skip pending 分佈；task_pool CLI 沒有分離 read-only list path 與 read-modify-write path。
+
+**解決方法**：`generate_handoff.py` 改用 `task_pool_claim._is_codex_eligible_task()` 同一套分類邏輯，section 1/4 顯示 Codex-eligible 與 Codex-skip pending count，且當可接數為 0 時明確提示 Codex 走 eligible list + fallback。`task_pool_claim.py list` 改 shared read lock `_locked_readonly()`，避免查詢改寫任務池；寫入 path 仍維持 exclusive lock，並補 newline。新增 regression test 鎖住 handoff eligibility 顯示與 list 不改檔。
+
 ## 2026-06-22 FB pipeline `pending_permission_denied` 卡住 WARN
 
 **問題**：dashboard `verification_fb_pipeline` 持續 WARN 1 筆 pending sync，但實際唯一項目是 `mile_9def57ab` 的 `fb_post_status=pending_permission_denied`。它已超過 72h、且 FB 個人帳號發文依 2026-06-03 規則不能交回 boss，也不應無限期卡在 pending。

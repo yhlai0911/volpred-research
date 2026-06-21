@@ -34,6 +34,11 @@ GMAIL_STATE = ROOT / "storage" / "ops" / "gmail_inbox_state.json"
 
 TAIPEI = ZoneInfo("Asia/Taipei")
 
+SCRIPTS_DIR = str(ROOT / "scripts")
+if SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SCRIPTS_DIR)
+from task_pool_claim import _is_codex_eligible_task  # noqa: E402
+
 
 def _now_local() -> str:
     return datetime.now(TAIPEI).strftime("%Y-%m-%d %H:%M:%S")
@@ -52,6 +57,8 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     status_counter = Counter()
     type_counter = Counter()
     pending_top: list[dict[str, Any]] = []
+    codex_eligible_pending: list[dict[str, Any]] = []
+    codex_skip_pending: list[dict[str, Any]] = []
     claimed: list[dict[str, Any]] = []
     in_progress: list[dict[str, Any]] = []
     email_replies: list[dict[str, Any]] = []
@@ -69,6 +76,10 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
 
         if status in {"pending", "pending_main_thread"}:
             pending_top.append(t)
+            if _is_codex_eligible_task(t):
+                codex_eligible_pending.append(t)
+            else:
+                codex_skip_pending.append(t)
         elif status == "claimed":
             claimed.append(t)
         elif status == "in_progress":
@@ -90,12 +101,17 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
         except (TypeError, ValueError):
             return (9, x.get("id") or "")
     pending_top.sort(key=_prio_key)
+    codex_eligible_pending.sort(key=_prio_key)
+    codex_skip_pending.sort(key=_prio_key)
     recently_completed.sort(key=lambda x: x.get("completed_at") or "", reverse=True)
 
     return {
         "status_counts": dict(status_counter),
         "type_counts": dict(type_counter),
         "pending_top": pending_top[:8],
+        "codex_eligible_pending": codex_eligible_pending[:8],
+        "codex_eligible_pending_count": len(codex_eligible_pending),
+        "codex_skip_pending_count": len(codex_skip_pending),
         "claimed": claimed,
         "in_progress": in_progress,
         "email_replies": email_replies,
@@ -223,6 +239,8 @@ def build() -> str:
     for s in ("pending", "pending_main_thread", "claimed", "in_progress", "succeeded", "failed", "blocked", "blocked_on_user"):
         if sc.get(s):
             lines.append(f"  - {s}: {sc[s]}")
+    lines.append(f"  - Codex-eligible pending: {snap['codex_eligible_pending_count']}")
+    lines.append(f"  - Codex-skip pending: {snap['codex_skip_pending_count']}")
     lines.append("")
     lines.append("**type 分佈（top 6）**：")
     for ttype, cnt in Counter(snap["type_counts"]).most_common(6):
@@ -257,6 +275,19 @@ def build() -> str:
     # 4. Pending top
     lines.append("## 4. Pending 任務 top 8（依 priority asc）")
     lines.append("")
+    lines.append(
+        f"- **Codex-eligible pending**：{snap['codex_eligible_pending_count']}；"
+        f"**Codex-skip pending**：{snap['codex_skip_pending_count']}"
+    )
+    if snap["codex_eligible_pending_count"] == 0 and snap["codex_skip_pending_count"] > 0:
+        lines.append("> Codex worker：此 snapshot 沒有可 claim 的 pending；先跑 `task_pool_claim.py list --codex-eligible`，仍為 0 才走 error_log fallback。")
+    if snap["codex_eligible_pending"]:
+        lines.append("")
+        lines.append("**Codex-eligible pending top 8**：")
+        for t in snap["codex_eligible_pending"]:
+            lines.append(_format_task_line(t))
+        lines.append("")
+        lines.append("**All pending top 8**：")
     if snap["pending_top"]:
         for t in snap["pending_top"]:
             lines.append(_format_task_line(t))
