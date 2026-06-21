@@ -1,0 +1,417 @@
+{
+  "experiment_id": "K1358",
+  "generated_utc": "2026-06-21T13:22:33.320263+00:00",
+  "seed": 42,
+  "data": {
+    "sources": [
+      "yfinance daily OHLCV auto_adjust=False",
+      "Felten/Raj/Seamans AIOE GitHub AIIE industry scores",
+      "GDELT DOC 2.0 TimelineVolRaw AI-labor query",
+      "FRED/BLS PAYEMS and CES0500000003 monthly labor series"
+    ],
+    "start": "2017-01-01",
+    "end_requested": "2026-06-21",
+    "oos_start": "2020-01-01",
+    "assets": [
+      "XLB",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLU",
+      "XLV",
+      "XLY",
+      "XLRE",
+      "XLC"
+    ],
+    "n_panel_rows": 26180,
+    "n_usable_rows": 24905
+  },
+  "lookahead_policy": {
+    "event_response": "shock at t, responses are sector RV/downside/correlation over t+1 forward windows",
+    "forecast_target": "row t target is sector close-to-close RV over t+1..t+5",
+    "forecast_signals": "HAR, VIX, SPY RV, AI-news, BLS labor, and joint shock interactions are all shifted by 1",
+    "bls_availability": "monthly BLS/FRED values are approximated as available next month plus four business days, then forward-filled and shifted",
+    "pooled_dm": "same-date cross-sector QLIKE loss differentials averaged before DM; h=5 overlapping horizon"
+  },
+  "sector_ai_exposure": [
+    {
+      "ticker": "XLB",
+      "sector_name": "Materials",
+      "ai_labor_exposure": -0.8025357363636364,
+      "ai_labor_exposure_median": -0.90400885,
+      "n_aiie_industries": 22,
+      "naics_prefixes": "2122,2123,321,322,325,326,327,331,332",
+      "ai_exposure_z": -1.3070186263778145,
+      "exposure_group": "low"
+    },
+    {
+      "ticker": "XLE",
+      "sector_name": "Energy",
+      "ai_labor_exposure": -0.1562127000000001,
+      "ai_labor_exposure_median": -0.1562127000000001,
+      "n_aiie_industries": 2,
+      "naics_prefixes": "211,213",
+      "ai_exposure_z": -0.530974342891333,
+      "exposure_group": "low"
+    },
+    {
+      "ticker": "XLF",
+      "sector_name": "Financials",
+      "ai_labor_exposure": 2.05267,
+      "ai_labor_exposure_median": 2.0917825,
+      "n_aiie_industries": 8,
+      "naics_prefixes": "52",
+      "ai_exposure_z": 2.1212455158833454,
+      "exposure_group": "high"
+    },
+    {
+      "ticker": "XLI",
+      "sector_name": "Industrials",
+      "ai_labor_exposure": -0.3709596068965517,
+      "ai_labor_exposure_median": -0.4659076499999999,
+      "n_aiie_industries": 58,
+      "naics_prefixes": "23,333,336,48,49,5413,561",
+      "ai_exposure_z": -0.7888223540516681,
+      "exposure_group": "low"
+    },
+    {
+      "ticker": "XLK",
+      "sector_name": "Technology",
+      "ai_labor_exposure": 1.32037981,
+      "ai_labor_exposure_median": 1.3889045,
+      "n_aiie_industries": 10,
+      "naics_prefixes": "334,5112,518,519,5415",
+      "ai_exposure_z": 1.241979910559947,
+      "exposure_group": "high"
+    },
+    {
+      "ticker": "XLP",
+      "sector_name": "Consumer Staples",
+      "ai_labor_exposure": -0.7375816999999999,
+      "ai_labor_exposure_median": -0.7953504499999999,
+      "n_aiie_industries": 14,
+      "naics_prefixes": "311,312,445,446",
+      "ai_exposure_z": -1.2290278914459827,
+      "exposure_group": "low"
+    },
+    {
+      "ticker": "XLU",
+      "sector_name": "Utilities",
+      "ai_labor_exposure": 0.13284996666666662,
+      "ai_labor_exposure_median": 0.2096186999999999,
+      "n_aiie_industries": 3,
+      "naics_prefixes": "221",
+      "ai_exposure_z": -0.18389491447093811,
+      "exposure_group": "mid"
+    },
+    {
+      "ticker": "XLV",
+      "sector_name": "Health Care",
+      "ai_labor_exposure": 0.5466657866666665,
+      "ai_labor_exposure_median": 0.6741955,
+      "n_aiie_industries": 15,
+      "naics_prefixes": "3254,621,622,623",
+      "ai_exposure_z": 0.31297643848914775,
+      "exposure_group": "high"
+    },
+    {
+      "ticker": "XLY",
+      "sector_name": "Consumer Discretionary",
+      "ai_labor_exposure": -0.144657378125,
+      "ai_labor_exposure_median": -0.08671545,
+      "n_aiie_industries": 32,
+      "naics_prefixes": "441,442,448,451,452,453,454,71,72",
+      "ai_exposure_z": -0.5170997925807128,
+      "exposure_group": "mid"
+    },
+    {
+      "ticker": "XLRE",
+      "sector_name": "Real Estate",
+      "ai_labor_exposure": 0.5238351,
+      "ai_labor_exposure_median": 0.5238351,
+      "n_aiie_industries": 1,
+      "naics_prefixes": "531",
+      "ai_exposure_z": 0.28556348416305555,
+      "exposure_group": "mid"
+    },
+    {
+      "ticker": "XLC",
+      "sector_name": "Communication Services",
+      "ai_labor_exposure": 0.7816075727272728,
+      "ai_labor_exposure_median": 0.6088023,
+      "n_aiie_industries": 11,
+      "naics_prefixes": "512,515,517,519,711",
+      "ai_exposure_z": 0.5950725727229537,
+      "exposure_group": "high"
+    }
+  ],
+  "event_did": {
+    "rv_high_low": {
+      "point": -0.00010068783919126316,
+      "ci_lo": -0.00018118382504822507,
+      "ci_hi": -1.9581532353274765e-05,
+      "n_a": 410,
+      "n_b": 1929
+    },
+    "downside_high_low": {
+      "point": -1.6687069779406372e-05,
+      "ci_lo": -7.036626370270024e-05,
+      "ci_hi": 3.894658980193856e-05,
+      "n_a": 410,
+      "n_b": 1929
+    },
+    "corr_high_low": {
+      "point": 0.014675346163443487,
+      "ci_lo": 0.0014466213551908435,
+      "ci_hi": 0.02796551683918847,
+      "n_a": 410,
+      "n_b": 1929
+    },
+    "n_event_dates": 410,
+    "n_non_event_dates": 1929
+  },
+  "forecast": {
+    "baseline": "HAR_VIX",
+    "challenger": "HAR_VIX_AI_LABOR",
+    "per_asset": [
+      {
+        "asset": "XLB",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.5627431693628157,
+            "mse_log": 0.832228312622291
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.5621946643519797,
+            "mse_log": 0.863943694039029
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": 0.09746986559729955,
+          "dm_qlike_t": -0.04553871338464227,
+          "dm_qlike_p": 0.9636836007921317
+        }
+      },
+      {
+        "asset": "XLC",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1461,
+            "qlike": 0.5236881251735126,
+            "mse_log": 0.8353967935797589
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1461,
+            "qlike": 0.5348099072819471,
+            "mse_log": 0.848033474003115
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -2.123741512135596,
+          "dm_qlike_t": 2.052044844907968,
+          "dm_qlike_p": 0.04034330560269139
+        }
+      },
+      {
+        "asset": "XLE",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.7147463493423531,
+            "mse_log": 0.8583759976457142
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.7547427485132074,
+            "mse_log": 1.3575813646136874
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -5.595887157402828,
+          "dm_qlike_t": 1.2243655178196051,
+          "dm_qlike_p": 0.22099461391220188
+        }
+      },
+      {
+        "asset": "XLF",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 1.010269471536853,
+            "mse_log": 1.1337641757092063
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.8716409278172739,
+            "mse_log": 1.0469302187411174
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": 13.721937327146302,
+          "dm_qlike_t": -1.2079830950795851,
+          "dm_qlike_p": 0.22723228187050037
+        }
+      },
+      {
+        "asset": "XLI",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.5509036336330628,
+            "mse_log": 0.776465538858142
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.6478663310358325,
+            "mse_log": 3.151710175355842
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -17.600663978802693,
+          "dm_qlike_t": 2.0235210899235185,
+          "dm_qlike_p": 0.04318540482578226
+        }
+      },
+      {
+        "asset": "XLK",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.5417226703025293,
+            "mse_log": 0.7485649283147141
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.6701867147926555,
+            "mse_log": 3.2960421071634656
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -23.713987162173662,
+          "dm_qlike_t": 1.4881248656804702,
+          "dm_qlike_p": 0.13691502011859868
+        }
+      },
+      {
+        "asset": "XLP",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.521818569592719,
+            "mse_log": 0.7290919186892356
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.6618941242161367,
+            "mse_log": 2.3613321828786256
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -26.843727453537557,
+          "dm_qlike_t": 1.5378278933639047,
+          "dm_qlike_p": 0.12428842541343998
+        }
+      },
+      {
+        "asset": "XLRE",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.6796206781681748,
+            "mse_log": 0.905806123455633
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.6873188899843652,
+            "mse_log": 0.9465097561536562
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -1.132721834912356,
+          "dm_qlike_t": 0.4189726778051631,
+          "dm_qlike_p": 0.6752923378486402
+        }
+      },
+      {
+        "asset": "XLU",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.6463839105069873,
+            "mse_log": 0.8456712272856187
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.6877092971699629,
+            "mse_log": 0.9930404037323938
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -6.39331920105534,
+          "dm_qlike_t": 1.9010813398774344,
+          "dm_qlike_p": 0.057470884714966086
+        }
+      },
+      {
+        "asset": "XLV",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.48463576998778174,
+            "mse_log": 0.7742104841897965
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.5344039311082746,
+            "mse_log": 1.1011332604023514
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -10.269188574699621,
+          "dm_qlike_t": 1.3695185901306737,
+          "dm_qlike_p": 0.17102940803142652
+        }
+      },
+      {
+        "asset": "XLY",
+        "metrics": {
+          "HAR_VIX": {
+            "n_oos": 1601,
+            "qlike": 0.5596742600836587,
+            "mse_log": 0.7890753897687661
+          },
+          "HAR_VIX_AI_LABOR": {
+            "n_oos": 1601,
+            "qlike": 0.6912899371308301,
+            "mse_log": 2.6114760727739834
+          }
+        },
+        "comparison": {
+          "qlike_improvement_pct": -23.516478500815417,
+          "dm_qlike_t": 1.651682882269048,
+          "dm_qlike_p": 0.09879543953334857
+        }
+      }
+    ],
+    "pooled": {
+      "n_dates": 1601,
+      "mean_loss_diff": 0.04937494653564287,
+      "dm_t": 1.7904564144863,
+      "dm_p": 0.07356957179064727,
+      "method": "date-clustered cross-sector mean QLIKE loss differential, h=5"
+    }
+  },
+  "verdict": {
+    "verdict": "NULL_PROXY",
+    "summary": "free-data AI labor exposure proxy does not robustly explain sector ETF volatility",
+    "event_pass": false,
+    "forecast_pass": false,
+    "positive_asset_count": 2,
+    "asset_count": 11,
+    "claim_ceiling": "NAICS-prefix sector proxy, GDELT/BLS macro shocks; not holdings-level labor-income exposure or firm-level AI adoption/layoff data"
+  }
+}

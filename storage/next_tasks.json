@@ -34977,7 +34977,7 @@
     "title": "K1358: AI 勞動收入曝險 × sector ETF vol：人力資本 shock 是否改變投組風險承擔** — 用 O*NET/免費 AI exposure score 對行業做 AI-labor exposure，映射到 sector ETF ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1129). Original: AI 勞動收入曝險 × sector ETF vol：人力資本 shock 是否改變投組風險承擔** — 用 O*NET/免費 AI exposure score 對行業做 AI-labor exposure，映射到 sector ETF 與 BLS wage/employment surprise，檢定高曝險行業在 AI adoption news / layoff shock 後 RV、downside semivariance、sector correlation 是否升高；與 AI capex/HHI/電力需求題正交，聚焦 household labor-income hedging channel（來源：JOIM 2026 Q2 Adapting to AI）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1358.py with signal.shift(1) + seed=42, (c) K1358_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34986,14 +34986,20 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-21T12:21:15Z"
+    "created_at": "2026-06-21T12:21:15Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-21T13:15:09.180727+00:00",
+    "claim_session_id": "d8998da072e8",
+    "started_at": "2026-06-21T13:15:09.276675+00:00",
+    "completed_at": "2026-06-21T13:24:03.414197+00:00",
+    "result": "K1358 completed: AI labor exposure x sector ETF volatility proxy using Felten/Raj/Seamans AIIE, GDELT AI-labor news, FRED/BLS labor residuals, and yfinance sector ETFs. Verdict NULL_PROXY: event DID fails RV/downside gates and forecast worsens (pooled QLIKE DM t=+1.790 p=0.0736; 2/11 sectors improve). No knowledge promotion."
   },
   {
     "id": "K1359",
     "title": "K1359: tailasym5 joimskews 尾部不對稱估計法賽馬：多資產尾部溢酬是否穩健** — 用 ETF/期貨代理（SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM）月頻，測多種 robust asymmetry es",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1131). Original: tailasym5 joimskews 尾部不對稱估計法賽馬：多資產尾部溢酬是否穩健** — 用 ETF/期貨代理（SPY/QQQ/TLT/GLD/USO/UUP/FXY/HYG/EEM）月頻，測多種 robust asymmetry estimator（含修剪尾端與上下行半變異），檢定下一月報酬、RV 與 left-tail exposure；與 FX 單一橫斷面題正交，聚焦 estimator robustness（來源：JOIM 2026 Q2 A Tail of Five Skews）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1359.py with signal.shift(1) + seed=42, (c) K1359_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35002,7 +35008,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-21T12:21:15Z"
+    "created_at": "2026-06-21T12:21:15Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-21T13:22:13.933572+00:00",
+    "claim_session_id": "62004df48022",
+    "started_at": "2026-06-21T13:22:17.712466+00:00"
   },
   {
     "id": "K1360",
