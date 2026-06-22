@@ -35058,7 +35058,7 @@
     "title": "K1361: Gaming / sports-betting / esports 籃子的 vol spillover 與 risk-on 訊號** — yfinance ESPO/HERO/NERD/GAMR + DKNG/FLUT/HOOD + QQQ",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1135). Original: Gaming / sports-betting / esports 籃子的 vol spillover 與 risk-on 訊號** — yfinance ESPO/HERO/NERD/GAMR + DKNG/FLUT/HOOD + QQQ/ARKK/BTC，做 DCC/VAR/Diebold-Yilmaz spillover，檢定 gaming/betting basket 是否在 market turmoil 前後變成高 beta transmitter 或 diversification sink；與 meme/gamma-squeeze 題正交（來源：JAI Spring 2026 gaming volatility spillovers；gaming 作 alternative exposure 被重新評估）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1361.py with signal.shift(1) + seed=42, (c) K1361_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35067,7 +35067,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-22T00:00:00Z"
+    "created_at": "2026-06-22T00:00:00Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-22T00:29:21.318934+00:00",
+    "claim_session_id": "2616b6b39d33",
+    "started_at": "2026-06-22T00:29:27.699682+00:00",
+    "completed_at": "2026-06-22T00:40:17.160709+00:00",
+    "result": "K1361 completed: yfinance gaming/betting baskets tested with VAR/Diebold-Yilmaz connectedness, rolling stress/calm diagnostics, and lagged HAC tests. Verdict DIVERSIFICATION_SINK_PLUS_WEAK_LEAD_NULL_TRANSMITTER; Codex source review CONDITIONAL_PASS and knowledge entry 5444a2b1 recorded."
   },
   {
     "id": "K1362",

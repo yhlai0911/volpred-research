@@ -35563,5 +35563,31 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-06-21T21:57:21.435499"
+  },
+  {
+    "item_id": "5444a2b1",
+    "category": "experiment",
+    "content": "K1361 DIVERSIFICATION_SINK_PLUS_WEAK_LEAD_NULL_TRANSMITTER: Built public yfinance adjusted-close gaming/esports and betting-fintech baskets (ESPO/HERO/NERD/GAMR and DKNG/FLUT/HOOD) and tested 21d log-RV VAR/Diebold-Yilmaz connectedness, 252d rolling stress/calm connectedness, and lagged OLS/HAC lead regressions against QQQ/ARKK/BTC/SPY from 2019-08-15 to 2026-06-18 (1,720 trading days). All predictive source volatility features use signal.shift(1); bootstrap seed is 42. Gaming and betting are net receivers in the full-sample connectedness table (net -0.077 and -0.167) and remain net receivers in SPY-stress windows; stress-minus-calm net connectedness is tiny and non-significant (Welch t +0.14/+0.10). Only 1/8 lagged source-volatility tests clears the Harvey-style t>=3 bar (BETTING_FINTECH -> ARKK t=+3.13), below the pre-registered strong transmitter rule. In contrast, 8/8 rolling return correlations with risk-on benchmarks rise sharply in SPY stress windows. Interpretation: public gaming / betting proxies behave more like diversification sinks during stress than robust ex-ante volatility transmitters; no trading, causal spillover, or option-pricing claim is supported. Codex source review: CONDITIONAL_PASS.",
+    "evidence": [
+      "experiments/k1361/K1361.py",
+      "experiments/k1361/K1361_results.json",
+      "experiments/k1361/README.md",
+      "experiments/k1361/codex_review.md"
+    ],
+    "confidence": 0.74,
+    "created_at": "2026-06-22T08:39:47.285832"
+  },
+  {
+    "item_id": "e42e4d4e",
+    "category": "experiment",
+    "content": "K1361 DIVERSIFICATION_SINK_PLUS_WEAK_LEAD_NULL_TRANSMITTER: Using yfinance adjusted close for ESPO/HERO/NERD/GAMR gaming ETFs, DKNG/FLUT/HOOD betting-fintech proxies, and QQQ/ARKK/BTC/SPY benchmarks, the experiment built equal-weighted daily baskets and 21-day close-to-close realized-variance proxies from 2019-08-15 to 2026-06-18 (1,720 daily observations). Predictive regressions use explicit one-day lags via source_lag1 = log_rv[source].shift(1); bootstrap seed is fixed at 42. Generalized Diebold-Yilmaz connectedness shows gaming and betting are net receivers, not transmitters (full-sample net connectedness -0.0772 and -0.1672; SPY +0.1735 and QQQ +0.1498 are the dominant transmitters). In stress vs calm rolling windows, gaming and betting net connectedness differences are tiny and insignificant (diff +0.0124, t=0.14; +0.0084, t=0.10). Only 1/8 lagged source-volatility tests passes the Harvey t>=3 bar (BETTING_FINTECH -> ARKK coef +0.0176, HAC t=+3.13), below the pre-registered strong-claim rule. However, all 8 rolling return-correlation diagnostics rise in SPY-volatility stress windows, so the supported result is correlation convergence / weaker diversification during stress, not robust ex-ante volatility transmission or a trading signal. Codex source review: PASS_WITH_LIMITATIONS.",
+    "evidence": [
+      "experiments/k1361/K1361.py",
+      "experiments/k1361/K1361_results.json",
+      "experiments/k1361/README.md",
+      "experiments/k1361/codex_review.md"
+    ],
+    "confidence": 0.74,
+    "created_at": "2026-06-22T08:40:01.153455"
   }
 ]

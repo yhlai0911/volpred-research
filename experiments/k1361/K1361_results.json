@@ -1,0 +1,784 @@
+{
+  "experiment_id": "K1361",
+  "title": "Gaming / betting basket volatility spillover and diversification-sink test",
+  "created_at": "2026-06-22T00:37:00.895786+00:00",
+  "seed": 42,
+  "verdict": "DIVERSIFICATION_SINK_PLUS_WEAK_LEAD_NULL_TRANSMITTER",
+  "key_findings": [
+    "transmitter_pass_count=0 (none)",
+    "lagged_vol_harvey_pass_count=1",
+    "stress_correlation_increase_pass_count=8"
+  ],
+  "data_source": "yfinance adjusted close via yf.Ticker(...).history(auto_adjust=True)",
+  "sample": {
+    "start": "2019-08-15",
+    "end": "2026-06-18",
+    "n_daily_observations": 1720,
+    "rv_window_days": 21,
+    "connectedness_series": [
+      "GAMING_ETF",
+      "BETTING_FINTECH",
+      "QQQ",
+      "ARKK",
+      "BTC",
+      "SPY"
+    ]
+  },
+  "raw_ticker_coverage": {
+    "ESPO": {
+      "role": "gaming ETF",
+      "first": "2018-10-17",
+      "last": "2026-06-18",
+      "n_daily_prices": 1927,
+      "load_error": null
+    },
+    "HERO": {
+      "role": "gaming ETF",
+      "first": "2019-10-31",
+      "last": "2026-06-18",
+      "n_daily_prices": 1666,
+      "load_error": null
+    },
+    "NERD": {
+      "role": "gaming ETF",
+      "first": "2019-06-04",
+      "last": "2026-06-18",
+      "n_daily_prices": 1771,
+      "load_error": null
+    },
+    "GAMR": {
+      "role": "gaming ETF",
+      "first": "2016-03-10",
+      "last": "2026-06-18",
+      "n_daily_prices": 2584,
+      "load_error": null
+    },
+    "DKNG": {
+      "role": "sports betting / gaming equity",
+      "first": "2019-07-25",
+      "last": "2026-06-18",
+      "n_daily_prices": 1735,
+      "load_error": null
+    },
+    "FLUT": {
+      "role": "sports betting equity",
+      "first": "2016-01-04",
+      "last": "2026-06-18",
+      "n_daily_prices": 2630,
+      "load_error": null
+    },
+    "HOOD": {
+      "role": "retail trading / betting-adjacent equity",
+      "first": "2021-07-29",
+      "last": "2026-06-18",
+      "n_daily_prices": 1228,
+      "load_error": null
+    },
+    "QQQ": {
+      "role": "growth benchmark",
+      "first": "2016-01-04",
+      "last": "2026-06-18",
+      "n_daily_prices": 2630,
+      "load_error": null
+    },
+    "ARKK": {
+      "role": "risk-on innovation benchmark",
+      "first": "2016-01-04",
+      "last": "2026-06-18",
+      "n_daily_prices": 2630,
+      "load_error": null
+    },
+    "BTC-USD": {
+      "role": "crypto risk-on benchmark",
+      "first": "2016-01-04",
+      "last": "2026-06-18",
+      "n_daily_prices": 2630,
+      "load_error": null
+    },
+    "SPY": {
+      "role": "market benchmark and trading calendar",
+      "first": "2016-01-04",
+      "last": "2026-06-18",
+      "n_daily_prices": 2630,
+      "load_error": null
+    }
+  },
+  "basket_coverage": {
+    "GAMING_ETF": {
+      "label": "Gaming/esports ETF basket",
+      "members_requested": [
+        "ESPO",
+        "HERO",
+        "NERD",
+        "GAMR"
+      ],
+      "members_available": [
+        "ESPO",
+        "HERO",
+        "NERD",
+        "GAMR"
+      ],
+      "min_members": 2,
+      "first_return": "2018-10-18",
+      "last_return": "2026-06-18",
+      "n_daily_returns": 1926,
+      "median_member_count": 4.0
+    },
+    "BETTING_FINTECH": {
+      "label": "Sports-betting / trading-app basket",
+      "members_requested": [
+        "DKNG",
+        "FLUT",
+        "HOOD"
+      ],
+      "members_available": [
+        "DKNG",
+        "FLUT",
+        "HOOD"
+      ],
+      "min_members": 2,
+      "first_return": "2019-07-26",
+      "last_return": "2026-06-18",
+      "n_daily_returns": 1734,
+      "median_member_count": 3.0
+    },
+    "QQQ": {
+      "label": "QQQ",
+      "members_requested": [
+        "QQQ"
+      ],
+      "members_available": [
+        "QQQ"
+      ],
+      "min_members": 1,
+      "first_return": "2016-01-05",
+      "last_return": "2026-06-18",
+      "n_daily_returns": 2629,
+      "median_member_count": 1.0
+    },
+    "ARKK": {
+      "label": "ARKK",
+      "members_requested": [
+        "ARKK"
+      ],
+      "members_available": [
+        "ARKK"
+      ],
+      "min_members": 1,
+      "first_return": "2016-01-05",
+      "last_return": "2026-06-18",
+      "n_daily_returns": 2629,
+      "median_member_count": 1.0
+    },
+    "BTC": {
+      "label": "BTC-USD",
+      "members_requested": [
+        "BTC-USD"
+      ],
+      "members_available": [
+        "BTC-USD"
+      ],
+      "min_members": 1,
+      "first_return": "2016-01-05",
+      "last_return": "2026-06-18",
+      "n_daily_returns": 2629,
+      "median_member_count": 1.0
+    },
+    "SPY": {
+      "label": "SPY",
+      "members_requested": [
+        "SPY"
+      ],
+      "members_available": [
+        "SPY"
+      ],
+      "min_members": 1,
+      "first_return": "2016-01-05",
+      "last_return": "2026-06-18",
+      "n_daily_returns": 2629,
+      "median_member_count": 1.0
+    }
+  },
+  "literature": [
+    {
+      "citation": "Papathanasiou (2026), Reevaluating Diversification: The Evolving Role of Gaming in Market Turmoil, Journal of Alternative Investments",
+      "url": "https://www.pm-research.com/content/iijaltinv/28/4/74",
+      "role": "motivates testing gaming as a sector-level volatility spillover source during market turmoil"
+    },
+    {
+      "citation": "Diebold and Yilmaz (2012), Better to give than to receive: Predictive directional measurement of volatility spillovers, International Journal of Forecasting",
+      "url": "https://ideas.repec.org/a/eee/intfor/v28y2012i1p57-66.html",
+      "role": "canonical generalized VAR connectedness / directional spillover framework"
+    },
+    {
+      "citation": "Barunik and Krehlik (2018), Measuring the frequency dynamics of financial connectedness and systemic risk, Journal of Financial Econometrics",
+      "url": "https://ideas.repec.org/a/oup/jfinec/v16y2018i2p271-296..html",
+      "role": "supports treating connectedness as time-varying and stress-regime dependent"
+    },
+    {
+      "citation": "Balli, Balli, Dang, and Gabauer (2023), Contemporaneous and lagged R2 decomposed connectedness approach, Finance Research Letters",
+      "url": "https://ideas.repec.org/a/eee/finlet/v57y2023ics1544612323005408.html",
+      "role": "motivates separating contemporaneous diversification from lagged predictive spillovers"
+    }
+  ],
+  "method": {
+    "vol_proxy": "annualized trailing 21-trading-day close-to-close variance; VAR uses log variance",
+    "connectedness": "generalized Diebold-Yilmaz FEVD from VAR on standardized log-RV",
+    "rolling_window_days": 252,
+    "rolling_step_days": 21,
+    "stress_regime": "SPY 21d realized vol top quartile at rolling window end",
+    "predictive_tests": "OLS/HAC on standardized log-RV with source_lag1 = source log-RV shifted by 1 day",
+    "harvey_bar": "positive lagged source coefficient with HAC t >= 3 for strong predictive claim"
+  },
+  "diagnostics": {
+    "stationarity_adf_log_rv": {
+      "GAMING_ETF": {
+        "n": 1720,
+        "adf_stat": -5.048821787292476,
+        "adf_p": 1.775065840678931e-05
+      },
+      "BETTING_FINTECH": {
+        "n": 1720,
+        "adf_stat": -4.286831276912716,
+        "adf_p": 0.000468124450771345
+      },
+      "QQQ": {
+        "n": 1720,
+        "adf_stat": -4.326164655297422,
+        "adf_p": 0.00040008299683214304
+      },
+      "ARKK": {
+        "n": 1720,
+        "adf_stat": -4.338048999930834,
+        "adf_p": 0.00038143783147004764
+      },
+      "BTC": {
+        "n": 1720,
+        "adf_stat": -5.578283887219515,
+        "adf_p": 1.4156267291369495e-06
+      },
+      "SPY": {
+        "n": 1720,
+        "adf_stat": -4.654661229160034,
+        "adf_p": 0.00010230060209730278
+      }
+    },
+    "full_sample_var_lag_aic": 3,
+    "rolling_windows": 70,
+    "stress_thresholds": {
+      "stress_spy_rv_q75": 0.1929717160935152,
+      "calm_spy_rv_q25": 0.10495662004913422
+    }
+  },
+  "full_sample_fevd": {
+    "GAMING_ETF": {
+      "GAMING_ETF": 0.378075,
+      "BETTING_FINTECH": 0.1057,
+      "QQQ": 0.131495,
+      "ARKK": 0.149821,
+      "BTC": 0.048548,
+      "SPY": 0.109185
+    },
+    "BETTING_FINTECH": {
+      "GAMING_ETF": 0.061883,
+      "BETTING_FINTECH": 0.595737,
+      "QQQ": 0.037043,
+      "ARKK": 0.072887,
+      "BTC": 0.028104,
+      "SPY": 0.037108
+    },
+    "QQQ": {
+      "GAMING_ETF": 0.182445,
+      "BETTING_FINTECH": 0.061372,
+      "QQQ": 0.357957,
+      "ARKK": 0.189162,
+      "BTC": 0.058141,
+      "SPY": 0.300771
+    },
+    "ARKK": {
+      "GAMING_ETF": 0.172633,
+      "BETTING_FINTECH": 0.149164,
+      "QQQ": 0.148957,
+      "ARKK": 0.375493,
+      "BTC": 0.054563,
+      "SPY": 0.13183
+    },
+    "BTC": {
+      "GAMING_ETF": 0.035908,
+      "BETTING_FINTECH": 0.015956,
+      "QQQ": 0.020831,
+      "ARKK": 0.03901,
+      "BTC": 0.756794,
+      "SPY": 0.019966
+    },
+    "SPY": {
+      "GAMING_ETF": 0.169056,
+      "BETTING_FINTECH": 0.072072,
+      "QQQ": 0.303717,
+      "ARKK": 0.173628,
+      "BTC": 0.05385,
+      "SPY": 0.401139
+    }
+  },
+  "full_sample_connectedness": {
+    "from_others": {
+      "GAMING_ETF": 0.621925,
+      "BETTING_FINTECH": 0.404263,
+      "QQQ": 0.642043,
+      "ARKK": 0.624507,
+      "BTC": 0.243206,
+      "SPY": 0.598861
+    },
+    "to_others": {
+      "GAMING_ETF": 0.544749,
+      "BETTING_FINTECH": 0.237026,
+      "QQQ": 0.791891,
+      "ARKK": 0.657147,
+      "BTC": 0.131672,
+      "SPY": 0.772322
+    },
+    "net": {
+      "GAMING_ETF": -0.077176,
+      "BETTING_FINTECH": -0.167237,
+      "QQQ": 0.149847,
+      "ARKK": 0.032639,
+      "BTC": -0.111535,
+      "SPY": 0.173461
+    }
+  },
+  "rolling_connectedness_stress_vs_calm": {
+    "GAMING_ETF": {
+      "stress_n": 14,
+      "calm_n": 17,
+      "stress_mean": -0.1405313967403882,
+      "calm_mean": -0.15292868069118484,
+      "diff_stress_minus_calm": 0.012397283950796645,
+      "welch_t": 0.1424943464016043,
+      "p_value": 0.8877633514598887,
+      "bootstrap_ci": [
+        -0.14344261318168994,
+        0.18106061025992276
+      ],
+      "bootstrap_p_diff_gt_0": 0.562
+    },
+    "BETTING_FINTECH": {
+      "stress_n": 14,
+      "calm_n": 17,
+      "stress_mean": -0.09349648279827838,
+      "calm_mean": -0.10187911402107043,
+      "diff_stress_minus_calm": 0.00838263122279205,
+      "welch_t": 0.10063260782943592,
+      "p_value": 0.9205868608734358,
+      "bootstrap_ci": [
+        -0.15090164811057252,
+        0.16357242983127146
+      ],
+      "bootstrap_p_diff_gt_0": 0.543
+    },
+    "QQQ": {
+      "stress_n": 14,
+      "calm_n": 17,
+      "stress_mean": 0.2599526151101719,
+      "calm_mean": 0.1173423997454855,
+      "diff_stress_minus_calm": 0.14261021536468643,
+      "welch_t": 3.7012746257565463,
+      "p_value": 0.001192085388251025,
+      "bootstrap_ci": [
+        0.07197062749929478,
+        0.2177504453369391
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    },
+    "ARKK": {
+      "stress_n": 14,
+      "calm_n": 17,
+      "stress_mean": -0.09190089450829499,
+      "calm_mean": 0.06706620458416974,
+      "diff_stress_minus_calm": -0.15896709909246473,
+      "welch_t": -2.057109912819371,
+      "p_value": 0.05637046448696822,
+      "bootstrap_ci": [
+        -0.31486952547100894,
+        -0.026903164382743403
+      ],
+      "bootstrap_p_diff_gt_0": 0.006
+    },
+    "BTC": {
+      "stress_n": 14,
+      "calm_n": 17,
+      "stress_mean": -0.1537415628911843,
+      "calm_mean": -0.08255088715595785,
+      "diff_stress_minus_calm": -0.07119067573522644,
+      "welch_t": -2.380800156987077,
+      "p_value": 0.024262234209350798,
+      "bootstrap_ci": [
+        -0.12567017585515233,
+        -0.014780793721781892
+      ],
+      "bootstrap_p_diff_gt_0": 0.01
+    },
+    "SPY": {
+      "stress_n": 14,
+      "calm_n": 17,
+      "stress_mean": 0.21971772182797397,
+      "calm_mean": 0.15295007753855788,
+      "diff_stress_minus_calm": 0.06676764428941609,
+      "welch_t": 2.182209626365212,
+      "p_value": 0.03832346015792986,
+      "bootstrap_ci": [
+        0.005172294693181852,
+        0.12154946536206496
+      ],
+      "bootstrap_p_diff_gt_0": 0.98
+    }
+  },
+  "lagged_vol_hac_tests": {
+    "GAMING_ETF_to_QQQ": {
+      "n": 1719,
+      "r2": 0.9785790477421685,
+      "params": {
+        "const": 2.0816681711721685e-16,
+        "QQQ_lag1": 0.98672133877101,
+        "GAMING_ETF_lag1": 0.0025284276618999227,
+        "SPY_lag1": 0.00038542372363653196
+      },
+      "tvalues": {
+        "const": 5.049077443550346e-14,
+        "QQQ_lag1": 68.1255069322604,
+        "GAMING_ETF_lag1": 0.3465119392914141,
+        "SPY_lag1": 0.026375632127364844
+      },
+      "pvalues": {
+        "const": 0.9999999999999597,
+        "QQQ_lag1": 0.0,
+        "GAMING_ETF_lag1": 0.7289580130924044,
+        "SPY_lag1": 0.9789577301323455
+      },
+      "source_term": "GAMING_ETF_lag1",
+      "source_coef": 0.0025284276618999227,
+      "source_t": 0.3465119392914141,
+      "harvey_pass_positive": false
+    },
+    "GAMING_ETF_to_ARKK": {
+      "n": 1719,
+      "r2": 0.977124678573223,
+      "params": {
+        "const": -3.0531133177191805e-16,
+        "ARKK_lag1": 0.972376687424191,
+        "GAMING_ETF_lag1": 0.007305665599433318,
+        "SPY_lag1": 0.008062942409903606,
+        "QQQ_lag1": 0.003868173590546653
+      },
+      "tvalues": {
+        "const": -7.233533329389816e-14,
+        "ARKK_lag1": 90.82402284794205,
+        "GAMING_ETF_lag1": 0.793243229736171,
+        "SPY_lag1": 0.5317070414170556,
+        "QQQ_lag1": 0.22717033438204937
+      },
+      "pvalues": {
+        "const": 0.9999999999999423,
+        "ARKK_lag1": 0.0,
+        "GAMING_ETF_lag1": 0.42763612533671314,
+        "SPY_lag1": 0.5949289142849904,
+        "QQQ_lag1": 0.8202912944132099
+      },
+      "source_term": "GAMING_ETF_lag1",
+      "source_coef": 0.007305665599433318,
+      "source_t": 0.793243229736171,
+      "harvey_pass_positive": false
+    },
+    "GAMING_ETF_to_BTC": {
+      "n": 1719,
+      "r2": 0.949802339173663,
+      "params": {
+        "const": -1.3877787807814457e-16,
+        "BTC_lag1": 0.9742445544314721,
+        "GAMING_ETF_lag1": -0.009526575703158374,
+        "SPY_lag1": -0.016901456795802742,
+        "QQQ_lag1": 0.030806994906347848
+      },
+      "tvalues": {
+        "const": -2.339088271788343e-14,
+        "BTC_lag1": 130.59580737276826,
+        "GAMING_ETF_lag1": -0.9097530736802456,
+        "SPY_lag1": -0.8177510207221425,
+        "QQQ_lag1": 1.7456832296866949
+      },
+      "pvalues": {
+        "const": 0.9999999999999813,
+        "BTC_lag1": 0.0,
+        "GAMING_ETF_lag1": 0.36295274744972184,
+        "SPY_lag1": 0.4134993707276071,
+        "QQQ_lag1": 0.08086601077315915
+      },
+      "source_term": "GAMING_ETF_lag1",
+      "source_coef": -0.009526575703158374,
+      "source_t": -0.9097530736802456,
+      "harvey_pass_positive": false
+    },
+    "GAMING_ETF_to_SPY": {
+      "n": 1719,
+      "r2": 0.978738491376414,
+      "params": {
+        "const": -3.7470027081099033e-16,
+        "SPY_lag1": 0.9762422522033778,
+        "GAMING_ETF_lag1": -0.0011390895482001617,
+        "QQQ_lag1": 0.014740343213072972
+      },
+      "tvalues": {
+        "const": -8.721474935124757e-14,
+        "SPY_lag1": 62.31216257174852,
+        "GAMING_ETF_lag1": -0.1434707533200667,
+        "QQQ_lag1": 0.9993072666200219
+      },
+      "pvalues": {
+        "const": 0.9999999999999304,
+        "SPY_lag1": 0.0,
+        "GAMING_ETF_lag1": 0.8859184077398371,
+        "QQQ_lag1": 0.3176458663754076
+      },
+      "source_term": "GAMING_ETF_lag1",
+      "source_coef": -0.0011390895482001617,
+      "source_t": -0.1434707533200667,
+      "harvey_pass_positive": false
+    },
+    "BETTING_FINTECH_to_QQQ": {
+      "n": 1719,
+      "r2": 0.9786814960493045,
+      "params": {
+        "const": 2.0816681711721685e-16,
+        "QQQ_lag1": 0.9793913449833901,
+        "BETTING_FINTECH_lag1": 0.013092790723410005,
+        "SPY_lag1": 0.0017400633846097538
+      },
+      "tvalues": {
+        "const": 5.077774227075062e-14,
+        "QQQ_lag1": 69.07955216477856,
+        "BETTING_FINTECH_lag1": 2.9010478615678537,
+        "SPY_lag1": 0.11900561801208505
+      },
+      "pvalues": {
+        "const": 0.9999999999999595,
+        "QQQ_lag1": 0.0,
+        "BETTING_FINTECH_lag1": 0.003719170678245864,
+        "SPY_lag1": 0.9052709048847118
+      },
+      "source_term": "BETTING_FINTECH_lag1",
+      "source_coef": 0.013092790723410005,
+      "source_t": 2.9010478615678537,
+      "harvey_pass_positive": false
+    },
+    "BETTING_FINTECH_to_ARKK": {
+      "n": 1719,
+      "r2": 0.9772456942229971,
+      "params": {
+        "const": -3.0531133177191805e-16,
+        "ARKK_lag1": 0.9616447332098483,
+        "BETTING_FINTECH_lag1": 0.017622142663483116,
+        "SPY_lag1": 0.010115718101976574,
+        "QQQ_lag1": 0.006239058020196109
+      },
+      "tvalues": {
+        "const": -7.27539433575469e-14,
+        "ARKK_lag1": 84.82198579095524,
+        "BETTING_FINTECH_lag1": 3.134083579357936,
+        "SPY_lag1": 0.6679519291842765,
+        "QQQ_lag1": 0.3736748436315604
+      },
+      "pvalues": {
+        "const": 0.9999999999999419,
+        "ARKK_lag1": 0.0,
+        "BETTING_FINTECH_lag1": 0.0017239174580683712,
+        "SPY_lag1": 0.5041642779210582,
+        "QQQ_lag1": 0.7086462435702028
+      },
+      "source_term": "BETTING_FINTECH_lag1",
+      "source_coef": 0.017622142663483116,
+      "source_t": 3.134083579357936,
+      "harvey_pass_positive": true
+    },
+    "BETTING_FINTECH_to_BTC": {
+      "n": 1719,
+      "r2": 0.949780532338547,
+      "params": {
+        "const": -1.3877787807814457e-16,
+        "BTC_lag1": 0.9727709039572103,
+        "BETTING_FINTECH_lag1": 0.0017743128056989556,
+        "SPY_lag1": -0.01701593198331086,
+        "QQQ_lag1": 0.02220126752465495
+      },
+      "tvalues": {
+        "const": -2.3320303598675507e-14,
+        "BTC_lag1": 131.41543802924775,
+        "BETTING_FINTECH_lag1": 0.2543360368897559,
+        "SPY_lag1": -0.8255656399990551,
+        "QQQ_lag1": 1.3302582558999982
+      },
+      "pvalues": {
+        "const": 0.9999999999999813,
+        "BTC_lag1": 0.0,
+        "BETTING_FINTECH_lag1": 0.7992359614970546,
+        "SPY_lag1": 0.4090505330745694,
+        "QQQ_lag1": 0.1834331959062886
+      },
+      "source_term": "BETTING_FINTECH_lag1",
+      "source_coef": 0.0017743128056989556,
+      "source_t": 0.2543360368897559,
+      "harvey_pass_positive": false
+    },
+    "BETTING_FINTECH_to_SPY": {
+      "n": 1719,
+      "r2": 0.9787722743886105,
+      "params": {
+        "const": -3.7470027081099033e-16,
+        "SPY_lag1": 0.9768039629754576,
+        "BETTING_FINTECH_lag1": 0.007493549861631282,
+        "QQQ_lag1": 0.008555170580545262
+      },
+      "tvalues": {
+        "const": -8.735931894683225e-14,
+        "SPY_lag1": 62.50995110565268,
+        "BETTING_FINTECH_lag1": 1.4035859999897504,
+        "QQQ_lag1": 0.5798240549556187
+      },
+      "pvalues": {
+        "const": 0.9999999999999303,
+        "SPY_lag1": 0.0,
+        "BETTING_FINTECH_lag1": 0.16044216644130083,
+        "QQQ_lag1": 0.5620332741311024
+      },
+      "source_term": "BETTING_FINTECH_lag1",
+      "source_coef": 0.007493549861631282,
+      "source_t": 1.4035859999897504,
+      "harvey_pass_positive": false
+    }
+  },
+  "rolling_return_correlation_stress_vs_calm": {
+    "GAMING_ETF_corr_QQQ": {
+      "stress_n": 412,
+      "calm_n": 424,
+      "stress_mean": 0.8420439829113467,
+      "calm_mean": 0.7115729191554315,
+      "diff_stress_minus_calm": 0.13047106375591522,
+      "welch_t": 21.396711938947224,
+      "p_value": 1.2388232359691309e-79,
+      "bootstrap_ci": [
+        0.11904464591277099,
+        0.14264179951047412
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    },
+    "GAMING_ETF_corr_ARKK": {
+      "stress_n": 412,
+      "calm_n": 424,
+      "stress_mean": 0.845831735627345,
+      "calm_mean": 0.6984855830796692,
+      "diff_stress_minus_calm": 0.1473461525476758,
+      "welch_t": 27.421833255506957,
+      "p_value": 1.9156802219331417e-109,
+      "bootstrap_ci": [
+        0.13689504425694363,
+        0.15756561382045592
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    },
+    "GAMING_ETF_corr_BTC": {
+      "stress_n": 412,
+      "calm_n": 424,
+      "stress_mean": 0.5330936387284295,
+      "calm_mean": 0.20892598125567796,
+      "diff_stress_minus_calm": 0.32416765747275156,
+      "welch_t": 30.154251160832526,
+      "p_value": 5.393067828396476e-135,
+      "bootstrap_ci": [
+        0.3037616421485744,
+        0.34526337247067806
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    },
+    "GAMING_ETF_corr_SPY": {
+      "stress_n": 412,
+      "calm_n": 424,
+      "stress_mean": 0.793510601529659,
+      "calm_mean": 0.6660579495676748,
+      "diff_stress_minus_calm": 0.1274526519619842,
+      "welch_t": 14.455492189891368,
+      "p_value": 3.320429328671207e-41,
+      "bootstrap_ci": [
+        0.11036306434385543,
+        0.14492037541241137
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    },
+    "BETTING_FINTECH_corr_QQQ": {
+      "stress_n": 412,
+      "calm_n": 424,
+      "stress_mean": 0.5745724820584074,
+      "calm_mean": 0.4112012009597008,
+      "diff_stress_minus_calm": 0.16337128109870658,
+      "welch_t": 10.678161881961756,
+      "p_value": 5.710935503921473e-25,
+      "bootstrap_ci": [
+        0.1345087797204107,
+        0.19404126665510374
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    },
+    "BETTING_FINTECH_corr_ARKK": {
+      "stress_n": 412,
+      "calm_n": 424,
+      "stress_mean": 0.6927053369777817,
+      "calm_mean": 0.5361507281828403,
+      "diff_stress_minus_calm": 0.15655460879494143,
+      "welch_t": 8.704075620084753,
+      "p_value": 1.7204794628947188e-17,
+      "bootstrap_ci": [
+        0.12344087556061577,
+        0.192375448459177
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    },
+    "BETTING_FINTECH_corr_BTC": {
+      "stress_n": 412,
+      "calm_n": 424,
+      "stress_mean": 0.40882408913497953,
+      "calm_mean": 0.2133965786492897,
+      "diff_stress_minus_calm": 0.19542751048568982,
+      "welch_t": 14.56068938517215,
+      "p_value": 5.825445983441122e-43,
+      "bootstrap_ci": [
+        0.17003195449458758,
+        0.22109450057281002
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    },
+    "BETTING_FINTECH_corr_SPY": {
+      "stress_n": 412,
+      "calm_n": 424,
+      "stress_mean": 0.5631792780022644,
+      "calm_mean": 0.4193350472895113,
+      "diff_stress_minus_calm": 0.1438442307127531,
+      "welch_t": 9.408164998945752,
+      "p_value": 8.0193630660272e-20,
+      "bootstrap_ci": [
+        0.11619806718981433,
+        0.174957140309422
+      ],
+      "bootstrap_p_diff_gt_0": 1.0
+    }
+  },
+  "figures": [
+    "figures/k1361_fevd_heatmap.png",
+    "figures/k1361_rolling_net_connectedness.png",
+    "figures/k1361_stress_corr_diffs.png"
+  ],
+  "limitations": [
+    "Current listed proxies are survivorship-biased and do not cover delisted gaming/betting firms.",
+    "FLUT yfinance history may reflect symbol/listing continuity rather than a pure NYSE-only listing history; it is treated only as a public betting-equity proxy.",
+    "BTC is aligned to the SPY trading calendar, so weekend crypto moves enter the next US trading-session return.",
+    "Close-to-close rolling variance is a public-data proxy, not intraday realized variance or option-implied volatility.",
+    "Diebold-Yilmaz connectedness is descriptive and model-dependent; causal transmitter claims require lagged tests to pass.",
+    "Rolling-window stress/calm differences are diagnostic because adjacent windows overlap."
+  ]
+}
