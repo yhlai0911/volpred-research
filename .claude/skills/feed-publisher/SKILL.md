@@ -283,6 +283,33 @@ Agent 提供的 audience 只是 **hint**。Publisher 的 `_infer_audience()` 會
 | `event` | 事件 | 時效性市場事件（FOMC/CPI/NFP/財報） | 即時觀察、情境劇本、當日建議 | 否（由 content_type=event_article 保留） |
 | `member_qa` | 會員提問 | 會員提問研究；問答頁連結 | 答覆指定會員問題 | 否（由 content_type=member_qa 保留） |
 | `daily` | 每日建議 | 每日市場配置、短版評論 | 每日倉位建議、VIX 看板 | 否（依 tag 推斷：`每日建議` / `daily-update`） |
+| `daily_digest` | 每日精選導讀 | 報紙專欄式專題策展（reader-facing general） | 把 archive 同主題多篇串成一條敘事 + 時事 hook | 否（`content_type='daily_digest'` 強制歸 general 並豁免學術關鍵詞 upcast） |
+
+#### 每日精選導讀 (content_type='daily_digest') — **專題策展型（editorial curation）**
+
+**這是 editorial curation，不是逐篇摘要。**（boss 2026-06-23 釐清）
+
+- **錯誤做法**（禁）：把「今天剛發的 3-5 篇」一篇一篇分析摘要 / recap。
+- **正確做法**：選定**一個專題**，從**過去累積的 archive** 撈**同主題多篇舊文**，結合**最近時事/市場狀態**，串成一篇**有觀點、有脈絡**的專題導讀長文。
+
+**5 步**：
+1. **選專題（theme）**：整篇圍繞單一 thesis（如「波動率模型複雜度天花板」「MOVE-VIX 跨資產分裂」「尾部風險 VaR 監管現實」「研究誠實 audit」），不橫跨多個無關主題。
+2. **撈 archive 同主題舊文 3-6 篇**：`grep -i "關鍵詞" storage/reports/feed.json` / `jq` 掃 title·tags。硬規則：發佈日期**橫跨 >1 週**、**至少 3 篇來自當天以外**；不可只挑今天/昨天湊數；排除 digest 自身與每日建議類日報。
+3. **掛時事 hook 開場**：當前 VIX 水位 / 近期 FOMC·NFP·CPI / MOVE-VIX 分裂等，**數據取自真實 archive 或 results.json，不可臆造**。
+4. **串敘事弧**：演進 / 對照 / 反差（告訴讀者「這主題我們做過什麼、結論如何演進、彼此如何呼應」），不是並列摘要。
+5. **文末列本期精選連結**：id + 一句話，連結 `https://volpred.zeabur.app/v3/reports/<mile_id>`。
+
+**前端 render 約束（硬性，缺一不可）**：
+- `details.content_type='daily_digest'`（首頁 `getDigestColumn` / `listDigestSlugsAsc` 偵測唯一依據；漏設則整篇不被視為 digest、期數算錯）。
+- `title` 以 `每日精選導讀｜` 起頭 + 專題式標題（非「今日 N 篇摘要」）。
+- `content` = 完整繁中 Markdown **單篇 essay**（詳情頁 `/digest/[slug]` 直接 render），**至少含一張圖** `![alt](url)`（首頁主圖靠正則抓第一張）。
+- `details.digest_articles` = **curated 來源文章 slug 陣列**（前端側欄「本期精選」唯一資料源；slug 須對應 archive 中真實存在的已發佈文章，查不到 title 會靜默消失；陣列順序 = 顯示順序）。
+- `status='published'` 立即發（非 draft）；`tags` 含 `精選導讀`；`excerpt` 填編按導言。
+- audience 固定 general → **必走 anti-ai-style 9-checklist + 文末懶人包圖組**（`lazypack-infographic`）。
+
+**注意**：勿與 `uv run volpred ops send-daily-digest` 混淆 — 那是給老闆的 EMAIL ops 通知（逐篇 recap 當天文章），與讀者向專欄完全無關，不可改成發文。
+
+**合格 checklist（四項皆 yes）**：(a) 單一專題標題 + thesis；(b) 成員橫跨 >1 週且 ≥3 篇非當天；(c) 含時事 hook；(d) 敘事串接非逐篇 recap。
 
 **學術關鍵詞清單**（`_infer_audience` 推斷用，≥2 命中 → `research`）：
 

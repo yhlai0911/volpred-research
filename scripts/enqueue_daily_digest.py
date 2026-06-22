@@ -27,12 +27,24 @@ FEED = ROOT / "storage" / "reports" / "feed.json"
 TPE = ZoneInfo("Asia/Taipei")
 
 DESCRIPTION = (
-    "寫今日『每日精選導讀』編輯專欄並立即發佈。規格：(1) 統整近一日平台已發佈的研究/"
-    "策略/市場文章，挑 3-5 則做有觀點的編輯導讀（不是流水帳摘要）；(2) reader-facing，"
-    "**必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）；"
-    "(3) 走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**"
-    "（首頁 getDigestColumn 靠此辨識），tags 含 '精選導讀'，title 以 '每日精選導讀｜' 起頭；"
-    "(4) 事件驅動／時效內容立即 published（非 draft）。資料來源與對應 K 編號要標清楚。"
+    "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。"
+    "規格：(1) **先選定一個專題（theme）**（例：波動率模型複雜度天花板 / MOVE-VIX 跨資產分裂 / "
+    "尾部風險 VaR 監管現實 / 研究誠實 audit），整篇圍繞單一 thesis；(2) **從過去累積的 archive "
+    "撈同主題的 3-6 篇舊文**（用 grep/jq 掃 storage/reports/feed.json 的 title/tags），發佈日期須"
+    "橫跨 >1 週、至少 3 篇來自當天以外 — **不可只挑今天/昨天剛發的湊數**；排除 digest 自身與每日建議"
+    "類日報；(3) **掛一個最近時事/市場狀態 hook 開場**（當前 VIX 水位 / 近期 FOMC·NFP·CPI / MOVE-VIX "
+    "分裂等，數據須取自真實 archive 文章或 results.json，不可臆造），把過去研究與當下市場連起來；"
+    "(4) **串成有觀點的敘事弧**（演進/對照/反差，告訴讀者『這主題上我們做過什麼、結論如何演進、彼此"
+    "如何呼應』），不是逐篇『這篇講 X、那篇講 Y』的並列摘要；(5) 文末才列本期精選連結"
+    "（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。"
+    "輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop "
+    "9-checklist）+ 文末懶人包圖組；走 feed-publisher 正式入口發佈，**details.content_type 必設 "
+    "'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 "
+    "details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中"
+    "真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 以 '每日精選導讀｜' 起頭"
+    "並帶專題式標題（非『今日 N 篇摘要』）；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 "
+    "![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號"
+    "與資料來源要標清楚。"
 )
 
 
@@ -95,7 +107,7 @@ def main() -> int:
 
     task = {
         "id": task_id,
-        "title": "[daily_digest] 寫今日每日精選導讀專欄並發佈",
+        "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
         "description": DESCRIPTION,
         "task_type": "daily_digest",
         "priority": 1,
