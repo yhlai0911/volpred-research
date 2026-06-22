@@ -142,7 +142,8 @@ def k_ids_with_feed_articles() -> set[str]:
             if line:
                 ks.add(line.upper())
         return ks
-    except Exception:
+    except Exception as exc:
+        _warn_task_generator("feed K-id grep failed; treating as no feed coverage", FEED_JSON, exc)
         return set()
 
 

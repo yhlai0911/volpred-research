@@ -64,6 +64,25 @@ def test_iter_managed_event_dates_warns_on_invalid_runtime_schedules(
     assert "JSONDecodeError" in captured.err
 
 
+def test_k_ids_with_feed_articles_warns_on_grep_failure(tmp_path, monkeypatch, capsys) -> None:
+    feed = tmp_path / "feed.json"
+    feed.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "FEED_JSON", feed)
+
+    def _raise(*args, **kwargs):
+        raise RuntimeError("grep unavailable")
+
+    monkeypatch.setattr(MODULE.subprocess, "run", _raise)
+
+    k_ids = MODULE.k_ids_with_feed_articles()
+
+    assert k_ids == set()
+    captured = capsys.readouterr()
+    assert "[task_generator_v2] WARN feed K-id grep failed; treating as no feed coverage" in captured.err
+    assert "feed.json" in captured.err
+    assert "RuntimeError: grep unavailable" in captured.err
+
+
 def test_event_article_skips_runtime_managed_adjacent_fomc_date(tmp_path, monkeypatch) -> None:
     runtime_schedules = tmp_path / "runtime_schedules.json"
     runtime_schedules.write_text(

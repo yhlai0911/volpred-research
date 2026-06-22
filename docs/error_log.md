@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 task_generator_v2 feed K-id grep 失敗被靜默當無 coverage
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::k_ids_with_feed_articles()`：用 grep 從 `storage/reports/feed.json` 掃已發文 K-id 時，subprocess 失敗會直接回空 set。daily_article generator 會繼續是對的，但可能把所有 K 視為尚未發文，造成重複派文風險。
+
+**根因**：此函式刻意不整檔載入大型 `feed.json`，用 grep 作輕量 coverage check；但舊寫法把 grep failure 寫成 silent empty coverage，讓工具/環境錯誤和真無 coverage 無法區分。
+
+**解決方法**：grep 例外時輸出 `[task_generator_v2] WARN feed K-id grep failed; treating as no feed coverage`，原本回空 set 的 fail-open 行為不變。新增 regression test monkeypatch subprocess failure，確認 warning 可見且不讀 full feed。
+
 ## 2026-06-22 task_generator_v2 runtime_schedules 讀取失敗被靜默當空 event jobs
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::_iter_managed_event_dates()`：`config/runtime_schedules.json` 已存在但 JSON 壞掉或讀取失敗時直接套 `{}`。event article generator 會繼續是對的，但可能把 canonical event jobs 視為不存在，進而產生重複事件任務。
