@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-06-22T00:03:31Z",
+  "timestamp": "2026-06-22T06:03:45Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "Total drafts: 129 (general=78, research=51). All above thresholds (total>=12, general>=8, research>=4)."
+      "detail": "Total drafts: 129 (research: 51, general: 78). All above thresholds (research>=4, general>=8)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json not found — file does not exist."
+      "detail": "storage/strategy_metrics.json does not exist (MISSING). Cannot check freshness."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last entry dated 2026-06-03 (no entries from today 2026-06-22 or yesterday 2026-06-21). Most recent topic: auto-compact root cause analysis and CLAUDE_AUTOCOMPACT_PCT_OVERRIDE fix."
+      "detail": "No entries dated today (2026-06-22) or yesterday (2026-06-21). Last entries are from 2026-06-03."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). None have >2 portfolio_return nulls in last 3 entries."
+      "detail": "All 14 strategies have <=2 nulls in last 3 entries (each has exactly 1 null = most recent entry). Last data_date: 2026-06-03. Threshold (>2 nulls) not breached."
     },
     {
       "name": "GIT_STATUS",
@@ -30,10 +30,10 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 2191 entries."
+      "detail": "knowledge.json has 2191 entries."
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json does not exist (missing file, cannot assess freshness)"
+    "STRATEGY_METRICS_MISSING: storage/strategy_metrics.json does not exist."
   ]
 }
