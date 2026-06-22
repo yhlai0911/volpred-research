@@ -101,6 +101,33 @@ def test_iter_managed_event_dates_warns_on_bad_runtime_event_date(
     assert "runtime_schedules.json" in captured.err
 
 
+def test_iter_managed_event_dates_warns_on_bad_existing_task_event_date(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    runtime_schedules.write_text(json.dumps({"event_jobs": {"items": []}}), encoding="utf-8")
+    next_tasks = tmp_path / "next_tasks.json"
+    monkeypatch.setattr(MODULE, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+
+    managed = MODULE._iter_managed_event_dates(
+        [
+            {
+                "id": "event_bad_date",
+                "task_type": "event_article",
+                "event_type": "CPI",
+                "event_date": "bad-date",
+            }
+        ]
+    )
+
+    assert managed == set()
+    captured = capsys.readouterr()
+    assert "[task_generator_v2] WARN existing event task date parse failed; skipping managed event" in captured.err
+    assert "event_bad_date" in captured.err
+    assert "bad-date" in captured.err
+
+
 def test_k_ids_with_feed_articles_warns_on_grep_failure(tmp_path, monkeypatch, capsys) -> None:
     feed = tmp_path / "feed.json"
     feed.write_text("[]", encoding="utf-8")
