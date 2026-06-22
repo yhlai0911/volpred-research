@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 continue_task_dispatch agent record 壞 JSON 被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::count_active_slots()`：`storage/ops/agents/*.json` 壞 JSON 時直接跳過。dispatcher 仍可運作是對的，但 slot 占用可能被低估，進而錯誤判斷還有可用 agent slot。
+
+**根因**：slot 掃描不能因單一 agent receipt 壞檔中斷；但舊寫法把可跳過做成 silent skip，讓 control-plane receipt corruption 不可觀察。
+
+**解決方法**：agent record 讀取 / 解析失敗時輸出 `[dispatch] WARN agent record read failed; skipping`，包含 path 與 exception，原本跳過壞 record 的行為不變。新增 regression test 覆蓋壞 JSON。
+
 ## 2026-06-22 pending_replay replay marker 讀寫失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/pending_replay.py::mark_self_replayed()`：`pending_sessions.json` 讀取 / 解析失敗或寫回失敗時直接回 `False`。maintain CLI 不應因 replay marker 失敗中斷是對的，但 cron log 看不出 replay marker 沒寫入，可能讓 session-online fire 被後續 piggy-back 誤記為 missed fire。

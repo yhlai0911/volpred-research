@@ -111,6 +111,24 @@ def test_invalid_blocked_until_warns_and_keeps_explicit_block(capsys):
     assert "not-a-date" in captured.err
 
 
+def test_count_active_slots_warns_on_invalid_agent_record(tmp_path, monkeypatch, capsys):
+    worktrees = tmp_path / "worktrees"
+    agents = tmp_path / "agents"
+    worktrees.mkdir()
+    agents.mkdir()
+    (agents / "bad-agent.json").write_text("{bad-json", encoding="utf-8")
+    monkeypatch.setattr(dispatch, "WORKTREES_DIR", worktrees)
+    monkeypatch.setattr(dispatch, "AGENTS_DIR", agents)
+
+    slots = dispatch.count_active_slots()
+
+    assert slots == {"worktrees": [], "active_agents": [], "occupied": 0}
+    captured = capsys.readouterr()
+    assert "[dispatch] WARN agent record read failed; skipping" in captured.err
+    assert "bad-agent.json" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
 def test_build_report_exposes_disambiguated_pending_summary(monkeypatch):
     tasks = [
         _task("platform-1", "platform_ops", priority=3),

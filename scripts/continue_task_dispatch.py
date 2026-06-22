@@ -90,8 +90,12 @@ def count_active_slots() -> dict:
     if AGENTS_DIR.exists():
         for f in AGENTS_DIR.glob("*.json"):
             try:
-                data = json.loads(f.read_text())
-            except json.JSONDecodeError:
+                data = json.loads(f.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as exc:
+                _warn_dispatch(
+                    "agent record read failed; skipping "
+                    f"path={f} error={type(exc).__name__}: {exc}"
+                )
                 continue
             status = (data.get("status") or "").lower()
             if status in {"running", "active", "in_progress", "claimed"}:
