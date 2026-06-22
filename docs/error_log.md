@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 cron_review schedule-aware regression test collection 失效
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，跑到 `tests/test_cron_review.py` 發現測試 collection 直接失敗：測試期待 `cron_review.expected_prev_fire` 與 `cron_review.is_stale`，但 `scripts/cron_review.py` 只剩私有 `_expected_last_fire()` 且 main 內嵌 stale 判斷。
+
+**根因**：2026-06-08 修 weekday-only cron 假 stale 時，schedule-aware 判斷先落在 main flow / 私有 helper，後續測試用 public helper 名稱鎖行為，但實作沒有同步抽出穩定 API。結果是守住 collect_us 週末 gap 的 regression test 本身失效，cron review 之後若再退化不會被測到。
+
+**解決方法**：補回 `expected_prev_fire(now, cron_expr)` 與 `is_stale(...)` public helpers；保留 `_expected_last_fire()` 相容 wrapper；`main()` 改用同一個 `is_stale()`，讓測試與實際巡檢共用邏輯。`tests/test_cron_review.py` collection/pass 恢復。
+
 ## 2026-06-22 hourly dispatch 整日空轉（pinned claude binary 被 auto-update 刪除）→ 發文脫班 + digest 缺
 
 **問題**：老闆回報「今天發文嚴重脫班」「每日精選導讀為什麼沒有」。06-22 全天只發 1 篇（K1512，且是 codex-vscode 做的），vs 06-21 發 14 篇。

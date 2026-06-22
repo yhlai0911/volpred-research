@@ -169,7 +169,7 @@ def git_commits_since(minutes: int = 75) -> list[str]:
         return []
 
 
-def _expected_last_fire(cron_expr: str | None, now: datetime) -> datetime | None:
+def expected_prev_fire(now: datetime, cron_expr: str | None) -> datetime | None:
     """Croniter prev fire time aligned to now's tz. None if cron_expr 缺省。"""
     if not cron_expr:
         return None
@@ -182,6 +182,35 @@ def _expected_last_fire(cron_expr: str | None, now: datetime) -> datetime | None
         return prev
     except Exception:
         return None
+
+
+def _expected_last_fire(cron_expr: str | None, now: datetime) -> datetime | None:
+    """Backward-compatible wrapper for older call sites."""
+    return expected_prev_fire(now, cron_expr)
+
+
+def is_stale(
+    *,
+    now: datetime,
+    last_end: datetime,
+    cron_expr: str | None,
+    fallback_max_gap_h: float,
+) -> tuple[bool, str | None]:
+    """Return whether a job is stale and the human-readable flag to print."""
+    gap_h = (now - last_end).total_seconds() / 3600
+    expected = expected_prev_fire(now, cron_expr)
+    if expected is not None:
+        threshold = expected - timedelta(hours=_SLACK_HOURS)
+        if last_end < threshold:
+            miss_h = (expected - last_end).total_seconds() / 3600
+            return True, (
+                f"⚠️ 上次完成 {gap_h:.1f}h 前；預期 {expected:%Y-%m-%d %H:%M} "
+                f"該 fire（已 miss {miss_h:.1f}h）"
+            )
+        return False, None
+    if gap_h > fallback_max_gap_h:
+        return True, f"⚠️ 上次完成 {gap_h:.1f}h 前（>{fallback_max_gap_h}h）"
+    return False, None
 
 
 def main() -> int:
@@ -216,21 +245,14 @@ def main() -> int:
             suffix = {"log": "", "piggy-back": " (piggy-back)",
                       "log-mtime": " (log-mtime)"}.get(source, "")
             when = end.strftime("%Y-%m-%d %H:%M:%S") + suffix
-            gap_h = (now - end).total_seconds() / 3600
-            expected = _expected_last_fire(cron_expr, now)
-            if expected is not None:
-                # Schedule-aware：actual_last_fire 必須 ≥ expected_last_fire - slack。
-                # 若 expected 還在未來（罕見 edge case），全部 OK。
-                threshold = expected - timedelta(hours=_SLACK_HOURS)
-                if end < threshold:
-                    miss_h = (expected - end).total_seconds() / 3600
-                    flags.append(
-                        f"⚠️ 上次完成 {gap_h:.1f}h 前；預期 {expected:%Y-%m-%d %H:%M} 該 fire（已 miss {miss_h:.1f}h）"
-                    )
-            else:
-                # 無 cron_expr → 退回舊 max_gap_h 行為（backward compat）
-                if gap_h > max_gap_h:
-                    flags.append(f"⚠️ 上次完成 {gap_h:.1f}h 前（>{max_gap_h}h）")
+            stale, stale_flag = is_stale(
+                now=now,
+                last_end=end,
+                cron_expr=cron_expr,
+                fallback_max_gap_h=max_gap_h,
+            )
+            if stale and stale_flag:
+                flags.append(stale_flag)
         elif lg.get("start"):
             when = lg["start"].strftime("%Y-%m-%d %H:%M:%S") + " (start)"
         if lg.get("start") and not lg.get("complete") and not st.get("running") and source == "log":
