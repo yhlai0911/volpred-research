@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_diverse_tasks experiments 目錄掃描失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_experiment_tasks()`：`experiments/` 存在但無法列舉時，舊碼直接回空清單，沒有任何 warning。
+
+**根因**：experiment backlog discovery 需要先列出既有 experiment folders，才能避免把已完成 K-id 重複轉成 scaffold 任務。列舉失敗時 fail-open 回空可避免 refill cron crash，但靜默回空會讓操作者誤以為沒有 research_program backlog，而不是 canonical experiments directory 不可掃描。
+
+**解決方法**：`EXPERIMENTS_DIR.iterdir()` 失敗時改用既有 `_warn_diverse()` 輸出 `[diverse_gen] WARN experiments directory scan failed; skipping experiment backlog ...` 到 stderr，原本不產任務的 fallback 行為不變。新增 regression test 覆蓋 experiments path 不可列舉時的 warning。
+
 ## 2026-06-23 generate_diverse_tasks research_program 讀取失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_experiment_tasks()`：`research_program.md` 存在但讀取失敗時，舊碼直接回空清單，沒有任何 warning。

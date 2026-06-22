@@ -280,3 +280,25 @@ def test_gen_experiment_tasks_warns_when_research_program_unreadable(
     err = capsys.readouterr().err
     assert "[diverse_gen] WARN research_program read failed; skipping experiment backlog" in err
     assert "IsADirectoryError" in err
+
+
+def test_gen_experiment_tasks_warns_when_experiments_dir_unreadable(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    research_program = tmp_path / "research_program.md"
+    research_program.write_text("Backlog: K9999 should become an experiment.\n", encoding="utf-8")
+    experiments = tmp_path / "experiments"
+    experiments.write_text("not a directory", encoding="utf-8")
+
+    monkeypatch.setattr(generate_diverse_tasks, "RESEARCH_PROGRAM", research_program)
+    monkeypatch.setattr(generate_diverse_tasks, "EXPERIMENTS_DIR", experiments)
+
+    tasks = generate_diverse_tasks.gen_experiment_tasks(
+        existing=set(),
+        rng=generate_diverse_tasks.random.Random(1533),
+    )
+
+    assert tasks == []
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN experiments directory scan failed; skipping experiment backlog" in err
+    assert "NotADirectoryError" in err

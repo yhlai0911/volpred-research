@@ -453,7 +453,11 @@ def gen_experiment_tasks(existing: set[str], rng: random.Random) -> list[dict]:
     # Existing experiments (folder presence)
     try:
         existing_dirs = {p.name.lower() for p in EXPERIMENTS_DIR.iterdir() if p.is_dir()}
-    except OSError:
+    except OSError as exc:
+        _warn_diverse(
+            "experiments directory scan failed; skipping experiment backlog "
+            f"path={EXPERIMENTS_DIR} error={type(exc).__name__}: {exc}"
+        )
         return out
 
     # Completed-K filter: K-IDs already documented in knowledge.json or
