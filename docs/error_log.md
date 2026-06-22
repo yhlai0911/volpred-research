@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 pending_replay replay marker 讀寫失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/pending_replay.py::mark_self_replayed()`：`pending_sessions.json` 讀取 / 解析失敗或寫回失敗時直接回 `False`。maintain CLI 不應因 replay marker 失敗中斷是對的，但 cron log 看不出 replay marker 沒寫入，可能讓 session-online fire 被後續 piggy-back 誤記為 missed fire。
+
+**根因**：pending replay 是去重協調層，舊實作把「非阻塞」寫成「不可觀察」，導致 state corruption / FS failure 只體現在後續 pending count 累積。
+
+**解決方法**：新增 `_warn_pending_replay()`；pending state 讀取 / 解析失敗與寫回失敗都輸出 `[pending_replay] WARN ... replay marker not written`，原本回 `False` 且不拋錯的行為不變。新增 regression test 覆蓋壞 JSON。
+
 ## 2026-06-22 task_generator_v2 feed K-id grep 失敗被靜默當無 coverage
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::k_ids_with_feed_articles()`：用 grep 從 `storage/reports/feed.json` 掃已發文 K-id 時，subprocess 失敗會直接回空 set。daily_article generator 會繼續是對的，但可能把所有 K 視為尚未發文，造成重複派文風險。

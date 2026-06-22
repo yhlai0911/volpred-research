@@ -23,12 +23,21 @@ session-offline ticks (the genuine missed-fire case) still do.
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 # src/volpred/ops/pending_replay.py → repo root is parents[3]
 PROJECT = Path(__file__).resolve().parents[3]
 PENDING_PATH = PROJECT / "storage" / "ops" / "pending_sessions.json"
+
+
+def _warn_pending_replay(message: str, exc: Exception) -> None:
+    print(
+        f"[pending_replay] WARN {message} "
+        f"path={PENDING_PATH} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
 
 
 def mark_self_replayed(job_id: str) -> bool:
@@ -46,8 +55,9 @@ def mark_self_replayed(job_id: str) -> bool:
     if not PENDING_PATH.exists():
         return False
     try:
-        state = json.loads(PENDING_PATH.read_text())
-    except (OSError, ValueError):
+        state = json.loads(PENDING_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        _warn_pending_replay("pending_sessions read failed; replay marker not written", exc)
         return False
 
     jobs = state.get("jobs")
@@ -77,5 +87,6 @@ def mark_self_replayed(job_id: str) -> bool:
     try:
         PENDING_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n")
         return True
-    except OSError:
+    except OSError as exc:
+        _warn_pending_replay("pending_sessions write failed; replay marker not written", exc)
         return False
