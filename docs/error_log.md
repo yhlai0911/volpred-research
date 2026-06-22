@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 dispatch_supervisor alert dedup 壞 timestamp 被靜默忽略
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py::should_dedup_alert()`：`alerts_dedup[alert_key]` timestamp 解析失敗時直接回 `False`，alert 會照常發送，但 log 沒有指出 dedup state 壞掉。這會讓重複通知看起來像正常超窗，而不是 state metadata 問題。
+
+**根因**：alert dedup 是非阻塞防噪音機制；舊寫法只保留「壞 timestamp 不應抑制重要 alert」，但沒有把 dedup state failure 可視化，也沒有相容歷史 naive ISO timestamp。
+
+**解決方法**：`should_dedup_alert()` 改用共用 `_parse_state_timestamp()`，支援 `Z`、aware ISO 與 naive ISO（naive 視為 UTC）。真正不可解析時仍回 `False` 不抑制 alert，但輸出 `invalid alerts_dedup timestamp ...` warning。新增 regression tests 鎖住 naive dedup timestamp 可正常抑制、壞 timestamp 會 warning 且不抑制。
+
 ## 2026-06-22 dispatch_supervisor heartbeat age 壞 timestamp 被靜默當作 unset
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py::get_supervisor_age_seconds()`：`last_heartbeat_at` 解析失敗時直接回 `None`，沒有 warning。external monitor 會看不出是 supervisor 尚未初始化，還是 dispatch state metadata 壞掉。

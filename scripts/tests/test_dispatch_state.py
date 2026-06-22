@@ -194,6 +194,34 @@ def test_alert_dedup_window(tmp_state: Path) -> None:
     assert st.should_dedup_alert("auth_blocked", 0, tmp_state) is False
 
 
+def test_alert_dedup_accepts_naive_timestamp(tmp_state: Path) -> None:
+    snap = st.read_state(tmp_state)
+    snap["alerts_dedup"] = {
+        "auth_blocked": (
+            datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+        )
+    }
+    tmp_state.write_text(json.dumps(snap), encoding="utf-8")
+
+    assert st.should_dedup_alert("auth_blocked", 60, tmp_state) is True
+
+
+def test_alert_dedup_warns_on_invalid_timestamp(
+    tmp_state: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    snap = st.read_state(tmp_state)
+    snap["alerts_dedup"] = {"auth_blocked": "not-a-date"}
+    tmp_state.write_text(json.dumps(snap), encoding="utf-8")
+
+    with caplog.at_level(logging.WARNING, logger=st.__name__):
+        deduped = st.should_dedup_alert("auth_blocked", 60, tmp_state)
+
+    assert deduped is False
+    assert "invalid alerts_dedup timestamp" in caplog.text
+    assert "auth_blocked" in caplog.text
+    assert "not-a-date" in caplog.text
+
+
 def test_get_current_job_returns_dataclass(tmp_state: Path) -> None:
     assert st.get_current_job(tmp_state) is None
     st.begin_fire(

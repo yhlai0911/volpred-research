@@ -263,10 +263,18 @@ def should_dedup_alert(alert_key: str, window_s: int, path: Path = STATE_PATH) -
     if not last:
         return False
     try:
-        last_dt = datetime.fromisoformat(last)
+        last_dt = _parse_state_timestamp(last)
         age = (datetime.now(timezone.utc) - last_dt).total_seconds()
         return age < window_s
-    except Exception:
+    except (TypeError, ValueError) as exc:
+        LOG.warning(
+            "invalid alerts_dedup timestamp for %s in %s: %r (%s: %s)",
+            alert_key,
+            path,
+            last,
+            type(exc).__name__,
+            exc,
+        )
         return False
 
 
