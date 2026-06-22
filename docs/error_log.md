@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 prune_rollback_points 容量掃描失敗被靜默少算
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/prune_rollback_points.py::dir_size_bytes()`：rollback snapshot 底下單檔 `is_file()` / `stat()` 失敗時直接略過，清理報告的 keep/delete 容量會少算但沒有任何提示。
+
+**根因**：rollback prune 是維運清理工具，應容忍單檔暫時無法讀取並繼續列出可刪 snapshot；但容量估算是使用者決定是否 `--apply` 的依據，靜默排除 unreadable file 會讓 dry-run 報告看起來比實際釋放空間更小，也掩蓋權限或 I/O 異常。
+
+**解決方法**：新增 `_warn_prune()`，`dir_size_bytes()` 在單檔型別檢查或 `stat()` 失敗時輸出 `[prune-rollback] WARN ... excluding from size total ...` 到 stderr，清理行為不變。新增 regression test 鎖定 warning 與少算語意。
+
 ## 2026-06-23 handoff_regen cleanup 無 timeout 導致 LaunchAgent 卡死
 
 **問題**：hourly tick 讀到的 `storage/ops/handoff_latest.md` 仍停在 2026-06-22 20:50，和 2026-06-23 現況不符；`~/.volpred/logs/handoff_regen.log` 最後一筆是 21:50，`generate_handoff.py` 被 60s alarm kill 後沒有 end banner。`launchctl print gui/501/com.volpred.handoff-regen` 顯示 job 仍 running，process tree 顯示 `task_pool_claim.py cleanup --stale-hours 2` 已卡住超過 2 小時。

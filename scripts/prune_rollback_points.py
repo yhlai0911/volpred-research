@@ -12,12 +12,21 @@ from __future__ import annotations
 import argparse
 import re
 import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROLLBACK_ROOT = Path("storage/ops/rollback_points")
 # Matches trailing timestamp like ...20260415T080047Z or ..._YYYYMMDDTHHMMSSZ
 TIMESTAMP_RE = re.compile(r"(\d{8}T\d{6}Z)$")
+
+
+def _warn_prune(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[prune-rollback] WARN {message}: path={path} "
+        f"error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
 
 
 def parse_timestamp(name: str) -> datetime | None:
@@ -33,11 +42,17 @@ def parse_timestamp(name: str) -> datetime | None:
 def dir_size_bytes(path: Path) -> int:
     total = 0
     for sub in path.rglob("*"):
-        if sub.is_file():
-            try:
-                total += sub.stat().st_size
-            except OSError:
-                pass
+        try:
+            is_file = sub.is_file()
+        except OSError as exc:
+            _warn_prune("file type check failed; excluding from size total", sub, exc)
+            continue
+        if not is_file:
+            continue
+        try:
+            total += sub.stat().st_size
+        except OSError as exc:
+            _warn_prune("file size stat failed; excluding from size total", sub, exc)
     return total
 
 
