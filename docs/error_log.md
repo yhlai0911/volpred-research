@@ -8,7 +8,7 @@
 
 **根因**：實際 `release_pool_articles()` 會排除近期仍有效的 `details.release_dedup_skipped` draft（21 天 TTL），但 preview path 沒套同一個 dedup TTL filter。live feed 的 46 篇 draft 全部帶近期 `release_dedup_skipped`，所以真正可釋出候選是 0；preview 的「eligible=46」是誤導。
 
-**解決方法**：抽出 `_release_dedup_flag_active()` 供 release 與 preview 共用；preview 新增 `eligible_before_dedup` / `dedup_flagged` / `eligible` 三個 count。live preview 現在正確顯示 `eligible_before_dedup=46, dedup_flagged=46, eligible=0, next_candidates=[]`。新增 regression test 鎖住近期 dedup-flagged draft 不進 preview candidates、過期旗標才重新入池。
+**解決方法**：抽出 `_release_dedup_flag_active()` 供 release 與 preview 共用；preview 新增 `eligible_before_dedup` / `dedup_flagged` / `eligible` 三個 count。live preview 現在正確顯示 `eligible_before_dedup=46, dedup_flagged=46, eligible=0, next_candidates=[]`。release starvation alert 也會把這些 preview counts 寫進 body/details，明確指示「eligible_after_dedup=0 時不要強行釋出已被 TTL 排除的草稿」。新增 regression test 鎖住近期 dedup-flagged draft 不進 preview candidates、過期旗標才重新入池，以及 alert 必須帶出 preview counts。
 
 ## 2026-06-22 error_log fallback 掃出 legacy bare except
 

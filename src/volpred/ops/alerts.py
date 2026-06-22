@@ -90,6 +90,22 @@ def _alert_dedup_path(storage_dir: str = "storage") -> Path:
     return _ops_path(storage_dir, "alert_dedup.json")
 
 
+def _release_pool_preview_for_alert(storage_dir: str) -> dict[str, Any]:
+    try:
+        from .content import preview_release_pool_by_settings
+
+        preview = preview_release_pool_by_settings(storage_dir=storage_dir)
+    except Exception as exc:
+        return {"preview_error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+
+    pool_counts = preview.get("pool_counts") if isinstance(preview, dict) else None
+    next_candidates = preview.get("next_candidates") if isinstance(preview, dict) else None
+    return {
+        "pool_counts": pool_counts if isinstance(pool_counts, dict) else {},
+        "next_candidates": next_candidates if isinstance(next_candidates, list) else [],
+    }
+
+
 def _notification_path(storage_dir: str, notification_id: str) -> Path:
     return _storage_root(storage_dir).joinpath("notifications", f"{notification_id}.json")
 
@@ -394,6 +410,21 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
     if release_starved:
         title = f"Release pool starved > {critical_hours}h (cron healthy)"
         release_text = release_last.isoformat() if release_last else "missing"
+        preview_summary = _release_pool_preview_for_alert(storage_dir)
+        pool_counts = preview_summary.get("pool_counts", {})
+        preview_error = preview_summary.get("preview_error")
+        if pool_counts:
+            preview_lines = [
+                f"- draft: {pool_counts.get('draft', 'unknown')}",
+                f"- scheduled: {pool_counts.get('scheduled', 'unknown')}",
+                f"- eligible_before_dedup: {pool_counts.get('eligible_before_dedup', 'unknown')}",
+                f"- dedup_flagged: {pool_counts.get('dedup_flagged', 'unknown')}",
+                f"- eligible_after_dedup: {pool_counts.get('eligible', 'unknown')}",
+            ]
+        elif preview_error:
+            preview_lines = [f"- preview_error: {preview_error}"]
+        else:
+            preview_lines = ["- preview unavailable"]
         body = "\n".join(
             [
                 "## 觸發條件",
@@ -402,16 +433,19 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
                 f"- release_gap_hours: {release_gap_hours if release_gap_hours is not None else 'missing'}",
                 f"- machinery_last_at: {machinery_last.isoformat() if machinery_last else 'missing'}",
                 "",
+                "## release preview",
+                *preview_lines,
+                "",
                 "## 影響",
                 "通常是 due 草稿全落在已飽和主題、dedup 正確 skip 但釋出算法未 fall-through 到 fresh-theme 草稿；",
                 "讀者端看不到新內容（Mission 第 1/5 條），但這不是 cron 停擺，是內容釋出層問題。",
                 "",
                 "## 建議行動",
-                "1. 定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：",
+                "1. 若 eligible_after_dedup=0：不要強行釋出已被 dedup TTL 排除的草稿，先補 fresh-theme draft 或等 TTL 到期。",
+                "2. 若還有 eligible_after_dedup>0：定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：",
                 "   jq '[.[]|select(.status==\"draft\")]|.[].title' storage/reports/feed.json 挑非飽和主題",
                 "   VOLPRED_ACTOR=claude uv run volpred ops release-pool --pub-id <id> --include-drafts",
-                "2. 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。",
-                "3. 結構修：release 算法應在 due 草稿被 dedup-skip 時 fall-through 到下一篇非飽和主題草稿。",
+                "3. 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。",
             ]
         )
         return {
@@ -420,7 +454,7 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
             "level": "warn",
             "title": title,
             "body": body,
-            "details": base_details,
+            "details": {**base_details, "release_preview": preview_summary},
         }
 
     # 3) Healthy: machinery firing + content released within cadence.

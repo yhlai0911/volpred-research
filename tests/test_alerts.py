@@ -145,6 +145,47 @@ def test_release_pool_fallback_fire_marker_counts_as_machinery_health(tmp_path: 
     assert condition["details"]["machinery_last_at"] == "2026-06-21T22:00:56+00:00"
 
 
+def test_release_pool_starved_alert_includes_preview_counts(tmp_path: Path, monkeypatch):
+    from volpred.ops.alerts import _parse_release_pool_state
+
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 6, 22, 1, 30, tzinfo=timezone.utc)
+    _write_json(
+        storage_dir / ".release_settings.json",
+        {
+            "mode": "auto",
+            "interval_minutes": 180,
+            "last_released_at": "2026-06-21T18:00:21+00:00",
+            "updated_at": "2026-06-22T01:00:00+00:00",
+        },
+    )
+    _write_text(
+        storage_dir / "logs" / "cron" / "release_pool.log",
+        "=== [release_pool] check_alerts fallback fire at 2026-06-22T01:00:00+00:00 ===\n",
+    )
+    monkeypatch.setattr(
+        "volpred.ops.alerts._release_pool_preview_for_alert",
+        lambda storage_dir: {
+            "pool_counts": {
+                "draft": 46,
+                "scheduled": 0,
+                "eligible_before_dedup": 46,
+                "dedup_flagged": 46,
+                "eligible": 0,
+            },
+            "next_candidates": [],
+        },
+    )
+
+    condition = _parse_release_pool_state(str(storage_dir), now)
+
+    assert condition["breached"] is True
+    assert condition["level"] == "warn"
+    assert "dedup_flagged: 46" in condition["body"]
+    assert "eligible_after_dedup: 0" in condition["body"]
+    assert condition["details"]["release_preview"]["pool_counts"]["eligible"] == 0
+
+
 def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Path, monkeypatch):
     storage_dir = tmp_path / "storage"
     now = datetime(2026, 4, 19, 12, 0, tzinfo=timezone.utc)
