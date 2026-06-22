@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 topic_clusters feed timestamp parse 失敗被靜默略過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/topic_clusters.py::recent_cluster_counts()`：feed item 的 `published_at` / `created_at` 若是壞時間戳，舊碼直接 `continue`，沒有任何 warning。
+
+**根因**：topic cluster cooldown gate 需要容忍單篇文章 metadata 壞值，避免發文 gate 因歷史 feed 單筆資料異常而中斷；但靜默略過會讓 cluster count / total 降級而不易察覺，操作者看不出 diversity gate 的輸入資料不完整。
+
+**解決方法**：保留「壞時間戳跳過該 item」的容錯行為，但新增 `[topic_clusters] WARN feed timestamp parse failed; skipping item ...` 到 stderr，包含 feed path、item id、原始值與例外類型。新增 regression test 覆蓋壞時間戳不計入 total / cluster count 且有 warning。
+
 ## 2026-06-23 generate_handoff pending priority parse 失敗被靜默降級
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_handoff.py::_task_pool_snapshot()`：pending task 的 `priority` 若不是可轉成整數的值，舊碼會靜默把排序 key 當 P9，handoff 沒有說明 metadata 壞掉。

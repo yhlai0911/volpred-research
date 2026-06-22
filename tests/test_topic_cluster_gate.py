@@ -214,3 +214,41 @@ def test_recent_cluster_counts_split_factor_etf_from_spy(tmp_path):
     assert total == 2
     assert counts["spy"] == 1
     assert counts["factor_etf"] == 1
+
+
+def test_recent_cluster_counts_warns_on_bad_timestamp(tmp_path, capsys):
+    feed_path = tmp_path / "feed.json"
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "bad_ts",
+                    "title": "VIX 壞時間戳",
+                    "tags": ["VIX"],
+                    "status": "published",
+                    "published_at": "not-a-date",
+                },
+                {
+                    "id": "good_ts",
+                    "title": "SPY 正常時間戳",
+                    "tags": ["SPY"],
+                    "status": "published",
+                    "published_at": "2026-06-11T00:00:00+00:00",
+                },
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    import volpred.topic_clusters as tc
+
+    counts, total = tc.recent_cluster_counts(days=30, feed_path=feed_path)
+
+    assert total == 1
+    assert counts["vix"] == 0
+    assert counts["spy"] == 1
+    captured = capsys.readouterr()
+    assert "[topic_clusters] WARN feed timestamp parse failed; skipping item" in captured.err
+    assert "bad_ts" in captured.err
+    assert "not-a-date" in captured.err

@@ -4,6 +4,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import json
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -42,6 +43,22 @@ CLUSTER_HARD_CAPS: dict[str, int] = {
 
 DEFAULT_CLUSTER_CAP = 6
 DOMINANT_RATIO_LIMIT = 0.25
+
+
+def _warn_topic_clusters(
+    message: str,
+    feed_path: Path,
+    exc: Exception,
+    *,
+    item_id: object | None = None,
+    value: object | None = None,
+) -> None:
+    print(
+        "[topic_clusters] WARN "
+        f"{message} path={feed_path} item_id={item_id!r} "
+        f"value={value!r} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
 
 
 def _normalize(text: str) -> str:
@@ -103,7 +120,14 @@ def recent_cluster_counts(
             continue
         try:
             dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
-        except ValueError:
+        except ValueError as exc:
+            _warn_topic_clusters(
+                "feed timestamp parse failed; skipping item",
+                feed_path,
+                exc,
+                item_id=item.get("id"),
+                value=ts,
+            )
             continue
         if dt < cutoff:
             continue
