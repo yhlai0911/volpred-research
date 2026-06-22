@@ -102,6 +102,25 @@ def test_experiment_readme_corpus_warns_on_unreadable_readme(
     assert "IsADirectoryError" in captured.err
 
 
+def test_generate_paper_body_tasks_warns_on_unreadable_tex(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    tex_path = tmp_path / "paper" / "paper_1" / "main.tex"
+    tex_path.mkdir(parents=True)
+    monkeypatch.setattr(MODULE, "PAPER_DIR", tmp_path / "paper")
+
+    tasks = MODULE.generate_paper_body_tasks(existing=[])
+
+    assert tasks == []
+    captured = capsys.readouterr()
+    assert (
+        "[task_generator_v2] WARN paper tex read failed; "
+        "excluding from paper_body TODO scan"
+    ) in captured.err
+    assert "main.tex" in captured.err
+    assert "IsADirectoryError" in captured.err
+
+
 def test_event_article_skips_runtime_managed_adjacent_fomc_date(tmp_path, monkeypatch) -> None:
     runtime_schedules = tmp_path / "runtime_schedules.json"
     runtime_schedules.write_text(

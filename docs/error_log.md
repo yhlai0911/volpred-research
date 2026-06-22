@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 task_generator_v2 paper tex TODO 掃描讀取失敗被靜默排除
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::generate_paper_body_tasks()`：掃描 `paper/*/main*.tex` TODO / placeholder 時，單一 tex 檔讀取失敗會直接 `continue`，沒有任何 warning。
+
+**根因**：paper_body task generator 需要容忍單一論文檔案暫時不可讀，避免整個任務生成流程中斷；但靜默跳過會讓 TODO / PLACEHOLDER 任務少產，操作者看不出 paper body queue 為何沒有涵蓋該 paper。
+
+**解決方法**：單一 tex 檔讀取失敗時改用 `_warn_task_generator()` 輸出 `[task_generator_v2] WARN paper tex read failed; excluding from paper_body TODO scan ...` 到 stderr，原本跳過該檔的 fallback 行為不變。新增 regression test 覆蓋 unreadable `main.tex` 時不產生任務且有 warning。
+
 ## 2026-06-23 task_generator_v2 experiment README corpus 讀取失敗被靜默排除
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::experiment_readme_corpus()`：掃描 `experiments/k*/README.md` 時，單一 README 讀取失敗會直接 `continue`，沒有任何 warning。

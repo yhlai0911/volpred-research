@@ -412,7 +412,12 @@ def generate_paper_body_tasks(
 
         try:
             lines = tex_path.read_text(encoding="utf-8", errors="ignore").splitlines()
-        except OSError:
+        except OSError as exc:
+            _warn_task_generator(
+                "paper tex read failed; excluding from paper_body TODO scan",
+                tex_path,
+                exc,
+            )
             continue
 
         todos: list[tuple[int, str]] = []
