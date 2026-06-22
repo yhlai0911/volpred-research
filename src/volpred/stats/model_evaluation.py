@@ -225,6 +225,19 @@ def _simple_mcs(losses_dict, alpha, n_boot, seed):
 
 # ─── Layer 6: VaR/ES Economic Significance ─────────────────────
 
+def unit_variance_student_t_ppf(alpha: float, df: float) -> float:
+    """Student-t quantile scaled to unit variance for standardized residual VaR.
+
+    ``scipy.stats.t.ppf`` has variance ``df / (df - 2)`` when ``df > 2``.
+    GARCH-style VaR paths that multiply a conditional sigma forecast by a
+    residual quantile need the unit-variance version unless they explicitly
+    estimate and report a separate scale parameter.
+    """
+    if df <= 2 or not np.isfinite(df):
+        raise ValueError("Student-t VaR requires df > 2 for unit-variance scaling")
+    return float(stats.t.ppf(alpha, df=df) * np.sqrt((df - 2) / df))
+
+
 def var_backtest(
     returns: np.ndarray,
     sigma_forecasts: np.ndarray,
@@ -247,9 +260,7 @@ def var_backtest(
     if distribution == "normal":
         z = stats.norm.ppf(alpha)
     elif distribution == "t":
-        if df <= 2:
-            raise ValueError("Student-t VaR requires df > 2 for unit-variance scaling")
-        z = stats.t.ppf(alpha, df=df) * np.sqrt((df - 2) / df)
+        z = unit_variance_student_t_ppf(alpha, df)
     else:
         z = stats.norm.ppf(alpha)
 
