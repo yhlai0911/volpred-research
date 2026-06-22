@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -91,3 +92,76 @@ def test_generate_drilldown_splits_text_bash_and_cache(monkeypatch):
     assert "scheduler/cron inspection" in family_names
     assert "repo navigation" in family_names
     assert drilldown["cache_diagnostics"]["top_sessions_by_cache_create"][0]["session_id"] == "sess_text"
+
+
+def test_scan_jsonl_warns_on_bad_usage_lines_without_blocking(tmp_path, capsys):
+    token_usage_report = _load_token_usage_report_module()
+    jsonl = tmp_path / "usage.jsonl"
+    target_day = date(2026, 6, 22)
+    valid = {
+        "type": "assistant",
+        "timestamp": "2026-06-22T01:02:03Z",
+        "message": {
+            "model": "claude-opus-4-7",
+            "usage": {"input_tokens": 10, "output_tokens": 2},
+            "content": [{"type": "text", "text": "ok"}],
+        },
+    }
+    bad_ts = {
+        "type": "assistant",
+        "timestamp": "not-a-timestamp",
+        "message": {
+            "model": "claude-opus-4-7",
+            "usage": {"input_tokens": 1},
+            "content": [],
+        },
+    }
+    missing_ts = {
+        "type": "assistant",
+        "message": {
+            "model": "claude-opus-4-7",
+            "usage": {"input_tokens": 1},
+            "content": [],
+        },
+    }
+    jsonl.write_text(
+        "\n".join([
+            json.dumps(valid),
+            "{bad-json",
+            json.dumps(bad_ts),
+            json.dumps(missing_ts),
+        ]),
+        encoding="utf-8",
+    )
+
+    rows = list(
+        token_usage_report._scan_jsonl(
+            jsonl,
+            "session",
+            False,
+            target_day,
+            date(2026, 6, 23),
+        )
+    )
+
+    assert len(rows) == 1
+    assert rows[0]["usage"] == {"input_tokens": 10, "output_tokens": 2}
+    err = capsys.readouterr().err
+    assert "[token_usage_report] WARN JSONL line parse failed; skipping" in err
+    assert "[token_usage_report] WARN assistant timestamp parse failed; skipping" in err
+    assert "[token_usage_report] WARN assistant usage missing timestamp; skipping" in err
+    assert "usage.jsonl:2" in err
+    assert "JSONDecodeError" in err
+
+
+def test_scan_jsonl_warns_on_unreadable_usage_path(tmp_path, capsys):
+    token_usage_report = _load_token_usage_report_module()
+    missing = tmp_path / "missing.jsonl"
+
+    rows = list(token_usage_report._scan_jsonl(missing, "session", False, None, None))
+
+    assert rows == []
+    err = capsys.readouterr().err
+    assert "[token_usage_report] WARN JSONL file read failed; returning no records" in err
+    assert "missing.jsonl" in err
+    assert "FileNotFoundError" in err

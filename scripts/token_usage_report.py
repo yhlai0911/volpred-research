@@ -369,17 +369,31 @@ def _classify_bash_family(cmd):
     return "other bash"
 
 
+def _warn_token_usage(message: str, path: Path, exc: Exception | None = None, *, line_no: int | None = None) -> None:
+    loc = f"{path}"
+    if line_no is not None:
+        loc = f"{loc}:{line_no}"
+    detail = f" error={type(exc).__name__}: {exc}" if exc is not None else ""
+    print(f"[token_usage_report] WARN {message} path={loc}{detail}", file=sys.stderr)
+
+
 def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_date_end):
     """Scan a single JSONL file and yield assistant message records."""
+    warned_bad_json = False
+    warned_bad_timestamp = False
+    warned_missing_timestamp = False
     try:
         with open(jsonl_path, "r") as f:
-            for line in f:
+            for line_no, line in enumerate(f, start=1):
                 line = line.strip()
                 if not line:
                     continue
                 try:
                     obj = json.loads(line)
-                except json.JSONDecodeError:
+                except json.JSONDecodeError as exc:
+                    if not warned_bad_json:
+                        _warn_token_usage("JSONL line parse failed; skipping", jsonl_path, exc, line_no=line_no)
+                        warned_bad_json = True
                     continue
 
                 if obj.get("type") != "assistant":
@@ -392,11 +406,17 @@ def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_d
 
                 ts_str = obj.get("timestamp")
                 if not ts_str:
+                    if not warned_missing_timestamp:
+                        _warn_token_usage("assistant usage missing timestamp; skipping", jsonl_path, line_no=line_no)
+                        warned_missing_timestamp = True
                     continue
 
                 try:
                     ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
-                except ValueError:
+                except ValueError as exc:
+                    if not warned_bad_timestamp:
+                        _warn_token_usage("assistant timestamp parse failed; skipping", jsonl_path, exc, line_no=line_no)
+                        warned_bad_timestamp = True
                     continue
 
                 ts_date = ts.date()
@@ -422,7 +442,8 @@ def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_d
                     "content": msg.get("content", []),
                     "text_content": _extract_text_content(msg.get("content", [])),
                 }
-    except IOError:
+    except OSError as exc:
+        _warn_token_usage("JSONL file read failed; returning no records", jsonl_path, exc)
         return
 
 

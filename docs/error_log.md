@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 token_usage_report JSONL usage 掃描壞行被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，承接 `session_drill_down.py` 的同型診斷，掃到 `scripts/token_usage_report.py::_scan_jsonl()`：session JSONL 壞行、assistant usage record 壞 timestamp、缺 timestamp、或檔案讀取失敗時直接跳過 / 回空。報表可繼續產生是對的，但 token usage、cache usage、tool category 統計會少算且沒有任何資料品質線索。
+
+**根因**：token usage report 必須容忍單一 session log 污染，不可讓成本報表整批失敗；但舊寫法把可容忍資料問題寫成 silent skip，使「真的沒有用量」和「讀不到用量」在報表層不可區分。
+
+**解決方法**：新增 `_warn_token_usage()`，對 JSONL parse failure、timestamp parse failure、missing timestamp、file read failure 輸出 `[token_usage_report] WARN ... path=<file>:<line>` 到 stderr；同一檔案同類問題只提示一次。新增 regression tests 鎖住壞行不阻塞有效 usage record，且 unreadable path 會 warning 後回空。
+
 ## 2026-06-22 session_drill_down JSONL 掃描壞行被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，延伸檢查近期「非阻塞容錯不可觀察」同型問題，掃到 `scripts/session_drill_down.py::scan_jsonl()`：Claude session JSONL 壞行、assistant message 壞 timestamp、缺 timestamp、或檔案讀取失敗時直接跳過 / 回空。工具仍能產生報告是對的，但 session cost / tool-call 統計可能少算，且操作者看不出是哪個 session 檔資料品質有問題。
