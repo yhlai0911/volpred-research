@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 session_replay_pending 壞 pending_sessions 直接 traceback
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/session_replay_pending.py`：`storage/ops/pending_sessions.json` 若 JSON 壞掉、頂層 schema 非 object、`jobs` 非 object，或單筆 job schema 壞掉，舊碼會直接 traceback 或在 `int(recorded_count)` 轉型時中斷。
+
+**根因**：session startup replay 是控制面清理工具，整體 pending state 壞掉時應 fail-closed 並給明確診斷；但單筆 job 壞掉時不應讓其他有效 missed-fire replay marker 無法處理。舊碼把 schema 假設寫死，錯誤訊號只剩 Python traceback，不適合 hourly/session-startup log。
+
+**解決方法**：新增 `[session-replay] ERROR/WARN ...` 診斷；整體 state 讀取或 schema 壞掉時回 1 並輸出 path + exception；單筆 job 非 object 或 `recorded_count` 不可轉 int 時 warning 後跳過該 job，其他有效 job 照常 dry-run/write。新增 regression tests 覆蓋壞 JSON fail-closed 與混合壞 job 不阻斷有效 job。
+
 ## 2026-06-23 scheduler_state 壞檔只回 invalid_state 不留診斷
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/scheduler.py::get_scheduler_state()`：`storage/ops/scheduler_state.json` 若 JSON 壞掉，舊碼只回 `last_status="invalid_state"`，不寫 scheduler log，也不包含 path / exception 訊號。

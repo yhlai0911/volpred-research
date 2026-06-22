@@ -31,6 +31,28 @@ PROJECT = Path(__file__).resolve().parent.parent
 PENDING_PATH = PROJECT / "storage" / "ops" / "pending_sessions.json"
 
 
+def _warn_session_replay(message: str, exc: Exception | None = None) -> None:
+    suffix = f" error={type(exc).__name__}: {exc}" if exc is not None else ""
+    print(f"[session-replay] WARN {message} path={PENDING_PATH}{suffix}", file=sys.stderr)
+
+
+def _error_session_replay(message: str, exc: Exception | None = None) -> None:
+    suffix = f" error={type(exc).__name__}: {exc}" if exc is not None else ""
+    print(f"[session-replay] ERROR {message} path={PENDING_PATH}{suffix}", file=sys.stderr)
+
+
+def _load_pending_state() -> dict | None:
+    try:
+        state = json.loads(PENDING_PATH.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        _error_session_replay("pending_sessions read failed; cannot mark replayed", exc)
+        return None
+    if not isinstance(state, dict):
+        _error_session_replay(f"pending_sessions schema invalid; expected object got {type(state).__name__}")
+        return None
+    return state
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="Show what would change without writing")
@@ -40,15 +62,31 @@ def main() -> int:
         print(f"[session-replay] pending_sessions.json not found at {PENDING_PATH} — nothing to do.")
         return 0
 
-    state = json.loads(PENDING_PATH.read_text())
+    state = _load_pending_state()
+    if state is None:
+        return 1
     jobs = state.get("jobs", {}) or {}
+    if not isinstance(jobs, dict):
+        _error_session_replay(f"pending_sessions jobs schema invalid; expected object got {type(jobs).__name__}")
+        return 1
     now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     marked: list[str] = []
     skipped: list[str] = []
 
     for job_id, job in jobs.items():
-        recorded_count = int(job.get("recorded_count", 0))
+        if not isinstance(job, dict):
+            _warn_session_replay(
+                f"pending_sessions job schema invalid; skipping job_id={job_id} type={type(job).__name__}"
+            )
+            skipped.append(f"{job_id}(invalid_schema)")
+            continue
+        try:
+            recorded_count = int(job.get("recorded_count", 0))
+        except (TypeError, ValueError) as exc:
+            _warn_session_replay(f"pending_sessions recorded_count invalid; skipping job_id={job_id}", exc)
+            skipped.append(f"{job_id}(invalid_recorded_count)")
+            continue
         recorded_at = job.get("recorded_at")
         replayed_at = job.get("replayed_at")
 
@@ -68,7 +106,13 @@ def main() -> int:
         state["last_replay_at"] = now_iso
         PENDING_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n")
 
-    total_recorded_count = sum(int(j.get("recorded_count", 0)) for j in jobs.values())
+    total_recorded_count = 0
+    for job in jobs.values():
+        if isinstance(job, dict):
+            try:
+                total_recorded_count += int(job.get("recorded_count", 0))
+            except (TypeError, ValueError):
+                continue
     print(f"[session-replay] mode={'DRY-RUN' if args.dry_run else 'WRITE'}")
     print(f"  Total jobs in pending_sessions: {len(jobs)}")
     print(f"  Total recorded_count (累積 missed fire): {total_recorded_count}")
