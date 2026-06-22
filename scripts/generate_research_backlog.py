@@ -45,6 +45,10 @@ OPEN_QUESTION_RE = re.compile(
 )
 
 
+def _warn_backlog(message: str) -> None:
+    print(f"[research_backlog] WARN {message}", file=sys.stderr)
+
+
 def find_next_k_id(start: int = 1300, *, existing_task_ids: set | None = None) -> int:
     """Find lowest free K-id ≥ start. Considers both experiments/ dir AND
     in-flight next_tasks.json entries to avoid collisions."""
@@ -254,8 +258,11 @@ def _journal_discovery_dispatch_task(
                     ts = ts.replace(tzinfo=timezone.utc)
                 if ts >= cutoff:
                     return []
-            except ValueError:
-                pass
+            except ValueError as exc:
+                _warn_backlog(
+                    "journal discovery timestamp parse failed; ignoring cooldown timestamp "
+                    f"task_id={task_id} value={completed_at!r} error={type(exc).__name__}: {exc}"
+                )
 
     bucket = now_utc.hour // JOURNAL_DISCOVERY_COOLDOWN_HOURS
     task_id = f"journal_discovery_{now_utc.strftime('%Y%m%d')}_{bucket}"

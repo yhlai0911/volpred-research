@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -144,3 +145,26 @@ def test_generate_backlog_all_covered_skips_when_journal_live(
     }
     data = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert len(data) == 2
+
+
+def test_journal_discovery_warns_on_bad_cooldown_timestamp(capsys):
+    tasks = [
+        {
+            "id": "journal_discovery_20260622_0",
+            "task_type": "platform_ops",
+            "status": "succeeded",
+            "source": "auto_journal_discovery_fallback",
+            "completed_at": "not-a-date",
+        }
+    ]
+
+    generated = MODULE._journal_discovery_dispatch_task(
+        tasks,
+        existing_ids=set(),
+        now_utc=datetime(2026, 6, 23, 5, tzinfo=timezone.utc),
+    )
+
+    assert len(generated) == 1
+    err = capsys.readouterr().err
+    assert "[research_backlog] WARN journal discovery timestamp parse failed" in err
+    assert "not-a-date" in err

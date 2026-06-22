@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_research_backlog journal cooldown 壞 timestamp 被靜默忽略
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_research_backlog.py::_journal_discovery_dispatch_task()`：既有 `journal_discovery_*` task 的 `completed_at` / `created_at` 若不可 parse，舊碼直接 `pass`，沒有 warning，後續 cooldown 判斷等同該 timestamp 不存在。
+
+**根因**：journal-discovery 是 research backlog 全覆蓋時的自動補題 fallback；壞 timestamp 不應中斷補池，但靜默忽略會讓操作者看不出是 cooldown receipt 漂移，並可能提早 materialize 新的 journal-discovery task。
+
+**解決方法**：新增 `[research_backlog] WARN ...` diagnostics；壞 cooldown timestamp 維持原本 fail-open 忽略該 timestamp 的行為，但輸出 task id、原始值與例外類型。新增 regression test 覆蓋壞 timestamp 會 warning 且仍可生成 fallback task。
+
 ## 2026-06-23 generate_diverse_tasks 補池 source 壞檔會中斷或無診斷降級
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py`：paper_review 補池直接 `json.loads(feed.json)`，feed 壞 JSON 會讓 generator 中斷；platform_ops 補池直接讀 `cron_last_run.json` / `runtime_schedules.json`，壞 JSON 或 schema drift 也會中斷或造成後續 `.get()` 不可信。
