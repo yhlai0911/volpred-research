@@ -19,6 +19,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -52,16 +53,37 @@ def _today_str() -> str:
     return datetime.now(TPE).strftime("%Y-%m-%d")
 
 
-def _load(path: Path, default):
+def _warn_digest_enqueue(message: str, path: Path, exc: Exception | None = None) -> None:
+    suffix = f" error={type(exc).__name__}: {exc}" if exc else ""
+    print(f"[digest-enqueue] WARN {message}: path={path}{suffix}", file=sys.stderr)
+
+
+def _load_json(path: Path, *, source_name: str) -> Any | None:
+    if not path.exists():
+        _warn_digest_enqueue(f"{source_name} JSON missing; aborting", path, FileNotFoundError(str(path)))
+        return None
     try:
         return json.loads(path.read_text())
-    except (OSError, json.JSONDecodeError):
-        return default
+    except (OSError, json.JSONDecodeError) as exc:
+        _warn_digest_enqueue(f"{source_name} JSON read failed; aborting", path, exc)
+        return None
 
 
-def _digest_published_today(today: str) -> bool:
-    feed = _load(FEED, [])
-    items = feed if isinstance(feed, list) else feed.get("items", [])
+def _digest_published_today(today: str) -> bool | None:
+    feed = _load_json(FEED, source_name="feed")
+    if feed is None:
+        return None
+    if isinstance(feed, list):
+        items = feed
+    elif isinstance(feed, dict):
+        items = feed.get("items", [])
+    else:
+        _warn_digest_enqueue(
+            "feed JSON schema invalid; aborting",
+            FEED,
+            TypeError(f"expected list or dict, got {type(feed).__name__}"),
+        )
+        return None
     for it in items:
         if not isinstance(it, dict):
             continue
@@ -92,12 +114,24 @@ def main() -> int:
     today = _today_str()
     task_id = f"daily_digest_{today.replace('-', '')}"
 
-    if _digest_published_today(today):
+    digest_published = _digest_published_today(today)
+    if digest_published is None:
+        print("[digest-enqueue] ERROR: feed source unavailable; abort to avoid duplicate digest", file=sys.stderr)
+        return 1
+    if digest_published:
         print(f"[digest-enqueue] skip: 今日({today}) digest 已發佈")
         return 0
 
-    tasks = _load(NEXT_TASKS, [])
+    tasks = _load_json(NEXT_TASKS, source_name="next_tasks")
+    if tasks is None:
+        print("[digest-enqueue] ERROR: next_tasks source unavailable; abort（不亂建任務池）", file=sys.stderr)
+        return 1
     if not isinstance(tasks, list):
+        _warn_digest_enqueue(
+            "next_tasks JSON schema invalid; aborting",
+            NEXT_TASKS,
+            TypeError(f"expected list, got {type(tasks).__name__}"),
+        )
         print("[digest-enqueue] ERROR: next_tasks.json 非 list，abort（不亂改 schema）", file=sys.stderr)
         return 1
 

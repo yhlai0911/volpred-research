@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 digest enqueue JSON source 讀取失敗被靜默套 default
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/enqueue_daily_digest.py`：`feed.json` 或 `next_tasks.json` 讀取 / JSON parse 失敗時直接套 default。`feed.json` 壞掉會讓「今日已發 digest」判斷失效而可能重複排文；`next_tasks.json` 壞掉更危險，可能把任務池當空池追加後覆寫。
+
+**根因**：daily digest enqueue 的冪等性依賴兩個 canonical source：feed 判斷今日是否已發、next_tasks 判斷今日任務是否已存在。這兩個 source 壞掉時不應 fail-open 成空資料；舊碼把 cron 不中斷和來源完整性混在一起，讓 duplicate / pool overwrite 風險不可觀察。
+
+**解決方法**：新增 `[digest-enqueue] WARN ...` source read/schema diagnostics；`feed.json`、`next_tasks.json` 缺失或讀取失敗時 fail-closed exit 1，避免重複排 digest 或重建任務池。`next_tasks` schema 非 list 也明確 warning + abort。新增 regression tests 覆蓋正常 dry-run、壞 feed abort、壞 next_tasks 不覆寫。
+
 ## 2026-06-23 email_notifier notification log 讀取失敗被靜默當空
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著近期 silent-fallback 修補掃到 `src/volpred/publisher/email_notifier.py::EmailNotifier._load_log()`：`storage/notifications/notification_log.json` 壞 JSON 時直接回空 list；若 schema 漂成 dict 或 list 內混入非 object，dedupe / notification listing 也可能失真或拋錯。
