@@ -24,6 +24,10 @@ from pathlib import Path
 LOG = Path(__file__).resolve().parent.parent / "storage" / "notifications" / "notification_log.json"
 
 
+def _warn(message: str) -> None:
+    print(f"[mark_alert_resolved] WARN {message}", file=sys.stderr)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--subject-contains", help="Match entries whose subject contains this substring (case-insensitive)")
@@ -51,8 +55,9 @@ def main() -> int:
 
     needle = args.subject_contains.lower() if args.subject_contains else None
     matched = []
-    for entry in data:
+    for idx, entry in enumerate(data):
         if not isinstance(entry, dict):
+            _warn(f"non-object notification log entry; skipping index={idx} type={type(entry).__name__}")
             continue
         if args.level and entry.get("level") != args.level:
             continue

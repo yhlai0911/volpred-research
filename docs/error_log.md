@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 mark_alert_resolved notification log 非 object entry 靜默略過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/mark_alert_resolved.py`：掃描 `notification_log.json` 時遇到 list 內非 object entry 會直接 `continue`，沒有 warning。
+
+**根因**：alert resolution CLI 應容忍單筆壞 audit entry，避免操作者標記其他 alerts resolved 時被壞資料阻斷；但靜默略過會讓 notification audit trail 的 schema drift 不可見，操作者只能看到 matched count 偏低，不知道來源 log 有壞 entry。
+
+**解決方法**：新增 `[mark_alert_resolved] WARN ...` diagnostics；非 object entry 仍跳過，但會輸出 index 與型別。新增 regression test 覆蓋 dry-run 時壞 entry warning 且合法 entry 仍能 match。
+
 ## 2026-06-23 unblock_expired blocked_until parse 失敗後用字串兜底
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/unblock_expired_blocked_tasks.py`：`blocked_until` 解析失敗後會改用 `str(until)[:10] > today` 的字串比較兜底，沒有 warning；某些非法值可能被誤判成已過期而解封 blocked task。
