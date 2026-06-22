@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 dedupe_next_tasks 壞 queue source 缺少診斷
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dedupe_next_tasks.py`：`storage/next_tasks.json` 壞 JSON 只會丟原生 parse 錯誤；頂層 schema 非 list 沒有 path/type 診斷；list 內若混入非 object entry，`dedupe()` 會在 `.get()` 直接 crash。
+
+**根因**：`dedupe_next_tasks.py` 是任務池 writer，遇到整體 source corruption 必須 fail-closed，且 log 需要指向壞 source；但舊碼假設 queue 一定是 list of object，沒有把「壞檔」與「合法但無 duplicate」區分清楚。
+
+**解決方法**：新增 `[dedupe_next_tasks] WARN ...` diagnostics；壞 JSON / 頂層 schema drift 先輸出 path + exception/schema 後拒絕寫回；單筆非 object entry warning 後 passthrough 保留，其他合法 task 照常 dedupe。新增 regression tests 覆蓋壞 JSON、非 list schema、混合壞 entry。
+
 ## 2026-06-23 mark_task_blocked next_tasks 壞檔缺少 writer 診斷
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/mark_task_blocked.py::_load()`：`next_tasks.json` 壞 JSON 會直接 traceback；頂層 schema / `tasks` 欄位非 list 時沒有明確拒絕訊息；list 內非 object entry 會在主流程 `.get()` 爆掉。

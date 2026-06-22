@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import fcntl
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -44,10 +45,19 @@ def _utc_iso_z() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def _load_tasks(fh) -> list[dict[str, Any]]:
+def _warn(message: str) -> None:
+    print(f"[dedupe_next_tasks] WARN {message}", file=sys.stderr)
+
+
+def _load_tasks(fh) -> list[Any]:
     fh.seek(0)
-    data = json.load(fh)
+    try:
+        data = json.load(fh)
+    except json.JSONDecodeError as exc:
+        _warn(f"next_tasks read failed path={NEXT_TASKS} error={type(exc).__name__}: {exc}")
+        raise SystemExit(f"failed to parse {NEXT_TASKS}: {type(exc).__name__}: {exc}") from exc
     if not isinstance(data, list):
+        _warn(f"next_tasks schema invalid path={NEXT_TASKS} expected=list actual={type(data).__name__}")
         raise SystemExit("next_tasks.json is not a list")
     return data
 
@@ -63,12 +73,19 @@ def _score(task: dict[str, Any], index: int) -> tuple[int, int, int, int, int]:
     )
 
 
-def dedupe(tasks: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def dedupe(tasks: list[Any]) -> tuple[list[Any], list[dict[str, Any]]]:
     grouped: dict[str, list[tuple[int, dict[str, Any]]]] = {}
     ordered: list[str] = []
-    passthrough: list[dict[str, Any]] = []
+    passthrough: list[Any] = []
 
     for idx, task in enumerate(tasks):
+        if not isinstance(task, dict):
+            _warn(
+                "next_tasks entry schema invalid; preserving passthrough "
+                f"index={idx} type={type(task).__name__}"
+            )
+            passthrough.append(task)
+            continue
         task_id = str(task.get("id") or "")
         if not task_id:
             passthrough.append(task)
@@ -78,7 +95,7 @@ def dedupe(tasks: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict
             ordered.append(task_id)
         grouped[task_id].append((idx, task))
 
-    deduped: list[dict[str, Any]] = []
+    deduped: list[Any] = []
     dropped: list[dict[str, Any]] = []
     for task_id in ordered:
         entries = grouped[task_id]
