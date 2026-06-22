@@ -50,6 +50,18 @@ def test_run_refill_skips_if_state_already_today(tmp_path, monkeypatch):
     assert result["reason"] == "already_scanned_today"
 
 
+def test_load_json_warns_on_invalid_existing_file(tmp_path, capsys):
+    path = tmp_path / "state.json"
+    path.write_text("{bad json", encoding="utf-8")
+
+    assert MODULE._load_json(path, {"fallback": True}) == {"fallback": True}
+
+    captured = capsys.readouterr()
+    assert "[reader_facing_refill] WARN JSON read failed; using default" in captured.out
+    assert "state.json" in captured.out
+    assert "JSONDecodeError" in captured.out
+
+
 def test_refill_event_candidates_adds_only_in_horizon(tmp_path, monkeypatch):
     next_tasks = tmp_path / "storage" / "next_tasks.json"
     next_tasks.parent.mkdir(parents=True, exist_ok=True)

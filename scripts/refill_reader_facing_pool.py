@@ -34,12 +34,20 @@ def _today_local() -> str:
     return _now_local().date().isoformat()
 
 
+def _warn_refill_reader(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[reader_facing_refill] WARN {message}: "
+        f"path={path} error={type(exc).__name__}: {exc}"
+    )
+
+
 def _load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
+    except Exception as exc:
+        _warn_refill_reader("JSON read failed; using default", path, exc)
         return default
 
 
