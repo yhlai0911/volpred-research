@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 
 from PyPDF2 import PdfWriter
 
@@ -47,6 +48,24 @@ def test_count_tex_metrics_counts_pages_from_current_main_pdf(tmp_path):
 
     assert metrics["title"] == "Current"
     assert metrics["pages"] == 2
+
+
+def test_count_tex_metrics_warns_when_page_count_fails(tmp_path, monkeypatch, capsys):
+    (tmp_path / "main.tex").write_text(r"\title{Current}\begin{abstract}Current\end{abstract}")
+    (tmp_path / "main.pdf").write_bytes(b"not a pdf")
+
+    def fail_run(*args, **kwargs):
+        raise RuntimeError("fitz missing")
+
+    monkeypatch.setattr(subprocess, "run", fail_run)
+
+    metrics = _count_tex_metrics(tmp_path)
+
+    out = capsys.readouterr().out
+    assert metrics["title"] == "Current"
+    assert "pages" not in metrics
+    assert "[papers] WARN page count failed" in out
+    assert "fitz missing" in out
 
 
 def test_count_tex_metrics_extracts_author_from_current_main_tex(tmp_path):

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 paper page-count fallback 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/papers.py::_count_tex_metrics()`：PyPDF2 讀 PDF page count 失敗後會再用 `python3 -c import fitz ...` fallback，但 fallback exception 直接 `pass`。若兩條路都失敗，paper metadata 沒有 `pages`，ops log 看不出原因。
+
+**根因**：paper sync 為了避免 PDF page count 失敗阻塞 metadata update，採用 best-effort；但 fallback 失敗沒有可觀察性，重演近期 silent-failure 類 incident。
+
+**解決方法**：保留非阻塞語義，但 PyPDF2 與 fitz fallback 都失敗時輸出 `[papers] WARN page count ...`，包含 PDF path、primary error 與 fallback error / exit。新增 regression test：壞 PDF 且 fitz fallback 拋錯時，metrics 不含 `pages`，但 warning 可見。
+
 ## 2026-06-22 generate_handoff naive completed_at 誤報 invalid warning
 
 **問題**：上一輪把 `completed_at` parse 失敗從 silent `pass` 改成 handoff warning 後，新 handoff 顯示多筆 `invalid completed_at ... (TypeError)`，但樣本如 `2026-05-19T11:49:03.785530`、`2026-05-04` 其實是合法的 naive ISO / date-only timestamp，不是壞資料。

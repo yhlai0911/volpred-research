@@ -350,7 +350,7 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
             from PyPDF2 import PdfReader
 
             metrics["pages"] = len(PdfReader(str(pdf)).pages)
-        except Exception:
+        except Exception as primary_exc:
             try:
                 result = subprocess.run(
                     ["python3", "-c", f"import fitz; print(fitz.open('{pdf}').page_count)"],
@@ -358,8 +358,17 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
                 )
                 if result.returncode == 0 and result.stdout.strip().isdigit():
                     metrics["pages"] = int(result.stdout.strip())
-            except Exception:
-                pass
+                else:
+                    print(
+                        f"  [papers] WARN page count fallback failed for {pdf}: "
+                        f"PyPDF2={primary_exc}; fitz_exit={result.returncode}; "
+                        f"stderr={result.stderr.strip()[:200]!r}"
+                    )
+            except Exception as fallback_exc:
+                print(
+                    f"  [papers] WARN page count failed for {pdf}: "
+                    f"PyPDF2={primary_exc}; fitz={fallback_exc}"
+                )
 
     # Extract abstract from \begin{abstract} … \end{abstract}. main_v*.tex
     # often only `\input{body_v*}` and has no \begin{abstract}; resolve \input
