@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 gmail-poll LaunchAgent 連續撞 60s alarm timeout（boss email pipeline silent 停 2.5h）
+
+**問題**：autonomous tick 發現 `gmail_inbox_state.json` mtime 卡在 21:00（已 2h20m 未更新）。boss email 自動 queue pipeline 停擺。
+
+**誤判（記取）**：先 tail `storage/logs/cron/gmail_poll.log` 看到最後 "poll done" 停在 21:00、且 sibling agent（compute-worker 23:15）正常 fire，**誤判為 gmail-poll 的 StartCalendarInterval 排程被 unarm**，做了 `launchctl bootout + bootstrap` reload（無害但非必要 — 排程其實一直 armed）。
+
+**真根因**：看錯 log 檔。LaunchAgent wrapper（`~/.volpred/bin/cron_gmail_poll.sh`）stdout 寫的是 **`~/.volpred/logs/gmail_poll.log`**，不是 `storage/logs/cron/gmail_poll.log`（後者是 `gmail_inbox_poll.py` 腳本自身的 log，只在跑完才寫 "poll done"）。正確 log 顯示排程**一直在每 15min fire**，但每次 `perl alarm 60` 把 `uv run python gmail_inbox_poll.py` 在 60s SIGALRM kill（exit=142）→ 從沒跑到 "poll done" → state 與 storage log 都凍在 21:00。手動跑只要 **9s** 完成；20:30/21:00 也都 ~8s → 21:15~23:15 是**外部 IMAP/網路延遲暫時性 spike**，非代碼問題。手動 run 補上即時 gap（queued=0，整段無遺漏 actionable boss 回信）。
+
+**教訓 + 候選結構修復**：(1) 診斷 LaunchAgent 看 log 要先確認 wrapper 的 `StandardOutPath` 實際指向哪（dual-log 陷阱：script-internal log vs launchd-stdout log 不同檔，只看一個會誤判）；(2) `state mtime` 是比 log "poll done" 更可靠的 liveness 訊號（log 可能來自不同檔/不同寫入點）；(3) **若復發**（非 transient）→ 結構修復走 directive #1 dead-man-switch 框架：加 `gmail_poll_freshness` check（`gmail_inbox_state.json` mtime 在台北活躍窗 >2h → warn），補上「boss email pipeline 停擺」這個目前無 outcome 監控的盲區；並考慮把 60s alarm 放寬到 120s 給 cold-start + IMAP latency headroom。本次屬 strike 1 + transient，先補 gap 不過度工程。
+
 ## 2026-06-22 release_pool failed sync ledger 壞檔被靜默重建
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/content.py` 的 release pool Supabase sync failure path：`sync_article()` 失敗時會把 article slug 寫入 `.failed_supabase_syncs.json`，但若該 ledger 壞 JSON 或 schema 不是 list，舊碼直接安靜用空 list 重建。
