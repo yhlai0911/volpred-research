@@ -114,3 +114,44 @@ def test_codex_review_artifact_under_reviews_dir_prevents_gap(tmp_path, monkeypa
 
     assert rc == 0
     assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
+
+
+def test_load_tasks_warns_when_dict_missing_tasks_list(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    experiments = tmp_path / "experiments"
+    next_tasks.parent.mkdir(parents=True)
+    experiments.mkdir()
+    next_tasks.write_text(json.dumps({"metadata": {"source": "drift"}}), encoding="utf-8")
+    monkeypatch.setattr(sync_next_tasks_status, "ROOT", tmp_path)
+    monkeypatch.setattr(sync_next_tasks_status, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(sync_next_tasks_status, "EXPERIMENTS", experiments)
+    monkeypatch.setattr(sys, "argv", ["sync_next_tasks_status.py", "--dry-run"])
+
+    rc = sync_next_tasks_status.main()
+
+    assert rc == 0
+    captured = capsys.readouterr()
+    assert "[sync_next_tasks] WARN next_tasks.json dict missing tasks list" in captured.err
+    assert "[sync_next_tasks] mark-succeeded candidates: 0" in captured.out
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == {"metadata": {"source": "drift"}}
+
+
+def test_load_tasks_warns_when_tasks_field_is_not_list(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    experiments = tmp_path / "experiments"
+    next_tasks.parent.mkdir(parents=True)
+    experiments.mkdir()
+    next_tasks.write_text(json.dumps({"tasks": {"id": "K1"}}), encoding="utf-8")
+    monkeypatch.setattr(sync_next_tasks_status, "ROOT", tmp_path)
+    monkeypatch.setattr(sync_next_tasks_status, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(sync_next_tasks_status, "EXPERIMENTS", experiments)
+    monkeypatch.setattr(sys, "argv", ["sync_next_tasks_status.py", "--dry-run"])
+
+    rc = sync_next_tasks_status.main()
+
+    assert rc == 0
+    captured = capsys.readouterr()
+    assert "[sync_next_tasks] WARN next_tasks.json tasks field is not a list" in captured.err
+    assert "type=dict" in captured.err
+    assert "[sync_next_tasks] mark-succeeded candidates: 0" in captured.out
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == {"tasks": {"id": "K1"}}

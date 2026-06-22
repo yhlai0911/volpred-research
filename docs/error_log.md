@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 sync_next_tasks_status next_tasks schema drift 靜默當空
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/sync_next_tasks_status.py::load_tasks()`：`next_tasks.json` 若是 dict 但缺 `tasks` 欄位，舊碼直接回空 list；若 `tasks` 不是 list，也可能在後續流程出錯或讓候選統計失真，沒有明確 warning。
+
+**根因**：experiment completion / Codex review gate reaper 需要容忍舊 dict shape，但把 schema drift 靜默當成「沒有任務」會讓操作者誤判 pending sync / review-gate gap 為 0，而不是 canonical task source 壞掉或格式不符。
+
+**解決方法**：`load_tasks()` 對已存在的 source schema 做明確 warning；dict 缺 `tasks`、`tasks` 非 list、或頂層非 list/dict 時輸出 `[sync_next_tasks] WARN ...`，並 fail-closed 當空不寫回。新增 dry-run regression tests 覆蓋缺 `tasks` 與 `tasks` 非 list。
+
 ## 2026-06-23 mark_alert_resolved notification log 非 object entry 靜默略過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/mark_alert_resolved.py`：掃描 `notification_log.json` 時遇到 list 內非 object entry 會直接 `continue`，沒有 warning。

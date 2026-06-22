@@ -46,6 +46,10 @@ STATUS_LINE_RE = re.compile(
 )
 
 
+def _warn(message: str) -> None:
+    print(f"[sync_next_tasks] WARN {message}", file=sys.stderr)
+
+
 def find_experiment_dir(task_id: str) -> Path | None:
     """Map K1125 -> experiments/k1125/, K1100g_d9 -> experiments/k1100g_d9/."""
     for name in (task_id, task_id.lower(), task_id.upper()):
@@ -120,7 +124,23 @@ def load_tasks() -> list[dict]:
         return []
     data = json.loads(NEXT_TASKS.read_text())
     if isinstance(data, dict):
-        data = data.get("tasks", [])
+        tasks = data.get("tasks")
+        if tasks is None:
+            _warn("next_tasks.json dict missing tasks list; treating as empty")
+            return []
+        if not isinstance(tasks, list):
+            _warn(
+                "next_tasks.json tasks field is not a list; treating as empty "
+                f"type={type(tasks).__name__}"
+            )
+            return []
+        return tasks
+    if not isinstance(data, list):
+        _warn(
+            "next_tasks.json top-level schema is not a list or dict; treating as empty "
+            f"type={type(data).__name__}"
+        )
+        return []
     return data
 
 
