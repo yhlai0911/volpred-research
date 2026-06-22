@@ -31,10 +31,28 @@ VALID_STATUSES = {
 }
 
 
+def _warn_mark_fb(message: str) -> None:
+    print(f"[mark_fb_post_status] WARN {message}", file=sys.stderr)
+
+
 def _load_json(path: Path, default):
     if not path.exists():
         return default
-    return json.loads(path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _warn_mark_fb(
+            "JSON read failed; refusing to update "
+            f"path={path} error={type(exc).__name__}: {exc}"
+        )
+        raise
+    if not isinstance(data, list):
+        _warn_mark_fb(
+            "JSON schema invalid; refusing to update "
+            f"path={path} expected=list got={type(data).__name__}"
+        )
+        raise ValueError(f"{path} must contain a JSON list")
+    return data
 
 
 def _write_json(path: Path, payload) -> None:

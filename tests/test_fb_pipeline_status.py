@@ -483,6 +483,32 @@ def test_mark_fb_post_status_updates_feed_and_log(tmp_path, monkeypatch) -> None
     assert log[0]["fb_post_note"] == "Needs Chrome MCP session"
 
 
+def test_mark_fb_post_status_warns_and_refuses_bad_json(tmp_path, capsys) -> None:
+    bad_path = tmp_path / "feed.json"
+    bad_path.write_text("{bad json", encoding="utf-8")
+
+    with pytest.raises(json.JSONDecodeError):
+        mark_fb_post_status._load_json(bad_path, [])
+
+    captured = capsys.readouterr()
+    assert "[mark_fb_post_status] WARN JSON read failed; refusing to update" in captured.err
+    assert "feed.json" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
+def test_mark_fb_post_status_warns_and_refuses_non_list_schema(tmp_path, capsys) -> None:
+    bad_path = tmp_path / "trending_repost_log.json"
+    bad_path.write_text('{"items":[]}', encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        mark_fb_post_status._load_json(bad_path, [])
+
+    captured = capsys.readouterr()
+    assert "[mark_fb_post_status] WARN JSON schema invalid; refusing to update" in captured.err
+    assert "trending_repost_log.json" in captured.err
+    assert "got=dict" in captured.err
+
+
 def test_fb_page_graph_api_script_is_withdrawn() -> None:
     script = Path(__file__).resolve().parents[1] / "scripts" / "fb_page_post.py"
     result = subprocess.run(

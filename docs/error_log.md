@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 mark_fb_post_status 壞 JSON 直接 traceback 且無前置診斷
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/mark_fb_post_status.py::_load_json()`：feed / trending_repost_log JSON 壞掉時會直接丟 `JSONDecodeError`；schema 非 list 時後續流程可能迭代錯誤型別或寫回不可信 payload，沒有明確 warning。
+
+**根因**：`mark_fb_post_status.py` 是 FB pipeline 狀態的 canonical writer，遇到 source corruption 必須 fail-closed，不能把壞 source 當 default 覆寫；但只靠 Python traceback 會讓 cron / caller log 缺少「拒絕更新哪個 source」的可操作訊號。
+
+**解決方法**：新增 `[mark_fb_post_status] WARN ...` diagnostics；JSON 讀取失敗或 schema 非 list 時先輸出 path + exception/schema，再拒絕更新並丟出錯誤。新增 regression tests 覆蓋壞 JSON 與非 list schema。
+
 ## 2026-06-23 continue_task_dispatch next_tasks 壞檔會中斷 dispatcher
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::load_pending_tasks()`：`storage/next_tasks.json` 壞 JSON 會直接 traceback；頂層 schema 或 `tasks` 欄位非 list 時也會在後續迭代 / `.get()` 出錯；list 內非 object entry 沒有明確診斷。
