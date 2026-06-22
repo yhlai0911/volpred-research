@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 audit_fb_pipeline 壞 FB source 無診斷或直接中斷
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/audit_fb_pipeline.py::_load_entries()`：`trending_repost_log.json` 壞 JSON 會直接讓 audit traceback；`feed.json` 壞 JSON 會被靜默當空；feed list 內非 object entry 也會靜默略過。
+
+**根因**：FB pipeline audit 是 dashboard WARN 與 auto-expire 的控制面稽核，應容忍單一 source 壞掉並繼續檢查另一個 source；但壞檔若直接中斷或靜默當空，會讓 stale FB status 被誤判為不存在，重演「監控雙盲」類事故。
+
+**解決方法**：新增 `[audit_fb_pipeline] WARN ...` diagnostics；trending log / feed JSON 讀取失敗或頂層 schema 非 list 時 fail-open 當空但輸出 path + exception/schema；feed 單筆非 object 時 warning 後只跳過該筆。新增 regression tests 覆蓋壞 trending log、壞 feed JSON 與混合壞 feed entry。
+
 ## 2026-06-23 handoff_regen uv 啟動卡住造成每小時 timeout
 
 **問題**：hourly tick 再次讀到 stale `storage/ops/handoff_latest.md`；`~/.volpred/logs/handoff_regen.log` 顯示 00:50、01:50、02:50、03:50、04:50 每次都有 LaunchAgent fire，但 `generate_handoff.py` 與 `task_pool_claim.py cleanup` 都在 alarm 前被 kill，沒有 Python traceback。手動執行兩個 Python script 均可在數秒內完成。

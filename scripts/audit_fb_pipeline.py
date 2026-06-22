@@ -36,6 +36,24 @@ HANDOFF_STATUSES = {
 TERMINAL_OR_HANDOFF_STATUSES = TERMINAL_STATUSES | HANDOFF_STATUSES
 
 
+def _warn(message: str) -> None:
+    print(f"[audit_fb_pipeline] WARN {message}", file=sys.stderr)
+
+
+def _load_json_list(path: Path, *, source: str) -> list:
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text())
+    except Exception as exc:
+        _warn(f"{source} JSON read failed; treating as empty path={path} error={type(exc).__name__}: {exc}")
+        return []
+    if not isinstance(data, list):
+        _warn(f"{source} schema invalid; expected list, got {type(data).__name__} path={path}")
+        return []
+    return data
+
+
 def _is_auto_expirable_status(status: str) -> bool:
     s = str(status or "").strip().lower()
     return s not in TERMINAL_STATUSES and s.startswith(AUTO_EXPIRE_STATUS_PREFIXES)
@@ -77,32 +95,27 @@ def _load_entries() -> list:
     """Merge trending log entries with feed.json top-level fb_post_status
     entries (event_article path). Feed entries are normalized to carry
     mile_id + date keys the rest of this script expects."""
-    data: list = []
-    if LOG.exists():
-        data = json.loads(LOG.read_text())
+    data: list = _load_json_list(LOG, source="trending_repost_log")
     seen = {e.get("mile_id") for e in data if isinstance(e, dict)}
-    if FEED.exists():
-        try:
-            feed = json.loads(FEED.read_text())
-        except json.JSONDecodeError:
-            feed = []
-        for a in feed:
-            if not isinstance(a, dict):
-                continue
-            status = str(a.get("fb_post_status") or "").strip()
-            if not status:
-                continue
-            mid = a.get("mile_id") or a.get("id")
-            if mid in seen:
-                continue
-            data.append({
-                "mile_id": mid,
-                "fb_post_status": status,
-                "date": (a.get("fb_post_status_at") or a.get("published_at")
-                         or a.get("created_at") or ""),
-                "fb_post_draft": a.get("fb_post_draft"),
-                "source": "feed.json",
-            })
+    feed = _load_json_list(FEED, source="feed")
+    for idx, a in enumerate(feed):
+        if not isinstance(a, dict):
+            _warn(f"feed entry schema invalid; skipping index={idx} type={type(a).__name__}")
+            continue
+        status = str(a.get("fb_post_status") or "").strip()
+        if not status:
+            continue
+        mid = a.get("mile_id") or a.get("id")
+        if mid in seen:
+            continue
+        data.append({
+            "mile_id": mid,
+            "fb_post_status": status,
+            "date": (a.get("fb_post_status_at") or a.get("published_at")
+                     or a.get("created_at") or ""),
+            "fb_post_draft": a.get("fb_post_draft"),
+            "source": "feed.json",
+        })
     return data
 
 

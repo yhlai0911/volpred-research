@@ -386,6 +386,72 @@ def test_audit_auto_expires_stale_pending_and_handoff_statuses(monkeypatch) -> N
     assert all("--status" in call and "expired_skip" in call for call in calls)
 
 
+def test_audit_load_entries_warns_on_bad_trending_log(tmp_path, monkeypatch, capsys) -> None:
+    log_path = tmp_path / "trending_repost_log.json"
+    feed_path = tmp_path / "feed.json"
+    log_path.write_text("{bad json", encoding="utf-8")
+    feed_path.write_text(
+        json.dumps(
+            [{"id": "mile_feed", "fb_post_status": "awaiting_interactive_session"}],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(audit_fb_pipeline, "LOG", log_path)
+    monkeypatch.setattr(audit_fb_pipeline, "FEED", feed_path)
+
+    entries = audit_fb_pipeline._load_entries()
+
+    assert [entry["mile_id"] for entry in entries] == ["mile_feed"]
+    captured = capsys.readouterr()
+    assert "[audit_fb_pipeline] WARN trending_repost_log JSON read failed" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
+def test_audit_load_entries_warns_on_bad_feed_json(tmp_path, monkeypatch, capsys) -> None:
+    log_path = tmp_path / "trending_repost_log.json"
+    feed_path = tmp_path / "feed.json"
+    log_path.write_text(
+        json.dumps([{"mile_id": "mile_log", "fb_post_status": "pending"}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    feed_path.write_text("{bad json", encoding="utf-8")
+
+    monkeypatch.setattr(audit_fb_pipeline, "LOG", log_path)
+    monkeypatch.setattr(audit_fb_pipeline, "FEED", feed_path)
+
+    entries = audit_fb_pipeline._load_entries()
+
+    assert [entry["mile_id"] for entry in entries] == ["mile_log"]
+    captured = capsys.readouterr()
+    assert "[audit_fb_pipeline] WARN feed JSON read failed" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
+def test_audit_load_entries_warns_on_bad_feed_entry(tmp_path, monkeypatch, capsys) -> None:
+    log_path = tmp_path / "trending_repost_log.json"
+    feed_path = tmp_path / "feed.json"
+    log_path.write_text("[]", encoding="utf-8")
+    feed_path.write_text(
+        json.dumps(
+            ["bad-entry", {"id": "mile_feed", "fb_post_status": "pending"}],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(audit_fb_pipeline, "LOG", log_path)
+    monkeypatch.setattr(audit_fb_pipeline, "FEED", feed_path)
+
+    entries = audit_fb_pipeline._load_entries()
+
+    assert [entry["mile_id"] for entry in entries] == ["mile_feed"]
+    captured = capsys.readouterr()
+    assert "[audit_fb_pipeline] WARN feed entry schema invalid" in captured.err
+    assert "index=0" in captured.err
+
+
 def test_mark_fb_post_status_updates_feed_and_log(tmp_path, monkeypatch) -> None:
     feed_path = tmp_path / "feed.json"
     log_path = tmp_path / "trending_repost_log.json"
