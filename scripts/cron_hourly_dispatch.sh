@@ -11,16 +11,21 @@
 REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/Desktop/volpred-research}"
 VOLPRED_HOME_DIR="${VOLPRED_HOME_DIR:-/Users/yhlai0911/.volpred}"
 HOURLY_LOG_PATH="${HOURLY_LOG_PATH:-$VOLPRED_HOME_DIR/logs/hourly_dispatch.log}"
-# PINNED to explicit version (2026-05-30): claude CLI 2.1.157 (auto-installed
-# 04:38) has a launchd-execution-context auth regression — `claude -p` returns
-# "An unknown error occurred (Unexpected)" under launchd despite a valid
-# CLAUDE_CODE_OAUTH_TOKEN, while the SAME binary+token works in an interactive
-# shell. Broke dispatch 05:07–07:09 (3 slots). 2.1.156 verified working under
-# launchd (preflight ok after pin). Pinning the explicit version path (not the
-# auto-updating symlink) makes cron immune to re-update re-breaking dispatch.
-# REVISIT when a newer claude version fixes the launchd regression, then bump
-# or restore the symlink. Override with CLAUDE_BIN env if needed.
-CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/share/claude/versions/2.1.156}"
+# 2026-06-22: REVERTED the explicit-version pin back to the symlink.
+# History: 2026-05-30 we pinned to 2.1.156 because 2.1.157 had a launchd
+# auth regression (`claude -p` → "unknown error" under launchd). BUT pinning an
+# explicit version is structurally fragile: claude auto-update DELETED 2.1.156,
+# so the pinned path vanished → every hourly dispatch since failed silently with
+# "no such file or directory" (binary not found, sub-second exit, 0 content
+# generated all day — caused the 06-22 發文脫班 + missing daily digest).
+# Silent binary-not-found is WORSE than the launchd auth regression (which the
+# auth-preflight below DETECTS and alerts on). And the regression is gone:
+# 2026-06-22 verified `env -i PATH=/usr/bin:/bin CLAUDE_CODE_OAUTH_TOKEN=… \
+# <symlink> -p` returns AUTHOK under a clean launchd-like env on current 2.1.181.
+# So: use the always-current symlink; the long-lived OAuth token handles auth
+# across versions, and run_auth_preflight() gives graceful, alerted degradation
+# if a future version ever re-breaks launchd auth. Override with CLAUDE_BIN env.
+CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/bin/claude}"
 UV_BIN="${UV_BIN:-/Users/yhlai0911/.local/bin/uv}"
 PROMPT_FILE="${PROMPT_FILE:-$REPO_ROOT/scripts/cron_hourly_dispatch_prompt.md}"
 ZSHRC_PATH="${ZSHRC_PATH:-$HOME/.zshrc}"

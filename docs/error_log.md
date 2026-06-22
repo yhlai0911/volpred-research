@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 hourly dispatch 整日空轉（pinned claude binary 被 auto-update 刪除）→ 發文脫班 + digest 缺
+
+**問題**：老闆回報「今天發文嚴重脫班」「每日精選導讀為什麼沒有」。06-22 全天只發 1 篇（K1512，且是 codex-vscode 做的），vs 06-21 發 14 篇。
+
+**現象/誤判**：hourly_dispatch.log 每小時 exit=0，但 start=end 同秒（<1s）。我先誤把「storage/ops receipts=0」當空轉、又因 K1512 已發而誤判「false alarm 平台健康」——**兩次都判錯**。
+
+**真根因**：`scripts/cron_hourly_dispatch.sh` 把 `CLAUDE_BIN` pin 死在 `…/versions/2.1.156`（2026-05-30 為閃避 2.1.157 的 launchd auth regression 而 pin）。但 claude auto-update **把 2.1.156 刪了** → 每次 dispatch `$CLAUDE_BIN -p` = "no such file or directory" → 秒退、0 內容生成。**連鎖**：無新鮮內容 → draft 池(46)老化且 cluster 集中 → release_pool 的 narrative-cluster-pressure 正確擋掉重複 factor_etf → released 0 → 發文脫班；digest 同屬內容生成停擺。
+
+**修復（結構性，廢棄 version-pin）**：`CLAUDE_BIN` 改指 always-current 符號連結 `~/.local/bin/claude`（→2.1.181）。理由：(1) explicit-version pin 結構脆弱，版本被刪即靜默全斷；(2) 已驗證 `env -i PATH=/usr/bin:/bin CLAUDE_CODE_OAUTH_TOKEN=… <symlink> -p` 在 launchd-like 乾淨環境回 AUTHOK（2.1.157 的 regression 在 2.1.181 已不存在，OAuth token 跨版本處理 auth）；(3) 「binary 找不到（靜默）」比「auth regression（preflight 會偵測並寄 alert）」更糟。同步 canonical→`~/.volpred/bin/` TCC copy。手動觸發驗證：`[AUTH-PREFLIGHT] ok` → `attempt 1/3 model=claude-opus-4-7` 真的跑起來（非秒退）。
+
+**教訓**：(1) 產出診斷別只看單一 audit-trail（storage/ops），要看實際產出（feed/git）+ 直接測底層 binary 是否存在可執行；(2) explicit-version pin 是反模式（版本會被刪），要 pin 就需配「版本消失 fallback」，否則用 symlink + 跨版本 token + preflight-alert 的優雅降級。
+
 ## 2026-06-22 token_usage_report JSONL usage 掃描壞行被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，承接 `session_drill_down.py` 的同型診斷，掃到 `scripts/token_usage_report.py::_scan_jsonl()`：session JSONL 壞行、assistant usage record 壞 timestamp、缺 timestamp、或檔案讀取失敗時直接跳過 / 回空。報表可繼續產生是對的，但 token usage、cache usage、tool category 統計會少算且沒有任何資料品質線索。
