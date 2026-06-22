@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 audit_release_settings local settings 讀取失敗被當缺檔
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/audit_release_settings.py::_load_local()`：`storage/.release_settings.json` 若存在但 JSON 讀取 / parse 失敗，舊碼直接回 `None`；main 只輸出 `no local .release_settings.json`，看不出是檔案不存在還是 local control source 壞掉。若 JSON schema 不是 object，也會沿後續流程出錯或產生不可信 audit。
+
+**根因**：release settings audit 要能在 local source 不可用時不中斷 cron，避免 Supabase drift audit 反過來造成 ops failure；但把壞檔與缺檔混成同一個無診斷路徑，會讓操作者誤判 local-first source 不存在，而不是已存在但不可解析。
+
+**解決方法**：新增 `[audit] WARN ...` diagnostics；local settings 讀取失敗或 schema 非 object 時，印出 path 與錯誤 / schema 訊號，仍維持原本回 `None` 的容錯行為。新增 regression tests 覆蓋壞 JSON 與非 object schema。
+
 ## 2026-06-23 sync_next_tasks_status next_tasks schema drift 靜默當空
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/sync_next_tasks_status.py::load_tasks()`：`next_tasks.json` 若是 dict 但缺 `tasks` 欄位，舊碼直接回空 list；若 `tasks` 不是 list，也可能在後續流程出錯或讓候選統計失真，沒有明確 warning。

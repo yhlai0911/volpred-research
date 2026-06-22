@@ -42,14 +42,32 @@ _AUDIT_FIELDS = (
 )
 
 
+def _warn_audit(message: str, *, path: Path | None = None, exc: Exception | None = None) -> None:
+    details = []
+    if path is not None:
+        details.append(f"path={path}")
+    if exc is not None:
+        details.append(f"error={type(exc).__name__}: {exc}")
+    suffix = " " + " ".join(details) if details else ""
+    print(f"[audit] WARN {message}{suffix}", file=sys.stderr)
+
+
 def _load_local() -> dict | None:
     path = PROJECT_ROOT / "storage" / ".release_settings.json"
     if not path.exists():
         return None
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _warn_audit("local release settings read failed; treating local settings as unavailable", path=path, exc=exc)
         return None
+    if not isinstance(data, dict):
+        _warn_audit(
+            "local release settings schema is not an object; treating local settings as unavailable",
+            path=path,
+        )
+        return None
+    return data
 
 
 def _load_remote() -> dict | None:
