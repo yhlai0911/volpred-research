@@ -215,6 +215,17 @@ class TestArcDuplicates:
         old = dict(K1091_ARTICLE, published_at=_ts(days_ago=120))
         assert find_arc_duplicates(K1449_TITLE, K1449_CONTENT, [old], days=90) == []
 
+    def test_unparseable_timestamp_warns_and_keeps_candidate(self, caplog):
+        bad_ts = dict(K1091_ARTICLE, published_at="not-a-date")
+
+        with caplog.at_level("WARNING"):
+            dups = find_arc_duplicates(K1449_TITLE, K1449_CONTENT, [bad_ts], days=90)
+
+        assert dups, "invalid timestamp must keep candidate conservatively"
+        assert "arc_dedup keeping item with invalid timestamp" in caplog.text
+        assert "mile_232ce5d4" in caplog.text
+        assert "not-a-date" in caplog.text
+
     def test_unpublished_ignored(self):
         unpub = dict(K1091_ARTICLE, status="unpublished")
         assert find_arc_duplicates(K1449_TITLE, K1449_CONTENT, [unpub]) == []

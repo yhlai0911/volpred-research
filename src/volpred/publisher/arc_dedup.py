@@ -26,8 +26,11 @@ Callers:
 
 from __future__ import annotations
 
+import logging
 import re
 from datetime import datetime, timedelta, timezone
+
+LOG = logging.getLogger(__name__)
 
 # --- Canonical entity dictionary -------------------------------------------
 # Maps surface forms (tickers, Chinese names, English names) to one canonical
@@ -551,8 +554,15 @@ def find_arc_duplicates(
 
             if dtparse(ts_raw).astimezone(timezone.utc) < cutoff:
                 continue
-        except Exception:
-            pass  # unparseable timestamp → keep (conservative)
+        except Exception as exc:
+            # Unparseable timestamp -> keep candidate, but surface bad feed metadata.
+            LOG.warning(
+                "arc_dedup keeping item with invalid timestamp id=%r timestamp=%r (%s: %s)",
+                existing.get("id"),
+                ts_raw,
+                type(exc).__name__,
+                exc,
+            )
         ex_sig = _signature_from_feed_item(existing)
         ex_ents = set(ex_sig["entities"])
         ex_cls = str(ex_sig["conclusion_class"])

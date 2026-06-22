@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 arc_dedup 壞 timestamp 保守保留但無 warning
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/publisher/arc_dedup.py::find_arc_duplicates()`：既有 feed item 的 `published_at/created_at` 解析失敗時會保守保留候選，但 exception 直接 `pass`。dedup 行為安全，卻讓壞 feed metadata 無從追蹤。
+
+**根因**：arc dedup 的正確策略是「timestamp 壞掉不能因此放過可能重複文章」，但舊寫法把保守保留與靜默忽略混在一起；這會在 feed metadata drift 時只留下 dedup 結果，沒有 root-cause 訊號。
+
+**解決方法**：新增 module logger；timestamp parse 失敗時輸出 `arc_dedup keeping item with invalid timestamp ...` warning，包含 item id、原始 timestamp 與 exception，仍繼續納入候選。新增 regression test 鎖住壞 timestamp 會 warning 且仍抓到 K1091/K1449 duplicate。
+
 ## 2026-06-22 plot_style 字型解析檢查失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/plot_style.py::apply_cjk_style()`：CJK font resolution check 若因 matplotlib font cache 或 font_manager 例外失敗，會直接 `pass`。這會讓「圖表中文是否會變 tofu」的防線本身失效卻無 warning。
