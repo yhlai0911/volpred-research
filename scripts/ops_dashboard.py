@@ -375,6 +375,7 @@ def main():
     # artifact it regenerates. Override the spec-seeded mapping.
     job_log_map["handoff_regen"] = "storage/ops/handoff_latest.md"
     stale = []
+    cron_warnings = []
     try:
         from croniter import croniter
         from datetime import datetime
@@ -403,8 +404,13 @@ def main():
             try:
                 if log_path.exists():
                     last_ts = max(last_ts or 0, int(log_path.stat().st_mtime))
-            except Exception:
-                pass
+            except Exception as exc:
+                cron_warnings.append({
+                    "job": job,
+                    "source": "log_mtime",
+                    "log_path": str(log_path),
+                    "error": f"{type(exc).__name__}: {exc}",
+                })
         if not last_ts:
             # 2026-06-10 process-audit 4-1: a monitored job with NO fire
             # evidence at all (no cron_last_run entry, no log file) was
@@ -431,8 +437,13 @@ def main():
                         "missed_expected_fire_at": time.strftime("%Y-%m-%d %H:%M", time.localtime(prev_fire)),
                     })
                 continue
-            except Exception:
-                pass
+            except Exception as exc:
+                cron_warnings.append({
+                    "job": job,
+                    "source": "croniter",
+                    "cron": cron_str,
+                    "error": f"{type(exc).__name__}: {exc}",
+                })
         # Fallback: simple max-age (legacy behavior)
         legacy_max_h = {
             "collect_us_data": 50, "collect_tw_data": 80, "release_pool": 4,
@@ -447,7 +458,8 @@ def main():
         "ok" if not stale else "warn" if len(stale) <= 2 else "critical",
         f"{len(stale)} cron jobs stale (over max-age)",
         f"manual fire ~/.volpred/bin/cron_<id>.sh" if stale else None,
-        stale=stale
+        stale=stale,
+        warnings=cron_warnings[:10],
     ))
 
     # L4 alerts — reflect CURRENT breached conditions, not historical notification

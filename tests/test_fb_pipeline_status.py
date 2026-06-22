@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 from datetime import UTC, datetime
+from types import ModuleType
 
 import pytest
 
@@ -189,6 +190,63 @@ def test_ops_dashboard_supabase_query_failure_is_unavailable_not_missing(tmp_pat
     assert section["tldr"].startswith("parity check unavailable")
     assert section["next"] == "fix Supabase env/connectivity before running sync remediation"
     assert "missing" not in section
+
+
+def test_ops_dashboard_health_cron_surfaces_croniter_failure(tmp_path, monkeypatch) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    recent = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
+    (repo / "storage" / "next_tasks.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text(
+        json.dumps({"collect_us_data": recent}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text(
+        json.dumps(
+            {"system_crontab": {"items": [{"id": "collect_us_data", "cron": "* * * * *"}]}},
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    fake_croniter = ModuleType("croniter")
+
+    def fail_croniter(*args, **kwargs):
+        raise RuntimeError("cron parser down")
+
+    fake_croniter.croniter = fail_croniter
+    monkeypatch.setitem(sys.modules, "croniter", fake_croniter)
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    import io
+    import contextlib
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = ops_dashboard.main()
+    payload = json.loads(buf.getvalue())
+    section = next(s for s in payload["sections"] if s["section"] == "health_cron")
+
+    assert rc == 0
+    assert any(
+        warning["job"] == "collect_us_data"
+        and warning["source"] == "croniter"
+        and "cron parser down" in warning["error"]
+        for warning in section["warnings"]
+    )
 
 
 def test_ops_dashboard_production_pending_counts_pending_main_thread(tmp_path, monkeypatch) -> None:

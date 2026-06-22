@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 ops_dashboard cron health 非致命檢查失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/ops_dashboard.py` 的 cron health section：讀取 job log mtime 失敗或 `croniter` 排程解析失敗時直接 `pass`，dashboard 只退回其他判斷，沒有指出 freshness check 的輔助證據失效。
+
+**根因**：cron health 需要容忍單一輔助來源失敗，避免 dashboard 整體中斷；但舊寫法把「非致命」寫成「不可觀察」，導致 log path 權限、mtime、cron spec parse 問題不會出現在 dashboard JSON。
+
+**解決方法**：新增 `health_cron.warnings` detail；log mtime 讀取失敗與 croniter 解析失敗都收集 job、source、path/cron 與 exception，原有 stale 判斷與 fallback 行為不變。新增 regression test 用 fake `croniter` 拋錯，確認 warning 出現在 dashboard payload。
+
 ## 2026-06-22 arc_dedup 壞 timestamp 保守保留但無 warning
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/publisher/arc_dedup.py::find_arc_duplicates()`：既有 feed item 的 `published_at/created_at` 解析失敗時會保守保留候選，但 exception 直接 `pass`。dedup 行為安全，卻讓壞 feed metadata 無從追蹤。
