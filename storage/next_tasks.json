@@ -35157,13 +35157,64 @@
     "description": "寫今日『每日精選導讀』編輯專欄並立即發佈。規格：(1) 統整近一日平台已發佈的研究/策略/市場文章，挑 3-5 則做有觀點的編輯導讀（不是流水帳摘要）；(2) reader-facing，**必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）；(3) 走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），tags 含 '精選導讀'，title 以 '每日精選導讀｜' 起頭；(4) 事件驅動／時效內容立即 published（非 draft）。資料來源與對應 K 編號要標清楚。",
     "task_type": "daily_digest",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-22T21:14:23.281439+08:00",
     "source": "scheduled",
     "tags": [
       "daily_digest",
       "reader_facing",
       "精選導讀"
-    ]
+    ],
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-22T13:49:16.385866+00:00",
+    "claim_session_id": "61999849f306",
+    "started_at": "2026-06-22T13:49:29.105831+00:00",
+    "completed_at": "2026-06-22T13:59:45.720984+00:00",
+    "result": "Published daily digest mile_d9129566 (general, details.content_type=daily_digest) from 7 recent articles; anti-AI regex clean; single-article Supabase sync_article=True. Full feed-sync was intentionally interrupted because it attempted large historical backfill; mirror PUT still hits known SSL EOF."
+  },
+  {
+    "id": "paper_review_mile_676cf7f1",
+    "title": "Paper review (Codex 24h-rule): 買因子 ETF 前，先看一眼它真的有沒有超額報酬訊號",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_676cf7f1 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_676cf7f1",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-22T13:48:48+00:00"
+  },
+  {
+    "id": "paper_review_mile_74822866",
+    "title": "Paper review (Codex 24h-rule): K1512：Double-ML 因子檢定顯示 ETF 層級沒有確認的非零效應",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_74822866 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_74822866",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-22T13:48:48+00:00"
+  },
+  {
+    "id": "paper_review_mile_476d20ea",
+    "title": "Paper review (Codex 24h-rule): 散戶越熱，0050 明天就越震？數字給的答案很保守",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_476d20ea needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_476d20ea",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-22T13:48:48+00:00"
   }
 ]

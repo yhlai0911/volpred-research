@@ -150,6 +150,10 @@ class TestInferAudienceContentTypeOverrides:
         content = "bootstrap QLIKE Harvey"
         assert _infer_audience("FOMC 即時觀察", content, [], content_type="event_article") == "event"
 
+    def test_daily_digest_preserved_as_general(self):
+        content = "K1512 bootstrap QLIKE Harvey p-value t-stat DM test"
+        assert _infer_audience("每日精選導讀", content, [], content_type="daily_digest") == "general"
+
     def test_none_content_type_uses_keyword_inference(self):
         content = "bootstrap QLIKE p-value"
         assert _infer_audience("分析", content, [], content_type=None) == "research"
@@ -167,6 +171,10 @@ class TestInferAudiencePublishMilestoneIntegration:
         monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
         monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
         monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+        monkeypatch.setattr(
+            "volpred.publisher.publisher.cluster_gate_status",
+            lambda _cluster: {"blocked": False, "count": 0, "cap": 10, "ratio": 0.0},
+        )
         # 2026-05-27 fix (50-ghost Supabase pollution incident): stub
         # supabase_sync.sync_article — Publisher.publish_milestone calls it
         # directly via module-level import, bypassing the REMOTE_URL gate.
@@ -265,6 +273,10 @@ class TestInferAudienceDailyPreservation:
         monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
         monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
         monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+        monkeypatch.setattr(
+            "volpred.publisher.publisher.cluster_gate_status",
+            lambda _cluster: {"blocked": False, "count": 0, "cap": 10, "ratio": 0.0},
+        )
         # 2026-05-27 fix (50-ghost Supabase pollution incident): stub
         # supabase_sync.sync_article — Publisher.publish_milestone calls it
         # directly via module-level import, bypassing the REMOTE_URL gate.

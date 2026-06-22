@@ -13,7 +13,7 @@ paths:
 Canonical mapping of `task_type` → who can claim, concurrency rules, **model tier**, special constraints.
 **Updated 2026-05-25**: backfill applied (0 null types remaining); experiment_review collapsed into paper_review; email_reply added; **model column added** (per `scripts/model_router.py`).
 
-## 12 canonical task types
+## 13 canonical task types
 
 | task_type | Claude | Codex | 並行 | **Model** | Skill / Workflow canonical | 特殊規則 |
 |---|---|---|---|---|---|---|
@@ -22,6 +22,7 @@ Canonical mapping of `task_type` → who can claim, concurrency rules, **model t
 | **paper_body** | ✅ only | ❌ | serialize per paper | **opus / medium** | `paper-update` | **禁止 background agent 寫 .tex** (CLAUDE.md hard rule); main thread only |
 | **paper_decision** | ✅ only | ❌ | one at a time | **opus / high** | `paper-stage-classifier` | 需 ≥3 互補實驗 + user confirm 才進 `decision_made_awaiting_body_rewrite` |
 | **daily_article** | ✅ | ✅ | up to 2 | sonnet / medium | `feed-publisher` + `anti-ai-style` | reader-facing 3-canonical 必讀；publication-candidates 選題；3-layer dedup |
+| **daily_digest** | ✅ | ✅ | 1/day | sonnet / medium | `feed-publisher` + `anti-ai-style` | 每日精選導讀；立即 published；`details.content_type='daily_digest'`；tags 含 `精選導讀` |
 | **event_article** | ✅ only | ❌ | one at a time | sonnet / medium | `feed-publisher` + event templates | 即時性需要主線程判斷；直接 `published` 不入 draft pool；**FB 雙發佈強制**（2026-05-25 起；共用 trending-repost FB SOP，不算 trending daily cap） |
 | **member_qa** | ✅ only | ❌ | one at a time | sonnet / medium | `member-questions` | 4 維度評分 → question-rerank → research → publish；每 6h cron |
 | **trending_repost** | ✅ only | ❌ | **daily cap = 2/day** | sonnet / medium | `trending-repost` | VolPred angle 改寫 + 無 source citation；雙發佈 feed + Ivan Lai FB（**同 event_article 共用 FB SOP**） |
@@ -60,7 +61,7 @@ tree below and then to free-text markers. Do not encode ownership solely in
   │     ├─ description 含 errata / footnote / typo / table-fix → Codex 可接
   │     └─ 含 structural / new section / methodology change → Claude only
   │
-  └─ task_type in {experiment, daily_article, platform_ops, governance}
+  └─ task_type in {experiment, daily_article, daily_digest, platform_ops, governance}
         └─ Claude OR Codex — claim 機制決定 (fcntl atomic, 先到先得)
 ```
 

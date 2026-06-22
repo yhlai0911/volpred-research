@@ -54,6 +54,7 @@ CODEX_ELIGIBLE_TASK_TYPES = {
     "code_review",
     "paper_review",
     "daily_article",
+    "daily_digest",
 }
 
 

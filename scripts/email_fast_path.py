@@ -173,7 +173,7 @@ def _h_next_task(_text: str) -> str:
 ## 派工對象
 
 依 `.claude/rules/task-routing.md`：`{t.get('task_type')}` → 由 Claude 主線程處理（{
-    'Codex 可接' if t.get('task_type') in {'experiment', 'platform_ops', 'governance', 'daily_article'} else 'Codex 不接，Claude 專屬'
+    'Codex 可接' if t.get('task_type') in {'experiment', 'platform_ops', 'governance', 'daily_article', 'daily_digest'} else 'Codex 不接，Claude 專屬'
 }）
 """
 

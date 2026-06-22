@@ -257,6 +257,12 @@ def test_list_codex_eligible_filters_claude_only_tasks(tmp_path, monkeypatch, ca
                     "priority": 7,
                 },
                 {
+                    "id": "daily_digest_example",
+                    "task_type": "daily_digest",
+                    "status": "pending",
+                    "priority": 7,
+                },
+                {
                     "id": "code_review_spaced",
                     "task_type": "code review",
                     "status": "pending",
@@ -296,6 +302,7 @@ def test_list_codex_eligible_filters_claude_only_tasks(tmp_path, monkeypatch, ca
         "platform_ops_example",
         "paper_review_example",
         "daily_article_example",
+        "daily_digest_example",
         "code_review_spaced",
         "explicit_codex_task",
     ]

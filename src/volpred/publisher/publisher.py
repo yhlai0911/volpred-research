@@ -205,6 +205,7 @@ def _infer_audience(
     Rules (in priority order):
     1. content_type == 'member_qa'  → 'member_qa' (always preserve)
     2. content_type == 'event_article' → 'event' (always preserve)
+    3. content_type == 'daily_digest' → 'general' (curated reader-facing column)
     3. Title contains K\\d+ regex match → 'research'
     4. title + content + tags combined contain ≥2 academic keywords → 'research'
     5. Default → 'general'
@@ -218,6 +219,8 @@ def _infer_audience(
         return 'member_qa'
     if content_type == 'event_article':
         return 'event'
+    if content_type == 'daily_digest':
+        return 'general'
 
     # Rule 3: K-id in title → research
     if re.search(r'K\d+', title or ''):
@@ -830,9 +833,12 @@ class Publisher:
         # Determine if this publish is exempt from cluster cooldown:
         is_type_locked = (
             audience in ('daily', 'member_qa', 'event')
-            or category in ('daily-update', 'member_qa', 'event_article')
+            or category in ('daily-update', 'member_qa', 'event_article', 'daily_digest')
+            or str((details or {}).get('content_type') or '') == 'daily_digest'
             or '每日建議' in tag_list_for_cluster
             or 'daily-update' in tag_list_for_cluster
+            or 'daily_digest' in tag_list_for_cluster
+            or '精選導讀' in tag_list_for_cluster
             or '會員提問' in tag_list_for_cluster
             or 'member_qa' in tag_list_for_cluster
             or 'event_article' in tag_list_for_cluster
@@ -1022,7 +1028,11 @@ class Publisher:
         # member_qa 的 proxy 會把帶署名的一般讀者文錯分成會員提問。改以「顯式
         # member_qa（audience/category）」判斷；僅保留 proposer-only(無 audience)
         # 的 legacy member_qa 呼叫相容性。
-        if (audience == 'member_qa' or category == 'member_qa'
+        explicit_content_type = str((details or {}).get('content_type') or category or '').strip()
+        if explicit_content_type == 'daily_digest':
+            audience = audience or 'general'
+            category = category or 'general'
+        elif (audience == 'member_qa' or category == 'member_qa'
                 or (proposer and audience is None)):
             audience = 'member_qa'
             category = 'member_qa'
@@ -1031,7 +1041,12 @@ class Publisher:
         else:
             # 2026-05-26: _infer_audience enforce gate — prevents agents from mis-tagging
             # research-grade content as 'general' (mile_d0d66405 incident).
-            inferred = _infer_audience(title, description or '', tag_list, content_type=category)
+            inferred = _infer_audience(
+                title,
+                description or '',
+                tag_list,
+                content_type=explicit_content_type or category,
+            )
             if audience is None:
                 audience = inferred
             elif audience != inferred and inferred != 'general':

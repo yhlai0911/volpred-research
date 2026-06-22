@@ -38,6 +38,7 @@ TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
     "paper_review":       ("sonnet", "medium"),  # latex-academic-reviewer + citation-verifier
     "event_article":      ("sonnet", "medium"),  # 事件驅動文章 (時效但結構化)
     "daily_article":      ("sonnet", "medium"),  # 日常文章 (feed-publisher 流程)
+    "daily_digest":       ("sonnet", "medium"),  # 每日精選導讀 (reader-facing article flow)
     "trending_repost":    ("sonnet", "medium"),  # 熱門改寫 (style enforcement)
     "member_qa":          ("sonnet", "medium"),  # 會員問題答覆
     "email_reply":        ("sonnet", "medium"),  # 用戶回信處理

@@ -228,7 +228,7 @@ def is_paper_task(task: dict) -> bool:
     in the verdict_preview but the task itself was a feed article about a
     K experiment, not body.tex editing.
 
-    Fix: short-circuit when task_type=='daily_article' (articles about
+    Fix: short-circuit when task_type is an article flow (articles about
     papers are still articles, not paper writing work). Other task_types
     follow the original regex.
     """
@@ -236,7 +236,7 @@ def is_paper_task(task: dict) -> bool:
     # daily_article + paper_review are both agentable; their ids may contain
     # `paper_` (paper_review_mile_*) or descriptions may cite paper sources.
     # 2026-05-11 incidents: K898/K904 daily_article + paper_review_mile_7ba7ee54.
-    if task_type in ("daily_article", "paper_review"):
+    if task_type in ("daily_article", "daily_digest", "paper_review"):
         return False
     blob = " ".join(
         str(task.get(k, "") or "") for k in ("title", "description", "id", "task_type")
@@ -301,6 +301,7 @@ def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> 
         explicit_agentable = (t.get("task_type") or "").lower() in (
             "experiment",
             "member_qa",
+            "daily_digest",
         )
         if explicit_agentable:
             agentable.append(t)

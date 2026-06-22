@@ -100,6 +100,7 @@ def main() -> int:
         "task_type": "daily_digest",
         "priority": 1,
         "status": "pending",
+        "dispatch_lane": "agent",
         "created_at": datetime.now(TPE).isoformat(),
         "source": "scheduled",
         "tags": ["daily_digest", "reader_facing", "精選導讀"],

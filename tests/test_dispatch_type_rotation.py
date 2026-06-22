@@ -50,11 +50,12 @@ def test_categorize_keeps_p1_non_experiment_on_main_thread():
         _task("event-1", "event_article", priority=1),
         _task("trend-1", "trending_repost", priority=1),
         _task("exp-1", "experiment", priority=1),
+        _task("digest-1", "daily_digest", priority=1),
     ]
 
     cats = dispatch.categorize(tasks, recent_type_counts=Counter())
 
-    assert [t["id"] for t in cats["agentable"]] == ["exp-1"]
+    assert [t["id"] for t in cats["agentable"]] == ["digest-1", "exp-1"]
     assert [t["id"] for t in cats["main_thread"]] == ["event-1", "trend-1"]
 
 
