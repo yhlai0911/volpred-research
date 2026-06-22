@@ -246,9 +246,25 @@ class EmailNotifier:
         if not log_file.exists():
             return []
         try:
-            return json.loads(log_file.read_text())
-        except Exception:
+            payload = json.loads(log_file.read_text())
+        except Exception as exc:
+            _warn_email_notifier("notification log read failed; treating as empty", log_file, exc)
             return []
+        if not isinstance(payload, list):
+            _warn_email_notifier(
+                "notification log schema invalid; treating as empty",
+                log_file,
+                TypeError(f"expected list, got {type(payload).__name__}"),
+            )
+            return []
+        bad_entries = [item for item in payload if not isinstance(item, dict)]
+        if bad_entries:
+            _warn_email_notifier(
+                "notification log contains non-object entries; excluding them",
+                log_file,
+                TypeError(f"{len(bad_entries)} invalid entries"),
+            )
+        return [item for item in payload if isinstance(item, dict)]
 
     def _save_log(self, entries: list[dict[str, Any]]) -> None:
         log_file = self.notifications_dir / "notification_log.json"

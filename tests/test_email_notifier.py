@@ -67,6 +67,51 @@ def test_notify_writes_log_and_file_when_send_suppressed(notifier: EmailNotifier
     assert any(entry["id"] == notif_id for entry in log)
 
 
+def test_load_log_warns_on_corrupt_json(notifier: EmailNotifier, tmp_path: Path, capsys):
+    log_file = tmp_path / "notifications" / "notification_log.json"
+    log_file.write_text("{bad json", encoding="utf-8")
+
+    assert notifier.get_notifications() == []
+    captured = capsys.readouterr()
+    assert "[email_notifier] WARN notification log read failed" in captured.err
+    assert "JSONDecodeError" in captured.err
+    assert str(log_file) in captured.err
+
+
+def test_load_log_warns_on_schema_drift(notifier: EmailNotifier, tmp_path: Path, capsys):
+    log_file = tmp_path / "notifications" / "notification_log.json"
+    log_file.write_text(json.dumps({"items": []}), encoding="utf-8")
+
+    assert notifier.already_sent("alert", "key") is False
+    captured = capsys.readouterr()
+    assert "[email_notifier] WARN notification log schema invalid" in captured.err
+    assert "expected list, got dict" in captured.err
+
+
+def test_load_log_filters_non_object_entries(notifier: EmailNotifier, tmp_path: Path, capsys):
+    log_file = tmp_path / "notifications" / "notification_log.json"
+    log_file.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "ok",
+                    "timestamp": "2026-06-22T00:00:00+00:00",
+                    "level": "warn",
+                    "metadata": {"notification_type": "alert", "notification_key": "key"},
+                    "sent": True,
+                },
+                "bad",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    assert notifier.already_sent("alert", "key") is True
+    captured = capsys.readouterr()
+    assert "[email_notifier] WARN notification log contains non-object entries" in captured.err
+    assert "1 invalid entries" in captured.err
+
+
 def test_notify_dedup_skips_duplicate(notifier: EmailNotifier, tmp_path: Path):
     first = notifier.notify(
         "Alert",

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 email_notifier notification log 讀取失敗被靜默當空
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著近期 silent-fallback 修補掃到 `src/volpred/publisher/email_notifier.py::EmailNotifier._load_log()`：`storage/notifications/notification_log.json` 壞 JSON 時直接回空 list；若 schema 漂成 dict 或 list 內混入非 object，dedupe / notification listing 也可能失真或拋錯。
+
+**根因**：EmailNotifier 需要在通知歷史檔損壞時 fail-open，避免 alert / article notification caller 被 audit log 拖垮；但把讀取失敗靜默當成「沒有歷史通知」會讓 dedupe 與 dashboard notification state 誤判，操作者也看不出 notification audit trail 已降級。
+
+**解決方法**：`_load_log()` 在 JSON 讀取失敗、頂層 schema 非 list、或 list 內含非 object entry 時輸出 `[email_notifier] WARN ...` 到 stderr，保留 fail-open 行為；非 object entry 會被排除但有效 dict entry 仍可用。新增 regression tests 覆蓋壞 JSON、schema drift 與 mixed-entry log。
+
 ## 2026-06-23 supervisor feed rhythm read 失敗只回 payload 不示警
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/supervisor.py::_feed_rhythm()`：`storage/reports/feed.json` 讀取或 parse 失敗時只回 `{"available": False, "error": "feed.json unreadable"}`，沒有 stderr warning。
