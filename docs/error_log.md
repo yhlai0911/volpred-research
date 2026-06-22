@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 run_due_jobs state 讀取失敗被靜默當首跑
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/run_due_jobs.py`：`cron_last_run.json` 讀取 / parse 失敗或 schema 非 dict 時直接回 `{}`；`pending_sessions.json` 壞檔時直接回 default state，沒有 warning。
+
+**根因**：piggy-back scheduler 需要在 state 檔壞掉時繼續運作，避免 check_alerts 主流程中斷；但靜默把壞 state 當成首跑會讓排程重跑 / session replay intent 缺失不可觀察，操作者只看到 jobs due 或 pending 空，無法知道 canonical state source 已經降級。
+
+**解決方法**：新增 `[run_due_jobs] WARN ...` diagnostics；缺檔仍安靜視為首跑，已存在但讀取 / parse 失敗、頂層 schema 非 dict、或 `jobs` schema 壞掉時 warning 後維持原本 fail-open/default 行為。新增 regression tests 覆蓋壞 `cron_last_run.json` 與壞 `pending_sessions.json`。
+
 ## 2026-06-23 check_alerts cron state source 壞檔被靜默當空
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/check_alerts.py`：release-pool fallback fire 寫 `cron_last_run.json` 前若既有 state 壞 JSON，會靜默用 `{}` 重寫；piggy-back drift 檢查讀 `cron_last_run.json` / `runtime_schedules.json` 失敗時也靜默把兩者當空。

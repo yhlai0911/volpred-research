@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -82,14 +83,30 @@ def _local_now() -> datetime:
     return datetime.now(LOCAL_TZ)
 
 
+def _warn_run_due_jobs(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[run_due_jobs] WARN {message}: "
+        f"path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def _load_last_run() -> dict[str, str]:
     if not LAST_RUN_PATH.exists():
         return {}
     try:
         data = json.loads(LAST_RUN_PATH.read_text())
-        return data if isinstance(data, dict) else {}
-    except (OSError, ValueError):
+    except (OSError, ValueError) as exc:
+        _warn_run_due_jobs("cron_last_run JSON read failed; using empty state", LAST_RUN_PATH, exc)
         return {}
+    if not isinstance(data, dict):
+        _warn_run_due_jobs(
+            "cron_last_run JSON schema invalid; using empty state",
+            LAST_RUN_PATH,
+            TypeError(f"expected dict, got {type(data).__name__}"),
+        )
+        return {}
+    return data
 
 
 def _save_last_run(state: dict[str, str]) -> None:
@@ -120,9 +137,20 @@ def _load_pending_sessions() -> dict[str, Any]:
     try:
         data = json.loads(PENDING_SESSIONS_PATH.read_text())
         if not isinstance(data, dict):
+            _warn_run_due_jobs(
+                "pending_sessions JSON schema invalid; using default state",
+                PENDING_SESSIONS_PATH,
+                TypeError(f"expected dict, got {type(data).__name__}"),
+            )
             return default_state
         jobs = data.get("jobs")
         if not isinstance(jobs, dict):
+            if "jobs" in data:
+                _warn_run_due_jobs(
+                    "pending_sessions jobs schema invalid; using empty jobs",
+                    PENDING_SESSIONS_PATH,
+                    TypeError(f"expected dict, got {type(jobs).__name__}"),
+                )
             jobs = {}
         # Legacy migration: older buggy payloads could write top-level
         # `pending` / `session_crons` objects instead of canonical `jobs`.
@@ -136,7 +164,8 @@ def _load_pending_sessions() -> dict[str, Any]:
         data["description"] = str(data.get("description") or default_state["description"])
         data["jobs"] = jobs
         return data
-    except (OSError, ValueError):
+    except (OSError, ValueError) as exc:
+        _warn_run_due_jobs("pending_sessions JSON read failed; using default state", PENDING_SESSIONS_PATH, exc)
         return default_state
 
 

@@ -153,6 +153,35 @@ def test_load_pending_sessions_normalizes_legacy_schema(tmp_path, monkeypatch):
     assert state["jobs"]["legacy_b"]["recorded_count"] == 1
 
 
+def test_load_last_run_warns_on_corrupt_json(tmp_path, monkeypatch, capsys):
+    import run_due_jobs as rdj
+
+    last_run_path = tmp_path / "cron_last_run.json"
+    monkeypatch.setattr(rdj, "LAST_RUN_PATH", last_run_path)
+    last_run_path.write_text("{bad json", encoding="utf-8")
+
+    assert rdj._load_last_run() == {}
+
+    captured = capsys.readouterr()
+    assert "[run_due_jobs] WARN cron_last_run JSON read failed; using empty state" in captured.err
+    assert "cron_last_run.json" in captured.err
+
+
+def test_load_pending_sessions_warns_on_corrupt_json(tmp_path, monkeypatch, capsys):
+    import run_due_jobs as rdj
+
+    pending_path = tmp_path / "pending_sessions.json"
+    monkeypatch.setattr(rdj, "PENDING_SESSIONS_PATH", pending_path)
+    pending_path.write_text("{bad json", encoding="utf-8")
+
+    state = rdj._load_pending_sessions()
+
+    captured = capsys.readouterr()
+    assert state["jobs"] == {}
+    assert "[run_due_jobs] WARN pending_sessions JSON read failed; using default state" in captured.err
+    assert "pending_sessions.json" in captured.err
+
+
 def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
     """piggy_back_skip=true items should be skipped by run_due_jobs even if due.
 
