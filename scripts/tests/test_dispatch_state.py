@@ -101,6 +101,57 @@ def test_record_completion_moves_to_ring_buffer(tmp_state: Path) -> None:
     assert len(snap["completions"]) == 1
 
 
+def test_record_completion_accepts_naive_started_at(tmp_state: Path) -> None:
+    st.begin_fire(
+        pid=1,
+        pgid=1,
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/c.log",
+        path=tmp_state,
+    )
+    snap = st.read_state(tmp_state)
+    snap["current_job"]["started_at"] = (
+        datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    )
+    tmp_state.write_text(json.dumps(snap), encoding="utf-8")
+
+    entry = st.record_completion(
+        exit_code=0, outcome="success", final_model="opus", path=tmp_state,
+    )
+
+    assert entry is not None
+    assert entry["duration_s"] >= 0
+
+
+def test_record_completion_warns_on_invalid_started_at(
+    tmp_state: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    st.begin_fire(
+        pid=1,
+        pgid=1,
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/c.log",
+        path=tmp_state,
+    )
+    snap = st.read_state(tmp_state)
+    snap["current_job"]["started_at"] = "not-a-date"
+    tmp_state.write_text(json.dumps(snap), encoding="utf-8")
+
+    with caplog.at_level(logging.WARNING, logger=st.__name__):
+        entry = st.record_completion(
+            exit_code=0, outcome="success", final_model="opus", path=tmp_state,
+        )
+
+    assert entry is not None
+    assert entry["duration_s"] == -1.0
+    assert "invalid current_job.started_at for completion" in caplog.text
+    assert "not-a-date" in caplog.text
+
+
 def test_record_completion_noop_when_no_job(tmp_state: Path) -> None:
     entry = st.record_completion(
         exit_code=0, outcome="success", final_model="opus", path=tmp_state,

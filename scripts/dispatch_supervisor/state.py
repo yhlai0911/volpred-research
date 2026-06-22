@@ -64,6 +64,13 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _parse_state_timestamp(value: Any) -> datetime:
+    dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 def _empty_state() -> dict[str, Any]:
     return {
         "version": SCHEMA_VERSION,
@@ -213,9 +220,16 @@ def record_completion(
             return None
         started_at = job.get("started_at")
         try:
-            started_dt = datetime.fromisoformat(started_at)
+            started_dt = _parse_state_timestamp(started_at)
             duration_s = (datetime.now(timezone.utc) - started_dt).total_seconds()
-        except Exception:
+        except (TypeError, ValueError) as exc:
+            LOG.warning(
+                "invalid current_job.started_at for completion in %s: %r (%s: %s)",
+                path,
+                started_at,
+                type(exc).__name__,
+                exc,
+            )
             duration_s = -1.0
         entry = {
             "fire_at": started_at,
@@ -287,10 +301,7 @@ def get_current_job(path: Path = STATE_PATH) -> CurrentJob | None:
         return None
     age = -1.0
     try:
-        started_at = str(job["started_at"]).replace("Z", "+00:00")
-        started_dt = datetime.fromisoformat(started_at)
-        if started_dt.tzinfo is None:
-            started_dt = started_dt.replace(tzinfo=timezone.utc)
+        started_dt = _parse_state_timestamp(job["started_at"])
         age = (datetime.now(timezone.utc) - started_dt).total_seconds()
     except (KeyError, TypeError, ValueError) as exc:
         LOG.warning(

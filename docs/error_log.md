@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 dispatch_supervisor completion duration 失敗被靜默寫成 -1
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py::record_completion()`：`current_job.started_at` 解析失敗時會直接把 `duration_s=-1.0` 寫進 completions ring buffer，沒有 warning。worker completion 仍被記錄是對的，但事後看 state 無法分辨是真實未知 duration 還是 metadata 壞掉。
+
+**根因**：`get_current_job()` 與 `record_completion()` 各自解析 timestamp；前者已修成可觀察，completion path 仍保留舊的 silent best-effort 寫法，也沒有相容歷史 naive ISO timestamp。
+
+**解決方法**：抽出 `_parse_state_timestamp()` 共用，支援 `Z`、aware ISO 與 naive ISO（naive 視為 UTC）。`record_completion()` 只有真正不可解析時才保留 `duration_s=-1.0`，並輸出 `invalid current_job.started_at for completion ...` warning。新增 regression tests 鎖住 naive timestamp 可算 duration、壞 timestamp 會 warning。
+
 ## 2026-06-22 dispatch_supervisor current_job age 解析失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py::get_current_job()`：`current_job.started_at` 解析或 aware/naive datetime 相減失敗時直接 `pass`，回傳 `age_seconds=-1.0`。health check 仍能繼續，但 ops log 看不出 worker 年齡未知是 metadata 壞掉還是單純未開始。
