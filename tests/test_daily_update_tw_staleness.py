@@ -52,6 +52,35 @@ def _import_generate_daily_article():
     return generate_daily_article
 
 
+def _import_check_vix_term_structure():
+    from daily_update import _check_vix_term_structure  # type: ignore
+    return _check_vix_term_structure
+
+
+class _FailingDataManager:
+    def get_model_data(self, *args, **kwargs):
+        raise RuntimeError("vix3m down")
+
+
+def test_vix_term_structure_warns_on_fetch_failure(capsys) -> None:
+    check_vix_term_structure = _import_check_vix_term_structure()
+    result = check_vix_term_structure(_FailingDataManager(), 18.0)
+    output = capsys.readouterr().out
+
+    assert result is None
+    assert "VIX term structure check failed" in output
+    assert "vix3m down" in output
+
+
+def test_vix_term_structure_skips_when_vix_unavailable(capsys) -> None:
+    check_vix_term_structure = _import_check_vix_term_structure()
+    result = check_vix_term_structure(_FailingDataManager(), None)
+    output = capsys.readouterr().out
+
+    assert result is None
+    assert "VIX term structure check skipped: VIX unavailable" in output
+
+
 def test_tw50_no_data_omits_tw_line() -> None:
     """When tw50_close is None (e.g. yfinance hard fail), no 0050.TW line and
     no staleness warning should be emitted."""

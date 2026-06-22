@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 daily_update VIX term structure 檢查失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/daily_update.py` 的 VIX/VIX3M term-structure check：`^VIX3M` 讀取、空資料或比值計算失敗時直接 `pass`。daily update 會照常完成，但少掉 backwardation / contango 風險提示，cron log 沒有原因。
+
+**根因**：term-structure check 是非阻塞輔助訊號，舊寫法只保留「不可阻塞每日更新」，沒有把資料缺失或 fetch failure 可視化；若 `vix_level` 也不可用，原本還會靠 TypeError 被同一個 silent pass 吞掉。
+
+**解決方法**：抽出 `_check_vix_term_structure()`，成功時回傳 ratio 並維持原本輸出；`VIX` 缺失、`^VIX3M` 空資料或 fetch/parse failure 時輸出明確 warning 並回 `None`。新增 regression tests 鎖住 fetch failure 與 VIX unavailable 都可見且不拋錯。
+
 ## 2026-06-22 ops_dashboard cron health 非致命檢查失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/ops_dashboard.py` 的 cron health section：讀取 job log mtime 失敗或 `croniter` 排程解析失敗時直接 `pass`，dashboard 只退回其他判斷，沒有指出 freshness check 的輔助證據失效。

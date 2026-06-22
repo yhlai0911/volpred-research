@@ -121,6 +121,30 @@ def _vix_regime(vix_level):
             "但要做好短期帳面虧損的心理準備。")
 
 
+def _check_vix_term_structure(dm, vix_level):
+    """Print VIX/VIX3M term-structure status; never block the daily update."""
+    if vix_level is None:
+        print("  ⚠️ VIX term structure check skipped: VIX unavailable")
+        return None
+    try:
+        vix3m_data = dm.get_model_data(
+            "^VIX3M", "2025-01-01", "2026-12-31", force_refresh=True
+        )
+        if len(vix3m_data) == 0:
+            print("  ⚠️ VIX term structure check skipped: ^VIX3M returned no rows")
+            return None
+        vix3m_level = float(vix3m_data.iloc[-1]["close"])
+        ts_ratio = vix_level / vix3m_level if vix3m_level > 0 else 1.0
+        if ts_ratio > 1.0:
+            print(f"  ⚠️ VIX BACKWARDATION (ratio={ts_ratio:.3f}) — preemptive reduction recommended!")
+        else:
+            print(f"  VIX term structure: contango ({ts_ratio:.3f})")
+        return ts_ratio
+    except Exception as exc:
+        print(f"  ⚠️ VIX term structure check failed: {type(exc).__name__}: {exc}")
+        return None
+
+
 def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
                            gld_close, spy_date, today, gap_alert_level=None,
                            gap_alert_text=None, overnight_gap=None,
@@ -480,17 +504,7 @@ def main():
             print(f"  VIX/GARCH ratio: {vix_garch_ratio} (normal)")
 
     # VIX term structure backwardation check (P37: Harvey-significant signal)
-    try:
-        vix3m_data = dm.get_model_data("^VIX3M", "2025-01-01", "2026-12-31", force_refresh=True)
-        if len(vix3m_data) > 0:
-            vix3m_level = float(vix3m_data.iloc[-1]["close"])
-            ts_ratio = vix_level / vix3m_level if vix3m_level > 0 else 1.0
-            if ts_ratio > 1.0:
-                print(f"  ⚠️ VIX BACKWARDATION (ratio={ts_ratio:.3f}) — preemptive reduction recommended!")
-            else:
-                print(f"  VIX term structure: contango ({ts_ratio:.3f})")
-    except Exception:
-        pass
+    _check_vix_term_structure(dm, vix_level)
 
     print(f"  SPY: ${spy_close} ({spy_ret*100:+.2f}%), σ={sigma_gjr_ann}%")
     print(f"  GLD: ${gld_close}, σ={sigma_gld_ann}%")
