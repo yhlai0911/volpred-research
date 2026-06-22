@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 agent_spec 非 UTF-8 資產 fallback copy 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/agent_spec.py`：import/render agent specs 時若 skill 或 agent asset 不是 UTF-8，舊碼捕捉 `UnicodeDecodeError` 後直接 `shutil.copy2()`，沒有任何提示。
+
+**根因**：agent spec 同步需要支援非文字資產，verbatim copy 是正確 fallback；但 canonical/generated agent spec 以文字治理檔為主，非 UTF-8 資產若靜默混入，之後 drift check 或人工審查會看不出該檔沒有經 placeholder render，而是原樣複製。
+
+**解決方法**：新增 `_warn_binary_copy()`，在 Unicode decode 失敗改走 verbatim copy 時輸出 `[agent_spec] WARN text render failed; copying file verbatim ...` 到 stderr，原本 copy 行為不變。新增 regression test 覆蓋非 UTF-8 skill asset warning 與 bytes 保留。
+
 ## 2026-06-23 dispatch scheduler 壞 last_fire_at 被靜默當 due
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/scheduler.py::_due_to_fire()`：state 裡的 `last_fire_at` 若不是可 parse 的 ISO timestamp，舊碼直接回 `due=True`，沒有任何 warning。

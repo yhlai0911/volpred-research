@@ -138,3 +138,20 @@ def test_import_normalizes_provider_specific_paths(tmp_path: Path, monkeypatch):
     assert "{{SKILL_ROOT}}" in imported_skill
     assert "{{PROVIDER_DIR}}" in imported_skill
     assert imported_skill.startswith("---\n")
+
+
+def test_import_warns_when_skill_asset_is_not_utf8(tmp_path: Path, monkeypatch, capsys):
+    canonical_root = _retarget_agent_spec(monkeypatch, tmp_path)
+    source_asset = tmp_path / ".claude" / "skills" / "demo" / "asset.bin"
+    source_asset.parent.mkdir(parents=True, exist_ok=True)
+    source_asset.write_bytes(b"\xff\xfe\x00binary")
+
+    result = agent_spec.import_agent_specs(source="claude", include_guide=False)
+
+    copied_asset = canonical_root / "skills" / "demo" / "asset.bin"
+    assert copied_asset.read_bytes() == b"\xff\xfe\x00binary"
+    assert str(copied_asset.relative_to(tmp_path)) in result["copied_files"]
+    err = capsys.readouterr().err
+    assert "[agent_spec] WARN text render failed; copying file verbatim" in err
+    assert "asset.bin" in err
+    assert "UnicodeDecodeError" in err

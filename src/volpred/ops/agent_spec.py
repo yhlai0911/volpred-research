@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -148,6 +149,15 @@ def _load_text(path: Path) -> str:
     return path.read_text()
 
 
+def _warn_binary_copy(source: Path, destination: Path, exc: Exception) -> None:
+    print(
+        "[agent_spec] WARN text render failed; copying file verbatim "
+        f"source={_display_path(source)} destination={_display_path(destination)} "
+        f"error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def _display_path(path: Path) -> str:
     for base in (project_path(), CANONICAL_ROOT.parent):
         try:
@@ -161,7 +171,8 @@ def _render_file(source: Path, destination: Path, target: AgentSpecTarget) -> No
     destination.parent.mkdir(parents=True, exist_ok=True)
     try:
         destination.write_text(_render_text(_load_text(source), target, destination))
-    except UnicodeDecodeError:
+    except UnicodeDecodeError as exc:
+        _warn_binary_copy(source, destination, exc)
         shutil.copy2(source, destination)
 
 
@@ -192,7 +203,8 @@ def import_agent_specs(
             destination.parent.mkdir(parents=True, exist_ok=True)
             try:
                 destination.write_text(_normalize_text(_load_text(path)))
-            except UnicodeDecodeError:
+            except UnicodeDecodeError as exc:
+                _warn_binary_copy(path, destination, exc)
                 shutil.copy2(path, destination)
             copied_files.append(_display_path(destination))
 
