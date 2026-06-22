@@ -10,6 +10,7 @@ Layer-1 of the supervisor observability upgrade (L1 in 2026-04-18 design).
 from __future__ import annotations
 
 import json
+import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -24,6 +25,14 @@ from .local_control_plane import (
 _RULES_PATH_DEFAULT = "config/supervisor_rules.json"
 
 
+def _warn_supervisor(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[ops_supervisor] WARN {message} "
+        f"path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def load_supervisor_rules(path: str = _RULES_PATH_DEFAULT) -> dict[str, Any]:
     """Load supervisor decision rules from canonical config. Runtime read — any
     change to the JSON takes effect on the next supervisor tick without
@@ -33,7 +42,8 @@ def load_supervisor_rules(path: str = _RULES_PATH_DEFAULT) -> dict[str, Any]:
         return {}
     try:
         return json.loads(rules_path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    except (OSError, ValueError) as exc:
+        _warn_supervisor("supervisor rules read failed; using defaults", rules_path, exc)
         return {}
 
 

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 supervisor rules read 失敗被靜默當預設
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/supervisor.py::load_supervisor_rules()`：`config/supervisor_rules.json` 讀取或 JSON parse 失敗時，舊碼直接回 `{}`，沒有 warning。
+
+**根因**：supervisor observability 需要在 config 壞掉時繼續使用預設規則，避免整個 supervisor tick 中斷；但靜默退回 `{}` 會讓操作者看不出 family floors / caps / policy rules 沒有從 canonical config 載入。
+
+**解決方法**：保留失敗時回 `{}` 的容錯行為，但新增 `[ops_supervisor] WARN supervisor rules read failed; using defaults ...` 到 stderr，包含 path 與例外類型。新增 regression test 覆蓋 invalid JSON 時 warning 出現。
+
 ## 2026-06-23 ops autotune floor/cap parse 失敗被靜默略過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/autotune.py::autotune_supervisor_rules()`：`config/supervisor_rules.json` 的 family floor / weekly cap 若不是可轉整數，舊碼直接 `continue`，沒有 warning。
