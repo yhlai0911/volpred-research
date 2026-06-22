@@ -1026,6 +1026,130 @@ def _parse_paper_stale_state(now: datetime, paper_root: Path | None = None) -> d
     }
 
 
+# ── 2026-06-22 STRUCTURAL（boss directive「禁止脫班，徹底從底層架構解決」/ Three-Strike）──
+# 既有 alert 全部監看「機器/流程」（job 是否 fire）：release-pool-by-settings 每次 run
+# 都改寫 updated_at → machinery 永遠不顯 stale，即使 0 篇發出；沒有任何 check 監看
+# 「實際產出」（最新發佈文章新鮮度）。2026-06-22 incident：hourly dispatch 的 pinned
+# claude binary 被 auto-update 刪 → generator 整日產 0 → release filter 擋住老化池 →
+# 12h 只發 1 篇，但 breach_count=0（每個 job exit 0）。以下兩個 check 直接監看 OUTCOME
+# （feed 新鮮度，active-window aware，CRITICAL）+ generator binary 源頭健康，與 job
+# exit code 完全脫鉤，補上這層盲區。
+PUBLISH_FRESHNESS_CRITICAL_HOURS = 5.0
+_TAIPEI_TZ = ZoneInfo("Asia/Taipei")
+PUBLISH_ACTIVE_START_HOUR = 9   # 台北時間：此窗內才預期有新內容
+PUBLISH_ACTIVE_END_HOUR = 23
+
+
+def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    feed_path = _storage_root(storage_dir).joinpath("reports", "feed.json")
+    feed = load_json(feed_path, [])
+    if not isinstance(feed, list):
+        feed = []
+    pub_times: list[datetime] = []
+    for item in feed:
+        if not isinstance(item, dict) or item.get("status") != "published":
+            continue
+        ts = _parse_iso_datetime(item.get("published_at") or item.get("created_at"))
+        if ts is not None:
+            pub_times.append(ts)
+    newest = max(pub_times) if pub_times else None
+    gap_hours = round((now - newest).total_seconds() / 3600.0, 2) if newest is not None else None
+    tpe_hour = now.astimezone(_TAIPEI_TZ).hour
+    in_active_window = PUBLISH_ACTIVE_START_HOUR <= tpe_hour < PUBLISH_ACTIVE_END_HOUR
+    breached = bool(
+        in_active_window
+        and (newest is None or (gap_hours is not None and gap_hours > PUBLISH_FRESHNESS_CRITICAL_HOURS))
+    )
+    newest_text = newest.isoformat() if newest else "missing"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            f"作用窗（台北 {PUBLISH_ACTIVE_START_HOUR}:00–{PUBLISH_ACTIVE_END_HOUR}:00）內，feed 最新已發佈文章距今 > {PUBLISH_FRESHNESS_CRITICAL_HOURS}h。",
+            f"- newest_published_at: {newest_text}",
+            f"- publish_gap_hours: {gap_hours if gap_hours is not None else 'missing'}",
+            f"- threshold_hours: {PUBLISH_FRESHNESS_CRITICAL_HOURS}",
+            f"- feed_path: {_relative_repo_path(feed_path)}",
+            "",
+            "## 影響",
+            "這是『發文脫班』的 outcome-level dead-man switch：不論成因（dispatch generator 死、",
+            "auth 失效、release cluster-filter 擋住、draft 池空），只要『實際沒發文』就觸發。",
+            "直接打 Mission 第 1 條（內容）＋第 5 條（流量）。2026-06-22 整日脫班即此盲區。",
+            "",
+            "## 建議行動（主線程 auto-remediation）",
+            "1. 查 generator 是否活著：tail -5 storage/logs/cron/hourly_dispatch.log",
+            "   （看是否秒退 / auth-preflight fail；確認 ~/.local/bin/claude 存在可執行）",
+            "2. 立即釋出（draft 池有 fresh-theme 時）：",
+            "   VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings",
+            "3. 若 release 因 cluster-pressure 擋住（released 0）：定向釋出 fresh-theme 草稿，",
+            "   或派 daily_article 補非飽和主題（publication-candidates skill）。",
+        ]
+    )
+    return {
+        "id": "publishing_freshness",
+        "breached": breached,
+        "level": "critical" if breached else "info",
+        "title": (
+            f"發文脫班：{gap_hours}h 無新文（門檻 {PUBLISH_FRESHNESS_CRITICAL_HOURS}h）"
+            if breached
+            else "publishing_freshness ok"
+        ),
+        "body": body if breached else "",
+        "details": {
+            "newest_published_at": newest_text,
+            "publish_gap_hours": gap_hours,
+            "in_active_window": in_active_window,
+            "tpe_hour": tpe_hour,
+            "threshold_hours": PUBLISH_FRESHNESS_CRITICAL_HOURS,
+        },
+    }
+
+
+def _parse_dispatch_health_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    wrapper = Path.home() / ".volpred" / "bin" / "cron_hourly_dispatch.sh"
+    claude_bin: str | None = None
+    if wrapper.exists():
+        m = re.search(r'CLAUDE_BIN="\$\{CLAUDE_BIN:-([^}"]+)\}"', wrapper.read_text(errors="ignore"))
+        if m:
+            claude_bin = m.group(1).strip()
+    if not claude_bin:
+        claude_bin = str(Path.home() / ".local" / "bin" / "claude")
+    resolved = Path(claude_bin)
+    try:
+        target = resolved.resolve()
+        exists = target.exists()
+    except OSError:
+        target = resolved
+        exists = False
+    breached = not exists
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "hourly dispatch 的 generator binary 無法解析到實際檔案。",
+            f"- CLAUDE_BIN: {claude_bin}",
+            f"- resolved: {target}",
+            f"- exists: {exists}",
+            "",
+            "## 影響",
+            "generator binary 不存在 → 每小時 dispatch `claude -p` binary-not-found 秒退、",
+            "0 內容生成（舊版 alert 看不到，因 job exit 0）。這是 2026-06-22 整日脫班的源頭。",
+            "",
+            "## 建議行動",
+            "1. 確認現行版本：ls -la ~/.local/bin/claude && claude --version",
+            "2. 修 wrapper CLAUDE_BIN 指向 always-current symlink ~/.local/bin/claude，再",
+            "   cp scripts/cron_hourly_dispatch.sh ~/.volpred/bin/ && chmod +x（不要 pin 死版本）。",
+            "3. 驗證：env -i HOME=$HOME PATH=/usr/bin:/bin CLAUDE_CODE_OAUTH_TOKEN=… <bin> -p 'say AUTHOK'",
+        ]
+    )
+    return {
+        "id": "dispatch_binary_health",
+        "breached": breached,
+        "level": "critical" if breached else "info",
+        "title": (f"Dispatch generator binary 不存在：{claude_bin}" if breached else "dispatch_binary_health ok"),
+        "body": body if breached else "",
+        "details": {"claude_bin": claude_bin, "resolved": str(target), "exists": exists},
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -1036,6 +1160,8 @@ def build_alert_condition_report(
     conditions = [
         _parse_release_pool_state(storage_dir, current),
         _parse_draft_pool_state(storage_dir),
+        _parse_publishing_freshness_state(storage_dir, current),  # 2026-06-22 outcome dead-man switch (禁止脫班)
+        _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
         _parse_host_cron_state(storage_dir, current),
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),
