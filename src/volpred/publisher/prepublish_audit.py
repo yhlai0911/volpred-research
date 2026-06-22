@@ -38,6 +38,7 @@ import json
 import math
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 # Statistics-context keywords. A numeric token is only audited if at least one
@@ -194,6 +195,14 @@ def _flatten_numbers(obj) -> list[float]:
     return out
 
 
+def _warn_source_values_load(path: Path, exc: Exception) -> None:
+    print(
+        "[prepublish_audit] WARN source results JSON read failed; skipping "
+        f"path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def load_source_values(k_ids: list[str], root: str | Path = ".") -> set[float]:
     """Load and flatten every numeric value from each cited K's results.json.
 
@@ -213,7 +222,8 @@ def load_source_values(k_ids: list[str], root: str | Path = ".") -> set[float]:
             continue
         try:
             data = json.loads(path.read_text())
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, OSError) as exc:
+            _warn_source_values_load(path, exc)
             continue
         for n in _flatten_numbers(data):
             values.add(n)

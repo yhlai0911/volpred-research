@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 prepublish provenance source results 讀取失敗被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/publisher/prepublish_audit.py::load_source_values()`：cited K 的 `*_results.json` 已存在但 JSON 壞掉或讀取失敗時直接 `continue`。prepublish gate 會繼續是對的，但審核少了一個 cited source 時看不出是「真的沒有來源」還是「來源檔壞掉」。
+
+**根因**：content provenance gate 需要容忍單一 cited K source 壞掉，避免工具本身中斷 publish flow；但舊寫法把可降級寫成 silent skip，削弱研究誠實防線的可觀察性。
+
+**解決方法**：新增 `_warn_source_values_load()`；已存在 results JSON 讀取 / 解析失敗時輸出 `[prepublish_audit] WARN source results JSON read failed; skipping`，missing file 仍照既有邏輯安靜略過。新增 regression test 覆蓋壞 JSON。
+
 ## 2026-06-22 reader-facing refill JSON source 讀取失敗被靜默套 default
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/refill_reader_facing_pool.py::_load_json()`：已存在的 state / next_tasks / runtime_schedules JSON 讀取或解析失敗時直接回 default。補池流程繼續是對的，但會看起來像「今天尚未掃描」或「沒有 event jobs」，而不是 source 壞掉。
