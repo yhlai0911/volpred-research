@@ -153,6 +153,60 @@ def test_preview_release_pool_self_heals_stale_settings_from_feed_ignoring_membe
     assert preview["due_now"] is True
 
 
+def test_preview_release_pool_excludes_active_dedup_flags(tmp_path: Path, monkeypatch):
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 22, 9, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(
+        storage_dir / ".release_settings.json",
+        {
+            "mode": "auto",
+            "interval_minutes": 180,
+            "max_articles_per_run": 2,
+            "due_only": True,
+            "include_drafts": True,
+            "preferred_audiences": [],
+            "last_released_at": (frozen_now - timedelta(hours=7)).isoformat(),
+            "updated_at": (frozen_now - timedelta(hours=7)).isoformat(),
+        },
+    )
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_active_dedup",
+                "title": "Active dedup draft",
+                "status": "draft",
+                "created_at": (frozen_now - timedelta(days=3)).isoformat(),
+                "category": "general",
+                "details": {
+                    "release_dedup_skipped": True,
+                    "release_dedup_skipped_at": (frozen_now - timedelta(days=1)).isoformat(),
+                },
+            },
+            {
+                "id": "mile_expired_dedup",
+                "title": "Expired dedup draft",
+                "status": "draft",
+                "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+                "category": "general",
+                "details": {
+                    "release_dedup_skipped": True,
+                    "release_dedup_skipped_at": (frozen_now - timedelta(days=22)).isoformat(),
+                },
+            },
+        ],
+    )
+
+    preview = content.preview_release_pool_by_settings(storage_dir=str(storage_dir))
+
+    assert preview["pool_counts"]["eligible_before_dedup"] == 2
+    assert preview["pool_counts"]["dedup_flagged"] == 1
+    assert preview["pool_counts"]["eligible"] == 1
+    assert [item["id"] for item in preview["next_candidates"]] == ["mile_expired_dedup"]
+
+
 def test_preview_release_pool_self_heals_ignores_daily_audience_articles(
     tmp_path: Path,
     monkeypatch,

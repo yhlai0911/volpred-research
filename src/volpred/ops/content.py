@@ -569,6 +569,22 @@ def _next_release_audit_skip_count(details: dict) -> int:
     return max(previous, 0) + 1
 
 
+def _release_dedup_flag_active(item: dict, *, now: datetime) -> bool:
+    d = item.get("details")
+    if not (isinstance(d, dict) and bool(d.get("release_dedup_skipped"))):
+        return False
+    # Dedup flags expire with the dedup window. Without this TTL, a draft can
+    # be permanently excluded from the release pool after a one-time skip.
+    flagged_at = d.get("release_dedup_skipped_at")
+    if not flagged_at:
+        return False  # legacy flag w/o timestamp -> re-evaluate
+    try:
+        flagged_dt = datetime.fromisoformat(flagged_at)
+        return (now - flagged_dt) < timedelta(days=_RELEASE_DEDUP_WINDOW_DAYS)
+    except (ValueError, TypeError):
+        return False
+
+
 def release_pool_articles(
     *,
     pub_id: str | None = None,
@@ -610,31 +626,11 @@ def release_pool_articles(
         # Sort: scheduled first, then audience priority, then FIFO (oldest created_at first)
         return (preferred_rank, 0 if status == "scheduled" else 1, created_at)
 
-    def _dedup_flagged(item: dict) -> bool:
-        d = item.get("details")
-        if not (isinstance(d, dict) and bool(d.get("release_dedup_skipped"))):
-            return False
-        # 2026-06-19: dedup flag must EXPIRE with the dedup window. The flag was
-        # write-once permanent, but the dedup BASE is a 21d sliding window — once
-        # the near-dup base scrolls out of the window the flag is stale and the
-        # draft must re-enter candidacy. Without TTL, 46/83 drafts got
-        # permanently flagged and the release pool starved toward 0 (boss
-        # complaint: "Release pool cron gap"). TTL = dedup window so flag
-        # lifetime matches the window that justified it.
-        flagged_at = d.get("release_dedup_skipped_at")
-        if not flagged_at:
-            return False  # legacy flag w/o timestamp -> re-evaluate (retrofit)
-        try:
-            flagged_dt = datetime.fromisoformat(flagged_at)
-            return (now - flagged_dt) < timedelta(days=_RELEASE_DEDUP_WINDOW_DAYS)
-        except (ValueError, TypeError):
-            return False
-
     candidates = [
         item for item in feed
         if item.get("status") in ({"scheduled", "draft"} if effective_include_drafts else {"scheduled"})
         and is_due(item)
-        and not _dedup_flagged(item)
+        and not _release_dedup_flag_active(item, now=now)
     ]
     candidates.sort(key=sort_key)
     if pub_id:
@@ -1101,7 +1097,15 @@ def preview_release_pool_by_settings(
 
     eligible_statuses = {"scheduled", "draft"} if include_drafts else {"scheduled"}
     pool_items = [item for item in feed if item.get("status") in {"draft", "scheduled"}]
-    candidates = [item for item in pool_items if item.get("status") in eligible_statuses and is_due(item)]
+    candidates_before_dedup = [
+        item for item in pool_items if item.get("status") in eligible_statuses and is_due(item)
+    ]
+    dedup_flagged = [
+        item for item in candidates_before_dedup if _release_dedup_flag_active(item, now=now)
+    ]
+    candidates = [
+        item for item in candidates_before_dedup if not _release_dedup_flag_active(item, now=now)
+    ]
     candidates.sort(key=sort_key)
 
     k_cluster = _knowledge_experiment_clusters(storage_dir)
@@ -1153,6 +1157,8 @@ def preview_release_pool_by_settings(
         "pool_counts": {
             "draft": sum(1 for item in pool_items if item.get("status") == "draft"),
             "scheduled": sum(1 for item in pool_items if item.get("status") == "scheduled"),
+            "eligible_before_dedup": len(candidates_before_dedup),
+            "dedup_flagged": len(dedup_flagged),
             "eligible": len(candidates),
         },
         "narrative_cluster_pressure": narrative_pressure,

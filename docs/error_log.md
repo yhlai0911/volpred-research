@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 release preview 未套 dedup TTL，誤報 46 篇 eligible draft
+
+**問題**：handoff 無 Codex-eligible pending 時巡檢 live dashboard，唯一 WARN 是 `Release pool starved > 6h (cron healthy)`。`release-pool-by-settings` 實際連續回 `released_count=0`，但 `preview_release_pool_by_settings()` 顯示 `eligible=46` 且列出 `next_candidates`，讓 ops 看起來像有文章可釋出卻沒有被釋出。
+
+**根因**：實際 `release_pool_articles()` 會排除近期仍有效的 `details.release_dedup_skipped` draft（21 天 TTL），但 preview path 沒套同一個 dedup TTL filter。live feed 的 46 篇 draft 全部帶近期 `release_dedup_skipped`，所以真正可釋出候選是 0；preview 的「eligible=46」是誤導。
+
+**解決方法**：抽出 `_release_dedup_flag_active()` 供 release 與 preview 共用；preview 新增 `eligible_before_dedup` / `dedup_flagged` / `eligible` 三個 count。live preview 現在正確顯示 `eligible_before_dedup=46, dedup_flagged=46, eligible=0, next_candidates=[]`。新增 regression test 鎖住近期 dedup-flagged draft 不進 preview candidates、過期旗標才重新入池。
+
 ## 2026-06-22 error_log fallback 掃出 legacy bare except
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，靜態掃描仍找到 3 支 legacy scripts 使用 bare `except:`：`scripts/taiwan_comprehensive_analysis.py`、`scripts/gen_k620_v2_lazypack.py`、`scripts/experiment_tail_dep_var_full.py`。這類 fallback 雖多半是非關鍵診斷或圖表格式容錯，但仍會把 model / VaR fallback 原因吞掉，與 2026-06-22 多個 silent-failure incident 同型。
