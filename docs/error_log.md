@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 fred_backfill_guard CSV date parse 失敗被靜默略過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/fred_backfill_guard.py::_latest_date()`：FRED macro CSV 內單列日期格式看似 `YYYY-MM-DD` 但實際不可 parse 時，舊碼直接 `continue`，沒有 warning。
+
+**根因**：FRED backfill guard 需要容忍單列壞資料，避免自癒 backfill guard 因 CSV 單筆異常中斷；但靜默略過會讓 freshness 判斷失去資料品質線索，操作者只能看到最新合法日期，無法知道同檔內已有壞列。
+
+**解決方法**：保留壞列跳過的容錯行為，但新增 `[fred_guard] WARN CSV date parse failed; skipping row ...` 到 stderr，包含檔案、原始日期值與例外類型。新增 regression test 覆蓋壞日期列 warning 且仍回傳最新合法日期。
+
 ## 2026-06-23 ops summaries no-work test 未隔離 alert state
 
 **問題**：上一輪驗證 `tests/test_ops_summaries.py` 時，`test_build_continue_task_maintenance_skips_when_no_work` 單獨執行失敗：預期 `skip=True/no_work`，實際因真實 alert breach 進入 `address_alert`。

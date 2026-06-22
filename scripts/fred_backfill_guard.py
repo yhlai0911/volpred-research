@@ -37,6 +37,14 @@ GUARDED = ["DGS10", "DGS2", "EFFR", "BAMLH0A0HYM2", "T10YIE", "WALCL"]
 STALE_DAYS = 4  # daily rates publish T+1; >4 calendar days = genuinely stale
 
 
+def _warn_fred_guard(message: str, path: Path, exc: Exception, *, value: str) -> None:
+    print(
+        f"[fred_guard] WARN {message} path={path} "
+        f"value={value!r} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def _api_key() -> str | None:
     key = os.environ.get("FRED_API_KEY")
     if key:
@@ -60,7 +68,13 @@ def _latest_date(ticker: str) -> datetime | None:
         if len(d) == 10 and d[4] == "-":
             try:
                 last = datetime.strptime(d, "%Y-%m-%d")
-            except ValueError:
+            except ValueError as exc:
+                _warn_fred_guard(
+                    "CSV date parse failed; skipping row",
+                    f,
+                    exc,
+                    value=d,
+                )
                 continue
     return last
 
