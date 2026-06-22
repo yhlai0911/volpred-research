@@ -75,6 +75,21 @@ def test_handoff_warns_codex_when_only_skip_pending_exists(tmp_path, monkeypatch
     assert "task_pool_claim.py list --codex-eligible" in handoff
 
 
+def test_handoff_warns_on_invalid_json_source(tmp_path, monkeypatch, capsys) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    (tmp_path / "next_tasks.json").write_text("{bad-json", encoding="utf-8")
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "總數**：0" in handoff
+    captured = capsys.readouterr()
+    assert "[generate_handoff] WARN JSON read failed; using default" in captured.err
+    assert "next_tasks.json" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
 def test_handoff_surfaces_invalid_completed_at_warning(tmp_path, monkeypatch) -> None:
     module = _load_generate_handoff()
     _write_fixture_files(

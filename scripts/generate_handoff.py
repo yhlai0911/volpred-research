@@ -49,7 +49,12 @@ def _load_json(path: Path, default: Any) -> Any:
         return default
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, OSError) as exc:
+        print(
+            "[generate_handoff] WARN JSON read failed; using default "
+            f"path={path} error={type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
         return default
 
 

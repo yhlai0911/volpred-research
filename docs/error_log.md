@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 generate_handoff JSON source 讀取失敗被靜默套 default
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_handoff.py::_load_json()`：`next_tasks.json`、dashboard、work_log、gmail state 等 handoff source 已存在但 JSON 壞掉時直接回 default。handoff 繼續生成是對的，但入口快照會看起來像「任務池空 / dashboard 無資料」，而不是 source 壞掉。
+
+**根因**：handoff generator 是每小時 dispatch 入口，採 fail-open 避免單一壞 source 阻塞整份 handoff；但舊寫法沒有 warning，讓 source corruption 變成靜默空值。
+
+**解決方法**：`_load_json()` 改為捕捉 `json.JSONDecodeError` 與 `OSError` 時輸出 `[generate_handoff] WARN JSON read failed; using default`，缺檔仍安靜套 default。新增 regression test 覆蓋壞 `next_tasks.json` 時 handoff 可生成且 warning 可見。
+
 ## 2026-06-22 prepublish provenance source results 讀取失敗被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/publisher/prepublish_audit.py::load_source_values()`：cited K 的 `*_results.json` 已存在但 JSON 壞掉或讀取失敗時直接 `continue`。prepublish gate 會繼續是對的，但審核少了一個 cited source 時看不出是「真的沒有來源」還是「來源檔壞掉」。
