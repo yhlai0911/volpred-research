@@ -39,6 +39,20 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     if not SUPABASE_URL or not SUPABASE_KEY:
         raise RuntimeError("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Set env vars or create .env.local")
 
+
+def _remote_writes_blocked() -> bool:
+    """Test-mode kill switch for ALL Supabase writes.
+
+    conftest.py sets VOLPRED_NO_REMOTE_WRITE=1 so no test can POST/PATCH
+    production Supabase even when creds are present (loaded from .env.local at
+    import) and a per-test sync stub is missing. 2026-06-23 incident:
+    test_daily_digest_dup_exemption.py published two stub daily_digest rows
+    (mile_46918766 / mile_6d06f91c, phase='test', identical MOVE-VIX content) to
+    PROD because its supabase_sync stub failed to apply — they leaked onto the
+    live 精選導讀 feed and had to be retracted. This is the structural backstop,
+    mirroring VOLPRED_NO_EMAIL for SMTP (conftest set at 2026-04-20)."""
+    return os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1"
+
 HEADERS = {
     "apikey": SUPABASE_KEY,
     "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -94,6 +108,8 @@ def _post(table: str, data: list | dict) -> bool:
     Note: schema-level column filtering is handled by the table-specific
     helpers (e.g. `sync_market_daily`) — `_post` stays generic.
     """
+    if _remote_writes_blocked():
+        return False
     if not SUPABASE_KEY:
         return False
     conflict = CONFLICT_KEYS.get(table)
@@ -189,6 +205,8 @@ def _select_rows_in(table: str, column: str, values: list[str], *, select: str =
 
 
 def _patch_where(table: str, filters: dict[str, object], row: dict) -> bool:
+    if _remote_writes_blocked():
+        return False
     query = _build_filter_query(filters)
     if not query:
         return False
@@ -213,6 +231,8 @@ def _patch_where_returning(
     and cross-session race protection). Differs from _patch_where which
     returns True on any HTTP success regardless of rows affected.
     """
+    if _remote_writes_blocked():
+        return []
     query = _build_filter_query(filters)
     if not query:
         return []

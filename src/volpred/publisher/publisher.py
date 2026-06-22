@@ -1464,7 +1464,15 @@ class Publisher:
         try:
             with shared_state_lock("publisher_feed", storage_dir=storage_dir):
                 feed = self._load_feed()
-                duplicate = _find_same_ref_feed_duplicate(feed, item)
+                # 2026-06-23: daily_digest is exempt from the same-experiment-ref
+                # gate here too (matching publish_milestone's _is_digest
+                # exemptions). A digest curates several past articles and
+                # legitimately shares their experiment_refs — without this
+                # exemption a digest citing the same K as a source article gets
+                # BLOCKED at feed append even after publish_milestone let it
+                # through (caught by tests/test_daily_digest_dup_exemption.py).
+                _item_is_digest = str((item.get('details') or {}).get('content_type') or '') == 'daily_digest'
+                duplicate = None if _item_is_digest else _find_same_ref_feed_duplicate(feed, item)
                 if duplicate is not None:
                     existing_id = duplicate.get("id") or item.get("id")
                     result_label = f"duplicate_same_ref:{existing_id}"[:200]

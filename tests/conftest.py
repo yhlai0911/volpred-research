@@ -22,3 +22,13 @@ os.environ.setdefault("PYTHONHASHSEED", "0")
 # in email_notifier.py _send_email; must be set BEFORE any test imports
 # that might transitively load the notifier.
 os.environ["VOLPRED_NO_EMAIL"] = "1"
+
+# 2026-06-23: test runs must never WRITE to production Supabase. A publish-style
+# test (test_daily_digest_dup_exemption.py) whose per-test sync stub failed to
+# apply synced two stub daily_digest rows (phase='test', identical MOVE-VIX
+# content: mile_46918766 / mile_6d06f91c) to the LIVE feed — they surfaced on the
+# 精選導讀 tab and had to be retracted. supabase_sync._post / _patch_where /
+# _patch_where_returning honor this flag and no-op, so even with creds present
+# (loaded from .env.local at import) and a missing per-test stub, no test can
+# mutate prod. Structural backstop mirroring VOLPRED_NO_EMAIL above.
+os.environ["VOLPRED_NO_REMOTE_WRITE"] = "1"
