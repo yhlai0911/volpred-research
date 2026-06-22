@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 indicator_arena review-due 壞 resolve_after 被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著 2026-06-22 silent fallback 類型掃描到 `src/volpred/indicators/cli.py::review_due()`：signal 的 `resolve_after` 若不可 parse，CLI 直接跳過該 signal，沒有 warning。
+
+**根因**：indicator arena review queue 應容忍單筆 signal metadata 壞值，避免 `review-due` 整體中斷；但靜默跳過會讓到期審查少列一筆，操作者看不出是「尚未到期」還是 `resolve_after` source drift。
+
+**解決方法**：新增 `[indicator_arena] WARN resolve_after parse failed; skipping signal ...`，包含 `signal_id`、原始值與例外類型；原本跳過壞 signal、保留其他 due signal 的行為不變。新增 CLI regression test 覆蓋壞 `resolve_after` 會 warning 且不進 due list；同步修正 indicator registry 測試對 2026-06-11 delisted 後「5 active + 1 delisted」的 stale expectation。
+
 ## 2026-06-23 dedupe_next_tasks 壞 queue source 缺少診斷
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dedupe_next_tasks.py`：`storage/next_tasks.json` 壞 JSON 只會丟原生 parse 錯誤；頂層 schema 非 list 沒有 path/type 診斷；list 內若混入非 object entry，`dedupe()` 會在 `.get()` 直接 crash。

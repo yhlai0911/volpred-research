@@ -2,7 +2,7 @@
 Tests for src/volpred/indicators/ module.
 
 Gate requirements (task indicator_arena_phase1_backend_2026_06_11):
-  1. Registry loads correctly — 6 active indicators
+  1. Registry loads correctly — 5 active indicators
   2. signals.append_signal append-only (two appends → 2 rows, different timestamps)
   3. signals.append_signal rejects missing required field (raises ValueError)
   4. reviews.compute_review correctly scores direction league (hit + abs error)
@@ -64,7 +64,7 @@ def _make_signal(
 
 
 # ---------------------------------------------------------------------------
-# Test 1: Registry loads correctly — 6 active indicators
+# Test 1: Registry loads correctly — 5 active indicators
 # ---------------------------------------------------------------------------
 
 def test_git_short_sha_warning_when_git_unavailable(monkeypatch, capsys):
@@ -80,10 +80,10 @@ def test_git_short_sha_warning_when_git_unavailable(monkeypatch, capsys):
 
 
 class TestRegistryLoad:
-    def test_loads_six_active_indicators(self):
+    def test_loads_five_active_indicators(self):
         specs = get_active()
-        assert len(specs) == 6, (
-            f"Expected 6 active indicators, got {len(specs)}: "
+        assert len(specs) == 5, (
+            f"Expected 5 active indicators, got {len(specs)}: "
             f"{[s.indicator_id for s in specs]}"
         )
 
@@ -361,4 +361,47 @@ class TestCliEmit:
         runner = CliRunner()
         result = runner.invoke(cli, ["status"])
         assert result.exit_code == 0
-        assert "6 active" in result.output
+        assert "5 active" in result.output
+
+    def test_review_due_warns_on_bad_resolve_after(self, tmp_path):
+        from click.testing import CliRunner
+        from volpred.indicators.cli import cli
+
+        signals_dir = tmp_path / "signals"
+        reviews_dir = tmp_path / "reviews"
+        signals_dir.mkdir()
+        reviews_dir.mkdir()
+        due_signal = _make_signal(indicator_id="us_tw_overnight_lead")
+        due_signal["signal_id"] = "due-now"
+        bad_signal = _make_signal(indicator_id="us_tw_overnight_lead")
+        bad_signal["signal_id"] = "bad-resolve"
+        bad_signal["resolve_after"] = "not-a-date"
+        (signals_dir / "2026-06.jsonl").write_text(
+            "\n".join(
+                [
+                    json.dumps(bad_signal, ensure_ascii=False),
+                    json.dumps(due_signal, ensure_ascii=False),
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        runner = CliRunner()
+        result = runner.invoke(
+            cli,
+            [
+                "review-due",
+                "--signals-dir",
+                str(signals_dir),
+                "--reviews-dir",
+                str(reviews_dir),
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert "Signals due for review (1):" in result.output
+        assert "due-now" in result.output
+        assert "  bad-resolve |" not in result.output
+        assert "[indicator_arena] WARN resolve_after parse failed; skipping signal" in result.output
+        assert "signal_id=bad-resolve" in result.output

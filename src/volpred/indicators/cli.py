@@ -37,6 +37,10 @@ def cli() -> None:
     """Indicator Arena management commands."""
 
 
+def _warn_indicator_cli(message: str) -> None:
+    click.echo(f"[indicator_arena] WARN {message}", err=True)
+
+
 # ---------------------------------------------------------------------------
 # emit
 # ---------------------------------------------------------------------------
@@ -150,8 +154,12 @@ def review_due(signals_dir: str | None, reviews_dir: str | None) -> None:
                 )
                 if now >= resolve_dt:
                     due.append(sig)
-            except (ValueError, TypeError):
-                pass
+            except (ValueError, TypeError) as exc:
+                _warn_indicator_cli(
+                    "resolve_after parse failed; skipping signal "
+                    f"signal_id={sid or '?'} value={resolve_after!r} "
+                    f"error={type(exc).__name__}: {exc}"
+                )
         else:
             # No resolve_after set — treat as immediately due
             due.append(sig)
