@@ -49,6 +49,15 @@ PAPER_DIR = ROOT / "paper"
 OUT_MD = EXPERIMENTS_DIR / "INDEX.md"
 OUT_JSON = EXPERIMENTS_DIR / "index.json"
 
+
+def _warn_index(message: str, exc: Exception, path: Path | None = None) -> None:
+    location = f" path={path}" if path is not None else ""
+    print(
+        f"[experiments_index] WARN {message}{location}: "
+        f"{type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
 # ---------------------------------------------------------------------------
 # K id normalisation
 # ---------------------------------------------------------------------------
@@ -88,7 +97,8 @@ def first_heading(readme: Path) -> str:
                     return title[:100]
     except FileNotFoundError:
         return ""
-    except Exception:
+    except Exception as exc:
+        _warn_index("README heading read failed; using UNKNOWN title", exc, readme)
         return ""
     return ""
 
@@ -100,7 +110,8 @@ def readme_date(readme: Path) -> Optional[str]:
     try:
         with readme.open("r", encoding="utf-8", errors="replace") as fh:
             head = fh.read(4000)
-    except Exception:
+    except Exception as exc:
+        _warn_index("README date read failed; using fallback date", exc, readme)
         return None
     m = DATE_RE.search(head)
     if not m:
@@ -181,7 +192,7 @@ def load_knowledge_k_map() -> dict[str, dict]:
         with KNOWLEDGE_PATH.open("r", encoding="utf-8") as fh:
             raw = json.load(fh)
     except Exception as exc:
-        print(f"[index] knowledge.json parse failed: {exc}", file=sys.stderr)
+        _warn_index("knowledge.json parse failed; treating knowledge coverage as empty", exc, KNOWLEDGE_PATH)
         return {}
 
     k_map: dict[str, dict] = {}
@@ -230,7 +241,7 @@ def load_feed_k_map() -> dict[str, list[str]]:
         with FEED_PATH.open("r", encoding="utf-8") as fh:
             feed = json.load(fh)
     except Exception as exc:
-        print(f"[index] feed.json parse failed: {exc}", file=sys.stderr)
+        _warn_index("feed.json parse failed; treating feed coverage as empty", exc, FEED_PATH)
         return {}
 
     k_map: dict[str, list[str]] = {}
@@ -281,7 +292,8 @@ def load_paper_k_map() -> dict[str, list[str]]:
                 continue
             try:
                 text = md_path.read_text(encoding="utf-8", errors="replace")
-            except Exception:
+            except Exception as exc:
+                _warn_index("paper markdown read failed; skipping paper coverage source", exc, md_path)
                 continue
             for m in K_ANY_RE.finditer(text):
                 kid = f"k{int(m.group(1))}{m.group(2).lower()}"
