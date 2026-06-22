@@ -58,6 +58,10 @@ _SUPABASE_URL = None
 _SUPABASE_KEY = None
 
 
+def _warn_strategy_listing(message: str, exc: Exception) -> None:
+    print(f"  WARN {message}: {type(exc).__name__}: {exc}")
+
+
 def _init_supabase():
     global _SUPABASE_URL, _SUPABASE_KEY
     if _SUPABASE_URL and _SUPABASE_KEY:
@@ -163,8 +167,8 @@ def _sb_count(table: str, **filters) -> int:
             # content-range: 0-N/TOTAL or */TOTAL
             if "/" in cr:
                 return int(cr.split("/")[-1])
-    except Exception:
-        pass
+    except Exception as exc:
+        _warn_strategy_listing(f"{table} count HEAD failed; falling back to GET count", exc)
     # Fallback: count via GET
     rows = _sb_select(table, select="count", **filters)
     if rows and isinstance(rows, list):
@@ -615,8 +619,8 @@ class StrategyLister:
                                   strategy_key=self.key)
                 if rows:
                     howto = rows[0].get("howto") or ""
-            except Exception:
-                pass
+            except Exception as exc:
+                _warn_strategy_listing("howto fetch failed during Step 9", exc)
 
         if not howto:
             print(f"  MISSING: howto is empty")
@@ -819,8 +823,8 @@ class StrategyLister:
                                   strategy_key=self.key)
                 if rows:
                     howto_to_check = rows[0].get("howto") or ""
-            except Exception:
-                pass
+            except Exception as exc:
+                _warn_strategy_listing("howto fetch failed during verify", exc)
         if howto_to_check:
             starts_bracket = howto_to_check.strip().startswith("【")
             has_target = "交易標的" in howto_to_check

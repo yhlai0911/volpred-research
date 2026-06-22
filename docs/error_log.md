@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 list_new_strategy Supabase fallback 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/list_new_strategy.py`：Supabase count 的 HEAD request 失敗時直接降級到 GET count，Step 9 / verify 的 howto fetch 失敗時直接 `pass`。策略上架檢查會繼續跑，但操作者看不出是 howto 真缺，還是 Supabase 查詢失敗造成 local fallback 失效。
+
+**根因**：strategy listing tool 正確地把 Supabase 輔助查詢設計成可降級，但舊寫法把「可降級」寫成 silent `pass`，使上架 gate 的診斷訊號不足。
+
+**解決方法**：新增 `_warn_strategy_listing()`；count HEAD 失敗會明確印出 fallback 到 GET count，Step 9 與 verify 的 howto fetch failure 會印出 warning，原有 MISSING / fallback 行為不變。新增 regression tests 覆蓋 HEAD fallback warning 與 Step 9 fetch failure warning。
+
 ## 2026-06-22 work_summary_6h platform health 局部讀取失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/work_summary_6h.py`：6 小時運營摘要的 platform health 在 feed draft count、release settings、knowledge.json stat、pending next_tasks 讀取失敗時只把欄位設為 `None` 或直接 `pass`。email 仍會寄出，但健康表缺值時看不出是「沒有資料」還是「讀取失敗」。
