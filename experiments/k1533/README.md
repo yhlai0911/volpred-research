@@ -107,9 +107,13 @@ The paper's primary claim (Table 3, S&P500): RECH-X beats RealGARCH on MSE
     (`omega_{t-1}, y_{t-1}, sigma_{t-1}^2, z_{t-1}`).
   - **Expanding-window OOS**: refit on `data[:origin]`, forecast the window
     `[origin, origin+H-1]`. The H-day target is the average realized variance
-    over that window, whose end (`origin+H-1`) is strictly **after** the training
-    window end (`origin-1`), so `target_end < forecast_origin` holds for every
-    refit and horizon. Refit cadence = every 10 days (bounded cost; warm-started).
+    over that window `[origin, origin+H-1]`, i.e. entirely **at or after** the
+    forecast origin, while the training data ends strictly **before** it
+    (`train_end = origin-1 < origin`). No training row's H-day label can reach the
+    forecast date or beyond — equivalently every training row `j` satisfies
+    `j+H ≤ origin` (the canonical forward-label guard applied to the *training*
+    labels, not the OOS target — the OOS target is supposed to be after the origin).
+    Refit cadence = every 10 days (bounded cost; warm-started).
   - All RNG (multistart inits, generator) uses **fixed seed 1533**.
 - **Horizons**: 1, 5, 22 days. Each horizon's H-day forecast uses forward
   iteration of its own recursion; the DM test uses the matching horizon `h` for
@@ -197,11 +201,13 @@ REPLICATED — the bug was inflating RealGARCH's long-horizon loss. After the fi
 the apparent "win" mostly evaporates.)
 
 ### (B) vs GARCH-X — does the RNN add value over the same covariate, linearly?
-QLIKE(RECH-X) ≈ QLIKE(GARCH-X) at **H=1 and H=5 in all three markets** (DM
-\|t\|<1.5 → tie). A significant edge appears **only at H=22** (SPY −3.3*, QQQ −4.3*,
-TW −3.0*). **The predictive gain is the realized-measure covariate, captured
-equally by the linear GARCH-X; the Simple-RNN contributes nothing at 1/5-day
-horizons and only a marginal long-horizon edge.**
+QLIKE(RECH-X) ≈ QLIKE(GARCH-X) at **H=1 and H=5 in all three markets**: none of
+the six H=1/H=5 RECH-X-vs-GARCH-X DM stats clears the `|t|>3` bar (the largest is
+TW H=1 at −2.68, still short of significance) → no robust edge. A significant edge
+appears **only at H=22** (SPY −3.3*, QQQ −4.3*, TW −3.0*). **The predictive gain is
+the realized-measure covariate, captured equally by the linear GARCH-X; the
+Simple-RNN contributes nothing at 1/5-day horizons and only a marginal long-horizon
+edge.**
 
 ### (C) vs the pre-specified GJR(1,1) — the honest ML-ceiling test
 (GJR is a fixed ex-ante model → DM here is NOT post-selection biased.)

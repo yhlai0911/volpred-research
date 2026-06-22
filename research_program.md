@@ -411,6 +411,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] KAN for VIX Forecasting — Expert Systems with Applications 2025
 - [ ] CNN-Transformer Hybrid — European J. Finance 2025
 - [x] ~~GARCH-to-Neural~~ → **K1312 完成 NULL (2026-05-17)**: SPY QLIKE LSTM=3.451 vs GJR=1.730 (差 99.4%，DM t=+8.71)，QQQ QLIKE LSTM=3.292 vs GJR=1.746 (差 88.5%，DM t=+9.32)，0/3 gates × 2 assets。**ML ceiling 第 8 次確認**。結構化 GJR inductive bias 仍無法突破 QLIKE ceiling；MSE 小幅改善(15%/6%)但均不顯著。
+- [x] ~~RECH-X (Recurrent Conditional Heteroskedasticity + realized covariate)~~ → **K1533 完成 PARTIAL/NULL (2026-06-22, user-requested replication)**：復現 Nguyen-Nguyen-Tran (2024 FRL) SRN-GARCH+RV+Student-t vs GARCH/GJR/GARCH-X/RealGARCH，SPY/QQQ(GK proxy)+TAIFEX TX(true 5-min RV)，own MLE numba-JIT，expanding OOS，H=1/5/22，Patton QLIKE，DM-HLN Harvey。**ML ceiling 第 9 次確認**。關鍵誠實發現：(1) RECH-X 在 H1/H5 與 **linear GARCH-X 打平**（無 DM 過 |t|>3，最大 TW H1=−2.68），RNN edge 只在 H22 出現 → 增益來自 RV covariate 不是 neural net；(2) 對 **pre-specified GJR(1,1) 從不勝**，台灣 true-RV GJR 大勝（QLIKE 0.30 vs 0.40，DM +8.4@H1）；(3) 只在 SPY H≥5 勝 RealGARCH。Codex 2+1 passes CONDITIONAL_PASS。Fidelity 限制：US 用 GK daily proxy（偏向不利 RECH-X，故 SPY 薄 edge 保守）、MLE 非原文 Bayesian SMC。
 - [ ] ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）
 
 ### Rough Volatility & Hurst
@@ -755,7 +756,7 @@ boss 點名「M3 不該只盯現有論文，實驗那麼多難道沒長出新論
 
 - **B（最扎實，可起草）— Forecast-loss ⊥ tail-coverage divergence**：模型 QLIKE 大勝（**DM t=−5.60，k850 實測確認**）卻過不了 1% VaR；CF/Conformal 只補一半。支撐 k850/k854/k824/k799/k800。方法論貢獻（loss 換排名反轉）→ IJF/J.Forecasting。**下一步：主線程起 .md 大綱。**
 - **A（cluster 真，thesis 待重驗）— 跨資產 VaR 尾部分布選擇**：k799/k800/k802/k883 真跨資產 VaR backtest（Normal/t/Skew-t/EVT/CF + Trinity + Acerbi-Szekely）。**但** agent 宣稱「skewness=唯一充分統計量 ρ=−0.873」未過查核（−0.876 是某資產 skew 值被誤當預測 rho；實測 rho 僅 0.10–0.21）。需先重估真正的 selection 預測子。
-- **C（誠實 null-result）— 日頻波動率 ML 天花板**：8+ ML（XGBoost/MLP/LSTM/KAN/GINN）無一顯著贏 GJR-GARCH；失敗結構性（loss degeneracy / 227-day overfit / LSTM 塌常數）。支撐 K618/k619/k816/k929/k940/k944 → FRL/IJF 負面結果。
+- **C（誠實 null-result）— 日頻波動率 ML 天花板**：9 次確認，ML（XGBoost/MLP/LSTM/KAN/GINN/RECH-X）無一顯著贏 well-specified GJR-GARCH；失敗結構性（loss degeneracy / 227-day overfit / LSTM 塌常數 / 增益實為 RV covariate 而非 NN）。支撐 K618/k619/k816/k929/k940/k944/K1263/K1312/K1533 → FRL/IJF 負面結果。最新 K1533（RECH-X 復現）尤其乾淨：RNN 對 linear GARCH-X 在 1/5 日 horizon 打平，edge 只在 22 日且增益來自 realized covariate。
 - **D（混合/null 避險，貼用戶 copula-GARCH 專長）— 動態相依 OOS 無加值**：時變 t-copula in-sample 更好（ΔAIC≈−144）但 DCC/copula OOS 少贏常數相關/naive hedge。支撐 k920/921/922/k931/k945/951/k965/K1320。用 HE/utility 不用 Sharpe；需補 1-2 OOS HE-ratio run → JFM/IJF。
 
 追蹤紀律：每個 idle tick 主動從新實驗找此類 cluster，不只維護舊 manuscript。狀態同步 memory [[project_papers_awaiting_submit_decision]]。

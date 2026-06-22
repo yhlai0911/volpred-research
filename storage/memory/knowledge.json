@@ -35602,5 +35602,24 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-06-22T08:52:31.174455"
+  },
+  {
+    "item_id": "03e88a81",
+    "category": "ml_volatility_ceiling",
+    "content": "K1533 — RECH-X replication + Taiwan extension → 9th ML-ceiling confirmation. Replicated RECH-X = Simple-RNN-GARCH(1,1) + exogenous realized-variance covariate, Student-t (Nguyen, Nguyen & Tran 2024, FRL 69:106145) vs GARCH/GJR/GARCH-X/RealGARCH on SPY, QQQ (2007-2024, Garman-Klass daily RV proxy) and TAIFEX TX (2017-2021, TRUE 5-min RV). Own MLE (numba-JIT filters), expanding-window OOS (n=479 US / n=320 TW), horizons 1/5/22, Patton QLIKE, DM-HLN Harvey |t|>3, fixed seed 1533, strict lag (covariate z_{t-1}, per-window demean, training forward-labels satisfy j+H<=origin). VERDICT = PARTIAL REPLICATION. (1) vs RealGARCH: SPY replicates only at H>=5 (H=1 ties); QQQ NULL; Taiwan NULL. (2) vs linear GARCH-X: RECH-X ties at H=1 and H=5 in all 3 markets — none of the six H1/H5 DM stats clears |t|>3 (largest is TW H=1 at -2.68); a significant RNN edge appears ONLY at H=22 (SPY -3.3*, QQQ -4.3*, TW -3.0*). => the predictive gain is the realized-measure covariate, captured equally by the linear GARCH-X; the Simple-RNN adds nothing at 1/5-day horizons. (3) vs pre-specified GJR(1,1): RECH-X NEVER wins; on Taiwan true-RV GJR decisively beats it (QLIKE 0.30 vs 0.40, DM +8.4 at H=1). Fidelity limits: US RV is a GK daily proxy (biases AGAINST RECH-X, so the thin SPY edge is conservative); MLE not the paper's Bayesian SMC; TW RV is day-session-only 2017-2021; the H=22 edges rest on a 21-lag HAC over overlapping windows (weak). Honest takeaway: this is the 9th neural/ML-vol method that fails to beat a well-specified classical GARCH ceiling once baselines are correctly specified and lookahead is removed (cf. K1312 LSTM-GARCH, K1263 KAN-GARCH-MIDAS, K816v2 GINN, K784 GARCH-GRU).",
+    "evidence": [
+      "experiments/k1533/k1533.py",
+      "experiments/k1533/k1533_results.json",
+      "experiments/k1533/README.md",
+      "experiments/k1533/figures/dm_heatmap_rechx_vs_realgarch.png",
+      "experiments/k1533/figures/qlike_TW_TX.png"
+    ],
+    "confidence": 0.82,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1533",
+    "experiment_path": "experiments/k1533/",
+    "reviewer": "Codex CLI 0.141.0 (ChatGPT auth, gpt-5.5 xhigh)",
+    "reviewer_source": "2 in-worktree passes (fixed 4 issues: RNN hidden-state reset, full-sample demean leak, RealGARCH multi-step blow-up, RealGARCH measurement leverage centering) + 1 post-merge codex exec read-only pass (CONDITIONAL_PASS; all 6 methodology checks pass; 2 minor README wordings fixed)",
+    "created_at": "2026-06-22T21:50:37.515127"
   }
 ]
