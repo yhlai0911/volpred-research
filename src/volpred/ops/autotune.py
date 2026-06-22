@@ -10,6 +10,7 @@ operators can see drift over time.
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,15 @@ def _utc_now_iso() -> str:
 
 def _clamp(value: int, lo: int, hi: int) -> int:
     return max(lo, min(hi, value))
+
+
+def _warn_autotune(message: str, *, family: str, value: Any, exc: Exception) -> None:
+    print(
+        "[autotune] WARN "
+        f"{message} family={family!r} value={value!r} "
+        f"error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
 
 
 def autotune_supervisor_rules(
@@ -71,7 +81,13 @@ def autotune_supervisor_rules(
             continue
         try:
             floor_int = int(current_floor)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as exc:
+            _warn_autotune(
+                "family floor parse failed; skipping",
+                family=family,
+                value=current_floor,
+                exc=exc,
+            )
             continue
         actual = int(activity.get(family, 0))
         if floor_int <= 0:
@@ -97,7 +113,13 @@ def autotune_supervisor_rules(
             continue
         try:
             cap_int = int(current_cap)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as exc:
+            _warn_autotune(
+                "family weekly cap parse failed; skipping",
+                family=family,
+                value=current_cap,
+                exc=exc,
+            )
             continue
         if cap_int <= 0:
             continue

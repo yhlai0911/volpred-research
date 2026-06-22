@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 ops autotune floor/cap parse 失敗被靜默略過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/autotune.py::autotune_supervisor_rules()`：`config/supervisor_rules.json` 的 family floor / weekly cap 若不是可轉整數，舊碼直接 `continue`，沒有 warning。
+
+**根因**：autotune 需要容忍單一 family config 壞值，避免 pacing 自動調參整體中斷；但靜默跳過會讓操作者看不出某個 family 的 floor/cap 沒被納入調參，容易誤判 supervisor pacing 規則已正常套用。
+
+**解決方法**：保留壞 floor/cap 跳過的容錯行為，但新增 `[autotune] WARN family floor/weekly cap parse failed; skipping ...` 到 stderr，包含 family、原始值與例外類型。新增 dry-run regression test 覆蓋壞值 warning 且合法 family 仍照常調整。
+
 ## 2026-06-23 fred_backfill_guard CSV date parse 失敗被靜默略過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/fred_backfill_guard.py::_latest_date()`：FRED macro CSV 內單列日期格式看似 `YYYY-MM-DD` 但實際不可 parse 時，舊碼直接 `continue`，沒有 warning。
