@@ -44,6 +44,14 @@ _OPENAI_MODEL = "text-embedding-3-small"  # $0.02/1M tokens
 _GEMINI_MODEL = "gemini-embedding-001"    # $0.15/1M tokens
 
 
+def _warn_index(message: str, exc: Exception | None = None) -> None:
+    """Print non-fatal knowledge-index ingestion/search warnings."""
+    if exc is None:
+        print(f"[knowledge_index] WARN {message}")
+    else:
+        print(f"[knowledge_index] WARN {message}: {type(exc).__name__}: {exc}")
+
+
 # ── Embedding ─────────────────────────────────────────────────────────
 def _load_env():
     """Load API keys from .env and .env.local files."""
@@ -222,8 +230,8 @@ def load_storage_experiments() -> list[dict]:
                     "confidence": 0,
                     "evidence": f.stem,
                 })
-        except (json.JSONDecodeError, Exception):
-            pass
+        except Exception as exc:
+            _warn_index(f"storage experiment skipped ({f.name})", exc)
     return docs
 
 
@@ -246,8 +254,8 @@ def load_strategy_data() -> list[dict]:
                     "confidence": 0,
                     "evidence": fname,
                 })
-        except Exception:
-            pass
+        except Exception as exc:
+            _warn_index(f"strategy data skipped ({fname})", exc)
     return docs
 
 
@@ -433,8 +441,8 @@ def load_notifications() -> list[dict]:
                         "confidence": 0,
                         "evidence": f.name,
                     })
-        except Exception:
-            pass
+        except Exception as exc:
+            _warn_index(f"notification history skipped ({f.name})", exc)
     return docs
 
 
@@ -707,8 +715,8 @@ def load_context(topic: str, n_per_source: int = 8):
                     context_text.append(text)
                 print()
                 total += len(results)
-        except Exception:
-            pass
+        except Exception as exc:
+            _warn_index(f"session context layer skipped ({src})", exc)
 
     print(f"{'='*60}")
     print(f"  Total memory loaded: {total} entries")

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 build_knowledge_index ingestion/search 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/build_knowledge_index.py`：storage experiment JSON、strategy/risk_forecast JSON、notification history JSON 讀取失敗時會直接跳過；session context 分層 search 失敗時也直接跳過。索引或 session context 仍會產生，但使用者看不出少了哪一層知識或哪個檔案壞掉。
+
+**根因**：knowledge index 需要容忍單筆檔案或單一 LanceDB layer 失敗，避免中斷整體 build/context；舊寫法把容錯寫成 silent `pass`，導致 memory drift、壞 JSON、向量表查詢失敗都沒有可觀察訊號。
+
+**解決方法**：新增 `_warn_index()`，讀取壞檔或分層查詢失敗時輸出 `[knowledge_index] WARN ...`，包含檔名 / layer 與 exception；流程仍跳過壞項目並繼續。新增 regression tests 用 tmp storage 驗證壞 strategy、notification、storage experiment JSON 都會 warning 且不拋錯。
+
 ## 2026-06-22 risk_forecast 非致命 VaR 降級被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/risk_forecast.py`：skewed-t GARCH fit 失敗時直接省略 skew-t VaR 欄位，SPY 的 VIX/GARCH ratio 查詢失敗時直接省略 alert。`storage/risk_forecast.json` 仍會產生，但使用者看不出是模型真的沒有風險訊號，還是輔助模型/資料源降級。
