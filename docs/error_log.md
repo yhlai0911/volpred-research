@@ -14,6 +14,22 @@
 
 **教訓**：(1) 產出診斷別只看單一 audit-trail（storage/ops），要看實際產出（feed/git）+ 直接測底層 binary 是否存在可執行；(2) explicit-version pin 是反模式（版本會被刪），要 pin 就需配「版本消失 fallback」，否則用 symlink + 跨版本 token + preflight-alert 的優雅降級。
 
+## 2026-06-22 model_evaluation Christoffersen 例外被偽裝成通過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著 6/22 silent-fallback 系列檢查到 `src/volpred/stats/model_evaluation.py::var_backtest()`：Christoffersen independence test 計算例外時直接回 `stat=0.0, p_value=1.0`，讓 `pass=True`，甚至可能使 `trinity_pass=True`。
+
+**根因**：VaR backtest 應容忍單一 independence-test 計算失敗，不讓整個模型評估中斷；但舊寫法把「無法計算」偽裝成「完美通過」，這比 silent warning 更危險，會弱化研究誠實 gate。
+
+**解決方法**：新增 `_warn_model_evaluation()`；Christoffersen 例外時輸出 `[model_evaluation] WARN ...`，payload 標成 `computed=false`、`pass=false`、`p_value=null`，並把 warning 放進 result。`trinity_pass` 改看 `cc_pass`，未計算的 independence test 不得通過 Trinity。新增 regression test monkeypatch transition count failure，確認 warning 可見且不會 Trinity pass。
+
+## 2026-06-22 build_experiments_index 來源讀取失敗被靜默降級
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著近期「非阻塞容錯不可靜默」同型問題掃到 `scripts/build_experiments_index.py`：README heading/date 讀取失敗、`knowledge.json` / `feed.json` 解析失敗、paper README / experiments.md 讀取失敗時會 fail-open，但部分路徑沒有一致 warning。daily update 仍能產生 index 是對的，但實驗索引的 title/date/feed/paper coverage 可能缺值，操作者看不出是「真的未知」還是「來源壞掉」。
+
+**根因**：experiments index 是 daily-update 輔助入口，設計上要容忍單筆 K 或單篇 paper metadata 壞掉，避免阻塞整批運營摘要；但舊寫法把可降級資料問題實作成 silent default，和近期 ops/report 可觀察性修正方向不一致。
+
+**解決方法**：新增 `_warn_index()`，對 README / knowledge / feed / paper markdown 讀取或解析失敗輸出 `[experiments_index] WARN ... path=<file>` 到 stderr，原本 fail-open 行為不變。新增 regression tests 鎖住壞 knowledge JSON、unreadable README、paper markdown read failure 都會 warning 且不中斷索引流程。
+
 ## 2026-06-22 token_usage_report JSONL usage 掃描壞行被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，承接 `session_drill_down.py` 的同型診斷，掃到 `scripts/token_usage_report.py::_scan_jsonl()`：session JSONL 壞行、assistant usage record 壞 timestamp、缺 timestamp、或檔案讀取失敗時直接跳過 / 回空。報表可繼續產生是對的，但 token usage、cache usage、tool category 統計會少算且沒有任何資料品質線索。

@@ -33,9 +33,15 @@ References:
 
 from __future__ import annotations
 
+import sys
+
 import numpy as np
 from scipy import stats
 from typing import Dict, List, Optional, Tuple
+
+
+def _warn_model_evaluation(message: str, exc: Exception) -> None:
+    print(f"[model_evaluation] WARN {message}: {exc}", file=sys.stderr)
 
 
 # ─── Layer 1 & 2: QLIKE Loss ────────────────────────────────────
@@ -281,6 +287,9 @@ def var_backtest(
         kupiec_p = float(1 - stats.chi2.cdf(lr, df=1))
 
     # Christoffersen (1998) independence test
+    result_warnings: List[str] = []
+    cc_computed = True
+    cc_warning: Optional[str] = None
     try:
         t00 = np.sum((violations[:-1] == 0) & (violations[1:] == 0))
         t01 = np.sum((violations[:-1] == 0) & (violations[1:] == 1))
@@ -297,8 +306,12 @@ def var_backtest(
             cc_p = float(1 - stats.chi2.cdf(lr_ind, df=1))
         else:
             cc_stat, cc_p = 0.0, 1.0
-    except Exception:
-        cc_stat, cc_p = 0.0, 1.0
+    except Exception as exc:
+        cc_computed = False
+        cc_stat, cc_p = None, None
+        cc_warning = "christoffersen independence test failed; marking as not computed"
+        result_warnings.append(f"{cc_warning}: {exc}")
+        _warn_model_evaluation(cc_warning, exc)
 
     # Basel-style traffic light using exact-binomial thresholds at the realized sample size.
     green_cutoff = int(stats.binom.ppf(0.95, n, alpha))
@@ -310,18 +323,29 @@ def var_backtest(
     else:
         traffic = "red"
 
-    return {
+    cc_pass = bool(cc_computed and cc_p is not None and cc_p > 0.05)
+    result = {
         "violation_rate": float(pi_hat),
         "expected_rate": float(alpha),
         "n_violations": int(n1),
         "n_total": int(n),
         "kupiec": {"stat": kupiec_stat, "p_value": kupiec_p, "pass": kupiec_p > 0.05},
-        "christoffersen": {"stat": cc_stat, "p_value": cc_p, "pass": cc_p > 0.05},
+        "christoffersen": {
+            "stat": cc_stat,
+            "p_value": cc_p,
+            "pass": cc_pass,
+            "computed": cc_computed,
+        },
         "basel_traffic_light": traffic,
         "basel_green_cutoff": green_cutoff,
         "basel_yellow_cutoff": yellow_cutoff,
-        "trinity_pass": kupiec_p > 0.05 and cc_p > 0.05 and traffic == "green",
+        "trinity_pass": kupiec_p > 0.05 and cc_pass and traffic == "green",
     }
+    if cc_warning:
+        result["christoffersen"]["warning"] = cc_warning
+    if result_warnings:
+        result["warnings"] = result_warnings
+    return result
 
 
 # ─── Main Evaluation Function ──────────────────────────────────
