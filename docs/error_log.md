@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 task_generator_v2 next_tasks 讀取失敗被靜默當空池
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::load_next_tasks()`：`storage/next_tasks.json` 已存在但 JSON 壞掉或讀取失敗時直接回 `[]`。task generator 繼續是對的，但會把既有任務池看成空池，可能重複產生任務或錯判 coverage。
+
+**根因**：任務生成器採 fail-open，避免 pending queue source 小故障讓補池整體中斷；但舊寫法沒有 warning，讓 canonical pending queue 的 source corruption 不可觀察。
+
+**解決方法**：`load_next_tasks()` 在 JSON 讀取 / 解析失敗時輸出 `[task_generator_v2] WARN next_tasks JSON read failed; treating as empty`，缺檔仍安靜回空 list。新增 regression test 覆蓋壞 JSON。
+
 ## 2026-06-22 build_feed_index jq output 壞行被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/build_feed_index.py::_jq_stream()`：`jq -c` 串流出的單行 JSON 若解析失敗會直接 `continue`。index build 繼續是對的，但 output 少一篇 metadata 時看不出是 jq output 壞行、資料格式異常，還是原本就沒有該篇。

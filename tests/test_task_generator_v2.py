@@ -31,6 +31,20 @@ def test_make_task_adds_default_dispatch_lanes() -> None:
     assert paper_body["dispatch_lane"] == "main_thread"
 
 
+def test_load_next_tasks_warns_on_invalid_json(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text("{bad-json", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+
+    tasks = MODULE.load_next_tasks()
+
+    assert tasks == []
+    captured = capsys.readouterr()
+    assert "[task_generator_v2] WARN next_tasks JSON read failed; treating as empty" in captured.err
+    assert "next_tasks.json" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
 def test_event_article_skips_runtime_managed_adjacent_fomc_date(tmp_path, monkeypatch) -> None:
     runtime_schedules = tmp_path / "runtime_schedules.json"
     runtime_schedules.write_text(

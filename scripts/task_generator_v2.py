@@ -54,15 +54,23 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _warn_task_generator(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[task_generator_v2] WARN {message} "
+        f"path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def load_next_tasks() -> list[dict]:
     """Load existing tasks from storage/next_tasks.json."""
     if not NEXT_TASKS.exists():
         return []
     try:
-        with open(NEXT_TASKS) as f:
-            data = json.load(f)
+        data = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
         return data if isinstance(data, list) else []
-    except (json.JSONDecodeError, OSError):
+    except (json.JSONDecodeError, OSError) as exc:
+        _warn_task_generator("next_tasks JSON read failed; treating as empty", NEXT_TASKS, exc)
         return []
 
 
