@@ -168,9 +168,14 @@ def _active_worktrees() -> list[str]:
     return [d.name for d in wd.iterdir() if d.is_dir() and d.name != ".DS_Store"]
 
 
+def _record_health_warning(health: dict, message: str, exc: Exception) -> None:
+    warnings = health.setdefault("warnings", [])
+    warnings.append(f"{message}: {type(exc).__name__}: {exc}")
+
+
 def _platform_health() -> dict:
     """Snapshot of platform key health metrics."""
-    health = {}
+    health = {"warnings": []}
     # Draft pool
     feed_path = STORAGE / "reports" / "feed.json"
     if feed_path.exists():
@@ -181,8 +186,9 @@ def _platform_health() -> dict:
                 health["published_total"] = sum(1 for a in feed if isinstance(a, dict) and a.get("status") == "published")
             else:
                 health["draft_count"] = None
-        except Exception:
+        except Exception as exc:
             health["draft_count"] = None
+            _record_health_warning(health, "feed draft count read failed", exc)
     # Release pool cadence
     rs_path = STORAGE / ".release_settings.json"
     if rs_path.exists():
@@ -198,8 +204,9 @@ def _platform_health() -> dict:
                 gap_min = (NOW - last_dt).total_seconds() / 60
                 health["last_release_gap_min"] = round(gap_min, 1)
                 health["last_release_at"] = last_dt.astimezone(TW).strftime("%H:%M") + " 台灣時間"
-        except Exception:
+        except Exception as exc:
             health["release_interval_min"] = None
+            _record_health_warning(health, "release settings read failed", exc)
     # Knowledge.json size + freshness
     kj = STORAGE / "memory" / "knowledge.json"
     if kj.exists():
@@ -207,8 +214,8 @@ def _platform_health() -> dict:
             stat = kj.stat()
             health["knowledge_size_mb"] = round(stat.st_size / (1024 * 1024), 2)
             health["knowledge_mtime"] = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).astimezone(TW).strftime("%Y-%m-%d %H:%M") + " 台灣時間"
-        except Exception:
-            pass
+        except Exception as exc:
+            _record_health_warning(health, "knowledge.json stat failed", exc)
     # Active alerts (current)
     health["alert_breaches"] = 0
     try:
@@ -226,8 +233,9 @@ def _platform_health() -> dict:
         try:
             tasks = json.loads(nt.read_text(encoding="utf-8"))
             health["pending_tasks"] = sum(1 for t in tasks if isinstance(t, dict) and t.get("status") == "pending")
-        except Exception:
-            pass
+        except Exception as exc:
+            health["pending_tasks"] = None
+            _record_health_warning(health, "pending tasks read failed", exc)
     return health
 
 
@@ -344,14 +352,14 @@ def _recommendations(commits: list[dict], articles: dict, health: dict, work: li
     # Release cadence
     rg = health.get("last_release_gap_min")
     interval = health.get("release_interval_min", 180)
-    if rg is not None and rg > interval:
+    if isinstance(rg, (int, float)) and isinstance(interval, (int, float)) and rg > interval:
         recs.append(f"釋出已 due（gap={rg:.0f}min > interval={interval}min）— 跑 `VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings`")
     # New experiments pending Codex
     if any("experiment" in c["subject"].lower() and "merge" in c["subject"].lower() for c in commits):
         recs.append("最近 merge 了實驗 worktree — 主線程確認已跑 Codex review + knowledge.json 入庫")
     # Pending tasks high
     pending = health.get("pending_tasks", 0)
-    if pending > 100:
+    if isinstance(pending, int) and pending > 100:
         recs.append(f"pending tasks {pending} 個 — 排程下次 refill_task_pool 視必要性，避免 noise 累積")
     # Worktree backlog
     wt_count = health.get("active_worktrees", 0)
@@ -499,6 +507,13 @@ def build_html() -> tuple[str, str, str]:
     # Active worktrees
     parts.append(f"<tr><td>Active worktrees</td><td>{len(worktrees)}</td><td>{'🟢' if len(worktrees) <= 2 else '🟡'}</td></tr>")
     parts.append("</tbody></table>")
+    health_warnings = health.get("warnings") or []
+    if health_warnings:
+        parts.append("<p style='color:#b45309;font-weight:600;margin:10px 0 4px;'>Health warnings</p>")
+        parts.append("<ul>")
+        for warning in health_warnings:
+            parts.append(f"<li>{esc(warning)}</li>")
+        parts.append("</ul>")
 
     # ───────────────────── Notable Events ─────────────────────
     parts.append("<h2>異常與值得關注事件</h2>")
@@ -620,6 +635,11 @@ def build_html() -> tuple[str, str, str]:
     text_lines.append(f"- Alerts: {health.get('alert_breaches',0)}/{health.get('alert_total_checked','?')} breach")
     text_lines.append(f"- knowledge.json: {health.get('knowledge_size_mb','?')}MB @ {health.get('knowledge_mtime','?')}")
     text_lines.append(f"- Pending tasks: {health.get('pending_tasks','?')} ｜ Worktrees: {len(worktrees)}")
+    health_warnings = health.get("warnings") or []
+    if health_warnings:
+        text_lines.append("- Health warnings:")
+        for warning in health_warnings:
+            text_lines.append(f"  - {warning}")
     text_lines.append("")
     if events:
         text_lines.append("## 異常事件")

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 work_summary_6h platform health 局部讀取失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/work_summary_6h.py`：6 小時運營摘要的 platform health 在 feed draft count、release settings、knowledge.json stat、pending next_tasks 讀取失敗時只把欄位設為 `None` 或直接 `pass`。email 仍會寄出，但健康表缺值時看不出是「沒有資料」還是「讀取失敗」。
+
+**根因**：6h summary 正確地避免單一資料源中斷整封信，但舊寫法沒有把局部降級帶進摘要，重演近期 report/dashboard 類 silent failure。
+
+**解決方法**：新增 `_record_health_warning()`，platform health 的局部讀取例外會寫入 `health["warnings"]`；HTML 與 plain-text 平台健康段落都列出 Health warnings。新增 regression tests 鎖住壞 `next_tasks.json` 會產生 warning，且 build_html 會渲染 warning。
+
 ## 2026-06-22 gemini_ask paid API usage notification failure 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/gemini_ask.py`：成功打到付費 Gemini API 後，usage ledger 寫入失敗或 `send-alert` admin 通知失敗都直接 `pass`。腳本仍會把 answer 回給 caller，但「有付費 API 使用」這件事可能沒有可靠紀錄或告警。
