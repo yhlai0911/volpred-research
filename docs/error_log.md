@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 build_feed_index 壞日期被歸入日期缺失但無診斷
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/build_feed_index.py::_parse_date()`：article date 欄位格式壞掉時直接回 `None`，後續進「日期缺失」桶，和真的缺欄位無法區分。
+
+**根因**：feed index 是 daily update 的輔助索引，應該容忍單篇文章 metadata 異常並繼續產生 `INDEX.md` / `index.json`；但日期 parse failure 若完全靜默，會讓 recent-30d 統計與季度桶分配少算，操作者只能看到「日期缺失」，看不到 source data 是壞格式。
+
+**解決方法**：新增 `_DATE_PARSE_WARNED` 去重集合；`_parse_date()` 對 invalid ISO date 輸出 `[feed-index] WARN invalid article date; treating as missing ...` 到 stderr，同一 raw 值只提示一次以避免 `_bucket()`、`_fmt_row()`、`_build_summary()` 重複洗版。新增 regression test 覆蓋壞日期 warning 去重。
+
 ## 2026-06-22 generate_handoff KEEP 區塊讀取失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_handoff.py::_extract_keep_block()`：既有 `storage/ops/handoff_latest.md` 存在但讀取失敗時直接回空字串，導致手寫 KEEP 區塊不會保留，且沒有任何 warning。

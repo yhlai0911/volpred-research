@@ -35,3 +35,15 @@ def test_jq_stream_warns_on_invalid_json_line(tmp_path: Path, monkeypatch, capsy
     assert "[feed-index] WARN jq output JSON line parse failed; skipping" in captured.err
     assert "{bad-json" in captured.err
     assert "JSONDecodeError" in captured.err
+
+
+def test_parse_date_warns_once_on_invalid_article_date(capsys) -> None:
+    module = _load_build_feed_index()
+
+    assert module._parse_date("not-a-date") is None
+    assert module._parse_date("not-a-date") is None
+
+    captured = capsys.readouterr()
+    assert captured.err.count("[feed-index] WARN invalid article date") == 1
+    assert "not-a-date" in captured.err
+    assert "Invalid isoformat string" in captured.err

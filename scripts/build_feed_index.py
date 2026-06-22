@@ -34,6 +34,7 @@ ROOT = Path(__file__).parent.parent
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 OUT_MD = ROOT / "storage" / "reports" / "INDEX.md"
 OUT_JSON = ROOT / "storage" / "reports" / "index.json"
+_DATE_PARSE_WARNED: set[str] = set()
 
 # jq program: emit one compact JSON per article with just the metadata we need.
 # Handles `details` being null, object (with chart_url), or string.
@@ -105,7 +106,14 @@ def _parse_date(raw: str | None) -> datetime | None:
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
         return dt.astimezone(timezone.utc)
-    except ValueError:
+    except ValueError as exc:
+        if raw not in _DATE_PARSE_WARNED:
+            _DATE_PARSE_WARNED.add(raw)
+            print(
+                "[feed-index] WARN invalid article date; treating as missing "
+                f"raw={raw[:120]!r} error={type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
         return None
 
 
