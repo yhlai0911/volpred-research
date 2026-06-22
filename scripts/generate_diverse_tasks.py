@@ -393,7 +393,11 @@ def gen_governance_tasks(existing: set[str]) -> list[dict]:
                 1 for line in ERROR_LOG.read_text(encoding="utf-8").splitlines()
                 if line.startswith("### ")
             )
-        except Exception:
+        except Exception as exc:
+            _warn_diverse(
+                "error_log accumulation read failed; treating heading count as zero "
+                f"path={ERROR_LOG} error={type(exc).__name__}: {exc}"
+            )
             heading_count = 0
         if heading_count >= ERROR_LOG_REVIEW_THRESHOLD:
             task_id = f"governance_error_log_review_{heading_count}"

@@ -201,6 +201,23 @@ def test_governance_skill_audit_warns_when_skill_stat_fails(
     assert "stat denied" in err
 
 
+def test_governance_error_log_read_failure_warns(tmp_path, monkeypatch, capsys) -> None:
+    skills_dir = tmp_path / "skills"
+    skills_dir.mkdir()
+    error_log = tmp_path / "error_log.md"
+    error_log.mkdir()
+
+    monkeypatch.setattr(generate_diverse_tasks, "SKILLS_DIR", skills_dir)
+    monkeypatch.setattr(generate_diverse_tasks, "ERROR_LOG", error_log)
+
+    tasks = generate_diverse_tasks.gen_governance_tasks(existing=set())
+
+    assert tasks == []
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN error_log accumulation read failed; treating heading count as zero" in err
+    assert "IsADirectoryError" in err
+
+
 def test_parse_banner_ts_accepts_hhmm_without_seconds() -> None:
     """Python script banners like `=== 台股數據收集: 2026-06-11 15:00 ===` use HH:MM
     (no seconds). _parse_banner_ts must accept them, otherwise _latest_cron_log_ts

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_diverse_tasks error_log accumulation 讀取失敗被靜默當 0
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_governance_tasks()`：error_log accumulation governance signal 讀取 `docs/error_log.md` 失敗時，舊碼直接把 `heading_count` 當 0，沒有任何 warning。
+
+**根因**：error_log accumulation 是用來觸發治理 sweep 的防漂移訊號。讀取失敗時把 count 當 0 可避免 task generator crash，但靜默當 0 會讓操作者誤以為 error log 尚未累積到門檻，而不是來源檔不可讀導致 sweep 候選被關掉。
+
+**解決方法**：error log 讀取失敗時改用 `_warn_diverse()` 輸出 `[diverse_gen] WARN error_log accumulation read failed; treating heading count as zero ...` 到 stderr，原本不產生 governance task 的 fallback 行為不變。新增 regression test 覆蓋 error_log path 不可讀時不 crash 且有 warning。
+
 ## 2026-06-23 generate_diverse_tasks skill mtime stat 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_governance_tasks()`：skill audit 掃描 `.claude/skills/*/SKILL.md` 時，單一 `SKILL.md` 的 `stat()` 失敗會直接 `continue`，沒有任何 warning。
