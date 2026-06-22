@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from volpred.config import schedules as schedule_config
+from volpred.ops import event_jobs
 from volpred.ops.event_jobs import expand_due_event_jobs, gc_event_ledger, preview_event_jobs
 from volpred.ops.local_control_plane import get_task
 
@@ -18,11 +19,16 @@ def _clear_schedule_cache():
     schedule_config.load_runtime_schedules.cache_clear()
 
 
-def _write_runtime_schedules(path: Path, *, event_items: list[dict]) -> None:
+def _write_runtime_schedules(
+    path: Path,
+    *,
+    event_items: list[dict],
+    timezone_name: str = "Asia/Taipei",
+) -> None:
     payload = {
         "metadata": {
             "canonical_path": "config/runtime_schedules.json",
-            "timezone": "Asia/Taipei",
+            "timezone": timezone_name,
             "updated_at": "2026-04-17",
         },
         "system_crontab": {"items": []},
@@ -31,6 +37,24 @@ def _write_runtime_schedules(path: Path, *, event_items: list[dict]) -> None:
         "event_jobs": {"items": event_items},
     }
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def test_coerce_datetime_warns_when_runtime_timezone_invalid(tmp_path: Path, monkeypatch, capsys):
+    config_path = tmp_path / "runtime_schedules.json"
+    _write_runtime_schedules(
+        config_path,
+        event_items=[],
+        timezone_name="Invalid/Timezone",
+    )
+    monkeypatch.setattr(schedule_config, "RUNTIME_SCHEDULES_PATH", config_path)
+    schedule_config.load_runtime_schedules.cache_clear()
+
+    parsed = event_jobs._coerce_datetime("2026-04-17T10:00:00")
+
+    captured = capsys.readouterr()
+    assert parsed == datetime(2026, 4, 17, 10, 0, tzinfo=timezone.utc)
+    assert "[event_jobs] WARN invalid runtime timezone" in captured.out
+    assert "Invalid/Timezone" in captured.out
 
 
 def test_expand_due_event_jobs_materializes_once(tmp_path: Path, monkeypatch):

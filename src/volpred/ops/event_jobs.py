@@ -24,12 +24,17 @@ def _event_ledger_root(storage_dir: str = "storage") -> Path:
     return root
 
 
+def _warn_event_jobs(message: str, exc: Exception) -> None:
+    print(f"[event_jobs] WARN {message}: {type(exc).__name__}: {exc}")
+
+
 def _runtime_timezone() -> ZoneInfo:
     metadata = load_runtime_schedules().get("metadata", {})
     timezone_name = str(metadata.get("timezone") or "UTC")
     try:
         return ZoneInfo(timezone_name)
-    except Exception:
+    except Exception as exc:
+        _warn_event_jobs(f"invalid runtime timezone {timezone_name!r}; using UTC", exc)
         return ZoneInfo("UTC")
 
 

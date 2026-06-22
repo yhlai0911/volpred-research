@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 event_jobs runtime timezone fallback 被靜默套 UTC
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/event_jobs.py::_runtime_timezone()`：`config/runtime_schedules.json::metadata.timezone` 無效時直接退回 UTC。event materializer 不因 config 小錯中斷是合理的，但 naive `not_before/deadline/gc_after` 會被 UTC 解讀，可能改變事件窗口是否 due，卻沒有任何診斷訊號。
+
+**根因**：event_jobs 將 runtime timezone 視為 best-effort config，缺少 fail-open warning，讓 schedule metadata drift 不可觀察。
+
+**解決方法**：新增 `_warn_event_jobs()`；invalid timezone 會輸出 `[event_jobs] WARN invalid runtime timezone ... using UTC`，原本 UTC fallback 行為不變。新增 regression test 鎖住 invalid timezone + naive timestamp 時會 warning 且 fallback 到 UTC。
+
 ## 2026-06-22 feed_sync single JSON 讀取失敗被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/feed_sync.py::reconcile_content_from_singles()`：掃 `storage/reports/mile_*.json` 補回完整文章 content 時，single JSON 讀取 / 解析失敗會直接 `continue`。reconcile 可繼續是對的，但結果只看得到少補幾篇，看不到哪個 single 壞掉。
