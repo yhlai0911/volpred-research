@@ -38,7 +38,12 @@
 
 **根因更正（同日次輪 tick，strike 2+）**：上輪判「transient IMAP spike」是**錯的**。次輪驗證 23:30 + 23:45 排程 fire **又雙雙 timeout**（exit=142），但手動跑 9s、最小 env 33s → 證明非 transient、非時間問題，是 **launchd context 下序列 IMAP I/O 跨越 60s alarm 邊界**：poll 對 SINCE 窗內 ~20 封 email 各做一次 IMAP FETCH round-trip，總延遲隨 email count 增長（59→63）且高變異（9s/33s/>60s），60s 太緊把合法工作 SIGALRM 砍掉。keychain 假設排除（憑證走 `.env` 非 keychain）。
 
-**結構修復（已落地，非候選）**：(a) `scripts/cron_gmail_poll.sh` 的 perl alarm **60s→180s**（cp 到 `~/.volpred/bin/`；180s 是合法 workload 的 headroom，非 band-aid；每 15min fire 不會 overlap；hang 保護保留在更高 ceiling）；(b) `src/volpred/ops/alerts.py` 新增 `_parse_gmail_poll_freshness_state`（`gmail_inbox_state.json` mtime warn>2h / critical>6h，**無 active-window gate**因 poll 24/7 跑），補上「boss email pipeline silent 停擺」這個原本零 alert 的盲區；regression test `tests/test_gmail_poll_freshness_alert.py`（4 cases：fresh/warn/critical/missing 全 PASS）。kickstart 驗證 180s wrapper 在真 launchd 下跑完。後續可選優化：收斂 SINCE 窗 / 批次 IMAP fetch / high-water-mark UID（目前 timeout 已解，不急）。
+**已落地的部分修復 + 更深根因（strike-3，誠實更正）**：
+- (a) `scripts/cron_gmail_poll.sh` perl alarm **60s→180s**（cp 到 `~/.volpred/bin/`）；
+- (b) `src/volpred/ops/alerts.py` 新增 `_parse_gmail_poll_freshness_state`（mtime warn>2h / critical>6h，無 active-window gate）+ regression test `tests/test_gmail_poll_freshness_alert.py`（4 cases PASS）。**這個 dead-man check 是目前最有價值的產出**——補上零 alert 盲區，未來再停擺會主動報。
+- **但 180s 不是真修復**：kickstart 驗證時連 **180s 都撞 alarm 被 kill**（exit=142 @ 23:56:43）。同時 `lsof -iTCP:993` 顯示 **6 個 ESTABLISHED 連線但無 poll process 在跑** → 真根因是 **`gmail_inbox_poll.py` 被 SIGALRM 硬殺時沒關閉 IMAP socket**，殭屍連線累積 → Gmail 連線數 throttle → 後續 `M.login()` hang → 更多 timeout → 更多殭屍（惡性循環）。這也解釋 21:15~23:15 的原始 timeout（被 kill 的 run 留 half-open 連線滾雪球），以及為何我密集 kickstart 反而加劇。
+- **真正的結構修復（daytime follow-up，需謹慎改 code 不可半夜盲改）**：(1) `gmail_inbox_poll.py` 用 try/finally 或 signal handler 確保 `M.logout()`/socket close（即使 timeout 也優雅關閉）；(2) 加 single-flight lock（PID/flock）防止 overlapping poll 累積連線；(3) IMAP socket 設 `settimeout` 讓 login/fetch 自己 fail-fast 而非靠外層 SIGALRM 硬殺。
+- **即時狀態**：23:50 手動/最小-env run 已完成並補 gap（queued=0，整段無漏 actionable boss 回信）。Gmail throttle 需 ~30min idle 自然清掉；停止再戳，靠新 dead-man check 當安全網 + 下班排程 fire 自然恢復。
 
 ## 2026-06-22 release_pool failed sync ledger 壞檔被靜默重建
 
