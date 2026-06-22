@@ -68,6 +68,14 @@ def test_var_es_basel_and_student_t_rule_is_documented() -> None:
     assert missing == []
 
 
+def test_k802_student_t_var_path_uses_unit_variance_scaling() -> None:
+    source = (ROOT / "experiments" / "k802" / "k802_gjr_skewt.py").read_text(encoding="utf-8")
+
+    assert "unit_variance_student_t_ppf(alpha_var, df_t_cur)" in source
+    assert "t_dist.ppf(alpha_var" not in source
+    assert "t_dist.logpdf(z / scale, df=df) - np.log(scale)" in source
+
+
 def test_retrofit_uniqueness_claim_rule_is_documented() -> None:
     section = _experiments_rule_section("### Retrofit 後 uniqueness claims 必須重驗 current result table")
 

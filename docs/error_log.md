@@ -2596,6 +2596,8 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 
 **Lesson / prevention**: VaR/ES articles must distinguish exact regulatory rules from custom convenience thresholds. If a script says "Basel", the review must inspect the zone formula, not just violation counts. Student-t innovations in GARCH-style VaR need explicit unit-variance scaling unless the fitted distribution includes a free scale parameter and that scale is reported.
 
+**2026-06-22 Codex partial source guard**: `experiments/k802/k802_gjr_skewt.py` Student-t path now uses the canonical `unit_variance_student_t_ppf()` helper and fits df with a unit-variance Student-t likelihood; regression test blocks raw `t_dist.ppf(alpha_var, ...)` from returning. This does **not** rerun or overwrite `k802_gjr_skewt_results.json`; canonical Basel handling, skewed-t standardization, regenerated charts, and article revision remain K802-v2 work.
+
 ## 2026-06-17 — K783c article source review FAIL: inverse QLIKE used for window-regime ranking
 
 **Symptom**: Published article `mile_ec0e72ee` accurately copied K783c JSON values and cautiously noted that only one pairwise comparison cleared the strict threshold, but its central conclusion said the best GJR-GARCH training window changes by regime (`2000` days in 2020-2021, `504` in 2018-2019, `252` in 2016-2017).

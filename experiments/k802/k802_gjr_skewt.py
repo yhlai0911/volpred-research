@@ -64,6 +64,8 @@ from numba import njit
 from scipy.optimize import minimize
 from scipy.stats import norm, t as t_dist, chi2, spearmanr
 
+from volpred.stats.model_evaluation import unit_variance_student_t_ppf
+
 warnings.filterwarnings('ignore')
 
 RESULTS_PATH = os.path.join(os.path.dirname(__file__), 'k802_gjr_skewt_results.json')
@@ -214,9 +216,10 @@ def estimate_t_df(std_residuals, df_min=2.1, df_max=30.0):
         df = np.exp(log_df)
         if df < df_min or df > df_max:
             return 1e10
-        # Student-t with mean=0, scale=1 is sqrt((df-2)/df) for unit variance
-        # We use df directly since z are already standardized (mean~0, std~1)
-        ll = np.sum(t_dist.logpdf(z, df=df))
+        scale = np.sqrt((df - 2) / df)
+        # z is standardized to unit variance, so use the scaled Student-t
+        # density instead of fitting a raw t(df) with variance df/(df-2).
+        ll = np.sum(t_dist.logpdf(z / scale, df=df) - np.log(scale))
         return -ll if np.isfinite(ll) else 1e10
 
     res = minimize(neg_loglik, x0=[np.log(5.0)],
@@ -592,10 +595,7 @@ def run_oos_loop(returns_all, oos_start_idx, oos_end_idx, refit_every=63, alpha_
 
             # Model 2: GJR + Student-t VaR
             df_t_cur = dist_params_t[-1]['df'] if dist_params_t else 5.0
-            z_t = float(t_dist.ppf(alpha_var, df=df_t_cur))
-            # Scale: t(df) has variance df/(df-2), so standardized z has std=1
-            # But our residuals are already approximately N(0,1) in expectation
-            # Use t_dist.ppf directly since we fit on standardized residuals
+            z_t = unit_variance_student_t_ppf(alpha_var, df_t_cur)
             var_gjr_t[i] = sigma_gjr * z_t
 
             # Model 3: GJR + Skewed-t VaR
