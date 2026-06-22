@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 indicator signals git version fallback 靜默變 unknown
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/indicators/signals.py::_get_git_short_sha()` 在 `git rev-parse --short HEAD` exception 時直接 `pass`，最後回傳 `code_version="unknown"`。signal emission 可以繼續是對的，但 provenance 降級沒有任何 log。
+
+**根因**：indicator arena 的 `code_version` fallback 把「git 不可用」視為非致命，卻沒有把降級原因寫到 cron/stdout；這會讓 daily signals 的 provenance 變差但不易追蹤。
+
+**解決方法**：保留 `unknown` fallback，但 git non-zero exit 或 exception 時輸出 `[signals] WARN ...`，包含 exit/stderr 或 exception。新增 regression test：`subprocess.run` 拋 `RuntimeError("git missing")` 時回傳 `unknown` 且 warning 可見。
+
 ## 2026-06-22 release_pool 文章通知失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/content.py::release_pool_articles()` 在釋出文章後直接呼叫 `EmailNotifier.notify_article_published()`，但 exception 只 `pass`。若 SMTP / notifier 失敗，release pool 仍成功發布文章，但 ops log 看不到通知缺失。

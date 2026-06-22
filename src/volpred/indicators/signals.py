@@ -74,10 +74,14 @@ def _get_git_short_sha() -> str:
             text=True,
             timeout=5,
         )
-        if result.returncode == 0:
+        if result.returncode == 0 and result.stdout.strip():
             return result.stdout.strip()
-    except Exception:
-        pass
+        print(
+            "[signals] WARN git rev-parse failed; "
+            f"exit={result.returncode} stderr={result.stderr.strip()[:200]!r}"
+        )
+    except Exception as exc:
+        print(f"[signals] WARN git rev-parse exception: {exc}")
     return "unknown"
 
 

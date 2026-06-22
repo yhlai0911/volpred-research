@@ -19,6 +19,7 @@ from pathlib import Path
 
 import pytest
 
+from volpred.indicators import signals as signals_module
 from volpred.indicators.registry import (
     IndicatorSpec,
     load_registry,
@@ -65,6 +66,18 @@ def _make_signal(
 # ---------------------------------------------------------------------------
 # Test 1: Registry loads correctly — 6 active indicators
 # ---------------------------------------------------------------------------
+
+def test_git_short_sha_warning_when_git_unavailable(monkeypatch, capsys):
+    def fail_run(*args, **kwargs):
+        raise RuntimeError("git missing")
+
+    monkeypatch.setattr(signals_module.subprocess, "run", fail_run)
+
+    assert signals_module._get_git_short_sha() == "unknown"
+    out = capsys.readouterr().out
+    assert "[signals] WARN git rev-parse exception" in out
+    assert "git missing" in out
+
 
 class TestRegistryLoad:
     def test_loads_six_active_indicators(self):
