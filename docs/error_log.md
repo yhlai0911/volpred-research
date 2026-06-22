@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 cron_review log mtime fallback 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/cron_review.py::last_log_run()`：cron log 可讀但 `stat()` 失敗時，舊碼直接略過 mtime fallback，沒有任何 warning。
+
+**根因**：cron review 會把 log mtime 當成 wrapper 是否有 fire 的活性底線，用來修補非標準 completion banner 造成的假 stale；若 `stat()` 失敗，退回 banner / piggy-back 判斷是合理 fail-open，但靜默降級會讓操作者看不出這次 review 少了一個重要 staleness 訊號。
+
+**解決方法**：新增 `_warn_cron_review()`，在 log mtime `stat()` 失敗時輸出 `[cron_review] WARN log mtime stat failed; continuing without mtime fallback ...` 到 stderr，原本 review 行為不變。新增 regression test 覆蓋 log 可讀但 mtime stat 失敗時的 warning 與 fallback 語意。
+
 ## 2026-06-23 agent_spec 非 UTF-8 資產 fallback copy 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/agent_spec.py`：import/render agent specs 時若 skill 或 agent asset 不是 UTF-8，舊碼捕捉 `UnicodeDecodeError` 後直接 `shutil.copy2()`，沒有任何提示。

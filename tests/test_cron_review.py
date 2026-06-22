@@ -36,6 +36,32 @@ def test_last_log_run_returns_mtime_when_completion_marker_not_banner(tmp_path):
     assert abs((now - res["mtime"]).total_seconds()) < 86400
 
 
+def test_last_log_run_warns_when_mtime_stat_fails(capsys):
+    class UnstatableLog:
+        def __init__(self) -> None:
+            self.path = Path("/tmp/unstatable-cron.log")
+
+        def exists(self) -> bool:
+            return True
+
+        def read_text(self, errors: str = "ignore") -> str:
+            return "=== job start 2026-06-23 00:00:00 ===\n"
+
+        def stat(self):
+            raise OSError("stat denied")
+
+        def __str__(self) -> str:
+            return str(self.path)
+
+    res = last_log_run(UnstatableLog())  # type: ignore[arg-type]
+
+    err = capsys.readouterr().err
+    assert "[cron_review] WARN log mtime stat failed; continuing without mtime fallback" in err
+    assert "stat denied" in err
+    assert res["mtime"] is None
+    assert res["start"] == datetime(2026, 6, 23, 0, 0, tzinfo=TPE)
+
+
 def test_expected_prev_fire_respects_weekday_restricted_collect_us_cron():
     now = datetime(2026, 5, 25, 22, 0, tzinfo=TPE)  # Sunday night Taipei
     prev_fire = expected_prev_fire(now, "3 7 * * 2-6")

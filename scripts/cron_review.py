@@ -67,6 +67,14 @@ JOBS = {
 _SLACK_HOURS = 2.0
 
 
+def _warn_cron_review(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[cron_review] WARN {message}: path={path} "
+        f"error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def _piggy_back_end(job_id: str) -> datetime | None:
     """Read piggy-back last-success timestamp from cron_last_run.json."""
     if not LAST_RUN_PATH.exists():
@@ -139,8 +147,8 @@ def last_log_run(log_path: Path) -> dict:
     mtime = None
     try:
         mtime = datetime.fromtimestamp(log_path.stat().st_mtime, TPE)
-    except OSError:
-        pass
+    except OSError as exc:
+        _warn_cron_review("log mtime stat failed; continuing without mtime fallback", log_path, exc)
     start = end = None
     for ln in reversed(lines):
         if "===" not in ln:
