@@ -9,6 +9,7 @@ Optimized: vectorized macro alignment, flush output, quarterly OOS re-estimation
 import sys
 import time
 import warnings
+from textwrap import dedent
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -19,6 +20,11 @@ warnings.filterwarnings("ignore")
 # Force unbuffered output
 def log(msg=""):
     print(msg, flush=True)
+
+
+def _warn_validation(message: str, exc: Exception) -> None:
+    log(f"[validate_garch_midas] WARN {message}: {type(exc).__name__}: {exc}")
+
 
 # ── Vectorized MIDAS functions (replacing slow align_macro_to_daily) ─
 
@@ -247,8 +253,11 @@ def oos_gjr(all_returns, oos_start_idx, refit_every=63):
                 cv_r = r.conditional_volatility
                 cv_arr = cv_r.values if hasattr(cv_r, 'values') else cv_r
                 last_sigma2 = (cv_arr[-1] ** 2) / 10000
-            except Exception:
-                pass
+            except Exception as exc:
+                _warn_validation(
+                    f"GJR refit failed at oos_step={i}, train_end={we}; using previous params",
+                    exc,
+                )
 
         last_r = all_returns[we - 1]
         ind = 1.0 if last_r < 0 else 0.0
@@ -331,221 +340,226 @@ def oos_garch_midas(all_returns, all_index, macro_series, oos_start_idx,
 # MAIN
 # ═══════════════════════════════════════════════════════════════════
 
-log("=" * 70)
-log("GARCH-MIDAS Cross-Asset Validation: QQQ & EEM")
-log("=" * 70)
+def main() -> None:
+    log("=" * 70)
+    log("GARCH-MIDAS Cross-Asset Validation: QQQ & EEM")
+    log("=" * 70)
 
-# Download INDPRO
-log("\n[1] Downloading INDPRO from FRED...")
-indpro_url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=INDPRO"
-indpro_df = pd.read_csv(indpro_url, parse_dates=["observation_date"])
-indpro_df = indpro_df.rename(columns={"observation_date": "date"}).set_index("date").sort_index()
-indpro_df = indpro_df[indpro_df["INDPRO"] != "."]
-indpro_df["INDPRO"] = indpro_df["INDPRO"].astype(float)
-indpro_growth = np.log(indpro_df["INDPRO"]).diff().dropna()
-log(f"  INDPRO growth: {indpro_growth.index[0].date()} to {indpro_growth.index[-1].date()}, N={len(indpro_growth)}")
+    # Download INDPRO
+    log("\n[1] Downloading INDPRO from FRED...")
+    indpro_url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=INDPRO"
+    indpro_df = pd.read_csv(indpro_url, parse_dates=["observation_date"])
+    indpro_df = indpro_df.rename(columns={"observation_date": "date"}).set_index("date").sort_index()
+    indpro_df = indpro_df[indpro_df["INDPRO"] != "."]
+    indpro_df["INDPRO"] = indpro_df["INDPRO"].astype(float)
+    indpro_growth = np.log(indpro_df["INDPRO"]).diff().dropna()
+    log(f"  INDPRO growth: {indpro_growth.index[0].date()} to {indpro_growth.index[-1].date()}, N={len(indpro_growth)}")
 
-# Download assets
-import yfinance as yf
-assets = ["QQQ", "EEM"]
-asset_data = {}
+    # Download assets
+    import yfinance as yf
+    assets = ["QQQ", "EEM"]
+    asset_data = {}
 
-log("\n[2] Downloading asset data...")
-for ticker in assets:
-    df = yf.download(ticker, start="1999-01-01", end="2026-03-17", progress=False)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    df = df.sort_index()
-    df["returns"] = np.log(df["Close"] / df["Close"].shift(1))
-    df = df.dropna(subset=["returns"])
-    asset_data[ticker] = df
-    log(f"  {ticker}: {df.index[0].date()} to {df.index[-1].date()}, N={len(df)}")
+    log("\n[2] Downloading asset data...")
+    for ticker in assets:
+        df = yf.download(ticker, start="1999-01-01", end="2026-03-17", progress=False)
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+        df = df.sort_index()
+        df["returns"] = np.log(df["Close"] / df["Close"].shift(1))
+        df = df.dropna(subset=["returns"])
+        asset_data[ticker] = df
+        log(f"  {ticker}: {df.index[0].date()} to {df.index[-1].date()}, N={len(df)}")
 
-# ── Run experiments ──────────────────────────────────────────────
+    # ── Run experiments ──────────────────────────────────────────────
 
-IS_END = "2022-12-31"
-OOS_START = "2023-01-01"
-REFIT = 63  # quarterly
+    IS_END = "2022-12-31"
+    OOS_START = "2023-01-01"
+    REFIT = 63  # quarterly
 
-results = []
+    results = []
 
-for ticker in assets:
-    log(f"\n{'=' * 70}")
-    log(f"Asset: {ticker}")
-    log(f"{'=' * 70}")
+    for ticker in assets:
+        log(f"\n{'=' * 70}")
+        log(f"Asset: {ticker}")
+        log(f"{'=' * 70}")
 
-    df = asset_data[ticker]
-    returns = df["returns"]
-    all_ret = returns.values
-    all_idx = returns.index
+        df = asset_data[ticker]
+        returns = df["returns"]
+        all_ret = returns.values
+        all_idx = returns.index
 
-    is_mask = returns.index <= IS_END
-    oos_mask = returns.index >= OOS_START
-    returns_is = returns[is_mask]
-    returns_oos = returns[oos_mask]
-    oos_si = np.where(all_idx >= OOS_START)[0][0]
+        is_mask = returns.index <= IS_END
+        oos_mask = returns.index >= OOS_START
+        returns_is = returns[is_mask]
+        returns_oos = returns[oos_mask]
+        oos_si = np.where(all_idx >= OOS_START)[0][0]
 
-    log(f"  IS: {returns_is.index[0].date()} to {returns_is.index[-1].date()}, N={len(returns_is)}")
-    log(f"  OOS: {returns_oos.index[0].date()} to {returns_oos.index[-1].date()}, N={len(returns_oos)}")
+        log(f"  IS: {returns_is.index[0].date()} to {returns_is.index[-1].date()}, N={len(returns_is)}")
+        log(f"  OOS: {returns_oos.index[0].date()} to {returns_oos.index[-1].date()}, N={len(returns_oos)}")
 
-    rv_is = returns_is.values ** 2
-    rv_oos = returns_oos.values ** 2
+        rv_is = returns_is.values ** 2
+        rv_oos = returns_oos.values ** 2
 
-    # ── A: GJR-GARCH ──
-    log(f"\n  [A] GJR-GARCH(1,1)")
-    from arch import arch_model
-    t0 = time.time()
+        # ── A: GJR-GARCH ──
+        log(f"\n  [A] GJR-GARCH(1,1)")
+        from arch import arch_model
+        t0 = time.time()
 
-    ret_pct_is = returns_is.values * 100
-    gjr_m = arch_model(ret_pct_is, vol="GARCH", p=1, o=1, q=1,
-                       dist="normal", mean="Zero", rescale=False)
-    gjr_r = gjr_m.fit(disp="off", show_warning=False)
-    gjr_p = dict(gjr_r.params)
-    log(f"      omega={gjr_p.get('omega',0):.6f}, alpha={gjr_p.get('alpha[1]',0):.4f}, "
-        f"beta={gjr_p.get('beta[1]',0):.4f}, gamma={gjr_p.get('gamma[1]',0):.4f}")
-    log(f"      LogLik: {gjr_r.loglikelihood:.2f}")
+        ret_pct_is = returns_is.values * 100
+        gjr_m = arch_model(ret_pct_is, vol="GARCH", p=1, o=1, q=1,
+                           dist="normal", mean="Zero", rescale=False)
+        gjr_r = gjr_m.fit(disp="off", show_warning=False)
+        gjr_p = dict(gjr_r.params)
+        log(f"      omega={gjr_p.get('omega',0):.6f}, alpha={gjr_p.get('alpha[1]',0):.4f}, "
+            f"beta={gjr_p.get('beta[1]',0):.4f}, gamma={gjr_p.get('gamma[1]',0):.4f}")
+        log(f"      LogLik: {gjr_r.loglikelihood:.2f}")
 
-    cv_raw = gjr_r.conditional_volatility
-    gjr_cv_is = (cv_raw.values if hasattr(cv_raw, 'values') else cv_raw) ** 2 / 10000
-
-    log(f"      OOS expanding (refit every {REFIT}d)...")
-    gjr_cv_oos = oos_gjr(all_ret, oos_si, REFIT)
-    log(f"      Done in {time.time()-t0:.1f}s")
-
-    # ── B: GARCH-MIDAS(INDPRO) ──
-    log(f"\n  [B] GARCH-MIDAS(INDPRO, K=12)")
-    t0 = time.time()
-
-    log(f"      Aligning macro data (IS)...")
-    ma_indpro_is = align_macro_to_daily_fast(returns_is.index, indpro_growth, 12)
-    log(f"      Alignment done in {time.time()-t0:.1f}s")
-
-    result_indpro = fit_garch_midas(returns_is.values, ma_indpro_is, K=12, n_starts=3)
-    if result_indpro:
-        p = result_indpro["params"]
-        log(f"      Converged: {result_indpro['converged']}")
-        log(f"      m={p[0]:.8f}, theta={p[1]:.8f}, w1={p[2]:.2f}, w2={p[3]:.2f}")
-        log(f"      alpha={p[4]:.4f}, beta={p[5]:.4f}, gamma={p[6]:.4f}")
-        log(f"      LogLik: {result_indpro['loglik']:.2f}, Persist: {result_indpro['persistence']:.4f}")
-        gm_indpro_cv_is = result_indpro["cv"]
+        cv_raw = gjr_r.conditional_volatility
+        gjr_cv_is = (cv_raw.values if hasattr(cv_raw, 'values') else cv_raw) ** 2 / 10000
 
         log(f"      OOS expanding (refit every {REFIT}d)...")
-        gm_indpro_cv_oos = oos_garch_midas(all_ret, all_idx, indpro_growth, oos_si, K=12, refit_every=REFIT)
+        gjr_cv_oos = oos_gjr(all_ret, oos_si, REFIT)
         log(f"      Done in {time.time()-t0:.1f}s")
-        indpro_ok = True
-    else:
-        log(f"      FIT FAILED")
-        indpro_ok = False
 
-    # ── C: GARCH-MIDAS(RV) ──
-    log(f"\n  [C] GARCH-MIDAS(Monthly RV, K=12)")
-    t0 = time.time()
+        # ── B: GARCH-MIDAS(INDPRO) ──
+        log(f"\n  [B] GARCH-MIDAS(INDPRO, K=12)")
+        t0 = time.time()
 
-    monthly_rv = compute_monthly_rv(returns)
-    ma_rv_is = align_macro_to_daily_fast(returns_is.index, monthly_rv, 12)
-    log(f"      Alignment done in {time.time()-t0:.1f}s")
+        log(f"      Aligning macro data (IS)...")
+        ma_indpro_is = align_macro_to_daily_fast(returns_is.index, indpro_growth, 12)
+        log(f"      Alignment done in {time.time()-t0:.1f}s")
 
-    result_rv = fit_garch_midas(returns_is.values, ma_rv_is, K=12, n_starts=3)
-    if result_rv:
-        p = result_rv["params"]
-        log(f"      Converged: {result_rv['converged']}")
-        log(f"      m={p[0]:.8f}, theta={p[1]:.8f}, w1={p[2]:.2f}, w2={p[3]:.2f}")
-        log(f"      alpha={p[4]:.4f}, beta={p[5]:.4f}, gamma={p[6]:.4f}")
-        log(f"      LogLik: {result_rv['loglik']:.2f}, Persist: {result_rv['persistence']:.4f}")
-        gm_rv_cv_is = result_rv["cv"]
+        result_indpro = fit_garch_midas(returns_is.values, ma_indpro_is, K=12, n_starts=3)
+        if result_indpro:
+            p = result_indpro["params"]
+            log(f"      Converged: {result_indpro['converged']}")
+            log(f"      m={p[0]:.8f}, theta={p[1]:.8f}, w1={p[2]:.2f}, w2={p[3]:.2f}")
+            log(f"      alpha={p[4]:.4f}, beta={p[5]:.4f}, gamma={p[6]:.4f}")
+            log(f"      LogLik: {result_indpro['loglik']:.2f}, Persist: {result_indpro['persistence']:.4f}")
+            gm_indpro_cv_is = result_indpro["cv"]
 
-        log(f"      OOS expanding (refit every {REFIT}d)...")
-        gm_rv_cv_oos = oos_garch_midas(all_ret, all_idx, monthly_rv, oos_si, K=12, refit_every=REFIT)
-        log(f"      Done in {time.time()-t0:.1f}s")
-        rv_ok = True
-    else:
-        log(f"      FIT FAILED")
-        rv_ok = False
+            log(f"      OOS expanding (refit every {REFIT}d)...")
+            gm_indpro_cv_oos = oos_garch_midas(all_ret, all_idx, indpro_growth, oos_si, K=12, refit_every=REFIT)
+            log(f"      Done in {time.time()-t0:.1f}s")
+            indpro_ok = True
+        else:
+            log(f"      FIT FAILED")
+            indpro_ok = False
 
-    # ── Evaluate ──
-    log(f"\n  {'─' * 55}")
-    log(f"  RESULTS: {ticker}")
-    log(f"  {'─' * 55}")
+        # ── C: GARCH-MIDAS(RV) ──
+        log(f"\n  [C] GARCH-MIDAS(Monthly RV, K=12)")
+        t0 = time.time()
 
-    gjr_is_q = qlike(rv_is, gjr_cv_is)
-    gjr_oos_q = qlike(rv_oos, gjr_cv_oos)
+        monthly_rv = compute_monthly_rv(returns)
+        ma_rv_is = align_macro_to_daily_fast(returns_is.index, monthly_rv, 12)
+        log(f"      Alignment done in {time.time()-t0:.1f}s")
 
-    gm_ind_is_q = qlike(rv_is, gm_indpro_cv_is) if indpro_ok else np.nan
-    gm_ind_oos_q = qlike(rv_oos, gm_indpro_cv_oos) if indpro_ok else np.nan
-    gm_rv_is_q = qlike(rv_is, gm_rv_cv_is) if rv_ok else np.nan
-    gm_rv_oos_q = qlike(rv_oos, gm_rv_cv_oos) if rv_ok else np.nan
+        result_rv = fit_garch_midas(returns_is.values, ma_rv_is, K=12, n_starts=3)
+        if result_rv:
+            p = result_rv["params"]
+            log(f"      Converged: {result_rv['converged']}")
+            log(f"      m={p[0]:.8f}, theta={p[1]:.8f}, w1={p[2]:.2f}, w2={p[3]:.2f}")
+            log(f"      alpha={p[4]:.4f}, beta={p[5]:.4f}, gamma={p[6]:.4f}")
+            log(f"      LogLik: {result_rv['loglik']:.2f}, Persist: {result_rv['persistence']:.4f}")
+            gm_rv_cv_is = result_rv["cv"]
 
-    log(f"\n  {'Model':<25} {'IS QLIKE':>12} {'OOS QLIKE':>12}")
-    log(f"  {'-'*50}")
-    log(f"  {'GJR-GARCH(1,1)':<25} {gjr_is_q:>12.6f} {gjr_oos_q:>12.6f}")
-    if indpro_ok:
-        log(f"  {'GARCH-MIDAS(INDPRO)':<25} {gm_ind_is_q:>12.6f} {gm_ind_oos_q:>12.6f}")
-    if rv_ok:
-        log(f"  {'GARCH-MIDAS(RV)':<25} {gm_rv_is_q:>12.6f} {gm_rv_oos_q:>12.6f}")
+            log(f"      OOS expanding (refit every {REFIT}d)...")
+            gm_rv_cv_oos = oos_garch_midas(all_ret, all_idx, monthly_rv, oos_si, K=12, refit_every=REFIT)
+            log(f"      Done in {time.time()-t0:.1f}s")
+            rv_ok = True
+        else:
+            log(f"      FIT FAILED")
+            rv_ok = False
 
-    # DM tests
-    gjr_loss = qlike_series(rv_oos, gjr_cv_oos)
+        # ── Evaluate ──
+        log(f"\n  {'─' * 55}")
+        log(f"  RESULTS: {ticker}")
+        log(f"  {'─' * 55}")
 
-    dm_t_ind = dm_p_ind = dm_t_rv = dm_p_rv = np.nan
+        gjr_is_q = qlike(rv_is, gjr_cv_is)
+        gjr_oos_q = qlike(rv_oos, gjr_cv_oos)
 
-    log(f"\n  Diebold-Mariano test (OOS, vs GJR-GARCH):")
-    if indpro_ok:
-        ind_loss = qlike_series(rv_oos, gm_indpro_cv_oos)
-        dm_t_ind, dm_p_ind = dm_test(ind_loss, gjr_loss)
-        sig = "***" if dm_p_ind < 0.01 else ("**" if dm_p_ind < 0.05 else ("*" if dm_p_ind < 0.10 else "n.s."))
-        direction = "MIDAS better" if dm_t_ind < 0 else "GJR better"
-        log(f"    INDPRO: t={dm_t_ind:+.4f}, p={dm_p_ind:.4f} [{sig}] ({direction})")
+        gm_ind_is_q = qlike(rv_is, gm_indpro_cv_is) if indpro_ok else np.nan
+        gm_ind_oos_q = qlike(rv_oos, gm_indpro_cv_oos) if indpro_ok else np.nan
+        gm_rv_is_q = qlike(rv_is, gm_rv_cv_is) if rv_ok else np.nan
+        gm_rv_oos_q = qlike(rv_oos, gm_rv_cv_oos) if rv_ok else np.nan
 
-    if rv_ok:
-        rv_loss = qlike_series(rv_oos, gm_rv_cv_oos)
-        dm_t_rv, dm_p_rv = dm_test(rv_loss, gjr_loss)
-        sig = "***" if dm_p_rv < 0.01 else ("**" if dm_p_rv < 0.05 else ("*" if dm_p_rv < 0.10 else "n.s."))
-        direction = "MIDAS better" if dm_t_rv < 0 else "GJR better"
-        log(f"    RV:     t={dm_t_rv:+.4f}, p={dm_p_rv:.4f} [{sig}] ({direction})")
+        log(f"\n  {'Model':<25} {'IS QLIKE':>12} {'OOS QLIKE':>12}")
+        log(f"  {'-'*50}")
+        log(f"  {'GJR-GARCH(1,1)':<25} {gjr_is_q:>12.6f} {gjr_oos_q:>12.6f}")
+        if indpro_ok:
+            log(f"  {'GARCH-MIDAS(INDPRO)':<25} {gm_ind_is_q:>12.6f} {gm_ind_oos_q:>12.6f}")
+        if rv_ok:
+            log(f"  {'GARCH-MIDAS(RV)':<25} {gm_rv_is_q:>12.6f} {gm_rv_oos_q:>12.6f}")
 
-    # Store
-    for model_name, is_q, oos_q, dm_t, dm_p in [
-        ("GJR-GARCH(1,1)", gjr_is_q, gjr_oos_q, "---", "---"),
-        ("GM-MIDAS(INDPRO)", gm_ind_is_q, gm_ind_oos_q,
-         f"{dm_t_ind:+.4f}" if not np.isnan(dm_t_ind) else "N/A",
-         f"{dm_p_ind:.4f}" if not np.isnan(dm_p_ind) else "N/A"),
-        ("GM-MIDAS(RV)", gm_rv_is_q, gm_rv_oos_q,
-         f"{dm_t_rv:+.4f}" if not np.isnan(dm_t_rv) else "N/A",
-         f"{dm_p_rv:.4f}" if not np.isnan(dm_p_rv) else "N/A"),
-    ]:
-        results.append({"Asset": ticker, "Model": model_name,
-                        "IS_QLIKE": is_q, "OOS_QLIKE": oos_q,
-                        "DM_t": dm_t, "DM_p": dm_p})
+        # DM tests
+        gjr_loss = qlike_series(rv_oos, gjr_cv_oos)
+
+        dm_t_ind = dm_p_ind = dm_t_rv = dm_p_rv = np.nan
+
+        log(f"\n  Diebold-Mariano test (OOS, vs GJR-GARCH):")
+        if indpro_ok:
+            ind_loss = qlike_series(rv_oos, gm_indpro_cv_oos)
+            dm_t_ind, dm_p_ind = dm_test(ind_loss, gjr_loss)
+            sig = "***" if dm_p_ind < 0.01 else ("**" if dm_p_ind < 0.05 else ("*" if dm_p_ind < 0.10 else "n.s."))
+            direction = "MIDAS better" if dm_t_ind < 0 else "GJR better"
+            log(f"    INDPRO: t={dm_t_ind:+.4f}, p={dm_p_ind:.4f} [{sig}] ({direction})")
+
+        if rv_ok:
+            rv_loss = qlike_series(rv_oos, gm_rv_cv_oos)
+            dm_t_rv, dm_p_rv = dm_test(rv_loss, gjr_loss)
+            sig = "***" if dm_p_rv < 0.01 else ("**" if dm_p_rv < 0.05 else ("*" if dm_p_rv < 0.10 else "n.s."))
+            direction = "MIDAS better" if dm_t_rv < 0 else "GJR better"
+            log(f"    RV:     t={dm_t_rv:+.4f}, p={dm_p_rv:.4f} [{sig}] ({direction})")
+
+        # Store
+        for model_name, is_q, oos_q, dm_t, dm_p in [
+            ("GJR-GARCH(1,1)", gjr_is_q, gjr_oos_q, "---", "---"),
+            ("GM-MIDAS(INDPRO)", gm_ind_is_q, gm_ind_oos_q,
+             f"{dm_t_ind:+.4f}" if not np.isnan(dm_t_ind) else "N/A",
+             f"{dm_p_ind:.4f}" if not np.isnan(dm_p_ind) else "N/A"),
+            ("GM-MIDAS(RV)", gm_rv_is_q, gm_rv_oos_q,
+             f"{dm_t_rv:+.4f}" if not np.isnan(dm_t_rv) else "N/A",
+             f"{dm_p_rv:.4f}" if not np.isnan(dm_p_rv) else "N/A"),
+        ]:
+            results.append({"Asset": ticker, "Model": model_name,
+                            "IS_QLIKE": is_q, "OOS_QLIKE": oos_q,
+                            "DM_t": dm_t, "DM_p": dm_p})
 
 
-# ═══════════════════════════════════════════════════════════════════
-# SUMMARY
-# ═══════════════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════════════════
+    # SUMMARY
+    # ═══════════════════════════════════════════════════════════════════
 
-log(f"\n\n{'=' * 78}")
-log("CROSS-ASSET SUMMARY TABLE")
-log(f"{'=' * 78}")
-log(f"{'Asset':<6} {'Model':<20} {'IS QLIKE':>12} {'OOS QLIKE':>12} {'DM t':>10} {'DM p':>10}")
-log("-" * 72)
-for r in results:
-    is_q = f"{r['IS_QLIKE']:.6f}" if isinstance(r['IS_QLIKE'], float) and not np.isnan(r['IS_QLIKE']) else "N/A"
-    oos_q = f"{r['OOS_QLIKE']:.6f}" if isinstance(r['OOS_QLIKE'], float) and not np.isnan(r['OOS_QLIKE']) else "N/A"
-    log(f"{r['Asset']:<6} {r['Model']:<20} {is_q:>12} {oos_q:>12} {r['DM_t']:>10} {r['DM_p']:>10}")
+    log(f"\n\n{'=' * 78}")
+    log("CROSS-ASSET SUMMARY TABLE")
+    log(f"{'=' * 78}")
+    log(f"{'Asset':<6} {'Model':<20} {'IS QLIKE':>12} {'OOS QLIKE':>12} {'DM t':>10} {'DM p':>10}")
+    log("-" * 72)
+    for r in results:
+        is_q = f"{r['IS_QLIKE']:.6f}" if isinstance(r['IS_QLIKE'], float) and not np.isnan(r['IS_QLIKE']) else "N/A"
+        oos_q = f"{r['OOS_QLIKE']:.6f}" if isinstance(r['OOS_QLIKE'], float) and not np.isnan(r['OOS_QLIKE']) else "N/A"
+        log(f"{r['Asset']:<6} {r['Model']:<20} {is_q:>12} {oos_q:>12} {r['DM_t']:>10} {r['DM_p']:>10}")
 
-log(f"\n{'=' * 78}")
-log("GENERALIZATION ASSESSMENT")
-log(f"{'=' * 78}")
-log("""
-SPY baseline (from prior experiment):
-  GARCH-MIDAS(INDPRO) vs GJR: DM p = 0.001 (significant, MIDAS better)
+    log(f"\n{'=' * 78}")
+    log("GENERALIZATION ASSESSMENT")
+    log(f"{'=' * 78}")
+    log(dedent("""
+    SPY baseline (from prior experiment):
+      GARCH-MIDAS(INDPRO) vs GJR: DM p = 0.001 (significant, MIDAS better)
 
-Criteria for generalization:
-  Strong:  Both QQQ/EEM show DM p < 0.05 favoring GARCH-MIDAS(INDPRO)
-  Partial: One asset shows p < 0.10, other is n.s.
-  Fails:   Neither shows significant improvement
+    Criteria for generalization:
+      Strong:  Both QQQ/EEM show DM p < 0.05 favoring GARCH-MIDAS(INDPRO)
+      Partial: One asset shows p < 0.10, other is n.s.
+      Fails:   Neither shows significant improvement
 
-If INDPRO fails but RV works:
-  → Macro channel is SPY-specific; volatility feedback is more universal
-If both fail:
-  → SPY result may be sample-specific or driven by SPY-INDPRO correlation
-""")
+    If INDPRO fails but RV works:
+      → Macro channel is SPY-specific; volatility feedback is more universal
+    If both fail:
+      → SPY result may be sample-specific or driven by SPY-INDPRO correlation
+    """))
+
+
+if __name__ == "__main__":
+    main()

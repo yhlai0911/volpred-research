@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 validate_garch_midas OOS GJR refit 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/validate_garch_midas_cross_asset.py`：OOS GJR-GARCH 每季 refit 失敗時直接 `pass`，後續用前次/default 參數繼續產生 forecast。驗證流程不被單次 fit failure 中斷是對的，但結果無法看出哪些 OOS step 用了 fallback。
+
+**根因**：heavy validation script 把模型估計的容錯與可觀察性混在一起；這會在 arch fitting 偶發失敗或資料窗口異常時，讓 QLIKE/DM 結果帶有未揭露的 fallback。
+
+**解決方法**：新增 `_warn_validation()`；GJR refit exception 時輸出 OOS step、train_end 與 exception，並保留使用前次參數的原行為。新增 regression test 用 fake `arch` module 讓 refit 失敗，確認 forecast 仍產生且 warning 可見。
+
 ## 2026-06-22 backtest_open_to_open BCI period 解析失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/backtest_open_to_open.py`：台灣 DGBAS BCI 月資料轉成 `(year, month)` key 時，壞 `period` 會直接 `pass`。open-to-open backtest 仍會跑，但 macro leading-indicator 月份會少一筆且沒有任何診斷。
