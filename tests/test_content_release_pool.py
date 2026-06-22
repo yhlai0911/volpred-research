@@ -98,6 +98,54 @@ def test_release_pool_by_settings_updates_last_released_and_gates_followup_run(
     assert followup["next_release_at"] == (frozen_now + timedelta(hours=2)).isoformat()
 
 
+def test_get_content_release_settings_warns_when_supabase_read_fails(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+):
+    storage_dir = tmp_path / "storage"
+
+    def fail_select(*args, **kwargs):
+        raise RuntimeError("remote unavailable")
+
+    monkeypatch.setattr(content, "_select_rows", fail_select)
+
+    settings = content.get_content_release_settings(storage_dir=str(storage_dir))
+
+    captured = capsys.readouterr()
+    assert settings["mode"] == "manual"
+    assert settings["interval_minutes"] == 1440
+    assert (storage_dir / ".release_settings.json").exists()
+    assert "[content_release_settings] WARN Supabase read failed" in captured.out
+    assert "RuntimeError: remote unavailable" in captured.out
+
+
+def test_update_content_release_settings_warns_when_supabase_patch_fails(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+):
+    storage_dir = tmp_path / "storage"
+    _write_json(storage_dir / ".release_settings.json", {"mode": "manual"})
+
+    def fail_patch(*args, **kwargs):
+        raise RuntimeError("patch denied")
+
+    monkeypatch.setattr(content, "_patch_where", fail_patch)
+
+    ok = content._update_content_release_settings(
+        {"mode": "auto"},
+        storage_dir=str(storage_dir),
+    )
+
+    settings = json.loads((storage_dir / ".release_settings.json").read_text(encoding="utf-8"))
+    captured = capsys.readouterr()
+    assert ok is False
+    assert settings["mode"] == "auto"
+    assert "[content_release_settings] WARN Supabase patch failed" in captured.out
+    assert "RuntimeError: patch denied" in captured.out
+
+
 def test_release_pool_notification_failure_warns_without_blocking(
     tmp_path: Path,
     monkeypatch,

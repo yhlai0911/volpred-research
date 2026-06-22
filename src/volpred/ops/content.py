@@ -102,6 +102,13 @@ def _local_release_settings_path(storage_dir: str = "storage") -> Path:
     return project_path(storage_dir, ".release_settings.json")
 
 
+def _warn_release_settings(message: str, exc: Exception) -> None:
+    print(
+        f"[content_release_settings] WARN {message}: "
+        f"{type(exc).__name__}: {exc}"
+    )
+
+
 def _derived_last_released_at_from_feed(storage_dir: str = "storage") -> str | None:
     """Return the latest published_at among items released BY release_pool.
 
@@ -140,7 +147,8 @@ def get_content_release_settings(storage_dir: str = "storage") -> dict:
         try:
             rows = _select_rows("content_release_settings", id="default")
             row = rows[0] if rows else None
-        except Exception:
+        except Exception as exc:
+            _warn_release_settings("Supabase read failed; using local defaults", exc)
             row = None
         settings = _normalize_release_settings(row)
         dump_json(local, settings)
@@ -190,7 +198,8 @@ def _update_content_release_settings(fields: dict, *, storage_dir: str = "storag
         remote_payload["mode"] = "scheduled"
     try:
         return _patch_where("content_release_settings", {"id": "default"}, remote_payload)
-    except Exception:
+    except Exception as exc:
+        _warn_release_settings("Supabase patch failed; local settings updated only", exc)
         return False
 
 

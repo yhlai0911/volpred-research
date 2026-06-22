@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 content_release_settings Supabase fallback 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/content.py` 的 release settings 路徑：首次讀 local settings 不存在時，Supabase `content_release_settings` read 失敗會直接用 defaults；更新 local settings 後 Supabase patch 失敗只回 `False`。兩者保持 release pool 不阻塞是對的，但 cron/stdout 看不出 local/default fallback 的原因。
+
+**根因**：release settings 是 ops control path，設計上要容忍 Supabase transient failure；舊寫法把「可降級」等同於「無診斷訊號」，和近期 silent failure 類 incident 同型。
+
+**解決方法**：新增 `_warn_release_settings()`；Supabase read failure 會輸出 `Supabase read failed; using local defaults`，patch failure 會輸出 `Supabase patch failed; local settings updated only`，原本 defaults/local update 行為不變。新增 regression tests 覆蓋兩條降級路徑。
+
 ## 2026-06-22 writer_log append failure 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/writer_log.py::append_writer_log()`：writer provenance log 寫入失敗時只 `pass`。caller 不應因 audit log 失敗中斷是對的，但 shared-state mutation 失去 provenance 時沒有任何 stderr 訊號。
