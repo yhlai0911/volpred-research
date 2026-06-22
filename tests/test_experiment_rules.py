@@ -84,6 +84,31 @@ def test_retrofit_uniqueness_claim_rule_is_documented() -> None:
     assert missing == []
 
 
+def test_k1412_sources_scope_superseded_uniqueness_claim() -> None:
+    source_paths = [
+        ROOT / "experiments" / "k1412" / "README.md",
+        ROOT / "experiments" / "k1412" / "k1412.py",
+    ]
+    combined = "\n".join(path.read_text(encoding="utf-8") for path in source_paths)
+
+    required_phrases = [
+        "HLN retrofit superseded",
+        "TW0050-HSI",
+        "最強 / 最醒目",
+    ]
+    missing = [phrase for phrase in required_phrases if phrase not in combined]
+    assert missing == []
+
+    stale_phrases = [
+        "TW0050-N225 唯一 Harvey sig",
+        "TW0050-N225 唯一 Harvey-sig",
+        "唯一 significant pair",
+        "only Harvey-significant",
+    ]
+    offenders = [phrase for phrase in stale_phrases if phrase in combined]
+    assert offenders == []
+
+
 def test_cross_asset_pooled_inference_rule_is_documented() -> None:
     section = _experiments_rule_section("### 跨資產 pooled inference 不可把 asset-day 當 iid")
 

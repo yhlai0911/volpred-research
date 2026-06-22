@@ -1,9 +1,11 @@
 """K1412 — TW0050-N225 Harvey-sig OOS sensitivity (rule out type-I).
 
 Paper3_E2 Open Question (research_program.md):
-TW0050-N225 是 cross-market copula 10 pairs 中原始 raw-DM 規則下唯一
-Harvey-sig pair (Student-t DM_t=3.92, oos_start=2015-06-01). 三因子
-candidate:
+原始 raw-DM 規則曾把 TW0050-N225 標成 cross-market copula 10 pairs 中唯一
+Harvey-sig pair (Student-t DM_t=3.92, oos_start=2015-06-01)。這個
+uniqueness framing 已被 2026-06-02 HLN retrofit superseded；current table
+另有較弱的 TW0050-HSI。K1412 因此只檢查最強 / 最醒目的 TW0050-N225
+是否只是 single-start type-I。三因子 candidate:
   (a) λ_L_clayton=0.444  (b) full_sample_corr=0.586
   (c) Asian trading-hour overlap
 
@@ -158,8 +160,8 @@ def main():
             'parent_experiments': ['Paper3_E2'],
             'references': [
                 'Paper3_E2 (paper3_E2_cross_market_copula, 2026-05-29)',
-                'research_program.md Open Question (TW0050-N225 唯一 Harvey-sig)',
-                'Harvey/Liu/Newman (1997) HLN small-sample DM correction',
+                'research_program.md Open Question (TW0050-N225 strongest/most visible; HLN table also has TW0050-HSI)',
+                'Harvey/Leybourne/Newbold (1997) HLN small-sample DM correction',
                 'Patton (2006) IER 47(2) tail dependence copula',
             ],
         }, f, indent=2)

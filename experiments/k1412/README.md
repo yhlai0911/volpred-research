@@ -2,11 +2,11 @@
 
 ## Motivation
 
-Paper3_E2 (paper3_E2_cross_market_copula, 2026-05-29) 原始 raw-DM 版本跑 5 markets × 10 pairs cross-market copula，**唯一** Harvey-sig 結果是 TW0050-N225 (Student-t DM_t=3.92, oos_start=2015-06-01)。在 2026-06-02 的 HLN retrofit 後，`TW0050-HSI` 也跨過 HLN 臨界值；但 K1412 仍保留價值，因為它專門檢查 `TW0050-N225` 是否只是 single-start type-I。
+Paper3_E2 (paper3_E2_cross_market_copula, 2026-05-29) 原始 raw-DM 版本曾把 TW0050-N225 (Student-t DM_t=3.92, oos_start=2015-06-01) 標成唯一 Harvey-sig pair。這個 uniqueness framing 已被 2026-06-02 HLN retrofit superseded：`TW0050-HSI` 也跨過 HLN 臨界值。K1412 仍保留價值，因為它專門檢查最強 / 最醒目的 `TW0050-N225` 是否只是 single-start type-I。
 
 `research_program.md` 明列 Open Question:
 
-> TW0050-N225 唯一 Harvey sig — λ_L_clayton=0.444 + full_sample_corr=0.586 + Asian trading-hour overlap 三因子哪個是 driver? 需 sensitivity (different OOS start / refit_every / window) 排除 type-I error
+> TW0050-N225 是最強 / 最醒目的 Harvey-sig pair（current HLN table 另有較弱的 TW0050-HSI）— λ_L_clayton=0.444 + full_sample_corr=0.586 + Asian trading-hour overlap 三因子哪個是 driver? 需 sensitivity (different OOS start / refit_every / window) 排除 type-I error
 
 K1412 = 該 Open Question 第一步：**OOS start sensitivity**。後續 K1413/K1414 可補 window/refit_every sensitivity 與 三因子 decomposition。
 
@@ -59,6 +59,6 @@ Regressor: `^VIX` squared (vix2)
 
 - Paper3_E2 (paper3_E2_cross_market_copula)
 - `research_program.md` Open Question (Paper 3 reframe E2)
-- Harvey/Liu/Newman (1997) HLN small-sample DM
+- Harvey/Leybourne/Newbold (1997) HLN small-sample DM
 - Patton (2006) IER 47(2) tail dependence
 - Christoffersen et al. (2012) RFS international copula
