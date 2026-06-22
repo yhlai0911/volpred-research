@@ -180,7 +180,7 @@ def poster_2_results():
                         color = ACCENT_GREEN if num > b else ACCENT_RED
                     else:
                         color = ACCENT_GREEN if num > b else ACCENT_RED
-                except:
+                except (AttributeError, TypeError, ValueError):
                     color = TEXT_DARK
             ax.text(col_x[c_idx], y, val, ha='center', va='center',
                     fontsize=9.5 if c_idx == 0 else 10, color=color,

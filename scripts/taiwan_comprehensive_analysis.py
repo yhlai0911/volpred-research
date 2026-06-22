@@ -628,8 +628,8 @@ if '0050.TW' in returns and vix_level is not None:
             # Get conditional variance series
             cv = am_full.fit(disp='off').conditional_volatility ** 2
 
-        except:
-            pass
+        except Exception as exc:
+            print(f"  [warn] GARCH OOS forecast diagnostic skipped: {exc}")
 
     # Alternative: correlation between VIX and GARCH residuals
     if res1 is not None:

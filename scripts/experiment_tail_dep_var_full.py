@@ -199,15 +199,18 @@ for idx, t in enumerate(eval_indices):
     if idx % REFIT_FREQ == 0:
         try:
             cached_g = compute_var_gaussian(window_ret, N_SIM, rng)
-        except:
+        except Exception as exc:
+            print(f"    [warn] gaussian copula VaR fallback at {ret_df.index[t].date()}: {exc}")
             cached_g = var_histsim[idx]
         try:
             cached_c = compute_var_clayton(window_ret, N_SIM, rng)
-        except:
+        except Exception as exc:
+            print(f"    [warn] clayton copula VaR fallback at {ret_df.index[t].date()}: {exc}")
             cached_c = var_histsim[idx]
         try:
             cached_d = compute_var_dcc(window_ret)
-        except:
+        except Exception as exc:
+            print(f"    [warn] DCC VaR fallback at {ret_df.index[t].date()}: {exc}")
             cached_d = var_histsim[idx]
 
     var_gaussian[idx] = cached_g

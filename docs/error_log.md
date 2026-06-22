@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 error_log fallback 掃出 legacy bare except
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，靜態掃描仍找到 3 支 legacy scripts 使用 bare `except:`：`scripts/taiwan_comprehensive_analysis.py`、`scripts/gen_k620_v2_lazypack.py`、`scripts/experiment_tail_dep_var_full.py`。這類 fallback 雖多半是非關鍵診斷或圖表格式容錯，但仍會把 model / VaR fallback 原因吞掉，與 2026-06-22 多個 silent-failure incident 同型。
+
+**根因**：舊的一次性研究腳本沿用「不中斷流程」寫法，沒有把不中斷與可觀察分開；repo 也沒有 regression test 防止新的 bare `except:` 混入。
+
+**解決方法**：將 3 支腳本的 bare `except:` 改為 typed `except Exception as exc` 或精準格式例外；模型與 VaR fallback 印出 `[warn] ... fallback ...`，圖表數字解析只捕捉 `AttributeError/TypeError/ValueError`。新增 `tests/test_no_bare_except.py`，用 AST 掃描 `scripts/` 與 `src/`，禁止後續新增 bare `except:`。
+
 ## 2026-06-22 publish_milestone exact-title gate 遇到壞 timestamp 會靜默放行
 
 **問題**：`publish_milestone()` 的 exact-title duplicate gate 只在既有文章 `published_at/created_at` 可解析且落在 24h 內時回收既有 id；若 timestamp 壞掉，原本 `except Exception: pass` 會靜默跳過這道 gate，讓同標題文章繼續往後走。
