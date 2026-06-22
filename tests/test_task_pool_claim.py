@@ -347,6 +347,93 @@ def test_list_does_not_rewrite_next_tasks_file(tmp_path, monkeypatch, capsys) ->
     assert next_tasks.read_text(encoding="utf-8") == original
 
 
+def test_list_stale_warns_on_invalid_claimed_at(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "bad_claim_timestamp",
+                    "task_type": "platform_ops",
+                    "status": "claimed",
+                    "claimed_by": "codex-vscode",
+                    "claimed_at": "not-a-timestamp",
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "list",
+            "--status",
+            "stale",
+            "--stale-hours",
+            "2",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert payload["count"] == 0
+    assert "[task_pool_claim] WARN invalid claimed_at while listing stale claims" in captured.err
+    assert "task_id=bad_claim_timestamp" in captured.err
+
+
+def test_cleanup_warns_on_invalid_claimed_at_without_releasing(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "bad_cleanup_timestamp",
+                    "task_type": "platform_ops",
+                    "status": "in_progress",
+                    "claimed_by": "codex-vscode",
+                    "claimed_at": "not-a-timestamp",
+                    "claim_session_id": "abc123",
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "cleanup",
+            "--stale-hours",
+            "2",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert payload["count"] == 0
+    assert "[task_pool_claim] WARN invalid claimed_at while cleaning stale claims" in captured.err
+    assert "task_id=bad_cleanup_timestamp" in captured.err
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "in_progress"
+    assert saved[0]["claimed_by"] == "codex-vscode"
+    assert saved[0]["claim_session_id"] == "abc123"
+
+
 @pytest.mark.parametrize(
     ("task_id", "task_type", "status"),
     [

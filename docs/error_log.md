@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 task_pool_claim stale claimed_at parse 失敗被靜默略過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_pool_claim.py`：`list --status stale` 與 `cleanup --stale-hours` 遇到 claimed / in_progress task 的 `claimed_at` 不可 parse 時直接 `continue`，沒有 warning。
+
+**根因**：stale claim 清理需要容忍單筆壞 task，避免整個任務池控制 CLI 因 timestamp drift 中斷；但靜默跳過會讓 claim 永遠不被列為 stale、也不會自動釋放，操作者只看到 stale count 偏低或 cleanup count 0，看不出任務池 receipt 已經漂移。
+
+**解決方法**：新增 `[task_pool_claim] WARN ...` diagnostics；壞 `claimed_at` 仍維持跳過、不強制 release，但 list stale / cleanup 都會輸出 task id、原始 timestamp 與例外類型。新增 regression tests 覆蓋 stale list 與 cleanup 的 warning 和不釋放行為。
+
 ## 2026-06-23 run_due_jobs state 讀取失敗被靜默當首跑
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/run_due_jobs.py`：`cron_last_run.json` 讀取 / parse 失敗或 schema 非 dict 時直接回 `{}`；`pending_sessions.json` 壞檔時直接回 default state，沒有 warning。

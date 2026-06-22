@@ -62,6 +62,10 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _warn(message: str) -> None:
+    print(f"[task_pool_claim] WARN {message}", file=sys.stderr)
+
+
 @contextmanager
 def _locked_load() -> Iterator[tuple[Any, list[dict[str, Any]]]]:
     NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
@@ -409,7 +413,11 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                     continue
                 try:
                     age_h = (datetime.now(timezone.utc) - datetime.fromisoformat(claimed_at)).total_seconds() / 3600
-                except Exception:
+                except Exception as exc:
+                    _warn(
+                        "invalid claimed_at while listing stale claims; skipping "
+                        f"task_id={t.get('id')} claimed_at={claimed_at!r} error={type(exc).__name__}: {exc}"
+                    )
                     continue
                 if age_h < args.stale_hours:
                     continue
@@ -454,7 +462,11 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                 continue
             try:
                 age_h = (now - datetime.fromisoformat(claimed_at)).total_seconds() / 3600
-            except Exception:
+            except Exception as exc:
+                _warn(
+                    "invalid claimed_at while cleaning stale claims; skipping "
+                    f"task_id={t.get('id')} claimed_at={claimed_at!r} error={type(exc).__name__}: {exc}"
+                )
                 continue
             if age_h >= args.stale_hours:
                 released.append({"id": t.get("id"), "owner": t.get("claimed_by"), "age_h": round(age_h, 1)})
