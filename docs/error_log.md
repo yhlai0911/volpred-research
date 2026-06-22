@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 dispatch scheduler 壞 last_fire_at 被靜默當 due
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/scheduler.py::_due_to_fire()`：state 裡的 `last_fire_at` 若不是可 parse 的 ISO timestamp，舊碼直接回 `due=True`，沒有任何 warning。
+
+**根因**：壞 `last_fire_at` 時偏向 fire 是保守策略，可避免 scheduler 因 state drift 永久不派工；但靜默當 due 會讓操作者看不出這次 fire 是正常排程落後，還是 state timestamp 壞掉導致的補跑。
+
+**解決方法**：保留 `due=True` 行為，但在 parse failure 時記錄 `invalid last_fire_at ... treating scheduler as due` warning。新增 regression test 鎖定壞 timestamp 仍 due 且有 warning。
+
 ## 2026-06-23 dispatch worker SIGKILL 後仍未 reap 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/worker.py::_run_one_attempt()`：worker attempt timeout 後會 `_kill_pgid()`，再 `proc.wait(timeout=GRACE_PERIOD_S + 5)`；若 child 在 SIGKILL grace 後仍 timeout，舊碼直接 `pass`。

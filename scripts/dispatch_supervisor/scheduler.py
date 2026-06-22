@@ -103,7 +103,12 @@ def _due_to_fire(*, cron_expr: str, last_fire_at: str | None, now: datetime | No
         # tz-naive cron + tz-aware state: drop tz for comparison (cron uses local time)
         if last_dt.tzinfo is not None:
             last_dt = last_dt.astimezone().replace(tzinfo=None)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError) as exc:
+        LOG.warning(
+            "invalid last_fire_at=%r; treating scheduler as due: %s",
+            last_fire_at,
+            exc,
+        )
         return True, prev
     return last_dt < prev, prev
 
