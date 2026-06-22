@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 supervisor feed rhythm read 失敗只回 payload 不示警
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/supervisor.py::_feed_rhythm()`：`storage/reports/feed.json` 讀取或 parse 失敗時只回 `{"available": False, "error": "feed.json unreadable"}`，沒有 stderr warning。
+
+**根因**：supervisor snapshot 需要在 feed 壞掉時繼續產出可解析 payload；但若只把錯誤藏在 nested summary 中，上層 CLI / logs 容易看不出 feed rhythm 的來源資料不可用。
+
+**解決方法**：保留原本 unavailable payload，但新增 `[ops_supervisor] WARN feed rhythm read failed; marking unavailable ...` 到 stderr，包含 feed path 與例外類型。新增 regression test 覆蓋 invalid feed JSON 時 warning 出現且 payload 不變。
+
 ## 2026-06-23 supervisor rules read 失敗被靜默當預設
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/supervisor.py::load_supervisor_rules()`：`config/supervisor_rules.json` 讀取或 JSON parse 失敗時，舊碼直接回 `{}`，沒有 warning。

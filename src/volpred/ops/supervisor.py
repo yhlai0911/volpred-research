@@ -197,7 +197,8 @@ def _feed_rhythm(storage_dir: str, cutoff: datetime) -> dict[str, Any]:
         return {"available": False}
     try:
         articles = json.loads(feed_path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    except (OSError, ValueError) as exc:
+        _warn_supervisor("feed rhythm read failed; marking unavailable", feed_path, exc)
         return {"available": False, "error": "feed.json unreadable"}
     if not isinstance(articles, list):
         return {"available": False, "error": "unexpected feed shape"}
