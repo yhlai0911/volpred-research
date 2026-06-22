@@ -22,6 +22,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from volpred.data.manager import DataManager
 
 
+def _warn_backtest(message: str, exc: Exception) -> None:
+    print(f"  WARN {message}: {type(exc).__name__}: {exc}")
+
+
+def _record_bci_monthly_mom(target: dict, period: str, mom: float) -> None:
+    try:
+        parts = str(period).split("M")
+        target[(int(parts[0]), int(parts[1]))] = float(mom)
+    except Exception as exc:
+        _warn_backtest(f"BCI period parse failed ({period})", exc)
+
+
 def rolling_garch_sigma(close_returns_pct, window=2000, vol_type="GARCH", p=1, o=0, q=1):
     """Compute rolling GARCH sigma for each day (annualized %).
 
@@ -106,11 +118,7 @@ def main():
             for _, row in lead_df.iterrows():
                 period = str(row['period'])  # e.g. "2023M01"
                 if pd.notna(row['mom']) and 'M' in period:
-                    parts = period.split('M')
-                    try:
-                        bci_monthly_mom[(int(parts[0]), int(parts[1]))] = float(row['mom'])
-                    except Exception:
-                        pass
+                    _record_bci_monthly_mom(bci_monthly_mom, period, row["mom"])
     print(f"  BCI MoM data: {len(bci_monthly_mom)} months loaded")
 
     def get_leading_mom(date):

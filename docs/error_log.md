@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 backtest_open_to_open BCI period 解析失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/backtest_open_to_open.py`：台灣 DGBAS BCI 月資料轉成 `(year, month)` key 時，壞 `period` 會直接 `pass`。open-to-open backtest 仍會跑，但 macro leading-indicator 月份會少一筆且沒有任何診斷。
+
+**根因**：BCI 是輔助 macro signal，壞 row 不應中斷整個 heavy backtest；但舊寫法把「跳過壞 row」實作成 silent failure，讓資料格式 drift 無法追蹤。
+
+**解決方法**：抽出 `_record_bci_monthly_mom()`，合法 period 照常寫入；解析失敗時輸出 `BCI period parse failed (...)` warning 並跳過該 row。新增 regression tests 覆蓋合法 period 寫入與壞 period warning。
+
 ## 2026-06-22 list_new_strategy Supabase fallback 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/list_new_strategy.py`：Supabase count 的 HEAD request 失敗時直接降級到 GET count，Step 9 / verify 的 howto fetch 失敗時直接 `pass`。策略上架檢查會繼續跑，但操作者看不出是 howto 真缺，還是 Supabase 查詢失敗造成 local fallback 失效。
