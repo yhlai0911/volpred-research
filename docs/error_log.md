@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 scan_arxiv_topics staging pool 壞檔被靜默當空
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/scan_arxiv_topics.py::write_staging()`：`storage/research/arxiv_candidates.json` 若 JSON 壞掉會被靜默當空；若 candidates list 內單筆缺 `arxiv_id`，舊碼會用外層 `KeyError` catch 直接放棄整批既有 staging pool，沒有 warning。
+
+**根因**：arXiv scanner 的 staging pool 是候選研究題目的 review buffer，cron 寫入需要容忍壞檔避免掃描中斷；但靜默當空或整批丟棄會讓操作者誤判為沒有既有候選，並可能覆寫掉仍有效的 pending review 狀態。
+
+**解決方法**：staging 讀取失敗、頂層 schema 非 object、`candidates` 非 list、單筆 candidate 非 object 或缺 `arxiv_id` 都輸出 `[scan_arxiv] WARN ...`；壞檔仍保留原本 fail-open 當空的行為，單筆壞 candidate 只跳過該筆並保留其他有效 existing 候選。新增 regression tests 覆蓋壞 JSON 與混合壞候選。
+
 ## 2026-06-23 scan_trending_agy agy 失敗被靜默轉空候選
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/scan_trending_agy.py`：`agy` CLI 若 exit nonzero，舊碼不檢查 return code，直接嘗試解析 stdout；若 stdout 無 JSON，只回 `{"candidates":[],"error":"no_json_from_agy"}`，cron log 看不出是 auth / command failure 還是模型輸出格式漂移。

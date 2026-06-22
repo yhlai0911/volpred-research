@@ -78,6 +78,11 @@ AXES: list[tuple[str, list[str]]] = [
 CATEGORIES = "cat:q-fin.ST OR cat:q-fin.RM OR cat:q-fin.PM OR cat:q-fin.TR"
 
 
+def _warn_scan_arxiv(message: str, exc: Exception | None = None) -> None:
+    suffix = f": {type(exc).__name__}: {exc}" if exc is not None else ""
+    print(f"[scan_arxiv] WARN {message}{suffix}", file=sys.stderr)
+
+
 def _match_axis(title: str, abstract: str) -> str | None:
     """回傳第一個命中的研究軸標籤；無命中回 None。"""
     hay = (title + " " + abstract).lower()
@@ -320,10 +325,34 @@ def write_staging(result: dict) -> dict:
     existing = {}
     if STAGING.exists():
         try:
-            for c in json.loads(STAGING.read_text(encoding="utf-8")).get("candidates", []):
-                existing[c["arxiv_id"]] = c
-        except (json.JSONDecodeError, KeyError):
-            pass
+            payload = json.loads(STAGING.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            _warn_scan_arxiv(f"staging read failed; treating as empty path={STAGING}", exc)
+            payload = {}
+        if not isinstance(payload, dict):
+            _warn_scan_arxiv(
+                f"staging schema invalid; treating as empty path={STAGING} type={type(payload).__name__}"
+            )
+            payload = {}
+        candidates = payload.get("candidates", [])
+        if not isinstance(candidates, list):
+            _warn_scan_arxiv(
+                "staging candidates schema invalid; treating as empty "
+                f"path={STAGING} type={type(candidates).__name__}"
+            )
+            candidates = []
+        for idx, c in enumerate(candidates):
+            if not isinstance(c, dict):
+                _warn_scan_arxiv(
+                    "invalid staging candidate; skipping "
+                    f"path={STAGING} index={idx} type={type(c).__name__}"
+                )
+                continue
+            aid = c.get("arxiv_id")
+            if not aid:
+                _warn_scan_arxiv(f"staging candidate missing arxiv_id; skipping path={STAGING} index={idx}")
+                continue
+            existing[aid] = c
     added = 0
     for c in result["candidates"]:
         aid = c["arxiv_id"]

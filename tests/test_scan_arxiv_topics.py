@@ -6,6 +6,7 @@ RSS 是本機可靠路徑（export API query 端點持續 429）；parser 正確
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -125,3 +126,59 @@ def test_write_staging_dedup_and_first_seen(tmp_path, monkeypatch):
     assert by_id["2605.00001"]["first_seen"] == "2026-05-29T06:00:00+00:00"  # 保留首見
     assert by_id["2606.00003"]["first_seen"] == "2026-06-05T06:00:00+00:00"
     assert all(c["status"] == "new" for c in pool["candidates"])
+
+
+def test_write_staging_warns_on_bad_existing_json(tmp_path, monkeypatch, capsys):
+    staging = tmp_path / "arxiv_candidates.json"
+    staging.write_text("{bad json", encoding="utf-8")
+    monkeypatch.setattr(s, "STAGING", staging)
+
+    result = {
+        "scanned_at": "2026-06-23T00:00:00+00:00",
+        "candidates": [{"arxiv_id": "2606.10000", "title": "New", "matched_axis": "面向_copula"}],
+    }
+
+    assert s.write_staging(result) == {"added": 1, "total": 1}
+
+    captured = capsys.readouterr()
+    assert "[scan_arxiv] WARN staging read failed; treating as empty" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
+def test_write_staging_skips_bad_existing_candidates_but_keeps_valid(tmp_path, monkeypatch, capsys):
+    staging = tmp_path / "arxiv_candidates.json"
+    staging.write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {"title": "missing id"},
+                    "not a candidate",
+                    {
+                        "arxiv_id": "2605.00001",
+                        "title": "Old",
+                        "matched_axis": "面向_copula",
+                        "first_seen": "2026-05-29T06:00:00+00:00",
+                        "status": "new",
+                    },
+                ]
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(s, "STAGING", staging)
+
+    result = {
+        "scanned_at": "2026-06-23T00:00:00+00:00",
+        "candidates": [{"arxiv_id": "2606.10000", "title": "New", "matched_axis": "面向A_波動率預測"}],
+    }
+
+    assert s.write_staging(result) == {"added": 1, "total": 2}
+
+    captured = capsys.readouterr()
+    assert "staging candidate missing arxiv_id; skipping" in captured.err
+    assert "invalid staging candidate; skipping" in captured.err
+    pool = json.loads(staging.read_text(encoding="utf-8"))
+    by_id = {c["arxiv_id"]: c for c in pool["candidates"]}
+    assert set(by_id) == {"2605.00001", "2606.10000"}
+    assert by_id["2605.00001"]["first_seen"] == "2026-05-29T06:00:00+00:00"
