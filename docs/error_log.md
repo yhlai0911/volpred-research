@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 scheduler_state 壞檔只回 invalid_state 不留診斷
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/scheduler.py::get_scheduler_state()`：`storage/ops/scheduler_state.json` 若 JSON 壞掉，舊碼只回 `last_status="invalid_state"`，不寫 scheduler log，也不包含 path / exception 訊號。
+
+**根因**：scheduler state 是 advisory control-plane receipt，壞檔時不能阻斷 `get_scheduler_state()` caller；但只回 generic invalid state 會讓操作者看不出是 JSON parse failure、檔案不可讀，或 scheduler 真的寫入了 invalid 狀態。
+
+**解決方法**：保留原本 `invalid_state` 回傳 contract，但在 JSON parse / OSError 時寫入 `scheduler_state_read_failed` warning 到 `storage/ops/scheduler.log`，包含 path 與例外類型。新增 regression test 覆蓋壞 JSON 會回 invalid_state 且 log 出 JSONDecodeError。
+
 ## 2026-06-23 scan_arxiv_topics staging pool 壞檔被靜默當空
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/scan_arxiv_topics.py::write_staging()`：`storage/research/arxiv_candidates.json` 若 JSON 壞掉會被靜默當空；若 candidates list 內單筆缺 `arxiv_id`，舊碼會用外層 `KeyError` catch 直接放棄整批既有 staging pool，沒有 warning。

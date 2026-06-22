@@ -24,6 +24,20 @@ def test_scheduler_tick_skips_when_no_work(tmp_path: Path):
     assert state["last_reason"] == "no_work"
 
 
+def test_get_scheduler_state_warns_on_invalid_json(tmp_path: Path):
+    storage_dir = str(tmp_path / "storage")
+    state_path = Path(storage_dir) / "ops" / "scheduler_state.json"
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text("{bad json", encoding="utf-8")
+
+    state = get_scheduler_state(storage_dir=storage_dir)
+
+    assert state["last_status"] == "invalid_state"
+    log_text = (Path(storage_dir) / "ops" / "scheduler.log").read_text(encoding="utf-8")
+    assert "scheduler_state_read_failed" in log_text
+    assert "JSONDecodeError" in log_text
+
+
 def test_scheduler_tick_skips_when_lock_busy(tmp_path: Path):
     storage_dir = str(tmp_path / "storage")
     with shared_state_lock("scheduler_tick", storage_dir=storage_dir):

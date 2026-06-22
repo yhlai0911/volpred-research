@@ -50,7 +50,13 @@ def get_scheduler_state(*, storage_dir: str = "storage") -> dict[str, Any]:
         }
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, OSError) as exc:
+        _logger(storage_dir).warning(
+            "scheduler_state_read_failed path=%s error=%s: %s",
+            path,
+            type(exc).__name__,
+            exc,
+        )
         return {
             "last_tick_at": None,
             "last_status": "invalid_state",
