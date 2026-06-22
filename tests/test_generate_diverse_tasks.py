@@ -87,6 +87,31 @@ def test_gen_platform_ops_tasks_still_emits_when_log_missing_and_last_run_stale(
     assert tasks[0]["id"] == "platform_ops_cron_stale_daily_update"
 
 
+def test_gen_platform_ops_tasks_warns_on_bad_runtime_schedules_json(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    cron_last_run = tmp_path / "cron_last_run.json"
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    cron_logs = tmp_path / "cron"
+    cron_logs.mkdir()
+    cron_last_run.write_text(
+        json.dumps({"daily_update": "2026-04-25T01:05:47+00:00"}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    runtime_schedules.write_text("{bad json", encoding="utf-8")
+
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
+    monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
+
+    tasks = generate_diverse_tasks.gen_platform_ops_tasks(existing=set())
+
+    assert tasks == []
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN runtime_schedules JSON read failed" in err
+    assert "JSONDecodeError" in err
+
+
 def test_piggy_back_skip_with_custom_log_path_uses_mtime_no_false_positive(tmp_path, monkeypatch) -> None:
     """Regression: 2026-06-08 market_calendar_sync false-positive.
 
@@ -302,6 +327,22 @@ def test_paper_review_tasks_are_codex_agentable_not_main_thread_only(tmp_path, m
     assert len(tasks) == 1
     assert tasks[0]["task_type"] == "paper_review"
     assert "main-thread-only" not in tasks[0]["tags"]
+
+
+def test_paper_review_tasks_warns_on_bad_feed_json(tmp_path, monkeypatch, capsys) -> None:
+    feed = tmp_path / "feed.json"
+    feed.write_text("{bad json", encoding="utf-8")
+    monkeypatch.setattr(generate_diverse_tasks, "FEED", feed)
+
+    tasks = generate_diverse_tasks.gen_paper_review_tasks(
+        existing=set(),
+        rng=generate_diverse_tasks.random.Random(42),
+    )
+
+    assert tasks == []
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN feed JSON read failed" in err
+    assert "JSONDecodeError" in err
 
 
 def test_gen_experiment_tasks_warns_when_research_program_unreadable(

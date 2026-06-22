@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_diverse_tasks 補池 source 壞檔會中斷或無診斷降級
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py`：paper_review 補池直接 `json.loads(feed.json)`，feed 壞 JSON 會讓 generator 中斷；platform_ops 補池直接讀 `cron_last_run.json` / `runtime_schedules.json`，壞 JSON 或 schema drift 也會中斷或造成後續 `.get()` 不可信。
+
+**根因**：diverse task generator 是 pending queue 補充入口，單一 source 壞掉時不應阻斷其他來源補池；但也不能靜默當作「沒有候選」，否則 Codex/Claude 只會看到任務池缺口，卻看不到是補池 source 已經漂移。
+
+**解決方法**：新增 `_load_json_list()` / `_load_json_dict()` 與 `[diverse_gen] WARN ...` diagnostics；feed、cron_last_run、runtime_schedules 讀取失敗或 schema 不符時 fail-open 當空並輸出 path + exception/schema。新增 regression tests 覆蓋壞 runtime_schedules 與壞 feed JSON。
+
 ## 2026-06-23 work_summary_6h activity sources 壞檔被靜默當空
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/work_summary_6h.py`：`storage/work_log.json` 讀取 / parse 失敗或 schema 非 list 時直接回空；`storage/reports/feed.json` 讀取失敗或 schema 非 list 時也直接把 6h 文章窗口當空，沒有任何 warning。

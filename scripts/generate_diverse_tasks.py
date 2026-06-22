@@ -97,6 +97,42 @@ def _warn_diverse(message: str) -> None:
     print(f"[diverse_gen] WARN {message}", file=sys.stderr)
 
 
+def _load_json_list(path: Path, *, source: str) -> list:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _warn_diverse(
+            f"{source} JSON read failed; treating as empty "
+            f"path={path} error={type(exc).__name__}: {exc}"
+        )
+        return []
+    if not isinstance(data, list):
+        _warn_diverse(
+            f"{source} schema invalid; expected list, got {type(data).__name__} "
+            f"path={path}"
+        )
+        return []
+    return data
+
+
+def _load_json_dict(path: Path, *, source: str) -> dict | None:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _warn_diverse(
+            f"{source} JSON read failed; treating source as unavailable "
+            f"path={path} error={type(exc).__name__}: {exc}"
+        )
+        return None
+    if not isinstance(data, dict):
+        _warn_diverse(
+            f"{source} schema invalid; expected object, got {type(data).__name__} "
+            f"path={path}"
+        )
+        return None
+    return data
+
+
 def _experiment_dir_covers_kid(dirname: str, kid_lower: str) -> bool:
     """Return True when an experiment directory belongs to a K-id.
 
@@ -112,7 +148,7 @@ def gen_paper_review_tasks(existing: set[str], rng: random.Random) -> list[dict]
     """Sample articles published in last 24h that lack Codex review tag."""
     if not FEED.exists():
         return []
-    feed = json.loads(FEED.read_text(encoding="utf-8"))
+    feed = _load_json_list(FEED, source="feed")
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=PAPER_REVIEW_AGE_HOURS)).isoformat()
 
     candidates = []
@@ -264,8 +300,10 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
     """Detect stale cron jobs — prefer recent log banner over stale cron_last_run."""
     if not CRON_LAST_RUN.exists() or not RUNTIME_SCHEDULES.exists():
         return []
-    last_run = json.loads(CRON_LAST_RUN.read_text(encoding="utf-8"))
-    schedules = json.loads(RUNTIME_SCHEDULES.read_text(encoding="utf-8"))
+    last_run = _load_json_dict(CRON_LAST_RUN, source="cron_last_run")
+    schedules = _load_json_dict(RUNTIME_SCHEDULES, source="runtime_schedules")
+    if last_run is None or schedules is None:
+        return []
     crontab_items = (schedules.get("system_crontab") or {}).get("items") or []
 
     now = datetime.now(timezone.utc)
