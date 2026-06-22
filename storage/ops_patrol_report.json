@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-06-21T18:03:18Z",
+  "timestamp": "2026-06-22T00:03:31Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "129 total drafts (general=78, research=51). All thresholds met (total>=12, research>=4, general>=8)."
+      "detail": "Total drafts: 129 (general=78, research=51). All above thresholds (total>=12, general>=8, research>=4)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist (FILE_NOT_FOUND). Cannot check freshness."
+      "detail": "storage/strategy_metrics.json not found — file does not exist."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries dated 2026-06-21 or 2026-06-20 found in last 30 lines of docs/error_log.md. Most recent entries concern 2026-06-03 compact/auto-compact root cause analysis."
+      "detail": "Last entry dated 2026-06-03 (no entries from today 2026-06-22 or yesterday 2026-06-21). Most recent topic: auto-compact root cause analysis and CLAUDE_AUTOCOMPACT_PCT_OVERRIDE fix."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 15 strategies checked. Each has exactly 1 null (latest entry) in last 3 portfolio_return values — within acceptable limit (<=2). Total entries per strategy: 778-839."
+      "detail": "15 strategies checked (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, _market_daily, adaptive_tier). None have >2 portfolio_return nulls in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2191 entries in storage/memory/knowledge.json."
+      "detail": "storage/memory/knowledge.json contains 2191 entries."
     }
   ],
   "alerts": [
-    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json not found — metrics cannot be validated for staleness"
+    "STRATEGY_METRICS_FRESHNESS: storage/strategy_metrics.json does not exist (missing file, cannot assess freshness)"
   ]
 }
