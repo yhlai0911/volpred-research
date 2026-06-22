@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 continue_task_dispatch work_log 讀取失敗被靜默當空 rotation
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::load_recent_task_type_counts()`：`storage/work_log.json` 已存在但 JSON 壞掉或讀取失敗時直接回空 `Counter()`。dispatcher 繼續是對的，但 same-priority task_type rotation 會失去最近工作分布，且看不出是 work_log 壞掉。
+
+**根因**：rotation 訊號是輔助排序，不應阻塞 dispatch；但舊寫法把可降級寫成 silent empty signal，讓 work_log corruption 不可觀察。
+
+**解決方法**：work_log 讀取 / 解析失敗時輸出 `[dispatch] WARN work_log read failed; treating recent task type counts as empty`，原本回空 Counter 的行為不變。新增 regression test 覆蓋壞 JSON。
+
 ## 2026-06-22 continue_task_dispatch agent record 壞 JSON 被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::count_active_slots()`：`storage/ops/agents/*.json` 壞 JSON 時直接跳過。dispatcher 仍可運作是對的，但 slot 占用可能被低估，進而錯誤判斷還有可用 agent slot。

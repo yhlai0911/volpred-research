@@ -128,8 +128,12 @@ def load_recent_task_type_counts(limit: int = 10) -> Counter:
     if not WORK_LOG.exists():
         return Counter()
     try:
-        data = json.loads(WORK_LOG.read_text())
-    except json.JSONDecodeError:
+        data = json.loads(WORK_LOG.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        _warn_dispatch(
+            "work_log read failed; treating recent task type counts as empty "
+            f"path={WORK_LOG} error={type(exc).__name__}: {exc}"
+        )
         return Counter()
     if not isinstance(data, list):
         return Counter()
