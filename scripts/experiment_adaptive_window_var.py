@@ -48,6 +48,17 @@ WINDOW_STRATEGIES = ["Fixed_2000", "Fixed_504", "Adaptive_CUSUM", "EWMA_094", "E
 EWMA_LAMBDA = 0.94
 
 
+def warn_garch_forecast_failure(asset, strategy, date, idx, window, exc):
+    """Warn without aborting the asset-level forecast sweep."""
+    date_label = date.strftime("%Y-%m-%d") if hasattr(date, "strftime") else str(date)
+    print(
+        f"[adaptive_window_var] WARN GARCH forecast failed "
+        f"asset={asset} strategy={strategy} date={date_label} "
+        f"idx={idx} window={window}: {type(exc).__name__}: {exc}",
+        flush=True,
+    )
+
+
 # ── VaR Computation ───────────────────────────────────────────────────
 
 def var_normal(sigma, alpha=0.01):
@@ -273,8 +284,8 @@ def run_forecasts_for_asset(asset, data, oos_dates):
                     "date": date, "actual_return": actual_return,
                     "sigma": sigma, "skew": skew, "kurt": kurt
                 })
-            except Exception:
-                pass
+            except Exception as exc:
+                warn_garch_forecast_failure(asset, "Fixed_2000", date, idx, w, exc)
 
         # ── Strategy 2: Fixed w=504 ──
         w = 504
@@ -286,8 +297,8 @@ def run_forecasts_for_asset(asset, data, oos_dates):
                     "date": date, "actual_return": actual_return,
                     "sigma": sigma, "skew": skew, "kurt": kurt
                 })
-            except Exception:
-                pass
+            except Exception as exc:
+                warn_garch_forecast_failure(asset, "Fixed_504", date, idx, w, exc)
 
         # ── Strategy 3: Adaptive (Structural Break) ──
         if idx >= 504:
@@ -300,8 +311,8 @@ def run_forecasts_for_asset(asset, data, oos_dates):
                     "sigma": sigma, "skew": skew, "kurt": kurt,
                     "window_used": actual_w
                 })
-            except Exception:
-                pass
+            except Exception as exc:
+                warn_garch_forecast_failure(asset, "Adaptive_CUSUM", date, idx, actual_w, exc)
 
         # ── Strategy 4: EWMA lambda=0.94 ──
         if idx >= 20:
@@ -330,8 +341,8 @@ def run_forecasts_for_asset(asset, data, oos_dates):
                     "sigma": sigma, "skew": skew, "kurt": kurt,
                     "window_used": idx
                 })
-            except Exception:
-                pass
+            except Exception as exc:
+                warn_garch_forecast_failure(asset, "Expanding", date, idx, idx, exc)
 
         # Progress
         if (i + 1) % 100 == 0:

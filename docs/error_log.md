@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 experiment_adaptive_window_var GARCH forecast failure 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/experiment_adaptive_window_var.py`：Fixed_2000、Fixed_504、Adaptive_CUSUM、Expanding 四個 GARCH window strategy 的 fit/forecast 失敗都直接 `pass`。VaR 賽馬會繼續跑，但某策略 forecast 筆數偏少時，看不出是資料不足、模型收斂失敗，還是程式例外。
+
+**根因**：adaptive-window VaR 實驗正確地讓單一策略/日期失敗不阻塞整個 asset sweep；但舊寫法沒有把非致命失敗寫進 stdout，導致結果表只留下缺筆數，沒有 root-cause 訊號。
+
+**解決方法**：新增 `warn_garch_forecast_failure()`；非致命 GARCH failure 會輸出 asset、strategy、date、idx、window 與 exception，原有跳過該 forecast 的行為不變。新增 regression test monkeypatch `run_garch_forecast` 失敗，確認 Fixed_504 / Adaptive_CUSUM / Expanding 會 warning，EWMA 路徑仍正常產生 forecast。
+
 ## 2026-06-22 gbm_qlike cross-validation forecast failure 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/gbm_qlike_cross_validation.py`：GJR-GARCH rolling fit 失敗與 GBM prediction 失敗都直接 `pass`，forecast 留 `NaN`。cross-validation 仍會跑完，但 valid count / QLIKE 變化看不出是哪一天、哪個模型路徑失敗。
