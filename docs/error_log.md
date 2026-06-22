@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 check_alerts cron state source 壞檔被靜默當空
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/check_alerts.py`：release-pool fallback fire 寫 `cron_last_run.json` 前若既有 state 壞 JSON，會靜默用 `{}` 重寫；piggy-back drift 檢查讀 `cron_last_run.json` / `runtime_schedules.json` 失敗時也靜默把兩者當空。
+
+**根因**：`check_alerts` 是觀測與 piggy-back scheduler 入口，必須在單一 state/config 壞掉時繼續產生 alert report；但把 source corruption 靜默降級成空資料，會讓操作者誤讀為沒有 stale job 或正常寫入 state，而不是 observability source 已經壞掉。
+
+**解決方法**：新增 `_load_json_dict()` 與 `[check_alerts] WARN ...` diagnostics；缺檔仍安靜視為空，已存在但讀取 / parse 失敗或 schema 非 dict 時 warning 後回空。release-pool fallback fire 與 piggy-back drift 共用此 helper。新增 regression tests 覆蓋壞 `cron_last_run.json` warning、fallback fire 仍寫入 release_pool、drift check 仍不中斷。
+
 ## 2026-06-23 compute_queue 壞 job JSON 被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/compute_queue.py`：`list` 與 `run-next` 掃描 `storage/ops/compute_queue/*.json` 時，單一 job JSON 讀取或 parse 失敗會直接 `continue`，沒有任何 warning。

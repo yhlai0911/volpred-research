@@ -57,3 +57,41 @@ def test_auto_trigger_release_pool_if_due_records_fallback_observability(tmp_pat
 
     expected = datetime.fromisoformat(result["end_at"]).isoformat(timespec="seconds")
     assert cron_last_run["release_pool"] == expected
+
+
+def test_release_pool_fallback_warns_on_corrupt_cron_state(tmp_path: Path, monkeypatch, capsys):
+    check_alerts = _load_check_alerts_module()
+    monkeypatch.setattr(check_alerts, "PROJECT_ROOT", tmp_path)
+    state_path = tmp_path / "storage" / "ops" / "cron_last_run.json"
+    state_path.parent.mkdir(parents=True)
+    state_path.write_text("{bad json", encoding="utf-8")
+
+    check_alerts._record_release_pool_fallback_fire(
+        start_iso="2026-06-23T00:00:00+00:00",
+        end_iso="2026-06-23T00:00:05+00:00",
+        returncode=0,
+    )
+
+    captured = capsys.readouterr()
+    assert "[check_alerts] WARN cron_last_run JSON read failed; using empty object" in captured.err
+    assert "cron_last_run.json" in captured.err
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    assert state == {"release_pool": "2026-06-23T00:00:05+00:00"}
+
+
+def test_piggy_back_drift_warns_on_bad_state_source(tmp_path: Path, monkeypatch, capsys):
+    check_alerts = _load_check_alerts_module()
+    monkeypatch.setattr(check_alerts, "PROJECT_ROOT", tmp_path)
+    state_path = tmp_path / "storage" / "ops" / "cron_last_run.json"
+    config_path = tmp_path / "config" / "runtime_schedules.json"
+    state_path.parent.mkdir(parents=True)
+    config_path.parent.mkdir(parents=True)
+    state_path.write_text("{bad json", encoding="utf-8")
+    config_path.write_text(json.dumps({"system_crontab": {"items": []}}), encoding="utf-8")
+
+    result = check_alerts._check_piggy_back_drift({"ok": True, "jobs": []})
+
+    captured = capsys.readouterr()
+    assert result == {"drift_count": 0, "drifts": []}
+    assert "[check_alerts] WARN cron_last_run JSON read failed; using empty object" in captured.err
+    assert "piggy-back-drift: none" in captured.out

@@ -30,6 +30,32 @@ if str(PROJECT_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
 
+def _warn_check_alerts(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[check_alerts] WARN {message}: "
+        f"path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
+def _load_json_dict(path: Path, *, label: str) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        _warn_check_alerts(f"{label} JSON read failed; using empty object", path, exc)
+        return {}
+    if not isinstance(payload, dict):
+        _warn_check_alerts(
+            f"{label} JSON schema invalid; using empty object",
+            path,
+            TypeError(f"expected dict, got {type(payload).__name__}"),
+        )
+        return {}
+    return payload
+
+
 def _record_release_pool_fallback_fire(*, start_iso: str, end_iso: str, returncode: int) -> None:
     """Keep fallback-triggered release runs visible in the canonical observability files.
 
@@ -46,12 +72,7 @@ def _record_release_pool_fallback_fire(*, start_iso: str, end_iso: str, returnco
 
     state_path = PROJECT_ROOT / "storage" / "ops" / "cron_last_run.json"
     state_path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
-    except Exception:
-        state = {}
-    if not isinstance(state, dict):
-        state = {}
+    state = _load_json_dict(state_path, label="cron_last_run")
     state["release_pool"] = end_iso
     state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -168,12 +189,8 @@ def _check_piggy_back_drift(due_summary: dict) -> dict:
     # Stale last_run check
     state_path = PROJECT_ROOT / "storage" / "ops" / "cron_last_run.json"
     config_path = PROJECT_ROOT / "config" / "runtime_schedules.json"
-    try:
-        state = json.loads(state_path.read_text()) if state_path.exists() else {}
-        config = json.loads(config_path.read_text()) if config_path.exists() else {}
-    except Exception:
-        state = {}
-        config = {}
+    state = _load_json_dict(state_path, label="cron_last_run")
+    config = _load_json_dict(config_path, label="runtime_schedules")
 
     items = (config.get("system_crontab") or {}).get("items") or []
     now = datetime.now(timezone.utc)
