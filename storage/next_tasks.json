@@ -35052,5 +35052,53 @@
       "reader_facing",
       "auto_refill"
     ]
+  },
+  {
+    "id": "K1361",
+    "title": "K1361: Gaming / sports-betting / esports 籃子的 vol spillover 與 risk-on 訊號** — yfinance ESPO/HERO/NERD/GAMR + DKNG/FLUT/HOOD + QQQ",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1135). Original: Gaming / sports-betting / esports 籃子的 vol spillover 與 risk-on 訊號** — yfinance ESPO/HERO/NERD/GAMR + DKNG/FLUT/HOOD + QQQ/ARKK/BTC，做 DCC/VAR/Diebold-Yilmaz spillover，檢定 gaming/betting basket 是否在 market turmoil 前後變成高 beta transmitter 或 diversification sink；與 meme/gamma-squeeze 題正交（來源：JAI Spring 2026 gaming volatility spillovers；gaming 作 alternative exposure 被重新評估）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1361.py with signal.shift(1) + seed=42, (c) K1361_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1135,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-22T00:00:00Z"
+  },
+  {
+    "id": "K1362",
+    "title": "K1362: optflowcrowd 總體選擇權買權需求差作 short-vol timing proxy** — 個別 order-flow 資料需付費；先用 CBOE put/call ratio、OCC aggregate volume、Cboe",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1137). Original: optflowcrowd 總體選擇權買權需求差作 short-vol timing proxy** — 個別 order-flow 資料需付費；先用 CBOE put/call ratio、OCC aggregate volume、Cboe index/equity split 建免費 proxy，檢定 call-buying pressure 是否預測 SPY excess return、VIX change、short-vol strategy drawdown；與 VIX/SKEW level 題正交，聚焦「訂單流 crowd」（來源：JFQA 2026 forthcoming Betting Against the Crowd）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1362.py with signal.shift(1) + seed=42, (c) K1362_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1137,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-22T00:00:00Z"
+  },
+  {
+    "id": "journal_discovery_20260622_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-06-22T00:00:00+00:00"
   }
 ]
