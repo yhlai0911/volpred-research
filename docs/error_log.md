@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 risk_forecast historical/YTD GARCH fallback 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，承接 `scripts/risk_forecast.py` 先前非致命 warning 修補，發現 historical sigma chart 與 YTD Basel sigma forecast 兩條 GARCH fitting path 仍有 silent fallback：前者失敗時直接略過該歷史點，後者失敗時直接使用當前 `sigma_daily`。
+
+**根因**：風險預測流程應允許單一 rolling fit 失敗，不阻塞整份 `storage/risk_forecast.json`；但「略過 / 用 fallback」沒有寫入 `warnings`，會讓圖表缺點或 Basel approximation 降級變成不可觀察。
+
+**解決方法**：抽出 `_fit_garch_sigma_daily()` 與 `_try_fit_garch_sigma_daily()`；historical sigma fit failure 會記錄 `sigma_history_fit_failed` 並略過該點，YTD Basel fit failure 會記錄 `ytd_basel_sigma_fit_failed` 並明示使用 current sigma fallback。兩者 warning 都進入該 asset 的 `warnings` 欄位與 stdout。新增 regression tests 覆蓋無 fallback 與有 fallback 兩種 warning path。
+
 ## 2026-06-22 work_dashboard_server JSON source 降級不可見
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/work_dashboard_server.py`：dashboard API 讀 `next_tasks.json`、`dashboard_latest.json`、`runtime_schedules.json`、`cron_last_run.json`、`feed.json`、release settings 失敗時直接回 default；`next_tasks` / `feed` 型別錯誤也只安靜轉空。頁面仍能開是對的，但操作者會把 source 壞掉誤讀成「真的沒有任務 / 沒有文章」。

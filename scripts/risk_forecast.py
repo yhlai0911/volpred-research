@@ -87,6 +87,30 @@ def _append_spy_vix_garch_alert(
         )
 
 
+def _fit_garch_sigma_daily(train_pct: pd.Series) -> float:
+    """Fit one-step GJR-GARCH sigma in decimal units."""
+    am = arch_model(train_pct, vol="GARCH", p=1, o=1, q=1,
+                    dist="normal", mean="Zero", rescale=False)
+    res = am.fit(disp="off", show_warning=False)
+    return float(np.sqrt(res.forecast(horizon=1).variance.iloc[-1, 0]) / 100)
+
+
+def _try_fit_garch_sigma_daily(
+    train_pct: pd.Series,
+    warnings: list[dict],
+    *,
+    code: str,
+    message: str,
+    fallback: float | None = None,
+) -> float | None:
+    """Best-effort GARCH sigma fit; record degradation before using fallback."""
+    try:
+        return _fit_garch_sigma_daily(train_pct)
+    except Exception as exc:
+        _record_forecast_warning(warnings, code, message, exc)
+        return fallback
+
+
 def cornish_fisher_quantile(alpha: float, skew: float, excess_kurt: float) -> float:
     """Cornish-Fisher expansion for VaR quantile.
 
@@ -324,15 +348,15 @@ def main():
                 if idx < window:
                     continue
                 t = returns_pct.iloc[idx - window:idx]
-                try:
-                    am_h = arch_model(t, vol="GARCH", p=1, o=1, q=1,
-                                     dist="normal", mean="Zero", rescale=False)
-                    res_h = am_h.fit(disp="off", show_warning=False)
-                    s = float(np.sqrt(res_h.forecast(horizon=1).variance.iloc[-1, 0]) / 100)
-                    d = str(raw_returns.index[idx].date())
+                d = str(raw_returns.index[idx].date())
+                s = _try_fit_garch_sigma_daily(
+                    t,
+                    asset_warnings,
+                    code="sigma_history_fit_failed",
+                    message=f"{ticker} historical sigma GARCH fit failed at {d}; point omitted",
+                )
+                if s is not None:
                     sigma_history.append({"date": d, "sigma_ann": round(s * np.sqrt(252) * 100, 1)})
-                except Exception:
-                    continue
 
             # Basel III YTD
             year_start = f"{datetime.now().year}-01-01"
@@ -347,14 +371,18 @@ def main():
                     if idx < window:
                         continue
                     t = returns_pct.iloc[idx - window:idx]
-                    try:
-                        am_y = arch_model(t, vol="GARCH", p=1, o=1, q=1,
-                                         dist="normal", mean="Zero", rescale=False)
-                        res_y = am_y.fit(disp="off", show_warning=False)
-                        s = float(np.sqrt(res_y.forecast(horizon=1).variance.iloc[-1, 0]) / 100)
-                        ytd_sigmas.append(s)
-                    except Exception:
-                        ytd_sigmas.append(sigma_daily)  # fallback
+                    date_label = str(dt.date()) if hasattr(dt, "date") else str(dt)
+                    s = _try_fit_garch_sigma_daily(
+                        t,
+                        asset_warnings,
+                        code="ytd_basel_sigma_fit_failed",
+                        message=(
+                            f"{ticker} YTD Basel sigma GARCH fit failed at {date_label}; "
+                            "using current sigma fallback"
+                        ),
+                        fallback=sigma_daily,
+                    )
+                    ytd_sigmas.append(float(s))
                 if ytd_sigmas:
                     ytd_sigmas_arr = np.array(ytd_sigmas[:len(ytd_returns)])
                     ytd_returns_arr = ytd_returns[:len(ytd_sigmas_arr)]

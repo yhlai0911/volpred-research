@@ -73,3 +73,60 @@ def test_spy_vix_garch_alert_records_empty_lookup(capsys) -> None:
         "message": "SPY VIX/GARCH ratio check skipped: ^VIX returned no rows",
     }]
     assert "^VIX returned no rows" in output
+
+
+def test_try_fit_garch_sigma_records_history_failure(monkeypatch, capsys) -> None:
+    import pandas as pd
+
+    import risk_forecast  # type: ignore
+
+    def _raise_fit_failure(_train_pct):
+        raise RuntimeError("history fit failed")
+
+    monkeypatch.setattr(risk_forecast, "_fit_garch_sigma_daily", _raise_fit_failure)
+
+    warnings: list[dict] = []
+    sigma = risk_forecast._try_fit_garch_sigma_daily(
+        pd.Series([0.1, -0.2, 0.3]),
+        warnings,
+        code="sigma_history_fit_failed",
+        message="SPY historical sigma GARCH fit failed at 2026-01-02; point omitted",
+    )
+    output = capsys.readouterr().out
+
+    assert sigma is None
+    assert warnings == [{
+        "code": "sigma_history_fit_failed",
+        "message": "SPY historical sigma GARCH fit failed at 2026-01-02; point omitted",
+        "error": "RuntimeError: history fit failed",
+    }]
+    assert "history fit failed" in output
+
+
+def test_try_fit_garch_sigma_records_ytd_failure_and_returns_fallback(monkeypatch, capsys) -> None:
+    import pandas as pd
+
+    import risk_forecast  # type: ignore
+
+    def _raise_fit_failure(_train_pct):
+        raise RuntimeError("ytd fit failed")
+
+    monkeypatch.setattr(risk_forecast, "_fit_garch_sigma_daily", _raise_fit_failure)
+
+    warnings: list[dict] = []
+    sigma = risk_forecast._try_fit_garch_sigma_daily(
+        pd.Series([0.1, -0.2, 0.3]),
+        warnings,
+        code="ytd_basel_sigma_fit_failed",
+        message="SPY YTD Basel sigma GARCH fit failed at 2026-01-02; using current sigma fallback",
+        fallback=0.0123,
+    )
+    output = capsys.readouterr().out
+
+    assert sigma == 0.0123
+    assert warnings == [{
+        "code": "ytd_basel_sigma_fit_failed",
+        "message": "SPY YTD Basel sigma GARCH fit failed at 2026-01-02; using current sigma fallback",
+        "error": "RuntimeError: ytd fit failed",
+    }]
+    assert "using current sigma fallback" in output
