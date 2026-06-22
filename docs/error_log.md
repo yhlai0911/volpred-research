@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 email_notifier env 檔讀取失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/publisher/email_notifier.py::_load_env_file()`：`.env` / `.env.local` / frontend `.env.local` 路徑存在但讀取失敗時直接 return，沒有任何 warning。
+
+**根因**：email notifier 啟動時應 fail-open，不能因 env file 暫時讀不到就阻塞文章發布或 ops alert；但 env file 讀取失敗會讓 SMTP / admin recipient 設定缺漏，看起來像「本來沒有設定」，使 email alert pipeline 降級不可觀測。
+
+**解決方法**：新增 `_warn_email_notifier()`；env file 讀取例外時輸出 `[email_notifier] WARN env file read failed; continuing without it ...` 到 stderr，原本 fail-open 行為不變。新增 regression test 覆蓋已存在但不可讀路徑。
+
 ## 2026-06-22 build_feed_index 壞日期被歸入日期缺失但無診斷
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/build_feed_index.py::_parse_date()`：article date 欄位格式壞掉時直接回 `None`，後續進「日期缺失」桶，和真的缺欄位無法區分。

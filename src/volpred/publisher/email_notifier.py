@@ -4,6 +4,7 @@ import json
 import os
 import smtplib
 import re
+import sys
 from datetime import date, datetime, timezone
 from email.message import EmailMessage
 from email.utils import formataddr
@@ -22,6 +23,14 @@ def _utc_now() -> str:
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
 
+def _warn_email_notifier(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[email_notifier] WARN {message}: "
+        f"path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def _load_env_file(path: Path) -> None:
     if not path.exists():
         return
@@ -35,7 +44,8 @@ def _load_env_file(path: Path) -> None:
             if not key or key in os.environ:
                 continue
             os.environ[key] = value.strip()
-    except Exception:
+    except Exception as exc:
+        _warn_email_notifier("env file read failed; continuing without it", path, exc)
         return
 
 

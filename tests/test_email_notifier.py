@@ -13,6 +13,7 @@ from pathlib import Path
 
 import pytest
 
+from volpred.publisher import email_notifier
 from volpred.publisher.email_notifier import EmailNotifier
 
 
@@ -20,6 +21,7 @@ from volpred.publisher.email_notifier import EmailNotifier
 def notifier(tmp_path: Path, monkeypatch) -> EmailNotifier:
     # Configure SMTP envs so is_configured() returns True; _send_email still
     # short-circuits via VOLPRED_NO_EMAIL=1 (set globally in conftest).
+    monkeypatch.setenv("ADMIN_NOTIFICATION_EMAILS", "alice@example.com,bob@example.com")
     monkeypatch.setenv("EMAIL_FROM", "ops@volpred.test")
     monkeypatch.setenv("SMTP_HOST", "smtp.test")
     monkeypatch.setenv("SMTP_USERNAME", "user")
@@ -31,6 +33,15 @@ def notifier(tmp_path: Path, monkeypatch) -> EmailNotifier:
 def test_is_configured_reflects_env(notifier: EmailNotifier):
     assert notifier.is_configured() is True
     assert "alice@example.com" in notifier.admin_emails
+
+
+def test_load_env_file_warns_when_existing_path_cannot_be_read(tmp_path: Path, capsys):
+    email_notifier._load_env_file(tmp_path)
+
+    captured = capsys.readouterr()
+    assert "[email_notifier] WARN env file read failed" in captured.err
+    assert "IsADirectoryError" in captured.err
+    assert str(tmp_path) in captured.err
 
 
 def test_notify_writes_log_and_file_when_send_suppressed(notifier: EmailNotifier, tmp_path: Path):
@@ -110,6 +121,7 @@ def test_get_notifications_filter_and_limit(notifier: EmailNotifier):
 
 def test_send_email_skipped_under_tmp_storage(tmp_path: Path, monkeypatch):
     """Defense-in-depth: tmp_path triggers the second guard even without VOLPRED_NO_EMAIL."""
+    monkeypatch.setenv("ADMIN_NOTIFICATION_EMAILS", "user@example.com")
     monkeypatch.setenv("EMAIL_FROM", "ops@volpred.test")
     monkeypatch.setenv("SMTP_HOST", "smtp.test")
     monkeypatch.setenv("OPS_ADMIN_EMAILS", "user@example.com")
