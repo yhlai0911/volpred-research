@@ -35090,7 +35090,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "auto_journal_discovery_fallback",
@@ -35099,6 +35099,12 @@
       "research-backlog-refresh",
       "all-covered-fallback"
     ],
-    "created_at": "2026-06-22T00:00:00+00:00"
+    "created_at": "2026-06-22T00:00:00+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-22T00:19:53.745403+00:00",
+    "claim_session_id": "a5397375e95a",
+    "started_at": "2026-06-22T00:19:53.841805+00:00",
+    "completed_at": "2026-06-22T00:27:15.444375+00:00",
+    "result": "Added a 2026-06-22 Codex supplement to research_program.md with 7 de-duplicated journal/practitioner research directions. Preserved the concurrently written 2026-06-22 batch and marked the Codex section as proxy-diagnostic where data are indirect. Verified with git diff --check and generate_research_backlog.py --dry-run.\n\n補 7 條期刊主題挖掘方向到 research_program.md，來源採 JoE/JFQA/RFS/JBF/JFEC/Fed 2025-26 公開摘要；已 grep 去重並以 generate_research_backlog.py --dry-run --json 驗證可解析。"
   }
 ]
