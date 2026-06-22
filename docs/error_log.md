@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 gemini_ask paid API usage notification failure 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/gemini_ask.py`：成功打到付費 Gemini API 後，usage ledger 寫入失敗或 `send-alert` admin 通知失敗都直接 `pass`。腳本仍會把 answer 回給 caller，但「有付費 API 使用」這件事可能沒有可靠紀錄或告警。
+
+**根因**：`gemini_ask.py` 是 fallback path，正確設計是不讓通知失敗阻塞已取得的回答；但舊寫法把非阻塞通知失敗寫成 silent failure，和檔案開頭「每次成功呼叫都要 emphatically notify」的治理要求衝突。
+
+**解決方法**：新增 `_warn_usage_notification()`，ledger write failure 與 admin alert send failure 都輸出 stderr warning，保留不阻塞主回答的行為。新增 regression tests monkeypatch usage log 與 subprocess，確認不會真打 API/寄信，但失敗原因可見。
+
 ## 2026-06-22 refill_task_pool arc dedup fail-open 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/refill_task_pool.py`：publication refill 的 narrative-arc dedup filter 在 import 失敗、實驗檔讀取失敗、arc check 失敗、或既有 feed timestamp 解析失敗時都 fail-open 但不輸出原因。refill 會繼續是對的，但 ops 看不出候選為何沒被 dedup filter 判斷，或壞 timestamp 為何仍被視為近期候選。

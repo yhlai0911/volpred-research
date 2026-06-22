@@ -38,6 +38,10 @@ API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 _USAGE_LOG = REPO / "storage" / "logs" / "gemini_ask_usage.jsonl"
 
 
+def _warn_usage_notification(message: str, exc: Exception) -> None:
+    print(f"⚠️  [gemini_ask.py] {message}: {type(exc).__name__}: {exc}", file=sys.stderr)
+
+
 def _caller() -> str:
     """Best-effort identification of the parent process (who invoked us)."""
     try:
@@ -69,8 +73,8 @@ def _notify_usage(model: str, prompt: str, response_chars: int) -> None:
                 "ts": ts, "model": model, "caller": caller,
                 "prompt_chars": len(prompt), "response_chars": response_chars,
             }, ensure_ascii=False) + "\n")
-    except Exception:
-        pass
+    except Exception as exc:
+        _warn_usage_notification("usage ledger write failed", exc)
     # 2. Loud stderr banner (visible to interactive / cron-log readers).
     print(
         f"\n⚠️  [gemini_ask.py] PAID Gemini API call — model={model}, "
@@ -99,8 +103,8 @@ def _notify_usage(model: str, prompt: str, response_chars: int) -> None:
              "--body", body],
             cwd=str(REPO), capture_output=True, timeout=60,
         )
-    except Exception:
-        pass
+    except Exception as exc:
+        _warn_usage_notification("admin alert send failed", exc)
 
 
 def load_api_key() -> str:
