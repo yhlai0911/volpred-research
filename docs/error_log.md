@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 task_generator_v2 experiment README corpus 讀取失敗被靜默排除
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::experiment_readme_corpus()`：掃描 `experiments/k*/README.md` 時，單一 README 讀取失敗會直接 `continue`，沒有任何 warning。
+
+**根因**：task generator v2 會用 experiment README corpus 做 conservative stale-backlog 檢查，避免已被實驗 README 覆蓋的研究方向又被排成新任務。單檔讀取失敗時跳過該檔可讓 generator 繼續，但靜默排除會讓操作者看不出 corpus 不完整，後續防重判斷可能降級。
+
+**解決方法**：單一 README 讀取失敗時改用 `_warn_task_generator()` 輸出 `[task_generator_v2] WARN experiment README read failed; excluding from stale-backlog corpus ...` 到 stderr，原本跳過該檔的 fallback 行為不變。新增 regression test 覆蓋 unreadable README 時 corpus 回空且有 warning。
+
 ## 2026-06-23 generate_diverse_tasks error_log accumulation 讀取失敗被靜默當 0
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_governance_tasks()`：error_log accumulation governance signal 讀取 `docs/error_log.md` 失敗時，舊碼直接把 `heading_count` 當 0，沒有任何 warning。

@@ -121,7 +121,12 @@ def experiment_readme_corpus() -> str:
     for readme in EXPERIMENTS_DIR.glob("k*/README.md"):
         try:
             chunks.append(readme.read_text(encoding="utf-8"))
-        except OSError:
+        except OSError as exc:
+            _warn_task_generator(
+                "experiment README read failed; excluding from stale-backlog corpus",
+                readme,
+                exc,
+            )
             continue
     return "\n".join(chunks)
 

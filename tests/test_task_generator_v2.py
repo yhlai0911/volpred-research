@@ -83,6 +83,25 @@ def test_k_ids_with_feed_articles_warns_on_grep_failure(tmp_path, monkeypatch, c
     assert "RuntimeError: grep unavailable" in captured.err
 
 
+def test_experiment_readme_corpus_warns_on_unreadable_readme(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    readme = tmp_path / "experiments" / "k9999" / "README.md"
+    readme.mkdir(parents=True)
+    monkeypatch.setattr(MODULE, "EXPERIMENTS_DIR", tmp_path / "experiments")
+
+    corpus = MODULE.experiment_readme_corpus()
+
+    assert corpus == ""
+    captured = capsys.readouterr()
+    assert (
+        "[task_generator_v2] WARN experiment README read failed; "
+        "excluding from stale-backlog corpus"
+    ) in captured.err
+    assert "README.md" in captured.err
+    assert "IsADirectoryError" in captured.err
+
+
 def test_event_article_skips_runtime_managed_adjacent_fomc_date(tmp_path, monkeypatch) -> None:
     runtime_schedules = tmp_path / "runtime_schedules.json"
     runtime_schedules.write_text(
