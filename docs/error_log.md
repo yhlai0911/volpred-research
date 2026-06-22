@@ -2949,3 +2949,19 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **Fix**: Reframed K1416 as a robustness check for the strongest / most visible `TW0050-N225` pair, not the only significant pair. Updated public articles, K1416 docs, and `research_program.md`; source reviews should treat old "唯一 Harvey-sig" wording as stale unless explicitly scoped to the original raw-DM run.
 
 **Lesson / prevention**: When a retrofit changes the set of significant peers, update every downstream narrative source, not just the newest README. Article review must compare uniqueness claims against the current result table, not against old experiment motivation text.
+
+## 2026-06-23 03:42 feed.json 肥大根因 = description 全文重複 (修流程 + backfill)
+
+**症狀**：用戶問「feed.json 太大為什麼有影響？會影響網站效率？」。實測 feed.json 22.5MB / 1650 entries（僅 3 個月歷史）。
+
+**誤區澄清**：feed.json **不直接拖慢使用者開頁** — 前端讀 Supabase（data-server.ts：supabase 77 處 / feed.json 0 處），feed.json 是後端 canonical 儲存。detail 頁 ISR `revalidate=300`、首頁 force-dynamic，所以「對應貼文沒改」主因是 digest 概念 + badge 顯示，非 feed.json 大小（大小頂多讓即時更新退化成 ≤5 分鐘）。
+
+**真正根因（資料品質 bug，非「文章太多」）**：`publisher.py` item 建構處 `'description': description, 'content': description,` — publisher API 的 `description` 參數其實裝完整 markdown 正文，entry 把它**同時**存進兩個欄位 → 每篇文章存兩份。1325/1650 筆（80%）description 是全文克隆，佔 ~5.6MB raw text。前端本文渲染是 `content || description`（content 為主，永遠非空 → description fallback 從不觸發），Supabase 用 content + 自算 excerpt[:200]，故 description=全文 100% 冗餘。
+
+**修法（修流程不修資料）**：
+1. **流程**：新增 `_make_excerpt()`（strip markdown → 首 300 字 plain text），item 改 `'description': _make_excerpt(description)`，content 保留完整正文。測試 `tests/test_make_excerpt.py`（7 cases）。
+2. **資料**：`scripts/slim_feed_description.py --apply` 對既有 description>400 字者從 canonical content 重生 excerpt（content 不動，屬衍生欄位清理非補洞）。**feed.json 22.5MB → 14.2MB（-37%，省 8.4MB）**。
+
+**第二個獨立 bug（已識別未修）**：10 筆 entry content 內嵌 base64 PNG data URI（圖沒上傳 Supabase 就 inline；mile_e5f33cfa 單張 862KB），共 1.84MB。`normalize_image_paths` 不處理 base64、publisher 無攔截。後續修補 = 抽 base64 → 上傳 Supabase article-images → 換 URL + 加 publisher gate。
+
+**ISR / mirror 鏈現況**：`_sync_feed_to_remote` 整包 PUT 23MB 到 /api/sync/feed.json 會超 Zeabur body 上限（SSL EOF）；revalidateTag 只由該端點觸發 → 即時失效斷，但 ISR 時間制兜底。feed.json 變小後此 PUT 仍 >8MB ceiling，須改單篇 push（後續）。

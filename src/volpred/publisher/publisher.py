@@ -9,6 +9,47 @@ from volpred.config.runtime import get_default_remote_url
 from volpred.topic_clusters import classify_topic_cluster, cluster_gate_status
 
 
+# 2026-06-23: feed.json bloat fix. The publisher API carries the FULL article
+# markdown body in the ``description`` parameter, and the feed entry historically
+# stored that body in BOTH ``description`` AND ``content`` (line ~1153
+# ``'content': description``) — every article persisted twice. With 1650 entries
+# the duplicate body was ~5.8MB of a 23MB feed.json. The frontend renders
+# ``content`` as the body (``content || description || analysis``) and Supabase
+# derives its own ``excerpt = content[:200]``; ``description`` is only a fallback
+# that never fires because ``content`` is always populated. So ``description`` as
+# a full-body clone is pure waste. Store a short plain-text excerpt instead —
+# which is also the conventional semantic of a "description" (list preview / SEO
+# meta). ``content`` stays the canonical full body; nothing downstream regresses.
+_EXCERPT_MAX_CHARS = 300
+
+
+def _make_excerpt(body: str | None, max_chars: int = _EXCERPT_MAX_CHARS) -> str:
+    """Derive a short plain-text excerpt from a markdown article body.
+
+    Strips the leading H1/heading line, images, markdown emphasis/heading marks,
+    and collapses whitespace, then truncates to ``max_chars`` (ellipsis appended
+    when truncated). Returns '' for empty input. Pure/deterministic so the same
+    body always yields the same excerpt (used by both publisher and backfill).
+    """
+    if not body:
+        return ''
+    text = str(body)
+    # Drop image embeds entirely (alt text + url are noise for a preview).
+    text = re.sub(r'!\[[^\]]*\]\([^)]*\)', ' ', text)
+    # Unwrap links: keep the visible text, drop the URL.
+    text = re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', text)
+    # Strip heading markers, blockquote/list markers, emphasis, inline code.
+    text = re.sub(r'(?m)^\s{0,3}#{1,6}\s*', '', text)
+    text = re.sub(r'(?m)^\s{0,3}>\s?', '', text)
+    text = re.sub(r'(?m)^\s{0,3}[-*+]\s+', '', text)
+    text = text.replace('`', '').replace('**', '').replace('__', '')
+    # Collapse all whitespace runs (incl. newlines) to single spaces.
+    text = re.sub(r'\s+', ' ', text).strip()
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars].rstrip() + '…'
+
+
 # 2026-04-26: audience-content consistency gate. Prior bug: agent dispatched
 # with audience='general' brief, wrote research-style content (K-id tags,
 # t-stats, Harvey thresholds, 14-tag pollution); publisher silently accepted
@@ -1149,7 +1190,9 @@ class Publisher:
         item = {
             'id': pub_id,
             'title': title,
-            'description': description,
+            # 2026-06-23: description = short excerpt (not a full-body clone).
+            # content holds the canonical full markdown body. See _make_excerpt.
+            'description': _make_excerpt(description),
             'content': description,
             'category': category,
             'audience': audience,

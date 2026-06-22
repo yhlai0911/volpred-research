@@ -58,7 +58,7 @@ def _stub_network(monkeypatch) -> None:
     monkeypatch.setattr(Publisher, "_sync_to_remote", lambda *a, **k: None, raising=False)
     monkeypatch.setattr(Publisher, "_notify_article_published", lambda *a, **k: None, raising=False)
     monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda *a, **k: None, raising=False)
-    import supabase_sync  # noqa: project script on path
+    import scripts.supabase_sync as supabase_sync  # conftest puts ROOT on sys.path
     monkeypatch.setattr(supabase_sync, "sync_article", lambda *a, **k: True, raising=False)
 
 
