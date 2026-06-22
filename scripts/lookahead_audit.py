@@ -1,4 +1,4 @@
-"""Audit experiments/ for the `weights * returns` same-day pattern.
+"""Audit experiments/ for lookahead-prone volatility experiment patterns.
 
 Background: 2026-05-06 K547 audit sweep (`docs/error_log.md`) identified that
 4 experiments (K547 / K570 / K556 / K583) had `port_ret = weights * spy_ret`
@@ -65,6 +65,29 @@ SIGNAL_LOOKAHEAD_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# 2026-06-16 K445 article review: arch's default one-step forecast alignment is
+# origin-aligned. The risky OOS pattern is `forecast(horizon=1, start=...,
+# reindex=False)` followed by same-index realized variance / QLIKE / MSE / DM
+# loss computation. A target-aligned call or an explicit shift/target comment
+# must appear nearby.
+ARCH_FORECAST_PATTERN = re.compile(
+    r"\.forecast\([^#\n]*horizon\s*=\s*1[^#\n]*(?:start\s*=|reindex\s*=\s*False)[^#\n]*\)",
+    re.IGNORECASE,
+)
+ARCH_OOS_LOSS_MARKER = re.compile(
+    r"\brealized(?:_sq|_var|_variance|_r2)?\s*\.loc\b|"
+    r"\b(?:qlike|mse|dm_test|diebold|loss)\b",
+    re.IGNORECASE,
+)
+ARCH_TARGET_ALIGNMENT_MARKER = re.compile(
+    r"align\s*=\s*['\"]target['\"]|"
+    r"target[-_ ]aligned|"
+    r"origin[-_ ]aligned.*shift|"
+    r"\.shift\(\s*-?1\s*\)|"
+    r"shift(?:ed)?\s+to\s+target",
+    re.IGNORECASE,
+)
+
 # Lag markers — at least one must appear within ±LAG_RADIUS lines of each
 # multiplication match for the file to be considered lag-aware.
 LAG_MARKERS = [
@@ -87,6 +110,7 @@ LAG_RADIUS = 30  # ±30 lines around the match
 
 # Experiments that shipped with documented caveat — pattern present but flagged.
 KNOWN_BUG_FAMILY = {"k547", "k570"}
+KNOWN_ARCH_ALIGNMENT_CAVEAT = {"k445"}
 
 
 def audit_file(path: Path) -> list[dict]:
@@ -115,14 +139,15 @@ def audit_file(path: Path) -> list[dict]:
     for i, line in enumerate(lines):
         primary_match = bool(PATTERN.search(line))
         signal_match = bool(SIGNAL_LOOKAHEAD_PATTERN.search(line))
-        if not (primary_match or signal_match):
+        arch_forecast_match = bool(ARCH_FORECAST_PATTERN.search(line))
+        if not (primary_match or signal_match or arch_forecast_match):
             continue
         # Skip comments / docstrings
         stripped = line.strip()
         if stripped.startswith("#") or stripped.startswith('"""') or stripped.startswith("'''"):
             continue
 
-        # Look for a lag marker within ±LAG_RADIUS
+        # Look for a lag / target-alignment marker within ±LAG_RADIUS
         lo = max(0, i - LAG_RADIUS)
         hi = min(len(lines), i + LAG_RADIUS + 1)
         window = "\n".join(lines[lo:hi])
@@ -132,14 +157,29 @@ def audit_file(path: Path) -> list[dict]:
         # For signal-shape matches, require BOTH (a) signal-at-t read AND (b)
         # return application within ±LAG_RADIUS (otherwise it's a benign
         # lookup like a regime classifier read at signal time, not return time).
-        is_suspect = primary_match
-        if signal_match and not primary_match:
+        is_suspect = primary_match or arch_forecast_match
+        if signal_match and not primary_match and not arch_forecast_match:
             # Require window to contain an actual `weight × ret` multiplication,
             # not just any return-like keyword. Filters K641-style metadata
             # snapshots where vix.loc[date] is logged but no return calc nearby.
             mul_with_ret = bool(re.search(rf"\*\s*{RETURN_LIKE}|{RETURN_LIKE}\s*\*", window))
             is_suspect = mul_with_ret
         if not is_suspect:
+            continue
+
+        if arch_forecast_match:
+            loss_context = bool(ARCH_OOS_LOSS_MARKER.search(window))
+            if not loss_context:
+                continue
+            has_target_alignment = bool(ARCH_TARGET_ALIGNMENT_MARKER.search(window))
+            suspects.append({
+                "line_no": i + 1,
+                "line": stripped[:120],
+                "shape": "arch_origin_forecast_alignment",
+                "has_lag_marker_nearby": has_target_alignment,
+                "lag_local": has_target_alignment,
+                "lag_global": False,
+            })
             continue
 
         suspects.append({
@@ -171,10 +211,11 @@ def run_audit() -> dict:
         kid = kid_from_path(py)
         unverified = [s for s in suspects if not s["has_lag_marker_nearby"]]
         verified = [s for s in suspects if s["has_lag_marker_nearby"]]
+        known_caveat = kid in KNOWN_BUG_FAMILY or kid in KNOWN_ARCH_ALIGNMENT_CAVEAT
 
         findings[str(py.relative_to(ROOT))] = {
             "kid": kid,
-            "is_known_bug": kid in KNOWN_BUG_FAMILY,
+            "is_known_bug": known_caveat,
             "n_matches": len(suspects),
             "n_verified": len(verified),
             "n_unverified": len(unverified),
@@ -208,9 +249,9 @@ def main() -> int:
             "findings": findings,
         }, indent=2))
     else:
-        print(f"[lookahead_audit] scanned {n_files} file(s) with weights × ret pattern:")
+        print(f"[lookahead_audit] scanned {n_files} file(s) with lookahead-prone pattern(s):")
         print(f"  - lag-verified (≥1 .shift(1)/_lag/_next_ret nearby): {n_verified_files}")
-        print(f"  - known-bug family (caveated):                       {n_known_bug}")
+        print(f"  - known-bug / known-caveat family:                   {n_known_bug}")
         print(f"  - UNVERIFIED unknown (potential silent regression):  {n_unverified_files}")
         if n_unverified_files:
             print("\n[lookahead_audit] UNVERIFIED files:")
