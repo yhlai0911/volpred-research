@@ -97,9 +97,12 @@
 **已落地的部分修復 + 更深根因（strike-3，誠實更正）**：
 - (a) `scripts/cron_gmail_poll.sh` perl alarm **60s→180s**（cp 到 `~/.volpred/bin/`）；
 - (b) `src/volpred/ops/alerts.py` 新增 `_parse_gmail_poll_freshness_state`（mtime warn>2h / critical>6h，無 active-window gate）+ regression test `tests/test_gmail_poll_freshness_alert.py`（4 cases PASS）。**這個 dead-man check 是目前最有價值的產出**——補上零 alert 盲區，未來再停擺會主動報。
-- **但 180s 不是真修復**：kickstart 驗證時連 **180s 都撞 alarm 被 kill**（exit=142 @ 23:56:43）。同時 `lsof -iTCP:993` 顯示 **6 個 ESTABLISHED 連線但無 poll process 在跑** → 真根因是 **`gmail_inbox_poll.py` 被 SIGALRM 硬殺時沒關閉 IMAP socket**，殭屍連線累積 → Gmail 連線數 throttle → 後續 `M.login()` hang → 更多 timeout → 更多殭屍（惡性循環）。這也解釋 21:15~23:15 的原始 timeout（被 kill 的 run 留 half-open 連線滾雪球），以及為何我密集 kickstart 反而加劇。
-- **真正的結構修復（daytime follow-up，需謹慎改 code 不可半夜盲改）**：(1) `gmail_inbox_poll.py` 用 try/finally 或 signal handler 確保 `M.logout()`/socket close（即使 timeout 也優雅關閉）；(2) 加 single-flight lock（PID/flock）防止 overlapping poll 累積連線；(3) IMAP socket 設 `settimeout` 讓 login/fetch 自己 fail-fast 而非靠外層 SIGALRM 硬殺。
-- **即時狀態**：23:50 手動/最小-env run 已完成並補 gap（queued=0，整段無漏 actionable boss 回信）。Gmail throttle 需 ~30min idle 自然清掉；停止再戳，靠新 dead-man check 當安全網 + 下班排程 fire 自然恢復。
+- **180s 不是真修復**：00:03 / 00:15 排程 fire 連 **180s 都撞 alarm 被 kill**（exit=142）。
+- **連線洩漏假設也錯了（第 3 次根因更正，誠實記取 hypothesis thrashing）**：`lsof -nP -iTCP:993` 的 6 個 ESTABLISHED 連線經 `ps` 確認**全是 Mail.app(PID 1527) + Notes.app(PID 1543)**——用戶自己的 app，**不是 poll 殭屍連線**，也無殘留 uv/python poll process。所以「SIGALRM 沒關 socket → 殭屍累積 → Gmail throttle」整個假設**不成立**。
+- **目前最準確的定位**：script-internal log（`storage/logs/cron/gmail_poll.log`）顯示，所有失敗的 launchd run **完全沒寫到「SINCE…count」那行**（該行在 IMAP connect+login+search 之後才印）→ launchd run 在「到 IMAP search 之前」就 hang（**uv-startup 或 IMAP connect/login**，**非** fetch loop）。對比：手動 run 與 `env -i` 最小-env run 都能完成（9s/33s）；其他 launchd agent（check-alerts 23:00、compute-worker 23:15）都正常 fire。⇒ 是 **gmail-poll 的網路操作在 launchd 執行 context 特定 hang，且 ~21:00 起才開始**（21:00 前 launchd run 都 ~8s 完成）。root cause **尚未定位**，非連線洩漏、非 throttle、非全 launchd 壞。
+- **真正的結構修復（daytime follow-up，需謹慎改 code + 動手測，不可半夜盲改）**：(1) 在 `gmail_inbox_poll.py` 的 IMAP connect / login / search **各加一行 log + 計時**，下次 launchd fire 即可定位卡在 connect 還是 login 還是 uv-startup；(2) IMAP socket 設 `settimeout` 讓 connect/login 自己 fail-fast 而非靠外層 180s SIGALRM；(3) 若確認 launchd-context 特定，考慮把 gmail-poll 從 LaunchAgent 改走 piggy-back `run_due_jobs`（host-cron-daemon path，與 launchd context 不同）測是否繞過。
+- **dedup 修正（本 tick 連帶修我自己引入的 bug）**：`_parse_publishing_freshness_state` 與 `_parse_gmail_poll_freshness_state` 的 alert **title 原含動態數字**（`{gap_hours}h`/`{age_hours}h`）→ defeat `sha256(level+title)` 24h dedup → 持續 breach 時**每小時洗版老闆信箱**。已把 title 改穩定、動態值移到 body/details。
+- **即時狀態**：23:50 手動/最小-env run 已補 gap（queued=0，整段無漏 actionable boss 回信）。**dead-man check（gmail_poll_freshness）是安全網**：state >2h（約 01:50）寄一次 warn、>6h 升一次 critical（title 已穩定，不洗版）。停止再戳 gmail-poll（已證實非 throttle，戳也沒用），留待白天加 instrument 定位。
 
 ## 2026-06-22 release_pool failed sync ledger 壞檔被靜默重建
 

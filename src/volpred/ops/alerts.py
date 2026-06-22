@@ -1088,8 +1088,10 @@ def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[s
         "id": "publishing_freshness",
         "breached": breached,
         "level": "critical" if breached else "info",
+        # title 必須穩定（不含動態數字）— 否則 sha256(level+title) 24h dedup 失效、
+        # 持續 breach 時每小時洗版。動態 gap 放 body / details（2026-06-23 dedup 修正）。
         "title": (
-            f"發文脫班：{gap_hours}h 無新文（門檻 {PUBLISH_FRESHNESS_CRITICAL_HOURS}h）"
+            f"發文脫班（無新文超過 {PUBLISH_FRESHNESS_CRITICAL_HOURS}h 門檻）"
             if breached
             else "publishing_freshness ok"
         ),
@@ -1203,8 +1205,11 @@ def _parse_gmail_poll_freshness_state(storage_dir: str, now: datetime) -> dict[s
         "id": "gmail_poll_freshness",
         "breached": breached,
         "level": level,
+        # title 穩定（不含動態 age）— 維持 sha256(level+title) 24h dedup 有效，避免持續
+        # breach 時每小時洗版；動態 age 放 body/details（2026-06-23 dedup 修正）。
+        # warn→critical 升級時 level 變→各寄一次（可接受），非每小時重寄。
         "title": (
-            f"gmail-poll 停擺：state {age_hours}h 未更新"
+            "gmail-poll 停擺（state 過期未更新）"
             if breached
             else "gmail_poll_freshness ok"
         ),
