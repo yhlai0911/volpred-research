@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 mark_task_blocked next_tasks 壞檔缺少 writer 診斷
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/mark_task_blocked.py::_load()`：`next_tasks.json` 壞 JSON 會直接 traceback；頂層 schema / `tasks` 欄位非 list 時沒有明確拒絕訊息；list 內非 object entry 會在主流程 `.get()` 爆掉。
+
+**根因**：`mark_task_blocked.py` 是控制面 writer，對壞 queue source 必須 fail-closed，不可用 default 覆寫；但舊碼只靠 Python exception，caller 看不到是 source corruption、schema drift，還是 task id 不存在。
+
+**解決方法**：新增 `[mark_task_blocked] WARN ...` diagnostics；整體 JSON/schema 壞掉時輸出 path + exception/schema 並拒絕更新；單筆非 object entry warning 後跳過，仍可更新其他合法 task。新增 regression tests 覆蓋壞 JSON 與混合壞 entry。
+
 ## 2026-06-23 mark_fb_post_status 壞 JSON 直接 traceback 且無前置診斷
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/mark_fb_post_status.py::_load_json()`：feed / trending_repost_log JSON 壞掉時會直接丟 `JSONDecodeError`；schema 非 list 時後續流程可能迭代錯誤型別或寫回不可信 payload，沒有明確 warning。

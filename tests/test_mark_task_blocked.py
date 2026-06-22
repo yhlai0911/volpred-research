@@ -99,3 +99,62 @@ def test_unblock_restores_pending_status(tmp_path, monkeypatch) -> None:
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "pending"
     assert "blocked_reason" not in saved[0]
+
+
+def test_load_warns_and_refuses_bad_next_tasks_json(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text("{bad json", encoding="utf-8")
+    monkeypatch.setattr(mark_task_blocked, "NEXT_TASKS", next_tasks)
+
+    try:
+        mark_task_blocked._load()
+    except json.JSONDecodeError:
+        pass
+    else:
+        raise AssertionError("_load should raise JSONDecodeError")
+
+    err = capsys.readouterr().err
+    assert "[mark_task_blocked] WARN next_tasks read failed; refusing to update" in err
+    assert "next_tasks.json" in err
+    assert "JSONDecodeError" in err
+
+
+def test_mark_task_blocked_skips_bad_entries_and_updates_valid(
+    tmp_path,
+    monkeypatch,
+    capsys,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                "bad-entry",
+                {"id": "target", "status": "pending"},
+            ],
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mark_task_blocked, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mark_task_blocked.py",
+            "--id",
+            "target",
+            "--reason",
+            "awaiting_interactive_session",
+        ],
+    )
+
+    rc = mark_task_blocked.main()
+
+    assert rc == 0
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[1]["status"] == "blocked"
+    err = capsys.readouterr().err
+    assert "[mark_task_blocked] WARN next_tasks entry schema invalid; skipping" in err
+    assert "index=0" in err

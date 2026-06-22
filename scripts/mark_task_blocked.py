@@ -49,6 +49,10 @@ sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
 
 
+def _warn_block_cli(message: str) -> None:
+    print(f"[mark_task_blocked] WARN {message}", file=sys.stderr)
+
+
 @contextmanager
 def shared_state_lock(name: str) -> None:
     LOCK_DIR.mkdir(parents=True, exist_ok=True)
@@ -64,9 +68,29 @@ def shared_state_lock(name: str) -> None:
 
 
 def _load() -> tuple[dict | list, list]:
-    data = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+    except Exception as exc:
+        _warn_block_cli(
+            "next_tasks read failed; refusing to update "
+            f"path={NEXT_TASKS} error={type(exc).__name__}: {exc}"
+        )
+        raise
     if isinstance(data, dict):
-        return data, data.get("tasks", [])
+        tasks = data.get("tasks", [])
+        if not isinstance(tasks, list):
+            _warn_block_cli(
+                "next_tasks schema invalid; refusing to update "
+                f"path={NEXT_TASKS} field=tasks type={type(tasks).__name__}"
+            )
+            raise ValueError("next_tasks payload field 'tasks' must be a list")
+        return data, tasks
+    if not isinstance(data, list):
+        _warn_block_cli(
+            "next_tasks schema invalid; refusing to update "
+            f"path={NEXT_TASKS} type={type(data).__name__}"
+        )
+        raise ValueError("next_tasks payload must be a list or object with tasks list")
     return data, data
 
 
@@ -101,7 +125,13 @@ def main() -> int:
     with shared_state_lock("control_plane"):
         payload, tasks = _load()
         matched = None
-        for t in tasks:
+        for idx, t in enumerate(tasks):
+            if not isinstance(t, dict):
+                _warn_block_cli(
+                    "next_tasks entry schema invalid; skipping "
+                    f"path={NEXT_TASKS} index={idx} type={type(t).__name__}"
+                )
+                continue
             if t.get("id") == args.id:
                 matched = t
                 break
