@@ -35118,5 +35118,27 @@
     "started_at": "2026-06-22T00:19:53.841805+00:00",
     "completed_at": "2026-06-22T00:27:15.444375+00:00",
     "result": "Added a 2026-06-22 Codex supplement to research_program.md with 7 de-duplicated journal/practitioner research directions. Preserved the concurrently written 2026-06-22 batch and marked the Codex section as proxy-diagnostic where data are indirect. Verified with git diff --check and generate_research_backlog.py --dry-run.\n\n補 7 條期刊主題挖掘方向到 research_program.md，來源採 JoE/JFQA/RFS/JBF/JFEC/Fed 2025-26 公開摘要；已 grep 去重並以 generate_research_backlog.py --dry-run --json 驗證可解析。"
+  },
+  {
+    "id": "K1512_article_research",
+    "title": "K1512: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1512 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no research article in feed.json.  Verdict preview: K1512 [PoC, CONDITIONAL_PASS] Double-ML 因果 factor 檢定 — 動能/品質/價值對下月超額報酬的非零效應\n\n**結論**: CONDITIONAL_PASS — DML PLR with repeated cross-fitting (n_rep=20, n_folds=2) 對 3 個 US factor ETF (MTUM 動能 / QUAL 品質 / VLUE 價值) × next-month SPY-excess return × controls {VIX, term spread, lag-1 r",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1512",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-22T07:20:21+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-22T07:43:30.110814+00:00",
+    "claim_session_id": "0adb44dab5f5",
+    "started_at": "2026-06-22T07:43:34.137188+00:00",
+    "completed_at": "2026-06-22T07:54:28.450259+00:00",
+    "result": "Published K1512 research-audience draft mile_74822866 from experiments/k1512 with two PNG figures.\\nVerified publish_draft strict audit/image gate; feed-sync full apply was stopped after it began unrelated bulk reconciliation."
   }
 ]
