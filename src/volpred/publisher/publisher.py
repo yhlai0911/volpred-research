@@ -50,6 +50,57 @@ def _make_excerpt(body: str | None, max_chars: int = _EXCERPT_MAX_CHARS) -> str:
     return text[:max_chars].rstrip() + '…'
 
 
+# 2026-06-23: base64 data-URI image gate. One-time Codex publish scripts embedded
+# charts as ``![alt](data:image/png;base64,...)`` (bypassing Supabase upload via
+# monkey-patched _normalize_publish_assets), bloating feed.json — one entry hit
+# 862KB, 10 entries ~1.84MB total. This regex + _extract_base64_images() is the
+# canonical-write-site safety net: ANY content reaching _append_to_feed gets its
+# data URIs decoded → uploaded to the article-images bucket → rewritten to the
+# public URL. Fail-safe: on any error keep the original data URI and warn — never
+# block a publish over an image. Reused by scripts/extract_base64_images.py.
+_DATA_URI_IMG_RE = re.compile(
+    r'!\[([^\]]*)\]\(data:image/([\w.+-]+);base64,([A-Za-z0-9+/=\s]+)\)'
+)
+
+
+def _extract_base64_images(content: str, article_id: str) -> str:
+    """Replace inline base64 data-URI images with uploaded Supabase URLs."""
+    if not content or 'data:image' not in content:
+        return content
+    import base64 as _b64
+    import tempfile
+
+    try:
+        from volpred.charts.article_charts import upload_chart
+    except Exception as exc:  # pragma: no cover - import guard
+        print(f"  [feed_publisher] WARN base64 gate: upload_chart unavailable for {article_id}: {exc}")
+        return content
+
+    counter = {'n': 0}
+
+    def _repl(match: re.Match) -> str:
+        alt, img_type, data = match.group(1), match.group(2), match.group(3)
+        try:
+            raw = _b64.b64decode(re.sub(r'\s+', '', data))
+            counter['n'] += 1
+            ext = 'png' if img_type.lower() in ('png', 'x-png') else img_type.lower().replace('+', '_')
+            fname = f"{article_id}_chart{counter['n']}.{ext}"
+            with tempfile.TemporaryDirectory() as td:
+                path = Path(td) / fname
+                path.write_bytes(raw)
+                url = upload_chart(str(path), bucket='article-images')
+            print(
+                f"  [feed_publisher] base64 gate: {article_id} extracted "
+                f"{len(raw) // 1024}KB inline image → {url}"
+            )
+            return f"![{alt}]({url})"
+        except Exception as exc:
+            print(f"  [feed_publisher] WARN base64 gate: extract failed for {article_id}: {exc}")
+            return match.group(0)
+
+    return _DATA_URI_IMG_RE.sub(_repl, content)
+
+
 # 2026-04-26: audience-content consistency gate. Prior bug: agent dispatched
 # with audience='general' brief, wrote research-style content (K-id tags,
 # t-stats, Harvey thresholds, 14-tag pollution); publisher silently accepted
@@ -1349,6 +1400,12 @@ class Publisher:
         # Ensure content is not empty (use description as fallback)
         if not item.get('content') and item.get('description'):
             item['content'] = item['description']
+        # 2026-06-23: base64 data-URI image gate. Extract any inline
+        # ![](data:image/...;base64,...) → upload to Supabase → rewrite to URL,
+        # so feed.json never accumulates multi-hundred-KB embedded images again.
+        # Fail-safe (never blocks a publish). See _extract_base64_images.
+        if item.get('content') and 'data:image' in item['content']:
+            item['content'] = _extract_base64_images(item['content'], item.get('id', 'unknown'))
         # Auto-escape unescaped statistical-notation pipes inside markdown
         # tables. Architectural fix 2026-04-29: K549 mile_5c662be0 broke
         # frontend table rendering because agent didn't escape `|t|>3.0`

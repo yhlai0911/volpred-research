@@ -2973,3 +2973,25 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **第二個獨立 bug（已識別未修）**：10 筆 entry content 內嵌 base64 PNG data URI（圖沒上傳 Supabase 就 inline；mile_e5f33cfa 單張 862KB），共 1.84MB。`normalize_image_paths` 不處理 base64、publisher 無攔截。後續修補 = 抽 base64 → 上傳 Supabase article-images → 換 URL + 加 publisher gate。
 
 **ISR / mirror 鏈現況**：`_sync_feed_to_remote` 整包 PUT 23MB 到 /api/sync/feed.json 會超 Zeabur body 上限（SSL EOF）；revalidateTag 只由該端點觸發 → 即時失效斷，但 ISR 時間制兜底。feed.json 變小後此 PUT 仍 >8MB ceiling，須改單篇 push（後續）。
+
+## 2026-06-23 04:12 base64 內嵌圖修補 + 精選導讀 filter + digest drift（boss「不繼續做完」+「篩選壞了」）
+
+**情境**：boss 截圖回報「每日更新 tab 顯示精選導讀/一般讀者文章 + 應該要多一個精選導讀」，並糾正我不該做一半排 wakeup 待機（已寫入 CLAUDE.md + memory `feedback_finish_task_before_standby`）。
+
+**A. 篩選分類 bug（前端，已修部署 736b418）**：
+- 首頁 feed 永遠 `diversify=cluster` → `getFeed` 走 `getCachedClusterFeed`→`getFeedFromQueries`（JS 過濾），**非 RPC**。workflow explorer 誤查 Editorial.tsx（V3 變體），實際線上是 `FeedBrowser.tsx`（page.tsx import）。
+- filter 用 `audience` 欄位、badge 用 `resolveBadgeCategory`（content_type 優先），兩套不一致：daily_digest（audience=general, badge=精選導讀）落在「一般讀者」tab 且無專屬篩選。
+- 修：FeedBrowser 加 `{key:digest,label:精選導讀}`；data-server `matchesAudience` digest→content_type=daily_digest、general→排除 daily_digest；`fetchArticleSummaries` digest 映射 audience=general。
+- **驗證**：線上 API audience=digest 只回 daily_digest；audience=general daily_digest=0。
+- **教訓**：截圖「每日更新顯示錯文章」其實是 **stale cache**（點 tab 前舊渲染）；別只信 explorer，親自核對線上 = 哪個元件被 render（page.tsx vs v3/page.tsx）。
+
+**B. base64 內嵌圖（後端，已修）**：
+- 10 筆 entry content 內嵌 base64 PNG（一次性 Codex publish script monkey-patch `_normalize_publish_assets` 為 no-op、直接內嵌），feed.json content 佔 1.84MB（mile_e5f33cfa 單張 862KB）。
+- **流程修**：`publisher._extract_base64_images` + `_DATA_URI_IMG_RE`，接入 `_append_to_feed` 單一寫入點（自動 decode→upload_chart(article-images)→換 URL，fail-safe 不阻塞發佈）。
+- **資料修**：`scripts/extract_base64_images.py --apply`（重用同 helper）抽 12 張圖上傳 Supabase + 改寫 feed + re-sync 10 筆。feed.json 14.2MB→12.3MB。
+- 加上 A 段前的 description 去重（22.5→14.2），**feed.json 累計 22.5MB→12.3MB（-45%）**。
+
+**C. digest drift（verification 中發現，symptom 已清，根因待追）**：
+- 線上 Supabase 有 2 筆 published daily_digest（mile_46918766/mile_6d06f91c）**不在本地 canonical feed.json**，且互為重複（identical 106 字 stub「把過去一個月談 MOVE 與 VIX...」= thinking 當 content；正規 mile_30c640e2 有 3716 字）。發佈時間 19:40/20:06 在 canonical 30c640e2（17:40）之後。
+- **symptom 清理**：`sync_article_status(slug,'retracted')`（正規 flow 非 raw PATCH）retract 兩筆；DB 已確認 retracted；線上 tab 待 120s 快取 TTL 後顯示乾淨 2 筆。
+- **根因待追（不過度宣稱已修）**：某發佈路徑把空/stub MOVE-VIX digest 寫進 Supabase 卻不在本地 feed.json。候選：(a) 背景 daily_digest 重複 fire + thinking-as-content stub publish；(b) 跨機器（Mac Studio）feed.json 分歧。需查 publish 路徑為何只寫 Supabase 不寫 canonical feed + 為何 thinking 被當 content。→ 下個 ops 追查項。
