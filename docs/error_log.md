@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 task_generator_v2 event calendar date parse 失敗被靜默略過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::generate_event_article_tasks()`：硬編碼 `EVENT_CALENDAR` 若含壞日期，舊碼直接 `continue`，沒有任何 warning。
+
+**根因**：legacy event calendar 是 runtime_schedules 外的備援事件來源，壞日期時跳過該事件可避免 generator crash；但靜默跳過會讓操作者看不出事件任務缺口是來源資料格式壞掉，而不是本來沒有可生成的 event_article。
+
+**解決方法**：`EVENT_CALENDAR` 日期 parse 失敗時改用 `_warn_task_generator()` 輸出 `[task_generator_v2] WARN event calendar date parse failed; skipping event ...` 到 stderr，原本跳過該 event 的 fallback 行為不變。新增 regression test 覆蓋壞日期時不產生任務且有 warning。
+
 ## 2026-06-23 task_generator_v2 existing event task date parse 失敗被靜默略過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::_iter_managed_event_dates()`：既有 `event_article` task 的 `event_date` 若是壞日期，舊碼直接 `continue`，沒有任何 warning。

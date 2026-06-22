@@ -221,6 +221,30 @@ def test_event_article_skips_runtime_managed_adjacent_fomc_date(tmp_path, monkey
     assert tasks == []
 
 
+def test_event_article_warns_on_bad_calendar_event_date(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    runtime_schedules.write_text(json.dumps({"event_jobs": {"items": []}}), encoding="utf-8")
+    monkeypatch.setattr(MODULE, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(
+        MODULE,
+        "EVENT_CALENDAR",
+        [("cpi", "bad-date", "BLS CPI release with bad date")],
+    )
+
+    tasks = MODULE.generate_event_article_tasks(existing=[], reference_date=date(2026, 6, 13))
+
+    assert tasks == []
+    captured = capsys.readouterr()
+    assert (
+        "[task_generator_v2] WARN event calendar date parse failed; "
+        "skipping event"
+    ) in captured.err
+    assert "bad-date" in captured.err
+    assert "task_generator_v2.py" in captured.err
+
+
 def test_event_article_skips_existing_adjacent_event_task(tmp_path, monkeypatch) -> None:
     runtime_schedules = tmp_path / "runtime_schedules.json"
     runtime_schedules.write_text(json.dumps({"event_jobs": {"items": []}}), encoding="utf-8")

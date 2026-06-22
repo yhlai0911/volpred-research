@@ -593,7 +593,13 @@ def generate_event_article_tasks(
     for event_type, date_str, description in EVENT_CALENDAR:
         try:
             event_date = date.fromisoformat(date_str)
-        except ValueError:
+        except ValueError as exc:
+            _warn_task_generator(
+                "event calendar date parse failed; skipping event "
+                f"event_type={event_type!r} value={date_str!r}",
+                Path(__file__).resolve(),
+                exc,
+            )
             continue
 
         days_until = (event_date - today).days
