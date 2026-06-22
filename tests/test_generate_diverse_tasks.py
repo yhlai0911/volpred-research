@@ -328,3 +328,29 @@ def test_gen_experiment_tasks_warns_when_knowledge_filter_unreadable(
     err = capsys.readouterr().err
     assert "[diverse_gen] WARN knowledge completed-K scan failed; continuing without knowledge filter" in err
     assert "IsADirectoryError" in err
+
+
+def test_gen_experiment_tasks_warns_when_archive_filter_file_unreadable(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    research_program = tmp_path / "research_program.md"
+    research_program.write_text("Backlog: K9999 should become an experiment.\n", encoding="utf-8")
+    experiments = tmp_path / "experiments"
+    experiments.mkdir()
+    archive_file = tmp_path / "docs" / "research_archive" / "completed_phases_bad.md"
+    archive_file.mkdir(parents=True)
+
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
+    monkeypatch.setattr(generate_diverse_tasks, "RESEARCH_PROGRAM", research_program)
+    monkeypatch.setattr(generate_diverse_tasks, "EXPERIMENTS_DIR", experiments)
+
+    tasks = generate_diverse_tasks.gen_experiment_tasks(
+        existing=set(),
+        rng=generate_diverse_tasks.random.Random(1533),
+    )
+
+    assert len(tasks) == 1
+    assert tasks[0]["id"] == "experiment_scaffold_k9999"
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN research archive completed-K scan failed" in err
+    assert "IsADirectoryError" in err

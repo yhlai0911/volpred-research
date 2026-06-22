@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_diverse_tasks research archive completed-K filter 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_experiment_tasks()`：completed-K filter 讀取 `docs/research_archive/completed_phases_*.md` 單檔失敗時，舊碼直接 `continue`，沒有任何 warning。
+
+**根因**：research archive 是 knowledge 之外的第二個 completed-K 來源，用來避免歷史完成研究因缺少 `experiments/k*/` 目錄而被重新排成 scaffold。單檔讀取失敗時跳過該檔可讓 discovery 繼續，但靜默跳過會讓操作者看不出 completed-K filter 只用了部分 archive。
+
+**解決方法**：archive 單檔讀取失敗時改用 `_warn_diverse()` 輸出 `[diverse_gen] WARN research archive completed-K scan failed; continuing without archive file ...` 到 stderr，原本繼續掃描與產生任務的 fallback 行為不變。新增 regression test 覆蓋 archive 檔不可讀時仍產生 backlog task 且有 warning。
+
 ## 2026-06-23 generate_diverse_tasks knowledge completed-K filter 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_experiment_tasks()`：completed-K filter 讀取 `storage/memory/knowledge.json` 失敗時，舊碼直接跳過，沒有任何 warning。

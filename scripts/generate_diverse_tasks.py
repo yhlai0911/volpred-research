@@ -484,7 +484,11 @@ def gen_experiment_tasks(existing: set[str], rng: random.Random) -> list[dict]:
                 arc_text = archive_md.read_text(encoding="utf-8")
                 for m in re.finditer(r"\b[Kk](\d{3,4}[a-z]?)\b", arc_text):
                     completed_ids.add(f"k{m.group(1).lower()}")
-            except OSError:
+            except OSError as exc:
+                _warn_diverse(
+                    "research archive completed-K scan failed; continuing without archive file "
+                    f"path={archive_md} error={type(exc).__name__}: {exc}"
+                )
                 continue
 
     # Find K-IDs in research_program with no experiment dir AND not yet completed
