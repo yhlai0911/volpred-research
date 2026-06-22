@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-06-22T12:03:46.587025+00:00",
+  "timestamp": "2026-06-22T18:03:28Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "total=129, research=51, general=78"
+      "detail": "total drafts=129 (general=78, research=51). Both above thresholds (general>=8, research>=4)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "file does not exist"
+      "detail": "storage/strategy_metrics.json does not exist — file missing entirely, counts as >26h stale."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "no entries dated 2026-06-21 or 2026-06-22 in last 30 lines"
+      "detail": "Last 30 lines of docs/error_log.md: most recent entries dated 2026-06-03. No entries from today (2026-06-22) or yesterday (2026-06-21)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "no strategy has >2 null portfolio_return in last 3 entries; strategies checked: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix"
+      "detail": "Checked 15 strategies. No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files. Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "2191 entries in knowledge.json"
+      "detail": "storage/memory/knowledge.json contains 2191 entries."
     }
   ],
   "alerts": [
-    "strategy_metrics.json missing"
+    "STRATEGY METRICS STALE: storage/strategy_metrics.json is missing (file does not exist). Strategy metrics unavailable — downstream displays and strategy rankings may be broken."
   ]
 }
