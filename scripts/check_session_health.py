@@ -20,6 +20,7 @@ Thresholds load from `config/token_policy.json > session_health`.
 
 import argparse
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -35,16 +36,31 @@ DEFAULT_POLICY = {
 POLICY_PATH = Path(__file__).resolve().parents[1] / "config" / "token_policy.json"
 
 
+def _warn_session_health(message: str, path: Path, exc: Exception | None = None) -> None:
+    suffix = f" path={path}"
+    if exc is not None:
+        suffix += f" error={type(exc).__name__}: {exc}"
+    print(f"[session_health] WARN {message}{suffix}", file=sys.stderr)
+
+
 def load_session_health_policy() -> dict:
     """Load session-health thresholds from config/token_policy.json with safe fallback."""
     if not POLICY_PATH.exists():
         return dict(DEFAULT_POLICY)
     try:
         payload = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
-    except ValueError:
+    except (OSError, ValueError) as exc:
+        _warn_session_health("token policy read failed; using default session health policy", POLICY_PATH, exc)
+        return dict(DEFAULT_POLICY)
+    if not isinstance(payload, dict):
+        _warn_session_health("token policy schema is not an object; using default session health policy", POLICY_PATH)
         return dict(DEFAULT_POLICY)
     section = payload.get("session_health") if isinstance(payload, dict) else None
     if not isinstance(section, dict):
+        _warn_session_health(
+            "token policy session_health section is missing or invalid; using default session health policy",
+            POLICY_PATH,
+        )
         return dict(DEFAULT_POLICY)
     return {
         "lifetime_cost_usd": float(section.get("lifetime_cost_usd", DEFAULT_POLICY["lifetime_cost_usd"])),

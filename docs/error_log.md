@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 check_session_health token policy 失效被靜默套 default
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/check_session_health.py::load_session_health_policy()`：`config/token_policy.json` 已存在但讀取 / parse 失敗、頂層 schema 非 object、或 `session_health` 區段缺失 / 非 object 時，舊碼直接套 `DEFAULT_POLICY`，沒有 warning。
+
+**根因**：session health check 必須在 policy 壞掉時繼續執行，避免健康檢查本身中斷；但靜默套 default 會讓操作者誤判現行 lifetime_cost / cache_read / message 閾值仍按 config 生效，而不是 config source 已降級。
+
+**解決方法**：新增 `[session_health] WARN ...` diagnostics；缺檔仍安靜使用 default，已存在但不可讀或 schema drift 時輸出 path 與錯誤 / schema 訊號後保留原本 default fallback。新增 regression tests 覆蓋壞 JSON 與 invalid `session_health` 區段。
+
 ## 2026-06-23 cron_review piggy-back state 壞檔被靜默當無 fallback
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/cron_review.py::_piggy_back_end()`：`storage/ops/cron_last_run.json` 讀取 / parse 失敗、頂層 schema 非 object，或單一 job timestamp parse 失敗時，舊碼直接回 `None`，沒有 warning。
