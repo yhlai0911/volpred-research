@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -60,6 +61,32 @@ def test_last_log_run_warns_when_mtime_stat_fails(capsys):
     assert "stat denied" in err
     assert res["mtime"] is None
     assert res["start"] == datetime(2026, 6, 23, 0, 0, tzinfo=TPE)
+
+
+def test_piggy_back_end_warns_when_state_read_fails(tmp_path, monkeypatch, capsys):
+    state_path = tmp_path / "cron_last_run.json"
+    state_path.write_text("{bad-json", encoding="utf-8")
+    monkeypatch.setattr(cron_review, "LAST_RUN_PATH", state_path)
+
+    end = cron_review._piggy_back_end("release_pool")
+
+    err = capsys.readouterr().err
+    assert end is None
+    assert "[cron_review] WARN piggy-back state read failed" in err
+    assert str(state_path) in err
+
+
+def test_piggy_back_end_warns_when_timestamp_parse_fails(tmp_path, monkeypatch, capsys):
+    state_path = tmp_path / "cron_last_run.json"
+    state_path.write_text(json.dumps({"release_pool": "not-a-timestamp"}), encoding="utf-8")
+    monkeypatch.setattr(cron_review, "LAST_RUN_PATH", state_path)
+
+    end = cron_review._piggy_back_end("release_pool")
+
+    err = capsys.readouterr().err
+    assert end is None
+    assert "[cron_review] WARN piggy-back timestamp parse failed for job_id=release_pool" in err
+    assert "not-a-timestamp" in err
 
 
 def test_expected_prev_fire_respects_weekday_restricted_collect_us_cron():

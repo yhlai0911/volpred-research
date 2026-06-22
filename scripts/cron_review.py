@@ -67,12 +67,11 @@ JOBS = {
 _SLACK_HOURS = 2.0
 
 
-def _warn_cron_review(message: str, path: Path, exc: Exception) -> None:
-    print(
-        f"[cron_review] WARN {message}: path={path} "
-        f"error={type(exc).__name__}: {exc}",
-        file=sys.stderr,
-    )
+def _warn_cron_review(message: str, path: Path, exc: Exception | None = None) -> None:
+    suffix = f": path={path}"
+    if exc is not None:
+        suffix += f" error={type(exc).__name__}: {exc}"
+    print(f"[cron_review] WARN {message}{suffix}", file=sys.stderr)
 
 
 def _piggy_back_end(job_id: str) -> datetime | None:
@@ -81,14 +80,23 @@ def _piggy_back_end(job_id: str) -> datetime | None:
         return None
     try:
         state = json.loads(LAST_RUN_PATH.read_text())
-    except (OSError, ValueError):
+    except (OSError, ValueError) as exc:
+        _warn_cron_review("piggy-back state read failed; ignoring fallback timestamp", LAST_RUN_PATH, exc)
+        return None
+    if not isinstance(state, dict):
+        _warn_cron_review("piggy-back state schema is not an object; ignoring fallback timestamp", LAST_RUN_PATH)
         return None
     raw = state.get(job_id) if isinstance(state, dict) else None
     if not raw:
         return None
     try:
-        return datetime.fromisoformat(raw.replace("Z", "+00:00")).astimezone(TPE)
-    except ValueError:
+        return datetime.fromisoformat(str(raw).replace("Z", "+00:00")).astimezone(TPE)
+    except ValueError as exc:
+        _warn_cron_review(
+            f"piggy-back timestamp parse failed for job_id={job_id}; ignoring fallback timestamp",
+            LAST_RUN_PATH,
+            exc,
+        )
         return None
 
 

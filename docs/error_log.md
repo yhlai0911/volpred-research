@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 cron_review piggy-back state 壞檔被靜默當無 fallback
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/cron_review.py::_piggy_back_end()`：`storage/ops/cron_last_run.json` 讀取 / parse 失敗、頂層 schema 非 object，或單一 job timestamp parse 失敗時，舊碼直接回 `None`，沒有 warning。
+
+**根因**：cron_review 需要在 piggy-back state 不可用時退回 log banner / mtime 判斷，避免巡檢整體中斷；但靜默回 `None` 會讓操作者誤判為該 job 沒有 piggy-back fallback record，而不是 canonical state source 壞掉或 timestamp 漂移。
+
+**解決方法**：`_piggy_back_end()` 對壞 state read/schema 與壞 timestamp 輸出 `[cron_review] WARN ...`，保留缺檔 / job id 不存在時安靜回 `None` 的既有行為。新增 regression tests 覆蓋壞 JSON 與壞 timestamp。
+
 ## 2026-06-23 audit_release_settings local settings 讀取失敗被當缺檔
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/audit_release_settings.py::_load_local()`：`storage/.release_settings.json` 若存在但 JSON 讀取 / parse 失敗，舊碼直接回 `None`；main 只輸出 `no local .release_settings.json`，看不出是檔案不存在還是 local control source 壞掉。若 JSON schema 不是 object，也會沿後續流程出錯或產生不可信 audit。
