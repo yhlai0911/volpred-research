@@ -86,6 +86,11 @@ def test_build_continue_task_maintenance_skips_when_no_work(monkeypatch):
         "_runtime_idle_policy",
         lambda: {"source_label": "test", "max_concurrent_agents": 4},
     )
+    monkeypatch.setattr(
+        summaries,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": []},
+    )
 
     result = summaries.build_continue_task_maintenance()
 

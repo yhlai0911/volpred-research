@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 ops summaries no-work test 未隔離 alert state
+
+**問題**：上一輪驗證 `tests/test_ops_summaries.py` 時，`test_build_continue_task_maintenance_skips_when_no_work` 單獨執行失敗：預期 `skip=True/no_work`，實際因真實 alert breach 進入 `address_alert`。
+
+**根因**：`build_continue_task_maintenance()` 自 2026-04-29 起會把 breached alerts 視為 actionable work；測試只 monkeypatch queue / scheduler / idle policy，沒有隔離 `build_alert_condition_report()`，因此測試結果依賴本機 dashboard alert 狀態。
+
+**解決方法**：在 no-work 測試中 monkeypatch `build_alert_condition_report()` 回空 conditions，讓測試只驗證「無 queue、無 decision、無 alert」時的 no-work 分支；runtime alert 行為不變。
+
 ## 2026-06-23 ops summaries token daily report date parse 失敗被靜默略過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/summaries.py::_iter_daily_reports()`：`storage/reports/token_usage/daily_*.json` 檔名日期若無法 parse，舊碼直接 `continue`，沒有 warning。
