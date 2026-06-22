@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 dispatch_supervisor heartbeat age 壞 timestamp 被靜默當作 unset
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py::get_supervisor_age_seconds()`：`last_heartbeat_at` 解析失敗時直接回 `None`，沒有 warning。external monitor 會看不出是 supervisor 尚未初始化，還是 dispatch state metadata 壞掉。
+
+**根因**：heartbeat age 屬於健康檢查輔助讀取，舊寫法把「不能讓壞 state 中斷 monitor」等同於「完全不記錄壞 timestamp」，也沒有相容歷史 naive ISO timestamp。
+
+**解決方法**：`get_supervisor_age_seconds()` 改用共用 `_parse_state_timestamp()`，支援 `Z`、aware ISO 與 naive ISO（naive 視為 UTC）。真正不可解析時仍回 `None`，但會輸出 `invalid last_heartbeat_at ...` warning。新增 regression tests 鎖住 naive heartbeat 可算 age、壞 heartbeat 會 warning。
+
 ## 2026-06-22 dispatch_supervisor completion duration 失敗被靜默寫成 -1
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py::record_completion()`：`current_job.started_at` 解析失敗時會直接把 `duration_s=-1.0` 寫進 completions ring buffer，沒有 warning。worker completion 仍被記錄是對的，但事後看 state 無法分辨是真實未知 duration 還是 metadata 壞掉。

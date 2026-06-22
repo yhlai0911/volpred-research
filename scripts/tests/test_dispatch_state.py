@@ -288,6 +288,36 @@ def test_get_supervisor_age_seconds_when_alive(tmp_state: Path) -> None:
     assert age < 10  # just set
 
 
+def test_get_supervisor_age_seconds_accepts_naive_heartbeat(tmp_state: Path) -> None:
+    st.mark_supervisor_started(tmp_state)
+    snap = st.read_state(tmp_state)
+    snap["last_heartbeat_at"] = (
+        datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    )
+    tmp_state.write_text(json.dumps(snap), encoding="utf-8")
+
+    age = st.get_supervisor_age_seconds(tmp_state)
+
+    assert age is not None
+    assert age >= 0
+
+
+def test_get_supervisor_age_seconds_warns_on_invalid_heartbeat(
+    tmp_state: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    st.mark_supervisor_started(tmp_state)
+    snap = st.read_state(tmp_state)
+    snap["last_heartbeat_at"] = "not-a-date"
+    tmp_state.write_text(json.dumps(snap), encoding="utf-8")
+
+    with caplog.at_level(logging.WARNING, logger=st.__name__):
+        age = st.get_supervisor_age_seconds(tmp_state)
+
+    assert age is None
+    assert "invalid last_heartbeat_at" in caplog.text
+    assert "not-a-date" in caplog.text
+
+
 def test_get_supervisor_age_seconds_none_when_unset(tmp_state: Path) -> None:
     assert st.get_supervisor_age_seconds(tmp_state) is None
 

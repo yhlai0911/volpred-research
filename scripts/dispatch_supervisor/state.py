@@ -330,6 +330,14 @@ def get_supervisor_age_seconds(path: Path = STATE_PATH) -> float | None:
     if not last:
         return None
     try:
-        return (datetime.now(timezone.utc) - datetime.fromisoformat(last)).total_seconds()
-    except Exception:
+        last_dt = _parse_state_timestamp(last)
+        return (datetime.now(timezone.utc) - last_dt).total_seconds()
+    except (TypeError, ValueError) as exc:
+        LOG.warning(
+            "invalid last_heartbeat_at in %s: %r (%s: %s)",
+            path,
+            last,
+            type(exc).__name__,
+            exc,
+        )
         return None
