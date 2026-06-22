@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 daily_update VIX/TW 資料降級不可見
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/daily_update.py` 的日更策略產生流程：`^VIX` 抓取失敗時直接把 VIX 策略退回 GARCH；`0050.TW` 抓取失敗時直接省略台灣策略，兩者都沒有把資料問題印出。
+
+**根因**：daily update 必須 fail-open，避免單一行情源暫時失敗阻塞整份持倉建議；但舊實作把「容忍資料源失敗」寫成 silent fallback，使操作者看不出 12/VIX、50/50、台股策略是按正常資料運作，還是因資料壞掉改用備援 / 被省略。
+
+**解決方法**：新增 `_load_vix_level()` 與 `_warn_daily_update()`；`^VIX` fetch failure 或空資料會明示「VIX-based strategies will fall back to GARCH」，並回傳 `(None, None)` 避免空資料時 `vix_level` 未定義。`0050.TW` exception path 也會明示台灣策略被省略。新增 regression tests 覆蓋 VIX 失敗與空資料兩種 warning path。
+
 ## 2026-06-22 risk_forecast historical/YTD GARCH fallback 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，承接 `scripts/risk_forecast.py` 先前非致命 warning 修補，發現 historical sigma chart 與 YTD Basel sigma forecast 兩條 GARCH fitting path 仍有 silent fallback：前者失敗時直接略過該歷史點，後者失敗時直接使用當前 `sigma_daily`。

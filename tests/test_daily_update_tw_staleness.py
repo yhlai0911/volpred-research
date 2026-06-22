@@ -57,9 +57,42 @@ def _import_check_vix_term_structure():
     return _check_vix_term_structure
 
 
+def _import_load_vix_level():
+    from daily_update import _load_vix_level  # type: ignore
+    return _load_vix_level
+
+
 class _FailingDataManager:
     def get_model_data(self, *args, **kwargs):
         raise RuntimeError("vix3m down")
+
+
+class _EmptyDataManager:
+    def get_model_data(self, *args, **kwargs):
+        return []
+
+
+def test_load_vix_level_warns_on_fetch_failure(capsys) -> None:
+    load_vix_level = _import_load_vix_level()
+    vix_level, vix_data = load_vix_level(_FailingDataManager())
+    output = capsys.readouterr().out
+
+    assert vix_level is None
+    assert vix_data is None
+    assert "^VIX fetch failed" in output
+    assert "VIX-based strategies will fall back to GARCH" in output
+    assert "vix3m down" in output
+
+
+def test_load_vix_level_warns_on_empty_data(capsys) -> None:
+    load_vix_level = _import_load_vix_level()
+    vix_level, vix_data = load_vix_level(_EmptyDataManager())
+    output = capsys.readouterr().out
+
+    assert vix_level is None
+    assert vix_data is None
+    assert "^VIX returned no rows" in output
+    assert "VIX-based strategies will fall back to GARCH" in output
 
 
 def test_vix_term_structure_warns_on_fetch_failure(capsys) -> None:

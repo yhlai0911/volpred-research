@@ -121,6 +121,30 @@ def _vix_regime(vix_level):
             "但要做好短期帳面虧損的心理準備。")
 
 
+def _warn_daily_update(message, exc=None):
+    if exc is None:
+        print(f"  ⚠️ {message}")
+    else:
+        print(f"  ⚠️ {message}: {type(exc).__name__}: {exc}")
+
+
+def _load_vix_level(dm):
+    """Load VIX level for strategy sizing; fall back visibly on data failure."""
+    try:
+        vix_data = dm.get_model_data("^VIX", "2025-01-01", "2026-12-31", force_refresh=True)
+        if len(vix_data) == 0:
+            _warn_daily_update(
+                "^VIX returned no rows; VIX-based strategies will fall back to GARCH"
+            )
+            return None, None
+        return float(vix_data.iloc[-1]["close"]), vix_data
+    except Exception as exc:
+        _warn_daily_update(
+            "^VIX fetch failed; VIX-based strategies will fall back to GARCH", exc
+        )
+        return None, None
+
+
 def _check_vix_term_structure(dm, vix_level):
     """Print VIX/VIX3M term-structure status; never block the daily update."""
     if vix_level is None:
@@ -471,13 +495,7 @@ def main():
         print(f"  GLD regime: {gld_regime} (252d ret={gld_trailing_ret*100:+.1f}%)")
 
     # VIX/GARCH ratio alert (94% VaR violations occur when ratio > 1.5)
-    try:
-        vix_data = dm.get_model_data("^VIX", "2025-01-01", "2026-12-31", force_refresh=True)
-        if len(vix_data) > 0:
-            vix_level = float(vix_data.iloc[-1]["close"])
-            # Will compute ratio after GARCH fit below
-    except Exception:
-        vix_level = None
+    vix_level, vix_data = _load_vix_level(dm)
 
     # Phase M: upgraded to w=2000 (better VaR: 0.8% vs 1.1%, +4ms cost)
     # Larger window reduces persistence bias (-3% → ~0%), improves tail coverage.
@@ -564,7 +582,8 @@ def main():
             sigma_tw = float(np.sqrt(tw50_ret_pct.ewm(span=50).var().iloc[-1])) * np.sqrt(252)
             w_tw50 = round(min(max(0.10 / sigma_tw, 0), 1.0), 2)
         cash_tw50 = round(max(0, 1 - w_tw50), 2)
-    except Exception:
+    except Exception as exc:
+        _warn_daily_update("0050.TW fetch failed; Taiwan strategy will be omitted", exc)
         tw50_close = None; tw50_date = None; tw50_ret = None; w_tw50 = None; cash_tw50 = None
 
     print(f"  Slow VT: {w_spy_only*100:.0f}% SPY, {cash_spy_only*100:.0f}% cash")
