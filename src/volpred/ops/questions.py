@@ -20,14 +20,18 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _warn_question_ops(message: str) -> None:
+    print(f"[question_ops] WARN {message}")
+
+
 def _get_article_status(article_slug: str) -> str | None:
     """Return the Supabase status of an article ('published', 'draft', etc.)."""
     try:
         rows = _select_rows("articles", select="id,status", slug=article_slug)
         if rows:
             return str(rows[0].get("status") or "")
-    except Exception:
-        pass
+    except Exception as exc:
+        _warn_question_ops(f"article status lookup failed for slug={article_slug}: {exc}")
     return None
 
 
@@ -43,7 +47,11 @@ def _link_question_article(question_id: str, article_slug: str) -> bool:
         if not article_id:
             return False
         return _post("question_articles", {"question_id": question_id, "article_id": article_id})
-    except Exception:
+    except Exception as exc:
+        _warn_question_ops(
+            f"question_articles link failed for question_id={question_id}, "
+            f"article_slug={article_slug}: {exc}"
+        )
         return False
 
 
@@ -204,8 +212,13 @@ def _ensure_article_question_metadata(article_slug: str, question_id: str) -> No
             details = rows[0].get("details") or {}
             details["question_id"] = question_id
             _patch_where("articles", {"slug": article_slug}, {"details": details})
-    except Exception:
-        pass  # Non-critical; question_articles row is the primary link
+    except Exception as exc:
+        # Non-critical; question_articles row is the primary link, but metadata
+        # persistence failures must be visible because frontend sync depends on it.
+        _warn_question_ops(
+            f"article question metadata update failed for article_slug={article_slug}, "
+            f"question_id={question_id}: {exc}"
+        )
 
 
 ACTIVE_USER_STATUSES = {"ranked", "researching"}

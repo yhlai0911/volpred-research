@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 question ops 非致命 Supabase/link 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/questions.py` 仍有 question ops 例外分支靜默降級：article status lookup 失敗會回 `None`、`question_articles` link 失敗會回 `False`、`_ensure_article_question_metadata()` 失敗會直接吞掉。這些 path 都是非致命，但會影響會員問答是否標為 answered、Supabase link 是否建立，以及 frontend sync 是否能靠 `details.question_id` 重建 link。
+
+**根因**：會員問答收尾流程把「非致命、不中斷」誤寫成「可靜默忽略」，與近期 publisher / dashboard / release pool 的 silent-failure 類 incident 同型。
+
+**解決方法**：保留非阻塞語義，但新增 `_warn_question_ops()`，三個分支失敗時都印出 `[question_ops] WARN ...`，包含 article slug、question id 與 exception。新增 regression test 覆蓋 status lookup failure、question_articles link failure、壞 `feed.json` metadata failure，確認錯誤不拋出但 warning 可見。
+
 ## 2026-06-22 release preview 未套 dedup TTL，誤報 46 篇 eligible draft
 
 **問題**：handoff 無 Codex-eligible pending 時巡檢 live dashboard，唯一 WARN 是 `Release pool starved > 6h (cron healthy)`。`release-pool-by-settings` 實際連續回 `released_count=0`，但 `preview_release_pool_by_settings()` 顯示 `eligible=46` 且列出 `next_candidates`，讓 ops 看起來像有文章可釋出卻沒有被釋出。
