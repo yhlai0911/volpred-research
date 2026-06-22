@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 generate_diverse_tasks cron log timestamp 讀取失敗被靜默忽略
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::_latest_cron_log_ts()`：cron log 存在但讀取或 stat 失敗時直接回 `None`。platform_ops stale detector 會繼續是對的，但可能失去最新 log timestamp 證據，回頭只看 stale `cron_last_run.json`，且沒有診斷。
+
+**根因**：cron log timestamp 是輔助 freshness 訊號，不能因單一 log 壞掉中斷 diverse task generation；但舊寫法把可降級寫成 silent `None`。
+
+**解決方法**：新增 `_warn_diverse()`；cron log read/stat failure 時輸出 `[diverse_gen] WARN cron log ... failed; skipping log timestamp`，原本回 `None` 的行為不變。新增 regression test 用 directory path 模擬 unreadable log。
+
 ## 2026-06-22 continue_task_dispatch work_log 非 list 被靜默當空 rotation
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::load_recent_task_type_counts()`：`storage/work_log.json` 可解析但頂層不是 list 時直接回空 `Counter()`。dispatcher 繼續是對的，但 schema drift 會讓 task_type rotation 失效且無診斷。

@@ -207,6 +207,20 @@ def test_latest_cron_log_ts_picks_latest_hhmm_banner_over_old_seconds_banner(
     assert ts.year == 2026 and ts.month == 6 and ts.day == 11
 
 
+def test_latest_cron_log_ts_warns_on_unreadable_log(tmp_path, monkeypatch, capsys) -> None:
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", tmp_path / "cron")
+    (tmp_path / "cron" / "x.log").mkdir(parents=True)
+
+    ts = generate_diverse_tasks._latest_cron_log_ts("x", "cron/x.log")
+
+    assert ts is None
+    captured = capsys.readouterr()
+    assert "[diverse_gen] WARN cron log read failed; skipping log timestamp" in captured.err
+    assert "x.log" in captured.err
+    assert "IsADirectoryError" in captured.err
+
+
 def test_experiment_dir_with_descriptive_suffix_covers_kid() -> None:
     assert generate_diverse_tasks._experiment_dir_covers_kid(
         "k1458_h1_trough_decomposition",

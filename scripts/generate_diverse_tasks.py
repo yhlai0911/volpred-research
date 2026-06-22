@@ -93,6 +93,10 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def _warn_diverse(message: str) -> None:
+    print(f"[diverse_gen] WARN {message}", file=sys.stderr)
+
+
 def _experiment_dir_covers_kid(dirname: str, kid_lower: str) -> bool:
     """Return True when an experiment directory belongs to a K-id.
 
@@ -234,7 +238,11 @@ def _latest_cron_log_ts(job_id: str, log_rel: str | None = None) -> datetime | N
         return None
     try:
         lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
-    except OSError:
+    except OSError as exc:
+        _warn_diverse(
+            "cron log read failed; skipping log timestamp "
+            f"path={log_path} error={type(exc).__name__}: {exc}"
+        )
         return None
     for line in reversed(lines):
         if "===" not in line:
@@ -244,7 +252,11 @@ def _latest_cron_log_ts(job_id: str, log_rel: str | None = None) -> datetime | N
             return ts
     try:
         return datetime.fromtimestamp(log_path.stat().st_mtime, tz=timezone.utc)
-    except OSError:
+    except OSError as exc:
+        _warn_diverse(
+            "cron log stat failed; skipping log timestamp "
+            f"path={log_path} error={type(exc).__name__}: {exc}"
+        )
         return None
 
 
