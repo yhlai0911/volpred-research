@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 work_dashboard_server JSON source 降級不可見
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/work_dashboard_server.py`：dashboard API 讀 `next_tasks.json`、`dashboard_latest.json`、`runtime_schedules.json`、`cron_last_run.json`、`feed.json`、release settings 失敗時直接回 default；`next_tasks` / `feed` 型別錯誤也只安靜轉空。頁面仍能開是對的，但操作者會把 source 壞掉誤讀成「真的沒有任務 / 沒有文章」。
+
+**根因**：本地 dashboard 是觀測面，不應因單一 JSON source 壞掉而 500；但舊實作把 fail-open 寫成 silent fallback，和 2026-06-22 一系列 ops 可觀察性修正方向不一致。
+
+**解決方法**：`_load()` 缺檔仍安靜 fallback，但已存在檔案讀取 / JSON parse 失敗會輸出 `[work_dashboard] WARN ...` 並放進 API payload `warnings`；`next_tasks` / `feed` schema drift 也會 warning。header strip 顯示 warning count。新增 regression tests 覆蓋壞 `next_tasks.json` 與非 list feed。
+
 ## 2026-06-22 cron_review schedule-aware regression test collection 失效
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，跑到 `tests/test_cron_review.py` 發現測試 collection 直接失敗：測試期待 `cron_review.expected_prev_fire` 與 `cron_review.is_stale`，但 `scripts/cron_review.py` 只剩私有 `_expected_last_fire()` 且 main 內嵌 stale 判斷。

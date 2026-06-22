@@ -117,10 +117,20 @@ TASK_MISSION = {
 MISSION_OTHER = ("其他", "#6e7681")
 
 
-def _load(path: Path, default):
+def _warn_dashboard(warnings: list[str], message: str, exc: Exception | None = None) -> None:
+    detail = f"{message}: {type(exc).__name__}: {exc}" if exc else message
+    warnings.append(detail)
+    print(f"[work_dashboard] WARN {detail}", file=sys.stderr)
+
+
+def _load(path: Path, default, warnings: list[str] | None = None):
+    if not path.exists():
+        return default
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
+    except Exception as exc:
+        if warnings is not None:
+            _warn_dashboard(warnings, f"JSON read failed; using default path={path}", exc)
         return default
 
 
@@ -213,16 +223,19 @@ def _file_age(path: Path) -> str:
 
 
 def build_work() -> dict:
-    tasks = _load(NEXT_TASKS, [])
+    warnings: list[str] = []
+    tasks = _load(NEXT_TASKS, [], warnings)
     if not isinstance(tasks, list):
+        _warn_dashboard(warnings, f"next_tasks is not a list; using embedded tasks/default path={NEXT_TASKS}")
         tasks = tasks.get("tasks", []) if isinstance(tasks, dict) else []
-    dash = _load(DASHBOARD, {})
-    scheds = _load(SCHEDULES, {})
-    last_run = _load(CRON_LAST, {})
-    feed = _load(FEED, [])
+    dash = _load(DASHBOARD, {}, warnings)
+    scheds = _load(SCHEDULES, {}, warnings)
+    last_run = _load(CRON_LAST, {}, warnings)
+    feed = _load(FEED, [], warnings)
     if not isinstance(feed, list):
+        _warn_dashboard(warnings, f"feed is not a list; using empty feed path={FEED}")
         feed = []
-    release = _load(RELEASE, {})
+    release = _load(RELEASE, {}, warnings)
 
     ongoing = [{"id": t.get("id"), "title": (t.get("title") or "")[:78], "type": t.get("task_type"),
                 "by": t.get("claimed_by"), "status": t.get("status")}
@@ -286,7 +299,12 @@ def build_work() -> dict:
 
     return {
         "generated": _now().strftime("%Y-%m-%d %H:%M:%S 台灣時間"),
-        "health": {"overall": dash.get("overall_status", "?"), "breaches": dash.get("section_breaches", 0)},
+        "health": {
+            "overall": dash.get("overall_status", "?"),
+            "breaches": dash.get("section_breaches", 0),
+            "warning_count": len(warnings),
+        },
+        "warnings": warnings,
         "daemons": daemons,
         "slots": {"used": len(ongoing), "cap": 4},
         "counts": dict(Counter((t.get("status") or "?") for t in tasks if isinstance(t, dict))),
@@ -371,6 +389,7 @@ async function load(){
   const c=d.content;
   el('strip').innerHTML=[
     chip('Slot',d.slots.used+'/'+d.slots.cap),
+    d.warnings&&d.warnings.length?chip('Warnings',d.warnings.length):'',
     chip('草稿池',c.draft),chip('已發佈',c.published),
     chip('最近發佈',esc(c.last_pub_when)+' · '+esc(c.last_pub_title)),
     chip('最近釋出',esc(c.last_release)+' (每'+esc(c.release_interval)+'min)'),
