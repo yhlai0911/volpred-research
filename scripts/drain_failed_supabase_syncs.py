@@ -39,13 +39,22 @@ QUEUE_PATH = ROOT / "storage" / ".failed_supabase_syncs.json"
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 
 
+def _warn_drain(message: str, path: Path, exc: Exception | None = None) -> None:
+    suffix = f": {type(exc).__name__}: {exc}" if exc is not None else ""
+    print(f"[drain] WARN {message}: path={path}{suffix}")
+
+
 def _load_list(path: Path) -> list:
     if not path.exists():
         return []
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-        return data if isinstance(data, list) else []
-    except Exception:
+        if isinstance(data, list):
+            return data
+        _warn_drain("queue JSON is not a list; treating as empty", path)
+        return []
+    except Exception as exc:
+        _warn_drain("queue JSON read failed; treating as empty", path, exc)
         return []
 
 

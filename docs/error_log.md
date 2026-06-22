@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 failed Supabase sync drain queue 讀取失敗被當空佇列
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/drain_failed_supabase_syncs.py::_load_list()`：`.failed_supabase_syncs.json` 壞 JSON 或非 list 時直接回 `[]`。drain 腳本不應因壞 queue 中斷 cron 是合理的，但輸出會像「queue empty」，可能掩蓋 dead-letter queue 本身損壞。
+
+**根因**：dead-letter queue consumer 採 fail-open，避免一個壞檔拖垮 cron；但缺少 warning，讓 remediation path 的來源資料問題不可觀察。
+
+**解決方法**：新增 `_warn_drain()`；壞 JSON 會輸出 `queue JSON read failed; treating as empty`，非 list 會輸出 `queue JSON is not a list; treating as empty`，原本回空 list 行為不變。新增 regression tests 覆蓋兩條降級路徑。
+
 ## 2026-06-22 ops_dashboard JSON source 讀取失敗被靜默套 default
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/ops_dashboard.py::jl()`：dashboard 讀 `next_tasks.json`、`feed.json`、`trending_repost_log.json`、`cron_last_run.json`、`runtime_schedules.json` 失敗時直接回 default。dashboard 繼續產生是對的，但 section 缺值時看不出是「真的空」還是「source 壞掉 / 缺檔」。
