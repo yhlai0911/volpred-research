@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 session_drill_down JSONL 掃描壞行被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，延伸檢查近期「非阻塞容錯不可觀察」同型問題，掃到 `scripts/session_drill_down.py::scan_jsonl()`：Claude session JSONL 壞行、assistant message 壞 timestamp、缺 timestamp、或檔案讀取失敗時直接跳過 / 回空。工具仍能產生報告是對的，但 session cost / tool-call 統計可能少算，且操作者看不出是哪個 session 檔資料品質有問題。
+
+**根因**：session drill-down 是診斷工具，設計上不能因單一壞行中斷整日掃描；但舊寫法把「容忍資料污染」實作成 silent skip，和近期 ops/report 類 fallback 可觀察性修正方向不一致。
+
+**解決方法**：新增 `_warn_session_drill()`，對 JSONL parse failure、timestamp parse failure、missing timestamp、file read failure 輸出 `[session_drill_down] WARN ... path=<file>:<line>` 到 stderr；同一檔案同類問題只提示一次以避免大量壞行洗版。新增 regression tests 鎖住壞行會跳過但保留有效 assistant record，且 unreadable path 會 warning 後回空。
+
 ## 2026-06-22 generate_diverse_tasks cron log timestamp 讀取失敗被靜默忽略
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::_latest_cron_log_ts()`：cron log 存在但讀取或 stat 失敗時直接回 `None`。platform_ops stale detector 會繼續是對的，但可能失去最新 log timestamp 證據，回頭只看 stale `cron_last_run.json`，且沒有診斷。

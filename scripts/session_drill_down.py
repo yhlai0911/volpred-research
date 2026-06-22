@@ -18,6 +18,7 @@ Session Drill-Down — token_usage_report.py 的補強
 import argparse
 import json
 import re
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -68,31 +69,72 @@ def bash_cmd_signature(cmd: str) -> str:
     return head[:80]
 
 
+def _warn_session_drill(
+    message: str,
+    path: Path,
+    exc: Exception | None = None,
+    *,
+    line_no: int | None = None,
+) -> None:
+    loc = f"{path}"
+    if line_no is not None:
+        loc = f"{loc}:{line_no}"
+    detail = f" error={type(exc).__name__}: {exc}" if exc is not None else ""
+    print(f"[session_drill_down] WARN {message} path={loc}{detail}", file=sys.stderr)
+
+
 def scan_jsonl(jsonl_path: Path):
     """Return list of (timestamp, role, content_list, usage, model) per assistant message."""
     out = []
+    warned_bad_json = False
+    warned_bad_timestamp = False
+    warned_missing_timestamp = False
     try:
         with open(jsonl_path, "r") as f:
-            for line in f:
+            for line_no, line in enumerate(f, start=1):
                 line = line.strip()
                 if not line:
                     continue
                 try:
                     obj = json.loads(line)
-                except json.JSONDecodeError:
+                except json.JSONDecodeError as exc:
+                    if not warned_bad_json:
+                        _warn_session_drill(
+                            "JSONL line parse failed; skipping",
+                            jsonl_path,
+                            exc,
+                            line_no=line_no,
+                        )
+                        warned_bad_json = True
                     continue
                 if obj.get("type") != "assistant":
                     continue
                 msg = obj.get("message", {})
                 ts_str = obj.get("timestamp")
                 if not ts_str:
+                    if not warned_missing_timestamp:
+                        _warn_session_drill(
+                            "assistant message missing timestamp; skipping",
+                            jsonl_path,
+                            line_no=line_no,
+                        )
+                        warned_missing_timestamp = True
                     continue
                 try:
                     ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
-                except ValueError:
+                except ValueError as exc:
+                    if not warned_bad_timestamp:
+                        _warn_session_drill(
+                            "assistant timestamp parse failed; skipping",
+                            jsonl_path,
+                            exc,
+                            line_no=line_no,
+                        )
+                        warned_bad_timestamp = True
                     continue
                 out.append((ts, msg.get("content", []), msg.get("usage") or {}, msg.get("model", "unknown")))
-    except IOError:
+    except OSError as exc:
+        _warn_session_drill("JSONL file read failed; returning empty session", jsonl_path, exc)
         return []
     return out
 
