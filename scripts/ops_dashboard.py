@@ -50,9 +50,20 @@ def load_env():
     return env
 
 
+def warn_json_read_failed(path: Path, exc: Exception) -> None:
+    print(
+        f"[ops_dashboard] WARN JSON read failed: "
+        f"path={path} error={type(exc).__name__}: {exc}"
+    )
+
+
 def jl(p, default=None):
-    try: return json.loads(Path(p).read_text())
-    except Exception: return default
+    path = Path(p)
+    try:
+        return json.loads(path.read_text())
+    except Exception as exc:
+        warn_json_read_failed(path, exc)
+        return default
 
 
 def http_ok(url, timeout=8):

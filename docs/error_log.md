@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 ops_dashboard JSON source 讀取失敗被靜默套 default
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/ops_dashboard.py::jl()`：dashboard 讀 `next_tasks.json`、`feed.json`、`trending_repost_log.json`、`cron_last_run.json`、`runtime_schedules.json` 失敗時直接回 default。dashboard 繼續產生是對的，但 section 缺值時看不出是「真的空」還是「source 壞掉 / 缺檔」。
+
+**根因**：dashboard helper 把巡檢來源讀取設計成 fail-open，卻沒有留下來源層級診斷，和近期 ops 可觀察性修正同型。
+
+**解決方法**：新增 `warn_json_read_failed()`；JSON 讀取或解析失敗時輸出 `[ops_dashboard] WARN JSON read failed`，包含 path 與 exception，原本回 default 行為不變。新增 regression test 覆蓋壞 JSON。
+
 ## 2026-06-22 event_jobs runtime timezone fallback 被靜默套 UTC
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/event_jobs.py::_runtime_timezone()`：`config/runtime_schedules.json::metadata.timezone` 無效時直接退回 UTC。event materializer 不因 config 小錯中斷是合理的，但 naive `not_before/deadline/gc_after` 會被 UTC 解讀，可能改變事件窗口是否 due，卻沒有任何診斷訊號。

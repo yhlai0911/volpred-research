@@ -39,6 +39,18 @@ def test_classify_fb_pipeline_separates_awaiting_interactive() -> None:
     assert [item["mile_id"] for item in awaiting] == ["mile_wait"]
 
 
+def test_ops_dashboard_jl_warns_on_json_read_failure(tmp_path, capsys) -> None:
+    bad_path = tmp_path / "bad.json"
+    bad_path.write_text("{bad json", encoding="utf-8")
+
+    assert ops_dashboard.jl(bad_path, default={"fallback": True}) == {"fallback": True}
+
+    captured = capsys.readouterr()
+    assert "[ops_dashboard] WARN JSON read failed" in captured.out
+    assert "bad.json" in captured.out
+    assert "JSONDecodeError" in captured.out
+
+
 def test_ops_dashboard_returns_zero_even_when_sections_are_critical(tmp_path, monkeypatch) -> None:
     repo = tmp_path
     (repo / "storage" / "reports").mkdir(parents=True)
