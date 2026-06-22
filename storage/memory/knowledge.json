@@ -35578,16 +35578,29 @@
     "created_at": "2026-06-22T08:39:47.285832"
   },
   {
-    "item_id": "e42e4d4e",
+    "item_id": "bac08cbc",
     "category": "experiment",
-    "content": "K1361 DIVERSIFICATION_SINK_PLUS_WEAK_LEAD_NULL_TRANSMITTER: Using yfinance adjusted close for ESPO/HERO/NERD/GAMR gaming ETFs, DKNG/FLUT/HOOD betting-fintech proxies, and QQQ/ARKK/BTC/SPY benchmarks, the experiment built equal-weighted daily baskets and 21-day close-to-close realized-variance proxies from 2019-08-15 to 2026-06-18 (1,720 daily observations). Predictive regressions use explicit one-day lags via source_lag1 = log_rv[source].shift(1); bootstrap seed is fixed at 42. Generalized Diebold-Yilmaz connectedness shows gaming and betting are net receivers, not transmitters (full-sample net connectedness -0.0772 and -0.1672; SPY +0.1735 and QQQ +0.1498 are the dominant transmitters). In stress vs calm rolling windows, gaming and betting net connectedness differences are tiny and insignificant (diff +0.0124, t=0.14; +0.0084, t=0.10). Only 1/8 lagged source-volatility tests passes the Harvey t>=3 bar (BETTING_FINTECH -> ARKK coef +0.0176, HAC t=+3.13), below the pre-registered strong-claim rule. However, all 8 rolling return-correlation diagnostics rise in SPY-volatility stress windows, so the supported result is correlation convergence / weaker diversification during stress, not robust ex-ante volatility transmission or a trading signal. Codex source review: PASS_WITH_LIMITATIONS.",
+    "content": "K1362 WEAK_DIAGNOSTIC_NULL_STRONG_TIMING: Built a public option-flow crowd proxy panel from Cboe total/equity/index put-call CSV archives and yfinance SPY/^VIX/SVXY/VXX/^IRX data. The usable public archive sample is 2007-04-03 to 2019-10-04 (3,275 daily rows; 3,150 after 252d rolling-z signal construction), so it is a pre-2020 feasibility test rather than a retail-options-boom study. Signals include equity call share z, negative equity P/C z, equity-index call gap z, and volume-adjusted call-crowd intensity; all predictive regressions use explicit lagged signals via signal.shift(1), with seed=42. Out of 30 expected-direction HAC cells, only equity_call_demand_z -> vix_change_5d clears Harvey t>=3 (coef +0.0849, HAC t=+3.03). Top-quintile equity call demand is followed by higher 5d VIX change (diff +0.556, Welch t=+4.38), but SPY excess-return and SVXY short-vol proxy tests do not pass (most negative SVXY 5d t=-1.13). Interpretation: public aggregate P/C proxies can mark weak future VIX-up pressure, but they do not replicate ACIB/order-imbalance evidence and do not support robust short-vol timing or a tradable call-crowd signal. Codex source review: CONDITIONAL_PASS.",
     "evidence": [
-      "experiments/k1361/K1361.py",
-      "experiments/k1361/K1361_results.json",
-      "experiments/k1361/README.md",
-      "experiments/k1361/codex_review.md"
+      "experiments/k1362/K1362.py",
+      "experiments/k1362/K1362_results.json",
+      "experiments/k1362/README.md",
+      "experiments/k1362/codex_review.md"
     ],
-    "confidence": 0.74,
-    "created_at": "2026-06-22T08:40:01.153455"
+    "confidence": 0.73,
+    "created_at": "2026-06-22T08:51:31.858365"
+  },
+  {
+    "item_id": "10d83adf",
+    "category": "experiment",
+    "content": "K1362 WEAK_DIAGNOSTIC_NULL_STRONG_TIMING: Built public option-flow crowd proxies from Cboe total/equity/index put-call volume archives plus yfinance SPY/^VIX/SVXY/VXX/^IRX, covering 2007-04-03 to 2019-10-04 (3,275 daily rows; 3,150 post-warmup signal observations). All predictive regressions use explicit signal.shift(1), and the SVXY risk-off diagnostic uses a lagged rolling 80% threshold; bootstrap seed is 42. Across 30 expected-direction HAC cells, only equity_call_demand_z -> 5d VIX change clears the Harvey bar (coef +0.0849, HAC t=+3.03). SPY excess-return and SVXY short-vol-return targets do not pass; the most negative SVXY 5d t-stat is only -1.13. Top-quintile equity call demand is followed by higher 5d VIX change (+0.556 VIX points, Welch t=+4.38), but SPY/SVXY effects are weak. The best SVXY gating diagnostic improves Sharpe/MDD but lacks matching HAC target support and the data end before the post-2020 retail-options boom. Interpretation: public aggregate Cboe put/call ratios are a weak VIX-stress diagnostic, not a replication of JFQA ACIB/open-buy order imbalance and not a robust short-vol timing alpha. Codex source review: CONDITIONAL_PASS.",
+    "evidence": [
+      "experiments/k1362/K1362.py",
+      "experiments/k1362/K1362_results.json",
+      "experiments/k1362/README.md",
+      "experiments/k1362/codex_review.md"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-06-22T08:52:31.174455"
   }
 ]

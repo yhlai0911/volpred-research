@@ -35080,7 +35080,7 @@
     "title": "K1362: optflowcrowd 總體選擇權買權需求差作 short-vol timing proxy** — 個別 order-flow 資料需付費；先用 CBOE put/call ratio、OCC aggregate volume、Cboe",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1137). Original: optflowcrowd 總體選擇權買權需求差作 short-vol timing proxy** — 個別 order-flow 資料需付費；先用 CBOE put/call ratio、OCC aggregate volume、Cboe index/equity split 建免費 proxy，檢定 call-buying pressure 是否預測 SPY excess return、VIX change、short-vol strategy drawdown；與 VIX/SKEW level 題正交，聚焦「訂單流 crowd」（來源：JFQA 2026 forthcoming Betting Against the Crowd）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1362.py with signal.shift(1) + seed=42, (c) K1362_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35089,7 +35089,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-22T00:00:00Z"
+    "created_at": "2026-06-22T00:00:00Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-22T00:41:01.190669+00:00",
+    "claim_session_id": "16f89921598b",
+    "started_at": "2026-06-22T00:41:01.289933+00:00",
+    "completed_at": "2026-06-22T00:51:51.364082+00:00",
+    "result": "K1362 completed: public Cboe aggregate put/call proxies tested against SPY excess return, VIX change, and SVXY short-vol proxy with all signals lagged by shift(1). Verdict WEAK_DIAGNOSTIC_NULL_STRONG_TIMING; Codex source review CONDITIONAL_PASS and knowledge entry bac08cbc recorded."
   },
   {
     "id": "journal_discovery_20260622_0",
