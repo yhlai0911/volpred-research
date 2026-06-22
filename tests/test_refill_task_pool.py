@@ -709,6 +709,46 @@ def test_research_backlog_arc_dedup_ignores_explanatory_tail(tmp_path, monkeypat
     assert tasks[0]["id"].startswith("research_")
 
 
+def test_research_backlog_arc_dedup_warns_on_invalid_feed_timestamp(
+    tmp_path, monkeypatch, capsys
+):
+    reports = tmp_path / "storage" / "reports"
+    reports.mkdir(parents=True, exist_ok=True)
+    (reports / "feed.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_bad_ts",
+                    "title": "BTC ETH volatility spillover",
+                    "description": "BITCOIN and ETHEREUM vol-of-vol spillover",
+                    "status": "published",
+                    "published_at": "not-a-date",
+                }
+            ],
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "_ARC_FEED_CACHE", None)
+
+    hits = MODULE._arc_covered_by_recent_article("BTC ETH vol-of-vol", days=90)
+    output = capsys.readouterr().out
+
+    assert hits == [
+        {
+            "id": "mile_bad_ts",
+            "title": "BTC ETH volatility spillover",
+            "shared_entities": ["BITCOIN", "ETHEREUM"],
+        }
+    ]
+    assert "recent arc feed timestamp invalid" in output
+    assert "mile_bad_ts" in output
+    assert "not-a-date" in output
+
+
 def test_journal_discovery_tier3_dispatched_on_empty_pool():
     """Tier-3 fallback fires when no live or recent journal_discovery_* exists."""
     out = MODULE._journal_discovery_dispatch_task(tasks=[], existing_ids=set())

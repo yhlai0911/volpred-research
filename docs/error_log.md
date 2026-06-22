@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 refill_task_pool arc dedup fail-open 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/refill_task_pool.py`：publication refill 的 narrative-arc dedup filter 在 import 失敗、實驗檔讀取失敗、arc check 失敗、或既有 feed timestamp 解析失敗時都 fail-open 但不輸出原因。refill 會繼續是對的，但 ops 看不出候選為何沒被 dedup filter 判斷，或壞 timestamp 為何仍被視為近期候選。
+
+**根因**：refill filter 不能因 arc-dedup 基礎設施問題阻塞任務池補充，因此採 fail-open；舊寫法把 fail-open 與 silent `pass` 混在一起，重演近期 metadata / dedup 可觀察性 incident。
+
+**解決方法**：新增 `_warn_refill()`，arc-dedup import/read/check failure 與 feed timestamp parse failure 都輸出 `[refill_task_pool] WARN ...`，同時保留原本不阻塞 refill 的行為。新增 regression test 鎖住壞 `published_at` 會 warning，且仍保守納入 BTC/ETH narrative-arc hit。
+
 ## 2026-06-22 build_knowledge_index ingestion/search 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/build_knowledge_index.py`：storage experiment JSON、strategy/risk_forecast JSON、notification history JSON 讀取失敗時會直接跳過；session context 分層 search 失敗時也直接跳過。索引或 session context 仍會產生，但使用者看不出少了哪一層知識或哪個檔案壞掉。

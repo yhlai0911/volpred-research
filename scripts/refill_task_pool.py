@@ -43,6 +43,14 @@ NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 CANDIDATES = ROOT / "storage" / "publication_candidates.json"
 
 
+def _warn_refill(message: str, exc: Exception | None = None) -> None:
+    """Print non-fatal refill warnings without blocking task-pool refill."""
+    if exc is None:
+        print(f"[refill_task_pool] WARN {message}")
+    else:
+        print(f"[refill_task_pool] WARN {message}: {type(exc).__name__}: {exc}")
+
+
 def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list, list]:
     if not NEXT_TASKS.exists():
         return [], []
@@ -547,7 +555,8 @@ def _is_arc_duplicate_candidate(cand: dict) -> bool:
         if src not in sys.path:
             sys.path.insert(0, src)
         from volpred.publisher.arc_dedup import find_arc_duplicates  # noqa: E402
-    except Exception:
+    except Exception as exc:
+        _warn_refill("arc duplicate filter unavailable; candidate not blocked", exc)
         return False
     feed = _load_feed_for_dedup() or {}
     if not feed:
@@ -561,15 +570,16 @@ def _is_arc_duplicate_candidate(cand: dict) -> bool:
         if f.exists():
             try:
                 text_parts.append(f.read_text(encoding="utf-8", errors="replace"))
-            except Exception:
-                pass
+            except Exception as exc:
+                _warn_refill(f"arc duplicate source read failed ({f})", exc)
     text = "\n".join(text_parts)
     if not text:
         return False
     title_hint = str(cand.get("title") or "")
     try:
         dups = find_arc_duplicates(title_hint, text, feed, days=90)
-    except Exception:
+    except Exception as exc:
+        _warn_refill(f"arc duplicate check failed for {k_id}; candidate not blocked", exc)
         return False
     return bool(dups)
 
@@ -770,8 +780,12 @@ def _arc_covered_by_recent_article(direction_text: str, days: int = 90) -> list[
 
                 if dtparse(ts_raw).astimezone(timezone.utc) < cutoff:
                     continue
-            except Exception:
-                pass
+            except Exception as exc:
+                if ts_raw:
+                    _warn_refill(
+                        f"recent arc feed timestamp invalid ({existing.get('id', '?')}: {ts_raw})",
+                        exc,
+                    )
             ex_text = f"{existing.get('title', '')}\n{existing.get('description') or ''}"
             ex_ents = extract_entities(ex_text)
             if _direction_level_overlap(new_ents, ex_ents):
@@ -783,7 +797,8 @@ def _arc_covered_by_recent_article(direction_text: str, days: int = 90) -> list[
                     }
                 )
         return hits
-    except Exception:
+    except Exception as exc:
+        _warn_refill("research backlog arc coverage check unavailable", exc)
         return []
 
 
