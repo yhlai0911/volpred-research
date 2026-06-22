@@ -24,6 +24,10 @@ PATH = Path("storage/next_tasks.json")
 BLOCKED_FIELDS = ("blocked_reason", "blocked_at", "blocked_until", "blocked_note")
 
 
+def _warn(message: str) -> None:
+    print(f"[unblock] WARN {message}", file=sys.stderr)
+
+
 def main(apply: bool) -> int:
     tasks = json.loads(PATH.read_text())
     now = datetime.now(timezone.utc)
@@ -35,18 +39,21 @@ def main(apply: bool) -> int:
         until = t.get("blocked_until")
         if not until:
             continue
-        # Prefer strict ISO datetime compare so `2026-06-05T21:30:00+08:00`
-        # is honored to the minute. Fall back to date-string compare for the
-        # plain `YYYY-MM-DD` form (treated as UTC end-of-day-start).
+        # Strict ISO parsing still accepts the plain `YYYY-MM-DD` form. Invalid
+        # blocked_until values must stay blocked; a lexical fallback can unblock
+        # malformed metadata by accident.
         try:
             until_dt = datetime.fromisoformat(str(until).replace("Z", "+00:00"))
             if until_dt.tzinfo is None:
                 until_dt = until_dt.replace(tzinfo=timezone.utc)
             if until_dt > now:
                 continue
-        except Exception:
-            if str(until)[:10] > now.date().isoformat():
-                continue
+        except (TypeError, ValueError) as exc:
+            _warn(
+                "invalid blocked_until; keeping task blocked "
+                f"task_id={t.get('id')} blocked_until={until!r} error={type(exc).__name__}: {exc}"
+            )
+            continue
         swept.append(
             {
                 "id": t.get("id"),

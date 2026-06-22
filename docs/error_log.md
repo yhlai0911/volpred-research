@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 unblock_expired blocked_until parse 失敗後用字串兜底
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/unblock_expired_blocked_tasks.py`：`blocked_until` 解析失敗後會改用 `str(until)[:10] > today` 的字串比較兜底，沒有 warning；某些非法值可能被誤判成已過期而解封 blocked task。
+
+**根因**：expired-block sweep 需要容忍壞 metadata，不應讓整個 hourly dispatch 前置步驟中斷；但把「date-only fallback」與「任意壞字串 fallback」混在一起，會讓控制面在不可驗證的 timestamp 上做狀態轉換，且操作者看不到 source drift。
+
+**解決方法**：改成 strict ISO parse（仍支援 `YYYY-MM-DD`），parse 失敗時輸出 `[unblock] WARN invalid blocked_until; keeping task blocked ...` 並保守跳過，不做解封。新增 regression tests 覆蓋壞 `blocked_until` apply 後仍 blocked，以及合法過期 ISO timestamp 仍正常回 pending。
+
 ## 2026-06-23 task_pool_claim stale claimed_at parse 失敗被靜默略過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_pool_claim.py`：`list --status stale` 與 `cleanup --stale-hours` 遇到 claimed / in_progress task 的 `claimed_at` 不可 parse 時直接 `continue`，沒有 warning。
