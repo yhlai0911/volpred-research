@@ -35150,5 +35150,20 @@
     "started_at": "2026-06-22T07:43:34.137188+00:00",
     "completed_at": "2026-06-22T07:54:28.450259+00:00",
     "result": "Published K1512 research-audience draft mile_74822866 from experiments/k1512 with two PNG figures.\\nVerified publish_draft strict audit/image gate; feed-sync full apply was stopped after it began unrelated bulk reconciliation."
+  },
+  {
+    "id": "daily_digest_20260622",
+    "title": "[daily_digest] 寫今日每日精選導讀專欄並發佈",
+    "description": "寫今日『每日精選導讀』編輯專欄並立即發佈。規格：(1) 統整近一日平台已發佈的研究/策略/市場文章，挑 3-5 則做有觀點的編輯導讀（不是流水帳摘要）；(2) reader-facing，**必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）；(3) 走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），tags 含 '精選導讀'，title 以 '每日精選導讀｜' 起頭；(4) 事件驅動／時效內容立即 published（非 draft）。資料來源與對應 K 編號要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-22T21:14:23.281439+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ]
   }
 ]

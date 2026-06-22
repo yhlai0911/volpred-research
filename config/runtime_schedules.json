@@ -242,6 +242,20 @@
         ]
       },
       {
+        "id": "digest_daily_enqueue",
+        "label": "每日精選導讀例行任務 enqueue",
+        "cron": "0 9 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_enqueue_daily_digest.sh",
+        "log_path": "storage/logs/cron/enqueue_daily_digest.log",
+        "description": "每日 09:00 台北冪等地把一個 daily_digest P1 任務排進 next_tasks.json，讓 hourly dispatch 接手寫作+發佈。冪等：今日已發 digest 或池中已有今日 digest 任務 → skip。2026-06-22 boss directive『每日精選導讀是例行任務』— 修 06-22 digest 缺漏（原本只有 06-21 首發後無重生機制）。由 piggy-back run_due_jobs 執行（host cron 只可靠 0 * * * *；0 9 * * * 走 piggy-back，host crontab entry 為 harmless fallback）。",
+        "host_crontab_managed": true,
+        "matchers": [
+          "enqueue_daily_digest.py",
+          "cron_enqueue_daily_digest.sh",
+          "daily_digest"
+        ]
+      },
+      {
         "id": "question_research",
         "label": "Member Q&A maintain + task materialization",
         "cron": "0 */6 * * *",

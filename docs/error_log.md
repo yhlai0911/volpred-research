@@ -30,6 +30,10 @@
 
 **教訓**：(1) 產出診斷別只看單一 audit-trail（storage/ops），要看實際產出（feed/git）+ 直接測底層 binary 是否存在可執行；(2) explicit-version pin 是反模式（版本會被刪），要 pin 就需配「版本消失 fallback」，否則用 symlink + 跨版本 token + preflight-alert 的優雅降級。
 
+**後續結構修復（boss directive 2026-06-22）**：
+- **#1 禁止脫班（outcome-based dead-man switch）**：既有 alert 全在看 PROCESS（job 有沒有 fire、exit code），沒人看 OUTCOME（feed 到底有沒有新文）；release-pool-by-settings 每次跑都改 updated_at，machinery 永遠不顯 stale → 今天 12h gap 的 breach_count=0。`src/volpred/ops/alerts.py` 新增 `_parse_publishing_freshness_state`（feed 最新 published_at 距今 >5h 且在台北 9–23 活躍窗 → critical）+ `_parse_dispatch_health_state`（讀 wrapper 的 CLAUDE_BIN 路徑，binary 不存在 → critical，直接抓 binary-deletion 復發）。兩者註冊進 `build_alert_condition_report`，regression test `tests/test_publishing_freshness_alert.py`（4 cases PASS）。
+- **#2 每日精選導讀例行化**：digest 06-21 首發後**無任何重生機制**（不是排程任務）→ 06-22 自然沒有。新增 `scripts/enqueue_daily_digest.py`（冪等：今日已發 digest / 池中已有今日 digest task → skip）+ wrapper `cron_enqueue_daily_digest.sh` + config `system_crontab.items.digest_daily_enqueue`（cron `0 9 * * *`，走 piggy-back run_due_jobs）。今日已補發 `daily_digest_20260622` P1 task 進池等 dispatch。
+
 ## 2026-06-22 model_evaluation Christoffersen 例外被偽裝成通過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著 6/22 silent-fallback 系列檢查到 `src/volpred/stats/model_evaluation.py::var_backtest()`：Christoffersen independence test 計算例外時直接回 `stat=0.0, p_value=1.0`，讓 `pass=True`，甚至可能使 `trinity_pass=True`。
