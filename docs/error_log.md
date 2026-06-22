@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 release_pool 文章通知失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/content.py::release_pool_articles()` 在釋出文章後直接呼叫 `EmailNotifier.notify_article_published()`，但 exception 只 `pass`。若 SMTP / notifier 失敗，release pool 仍成功發布文章，但 ops log 看不到通知缺失。
+
+**根因**：publisher 主入口先前已收斂到 `Publisher._notify_article_published()`，會保留「通知失敗不阻塞發布」並輸出 `[email_notify]` warning；release pool 仍保留舊的 local try/except/pass，形成第二條靜默通知路徑。
+
+**解決方法**：release pool 改呼叫 `publisher._notify_article_published(item, reason="release_pool")`，沿用 publisher helper 的 warning 與非阻塞語義。新增 regression test：notifier 拋 `RuntimeError("smtp down")` 時文章仍發布，且 stdout 包含 article id、`release_pool` reason 與錯誤。
+
 ## 2026-06-22 generate_handoff 壞 completed_at 會靜默漏列最近完成
 
 **問題**：hourly handoff fallback 掃到 `scripts/generate_handoff.py::_task_pool_snapshot()` 對 succeeded task 的 `completed_at` parse 失敗時直接 `pass`。若任務池某筆完成任務 timestamp 壞掉，handoff 的「最近 24h 完成」會少一筆，但 section 1 沒有任何警告。

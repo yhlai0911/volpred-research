@@ -907,15 +907,7 @@ def release_pool_articles(
             )
         # Auto-mark linked questions as answered now that article is published
         _mark_questions_answered_on_publish(article_slug)
-        try:
-            from volpred.publisher.email_notifier import EmailNotifier
-
-            EmailNotifier(storage_dir=str(publisher.reports_dir.parent)).notify_article_published(
-                item,
-                reason="release_pool",
-            )
-        except Exception:
-            pass
+        publisher._notify_article_published(item, reason="release_pool")
 
     if (dedup_skipped or audit_skipped) and not released:
         # Persist release skip metadata even when nothing was released, so

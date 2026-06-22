@@ -98,6 +98,58 @@ def test_release_pool_by_settings_updates_last_released_and_gates_followup_run(
     assert followup["next_release_at"] == (frozen_now + timedelta(hours=2)).isoformat()
 
 
+def test_release_pool_notification_failure_warns_without_blocking(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+):
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 4, 19, 8, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    from volpred.publisher.email_notifier import EmailNotifier
+
+    def fail_notify(*args, **kwargs):
+        raise RuntimeError("smtp down")
+
+    monkeypatch.setattr(EmailNotifier, "notify_article_published", fail_notify)
+    _write_json(
+        storage_dir / ".release_settings.json",
+        {
+            "mode": "auto",
+            "interval_minutes": 120,
+            "max_articles_per_run": 1,
+            "due_only": True,
+            "include_drafts": False,
+            "preferred_audiences": [],
+            "last_released_at": (frozen_now - timedelta(hours=3)).isoformat(),
+            "updated_at": (frozen_now - timedelta(hours=3)).isoformat(),
+        },
+    )
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_notify_fail",
+                "title": "Scheduled article",
+                "status": "scheduled",
+                "published_at": (frozen_now - timedelta(minutes=1)).isoformat(),
+                "created_at": (frozen_now - timedelta(days=1)).isoformat(),
+                "category": "general",
+            }
+        ],
+    )
+
+    result = content.release_pool_by_settings(storage_dir=str(storage_dir))
+
+    captured = capsys.readouterr()
+    feed = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    assert result["released_count"] == 1
+    assert feed[0]["status"] == "published"
+    assert "[email_notify] article notification failed for mile_notify_fail" in captured.out
+    assert "(release_pool): smtp down" in captured.out
+
+
 def test_preview_release_pool_self_heals_stale_settings_from_feed_ignoring_member_qa(
     tmp_path: Path,
     monkeypatch,
