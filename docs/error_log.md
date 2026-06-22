@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 continue_task_dispatch next_tasks 壞檔會中斷 dispatcher
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::load_pending_tasks()`：`storage/next_tasks.json` 壞 JSON 會直接 traceback；頂層 schema 或 `tasks` 欄位非 list 時也會在後續迭代 / `.get()` 出錯；list 內非 object entry 沒有明確診斷。
+
+**根因**：continue_task_dispatch 是 slot-aware dispatcher 的入口，讀 pending queue 時應容忍單次 source drift 並 fail-open，避免整個 tick 中斷；但不能靜默或 traceback，否則會把「任務池 source 壞掉」誤讀成 dispatcher 掛掉或 slot idle。
+
+**解決方法**：`load_pending_tasks()` 對 JSON 讀取失敗、schema 非 list、以及單筆非 object entry 輸出 `[dispatch] WARN ...`；整體壞 source 回空 queue，單筆壞 entry 跳過並保留其他合法 pending。新增 regression tests 覆蓋壞 JSON 與混合壞 entry。
+
 ## 2026-06-23 generate_research_backlog journal cooldown 壞 timestamp 被靜默忽略
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_research_backlog.py::_journal_discovery_dispatch_task()`：既有 `journal_discovery_*` task 的 `completed_at` / `created_at` 若不可 parse，舊碼直接 `pass`，沒有 warning，後續 cooldown 判斷等同該 timestamp 不存在。

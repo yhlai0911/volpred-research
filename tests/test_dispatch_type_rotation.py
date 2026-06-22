@@ -158,6 +158,45 @@ def test_load_recent_task_type_counts_warns_on_non_list_work_log(tmp_path, monke
     assert "type=dict" in captured.err
 
 
+def test_load_pending_tasks_warns_on_invalid_next_tasks(tmp_path, monkeypatch, capsys):
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text("{bad-json", encoding="utf-8")
+    monkeypatch.setattr(dispatch, "NEXT_TASKS", next_tasks)
+
+    tasks = dispatch.load_pending_tasks()
+
+    assert tasks == []
+    captured = capsys.readouterr()
+    assert "[dispatch] WARN next_tasks read failed; treating pending queue as empty" in captured.err
+    assert "next_tasks.json" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
+def test_load_pending_tasks_warns_on_bad_entries_and_keeps_valid(tmp_path, monkeypatch, capsys):
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            {
+                "tasks": [
+                    "bad-entry",
+                    {"id": "pending-1", "status": "pending"},
+                    {"id": "done-1", "status": "succeeded"},
+                ]
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(dispatch, "NEXT_TASKS", next_tasks)
+
+    tasks = dispatch.load_pending_tasks()
+
+    assert [task["id"] for task in tasks] == ["pending-1"]
+    captured = capsys.readouterr()
+    assert "[dispatch] WARN next_tasks entry schema invalid; skipping" in captured.err
+    assert "index=0" in captured.err
+
+
 def test_build_report_exposes_disambiguated_pending_summary(monkeypatch):
     tasks = [
         _task("platform-1", "platform_ops", priority=3),

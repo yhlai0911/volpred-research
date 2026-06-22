@@ -111,10 +111,33 @@ def count_active_slots() -> dict:
 def load_pending_tasks() -> list[dict]:
     if not NEXT_TASKS.exists():
         return []
-    data = json.loads(NEXT_TASKS.read_text())
+    try:
+        data = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        _warn_dispatch(
+            "next_tasks read failed; treating pending queue as empty "
+            f"path={NEXT_TASKS} error={type(exc).__name__}: {exc}"
+        )
+        return []
     if isinstance(data, dict):
         data = data.get("tasks", [])
-    return [t for t in data if (t.get("status") or "").lower() == "pending"]
+    if not isinstance(data, list):
+        _warn_dispatch(
+            "next_tasks schema invalid; expected list or object.tasks list "
+            f"path={NEXT_TASKS} type={type(data).__name__}"
+        )
+        return []
+    pending: list[dict] = []
+    for idx, task in enumerate(data):
+        if not isinstance(task, dict):
+            _warn_dispatch(
+                "next_tasks entry schema invalid; skipping "
+                f"path={NEXT_TASKS} index={idx} type={type(task).__name__}"
+            )
+            continue
+        if (task.get("status") or "").lower() == "pending":
+            pending.append(task)
+    return pending
 
 
 def load_recent_task_type_counts(limit: int = 10) -> Counter:
