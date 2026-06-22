@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 dispatch worker SIGKILL 後仍未 reap 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/worker.py::_run_one_attempt()`：worker attempt timeout 後會 `_kill_pgid()`，再 `proc.wait(timeout=GRACE_PERIOD_S + 5)`；若 child 在 SIGKILL grace 後仍 timeout，舊碼直接 `pass`。
+
+**根因**：timeout path 最終仍要回 `TIMEOUT_KILLED_SENTINEL` 並走 no-retry hang 分類，這個 fail-open 行為正確；但「SIGKILL 後仍無法 reap」代表 process group / wait 狀態異常，若靜默吞掉，後續只能看到一般 killed_timeout，看不到 hang cleanup 自身也降級。
+
+**解決方法**：第二次 `TimeoutExpired` 時新增 `LOG.warning("worker attempt still alive after SIGKILL grace ...")`，不改 outcome / retry 行為。新增 regression test 用 fake stuck process 模擬兩次 timeout，確認 warning、kill call 與 sentinel 回傳。
+
 ## 2026-06-23 dispatch supervisor alert temp cleanup 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/alerts.py::_send()`：alert body 會先寫 temporary markdown 檔，再呼叫 `volpred ops send-alert`；finally 區塊若 `os.unlink(tmp.name)` 失敗，舊碼直接 `pass`。

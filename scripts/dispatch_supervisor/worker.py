@@ -193,7 +193,11 @@ def _run_one_attempt(
         try:
             proc.wait(timeout=GRACE_PERIOD_S + 5)
         except subprocess.TimeoutExpired:
-            pass  # child stuck past SIGKILL grace — still a hang
+            LOG.warning(
+                "worker attempt=%d still alive after SIGKILL grace pgid=%d",
+                attempt,
+                pgid,
+            )
         duration = time.time() - started
         return TIMEOUT_KILLED_SENTINEL, duration
     duration = time.time() - started

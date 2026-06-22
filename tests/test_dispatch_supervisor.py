@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import resource
+import subprocess
 from pathlib import Path
 
 from scripts.dispatch_supervisor import health, scheduler, state, supervisor, worker
@@ -323,6 +325,48 @@ def test_classify_timeout_sentinel_is_hang() -> None:
     # Must NOT be misread as success despite being negative (sentinel uses
     # -1000, far outside any real POSIX status range).
     assert worker.TIMEOUT_KILLED_SENTINEL != 0
+
+
+def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
+    tmp_path: Path,
+    monkeypatch,
+    caplog,
+) -> None:
+    class StuckProc:
+        pid = 123
+
+        def wait(self, timeout=None):
+            raise subprocess.TimeoutExpired(cmd="claude", timeout=timeout)
+
+    kills: list[int] = []
+    begin_calls: list[dict] = []
+
+    monkeypatch.setattr(worker, "_spawn", lambda **kwargs: StuckProc())
+    monkeypatch.setattr(worker.os, "getpgid", lambda pid: 456)
+    monkeypatch.setattr(worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(
+        worker.state,
+        "begin_fire",
+        lambda **kwargs: begin_calls.append(kwargs),
+    )
+
+    with caplog.at_level(logging.WARNING, logger=worker.__name__):
+        exit_code, duration = worker._run_one_attempt(
+            prompt_text="prompt",
+            model=worker.OPUS_MODEL,
+            timeout_s=1,
+            log_path=tmp_path / "worker.log",
+            attempt=1,
+            schedule_id="hourly_dispatch",
+            state_path=tmp_path / "dispatch_state.json",
+            claude_bin="/tmp/claude",
+        )
+
+    assert exit_code == worker.TIMEOUT_KILLED_SENTINEL
+    assert duration >= 0
+    assert kills == [456]
+    assert begin_calls and begin_calls[0]["pid"] == 123
+    assert "still alive after SIGKILL grace" in caplog.text
 
 
 def test_worker_timeout_path_short_circuits_retry(tmp_path: Path, monkeypatch) -> None:
