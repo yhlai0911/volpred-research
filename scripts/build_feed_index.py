@@ -86,7 +86,12 @@ def _jq_stream() -> list[dict[str, Any]]:
             continue
         try:
             records.append(json.loads(line))
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as exc:
+            print(
+                "[feed-index] WARN jq output JSON line parse failed; skipping "
+                f"line={line[:200]!r} error={type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
             continue
     return records
 

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 build_feed_index jq output 壞行被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/build_feed_index.py::_jq_stream()`：`jq -c` 串流出的單行 JSON 若解析失敗會直接 `continue`。index build 繼續是對的，但 output 少一篇 metadata 時看不出是 jq output 壞行、資料格式異常，還是原本就沒有該篇。
+
+**根因**：feed index builder 為了避免單筆 metadata 異常中斷整份 index，採逐行容錯；但舊寫法把容錯寫成 silent skip，讓 daily index cron 的資料缺口不可觀察。
+
+**解決方法**：單行 JSON parse failure 時輸出 `[feed-index] WARN jq output JSON line parse failed; skipping`，包含截斷後壞行與 exception，原本跳過壞行、保留其他 records 的行為不變。新增 regression test 用 fake jq output 覆蓋一好一壞兩行。
+
 ## 2026-06-22 generate_handoff agent receipt 壞 JSON 被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_handoff.py::_active_agents()`：`storage/ops/agents/*.json` 壞 JSON 時直接 `continue`。handoff 仍會產生，但 slot 占用與進行中 agent 可能被低估，cron log 看不出是 agent receipt 壞掉。
