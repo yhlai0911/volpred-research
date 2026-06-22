@@ -705,6 +705,14 @@ class Publisher:
         for _m in _re.findall(r'[Kk]\d{2,}[a-z]?', f"{title} {description or ''}"):
             new_refs.add('K' + _m[1:])
 
+        # daily_digest 是 meta-curation：它本來就會引用同主題的多篇舊文，必然與被策展
+        # 文章共享 experiment_refs / 標題主題 / narrative arc / entities。對它套用 dup
+        # gate 是 false positive（2026-06-23：MOVE-VIX digest 被自己 curate 的來源文章
+        # mile_671d4c75 判為 narrative-arc dup 而擋下）。比照 _infer_audience 對 daily_digest
+        # 的豁免，這裡也整體豁免三個 dup gate。digest 之間的「同專題重出」改由 daily_digest
+        # 自身的 theme-rotation / 主線程選題判斷把關，不靠這組為研究文章設計的 gate。
+        _is_digest = str((details or {}).get('content_type') or '') == 'daily_digest'
+
         # --- HARD BLOCK same-experiment-ref recycle (2026-06-19 K1054 ghost
         # incident). mile_bb520db8 byte-for-byte re-published mile_c481c8cf —
         # both K1054, both 'descriptive' (so arc gate skipped them), titles only
@@ -713,7 +721,7 @@ class Publisher:
         # NON-retracted article with the same audience already covers this K.
         # Skips retracted/unpublished (those were intentionally pulled — a
         # deliberate republish is allowed). Override with details['dup_waiver'].
-        if new_refs and not (details or {}).get('dup_waiver'):
+        if new_refs and not (details or {}).get('dup_waiver') and not _is_digest:
             inferred_aud = _infer_audience(title, description or '', tags or [])
             for existing in feed:
                 if existing.get('status') in ('unpublished', 'retracted'):
@@ -735,7 +743,7 @@ class Publisher:
                           f"Set details['dup_waiver'] to override or use a different audience.")
                     return existing.get('id')
 
-        if not (details or {}).get('dup_waiver'):
+        if not (details or {}).get('dup_waiver') and not _is_digest:
             cutoff_dup = datetime.now(timezone.utc) - timedelta(days=14)
             for s in similar:
                 existing = next((a for a in feed if a.get('id') == s['id']), None)
@@ -760,7 +768,7 @@ class Publisher:
         # entities + same conclusion class is a duplicate to the reader even
         # with ~0 title overlap and different experiment refs. 90-day window.
         # Override with details['dup_waiver'] for a genuinely new angle.
-        if not (details or {}).get('dup_waiver'):
+        if not (details or {}).get('dup_waiver') and not _is_digest:
             try:
                 from volpred.publisher.arc_dedup import find_arc_duplicates
                 arc_dups = find_arc_duplicates(
