@@ -541,7 +541,13 @@ def _iter_managed_event_dates(existing: list[dict]) -> set[tuple[str, date]]:
                     continue
                 try:
                     managed.add((event_type, date.fromisoformat(str(event_date_raw))))
-                except ValueError:
+                except ValueError as exc:
+                    _warn_task_generator(
+                        "runtime event_date parse failed; skipping managed event "
+                        f"value={event_date_raw!r}",
+                        RUNTIME_SCHEDULES,
+                        exc,
+                    )
                     continue
 
     for task in existing:

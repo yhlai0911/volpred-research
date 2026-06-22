@@ -64,6 +64,43 @@ def test_iter_managed_event_dates_warns_on_invalid_runtime_schedules(
     assert "JSONDecodeError" in captured.err
 
 
+def test_iter_managed_event_dates_warns_on_bad_runtime_event_date(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    runtime_schedules.write_text(
+        json.dumps(
+            {
+                "event_jobs": {
+                    "items": [
+                        {
+                            "id": "bad-date",
+                            "event_key": "FOMC_2026_bad",
+                            "task_template": {
+                                "payload_patch": {
+                                    "event_type": "FOMC",
+                                    "event_date": "not-a-date",
+                                }
+                            },
+                        }
+                    ]
+                }
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(MODULE, "RUNTIME_SCHEDULES", runtime_schedules)
+
+    managed = MODULE._iter_managed_event_dates([])
+
+    assert managed == set()
+    captured = capsys.readouterr()
+    assert "[task_generator_v2] WARN runtime event_date parse failed; skipping managed event" in captured.err
+    assert "not-a-date" in captured.err
+    assert "runtime_schedules.json" in captured.err
+
+
 def test_k_ids_with_feed_articles_warns_on_grep_failure(tmp_path, monkeypatch, capsys) -> None:
     feed = tmp_path / "feed.json"
     feed.write_text("[]", encoding="utf-8")

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 task_generator_v2 runtime event_date parse 失敗被靜默略過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::_iter_managed_event_dates()`：`config/runtime_schedules.json` 的 event job `event_date` 若是壞日期，舊碼直接 `continue`，沒有任何 warning。
+
+**根因**：legacy event calendar 與 runtime_schedules 會用 managed event set 做去重，避免 FOMC/CPI/NFP 任務重複入池。壞 event_date 時跳過該 managed event 可讓 generator 繼續，但靜默跳過會讓操作者看不出事件去重訊號不完整，後續可能重複產生 event_article 任務。
+
+**解決方法**：runtime event_date parse 失敗時改用 `_warn_task_generator()` 輸出 `[task_generator_v2] WARN runtime event_date parse failed; skipping managed event ...` 到 stderr，原本跳過該 event 的 fallback 行為不變。新增 regression test 覆蓋壞 event_date 時 managed set 回空且有 warning。
+
 ## 2026-06-23 task_generator_v2 paper tex TODO 掃描讀取失敗被靜默排除
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::generate_paper_body_tasks()`：掃描 `paper/*/main*.tex` TODO / placeholder 時，單一 tex 檔讀取失敗會直接 `continue`，沒有任何 warning。
