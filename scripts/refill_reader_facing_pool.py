@@ -144,7 +144,12 @@ def refill_event_candidates(*, horizon_days: int = 14) -> dict[str, Any]:
             continue
         try:
             event_date = datetime.fromisoformat(str(event_date_raw)).date()
-        except ValueError:
+        except ValueError as exc:
+            _warn_refill_reader(
+                f"event_date parse failed; skipping event item id={item.get('id')} raw={event_date_raw!r}",
+                RUNTIME_SCHEDULES,
+                exc,
+            )
             skipped.append({"id": str(item.get("id")), "reason": "bad_event_date"})
             continue
         delta_days = (event_date - now.astimezone(LOCAL_TZ).date()).days
@@ -155,8 +160,14 @@ def refill_event_candidates(*, horizon_days: int = 14) -> dict[str, Any]:
         if not_before_raw:
             try:
                 not_before_dt = datetime.fromisoformat(str(not_before_raw))
-            except ValueError:
-                not_before_dt = None
+            except ValueError as exc:
+                _warn_refill_reader(
+                    f"not_before parse failed; skipping event item id={item.get('id')} raw={not_before_raw!r}",
+                    RUNTIME_SCHEDULES,
+                    exc,
+                )
+                skipped.append({"id": str(item.get("id")), "reason": "bad_not_before"})
+                continue
             if not_before_dt is not None:
                 if not_before_dt.tzinfo is None:
                     not_before_dt = not_before_dt.replace(tzinfo=LOCAL_TZ)
