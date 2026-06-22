@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 content question link side-effect 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/content.py`：release pool 發布文章後 `_mark_questions_answered_on_publish()` 失敗會回 0，unpublish / cleanup 時 `_cleanup_question_article_links()` 失敗也回 0。發布 / 下架不該被 Supabase question link side-effect 阻塞，但原本看不出是「沒有 linked question」還是「查詢 / 刪除失敗」。
+
+**根因**：content ops 把會員問答 link 維護視為非核心 side effect，正確地不阻塞內容發布；但缺少 warning 讓關聯資料漂移不可觀察，和近期 question ops silent failure 類 incident 同型。
+
+**解決方法**：新增 `_warn_question_link_side_effect()`；mark answered 與 cleanup 失敗都輸出 `[content_question_links] WARN ...`，包含 article slug 與 exception，原本回 0 / 不阻塞行為不變。新增 regression tests 覆蓋 lookup failure 與 delete failure。
+
 ## 2026-06-22 content_release_settings Supabase fallback 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/content.py` 的 release settings 路徑：首次讀 local settings 不存在時，Supabase `content_release_settings` read 失敗會直接用 defaults；更新 local settings 後 Supabase patch 失敗只回 `False`。兩者保持 release pool 不阻塞是對的，但 cron/stdout 看不出 local/default fallback 的原因。

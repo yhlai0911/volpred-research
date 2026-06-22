@@ -109,6 +109,13 @@ def _warn_release_settings(message: str, exc: Exception) -> None:
     )
 
 
+def _warn_question_link_side_effect(message: str, article_slug: str, exc: Exception) -> None:
+    print(
+        f"[content_question_links] WARN {message}: "
+        f"article_slug={article_slug} error={type(exc).__name__}: {exc}"
+    )
+
+
 def _derived_last_released_at_from_feed(storage_dir: str = "storage") -> str | None:
     """Return the latest published_at among items released BY release_pool.
 
@@ -1265,7 +1272,8 @@ def _mark_questions_answered_on_publish(article_slug: str) -> int:
                 })
                 marked += 1
         return marked
-    except Exception:
+    except Exception as exc:
+        _warn_question_link_side_effect("mark answered failed on publish", article_slug, exc)
         return 0
 
 
@@ -1287,7 +1295,8 @@ def _cleanup_question_article_links(article_slug: str) -> int:
             if question_id and _delete_where("question_articles", {"question_id": question_id, "article_id": article_id}):
                 deleted += 1
         return deleted
-    except Exception:
+    except Exception as exc:
+        _warn_question_link_side_effect("cleanup failed", article_slug, exc)
         return 0
 
 
