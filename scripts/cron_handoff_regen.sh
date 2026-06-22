@@ -11,7 +11,10 @@ ulimit -Sn 65536 2>/dev/null || true
 
 echo "=== handoff-regen $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 
-/usr/bin/perl -e 'alarm shift; exec @ARGV' 60 \
+GENERATE_CAP_SEC=180
+CLEANUP_CAP_SEC=60
+
+/usr/bin/perl -e 'alarm shift; exec @ARGV' "$GENERATE_CAP_SEC" \
   /Users/yhlai0911/.local/bin/uv run python /Users/yhlai0911/Desktop/volpred-research/scripts/generate_handoff.py
 RC1=$?
 
@@ -19,9 +22,13 @@ RC1=$?
 # 2h chosen because hourly-dispatch cap = 50min and Codex sessions are
 # usually short-lived in VSCode; a 2h-stuck claim almost certainly = crash
 # or forgotten release rather than legitimate long work.
-/Users/yhlai0911/.local/bin/uv run python /Users/yhlai0911/Desktop/volpred-research/scripts/task_pool_claim.py cleanup --stale-hours 2
+/usr/bin/perl -e 'alarm shift; exec @ARGV' "$CLEANUP_CAP_SEC" \
+  /Users/yhlai0911/.local/bin/uv run python /Users/yhlai0911/Desktop/volpred-research/scripts/task_pool_claim.py cleanup --stale-hours 2
 RC2=$?
 
-EXIT_CODE=$((RC1 + RC2))
+EXIT_CODE=0
+if [[ "$RC1" -ne 0 || "$RC2" -ne 0 ]]; then
+  EXIT_CODE=1
+fi
 echo "=== handoff-regen end $(date '+%Y-%m-%d %H:%M:%S %Z') (rc1=$RC1 rc2=$RC2 exit=$EXIT_CODE) ==="
 echo "=== [handoff_regen] exit $EXIT_CODE at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 handoff_regen cleanup 無 timeout 導致 LaunchAgent 卡死
+
+**問題**：hourly tick 讀到的 `storage/ops/handoff_latest.md` 仍停在 2026-06-22 20:50，和 2026-06-23 現況不符；`~/.volpred/logs/handoff_regen.log` 最後一筆是 21:50，`generate_handoff.py` 被 60s alarm kill 後沒有 end banner。`launchctl print gui/501/com.volpred.handoff-regen` 顯示 job 仍 running，process tree 顯示 `task_pool_claim.py cleanup --stale-hours 2` 已卡住超過 2 小時。
+
+**根因**：`scripts/cron_handoff_regen.sh` 只對 `generate_handoff.py` 加 60s alarm，後續 cleanup 沒有 wall-clock cap。只要 cleanup 因檔案鎖或 I/O 卡住，LaunchAgent 同 label 會一直維持 running，後續每小時 :50 不會重新 fire，handoff snapshot 就停在舊版本。
+
+**解決方法**：`generate_handoff.py` cap 放寬到 180s，cleanup 加 60s cap，並保留 `rc1/rc2` end banner；任一子步驟非 0 時 wrapper exit=1，避免加總 exit code wrap。同步 live TCC copy `~/.volpred/bin/cron_handoff_regen.sh`，終止已卡住的舊 cleanup，手動跑新 wrapper 驗證 handoff 可刷新並正常退出。
+
 ## 2026-06-22 email_notifier env 檔讀取失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/publisher/email_notifier.py::_load_env_file()`：`.env` / `.env.local` / frontend `.env.local` 路徑存在但讀取失敗時直接 return，沒有任何 warning。
