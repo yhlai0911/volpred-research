@@ -124,12 +124,21 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
                         f"{t.get('id') or '(missing-id)'}: {completed_at!r} ({exc.__class__.__name__})"
                     )
 
+    invalid_priority_ids: set[str] = set()
+
     def _prio_key(x: dict[str, Any]) -> tuple[int, str]:
         p = x.get("priority")
+        task_id = x.get("id") or "(missing-id)"
         try:
-            return (int(p), x.get("id") or "")
-        except (TypeError, ValueError):
-            return (9, x.get("id") or "")
+            return (int(p), task_id)
+        except (TypeError, ValueError) as exc:
+            if task_id not in invalid_priority_ids:
+                invalid_priority_ids.add(task_id)
+                warnings.append(
+                    "invalid priority for pending task "
+                    f"{task_id}: {p!r} ({exc.__class__.__name__}); treating as P9"
+                )
+            return (9, task_id)
     pending_top.sort(key=_prio_key)
     codex_eligible_pending.sort(key=_prio_key)
     codex_skip_pending.sort(key=_prio_key)

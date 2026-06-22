@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_handoff pending priority parse 失敗被靜默降級
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_handoff.py::_task_pool_snapshot()`：pending task 的 `priority` 若不是可轉成整數的值，舊碼會靜默把排序 key 當 P9，handoff 沒有說明 metadata 壞掉。
+
+**根因**：pending top 8 需要容忍單一任務 priority 壞值，避免 handoff regen crash；但靜默降級會讓操作者只看到任務排序被往後推，無法分辨是低優先序還是 task metadata 格式錯誤。
+
+**解決方法**：保留「壞 priority 當 P9 排序」的容錯行為，但在 task pool warnings 顯示 `invalid priority for pending task ...; treating as P9`。新增 regression test 覆蓋壞 priority 會出現在 handoff warnings。
+
 ## 2026-06-23 task_generator_v2 event calendar date parse 失敗被靜默略過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::generate_event_article_tasks()`：硬編碼 `EVENT_CALENDAR` 若含壞日期，舊碼直接 `continue`，沒有任何 warning。

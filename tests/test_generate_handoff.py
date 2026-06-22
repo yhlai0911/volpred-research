@@ -128,6 +128,30 @@ def test_handoff_surfaces_invalid_completed_at_warning(tmp_path, monkeypatch) ->
     assert "not-a-date" in handoff
 
 
+def test_handoff_surfaces_invalid_pending_priority_warning(tmp_path, monkeypatch) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(
+        tmp_path,
+        [
+            {
+                "id": "bad_priority",
+                "status": "pending",
+                "task_type": "platform_ops",
+                "priority": "urgent",
+                "title": "Bad priority task",
+            }
+        ],
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "**task pool warnings" in handoff
+    assert "invalid priority for pending task bad_priority" in handoff
+    assert "urgent" in handoff
+    assert "treating as P9" in handoff
+
+
 def test_handoff_accepts_naive_completed_at_without_warning(tmp_path, monkeypatch) -> None:
     module = _load_generate_handoff()
     _write_fixture_files(
