@@ -67,8 +67,8 @@ JOBS = {
 _SLACK_HOURS = 2.0
 
 
-def _warn_cron_review(message: str, path: Path, exc: Exception | None = None) -> None:
-    suffix = f": path={path}"
+def _warn_cron_review(message: str, path: Path | None = None, exc: Exception | None = None) -> None:
+    suffix = f": path={path}" if path is not None else ""
     if exc is not None:
         suffix += f" error={type(exc).__name__}: {exc}"
     print(f"[cron_review] WARN {message}{suffix}", file=sys.stderr)
@@ -196,7 +196,11 @@ def expected_prev_fire(now: datetime, cron_expr: str | None) -> datetime | None:
         if prev.tzinfo is None:
             prev = prev.replace(tzinfo=now.tzinfo)
         return prev
-    except Exception:
+    except Exception as exc:
+        _warn_cron_review(
+            f"cron schedule evaluation failed; using max-gap fallback cron_expr={cron_expr!r}",
+            exc=exc,
+        )
         return None
 
 

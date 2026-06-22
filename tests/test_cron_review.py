@@ -97,6 +97,17 @@ def test_expected_prev_fire_respects_weekday_restricted_collect_us_cron():
     assert prev_fire == datetime(2026, 5, 23, 7, 3, tzinfo=TPE)  # Saturday
 
 
+def test_expected_prev_fire_warns_when_cron_expr_invalid(capsys):
+    now = datetime(2026, 5, 25, 22, 0, tzinfo=TPE)
+
+    prev_fire = expected_prev_fire(now, "not a cron")
+
+    assert prev_fire is None
+    err = capsys.readouterr().err
+    assert "[cron_review] WARN cron schedule evaluation failed; using max-gap fallback" in err
+    assert "cron_expr='not a cron'" in err
+
+
 def test_is_stale_does_not_false_alarm_on_weekend_gap_for_collect_us():
     now = datetime(2026, 5, 25, 22, 0, tzinfo=TPE)  # Sunday night Taipei
     last_end = datetime(2026, 5, 23, 8, 0, tzinfo=TPE)  # Saturday after run

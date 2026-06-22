@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 cron_review schedule-aware fallback 靜默退回 max-gap
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著 cron review 可觀察性檢查到 `scripts/cron_review.py::expected_prev_fire()`：croniter import / cron expression parse 失敗時直接回 `None`，`is_stale()` 會安靜退回舊的 max-gap 判斷。
+
+**根因**：max-gap fallback 是必要的 fail-open 行為，但 silent fallback 會讓操作者看不出 schedule-aware 判斷失效，可能把 weekday-only cron 的結果誤讀成已按 cron spec 檢查。
+
+**解決方法**：cron schedule evaluation 失敗時輸出 `[cron_review] WARN cron schedule evaluation failed; using max-gap fallback ...`，原本回 `None` 與 fallback 語義不變。新增 regression test 覆蓋 invalid cron expression 會 warning。
+
 ## 2026-06-23 indicator_arena review-due 壞 resolve_after 被靜默跳過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著 2026-06-22 silent fallback 類型掃描到 `src/volpred/indicators/cli.py::review_due()`：signal 的 `resolve_after` 若不可 parse，CLI 直接跳過該 signal，沒有 warning。
