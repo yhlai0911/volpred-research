@@ -43,6 +43,11 @@ PROMPT = """你是 VolPred 波動率研究平台的選題助手。請列出「�
 不要解釋，不要額外文字，只回 JSON 陣列。"""
 
 
+def _warn_scan(message: str, exc: Exception | None = None) -> None:
+    suffix = f": {type(exc).__name__}: {exc}" if exc is not None else ""
+    print(f"[scan_trending_agy] WARN {message}{suffix}", file=sys.stderr)
+
+
 def _extract_json(text: str):
     """從 agy 輸出（可能含 ```json fence 或前後散文）抽出第一個 JSON 陣列/物件。"""
     # 去 code fence
@@ -73,11 +78,23 @@ def main() -> int:
         proc = subprocess.run([AGY, "-p", PROMPT], capture_output=True, text=True, timeout=180)
     except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
         # 失敗 = 印空候選（best-effort，refill 視為 skip 不報錯）
-        print(json.dumps({"candidates": [], "error": str(exc)[:200]}))
+        _warn_scan("agy command failed before producing output", exc)
+        print(json.dumps({"candidates": [], "error": type(exc).__name__, "detail": str(exc)[:200]}))
+        return 0
+
+    if proc.returncode != 0:
+        _warn_scan(f"agy command exited nonzero returncode={proc.returncode}")
+        print(json.dumps({
+            "candidates": [],
+            "error": "agy_exit_nonzero",
+            "returncode": proc.returncode,
+            "stderr_tail": (proc.stderr or "")[-200:],
+        }, ensure_ascii=False))
         return 0
 
     parsed = _extract_json(proc.stdout or "")
     if parsed is None:
+        _warn_scan("agy output did not contain JSON candidates")
         print(json.dumps({"candidates": [], "error": "no_json_from_agy",
                           "raw_tail": (proc.stdout or "")[-200:]}))
         return 0

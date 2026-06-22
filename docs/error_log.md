@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 scan_trending_agy agy 失敗被靜默轉空候選
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/scan_trending_agy.py`：`agy` CLI 若 exit nonzero，舊碼不檢查 return code，直接嘗試解析 stdout；若 stdout 無 JSON，只回 `{"candidates":[],"error":"no_json_from_agy"}`，cron log 看不出是 auth / command failure 還是模型輸出格式漂移。
+
+**根因**：trending 掃描 stdout 是 refill pipeline 的 JSON contract，因此失敗時需要保留空候選容錯；但 command-level failure 與 content-level no-json 混成同一條靜默路徑，會讓 reader-facing 補池長期沒有 trending 候選卻缺少可操作診斷。
+
+**解決方法**：`agy` timeout / missing binary / nonzero exit 改為 fail-closed 空候選但輸出 `[scan_trending_agy] WARN ...` 到 stderr；nonzero exit 的 JSON payload 加入 `returncode` 與 `stderr_tail`，no-json 也輸出 warning。新增 regression tests 覆蓋 nonzero exit 與 no-json 輸出格式漂移。
+
 ## 2026-06-23 reader_facing_refill event timestamp 壞值靜默降級
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/refill_reader_facing_pool.py::refill_event_candidates()`：runtime event job 的 `event_date` parse 失敗時只記 skipped，沒有 warning；`not_before` parse 失敗時更會把 gate 當成不存在，後續可能提前 materialize event_article task。
