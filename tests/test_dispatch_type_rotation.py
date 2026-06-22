@@ -143,6 +143,20 @@ def test_load_recent_task_type_counts_warns_on_invalid_work_log(tmp_path, monkey
     assert "JSONDecodeError" in captured.err
 
 
+def test_load_recent_task_type_counts_warns_on_non_list_work_log(tmp_path, monkeypatch, capsys):
+    work_log = tmp_path / "work_log.json"
+    work_log.write_text('{"items":[]}', encoding="utf-8")
+    monkeypatch.setattr(dispatch, "WORK_LOG", work_log)
+
+    counts = dispatch.load_recent_task_type_counts()
+
+    assert counts == Counter()
+    captured = capsys.readouterr()
+    assert "[dispatch] WARN work_log is not a list; treating recent task type counts as empty" in captured.err
+    assert "work_log.json" in captured.err
+    assert "type=dict" in captured.err
+
+
 def test_build_report_exposes_disambiguated_pending_summary(monkeypatch):
     tasks = [
         _task("platform-1", "platform_ops", priority=3),

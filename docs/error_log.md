@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 continue_task_dispatch work_log 非 list 被靜默當空 rotation
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::load_recent_task_type_counts()`：`storage/work_log.json` 可解析但頂層不是 list 時直接回空 `Counter()`。dispatcher 繼續是對的，但 schema drift 會讓 task_type rotation 失效且無診斷。
+
+**根因**：rotation 訊號是非阻塞排序輔助，但舊寫法只檢查型別後安靜降級，把 work_log schema 問題和「近期沒有工作」混在一起。
+
+**解決方法**：work_log 頂層非 list 時輸出 `[dispatch] WARN work_log is not a list; treating recent task type counts as empty`，原本回空 Counter 的行為不變。新增 regression test 覆蓋 dict payload。
+
 ## 2026-06-22 continue_task_dispatch work_log 讀取失敗被靜默當空 rotation
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::load_recent_task_type_counts()`：`storage/work_log.json` 已存在但 JSON 壞掉或讀取失敗時直接回空 `Counter()`。dispatcher 繼續是對的，但 same-priority task_type rotation 會失去最近工作分布，且看不出是 work_log 壞掉。

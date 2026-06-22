@@ -136,6 +136,10 @@ def load_recent_task_type_counts(limit: int = 10) -> Counter:
         )
         return Counter()
     if not isinstance(data, list):
+        _warn_dispatch(
+            "work_log is not a list; treating recent task type counts as empty "
+            f"path={WORK_LOG} type={type(data).__name__}"
+        )
         return Counter()
 
     recent = data[-limit:]
