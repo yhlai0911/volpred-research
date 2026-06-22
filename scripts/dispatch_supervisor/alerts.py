@@ -68,8 +68,8 @@ def _send(level: str, title: str, body_md: str) -> int:
     finally:
         try:
             os.unlink(tmp.name)
-        except OSError:
-            pass
+        except OSError as exc:
+            LOG.warning("alert temp file cleanup failed: path=%s error=%s", tmp.name, exc)
 
 
 def send_auth_alert(*, log_tail: str = "", state_path: Path = state.STATE_PATH) -> bool:

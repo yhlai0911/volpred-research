@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 dispatch supervisor alert temp cleanup 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/alerts.py::_send()`：alert body 會先寫 temporary markdown 檔，再呼叫 `volpred ops send-alert`；finally 區塊若 `os.unlink(tmp.name)` 失敗，舊碼直接 `pass`。
+
+**根因**：alert 發送不應因 temp cleanup 失敗而被判失敗，fail-open 是合理的；但 cleanup failure 若完全靜默，會讓 `/tmp` 殘留或權限/I/O 問題不可追蹤。alert path 本身就是事故通報管線，不應在自身降級時無診斷。
+
+**解決方法**：temp file cleanup 失敗時改為 `LOG.warning("alert temp file cleanup failed ...")`，`_send()` 回傳語意不變。新增 regression test mock `os.unlink` 失敗，確認 warning 產生且 alert subprocess 成功回傳仍維持 `0`。
+
 ## 2026-06-23 dispatch_state 壞檔 reset 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py`：`dispatch_state.json` 壞 JSON 或 schema version 不符時，讀寫路徑會 fail-open 回 `_empty_state()`，但舊碼沒有任何 warning。
