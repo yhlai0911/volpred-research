@@ -35198,7 +35198,7 @@
     "title": "Paper review (Codex 24h-rule): K1512：Double-ML 因子檢定顯示 ETF 層級沒有確認的非零效應",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_74822866 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_74822866",
@@ -35206,7 +35206,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-22T13:48:48+00:00"
+    "created_at": "2026-06-22T13:48:48+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-22T15:06:01.376732+00:00",
+    "claim_session_id": "dd376bbafbc8",
+    "started_at": "2026-06-22T15:06:09.140280+00:00",
+    "completed_at": "2026-06-22T15:06:52.238168+00:00",
+    "result": "Codex 24h article review PASS. K1512 research article mile_74822866 matches canonical DML/NW/Bonferroni source, preserves lookahead and term-spread caveats, and makes no DM/Harvey or broad factor-investing overclaim. Review artifact: storage/reviews/codex_24h/mile_74822866_review.md"
   },
   {
     "id": "paper_review_mile_476d20ea",
