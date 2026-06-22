@@ -34,6 +34,19 @@ def test_arch_forecast_alignment_rule_is_documented() -> None:
     assert missing == []
 
 
+def test_k445_source_uses_target_aligned_arch_forecasts() -> None:
+    source = (ROOT / "experiments" / "k445" / "k445_btc_leverage.py").read_text(encoding="utf-8")
+    readme = (ROOT / "experiments" / "k445" / "README.md").read_text(encoding="utf-8")
+
+    assert "def target_aligned_variance_forecast" in source
+    assert 'align="target"' in source
+    assert "target_aligned_variance_forecast(res, oos_start)" in source
+    assert "forecast(horizon=1, start=oos_start, reindex=False)" not in source
+    assert "canonical_qlike(r_sq, f_var)" in source
+    assert "canonical_qlike_pointwise(" in source
+    assert "source-review FAIL pending target-aligned rerun" in readme
+
+
 def test_qlike_pointwise_orientation_rule_is_documented() -> None:
     section = _experiments_rule_section("### QLIKE / DM pointwise loss 必須用 actual over predicted")
 

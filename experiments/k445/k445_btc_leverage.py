@@ -25,6 +25,11 @@ from scipy import stats
 from statsmodels.stats.diagnostic import het_arch, acorr_ljungbox
 from statsmodels.tsa.stattools import adfuller
 
+from volpred.stats.model_evaluation import (
+    qlike as canonical_qlike,
+    qlike_pointwise as canonical_qlike_pointwise,
+)
+
 warnings.filterwarnings("ignore")
 
 RESULTS = {
@@ -509,6 +514,17 @@ if pre_g is not None and post_g is not None:
 
 RESULTS["structural_break"] = subperiod_results
 
+
+def target_aligned_variance_forecast(result, start: str) -> pd.DataFrame:
+    """Return arch one-step variance forecasts aligned to target return dates."""
+    return result.forecast(
+        horizon=1,
+        start=start,
+        reindex=False,
+        align="target",
+    ).variance.dropna()
+
+
 # ============================================================
 # Step 6: OOS Forecasting Comparison
 # ============================================================
@@ -556,9 +572,8 @@ for name, spec in oos_models.items():
         # Fit on full sample, then use fixed-window forecasting
         res = am.fit(disp="off", last_obs=oos_start, options={"maxiter": 500})
 
-        # One-step-ahead forecasts
-        forecasts = res.forecast(horizon=1, start=oos_start, reindex=False)
-        var_forecast = forecasts.variance.dropna()
+        # One-step-ahead forecasts aligned to the target return date.
+        var_forecast = target_aligned_variance_forecast(res, oos_start)
 
         # Align with OOS dates
         common_idx = var_forecast.index.intersection(oos_dates)
@@ -571,7 +586,7 @@ for name, spec in oos_models.items():
         r_sq = realized_sq.loc[common_idx].values.flatten()
 
         # QLIKE loss
-        qlike = np.mean(np.log(f_var) + r_sq / f_var)
+        qlike_loss = canonical_qlike(r_sq, f_var)
 
         # MSE loss (variance)
         mse = np.mean((r_sq - f_var) ** 2)
@@ -585,14 +600,14 @@ for name, spec in oos_models.items():
         r2 = 1 - ss_res / ss_tot
 
         oos_forecasts[name] = {
-            "qlike": float(qlike),
+            "qlike": float(qlike_loss),
             "mse": float(mse),
             "mae": float(mae),
             "mz_r2": float(r2),
             "n_forecasts": int(len(common_idx)),
         }
 
-        print(f"{name:15s}: QLIKE={qlike:.4f}  MSE={mse:.2f}  MAE={mae:.4f}  R2={r2:.4f}  n={len(common_idx)}")
+        print(f"{name:15s}: QLIKE={qlike_loss:.4f}  MSE={mse:.2f}  MAE={mae:.4f}  R2={r2:.4f}  n={len(common_idx)}")
 
     except Exception as e:
         print(f"{name:15s}: FAILED - {e}")
@@ -616,7 +631,7 @@ if valid_oos:
         # Re-compute individual losses for DM test
         am_base = arch_model(returns, vol="GARCH", p=1, o=0, q=1, dist="t", mean="ARX", lags=1)
         res_base = am_base.fit(disp="off", last_obs=oos_start)
-        fc_base = res_base.forecast(horizon=1, start=oos_start, reindex=False).variance.dropna()
+        fc_base = target_aligned_variance_forecast(res_base, oos_start)
 
         am_best = arch_model(
             returns,
@@ -629,13 +644,19 @@ if valid_oos:
             lags=1,
         )
         res_best = am_best.fit(disp="off", last_obs=oos_start)
-        fc_best = res_best.forecast(horizon=1, start=oos_start, reindex=False).variance.dropna()
+        fc_best = target_aligned_variance_forecast(res_best, oos_start)
 
         common = fc_base.index.intersection(fc_best.index).intersection(oos_dates)
         if len(common) > 50:
             r2_common = realized_sq.loc[common].values.flatten()
-            loss_base = np.log(fc_base.loc[common].values.flatten()) + r2_common / fc_base.loc[common].values.flatten()
-            loss_best = np.log(fc_best.loc[common].values.flatten()) + r2_common / fc_best.loc[common].values.flatten()
+            loss_base = canonical_qlike_pointwise(
+                r2_common,
+                fc_base.loc[common].values.flatten(),
+            )
+            loss_best = canonical_qlike_pointwise(
+                r2_common,
+                fc_best.loc[common].values.flatten(),
+            )
 
             d = loss_base - loss_best  # positive means best model is better
             dm_stat = np.mean(d) / (np.std(d, ddof=1) / np.sqrt(len(d)))

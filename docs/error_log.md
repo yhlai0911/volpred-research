@@ -2586,6 +2586,8 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 
 **Lesson / prevention**: For `arch` one-step OOS loss evaluation, use `forecast(..., align='target')` or explicitly shift origin-aligned `h.1` forecasts to the target return date before computing QLIKE/MSE/DM tests. Reviewers should treat same-index comparison of origin-aligned forecasts and realized variance as a potential lookahead/off-by-one error.
 
+**2026-06-22 Codex partial source guard**: `experiments/k445/k445_btc_leverage.py` now routes OOS forecasts through `target_aligned_variance_forecast(... align="target")` and uses canonical `qlike(actual, predicted)` / `qlike_pointwise(actual, predicted)` helpers for OOS loss and DM loss construction. `README.md` now marks v1 as source-review FAIL pending target-aligned rerun. This does **not** rerun or overwrite `k445_btc_leverage_results.json`; charts/results/article language still require a K445 rerun before production citation.
+
 ## 2026-06-17 — K802 article source review FAIL: Basel traffic-light rule and Student-t scaling do not support Trinity PASS
 
 **Symptom**: Published article `mile_cbf8ba62` copied K802 results correctly, but the central narrative said changing GJR VaR from Normal to Student-t/Skewed-t turns the model from Basel yellow to green and achieves Trinity PASS.

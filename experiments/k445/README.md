@@ -1,25 +1,42 @@
-# k445
+# K445 — Bitcoin Inverse Leverage Effect
 
-- Experiment ID: `k445`
-- Status: planning
-- Created At: 2026-04-16T09:39:31.544452+00:00
+**Status: source-review FAIL pending target-aligned rerun.**
 
-## 問題描述
+K445 studies BTC inverse leverage and compares GARCH-family OOS volatility
+forecasts over 2023-2024. The asymmetry/gamma findings remain useful
+diagnostics, but the published OOS model-ranking claim is not source-review
+safe.
 
-- 待補充
+## Source-Review Finding
 
-## 動機
+The 2026-06-16 Codex review found that v1 used `arch` one-step forecasts with
+the default origin alignment and compared them to same-index realized squared
+returns. In `arch`, row `t` under origin alignment is the forecast made at
+origin `t` for target `t+1`; same-index loss evaluation can therefore be
+off-by-one for OOS ranking.
 
-- 待補充
+## Current Source Guard
 
-## 方法
+The script now routes OOS forecasts through:
 
-- 待補充
+```python
+target_aligned_variance_forecast(result, start)
+```
 
-## 預期
+which calls:
 
-- 待補充
+```python
+forecast(..., align="target")
+```
 
-## 結論
+OOS QLIKE and DM pointwise losses use the canonical project helpers:
 
-- 待補充
+- `volpred.stats.model_evaluation.qlike(actual, predicted)`
+- `volpred.stats.model_evaluation.qlike_pointwise(actual, predicted)`
+
+## Required K445 Rerun
+
+- Rerun K445 from source after this target-alignment fix.
+- Regenerate `k445_btc_leverage_results.json` and charts from the rerun.
+- Keep article language conditional until rerun review passes.
+- Do not cite the v1 OOS model-ranking claim as reviewed evidence.
