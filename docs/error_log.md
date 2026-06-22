@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 risk_forecast 非致命 VaR 降級被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/risk_forecast.py`：skewed-t GARCH fit 失敗時直接省略 skew-t VaR 欄位，SPY 的 VIX/GARCH ratio 查詢失敗時直接省略 alert。`storage/risk_forecast.json` 仍會產生，但使用者看不出是模型真的沒有風險訊號，還是輔助模型/資料源降級。
+
+**根因**：風險預測流程正確地避免單一輔助模型阻塞整體 forecast，但舊寫法把「非致命」實作成 silent `pass`，沒有把 skew-t fit failure、`^VIX` 空資料或 fetch failure 寫進 JSON/console。
+
+**解決方法**：新增 `_record_forecast_warning()`，把非致命降級同時印到 stdout 並寫入每個 asset 的 `warnings` 欄位；SPY VIX/GARCH lookup 改由 `_append_spy_vix_garch_alert()` 封裝，空資料與例外都會留下 warning。新增 regression tests 鎖住 warning 結構與 console 訊息。
+
 ## 2026-06-22 daily_update VIX term structure 檢查失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/daily_update.py` 的 VIX/VIX3M term-structure check：`^VIX3M` 讀取、空資料或比值計算失敗時直接 `pass`。daily update 會照常完成，但少掉 backwardation / contango 風險提示，cron log 沒有原因。

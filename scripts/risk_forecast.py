@@ -34,6 +34,59 @@ def get_regime(sigma_ann: float) -> dict:
         return {"level": "extreme", "label": "極端", "color": "red"}
 
 
+def _record_forecast_warning(
+    warnings: list[dict],
+    code: str,
+    message: str,
+    exc: Exception | None = None,
+) -> dict:
+    """Record a non-fatal degradation in both stdout and forecast JSON."""
+    warning = {"code": code, "message": message}
+    console_message = message
+    if exc is not None:
+        warning["error"] = f"{type(exc).__name__}: {exc}"
+        console_message = f"{message}: {warning['error']}"
+    warnings.append(warning)
+    print(f"    ⚠️ {console_message}")
+    return warning
+
+
+def _append_spy_vix_garch_alert(
+    alerts: list[dict],
+    warnings: list[dict],
+    dm: DataManager,
+    ticker: str,
+    sigma_ann: float,
+) -> None:
+    """Append SPY VIX/GARCH alert; record lookup failures instead of hiding them."""
+    if ticker != "SPY":
+        return
+    try:
+        vix_data = dm.get_model_data("^VIX", "2025-01-01", "2026-12-31")
+        if len(vix_data) == 0:
+            _record_forecast_warning(
+                warnings,
+                "vix_garch_lookup_empty",
+                "SPY VIX/GARCH ratio check skipped: ^VIX returned no rows",
+            )
+            return
+        vix_level = float(vix_data.iloc[-1]["close"])
+        vix_garch_ratio = vix_level / (sigma_ann * 100)
+        if vix_garch_ratio > 1.5:
+            alerts.append({
+                "type": "vix_garch_gap",
+                "message": f"VIX/GARCH ratio {vix_garch_ratio:.2f}（>1.5，VaR 可能不可靠）",
+                "severity": "high"
+            })
+    except Exception as exc:
+        _record_forecast_warning(
+            warnings,
+            "vix_garch_lookup_failed",
+            "SPY VIX/GARCH ratio check failed; alert omitted",
+            exc,
+        )
+
+
 def cornish_fisher_quantile(alpha: float, skew: float, excess_kurt: float) -> float:
     """Cornish-Fisher expansion for VaR quantile.
 
@@ -205,6 +258,7 @@ def main():
             last_date = str(data.index[-1].date())
             returns_pct = data["returns"].dropna() * 100
             window = cfg["window"]
+            asset_warnings = []
 
             # Fit GJR-GARCH
             train = returns_pct.iloc[-window:]
@@ -238,8 +292,13 @@ def main():
                 res_skewt = am_skewt.fit(disp="off", show_warning=False)
                 skewt_eta = float(res_skewt.params["eta"])
                 skewt_lam = float(res_skewt.params["lambda"])
-            except Exception:
-                pass  # Fallback: skewt fields won't be in output
+            except Exception as exc:
+                _record_forecast_warning(
+                    asset_warnings,
+                    "skewt_fit_failed",
+                    f"{ticker} skewed-t fit failed; skewt VaR fields omitted",
+                    exc,
+                )
 
             # Multi-horizon VaR/ES (Student-t + CF-VaR + Skewed-t)
             daily = compute_var_es(sigma_daily, horizon=1,
@@ -335,20 +394,7 @@ def main():
                 })
 
             # VIX/GARCH ratio alert (94% of VaR violations occur when ratio > 1.5)
-            if ticker == "SPY":
-                try:
-                    vix_data = dm.get_model_data("^VIX", "2025-01-01", "2026-12-31")
-                    if len(vix_data) > 0:
-                        vix_level = float(vix_data.iloc[-1]["close"])
-                        vix_garch_ratio = vix_level / (sigma_ann * 100)
-                        if vix_garch_ratio > 1.5:
-                            alerts.append({
-                                "type": "vix_garch_gap",
-                                "message": f"VIX/GARCH ratio {vix_garch_ratio:.2f}（>1.5，VaR 可能不可靠）",
-                                "severity": "high"
-                            })
-                except Exception:
-                    pass
+            _append_spy_vix_garch_alert(alerts, asset_warnings, dm, ticker, sigma_ann)
 
             # GARCH params
             params = {k: round(float(v), 6) for k, v in res.params.items()}
@@ -377,6 +423,7 @@ def main():
                 "sigma_vs_5y_avg": round(sigma_vs_avg * 100, 1),
                 "hist_avg_sigma_ann": round(hist_sigma_ann * 100, 1),
                 "alerts": alerts,
+                "warnings": asset_warnings,
                 "model": f"GJR-GARCH(1,1) w={window}",
                 "params": params,
                 "model_note": cfg.get("model_note", ""),
