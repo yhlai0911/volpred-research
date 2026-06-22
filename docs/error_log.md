@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 task_generator_v2 runtime_schedules 讀取失敗被靜默當空 event jobs
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::_iter_managed_event_dates()`：`config/runtime_schedules.json` 已存在但 JSON 壞掉或讀取失敗時直接套 `{}`。event article generator 會繼續是對的，但可能把 canonical event jobs 視為不存在，進而產生重複事件任務。
+
+**根因**：legacy event calendar 需要在 runtime schedule source 短暫故障時不中斷；但舊寫法沒有 warning，讓 schedule source corruption 變成靜默「沒有 canonical schedules」。
+
+**解決方法**：runtime schedules 讀取 / 解析失敗時輸出 `[task_generator_v2] WARN runtime_schedules JSON read failed; treating event schedules as empty`，原本 fail-open 行為不變。新增 regression test 覆蓋壞 JSON。
+
 ## 2026-06-22 task_generator_v2 next_tasks 讀取失敗被靜默當空池
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/task_generator_v2.py::load_next_tasks()`：`storage/next_tasks.json` 已存在但 JSON 壞掉或讀取失敗時直接回 `[]`。task generator 繼續是對的，但會把既有任務池看成空池，可能重複產生任務或錯判 coverage。

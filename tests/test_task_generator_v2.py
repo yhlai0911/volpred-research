@@ -45,6 +45,25 @@ def test_load_next_tasks_warns_on_invalid_json(tmp_path, monkeypatch, capsys) ->
     assert "JSONDecodeError" in captured.err
 
 
+def test_iter_managed_event_dates_warns_on_invalid_runtime_schedules(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    runtime_schedules.write_text("{bad-json", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "RUNTIME_SCHEDULES", runtime_schedules)
+
+    managed = MODULE._iter_managed_event_dates([])
+
+    assert managed == set()
+    captured = capsys.readouterr()
+    assert (
+        "[task_generator_v2] WARN runtime_schedules JSON read failed; "
+        "treating event schedules as empty"
+    ) in captured.err
+    assert "runtime_schedules.json" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
 def test_event_article_skips_runtime_managed_adjacent_fomc_date(tmp_path, monkeypatch) -> None:
     runtime_schedules = tmp_path / "runtime_schedules.json"
     runtime_schedules.write_text(

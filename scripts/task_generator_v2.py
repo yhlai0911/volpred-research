@@ -511,7 +511,12 @@ def _iter_managed_event_dates(existing: list[dict]) -> set[tuple[str, date]]:
     if RUNTIME_SCHEDULES.exists():
         try:
             payload = json.loads(RUNTIME_SCHEDULES.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
+        except (json.JSONDecodeError, OSError) as exc:
+            _warn_task_generator(
+                "runtime_schedules JSON read failed; treating event schedules as empty",
+                RUNTIME_SCHEDULES,
+                exc,
+            )
             payload = {}
         items = ((payload.get("event_jobs") or {}).get("items") or [])
         if isinstance(items, list):
