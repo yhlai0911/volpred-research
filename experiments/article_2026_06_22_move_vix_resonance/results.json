@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "data_source": "Yahoo Finance (^MOVE, ^VIX)",
+    "date_range": "2020-01-02 to 2026-06-18",
+    "N_obs": 1613,
+    "seed": 42
+  },
+  "rolling_corr_60d": {
+    "most_recent": 0.5017,
+    "hist_median": 0.4126,
+    "hist_p75": 0.4854,
+    "hist_p90": 0.5749,
+    "last_21d_avg": 0.5723,
+    "percentile_of_recent": 78.5
+  },
+  "move_vix_ratio": {
+    "most_recent": 3.99,
+    "hist_median": 4.62,
+    "hist_p10": 1.98,
+    "hist_p75": 6.1,
+    "hist_p90": 7.62,
+    "percentile_of_recent": 38.0
+  },
+  "resonance_both_z_gt1": {
+    "full_sample_rate": 0.0806,
+    "last_90d_rate": 0.0556,
+    "last_90d_episodes": 5
+  },
+  "current_levels": {
+    "MOVE": 65.4,
+    "VIX": 16.4
+  },
+  "period_summary_table": [
+    {
+      "period": "2020 (COVID)",
+      "avg_corr": 0.332,
+      "avg_MOVE_VIX_ratio": 2.2,
+      "resonance_rate": 0.0
+    },
+    {
+      "period": "2022 (rate hike cycle)",
+      "avg_corr": 0.391,
+      "avg_MOVE_VIX_ratio": 4.77,
+      "resonance_rate": 0.349
+    },
+    {
+      "period": "2023 (plateau)",
+      "avg_corr": 0.407,
+      "avg_MOVE_VIX_ratio": 7.36,
+      "resonance_rate": 0.0
+    },
+    {
+      "period": "2024",
+      "avg_corr": 0.36,
+      "avg_MOVE_VIX_ratio": 6.82,
+      "resonance_rate": 0.072
+    },
+    {
+      "period": "2025",
+      "avg_corr": 0.476,
+      "avg_MOVE_VIX_ratio": 4.77,
+      "resonance_rate": 0.056
+    },
+    {
+      "period": "2026 recent 90d",
+      "avg_corr": 0.604,
+      "avg_MOVE_VIX_ratio": 3.81,
+      "resonance_rate": 0.056
+    }
+  ]
+}
