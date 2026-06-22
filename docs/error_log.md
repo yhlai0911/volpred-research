@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 ops summaries token daily report date parse 失敗被靜默略過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/summaries.py::_iter_daily_reports()`：`storage/reports/token_usage/daily_*.json` 檔名日期若無法 parse，舊碼直接 `continue`，沒有 warning。
+
+**根因**：token usage summary 需要容忍單一壞檔名，避免 dashboard / maintenance summary 中斷；但靜默略過會讓 `daily_reports_available` 與 rolling window 少算，操作者看不出是檔名格式壞掉，而不是沒有該日報告。
+
+**解決方法**：保留壞檔名跳過該 daily report 的容錯行為，但新增 `[ops_summaries] WARN token usage daily report date parse failed; skipping ...` 到 stderr，包含 path 與例外類型。新增 regression test 確認壞檔不進 summary 且 warning 出現。
+
 ## 2026-06-23 audit_topic_clusters feed timestamp parse 失敗被靜默略過
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/audit_topic_clusters.py`：legacy topic cluster audit 解析 feed item 的 `published_at` / `created_at` 失敗時直接 `continue`，沒有 warning。

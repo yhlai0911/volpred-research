@@ -385,6 +385,38 @@ def test_build_token_summary_rolls_latest_available_reports(tmp_path: Path):
     assert summary["latest_weekly"]["week_end"] == "2026-04-20"
 
 
+def test_build_token_summary_warns_on_bad_daily_report_date(tmp_path: Path, capsys):
+    storage_dir = tmp_path / "storage"
+    _write_json(
+        storage_dir / "reports" / "token_usage" / "daily_bad-date.json",
+        {"date": "bad-date", "totals": {"estimated_cost_usd": 99}},
+    )
+    _write_json(
+        storage_dir / "reports" / "token_usage" / "daily_2026-04-21.json",
+        {
+            "date": "2026-04-21",
+            "totals": {
+                "estimated_cost_usd": 12.0,
+                "billable_total": 120,
+                "cache_create_tokens": 30,
+            },
+        },
+    )
+
+    summary = summaries.build_token_summary(storage_dir=str(storage_dir), days=2)
+
+    assert summary["daily_reports_available"] == 1
+    assert summary["latest_daily"]["date"] == "2026-04-21"
+    assert summary["rolling_window"]["estimated_cost_usd"] == 12.0
+    captured = capsys.readouterr()
+    assert (
+        "[ops_summaries] WARN token usage daily report date parse failed; skipping"
+        in captured.err
+    )
+    assert "daily_bad-date.json" in captured.err
+    assert "ValueError" in captured.err
+
+
 def test_build_token_policy_summary_reads_canonical_thresholds(tmp_path: Path):
     config_path = tmp_path / "token_policy.json"
     _write_json(

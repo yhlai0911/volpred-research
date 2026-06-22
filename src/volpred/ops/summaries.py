@@ -5,6 +5,7 @@ import json
 import shlex
 import subprocess
 import csv
+import sys
 from collections import deque
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -30,6 +31,14 @@ def _display_path(path: Path) -> str:
         return str(path.relative_to(root))
     except ValueError:
         return str(path)
+
+
+def _warn_ops_summaries(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[ops_summaries] WARN {message} "
+        f"path={_display_path(path)} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
 
 
 def _compact_decision(decision: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -346,7 +355,12 @@ def _iter_daily_reports(report_dir: Path) -> list[tuple[date, dict[str, Any]]]:
     for path in report_dir.glob("daily_*.json"):
         try:
             report_date = date.fromisoformat(path.stem.removeprefix("daily_"))
-        except ValueError:
+        except ValueError as exc:
+            _warn_ops_summaries(
+                "token usage daily report date parse failed; skipping",
+                path,
+                exc,
+            )
             continue
         payload = _read_json_dict(path)
         if payload is None:
