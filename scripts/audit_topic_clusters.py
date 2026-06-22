@@ -15,6 +15,21 @@ sys.path.insert(0, str(ROOT / "src"))
 from volpred.topic_clusters import CLUSTER_HARD_CAPS, classify_topic_cluster, load_feed_items  # noqa: E402
 
 
+def _warn_audit_topic_clusters(
+    message: str,
+    exc: Exception,
+    *,
+    item_id: object | None = None,
+    value: object | None = None,
+) -> None:
+    print(
+        "[audit_topic_clusters] WARN "
+        f"{message} item_id={item_id!r} value={value!r} "
+        f"error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def main() -> int:
     feed = load_feed_items()
     cutoff = datetime.now(timezone.utc) - timedelta(days=90)
@@ -32,7 +47,13 @@ def main() -> int:
             continue
         try:
             dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
-        except ValueError:
+        except ValueError as exc:
+            _warn_audit_topic_clusters(
+                "feed timestamp parse failed; skipping item",
+                exc,
+                item_id=item.get("id"),
+                value=ts,
+            )
             continue
         if dt < cutoff:
             continue
