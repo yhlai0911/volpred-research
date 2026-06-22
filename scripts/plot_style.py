@@ -72,8 +72,14 @@ def apply_cjk_style(*, dpi: int | None = None) -> None:
                 "Chinese text WILL render as tofu boxes. Install PingFang/Noto CJK.",
                 stacklevel=2,
             )
-    except Exception:
-        pass
+    except Exception as exc:
+        import warnings
+
+        warnings.warn(
+            "apply_cjk_style: CJK font resolution check failed "
+            f"({type(exc).__name__}: {exc}); Chinese text may render incorrectly.",
+            stacklevel=2,
+        )
 
 
 if __name__ == "__main__":

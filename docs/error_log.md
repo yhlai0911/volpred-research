@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 plot_style 字型解析檢查失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/plot_style.py::apply_cjk_style()`：CJK font resolution check 若因 matplotlib font cache 或 font_manager 例外失敗，會直接 `pass`。這會讓「圖表中文是否會變 tofu」的防線本身失效卻無 warning。
+
+**根因**：`apply_cjk_style()` 已經會在找不到 CJK font 時 loud warning，但包住整段 font resolution 的 fallback 仍沿用 silent best-effort；若檢查器本身壞掉，使用者看到的是無訊號而不是降級原因。
+
+**解決方法**：font resolution check 例外時改發 `apply_cjk_style: CJK font resolution check failed ...` warning，保留繪圖不中斷。新增 regression test monkeypatch `font_manager.findfont` 拋錯，確認 warning 包含錯誤原因。
+
 ## 2026-06-22 dispatch_supervisor alert dedup 壞 timestamp 被靜默忽略
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py::should_dedup_alert()`：`alerts_dedup[alert_key]` timestamp 解析失敗時直接回 `False`，alert 會照常發送，但 log 沒有指出 dedup state 壞掉。這會讓重複通知看起來像正常超窗，而不是 state metadata 問題。
