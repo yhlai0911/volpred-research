@@ -95,3 +95,30 @@ def test_handoff_surfaces_invalid_completed_at_warning(tmp_path, monkeypatch) ->
     assert "**task pool warnings" in handoff
     assert "invalid completed_at for succeeded task bad_completed" in handoff
     assert "not-a-date" in handoff
+
+
+def test_handoff_accepts_naive_completed_at_without_warning(tmp_path, monkeypatch) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(
+        tmp_path,
+        [
+            {
+                "id": "naive_completed",
+                "status": "succeeded",
+                "task_type": "platform_ops",
+                "completed_at": "2026-05-19T11:49:03.785530",
+            },
+            {
+                "id": "date_only_completed",
+                "status": "succeeded",
+                "task_type": "platform_ops",
+                "completed_at": "2026-05-04",
+            },
+        ],
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "invalid completed_at" not in handoff
+    assert "**task pool warnings" not in handoff

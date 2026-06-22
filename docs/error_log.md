@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 generate_handoff naive completed_at 誤報 invalid warning
+
+**問題**：上一輪把 `completed_at` parse 失敗從 silent `pass` 改成 handoff warning 後，新 handoff 顯示多筆 `invalid completed_at ... (TypeError)`，但樣本如 `2026-05-19T11:49:03.785530`、`2026-05-04` 其實是合法的 naive ISO / date-only timestamp，不是壞資料。
+
+**根因**：`datetime.fromisoformat()` 會把無 timezone 的字串解析成 naive datetime；原程式直接拿 aware `now=datetime.now(timezone.utc)` 相減，觸發 `TypeError`。warning 機制正確浮出了問題，但 parser 需要相容歷史任務池的 naive timestamp。
+
+**解決方法**：新增 `_parse_completed_at()`，支援 `Z`、aware ISO、naive ISO、date-only；naive/date-only 一律視為 UTC-aware datetime。只有真正不可解析字串才列為 `invalid completed_at` warning。新增 regression test 鎖住 naive ISO / date-only 不再出現在 task pool warnings。
+
 ## 2026-06-22 indicator signals git version fallback 靜默變 unknown
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/indicators/signals.py::_get_git_short_sha()` 在 `git rev-parse --short HEAD` exception 時直接 `pass`，最後回傳 `code_version="unknown"`。signal emission 可以繼續是對的，但 provenance 降級沒有任何 log。

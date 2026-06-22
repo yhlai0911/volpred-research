@@ -53,6 +53,15 @@ def _load_json(path: Path, default: Any) -> Any:
         return default
 
 
+def _parse_completed_at(value: Any) -> datetime:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("completed_at must be a non-empty ISO string")
+    dt = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     status_counter = Counter()
     type_counter = Counter()
@@ -89,7 +98,7 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
             completed_at = t.get("completed_at")
             if completed_at:
                 try:
-                    age_h = (now - datetime.fromisoformat(completed_at)).total_seconds() / 3600
+                    age_h = (now - _parse_completed_at(completed_at)).total_seconds() / 3600
                     if age_h <= 24:
                         recently_completed.append(t)
                 except (TypeError, ValueError) as exc:
