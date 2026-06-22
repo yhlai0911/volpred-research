@@ -28,6 +28,10 @@ def log(msg=""):
     print(msg, flush=True)
 
 
+def _warn_cross_validation(message: str, exc: Exception) -> None:
+    log(f"[gbm_qlike_cv] WARN {message}: {type(exc).__name__}: {exc}")
+
+
 # ============================================================
 # Data download
 # ============================================================
@@ -94,8 +98,12 @@ def gjr_garch_rolling(returns_pct, oos_start_idx, oos_end_idx, window=2000):
             fcast = res.forecast(horizon=1)
             # Variance in pct^2 units
             forecasts[i] = fcast.variance.iloc[-1, 0]
-        except Exception:
-            pass
+        except Exception as exc:
+            _warn_cross_validation(
+                f"GJR rolling forecast failed at oos_offset={i}, t={t}, "
+                f"train_start={train_start}, train_n={len(train_data)}",
+                exc,
+            )
 
     return forecasts
 
@@ -183,8 +191,11 @@ def gbm_rolling(merged_df, feature_cols, oos_start_idx, oos_end_idx,
             pred = model.predict(X[t:t+1])[0]
             # Floor at small positive value
             forecasts[i] = max(pred, 1e-6)
-        except Exception:
-            pass
+        except Exception as exc:
+            _warn_cross_validation(
+                f"GBM forecast failed at oos_offset={i}, t={t}, features={feature_cols}",
+                exc,
+            )
 
     return forecasts
 

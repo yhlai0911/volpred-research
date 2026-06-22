@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 gbm_qlike cross-validation forecast failure 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/gbm_qlike_cross_validation.py`：GJR-GARCH rolling fit 失敗與 GBM prediction 失敗都直接 `pass`，forecast 留 `NaN`。cross-validation 仍會跑完，但 valid count / QLIKE 變化看不出是哪一天、哪個模型路徑失敗。
+
+**根因**：模型賽馬腳本正確地容忍單日 fit/predict failure，避免一個 OOS day 中斷全資產/全期間驗證；但舊寫法把「容錯」等同於「不可觀察」，重演近期 validation 類 silent fallback 問題。
+
+**解決方法**：新增 `_warn_cross_validation()`；GJR failure 輸出 oos_offset、t、train_start、train_n 與 exception，GBM failure 輸出 oos_offset、t、features 與 exception，原本 forecast 保留 `NaN` 的行為不變。新增 regression tests 用 fake `arch` 與 fake sklearn 鎖住 warning 可見且不下載資料。
+
 ## 2026-06-22 validate_garch_midas OOS GJR refit 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/validate_garch_midas_cross_asset.py`：OOS GJR-GARCH 每季 refit 失敗時直接 `pass`，後續用前次/default 參數繼續產生 forecast。驗證流程不被單次 fit failure 中斷是對的，但結果無法看出哪些 OOS step 用了 fallback。
