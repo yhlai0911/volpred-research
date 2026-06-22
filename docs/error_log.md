@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 writer_log append failure 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/writer_log.py::append_writer_log()`：writer provenance log 寫入失敗時只 `pass`。caller 不應因 audit log 失敗中斷是對的，但 shared-state mutation 失去 provenance 時沒有任何 stderr 訊號。
+
+**根因**：writer log 是 best-effort safety layer，舊寫法把「非阻塞」實作成「不可觀察」，與近期 ops 路徑 silent failure 防線不一致。
+
+**解決方法**：保留 never-raises 語義，但 append 失敗時輸出 `[writer_log] WARN append failed`，包含 subsystem、target、record_id 與 exception。新增 regression test 鎖住 `_writer_log_path()` 失敗時 caller 不拋錯且 stderr 可見。
+
 ## 2026-06-22 gmail_inbox_poll 非阻塞 guard/cleanup 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/gmail_inbox_poll.py`：state JSON 解析失敗、email header decode fallback、ack/fast-path temp body cleanup、immediate dispatch pgrep/min-gap guard 失敗都直接 `pass`。Gmail poll 不能因這些非核心問題中斷是對的，但 cron log 會缺少「為何重置 state、為何用 raw header、為何 immediate dispatch guard 失效」的線索。

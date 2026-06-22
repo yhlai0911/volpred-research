@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -52,6 +53,14 @@ def append_writer_log(
         path = _writer_log_path(storage_dir)
         with path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception:
+    except Exception as exc:
         # Writer log is best-effort; must never break the caller.
-        pass
+        try:
+            print(
+                "[writer_log] WARN append failed: "
+                f"subsystem={subsystem!r} target={target!r} "
+                f"record_id={record_id!r} error={type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
+        except Exception:
+            return
