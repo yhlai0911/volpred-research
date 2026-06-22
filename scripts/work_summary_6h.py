@@ -49,6 +49,16 @@ def _git(cmd: list[str]) -> str:
         return f"(git failed: {e})"
 
 
+def _warn_summary(message: str, *, path: Path | None = None, exc: Exception | None = None) -> None:
+    details = []
+    if path is not None:
+        details.append(f"path={path}")
+    if exc is not None:
+        details.append(f"error={type(exc).__name__}: {exc}")
+    suffix = " " + " ".join(details) if details else ""
+    print(f"[work_summary_6h] WARN {message}{suffix}", file=sys.stderr)
+
+
 def _commits_in_window() -> list[dict]:
     since_iso = SINCE.isoformat()
     raw = _git(["log", f"--since={since_iso}", "--pretty=format:%h|%s|%ai"])
@@ -80,9 +90,14 @@ def _work_log_entries() -> list[dict]:
         return []
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
+    except Exception as exc:
+        _warn_summary("work_log read failed; treating as empty", path=path, exc=exc)
         return []
     if not isinstance(data, list):
+        _warn_summary(
+            f"work_log schema invalid; expected list, got {type(data).__name__}",
+            path=path,
+        )
         return []
     out = []
     for entry in data:
@@ -131,9 +146,14 @@ def _articles_in_window() -> dict[str, list[dict]]:
         return {"published": [], "drafts": []}
     try:
         feed = json.loads(feed_path.read_text(encoding="utf-8"))
-    except Exception:
+    except Exception as exc:
+        _warn_summary("feed read failed; treating article window as empty", path=feed_path, exc=exc)
         return {"published": [], "drafts": []}
     if not isinstance(feed, list):
+        _warn_summary(
+            f"feed schema invalid; expected list, got {type(feed).__name__}",
+            path=feed_path,
+        )
         return {"published": [], "drafts": []}
     pub: list[dict] = []
     drafts: list[dict] = []

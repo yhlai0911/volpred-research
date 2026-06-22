@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 work_summary_6h activity sources 壞檔被靜默當空
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/work_summary_6h.py`：`storage/work_log.json` 讀取 / parse 失敗或 schema 非 list 時直接回空；`storage/reports/feed.json` 讀取失敗或 schema 非 list 時也直接把 6h 文章窗口當空，沒有任何 warning。
+
+**根因**：6h summary 是老闆用來判斷「系統有沒有在動」的營運回報；activity source 壞掉時保守回空可以避免 email job 中斷，但靜默回空會把 source corruption 包裝成「本窗口無工作 / 無文章」，錯誤地降低可見性。
+
+**解決方法**：新增 `[work_summary_6h] WARN ...` diagnostics；`work_log.json` 與 feed source 讀取失敗或 schema drift 時保留原本 fail-open 空結果，但在 stderr 輸出 path、exception 或 schema 類型。新增 regression tests 覆蓋壞 work_log JSON 與 feed 非 list schema。
+
 ## 2026-06-23 audit_fb_pipeline 壞 FB source 無診斷或直接中斷
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/audit_fb_pipeline.py::_load_entries()`：`trending_repost_log.json` 壞 JSON 會直接讓 audit traceback；`feed.json` 壞 JSON 會被靜默當空；feed list 內非 object entry 也會靜默略過。

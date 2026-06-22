@@ -30,6 +30,36 @@ def test_platform_health_records_pending_task_read_warning(
     assert any("JSONDecodeError" in w for w in health["warnings"])
 
 
+def test_work_log_entries_warns_on_bad_json(tmp_path, monkeypatch, capsys) -> None:
+    import work_summary_6h as ws  # type: ignore
+
+    monkeypatch.setattr(ws, "STORAGE", tmp_path)
+    (tmp_path / "work_log.json").write_text("{bad json", encoding="utf-8")
+
+    entries = ws._work_log_entries()
+
+    assert entries == []
+    captured = capsys.readouterr()
+    assert "[work_summary_6h] WARN work_log read failed" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
+def test_articles_in_window_warns_on_bad_feed_schema(tmp_path, monkeypatch, capsys) -> None:
+    import work_summary_6h as ws  # type: ignore
+
+    monkeypatch.setattr(ws, "STORAGE", tmp_path)
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    (reports / "feed.json").write_text('{"not": "a list"}', encoding="utf-8")
+
+    articles = ws._articles_in_window()
+
+    assert articles == {"published": [], "drafts": []}
+    captured = capsys.readouterr()
+    assert "[work_summary_6h] WARN feed schema invalid" in captured.err
+    assert "dict" in captured.err
+
+
 def test_build_html_renders_health_warnings(monkeypatch) -> None:
     import work_summary_6h as ws  # type: ignore
 
