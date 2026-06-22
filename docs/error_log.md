@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 paper sync-all 壞 updated_at 被靜默當 stale
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/papers.py::sync_all_papers()`：Supabase `papers.updated_at` 若是壞 ISO timestamp，舊碼直接吞掉 parse exception，然後把該 paper 當作 stale 繼續更新。
+
+**根因**：壞 `updated_at` 時 fail-open、偏向更新，是正確保守行為；但沒有任何 warning 會讓操作者看不出「這篇真的比本地舊」還是「遠端 metadata 壞掉才被強制納入更新」。paper metadata 曾發生 stale PDF / stale page count 類事故，timestamp parse drift 不應靜默。
+
+**解決方法**：新增 `_warn_paper_ops()`，`sync_all_papers()` 在 `updated_at` parse 失敗時輸出 `[papers] WARN Supabase updated_at parse failed; treating paper as stale ...` 到 stderr，原本更新策略不變。新增可注入 `paper_root` 的 regression test，使用 dry-run 驗證不碰真實 `paper/`。
+
 ## 2026-06-23 prune_rollback_points 容量掃描失敗被靜默少算
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/prune_rollback_points.py::dir_size_bytes()`：rollback snapshot 底下單檔 `is_file()` / `stat()` 失敗時直接略過，清理報告的 keep/delete 容量會少算但沒有任何提示。

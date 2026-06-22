@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -30,6 +31,14 @@ PAPER_SELECT = (
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _warn_paper_ops(message: str, *, paper_id: str, value: Any, exc: Exception) -> None:
+    print(
+        f"[papers] WARN {message}: paper_id={paper_id} value={value!r} "
+        f"error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
 
 
 def _normalize_paper(row: dict[str, Any]) -> dict[str, Any]:
@@ -462,6 +471,7 @@ def sync_all_papers(
     *,
     only_stale: bool = True,
     dry_run: bool = False,
+    paper_root: str | Path | None = None,
 ) -> list[dict[str, Any]]:
     """Auto-sync every paper in paper/<id>/ whose .tex or .pdf is newer than its
     Supabase updated_at timestamp.
@@ -479,7 +489,7 @@ def sync_all_papers(
     Returns: list of dicts with {paper_id, action, reason, ...}.
     """
     PROJECT = Path(__file__).resolve().parent.parent.parent.parent
-    paper_root = PROJECT / "paper"
+    paper_root = Path(paper_root) if paper_root is not None else PROJECT / "paper"
     if not paper_root.is_dir():
         return []
 
@@ -511,8 +521,13 @@ def sync_all_papers(
                 if db_updated.timestamp() >= latest_local_mtime:
                     results.append({"paper_id": paper_id, "action": "skip", "reason": "supabase_newer"})
                     continue
-            except (ValueError, AttributeError):
-                pass
+            except (ValueError, AttributeError) as exc:
+                _warn_paper_ops(
+                    "Supabase updated_at parse failed; treating paper as stale",
+                    paper_id=paper_id,
+                    value=db_updated_str,
+                    exc=exc,
+                )
 
         if dry_run:
             results.append({"paper_id": paper_id, "action": "would_update", "in_db": existing is not None})
