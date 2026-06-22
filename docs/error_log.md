@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_diverse_tasks knowledge completed-K filter 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_experiment_tasks()`：completed-K filter 讀取 `storage/memory/knowledge.json` 失敗時，舊碼直接跳過，沒有任何 warning。
+
+**根因**：experiment backlog discovery 會用 knowledge entries 排除已完成但沒有 `experiments/k*/` 目錄的 K-id，避免舊研究被重複排成 scaffold 任務。`knowledge.json` 讀取失敗時繼續產生任務是合理 fail-open，但靜默跳過 filter 會讓操作者看不出後續 backlog 可能包含已完成 K。
+
+**解決方法**：`knowledge.json` completed-K scan 失敗時改用 `_warn_diverse()` 輸出 `[diverse_gen] WARN knowledge completed-K scan failed; continuing without knowledge filter ...` 到 stderr，原本繼續產生任務的 fallback 行為不變。新增 regression test 覆蓋 filter 降級時仍產生 backlog task 且有 warning。
+
 ## 2026-06-23 generate_diverse_tasks experiments 目錄掃描失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_experiment_tasks()`：`experiments/` 存在但無法列舉時，舊碼直接回空清單，沒有任何 warning。

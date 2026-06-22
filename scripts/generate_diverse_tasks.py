@@ -472,8 +472,11 @@ def gen_experiment_tasks(existing: set[str], rng: random.Random) -> list[dict]:
             kb_text = kb_path.read_text(encoding="utf-8")
             for m in re.finditer(r"\b[Kk](\d{3,4}[a-z]?)\b", kb_text):
                 completed_ids.add(f"k{m.group(1).lower()}")
-        except OSError:
-            pass
+        except OSError as exc:
+            _warn_diverse(
+                "knowledge completed-K scan failed; continuing without knowledge filter "
+                f"path={kb_path} error={type(exc).__name__}: {exc}"
+            )
     archive_dir = ROOT / "docs" / "research_archive"
     if archive_dir.exists():
         for archive_md in archive_dir.glob("completed_phases_*.md"):
