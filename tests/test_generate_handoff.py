@@ -90,6 +90,22 @@ def test_handoff_warns_on_invalid_json_source(tmp_path, monkeypatch, capsys) -> 
     assert "JSONDecodeError" in captured.err
 
 
+def test_handoff_warns_on_invalid_agent_receipt(tmp_path, monkeypatch, capsys) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    bad_agent = tmp_path / "ops" / "agents" / "bad-agent.json"
+    bad_agent.write_text("{bad-json", encoding="utf-8")
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "slot 占用**：0 / 4" in handoff
+    captured = capsys.readouterr()
+    assert "[generate_handoff] WARN JSON read failed; skipping agent receipt" in captured.err
+    assert "bad-agent.json" in captured.err
+    assert "JSONDecodeError" in captured.err
+
+
 def test_handoff_surfaces_invalid_completed_at_warning(tmp_path, monkeypatch) -> None:
     module = _load_generate_handoff()
     _write_fixture_files(

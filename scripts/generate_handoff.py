@@ -44,17 +44,21 @@ def _now_local() -> str:
     return datetime.now(TAIPEI).strftime("%Y-%m-%d %H:%M:%S")
 
 
+def _warn_json_read_failed(path: Path, exc: Exception, *, action: str) -> None:
+    print(
+        "[generate_handoff] WARN JSON read failed; "
+        f"{action} path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def _load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as exc:
-        print(
-            "[generate_handoff] WARN JSON read failed; using default "
-            f"path={path} error={type(exc).__name__}: {exc}",
-            file=sys.stderr,
-        )
+        _warn_json_read_failed(path, exc, action="using default")
         return default
 
 
@@ -150,7 +154,8 @@ def _active_agents() -> dict[str, Any]:
         for f in sorted(AGENTS_DIR.glob("*.json")):
             try:
                 data = json.loads(f.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, OSError) as exc:
+                _warn_json_read_failed(f, exc, action="skipping agent receipt")
                 continue
             status = (data.get("status") or "").lower()
             if status in {"running", "active", "in_progress", "claimed"}:

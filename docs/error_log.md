@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 generate_handoff agent receipt 壞 JSON 被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_handoff.py::_active_agents()`：`storage/ops/agents/*.json` 壞 JSON 時直接 `continue`。handoff 仍會產生，但 slot 占用與進行中 agent 可能被低估，cron log 看不出是 agent receipt 壞掉。
+
+**根因**：active agent scan 正確地不能讓單一 receipt 壞檔阻塞整份 handoff；但舊寫法把可跳過寫成 silent skip，讓 control-plane receipt corruption 不可觀察。
+
+**解決方法**：抽出 `_warn_json_read_failed()` 共用 warning helper；`_active_agents()` 遇到 agent receipt JSON 讀取 / 解析失敗時輸出 `[generate_handoff] WARN JSON read failed; skipping agent receipt`，原本跳過壞 receipt 的行為不變。新增 regression test 覆蓋壞 agent JSON。
+
 ## 2026-06-22 generate_handoff JSON source 讀取失敗被靜默套 default
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_handoff.py::_load_json()`：`next_tasks.json`、dashboard、work_log、gmail state 等 handoff source 已存在但 JSON 壞掉時直接回 default。handoff 繼續生成是對的，但入口快照會看起來像「任務池空 / dashboard 無資料」，而不是 source 壞掉。
