@@ -116,6 +116,10 @@ def _warn_question_link_side_effect(message: str, article_slug: str, exc: Except
     )
 
 
+def _warn_release_pool(message: str, exc: Exception) -> None:
+    print(f"  [release_pool] WARN {message}: {type(exc).__name__}: {exc}")
+
+
 def _derived_last_released_at_from_feed(storage_dir: str = "storage") -> str | None:
     """Return the latest published_at among items released BY release_pool.
 
@@ -911,7 +915,12 @@ def release_pool_articles(
             failed_path = publisher.reports_dir.parent / ".failed_supabase_syncs.json"
             try:
                 failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
-            except Exception:
+                if not isinstance(failed, list):
+                    raise ValueError(".failed_supabase_syncs.json must contain a list")
+            except Exception as exc:
+                _warn_release_pool(
+                    "failed Supabase sync ledger unreadable; recreating", exc
+                )
                 failed = []
             if article_slug not in failed:
                 failed.append(article_slug)

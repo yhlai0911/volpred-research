@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 release_pool failed sync ledger 壞檔被靜默重建
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/content.py` 的 release pool Supabase sync failure path：`sync_article()` 失敗時會把 article slug 寫入 `.failed_supabase_syncs.json`，但若該 ledger 壞 JSON 或 schema 不是 list，舊碼直接安靜用空 list 重建。
+
+**根因**：release pool 必須在 Supabase 暫時失敗時繼續發布本地 canonical feed；但 failed-sync ledger 是 alerts 與人工 retry 的 audit trail。壞 ledger 被靜默重建會讓操作者不知道既有 failed slug 可能已遺失，降低 K1021 類「本地已 published、Supabase 未同步」問題的可追蹤性。
+
+**解決方法**：新增 `_warn_release_pool()`，`.failed_supabase_syncs.json` 讀取 / JSON parse 失敗或非 list schema 時輸出 warning，再以空 list 重建並寫入當前失敗 slug。發布行為與 fail-open 行為不變。新增 regression test 覆蓋 corrupt ledger + sync failure path。
+
 ## 2026-06-22 daily_update VIX/TW 資料降級不可見
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/daily_update.py` 的日更策略產生流程：`^VIX` 抓取失敗時直接把 VIX 策略退回 GARCH；`0050.TW` 抓取失敗時直接省略台灣策略，兩者都沒有把資料問題印出。

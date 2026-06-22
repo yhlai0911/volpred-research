@@ -198,6 +198,49 @@ def test_release_pool_notification_failure_warns_without_blocking(
     assert "(release_pool): smtp down" in captured.out
 
 
+def test_release_pool_warns_when_failed_sync_ledger_is_corrupt(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+):
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 4, 19, 8, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "mile_sync_fail",
+                "title": "Scheduled article with failed sync",
+                "status": "scheduled",
+                "published_at": (frozen_now - timedelta(minutes=1)).isoformat(),
+                "created_at": (frozen_now - timedelta(days=1)).isoformat(),
+                "category": "general",
+                "audience": "general",
+                "content": "General audience market note.",
+            }
+        ],
+    )
+    failed_syncs = storage_dir / ".failed_supabase_syncs.json"
+    failed_syncs.write_text("{bad-json", encoding="utf-8")
+
+    result = content.release_pool_articles(
+        limit=1,
+        due_only=False,
+        include_drafts=False,
+        storage_dir=str(storage_dir),
+    )
+
+    captured = capsys.readouterr()
+    failed = json.loads(failed_syncs.read_text(encoding="utf-8"))
+    assert [item["id"] for item in result["released"]] == ["mile_sync_fail"]
+    assert result["released"][0]["supabase_synced"] is False
+    assert failed == ["mile_sync_fail"]
+    assert "[release_pool] WARN failed Supabase sync ledger unreadable" in captured.out
+    assert "JSONDecodeError" in captured.out
+
+
 def test_preview_release_pool_self_heals_stale_settings_from_feed_ignoring_member_qa(
     tmp_path: Path,
     monkeypatch,
