@@ -97,6 +97,20 @@ def test_dispatch_lane_blocked_and_unknown_are_not_dispatched():
     ]
 
 
+def test_invalid_blocked_until_warns_and_keeps_explicit_block(capsys):
+    task = _task("bad-until", "platform_ops", priority=3)
+    task["blocked_reason"] = "external_auth"
+    task["blocked_until"] = "not-a-date"
+
+    reason = dispatch.detect_block_reason(task)
+
+    captured = capsys.readouterr()
+    assert reason == "external_auth"
+    assert "[dispatch] WARN invalid blocked_until" in captured.err
+    assert "bad-until" in captured.err
+    assert "not-a-date" in captured.err
+
+
 def test_build_report_exposes_disambiguated_pending_summary(monkeypatch):
     tasks = [
         _task("platform-1", "platform_ops", priority=3),

@@ -74,6 +74,10 @@ SELF_OPTIONAL_PATTERN = re.compile(
 )
 
 
+def _warn_dispatch(message: str) -> None:
+    print(f"[dispatch] WARN {message}", file=sys.stderr)
+
+
 def count_active_slots() -> dict:
     """Count occupied slots across worktrees + agent records."""
     worktrees = []
@@ -187,8 +191,12 @@ def detect_block_reason(task: dict) -> str | None:
                     deadline = deadline.replace(tzinfo=timezone.utc)
                 if datetime.now(timezone.utc) >= deadline:
                     return None
-            except Exception:
-                pass
+            except (TypeError, ValueError) as exc:
+                _warn_dispatch(
+                    "invalid blocked_until for "
+                    f"task {task.get('id', '<unknown>')}: {unblock_at!r} "
+                    f"({type(exc).__name__}: {exc})"
+                )
         return explicit
 
     blob = " ".join(

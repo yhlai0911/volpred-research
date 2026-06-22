@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 dispatch blocked_until 解析失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::detect_block_reason()`：任務有 `blocked_reason` 與 `blocked_until` 時，timestamp 解析失敗會直接 `pass`。任務仍被視為 blocked 是保守的，但 hourly dispatch log 看不出是過期時間尚未到、還是 metadata 壞掉。
+
+**根因**：dispatcher 把「blocked_until 壞掉時不要錯誤解封」與「完全不記錄壞 metadata」混在同一個 broad exception path，重演近期 silent-failure 類 incident。
+
+**解決方法**：保留 explicit block 語義；`blocked_until` 解析失敗時輸出 `[dispatch] WARN invalid blocked_until ...`，包含 task id、原始值與 exception。新增 regression test 鎖住壞 timestamp 會保留 blocked reason 且 warning 可見。
+
 ## 2026-06-22 paper page-count fallback 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/papers.py::_count_tex_metrics()`：PyPDF2 讀 PDF page count 失敗後會再用 `python3 -c import fitz ...` fallback，但 fallback exception 直接 `pass`。若兩條路都失敗，paper metadata 沒有 `pages`，ops log 看不出原因。
