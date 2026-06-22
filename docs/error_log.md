@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 dispatch_state 壞檔 reset 被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py`：`dispatch_state.json` 壞 JSON 或 schema version 不符時，讀寫路徑會 fail-open 回 `_empty_state()`，但舊碼沒有任何 warning。
+
+**根因**：dispatch supervisor 狀態檔不能因單次壞檔阻塞 supervisor 或 health reader；但靜默 reset 會清掉 `current_job`、completion ring、auth-blocked 與 alert dedup 脈絡，操作者只會看到「狀態是空的」，看不出曾發生 state corruption / schema drift。
+
+**解決方法**：新增 `_warn_state_reset()`，`read_state()` 與 `_locked_state()` 在 JSON parse failure 或 schema invalid 時記錄 `dispatch state reset to empty` warning，仍維持 fail-open。同步升級 dispatch state regression tests，鎖定壞 JSON 與舊 schema 都有 warning。
+
 ## 2026-06-23 paper sync-all 壞 updated_at 被靜默當 stale
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/papers.py::sync_all_papers()`：Supabase `papers.updated_at` 若是壞 ISO timestamp，舊碼直接吞掉 parse exception，然後把該 paper 當作 stale 繼續更新。

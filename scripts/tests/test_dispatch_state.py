@@ -283,20 +283,34 @@ def test_get_current_job_warns_on_invalid_started_at(
     assert "not-a-date" in caplog.text
 
 
-def test_corrupt_state_falls_back_to_empty(tmp_state: Path) -> None:
+def test_corrupt_state_warns_and_falls_back_to_empty(
+    tmp_state: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     tmp_state.write_text("{ not valid json")
-    snap = st.read_state(tmp_state)
+    with caplog.at_level(logging.WARNING, logger=st.__name__):
+        snap = st.read_state(tmp_state)
+
     assert snap["version"] == st.SCHEMA_VERSION
     assert snap["current_job"] is None
+    assert "dispatch state reset to empty" in caplog.text
+    assert "json_decode_failed" in caplog.text
 
 
-def test_old_schema_version_is_reset(tmp_state: Path) -> None:
+def test_old_schema_version_warns_and_is_reset(
+    tmp_state: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     tmp_state.write_text(json.dumps({"version": 999, "stuff": "old"}))
-    # Locked-write path bootstraps fresh state on version mismatch.
-    st.heartbeat(tmp_state)
-    snap = st.read_state(tmp_state)
+    with caplog.at_level(logging.WARNING, logger=st.__name__):
+        # Locked-write path bootstraps fresh state on version mismatch.
+        st.heartbeat(tmp_state)
+        snap = st.read_state(tmp_state)
+
     assert snap["version"] == st.SCHEMA_VERSION
     assert "stuff" not in snap
+    assert "dispatch state reset to empty" in caplog.text
+    assert "schema_invalid" in caplog.text
 
 
 def test_heartbeat_updates_timestamp(tmp_state: Path) -> None:

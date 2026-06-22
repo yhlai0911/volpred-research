@@ -85,6 +85,20 @@ def _empty_state() -> dict[str, Any]:
     }
 
 
+def _warn_state_reset(path: Path, reason: str, detail: str) -> None:
+    LOG.warning(
+        "dispatch state reset to empty: path=%s reason=%s detail=%s",
+        path,
+        reason,
+        detail,
+    )
+
+
+def _state_schema_detail(data: Any) -> str:
+    version = data.get("version") if isinstance(data, dict) else None
+    return f"type={type(data).__name__} version={version!r}"
+
+
 def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
     """Write JSON atomically: temp file in same dir → fsync → os.replace.
 
@@ -135,9 +149,15 @@ def _locked_state(path: Path = STATE_PATH) -> Iterator[tuple[Any, dict[str, Any]
     try:
         try:
             data = json.load(fh)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as exc:
+            _warn_state_reset(path, "json_decode_failed", f"{type(exc).__name__}: {exc}")
             data = _empty_state()
         if not isinstance(data, dict) or data.get("version") != SCHEMA_VERSION:
+            _warn_state_reset(
+                path,
+                "schema_invalid",
+                _state_schema_detail(data),
+            )
             data = _empty_state()
         yield fh, data
         _atomic_write_json(path, data)
@@ -154,9 +174,18 @@ def read_state(path: Path = STATE_PATH) -> dict[str, Any]:
     fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
     try:
         try:
-            return json.load(fh)
-        except json.JSONDecodeError:
+            data = json.load(fh)
+        except json.JSONDecodeError as exc:
+            _warn_state_reset(path, "json_decode_failed", f"{type(exc).__name__}: {exc}")
             return _empty_state()
+        if not isinstance(data, dict) or data.get("version") != SCHEMA_VERSION:
+            _warn_state_reset(
+                path,
+                "schema_invalid",
+                _state_schema_detail(data),
+            )
+            return _empty_state()
+        return data
     finally:
         fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         fh.close()
