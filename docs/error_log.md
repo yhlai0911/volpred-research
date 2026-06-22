@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 handoff_regen uv 啟動卡住造成每小時 timeout
+
+**問題**：hourly tick 再次讀到 stale `storage/ops/handoff_latest.md`；`~/.volpred/logs/handoff_regen.log` 顯示 00:50、01:50、02:50、03:50、04:50 每次都有 LaunchAgent fire，但 `generate_handoff.py` 與 `task_pool_claim.py cleanup` 都在 alarm 前被 kill，沒有 Python traceback。手動執行兩個 Python script 均可在數秒內完成。
+
+**根因**：前一輪只替 wrapper 加上 wall-clock cap，但 wrapper 仍用 `uv run python` 啟動短任務。LaunchAgent 每小時和其他 uv-based jobs 併發時，卡住點可能發生在 uv env/cache/lock 啟動階段，尚未進入 Python 腳本，因此 log 只有 alarm kill 而沒有應用層診斷。
+
+**解決方法**：`scripts/cron_handoff_regen.sh` 改為優先使用 repo 既有 `.venv/bin/python` 直接執行 `generate_handoff.py` 與 stale-claim cleanup；`uv run python` 只保留為 venv 不存在時的 fallback，並在 log 印出實際 runner。新增 regression test 鎖定兩個子步驟共用 `PYTHON_RUN`，避免 wrapper 回退到容易卡住的 uv-first 路徑。
+
 ## 2026-06-23 session_replay_pending 壞 pending_sessions 直接 traceback
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/session_replay_pending.py`：`storage/ops/pending_sessions.json` 若 JSON 壞掉、頂層 schema 非 object、`jobs` 非 object，或單筆 job schema 壞掉，舊碼會直接 traceback 或在 `int(recorded_count)` 轉型時中斷。
