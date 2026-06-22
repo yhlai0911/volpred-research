@@ -29,6 +29,7 @@ References:
 """
 
 import json
+import os
 import warnings
 from datetime import datetime, timezone
 
@@ -36,6 +37,8 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 from arch import arch_model
+
+from volpred.stats.model_evaluation import qlike, qlike_pointwise
 
 warnings.filterwarnings("ignore")
 
@@ -57,13 +60,6 @@ BASELINE_WINDOW = 2000
 MIN_PRESAMPLE = 252  # at least 1 year before OOS start
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
-
-def qlike(sigma2_hat: np.ndarray, r2: np.ndarray) -> float:
-    """QLIKE = mean[sigma2_hat/r2 - log(sigma2_hat/r2) - 1]  (Patton 2011)."""
-    eps = 1e-12
-    ratio = sigma2_hat / (r2 + eps)
-    return float(np.mean(ratio - np.log(ratio) - 1))
-
 
 def dm_test(loss_a: np.ndarray, loss_b: np.ndarray) -> tuple[float, float]:
     """Diebold-Mariano test (two-sided, HAC SE via Newey-West lag=h=1)."""
@@ -186,7 +182,7 @@ def main():
             if valid.sum() < 50:
                 print(f"too few valid ({valid.sum()}), skip")
                 continue
-            ql = qlike(fc_aligned[valid].values, r2[valid])
+            ql = qlike(r2[valid], fc_aligned[valid].values)
             window_qlike[label_w] = ql
             window_forecasts[label_w] = fc_aligned
             print(f"QLIKE={ql:.6f}")
@@ -201,8 +197,8 @@ def main():
                 if w_key == baseline_key:
                     continue
                 valid = fc_w.notna() & fc_base.notna() & (r2_series > 0)
-                loss_w   = qlike_pointwise(fc_w[valid].values,    r2_series[valid].values)
-                loss_base = qlike_pointwise(fc_base[valid].values, r2_series[valid].values)
+                loss_w = qlike_pointwise(r2_series[valid].values, fc_w[valid].values)
+                loss_base = qlike_pointwise(r2_series[valid].values, fc_base[valid].values)
                 t_stat, p_val = dm_test(loss_w, loss_base)
                 dm_results[w_key] = {
                     "t_stat": round(t_stat, 4),
@@ -299,18 +295,11 @@ def main():
         "prior_experiments": ["K783 (SPY full OOS)", "K783b (cross-asset)"],
     }
 
-    out_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-af08eda0/experiments/k783c_cross_period_window_results.json"
+    out_path = os.path.join(os.path.dirname(__file__), "k783c_cross_period_window_results.json")
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2, default=str)
     print(f"\nResults saved → {out_path}")
     print(f"Elapsed: {elapsed:.1f}s")
-
-
-def qlike_pointwise(sigma2_hat: np.ndarray, r2: np.ndarray) -> np.ndarray:
-    """Element-wise QLIKE loss for DM test."""
-    eps = 1e-12
-    ratio = sigma2_hat / (r2 + eps)
-    return ratio - np.log(ratio) - 1
 
 
 def _build_summary(results_by_period: dict, wins: dict) -> str:

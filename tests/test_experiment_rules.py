@@ -49,6 +49,21 @@ def test_qlike_pointwise_orientation_rule_is_documented() -> None:
     assert missing == []
 
 
+def test_k783c_source_uses_canonical_qlike_orientation() -> None:
+    source = (
+        ROOT / "experiments" / "k783c" / "k783c_cross_period_window.py"
+    ).read_text(encoding="utf-8")
+    readme = (ROOT / "experiments" / "k783c" / "README.md").read_text(encoding="utf-8")
+
+    assert "from volpred.stats.model_evaluation import qlike, qlike_pointwise" in source
+    assert "qlike(r2[valid], fc_aligned[valid].values)" in source
+    assert "qlike_pointwise(r2_series[valid].values, fc_w[valid].values)" in source
+    assert "ratio = sigma2_hat /" not in source
+    assert ".claude/worktrees" not in source
+    assert 'os.path.join(os.path.dirname(__file__), "k783c_cross_period_window_results.json")' in source
+    assert "source-review FAIL pending K783c-v2 rerun" in readme
+
+
 def test_var_es_basel_and_student_t_rule_is_documented() -> None:
     section = _experiments_rule_section("### VaR / ES 的 Basel 與 Student-t 口徑必須明示")
 
