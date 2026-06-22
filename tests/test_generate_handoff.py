@@ -73,3 +73,25 @@ def test_handoff_warns_codex_when_only_skip_pending_exists(tmp_path, monkeypatch
     assert "Codex-skip pending: 2" in handoff
     assert "沒有可 claim 的 pending" in handoff
     assert "task_pool_claim.py list --codex-eligible" in handoff
+
+
+def test_handoff_surfaces_invalid_completed_at_warning(tmp_path, monkeypatch) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(
+        tmp_path,
+        [
+            {
+                "id": "bad_completed",
+                "status": "succeeded",
+                "task_type": "platform_ops",
+                "completed_at": "not-a-date",
+            }
+        ],
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "**task pool warnings" in handoff
+    assert "invalid completed_at for succeeded task bad_completed" in handoff
+    assert "not-a-date" in handoff

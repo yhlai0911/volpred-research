@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 generate_handoff 壞 completed_at 會靜默漏列最近完成
+
+**問題**：hourly handoff fallback 掃到 `scripts/generate_handoff.py::_task_pool_snapshot()` 對 succeeded task 的 `completed_at` parse 失敗時直接 `pass`。若任務池某筆完成任務 timestamp 壞掉，handoff 的「最近 24h 完成」會少一筆，但 section 1 沒有任何警告。
+
+**根因**：handoff generator 為了避免單筆壞 metadata 中斷整份 handoff，採用 silent best-effort；但沒有把「跳過原因」帶回 snapshot，重演近期多個 silent-failure 類 incident。
+
+**解決方法**：將 broad `except Exception: pass` 改為 `TypeError/ValueError` 精準捕捉，收集 `invalid completed_at ...` warnings 並在 section 1 顯示 `task pool warnings`。新增 regression test 鎖住壞 `completed_at` 會出現在 handoff warning，不再靜默漏列。
+
 ## 2026-06-22 question ops 非致命 Supabase/link 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/questions.py` 仍有 question ops 例外分支靜默降級：article status lookup 失敗會回 `None`、`question_articles` link 失敗會回 `False`、`_ensure_article_question_metadata()` 失敗會直接吞掉。這些 path 都是非致命，但會影響會員問答是否標為 answered、Supabase link 是否建立，以及 frontend sync 是否能靠 `details.question_id` 重建 link。

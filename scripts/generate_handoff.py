@@ -63,6 +63,7 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     in_progress: list[dict[str, Any]] = []
     email_replies: list[dict[str, Any]] = []
     recently_completed: list[dict[str, Any]] = []
+    warnings: list[str] = []
 
     now = datetime.now(timezone.utc)
 
@@ -91,8 +92,11 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
                     age_h = (now - datetime.fromisoformat(completed_at)).total_seconds() / 3600
                     if age_h <= 24:
                         recently_completed.append(t)
-                except Exception:
-                    pass
+                except (TypeError, ValueError) as exc:
+                    warnings.append(
+                        "invalid completed_at for succeeded task "
+                        f"{t.get('id') or '(missing-id)'}: {completed_at!r} ({exc.__class__.__name__})"
+                    )
 
     def _prio_key(x: dict[str, Any]) -> tuple[int, str]:
         p = x.get("priority")
@@ -116,6 +120,7 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
         "in_progress": in_progress,
         "email_replies": email_replies,
         "recently_completed": recently_completed[:5],
+        "warnings": warnings[:5],
     }
 
 
@@ -245,6 +250,11 @@ def build() -> str:
     lines.append("**type 分佈（top 6）**：")
     for ttype, cnt in Counter(snap["type_counts"]).most_common(6):
         lines.append(f"  - {ttype}: {cnt}")
+    if snap["warnings"]:
+        lines.append("")
+        lines.append("**task pool warnings（top 5）**：")
+        for warning in snap["warnings"]:
+            lines.append(f"  - WARN: {warning}")
     lines.append("")
 
     # 2. 進行中 claim

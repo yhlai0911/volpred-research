@@ -132,7 +132,7 @@ def test_ensure_member_qa_task_min_age_gate_blocks_young_question(monkeypatch, t
             "ranked_table": [
                 {
                     "question_id": "young0001-0000-0000-0000-000000000000",
-                    "question": "ï¿½‰›ï¿½•ï¿½š„ï¿½•ï¿½Œ",
+                    "question": "young member question",
                     "proposer": "reader",
                     "status": "ranked",
                     "score": 9.0,
@@ -164,7 +164,7 @@ def test_ensure_member_qa_task_min_age_gate_allows_aged_question(monkeypatch, tm
             "ranked_table": [
                 {
                     "question_id": "aged0001-0000-0000-0000-000000000000",
-                    "question": "ï¿½­‰ï¿½†ï¿½…ï¿½ï¿½ï¿½™‚ï¿½š„ï¿½•ï¿½Œ",
+                    "question": "aged member question",
                     "proposer": "reader",
                     "status": "ranked",
                     "score": 9.0,
