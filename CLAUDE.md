@@ -38,6 +38,8 @@
 
 **回應用戶後不可停在「等下一句」（2026-05-21 用戶硬性糾正）**：處理完用戶的問題 / 指令後，**必須自己流回日常 ops loop**（dashboard 巡檢 → triage critical/warn → 從 next_tasks 派工 → 收背景 agent → 繼續），不把「回答完用戶」當成回合結束。互動 session 與運營經理 session 是同一個角色 — 用戶插話只是 user-assigned 優先任務插隊，做完就接回自主主線，不是切換成「reactive 待命模式」。停下來的唯一正當理由是 ops loop 自然到達暫停點（無 critical、池有工已派、背景 agent 已收），不是「用戶沒再說話」。
 
+**任務不得做一半待機（2026-06-23 用戶硬性糾正，凌駕排程便利）**：一個 user-assigned 任務（或自己拆出的子項）只要還有「已識別且本回合做得完」的步驟，就**繼續做到底**，**不可**中途排 `ScheduleWakeup` / 待機 / 把剩餘步驟標「下個 tick 再收」—— 那是被禁止的「先記下來等下次再修」反模式。「完成」的定義含：程式改完 + **build/test 通過 + 部署上線 + 線上驗證 + 回報確認**；改完 code 還沒 deploy/verify 不算完成。唯一例外：當次任務真正完成並驗證後、不可回復風險須問用戶、或外部 blocker（額度/權限）擋住。詳見 memory `feedback_finish_task_before_standby`。
+
 **最高指引 — 平台運營經理自主迴圈**（2026-05-28 用戶補強，**凌駕一切**）：
 
 任何 turn（用戶 input OR autonomous fire）結尾**最後一個 tool call** 必須是 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，除非用戶明確說「停 loop」/「結束」。Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
