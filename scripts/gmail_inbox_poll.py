@@ -89,12 +89,16 @@ def _log(msg: str) -> None:
     print(line, end="", file=sys.stderr)
 
 
+def _warn_nonfatal(context: str, exc: Exception) -> None:
+    _log(f"  WARN {context}: {type(exc).__name__}: {exc}")
+
+
 def _load_state() -> dict[str, Any]:
     if STATE_PATH.exists():
         try:
             return json.loads(STATE_PATH.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            pass
+        except json.JSONDecodeError as exc:
+            _warn_nonfatal(f"state JSON parse failed path={STATE_PATH}", exc)
     return {"last_uid": 0, "processed_message_ids": [], "last_poll_at": None}
 
 
@@ -111,7 +115,8 @@ def _decode(value: str | None) -> str:
         return ""
     try:
         return str(make_header(decode_header(value)))
-    except Exception:
+    except Exception as exc:
+        _warn_nonfatal("header decode failed; using raw value", exc)
         return value
 
 
@@ -307,8 +312,8 @@ def _send_ack_email(task: dict[str, Any], dry_run: bool) -> dict[str, Any]:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=str(ROOT))
         try:
             _P(tmppath).unlink()
-        except Exception:
-            pass
+        except Exception as exc:
+            _warn_nonfatal(f"ack temp body cleanup failed path={tmppath}", exc)
         if proc.returncode != 0:
             _log(f"  ack send FAILED for {task.get('id')}: {proc.stderr[-200:]}")
             return {"ok": False, "stderr": proc.stderr[-200:]}
@@ -357,8 +362,8 @@ def _send_fast_path_answer(task: dict[str, Any], answer_md: str, pattern_id: str
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30, cwd=str(ROOT))
         try:
             _P(tmppath).unlink()
-        except Exception:
-            pass
+        except Exception as exc:
+            _warn_nonfatal(f"fast_path temp body cleanup failed path={tmppath}", exc)
         if proc.returncode != 0:
             _log(f"  fast_path answer send FAILED: {proc.stderr[-200:]}")
             return {"ok": False, "stderr": proc.stderr[-200:]}
@@ -676,16 +681,16 @@ def _trigger_immediate_dispatch(queued: list[dict[str, Any]]) -> dict[str, Any]:
                            capture_output=True, text=True, timeout=10)
         if r.returncode == 0 and r.stdout.strip():
             return {"fired": False, "reason": "dispatch_already_running"}
-    except Exception:
-        pass
+    except Exception as exc:
+        _warn_nonfatal("immediate dispatch pgrep guard failed; continuing", exc)
     # guard 2: min-gap since last immediate fire
     try:
         if _TRIGGER_MARKER.exists():
             age = time.time() - _TRIGGER_MARKER.stat().st_mtime
             if age < _TRIGGER_MIN_GAP_SEC:
                 return {"fired": False, "reason": f"min_gap_{int(age)}s"}
-    except Exception:
-        pass
+    except Exception as exc:
+        _warn_nonfatal(f"immediate dispatch marker stat failed path={_TRIGGER_MARKER}", exc)
     if not Path(_DISPATCH_WRAPPER).exists():
         return {"fired": False, "reason": "wrapper_missing"}
     try:

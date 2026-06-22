@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 gmail_inbox_poll 非阻塞 guard/cleanup 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/gmail_inbox_poll.py`：state JSON 解析失敗、email header decode fallback、ack/fast-path temp body cleanup、immediate dispatch pgrep/min-gap guard 失敗都直接 `pass`。Gmail poll 不能因這些非核心問題中斷是對的，但 cron log 會缺少「為何重置 state、為何用 raw header、為何 immediate dispatch guard 失效」的線索。
+
+**根因**：Gmail poll 是高敏感 ops path，舊寫法過度偏向不中斷，沒有區分非阻塞與不可觀察；這會讓 email_reply queue / immediate dispatch 問題只留下結果，不留下 guard/cleanup failure 的根因訊號。
+
+**解決方法**：新增 `_warn_nonfatal()`，所有非阻塞 guard/cleanup failure 都寫入 gmail poll log/stderr，原行為不變。新增 regression tests 覆蓋壞 state JSON、header decode failure、pgrep guard failure，確認 fallback 繼續但 warning 可見。
+
 ## 2026-06-22 experiment_adaptive_window_var GARCH forecast failure 被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/experiment_adaptive_window_var.py`：Fixed_2000、Fixed_504、Adaptive_CUSUM、Expanding 四個 GARCH window strategy 的 fit/forecast 失敗都直接 `pass`。VaR 賽馬會繼續跑，但某策略 forecast 筆數偏少時，看不出是資料不足、模型收斂失敗，還是程式例外。
