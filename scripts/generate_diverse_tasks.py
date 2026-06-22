@@ -352,7 +352,11 @@ def gen_governance_tasks(existing: set[str]) -> list[dict]:
         for skill_md in SKILLS_DIR.glob("*/SKILL.md"):
             try:
                 m = skill_md.stat().st_mtime
-            except OSError:
+            except OSError as exc:
+                _warn_diverse(
+                    "skill mtime stat failed; excluding skill from stale audit "
+                    f"path={skill_md} error={type(exc).__name__}: {exc}"
+                )
                 continue
             if m < cutoff:
                 stale_skills.append((skill_md.parent.name, m))

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_diverse_tasks skill mtime stat 失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_governance_tasks()`：skill audit 掃描 `.claude/skills/*/SKILL.md` 時，單一 `SKILL.md` 的 `stat()` 失敗會直接 `continue`，沒有任何 warning。
+
+**根因**：skill mtime audit 需要容忍單一 skill 檔案暫時不可讀，避免 governance task generator 因檔案系統 race 或權限問題 crash；但靜默排除會讓 stale skill count 少算，也讓操作者看不出治理訊號不完整。
+
+**解決方法**：單一 `SKILL.md` mtime `stat()` 失敗時改用 `_warn_diverse()` 輸出 `[diverse_gen] WARN skill mtime stat failed; excluding skill from stale audit ...` 到 stderr，原本繼續掃描的 fallback 行為不變。新增 regression test 覆蓋單一 skill stat 失敗時不產生任務且有 warning。
+
 ## 2026-06-23 generate_diverse_tasks research archive completed-K filter 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_experiment_tasks()`：completed-K filter 讀取 `docs/research_archive/completed_phases_*.md` 單檔失敗時，舊碼直接 `continue`，沒有任何 warning。

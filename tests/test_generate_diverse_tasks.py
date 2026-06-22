@@ -174,6 +174,33 @@ def test_host_crontab_unmanaged_advisory_items_skipped(tmp_path, monkeypatch) ->
     assert tasks == []
 
 
+def test_governance_skill_audit_warns_when_skill_stat_fails(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    skills_dir = tmp_path / ".claude" / "skills"
+    skill_md = skills_dir / "bad-skill" / "SKILL.md"
+    skill_md.parent.mkdir(parents=True)
+    skill_md.write_text("# bad skill\n", encoding="utf-8")
+
+    monkeypatch.setattr(generate_diverse_tasks, "SKILLS_DIR", skills_dir)
+    monkeypatch.setattr(generate_diverse_tasks, "ERROR_LOG", tmp_path / "missing_error_log.md")
+    original_stat = Path.stat
+
+    def flaky_stat(self: Path, *args, **kwargs):
+        if self == skill_md:
+            raise OSError("stat denied")
+        return original_stat(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "stat", flaky_stat)
+
+    tasks = generate_diverse_tasks.gen_governance_tasks(existing=set())
+
+    assert tasks == []
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN skill mtime stat failed; excluding skill from stale audit" in err
+    assert "stat denied" in err
+
+
 def test_parse_banner_ts_accepts_hhmm_without_seconds() -> None:
     """Python script banners like `=== 台股數據收集: 2026-06-11 15:00 ===` use HH:MM
     (no seconds). _parse_banner_ts must accept them, otherwise _latest_cron_log_ts
