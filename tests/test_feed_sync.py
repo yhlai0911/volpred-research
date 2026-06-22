@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import pytest
 
-from volpred.ops.feed_sync import compute_diff
+from volpred.ops.feed_sync import compute_diff, reconcile_content_from_singles
 
 
 def _md5(s: str) -> str:
@@ -121,3 +121,31 @@ def test_compute_diff_description_fallback_for_content(tmp_path, monkeypatch):
     assert "mile_t3" not in diff["update"], (
         "feed 'description' field should hash-match DB 'content' field"
     )
+
+
+def test_reconcile_content_from_singles_warns_on_bad_single_json(tmp_path, capsys):
+    reports = tmp_path / "storage" / "reports"
+    reports.mkdir(parents=True)
+    (reports / "feed.json").write_text(
+        '[{"id": "mile_good", "title": "Good", "content": "short"}]',
+        encoding="utf-8",
+    )
+    (reports / "mile_good.json").write_text(
+        '{"id": "mile_good", "content": "short but not enough gain"}',
+        encoding="utf-8",
+    )
+    (reports / "mile_bad.json").write_text("{bad json", encoding="utf-8")
+
+    result = reconcile_content_from_singles(
+        storage_dir=tmp_path / "storage",
+        dry_run=True,
+        min_gain=100,
+    )
+
+    captured = capsys.readouterr()
+    assert result["checked_singles"] == 2
+    assert result["invalid_singles"] == 1
+    assert result["updated"] == 0
+    assert "[feed_sync] WARN single article JSON read failed; skipping" in captured.out
+    assert "mile_bad.json" in captured.out
+    assert "JSONDecodeError" in captured.out

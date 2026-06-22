@@ -100,6 +100,13 @@ def _load_feed(storage_dir: str | Path = "storage") -> list[dict]:
     return json.loads(p.read_text())
 
 
+def _warn_feed_sync(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[feed_sync] WARN {message}: "
+        f"path={path} error={type(exc).__name__}: {exc}"
+    )
+
+
 def _fetch_supabase_articles() -> dict[str, dict]:
     """Return slug -> minimal row for diff comparison.
 
@@ -344,10 +351,14 @@ def reconcile_content_from_singles(
 
     singles_dir = Path(storage_dir) / "reports"
     updated: list[dict] = []
-    for single_path in singles_dir.glob("mile_*.json"):
+    invalid_singles: list[str] = []
+    single_paths = list(singles_dir.glob("mile_*.json"))
+    for single_path in single_paths:
         try:
-            single = json.loads(single_path.read_text())
-        except Exception:
+            single = json.loads(single_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            invalid_singles.append(str(single_path))
+            _warn_feed_sync("single article JSON read failed; skipping", single_path, exc)
             continue
         sid = single.get("id")
         if not sid or sid not in feed_by_id:
@@ -375,7 +386,8 @@ def reconcile_content_from_singles(
         feed_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2))
 
     return {
-        "checked_singles": len(list(singles_dir.glob("mile_*.json"))),
+        "checked_singles": len(single_paths),
+        "invalid_singles": len(invalid_singles),
         "updated": len(updated),
         "examples": updated[:5],
         "mode": "dry_run" if dry_run else "apply",

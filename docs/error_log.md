@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 feed_sync single JSON 讀取失敗被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/feed_sync.py::reconcile_content_from_singles()`：掃 `storage/reports/mile_*.json` 補回完整文章 content 時，single JSON 讀取 / 解析失敗會直接 `continue`。reconcile 可繼續是對的，但結果只看得到少補幾篇，看不到哪個 single 壞掉。
+
+**根因**：content reconcile 是一次性 / 修復型工具，舊寫法為避免壞 single 中斷全批次而 fail-open；但缺少 warning 與計數，讓資料修復缺口不可觀察。
+
+**解決方法**：新增 `_warn_feed_sync()`；壞 single 會輸出 `[feed_sync] WARN single article JSON read failed; skipping`，回傳結果新增 `invalid_singles` 計數，原本跳過壞檔、繼續處理其他 single 的行為不變。新增 regression test 覆蓋壞 `mile_*.json`。
+
 ## 2026-06-22 content question link side-effect 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `src/volpred/ops/content.py`：release pool 發布文章後 `_mark_questions_answered_on_publish()` 失敗會回 0，unpublish / cleanup 時 `_cleanup_question_article_links()` 失敗也回 0。發布 / 下架不該被 Supabase question link side-effect 阻塞，但原本看不出是「沒有 linked question」還是「查詢 / 刪除失敗」。
