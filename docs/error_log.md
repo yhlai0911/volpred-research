@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 generate_handoff KEEP 區塊讀取失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_handoff.py::_extract_keep_block()`：既有 `storage/ops/handoff_latest.md` 存在但讀取失敗時直接回空字串，導致手寫 KEEP 區塊不會保留，且沒有任何 warning。
+
+**根因**：handoff regen 必須 fail-open，不能因舊 handoff 暫時讀不到而阻塞每小時任務池快照；但 KEEP 區塊是跨 session 手動脈絡保護機制。讀取失敗若靜默，操作者只會看到手寫內容消失，無法分辨是沒有 KEEP、marker 格式錯誤，還是檔案讀取失敗。
+
+**解決方法**：新增 `_warn_handoff_read_failed()`；`_extract_keep_block()` 在既有 handoff 讀取失敗時輸出 `[generate_handoff] WARN handoff read failed; KEEP block not preserved ...` 到 stderr，仍回空字串不中斷 regen。新增 regression test 覆蓋既有 handoff 無法讀取時的 warning。
+
 ## 2026-06-22 gmail-poll LaunchAgent 連續撞 60s alarm timeout（boss email pipeline silent 停 2.5h）
 
 **問題**：autonomous tick 發現 `gmail_inbox_state.json` mtime 卡在 21:00（已 2h20m 未更新）。boss email 自動 queue pipeline 停擺。

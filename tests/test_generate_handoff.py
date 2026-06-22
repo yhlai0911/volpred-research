@@ -153,3 +153,29 @@ def test_handoff_accepts_naive_completed_at_without_warning(tmp_path, monkeypatc
 
     assert "invalid completed_at" not in handoff
     assert "**task pool warnings" not in handoff
+
+
+def test_extract_keep_block_warns_when_existing_handoff_cannot_be_read(
+    tmp_path,
+    monkeypatch,
+    capsys,
+) -> None:
+    module = _load_generate_handoff()
+    handoff = tmp_path / "handoff_latest.md"
+    handoff.write_text("<!-- KEEP -->\nmanual note\n<!-- /KEEP -->", encoding="utf-8")
+    original_read_text = Path.read_text
+
+    def fail_read_text(path: Path, *args, **kwargs):
+        if path == handoff:
+            raise OSError("permission denied")
+        return original_read_text(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", fail_read_text)
+
+    keep = module._extract_keep_block(handoff)
+
+    captured = capsys.readouterr()
+    assert keep == ""
+    assert "[generate_handoff] WARN handoff read failed" in captured.err
+    assert "KEEP block not preserved" in captured.err
+    assert "permission denied" in captured.err

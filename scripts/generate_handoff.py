@@ -52,6 +52,14 @@ def _warn_json_read_failed(path: Path, exc: Exception, *, action: str) -> None:
     )
 
 
+def _warn_handoff_read_failed(path: Path, exc: Exception, *, action: str) -> None:
+    print(
+        "[generate_handoff] WARN handoff read failed; "
+        f"{action} path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def _load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
@@ -410,7 +418,8 @@ def _extract_keep_block(path: Path) -> str:
         return ""
     try:
         txt = path.read_text(encoding="utf-8")
-    except Exception:
+    except Exception as exc:
+        _warn_handoff_read_failed(path, exc, action="KEEP block not preserved")
         return ""
     start = txt.find("<!-- KEEP -->")
     if start == -1:
