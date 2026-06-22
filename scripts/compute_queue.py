@@ -44,6 +44,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
@@ -58,6 +59,30 @@ def utc_now() -> str:
 def ensure_dirs():
     QUEUE_DIR.mkdir(parents=True, exist_ok=True)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _warn_compute_queue(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[compute_queue] WARN {message}: "
+        f"path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
+def _read_job_file(path: Path, *, context: str) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        _warn_compute_queue(f"{context} job JSON read failed; skipping", path, exc)
+        return None
+    if not isinstance(payload, dict):
+        _warn_compute_queue(
+            f"{context} job JSON schema invalid; skipping",
+            path,
+            TypeError(f"expected dict, got {type(payload).__name__}"),
+        )
+        return None
+    return payload
 
 
 def slug(s: str) -> str:
@@ -110,9 +135,8 @@ def list_jobs(args) -> int:
     ensure_dirs()
     rows = []
     for p in sorted(QUEUE_DIR.glob("*.json")):
-        try:
-            j = json.loads(p.read_text())
-        except Exception:
+        j = _read_job_file(p, context="list")
+        if j is None:
             continue
         if args.status and j.get("status") != args.status:
             continue
@@ -179,9 +203,8 @@ def run_next(args) -> int:
         # Find oldest queued job
         queued = []
         for p in sorted(QUEUE_DIR.glob("*.json")):
-            try:
-                j = json.loads(p.read_text())
-            except Exception:
+            j = _read_job_file(p, context="run-next")
+            if j is None:
                 continue
             if j.get("status") == "queued":
                 queued.append((j.get("queued_at", ""), p, j))

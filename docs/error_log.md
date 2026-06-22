@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 compute_queue 壞 job JSON 被靜默跳過
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/compute_queue.py`：`list` 與 `run-next` 掃描 `storage/ops/compute_queue/*.json` 時，單一 job JSON 讀取或 parse 失敗會直接 `continue`，沒有任何 warning。
+
+**根因**：compute queue worker 需要容忍單一壞 receipt，避免整批 heavy compute queue 被一個壞檔卡死；但靜默跳過會低估 queued / completed-pending-followup work，甚至讓 `run-next` 回 `no queued jobs`，操作者看不出是 queue 空還是 receipt corruption。
+
+**解決方法**：新增 `_read_job_file()` 與 `[compute_queue] WARN ...` diagnostics；壞 JSON 或頂層 schema 非 dict 時仍跳過該 job，但 list / run-next 都會把檔案與錯誤類型印到 stderr。新增 regression tests 覆蓋 list 跳過壞檔仍列好檔，以及 run-next 只有壞檔時 warning + no queued。
+
 ## 2026-06-23 digest enqueue JSON source 讀取失敗被靜默套 default
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/enqueue_daily_digest.py`：`feed.json` 或 `next_tasks.json` 讀取 / JSON parse 失敗時直接套 default。`feed.json` 壞掉會讓「今日已發 digest」判斷失效而可能重複排文；`next_tasks.json` 壞掉更危險，可能把任務池當空池追加後覆寫。
