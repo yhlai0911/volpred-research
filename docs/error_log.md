@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-22 dispatch_supervisor current_job age 解析失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/dispatch_supervisor/state.py::get_current_job()`：`current_job.started_at` 解析或 aware/naive datetime 相減失敗時直接 `pass`，回傳 `age_seconds=-1.0`。health check 仍能繼續，但 ops log 看不出 worker 年齡未知是 metadata 壞掉還是單純未開始。
+
+**根因**：dispatch supervisor state 屬於非阻塞監控讀取，舊寫法為了避免壞 state 中斷 health check，把 timestamp parse failure 靜默降級；同時沒有相容歷史 naive ISO timestamp。
+
+**解決方法**：`get_current_job()` 改為支援 `Z`、aware ISO 與 naive ISO（naive 視為 UTC）；真正不可解析時用 logger 輸出 `invalid current_job.started_at ...` warning，保留 `age_seconds=-1.0`。新增 regression tests 鎖住 naive timestamp 可算 age、壞 timestamp 會 warning。
+
 ## 2026-06-22 dispatch blocked_until 解析失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/continue_task_dispatch.py::detect_block_reason()`：任務有 `blocked_reason` 與 `blocked_until` 時，timestamp 解析失敗會直接 `pass`。任務仍被視為 blocked 是保守的，但 hourly dispatch log 看不出是過期時間尚未到、還是 metadata 壞掉。

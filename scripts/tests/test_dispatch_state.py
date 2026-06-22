@@ -16,6 +16,7 @@ Run::
 from __future__ import annotations
 
 import json
+import logging
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -154,6 +155,53 @@ def test_get_current_job_returns_dataclass(tmp_state: Path) -> None:
     assert job.attempt == 2
     assert job.model == "sonnet"
     assert job.age_seconds >= 0
+
+
+def test_get_current_job_accepts_naive_started_at(tmp_state: Path) -> None:
+    st.begin_fire(
+        pid=42,
+        pgid=42,
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/d.log",
+        path=tmp_state,
+    )
+    snap = st.read_state(tmp_state)
+    snap["current_job"]["started_at"] = (
+        datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    )
+    tmp_state.write_text(json.dumps(snap), encoding="utf-8")
+
+    job = st.get_current_job(tmp_state)
+
+    assert job is not None
+    assert job.age_seconds >= 0
+
+
+def test_get_current_job_warns_on_invalid_started_at(
+    tmp_state: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    st.begin_fire(
+        pid=42,
+        pgid=42,
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/d.log",
+        path=tmp_state,
+    )
+    snap = st.read_state(tmp_state)
+    snap["current_job"]["started_at"] = "not-a-date"
+    tmp_state.write_text(json.dumps(snap), encoding="utf-8")
+
+    with caplog.at_level(logging.WARNING, logger=st.__name__):
+        job = st.get_current_job(tmp_state)
+
+    assert job is not None
+    assert job.age_seconds == -1.0
+    assert "invalid current_job.started_at" in caplog.text
+    assert "not-a-date" in caplog.text
 
 
 def test_corrupt_state_falls_back_to_empty(tmp_state: Path) -> None:

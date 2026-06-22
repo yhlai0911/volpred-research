@@ -43,6 +43,7 @@ from __future__ import annotations
 
 import fcntl
 import json
+import logging
 import os
 import tempfile
 from contextlib import contextmanager
@@ -56,6 +57,7 @@ STATE_PATH = ROOT / "storage" / "ops" / "dispatch_state.json"
 
 SCHEMA_VERSION = 1
 COMPLETIONS_MAX = 100  # ring buffer cap
+LOG = logging.getLogger(__name__)
 
 
 def _now() -> str:
@@ -285,9 +287,19 @@ def get_current_job(path: Path = STATE_PATH) -> CurrentJob | None:
         return None
     age = -1.0
     try:
-        age = (datetime.now(timezone.utc) - datetime.fromisoformat(job["started_at"])).total_seconds()
-    except Exception:
-        pass
+        started_at = str(job["started_at"]).replace("Z", "+00:00")
+        started_dt = datetime.fromisoformat(started_at)
+        if started_dt.tzinfo is None:
+            started_dt = started_dt.replace(tzinfo=timezone.utc)
+        age = (datetime.now(timezone.utc) - started_dt).total_seconds()
+    except (KeyError, TypeError, ValueError) as exc:
+        LOG.warning(
+            "invalid current_job.started_at in %s: %r (%s: %s)",
+            path,
+            job.get("started_at"),
+            type(exc).__name__,
+            exc,
+        )
     return CurrentJob(
         pid=int(job["pid"]),
         pgid=int(job.get("pgid", job["pid"])),
