@@ -258,3 +258,25 @@ def test_paper_review_tasks_are_codex_agentable_not_main_thread_only(tmp_path, m
     assert len(tasks) == 1
     assert tasks[0]["task_type"] == "paper_review"
     assert "main-thread-only" not in tasks[0]["tags"]
+
+
+def test_gen_experiment_tasks_warns_when_research_program_unreadable(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    research_program = tmp_path / "research_program.md"
+    research_program.mkdir()
+    experiments = tmp_path / "experiments"
+    experiments.mkdir()
+
+    monkeypatch.setattr(generate_diverse_tasks, "RESEARCH_PROGRAM", research_program)
+    monkeypatch.setattr(generate_diverse_tasks, "EXPERIMENTS_DIR", experiments)
+
+    tasks = generate_diverse_tasks.gen_experiment_tasks(
+        existing=set(),
+        rng=generate_diverse_tasks.random.Random(1533),
+    )
+
+    assert tasks == []
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN research_program read failed; skipping experiment backlog" in err
+    assert "IsADirectoryError" in err

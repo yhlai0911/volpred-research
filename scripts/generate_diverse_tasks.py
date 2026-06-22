@@ -432,7 +432,11 @@ def gen_experiment_tasks(existing: set[str], rng: random.Random) -> list[dict]:
 
     try:
         text = RESEARCH_PROGRAM.read_text(encoding="utf-8")
-    except OSError:
+    except OSError as exc:
+        _warn_diverse(
+            "research_program read failed; skipping experiment backlog "
+            f"path={RESEARCH_PROGRAM} error={type(exc).__name__}: {exc}"
+        )
         return out
 
     import re

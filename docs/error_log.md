@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 generate_diverse_tasks research_program 讀取失敗被靜默吞掉
+
+**問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/generate_diverse_tasks.py::gen_experiment_tasks()`：`research_program.md` 存在但讀取失敗時，舊碼直接回空清單，沒有任何 warning。
+
+**根因**：experiment backlog discovery 依賴 `research_program.md` 掃出尚未 materialize 的 K-id。讀取失敗時 fail-open 回空清單可避免 refill cron crash，但靜默回空會讓操作者誤以為 backlog 本來就沒有可轉成任務的實驗方向，實際上是來源訊號不可讀。
+
+**解決方法**：在 `research_program.md` 讀取失敗時改用既有 `_warn_diverse()` 輸出 `[diverse_gen] WARN research_program read failed; skipping experiment backlog ...` 到 stderr，原本不產生任務的 fallback 行為不變。新增 regression test 覆蓋 unreadable research_program 時不 crash 且有 warning。
+
 ## 2026-06-23 cron_review log mtime fallback 失敗被靜默吞掉
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，掃到 `scripts/cron_review.py::last_log_run()`：cron log 可讀但 `stat()` 失敗時，舊碼直接略過 mtime fallback，沒有任何 warning。
