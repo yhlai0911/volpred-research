@@ -1150,6 +1150,74 @@ def _parse_dispatch_health_state(storage_dir: str, now: datetime) -> dict[str, A
     }
 
 
+GMAIL_POLL_STALE_WARN_HOURS = 2.0
+GMAIL_POLL_STALE_CRITICAL_HOURS = 6.0
+
+
+def _parse_gmail_poll_freshness_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Dead-man switch for the boss-email ingestion pipeline (2026-06-22).
+
+    gmail-poll runs every 15min (24/7) via LaunchAgent and updates
+    storage/ops/gmail_inbox_state.json on every successful poll (even when
+    nothing new is queued). If that file's mtime falls behind, the poll is
+    silently failing — e.g. the wrapper's alarm-timeout SIGALRM-kills every fire
+    before completion (2026-06-22: 60s cap too tight for ~20 sequential IMAP
+    fetches → state froze 2.5h, zero alerts). No active-window gate: the poll is
+    expected to run around the clock.
+    """
+    state_path = Path(storage_dir) / "ops" / "gmail_inbox_state.json"
+    age_hours: float | None = None
+    if state_path.exists():
+        try:
+            mtime = datetime.fromtimestamp(state_path.stat().st_mtime, tz=timezone.utc)
+            age_hours = round((now - mtime).total_seconds() / 3600.0, 2)
+        except OSError:
+            age_hours = None
+
+    missing = age_hours is None
+    is_critical = missing or age_hours > GMAIL_POLL_STALE_CRITICAL_HOURS
+    breached = missing or age_hours > GMAIL_POLL_STALE_WARN_HOURS
+    level = "critical" if is_critical else ("warn" if breached else "info")
+
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "gmail-poll 的 state 檔（boss email 自動 queue pipeline 的 liveness 訊號）過期。",
+            f"- state 檔: {state_path}",
+            f"- 距今: {age_hours if age_hours is not None else '檔案不存在/不可讀'} 小時",
+            f"- 門檻: warn>{GMAIL_POLL_STALE_WARN_HOURS}h / critical>{GMAIL_POLL_STALE_CRITICAL_HOURS}h",
+            "",
+            "## 影響",
+            "poll 每 15min 跑、每次成功都更新此檔；mtime 落後代表 poll 連續失敗（通常是",
+            "wrapper alarm-timeout 把序列 IMAP fetch 砍掉，exit=142）。boss 回信不會被自動",
+            "queue 成 task → 老闆指示 silent 漏接（違反 AI 全自動運營 mission）。",
+            "",
+            "## 建議行動",
+            "1. 看 ~/.volpred/logs/gmail_poll.log 是否有 'Alarm clock' / exit=142（timeout）。",
+            "2. 手動補 gap：uv run python scripts/gmail_inbox_poll.py --max 20（確認可完成）。",
+            "3. 若反覆 timeout，放寬 ~/.volpred/bin/cron_gmail_poll.sh 的 perl alarm 秒數，",
+            "   並考慮收斂 SINCE 窗 / 批次 IMAP fetch。詳 docs/error_log.md gmail-poll entry。",
+        ]
+    )
+    return {
+        "id": "gmail_poll_freshness",
+        "breached": breached,
+        "level": level,
+        "title": (
+            f"gmail-poll 停擺：state {age_hours}h 未更新"
+            if breached
+            else "gmail_poll_freshness ok"
+        ),
+        "body": body if breached else "",
+        "details": {
+            "state_path": str(state_path),
+            "age_hours": age_hours,
+            "warn_hours": GMAIL_POLL_STALE_WARN_HOURS,
+            "critical_hours": GMAIL_POLL_STALE_CRITICAL_HOURS,
+        },
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -1162,6 +1230,7 @@ def build_alert_condition_report(
         _parse_draft_pool_state(storage_dir),
         _parse_publishing_freshness_state(storage_dir, current),  # 2026-06-22 outcome dead-man switch (禁止脫班)
         _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
+        _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
         _parse_host_cron_state(storage_dir, current),
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),

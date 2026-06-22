@@ -34,7 +34,11 @@
 
 **真根因**：看錯 log 檔。LaunchAgent wrapper（`~/.volpred/bin/cron_gmail_poll.sh`）stdout 寫的是 **`~/.volpred/logs/gmail_poll.log`**，不是 `storage/logs/cron/gmail_poll.log`（後者是 `gmail_inbox_poll.py` 腳本自身的 log，只在跑完才寫 "poll done"）。正確 log 顯示排程**一直在每 15min fire**，但每次 `perl alarm 60` 把 `uv run python gmail_inbox_poll.py` 在 60s SIGALRM kill（exit=142）→ 從沒跑到 "poll done" → state 與 storage log 都凍在 21:00。手動跑只要 **9s** 完成；20:30/21:00 也都 ~8s → 21:15~23:15 是**外部 IMAP/網路延遲暫時性 spike**，非代碼問題。手動 run 補上即時 gap（queued=0，整段無遺漏 actionable boss 回信）。
 
-**教訓 + 候選結構修復**：(1) 診斷 LaunchAgent 看 log 要先確認 wrapper 的 `StandardOutPath` 實際指向哪（dual-log 陷阱：script-internal log vs launchd-stdout log 不同檔，只看一個會誤判）；(2) `state mtime` 是比 log "poll done" 更可靠的 liveness 訊號（log 可能來自不同檔/不同寫入點）；(3) **若復發**（非 transient）→ 結構修復走 directive #1 dead-man-switch 框架：加 `gmail_poll_freshness` check（`gmail_inbox_state.json` mtime 在台北活躍窗 >2h → warn），補上「boss email pipeline 停擺」這個目前無 outcome 監控的盲區；並考慮把 60s alarm 放寬到 120s 給 cold-start + IMAP latency headroom。本次屬 strike 1 + transient，先補 gap 不過度工程。
+**教訓**：(1) 診斷 LaunchAgent 看 log 要先確認 wrapper 的 `StandardOutPath` 實際指向哪（dual-log 陷阱：script-internal log vs launchd-stdout log 不同檔，只看一個會誤判）；(2) `state mtime` 是比 log "poll done" 更可靠的 liveness 訊號（log 可能來自不同檔/不同寫入點）。
+
+**根因更正（同日次輪 tick，strike 2+）**：上輪判「transient IMAP spike」是**錯的**。次輪驗證 23:30 + 23:45 排程 fire **又雙雙 timeout**（exit=142），但手動跑 9s、最小 env 33s → 證明非 transient、非時間問題，是 **launchd context 下序列 IMAP I/O 跨越 60s alarm 邊界**：poll 對 SINCE 窗內 ~20 封 email 各做一次 IMAP FETCH round-trip，總延遲隨 email count 增長（59→63）且高變異（9s/33s/>60s），60s 太緊把合法工作 SIGALRM 砍掉。keychain 假設排除（憑證走 `.env` 非 keychain）。
+
+**結構修復（已落地，非候選）**：(a) `scripts/cron_gmail_poll.sh` 的 perl alarm **60s→180s**（cp 到 `~/.volpred/bin/`；180s 是合法 workload 的 headroom，非 band-aid；每 15min fire 不會 overlap；hang 保護保留在更高 ceiling）；(b) `src/volpred/ops/alerts.py` 新增 `_parse_gmail_poll_freshness_state`（`gmail_inbox_state.json` mtime warn>2h / critical>6h，**無 active-window gate**因 poll 24/7 跑），補上「boss email pipeline silent 停擺」這個原本零 alert 的盲區；regression test `tests/test_gmail_poll_freshness_alert.py`（4 cases：fresh/warn/critical/missing 全 PASS）。kickstart 驗證 180s wrapper 在真 launchd 下跑完。後續可選優化：收斂 SINCE 窗 / 批次 IMAP fetch / high-water-mark UID（目前 timeout 已解，不急）。
 
 ## 2026-06-22 release_pool failed sync ledger 壞檔被靜默重建
 
