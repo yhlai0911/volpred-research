@@ -36607,5 +36607,41 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-23T19:08:23+00:00"
+  },
+  {
+    "id": "platform_ops_paper_submit_reminder_1782245463",
+    "title": "[platform_ops] Paper portfolio submit reminder — leverage-direction 已 ready 9 天",
+    "description": "leverage-direction v13 READY_FOR_SUBMISSION_CHECKPOINT since 2026-06-15 (9 days). PRG v5_independent REJECT (3 BLOCKING, 4 MAJOR) — 需修。本 task: (1) Audit paper portfolio status, (2) 寄 boss reminder email 推 leverage-direction JBF submit decision + PRG BLOCKING 已 backlog, (3) PHASE Z commit.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "tags": [
+      "paper",
+      "submit_decision",
+      "boss_reminder"
+    ],
+    "created_at": "2026-06-23T20:11:03Z",
+    "source": "hourly_dispatch_main_thread",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-23T20:11:03.384348+00:00",
+    "claim_session_id": "e604f0e776ed",
+    "started_at": "2026-06-23T20:11:03.584369+00:00",
+    "completed_at": "2026-06-23T20:11:52.211176+00:00",
+    "result": "Paper portfolio audit 完成: leverage-direction v13 ready 9 天 (JBF), PRG v5_independent REJECT 3 BLOCKING 已 backlog as paper_body_prg_v5_blocking_fix_1782245463. Boss reminder email 已寄 (notification_id b59c6873, needs_reply). 其他 6 篇 paper readiness 待下次 paper_review fire 補 audit."
+  },
+  {
+    "id": "paper_body_prg_v5_blocking_fix_1782245463",
+    "title": "[paper_body] PRG-Periodic-GARCH v5_independent BLOCKING fixes (3 issues)",
+    "description": "Codex v5_independent verdict=REJECT. 3 BLOCKING: (1) Identification — PRG/GJR-HAR 資訊集 + 時點不對等需重新 frame, abstract/intro/conclusion 不能再說 structural dominance; (2) Eq.(10) GJR-X 不 fair — PRG 用 r²_{d,0} (當日), GJR-X 用 r²_{overnight,t-1} (前日), 必須對齊或撤回 structural claim; (3) Lookahead — 開盤可交易性敘事與 r_{d,0} 計算需證成 implementability. 4 MAJOR: Harvey citation, VaR/ES claims, ablation generalization, HAR artifact. 完整 review: paper/prg-periodic-garch/review_history/v5_independent/codex_review.md. 需 body_v6.tex rewrite + 重審。",
+    "task_type": "paper_body",
+    "priority": 2,
+    "status": "pending",
+    "tags": [
+      "paper",
+      "prg",
+      "blocking_fix"
+    ],
+    "created_at": "2026-06-23T20:11:03Z",
+    "source": "hourly_dispatch_main_thread"
   }
 ]
