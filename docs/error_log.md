@@ -10,7 +10,14 @@
 
 **根因（meta，跨三 incident）**：全系統**無並發紀律** —— (a) codex_loop 無單例鎖；(b) release `.release_settings.json` read→gate→write 無 lock；(c) K-id 配號無 atomic reservation。三者都是「多源/多實例搶同一資源 + 無鎖 + orphan/stale 不清理」。依 CLAUDE.md「看見結構性 root cause 就立刻重構不等次數」→ 即時修。
 
-**解決方法**：(a) `scripts/codex_loop.sh` 加 single-instance guard：先用 atomic `mkdir` lock 阻止新實例並發進入；若 lock pid 已不存在則回收 stale lock；取得 lock 後再用 legacy `pgrep -f scripts/codex_loop.sh` 清掉舊版 orphan sibling（TERM → KILL mop-up）；(b) **Claude Bash sandbox 無法 signal 外部 process**（`kill`/`kill -9` 回 exit=0 但 seatbelt no-op，process 不死）→ 現存 24 個需用戶在自己 terminal 跑 `pkill -KILL -f scripts/codex_loop.sh`，或直接重啟一個新版 loop（guard 會自動清掉舊 24）；(c) release-pool 與 K-id 的鎖修見 refactor_plan。**驗證**：`tests/test_codex_loop_guard.py` 覆蓋取得/釋放 lock、live lock 退出、stale lock 回收。**教訓**：任何「常駐背景 loop」腳本一律要單例鎖，否則 terminal-tied 假設在 orphan 下失效。
+**解決方法**：(a) `scripts/codex_loop.sh` 加 single-instance guard：先用 atomic `mkdir` lock 阻止新實例並發進入；若 lock pid 已不存在則回收 stale lock；取得 lock 後再清掉舊版 orphan sibling（TERM → KILL mop-up）；(b) release-pool 與 K-id 的鎖修見 refactor_plan。**驗證**：`tests/test_codex_loop_guard.py` 覆蓋取得/釋放 lock、live lock 退出、stale lock 回收。**教訓**：任何「常駐背景 loop」腳本一律要單例鎖，否則 terminal-tied 假設在 orphan 下失效。
+
+**2026-06-24 收尾（24 孤兒已實清 + pgrep 偵測 bug 修正）**：
+- **關鍵實證**：本機 `pgrep -f 'scripts/codex_loop.sh'` **回傳 0**，即使同一 shell 的 `ps -ax | grep` 看得到 24 個活著的實例 —— pgrep -f 在此 host 的 full-argv 匹配是壞的。**這正是新版 mkdir-lock loop（pid 49233）啟動後沒能自動清掉那 24 個孤兒的真因**：它的 legacy cleanup 走 `pgrep`，pgrep 回空 → 找不到 sibling → 一個都沒殺。
+- **Claude Bash sandbox 限制更正**：先前以為「kill 一律被 seatbelt no-op」；實測在 **`dangerouslyDisableSandbox: true`** 下，`kill -9 <pid>` **會生效**。先前失敗是沒關 sandbox。用 `ps -ax | grep` 取 PID（不是 pgrep）+ 逐一 `kill -9` 成功清掉全部 24 個，只留合法的 49233。
+- **修流程不修資料**：`be5e4806` 把 `cleanup_legacy_codex_loop_siblings` 的偵測從壞掉的 `pgrep -f` 換成 `list_codex_loop_pids()`（`ps -ax | grep`），未來一次性 legacy reap 不再 silent miss。mkdir lock 仍是 primary forward guard。
+- **forward guard 端到端驗證**：49233 持 lock 時跑第二實例 → 印 `already running pid=49233; exiting` 並退出，lock holder 未被覆蓋。孤兒不會再累積。
+- **殘留教訓**：ops 腳本偵測同名 process 一律用 `ps -ax | grep ... | grep -v grep | awk '{print $1}'`，**禁用 `pgrep -f`**（本機不可靠，silent 回 0）。
 
 
 ## 2026-06-23 publisher mirror sync 整包 feed PUT 後續改為單篇 report PUT
