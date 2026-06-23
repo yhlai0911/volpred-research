@@ -1,7 +1,7 @@
 {
   "experiment_id": "k1544_prg_fair_info_gjr",
   "title": "PRG v6 fair-information GJR-X current-overnight benchmark across six markets",
-  "created_at": "2026-06-23T22:09:24.434040+00:00",
+  "created_at": "2026-06-23T22:13:48.990475+00:00",
   "random_seed": 1544,
   "research_question": "Does PRG still beat a GJR-X benchmark that receives the current-day overnight realization at the day-d open, rather than lagged overnight?",
   "method_summary": {
@@ -9,6 +9,7 @@
     "no_lookahead_guard": "At OOS t, fit uses observations < t; forecast may use x_overnight[t] only because it is realized at the market open. It never uses r_c2c[t] or target[t].",
     "loss": "QLIKE on common full-day variance target",
     "dm_orientation": "DM t is computed on fair-GJR loss minus PRG loss; positive favors PRG.",
+    "prg_open_known_diagnostic": "Also reports PRG_Extended_OpenKnownON = current overnight realized component + PRG h_intraday_t. This is not the paper's canonical h_overnight_t + h_intraday_t forecast, but diagnoses the full-day-at-open convention.",
     "harvey_threshold": "|t| > 3.0"
   },
   "markets": {
@@ -22,7 +23,7 @@
         "n_is": 4778,
         "n_oos": 1823,
         "period": "2000-01-04 to 2026-04-02",
-        "overnight_variance_share_pct": 34.466444673080275,
+        "overnight_variance_share_pct": 34.46642965714483,
         "prg_refit_freq_days": 126
       },
       "oos_period": {
@@ -32,14 +33,28 @@
         "n_common_valid": 1823
       },
       "qlike": {
-        "PRG_Extended": 0.7490117483816979,
-        "FairInfo_GJR_X_CurrentON": 0.7294141219166189,
-        "prg_advantage_pct_vs_fair_gjr": -2.6867626875092587,
+        "PRG_Extended": 0.7460150570431098,
+        "FairInfo_GJR_X_CurrentON": 0.7209268782819515,
+        "prg_advantage_pct_vs_fair_gjr": -3.479989374365709,
         "winner": "FairInfo_GJR_X_CurrentON"
       },
+      "diagnostic_prg_open_known_overnight": {
+        "qlike": 0.6714448877579756,
+        "n_common_valid": 1823,
+        "prg_open_known_advantage_pct_vs_fair_gjr": 6.863662878251523,
+        "dm_fair_gjr_minus_prg_open_known": {
+          "t_stat": 2.6563646665897287,
+          "p_value": 0.007967731453511595,
+          "n": 1823,
+          "max_lag": 12,
+          "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended_OpenKnownON loss, favoring open-known PRG",
+          "harvey_pass_abs_t_gt_3": false
+        },
+        "valid_oos": 1823
+      },
       "dm_fair_gjr_minus_prg": {
-        "t_stat": -1.7191260880381753,
-        "p_value": 0.08576126706477716,
+        "t_stat": -2.5043261405673,
+        "p_value": 0.012355258769147337,
         "n": 1823,
         "max_lag": 12,
         "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
@@ -59,377 +74,377 @@
               "t": 4778,
               "date": "2019-01-02",
               "n_train": 4778,
-              "neg_loglik": -20100.30614587234,
+              "neg_loglik": -20113.359672943585,
               "params": {
-                "omega": 2.487864414829698e-06,
+                "omega": 4.597805525908777e-06,
                 "alpha": 0.0,
-                "gamma": 0.2144824191097555,
-                "beta": 0.7759843780981085,
-                "delta_current_overnight": 0.36333903376488563
+                "gamma": 0.2321502199551855,
+                "beta": 0.6474315631808586,
+                "delta_current_overnight": 0.7546459965548256
               }
             },
             {
               "t": 4841,
               "date": "2019-04-03",
               "n_train": 4841,
-              "neg_loglik": -20303.697958041044,
+              "neg_loglik": -20303.697412324167,
               "params": {
-                "omega": 1.2816860872436548e-05,
-                "alpha": 0.15462219467271346,
-                "gamma": 0.14391453683484157,
-                "beta": 0.3832152013438988,
-                "delta_current_overnight": 0.9744469756610976
+                "omega": 1.281248600273484e-05,
+                "alpha": 0.15472994980694915,
+                "gamma": 0.14399088454420164,
+                "beta": 0.38313017916106923,
+                "delta_current_overnight": 0.9748400467378683
               }
             },
             {
               "t": 4904,
               "date": "2019-07-03",
               "n_train": 4904,
-              "neg_loglik": -20636.514291049614,
+              "neg_loglik": -20636.509897504722,
               "params": {
-                "omega": 2.9897946667647637e-06,
-                "alpha": 0.02797645989476101,
-                "gamma": 0.09493471873911073,
-                "beta": 0.7500881855381198,
-                "delta_current_overnight": 0.5083495668084177
+                "omega": 2.9900296792671838e-06,
+                "alpha": 0.027985132899852366,
+                "gamma": 0.09493877414737278,
+                "beta": 0.7500887870202136,
+                "delta_current_overnight": 0.508318361347031
               }
             },
             {
               "t": 4967,
               "date": "2019-10-02",
               "n_train": 4967,
-              "neg_loglik": -20861.332865309672,
+              "neg_loglik": -20853.33522005555,
               "params": {
-                "omega": 2.0714448865565186e-06,
-                "alpha": 0.08554909024044667,
-                "gamma": 0.15787150646631556,
-                "beta": 0.7660120330560362,
-                "delta_current_overnight": 0.2689569507885714
+                "omega": 2.9406250077056695e-06,
+                "alpha": 0.0877906013903389,
+                "gamma": 0.13580157980354712,
+                "beta": 0.7599060441147988,
+                "delta_current_overnight": 0.22359096032758427
               }
             },
             {
               "t": 5030,
               "date": "2020-01-02",
               "n_train": 5030,
-              "neg_loglik": -21211.026413151372,
+              "neg_loglik": -21151.8280899135,
               "params": {
-                "omega": 4.649915444818208e-06,
-                "alpha": 0.05704299188589128,
-                "gamma": 0.33295607495819124,
-                "beta": 0.6061554553532746,
-                "delta_current_overnight": 0.6159903590770897
+                "omega": 2.860546015047952e-06,
+                "alpha": 0.08796708912920041,
+                "gamma": 0.13596877637032065,
+                "beta": 0.7599522991801967,
+                "delta_current_overnight": 0.22393461241133916
               }
             },
             {
               "t": 5093,
               "date": "2020-04-02",
               "n_train": 5093,
-              "neg_loglik": -21377.50109928898,
+              "neg_loglik": -21432.390396020997,
               "params": {
-                "omega": 2.863890089403916e-06,
-                "alpha": 0.08783814910178858,
-                "gamma": 0.13584662929596455,
-                "beta": 0.7599184805356614,
-                "delta_current_overnight": 0.22368355339360543
+                "omega": 5.22684638299566e-06,
+                "alpha": 0.07272477045675435,
+                "gamma": 0.3276769872720747,
+                "beta": 0.5769824883551089,
+                "delta_current_overnight": 0.6600917322446295
               }
             },
             {
               "t": 5156,
               "date": "2020-07-02",
               "n_train": 5156,
-              "neg_loglik": -21660.71908949811,
+              "neg_loglik": -21606.932493541357,
               "params": {
-                "omega": 5.033936376771145e-06,
-                "alpha": 0.05152920964183296,
-                "gamma": 0.35526352784955917,
-                "beta": 0.5962473597309913,
-                "delta_current_overnight": 0.6121199424472928
+                "omega": 2.793573986534212e-06,
+                "alpha": 0.06664726175338943,
+                "gamma": 0.16610475241080802,
+                "beta": 0.7711791676283849,
+                "delta_current_overnight": 0.20493092606590316
               }
             },
             {
               "t": 5219,
               "date": "2020-10-01",
               "n_train": 5219,
-              "neg_loglik": -21950.814588878406,
+              "neg_loglik": -21950.822906384525,
               "params": {
-                "omega": 4.801888048367169e-06,
+                "omega": 4.803817087193121e-06,
                 "alpha": 0.0,
-                "gamma": 0.24035876194322944,
-                "beta": 0.6342478940488597,
-                "delta_current_overnight": 0.7608332601609195
+                "gamma": 0.24069246465851066,
+                "beta": 0.63396481991198,
+                "delta_current_overnight": 0.7617468208967385
               }
             },
             {
               "t": 5282,
               "date": "2020-12-31",
               "n_train": 5282,
-              "neg_loglik": -22209.976236108898,
+              "neg_loglik": -22213.104737582154,
               "params": {
-                "omega": 4.166946256909734e-06,
+                "omega": 4.416709427084646e-06,
                 "alpha": 0.0,
-                "gamma": 0.20172601568869136,
-                "beta": 0.6594659678062995,
-                "delta_current_overnight": 0.7582842551133637
+                "gamma": 0.2750028810504705,
+                "beta": 0.6464545719274887,
+                "delta_current_overnight": 0.6883202265155364
               }
             },
             {
               "t": 5345,
               "date": "2021-04-05",
               "n_train": 5345,
-              "neg_loglik": -22427.125025528618,
+              "neg_loglik": -22478.001913520322,
               "params": {
-                "omega": 1.1672768478097517e-05,
-                "alpha": 0.04207861375604446,
-                "gamma": 0.33159030302381287,
-                "beta": 0.4392796826929617,
-                "delta_current_overnight": 0.8197525858381458
+                "omega": 4.740142836292724e-06,
+                "alpha": 0.0,
+                "gamma": 0.2741238248763344,
+                "beta": 0.6329204506482574,
+                "delta_current_overnight": 0.7235675881342347
               }
             },
             {
               "t": 5408,
               "date": "2021-07-02",
               "n_train": 5408,
-              "neg_loglik": -22767.64090197937,
+              "neg_loglik": -22766.76746169623,
               "params": {
-                "omega": 5.158875480039268e-06,
+                "omega": 4.706460170961077e-06,
                 "alpha": 0.0,
-                "gamma": 0.24421607361232703,
-                "beta": 0.6163373869956491,
-                "delta_current_overnight": 0.7987284144101293
+                "gamma": 0.22971314434776266,
+                "beta": 0.6279933671027065,
+                "delta_current_overnight": 0.8149603014740378
               }
             },
             {
               "t": 5471,
               "date": "2021-10-01",
               "n_train": 5471,
-              "neg_loglik": -23031.352854897996,
+              "neg_loglik": -23057.38983129356,
               "params": {
-                "omega": 3.605164530934529e-06,
-                "alpha": 0.0575223812009884,
-                "gamma": 0.23189206714179986,
-                "beta": 0.6486507080480447,
-                "delta_current_overnight": 0.6177487079306133
+                "omega": 4.987849862416758e-06,
+                "alpha": 0.0,
+                "gamma": 0.25641743959723734,
+                "beta": 0.6144369428829718,
+                "delta_current_overnight": 0.805203244793291
               }
             },
             {
               "t": 5534,
               "date": "2021-12-31",
               "n_train": 5534,
-              "neg_loglik": -23336.409440578147,
+              "neg_loglik": -23324.78932635343,
               "params": {
-                "omega": 4.744653249109148e-06,
+                "omega": 4.211532138821055e-06,
                 "alpha": 0.0,
-                "gamma": 0.24320552104247023,
-                "beta": 0.620346838145947,
-                "delta_current_overnight": 0.8167186904856449
+                "gamma": 0.3312563884927096,
+                "beta": 0.658687008557416,
+                "delta_current_overnight": 0.5615078676917244
               }
             },
             {
               "t": 5597,
               "date": "2022-04-01",
               "n_train": 5597,
-              "neg_loglik": -23461.979564499165,
+              "neg_loglik": -23547.801546175964,
               "params": {
-                "omega": 2.8982641156444504e-06,
-                "alpha": 0.08685492108696378,
-                "gamma": 0.13491514070516875,
-                "beta": 0.7596607096959523,
-                "delta_current_overnight": 0.22176898920887886
+                "omega": 7.72496823078612e-06,
+                "alpha": 0.04761737768123245,
+                "gamma": 0.31200406398242075,
+                "beta": 0.505934668223137,
+                "delta_current_overnight": 0.8419363285166266
               }
             },
             {
               "t": 5660,
               "date": "2022-07-05",
               "n_train": 5660,
-              "neg_loglik": -23790.667988955534,
+              "neg_loglik": -23682.722801099066,
               "params": {
-                "omega": 5.460622640852797e-06,
-                "alpha": 7.742756056400896e-05,
-                "gamma": 0.24366219854639112,
-                "beta": 0.5989431996210254,
-                "delta_current_overnight": 0.8613792077336582
+                "omega": 2.874094113776126e-06,
+                "alpha": 0.08734529060987016,
+                "gamma": 0.13537967982281476,
+                "beta": 0.7597892465496945,
+                "delta_current_overnight": 0.2227238406650251
               }
             },
             {
               "t": 5723,
               "date": "2022-10-03",
               "n_train": 5723,
-              "neg_loglik": -24026.46829760621,
+              "neg_loglik": -24026.46561537898,
               "params": {
-                "omega": 3.9332211293349666e-06,
+                "omega": 3.928713177043644e-06,
                 "alpha": 0.0,
-                "gamma": 0.1977895203002794,
-                "beta": 0.6673791836169606,
-                "delta_current_overnight": 0.7420964472090116
+                "gamma": 0.19796832251410998,
+                "beta": 0.6673033723399832,
+                "delta_current_overnight": 0.7428799059639728
               }
             },
             {
               "t": 5786,
               "date": "2023-01-03",
               "n_train": 5786,
-              "neg_loglik": -24260.79701329232,
+              "neg_loglik": -24255.168717705077,
               "params": {
-                "omega": 4.399051871677186e-06,
+                "omega": 3.820448189926223e-06,
                 "alpha": 0.0,
-                "gamma": 0.2512399365380289,
-                "beta": 0.6440787722492471,
-                "delta_current_overnight": 0.7316558764781096
+                "gamma": 0.29056474378324937,
+                "beta": 0.676387956020184,
+                "delta_current_overnight": 0.5780696183694017
               }
             },
             {
               "t": 5849,
               "date": "2023-04-04",
               "n_train": 5849,
-              "neg_loglik": -24404.811003245508,
+              "neg_loglik": -24476.865080862266,
               "params": {
-                "omega": 2.8771010101811647e-06,
-                "alpha": 0.08761532349548742,
-                "gamma": 0.13563547404560733,
-                "beta": 0.7598600400626699,
-                "delta_current_overnight": 0.22324968398010037
+                "omega": 3.975085082918286e-06,
+                "alpha": 0.06346922727680061,
+                "gamma": 0.32103618233056985,
+                "beta": 0.6032067246214179,
+                "delta_current_overnight": 0.7129042526075317
               }
             },
             {
               "t": 5912,
               "date": "2023-07-06",
               "n_train": 5912,
-              "neg_loglik": -24755.76804416427,
+              "neg_loglik": -24765.39070269516,
               "params": {
-                "omega": 4.810750804864769e-06,
-                "alpha": 0.05619921576234292,
-                "gamma": 0.34241640368904214,
-                "beta": 0.5971169812240116,
-                "delta_current_overnight": 0.635658490010921
+                "omega": 4.516860623013156e-06,
+                "alpha": 0.07620386841328684,
+                "gamma": 0.19506808074382015,
+                "beta": 0.5805380053205964,
+                "delta_current_overnight": 0.888377750870362
               }
             },
             {
               "t": 5975,
               "date": "2023-10-04",
               "n_train": 5975,
-              "neg_loglik": -25015.465766540237,
+              "neg_loglik": -25015.46093488114,
               "params": {
-                "omega": 3.7951509571281874e-06,
-                "alpha": 0.0939850741753272,
-                "gamma": 0.1672219311660808,
-                "beta": 0.6698661715963932,
-                "delta_current_overnight": 0.4626845077838851
+                "omega": 3.7953026184115224e-06,
+                "alpha": 0.09398885950202063,
+                "gamma": 0.16722857276201938,
+                "beta": 0.6698561577329383,
+                "delta_current_overnight": 0.46270288762436945
               }
             },
             {
               "t": 6038,
               "date": "2024-01-04",
               "n_train": 6038,
-              "neg_loglik": -25334.491140237966,
+              "neg_loglik": -25352.50990947875,
               "params": {
-                "omega": 6.085547930507993e-06,
-                "alpha": 0.0060793623712521545,
-                "gamma": 0.3002117890284058,
-                "beta": 0.6187217779105468,
-                "delta_current_overnight": 0.5880113462053266
+                "omega": 4.4726656206162366e-06,
+                "alpha": 0.0,
+                "gamma": 0.2468925123009505,
+                "beta": 0.6462275505541586,
+                "delta_current_overnight": 0.719043748453548
               }
             },
             {
               "t": 6101,
               "date": "2024-04-05",
               "n_train": 6101,
-              "neg_loglik": -25636.779815773443,
+              "neg_loglik": -25633.89728931929,
               "params": {
-                "omega": 4.493404532210238e-06,
+                "omega": 4.274464983460601e-06,
                 "alpha": 0.0,
-                "gamma": 0.24817404616223104,
-                "beta": 0.6441891123239173,
-                "delta_current_overnight": 0.7227028826011292
+                "gamma": 0.2815454727369894,
+                "beta": 0.6587517927581287,
+                "delta_current_overnight": 0.6268509727802928
               }
             },
             {
               "t": 6164,
               "date": "2024-07-08",
               "n_train": 6164,
-              "neg_loglik": -25917.918423325336,
+              "neg_loglik": -25917.942575854395,
               "params": {
-                "omega": 3.377202652215427e-06,
+                "omega": 3.357591342061932e-06,
                 "alpha": 0.0,
-                "gamma": 0.1758447700274354,
-                "beta": 0.7034558293167796,
-                "delta_current_overnight": 0.6440138685681708
+                "gamma": 0.1762862517872632,
+                "beta": 0.7047827001520572,
+                "delta_current_overnight": 0.6383466900900275
               }
             },
             {
               "t": 6227,
               "date": "2024-10-04",
               "n_train": 6227,
-              "neg_loglik": -26192.645105940348,
+              "neg_loglik": -26192.64208406425,
               "params": {
-                "omega": 4.682300631893221e-06,
+                "omega": 4.66859912481372e-06,
                 "alpha": 0.0,
-                "gamma": 0.2500711868535303,
-                "beta": 0.6342582526808086,
-                "delta_current_overnight": 0.7448856002931007
+                "gamma": 0.2501327076955664,
+                "beta": 0.6346316980212812,
+                "delta_current_overnight": 0.7442660619261658
               }
             },
             {
               "t": 6290,
               "date": "2025-01-06",
               "n_train": 6290,
-              "neg_loglik": -26464.763729481285,
+              "neg_loglik": -26453.89998861887,
               "params": {
-                "omega": 4.817776307794737e-06,
+                "omega": 4.9098419571938965e-06,
                 "alpha": 0.0,
-                "gamma": 0.24980242049216414,
-                "beta": 0.6302383548730377,
-                "delta_current_overnight": 0.7553679529174947
+                "gamma": 0.3046893964746739,
+                "beta": 0.6506606913760868,
+                "delta_current_overnight": 0.5668362553844506
               }
             },
             {
               "t": 6353,
               "date": "2025-04-08",
               "n_train": 6353,
-              "neg_loglik": -26592.497253461777,
+              "neg_loglik": -26714.78233178544,
               "params": {
-                "omega": 3.056178716211973e-06,
-                "alpha": 0.08575534814814922,
-                "gamma": 0.13387346330429575,
-                "beta": 0.7593724844772238,
-                "delta_current_overnight": 0.21962785020761783
+                "omega": 4.860990624542621e-06,
+                "alpha": 0.0,
+                "gamma": 0.2498838608244987,
+                "beta": 0.6315458326649465,
+                "delta_current_overnight": 0.7452707025925843
               }
             },
             {
               "t": 6416,
               "date": "2025-07-10",
               "n_train": 6416,
-              "neg_loglik": -26944.325229732724,
+              "neg_loglik": -26971.02370601816,
               "params": {
-                "omega": 5.613171976775425e-06,
-                "alpha": 0.021467800943192835,
-                "gamma": 0.18498179570313245,
-                "beta": 0.6621241506701154,
-                "delta_current_overnight": 0.5112978559709053
+                "omega": 4.982465010168334e-06,
+                "alpha": 0.0,
+                "gamma": 0.24778175664946767,
+                "beta": 0.616113718712826,
+                "delta_current_overnight": 0.8191024531829056
               }
             },
             {
               "t": 6479,
               "date": "2025-10-08",
               "n_train": 6479,
-              "neg_loglik": -27271.48639239948,
+              "neg_loglik": -27192.396886453007,
               "params": {
-                "omega": 4.6558490017218116e-06,
-                "alpha": 0.0,
-                "gamma": 0.22065519390438493,
-                "beta": 0.6362813675310782,
-                "delta_current_overnight": 0.7734113193597266
+                "omega": 1.0324375338321133e-05,
+                "alpha": 0.16415128558971226,
+                "gamma": 0.11102461043311258,
+                "beta": 0.4035496053268517,
+                "delta_current_overnight": 1.0638751400800173
               }
             },
             {
               "t": 6542,
               "date": "2026-01-08",
               "n_train": 6542,
-              "neg_loglik": -27537.560966851714,
+              "neg_loglik": -27537.55899111307,
               "params": {
-                "omega": 5.275235043749561e-06,
+                "omega": 5.266213087764719e-06,
                 "alpha": 0.0,
-                "gamma": 0.2550324532340152,
-                "beta": 0.6202291163508848,
-                "delta_current_overnight": 0.7522449507181086
+                "gamma": 0.2550216749276267,
+                "beta": 0.6206066224698631,
+                "delta_current_overnight": 0.7512469259108482
               }
             }
           ]
@@ -447,7 +462,7 @@
         "n_is": 4620,
         "n_oos": 1981,
         "period": "2000-01-04 to 2026-04-02",
-        "overnight_variance_share_pct": 27.85989076913823,
+        "overnight_variance_share_pct": 27.859897836436197,
         "prg_refit_freq_days": 252
       },
       "oos_period": {
@@ -457,14 +472,28 @@
         "n_common_valid": 1981
       },
       "qlike": {
-        "PRG_Extended": 0.7648771878495073,
-        "FairInfo_GJR_X_CurrentON": 0.7414264976279146,
-        "prg_advantage_pct_vs_fair_gjr": -3.162915042370321,
+        "PRG_Extended": 0.768542702218426,
+        "FairInfo_GJR_X_CurrentON": 0.7376126587363583,
+        "prg_advantage_pct_vs_fair_gjr": -4.193263648031145,
         "winner": "FairInfo_GJR_X_CurrentON"
       },
+      "diagnostic_prg_open_known_overnight": {
+        "qlike": 0.6858334468289821,
+        "n_common_valid": 1981,
+        "prg_open_known_advantage_pct_vs_fair_gjr": 7.019837755507318,
+        "dm_fair_gjr_minus_prg_open_known": {
+          "t_stat": 3.04360099820476,
+          "p_value": 0.0023684031307984466,
+          "n": 1981,
+          "max_lag": 12,
+          "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended_OpenKnownON loss, favoring open-known PRG",
+          "harvey_pass_abs_t_gt_3": true
+        },
+        "valid_oos": 1981
+      },
       "dm_fair_gjr_minus_prg": {
-        "t_stat": -1.9976330058883396,
-        "p_value": 0.045893060856625034,
+        "t_stat": -2.6389342252492285,
+        "p_value": 0.008381918506123798,
         "n": 1981,
         "max_lag": 12,
         "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
@@ -484,416 +513,416 @@
               "t": 4620,
               "date": "2018-05-16",
               "n_train": 4620,
-              "neg_loglik": -17930.439165432043,
+              "neg_loglik": -17930.435937782793,
               "params": {
-                "omega": 3.718020830075474e-06,
+                "omega": 3.7153257133251067e-06,
                 "alpha": 0.0,
-                "gamma": 0.19595623542091867,
-                "beta": 0.7610215403826655,
-                "delta_current_overnight": 0.527161076860815
+                "gamma": 0.19591418212465958,
+                "beta": 0.7610463213339123,
+                "delta_current_overnight": 0.5273167111496827
               }
             },
             {
               "t": 4683,
               "date": "2018-08-15",
               "n_train": 4683,
-              "neg_loglik": -18204.446519582976,
+              "neg_loglik": -18204.443300685736,
               "params": {
-                "omega": 3.6885711696833214e-06,
+                "omega": 3.685516008418556e-06,
                 "alpha": 0.0,
-                "gamma": 0.19613004932245343,
-                "beta": 0.7604517482444012,
-                "delta_current_overnight": 0.526363185798129
+                "gamma": 0.19613384274929543,
+                "beta": 0.7604857410542263,
+                "delta_current_overnight": 0.5263104752121857
               }
             },
             {
               "t": 4746,
               "date": "2018-11-13",
               "n_train": 4746,
-              "neg_loglik": -18409.077211680302,
+              "neg_loglik": -18433.906062341637,
               "params": {
-                "omega": 5.498838463488433e-06,
-                "alpha": 0.0687783750807444,
-                "gamma": 0.2473241714676516,
-                "beta": 0.6907640746057727,
-                "delta_current_overnight": 0.45165392929372083
+                "omega": 4.388514891235867e-06,
+                "alpha": 0.0,
+                "gamma": 0.2629898972537945,
+                "beta": 0.7626486832877594,
+                "delta_current_overnight": 0.37955075860151516
               }
             },
             {
               "t": 4809,
               "date": "2019-02-15",
               "n_train": 4809,
-              "neg_loglik": -18672.49655694277,
+              "neg_loglik": -18672.49353127649,
               "params": {
-                "omega": 3.793240119396089e-06,
+                "omega": 3.7941324832827557e-06,
                 "alpha": 0.0,
-                "gamma": 0.19828608895626026,
-                "beta": 0.759036060770328,
-                "delta_current_overnight": 0.5261978611728281
+                "gamma": 0.19830394935042747,
+                "beta": 0.7589497875940854,
+                "delta_current_overnight": 0.5265004168003492
               }
             },
             {
               "t": 4872,
               "date": "2019-05-17",
               "n_train": 4872,
-              "neg_loglik": -18939.412804832577,
+              "neg_loglik": -18943.14433939458,
               "params": {
-                "omega": 4.663184272188404e-06,
-                "alpha": 0.0093046924225996,
-                "gamma": 0.19462911113163067,
-                "beta": 0.7157626435872899,
-                "delta_current_overnight": 0.6648381232195437
+                "omega": 3.7722482168123267e-06,
+                "alpha": 0.0,
+                "gamma": 0.19719347569624737,
+                "beta": 0.7614815255702572,
+                "delta_current_overnight": 0.5134772469550722
               }
             },
             {
               "t": 4935,
               "date": "2019-08-16",
               "n_train": 4935,
-              "neg_loglik": -19192.925685944076,
+              "neg_loglik": -19192.922480094294,
               "params": {
-                "omega": 3.199838058680199e-06,
+                "omega": 3.1979856831049245e-06,
                 "alpha": 0.0,
-                "gamma": 0.1718163144519917,
-                "beta": 0.8024178926270326,
-                "delta_current_overnight": 0.3787709021869363
+                "gamma": 0.1717034338121417,
+                "beta": 0.8024362673109503,
+                "delta_current_overnight": 0.3789178355058975
               }
             },
             {
               "t": 4998,
               "date": "2019-11-14",
               "n_train": 4998,
-              "neg_loglik": -19461.23022044715,
+              "neg_loglik": -19461.227040453436,
               "params": {
-                "omega": 3.865189556972944e-06,
+                "omega": 3.864654314459737e-06,
                 "alpha": 0.0,
-                "gamma": 0.20185213863176427,
-                "beta": 0.7578432427410131,
-                "delta_current_overnight": 0.511198137823495
+                "gamma": 0.20186717069617652,
+                "beta": 0.7578692152045785,
+                "delta_current_overnight": 0.5110609175636676
               }
             },
             {
               "t": 5061,
               "date": "2020-02-18",
               "n_train": 5061,
-              "neg_loglik": -19738.27665883743,
+              "neg_loglik": -19738.273870901972,
               "params": {
-                "omega": 3.825179695408136e-06,
+                "omega": 3.829312675877087e-06,
                 "alpha": 0.0,
-                "gamma": 0.2045488741882984,
-                "beta": 0.7586983023700608,
-                "delta_current_overnight": 0.49997302017930834
+                "gamma": 0.20462901690336954,
+                "beta": 0.7586478540005288,
+                "delta_current_overnight": 0.499914356967133
               }
             },
             {
               "t": 5124,
               "date": "2020-05-18",
               "n_train": 5124,
-              "neg_loglik": -19929.323203999553,
+              "neg_loglik": -19928.954457674554,
               "params": {
-                "omega": 4.0105452102443125e-06,
+                "omega": 4.334239707866706e-06,
                 "alpha": 0.0,
-                "gamma": 0.20682471502471403,
-                "beta": 0.7541693561939986,
-                "delta_current_overnight": 0.5065531449024581
+                "gamma": 0.21504600613647118,
+                "beta": 0.7384648044905153,
+                "delta_current_overnight": 0.5547629453936982
               }
             },
             {
               "t": 5187,
               "date": "2020-08-17",
               "n_train": 5187,
-              "neg_loglik": -20162.03295972928,
+              "neg_loglik": -20140.51039372037,
               "params": {
-                "omega": 4.124777763229354e-06,
-                "alpha": 0.0,
-                "gamma": 0.2137255933931526,
-                "beta": 0.7520850862609675,
-                "delta_current_overnight": 0.5022035768248537
+                "omega": 2.6248045030602746e-06,
+                "alpha": 0.0033846762272014986,
+                "gamma": 0.11996694517359432,
+                "beta": 0.8430690424279423,
+                "delta_current_overnight": 0.2850653615916492
               }
             },
             {
               "t": 5250,
               "date": "2020-11-13",
               "n_train": 5250,
-              "neg_loglik": -20383.37200079127,
+              "neg_loglik": -20383.369117847753,
               "params": {
-                "omega": 4.316571377326074e-06,
+                "omega": 4.314207459180195e-06,
                 "alpha": 0.0,
-                "gamma": 0.20682379710916793,
-                "beta": 0.7423274398651235,
-                "delta_current_overnight": 0.5509988101362238
+                "gamma": 0.2066400354812994,
+                "beta": 0.7423762627847167,
+                "delta_current_overnight": 0.5511048660616144
               }
             },
             {
               "t": 5313,
               "date": "2021-02-17",
               "n_train": 5313,
-              "neg_loglik": -20574.081881344464,
+              "neg_loglik": -20574.08053214219,
               "params": {
-                "omega": 1.299495770006553e-05,
-                "alpha": 0.03942692918145592,
-                "gamma": 0.29031600790646933,
-                "beta": 0.5914034366384388,
-                "delta_current_overnight": 0.5412051361046721
+                "omega": 1.2994842061269924e-05,
+                "alpha": 0.03942724994889773,
+                "gamma": 0.29031023254858446,
+                "beta": 0.5914082492062172,
+                "delta_current_overnight": 0.5411932645162854
               }
             },
             {
               "t": 5376,
               "date": "2021-05-18",
               "n_train": 5376,
-              "neg_loglik": -20878.275860585178,
+              "neg_loglik": -20873.97721621847,
               "params": {
-                "omega": 4.530723071789048e-06,
-                "alpha": 0.0,
-                "gamma": 0.21306278075796367,
-                "beta": 0.7422065140209293,
-                "delta_current_overnight": 0.5310049764481707
+                "omega": 4.465443274069056e-06,
+                "alpha": 0.0006906351210000312,
+                "gamma": 0.233074885791397,
+                "beta": 0.7545055433247252,
+                "delta_current_overnight": 0.4424402956287213
               }
             },
             {
               "t": 5439,
               "date": "2021-08-17",
               "n_train": 5439,
-              "neg_loglik": -21093.033317885405,
+              "neg_loglik": -21093.031978404517,
               "params": {
-                "omega": 1.2825188106087178e-05,
-                "alpha": 0.0394022803790479,
-                "gamma": 0.2907600525823365,
-                "beta": 0.5910334575429665,
-                "delta_current_overnight": 0.5421178995611011
+                "omega": 1.2825187901421026e-05,
+                "alpha": 0.03940224029005641,
+                "gamma": 0.2907607761732946,
+                "beta": 0.5910328548502379,
+                "delta_current_overnight": 0.542119386969111
               }
             },
             {
               "t": 5502,
               "date": "2021-11-15",
               "n_train": 5502,
-              "neg_loglik": -21426.912615880377,
+              "neg_loglik": -21416.673978113777,
               "params": {
-                "omega": 4.50737856684033e-06,
-                "alpha": 0.0,
-                "gamma": 0.20534838591569057,
-                "beta": 0.7392121366995931,
-                "delta_current_overnight": 0.5520011944336076
+                "omega": 3.268865014096034e-06,
+                "alpha": 0.003623375104597396,
+                "gamma": 0.13720740388197658,
+                "beta": 0.801598408317017,
+                "delta_current_overnight": 0.4054007244435784
               }
             },
             {
               "t": 5565,
               "date": "2022-02-15",
               "n_train": 5565,
-              "neg_loglik": -21653.02969527035,
+              "neg_loglik": -21654.80529118551,
               "params": {
-                "omega": 3.818830737943182e-06,
+                "omega": 4.502264777797591e-06,
                 "alpha": 0.0,
-                "gamma": 0.18298153695592217,
-                "beta": 0.7775933552545522,
-                "delta_current_overnight": 0.43566164926768997
+                "gamma": 0.21350263319058638,
+                "beta": 0.7483999876141042,
+                "delta_current_overnight": 0.4946869278689071
               }
             },
             {
               "t": 5628,
               "date": "2022-05-17",
               "n_train": 5628,
-              "neg_loglik": -21792.904970658634,
+              "neg_loglik": -21821.054914905715,
               "params": {
-                "omega": 1.2909800266544758e-05,
-                "alpha": 0.039538161382476636,
-                "gamma": 0.28831531227163787,
-                "beta": 0.5930708859528808,
-                "delta_current_overnight": 0.5370926003678331
+                "omega": 6.436410996585096e-06,
+                "alpha": 0.07078759940371974,
+                "gamma": 0.2690802052112395,
+                "beta": 0.6657117118814679,
+                "delta_current_overnight": 0.47622096051364776
               }
             },
             {
               "t": 5691,
               "date": "2022-08-17",
               "n_train": 5691,
-              "neg_loglik": -22056.86362715887,
+              "neg_loglik": -22078.036505606462,
               "params": {
-                "omega": 3.2177845562253605e-06,
-                "alpha": 0.029178053522105167,
-                "gamma": 0.09003654904211844,
-                "beta": 0.7871623009203764,
-                "delta_current_overnight": 0.4609544221422802
+                "omega": 4.311982091958622e-06,
+                "alpha": 0.0,
+                "gamma": 0.20219954847095015,
+                "beta": 0.7475106268249522,
+                "delta_current_overnight": 0.5324032384769777
               }
             },
             {
               "t": 5754,
               "date": "2022-11-15",
               "n_train": 5754,
-              "neg_loglik": -22284.414415834803,
+              "neg_loglik": -22284.412397496726,
               "params": {
-                "omega": 4.207809807979635e-06,
-                "alpha": 0.017707493110454827,
-                "gamma": 0.20433921658185944,
-                "beta": 0.7494361323697447,
-                "delta_current_overnight": 0.4571412388475854
+                "omega": 4.207796949653927e-06,
+                "alpha": 0.017707453144140926,
+                "gamma": 0.20433876726239225,
+                "beta": 0.7494373394930797,
+                "delta_current_overnight": 0.45714023437205203
               }
             },
             {
               "t": 5817,
               "date": "2023-02-16",
               "n_train": 5817,
-              "neg_loglik": -22517.096110415718,
+              "neg_loglik": -22517.093793971515,
               "params": {
-                "omega": 4.26735647868017e-06,
+                "omega": 4.27261245804763e-06,
                 "alpha": 0.0,
-                "gamma": 0.1985217204760261,
-                "beta": 0.7509390402151459,
-                "delta_current_overnight": 0.5241378326035426
+                "gamma": 0.19862108395639558,
+                "beta": 0.7507144110106203,
+                "delta_current_overnight": 0.5247510350206
               }
             },
             {
               "t": 5880,
               "date": "2023-05-18",
               "n_train": 5880,
-              "neg_loglik": -22769.72766482225,
+              "neg_loglik": -22769.724999245584,
               "params": {
-                "omega": 4.276230863583125e-06,
+                "omega": 4.273573648660156e-06,
                 "alpha": 0.0,
-                "gamma": 0.19853713962102348,
-                "beta": 0.7511151471768918,
-                "delta_current_overnight": 0.5215238853688873
+                "gamma": 0.19845283189491347,
+                "beta": 0.7512120487205914,
+                "delta_current_overnight": 0.5213192730378822
               }
             },
             {
               "t": 5943,
               "date": "2023-08-18",
               "n_train": 5943,
-              "neg_loglik": -23023.080306534077,
+              "neg_loglik": -22985.828197980445,
               "params": {
-                "omega": 4.316537326551935e-06,
-                "alpha": 0.0,
-                "gamma": 0.19513937778898738,
-                "beta": 0.7524822532591894,
-                "delta_current_overnight": 0.519214240891644
+                "omega": 6.033095842618249e-06,
+                "alpha": 0.06369232396361606,
+                "gamma": 0.24944746752625768,
+                "beta": 0.6839092478265626,
+                "delta_current_overnight": 0.46062984396027057
               }
             },
             {
               "t": 6006,
               "date": "2023-11-16",
               "n_train": 6006,
-              "neg_loglik": -23271.60514721265,
+              "neg_loglik": -23273.338664075814,
               "params": {
-                "omega": 4.04121359197545e-06,
-                "alpha": 0.0008198081659641108,
-                "gamma": 0.18121184870296292,
-                "beta": 0.7476726485275917,
-                "delta_current_overnight": 0.5846524704212299
+                "omega": 4.326409776368416e-06,
+                "alpha": 0.0,
+                "gamma": 0.1935596745709157,
+                "beta": 0.7526075951309737,
+                "delta_current_overnight": 0.5211796685955602
               }
             },
             {
               "t": 6069,
               "date": "2024-02-20",
               "n_train": 6069,
-              "neg_loglik": -23485.504959344496,
+              "neg_loglik": -23504.92826012083,
               "params": {
-                "omega": 4.899987970549626e-06,
-                "alpha": 0.04580806498787425,
-                "gamma": 0.029843462890143193,
-                "beta": 0.7166525883432866,
-                "delta_current_overnight": 0.7877266714720187
+                "omega": 6.043918125750488e-06,
+                "alpha": 0.06270041946833632,
+                "gamma": 0.24909493599077673,
+                "beta": 0.6843800936775254,
+                "delta_current_overnight": 0.4604636782636538
               }
             },
             {
               "t": 6132,
               "date": "2024-05-20",
               "n_train": 6132,
-              "neg_loglik": -23799.884896811498,
+              "neg_loglik": -23774.106867731392,
               "params": {
-                "omega": 4.364600756159707e-06,
-                "alpha": 0.0,
-                "gamma": 0.19527350167758734,
-                "beta": 0.7524130414862104,
-                "delta_current_overnight": 0.5119531003733804
+                "omega": 2.9544992235523266e-06,
+                "alpha": 0.023600570499788448,
+                "gamma": 0.08562053623592765,
+                "beta": 0.8109325837417416,
+                "delta_current_overnight": 0.3878873438104588
               }
             },
             {
               "t": 6195,
               "date": "2024-08-20",
               "n_train": 6195,
-              "neg_loglik": -23992.35168087642,
+              "neg_loglik": -24037.872900928465,
               "params": {
-                "omega": 3.828052146434784e-06,
-                "alpha": 0.07971785377812204,
-                "gamma": 0.1250124707543794,
-                "beta": 0.7697525925256873,
-                "delta_current_overnight": 0.2854405764058055
+                "omega": 3.459592939265285e-06,
+                "alpha": 0.0,
+                "gamma": 0.15600603766184123,
+                "beta": 0.8098524475697477,
+                "delta_current_overnight": 0.34815381690790465
               }
             },
             {
               "t": 6258,
               "date": "2024-11-18",
               "n_train": 6258,
-              "neg_loglik": -24228.420765157625,
+              "neg_loglik": -24228.418780496282,
               "params": {
-                "omega": 1.3203957698980023e-05,
-                "alpha": 0.03963151453922208,
-                "gamma": 0.28663276366388163,
-                "beta": 0.5944727033327563,
-                "delta_current_overnight": 0.533634015629232
+                "omega": 1.3204363687139108e-05,
+                "alpha": 0.039631350332997306,
+                "gamma": 0.2866357193896507,
+                "beta": 0.5944702402299646,
+                "delta_current_overnight": 0.5336400912879811
               }
             },
             {
               "t": 6321,
               "date": "2025-02-21",
               "n_train": 6321,
-              "neg_loglik": -24541.467456058166,
+              "neg_loglik": -24477.69898275553,
               "params": {
-                "omega": 6.162108062355843e-06,
-                "alpha": 0.006680710690310761,
-                "gamma": 0.21067741940020865,
-                "beta": 0.6925341804000162,
-                "delta_current_overnight": 0.6721751865271066
+                "omega": 1.3229287557043291e-05,
+                "alpha": 0.03974185600244362,
+                "gamma": 0.28464672234430116,
+                "beta": 0.5961277549965367,
+                "delta_current_overnight": 0.529551599680669
               }
             },
             {
               "t": 6384,
               "date": "2025-05-22",
               "n_train": 6384,
-              "neg_loglik": -24758.740015764182,
+              "neg_loglik": -24758.737207841154,
               "params": {
-                "omega": 5.084774483224301e-06,
+                "omega": 5.0962034228393075e-06,
                 "alpha": 0.0,
-                "gamma": 0.19751704260557618,
-                "beta": 0.740765878433053,
-                "delta_current_overnight": 0.530703936994077
+                "gamma": 0.1975967500215853,
+                "beta": 0.7404962121850942,
+                "delta_current_overnight": 0.5314586216728309
               }
             },
             {
               "t": 6447,
               "date": "2025-08-22",
               "n_train": 6447,
-              "neg_loglik": -25035.178806181855,
+              "neg_loglik": -25035.042888424825,
               "params": {
-                "omega": 5.051966819786274e-06,
+                "omega": 4.845566812152936e-06,
                 "alpha": 0.0,
-                "gamma": 0.20038726117934194,
-                "beta": 0.7389110777859856,
-                "delta_current_overnight": 0.5316951334808485
+                "gamma": 0.19708474031812895,
+                "beta": 0.7473000319810574,
+                "delta_current_overnight": 0.5062960166533161
               }
             },
             {
               "t": 6510,
               "date": "2025-11-20",
               "n_train": 6510,
-              "neg_loglik": -25256.165103611896,
+              "neg_loglik": -25288.73620200574,
               "params": {
-                "omega": 6.575956576874897e-06,
-                "alpha": 0.058912332602668115,
-                "gamma": 0.24637130337120938,
-                "beta": 0.6823835612614473,
-                "delta_current_overnight": 0.4579339652410242
+                "omega": 5.11878157028185e-06,
+                "alpha": 0.0,
+                "gamma": 0.19678237465787937,
+                "beta": 0.7428044337014333,
+                "delta_current_overnight": 0.5172645183385024
               }
             },
             {
               "t": 6573,
               "date": "2026-02-24",
               "n_train": 6573,
-              "neg_loglik": -25548.938639758726,
+              "neg_loglik": -25540.704613562404,
               "params": {
-                "omega": 5.210905199984077e-06,
+                "omega": 3.876406043603777e-06,
                 "alpha": 0.0,
-                "gamma": 0.19859798118881877,
-                "beta": 0.7400030812889465,
-                "delta_current_overnight": 0.5203577524127362
+                "gamma": 0.15527605424945967,
+                "beta": 0.8013246321363198,
+                "delta_current_overnight": 0.36224101756818083
               }
             }
           ]
@@ -925,6 +954,20 @@
         "FairInfo_GJR_X_CurrentON": 0.5860321649464217,
         "prg_advantage_pct_vs_fair_gjr": -39.99408598197514,
         "winner": "FairInfo_GJR_X_CurrentON"
+      },
+      "diagnostic_prg_open_known_overnight": {
+        "qlike": 0.5535320450412095,
+        "n_common_valid": 1613,
+        "prg_open_known_advantage_pct_vs_fair_gjr": 5.545791144106165,
+        "dm_fair_gjr_minus_prg_open_known": {
+          "t_stat": 3.6136086399504994,
+          "p_value": 0.00031123637215912936,
+          "n": 1613,
+          "max_lag": 11,
+          "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended_OpenKnownON loss, favoring open-known PRG",
+          "harvey_pass_abs_t_gt_3": true
+        },
+        "valid_oos": 1613
       },
       "dm_fair_gjr_minus_prg": {
         "t_stat": -11.27044964999816,
@@ -1297,7 +1340,7 @@
         "n_is": 4044,
         "n_oos": 1734,
         "period": "2003-04-15 to 2026-04-02",
-        "overnight_variance_share_pct": 52.6086109792393,
+        "overnight_variance_share_pct": 52.60861107881012,
         "prg_refit_freq_days": 252
       },
       "oos_period": {
@@ -1307,14 +1350,28 @@
         "n_common_valid": 1734
       },
       "qlike": {
-        "PRG_Extended": 0.6662672466384173,
-        "FairInfo_GJR_X_CurrentON": 0.533529435049281,
-        "prg_advantage_pct_vs_fair_gjr": -24.879191825072525,
+        "PRG_Extended": 0.6635212967895925,
+        "FairInfo_GJR_X_CurrentON": 0.5310704752009834,
+        "prg_advantage_pct_vs_fair_gjr": -24.940347425355014,
         "winner": "FairInfo_GJR_X_CurrentON"
       },
+      "diagnostic_prg_open_known_overnight": {
+        "qlike": 0.44063364632117596,
+        "n_common_valid": 1734,
+        "prg_open_known_advantage_pct_vs_fair_gjr": 17.02915773006994,
+        "dm_fair_gjr_minus_prg_open_known": {
+          "t_stat": 10.750355761236339,
+          "p_value": 0.0,
+          "n": 1734,
+          "max_lag": 12,
+          "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended_OpenKnownON loss, favoring open-known PRG",
+          "harvey_pass_abs_t_gt_3": true
+        },
+        "valid_oos": 1734
+      },
       "dm_fair_gjr_minus_prg": {
-        "t_stat": -7.79305945088368,
-        "p_value": 1.1102230246251565e-14,
+        "t_stat": -9.363997918166076,
+        "p_value": 0.0,
         "n": 1734,
         "max_lag": 12,
         "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
@@ -1334,364 +1391,364 @@
               "t": 4044,
               "date": "2019-05-10",
               "n_train": 4044,
-              "neg_loglik": -15516.891730707459,
+              "neg_loglik": -15528.431882182416,
               "params": {
-                "omega": 2.818820917285429e-05,
-                "alpha": 0.03154174140503779,
-                "gamma": 0.023656312935047663,
-                "beta": 0.33513088448788425,
-                "delta_current_overnight": 1.2311703332809634
+                "omega": 2.9160054152118755e-05,
+                "alpha": 0.022741767394774973,
+                "gamma": 0.12823199947442546,
+                "beta": 0.29578124411388307,
+                "delta_current_overnight": 1.2300306465508761
               }
             },
             {
               "t": 4107,
               "date": "2019-08-09",
               "n_train": 4107,
-              "neg_loglik": -15792.65779699956,
+              "neg_loglik": -15792.656565392415,
               "params": {
-                "omega": 2.9146698376323035e-05,
-                "alpha": 0.024707699329882808,
-                "gamma": 0.1294447500793238,
-                "beta": 0.28966180730421004,
-                "delta_current_overnight": 1.2303402118318216
+                "omega": 2.9142559463105075e-05,
+                "alpha": 0.024684100270397958,
+                "gamma": 0.12944090302775518,
+                "beta": 0.28976350866761547,
+                "delta_current_overnight": 1.2300971158123317
               }
             },
             {
               "t": 4170,
               "date": "2019-11-07",
               "n_train": 4170,
-              "neg_loglik": -16056.351257394037,
+              "neg_loglik": -16056.349898703225,
               "params": {
-                "omega": 2.7272266541868742e-05,
-                "alpha": 0.060171179283093415,
-                "gamma": 0.06457271319272086,
-                "beta": 0.2785139855969098,
-                "delta_current_overnight": 1.3308541057483914
+                "omega": 2.7270390470866254e-05,
+                "alpha": 0.06017208050657335,
+                "gamma": 0.06456972485172996,
+                "beta": 0.2785390308784697,
+                "delta_current_overnight": 1.3308027266392701
               }
             },
             {
               "t": 4233,
               "date": "2020-02-10",
               "n_train": 4233,
-              "neg_loglik": -16324.373815977577,
+              "neg_loglik": -16323.4884339026,
               "params": {
-                "omega": 2.8384422661269676e-05,
-                "alpha": 0.027708115284834172,
-                "gamma": 0.12950354856329882,
-                "beta": 0.28859547757392845,
-                "delta_current_overnight": 1.2117783180333916
+                "omega": 2.6885517618626283e-05,
+                "alpha": 0.019273033125006795,
+                "gamma": 0.16635963155748415,
+                "beta": 0.30752349917505317,
+                "delta_current_overnight": 1.1576593584045727
               }
             },
             {
               "t": 4296,
               "date": "2020-05-11",
               "n_train": 4296,
-              "neg_loglik": -16526.21476740989,
+              "neg_loglik": -16525.15224879499,
               "params": {
-                "omega": 2.509310705605398e-05,
-                "alpha": 0.05516160006376301,
-                "gamma": 0.07534650226143123,
-                "beta": 0.3131098103841885,
-                "delta_current_overnight": 1.2039166947643452
+                "omega": 2.815701807634789e-05,
+                "alpha": 0.0615593701784028,
+                "gamma": 0.06364050327144796,
+                "beta": 0.2596613958436322,
+                "delta_current_overnight": 1.3630403714966979
               }
             },
             {
               "t": 4359,
               "date": "2020-08-10",
               "n_train": 4359,
-              "neg_loglik": -16769.27883732459,
+              "neg_loglik": -16769.277432914267,
               "params": {
-                "omega": 3.1258668996654594e-05,
-                "alpha": 0.03154226345686587,
-                "gamma": 0.12045441395340413,
-                "beta": 0.25941601579941254,
-                "delta_current_overnight": 1.2300178232715853
+                "omega": 3.1258320033540194e-05,
+                "alpha": 0.031540278467594225,
+                "gamma": 0.1205156638862677,
+                "beta": 0.25942620891675383,
+                "delta_current_overnight": 1.2300932684623465
               }
             },
             {
               "t": 4422,
               "date": "2020-11-06",
               "n_train": 4422,
-              "neg_loglik": -17019.038141309666,
+              "neg_loglik": -17024.438292640098,
               "params": {
-                "omega": 2.8798906512708995e-05,
-                "alpha": 0.06174400672544382,
-                "gamma": 0.06417246840653647,
-                "beta": 0.2480247368186621,
-                "delta_current_overnight": 1.3801318971368406
+                "omega": 3.1433162933624785e-05,
+                "alpha": 0.03175661714010486,
+                "gamma": 0.11931315587915493,
+                "beta": 0.2563358198120422,
+                "delta_current_overnight": 1.2283670451463384
               }
             },
             {
               "t": 4485,
               "date": "2021-02-09",
               "n_train": 4485,
-              "neg_loglik": -17278.362628973777,
+              "neg_loglik": -17278.362869479926,
               "params": {
-                "omega": 3.2060454904644486e-05,
-                "alpha": 0.03180483940814939,
-                "gamma": 0.12075639898905807,
-                "beta": 0.24693720912946288,
-                "delta_current_overnight": 1.233516578199522
+                "omega": 3.212650934474825e-05,
+                "alpha": 0.032065983727761226,
+                "gamma": 0.12085648729874975,
+                "beta": 0.24659398737891072,
+                "delta_current_overnight": 1.2312066631192986
               }
             },
             {
               "t": 4548,
               "date": "2021-05-11",
               "n_train": 4548,
-              "neg_loglik": -17527.11392882996,
+              "neg_loglik": -17522.754690243044,
               "params": {
-                "omega": 3.3458252776121477e-05,
-                "alpha": 0.06158313969824552,
-                "gamma": 0.09312741623424611,
-                "beta": 0.2114643213073741,
-                "delta_current_overnight": 1.2881745860206106
+                "omega": 2.9089457431756175e-05,
+                "alpha": 0.062038393070942575,
+                "gamma": 0.06530405362174758,
+                "beta": 0.2387588490939568,
+                "delta_current_overnight": 1.3934110898510381
               }
             },
             {
               "t": 4611,
               "date": "2021-08-10",
               "n_train": 4611,
-              "neg_loglik": -17788.86471303746,
+              "neg_loglik": -17788.70344296704,
               "params": {
-                "omega": 3.195984910315623e-05,
-                "alpha": 0.0731529828315297,
-                "gamma": 0.0506318816843616,
-                "beta": 0.22603900772570912,
-                "delta_current_overnight": 1.2792750885878923
+                "omega": 3.0157156977855336e-05,
+                "alpha": 0.051701062722191216,
+                "gamma": 0.05013233262614323,
+                "beta": 0.26727529886320917,
+                "delta_current_overnight": 1.21940427277882
               }
             },
             {
               "t": 4674,
               "date": "2021-11-08",
               "n_train": 4674,
-              "neg_loglik": -18058.021370747658,
+              "neg_loglik": -18058.020341037784,
               "params": {
-                "omega": 3.176757330812882e-05,
-                "alpha": 0.033191377211177736,
-                "gamma": 0.11793594519438953,
-                "beta": 0.24211500732520438,
-                "delta_current_overnight": 1.2201161232937063
+                "omega": 3.1760308715900365e-05,
+                "alpha": 0.03318579202984599,
+                "gamma": 0.11792287432443724,
+                "beta": 0.24221533322734165,
+                "delta_current_overnight": 1.2199536332425946
               }
             },
             {
               "t": 4737,
               "date": "2022-02-08",
               "n_train": 4737,
-              "neg_loglik": -18320.619751847014,
+              "neg_loglik": -18318.03800265214,
               "params": {
-                "omega": 3.184252064896321e-05,
-                "alpha": 0.03317984504331983,
-                "gamma": 0.1152798466032232,
-                "beta": 0.23710304497975263,
-                "delta_current_overnight": 1.23200252768399
+                "omega": 2.954506141246462e-05,
+                "alpha": 0.056481270034347816,
+                "gamma": 0.07111764795268576,
+                "beta": 0.2431558172970005,
+                "delta_current_overnight": 1.287069334289054
               }
             },
             {
               "t": 4800,
               "date": "2022-05-10",
               "n_train": 4800,
-              "neg_loglik": -18551.0466889234,
+              "neg_loglik": -18553.28404809662,
               "params": {
-                "omega": 3.3210989135713565e-05,
-                "alpha": 0.06178277876917622,
-                "gamma": 0.061897419033534185,
-                "beta": 0.2185969563003473,
-                "delta_current_overnight": 1.253057319677987
+                "omega": 3.2460326234944784e-05,
+                "alpha": 0.03216885969484348,
+                "gamma": 0.11368307335280635,
+                "beta": 0.23490575204309522,
+                "delta_current_overnight": 1.2298606410467605
               }
             },
             {
               "t": 4863,
               "date": "2022-08-10",
               "n_train": 4863,
-              "neg_loglik": -18798.00284314629,
+              "neg_loglik": -18798.00212796359,
               "params": {
-                "omega": 3.286397178368189e-05,
-                "alpha": 0.0321336304815284,
-                "gamma": 0.11210255948972984,
-                "beta": 0.23192768455339996,
-                "delta_current_overnight": 1.223967601056026
+                "omega": 3.2864785592865136e-05,
+                "alpha": 0.03213226458726289,
+                "gamma": 0.11208132683938063,
+                "beta": 0.23192250477274834,
+                "delta_current_overnight": 1.2240052799564551
               }
             },
             {
               "t": 4926,
               "date": "2022-11-08",
               "n_train": 4926,
-              "neg_loglik": -19042.303734284294,
+              "neg_loglik": -19042.30300231559,
               "params": {
-                "omega": 3.343758468945497e-05,
-                "alpha": 0.032107033582863286,
-                "gamma": 0.10875593361217901,
-                "beta": 0.22693469467009164,
-                "delta_current_overnight": 1.2255884647650537
+                "omega": 3.343910079650542e-05,
+                "alpha": 0.03211261255085282,
+                "gamma": 0.10874426813828526,
+                "beta": 0.22691070426188636,
+                "delta_current_overnight": 1.2256519716889092
               }
             },
             {
               "t": 4989,
               "date": "2023-02-09",
               "n_train": 4989,
-              "neg_loglik": -19296.01684045237,
+              "neg_loglik": -19296.015908109668,
               "params": {
-                "omega": 3.3658019477573256e-05,
-                "alpha": 0.032380136216952696,
-                "gamma": 0.10684144860097808,
-                "beta": 0.22307916176094347,
-                "delta_current_overnight": 1.2278671948908393
+                "omega": 3.3658661713955496e-05,
+                "alpha": 0.032380548687861305,
+                "gamma": 0.10683824110534909,
+                "beta": 0.22307276123479736,
+                "delta_current_overnight": 1.2278857283545077
               }
             },
             {
               "t": 5052,
               "date": "2023-05-11",
               "n_train": 5052,
-              "neg_loglik": -19562.51654965108,
+              "neg_loglik": -19562.51549797457,
               "params": {
-                "omega": 3.351560931578742e-05,
-                "alpha": 0.03332743321778421,
-                "gamma": 0.1048503245499289,
-                "beta": 0.22012165551972618,
-                "delta_current_overnight": 1.2279863471900743
+                "omega": 3.3515840319846856e-05,
+                "alpha": 0.03332913414460411,
+                "gamma": 0.10484793831540146,
+                "beta": 0.2201210772262953,
+                "delta_current_overnight": 1.2279875077269689
               }
             },
             {
               "t": 5115,
               "date": "2023-08-11",
               "n_train": 5115,
-              "neg_loglik": -19824.22337782623,
+              "neg_loglik": -19824.222357858693,
               "params": {
-                "omega": 3.351238287627663e-05,
-                "alpha": 0.03359412426562856,
-                "gamma": 0.10361748357200233,
-                "beta": 0.21779333460368713,
-                "delta_current_overnight": 1.2288088051745474
+                "omega": 3.351491160319052e-05,
+                "alpha": 0.03357794215983229,
+                "gamma": 0.10362314596531,
+                "beta": 0.2177816844005373,
+                "delta_current_overnight": 1.2288492277674743
               }
             },
             {
               "t": 5178,
               "date": "2023-11-09",
               "n_train": 5178,
-              "neg_loglik": -20087.10922853255,
+              "neg_loglik": -20087.10820440253,
               "params": {
-                "omega": 3.349298585843928e-05,
-                "alpha": 0.03424545138469864,
-                "gamma": 0.10191348097550278,
-                "beta": 0.21740932469474564,
-                "delta_current_overnight": 1.2197197002530102
+                "omega": 3.349287522507786e-05,
+                "alpha": 0.03424333443281922,
+                "gamma": 0.10189429274567877,
+                "beta": 0.2174340001338898,
+                "delta_current_overnight": 1.2196382632687048
               }
             },
             {
               "t": 5241,
               "date": "2024-02-12",
               "n_train": 5241,
-              "neg_loglik": -20349.571787691537,
+              "neg_loglik": -20347.23242433998,
               "params": {
-                "omega": 2.6729394038872655e-05,
-                "alpha": 0.03279055640095594,
-                "gamma": 0.07350766808126331,
-                "beta": 0.2706737990124289,
-                "delta_current_overnight": 1.2852563464313096
+                "omega": 2.877571591710381e-05,
+                "alpha": 0.062087386735596044,
+                "gamma": 0.0641063594677229,
+                "beta": 0.21220769694465258,
+                "delta_current_overnight": 1.4249910526171465
               }
             },
             {
               "t": 5304,
               "date": "2024-05-13",
               "n_train": 5304,
-              "neg_loglik": -20632.185206102968,
+              "neg_loglik": -20632.184149469795,
               "params": {
-                "omega": 3.233056826259229e-05,
-                "alpha": 0.03601931066466337,
-                "gamma": 0.1025742632088285,
-                "beta": 0.217293248414974,
-                "delta_current_overnight": 1.2153150380247506
+                "omega": 3.2320534234012547e-05,
+                "alpha": 0.03602515825823271,
+                "gamma": 0.10267623403647658,
+                "beta": 0.21734795410184443,
+                "delta_current_overnight": 1.2152702129692423
               }
             },
             {
               "t": 5367,
               "date": "2024-08-13",
               "n_train": 5367,
-              "neg_loglik": -20892.3274519279,
+              "neg_loglik": -20902.28194479333,
               "params": {
-                "omega": 2.7233945318789828e-05,
-                "alpha": 0.06415033490415663,
-                "gamma": 0.0658116010504866,
-                "beta": 0.21717889671916063,
-                "delta_current_overnight": 1.4101419605033818
+                "omega": 3.172112242989935e-05,
+                "alpha": 0.03768625539374411,
+                "gamma": 0.10196263305197623,
+                "beta": 0.21708057734652011,
+                "delta_current_overnight": 1.214670569540018
               }
             },
             {
               "t": 5430,
               "date": "2024-11-11",
               "n_train": 5430,
-              "neg_loglik": -21160.252430414286,
+              "neg_loglik": -21160.251473586788,
               "params": {
-                "omega": 3.198548388365934e-05,
-                "alpha": 0.0368769607089746,
-                "gamma": 0.1012398005437658,
-                "beta": 0.21553536543681992,
-                "delta_current_overnight": 1.2095017571174067
+                "omega": 3.197065383189896e-05,
+                "alpha": 0.03690605716468952,
+                "gamma": 0.10118764695985417,
+                "beta": 0.21570425157992257,
+                "delta_current_overnight": 1.2091565393964185
               }
             },
             {
               "t": 5493,
               "date": "2025-02-13",
               "n_train": 5493,
-              "neg_loglik": -21426.546801632492,
+              "neg_loglik": -21431.318420926254,
               "params": {
-                "omega": 3.254533306308789e-05,
-                "alpha": 0.0738630141145739,
-                "gamma": 0.02548174918125903,
-                "beta": 0.20049427741397569,
-                "delta_current_overnight": 1.2301052702375177
+                "omega": 3.141352762494522e-05,
+                "alpha": 0.03768146981722273,
+                "gamma": 0.10011059290219998,
+                "beta": 0.21795347409286994,
+                "delta_current_overnight": 1.2016877852051335
               }
             },
             {
               "t": 5556,
               "date": "2025-05-15",
               "n_train": 5556,
-              "neg_loglik": -21676.880863704984,
+              "neg_loglik": -21677.121732146763,
               "params": {
-                "omega": 2.8204084032330302e-05,
-                "alpha": 0.06741135623459288,
-                "gamma": 0.07772808285012166,
-                "beta": 0.21343284031417073,
-                "delta_current_overnight": 1.295297070485117
+                "omega": 3.0093343004558663e-05,
+                "alpha": 0.07515560115378003,
+                "gamma": 0.040949867840187816,
+                "beta": 0.21206911827840894,
+                "delta_current_overnight": 1.2359360984048438
               }
             },
             {
               "t": 5619,
               "date": "2025-08-15",
               "n_train": 5619,
-              "neg_loglik": -21952.04341830993,
+              "neg_loglik": -21952.043971208503,
               "params": {
-                "omega": 2.542738992891509e-05,
-                "alpha": 0.06558428077699384,
-                "gamma": 0.06723175686023981,
-                "beta": 0.22379332140235397,
-                "delta_current_overnight": 1.3881040870985935
+                "omega": 2.5427610049046082e-05,
+                "alpha": 0.06558872576067984,
+                "gamma": 0.06723804963370529,
+                "beta": 0.2237884011123894,
+                "delta_current_overnight": 1.388083545065751
               }
             },
             {
               "t": 5682,
               "date": "2025-11-13",
               "n_train": 5682,
-              "neg_loglik": -22220.220040826767,
+              "neg_loglik": -22211.211178982492,
               "params": {
-                "omega": 3.0868546846738935e-05,
-                "alpha": 0.0651270240622005,
-                "gamma": 0.06341756392473344,
-                "beta": 0.2077650715321689,
-                "delta_current_overnight": 1.196425773007311
+                "omega": 2.6769374159076342e-05,
+                "alpha": 0.03158796489056982,
+                "gamma": 0.04573410281400031,
+                "beta": 0.2884384421399012,
+                "delta_current_overnight": 1.1486389902730578
               }
             },
             {
               "t": 5745,
               "date": "2026-02-17",
               "n_train": 5745,
-              "neg_loglik": -22492.36383993181,
+              "neg_loglik": -22492.36276656579,
               "params": {
-                "omega": 3.0448713255591556e-05,
-                "alpha": 0.041203834578865124,
-                "gamma": 0.10319852965211537,
-                "beta": 0.21763378619891366,
-                "delta_current_overnight": 1.1777031992729894
+                "omega": 3.0446883750590215e-05,
+                "alpha": 0.0412036715883574,
+                "gamma": 0.1031708892346233,
+                "beta": 0.21765924152220956,
+                "delta_current_overnight": 1.177747880920393
               }
             }
           ]
@@ -1708,7 +1765,7 @@
         "n_is": 2951,
         "n_oos": 1266,
         "period": "2009-01-05 to 2026-04-02",
-        "overnight_variance_share_pct": 46.14518716093072,
+        "overnight_variance_share_pct": 46.145149831873745,
         "prg_refit_freq_days": 252
       },
       "oos_period": {
@@ -1718,14 +1775,28 @@
         "n_common_valid": 1251
       },
       "qlike": {
-        "PRG_Extended": 0.7866856001535918,
-        "FairInfo_GJR_X_CurrentON": 0.6133039432977504,
-        "prg_advantage_pct_vs_fair_gjr": -28.27010306236806,
+        "PRG_Extended": 0.787596600489332,
+        "FairInfo_GJR_X_CurrentON": 0.596868473541547,
+        "prg_advantage_pct_vs_fair_gjr": -31.95479999405743,
         "winner": "FairInfo_GJR_X_CurrentON"
       },
+      "diagnostic_prg_open_known_overnight": {
+        "qlike": 0.5666763670690373,
+        "n_common_valid": 1251,
+        "prg_open_known_advantage_pct_vs_fair_gjr": 5.058418698740011,
+        "dm_fair_gjr_minus_prg_open_known": {
+          "t_stat": 2.7840460895049586,
+          "p_value": 0.005449478473524616,
+          "n": 1251,
+          "max_lag": 10,
+          "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended_OpenKnownON loss, favoring open-known PRG",
+          "harvey_pass_abs_t_gt_3": false
+        },
+        "valid_oos": 1266
+      },
       "dm_fair_gjr_minus_prg": {
-        "t_stat": -7.251891446951652,
-        "p_value": 7.185363415374013e-13,
+        "t_stat": -8.62938796517668,
+        "p_value": 0.0,
         "n": 1251,
         "max_lag": 10,
         "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
@@ -1745,273 +1816,273 @@
               "t": 2951,
               "date": "2021-01-08",
               "n_train": 2951,
-              "neg_loglik": -12311.6148358382,
+              "neg_loglik": -12217.98711376227,
               "params": {
-                "omega": 3.1404208848764e-05,
-                "alpha": 0.08120333187487365,
-                "gamma": 0.0029401832693535996,
-                "beta": 0.15509573291703946,
-                "delta_current_overnight": 1.153458952171329
+                "omega": 1.3643049470101995e-05,
+                "alpha": 0.03176728327802394,
+                "gamma": 0.1091699700147641,
+                "beta": 0.659062404664809,
+                "delta_current_overnight": 0.21354701428989953
               }
             },
             {
               "t": 3014,
               "date": "2021-04-22",
               "n_train": 3014,
-              "neg_loglik": -12547.809553759153,
+              "neg_loglik": -12547.808562185082,
               "params": {
-                "omega": 3.096080992392591e-05,
-                "alpha": 0.07943996943261082,
-                "gamma": 0.0015805655831368183,
-                "beta": 0.18029473860088877,
-                "delta_current_overnight": 1.1013429773335823
+                "omega": 3.0962426440972316e-05,
+                "alpha": 0.07943843236259736,
+                "gamma": 0.0015848023887831038,
+                "beta": 0.18026706526360942,
+                "delta_current_overnight": 1.101333856499902
               }
             },
             {
               "t": 3077,
               "date": "2021-07-22",
               "n_train": 3077,
-              "neg_loglik": -12808.706954386462,
+              "neg_loglik": -12808.693072268366,
               "params": {
-                "omega": 3.075687731681649e-05,
-                "alpha": 0.07573423875518523,
-                "gamma": 0.010848744066713092,
-                "beta": 0.18181708402124558,
-                "delta_current_overnight": 1.108282731582711
+                "omega": 3.059887096336139e-05,
+                "alpha": 0.07646220570713834,
+                "gamma": 0.006900473027119136,
+                "beta": 0.18452035330244665,
+                "delta_current_overnight": 1.1094568535276346
               }
             },
             {
               "t": 3140,
               "date": "2021-10-22",
               "n_train": 3140,
-              "neg_loglik": -13066.322288963966,
+              "neg_loglik": -13073.434226036134,
               "params": {
-                "omega": 2.8652778496216452e-05,
-                "alpha": 0.04477011557365365,
-                "gamma": 0.13370801909484972,
-                "beta": 0.23248973762176003,
-                "delta_current_overnight": 0.9419962161803898
+                "omega": 3.0846758344081496e-05,
+                "alpha": 0.07440122428052129,
+                "gamma": 0.010394452909388419,
+                "beta": 0.180212148823184,
+                "delta_current_overnight": 1.1200106026995609
               }
             },
             {
               "t": 3203,
               "date": "2022-01-20",
               "n_train": 3203,
-              "neg_loglik": -13353.331265917202,
+              "neg_loglik": -13353.330456672313,
               "params": {
-                "omega": 3.063715243878818e-05,
-                "alpha": 0.07382088195713923,
-                "gamma": 0.010176556660510512,
-                "beta": 0.17997411404581648,
-                "delta_current_overnight": 1.122812268349107
+                "omega": 3.06427545888634e-05,
+                "alpha": 0.07385748093248418,
+                "gamma": 0.010108011567995278,
+                "beta": 0.17989272101943957,
+                "delta_current_overnight": 1.1229800414067224
               }
             },
             {
               "t": 3266,
               "date": "2022-05-04",
               "n_train": 3266,
-              "neg_loglik": -13608.777593101604,
+              "neg_loglik": -13608.776973506572,
               "params": {
-                "omega": 3.100966071556751e-05,
-                "alpha": 0.07437147579926301,
-                "gamma": 0.005335319408007039,
-                "beta": 0.16941899690826936,
-                "delta_current_overnight": 1.1527629606125518
+                "omega": 3.101805246903521e-05,
+                "alpha": 0.07435891360442948,
+                "gamma": 0.005372084826100391,
+                "beta": 0.16937727559418642,
+                "delta_current_overnight": 1.1527603592877191
               }
             },
             {
               "t": 3329,
               "date": "2022-08-02",
               "n_train": 3329,
-              "neg_loglik": -13846.367328991853,
+              "neg_loglik": -13846.366661247866,
               "params": {
-                "omega": 3.102389403517632e-05,
-                "alpha": 0.07222943364052839,
-                "gamma": 0.02578072069635771,
-                "beta": 0.16913269455847468,
-                "delta_current_overnight": 1.1462540163377894
+                "omega": 3.103222351852282e-05,
+                "alpha": 0.07222995527418317,
+                "gamma": 0.025798086827692687,
+                "beta": 0.16911176320004923,
+                "delta_current_overnight": 1.1461121084791488
               }
             },
             {
               "t": 3392,
               "date": "2022-11-01",
               "n_train": 3392,
-              "neg_loglik": -14091.003163403315,
+              "neg_loglik": -14091.002239975352,
               "params": {
-                "omega": 3.107285408924136e-05,
-                "alpha": 0.07150764626170923,
-                "gamma": 0.022177572927708545,
-                "beta": 0.17214006643707033,
-                "delta_current_overnight": 1.1297819142902978
+                "omega": 3.107312164457508e-05,
+                "alpha": 0.07150810246867892,
+                "gamma": 0.022179337659467297,
+                "beta": 0.17213650341622744,
+                "delta_current_overnight": 1.12977783862091
               }
             },
             {
               "t": 3455,
               "date": "2023-02-09",
               "n_train": 3455,
-              "neg_loglik": -14341.026019357432,
+              "neg_loglik": -14341.025068875797,
               "params": {
-                "omega": 3.112327335518941e-05,
-                "alpha": 0.06993271281075533,
-                "gamma": 0.022503114367571683,
-                "beta": 0.16922658123286197,
-                "delta_current_overnight": 1.1395695038342668
+                "omega": 3.1123810641568046e-05,
+                "alpha": 0.06992017657624101,
+                "gamma": 0.022536988488195225,
+                "beta": 0.16921583618325053,
+                "delta_current_overnight": 1.1395866103724661
               }
             },
             {
               "t": 3518,
               "date": "2023-05-17",
               "n_train": 3518,
-              "neg_loglik": -14621.952969517644,
+              "neg_loglik": -14621.951881648825,
               "params": {
-                "omega": 3.077373542109662e-05,
-                "alpha": 0.06977850533414132,
-                "gamma": 0.02166192568972509,
-                "beta": 0.1678174989852299,
-                "delta_current_overnight": 1.1473857456052976
+                "omega": 3.078008927004064e-05,
+                "alpha": 0.06977644302899431,
+                "gamma": 0.021644484717996716,
+                "beta": 0.1677798123002247,
+                "delta_current_overnight": 1.1474085742977227
               }
             },
             {
               "t": 3581,
               "date": "2023-08-17",
               "n_train": 3581,
-              "neg_loglik": -14892.548142449725,
+              "neg_loglik": -14895.270675688842,
               "params": {
-                "omega": 3.199507519838285e-05,
-                "alpha": 0.05913609722833292,
-                "gamma": 0.08032003927534112,
-                "beta": 0.13765469229881963,
-                "delta_current_overnight": 1.1774606535370986
+                "omega": 3.091369594765551e-05,
+                "alpha": 0.0690774134606563,
+                "gamma": 0.022684133914639654,
+                "beta": 0.16258155269010535,
+                "delta_current_overnight": 1.1580699687979417
               }
             },
             {
               "t": 3644,
               "date": "2023-11-17",
               "n_train": 3644,
-              "neg_loglik": -15168.990131251254,
+              "neg_loglik": -15168.98910178733,
               "params": {
-                "omega": 3.09484637061864e-05,
-                "alpha": 0.07008578058234212,
-                "gamma": 0.017020153111936623,
-                "beta": 0.15772897775275913,
-                "delta_current_overnight": 1.1707853573759355
+                "omega": 3.094350981723597e-05,
+                "alpha": 0.07006194277768316,
+                "gamma": 0.017027721299128353,
+                "beta": 0.15778242359136066,
+                "delta_current_overnight": 1.1709145350432726
               }
             },
             {
               "t": 3707,
               "date": "2024-02-26",
               "n_train": 3707,
-              "neg_loglik": -15453.45591391342,
+              "neg_loglik": -15436.821972815307,
               "params": {
-                "omega": 3.102462476163338e-05,
-                "alpha": 0.07039288985046957,
-                "gamma": 0.018217134611631925,
-                "beta": 0.14663526584925807,
-                "delta_current_overnight": 1.189382133008492
+                "omega": 2.3897723552889355e-05,
+                "alpha": 0.04212578333112162,
+                "gamma": 0.04396395751497599,
+                "beta": 0.23920050079913713,
+                "delta_current_overnight": 1.381194509089556
               }
             },
             {
               "t": 3770,
               "date": "2024-05-29",
               "n_train": 3770,
-              "neg_loglik": -15708.83697017408,
+              "neg_loglik": -15709.907458118902,
               "params": {
-                "omega": 3.144536501367398e-05,
-                "alpha": 0.06154974339861267,
-                "gamma": 0.05721618892809409,
-                "beta": 0.13685411118797436,
-                "delta_current_overnight": 1.1867986112647155
+                "omega": 3.137008636671982e-05,
+                "alpha": 0.06933953729030183,
+                "gamma": 0.020162799514176724,
+                "beta": 0.13901795366809222,
+                "delta_current_overnight": 1.2079246740144738
               }
             },
             {
               "t": 3833,
               "date": "2024-08-29",
               "n_train": 3833,
-              "neg_loglik": -15778.521877811001,
+              "neg_loglik": -15933.052211611946,
               "params": {
-                "omega": 1.1373436718446172e-05,
-                "alpha": 0.01729047542526197,
-                "gamma": 0.05687200388357293,
-                "beta": 0.7162014668343792,
-                "delta_current_overnight": 0.22095802981082754
+                "omega": 3.1074120953904256e-05,
+                "alpha": 0.06755915327254501,
+                "gamma": 0.02137343989221832,
+                "beta": 0.15486168585603516,
+                "delta_current_overnight": 1.1742455083778836
               }
             },
             {
               "t": 3896,
               "date": "2024-12-03",
               "n_train": 3896,
-              "neg_loglik": -16179.413408062741,
+              "neg_loglik": -16179.412560159906,
               "params": {
-                "omega": 3.194902731075188e-05,
-                "alpha": 0.06776725281253239,
-                "gamma": 0.02004074773594754,
-                "beta": 0.14367667000766804,
-                "delta_current_overnight": 1.183114990783076
+                "omega": 3.194941682220199e-05,
+                "alpha": 0.06776984575926583,
+                "gamma": 0.020031145830150855,
+                "beta": 0.14365880011699333,
+                "delta_current_overnight": 1.1832253065754792
               }
             },
             {
               "t": 3959,
               "date": "2025-03-13",
               "n_train": 3959,
-              "neg_loglik": -16436.693865222536,
+              "neg_loglik": -16436.69313660243,
               "params": {
-                "omega": 3.237219309355665e-05,
-                "alpha": 0.06676505596777887,
-                "gamma": 0.021724761548145764,
-                "beta": 0.14043681160747415,
-                "delta_current_overnight": 1.175306511461178
+                "omega": 3.2372782702837474e-05,
+                "alpha": 0.06677038569608856,
+                "gamma": 0.02170317248915858,
+                "beta": 0.14041677134592573,
+                "delta_current_overnight": 1.1753866362215253
               }
             },
             {
               "t": 4022,
               "date": "2025-06-16",
               "n_train": 4022,
-              "neg_loglik": -16674.59071618921,
+              "neg_loglik": -16674.58999101236,
               "params": {
-                "omega": 3.281117271934112e-05,
-                "alpha": 0.06521890440678017,
-                "gamma": 0.024252142948685194,
-                "beta": 0.1363547314834813,
-                "delta_current_overnight": 1.1745175350501458
+                "omega": 3.2811226910061305e-05,
+                "alpha": 0.06522969606702624,
+                "gamma": 0.024248350442225577,
+                "beta": 0.1363271409686914,
+                "delta_current_overnight": 1.1746173494799363
               }
             },
             {
               "t": 4085,
               "date": "2025-09-11",
               "n_train": 4085,
-              "neg_loglik": -16945.47068675406,
+              "neg_loglik": -16945.46997585386,
               "params": {
-                "omega": 3.276021952952476e-05,
-                "alpha": 0.06482010908515637,
-                "gamma": 0.02450112888506043,
-                "beta": 0.13409358798458573,
-                "delta_current_overnight": 1.180648200744366
+                "omega": 3.276282537625236e-05,
+                "alpha": 0.06484266132198178,
+                "gamma": 0.02442496366672271,
+                "beta": 0.1340942094101247,
+                "delta_current_overnight": 1.1805960230636354
               }
             },
             {
               "t": 4148,
               "date": "2025-12-15",
               "n_train": 4148,
-              "neg_loglik": -17196.21745006187,
+              "neg_loglik": -17196.216735686023,
               "params": {
-                "omega": 3.287453340427469e-05,
-                "alpha": 0.0644934361974578,
-                "gamma": 0.023133408491233905,
-                "beta": 0.13372530701107768,
-                "delta_current_overnight": 1.1801214823110915
+                "omega": 3.2877731171506394e-05,
+                "alpha": 0.0644881858956551,
+                "gamma": 0.023090942850534993,
+                "beta": 0.1336862485366769,
+                "delta_current_overnight": 1.1802586329619145
               }
             },
             {
               "t": 4211,
               "date": "2026-03-26",
               "n_train": 4211,
-              "neg_loglik": -17434.88649081246,
+              "neg_loglik": -17434.88578798363,
               "params": {
-                "omega": 3.289099171858235e-05,
-                "alpha": 0.06469502979364243,
-                "gamma": 0.021774953320801274,
-                "beta": 0.13341581262070165,
-                "delta_current_overnight": 1.18008674217272
+                "omega": 3.2898536652288514e-05,
+                "alpha": 0.06472088813956195,
+                "gamma": 0.021733857159833978,
+                "beta": 0.13335731585666524,
+                "delta_current_overnight": 1.1801108155529325
               }
             }
           ]
@@ -2042,6 +2113,20 @@
         "FairInfo_GJR_X_CurrentON": 0.05820674059564027,
         "prg_advantage_pct_vs_fair_gjr": -107.7624130749264,
         "winner": "FairInfo_GJR_X_CurrentON"
+      },
+      "diagnostic_prg_open_known_overnight": {
+        "qlike": 0.0392907889368349,
+        "n_common_valid": 843,
+        "prg_open_known_advantage_pct_vs_fair_gjr": 32.49787132080402,
+        "dm_fair_gjr_minus_prg_open_known": {
+          "t_stat": 5.512836322068074,
+          "p_value": 4.696788735714108e-08,
+          "n": 843,
+          "max_lag": 9,
+          "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended_OpenKnownON loss, favoring open-known PRG",
+          "harvey_pass_abs_t_gt_3": true
+        },
+        "valid_oos": 843
       },
       "dm_fair_gjr_minus_prg": {
         "t_stat": -6.298591267441017,
@@ -2258,5 +2343,5 @@
     "Opschoor and Lucas (2021), Observation-driven models for realized variances and overnight returns.",
     "Todorova and Soucek (2014), Overnight information flow and realized volatility forecasting."
   ],
-  "runtime_seconds": 69.9907660484314
+  "runtime_seconds": 69.13928699493408
 }

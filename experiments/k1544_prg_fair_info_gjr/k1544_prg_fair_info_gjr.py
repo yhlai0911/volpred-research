@@ -200,7 +200,7 @@ def gjrx_current_oos_forecast(
 
     for t in range(is_end, n):
         if (t - is_end) % refit_freq == 0 or t == is_end:
-            params_new, nll = _fit_gjrx_current(r[:t], x_on[:t], seed=RNG_SEED + t)
+            params_new, nll = _fit_gjrx_current(r[:t], x_on[:t], seed=RNG_SEED)
             if params_new is not None:
                 params = params_new
                 h_state = float(_gjrx_current_state(params, r[:t], x_on[:t], t))
