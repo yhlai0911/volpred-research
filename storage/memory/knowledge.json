@@ -35914,5 +35914,21 @@
     ],
     "confidence": 0.55,
     "created_at": "2026-06-23T21:09:38.039863"
+  },
+  {
+    "item_id": "6f8446c6",
+    "category": "experiment_review",
+    "content": "K935 24h-rule source review — VERDICT: CONDITIONAL_PASS, decision: needs_correction_then_keep.\n\nArticle: mile_1bff1fe5 (published 2026-06-23 02:19 UTC) — compares 4 range estimators (Parkinson / GK / RS / YZ) as CARR(1,1) targets on SPY 2004-2026, OOS 2016-2025 (n=2514), QLIKE(r²) Patton 2011, Harvey DM |t|>3.0.\n\nCore methodology PASS:\n- Lookahead: OOS loop uses train_start:t window (k935.py:449-457); CARR forecast at t uses data ≤ t-1.\n- QLIKE direction: canonical actual/predicted − log(actual/predicted) − 1 via volpred.stats.model_evaluation.qlike_pointwise (model_evaluation.py:59-60).\n- DM Harvey: default h=1 (k935.py:550 calls dm_test(loss1, loss2) — model_evaluation.py:89 sig dm_test(..., h=1)); n=2514 → HAC lag 13, |t|>3.0 threshold applied at line 552.\n- r² proxy independence: squared close-to-close log return (k935.py:77-78), not OHLC-range derived.\n- OOS/IS split: train_end=t exclusive, window [max(0,t-2000):t] strictly past (k935.py:421-446).\n- Random seed: np.random.seed(42) global.\n- Estimator formulas: Parkinson/GK/RS canonical against Parkinson 1980 / Garman-Klass 1980 / Rogers-Satchell 1991.\n- CARR(1,1): positivity bounds + α+β<0.9999 stationarity (k935.py:168-210, Chou 2005 conformant).\n\nONE issue (CHECK 7 WARN, k935.py:117): YZ open-variance term implements (log H − log O)²+(log L − log O)² (single-day squared intraday range), not canonical Yang-Zhang 2000 σ²_o (rolling sample variance of overnight open gaps across estimation window). README and article label this \"Yang-Zhang 2000\" without qualification.\n\nReviewer decision: needs_correction_then_keep — headline DM result (t=-3.28 CARR-YZ vs CARR-Parkinson) is real for the implemented estimator; the directional claim (\"加入隔夜成分改善 Parkinson\") is supported. But canonical label is misleading.\n\nActions taken:\n1. Methodology correction footnote appended to mile_1bff1fe5 in feed.json + reports/mile_1bff1fe5.json clarifying YZ variant as \"Yang-Zhang-style overnight-adjusted simplification\".\n2. feed.json entry.details.methodology_correction with verdict + reviewer_source + followup task id.\n3. Followup task K935_codex_review_canonical_yz_rerun queued in next_tasks.json (P3 experiment) — rerun K935 with canonical σ²_o rolling variance, confirm headline DM robust.\n\nReviewer source: feature-dev:code-reviewer subagent (fallback; Codex CLI quota exhausted 22:08 CST, reset 22:18). Per .claude/rules/experiments.md K1259 lesson: subagent fallback PASS ≠ primary-path Codex PASS — when Codex recovers, re-verify with codex exec for closure confidence.\n",
+    "evidence": [
+      "experiments/k935/k935.py:449-457 (OOS loop)",
+      "experiments/k935/k935.py:77-78 (r² proxy)",
+      "experiments/k935/k935.py:117 (YZ open_var non-canonical)",
+      "experiments/k935/k935.py:550 (dm_test call, h=1 default)",
+      "src/volpred/stats/model_evaluation.py:59-60 (qlike canonical direction)",
+      "src/volpred/stats/model_evaluation.py:89 (dm_test signature)",
+      "storage/reports/mile_1bff1fe5.json (article + methodology_correction footnote)"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-23T22:15:00.883526"
   }
 ]

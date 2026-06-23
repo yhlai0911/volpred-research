@@ -35883,7 +35883,7 @@
     "title": "Paper review (Codex 24h-rule): 白天波動看得很清楚，為什麼模型還是會估錯？問題常常出在『隔夜那一下』",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1bff1fe5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_1bff1fe5",
@@ -35892,8 +35892,13 @@
       "codex-24h-rule"
     ],
     "created_at": "2026-06-23T04:08:02+00:00",
-    "started_at": "2026-06-23T12:08:55.186710+00:00",
-    "last_released_at": "2026-06-23T13:08:56.705550+00:00"
+    "started_at": "2026-06-23T14:08:52.748655+00:00",
+    "last_released_at": "2026-06-23T13:08:56.705550+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-23T14:08:49.605724+00:00",
+    "claim_session_id": "562dedd648bf",
+    "completed_at": "2026-06-23T14:15:51.187368+00:00",
+    "result": "K935 24h-rule review via code-reviewer subagent (Codex quota fallback). VERDICT: CONDITIONAL_PASS / needs_correction_then_keep. Core methodology PASS (lookahead/QLIKE/DM-h1/r2-proxy/OOS/seed/CARR-spec). One WARN: YZ open-variance non-canonical (single-day range vs YZ2000 rolling sigma_o). Actions: footnote added to mile_1bff1fe5 (feed+report), knowledge item_id=6f8446c6, audit artifact experiments/k935/24h_rule_review_20260623.json, followup task K935_codex_review_canonical_yz_rerun queued P3. Headline DM result t=-3.28 holds for implemented estimator; directional claim '加入隔夜成分改善 Parkinson' unchanged."
   },
   {
     "id": "paper_review_mile_1330219a",
@@ -36232,7 +36237,7 @@
     "title": "研究 backlog fallback: corporate-bond news sentiment 的 RV-only 再檢定：報酬小不代表風險無訊號",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: corporate-bond news sentiment 的 RV-only 再檢定：報酬小不代表風險無訊號 — 用免費新聞/RSS/GDELT corporate-credit 關鍵字 sentiment + yfinance HYG/LQD/BKLN/VCIT/VCSH，先複核 sentiment 對 bond ETF returns 經濟量級是否小，再改 target 為 next-week RV、downside semivariance、spread proxy drawdown，檢定是否只在風險維度有增量；與能源新聞 topic shock 及 generic news-atte | 來源 section: 期刊主題挖掘 batch（2026-06-22 codex 補充；journal_discovery_20260622_0；websearch faj/rfs/rof/jfqa/jfi/jod/jai/jpm 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -36245,7 +36250,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-23T12:54:10.037838+00:00",
     "claim_session_id": "b188f493d43c",
-    "started_at": "2026-06-23T12:54:19.436719+00:00"
+    "started_at": "2026-06-23T12:54:19.436719+00:00",
+    "completed_at": "2026-06-23T14:08:48.319257+00:00",
+    "result": "K1539 NULL completed (commit a903017b); 2 knowledge entries written (empirical_null + diagnostic_null)"
   },
   {
     "id": "research_volatility_management_equity_beta_timing",
@@ -36275,5 +36282,17 @@
     "related_k_id": "K1330",
     "predecessor": "K1330",
     "dispatch_lane": "agent"
+  },
+  {
+    "id": "K935_codex_review_canonical_yz_rerun",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "pending",
+    "source": "paper_review_followup",
+    "title": "K935 canonical Yang-Zhang rerun (24h-review correction follow-up)",
+    "description": "Per 24h-rule review of mile_1bff1fe5 (k935): YZ open-variance currently uses single-day intraday range proxy, not canonical Yang-Zhang 2000 rolling sample variance σ²_o. Rerun K935 with σ²_o = (1/n) Σ (o_i − ō)² over the 2000-day training window where o_i = log(Open_i/Close_{i-1}); confirm headline DM t<-3.0 vs Parkinson holds. If t drops materially, update mile_1bff1fe5 with revised quantitative magnitude. Path: experiments/k935/k935.py:108-118 (YZ block).",
+    "parent_article_id": "mile_1bff1fe5",
+    "parent_review_task_id": "paper_review_mile_1bff1fe5",
+    "created_at": "2026-06-23T14:15:01.038832+00:00"
   }
 ]
