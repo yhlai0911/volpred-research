@@ -482,11 +482,24 @@ def build_results(
             "group": UNIVERSE[ticker]["group"],
         }
 
+    top_gap = (
+        primary_gap.assign(abs_t=primary_gap["hac_post_t"].abs())
+        .sort_values("abs_t", ascending=False)
+        .drop(columns=["abs_t"])
+    )
+    limitations = [
+        "Daily OHLCV cannot see intraday settlement-fail dynamics, locate market-on-close imbalance, or identify true ETF primary-market creation/redemption timing.",
+        "T+1 is a single common date; macro and market regime changes around 2024-2026 are not causally separated.",
+        "ADR basket is a free-data proxy for cross-border settlement pressure, not a direct fails/affirmation-rate dataset.",
+        "Month-end/quarter-end flags are mechanical last-trading-day proxies, not official index-rebalance calendars.",
+    ]
+
     return {
         "experiment_id": EXPERIMENT_ID,
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "seed": SEED,
         "verdict": verdict,
+        "event_date": EVENT_DATE.date().isoformat(),
         "event": {
             "event_date": EVENT_DATE.date().isoformat(),
             "description": "U.S. standard securities settlement cycle moved from T+2 to T+1 for covered securities.",
@@ -515,14 +528,36 @@ def build_results(
             "n_gap_primary_tests": int(len(primary_gap)),
             "n_gap_abs_harvey": n_gap_harvey,
             "n_gap_abs_harvey_and_bh": n_gap_bh,
-            "top_abs_gap_effects": primary_gap.assign(abs_t=primary_gap["hac_post_t"].abs())
-            .sort_values("abs_t", ascending=False)
-            .head(8)
-            .drop(columns=["abs_t"])
-            .to_dict(orient="records"),
+            "top_abs_gap_effects": top_gap.head(8).to_dict(orient="records"),
             "rebalance_interaction_passes": rebalance_pass,
             "group_interaction_passes": group_pass,
         },
+        "key_findings": [
+            {
+                "finding": "Ticker-level overnight gap-variance break is present in this daily proxy, but mostly as a market-quality diagnostic rather than a causal T+1 estimate.",
+                "evidence": {
+                    "passing_gap_tests": n_gap_bh,
+                    "total_gap_tests": int(len(primary_gap)),
+                    "largest_abs_gap_cells": top_gap.head(5)[
+                        ["ticker", "group", "hac_post_coef", "hac_post_t", "bh_q_metric_family", "post_minus_pre"]
+                    ].to_dict(orient="records"),
+                },
+            },
+            {
+                "finding": "Month-end and quarter-end rebalance-day interactions do not survive the Harvey plus BH gate.",
+                "evidence": {
+                    "passing_rebalance_interactions": rebalance_pass,
+                    "tested_rebalance_interactions": int(len(rebalance_table)),
+                },
+            },
+            {
+                "finding": "ADR and U.S. ETF post-event interactions are detectable in pooled daily data, so the result should be read as a cross-segment structural-break screen.",
+                "evidence": {
+                    "passing_group_interactions": group_pass,
+                    "tested_group_interactions": int(len(group_table)),
+                },
+            },
+        ],
         "outputs": {
             "daily_panel": f"data/{EXPERIMENT_ID}_daily_panel.csv",
             "ticker_breaks": f"{EXPERIMENT_ID}_ticker_breaks.csv",
@@ -530,12 +565,8 @@ def build_results(
             "group_interactions": f"{EXPERIMENT_ID}_group_interactions.csv",
             "figures": figures,
         },
-        "limitations": [
-            "Daily OHLCV cannot see intraday settlement-fail dynamics, locate market-on-close imbalance, or identify true ETF primary-market creation/redemption timing.",
-            "T+1 is a single common date; macro and market regime changes around 2024-2026 are not causally separated.",
-            "ADR basket is a free-data proxy for cross-border settlement pressure, not a direct fails/affirmation-rate dataset.",
-            "Month-end/quarter-end flags are mechanical last-trading-day proxies, not official index-rebalance calendars.",
-        ],
+        "limitations": limitations,
+        "caveats": limitations,
         "claim_rule": "A strong structural-break claim requires multiple gap-variance cells passing |t|>=3 and BH q<=0.05 or a robust group/rebalance interaction. Otherwise report NULL_DAILY_PROXY.",
     }
 

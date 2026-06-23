@@ -35711,7 +35711,7 @@
     "title": "研究 backlog fallback: T+1 結算制度（2024-05-28 生效）對美股/ETF 隔夜 gap 與 realized vol 的結構斷點",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: T+1 結算制度（2024-05-28 生效）對美股/ETF 隔夜 gap 與 realized vol 的結構斷點 — yfinance SPY/QQQ/IWM + 一籃 ADR（settlement gap 最敏感）+ 大型 ETF，以 2024-05-28 為斷點做 event study / regression discontinuity，檢定 T+1 後 (i) 隔夜 close→open gap variance、(ii) 月底/季底再平衡日 RV、(iii) ETF vs 成分股 RV 裂口是否系統性改變；明確分前後子樣本、對齊國際 calendar 避免 date drift | 來源 section: 期刊主題挖掘 batch（2026-06-19；research backlog 連 4 天回報 all_already_covered → open questions 抽乾、experiment pending 池歸零 m2 idle → websearch jbf/rfs/ijf/jfec/j.futures markets/joae/faj/fed 2025-26 趨勢層級補 7 軸，全免費資料 yfinance/fred/cftc/opex 日曆可啟動）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -35724,7 +35724,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-23T02:33:37.506522+00:00",
     "claim_session_id": "a8fbf9425b7c",
-    "started_at": "2026-06-23T02:33:42.498475+00:00"
+    "started_at": "2026-06-23T02:33:42.498475+00:00",
+    "completed_at": "2026-06-23T02:40:51.062171+00:00",
+    "result": "完成 T+1 settlement 日頻 structural-break diagnostic。yfinance 15 檔 ETF/ADR、2022-01-03 至 2026-06-22；gap variance 9/15 通過 Harvey+BH，group interaction 4/6，rebalance interaction 0/30。產出 experiments/research_t_1_2024_05_28_etf_gap_realized_vol/ 三件套、CSV、圖表與 Codex review。"
   },
   {
     "id": "research_realized_crp_spike",

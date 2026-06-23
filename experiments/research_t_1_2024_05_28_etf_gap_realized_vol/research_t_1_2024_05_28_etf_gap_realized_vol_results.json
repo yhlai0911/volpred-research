@@ -1,0 +1,409 @@
+{
+  "experiment_id": "research_t_1_2024_05_28_etf_gap_realized_vol",
+  "generated_utc": "2026-06-23T02:38:50.362653+00:00",
+  "seed": 42,
+  "verdict": "CONDITIONAL_BREAK_DIAGNOSTIC",
+  "event_date": "2024-05-28",
+  "event": {
+    "event_date": "2024-05-28",
+    "description": "U.S. standard securities settlement cycle moved from T+2 to T+1 for covered securities."
+  },
+  "data_sources": {
+    "market_data": {
+      "source": "yfinance daily adjusted OHLCV, auto_adjust=True",
+      "requested_start": "2022-01-01",
+      "requested_end_exclusive": "2026-06-24",
+      "sample": {
+        "SPY": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "us_etf"
+        },
+        "QQQ": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "us_etf"
+        },
+        "IWM": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "us_etf"
+        },
+        "VTI": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "us_etf"
+        },
+        "EFA": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "intl_etf"
+        },
+        "EEM": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "intl_etf"
+        },
+        "HYG": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "credit_etf"
+        },
+        "LQD": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "credit_etf"
+        },
+        "TLT": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "bond_etf"
+        },
+        "BABA": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "adr"
+        },
+        "TSM": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "adr"
+        },
+        "ASML": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "adr"
+        },
+        "NVO": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "adr"
+        },
+        "SAP": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "adr"
+        },
+        "TM": {
+          "start": "2022-01-03",
+          "end": "2026-06-22",
+          "n": 1120,
+          "group": "adr"
+        }
+      }
+    },
+    "official_sources": [
+      {
+        "citation": "SEC (2023/2024), Shortening the Securities Transaction Settlement Cycle; T+1 effective May 28, 2024",
+        "url": "https://www.sec.gov/investment/settlement-cycle-small-entity-compliance-guide-15c6-1-15c6-2-204-2",
+        "role": "official source for the U.S. T+1 settlement-cycle date and scope"
+      },
+      {
+        "citation": "SEC Chair statement (2024-05-21), Upcoming implementation of T+1 settlement cycle",
+        "url": "https://www.sec.gov/newsroom/press-releases/2024-62",
+        "role": "confirms May 28, 2024 conversion date"
+      },
+      {
+        "citation": "DTCC (2023), Comments on SEC T+1 implementation date",
+        "url": "https://www.dtcc.com/news/2023/february/15/dtcc-comments-on-sec-announcement-regarding-the-t1-implementation-date-of-may-2024",
+        "role": "market-infrastructure rationale: reduced risk, margin, and liquidity needs"
+      },
+      {
+        "citation": "SIFMA/CCMA/ISDA (2024), T+1 Securities Settlement Industry Implementation Playbook",
+        "url": "https://www.sifma.org/research/white-papers/t1-playbook",
+        "role": "implementation concerns around trade processing and cross-market timing"
+      },
+      {
+        "citation": "LSEG/FTSE Russell (2024), The market and index impact of shorter equity settlement cycles",
+        "url": "https://www.lseg.com/content/dam/ftse-russell/en_us/documents/research/market-index-impact-of-shorter-equity-settlement-cycles.pdf",
+        "role": "index and settlement-cycle frictions motivating ETF/ADR market-quality diagnostics"
+      }
+    ]
+  },
+  "method": {
+    "targets": [
+      "log_gap_var",
+      "log_cc_var",
+      "log_range_var"
+    ],
+    "primary_test": "per-ticker OLS-HAC: z(log_gap_var) ~ post_t1 + month_end + quarter_end + z(log_dollar_volume)",
+    "secondary_tests": [
+      "group-level post_t1 x ADR / US ETF interactions",
+      "post_t1 x month_end and post_t1 x quarter_end rebalance-day interactions"
+    ],
+    "inference": "OLS-HAC maxlags=5; Harvey absolute threshold |t| >= 3.0; BH q-values within test families",
+    "bootstrap": "stationary-style simple block bootstrap of post-minus-pre means, block=5, reps=1000, seed=42"
+  },
+  "lookahead_policy": "Descriptive structural-break test; no trading signal. Overnight gap uses open_t / close_{t-1}; post dummy is calendar event classification.",
+  "primary_summary": {
+    "n_gap_primary_tests": 15,
+    "n_gap_abs_harvey": 9,
+    "n_gap_abs_harvey_and_bh": 9,
+    "top_abs_gap_effects": [
+      {
+        "ticker": "HYG",
+        "group": "credit_etf",
+        "metric": "log_gap_var",
+        "n_pre": 601,
+        "n_post": 518,
+        "pre_mean": -13.279636193914884,
+        "post_mean": -14.8801133897555,
+        "post_minus_pre": -1.6004771958406163,
+        "welch_t": -7.5316484000217,
+        "welch_p": 1.0795472038185114e-13,
+        "bootstrap_ci95_low": -2.1117689871941616,
+        "bootstrap_ci95_high": -1.1491051603184645,
+        "bootstrap_p_diff_gt_0": 0.0,
+        "hac_post_coef": -0.5296466900539679,
+        "hac_post_t": -7.663171552008732,
+        "hac_post_p": 1.813967831295227e-14,
+        "bh_q_metric_family": 7.420777491662291e-14,
+        "harvey_abs_pass": true
+      },
+      {
+        "ticker": "TSM",
+        "group": "adr",
+        "metric": "log_gap_var",
+        "n_pre": 601,
+        "n_post": 518,
+        "pre_mean": -9.997348188991186,
+        "post_mean": -9.754869875520876,
+        "post_minus_pre": 0.24247831347030946,
+        "welch_t": 1.5070173239809455,
+        "welch_p": 0.1320904849460612,
+        "bootstrap_ci95_low": -0.05614287422828763,
+        "bootstrap_ci95_high": 0.5783708247800262,
+        "bootstrap_p_diff_gt_0": 0.937,
+        "hac_post_coef": -0.6021859322788994,
+        "hac_post_t": -7.468685047725823,
+        "hac_post_p": 8.100014960853351e-14,
+        "bh_q_metric_family": 3.037505610320007e-13,
+        "harvey_abs_pass": true
+      },
+      {
+        "ticker": "LQD",
+        "group": "credit_etf",
+        "metric": "log_gap_var",
+        "n_pre": 601,
+        "n_post": 518,
+        "pre_mean": -12.033155995096324,
+        "post_mean": -12.945989897569284,
+        "post_minus_pre": -0.9128339024729595,
+        "welch_t": -6.374811275541807,
+        "welch_p": 2.7407095396922235e-10,
+        "bootstrap_ci95_low": -1.2514011115546517,
+        "bootstrap_ci95_high": -0.6104447980801637,
+        "bootstrap_p_diff_gt_0": 0.0,
+        "hac_post_coef": -0.48063970991157107,
+        "hac_post_t": -6.464401372333395,
+        "hac_post_p": 1.0170060238935059e-10,
+        "bh_q_metric_family": 2.5425150597337647e-10,
+        "harvey_abs_pass": true
+      },
+      {
+        "ticker": "SAP",
+        "group": "adr",
+        "metric": "log_gap_var",
+        "n_pre": 601,
+        "n_post": 518,
+        "pre_mean": -10.201450022438753,
+        "post_mean": -10.15594483696634,
+        "post_minus_pre": 0.04550518547241289,
+        "welch_t": 0.3082619388671069,
+        "welch_p": 0.757942824173503,
+        "bootstrap_ci95_low": -0.3079712382326406,
+        "bootstrap_ci95_high": 0.35065197863858394,
+        "bootstrap_p_diff_gt_0": 0.578,
+        "hac_post_coef": -0.6015108498874802,
+        "hac_post_t": -5.896101020600572,
+        "hac_post_p": 3.7219116218901435e-09,
+        "bh_q_metric_family": 7.975524904050307e-09,
+        "harvey_abs_pass": true
+      },
+      {
+        "ticker": "TLT",
+        "group": "bond_etf",
+        "metric": "log_gap_var",
+        "n_pre": 601,
+        "n_post": 518,
+        "pre_mean": -10.854145554034249,
+        "post_mean": -11.559602391708072,
+        "post_minus_pre": -0.7054568376738235,
+        "welch_t": -4.886470506675182,
+        "welch_p": 1.1801174716412013e-06,
+        "bootstrap_ci95_low": -1.0520505204914503,
+        "bootstrap_ci95_high": -0.417062234568765,
+        "bootstrap_p_diff_gt_0": 0.0,
+        "hac_post_coef": -0.4162480904724524,
+        "hac_post_t": -5.886016281943071,
+        "hac_post_p": 3.956153569675768e-09,
+        "bh_q_metric_family": 8.092132301609526e-09,
+        "harvey_abs_pass": true
+      },
+      {
+        "ticker": "TM",
+        "group": "adr",
+        "metric": "log_gap_var",
+        "n_pre": 601,
+        "n_post": 518,
+        "pre_mean": -10.347417796192527,
+        "post_mean": -10.097033319945274,
+        "post_minus_pre": 0.2503844762472536,
+        "welch_t": 1.5233235328107524,
+        "welch_p": 0.1279669727462038,
+        "bootstrap_ci95_low": -0.09316491447004079,
+        "bootstrap_ci95_high": 0.6141102190841969,
+        "bootstrap_p_diff_gt_0": 0.921,
+        "hac_post_coef": -0.2917663138294203,
+        "hac_post_t": -4.355080986642954,
+        "hac_post_p": 1.3301773037827258e-05,
+        "bh_q_metric_family": 2.137784952507952e-05,
+        "harvey_abs_pass": true
+      },
+      {
+        "ticker": "ASML",
+        "group": "adr",
+        "metric": "log_gap_var",
+        "n_pre": 601,
+        "n_post": 518,
+        "pre_mean": -9.865344176502122,
+        "post_mean": -9.617447045758556,
+        "post_minus_pre": 0.24789713074356534,
+        "welch_t": 1.4321867256999694,
+        "welch_p": 0.15237072210527378,
+        "bootstrap_ci95_low": -0.13181671555714844,
+        "bootstrap_ci95_high": 0.6035254555667512,
+        "bootstrap_p_diff_gt_0": 0.879,
+        "hac_post_coef": -0.34862287983817364,
+        "hac_post_t": -4.2916308713920515,
+        "hac_post_p": 1.773656183236987e-05,
+        "bh_q_metric_family": 2.7522251119194627e-05,
+        "harvey_abs_pass": true
+      },
+      {
+        "ticker": "SPY",
+        "group": "us_etf",
+        "metric": "log_gap_var",
+        "n_pre": 601,
+        "n_post": 518,
+        "pre_mean": -11.686662882118164,
+        "post_mean": -12.17578807242025,
+        "post_minus_pre": -0.48912519030208657,
+        "welch_t": -3.146384735682996,
+        "welch_p": 0.0016992526265242095,
+        "bootstrap_ci95_low": -0.8572802797312371,
+        "bootstrap_ci95_high": -0.15007404379488717,
+        "bootstrap_p_diff_gt_0": 0.003,
+        "hac_post_coef": -0.2716720970731407,
+        "hac_post_t": -3.97930312625055,
+        "hac_post_p": 6.911756893018512e-05,
+        "bh_q_metric_family": 0.00010033195489865582,
+        "harvey_abs_pass": true
+      }
+    ],
+    "rebalance_interaction_passes": 0,
+    "group_interaction_passes": 4
+  },
+  "key_findings": [
+    {
+      "finding": "Ticker-level overnight gap-variance break is present in this daily proxy, but mostly as a market-quality diagnostic rather than a causal T+1 estimate.",
+      "evidence": {
+        "passing_gap_tests": 9,
+        "total_gap_tests": 15,
+        "largest_abs_gap_cells": [
+          {
+            "ticker": "HYG",
+            "group": "credit_etf",
+            "hac_post_coef": -0.5296466900539679,
+            "hac_post_t": -7.663171552008732,
+            "bh_q_metric_family": 7.420777491662291e-14,
+            "post_minus_pre": -1.6004771958406163
+          },
+          {
+            "ticker": "TSM",
+            "group": "adr",
+            "hac_post_coef": -0.6021859322788994,
+            "hac_post_t": -7.468685047725823,
+            "bh_q_metric_family": 3.037505610320007e-13,
+            "post_minus_pre": 0.24247831347030946
+          },
+          {
+            "ticker": "LQD",
+            "group": "credit_etf",
+            "hac_post_coef": -0.48063970991157107,
+            "hac_post_t": -6.464401372333395,
+            "bh_q_metric_family": 2.5425150597337647e-10,
+            "post_minus_pre": -0.9128339024729595
+          },
+          {
+            "ticker": "SAP",
+            "group": "adr",
+            "hac_post_coef": -0.6015108498874802,
+            "hac_post_t": -5.896101020600572,
+            "bh_q_metric_family": 7.975524904050307e-09,
+            "post_minus_pre": 0.04550518547241289
+          },
+          {
+            "ticker": "TLT",
+            "group": "bond_etf",
+            "hac_post_coef": -0.4162480904724524,
+            "hac_post_t": -5.886016281943071,
+            "bh_q_metric_family": 8.092132301609526e-09,
+            "post_minus_pre": -0.7054568376738235
+          }
+        ]
+      }
+    },
+    {
+      "finding": "Month-end and quarter-end rebalance-day interactions do not survive the Harvey plus BH gate.",
+      "evidence": {
+        "passing_rebalance_interactions": 0,
+        "tested_rebalance_interactions": 30
+      }
+    },
+    {
+      "finding": "ADR and U.S. ETF post-event interactions are detectable in pooled daily data, so the result should be read as a cross-segment structural-break screen.",
+      "evidence": {
+        "passing_group_interactions": 4,
+        "tested_group_interactions": 6
+      }
+    }
+  ],
+  "outputs": {
+    "daily_panel": "data/research_t_1_2024_05_28_etf_gap_realized_vol_daily_panel.csv",
+    "ticker_breaks": "research_t_1_2024_05_28_etf_gap_realized_vol_ticker_breaks.csv",
+    "rebalance_interactions": "research_t_1_2024_05_28_etf_gap_realized_vol_rebalance_interactions.csv",
+    "group_interactions": "research_t_1_2024_05_28_etf_gap_realized_vol_group_interactions.csv",
+    "figures": [
+      "figures/t1_gap_var_hac_tstats.png",
+      "figures/t1_group_gap_var_timeline.png"
+    ]
+  },
+  "limitations": [
+    "Daily OHLCV cannot see intraday settlement-fail dynamics, locate market-on-close imbalance, or identify true ETF primary-market creation/redemption timing.",
+    "T+1 is a single common date; macro and market regime changes around 2024-2026 are not causally separated.",
+    "ADR basket is a free-data proxy for cross-border settlement pressure, not a direct fails/affirmation-rate dataset.",
+    "Month-end/quarter-end flags are mechanical last-trading-day proxies, not official index-rebalance calendars."
+  ],
+  "caveats": [
+    "Daily OHLCV cannot see intraday settlement-fail dynamics, locate market-on-close imbalance, or identify true ETF primary-market creation/redemption timing.",
+    "T+1 is a single common date; macro and market regime changes around 2024-2026 are not causally separated.",
+    "ADR basket is a free-data proxy for cross-border settlement pressure, not a direct fails/affirmation-rate dataset.",
+    "Month-end/quarter-end flags are mechanical last-trading-day proxies, not official index-rebalance calendars."
+  ],
+  "claim_rule": "A strong structural-break claim requires multiple gap-variance cells passing |t|>=3 and BH q<=0.05 or a robust group/rebalance interaction. Otherwise report NULL_DAILY_PROXY."
+}
