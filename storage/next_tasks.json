@@ -35306,7 +35306,7 @@
     "title": "K1365: 同指數 ETF liquidity-clientele concentration 作 index RV 壓力代理** — 用同指數 ETF 組（SPY/IVV/VOO、QQQ/QQQM、IWM/VTWO、EEM/IEMG）每日成交額 sh",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1147). Original: 同指數 ETF liquidity-clientele concentration 作 index RV 壓力代理** — 用同指數 ETF 組（SPY/IVV/VOO、QQQ/QQQM、IWM/VTWO、EEM/IEMG）每日成交額 share、spread proxy、費率與 AUM share，建 liquidity-pool concentration / fragmentation 指標，檢定短線流動性是否集中到高 turnover ETF 時，index ETF RV、premium-discount proxy 與尾盤 range-vol 升高；與被動 flow 題不同，這裡是 same-index ETF 內部 liquidity clientele 與交易池集中（來源：RFS 2024/25 Value of ETF Liquidity；同指數 ETF 的流動性外部性與短線投資人 clientele 是新近 ETF 競爭主題）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1365.py with signal.shift(1) + seed=42, (c) K1365_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35319,7 +35319,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-23T01:49:42.416460+00:00",
     "claim_session_id": "0decacf4a7f1",
-    "started_at": "2026-06-23T01:49:46.569846+00:00"
+    "started_at": "2026-06-23T01:49:46.569846+00:00",
+    "completed_at": "2026-06-23T01:59:29.742698+00:00",
+    "result": "K1365 completed: same-index ETF leader-volume concentration NULL_PROXY; EM fragmentation reverse diagnostic documented. Actual closure files in 2376606b; [codex] marker commit 49c2ec8e; no push."
   },
   {
     "id": "K1366",
