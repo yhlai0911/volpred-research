@@ -14,13 +14,14 @@ This review supports only the experiment's own `NULL_PROXY` conclusion. It does 
   - `README.md`
   - `K1367.py`
   - `K1367_results.json`
-- Re-ran `uv run python experiments/k1367/K1367.py`; it completed and regenerated `K1367_results.json` with verdict `NULL_PROXY`.
-- `python -m py_compile experiments/k1367/K1367.py` passes.
+- Re-ran `uv run python experiments/K1367/K1367.py`; it completed and regenerated `K1367_results.json` with verdict `NULL_PROXY`.
+- `python -m py_compile experiments/K1367/K1367.py` passes.
 - Data provenance is byte-traceable:
   - raw GDELT API response cached at `data/gdelt_climate_timeline_raw.json`;
   - parsed GDELT daily series cached at `data/gdelt_climate_daily.csv`;
   - yfinance OHLCV cached at `data/yfinance_ohlcv.csv`;
   - event and model panels written to CSV.
+- The script contains a Sentometrics MCCC fallback for GDELT DOC rate limits, but this reviewed run used the cached GDELT DOC response (`climate_news.source = GDELT DOC 2.0 TimelineVolRaw`).
 - Randomness is fixed with `SEED = 42` and `np.random.default_rng(SEED)` for bootstrap diagnostics.
 - Lookahead guard is explicit:
   - rolling news z-score uses `shift(1)` for historical mean/std;

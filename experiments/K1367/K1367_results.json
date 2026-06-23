@@ -3,13 +3,19 @@
   "title": "Climate-news duration and green/brown reaction-time proxy for tail risk",
   "verdict": "NULL_PROXY",
   "data_sources": {
-    "gdelt_doc_api": {
+    "climate_news": {
+      "source": "GDELT DOC 2.0 TimelineVolRaw",
+      "source_url": "https://api.gdeltproject.org/api/v2/doc/doc",
+      "fallback_from_gdelt_reason": null,
+      "rows": 3440,
+      "sample_start": "2017-01-01",
+      "sample_end": "2026-06-23"
+    },
+    "gdelt_doc_api_attempt": {
       "url": "https://api.gdeltproject.org/api/v2/doc/doc",
       "mode": "TimelineVolRaw",
       "query": "(\"climate change\" OR \"climate policy\" OR \"carbon emissions\" OR \"global warming\" OR \"clean energy transition\" OR \"net zero\" OR \"carbon tax\")",
-      "start": "2017-01-01",
-      "end": "2026-06-23",
-      "cache": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/data/gdelt_climate_timeline_raw.json"
+      "cache": "/Users/yhlai0911/Desktop/volpred-research/experiments/K1367/data/gdelt_climate_timeline_raw.json"
     },
     "yfinance": {
       "tickers": [
@@ -22,7 +28,7 @@
       ],
       "start": "2017-01-01",
       "end": "2026-06-23",
-      "cache": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/data/yfinance_ohlcv.csv"
+      "cache": "/Users/yhlai0911/Desktop/volpred-research/experiments/K1367/data/yfinance_ohlcv.csv"
     }
   },
   "methodology": {
@@ -41,9 +47,9 @@
     "success_criteria": "At least two positive duration/reaction coefficients must pass Bonferroni p<0.05 and Harvey |t|>=3 across risk targets."
   },
   "sample": {
-    "gdelt_rows": 3440,
-    "gdelt_date_start": "2017-01-01",
-    "gdelt_date_end": "2026-06-23",
+    "news_rows": 3440,
+    "news_date_start": "2017-01-01",
+    "news_date_end": "2026-06-23",
     "raw_news_events": 70,
     "price_rows": 2378,
     "price_date_start": "2017-01-04",
@@ -836,11 +842,11 @@
     "verdict": "NULL_PROXY"
   },
   "outputs": {
-    "event_features_csv": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_event_features.csv",
-    "model_panel_csv": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_model_panel.csv",
-    "news_duration_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_news_duration_events.png",
-    "coefficient_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_coefficients.png",
-    "event_diagnostic_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_event_diagnostics.png"
+    "event_features_csv": "/Users/yhlai0911/Desktop/volpred-research/experiments/K1367/K1367_event_features.csv",
+    "model_panel_csv": "/Users/yhlai0911/Desktop/volpred-research/experiments/K1367/K1367_model_panel.csv",
+    "news_duration_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/K1367/K1367_news_duration_events.png",
+    "coefficient_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/K1367/K1367_coefficients.png",
+    "event_diagnostic_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/K1367/K1367_event_diagnostics.png"
   },
   "limitations": [
     "ETF baskets are public daily proxies, not firm-level green/brown portfolios.",

@@ -11,9 +11,12 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+import xml.etree.ElementTree as ET
+import zipfile
 
 import matplotlib
 
@@ -58,11 +61,13 @@ FIG_COEF_PATH = HERE / f"{EXPERIMENT_ID}_coefficients.png"
 FIG_DIAG_PATH = HERE / f"{EXPERIMENT_ID}_event_diagnostics.png"
 
 GDELT_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
+MCCC_URL = "https://www.dropbox.com/scl/fi/uucc6401uje293ofc3ahq/Sentometrics_US_Media_Climate_Change_Index.xlsx?dl=1&rlkey=jvgb6xg9w4ctdz5cdl6qun5md"
 GDELT_QUERY = (
     '("climate change" OR "climate policy" OR "carbon emissions" OR '
     '"global warming" OR "clean energy transition" OR "net zero" OR '
     '"carbon tax")'
 )
+NEWS_METADATA: dict[str, object] = {}
 
 np.random.seed(SEED)
 
@@ -105,7 +110,7 @@ def fetch_gdelt_timeline() -> dict:
 
     params = gdelt_params(START, END)
     last_response = ""
-    for attempt in range(5):
+    for attempt in range(1):
         if attempt:
             time.sleep(8 * attempt)
         response = requests.get(
@@ -115,7 +120,7 @@ def fetch_gdelt_timeline() -> dict:
             headers={"User-Agent": "volpred-k1367/1.0"},
         )
         last_response = response.text[:500]
-        if response.status_code == 429:
+        if response.status_code == 429 or last_response.startswith("Please limit requests"):
             continue
         response.raise_for_status()
         payload = response.json()
@@ -149,6 +154,144 @@ def parse_gdelt_daily(payload: dict) -> pd.DataFrame:
     out = df.set_index("date").sort_index()
     out.to_csv(DATA_DIR / "gdelt_climate_daily.csv")
     return out
+
+
+def xlsx_shared_strings(zf: zipfile.ZipFile) -> list[str]:
+    ns = {"a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+    root = ET.fromstring(zf.read("xl/sharedStrings.xml"))
+    values: list[str] = []
+    for item in root.findall("a:si", ns):
+        parts = [
+            node.text or ""
+            for node in item.iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t")
+        ]
+        values.append("".join(parts))
+    return values
+
+
+def xlsx_sheet_path(zf: zipfile.ZipFile, sheet_name: str) -> str:
+    ns = {
+        "a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+        "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+    }
+    workbook = ET.fromstring(zf.read("xl/workbook.xml"))
+    rel_id = None
+    for sheet in workbook.find("a:sheets", ns):
+        if sheet.attrib.get("name") == sheet_name:
+            rel_id = sheet.attrib.get(
+                "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
+            )
+            break
+    if rel_id is None:
+        raise ValueError(f"Missing xlsx sheet: {sheet_name}")
+    rels = ET.fromstring(zf.read("xl/_rels/workbook.xml.rels"))
+    for rel in rels:
+        if rel.attrib.get("Id") == rel_id:
+            return "xl/" + rel.attrib["Target"]
+    raise ValueError(f"Missing xlsx relationship for sheet: {sheet_name}")
+
+
+def xlsx_cell_col(cell_ref: str) -> int:
+    match = re.match(r"([A-Z]+)", cell_ref)
+    if not match:
+        return 0
+    out = 0
+    for ch in match.group(1):
+        out = out * 26 + (ord(ch) - ord("A") + 1)
+    return out - 1
+
+
+def excel_serial_to_timestamp(value: str) -> pd.Timestamp:
+    return pd.Timestamp("1899-12-30") + pd.to_timedelta(float(value), unit="D")
+
+
+def parse_mccc_xlsx(path: Path) -> pd.DataFrame:
+    ns = {"a": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+    with zipfile.ZipFile(path) as zf:
+        shared = xlsx_shared_strings(zf)
+        target = xlsx_sheet_path(zf, "2025 update daily")
+        root = ET.fromstring(zf.read(target))
+
+    headers: dict[int, str] | None = None
+    rows: list[dict[str, str]] = []
+    for row in root.findall(".//a:row", ns):
+        values: dict[int, str] = {}
+        for cell in row.findall("a:c", ns):
+            col = xlsx_cell_col(cell.attrib.get("r", "A1"))
+            node = cell.find("a:v", ns)
+            value = "" if node is None else node.text or ""
+            if cell.attrib.get("t") == "s" and value:
+                value = shared[int(value)]
+            values[col] = value
+        if not values:
+            continue
+        if headers is None:
+            if values.get(0) == "Date":
+                headers = {idx: name for idx, name in values.items()}
+            continue
+        if not values.get(0):
+            continue
+        rows.append({headers[idx]: value for idx, value in values.items() if idx in headers})
+
+    raw = pd.DataFrame(rows)
+    if raw.empty:
+        raise ValueError("No rows parsed from MCCC xlsx")
+    raw["date"] = raw["Date"].map(excel_serial_to_timestamp).dt.normalize()
+    raw["mccc_aggregate"] = pd.to_numeric(raw["Aggregate"], errors="coerce")
+    raw = raw[["date", "mccc_aggregate"]].dropna().sort_values("date")
+    raw = raw.loc[(raw["date"] >= pd.Timestamp(START)) & (raw["date"] <= pd.Timestamp(END))]
+
+    raw["news_count"] = raw["mccc_aggregate"]
+    raw["gdelt_total"] = np.nan
+    raw["news_share"] = raw["mccc_aggregate"]
+    raw["log_news_share"] = np.log(raw["mccc_aggregate"].clip(lower=1e-12))
+    roll_mean = raw["log_news_share"].shift(1).rolling(ROLLING_WINDOW, min_periods=60).mean()
+    roll_std = raw["log_news_share"].shift(1).rolling(ROLLING_WINDOW, min_periods=60).std()
+    raw["news_z"] = ((raw["log_news_share"] - roll_mean) / roll_std).replace(
+        [np.inf, -np.inf], np.nan
+    )
+    raw["news_z"] = raw["news_z"].clip(-8, 8)
+    out = raw.set_index("date").sort_index()
+    out.to_csv(DATA_DIR / "mccc_daily.csv")
+    return out
+
+
+def fetch_mccc_daily(reason: str) -> pd.DataFrame:
+    cache = DATA_DIR / "mccc_index.xlsx"
+    if not cache.exists():
+        response = requests.get(MCCC_URL, timeout=120)
+        response.raise_for_status()
+        cache.write_bytes(response.content)
+    out = parse_mccc_xlsx(cache)
+    NEWS_METADATA.update(
+        {
+            "source": "Sentometrics MCCC 2025 update daily",
+            "source_url": "https://sentometrics-research.com/download/mccc/",
+            "fallback_from_gdelt_reason": reason,
+            "rows": int(len(out)),
+            "sample_start": str(out.index.min().date()),
+            "sample_end": str(out.index.max().date()),
+        }
+    )
+    return out
+
+
+def load_news_daily() -> pd.DataFrame:
+    try:
+        out = parse_gdelt_daily(fetch_gdelt_timeline())
+        NEWS_METADATA.update(
+            {
+                "source": "GDELT DOC 2.0 TimelineVolRaw",
+                "source_url": GDELT_URL,
+                "fallback_from_gdelt_reason": None,
+                "rows": int(len(out)),
+                "sample_start": str(out.index.min().date()),
+                "sample_end": str(out.index.max().date()),
+            }
+        )
+        return out
+    except Exception as exc:  # noqa: BLE001 - external API fallback is part of provenance.
+        return fetch_mccc_daily(reason=repr(exc))
 
 
 def build_news_events(gdelt: pd.DataFrame) -> pd.DataFrame:
@@ -380,8 +523,8 @@ def build_market_panel(events: pd.DataFrame, returns: pd.DataFrame, gdelt: pd.Da
     for col in signal.columns:
         panel[f"{col}_lag1"] = signal_lagged[col]
 
-    news = gdelt["news_z"].reindex(gdelt.index.union(returns.index)).sort_index().ffill()
-    panel["daily_news_z_lag1"] = news.reindex(returns.index).shift(1)
+    news = gdelt["news_z"].reindex(returns.index)
+    panel["daily_news_z_lag1"] = news.shift(1)
     panel["spy_rv21_lag1"] = (
         returns["SPY"].pow(2).rolling(21, min_periods=10).sum().shift(1) * (252.0 / 21.0)
     )
@@ -549,7 +692,7 @@ def plot_news_events(gdelt: pd.DataFrame, events: pd.DataFrame) -> None:
     recent_events = events[pd.to_datetime(events["end_date"]) >= pd.Timestamp("2020-01-01")]
     for _, row in recent_events.iterrows():
         ax.axvspan(row["start_date"], row["end_date"], color="#c9d6df", alpha=0.22, lw=0)
-    ax.set_title("K1367 climate-news duration events from GDELT TimelineVolRaw")
+    ax.set_title("K1367 climate-news duration events")
     ax.set_ylabel("Rolling z-score of log article share")
     ax.legend(loc="upper left", fontsize=8)
     ax.grid(alpha=0.25)
@@ -634,11 +777,12 @@ def plot_diagnostics(diagnostics: dict[str, dict], targets: list[str]) -> None:
 
 
 def main() -> None:
-    gdelt = parse_gdelt_daily(fetch_gdelt_timeline())
+    gdelt = load_news_daily()
     news_events = build_news_events(gdelt)
 
     yfin = load_yfinance_ohlcv()
     prices = close_prices(yfin)
+    prices = prices.loc[(prices.index >= gdelt.index.min()) & (prices.index <= gdelt.index.max())]
     returns = np.log(prices / prices.shift(1)).dropna()
     returns["green"] = returns[GREEN_TICKERS].mean(axis=1)
     returns["brown"] = returns[BROWN_TICKERS].mean(axis=1)
@@ -682,18 +826,17 @@ def main() -> None:
         "title": "Climate-news duration and green/brown reaction-time proxy for tail risk",
         "verdict": multiple_test["verdict"],
         "data_sources": {
-            "gdelt_doc_api": {
+            "climate_news": NEWS_METADATA,
+            "gdelt_doc_api_attempt": {
                 "url": GDELT_URL,
                 "mode": "TimelineVolRaw",
                 "query": GDELT_QUERY,
-                "start": START,
-                "end": END,
                 "cache": str(DATA_DIR / "gdelt_climate_timeline_raw.json"),
             },
             "yfinance": {
                 "tickers": TICKERS,
                 "start": START,
-                "end": END,
+                "end": str(gdelt.index.max().date()),
                 "cache": str(DATA_DIR / "yfinance_ohlcv.csv"),
             },
         },
@@ -716,9 +859,9 @@ def main() -> None:
             ),
         },
         "sample": {
-            "gdelt_rows": int(len(gdelt)),
-            "gdelt_date_start": gdelt.index.min(),
-            "gdelt_date_end": gdelt.index.max(),
+            "news_rows": int(len(gdelt)),
+            "news_date_start": gdelt.index.min(),
+            "news_date_end": gdelt.index.max(),
             "raw_news_events": int(len(news_events)),
             "price_rows": int(len(returns)),
             "price_date_start": returns.index.min(),
