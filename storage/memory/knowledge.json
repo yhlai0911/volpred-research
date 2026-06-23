@@ -35621,5 +35621,37 @@
     "reviewer": "Codex CLI 0.141.0 (ChatGPT auth, gpt-5.5 xhigh)",
     "reviewer_source": "2 in-worktree passes (fixed 4 issues: RNN hidden-state reset, full-sample demean leak, RealGARCH multi-step blow-up, RealGARCH measurement leverage centering) + 1 post-merge codex exec read-only pass (CONDITIONAL_PASS; all 6 methodology checks pass; 2 minor README wordings fixed)",
     "created_at": "2026-06-22T21:50:37.515127"
+  },
+  {
+    "id": "K_paper_review_mile_671d4c75",
+    "title": "Paper review: MOVE-VIX cross-asset resonance article (mile_671d4c75)",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "article_2026_06_22_move_vix_resonance",
+    "experiment_path": "experiments/article_2026_06_22_move_vix_resonance/",
+    "reviewer": "Codex CLI (codex-cli 0.135, gpt-5.4 medium)",
+    "reviewer_source": "primary_codex_review_24h_rule",
+    "category": "paper_review",
+    "summary": "MOVE x VIX 60d rolling correlation article passes core descriptive claim (current 0.50 > hist median 0.41, ~78.5 pct). No DM/Harvey overclaim risk (article is descriptive). Lookahead-free (rolling/shift correct). 4 minor wording/validity issues found; 2020 co-resonance cell biased by NaN>1 returning False (does not drop pre-252d NaN window) — minor, does not flip article narrative.",
+    "issues_found": [
+      "compute_evidence.py:66-68: NaN > 1 returns False so co-resonance series doesn't drop first ~251 obs without valid 252d z-score; biases 2020 0% resonance_rate downward",
+      "compute_evidence.py:66-67: 252d z-score uses contemporaneous window (no shift); minor — descriptive use OK but not strictly prior-info",
+      "compute_evidence.py:41-43,54-57,189-197: percentiles are full-sample, should label '2020-2026 retrospective percentile' not 'historical'",
+      "compute_evidence.py:99: period corr is within-period Pearson, article wording could clarify it is not an average of rolling correlations"
+    ],
+    "recommendations": [
+      "Open followup: mask invalid z-score windows in co-resonance + clarify 2020 cell",
+      "Label percentile claims as '2020-2026 full-sample retrospective percentile' in future articles"
+    ],
+    "tags": [
+      "paper-review",
+      "codex-24h-rule",
+      "MOVE",
+      "VIX",
+      "cross-asset",
+      "descriptive"
+    ],
+    "article_id": "mile_671d4c75",
+    "review_date": "2026-06-23T01:55:00+08:00",
+    "tokens_used": 75883
   }
 ]
