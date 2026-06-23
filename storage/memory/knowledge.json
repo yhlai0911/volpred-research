@@ -35981,5 +35981,17 @@
     ],
     "confidence": 0.74,
     "created_at": "2026-06-24T00:10:28.621287"
+  },
+  {
+    "item_id": "7cd2bf3b",
+    "category": "null_findings",
+    "content": "K1367 [NULL_PROXY] climate-news duration + green/brown ETF reaction-time 不能當尾端風險訊號\n\n實驗: GDELT TimelineVolRaw (climate keywords) → daily article-share z-score → active cluster duration + decay proxy. 配對 ICLN+TAN (green basket) / XLE+XOP (brown basket) excess vs SPY 的 first-cross-1sigma response time. 69 aligned events 2017-2026.\n\n目標: 5d forward green/brown RV, left-tail loss, VaR breach, ES gap; 21d forward green-brown corr spike. 共 9 個 target × 2 個 focal predictor (duration_score_lag1, reaction_gap_abs_lag1) = 18 cells.\n\n統計: OLS + HAC, controls peak_news_z_lag1 + spy_rv21_lag1 + abs_spy_ret_lag1, seed=42, lookahead guard signal.shift(1).\n\n結果: 全部 18 個 coefficient 沒有一個過 Harvey |t|>=3 或 Bonferroni p<0.05. 最強訊號是 green_rv5 duration coef +0.0241 t=+1.80. 事件診斷 top-tercile vs bottom-tercile composite green RV5 0.0930 vs 0.0547, bootstrap 95% CI [-0.0131, +0.0956] 橫跨 0.\n\nNARROW CONCLUSION: 公開 GDELT 日頻 + ETF basket proxy 太 noisy, 抓不到 climate-news duration tail-risk signal. NOT a rejection of Fahmy 2025 JBF firm-level / intraday IG-ACD-GARCH mechanism (那需要 EDGAR 10-K 段落 + earnings call transcript firm-level data).\n\nLimitations: (a) ETF basket coarse vs firm-level (b) GDELT count != content sentiment quality (c) daily prices 不能測 intraday ACD-GARCH channel.\n\nPublished feed mile_dc516a52 (2026-06-24, status=draft, audience=research).",
+    "evidence": [
+      "experiments/K1367/K1367_results.json",
+      "experiments/K1367/README.md",
+      "feed:mile_dc516a52"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-06-24T00:20:33.475113"
   }
 ]
