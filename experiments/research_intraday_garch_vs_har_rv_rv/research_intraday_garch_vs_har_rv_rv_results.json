@@ -1,0 +1,78 @@
+{
+  "experiment_id": "research_intraday_garch_vs_har_rv_rv",
+  "created_at": "2026-06-23T02:52:43.443263+00:00",
+  "seed": 1534,
+  "verdict": "PILOT_ONLY_INSUFFICIENT_OOS",
+  "claim_strength": "pilot only; not paper-grade due to <252 OOS forecasts",
+  "data": {
+    "source": "local yfinance 5-minute snapshots from data/intraday/SPY_5min_YYYY-MM-DD.csv",
+    "ticker": "SPY",
+    "start_date": "2026-01-14",
+    "end_date": "2026-06-22",
+    "n_intraday_bars": 8310,
+    "n_daily_rv": 107,
+    "median_bars_per_day": 78.0,
+    "n_feature_rows": 85,
+    "n_oos_forecasts": 43
+  },
+  "information_set": {
+    "features": "day-t HAR and intraday shape measures observed after close",
+    "target": "day-t+1 5-minute realized variance",
+    "lookahead_guard": "target_rv_next = rv.shift(-1); all predictors are day-t or rolling windows ending at day t"
+  },
+  "diagnostics": {
+    "annualized_rv_mean_pct": 11.140247295412701,
+    "annualized_rv_median_pct": 10.059878214172315,
+    "open_close_share_mean_pct": 25.205952732496044,
+    "seasonal_concentration_mean": 0.06498582787573579,
+    "top_intraday_slot_by_mean_share": 2
+  },
+  "model_comparison": {
+    "har_qlike": 0.4560355012961686,
+    "seasonal_qlike": 0.6955559230576942,
+    "seasonal_vs_har_qlike_improvement_pct": -52.522319223119204,
+    "dm_t_seasonal_minus_har": 0.8222903496896516,
+    "dm_p": 0.4155557152597922,
+    "harvey_abs_t_gt_3": false
+  },
+  "statistical_standard": {
+    "loss": "Patton QLIKE on next-day realized variance",
+    "dm": "volpred.stats.model_evaluation.dm_test, h=1",
+    "harvey_threshold_abs_t": 3.0,
+    "oos_minimum_for_paper_grade": 252
+  },
+  "literature": [
+    {
+      "citation": "Corsi (2009), Journal of Financial Econometrics",
+      "role": "HAR-RV baseline: heterogeneous daily/weekly/monthly realized-volatility components",
+      "url": "https://academic.oup.com/jfec/article-abstract/7/2/174/856522"
+    },
+    {
+      "citation": "Andersen and Bollerslev (1997), Journal of Empirical Finance",
+      "role": "intraday periodicity and volatility persistence motivation",
+      "url": "https://ideas.repec.org/a/eee/empfin/v4y1997i2-3p115-158.html"
+    },
+    {
+      "citation": "Engle and Sokalska (2012), Journal of Financial Econometrics",
+      "role": "multiplicative daily x diurnal x stochastic intraday volatility decomposition",
+      "url": "https://academic.oup.com/jfec/article-abstract/10/1/54/755620"
+    }
+  ],
+  "limitations": [
+    "Local yfinance 5-minute cache covers only a short 2026 window; OOS forecasts are far below 252.",
+    "This is a linear OLS proxy for a multiplicative component model, not a full intraday GARCH MLE.",
+    "SPY ETF 5-minute bars only; no cross-asset or true trade/quote microstructure cleaning.",
+    "Forecast target is intraday realized variance, not total close-to-close variance including overnight."
+  ],
+  "artifacts": {
+    "daily_measures_csv": "experiments/research_intraday_garch_vs_har_rv_rv/research_intraday_garch_vs_har_rv_rv_daily_measures.csv",
+    "oos_forecasts_csv": "experiments/research_intraday_garch_vs_har_rv_rv/research_intraday_garch_vs_har_rv_rv_oos_forecasts.csv",
+    "figures": [
+      "experiments/research_intraday_garch_vs_har_rv_rv/figures/fig_daily_rv_snapshot.png",
+      "experiments/research_intraday_garch_vs_har_rv_rv/figures/fig_intraday_seasonal_profile.png",
+      "experiments/research_intraday_garch_vs_har_rv_rv/figures/fig_oos_forecasts.png"
+    ],
+    "codex_review": "experiments/research_intraday_garch_vs_har_rv_rv/codex_review.md",
+    "results_json": "experiments/research_intraday_garch_vs_har_rv_rv/research_intraday_garch_vs_har_rv_rv_results.json"
+  }
+}
