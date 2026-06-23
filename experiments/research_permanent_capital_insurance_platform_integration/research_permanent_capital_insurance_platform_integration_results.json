@@ -1,0 +1,234 @@
+{
+  "experiment_id": "research_permanent_capital_insurance_platform_integration",
+  "created_at_utc": "2026-06-23T18:31:25.742099+00:00",
+  "seed": 20260624,
+  "verdict": "BETA_COMPOSITION_SHIFT_NO_RV_CREDIT_PASS",
+  "data": {
+    "source": "yfinance adjusted close; FRED HY OAS or LQD-HYG fallback for credit stress",
+    "price_start": "2014-01-02",
+    "price_end": "2026-06-23",
+    "panel_start": "2014-05-05",
+    "panel_end": "2026-06-23",
+    "panel_obs": 18312,
+    "managers": [
+      "BX",
+      "KKR",
+      "APO",
+      "ARES",
+      "BAM_BN_PROXY",
+      "CG"
+    ],
+    "manager_tickers": {
+      "BX": "BX",
+      "KKR": "KKR",
+      "APO": "APO",
+      "ARES": "ARES",
+      "BAM_BN_PROXY": "BN",
+      "CG": "CG"
+    },
+    "credit_stress": {
+      "source": "tradable proxy LQD_return_minus_HYG_return",
+      "fallback_used": true,
+      "start": "2023-06-26",
+      "end": "2026-06-23",
+      "n": 3135
+    }
+  },
+  "events": [
+    {
+      "manager": "BX",
+      "ticker": "BX",
+      "partner": "Allstate Life",
+      "announcement_date": "2021-01-26",
+      "integration_date": "2021-11-01",
+      "description": "Blackstone-managed entities acquire Allstate Life Insurance Company.",
+      "source_url": "https://www.allstatenewsroom.com/news/allstate-completes-sale-of-life-and-annuity-businesses/"
+    },
+    {
+      "manager": "KKR",
+      "ticker": "KKR",
+      "partner": "Global Atlantic",
+      "announcement_date": "2020-07-08",
+      "integration_date": "2021-02-01",
+      "description": "KKR acquires majority ownership of Global Atlantic.",
+      "source_url": "https://www.globalatlantic.com/news/kkr-closes-acquisition-global-atlantic-financial-group-limited"
+    },
+    {
+      "manager": "APO",
+      "ticker": "APO",
+      "partner": "Athene",
+      "announcement_date": "2021-03-08",
+      "integration_date": "2022-01-03",
+      "description": "Apollo completes full merger with Athene.",
+      "source_url": "https://www.apollo.com/insights-news/pressreleases/2022/01/apollo-completes-merger-with-athene-and-finalizes-key-governance-enhancements-120051006"
+    },
+    {
+      "manager": "ARES",
+      "ticker": "ARES",
+      "partner": "Aspida / Global Bankers",
+      "announcement_date": "2019-07-08",
+      "integration_date": "2021-07-15",
+      "description": "Ares-backed Aspida closes acquisition of U.S. insurance platform operations.",
+      "source_url": "https://www.businesswire.com/news/home/20210715005357/en/Aspida-Completes-Acquisition-of-U.S.-Based-Insurance-Platform"
+    },
+    {
+      "manager": "BAM_BN_PROXY",
+      "ticker": "BN",
+      "partner": "American Equity Investment Life",
+      "announcement_date": "2023-07-05",
+      "integration_date": "2024-05-02",
+      "description": "Brookfield Reinsurance completes acquisition of AEL; BN used for longer Brookfield history.",
+      "source_url": "https://bnt.brookfield.com/sites/brookfield-bnt/files/Brookfield-BNT/Press-Releases/2024/bnre-press-release-brookfield-reinsurance-completes-acquisition-ael-f.pdf"
+    },
+    {
+      "manager": "CG",
+      "ticker": "CG",
+      "partner": "Fortitude Re",
+      "announcement_date": "2019-11-25",
+      "integration_date": "2020-06-03",
+      "description": "Carlyle-led consortium completes majority acquisition of Fortitude Re.",
+      "source_url": "https://www.carlyle.com/media-room/news-release-archive/carlyle-group-and-td-holdings-complete-acquisition-majority"
+    }
+  ],
+  "model_meta": {
+    "return_beta_shift": {
+      "n_obs": 18312,
+      "r_squared": 0.4843169888051393
+    },
+    "rv_shift": {
+      "n_obs": 18312,
+      "r_squared": 0.34714146636153187
+    },
+    "downside_insurer_beta_shift": {
+      "n_obs": 8202,
+      "r_squared": 0.41036238549326465
+    }
+  },
+  "primary_tests": {
+    "market_beta_shift": {
+      "model": "return_beta_shift",
+      "term": "spy:post",
+      "coef": 0.22237975899916185,
+      "std_err": 0.07220871543733383,
+      "t": 3.079680308011484,
+      "p": 0.002072228952623996,
+      "ci_low": 0.08085327737208611,
+      "ci_high": 0.36390624062623755,
+      "harvey_pass": true
+    },
+    "financial_beta_shift": {
+      "model": "return_beta_shift",
+      "term": "xlf:post",
+      "coef": 0.49813535437188117,
+      "std_err": 0.11259738277080182,
+      "t": 4.424040258430013,
+      "p": 9.687195627385648e-06,
+      "ci_low": 0.2774485393876388,
+      "ci_high": 0.7188221693561235,
+      "harvey_pass": true
+    },
+    "insurance_beta_shift": {
+      "model": "return_beta_shift",
+      "term": "kie:post",
+      "coef": -0.2556341988171827,
+      "std_err": 0.08887061561753788,
+      "t": -2.8764760662548556,
+      "p": 0.004021426908749356,
+      "ci_low": -0.4298174047114598,
+      "ci_high": -0.08145099292290559,
+      "harvey_pass": false
+    },
+    "credit_beta_shift": {
+      "model": "return_beta_shift",
+      "term": "credit_z:post",
+      "coef": 0.0006547254016365696,
+      "std_err": 0.0007842006121423298,
+      "t": 0.8348952952841348,
+      "p": 0.403776663946937,
+      "ci_low": -0.0008822795548166606,
+      "ci_high": 0.0021917303580898,
+      "harvey_pass": false
+    },
+    "rv_level_shift": {
+      "model": "rv_shift",
+      "term": "post",
+      "coef": -0.014098983697471616,
+      "std_err": 0.007281675795619653,
+      "t": -1.9362278812183544,
+      "p": 0.052839797120423616,
+      "ci_low": -0.02837080600398318,
+      "ci_high": 0.0001728386090399485,
+      "harvey_pass": false
+    },
+    "downside_insurance_beta_shift": {
+      "model": "downside_insurer_beta_shift",
+      "term": "kie:post",
+      "coef": 0.3323818335032999,
+      "std_err": 0.06809766867641849,
+      "t": 4.880957600511811,
+      "p": 1.0557194043105998e-06,
+      "ci_low": 0.1989128554663783,
+      "ci_high": 0.46585081154022157,
+      "harvey_pass": true
+    }
+  },
+  "primary_harvey_passes": [
+    "market_beta_shift",
+    "financial_beta_shift",
+    "downside_insurance_beta_shift"
+  ],
+  "manager_diff_summary": {
+    "ann_vol_diff": {
+      "n_managers": 6,
+      "mean": 0.044085560718150084,
+      "std": 0.024760163111367296,
+      "t_cross_section": 4.361325420121209,
+      "harvey_pass": true
+    },
+    "beta_spy_diff": {
+      "n_managers": 6,
+      "mean": 0.21654093478415648,
+      "std": 0.20065233555148404,
+      "t_cross_section": 2.643451904951173,
+      "harvey_pass": false
+    },
+    "beta_kie_diff": {
+      "n_managers": 6,
+      "mean": -0.24125242292967944,
+      "std": 0.07727087691008862,
+      "t_cross_section": -7.647711000814126,
+      "harvey_pass": true
+    },
+    "beta_credit_z_diff": {
+      "n_managers": 6,
+      "mean": 0.0010313032268124606,
+      "std": 0.002376702466810817,
+      "t_cross_section": 1.0628872191840055,
+      "harvey_pass": false
+    },
+    "downside_corr_kie_diff": {
+      "n_managers": 6,
+      "mean": -0.13792342749097147,
+      "std": 0.05024611979273818,
+      "t_cross_section": -6.723743491481717,
+      "harvey_pass": true
+    }
+  },
+  "event_window_summary": {
+    "median_close_post_pre_vol_ratio": 1.1312177428484942,
+    "median_announcement_post_pre_vol_ratio": 1.1882500315766626
+  },
+  "files": {
+    "prices": "data/prices.csv",
+    "daily_returns": "data/daily_returns.csv",
+    "credit_stress": "data/credit_stress.csv",
+    "events": "data/insurance_events.csv",
+    "panel": "data/panel.csv",
+    "panel_regressions": "data/panel_regressions.csv",
+    "manager_metrics": "data/manager_pre_post_metrics.csv",
+    "manager_diffs": "data/manager_post_pre_diffs.csv",
+    "event_windows": "data/event_windows.csv",
+    "figure_coef": "figures/panel_coefficient_shifts.png",
+    "figure_manager_diffs": "figures/manager_post_pre_diffs.png"
+  }
+}

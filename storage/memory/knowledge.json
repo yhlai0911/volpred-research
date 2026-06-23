@@ -36018,5 +36018,17 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-24T01:25:27.352638"
+  },
+  {
+    "item_id": "85b8f7f1",
+    "category": "experiment",
+    "content": "research_permanent_capital_insurance_platform_integration BETA_COMPOSITION_SHIFT_NO_RV_CREDIT_PASS: BX/KKR/APO/ARES/CG plus Brookfield BN proxy panel, yfinance adjusted close, 18,312 manager-days from 2014-05-05 to 2026-06-23. Major insurance-platform integration close dates are used as post dummies; manager FE + calendar-year FE regressions with date-clustered SEs control SPY/XLF/KIE and credit stress. Post-integration interactions pass Harvey for SPY beta (+0.222, t=3.08), XLF beta (+0.498, t=4.42), and downside-day KIE beta (+0.332, t=4.88). Residual RV level shift fails (t=-1.94), unconditional KIE beta fails (t=-2.88), and credit-stress proxy LQD-HYG fails (t=0.83). Interpretation: public AAM equities show a beta-composition shift after insurance-platform integration, not a standalone residual-volatility or credit-spread sensitivity regime shift. Caveats: observational design, year FE only, BN is BAM proxy, FRED HY OAS full history unavailable.",
+    "evidence": [
+      "experiments/research_permanent_capital_insurance_platform_integration/research_permanent_capital_insurance_platform_integration_results.json",
+      "experiments/research_permanent_capital_insurance_platform_integration/README.md",
+      "experiments/research_permanent_capital_insurance_platform_integration/codex_review.md"
+    ],
+    "confidence": 0.76,
+    "created_at": "2026-06-24T02:33:23.827638"
   }
 ]
