@@ -4,8 +4,9 @@
 # transcript / tool context / full agent features persist across ticks.
 #
 # Behaves like an always-on Codex agent sitting next to Claude Code,
-# but tied to your VSCode session: terminal open → loop runs;
-# Ctrl-C or close → loop stops. Zero launchd / cron / background daemon.
+# but tied to your VSCode session: terminal open -> loop runs;
+# Ctrl-C stops it cleanly. A single-instance lock prevents duplicate
+# orphan loops when a terminal is closed unexpectedly.
 #
 # Usage:
 #   bash scripts/codex_loop.sh              # default: every 1h
@@ -14,6 +15,74 @@
 
 set -m
 cd "$(dirname "$0")/.." || exit 1
+
+SELF=$$
+LOCK_DIR="${CODEX_LOOP_LOCK_DIR:-${TMPDIR:-/tmp}/volpred_codex_loop.lock}"
+LOCK_ACQUIRED=0
+
+cleanup_single_instance_lock() {
+  if [ "${LOCK_ACQUIRED:-0}" = "1" ] && [ -n "${LOCK_DIR:-}" ]; then
+    rm -rf "$LOCK_DIR"
+  fi
+}
+
+stop_loop() {
+  echo
+  echo "[loop] stopped by Ctrl-C at $(date +%H:%M:%S)"
+  cleanup_single_instance_lock
+  exit 0
+}
+
+acquire_single_instance_lock() {
+  if mkdir "$LOCK_DIR" 2>/dev/null; then
+    LOCK_ACQUIRED=1
+    echo "$SELF" > "$LOCK_DIR/pid"
+    return
+  fi
+
+  existing_pid=$(cat "$LOCK_DIR/pid" 2>/dev/null || true)
+  if [ -n "$existing_pid" ] && kill -0 "$existing_pid" 2>/dev/null; then
+    echo "[loop] single-instance guard: codex_loop.sh already running pid=${existing_pid}; exiting"
+    exit 0
+  fi
+
+  echo "[loop] single-instance guard: removing stale lock ${LOCK_DIR}"
+  rm -rf "$LOCK_DIR"
+  if mkdir "$LOCK_DIR" 2>/dev/null; then
+    LOCK_ACQUIRED=1
+    echo "$SELF" > "$LOCK_DIR/pid"
+    return
+  fi
+
+  echo "[loop] single-instance guard: failed to acquire lock ${LOCK_DIR}; exiting"
+  exit 1
+}
+
+cleanup_legacy_codex_loop_siblings() {
+  if [ "${CODEX_LOOP_SKIP_LEGACY_CLEANUP:-0}" = "1" ]; then
+    return
+  fi
+
+  # 2026-06-23 fix: before the lock existed, closing VSCode terminal windows
+  # orphaned loops under PPID=1. The first upgraded loop cleans those up.
+  SIBLINGS=$(pgrep -f 'scripts/codex_loop.sh' 2>/dev/null | grep -vx "$SELF" || true)
+  if [ -n "$SIBLINGS" ]; then
+    echo "[loop] single-instance guard: stopping $(echo "$SIBLINGS" | wc -l | tr -d ' ') existing codex_loop.sh: $(echo "$SIBLINGS" | tr '\n' ' ')"
+    for opid in $SIBLINGS; do kill -TERM "$opid" 2>/dev/null; done
+    sleep 2
+    for opid in $(pgrep -f 'scripts/codex_loop.sh' 2>/dev/null | grep -vx "$SELF" || true); do kill -KILL "$opid" 2>/dev/null; done
+  fi
+}
+
+acquire_single_instance_lock
+trap cleanup_single_instance_lock EXIT
+trap stop_loop INT TERM
+cleanup_legacy_codex_loop_siblings
+
+if [ "${CODEX_LOOP_GUARD_ONLY:-0}" = "1" ]; then
+  echo "[loop] guard-only mode: single-instance guard acquired and released"
+  exit 0
+fi
 
 INTERVAL_SEC="${INTERVAL_SEC:-3600}"
 OWNER="${CODEX_OWNER:-codex-vscode}"
@@ -37,8 +106,6 @@ FIRST_PROMPT="${FIRST_PROMPT_OVERRIDE:-讀 AGENTS.md「Codex 每小時任務池�
 RESUME_PROMPT="新一輪 hourly tick。重新 cat storage/ops/handoff_latest.md（每小時 :50 已重生），依同樣流程 claim 下一個 pending task → 完整完成 → complete → commit [codex]。若上一輪有未完事項，先收尾再挑新工。"
 
 CODEX=/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin/codex
-
-trap 'echo; echo "[loop] stopped by Ctrl-C at $(date +%H:%M:%S)"; exit 0' INT TERM
 
 echo "[loop] start at $(date '+%Y-%m-%d %H:%M:%S')  interval=${INTERVAL_SEC}s  owner=${OWNER}"
 echo "[loop] Ctrl-C to stop. AGENTS.md is auto-loaded by Codex."

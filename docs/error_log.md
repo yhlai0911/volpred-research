@@ -2,6 +2,17 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 **3-STRIKE META ROOT CAUSE** 全系統缺並發紀律：codex_loop.sh 24-orphan 堆積 + release burst + K-id 撞號同源
+
+**問題**：用戶問「51 個 running task 有無重複」→ 巡檢發現 `scripts/codex_loop.sh` 同時跑 **24 個**（設計上應只有 1），其中 21 個是 PPID=1 orphan（Jun 18→23 累積 5 天）。
+
+**現象**：腳本註解聲稱「terminal 關閉 → loop 停」，但 `set -m` + terminal 關閉只是把 loop orphan 到 PPID=1、不會停。每次 VSCode terminal reopen 就起一個新 loop，無單例保護 → 5 天疊 24 個，每個每小時 `codex resume --last` 打同一個 task pool → 這正是今日 biodiversity K1536/K1537 撞號（多 agent 搶同題）、release burst（多 trigger 搶 gate）的**同一個結構性根**。
+
+**根因（meta，跨三 incident）**：全系統**無並發紀律** —— (a) codex_loop 無單例鎖；(b) release `.release_settings.json` read→gate→write 無 lock；(c) K-id 配號無 atomic reservation。三者都是「多源/多實例搶同一資源 + 無鎖 + orphan/stale 不清理」。依 CLAUDE.md「看見結構性 root cause 就立刻重構不等次數」→ 即時修。
+
+**解決方法**：(a) `scripts/codex_loop.sh` 加 single-instance guard：先用 atomic `mkdir` lock 阻止新實例並發進入；若 lock pid 已不存在則回收 stale lock；取得 lock 後再用 legacy `pgrep -f scripts/codex_loop.sh` 清掉舊版 orphan sibling（TERM → KILL mop-up）；(b) **Claude Bash sandbox 無法 signal 外部 process**（`kill`/`kill -9` 回 exit=0 但 seatbelt no-op，process 不死）→ 現存 24 個需用戶在自己 terminal 跑 `pkill -KILL -f scripts/codex_loop.sh`，或直接重啟一個新版 loop（guard 會自動清掉舊 24）；(c) release-pool 與 K-id 的鎖修見 refactor_plan。**驗證**：`tests/test_codex_loop_guard.py` 覆蓋取得/釋放 lock、live lock 退出、stale lock 回收。**教訓**：任何「常駐背景 loop」腳本一律要單例鎖，否則 terminal-tied 假設在 orphan 下失效。
+
+
 ## 2026-06-23 publisher mirror sync 整包 feed PUT 後續改為單篇 report PUT
 
 **問題**：2026-06-23 feed.json 肥大事件已把 description/base64 兩個資料膨脹源修掉，但 publisher 寫入路徑仍在 `_append_to_feed()` / `_rewrite_feed_entry()` / release pool 狀態更新後呼叫 `_sync_feed_to_remote()`，依賴整包 `feed.json` PUT `/api/sync/feed.json`。feed 即使縮小後仍可能超 Zeabur / Next.js body limit，且 cache revalidation 不應依賴大檔上傳成功。
