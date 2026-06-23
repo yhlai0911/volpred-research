@@ -36340,5 +36340,107 @@
     "started_at": "2026-06-23T15:21:53.200506+00:00",
     "completed_at": "2026-06-23T15:26:31.844780+00:00",
     "result": "mile_057f178b published: AI推理成本危機→科技股波動，NVDA 44% vs QQQ 29%，anti-AI gate PASS，圖表 Supabase上傳，FB pending Chrome"
+  },
+  {
+    "id": "research_demand_depth_reserve_price_bindingness_krbn_rv_e",
+    "title": "研究 backlog fallback: 碳權拍賣 demand-depth / reserve-price bindingness 作 KRBN RV event prior",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 碳權拍賣 demand-depth / reserve-price bindingness 作 KRBN RV event prior — 用 EU ETS / California / Washington auction 公開日曆與結果，搭 KRBN/GRN/歐洲碳權 ETF proxy，檢定 auction 壓力是否領先 t+1/t+5 RV、gap risk、能源/公用事業 spillover；與 line 466 generic KRBN vol clustering 正交，聚焦 primary-market auction mechanism（來源：CFA RPC 2026 com | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "demand_depth_reserve_price_bindingness_krbn_rv_e",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T16:03:35+00:00"
+  },
+  {
+    "id": "research_bhc_ai_loss_disclosure_rv",
+    "title": "研究 backlog fallback: 銀行 BHC AI-loss disclosure 是否預測銀行 RV",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 銀行 BHC AI-loss disclosure 是否預測銀行 RV — 抓 10-K/8-K 與年報 AI mention / model-control weakness，全部 `shift(1)` 後檢定 KRE/KBE/XLF 與銀行個股 basket 的 RV、downside semivariance、earnings-window jump；與 AI capex/HHI/勞動曝險題正交，聚焦金融機構 operational-loss channel（來源：RCFS 2026 \"AI and Operational Losses: Evidence from U.S. Bank  | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "bhc_ai_loss_disclosure_rv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T16:03:35+00:00"
+  },
+  {
+    "id": "research_fx_predictability_complexity_penalty",
+    "title": "研究 backlog fallback: FX predictability complexity penalty：非線性模型是否只在小樣本看起來有效",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: FX predictability complexity penalty：非線性模型是否只在小樣本看起來有效 — 用 FXE/FXY/FXB/FXA/UUP/CEW + FRED fundamentals，比較 random walk、linear ridge、Ridge-RFF/kernel features 對 FX return、RV、left-tail indicator 的 OOS；用 Clark-West / DM / bootstrap Sharpe 檢定 12/60/120 月訓練窗下 performance decay；與 FX skewness/carry 題正交（來源：F | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "fx_predictability_complexity_penalty",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T16:03:35+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T16:03:52.136259+00:00",
+    "claim_session_id": "2ecb28aed817",
+    "started_at": "2026-06-23T16:03:52.368196+00:00",
+    "completed_at": "2026-06-23T16:11:04.642073+00:00",
+    "result": "完成 FX complexity penalty 月頻 OOS screen：experiments/research_fx_predictability_complexity_penalty 三件套+results+figures+codex_review；17,058 OOS forecasts / 108 tests，verdict PARTIAL_RV_ONLY_NO_RETURN_PREDICTABILITY；knowledge entry deb750f3，research_program 已標完成。"
+  },
+  {
+    "id": "research_permanent_capital_insurance_platform_integration",
+    "title": "研究 backlog fallback: permanent-capital insurance platform integration 是否改變 alternative-manager vol beta",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: permanent-capital insurance platform integration 是否改變 alternative-manager vol beta — 用 BX/KKR/APO/ARES/BAM/CG + insurer partners（MET/PRU/EQH/GL）公開併購/partnership dates、credit spread 與 insurer ETF proxy，檢定 integration 後 AAM basket 的 beta、RV、credit-spread sensitivity、downside correlation 是否 regime shif | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "permanent_capital_insurance_platform_integration",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T16:03:35+00:00"
+  },
+  {
+    "id": "research_ex_ante_model_risk_band",
+    "title": "研究 backlog fallback: 低風險組合建構參數不確定性作 ex-ante model-risk band",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 低風險組合建構參數不確定性作 ex-ante model-risk band — 用大型股 / ETF panel 建 low-vol / min-vol portfolio，系統改 covariance estimator、lookback、權重上限、long-only / limited-short、turnover cost，量化同一 signal 下 realized vol、tracking error、drawdown 與 net Sharpe 分散；與 USMV/SPLV 因子報酬題不同，測 implementation model risk（來源：JPM 2026 \"Low R | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "ex_ante_model_risk_band",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T16:03:35+00:00"
+  },
+  {
+    "id": "research_listed_infrastructure_inflation_hedge_beta_durat",
+    "title": "研究 backlog fallback: listed infrastructure inflation-hedge 是否只是在能源 beta 與 duration beta 下失效",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: listed infrastructure inflation-hedge 是否只是在能源 beta 與 duration beta 下失效 — 用 PAVE/IFRA/IGF/GRID/UTF/XLU + CPI/PPI surprise、breakeven inflation、TLT/IEF、energy controls，檢定 inflation-shock days 與 high-inflation regime 下 RV、downside semivariance、equity correlation 是否真低於 equities；與 commodity/inflation hedg | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "listed_infrastructure_inflation_hedge_beta_durat",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T16:03:35+00:00"
   }
 ]

@@ -35969,5 +35969,17 @@
     "k_id": null,
     "updated_at": "2026-06-23T23:19:35.532900",
     "reviewer_source": "Codex CLI source-level review, 2026-06-23"
+  },
+  {
+    "item_id": "deb750f3",
+    "category": "complexity_ceiling",
+    "content": "research_fx_predictability_complexity_penalty: FXE/FXY/FXB/FXA/UUP/CEW monthly ETF proxy + lagged FRED macro screen (2006-2026, 17,058 OOS forecasts, 108 test cells) finds PARTIAL_RV_ONLY_NO_RETURN_PREDICTABILITY. Ridge-RFF clears Harvey t>=3 vs simple benchmark only for 60m RV on FXE (+20.38%, DM t=3.77) and FXY (+10.18%, DM t=3.25); return forecasts have 0 Clark-West passes. RFF beats linear Ridge in 11 cells, but that mostly reflects linear overfit and does not validate FX return predictability or trading alpha.",
+    "evidence": [
+      "experiments/research_fx_predictability_complexity_penalty/research_fx_predictability_complexity_penalty_results.json",
+      "experiments/research_fx_predictability_complexity_penalty/README.md",
+      "experiments/research_fx_predictability_complexity_penalty/codex_review.md"
+    ],
+    "confidence": 0.74,
+    "created_at": "2026-06-24T00:10:28.621287"
   }
 ]
