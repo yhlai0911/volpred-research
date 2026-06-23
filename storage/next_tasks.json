@@ -36047,7 +36047,7 @@
     "title": "Paper review (Codex 24h-rule): K1417: Stationary Bootstrap 驗證 Paper 三 MDD Retention CI 穩健性 — Gemini Reviewer H2",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_2849a7b5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_2849a7b5",
@@ -36055,7 +36055,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-23T10:42:07+00:00"
+    "created_at": "2026-06-23T10:42:07+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T10:46:09.362532+00:00",
+    "claim_session_id": "edbe8ce6099f",
+    "started_at": "2026-06-23T10:46:35.363412+00:00",
+    "completed_at": "2026-06-23T10:51:19.172592+00:00",
+    "result": "Reviewed mile_2849a7b5/K1417 against K1417 and K1192. PASS core stationary-bootstrap computation: K1417 JSON/script use B=10000 seed=42, mean blocks 756/1260, and article's stationary CI values match results. CRITICAL provenance issue fixed: article mislabeled unreproducible Paper Table 6/v2 CIs [86,90,83,82,91] as K1192 fixed-block baseline even though K1192 says Table 6 cannot be reproduced and canonical fixed-252 def(a) lower bounds are [93.0,76.0,82.3,89.0,87.4]. Updated article locally and Supabase to use K1192 canonical baseline; H2 remains unsupported with stationary-1260 mean lo shift +10.14pp and material downward shift 0/5."
   },
   {
     "id": "paper_review_mile_daed240a",

@@ -1,0 +1,179 @@
+{
+  "id": "mile_2849a7b5",
+  "title": "K1417: Stationary Bootstrap 驗證 Paper 三 MDD Retention CI 穩健性 — H2 不成立，但基線需改用 canonical",
+  "description": "Codex review correction: K1417 的 H2 結論仍不成立，但原文把不可復現的 Paper Table 6/v2 CI 誤稱為 K1192 baseline；本文已改用 K1192 canonical fixed-252 CI 重算。",
+  "content": "# K1417: Stationary Bootstrap 驗證 Paper 三 MDD Retention CI 穩健性 — H2 不成立，但基線需改用 canonical\n\n**Codex review correction（2026-06-23）**：原版把 Paper Table 6 / v2 的不可復現 CI 下界 `[86, 90, 83, 82, 91]` 稱為 K1192 fixed-block baseline，這是不正確的。K1192 的 canonical fixed-252 結果來自 `experiments/k1192/k1192_results.json` 的 `def_a_retention_fraction`，下界應為 `[93.0, 76.0, 82.3, 89.0, 87.4]`。下文已改用 canonical baseline 重算 shift。K1417 的核心結論不變：long-block stationary bootstrap 沒有造成 ≥3/5 資產的 material downward shift，Gemini reviewer H2 不成立。但不能再說舊 Table 6 / v2 CI「不需修改」；那是獨立的 provenance 問題，應以 K1192/K1376 canonical 表格取代。\n\n---\n\n## 摘要\n\nPaper 三 v4 審查中，Gemini reviewer 提出 H2 質疑：K1192 用固定 252 個交易日的 block bootstrap，可能切碎 2008、2020、2022 這類跨年度 drawdown path，讓合成買進持有（BH）的 MDD 偏淺，進而把 VT 策略的 retention ratio 信賴區間下界推得太高。\n\nK1417 用 Politis & Romano（1994）的 stationary bootstrap，mean block ∈ {756, 1260} 交易日（3 年與 5 年），重跑 5 個美股資產的完整分析。設定為 B=10,000、seed=42、資料期間 2005-01-03 至 2026-04-01；策略構建沿用 K1192 的 `build_vt_monthly`、`compute_hedged_vt`、`compute_mdd`。\n\n用 corrected canonical baseline 比較，1260-day mean-block 下的 CI 下界 shift 為：SPY +4.7pp、50/50 +13.8pp、DIA +11.1pp、QQQ +8.5pp、IWM +12.6pp。平均 +10.14pp，中位數 +11.1pp；material downward shift（≤-3pp）資產數為 0/5。H2 在事前判定標準下不成立。\n\n---\n\n## 方法與資料\n\n| 項目 | K1192 canonical baseline | K1417 H2 驗證 |\n|------|--------------------------|---------------|\n| 資產 | SPY / 50-50 SPY-GLD / DIA / QQQ / IWM | 完全相同 |\n| 期間 | 2005-01-03 至 2026-04-01 | 完全相同 |\n| 樣本 | SPY/DIA/QQQ/IWM 5,240 obs；50/50 5,121 obs | 完全相同 |\n| VT 規則 | `w = min(12/VIX_month_end, 1)`，月末調整，滯後 1 月 | 完全相同 |\n| 現金代理 | SHY | 完全相同 |\n| TSMOM | rolling 252-day lookback，滯後一日 | 完全相同 |\n| Bootstrap | fixed-block size 252, B=10,000 | stationary mean block ∈ {756, 1260}, B=10,000 |\n| CI | 90%（5th/95th percentile） | 完全相同 |\n| Seed | 42 | 42 |\n\nH2 的事前判定標準：如果 1260-day stationary bootstrap 讓至少 3/5 個資產的 retention 90% CI 下界相較 K1192 canonical fixed-252 向下移動 ≥3pp，則 H2 成立；否則 H2 不成立。\n\n---\n\n## Corrected 核心結果\n\n| 資產 | K1192 canonical fixed-252 CI [lo, hi] | K1417 stationary-756 CI [lo, hi] | shift 756 | K1417 stationary-1260 CI [lo, hi] | shift 1260 |\n|------|----------------------------------------|----------------------------------|-----------|------------------------------------|------------|\n| SPY | [93.0, 182.3] | [97.1, 181.1] | +4.1 | [97.7, 181.1] | +4.7 |\n| 50/50 | [76.0, 189.9] | [84.7, 149.6] | +8.7 | [89.8, 149.6] | +13.8 |\n| DIA | [82.3, 154.3] | [91.3, 137.2] | +9.0 | [93.4, 137.2] | +11.1 |\n| QQQ | [89.0, 210.0] | [97.5, 199.0] | +8.5 | [97.5, 174.1] | +8.5 |\n| IWM | [87.4, 184.2] | [97.3, 140.7] | +9.9 | [100.0, 131.0] | +12.6 |\n\n**Mean lo shift（1260）= +10.14pp；median = +11.1pp；material downward shift = 0/5。**\n\n這個 corrected comparison 反而比原版更清楚：即使把基線改回 K1192 canonical fixed-block CI，stationary bootstrap 也沒有讓下界向下移。H2 的方向性預測不成立。\n\n![K1417 corrected per-asset CI lo-bound shift](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_lo_shift_per_asset_canonical.png)\n\n*圖 1：用 K1192 canonical fixed-252 baseline 重算後，stationary-756 與 stationary-1260 的 CI 下界 shift 全為正值。橘色虛線是 H2 的 material downward threshold（-3pp）；0 個資產落到門檻以下。*\n\n![K1417 corrected CI forest plot](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_ci_forest_canonical.png)\n\n*圖 2：K1192 canonical fixed-252 與 K1417 stationary-1260 的 retention 90% CI。Stationary bootstrap 不會削弱 lower-bound 結論，但也顯示 retention ratio 的 upper tail 很寬，論文與文章應明確保留 denominator-instability caveat。*\n\n---\n\n## 解讀\n\nH2 是合理的 econometric challenge：MDD 是 path-dependent statistic，過短 block 可能破壞長 drawdown 的自相關結構。因此，改用 3 至 5 年 mean block 的 stationary bootstrap 是正確的壓力測試。\n\n但在 K1417 的實證結果中，long-block stationary bootstrap 並沒有讓 BH MDD 深到足以壓低 retention CI 下界。可能原因有三個：第一，VT 使用 VIX 月末權重，危機期高 VIX 的減倉機制會隨原始時間序列一起被保留；第二，stationary bootstrap 的 circular continuation 可能把危機片段接到其他高波動片段，讓 VT 的保護機制同樣受益；第三，retention ratio 的分母 `MDD_BH - MDD_VT` 本身可能接近零，導致上界很寬，應把重點放在 lower-bound 是否 materially weakening。\n\n因此，K1417 可以支持的結論是：「針對 Gemini H2 的 block-length concern，canonical K1192 lower bounds 沒有被 long-block stationary bootstrap 削弱。」它不能支持的結論是：「不可復現的舊 Table 6/v2 CI 不需修改。」後者已由 K1192 diff report 與後續 paper audit 另行處理。\n\n---\n\n## 結論\n\nK1417 提供了 Paper 三 H2 的直接穩健性檢查。用 K1192 canonical fixed-252 CI 當基線，5 年 mean-block stationary bootstrap 的 lower-bound shift 全部為正，material downward shift 資產數為 0/5，未達 H2 事前門檻。H2 不成立。\n\n研究誠實上的修正是：原版文章把 `[86, 90, 83, 82, 91]` 當作 K1192 baseline 是錯的。那些是不可復現的舊 paper reference；canonical baseline 應來自 `experiments/k1192/k1192_results.json` 或後續 K1376 canonical table。本文已更新為 corrected comparison。\n\n---\n\n*本文基於實驗 K1417（`experiments/k1417/k1417.py`、`experiments/k1417/k1417_results.json`）與 K1192（`experiments/k1192/k1192_results.json`、`experiments/k1192/k1192_vs_paper3_table6_diff.md`）。數據來源：yfinance；期間：2005-01-03 至 2026-04-01；bootstrap B=10,000；seed=42。*\n\n",
+  "category": "milestone",
+  "audience": "research",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1417",
+      "K1192"
+    ],
+    "image_urls": [
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_lo_shift_per_asset.png",
+      "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_ci_forest.png"
+    ],
+    "cluster_waiver": "Paper 三 robustness check — not a standalone SPY strategy article; methodological verification of bootstrap block-length sensitivity for reviewer H2",
+    "topic_cluster": "vt",
+    "topic_cluster_30d": {
+      "count": 12,
+      "cap": 8,
+      "ratio": 0.0307,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "MOMENTUM",
+        "NASDAQ",
+        "US_EQUITY",
+        "US_SMALLCAP",
+        "VIX"
+      ],
+      "conclusion_class": "null_no_info",
+      "mechanisms": [
+        "momentum_reversal",
+        "tail_risk_allocation"
+      ],
+      "time_horizon": "monthly"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    },
+    "release_dedup_skipped": true,
+    "release_theme_flood": "vt_strategy",
+    "release_theme_recent_count": 15,
+    "release_arc_dedup_of": "mile_1a5263af",
+    "release_arc_dedup_class": "null_no_info",
+    "release_dedup_skipped_at": "2026-06-20T05:00:05.333639+00:00",
+    "release_theme_valve": true,
+    "release_theme_valve_theme": "vt_strategy",
+    "release_theme_valve_recent_count": 18,
+    "release_theme_valve_at": "2026-06-23T02:19:59.523316+00:00"
+  },
+  "tags": [
+    "研究",
+    "stationary-bootstrap",
+    "MDD",
+    "bootstrap",
+    "Paper3",
+    "VT",
+    "robustness-check"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-05T08:18:35.130262+00:00",
+  "published_at": "2026-06-23T02:19:59.523316+00:00",
+  "status": "published",
+  "proposer": "Claude",
+  "verified_live_at": "2026-06-23T02:20:16.352974+00:00",
+  "errata": {
+    "update_at": "2026-06-23T10:52:44.494215+00:00",
+    "update_action": "codex_review_description_fix",
+    "update_summary": "Cleaned the article description after the Codex review fix so the list-view snippet does not mangle underscored source paths.",
+    "update_history": [
+      {
+        "at": "2026-06-23T10:49:43.596807+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex review found the article mislabeled unreproducible Paper Table 6/v2 reference CIs as K1192 baseline. Rewrote the article to compare K1417 stationary bootstrap against K1192 canonical fixed-252 def(a) CI; H2 remains unsupported but the Table 6 provenance caveat is now explicit.",
+        "old_content_chars": 7564,
+        "new_content_chars": 4086,
+        "title_changed": true,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": true
+      },
+      {
+        "at": "2026-06-23T10:50:28.128379+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex review found the article mislabeled unreproducible Paper Table 6/v2 reference CIs as K1192 baseline. Rewrote the article to compare K1417 stationary bootstrap against K1192 canonical fixed-252 def(a) CI; H2 remains unsupported but the Table 6 provenance caveat is now explicit.",
+        "old_content_chars": 4086,
+        "new_content_chars": 4084,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "auto (first paragraph)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      },
+      {
+        "at": "2026-06-23T10:51:07.155813+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex review corrected K1417 baseline provenance: Paper Table 6/v2 CI was wrongly labeled as K1192 baseline. Recomputed article tables/figures against K1192 canonical fixed-252 CI; H2 remains rejected, but the old K1192-no-modification claim was withdrawn.",
+        "old_content_chars": 4084,
+        "new_content_chars": 4365,
+        "title_changed": true,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      },
+      {
+        "at": "2026-06-23T10:51:15.923328+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex review found the article used unreproducible Paper Table 6/v2 numbers as the K1192 baseline. Rewrote the article to use K1192 canonical fixed-252 CI from k1192_results.json, regenerated canonical K1417 comparison charts, and preserved the H2-not-supported conclusion with corrected provenance.",
+        "old_content_chars": 4365,
+        "new_content_chars": 4830,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 2,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      },
+      {
+        "at": "2026-06-23T10:51:19.926485+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex 24h review found the article mislabeled old Paper Table 6 reference CI as the K1192 fixed-block baseline. Rewrote the article and charts to use K1192 canonical fixed-252 CI plus K1417 stationary-bootstrap results; H2 remains unsupported.",
+        "old_content_chars": 4830,
+        "new_content_chars": 3319,
+        "title_changed": true,
+        "description_changed": true,
+        "description_source": "frontmatter override",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 2,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      },
+      {
+        "at": "2026-06-23T10:51:38.504935+00:00",
+        "action": "codex_review_fix",
+        "summary": "Codex review found the article compared K1417 against unreproducible Paper Table 6/v2 CI and mislabeled it as K1192 baseline. Rewrote the article with K1192 canonical fixed-252 CI, regenerated corrected figures, and preserved the H2-not-supported conclusion with corrected provenance.",
+        "old_content_chars": 3319,
+        "new_content_chars": 4783,
+        "title_changed": true,
+        "description_changed": true,
+        "description_source": "auto (first paragraph)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 2,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      },
+      {
+        "at": "2026-06-23T10:52:44.494215+00:00",
+        "action": "codex_review_description_fix",
+        "summary": "Cleaned the article description after the Codex review fix so the list-view snippet does not mangle underscored source paths.",
+        "old_content_chars": 4783,
+        "new_content_chars": 4784,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "cli override (--update-description)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-23T10:52:44.494215+00:00"
+}
