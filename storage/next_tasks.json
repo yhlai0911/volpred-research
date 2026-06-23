@@ -36105,5 +36105,76 @@
     "started_at": "2026-06-23T10:45:46.082364+00:00",
     "completed_at": "2026-06-23T10:46:24.756531+00:00",
     "result": "Blocked as stale/unsafe scaffold request. research_program.md already marks K1537 completed on 2026-06-23 as biodiversity transition-risk commodity proxy NULL_PROXY, while docs/error_log.md records a same-day K1537/K1536 K-id collision and quarantine for duplicate biodiversity experiments. Creating a fresh experiments/k1537 scaffold would re-open an already completed/collided K-id and risk false provenance. No experiment files were created; generator should ignore completed [x] K entries or reserved/collided K-ids."
+  },
+  {
+    "id": "paper_review_mile_0908542b",
+    "title": "Paper review (Codex 24h-rule): 市場最怕極端波動，為什麼一個專門「忽略極端值」的新模型反而輸了？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_0908542b needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_0908542b",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T11:08:10+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T11:16:25.245919+00:00",
+    "claim_session_id": "b9b7e3d2204e",
+    "started_at": "2026-06-23T11:16:29.114014+00:00",
+    "completed_at": "2026-06-23T11:18:14.038837+00:00",
+    "result": "PASS: mile_0908542b claims match K437/K1129 artifacts: K437 OOS=502, QLIKE #1/#2=0.557/0.561, GAS-t=0.611 rank #6, 5sigma downweight=23%; K1129 BTC GAS-t worse vs M1 (1.935 vs 1.861, DM-HLN=-4.58) and triple gates fail. PASS: source review found no same-day/lookahead; forecasts use data through t-1. No DM/Harvey overclaim detected; caveat K437 README is blank, so provenance relies on script/results/footer."
+  },
+  {
+    "id": "paper_review_mile_d28231b6",
+    "title": "Paper review (Codex 24h-rule): 一個在 5 天很有用的訊號，搬到明天反而完全失靈",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d28231b6 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_d28231b6",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T11:08:10+00:00"
+  },
+  {
+    "id": "paper_review_mile_d3993bd1",
+    "title": "Paper review (Codex 24h-rule): 把老模型塞進 LSTM，為什麼預測反而更差？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d3993bd1 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_d3993bd1",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T11:08:10+00:00"
+  },
+  {
+    "id": "K1533_article_research",
+    "title": "K1533: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1533 has verdict signal (score=5, reasons=['PASS/Harvey-significant', 'paradigm/decisive null']) but no research article in feed.json.  Verdict preview: K1533 — RECH-X replication + Taiwan extension → 9th ML-ceiling confirmation. Replicated RECH-X = Simple-RNN-GARCH(1,1) + exogenous realized-variance covariate, Student-t (Nguyen, Nguyen & Tran 2024, FRL 69:106145) vs GARCH/GJR/GARCH-X/RealGARCH on SPY, QQQ (2007-2024, Garman-Klas",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1533",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-23T11:08:11+00:00",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-23T11:09:15.362785+00:00",
+    "claim_session_id": "865d9f7ca3c9",
+    "started_at": "2026-06-23T11:09:15.559114+00:00"
   }
 ]
