@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 K-id 配號撞到在飛 worktree（K1534 雙佔）
+
+**問題**：主線程派 ML-vs-GARCH 復現裁決實驗時，用 `ls experiments/`(max=1533) 配 K1534，但同時間另一個 cron worktree(agent-af6ab21fe0e09cb21)正在做「CRP spike pre-event study」也用 K1534，且先 merge(commit 774df789/0fe5d876 + knowledge entry)。→ 兩個不同實驗搶同一 K-id。
+
+**根因**：K-id 配號靠「`ls experiments/` 取 max+1」，但這只看**已 merge 到 main 的目錄**；在飛的 worktree(尚未 merge)與平行 cron 各自配號，彼此看不到 → race。規則本有「派前 ls experiments/ + ls .claude/worktrees/」，但我只列了 worktree 名稱、沒去看它們**正在產出哪個 K-id**(`ls .claude/worktrees/*/experiments/`)，等於只做半套。
+
+**解決方法（即時）**：偵測後 SendMessage 給我的 agent 把整個實驗 K1534→K1535(rename dir + 內部所有 K-id 引用)，CRP spike 保留 K1534(它先 merge + 已寫 knowledge)。
+
+**流程修正**：配 K-id 前必掃**四個來源**取聯集再 +1：(a) `ls experiments/k*`、(b) `ls .claude/worktrees/*/experiments/k*`(在飛 worktree 正在產的)、(c) `git log --oneline -30 | grep -oiE 'K[0-9]+'`(近期 commit claim 的)、(d) `storage/next_tasks.json` 內 claimed K-id。**根治方向(TODO)**：改用 atomic K-id reservation（`storage/ops/k_id_registry.json` 或 next_tasks 配號），讓主線程與 cron 共用單一原子配號源，不再各自 `ls` 猜 max——這是 race 的結構性解，待下次 K-id 衝突(strike 2)即落地。
+
 ## 2026-06-23 首頁 feed 標籤消失 + tw/us 篩選慢（同根：Supabase 1000-row cap）
 
 **問題**：老闆瀏覽器實測「Tab 篩選沒效率、有些標籤分類根本出不來、台股美股驗證過嗎」。
