@@ -1,7 +1,7 @@
 {
   "experiment_id": "K772",
-  "title": "Overnight Volatility Component \u2014 Hansen & Lunde (2005) Decomposition",
-  "proposer": "\u7528\u6236",
+  "title": "Overnight Volatility Component — Hansen & Lunde (2005) Decomposition",
+  "proposer": "用戶",
   "executor": "Claude",
   "date": "2026-03-31",
   "data_source": "yfinance (SPY OHLC)",
@@ -16,14 +16,14 @@
     "n": 4840,
     "date_range": "2007-01-03 to 2026-03-30",
     "var_total": 0.00015407381573853853,
-    "var_overnight": 5.675909418499793e-05,
-    "var_intraday": 9.157012480146906e-05,
-    "cov_overnight_intraday": 2.8722983760357474e-06,
+    "var_overnight": 0.00005675909418499793,
+    "var_intraday": 0.00009157012480146906,
+    "cov_overnight_intraday": 0.0000028722983760357474,
     "corr_overnight_intraday": 0.039841430348610214,
     "overnight_share": 0.3683889693581514,
     "intraday_share": 0.5943263257454628,
     "covariance_share": 0.037284704896385565,
-    "decomp_check_error": 1.759225224754255e-16,
+    "decomp_check_error": 1.759225224754255E-16,
     "annualized_vol_total": 0.19704466896141015,
     "annualized_vol_overnight": 0.11959637007292269,
     "annualized_vol_intraday": 0.15190678539805325,
@@ -105,13 +105,13 @@
   "part_c_har_oc_regression": {
     "har_rv2": {
       "beta": [
-        3.403609153417759e-05,
+        0.00003403609153417759,
         -0.06024570065084006,
         0.5870601956158708,
         0.2539928961705862
       ],
       "se": [
-        8.104377893288538e-06,
+        0.000008104377893288538,
         0.1040052386710266,
         0.18410127254360584,
         0.13126136987162368
@@ -128,14 +128,14 @@
     },
     "har_oc": {
       "beta": [
-        3.32344785571227e-05,
+        0.0000332344785571227,
         -0.00448015863899277,
         0.46321860913109825,
         0.2710301717960446,
         0.1474500326312267
       ],
       "se": [
-        7.622528230047221e-06,
+        0.000007622528230047221,
         0.10253054706194666,
         0.15281279343594206,
         0.12177005386300871,
@@ -160,32 +160,34 @@
     "metrics": {
       "gjr": {
         "qlike": 1.5380489687729477,
-        "mse": 1.531981018731329e-07,
+        "mse": 1.531981018731329E-7,
         "n_valid": 3828
       },
       "ewma": {
         "qlike": 1.6237882830182067,
-        "mse": 1.7225229769404333e-07,
+        "mse": 1.7225229769404333E-7,
         "n_valid": 3828
       },
       "har_rv2": {
         "qlike": 1.6731913979172608,
-        "mse": 1.660665305293281e-07,
+        "mse": 1.660665305293281E-7,
         "n_valid": 3828
       },
       "har_oc": {
         "qlike": 1.6048408246018802,
-        "mse": 1.5981968042258271e-07,
+        "mse": 1.5981968042258271E-7,
         "n_valid": 3828
       },
       "har_oc_ext": {
         "qlike": 162893.00810526643,
-        "mse": 1.7434619261637346e-07,
-        "n_valid": 3828
+        "mse": 1.7434619261637346E-7,
+        "n_valid": 3828,
+        "degenerate": true,
+        "note": "Numerical explosion (QLIKE 162893) due to negative forecast clamp. Exclude from ranking and DM tests."
       },
       "amem": {
         "qlike": 1.5074107558003462,
-        "mse": 1.475130695281197e-07,
+        "mse": 1.475130695281197E-7,
         "n_valid": 3828
       }
     },
@@ -200,7 +202,7 @@
     "dm_tests": {
       "gjr_vs_ewma": {
         "dm_stat": -4.751631357028456,
-        "p_value": 2.0178200639264787e-06,
+        "p_value": 0.0000020178200639264787,
         "harvey_pass": true,
         "better": "gjr",
         "n_common": 3828
@@ -214,7 +216,7 @@
       },
       "gjr_vs_har_oc": {
         "dm_stat": -6.618136298780391,
-        "p_value": 3.6375569223423554e-11,
+        "p_value": 3.6375569223423554E-11,
         "harvey_pass": true,
         "better": "gjr",
         "n_common": 3828
@@ -224,7 +226,9 @@
         "p_value": 0.21493802859784505,
         "harvey_pass": false,
         "better": "gjr",
-        "n_common": 3828
+        "n_common": 3828,
+        "degenerate_pair": true,
+        "note": "One side is degenerate har_oc_ext; DM result uninformative."
       },
       "gjr_vs_amem": {
         "dm_stat": 2.105541306815135,
@@ -252,11 +256,13 @@
         "p_value": 0.21493826737667154,
         "harvey_pass": false,
         "better": "ewma",
-        "n_common": 3828
+        "n_common": 3828,
+        "degenerate_pair": true,
+        "note": "One side is degenerate har_oc_ext; DM result uninformative."
       },
       "ewma_vs_amem": {
         "dm_stat": 4.558345819001482,
-        "p_value": 5.155809329693284e-06,
+        "p_value": 0.000005155809329693284,
         "harvey_pass": true,
         "better": "amem",
         "n_common": 3828
@@ -273,7 +279,9 @@
         "p_value": 0.21493827903258733,
         "harvey_pass": false,
         "better": "har_rv2",
-        "n_common": 3828
+        "n_common": 3828,
+        "degenerate_pair": true,
+        "note": "One side is degenerate har_oc_ext; DM result uninformative."
       },
       "har_rv2_vs_amem": {
         "dm_stat": 3.6545736692930553,
@@ -287,11 +295,13 @@
         "p_value": 0.2149382124273278,
         "harvey_pass": false,
         "better": "har_oc",
-        "n_common": 3828
+        "n_common": 3828,
+        "degenerate_pair": true,
+        "note": "One side is degenerate har_oc_ext; DM result uninformative."
       },
       "har_oc_vs_amem": {
         "dm_stat": 4.48239883315136,
-        "p_value": 7.3808635625560726e-06,
+        "p_value": 0.0000073808635625560726,
         "harvey_pass": true,
         "better": "amem",
         "n_common": 3828
@@ -301,7 +311,9 @@
         "p_value": 0.2149379420483959,
         "harvey_pass": false,
         "better": "amem",
-        "n_common": 3828
+        "n_common": 3828,
+        "degenerate_pair": true,
+        "note": "One side is degenerate har_oc_ext; DM result uninformative."
       }
     },
     "oos_range": "2010-12-22 to 2026-03-30",

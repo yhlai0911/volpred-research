@@ -35814,5 +35814,52 @@
       "Daily data cannot isolate close-auction rebalancing pressure.",
       "Predictive regressions are not causal identification."
     ]
+  },
+  {
+    "item_id": "da14a562",
+    "category": "paper_review",
+    "verdict": "CONDITIONAL_PASS",
+    "k_id": "K772",
+    "experiment_id": "K772",
+    "experiment_path": "experiments/K772/",
+    "experiment_script": "experiments/K772/k772_overnight_vol.py",
+    "reviewer": "feature-dev:code-reviewer subagent (Codex quota exhausted, per .claude/rules/experiments.md fallback)",
+    "reviewer_source": "subagent-fresh-context",
+    "codex_review": false,
+    "mile_id": "mile_0a7041f4",
+    "title": "K772 SPY overnight RV decomposition — post-publish review (mile_0a7041f4)",
+    "content": "CONDITIONAL_PASS for K772/mile_0a7041f4 (SPY overnight vol decomposition article). Reviewer audit (subagent fallback): methodology clean — no lookahead (expanding window t→t+1 properly aligned), QLIKE canonical direction (actual/predicted - log - 1 per K783c), no arch library used (K445 N/A), seeds fixed (np.random.seed(42+attempt)/seed+100), 8/8 spot-checked article numbers match results JSON exactly. Conditions: (1) README stub filled, (2) har_oc_ext flagged degenerate in results JSON + 5 DM test pairs tagged degenerate_pair, (3) article OOS start date corrected (\"2011 年\" → \"2010 年底\", true OOS 2010-12-22). All 3 conditions applied in same fire + supabase synced.",
+    "evidence": [
+      "experiments/K772/k772_overnight_vol_results.json",
+      "experiments/K772/k772_overnight_vol.py",
+      "storage/reports/feed.json#mile_0a7041f4"
+    ],
+    "key_findings": [
+      "Overnight share 36.8% (SPY 2007-2026 N=4840 trading days)",
+      "Overnight vs intraday corr = 0.040 (near-independent)",
+      "AMEM 1.5074 vs GJR 1.5380 — DM p=0.035 but Harvey-fail (marginal, statistically indistinguishable)",
+      "GJR > EWMA / HAR-RV / HAR-OC all Harvey-pass at p<0.01",
+      "HAR-OC-ext QLIKE 162893 degenerate (excluded from ranking)"
+    ],
+    "follow_ups": [],
+    "tags": [
+      "paper_review",
+      "K772",
+      "mile_0a7041f4",
+      "overnight_vol",
+      "spy",
+      "qlike",
+      "dm_test",
+      "harvey_correction",
+      "conditional_pass"
+    ],
+    "related": [
+      "K445",
+      "K783c",
+      "K1018",
+      "K1259"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-23T12:15:57.884924"
   }
 ]

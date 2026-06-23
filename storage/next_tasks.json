@@ -35857,5 +35857,71 @@
     "started_at": "2026-06-23T02:46:59.295467+00:00",
     "completed_at": "2026-06-23T02:55:51.535863+00:00",
     "result": "Completed free-data ETF proxy diagnostic for retail complex-payoff demand. Result: POSITIVE_PROXY_NEEDS_CAUSAL_FOLLOWUP; 33 HAC tests, 3 Harvey+Bonferroni passes concentrated in single-stock leveraged ETF demand predicting COIN/NVDA/TSLA 5d RV. Added Codex review, knowledge entry 44d7750e, research_log entry b3302f5c, and research_program closure."
+  },
+  {
+    "id": "paper_review_mile_1bff1fe5",
+    "title": "Paper review (Codex 24h-rule): 白天波動看得很清楚，為什麼模型還是會估錯？問題常常出在『隔夜那一下』",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1bff1fe5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1bff1fe5",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T04:08:02+00:00"
+  },
+  {
+    "id": "paper_review_mile_1330219a",
+    "title": "Paper review (Codex 24h-rule): 你以為多看 VIX 會更準，結果台股這次剛好相反",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1330219a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1330219a",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T04:08:02+00:00"
+  },
+  {
+    "id": "paper_review_mile_0a7041f4",
+    "title": "Paper review (Codex 24h-rule): 美股收盤後的 16 小時：SPY 隔夜波動貢獻了全天波動的 36.8%",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_0a7041f4 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_0a7041f4",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T04:08:02+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-23T04:09:03.516067+00:00",
+    "claim_session_id": "add85a360258",
+    "started_at": "2026-06-23T04:09:03.615914+00:00",
+    "completed_at": "2026-06-23T04:16:03.661432+00:00",
+    "result": "CONDITIONAL_PASS via code-reviewer subagent (Codex quota exhausted fallback). 8/8 spot-checked numbers match; no lookahead; QLIKE canonical; seeds fixed. 3 conditions all applied same-fire: (1) README.md filled, (2) har_oc_ext flagged degenerate in results JSON + 5 DM pairs, (3) article OOS date 2011→2010 年底 fixed + supabase synced. knowledge.json item_id=da14a562."
+  },
+  {
+    "id": "governance_error_log_review_200",
+    "title": "Governance: error_log has 233 entries — sweep for systemic patterns",
+    "description": "docs/error_log.md accumulated 233 top-level entries (bucket 200, threshold 40). Read recent 20 entries; identify recurring root cause patterns; run `uv run python scripts/audit_silent_fallbacks.py --json` when silent fallback appears in the cluster; consolidate repeats into rules / skills / lint. Per CLAUDE.md `永遠修流程，不修資料`.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "governance",
+    "source": "diverse_gen",
+    "tags": [
+      "governance",
+      "error-log-sweep",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-23T04:08:02+00:00"
   }
 ]
