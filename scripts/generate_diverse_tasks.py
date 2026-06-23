@@ -48,7 +48,7 @@ QUOTA_GOVERNANCE = 1
 QUOTA_EXPERIMENT = 2     # 2026-05-08 v2 extension: backlog scan
 PAPER_REVIEW_AGE_HOURS = 24
 SKILL_STALE_DAYS = 30
-ERROR_LOG_REVIEW_THRESHOLD = 40  # `### ` headings — trigger sweep when accumulated
+ERROR_LOG_REVIEW_THRESHOLD = 40  # top-level `## ` error entries per governance sweep
 
 EXPERIMENTS_DIR = ROOT / "experiments"
 RESEARCH_PROGRAM = ROOT / "research_program.md"
@@ -95,6 +95,19 @@ def _now_iso() -> str:
 
 def _warn_diverse(message: str) -> None:
     print(f"[diverse_gen] WARN {message}", file=sys.stderr)
+
+
+def _error_log_entry_count(path: Path) -> int:
+    """Count top-level error-log incident entries.
+
+    `docs/error_log.md` uses `## ...` for incident entries. Older sections also
+    contain `### ...` subsections such as "問題" / "根因"; those are not
+    independent incidents and must not drive governance sweep cadence.
+    """
+    return sum(
+        1 for line in path.read_text(encoding="utf-8").splitlines()
+        if line.startswith("## ")
+    )
 
 
 def _load_json_list(path: Path, *, source: str) -> list:
@@ -246,15 +259,32 @@ def _effective_expected_gap_seconds(item: dict) -> int | None:
     if override_min is not None:
         try:
             override = int(override_min)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as exc:
+            _warn_diverse(
+                "staleness_expected_minutes parse failed; skipping cron item "
+                f"id={item.get('id')!r} value={override_min!r} "
+                f"error={type(exc).__name__}: {exc}"
+            )
             return None
         if override <= 0:
+            _warn_diverse(
+                "staleness_expected_minutes must be positive; skipping cron item "
+                f"id={item.get('id')!r} value={override_min!r}"
+            )
             return None
         return override * 60
     return _parse_cron_gap_seconds(str(item.get("cron") or ""))
 
 
-def _parse_banner_ts(text: str) -> datetime | None:
+def _warn_banner_ts_parse_failed(raw: str, exc: Exception, source: str | None) -> None:
+    source_text = f" source={source}" if source else ""
+    _warn_diverse(
+        "cron log timestamp parse failed; skipping matched banner timestamp "
+        f"raw={raw!r}{source_text} error={type(exc).__name__}: {exc}"
+    )
+
+
+def _parse_banner_ts(text: str, *, source: str | None = None) -> datetime | None:
     m = re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:\+00:00|\+\d{4})", text)
     if m:
         raw = m.group(0)
@@ -262,25 +292,28 @@ def _parse_banner_ts(text: str) -> datetime | None:
             raw = raw[:-5] + raw[-5:-2] + ":" + raw[-2:]
         try:
             return datetime.fromisoformat(raw).astimezone(timezone.utc)
-        except ValueError:
-            pass
+        except ValueError as exc:
+            _warn_banner_ts_parse_failed(raw, exc, source)
     m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}", text)
     if m:
+        raw = m.group(0)
         try:
             return datetime.strptime(
-                m.group(0).replace("T", " "),
+                raw.replace("T", " "),
                 "%Y-%m-%d %H:%M:%S",
             ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
-        except ValueError:
-            pass
+        except ValueError as exc:
+            _warn_banner_ts_parse_failed(raw, exc, source)
     m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?!:)", text)
     if m:
+        raw = m.group(0)
         try:
             return datetime.strptime(
-                m.group(0).replace("T", " "),
+                raw.replace("T", " "),
                 "%Y-%m-%d %H:%M",
             ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
-        except ValueError:
+        except ValueError as exc:
+            _warn_banner_ts_parse_failed(raw, exc, source)
             return None
     return None
 
@@ -304,7 +337,7 @@ def _latest_cron_log_ts(job_id: str, log_rel: str | None = None) -> datetime | N
     for line in reversed(lines):
         if "===" not in line:
             continue
-        ts = _parse_banner_ts(line)
+        ts = _parse_banner_ts(line, source=str(log_path))
         if ts is not None:
             return ts
     try:
@@ -350,8 +383,16 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
         else:
             try:
                 last_dt = datetime.fromisoformat(last_iso.replace("Z", "+00:00"))
-            except Exception:
-                continue
+            except Exception as exc:
+                _warn_diverse(
+                    "cron_last_run timestamp parse failed; using log fallback when available "
+                    f"id={cid!r} value={last_iso!r} "
+                    f"error={type(exc).__name__}: {exc}"
+                )
+                if log_dt is None:
+                    continue
+                last_dt = log_dt
+                last_iso = log_dt.isoformat()
         if log_dt and log_dt > last_dt:
             last_dt = log_dt
             last_iso = last_dt.isoformat()
@@ -396,9 +437,9 @@ def gen_governance_tasks(existing: set[str]) -> list[dict]:
     Two governance signals:
     1. Stale skill: any SKILL.md not touched in > SKILL_STALE_DAYS — emit single
        audit task per generator run (low-frequency; one slot only).
-    2. error_log accumulation: if `### ` heading count > threshold and no recent
-       sweep marker — emit error_log review task. (For now we just check raw count;
-       a sweep marker file is a follow-up.)
+    2. error_log accumulation: every threshold-sized bucket of top-level
+       incident entries emits one error_log review task. Old completed sweep
+       task ids must not suppress future buckets.
 
     Capped at QUOTA_GOVERNANCE total across both signals to avoid governance noise.
     """
@@ -449,29 +490,28 @@ def gen_governance_tasks(existing: set[str]) -> list[dict]:
     # Signal 2 — error_log accumulation
     if ERROR_LOG.exists() and len(out) < QUOTA_GOVERNANCE:
         try:
-            heading_count = sum(
-                1 for line in ERROR_LOG.read_text(encoding="utf-8").splitlines()
-                if line.startswith("### ")
-            )
+            entry_count = _error_log_entry_count(ERROR_LOG)
         except Exception as exc:
             _warn_diverse(
-                "error_log accumulation read failed; treating heading count as zero "
+                "error_log accumulation read failed; treating entry count as zero "
                 f"path={ERROR_LOG} error={type(exc).__name__}: {exc}"
             )
-            heading_count = 0
-        if heading_count >= ERROR_LOG_REVIEW_THRESHOLD:
-            task_id = f"governance_error_log_review_{heading_count}"
-            if task_id not in existing and not any(
-                e.startswith("governance_error_log_review_") for e in existing
-            ):
+            entry_count = 0
+        if entry_count >= ERROR_LOG_REVIEW_THRESHOLD:
+            review_bucket = (entry_count // ERROR_LOG_REVIEW_THRESHOLD) * ERROR_LOG_REVIEW_THRESHOLD
+            task_id = f"governance_error_log_review_{review_bucket}"
+            if task_id not in existing:
                 out.append({
                     "id": task_id,
-                    "title": f"Governance: error_log has {heading_count} entries — sweep for systemic patterns",
+                    "title": f"Governance: error_log has {entry_count} entries — sweep for systemic patterns",
                     "description": (
-                        f"docs/error_log.md accumulated {heading_count} entries (threshold "
-                        f"{ERROR_LOG_REVIEW_THRESHOLD}). Read recent 20 entries; identify "
-                        f"recurring root cause patterns; consolidate into rules / skills if a "
-                        f"class of failure repeats. Per CLAUDE.md `永遠修流程，不修資料`."
+                        f"docs/error_log.md accumulated {entry_count} top-level entries "
+                        f"(bucket {review_bucket}, threshold {ERROR_LOG_REVIEW_THRESHOLD}). "
+                        f"Read recent 20 entries; identify recurring root cause patterns; "
+                        f"run `uv run python scripts/audit_silent_fallbacks.py --json` "
+                        f"when silent fallback appears in the cluster; consolidate repeats "
+                        f"into rules / skills / lint. "
+                        f"Per CLAUDE.md `永遠修流程，不修資料`."
                     ),
                     "priority": 4,
                     "status": "pending",

@@ -35536,7 +35536,7 @@
     "title": "Governance: error_log has 40 entries — sweep for systemic patterns",
     "description": "docs/error_log.md accumulated 40 entries (threshold 40). Read recent 20 entries; identify recurring root cause patterns; consolidate into rules / skills if a class of failure repeats. Per CLAUDE.md `永遠修流程，不修資料`.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "governance",
     "source": "diverse_gen",
     "tags": [
@@ -35544,7 +35544,13 @@
       "error-log-sweep",
       "main-thread-only"
     ],
-    "created_at": "2026-06-23T01:50:22+00:00"
+    "created_at": "2026-06-23T01:50:22+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T02:39:59.166298+00:00",
+    "claim_session_id": "f163c8dc80a7",
+    "started_at": "2026-06-23T02:40:03.490907+00:00",
+    "completed_at": "2026-06-23T02:45:51.768653+00:00",
+    "result": "修正 error_log governance sweep 觸發器：改以 top-level ## incident 計數並用 40-entry bucket 週期性產生 sweep task；舊 sweep 不再永久擋住未來 bucket。新增 regression tests，targeted pytest 22 passed。\n\n完成 error_log governance sweep。近 2026-06-23 entries 的共通模式是 source corruption / timestamp parse / fallback 被靜默當空或 default，治理訊號本身也低估：原本用 ### heading count 且 prefix 去重會讓後續 sweep 永久不再產生。已修 generate_diverse_tasks：改 counting top-level ## incident entries、以 40-entry bucket recurrence 產生 governance_error_log_review_<bucket>，並補 regression tests；同檔補 staleness / cron timestamp diagnostics，測試 25 passed。\n\n完成 error-log governance sweep：新增 reusable silent fallback AST audit（report/json/strict）與 sweep memo；修正 diverse task generator 的 error-log bucket recurrence、cron staleness 壞 timestamp/override diagnostics 與 log fallback；targeted tests 27 passed，audit report mode可跑。"
   },
   {
     "id": "fix_move_vix_zscore_validity_mile_671d4c75",

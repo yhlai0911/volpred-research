@@ -176,6 +176,48 @@ def test_platform_ops_staleness_uses_config_log_path_in_description(tmp_path, mo
     assert "storage/logs/cron/drain_failed_syncs.log" in tasks[0]["description"]
 
 
+def test_platform_ops_staleness_warns_on_bad_expected_minutes(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    cron_last_run = tmp_path / "cron_last_run.json"
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    cron_logs = tmp_path / "cron"
+    cron_logs.mkdir()
+
+    cron_last_run.write_text(
+        json.dumps({"daily_update": "2026-04-25T01:05:47+00:00"}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    runtime_schedules.write_text(
+        json.dumps(
+            {
+                "system_crontab": {
+                    "items": [
+                        {
+                            "id": "daily_update",
+                            "cron": "3 8 * * 1-6",
+                            "staleness_expected_minutes": "bad",
+                        },
+                    ]
+                }
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
+    monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
+
+    tasks = generate_diverse_tasks.gen_platform_ops_tasks(existing=set())
+
+    assert tasks == []
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN staleness_expected_minutes parse failed" in err
+    assert "daily_update" in err
+
+
 def test_gen_platform_ops_tasks_warns_on_bad_runtime_schedules_json(
     tmp_path, monkeypatch, capsys
 ) -> None:
@@ -328,8 +370,77 @@ def test_governance_error_log_read_failure_warns(tmp_path, monkeypatch, capsys) 
 
     assert tasks == []
     err = capsys.readouterr().err
-    assert "[diverse_gen] WARN error_log accumulation read failed; treating heading count as zero" in err
+    assert "[diverse_gen] WARN error_log accumulation read failed; treating entry count as zero" in err
     assert "IsADirectoryError" in err
+
+
+def test_governance_error_log_counts_top_level_entries_only(tmp_path, monkeypatch) -> None:
+    skills_dir = tmp_path / "skills"
+    skills_dir.mkdir()
+    error_log = tmp_path / "error_log.md"
+    error_log.write_text(
+        "# Error Log\n\n"
+        + "\n".join(
+            f"## 2026-06-23 incident {i}\n\n### 問題\n\nbody"
+            for i in range(40)
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(generate_diverse_tasks, "SKILLS_DIR", skills_dir)
+    monkeypatch.setattr(generate_diverse_tasks, "ERROR_LOG", error_log)
+
+    tasks = generate_diverse_tasks.gen_governance_tasks(existing=set())
+
+    assert len(tasks) == 1
+    assert tasks[0]["id"] == "governance_error_log_review_40"
+    assert "40 top-level entries" in tasks[0]["description"]
+    assert "scripts/audit_silent_fallbacks.py --json" in tasks[0]["description"]
+
+
+def test_governance_error_log_sweep_recurs_by_threshold_bucket(tmp_path, monkeypatch) -> None:
+    skills_dir = tmp_path / "skills"
+    skills_dir.mkdir()
+    error_log = tmp_path / "error_log.md"
+    error_log.write_text(
+        "# Error Log\n\n"
+        + "\n".join(f"## 2026-06-23 incident {i}\n\nbody" for i in range(85))
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(generate_diverse_tasks, "SKILLS_DIR", skills_dir)
+    monkeypatch.setattr(generate_diverse_tasks, "ERROR_LOG", error_log)
+
+    tasks = generate_diverse_tasks.gen_governance_tasks(
+        existing={"governance_error_log_review_40"}
+    )
+
+    assert len(tasks) == 1
+    assert tasks[0]["id"] == "governance_error_log_review_80"
+    assert "bucket 80" in tasks[0]["description"]
+
+
+def test_governance_error_log_sweep_skips_existing_current_bucket(tmp_path, monkeypatch) -> None:
+    skills_dir = tmp_path / "skills"
+    skills_dir.mkdir()
+    error_log = tmp_path / "error_log.md"
+    error_log.write_text(
+        "# Error Log\n\n"
+        + "\n".join(f"## 2026-06-23 incident {i}\n\nbody" for i in range(85))
+        + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(generate_diverse_tasks, "SKILLS_DIR", skills_dir)
+    monkeypatch.setattr(generate_diverse_tasks, "ERROR_LOG", error_log)
+
+    tasks = generate_diverse_tasks.gen_governance_tasks(
+        existing={"governance_error_log_review_80"}
+    )
+
+    assert tasks == []
 
 
 def test_parse_banner_ts_accepts_hhmm_without_seconds() -> None:
@@ -344,6 +455,62 @@ def test_parse_banner_ts_accepts_hhmm_without_seconds() -> None:
     # 15:00 Asia/Taipei = 07:00 UTC
     assert ts.hour == 7 and ts.minute == 0
     assert ts.year == 2026 and ts.month == 6 and ts.day == 11
+
+
+def test_parse_banner_ts_warns_on_date_like_invalid_banner(capsys) -> None:
+    ts = generate_diverse_tasks._parse_banner_ts(
+        "=== [daily_update] exit 0 at 2026-02-31T09:00:00+0000 ===",
+        source="daily_update.log",
+    )
+
+    assert ts is None
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN cron log timestamp parse failed" in err
+    assert "2026-02-31T09:00:00+00:00" in err
+    assert "daily_update.log" in err
+
+
+def test_bad_cron_last_run_timestamp_uses_fresh_log_fallback(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    cron_last_run = tmp_path / "cron_last_run.json"
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    cron_logs = tmp_path / "cron"
+    cron_logs.mkdir()
+
+    cron_last_run.write_text(
+        json.dumps({"daily_update": "not-a-date"}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    runtime_schedules.write_text(
+        json.dumps(
+            {
+                "system_crontab": {
+                    "items": [
+                        {"id": "daily_update", "cron": "3 8 * * 1-6"},
+                    ]
+                }
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    fresh_ts = (datetime.now(timezone.utc) - timedelta(minutes=10)).strftime("%Y-%m-%dT%H:%M:%S+0000")
+    (cron_logs / "daily_update.log").write_text(
+        f"=== [daily_update] exit 0 at {fresh_ts} (duration=1s) ===\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
+    monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
+
+    tasks = generate_diverse_tasks.gen_platform_ops_tasks(existing=set())
+
+    assert tasks == []
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN cron_last_run timestamp parse failed" in err
+    assert "using log fallback" in err
 
 
 def test_latest_cron_log_ts_picks_latest_hhmm_banner_over_old_seconds_banner(

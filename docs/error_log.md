@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 governance error_log sweep 觸發器低估且會被舊 task 永久擋住
+
+**問題**：`governance_error_log_review_40` sweep 時發現，近兩日 error log 已大量累積 silent fallback / 壞 source 診斷修正，但 `scripts/generate_diverse_tasks.py::gen_governance_tasks()` 仍用 `### ` heading count 當 error-log accumulation 訊號。實際 `docs/error_log.md` 的事件條目是 top-level `## `；此外舊碼只要任一 `governance_error_log_review_*` task id 曾存在，就會擋住所有後續 sweep。
+
+**根因**：治理訊號把「事件條目」和「段落小標」混在一起，且把去重寫成 prefix-level 一次性任務。結果是舊的 40-entry sweep 完成後，未來 80 / 120 / 160 entry 的系統性回顧不會再 materialize，治理 loop 會靜默降級。
+
+**解決方法**：改為只計算 top-level `## ` error-log incident entries，並以 40-entry bucket 產生 task id（例如 `governance_error_log_review_80`）。只去重同 bucket 的 exact id，讓舊 sweep 不會擋住未來 bucket。新增 regression tests 覆蓋 top-level-only count、跨 bucket recurrence、同 bucket no-duplicate。
+
 ## 2026-06-23 cron_review schedule-aware fallback 靜默退回 max-gap
 
 **問題**：hourly handoff 無 Codex-eligible pending 時走 error_log fallback，沿著 cron review 可觀察性檢查到 `scripts/cron_review.py::expected_prev_fire()`：croniter import / cron expression parse 失敗時直接回 `None`，`is_stale()` 會安靜退回舊的 max-gap 判斷。
