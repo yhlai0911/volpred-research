@@ -1,0 +1,776 @@
+{
+  "experiment_id": "research_retail_structured_product_complexity_etf_proxy_t",
+  "created_at": "2026-06-23T02:53:26.165881+00:00",
+  "random_seed": 42,
+  "data": {
+    "data_source": "yfinance OHLCV daily data",
+    "start_date_requested": "2021-01-01",
+    "sample_start": "2021-01-04",
+    "sample_end": "2026-06-22",
+    "n_trading_days_union": 1373,
+    "valid_tickers": [
+      "AAPD",
+      "AAPL",
+      "AAPU",
+      "AMD",
+      "AMDL",
+      "AMDS",
+      "BAPR",
+      "BJUL",
+      "BUFR",
+      "COIN",
+      "CONI",
+      "CONL",
+      "DIVO",
+      "GGLL",
+      "GGLS",
+      "GOOGL",
+      "IWM",
+      "JEPI",
+      "JEPQ",
+      "MSFD",
+      "MSFT",
+      "MSFU",
+      "NUSI",
+      "NVDA",
+      "NVDL",
+      "NVDS",
+      "PAPR",
+      "PJAN",
+      "PJUL",
+      "POCT",
+      "QQQ",
+      "QYLD",
+      "RYLD",
+      "SPY",
+      "TSLA",
+      "TSLL",
+      "TSLQ",
+      "XYLD",
+      "^VIX",
+      "^VVIX"
+    ],
+    "missing_or_short_tickers": [],
+    "n_signals": 10,
+    "n_targets": 22,
+    "ticker_diagnostics": {
+      "AAPD": {
+        "available": true,
+        "start": "2022-08-10",
+        "end": "2026-06-22",
+        "n_obs": 969
+      },
+      "AAPL": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "AAPU": {
+        "available": true,
+        "start": "2022-08-09",
+        "end": "2026-06-22",
+        "n_obs": 970
+      },
+      "AMD": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "AMDL": {
+        "available": true,
+        "start": "2024-03-18",
+        "end": "2026-06-22",
+        "n_obs": 567
+      },
+      "AMDS": {
+        "available": true,
+        "start": "2023-08-21",
+        "end": "2025-06-23",
+        "n_obs": 461
+      },
+      "BAPR": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "BJUL": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "BUFR": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "COIN": {
+        "available": true,
+        "start": "2021-04-14",
+        "end": "2026-06-22",
+        "n_obs": 1303
+      },
+      "CONI": {
+        "available": true,
+        "start": "2024-09-04",
+        "end": "2026-06-22",
+        "n_obs": 450
+      },
+      "CONL": {
+        "available": true,
+        "start": "2022-08-10",
+        "end": "2026-06-22",
+        "n_obs": 969
+      },
+      "DIVO": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "GGLL": {
+        "available": true,
+        "start": "2022-09-07",
+        "end": "2026-06-22",
+        "n_obs": 950
+      },
+      "GGLS": {
+        "available": true,
+        "start": "2022-09-16",
+        "end": "2026-06-22",
+        "n_obs": 943
+      },
+      "GOOGL": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "IWM": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "JEPI": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "JEPQ": {
+        "available": true,
+        "start": "2022-05-04",
+        "end": "2026-06-22",
+        "n_obs": 1036
+      },
+      "MSFD": {
+        "available": true,
+        "start": "2022-09-08",
+        "end": "2026-06-22",
+        "n_obs": 949
+      },
+      "MSFT": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "MSFU": {
+        "available": true,
+        "start": "2022-09-07",
+        "end": "2026-06-22",
+        "n_obs": 950
+      },
+      "NUSI": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-18",
+        "n_obs": 1370
+      },
+      "NVDA": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "NVDL": {
+        "available": true,
+        "start": "2022-12-13",
+        "end": "2026-06-22",
+        "n_obs": 882
+      },
+      "NVDS": {
+        "available": true,
+        "start": "2022-07-14",
+        "end": "2026-06-22",
+        "n_obs": 988
+      },
+      "PAPR": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "PJAN": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "PJUL": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "POCT": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "QQQ": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "QYLD": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "RYLD": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "SPY": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "TSLA": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "TSLL": {
+        "available": true,
+        "start": "2022-08-09",
+        "end": "2026-06-22",
+        "n_obs": 970
+      },
+      "TSLQ": {
+        "available": true,
+        "start": "2022-07-14",
+        "end": "2026-06-22",
+        "n_obs": 988
+      },
+      "XYLD": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1372
+      },
+      "^VIX": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1373
+      },
+      "^VVIX": {
+        "available": true,
+        "start": "2021-01-04",
+        "end": "2026-06-22",
+        "n_obs": 1366
+      }
+    }
+  },
+  "signal_metadata": {
+    "option_income": {
+      "tickers_requested": [
+        "JEPI",
+        "JEPQ",
+        "QYLD",
+        "XYLD",
+        "RYLD",
+        "DIVO",
+        "NUSI"
+      ],
+      "tickers_available": [
+        "JEPI",
+        "JEPQ",
+        "QYLD",
+        "XYLD",
+        "RYLD",
+        "DIVO",
+        "NUSI"
+      ],
+      "min_count": 2,
+      "n_non_null": 1342
+    },
+    "defined_outcome": {
+      "tickers_requested": [
+        "PJUL",
+        "PJAN",
+        "PAPR",
+        "POCT",
+        "BJUL",
+        "BAPR",
+        "BUFR"
+      ],
+      "tickers_available": [
+        "PJUL",
+        "PJAN",
+        "PAPR",
+        "POCT",
+        "BJUL",
+        "BAPR",
+        "BUFR"
+      ],
+      "min_count": 2,
+      "n_non_null": 1342
+    },
+    "single_stock_leveraged": {
+      "tickers_requested": [
+        "TSLL",
+        "TSLQ",
+        "NVDL",
+        "NVDS",
+        "CONL",
+        "CONI",
+        "AAPU",
+        "AAPD",
+        "GGLL",
+        "GGLS",
+        "MSFU",
+        "MSFD",
+        "AMDL",
+        "AMDS"
+      ],
+      "tickers_available": [
+        "TSLL",
+        "TSLQ",
+        "NVDL",
+        "NVDS",
+        "CONL",
+        "CONI",
+        "AAPU",
+        "AAPD",
+        "GGLL",
+        "GGLS",
+        "MSFU",
+        "MSFD",
+        "AMDL",
+        "AMDS"
+      ],
+      "min_count": 2,
+      "n_non_null": 958
+    },
+    "single_stock_AAPL": {
+      "tickers_requested": [
+        "AAPU",
+        "AAPD"
+      ],
+      "tickers_available": [
+        "AAPU",
+        "AAPD"
+      ],
+      "min_count": 1,
+      "n_non_null": 940
+    },
+    "single_stock_AMD": {
+      "tickers_requested": [
+        "AMDL",
+        "AMDS"
+      ],
+      "tickers_available": [
+        "AMDL",
+        "AMDS"
+      ],
+      "min_count": 1,
+      "n_non_null": 681
+    },
+    "single_stock_COIN": {
+      "tickers_requested": [
+        "CONL",
+        "CONI"
+      ],
+      "tickers_available": [
+        "CONL",
+        "CONI"
+      ],
+      "min_count": 1,
+      "n_non_null": 939
+    },
+    "single_stock_GOOGL": {
+      "tickers_requested": [
+        "GGLL",
+        "GGLS"
+      ],
+      "tickers_available": [
+        "GGLL",
+        "GGLS"
+      ],
+      "min_count": 1,
+      "n_non_null": 920
+    },
+    "single_stock_MSFT": {
+      "tickers_requested": [
+        "MSFU",
+        "MSFD"
+      ],
+      "tickers_available": [
+        "MSFU",
+        "MSFD"
+      ],
+      "min_count": 1,
+      "n_non_null": 920
+    },
+    "single_stock_NVDA": {
+      "tickers_requested": [
+        "NVDL",
+        "NVDS"
+      ],
+      "tickers_available": [
+        "NVDL",
+        "NVDS"
+      ],
+      "min_count": 1,
+      "n_non_null": 958
+    },
+    "single_stock_TSLA": {
+      "tickers_requested": [
+        "TSLL",
+        "TSLQ"
+      ],
+      "tickers_available": [
+        "TSLL",
+        "TSLQ"
+      ],
+      "min_count": 1,
+      "n_non_null": 958
+    }
+  },
+  "target_types": {
+    "SPY_rv5": "future_5d_realized_variance",
+    "SPY_left_loss5": "future_5d_negative_log_return",
+    "QQQ_rv5": "future_5d_realized_variance",
+    "QQQ_left_loss5": "future_5d_negative_log_return",
+    "IWM_rv5": "future_5d_realized_variance",
+    "IWM_left_loss5": "future_5d_negative_log_return",
+    "TSLA_rv5": "future_5d_realized_variance",
+    "TSLA_left_loss5": "future_5d_negative_log_return",
+    "NVDA_rv5": "future_5d_realized_variance",
+    "NVDA_left_loss5": "future_5d_negative_log_return",
+    "COIN_rv5": "future_5d_realized_variance",
+    "COIN_left_loss5": "future_5d_negative_log_return",
+    "AAPL_rv5": "future_5d_realized_variance",
+    "AAPL_left_loss5": "future_5d_negative_log_return",
+    "GOOGL_rv5": "future_5d_realized_variance",
+    "GOOGL_left_loss5": "future_5d_negative_log_return",
+    "MSFT_rv5": "future_5d_realized_variance",
+    "MSFT_left_loss5": "future_5d_negative_log_return",
+    "AMD_rv5": "future_5d_realized_variance",
+    "AMD_left_loss5": "future_5d_negative_log_return",
+    "VIX_chg5": "future_5d_log_change",
+    "VVIX_chg5": "future_5d_log_change"
+  },
+  "methodology": {
+    "type": "empirical_proxy_diagnostic",
+    "lookahead_guard": "signal_lag = signals.shift(1); target starts at t",
+    "hac_lags": 4,
+    "rolling_z_window": 63,
+    "horizon_days": 5,
+    "multiple_testing": [
+      "Harvey |t|>=3",
+      "Benjamini-Hochberg",
+      "Bonferroni"
+    ],
+    "bootstrap": {
+      "reps": 1000,
+      "block": 20,
+      "seed": 42
+    }
+  },
+  "regression_summary": {
+    "n_tests": 33,
+    "harvey_pass_count": 3,
+    "bh_pass_count": 4,
+    "bonferroni_pass_count": 3,
+    "max_abs_t": 3.774704053082024,
+    "min_bh_q": 0.005286525191431606
+  },
+  "top_results": [
+    {
+      "test_id": "T15",
+      "signal": "single_stock_leveraged",
+      "target": "COIN_rv5",
+      "outcome": "family_to_underlying_rv",
+      "n_obs": 943,
+      "coef": 0.005213938811578111,
+      "hac_t": 3.774704053082024,
+      "p_value": 0.00016019773307368503,
+      "r2": 0.0791764689672676,
+      "control_coef": 0.181061376059365,
+      "abs_t": 3.774704053082024,
+      "bh_q": 0.005286525191431606,
+      "bonferroni_p": 0.005286525191431606,
+      "harvey_pass": true,
+      "bh_pass_5pct": true
+    },
+    {
+      "test_id": "T14",
+      "signal": "single_stock_leveraged",
+      "target": "NVDA_rv5",
+      "outcome": "family_to_underlying_rv",
+      "n_obs": 943,
+      "coef": 0.0018073600933633809,
+      "hac_t": 3.595448175261194,
+      "p_value": 0.00032383359287689763,
+      "r2": 0.02557508155721877,
+      "control_coef": 0.07133116567749269,
+      "abs_t": 3.595448175261194,
+      "bh_q": 0.005343254282468811,
+      "bonferroni_p": 0.010686508564937622,
+      "harvey_pass": true,
+      "bh_pass_5pct": true
+    },
+    {
+      "test_id": "T32",
+      "signal": "single_stock_TSLA",
+      "target": "TSLA_rv5",
+      "outcome": "underlying_specific_rv",
+      "n_obs": 943,
+      "coef": 0.0016486919201437757,
+      "hac_t": 3.194233822410189,
+      "p_value": 0.0014020250984983513,
+      "r2": 0.04394843155621131,
+      "control_coef": 0.007332290005688864,
+      "abs_t": 3.194233822410189,
+      "bh_q": 0.015422276083481864,
+      "bonferroni_p": 0.04626682825044559,
+      "harvey_pass": true,
+      "bh_pass_5pct": true
+    },
+    {
+      "test_id": "T17",
+      "signal": "single_stock_leveraged",
+      "target": "GOOGL_rv5",
+      "outcome": "family_to_underlying_rv",
+      "n_obs": 943,
+      "coef": 0.0006285349673120532,
+      "hac_t": 2.8293536977878064,
+      "p_value": 0.004664211989734832,
+      "r2": 0.02590007411926487,
+      "control_coef": 0.05464269083090908,
+      "abs_t": 2.8293536977878064,
+      "bh_q": 0.03847974891531236,
+      "bonferroni_p": 0.15391899566124945,
+      "harvey_pass": false,
+      "bh_pass_5pct": true
+    },
+    {
+      "test_id": "T24",
+      "signal": "single_stock_COIN",
+      "target": "COIN_rv5",
+      "outcome": "underlying_specific_rv",
+      "n_obs": 924,
+      "coef": 0.0021016771433838614,
+      "hac_t": 2.6343743487741307,
+      "p_value": 0.0084292496198238,
+      "r2": 0.07146638078039047,
+      "control_coef": 0.16255085702283056,
+      "abs_t": 2.6343743487741307,
+      "bh_q": 0.05563304749083707,
+      "bonferroni_p": 0.27816523745418537,
+      "harvey_pass": false,
+      "bh_pass_5pct": false
+    },
+    {
+      "test_id": "T20",
+      "signal": "single_stock_AAPL",
+      "target": "AAPL_rv5",
+      "outcome": "underlying_specific_rv",
+      "n_obs": 925,
+      "coef": 0.0003467801526129296,
+      "hac_t": 2.554157077693477,
+      "p_value": 0.010644522414212746,
+      "r2": 0.09742935648577955,
+      "control_coef": 0.2615005031720708,
+      "abs_t": 2.554157077693477,
+      "bh_q": 0.0585448732781701,
+      "bonferroni_p": 0.3512692396690206,
+      "harvey_pass": false,
+      "bh_pass_5pct": false
+    },
+    {
+      "test_id": "T19",
+      "signal": "single_stock_leveraged",
+      "target": "AMD_rv5",
+      "outcome": "family_to_underlying_rv",
+      "n_obs": 943,
+      "coef": 0.0013085795179955113,
+      "hac_t": 2.130849370142159,
+      "p_value": 0.03310155356813097,
+      "r2": 0.017788578540412603,
+      "control_coef": 0.10250236072321789,
+      "abs_t": 2.130849370142159,
+      "bh_q": 0.15605018110690314,
+      "bonferroni_p": 1.0,
+      "harvey_pass": false,
+      "bh_pass_5pct": false
+    },
+    {
+      "test_id": "T29",
+      "signal": "single_stock_MSFT",
+      "target": "MSFT_left_loss5",
+      "outcome": "underlying_specific_left_loss",
+      "n_obs": 905,
+      "coef": 0.004217987183968879,
+      "hac_t": 2.0206601498913965,
+      "p_value": 0.043314957707059724,
+      "r2": 0.011318800023171982,
+      "control_coef": -0.02586729839050636,
+      "abs_t": 2.0206601498913965,
+      "bh_q": 0.17867420054162136,
+      "bonferroni_p": 1.0,
+      "harvey_pass": false,
+      "bh_pass_5pct": false
+    },
+    {
+      "test_id": "T06",
+      "signal": "option_income",
+      "target": "VVIX_chg5",
+      "outcome": "index_or_vol_proxy",
+      "n_obs": 1296,
+      "coef": -0.012335051223188741,
+      "hac_t": -1.8377839905387805,
+      "p_value": 0.06609424161683111,
+      "r2": 0.06387018275678169,
+      "control_coef": -0.21971898127617934,
+      "abs_t": 1.8377839905387805,
+      "bh_q": 0.24234555259504742,
+      "bonferroni_p": 1.0,
+      "harvey_pass": false,
+      "bh_pass_5pct": false
+    },
+    {
+      "test_id": "T26",
+      "signal": "single_stock_GOOGL",
+      "target": "GOOGL_rv5",
+      "outcome": "underlying_specific_rv",
+      "n_obs": 905,
+      "coef": 0.0002092202554130632,
+      "hac_t": 1.7758587530084862,
+      "p_value": 0.07575620090636687,
+      "r2": 0.013832143608353942,
+      "control_coef": 0.0672418853159217,
+      "abs_t": 1.7758587530084862,
+      "bh_q": 0.24999546299101066,
+      "bonferroni_p": 1.0,
+      "harvey_pass": false,
+      "bh_pass_5pct": false
+    },
+    {
+      "test_id": "T16",
+      "signal": "single_stock_leveraged",
+      "target": "AAPL_rv5",
+      "outcome": "family_to_underlying_rv",
+      "n_obs": 943,
+      "coef": 0.0003014257788698916,
+      "hac_t": 1.7108256429530089,
+      "p_value": 0.08711330432891778,
+      "r2": 0.08536804638211526,
+      "control_coef": 0.28172396193402965,
+      "abs_t": 1.7108256429530089,
+      "bh_q": 0.26133991298675335,
+      "bonferroni_p": 1.0,
+      "harvey_pass": false,
+      "bh_pass_5pct": false
+    },
+    {
+      "test_id": "T25",
+      "signal": "single_stock_COIN",
+      "target": "COIN_left_loss5",
+      "outcome": "underlying_specific_left_loss",
+      "n_obs": 924,
+      "coef": -0.009362766975778748,
+      "hac_t": -1.618336089828001,
+      "p_value": 0.10559018702811765,
+      "r2": 0.007054950719260322,
+      "control_coef": -0.023224414795758073,
+      "abs_t": 1.618336089828001,
+      "bh_q": 0.29037301432732354,
+      "bonferroni_p": 1.0,
+      "harvey_pass": false,
+      "bh_pass_5pct": false
+    }
+  ],
+  "bootstrap_top_cell": {
+    "signal": "single_stock_leveraged",
+    "target": "COIN_rv5",
+    "hac_coef": 0.005213938811578111,
+    "hac_t": 3.774704053082024,
+    "available": true,
+    "seed": 42,
+    "reps": 1000,
+    "block": 20,
+    "coef_mean": 0.005339028417898119,
+    "ci_025": 0.0026831579330015075,
+    "ci_975": 0.008205558060621822,
+    "n_success": 1000
+  },
+  "figures": {
+    "demand_timeseries": "figures/complex_demand_proxy_timeseries.png",
+    "top_hac_tstats": "figures/top_hac_tstats.png"
+  },
+  "tables": {
+    "regressions_csv": "research_retail_structured_product_complexity_etf_proxy_t_regressions.csv",
+    "signals_csv": "research_retail_structured_product_complexity_etf_proxy_t_signals.csv"
+  },
+  "references": [
+    {
+      "citation": "Celerier, C. and Vallee, B. (2026), Competition, complexity, and security design: evidence from retail investment products, Review of Finance.",
+      "url": "https://academic.oup.com/rof/advance-article/doi/10.1093/rof/rfag001/8516563",
+      "use": "Motivates product complexity, markups, and tail-risk concerns in retail investment products."
+    },
+    {
+      "citation": "Huang, Z. (2025), The Rise of Single-Stock ETFs and More Volatile Stock Prices, SSRN.",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5691524",
+      "use": "Motivates single-stock ETFs as retail leverage/short-sale constraint circumvention and possible idiosyncratic volatility channel."
+    },
+    {
+      "citation": "Lenkey, S. L. (2024), The market impact of leveraged ETFs: A Survey of the literature, Quantitative Finance and Economics.",
+      "url": "https://www.aimspress.com/article/doi/10.3934/QFE.2024031?viewType=HTML",
+      "use": "Cautions that leveraged ETF market-impact evidence is mixed and often methodologically fragile."
+    },
+    {
+      "citation": "Garcia-Feijoo, L. and Silverstein, B. (2023), The Dynamics of Defined Outcome Exchange Traded Funds, SSRN.",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4371346",
+      "use": "Motivates defined-outcome ETF nonlinear option exposure and timing risk."
+    },
+    {
+      "citation": "SEC Investor Advisory Committee (2023), Draft Recommendation on Single-Stock ETFs and Leveraged ETFs.",
+      "url": "https://www.sec.gov/files/20230616-recommendation-single-stock-etfs-and-leveraged-etfs.pdf",
+      "use": "Regulatory context for single-stock ETFs as complex, derivative-based, non-diversified products."
+    }
+  ],
+  "verdict": "POSITIVE_PROXY_NEEDS_CAUSAL_FOLLOWUP",
+  "limitations": [
+    "ETF volume proxy is not investor-level structured-note sales.",
+    "Short product histories limit inference for newer single-stock leveraged ETFs.",
+    "Daily data cannot isolate close-auction rebalancing pressure.",
+    "Predictive regressions are not causal identification."
+  ]
+}

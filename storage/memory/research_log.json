@@ -4077,5 +4077,22 @@
       "null-result",
       "codex"
     ]
+  },
+  {
+    "entry_id": "b3302f5c",
+    "timestamp": "2026-06-23T10:55:34.561615",
+    "phase": "experiment_closure",
+    "action": "Ran free-data retail complex-payoff ETF demand proxy diagnostic and Codex review.",
+    "observation": "Single-stock leveraged ETF dollar-volume heat shows positive predictive association with selected 5d realized-volatility targets after signal.shift(1), HAC(4), BH, Bonferroni, Harvey |t|>=3, and fixed-seed block bootstrap checks. Option-income and defined-outcome families are not the main significant cells.",
+    "decision": "Closed as CONDITIONAL_PASS / POSITIVE_PROXY_NEEDS_CAUSAL_FOLLOWUP. Do not claim causal structured-note evidence; require launch-date, attention, turnover, and volatility-regime robustness before publication narrative.",
+    "experiment_ids": [
+      "research_retail_structured_product_complexity_etf_proxy_t"
+    ],
+    "tags": [
+      "retail_complex_product_proxy",
+      "single_stock_leveraged_etf",
+      "tail_risk_proxy",
+      "codex_review"
+    ]
   }
 ]

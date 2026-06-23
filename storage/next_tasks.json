@@ -35809,7 +35809,7 @@
     "title": "研究 backlog fallback: retail structured-product complexity 的免費 ETF proxy：複雜產品熱度是否預測 tail-risk mispricing",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: retail structured-product complexity 的免費 ETF proxy：複雜產品熱度是否預測 tail-risk mispricing — 用 option-income、defined-outcome/buffer、single-stock leveraged/inverse ETF 籃（JEPI/JEPQ/QYLD/XYLD、PJUL/BUFF 類、TSLL/NVDL/CONL/TSLQ 等）建「complex retail payoff demand」成交額/資產價格熱度 proxy，檢定複雜產品成交額 shock 是否領先標的 RV、upside cap  | 來源 section: 期刊主題挖掘 batch（2026-06-22 codex 補充；journal_discovery_20260622_0；websearch faj/rfs/rof/jfqa/jfi/jod/jai/jpm 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -35818,6 +35818,12 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T02:21:49+00:00"
+    "created_at": "2026-06-23T02:21:49+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T02:46:52.732360+00:00",
+    "claim_session_id": "ee4b2dca4861",
+    "started_at": "2026-06-23T02:46:59.295467+00:00",
+    "completed_at": "2026-06-23T02:55:51.535863+00:00",
+    "result": "Completed free-data ETF proxy diagnostic for retail complex-payoff demand. Result: POSITIVE_PROXY_NEEDS_CAUSAL_FOLLOWUP; 33 HAC tests, 3 Harvey+Bonferroni passes concentrated in single-stock leveraged ETF demand predicting COIN/NVDA/TSLA 5d RV. Added Codex review, knowledge entry 44d7750e, research_log entry b3302f5c, and research_program closure."
   }
 ]

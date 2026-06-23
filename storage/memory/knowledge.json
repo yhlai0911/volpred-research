@@ -35765,5 +35765,54 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-23T10:00:02.737385"
+  },
+  {
+    "item_id": "44d7750e",
+    "category": "retail_complex_product_proxy",
+    "experiment_id": "research_retail_structured_product_complexity_etf_proxy_t",
+    "experiment_path": "experiments/research_retail_structured_product_complexity_etf_proxy_t/",
+    "experiment_script": "experiments/research_retail_structured_product_complexity_etf_proxy_t/research_retail_structured_product_complexity_etf_proxy_t.py",
+    "verdict": "CONDITIONAL_PASS",
+    "title": "Retail complex-payoff ETF volume proxy predicts some single-stock realized volatility cells [CONDITIONAL_PASS]",
+    "content": "research_retail_structured_product_complexity_etf_proxy_t: free-data ETF proxy diagnostic for retail structured-product / complex payoff demand. Data source yfinance OHLCV daily, effective sample 2021-01-04 to 2026-06-22 (1373 union trading days). Signals are 63d z-scores of log dollar volume for option-income, defined-outcome/buffer, and single-stock leveraged/inverse ETF baskets. All predictive regressions use signal_lag = signals.shift(1) with 5-trading-day forward RV / loss / VIX targets. Verdict=POSITIVE_PROXY_NEEDS_CAUSAL_FOLLOWUP: 33 HAC(4) tests, Harvey |t|>=3 passes=3, BH 5% passes=4, Bonferroni 5% passes=3. Top cells: single_stock_leveraged->COIN_rv5 t=3.77, BH q=0.0053; single_stock_leveraged->NVDA_rv5 t=3.60, BH q=0.0053; single_stock_TSLA->TSLA_rv5 t=3.19, BH q=0.0154. Top-cell moving-block bootstrap seed=42 reps=1000 gives coef 95% CI [0.002683, 0.008206]. Interpretation: positive predictive association concentrated in single-stock leveraged ETF demand proxies; this is not OTC structured-note issuance, not investor-level exposure, and not causal identification. Use only as a candidate article / follow-up trigger after launch-date, attention, turnover, and volatility-regime robustness.",
+    "evidence": [
+      "experiments/research_retail_structured_product_complexity_etf_proxy_t/README.md",
+      "experiments/research_retail_structured_product_complexity_etf_proxy_t/research_retail_structured_product_complexity_etf_proxy_t_results.json",
+      "experiments/research_retail_structured_product_complexity_etf_proxy_t/research_retail_structured_product_complexity_etf_proxy_t_regressions.csv",
+      "experiments/research_retail_structured_product_complexity_etf_proxy_t/codex_review.md",
+      "Celerier and Vallee (2026), Review of Finance, Competition, complexity, and security design: evidence from retail investment products",
+      "Huang (2025), SSRN, The Rise of Single-Stock ETFs and More Volatile Stock Prices",
+      "Garcia-Feijoo and Silverstein (2023), SSRN, The Dynamics of Defined Outcome ETFs",
+      "SEC Investor Advisory Committee (2023), Draft Recommendation on Single-Stock ETFs and Leveraged ETFs"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-06-23T02:55:22.652681+00:00",
+    "reviewer": "Codex primary-path self-review, 2026-06-23",
+    "reviewer_source": "Codex primary-path",
+    "codex_review": "CONDITIONAL_PASS: reproducible proxy diagnostic with explicit signal.shift(1), HAC/BH/Bonferroni/Harvey checks, fixed bootstrap seed, and caveat that results are predictive associations rather than causal structured-note evidence.",
+    "codex_review_path": "experiments/research_retail_structured_product_complexity_etf_proxy_t/codex_review.md",
+    "key_metrics": {
+      "n_tests": 33,
+      "harvey_pass_count": 3,
+      "bh_pass_count": 4,
+      "bonferroni_pass_count": 3,
+      "top_cell": {
+        "signal": "single_stock_leveraged",
+        "target": "COIN_rv5",
+        "hac_t": 3.774704053082024,
+        "bh_q": 0.005286525191431606,
+        "bonferroni_p": 0.005286525191431606
+      },
+      "bootstrap_top_cell_ci_95": [
+        0.0026831579330015075,
+        0.008205558060621822
+      ]
+    },
+    "limitations": [
+      "ETF volume proxy is not investor-level structured-note sales.",
+      "Short product histories limit inference for newer single-stock leveraged ETFs.",
+      "Daily data cannot isolate close-auction rebalancing pressure.",
+      "Predictive regressions are not causal identification."
+    ]
   }
 ]
