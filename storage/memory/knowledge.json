@@ -36081,5 +36081,20 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-06-24T06:17:42.566745"
+  },
+  {
+    "item_id": "b64b87ed",
+    "category": "credit_volatility",
+    "content": "BEI-vol credit-risk experiment (research_tips_breakeven_volatility_corporate_bond_return, 2026-06-24): lagged 21d/63d realized volatility of FRED T5YIE/T10YIE changes did not deliver a robust OOS QLIKE improvement for corporate-credit risk targets after controls. Across LQD/HYG/BKLN 5d/22d future RV and downside variance plus HY/IG OAS spread-change variance, 16 valid cells had zero positive Harvey-level QLIKE wins; median QLIKE improvement from adding BEI-vol terms was -3.17% and mean was -8.97%. HYG/BKLN 5d RV cells were positive but weak (DM t about 1.6-1.8), so this is a null/mixed-negative credit-volatility finding, not article-ready evidence. OAS cells are short-sample diagnostics because FRED CSV returned only 2023-06-26 onward in this session.",
+    "evidence": [
+      "experiments/research_tips_breakeven_volatility_corporate_bond_return/research_tips_breakeven_volatility_corporate_bond_return_results.json",
+      "experiments/research_tips_breakeven_volatility_corporate_bond_return/summary_table.csv",
+      "experiments/research_tips_breakeven_volatility_corporate_bond_return/codex_review.md",
+      "https://fred.stlouisfed.org/series/T5YIE",
+      "https://fred.stlouisfed.org/series/T10YIE",
+      "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3883556"
+    ],
+    "confidence": 0.68,
+    "created_at": "2026-06-24T07:29:19.408853"
   }
 ]
