@@ -16,6 +16,8 @@ VolPred 是波動率與交易/投資策略研究平台（已做 1400+ 個 K 實�
 ## 要掃的期刊（WebSearch，近 1-2 年 issue / 熱門主題）
 **學術**：JBF、JFE、RFS、Journal of Econometrics、Review of Finance、JFQA、Journal of Empirical Finance、Journal of Financial Markets。
 **實務（重點，交易/投資策略導向）**：Journal of Portfolio Management (JPM)、Financial Analysts Journal (FAJ)、CFA Institute Research、Journal of Investment Strategies、Journal of Trading、Journal of Alternative Investments、Journal of Derivatives、Journal of Fixed Income、Journal of Index Investing。
+**經濟學頂刊（獵奇 / 跨領域角度，2026-06-23 用戶加）**：QJE、American Economic Review (AER)、Journal of Political Economy (JPE)、Econometrica、Review of Economic Studies (RES)、AEJ: Applied/Macro、Journal of Economic Perspectives (JEP)。這類期刊愛收「乾淨識別（RD/DiD/natural experiment）＋新奇角度＋跨領域資料」的題目——從中挑**能轉成波動率 / 投資 / 風險角度**的方向（例：氣候·天災·政策不連續·博弈/樂透文化·注意力·人口·媒體·地緣 → 市場波動 / 風險溢酬 / regime 切換）。VolPred 不做純經濟學因果，而是把這些「外生衝擊 / 新奇變數」當成波動率與投資策略的**事件窗 / 解釋變數 / regime 訊號**。例如 biodiversity transition-risk → 商品波動（K1536）就是這條路。
+**計量經濟學頂刊（波動率 / 預測方法學，2026-06-23 用戶加）**：Journal of Financial Econometrics (JFEC)、Journal of Business & Economic Statistics (JBES)、Review of Economics and Statistics (REStat)、Journal of Applied Econometrics (JAE)、Econometric Theory、Quantitative Economics（Journal of Econometrics + Econometrica 已列上）。這類出**波動率與預測的前沿方法**——新 realized measures、HARQ / 含測量誤差修正的 HAR、rough volatility、forecast combination/評估（DM / MCS / Giacomini-White）、高頻計量、jump / regime / co-jump 檢測、ML×計量且有正式 inference。重點不是找新題，是找**更好的方法去做 VolPred 既有的 vol-forecast / risk 核心**，直接升級建模競爭力（並接住 C+ ML-天花板 program）。
 
 ## 搜尋焦點
 波動率預測/交易、vol risk premium、交易/投資策略、因子（動能/價值/品質/low-vol）、風險管理、組合構建、資產配置、tail risk、drawdown control、vol targeting、risk parity、跨資產/regime/相關性、另類/加密/商品/EM。
