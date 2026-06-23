@@ -310,9 +310,12 @@ class TestArcDuplicates:
 
 
 class TestPublisherGateWiring:
-    def test_publish_milestone_blocks_arc_dup(self, tmp_path, monkeypatch):
-        """End-to-end: publish_milestone must refuse the K1449 article when the
-        K1091 article is in the feed."""
+    def test_publish_milestone_warns_but_publishes_arc_dup(self, tmp_path, monkeypatch):
+        """End-to-end: 2026-06-23 (boss「沒發文比重複發文嚴重」) the narrative-arc gate
+        is downgraded from HARD BLOCK to warn-only. A different-K, same-arc article
+        (K1449 vs K1091) now PUBLISHES, but the decision is logged to
+        dedup_decisions.jsonl so the (rare) reader-facing dup is auditable and
+        cheaply retractable — the lesser evil vs a silent missed publish."""
         import json as _json
 
         storage = tmp_path / "storage"
@@ -330,10 +333,15 @@ class TestPublisherGateWiring:
             status="draft",
             audit_strict=False,
         )
-        # Blocked → returns the existing dup id, and no new article in feed
-        assert returned == "mile_232ce5d4"
+        # Warn-only → publishes a NEW article (not the existing dup id)
+        assert returned != "mile_232ce5d4"
         feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
-        assert len(feed) == 1
+        assert len(feed) == 2
+        # The arc-dup was not silent: a warn_arc_dup record was logged.
+        log_path = storage / "logs" / "dedup_decisions.jsonl"
+        assert log_path.exists(), "arc-dup warn must be logged (never silent)"
+        actions = [_json.loads(line)["action"] for line in log_path.read_text().splitlines() if line.strip()]
+        assert "warn_arc_dup" in actions
 
     def test_dup_waiver_overrides(self, tmp_path):
         import json as _json
@@ -529,13 +537,29 @@ class TestK1054GhostRecycle:
         )
         assert returned != "mile_c481c8cf", "research companion must not be blocked"
 
-    def test_append_choke_point_blocks_legacy_publish_experiment_same_ref(
+    def test_append_choke_blocks_near_identical_same_ref(self):
+        """Unit: the append choke (_find_same_ref_feed_duplicate) still blocks a
+        TRUE byte-level recycle — same experiment_ref + same audience + a
+        near-identical BODY (the K1054 ghost pattern, body_sim ≈ 1.0)."""
+        from volpred.publisher.publisher import _find_same_ref_feed_duplicate
+
+        existing = dict(self.C481_ARTICLE, audience="research")
+        recycle = {
+            "title": self.BB520_TITLE,
+            "content": self.BB520_CONTENT,  # byte-identical to C481 content
+            "audience": "research",
+            "details": {"experiment_refs": ["K1054"]},
+        }
+        dup = _find_same_ref_feed_duplicate([existing], recycle)
+        assert dup is not None and dup["id"] == "mile_c481c8cf"
+
+    def test_append_choke_allows_legacy_different_body_same_ref(
         self, tmp_path, monkeypatch
     ):
-        """Legacy publish_experiment bypasses publish_milestone arc gates.
-
-        The append choke point must still block a same-audience same-K recycle.
-        """
+        """2026-06-23 (boss「沒發文比重複發文嚴重」): a same-K legacy publish whose
+        BODY is genuinely different (the templated publish_experiment render vs the
+        stored prose) is a companion piece, not a recycle, and now PUBLISHES. Only
+        a near-identical body recycle is blocked (see the unit test above)."""
         import json as _json
 
         storage = tmp_path / "storage"
@@ -556,39 +580,8 @@ class TestK1054GhostRecycle:
         )
 
         feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
-        assert returned == "mile_c481c8cf"
-        assert len(feed) == 1, "legacy publish_experiment must not append same-ref dup"
-
-    def test_append_choke_point_blocks_legacy_publish_comparison_same_ref(
-        self, tmp_path, monkeypatch
-    ):
-        """Legacy publish_comparison uses experiment_ids, not details refs."""
-        import json as _json
-
-        storage = tmp_path / "storage"
-        (storage / "reports").mkdir(parents=True)
-        existing = dict(
-            self.C481_ARTICLE,
-            audience="research",
-            details={"experiment_refs": ["K1054", "K777"]},
-        )
-        (storage / "reports" / "feed.json").write_text(
-            _json.dumps([existing], ensure_ascii=False), encoding="utf-8"
-        )
-        from volpred.publisher.publisher import Publisher
-
-        monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None)
-        pub = Publisher(storage_dir=str(storage))
-        returned = pub.publish_comparison(
-            ["K1054", "K888"],
-            title="K1054 comparison recycle",
-            ranking=[],
-            analysis="Same K1054 comparison through the legacy comparison path.",
-        )
-
-        feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
-        assert returned == "mile_c481c8cf"
-        assert len(feed) == 1, "legacy publish_comparison must not append same-ref dup"
+        assert returned != "mile_c481c8cf"
+        assert len(feed) == 2, "different-body same-K legacy publish should append"
 
 
 def test_vt_crowding_arc_caught():

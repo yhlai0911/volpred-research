@@ -50,6 +50,64 @@ def _make_excerpt(body: str | None, max_chars: int = _EXCERPT_MAX_CHARS) -> str:
     return text[:max_chars].rstrip() + '…'
 
 
+# 2026-06-23 dedup policy inversion (boss directive「沒發文比重複發文嚴重」).
+# A missed publish is ranked WORSE than a duplicate, so the dedup gates change
+# from "default block, carve per-category exemptions" (the whack-a-mole that
+# silently dropped daily/digest/event content all session) to "default publish,
+# hard-block ONLY a provable byte-level recycle, WARN+log everything else".
+#   - _RECYCLE_SIM: char-bigram body similarity above which a same-experiment-ref
+#     republish is judged a true recycle (K1054 ghost was byte-for-byte ≈ 1.0).
+#     Below it, a same-K article is a legitimate companion/different-angle piece
+#     and now PUBLISHES instead of being silently swallowed.
+#   - _log_dedup_decision: every block OR downgraded-warn is appended to
+#     storage/logs/dedup_decisions.jsonl so a non-publish is NEVER silent —
+#     it can be audited and (cheaply) retracted, which is the lesser evil.
+_RECYCLE_SIM = 0.62
+
+
+def _dup_body_similarity(a_title: str, a_body: str | None,
+                         b_title: str, b_body: str | None) -> float:
+    """Char-bigram Jaccard over normalized title+body (first 2000 chars of body).
+
+    Distinguishes a true byte-level recycle (≥ _RECYCLE_SIM) from a same-topic /
+    same-experiment companion piece with a genuinely different writeup. CJK-aware
+    (strips latin/digits/punctuation so bigrams are content characters). Returns
+    0.0 when either side is too short to judge (never blocks on thin input).
+    """
+    def _prof(title: str, body: str | None) -> set[str]:
+        s = re.sub(r"[\s0-9A-Za-z，,。.：:；;？?！!（）()「」、\-—~%]+", "",
+                   f"{title}\n{(body or '')[:2000]}")
+        return {s[i:i + 2] for i in range(len(s) - 1)}
+    pa = _prof(a_title, a_body)
+    pb = _prof(b_title, b_body)
+    if len(pa) < 20 or not pb:
+        return 0.0
+    return len(pa & pb) / len(pa | pb)
+
+
+def _log_dedup_decision(storage_dir: str, action: str, new_title: str | None,
+                        matched_id: str | None, reason: str) -> None:
+    """Append a structured dedup decision so a BLOCK is never silent.
+
+    action ∈ {block_same_ref_recycle, allow_same_ref_companion, warn_near_dup,
+    warn_arc_dup}. Fail-safe: logging must never break a publish.
+    """
+    try:
+        path = os.path.join(storage_dir, "logs", "dedup_decisions.jsonl")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        rec = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "action": action,
+            "new_title": (new_title or "")[:120],
+            "matched_id": matched_id,
+            "reason": reason,
+        }
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
+
+
 # 2026-06-23: base64 data-URI image gate. One-time Codex publish scripts embedded
 # charts as ``![alt](data:image/png;base64,...)`` (bypassing Supabase upload via
 # monkey-patched _normalize_publish_assets), bloating feed.json — one entry hit
@@ -417,7 +475,11 @@ def _find_same_ref_feed_duplicate(feed: list[dict], item: dict) -> dict | None:
     `publish_milestone` has richer arc and near-duplicate gates before item
     construction. Legacy entrypoints (`publish_experiment`, `publish_comparison`)
     bypass those gates, so `_append_to_feed` needs a minimal choke-point guard:
-    same non-retracted experiment ref + same audience means "already covered".
+    same non-retracted experiment ref + same audience + near-identical BODY means
+    "already covered" (a true recycle). 2026-06-23 (boss「沒發文比重複發文嚴重」):
+    require the body-similarity check here too, so a same-K but different-angle
+    companion piece that passed publish_milestone's relaxed gate is not silently
+    re-blocked at the append choke point.
     """
     details = item.get("details") or {}
     if isinstance(details, dict) and details.get("dup_waiver"):
@@ -426,6 +488,8 @@ def _find_same_ref_feed_duplicate(feed: list[dict], item: dict) -> dict | None:
     if not refs:
         return None
     audience = item.get("audience")
+    item_title = item.get("title", "")
+    item_body = item.get("content") or item.get("description") or ""
     for existing in feed:
         if existing.get("status") in ("unpublished", "retracted"):
             continue
@@ -433,7 +497,14 @@ def _find_same_ref_feed_duplicate(feed: list[dict], item: dict) -> dict | None:
         if audience and existing_audience and existing_audience != audience:
             continue
         shared = refs & _item_experiment_refs(existing)
-        if shared:
+        if not shared:
+            continue
+        body_sim = _dup_body_similarity(
+            item_title, item_body,
+            existing.get("title", ""),
+            existing.get("content") or existing.get("description") or "",
+        )
+        if body_sim >= _RECYCLE_SIM:
             return existing
     return None
 
@@ -805,14 +876,18 @@ class Publisher:
         # 自身的 theme-rotation / 主線程選題判斷把關，不靠這組為研究文章設計的 gate。
         _is_digest = str((details or {}).get('content_type') or '') == 'daily_digest'
 
+        _dedup_storage_dir = str(self.reports_dir.parent)
+
         # --- HARD BLOCK same-experiment-ref recycle (2026-06-19 K1054 ghost
         # incident). mile_bb520db8 byte-for-byte re-published mile_c481c8cf —
         # both K1054, both 'descriptive' (so arc gate skipped them), titles only
-        # slightly reworded (so the title-sim near-dup gate missed). The most
-        # robust signal of a recycle is the SAME experiment_ref. Block when a
-        # NON-retracted article with the same audience already covers this K.
-        # Skips retracted/unpublished (those were intentionally pulled — a
-        # deliberate republish is allowed). Override with details['dup_waiver'].
+        # slightly reworded (so the title-sim near-dup gate missed). The robust
+        # signal of a TRUE recycle is same experiment_ref + same audience + a
+        # near-identical BODY. 2026-06-23 (boss「沒發文比重複發文嚴重」): require the
+        # body-similarity check too — same K with a genuinely different writeup is
+        # a legitimate companion/different-angle piece and now PUBLISHES instead
+        # of being silently swallowed. This is the ONE remaining hard block; the
+        # fuzzy gates below are downgraded to warn+log. Override with dup_waiver.
         if new_refs and not (details or {}).get('dup_waiver') and not _is_digest:
             inferred_aud = _infer_audience(title, description or '', tags or [])
             for existing in feed:
@@ -826,15 +901,36 @@ class Publisher:
                 shared = new_refs & erefs
                 if not shared:
                     continue
-                # Same audience covering the same K is a recycle. Different
-                # audience (general vs research) is a legitimate companion piece.
-                if existing.get('audience') == inferred_aud:
+                if existing.get('audience') != inferred_aud:
+                    continue
+                # Same audience + same K. Only block if the BODY is near-identical
+                # (a true recycle); otherwise let the companion piece publish.
+                body_sim = _dup_body_similarity(
+                    title, description,
+                    existing.get('title', ''),
+                    existing.get('content') or existing.get('description') or '',
+                )
+                if body_sim >= _RECYCLE_SIM:
                     print(f"  🚫 BLOCKED same-experiment-ref recycle of {existing.get('id')} "
                           f"'{existing.get('title','')[:50]}' (shared_refs={sorted(shared)}, "
-                          f"audience={inferred_aud}) — skipping publish. "
+                          f"audience={inferred_aud}, body_sim={body_sim:.0%}) — skipping publish. "
                           f"Set details['dup_waiver'] to override or use a different audience.")
+                    _log_dedup_decision(_dedup_storage_dir, "block_same_ref_recycle",
+                                        title, existing.get('id'),
+                                        f"shared_refs={sorted(shared)} aud={inferred_aud} body_sim={body_sim:.2f}")
                     return existing.get('id')
+                else:
+                    # Same K, different writeup → publish, but record the call so
+                    # an over-publishing pattern is auditable (never silent).
+                    _log_dedup_decision(_dedup_storage_dir, "allow_same_ref_companion",
+                                        title, existing.get('id'),
+                                        f"shared_refs={sorted(shared)} aud={inferred_aud} body_sim={body_sim:.2f}")
 
+        # --- WARN-only near-duplicate (title similarity). 2026-06-23: downgraded
+        # from HARD BLOCK to warn+log+publish. Title-token similarity is a fuzzy
+        # signal with false positives; a true reworded recycle is already caught
+        # by the same-ref body-similarity block above. Per boss directive a missed
+        # publish is worse than a duplicate, so this only flags for audit.
         if not (details or {}).get('dup_waiver') and not _is_digest:
             cutoff_dup = datetime.now(timezone.utc) - timedelta(days=14)
             for s in similar:
@@ -849,17 +945,17 @@ class Publisher:
                 except Exception:
                     recent = True
                 if recent and ((shared and s['similarity'] > 0.40) or s['similarity'] > 0.55):
-                    print(f"  🚫 BLOCKED near-duplicate (sim={s['similarity']:.0%}, shared_ref={shared}) "
-                          f"of {s['id']} '{existing.get('title','')[:50]}' — skipping publish. "
-                          f"Set details['dup_waiver'] to override.")
-                    return s['id']
+                    print(f"  ⚠️ NEAR-DUP (warn, publishing anyway) sim={s['similarity']:.0%}, "
+                          f"shared_ref={shared} of {s['id']} '{existing.get('title','')[:50]}'.")
+                    _log_dedup_decision(_dedup_storage_dir, "warn_near_dup",
+                                        title, s['id'],
+                                        f"title_sim={s['similarity']:.2f} shared_ref={shared}")
+                    break
 
-        # --- HARD BLOCK narrative-arc duplicates (2026-06-10 fix; K1449/K1091
-        # incident, 3rd strike of the title-similarity blind spot after K1396).
-        # Title-token Jaccard misses "same story, different shell": same asset
-        # entities + same conclusion class is a duplicate to the reader even
-        # with ~0 title overlap and different experiment refs. 90-day window.
-        # Override with details['dup_waiver'] for a genuinely new angle.
+        # --- WARN-only narrative-arc duplicate. 2026-06-23: downgraded from HARD
+        # BLOCK to warn+log+publish. Same-entities/same-conclusion is the gate
+        # that false-positived a digest against its own curated source; under the
+        # boss directive it must not silently kill a publish. Logged for audit.
         if not (details or {}).get('dup_waiver') and not _is_digest:
             try:
                 from volpred.publisher.arc_dedup import find_arc_duplicates
@@ -868,13 +964,12 @@ class Publisher:
                 )
                 if arc_dups:
                     d = arc_dups[0]
-                    print(f"  🚫 BLOCKED narrative-arc duplicate of {d['id']} "
+                    print(f"  ⚠️ ARC-DUP (warn, publishing anyway) of {d['id']} "
                           f"'{d['title'][:50]}' (shared entities={d['shared_entities']}, "
-                          f"conclusion_class={d['conclusion_class']}, "
-                          f"mechanisms={d.get('shared_mechanisms') or d.get('new_mechanisms')}, "
-                          f"time_horizon={d.get('time_horizon')}) — skipping publish. "
-                          f"Set details['dup_waiver'] to override.")
-                    return d['id']
+                          f"conclusion_class={d['conclusion_class']}).")
+                    _log_dedup_decision(_dedup_storage_dir, "warn_arc_dup",
+                                        title, d['id'],
+                                        f"entities={d['shared_entities']} class={d['conclusion_class']}")
             except ImportError:
                 pass
 

@@ -20,16 +20,47 @@ fi
 
 case "$MODE" in
   test)
-    if [[ "$STATUS" -eq 0 ]]; then
+    # 2026-06-23 false-report root-cause fix (boss-flagged). The PreToolUse
+    # optimizer wraps the caller's ENTIRE command — including any `| tail`,
+    # `| grep`, or `; echo` appended after pytest — and this runner executes it
+    # via `bash -lc` WITHOUT pipefail. So $STATUS was the exit code of the LAST
+    # pipe/list element (tail/grep/echo → almost always 0), which silently masked
+    # real pytest failures as "Tests passed". Decide pass/fail from PYTEST'S OWN
+    # summary in the captured output instead, and FAIL-LOUD: only claim success on
+    # positive proof of passing; never report green on ambiguity.
+    HAS_FAIL=0
+    HAS_PASS=0
+    # Failure markers: the summary banner "N failed"/"N error(s)" (count-prefixed,
+    # so it won't match captured stdout noise like "sync FAILED") and the
+    # per-test "FAILED ..."/"ERROR ..." short-summary lines.
+    if grep -qE '(^FAILED |^ERROR )|((^|[[:space:]])[0-9]+ (failed|error|errors)([[:space:]]|,|$))' "$LOG_FILE"; then
+      HAS_FAIL=1
+    fi
+    if grep -qE '((^|[[:space:]])[0-9]+ passed([[:space:]]|,|$))|(no tests ran)' "$LOG_FILE"; then
+      HAS_PASS=1
+    fi
+
+    if [[ "$HAS_FAIL" -eq 0 && "$HAS_PASS" -eq 1 ]]; then
       echo "Tests passed. Full runner output suppressed to save context."
+      grep -hE '(^|[[:space:]])[0-9]+ passed' "$LOG_FILE" | tail -1
       echo "Full log: $LOG_FILE"
-    else
-      echo "Tests failed. Failure-focused excerpt:"
-      if ! grep -n -A 5 -B 2 -E '(^FAIL|^FAILED|^ERROR|FAILED|ERROR|Traceback|AssertionError|E[[:space:]]+)' "$LOG_FILE" | head -120; then
+      STATUS=0
+    elif [[ "$HAS_FAIL" -eq 1 ]]; then
+      echo "Tests FAILED. Failure-focused excerpt:"
+      if ! grep -n -A 5 -B 2 -E '(^FAIL|^FAILED|^ERROR|FAILED|ERROR|Traceback|AssertionError|E[[:space:]]+|[0-9]+ (failed|error))' "$LOG_FILE" | head -120; then
         sed -n '1,120p' "$LOG_FILE"
       fi
       echo
       echo "Full log: $LOG_FILE"
+      STATUS=1
+    else
+      # No parseable pytest summary (collection crash, non-pytest runner, or the
+      # caller piped the summary away). Do NOT claim success — surface the tail
+      # and the real shell exit so the result is never silently green.
+      echo "Test result UNVERIFIED — no pytest pass/fail summary found (shell exit=$STATUS). Tail:"
+      tail -n 40 "$LOG_FILE"
+      echo "Full log: $LOG_FILE"
+      [[ "$STATUS" -eq 0 ]] || STATUS=1
     fi
     ;;
   git_status)
