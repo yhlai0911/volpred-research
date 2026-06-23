@@ -1,0 +1,240 @@
+{
+  "experiment_id": "K1534",
+  "title": "Realized CRP \u5de6\u5c3e spike \u524d\u7f6e\u8a0a\u865f event-study",
+  "design": "Descriptive event-study; NOT a trading backtest.",
+  "sample": {
+    "start": "2018-01-01",
+    "end": "2026-06-01",
+    "n_days_rho": 2092,
+    "constituents": [
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "GOOG",
+      "AMZN",
+      "META",
+      "BRK-B",
+      "AVGO",
+      "LLY",
+      "JPM"
+    ],
+    "weights": "equal",
+    "rv_window": 21
+  },
+  "spike_threshold": {
+    "pct": 0.9,
+    "rho_R_value": 0.3868228856301234,
+    "n_spike_onsets": 7,
+    "onset_dates": [
+      "2018-02-08",
+      "2018-12-26",
+      "2019-08-23",
+      "2020-02-27",
+      "2022-06-01",
+      "2022-09-19",
+      "2025-04-04"
+    ],
+    "inter_onset_gaps_trading_days": [
+      221,
+      166,
+      128,
+      570,
+      75,
+      638
+    ],
+    "min_gap_filter_days": 21,
+    "interpretation": "\u03c1_R high = 'everything correlates' regime; spike = upper-tail onset",
+    "independence_note": "Onsets within rv_window days of a prior onset are dropped to avoid overlapping RV windows that would violate Welch t independence. Pre-filter raw onsets: 14; post-filter independent onsets: see n_spike_onsets."
+  },
+  "event_study": {
+    "lag_-10": {
+      "vix": {
+        "spike_mean": 20.71999994913737,
+        "spike_p5": 14.797499656677246,
+        "spike_p95": 25.942500114440918,
+        "spike_n": 6,
+        "control_mean": 19.93688006210327,
+        "control_p5": 12.649999618530273,
+        "control_p95": 32.030000495910635,
+        "control_n": 500
+      },
+      "vix_ts": {
+        "spike_mean": 1.0551706273604313,
+        "spike_p5": 1.0068294190771638,
+        "spike_p95": 1.11017124191059,
+        "spike_n": 6,
+        "control_mean": 1.1269403198972765,
+        "control_p5": 0.9911170763826164,
+        "control_p95": 1.2502965577549376,
+        "control_n": 500
+      },
+      "breadth": {
+        "spike_mean": 0.48253968253968255,
+        "spike_p5": 0.4130952380952381,
+        "spike_p95": 0.5654761904761905,
+        "spike_n": 6,
+        "control_mean": 0.5356952380952381,
+        "control_p5": 0.4333333333333333,
+        "control_p95": 0.6142857142857143,
+        "control_n": 500
+      }
+    },
+    "lag_-5": {
+      "vix": {
+        "spike_mean": 21.150000163487025,
+        "spike_p5": 14.097000312805175,
+        "spike_p95": 28.28900051116943,
+        "spike_n": 7,
+        "control_mean": 19.66697997665405,
+        "control_p5": 12.779499769210815,
+        "control_p95": 31.485999107360815,
+        "control_n": 500
+      },
+      "vix_ts": {
+        "spike_mean": 1.0405466710759042,
+        "spike_p5": 0.9590150359811975,
+        "spike_p95": 1.0850105798404215,
+        "spike_n": 7,
+        "control_mean": 1.126740698956898,
+        "control_p5": 0.9868248805268838,
+        "control_p95": 1.248134618226053,
+        "control_n": 500
+      },
+      "breadth": {
+        "spike_mean": 0.5061224489795919,
+        "spike_p5": 0.450952380952381,
+        "spike_p95": 0.5895238095238095,
+        "spike_n": 7,
+        "control_mean": 0.5371333333333334,
+        "control_p5": 0.4333333333333333,
+        "control_p95": 0.6142857142857143,
+        "control_n": 500
+      }
+    },
+    "lag_-1": {
+      "vix": {
+        "spike_mean": 27.22142846243722,
+        "spike_p5": 19.53300037384033,
+        "spike_p95": 34.25499992370605,
+        "spike_n": 7,
+        "control_mean": 19.44900001144409,
+        "control_p5": 12.577999925613403,
+        "control_p95": 30.505500030517574,
+        "control_n": 500
+      },
+      "vix_ts": {
+        "spike_mean": 0.9448985659485594,
+        "spike_p5": 0.8088420542641541,
+        "spike_p95": 1.0856664759640424,
+        "spike_n": 7,
+        "control_mean": 1.12955463667611,
+        "control_p5": 0.9897392715041352,
+        "control_p95": 1.2472549061045162,
+        "control_n": 500
+      },
+      "breadth": {
+        "spike_mean": 0.48095238095238096,
+        "spike_p5": 0.4271428571428571,
+        "spike_p95": 0.5319047619047619,
+        "spike_n": 7,
+        "control_mean": 0.5355428571428572,
+        "control_p5": 0.43809523809523804,
+        "control_p95": 0.6190476190476191,
+        "control_n": 500
+      }
+    }
+  },
+  "stats": {
+    "vix_lag_-10": {
+      "t": 0.4008091069202014,
+      "p_welch": 0.7041325859862217,
+      "p_mwu": 0.3532409627476222,
+      "n_spike": 6,
+      "n_control": 500,
+      "p_holm": 1.0
+    },
+    "vix_ts_lag_-10": {
+      "t": -4.061969504140618,
+      "p_welch": 0.007989652520646496,
+      "p_mwu": 0.014855921427680668,
+      "n_spike": 6,
+      "n_control": 500,
+      "p_holm": 0.058370455077649416
+    },
+    "breadth_lag_-10": {
+      "t": -2.0950319427722945,
+      "p_welch": 0.08923375121624101,
+      "p_mwu": 0.03115758648337495,
+      "n_spike": 6,
+      "n_control": 500,
+      "p_holm": 0.35693500486496405
+    },
+    "vix_lag_-5": {
+      "t": 0.6841712198682508,
+      "p_welch": 0.5184734553280395,
+      "p_mwu": 0.347654875849679,
+      "n_spike": 7,
+      "n_control": 500,
+      "p_holm": 1.0
+    },
+    "vix_ts_lag_-5": {
+      "t": -4.282957630910654,
+      "p_welch": 0.004466853282307863,
+      "p_mwu": 0.0029855967470449416,
+      "n_spike": 7,
+      "n_control": 500,
+      "p_holm": 0.040201679540770766
+    },
+    "breadth_lag_-5": {
+      "t": -1.464140043912515,
+      "p_welch": 0.19217069710463755,
+      "p_mwu": 0.09420473295738131,
+      "n_spike": 7,
+      "n_control": 500,
+      "p_holm": 0.5765120913139127
+    },
+    "vix_lag_-1": {
+      "t": 3.5355009886763322,
+      "p_welch": 0.01160770144075904,
+      "p_mwu": 0.0024628118506932945,
+      "n_spike": 7,
+      "n_control": 500,
+      "p_holm": 0.06964620864455424
+    },
+    "vix_ts_lag_-1": {
+      "t": -3.956462598845247,
+      "p_welch": 0.007296306884706177,
+      "p_mwu": 6.641312074406685e-05,
+      "n_spike": 7,
+      "n_control": 500,
+      "p_holm": 0.058370455077649416
+    },
+    "breadth_lag_-1": {
+      "t": -3.3123598360668005,
+      "p_welch": 0.015131637078490724,
+      "p_mwu": 0.00696108203801176,
+      "n_spike": 7,
+      "n_control": 500,
+      "p_holm": 0.07565818539245361
+    }
+  },
+  "multiple_testing": {
+    "correction": "Holm-Bonferroni",
+    "n_tests": 9,
+    "features": [
+      "vix",
+      "vix_ts",
+      "breadth"
+    ],
+    "lags_days": [
+      -10,
+      -5,
+      -1
+    ]
+  },
+  "seed": 42,
+  "lookahead_audit": "Spike onset uses \u03c1_R values up to t (RV uses returns up to t inclusive \u2014 descriptive marker, not a forecast). Features evaluated at t+lag (lag<0) precede onset by 1/5/10 days. No future information leaks into pre-event feature snapshot.",
+  "verdict": "CONDITIONAL_PASS",
+  "headline_finding": "Strongest pre-spike signal: vix_ts_lag_-5 (Welch t=-4.28, p_holm=0.0402, n_spike=7, n_ctrl=500).",
+  "scope_disclaimer": "Findings are statistical leads for \u03c1_R spike onsets only. No claim about tradability, hedging cost, or short-correlation carry profitability. Future K may extend to OOS lead-time profitability with transaction costs."
+}
