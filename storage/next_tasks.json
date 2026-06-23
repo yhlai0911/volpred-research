@@ -36060,8 +36060,8 @@
     "claimed_at": "2026-06-23T10:46:09.362532+00:00",
     "claim_session_id": "edbe8ce6099f",
     "started_at": "2026-06-23T10:46:35.363412+00:00",
-    "completed_at": "2026-06-23T10:51:19.172592+00:00",
-    "result": "Reviewed mile_2849a7b5/K1417 against K1417 and K1192. PASS core stationary-bootstrap computation: K1417 JSON/script use B=10000 seed=42, mean blocks 756/1260, and article's stationary CI values match results. CRITICAL provenance issue fixed: article mislabeled unreproducible Paper Table 6/v2 CIs [86,90,83,82,91] as K1192 fixed-block baseline even though K1192 says Table 6 cannot be reproduced and canonical fixed-252 def(a) lower bounds are [93.0,76.0,82.3,89.0,87.4]. Updated article locally and Supabase to use K1192 canonical baseline; H2 remains unsupported with stationary-1260 mean lo shift +10.14pp and material downward shift 0/5."
+    "completed_at": "2026-06-23T10:56:44.724181+00:00",
+    "result": "Reviewed mile_2849a7b5/K1417 against K1417 and K1192. PASS core stationary-bootstrap computation: K1417 JSON/script use B=10000 seed=42, mean blocks 756/1260, and stationary CI values match results. CRITICAL provenance issue fixed: article mislabeled unreproducible Paper Table 6/v2 CIs [86,90,83,82,91] as K1192 fixed-block baseline; K1192 canonical fixed-252 def(a) lower bounds are [93.0,76.0,82.3,89.0,87.4]. Updated published article + corrected figures + single Supabase sync; H2 remains unsupported with stationary-1260 mean lo shift +10.14pp and material downward shift 0/5."
   },
   {
     "id": "paper_review_mile_daed240a",
@@ -36081,8 +36081,8 @@
     "claimed_at": "2026-06-23T10:53:04.358473+00:00",
     "claim_session_id": "58024cbb220c",
     "started_at": "2026-06-23T10:53:16.677555+00:00",
-    "completed_at": "2026-06-23T10:54:51.633899+00:00",
-    "result": "Reviewed mile_daed240a/K941 against experiments/k941/k941.py and k941_results.json. PASS: article's ranking and coverage numbers match JSON (CAViaR-SAV 91.2%, QRF 90.0%, MF-GJR 89.3%, GARCH Param 88.7%, QR-GARCH 84.6%; OOS N=2513). PASS lookahead: OOS forecasts use returns/VIX/features through t-1 and rolling refits train on [:t]. PASS claim discipline: no DM/Harvey/formal significance overclaim; article frames results as descriptive coverage and ranking, with K941 limitation that no formal DM tests were run."
+    "completed_at": "2026-06-23T10:56:44.677355+00:00",
+    "result": "Reviewed mile_daed240a/K941 against experiments/k941/k941.py and k941_results.json. PASS numeric consistency: article coverage values 91.2/90.0/89.3/88.7/84.6%, OOS N=2,513, and 2006-01-04~2025-12-30 period match k941_results.json. PASS lookahead: K941 OOS split uses 2016+ holdout; QR/QRF feature matrix uses t-1 inputs; GARCH/MF-GJR OOS variance recursion uses prior-day return/VIX and refits only on returns[:t]. PASS claim discipline with caveat: no DM/Harvey/formal significance overclaim; CAViaR vs GARCH Param is a descriptive near-tie, not statistically significant superiority."
   },
   {
     "id": "experiment_scaffold_k1537",
