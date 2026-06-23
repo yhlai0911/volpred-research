@@ -36675,7 +36675,7 @@
     "id": "experiment_prg_v6_fair_info_gjr_six_markets",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "title": "[experiment] PRG v6 BLOCKING #2 — fair-information GJR-type benchmark across all six markets",
     "description": "Build and estimate a GJR-type benchmark that, like PRG h_{d,1}, conditions on the current-day overnight realization r²_{d,0} at the day-d open (NOT lagged overnight). Apply to all six markets (TAIFEX, SPY, QQQ, GLD, EEM, 0050.TW). Report OOS QLIKE + DM(PRG vs fair-GJR) per market. Codex v5_independent BLOCKING #2: current §4.5 GJR-X uses r²_{overnight,t-1} so does not equalize information sets; structural-only attribution cannot be cleaned without this benchmark. Output: experiments/kXXXX_prg_fair_info_gjr/ with results.json + per-market table. Codex review required before paper_body integration.",
     "source": "paper_review_followup",
@@ -36689,8 +36689,8 @@
     "claimed_at": "2026-06-23T21:56:47.672002+00:00",
     "claim_session_id": "6b84ee9b9d2b",
     "started_at": "2026-06-23T21:56:52.567273+00:00",
-    "completed_at": null,
-    "result": null
+    "completed_at": "2026-06-23T22:17:50.193806+00:00",
+    "result": "K1544 completed current-overnight fair-info GJR-X benchmark across six markets. Direct current-ON GJR-X beats canonical PRG; open-known PRG diagnostic reverses result, so P6 needs timing-convention decision before paper integration. Knowledge ae311594."
   },
   {
     "id": "paper_body_prg_v6_major_fixes",

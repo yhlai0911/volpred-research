@@ -36068,5 +36068,18 @@
     ],
     "confidence": 0.76,
     "created_at": "2026-06-24T04:54:57.115381"
+  },
+  {
+    "item_id": "ae311594",
+    "category": "experiment",
+    "content": "K1544 PRG fair-information current-overnight GJR-X benchmark across six markets. Codex self-reviewed experiment output. Direct current-ON GJR-X beats canonical PRG Extended on QLIKE in all six markets: SPY 0.726747<0.758061 (DM fair-PRG=-2.80), QQQ 0.742209<0.770729 (-2.50), GLD 0.587197<0.820410 (-11.06), EEM 0.528671<0.678591 (-9.43), 0050.TW 0.615490<0.776468 (-6.57), TAIFEX 0.058561<0.120932 (-6.26). Diagnostic open-known PRG, defined as current overnight realized component plus PRG h_intraday_t, beats current-ON GJR-X in all six markets (DM fair-openPRG: SPY 2.12, QQQ 2.97, GLD 3.63, EEM 10.13, 0050.TW 3.87, TAIFEX 5.61). Conclusion: P6 blocking issue is a forecast timing/target convention problem; do not integrate into paper body until canonical full-day timing is rewritten/decided.",
+    "evidence": [
+      "experiments/k1544_prg_fair_info_gjr/results.json",
+      "experiments/k1544_prg_fair_info_gjr/per_market_table.md",
+      "experiments/k1544_prg_fair_info_gjr/codex_review.md",
+      "research_program.md P6/K1544 update"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-06-24T06:17:42.566745"
   }
 ]
