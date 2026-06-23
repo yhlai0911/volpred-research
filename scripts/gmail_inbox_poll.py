@@ -544,18 +544,23 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
 
         for raw_uid in uids[:max_messages]:
             uid = int(raw_uid)
-            # BODY.PEEK[] (NOT RFC822/BODY[]) — PEEK does not set the \Seen flag.
-            # 2026-06-08 (用戶要求): the SINCE-date search (line ~504) returns ALL
-            # recent mail, not just VolPred; fetching each with RFC822 silently
-            # marked every message — including the user's personal non-VolPred mail —
-            # as read. PEEK fetches identical content without touching read state,
-            # honouring the long-standing intent (see "Do NOT set \\Seen" below).
-            typ, msg_data = M.fetch(raw_uid, "(BODY.PEEK[])")
-            if typ != "OK" or not msg_data or not msg_data[0]:
+            # 2026-06-23 (3-STRIKE fix: 78× exit=142 timeouts over 5h, boss
+            # "立刻馬上right now"): fetch HEADERS ONLY first, filter, and fetch the
+            # full body LATER only for messages that pass. Previously every one of
+            # the newest-`max_messages` mails — and the SINCE window held ~71, mostly
+            # the owner's large personal/newsletter mail, NOT VolPred replies — had
+            # its entire BODY.PEEK[] (incl. attachments) fetched SERIALLY before any
+            # filtering. A single big message in the window blew past the wrapper's
+            # perl-alarm timeout, so the poll died (exit=142) on every 15-min run
+            # until that message aged out (04:03–08:48 outage). Header is tiny, so
+            # the 20 header fetches + the 0–2 real-reply body fetches stay well
+            # under the alarm. BODY.PEEK[...] (NOT RFC822/BODY[]) never sets \Seen,
+            # so the owner's personal mail is not marked read (see below).
+            typ, hdr_data = M.fetch(raw_uid, "(BODY.PEEK[HEADER])")
+            if typ != "OK" or not hdr_data or not hdr_data[0]:
                 skipped += 1
                 continue
-            raw = msg_data[0][1]
-            msg = email.message_from_bytes(raw)
+            msg = email.message_from_bytes(hdr_data[0][1])
 
             message_id = (msg.get("Message-ID") or "").strip()
             subject = _decode(msg.get("Subject"))
@@ -585,6 +590,15 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
             if message_id and message_id in processed_ids:
                 skipped += 1
                 continue
+
+            # Passed every header-only filter → this is a genuine owner reply
+            # (typically 0–2 per poll). NOW fetch the full body. `msg` so far holds
+            # only headers, so re-parse from the complete message.
+            typ, msg_data = M.fetch(raw_uid, "(BODY.PEEK[])")
+            if typ != "OK" or not msg_data or not msg_data[0]:
+                skipped += 1
+                continue
+            msg = email.message_from_bytes(msg_data[0][1])
 
             body = _extract_body(msg)
             reply, quoted = _split_reply_and_quote(body)

@@ -3200,3 +3200,15 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **���帶��������� bug**��daily_digest dup �����**�������** ��� ��������������� `publish_milestone`��line 806/816/838�������� `_append_to_feed` ��� `_find_same_ref_feed_duplicate` ��次 gate��line 1467��������享 K-ref �������� digest ������ append ���段被�����`���� BLOCKED same-experiment-ref duplicate at feed append`�����已�� `_item_is_digest` ��������測試 `test_daily_digest_bypasses_arc_dup` �����������路�����
 
 **�����**��(a) hook ������Tests passed���summary ��� pipe ���端 exit code��**�����信** ��� ��������� pytest ���實輸�����寫����� Read�����(b) 測試 dedup ������������**������** gate��publish_milestone + _append_to_feed ���層������������測��層���(c) 任����� publish ���測試���� conftest ������ guard������� test���prod 洩���������������
+
+## 2026-06-23 09:54 **3-STRIKE TRIGGER** gmail-poll 反覆 timeout 根治（boss「立刻馬上right now」）
+
+**Incident**：gmail-poll 04:03–08:48 **每一班 exit=142（perl alarm timeout / Alarm clock）連續 5 小時**，state 檔 stale 7.5h，觸發 02:00 WARN + 06:00 CRITICAL alert。老闆 4 封回信全要求立即修（email-11907 P1「立刻馬上right now」/ 11898「立即處理」/ 11893「立即改善」）。歷史共 78× exit=142、50× Alarm clock。先前 fix（alarm 60→180s）是 band-aid，timeout 仍復發 → 達 3-strike。
+
+**真根因（非連線洩漏 — 那假說早被推翻）**：`scripts/gmail_inbox_poll.py:poll()` 每次 `M.search(SINCE 2天)` 取窗內**全部** UID（實測 71 封，多為老闆個人/newsletter 信），對最新 `max_messages=20` 封**serial 逐封抓完整 `BODY.PEEK[]`（含附件）後才 filter**。窗內只要有一封大信（大 HTML / 附件），serial 全文抓取就超 180s alarm → exit=142；且因按 SINCE 重掃（state 的 last_uid 從不拿來 filter），同幾封大信每 15 分鐘被重抓 → 連續失敗，直到大信滑出最新-20 窗才恢復（09:45 exit=0）。
+
+**結構性修（header-first）**：fetch 拆兩段 —— 先 `M.fetch(uid, "(BODY.PEEK[HEADER])")` 抓 header（tiny）跑 `_should_process` + dedup filter，**只對通過的真 VolPred reply（通常 0–2 封/poll）才 `M.fetch(uid, "(BODY.PEEK[])")` 抓全文**。如此抓取量由 ≤20 個 tiny header + 0–2 個小 reply body 組成，受 round-trip 數 bound（實測 8–9s）而非 body 大小 → 窗內再多大信也不會 timeout。BODY.PEEK 仍不設 \Seen（不誤標老闆個人信為已讀）。
+
+**驗證**：header-first dry-run + 真實 run 皆正確識別 4 封 boss reply（Message-ID dedup）、16 封個人信 filter、9s 完成、state 更新。wrapper（`~/.volpred/bin/cron_gmail_poll.sh` line 23）直呼 repo 原檔 → 編輯即 live，下班 cron 10:03 生效。alarm 180s 保留作 safety net。
+
+**教訓**：serial 全文抓「未過濾的混合收件匣」是反模式 — 永遠先抓 header filter，body 只抓需要的。state 存了 high-water mark 就要拿來 filter，別每次全量重掃。
