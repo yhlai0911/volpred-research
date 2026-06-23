@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-06-22T18:03:28Z",
+  "timestamp": "2026-06-23T00:03:36Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "total drafts=129 (general=78, research=51). Both above thresholds (general>=8, research>=4)."
+      "detail": "total drafts=129 (general=78, research=51). Both above thresholds (total>=12, general>=8, research>=4)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "alert",
-      "detail": "storage/strategy_metrics.json does not exist — file missing entirely, counts as >26h stale."
+      "detail": "storage/strategy_metrics.json does not exist — file missing entirely, counts as >26h stale. Recurring issue since 2026-05-31."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md: most recent entries dated 2026-06-03. No entries from today (2026-06-22) or yesterday (2026-06-21)."
+      "detail": "Last 30 lines of docs/error_log.md: most recent entries dated 2026-06-03. No entries from today (2026-06-23) or yesterday (2026-06-22)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 15 strategies. No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "Checked 14 strategies. No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -34,6 +34,6 @@
     }
   ],
   "alerts": [
-    "STRATEGY METRICS STALE: storage/strategy_metrics.json is missing (file does not exist). Strategy metrics unavailable — downstream displays and strategy rankings may be broken."
+    "METRICS MISSING: storage/strategy_metrics.json does not exist. Strategy metrics unavailable — downstream displays and strategy rankings may be broken. Recurring since 2026-05-31."
   ]
 }
