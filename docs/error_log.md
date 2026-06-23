@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 **3-STRIKE TRIGGER** 並行 cron agent 撞同一 journal-discovery 題 + K-id 雙佔（biodiversity K1536/K1537×2）
+
+**問題**：autonomous loop tick（17:39）巡檢發現 3 個未 commit 實驗 `experiments/{k1536, k1537, k1537_biodiversity_transition_risk_proxy}` **全是同一主題**（biodiversity transition-risk commodity proxy event study），全 NULL、全 Codex PASS-with-caveats；其中 `k1537/` 與 `k1537_biodiversity/` **內部 id 都標 K1537**（雙佔），knowledge.json 並行被寫入 2 個都標 K1537 的 biodiversity 條目（item 912cbc59、76a1d807）。
+
+**現象**：多個 `codex exec resume`（PID 52584@17:30、62527@17:43，hourly tick prompt「claim 下一個 pending task → commit」）並行跑，各自挑了 journal-discovery backlog 裡同一個 biodiversity 題、各自配了相近 K-id。主線程 autonomous tick 嘗試清理（mv 重複 dir 到 /tmp、jq 刪重複 knowledge 條目）時與正在 commit 的 Codex agent 撞出瞬時 `conflicts=2 / staged=24`。
+
+**根因（結構性，strike 2）**：與 K1534 同一 root — **並行配號/挑題無跨 agent 原子鎖**。這次 root 擴大為兩個面向：(1) **K-id 配號 race**（K1534 已記，仍用 `ls` 猜 max，平行 agent 看不到彼此在飛的 K-id）；(2) **journal-discovery 題目 claim race**（多個 cron agent 從 backlog 挑題無「topic claim ledger」，導致 3 個 agent 重複做同一題、浪費 ~3× compute）。K1534 entry 已明寫「待 strike 2 即落地 atomic K-id reservation」→ **此即 strike 2**。
+
+**解決方法（即時）**：(a) 確認 Codex agent 已自行收斂 — commit `f350674e` 留下**單一** k1536 biodiversity 實驗（完整 + codex_review PASS-with-limitations），knowledge.json 乾淨 2353 條、**0 殘留 K1537 撞車**；(b) 主線程的 quarantine/刪條目干擾被 agent commit superseded（無害，已驗證）；重複的 k1537 留在 `/tmp/volpred_quarantine_biodiv_dups/` 備查；(c) **未竟**：k1536 已 commit 但尚無 knowledge 條目（running agent 可能補，或 agents 靜止後由主線程補，codex_review 已存）。
+
+**流程修正 / 重構**：寫 `docs/refactor_plan_kid_allocation.md`（3-STRIKE 三層重構：atomic K-id reservation + topic-claim ledger + 驗證 gate）。**實作延後**：agents 活躍時改 dispatch infra 會再 race；且屬 dispatch 基礎建設變更，需 agents 靜止 + 老闆能見度。**教訓**：背景 cron agent 活躍時，主線程**不可**碰共享檔（knowledge.json / experiments/ / next_tasks）做清理 — 會與正在 commit 的 agent race；正確做法是先 `ps aux | grep codex` 確認無活躍 agent，或純 read-only 觀察 + 留給 agent 自己收斂。cross-ref ↓ K1534 entry。
+
 ## 2026-06-23 K-id 配號撞到在飛 worktree（K1534 雙佔）
 
 **問題**：主線程派 ML-vs-GARCH 復現裁決實驗時，用 `ls experiments/`(max=1533) 配 K1534，但同時間另一個 cron worktree(agent-af6ab21fe0e09cb21)正在做「CRP spike pre-event study」也用 K1534，且先 merge(commit 774df789/0fe5d876 + knowledge entry)。→ 兩個不同實驗搶同一 K-id。
