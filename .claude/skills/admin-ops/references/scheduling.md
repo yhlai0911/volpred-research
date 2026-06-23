@@ -7,6 +7,58 @@
 **所有時間統一標註台灣時間（UTC+8）。** 系統 crontab 和 session cron 本機執行，直接用台灣時間。
 **雲端 RemoteTrigger 的 cron 表達式固定 UTC — 設定時必須「台灣時間 - 8 小時」換算。**
 
+## LaunchAgent dual-log 診斷 checklist
+
+遇到 LaunchAgent stale、timeout、或「看起來沒 fire」時，先分清三層訊號，不要只 tail 一個 log 就判斷排程壞掉：
+
+1. **launchd state**：先查 job 是否仍 running，若 running，下一個 calendar slot 不會重啟同 label。
+   ```bash
+   launchctl print gui/501/<label>
+   ```
+   先看 `state = running` / `last exit code` / `pid` / `program`。若仍 running，再用 process tree 定位卡在哪個子步驟；不要先 bootout/bootstrap。
+2. **LaunchAgent `StandardOutPath` / `StandardErrorPath`**：這是 wrapper 層 stdout/stderr，應能看到 wrapper STARTED、runner、timeout、exit banner。plist 的 std path 必須放在 `~/.volpred/logs/` 這類 TCC-safe 位置，不要放 `~/Desktop/...`。
+3. **script-internal log / state file**：這是應用層 outcome，例如 `storage/logs/cron/gmail_poll.log`、`storage/ops/handoff_latest.md`、或 freshness state。它只代表腳本成功跑到某個寫入點；若 wrapper 在 `uv` startup、IMAP connect、cleanup lock、或外層 timeout 前被 kill，internal log 可能完全不更新。
+
+判讀順序：`launchctl print` 確認是否仍 running → plist `StandardOutPath` 看 wrapper 是否啟動與怎麼退出 → script-internal log/state 判斷應用結果。這是 2026-06-22 `gmail-poll` 與 2026-06-23 `handoff_regen` incident 的共同教訓。
+
+## LaunchAgent wrapper banner template
+
+新增或修 wrapper 時，預設保留 wrapper-level banner。不要用 `exec <command>` 取代整個 shell，否則 trap/exit banner 不會執行。
+
+```bash
+#!/usr/bin/env bash
+set -u
+
+JOB_ID="example_job"
+LOG_PATH="/Users/yhlai0911/.volpred/logs/${JOB_ID}.log"
+mkdir -p "$(dirname "$LOG_PATH")"
+exec >> "$LOG_PATH" 2>&1
+
+START_EPOCH="$(date +%s)"
+echo "=== [${JOB_ID}] STARTED at $(date -u +%Y-%m-%dT%H:%M:%SZ) pid=$$ ==="
+
+emit_exit_banner() {
+  local rc=$?
+  local end_epoch
+  end_epoch="$(date +%s)"
+  echo "=== [${JOB_ID}] exit ${rc} at $(date -u +%Y-%m-%dT%H:%M:%SZ) (duration=$((end_epoch - START_EPOCH))s) ==="
+}
+trap emit_exit_banner EXIT
+
+# Example: wrap the actual app command. Add a wall-clock cap for jobs that can hang.
+/usr/bin/perl -e 'alarm shift; exec @ARGV' 180 \
+  /Users/yhlai0911/Desktop/volpred-research/.venv/bin/python \
+  /Users/yhlai0911/Desktop/volpred-research/scripts/example_job.py
+```
+
+Minimum expected wrapper log shape:
+
+```text
+=== [example_job] STARTED at 2026-06-23T00:00:00Z pid=12345 ===
+... runner / app output ...
+=== [example_job] exit 0 at 2026-06-23T00:00:09Z (duration=9s) ===
+```
+
 ## 永久任務（系統 crontab — 無人值守也會跑，台灣時間）
 ```
 0 15 * * 1-5   collect_tw_data.py      # 15:00 台股收盤後
