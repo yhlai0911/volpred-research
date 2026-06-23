@@ -26,6 +26,8 @@ ARC_DEDUP_WINDOW_DAYS = 30
 
 sys.path.insert(0, str(ROOT / "src"))
 
+from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+
 
 def _now_utc() -> datetime:
     return datetime.now(timezone.utc)
@@ -149,38 +151,41 @@ def refill_event_candidates(*, horizon_days: int = 14) -> dict[str, Any]:
         if not event_date_raw:
             skipped.append({"id": str(item.get("id")), "reason": "missing_event_date"})
             continue
-        try:
-            event_date = datetime.fromisoformat(str(event_date_raw)).date()
-        except ValueError as exc:
-            _warn_refill_reader(
-                f"event_date parse failed; skipping event item id={item.get('id')} raw={event_date_raw!r}",
-                RUNTIME_SCHEDULES,
-                exc,
-            )
+        event_date_dt = parse_iso_warn(
+            event_date_raw,
+            tag="reader_facing_refill",
+            field_name="event_date",
+            fallback=None,
+            item_id=str(item.get("id") or ""),
+            path=str(RUNTIME_SCHEDULES),
+        )
+        if event_date_dt is None:
             skipped.append({"id": str(item.get("id")), "reason": "bad_event_date"})
             continue
+        event_date = event_date_dt.date()
         delta_days = (event_date - now.astimezone(LOCAL_TZ).date()).days
         if delta_days < 0 or delta_days > horizon_days:
             skipped.append({"id": str(item.get("id")), "reason": "out_of_horizon"})
             continue
         not_before_raw = item.get("not_before")
         if not_before_raw:
-            try:
-                not_before_dt = datetime.fromisoformat(str(not_before_raw))
-            except ValueError as exc:
-                _warn_refill_reader(
-                    f"not_before parse failed; skipping event item id={item.get('id')} raw={not_before_raw!r}",
-                    RUNTIME_SCHEDULES,
-                    exc,
-                )
+            not_before_dt = parse_iso_warn(
+                not_before_raw,
+                tag="reader_facing_refill",
+                field_name="not_before",
+                fallback=None,
+                assume_tz=None,
+                item_id=str(item.get("id") or ""),
+                path=str(RUNTIME_SCHEDULES),
+            )
+            if not_before_dt is None:
                 skipped.append({"id": str(item.get("id")), "reason": "bad_not_before"})
                 continue
-            if not_before_dt is not None:
-                if not_before_dt.tzinfo is None:
-                    not_before_dt = not_before_dt.replace(tzinfo=LOCAL_TZ)
-                if now < not_before_dt.astimezone(timezone.utc):
-                    skipped.append({"id": str(item.get("id")), "reason": "not_yet_in_window"})
-                    continue
+            if not_before_dt.tzinfo is None:
+                not_before_dt = not_before_dt.replace(tzinfo=LOCAL_TZ)
+            if now < not_before_dt.astimezone(timezone.utc):
+                skipped.append({"id": str(item.get("id")), "reason": "not_yet_in_window"})
+                continue
         task = _build_event_task(item)
         if _append_task(task):
             added.append(task["id"])

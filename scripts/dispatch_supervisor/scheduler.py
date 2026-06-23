@@ -22,11 +22,17 @@ import asyncio
 import json
 import logging
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from croniter import croniter
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT / "src"))
+from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 from . import state, worker
 
@@ -98,18 +104,19 @@ def _due_to_fire(*, cron_expr: str, last_fire_at: str | None, now: datetime | No
     prev = _prev_fire(cron_expr, now=now)
     if not last_fire_at:
         return True, prev
-    try:
-        last_dt = datetime.fromisoformat(last_fire_at)
-        # tz-naive cron + tz-aware state: drop tz for comparison (cron uses local time)
-        if last_dt.tzinfo is not None:
-            last_dt = last_dt.astimezone().replace(tzinfo=None)
-    except (TypeError, ValueError) as exc:
-        LOG.warning(
-            "invalid last_fire_at=%r; treating scheduler as due: %s",
-            last_fire_at,
-            exc,
-        )
-        return True, prev
+    # tz-naive cron + tz-aware state: ask helper for naive datetime so we can
+    # compare against the cron-derived naive `prev` directly.
+    last_dt = parse_iso_warn(
+        last_fire_at,
+        tag="supervisor",
+        field_name="last_fire_at",
+        fallback=None,
+        assume_tz=None,
+    )
+    if last_dt is None:
+        return True, prev  # parse failed → WARN already emitted, treat as due
+    if last_dt.tzinfo is not None:
+        last_dt = last_dt.astimezone().replace(tzinfo=None)
     return last_dt < prev, prev
 
 

@@ -43,6 +43,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+# Ensure repo root in sys.path so `volpred.ops` imports work when invoked as
+# `python scripts/task_pool_claim.py` from anywhere.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT / "src"))
+
+from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
@@ -411,14 +419,17 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                 claimed_at = t.get("claimed_at")
                 if not claimed_at:
                     continue
-                try:
-                    age_h = (datetime.now(timezone.utc) - datetime.fromisoformat(claimed_at)).total_seconds() / 3600
-                except Exception as exc:
-                    _warn(
-                        "invalid claimed_at while listing stale claims; skipping "
-                        f"task_id={t.get('id')} claimed_at={claimed_at!r} error={type(exc).__name__}: {exc}"
-                    )
+                claimed_dt = parse_iso_warn(
+                    claimed_at,
+                    tag="claim",
+                    field_name="claimed_at",
+                    fallback=None,
+                    site="list_stale",
+                    task_id=str(t.get("id") or ""),
+                )
+                if claimed_dt is None:
                     continue
+                age_h = (datetime.now(timezone.utc) - claimed_dt).total_seconds() / 3600
                 if age_h < args.stale_hours:
                     continue
             elif args.status and status != args.status:
@@ -460,14 +471,17 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
             claimed_at = t.get("claimed_at")
             if not claimed_at:
                 continue
-            try:
-                age_h = (now - datetime.fromisoformat(claimed_at)).total_seconds() / 3600
-            except Exception as exc:
-                _warn(
-                    "invalid claimed_at while cleaning stale claims; skipping "
-                    f"task_id={t.get('id')} claimed_at={claimed_at!r} error={type(exc).__name__}: {exc}"
-                )
+            claimed_dt = parse_iso_warn(
+                claimed_at,
+                tag="claim",
+                field_name="claimed_at",
+                fallback=None,
+                site="cleanup_stale",
+                task_id=str(t.get("id") or ""),
+            )
+            if claimed_dt is None:
                 continue
+            age_h = (now - claimed_dt).total_seconds() / 3600
             if age_h >= args.stale_hours:
                 released.append({"id": t.get("id"), "owner": t.get("claimed_by"), "age_h": round(age_h, 1)})
                 t["status"] = "pending"

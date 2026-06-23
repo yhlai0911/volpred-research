@@ -66,6 +66,7 @@ from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 from volpred.ops.blocked_reasons import BLOCKED_REASONS  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 SELF_OPTIONAL_PATTERN = re.compile(
     r"\(\s*optional\s*\)|（\s*optional\s*）|"
@@ -221,18 +222,16 @@ def detect_block_reason(task: dict) -> str | None:
         # the past, treat block as expired and let task return to pending.
         unblock_at = task.get("blocked_until")
         if unblock_at:
-            try:
-                deadline = datetime.fromisoformat(str(unblock_at).replace("Z", "+00:00"))
-                if deadline.tzinfo is None:
-                    deadline = deadline.replace(tzinfo=timezone.utc)
-                if datetime.now(timezone.utc) >= deadline:
-                    return None
-            except (TypeError, ValueError) as exc:
-                _warn_dispatch(
-                    "invalid blocked_until for "
-                    f"task {task.get('id', '<unknown>')}: {unblock_at!r} "
-                    f"({type(exc).__name__}: {exc})"
-                )
+            deadline = parse_iso_warn(
+                unblock_at,
+                tag="dispatch",
+                field_name="blocked_until",
+                fallback=None,
+                task_id=str(task.get("id", "<unknown>")),
+            )
+            if deadline is not None and datetime.now(timezone.utc) >= deadline:
+                return None
+            # parse failed → WARN already emitted; keep hard block (don't auto-recheck)
         return explicit
 
     blob = " ".join(

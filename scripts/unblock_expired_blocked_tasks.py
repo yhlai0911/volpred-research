@@ -20,12 +20,13 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT / "src"))
+from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+
 PATH = Path("storage/next_tasks.json")
 BLOCKED_FIELDS = ("blocked_reason", "blocked_at", "blocked_until", "blocked_note")
-
-
-def _warn(message: str) -> None:
-    print(f"[unblock] WARN {message}", file=sys.stderr)
 
 
 def main(apply: bool) -> int:
@@ -42,17 +43,16 @@ def main(apply: bool) -> int:
         # Strict ISO parsing still accepts the plain `YYYY-MM-DD` form. Invalid
         # blocked_until values must stay blocked; a lexical fallback can unblock
         # malformed metadata by accident.
-        try:
-            until_dt = datetime.fromisoformat(str(until).replace("Z", "+00:00"))
-            if until_dt.tzinfo is None:
-                until_dt = until_dt.replace(tzinfo=timezone.utc)
-            if until_dt > now:
-                continue
-        except (TypeError, ValueError) as exc:
-            _warn(
-                "invalid blocked_until; keeping task blocked "
-                f"task_id={t.get('id')} blocked_until={until!r} error={type(exc).__name__}: {exc}"
-            )
+        until_dt = parse_iso_warn(
+            until,
+            tag="unblock",
+            field_name="blocked_until",
+            fallback=None,
+            task_id=str(t.get("id") or ""),
+        )
+        if until_dt is None:
+            continue  # parse failed → WARN already emitted, keep blocked
+        if until_dt > now:
             continue
         swept.append(
             {

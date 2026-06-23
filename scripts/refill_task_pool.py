@@ -44,6 +44,7 @@ CANDIDATES = ROOT / "storage" / "publication_candidates.json"
 
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 
 def _warn_refill(message: str, exc: Exception | None = None) -> None:
@@ -938,14 +939,16 @@ def _journal_discovery_dispatch_task(tasks: list, existing_ids: set[str]) -> lis
             return []  # already pending — don't double-queue
         completed_at = t.get("completed_at") or t.get("created_at")
         if completed_at and isinstance(completed_at, str):
-            try:
-                ts = datetime.fromisoformat(completed_at)
-                if ts.tzinfo is None:
-                    ts = ts.replace(tzinfo=timezone.utc)
-                if ts >= cutoff:
-                    return []  # recent dispatch within 6h
-            except ValueError:
-                pass
+            ts = parse_iso_warn(
+                completed_at,
+                tag="refill",
+                field_name="completed_at",
+                fallback=None,
+                site="journal_discovery_cooldown",
+                task_id=tid,
+            )
+            if ts is not None and ts >= cutoff:
+                return []  # recent dispatch within 6h
 
     # 6h bucket cap: 每日最多 4 次 dispatch（00-06/06-12/12-18/18-24），對齊消耗
     bucket = now_utc.hour // 6

@@ -219,16 +219,18 @@ def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> Non
     assert received and received[0]["prompt_text"] == "prompt-body"
 
 
-def test_due_to_fire_warns_on_invalid_last_fire_at(caplog) -> None:
-    with caplog.at_level(logging.WARNING, logger=scheduler.__name__):
-        due, _prev = scheduler._due_to_fire(
-            cron_expr="7 * * * *",
-            last_fire_at="not-a-date",
-        )
+def test_due_to_fire_warns_on_invalid_last_fire_at(capsys) -> None:
+    # parse_iso_warn (via volpred.ops.diagnostics) writes structured WARN to
+    # stderr, not the std logging module — so we read capsys.err here.
+    due, _prev = scheduler._due_to_fire(
+        cron_expr="7 * * * *",
+        last_fire_at="not-a-date",
+    )
 
+    err = capsys.readouterr().err
     assert due is True
-    assert "invalid last_fire_at" in caplog.text
-    assert "not-a-date" in caplog.text
+    assert "[supervisor] WARN last_fire_at parse failed" in err
+    assert "raw=not-a-date" in err
 
 
 def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
