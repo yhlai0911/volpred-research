@@ -36153,7 +36153,7 @@
     "title": "Paper review (Codex 24h-rule): 把老模型塞進 LSTM，為什麼預測反而更差？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d3993bd1 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d3993bd1",
@@ -36161,7 +36161,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-23T11:08:10+00:00"
+    "created_at": "2026-06-23T11:08:10+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T11:50:55.129223+00:00",
+    "claim_session_id": "165e0c105deb",
+    "started_at": "2026-06-23T11:50:59.092624+00:00",
+    "completed_at": "2026-06-23T11:52:11.417578+00:00",
+    "result": "PASS: mile_d3993bd1 claims match K1312 artifacts. OOS 2021-01-04..2026-05-15 with n=1348 per asset; SPY QLIKE GJR=1.7304 vs GARCH-LSTM=3.4510 (~99% worse), QQQ 1.7461 vs 3.2916 (~89% worse). MSE point improvements match article (SPY +14.7%, QQQ +6.0%) but DM-HLN MSE p=0.1246/0.3977 NS, so article correctly treats MSE as secondary. PASS: all three gates fail for both assets and both subperiods do not flip. Source review found no same-day/lookahead: features are shifted by 1 day and GJR/LSTM walk-forward fit uses prior data only. Caveat: K1312 README status is stale (compute_queued/TBD) despite results existing; article provenance relies on results JSON and details experiment_refs."
   },
   {
     "id": "K1533_article_research",
