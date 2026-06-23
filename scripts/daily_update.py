@@ -360,6 +360,14 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
             "chart_url": chart_url,
             "strategies": {s["id"]: s["weights"] for s in active_strats},
             "auto_generated": True,
+            # 2026-06-23 (boss「每日更新的文章要更新」): templated daily bulletin —
+            # it is INTENTIONALLY ~70% similar to yesterday's, so the publisher's
+            # near-duplicate gate was BLOCKING it every day ("Set details['dup_waiver']
+            # to override"), leaving the last daily_update stuck at 2026-06-15.
+            # daily audience is already exempt from RELEASE dedup; this waives the
+            # PUBLISH-time near-dup gate too. Non-trading-day repetition is still
+            # prevented upstream by the spy_date skip_publish guard.
+            "dup_waiver": True,
         },
     )
 
@@ -967,6 +975,12 @@ def main():
                 "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
                 "gap_alert_level": gap_alert_level,
                 "strategies": {sid: dict(w_info) for sid, w_info in strat_list},
+                # 2026-06-23 (boss「每日更新的文章要更新」): see the 每日策略建議 call
+                # above — templated daily 持倉 bulletin, intentionally near-identical
+                # day-to-day; the near-dup gate was blocking it (sim=61%). Waive the
+                # PUBLISH-time near-dup gate; spy_date skip_publish still guards
+                # non-trading-day repeats.
+                "dup_waiver": True,
             },
         )
 
