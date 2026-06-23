@@ -1,0 +1,574 @@
+{
+  "experiment_id": "k1535_ml_garch_adjudication_equity",
+  "title": "ML-vs-GARCH volatility reproduction adjudication (daily US equity)",
+  "reproduced_paper": {
+    "citation": "Aljadani et al. (2025), J. Risk Financial Management 18(12):685",
+    "url": "https://www.mdpi.com/1911-8074/18/12/685",
+    "claimed_winner": "PatchTST-lite over LSTM/CNN-LSTM/Vanilla-Transformer and ARIMA/GARCH(1,1)/HAR-RV on daily RV, h=1/5/22",
+    "weaknesses_targeted": {
+      "M1": "weak baseline \u2014 only plain Gaussian GARCH(1,1)",
+      "M2": "no significance test on the DL models (DM/MCS classical-only)",
+      "M3": "possible covariate asymmetry (RV proxy to NN, return^2 to GARCH)"
+    },
+    "paper_numbers_verified": "unverified \u2014 not cross-checked against PDF in smoke"
+  },
+  "run_type": "smoke_test",
+  "verdict": "SMOKE_PENDING_FULL_RUN",
+  "data_source": {
+    "GSPC": {
+      "ticker": "^GSPC",
+      "n_rows_raw": 6656,
+      "n_dropped_bad_ohlc": 0,
+      "n_rows_final": 6655,
+      "date_start": "2000-01-04",
+      "date_end": "2026-06-22"
+    }
+  },
+  "config": {
+    "index": "gspc",
+    "targets": [
+      "rv_cc",
+      "rv_park"
+    ],
+    "horizon": 1,
+    "max_oos": 400,
+    "epochs": 30,
+    "seed": 0,
+    "info_set": "ret_t, log RV_t, log RV_w(5), log RV_m(22), log VIX^2 \u2014 identical for NN windows and GARCH-X/HAR-X baselines",
+    "target_note": "rv_cc (close-to-close r^2) is a very noisy proxy on which classical GARCH wins by construction and the paper's HAR>>GARCH ranking does NOT hold; the paper's claim is on a SMOOTH RV target (range-based), so rv_park is the faithful-reproduction target."
+  },
+  "smoke_conclusions": {
+    "gspc_rv_cc_h1_seed0": {
+      "phaseA_reproduced_raw_win": false,
+      "dl_models_significantly_beating_HAR_RV_X": [],
+      "dl_models_significantly_beating_GJR_t": [],
+      "ceiling_holds": true,
+      "interpretation": "CEILING HOLDS \u2014 once HAR-RV-X gets the same lagged RV(1,5,22)+VIX info, NO DL model is Harvey-significant over it (M2/M3 confirmed: the paper's DL 'win' is an information advantage, not architecture)."
+    },
+    "gspc_rv_park_h1_seed0": {
+      "phaseA_reproduced_raw_win": true,
+      "dl_models_significantly_beating_HAR_RV_X": [],
+      "dl_models_significantly_beating_GJR_t": [
+        "Transformer"
+      ],
+      "ceiling_holds": true,
+      "interpretation": "CEILING HOLDS \u2014 once HAR-RV-X gets the same lagged RV(1,5,22)+VIX info, NO DL model is Harvey-significant over it (M2/M3 confirmed: the paper's DL 'win' is an information advantage, not architecture)."
+    }
+  },
+  "results": {
+    "gspc_rv_cc_h1_seed0": {
+      "index": "GSPC",
+      "target": "rv_cc",
+      "horizon": 1,
+      "seed": 0,
+      "n_oos_origins": 400,
+      "n_valid_common": 400,
+      "qlike": {
+        "ARIMA": 4.816545830672308,
+        "GARCH(1,1)": 1.7906683477802061,
+        "HAR-RV": 4.669162014405358,
+        "GJR-t": 1.7318269549986562,
+        "GARCH-X": 1.8079191919010917,
+        "HAR-RV-X": 3.150580875179898,
+        "LSTM": 3.4025859679223265,
+        "CNN-LSTM": 3.414439576906013,
+        "PatchTST-lite": 14.540092002363588,
+        "Transformer": 3.8353766027666505
+      },
+      "rmse_vol": {
+        "ARIMA": 0.8367651541335641,
+        "GARCH(1,1)": 0.8521782885849232,
+        "HAR-RV": 0.832143359193641,
+        "GJR-t": 0.8071337815957877,
+        "GARCH-X": 0.8651474561244265,
+        "HAR-RV-X": 0.770156264163639,
+        "LSTM": 0.7760434403777723,
+        "CNN-LSTM": 0.7769949637448167,
+        "PatchTST-lite": 0.9048525684153953,
+        "Transformer": 0.7868308973100642
+      },
+      "mae_vol": {
+        "ARIMA": 0.47248557828108645,
+        "GARCH(1,1)": 0.5875052881819525,
+        "HAR-RV": 0.4719517273830578,
+        "GJR-t": 0.561100148997003,
+        "GARCH-X": 0.5957298840263198,
+        "HAR-RV-X": 0.4422324103675288,
+        "LSTM": 0.43495590826800595,
+        "CNN-LSTM": 0.4397475665118195,
+        "PatchTST-lite": 0.5615030812318109,
+        "Transformer": 0.46526969856115696
+      },
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "GJR-t",
+          "qlike": 1.7318269549986562
+        },
+        {
+          "rank": 2,
+          "model": "GARCH(1,1)",
+          "qlike": 1.7906683477802061
+        },
+        {
+          "rank": 3,
+          "model": "GARCH-X",
+          "qlike": 1.8079191919010917
+        },
+        {
+          "rank": 4,
+          "model": "HAR-RV-X",
+          "qlike": 3.150580875179898
+        },
+        {
+          "rank": 5,
+          "model": "LSTM",
+          "qlike": 3.4025859679223265
+        },
+        {
+          "rank": 6,
+          "model": "CNN-LSTM",
+          "qlike": 3.414439576906013
+        },
+        {
+          "rank": 7,
+          "model": "Transformer",
+          "qlike": 3.8353766027666505
+        },
+        {
+          "rank": 8,
+          "model": "HAR-RV",
+          "qlike": 4.669162014405358
+        },
+        {
+          "rank": 9,
+          "model": "ARIMA",
+          "qlike": 4.816545830672308
+        },
+        {
+          "rank": 10,
+          "model": "PatchTST-lite",
+          "qlike": 14.540092002363588
+        }
+      ],
+      "phaseA_reproduction": {
+        "patchtst_qlike": 14.540092002363588,
+        "garch11_qlike": 1.7906683477802061,
+        "patchtst_beats_garch11": false,
+        "har_vs_garch11_dm_hln": {
+          "dm": 5.220221128413685,
+          "p": 2.881394929321601e-07,
+          "n": 400,
+          "dbar": 2.878493666625153,
+          "h": 1
+        },
+        "har_crushes_garch11_tableA2_sanity": false
+      },
+      "phaseB_adjudication_dm": {
+        "LSTM_vs_GJR-t": {
+          "dm": 4.143531899698245,
+          "p": 4.178006188038097e-05,
+          "n": 400,
+          "dbar": 1.67075901292367,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": true
+        },
+        "LSTM_vs_GARCH-X": {
+          "dm": 4.035041299634084,
+          "p": 6.544389203066991e-05,
+          "n": 400,
+          "dbar": 1.594666776021234,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": true
+        },
+        "LSTM_vs_HAR-RV-X": {
+          "dm": 1.3593704407057656,
+          "p": 0.17479700050611924,
+          "n": 400,
+          "dbar": 0.2520050927424284,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": false
+        },
+        "CNN-LSTM_vs_GJR-t": {
+          "dm": 4.0371369906978325,
+          "p": 6.488506488611101e-05,
+          "n": 400,
+          "dbar": 1.682612621907357,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": true
+        },
+        "CNN-LSTM_vs_GARCH-X": {
+          "dm": 3.9277425002027733,
+          "p": 0.00010102276569545765,
+          "n": 400,
+          "dbar": 1.6065203850049212,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": true
+        },
+        "CNN-LSTM_vs_HAR-RV-X": {
+          "dm": 1.3955452532753931,
+          "p": 0.163627624641409,
+          "n": 400,
+          "dbar": 0.26385870172611553,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": false
+        },
+        "PatchTST-lite_vs_GJR-t": {
+          "dm": 2.9068748413214744,
+          "p": 0.003854249964645673,
+          "n": 400,
+          "dbar": 12.808265047364932,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": false
+        },
+        "PatchTST-lite_vs_GARCH-X": {
+          "dm": 2.8925533740077087,
+          "p": 0.004030560293557306,
+          "n": 400,
+          "dbar": 12.732172810462496,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": false
+        },
+        "PatchTST-lite_vs_HAR-RV-X": {
+          "dm": 2.6485275754551925,
+          "p": 0.008405129384579935,
+          "n": 400,
+          "dbar": 11.389511127183692,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": false
+        },
+        "Transformer_vs_GJR-t": {
+          "dm": 4.462105360715021,
+          "p": 1.0571268617365348e-05,
+          "n": 400,
+          "dbar": 2.103549647767994,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": true
+        },
+        "Transformer_vs_GARCH-X": {
+          "dm": 4.360065944502646,
+          "p": 1.6567625072960723e-05,
+          "n": 400,
+          "dbar": 2.027457410865558,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": true
+        },
+        "Transformer_vs_HAR-RV-X": {
+          "dm": 1.8676322624485828,
+          "p": 0.06254625868800479,
+          "n": 400,
+          "dbar": 0.6847957275867526,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": false
+        }
+      },
+      "mcs": {
+        "members": [
+          "ARIMA",
+          "GARCH(1,1)",
+          "HAR-RV",
+          "GJR-t",
+          "GARCH-X",
+          "HAR-RV-X",
+          "LSTM",
+          "CNN-LSTM",
+          "PatchTST-lite",
+          "Transformer"
+        ],
+        "size": 10,
+        "p_values": {
+          "ARIMA": 0.18,
+          "GARCH(1,1)": 0.18,
+          "HAR-RV": 0.18,
+          "GJR-t": 0.18,
+          "GARCH-X": 0.18,
+          "HAR-RV-X": 0.18,
+          "LSTM": 0.18,
+          "CNN-LSTM": 0.18,
+          "PatchTST-lite": 0.18,
+          "Transformer": 0.18
+        }
+      },
+      "nn_train_times_s": {
+        "LSTM": 7.240673065185547,
+        "CNN-LSTM": 13.816116094589233,
+        "PatchTST-lite": 4.551101207733154,
+        "Transformer": 8.093538045883179
+      },
+      "elapsed_s": 397.539963722229
+    },
+    "gspc_rv_park_h1_seed0": {
+      "index": "GSPC",
+      "target": "rv_park",
+      "horizon": 1,
+      "seed": 0,
+      "n_oos_origins": 400,
+      "n_valid_common": 400,
+      "qlike": {
+        "ARIMA": 0.5818654020659574,
+        "GARCH(1,1)": 0.6203212977416502,
+        "HAR-RV": 0.5836781254135246,
+        "GJR-t": 0.5541162575941173,
+        "GARCH-X": 0.573052190250278,
+        "HAR-RV-X": 0.4308108517184439,
+        "LSTM": 0.42369361347055656,
+        "CNN-LSTM": 0.42000396192772194,
+        "PatchTST-lite": 0.45524348337986387,
+        "Transformer": 0.4058289427575223
+      },
+      "rmse_vol": {
+        "ARIMA": 0.43057611819665614,
+        "GARCH(1,1)": 0.6080407294677778,
+        "HAR-RV": 0.4337548847803663,
+        "GJR-t": 0.5408648818150841,
+        "GARCH-X": 0.610955716116244,
+        "HAR-RV-X": 0.389430814408964,
+        "LSTM": 0.3788221817930396,
+        "CNN-LSTM": 0.35565224494019215,
+        "PatchTST-lite": 0.3897923079167955,
+        "Transformer": 0.3523887010529804
+      },
+      "mae_vol": {
+        "ARIMA": 0.23496651047328299,
+        "GARCH(1,1)": 0.43390526209003377,
+        "HAR-RV": 0.23533925556723442,
+        "GJR-t": 0.3950250368426218,
+        "GARCH-X": 0.3971885241710722,
+        "HAR-RV-X": 0.22398776896414746,
+        "LSTM": 0.2147106330549431,
+        "CNN-LSTM": 0.21187647239261997,
+        "PatchTST-lite": 0.22807317982631947,
+        "Transformer": 0.2141927427605718
+      },
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "Transformer",
+          "qlike": 0.4058289427575223
+        },
+        {
+          "rank": 2,
+          "model": "CNN-LSTM",
+          "qlike": 0.42000396192772194
+        },
+        {
+          "rank": 3,
+          "model": "LSTM",
+          "qlike": 0.42369361347055656
+        },
+        {
+          "rank": 4,
+          "model": "HAR-RV-X",
+          "qlike": 0.4308108517184439
+        },
+        {
+          "rank": 5,
+          "model": "PatchTST-lite",
+          "qlike": 0.45524348337986387
+        },
+        {
+          "rank": 6,
+          "model": "GJR-t",
+          "qlike": 0.5541162575941173
+        },
+        {
+          "rank": 7,
+          "model": "GARCH-X",
+          "qlike": 0.573052190250278
+        },
+        {
+          "rank": 8,
+          "model": "ARIMA",
+          "qlike": 0.5818654020659574
+        },
+        {
+          "rank": 9,
+          "model": "HAR-RV",
+          "qlike": 0.5836781254135246
+        },
+        {
+          "rank": 10,
+          "model": "GARCH(1,1)",
+          "qlike": 0.6203212977416502
+        }
+      ],
+      "phaseA_reproduction": {
+        "patchtst_qlike": 0.45524348337986387,
+        "garch11_qlike": 0.6203212977416502,
+        "patchtst_beats_garch11": true,
+        "har_vs_garch11_dm_hln": {
+          "dm": -0.39318503532925064,
+          "p": 0.6943928166775684,
+          "n": 400,
+          "dbar": -0.036643172328125626,
+          "h": 1
+        },
+        "har_crushes_garch11_tableA2_sanity": false
+      },
+      "phaseB_adjudication_dm": {
+        "LSTM_vs_GJR-t": {
+          "dm": -2.740082218620917,
+          "p": 0.006418158830885146,
+          "n": 400,
+          "dbar": -0.13042264412356075,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": false
+        },
+        "LSTM_vs_GARCH-X": {
+          "dm": -3.8893391626187563,
+          "p": 0.00011772876111226793,
+          "n": 400,
+          "dbar": -0.14935857677972128,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": true
+        },
+        "LSTM_vs_HAR-RV-X": {
+          "dm": -0.47883249791338756,
+          "p": 0.6323200895648167,
+          "n": 400,
+          "dbar": -0.00711723824788735,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": false
+        },
+        "CNN-LSTM_vs_GJR-t": {
+          "dm": -2.678919552897204,
+          "p": 0.007691477822494797,
+          "n": 400,
+          "dbar": -0.1341122956663955,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": false
+        },
+        "CNN-LSTM_vs_GARCH-X": {
+          "dm": -3.6831699917048546,
+          "p": 0.00026209135929189387,
+          "n": 400,
+          "dbar": -0.15304822832255602,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": true
+        },
+        "CNN-LSTM_vs_HAR-RV-X": {
+          "dm": -0.7077930664298968,
+          "p": 0.4794870038315664,
+          "n": 400,
+          "dbar": -0.010806889790722078,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": false
+        },
+        "PatchTST-lite_vs_GJR-t": {
+          "dm": -2.1628259800754472,
+          "p": 0.031147963319203553,
+          "n": 400,
+          "dbar": -0.09887277421425339,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": false
+        },
+        "PatchTST-lite_vs_GARCH-X": {
+          "dm": -2.789105835252881,
+          "p": 0.005538575661810929,
+          "n": 400,
+          "dbar": -0.11780870687041396,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": false
+        },
+        "PatchTST-lite_vs_HAR-RV-X": {
+          "dm": 0.9046673096261781,
+          "p": 0.3661875728404278,
+          "n": 400,
+          "dbar": 0.024432631661420002,
+          "h": 1,
+          "interpretation": "baseline_better",
+          "harvey_significant": false
+        },
+        "Transformer_vs_GJR-t": {
+          "dm": -3.583646213780685,
+          "p": 0.00038074752352201813,
+          "n": 400,
+          "dbar": -0.14828731483659507,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": true
+        },
+        "Transformer_vs_GARCH-X": {
+          "dm": -4.062876879055542,
+          "p": 5.838088558829391e-05,
+          "n": 400,
+          "dbar": -0.16722324749275563,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": true
+        },
+        "Transformer_vs_HAR-RV-X": {
+          "dm": -1.004402968185109,
+          "p": 0.31579314415911885,
+          "n": 400,
+          "dbar": -0.02498190896092169,
+          "h": 1,
+          "interpretation": "DL_better",
+          "harvey_significant": false
+        }
+      },
+      "mcs": {
+        "members": [
+          "ARIMA",
+          "GARCH(1,1)",
+          "HAR-RV",
+          "GJR-t",
+          "GARCH-X",
+          "HAR-RV-X",
+          "LSTM",
+          "CNN-LSTM",
+          "PatchTST-lite",
+          "Transformer"
+        ],
+        "size": 10,
+        "p_values": {
+          "ARIMA": 0.1795,
+          "GARCH(1,1)": 0.1795,
+          "HAR-RV": 0.1795,
+          "GJR-t": 0.1795,
+          "GARCH-X": 0.1795,
+          "HAR-RV-X": 0.1795,
+          "LSTM": 0.1795,
+          "CNN-LSTM": 0.1795,
+          "PatchTST-lite": 0.1795,
+          "Transformer": 0.1795
+        }
+      },
+      "nn_train_times_s": {
+        "LSTM": 5.849991083145142,
+        "CNN-LSTM": 14.175359010696411,
+        "PatchTST-lite": 4.557964086532593,
+        "Transformer": 7.717590570449829
+      },
+      "elapsed_s": 329.99371218681335
+    }
+  },
+  "determinism_check": {
+    "target": "rv_park",
+    "patchtst_qlike_seed0_runA": 0.45524348337986387,
+    "patchtst_qlike_seed0_runB": 0.45524348337986387,
+    "same_seed_reproduces": true,
+    "patchtst_qlike_seed1": 0.43497082817299443,
+    "different_seed_differs": true
+  }
+}
