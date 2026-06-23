@@ -1,8 +1,8 @@
 {
   "id": "mile_1bff1fe5",
   "title": "白天波動看得很清楚，為什麼模型還是會估錯？問題常常出在『隔夜那一下』",
-  "description": "很多波動率模型都很愛用一種直覺資料：今天盤中最高多少、最低多少。",
-  "content": "# 白天波動看得很清楚，為什麼模型還是會估錯？問題常常出在「隔夜那一下」\n\n很多波動率模型都很愛用一種直覺資料：今天盤中最高多少、最低多少。\n\n這樣做有個很吸引人的地方。你不用等更細的分時資料，只看每天的高低開收，就能大致量市場今天震得多厲害。\n\n問題是，市場不只在白天動。\n\n如果昨天收盤和今天開盤之間，剛好發生一個很大的跳空，你只看白天那段高低區間，就會漏掉真正讓投資人受傷的那一下。\n\n這次實驗想回答的就是這件事：\n\n**同樣是用每日高低開收來估波動，誰有把「隔夜跳空」算進去，誰沒有？這個差別到底大不大？**\n\n## 先講結論：差很大，關鍵在於有沒有把重要資訊漏掉\n\n這次我們把四種常見做法放在一起比：\n\n1. `Parkinson`：只看最高價和最低價\n2. `Garman-Klass`：開始把開盤到收盤也算進來\n3. `Rogers-Satchell`：容許價格有方向漂移\n4. `Yang-Zhang`：把隔夜跳空、開盤後波動、盤中波動拆開來看\n\n然後每一種都拿去驅動同一種波動模型，再和兩個基準模型一起比較。\n\n結果很乾脆：\n\n- 最好的區間型版本是 **Yang-Zhang**\n- 它明顯贏過只看高低價的 Parkinson\n- 但整體第一名仍然是那個有額外恐慌資訊加持的基準模型\n\n![Comparison of range-based variants and benchmarks](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/range_model_score_chart.png)\n\n## 第一個重點：只看盤中高低價，真的會漏掉重要風險\n\n這次最重要的發現之一，是 `Parkinson` 這種「只看白天高低價」的做法，排名幾乎墊底。\n\n用同一個評分標準比較：\n\n- 含額外恐慌資訊的基準模型：`1.480`\n- `CARR_YZ`：`1.556`\n- 老牌基準模型：`1.603`\n- `CARR_RS`：`1.670`\n- `CARR_GK`：`1.689`\n- `CARR_Parkinson`：`1.692`\n\n這個排序最值得注意的地方是：\n\n**只要你完全忽略隔夜跳空，模型就很容易把波動估得偏掉。**\n\n因為對投資人來說，昨天收盤 100、今天直接開在 95，這 5% 的落差是真實存在的風險；市場不會因為它發生在開盤前，就當它沒發生。\n\n## 第二個重點：有些修正幾乎沒差，真正有感的是 Yang-Zhang\n\n如果把 `Parkinson` 當作基準，三種修正版對它的改善幅度是：\n\n- `Garman-Klass`：約 **0.19%**\n- `Rogers-Satchell`：約 **1.30%**\n- `Yang-Zhang`：約 **8.04%**\n\n![Improvement versus Parkinson after adding gap information](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/gap_adjustment_gain_chart.png)\n\n這個對照很有意思。\n\n多加一點數學，結果不會自然變好。前兩個版本有修，但改善很小；真正把差距拉開的是 `Yang-Zhang`，因為它沒有只在白天範圍裡面修修補補，而是直接把「隔夜」當成獨立成分處理。\n\n換句話說，**真正的關鍵在於它有沒有把漏掉的那塊風險補回來。**\n\n## 第三個重點：第二名很強，但還沒有強到可以篡位\n\n這篇最容易被過度解讀的地方，是 `CARR_YZ` 的成績其實非常接近那個老牌基準模型，甚至在這次分數上還比較好。\n\n但研究上更嚴格的看法是：\n\n- `CARR_YZ` 的分數比老牌基準模型好\n- 可是差距還沒有強到足以宣告「它穩定更強」\n\n這點很重要。因為這次結果真正能穩健支持的結論是：\n\n1. `Yang-Zhang` 明顯優於 `Parkinson`\n2. `Yang-Zhang` 很接近、甚至略優於老牌基準模型\n3. **整體最強還是那個帶額外恐慌資訊的版本**\n\n所以一般讀者最安全的 takeaway 很簡單：\n\n**如果你一定要用日線高低開收去估波動，至少別再忽略隔夜跳空。**\n\n## 為什麼這件事對投資人其實很直觀\n\n把它想成你在估一天的危險程度。\n\n如果某個城市白天很平靜，但凌晨發生了大地震，你不能因為震在半夜，就把那天記成「風平浪靜」。\n\n波動率也是同樣的邏輯。\n\n很多看盤中區間的方法，白天看得很仔細，卻把隔夜那一段當成不存在。這篇真正提醒的是：**對股市這種會跳空開盤的資產，這樣的省略不是小誤差，它會形成系統性漏算。**\n\n## 這篇不能說到哪裡\n\n這次結果也有邊界，不能說過頭：\n\n- 這次只看 `SPY`\n- 用的是日資料，不是更細的盤中資料\n- `Yang-Zhang` 雖然是四種區間型版本裡最好的，但整體冠軍還不是它\n\n所以最穩健的結論是：\n\n**隔夜 gap 這件事必須補；補得最有效的是 Yang-Zhang；但要說它已經全面取代最強基準，證據還不夠。**\n\n這種結果其實很有價值，因為它幫你分清楚兩件事：\n\n1. 哪些改法只是把公式弄得更複雜\n2. 哪些改法真的有補到原本漏掉的風險來源\n\n---\n\n*本文基於一項 SPY 日線波動估計比較。資料期間 `2004-01-01` 至 `2025-12-31`，外樣本 `2016-01-04` 至 `2025-12-31`，共 `2,514` 個交易日。比較對象包含四種日線區間波動估計方式，以及兩個基準模型。圖表來自本地實驗輸出；資料來源：yfinance。*\n\n\n---\n\n**方法校正附註（2026-06-23 24h-rule review 後補）**\n\n本文中以 `Yang-Zhang` 標示的版本，實作上的「開盤波動」項用的是當日 `(log H − log O)²+(log L − log O)²`，並非 Yang & Zhang (2000) 原始定義 的「跨日開盤跳空樣本變異數」。也就是說，本文比較的「YZ 版本」更精確的稱呼是 **Yang-Zhang 風格的隔夜調整估計子（YZ-style overnight-adjusted）**：仍然保留 「把隔夜跳空當成獨立成分」這個核心精神，但簡化了原文的滾動樣本變異數。\n\n這個簡化不會推翻本文結論：DM/Harvey 顯著性（t = −3.28，相對 Parkinson）對於實際算出來的版本是成立的。讀者只要記住一件事 — 「加入隔夜成分能改善 Parkinson」這個方向性結論是穩固的；之後我們會用 canonical Yang-Zhang 原始公式重跑一次，確認量化幅度是否一致。\n",
+  "description": "K935 原始 YZ-style 結果仍顯示隔夜調整有用，但 canonical Yang-Zhang 2000 rolling rerun 沒有確認原本的 headline。",
+  "content": "# 白天波動看得很清楚，為什麼模型還是會估錯？問題常常出在「隔夜那一下」\n\n很多波動率模型都很愛用一種直覺資料：今天盤中最高多少、最低多少。\n\n這樣做有個很吸引人的地方。你不用等更細的分時資料，只看每天的高低開收，就能大致量市場今天震得多厲害。\n\n問題是，市場不只在白天動。\n\n如果昨天收盤和今天開盤之間，剛好發生一個很大的跳空，你只看白天那段高低區間，就會漏掉真正讓投資人受傷的那一下。\n\n這次實驗想回答的是：\n\n**同樣是用每日高低開收來估波動，誰有把「隔夜跳空」算進去，誰沒有？這個差別到底大不大？**\n\n## 先講更新後結論\n\n原始 K935 的主要方向仍然成立：**只看盤中高低價的 Parkinson 版本，確實會漏掉隔夜 gap 這塊風險。**\n\n但 24 小時 source review 後，我們補跑了一次更嚴格的 canonical Yang-Zhang 2000 rolling 版本，結果必須修正：\n\n- 原始文章裡標成 `Yang-Zhang` 的版本，其實更精確應叫 **YZ-style overnight-adjusted proxy**\n- 這個 YZ-style 版本仍明顯贏過 Parkinson：`QLIKE 1.541` vs `1.682`，改善約 `8.38%`\n- 但 canonical Yang-Zhang 2000 rolling 版本沒有確認原本 headline：`QLIKE 2.232`，比 Parkinson 差約 `32.71%`\n- 兩模型比較的統計值為 `+2.13`，方向是 canonical YZ 較差，但未達本平台最嚴格門檻\n\n所以這篇現在最準確的讀法是：\n\n**隔夜 gap 必須處理；原始 K935 的簡化隔夜調整 proxy 有用；但不能再把那個結果說成 canonical Yang-Zhang 2000 本身勝出。**\n\n## 原始實驗看到什麼\n\n原始 K935 把四種日線區間做法放在一起比：\n\n1. `Parkinson`：只看最高價和最低價\n2. `Garman-Klass`：開始把開盤到收盤也算進來\n3. `Rogers-Satchell`：容許價格有方向漂移\n4. `YZ-style`：把隔夜跳空加成獨立成分，但不是 canonical Yang-Zhang 2000 rolling 公式\n\n然後每一種都拿去驅動同一種波動模型，再和兩個基準模型一起比較。\n\n原始結果排序如下：\n\n- 含額外恐慌資訊的基準模型：`1.480`\n- `CARR_YZ-style`：`1.556`\n- 老牌基準模型：`1.603`\n- `CARR_RS`：`1.670`\n- `CARR_GK`：`1.689`\n- `CARR_Parkinson`：`1.692`\n\n![Comparison of range-based variants and benchmarks](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/range_model_score_chart.png)\n\n這張圖仍然可以看，但標籤要改讀成：圖中的 `CARR_YZ` 是 **YZ-style overnight-adjusted proxy**，不是 canonical Yang-Zhang 2000。\n\n## 第一個重點：只看盤中高低價，仍然會漏掉重要風險\n\n`Parkinson` 這種「只看白天高低價」的做法，在原始 K935 裡排名幾乎墊底。\n\n這個方向沒有被推翻。\n\n因為對投資人來說，昨天收盤 100、今天直接開在 95，這 5% 的落差是真實存在的風險；市場不會因為它發生在開盤前，就當它沒發生。\n\n所以原始 K935 最穩的結論不是「某個名牌公式必勝」，而是：\n\n**只看白天 range 會系統性漏掉隔夜 gap。**\n\n## 第二個重點：簡化 proxy 有用，但 canonical 版本不確認\n\n原始版本如果把 `Parkinson` 當作基準，三種修正版對它的改善幅度是：\n\n- `Garman-Klass`：約 `0.19%`\n- `Rogers-Satchell`：約 `1.30%`\n- `YZ-style`：約 `8.04%`\n\n![Improvement versus Parkinson after adding gap information](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/gap_adjustment_gain_chart.png)\n\n補跑 canonical rolling Yang-Zhang 後，這裡要加一條限制：\n\n**上面這個 8% 改善，是原始 YZ-style proxy 的改善，不是 canonical Yang-Zhang 2000 rolling estimator 的改善。**\n\ncanonical rerun 用的是 2000 日 rolling Yang-Zhang 方差：\n\n`overnight variance + k * open-to-close variance + (1-k) * Rogers-Satchell variance`\n\n結果是：\n\n- `CARR_Parkinson`：`QLIKE 1.682`\n- `CARR_YZ-style`：`QLIKE 1.541`\n- `CARR_YZ_canonical_2000`：`QLIKE 2.232`\n\n也就是說，把 canonical rolling estimator 直接拿來當 CARR target，在這個設定下反而太平滑，對隔日 `r²` 的校準沒有幫助。\n\n## 第三個重點：這不是「隔夜 gap 不重要」\n\n這次修正容易被誤讀成：既然 canonical YZ 沒贏，所以隔夜 gap 不重要。\n\n這不是正確解讀。\n\n正確解讀是：\n\n1. `Parkinson` 漏掉隔夜 gap，這個問題仍然存在\n2. 原始 K935 的 YZ-style proxy 把隔夜成分補回來後，確實改善了預測校準\n3. 但 canonical Yang-Zhang 2000 是一個 multi-period rolling historical volatility estimator，不一定適合直接當一日 CARR target\n\n這三件事可以同時成立。\n\n## 這篇現在不能說到哪裡\n\n更新後，這篇不能再說：\n\n- canonical Yang-Zhang 2000 顯著勝 Parkinson\n- 「Yang-Zhang」本身是四種版本裡穩定最強\n- 原始 8% 改善就是 Yang & Zhang (2000) 原公式的勝利\n\n可以說的是：\n\n- `Parkinson` 忽略隔夜 gap，確實有風險漏算問題\n- K935 原始的 YZ-style overnight-adjusted proxy 在同一 OOS 口徑下贏 Parkinson\n- canonical rolling Yang-Zhang follow-up 不支持把原始結果升級成「Yang-Zhang 2000 公式勝出」\n\n所以給一般讀者的 takeaway 應該更精準：\n\n**不要忽略隔夜 gap；但也不要把「加了隔夜成分的簡化 proxy」和「canonical Yang-Zhang 2000 rolling estimator」混成同一件事。**\n\n---\n\n*本文基於 SPY 日線波動估計比較。原始 K935 資料期間 `2004-01-01` 至 `2025-12-31`，外樣本 `2016-01-04` 至 `2025-12-31`。2026-06-23 補跑 `experiments/k935/k935_canonical_yz_rerun.py`，同樣使用 SPY 日線 OHLC、OOS `2016-01-04` 至 `2025-12-31`，有效比較樣本 `2,508` 日。資料來源：yfinance。*\n\n**修正紀錄（2026-06-23）**：原文將 `YZ-style overnight-adjusted proxy` 簡稱為 `Yang-Zhang`，容易被理解為 canonical Yang-Zhang 2000。補跑 canonical rolling YZ(2000) 後，headline 不成立：canonical CARR-YZ `QLIKE 2.232`，Parkinson `1.682`，原始 YZ-style `1.541`。本文已改為保留「隔夜 gap 需要處理」的方向性結論，撤回「canonical Yang-Zhang 2000 勝出」的表述。\n",
   "category": "general",
   "audience": "general",
   "phase": "research",
@@ -17,6 +17,56 @@
       "cap": 10,
       "ratio": 0.2158,
       "exempt": false
+    },
+    "release_dedup_skipped": true,
+    "release_theme_flood": "overnight_gap",
+    "release_theme_recent_count": 17,
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "US_EQUITY"
+      ],
+      "conclusion_class": "null_no_info",
+      "mechanisms": [
+        "unspecified"
+      ],
+      "time_horizon": "intraday"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    },
+    "release_dedup_skipped_at": "2026-06-19T14:00:03.891368+00:00",
+    "release_theme_valve": true,
+    "release_theme_valve_theme": "overnight_gap",
+    "release_theme_valve_recent_count": 21,
+    "release_theme_valve_at": "2026-06-23T02:19:32.475949+00:00",
+    "methodology_correction": {
+      "added_at": "2026-06-23T22:15+08:00",
+      "reviewer_source": "feature-dev:code-reviewer subagent (Codex quota fallback)",
+      "verdict": "CONDITIONAL_PASS_WITH_CANONICAL_HEADLINE_RETRACTED",
+      "decision": "keep_article_after_rewrite; original YZ-style proxy result holds, canonical Yang-Zhang 2000 headline withdrawn",
+      "issue": "YZ open-variance term is single-day squared intraday range, not canonical Yang-Zhang 2000 rolling sample variance",
+      "headline_result_holds": false,
+      "followup_task_id": "K935_codex_review_canonical_yz_rerun",
+      "updated_at": "2026-06-23T14:41:07.073512+00:00",
+      "headline_result_holds_for": "YZ-style overnight-adjusted proxy only, not canonical Yang-Zhang 2000 rolling estimator",
+      "canonical_followup": {
+        "completed_at": "2026-06-23T14:41:07.073512+00:00",
+        "task_id": "K935_codex_review_canonical_yz_rerun",
+        "results_path": "experiments/k935/k935_canonical_yz_rerun_results.json",
+        "verdict": "CANONICAL_YZ_DOES_NOT_CONFIRM_HEADLINE",
+        "article_update_action": "codex_review_canonical_yz_rerun",
+        "canonical_yz_qlike_r2": 2.232007,
+        "parkinson_qlike_r2": 1.681861,
+        "yz_style_qlike_r2": 1.540845,
+        "canonical_vs_parkinson_dm_t": 2.1326,
+        "canonical_vs_parkinson_p_value": 0.033054,
+        "canonical_improvement_pct_vs_parkinson": -32.71,
+        "yz_style_vs_parkinson_dm_t": -3.4973,
+        "yz_style_improvement_pct_vs_parkinson": 8.38
+      }
     }
   },
   "tags": [
@@ -29,12 +79,12 @@
   ],
   "related_articles": [],
   "created_at": "2026-06-02T19:36:14.475102+00:00",
-  "published_at": "2026-06-02T19:36:14.475102+00:00",
-  "status": "draft",
+  "published_at": "2026-06-23T02:19:32.475949+00:00",
+  "status": "published",
   "errata": {
-    "update_at": "2026-06-02T19:37:04.400403+00:00",
-    "update_action": "codex_refine_general_draft",
-    "update_summary": "同步 K935 general draft 的最終文案：去掉多餘 research 腔與重複語句，保留 2 張圖與同一結論。",
+    "update_at": "2026-06-23T14:37:13.054483+00:00",
+    "update_action": "codex_review_canonical_yz_rerun",
+    "update_summary": "Canonical Yang-Zhang 2000 rolling rerun did not confirm the original K935 headline. Article now distinguishes the original YZ-style overnight-adjusted proxy from canonical YZ and withdraws the canonical-YZ-wins wording.",
     "update_history": [
       {
         "at": "2026-06-02T19:37:04.400403+00:00",
@@ -47,8 +97,23 @@
         "description_source": "auto (first paragraph)",
         "image_paths_normalized": 2,
         "image_url_changed": false
+      },
+      {
+        "at": "2026-06-23T14:37:13.054483+00:00",
+        "action": "codex_review_canonical_yz_rerun",
+        "summary": "Canonical Yang-Zhang 2000 rolling rerun did not confirm the original K935 headline. Article now distinguishes the original YZ-style overnight-adjusted proxy from canonical YZ and withdraws the canonical-YZ-wins wording.",
+        "old_content_chars": 2883,
+        "new_content_chars": 3731,
+        "title_changed": false,
+        "description_changed": true,
+        "description_source": "frontmatter override",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
       }
     ]
   },
-  "last_updated_at": "2026-06-02T19:37:04.400403+00:00"
+  "last_updated_at": "2026-06-23T14:37:13.054483+00:00",
+  "verified_live_at": "2026-06-23T02:19:48.812538+00:00"
 }

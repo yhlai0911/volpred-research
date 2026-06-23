@@ -7,20 +7,52 @@
   "review_performed_at": "2026-06-23T22:15+08:00",
   "rule": ".claude/rules/agent-delegation.md 2026-05-02 K1018 lesson — production article needs source-code review within 24h of publish",
   "verdict": "CONDITIONAL_PASS",
-  "decision": "needs_correction_then_keep",
+  "decision": "keep_after_rewrite; canonical_yz_headline_retracted",
   "reviewer": "feature-dev:code-reviewer subagent",
   "reviewer_source": "code-reviewer subagent fallback (Codex CLI quota exhausted 2026-06-23 22:08 CST, reset 22:18)",
   "codex_review": false,
   "knowledge_item_id": "6f8446c6",
   "checks": {
-    "lookahead": {"status": "OK", "evidence": "k935.py:449-457", "note": "OOS loop uses train_start:t window; CARR forecast for day t uses data ≤ t-1"},
-    "qlike_direction": {"status": "OK", "evidence": "src/volpred/stats/model_evaluation.py:59-60", "note": "canonical actual/predicted − log(actual/predicted) − 1 via qlike_pointwise"},
-    "dm_harvey_horizon": {"status": "OK", "evidence": "model_evaluation.py:89 (sig h=1 default), k935.py:550 (call), :552 (threshold)", "note": "n=2514 → HAC lag 13, |t|>3.0 threshold applied"},
-    "r2_proxy_independence": {"status": "OK", "evidence": "k935.py:77-78", "note": "squared close-to-close log return, independent of OHLC range"},
-    "oos_is_split": {"status": "OK", "evidence": "k935.py:421-446", "note": "train_end=t exclusive, window strictly past"},
-    "random_seed": {"status": "OK", "evidence": "k935.py:42", "note": "np.random.seed(42) global"},
-    "estimator_formulas": {"status": "WARN", "evidence": "k935.py:113-118", "note": "YZ open-variance term implements single-day (log H − log O)² + (log L − log O)², not canonical Yang-Zhang 2000 σ²_o rolling sample variance of overnight open gaps. Parkinson/GK/RS canonical."},
-    "carr_spec": {"status": "OK", "evidence": "k935.py:168-210", "note": "positivity bounds + α+β<0.9999 stationarity, Chou 2005 conformant"}
+    "lookahead": {
+      "status": "OK",
+      "evidence": "k935.py:449-457",
+      "note": "OOS loop uses train_start:t window; CARR forecast for day t uses data ≤ t-1"
+    },
+    "qlike_direction": {
+      "status": "OK",
+      "evidence": "src/volpred/stats/model_evaluation.py:59-60",
+      "note": "canonical actual/predicted − log(actual/predicted) − 1 via qlike_pointwise"
+    },
+    "dm_harvey_horizon": {
+      "status": "OK",
+      "evidence": "model_evaluation.py:89 (sig h=1 default), k935.py:550 (call), :552 (threshold)",
+      "note": "n=2514 → HAC lag 13, |t|>3.0 threshold applied"
+    },
+    "r2_proxy_independence": {
+      "status": "OK",
+      "evidence": "k935.py:77-78",
+      "note": "squared close-to-close log return, independent of OHLC range"
+    },
+    "oos_is_split": {
+      "status": "OK",
+      "evidence": "k935.py:421-446",
+      "note": "train_end=t exclusive, window strictly past"
+    },
+    "random_seed": {
+      "status": "OK",
+      "evidence": "k935.py:42",
+      "note": "np.random.seed(42) global"
+    },
+    "estimator_formulas": {
+      "status": "WARN",
+      "evidence": "k935.py:113-118",
+      "note": "YZ open-variance term implements single-day (log H − log O)² + (log L − log O)², not canonical Yang-Zhang 2000 σ²_o rolling sample variance of overnight open gaps. Parkinson/GK/RS canonical."
+    },
+    "carr_spec": {
+      "status": "OK",
+      "evidence": "k935.py:168-210",
+      "note": "positivity bounds + α+β<0.9999 stationarity, Chou 2005 conformant"
+    }
   },
   "primary_issue": {
     "location": "k935.py:113-118 (YZ block) + README.md:18 + article mile_1bff1fe5 content",
@@ -35,5 +67,21 @@
     "Knowledge entry added (item_id=6f8446c6, category=experiment_review)"
   ],
   "followup_task_id": "K935_codex_review_canonical_yz_rerun",
-  "followup_description": "Rerun K935 with canonical Yang-Zhang 2000 σ²_o (rolling sample variance of overnight open gaps across 2000-day training window); confirm headline DM t<-3.0 vs Parkinson robust to true YZ formula. If t drops materially, update mile_1bff1fe5 with revised quantitative magnitude."
+  "followup_description": "Rerun K935 with canonical Yang-Zhang 2000 σ²_o (rolling sample variance of overnight open gaps across 2000-day training window); confirm headline DM t<-3.0 vs Parkinson robust to true YZ formula. If t drops materially, update mile_1bff1fe5 with revised quantitative magnitude.",
+  "followup_status": "completed",
+  "followup_completed_at": "2026-06-23T14:43:27.371013+00:00",
+  "followup_result": {
+    "task_id": "K935_codex_review_canonical_yz_rerun",
+    "results_path": "experiments/k935/k935_canonical_yz_rerun_results.json",
+    "verdict": "CANONICAL_YZ_DOES_NOT_CONFIRM_HEADLINE",
+    "summary": "Original YZ-style proxy still beats Parkinson, but canonical rolling Yang-Zhang 2000 does not confirm the headline.",
+    "yz_style_qlike_r2": 1.540845,
+    "parkinson_qlike_r2": 1.681861,
+    "canonical_yz_qlike_r2": 2.232007,
+    "yz_style_vs_parkinson_dm_t": -3.4973,
+    "canonical_vs_parkinson_dm_t": 2.1326,
+    "canonical_improvement_pct_vs_parkinson": -32.71,
+    "article_update": "mile_1bff1fe5 rewritten via publish_draft.py --update; canonical-YZ-wins wording withdrawn",
+    "knowledge_item_id": "k935canon2606"
+  }
 }

@@ -46,6 +46,42 @@ K934 found that CARR(1,1) with Parkinson range had the best Spearman ranking (rh
 - CARR_YZ vs GARCH: t=-2.68, NOT significant at Harvey threshold
 - GK, RS, Parkinson are NOT significantly different from each other
 
+## 2026-06-23 canonical Yang-Zhang follow-up
+
+24h-rule source review found that the original `CARR_YZ` implementation is
+better described as a **YZ-style overnight-adjusted proxy**, not canonical
+Yang-Zhang (2000). The original daily target used:
+
+`overnight^2 + k * ((log H - log O)^2 + (log L - log O)^2) + (1-k) * RS`
+
+Follow-up script:
+
+```bash
+uv run python experiments/k935/k935_canonical_yz_rerun.py
+```
+
+This rerun uses a 2000-day rolling canonical Yang-Zhang target:
+
+`sigma_o2 + k * sigma_c2 + (1-k) * sigma_rs2`
+
+where `sigma_o2` is the rolling 2000-day variance of
+`log(Open_t / Close_{t-1})`, `sigma_c2` is the rolling variance of
+`log(Close_t / Open_t)`, and `sigma_rs2` is the rolling mean RS variance.
+
+Result:
+
+| Model | QLIKE on r^2 | vs Parkinson | DM t vs Parkinson |
+|------|--------------|---------------|-------------------|
+| CARR_YZ-style | 1.540845 | +8.38% better | -3.497 |
+| CARR_Parkinson | 1.681861 | baseline | -- |
+| CARR_YZ_canonical_2000 | 2.232007 | -32.71% worse | +2.133 |
+
+Therefore the original headline is valid only for the implemented YZ-style
+overnight-adjusted proxy. It should not be cited as canonical Yang-Zhang
+(2000) beating Parkinson. The public article `mile_1bff1fe5` was rewritten on
+2026-06-23 to withdraw the canonical-YZ wording while keeping the narrower
+gap-handling conclusion.
+
 ## Conclusions
 
 ### H1: CONFIRMED

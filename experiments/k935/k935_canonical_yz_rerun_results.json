@@ -1,0 +1,131 @@
+{
+  "oos_period": {
+    "start": "2016-01-04",
+    "end": "2025-12-31",
+    "n_oos": 2514
+  },
+  "window": 2000,
+  "refit_every": 21,
+  "n_refits": 120,
+  "metrics": {
+    "CARR_Parkinson": {
+      "qlike_r2": 1.6818607028700001,
+      "n_valid": 2508,
+      "spearman_rho": 0.42749548276254856,
+      "spearman_p": 5.6213438921762335e-112
+    },
+    "CARR_YZ_Style": {
+      "qlike_r2": 1.5408454213737866,
+      "n_valid": 2508,
+      "spearman_rho": 0.42289320535220204,
+      "spearman_p": 2.2609233012082927e-109
+    },
+    "CARR_YZ_Canonical_2000": {
+      "qlike_r2": 2.232007490845635,
+      "n_valid": 2508,
+      "spearman_rho": 0.03476568090539795,
+      "spearman_p": 0.0817324411550847
+    }
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "model": "CARR_YZ_Style",
+      "qlike_r2": 1.5408454213737866
+    },
+    {
+      "rank": 2,
+      "model": "CARR_Parkinson",
+      "qlike_r2": 1.6818607028700001
+    },
+    {
+      "rank": 3,
+      "model": "CARR_YZ_Canonical_2000",
+      "qlike_r2": 2.232007490845635
+    }
+  ],
+  "dm_vs_parkinson": {
+    "CARR_YZ_Style": {
+      "t_stat": -3.4973162538602516,
+      "p_value": 0.00047813899329463005,
+      "harvey_threshold_abs_t_gt_3": true,
+      "winner": "CARR_YZ_Style",
+      "improvement_pct_vs_parkinson": 8.384480430250791,
+      "n_valid": 2508
+    },
+    "CARR_YZ_Canonical_2000": {
+      "t_stat": 2.1326110128605826,
+      "p_value": 0.03305355035579027,
+      "harvey_threshold_abs_t_gt_3": false,
+      "winner": "n.s.",
+      "improvement_pct_vs_parkinson": -32.71060362114655,
+      "n_valid": 2508
+    }
+  },
+  "dm_canonical_vs_yz_style": {
+    "t_stat": 2.563852219069301,
+    "p_value": 0.010409572268251344,
+    "negative_t_means_canonical_better": true,
+    "n_valid": 2508
+  },
+  "model_params_last_refit": {
+    "CARR_Parkinson": {
+      "omega": 1.6732e-06,
+      "alpha": 0.1024224265,
+      "beta": 0.8633233328,
+      "persistence": 0.9657457594,
+      "converged": true,
+      "loglik": 17397.8634583121,
+      "n_fit": 2000
+    },
+    "CARR_YZ_Style": {
+      "omega": 2.5635e-06,
+      "alpha": 0.103044997,
+      "beta": 0.8667474221,
+      "persistence": 0.9697924192,
+      "converged": true,
+      "loglik": 16336.4444923206,
+      "n_fit": 2000
+    },
+    "CARR_YZ_Canonical_2000": {
+      "omega": 9.999e-07,
+      "alpha": 0.1064178055,
+      "beta": 0.8852979324,
+      "persistence": 0.991715738,
+      "converged": true,
+      "loglik": 16024.4311734712,
+      "n_fit": 2000
+    }
+  },
+  "experiment_id": "K935_canonical_yz_rerun",
+  "parent_experiment": "K935",
+  "parent_article_id": "mile_1bff1fe5",
+  "generated_at": "2026-06-23T14:35:41.624962+00:00",
+  "seed": 42,
+  "data_source": "yfinance SPY OHLC, auto_adjust=True",
+  "period": {
+    "start": "2004-01-01",
+    "end_exclusive": "2026-01-01",
+    "n_obs_after_dropna": 5534
+  },
+  "formula": {
+    "canonical_yz_2000": "sigma_o2 + k*sigma_c2 + (1-k)*sigma_rs2",
+    "sigma_o2": "rolling 2000-day mean((log(Open_t/Close_{t-1}) - rolling_mean)^2), ddof=0 per task brief",
+    "sigma_c2": "rolling 2000-day mean((log(Close_t/Open_t) - rolling_mean)^2), ddof=0",
+    "sigma_rs2": "rolling 2000-day mean of Rogers-Satchell daily variance",
+    "k": 0.14523704713590305
+  },
+  "lookahead_policy": "Rolling YZ at day s uses OHLC through s; OOS forecast for day t uses target history only through t-1.",
+  "original_k935_reference": {
+    "qlike_r2_CARR_YZ": 1.55597,
+    "qlike_r2_CARR_Parkinson": 1.692067,
+    "dm_CARR_YZ_vs_CARR_Parkinson": {
+      "t_stat": -3.2847,
+      "p_value": 0.001035,
+      "significant": true,
+      "winner": "CARR_YZ"
+    }
+  },
+  "verdict": "CANONICAL_YZ_DOES_NOT_CONFIRM_HEADLINE",
+  "article_update_required": true
+}

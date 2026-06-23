@@ -35930,5 +35930,23 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-23T22:15:00.883526"
+  },
+  {
+    "item_id": "k935canon2606",
+    "category": "methodology_correction",
+    "experiment_id": "K935",
+    "k_id": "K935",
+    "experiment_path": "experiments/k935/",
+    "reviewer": "Codex",
+    "verdict": "CANONICAL_YZ_DOES_NOT_CONFIRM_HEADLINE",
+    "title": "K935 canonical Yang-Zhang rerun retracts canonical-YZ headline",
+    "content": "K935 follow-up reran the CARR comparison with canonical rolling Yang-Zhang 2000 over the 2000-day window. The original YZ-style overnight-adjusted proxy still beats Parkinson on QLIKE(r^2): 1.540845 vs 1.681861, DM t=-3.497, improvement +8.38%. But canonical rolling Yang-Zhang does NOT confirm the article headline: QLIKE=2.232007, worse than Parkinson by -32.71%, DM t=+2.133 (direction canonical worse, below |t|>3). Therefore old K935 wording must be read as YZ-style proxy only, not canonical Yang-Zhang 2000. Article mile_1bff1fe5 was rewritten to withdraw canonical-YZ-wins wording and keep only the directional gap-handling conclusion.",
+    "evidence": [
+      "experiments/k935/k935_canonical_yz_rerun.py",
+      "experiments/k935/k935_canonical_yz_rerun_results.json",
+      "storage/reports/mile_1bff1fe5.json"
+    ],
+    "confidence": 0.94,
+    "created_at": "2026-06-23T14:41:07.073512+00:00"
   }
 ]

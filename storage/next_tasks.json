@@ -36293,12 +36293,18 @@
     "id": "K935_codex_review_canonical_yz_rerun",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "paper_review_followup",
     "title": "K935 canonical Yang-Zhang rerun (24h-review correction follow-up)",
     "description": "Per 24h-rule review of mile_1bff1fe5 (k935): YZ open-variance currently uses single-day intraday range proxy, not canonical Yang-Zhang 2000 rolling sample variance σ²_o. Rerun K935 with σ²_o = (1/n) Σ (o_i − ō)² over the 2000-day training window where o_i = log(Open_i/Close_{i-1}); confirm headline DM t<-3.0 vs Parkinson holds. If t drops materially, update mile_1bff1fe5 with revised quantitative magnitude. Path: experiments/k935/k935.py:108-118 (YZ block).",
     "parent_article_id": "mile_1bff1fe5",
     "parent_review_task_id": "paper_review_mile_1bff1fe5",
-    "created_at": "2026-06-23T14:15:01.038832+00:00"
+    "created_at": "2026-06-23T14:15:01.038832+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T14:30:47.222423+00:00",
+    "claim_session_id": "0a3c50299401",
+    "started_at": "2026-06-23T14:30:56.475185+00:00",
+    "completed_at": "2026-06-23T14:42:57.967782+00:00",
+    "result": "Reran K935 with canonical rolling Yang-Zhang 2000 target over 2000-day window. Verdict: CANONICAL_YZ_DOES_NOT_CONFIRM_HEADLINE. YZ-style proxy still beats Parkinson (QLIKE 1.540845 vs 1.681861, DM t=-3.497, +8.38%), but canonical YZ is worse than Parkinson (QLIKE 2.232007, DM t=+2.133, -32.71%). Rewrote mile_1bff1fe5 to withdraw canonical-YZ-wins wording, updated article metadata, synced single article to Supabase, and added knowledge correction k935canon2606."
   }
 ]
