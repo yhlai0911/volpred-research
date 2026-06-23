@@ -1,0 +1,204 @@
+{
+  "experiment_id": "k1254_rl_volatility_pilot",
+  "spec_version": "1.0",
+  "run_type": "smoke_test",
+  "asset": "SPY",
+  "data_source": "experiments/K1423_ewma_hurst_pilot/data/spy_vix_daily.parquet",
+  "rv_proxy": "daily squared close-to-close log return",
+  "sample_period": "2010-02-08 to 2026-06-05",
+  "n_total_usable_days": 4107,
+  "seed": 0,
+  "ppo_env_steps": 25000,
+  "ppo_hyperparams": {
+    "learning_rate": 0.0003,
+    "n_steps": 2048,
+    "batch_size": 2048,
+    "clip_range": 0.2,
+    "gamma": 0.95,
+    "policy": "MlpPolicy"
+  },
+  "state_dim": 29,
+  "state_feature_names": [
+    "ret_lag1",
+    "ret_lag2",
+    "ret_lag3",
+    "ret_lag4",
+    "ret_lag5",
+    "ret_lag6",
+    "ret_lag7",
+    "ret_lag8",
+    "ret_lag9",
+    "ret_lag10",
+    "ret_lag11",
+    "ret_lag12",
+    "ret_lag13",
+    "ret_lag14",
+    "ret_lag15",
+    "ret_lag16",
+    "ret_lag17",
+    "ret_lag18",
+    "ret_lag19",
+    "ret_lag20",
+    "ret_lag21",
+    "ret_lag22",
+    "vix_lag1",
+    "vix_ma5_lag1",
+    "rv22_lag1",
+    "dow_tue",
+    "dow_wed",
+    "dow_thu",
+    "dow_fri"
+  ],
+  "action_space": {
+    "raw": "[-1,1]",
+    "log_var_bounds": [
+      -15.0,
+      0.0
+    ],
+    "forecast_bounds": [
+      3.059023205018258e-07,
+      1.0
+    ]
+  },
+  "unit_tests": {
+    "reward_sign": true,
+    "state_no_leak": true,
+    "nan_guard": true,
+    "details": {
+      "reward_sign": {
+        "perfect_reward": -0.0,
+        "over_reward": -0.6362943323748333,
+        "under_reward": -1.6137057767161949,
+        "pass": true
+      },
+      "state_no_leak": {
+        "rv_changed_at_i": true,
+        "state_unchanged_at_i": true,
+        "next_row_state_changed": true,
+        "row_tested": 2053,
+        "pass": true
+      },
+      "nan_guard": {
+        "checked": [
+          {
+            "action": -1.0,
+            "forecast": 3.059023205018258e-07,
+            "reward": -2.4533709176770864
+          },
+          {
+            "action": -0.999,
+            "forecast": 3.082051831973526e-07,
+            "reward": -2.4606265650645
+          },
+          {
+            "action": 0.0,
+            "forecast": 0.0005530843701478336,
+            "reward": -9.92069882437651
+          },
+          {
+            "action": 0.999,
+            "forecast": 0.9925281506571801,
+            "reward": -17.413180850587167
+          },
+          {
+            "action": 1.0,
+            "forecast": 1.0,
+            "reward": -17.420680753952368
+          },
+          {
+            "action": 5.0,
+            "forecast": 1.0,
+            "reward": -17.420680753952368
+          },
+          {
+            "action": -5.0,
+            "forecast": 3.059023205018258e-07,
+            "reward": -2.4533709176770864
+          }
+        ],
+        "pass": true
+      }
+    }
+  },
+  "oos_slabs": [
+    {
+      "start": "2024-06-07",
+      "end": "2026-06-05",
+      "n_test": 500,
+      "n_train": 3607,
+      "qlike": {
+        "rl_ppo": 2.8196813708567263,
+        "har_rv": 2.2872436695716867,
+        "gjr_garch": 1.636715301043875,
+        "rolling_22d": 1.7978184030000743
+      },
+      "dm": {
+        "rl_vs_har_rv": {
+          "t_stat": 12.011760360417746,
+          "p_value": 0.0,
+          "n": 500,
+          "interpretation": "baseline_better (positive t => baseline lower QLIKE)"
+        },
+        "rl_vs_gjr_garch": {
+          "t_stat": 10.008499419597978,
+          "p_value": 0.0,
+          "n": 500,
+          "interpretation": "baseline_better (positive t => baseline lower QLIKE)"
+        },
+        "rl_vs_rolling_22d": {
+          "t_stat": 6.559363589681596,
+          "p_value": 1.3536460841123699e-10,
+          "n": 500,
+          "interpretation": "baseline_better (positive t => baseline lower QLIKE)"
+        }
+      }
+    }
+  ],
+  "baselines": {
+    "har_rv": {
+      "spec": "Corsi (2009) HAR-RV, no exogenous, log-RV + lognormal bias correction",
+      "params": {
+        "beta": [
+          -3.466632547058761,
+          -0.049708177588002785,
+          0.31167576228447885,
+          0.4251994942967638
+        ],
+        "sigma_resid": 2.469643259701596
+      },
+      "qlike": 2.2872436695716867
+    },
+    "gjr_garch": {
+      "spec": "GJR-GARCH(1,1,1) Normal, recursive 1-step OOS",
+      "params": {
+        "omega": 1.583511540374276e-06,
+        "alpha": 0.030998803891120863,
+        "gamma": 0.051664672991790464,
+        "beta": 0.9199760713709841,
+        "persistence": 0.9768072117580002
+      },
+      "qlike": 1.636715301043875
+    },
+    "rolling_22d": {
+      "spec": "mean of last 22 daily squared returns",
+      "qlike": 1.7978184030000743
+    }
+  },
+  "rl": {
+    "algo": "PPO",
+    "seeds_in_smoke": [
+      0
+    ],
+    "qlike_mean": 2.8196813708567263
+  },
+  "wall_time_smoke_seconds": 5.0,
+  "full_run_walltime_estimate_hours_naive_linear": 0.3,
+  "full_run_walltime_estimate_note": "Naive linear extrapolation from a 25k-step smoke run UNDERESTIMATES the full run: SB3 per-call overhead, baseline refits every 250 days, and longer 200k-step training dynamics do not scale linearly. README \u00a73.7 budgets ~6-10 hr for the full 6M-step (200k x 6 slabs x 5 seeds) run on M-series CPU; treat that as the planning figure, not the linear-extrapolated number.",
+  "verdict": "SMOKE_PENDING_FULL_RUN",
+  "notes": [
+    "Smoke test draws NO research verdict. Single slab, single seed, reduced PPO steps. Full 6M-step multi-seed run scheduled by main thread after Codex review.",
+    "Data starts 2010 (K1423 parquet) \u2014 full run should source the 2004-2025 span per README \u00a73.1 to cover GFC; the pipeline itself is span-agnostic.",
+    "DM convention: positive t_stat => baseline has lower QLIKE (better); negative => RL better. HLN small-sample correction, h=1."
+  ],
+  "generated_at": "2026-06-23T06:21:00.591608+00:00"
+}
