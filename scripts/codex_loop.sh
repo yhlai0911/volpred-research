@@ -33,6 +33,17 @@ stop_loop() {
   exit 0
 }
 
+# 2026-06-24: `pgrep -f 'scripts/codex_loop.sh'` empirically returns 0 on this
+# host even when `ps -ax` lists 24 live instances (pgrep -f matching is broken
+# here). That silent miss is exactly why the first upgraded loop failed to reap
+# the pre-existing orphans. Detect siblings via ps, which works reliably.
+list_codex_loop_pids() {
+  ps -ax -o pid,command 2>/dev/null \
+    | grep 'scripts/codex_loop.sh' \
+    | grep -v grep \
+    | awk '{print $1}'
+}
+
 acquire_single_instance_lock() {
   if mkdir "$LOCK_DIR" 2>/dev/null; then
     LOCK_ACQUIRED=1
@@ -65,12 +76,13 @@ cleanup_legacy_codex_loop_siblings() {
 
   # 2026-06-23 fix: before the lock existed, closing VSCode terminal windows
   # orphaned loops under PPID=1. The first upgraded loop cleans those up.
-  SIBLINGS=$(pgrep -f 'scripts/codex_loop.sh' 2>/dev/null | grep -vx "$SELF" || true)
+  # Use ps-based detection (list_codex_loop_pids) — pgrep -f is broken here.
+  SIBLINGS=$(list_codex_loop_pids | grep -vx "$SELF" || true)
   if [ -n "$SIBLINGS" ]; then
     echo "[loop] single-instance guard: stopping $(echo "$SIBLINGS" | wc -l | tr -d ' ') existing codex_loop.sh: $(echo "$SIBLINGS" | tr '\n' ' ')"
     for opid in $SIBLINGS; do kill -TERM "$opid" 2>/dev/null; done
     sleep 2
-    for opid in $(pgrep -f 'scripts/codex_loop.sh' 2>/dev/null | grep -vx "$SELF" || true); do kill -KILL "$opid" 2>/dev/null; done
+    for opid in $(list_codex_loop_pids | grep -vx "$SELF" || true); do kill -KILL "$opid" 2>/dev/null; done
   fi
 }
 
