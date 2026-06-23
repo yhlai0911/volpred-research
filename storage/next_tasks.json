@@ -36020,5 +36020,72 @@
     "started_at": "2026-06-23T09:45:33.487438+00:00",
     "completed_at": "2026-06-23T09:50:23.767962+00:00",
     "result": "Updated .claude/skills/admin-ops/references/scheduling.md with a LaunchAgent dual-log diagnosis checklist: launchctl state, plist StandardOutPath/StandardErrorPath wrapper banner, and script-internal log/state outcome separation. Added a STARTED + EXIT trap wrapper banner template with TCC-safe log paths, wall-clock cap, and .venv-Python preference for short launchd jobs."
+  },
+  {
+    "id": "paper_review_mile_6a189e72",
+    "title": "Paper review (Codex 24h-rule): 台股與日股同漲同跌，比你以為的還要黏：5 次嚴格重測全數通過",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_6a189e72 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_6a189e72",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T10:42:07+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T10:42:29.145070+00:00",
+    "claim_session_id": "7bf6f6409f80",
+    "started_at": "2026-06-23T10:42:29.349031+00:00",
+    "completed_at": "2026-06-23T10:45:03.131472+00:00",
+    "result": "Reviewed mile_6a189e72/K1412. Core article numbers match k1412_results.json: corr 0.586, 5 OOS starts, Student-t DM 3.24/3.89/3.66/3.04/3.09, Clayton DM 1.66/1.55/1.70/1.63/1.15, window=1250/refit=63/MC=5000/seed=42. Parent code uses rolling fits on ret[:t] and recursive forecasts with ret[t-1]/x2[t-1]; no same-day lookahead found. Caveat: K1412 stores n_oos_obs=null and HLN n/critical-value details are not directly persisted, so the article's OOS N / ~2.87 threshold claim is not fully auditable from the saved result file alone."
+  },
+  {
+    "id": "paper_review_mile_2849a7b5",
+    "title": "Paper review (Codex 24h-rule): K1417: Stationary Bootstrap 驗證 Paper 三 MDD Retention CI 穩健性 — Gemini Reviewer H2",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_2849a7b5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_2849a7b5",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T10:42:07+00:00"
+  },
+  {
+    "id": "paper_review_mile_daed240a",
+    "title": "Paper review (Codex 24h-rule): 風險模型最怕的不是猜不準平均，而是你以為安全、其實根本沒罩住",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_daed240a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_daed240a",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-23T10:42:07+00:00"
+  },
+  {
+    "id": "experiment_scaffold_k1537",
+    "title": "Experiment scaffold: K1537 (research_program backlog)",
+    "description": "K1537 mentioned in research_program.md but no experiments/k1537/ directory yet. Create three-part scaffold per CLAUDE.md `.claude/rules/experiments.md`: (a) README.md (motivation + method + expected output + lookahead policy), (b) k1537.py initial implementation (with signal.shift(1) + seed), (c) plan placeholder k1537_results.json schema. Do NOT run the experiment — just scaffold + stage for main thread to review.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "diverse_gen",
+    "tags": [
+      "experiment",
+      "scaffold",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T10:42:07+00:00"
   }
 ]
