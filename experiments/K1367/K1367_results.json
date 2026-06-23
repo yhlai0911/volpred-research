@@ -1,0 +1,852 @@
+{
+  "experiment_id": "K1367",
+  "title": "Climate-news duration and green/brown reaction-time proxy for tail risk",
+  "verdict": "NULL_PROXY",
+  "data_sources": {
+    "gdelt_doc_api": {
+      "url": "https://api.gdeltproject.org/api/v2/doc/doc",
+      "mode": "TimelineVolRaw",
+      "query": "(\"climate change\" OR \"climate policy\" OR \"carbon emissions\" OR \"global warming\" OR \"clean energy transition\" OR \"net zero\" OR \"carbon tax\")",
+      "start": "2017-01-01",
+      "end": "2026-06-23",
+      "cache": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/data/gdelt_climate_timeline_raw.json"
+    },
+    "yfinance": {
+      "tickers": [
+        "ICLN",
+        "TAN",
+        "XLE",
+        "XOP",
+        "XLU",
+        "SPY"
+      ],
+      "start": "2017-01-01",
+      "end": "2026-06-23",
+      "cache": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/data/yfinance_ohlcv.csv"
+    }
+  },
+  "methodology": {
+    "seed": 42,
+    "lookahead_guard": "raw event features assigned at feature_date; signal_lagged = signal.shift(1) before target construction",
+    "event_definition": {
+      "core_news_z": 1.5,
+      "active_duration_news_z": 0.5,
+      "duration_proxy": "active news-z cluster length containing at least one core day",
+      "price_response_proxy": "first trading day where cumulative green/brown excess return crosses lagged 60d sigma"
+    },
+    "risk_horizons": {
+      "forward_rv_left_tail_var_es_days": 5,
+      "forward_corr_days": 21
+    },
+    "success_criteria": "At least two positive duration/reaction coefficients must pass Bonferroni p<0.05 and Harvey |t|>=3 across risk targets."
+  },
+  "sample": {
+    "gdelt_rows": 3440,
+    "gdelt_date_start": "2017-01-01",
+    "gdelt_date_end": "2026-06-23",
+    "raw_news_events": 70,
+    "price_rows": 2378,
+    "price_date_start": "2017-01-04",
+    "price_date_end": "2026-06-22",
+    "aligned_events": 69,
+    "event_signal_rows_after_shift": 69
+  },
+  "descriptive_statistics": {
+    "news_event_duration_days": {
+      "count": 69.0,
+      "mean": 10.333333333333334,
+      "std": 8.558907755127652,
+      "min": 1.0,
+      "25%": 4.0,
+      "50%": 7.0,
+      "75%": 14.0,
+      "max": 38.0
+    },
+    "news_event_peak_z": {
+      "count": 69.0,
+      "mean": 2.638861144325848,
+      "std": 1.0435460660888192,
+      "min": 1.5112517795353786,
+      "25%": 1.8402803823070435,
+      "50%": 2.3700986696078545,
+      "75%": 3.0031406184041005,
+      "max": 6.181329683858195
+    },
+    "reaction_gap_abs_days": {
+      "count": 69.0,
+      "mean": 1.4057971014492754,
+      "std": 1.320860243082583,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 1.0,
+      "75%": 2.0,
+      "max": 5.0
+    },
+    "green_response_days": {
+      "count": 69.0,
+      "mean": 1.3768115942028984,
+      "std": 1.4358994852106823,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 1.0,
+      "75%": 2.0,
+      "max": 5.0
+    },
+    "brown_response_days": {
+      "count": 69.0,
+      "mean": 1.6521739130434783,
+      "std": 1.5607887048137452,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 1.0,
+      "75%": 3.0,
+      "max": 5.0
+    }
+  },
+  "regressions": {
+    "green_rv5": {
+      "target": "green_rv5",
+      "n": 69,
+      "status": "ok",
+      "r2": 0.15281566310453742,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.07291272685298095,
+          "se_hac": 0.010777766262182485,
+          "t_hac": 6.765105596028783,
+          "p_hac": 1.3321200492058391e-11
+        },
+        "duration_score_lag1": {
+          "coef": 0.024148079867231158,
+          "se_hac": 0.013420100580505799,
+          "t_hac": 1.7993963400176711,
+          "p_hac": 0.07195600812690066
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": 0.00958805197194578,
+          "se_hac": 0.007239158398013821,
+          "t_hac": 1.324470531626496,
+          "p_hac": 0.1853468236136837
+        },
+        "peak_news_z_lag1": {
+          "coef": -0.023017951203177973,
+          "se_hac": 0.013111049031648343,
+          "t_hac": -1.755614760315187,
+          "p_hac": 0.07915421018977184
+        },
+        "spy_rv21_lag1": {
+          "coef": 0.006993833574525455,
+          "se_hac": 0.008280201847349336,
+          "t_hac": 0.8446453001341176,
+          "p_hac": 0.3983089085423497
+        },
+        "abs_spy_ret_lag1": {
+          "coef": 0.0186204642161915,
+          "se_hac": 0.011427425454262587,
+          "t_hac": 1.6294540087545097,
+          "p_hac": 0.10321694340352863
+        }
+      }
+    },
+    "brown_rv5": {
+      "target": "brown_rv5",
+      "n": 69,
+      "status": "ok",
+      "r2": 0.1353493829781709,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.09618205171967285,
+          "se_hac": 0.017601523214401952,
+          "t_hac": 5.464416377383441,
+          "p_hac": 4.644322488021607e-08
+        },
+        "duration_score_lag1": {
+          "coef": 0.03358552771156015,
+          "se_hac": 0.01984606372805825,
+          "t_hac": 1.6923017164394734,
+          "p_hac": 0.09058846073900646
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": -0.005121489202604088,
+          "se_hac": 0.01575186103252131,
+          "t_hac": -0.32513549935656844,
+          "p_hac": 0.7450785226642735
+        },
+        "peak_news_z_lag1": {
+          "coef": -0.0025080639201285095,
+          "se_hac": 0.012560701799636451,
+          "t_hac": -0.19967546082505527,
+          "p_hac": 0.8417344067014255
+        },
+        "spy_rv21_lag1": {
+          "coef": 0.01027451490338906,
+          "se_hac": 0.016184436046582835,
+          "t_hac": 0.6348392291097724,
+          "p_hac": 0.5255332751419155
+        },
+        "abs_spy_ret_lag1": {
+          "coef": 0.026140522837428834,
+          "se_hac": 0.010761409016718699,
+          "t_hac": 2.4290985313184796,
+          "p_hac": 0.01513641814221561
+        }
+      }
+    },
+    "green_left_tail_loss5": {
+      "target": "green_left_tail_loss5",
+      "n": 69,
+      "status": "ok",
+      "r2": 0.03267842251850561,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.013367991412537136,
+          "se_hac": 0.0032151819344156114,
+          "t_hac": 4.157771375064313,
+          "p_hac": 3.213674043280973e-05
+        },
+        "duration_score_lag1": {
+          "coef": 0.0038111411866930964,
+          "se_hac": 0.004016271373054803,
+          "t_hac": 0.9489252176190267,
+          "p_hac": 0.3426586478061284
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": 0.0008816132197377143,
+          "se_hac": 0.002586828795960612,
+          "t_hac": 0.3408084915068102,
+          "p_hac": 0.7332477574749978
+        },
+        "peak_news_z_lag1": {
+          "coef": -0.0014310013365347947,
+          "se_hac": 0.0039080750134976115,
+          "t_hac": -0.36616526847423303,
+          "p_hac": 0.7142417569203036
+        },
+        "spy_rv21_lag1": {
+          "coef": -0.0013119591880874568,
+          "se_hac": 0.0016083589424706122,
+          "t_hac": -0.8157129316371048,
+          "p_hac": 0.4146643411231098
+        },
+        "abs_spy_ret_lag1": {
+          "coef": -0.0033213215963223876,
+          "se_hac": 0.0022800752154661414,
+          "t_hac": -1.4566719438873303,
+          "p_hac": 0.1452069578965698
+        }
+      }
+    },
+    "brown_left_tail_loss5": {
+      "target": "brown_left_tail_loss5",
+      "n": 69,
+      "status": "ok",
+      "r2": 0.05382204615079933,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.011566673917884506,
+          "se_hac": 0.0012875580534848613,
+          "t_hac": 8.983419339095844,
+          "p_hac": 2.6247989234796497e-19
+        },
+        "duration_score_lag1": {
+          "coef": -0.0017781133885740909,
+          "se_hac": 0.0020631039197212824,
+          "t_hac": -0.861863220546984,
+          "p_hac": 0.38876279037242967
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": -0.001756154208962175,
+          "se_hac": 0.0012444127610427866,
+          "t_hac": -1.4112312762612318,
+          "p_hac": 0.15817643084012623
+        },
+        "peak_news_z_lag1": {
+          "coef": -0.0013021144476808954,
+          "se_hac": 0.0017646854564182116,
+          "t_hac": -0.7378733943463227,
+          "p_hac": 0.46059138794771715
+        },
+        "spy_rv21_lag1": {
+          "coef": -0.0009705919036181504,
+          "se_hac": 0.0009313048129066949,
+          "t_hac": -1.0421849969709023,
+          "p_hac": 0.29732591748823933
+        },
+        "abs_spy_ret_lag1": {
+          "coef": 0.0007412409094307009,
+          "se_hac": 0.002281887218198751,
+          "t_hac": 0.32483678576183656,
+          "p_hac": 0.7453046019783136
+        }
+      }
+    },
+    "green_var5_breach": {
+      "target": "green_var5_breach",
+      "n": 64,
+      "status": "ok",
+      "r2": 0.03345058223903741,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.17187499999999994,
+          "se_hac": 0.04483761030867222,
+          "t_hac": 3.8332774386675315,
+          "p_hac": 0.00012644720453889148
+        },
+        "duration_score_lag1": {
+          "coef": 0.0030773131420749125,
+          "se_hac": 0.07848087094648798,
+          "t_hac": 0.03921099632257104,
+          "p_hac": 0.9687221665822753
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": 0.023174761022901356,
+          "se_hac": 0.040065361520430956,
+          "t_hac": 0.5784238590005885,
+          "p_hac": 0.5629779895971041
+        },
+        "peak_news_z_lag1": {
+          "coef": -0.04384615331142511,
+          "se_hac": 0.0558850264026522,
+          "t_hac": -0.7845778401447485,
+          "p_hac": 0.4327011268348371
+        },
+        "spy_rv21_lag1": {
+          "coef": -0.05055888612548928,
+          "se_hac": 0.027795905682015898,
+          "t_hac": -1.818932856654538,
+          "p_hac": 0.06892167435382611
+        },
+        "abs_spy_ret_lag1": {
+          "coef": 0.005523183102082552,
+          "se_hac": 0.043824258327037346,
+          "t_hac": 0.12603026983060264,
+          "p_hac": 0.8997079637489827
+        }
+      }
+    },
+    "brown_var5_breach": {
+      "target": "brown_var5_breach",
+      "n": 64,
+      "status": "ok",
+      "r2": 0.043064238071515826,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.21874999999999994,
+          "se_hac": 0.0452968048227566,
+          "t_hac": 4.8292589478651795,
+          "p_hac": 1.3704209996870584e-06
+        },
+        "duration_score_lag1": {
+          "coef": -0.04390160027039445,
+          "se_hac": 0.060119082757973646,
+          "t_hac": -0.7302440133215728,
+          "p_hac": 0.4652410435679246
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": 0.017253769448180245,
+          "se_hac": 0.04435937287590804,
+          "t_hac": 0.3889543140397036,
+          "p_hac": 0.6973099425753502
+        },
+        "peak_news_z_lag1": {
+          "coef": 0.10291514768649543,
+          "se_hac": 0.08973187632391277,
+          "t_hac": 1.1469184854108465,
+          "p_hac": 0.2514153119950929
+        },
+        "spy_rv21_lag1": {
+          "coef": -0.018443136135593292,
+          "se_hac": 0.029334121957071507,
+          "t_hac": -0.6287263741039725,
+          "p_hac": 0.5295282084667525
+        },
+        "abs_spy_ret_lag1": {
+          "coef": -0.005655084018919704,
+          "se_hac": 0.06540879720433898,
+          "t_hac": -0.08645754486591548,
+          "p_hac": 0.9311027039397602
+        }
+      }
+    },
+    "green_es_gap5": {
+      "target": "green_es_gap5",
+      "n": 64,
+      "status": "ok",
+      "r2": 0.014807502026170871,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.00025923942040771724,
+          "se_hac": 0.0001252698939187176,
+          "t_hac": 2.0694471137329042,
+          "p_hac": 0.038504149275459816
+        },
+        "duration_score_lag1": {
+          "coef": 4.532504009244784e-05,
+          "se_hac": 0.00021450539807159192,
+          "t_hac": 0.2113002306698149,
+          "p_hac": 0.8326530029386574
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": -4.413319719196334e-06,
+          "se_hac": 0.0001390345897852515,
+          "t_hac": -0.03174260251361198,
+          "p_hac": 0.9746773200977992
+        },
+        "peak_news_z_lag1": {
+          "coef": -5.922118710799101e-05,
+          "se_hac": 0.0001729782819754717,
+          "t_hac": -0.3423619799645632,
+          "p_hac": 0.7320784971571839
+        },
+        "spy_rv21_lag1": {
+          "coef": -0.000141320977631149,
+          "se_hac": 0.00011444514475281392,
+          "t_hac": -1.234835937657148,
+          "p_hac": 0.21689156944965915
+        },
+        "abs_spy_ret_lag1": {
+          "coef": 8.322322100749395e-05,
+          "se_hac": 0.0001758326882548132,
+          "t_hac": 0.47330915447808275,
+          "p_hac": 0.6359926318975314
+        }
+      }
+    },
+    "brown_es_gap5": {
+      "target": "brown_es_gap5",
+      "n": 64,
+      "status": "ok",
+      "r2": 0.02403857317528757,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.0006123479689088749,
+          "se_hac": 0.0002604520166752629,
+          "t_hac": 2.3510970532140796,
+          "p_hac": 0.018718150885404485
+        },
+        "duration_score_lag1": {
+          "coef": -0.00011329881845512973,
+          "se_hac": 0.00021513469020499975,
+          "t_hac": -0.5266413257070182,
+          "p_hac": 0.5984426882094414
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": -2.0679511784055222e-05,
+          "se_hac": 0.0002259914116323284,
+          "t_hac": -0.09150574189827747,
+          "p_hac": 0.9270907440048646
+        },
+        "peak_news_z_lag1": {
+          "coef": 0.00031475161319376697,
+          "se_hac": 0.00026397451058359373,
+          "t_hac": 1.1923560820244177,
+          "p_hac": 0.23312165304131627
+        },
+        "spy_rv21_lag1": {
+          "coef": -0.00013941273183897045,
+          "se_hac": 9.973408540259201e-05,
+          "t_hac": -1.3978443906735543,
+          "p_hac": 0.16215980081366843
+        },
+        "abs_spy_ret_lag1": {
+          "coef": 0.0002446845711922303,
+          "se_hac": 0.0003599400026975746,
+          "t_hac": 0.6797926581053478,
+          "p_hac": 0.4966357561084378
+        }
+      }
+    },
+    "green_brown_corr_spike21": {
+      "target": "green_brown_corr_spike21",
+      "n": 69,
+      "status": "ok",
+      "r2": 0.01383610424390358,
+      "predictors_scaled": "All non-constant regressors standardized within the regression sample.",
+      "coefs": {
+        "const": {
+          "coef": 0.003949025678386713,
+          "se_hac": 0.03417075349585286,
+          "t_hac": 0.11556741582728013,
+          "p_hac": 0.9079953882301346
+        },
+        "duration_score_lag1": {
+          "coef": -0.03257856925029691,
+          "se_hac": 0.037782553227658416,
+          "t_hac": -0.8622648939047356,
+          "p_hac": 0.38854176651636896
+        },
+        "reaction_gap_abs_lag1": {
+          "coef": 0.010016206429479396,
+          "se_hac": 0.023055579299363395,
+          "t_hac": 0.4344374218242246,
+          "p_hac": 0.6639708280404855
+        },
+        "peak_news_z_lag1": {
+          "coef": 0.008846855583185917,
+          "se_hac": 0.02904011483752895,
+          "t_hac": 0.30464258260277266,
+          "p_hac": 0.7606383843924964
+        },
+        "spy_rv21_lag1": {
+          "coef": 0.0013290232959610286,
+          "se_hac": 0.023083127395432154,
+          "t_hac": 0.05757553009147386,
+          "p_hac": 0.9540867414891752
+        },
+        "abs_spy_ret_lag1": {
+          "coef": -0.007974843481038092,
+          "se_hac": 0.03279882738015775,
+          "t_hac": -0.24314416453384,
+          "p_hac": 0.8078937192122204
+        }
+      }
+    }
+  },
+  "event_diagnostics": {
+    "green_rv5": {
+      "status": "ok",
+      "top_n": 23,
+      "bottom_n": 23,
+      "top_mean": 0.09301759750866208,
+      "bottom_mean": 0.05468655670969382,
+      "diff": 0.038331040798968256,
+      "welch_t": 1.304946773857347,
+      "welch_p": 0.1994578539949511,
+      "bootstrap_ci95": [
+        -0.013104338453719357,
+        0.09562591060914037
+      ],
+      "bootstrap_reps": 1000
+    },
+    "brown_rv5": {
+      "status": "ok",
+      "top_n": 23,
+      "bottom_n": 23,
+      "top_mean": 0.1033396251247856,
+      "bottom_mean": 0.0923220450214031,
+      "diff": 0.011017580103382496,
+      "welch_t": 0.22350131822482433,
+      "welch_p": 0.824555960067046,
+      "bootstrap_ci95": [
+        -0.09727127118189208,
+        0.0915978414830649
+      ],
+      "bootstrap_reps": 1000
+    },
+    "green_left_tail_loss5": {
+      "status": "ok",
+      "top_n": 23,
+      "bottom_n": 23,
+      "top_mean": 0.01821579159811387,
+      "bottom_mean": 0.013945280158802482,
+      "diff": 0.004270511439311387,
+      "welch_t": 0.5376162763308312,
+      "welch_p": 0.5939950441102567,
+      "bootstrap_ci95": [
+        -0.009637755471247213,
+        0.020133913550355684
+      ],
+      "bootstrap_reps": 1000
+    },
+    "brown_left_tail_loss5": {
+      "status": "ok",
+      "top_n": 23,
+      "bottom_n": 23,
+      "top_mean": 0.008256760664405944,
+      "bottom_mean": 0.015306901923215549,
+      "diff": -0.007050141258809605,
+      "welch_t": -1.6081217161988464,
+      "welch_p": 0.11517896145795059,
+      "bootstrap_ci95": [
+        -0.015549002017742447,
+        0.0016339330934680718
+      ],
+      "bootstrap_reps": 1000
+    },
+    "green_var5_breach": {
+      "status": "ok",
+      "top_n": 22,
+      "bottom_n": 20,
+      "top_mean": 0.22727272727272727,
+      "bottom_mean": 0.15,
+      "diff": 0.07727272727272727,
+      "welch_t": 0.6293916547339699,
+      "welch_p": 0.5326839112694294,
+      "bootstrap_ci95": [
+        -0.1590909090909091,
+        0.31363636363636366
+      ],
+      "bootstrap_reps": 1000
+    },
+    "brown_var5_breach": {
+      "status": "ok",
+      "top_n": 22,
+      "bottom_n": 20,
+      "top_mean": 0.2727272727272727,
+      "bottom_mean": 0.3,
+      "diff": -0.027272727272727282,
+      "welch_t": -0.19049152779125106,
+      "welch_p": 0.8499033759787039,
+      "bootstrap_ci95": [
+        -0.3090909090909091,
+        0.25909090909090915
+      ],
+      "bootstrap_reps": 1000
+    },
+    "green_es_gap5": {
+      "status": "ok",
+      "top_n": 22,
+      "bottom_n": 20,
+      "top_mean": 0.0005370181742891645,
+      "bottom_mean": 0.00023884615358661464,
+      "diff": 0.00029817202070254984,
+      "welch_t": 0.6762537427034578,
+      "welch_p": 0.5032829033453928,
+      "bootstrap_ci95": [
+        -0.0004776923071732293,
+        0.0011076543183149976
+      ],
+      "bootstrap_reps": 1000
+    },
+    "brown_es_gap5": {
+      "status": "ok",
+      "top_n": 22,
+      "bottom_n": 20,
+      "top_mean": 0.0005575241277303827,
+      "bottom_mean": 0.001043090210010614,
+      "diff": -0.00048556608228023123,
+      "welch_t": -0.5732749153962886,
+      "welch_p": 0.5707454900573738,
+      "bootstrap_ci95": [
+        -0.002086624147265486,
+        0.0010419623119590094
+      ],
+      "bootstrap_reps": 1000
+    },
+    "green_brown_corr_spike21": {
+      "status": "ok",
+      "top_n": 23,
+      "bottom_n": 23,
+      "top_mean": -0.04203920297772975,
+      "bottom_mean": -0.010415267773620625,
+      "diff": -0.031623935204109124,
+      "welch_t": -0.36759517768270156,
+      "welch_p": 0.715003623941745,
+      "bootstrap_ci95": [
+        -0.19677446430262188,
+        0.12854076185672653
+      ],
+      "bootstrap_reps": 1000
+    }
+  },
+  "multiple_testing": {
+    "total_main_tests": 18,
+    "rows": [
+      {
+        "target": "green_rv5",
+        "predictor": "duration_score_lag1",
+        "coef": 0.024148079867231158,
+        "t_hac": 1.7993963400176711,
+        "p_hac": 0.07195600812690066,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_rv5",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": 0.00958805197194578,
+        "t_hac": 1.324470531626496,
+        "p_hac": 0.1853468236136837,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "brown_rv5",
+        "predictor": "duration_score_lag1",
+        "coef": 0.03358552771156015,
+        "t_hac": 1.6923017164394734,
+        "p_hac": 0.09058846073900646,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "brown_rv5",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": -0.005121489202604088,
+        "t_hac": -0.32513549935656844,
+        "p_hac": 0.7450785226642735,
+        "p_bonferroni": 1.0,
+        "expected_positive": false,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_left_tail_loss5",
+        "predictor": "duration_score_lag1",
+        "coef": 0.0038111411866930964,
+        "t_hac": 0.9489252176190267,
+        "p_hac": 0.3426586478061284,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_left_tail_loss5",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": 0.0008816132197377143,
+        "t_hac": 0.3408084915068102,
+        "p_hac": 0.7332477574749978,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "brown_left_tail_loss5",
+        "predictor": "duration_score_lag1",
+        "coef": -0.0017781133885740909,
+        "t_hac": -0.861863220546984,
+        "p_hac": 0.38876279037242967,
+        "p_bonferroni": 1.0,
+        "expected_positive": false,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "brown_left_tail_loss5",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": -0.001756154208962175,
+        "t_hac": -1.4112312762612318,
+        "p_hac": 0.15817643084012623,
+        "p_bonferroni": 1.0,
+        "expected_positive": false,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_var5_breach",
+        "predictor": "duration_score_lag1",
+        "coef": 0.0030773131420749125,
+        "t_hac": 0.03921099632257104,
+        "p_hac": 0.9687221665822753,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_var5_breach",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": 0.023174761022901356,
+        "t_hac": 0.5784238590005885,
+        "p_hac": 0.5629779895971041,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "brown_var5_breach",
+        "predictor": "duration_score_lag1",
+        "coef": -0.04390160027039445,
+        "t_hac": -0.7302440133215728,
+        "p_hac": 0.4652410435679246,
+        "p_bonferroni": 1.0,
+        "expected_positive": false,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "brown_var5_breach",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": 0.017253769448180245,
+        "t_hac": 0.3889543140397036,
+        "p_hac": 0.6973099425753502,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_es_gap5",
+        "predictor": "duration_score_lag1",
+        "coef": 4.532504009244784e-05,
+        "t_hac": 0.2113002306698149,
+        "p_hac": 0.8326530029386574,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_es_gap5",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": -4.413319719196334e-06,
+        "t_hac": -0.03174260251361198,
+        "p_hac": 0.9746773200977992,
+        "p_bonferroni": 1.0,
+        "expected_positive": false,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "brown_es_gap5",
+        "predictor": "duration_score_lag1",
+        "coef": -0.00011329881845512973,
+        "t_hac": -0.5266413257070182,
+        "p_hac": 0.5984426882094414,
+        "p_bonferroni": 1.0,
+        "expected_positive": false,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "brown_es_gap5",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": -2.0679511784055222e-05,
+        "t_hac": -0.09150574189827747,
+        "p_hac": 0.9270907440048646,
+        "p_bonferroni": 1.0,
+        "expected_positive": false,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_brown_corr_spike21",
+        "predictor": "duration_score_lag1",
+        "coef": -0.03257856925029691,
+        "t_hac": -0.8622648939047356,
+        "p_hac": 0.38854176651636896,
+        "p_bonferroni": 1.0,
+        "expected_positive": false,
+        "harvey_t_ge_3": false
+      },
+      {
+        "target": "green_brown_corr_spike21",
+        "predictor": "reaction_gap_abs_lag1",
+        "coef": 0.010016206429479396,
+        "t_hac": 0.4344374218242246,
+        "p_hac": 0.6639708280404855,
+        "p_bonferroni": 1.0,
+        "expected_positive": true,
+        "harvey_t_ge_3": false
+      }
+    ],
+    "strong_positive_bonferroni_tests": [],
+    "weak_positive_harvey_tests": [],
+    "verdict": "NULL_PROXY"
+  },
+  "outputs": {
+    "event_features_csv": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_event_features.csv",
+    "model_panel_csv": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_model_panel.csv",
+    "news_duration_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_news_duration_events.png",
+    "coefficient_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_coefficients.png",
+    "event_diagnostic_figure": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1367/K1367_event_diagnostics.png"
+  },
+  "limitations": [
+    "ETF baskets are public daily proxies, not firm-level green/brown portfolios.",
+    "GDELT keyword counts measure news attention, not validated climate-event content or sentiment.",
+    "Duration/decay is known only after the news cluster ends; the test is a lagged risk-prior diagnostic.",
+    "Daily ETF prices cannot test the intraday ACD-GARCH mechanism in Fahmy (2025).",
+    "A null proxy result cannot reject company-level or intraday climate-news response-time evidence."
+  ]
+}
