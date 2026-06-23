@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-23T12:03:52Z",
-  "timestamp_tw": "2026-06-23T20:03:52+08:00",
+  "timestamp": "2026-06-23T18:03:15Z",
+  "timestamp_tw": "2026-06-24T02:03:15+08:00",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "total drafts=129 (general=78, research=51). Both above thresholds (total>=12, general>=8, research>=4)."
+      "detail": "Total drafts=129 (general=78, research=51). All above thresholds (total>=12, general>=8, research>=4)."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
@@ -16,17 +16,17 @@
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines of docs/error_log.md: most recent entries dated 2026-06-03. No entries from today (2026-06-23) or yesterday (2026-06-22)."
+      "detail": "Last 30 lines of docs/error_log.md checked. Most recent entries dated 2026-06-03. No entries from 2026-06-23 or 2026-06-24 (Taiwan time)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "Checked 15 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier, _market_daily). No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "Checked 5 strategies (slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix). No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean."
+      "detail": "0 uncommitted files. Working tree is clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
