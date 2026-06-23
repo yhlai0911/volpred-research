@@ -1,0 +1,2262 @@
+{
+  "experiment_id": "k1544_prg_fair_info_gjr",
+  "title": "PRG v6 fair-information GJR-X current-overnight benchmark across six markets",
+  "created_at": "2026-06-23T22:09:24.434040+00:00",
+  "random_seed": 1544,
+  "research_question": "Does PRG still beat a GJR-X benchmark that receives the current-day overnight realization at the day-d open, rather than lagged overnight?",
+  "method_summary": {
+    "fair_gjr_equation": "h_t = omega + alpha*r_c2c[t-1]^2 + gamma*I(r_c2c[t-1]<0)*r_c2c[t-1]^2 + beta*h[t-1] + delta*x_overnight[t]",
+    "no_lookahead_guard": "At OOS t, fit uses observations < t; forecast may use x_overnight[t] only because it is realized at the market open. It never uses r_c2c[t] or target[t].",
+    "loss": "QLIKE on common full-day variance target",
+    "dm_orientation": "DM t is computed on fair-GJR loss minus PRG loss; positive favors PRG.",
+    "harvey_threshold": "|t| > 3.0"
+  },
+  "markets": {
+    "SPY": {
+      "market": "SPY",
+      "metadata": {
+        "data_source": "yfinance via k880 load_spy_data",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "IS through 2018-12-31",
+        "n_total": 6601,
+        "n_is": 4778,
+        "n_oos": 1823,
+        "period": "2000-01-04 to 2026-04-02",
+        "overnight_variance_share_pct": 34.466444673080275,
+        "prg_refit_freq_days": 126
+      },
+      "oos_period": {
+        "start": "2019-01-02",
+        "end": "2026-04-02",
+        "n_oos": 1823,
+        "n_common_valid": 1823
+      },
+      "qlike": {
+        "PRG_Extended": 0.7490117483816979,
+        "FairInfo_GJR_X_CurrentON": 0.7294141219166189,
+        "prg_advantage_pct_vs_fair_gjr": -2.6867626875092587,
+        "winner": "FairInfo_GJR_X_CurrentON"
+      },
+      "dm_fair_gjr_minus_prg": {
+        "t_stat": -1.7191260880381753,
+        "p_value": 0.08576126706477716,
+        "n": 1823,
+        "max_lag": 12,
+        "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
+        "harvey_pass_abs_t_gt_3": false
+      },
+      "forecast_diagnostics": {
+        "PRG_Extended_valid_oos": 1823,
+        "FairInfo_GJR_X_CurrentON_valid_oos": 1823,
+        "FairInfo_GJR_X_CurrentON": {
+          "model": "FairInfo_GJR_X_CurrentON",
+          "equation": "h_t = omega + alpha*r_c2c[t-1]^2 + gamma*I(r_c2c[t-1]<0)*r_c2c[t-1]^2 + beta*h[t-1] + delta*x_overnight[t]",
+          "refit_freq_days": 63,
+          "n_starts": 5,
+          "n_refits": 29,
+          "refits": [
+            {
+              "t": 4778,
+              "date": "2019-01-02",
+              "n_train": 4778,
+              "neg_loglik": -20100.30614587234,
+              "params": {
+                "omega": 2.487864414829698e-06,
+                "alpha": 0.0,
+                "gamma": 0.2144824191097555,
+                "beta": 0.7759843780981085,
+                "delta_current_overnight": 0.36333903376488563
+              }
+            },
+            {
+              "t": 4841,
+              "date": "2019-04-03",
+              "n_train": 4841,
+              "neg_loglik": -20303.697958041044,
+              "params": {
+                "omega": 1.2816860872436548e-05,
+                "alpha": 0.15462219467271346,
+                "gamma": 0.14391453683484157,
+                "beta": 0.3832152013438988,
+                "delta_current_overnight": 0.9744469756610976
+              }
+            },
+            {
+              "t": 4904,
+              "date": "2019-07-03",
+              "n_train": 4904,
+              "neg_loglik": -20636.514291049614,
+              "params": {
+                "omega": 2.9897946667647637e-06,
+                "alpha": 0.02797645989476101,
+                "gamma": 0.09493471873911073,
+                "beta": 0.7500881855381198,
+                "delta_current_overnight": 0.5083495668084177
+              }
+            },
+            {
+              "t": 4967,
+              "date": "2019-10-02",
+              "n_train": 4967,
+              "neg_loglik": -20861.332865309672,
+              "params": {
+                "omega": 2.0714448865565186e-06,
+                "alpha": 0.08554909024044667,
+                "gamma": 0.15787150646631556,
+                "beta": 0.7660120330560362,
+                "delta_current_overnight": 0.2689569507885714
+              }
+            },
+            {
+              "t": 5030,
+              "date": "2020-01-02",
+              "n_train": 5030,
+              "neg_loglik": -21211.026413151372,
+              "params": {
+                "omega": 4.649915444818208e-06,
+                "alpha": 0.05704299188589128,
+                "gamma": 0.33295607495819124,
+                "beta": 0.6061554553532746,
+                "delta_current_overnight": 0.6159903590770897
+              }
+            },
+            {
+              "t": 5093,
+              "date": "2020-04-02",
+              "n_train": 5093,
+              "neg_loglik": -21377.50109928898,
+              "params": {
+                "omega": 2.863890089403916e-06,
+                "alpha": 0.08783814910178858,
+                "gamma": 0.13584662929596455,
+                "beta": 0.7599184805356614,
+                "delta_current_overnight": 0.22368355339360543
+              }
+            },
+            {
+              "t": 5156,
+              "date": "2020-07-02",
+              "n_train": 5156,
+              "neg_loglik": -21660.71908949811,
+              "params": {
+                "omega": 5.033936376771145e-06,
+                "alpha": 0.05152920964183296,
+                "gamma": 0.35526352784955917,
+                "beta": 0.5962473597309913,
+                "delta_current_overnight": 0.6121199424472928
+              }
+            },
+            {
+              "t": 5219,
+              "date": "2020-10-01",
+              "n_train": 5219,
+              "neg_loglik": -21950.814588878406,
+              "params": {
+                "omega": 4.801888048367169e-06,
+                "alpha": 0.0,
+                "gamma": 0.24035876194322944,
+                "beta": 0.6342478940488597,
+                "delta_current_overnight": 0.7608332601609195
+              }
+            },
+            {
+              "t": 5282,
+              "date": "2020-12-31",
+              "n_train": 5282,
+              "neg_loglik": -22209.976236108898,
+              "params": {
+                "omega": 4.166946256909734e-06,
+                "alpha": 0.0,
+                "gamma": 0.20172601568869136,
+                "beta": 0.6594659678062995,
+                "delta_current_overnight": 0.7582842551133637
+              }
+            },
+            {
+              "t": 5345,
+              "date": "2021-04-05",
+              "n_train": 5345,
+              "neg_loglik": -22427.125025528618,
+              "params": {
+                "omega": 1.1672768478097517e-05,
+                "alpha": 0.04207861375604446,
+                "gamma": 0.33159030302381287,
+                "beta": 0.4392796826929617,
+                "delta_current_overnight": 0.8197525858381458
+              }
+            },
+            {
+              "t": 5408,
+              "date": "2021-07-02",
+              "n_train": 5408,
+              "neg_loglik": -22767.64090197937,
+              "params": {
+                "omega": 5.158875480039268e-06,
+                "alpha": 0.0,
+                "gamma": 0.24421607361232703,
+                "beta": 0.6163373869956491,
+                "delta_current_overnight": 0.7987284144101293
+              }
+            },
+            {
+              "t": 5471,
+              "date": "2021-10-01",
+              "n_train": 5471,
+              "neg_loglik": -23031.352854897996,
+              "params": {
+                "omega": 3.605164530934529e-06,
+                "alpha": 0.0575223812009884,
+                "gamma": 0.23189206714179986,
+                "beta": 0.6486507080480447,
+                "delta_current_overnight": 0.6177487079306133
+              }
+            },
+            {
+              "t": 5534,
+              "date": "2021-12-31",
+              "n_train": 5534,
+              "neg_loglik": -23336.409440578147,
+              "params": {
+                "omega": 4.744653249109148e-06,
+                "alpha": 0.0,
+                "gamma": 0.24320552104247023,
+                "beta": 0.620346838145947,
+                "delta_current_overnight": 0.8167186904856449
+              }
+            },
+            {
+              "t": 5597,
+              "date": "2022-04-01",
+              "n_train": 5597,
+              "neg_loglik": -23461.979564499165,
+              "params": {
+                "omega": 2.8982641156444504e-06,
+                "alpha": 0.08685492108696378,
+                "gamma": 0.13491514070516875,
+                "beta": 0.7596607096959523,
+                "delta_current_overnight": 0.22176898920887886
+              }
+            },
+            {
+              "t": 5660,
+              "date": "2022-07-05",
+              "n_train": 5660,
+              "neg_loglik": -23790.667988955534,
+              "params": {
+                "omega": 5.460622640852797e-06,
+                "alpha": 7.742756056400896e-05,
+                "gamma": 0.24366219854639112,
+                "beta": 0.5989431996210254,
+                "delta_current_overnight": 0.8613792077336582
+              }
+            },
+            {
+              "t": 5723,
+              "date": "2022-10-03",
+              "n_train": 5723,
+              "neg_loglik": -24026.46829760621,
+              "params": {
+                "omega": 3.9332211293349666e-06,
+                "alpha": 0.0,
+                "gamma": 0.1977895203002794,
+                "beta": 0.6673791836169606,
+                "delta_current_overnight": 0.7420964472090116
+              }
+            },
+            {
+              "t": 5786,
+              "date": "2023-01-03",
+              "n_train": 5786,
+              "neg_loglik": -24260.79701329232,
+              "params": {
+                "omega": 4.399051871677186e-06,
+                "alpha": 0.0,
+                "gamma": 0.2512399365380289,
+                "beta": 0.6440787722492471,
+                "delta_current_overnight": 0.7316558764781096
+              }
+            },
+            {
+              "t": 5849,
+              "date": "2023-04-04",
+              "n_train": 5849,
+              "neg_loglik": -24404.811003245508,
+              "params": {
+                "omega": 2.8771010101811647e-06,
+                "alpha": 0.08761532349548742,
+                "gamma": 0.13563547404560733,
+                "beta": 0.7598600400626699,
+                "delta_current_overnight": 0.22324968398010037
+              }
+            },
+            {
+              "t": 5912,
+              "date": "2023-07-06",
+              "n_train": 5912,
+              "neg_loglik": -24755.76804416427,
+              "params": {
+                "omega": 4.810750804864769e-06,
+                "alpha": 0.05619921576234292,
+                "gamma": 0.34241640368904214,
+                "beta": 0.5971169812240116,
+                "delta_current_overnight": 0.635658490010921
+              }
+            },
+            {
+              "t": 5975,
+              "date": "2023-10-04",
+              "n_train": 5975,
+              "neg_loglik": -25015.465766540237,
+              "params": {
+                "omega": 3.7951509571281874e-06,
+                "alpha": 0.0939850741753272,
+                "gamma": 0.1672219311660808,
+                "beta": 0.6698661715963932,
+                "delta_current_overnight": 0.4626845077838851
+              }
+            },
+            {
+              "t": 6038,
+              "date": "2024-01-04",
+              "n_train": 6038,
+              "neg_loglik": -25334.491140237966,
+              "params": {
+                "omega": 6.085547930507993e-06,
+                "alpha": 0.0060793623712521545,
+                "gamma": 0.3002117890284058,
+                "beta": 0.6187217779105468,
+                "delta_current_overnight": 0.5880113462053266
+              }
+            },
+            {
+              "t": 6101,
+              "date": "2024-04-05",
+              "n_train": 6101,
+              "neg_loglik": -25636.779815773443,
+              "params": {
+                "omega": 4.493404532210238e-06,
+                "alpha": 0.0,
+                "gamma": 0.24817404616223104,
+                "beta": 0.6441891123239173,
+                "delta_current_overnight": 0.7227028826011292
+              }
+            },
+            {
+              "t": 6164,
+              "date": "2024-07-08",
+              "n_train": 6164,
+              "neg_loglik": -25917.918423325336,
+              "params": {
+                "omega": 3.377202652215427e-06,
+                "alpha": 0.0,
+                "gamma": 0.1758447700274354,
+                "beta": 0.7034558293167796,
+                "delta_current_overnight": 0.6440138685681708
+              }
+            },
+            {
+              "t": 6227,
+              "date": "2024-10-04",
+              "n_train": 6227,
+              "neg_loglik": -26192.645105940348,
+              "params": {
+                "omega": 4.682300631893221e-06,
+                "alpha": 0.0,
+                "gamma": 0.2500711868535303,
+                "beta": 0.6342582526808086,
+                "delta_current_overnight": 0.7448856002931007
+              }
+            },
+            {
+              "t": 6290,
+              "date": "2025-01-06",
+              "n_train": 6290,
+              "neg_loglik": -26464.763729481285,
+              "params": {
+                "omega": 4.817776307794737e-06,
+                "alpha": 0.0,
+                "gamma": 0.24980242049216414,
+                "beta": 0.6302383548730377,
+                "delta_current_overnight": 0.7553679529174947
+              }
+            },
+            {
+              "t": 6353,
+              "date": "2025-04-08",
+              "n_train": 6353,
+              "neg_loglik": -26592.497253461777,
+              "params": {
+                "omega": 3.056178716211973e-06,
+                "alpha": 0.08575534814814922,
+                "gamma": 0.13387346330429575,
+                "beta": 0.7593724844772238,
+                "delta_current_overnight": 0.21962785020761783
+              }
+            },
+            {
+              "t": 6416,
+              "date": "2025-07-10",
+              "n_train": 6416,
+              "neg_loglik": -26944.325229732724,
+              "params": {
+                "omega": 5.613171976775425e-06,
+                "alpha": 0.021467800943192835,
+                "gamma": 0.18498179570313245,
+                "beta": 0.6621241506701154,
+                "delta_current_overnight": 0.5112978559709053
+              }
+            },
+            {
+              "t": 6479,
+              "date": "2025-10-08",
+              "n_train": 6479,
+              "neg_loglik": -27271.48639239948,
+              "params": {
+                "omega": 4.6558490017218116e-06,
+                "alpha": 0.0,
+                "gamma": 0.22065519390438493,
+                "beta": 0.6362813675310782,
+                "delta_current_overnight": 0.7734113193597266
+              }
+            },
+            {
+              "t": 6542,
+              "date": "2026-01-08",
+              "n_train": 6542,
+              "neg_loglik": -27537.560966851714,
+              "params": {
+                "omega": 5.275235043749561e-06,
+                "alpha": 0.0,
+                "gamma": 0.2550324532340152,
+                "beta": 0.6202291163508848,
+                "delta_current_overnight": 0.7522449507181086
+              }
+            }
+          ]
+        }
+      }
+    },
+    "QQQ": {
+      "market": "QQQ",
+      "metadata": {
+        "data_source": "yfinance via k881 load_asset_data(QQQ)",
+        "description": "Tech equity (Nasdaq-100)",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample / 30% OOS",
+        "n_total": 6601,
+        "n_is": 4620,
+        "n_oos": 1981,
+        "period": "2000-01-04 to 2026-04-02",
+        "overnight_variance_share_pct": 27.85989076913823,
+        "prg_refit_freq_days": 252
+      },
+      "oos_period": {
+        "start": "2018-05-16",
+        "end": "2026-04-02",
+        "n_oos": 1981,
+        "n_common_valid": 1981
+      },
+      "qlike": {
+        "PRG_Extended": 0.7648771878495073,
+        "FairInfo_GJR_X_CurrentON": 0.7414264976279146,
+        "prg_advantage_pct_vs_fair_gjr": -3.162915042370321,
+        "winner": "FairInfo_GJR_X_CurrentON"
+      },
+      "dm_fair_gjr_minus_prg": {
+        "t_stat": -1.9976330058883396,
+        "p_value": 0.045893060856625034,
+        "n": 1981,
+        "max_lag": 12,
+        "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
+        "harvey_pass_abs_t_gt_3": false
+      },
+      "forecast_diagnostics": {
+        "PRG_Extended_valid_oos": 1981,
+        "FairInfo_GJR_X_CurrentON_valid_oos": 1981,
+        "FairInfo_GJR_X_CurrentON": {
+          "model": "FairInfo_GJR_X_CurrentON",
+          "equation": "h_t = omega + alpha*r_c2c[t-1]^2 + gamma*I(r_c2c[t-1]<0)*r_c2c[t-1]^2 + beta*h[t-1] + delta*x_overnight[t]",
+          "refit_freq_days": 63,
+          "n_starts": 5,
+          "n_refits": 32,
+          "refits": [
+            {
+              "t": 4620,
+              "date": "2018-05-16",
+              "n_train": 4620,
+              "neg_loglik": -17930.439165432043,
+              "params": {
+                "omega": 3.718020830075474e-06,
+                "alpha": 0.0,
+                "gamma": 0.19595623542091867,
+                "beta": 0.7610215403826655,
+                "delta_current_overnight": 0.527161076860815
+              }
+            },
+            {
+              "t": 4683,
+              "date": "2018-08-15",
+              "n_train": 4683,
+              "neg_loglik": -18204.446519582976,
+              "params": {
+                "omega": 3.6885711696833214e-06,
+                "alpha": 0.0,
+                "gamma": 0.19613004932245343,
+                "beta": 0.7604517482444012,
+                "delta_current_overnight": 0.526363185798129
+              }
+            },
+            {
+              "t": 4746,
+              "date": "2018-11-13",
+              "n_train": 4746,
+              "neg_loglik": -18409.077211680302,
+              "params": {
+                "omega": 5.498838463488433e-06,
+                "alpha": 0.0687783750807444,
+                "gamma": 0.2473241714676516,
+                "beta": 0.6907640746057727,
+                "delta_current_overnight": 0.45165392929372083
+              }
+            },
+            {
+              "t": 4809,
+              "date": "2019-02-15",
+              "n_train": 4809,
+              "neg_loglik": -18672.49655694277,
+              "params": {
+                "omega": 3.793240119396089e-06,
+                "alpha": 0.0,
+                "gamma": 0.19828608895626026,
+                "beta": 0.759036060770328,
+                "delta_current_overnight": 0.5261978611728281
+              }
+            },
+            {
+              "t": 4872,
+              "date": "2019-05-17",
+              "n_train": 4872,
+              "neg_loglik": -18939.412804832577,
+              "params": {
+                "omega": 4.663184272188404e-06,
+                "alpha": 0.0093046924225996,
+                "gamma": 0.19462911113163067,
+                "beta": 0.7157626435872899,
+                "delta_current_overnight": 0.6648381232195437
+              }
+            },
+            {
+              "t": 4935,
+              "date": "2019-08-16",
+              "n_train": 4935,
+              "neg_loglik": -19192.925685944076,
+              "params": {
+                "omega": 3.199838058680199e-06,
+                "alpha": 0.0,
+                "gamma": 0.1718163144519917,
+                "beta": 0.8024178926270326,
+                "delta_current_overnight": 0.3787709021869363
+              }
+            },
+            {
+              "t": 4998,
+              "date": "2019-11-14",
+              "n_train": 4998,
+              "neg_loglik": -19461.23022044715,
+              "params": {
+                "omega": 3.865189556972944e-06,
+                "alpha": 0.0,
+                "gamma": 0.20185213863176427,
+                "beta": 0.7578432427410131,
+                "delta_current_overnight": 0.511198137823495
+              }
+            },
+            {
+              "t": 5061,
+              "date": "2020-02-18",
+              "n_train": 5061,
+              "neg_loglik": -19738.27665883743,
+              "params": {
+                "omega": 3.825179695408136e-06,
+                "alpha": 0.0,
+                "gamma": 0.2045488741882984,
+                "beta": 0.7586983023700608,
+                "delta_current_overnight": 0.49997302017930834
+              }
+            },
+            {
+              "t": 5124,
+              "date": "2020-05-18",
+              "n_train": 5124,
+              "neg_loglik": -19929.323203999553,
+              "params": {
+                "omega": 4.0105452102443125e-06,
+                "alpha": 0.0,
+                "gamma": 0.20682471502471403,
+                "beta": 0.7541693561939986,
+                "delta_current_overnight": 0.5065531449024581
+              }
+            },
+            {
+              "t": 5187,
+              "date": "2020-08-17",
+              "n_train": 5187,
+              "neg_loglik": -20162.03295972928,
+              "params": {
+                "omega": 4.124777763229354e-06,
+                "alpha": 0.0,
+                "gamma": 0.2137255933931526,
+                "beta": 0.7520850862609675,
+                "delta_current_overnight": 0.5022035768248537
+              }
+            },
+            {
+              "t": 5250,
+              "date": "2020-11-13",
+              "n_train": 5250,
+              "neg_loglik": -20383.37200079127,
+              "params": {
+                "omega": 4.316571377326074e-06,
+                "alpha": 0.0,
+                "gamma": 0.20682379710916793,
+                "beta": 0.7423274398651235,
+                "delta_current_overnight": 0.5509988101362238
+              }
+            },
+            {
+              "t": 5313,
+              "date": "2021-02-17",
+              "n_train": 5313,
+              "neg_loglik": -20574.081881344464,
+              "params": {
+                "omega": 1.299495770006553e-05,
+                "alpha": 0.03942692918145592,
+                "gamma": 0.29031600790646933,
+                "beta": 0.5914034366384388,
+                "delta_current_overnight": 0.5412051361046721
+              }
+            },
+            {
+              "t": 5376,
+              "date": "2021-05-18",
+              "n_train": 5376,
+              "neg_loglik": -20878.275860585178,
+              "params": {
+                "omega": 4.530723071789048e-06,
+                "alpha": 0.0,
+                "gamma": 0.21306278075796367,
+                "beta": 0.7422065140209293,
+                "delta_current_overnight": 0.5310049764481707
+              }
+            },
+            {
+              "t": 5439,
+              "date": "2021-08-17",
+              "n_train": 5439,
+              "neg_loglik": -21093.033317885405,
+              "params": {
+                "omega": 1.2825188106087178e-05,
+                "alpha": 0.0394022803790479,
+                "gamma": 0.2907600525823365,
+                "beta": 0.5910334575429665,
+                "delta_current_overnight": 0.5421178995611011
+              }
+            },
+            {
+              "t": 5502,
+              "date": "2021-11-15",
+              "n_train": 5502,
+              "neg_loglik": -21426.912615880377,
+              "params": {
+                "omega": 4.50737856684033e-06,
+                "alpha": 0.0,
+                "gamma": 0.20534838591569057,
+                "beta": 0.7392121366995931,
+                "delta_current_overnight": 0.5520011944336076
+              }
+            },
+            {
+              "t": 5565,
+              "date": "2022-02-15",
+              "n_train": 5565,
+              "neg_loglik": -21653.02969527035,
+              "params": {
+                "omega": 3.818830737943182e-06,
+                "alpha": 0.0,
+                "gamma": 0.18298153695592217,
+                "beta": 0.7775933552545522,
+                "delta_current_overnight": 0.43566164926768997
+              }
+            },
+            {
+              "t": 5628,
+              "date": "2022-05-17",
+              "n_train": 5628,
+              "neg_loglik": -21792.904970658634,
+              "params": {
+                "omega": 1.2909800266544758e-05,
+                "alpha": 0.039538161382476636,
+                "gamma": 0.28831531227163787,
+                "beta": 0.5930708859528808,
+                "delta_current_overnight": 0.5370926003678331
+              }
+            },
+            {
+              "t": 5691,
+              "date": "2022-08-17",
+              "n_train": 5691,
+              "neg_loglik": -22056.86362715887,
+              "params": {
+                "omega": 3.2177845562253605e-06,
+                "alpha": 0.029178053522105167,
+                "gamma": 0.09003654904211844,
+                "beta": 0.7871623009203764,
+                "delta_current_overnight": 0.4609544221422802
+              }
+            },
+            {
+              "t": 5754,
+              "date": "2022-11-15",
+              "n_train": 5754,
+              "neg_loglik": -22284.414415834803,
+              "params": {
+                "omega": 4.207809807979635e-06,
+                "alpha": 0.017707493110454827,
+                "gamma": 0.20433921658185944,
+                "beta": 0.7494361323697447,
+                "delta_current_overnight": 0.4571412388475854
+              }
+            },
+            {
+              "t": 5817,
+              "date": "2023-02-16",
+              "n_train": 5817,
+              "neg_loglik": -22517.096110415718,
+              "params": {
+                "omega": 4.26735647868017e-06,
+                "alpha": 0.0,
+                "gamma": 0.1985217204760261,
+                "beta": 0.7509390402151459,
+                "delta_current_overnight": 0.5241378326035426
+              }
+            },
+            {
+              "t": 5880,
+              "date": "2023-05-18",
+              "n_train": 5880,
+              "neg_loglik": -22769.72766482225,
+              "params": {
+                "omega": 4.276230863583125e-06,
+                "alpha": 0.0,
+                "gamma": 0.19853713962102348,
+                "beta": 0.7511151471768918,
+                "delta_current_overnight": 0.5215238853688873
+              }
+            },
+            {
+              "t": 5943,
+              "date": "2023-08-18",
+              "n_train": 5943,
+              "neg_loglik": -23023.080306534077,
+              "params": {
+                "omega": 4.316537326551935e-06,
+                "alpha": 0.0,
+                "gamma": 0.19513937778898738,
+                "beta": 0.7524822532591894,
+                "delta_current_overnight": 0.519214240891644
+              }
+            },
+            {
+              "t": 6006,
+              "date": "2023-11-16",
+              "n_train": 6006,
+              "neg_loglik": -23271.60514721265,
+              "params": {
+                "omega": 4.04121359197545e-06,
+                "alpha": 0.0008198081659641108,
+                "gamma": 0.18121184870296292,
+                "beta": 0.7476726485275917,
+                "delta_current_overnight": 0.5846524704212299
+              }
+            },
+            {
+              "t": 6069,
+              "date": "2024-02-20",
+              "n_train": 6069,
+              "neg_loglik": -23485.504959344496,
+              "params": {
+                "omega": 4.899987970549626e-06,
+                "alpha": 0.04580806498787425,
+                "gamma": 0.029843462890143193,
+                "beta": 0.7166525883432866,
+                "delta_current_overnight": 0.7877266714720187
+              }
+            },
+            {
+              "t": 6132,
+              "date": "2024-05-20",
+              "n_train": 6132,
+              "neg_loglik": -23799.884896811498,
+              "params": {
+                "omega": 4.364600756159707e-06,
+                "alpha": 0.0,
+                "gamma": 0.19527350167758734,
+                "beta": 0.7524130414862104,
+                "delta_current_overnight": 0.5119531003733804
+              }
+            },
+            {
+              "t": 6195,
+              "date": "2024-08-20",
+              "n_train": 6195,
+              "neg_loglik": -23992.35168087642,
+              "params": {
+                "omega": 3.828052146434784e-06,
+                "alpha": 0.07971785377812204,
+                "gamma": 0.1250124707543794,
+                "beta": 0.7697525925256873,
+                "delta_current_overnight": 0.2854405764058055
+              }
+            },
+            {
+              "t": 6258,
+              "date": "2024-11-18",
+              "n_train": 6258,
+              "neg_loglik": -24228.420765157625,
+              "params": {
+                "omega": 1.3203957698980023e-05,
+                "alpha": 0.03963151453922208,
+                "gamma": 0.28663276366388163,
+                "beta": 0.5944727033327563,
+                "delta_current_overnight": 0.533634015629232
+              }
+            },
+            {
+              "t": 6321,
+              "date": "2025-02-21",
+              "n_train": 6321,
+              "neg_loglik": -24541.467456058166,
+              "params": {
+                "omega": 6.162108062355843e-06,
+                "alpha": 0.006680710690310761,
+                "gamma": 0.21067741940020865,
+                "beta": 0.6925341804000162,
+                "delta_current_overnight": 0.6721751865271066
+              }
+            },
+            {
+              "t": 6384,
+              "date": "2025-05-22",
+              "n_train": 6384,
+              "neg_loglik": -24758.740015764182,
+              "params": {
+                "omega": 5.084774483224301e-06,
+                "alpha": 0.0,
+                "gamma": 0.19751704260557618,
+                "beta": 0.740765878433053,
+                "delta_current_overnight": 0.530703936994077
+              }
+            },
+            {
+              "t": 6447,
+              "date": "2025-08-22",
+              "n_train": 6447,
+              "neg_loglik": -25035.178806181855,
+              "params": {
+                "omega": 5.051966819786274e-06,
+                "alpha": 0.0,
+                "gamma": 0.20038726117934194,
+                "beta": 0.7389110777859856,
+                "delta_current_overnight": 0.5316951334808485
+              }
+            },
+            {
+              "t": 6510,
+              "date": "2025-11-20",
+              "n_train": 6510,
+              "neg_loglik": -25256.165103611896,
+              "params": {
+                "omega": 6.575956576874897e-06,
+                "alpha": 0.058912332602668115,
+                "gamma": 0.24637130337120938,
+                "beta": 0.6823835612614473,
+                "delta_current_overnight": 0.4579339652410242
+              }
+            },
+            {
+              "t": 6573,
+              "date": "2026-02-24",
+              "n_train": 6573,
+              "neg_loglik": -25548.938639758726,
+              "params": {
+                "omega": 5.210905199984077e-06,
+                "alpha": 0.0,
+                "gamma": 0.19859798118881877,
+                "beta": 0.7400030812889465,
+                "delta_current_overnight": 0.5203577524127362
+              }
+            }
+          ]
+        }
+      }
+    },
+    "GLD": {
+      "market": "GLD",
+      "metadata": {
+        "data_source": "yfinance via k881 load_asset_data(GLD)",
+        "description": "Gold ETF (no leverage effect)",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample / 30% OOS",
+        "n_total": 5375,
+        "n_is": 3762,
+        "n_oos": 1613,
+        "period": "2004-11-19 to 2026-04-02",
+        "overnight_variance_share_pct": 53.08619411951982,
+        "prg_refit_freq_days": 252
+      },
+      "oos_period": {
+        "start": "2019-10-31",
+        "end": "2026-04-02",
+        "n_oos": 1613,
+        "n_common_valid": 1613
+      },
+      "qlike": {
+        "PRG_Extended": 0.820410372877124,
+        "FairInfo_GJR_X_CurrentON": 0.5860321649464217,
+        "prg_advantage_pct_vs_fair_gjr": -39.99408598197514,
+        "winner": "FairInfo_GJR_X_CurrentON"
+      },
+      "dm_fair_gjr_minus_prg": {
+        "t_stat": -11.27044964999816,
+        "p_value": 0.0,
+        "n": 1613,
+        "max_lag": 11,
+        "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
+        "harvey_pass_abs_t_gt_3": true
+      },
+      "forecast_diagnostics": {
+        "PRG_Extended_valid_oos": 1613,
+        "FairInfo_GJR_X_CurrentON_valid_oos": 1613,
+        "FairInfo_GJR_X_CurrentON": {
+          "model": "FairInfo_GJR_X_CurrentON",
+          "equation": "h_t = omega + alpha*r_c2c[t-1]^2 + gamma*I(r_c2c[t-1]<0)*r_c2c[t-1]^2 + beta*h[t-1] + delta*x_overnight[t]",
+          "refit_freq_days": 63,
+          "n_starts": 5,
+          "n_refits": 26,
+          "refits": [
+            {
+              "t": 3762,
+              "date": "2019-10-31",
+              "n_train": 3762,
+              "neg_loglik": -15753.93344778076,
+              "params": {
+                "omega": 1.3255096907605629e-05,
+                "alpha": 0.07141100948327612,
+                "gamma": 0.03602379665762319,
+                "beta": 0.2699266793675855,
+                "delta_current_overnight": 1.2438081560976706
+              }
+            },
+            {
+              "t": 3825,
+              "date": "2020-02-03",
+              "n_train": 3825,
+              "neg_loglik": -16054.844171297964,
+              "params": {
+                "omega": 1.3346857016438157e-05,
+                "alpha": 0.0750625568873897,
+                "gamma": 0.0,
+                "beta": 0.28717833830341216,
+                "delta_current_overnight": 1.1446658375337102
+              }
+            },
+            {
+              "t": 3888,
+              "date": "2020-05-04",
+              "n_train": 3888,
+              "neg_loglik": -16295.659789339114,
+              "params": {
+                "omega": 1.3536628794007106e-05,
+                "alpha": 0.07259997859398949,
+                "gamma": 0.0,
+                "beta": 0.2790923821945502,
+                "delta_current_overnight": 1.1777033622802295
+              }
+            },
+            {
+              "t": 3951,
+              "date": "2020-08-03",
+              "n_train": 3951,
+              "neg_loglik": -16564.559725221396,
+              "params": {
+                "omega": 1.1402615050976839e-05,
+                "alpha": 0.03053525528220553,
+                "gamma": 0.0229014402001206,
+                "beta": 0.3244370782833701,
+                "delta_current_overnight": 1.2557031818987616
+              }
+            },
+            {
+              "t": 4014,
+              "date": "2020-10-30",
+              "n_train": 4014,
+              "neg_loglik": -16821.53985490356,
+              "params": {
+                "omega": 1.1546418751705894e-05,
+                "alpha": 0.030487938522452424,
+                "gamma": 0.02286595285555989,
+                "beta": 0.32393434574329727,
+                "delta_current_overnight": 1.2568565101276932
+              }
+            },
+            {
+              "t": 4077,
+              "date": "2021-02-02",
+              "n_train": 4077,
+              "neg_loglik": -17090.74447253948,
+              "params": {
+                "omega": 1.4544338055893168e-05,
+                "alpha": 0.06619541756994295,
+                "gamma": 0.0,
+                "beta": 0.27183010696142695,
+                "delta_current_overnight": 1.1692183770175264
+              }
+            },
+            {
+              "t": 4140,
+              "date": "2021-05-04",
+              "n_train": 4140,
+              "neg_loglik": -17362.281574869947,
+              "params": {
+                "omega": 1.4708917286082351e-05,
+                "alpha": 0.06655297783131844,
+                "gamma": 0.0,
+                "beta": 0.2670959844170583,
+                "delta_current_overnight": 1.1686648856779045
+              }
+            },
+            {
+              "t": 4203,
+              "date": "2021-08-03",
+              "n_train": 4203,
+              "neg_loglik": -17636.483216904748,
+              "params": {
+                "omega": 1.1790541358525422e-05,
+                "alpha": 0.02954435468828325,
+                "gamma": 0.022158265100150613,
+                "beta": 0.31390877136804096,
+                "delta_current_overnight": 1.2798563565499372
+              }
+            },
+            {
+              "t": 4266,
+              "date": "2021-11-01",
+              "n_train": 4266,
+              "neg_loglik": -17921.995786559884,
+              "params": {
+                "omega": 1.4714736265187244e-05,
+                "alpha": 0.06391927580460796,
+                "gamma": 0.0,
+                "beta": 0.26680240433821795,
+                "delta_current_overnight": 1.161137527709531
+              }
+            },
+            {
+              "t": 4329,
+              "date": "2022-02-01",
+              "n_train": 4329,
+              "neg_loglik": -18204.798568034486,
+              "params": {
+                "omega": 1.4735558817362811e-05,
+                "alpha": 0.06277008438795449,
+                "gamma": 0.0,
+                "beta": 0.2653507171735062,
+                "delta_current_overnight": 1.161530606293698
+              }
+            },
+            {
+              "t": 4392,
+              "date": "2022-05-03",
+              "n_train": 4392,
+              "neg_loglik": -18468.525923593923,
+              "params": {
+                "omega": 1.5164132921952185e-05,
+                "alpha": 0.06261889018157044,
+                "gamma": 0.0,
+                "beta": 0.2600328229483465,
+                "delta_current_overnight": 1.160914330931709
+              }
+            },
+            {
+              "t": 4455,
+              "date": "2022-08-03",
+              "n_train": 4455,
+              "neg_loglik": -18742.584829147494,
+              "params": {
+                "omega": 1.5349263743449872e-05,
+                "alpha": 0.062154840247309204,
+                "gamma": 0.0,
+                "beta": 0.2583759914525251,
+                "delta_current_overnight": 1.159641800715956
+              }
+            },
+            {
+              "t": 4518,
+              "date": "2022-11-01",
+              "n_train": 4518,
+              "neg_loglik": -19009.27822566744,
+              "params": {
+                "omega": 1.556585617031464e-05,
+                "alpha": 0.06040110880150362,
+                "gamma": 0.0,
+                "beta": 0.25610887584047437,
+                "delta_current_overnight": 1.1640032240769607
+              }
+            },
+            {
+              "t": 4581,
+              "date": "2023-02-02",
+              "n_train": 4581,
+              "neg_loglik": -19277.637433862266,
+              "params": {
+                "omega": 1.5533271514058532e-05,
+                "alpha": 0.058681099103082876,
+                "gamma": 0.0,
+                "beta": 0.25817376159214706,
+                "delta_current_overnight": 1.1614352275354292
+              }
+            },
+            {
+              "t": 4644,
+              "date": "2023-05-04",
+              "n_train": 4644,
+              "neg_loglik": -19537.372161052703,
+              "params": {
+                "omega": 1.6103643689508252e-05,
+                "alpha": 0.06276311199828474,
+                "gamma": 0.0,
+                "beta": 0.24882392589143726,
+                "delta_current_overnight": 1.165921589289026
+              }
+            },
+            {
+              "t": 4707,
+              "date": "2023-08-04",
+              "n_train": 4707,
+              "neg_loglik": -19820.615206470025,
+              "params": {
+                "omega": 1.64525971903327e-05,
+                "alpha": 0.06219804403613041,
+                "gamma": 0.0,
+                "beta": 0.24359241814229923,
+                "delta_current_overnight": 1.167585811672049
+              }
+            },
+            {
+              "t": 4770,
+              "date": "2023-11-02",
+              "n_train": 4770,
+              "neg_loglik": -20113.937771968463,
+              "params": {
+                "omega": 1.6244815341494816e-05,
+                "alpha": 0.06224832139472622,
+                "gamma": 0.0,
+                "beta": 0.24279178743781013,
+                "delta_current_overnight": 1.1696433944259106
+              }
+            },
+            {
+              "t": 4833,
+              "date": "2024-02-05",
+              "n_train": 4833,
+              "neg_loglik": -20386.54847665317,
+              "params": {
+                "omega": 1.6455817564900275e-05,
+                "alpha": 0.06088306095174861,
+                "gamma": 0.0,
+                "beta": 0.24542244543935302,
+                "delta_current_overnight": 1.155499380803987
+              }
+            },
+            {
+              "t": 4896,
+              "date": "2024-05-06",
+              "n_train": 4896,
+              "neg_loglik": -20661.497102752695,
+              "params": {
+                "omega": 1.6416969524682962e-05,
+                "alpha": 0.0612612747899811,
+                "gamma": 0.0,
+                "beta": 0.24354118271694117,
+                "delta_current_overnight": 1.1589503985274445
+              }
+            },
+            {
+              "t": 4959,
+              "date": "2024-08-06",
+              "n_train": 4959,
+              "neg_loglik": -20920.135940076205,
+              "params": {
+                "omega": 1.6965683991366578e-05,
+                "alpha": 0.06088898505573829,
+                "gamma": 0.0002762322461743499,
+                "beta": 0.2336147387798615,
+                "delta_current_overnight": 1.1748613389680427
+              }
+            },
+            {
+              "t": 5022,
+              "date": "2024-11-04",
+              "n_train": 5022,
+              "neg_loglik": -21197.105593439657,
+              "params": {
+                "omega": 1.7086211719679856e-05,
+                "alpha": 0.06000305009365915,
+                "gamma": 0.0,
+                "beta": 0.23026579392953073,
+                "delta_current_overnight": 1.1803412956643524
+              }
+            },
+            {
+              "t": 5085,
+              "date": "2025-02-06",
+              "n_train": 5085,
+              "neg_loglik": -21464.054804939165,
+              "params": {
+                "omega": 1.7325474186681943e-05,
+                "alpha": 0.058440841076388444,
+                "gamma": 0.0,
+                "beta": 0.22803369180158356,
+                "delta_current_overnight": 1.176548047385777
+              }
+            },
+            {
+              "t": 5148,
+              "date": "2025-05-08",
+              "n_train": 5148,
+              "neg_loglik": -21703.344711236434,
+              "params": {
+                "omega": 1.566126283069042e-05,
+                "alpha": 0.0073836377594198276,
+                "gamma": 0.02169783067916517,
+                "beta": 0.2886617110254701,
+                "delta_current_overnight": 1.197065173096065
+              }
+            },
+            {
+              "t": 5211,
+              "date": "2025-08-08",
+              "n_train": 5211,
+              "neg_loglik": -21976.58406861969,
+              "params": {
+                "omega": 1.7843643964934666e-05,
+                "alpha": 0.05838213038667812,
+                "gamma": 0.0,
+                "beta": 0.22216086290957107,
+                "delta_current_overnight": 1.1692672847153254
+              }
+            },
+            {
+              "t": 5274,
+              "date": "2025-11-06",
+              "n_train": 5274,
+              "neg_loglik": -22234.27513640698,
+              "params": {
+                "omega": 1.807383703765676e-05,
+                "alpha": 0.05809366977539006,
+                "gamma": 0.0,
+                "beta": 0.21771391992522604,
+                "delta_current_overnight": 1.1772664530407895
+              }
+            },
+            {
+              "t": 5337,
+              "date": "2026-02-09",
+              "n_train": 5337,
+              "neg_loglik": -22478.892873410143,
+              "params": {
+                "omega": 1.8311415401232948e-05,
+                "alpha": 0.0571952278662561,
+                "gamma": 0.0,
+                "beta": 0.21649402614909552,
+                "delta_current_overnight": 1.1719340274676484
+              }
+            }
+          ]
+        }
+      }
+    },
+    "EEM": {
+      "market": "EEM",
+      "metadata": {
+        "data_source": "yfinance via k881 load_asset_data(EEM)",
+        "description": "Emerging markets ETF",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample / 30% OOS",
+        "n_total": 5778,
+        "n_is": 4044,
+        "n_oos": 1734,
+        "period": "2003-04-15 to 2026-04-02",
+        "overnight_variance_share_pct": 52.6086109792393,
+        "prg_refit_freq_days": 252
+      },
+      "oos_period": {
+        "start": "2019-05-10",
+        "end": "2026-04-02",
+        "n_oos": 1734,
+        "n_common_valid": 1734
+      },
+      "qlike": {
+        "PRG_Extended": 0.6662672466384173,
+        "FairInfo_GJR_X_CurrentON": 0.533529435049281,
+        "prg_advantage_pct_vs_fair_gjr": -24.879191825072525,
+        "winner": "FairInfo_GJR_X_CurrentON"
+      },
+      "dm_fair_gjr_minus_prg": {
+        "t_stat": -7.79305945088368,
+        "p_value": 1.1102230246251565e-14,
+        "n": 1734,
+        "max_lag": 12,
+        "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
+        "harvey_pass_abs_t_gt_3": true
+      },
+      "forecast_diagnostics": {
+        "PRG_Extended_valid_oos": 1734,
+        "FairInfo_GJR_X_CurrentON_valid_oos": 1734,
+        "FairInfo_GJR_X_CurrentON": {
+          "model": "FairInfo_GJR_X_CurrentON",
+          "equation": "h_t = omega + alpha*r_c2c[t-1]^2 + gamma*I(r_c2c[t-1]<0)*r_c2c[t-1]^2 + beta*h[t-1] + delta*x_overnight[t]",
+          "refit_freq_days": 63,
+          "n_starts": 5,
+          "n_refits": 28,
+          "refits": [
+            {
+              "t": 4044,
+              "date": "2019-05-10",
+              "n_train": 4044,
+              "neg_loglik": -15516.891730707459,
+              "params": {
+                "omega": 2.818820917285429e-05,
+                "alpha": 0.03154174140503779,
+                "gamma": 0.023656312935047663,
+                "beta": 0.33513088448788425,
+                "delta_current_overnight": 1.2311703332809634
+              }
+            },
+            {
+              "t": 4107,
+              "date": "2019-08-09",
+              "n_train": 4107,
+              "neg_loglik": -15792.65779699956,
+              "params": {
+                "omega": 2.9146698376323035e-05,
+                "alpha": 0.024707699329882808,
+                "gamma": 0.1294447500793238,
+                "beta": 0.28966180730421004,
+                "delta_current_overnight": 1.2303402118318216
+              }
+            },
+            {
+              "t": 4170,
+              "date": "2019-11-07",
+              "n_train": 4170,
+              "neg_loglik": -16056.351257394037,
+              "params": {
+                "omega": 2.7272266541868742e-05,
+                "alpha": 0.060171179283093415,
+                "gamma": 0.06457271319272086,
+                "beta": 0.2785139855969098,
+                "delta_current_overnight": 1.3308541057483914
+              }
+            },
+            {
+              "t": 4233,
+              "date": "2020-02-10",
+              "n_train": 4233,
+              "neg_loglik": -16324.373815977577,
+              "params": {
+                "omega": 2.8384422661269676e-05,
+                "alpha": 0.027708115284834172,
+                "gamma": 0.12950354856329882,
+                "beta": 0.28859547757392845,
+                "delta_current_overnight": 1.2117783180333916
+              }
+            },
+            {
+              "t": 4296,
+              "date": "2020-05-11",
+              "n_train": 4296,
+              "neg_loglik": -16526.21476740989,
+              "params": {
+                "omega": 2.509310705605398e-05,
+                "alpha": 0.05516160006376301,
+                "gamma": 0.07534650226143123,
+                "beta": 0.3131098103841885,
+                "delta_current_overnight": 1.2039166947643452
+              }
+            },
+            {
+              "t": 4359,
+              "date": "2020-08-10",
+              "n_train": 4359,
+              "neg_loglik": -16769.27883732459,
+              "params": {
+                "omega": 3.1258668996654594e-05,
+                "alpha": 0.03154226345686587,
+                "gamma": 0.12045441395340413,
+                "beta": 0.25941601579941254,
+                "delta_current_overnight": 1.2300178232715853
+              }
+            },
+            {
+              "t": 4422,
+              "date": "2020-11-06",
+              "n_train": 4422,
+              "neg_loglik": -17019.038141309666,
+              "params": {
+                "omega": 2.8798906512708995e-05,
+                "alpha": 0.06174400672544382,
+                "gamma": 0.06417246840653647,
+                "beta": 0.2480247368186621,
+                "delta_current_overnight": 1.3801318971368406
+              }
+            },
+            {
+              "t": 4485,
+              "date": "2021-02-09",
+              "n_train": 4485,
+              "neg_loglik": -17278.362628973777,
+              "params": {
+                "omega": 3.2060454904644486e-05,
+                "alpha": 0.03180483940814939,
+                "gamma": 0.12075639898905807,
+                "beta": 0.24693720912946288,
+                "delta_current_overnight": 1.233516578199522
+              }
+            },
+            {
+              "t": 4548,
+              "date": "2021-05-11",
+              "n_train": 4548,
+              "neg_loglik": -17527.11392882996,
+              "params": {
+                "omega": 3.3458252776121477e-05,
+                "alpha": 0.06158313969824552,
+                "gamma": 0.09312741623424611,
+                "beta": 0.2114643213073741,
+                "delta_current_overnight": 1.2881745860206106
+              }
+            },
+            {
+              "t": 4611,
+              "date": "2021-08-10",
+              "n_train": 4611,
+              "neg_loglik": -17788.86471303746,
+              "params": {
+                "omega": 3.195984910315623e-05,
+                "alpha": 0.0731529828315297,
+                "gamma": 0.0506318816843616,
+                "beta": 0.22603900772570912,
+                "delta_current_overnight": 1.2792750885878923
+              }
+            },
+            {
+              "t": 4674,
+              "date": "2021-11-08",
+              "n_train": 4674,
+              "neg_loglik": -18058.021370747658,
+              "params": {
+                "omega": 3.176757330812882e-05,
+                "alpha": 0.033191377211177736,
+                "gamma": 0.11793594519438953,
+                "beta": 0.24211500732520438,
+                "delta_current_overnight": 1.2201161232937063
+              }
+            },
+            {
+              "t": 4737,
+              "date": "2022-02-08",
+              "n_train": 4737,
+              "neg_loglik": -18320.619751847014,
+              "params": {
+                "omega": 3.184252064896321e-05,
+                "alpha": 0.03317984504331983,
+                "gamma": 0.1152798466032232,
+                "beta": 0.23710304497975263,
+                "delta_current_overnight": 1.23200252768399
+              }
+            },
+            {
+              "t": 4800,
+              "date": "2022-05-10",
+              "n_train": 4800,
+              "neg_loglik": -18551.0466889234,
+              "params": {
+                "omega": 3.3210989135713565e-05,
+                "alpha": 0.06178277876917622,
+                "gamma": 0.061897419033534185,
+                "beta": 0.2185969563003473,
+                "delta_current_overnight": 1.253057319677987
+              }
+            },
+            {
+              "t": 4863,
+              "date": "2022-08-10",
+              "n_train": 4863,
+              "neg_loglik": -18798.00284314629,
+              "params": {
+                "omega": 3.286397178368189e-05,
+                "alpha": 0.0321336304815284,
+                "gamma": 0.11210255948972984,
+                "beta": 0.23192768455339996,
+                "delta_current_overnight": 1.223967601056026
+              }
+            },
+            {
+              "t": 4926,
+              "date": "2022-11-08",
+              "n_train": 4926,
+              "neg_loglik": -19042.303734284294,
+              "params": {
+                "omega": 3.343758468945497e-05,
+                "alpha": 0.032107033582863286,
+                "gamma": 0.10875593361217901,
+                "beta": 0.22693469467009164,
+                "delta_current_overnight": 1.2255884647650537
+              }
+            },
+            {
+              "t": 4989,
+              "date": "2023-02-09",
+              "n_train": 4989,
+              "neg_loglik": -19296.01684045237,
+              "params": {
+                "omega": 3.3658019477573256e-05,
+                "alpha": 0.032380136216952696,
+                "gamma": 0.10684144860097808,
+                "beta": 0.22307916176094347,
+                "delta_current_overnight": 1.2278671948908393
+              }
+            },
+            {
+              "t": 5052,
+              "date": "2023-05-11",
+              "n_train": 5052,
+              "neg_loglik": -19562.51654965108,
+              "params": {
+                "omega": 3.351560931578742e-05,
+                "alpha": 0.03332743321778421,
+                "gamma": 0.1048503245499289,
+                "beta": 0.22012165551972618,
+                "delta_current_overnight": 1.2279863471900743
+              }
+            },
+            {
+              "t": 5115,
+              "date": "2023-08-11",
+              "n_train": 5115,
+              "neg_loglik": -19824.22337782623,
+              "params": {
+                "omega": 3.351238287627663e-05,
+                "alpha": 0.03359412426562856,
+                "gamma": 0.10361748357200233,
+                "beta": 0.21779333460368713,
+                "delta_current_overnight": 1.2288088051745474
+              }
+            },
+            {
+              "t": 5178,
+              "date": "2023-11-09",
+              "n_train": 5178,
+              "neg_loglik": -20087.10922853255,
+              "params": {
+                "omega": 3.349298585843928e-05,
+                "alpha": 0.03424545138469864,
+                "gamma": 0.10191348097550278,
+                "beta": 0.21740932469474564,
+                "delta_current_overnight": 1.2197197002530102
+              }
+            },
+            {
+              "t": 5241,
+              "date": "2024-02-12",
+              "n_train": 5241,
+              "neg_loglik": -20349.571787691537,
+              "params": {
+                "omega": 2.6729394038872655e-05,
+                "alpha": 0.03279055640095594,
+                "gamma": 0.07350766808126331,
+                "beta": 0.2706737990124289,
+                "delta_current_overnight": 1.2852563464313096
+              }
+            },
+            {
+              "t": 5304,
+              "date": "2024-05-13",
+              "n_train": 5304,
+              "neg_loglik": -20632.185206102968,
+              "params": {
+                "omega": 3.233056826259229e-05,
+                "alpha": 0.03601931066466337,
+                "gamma": 0.1025742632088285,
+                "beta": 0.217293248414974,
+                "delta_current_overnight": 1.2153150380247506
+              }
+            },
+            {
+              "t": 5367,
+              "date": "2024-08-13",
+              "n_train": 5367,
+              "neg_loglik": -20892.3274519279,
+              "params": {
+                "omega": 2.7233945318789828e-05,
+                "alpha": 0.06415033490415663,
+                "gamma": 0.0658116010504866,
+                "beta": 0.21717889671916063,
+                "delta_current_overnight": 1.4101419605033818
+              }
+            },
+            {
+              "t": 5430,
+              "date": "2024-11-11",
+              "n_train": 5430,
+              "neg_loglik": -21160.252430414286,
+              "params": {
+                "omega": 3.198548388365934e-05,
+                "alpha": 0.0368769607089746,
+                "gamma": 0.1012398005437658,
+                "beta": 0.21553536543681992,
+                "delta_current_overnight": 1.2095017571174067
+              }
+            },
+            {
+              "t": 5493,
+              "date": "2025-02-13",
+              "n_train": 5493,
+              "neg_loglik": -21426.546801632492,
+              "params": {
+                "omega": 3.254533306308789e-05,
+                "alpha": 0.0738630141145739,
+                "gamma": 0.02548174918125903,
+                "beta": 0.20049427741397569,
+                "delta_current_overnight": 1.2301052702375177
+              }
+            },
+            {
+              "t": 5556,
+              "date": "2025-05-15",
+              "n_train": 5556,
+              "neg_loglik": -21676.880863704984,
+              "params": {
+                "omega": 2.8204084032330302e-05,
+                "alpha": 0.06741135623459288,
+                "gamma": 0.07772808285012166,
+                "beta": 0.21343284031417073,
+                "delta_current_overnight": 1.295297070485117
+              }
+            },
+            {
+              "t": 5619,
+              "date": "2025-08-15",
+              "n_train": 5619,
+              "neg_loglik": -21952.04341830993,
+              "params": {
+                "omega": 2.542738992891509e-05,
+                "alpha": 0.06558428077699384,
+                "gamma": 0.06723175686023981,
+                "beta": 0.22379332140235397,
+                "delta_current_overnight": 1.3881040870985935
+              }
+            },
+            {
+              "t": 5682,
+              "date": "2025-11-13",
+              "n_train": 5682,
+              "neg_loglik": -22220.220040826767,
+              "params": {
+                "omega": 3.0868546846738935e-05,
+                "alpha": 0.0651270240622005,
+                "gamma": 0.06341756392473344,
+                "beta": 0.2077650715321689,
+                "delta_current_overnight": 1.196425773007311
+              }
+            },
+            {
+              "t": 5745,
+              "date": "2026-02-17",
+              "n_train": 5745,
+              "neg_loglik": -22492.36383993181,
+              "params": {
+                "omega": 3.0448713255591556e-05,
+                "alpha": 0.041203834578865124,
+                "gamma": 0.10319852965211537,
+                "beta": 0.21763378619891366,
+                "delta_current_overnight": 1.1777031992729894
+              }
+            }
+          ]
+        }
+      }
+    },
+    "0050.TW": {
+      "market": "0050.TW",
+      "metadata": {
+        "data_source": "yfinance via k886 load_0050tw_data with clean_tw50_data split fix",
+        "target": "sigma2_fullday = r2_overnight + r2_intra",
+        "split": "70% in-sample / 30% OOS",
+        "n_total": 4217,
+        "n_is": 2951,
+        "n_oos": 1266,
+        "period": "2009-01-05 to 2026-04-02",
+        "overnight_variance_share_pct": 46.14518716093072,
+        "prg_refit_freq_days": 252
+      },
+      "oos_period": {
+        "start": "2021-01-08",
+        "end": "2026-04-02",
+        "n_oos": 1266,
+        "n_common_valid": 1251
+      },
+      "qlike": {
+        "PRG_Extended": 0.7866856001535918,
+        "FairInfo_GJR_X_CurrentON": 0.6133039432977504,
+        "prg_advantage_pct_vs_fair_gjr": -28.27010306236806,
+        "winner": "FairInfo_GJR_X_CurrentON"
+      },
+      "dm_fair_gjr_minus_prg": {
+        "t_stat": -7.251891446951652,
+        "p_value": 7.185363415374013e-13,
+        "n": 1251,
+        "max_lag": 10,
+        "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
+        "harvey_pass_abs_t_gt_3": true
+      },
+      "forecast_diagnostics": {
+        "PRG_Extended_valid_oos": 1266,
+        "FairInfo_GJR_X_CurrentON_valid_oos": 1266,
+        "FairInfo_GJR_X_CurrentON": {
+          "model": "FairInfo_GJR_X_CurrentON",
+          "equation": "h_t = omega + alpha*r_c2c[t-1]^2 + gamma*I(r_c2c[t-1]<0)*r_c2c[t-1]^2 + beta*h[t-1] + delta*x_overnight[t]",
+          "refit_freq_days": 63,
+          "n_starts": 5,
+          "n_refits": 21,
+          "refits": [
+            {
+              "t": 2951,
+              "date": "2021-01-08",
+              "n_train": 2951,
+              "neg_loglik": -12311.6148358382,
+              "params": {
+                "omega": 3.1404208848764e-05,
+                "alpha": 0.08120333187487365,
+                "gamma": 0.0029401832693535996,
+                "beta": 0.15509573291703946,
+                "delta_current_overnight": 1.153458952171329
+              }
+            },
+            {
+              "t": 3014,
+              "date": "2021-04-22",
+              "n_train": 3014,
+              "neg_loglik": -12547.809553759153,
+              "params": {
+                "omega": 3.096080992392591e-05,
+                "alpha": 0.07943996943261082,
+                "gamma": 0.0015805655831368183,
+                "beta": 0.18029473860088877,
+                "delta_current_overnight": 1.1013429773335823
+              }
+            },
+            {
+              "t": 3077,
+              "date": "2021-07-22",
+              "n_train": 3077,
+              "neg_loglik": -12808.706954386462,
+              "params": {
+                "omega": 3.075687731681649e-05,
+                "alpha": 0.07573423875518523,
+                "gamma": 0.010848744066713092,
+                "beta": 0.18181708402124558,
+                "delta_current_overnight": 1.108282731582711
+              }
+            },
+            {
+              "t": 3140,
+              "date": "2021-10-22",
+              "n_train": 3140,
+              "neg_loglik": -13066.322288963966,
+              "params": {
+                "omega": 2.8652778496216452e-05,
+                "alpha": 0.04477011557365365,
+                "gamma": 0.13370801909484972,
+                "beta": 0.23248973762176003,
+                "delta_current_overnight": 0.9419962161803898
+              }
+            },
+            {
+              "t": 3203,
+              "date": "2022-01-20",
+              "n_train": 3203,
+              "neg_loglik": -13353.331265917202,
+              "params": {
+                "omega": 3.063715243878818e-05,
+                "alpha": 0.07382088195713923,
+                "gamma": 0.010176556660510512,
+                "beta": 0.17997411404581648,
+                "delta_current_overnight": 1.122812268349107
+              }
+            },
+            {
+              "t": 3266,
+              "date": "2022-05-04",
+              "n_train": 3266,
+              "neg_loglik": -13608.777593101604,
+              "params": {
+                "omega": 3.100966071556751e-05,
+                "alpha": 0.07437147579926301,
+                "gamma": 0.005335319408007039,
+                "beta": 0.16941899690826936,
+                "delta_current_overnight": 1.1527629606125518
+              }
+            },
+            {
+              "t": 3329,
+              "date": "2022-08-02",
+              "n_train": 3329,
+              "neg_loglik": -13846.367328991853,
+              "params": {
+                "omega": 3.102389403517632e-05,
+                "alpha": 0.07222943364052839,
+                "gamma": 0.02578072069635771,
+                "beta": 0.16913269455847468,
+                "delta_current_overnight": 1.1462540163377894
+              }
+            },
+            {
+              "t": 3392,
+              "date": "2022-11-01",
+              "n_train": 3392,
+              "neg_loglik": -14091.003163403315,
+              "params": {
+                "omega": 3.107285408924136e-05,
+                "alpha": 0.07150764626170923,
+                "gamma": 0.022177572927708545,
+                "beta": 0.17214006643707033,
+                "delta_current_overnight": 1.1297819142902978
+              }
+            },
+            {
+              "t": 3455,
+              "date": "2023-02-09",
+              "n_train": 3455,
+              "neg_loglik": -14341.026019357432,
+              "params": {
+                "omega": 3.112327335518941e-05,
+                "alpha": 0.06993271281075533,
+                "gamma": 0.022503114367571683,
+                "beta": 0.16922658123286197,
+                "delta_current_overnight": 1.1395695038342668
+              }
+            },
+            {
+              "t": 3518,
+              "date": "2023-05-17",
+              "n_train": 3518,
+              "neg_loglik": -14621.952969517644,
+              "params": {
+                "omega": 3.077373542109662e-05,
+                "alpha": 0.06977850533414132,
+                "gamma": 0.02166192568972509,
+                "beta": 0.1678174989852299,
+                "delta_current_overnight": 1.1473857456052976
+              }
+            },
+            {
+              "t": 3581,
+              "date": "2023-08-17",
+              "n_train": 3581,
+              "neg_loglik": -14892.548142449725,
+              "params": {
+                "omega": 3.199507519838285e-05,
+                "alpha": 0.05913609722833292,
+                "gamma": 0.08032003927534112,
+                "beta": 0.13765469229881963,
+                "delta_current_overnight": 1.1774606535370986
+              }
+            },
+            {
+              "t": 3644,
+              "date": "2023-11-17",
+              "n_train": 3644,
+              "neg_loglik": -15168.990131251254,
+              "params": {
+                "omega": 3.09484637061864e-05,
+                "alpha": 0.07008578058234212,
+                "gamma": 0.017020153111936623,
+                "beta": 0.15772897775275913,
+                "delta_current_overnight": 1.1707853573759355
+              }
+            },
+            {
+              "t": 3707,
+              "date": "2024-02-26",
+              "n_train": 3707,
+              "neg_loglik": -15453.45591391342,
+              "params": {
+                "omega": 3.102462476163338e-05,
+                "alpha": 0.07039288985046957,
+                "gamma": 0.018217134611631925,
+                "beta": 0.14663526584925807,
+                "delta_current_overnight": 1.189382133008492
+              }
+            },
+            {
+              "t": 3770,
+              "date": "2024-05-29",
+              "n_train": 3770,
+              "neg_loglik": -15708.83697017408,
+              "params": {
+                "omega": 3.144536501367398e-05,
+                "alpha": 0.06154974339861267,
+                "gamma": 0.05721618892809409,
+                "beta": 0.13685411118797436,
+                "delta_current_overnight": 1.1867986112647155
+              }
+            },
+            {
+              "t": 3833,
+              "date": "2024-08-29",
+              "n_train": 3833,
+              "neg_loglik": -15778.521877811001,
+              "params": {
+                "omega": 1.1373436718446172e-05,
+                "alpha": 0.01729047542526197,
+                "gamma": 0.05687200388357293,
+                "beta": 0.7162014668343792,
+                "delta_current_overnight": 0.22095802981082754
+              }
+            },
+            {
+              "t": 3896,
+              "date": "2024-12-03",
+              "n_train": 3896,
+              "neg_loglik": -16179.413408062741,
+              "params": {
+                "omega": 3.194902731075188e-05,
+                "alpha": 0.06776725281253239,
+                "gamma": 0.02004074773594754,
+                "beta": 0.14367667000766804,
+                "delta_current_overnight": 1.183114990783076
+              }
+            },
+            {
+              "t": 3959,
+              "date": "2025-03-13",
+              "n_train": 3959,
+              "neg_loglik": -16436.693865222536,
+              "params": {
+                "omega": 3.237219309355665e-05,
+                "alpha": 0.06676505596777887,
+                "gamma": 0.021724761548145764,
+                "beta": 0.14043681160747415,
+                "delta_current_overnight": 1.175306511461178
+              }
+            },
+            {
+              "t": 4022,
+              "date": "2025-06-16",
+              "n_train": 4022,
+              "neg_loglik": -16674.59071618921,
+              "params": {
+                "omega": 3.281117271934112e-05,
+                "alpha": 0.06521890440678017,
+                "gamma": 0.024252142948685194,
+                "beta": 0.1363547314834813,
+                "delta_current_overnight": 1.1745175350501458
+              }
+            },
+            {
+              "t": 4085,
+              "date": "2025-09-11",
+              "n_train": 4085,
+              "neg_loglik": -16945.47068675406,
+              "params": {
+                "omega": 3.276021952952476e-05,
+                "alpha": 0.06482010908515637,
+                "gamma": 0.02450112888506043,
+                "beta": 0.13409358798458573,
+                "delta_current_overnight": 1.180648200744366
+              }
+            },
+            {
+              "t": 4148,
+              "date": "2025-12-15",
+              "n_train": 4148,
+              "neg_loglik": -17196.21745006187,
+              "params": {
+                "omega": 3.287453340427469e-05,
+                "alpha": 0.0644934361974578,
+                "gamma": 0.023133408491233905,
+                "beta": 0.13372530701107768,
+                "delta_current_overnight": 1.1801214823110915
+              }
+            },
+            {
+              "t": 4211,
+              "date": "2026-03-26",
+              "n_train": 4211,
+              "neg_loglik": -17434.88649081246,
+              "params": {
+                "omega": 3.289099171858235e-05,
+                "alpha": 0.06469502979364243,
+                "gamma": 0.021774953320801274,
+                "beta": 0.13341581262070165,
+                "delta_current_overnight": 1.18008674217272
+              }
+            }
+          ]
+        }
+      }
+    },
+    "TAIFEX": {
+      "market": "TAIFEX",
+      "metadata": {
+        "data_source": "TAIFEX TX tick files via k883 load_all_rv_data",
+        "target": "rv_fullday = x_overnight + x_intraday",
+        "n_total": 2107,
+        "n_is": 1264,
+        "n_oos": 843,
+        "period": "2017-05-16 to 2025-12-31",
+        "overnight_variance_share_pct": 60.99100156255347,
+        "prg_refit_freq_sessions": 126,
+        "fair_gjr_refit_freq_days": 63
+      },
+      "oos_period": {
+        "start": "2022-07-14",
+        "end": "2025-12-31",
+        "n_oos": 843,
+        "n_common_valid": 843
+      },
+      "qlike": {
+        "PRG_Extended": 0.12093172883376502,
+        "FairInfo_GJR_X_CurrentON": 0.05820674059564027,
+        "prg_advantage_pct_vs_fair_gjr": -107.7624130749264,
+        "winner": "FairInfo_GJR_X_CurrentON"
+      },
+      "dm_fair_gjr_minus_prg": {
+        "t_stat": -6.298591267441017,
+        "p_value": 4.834230793449024e-10,
+        "n": 843,
+        "max_lag": 9,
+        "orientation": "positive t_stat means FairInfo_GJR_X_CurrentON loss > PRG_Extended loss, favoring PRG",
+        "harvey_pass_abs_t_gt_3": true
+      },
+      "forecast_diagnostics": {
+        "PRG_Extended_valid_oos": 843,
+        "FairInfo_GJR_X_CurrentON_valid_oos": 843,
+        "FairInfo_GJR_X_CurrentON": {
+          "model": "FairInfo_GJR_X_CurrentON",
+          "equation": "h_t = omega + alpha*r_c2c[t-1]^2 + gamma*I(r_c2c[t-1]<0)*r_c2c[t-1]^2 + beta*h[t-1] + delta*x_overnight[t]",
+          "refit_freq_days": 63,
+          "n_starts": 5,
+          "n_refits": 14,
+          "refits": [
+            {
+              "t": 1264,
+              "date": "2022-07-14",
+              "n_train": 1264,
+              "neg_loglik": -5347.437563036136,
+              "params": {
+                "omega": 1.5445570045972603e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.22037179170841245,
+                "delta_current_overnight": 1.4345608553971645
+              }
+            },
+            {
+              "t": 1327,
+              "date": "2022-10-13",
+              "n_train": 1327,
+              "neg_loglik": -5597.982602414799,
+              "params": {
+                "omega": 1.726759583454146e-05,
+                "alpha": 0.0,
+                "gamma": 0.009383679071816585,
+                "beta": 0.1789899785544455,
+                "delta_current_overnight": 1.44466433556321
+              }
+            },
+            {
+              "t": 1390,
+              "date": "2023-01-11",
+              "n_train": 1390,
+              "neg_loglik": -5845.5246785132895,
+              "params": {
+                "omega": 1.6595285957103682e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.1880110017986234,
+                "delta_current_overnight": 1.4644986495560148
+              }
+            },
+            {
+              "t": 1453,
+              "date": "2023-04-27",
+              "n_train": 1453,
+              "neg_loglik": -6117.740918634222,
+              "params": {
+                "omega": 1.711472030310675e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.1805006631019863,
+                "delta_current_overnight": 1.4338451774943934
+              }
+            },
+            {
+              "t": 1516,
+              "date": "2023-07-28",
+              "n_train": 1516,
+              "neg_loglik": -6390.24337951592,
+              "params": {
+                "omega": 1.7543488270343782e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.17669484125601911,
+                "delta_current_overnight": 1.4332657956445596
+              }
+            },
+            {
+              "t": 1579,
+              "date": "2023-10-31",
+              "n_train": 1579,
+              "neg_loglik": -6659.010790941188,
+              "params": {
+                "omega": 1.7823547155672674e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.1703501023919,
+                "delta_current_overnight": 1.4359309657664567
+              }
+            },
+            {
+              "t": 1642,
+              "date": "2024-01-29",
+              "n_train": 1642,
+              "neg_loglik": -6941.378887139276,
+              "params": {
+                "omega": 1.7583990955265427e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.1708172355457029,
+                "delta_current_overnight": 1.423542243897016
+              }
+            },
+            {
+              "t": 1705,
+              "date": "2024-05-10",
+              "n_train": 1705,
+              "neg_loglik": -7201.2972696559555,
+              "params": {
+                "omega": 1.8173388112237024e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.14291041676350985,
+                "delta_current_overnight": 1.4981616376591702
+              }
+            },
+            {
+              "t": 1768,
+              "date": "2024-08-12",
+              "n_train": 1768,
+              "neg_loglik": -7436.232720323264,
+              "params": {
+                "omega": 1.852623332155965e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.11515144500678735,
+                "delta_current_overnight": 1.601747460764656
+              }
+            },
+            {
+              "t": 1831,
+              "date": "2024-11-14",
+              "n_train": 1831,
+              "neg_loglik": -7681.658690645967,
+              "params": {
+                "omega": 1.9952582112244466e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.08657346344799191,
+                "delta_current_overnight": 1.6068645821753986
+              }
+            },
+            {
+              "t": 1894,
+              "date": "2025-02-21",
+              "n_train": 1894,
+              "neg_loglik": -7935.991413512152,
+              "params": {
+                "omega": 2.0041131016098103e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.09314448789185074,
+                "delta_current_overnight": 1.5631932035748997
+              }
+            },
+            {
+              "t": 1957,
+              "date": "2025-05-28",
+              "n_train": 1957,
+              "neg_loglik": -8170.09757370917,
+              "params": {
+                "omega": 2.0785561963496e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.08677438901604118,
+                "delta_current_overnight": 1.5365870436774063
+              }
+            },
+            {
+              "t": 2020,
+              "date": "2025-08-26",
+              "n_train": 2020,
+              "neg_loglik": -8425.069289225536,
+              "params": {
+                "omega": 2.1525205760610906e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.08043781559383291,
+                "delta_current_overnight": 1.5383991700532174
+              }
+            },
+            {
+              "t": 2083,
+              "date": "2025-11-27",
+              "n_train": 2083,
+              "neg_loglik": -8675.740228642222,
+              "params": {
+                "omega": 2.192135511123061e-05,
+                "alpha": 0.0,
+                "gamma": 0.0,
+                "beta": 0.07567551222019797,
+                "delta_current_overnight": 1.5364953766157268
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "references": [
+    "Bollerslev and Ghysels (1996), Periodic autoregressive conditional heteroskedasticity.",
+    "Patton (2011), Volatility forecast comparison using imperfect volatility proxies.",
+    "Diebold and Mariano (1995), Comparing predictive accuracy.",
+    "Harvey, Leybourne, and Newbold (1997), Testing equality of prediction mean squared errors.",
+    "Harvey, Liu, and Zhu (2016), ...and the cross-section of expected returns.",
+    "Linton and Wu (2020), A coupled component DCS-EGARCH model for intraday and overnight volatility.",
+    "Opschoor and Lucas (2021), Observation-driven models for realized variances and overnight returns.",
+    "Todorova and Soucek (2014), Overnight information flow and realized volatility forecasting."
+  ],
+  "runtime_seconds": 69.9907660484314
+}

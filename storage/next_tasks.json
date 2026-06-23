@@ -36675,7 +36675,7 @@
     "id": "experiment_prg_v6_fair_info_gjr_six_markets",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "title": "[experiment] PRG v6 BLOCKING #2 — fair-information GJR-type benchmark across all six markets",
     "description": "Build and estimate a GJR-type benchmark that, like PRG h_{d,1}, conditions on the current-day overnight realization r²_{d,0} at the day-d open (NOT lagged overnight). Apply to all six markets (TAIFEX, SPY, QQQ, GLD, EEM, 0050.TW). Report OOS QLIKE + DM(PRG vs fair-GJR) per market. Codex v5_independent BLOCKING #2: current §4.5 GJR-X uses r²_{overnight,t-1} so does not equalize information sets; structural-only attribution cannot be cleaned without this benchmark. Output: experiments/kXXXX_prg_fair_info_gjr/ with results.json + per-market table. Codex review required before paper_body integration.",
     "source": "paper_review_followup",
@@ -36685,10 +36685,10 @@
       "blocking:2"
     ],
     "created_at": "2026-06-23T21:15:36+00:00",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": null,
-    "started_at": null,
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T21:56:47.672002+00:00",
+    "claim_session_id": "6b84ee9b9d2b",
+    "started_at": "2026-06-23T21:56:52.567273+00:00",
     "completed_at": null,
     "result": null
   },
@@ -36696,7 +36696,7 @@
     "id": "paper_body_prg_v6_major_fixes",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "[paper_body] PRG v6 MAJOR #4-7 + MINOR #8-10 batch fixes",
     "description": "Codex v5_independent remaining items (BLOCKING #1+#3 partial done in v6 round 1 commit; BLOCKING #2 split to experiment_prg_v6_fair_info_gjr_six_markets). MAJOR #4: replace Harvey(2016) |t|>3.0 citation with defensible source (Bonferroni / FDR / MCS argument) and drop the now-standard-in-MCS-literature framing where unsupported. MAJOR #5: scope VaR/ES claims to Table 3 actually-shown rows; drop dominates and consistent-ranking-across-all-six-markets phrasing. MAJOR #6: ablation generalization scope-pull-in (SPY-only evidence wording). MAJOR #7: HAR target-mismatch claim scope (TAIFEX-only or replicate cross-market). MINOR #8: Table 1 MCS row consistency (PRG only vs PRG Basic + Extended). MINOR #9: discussion-mechanism citation gaps. MINOR #10: economic-value formal test table (Sharpe difference test / bootstrap CI / transaction-cost sensitivity).",
     "source": "paper_review_followup",
@@ -36707,11 +36707,77 @@
       "minor:8-10"
     ],
     "created_at": "2026-06-23T21:15:36+00:00",
-    "claimed_by": null,
-    "claimed_at": null,
-    "claim_session_id": null,
-    "started_at": null,
-    "completed_at": null,
-    "result": null
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-23T22:08:45.153434+00:00",
+    "claim_session_id": "2fde5e8669fc",
+    "started_at": "2026-06-23T22:08:50.405241+00:00",
+    "completed_at": "2026-06-23T22:12:22.068452+00:00",
+    "result": "MAJOR #4 done: replaced Harvey(2016) citation (cross-section asset pricing, mis-applied to DM forecast comparisons) with explicit Bonferroni-style argument (~20 DM tests, alpha/m=0.05/20=0.0025, |z|=3.02 ~ |t|>3.0) + Hansen2011MCS complementarity. Edits at main.tex L139/L209/L336 + removed Harvey2016 from references + added label{sec:eval_framework}. PDF compiled 19pp clean. Sub-tasks created for MAJOR #5-7 + MINOR #8-10: paper_body_prg_v6_major5/6/7 + minor8/9/10. paper-update CLI synced to Supabase."
+  },
+  {
+    "id": "paper_body_prg_v6_major5_var_es_scope",
+    "task_type": "paper_body",
+    "priority": 3,
+    "status": "pending",
+    "title": "[paper_body] PRG v6 MAJOR #5 — VaR/ES claim scope to Table 3 actually-shown rows",
+    "description": "Codex v5_independent MAJOR #5: §4-discussion currently says PRG 'dominates' VaR/ES and claims consistent ranking across all six markets. Table 3 (tab:var_es) only shows specific market-level numbers (SPY ES gain, Kupiec p-values per market, FZ DM SPY t=3.75). Action: (a) replace 'dominates' with the specific evidence actually shown (per-market traffic-light + Kupiec + SPY FZ DM); (b) drop 'consistent ranking across all six markets' wording where not supported; (c) cite tab:var_es row-by-row. Files: paper/prg-periodic-garch/main.tex §3 (Results) + §4 (Discussion) + §5 (Conclusion).",
+    "created_at": "2026-06-24T06:15:00+08:00",
+    "source": "codex_v5_independent_round1_split",
+    "parent_task_id": "paper_body_prg_v6_major_fixes"
+  },
+  {
+    "id": "paper_body_prg_v6_major6_ablation_spy_scope",
+    "task_type": "paper_body",
+    "priority": 3,
+    "status": "pending",
+    "title": "[paper_body] PRG v6 MAJOR #6 — ablation generalization scope-pull-in (SPY-only evidence wording)",
+    "description": "Codex v5_independent MAJOR #6: paper currently generalizes ablation (e.g., timing convention robustness) from SPY evidence to all six markets in §3.2 / §5 wording. Action: scope down all SPY-only sentences to 'SPY' or 'illustrated for SPY'; explicitly note that cross-market replication of the timing-convention ablation is left for follow-up. Files: paper/prg-periodic-garch/main.tex abstract (line 41) + §3.2 (tab:timing_convention context) + §5 (conclusion).",
+    "created_at": "2026-06-24T06:15:00+08:00",
+    "source": "codex_v5_independent_round1_split",
+    "parent_task_id": "paper_body_prg_v6_major_fixes"
+  },
+  {
+    "id": "paper_body_prg_v6_major7_har_target_mismatch_scope",
+    "task_type": "paper_body",
+    "priority": 3,
+    "status": "pending",
+    "title": "[paper_body] PRG v6 MAJOR #7 — HAR target-mismatch claim scope (TAIFEX-only or replicate cross-market)",
+    "description": "Codex v5_independent MAJOR #7: paper claims HAR underperforms PRG due to target mismatch (DM t=0.57 on sigma^2_full); this finding currently uses TAIFEX evidence only but is framed as a general HAR-versus-GJR adjudication. Action: (a) explicitly scope claim to 'TAIFEX sample examined here'; (b) frame as 'consistent with broader target-mismatch concern in the volatility-forecasting literature' rather than general adjudication; OR (c) replicate the target-mismatch test on remaining 5 markets and report. Path (a)+(b) is minimum-effort fix; path (c) is full evidence. Files: paper/prg-periodic-garch/main.tex §5 (conclusion line 361 area).",
+    "created_at": "2026-06-24T06:15:00+08:00",
+    "source": "codex_v5_independent_round1_split",
+    "parent_task_id": "paper_body_prg_v6_major_fixes"
+  },
+  {
+    "id": "paper_body_prg_v6_minor8_table1_mcs_row_consistency",
+    "task_type": "paper_body",
+    "priority": 4,
+    "status": "pending",
+    "title": "[paper_body] PRG v6 MINOR #8 — Table 1 MCS row consistency (PRG Basic vs PRG Extended)",
+    "description": "Codex v5_independent MINOR #8: Table 1 MCS column reports survivors at 10% — for TAIFEX both PRG Basic and PRG Extended survive; for other markets MCS row sometimes lists 'PRG only' or 'all models'. Check row-level consistency: does 'PRG' in MCS column mean PRG Extended specifically or PRG family? Standardize wording per row. Files: paper/prg-periodic-garch/main.tex tab:main_results.",
+    "created_at": "2026-06-24T06:15:00+08:00",
+    "source": "codex_v5_independent_round1_split",
+    "parent_task_id": "paper_body_prg_v6_major_fixes"
+  },
+  {
+    "id": "paper_body_prg_v6_minor9_discussion_mechanism_citation_gaps",
+    "task_type": "paper_body",
+    "priority": 4,
+    "status": "pending",
+    "title": "[paper_body] PRG v6 MINOR #9 — discussion-mechanism citation gaps",
+    "description": "Codex v5_independent MINOR #9: §4 Discussion mentions overnight information mechanisms, session-boundary effects, and intraday volatility patterns but cites few mechanism papers. Add references: Andersen-Bollerslev (overnight returns), Hansen-Lunde (RV decomposition), Tsiakas (overnight risk premium). Verify each citation actually supports claim made.",
+    "created_at": "2026-06-24T06:15:00+08:00",
+    "source": "codex_v5_independent_round1_split",
+    "parent_task_id": "paper_body_prg_v6_major_fixes"
+  },
+  {
+    "id": "paper_body_prg_v6_minor10_economic_value_formal_test",
+    "task_type": "paper_body",
+    "priority": 4,
+    "status": "pending",
+    "title": "[paper_body] PRG v6 MINOR #10 — economic-value formal test (Sharpe diff / bootstrap CI / TC sensitivity)",
+    "description": "Codex v5_independent MINOR #10: §3.3 Economic significance reports TAIFEX volatility timing Sharpe but lacks formal Sharpe-difference test, bootstrap CI, and transaction-cost sensitivity table. Action: (a) add Jobson-Korkie / Memmel Sharpe difference test PRG vs GJR; (b) report 95% bootstrap CI for Sharpe diff; (c) sensitivity table at TC = {1, 3, 5, 10} bps. Run scripts/economic_value_eval.py or new script. May trigger compute_queue if pooled.",
+    "created_at": "2026-06-24T06:15:00+08:00",
+    "source": "codex_v5_independent_round1_split",
+    "parent_task_id": "paper_body_prg_v6_major_fixes"
   }
 ]

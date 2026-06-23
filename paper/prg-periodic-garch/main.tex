@@ -135,8 +135,9 @@ We compare PRG against four alternatives. (i) \textbf{GJR-GARCH(1,1)} \citep{Glo
 All models are estimated out-of-sample with periodic refitting: GJR and HAR every 63 trading days, PRG and Separate GARCH every 126--252 days (reflecting higher estimation cost).
 
 \subsection{Evaluation framework}
+\label{sec:eval_framework}
 
-Statistical evaluation employs the QLIKE loss function, which \citet{Patton2011} shows is robust to noise in unbiased volatility proxies. Pairwise comparisons use the \citet{Diebold1995} test with \citet{Harvey1997} small-sample correction, and we adopt $|t| > 3.0$ as a conservative threshold motivated by the multiple-testing logic in \citet{Harvey2016}. The Model Confidence Set \citep{Hansen2011MCS} provides a joint assessment. Additional layers include Spearman rank correlations, VaR backtesting (\citealp{Kupiec1995}; \citealp{Christoffersen1998}; Basel traffic light), and Expected Shortfall evaluation via the \citet{Fissler2016} joint loss.
+Statistical evaluation employs the QLIKE loss function, which \citet{Patton2011} shows is robust to noise in unbiased volatility proxies. Pairwise comparisons use the \citet{Diebold1995} test with \citet{Harvey1997} small-sample correction. We adopt $|t|>3.0$ as a conservative significance threshold that approximates a Bonferroni-style adjustment for the family of pairwise DM tests reported across the paper's main results (six markets $\times$ three benchmarks) and supplementary tables (approximately 20 tests in total; $\alpha/m \approx 0.05/20 = 0.0025$, corresponding to a two-sided normal critical value $|z|\approx 3.02$). This individual-test threshold complements, rather than substitutes for, the joint \citet{Hansen2011MCS} Model Confidence Set assessment that we report alongside DM statistics. Additional layers include Spearman rank correlations, VaR backtesting (\citealp{Kupiec1995}; \citealp{Christoffersen1998}; Basel traffic light), and Expected Shortfall evaluation via the \citet{Fissler2016} joint loss.
 
 
 %% =====================================================================
@@ -206,7 +207,7 @@ EEM     & 0.664 & 6.63$^{***}$ & 6.34$^{***}$ & 6.30$^{***}$ & 0.469 & All \\
 \end{flushleft}
 \end{table}
 
-The PRG Extended model significantly outperforms GJR-GARCH in every market, with DM $t$-statistics ranging from 4.26 (QQQ) to 6.63 (EEM), all surpassing the conservative $|t|>3.0$ threshold adopted in this paper. We use this stricter cutoff---rather than the conventional $|t|>1.96$---as a deliberately conservative choice motivated by the multiple-testing logic of \citet{Harvey2016} for multi-model comparisons on the same data set. The comparison against Separate GARCH is equally decisive: DM statistics range from 4.07 (TAIFEX) to 6.69 (SPY), confirming that the cross-session information bridge---not merely the session-specific parameterization---drives the improvement. The PRG Extended also significantly outperforms HAR in four of six markets; the TAIFEX comparison yields $t = 2.63$, below the conservative threshold, a result we discuss further below.
+The PRG Extended model significantly outperforms GJR-GARCH in every market, with DM $t$-statistics ranging from 4.26 (QQQ) to 6.63 (EEM), all surpassing the conservative $|t|>3.0$ threshold adopted in this paper. We use this stricter cutoff---rather than the conventional $|t|>1.96$---as a deliberately conservative choice that approximates a Bonferroni adjustment for the roughly 20 pairwise DM tests reported across the paper's main and supplementary tables (see Section~\ref{sec:eval_framework}), complementing the joint \citet{Hansen2011MCS} MCS assessment. The comparison against Separate GARCH is equally decisive: DM statistics range from 4.07 (TAIFEX) to 6.69 (SPY), confirming that the cross-session information bridge---not merely the session-specific parameterization---drives the improvement. The PRG Extended also significantly outperforms HAR in four of six markets; the TAIFEX comparison yields $t = 2.63$, below the conservative threshold, a result we discuss further below.
 
 The TAIFEX MCS analysis is particularly informative: at the 10\% significance level, only the PRG Basic and PRG Extended survive, with both GJR-GARCH ($p = 0.000$) and HAR ($p = 0.000$) eliminated. This is the strongest possible model selection outcome. For the U.S. ETFs, all models survive the MCS, reflecting the noisier daily OHLC proxies.
 
@@ -333,7 +334,7 @@ PRG Extended                & \multicolumn{2}{c}{\textbf{0.7559}} \\
 \bottomrule
 \end{tabular}
 \\[4pt]
-\emph{Notes:} OOS period 2019-01-02 to 2026-04-08; loss function is QLIKE; DM tests use Newey--West HAC standard errors with \citet{Harvey1997} small-sample correction; the paper adopts $|t|>3.0$ as a conservative threshold motivated by \citet{Harvey2016}. ${}^{***}$ denotes Harvey PASS. The canonical PRG-vs-GJR comparison for SPY is reported in Table~\ref{tab:main_results}; this benchmark table presents only the two contrasts unique to GJR-X. In-sample LR test for the GJR-X exogenous regressor: $\hat{\delta}=0.13$, $\mathrm{LR}=49.37$, $p<0.0001$ ($n_{\text{IS}}=4{,}778$ days; $n_{\text{LR starts}}=16$ random initializations used in the LR diagnostic's internal grid search to verify basin stability, distinct from the model-estimation multistart counts).
+\emph{Notes:} OOS period 2019-01-02 to 2026-04-08; loss function is QLIKE; DM tests use Newey--West HAC standard errors with \citet{Harvey1997} small-sample correction; the paper adopts $|t|>3.0$ as a conservative threshold approximating a Bonferroni-style adjustment for the family of pairwise DM tests reported across the paper's main and supplementary results (Section~\ref{sec:eval_framework}). ${}^{***}$ denotes Harvey PASS. The canonical PRG-vs-GJR comparison for SPY is reported in Table~\ref{tab:main_results}; this benchmark table presents only the two contrasts unique to GJR-X. In-sample LR test for the GJR-X exogenous regressor: $\hat{\delta}=0.13$, $\mathrm{LR}=49.37$, $p<0.0001$ ($n_{\text{IS}}=4{,}778$ days; $n_{\text{LR starts}}=16$ random initializations used in the LR diagnostic's internal grid search to verify basin stability, distinct from the model-estimation multistart counts).
 \end{table}
 
 
@@ -596,12 +597,6 @@ Harvey, D., Leybourne, S., and Newbold, P. (1997).
 \newblock Testing the equality of prediction mean squared errors.
 \newblock \emph{International Journal of Forecasting}, 13(2), 281--291.
 \newblock \url{https://doi.org/10.1016/S0169-2070(96)00719-4}
-
-\bibitem[Harvey et~al.(2016)]{Harvey2016}
-Harvey, C.~R., Liu, Y., and Zhu, H. (2016).
-\newblock ...and the cross-section of expected returns.
-\newblock \emph{The Review of Financial Studies}, 29(1), 5--68.
-\newblock \url{https://doi.org/10.1093/rfs/hhv059}
 
 \bibitem[Kim et~al.(2023)]{Kim2023}
 Kim, D., Shin, M., and Wang, Y. (2023).
