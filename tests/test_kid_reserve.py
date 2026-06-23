@@ -64,6 +64,34 @@ def test_reserve_uses_registry_and_legacy_sources(tmp_path, monkeypatch) -> None
     assert saved["reservations"][-1]["source_max"] == 107
 
 
+def test_reserve_honors_minimum_floor(tmp_path, monkeypatch) -> None:
+    root = tmp_path
+    registry = root / "storage" / "ops" / "k_id_registry.json"
+    next_tasks = root / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(kid_reserve, "_scan_git_log_k_ids", lambda *_args, **_kwargs: set())
+
+    first = kid_reserve.reserve_k_id(
+        claimed_by="pytest",
+        root=root,
+        registry_path=registry,
+        next_tasks_path=next_tasks,
+        minimum=1302,
+    )
+    second = kid_reserve.reserve_k_id(
+        claimed_by="pytest",
+        root=root,
+        registry_path=registry,
+        next_tasks_path=next_tasks,
+        minimum=1302,
+    )
+
+    assert first["k_id"] == "K1302"
+    assert first["source_max"] == 1301
+    assert second["k_id"] == "K1303"
+
+
 def test_reserve_cli_is_process_atomic(tmp_path) -> None:
     root = tmp_path
     registry = root / "storage" / "ops" / "k_id_registry.json"

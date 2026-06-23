@@ -1,6 +1,6 @@
 # Refactor Plan — Atomic K-id Allocation + Topic-Claim Ledger（3-STRIKE）
 
-> **狀態**：PARTIAL（A/B 層 helper 已落地；入口尚未全面改寫）。2026-06-23 strike 2 觸發後寫。`scripts/kid_reserve.py` 已提供 `fcntl` 原子 K-id reservation；`scripts/topic_claim.py` 已提供 `fcntl` 原子 topic-claim ledger。兩者皆有 regression tests；後續仍需把所有配號/挑題入口與 in-flight marker 接上。
+> **狀態**：PARTIAL（A/B 層 helper 已落地；入口尚未全面改寫）。2026-06-23 strike 2 觸發後寫。`scripts/kid_reserve.py` 已提供 `fcntl` 原子 K-id reservation；`scripts/topic_claim.py` 已提供 `fcntl` 原子 topic-claim ledger。兩者皆有 regression tests。2026-06-24 Codex 已把 `scripts/generate_research_backlog.py --apply` 切到 `reserve_k_id(minimum=1302)`；後續仍需把其他配號/挑題入口與 in-flight marker 接上。
 > **觸發**：K-id 配號/挑題 race，同根因連兩次 ——
 > - **strike 1** 2026-06-23 K1534 雙佔（主線程 vs 在飛 worktree，commit 774df789/0fe5d876 vs 0f789f32）
 > - **strike 2** 2026-06-23 biodiversity K1536/K1537×2（3 個並行 cron Codex agent 撞同一 journal-discovery 題 + 雙佔 K1537，commit f350674e 收斂）

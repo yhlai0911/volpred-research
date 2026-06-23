@@ -13,7 +13,7 @@ Approach:
 1. Scan research_program.md for unchecked `- [ ]` items
 2. Scan for "Open Question / 待深入 / TODO" headings + immediate context
 3. Generate K-experiment brief per unique research thread
-4. Auto-assign next free K-id from experiments/ directory
+4. Atomically reserve a free K-id before appending experiment tasks
 5. Append as `task_type="experiment"`, priority 3 (sub-priority by ROI)
 
 Usage:
@@ -35,9 +35,13 @@ ROOT = Path(__file__).resolve().parents[1]
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 EXPERIMENTS_DIR = ROOT / "experiments"
+SCRIPTS_DIR = ROOT / "scripts"
 
 sys.path.insert(0, str(ROOT / "src"))
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from kid_reserve import reserve_k_id  # noqa: E402
 JOURNAL_DISCOVERY_LIVE_STATUSES = {"pending", "claimed", "in_progress", "blocked", "pending_main_thread"}
 JOURNAL_DISCOVERY_COOLDOWN_HOURS = 6
 
@@ -233,6 +237,20 @@ def build_experiment_brief(item: dict, k_id: int) -> dict:
     }
 
 
+def _reserve_backlog_k_id(item: dict) -> int:
+    """Reserve a K-id in the shared registry before materializing a task."""
+    root = RESEARCH_PROGRAM.parent
+    record = reserve_k_id(
+        claimed_by="research_backlog_auto",
+        topic=str(item.get("text") or ""),
+        root=root,
+        registry_path=root / "storage" / "ops" / "k_id_registry.json",
+        next_tasks_path=NEXT_TASKS,
+        minimum=1302,
+    )
+    return int(record["number"])
+
+
 def _journal_discovery_dispatch_task(
     tasks: list,
     existing_ids: set[str],
@@ -345,9 +363,9 @@ def generate(*, dry_run: bool = False, max_new: int = 5) -> dict:
             reason="no_unchecked_items",
         )
 
-    # K-id assignment must avoid collisions with in-flight next_tasks.json
-    # entries, not just experiments/ dirs — otherwise every run re-assigns the
-    # same id to the same recurring item (K1308 collided 5x before this fix).
+    # Dry-run previews keep the old read-only scan. Apply mode uses the shared
+    # fcntl-backed K-id registry so concurrent backlog generators cannot reserve
+    # the same K-id between scan and write.
     in_flight_ids = _existing_ids(tasks)
     new_briefs = []
     next_k = find_next_k_id(start=1302, existing_task_ids=in_flight_ids)
@@ -356,10 +374,14 @@ def generate(*, dry_run: bool = False, max_new: int = 5) -> dict:
             break
         if already_in_next_tasks(item, tasks):
             continue
-        brief = build_experiment_brief(item, next_k)
+        if dry_run:
+            k_id = next_k
+        else:
+            k_id = _reserve_backlog_k_id(item)
+        brief = build_experiment_brief(item, k_id)
         new_briefs.append(brief)
         in_flight_ids.add(brief["id"])
-        next_k = find_next_k_id(start=next_k + 1, existing_task_ids=in_flight_ids)
+        next_k = find_next_k_id(start=max(next_k, k_id) + 1, existing_task_ids=in_flight_ids)
 
     if not new_briefs:
         return _journal_fallback_result(

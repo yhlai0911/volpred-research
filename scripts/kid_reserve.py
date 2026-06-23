@@ -226,10 +226,13 @@ def reserve_k_id(
     next_tasks_path: Path | None = None,
     lock_path: Path | None = None,
     git_log_limit: int = 30,
+    minimum: int = 1,
 ) -> dict[str, Any]:
     """Reserve and persist the next available K-id under an exclusive lock."""
     if not claimed_by.strip():
         raise ValueError("claimed_by is required")
+    if minimum < 1:
+        raise ValueError("minimum must be >= 1")
     root = Path(root)
     registry_path = Path(registry_path)
     next_tasks_path = Path(next_tasks_path) if next_tasks_path is not None else root / "storage" / "next_tasks.json"
@@ -243,7 +246,7 @@ def reserve_k_id(
             next_tasks_path=next_tasks_path,
             git_log_limit=git_log_limit,
         )
-        source_max = max(known) if known else 0
+        source_max = max(max(known) if known else 0, minimum - 1)
         number = source_max + 1
         record = {
             "k_id": f"K{number}",
@@ -275,6 +278,7 @@ def _build_parser() -> argparse.ArgumentParser:
     reserve.add_argument("--next-tasks", type=Path, default=None)
     reserve.add_argument("--lock", type=Path, default=None)
     reserve.add_argument("--git-log-limit", type=int, default=30)
+    reserve.add_argument("--minimum", type=int, default=1)
     return parser
 
 
@@ -290,6 +294,7 @@ def main(argv: list[str] | None = None) -> int:
                 next_tasks_path=args.next_tasks,
                 lock_path=args.lock,
                 git_log_limit=args.git_log_limit,
+                minimum=args.minimum,
             )
             print(json.dumps({"ok": True, **record}, ensure_ascii=False, sort_keys=True))
             return 0

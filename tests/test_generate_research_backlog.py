@@ -75,6 +75,84 @@ def test_generate_backlog_all_covered_materializes_journal_discovery(
     assert journal["source"] == "auto_journal_discovery_fallback"
 
 
+def test_generate_backlog_apply_uses_reserved_k_id(
+    tmp_path: Path,
+    monkeypatch,
+):
+    research_program, next_tasks, _ = _setup_paths(tmp_path, monkeypatch)
+    research_program.write_text(
+        "- [ ] GARCH model regime test for ETF volatility forecasting using panel regression\n",
+        encoding="utf-8",
+    )
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    reserved_items: list[str] = []
+
+    def fake_reserve(item: dict) -> int:
+        reserved_items.append(item["text"])
+        return 2400
+
+    monkeypatch.setattr(MODULE, "_reserve_backlog_k_id", fake_reserve)
+
+    result = MODULE.generate(dry_run=False, max_new=5)
+
+    assert result == {"ok": True, "added": 1, "added_ids": ["K2400"]}
+    assert reserved_items == [
+        "GARCH model regime test for ETF volatility forecasting using panel regression"
+    ]
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert data[0]["id"] == "K2400"
+    assert "K2400.py" in data[0]["description"]
+    assert "K2400_results.json" in data[0]["description"]
+
+
+def test_generate_backlog_dry_run_does_not_reserve_k_id(
+    tmp_path: Path,
+    monkeypatch,
+):
+    research_program, next_tasks, _ = _setup_paths(tmp_path, monkeypatch)
+    research_program.write_text(
+        "- [ ] HAR model stress test for VIX volatility spillover using rolling regression\n",
+        encoding="utf-8",
+    )
+    next_tasks.write_text("[]\n", encoding="utf-8")
+
+    def fail_reserve(_item: dict) -> int:
+        raise AssertionError("dry-run must not reserve K-id")
+
+    monkeypatch.setattr(MODULE, "_reserve_backlog_k_id", fail_reserve)
+
+    result = MODULE.generate(dry_run=True, max_new=5)
+
+    assert result["dry_run"] is True
+    assert result["would_add"] == 1
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
+
+
+def test_reserve_backlog_k_id_uses_shared_registry_floor(
+    tmp_path: Path,
+    monkeypatch,
+):
+    research_program, next_tasks, _ = _setup_paths(tmp_path, monkeypatch)
+    research_program.write_text("# test\n", encoding="utf-8")
+    seen: dict[str, object] = {}
+
+    def fake_reserve_k_id(**kwargs) -> dict:
+        seen.update(kwargs)
+        return {"number": 2401}
+
+    monkeypatch.setattr(MODULE, "reserve_k_id", fake_reserve_k_id)
+
+    k_id = MODULE._reserve_backlog_k_id({"text": "HAR model volatility test"})
+
+    assert k_id == 2401
+    assert seen["claimed_by"] == "research_backlog_auto"
+    assert seen["topic"] == "HAR model volatility test"
+    assert seen["root"] == tmp_path
+    assert seen["registry_path"] == tmp_path / "storage" / "ops" / "k_id_registry.json"
+    assert seen["next_tasks_path"] == next_tasks
+    assert seen["minimum"] == 1302
+
+
 def test_generate_backlog_all_covered_dry_run_does_not_write(
     tmp_path: Path,
     monkeypatch,
