@@ -41,16 +41,29 @@ def get_latest_period(df, item_pattern):
 def fetch_ndc_table():
     """
     Fetch BCI data from NDC indicators_table1 page.
-    This page is Angular SPA, so requests alone won't work.
-    We use the Highcharts API approach instead.
-    """
-    import requests
+    This page is an Angular SPA, so plain `requests` GET returns the SPA HTML
+    shell, not data.
 
-    # NDC doesn't have a clean API. The data is rendered by Angular.
-    # Best approach: use known data structure and manual updates.
-    # When Chrome DevTools MCP is available, use it to scrape.
-    print("  NDC website requires JavaScript rendering.")
-    print("  Use Chrome DevTools MCP or manual update.")
+    2026-06-24 finding (via Chrome MCP investigation, do not lose this):
+    - A JSON data endpoint DOES exist: `/n/json/data/eco/indicators` on
+      index.ndc.gov.tw. The earlier "NDC has no clean API" comment was wrong.
+    - BUT a plain GET (even with the page's own query string) still returns the
+      SPA HTML — the Angular app reaches it via POST with params built inside
+      `/n/include/js/app/indicators.min.js`. Wiring the pure-Python collector to
+      it requires reverse-engineering that POST body (TODO, low priority — no
+      active knowledge/strategy currently depends on this series).
+    - What DOES work cheaply: the rendered table at indicators_table1 is readable
+      via Chrome MCP (get_page_text / DOM read). 景氣對策信號(分) sits in the
+      default table; 領先指標 series need the leading-indicator view.
+    - Manual refresh procedure: open the page in Chrome MCP, read the table,
+      upsert into BCI_PATH (item/unit/freq/period/value schema).
+    - Last manual refresh: 2026-06-24 — 景氣對策信號 brought current to 2026M04
+      (2026M02 revised 40->41, M03=39, M04=39). 領先指標 series NOT refreshed
+      that pass (still ~M01).
+    """
+    print("  NDC indicators page is an Angular SPA (data via POST /n/json/data/eco/indicators).")
+    print("  Plain-Python auto-fetch not wired yet (POST params live in indicators.min.js).")
+    print("  Refresh path: read the rendered table via Chrome MCP, then upsert BCI_PATH.")
     print("  Run: claude 'update NDC BCI data from website'")
     return None
 
