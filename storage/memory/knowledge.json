@@ -35861,5 +35861,19 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-06-23T12:15:57.884924"
+  },
+  {
+    "item_id": "87b42dd6",
+    "category": "pre_event_predictors",
+    "content": "K1534 [CONDITIONAL_PASS] 已實現 CRP spike pre-event study (SPY top-10, 2018-2026, ρ_R Driessen-Maenhout-Vilkov realized proxy, n_days=2092): VIX term structure (VIX3M/VIX) at lag=-5 days 顯著 compress to 1.04 (spike) vs control 1.13, Welch t=-4.28, p_holm=0.0402, n_spike=7, n_ctrl=500. CRITICAL bug caught by code-reviewer subagent (Codex fallback): 21-day overlapping-RV filter 將原 14 raw spike events 降為 7 independent。9 features × 3 lags Holm-Bonferroni correction，其他 features (vix level / breadth) 校正後 ns。Scope: descriptive only, no trading claim — n_spike=7 偏小、bonferroni-marginal、尚需 OOS forward test。Reviewer source: code-reviewer subagent fallback (Codex CLI unavailable). experiment_id=K1534 path=experiments/K1534 seed=42 task_id=research_realized_crp_spike",
+    "evidence": [
+      "experiments/K1534/K1534_results.json",
+      "experiments/K1534/README.md",
+      "experiments/K1534/fig_event_study_lags.png",
+      "experiments/K1534/fig_rho_R_timeseries.png",
+      "commit 774df789"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-23T15:10:47.983961"
   }
 ]
