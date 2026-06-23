@@ -36082,7 +36082,7 @@
     "claim_session_id": "58024cbb220c",
     "started_at": "2026-06-23T10:53:16.677555+00:00",
     "completed_at": "2026-06-23T10:56:44.677355+00:00",
-    "result": "Reviewed mile_daed240a/K941 against experiments/k941/k941.py and k941_results.json. PASS numeric consistency: article coverage values 91.2/90.0/89.3/88.7/84.6%, OOS N=2,513, and 2006-01-04~2025-12-30 period match k941_results.json. PASS lookahead: K941 OOS split uses 2016+ holdout; QR/QRF feature matrix uses t-1 inputs; GARCH/MF-GJR OOS variance recursion uses prior-day return/VIX and refits only on returns[:t]. PASS claim discipline with caveat: no DM/Harvey/formal significance overclaim; CAViaR vs GARCH Param is a descriptive near-tie, not statistically significant superiority."
+    "result": "Reviewed mile_daed240a/K941 against experiments/k941/k941.py, README, and k941_results.json. PASS numeric consistency: article coverage values 91.2/90.0/89.3/88.7/84.6%, ranking, yfinance SPY period 2006-01-04~2025-12-30, OOS dates, and N=2,513 match source artifacts. PASS lookahead: K941 OOS train slices stop at :t and forecasts use lagged t-1 returns/VIX/features. PASS claim discipline with caveat: no DM/Harvey/formal significance overclaim; CAViaR vs GARCH Param is a descriptive near-tie, not statistically significant superiority."
   },
   {
     "id": "experiment_scaffold_k1537",
