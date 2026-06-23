@@ -2,6 +2,24 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 首頁 feed 標籤消失 + tw/us 篩選慢（同根：Supabase 1000-row cap）
+
+**問題**：老闆瀏覽器實測「Tab 篩選沒效率、有些標籤分類根本出不來、台股美股驗證過嗎」。
+
+**現象**：(1) tw/us 篩選比其他 filter 慢 3 倍（tw≈0.71s vs general≈0.2s）；(2) 首頁 feed 卡片的 topic tag chips（SPY/VIX/0050.TW…）幾乎全部不顯示（API 回 `tags=[]`）；(3) proposer 欄位秀出 research_program/publication/K979/厚尾分布比較 等內部雜訊當標籤。
+
+**根因**：
+1. **tags 消失 + tw/us 慢同一個根**：`getFeedFromQueries` 對全部 ~1000 篇 candidate 一次 `fetchArticleTags`（article_tags ~6 rows/篇 → ~6000 rows）撞 **PostgREST 預設 1000-row cap**，只有 ~160 篇拿到 tags、其餘 `tags=[]`。→ (a) tag-based virtual audience tw/us 在 JS filter 全 miss（之前已用 RPC 繞過，但**無快取**故慢）；(b) 顯示的卡片大多 `tags=[]` → topic chips never render。
+2. **proposer 亂**：欄位被混入 agent 名/user 名/內部 slug/K-id/主題碎片，verbatim 渲染像壞標籤。
+
+**解決方法**：
+- tw/us：加 `getCachedVirtualAudienceFeed`（unstable_cache 120s，mirror getCachedClusterFeed）→ 0.71s→0.31s。
+- tag chips：改只對「實際顯示那一頁(≤20 篇)」重抓 tags（~120 rows，遠低於 cap → 完整），mirror 既有 statsMap pattern；大 tagMap 仍供 filter/diversify/tagCounts 聚合（聚合容忍部分缺 tag）。
+- proposer：FeedBrowser whitelist 只顯示可辨識 AI 作者（Claude/Gemini/Codex/Antigravity），其餘 suppress。
+- **驗證**：build exit 0；deploy RUNNING；live tw=209/us=799、延遲降到 ~0.31s。
+
+**教訓**：Supabase/PostgREST 的 implicit 1000-row cap 是 silent failure — 多篇文章 join child table 時必須 (a) 只抓要顯示那頁的 child rows，或 (b) 分頁 `.range()` 補滿，不能假設一次 `.in()` 全回。同一 cap 這次同時害到「篩選」與「標籤顯示」兩個看似無關的症狀。
+
 ## 2026-06-23 **3-STRIKE TRIGGER** 測試 hook 假報「Tests passed」（exit-code masking）
 
 **問題**：`.claude/hooks/run-compact-bash.sh` test mode 在 pytest 實際 FAILED 時仍輸出「Tests passed」。本 session 至少 3 次（dedup 改動驗證時連續 2 次 + summary 記載 1 次），老闆 2026-06-23 直接點名「你都是要有假報告，為什麼不改？底層邏輯是什麼？」。
