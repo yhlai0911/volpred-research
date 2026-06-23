@@ -1,0 +1,304 @@
+{
+  "experiment_id": "K1366",
+  "generated_at": "2026-06-23T01:54:06.548414+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance adjusted close",
+    "tickers": {
+      "SPY": "US equity",
+      "TLT": "long Treasury",
+      "UUP": "US dollar",
+      "GLD": "gold",
+      "HYG": "high-yield credit"
+    },
+    "start_requested": "2016-01-01",
+    "sample_start": "2016-01-05",
+    "sample_end": "2026-06-22",
+    "n_daily_returns": 2630,
+    "covariance_sample_start": "2017-01-04",
+    "coverage": {
+      "SPY": {
+        "role": "US equity",
+        "first": "2016-01-04",
+        "last": "2026-06-22",
+        "n_daily_prices": 2631,
+        "load_error": null
+      },
+      "TLT": {
+        "role": "long Treasury",
+        "first": "2016-01-04",
+        "last": "2026-06-22",
+        "n_daily_prices": 2631,
+        "load_error": null
+      },
+      "UUP": {
+        "role": "US dollar",
+        "first": "2016-01-04",
+        "last": "2026-06-22",
+        "n_daily_prices": 2631,
+        "load_error": null
+      },
+      "GLD": {
+        "role": "gold",
+        "first": "2016-01-04",
+        "last": "2026-06-22",
+        "n_daily_prices": 2631,
+        "load_error": null
+      },
+      "HYG": {
+        "role": "high-yield credit",
+        "first": "2016-01-04",
+        "last": "2026-06-22",
+        "n_daily_prices": 2631,
+        "load_error": null
+      }
+    }
+  },
+  "method": {
+    "scope": "VIRF-inspired historical EWMA covariance response template; not a structural BEKK/DCC identification",
+    "ewma_lambda": 0.94,
+    "init_window": 252,
+    "horizon_trading_days": 60,
+    "placebo_reps": 1000,
+    "placebo_exclusion_days_around_events": 63,
+    "placebo_candidate_dates": 1559
+  },
+  "literature": [
+    {
+      "citation": "Hafner and Herwartz (2006), Volatility impulse response functions for multivariate GARCH models",
+      "url": "https://econpapers.repec.org/RePEc:eee:econom:v132y2006i2p381-402",
+      "role": "canonical VIRF definition for multivariate GARCH second-moment shock responses"
+    },
+    {
+      "citation": "Fengler and Polivka (2025), Structural Volatility Impulse Response Analysis, Journal of Financial Econometrics",
+      "url": "https://academic.oup.com/jfec/article/23/2/nbae036/7994364",
+      "role": "motivates structural embedding, historical scenarios, and confidence intervals for VIRFs"
+    },
+    {
+      "citation": "Bauwens, Laurent, and Rombouts (2006), Multivariate GARCH models: a survey",
+      "url": "https://ideas.repec.org/a/jae/japmet/v21y2006i1p79-109.html",
+      "role": "background on feasible MGARCH parameterizations and why a pilot should avoid overclaiming full identification"
+    },
+    {
+      "citation": "DCC-GARCH VIRF extension (2020), Volatility impulse response analysis for DCC-GARCH models",
+      "url": "https://ideas.repec.org/a/wly/jforec/v39y2020i5p788-796.html",
+      "role": "connects VIRF-style responses with DCC-GARCH and network/connectedness diagnostics"
+    }
+  ],
+  "events": [
+    {
+      "event": "2018Q4_equity_credit",
+      "description": "Q4 2018 equity/credit selloff shock",
+      "requested_date": "2018-10-10",
+      "trading_date": "2018-10-10",
+      "shock": {
+        "trading_date": "2018-10-10",
+        "log_returns": {
+          "SPY": -0.032175613565849304,
+          "TLT": -0.0027280831059472987,
+          "UUP": -0.0011809510833424852,
+          "GLD": 0.0024835810584162843,
+          "HYG": -0.007181365722596311
+        },
+        "standardized_returns": {
+          "SPY": -8.234086285771863,
+          "TLT": -0.4044456153182927,
+          "UUP": -0.3870493774032124,
+          "GLD": 0.4172262941697447,
+          "HYG": -3.650440847733416
+        },
+        "mahalanobis_squared": 75.95158799331578,
+        "mahalanobis_chi2_p_upper": 5.8882303785652645e-15
+      },
+      "peak_total_variance_lift": 3.605490093819596,
+      "peak_total_variance_horizon": 58,
+      "avg_0_20_total_variance_lift": 1.1778263023542987,
+      "peak_avg_abs_corr_delta": 0.3979779132184076,
+      "p_peak_vs_placebo": 0.025974025974025976,
+      "p_avg20_vs_placebo": 0.025974025974025976,
+      "p_peak_corr_vs_placebo": 0.17482517482517482,
+      "half_life_trading_days": null,
+      "zero_decay_trading_days": null,
+      "peak_asset_vol_lifts": {
+        "SPY": 3.8906663284922347,
+        "TLT": 0.04185881642409095,
+        "UUP": 0.40225695806272466,
+        "GLD": 0.40819088262668846,
+        "HYG": 2.4958716056263177
+      },
+      "h0_placebo_5_95_band": {
+        "p05": -0.05332518699333294,
+        "p95": 0.13160072932487957
+      }
+    },
+    {
+      "event": "2020_covid_liquidity",
+      "description": "COVID liquidity crash shock",
+      "requested_date": "2020-03-16",
+      "trading_date": "2020-03-16",
+      "shock": {
+        "trading_date": "2020-03-16",
+        "log_returns": {
+          "SPY": -0.11588602063577191,
+          "TLT": 0.06275433499902139,
+          "UUP": -0.032595524635052,
+          "GLD": -0.011512126298224956,
+          "HYG": -0.05653388720551167
+        },
+        "standardized_returns": {
+          "SPY": -2.6583743903611285,
+          "TLT": 2.8579495283426954,
+          "UUP": -3.026335498157488,
+          "GLD": -0.6599538706586145,
+          "HYG": -3.188317992041748
+        },
+        "mahalanobis_squared": 27.813902069661967,
+        "mahalanobis_chi2_p_upper": 3.957787360431851e-05
+      },
+      "peak_total_variance_lift": 0.6617722510055664,
+      "peak_total_variance_horizon": 6,
+      "avg_0_20_total_variance_lift": 0.38880203471869057,
+      "peak_avg_abs_corr_delta": 0.3325673584047766,
+      "p_peak_vs_placebo": 0.32367632367632365,
+      "p_avg20_vs_placebo": 0.0919080919080919,
+      "p_peak_corr_vs_placebo": 0.3926073926073926,
+      "half_life_trading_days": 13,
+      "zero_decay_trading_days": 22,
+      "peak_asset_vol_lifts": {
+        "SPY": 0.17613266027960028,
+        "TLT": 0.660703460637458,
+        "UUP": 0.33096521263325807,
+        "GLD": 0.28163270861777656,
+        "HYG": 0.5377092735114253
+      },
+      "h0_placebo_5_95_band": {
+        "p05": -0.05332518699333294,
+        "p95": 0.13160072932487957
+      }
+    },
+    {
+      "event": "2022_rate_shock",
+      "description": "2022 inflation/rate repricing shock before the June FOMC",
+      "requested_date": "2022-06-13",
+      "trading_date": "2022-06-13",
+      "shock": {
+        "trading_date": "2022-06-13",
+        "log_returns": {
+          "SPY": -0.03870786431316997,
+          "TLT": -0.031881963200412144,
+          "UUP": 0.009655074783578854,
+          "GLD": -0.026767358824472787,
+          "HYG": -0.03402506566498431
+        },
+        "standardized_returns": {
+          "SPY": -2.1369703396495696,
+          "TLT": -2.7524366624503904,
+          "UUP": 1.7797813605348762,
+          "GLD": -3.1983347159337354,
+          "HYG": -4.035456667131718
+        },
+        "mahalanobis_squared": 30.933398600763983,
+        "mahalanobis_chi2_p_upper": 9.655185699738269e-06
+      },
+      "peak_total_variance_lift": 0.41752010774936466,
+      "peak_total_variance_horizon": 3,
+      "avg_0_20_total_variance_lift": 0.20609977185830408,
+      "peak_avg_abs_corr_delta": 0.2665973478535316,
+      "p_peak_vs_placebo": 0.46853146853146854,
+      "p_avg20_vs_placebo": 0.20679320679320679,
+      "p_peak_corr_vs_placebo": 0.7402597402597403,
+      "half_life_trading_days": 11,
+      "zero_decay_trading_days": 19,
+      "peak_asset_vol_lifts": {
+        "SPY": 0.11865602486925786,
+        "TLT": 0.27025973229322253,
+        "UUP": 0.17821910494929827,
+        "GLD": 0.25772118041359793,
+        "HYG": 0.4608276248776493
+      },
+      "h0_placebo_5_95_band": {
+        "p05": -0.05332518699333294,
+        "p95": 0.13160072932487957
+      }
+    },
+    {
+      "event": "2025_tariff_shock",
+      "description": "2025 tariff-policy repricing shock",
+      "requested_date": "2025-04-03",
+      "trading_date": "2025-04-03",
+      "shock": {
+        "trading_date": "2025-04-03",
+        "log_returns": {
+          "SPY": -0.05053675428513493,
+          "TLT": 0.00458312571315922,
+          "UUP": -0.017730974986422954,
+          "GLD": -0.00605658220441363,
+          "HYG": -0.01250653892331055
+        },
+        "standardized_returns": {
+          "SPY": -4.574484465777878,
+          "TLT": 0.595161295263666,
+          "UUP": -4.456170022966716,
+          "GLD": -0.7298066649428802,
+          "HYG": -4.5886552963299065
+        },
+        "mahalanobis_squared": 61.514575660375456,
+        "mahalanobis_chi2_p_upper": 5.909739916768127e-12
+      },
+      "peak_total_variance_lift": 4.765790324141403,
+      "peak_total_variance_horizon": 5,
+      "avg_0_20_total_variance_lift": 3.2534981089404917,
+      "peak_avg_abs_corr_delta": 0.3379951734378923,
+      "p_peak_vs_placebo": 0.014985014985014986,
+      "p_avg20_vs_placebo": 0.000999000999000999,
+      "p_peak_corr_vs_placebo": 0.35864135864135865,
+      "half_life_trading_days": 24,
+      "zero_decay_trading_days": null,
+      "peak_asset_vol_lifts": {
+        "SPY": 1.9518189924501996,
+        "TLT": 0.6535616424964468,
+        "UUP": 0.9567501177092756,
+        "GLD": 1.1770749929350788,
+        "HYG": 2.326808518044838
+      },
+      "h0_placebo_5_95_band": {
+        "p05": -0.05332518699333294,
+        "p95": 0.13160072932487957
+      }
+    }
+  ],
+  "lagged_carryover_diagnostic": {
+    "purpose": "guardrail diagnostic only; central event templates are descriptive",
+    "lookahead_policy": "event_shock_signal_lag1 = event_shock_signal.shift(1)",
+    "n_event_next_days": 4,
+    "n_non_event_days": 2373,
+    "event_next_day_mean_lift": 0.47111592384245954,
+    "non_event_day_mean_lift": 0.0026662472650899258,
+    "welch_t": 7.231280469263009,
+    "welch_p": 0.005426834770740248
+  },
+  "success_criteria": {
+    "strong_scenario_library": ">=2 events with p_peak_vs_placebo <= 0.05, positive peak response, and half-life >=5 trading days or not decayed within horizon; plus >=1 event with p_peak_corr_vs_placebo <= 0.05",
+    "harvey_dm": "not applicable; this is not a forecast horse race"
+  },
+  "verdict": "PARTIAL_VARIANCE_TEMPLATE_CORR_NULL",
+  "conclusion": "At least two shocks clear the unusual total-variance response gate, but no event clears the correlation-response placebo gate. Use as a variance scenario-template library only; do not claim structural covariance-network VIRF evidence.",
+  "artifacts": {
+    "templates_csv": "data/K1366_response_templates.csv",
+    "placebo_summary_csv": "data/placebo_summary.csv",
+    "placebo_bands_csv": "data/placebo_bands_by_horizon.csv",
+    "lagged_carryover_panel_csv": "data/lagged_event_carryover_panel.csv",
+    "figures": [
+      "figures/k1366_total_variance_response.png",
+      "figures/k1366_asset_peak_vol_lifts.png",
+      "figures/k1366_correlation_response.png"
+    ]
+  },
+  "limitations": [
+    "EWMA covariance is a feasible public-data filter, not a fitted structural MGARCH/BEKK model.",
+    "Event dates are manually specified historical scenarios; results are sensitive to date choice.",
+    "Placebo-date bands are empirical diagnostics, not asymptotic VIRF confidence intervals.",
+    "Close-to-close ETF returns omit intraday realized variance and option-implied volatility.",
+    "The 2025 tariff shock is represented by the first large repricing trading day in the ETF data and should be rechecked if a more exact policy timestamp is required."
+  ]
+}
