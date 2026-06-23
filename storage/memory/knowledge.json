@@ -36005,5 +36005,18 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-24T01:20:56.737011"
+  },
+  {
+    "item_id": "4d4ba63f",
+    "category": "experiment_result",
+    "content": "K1543 MIXED (lean NULL_REJECTED_HEDGE): Listed infrastructure ETFs (IFRA/NFRA/IGF/PAVE/GRID/UTF/XLU) inflation-hedge narrative tested with 4-tier hypothesis design (H1 raw RV / H2 downside semivariance / H3 60d corr Fisher-z / H4 HAC-controlled regression on energy beta XLE + duration TLT + VIX level). Data: yfinance 2014-01..2026-06 + FRED CPIAUCSL/PPIACO/T5YIE/T10YIE with conservative +15 calendar day release lag. Inflation-shock day = CPI release +/-5 trading days OR |Delta_BE5y| > 5bp. 28 cells, Bonferroni alpha=0.001786. Result: raw 6/28, Bonferroni 3/28. H4 controlled regression beta1 median=-0.055 [-0.102 (GRID), -0.011 (UTF)], 3/7 ETFs raw-sig (PAVE/GRID/XLU), 0/7 Bonferroni-sig. Core pure-infra IFRA/NFRA/IGF/UTF fail H4 entirely despite some H1 raw signal -> composite-beta artifact for them; only PAVE/GRID/XLU borderline survive but no Bonferroni-pass. Conclusion: do NOT claim a robust infra-specific inflation-hedge alpha after controlling energy + duration + VIX beta in this free-data spec. Reviewer: codex-cli round-1 FAIL (H4 double shock-lag / vix_lag used rv_VIX not level / CPI window center=True future-leak) -> 3 issues fixed -> round-2 PASS. Differentiation vs K1508: K1508 tested AI power demand on utility RV regime (NULL); K1543 tests inflation-hedge mechanism under controlled regression, different driver + outcome + ETF set. experiment_id=k1543, experiment_path=experiments/k1543/, reviewer=codex-cli round-2 PASS, commit=932ef1ca.",
+    "evidence": [
+      "experiments/k1543/k1543.py",
+      "experiments/k1543/k1543_results.json",
+      "experiments/k1543/README.md",
+      "experiments/k1543/review_codex.md"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-24T01:25:27.352638"
   }
 ]
