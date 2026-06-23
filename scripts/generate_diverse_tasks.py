@@ -233,6 +233,27 @@ def _parse_cron_gap_seconds(cron: str) -> int | None:
     return None
 
 
+def _effective_expected_gap_seconds(item: dict) -> int | None:
+    """Return the monitoring cadence for cron staleness checks.
+
+    Some runtime jobs are specified with a finer cron expression than their
+    actual execution clock can observe. Example: `supabase_sync_drain` is
+    declared as `*/30` but is dispatched by the hourly check_alerts piggy-back.
+    The cron expression remains useful as intent, while staleness monitoring
+    must use the effective fire cadence to avoid false-positive ops tasks.
+    """
+    override_min = item.get("staleness_expected_minutes")
+    if override_min is not None:
+        try:
+            override = int(override_min)
+        except (TypeError, ValueError):
+            return None
+        if override <= 0:
+            return None
+        return override * 60
+    return _parse_cron_gap_seconds(str(item.get("cron") or ""))
+
+
 def _parse_banner_ts(text: str) -> datetime | None:
     m = re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:\+00:00|\+\d{4})", text)
     if m:
@@ -307,7 +328,7 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
     crontab_items = (schedules.get("system_crontab") or {}).get("items") or []
 
     now = datetime.now(timezone.utc)
-    stale: list[tuple[str, str, int, int]] = []  # (id, last_iso, gap_s, expected_s)
+    stale: list[tuple[str, str, int, int, str | None]] = []  # (id, last_iso, gap_s, expected_s, log_path)
     for item in crontab_items:
         cid = item.get("id")
         cron_expr = item.get("cron")
@@ -315,7 +336,7 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
             continue
         if item.get("host_crontab_managed") is False:
             continue
-        expected = _parse_cron_gap_seconds(cron_expr)
+        expected = _effective_expected_gap_seconds(item)
         if expected is None:
             continue
         last_iso = last_run.get(cid)
@@ -336,17 +357,18 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
             last_iso = last_dt.isoformat()
         gap = int((now - last_dt).total_seconds())
         if gap > 2 * expected and gap > 3600:  # absolute floor 1h to skip recently-fired
-            stale.append((cid, last_iso, gap, expected))
+            stale.append((cid, last_iso, gap, expected, log_rel))
 
     stale.sort(key=lambda x: x[2] / x[3], reverse=True)  # worst overdue first
     sampled = stale[:QUOTA_PLATFORM_OPS]
     out = []
-    for cid, last_iso, gap, expected in sampled:
+    for cid, last_iso, gap, expected, log_rel in sampled:
         task_id = f"platform_ops_cron_stale_{cid}"
         if task_id in existing:
             continue
         gap_h = gap / 3600
         exp_h = expected / 3600
+        log_hint = log_rel or f"storage/logs/cron/{cid}.log"
         out.append({
             "id": task_id,
             "title": f"Cron staleness: {cid} — last fire {gap_h:.1f}h ago (expected ≤{2 * exp_h:.1f}h)",
@@ -354,7 +376,7 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
                 f"`{cid}` last ran at {last_iso} ({gap_h:.1f}h ago). Expected cadence "
                 f"per config/runtime_schedules.json gives gap ≤{exp_h:.1f}h; "
                 f"observed >2x. Investigate: (a) wrapper script exists & executable, "
-                f"(b) recent log at storage/logs/cron/{cid}.log, "
+                f"(b) recent log at {log_hint}, "
                 f"(c) launchd / crontab entry actually installed, "
                 f"(d) downstream consumer (release_pool / daily_update) for failure cascade."
             ),

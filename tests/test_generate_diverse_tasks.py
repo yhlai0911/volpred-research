@@ -87,6 +87,95 @@ def test_gen_platform_ops_tasks_still_emits_when_log_missing_and_last_run_stale(
     assert tasks[0]["id"] == "platform_ops_cron_stale_daily_update"
 
 
+def test_platform_ops_staleness_respects_effective_expected_minutes(tmp_path, monkeypatch) -> None:
+    """Regression: supabase_sync_drain is cron `*/30` but piggy-back hourly.
+
+    The stale detector should not open an ops task at 110 minutes simply
+    because the cron expression says 30 minutes; the effective monitoring
+    cadence is 60 minutes.
+    """
+    cron_last_run = tmp_path / "cron_last_run.json"
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    cron_logs = tmp_path / "cron"
+    cron_logs.mkdir()
+
+    last_run = datetime.now(timezone.utc) - timedelta(minutes=110)
+    cron_last_run.write_text(
+        json.dumps({"supabase_sync_drain": last_run.isoformat()}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    runtime_schedules.write_text(
+        json.dumps(
+            {
+                "system_crontab": {
+                    "items": [
+                        {
+                            "id": "supabase_sync_drain",
+                            "cron": "*/30 * * * *",
+                            "staleness_expected_minutes": 60,
+                            "log_path": "storage/logs/cron/drain_failed_syncs.log",
+                        },
+                    ]
+                }
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
+    monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
+
+    tasks = generate_diverse_tasks.gen_platform_ops_tasks(existing=set())
+
+    assert tasks == []
+
+
+def test_platform_ops_staleness_uses_config_log_path_in_description(tmp_path, monkeypatch) -> None:
+    cron_last_run = tmp_path / "cron_last_run.json"
+    runtime_schedules = tmp_path / "runtime_schedules.json"
+    cron_logs = tmp_path / "cron"
+    cron_logs.mkdir()
+
+    last_run = datetime.now(timezone.utc) - timedelta(minutes=130)
+    cron_last_run.write_text(
+        json.dumps({"supabase_sync_drain": last_run.isoformat()}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    runtime_schedules.write_text(
+        json.dumps(
+            {
+                "system_crontab": {
+                    "items": [
+                        {
+                            "id": "supabase_sync_drain",
+                            "cron": "*/30 * * * *",
+                            "staleness_expected_minutes": 60,
+                            "log_path": "storage/logs/cron/drain_failed_syncs.log",
+                        },
+                    ]
+                }
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
+    monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
+    monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
+
+    tasks = generate_diverse_tasks.gen_platform_ops_tasks(existing=set())
+
+    assert len(tasks) == 1
+    assert tasks[0]["id"] == "platform_ops_cron_stale_supabase_sync_drain"
+    assert "expected ≤2.0h" in tasks[0]["title"]
+    assert "storage/logs/cron/drain_failed_syncs.log" in tasks[0]["description"]
+
+
 def test_gen_platform_ops_tasks_warns_on_bad_runtime_schedules_json(
     tmp_path, monkeypatch, capsys
 ) -> None:

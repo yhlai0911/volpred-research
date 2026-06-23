@@ -3234,3 +3234,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **驗證**：修法後 44/46 draft 解鎖（剩 2 在 2 天 cooldown）。release-pool-by-settings 立即放出 2 篇 fresh spy-cluster（mile_0a7041f4 隔夜波動 36.8% / mile_d3993bd1 LSTM 反而更差），HTTP 200 + Supabase published 上線。live cluster gate 仍正常擋 vix（blocked_clusters=['vix']）→ 防 dup 未失效。
 
 **教訓**：anti-thrash「跳過記憶」flag 的 TTL 必須遠短於 dedup window 本身，否則單次 skip = 長期凍結，池子會 monotonic 鎖死。正確性留給每次 run 的 live gate，flag 只做短期 perf 優化。
+
+## 2026-06-23 — supabase_sync_drain staleness false-positive: cron intent 30m vs piggy-back hourly clock
+
+**症狀**：`generate_diverse_tasks.py` 產生 `platform_ops_cron_stale_supabase_sync_drain`，描述為 last fire 1.8h、expected gap ≤0.5h。實際檢查 `storage/logs/cron/drain_failed_syncs.log` 顯示 drain wrapper 正常、queue empty、10:00 台北已自行恢復；wrapper 也存在且可執行。
+
+**根因**：`runtime_schedules.json` 宣告 `supabase_sync_drain` cron 為 `*/30 * * * *`，但該 job 不是獨立 LaunchAgent，也不在現行 host crontab；它由 `check_alerts` 每小時呼叫 `run_due_jobs.py` piggy-back 執行。staleness detector 直接用 cron expression 推斷 expected gap=30 分鐘，沒有表示「有效觀測/觸發 cadence 為 hourly」的欄位，於是一次 hourly tick gap 就會被錯判為 >2x stale。
+
+**修法**：`scripts/generate_diverse_tasks.py` 新增 `staleness_expected_minutes` override，監控口徑可和實際執行載體對齊；`config/runtime_schedules.json` 對 `supabase_sync_drain` 設 `staleness_expected_minutes: 60` 並更新描述。task description 也改用 config 的真實 `log_path`（`storage/logs/cron/drain_failed_syncs.log`），不再提示不存在的 `{job_id}.log`。
+
+**防再發**：cron expression 可以表達「理想 intent」，但 piggy-back job 的 staleness 必須看 effective clock。任何非獨立 crontab/LaunchAgent、實際靠 hourly piggy-back 的 sub-hourly cron，都要在 config 補 `staleness_expected_minutes` 或改成真實可安裝的排程載體；不要用 false-positive ops task 代替排程模型校正。
