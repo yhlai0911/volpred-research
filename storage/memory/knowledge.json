@@ -35653,5 +35653,104 @@
     "article_id": "mile_671d4c75",
     "review_date": "2026-06-23T01:55:00+08:00",
     "tokens_used": 75883
+  },
+  {
+    "item_id": "9bd23793",
+    "category": "experiment_result",
+    "experiment_id": "K1365",
+    "k_id": "K1365",
+    "experiment_path": "experiments/k1365",
+    "verdict": "NULL_PROXY",
+    "title": "K1365: same-index ETF leader-volume concentration does not predict higher vol; EM fragmentation is the reverse diagnostic",
+    "content": "K1365 tested same-index ETF liquidity-clientele concentration using yfinance daily adjusted OHLCV (SPY/IVV/VOO, QQQ/QQQM, IWM/VTWO, EEM/IEMG; group common samples through 2026-06-22). Primary signal = legacy leader dollar-volume share rolling z-score with explicit signal.shift(1); targets include next range vol, forward 5d RV, and same-index return dispersion; OLS-HAC maxlags=5 controls lagged target and total dollar-volume shock. Original concentration hypothesis FAILS: 0/16 primary leader-share tests have positive HAC t>=3; directional positives are 8/16. The robust signal is reverse and EM-only: EEM/IEMG leader share is negatively associated with forward5 RV (t=-5.34, BH q=8.9e-06), while EM fragmentation/entropy positively predicts forward5 RV (t=4.86/4.87, BH q=2.86e-05). Interpretation: do not claim ETF liquidity concentration raises same-index volatility from free OHLCV proxies; the actionable follow-up is EM fragmentation stress with NAV/spread/AUM/creation-redemption data.",
+    "evidence": [
+      "experiments/k1365/K1365.py",
+      "experiments/k1365/K1365_results.json",
+      "experiments/k1365/K1365_regression_table.csv",
+      "experiments/k1365/codex_review.md",
+      "https://academic.oup.com/rfs/article/37/10/3092/7738093",
+      "https://onlinelibrary.wiley.com/doi/abs/10.1111/jofi.12727",
+      "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3001524"
+    ],
+    "confidence": 0.72,
+    "reviewer": "Codex source review 2026-06-23: CONDITIONAL_PASS for source and null/reverse-diagnostic conclusion",
+    "reviewer_source": "codex-vscode primary path",
+    "codex_review": "experiments/k1365/codex_review.md",
+    "created_at": "2026-06-23T01:58:05.947694+00:00",
+    "data_source": "yfinance daily adjusted OHLCV, auto_adjust=True",
+    "sample_end": "2026-06-22",
+    "primary_summary": {
+      "n_primary_tests": 16,
+      "n_positive_hac_t": 8,
+      "n_positive_harvey_t_ge_3": 0,
+      "n_positive_harvey_and_bh_q_le_0_05": 0,
+      "n_negative_harvey_and_bh_q_le_0_05": 4
+    },
+    "secondary_reverse_signal": {
+      "description": "Rows where higher fragmentation/entropy, rather than leader concentration, predicts higher vol/range targets with positive HAC t>=3 and BH q<=0.05.",
+      "n_hits": 2,
+      "rows": [
+        {
+          "group": "em",
+          "label": "Emerging-market same-index ETF pair",
+          "tickers": [
+            "EEM",
+            "IEMG"
+          ],
+          "leader": "EEM",
+          "primary": "EEM",
+          "signal": "fragmentation_z_l1",
+          "target": "forward5_rv",
+          "n_obs": 3365,
+          "sample_start": "2013-01-29",
+          "sample_end": "2026-06-15",
+          "beta_signal_std": 0.04682083274549272,
+          "hac_t": 4.857127578511834,
+          "hac_p": 1.1910086120610071e-06,
+          "r2": 0.7008442889631104,
+          "target_mean_raw": 0.17586081312895932,
+          "signal_mean_raw": 0.08362725117675099,
+          "status": "ok",
+          "hac_maxlags": 5,
+          "model": "z(log(target)) ~ z(signal_l1) + z(log(target_l1)) + z(total_dollar_volume_l1), OLS-HAC",
+          "bh_q_all_regressions": 2.858420668946417e-05,
+          "harvey_abs_t_ge_3": true,
+          "positive_harvey_t_ge_3": true
+        },
+        {
+          "group": "em",
+          "label": "Emerging-market same-index ETF pair",
+          "tickers": [
+            "EEM",
+            "IEMG"
+          ],
+          "leader": "EEM",
+          "primary": "EEM",
+          "signal": "entropy_z_l1",
+          "target": "forward5_rv",
+          "n_obs": 3365,
+          "sample_start": "2013-01-29",
+          "sample_end": "2026-06-15",
+          "beta_signal_std": 0.047200688917475545,
+          "hac_t": 4.865980247173926,
+          "hac_p": 1.138908929857465e-06,
+          "r2": 0.700877818355834,
+          "target_mean_raw": 0.17586081312895932,
+          "signal_mean_raw": 0.08434901953181577,
+          "status": "ok",
+          "hac_maxlags": 5,
+          "model": "z(log(target)) ~ z(signal_l1) + z(log(target_l1)) + z(total_dollar_volume_l1), OLS-HAC",
+          "bh_q_all_regressions": 2.858420668946417e-05,
+          "harvey_abs_t_ge_3": true,
+          "positive_harvey_t_ge_3": true
+        }
+      ]
+    },
+    "limitations": [
+      "Same-index ETF pairs are small cross-sections; inference is time-series within group, not broad ETF universe inference.",
+      "yfinance OHLCV cannot identify ETF NAV premiums, creations/redemptions, or historical AUM/fee dynamics.",
+      "Forward 5-day targets overlap; HAC maxlags=5 mitigates but does not replace a non-overlapping robustness design.",
+      "The leader ETF is pre-specified by historical liquidity (SPY/QQQ/IWM/EEM), not estimated from future data."
+    ]
   }
 ]

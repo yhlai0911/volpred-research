@@ -199,6 +199,15 @@ def weighted_mean(values: pd.Series, weights: pd.Series) -> float:
     return float(np.average(values[valid], weights=weights[valid]))
 
 
+def weighted_mean_np(values: np.ndarray, weights: np.ndarray, positions: np.ndarray) -> float:
+    vals = values[positions]
+    w = weights[positions]
+    valid = np.isfinite(vals) & np.isfinite(w) & (w > 0)
+    if valid.sum() == 0:
+        return float("nan")
+    return float(np.average(vals[valid], weights=w[valid]))
+
+
 def build_data() -> tuple[pd.DataFrame, dict]:
     holdings = load_all_holdings()
     stock_tickers = sorted(set(holdings["symbol"]) - set(ETF_TICKERS))
@@ -255,49 +264,61 @@ def build_data() -> tuple[pd.DataFrame, dict]:
 
         comovement_z = returns[symbols].mul(etf_ret, axis=0).apply(rolling_z)
 
-        for date in returns.index:
-            shock = etf_shock_lag1.get(date, np.nan)
-            if not np.isfinite(shock):
-                continue
+        liq_df = log_adv_lag1[symbols]
+        valid_date_mask = etf_shock_lag1.notna() & (liq_df.notna().sum(axis=1) >= 6)
+        valid_dates = liq_df.index[valid_date_mask.to_numpy()]
+        if len(valid_dates) == 0:
+            skipped.append({"etf": etf, "reason": "no_valid_lagged_shock_dates"})
+            continue
 
-            liq = log_adv_lag1.loc[date, symbols].dropna()
-            if len(liq) < 6:
-                continue
-            ordered = liq.sort_values()
-            tercile_n = max(2, len(ordered) // 3)
-            low_symbols = ordered.index[:tercile_n].tolist()
-            high_symbols = ordered.index[-tercile_n:].tolist()
+        symbol_arr = np.asarray(symbols)
+        weights_arr = weights.reindex(symbols).to_numpy(dtype=float)
+        liq_values = liq_df.loc[valid_dates].to_numpy(dtype=float)
+        rv_values = rv_z.loc[valid_dates, symbols].to_numpy(dtype=float)
+        beta_values = beta_contrib_z.loc[valid_dates, symbols].to_numpy(dtype=float)
+        comove_values = comovement_z.loc[valid_dates, symbols].to_numpy(dtype=float)
+        shock_values = etf_shock_lag1.loc[valid_dates].to_numpy(dtype=float)
+        volume_values = volume_z_lag1.loc[valid_dates].to_numpy(dtype=float)
+        tracking_values = tracking_error_z_lag1.loc[valid_dates].to_numpy(dtype=float)
+        abs_ret_values = abs_etf_ret_lag1.loc[valid_dates].to_numpy(dtype=float)
+        market_rv_values = market_rv_lag1.loc[valid_dates].to_numpy(dtype=float)
 
-            high_w = weights.reindex(high_symbols)
-            low_w = weights.reindex(low_symbols)
+        target_arrays = {
+            "rv_spread": rv_values,
+            "market_beta_proxy_spread": beta_values,
+            "etf_comovement_spread": comove_values,
+        }
+
+        for i, date in enumerate(valid_dates):
+            liq_arr = liq_values[i]
+            valid_liq_pos = np.where(np.isfinite(liq_arr))[0]
+            if len(valid_liq_pos) < 6:
+                continue
+            ordered_pos = valid_liq_pos[np.argsort(liq_arr[valid_liq_pos])]
+            tercile_n = max(2, len(ordered_pos) // 3)
+            low_pos = ordered_pos[:tercile_n]
+            high_pos = ordered_pos[-tercile_n:]
 
             row = {
                 "date": date,
                 "etf": etf,
-                "n_holdings_available": int(len(liq)),
-                "high_liq_symbols": ",".join(high_symbols),
-                "low_liq_symbols": ",".join(low_symbols),
-                "high_liq_log_adv": float(liq.reindex(high_symbols).mean()),
-                "low_liq_log_adv": float(liq.reindex(low_symbols).mean()),
-                "holding_weight_high": float(weights.reindex(high_symbols).sum()),
-                "holding_weight_low": float(weights.reindex(low_symbols).sum()),
-                "etf_shock_lag1": float(shock),
-                "volume_z_lag1": float(volume_z_lag1.get(date, np.nan)),
-                "tracking_error_z_lag1": float(tracking_error_z_lag1.get(date, np.nan)),
-                "abs_etf_ret_lag1": float(abs_etf_ret_lag1.get(date, np.nan)),
-                "market_rv_lag1": float(market_rv_lag1.get(date, np.nan)),
+                "n_holdings_available": int(len(valid_liq_pos)),
+                "high_liq_symbols": ",".join(symbol_arr[high_pos].tolist()),
+                "low_liq_symbols": ",".join(symbol_arr[low_pos].tolist()),
+                "high_liq_log_adv": float(np.nanmean(liq_arr[high_pos])),
+                "low_liq_log_adv": float(np.nanmean(liq_arr[low_pos])),
+                "holding_weight_high": float(np.nansum(weights_arr[high_pos])),
+                "holding_weight_low": float(np.nansum(weights_arr[low_pos])),
+                "etf_shock_lag1": float(shock_values[i]),
+                "volume_z_lag1": float(volume_values[i]),
+                "tracking_error_z_lag1": float(tracking_values[i]),
+                "abs_etf_ret_lag1": float(abs_ret_values[i]),
+                "market_rv_lag1": float(market_rv_values[i]),
             }
 
-            target_specs = {
-                "rv_spread": rv_z,
-                "market_beta_proxy_spread": beta_contrib_z,
-                "etf_comovement_spread": comovement_z,
-            }
-            for target_name, target_frame in target_specs.items():
-                high_vals = target_frame.loc[date, high_symbols]
-                low_vals = target_frame.loc[date, low_symbols]
-                high_mean = weighted_mean(high_vals, high_w)
-                low_mean = weighted_mean(low_vals, low_w)
+            for target_name, target_values in target_arrays.items():
+                high_mean = weighted_mean_np(target_values[i], weights_arr, high_pos)
+                low_mean = weighted_mean_np(target_values[i], weights_arr, low_pos)
                 row[f"{target_name}_high"] = high_mean
                 row[f"{target_name}_low"] = low_mean
                 row[target_name] = high_mean - low_mean
