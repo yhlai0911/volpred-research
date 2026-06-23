@@ -36077,7 +36077,7 @@
     "title": "Experiment scaffold: K1537 (research_program backlog)",
     "description": "K1537 mentioned in research_program.md but no experiments/k1537/ directory yet. Create three-part scaffold per CLAUDE.md `.claude/rules/experiments.md`: (a) README.md (motivation + method + expected output + lookahead policy), (b) k1537.py initial implementation (with signal.shift(1) + seed), (c) plan placeholder k1537_results.json schema. Do NOT run the experiment — just scaffold + stage for main thread to review.",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "diverse_gen",
@@ -36086,6 +36086,12 @@
       "scaffold",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T10:42:07+00:00"
+    "created_at": "2026-06-23T10:42:07+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T10:45:45.883878+00:00",
+    "claim_session_id": "e9ce8fa643ab",
+    "started_at": "2026-06-23T10:45:46.082364+00:00",
+    "completed_at": "2026-06-23T10:46:24.756531+00:00",
+    "result": "Blocked as stale/unsafe scaffold request. research_program.md already marks K1537 completed on 2026-06-23 as biodiversity transition-risk commodity proxy NULL_PROXY, while docs/error_log.md records a same-day K1537/K1536 K-id collision and quarantine for duplicate biodiversity experiments. Creating a fresh experiments/k1537 scaffold would re-open an already completed/collided K-id and risk false provenance. No experiment files were created; generator should ignore completed [x] K entries or reserved/collided K-ids."
   }
 ]
