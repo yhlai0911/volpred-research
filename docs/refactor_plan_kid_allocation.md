@@ -1,6 +1,6 @@
 # Refactor Plan — Atomic K-id Allocation + Topic-Claim Ledger（3-STRIKE）
 
-> **狀態**：PARTIAL（A 層 helper 已落地；入口尚未全面改寫）。2026-06-23 strike 2 觸發後寫。`scripts/kid_reserve.py` 已提供 `fcntl` 原子 K-id reservation 與 regression tests；後續仍需把所有配號入口、topic-claim ledger、in-flight marker 接上。
+> **狀態**：PARTIAL（A/B 層 helper 已落地；入口尚未全面改寫）。2026-06-23 strike 2 觸發後寫。`scripts/kid_reserve.py` 已提供 `fcntl` 原子 K-id reservation；`scripts/topic_claim.py` 已提供 `fcntl` 原子 topic-claim ledger。兩者皆有 regression tests；後續仍需把所有配號/挑題入口與 in-flight marker 接上。
 > **觸發**：K-id 配號/挑題 race，同根因連兩次 ——
 > - **strike 1** 2026-06-23 K1534 雙佔（主線程 vs 在飛 worktree，commit 774df789/0fe5d876 vs 0f789f32）
 > - **strike 2** 2026-06-23 biodiversity K1536/K1537×2（3 個並行 cron Codex agent 撞同一 journal-discovery 題 + 雙佔 K1537，commit f350674e 收斂）
@@ -29,7 +29,7 @@
 - 所有配號入口（主線程、`continue_task_dispatch.py`、cron agent prompt 範本、worktree brief）一律改呼叫 `reserve_kid`，**禁止**任何地方再用 `ls | max+1` 直接配號。
 
 ### B. Topic-claim ledger（`storage/ops/topic_claims.json`）
-- `claim_topic(topic, claimed_by) -> {ok, existing_k_id?}`：`flock` + normalize(topic) → hash → 若已 claim 回 `ok=False`（附既有 k_id 讓 agent 跳過 / 改挑下一題）；否則寫入並（可選）順帶 `reserve_kid`。
+- `claim_topic(topic, claimed_by) -> {ok, existing_k_id?}`：`flock` + normalize(topic) → hash → 若已 claim 回 `ok=False`（附既有 k_id 讓 agent 跳過 / 改挑下一題）；否則寫入並（可選）順帶 `reserve_kid`。2026-06-23 已落地 helper：`scripts/topic_claim.py claim --topic ... --owner ... --k-id ...`，並以並行 CLI regression test 驗證同題只會有 1 個 winner。
 - journal-discovery / backlog 挑題流程：派工前先 `claim_topic`；LanceDB 主題相似度（dist < 0.3 視為同題）併入 claim 判斷，擋「換殼同題」。
 
 ### C. In-flight 標記 + orphan 判定
@@ -42,7 +42,7 @@
 
 ## 驗證 gate（regression 必覆蓋兩次 incident 觸發條件）
 1. **strike 1 重現**：模擬「主線程 + 在飛 worktree 同時 reserve」→ 斷言兩者拿到**不同** K-id。
-2. **strike 2 重現**：模擬「3 個並行 caller 同時 `reserve_kid` + `claim_topic` 同一 biodiversity 題」→ 斷言 (a) 3 個不同 K-id 或後兩者被 topic-claim 擋下、(b) knowledge.json 不可能出現 2 個同 K-id 條目。
+2. **strike 2 重現**：模擬「3 個並行 caller 同時 `reserve_kid` + `claim_topic` 同一 biodiversity 題」→ 斷言 (a) 3 個不同 K-id 或後兩者被 topic-claim 擋下、(b) knowledge.json 不可能出現 2 個同 K-id 條目。2026-06-23 已覆蓋 topic-claim 後者：同 normalized topic 的 8 個並行 CLI caller 只有 1 個 `ok=True`。
 3. **並發壓力**：`multiprocessing` 開 16 個 worker 各 reserve 100 次 → 斷言 1600 個號全 unique、無 gap-corruption。
 4. **provenance 不破**：跑 `scripts/validate_knowledge_provenance.py`（baseline 不因重構而被繞過）。
 5. 重構 commit 訊息開頭 `refactor(3-strike): kid-allocation` 便於 grep。

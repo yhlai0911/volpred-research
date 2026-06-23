@@ -33,7 +33,7 @@
 
 **解決方法（即時）**：(a) 確認 Codex agent 已自行收斂 — commit `f350674e` 留下**單一** k1536 biodiversity 實驗（完整 + codex_review PASS-with-limitations），knowledge.json 乾淨 2353 條、**0 殘留 K1537 撞車**；(b) 主線程的 quarantine/刪條目干擾被 agent commit superseded（無害，已驗證）；重複的 k1537 留在 `/tmp/volpred_quarantine_biodiv_dups/` 備查；(c) **未竟**：k1536 已 commit 但尚無 knowledge 條目（running agent 可能補，或 agents 靜止後由主線程補，codex_review 已存）。
 
-**流程修正 / 重構**：寫 `docs/refactor_plan_kid_allocation.md`（3-STRIKE 三層重構：atomic K-id reservation + topic-claim ledger + 驗證 gate）。**2026-06-23 Codex partial landing**：新增 `scripts/kid_reserve.py` + `tests/test_kid_reserve.py`，先落地 `fcntl` 原子 K-id reservation helper（union 掃描 registry / experiments / worktrees / git log / next_tasks，多進程唯一性測試通過）；尚未把所有配號入口、topic-claim ledger、in-flight marker 全面切換。**教訓**：背景 cron agent 活躍時，主線程**不可**碰共享檔（knowledge.json / experiments/ / next_tasks）做清理 — 會與正在 commit 的 agent race；正確做法是先 `ps aux | grep codex` 確認無活躍 agent，或純 read-only 觀察 + 留給 agent 自己收斂。cross-ref ↓ K1534 entry。
+**流程修正 / 重構**：寫 `docs/refactor_plan_kid_allocation.md`（3-STRIKE 三層重構：atomic K-id reservation + topic-claim ledger + 驗證 gate）。**2026-06-23 Codex partial landing**：新增 `scripts/kid_reserve.py` + `tests/test_kid_reserve.py`，先落地 `fcntl` 原子 K-id reservation helper（union 掃描 registry / experiments / worktrees / git log / next_tasks，多進程唯一性測試通過）；同日補上 `scripts/topic_claim.py` + `tests/test_topic_claim.py`，落地 `fcntl` 原子 topic-claim ledger helper（同 normalized topic 並行 CLI 只允許 1 個 winner）。尚未把所有配號/挑題入口與 in-flight marker 全面切換。**教訓**：背景 cron agent 活躍時，主線程**不可**碰共享檔（knowledge.json / experiments/ / next_tasks）做清理 — 會與正在 commit 的 agent race；正確做法是先 `ps aux | grep codex` 確認無活躍 agent，或純 read-only 觀察 + 留給 agent 自己收斂。cross-ref ↓ K1534 entry。
 
 ## 2026-06-23 K-id 配號撞到在飛 worktree（K1534 雙佔）
 
