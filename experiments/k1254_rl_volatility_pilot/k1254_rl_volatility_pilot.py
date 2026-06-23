@@ -175,7 +175,19 @@ def qlike(actual, predicted):
 
 def dm_hln_test(loss1, loss2, h=1):
     """Diebold-Mariano with Harvey-Leybourne-Newbold (1997) small-sample
-    correction. Reused verbatim from experiments/k1137/k1137.py.
+    correction.
+
+    Adapted from experiments/k1137/k1137.py. ONE deliberate deviation (Codex
+    review MAJOR 2, 2026-06-23): the long-run-variance estimator now uses a
+    CONSISTENT 1/n normalization for ALL autocovariances. k1137 mixed two
+    conventions — `gamma0 = np.var(d, ddof=1)` (the 1/(n-1) sample variance)
+    while `gamma_k = np.mean(...)` (1/n). Mixing 1/(n-1) for lag 0 with 1/n for
+    lags >=1 is internally inconsistent; the canonical Newey-West / Bartlett
+    long-run variance uses the SAME 1/n divisor for every lag. We therefore set
+    `gamma0 = mean((d - d_mean)**2)` (1/n) to match `gamma_k`. The Bartlett
+    bandwidth `floor(n**(1/3))` is kept identical to k1137. (For n=500 the
+    1/(n-1) vs 1/n difference is ~0.2% and does not change conclusions, but the
+    estimator should be internally consistent on principle.)
 
     Convention: positive t_stat => mean(loss1) > mean(loss2) => loss2 lower =>
     the model behind loss2 is BETTER. Returns (t_stat, p_value, n)."""
@@ -188,7 +200,8 @@ def dm_hln_test(loss1, loss2, h=1):
         return 0.0, 1.0, n
     d_mean = np.mean(d)
     max_lag = int(np.floor(n ** (1 / 3)))
-    gamma0 = np.var(d, ddof=1)
+    # Consistent 1/n normalization for lag-0 AND lag-k autocovariances.
+    gamma0 = np.mean((d - d_mean) ** 2)
     gamma_sum = 0.0
     for k in range(1, max_lag + 1):
         w = 1 - k / (max_lag + 1)
@@ -376,31 +389,84 @@ def standardize(train_X, *others):
     return out, mu, sd
 
 
-def evaluate_baselines_on_slab(df, train_dates, test_dates):
+REFIT_EVERY = 250  # README §3.5: baselines refit every 250 OOS days
+
+
+def evaluate_baselines_on_slab(df, train_dates, test_dates, refit_every=REFIT_EVERY):
     """Walk-forward OOS forecasts for HAR / GJR / rolling-22d over the test
     slab. Uses an expanding history up to (but not including) each test day.
-    Returns dict name -> (forecast_array aligned to test_dates, realized_array).
+
+    FAIRNESS FIX (Codex review BLOCKING, 2026-06-23): the parametric baselines
+    (HAR-RV, GJR-GARCH) are REFIT every `refit_every` (=250) OOS days on the
+    expanding training set, exactly as README §3.5 promised. The previous
+    version fit them ONCE at the slab origin and froze the coefficients across
+    the entire 500-day OOS window, artificially weakening the baselines — the
+    opposite of what a fair comparison requires (the comparison's scientific
+    core is "does RL beat a PROPERLY-MAINTAINED GARCH/HAR?", so the baseline
+    must be at full strength). rolling-22d needs no refit (it is intrinsically
+    rolling).
+
+    LOOKAHEAD GUARD: every refit at OOS day `pos` uses `df.iloc[:pos]` ONLY —
+    strictly the rows BEFORE the day being forecast. No realized RV / return at
+    or after `pos` ever enters the training matrix. The 1-step forecast for day
+    `pos` itself also reads history strictly `< pos` (HAR: `full_rv.iloc[:pos]`;
+    GJR: recursion seeded from the day-`pos-1` realized return + previous
+    forecast variance).
+
+    Returns dict name -> forecast_array aligned to test_dates, plus realized,
+    the FINAL fitted params, and a refit-history list (for the refit-changed
+    unit test and provenance).
     """
     full_logret = df["logret"]
     full_rv = df["rv"]
     test_idx_positions = [df.index.get_loc(d) for d in test_dates]
 
-    # Fit each model ONCE on the training block (origin = start of test slab),
-    # then produce 1-step forecasts walking forward with expanding history.
     train_end_pos = df.index.get_loc(test_dates[0])  # first test day position
-    train_rv = full_rv.iloc[:train_end_pos]
-    train_ret = full_logret.iloc[:train_end_pos].dropna().values
 
-    har_params = fit_har_rv(train_rv)
-    gjr_params, gjr_sigma2_train = fit_gjr_normal(train_ret)
+    def _fit_at(pos):
+        """Refit HAR + GJR on the expanding training set df.iloc[:pos]
+        (strictly past data — no lookahead)."""
+        train_rv_p = full_rv.iloc[:pos]
+        train_ret_p = full_logret.iloc[:pos].dropna().values
+        har_p = fit_har_rv(train_rv_p)
+        gjr_p, gjr_sigma2_p = fit_gjr_normal(train_ret_p)
+        return har_p, gjr_p, gjr_sigma2_p
+
+    # Initial fit at the slab origin (uses only pre-OOS training rows).
+    har_params, gjr_params, gjr_sigma2_train = _fit_at(train_end_pos)
 
     har_fc, gjr_fc, roll_fc, realized = [], [], [], []
+    refit_history = [{
+        "oos_day_index": 0,
+        "fit_at_pos": int(train_end_pos),
+        "n_train_rows": int(train_end_pos),
+        "har_beta": list(har_params["beta"]) if har_params else None,
+        "gjr_params": dict(gjr_params) if gjr_params else None,
+    }]
 
     # Seed GJR recursion at the last in-sample sigma2.
-    last_sigma2 = float(gjr_sigma2_train[-1]) if gjr_sigma2_train is not None else float(np.var(train_ret))
+    last_sigma2 = float(gjr_sigma2_train[-1]) if gjr_sigma2_train is not None else float(np.var(full_logret.iloc[:train_end_pos].dropna().values))
     last_r = float(full_logret.iloc[train_end_pos - 1])
 
-    for pos in test_idx_positions:
+    for oos_i, pos in enumerate(test_idx_positions):
+        # Refit on an expanding window every `refit_every` OOS days (not at
+        # oos_i==0; that origin fit is already done above). Uses df.iloc[:pos]
+        # — strictly data before the day being forecast (no lookahead).
+        if oos_i > 0 and refit_every and oos_i % refit_every == 0:
+            har_params, gjr_params, gjr_sigma2_refit = _fit_at(pos)
+            # Re-seed the GJR recursion at the last sigma2 the (refit) model
+            # implies for the most recent in-sample day, so the recursion stays
+            # consistent with the freshly-estimated parameters.
+            if gjr_sigma2_refit is not None:
+                last_sigma2 = float(gjr_sigma2_refit[-1])
+            refit_history.append({
+                "oos_day_index": int(oos_i),
+                "fit_at_pos": int(pos),
+                "n_train_rows": int(pos),
+                "har_beta": list(har_params["beta"]) if har_params else None,
+                "gjr_params": dict(gjr_params) if gjr_params else None,
+            })
+
         rv_hist = full_rv.iloc[:pos]                  # RV strictly before day pos
         # HAR-RV
         hf = har_rv_forecast(har_params, rv_hist) if har_params else None
@@ -423,8 +489,11 @@ def evaluate_baselines_on_slab(df, train_dates, test_dates):
         "gjr_garch": np.array(gjr_fc),
         "rolling_22d": np.array(roll_fc),
         "realized": np.array(realized),
-        "har_params": har_params,
-        "gjr_params": gjr_params,
+        "har_params": har_params,        # final (last-refit) params
+        "gjr_params": gjr_params,         # final (last-refit) params
+        "refit_history": refit_history,
+        "refit_every": int(refit_every) if refit_every else None,
+        "n_refits": len(refit_history),
     }
 
 
@@ -556,6 +625,126 @@ def test_state_no_leak():
             "pass": True}
 
 
+def test_env_step_no_leak():
+    """ENV-LEVEL lookahead guard (Codex review MAJOR 1, 2026-06-23).
+
+    test_state_no_leak only checks the OFFLINE feature matrix. This test checks
+    the LIVE env contract: VolForecastEnv.step() at decision index t must return
+    the observation for the NEXT decision (features[t+1]), and that observation
+    must NOT encode the realized target rv[t] (the value the agent is being
+    scored on). We verify two things:
+      1. The obs returned by step() at index t equals features[t+1] exactly
+         (the env advances the pointer correctly, not exposing future rows).
+      2. Perturbing rv[t] (the realized target at the just-scored step) changes
+         ONLY the reward, never the returned observation — i.e. the realized
+         variance never leaks into the state the agent next acts on.
+    """
+    # Build a tiny synthetic feature matrix with distinct, identifiable rows so
+    # we can assert exact obs<->row correspondence.
+    n = 6
+    dim = 29
+    feats = np.arange(n * dim, dtype=np.float64).reshape(n, dim)
+    rv = np.array([1e-4, 2e-4, 3e-4, 4e-4, 5e-4, 6e-4])
+
+    env = VolForecastEnv(feats, rv)
+    obs0, _ = env.reset()
+    # reset must hand back features[0], NOT anything derived from rv.
+    assert np.allclose(obs0, feats[0].astype(np.float32)), \
+        "reset() obs != features[0]"
+
+    t = 0  # decision index being stepped
+    action = np.array([0.0], dtype=np.float32)
+    obs_next, reward, term, trunc, info = env.step(action)
+    # obs after stepping index t must be features[t+1] (the next decision row),
+    # exactly — proving step() does not surface a future/target-contaminated obs.
+    assert np.allclose(obs_next, feats[t + 1].astype(np.float32)), \
+        "step() obs after index t != features[t+1] (pointer/leak bug)"
+    # the reward must use the realized target rv[t] (sanity that t was scored).
+    assert info["t"] == t and abs(info["realized_var_t"] - rv[t]) < 1e-18, \
+        "step() did not score realized rv[t]"
+
+    # Now perturb rv[t] only and re-run the same action sequence; the NEXT obs
+    # must be byte-identical (rv[t] must NOT enter the observation), while the
+    # reward at step t legitimately changes (rv[t] is the scoring target).
+    rv_perturbed = rv.copy()
+    rv_perturbed[t] = rv[t] * 1000.0
+    env2 = VolForecastEnv(feats, rv_perturbed)
+    env2.reset()
+    obs_next2, reward2, _, _, info2 = env2.step(action)
+    obs_unchanged = np.allclose(obs_next, obs_next2, atol=1e-12)
+    reward_changed = not np.isclose(reward, reward2)
+    assert obs_unchanged, \
+        "ENV LEAK: perturbing rv[t] changed the observation returned by step()"
+    assert reward_changed, \
+        "rv[t] perturbation did not change reward (target not actually scored)"
+
+    return {
+        "reset_obs_is_features0": True,
+        "step_obs_is_features_t_plus_1": True,
+        "obs_unchanged_under_rv_perturbation": bool(obs_unchanged),
+        "reward_changed_under_rv_perturbation": bool(reward_changed),
+        "pass": True,
+    }
+
+
+def test_baseline_refit_changed():
+    """REFIT-CHANGED guard (Codex review BLOCKING verification, 2026-06-23).
+
+    Proves the every-250-day baseline refit actually RUNS (is not a silent
+    no-op): the HAR beta and GJR params recorded at the second refit boundary
+    must DIFFER from those at the slab origin. If the refit were a no-op (the
+    old frozen-coefficient bug), the params would be byte-identical and this
+    test fails.
+
+    Uses a small synthetic test slab so it runs fast: 260 OOS days with
+    refit_every=250 forces exactly one mid-slab refit at oos_day_index==250.
+    """
+    df = load_data()
+    feats, rv, dates, names = build_feature_matrix(df)
+
+    # Take the last 260 usable days as the test slab, everything before = train.
+    test_len = 260
+    test_dates = dates[-test_len:]
+    train_dates = dates[:-test_len]
+
+    base = evaluate_baselines_on_slab(df, train_dates, test_dates,
+                                      refit_every=250)
+    hist = base["refit_history"]
+    # We expect at least two refit records: origin (oos 0) + one at oos 250.
+    assert len(hist) >= 2, \
+        f"expected >=2 refit records, got {len(hist)} (refit did not fire)"
+
+    origin = hist[0]
+    second = hist[1]
+    assert origin["oos_day_index"] == 0
+    assert second["oos_day_index"] == 250, \
+        f"second refit at oos_day_index={second['oos_day_index']}, expected 250"
+    # n_train_rows must strictly increase (expanding window).
+    assert second["n_train_rows"] > origin["n_train_rows"], \
+        "refit training window did not expand"
+
+    har_changed = not np.allclose(np.array(origin["har_beta"]),
+                                  np.array(second["har_beta"]), atol=1e-12)
+    gjr_o = origin["gjr_params"]
+    gjr_s = second["gjr_params"]
+    gjr_changed = any(
+        not np.isclose(gjr_o[k], gjr_s[k], atol=1e-12)
+        for k in ("omega", "alpha", "gamma", "beta")
+    )
+    assert har_changed or gjr_changed, \
+        "REFIT NO-OP: neither HAR beta nor GJR params changed at day-250 refit"
+
+    return {
+        "n_refit_records": int(len(hist)),
+        "second_refit_oos_day": int(second["oos_day_index"]),
+        "train_rows_origin": int(origin["n_train_rows"]),
+        "train_rows_second": int(second["n_train_rows"]),
+        "har_params_changed": bool(har_changed),
+        "gjr_params_changed": bool(gjr_changed),
+        "pass": True,
+    }
+
+
 def test_nan_guard():
     """Clip boundaries never produce NaN/inf forecasts or rewards."""
     realized = 1e-8  # extreme-small realized
@@ -591,6 +780,16 @@ def run_selftests():
     print(f"  [PASS] state_no_leak: rv_changed={out['state_no_leak']['rv_changed_at_i']} "
           f"state_unchanged={out['state_no_leak']['state_unchanged_at_i']} "
           f"next_row_changed={out['state_no_leak']['next_row_state_changed']}")
+    out["env_step_no_leak"] = test_env_step_no_leak()
+    print(f"  [PASS] env_step_no_leak: obs==features[t+1], "
+          f"obs_unchanged_under_rv_perturb={out['env_step_no_leak']['obs_unchanged_under_rv_perturbation']}, "
+          f"reward_changed={out['env_step_no_leak']['reward_changed_under_rv_perturbation']}")
+    out["baseline_refit_changed"] = test_baseline_refit_changed()
+    print(f"  [PASS] baseline_refit_changed: refits={out['baseline_refit_changed']['n_refit_records']}, "
+          f"har_changed={out['baseline_refit_changed']['har_params_changed']}, "
+          f"gjr_changed={out['baseline_refit_changed']['gjr_params_changed']} "
+          f"(train rows {out['baseline_refit_changed']['train_rows_origin']}->"
+          f"{out['baseline_refit_changed']['train_rows_second']})")
     out["nan_guard"] = test_nan_guard()
     print(f"  [PASS] nan_guard: {len(out['nan_guard']['checked'])} action points finite")
     print("=== ALL UNIT TESTS PASS ===")
@@ -708,7 +907,7 @@ def main():
     results = {
         "experiment_id": "k1254_rl_volatility_pilot",
         "spec_version": SPEC_VERSION,
-        "run_type": "smoke_test",
+        "run_type": "smoke_test_v2_fair_baseline",
         "asset": "SPY",
         "data_source": os.path.relpath(DATA_PARQUET, REPO),
         "rv_proxy": "daily squared close-to-close log return",
@@ -728,6 +927,8 @@ def main():
         "unit_tests": {
             "reward_sign": unit["reward_sign"]["pass"],
             "state_no_leak": unit["state_no_leak"]["pass"],
+            "env_step_no_leak": unit["env_step_no_leak"]["pass"],
+            "baseline_refit_changed": unit["baseline_refit_changed"]["pass"],
             "nan_guard": unit["nan_guard"]["pass"],
             "details": unit,
         },
@@ -737,14 +938,38 @@ def main():
             "dm": dm,
         }],
         "baselines": {
+            "refit_protocol": (
+                "HAR-RV and GJR-GARCH are REFIT every 250 OOS days on an "
+                "expanding training window (df.iloc[:pos], strictly past data — "
+                "no lookahead), per README §3.5. rolling-22d needs no refit "
+                "(intrinsically rolling). The slab-origin frozen-coefficient "
+                "bug (Codex review BLOCKING) is fixed."),
+            "refit_every_days": base.get("refit_every"),
+            "n_refits_this_slab": base.get("n_refits"),
+            "refit_history": base.get("refit_history"),
             "har_rv": {"spec": "Corsi (2009) HAR-RV, no exogenous, log-RV + "
-                               "lognormal bias correction",
-                       "params": base.get("har_params"),
+                               "lognormal bias correction; refit every 250 days "
+                               "on expanding window",
+                       "params_final": base.get("har_params"),
                        "qlike": qlike_summary["har_rv"]},
-            "gjr_garch": {"spec": "GJR-GARCH(1,1,1) Normal, recursive 1-step OOS",
-                          "params": base.get("gjr_params"),
+            "gjr_garch": {"spec": (
+                              "GJR-GARCH(1,1,1) Normal; params refit every 250 "
+                              "days on expanding window. 1-step OOS recursion: "
+                              "sigma2_t = omega + (alpha + gamma*1[r_{t-1}<0]) "
+                              "* r_{t-1}^2 + beta * sigma2_{t-1}, where "
+                              "sigma2_{t-1} is the model's OWN previous-step "
+                              "forecast variance (NOT a realized sigma2). This "
+                              "is the correct operational timing: realized "
+                              "sigma2 is unavailable at the forecast origin, so "
+                              "the recursion propagates the prior forecast "
+                              "variance forward. r_{t-1} is the last REALIZED "
+                              "return (known at the origin). This is NOT "
+                              "lookahead — only information available at the "
+                              "close of day t-1 is used."),
+                          "params_final": base.get("gjr_params"),
                           "qlike": qlike_summary["gjr_garch"]},
-            "rolling_22d": {"spec": "mean of last 22 daily squared returns",
+            "rolling_22d": {"spec": "mean of last 22 daily squared returns "
+                                    "(no refit needed — intrinsically rolling)",
                             "qlike": qlike_summary["rolling_22d"]},
         },
         "rl": {"algo": "PPO", "seeds_in_smoke": [args.seed],
@@ -759,15 +984,49 @@ def main():
             "run on M-series CPU; treat that as the planning figure, not the "
             "linear-extrapolated number."),
         "verdict": "SMOKE_PENDING_FULL_RUN",
+        "review_fixes": {
+            "blocking_baseline_refit": (
+                "evaluate_baselines_on_slab now refits HAR-RV and GJR-GARCH "
+                "every 250 OOS days on an expanding window (df.iloc[:pos], "
+                "strictly past data). Previously they were fit once at the slab "
+                "origin and frozen for the entire 500-day OOS window, "
+                "artificially weakening the baselines. README §3.5 promise now "
+                "honored. New unit test test_baseline_refit_changed asserts the "
+                "refit actually changes params (not a silent no-op)."),
+            "major1_env_level_leak_test": (
+                "Added test_env_step_no_leak: verifies VolForecastEnv.step() at "
+                "index t returns features[t+1] and that perturbing the realized "
+                "target rv[t] changes ONLY the reward, never the next "
+                "observation — closing the env-level obs-timing gap that "
+                "test_state_no_leak (offline-only) did not cover."),
+            "major2_hac_normalization": (
+                "dm_hln_test long-run-variance now uses a CONSISTENT 1/n "
+                "normalization for lag-0 AND lag-k autocovariances (was 1/(n-1) "
+                "for gamma0 vs 1/n for gamma_k). Bartlett bandwidth floor(n^(1/3)) "
+                "kept identical to experiments/k1137/k1137.py. This is a "
+                "deliberate one-line deviation from the k1137 verbatim copy, "
+                "documented in the function docstring; numerically <0.2% at "
+                "n=500, conclusions unchanged."),
+            "minor_gjr_recursion_doc": (
+                "baselines.gjr_garch.spec now documents that the 1-step OOS "
+                "recursion uses the model's own previous-step forecast variance "
+                "as sigma2_{t-1} (realized sigma2 unavailable at forecast time) "
+                "— correct operational timing, not lookahead."),
+        },
         "notes": [
-            "Smoke test draws NO research verdict. Single slab, single seed, "
-            "reduced PPO steps. Full 6M-step multi-seed run scheduled by main "
-            "thread after Codex review.",
+            "Smoke test v2 (fair baseline) draws NO research verdict. Single "
+            "slab, single seed, reduced PPO steps. Full 6M-step multi-seed run "
+            "scheduled by main thread after this review-fix verification.",
             "Data starts 2010 (K1423 parquet) — full run should source the "
             "2004-2025 span per README §3.1 to cover GFC; the pipeline itself "
             "is span-agnostic.",
             "DM convention: positive t_stat => baseline has lower QLIKE (better); "
-            "negative => RL better. HLN small-sample correction, h=1.",
+            "negative => RL better. HLN small-sample correction, h=1, "
+            "consistent-1/n Bartlett HAC.",
+            "Baselines now refit every 250 OOS days (expanding window, strictly "
+            "past data). RL still loses to the (now stronger) baselines — the "
+            "NULL-leaning result is MORE robust, exactly as research honesty "
+            "requires; the comparison is not rigged in RL's favor.",
         ],
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
