@@ -3298,3 +3298,16 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **修法**：`scripts/generate_diverse_tasks.py` 新增 `staleness_expected_minutes` override，監控口徑可和實際執行載體對齊；`config/runtime_schedules.json` 對 `supabase_sync_drain` 設 `staleness_expected_minutes: 60` 並更新描述。task description 也改用 config 的真實 `log_path`（`storage/logs/cron/drain_failed_syncs.log`），不再提示不存在的 `{job_id}.log`。
 
 **防再發**：cron expression 可以表達「理想 intent」，但 piggy-back job 的 staleness 必須看 effective clock。任何非獨立 crontab/LaunchAgent、實際靠 hourly piggy-back 的 sub-hourly cron，都要在 config 補 `staleness_expected_minutes` 或改成真實可安裝的排程載體；不要用 false-positive ops task 代替排程模型校正。
+
+## 2026-06-23 11:14 台灣時間 — Trending repost 池 release-layer recycling 根因修整
+
+**Incident**：Hourly dispatch 11:07 fire 發現 next_tasks pending 池 9/12 是 trending_repost，全集中在 2 個飽和 narrative arc（Fed-pivot 5 篇 + AI capex 4 篇）。arc_dedup 檢驗：Fed-pivot 已被 22 篇現有文章覆蓋；AI capex 已被 2 篇近期文章覆蓋。整批 pending 都是 release-layer 重複堆積，不是研究端缺題。
+
+**Root cause**：`scripts/refill_reader_facing_pool.py::refill_trending_candidates` 把 trending scan 輸出直接寫入 `next_tasks.json`，**沒有跑 arc_dedup pre-check**。publisher 端 arc block 只在 publish 時 fire — 任務仍佔 dispatch slot、消耗主線程注意力、產生「鬼打牆」感（呼應 memory `feedback_recycling_is_release_layer_not_research`）。
+
+**Fix（11:13 commit 即將推）**：
+- `refill_reader_facing_pool.py` 加 `_is_arc_duplicate()` + `_load_feed_for_dedup()` helper；trending refill 在 `_append_task` 前對 (title, description) 跑 `find_arc_duplicates(..., days=30)`，命中即 skip 並記 `reason=arc_duplicate, dup_of=<mile_id>`
+- 9 篇現有 dup pending 已 mark `blocked_reason=deprecated`（hourly 11:11 完成）
+- 新增 `tests/test_reader_facing_refill.py::test_refill_trending_skips_arc_duplicate` 覆蓋 dup+fresh 兩條候選的混合場景
+
+**Why pre-check 必要**：publish-time block 是 last-resort；upstream gate 才能避免 pool 堆積 → 主線程選題 noise → diversity rotation 卡死。修流程不修資料原則。

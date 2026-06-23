@@ -201,6 +201,46 @@ def test_refill_event_candidates_warns_on_bad_event_date(tmp_path, monkeypatch, 
     assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
 
 
+def test_refill_trending_skips_arc_duplicate(tmp_path, monkeypatch):
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setenv("VOLPRED_TRENDING_SCAN_CMD", "echo dummy")
+
+    candidates = [
+        {"id": "dup_topic", "title": "duplicate fed-pivot story", "description": "..."},
+        {"id": "fresh_topic", "title": "novel arc on green hydrogen vol", "description": "..."},
+    ]
+
+    class _FakeProc:
+        returncode = 0
+        stdout = json.dumps(candidates)
+        stderr = ""
+
+    monkeypatch.setattr(MODULE.subprocess, "run", lambda *a, **kw: _FakeProc())
+    monkeypatch.setattr(MODULE, "_load_feed_for_dedup", lambda: [{"id": "mile_existing"}])
+
+    def _fake_is_dup(title, desc, feed):
+        if "duplicate" in title:
+            return {"id": "mile_existing"}
+        return None
+
+    monkeypatch.setattr(MODULE, "_is_arc_duplicate", _fake_is_dup)
+
+    result = MODULE.refill_trending_candidates()
+
+    assert result["ok"] is True
+    assert result["added"] == ["dup_topic"] or result["added"] == ["fresh_topic"]
+    # exactly one fresh task added, dup must appear in skipped with arc_duplicate reason
+    skipped_dup = [s for s in result["skipped"] if s.get("reason") == "arc_duplicate"]
+    assert any(s.get("dup_of") == "mile_existing" for s in skipped_dup)
+    # the dup id must not appear in next_tasks.json
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    dup_ids = [t["id"] for t in data if "duplicate" in t.get("title", "")]
+    assert dup_ids == []
+
+
 def test_refill_event_candidates_warns_and_skips_on_bad_not_before(tmp_path, monkeypatch, capsys):
     next_tasks = tmp_path / "storage" / "next_tasks.json"
     next_tasks.parent.mkdir(parents=True, exist_ok=True)

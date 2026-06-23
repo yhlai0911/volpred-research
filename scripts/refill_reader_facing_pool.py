@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -17,9 +18,13 @@ OPS = STORAGE / "ops"
 NEXT_TASKS = STORAGE / "next_tasks.json"
 STATE_PATH = OPS / "daily_reader_facing_scan_state.json"
 TRENDING_LOG = STORAGE / "reports" / "trending_repost_log.json"
+FEED_PATH = STORAGE / "reports" / "feed.json"
 RUNTIME_SCHEDULES = ROOT / "config" / "runtime_schedules.json"
 LOCAL_TZ = ZoneInfo("Asia/Taipei")
 TRENDING_SCAN_CMD_ENV = "VOLPRED_TRENDING_SCAN_CMD"
+ARC_DEDUP_WINDOW_DAYS = 30
+
+sys.path.insert(0, str(ROOT / "src"))
 
 
 def _now_utc() -> datetime:
@@ -225,6 +230,34 @@ def _build_trending_task(candidate: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _is_arc_duplicate(title: str, description: str, feed: list[dict] | None) -> dict | None:
+    """Return first arc-duplicate match or None.
+
+    Pre-write gate (release-layer recycling root cause, 2026-06-23): trending
+    scan kept producing pending tasks for arcs already covered (Fed-pivot 22
+    dups, AI capex 2 dups) because no upstream check existed. Publisher arc
+    block fires only at publish time — the task still wastes a dispatch slot.
+    """
+    if not feed:
+        return None
+    try:
+        from volpred.publisher.arc_dedup import find_arc_duplicates
+    except Exception:
+        return None
+    dups = find_arc_duplicates(title, description, feed, days=ARC_DEDUP_WINDOW_DAYS)
+    return dups[0] if dups else None
+
+
+def _load_feed_for_dedup() -> list[dict]:
+    if not FEED_PATH.exists():
+        return []
+    try:
+        data = json.loads(FEED_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    return data if isinstance(data, list) else []
+
+
 def refill_trending_candidates() -> dict[str, Any]:
     cmd = os.environ.get(TRENDING_SCAN_CMD_ENV, "").strip()
     if not cmd:
@@ -245,12 +278,23 @@ def refill_trending_candidates() -> dict[str, Any]:
     except json.JSONDecodeError as exc:
         return {"ok": False, "reason": "bad_json", "error": str(exc)}
 
+    feed = _load_feed_for_dedup()
     added: list[str] = []
     skipped: list[dict[str, str]] = []
-    for candidate in _extract_trending_candidates(payload)[:1]:
+    for candidate in _extract_trending_candidates(payload):
         task = _build_trending_task(candidate)
+        dup = _is_arc_duplicate(task["title"], task.get("description", ""), feed)
+        if dup:
+            skipped.append({
+                "id": task["id"],
+                "reason": "arc_duplicate",
+                "dup_of": dup.get("id", ""),
+            })
+            continue
         if _append_task(task):
             added.append(task["id"])
+            if len(added) >= 1:
+                break
         else:
             skipped.append({"id": task["id"], "reason": "already_exists"})
     return {"ok": True, "added": added, "skipped": skipped}

@@ -32027,7 +32027,7 @@
     "description": "分析新任 Fed 主席可能改革前瞻指引與點陣圖的市場衝擊。從利率期權隱含波動率切入，探討政策不確定性溢價的上升空間。可量化：美債 MOVE 指數與 VIX 在政策轉折期的相關性變化。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-15T22:00:50+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -32042,7 +32042,10 @@
         "to": "pending",
         "reason": "blocked_until_expired (2026-06-19)"
       }
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:10:04+00:00",
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
   },
   {
     "id": "trending_repost_2026_06_16_fed點陣圖",
@@ -34368,14 +34371,17 @@
     "description": "分析 2026 年 6 月 FOMC 點陣圖轉鷹對美債與美股波動率的衝擊。可量化：計算 MOVE 指數與聯邦基金利率期貨隱含升息機率的跨期相關性，評估利率尾部風險對沖成本。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-18T22:00:27+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:10:05+00:00",
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
   },
   {
     "id": "email-11794-e3826f",
@@ -34608,14 +34614,17 @@
     "description": "從超大型科技股 Capex 暴增 70% 但現金流僅增 23% 的背離切入，探討市場對 AI 泡沫破裂的隱含波動率定價。可量化：分析科技巨頭遠期 IV 偏斜度（Skewness）與 Capex/OCF 缺口的領先相關性。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-19T22:00:30+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:10:22+00:00",
+    "blocked_note": "arc_dedup: 與 trending_repost_2026_06_21_ai營收缺口 同 arc (AI capex/revenue gap → tail risk)，留最新一篇即可"
   },
   {
     "id": "trending_repost_2026_06_20_ai營收缺口",
@@ -34623,14 +34632,17 @@
     "description": "從各大雲端服務商持續擴大資本支出但軟體端營收尚未跟上切入。量化指標：分析科技巨頭的偏斜度與資本支出公布前後的隱含波動率變化，驗證市場對尾部風險定價是否偏低。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-19T22:00:36+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:10:22+00:00",
+    "blocked_note": "arc_dedup: 與 trending_repost_2026_06_21_ai營收缺口 同 arc (AI capex/revenue gap → tail risk)，留最新一篇即可"
   },
   {
     "id": "K1354",
@@ -34772,14 +34784,22 @@
     "description": "從 CapEx 高達 7250 億美元與實際 AI 營收的 6000 億缺口切入，分析超大型科技股的尾部風險。可量化：科技巨頭 implied vol skew 與 CapEx 修正預期的動態關聯。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-20T22:00:26+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "claimed_by": null,
+    "claimed_at": "2026-06-23T03:10:23.516791+00:00",
+    "claim_session_id": "d8412d56d0bb",
+    "started_at": "2026-06-23T03:10:27.664294+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:12:46+00:00",
+    "blocked_note": "arc_dedup: AI capex 故事已被 mile_49616ac2 + 2 existing 覆蓋（過去 20 日 06-03/06-06 兩篇）; release-layer recycling root cause 待修",
+    "claimed_by_session": null
   },
   {
     "id": "trending_repost_2026_06_21_fed鷹派",
@@ -34787,14 +34807,17 @@
     "description": "分析新任Fed主席Warsh棄用前瞻指引並改採數據依賴對隱含波動率期限結構的衝擊。透過研究FOMC會議前後短天期與長天期VIX及MOVE溢價的斜率轉變，量化政策不確定性。可驗證點：短端波動率敏感度跳升與長端風險溢價的重估。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-20T22:00:27+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:10:05+00:00",
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
   },
   {
     "id": "email-11851-ecf2e3",
@@ -35054,14 +35077,17 @@
     "description": "分析美聯儲新主席停止前瞻指引對市場波動的衝擊。可量化角度：藉由測算美債隱含波動率期限結構漂移，以及 VIX 指數對政策意外度的敏感度，建立動態波動率溢價避險模型。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-21T22:00:36+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:10:05+00:00",
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
   },
   {
     "id": "K1361",
@@ -35241,14 +35267,17 @@
     "description": "新主席 Warsh 改變溝通政策，不再提供明確的前瞻指引。我們可分析 FOMC 會後 VIX 期限結構的短端波動跳躍，量化市場對總經數據敏感度上升的風險。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-22T22:00:21+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:10:05+00:00",
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
   },
   {
     "id": "trending_repost_2026_06_23_fed換帥",
@@ -35256,14 +35285,17 @@
     "description": "分析 Kevin Warsh 上任後淡化前瞻指引，如何因政策透明度下降而推升債市與貨幣市場隱含波動率。可量化：Fed 會議前後 MOVE 指數的變動幅度，與市場利率預期落差（Surprise Index）的實證關聯。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-22T22:00:23+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-23T03:10:05+00:00",
+    "blocked_note": "arc_dedup: Fed-pivot story 已被 22 existing articles 覆蓋（dispatch hourly 11:07 audit）"
   },
   {
     "id": "K1363",
@@ -35549,8 +35581,8 @@
     "claimed_at": "2026-06-23T02:39:59.166298+00:00",
     "claim_session_id": "f163c8dc80a7",
     "started_at": "2026-06-23T02:40:03.490907+00:00",
-    "completed_at": "2026-06-23T02:45:51.768653+00:00",
-    "result": "完成 error-log governance sweep：近 2026-06-23 entries 的主模式是 source corruption / timestamp parse / fallback 被靜默當空或 default。新增 reusable silent fallback AST audit（report/json/strict）與 sweep memo；修正 diverse task generator 的 top-level ## error-log bucket recurrence、cron staleness 壞 timestamp/override diagnostics 與 log fallback。驗證：uv run pytest tests/test_generate_diverse_tasks.py tests/test_silent_fallback_audit.py -q（28 passed），audit report mode 可跑。"
+    "completed_at": "2026-06-23T02:46:44.314792+00:00",
+    "result": "完成 error-log governance sweep：近 2026-06-23 entries 的主模式是 source corruption / timestamp parse / fallback 被靜默當空或 default。新增 reusable silent fallback AST audit（report/json/strict）與 sweep memo；修正 diverse task generator 的 top-level ## error-log bucket recurrence、cron staleness 壞 timestamp/override diagnostics 與 log fallback。驗證：uv run pytest tests/test_generate_diverse_tasks.py tests/test_silent_fallback_audit.py -q（28 passed），audit report mode 可跑。\n\n完成 error_log systemic sweep：新增 scripts/audit_silent_fallbacks.py 與治理報告，baseline 125 個 suspect silent fallback handlers。修正 generate_diverse_tasks 的 staleness_expected_minutes、cron log banner、cron_last_run 壞 timestamp 診斷與 log fallback；新增 regression tests，targeted pytest 29 passed。"
   },
   {
     "id": "fix_move_vix_zscore_validity_mile_671d4c75",
