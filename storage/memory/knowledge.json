@@ -36030,5 +36030,17 @@
     ],
     "confidence": 0.76,
     "created_at": "2026-06-24T02:33:23.827638"
+  },
+  {
+    "item_id": "514a3248",
+    "category": "experiment_result",
+    "content": "K1544 NULL: FRED 10y-2y term-spread realized volatility (TSV21 21d / TSV63 63d annualised std of Delta spread) tested as incremental predictor over ^MOVE for SPY/HYG/IWM next-h-day RV at h=1/21/63 with expanding-window OOS. Methodology: HAC SE Newey-West bandwidth >= ceil(1.5*h), DM-HLN small-sample correction, seed=42, lookahead-safe (signal.shift(1) + training row j+h<i constraint), QLIKE = actual/pred - log(actual/pred) - 1, SPY/HYG/IWM analyzed separately (K1355 no-pool rule). Sample: SPY n=1065-1123, HYG n=1748-1790, IWM n=1065-1129. Period 2007-01..2026-06 (HYG availability cut). Result: Nested M3 (RV ~ MOVE + TSV) shows |t-stat|<2.0 for TSV21 coefficient across ALL 9 (asset, horizon) cells. 8/9 OOS cells: adding TSV21 strictly INCREASES QLIKE loss. IWM h=1 HLN-t=+4.53 (TSV21 significantly degrades small-cap RV forecasts). Conclusion: ^MOVE already captures all term-spread vol leading information for these RV horizons; no incremental signal. Orthogonal to K1054 (MOVE axis) -- this rules out the spread-vol axis as separate predictor. Reviewer: codex_cli_0.141.0 PASS - 8/8 methodology checks clean (lookahead, QLIKE direction, DM-HLN, HAC bandwidth, seed, no asset-day pooling, nested incremental test, log RV regression + exp for QLIKE). experiment_id=K1544, experiment_path=experiments/K1544/, reviewer=codex_cli_0.141.0 PASS, related_K=K1054 K1355, commit_cherry_picked_to_main.",
+    "evidence": [
+      "experiments/K1544/K1544.py",
+      "experiments/K1544/K1544_results.json",
+      "experiments/K1544/README.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-24T03:33:03.423106"
   }
 ]

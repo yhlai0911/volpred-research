@@ -36499,5 +36499,107 @@
     "started_at": "2026-06-23T18:09:06.669751+00:00",
     "completed_at": "2026-06-23T18:15:03.623525+00:00",
     "result": "13 new research directions added to research_program.md (193→206) by sonnet agent. 4-axis coverage: HAR-tree macro-uncertainty / term-spread vol→GDP / NBFI stress proxy / VRP term-structure. Section: 期刊主題挖掘 batch 2026-06-24."
+  },
+  {
+    "id": "research_term_spread_realized_volatility_gdp_spillover",
+    "title": "研究 backlog fallback: Term-spread realized volatility 作 GDP / 衰退 領先指標的市場波動 spillover",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Term-spread realized volatility 作 GDP / 衰退 領先指標的市場波動 spillover — FRED 10y-2y / 10y-3m 日頻 yield spread，建 21d/63d realized term-spread vol，檢定其是否領先 NBER recession probability + SPY/HYG/IWM 下個 1-3 個月 RV、left-tail 與 vol-of-vol，並比較與 ^MOVE leading 軸的增量（incremental over MOVE）；與 line 1054 MOVE 軸正交，這裡是 spread | 來源 section: 期刊主題挖掘 batch 2026-06-24（journal_discovery_20260624_0；websearch jbf/joe/rfs/jpm/faj/jfec/jfe/qje/econometrica/jof/ijf/jfqa/jai/jod/jot/jfm/jbes/aer 2025-26 趨勢層級；selectivity gate 後 13 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "term_spread_realized_volatility_gdp_spillover",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T19:08:23+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-23T19:10:54.006687+00:00",
+    "claim_session_id": "5b30ff4cbf88",
+    "started_at": "2026-06-23T19:11:03.956092+00:00",
+    "completed_at": "2026-06-23T19:31:39.082471+00:00",
+    "result": "K1544 term-spread RV / SPY HYG IWM × h=1,21,63 / NULL verdict / Codex PASS (8/8 methodology checks) / TSV21 not incremental over MOVE / 9/9 cells M3 t-stat<2.0; 8/9 OOS QLIKE worse with TSV; IWM h=1 HLN-t=+4.53 degrade. files cherry-picked to main."
+  },
+  {
+    "id": "research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test",
+    "title": "研究 backlog fallback: NBFI 流動性壓力的免費 proxy → 信用 / 銀行 ETF vol 領先性（EU FSB 2026 stress test 前哨）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: NBFI 流動性壓力的免費 proxy → 信用 / 銀行 ETF vol 領先性（EU FSB 2026 stress test 前哨） — 用 ICI MMF 流量、HYG/BKLN/BIZD 成交額與折溢價代理、FRED bank credit、SOFR-IORB → 建 NBFI run-pressure 綜合指標（pure free-data proxy），檢定是否領先 KRE/KBE/XLF + HYG RV、left-tail 與 cross-sector correlation 升高，明確 shift(1) lag；與 K1538 bond-fund run pressure  | 來源 section: 期刊主題挖掘 batch 2026-06-24（journal_discovery_20260624_0；websearch jbf/joe/rfs/jpm/faj/jfec/jfe/qje/econometrica/jof/ijf/jfqa/jai/jod/jot/jfm/jbes/aer 2025-26 趨勢層級；selectivity gate 後 13 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "nbfi_proxy_etf_vol_eu_fsb_2026_stress_test",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T19:08:23+00:00"
+  },
+  {
+    "id": "research_hedge_fund_alpha_dispersion_regime_strategy_etf",
+    "title": "研究 backlog fallback: Hedge-fund alpha-dispersion regime 的免費代理：strategy ETF dispersion 是否預測股票 cross-sectional vol",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Hedge-fund alpha-dispersion regime 的免費代理：strategy ETF dispersion 是否預測股票 cross-sectional vol — 用 hedge-fund / alternative-strategy ETF basket（QAI/MNA/CTA/DBMF/MRGR/HFXI/RPAR）日報酬計算 cross-strategy dispersion（21d 標準差），shift(1) 後檢定其是否預測 SPY 成分股下個月 cross-sectional return dispersion + IWM/IWR 個股 RV 平均；與既有  | 來源 section: 期刊主題挖掘 batch 2026-06-24（journal_discovery_20260624_0；websearch jbf/joe/rfs/jpm/faj/jfec/jfe/qje/econometrica/jof/ijf/jfqa/jai/jod/jot/jfm/jbes/aer 2025-26 趨勢層級；selectivity gate 後 13 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "hedge_fund_alpha_dispersion_regime_strategy_etf",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T19:08:23+00:00"
+  },
+  {
+    "id": "research_cornish_fisher_regime_tail_adjustment_sector_rot",
+    "title": "研究 backlog fallback: Cornish-Fisher regime tail adjustment 作 Sector rotation timing：HMM-regime + CF 修正能否擇時 sector ETF",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Cornish-Fisher regime tail adjustment 作 Sector rotation timing：HMM-regime + CF 修正能否擇時 sector ETF — yfinance 11 sector ETF + SPY，建 2-state HMM（calm/turbulent）on SPY daily return，每個 regime 用 Cornish-Fisher 修正 VaR/ES，依 regime-CF tail estimate 做 sector rotation（turbulent regime tilt to XLP/XLU 防禦），檢定 OO | 來源 section: 期刊主題挖掘 batch 2026-06-24（journal_discovery_20260624_0；websearch jbf/joe/rfs/jpm/faj/jfec/jfe/qje/econometrica/jof/ijf/jfqa/jai/jod/jot/jfm/jbes/aer 2025-26 趨勢層級；selectivity gate 後 13 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "cornish_fisher_regime_tail_adjustment_sector_rot",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T19:08:23+00:00"
+  },
+  {
+    "id": "research_index_inclusion_fast_entry_mechanism_sector_rv",
+    "title": "研究 backlog fallback: Index inclusion fast-entry mechanism 對被納入個股 + 同 sector 對手 RV 的事件研究",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Index inclusion fast-entry mechanism 對被納入個股 + 同 sector 對手 RV 的事件研究 — 用 S&P 500 / Nasdaq-100 公開 fast-entry 規則 2024-2026 案例（特別 mega-cap IPO 或快速納入），對被納入個股 + 同 sector ETF（XLK/XLC）+ 同 sector 對手做 [-30,+60] event window RV、jump frequency、cross-sectional correlation 變化的 event study，明確 shift(1) lag；與既有 secto | 來源 section: 期刊主題挖掘 batch 2026-06-24（journal_discovery_20260624_0；websearch jbf/joe/rfs/jpm/faj/jfec/jfe/qje/econometrica/jof/ijf/jfqa/jai/jod/jot/jfm/jbes/aer 2025-26 趨勢層級；selectivity gate 後 13 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "index_inclusion_fast_entry_mechanism_sector_rv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T19:08:23+00:00"
+  },
+  {
+    "id": "research_tips_breakeven_volatility_corporate_bond_return",
+    "title": "研究 backlog fallback: TIPS breakeven volatility 與 corporate bond return：BEI vol 是否預測下期 LQD/HYG RV 與 credit spread vol",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: TIPS breakeven volatility 與 corporate bond return：BEI vol 是否預測下期 LQD/HYG RV 與 credit spread vol — FRED T10YIE/T5YIE 日頻 breakeven inflation，建 21d/63d realized BEI vol（不只 BEI level），檢定是否領先 LQD/HYG/BKLN 5d/22d RV、credit-spread vol 與 negative-skew exposure；與既有 BEI regime 軸（line 1075）正交，那是 regime level，這 | 來源 section: 期刊主題挖掘 batch 2026-06-24（journal_discovery_20260624_0；websearch jbf/joe/rfs/jpm/faj/jfec/jfe/qje/econometrica/jof/ijf/jfqa/jai/jod/jot/jfm/jbes/aer 2025-26 趨勢層級；selectivity gate 後 13 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "tips_breakeven_volatility_corporate_bond_return",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T19:08:23+00:00"
   }
 ]

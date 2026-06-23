@@ -11265,5 +11265,15 @@
     "k_id": "K1543",
     "result": "MIXED (lean NULL_REJECTED_HEDGE): infra inflation-hedge alpha collapses after controlling energy+duration+VIX beta; raw 6/28, Bonferroni 3/28; Codex round-2 PASS",
     "owner": "hourly-01"
+  },
+  {
+    "timestamp": "2026-06-24T03:31:45+08:00",
+    "task_type": "experiment",
+    "task_id": "research_term_spread_realized_volatility_gdp_spillover",
+    "k_id": "K1544",
+    "verdict": "NULL",
+    "reviewer": "codex_cli_0.141.0",
+    "owner": "hourly-03",
+    "summary": "Term-spread RV (TSV21/TSV63) NOT incremental over MOVE. SPY/HYG/IWM × h=1,21,63 all M3 |t|<2.0. 8/9 OOS QLIKE worse with TSV. IWM h=1 HLN-t=+4.53. Codex PASS 8/8 checks."
   }
 ]
