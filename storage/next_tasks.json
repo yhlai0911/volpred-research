@@ -36641,13 +36641,77 @@
     "description": "Codex v5_independent verdict=REJECT. 3 BLOCKING: (1) Identification — PRG/GJR-HAR 資訊集 + 時點不對等需重新 frame, abstract/intro/conclusion 不能再說 structural dominance; (2) Eq.(10) GJR-X 不 fair — PRG 用 r²_{d,0} (當日), GJR-X 用 r²_{overnight,t-1} (前日), 必須對齊或撤回 structural claim; (3) Lookahead — 開盤可交易性敘事與 r_{d,0} 計算需證成 implementability. 4 MAJOR: Harvey citation, VaR/ES claims, ablation generalization, HAR artifact. 完整 review: paper/prg-periodic-garch/review_history/v5_independent/codex_review.md. 需 body_v6.tex rewrite + 重審。",
     "task_type": "paper_body",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "paper",
       "prg",
       "blocking_fix"
     ],
     "created_at": "2026-06-23T20:11:03Z",
-    "source": "hourly_dispatch_main_thread"
+    "source": "hourly_dispatch_main_thread",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-06-23T21:09:24.450911+00:00",
+    "claim_session_id": "ae3da61e42e5",
+    "started_at": "2026-06-23T21:10:33.515869+00:00",
+    "completed_at": "2026-06-23T21:14:36.042795+00:00",
+    "result": "v6 round 1: BLOCKING #1 partial (abstract/intro/conclusion/§4.5 title/limitations reframed to joint info+structural framing per Codex v5 review) + BLOCKING #3 partial (opening-auction tradability caveat). xelatex clean 19pp. v6 README + pre-edit snapshot at review_history/v6/. Remaining BLOCKING #2 + MAJOR #4-7 split to follow-up tasks."
+  },
+  {
+    "id": "trending_repost_2026_06_24_ai_變現",
+    "title": "[trending_repost] AI 營收檢驗期將至，科技龍頭 Implied Vol 偏斜度分析",
+    "description": "隨著下半年財報季臨近，市場對 AI 資本支出能否轉化為營收的容忍度降低。可量化：分析美股 Mag 7 期權的 OTM Put 隱含波動率溢價，驗證市場在財報公布前的下行防禦情緒與偏斜度變化。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-23T21:09:23+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "experiment_prg_v6_fair_info_gjr_six_markets",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "title": "[experiment] PRG v6 BLOCKING #2 — fair-information GJR-type benchmark across all six markets",
+    "description": "Build and estimate a GJR-type benchmark that, like PRG h_{d,1}, conditions on the current-day overnight realization r²_{d,0} at the day-d open (NOT lagged overnight). Apply to all six markets (TAIFEX, SPY, QQQ, GLD, EEM, 0050.TW). Report OOS QLIKE + DM(PRG vs fair-GJR) per market. Codex v5_independent BLOCKING #2: current §4.5 GJR-X uses r²_{overnight,t-1} so does not equalize information sets; structural-only attribution cannot be cleaned without this benchmark. Output: experiments/kXXXX_prg_fair_info_gjr/ with results.json + per-market table. Codex review required before paper_body integration.",
+    "source": "paper_review_followup",
+    "tags": [
+      "paper:prg-periodic-garch",
+      "review:v5_independent",
+      "blocking:2"
+    ],
+    "created_at": "2026-06-23T21:15:36+00:00",
+    "claimed_by": null,
+    "claimed_at": null,
+    "claim_session_id": null,
+    "started_at": null,
+    "completed_at": null,
+    "result": null
+  },
+  {
+    "id": "paper_body_prg_v6_major_fixes",
+    "task_type": "paper_body",
+    "priority": 3,
+    "status": "pending",
+    "title": "[paper_body] PRG v6 MAJOR #4-7 + MINOR #8-10 batch fixes",
+    "description": "Codex v5_independent remaining items (BLOCKING #1+#3 partial done in v6 round 1 commit; BLOCKING #2 split to experiment_prg_v6_fair_info_gjr_six_markets). MAJOR #4: replace Harvey(2016) |t|>3.0 citation with defensible source (Bonferroni / FDR / MCS argument) and drop the now-standard-in-MCS-literature framing where unsupported. MAJOR #5: scope VaR/ES claims to Table 3 actually-shown rows; drop dominates and consistent-ranking-across-all-six-markets phrasing. MAJOR #6: ablation generalization scope-pull-in (SPY-only evidence wording). MAJOR #7: HAR target-mismatch claim scope (TAIFEX-only or replicate cross-market). MINOR #8: Table 1 MCS row consistency (PRG only vs PRG Basic + Extended). MINOR #9: discussion-mechanism citation gaps. MINOR #10: economic-value formal test table (Sharpe difference test / bootstrap CI / transaction-cost sensitivity).",
+    "source": "paper_review_followup",
+    "tags": [
+      "paper:prg-periodic-garch",
+      "review:v5_independent",
+      "major:4-7",
+      "minor:8-10"
+    ],
+    "created_at": "2026-06-23T21:15:36+00:00",
+    "claimed_by": null,
+    "claimed_at": null,
+    "claim_session_id": null,
+    "started_at": null,
+    "completed_at": null,
+    "result": null
   }
 ]
