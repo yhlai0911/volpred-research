@@ -1,0 +1,245 @@
+{
+  "k_id": "K1540",
+  "experiment_id": "research_friday_triple_witching_closing_auction_concentra",
+  "title": "Friday / triple-witching auction-crowding proxy for next-day RV and reversal",
+  "status": "NULL_PROXY",
+  "seed": 1540,
+  "created_at": "2026-06-23T15:21:18.334911+00:00",
+  "data": {
+    "daily_source": "yfinance daily OHLCV, auto_adjust=True, downloaded with explicit end date",
+    "daily_start": "2015-01-01",
+    "daily_end_exclusive": "2026-06-23",
+    "tickers_requested": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "AMZN",
+      "META",
+      "GOOGL",
+      "TSLA",
+      "JPM",
+      "XOM",
+      "UNH"
+    ],
+    "tickers_used": [
+      "AAPL",
+      "AMZN",
+      "IWM",
+      "JPM",
+      "META",
+      "MSFT",
+      "NVDA",
+      "QQQ",
+      "SPY",
+      "TSLA",
+      "UNH",
+      "XOM"
+    ],
+    "n_asset_days": 34596,
+    "n_dates": 2883,
+    "first_date": "2015-01-02",
+    "last_date": "2026-06-22",
+    "event_calendar_rule": "monthly OPEX = third Friday; if not an SPY trading day, use previous SPY trading day in same month; triple-witch = Mar/Jun/Sep/Dec OPEX",
+    "intraday_diagnostic": {
+      "available": false,
+      "reason": "local intraday panel not present"
+    }
+  },
+  "lookahead_controls": {
+    "event_flags_known_ex_ante": true,
+    "daily_volume_range_proxy_available_after_close": true,
+    "explicit_shift1_signal_columns": [
+      "is_friday_signal",
+      "is_opex_signal",
+      "is_triple_witch_signal",
+      "volume_z_mean_signal",
+      "range_z_mean_signal",
+      "auction_crowding_raw_signal"
+    ],
+    "oos_training_rule": "for forecast date t, regression is fit only on target rows with date < t"
+  },
+  "data_diagnostics": {
+    "raw_fridays": 578,
+    "raw_monthly_opex_days": 138,
+    "raw_triple_witch_days": 46,
+    "target_days_after_friday": 578,
+    "target_days_after_monthly_opex": 138,
+    "target_days_after_triple_witch": 46,
+    "mean_n_assets_per_date": 12.0
+  },
+  "event_study_date_level": {
+    "after_friday_next_day_oc_var": {
+      "n_event": 578,
+      "n_control": 2304,
+      "event_mean": 0.0002611565393664715,
+      "control_mean": 0.00026277216447532614,
+      "diff": -1.6156251088546574e-06,
+      "ratio": 0.9938516124336055,
+      "hac_t": -0.1160693744377483,
+      "hac_p": 0.907597560388221,
+      "bootstrap_ci95": [
+        -3.3061079104939966e-05,
+        3.0121405071669067e-05
+      ],
+      "bootstrap_p_two_sided": 0.902,
+      "harvey_significant": false
+    },
+    "after_friday_reversal_return": {
+      "n_event": 578,
+      "n_control": 2304,
+      "event_mean": 0.00029779278661568276,
+      "control_mean": 0.0005809339481157734,
+      "diff": -0.0002831411615000907,
+      "ratio": 0.512610405333613,
+      "hac_t": -0.7808533199193999,
+      "hac_p": 0.43488876966043943,
+      "bootstrap_ci95": [
+        -0.0009841623262472068,
+        0.0003728682088390681
+      ],
+      "bootstrap_p_two_sided": 0.434,
+      "harvey_significant": false
+    },
+    "after_monthly_opex_next_day_oc_var": {
+      "n_event": 138,
+      "n_control": 2744,
+      "event_mean": 0.000236913188703155,
+      "control_mean": 0.0002637323347900643,
+      "diff": -2.681914608690931e-05,
+      "ratio": 0.8983092228404309,
+      "hac_t": -1.1574895754119605,
+      "hac_p": 0.24707239593628172,
+      "bootstrap_ci95": [
+        -7.034941521463114e-05,
+        2.5005881193186662e-05
+      ],
+      "bootstrap_p_two_sided": 0.268,
+      "harvey_significant": false
+    },
+    "after_monthly_opex_reversal_return": {
+      "n_event": 138,
+      "n_control": 2744,
+      "event_mean": 0.0005639901114629703,
+      "control_mean": 0.0005221448293515732,
+      "diff": 4.184528211139706e-05,
+      "ratio": 1.0801411404635812,
+      "hac_t": 0.06267751888766177,
+      "hac_p": 0.9500232995165603,
+      "bootstrap_ci95": [
+        -0.0012820544638648666,
+        0.0013098853748346425
+      ],
+      "bootstrap_p_two_sided": 0.98,
+      "harvey_significant": false
+    },
+    "after_triple_witch_next_day_oc_var": {
+      "n_event": 46,
+      "n_control": 2836,
+      "event_mean": 0.00021149450910228225,
+      "control_mean": 0.00026327461187809135,
+      "diff": -5.17801027758091e-05,
+      "ratio": 0.803322840715892,
+      "hac_t": -1.7603437670423434,
+      "hac_p": 0.07834953756716435,
+      "bootstrap_ci95": [
+        -0.00010879481237472614,
+        5.565223957399911e-06
+      ],
+      "bootstrap_p_two_sided": 0.088,
+      "harvey_significant": false
+    },
+    "after_triple_witch_reversal_return": {
+      "n_event": 46,
+      "n_control": 2836,
+      "event_mean": -0.0001792643190699327,
+      "control_mean": 0.000535557900493591,
+      "diff": -0.0007148222195635238,
+      "ratio": -0.33472444138106394,
+      "hac_t": -0.7829813862891927,
+      "hac_p": 0.4336380426879056,
+      "bootstrap_ci95": [
+        -0.0023140339489782,
+        0.0011600874895894729
+      ],
+      "bootstrap_p_two_sided": 0.426,
+      "harvey_significant": false
+    }
+  },
+  "oos_forecast": {
+    "n_oos": 2128,
+    "first_oos": "2018-01-02",
+    "last_oos": "2026-06-22",
+    "baseline_har_qlike": 0.49463764438431534,
+    "augmented_auction_proxy_qlike": 0.4952109389630812,
+    "qlike_improvement_pct": -0.115901930488825,
+    "dm_hln_horizon": 1,
+    "dm_t_augmented_minus_baseline": 0.03628285779193428,
+    "dm_p": 0.9710602231020273,
+    "harvey_significant_abs_t_gt_3": false,
+    "feature_sets": {
+      "baseline": [
+        "log_rv_lag1",
+        "log_rv_lag5",
+        "log_rv_lag22"
+      ],
+      "augmented": [
+        "log_rv_lag1",
+        "log_rv_lag5",
+        "log_rv_lag22",
+        "is_friday_signal",
+        "is_opex_signal",
+        "is_triple_witch_signal",
+        "volume_z_mean_signal",
+        "range_z_mean_signal",
+        "auction_crowding_raw_signal"
+      ]
+    },
+    "qlike_direction": "actual/predicted - log(actual/predicted) - 1 via volpred.stats.model_evaluation",
+    "split_rule": "expanding OOS; train rows are strictly before forecast date"
+  },
+  "primary_verdict": {
+    "claim_tested": "HAR + Friday/OPEX/triple-witch/daily crowding proxy improves next-day open-close variance forecast vs HAR baseline and/or produces next-day reversal.",
+    "verdict": "FAIL_TO_SUPPORT",
+    "reason": "Augmented model does not clear Harvey |t|>3 on QLIKE; event-study effects are descriptive and not robust enough for a publication claim.",
+    "article_ready": false,
+    "publication_guardrail": "Do not publish as a positive closing-auction signal. At most publish as free-data negative screen / data limitation note."
+  },
+  "limitations": [
+    "Daily OHLCV cannot observe actual closing-auction volume share or MOC imbalance.",
+    "Local SPY 5-minute data covers only a short 2026 sample and is diagnostic only.",
+    "Large-cap ticker list is current-name and therefore has survivorship bias.",
+    "Quarterly triple-witching sample is small even over 2015-2026."
+  ],
+  "references": [
+    {
+      "title": "Goyal, Jegadeesh, and Wu, Price Impact in Closing Auctions, Opening Auctions, and Continuous Markets",
+      "source": "JFQA / Cambridge, online 2026",
+      "url": "https://www.cambridge.org/core/journals/journal-of-financial-and-quantitative-analysis/article/price-impact-in-closing-auctions-opening-auctions-and-continuous-markets-a-benchmark-for-cost-of-trading-on-anomalies/0F72910A79C5B42CF6E85F55164CE846"
+    },
+    {
+      "title": "Ni, Pearson, and Poteshman, Stock Price Clustering on Option Expiration Dates",
+      "source": "Journal of Financial Economics, 2005",
+      "url": "https://ideas.repec.org/a/eee/jfinec/v78y2005i1p49-87.html"
+    },
+    {
+      "title": "Jegadeesh and Wu, Closing Auction, Passive Investing, and Stock Prices",
+      "source": "SSRN working paper",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3440239"
+    }
+  ],
+  "artifacts": {
+    "daily_cache": "data/daily_ohlcv_auto_adjusted.csv",
+    "daily_asset_panel": "data/daily_asset_panel.csv",
+    "date_panel": "data/date_panel.csv",
+    "oos_forecasts": "data/oos_forecasts.csv",
+    "intraday_panel": "data/intraday_spy_close30_panel.csv",
+    "figures": [
+      "figures/fig_event_rv_reversal.png",
+      "figures/fig_oos_qlike.png"
+    ]
+  },
+  "runtime_seconds": 42.42253804206848
+}

@@ -1,0 +1,1662 @@
+{
+  "experiment_id": "research_friday_triple_witching_closing_auction_concentra",
+  "k_id": "K1540",
+  "title": "Friday / triple-witching auction-crowding proxy for next-day RV and reversal",
+  "status": "NULL_FOR_CALENDAR_EVENT_HYPOTHESIS",
+  "verdict": "NULL_PROXY",
+  "verdict_notes": [
+    "Calendar/triple-witching event contrasts do not pass the Harvey |t|>3 gate in the positive RV direction.",
+    "OOS augmented proxy pass groups: []; this is daily OHLCV proxy evidence, not closing-auction concentration evidence.",
+    "The local SPY 5-minute closing proxy has too few triple-witching days for inference."
+  ],
+  "seed": 1540,
+  "generated_at_utc": "2026-06-23T15:25:42.575402+00:00",
+  "data": {
+    "daily_source": "yfinance daily OHLCV, auto_adjust=True, cached locally",
+    "daily_start": "2015-01-01",
+    "daily_end_exclusive": "2026-06-23",
+    "tickers_requested": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "AAPL",
+      "MSFT",
+      "NVDA",
+      "AMZN",
+      "META",
+      "GOOGL",
+      "TSLA",
+      "JPM",
+      "XOM",
+      "UNH"
+    ],
+    "tickers_used": [
+      "AAPL",
+      "AMZN",
+      "IWM",
+      "JPM",
+      "META",
+      "MSFT",
+      "NVDA",
+      "QQQ",
+      "SPY",
+      "TSLA",
+      "UNH",
+      "XOM"
+    ],
+    "n_asset_days": 34596,
+    "first_date": "2015-01-02",
+    "last_date": "2026-06-22",
+    "event_calendar_rule": "monthly OPEX = third Friday; if not an SPY trading day, use previous SPY trading day in same month; triple-witch = Mar/Jun/Sep/Dec OPEX",
+    "intraday_diagnostic": {
+      "available": true,
+      "source": "local data/intraday/SPY_5min_2026-*.csv yfinance-style snapshots",
+      "n_days": 108,
+      "first_day": "2026-01-14",
+      "last_day": "2026-06-22",
+      "n_opex_days": 6,
+      "n_triple_witch_days": 2,
+      "median_close30_volume_share": 0.16679080880004854,
+      "median_close30_absret_share": 0.06066094247086305,
+      "interpretation_limit": "diagnostic only; local 5-minute sample has too few triple-witching days for inference",
+      "opex_close30_volume_share_mean": 0.14040331862615638,
+      "non_opex_close30_volume_share_mean": 0.16460156415595067,
+      "opex_close30_volume_share_diff": -0.0241982455297943
+    }
+  },
+  "methodology": {
+    "primary_proxy": "calendar expiry signals plus daily volume/range shocks; no historical auction imbalance feed available",
+    "targets": {
+      "next_day_open_to_close_rv": "ret_oc[t]^2 on target date t",
+      "next_day_reversal": "-sign(open_to_close_return[t-1]) * open_to_close_return[t]"
+    },
+    "lookahead_policy": [
+      "friday_lag1 = is_friday.shift(1)",
+      "monthly_opex_lag1 = is_opex.shift(1)",
+      "triple_witching_lag1 = is_triple_witch.shift(1)",
+      "volume_z_lag1, range_z_lag1, auction_crowding_lag1 are shifted before target-date tests",
+      "expanding OOS trains on rows strictly before the forecast row"
+    ],
+    "forecast_baseline_features": [
+      "log_oc_var_lag1",
+      "log_oc_var_lag5",
+      "log_oc_var_lag22",
+      "abs_cc_ret_lag1"
+    ],
+    "forecast_augmented_features": [
+      "log_oc_var_lag1",
+      "log_oc_var_lag5",
+      "log_oc_var_lag22",
+      "abs_cc_ret_lag1",
+      "friday_lag1",
+      "monthly_opex_lag1",
+      "triple_witching_lag1",
+      "volume_z_lag1",
+      "range_z_lag1",
+      "auction_crowding_lag1",
+      "triple_x_volume_z_lag1"
+    ],
+    "qlike_direction": "volpred.stats.model_evaluation.qlike: actual/predicted - log(actual/predicted) - 1",
+    "dm_horizon": 1,
+    "hac_lags": 5,
+    "bootstrap_reps": 5000
+  },
+  "integrity_checks": {
+    "random_seed_fixed": 1540,
+    "signal_shift_1_columns": [
+      "friday_lag1",
+      "monthly_opex_lag1",
+      "triple_witching_lag1",
+      "volume_z_lag1",
+      "range_z_lag1",
+      "auction_crowding_lag1"
+    ],
+    "oos_train_test_contamination": "expanding regression uses train rows before the forecast row only",
+    "not_using_squared_range_as_variance_proxy": "primary target is squared open-to-close return; range_var is only a lagged proxy feature"
+  },
+  "all_event_tests": [
+    {
+      "group": "POOLED",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "log_oc_var",
+      "n_event": 6936,
+      "n_control": 27648,
+      "mean_event": -10.20988528902491,
+      "mean_control": -10.148243779120083,
+      "diff_event_minus_control": -0.06164150990482753,
+      "welch_t": -1.741107336671244,
+      "welch_p": 0.0816943690191903,
+      "hac_t": -1.8649641101323038,
+      "hac_p": 0.06218643503694507,
+      "bootstrap": {
+        "estimate": -0.06164150990482753,
+        "ci95": [
+          -0.12623529820067508,
+          0.0007525521638306492
+        ],
+        "p_two_sided": 0.054,
+        "reps": 5000,
+        "seed": 1540
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 6936,
+      "n_control": 27648,
+      "mean_event": 17.418450595584158,
+      "mean_control": 17.57868539050619,
+      "diff_event_minus_control": -0.16023479492203307,
+      "welch_t": -0.6337671646414619,
+      "welch_p": 0.5262463766263379,
+      "hac_t": -0.7194251988250523,
+      "hac_p": 0.47187897531488676,
+      "bootstrap": {
+        "estimate": -0.16023479492203307,
+        "ci95": [
+          -0.58528305435745,
+          0.2608045838158014
+        ],
+        "p_two_sided": 0.4692,
+        "reps": 5000,
+        "seed": 1541
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "reversal_bps",
+      "n_event": 6936,
+      "n_control": 27648,
+      "mean_event": 2.977927866156834,
+      "mean_control": 5.809339481157729,
+      "diff_event_minus_control": -2.831411615000895,
+      "welch_t": -1.3049313238283957,
+      "welch_p": 0.1919442923804589,
+      "hac_t": -1.3108557953323696,
+      "hac_p": 0.18990648783189434,
+      "bootstrap": {
+        "estimate": -2.831411615000895,
+        "ci95": [
+          -7.023730989273175,
+          1.4176430779908167
+        ],
+        "p_two_sided": 0.1904,
+        "reps": 5000,
+        "seed": 1542
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "log_oc_var",
+      "n_event": 1656,
+      "n_control": 5328,
+      "mean_event": -10.218823257030623,
+      "mean_control": -10.20317550043099,
+      "diff_event_minus_control": -0.015647756599632245,
+      "welch_t": -0.21650690327707145,
+      "welch_p": 0.8286078103402188,
+      "hac_t": -0.2340774868894733,
+      "hac_p": 0.8149248233160737,
+      "bootstrap": {
+        "estimate": -0.015647756599632245,
+        "ci95": [
+          -0.14982445912313103,
+          0.11111184931340157
+        ],
+        "p_two_sided": 0.8152,
+        "reps": 5000,
+        "seed": 1543
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 1656,
+      "n_control": 5328,
+      "mean_event": 16.925746697544163,
+      "mean_control": 17.580237460117754,
+      "diff_event_minus_control": -0.654490762573591,
+      "welch_t": -1.2920347670873287,
+      "welch_p": 0.19644561376516867,
+      "hac_t": -1.4480931290537729,
+      "hac_p": 0.14759100690425916,
+      "bootstrap": {
+        "estimate": -0.654490762573591,
+        "ci95": [
+          -1.5197262394734101,
+          0.22873048636679583
+        ],
+        "p_two_sided": 0.142,
+        "reps": 5000,
+        "seed": 1544
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "reversal_bps",
+      "n_event": 1656,
+      "n_control": 5328,
+      "mean_event": 5.6399011146297084,
+      "mean_control": 2.304941242990167,
+      "diff_event_minus_control": 3.3349598716395414,
+      "welch_t": 0.7589657792108804,
+      "welch_p": 0.44793439264548596,
+      "hac_t": 0.7354124618528665,
+      "hac_p": 0.46208833460344234,
+      "bootstrap": {
+        "estimate": 3.3349598716395414,
+        "ci95": [
+          -5.671114974279982,
+          12.359617240652618
+        ],
+        "p_two_sided": 0.44,
+        "reps": 5000,
+        "seed": 1545
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 552,
+      "n_control": 6396,
+      "mean_event": -10.366261058622941,
+      "mean_control": -10.195986422466945,
+      "diff_event_minus_control": -0.17027463615599636,
+      "welch_t": -1.4491514168478814,
+      "welch_p": 0.147777235736945,
+      "hac_t": -1.4849272474042228,
+      "hac_p": 0.13756309729172553,
+      "bootstrap": {
+        "estimate": -0.17027463615599636,
+        "ci95": [
+          -0.3987798171533114,
+          0.04248459534237647
+        ],
+        "p_two_sided": 0.124,
+        "reps": 5000,
+        "seed": 1546
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 552,
+      "n_control": 6396,
+      "mean_event": 16.07140283011719,
+      "mean_control": 17.53632862034646,
+      "diff_event_minus_control": -1.4649257902292696,
+      "welch_t": -1.9664040348671443,
+      "welch_p": 0.04965698658338852,
+      "hac_t": -2.043156673467749,
+      "hac_p": 0.04103693117513368,
+      "bootstrap": {
+        "estimate": -1.4649257902292696,
+        "ci95": [
+          -2.92251942506355,
+          -0.006589403324444941
+        ],
+        "p_two_sided": 0.048,
+        "reps": 5000,
+        "seed": 1547
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 552,
+      "n_control": 6396,
+      "mean_event": -1.7926431906993074,
+      "mean_control": 3.490753093479291,
+      "diff_event_minus_control": -5.283396284178599,
+      "welch_t": -0.811879046587876,
+      "welch_p": 0.41714668695504953,
+      "hac_t": -0.8093949416856191,
+      "hac_p": 0.418288010832369,
+      "bootstrap": {
+        "estimate": -5.283396284178599,
+        "ci95": [
+          -17.834571833307535,
+          7.355335521293522
+        ],
+        "p_two_sided": 0.4276,
+        "reps": 5000,
+        "seed": 1548
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 552,
+      "n_control": 1104,
+      "mean_event": -10.366261058622941,
+      "mean_control": -10.14510435623446,
+      "diff_event_minus_control": -0.2211567023884804,
+      "welch_t": -1.638750652602584,
+      "welch_p": 0.10156901909003747,
+      "hac_t": -1.6496934627819975,
+      "hac_p": 0.09900564793533272,
+      "bootstrap": {
+        "estimate": -0.2211567023884804,
+        "ci95": [
+          -0.4920464687425733,
+          0.038234108249191885
+        ],
+        "p_two_sided": 0.09,
+        "reps": 5000,
+        "seed": 1549
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 552,
+      "n_control": 1104,
+      "mean_event": 16.07140283011719,
+      "mean_control": 17.352918631257648,
+      "diff_event_minus_control": -1.2815158011404577,
+      "welch_t": -1.4365472336856069,
+      "welch_p": 0.15110900912552966,
+      "hac_t": -1.4832537327905442,
+      "hac_p": 0.13800700991529405,
+      "bootstrap": {
+        "estimate": -1.2815158011404577,
+        "ci95": [
+          -2.9711610934189387,
+          0.42510696658741914
+        ],
+        "p_two_sided": 0.1412,
+        "reps": 5000,
+        "seed": 1550
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 552,
+      "n_control": 1104,
+      "mean_event": -1.7926431906993074,
+      "mean_control": 9.356173267294217,
+      "diff_event_minus_control": -11.148816457993524,
+      "welch_t": -1.430339517151667,
+      "welch_p": 0.15288280716209984,
+      "hac_t": -1.4787113371421123,
+      "hac_p": 0.13921748097280667,
+      "bootstrap": {
+        "estimate": -11.148816457993524,
+        "ci95": [
+          -26.18496767665903,
+          3.879651352320984
+        ],
+        "p_two_sided": 0.1416,
+        "reps": 5000,
+        "seed": 1551
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "log_oc_var",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": -11.842673582015756,
+      "mean_control": -11.478532698427006,
+      "diff_event_minus_control": -0.36414088358874963,
+      "welch_t": -2.7704898027541476,
+      "welch_p": 0.005719547874719016,
+      "hac_t": -2.9634686341081173,
+      "hac_p": 0.003041930616568159,
+      "bootstrap": {
+        "estimate": -0.36414088358874963,
+        "ci95": [
+          -0.6055348165747793,
+          -0.12314839747941245
+        ],
+        "p_two_sided": 0.0028,
+        "reps": 5000,
+        "seed": 1552
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": 7.924969810197952,
+      "mean_control": 9.255063255776216,
+      "diff_event_minus_control": -1.3300934455782638,
+      "welch_t": -3.2936403416243656,
+      "welch_p": 0.0010216642175834834,
+      "hac_t": -3.792546434419771,
+      "hac_p": 0.0001491103571710122,
+      "bootstrap": {
+        "estimate": -1.3300934455782638,
+        "ci95": [
+          -1.9916297107796028,
+          -0.6603131308002702
+        ],
+        "p_two_sided": 0.0,
+        "reps": 5000,
+        "seed": 1553
+      },
+      "harvey_abs_t_gt_3": true
+    },
+    {
+      "group": "SPY",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "reversal_bps",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": -0.9550379470702541,
+      "mean_control": 2.5625587373022136,
+      "diff_event_minus_control": -3.5175966843724678,
+      "welch_t": -1.0052396954758007,
+      "welch_p": 0.3150163051944016,
+      "hac_t": -1.0242245631598064,
+      "hac_p": 0.3057292193949428,
+      "bootstrap": {
+        "estimate": -3.5175966843724678,
+        "ci95": [
+          -10.464562510339693,
+          3.310102200489288
+        ],
+        "p_two_sided": 0.3104,
+        "reps": 5000,
+        "seed": 1554
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "log_oc_var",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": -12.067274911930921,
+      "mean_control": -11.761614709621881,
+      "diff_event_minus_control": -0.30566020230904023,
+      "welch_t": -1.086857448365756,
+      "welch_p": 0.27826427329068515,
+      "hac_t": -1.1666951463165776,
+      "hac_p": 0.24333350363621364,
+      "bootstrap": {
+        "estimate": -0.30566020230904023,
+        "ci95": [
+          -0.8451573536948017,
+          0.20854331296463216
+        ],
+        "p_two_sided": 0.2468,
+        "reps": 5000,
+        "seed": 1555
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": 7.226573972058252,
+      "mean_control": 8.159857356090658,
+      "diff_event_minus_control": -0.9332833840324062,
+      "welch_t": -1.2717289050294243,
+      "welch_p": 0.20456901692345233,
+      "hac_t": -1.4697743094544324,
+      "hac_p": 0.14162288927596234,
+      "bootstrap": {
+        "estimate": -0.9332833840324062,
+        "ci95": [
+          -2.1468056753689475,
+          0.30626734048105697
+        ],
+        "p_two_sided": 0.1344,
+        "reps": 5000,
+        "seed": 1556
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "reversal_bps",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": -7.172165042793979,
+      "mean_control": 0.7144028239496434,
+      "diff_event_minus_control": -7.886567866743622,
+      "welch_t": -1.2171015842810684,
+      "welch_p": 0.22465568944075348,
+      "hac_t": -1.214412494248034,
+      "hac_p": 0.22459024666889915,
+      "bootstrap": {
+        "estimate": -7.886567866743622,
+        "ci95": [
+          -21.095451570946164,
+          4.655750299011023
+        ],
+        "p_two_sided": 0.2096,
+        "reps": 5000,
+        "seed": 1557
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": -11.952723667667847,
+      "mean_control": -11.83128652042066,
+      "diff_event_minus_control": -0.12143714724718713,
+      "welch_t": -0.3001016190883254,
+      "welch_p": 0.7652329300061282,
+      "hac_t": -0.30030085170160353,
+      "hac_p": 0.7639476836347636,
+      "bootstrap": {
+        "estimate": -0.12143714724718713,
+        "ci95": [
+          -0.9396437750665295,
+          0.6526842758622443
+        ],
+        "p_two_sided": 0.7636,
+        "reps": 5000,
+        "seed": 1558
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": 7.488365727785367,
+      "mean_control": 7.960995915724475,
+      "diff_event_minus_control": -0.4726301879391084,
+      "welch_t": -0.38268433345433794,
+      "welch_p": 0.7034660510941869,
+      "hac_t": -0.41564309632139473,
+      "hac_p": 0.6776711860823591,
+      "bootstrap": {
+        "estimate": -0.4726301879391084,
+        "ci95": [
+          -2.6029021544641626,
+          1.9478472631460992
+        ],
+        "p_two_sided": 0.678,
+        "reps": 5000,
+        "seed": 1559
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": -15.703250999963807,
+      "mean_control": 0.23634198209519072,
+      "diff_event_minus_control": -15.939592982058997,
+      "welch_t": -1.525256381591309,
+      "welch_p": 0.13300014606576008,
+      "hac_t": -1.576295271675125,
+      "hac_p": 0.11495777082794129,
+      "bootstrap": {
+        "estimate": -15.939592982058997,
+        "ci95": [
+          -37.2234458012618,
+          3.2693937740435066
+        ],
+        "p_two_sided": 0.1124,
+        "reps": 5000,
+        "seed": 1560
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": -11.952723667667847,
+      "mean_control": -12.124550534062463,
+      "diff_event_minus_control": 0.17182686639461586,
+      "welch_t": 0.3443374279684744,
+      "welch_p": 0.7312918031328147,
+      "hac_t": 0.3127202749564553,
+      "hac_p": 0.7544931904262575,
+      "bootstrap": {
+        "estimate": 0.17182686639461586,
+        "ci95": [
+          -0.9356540458222492,
+          1.2156150805961052
+        ],
+        "p_two_sided": 0.7704,
+        "reps": 5000,
+        "seed": 1561
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": 7.488365727785367,
+      "mean_control": 7.095678094194693,
+      "diff_event_minus_control": 0.3926876335906737,
+      "welch_t": 0.28533762253598655,
+      "welch_p": 0.7761429943310149,
+      "hac_t": 0.31264100011988927,
+      "hac_p": 0.7545534248984005,
+      "bootstrap": {
+        "estimate": 0.3926876335906737,
+        "ci95": [
+          -2.042136610407725,
+          2.8692674496940853
+        ],
+        "p_two_sided": 0.768,
+        "reps": 5000,
+        "seed": 1562
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "SPY",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": -15.703250999963807,
+      "mean_control": -2.9066220642090665,
+      "diff_event_minus_control": -12.79662893575474,
+      "welch_t": -1.0784542658339664,
+      "welch_p": 0.2839490824771414,
+      "hac_t": -1.013662023211691,
+      "hac_p": 0.3107440512001729,
+      "bootstrap": {
+        "estimate": -12.79662893575474,
+        "ci95": [
+          -37.20319801648275,
+          10.90442652882599
+        ],
+        "p_two_sided": 0.2944,
+        "reps": 5000,
+        "seed": 1563
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "log_oc_var",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": -10.972533524981,
+      "mean_control": -10.800915846943107,
+      "diff_event_minus_control": -0.17161767803789196,
+      "welch_t": -1.4606629441904917,
+      "welch_p": 0.14446136831529274,
+      "hac_t": -1.5080129125947874,
+      "hac_p": 0.13155122223587623,
+      "bootstrap": {
+        "estimate": -0.17161767803789196,
+        "ci95": [
+          -0.39811696863444895,
+          0.04338362922436609
+        ],
+        "p_two_sided": 0.1212,
+        "reps": 5000,
+        "seed": 1564
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": 11.19555291881749,
+      "mean_control": 12.401901030346886,
+      "diff_event_minus_control": -1.2063481115293957,
+      "welch_t": -2.3209952516009147,
+      "welch_p": 0.020485441474747096,
+      "hac_t": -2.58627771214788,
+      "hac_p": 0.00970187264690227,
+      "bootstrap": {
+        "estimate": -1.2063481115293957,
+        "ci95": [
+          -2.1104569308610768,
+          -0.29138085163530975
+        ],
+        "p_two_sided": 0.0124,
+        "reps": 5000,
+        "seed": 1565
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "reversal_bps",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": 1.9681024826365012,
+      "mean_control": 6.226981115710261,
+      "diff_event_minus_control": -4.25887863307376,
+      "welch_t": -0.9087581249728581,
+      "welch_p": 0.3637002512757472,
+      "hac_t": -0.9327460530805508,
+      "hac_p": 0.35095110080038994,
+      "bootstrap": {
+        "estimate": -4.25887863307376,
+        "ci95": [
+          -13.565384119783687,
+          4.744793397526941
+        ],
+        "p_two_sided": 0.3328,
+        "reps": 5000,
+        "seed": 1566
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "log_oc_var",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": -10.814714828144082,
+      "mean_control": -11.013316734191916,
+      "diff_event_minus_control": 0.19860190604783412,
+      "welch_t": 0.8426864554326461,
+      "welch_p": 0.40022678389441885,
+      "hac_t": 0.854515354567068,
+      "hac_p": 0.3928195054669773,
+      "bootstrap": {
+        "estimate": 0.19860190604783412,
+        "ci95": [
+          -0.28747630463294094,
+          0.6360085006532173
+        ],
+        "p_two_sided": 0.3748,
+        "reps": 5000,
+        "seed": 1567
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": 11.04435423457364,
+      "mean_control": 11.243320257490673,
+      "diff_event_minus_control": -0.19896602291703225,
+      "welch_t": -0.19776918629093862,
+      "welch_p": 0.8433896468638721,
+      "hac_t": -0.20341295055950334,
+      "hac_p": 0.8388122783226171,
+      "bootstrap": {
+        "estimate": -0.19896602291703225,
+        "ci95": [
+          -2.05736997559561,
+          1.7188046661320904
+        ],
+        "p_two_sided": 0.856,
+        "reps": 5000,
+        "seed": 1568
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "reversal_bps",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": -0.6180051457402341,
+      "mean_control": 2.8650172453990703,
+      "diff_event_minus_control": -3.4830223911393046,
+      "welch_t": -0.37385373663251875,
+      "welch_p": 0.7088465636689308,
+      "hac_t": -0.35640025775306405,
+      "hac_p": 0.7215408363712796,
+      "bootstrap": {
+        "estimate": -3.4830223911393046,
+        "ci95": [
+          -23.208219932807673,
+          15.60873789680545
+        ],
+        "p_two_sided": 0.6768,
+        "reps": 5000,
+        "seed": 1569
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": -11.343195287327596,
+      "mean_control": -10.939480974589772,
+      "diff_event_minus_control": -0.403714312737824,
+      "welch_t": -0.8477817127512086,
+      "welch_p": 0.4006101115545625,
+      "hac_t": -0.8556202365550346,
+      "hac_p": 0.3922078727441869,
+      "bootstrap": {
+        "estimate": -0.403714312737824,
+        "ci95": [
+          -1.4088624079324166,
+          0.4160700987463845
+        ],
+        "p_two_sided": 0.404,
+        "reps": 5000,
+        "seed": 1570
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": 9.285586673071151,
+      "mean_control": 11.35576696803108,
+      "diff_event_minus_control": -2.070180294959929,
+      "welch_t": -1.7075101713415946,
+      "welch_p": 0.09267001083640758,
+      "hac_t": -1.7085305287504835,
+      "hac_p": 0.08753794671640268,
+      "bootstrap": {
+        "estimate": -2.070180294959929,
+        "ci95": [
+          -4.391909036260567,
+          0.3543123390805462
+        ],
+        "p_two_sided": 0.096,
+        "reps": 5000,
+        "seed": 1571
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": -7.787843976856374,
+      "mean_control": 2.9095786289696255,
+      "diff_event_minus_control": -10.697422605825999,
+      "welch_t": -0.8957595929641835,
+      "welch_p": 0.37399647358068316,
+      "hac_t": -0.9170537570943579,
+      "hac_p": 0.35911447131751917,
+      "bootstrap": {
+        "estimate": -10.697422605825999,
+        "ci95": [
+          -33.300630480660416,
+          12.157741133740911
+        ],
+        "p_two_sided": 0.3556,
+        "reps": 5000,
+        "seed": 1572
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": -11.343195287327596,
+      "mean_control": -10.550474598552325,
+      "diff_event_minus_control": -0.7927206887752707,
+      "welch_t": -1.5796924627471691,
+      "welch_p": 0.1193784994301429,
+      "hac_t": -1.6413304722592412,
+      "hac_p": 0.10072883390848598,
+      "bootstrap": {
+        "estimate": -0.7927206887752707,
+        "ci95": [
+          -1.8591403006781926,
+          0.022339666323958365
+        ],
+        "p_two_sided": 0.0592,
+        "reps": 5000,
+        "seed": 1573
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": 9.285586673071151,
+      "mean_control": 11.923738015324888,
+      "diff_event_minus_control": -2.638151342253737,
+      "welch_t": -1.6407796624248223,
+      "welch_p": 0.10338820451273932,
+      "hac_t": -2.0042293397233832,
+      "hac_p": 0.04504549904278413,
+      "bootstrap": {
+        "estimate": -2.638151342253737,
+        "ci95": [
+          -5.278230442057553,
+          -0.15907017415782163
+        ],
+        "p_two_sided": 0.0364,
+        "reps": 5000,
+        "seed": 1574
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "QQQ",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": -7.787843976856374,
+      "mean_control": 2.9669142698178335,
+      "diff_event_minus_control": -10.754758246674207,
+      "welch_t": -0.6954110941090443,
+      "welch_p": 0.48817254197669946,
+      "hac_t": -0.6809594191069961,
+      "hac_p": 0.4958971685525513,
+      "bootstrap": {
+        "estimate": -10.754758246674207,
+        "ci95": [
+          -41.06580757590239,
+          17.706609093139146
+        ],
+        "p_two_sided": 0.4668,
+        "reps": 5000,
+        "seed": 1575
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "log_oc_var",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": -10.64177468016563,
+      "mean_control": -10.546352127361253,
+      "diff_event_minus_control": -0.0954225528043775,
+      "welch_t": -0.8671888703051538,
+      "welch_p": 0.38606854921206063,
+      "hac_t": -0.8946943055985082,
+      "hac_p": 0.3709505235472378,
+      "bootstrap": {
+        "estimate": -0.0954225528043775,
+        "ci95": [
+          -0.3036604387178876,
+          0.09989976093463253
+        ],
+        "p_two_sided": 0.354,
+        "reps": 5000,
+        "seed": 1576
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": 12.38040851182796,
+      "mean_control": 13.19707701678888,
+      "diff_event_minus_control": -0.8166685049609193,
+      "welch_t": -1.5582527272755207,
+      "welch_p": 0.1195046581349153,
+      "hac_t": -1.7212190071289033,
+      "hac_p": 0.08521109002096043,
+      "bootstrap": {
+        "estimate": -0.8166685049609193,
+        "ci95": [
+          -1.702276444090202,
+          0.10615190992386163
+        ],
+        "p_two_sided": 0.0816,
+        "reps": 5000,
+        "seed": 1577
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_friday_vs_non_friday",
+      "signal": "friday_lag1",
+      "control": "not_friday",
+      "metric": "reversal_bps",
+      "n_event": 578,
+      "n_control": 2304,
+      "mean_event": 2.9899913271859773,
+      "mean_control": 4.750693291071308,
+      "diff_event_minus_control": -1.7607019638853312,
+      "welch_t": -0.3570567162656219,
+      "welch_p": 0.7211291124285748,
+      "hac_t": -0.3482633154738119,
+      "hac_p": 0.7276424413950684,
+      "bootstrap": {
+        "estimate": -1.7607019638853312,
+        "ci95": [
+          -11.201098463113496,
+          7.665647066671791
+        ],
+        "p_two_sided": 0.7028,
+        "reps": 5000,
+        "seed": 1578
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "log_oc_var",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": -11.019316161853347,
+      "mean_control": -10.53252142033352,
+      "diff_event_minus_control": -0.4867947415198266,
+      "welch_t": -2.131463286963217,
+      "welch_p": 0.034115196543911736,
+      "hac_t": -2.2873201288771843,
+      "hac_p": 0.02217714443365671,
+      "bootstrap": {
+        "estimate": -0.4867947415198266,
+        "ci95": [
+          -0.9046982849006161,
+          -0.07334000039808135
+        ],
+        "p_two_sided": 0.02,
+        "reps": 5000,
+        "seed": 1579
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": 10.470017432370103,
+      "mean_control": 12.936209078889997,
+      "diff_event_minus_control": -2.466191646519894,
+      "welch_t": -2.5828465605073685,
+      "welch_p": 0.010304666175314803,
+      "hac_t": -2.982407736915197,
+      "hac_p": 0.0028599083437448694,
+      "bootstrap": {
+        "estimate": -2.466191646519894,
+        "ci95": [
+          -4.05028624482737,
+          -0.7921540400808392
+        ],
+        "p_two_sided": 0.0036,
+        "reps": 5000,
+        "seed": 1580
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_monthly_opex_vs_other_fridays",
+      "signal": "monthly_opex_lag1",
+      "control": "friday_non_monthly",
+      "metric": "reversal_bps",
+      "n_event": 138,
+      "n_control": 444,
+      "mean_event": -6.026396206100967,
+      "mean_control": 5.855693055585594,
+      "diff_event_minus_control": -11.882089261686561,
+      "welch_t": -1.3088707456704909,
+      "welch_p": 0.1916569411901478,
+      "hac_t": -1.3477532533880725,
+      "hac_p": 0.17773775771981382,
+      "bootstrap": {
+        "estimate": -11.882089261686561,
+        "ci95": [
+          -28.338583676372277,
+          6.119679655830829
+        ],
+        "p_two_sided": 0.1984,
+        "reps": 5000,
+        "seed": 1581
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": -10.99631675982397,
+      "mean_control": -10.61240057264619,
+      "diff_event_minus_control": -0.3839161871777801,
+      "welch_t": -1.027640917135995,
+      "welch_p": 0.3088357057758678,
+      "hac_t": -1.046780585237092,
+      "hac_p": 0.295200786700507,
+      "bootstrap": {
+        "estimate": -0.3839161871777801,
+        "ci95": [
+          -1.1080093022510642,
+          0.30545877874146105
+        ],
+        "p_two_sided": 0.2912,
+        "reps": 5000,
+        "seed": 1582
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": 10.761941946822132,
+      "mean_control": 12.507366943571158,
+      "diff_event_minus_control": -1.7454249967490263,
+      "welch_t": -1.2424435320379856,
+      "welch_p": 0.21907989202233447,
+      "hac_t": -1.3344022226816028,
+      "hac_p": 0.18207207200347653,
+      "bootstrap": {
+        "estimate": -1.7454249967490263,
+        "ci95": [
+          -4.262460764354961,
+          0.8930268630515444
+        ],
+        "p_two_sided": 0.186,
+        "reps": 5000,
+        "seed": 1583
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 46,
+      "n_control": 533,
+      "mean_event": 2.2239617691024343,
+      "mean_control": 2.984310282226979,
+      "diff_event_minus_control": -0.7603485131245447,
+      "welch_t": -0.0548912202038054,
+      "welch_p": 0.9564184765212084,
+      "hac_t": -0.05646345779794888,
+      "hac_p": 0.9549726055153587,
+      "bootstrap": {
+        "estimate": -0.7603485131245447,
+        "ci95": [
+          -27.256180477268583,
+          25.82257204258801
+        ],
+        "p_two_sided": 0.9432,
+        "reps": 5000,
+        "seed": 1584
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": -10.99631675982397,
+      "mean_control": -11.030815862868035,
+      "diff_event_minus_control": 0.034499103044066004,
+      "welch_t": 0.07977889987690989,
+      "welch_p": 0.9365990491536238,
+      "hac_t": 0.07026358509470637,
+      "hac_p": 0.943983865729309,
+      "bootstrap": {
+        "estimate": 0.034499103044066004,
+        "ci95": [
+          -0.9211460840337015,
+          0.9751862600964667
+        ],
+        "p_two_sided": 0.94,
+        "reps": 5000,
+        "seed": 1585
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": 10.761941946822132,
+      "mean_control": 10.32405517514409,
+      "diff_event_minus_control": 0.43788677167804124,
+      "welch_t": 0.2666863572046273,
+      "welch_p": 0.7902940599627403,
+      "hac_t": 0.2358874724847996,
+      "hac_p": 0.8135199894902254,
+      "bootstrap": {
+        "estimate": 0.43788677167804124,
+        "ci95": [
+          -3.1343449727122406,
+          4.041056700409551
+        ],
+        "p_two_sided": 0.806,
+        "reps": 5000,
+        "seed": 1586
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "IWM",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 46,
+      "n_control": 92,
+      "mean_event": 2.2239617691024343,
+      "mean_control": -10.15157519370267,
+      "diff_event_minus_control": 12.375536962805104,
+      "welch_t": 0.7759681895354642,
+      "welch_p": 0.43982278142745623,
+      "hac_t": 0.8163934367123329,
+      "hac_p": 0.4142751492296537,
+      "bootstrap": {
+        "estimate": 12.375536962805104,
+        "ci95": [
+          -16.629516264470574,
+          43.47405335338049
+        ],
+        "p_two_sided": 0.4208,
+        "reps": 5000,
+        "seed": 1587
+      },
+      "harvey_abs_t_gt_3": false
+    }
+  ],
+  "primary_event_tests": [
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 552,
+      "n_control": 6396,
+      "mean_event": -10.366261058622941,
+      "mean_control": -10.195986422466945,
+      "diff_event_minus_control": -0.17027463615599636,
+      "welch_t": -1.4491514168478814,
+      "welch_p": 0.147777235736945,
+      "hac_t": -1.4849272474042228,
+      "hac_p": 0.13756309729172553,
+      "bootstrap": {
+        "estimate": -0.17027463615599636,
+        "ci95": [
+          -0.3987798171533114,
+          0.04248459534237647
+        ],
+        "p_two_sided": 0.124,
+        "reps": 5000,
+        "seed": 1546
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 552,
+      "n_control": 6396,
+      "mean_event": 16.07140283011719,
+      "mean_control": 17.53632862034646,
+      "diff_event_minus_control": -1.4649257902292696,
+      "welch_t": -1.9664040348671443,
+      "welch_p": 0.04965698658338852,
+      "hac_t": -2.043156673467749,
+      "hac_p": 0.04103693117513368,
+      "bootstrap": {
+        "estimate": -1.4649257902292696,
+        "ci95": [
+          -2.92251942506355,
+          -0.006589403324444941
+        ],
+        "p_two_sided": 0.048,
+        "reps": 5000,
+        "seed": 1547
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_other_fridays",
+      "signal": "triple_witching_lag1",
+      "control": "friday_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 552,
+      "n_control": 6396,
+      "mean_event": -1.7926431906993074,
+      "mean_control": 3.490753093479291,
+      "diff_event_minus_control": -5.283396284178599,
+      "welch_t": -0.811879046587876,
+      "welch_p": 0.41714668695504953,
+      "hac_t": -0.8093949416856191,
+      "hac_p": 0.418288010832369,
+      "bootstrap": {
+        "estimate": -5.283396284178599,
+        "ci95": [
+          -17.834571833307535,
+          7.355335521293522
+        ],
+        "p_two_sided": 0.4276,
+        "reps": 5000,
+        "seed": 1548
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "log_oc_var",
+      "n_event": 552,
+      "n_control": 1104,
+      "mean_event": -10.366261058622941,
+      "mean_control": -10.14510435623446,
+      "diff_event_minus_control": -0.2211567023884804,
+      "welch_t": -1.638750652602584,
+      "welch_p": 0.10156901909003747,
+      "hac_t": -1.6496934627819975,
+      "hac_p": 0.09900564793533272,
+      "bootstrap": {
+        "estimate": -0.2211567023884804,
+        "ci95": [
+          -0.4920464687425733,
+          0.038234108249191885
+        ],
+        "p_two_sided": 0.09,
+        "reps": 5000,
+        "seed": 1549
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "annualized_oc_vol_pct",
+      "n_event": 552,
+      "n_control": 1104,
+      "mean_event": 16.07140283011719,
+      "mean_control": 17.352918631257648,
+      "diff_event_minus_control": -1.2815158011404577,
+      "welch_t": -1.4365472336856069,
+      "welch_p": 0.15110900912552966,
+      "hac_t": -1.4832537327905442,
+      "hac_p": 0.13800700991529405,
+      "bootstrap": {
+        "estimate": -1.2815158011404577,
+        "ci95": [
+          -2.9711610934189387,
+          0.42510696658741914
+        ],
+        "p_two_sided": 0.1412,
+        "reps": 5000,
+        "seed": 1550
+      },
+      "harvey_abs_t_gt_3": false
+    },
+    {
+      "group": "POOLED",
+      "test": "after_triple_vs_nontriple_monthly",
+      "signal": "triple_witching_lag1",
+      "control": "monthly_non_triple",
+      "metric": "reversal_bps",
+      "n_event": 552,
+      "n_control": 1104,
+      "mean_event": -1.7926431906993074,
+      "mean_control": 9.356173267294217,
+      "diff_event_minus_control": -11.148816457993524,
+      "welch_t": -1.430339517151667,
+      "welch_p": 0.15288280716209984,
+      "hac_t": -1.4787113371421123,
+      "hac_p": 0.13921748097280667,
+      "bootstrap": {
+        "estimate": -11.148816457993524,
+        "ci95": [
+          -26.18496767665903,
+          3.879651352320984
+        ],
+        "p_two_sided": 0.1416,
+        "reps": 5000,
+        "seed": 1551
+      },
+      "harvey_abs_t_gt_3": false
+    }
+  ],
+  "forecast_evaluation": {
+    "SPY": {
+      "n_oos": 2128,
+      "baseline_qlike": 4.824145002965597,
+      "augmented_qlike": 4.8940433241228165,
+      "augmented_vs_baseline_improvement_pct": -1.4489266204529496,
+      "dm_t_augmented_minus_baseline": 0.3501508061705203,
+      "dm_p": 0.7262601926745136,
+      "harvey_gate_pass": false,
+      "event_counts_in_oos": {
+        "after_friday": 428,
+        "after_monthly_opex": 102,
+        "after_triple_witching": 34
+      }
+    },
+    "QQQ": {
+      "n_oos": 2128,
+      "baseline_qlike": 4.132769644622691,
+      "augmented_qlike": 4.311389719691294,
+      "augmented_vs_baseline_improvement_pct": -4.322042853296044,
+      "dm_t_augmented_minus_baseline": 1.5700108419022931,
+      "dm_p": 0.11656132796816121,
+      "harvey_gate_pass": false,
+      "event_counts_in_oos": {
+        "after_friday": 428,
+        "after_monthly_opex": 102,
+        "after_triple_witching": 34
+      }
+    },
+    "IWM": {
+      "n_oos": 2128,
+      "baseline_qlike": 3.405572444135143,
+      "augmented_qlike": 3.348147810922142,
+      "augmented_vs_baseline_improvement_pct": 1.6861962021067642,
+      "dm_t_augmented_minus_baseline": -0.7642142768285888,
+      "dm_p": 0.44482432738543665,
+      "harvey_gate_pass": false,
+      "event_counts_in_oos": {
+        "after_friday": 428,
+        "after_monthly_opex": 102,
+        "after_triple_witching": 34
+      }
+    },
+    "POOLED": {
+      "n_oos": 6384,
+      "baseline_qlike": 4.120829030574478,
+      "augmented_qlike": 4.184526951578751,
+      "augmented_vs_baseline_improvement_pct": -1.5457550054046567,
+      "dm_t_augmented_minus_baseline": 0.7506849246889147,
+      "dm_p": 0.45286996953310776,
+      "harvey_gate_pass": false,
+      "event_counts_in_oos": {
+        "after_friday": 1284,
+        "after_monthly_opex": 306,
+        "after_triple_witching": 102
+      }
+    }
+  },
+  "limitations": [
+    "Daily OHLCV cannot observe actual closing-auction volume share or MOC imbalance.",
+    "Local SPY 5-minute data covers only a short 2026 sample and is diagnostic only.",
+    "Large-cap ticker list is current-name and therefore has survivorship bias.",
+    "Pooled ETF tests share common dates and are not independent cross-sectional evidence."
+  ],
+  "figures": [
+    "figures/fig_event_group_nextday_vol.png",
+    "figures/fig_oos_qlike.png",
+    "figures/fig_intraday_close30_volume_share.png"
+  ],
+  "references": [
+    {
+      "title": "Feinstein and Goetzmann, The Effect of the Triple Witching Hour on Stock Market Volatility",
+      "url": "https://fraser.stlouisfed.org/title/economic-review-federal-reserve-bank-atlanta-884/september-october-1988-34635?page=4"
+    },
+    {
+      "title": "Price Impact in Closing Auctions, Opening Auctions, and Continuous Markets",
+      "url": "https://www.cambridge.org/core/journals/journal-of-financial-and-quantitative-analysis/article/price-impact-in-closing-auctions-opening-auctions-and-continuous-markets-a-benchmark-for-cost-of-trading-on-anomalies/0F72910A79C5B42CF6E85F55164CE846"
+    },
+    {
+      "title": "Nasdaq, The Powerful Impact of Triple Witching",
+      "url": "https://www.nasdaq.com/articles/the-powerful-impact-of-triple-witching-2021-06-10"
+    }
+  ]
+}

@@ -35948,5 +35948,26 @@
     ],
     "confidence": 0.94,
     "created_at": "2026-06-23T14:41:07.073512+00:00"
+  },
+  {
+    "item_id": "rpclose30",
+    "category": "event_study_closing_auction_proxy",
+    "experiment_id": "research_friday_triple_witching_closing_auction_concentra",
+    "experiment_path": "experiments/research_friday_triple_witching_closing_auction_concentra/",
+    "verdict": "INSUFFICIENT_TRIPLE_WITCHING_SAMPLE",
+    "content": "research_friday_triple_witching_closing_auction_concentra tested whether SPY final-30-minute concentration around Fridays, monthly OPEX, and triple-witching predicts next-day open-to-close RV, next 5-minute RV, or reversal. Data are local yfinance-style SPY 5-minute snapshots from 2026-01-14 to 2026-06-22 (106 usable days; 20 Fridays; 6 monthly OPEX; 2 triple-witching proxies). Friday close30 volume share is 16.58% vs 16.26% non-Friday (t=0.26); OPEX is 14.04% vs 16.46% (t=-1.12); triple proxy is 18.82% vs 16.27% (t=1.35) but N=2 blocks inference. Triple close30 RV share is descriptively high (17.69% vs 6.76%) but equally underpowered. The causal high-concentration signal uses close30_vol_share.shift(1).rolling(40, min_periods=20).quantile(0.80); next OC r2 and next 5-min RV are null-to-negative (t=-0.27/-0.78), reversal payoff is positive but non-significant (t=1.32). Do not publish a Friday/OPEX auction-crowding RV claim from this proxy; a proper test needs multi-year minute bars or true NYSE/Nasdaq auction/imbalance feed.",
+    "evidence": [
+      "experiments/research_friday_triple_witching_closing_auction_concentra/research_friday_triple_witching_closing_auction_concentra_results.json",
+      "experiments/research_friday_triple_witching_closing_auction_concentra/research_friday_triple_witching_closing_auction_concentra.py",
+      "experiments/research_friday_triple_witching_closing_auction_concentra/README.md",
+      "experiments/research_friday_triple_witching_closing_auction_concentra/codex_review.md",
+      "research_program.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-23T23:11:51.151391",
+    "reviewer": "Codex CLI source-level review, 2026-06-23",
+    "k_id": null,
+    "updated_at": "2026-06-23T23:19:35.532900",
+    "reviewer_source": "Codex CLI source-level review, 2026-06-23"
   }
 ]

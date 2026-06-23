@@ -1113,5 +1113,21 @@
       "K982 general → LanceDB top dist 0.521 (just barely PASS, no pivot needed)"
     ],
     "created_at": "2026-05-09T14:42:00+00:00"
+  },
+  {
+    "id": "E079",
+    "title": "Auction microstructure proxy 題必區分 exact feed、intraday proxy、daily proxy 三層證據",
+    "category": "methodology",
+    "lesson": "K1540 closing-auction / triple-witching 題同時出現多個 free-data proxy 產物。收斂後的 canonical 結論是 NULL_PROXY：daily OHLCV date-level OOS 不能改善 HAR，短 5-min close-30m panel 只有 2 個 triple-witching days，不能推論真 auction pressure。這類題不可用 pooled cross-section 顯著性或短 intraday descriptive lift 取代真正 NYSE/Nasdaq auction/imbalance feed。",
+    "examples": [
+      "K1540 canonical date-level panel：HAR QLIKE 0.503612 vs augmented 0.507781，DM t=+0.321。",
+      "SPY 5-min diagnostic：2026-01-14 至 2026-06-22 只有 6 OPEX / 2 triple-witching days。",
+      "同題平行產物曾指向不同 paths / verdicts；收尾時必統一到一個 canonical experiment_id、README、results、knowledge entry。"
+    ],
+    "recommendation": "Microstructure backlog 題先宣告資料層級：true auction feed > multi-year minute bars > daily proxy。若只有後兩者，結果只能是 screening 或 limitation，不可發文宣稱 auction mechanism。",
+    "source_experiments": [
+      "research_friday_triple_witching_closing_auction_concentra"
+    ],
+    "created_at": "2026-06-23T23:24:00+08:00"
   }
 ]
