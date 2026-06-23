@@ -35890,5 +35890,29 @@
     ],
     "confidence": 0.62,
     "created_at": "2026-06-23T17:55:32.451952"
+  },
+  {
+    "item_id": "eaddc39a",
+    "category": "empirical_null",
+    "content": "K1539-rv_only NULL: FRBSF Daily News Sentiment Index 對 corporate-bond ETF (HYG/LQD/BKLN/VCIT/VCSH) 未來 5d 報酬與風險目標（RV / downside semivol / HYG-LQD drawdown）皆無預測力。Panel 2007-07-05 到 2026-06-23 共 4,899 daily rows；signal = (-rolling_z(FRBSF)).shift(1) 嚴格 lag。最強 risk cell = LQD downside semivol (HAC t=+2.43, Bonferroni p=0.243, FAIL); 最強 return cell = HYG 5d log-ret (beta=-0.000773, HAC t=-1.94, Bonferroni p=0.843, FAIL)。OOS expanding window (refit every 21d, controls = own RV21 / own 5d ret / SPY RV21 / log VIX) 在所有 16 個 target × ETF cells 均比 baseline 差（augmented MSE 全劣於 controls-only），DM t 全 < 3。Harvey |t|>=3 gate / Bonferroni / BH q-value gate 全 FAIL。結論：broad-economic news sentiment 不是 corporate-bond ETF 風險可靠預測因子；下一步需 corporate-credit specific 文本 feed（如 Ravenpack / Bloomberg news topics）或 TRACE bond-level data。",
+    "evidence": [
+      "experiments/k1539_corporate_bond_news_sentiment_rv_only/README.md",
+      "experiments/k1539_corporate_bond_news_sentiment_rv_only/k1539_corporate_bond_news_sentiment_rv_only_results.json",
+      "FRBSF Daily News Sentiment Index (Shapiro/Sudhof/Wilson 2017)",
+      "Tetlock 2007 (JF) - investor sentiment"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-23T21:09:37.904207"
+  },
+  {
+    "item_id": "c5e6af11",
+    "category": "diagnostic_null",
+    "content": "K1539-rv diagnostic NULL_PROXY: GDELT TimelineVol 對 corporate-credit keyword buckets 的 cached 代理 （K1487 private_credit fallback，本輪 GDELT live 429 rate-limited）對 credit ETF 風險與報酬目標皆無 formal-gate 通過訊號。Top risk cell = HYG_minus_LQD 21d drawdown HAC t=1.78 (Bonferroni p=1.0, FAIL); return effect economically small (max |effect|=21.4 bps per 1z, 全部 <25 bps)。本變體為 adjacent proxy diagnostic，非 full corporate-credit bucket panel；rv_only 變體（FRBSF 全期）為主結論來源。研究誠實：未取得 fresh GDELT live data 不宜放大 inference。",
+    "evidence": [
+      "experiments/k1539_corporate_bond_news_sentiment_rv/README.md",
+      "experiments/k1539_corporate_bond_news_sentiment_rv/k1539_corporate_bond_news_sentiment_rv_results.json"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-23T21:09:38.039863"
   }
 ]

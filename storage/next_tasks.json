@@ -30432,7 +30432,7 @@
     "title": "K1330: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 465). Original: 美元指數（DXY / UUP）作為跨資產 vol 的條件變數：強弱美元 regime 下 EM/商品/黃金 vol 的差異（yfinance）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1330.py with signal.shift(1) + seed=42, (c) K1330_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "succeeded",
+    "status": "blocked",
     "task_type": "experiment",
     "source": "research_backlog_auto",
     "source_line": 465,
@@ -30446,7 +30446,13 @@
     "claim_session_id": "fe800fa707e9",
     "started_at": "2026-06-14T06:56:02.915718+00:00",
     "completed_at": "2026-06-14T06:58:44.741171+00:00",
-    "result": "K1330 closed as duplicate/superseded by experiments/k1439 after live reproduction on 2026-06-14.\nAdded experiments/K1330/{README,K1330.py,K1330_results.json} to document coverage audit and canonical findings.\nConclusion: strong/weak USD regime question already answered; only USO remains HAC+Bonferroni robust, so no same-topic rerun."
+    "result": "K1330 closed as duplicate/superseded by experiments/k1439 after live reproduction on 2026-06-14.\nAdded experiments/K1330/{README,K1330.py,K1330_results.json} to document coverage audit and canonical findings.\nConclusion: strong/weak USD regime question already answered; only USO remains HAC+Bonferroni robust, so no same-topic rerun.",
+    "blocked_reason": "awaiting_codex_review",
+    "review_gate_status": "awaiting_review",
+    "review_gate_detected_at": "2026-06-23T13:10:06.471291+00:00",
+    "review_gate_previous_status": "succeeded",
+    "review_gate_experiment_dir": "experiments/K1330",
+    "review_gate_followup_task_id": "K1330_codex_review_followup"
   },
   {
     "id": "K1331",
@@ -35877,7 +35883,7 @@
     "title": "Paper review (Codex 24h-rule): 白天波動看得很清楚，為什麼模型還是會估錯？問題常常出在『隔夜那一下』",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1bff1fe5 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_1bff1fe5",
@@ -35887,10 +35893,7 @@
     ],
     "created_at": "2026-06-23T04:08:02+00:00",
     "started_at": "2026-06-23T12:08:55.186710+00:00",
-    "last_released_at": "2026-06-23T12:08:31.470153+00:00",
-    "claimed_by": "hourly-20",
-    "claimed_at": "2026-06-23T12:08:41.604632+00:00",
-    "claim_session_id": "7f329e5256cf"
+    "last_released_at": "2026-06-23T13:08:56.705550+00:00"
   },
   {
     "id": "paper_review_mile_1330219a",
@@ -36191,5 +36194,86 @@
     "started_at": "2026-06-23T11:09:15.559114+00:00",
     "completed_at": "2026-06-23T11:21:39.041195+00:00",
     "result": "已發 research-audience daily_article mile_3607af6a (draft, 5316 chars, 4 圖, K1533 in details.experiment_refs, anti_ai_gate PASS, fidelity caveats present, US_SPY REPLICATED + TW_TX vs GJR WORSE = 9th ML-ceiling 確認)"
+  },
+  {
+    "id": "research_friday_triple_witching_closing_auction_concentra",
+    "title": "研究 backlog fallback: Friday / triple-witching closing-auction concentration 作隔日 RV 與 reversal 訊號",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Friday / triple-witching closing-auction concentration 作隔日 RV 與 reversal 訊號 — yfinance 或本機 5-min SPY/QQQ/IWM + 大型股樣本，標 Friday、monthly options expiry、triple-witching dates，計算收盤 30min volume share / range-vol concentration，檢定當日收盤 auction crowding 是否預測隔日 open-to-close RV、reversal 與策略交易成本；與 Russell reco | 來源 section: 期刊主題挖掘 batch（2026-06-22 codex 補充；journal_discovery_20260622_0；websearch faj/rfs/rof/jfqa/jfi/jod/jai/jpm 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "friday_triple_witching_closing_auction_concentra",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T12:53:48+00:00"
+  },
+  {
+    "id": "research_municipal_convenience_premium_tax_liquidity_stre",
+    "title": "研究 backlog fallback: municipal convenience premium 壓縮作 tax-liquidity stress 的 cross-asset vol prior",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: municipal convenience premium 壓縮作 tax-liquidity stress 的 cross-asset vol prior — 用 MUB/TFI/HYD/TAXF 對 IEF/AGG/LQD/HYG 的相對報酬、drawdown、成交額與 FRED state/local fiscal stress proxy 建 muni-richness/cheapness 指標，檢定 muni convenience premium proxy 壓縮是否領先 muni ETF RV、credit ETF RV 與股債相關 regime；與 generic bond E | 來源 section: 期刊主題挖掘 batch（2026-06-22 codex 補充；journal_discovery_20260622_0；websearch faj/rfs/rof/jfqa/jfi/jod/jai/jpm 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "municipal_convenience_premium_tax_liquidity_stre",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T12:53:48+00:00"
+  },
+  {
+    "id": "research_corporate_bond_news_sentiment_rv_only",
+    "title": "研究 backlog fallback: corporate-bond news sentiment 的 RV-only 再檢定：報酬小不代表風險無訊號",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: corporate-bond news sentiment 的 RV-only 再檢定：報酬小不代表風險無訊號 — 用免費新聞/RSS/GDELT corporate-credit 關鍵字 sentiment + yfinance HYG/LQD/BKLN/VCIT/VCSH，先複核 sentiment 對 bond ETF returns 經濟量級是否小，再改 target 為 next-week RV、downside semivariance、spread proxy drawdown，檢定是否只在風險維度有增量；與能源新聞 topic shock 及 generic news-atte | 來源 section: 期刊主題挖掘 batch（2026-06-22 codex 補充；journal_discovery_20260622_0；websearch faj/rfs/rof/jfqa/jfi/jod/jai/jpm 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "corporate_bond_news_sentiment_rv_only",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T12:53:48+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T12:54:10.037838+00:00",
+    "claim_session_id": "b188f493d43c",
+    "started_at": "2026-06-23T12:54:19.436719+00:00"
+  },
+  {
+    "id": "research_volatility_management_equity_beta_timing",
+    "title": "研究 backlog fallback: 可轉債 volatility-management 是否只是 equity-beta timing",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 可轉債 volatility-management 是否只是 equity-beta timing — 用 CWB/ICVT/CONV + SPY/QQQ/HYG/LQD/^VIX，比較 raw CB、vol-scaled CB、等 equity/credit beta baseline 的 net Sharpe/MDD/DM；AAII/UMCSENT 分 sentiment regime。與既有 VT/factor timing 不同，聚焦 hybrid equity-credit-option asset class；ETF proxy 不冒充個券可轉債 replication（來源：JF | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "volatility_management_equity_beta_timing",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-23T12:53:48+00:00"
+  },
+  {
+    "id": "K1330_codex_review_followup",
+    "task_type": "experiment",
+    "status": "pending",
+    "priority": 3,
+    "title": "K1330 Codex review follow-up (missing review gate)",
+    "description": "K1330 was marked succeeded by codex-desktop, but experiments/K1330/ has no Codex review artifact. Run source-level Codex review before any knowledge.json promotion. If verdict is FAIL, complete this follow-up with verdict=FAIL so task_pool_claim.py can open the v2 methodology fix.",
+    "source": "sync_next_tasks_status_review_gate",
+    "created_at": "2026-06-23T13:10:06.471291+00:00",
+    "related_k_id": "K1330",
+    "predecessor": "K1330",
+    "dispatch_lane": "agent"
   }
 ]
