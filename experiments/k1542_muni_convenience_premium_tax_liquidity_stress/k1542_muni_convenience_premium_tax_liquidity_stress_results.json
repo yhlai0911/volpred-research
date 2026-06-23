@@ -1,0 +1,848 @@
+{
+  "experiment_id": "K1542",
+  "slug": "k1542_muni_convenience_premium_tax_liquidity_stress",
+  "created_at": "2026-06-23T15:30:22.426422+00:00",
+  "random_seed": 42,
+  "verdict": "WEAK_DIAGNOSTIC_ONLY",
+  "data": {
+    "price_source": "yfinance adjusted daily close via yf.download(auto_adjust=True)",
+    "requested_start": "2007-01-01",
+    "requested_end": "2026-06-24",
+    "availability": {
+      "MUB": {
+        "available": true,
+        "n_close": 4726,
+        "start": "2007-09-10",
+        "end": "2026-06-23"
+      },
+      "TFI": {
+        "available": true,
+        "n_close": 4723,
+        "start": "2007-09-13",
+        "end": "2026-06-23"
+      },
+      "HYD": {
+        "available": true,
+        "n_close": 4371,
+        "start": "2009-02-05",
+        "end": "2026-06-23"
+      },
+      "TAXF": {
+        "available": true,
+        "n_close": 1954,
+        "start": "2018-09-12",
+        "end": "2026-06-23"
+      },
+      "IEF": {
+        "available": true,
+        "n_close": 4898,
+        "start": "2007-01-03",
+        "end": "2026-06-23"
+      },
+      "AGG": {
+        "available": true,
+        "n_close": 4898,
+        "start": "2007-01-03",
+        "end": "2026-06-23"
+      },
+      "LQD": {
+        "available": true,
+        "n_close": 4898,
+        "start": "2007-01-03",
+        "end": "2026-06-23"
+      },
+      "HYG": {
+        "available": true,
+        "n_close": 4831,
+        "start": "2007-04-11",
+        "end": "2026-06-23"
+      },
+      "SPY": {
+        "available": true,
+        "n_close": 4898,
+        "start": "2007-01-03",
+        "end": "2026-06-23"
+      },
+      "^VIX": {
+        "available": true,
+        "n_close": 4899,
+        "start": "2007-01-03",
+        "end": "2026-06-23"
+      }
+    },
+    "fred": {
+      "series": {
+        "state_local_tax_receipts": "W070RC1Q027SBEA",
+        "state_local_tax_receipts_nsa": "NA000328Q",
+        "stl_fsi": "STLFSI4",
+        "nfci": "NFCI"
+      },
+      "state_local_tax_receipts_span": [
+        "1947-01-01",
+        "2026-01-01"
+      ],
+      "stl_fsi_span": [
+        "1993-12-31",
+        "2026-06-12"
+      ],
+      "lag_policy": "quarterly tax-receipt YoY and weekly financial-stress observations are shifted one release stamp before daily forward fill"
+    },
+    "effective_panel_start": "2007-03-20",
+    "effective_panel_end": "2026-06-23",
+    "daily_panel_rows": 4899
+  },
+  "method": {
+    "proxy_definition": "muni convenience-premium compression is proxied by beta-residual cheapening, 21d drawdown, volume spike, lagged state/local tax-receipt stress, and STLFSI",
+    "target_variables": [
+      [
+        "MUB_fwd_rv5",
+        "muni_rv5",
+        "positive"
+      ],
+      [
+        "MUB_fwd_drawdown5",
+        "muni_drawdown5",
+        "positive"
+      ],
+      [
+        "TFI_fwd_rv5",
+        "muni_rv5",
+        "positive"
+      ],
+      [
+        "TFI_fwd_drawdown5",
+        "muni_drawdown5",
+        "positive"
+      ],
+      [
+        "HYD_fwd_rv5",
+        "muni_rv5",
+        "positive"
+      ],
+      [
+        "HYD_fwd_drawdown5",
+        "muni_drawdown5",
+        "positive"
+      ],
+      [
+        "TAXF_fwd_rv5",
+        "muni_rv5",
+        "positive"
+      ],
+      [
+        "TAXF_fwd_drawdown5",
+        "muni_drawdown5",
+        "positive"
+      ],
+      [
+        "LQD_fwd_rv5",
+        "cross_asset_rv5",
+        "positive"
+      ],
+      [
+        "HYG_fwd_rv5",
+        "cross_asset_rv5",
+        "positive"
+      ],
+      [
+        "AGG_fwd_rv5",
+        "cross_asset_rv5",
+        "positive"
+      ],
+      [
+        "IEF_fwd_rv5",
+        "cross_asset_rv5",
+        "positive"
+      ],
+      [
+        "HYG_LQD_fwd_spread_drawdown5",
+        "credit_spread_drawdown5",
+        "positive"
+      ],
+      [
+        "spy_ief_fwd_corr21",
+        "stock_bond_corr21",
+        "positive"
+      ]
+    ],
+    "controls": [
+      "SPY_rv21_lag",
+      "IEF_rv21_lag",
+      "HYG_rv21_lag",
+      "log_vix_lag",
+      "stl_fsi_z_lag"
+    ],
+    "lookahead_policy": "muni cheapening/drawdown/volume/FRED stress components are lagged before forward RV/corr targets",
+    "formal_gate": "Harvey-style HAC t >= 3 plus Bonferroni p < 0.05 in sample; OOS requires MSE improvement > 0 and DM t <= -3",
+    "caveat": "ETF proxy does not identify bond-level convenience premium; it tests whether a free daily proxy has forecast content."
+  },
+  "panel_meta": {
+    "beta_factors": [
+      "IEF",
+      "AGG",
+      "LQD",
+      "HYG",
+      "SPY"
+    ],
+    "stress_components": [
+      "muni_cheapening_z_lag",
+      "muni_drawdown_z_lag",
+      "muni_volume_z_lag",
+      "fiscal_stress_z_lag",
+      "stl_fsi_z_lag"
+    ],
+    "beta_summaries": {
+      "MUB": {
+        "MUB_beta_IEF": {
+          "count": 4472.0,
+          "mean": 0.1295983557596474,
+          "std": 0.15827904915603155,
+          "min": -0.5066831541233673,
+          "10%": -0.10160338452930633,
+          "50%": 0.14766558711861077,
+          "90%": 0.33809639081224324,
+          "max": 0.4637395639052097
+        },
+        "MUB_beta_AGG": {
+          "count": 4472.0,
+          "mean": 0.21917153706936837,
+          "std": 0.22297643843771506,
+          "min": -0.35393911219310636,
+          "10%": -0.04709644313851736,
+          "50%": 0.18415683665597077,
+          "90%": 0.5070059341732427,
+          "max": 1.355350403752992
+        },
+        "MUB_beta_LQD": {
+          "count": 4472.0,
+          "mean": 0.09496497347005135,
+          "std": 0.12230283859177307,
+          "min": -0.2547717754036082,
+          "10%": -0.03951630707332707,
+          "50%": 0.08017284863266894,
+          "90%": 0.24995690523376676,
+          "max": 0.45417679342472345
+        },
+        "MUB_beta_HYG": {
+          "count": 4472.0,
+          "mean": 0.03008176716112667,
+          "std": 0.08697523395484498,
+          "min": -0.24575472839427975,
+          "10%": -0.04869243257743185,
+          "50%": 0.0063149674431299905,
+          "90%": 0.1506933507062466,
+          "max": 0.6595428095155046
+        },
+        "MUB_beta_SPY": {
+          "count": 4472.0,
+          "mean": 0.006590702431746283,
+          "std": 0.029355511575545487,
+          "min": -0.18140703329802788,
+          "10%": -0.0335974670261121,
+          "50%": 0.00889874379655203,
+          "90%": 0.038477774084541894,
+          "max": 0.11873068977298759
+        }
+      },
+      "TFI": {
+        "TFI_beta_IEF": {
+          "count": 4469.0,
+          "mean": 0.16794048968585823,
+          "std": 0.19108133117962542,
+          "min": -0.8361178895809673,
+          "10%": -0.08498631202192708,
+          "50%": 0.15341998153821704,
+          "90%": 0.4158402554826312,
+          "max": 0.5835304980298565
+        },
+        "TFI_beta_AGG": {
+          "count": 4469.0,
+          "mean": 0.17952021732669576,
+          "std": 0.3079327858751526,
+          "min": -1.0777226062294112,
+          "10%": -0.20470913414466677,
+          "50%": 0.15005760640571178,
+          "90%": 0.6196964517451674,
+          "max": 1.753957674237979
+        },
+        "TFI_beta_LQD": {
+          "count": 4469.0,
+          "mean": 0.062386987077832474,
+          "std": 0.15262839439535367,
+          "min": -0.4406168102737465,
+          "10%": -0.07624591971541506,
+          "50%": 0.015330564395915664,
+          "90%": 0.28377850618471817,
+          "max": 0.7923377360637531
+        },
+        "TFI_beta_HYG": {
+          "count": 4469.0,
+          "mean": 0.04489443528910312,
+          "std": 0.10640609367037843,
+          "min": -0.20123860697967955,
+          "10%": -0.07369244690175865,
+          "50%": 0.019369936449933834,
+          "90%": 0.20142139573153617,
+          "max": 0.6376655727072548
+        },
+        "TFI_beta_SPY": {
+          "count": 4469.0,
+          "mean": -0.006668339955135885,
+          "std": 0.0359903429783884,
+          "min": -0.16024156454461208,
+          "10%": -0.05312168614411409,
+          "50%": -0.0041424135839741956,
+          "90%": 0.03685746252140594,
+          "max": 0.07089984086348171
+        }
+      },
+      "HYD": {
+        "HYD_beta_IEF": {
+          "count": 4117.0,
+          "mean": 0.12749330545296492,
+          "std": 0.4263715690379121,
+          "min": -2.820792605507598,
+          "10%": -0.4045179892633464,
+          "50%": 0.11670021564193198,
+          "90%": 0.6973968079798899,
+          "max": 1.0674846704480354
+        },
+        "HYD_beta_AGG": {
+          "count": 4117.0,
+          "mean": 0.4816744628901746,
+          "std": 0.8343906989645407,
+          "min": -1.5966935283310315,
+          "10%": -0.2183022223870919,
+          "50%": 0.23637051626620864,
+          "90%": 1.2757103270454186,
+          "max": 6.086270652633966
+        },
+        "HYD_beta_LQD": {
+          "count": 4117.0,
+          "mean": 0.008369528920347192,
+          "std": 0.31928918260328787,
+          "min": -1.4201047590530491,
+          "10%": -0.5443560596203874,
+          "50%": 0.07452086544718066,
+          "90%": 0.3575950280210432,
+          "max": 1.2121621958486442
+        },
+        "HYD_beta_HYG": {
+          "count": 4117.0,
+          "mean": 0.15857142050411552,
+          "std": 0.2851621682499532,
+          "min": -0.34490891075763447,
+          "10%": -0.04662553630244775,
+          "50%": 0.09371833461755626,
+          "90%": 0.4388078880256109,
+          "max": 2.258067271113144
+        },
+        "HYD_beta_SPY": {
+          "count": 4117.0,
+          "mean": 0.026773476165482535,
+          "std": 0.06852238794884656,
+          "min": -0.2969283007807434,
+          "10%": -0.05113650183641267,
+          "50%": 0.013630457521326135,
+          "90%": 0.14283055130939876,
+          "max": 0.2538929744568145
+        }
+      },
+      "TAXF": {
+        "TAXF_beta_IEF": {
+          "count": 1700.0,
+          "mean": 0.10474048812797067,
+          "std": 0.18170551582298688,
+          "min": -0.4988840190469582,
+          "10%": -0.13000783144539063,
+          "50%": 0.1336473772663116,
+          "90%": 0.32815229258664336,
+          "max": 0.5343679468991926
+        },
+        "TAXF_beta_AGG": {
+          "count": 1700.0,
+          "mean": 0.24463545291845096,
+          "std": 0.23559279504148053,
+          "min": -0.3979116222616079,
+          "10%": -0.026697257238560507,
+          "50%": 0.2696916458901113,
+          "90%": 0.5185536240983895,
+          "max": 1.2206585789619386
+        },
+        "TAXF_beta_LQD": {
+          "count": 1700.0,
+          "mean": 0.018340061380683427,
+          "std": 0.1107640933591675,
+          "min": -0.400132960716694,
+          "10%": -0.09774982263872964,
+          "50%": -0.001214510767663871,
+          "90%": 0.2245015370396612,
+          "max": 0.32076022984497965
+        },
+        "TAXF_beta_HYG": {
+          "count": 1700.0,
+          "mean": 0.08047384693069994,
+          "std": 0.12394953272846604,
+          "min": -0.1783630340702205,
+          "10%": -0.06520980158367318,
+          "50%": 0.06453828494077032,
+          "90%": 0.25552987362663687,
+          "max": 0.7232478806678894
+        },
+        "TAXF_beta_SPY": {
+          "count": 1700.0,
+          "mean": -0.012155461209052901,
+          "std": 0.03164433468407784,
+          "min": -0.20870095954176032,
+          "10%": -0.04199025068816833,
+          "50%": -0.02112072643219088,
+          "90%": 0.029076665522418093,
+          "max": 0.04823938012986666
+        }
+      }
+    },
+    "lookahead_policy": "muni cheapening/drawdown/volume/FRED stress components are lagged before forward RV/corr targets"
+  },
+  "regressions": [
+    {
+      "target": "MUB_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 4716,
+      "beta": 0.022528342035451242,
+      "hac_t": 4.2517077780035155,
+      "p_value": 2.1214656004195837e-05,
+      "effect_per_1sd": 0.01494071790325947,
+      "expected_sign": "positive",
+      "raw_gate": true,
+      "bonferroni_p": 0.0002970051840587417,
+      "bh_q": 0.0002667483175500826,
+      "gate_pass": true
+    },
+    {
+      "target": "MUB_fwd_drawdown5",
+      "family": "muni_drawdown5",
+      "nobs": 4724,
+      "beta": 0.002518781819107592,
+      "hac_t": 2.935791914770181,
+      "p_value": 0.003326974144374013,
+      "effect_per_1sd": 0.0016700238124025474,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.046577638021236184,
+      "bh_q": 0.009315527604247236,
+      "gate_pass": false
+    },
+    {
+      "target": "TFI_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 4713,
+      "beta": 0.020649474088858578,
+      "hac_t": 4.118667804579569,
+      "p_value": 3.810690250715466e-05,
+      "effect_per_1sd": 0.01368005343851937,
+      "expected_sign": "positive",
+      "raw_gate": true,
+      "bonferroni_p": 0.0005334966351001652,
+      "bh_q": 0.0002667483175500826,
+      "gate_pass": true
+    },
+    {
+      "target": "TFI_fwd_drawdown5",
+      "family": "muni_drawdown5",
+      "nobs": 4721,
+      "beta": 0.00287238418213156,
+      "hac_t": 2.8051988753249377,
+      "p_value": 0.0050285542750607625,
+      "effect_per_1sd": 0.0019024408263182508,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.07039975985085067,
+      "bh_q": 0.009345320636251467,
+      "gate_pass": false
+    },
+    {
+      "target": "HYD_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 4361,
+      "beta": 0.059054831953866085,
+      "hac_t": 2.7857634113786083,
+      "p_value": 0.005340183220715124,
+      "effect_per_1sd": 0.03485379889355907,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.07476256509001174,
+      "bh_q": 0.009345320636251467,
+      "gate_pass": false
+    },
+    {
+      "target": "HYD_fwd_drawdown5",
+      "family": "muni_drawdown5",
+      "nobs": 4369,
+      "beta": 0.005779082347946085,
+      "hac_t": 2.362990105143039,
+      "p_value": 0.018128153611805455,
+      "effect_per_1sd": 0.0034099512044364283,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.2537941505652764,
+      "bh_q": 0.02537941505652764,
+      "gate_pass": false
+    },
+    {
+      "target": "TAXF_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 1944,
+      "beta": 0.014837790403701593,
+      "hac_t": 2.8387805621721913,
+      "p_value": 0.004528628821283617,
+      "effect_per_1sd": 0.009500568227138883,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.06340080349797064,
+      "bh_q": 0.009345320636251467,
+      "gate_pass": false
+    },
+    {
+      "target": "TAXF_fwd_drawdown5",
+      "family": "muni_drawdown5",
+      "nobs": 1952,
+      "beta": 0.00329711994474086,
+      "hac_t": 2.6656710002157293,
+      "p_value": 0.007683484486501496,
+      "effect_per_1sd": 0.002109825272945608,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.10756878281102095,
+      "bh_q": 0.011952086979002328,
+      "gate_pass": false
+    },
+    {
+      "target": "LQD_fwd_rv5",
+      "family": "cross_asset_rv5",
+      "nobs": 4806,
+      "beta": 0.02064421701859713,
+      "hac_t": 2.937321029393553,
+      "p_value": 0.0033106119802712056,
+      "effect_per_1sd": 0.013985555867841098,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.04634856772379688,
+      "bh_q": 0.009315527604247236,
+      "gate_pass": false
+    },
+    {
+      "target": "HYG_fwd_rv5",
+      "family": "cross_asset_rv5",
+      "nobs": 4806,
+      "beta": 0.014344025188209144,
+      "hac_t": 3.002441024363843,
+      "p_value": 0.002678238614532672,
+      "effect_per_1sd": 0.009717450919000814,
+      "expected_sign": "positive",
+      "raw_gate": true,
+      "bonferroni_p": 0.03749534060345741,
+      "bh_q": 0.009315527604247236,
+      "gate_pass": true
+    },
+    {
+      "target": "AGG_fwd_rv5",
+      "family": "cross_asset_rv5",
+      "nobs": 4806,
+      "beta": 0.00939294021770286,
+      "hac_t": 2.2947893369429924,
+      "p_value": 0.021745200029119532,
+      "effect_per_1sd": 0.006363306976459104,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.30443280040767345,
+      "bh_q": 0.027675709127970315,
+      "gate_pass": false
+    },
+    {
+      "target": "IEF_fwd_rv5",
+      "family": "cross_asset_rv5",
+      "nobs": 4806,
+      "beta": 0.004575673774558804,
+      "hac_t": 1.8457588200965607,
+      "p_value": 0.06492723233379083,
+      "effect_per_1sd": 0.003099819244753132,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 0.9089812526730716,
+      "bh_q": 0.07574843772275597,
+      "gate_pass": false
+    },
+    {
+      "target": "HYG_LQD_fwd_spread_drawdown5",
+      "family": "credit_spread_drawdown5",
+      "nobs": 4814,
+      "beta": 0.0007767374779978578,
+      "hac_t": 1.0514341132379554,
+      "p_value": 0.29305925512010367,
+      "effect_per_1sd": 0.0005260695672478702,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 1.0,
+      "bh_q": 0.315602274744727,
+      "gate_pass": false
+    },
+    {
+      "target": "spy_ief_fwd_corr21",
+      "family": "stock_bond_corr21",
+      "nobs": 4796,
+      "beta": 0.010817277973662592,
+      "hac_t": 0.4550732824552727,
+      "p_value": 0.6490565185296,
+      "effect_per_1sd": 0.0073266939626163785,
+      "expected_sign": "positive",
+      "raw_gate": false,
+      "bonferroni_p": 1.0,
+      "bh_q": 0.6490565185296001,
+      "gate_pass": false
+    }
+  ],
+  "oos": [
+    {
+      "target": "MUB_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 3960,
+      "baseline_mse": 0.00111698191121687,
+      "augmented_mse": 0.0009959219139838928,
+      "mse_improvement_pct": 10.838134084113427,
+      "dm_t": -1.3879040895839638,
+      "dm_p": 0.16524435343524013,
+      "gate_pass": false
+    },
+    {
+      "target": "MUB_fwd_drawdown5",
+      "family": "muni_drawdown5",
+      "nobs": 3968,
+      "baseline_mse": 3.303099901843716e-05,
+      "augmented_mse": 3.171759906787325e-05,
+      "mse_improvement_pct": 3.9762646895142377,
+      "dm_t": -1.2030669505358351,
+      "dm_p": 0.22902220697919273,
+      "gate_pass": false
+    },
+    {
+      "target": "TFI_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 3957,
+      "baseline_mse": 0.0010424458329964855,
+      "augmented_mse": 0.0009448306680554386,
+      "mse_improvement_pct": 9.36405152682653,
+      "dm_t": -1.3953258109721456,
+      "dm_p": 0.1629959319147174,
+      "gate_pass": false
+    },
+    {
+      "target": "TFI_fwd_drawdown5",
+      "family": "muni_drawdown5",
+      "nobs": 3965,
+      "baseline_mse": 3.731519586086145e-05,
+      "augmented_mse": 3.584828342647435e-05,
+      "mse_improvement_pct": 3.9311395814638965,
+      "dm_t": -1.3596138476660191,
+      "dm_p": 0.1740294842147374,
+      "gate_pass": false
+    },
+    {
+      "target": "HYD_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 3605,
+      "baseline_mse": 0.01000251134828274,
+      "augmented_mse": 0.00923005166458351,
+      "mse_improvement_pct": 7.722657408750141,
+      "dm_t": -0.8890166012377988,
+      "dm_p": 0.37405349039605684,
+      "gate_pass": false
+    },
+    {
+      "target": "HYD_fwd_drawdown5",
+      "family": "muni_drawdown5",
+      "nobs": 3613,
+      "baseline_mse": 0.0001719514857689204,
+      "augmented_mse": 0.00016558754032560378,
+      "mse_improvement_pct": 3.701012186582028,
+      "dm_t": -0.890707671205291,
+      "dm_p": 0.373145342435131,
+      "gate_pass": false
+    },
+    {
+      "target": "TAXF_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 1188,
+      "baseline_mse": 0.0006699754210061467,
+      "augmented_mse": 0.0006768186723515217,
+      "mse_improvement_pct": -1.0214182686132094,
+      "dm_t": 0.23917308919866445,
+      "dm_p": 0.8110126575553616,
+      "gate_pass": false
+    },
+    {
+      "target": "TAXF_fwd_drawdown5",
+      "family": "muni_drawdown5",
+      "nobs": 1196,
+      "baseline_mse": 2.5593040620721217e-05,
+      "augmented_mse": 2.5456264684985214e-05,
+      "mse_improvement_pct": 0.5344262831563013,
+      "dm_t": -0.13658263087194988,
+      "dm_p": 0.8913837122037416,
+      "gate_pass": false
+    },
+    {
+      "target": "LQD_fwd_rv5",
+      "family": "cross_asset_rv5",
+      "nobs": 4050,
+      "baseline_mse": 0.001776946167024808,
+      "augmented_mse": 0.0017062032028413658,
+      "mse_improvement_pct": 3.9811540437316233,
+      "dm_t": -1.0670326041746334,
+      "dm_p": 0.2860207295911308,
+      "gate_pass": false
+    },
+    {
+      "target": "HYG_fwd_rv5",
+      "family": "cross_asset_rv5",
+      "nobs": 4050,
+      "baseline_mse": 0.0017285072255344939,
+      "augmented_mse": 0.0017351102894757923,
+      "mse_improvement_pct": -0.38200962331856086,
+      "dm_t": 0.16486176943406544,
+      "dm_p": 0.8690610138330079,
+      "gate_pass": false
+    },
+    {
+      "target": "AGG_fwd_rv5",
+      "family": "cross_asset_rv5",
+      "nobs": 4050,
+      "baseline_mse": 0.0006767672767116977,
+      "augmented_mse": 0.0006720840753105297,
+      "mse_improvement_pct": 0.6919958399766182,
+      "dm_t": -0.25555587573702054,
+      "dm_p": 0.7983067739073488,
+      "gate_pass": false
+    },
+    {
+      "target": "IEF_fwd_rv5",
+      "family": "cross_asset_rv5",
+      "nobs": 4050,
+      "baseline_mse": 0.0006386965225260115,
+      "augmented_mse": 0.0006374864257441738,
+      "mse_improvement_pct": 0.1894634993551949,
+      "dm_t": -0.29159965656958514,
+      "dm_p": 0.7706076757120757,
+      "gate_pass": false
+    },
+    {
+      "target": "HYG_LQD_fwd_spread_drawdown5",
+      "family": "credit_spread_drawdown5",
+      "nobs": 4058,
+      "baseline_mse": 5.936473152672052e-05,
+      "augmented_mse": 5.964833028754888e-05,
+      "mse_improvement_pct": -0.47772263688366456,
+      "dm_t": 1.5224931877119687,
+      "dm_p": 0.12796348752872455,
+      "gate_pass": false
+    },
+    {
+      "target": "spy_ief_fwd_corr21",
+      "family": "stock_bond_corr21",
+      "nobs": 4040,
+      "baseline_mse": 0.1625268166513072,
+      "augmented_mse": 0.16356609567752034,
+      "mse_improvement_pct": -0.639450798106054,
+      "dm_t": 1.5554323079739,
+      "dm_p": 0.11992149224371418,
+      "gate_pass": false
+    }
+  ],
+  "summary": {
+    "in_sample_gate_pass": [
+      {
+        "target": "MUB_fwd_rv5",
+        "family": "muni_rv5",
+        "nobs": 4716,
+        "beta": 0.022528342035451242,
+        "hac_t": 4.2517077780035155,
+        "p_value": 2.1214656004195837e-05,
+        "effect_per_1sd": 0.01494071790325947,
+        "expected_sign": "positive",
+        "raw_gate": true,
+        "bonferroni_p": 0.0002970051840587417,
+        "bh_q": 0.0002667483175500826,
+        "gate_pass": true
+      },
+      {
+        "target": "TFI_fwd_rv5",
+        "family": "muni_rv5",
+        "nobs": 4713,
+        "beta": 0.020649474088858578,
+        "hac_t": 4.118667804579569,
+        "p_value": 3.810690250715466e-05,
+        "effect_per_1sd": 0.01368005343851937,
+        "expected_sign": "positive",
+        "raw_gate": true,
+        "bonferroni_p": 0.0005334966351001652,
+        "bh_q": 0.0002667483175500826,
+        "gate_pass": true
+      },
+      {
+        "target": "HYG_fwd_rv5",
+        "family": "cross_asset_rv5",
+        "nobs": 4806,
+        "beta": 0.014344025188209144,
+        "hac_t": 3.002441024363843,
+        "p_value": 0.002678238614532672,
+        "effect_per_1sd": 0.009717450919000814,
+        "expected_sign": "positive",
+        "raw_gate": true,
+        "bonferroni_p": 0.03749534060345741,
+        "bh_q": 0.009315527604247236,
+        "gate_pass": true
+      }
+    ],
+    "oos_gate_pass": [],
+    "best_abs_hac": {
+      "target": "MUB_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 4716,
+      "beta": 0.022528342035451242,
+      "hac_t": 4.2517077780035155,
+      "p_value": 2.1214656004195837e-05,
+      "effect_per_1sd": 0.01494071790325947,
+      "expected_sign": "positive",
+      "raw_gate": true,
+      "bonferroni_p": 0.0002970051840587417,
+      "bh_q": 0.0002667483175500826,
+      "gate_pass": true
+    },
+    "best_oos_improvement": {
+      "target": "MUB_fwd_rv5",
+      "family": "muni_rv5",
+      "nobs": 3960,
+      "baseline_mse": 0.00111698191121687,
+      "augmented_mse": 0.0009959219139838928,
+      "mse_improvement_pct": 10.838134084113427,
+      "dm_t": -1.3879040895839638,
+      "dm_p": 0.16524435343524013,
+      "gate_pass": false
+    },
+    "interpretation": "The ETF/FRED proxy must pass formal gates before it can be treated as a cross-asset vol prior. Directional t-stats or stress-quintile patterns alone are diagnostics, not publishable claims."
+  },
+  "outputs": {
+    "daily_panel": "experiments/k1542_muni_convenience_premium_tax_liquidity_stress/k1542_muni_convenience_premium_tax_liquidity_stress_daily_panel.csv",
+    "figures": [
+      "experiments/k1542_muni_convenience_premium_tax_liquidity_stress/figures/k1542_stress_components.png",
+      "experiments/k1542_muni_convenience_premium_tax_liquidity_stress/figures/k1542_regression_tstats.png",
+      "experiments/k1542_muni_convenience_premium_tax_liquidity_stress/figures/k1542_oos_mse_improvement.png",
+      "experiments/k1542_muni_convenience_premium_tax_liquidity_stress/figures/k1542_stress_quintiles.png"
+    ]
+  },
+  "limitations": [
+    "ETF returns are proxies for broad muni portfolios, not bond-level tax-exempt convenience premia.",
+    "State/local tax receipts are quarterly and lagged, so they cannot explain high-frequency daily moves alone.",
+    "Volume is ETF volume, not underlying municipal bond trading volume.",
+    "The stock-bond correlation target is an ex-post 21-day forward realized correlation, used only as a predictive target."
+  ]
+}
