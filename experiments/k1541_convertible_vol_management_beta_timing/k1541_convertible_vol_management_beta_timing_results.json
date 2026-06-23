@@ -1,0 +1,838 @@
+{
+  "experiment_id": "K1541",
+  "slug": "k1541_convertible_vol_management_beta_timing",
+  "created_at": "2026-06-23T15:24:23.613216+00:00",
+  "random_seed": 42,
+  "verdict": "NULL_OR_BETA_TIMING_DOMINATED",
+  "data": {
+    "price_source": "yfinance adjusted daily close via yf.download(auto_adjust=True)",
+    "requested_start": "2009-01-01",
+    "requested_end": "2026-06-24",
+    "availability": {
+      "CWB": {
+        "available": true,
+        "n_close": 4323,
+        "start": "2009-04-16",
+        "end": "2026-06-23"
+      },
+      "ICVT": {
+        "available": true,
+        "n_close": 2779,
+        "start": "2015-06-04",
+        "end": "2026-06-23"
+      },
+      "CONV": {
+        "available": false,
+        "reason": "empty adjusted close"
+      },
+      "SPY": {
+        "available": true,
+        "n_close": 4394,
+        "start": "2009-01-02",
+        "end": "2026-06-23"
+      },
+      "QQQ": {
+        "available": true,
+        "n_close": 4394,
+        "start": "2009-01-02",
+        "end": "2026-06-23"
+      },
+      "HYG": {
+        "available": true,
+        "n_close": 4394,
+        "start": "2009-01-02",
+        "end": "2026-06-23"
+      },
+      "LQD": {
+        "available": true,
+        "n_close": 4394,
+        "start": "2009-01-02",
+        "end": "2026-06-23"
+      },
+      "^VIX": {
+        "available": true,
+        "n_close": 4395,
+        "start": "2009-01-02",
+        "end": "2026-06-23"
+      }
+    },
+    "available_convertible_etfs_used": [
+      "CWB",
+      "ICVT"
+    ],
+    "unavailable_or_excluded_convertible_etfs": [
+      "CONV"
+    ],
+    "umcsent": {
+      "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=UMCSENT",
+      "source": "FRED UMCSENT CSV",
+      "monthly_start": "1952-11-01",
+      "monthly_end": "2026-04-01",
+      "lag_policy": "daily regime uses UMCSENT shifted by one monthly observation before forward fill"
+    },
+    "volume_rows": {
+      "CWB": 4323,
+      "ICVT": 2779,
+      "SPY": 4394,
+      "QQQ": 4394,
+      "HYG": 4394,
+      "LQD": 4394,
+      "^VIX": 4395
+    }
+  },
+  "method": {
+    "objective": "test whether convertible ETF volatility-management survives an equal equity/credit beta baseline",
+    "convertible_proxy_warning": "ETF proxy only; no claim about individual convertible-bond replication or arbitrage books",
+    "volatility_management": {
+      "weight_formula": "clip(0.10 / asset_ret.rolling(21).std().sqrt252.shift(1), 0, 2)",
+      "lookahead_guard": "asset_vol21_lag uses .shift(1); strategy return at t multiplies lagged weight_t by return_t",
+      "target_annual_vol": 0.1,
+      "max_leverage": 2.0
+    },
+    "beta_replication": {
+      "factors": [
+        "SPY",
+        "QQQ",
+        "HYG",
+        "LQD"
+      ],
+      "window_days": 252,
+      "estimation": "rolling no-intercept OLS using observations t-252 through t-1",
+      "baselines": [
+        "beta_rep_net: rolling beta factor basket minus turnover costs",
+        "vm_beta_rep_net: same lagged VM scalar applied to rolling beta factor basket"
+      ]
+    },
+    "transaction_cost": {
+      "bps_per_100pct_turnover": 5.0,
+      "raw_cb": "buy-and-hold adjusted ETF return, no daily turnover charge",
+      "vm_cb_net": "cost on absolute change in VM weight",
+      "beta_rep_net": "cost on sum absolute rolling factor-weight changes",
+      "vm_beta_rep_net": "cost on sum absolute combined VM-factor weight changes"
+    },
+    "tests": {
+      "dm": "volpred.stats.model_evaluation.strategy_dm_test(loss_fn='negative_return'); negative t means left strategy better",
+      "bootstrap": "1000 circular 21-day block-bootstrap Sharpe-difference CI, seed=42",
+      "gate": "specific convertible VM edge requires Sharpe diff > 0, 95% CI lower > 0, and DM t <= -3 versus vm_beta_rep_net",
+      "alpha": "HAC(maxlags=5) alpha of vm_cb_net on vm_beta_rep_net; alpha t >= 3 required for alpha gate"
+    }
+  },
+  "asset_meta": {
+    "CWB": {
+      "asset": "CWB",
+      "effective_start": "2010-04-19",
+      "effective_end": "2026-06-23",
+      "n_days": 4069,
+      "target_vol": 0.1,
+      "vol_lookback_days": 21,
+      "beta_lookback_days": 252,
+      "max_leverage": 2.0,
+      "transaction_cost_bps_per_100pct_turnover": 5.0
+    },
+    "ICVT": {
+      "asset": "ICVT",
+      "effective_start": "2016-06-06",
+      "effective_end": "2026-06-23",
+      "n_days": 2525,
+      "target_vol": 0.1,
+      "vol_lookback_days": 21,
+      "beta_lookback_days": 252,
+      "max_leverage": 2.0,
+      "transaction_cost_bps_per_100pct_turnover": 5.0
+    }
+  },
+  "descriptive_stats": [
+    {
+      "asset": "CWB",
+      "raw_performance": {
+        "n_days": 4069,
+        "start": "2010-04-19",
+        "end": "2026-06-23",
+        "cagr": 0.10532772589196115,
+        "ann_return_arith": 0.1089988874906371,
+        "ann_vol": 0.13261380582026416,
+        "sharpe": 0.8219271501669055,
+        "max_drawdown": -0.32058311965557984,
+        "mean_daily_return": 0.0004325352678199885,
+        "min_daily_return": -0.09132791756914427,
+        "max_daily_return": 0.06176807784310312,
+        "annual_turnover": null,
+        "mean_exposure": null,
+        "mean_gross_exposure": null
+      },
+      "correlations_with_factors": {
+        "SPY": 0.8294701142259508,
+        "QQQ": 0.8261784353780479,
+        "HYG": 0.6765323586949835,
+        "LQD": 0.256651556521618
+      },
+      "rolling_beta_summary": {
+        "SPY": {
+          "count": 4069.0,
+          "mean": 0.27519069555383546,
+          "std": 0.1774391343259775,
+          "min": -0.2486603160256226,
+          "10%": 0.03645823740246382,
+          "50%": 0.35663969646019245,
+          "90%": 0.4568008336544651,
+          "max": 0.6185076606361307
+        },
+        "QQQ": {
+          "count": 4069.0,
+          "mean": 0.24194140139364484,
+          "std": 0.18922281651440828,
+          "min": -0.06552760721443297,
+          "10%": 0.011615353825649068,
+          "50%": 0.20067280013877054,
+          "90%": 0.47454724173206697,
+          "max": 0.7598698975822991
+        },
+        "HYG": {
+          "count": 4069.0,
+          "mean": 0.258351037831559,
+          "std": 0.19030697103170224,
+          "min": -0.11505500004380725,
+          "10%": 0.05312218355845241,
+          "50%": 0.23162573076621978,
+          "90%": 0.5824164754646012,
+          "max": 0.9458594684585963
+        },
+        "LQD": {
+          "count": 4069.0,
+          "mean": 0.02344319346639888,
+          "std": 0.09656934103809052,
+          "min": -0.2614784013531107,
+          "10%": -0.0908284698639041,
+          "50%": 0.009570977201770529,
+          "90%": 0.1784323989718547,
+          "max": 0.48173135724141086
+        }
+      },
+      "mean_vix_when_weight_below_0_75": null,
+      "mean_vix_when_weight_above_1_25": null
+    },
+    {
+      "asset": "ICVT",
+      "raw_performance": {
+        "n_days": 2525,
+        "start": "2016-06-06",
+        "end": "2026-06-23",
+        "cagr": 0.13729098139672868,
+        "ann_return_arith": 0.14089491615579333,
+        "ann_vol": 0.15592083430757658,
+        "sharpe": 0.9036311072954983,
+        "max_drawdown": -0.3324798783285373,
+        "mean_daily_return": 0.0005591068101420371,
+        "min_daily_return": -0.10180179864558558,
+        "max_daily_return": 0.09987110759234707,
+        "annual_turnover": null,
+        "mean_exposure": null,
+        "mean_gross_exposure": null
+      },
+      "correlations_with_factors": {
+        "SPY": 0.7446926233400223,
+        "QQQ": 0.7505022548561482,
+        "HYG": 0.6391063620323458,
+        "LQD": 0.2962771276568394
+      },
+      "rolling_beta_summary": {
+        "SPY": {
+          "count": 2525.0,
+          "mean": 0.1224534324605718,
+          "std": 0.25081159268847014,
+          "min": -0.4350825421890993,
+          "10%": -0.21359541942422805,
+          "50%": 0.11856492311086769,
+          "90%": 0.4501481692047685,
+          "max": 0.9795551931159847
+        },
+        "QQQ": {
+          "count": 2525.0,
+          "mean": 0.32214967936450867,
+          "std": 0.24875540294803086,
+          "min": -0.2972478452458272,
+          "10%": -0.01163533054022653,
+          "50%": 0.3452463916834271,
+          "90%": 0.6804878143642165,
+          "max": 0.9003725117256851
+        },
+        "HYG": {
+          "count": 2525.0,
+          "mean": 0.38655061747832137,
+          "std": 0.20531493806900375,
+          "min": -0.08909826216598295,
+          "10%": 0.17738956135463313,
+          "50%": 0.3263707081016596,
+          "90%": 0.6739122978647761,
+          "max": 1.244266012042233
+        },
+        "LQD": {
+          "count": 2525.0,
+          "mean": -0.04531240233778794,
+          "std": 0.10829580218323899,
+          "min": -0.26897662906046366,
+          "10%": -0.1705361067992011,
+          "50%": -0.06998635365283275,
+          "90%": 0.1091293828491354,
+          "max": 0.5468303621543029
+        }
+      },
+      "mean_vix_when_weight_below_0_75": null,
+      "mean_vix_when_weight_above_1_25": null
+    }
+  ],
+  "performance": [
+    {
+      "n_days": 4069,
+      "start": "2010-04-19",
+      "end": "2026-06-23",
+      "cagr": 0.10532772589196115,
+      "ann_return_arith": 0.1089988874906371,
+      "ann_vol": 0.13261380582026416,
+      "sharpe": 0.8219271501669055,
+      "max_drawdown": -0.32058311965557984,
+      "mean_daily_return": 0.0004325352678199885,
+      "min_daily_return": -0.09132791756914427,
+      "max_daily_return": 0.06176807784310312,
+      "annual_turnover": NaN,
+      "mean_exposure": NaN,
+      "mean_gross_exposure": NaN,
+      "asset": "CWB",
+      "strategy": "raw_cb"
+    },
+    {
+      "n_days": 4069,
+      "start": "2010-04-19",
+      "end": "2026-06-23",
+      "cagr": 0.08967909943173025,
+      "ann_return_arith": 0.0919203608548742,
+      "ann_vol": 0.10964524172058358,
+      "sharpe": 0.8383433645859535,
+      "max_drawdown": -0.20902805651779754,
+      "mean_daily_return": 0.00036476333672569127,
+      "min_daily_return": -0.03722677979106851,
+      "max_daily_return": 0.026506963458375582,
+      "annual_turnover": 9.910577430526411,
+      "mean_exposure": 1.0538376403091543,
+      "mean_gross_exposure": 1.0538376403091543,
+      "asset": "CWB",
+      "strategy": "vm_cb_net"
+    },
+    {
+      "n_days": 4069,
+      "start": "2010-04-19",
+      "end": "2026-06-23",
+      "cagr": 0.09715769412972253,
+      "ann_return_arith": 0.09975344308691877,
+      "ann_vol": 0.11835229952794953,
+      "sharpe": 0.8428517526468631,
+      "max_drawdown": -0.25097645028286897,
+      "mean_daily_return": 0.0003958469963766618,
+      "min_daily_return": -0.0806775067386503,
+      "max_daily_return": 0.07152797719252407,
+      "annual_turnover": 5.536306360909393,
+      "mean_exposure": 0.8714921100094156,
+      "mean_gross_exposure": 0.8714921100094156,
+      "asset": "CWB",
+      "strategy": "beta_rep_net"
+    },
+    {
+      "n_days": 4069,
+      "start": "2010-04-19",
+      "end": "2026-06-23",
+      "cagr": 0.08773074771574985,
+      "ann_return_arith": 0.08851751897536353,
+      "ann_vol": 0.09385599760309418,
+      "sharpe": 0.9431205382280796,
+      "max_drawdown": -0.16314460946881582,
+      "mean_daily_return": 0.00035125999593398224,
+      "min_daily_return": -0.034153530910878985,
+      "max_daily_return": 0.03353928182655389,
+      "annual_turnover": 11.134536851772207,
+      "mean_exposure": 0.886857940053185,
+      "mean_gross_exposure": 0.886857940053185,
+      "asset": "CWB",
+      "strategy": "vm_beta_rep_net"
+    },
+    {
+      "n_days": 2525,
+      "start": "2016-06-06",
+      "end": "2026-06-23",
+      "cagr": 0.13729098139672868,
+      "ann_return_arith": 0.14089491615579333,
+      "ann_vol": 0.15592083430757658,
+      "sharpe": 0.9036311072954983,
+      "max_drawdown": -0.3324798783285373,
+      "mean_daily_return": 0.0005591068101420371,
+      "min_daily_return": -0.10180179864558558,
+      "max_daily_return": 0.09987110759234707,
+      "annual_turnover": NaN,
+      "mean_exposure": NaN,
+      "mean_gross_exposure": NaN,
+      "asset": "ICVT",
+      "strategy": "raw_cb"
+    },
+    {
+      "n_days": 2525,
+      "start": "2016-06-06",
+      "end": "2026-06-23",
+      "cagr": 0.10930825427352264,
+      "ann_return_arith": 0.1098648426743459,
+      "ann_vol": 0.11041946188820939,
+      "sharpe": 0.9949771606890734,
+      "max_drawdown": -0.22406916253285147,
+      "mean_daily_return": 0.00043597159791407107,
+      "min_daily_return": -0.032736266178021396,
+      "max_daily_return": 0.0266367271141848,
+      "annual_turnover": 9.159196984741563,
+      "mean_exposure": 0.9687903938579873,
+      "mean_gross_exposure": 0.9687903938579873,
+      "asset": "ICVT",
+      "strategy": "vm_cb_net"
+    },
+    {
+      "n_days": 2525,
+      "start": "2016-06-06",
+      "end": "2026-06-23",
+      "cagr": 0.09642256527569648,
+      "ann_return_arith": 0.10094368414343245,
+      "ann_vol": 0.13310639568758367,
+      "sharpe": 0.7583683986181936,
+      "max_drawdown": -0.2674605110125412,
+      "mean_daily_return": 0.000400570175172351,
+      "min_daily_return": -0.09140990577215964,
+      "max_daily_return": 0.07478188061881126,
+      "annual_turnover": 8.088039464399936,
+      "mean_exposure": 1.047369837595181,
+      "mean_gross_exposure": 1.047369837595181,
+      "asset": "ICVT",
+      "strategy": "beta_rep_net"
+    },
+    {
+      "n_days": 2525,
+      "start": "2016-06-06",
+      "end": "2026-06-23",
+      "cagr": 0.0842715634828135,
+      "ann_return_arith": 0.08478209352633288,
+      "ann_vol": 0.08783419714461903,
+      "sharpe": 0.96525153394115,
+      "max_drawdown": -0.1756257045945364,
+      "mean_daily_return": 0.00033643687907274956,
+      "min_daily_return": -0.030101295814249026,
+      "max_daily_return": 0.03623892021792726,
+      "annual_turnover": 12.933580321402419,
+      "mean_exposure": 0.9442832323460185,
+      "mean_gross_exposure": 0.9442832323460185,
+      "asset": "ICVT",
+      "strategy": "vm_beta_rep_net"
+    }
+  ],
+  "comparisons": [
+    {
+      "asset": "CWB",
+      "left": "vm_cb_net",
+      "right": "raw_cb",
+      "n_days": 4069,
+      "sharpe_diff": 0.016416214419047948,
+      "mean_ann_return_diff": -0.017078526635762908,
+      "dm_t_negative_return": 1.0169321915702565,
+      "dm_p_negative_return": 0.309246164198437,
+      "bootstrap_ci_low": -0.26402994854874917,
+      "bootstrap_ci_high": 0.2797460707254641,
+      "bootstrap_p_diff_le_0": 0.479,
+      "gate_pass": false
+    },
+    {
+      "asset": "CWB",
+      "left": "vm_cb_net",
+      "right": "beta_rep_net",
+      "n_days": 4069,
+      "sharpe_diff": -0.004508388060909585,
+      "mean_ann_return_diff": -0.00783308223204457,
+      "dm_t_negative_return": 0.41461405365434933,
+      "dm_p_negative_return": 0.6784463205818629,
+      "bootstrap_ci_low": -0.35518961320416637,
+      "bootstrap_ci_high": 0.32258587525904364,
+      "bootstrap_p_diff_le_0": 0.51,
+      "gate_pass": false
+    },
+    {
+      "asset": "CWB",
+      "left": "vm_cb_net",
+      "right": "vm_beta_rep_net",
+      "n_days": 4069,
+      "sharpe_diff": -0.10477717364212613,
+      "mean_ann_return_diff": 0.0034028418795106754,
+      "dm_t_negative_return": -0.23386475041494686,
+      "dm_p_negative_return": 0.8151017474161444,
+      "bootstrap_ci_low": -0.3661519666989389,
+      "bootstrap_ci_high": 0.14510797052761748,
+      "bootstrap_p_diff_le_0": 0.773,
+      "gate_pass": false
+    },
+    {
+      "asset": "CWB",
+      "left": "raw_cb",
+      "right": "beta_rep_net",
+      "n_days": 4069,
+      "sharpe_diff": -0.020924602479957533,
+      "mean_ann_return_diff": 0.00924544440371834,
+      "dm_t_negative_return": -0.5626787717841344,
+      "dm_p_negative_return": 0.5736846481630218,
+      "bootstrap_ci_low": -0.2599624869423475,
+      "bootstrap_ci_high": 0.21060362549469777,
+      "bootstrap_p_diff_le_0": 0.57,
+      "gate_pass": false
+    },
+    {
+      "asset": "ICVT",
+      "left": "vm_cb_net",
+      "right": "raw_cb",
+      "n_days": 2525,
+      "sharpe_diff": 0.09134605339357504,
+      "mean_ann_return_diff": -0.031030073481447436,
+      "dm_t_negative_return": 1.2210115728178033,
+      "dm_p_negative_return": 0.22219568327948136,
+      "bootstrap_ci_low": -0.312860710246534,
+      "bootstrap_ci_high": 0.41772594619355347,
+      "bootstrap_p_diff_le_0": 0.378,
+      "gate_pass": false
+    },
+    {
+      "asset": "ICVT",
+      "left": "vm_cb_net",
+      "right": "beta_rep_net",
+      "n_days": 2525,
+      "sharpe_diff": 0.23660876207087977,
+      "mean_ann_return_diff": 0.008921158530913454,
+      "dm_t_negative_return": -0.30618271610229525,
+      "dm_p_negative_return": 0.7594907841567939,
+      "bootstrap_ci_low": -0.2637816069342121,
+      "bootstrap_ci_high": 0.7012700274035066,
+      "bootstrap_p_diff_le_0": 0.203,
+      "gate_pass": false
+    },
+    {
+      "asset": "ICVT",
+      "left": "vm_cb_net",
+      "right": "vm_beta_rep_net",
+      "n_days": 2525,
+      "sharpe_diff": 0.02972562674792334,
+      "mean_ann_return_diff": 0.02508274914801302,
+      "dm_t_negative_return": -1.1983801793998028,
+      "dm_p_negative_return": 0.23088155441554625,
+      "bootstrap_ci_low": -0.3622122083631302,
+      "bootstrap_ci_high": 0.3960658298860456,
+      "bootstrap_p_diff_le_0": 0.448,
+      "gate_pass": false
+    },
+    {
+      "asset": "ICVT",
+      "left": "raw_cb",
+      "right": "beta_rep_net",
+      "n_days": 2525,
+      "sharpe_diff": 0.14526270867730473,
+      "mean_ann_return_diff": 0.03995123201236089,
+      "dm_t_negative_return": -1.5428925658959256,
+      "dm_p_negative_return": 0.12298220425202455,
+      "bootstrap_ci_low": -0.18076657564974222,
+      "bootstrap_ci_high": 0.5153845566176875,
+      "bootstrap_p_diff_le_0": 0.2,
+      "gate_pass": false
+    }
+  ],
+  "alpha_tests": [
+    {
+      "asset": "CWB",
+      "model": "vm_cb_net ~ vm_beta_rep_net",
+      "nobs": 4069,
+      "alpha_daily": 1.6920031573007982e-05,
+      "alpha_annualized": 0.004263847956398011,
+      "alpha_hac_t": 0.2997296337542601,
+      "beta_to_baseline": 0.9902730432703715,
+      "r2": 0.7185457018338612,
+      "gate_pass": false
+    },
+    {
+      "asset": "CWB",
+      "model": "raw_cb ~ beta_rep_net",
+      "nobs": 4069,
+      "alpha_daily": 4.946963987646823e-05,
+      "alpha_annualized": 0.012466349248869994,
+      "alpha_hac_t": 0.7315943849126393,
+      "beta_to_baseline": 0.9677113416291284,
+      "r2": 0.7458776353882327,
+      "gate_pass": false
+    },
+    {
+      "asset": "ICVT",
+      "model": "vm_cb_net ~ vm_beta_rep_net",
+      "nobs": 2525,
+      "alpha_daily": 0.00010106622233627012,
+      "alpha_annualized": 0.02546868802874007,
+      "alpha_hac_t": 1.2166331148538576,
+      "beta_to_baseline": 0.9954478727208224,
+      "r2": 0.6270079752601425,
+      "gate_pass": false
+    },
+    {
+      "asset": "ICVT",
+      "model": "raw_cb ~ beta_rep_net",
+      "nobs": 2525,
+      "alpha_daily": 0.000179702359291186,
+      "alpha_annualized": 0.045284994541378874,
+      "alpha_hac_t": 1.629902864819254,
+      "beta_to_baseline": 0.9471610078998196,
+      "r2": 0.6537883375405368,
+      "gate_pass": false
+    }
+  ],
+  "sentiment_regime": [
+    {
+      "asset": "CWB",
+      "regimes": {
+        "high": {
+          "n_days": 1804,
+          "raw_cb": {
+            "n_days": 1804,
+            "start": "2012-10-01",
+            "end": "2020-04-30",
+            "cagr": 0.08772004964816604,
+            "ann_return_arith": 0.09240182894772916,
+            "ann_vol": 0.1282695417108902,
+            "sharpe": 0.7203723324746563,
+            "max_drawdown": -0.3205831196555796,
+            "mean_daily_return": 0.0003666739243957507,
+            "min_daily_return": -0.09132791756914427,
+            "max_daily_return": 0.06176807784310312,
+            "annual_turnover": null,
+            "mean_exposure": null,
+            "mean_gross_exposure": null
+          },
+          "vm_cb_net": {
+            "n_days": 1804,
+            "start": "2012-10-01",
+            "end": "2020-04-30",
+            "cagr": 0.07376391717282571,
+            "ann_return_arith": 0.07734957181590035,
+            "ann_vol": 0.11093076802694628,
+            "sharpe": 0.6972778895491946,
+            "max_drawdown": -0.19378012923483945,
+            "mean_daily_return": 0.0003069427453011919,
+            "min_daily_return": -0.03722677979106851,
+            "max_daily_return": 0.022961550283123484,
+            "annual_turnover": 11.131953633388104,
+            "mean_exposure": 1.1721284008942296,
+            "mean_gross_exposure": 1.1721284008942296
+          },
+          "vm_beta_rep_net": {
+            "n_days": 1804,
+            "start": "2012-10-01",
+            "end": "2020-04-30",
+            "cagr": 0.07120834283311694,
+            "ann_return_arith": 0.07357846270463159,
+            "ann_vol": 0.09768957306666577,
+            "sharpe": 0.7531864496369519,
+            "max_drawdown": -0.12210268791533918,
+            "mean_daily_return": 0.0002919780266056809,
+            "min_daily_return": -0.034153530910878985,
+            "max_daily_return": 0.029927130257352785,
+            "annual_turnover": 11.533754001363308,
+            "mean_exposure": 0.9191511370767151,
+            "mean_gross_exposure": 0.9191511370767151
+          },
+          "vm_minus_raw_ann_return": -0.015052257131828811,
+          "vm_minus_beta_ann_return": 0.003771109111268771
+        },
+        "low": {
+          "n_days": 2265,
+          "raw_cb": {
+            "n_days": 2265,
+            "start": "2010-04-19",
+            "end": "2026-06-23",
+            "cagr": 0.11955536648912424,
+            "ann_return_arith": 0.12221791336763753,
+            "ann_vol": 0.13599704653546954,
+            "sharpe": 0.8986806440370877,
+            "max_drawdown": -0.2985711321729143,
+            "mean_daily_return": 0.00048499171971284736,
+            "min_daily_return": -0.04900670148979469,
+            "max_daily_return": 0.04091264716674381,
+            "annual_turnover": null,
+            "mean_exposure": null,
+            "mean_gross_exposure": null
+          },
+          "vm_cb_net": {
+            "n_days": 2265,
+            "start": "2010-04-19",
+            "end": "2026-06-23",
+            "cagr": 0.10252362478360899,
+            "ann_return_arith": 0.10352552793050722,
+            "ann_vol": 0.10862948562743695,
+            "sharpe": 0.9530149878971664,
+            "max_drawdown": -0.20902805651779688,
+            "mean_daily_return": 0.0004108155870258223,
+            "min_daily_return": -0.03360607910137359,
+            "max_daily_return": 0.026506963458375582,
+            "annual_turnover": 8.937790379770341,
+            "mean_exposure": 0.9596228358519905,
+            "mean_gross_exposure": 0.9596228358519905
+          },
+          "vm_beta_rep_net": {
+            "n_days": 2265,
+            "start": "2010-04-19",
+            "end": "2026-06-23",
+            "cagr": 0.10107244279073346,
+            "ann_return_arith": 0.10041599911328865,
+            "ann_vol": 0.09070164001557852,
+            "sharpe": 1.1071023533426918,
+            "max_drawdown": -0.16314460946881615,
+            "mean_daily_return": 0.0003984761869574946,
+            "min_daily_return": -0.02668508545754647,
+            "max_daily_return": 0.03353928182655389,
+            "annual_turnover": 10.81657317059678,
+            "mean_exposure": 0.8611374422913977,
+            "mean_gross_exposure": 0.8611374422913977
+          },
+          "vm_minus_raw_ann_return": -0.018692385437130317,
+          "vm_minus_beta_ann_return": 0.003109528817218577
+        }
+      }
+    },
+    {
+      "asset": "ICVT",
+      "regimes": {
+        "high": {
+          "n_days": 983,
+          "raw_cb": {
+            "n_days": 983,
+            "start": "2016-06-06",
+            "end": "2020-04-30",
+            "cagr": 0.112811236486269,
+            "ann_return_arith": 0.12046652862572395,
+            "ann_vol": 0.1639866970628414,
+            "sharpe": 0.734611592180309,
+            "max_drawdown": -0.32179536525896224,
+            "mean_daily_return": 0.0004780417802608093,
+            "min_daily_return": -0.10180179864558558,
+            "max_daily_return": 0.09987110759234707,
+            "annual_turnover": null,
+            "mean_exposure": null,
+            "mean_gross_exposure": null
+          },
+          "vm_cb_net": {
+            "n_days": 983,
+            "start": "2016-06-06",
+            "end": "2020-04-30",
+            "cagr": 0.10881652456666613,
+            "ann_return_arith": 0.10961667839483408,
+            "ann_vol": 0.11214236325531339,
+            "sharpe": 0.9774778702074512,
+            "max_drawdown": -0.13228955042183732,
+            "mean_daily_return": 0.00043498681902711934,
+            "min_daily_return": -0.032736266178021396,
+            "max_daily_return": 0.023503321013260907,
+            "annual_turnover": 10.47359284910115,
+            "mean_exposure": 1.1068168692408293,
+            "mean_gross_exposure": 1.1068168692408293
+          },
+          "vm_beta_rep_net": {
+            "n_days": 983,
+            "start": "2016-06-06",
+            "end": "2020-04-30",
+            "cagr": 0.08762425755454761,
+            "ann_return_arith": 0.08757897758207084,
+            "ann_vol": 0.08442712712381417,
+            "sharpe": 1.037332200746739,
+            "max_drawdown": -0.10296310212043147,
+            "mean_daily_return": 0.0003475356253256779,
+            "min_daily_return": -0.026718583124298867,
+            "max_daily_return": 0.02305460485652134,
+            "annual_turnover": 13.702246411500134,
+            "mean_exposure": 0.8836749743307204,
+            "mean_gross_exposure": 0.8836749743307204
+          },
+          "vm_minus_raw_ann_return": -0.010849850230889873,
+          "vm_minus_beta_ann_return": 0.022037700812763242
+        },
+        "low": {
+          "n_days": 1542,
+          "raw_cb": {
+            "n_days": 1542,
+            "start": "2020-05-01",
+            "end": "2026-06-23",
+            "cagr": 0.15317674637476553,
+            "ann_return_arith": 0.1539176820066742,
+            "ann_vol": 0.15060226230548873,
+            "sharpe": 1.0220144083523812,
+            "max_drawdown": -0.332479878328536,
+            "mean_daily_return": 0.0006107844524074372,
+            "min_daily_return": -0.04501993761697387,
+            "max_daily_return": 0.040586983068610305,
+            "annual_turnover": null,
+            "mean_exposure": null,
+            "mean_gross_exposure": null
+          },
+          "vm_cb_net": {
+            "n_days": 1542,
+            "start": "2020-05-01",
+            "end": "2026-06-23",
+            "cagr": 0.10962183780085666,
+            "ann_return_arith": 0.11002304337911901,
+            "ann_vol": 0.10934356440794424,
+            "sharpe": 1.0062141651852483,
+            "max_drawdown": -0.22406916253285258,
+            "mean_daily_return": 0.0004365993784885675,
+            "min_daily_return": -0.031153399883421046,
+            "max_daily_return": 0.0266367271141848,
+            "annual_turnover": 8.321290931132307,
+            "mean_exposure": 0.8808007535847486,
+            "mean_gross_exposure": 0.8808007535847486
+          },
+          "vm_beta_rep_net": {
+            "n_days": 1542,
+            "start": "2020-05-01",
+            "end": "2026-06-23",
+            "cagr": 0.08213967155591884,
+            "ann_return_arith": 0.0829991252858722,
+            "ann_vol": 0.08996569010027713,
+            "sharpe": 0.9225642041244845,
+            "max_drawdown": -0.1756257045945372,
+            "mean_daily_return": 0.0003293616082772706,
+            "min_daily_return": -0.030101295814249026,
+            "max_daily_return": 0.03623892021792726,
+            "annual_turnover": 12.443568151126112,
+            "mean_exposure": 0.9829200142066139,
+            "mean_gross_exposure": 0.9829200142066139
+          },
+          "vm_minus_raw_ann_return": -0.04389463862755517,
+          "vm_minus_beta_ann_return": 0.02702391809324682
+        }
+      }
+    }
+  ],
+  "summary": {
+    "vm_vs_beta_gate_pass_assets": [],
+    "vm_vs_raw_gate_pass_assets": [],
+    "interpretation": "The test is deliberately conservative. A convertible-specific claim is allowed only if the VM ETF strategy beats the same lagged VM scalar applied to a rolling SPY/QQQ/HYG/LQD beta replication. Otherwise the result is treated as beta timing or a null result rather than convertible-bond alpha."
+  },
+  "outputs": {
+    "daily_panels": {
+      "CWB": "experiments/k1541_convertible_vol_management_beta_timing/k1541_convertible_vol_management_beta_timing_cwb_daily_panel.csv",
+      "ICVT": "experiments/k1541_convertible_vol_management_beta_timing/k1541_convertible_vol_management_beta_timing_icvt_daily_panel.csv"
+    },
+    "figures": [
+      "experiments/k1541_convertible_vol_management_beta_timing/figures/k1541_vm_weights.png",
+      "experiments/k1541_convertible_vol_management_beta_timing/figures/k1541_sharpe_comparison.png",
+      "experiments/k1541_convertible_vol_management_beta_timing/figures/k1541_vm_vs_beta_relative_wealth.png",
+      "experiments/k1541_convertible_vol_management_beta_timing/figures/k1541_sharpe_diff_bootstrap.png"
+    ]
+  },
+  "limitations": [
+    "CWB and ICVT are ETF proxies; CONV had no yfinance adjusted-close history in this run.",
+    "Adjusted close includes ETF expense effects but not borrow or financing costs for leverage above 1x.",
+    "Rolling ETF beta replication is a liquid proxy baseline, not a full convertible-bond structural model.",
+    "UMCSENT is monthly and lagged one observation; AAII was not used because this run used only stable free CSV/API sources.",
+    "The design tests daily ETF timing, not individual bond issue selection, call features, or delta/credit hedging."
+  ]
+}

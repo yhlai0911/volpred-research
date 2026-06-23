@@ -36259,7 +36259,7 @@
     "title": "研究 backlog fallback: 可轉債 volatility-management 是否只是 equity-beta timing",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 可轉債 volatility-management 是否只是 equity-beta timing — 用 CWB/ICVT/CONV + SPY/QQQ/HYG/LQD/^VIX，比較 raw CB、vol-scaled CB、等 equity/credit beta baseline 的 net Sharpe/MDD/DM；AAII/UMCSENT 分 sentiment regime。與既有 VT/factor timing 不同，聚焦 hybrid equity-credit-option asset class；ETF proxy 不冒充個券可轉債 replication（來源：JF | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -36268,7 +36268,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T12:53:48+00:00"
+    "created_at": "2026-06-23T12:53:48+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T15:16:43.706030+00:00",
+    "claim_session_id": "70bada6880fe",
+    "started_at": "2026-06-23T15:16:49.568949+00:00",
+    "completed_at": "2026-06-23T15:25:19.358362+00:00",
+    "result": "K1541 completed: convertible ETF volatility-management vs SPY/QQQ/HYG/LQD beta timing. Verdict NULL_OR_BETA_TIMING_DOMINATED; CWB/ICVT no formal VM-vs-raw or VM-vs-VM-beta gate pass; CONV unavailable in yfinance. Outputs under experiments/k1541_convertible_vol_management_beta_timing with Codex review PASS_WITH_LIMITATIONS.\n\nK1541 completed: convertible ETF VM vs rolling SPY/QQQ/HYG/LQD beta baseline; verdict NULL_OR_BETA_TIMING_DOMINATED. Outputs under experiments/k1541_convertible_vol_management_beta_timing with README/results/review/figures."
   },
   {
     "id": "K1330_codex_review_followup",
