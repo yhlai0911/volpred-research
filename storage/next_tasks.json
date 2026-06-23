@@ -36362,7 +36362,7 @@
     "title": "研究 backlog fallback: 銀行 BHC AI-loss disclosure 是否預測銀行 RV",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 銀行 BHC AI-loss disclosure 是否預測銀行 RV — 抓 10-K/8-K 與年報 AI mention / model-control weakness，全部 `shift(1)` 後檢定 KRE/KBE/XLF 與銀行個股 basket 的 RV、downside semivariance、earnings-window jump；與 AI capex/HHI/勞動曝險題正交，聚焦金融機構 operational-loss channel（來源：RCFS 2026 \"AI and Operational Losses: Evidence from U.S. Bank  | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -36371,7 +36371,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T16:03:35+00:00"
+    "created_at": "2026-06-23T16:03:35+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T19:35:03.280806+00:00",
+    "claim_session_id": "6a0575dfe9d9",
+    "started_at": "2026-06-23T19:35:09.980038+00:00",
+    "completed_at": "2026-06-23T19:47:09.689312+00:00",
+    "result": "Completed BHC AI/model-risk/operational-risk disclosure RV experiment. SEC 10-K sample covers 10 BHCs x 2019-2025; all signals use one-month lag and drop partial target month. Verdict MIXED_DISCLOSURE_SIGNAL: bank panel no Harvey pass; only XLF aggregate model-risk proxy passes, kept as governance/sector-risk candidate only."
   },
   {
     "id": "research_fx_predictability_complexity_penalty",

@@ -1,0 +1,350 @@
+{
+  "experiment_id": "research_bhc_ai_loss_disclosure_rv",
+  "created_at_utc": "2026-06-23T19:44:56.967232+00:00",
+  "seed": 20260624,
+  "verdict": "MIXED_DISCLOSURE_SIGNAL",
+  "data": {
+    "sec_source": "SEC data.sec.gov submissions and Archives primary 10-K documents",
+    "price_source": "yfinance adjusted close",
+    "banks": [
+      {
+        "ticker": "JPM",
+        "name": "JPMorgan Chase",
+        "cik": "0000019617"
+      },
+      {
+        "ticker": "BAC",
+        "name": "Bank of America",
+        "cik": "0000070858"
+      },
+      {
+        "ticker": "WFC",
+        "name": "Wells Fargo",
+        "cik": "0000072971"
+      },
+      {
+        "ticker": "C",
+        "name": "Citigroup",
+        "cik": "0000831001"
+      },
+      {
+        "ticker": "GS",
+        "name": "Goldman Sachs",
+        "cik": "0000886982"
+      },
+      {
+        "ticker": "MS",
+        "name": "Morgan Stanley",
+        "cik": "0000895421"
+      },
+      {
+        "ticker": "USB",
+        "name": "U.S. Bancorp",
+        "cik": "0000036104"
+      },
+      {
+        "ticker": "PNC",
+        "name": "PNC Financial",
+        "cik": "0000713676"
+      },
+      {
+        "ticker": "TFC",
+        "name": "Truist Financial",
+        "cik": "0000092230"
+      },
+      {
+        "ticker": "COF",
+        "name": "Capital One",
+        "cik": "0000927628"
+      }
+    ],
+    "filings_n": 70,
+    "filing_report_year_min": 2019,
+    "filing_report_year_max": 2025,
+    "price_start": "2019-01-02",
+    "price_end": "2026-06-23",
+    "monthly_rv_policy": "final observed price month is dropped so next-month RV targets do not use partial-month realized volatility",
+    "panel_obs": 738,
+    "panel_month_min": "2020-03-31",
+    "panel_month_max": "2026-04-30",
+    "explicit_lag": "active disclosure state is grouped by ticker and shifted one month with groupby('ticker').shift(1)"
+  },
+  "literature_and_source_links": [
+    "https://doi.org/10.1093/rcfs/cfag003",
+    "https://www.federalreserve.gov/frrs/guidance/supervisory-guidance-on-model-risk-management.htm",
+    "https://www.nist.gov/itl/ai-risk-management-framework",
+    "https://www.sec.gov/search-filings/edgar-application-programming-interfaces"
+  ],
+  "bank_panel_meta": {
+    "ai_only": {
+      "n_obs": 738,
+      "r_squared": 0.4512072258671024
+    },
+    "model_risk_only": {
+      "n_obs": 738,
+      "r_squared": 0.45158827078789465
+    },
+    "operational_only": {
+      "n_obs": 738,
+      "r_squared": 0.45123861583269764
+    },
+    "combined": {
+      "n_obs": 738,
+      "r_squared": 0.45125874410219147
+    }
+  },
+  "primary_bank_tests": [
+    {
+      "model": "ai_only",
+      "term": "ai_terms_per_10k_lag1_z",
+      "coef": 0.0007681204896268562,
+      "std_err": 0.0040917023387721015,
+      "t": 0.1877263852622684,
+      "p": 0.8510911455318614,
+      "ci_low": -0.00725146872982477,
+      "ci_high": 0.008787709709078481,
+      "harvey_pass": false,
+      "primary_signal": true
+    },
+    {
+      "model": "model_risk_only",
+      "term": "model_risk_terms_per_10k_lag1_z",
+      "coef": -0.017659633252115937,
+      "std_err": 0.018102186704061864,
+      "t": -0.9755524866039181,
+      "p": 0.3292862797285234,
+      "ci_low": -0.05313926723349702,
+      "ci_high": 0.01782000072926514,
+      "harvey_pass": false,
+      "primary_signal": true
+    },
+    {
+      "model": "operational_only",
+      "term": "operational_loss_terms_per_10k_lag1_z",
+      "coef": -0.00241671532713756,
+      "std_err": 0.006129564168931692,
+      "t": -0.3942719678809992,
+      "p": 0.6933802569758951,
+      "ci_low": -0.014430440339170864,
+      "ci_high": 0.009597009684895744,
+      "harvey_pass": false,
+      "primary_signal": true
+    },
+    {
+      "model": "combined",
+      "term": "combined_ai_model_operational_per_10k_lag1_z",
+      "coef": -0.0033440924669319687,
+      "std_err": 0.007496344688024101,
+      "t": -0.44609641179845616,
+      "p": 0.655527604629803,
+      "ci_low": -0.018036658071157355,
+      "ci_high": 0.011348473137293416,
+      "harvey_pass": false,
+      "primary_signal": true
+    }
+  ],
+  "primary_etf_tests": [
+    {
+      "target": "KBE",
+      "model": "aggregate_ai",
+      "term": "ai_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.0165533857951207,
+      "std_err": 0.008318191135155249,
+      "t": -1.990022292846935,
+      "p": 0.046588479823814664,
+      "ci_low": -0.032856740836545335,
+      "ci_high": -0.0002500307536960622,
+      "harvey_pass": false,
+      "r_squared": 0.36635046569590923
+    },
+    {
+      "target": "KBE",
+      "model": "aggregate_model_risk",
+      "term": "model_risk_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": 0.02751180160798098,
+      "std_err": 0.009498882176264201,
+      "t": 2.8963199140134033,
+      "p": 0.0037756727817533533,
+      "ci_low": 0.008894334649113697,
+      "ci_high": 0.046129268566848264,
+      "harvey_pass": false,
+      "r_squared": 0.3919557099425782
+    },
+    {
+      "target": "KBE",
+      "model": "aggregate_operational",
+      "term": "operational_loss_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.01587754141099494,
+      "std_err": 0.00827897413224906,
+      "t": -1.9178150767674471,
+      "p": 0.055134463359163874,
+      "ci_low": -0.03210403253914185,
+      "ci_high": 0.000348949717151964,
+      "harvey_pass": false,
+      "r_squared": 0.3651167578274126
+    },
+    {
+      "target": "KBE",
+      "model": "aggregate_combined",
+      "term": "combined_ai_model_operational_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.015551265177247618,
+      "std_err": 0.00820744963168213,
+      "t": -1.89477436659704,
+      "p": 0.0581223005650866,
+      "ci_low": -0.03163757086027112,
+      "ci_high": 0.0005350405057758904,
+      "harvey_pass": false,
+      "r_squared": 0.36451233386054815
+    },
+    {
+      "target": "KRE",
+      "model": "aggregate_ai",
+      "term": "ai_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.019741640930494922,
+      "std_err": 0.009994763529427705,
+      "t": -1.9751983998790332,
+      "p": 0.04824563744314632,
+      "ci_low": -0.03933101748216766,
+      "ci_high": -0.0001522643788221846,
+      "harvey_pass": false,
+      "r_squared": 0.31842820131983596
+    },
+    {
+      "target": "KRE",
+      "model": "aggregate_model_risk",
+      "term": "model_risk_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": 0.028649036168704498,
+      "std_err": 0.011082103859360058,
+      "t": 2.585162215792377,
+      "p": 0.00973331921399814,
+      "ci_low": 0.0069285117314264455,
+      "ci_high": 0.05036956060598255,
+      "harvey_pass": false,
+      "r_squared": 0.33781915448955624
+    },
+    {
+      "target": "KRE",
+      "model": "aggregate_operational",
+      "term": "operational_loss_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.018777786112383576,
+      "std_err": 0.009975651735374144,
+      "t": -1.8823618356479546,
+      "p": 0.05978690398826553,
+      "ci_low": -0.03832970423603139,
+      "ci_high": 0.0007741320112642364,
+      "harvey_pass": false,
+      "r_squared": 0.3167108861442439
+    },
+    {
+      "target": "KRE",
+      "model": "aggregate_combined",
+      "term": "combined_ai_model_operational_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.018577545159059176,
+      "std_err": 0.00988764208694121,
+      "t": -1.8788650515166685,
+      "p": 0.0602629218999599,
+      "ci_low": -0.037956967541486406,
+      "ci_high": 0.0008018772233680527,
+      "harvey_pass": false,
+      "r_squared": 0.3163366818265544
+    },
+    {
+      "target": "XLF",
+      "model": "aggregate_ai",
+      "term": "ai_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.010263386250692607,
+      "std_err": 0.0069552504639040415,
+      "t": -1.4756314390052432,
+      "p": 0.14004286045801576,
+      "ci_low": -0.023895426663400034,
+      "ci_high": 0.0033686541620148187,
+      "harvey_pass": false,
+      "r_squared": 0.4409088484490622
+    },
+    {
+      "target": "XLF",
+      "model": "aggregate_model_risk",
+      "term": "model_risk_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": 0.02417412739653535,
+      "std_err": 0.0066228798798735,
+      "t": 3.650092985983174,
+      "p": 0.00026214539277418745,
+      "ci_low": 0.01119352135804833,
+      "ci_high": 0.03715473343502237,
+      "harvey_pass": true,
+      "r_squared": 0.4894421901033187
+    },
+    {
+      "target": "XLF",
+      "model": "aggregate_operational",
+      "term": "operational_loss_terms_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.011308771353632589,
+      "std_err": 0.006695454916602596,
+      "t": -1.689022104471264,
+      "p": 0.09121519399712197,
+      "ci_low": -0.024431621850285308,
+      "ci_high": 0.0018140791430201302,
+      "harvey_pass": false,
+      "r_squared": 0.44354030592456684
+    },
+    {
+      "target": "XLF",
+      "model": "aggregate_combined",
+      "term": "combined_ai_model_operational_per_10k_lag1_z",
+      "n_obs": 74,
+      "coef": -0.010558921476101792,
+      "std_err": 0.006812820541605385,
+      "t": -1.5498605036811477,
+      "p": 0.12117500125161,
+      "ci_low": -0.02391180437078301,
+      "ci_high": 0.0027939614185794274,
+      "harvey_pass": false,
+      "r_squared": 0.44165440787220256
+    }
+  ],
+  "bank_harvey_passes": [],
+  "etf_harvey_passes": [
+    {
+      "target": "XLF",
+      "model": "aggregate_model_risk",
+      "coef": 0.02417412739653535,
+      "t": 3.650092985983174
+    }
+  ],
+  "direction_counts": {
+    "bank_positive_coefficients": 1,
+    "bank_tests": 4,
+    "etf_positive_coefficients": 3,
+    "etf_tests": 12
+  },
+  "filing_event_window_summary": {
+    "n_windows": 70,
+    "median_post_pre_vol_ratio": 1.4676914355759652,
+    "mean_post_pre_vol_ratio": 2.114769372829047
+  },
+  "files": {
+    "filing_counts": "data/filing_counts.csv",
+    "prices": "data/prices.csv",
+    "daily_returns": "data/daily_returns.csv",
+    "monthly_realized_vol": "data/monthly_realized_vol.csv",
+    "monthly_returns": "data/monthly_returns.csv",
+    "active_disclosure": "data/active_disclosure_by_month.csv",
+    "bank_panel": "data/bank_monthly_panel.csv",
+    "bank_panel_regressions": "data/bank_panel_regressions.csv",
+    "etf_aggregate_regressions": "data/etf_aggregate_regressions.csv",
+    "filing_event_windows": "data/filing_event_windows.csv",
+    "figure_coefficients": "figures/primary_coefficients.png",
+    "figure_trends": "figures/disclosure_trends.png"
+  }
+}

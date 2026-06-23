@@ -36042,5 +36042,18 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-24T03:33:03.423106"
+  },
+  {
+    "item_id": "725a3126",
+    "category": "experiment",
+    "content": "Experiment research_bhc_ai_loss_disclosure_rv found MIXED_DISCLOSURE_SIGNAL. Using SEC data.sec.gov submissions plus SEC Archives 10-K text for 10 large U.S. BHCs (JPM/BAC/WFC/C/GS/MS/USB/PNC/TFC/COF), report years 2019-2025, and yfinance bank/ETF prices, lagged public AI/model-risk/operational-risk disclosure proxies do not robustly predict bank-stock next-month RV. The bank FE/year FE panel has 738 observations and no primary signal passes the abs(t)>3 Harvey hurdle (combined t=-0.45). ETF aggregate tests have one positive pass for XLF model-risk language (coef 0.0242, t=3.65), but KBE/KRE and combined proxies do not pass, so this should remain a governance/sector-risk feature candidate rather than an active strategy or paper narrative. Implementation uses groupby('ticker').shift(1) for disclosure lag and drops the final observed price month to avoid partial-month next-RV targets.",
+    "evidence": [
+      "experiments/research_bhc_ai_loss_disclosure_rv/research_bhc_ai_loss_disclosure_rv_results.json",
+      "experiments/research_bhc_ai_loss_disclosure_rv/README.md",
+      "experiments/research_bhc_ai_loss_disclosure_rv/codex_review.md",
+      "research_program.md"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-06-24T03:46:27.783899"
   }
 ]
