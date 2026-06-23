@@ -35270,7 +35270,7 @@
     "title": "K1363: Fedspeak forecast-revision shock 作 equity/bond tail-vol prior** — 抓 Fed 官網公開演說全文與行事曆，先用 dictionary / FinBERT-lite 分 GDP、",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1143). Original: Fedspeak forecast-revision shock 作 equity/bond tail-vol prior** — 抓 Fed 官網公開演說全文與行事曆，先用 dictionary / FinBERT-lite 分 GDP、inflation、labor 三類 forecast-revision tone，全部 `shift(1)` 加入 SPY/TLT/IEF/QQQ HAR-RV 與 5d left-tail 分類；與 FOMC event / macro attention 題不同，這裡是 between-meeting central-bank speech 的資訊 shock，而非正式決議日或一般新聞量（來源：Journal of Econometrics 2025 central-bank-speech NLP；FOMC-member speech forecast revisions 可解釋 equity/bond vol 與 tail risk）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1363.py with signal.shift(1) + seed=42, (c) K1363_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35283,7 +35283,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-23T02:15:59.548796+00:00",
     "claim_session_id": "376f6620e74c",
-    "started_at": "2026-06-23T02:16:03.816420+00:00"
+    "started_at": "2026-06-23T02:16:03.816420+00:00",
+    "completed_at": "2026-06-23T02:30:59.690164+00:00",
+    "result": "K1363 public-data dictionary pilot completed: 477 between-meeting Fed Board speeches + SPY/QQQ/TLT/IEF daily OHLCV, all speech signals shifted by one trading day. Primary 12 HAC tests have 0 positive Harvey/BH passes; verdict NULL_PUBLIC_DICTIONARY_PROXY; README/results/codex_review/research_program updated."
   },
   {
     "id": "K1364",

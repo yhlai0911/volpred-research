@@ -24,6 +24,7 @@ import time
 import urllib.request
 import warnings
 from collections import OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from html import unescape
 from pathlib import Path
@@ -221,6 +222,16 @@ def _safe_filename(url: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.-]+", "_", url).strip("_")[:180]
 
 
+def _speech_url_date(url: str) -> pd.Timestamp | None:
+    match = re.search(r"(\d{8})[a-z]?\.htm", url)
+    if not match:
+        return None
+    try:
+        return pd.Timestamp(match.group(1)).normalize()
+    except Exception:
+        return None
+
+
 def _urlopen_text(url: str, timeout: int = 30) -> str:
     headers = {
         "User-Agent": "volpred-k1363/1.0 (+research; contact=local)",
@@ -332,6 +343,9 @@ def collect_speech_links(refresh: bool = False) -> list[str]:
         html = _read_or_fetch_text(url, f"fed_speech_index_{year}.html", refresh)
         for href in re.findall(r"href=['\"](/newsevents/speech/[^'\"]+\.htm)['\"]", html):
             full = FED_BASE + href
+            url_date = _speech_url_date(full)
+            if url_date is not None and url_date > CURRENT_DATE:
+                continue
             if full not in seen:
                 seen.add(full)
                 links.append(full)
@@ -339,30 +353,34 @@ def collect_speech_links(refresh: bool = False) -> list[str]:
 
 
 def fetch_speeches(refresh: bool = False, limit: int | None = None) -> pd.DataFrame:
-    records = []
     links = collect_speech_links(refresh)
     if limit:
         links = links[:limit]
-    for i, url in enumerate(links, start=1):
+
+    def load_parse(url: str) -> dict[str, Any] | None:
         cache_name = f"fed_speech_{_safe_filename(url)}.html"
         try:
             html = _read_or_fetch_text(url, cache_name, refresh)
-            parsed = parse_speech_page(url, html)
+            return parse_speech_page(url, html)
+        except Exception as exc:
+            return {
+                "date": pd.NaT,
+                "url": url,
+                "title": None,
+                "speaker": None,
+                "word_count": 0,
+                "parse_error": repr(exc),
+            }
+
+    records = []
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        for i, parsed in enumerate(executor.map(load_parse, links), start=1):
             if parsed is not None:
                 records.append(parsed)
-        except Exception as exc:
-            records.append(
-                {
-                    "date": pd.NaT,
-                    "url": url,
-                    "title": None,
-                    "speaker": None,
-                    "word_count": 0,
-                    "parse_error": repr(exc),
-                }
-            )
-        if i % 10 == 0:
-            print(f"[fed] processed {i}/{len(links)} speech links", flush=True)
+            if i % 25 == 0:
+                print(f"[fed] processed {i}/{len(links)} speech links", flush=True)
+    if len(links) % 25:
+        print(f"[fed] processed {len(links)}/{len(links)} speech links", flush=True)
 
     df = pd.DataFrame(records)
     if df.empty:
@@ -732,7 +750,10 @@ def top_quintile_diagnostics(asset_panels: dict[str, pd.DataFrame]) -> list[dict
         data = panel[["forecast_revision_shock_z_l1", "log_forward5_rv", "left_tail5"]].dropna()
         if len(data) < 252:
             continue
-        threshold = data["forecast_revision_shock_z_l1"].quantile(0.8)
+        positive_signal = data.loc[data["forecast_revision_shock_z_l1"] > 0.0]
+        if len(positive_signal) < 20:
+            continue
+        threshold = positive_signal["forecast_revision_shock_z_l1"].quantile(0.8)
         top = data.loc[data["forecast_revision_shock_z_l1"] >= threshold]
         rest = data.loc[data["forecast_revision_shock_z_l1"] < threshold]
         if len(top) < 20 or len(rest) < 20:
@@ -745,6 +766,7 @@ def top_quintile_diagnostics(asset_panels: dict[str, pd.DataFrame]) -> list[dict
                 "ticker": ticker,
                 "n_top": int(len(top)),
                 "n_rest": int(len(rest)),
+                "threshold_definition": "80th percentile among positive lagged speech-shock z-signal days",
                 "signal_top_quintile_threshold": float(threshold),
                 "top_forward5_rv_mean": float(top_rv.mean()),
                 "rest_forward5_rv_mean": float(rest_rv.mean()),
@@ -868,7 +890,7 @@ def summarize(
                 "sample_end": speeches_between["date"].max().date().isoformat()
                 if not speeches_between.empty
                 else None,
-                "raw_cache": "data/raw/fed_speech_*.html",
+                "raw_html_cache": "data/raw/fed_speech_*.html is generated locally on rerun; committed trace is the URL-level speech corpus CSV to avoid versioning large official HTML snapshots",
             },
             "fomc_calendar": {
                 "source": "Federal Reserve official FOMC calendars",
