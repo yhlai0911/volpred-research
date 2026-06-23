@@ -35892,7 +35892,7 @@
     "title": "Paper review (Codex 24h-rule): 你以為多看 VIX 會更準，結果台股這次剛好相反",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1330219a needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_1330219a",
@@ -35900,7 +35900,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-23T04:08:02+00:00"
+    "created_at": "2026-06-23T04:08:02+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T10:11:45.874392+00:00",
+    "claim_session_id": "dcc3a49f66af",
+    "started_at": "2026-06-23T10:11:46.073451+00:00",
+    "completed_at": "2026-06-23T10:13:41.032374+00:00",
+    "result": "Reviewed mile_1330219a against experiments/k462. PASS: article numbers match K462 results; OOS uses lagged/ffilled US signals and forecast idx-1, no same-day lookahead found. Caveats: DM test is plain normal/no HAC-HLN correction; K462 README is placeholder and script save path risks writing outside experiments/k462 on rerun."
   },
   {
     "id": "paper_review_mile_0a7041f4",
