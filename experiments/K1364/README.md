@@ -72,6 +72,22 @@ Anything weaker is recorded as `WEAK_DIAGNOSTIC` or `NULL_PROXY`, not as evidenc
 - `K1364_event_spreads.png` - top-decile ETF-shock event diagnostic.
 - `codex_review.md` - source-level review after rerun.
 
+## Main Result
+
+Verdict: `NULL_PROXY`.
+
+Effective sample is `2020-07-02` to `2026-06-22`, with 23,984 ETF-date rows, 1,499 trading dates, 16 ETFs, and 128 requested unique constituents.
+
+All three point estimates are directionally positive, but none survives the pre-set Bonferroni gate:
+
+| Target | Coef on lagged ETF shock | Cluster SE | z | Bonferroni p |
+| --- | ---: | ---: | ---: | ---: |
+| `rv_spread` | 0.0064 | 0.0098 | 0.65 | 1.000 |
+| `market_beta_proxy_spread` | 0.0093 | 0.0085 | 1.09 | 0.825 |
+| `etf_comovement_spread` | 0.0152 | 0.0073 | 2.08 | 0.113 |
+
+Top-decile shock event diagnostics are also positive but their moving-block bootstrap 95% CIs cross zero for all three targets. Therefore this free-data top-holdings proxy does **not** robustly support the claim that ETF shocks amplify liquid constituents more than illiquid constituents. It also cannot reject the JFQA finding, because the measurement here is much coarser than direct AP basket / intraday market-quality data.
+
 ## Limitations
 
 - This is not AP basket data.

@@ -1,0 +1,331 @@
+{
+  "experiment_id": "K1364",
+  "title": "ETF sampling arbitrage proxy and liquid-constituent heterogeneity",
+  "seed": 42,
+  "verdict": "NULL_PROXY",
+  "conclusion": "The yfinance top-holdings proxy does not robustly show that lagged ETF shocks amplify high-liquidity constituents more than low-liquidity constituents across RV, market-beta proxy, and ETF-comovement targets.",
+  "data": {
+    "holdings_source": "yfinance Ticker(...).funds_data.top_holdings top-10 snapshot",
+    "price_source": "yfinance adjusted OHLCV",
+    "start_date": "2020-01-01",
+    "end_date_exclusive": "2026-06-24",
+    "etfs_requested": [
+      "SPY",
+      "IVV",
+      "VTI",
+      "IWM",
+      "MDY",
+      "XLK",
+      "XLF",
+      "XLE",
+      "XLV",
+      "XLY",
+      "XLP",
+      "XLI",
+      "XLB",
+      "XLU",
+      "XLRE",
+      "XLC"
+    ],
+    "etfs_used": [
+      "IVV",
+      "IWM",
+      "MDY",
+      "SPY",
+      "VTI",
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+    ],
+    "unique_constituents_requested": 128,
+    "unique_tickers_with_prices": 144,
+    "holdings_errors": [],
+    "price_errors": [],
+    "skipped_etfs": [],
+    "shock_diagnostics": [
+      {
+        "etf": "SPY",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.39209599500000003,
+        "mean_abs_tracking_error": 0.007877956054052476,
+        "mean_log_dollar_volume": 24.193915300040533
+      },
+      {
+        "etf": "IVV",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.391694499,
+        "mean_abs_tracking_error": 0.007878993601124228,
+        "mean_log_dollar_volume": 21.513222284407654
+      },
+      {
+        "etf": "VTI",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.34608820500000004,
+        "mean_abs_tracking_error": 0.007881897720078456,
+        "mean_log_dollar_volume": 20.498101998554077
+      },
+      {
+        "etf": "IWM",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.0786573987,
+        "mean_abs_tracking_error": 0.013487704296386682,
+        "mean_log_dollar_volume": 22.453393137816782
+      },
+      {
+        "etf": "MDY",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.083225901,
+        "mean_abs_tracking_error": 0.006898910165935641,
+        "mean_log_dollar_volume": 19.838619166996928
+      },
+      {
+        "etf": "XLK",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.617820106,
+        "mean_abs_tracking_error": 0.0048614500668150065,
+        "mean_log_dollar_volume": 20.919110779894982
+      },
+      {
+        "etf": "XLF",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.565485402,
+        "mean_abs_tracking_error": 0.0024063941869503806,
+        "mean_log_dollar_volume": 21.22478387625699
+      },
+      {
+        "etf": "XLE",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.7492104980000001,
+        "mean_abs_tracking_error": 0.00166131781761289,
+        "mean_log_dollar_volume": 21.031702872027616
+      },
+      {
+        "etf": "XLV",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.605268296,
+        "mean_abs_tracking_error": 0.003410113194747645,
+        "mean_log_dollar_volume": 20.866353636568824
+      },
+      {
+        "etf": "XLY",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.720525988,
+        "mean_abs_tracking_error": 0.005093678245497426,
+        "mean_log_dollar_volume": 20.47067259562033
+      },
+      {
+        "etf": "XLP",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.6209839079999999,
+        "mean_abs_tracking_error": 0.0018335450965413413,
+        "mean_log_dollar_volume": 20.491427400993466
+      },
+      {
+        "etf": "XLI",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.40293099499999996,
+        "mean_abs_tracking_error": 0.003821534605408673,
+        "mean_log_dollar_volume": 20.78165671194777
+      },
+      {
+        "etf": "XLB",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.600350608,
+        "mean_abs_tracking_error": 0.003133239123422432,
+        "mean_log_dollar_volume": 19.910771557159435
+      },
+      {
+        "etf": "XLU",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.5813036039999999,
+        "mean_abs_tracking_error": 0.0020729080845450776,
+        "mean_log_dollar_volume": 20.508295878786765
+      },
+      {
+        "etf": "XLRE",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.5842877980000001,
+        "mean_abs_tracking_error": 0.0023053231219267362,
+        "mean_log_dollar_volume": 19.11437329025166
+      },
+      {
+        "etf": "XLC",
+        "available_holdings": 10,
+        "top10_weight_sum": 0.6285070989999999,
+        "mean_abs_tracking_error": 0.003570728559693599,
+        "mean_log_dollar_volume": 19.664108357590752
+      }
+    ],
+    "effective_sample_start": "2020-07-02",
+    "effective_sample_end": "2026-06-22",
+    "effective_panel_rows": 23984,
+    "effective_dates": 1499,
+    "effective_etfs": 16
+  },
+  "method": {
+    "design": "For each ETF-date, split available top-10 holdings into high and low liquidity terciles using 63-day lagged log dollar volume. Regress the high-minus-low target spread on lagged ETF shock, controls, and ETF fixed effects.",
+    "etf_shock": "Mean of rolling-z ETF dollar-volume shock and rolling-z absolute ETF-vs-top-holdings tracking-error proxy, then signal.shift(1).",
+    "lookahead_policy": "All predictive ETF-shock and liquidity-ranking variables use t-1 information: etf_shock_lag1 = etf_shock_raw.shift(1), log_adv_lag1 = rolling_mean(log dollar volume).shift(1).",
+    "targets": {
+      "rv_spread": "High-minus-low weighted mean of constituent r_t^2 rolling z-scores.",
+      "market_beta_proxy_spread": "High-minus-low weighted mean of rolling-z stock_ret_t * SPY_ret_t as a daily market-beta contribution proxy.",
+      "etf_comovement_spread": "High-minus-low weighted mean of rolling-z stock_ret_t * ETF_ret_t as close-to-close ETF comovement proxy."
+    },
+    "formal_test": "Cluster-by-date OLS coefficient on lagged ETF shock.  Pre-set support requires positive coefficients with Bonferroni p<0.05 for at least two of three targets."
+  },
+  "descriptive_diagnostics": {
+    "avg_holding_weight_high_minus_low": 0.23861167818754578,
+    "avg_log_adv_high_minus_low": 1.797743526033375,
+    "shock_lag1_summary": {
+      "count": 23984.0,
+      "mean": 0.061167733545111784,
+      "std": 0.7761380170122362,
+      "min": -2.443931853347256,
+      "25%": -0.46622947075754007,
+      "50%": -0.0227123031260806,
+      "75%": 0.4847351856490246,
+      "max": 7.1686600100315445
+    }
+  },
+  "regression_results": [
+    {
+      "target": "rv_spread",
+      "n_obs": 23968,
+      "n_dates": 1498,
+      "n_etfs": 16,
+      "coef_etf_shock_lag1": 0.006366401143120242,
+      "se_cluster_by_date": 0.009810308002616204,
+      "z_stat": 0.6489501798947042,
+      "p_value": 0.516370578663774,
+      "r_squared": 0.0017461591051660674,
+      "controls": [
+        "abs_etf_ret_lag1",
+        "market_rv_lag1",
+        "rv_spread_lag1",
+        "ETF fixed effects"
+      ],
+      "interpretation": "Positive coefficient means high-liquidity constituents have a larger next-day standardized response than low-liquidity constituents after a lagged ETF shock.",
+      "p_value_bonferroni_3_targets": 1.0
+    },
+    {
+      "target": "market_beta_proxy_spread",
+      "n_obs": 23968,
+      "n_dates": 1498,
+      "n_etfs": 16,
+      "coef_etf_shock_lag1": 0.009324041555081148,
+      "se_cluster_by_date": 0.00853856655284228,
+      "z_stat": 1.0919914364288,
+      "p_value": 0.2748368652413571,
+      "r_squared": 0.0021658314435561987,
+      "controls": [
+        "abs_etf_ret_lag1",
+        "market_rv_lag1",
+        "market_beta_proxy_spread_lag1",
+        "ETF fixed effects"
+      ],
+      "interpretation": "Positive coefficient means high-liquidity constituents have a larger next-day standardized response than low-liquidity constituents after a lagged ETF shock.",
+      "p_value_bonferroni_3_targets": 0.8245105957240713
+    },
+    {
+      "target": "etf_comovement_spread",
+      "n_obs": 23968,
+      "n_dates": 1498,
+      "n_etfs": 16,
+      "coef_etf_shock_lag1": 0.015222910541011152,
+      "se_cluster_by_date": 0.007321001160493128,
+      "z_stat": 2.0793481939546323,
+      "p_value": 0.037585358464469865,
+      "r_squared": 0.00135173745057382,
+      "controls": [
+        "abs_etf_ret_lag1",
+        "market_rv_lag1",
+        "etf_comovement_spread_lag1",
+        "ETF fixed effects"
+      ],
+      "interpretation": "Positive coefficient means high-liquidity constituents have a larger next-day standardized response than low-liquidity constituents after a lagged ETF shock.",
+      "p_value_bonferroni_3_targets": 0.1127560753934096
+    }
+  ],
+  "event_diagnostics": [
+    {
+      "target": "rv_spread",
+      "shock_cutoff_top_decile": 1.0432976701251826,
+      "top_decile_mean_spread": 0.047495020828804704,
+      "other_mean_spread": -0.002074992600612974,
+      "top_minus_other": 0.04957001342941768,
+      "bootstrap_reps": 1000,
+      "bootstrap_block_days": 21,
+      "bootstrap_ci_95": [
+        -0.004798203733114516,
+        0.09359420086908206
+      ]
+    },
+    {
+      "target": "market_beta_proxy_spread",
+      "shock_cutoff_top_decile": 1.0432976701251826,
+      "top_decile_mean_spread": 0.03639922573080362,
+      "other_mean_spread": 0.004326131808719172,
+      "top_minus_other": 0.03207309392208445,
+      "bootstrap_reps": 1000,
+      "bootstrap_block_days": 21,
+      "bootstrap_ci_95": [
+        -0.010943886814818676,
+        0.06437029091483272
+      ]
+    },
+    {
+      "target": "etf_comovement_spread",
+      "shock_cutoff_top_decile": 1.0432976701251826,
+      "top_decile_mean_spread": 0.046962332195615554,
+      "other_mean_spread": 0.006868010878072989,
+      "top_minus_other": 0.040094321317542564,
+      "bootstrap_reps": 1000,
+      "bootstrap_block_days": 21,
+      "bootstrap_ci_95": [
+        -0.005090623594519471,
+        0.07005797821614812
+      ]
+    }
+  ],
+  "figures": [
+    "K1364_coefficients.png",
+    "K1364_event_spreads.png"
+  ],
+  "literature": [
+    {
+      "citation": "Brogaard, Heath, Huang (2025/2026), ETF Sampling and Index Arbitrage, JFQA",
+      "url": "https://www.cambridge.org/core/journals/journal-of-financial-and-quantitative-analysis/article/etf-sampling-and-index-arbitrage/EE6BA16F9C54C1E01DD726FF23796FC7",
+      "use": "Primary heterogeneity hypothesis: AP arbitrage effects differ by constituent liquidity."
+    },
+    {
+      "citation": "Ben-David, Franzoni, Moussawi (2018), Do ETFs Increase Volatility?, Journal of Finance",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/jofi.12727",
+      "use": "ETF ownership/arbitrage channel motivates volatility target."
+    },
+    {
+      "citation": "Da and Shive (2018), Exchange Traded Funds and Asset Return Correlations, European Financial Management",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/eufm.12137",
+      "use": "ETF arbitrage and constituent return comovement motivate comovement target."
+    },
+    {
+      "citation": "Brown, Davies, Ringgenberg (2021), ETF Arbitrage, Non-Fundamental Demand, and Return Predictability, Review of Finance",
+      "url": "https://academic.oup.com/rof/article-abstract/25/4/937/5919085",
+      "use": "Creation/redemption activity as non-fundamental ETF demand shock context."
+    }
+  ],
+  "limitations": [
+    "This is not direct AP creation-redemption basket data.",
+    "yfinance holdings are current top-10 snapshots, not historical full holdings; survivorship and composition drift remain.",
+    "Tracking error is measured against the normalized top-10 basket, not official NAV.",
+    "Daily OHLCV cannot identify intraday arbitrage trades or official bid-ask depth.",
+    "Cluster-by-date inference handles common-day shocks but is still a low-frequency proxy test, not causal identification."
+  ]
+}

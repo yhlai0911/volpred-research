@@ -35752,5 +35752,18 @@
       "Forward 5-day targets overlap; HAC maxlags=5 mitigates but does not replace a non-overlapping robustness design.",
       "The leader ETF is pre-specified by historical liquidity (SPY/QQQ/IWM/EEM), not estimated from future data."
     ]
+  },
+  {
+    "item_id": "90604fa1",
+    "category": "experiment_result",
+    "content": "K1364 completed 2026-06-23 with verdict NULL_PROXY. Using yfinance current top-10 holdings and adjusted OHLCV for SPY/IVV/VTI/IWM/MDY plus 11 sector ETFs, effective sample 2020-07-02 to 2026-06-22 (23,984 ETF-date rows; 1,499 trading dates; 128 requested constituents). All ETF shock and liquidity-ranking predictors use explicit t-1 lags. High-minus-low liquid-tercile regressions are directionally positive but not Bonferroni significant: RV z=0.65 p_adj=1.000; market-beta proxy z=1.09 p_adj=0.825; ETF-comovement z=2.08 p_adj=0.113. Top-decile shock bootstrap CIs all cross zero. Allowed claim: the free top-holdings/daily-OHLCV proxy does not robustly detect liquid-constituent amplification; it must not be cited as evidence against the JFQA AP-basket/intraday ETF sampling-arbitrage mechanism.",
+    "evidence": [
+      "experiments/K1364/README.md",
+      "experiments/K1364/K1364.py",
+      "experiments/K1364/K1364_results.json",
+      "experiments/K1364/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-23T10:00:02.737385"
   }
 ]

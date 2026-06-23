@@ -35286,7 +35286,7 @@
     "title": "K1364: ETF sampling arbitrage 是否只放大 liquid constituents 的 vol/comovement** — 用 SPY/IVV/VTI/IWM/MDY/sector ETF 公開 holdings + yfi",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1145). Original: ETF sampling arbitrage 是否只放大 liquid constituents 的 vol/comovement** — 用 SPY/IVV/VTI/IWM/MDY/sector ETF 公開 holdings + yfinance 成分股流動性 proxy，建「ETF basket sampling tilt」與 tracking-error/volume shock，分 liquid/illiquid tercile 檢定 ETF shock 後成分股 RV、market beta、close-to-close comovement 是否異質；與 ETF macro-efficiency / heartbeat 題正交，聚焦 creation-redemption basket sampling 的截面異質性（來源：JFQA 2026 ETF Sampling and Index Arbitrage；AP arbitrage 對 liquid stocks 的 volatility / market-quality 影響更強）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1364.py with signal.shift(1) + seed=42, (c) K1364_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35299,7 +35299,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-23T01:50:03.132940+00:00",
     "claim_session_id": "457b06be1bbc",
-    "started_at": "2026-06-23T01:50:06.648464+00:00"
+    "started_at": "2026-06-23T01:50:06.648464+00:00",
+    "completed_at": "2026-06-23T02:01:22.834347+00:00",
+    "result": "K1364 completed as NULL_PROXY: yfinance top-10 ETF holdings + adjusted OHLCV, 2020-07-02..2026-06-22, 23,984 ETF-date rows. Lagged ETF shock coefficients were positive but none survived Bonferroni; event bootstrap CIs crossed zero. Added README/results/panel/figures/codex_review, updated research_program and knowledge entry 90604fa1."
   },
   {
     "id": "K1365",
