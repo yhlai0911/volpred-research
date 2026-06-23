@@ -1,0 +1,325 @@
+{
+  "experiment_id": "K1538",
+  "task_id": "research_bond_mutual_fund_demandable_equity_run_proxy_etf",
+  "title": "Bond mutual fund demandable-equity run proxy and credit ETF volatility",
+  "verdict": "WEAK_DIRECTIONAL_PROXY",
+  "created_at": "2026-06-23T09:53:43.832699+00:00",
+  "seed": 42,
+  "data": {
+    "yfinance_source": "auto_adjust=True daily close and volume",
+    "requested_start": "2010-01-01",
+    "requested_end": "2026-06-24",
+    "effective_start": "2010-01-04",
+    "effective_end": "2026-06-23",
+    "n_daily_rows": 4143,
+    "tickers": [
+      "AGG",
+      "BND",
+      "LQD",
+      "HYG",
+      "BKLN",
+      "TLT",
+      "SPY",
+      "^VIX"
+    ],
+    "fred_status": {
+      "bank_deposits": {
+        "series_id": "DPSACBW027SBOG",
+        "status": "ok",
+        "start": "1973-01-03",
+        "end": "2026-06-10",
+        "observations": 2789
+      },
+      "money_market_assets": {
+        "series_id": "MMMFFAQ027S",
+        "status": "ok",
+        "start": "1945-10-01",
+        "end": "2026-01-01",
+        "observations": 304
+      }
+    }
+  },
+  "method": {
+    "proxy_components": [
+      "bond ETF dollar-volume shock z-score (AGG/BND/LQD/HYG)",
+      "negative 5-day bond ETF basket return pressure",
+      "HYG underperformance versus LQD as credit redemption pressure",
+      "ETF Amihud-style illiquidity z-score (HYG/LQD/BKLN)",
+      "FRED cash migration: money-market asset growth minus bank-deposit growth when available"
+    ],
+    "lookahead_guard": "run_pressure_index is used only through signal_lag = run_pressure_index.shift(1); targets begin at date t.",
+    "controls": [
+      "own lagged 21-day realized variance",
+      "SPY lagged 21-day realized variance",
+      "lagged log VIX",
+      "lagged HYG-LQD credit underperformance"
+    ],
+    "formal_tests": [
+      "OLS predictive regressions with Newey-West HAC standard errors",
+      "Harvey-style |t|>=3 gate; expected direction is positive beta",
+      "Bonferroni and BH q-values across all HAC target tests",
+      "Expanding-window OOS MSE comparison with HAC DM test on squared-error loss difference"
+    ]
+  },
+  "related_prior": [
+    "K1332 private-credit BDC proxy: narrow credit-only PASS",
+    "K1499 BIZD-minus-HYG NAV-discount proxy: narrow HYG 5d signal after controls",
+    "This K1538 differs by targeting open-end bond-fund run pressure via broad bond ETF volume/cash migration proxies."
+  ],
+  "literature_precheck": [
+    {
+      "title": "Ma, Xiao, and Zeng, Bank Debt, Mutual Fund Equity, and Swing Pricing in Liquidity Provision",
+      "source": "Review of Financial Studies / Oxford Academic",
+      "url": "https://academic.oup.com/rfs/advance-article-abstract/doi/10.1093/rfs/hhaf105/8343552"
+    },
+    {
+      "title": "Jin, Kacperczyk, Kahraman, and Suntheim, Swing Pricing and Fragility in Open-End Mutual Funds",
+      "source": "Review of Financial Studies",
+      "url": "https://academic.oup.com/rfs/article/35/1/1/6162183"
+    },
+    {
+      "title": "IMF, Fund Investor Types and Bond Market Volatility",
+      "source": "Global Financial Stability Note 2025",
+      "url": "https://meetings.imf.org/-/media/Files/Publications/gfs-notes/2025/English/GFSNEA2025002.ashx"
+    },
+    {
+      "title": "Xiao / Zeng, Mutual Fund Liquidity Transformation and Reverse Flight to Liquidity",
+      "source": "Cleveland Fed / Wharton draft",
+      "url": "https://rodneywhitecenter.wharton.upenn.edu/wp-content/uploads/2020/12/21-20.Zeng2_.pdf"
+    }
+  ],
+  "hac_regression_tests": [
+    {
+      "target": "HYG",
+      "horizon": "rv5",
+      "n_obs": 3993,
+      "beta": 0.0028391970670062546,
+      "hac_t": 2.040124549210764,
+      "hac_p": 0.041337922184741194,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.19082207644999133,
+      "bonferroni_p": 0.37204129966267074,
+      "passes_bonferroni_5pct": false
+    },
+    {
+      "target": "HYG",
+      "horizon": "rv21",
+      "n_obs": 3977,
+      "beta": 0.0020429717553614984,
+      "hac_t": 1.682457640136383,
+      "hac_p": 0.09248013237262542,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.19082207644999133,
+      "bonferroni_p": 0.8323211913536288,
+      "passes_bonferroni_5pct": false
+    },
+    {
+      "target": "LQD",
+      "horizon": "rv5",
+      "n_obs": 3993,
+      "beta": 0.0036331764642590983,
+      "hac_t": 1.507647918989635,
+      "hac_p": 0.13164466155257548,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.19082207644999133,
+      "bonferroni_p": 1.0,
+      "passes_bonferroni_5pct": false
+    },
+    {
+      "target": "LQD",
+      "horizon": "rv21",
+      "n_obs": 3977,
+      "beta": 0.0024577302378704863,
+      "hac_t": 1.4887802091782671,
+      "hac_p": 0.13654525545834328,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.19082207644999133,
+      "bonferroni_p": 1.0,
+      "passes_bonferroni_5pct": false
+    },
+    {
+      "target": "BKLN",
+      "horizon": "rv5",
+      "n_obs": 3803,
+      "beta": 0.0030054965088553752,
+      "hac_t": 1.65434083321014,
+      "hac_p": 0.0980582807871535,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.19082207644999133,
+      "bonferroni_p": 0.8825245270843816,
+      "passes_bonferroni_5pct": false
+    },
+    {
+      "target": "BKLN",
+      "horizon": "rv21",
+      "n_obs": 3787,
+      "beta": 0.0022691363188139494,
+      "hac_t": 1.5380453135984433,
+      "hac_p": 0.12403753569935261,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.19082207644999133,
+      "bonferroni_p": 1.0,
+      "passes_bonferroni_5pct": false
+    },
+    {
+      "target": "TLT",
+      "horizon": "rv5",
+      "n_obs": 3993,
+      "beta": 0.00368094267767997,
+      "hac_t": 1.1164250020164534,
+      "hac_p": 0.2642402563777413,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.29727028842495895,
+      "bonferroni_p": 1.0,
+      "passes_bonferroni_5pct": false
+    },
+    {
+      "target": "TLT",
+      "horizon": "rv21",
+      "n_obs": 3977,
+      "beta": 0.0019125759105586648,
+      "hac_t": 1.0315310007973357,
+      "hac_p": 0.30229187830532656,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.30229187830532656,
+      "bonferroni_p": 1.0,
+      "passes_bonferroni_5pct": false
+    },
+    {
+      "target": "HYG_SPY",
+      "horizon": "downside_corr21",
+      "n_obs": 3998,
+      "beta": 0.012232651540804976,
+      "hac_t": 1.445144967092537,
+      "hac_p": 0.14841717057221548,
+      "expected_direction": "positive",
+      "passes_harvey_t3": false,
+      "bh_q": 0.19082207644999133,
+      "bonferroni_p": 1.0,
+      "passes_bonferroni_5pct": false
+    }
+  ],
+  "oos_forecast_tests": [
+    {
+      "target": "HYG",
+      "horizon": "5d",
+      "n_oos": 3237,
+      "mse_baseline": 0.00023029258952279074,
+      "mse_augmented": 0.00022094844455206888,
+      "mse_improvement_pct": 4.0575100527918355,
+      "dm_t_aug_minus_base": -1.4694126178803595,
+      "dm_p": 0.14172090697088335,
+      "passes_harvey_t3": false
+    },
+    {
+      "target": "HYG",
+      "horizon": "21d",
+      "n_oos": 3221,
+      "mse_baseline": 0.00019537689773308073,
+      "mse_augmented": 0.0001901534498980478,
+      "mse_improvement_pct": 2.673523786916232,
+      "dm_t_aug_minus_base": -0.9285007594050795,
+      "dm_p": 0.3531478740599838,
+      "passes_harvey_t3": false
+    },
+    {
+      "target": "LQD",
+      "horizon": "5d",
+      "n_oos": 3237,
+      "mse_baseline": 0.0004445673738094786,
+      "mse_augmented": 0.0004252090269804654,
+      "mse_improvement_pct": 4.354423641827864,
+      "dm_t_aug_minus_base": -1.5610816364635147,
+      "dm_p": 0.11850449028975274,
+      "passes_harvey_t3": false
+    },
+    {
+      "target": "LQD",
+      "horizon": "21d",
+      "n_oos": 3221,
+      "mse_baseline": 0.0002999738969472143,
+      "mse_augmented": 0.0002911655531374801,
+      "mse_improvement_pct": 2.9363700973235485,
+      "dm_t_aug_minus_base": -0.9679384771249738,
+      "dm_p": 0.33307509650781664,
+      "passes_harvey_t3": false
+    },
+    {
+      "target": "BKLN",
+      "horizon": "5d",
+      "n_oos": 3047,
+      "mse_baseline": 0.0002885311237771342,
+      "mse_augmented": 0.0002764098137517768,
+      "mse_improvement_pct": 4.201040728874728,
+      "dm_t_aug_minus_base": -1.8765565530459845,
+      "dm_p": 0.06057889682496165,
+      "passes_harvey_t3": false
+    },
+    {
+      "target": "BKLN",
+      "horizon": "21d",
+      "n_oos": 3031,
+      "mse_baseline": 0.0002639134119602201,
+      "mse_augmented": 0.00025731115566625596,
+      "mse_improvement_pct": 2.501675168732742,
+      "dm_t_aug_minus_base": -0.9548344714450799,
+      "dm_p": 0.3396614120215786,
+      "passes_harvey_t3": false
+    },
+    {
+      "target": "TLT",
+      "horizon": "5d",
+      "n_oos": 3237,
+      "mse_baseline": 0.0008294955894038079,
+      "mse_augmented": 0.0008128342412401927,
+      "mse_improvement_pct": 2.0086120259651286,
+      "dm_t_aug_minus_base": -1.3615164242752336,
+      "dm_p": 0.1733505467403993,
+      "passes_harvey_t3": false
+    },
+    {
+      "target": "TLT",
+      "horizon": "21d",
+      "n_oos": 3221,
+      "mse_baseline": 0.0005194115294499949,
+      "mse_augmented": 0.0005149213916031432,
+      "mse_improvement_pct": 0.8644663416706,
+      "dm_t_aug_minus_base": -0.658518799690061,
+      "dm_p": 0.5102048208914316,
+      "passes_harvey_t3": false
+    },
+    {
+      "target": "HYG_SPY",
+      "horizon": "21d",
+      "n_oos": 3242,
+      "mse_baseline": 0.04998194466482934,
+      "mse_augmented": 0.0499570980830284,
+      "mse_improvement_pct": 0.049711114618589125,
+      "dm_t_aug_minus_base": -0.10968341896936197,
+      "dm_p": 0.9126604508125014,
+      "passes_harvey_t3": false
+    }
+  ],
+  "positive_hac_gate_tests": [],
+  "positive_oos_gate_tests": [],
+  "figures": {
+    "run_pressure_timeseries": "figures/k1538_run_pressure_timeseries.png",
+    "hac_tstats": "figures/k1538_hac_tstats.png"
+  },
+  "panel_csv": "k1538_bond_fund_run_proxy_credit_etf_vol_daily_panel.csv",
+  "limitations": [
+    "No ICI fund-level daily/weekly bond mutual fund flow microdata are used; this is a free ETF/FRED proxy diagnostic.",
+    "ETF trading volume can reflect hedging and institutional ETF use, not only open-end mutual fund redemptions.",
+    "FRED cash-migration series are low frequency and ffilled to daily dates, so they cannot identify intraday or daily fund runs.",
+    "HYG/LQD/BKLN/TLT realized volatility is an ETF-level target, not underlying bond TRACE volatility.",
+    "Positive predictive coefficients would be association, not causal evidence of fund-run fire sales."
+  ]
+}

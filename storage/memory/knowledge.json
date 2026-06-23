@@ -35875,5 +35875,20 @@
     ],
     "confidence": 0.55,
     "created_at": "2026-06-23T15:10:47.983961"
+  },
+  {
+    "item_id": "60afbd0f",
+    "category": "credit_volatility",
+    "content": "K1538 [WEAK_DIRECTIONAL_PROXY / gate fail]: bond mutual fund demandable-equity run-pressure free-data proxy. Data: yfinance AGG/BND/LQD/HYG/BKLN/TLT/SPY/^VIX daily close+volume and FRED DPSACBW027SBOG/MMMFFAQ027S, 2010-01-04 to 2026-06-23, 4143 daily rows, seed=42. Proxy averages bond ETF dollar-volume shock, negative bond-basket return pressure, HYG-vs-LQD underperformance, ETF Amihud-style illiquidity, and FRED cash migration; all predictive tests use signal_lag = run_pressure_index.shift(1). Evidence is directionally positive but below gates: HYG RV5 HAC beta=+0.00284, t=2.04, raw p=0.041 but BH q=0.191 and Bonferroni p=0.372; HYG RV21 t=1.68; BKLN RV5 t=1.65; HYG-SPY downside corr21 t=1.45. OOS MSE improves directionally (HYG 5d +4.06%, LQD 5d +4.35%, BKLN 5d +4.20%) but DM t fails Harvey, best BKLN 5d t=-1.88. Conclusion: public ETF/FRED run-pressure proxy is a weak diagnostic only; do not publish a claim that bond-fund run pressure robustly predicts credit ETF volatility without ICI fund-flow, fund NAV-discount, or TRACE data.",
+    "evidence": [
+      "experiments/k1538_bond_fund_run_proxy_credit_etf_vol/README.md",
+      "experiments/k1538_bond_fund_run_proxy_credit_etf_vol/k1538_bond_fund_run_proxy_credit_etf_vol.py",
+      "experiments/k1538_bond_fund_run_proxy_credit_etf_vol/k1538_bond_fund_run_proxy_credit_etf_vol_results.json",
+      "experiments/k1538_bond_fund_run_proxy_credit_etf_vol/codex_review.md",
+      "experiments/k1538_bond_fund_run_proxy_credit_etf_vol/figures/k1538_run_pressure_timeseries.png",
+      "experiments/k1538_bond_fund_run_proxy_credit_etf_vol/figures/k1538_hac_tstats.png"
+    ],
+    "confidence": 0.62,
+    "created_at": "2026-06-23T17:55:32.451952"
   }
 ]
