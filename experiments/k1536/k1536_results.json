@@ -1,0 +1,363 @@
+{
+  "experiment_id": "k1536",
+  "task": "biodiversity transition-risk commodity basket RV and tail repricing",
+  "verdict": "NULL_HIGHER_RV_REJECTED",
+  "seed": 42,
+  "data": {
+    "source": "yfinance daily adjusted close via auto_adjust=True",
+    "requested_start": "2018-01-01",
+    "requested_end": "2026-06-24",
+    "effective_start": "2018-01-03",
+    "effective_end": "2026-06-22",
+    "n_union_days": 2128,
+    "available_tickers": [
+      "CORN",
+      "SOYB",
+      "WEAT",
+      "CANE",
+      "JO",
+      "WOOD",
+      "DBA",
+      "GLD",
+      "SLV",
+      "CPER",
+      "USO",
+      "UNG",
+      "PDBC"
+    ],
+    "missing_or_short_tickers": [],
+    "high_biodiversity_proxy": {
+      "CORN": "corn ETF proxy",
+      "SOYB": "soybean ETF proxy",
+      "WEAT": "wheat ETF proxy",
+      "CANE": "sugar ETF proxy",
+      "JO": "coffee ETN proxy",
+      "WOOD": "global timber/forestry equity proxy",
+      "DBA": "broad agriculture commodity ETF proxy"
+    },
+    "control_commodities": {
+      "GLD": "gold ETF control",
+      "SLV": "silver ETF control",
+      "CPER": "copper ETF control",
+      "USO": "oil ETF control",
+      "UNG": "natural gas ETF control",
+      "PDBC": "broad commodity ETF benchmark/control"
+    },
+    "ticker_observations": {
+      "CORN": 2127,
+      "SOYB": 2127,
+      "WEAT": 2127,
+      "CANE": 2127,
+      "JO": 1386,
+      "WOOD": 2127,
+      "DBA": 2127,
+      "GLD": 2127,
+      "SLV": 2127,
+      "CPER": 2127,
+      "USO": 2127,
+      "UNG": 2127,
+      "PDBC": 2127
+    }
+  },
+  "methodology": {
+    "type": "empirical proxy diagnostic event study",
+    "pre_window_trading_days": 20,
+    "post_window_trading_days": 20,
+    "unconditional_test": "daily high-minus-control mean with HAC(21) intercept standard error",
+    "event_test": "event-block bootstrap resampling event IDs for high-minus-control post/pre diff-in-diff",
+    "multiple_testing": "BH and Bonferroni on Welch event-level diagnostics",
+    "lookahead_guard": "Pre-window uses t-20..t-1; post-window starts at event trading date. No predictive signal or same-day signal-return strategy is used."
+  },
+  "events": [
+    {
+      "id": "kunming_declaration",
+      "date": "2021-10-13",
+      "name": "Kunming Declaration adopted at CBD COP15 part 1",
+      "source": "Review of Finance biodiversity commodity event channel",
+      "event_trading_date": "2021-10-13",
+      "pre_window": [
+        "2021-09-15",
+        "2021-10-12"
+      ],
+      "post_window": [
+        "2021-10-13",
+        "2021-11-10"
+      ]
+    },
+    {
+      "id": "gbf_adoption",
+      "date": "2022-12-19",
+      "name": "Kunming-Montreal Global Biodiversity Framework adopted",
+      "source": "CBD official GBF page",
+      "event_trading_date": "2022-12-19",
+      "pre_window": [
+        "2022-11-18",
+        "2022-12-16"
+      ],
+      "post_window": [
+        "2022-12-19",
+        "2023-01-19"
+      ]
+    },
+    {
+      "id": "eudr_signed",
+      "date": "2023-05-31",
+      "name": "EU Deforestation Regulation signed",
+      "source": "EU Regulation 2023/1115 legislative timeline",
+      "event_trading_date": "2023-05-31",
+      "pre_window": [
+        "2023-05-02",
+        "2023-05-30"
+      ],
+      "post_window": [
+        "2023-05-31",
+        "2023-06-29"
+      ]
+    },
+    {
+      "id": "eudr_entry_force",
+      "date": "2023-06-29",
+      "name": "EU Deforestation Regulation entered into force",
+      "source": "European Commission EUDR page",
+      "event_trading_date": "2023-06-29",
+      "pre_window": [
+        "2023-05-31",
+        "2023-06-28"
+      ],
+      "post_window": [
+        "2023-06-29",
+        "2023-07-28"
+      ]
+    },
+    {
+      "id": "tnfd_final",
+      "date": "2023-09-18",
+      "name": "TNFD final recommendations published",
+      "source": "TNFD official release",
+      "event_trading_date": "2023-09-18",
+      "pre_window": [
+        "2023-08-18",
+        "2023-09-15"
+      ],
+      "post_window": [
+        "2023-09-18",
+        "2023-10-16"
+      ]
+    },
+    {
+      "id": "eu_nature_restoration_adopted",
+      "date": "2024-06-17",
+      "name": "EU Council adopted Nature Restoration Regulation",
+      "source": "European Commission Nature Restoration timeline",
+      "event_trading_date": "2024-06-17",
+      "pre_window": [
+        "2024-05-17",
+        "2024-06-14"
+      ],
+      "post_window": [
+        "2024-06-17",
+        "2024-07-17"
+      ]
+    }
+  ],
+  "unconditional_tests": [
+    {
+      "metric": "rv_high_minus_control",
+      "n_obs": 2127,
+      "mean": -0.07537903322074402,
+      "hac_t": -7.513002819386351,
+      "hac_p": 5.77862827653423e-14,
+      "ci95": [
+        -0.09504399391148494,
+        -0.0557140725300031
+      ]
+    },
+    {
+      "metric": "downside_high_minus_control",
+      "n_obs": 2127,
+      "mean": -0.04486618607153636,
+      "hac_t": -6.322980445331926,
+      "hac_p": 2.565657800169023e-10,
+      "ci95": [
+        -0.05877382432228141,
+        -0.030958547820791313
+      ]
+    }
+  ],
+  "event_bootstrap_tests": [
+    {
+      "metric": "log_rv_ratio",
+      "estimate": 0.24255218071131232,
+      "ci95": [
+        -0.1769171385924903,
+        0.6538497394674998
+      ],
+      "p_two_sided": 0.28314337132573486,
+      "reps": 5000,
+      "seed": 42
+    },
+    {
+      "metric": "log_downside_ratio",
+      "estimate": 0.38340334426035316,
+      "ci95": [
+        -0.1786334910117443,
+        0.9322493307492901
+      ],
+      "p_two_sided": 0.17716456708658268,
+      "reps": 5000,
+      "seed": 42
+    },
+    {
+      "metric": "abnormal_post_minus_pre_cum",
+      "estimate": 0.0029070936342181506,
+      "ci95": [
+        -0.014354601249042746,
+        0.02315573276348912
+      ],
+      "p_two_sided": 0.8210357928414317,
+      "reps": 5000,
+      "seed": 42
+    }
+  ],
+  "event_welch_diagnostics": [
+    {
+      "metric": "log_rv_ratio",
+      "high_mean": 0.09191705238883227,
+      "control_mean": -0.15063512832248005,
+      "diff_high_minus_control": 0.24255218071131232,
+      "welch_t": 1.8837693099983672,
+      "welch_p": 0.06434588916866604,
+      "n_high": 39,
+      "n_control": 36,
+      "bh_q": 0.17385516632178794,
+      "bonferroni_p": 0.19303766750599813
+    },
+    {
+      "metric": "log_downside_ratio",
+      "high_mean": 0.14653664390341342,
+      "control_mean": -0.2368667003569397,
+      "diff_high_minus_control": 0.38340334426035316,
+      "welch_t": 1.5951725427280368,
+      "welch_p": 0.11590344421452528,
+      "n_high": 39,
+      "n_control": 36,
+      "bh_q": 0.17385516632178794,
+      "bonferroni_p": 0.34771033264357587
+    },
+    {
+      "metric": "abnormal_post_minus_pre_cum",
+      "high_mean": -0.003020527903302514,
+      "control_mean": -0.005927621537520664,
+      "diff_high_minus_control": 0.0029070936342181506,
+      "welch_t": 0.09998622770862013,
+      "welch_p": 0.9207732016781826,
+      "n_high": 39,
+      "n_control": 36,
+      "bh_q": 0.9207732016781826,
+      "bonferroni_p": 1.0
+    }
+  ],
+  "event_group_summary": [
+    {
+      "event_id": "eu_nature_restoration_adopted",
+      "group": "control",
+      "log_rv_ratio": -0.8329580889316031,
+      "log_downside_ratio": -1.0476302768472494,
+      "abnormal_post_minus_pre_cum": -0.03523226769007052
+    },
+    {
+      "event_id": "eu_nature_restoration_adopted",
+      "group": "high_biodiversity",
+      "log_rv_ratio": 0.2323096310113237,
+      "log_downside_ratio": 0.4583950608934808,
+      "abnormal_post_minus_pre_cum": -0.04117320466516968
+    },
+    {
+      "event_id": "eudr_entry_force",
+      "group": "control",
+      "log_rv_ratio": -0.2890272117054835,
+      "log_downside_ratio": -0.8974398057043683,
+      "abnormal_post_minus_pre_cum": 0.048440052020683376
+    },
+    {
+      "event_id": "eudr_entry_force",
+      "group": "high_biodiversity",
+      "log_rv_ratio": -0.13594172958656947,
+      "log_downside_ratio": -0.46332007760267047,
+      "abnormal_post_minus_pre_cum": 0.020515054983263763
+    },
+    {
+      "event_id": "eudr_signed",
+      "group": "control",
+      "log_rv_ratio": -0.3920490049223375,
+      "log_downside_ratio": -0.5818272352191493,
+      "abnormal_post_minus_pre_cum": 0.07157310972774988
+    },
+    {
+      "event_id": "eudr_signed",
+      "group": "high_biodiversity",
+      "log_rv_ratio": 0.27290142980863896,
+      "log_downside_ratio": 0.028916083370666628,
+      "abnormal_post_minus_pre_cum": 0.051488515674441
+    },
+    {
+      "event_id": "gbf_adoption",
+      "group": "control",
+      "log_rv_ratio": -0.055342805301492326,
+      "log_downside_ratio": -0.39163496346635535,
+      "abnormal_post_minus_pre_cum": -0.04811993322288232
+    },
+    {
+      "event_id": "gbf_adoption",
+      "group": "high_biodiversity",
+      "log_rv_ratio": 0.12161981296842404,
+      "log_downside_ratio": 0.026335619560843467,
+      "abnormal_post_minus_pre_cum": -0.0032244296754621294
+    },
+    {
+      "event_id": "kunming_declaration",
+      "group": "control",
+      "log_rv_ratio": -0.10647194836815412,
+      "log_downside_ratio": -0.06591288903494175,
+      "abnormal_post_minus_pre_cum": -0.025675196439041387
+    },
+    {
+      "event_id": "kunming_declaration",
+      "group": "high_biodiversity",
+      "log_rv_ratio": -0.07033114376869488,
+      "log_downside_ratio": 0.09527733134530282,
+      "abnormal_post_minus_pre_cum": -0.013946066102249868
+    },
+    {
+      "event_id": "tnfd_final",
+      "group": "control",
+      "log_rv_ratio": 0.7720382892941903,
+      "log_downside_ratio": 1.5632449681304257,
+      "abnormal_post_minus_pre_cum": -0.046551493621563016
+    },
+    {
+      "event_id": "tnfd_final",
+      "group": "high_biodiversity",
+      "log_rv_ratio": 0.12287115692622606,
+      "log_downside_ratio": 0.7817959954250949,
+      "abnormal_post_minus_pre_cum": -0.03901297156907759
+    }
+  ],
+  "positive_harvey_like_t_ge_3_metrics": [],
+  "negative_harvey_like_t_le_minus_3_metrics": [
+    "rv_high_minus_control",
+    "downside_high_minus_control"
+  ],
+  "event_bootstrap_ci_excludes_zero_metrics": [],
+  "figures": {
+    "basket_rv_event_windows": "figures/basket_rv_event_windows.png",
+    "event_diff_in_diff": "figures/event_diff_in_diff.png"
+  },
+  "limitations": [
+    "ETF/ETN proxies are not commodity futures excess returns and do not reproduce biodiversity-footprint scores.",
+    "Group membership is an economic proxy, not a measured JNCC/SEI biodiversity-intensity sort.",
+    "Only six policy/disclosure events are tested; event-block inference is low power.",
+    "WOOD is an equity ETF proxy for forestry/timber exposure, not a physical commodity future.",
+    "Daily close data cannot observe intraday repricing at announcement timestamps."
+  ]
+}
