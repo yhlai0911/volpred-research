@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-06-23T06:03:36Z",
+  "timestamp_tw": "2026-06-23T14:03:36+08:00",
+  "alert_type": "METRICS MISSING",
+  "severity": "warn",
+  "detail": "storage/strategy_metrics.json does not exist. Strategy metrics unavailable — downstream strategy displays and rankings may be broken. This is a recurring issue first observed 2026-05-31 with no resolution yet.",
+  "action_required": "Investigate why strategy_metrics.json is not being generated. Check if metrics recomputation job is running (config/runtime_schedules.json). Run: uv run volpred ops recompute-metrics or equivalent."
+}
