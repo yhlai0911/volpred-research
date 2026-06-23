@@ -77,6 +77,96 @@ def b():
     assert findings == []
 
 
+def test_audit_ignores_inline_silent_ok_comments(tmp_path: Path) -> None:
+    source = tmp_path / "sample.py"
+    source.write_text(
+        """
+def cleanup(tmp):
+    try:
+        tmp.unlink()
+    except FileNotFoundError:
+        pass  # silent-ok: cleanup race-safe
+""",
+        encoding="utf-8",
+    )
+
+    findings = audit_silent_fallbacks.audit_file(source, root=tmp_path)
+
+    assert findings == []
+
+
+def test_baseline_diff_reports_only_new_findings() -> None:
+    existing = audit_silent_fallbacks.Finding("scripts/a.py", 10, "Exception", "return None")
+    new = audit_silent_fallbacks.Finding("scripts/b.py", 20, "ValueError", "continue")
+
+    new_findings, resolved_findings = audit_silent_fallbacks.diff_against_baseline(
+        [existing, new],
+        [existing],
+    )
+
+    assert new_findings == [new]
+    assert resolved_findings == []
+
+
+def test_load_baseline_accepts_metadata_object(tmp_path: Path) -> None:
+    baseline_path = tmp_path / "baseline.json"
+    baseline_path.write_text(
+        """
+{
+  "schema": "silent_fallback_baseline.v1",
+  "count": 1,
+  "findings": [
+    {
+      "path": "scripts/a.py",
+      "line": 10,
+      "exception": "Exception",
+      "action": "return None"
+    }
+  ]
+}
+""",
+        encoding="utf-8",
+    )
+
+    baseline = audit_silent_fallbacks.load_baseline(baseline_path)
+
+    assert baseline == [
+        audit_silent_fallbacks.Finding("scripts/a.py", 10, "Exception", "return None")
+    ]
+
+
+def test_main_strict_with_baseline_fails_for_new_finding(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    source = tmp_path / "sample.py"
+    source.write_text(
+        """
+def a():
+    try:
+        risky()
+    except ValueError:
+        return None
+""",
+        encoding="utf-8",
+    )
+    baseline_path = tmp_path / "baseline.json"
+    baseline_path.write_text('{"findings": []}\n', encoding="utf-8")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "audit_silent_fallbacks.py",
+            "--strict",
+            "--baseline",
+            str(baseline_path),
+            str(source),
+        ],
+    )
+
+    assert audit_silent_fallbacks.main() == 1
+
+
 def test_iter_python_files_skips_test_directories_by_default(tmp_path: Path) -> None:
     scripts = tmp_path / "scripts"
     scripts.mkdir()

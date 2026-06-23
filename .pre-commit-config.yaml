@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: silent-fallback-baseline
+        name: silent fallback baseline gate
+        entry: python scripts/audit_silent_fallbacks.py --strict --baseline storage/qa/silent_fallback_baseline.json
+        language: system
+        pass_filenames: false
+        types_or: [python]

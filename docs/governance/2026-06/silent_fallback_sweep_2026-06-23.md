@@ -39,6 +39,25 @@ Initial run on 2026-06-23 returned 125 suspect handlers after excluding test
 directories from recursive scans. This is not a clean gate yet; it is the
 backlog map for future targeted burn-down tasks.
 
+## Baseline Gate Activation
+
+Follow-up task `platform_ops_silent_fallback_ci_gate` wired the audit into:
+
+- `.github/workflows/silent-fallbacks.yml`
+- `.pre-commit-config.yaml`
+
+The gate command is:
+
+```bash
+python scripts/audit_silent_fallbacks.py --strict --baseline storage/qa/silent_fallback_baseline.json
+```
+
+Current generated baseline: 126 findings. The earlier 125/127 counts were
+transient snapshots during adjacent platform-ops changes; the committed
+baseline reflects the actual scanner output at activation time. Strict mode now
+fails only when a finding is absent from the baseline, so legacy debt remains
+visible without allowing new silent fallback debt.
+
 ## Task Generator Update
 
 Future `governance_error_log_review_*` tasks now include the audit command in

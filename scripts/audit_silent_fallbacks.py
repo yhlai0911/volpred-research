@@ -8,11 +8,15 @@ Usage:
   uv run python scripts/audit_silent_fallbacks.py
   uv run python scripts/audit_silent_fallbacks.py --json
   uv run python scripts/audit_silent_fallbacks.py --strict
+  uv run python scripts/audit_silent_fallbacks.py --strict --baseline storage/qa/silent_fallback_baseline.json
+  uv run python scripts/audit_silent_fallbacks.py --write-baseline storage/qa/silent_fallback_baseline.json
 
 The audit is intentionally heuristic. It reports suspect exception handlers in
 `scripts/` and `src/` that contain `pass`, `continue`, or default-ish `return`
 statements without a nearby print/log/warn/error call. Report mode exits 0;
-`--strict` exits 1 when any finding remains.
+`--strict` exits 1 when any finding remains unless a baseline is supplied. With
+`--baseline`, strict mode fails only for findings not already present in the
+baseline.
 """
 from __future__ import annotations
 
@@ -22,11 +26,11 @@ import json
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_TARGETS = (ROOT / "scripts", ROOT / "src")
+DEFAULT_TARGETS = (ROOT / "scripts", ROOT / "src" / "volpred", ROOT / ".claude" / "hooks")
 SKIP_DIRS = {".git", ".venv", "__pycache__", "node_modules", "tests"}
 
 OBSERVABLE_CALL_NAMES = {
@@ -49,6 +53,9 @@ class Finding:
     line: int
     exception: str
     action: str
+
+    def key(self) -> tuple[str, int, str, str]:
+        return (self.path, self.line, self.exception, self.action)
 
 
 def _relative(path: Path, root: Path = ROOT) -> str:
@@ -145,8 +152,21 @@ def _silent_action(stmt: ast.stmt) -> str | None:
     return None
 
 
+def _has_silent_ok_comment(source_lines: list[str], stmt: ast.stmt) -> bool:
+    start = getattr(stmt, "lineno", None)
+    end = getattr(stmt, "end_lineno", start)
+    if start is None or end is None:
+        return False
+    for line_no in range(start, end + 1):
+        if 1 <= line_no <= len(source_lines) and "silent-ok:" in source_lines[line_no - 1]:
+            return True
+    return False
+
+
 def audit_file(path: Path, *, root: Path = ROOT) -> list[Finding]:
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    source = path.read_text(encoding="utf-8")
+    source_lines = source.splitlines()
+    tree = ast.parse(source, filename=str(path))
     findings: list[Finding] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.ExceptHandler):
@@ -156,6 +176,8 @@ def audit_file(path: Path, *, root: Path = ROOT) -> list[Finding]:
         for stmt in node.body:
             action = _silent_action(stmt)
             if action is None:
+                continue
+            if _has_silent_ok_comment(source_lines, stmt):
                 continue
             findings.append(
                 Finding(
@@ -183,6 +205,65 @@ def audit_paths(paths: Iterable[Path], *, root: Path = ROOT) -> list[Finding]:
     return sorted(findings, key=lambda item: (item.path, item.line, item.action))
 
 
+def _finding_from_raw(raw: dict[str, Any], *, baseline_path: Path) -> Finding:
+    try:
+        return Finding(
+            path=str(raw["path"]),
+            line=int(raw["line"]),
+            exception=str(raw["exception"]),
+            action=str(raw["action"]),
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError(f"invalid baseline finding in {baseline_path}: {raw!r}") from exc
+
+
+def load_baseline(path: Path) -> list[Finding]:
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise ValueError(f"baseline read failed: {path} ({type(exc).__name__}: {exc})") from exc
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"baseline JSON parse failed: {path} ({exc})") from exc
+
+    if isinstance(raw, dict):
+        raw_findings = raw.get("findings")
+    else:
+        raw_findings = raw
+    if not isinstance(raw_findings, list):
+        raise ValueError(f"baseline must be a list or object with findings list: {path}")
+    return sorted(
+        (_finding_from_raw(item, baseline_path=path) for item in raw_findings),
+        key=lambda item: item.key(),
+    )
+
+
+def diff_against_baseline(
+    findings: list[Finding],
+    baseline: list[Finding],
+) -> tuple[list[Finding], list[Finding]]:
+    current_by_key = {item.key(): item for item in findings}
+    baseline_by_key = {item.key(): item for item in baseline}
+    new_findings = [current_by_key[key] for key in sorted(current_by_key.keys() - baseline_by_key.keys())]
+    resolved_findings = [
+        baseline_by_key[key] for key in sorted(baseline_by_key.keys() - current_by_key.keys())
+    ]
+    return new_findings, resolved_findings
+
+
+def write_baseline(path: Path, findings: list[Finding]) -> None:
+    payload = {
+        "schema": "silent_fallback_baseline.v1",
+        "description": (
+            "Known silent-fallback audit findings. CI strict mode fails only when "
+            "current findings introduce keys absent from this baseline."
+        ),
+        "count": len(findings),
+        "findings": [asdict(item) for item in findings],
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def _human_report(findings: list[Finding], *, limit: int | None) -> None:
     print(f"[silent-fallback-audit] findings={len(findings)}")
     rows = findings if limit is None else findings[:limit]
@@ -192,11 +273,48 @@ def _human_report(findings: list[Finding], *, limit: int | None) -> None:
         print(f"... {len(findings) - limit} more (rerun with --limit 0 for all)")
 
 
+def _baseline_report(
+    *,
+    baseline_path: Path,
+    current_count: int,
+    baseline: list[Finding],
+    new_findings: list[Finding],
+    resolved_findings: list[Finding],
+    limit: int | None,
+) -> None:
+    print(
+        "[silent-fallback-audit] "
+        f"findings={current_count} baseline={baseline_path} baseline_findings={len(baseline)} "
+        f"new={len(new_findings)} resolved={len(resolved_findings)}"
+    )
+    rows = new_findings if limit is None else new_findings[:limit]
+    for item in rows:
+        print(f"NEW {item.path}:{item.line} except {item.exception}: {item.action}")
+    if limit is not None and len(new_findings) > limit:
+        print(f"... {len(new_findings) - limit} more new findings (rerun with --limit 0 for all)")
+    if resolved_findings:
+        print(
+            "[silent-fallback-audit] "
+            f"note: {len(resolved_findings)} baseline finding(s) no longer present; "
+            "reduce the baseline in a separate cleanup commit."
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="*", type=Path, default=list(DEFAULT_TARGETS))
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        help="JSON baseline file; with --strict, fail only for findings absent from this baseline",
+    )
+    parser.add_argument(
+        "--write-baseline",
+        type=Path,
+        help="write the current findings to this baseline file and exit",
+    )
     parser.add_argument(
         "--limit",
         type=int,
@@ -206,11 +324,53 @@ def main() -> int:
     args = parser.parse_args()
 
     findings = audit_paths(args.paths)
-    if args.json:
+    if args.write_baseline:
+        write_baseline(args.write_baseline, findings)
+        print(f"[silent-fallback-audit] wrote baseline={args.write_baseline} findings={len(findings)}")
+        return 0
+
+    baseline: list[Finding] | None = None
+    new_findings: list[Finding] = []
+    resolved_findings: list[Finding] = []
+    if args.baseline:
+        try:
+            baseline = load_baseline(args.baseline)
+        except ValueError as exc:
+            print(f"[silent-fallback-audit] ERROR {exc}", file=sys.stderr)
+            return 2
+        new_findings, resolved_findings = diff_against_baseline(findings, baseline)
+
+    if args.json and baseline is not None:
+        print(
+            json.dumps(
+                {
+                    "findings": [asdict(item) for item in findings],
+                    "baseline": str(args.baseline),
+                    "baseline_count": len(baseline),
+                    "new_findings": [asdict(item) for item in new_findings],
+                    "resolved_findings": [asdict(item) for item in resolved_findings],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    elif args.json:
         print(json.dumps([asdict(item) for item in findings], ensure_ascii=False, indent=2))
     else:
-        _human_report(findings, limit=None if args.limit == 0 else args.limit)
+        if baseline is None:
+            _human_report(findings, limit=None if args.limit == 0 else args.limit)
+        else:
+            _baseline_report(
+                baseline_path=args.baseline,
+                current_count=len(findings),
+                baseline=baseline,
+                new_findings=new_findings,
+                resolved_findings=resolved_findings,
+                limit=None if args.limit == 0 else args.limit,
+            )
 
+    if args.strict and baseline is not None:
+        return 1 if new_findings else 0
     return 1 if args.strict and findings else 0
 
 
