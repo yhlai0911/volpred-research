@@ -65,6 +65,7 @@ import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 from volpred.ops.blocked_reasons import BLOCKED_REASONS  # noqa: E402
+from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 
 SELF_OPTIONAL_PATTERN = re.compile(
     r"\(\s*optional\s*\)|（\s*optional\s*）|"
@@ -75,7 +76,7 @@ SELF_OPTIONAL_PATTERN = re.compile(
 
 
 def _warn_dispatch(message: str) -> None:
-    print(f"[dispatch] WARN {message}", file=sys.stderr)
+    _diag_warn("dispatch", message)
 
 
 def count_active_slots() -> dict:

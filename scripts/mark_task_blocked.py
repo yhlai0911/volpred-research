@@ -47,10 +47,11 @@ LOCK_DIR = ROOT / "storage" / "ops" / "locks"
 
 sys.path.insert(0, str(ROOT / "src"))
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
+from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 
 
 def _warn_block_cli(message: str) -> None:
-    print(f"[mark_task_blocked] WARN {message}", file=sys.stderr)
+    _diag_warn("mark_task_blocked", message)
 
 
 @contextmanager

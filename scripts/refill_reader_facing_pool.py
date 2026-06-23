@@ -40,9 +40,11 @@ def _today_local() -> str:
 
 
 def _warn_refill_reader(message: str, path: Path, exc: Exception) -> None:
-    print(
-        f"[reader_facing_refill] WARN {message}: "
-        f"path={path} error={type(exc).__name__}: {exc}"
+    _diag_warn(
+        "reader_facing_refill",
+        message,
+        path=str(path),
+        err=f"{type(exc).__name__}: {exc}",
     )
 
 

@@ -33,6 +33,9 @@ LOGS = REPO / "storage" / "logs" / "cron"
 LAST_RUN_PATH = REPO / "storage" / "ops" / "cron_last_run.json"
 TPE = timezone(timedelta(hours=8))
 
+sys.path.insert(0, str(REPO / "src"))
+from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+
 # job → (launchd label, log file, fallback max gap hours, piggy_back_id, cron_expr)
 #
 # 2026-05-27: market_cal / memory_health 的 LaunchAgent 從未可靠 fire（macOS cron
@@ -68,10 +71,12 @@ _SLACK_HOURS = 2.0
 
 
 def _warn_cron_review(message: str, path: Path | None = None, exc: Exception | None = None) -> None:
-    suffix = f": path={path}" if path is not None else ""
+    ctx: dict[str, str] = {}
+    if path is not None:
+        ctx["path"] = str(path)
     if exc is not None:
-        suffix += f" error={type(exc).__name__}: {exc}"
-    print(f"[cron_review] WARN {message}{suffix}", file=sys.stderr)
+        ctx["err"] = f"{type(exc).__name__}: {exc}"
+    _diag_warn("cron_review", message, **ctx)
 
 
 def _piggy_back_end(job_id: str) -> datetime | None:

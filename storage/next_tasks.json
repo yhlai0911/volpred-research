@@ -35940,11 +35940,17 @@
     "id": "platform_ops_build_diagnostics_module",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "description": "Build src/volpred/ops/diagnostics.py with warn(tag, msg, **ctx) — writes [tag] WARN to stderr + optional storage/logs/diagnostics/<tag>.jsonl. Replaces 30+ scattered _warn_<module>() helpers added in 2026-06-22/23 silent-fallback batch. Spec: .claude/rules/no-silent-fallback.md. After done, refactor 5-10 ops scripts to delegate via this helper as POC.",
     "created_at": "2026-06-23T13:18:00+08:00",
     "source": "governance_error_log_review_200_followup",
-    "parent_task_id": "governance_error_log_review_200"
+    "parent_task_id": "governance_error_log_review_200",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-23T08:11:06.145343+00:00",
+    "claim_session_id": "03d16b6d3d29",
+    "started_at": "2026-06-23T08:11:06.246285+00:00",
+    "completed_at": "2026-06-23T08:14:15.689867+00:00",
+    "result": "Built src/volpred/ops/diagnostics.py with warn(tag,msg,**ctx) + 10 unit tests (all green). Refactored 6 ops scripts (continue_task_dispatch / refill_task_pool / refill_reader_facing_pool / cron_review / mark_task_blocked / generate_research_backlog) to delegate via _diag_warn. Output format unified: [tag] WARN msg | k=v | k=v. Opt-in JSONL persistence via VOLPRED_DIAGNOSTICS_PERSIST=1. Updated no-silent-fallback.md marker 待建→已建立."
   },
   {
     "id": "platform_ops_build_timestamps_module",

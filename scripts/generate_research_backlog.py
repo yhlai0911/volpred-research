@@ -35,6 +35,9 @@ ROOT = Path(__file__).resolve().parents[1]
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 EXPERIMENTS_DIR = ROOT / "experiments"
+
+sys.path.insert(0, str(ROOT / "src"))
+from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 JOURNAL_DISCOVERY_LIVE_STATUSES = {"pending", "claimed", "in_progress", "blocked", "pending_main_thread"}
 JOURNAL_DISCOVERY_COOLDOWN_HOURS = 6
 
@@ -46,7 +49,7 @@ OPEN_QUESTION_RE = re.compile(
 
 
 def _warn_backlog(message: str) -> None:
-    print(f"[research_backlog] WARN {message}", file=sys.stderr)
+    _diag_warn("research_backlog", message)
 
 
 def find_next_k_id(start: int = 1300, *, existing_task_ids: set | None = None) -> int:

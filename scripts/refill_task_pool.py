@@ -42,13 +42,20 @@ ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 CANDIDATES = ROOT / "storage" / "publication_candidates.json"
 
+sys.path.insert(0, str(ROOT / "src"))
+from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+
 
 def _warn_refill(message: str, exc: Exception | None = None) -> None:
     """Print non-fatal refill warnings without blocking task-pool refill."""
     if exc is None:
-        print(f"[refill_task_pool] WARN {message}")
+        _diag_warn("refill_task_pool", message)
     else:
-        print(f"[refill_task_pool] WARN {message}: {type(exc).__name__}: {exc}")
+        _diag_warn(
+            "refill_task_pool",
+            message,
+            err=f"{type(exc).__name__}: {exc}",
+        )
 
 
 def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list, list]:

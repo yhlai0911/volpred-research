@@ -75,7 +75,7 @@ except Exception as e:
 
 ## 共用 helper
 
-統一使用 `src/volpred/ops/diagnostics.py`（**待建**，governance_error_log_review_200 followup task）的 `warn(tag, msg, **ctx)`：
+統一使用 `src/volpred/ops/diagnostics.py`（**已建立**，2026-06-23 `platform_ops_build_diagnostics_module`）的 `warn(tag, msg, **ctx)`：
 - 自動 timestamp + level + tag prefix
 - 寫 stderr + 可選 `storage/logs/diagnostics/<tag>.jsonl` 持久化
 - 各 script 不要自己寫 `_warn_<module>()` helper（散落 30+ 處，格式不一）
