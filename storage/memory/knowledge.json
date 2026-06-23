@@ -35993,5 +35993,17 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-06-24T00:20:33.475113"
+  },
+  {
+    "item_id": "b07345db",
+    "category": "experiment",
+    "content": "research_ex_ante_model_risk_band MODEL_RISK_BAND_MODEST: ETF-sector low-risk/min-vol construction using yfinance adjusted-close XLB/XLE/XLF/XLI/XLK/XLP/XLU/XLV/XLY/IYR, OOS 2012-01-03 to 2026-05-29 (3,622 daily returns; 173 monthly holding periods). 72 specs vary covariance estimator (sample/Ledoit-Wolf/diagonal/EWMA), lookback 126/252/504, cap 20/35/50%, long-only vs limited-short, and cost grid. At 10bps, annualized vol band is 13.17%-14.89% (range 1.72pp), Sharpe 0.745-0.886, MDD -35.98% to -28.52%, tracking error vs SPY 5.56%-9.62%, annual turnover 0.32x-5.39x. 72/72 specs pass Harvey lower-realized-variance DM/HAC vs sector equal weight and SPY, but 0/72 pass higher-return Harvey tests. Interpretation: low-risk construction robustly lowers variance in this ETF proxy, but implementation parameter model-risk is modest and does not support return-alpha claims; stock-level large-cap constituent tests remain a separate question.",
+    "evidence": [
+      "experiments/research_ex_ante_model_risk_band/research_ex_ante_model_risk_band_results.json",
+      "experiments/research_ex_ante_model_risk_band/README.md",
+      "experiments/research_ex_ante_model_risk_band/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-24T01:20:56.737011"
   }
 ]
