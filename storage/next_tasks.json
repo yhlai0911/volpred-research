@@ -36132,7 +36132,7 @@
     "title": "Paper review (Codex 24h-rule): 一個在 5 天很有用的訊號，搬到明天反而完全失靈",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_d28231b6 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_d28231b6",
@@ -36140,7 +36140,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-23T11:08:10+00:00"
+    "created_at": "2026-06-23T11:08:10+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T11:27:19.003694+00:00",
+    "claim_session_id": "0853965af187",
+    "started_at": "2026-06-23T11:27:22.640117+00:00",
+    "completed_at": "2026-06-23T11:29:06.448604+00:00",
+    "result": "PASS: mile_d28231b6 claims match K976/K975 artifacts. K976 slope k=0.00, OOS n=1824, MF2-2Factor QLIKE -8.3754 vs GJR -8.2741 (~1.22% lower by abs baseline), MF2-2Factor vs MF2-VIX DM p=0.1557 NS, slope form vs MF2-VIX p=1.0. K975 5d RVol incremental OOS R2 +0.0219 and DM p=0.00023 support the slower-horizon background. PASS: K976 tau/slope/EMA use shift(1) and OOS forecast uses prior-day returns/tau; no same-day/lookahead found. Caveat: K976 JSON conclusions.improvement_over_gjr_pct has sign-convention bug due negative QLIKE denominator, but article/README use the semantically correct +1.22%."
   },
   {
     "id": "paper_review_mile_d3993bd1",
