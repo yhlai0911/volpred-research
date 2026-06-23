@@ -11,7 +11,8 @@
     "hist_p75": 0.4854,
     "hist_p90": 0.5749,
     "last_21d_avg": 0.5723,
-    "percentile_of_recent": 78.5
+    "percentile_of_recent": 78.5,
+    "percentile_label": "2020-2026 retrospective percentile"
   },
   "move_vix_ratio": {
     "most_recent": 3.99,
@@ -19,12 +20,16 @@
     "hist_p10": 1.98,
     "hist_p75": 6.1,
     "hist_p90": 7.62,
-    "percentile_of_recent": 38.0
+    "percentile_of_recent": 38.0,
+    "percentile_label": "2020-2026 retrospective percentile"
   },
   "resonance_both_z_gt1": {
-    "full_sample_rate": 0.0806,
+    "full_sample_rate": 0.0954,
     "last_90d_rate": 0.0556,
-    "last_90d_episodes": 5
+    "last_90d_episodes": 5,
+    "valid_z_obs": 1362,
+    "invalid_z_obs_dropped": 251,
+    "definition": "Both MOVE and VIX are above their valid 252-trading-day rolling z-score +1 threshold; invalid rolling windows are excluded before comparison."
   },
   "current_levels": {
     "MOVE": 65.4,
@@ -35,37 +40,43 @@
       "period": "2020 (COVID)",
       "avg_corr": 0.332,
       "avg_MOVE_VIX_ratio": 2.2,
-      "resonance_rate": 0.0
+      "resonance_rate": null,
+      "resonance_valid_n": 0
     },
     {
       "period": "2022 (rate hike cycle)",
       "avg_corr": 0.391,
       "avg_MOVE_VIX_ratio": 4.77,
-      "resonance_rate": 0.349
+      "resonance_rate": 0.349,
+      "resonance_valid_n": 249
     },
     {
       "period": "2023 (plateau)",
       "avg_corr": 0.407,
       "avg_MOVE_VIX_ratio": 7.36,
-      "resonance_rate": 0.0
+      "resonance_rate": 0.0,
+      "resonance_valid_n": 249
     },
     {
       "period": "2024",
       "avg_corr": 0.36,
       "avg_MOVE_VIX_ratio": 6.82,
-      "resonance_rate": 0.072
+      "resonance_rate": 0.072,
+      "resonance_valid_n": 250
     },
     {
       "period": "2025",
       "avg_corr": 0.476,
       "avg_MOVE_VIX_ratio": 4.77,
-      "resonance_rate": 0.056
+      "resonance_rate": 0.056,
+      "resonance_valid_n": 248
     },
     {
       "period": "2026 recent 90d",
       "avg_corr": 0.604,
       "avg_MOVE_VIX_ratio": 3.81,
-      "resonance_rate": 0.056
+      "resonance_rate": 0.056,
+      "resonance_valid_n": 90
     }
   ]
 }

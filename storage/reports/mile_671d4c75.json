@@ -1,0 +1,75 @@
+{
+  "id": "mile_671d4c75",
+  "title": "債市和股市同時在怕，但怕的不是同一件事",
+  "description": "六月初，一位朋友傳來截圖：MOVE 指數 65，VIX 16。他問：「美股這麼低，美債那邊到底在緊張什麼？」 這個問題比問哪個指數高低更有趣。MOVE 量的是美國國債選擇權的隱含波動率，VIX 量的是 S&P 500。兩個都是「市場有多緊張」的讀數，但緊張的來源不一樣。一個是利率市場在猜 Fed 的下一步，一個是股市投資人在對沖持倉風險。 這兩者的同步程度，在過去半年悄悄上升了。 --- 數字先說話 VolPred 從 2020 年 1 月到 2026 年 6 月，整理了 1,613 個交易日的 MOVE 和 VIX 日資料（來源：Yahoo Finance，代碼 ^MOVE、^VIX）。計算…",
+  "content": "六月初，一位朋友傳來截圖：MOVE 指數 65，VIX 16。他問：「美股這麼低，美債那邊到底在緊張什麼？」\n\n這個問題比問哪個指數高低更有趣。MOVE 量的是美國國債選擇權的隱含波動率，VIX 量的是 S&P 500。兩個都是「市場有多緊張」的讀數，但緊張的來源不一樣。一個是利率市場在猜 Fed 的下一步，一個是股市投資人在對沖持倉風險。\n\n這兩者的同步程度，在過去半年悄悄上升了。\n\n---\n\n## 數字先說話\n\nVolPred 從 2020 年 1 月到 2026 年 6 月，整理了 1,613 個交易日的 MOVE 和 VIX 日資料（來源：Yahoo Finance，代碼 ^MOVE、^VIX）。計算方式是兩者日對數漲跌幅的 60 日滾動 Pearson 相關係數。\n\n**最新讀數：0.50。**\n\n這個數字放在歷史脈絡才有意義。2020 到 2026 年間，這個相關係數的歷史中位數是 0.41，第 75 百分位是 0.49，第 90 百分位是 0.57。0.50 落在 2020–2026 回看分布第 78.5 百分位。\n\n白話說：目前 MOVE 和 VIX 日內漲跌方向的同步程度，比過去六年裡將近八成的時間點還要高。\n\n再看最近 21 個交易日（約一個月）的平均滾動相關係數：0.572。已經非常接近歷史 90 百分位門檻。\n\n| 時期 | 平均相關係數 | 平均 MOVE/VIX 比值 | 共振日頻率 |\n|---|---|---|---|\n| 2020（COVID 衝擊） | 0.33 | 2.2 | 不可估（252日窗口不足） |\n| 2022（升息循環） | 0.39 | 4.8 | 34.9% |\n| 2023（高原期） | 0.41 | 7.4 | 0% |\n| 2024 | 0.36 | 6.8 | 7.2% |\n| 2025 | 0.48 | 4.8 | 5.6% |\n| 2026 近 90 日 | **0.60** | **3.8** | 5.6% |\n\n資料來源：Yahoo Finance ^MOVE、^VIX；計算期間 2020-01-02 至 2026-06-18。\n\n2026 年近 90 日的平均相關 0.60，是表格裡最高的一格，甚至高過 2022 年 Fed 單次升息 75 基點那段時期。\n\n---\n\n## 但有一個地方不一樣\n\n![MOVE × VIX 日對數漲跌 60 日滾動相關係數（2020-2026）](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_rolling_corr.png)\n\n相關係數升高，直覺上應該搭配「兩個都在漲」的恐慌讀數。但實際上，MOVE/VIX 比值目前是 3.99，落在 2020–2026 回看分布第 38 百分位（低於中位數 4.62，遠低於 2022 年高點和 2023 年那段高原期）。\n\n![MOVE 與 VIX 水準走勢及 MOVE/VIX 比值（2020-2026）](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/fig_regime.png)\n\n這個組合的意思是：**日內漲跌同步了，但絕對水準差異懸殊**。MOVE 65 對應的是美債市場仍有明顯的利率不確定性（歷史正常帶大概 60–100），VIX 16 對應的是股市投資人普遍認為短期風險可控。\n\n用一個比喻：兩人同時轉頭往同一個方向看，但一個人眉頭皺著，另一個人還在喝咖啡。\n\n「共振日」的定義更嚴格：MOVE 和 VIX 雙雙站上各自過去一年 z-score 1 倍標準差以上。這種程度的同步，在有效 252 日 z-score 視窗裡占 9.5% 的交易日；近 90 日只有 5 天（約 5.6%），低於 2022 年那段每三天就出現一次的高頻狀態。2020 年因樣本開頭尚未累積足夠 252 日 rolling window，不再把它記成 0%。\n\n---\n\n## 為什麼現在相關係數在爬升？\n\n三個觀察方向，不一定能給完整解答，但至少說得清楚發生了什麼。\n\n第一，Fed 政策不確定性同時影響兩個市場。當市場在猜「升息/降息/暫停」時，利率預期的擺動會同時推高 MOVE（直接），也透過折現率路徑影響股市情緒（間接推高 VIX）。政策霧霾愈濃，這條傳導路徑就愈活躍。\n\n第二，目前 VIX 16 其實不算低，2024 年有好幾段 VIX 在 12–13 的時段，那時候的滾動相關係數反而更低（2024 年全年均值 0.36）。現在 VIX 的絕對位置略高於那個平靜期，市場沒有完全睡著。\n\n第三，當長端美債波動（MOVE）居高不下，而股市（VIX）卻裝睡，兩者便在每日同向震盪的同時，拉開了絕對數值的差距。「相關係數在爬，比值在跌」，正是目前讀到的組合。\n\n---\n\n## 從波動率管理角度看\n\n需要說清楚的是：本文量化的是 MOVE 與 VIX 日內漲跌幅的相關，不是股票與債券資產報酬的相關。兩者方向一致，但不完全等號。\n\n不過，間接影響有其脈絡。傳統 60/40 組合防禦性的基礎，是股債在壓力時期各自往不同方向走。2022 年那次升息週期打破了這個基礎，股票和債券同時下跌。\n\n現在不是 2022 年，但日內漲跌的方向同步性已悄悄回到接近那個時期的水準。完全共振（雙 z-score 突破）還沒到，同向共鳴已經有了。如果你的混合持倉最近防禦力不如以往，這個方向的漂移值得追蹤。\n\n---\n\n## 什麼情況會讓這個同步性繼續升高？\n\n有幾個路徑值得追蹤：\n\n一，Fed 在接下來幾次 FOMC 表態比市場預期更鷹派，或通膨資料連續超預期，長端美債殖利率上行，MOVE 先走，VIX 跟著反應。\n\n二，美股估值壓縮引發較大回調，VIX 拉升，MOVE 也被風險情緒連帶推高。\n\n這兩條路徑的共同點是：Fed 政策預期和股市情緒同時被衝擊。目前的狀況是，一個先走，另一個還在觀望。\n\n---\n\n**數據說明**：本文所有計算基於 Yahoo Finance ^MOVE 及 ^VIX 日收盤資料，樣本期間 2020-01-02 至 2026-06-18，共 1,613 個交易日。對數漲跌幅計算後取 60 日滾動 Pearson 相關係數。共振指標定義為兩者各自過去 252 日 z-score 同時高於 1.0 的交易日；rolling z-score 尚未形成的前 251 筆觀測已排除，不當作非共振日。百分位均為 2020–2026 回看分布。完整計算程式碼存放於本站實驗庫 `experiments/article_2026_06_22_move_vix_resonance/`。\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "article_2026_06_22_move_vix_resonance"
+    ],
+    "cluster_waiver": "MOVE-VIX cross-asset resonance: primary topic is MOVE bond vol not VIX alone; cross-asset rolling correlation regime analysis unique angle not in recent VIX cluster entries",
+    "topic_cluster": "vix",
+    "topic_cluster_30d": {
+      "count": 96,
+      "cap": 15,
+      "ratio": 0.2883,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "FOMC",
+        "MOVE_INDEX",
+        "US_BOND",
+        "US_EQUITY",
+        "VIX"
+      ],
+      "conclusion_class": "systemic_crowding",
+      "mechanisms": [
+        "macro_policy"
+      ],
+      "time_horizon": "intraday"
+    },
+    "content_type": "general_article"
+  },
+  "tags": [
+    "一般讀者",
+    "MOVE",
+    "VIX",
+    "美債",
+    "跨資產",
+    "波動率",
+    "Fed",
+    "通膨"
+  ],
+  "related_articles": [],
+  "created_at": "2026-06-22T12:55:05.904302+00:00",
+  "published_at": "2026-06-22T12:55:05.904302+00:00",
+  "status": "published",
+  "verified_live_at": "2026-06-22T12:55:18.319148+00:00",
+  "errata": {
+    "update_at": "2026-06-23T02:08:30.666574+00:00",
+    "update_action": "codex_review_fix",
+    "update_summary": "修正 MOVE/VIX 共振指標的 252 日 rolling z-score invalid-window bug；2020 共振率改為不可估，全文共振率改為有效視窗 9.5%，百分位標成 2020-2026 回看分布。",
+    "update_history": [
+      {
+        "at": "2026-06-23T02:08:30.666574+00:00",
+        "action": "codex_review_fix",
+        "summary": "修正 MOVE/VIX 共振指標的 252 日 rolling z-score invalid-window bug；2020 共振率改為不可估，全文共振率改為有效視窗 9.5%，百分位標成 2020-2026 回看分布。",
+        "old_content_chars": 2693,
+        "new_content_chars": 2862,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "preserved (--no-update-description)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-23T02:08:30.666574+00:00"
+}

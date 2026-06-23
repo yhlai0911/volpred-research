@@ -65,7 +65,8 @@ print(f"  P10/P75/P90: {hist_ratio_p10:.2f} / {hist_ratio_p75:.2f} / {hist_ratio
 # Both z-score > 1 on same day = resonance episode
 move_z = (df["MOVE"] - df["MOVE"].rolling(252).mean()) / df["MOVE"].rolling(252).std()
 vix_z  = (df["VIX"]  - df["VIX"].rolling(252).mean()) / df["VIX"].rolling(252).std()
-resonance = ((move_z > 1.0) & (vix_z > 1.0)).dropna()
+valid_z = move_z.notna() & vix_z.notna()
+resonance = ((move_z > 1.0) & (vix_z > 1.0)).where(valid_z).dropna().astype(bool)
 resonance_rate_total = resonance.mean()
 
 # Last 90 days
@@ -98,9 +99,17 @@ print(f"\nCurrent levels: MOVE={move_latest:.1f}, VIX={vix_latest:.1f}")
 def period_stats(df_sub, label):
     c = df_sub["MOVE_chg"].corr(df_sub["VIX_chg"])
     r = (df_sub["MOVE"] / df_sub["VIX"]).mean()
-    res_r = ((move_z.loc[df_sub.index] > 1) & (vix_z.loc[df_sub.index] > 1)).mean()
+    valid_idx = df_sub.index[valid_z.reindex(df_sub.index).fillna(False)]
+    if len(valid_idx) == 0:
+        res_r = np.nan
+        res_n = 0
+    else:
+        res_series = ((move_z.loc[valid_idx] > 1) & (vix_z.loc[valid_idx] > 1))
+        res_r = res_series.mean()
+        res_n = int(res_series.count())
     return {"period": label, "avg_corr": round(c, 3), "avg_MOVE_VIX_ratio": round(r, 2),
-            "resonance_rate": round(float(res_r), 3)}
+            "resonance_rate": None if pd.isna(res_r) else round(float(res_r), 3),
+            "resonance_valid_n": res_n}
 
 stats_2020 = period_stats(df_chg.loc["2020":"2020"], "2020 (COVID)")
 stats_2022 = period_stats(df_chg.loc["2022":"2022"], "2022 (rate hike cycle)")
@@ -186,7 +195,8 @@ results = {
         "hist_p75": round(float(hist_p75), 4),
         "hist_p90": round(float(hist_p90), 4),
         "last_21d_avg": round(float(last_21_corr), 4),
-        "percentile_of_recent": round(float((roll_corr.dropna() <= recent_corr).mean() * 100), 1)
+        "percentile_of_recent": round(float((roll_corr.dropna() <= recent_corr).mean() * 100), 1),
+        "percentile_label": "2020-2026 retrospective percentile"
     },
     "move_vix_ratio": {
         "most_recent": round(float(recent_ratio), 2),
@@ -194,12 +204,16 @@ results = {
         "hist_p10": round(float(hist_ratio_p10), 2),
         "hist_p75": round(float(hist_ratio_p75), 2),
         "hist_p90": round(float(hist_ratio_p90), 2),
-        "percentile_of_recent": round(float((df["ratio"] <= recent_ratio).mean() * 100), 1)
+        "percentile_of_recent": round(float((df["ratio"] <= recent_ratio).mean() * 100), 1),
+        "percentile_label": "2020-2026 retrospective percentile"
     },
     "resonance_both_z_gt1": {
         "full_sample_rate": round(float(resonance_rate_total), 4),
         "last_90d_rate": round(float(resonance_rate_recent), 4),
-        "last_90d_episodes": int(resonance_episodes_recent)
+        "last_90d_episodes": int(resonance_episodes_recent),
+        "valid_z_obs": int(resonance.count()),
+        "invalid_z_obs_dropped": int((~valid_z).sum()),
+        "definition": "Both MOVE and VIX are above their valid 252-trading-day rolling z-score +1 threshold; invalid rolling windows are excluded before comparison."
     },
     "current_levels": {
         "MOVE": round(float(move_latest), 1),

@@ -3201,6 +3201,16 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 
 **�����**��(a) hook ������Tests passed���summary ��� pipe ���端 exit code��**�����信** ��� ��������� pytest ���實輸�����寫����� Read�����(b) 測試 dedup ������������**������** gate��publish_milestone + _append_to_feed ���層������������測��層���(c) 任����� publish ���測試���� conftest ������ guard������� test���prod 洩���������������
 
+## 2026-06-23 — MOVE/VIX 共振指標把 invalid rolling z-score 當成非共振日
+
+**症狀**：`mile_671d4c75` 文章的 MOVE/VIX 共振表把 2020 年列為 0%，但共振定義使用 252 日 rolling z-score；樣本從 2020-01-02 起算，2020 分段沒有任何有效 252 日 z-score 視窗，不能解讀為 0% 共振。
+
+**根因**：`experiments/article_2026_06_22_move_vix_resonance/compute_evidence.py` 原本直接計算 `(move_z > 1.0) & (vix_z > 1.0)`。在 pandas 中 `NaN > 1.0` 會回 `False`，後續 `.dropna()` 已經無效，導致前 251 筆 invalid rolling window 被安靜納入 denominator，壓低全樣本共振率並把 2020 誤標為 0%。
+
+**修法**：先建立 `valid_z = move_z.notna() & vix_z.notna()`，再用 `.where(valid_z).dropna().astype(bool)` 產生共振序列；period table 也只在有效 z-score index 上計算。重跑後 full-sample resonance rate 由 8.06% 改為 9.54%，2020 cell 改為 `null / resonance_valid_n=0`。文章 `mile_671d4c75` 透過 `publish_draft.py --update` 回溯更正，並用單篇 `sync_article()` 同步 Supabase；遠端讀回確認 published row 已包含「不可估（252日窗口不足）」與「有效 252 日 z-score 視窗裡占 9.5%」。
+
+**防再發**：rolling-window threshold indicator 不可直接對含 NaN 的 series 做 boolean comparison 後取 mean；必須先 mask valid estimation window，並在 results JSON 寫出 `valid_n` / `invalid_dropped`，讓 table cell 可分辨「0%」與「不可估」。
+
 ## 2026-06-23 09:54 **3-STRIKE TRIGGER** gmail-poll 反覆 timeout 根治（boss「立刻馬上right now」）
 
 **Incident**：gmail-poll 04:03–08:48 **每一班 exit=142（perl alarm timeout / Alarm clock）連續 5 小時**，state 檔 stale 7.5h，觸發 02:00 WARN + 06:00 CRITICAL alert。老闆 4 封回信全要求立即修（email-11907 P1「立刻馬上right now」/ 11898「立即處理」/ 11893「立即改善」）。歷史共 78× exit=142、50× Alarm clock。先前 fix（alarm 60→180s）是 band-aid，timeout 仍復發 → 達 3-strike。
@@ -3212,3 +3222,15 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **驗證**：header-first dry-run + 真實 run 皆正確識別 4 封 boss reply（Message-ID dedup）、16 封個人信 filter、9s 完成、state 更新。wrapper（`~/.volpred/bin/cron_gmail_poll.sh` line 23）直呼 repo 原檔 → 編輯即 live，下班 cron 10:03 生效。alarm 180s 保留作 safety net。
 
 **教訓**：serial 全文抓「未過濾的混合收件匣」是反模式 — 永遠先抓 header filter，body 只抓需要的。state 存了 high-water mark 就要拿來 filter，別每次全量重掃。
+
+## 2026-06-23 10:16 釋出層鎖死全池 — release_dedup_skipped 21天TTL 凍結 46/46 draft（boss「可以發文了嗎」）
+
+**症狀**：今日 0 篇發佈（target 6/day），最新發佈停在 6/23 01:40。release-pool-by-settings 每次 fire 都「Released 0」，即使手動 `release-pool --pub-id <fresh draft> --include-drafts` 也 released 0，且 JSON 的 dedup_skipped/narrative_filtered/audit_skipped **全空**（不是被任何 live gate 擋）。
+
+**根因（老闆一直講的「鬼打牆根因在釋出端非研究端」實錘）**：`release_pool_articles` candidate filter（content.py:653）有 `not _release_dedup_flag_active(item)`，在 pub_id filter 之前就靜默排除。`_release_dedup_flag_active` 把 `details.release_dedup_skipped` flag 綁 `_RELEASE_DEDUP_WINDOW_DAYS=21` → 任一次釋出 run 的 transient skip（如一次性 cluster pressure）就把該 draft 鎖出釋出池 **21 天**；池子持續 churn 下，**每篇 draft 遲早都被標一次 → 全池凍結**。實測 46/46 draft flagged、0 eligible → 釋出 0 → 0 文章。
+
+**修法（flag cooldown 與 dedup window 解耦）**：新增 `_RELEASE_DEDUP_FLAG_TTL_DAYS=2`，`_release_dedup_flag_active` 改用它（非 21 天 window）。flag 只當「短 anti-thrash cooldown」（2 天內不重評），**正確性靠每次 run 的 live dedup gate**（narrative_cluster_filtered + Jaccard near-dup，對 current published 重查）—— flag 純粹是 perf 優化，短 cooldown 即足且安全。
+
+**驗證**：修法後 44/46 draft 解鎖（剩 2 在 2 天 cooldown）。release-pool-by-settings 立即放出 2 篇 fresh spy-cluster（mile_0a7041f4 隔夜波動 36.8% / mile_d3993bd1 LSTM 反而更差），HTTP 200 + Supabase published 上線。live cluster gate 仍正常擋 vix（blocked_clusters=['vix']）→ 防 dup 未失效。
+
+**教訓**：anti-thrash「跳過記憶」flag 的 TTL 必須遠短於 dedup window 本身，否則單次 skip = 長期凍結，池子會 monotonic 鎖死。正確性留給每次 run 的 live gate，flag 只做短期 perf 優化。

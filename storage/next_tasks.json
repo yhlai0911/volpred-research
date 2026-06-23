@@ -35531,7 +35531,7 @@
     "title": "Fix z-score validity bug + 2020 cell in article_2026_06_22_move_vix_resonance",
     "description": "Per Codex review (CONDITIONAL_PASS, K_paper_review_mile_671d4c75): compute_evidence.py:66-68 has NaN>1 silent-False bug — co-resonance series fails to drop first ~251 obs without valid 252d z-score, biases 2020 0% resonance downward. Fix: mask invalid z-score windows BEFORE the comparison (move_z.dropna() / use .where()). Rerun compute_evidence.py, update results.json + table in article mile_671d4c75, label '2020-2026 retrospective percentile' wording. Light task (~15min, 1 file edit + rerun + article patch).",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "codex_review_followup",
     "article_id": "mile_671d4c75",
@@ -35542,6 +35542,12 @@
       "MOVE",
       "VIX"
     ],
-    "created_at": "2026-06-23T01:56:00+08:00"
+    "created_at": "2026-06-23T01:56:00+08:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T02:05:45.084570+00:00",
+    "claim_session_id": "76e694a9dcd8",
+    "started_at": "2026-06-23T02:05:49.377165+00:00",
+    "completed_at": "2026-06-23T02:14:45.095145+00:00",
+    "result": "Fixed MOVE/VIX z-score validity bug: invalid 252d rolling windows are masked before resonance comparison; reran evidence; 2020 cell is now null/valid_n=0 and full-sample resonance is 9.54%. Updated mile_671d4c75 via publish_draft errata, single-article sync_article read-back confirmed published row contains corrected text."
   }
 ]

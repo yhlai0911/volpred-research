@@ -241,6 +241,17 @@ def _article_audience(item: dict) -> str:
 # of flooding the live feed. Daily/event/member_qa audiences are exempt (their
 # repetition is by design — e.g. the templated daily VIX bulletin).
 _RELEASE_DEDUP_WINDOW_DAYS = 21
+# 2026-06-23 (boss「可以發文了嗎」throughput incident): the per-draft
+# `release_dedup_skipped` flag is only an anti-thrash COOLDOWN — it stops the
+# release pool from re-evaluating the same near-dup draft on every single run.
+# It must NOT be tied to the full 21-day dedup WINDOW: a single transient skip
+# (e.g. one-off cluster pressure) then locks that draft out of release for 21
+# days, and over time EVERY draft accumulates the flag → the whole pool freezes
+# (observed: 46/46 drafts flagged, 0 eligible, 0 articles/day). Correctness is
+# already guaranteed by the LIVE dedup gates (narrative_cluster_filtered +
+# Jaccard near-dup) re-checked against current published content on every run;
+# the flag is pure optimization, so a short cooldown is sufficient and safe.
+_RELEASE_DEDUP_FLAG_TTL_DAYS = 2
 _RELEASE_DEDUP_JACCARD = 0.45
 _RELEASE_DEDUP_AUDIENCES = {"general", "research"}
 _RELEASE_LAST_N_CLUSTER_WINDOW = 3
@@ -600,7 +611,10 @@ def _release_dedup_flag_active(item: dict, *, now: datetime) -> bool:
         return False  # legacy flag w/o timestamp -> re-evaluate
     try:
         flagged_dt = datetime.fromisoformat(flagged_at)
-        return (now - flagged_dt) < timedelta(days=_RELEASE_DEDUP_WINDOW_DAYS)
+        # Short anti-thrash cooldown, NOT the full dedup window — see
+        # _RELEASE_DEDUP_FLAG_TTL_DAYS. After the cooldown the draft is
+        # re-evaluated fresh by the live dedup gates each release run.
+        return (now - flagged_dt) < timedelta(days=_RELEASE_DEDUP_FLAG_TTL_DAYS)
     except (ValueError, TypeError):
         return False
 
