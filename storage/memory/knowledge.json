@@ -36055,5 +36055,18 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-06-24T03:46:27.783899"
+  },
+  {
+    "item_id": "0ac52cd3",
+    "category": "experiment",
+    "content": "Experiment research_cornish_fisher_regime_tail_adjustment_sector_rot found NULL_CF_HMM_ROTATION_NO_EDGE. Using yfinance adjusted close for 11 sector ETFs plus SPY from 2018-06-19 to 2026-06-23, the OOS strategy sample runs 2021-07-01 to 2026-06-23 with 1,249 trading days and 61 monthly rebalances. At each rebalance the script fits a trailing 756-day 2-state Gaussian HMM on SPY returns, labels the higher-variance state turbulent, computes sector Cornish-Fisher 5% VaR plus empirical ES tail scores from the matching regime window, applies inverse-risk weights with a turbulent XLP/XLU boost, then shifts weights one trading day and subtracts 10bps turnover cost. Net performance: CF-HMM Sharpe 0.718 and MDD -19.0%, sector equal-weight Sharpe 0.731 and MDD -19.2%, sector EW volatility-targeted baseline Sharpe 0.782 and MDD -16.2%. Strategy DM return-loss tests do not support CF-HMM over sector EW (t=+1.04) or EW-VT (t=+0.05). Downside-loss improves versus raw EW (t=-3.52) but not versus EW-VT (t=+1.19). Conclusion: the CF-HMM signal mostly becomes a persistent XLP/XLU defensive tilt; simple volatility targeting absorbs the risk benefit, so this is not an active sector-rotation edge.",
+    "evidence": [
+      "experiments/research_cornish_fisher_regime_tail_adjustment_sector_rot/research_cornish_fisher_regime_tail_adjustment_sector_rot_results.json",
+      "experiments/research_cornish_fisher_regime_tail_adjustment_sector_rot/README.md",
+      "experiments/research_cornish_fisher_regime_tail_adjustment_sector_rot/codex_review.md",
+      "research_program.md"
+    ],
+    "confidence": 0.76,
+    "created_at": "2026-06-24T04:54:57.115381"
   }
 ]

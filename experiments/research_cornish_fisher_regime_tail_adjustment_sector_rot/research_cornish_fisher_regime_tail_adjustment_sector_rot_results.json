@@ -1,0 +1,187 @@
+{
+  "experiment_id": "research_cornish_fisher_regime_tail_adjustment_sector_rot",
+  "created_at_utc": "2026-06-23T20:53:12.466660+00:00",
+  "seed": 20260624,
+  "verdict": "NULL_CF_HMM_ROTATION_NO_EDGE",
+  "data": {
+    "price_source": "yfinance adjusted close",
+    "tickers": [
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY",
+      "SPY"
+    ],
+    "sector_tickers": [
+      "XLB",
+      "XLC",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLRE",
+      "XLU",
+      "XLV",
+      "XLY"
+    ],
+    "price_start": "2018-06-19",
+    "price_end": "2026-06-23",
+    "return_start": "2018-06-20",
+    "return_end": "2026-06-23",
+    "oos_start": "2021-07-01",
+    "oos_end": "2026-06-23",
+    "oos_days": 1249,
+    "rebalance_count": 61
+  },
+  "method": {
+    "hmm": "2-state GaussianHMM fit on trailing SPY daily returns at each month-end rebalance",
+    "turbulent_state": "state with higher fitted return variance",
+    "cf_tail_score": "0.65 * Cornish-Fisher 5% VaR loss + 0.35 * empirical ES loss below the CF quantile",
+    "lookahead_guard": "rebalance weights are computed at month-end close and shifted one trading day before return application",
+    "transaction_cost": 0.001,
+    "vt_baseline": "sector equal weight scaled monthly to 12% annualized vol using trailing 63 daily returns",
+    "bootstrap": "1000 circular block bootstrap samples, block length 21"
+  },
+  "performance": [
+    {
+      "strategy": "cf_hmm_rotation",
+      "n_days": 1249,
+      "ann_return": 0.10120642531648194,
+      "ann_vol": 0.14086884646659364,
+      "sharpe": 0.7184443392207556,
+      "sortino": 0.9937314398012282,
+      "max_drawdown": -0.19003850120839838,
+      "calmar": 0.5325574800524122,
+      "cumulative_return": 0.6125607327926477,
+      "mean_daily_turnover": 0.005191301955773542,
+      "total_transaction_cost": 0.006483936142761154
+    },
+    {
+      "strategy": "sector_ew",
+      "n_days": 1249,
+      "ann_return": 0.10835754931847097,
+      "ann_vol": 0.14821214765236904,
+      "sharpe": 0.7310976261717976,
+      "sortino": 1.0010091126918406,
+      "max_drawdown": -0.19186659581711796,
+      "calmar": 0.564754635151574,
+      "cumulative_return": 0.6651336838791271,
+      "mean_daily_turnover": 0.0008006405124099279,
+      "total_transaction_cost": 0.001
+    },
+    {
+      "strategy": "sector_ew_vt",
+      "n_days": 1249,
+      "ann_return": 0.10352126190932909,
+      "ann_vol": 0.13231640558780045,
+      "sharpe": 0.7823766179971997,
+      "sortino": 1.0714598463688747,
+      "max_drawdown": -0.1616728800714069,
+      "calmar": 0.6403130931026052,
+      "cumulative_return": 0.6294315256605136,
+      "mean_daily_turnover": 0.006140443607459244,
+      "total_transaction_cost": 0.007669414065716597
+    }
+  ],
+  "dm_tests": [
+    {
+      "model": "cf_hmm_rotation",
+      "baseline": "sector_ew",
+      "loss_fn": "negative_return",
+      "n_obs": 1249,
+      "dm_t": 1.0430003278690831,
+      "p_value": 0.29715013388336264,
+      "harvey_pass": false,
+      "model_better": false
+    },
+    {
+      "model": "cf_hmm_rotation",
+      "baseline": "sector_ew",
+      "loss_fn": "downside",
+      "n_obs": 1249,
+      "dm_t": -3.519141971240763,
+      "p_value": 0.00044851876773210897,
+      "harvey_pass": true,
+      "model_better": true
+    },
+    {
+      "model": "cf_hmm_rotation",
+      "baseline": "sector_ew_vt",
+      "loss_fn": "negative_return",
+      "n_obs": 1249,
+      "dm_t": 0.047771871536215434,
+      "p_value": 0.961905697649712,
+      "harvey_pass": false,
+      "model_better": false
+    },
+    {
+      "model": "cf_hmm_rotation",
+      "baseline": "sector_ew_vt",
+      "loss_fn": "downside",
+      "n_obs": 1249,
+      "dm_t": 1.1889857177552632,
+      "p_value": 0.23467146561391306,
+      "harvey_pass": false,
+      "model_better": false
+    }
+  ],
+  "bootstrap_sharpe_diff": {
+    "cf_hmm_minus_sector_ew": {
+      "reps": 1000,
+      "block": 21,
+      "mean": -0.013209857917046314,
+      "ci_low": -0.11711346416567515,
+      "ci_high": 0.09504741739423317,
+      "p_gt_0": 0.402
+    },
+    "cf_hmm_minus_sector_ew_vt": {
+      "reps": 1000,
+      "block": 21,
+      "mean": -0.06145300879326062,
+      "ci_low": -0.3588945089570206,
+      "ci_high": 0.23804674928653077,
+      "p_gt_0": 0.361
+    }
+  },
+  "regime_summary": {
+    "turbulent_rebalance_share": 0.29508196721311475,
+    "mean_turbulent_state_prob": 0.8322499728098584,
+    "mean_calm_state_prob": 0.9408431237082512,
+    "top_lowest_tail_sector_counts": {
+      "XLP": 54,
+      "XLV": 6,
+      "XLF": 1
+    },
+    "top_highest_tail_sector_counts": {
+      "XLE": 53,
+      "XLK": 8
+    }
+  },
+  "literature_and_source_links": [
+    "https://medium.com/@tandel/options-volatility-analysis-what-cornish-fisher-tail-risk-reveals-about-the-february-2026-sector-e7a4a4fffd66",
+    "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1997178",
+    "https://www.mdpi.com/1911-8074/13/12/311",
+    "https://www.rdocumentation.org/packages/PerformanceAnalytics/versions/0.9.6/topics/VaR.CornishFisher"
+  ],
+  "files": {
+    "daily_returns": "data/daily_returns.csv",
+    "cf_hmm_weights": "data/cf_hmm_rotation_rebalance_weights.csv",
+    "ew_weights": "data/sector_ew_rebalance_weights.csv",
+    "vt_weights": "data/sector_ew_vt_rebalance_weights.csv",
+    "rebalance_diagnostics": "data/rebalance_diagnostics.csv",
+    "strategy_net_returns": "data/strategy_net_returns.csv",
+    "strategy_daily_details": "data/strategy_daily_details.csv",
+    "performance_summary": "data/performance_summary.csv",
+    "dm_tests": "data/dm_tests.csv",
+    "figure_cumulative": "figures/cumulative_returns.png",
+    "figure_regime_weights": "figures/regime_weights.png"
+  }
+}
