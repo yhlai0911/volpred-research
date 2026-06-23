@@ -962,7 +962,10 @@ def release_pool_articles(
         from volpred.ops.shared_lock import shared_state_lock
         with shared_state_lock("publisher_feed", storage_dir=storage_dir):
             dump_json(_feed_path(storage_dir), feed)
-        publisher._sync_feed_to_remote()
+        for released_entry in released:
+            article_id = released_entry.get("id")
+            if article_id:
+                publisher._sync_report_to_remote(str(article_id), released_entry)
 
         # 2026-05-19 post-publish live verify gate (Three-Strike fix):
         # release_pool was flipping status='published' without verifying the
@@ -997,7 +1000,15 @@ def release_pool_articles(
             # Re-persist feed with verify stamps under the same lock namespace.
             with shared_state_lock("publisher_feed", storage_dir=storage_dir):
                 dump_json(_feed_path(storage_dir), feed)
-            publisher._sync_feed_to_remote()
+            for released_entry in released:
+                article_id = released_entry.get("id")
+                if not article_id:
+                    continue
+                target = next(
+                    (i for i in feed if i.get("id") == article_id),
+                    released_entry,
+                )
+                publisher._sync_report_to_remote(str(article_id), target)
         except Exception as exc:
             print(f"  [release_pool] live_verify exception: {exc}")
 

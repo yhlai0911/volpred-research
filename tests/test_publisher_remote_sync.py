@@ -74,6 +74,101 @@ def test_sync_feed_to_remote_skips_large_incompressible_feed(
     assert calls == []
 
 
+def test_sync_report_to_remote_puts_single_article_payload(
+    tmp_path: Path,
+    monkeypatch,
+):
+    captured: dict[str, object] = {}
+
+    def fake_urlopen(req: urllib.request.Request, timeout: int):
+        captured["url"] = req.full_url
+        captured["data"] = req.data
+        captured["content_type"] = req.get_header("Content-type")
+        captured["timeout"] = timeout
+        return object()
+
+    monkeypatch.delenv("VOLPRED_NO_REMOTE_WRITE", raising=False)
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "https://mirror.example", raising=False)
+    monkeypatch.setattr("volpred.mirror_auth.ops_admin_headers", lambda: {"x-test-token": "ok"})
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+
+    ok = Publisher(storage_dir=str(tmp_path))._sync_report_to_remote(
+        "mile_single_sync",
+        {
+            "id": "mile_single_sync",
+            "title": "Single Article",
+            "content": "body",
+            "status": "published",
+            "tags": ["SPY"],
+        },
+    )
+
+    assert ok is True
+    assert captured["url"] == "https://mirror.example/api/sync/reports/mile_single_sync.json"
+    assert captured["content_type"] == "application/json"
+    payload = captured["data"]
+    assert isinstance(payload, bytes)
+    decoded = json.loads(payload.decode("utf-8"))
+    assert decoded["id"] == "mile_single_sync"
+    assert decoded["content"] == "body"
+
+
+def test_sync_report_to_remote_honors_no_remote_write_guard(
+    tmp_path: Path,
+    monkeypatch,
+):
+    calls: list[object] = []
+
+    def fake_urlopen(req: urllib.request.Request, timeout: int):
+        calls.append(req)
+        return object()
+
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", "1")
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "https://mirror.example", raising=False)
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+
+    ok = Publisher(storage_dir=str(tmp_path))._sync_report_to_remote(
+        "mile_blocked_sync",
+        {"id": "mile_blocked_sync", "title": "Blocked"},
+    )
+
+    assert ok is False
+    assert calls == []
+
+
+def test_append_to_feed_uses_single_report_sync(
+    tmp_path: Path,
+    monkeypatch,
+):
+    reports_dir = tmp_path / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "feed.json").write_text("[]", encoding="utf-8")
+    calls: list[tuple[str, str]] = []
+
+    def fail_full_feed_sync(self):
+        raise AssertionError("whole-feed sync should not run for single article append")
+
+    def fake_report_sync(self, pub_id: str, item: dict):
+        calls.append((pub_id, item["title"]))
+        return True
+
+    monkeypatch.setattr(Publisher, "_sync_feed_to_remote", fail_full_feed_sync)
+    monkeypatch.setattr(Publisher, "_sync_report_to_remote", fake_report_sync)
+
+    item = {
+        "id": "mile_append_single",
+        "title": "Append Single",
+        "content": "body",
+        "description": "excerpt",
+        "status": "published",
+        "published_at": "2026-06-23T00:00:00+00:00",
+        "created_at": "2026-06-23T00:00:00+00:00",
+    }
+
+    assert Publisher(storage_dir=str(tmp_path))._append_to_feed(item) == "mile_append_single"
+    assert calls == [("mile_append_single", "Append Single")]
+
+
 def test_article_notification_failure_warns_without_blocking(
     tmp_path: Path,
     monkeypatch,

@@ -1438,8 +1438,7 @@ class Publisher:
             return False
         with open(self._feed_file, 'w') as f:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
-        # Contentlayer pattern: no per-item mile_*.json to sync.
-        self._sync_feed_to_remote()
+        self._sync_report_to_remote(pub_id, target_item)
         sync_ok = False
         try:
             import sys
@@ -1600,7 +1599,8 @@ class Publisher:
                             f"_append_to_feed read-back failed: id={_record_id} "
                             f"not present in persisted feed (entries={len(verify_feed)})"
                         )
-                self._sync_feed_to_remote()
+                if _record_id:
+                    self._sync_report_to_remote(str(_record_id), item)
                 return str(item.get('id'))
         except Exception as exc:
             result_label = f"error: {type(exc).__name__}: {exc}"[:200]
@@ -1639,7 +1639,7 @@ class Publisher:
             with open(tmp_file) as f:
                 json.load(f)
             tmp_file.replace(self._feed_file)
-            self._sync_feed_to_remote()
+            self._sync_report_to_remote(pub_id, updated_item)
             return True
 
     def get_report(self, pub_id: str) -> dict | None:
@@ -1692,18 +1692,54 @@ class Publisher:
         result["article_ids"] = [str(article.get("id") or "") for article in articles]
         return result
 
-    def _sync_report_to_remote(self, pub_id: str, item: dict):
-        """Deprecated (2026-04-18 Contentlayer cutover): no-op.
+    def _sync_report_to_remote(self, pub_id: str, item: dict) -> bool:
+        """PUT a single article to the remote sync route.
 
-        Individual mile_*.json files are no longer canonical. feed.json
-        alone is PUT to the remote mirror via _sync_feed_to_remote().
-        Kept as a stub so existing callers (content.py release_pool) don't
-        break during transition — safe to delete once callers are updated.
+        feed.json remains the local canonical source, but whole-file mirror
+        PUTs are too large for the Zeabur/Next.js body limit. The frontend sync
+        route already accepts ``reports/<slug>.json`` and revalidates article
+        cache tags, so publisher mutations should use this small payload path.
         """
-        return
+        if not self.REMOTE_URL:
+            return False
+        if os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1":
+            return False
+        import time
+        import urllib.error
+        import urllib.parse
+        import urllib.request
+
+        from volpred.mirror_auth import ops_admin_headers
+
+        slug = urllib.parse.quote(str(pub_id), safe="")
+        url = f"{self.REMOTE_URL}/api/sync/reports/{slug}.json"
+        payload = json.dumps(item, ensure_ascii=False, default=str).encode("utf-8")
+        headers = {"Content-Type": "application/json", **ops_admin_headers()}
+        last_exc = None
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request(
+                    url,
+                    data=payload,
+                    headers=headers,
+                    method="PUT",
+                )
+                urllib.request.urlopen(req, timeout=10)
+                if attempt > 0:
+                    print(f"[mirror-sync] article {pub_id} remote sync OK on retry {attempt}")
+                return True
+            except urllib.error.HTTPError as exc:
+                print(f"[mirror-sync] article {pub_id} remote sync FAILED (HTTP {exc.code}): {exc}")
+                return False
+            except Exception as exc:
+                last_exc = exc
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+        print(f"[mirror-sync] article {pub_id} remote sync FAILED after 3 attempts: {last_exc}")
+        return False
 
     def _sync_feed_to_remote(self):
-        """PUT full feed.json to remote for consistency."""
+        """PUT full feed.json to remote for legacy/manual consistency checks."""
         if not self.REMOTE_URL:
             return
         import gzip

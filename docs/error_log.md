@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-23 publisher mirror sync 整包 feed PUT 後續改為單篇 report PUT
+
+**問題**：2026-06-23 feed.json 肥大事件已把 description/base64 兩個資料膨脹源修掉，但 publisher 寫入路徑仍在 `_append_to_feed()` / `_rewrite_feed_entry()` / release pool 狀態更新後呼叫 `_sync_feed_to_remote()`，依賴整包 `feed.json` PUT `/api/sync/feed.json`。feed 即使縮小後仍可能超 Zeabur / Next.js body limit，且 cache revalidation 不應依賴大檔上傳成功。
+
+**根因**：2026-04-18 Contentlayer cutover 後把 `reports/<slug>.json` 單篇 sync stub 成 no-op，留下整包 feed mirror 作為唯一 publisher-side remote sync。前端 route 其實已支援 `PUT /api/sync/reports/<slug>.json`，並會 upsert 單篇 article、同步 tags、`revalidateTag('article')` / `article-<slug>`。
+
+**解決方法**：補回 `Publisher._sync_report_to_remote(pub_id, item)`，以小 payload PUT 單篇 report route；`_append_to_feed()`、`_rewrite_feed_entry()`、`unpublish()` 與 release pool 釋出/verify stamp 更新改走單篇 sync。整包 `_sync_feed_to_remote()` 保留為 legacy/manual fallback，不再是單篇發佈流程的正常路徑。`VOLPRED_NO_REMOTE_WRITE=1` 會擋住單篇 mirror sync，避免測試或 dry-run 外發。
+
+**驗證**：`tests/test_publisher_remote_sync.py` 新增單篇 payload、remote-write guard、append 不走整包 sync 測試；相鄰 publisher/release/dedup 測試通過（`test_publisher_remote_sync.py`、`test_content_release_pool.py`、`test_daily_digest_dup_exemption.py`、`test_arc_dedup.py`、`test_publisher_provenance.py`、`test_publisher_audience_audit.py`）。
+
 ## 2026-06-23 **3-STRIKE TRIGGER** 並行 cron agent 撞同一 journal-discovery 題 + K-id 雙佔（biodiversity K1536/K1537×2）
 
 **問題**：autonomous loop tick（17:39）巡檢發現 3 個未 commit 實驗 `experiments/{k1536, k1537, k1537_biodiversity_transition_risk_proxy}` **全是同一主題**（biodiversity transition-risk commodity proxy event study），全 NULL、全 Codex PASS-with-caveats；其中 `k1537/` 與 `k1537_biodiversity/` **內部 id 都標 K1537**（雙佔），knowledge.json 並行被寫入 2 個都標 K1537 的 biodiversity 條目（item 912cbc59、76a1d807）。
