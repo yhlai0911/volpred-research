@@ -36205,7 +36205,7 @@
     "title": "研究 backlog fallback: Friday / triple-witching closing-auction concentration 作隔日 RV 與 reversal 訊號",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Friday / triple-witching closing-auction concentration 作隔日 RV 與 reversal 訊號 — yfinance 或本機 5-min SPY/QQQ/IWM + 大型股樣本，標 Friday、monthly options expiry、triple-witching dates，計算收盤 30min volume share / range-vol concentration，檢定當日收盤 auction crowding 是否預測隔日 open-to-close RV、reversal 與策略交易成本；與 Russell reco | 來源 section: 期刊主題挖掘 batch（2026-06-22 codex 補充；journal_discovery_20260622_0；websearch faj/rfs/rof/jfqa/jfi/jod/jai/jpm 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -36214,14 +36214,18 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T12:53:48+00:00"
+    "created_at": "2026-06-23T12:53:48+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T15:05:57.991215+00:00",
+    "claim_session_id": "14118cc8d968",
+    "started_at": "2026-06-23T15:06:13.437067+00:00"
   },
   {
     "id": "research_municipal_convenience_premium_tax_liquidity_stre",
     "title": "研究 backlog fallback: municipal convenience premium 壓縮作 tax-liquidity stress 的 cross-asset vol prior",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: municipal convenience premium 壓縮作 tax-liquidity stress 的 cross-asset vol prior — 用 MUB/TFI/HYD/TAXF 對 IEF/AGG/LQD/HYG 的相對報酬、drawdown、成交額與 FRED state/local fiscal stress proxy 建 muni-richness/cheapness 指標，檢定 muni convenience premium proxy 壓縮是否領先 muni ETF RV、credit ETF RV 與股債相關 regime；與 generic bond E | 來源 section: 期刊主題挖掘 batch（2026-06-22 codex 補充；journal_discovery_20260622_0；websearch faj/rfs/rof/jfqa/jfi/jod/jai/jpm 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -36230,7 +36234,11 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T12:53:48+00:00"
+    "created_at": "2026-06-23T12:53:48+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-23T15:26:37.311602+00:00",
+    "claim_session_id": "bbdde03f097a",
+    "started_at": "2026-06-23T15:26:41.796140+00:00"
   },
   {
     "id": "research_corporate_bond_news_sentiment_rv_only",
@@ -36312,5 +36320,21 @@
     "started_at": "2026-06-23T14:30:56.475185+00:00",
     "completed_at": "2026-06-23T14:42:57.967782+00:00",
     "result": "Reran K935 with canonical rolling Yang-Zhang 2000 target over 2000-day window. Verdict: CANONICAL_YZ_DOES_NOT_CONFIRM_HEADLINE. YZ-style proxy still beats Parkinson (QLIKE 1.540845 vs 1.681861, DM t=-3.497, +8.38%), but canonical YZ is worse than Parkinson (QLIKE 2.232007, DM t=+2.133, -32.71%). Rewrote mile_1bff1fe5 to withdraw canonical-YZ-wins wording, updated article metadata, synced single article to Supabase, and added knowledge correction k935canon2606."
+  },
+  {
+    "id": "trending_repost_2026_06_23_ai推理成本",
+    "title": "AI推理成本危機：token定價崩壞如何傳導到科技股波動",
+    "task_type": "trending_repost",
+    "priority": 2,
+    "status": "succeeded",
+    "description": "trending_repost: AI推理成本危機 — token定價崩壞如何傳導到科技股波動。Token cost 12個月跌75%、Anthropic推理毛利70%、中國模型9倍差距、企業capex $725B YoY+76%。VolPred angle: AI供應商margin壓縮 → 科技股盈利能見度下降 → implied vol抬升。",
+    "created_at": "2026-06-23T15:21:48.714902+00:00",
+    "source": "hourly-dispatch-trending",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-23T15:21:52.941409+00:00",
+    "claim_session_id": "76a44da2c65a",
+    "started_at": "2026-06-23T15:21:53.200506+00:00",
+    "completed_at": "2026-06-23T15:26:31.844780+00:00",
+    "result": "mile_057f178b published: AI推理成本危機→科技股波動，NVDA 44% vs QQQ 29%，anti-AI gate PASS，圖表 Supabase上傳，FB pending Chrome"
   }
 ]
