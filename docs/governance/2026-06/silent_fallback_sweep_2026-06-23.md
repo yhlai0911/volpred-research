@@ -35,8 +35,9 @@ It is heuristic by design; report mode is for governance triage, while
 `--strict` is available once owners have burned down or allowlisted legacy
 cases.
 
-Initial run on 2026-06-23 returned 126 suspect handlers. This is not a clean
-gate yet; it is the backlog map for future targeted burn-down tasks.
+Initial run on 2026-06-23 returned 125 suspect handlers after excluding test
+directories from recursive scans. This is not a clean gate yet; it is the
+backlog map for future targeted burn-down tasks.
 
 ## Task Generator Update
 
