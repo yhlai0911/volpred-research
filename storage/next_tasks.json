@@ -1,5 +1,17 @@
 [
   {
+    "id": "paper_decision_leverage_direction_jbf_submission_356440a2d6dd",
+    "priority": "P1",
+    "task_type": "paper_decision",
+    "title": "[paper_decision] leverage-direction JBF submission package final prep",
+    "description": "老闆 2026-06-24 08:34 回信 email-11958 \"你決定\" → 自主決定投 JBF。\n\n任務範圍（本任務為 final-prep，不含 online submission，後者需 boss JBF account 登入）：\n1. 確認 paper/leverage-direction/main.pdf 是最新版（v13 confirmation post-fix），sha256 + filesize 寫入 result\n2. 重新編譯 cover_letter.tex → cover_letter.pdf，verify metadata (target = JBF, addressed to editor-in-chief)\n3. Suggested reviewers 名單（3-5 人）— 從 paper bibliography 高引用作者挑出 (avoid co-author conflict)\n4. Excluded reviewers 名單（如有）— 競爭 lab / personal conflict\n5. JBF online submission checklist（cover letter / main PDF / figures / data availability statement / declarations）逐項打勾\n6. 整合所有 artifact 路徑寫成 /tmp/jbf_submission_package_leverage_direction.md 給 boss 一次性參考\n7. 寄 alert email 給 boss：「submission package ready, 請於 JBF Elsevier 系統登入後依清單上傳 (URL: https://www.editorialmanager.com/jbf/)」\n\n注意：實際 click-submit by boss，不由 agent 執行。本任務只負責準備到「boss 可一鍵 submit」狀態。\n",
+    "source": "boss_directive_email_reply",
+    "status": "pending",
+    "created_at": "2026-06-24T01:13:21+00:00",
+    "codex_eligible": false,
+    "parent_email_task_id": "email-11958-66692c"
+  },
+  {
     "id": "platform_ops_dispatch_pool_dry_diagnostic_20260618",
     "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
     "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
@@ -36346,7 +36358,7 @@
     "title": "研究 backlog fallback: 碳權拍賣 demand-depth / reserve-price bindingness 作 KRBN RV event prior",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 碳權拍賣 demand-depth / reserve-price bindingness 作 KRBN RV event prior — 用 EU ETS / California / Washington auction 公開日曆與結果，搭 KRBN/GRN/歐洲碳權 ETF proxy，檢定 auction 壓力是否領先 t+1/t+5 RV、gap risk、能源/公用事業 spillover；與 line 466 generic KRBN vol clustering 正交，聚焦 primary-market auction mechanism（來源：CFA RPC 2026 com | 來源 section: 期刊主題挖掘 batch（2026-06-23；journal_discovery_20260623_0；websearch jpm/jfi/jai/cfa/fed/rof 2025-26 趨勢層級；selectivity gate 後 7 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -36355,7 +36367,11 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T16:03:35+00:00"
+    "created_at": "2026-06-23T16:03:35+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-24T00:53:02.986860+00:00",
+    "claim_session_id": "c0a8083c86cf",
+    "started_at": "2026-06-24T00:53:03.194916+00:00"
   },
   {
     "id": "research_bhc_ai_loss_disclosure_rv",
@@ -36820,5 +36836,71 @@
     "started_at": "2026-06-24T00:10:46.539173+00:00",
     "completed_at": "2026-06-24T00:13:23.722869+00:00",
     "result": "MAJOR #4 (commit 92f172cf) verdict: PASS. Bonferroni replacement structurally sound (math α/m=0.05/20=0.0025 → |z|=3.02 matches |t|>3.0 cutoff; Harvey2016 fully removed; MCS complement honestly framed). Scope check vs current main.tex: MAJOR #5 ALREADY DONE (closed in same fire as succeeded_already_done). MAJOR #6 + #7 + MINOR #8/9/10 task descriptions remain accurate. Review report: paper/prg-periodic-garch/review_history/v6/major4_verification.md."
+  },
+  {
+    "id": "email-11958-66692c",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 🔴【需老闆回信】Paper submit decision reminder：leverage-direct",
+    "description": "Gmail UID: 11958\nMessage-ID: <7B9F5877-55FF-4E35-B88E-76DE6365B0DF@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 24 Jun 2026 08:38:13 +0800\nSubject: Re: [VolPred Alert][INFO] 🔴【需老闆回信】Paper submit decision reminder：leverage-direction 已 ready 9 天（JBF 待你決定）\n\n--- 用戶回信內容 ---\n你決定\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月24日 04:11 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 🔴【需老闆回信】Paper submit decision reminder：leverage-direction 已 ready 9 天（JBF 待你決定）\r\n> Alert level: info\r\n> INFO\r\n> 🔴 此 email 需老闆做出決定才能繼續推進。\r\n> 請看下方「需要的決定」段，回信告知選項即可。\r\n> \r\n> Paper portfolio submit decision reminder\r\n> \r\n> Date: 2026-06-24 04:14 台灣時間\r\n> Triggered by: hourly-dispatch :07，paper portfolio audit + memory project_papers_awaiting_submit_decision 規則「boss 回前每隔幾 tick 重提」\r\n> \r\n> 1. Leverage-direction（JBF target）— 可投，待你決定\r\n> \r\n> Status: READY_FOR_SUBMISSION_CHECKPOINT（v13 confirmation_review.md, 2026-06-15）\r\n> 0 HIGH unresolved：v12 H5 TLT/BTC QLIKE prose blocker 已 close（commit 02c91001），reproducibility gate 通過，PDF 重編完成\r\n> Ready 天數: 9 天（自 2026-06-15 起）\r\n> Review history: v2 → v13 + audit_2026-06-10 + gate_fix_v1 — 共 13 輪迭代收斂\r\n> Target: JBF（Journal of Banking and Finance）\r\n> 需要你：(a) 確認投 JBF 或改投他刊（FRL / IJF / JFE）；(b) 確認 cover letter 寄送授權；(c) Editor 推薦 / 排除人選\r\n> \r\n> 2. PRG-Periodic-GARCH（原 FRL target）— 未 ready，需修\r\n> \r\n> Status: v5_independent REJECT（Codex 2026-05-21）\r\n> 3 BLOCKING issues（無法直接投）：\r\n> Identification 缺陷：PRG 全日預測兩階段（h_{d,0} 收盤後 + h_{d,1} 用當日 overnight return），GJR/HAR 限制在較弱 F_{d-1}^c 資訊集 → 結果混合「模型形式 + 資訊集」兩種效果，無法解讀為結構性勝利\r\n> \"Fair-information GJR-X\" 不 fair：PRG 用當日 r²_{d,0}，GJR-X 用前日 r²_{overnight,t-1} — 主文聲稱「identical session-level information」被自己方程式推翻\r\n> Lookahead / implementability：開盤可交易性敘事未證成，VT 經濟價值結果有偏誤\r\n> 4 MAJOR: Harvey (2016) citation 誤用 / VaR-ES claims 證據不足 / SPY ablation 推廣過強 / HAR-artifact 外推超證據\r\n> 已 backlog: task paper_body_prg_v5_blocking_fix_1782245463（P2）排入 next_tasks，等下次 paper_body fire 處理\r\n> 預估: body_v6.tex rewrite + 重審 ~2-3 個 review cycles，~10-14 天\r\n> 3. 其他 paper portfolio 狀態（快速 audit）\r\n> \r\n> Paper\t最新 review round\t備註\r\n> leverage-direction\tv13 ✅ ready\t9 天 awaiting submit\r\n> prg-periodic-garch\tv5_independent ❌ REJECT\t需修 BLOCKING\r\n> vt-trend-following\treproduce_report.json 在\t未 audit submit-ready 狀態\r\n> vt-insurance-cost\treproduce_report.json 在\t未 audit\r\n> volatility-absorption\treproduce_report.json 在\t未 audit\r\n> vix-sufficiency\treproduce_report.json 在\t未 audit\r\n> eav-universal-magnitude\treproduce_report.json 在\t未 audit\r\n> crypto-fear-channel\treproduce_report.json 在\t未 audit\r\n> 其他\treview_history 仍在迭代\t—\r\n> 下次 paper_review fire 會優先 audit 其餘 6 篇 submit-readiness 狀態。\r\n> \r\n> 行動請求\r\n> \r\n> 回信告訴我：\r\n> \r\n> A. 「leverage-direction 投 JBF」→ 我下次 fire 啟動 cover letter 最終確認 + submission package 準備\r\n> B. 「leverage-direction 改投 X」→ 我重 reformat for X journal house style\r\n> C. 「先推 PRG 修 BLOCKING」→ 我下次 paper_body fire 派 codex/agy 進 body_v6.tex\r\n> D. 其他指示\r\n> ——\r\n> Hourly-dispatch :07\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-24T00:45:02.644167+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11958,
+    "email_message_id": "<7B9F5877-55FF-4E35-B88E-76DE6365B0DF@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 🔴【需老闆回信】Paper submit decision reminder：leverage-direction 已 ready 9 天（JBF 待你決定）",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "last_released_at": "2026-06-24T01:10:20.560850+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-24T01:12:17.192778+00:00",
+    "claim_session_id": "131e147cad36",
+    "started_at": "2026-06-24T01:12:17.397307+00:00",
+    "completed_at": "2026-06-24T01:14:45.578946+00:00",
+    "result": "boss '你決定' → 自主決定投 JBF (per portfolio decision authority); 派 follow-up paper_decision task paper_decision_leverage_direction_jbf_submission_356440a2d6dd (P1) 做 final-prep (cover letter recompile / suggested reviewers / submission checklist); 實際 click-submit by boss (corresponding author). Close email 9f444a86 已寄"
+  },
+  {
+    "id": "email-11957-21ca7b",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-06-24 08:10 台灣時間 平台運營報告",
+    "description": "Gmail UID: 11957\nMessage-ID: <3C3F55AB-05D4-42E6-B252-097A1F958B3A@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 24 Jun 2026 08:34:29 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-24 08:10 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n徹底解決\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月24日 08:10 寫道：\r\n> ﻿\r\n> VolPred Boss Report · 2026-06-24 08:10 台灣時間 · Overall CRITICAL\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t10 pending tasks (top types: [('paper_body', 6), ('experiment', 4)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t18 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t18/18 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample report URLs ok; 3/3 core pages content-ok\t—\r\n> verification_fb_pipeline\tcritical\t3 FB posts pending sync\thandoff doc + manual paste or retry MCP\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\tok\t0 current warn/critical alert conditions\t—\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。全部正常\r\n> \r\n> === cron 成果掌握 review — 2026-06-24 08:10:05（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=130 exit=0 running | last: 2026-06-24 08:07:23 (log-mtime)\r\n>   compute_worker    runs=562 exit=0 idle | last: 2026-06-24 08:00:01 (log-mtime)\r\n>   check_alerts      runs=141 exit=0 idle | last: 2026-06-24 08:00:17 (log-mtime)\r\n>   collect_tw        runs=4 exit=0 idle | last: 2026-06-23 15:00:09 (log-mtime)\r\n>   collect_us        runs=4 exit=0 idle | last: 2026-06-24 07:03:10 (log-mtime)\r\n>   daily_update      runs=5 exit=0 idle | last: 2026-06-24 08:07:15 (log-mtime)\r\n>   release_pool      runs=24 exit=0 idle | last: 2026-06-24 08:00:17 (log-mtime)\r\n>   market_cal        runs=1 exit=0 idle | last: 2026-06-22 08:00:02 (log-mtime)\r\n>   memory_health     runs=6 exit=0 idle | last: 2026-06-24 05:30:03 (log-mtime)\r\n>   work_summary      runs=24 exit=0 idle | last: 2026-06-24 06:05:07 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：2 筆\r\n>   d349ef06 [codex] complete BEI vol credit RV experiment\r\n>   6e110bff trending_repost mile_b221e550 | Mag 7 OTM put skew 法說季預告\r\n> \r\n> ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 8 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> d349ef06\t[codex] complete BEI vol credit RV experiment\t07:30\r\n> 6e110bff\ttrending_repost mile_b221e550\tput s\r\n> 586ff196\t[codex] complete fair-info PRG GJR benchmark\t06:18\r\n> dc495e48\tops(hourly 06:15): PHASE-Z safety-net auto-commit (agent left uncommitted)\t06:15\r\n> 92f172cf\tpaper_body_prg_v6_major_fixes\tPRG\r\n> b630209d\tpaper(P6 PRG): v6 round 1 — BLOCKING #1 + #3 partial reframe per Codex v5_independent\t05:16\r\n> e99ee510\t[codex] complete CF-HMM sector rotation experiment\t04:55\r\n> d0a5187f\tplatform_ops_paper_submit_reminder\tfolio\r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 10\r\n> \r\n> By type: paper_body · 6experiment · 4\r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> btc-gas-negative\t`major_revision` — 2026-06-10 audit HIGH\r\n> crypto-fear-channel\t**MAJOR REVISION** (2026-06-11 audit syn\r\n> eav-universal-magnitude\t🔶 **MAJOR_REVISION（2026-06-10 全組合審查，5 HI\r\n> forecast-tail-divergence\t?\r\n> garch-x-vix\tsubmitted (under review) | Reproduce gat\r\n> k189_audit\t?\r\n> leverage-direction\t🟢 *\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-24T00:45:07.936265+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11957,
+    "email_message_id": "<3C3F55AB-05D4-42E6-B252-097A1F958B3A@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-06-24 08:10 台灣時間 平台運營報告",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "last_released_at": "2026-06-24T01:10:20.766572+00:00",
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-24T01:12:16.779942+00:00",
+    "claim_session_id": "11014adebfd4",
+    "started_at": "2026-06-24T01:12:16.986179+00:00",
+    "completed_at": "2026-06-24T01:14:45.376339+00:00",
+    "result": "boss '徹底解決' → FB pipeline 3-layer fix: (1) 2 awaiting wont_fix → dashboard 0/0 clean (2) audit_fb_pipeline.py 已含 72h auto-expire 機制 cron 6h (3) dashboard classify_fb_pipeline awaiting bucket 已分流不算 critical → 未來新 publish 自動走 awaiting→expired_skip path actionable 永不累積。Close email e9de0c55 已寄"
+  },
+  {
+    "id": "daily_digest_20260624",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **先選定一個專題（theme）**（例：波動率模型複雜度天花板 / MOVE-VIX 跨資產分裂 / 尾部風險 VaR 監管現實 / 研究誠實 audit），整篇圍繞單一 thesis；(2) **從過去累積的 archive 撈同主題的 3-6 篇舊文**（用 grep/jq 掃 storage/reports/feed.json 的 title/tags），發佈日期須橫跨 >1 週、至少 3 篇來自當天以外 — **不可只挑今天/昨天剛發的湊數**；排除 digest 自身與每日建議類日報；(3) **掛一個最近時事/市場狀態 hook 開場**（當前 VIX 水位 / 近期 FOMC·NFP·CPI / MOVE-VIX 分裂等，數據須取自真實 archive 文章或 results.json，不可臆造），把過去研究與當下市場連起來；(4) **串成有觀點的敘事弧**（演進/對照/反差，告訴讀者『這主題上我們做過什麼、結論如何演進、彼此如何呼應』），不是逐篇『這篇講 X、那篇講 Y』的並列摘要；(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ 文末懶人包圖組；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 以 '每日精選導讀｜' 起頭並帶專題式標題（非『今日 N 篇摘要』）；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "created_at": "2026-06-24T09:00:02.927049+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ]
   }
 ]
