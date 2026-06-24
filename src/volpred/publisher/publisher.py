@@ -1698,7 +1698,15 @@ class Publisher:
                 continue
             try:
                 published_dt = datetime.fromisoformat(published_at.replace("Z", "+00:00"))
-            except Exception:
+            except Exception as exc:
+                from volpred.ops.diagnostics import warn
+                warn(
+                    "publisher_published_at_parse",
+                    "skip feed item with unparseable published_at",
+                    err=str(exc),
+                    pub_at=str(published_at)[:40],
+                    id=str(item.get("id")),
+                )
                 continue
             if published_dt.date() != target:
                 continue

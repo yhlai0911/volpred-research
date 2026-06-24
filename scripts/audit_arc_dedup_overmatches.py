@@ -21,6 +21,7 @@ FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.publisher.arc_dedup import arc_signature  # noqa: E402
+from volpred.ops.diagnostics import warn  # noqa: E402
 
 
 def _article_text(item: dict) -> str:
@@ -37,7 +38,8 @@ def _parse_dt(raw: object) -> datetime | None:
         if parsed.tzinfo is None:
             parsed = parsed.replace(tzinfo=timezone.utc)
         return parsed.astimezone(timezone.utc)
-    except Exception:
+    except Exception as exc:
+        warn("arc_overmatch_parse_dt", "timestamp parse failed", err=str(exc), raw=str(raw)[:60])
         return None
 
 
