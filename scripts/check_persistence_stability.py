@@ -19,6 +19,14 @@ from arch import arch_model
 from volpred.data.manager import DataManager
 
 
+def _warn_persistence(message, *, exc=None, **context):
+    parts = [f"{key}={value}" for key, value in context.items() if value is not None]
+    if exc is not None:
+        parts.append(f"error={type(exc).__name__}: {exc}")
+    suffix = f" {' '.join(parts)}" if parts else ""
+    print(f"[persistence-stability] WARN {message}{suffix}", file=sys.stderr)
+
+
 def check_persistence_stability(asset, start="2022-01-01"):
     dm = DataManager()
     data = dm.get_model_data(asset, start, "2026-12-31")
@@ -26,6 +34,7 @@ def check_persistence_stability(asset, start="2022-01-01"):
 
     persistences = []
     dates = []
+    fit_failures = 0
     for i in range(504, len(returns)):
         train = returns.iloc[i-252:i]
         am = arch_model(train * 100, vol="GARCH", p=1, o=1, q=1,
@@ -36,8 +45,22 @@ def check_persistence_stability(asset, start="2022-01-01"):
             pers = p.get("alpha[1]", 0) + p.get("gamma[1]", 0)/2 + p.get("beta[1]", 0)
             persistences.append(pers)
             dates.append(returns.index[i])
-        except Exception:
+        except Exception as exc:
+            fit_failures += 1
+            if fit_failures <= 5:
+                _warn_persistence(
+                    "GARCH fit failed; skipping rolling window",
+                    asset=asset,
+                    date=returns.index[i],
+                    exc=exc,
+                )
             continue
+    if fit_failures > 5:
+        _warn_persistence(
+            "additional GARCH fit failures suppressed",
+            asset=asset,
+            count=fit_failures - 5,
+        )
 
     pers_series = pd.Series(persistences, index=dates[:len(persistences)])
     pers_std = pers_series.rolling(60).std()

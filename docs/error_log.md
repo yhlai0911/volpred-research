@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 check_persistence_stability GARCH fit failure 靜默跳窗
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/check_persistence_stability.py` rolling GARCH fit 失敗時直接 `continue`。這個 monthly audit 最後仍會輸出 asset-specific optimal window recommendation，但 operator 看不出推薦是基於完整 rolling windows，還是大量 fit failure 後的殘餘樣本。
+
+**根因**：persistence stability check 應容忍單個 rolling window fit failure，不因少數不收斂中斷整個月檢查；但舊實作把「可跳過」寫成完全靜默，會削弱 adaptive window selection 的可驗證性。
+
+**解決方法**：新增 `_warn_persistence()`，每個 asset 前 5 個 fit failure 會輸出 `[persistence-stability] WARN GARCH fit failed; skipping rolling window ...`，包含 asset、date、exception；超過 5 個後合併輸出 suppressed count，避免 log 洗版。新增 regression test 模擬所有 GARCH fit 失敗，確認 warning 與原本 fail-open recommendation 行為並存。
+
 ## 2026-06-25 boss_report warning collector 未被 silent-fallback audit 辨識
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/boss_report.py::_cycle_intent()` 的 exception handler：讀 `current_cycle_intent.json` 失敗後記 report warning 再 `return {}`，但 helper 名稱是 `_record_warning()`，靜態 audit 不認得，仍列為 silent default return。
