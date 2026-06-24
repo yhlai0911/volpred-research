@@ -1,23 +1,24 @@
 # Feed Index
 
-_Last built: 2026-06-24 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-06-24 02:23 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1661**  (with thumbnail: 63)
+- Total articles: **1662**  (with thumbnail: 63)
 - Last 30 days: **393**
-- Total chars (content): 4,981,320
+- Total chars (content): 4,985,533
 
-**Status**: published=1452, archived=122, draft=39, unpublished=35, retracted=12, wont_fix=1
+**Status**: published=1453, archived=122, draft=39, unpublished=35, retracted=12, wont_fix=1
 
-**Audience**: research=1094, general=357, daily=116, unknown=77, member_qa=12, event=5
+**Audience**: research=1094, general=358, daily=116, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=842, general=704, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
+**Category**: milestone=842, general=705, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
 
 ## 最近 30 天 (393)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-24 | `mile_f3e389cf` | 每日精選導讀｜隔夜波動率：學術上很重要，實戰裡很尷尬 | general | general | published | 4213 |  | 一般讀者, 精選導讀, 隔夜波動率, SPY, 台指期, PRG模型 |
 | 2026-06-24 | `mile_366ef29b` | 每日策略建議：VIX 19.49（正常）— 2026-06-24 | daily | general | published | 1708 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-24 | `mile_964dbe85` | 2026-06-24 本日持倉比率建議（依據 2026-06-23 收盤數據） | daily | milestone | published | 1069 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-06-23 | `mile_b221e550` | 法說季開打前，Mag 7 的期權市場悄悄在說一件事 | general | general | published | 3760 |  | 一般讀者, trending, Mag7, 期權, 實現波動率, earnings |
@@ -410,12 +411,12 @@ _Last built: 2026-06-24 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-05-25 | `mile_20e96f77` | 波動的波動率能預測動盪嗎？實證 NULL | research | general | published | 6373 |  | 研究, 波動率, VIX, 風險管理, 實證研究, 策略回測 |
 | 2026-05-25 | `mile_13fdd2aa` | 多資產 rough volatility 聽起來很新，為什麼放到日線還是輸給老派 DCC-GARCH？ | research | general | archived | 2050 |  | 研究, rough-volatility, DCC-GARCH, SPY, QQQ, IWM |
 | 2026-05-25 | `mile_daaff779` | 五月底又來了：25年數據告訴你，GDP第二估對VIX毫無影響力，但VIX其實在看這三件事 | research | general | published | 2861 |  | 研究, GDP, BEA, VIX, 事件研究, 關稅 |
-| 2026-05-25 | `mile_be32d58a` | 黃金永遠該配 50%？四套動態策略全 null | research | general | published | 6940 |  | 研究, 黃金配置, 資產配置, 動態策略, 回測, OOS驗證 |
 
-<details><summary>## 2026-Q2 (596)</summary>
+<details><summary>## 2026-Q2 (597)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-05-25 | `mile_be32d58a` | 黃金永遠該配 50%？四套動態策略全 null | research | general | published | 6940 |  | 研究, 黃金配置, 資產配置, 動態策略, 回測, OOS驗證 |
 | 2026-05-24 | `mile_b75a59e8` | 再平衡時點重要嗎？日內季節性的誠實檢驗 | research | general | published | 6314 |  | 研究, 波動率目標, 再平衡, 日內季節, 隔夜溢酬, SPY |
 | 2026-05-24 | `mile_951a301b` | VT-Sized 隔夜策略上架前的壓力測試 | general | general | published | 6091 |  | 一般讀者, 波動率策略, 敏感度分析, 隔夜跳空, VIX, 風險管理 |
 | 2026-05-24 | `mile_9a66c8b2` | 我們檢驗了自己 20 個主張，只有 13 個過關——這就是研究誠實的樣子 | research | general | published | 4690 |  | 研究 |
