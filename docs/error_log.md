@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-24 build_topic_diversity_audit jq 壞行被靜默跳過
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/build_topic_diversity_audit.py` 三個 jq streaming 解析點：feed tags、feed latest date、knowledge keyword hits 遇到單行壞 JSON 時直接 `continue`，沒有任何 warning。
+
+**根因**：topic diversity audit 是手動診斷工具，應容忍單筆 jq output 或 source artifact 污染，不中斷整份 gap analysis；但靜默跳過會讓 feed tag count、latest date、novelty probe 的 knowledge hit 少算，操作者看不出是主題真的沒覆蓋，還是輸入 stream 有壞行。
+
+**解決方法**：新增共用 `_json_lines()` / `_warn_topic_audit()`，壞 JSON 行會輸出 `[topic-audit] WARN jq output JSON line parse failed; skipping ...`，包含 source、line、截斷 raw 與 exception；原本跳過壞行、保留有效資料的容錯行為不變。新增 regression tests 覆蓋三個來源路徑。
+
 ## 2026-06-24 refill_task_pool 直接 CLI 仍會卡在 publication candidate rebuild
 
 **問題**：Codex hourly tick 在「Codex-eligible pending=0」fallback 時手動跑 `uv run python scripts/refill_task_pool.py --dry-run --json --target 6`，程序長時間無輸出；`ps` 顯示子程序 `scripts/build_publication_candidates.py` 100% CPU，父程序卡在 `subprocess.run(...).communicate()`。

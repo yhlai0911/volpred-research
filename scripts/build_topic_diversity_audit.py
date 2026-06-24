@@ -48,6 +48,32 @@ STOP_TAGS = {
 K_RE = re.compile(r"^[kK]\d{2,}$|^[iI]\d+[a-z]?$")
 
 
+def _warn_topic_audit(message: str, *, source: str, line_no: int, raw: str, exc: Exception) -> None:
+    snippet = raw[:160].replace("\n", "\\n")
+    print(
+        "[topic-audit] WARN "
+        f"{message}; source={source} line={line_no} raw={snippet!r} "
+        f"err={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
+def _json_lines(raw: str, *, source: str):
+    for line_no, line in enumerate(raw.splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            yield json.loads(line)
+        except json.JSONDecodeError as exc:
+            _warn_topic_audit(
+                "jq output JSON line parse failed; skipping",
+                source=source,
+                line_no=line_no,
+                raw=line,
+                exc=exc,
+            )
+
+
 def _jq(prog: str, path: Path) -> str:
     return subprocess.run(
         ["jq", "-c", prog, str(path)],
@@ -59,15 +85,7 @@ def _feed_tags() -> Counter:
     """Top tags from feed.json (excluding stop list + K labels)."""
     raw = _jq(".[] | .tags // []", FEED_PATH)
     ctr: Counter = Counter()
-    latest_date: dict[str, str] = {}
-    # We also want per-tag latest date — need another jq pass with date join.
-    for line in raw.splitlines():
-        if not line.strip():
-            continue
-        try:
-            tags = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+    for tags in _json_lines(raw, source="feed_tags"):
         for t in tags:
             if not isinstance(t, str):
                 continue
@@ -82,13 +100,7 @@ def _feed_tag_latest_date() -> dict[str, str]:
     """For each tag, the latest article date."""
     raw = _jq(".[] | {d: (.published_at // .created_at), t: (.tags // [])}", FEED_PATH)
     latest: dict[str, str] = {}
-    for line in raw.splitlines():
-        if not line.strip():
-            continue
-        try:
-            rec = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+    for rec in _json_lines(raw, source="feed_tag_latest_date"):
         d = rec.get("d") or ""
         for t in rec.get("t") or []:
             if not isinstance(t, str):
@@ -156,14 +168,10 @@ def _knowledge_keyword_hits(keywords: list[str]) -> dict[str, int]:
     hits = {kw: 0 for kw in keywords}
     lowered_kw = [kw.lower() for kw in keywords]
     # Each line is a JSON string on its own.
-    for line in raw.splitlines():
-        line = line.strip()
-        if not line:
+    for content_raw in _json_lines(raw, source="knowledge_keyword_hits"):
+        if not isinstance(content_raw, str):
             continue
-        try:
-            content = json.loads(line).lower()
-        except json.JSONDecodeError:
-            continue
+        content = content_raw.lower()
         for i, kw in enumerate(lowered_kw):
             if kw in content:
                 hits[keywords[i]] += 1
