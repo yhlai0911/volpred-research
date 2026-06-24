@@ -36994,7 +36994,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "auto_journal_discovery_fallback",
@@ -37007,6 +37007,8 @@
     "claimed_by": "hourly-11",
     "claimed_at": "2026-06-24T03:09:27.224058+00:00",
     "claim_session_id": "a8560437fca6",
-    "started_at": "2026-06-24T03:09:30.047941+00:00"
+    "started_at": "2026-06-24T03:09:30.047941+00:00",
+    "completed_at": "2026-06-24T03:16:31.498049+00:00",
+    "result": "Agent (general-purpose sonnet/medium, 4 min, 25 tools, 103k tokens) WebSearch'd JFM/JBES/JFutMkts/JFQA/Math.Finance/CFA/JAI/JFRA/Corp.Gov./EFM 2025-26 趨勢層級, 產 13 條; selectivity gate 主線程 grep 後剔 2 條 (hurricane line 487 既覆蓋, VVIX K43 NULL closed), 入單 11 條到 research_program.md '期刊主題挖掘 batch 2026-06-24b' section. 主軸: HFT free-data proxy, AP-concentration, cojump asymmetric, rough/path-dep/Markovian HAR 三方賽馬, 台灣多幣別 hedge, stablecoin TVL->BTC tail, CTA crisis-alpha 重檢, variance dispersion, short squeeze, ESG controversy, Russell reconstitution. 下一輪 refill 自動取用."
   }
 ]
