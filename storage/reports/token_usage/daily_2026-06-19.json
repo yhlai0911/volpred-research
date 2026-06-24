@@ -1,0 +1,161 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-19",
+  "week_range": "2026-06-19 → 2026-06-26",
+  "totals": {
+    "input_tokens": 14,
+    "output_tokens": 1302,
+    "cache_read_tokens": 65576,
+    "cache_create_tokens": 131854,
+    "billable_total": 133170,
+    "assistant_messages": 6,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.5337
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 14,
+      "output_tokens": 1302,
+      "cache_read_tokens": 65576,
+      "cache_create_tokens": 131854,
+      "messages": 6,
+      "estimated_cost_usd": 0.5337
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 7,
+      "output_tokens": 651,
+      "cache_read_tokens": 32788,
+      "cache_create_tokens": 65927,
+      "messages": 3,
+      "billable_total": 66585,
+      "estimated_cost_usd": 0.2668,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "token_report": {
+      "input_tokens": 4,
+      "output_tokens": 396,
+      "cache_read_tokens": 32788,
+      "cache_create_tokens": 33139,
+      "messages": 2,
+      "billable_total": 33539,
+      "estimated_cost_usd": 0.1401,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 255,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 32788,
+      "messages": 1,
+      "billable_total": 33046,
+      "estimated_cost_usd": 0.1268,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 3,
+      "billable_total": 66585,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 3,
+          "billable_total": 66585
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 33539
+        },
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 33046
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 33046
+        },
+        {
+          "name": "⏱ 開始 2026-06-19 執行 Token 用量日報",
+          "messages": 1,
+          "billable_total": 33046
+        },
+        {
+          "name": "今天是週四（非週五），先執行每日報告。",
+          "messages": 1,
+          "billable_total": 493
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 33046,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 33046
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 33046
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 33046
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 131854,
+      "billable_total": 133170,
+      "cache_create_share_pct": 99.0,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "904e6901-f416-5a29-ad01-8026e3d06978",
+          "messages": 6,
+          "billable_total": 133170,
+          "cache_create_tokens": 131854,
+          "cache_read_tokens": 65576,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 99.0,
+          "first_ts": "2026-06-19T14:44:23.860000+00:00",
+          "last_ts": "2026-06-19T14:44:28.991000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "24f0cb0",
+      "message": "Ops patrol report 2026-06-19T12:04Z"
+    },
+    {
+      "sha": "6cb0198",
+      "message": "Ops patrol report 2026-06-19T06:02Z"
+    },
+    {
+      "sha": "f370dc1",
+      "message": "Ops patrol report 2026-06-19T00:03Z"
+    }
+  ]
+}

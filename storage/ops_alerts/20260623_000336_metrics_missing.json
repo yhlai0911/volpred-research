@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-06-23T00:03:36Z",
+  "alert_type": "metrics_missing",
+  "severity": "high",
+  "detail": "storage/strategy_metrics.json does not exist. Strategy metrics are completely unavailable. This is a recurring issue since 2026-05-31 with no resolution. Downstream effects: strategy rankings, frontend displays, and performance comparisons are broken.",
+  "action_required": "Regenerate storage/strategy_metrics.json via the appropriate CLI command (uv run volpred ops update-metrics or equivalent)."
+}

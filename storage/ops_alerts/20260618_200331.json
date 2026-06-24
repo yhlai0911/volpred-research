@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-06-18T12:03:31Z",
+  "alert_type": "STRATEGY_METRICS_MISSING",
+  "severity": "warn",
+  "detail": "storage/strategy_metrics.json does not exist on filesystem and is not tracked by git. The previous ops patrol at 06:04 UTC saw it as fresh (~18s old), suggesting the file is generated ephemerally during certain jobs but not persisted. Strategy metrics are currently unavailable — any feature relying on this file will fail silently.",
+  "recommended_action": "Investigate which job generates strategy_metrics.json (likely a scheduled compute task). Ensure it runs before each patrol and persists the output. Check if a recent job failed or was skipped."
+}

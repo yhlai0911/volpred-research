@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-06-20T18:03:02Z",
+  "alert": "metrics missing: storage/strategy_metrics.json does not exist",
+  "report": {
+    "timestamp": "2026-06-20T18:03:02Z",
+    "all_ok": false,
+    "checks": [
+      {
+        "name": "ARTICLE_POOL",
+        "status": "ok",
+        "detail": "Total drafts: 129 (research: 51, general: 78)"
+      },
+      {
+        "name": "STRATEGY_METRICS_FRESHNESS",
+        "status": "alert",
+        "detail": "storage/strategy_metrics.json not found"
+      },
+      {
+        "name": "ERROR_LOG",
+        "status": "ok",
+        "detail": "Last 30 lines: most recent entry 2026-06-03 (not today/yesterday). No new incidents in last 2 days."
+      },
+      {
+        "name": "PAPER_TRADING_GAPS",
+        "status": "ok",
+        "detail": "All 15 strategies OK; no strategy has >2 portfolio_return=null in last 3 entries"
+      },
+      {
+        "name": "GIT_STATUS",
+        "status": "ok",
+        "detail": "0 uncommitted files"
+      },
+      {
+        "name": "KNOWLEDGE_SIZE",
+        "status": "ok",
+        "detail": "2191 entries in storage/memory/knowledge.json"
+      }
+    ],
+    "alerts": [
+      "metrics missing: storage/strategy_metrics.json does not exist"
+    ]
+  }
+}

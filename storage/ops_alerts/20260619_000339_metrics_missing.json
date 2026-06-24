@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-06-19T00:03:43Z",
+  "alert_type": "metrics_missing",
+  "severity": "warning",
+  "detail": "storage/strategy_metrics.json does not exist. Persistent issue since ~2026-05-31. Strategy metrics freshness cannot be evaluated.",
+  "recommended_action": "Regenerate strategy_metrics.json via: uv run volpred ops update-metrics or equivalent CLI command."
+}

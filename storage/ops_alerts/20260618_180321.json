@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-06-18T18:03:21Z",
+  "alert_type": "STRATEGY_METRICS_FRESHNESS",
+  "severity": "warning",
+  "detail": "storage/strategy_metrics.json is missing entirely (file does not exist). Strategy metrics freshness cannot be verified. This may indicate the metrics generation pipeline has not run or the file was deleted. Expected file to be present and updated within the last 26 hours.",
+  "recommended_action": "Run strategy metrics generation: `uv run volpred ops refresh-strategy-metrics` or check the scheduled job that produces storage/strategy_metrics.json."
+}

@@ -1,0 +1,161 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-06-21",
+  "week_range": "2026-06-19 → 2026-06-26",
+  "totals": {
+    "input_tokens": 11,
+    "output_tokens": 931,
+    "cache_read_tokens": 65576,
+    "cache_create_tokens": 98810,
+    "billable_total": 99752,
+    "assistant_messages": 5,
+    "unique_sessions": 1,
+    "estimated_cost_usd": 0.4042
+  },
+  "by_model": {
+    "claude-sonnet-4-6": {
+      "input_tokens": 11,
+      "output_tokens": 931,
+      "cache_read_tokens": 65576,
+      "cache_create_tokens": 98810,
+      "messages": 5,
+      "estimated_cost_usd": 0.4042
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 7,
+      "output_tokens": 570,
+      "cache_read_tokens": 32788,
+      "cache_create_tokens": 65799,
+      "messages": 3,
+      "billable_total": 66376,
+      "estimated_cost_usd": 0.2652,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "bash_other": {
+      "input_tokens": 3,
+      "output_tokens": 209,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 32788,
+      "messages": 1,
+      "billable_total": 33000,
+      "estimated_cost_usd": 0.1261,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "token_report": {
+      "input_tokens": 1,
+      "output_tokens": 152,
+      "cache_read_tokens": 32788,
+      "cache_create_tokens": 223,
+      "messages": 1,
+      "billable_total": 376,
+      "estimated_cost_usd": 0.013,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    }
+  },
+  "drilldown": {
+    "text_only": {
+      "messages": 3,
+      "billable_total": 66376,
+      "length_buckets": [
+        {
+          "name": "<200 chars",
+          "messages": 3,
+          "billable_total": 66376
+        }
+      ],
+      "reason_groups": [
+        {
+          "name": "other",
+          "messages": 2,
+          "billable_total": 33376
+        },
+        {
+          "name": "non-text assistant message",
+          "messages": 1,
+          "billable_total": 33000
+        }
+      ],
+      "top_signatures": [
+        {
+          "name": "(content types: thinking)",
+          "messages": 1,
+          "billable_total": 33000
+        },
+        {
+          "name": "今天是 2026-06-21（週日），先執行每日 token 用量報告。",
+          "messages": 1,
+          "billable_total": 33000
+        },
+        {
+          "name": "⏱ 開始 2026-06-21 22:44:25（台灣時間）",
+          "messages": 1,
+          "billable_total": 376
+        }
+      ]
+    },
+    "bash_other": {
+      "messages": 1,
+      "billable_total": 33000,
+      "family_breakdown": [
+        {
+          "name": "other bash",
+          "messages": 1,
+          "billable_total": 33000
+        }
+      ],
+      "prefix_breakdown": [
+        {
+          "name": "TZ='Asia/Taipei'",
+          "messages": 1,
+          "billable_total": 33000
+        }
+      ],
+      "top_first_lines": [
+        {
+          "name": "TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'",
+          "messages": 1,
+          "billable_total": 33000
+        }
+      ]
+    },
+    "cache_diagnostics": {
+      "sessions_in_window": 1,
+      "cache_create_tokens": 98810,
+      "billable_total": 99752,
+      "cache_create_share_pct": 99.1,
+      "top_sessions_by_cache_create": [
+        {
+          "session_id": "940ac106-9bdf-5fdb-b365-fe43f4fccc12",
+          "messages": 5,
+          "billable_total": 99752,
+          "cache_create_tokens": 98810,
+          "cache_read_tokens": 65576,
+          "duration_minutes": 0.1,
+          "cache_create_share_pct": 99.1,
+          "first_ts": "2026-06-21T14:44:23.211000+00:00",
+          "last_ts": "2026-06-21T14:44:28.882000+00:00"
+        }
+      ]
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "996405c",
+      "message": "Ops patrol report 2026-06-21T12:03Z"
+    },
+    {
+      "sha": "ef1fec3",
+      "message": "Ops patrol report 2026-06-21T06:02Z"
+    },
+    {
+      "sha": "3a2d3b4",
+      "message": "Ops patrol report 2026-06-21T00:03Z"
+    }
+  ]
+}
