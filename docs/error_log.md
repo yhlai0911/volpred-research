@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 cron_review git commit scan failure 靜默當無近期產出
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/cron_review.py::git_commits_since()`：`git log` subprocess 失敗時直接 `return []`。Cron review / boss report 會把「commit 掃描失敗」呈現成「最近沒有 commit」，削弱 hourly dispatch 是否有產出的 proxy 訊號。
+
+**根因**：cron review 應 fail-open，不能因 git 暫時不可用中斷整份排程成果掌握；但 fail-open 不能靜默，否則 operator 無法區分真的沒有近期產出與本地 git / subprocess layer 壞掉。
+
+**解決方法**：`git_commits_since()` 在 exception path 呼叫既有 `_warn_cron_review()`，輸出 `[cron_review] WARN git commit scan failed; treating recent commit list as empty ...`，原本回空 list 行為不變。新增 regression test 模擬 `subprocess.run` 失敗，確認 warning 與 fail-open 回傳並存。
+
 ## 2026-06-25 collect_vixtwn TAIFEX row parse failure 靜默跳過
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/collect_vixtwn.py::fetch_month()`：TAIFEX 月檔中某列日期有效但 VIX 數值不可 parse 時，直接 `continue`，該日資料缺口不會出現在 cron log。

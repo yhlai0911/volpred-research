@@ -186,7 +186,8 @@ def git_commits_since(minutes: int = 75) -> list[str]:
              "--pretty=%h %s"], capture_output=True, text=True, timeout=10,
         ).stdout.strip()
         return [l for l in out.splitlines() if l]
-    except Exception:
+    except Exception as exc:
+        _warn_cron_review("git commit scan failed; treating recent commit list as empty", exc=exc)
         return []
 
 

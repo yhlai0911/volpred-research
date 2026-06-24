@@ -108,6 +108,20 @@ def test_expected_prev_fire_warns_when_cron_expr_invalid(capsys):
     assert "cron_expr='not a cron'" in err
 
 
+def test_git_commits_since_warns_when_git_scan_fails(monkeypatch, capsys):
+    def fail_run(*args, **kwargs):
+        raise OSError("git unavailable")
+
+    monkeypatch.setattr(cron_review.subprocess, "run", fail_run)
+
+    commits = cron_review.git_commits_since(75)
+
+    err = capsys.readouterr().err
+    assert commits == []
+    assert "[cron_review] WARN git commit scan failed; treating recent commit list as empty" in err
+    assert "OSError: git unavailable" in err
+
+
 def test_is_stale_does_not_false_alarm_on_weekend_gap_for_collect_us():
     now = datetime(2026, 5, 25, 22, 0, tzinfo=TPE)  # Sunday night Taipei
     last_end = datetime(2026, 5, 23, 8, 0, tzinfo=TPE)  # Saturday after run
