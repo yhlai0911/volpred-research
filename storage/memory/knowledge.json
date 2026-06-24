@@ -36123,5 +36123,20 @@
     ],
     "confidence": 0.55,
     "created_at": "2026-06-24T09:18:36.754005"
+  },
+  {
+    "item_id": "e8300a8d",
+    "category": "null_findings",
+    "content": "NBFI run-pressure public-proxy experiment (research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test, 2026-06-24): a free ETF/FRED composite using HYG/BKLN/BIZD price-volume pressure, BIZD-HYG discount-style pressure, FRED WRMFNS/MMMFFAQ027S MMF flows, TOTBKCR bank-credit contraction, and SOFR-IORB did not robustly improve bank/credit ETF variance forecasts. All predictive tests use run_pressure_index.shift(1). Across 16 KRE/KBE/XLF/HYG future 5d/22d RV and downside-variance OOS cells, strict t>3 positive QLIKE wins=0; median QLIKE improvement was -0.33% and mean -0.62%. XLF 22d RV was the best positive cell (+2.11%) but DM t=0.77 and HAC signal t=2.81 are below gate. Cross-sector correlation diagnostic also failed (MSE improvement -0.09%, t=-0.10). Conclusion: the public NBFI proxy is weak diagnostic only, not evidence that NBFI run pressure robustly leads bank/credit ETF volatility.",
+    "evidence": [
+      "experiments/research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test/research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test_results.json",
+      "experiments/research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test/summary_table.csv",
+      "experiments/research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test/codex_review.md",
+      "https://www.fsb.org/2025/12/global-monitoring-report-on-nonbank-financial-intermediation-2025/",
+      "https://www.esrb.europa.eu/pub/pdf/reports/esrb.report202602_financialstabilityrisks.en.pdf",
+      "https://fred.stlouisfed.org/series/WRMFNS"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-24T09:49:57.640219"
   }
 ]

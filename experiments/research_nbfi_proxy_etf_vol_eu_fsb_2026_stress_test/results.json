@@ -1,0 +1,1349 @@
+{
+  "experiment_id": "research_nbfi_proxy_etf_vol_eu_fsb_2026_stress_test",
+  "run_timestamp_local": "2026-06-24T09:48:16.061669+08:00",
+  "data_sources": {
+    "yfinance": {
+      "tickers_requested": [
+        "HYG",
+        "LQD",
+        "BKLN",
+        "BIZD",
+        "KRE",
+        "KBE",
+        "XLF",
+        "SPY",
+        "^VIX"
+      ],
+      "tickers_downloaded": [
+        "^VIX",
+        "KRE",
+        "BIZD",
+        "SPY",
+        "BKLN",
+        "LQD",
+        "XLF",
+        "HYG",
+        "KBE"
+      ],
+      "first_date": "2013-01-02",
+      "last_date": "2026-06-23"
+    },
+    "fred": {
+      "retail_mmf_assets": {
+        "series_id": "WRMFNS",
+        "status": "ok",
+        "first_date": "1980-02-04",
+        "last_date": "2026-06-01",
+        "n": 2418,
+        "url": "https://fred.stlouisfed.org/series/WRMFNS"
+      },
+      "total_mmf_assets": {
+        "series_id": "MMMFFAQ027S",
+        "status": "ok",
+        "first_date": "1945-10-01",
+        "last_date": "2026-01-01",
+        "n": 304,
+        "url": "https://fred.stlouisfed.org/series/MMMFFAQ027S"
+      },
+      "bank_credit": {
+        "series_id": "TOTBKCR",
+        "status": "ok",
+        "first_date": "1973-01-03",
+        "last_date": "2026-06-10",
+        "n": 2789,
+        "url": "https://fred.stlouisfed.org/series/TOTBKCR"
+      },
+      "sofr": {
+        "series_id": "SOFR",
+        "status": "ok",
+        "first_date": "2018-04-03",
+        "last_date": "2026-06-22",
+        "n": 2052,
+        "url": "https://fred.stlouisfed.org/series/SOFR"
+      },
+      "iorb": {
+        "series_id": "IORB",
+        "status": "ok",
+        "first_date": "2021-07-29",
+        "last_date": "2026-06-24",
+        "n": 1792,
+        "url": "https://fred.stlouisfed.org/series/IORB"
+      }
+    }
+  },
+  "literature_checked": [
+    {
+      "title": "FSB Global Monitoring Report on Non-Bank Financial Intermediation 2025",
+      "url": "https://www.fsb.org/2025/12/global-monitoring-report-on-nonbank-financial-intermediation-2025/",
+      "role": "NBFI liquidity/maturity transformation and market-volatility amplification motivation."
+    },
+    {
+      "title": "ESRB/ECB 2026 report on bank-NBFI linkages",
+      "url": "https://www.esrb.europa.eu/pub/pdf/reports/esrb.report202602_financialstabilityrisks.en.pdf",
+      "role": "bank liquidity/leverage/market-making channels from NBFI stress."
+    },
+    {
+      "title": "FRED WRMFNS retail money market funds",
+      "url": "https://fred.stlouisfed.org/series/WRMFNS",
+      "role": "weekly ICI-based MMF assets component used as cash-migration proxy."
+    },
+    {
+      "title": "BIS WP 972 Non-bank financial intermediaries and financial stability",
+      "url": "https://www.bis.org/publ/work972.pdf",
+      "role": "liquidity-demand shock and NBFI amplification background."
+    }
+  ],
+  "design": {
+    "proxy_components": [
+      "HYG/BKLN/BIZD ETF dollar-volume shock",
+      "HYG/BKLN/BIZD ETF Amihud-style illiquidity",
+      "HYG vs LQD credit underperformance",
+      "BIZD vs HYG BDC discount-style pressure",
+      "FRED WRMFNS retail MMF flow",
+      "FRED MMMFFAQ027S total MMF asset flow",
+      "FRED TOTBKCR bank-credit contraction",
+      "FRED SOFR minus IORB spread"
+    ],
+    "feature_lag_rule": "Composite run_pressure_index is used only through run_pressure_index.shift(1).",
+    "target_alignment": "Variance targets at date t are forward sums over t..t+h-1; OOS training at t excludes rows whose target window ends after t-1.",
+    "baseline_model": "own lagged target, SPY 22d RV, log VIX, HYG-LQD 22d gap.",
+    "augmented_model": "baseline plus lagged NBFI run-pressure index.",
+    "loss": "Variance targets use QLIKE(actual, predicted); correlation target is diagnostic MSE only.",
+    "formal_test": "DM/HAC on baseline loss minus augmented loss; Harvey-style practical threshold |t| > 3 for variance QLIKE cells."
+  },
+  "summary": {
+    "n_ok_cells": 17,
+    "n_variance_cells": 16,
+    "positive_harvey_cells": 0,
+    "negative_harvey_cells": 0,
+    "median_qlike_improvement_pct": -0.32868756225626394,
+    "mean_qlike_improvement_pct": -0.6240616664105505,
+    "verdict": "null_or_weak_diagnostic",
+    "conclusion": "The free-data NBFI run-pressure proxy does not robustly improve OOS QLIKE for bank/credit ETF variance targets after own-risk, SPY, VIX, and HYG-LQD controls."
+  },
+  "summary_rows": [
+    {
+      "target": "KRE_future_rv_5d",
+      "target_type": "variance",
+      "horizon": 5,
+      "status": "ok",
+      "oos_rows": 1349,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-05-18",
+      "mse_improvement_pct": -0.10824925028941351,
+      "mse_dm_t": -0.7287385557906516,
+      "signal_hac_t": -1.6175732497855702,
+      "signal_hac_beta": -0.052835025461998156,
+      "qlike_improvement_pct": 0.3307238215641853,
+      "qlike_dm_t": 0.42499673518918496,
+      "qlike_base": 0.7157891416927146,
+      "qlike_aug": 0.7134218564889669
+    },
+    {
+      "target": "KRE_future_downside_var_5d",
+      "target_type": "variance",
+      "horizon": 5,
+      "status": "ok",
+      "oos_rows": 1325,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-05-18",
+      "mse_improvement_pct": -0.04338276012467072,
+      "mse_dm_t": -0.9045659048158843,
+      "signal_hac_t": -0.28429430452943233,
+      "signal_hac_beta": -0.016162617241687438,
+      "qlike_improvement_pct": 0.5115577472118729,
+      "qlike_dm_t": 1.104254039687975,
+      "qlike_base": 1.9190080297263428,
+      "qlike_aug": 1.9091911954806597
+    },
+    {
+      "target": "KRE_future_rv_22d",
+      "target_type": "variance",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": -1.7856848103324539,
+      "mse_dm_t": -2.15606754887432,
+      "signal_hac_t": 1.3473816320398255,
+      "signal_hac_beta": 0.04728009833435666,
+      "qlike_improvement_pct": -1.9103912842704542,
+      "qlike_dm_t": -1.5771015316067902,
+      "qlike_base": 0.2717347843085872,
+      "qlike_aug": 0.2769259819443496
+    },
+    {
+      "target": "KRE_future_downside_var_22d",
+      "target_type": "variance",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": -0.6284678209418169,
+      "mse_dm_t": -1.8305848258837616,
+      "signal_hac_t": 0.7879819037535464,
+      "signal_hac_beta": 0.0407517780485316,
+      "qlike_improvement_pct": -0.8786031729704001,
+      "qlike_dm_t": -0.9955811996019944,
+      "qlike_base": 0.5350597056092109,
+      "qlike_aug": 0.5397607571599795
+    },
+    {
+      "target": "KBE_future_rv_5d",
+      "target_type": "variance",
+      "horizon": 5,
+      "status": "ok",
+      "oos_rows": 1349,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-05-18",
+      "mse_improvement_pct": -0.13855996699244488,
+      "mse_dm_t": -0.9890473237215005,
+      "signal_hac_t": -1.0849438997372551,
+      "signal_hac_beta": -0.03494677467266885,
+      "qlike_improvement_pct": 0.07515497231958192,
+      "qlike_dm_t": 0.12385881330857827,
+      "qlike_base": 0.6200061700084157,
+      "qlike_aug": 0.6195402045429662
+    },
+    {
+      "target": "KBE_future_downside_var_5d",
+      "target_type": "variance",
+      "horizon": 5,
+      "status": "ok",
+      "oos_rows": 1319,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-05-18",
+      "mse_improvement_pct": -0.09580727036070298,
+      "mse_dm_t": -0.8095995168992637,
+      "signal_hac_t": 0.4497883641988757,
+      "signal_hac_beta": 0.025698688658028407,
+      "qlike_improvement_pct": 0.31179168297788823,
+      "qlike_dm_t": 0.43419850442742736,
+      "qlike_base": 1.7182982940529485,
+      "qlike_aug": 1.7129407828833405
+    },
+    {
+      "target": "KBE_future_rv_22d",
+      "target_type": "variance",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": -2.110361592015514,
+      "mse_dm_t": -2.322945740828343,
+      "signal_hac_t": 1.5605036620400556,
+      "signal_hac_beta": 0.0566075902749435,
+      "qlike_improvement_pct": -2.347550800980881,
+      "qlike_dm_t": -1.454094778834347,
+      "qlike_base": 0.22707345712369004,
+      "qlike_aug": 0.2324041218852122
+    },
+    {
+      "target": "KBE_future_downside_var_22d",
+      "target_type": "variance",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": -0.5783837258825761,
+      "mse_dm_t": -1.5408846280088355,
+      "signal_hac_t": 0.8775457237425706,
+      "signal_hac_beta": 0.04684168104747912,
+      "qlike_improvement_pct": -0.7325300968321098,
+      "qlike_dm_t": -0.7369461175652544,
+      "qlike_base": 0.4667686716046313,
+      "qlike_aug": 0.47018789260671867
+    },
+    {
+      "target": "XLF_future_rv_5d",
+      "target_type": "variance",
+      "horizon": 5,
+      "status": "ok",
+      "oos_rows": 1349,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-05-18",
+      "mse_improvement_pct": 0.22047548227686173,
+      "mse_dm_t": 0.4509255927253242,
+      "signal_hac_t": 2.0808717743993466,
+      "signal_hac_beta": 0.06290211036143735,
+      "qlike_improvement_pct": 1.0318203917360897,
+      "qlike_dm_t": 1.3842992728862817,
+      "qlike_base": 0.3332036466418916,
+      "qlike_aug": 0.3297655834698323
+    },
+    {
+      "target": "XLF_future_downside_var_5d",
+      "target_type": "variance",
+      "horizon": 5,
+      "status": "ok",
+      "oos_rows": 1288,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-05-18",
+      "mse_improvement_pct": -0.02102276689643961,
+      "mse_dm_t": -0.060854008339922175,
+      "signal_hac_t": 2.2370015004438653,
+      "signal_hac_beta": 0.13067787601634367,
+      "qlike_improvement_pct": 0.7609862702688858,
+      "qlike_dm_t": 0.49715691061069156,
+      "qlike_base": 1.4492346041523905,
+      "qlike_aug": 1.4382061277908051
+    },
+    {
+      "target": "XLF_future_rv_22d",
+      "target_type": "variance",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": -1.7157495386739188,
+      "mse_dm_t": -0.7716524011463732,
+      "signal_hac_t": 2.8100309877820586,
+      "signal_hac_beta": 0.11179355418981864,
+      "qlike_improvement_pct": 2.1112334925035454,
+      "qlike_dm_t": 0.7710539418041433,
+      "qlike_base": 0.1555477469670869,
+      "qlike_aug": 0.1522637708362831
+    },
+    {
+      "target": "XLF_future_downside_var_22d",
+      "target_type": "variance",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": -1.6187127671433323,
+      "mse_dm_t": -1.0215104439208669,
+      "signal_hac_t": 1.7106683956109197,
+      "signal_hac_beta": 0.10392114111540367,
+      "qlike_improvement_pct": 0.8246172795146067,
+      "qlike_dm_t": 0.455643092309677,
+      "qlike_base": 0.37367058383915136,
+      "qlike_aug": 0.3705892316363506
+    },
+    {
+      "target": "HYG_future_rv_5d",
+      "target_type": "variance",
+      "horizon": 5,
+      "status": "ok",
+      "oos_rows": 1349,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-05-18",
+      "mse_improvement_pct": 1.1976581980915009,
+      "mse_dm_t": 2.240642122082208,
+      "signal_hac_t": 1.1896155159742243,
+      "signal_hac_beta": 0.051838326929956866,
+      "qlike_improvement_pct": -2.17979836181783,
+      "qlike_dm_t": -1.9177628067458055,
+      "qlike_base": 0.7314520021139632,
+      "qlike_aug": 0.7473961808735271
+    },
+    {
+      "target": "HYG_future_downside_var_5d",
+      "target_type": "variance",
+      "horizon": 5,
+      "status": "ok",
+      "oos_rows": 1303,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-05-18",
+      "mse_improvement_pct": 0.3820816604301197,
+      "mse_dm_t": 2.080904220868193,
+      "signal_hac_t": 0.6308305274960466,
+      "signal_hac_beta": 0.04705991725231434,
+      "qlike_improvement_pct": -0.7602414090168135,
+      "qlike_dm_t": -0.9165048508126108,
+      "qlike_base": 1.927044265536284,
+      "qlike_aug": 1.9416944540129748
+    },
+    {
+      "target": "HYG_future_rv_22d",
+      "target_type": "variance",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": 4.255587794069482,
+      "mse_dm_t": 1.2444154424434424,
+      "signal_hac_t": 1.8953172591482763,
+      "signal_hac_beta": 0.1117062733947347,
+      "qlike_improvement_pct": -4.46457110800551,
+      "qlike_dm_t": -1.270438404733789,
+      "qlike_base": 0.45717965414437683,
+      "qlike_aug": 0.4775907648949862
+    },
+    {
+      "target": "HYG_future_downside_var_22d",
+      "target_type": "variance",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": 1.4894364439434764,
+      "mse_dm_t": 0.9717884778507614,
+      "signal_hac_t": 1.6276941895013846,
+      "signal_hac_beta": 0.11418245491643182,
+      "qlike_improvement_pct": -2.6691860867714645,
+      "qlike_dm_t": -0.803085395128305,
+      "qlike_base": 0.7599951468218293,
+      "qlike_aug": 0.780280831540936
+    },
+    {
+      "target": "bank_credit_cross_sector_corr_22d",
+      "target_type": "correlation",
+      "horizon": 22,
+      "status": "ok",
+      "oos_rows": 1332,
+      "first_oos_date": "2021-01-04",
+      "last_oos_date": "2026-04-23",
+      "mse_improvement_pct": -0.0932436393798591,
+      "mse_dm_t": -0.1014306357016471,
+      "signal_hac_t": 0.7265282925217819,
+      "signal_hac_beta": 0.00637154555318992
+    }
+  ],
+  "detailed_results": {
+    "KRE_future_rv_5d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3239,
+        "oos_rows": 1349,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-05-18",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-05-18",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 65
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 6.343086722758082e-06,
+        "mse_aug": 6.349953066580675e-06,
+        "mse_improvement_pct": -0.10824925028941351,
+        "mse_dm": {
+          "mean": -6.866343822592089e-09,
+          "t": -0.7287385557906516,
+          "p": 0.4661616033780842,
+          "n": 1349
+        },
+        "qlike_base": 0.7157891416927146,
+        "qlike_aug": 0.7134218564889669,
+        "qlike_improvement_pct": 0.3307238215641853,
+        "qlike_dm": {
+          "mean": 0.0023672852037475056,
+          "t": 0.42499673518918496,
+          "p": 0.6708390547359864,
+          "n": 1349
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": -0.052835025461998156,
+        "t": -1.6175732497855702,
+        "p": 0.10575459786466124,
+        "n": 3239
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "KRE_future_downside_var_5d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3158,
+        "oos_rows": 1325,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-05-18",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-05-18",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 4.116000631390179e-06,
+        "mse_aug": 4.117786266070825e-06,
+        "mse_improvement_pct": -0.04338276012467072,
+        "mse_dm": {
+          "mean": -1.785634680644623e-09,
+          "t": -0.9045659048158843,
+          "p": 0.36569540491860475,
+          "n": 1325
+        },
+        "qlike_base": 1.9190080297263428,
+        "qlike_aug": 1.9091911954806597,
+        "qlike_improvement_pct": 0.5115577472118729,
+        "qlike_dm": {
+          "mean": 0.009816834245682901,
+          "t": 1.104254039687975,
+          "p": 0.26948295377553166,
+          "n": 1325
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": -0.016162617241687438,
+        "t": -0.28429430452943233,
+        "p": 0.7761848504848297,
+        "n": 3158
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "KRE_future_rv_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 4.247274561536432e-05,
+        "mse_aug": 4.3231174982349025e-05,
+        "mse_improvement_pct": -1.7856848103324539,
+        "mse_dm": {
+          "mean": -7.584293669847046e-07,
+          "t": -2.15606754887432,
+          "p": 0.03107839099683325,
+          "n": 1332
+        },
+        "qlike_base": 0.2717347843085872,
+        "qlike_aug": 0.2769259819443496,
+        "qlike_improvement_pct": -1.9103912842704542,
+        "qlike_dm": {
+          "mean": -0.005191197635762336,
+          "t": -1.5771015316067902,
+          "p": 0.11477216486474734,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.04728009833435666,
+        "t": 1.3473816320398255,
+        "p": 0.17785735320607854,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "KRE_future_downside_var_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 2.548869363355045e-05,
+        "mse_aug": 2.564888187101576e-05,
+        "mse_improvement_pct": -0.6284678209418169,
+        "mse_dm": {
+          "mean": -1.601882374653073e-07,
+          "t": -1.8305848258837616,
+          "p": 0.06716253513271181,
+          "n": 1332
+        },
+        "qlike_base": 0.5350597056092109,
+        "qlike_aug": 0.5397607571599795,
+        "qlike_improvement_pct": -0.8786031729704001,
+        "qlike_dm": {
+          "mean": -0.004701051550768467,
+          "t": -0.9955811996019944,
+          "p": 0.3194536731863835,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.0407517780485316,
+        "t": 0.7879819037535464,
+        "p": 0.43070729099410143,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "KBE_future_rv_5d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3239,
+        "oos_rows": 1349,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-05-18",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-05-18",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 65
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 3.7117474942219697e-06,
+        "mse_aug": 3.7168904903248066e-06,
+        "mse_improvement_pct": -0.13855996699244488,
+        "mse_dm": {
+          "mean": -5.1429961028361746e-09,
+          "t": -0.9890473237215005,
+          "p": 0.3226399883889154,
+          "n": 1349
+        },
+        "qlike_base": 0.6200061700084157,
+        "qlike_aug": 0.6195402045429662,
+        "qlike_improvement_pct": 0.07515497231958192,
+        "qlike_dm": {
+          "mean": 0.00046596546544942004,
+          "t": 0.12385881330857827,
+          "p": 0.9014270639851086,
+          "n": 1349
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": -0.03494677467266885,
+        "t": -1.0849438997372551,
+        "p": 0.2779465030146471,
+        "n": 3239
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "KBE_future_downside_var_5d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3143,
+        "oos_rows": 1319,
+        "first_clean_date": "2013-07-03",
+        "last_clean_date": "2026-05-18",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-05-18",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 63
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 2.3599927824525766e-06,
+        "mse_aug": 2.362253827118154e-06,
+        "mse_improvement_pct": -0.09580727036070298,
+        "mse_dm": {
+          "mean": -2.2610446655772342e-09,
+          "t": -0.8095995168992637,
+          "p": 0.41817038584795674,
+          "n": 1319
+        },
+        "qlike_base": 1.7182982940529485,
+        "qlike_aug": 1.7129407828833405,
+        "qlike_improvement_pct": 0.31179168297788823,
+        "qlike_dm": {
+          "mean": 0.005357511169608194,
+          "t": 0.43419850442742736,
+          "p": 0.6641442990461288,
+          "n": 1319
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.025698688658028407,
+        "t": 0.4497883641988757,
+        "p": 0.652863048666541,
+        "n": 3143
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "KBE_future_rv_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 2.4723803055128503e-05,
+        "mse_aug": 2.5245564698889493e-05,
+        "mse_improvement_pct": -2.110361592015514,
+        "mse_dm": {
+          "mean": -5.217616437609974e-07,
+          "t": -2.322945740828343,
+          "p": 0.02018206746603941,
+          "n": 1332
+        },
+        "qlike_base": 0.22707345712369004,
+        "qlike_aug": 0.2324041218852122,
+        "qlike_improvement_pct": -2.347550800980881,
+        "qlike_dm": {
+          "mean": -0.005330664761522195,
+          "t": -1.454094778834347,
+          "p": 0.14592003093233977,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.0566075902749435,
+        "t": 1.5605036620400556,
+        "p": 0.11864090525264094,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "KBE_future_downside_var_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 1.4534363672230886e-05,
+        "mse_aug": 1.4618428066371659e-05,
+        "mse_improvement_pct": -0.5783837258825761,
+        "mse_dm": {
+          "mean": -8.406439414077344e-08,
+          "t": -1.5408846280088355,
+          "p": 0.12334486770027638,
+          "n": 1332
+        },
+        "qlike_base": 0.4667686716046313,
+        "qlike_aug": 0.47018789260671867,
+        "qlike_improvement_pct": -0.7325300968321098,
+        "qlike_dm": {
+          "mean": -0.0034192210020873707,
+          "t": -0.7369461175652544,
+          "p": 0.46115511723835134,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.04684168104747912,
+        "t": 0.8775457237425706,
+        "p": 0.3801902950372069,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "XLF_future_rv_5d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3239,
+        "oos_rows": 1349,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-05-18",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-05-18",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 65
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 6.910526005877891e-07,
+        "mse_aug": 6.895289990338564e-07,
+        "mse_improvement_pct": 0.22047548227686173,
+        "mse_dm": {
+          "mean": 1.5236015539325056e-09,
+          "t": 0.4509255927253242,
+          "p": 0.6520431773764395,
+          "n": 1349
+        },
+        "qlike_base": 0.3332036466418916,
+        "qlike_aug": 0.3297655834698323,
+        "qlike_improvement_pct": 1.0318203917360897,
+        "qlike_dm": {
+          "mean": 0.003438063172059313,
+          "t": 1.3842992728862817,
+          "p": 0.16626683659192132,
+          "n": 1349
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.06290211036143735,
+        "t": 2.0808717743993466,
+        "p": 0.03744564430804474,
+        "n": 3239
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "XLF_future_downside_var_5d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3115,
+        "oos_rows": 1288,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-05-18",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-05-18",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 62
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 4.885609926129351e-07,
+        "mse_aug": 4.88663701651559e-07,
+        "mse_improvement_pct": -0.02102276689643961,
+        "mse_dm": {
+          "mean": -1.0270903862397917e-10,
+          "t": -0.060854008339922175,
+          "p": 0.9514754775481067,
+          "n": 1288
+        },
+        "qlike_base": 1.4492346041523905,
+        "qlike_aug": 1.4382061277908051,
+        "qlike_improvement_pct": 0.7609862702688858,
+        "qlike_dm": {
+          "mean": 0.011028476361585599,
+          "t": 0.49715691061069156,
+          "p": 0.6190784047160619,
+          "n": 1288
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.13067787601634367,
+        "t": 2.2370015004438653,
+        "p": 0.02528624197360795,
+        "n": 3115
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "XLF_future_rv_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 5.114525217193072e-06,
+        "mse_aug": 5.2022776600124234e-06,
+        "mse_improvement_pct": -1.7157495386739188,
+        "mse_dm": {
+          "mean": -8.77524428193514e-08,
+          "t": -0.7716524011463732,
+          "p": 0.44032032941016064,
+          "n": 1332
+        },
+        "qlike_base": 0.1555477469670869,
+        "qlike_aug": 0.1522637708362831,
+        "qlike_improvement_pct": 2.1112334925035454,
+        "qlike_dm": {
+          "mean": 0.0032839761308037863,
+          "t": 0.7710539418041433,
+          "p": 0.4406749591907215,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.11179355418981864,
+        "t": 2.8100309877820586,
+        "p": 0.004953673022900977,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "XLF_future_downside_var_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 2.6268160827065183e-06,
+        "mse_aug": 2.669336690006663e-06,
+        "mse_improvement_pct": -1.6187127671433323,
+        "mse_dm": {
+          "mean": -4.2520607300144965e-08,
+          "t": -1.0215104439208669,
+          "p": 0.3070126635260877,
+          "n": 1332
+        },
+        "qlike_base": 0.37367058383915136,
+        "qlike_aug": 0.3705892316363506,
+        "qlike_improvement_pct": 0.8246172795146067,
+        "qlike_dm": {
+          "mean": 0.0030813522028007296,
+          "t": 0.455643092309677,
+          "p": 0.6486466502603192,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.10392114111540367,
+        "t": 1.7106683956109197,
+        "p": 0.08714234510633996,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "HYG_future_rv_5d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3239,
+        "oos_rows": 1349,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-05-18",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-05-18",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 65
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 3.131524810435534e-08,
+        "mse_aug": 3.0940198468180833e-08,
+        "mse_improvement_pct": 1.1976581980915009,
+        "mse_dm": {
+          "mean": 3.750496361745068e-10,
+          "t": 2.240642122082208,
+          "p": 0.025049265933910884,
+          "n": 1349
+        },
+        "qlike_base": 0.7314520021139632,
+        "qlike_aug": 0.7473961808735271,
+        "qlike_improvement_pct": -2.17979836181783,
+        "qlike_dm": {
+          "mean": -0.01594417875956384,
+          "t": -1.9177628067458055,
+          "p": 0.05514109382087758,
+          "n": 1349
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.051838326929956866,
+        "t": 1.1896155159742243,
+        "p": 0.23419754460382436,
+        "n": 3239
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "HYG_future_downside_var_5d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3104,
+        "oos_rows": 1303,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-05-18",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-05-18",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 63
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 1.6308902906643532e-08,
+        "mse_aug": 1.6246589579619892e-08,
+        "mse_improvement_pct": 0.3820816604301197,
+        "mse_dm": {
+          "mean": 6.231332702364276e-11,
+          "t": 2.080904220868193,
+          "p": 0.03744267374106435,
+          "n": 1303
+        },
+        "qlike_base": 1.927044265536284,
+        "qlike_aug": 1.9416944540129748,
+        "qlike_improvement_pct": -0.7602414090168135,
+        "qlike_dm": {
+          "mean": -0.01465018847669059,
+          "t": -0.9165048508126108,
+          "p": 0.35940216439797246,
+          "n": 1303
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.04705991725231434,
+        "t": 0.6308305274960466,
+        "p": 0.5281513405629812,
+        "n": 3104
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "HYG_future_rv_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 2.8950198444559464e-07,
+        "mse_aug": 2.77181973331939e-07,
+        "mse_improvement_pct": 4.255587794069482,
+        "mse_dm": {
+          "mean": 1.2320011113655666e-08,
+          "t": 1.2444154424434424,
+          "p": 0.21334670234262887,
+          "n": 1332
+        },
+        "qlike_base": 0.45717965414437683,
+        "qlike_aug": 0.4775907648949862,
+        "qlike_improvement_pct": -4.46457110800551,
+        "qlike_dm": {
+          "mean": -0.02041111075060935,
+          "t": -1.270438404733789,
+          "p": 0.2039285104880474,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.1117062733947347,
+        "t": 1.8953172591482763,
+        "p": 0.05805038298205681,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "HYG_future_downside_var_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 1.156022044795819e-07,
+        "mse_aug": 1.1388038311606096e-07,
+        "mse_improvement_pct": 1.4894364439434764,
+        "mse_dm": {
+          "mean": 1.7218213635209352e-09,
+          "t": 0.9717884778507614,
+          "p": 0.3311557891591965,
+          "n": 1332
+        },
+        "qlike_base": 0.7599951468218293,
+        "qlike_aug": 0.780280831540936,
+        "qlike_improvement_pct": -2.6691860867714645,
+        "qlike_dm": {
+          "mean": -0.020285684719106682,
+          "t": -0.803085395128305,
+          "p": 0.4219253785853041,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.11418245491643182,
+        "t": 1.6276941895013846,
+        "p": 0.10358974577649999,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "variance"
+    },
+    "bank_credit_cross_sector_corr_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 3222,
+        "oos_rows": 1332,
+        "first_clean_date": "2013-07-02",
+        "last_clean_date": "2026-04-23",
+        "first_oos_date": "2021-01-04",
+        "last_oos_date": "2026-04-23",
+        "min_train": 756,
+        "refit_every": 21,
+        "refit_count": 64
+      },
+      "eval": {
+        "status": "ok",
+        "mse_base": 0.012485596661516557,
+        "mse_aug": 0.012497238686242045,
+        "mse_improvement_pct": -0.0932436393798591,
+        "mse_dm": {
+          "mean": -1.16420247254864e-05,
+          "t": -0.1014306357016471,
+          "p": 0.919208618101918,
+          "n": 1332
+        }
+      },
+      "signal_hac_coefficient": {
+        "coef": 0.00637154555318992,
+        "t": 0.7265282925217819,
+        "p": 0.46751496959954064,
+        "n": 3222
+      },
+      "base_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_rv22_lag1",
+        "vix_log_lag1",
+        "hyg_lqd_gap_22_lag1",
+        "run_pressure_lag1"
+      ],
+      "target_type": "correlation"
+    }
+  },
+  "figures": {
+    "run_pressure_timeseries": "figures/nbfi_run_pressure_timeseries.png",
+    "oos_dm_tstats": "figures/oos_dm_tstats.png"
+  },
+  "limitations": [
+    "This is a pure free-data proxy, not ICI full MMF flow by fund, TRACE liquidity, fund NAV discount, or supervisory NBFI exposure data.",
+    "WRMFNS is a retail MMF component built from weekly ICI data; total MMF assets are quarterly flow-of-funds data and are forward-filled for daily alignment.",
+    "ETF price/volume pressure can mix NBFI liquidity stress with ordinary market beta and risk-off regimes.",
+    "Correlation target is a diagnostic MSE cell, not a variance-forecast QLIKE cell."
+  ]
+}

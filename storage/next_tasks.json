@@ -36551,7 +36551,7 @@
     "title": "研究 backlog fallback: NBFI 流動性壓力的免費 proxy → 信用 / 銀行 ETF vol 領先性（EU FSB 2026 stress test 前哨）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: NBFI 流動性壓力的免費 proxy → 信用 / 銀行 ETF vol 領先性（EU FSB 2026 stress test 前哨） — 用 ICI MMF 流量、HYG/BKLN/BIZD 成交額與折溢價代理、FRED bank credit、SOFR-IORB → 建 NBFI run-pressure 綜合指標（pure free-data proxy），檢定是否領先 KRE/KBE/XLF + HYG RV、left-tail 與 cross-sector correlation 升高，明確 shift(1) lag；與 K1538 bond-fund run pressure  | 來源 section: 期刊主題挖掘 batch 2026-06-24（journal_discovery_20260624_0；websearch jbf/joe/rfs/jpm/faj/jfec/jfe/qje/econometrica/jof/ijf/jfqa/jai/jod/jot/jfm/jbes/aer 2025-26 趨勢層級；selectivity gate 後 13 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -36560,7 +36560,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T19:08:23+00:00"
+    "created_at": "2026-06-23T19:08:23+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-24T01:42:27.071380+00:00",
+    "claim_session_id": "9877386c6465",
+    "started_at": "2026-06-24T01:42:32.841301+00:00",
+    "completed_at": "2026-06-24T01:50:20.811949+00:00",
+    "result": "Completed NBFI run-pressure free-data proxy experiment. 16 KRE/KBE/XLF/HYG variance OOS cells showed zero positive Harvey-level QLIKE wins; median QLIKE improvement -0.33%, verdict null_or_weak_diagnostic. Added experiment outputs, Codex review, knowledge ID e8300a8d, and research_program backlog note."
   },
   {
     "id": "research_hedge_fund_alpha_dispersion_regime_strategy_etf",
