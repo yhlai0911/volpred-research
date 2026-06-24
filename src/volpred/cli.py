@@ -2442,6 +2442,56 @@ def ops_check_alerts(storage_dir: str) -> None:
     _print_json({"action": "check_alerts", **result})
 
 
+@ops.command("content-quality-report")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option(
+    "--output",
+    "output_path",
+    default="storage/ops/content_quality_report.json",
+    show_default=True,
+    help="Where to persist the snapshot JSON (used by dashboards)",
+)
+def ops_content_quality_report(storage_dir: str, output_path: str) -> None:
+    """Run the content-quality patrol (rhythm / digest uniqueness / title format).
+
+    Writes a JSON snapshot to --output and prints a summary line. The alert
+    chain (`volpred ops check-alerts`) runs the same checks for email
+    notification; this command exposes the raw report for dashboards / cron
+    consumers and gives a quick CLI readout for manual ops.
+    """
+    import json
+    from pathlib import Path as _Path
+
+    from volpred.ops.content_quality import content_quality_snapshot
+
+    snapshot = content_quality_snapshot(storage_dir=storage_dir)
+    out = _Path(output_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        json.dumps(snapshot, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    rhythm = snapshot["publish_rhythm"]["status"]
+    digest = snapshot["daily_digest_uniqueness"]["status"]
+    title = snapshot["title_format"]["status"]
+    breached = (
+        digest == "duplicate"
+        or rhythm in ("burst", "drought")
+        or any(
+            f["issue"] == "digest_prefix_duplicates_section_header"
+            for f in snapshot["title_format"]["findings"]
+        )
+    )
+    colour = "yellow" if breached else "green"
+    console.print(
+        f"[{colour}]Content quality patrol[/{colour}] "
+        f"rhythm={rhythm} digest={digest} title={title} "
+        f"→ {out}"
+    )
+    _print_json({"action": "content_quality_report", "path": str(out), **snapshot})
+
+
 @ops.command("paper-list")
 def ops_paper_list() -> None:
     """List DB-driven papers and whether their PDFs are already storage-backed."""

@@ -11,6 +11,10 @@ from volpred.config import load_runtime_schedules
 from volpred.publisher.email_notifier import EmailNotifier
 
 from .common import dump_json, load_json, project_path
+from .content_quality import (
+    DIGEST_TITLE_PREFIX,
+    content_quality_snapshot,
+)
 from .diagnostics import warn
 from .health import (
     DISK_USAGE_ALERT_PCT,
@@ -1366,6 +1370,113 @@ def _parse_disk_usage_state(storage_dir: str) -> dict[str, Any]:
     }
 
 
+def _parse_content_quality_state(
+    storage_dir: str, now: datetime
+) -> dict[str, Any]:
+    """Content-quality patrol breach (2026-06-24 meta-fix).
+
+    Aggregates `content_quality_snapshot` into the alert chain. Breach
+    severity follows the worst sub-check:
+
+    - `duplicate` daily digest → warn (today's mile_f3e389cf dup case)
+    - `digest_prefix_duplicates_section_header` title finding → warn
+    - rhythm `burst` or `drought` → warn
+    - any other title format issue → info-level note (no breach)
+
+    Body lists the breached sub-checks plus pointers; details carries the
+    full snapshot for `ops_dashboard` consumers.
+    """
+    snapshot = content_quality_snapshot(storage_dir, now=now)
+    digest = snapshot["daily_digest_uniqueness"]
+    rhythm = snapshot["publish_rhythm"]
+    title = snapshot["title_format"]
+
+    breached_subchecks: list[str] = []
+    if digest["status"] == "duplicate":
+        breached_subchecks.append("daily_digest_uniqueness")
+    if rhythm["status"] in ("burst", "drought"):
+        breached_subchecks.append(f"publish_rhythm:{rhythm['status']}")
+    if any(
+        f["issue"] == "digest_prefix_duplicates_section_header"
+        for f in title["findings"]
+    ):
+        breached_subchecks.append("title_format:digest_prefix")
+
+    breached = bool(breached_subchecks)
+
+    lines = ["## 觸發條件"]
+    if digest["status"] == "duplicate":
+        ids = ", ".join(x.get("id", "?") for x in digest["items"])
+        lines.append(
+            f"- daily_digest: 同日（TPE {digest['date_tpe']}）published "
+            f"{digest['published_count']} 篇 `{DIGEST_TITLE_PREFIX}`: {ids}"
+        )
+    if rhythm["status"] == "burst":
+        lines.append(
+            f"- publish_rhythm: burst — {len(rhythm['burst_pairs'])} 對 "
+            f"間距 < {rhythm['burst_gap_threshold_min']}min（最新間距列表："
+            f"{rhythm['gaps_min_newest_first'][:3]}）"
+        )
+    if rhythm["status"] == "drought":
+        lines.append(
+            f"- publish_rhythm: drought — 距最新發文 "
+            f"{rhythm['age_since_newest_min']}min "
+            f"> {rhythm['drought_gap_threshold_hours']}h 門檻"
+            f"（作用窗 TPE hour={rhythm['tpe_hour']}）"
+        )
+    if any(
+        f["issue"] == "digest_prefix_duplicates_section_header"
+        for f in title["findings"]
+    ):
+        dup_titles = [
+            f for f in title["findings"]
+            if f["issue"] == "digest_prefix_duplicates_section_header"
+        ]
+        lines.append(
+            f"- title_format: {len(dup_titles)} 篇 digest title 重複前端區塊"
+            "標頭 `每日精選導讀`"
+        )
+    if not breached:
+        lines.append("- (none)")
+
+    lines.extend(
+        [
+            "",
+            "## 影響",
+            "內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 "
+            "2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，"
+            "未來這類問題不再倚賴人工發現。",
+            "",
+            "## 建議行動（主線程 auto-remediation）",
+            "1. `daily_digest_uniqueness=duplicate` → 檢視 `storage/ops/"
+            "content_quality_report.json` items，挑 1 篇 retract："
+            "`uv run volpred ops unpublish --mile-id <id>`；同時排查為何"
+            " enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。",
+            "2. `publish_rhythm=burst` → 派工節流，下一輪 hourly 跳過 reader-facing；"
+            "查 dispatch log 是否雙 session 同時 fire。",
+            "3. `publish_rhythm=drought` → 立即 `release-pool-by-settings` 或派 "
+            "fresh-arc daily_article 補位；同時查 release deadlock "
+            "(`docs/refactor_plan_release_layer_deadlock.md`)。",
+            "4. `title_format:digest_prefix` → 前端 header 與 title 擇一移除前綴；"
+            "前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。",
+        ]
+    )
+
+    body = "\n".join(lines)
+    return {
+        "id": "content_quality",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        "title": (
+            "內容品質巡檢觸發（" + " / ".join(breached_subchecks) + "）"
+            if breached
+            else "content_quality ok"
+        ),
+        "body": body if breached else "",
+        "details": snapshot,
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -1387,6 +1498,7 @@ def build_alert_condition_report(
         _parse_strategy_metrics_freshness_state(storage_dir),     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_paper_trading_gaps_state(storage_dir),             # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol
+        _parse_content_quality_state(storage_dir, current),       # 2026-06-24 meta-fix: content patrol layer
     ]
     return {
         "generated_at": current.isoformat(),
