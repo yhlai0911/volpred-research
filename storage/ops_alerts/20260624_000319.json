@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-06-24T00:03:19Z",
+  "timestamp_tw": "2026-06-24T08:03:19+08:00",
+  "alert_type": "STRATEGY_METRICS_FRESHNESS",
+  "severity": "warning",
+  "title": "strategy_metrics.json missing (metrics stale)",
+  "detail": "storage/strategy_metrics.json does not exist. Cannot verify strategy metrics freshness. File has been missing since at least 2026-05-31. Strategy rankings and downstream displays may be broken.",
+  "recommended_action": "Regenerate strategy_metrics.json via: uv run volpred ops compute-strategy-metrics"
+}
