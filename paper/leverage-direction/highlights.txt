@@ -1,7 +1,7 @@
 Highlights
 
-- Gold exhibits regime-dependent inverted leverage (t = -5.79, 93% negative)
-- GJR-GARCH beats GARCH only when gamma > 0.10; gamma sign guides selection
-- Gamma predicts VT alpha channel for equities (rho = 0.886, p = 0.019)
-- VT drawdown reduction is universal, driven by volatility level (rho = 0.944)
-- Time-zone momentum yields t > 3.0 in six Asia-Pacific markets after costs
+- Gold's inverted leverage is regime-dependent: unconditional rolling mean is indistinguishable from zero (gamma = +0.002), but fear-driven rallies vs liquidation declines differ at t = -3.79 (p < 0.001)
+- GJR-GARCH beats symmetric GARCH only when gamma is statistically significant (t > 1.65); 11/11 in-sample and 6/6 out-of-sample model comparisons correctly classified
+- Gamma direction predicts the channel of volatility-targeting alpha for equity-type assets (Spearman rho = 0.886, p = 0.019)
+- Volatility-targeting drawdown reduction is universal across asset classes and driven by base volatility level (rho = 0.944), independent of gamma sign
+- US-to-Asia time-zone momentum yields t-statistics exceeding the Harvey et al. (2016) multiple-testing threshold in six Asia-Pacific markets, net of transaction costs
