@@ -108,15 +108,35 @@ def test_paper_trading_three_nulls_is_gap(tmp_path: Path):
 # --------------------------------------------------------------------------- #
 # disk_usage
 # --------------------------------------------------------------------------- #
-def test_disk_usage_alert_when_high(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_disk_usage_alert_when_high_pct_and_low_free(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    # 雙條件都滿足：96% 使用率 + 僅 40GB free（< 50GB）→ alert
     storage = tmp_path / "storage"
     storage.mkdir(parents=True)
     monkeypatch.setattr(
-        health.shutil, "disk_usage", lambda _p: _DiskUsage(total=100, used=90, free=10)
+        health.shutil,
+        "disk_usage",
+        lambda _p: _DiskUsage(total=1000 * 10**9, used=960 * 10**9, free=40 * 10**9),
     )
     result = check_disk_usage(str(storage))
     assert result["status"] == "alert"
-    assert result["pct"] == 90.0
+    assert result["pct"] == 96.0
+    assert result["free_gb"] == 40.0
+
+
+def test_disk_usage_ok_when_high_pct_but_ample_free(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    # 大碟誤報防護：87% 使用率但仍有 130GB free（> 50GB）→ ok（不 alert）
+    # 對應真實案例：926GB 碟 83% 使用、156GB free 不該誤報。
+    storage = tmp_path / "storage"
+    storage.mkdir(parents=True)
+    monkeypatch.setattr(
+        health.shutil,
+        "disk_usage",
+        lambda _p: _DiskUsage(total=1000 * 10**9, used=870 * 10**9, free=130 * 10**9),
+    )
+    result = check_disk_usage(str(storage))
+    assert result["status"] == "ok"
+    assert result["pct"] == 87.0
+    assert result["free_gb"] == 130.0
 
 
 def test_disk_usage_ok_when_low(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):

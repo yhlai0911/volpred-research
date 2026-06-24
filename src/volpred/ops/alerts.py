@@ -14,6 +14,7 @@ from .common import dump_json, load_json, project_path
 from .diagnostics import warn
 from .health import (
     DISK_USAGE_ALERT_PCT,
+    DISK_USAGE_MIN_FREE_GB,
     PAPER_TRADING_GAP_NULL_THRESHOLD,
     STRATEGY_METRICS_STALE_HOURS,
     check_disk_usage,
@@ -1323,19 +1324,22 @@ def _parse_paper_trading_gaps_state(storage_dir: str) -> dict[str, Any]:
 
 
 def _parse_disk_usage_state(storage_dir: str) -> dict[str, Any]:
-    """Root-filesystem usage > 85% → alert (warn).
+    """Disk usage > 85% AND free < 50GB → alert (warn, 雙條件避免大碟誤報).
 
     Migrated 2026-06-24 from the disabled cloud platform-ops-patrol routine.
+    2026-06-24 改雙條件：純百分比對大碟（926GB）在 85% 時仍有上百 GB free 卻誤報。
     """
     check = check_disk_usage(storage_dir)
     pct = check.get("pct")
+    free_gb = check.get("free_gb")
     breached = check.get("status") == "alert"
     body = "\n".join(
         [
             "## 觸發條件",
-            f"根目錄磁碟使用率 > {DISK_USAGE_ALERT_PCT}%。",
+            f"磁碟使用率 > {DISK_USAGE_ALERT_PCT}% 且剩餘空間 < {DISK_USAGE_MIN_FREE_GB}GB（雙條件）。",
             f"- 使用率: {pct if pct is not None else '不可讀'}%",
-            f"- 門檻: {DISK_USAGE_ALERT_PCT}%",
+            f"- 剩餘空間: {free_gb if free_gb is not None else '不可讀'}GB",
+            f"- 門檻: 使用率 > {DISK_USAGE_ALERT_PCT}% 且 free < {DISK_USAGE_MIN_FREE_GB}GB",
             "",
             "## 影響",
             "磁碟接近滿載 → experiment 輸出 / log / sync 寫入可能失敗，造成 silent data loss "
@@ -1351,9 +1355,9 @@ def _parse_disk_usage_state(storage_dir: str) -> dict[str, Any]:
         "id": "disk_usage",
         "breached": breached,
         "level": "warn" if breached else "info",
-        # title 穩定（不含動態 pct）— 維持 24h dedup 有效，動態值放 body/details。
+        # title 穩定（不含動態值）— 維持 24h dedup 有效，動態值放 body/details。
         "title": (
-            f"磁碟使用率超標（> {DISK_USAGE_ALERT_PCT}%）"
+            f"磁碟空間不足（使用率 > {DISK_USAGE_ALERT_PCT}% 且剩餘 < {DISK_USAGE_MIN_FREE_GB}GB）"
             if breached
             else "disk_usage ok"
         ),

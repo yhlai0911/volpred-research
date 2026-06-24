@@ -18,6 +18,7 @@ from .scheduler import get_scheduler_state
 STRATEGY_METRICS_STALE_HOURS = 26.0
 PAPER_TRADING_GAP_NULL_THRESHOLD = 2  # >2 nulls in last 3 entries → gap alert
 DISK_USAGE_ALERT_PCT = 85.0
+DISK_USAGE_MIN_FREE_GB = 50.0  # 雙條件：須同時 >85% 且 free < 50GB 才 alert（避免大碟誤報）
 
 
 def check_strategy_metrics_freshness(storage_dir: str = "storage") -> dict:
@@ -103,11 +104,19 @@ def check_paper_trading_gaps(storage_dir: str = "storage") -> dict:
 
 
 def check_disk_usage(storage_dir: str = "storage") -> dict:
-    """Root-filesystem usage > 85% → alert."""
+    """Disk usage > 85% AND free < 50GB → alert (雙條件，避免大碟誤報)."""
     target = project_path(storage_dir)
+    unknown = {
+        "status": "unknown",
+        "pct": None,
+        "free_gb": None,
+        "threshold_pct": DISK_USAGE_ALERT_PCT,
+        "min_free_gb": DISK_USAGE_MIN_FREE_GB,
+    }
     try:
         usage = shutil.disk_usage(target)
         pct = round(usage.used / usage.total * 100.0, 2) if usage.total else None
+        free_gb = round(usage.free / 1e9, 2)
     except OSError as exc:
         warn(
             "health_disk_usage",
@@ -115,13 +124,18 @@ def check_disk_usage(storage_dir: str = "storage") -> dict:
             path=str(target),
             err=str(exc),
         )
-        return {"status": "unknown", "pct": None, "threshold_pct": DISK_USAGE_ALERT_PCT}
+        return unknown
     if pct is None:
-        return {"status": "unknown", "pct": None, "threshold_pct": DISK_USAGE_ALERT_PCT}
+        return unknown
+    # 雙條件：僅在使用率高 *且* 絕對剩餘空間不足時才 alert，避免大碟
+    # （如 926GB）在 85% 時仍有上百 GB free 卻誤報。
+    breached = pct > DISK_USAGE_ALERT_PCT and free_gb < DISK_USAGE_MIN_FREE_GB
     return {
-        "status": "alert" if pct > DISK_USAGE_ALERT_PCT else "ok",
+        "status": "alert" if breached else "ok",
         "pct": pct,
+        "free_gb": free_gb,
         "threshold_pct": DISK_USAGE_ALERT_PCT,
+        "min_free_gb": DISK_USAGE_MIN_FREE_GB,
     }
 
 
