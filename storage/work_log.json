@@ -11382,5 +11382,17 @@
     "summary": "K1549 Russell reconstitution event study — NULL on 12/12 Bonferroni family (m=12, α=0.00417). All 12 ratios geom-mean <1: event window quieter than baseline (caveat: baseline overlaps earnings + FOMC). n=16 years, IWM/IWO/IWN/IWP. Reviewer=self_audit (Codex 5min timeout fallback per K1259 gate). Orthogonal to K1341 S&P inclusion NULL.",
     "commit": "merged from worktree-agent-a591aea499df5f634",
     "owner": "hourly-16"
+  },
+  {
+    "timestamp": "2026-06-24T17:16",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_content_quality_patrol_mvp_20260624",
+    "outcome": "succeeded",
+    "summary": "Content-quality patrol MVP (meta-fix #1): module + 3 checks (rhythm/digest uniqueness/title format) + CLI + alerts wiring + 14 tests. Real feed already surfaces 4 digest titles with prefix-dup + 1 over-long title.",
+    "commits": [
+      "fc5ce73fb",
+      "e3160d8f1"
+    ],
+    "next": "follow-up fire: 4 remaining checks (主題多樣性/前端 render/內容完整/release candidates 連續 0)"
   }
 ]
