@@ -26,7 +26,7 @@
 
 ### Auto-remediation（接 alert SOP）
 - 主題過度集中 → 派 journal-discovery 補 fresh 方向（不是 force 發重複）。
-- digest 重複 → retract 多餘 + 修生成冪等。
+- digest 重複 → retract 多餘 + 查為何繞過 enqueue_daily_digest.py 既有冪等（race/雙源）。
 - 前端 render 錯 → 派前端修 task。
 - release candidates 連續 0 → 觸發 release-deadlock 處理（refactor_plan_release_layer_deadlock）。
 

@@ -23,6 +23,14 @@
 - **副作用**：release 成功會 `update_last_released=True` → reset `last_released_at=now` → 打亂正常 180min cadence（用戶洞察正確）。
 - 結論：force 治標且有害，廢棄為 remediation 手段。
 
+## 鎖機制再檢討（2026-06-24 workflow 驗證更正 — 推翻原 framing）
+原 plan（及當下給老闆的口頭分析）把 `release_dedup_skipped` 當「鎖+等 review」是**誤讀**，據 `content.py:863` 殘字註解「left as draft for review」。實際 code `content.py:244-253` 已於 **2026-06-23 boss throughput incident**（「可以發文了嗎」）後把它從 21天 dedup-window 改成 **2天 anti-thrash COOLDOWN**：
+- flag 是**純優化**（避免每次 release run 重評同一 near-dup draft），correctness 由 **LIVE dedup gate（narrative_cluster_filtered + Jaccard near-dup）每次對 current published 重查**保證，不是 lock。
+- 老闆「鎖不合理」直覺對**舊的 21天 window** 正確 — 6/23 已修（縮為 2 天 + 解綁 window）。
+- 「等 review」framing 站不住：cooldown 不需 reviewer。
+
+**→ 真 root cause 不在 flag（已是輕量 cooldown），在生產端持續產 arc 重複**：每次 release run 重判重複 → 重標 flag → 2天 cooldown 對「持續重標」無防護 → pool freeze（code 註解自記「46/46 drafts flagged, 0 eligible」）。修法核心 = **生產端 pre-check（不產重複）**，flag 的 cooldown 設計 6/23 已合理、不需廢除。
+
 ## 三層重構方案
 ### 1. 底層邏輯 — 生產端 arc-dedup pre-check
 - draft 生成（research milestone publish + refill_reader_facing_pool）產 draft **前**跑 `find_arc_duplicates`，命中既有文章/draft 的 arc → 不產（或改寫 fresh angle 才產）。
