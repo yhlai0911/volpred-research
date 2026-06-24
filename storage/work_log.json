@@ -11363,5 +11363,15 @@
     "task_id": "paper_body_prg_v6_major7_har_target_mismatch_scope",
     "result": "succeeded",
     "note": "PRG abstract HAR target-mismatch claim TAIFEX-scoped"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "hourly_15_dispatch_diagnosis",
+    "agent": "main_thread_claude",
+    "title": "Release pool dedup-saturation 診斷 + arc_dedup gate v3 governance task enqueue",
+    "summary": "Hourly-15 fire: pending pool 6/0 actionable (3 heavy experiment + 3 paper_body diversity 禁), 9 publication candidates 中 8 被 arc_dedup gate ban (K267 PASS 但 meta-summary 不適 reader-facing), K1547 CTA crisis alpha 今日剛 NULL 也被 K1417 paper3 H2 bootstrap 因三元組 (entities/conclusion/mechanisms) 全 match 誤判同 arc. 記 docs/error_log.md 2026-06-24 entry (strike 2). Enqueue platform_ops_arc_dedup_gate_v3_entity_granularity_20260624 (P2) 給後續 hourly refactor.",
+    "evidence": "K1547 narrative=投資商品反迷思 vs K1417 narrative=paper methodology robustness, reader-facing 主題完全不同但 dedup gate 用 entity bag + conclusion bucket + mechanism tag 三元組粗粒度判 dup. dedup output 證據在 /tmp/k1547_dedup.json (truncated to terminal).",
+    "verdict": "diagnostic_completed_treatment_enqueued",
+    "timestamp": "2026-06-24T15:15:56+08:00"
   }
 ]

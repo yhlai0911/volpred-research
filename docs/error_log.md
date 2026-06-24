@@ -2,6 +2,32 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-24 arc_dedup gate 過粗的 entity granularity → K1547 (CTA crisis alpha) 被 K1417 (paper3 H2 bootstrap) 誤判同 arc
+
+**問題**：本日 hourly-15 fire 巡檢 release pool — 全 9 candidates + K1547 共 10 條 reader-facing 機會中，**9/10 被 arc_dedup gate ban**（exit 1）。具體 K1547 案例：
+
+- K1547 narrative：「免費 ETF proxy 下 CTA / 趨勢策略在 stress regime 沒有 robust crisis alpha」（投資商品反迷思，台灣讀者高需求）
+- 誤判對手 mile_2849a7b5 (K1417)：「Stationary Bootstrap 驗證 Paper 三 MDD Retention CI 穩健性」（paper3 methodology robustness）
+- gate 判同 arc 的依據：entities={MOMENTUM, US_EQUITY, VIX} + conclusion_class=null_no_info + mechanisms={momentum_reversal, tail_risk_allocation} 三元組全 match
+
+**現象**：兩篇 reader-facing 故事題目完全不同 — 一篇是投資商品實務反迷思，一篇是 paper methodology 統計穩健性。但 dedup gate 只看 (entity bag + conclusion bucket + mechanism tag) 三元組粗粒度，無法區分 "experiment 類別屬性"（CTA_ETF / DBMF_PROXY vs PAPER3 / BOOTSTRAP_TEST），更無法區分 "reader-facing narrative axis"（商品反迷思 vs methodology robustness）。
+
+**過程**：本月 release pool 已連續 6/16、6/17、6/18、6/24 多次出現 "agentable=0、refill all-skipped" 狀態（KEEP block "鬼打牆 K1054 重發" 同根的延伸：dedup 過嚴 → 釋出端飽和）。本日 K1547 case 是第一份**具體可量化**的 over-match 證據。
+
+**判定**：此為 strike 2 證據累積（strike 1 = KEEP block 提及的 mile_bb520db8 over-match 修整週期）。下一次同類 false-positive 觸發即啟動 3-strike 重構（dedup gate v3）。
+
+**暫行 mitigation**（不修 gate）：
+- 對清楚 reader-facing narrative 不同的 K，允許 publish 時帶 `details.dup_waiver = true` + 一行 reason 寫明為何 narrative 不同（不可濫用）
+- KEEP block 已記 hourly fire 對 K1547 暫不 publish（避免 dup_waiver 程序未審就推）
+
+**根治方向 brief**（enqueue 為 next_tasks governance task 給後續 hourly / 互動 session 接手）：
+- arc_dedup gate v3 設計：(1) entities 細分 paper_methodology vs reader_narrative 兩集合；(2) 加 `narrative_axis` 維度（commodity_myth / methodology_robustness / event_window / regime_signal 等）；(3) shared_entities ≥3 但 narrative_axis 不同 → 不算 dup；(4) 加 unit test 用 K1547 vs K1417 作為 known false-positive 反例
+- 同時加 "dedup over-match audit script"，主動掃近 30 天 publish skip 中 narrative_axis 不同的 case，產出 dup_waiver candidate list
+
+**狀態**：governance task 已 enqueue（id=`platform_ops_arc_dedup_gate_v3_entity_granularity_20260624`，P2）。Code refactor 由後續 hourly 派 sonnet/codex 接。
+
+---
+
 ## 2026-06-23 **3-STRIKE META ROOT CAUSE** 全系統缺並發紀律：codex_loop.sh 24-orphan 堆積 + release burst + K-id 撞號同源
 
 **問題**：用戶問「51 個 running task 有無重複」→ 巡檢發現 `scripts/codex_loop.sh` 同時跑 **24 個**（設計上應只有 1），其中 21 個是 PPID=1 orphan（Jun 18→23 累積 5 天）。
