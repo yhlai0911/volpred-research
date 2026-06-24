@@ -1509,6 +1509,27 @@ class Publisher:
         # inconsistency proves manual escape unenforceable; sanitize at
         # the canonical write site so feed.json is always clean.
         if item.get('content'):
+            # Leaked YAML frontmatter defense (2026-06-24): some writing
+            # agents glued their own `---\ntitle: ...\n---` block to the start
+            # of the body, so the frontend rendered it as a horizontal rule +
+            # literal `audience: general` / `content_type: daily_digest` text
+            # (boss saw「排版亂了」). The item's real metadata lives in the feed
+            # entry's top-level fields, so a leading frontmatter block is pure
+            # leakage. Strip it FIRST, before the table/em-dash sanitizers, so
+            # they operate on the real prose. Conservative: only a genuine
+            # leading YAML block (or a stray leading `---`) is removed; a
+            # mid-article `---` section break is untouched. See
+            # frontmatter_stripper for the exact scope.
+            from volpred.publisher.frontmatter_stripper import strip_frontmatter
+
+            fm_cleaned, fmrep = strip_frontmatter(item['content'])
+            if fmrep.changed:
+                item['content'] = fm_cleaned
+                print(
+                    f"  [feed_publisher] frontmatter_stripper removed leaked "
+                    f"frontmatter for {item.get('id', 'unknown')}: "
+                    f"{fmrep.summary()}"
+                )
             from volpred.publisher.markdown_table_sanitizer import (
                 sanitize_markdown_tables,
             )
