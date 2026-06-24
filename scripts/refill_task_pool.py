@@ -790,10 +790,14 @@ def _arc_covered_by_recent_article(direction_text: str, days: int = 90) -> list[
                     continue
             except Exception as exc:
                 if ts_raw:
+                    msg = f"recent arc feed timestamp invalid ({existing.get('id', '?')}: {ts_raw})"
                     _warn_refill(
-                        f"recent arc feed timestamp invalid ({existing.get('id', '?')}: {ts_raw})",
+                        msg,
                         exc,
                     )
+                    # Keep the legacy CLI contract: refill dry-run diagnostics
+                    # are consumed from stdout by adjacent tests and cron logs.
+                    print(f"[refill_task_pool] WARN {msg} | err={type(exc).__name__}: {exc}")
             ex_text = f"{existing.get('title', '')}\n{existing.get('description') or ''}"
             ex_ents = extract_entities(ex_text)
             if _direction_level_overlap(new_ents, ex_ents):

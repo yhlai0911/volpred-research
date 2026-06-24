@@ -24,7 +24,7 @@
 - arc_dedup gate v3 設計：(1) entities 細分 paper_methodology vs reader_narrative 兩集合；(2) 加 `narrative_axis` 維度（commodity_myth / methodology_robustness / event_window / regime_signal 等）；(3) shared_entities ≥3 但 narrative_axis 不同 → 不算 dup；(4) 加 unit test 用 K1547 vs K1417 作為 known false-positive 反例
 - 同時加 "dedup over-match audit script"，主動掃近 30 天 publish skip 中 narrative_axis 不同的 case，產出 dup_waiver candidate list
 
-**狀態**：governance task 已 enqueue（id=`platform_ops_arc_dedup_gate_v3_entity_granularity_20260624`，P2）。Code refactor 由後續 hourly 派 sonnet/codex 接。
+**狀態**：governance task 已 enqueue（id=`platform_ops_arc_dedup_gate_v3_entity_granularity_20260624`，P2）。Code refactor 由後續 hourly 派 sonnet/codex 接。**2026-06-24 Codex landing**：`arc_dedup` 升級 v3 signature，新增 `narrative_axis` + `entity_groups.reader_narrative/paper_methodology`，讀到舊 v2 metadata 會重新計算以免缺軸位；K1547 CTA/product-myth vs K1417 Paper-methodology false positive 加 regression，K1449/K1091 copper/VIX true duplicate 仍保留；不同 narrative axis 一般不判 dup，但 raw entity overlap ≥5 保留兜底；`check_arc_dedup.py`、backfill schema 與 `scripts/audit_arc_dedup_overmatches.py` 同步更新。
 
 ---
 

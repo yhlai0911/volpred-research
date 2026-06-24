@@ -37199,7 +37199,7 @@
   {
     "id": "platform_ops_arc_dedup_gate_v3_entity_granularity_20260624",
     "task_type": "platform_ops",
-    "status": "pending",
+    "status": "succeeded",
     "priority": "P2",
     "title": "[platform_ops] arc_dedup gate v3 — narrative_axis 與 entity 粒度區分（治本 release 飽和）",
     "description": "## 根因\n\narc_dedup gate v2 用 (entities + conclusion_class + mechanisms) 三元組判 dup，過粗。本日（2026-06-24）K1547 (CTA crisis alpha) 被 mile_2849a7b5 (K1417 paper3 H2 bootstrap) 誤判同 arc — 兩篇 reader-facing narrative 完全不同（投資商品反迷思 vs paper methodology 統計穩健性）但 entities/conclusion/mechanisms 三元組全 match。已在 docs/error_log.md 2026-06-24 entry 記載 strike 2 證據（strike 1 = mile_bb520db8 over-match 週期）。\n\n## 任務\n\nRefactor src/volpred/publisher/arc_dedup.py（或同義路徑）至 v3：\n\n1. entities 細分兩集合：paper_methodology_entities（PAPER_N, BOOTSTRAP_TEST, MCS, HAC, DM, ROBUSTNESS 等）vs reader_narrative_entities（CTA_ETF, DBMF, KMLM, STRESS_REGIME, CRISIS_ALPHA, MOMENTUM 等）\n2. 加 narrative_axis 維度：commodity_myth / methodology_robustness / event_window / regime_signal / portfolio_strategy / risk_metric / structural_etf 等\n3. 判 dup 規則：shared_entities ≥3 但 narrative_axis 不同 → 不算 dup\n4. 加 unit test 用 K1547 vs K1417 作 known false-positive 反例（必須 NOT dup）\n5. 同時加 dup_audit script — 掃近 30 天 publish skip 中 narrative_axis 不同的 case，產出 dup_waiver candidate list（給互動 session 審）\n\n## 派工建議\n\n- 模型：sonnet medium（refactor + test）或 codex（second opinion）\n- 不走 worktree（單一 publisher path edit），主目錄 direct edit\n- 完成後跑 publisher unit tests 全綠 + arc_dedup regression test\n- 完成後 dry-run `scripts/refill_task_pool.py --dry-run --target 8` 看 candidates 通過率是否回升\n\n## 不可\n\n- 不可放寬到「所有 narrative_axis 不同都不算 dup」— 留 entity overlap >=5 仍判 dup 的兜底\n- 不可移除 K1054-style same-K-id 硬 gate（KEEP block 鬼打牆 fix）\n",
@@ -37211,7 +37211,13 @@
       "narrative_axis",
       "strike_2",
       "treatment_root_cause"
-    ]
+    ],
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-24T08:40:27.685512+00:00",
+    "claim_session_id": "c2d1f89ccde0",
+    "started_at": "2026-06-24T08:40:31.810605+00:00",
+    "completed_at": "2026-06-24T08:50:13.163874+00:00",
+    "result": "Implemented arc_dedup v3: added narrative_axis + reader/paper entity_groups, v3 metadata recomputation for old signatures, CLI/backfill schema updates, and K1547-vs-K1417 false-positive regression while preserving K1449/K1091 true-dup behavior. Tests: test_arc_dedup, content_release_pool, daily_digest/backfill, refill_task_pool."
   },
   {
     "id": "K1549",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Backfill arc-dedup v2 metadata onto existing feed entries.
+"""Backfill arc-dedup v3 metadata onto existing feed entries.
 
 Dry-run by default:
     uv run python scripts/backfill_arc_dedup_metadata.py
@@ -58,7 +58,7 @@ def build_backfill_plan(feed: list[dict], ids: set[str] | None = None) -> dict:
             }
         )
     return {
-        "schema_version": "arc_dedup_v2",
+        "schema_version": "arc_dedup_v3",
         "count": len(entries),
         "entries": entries,
     }

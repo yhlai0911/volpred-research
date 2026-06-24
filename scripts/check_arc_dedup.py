@@ -28,6 +28,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.publisher.arc_dedup import (  # noqa: E402
     arc_signature,
+    classify_narrative_axis,
     extract_entities,
     find_arc_duplicates,
 )
@@ -63,6 +64,8 @@ def main() -> int:
     report = {
         "entities": sorted(extract_entities(full)),
         "conclusion_class": signature["conclusion_class"],
+        "narrative_axis": classify_narrative_axis(full),
+        "entity_groups": signature.get("entity_groups", {}),
         "mechanisms": signature["mechanisms"],
         "time_horizon": signature["time_horizon"],
         "arc_signature": signature,

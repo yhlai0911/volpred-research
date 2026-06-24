@@ -8,15 +8,15 @@ mile_5af5ec51 (K1449,「銅博士的波動率版本」) and mile_232ce5d4 (K1091
 「銅銀吃不到 VIX 紅利」) share ~0 title tokens and have different experiment
 refs, yet tell the reader the exact same thing: copper vol × equity-vol/VIX
 → no incremental information. The correct domain model for "duplicate" is
-the **(asset entities, conclusion class, mechanism, time horizon)** tuple —
-the narrative arc — not surface text.
+the **(entity scope, conclusion class, narrative axis, mechanism, time horizon)**
+tuple — the narrative arc — not surface text.
 
 Arc key = (frozenset of canonical asset entities, conclusion class,
-mechanism axis, time-horizon axis). Two articles whose entity overlap is
+reader/methodology narrative axis, mechanism axis, time-horizon axis). Two articles whose entity overlap is
 significant AND whose conclusion class matches are still allowed through when
-both sides identify different mechanisms or different horizons. This prevents
-one asset family from absorbing every later experiment that asks a genuinely
-different causal/mechanical question.
+both sides identify different reader-facing axes, mechanisms, or horizons. This
+prevents one asset family or paper-methodology article from absorbing every
+later experiment that asks a genuinely different reader question.
 
 Callers:
 - publisher.publish_milestone — hard gate (last line of defence)
@@ -88,6 +88,10 @@ _ENTITY_SURFACE: dict[str, str] = {
     "低波動因子": "LOW_VOL_FACTOR", "low-vol etf": "LOW_VOL_FACTOR",
     "low volatility etf": "LOW_VOL_FACTOR",
     "動量": "MOMENTUM", "momentum": "MOMENTUM",
+    "cta": "MANAGED_FUTURES", "dbmf": "MANAGED_FUTURES", "kmlm": "MANAGED_FUTURES",
+    "managed futures": "MANAGED_FUTURES", "managed-futures": "MANAGED_FUTURES",
+    "trend following": "TREND_FOLLOWING", "trend-following": "TREND_FOLLOWING",
+    "趨勢跟隨": "TREND_FOLLOWING", "危機alpha": "CRISIS_ALPHA", "crisis alpha": "CRISIS_ALPHA",
     # Strategy / mechanism entities (2026-06-14): VT crowding 類文章原本抽不到
     # 資產實體 → arc-dedup 漏判（mile_ec28b1cc/mile_1a6d9369 同 arc）。這些是
     # distinctive 策略實體，搭配 conclusion class 才觸發 dedup，不會誤擋。
@@ -215,6 +219,65 @@ _MECHANISM_KEYWORDS: dict[str, list[str]] = {
 
 _GENERIC_MECHANISMS = {"cross_asset_spillover", "model_forecast"}
 
+_NARRATIVE_AXIS_ORDER = [
+    "methodology_robustness",
+    "product_myth",
+    "market_structure",
+    "event_window",
+    "portfolio_allocation",
+    "regime_signal",
+    "cross_asset_signal",
+    "model_benchmark",
+]
+
+_NARRATIVE_AXIS_KEYWORDS: dict[str, list[str]] = {
+    "product_myth": [
+        "managed futures", "managed-futures", "trend-following", "trend following",
+        "crisis alpha", "cta", "dbmf", "kmlm", "免費 etf", "免費ETF",
+        "etf proxy", "商品反迷思", "投資商品", "策略 etf", "strategy etf",
+    ],
+    "market_structure": [
+        "ap concentration", "authorized participant", "premium-discount",
+        "nav deviation", "short interest", "borrow rate", "squeeze", "liquidity",
+        "microstructure", "index reconstitution", "成分股調整", "流動性",
+    ],
+    "event_window": [
+        "event study", "event-study", "event window", "事件研究", "事件窗",
+        "announcement", "公告", "財報", "fomc", "cpi", "nfp", "auction",
+    ],
+    "portfolio_allocation": [
+        "hedge ratio", "currency hedge", "currency hedging", "避險比例",
+        "risk parity", "asset allocation", "portfolio", "multi-layer",
+        "多層次避險", "貨幣避險",
+    ],
+    "regime_signal": [
+        "regime", "stress regime", "tail risk", "drawdown", "var", "expected shortfall",
+        "cvar", "crisis", "危機", "壓力期", "尾部", "回撤",
+    ],
+    "model_benchmark": [
+        "garch", "egarch", "gjr", "har-rv", "har rv", "qlike", "model comparison",
+        "forecast model", "模型比較", "預測模型",
+    ],
+    "cross_asset_signal": [
+        "cross-asset", "cross asset", "cross-market", "lead-lag", "lead lag",
+        "spillover", "incremental information", "增量資訊", "vix 紅利",
+        "吃不到 vix", "拿同一個 vix", "跨市場", "領先",
+    ],
+}
+
+_METHODOLOGY_PAPER_MARKERS = [
+    "paper", "paper 三", "paper3", "論文", "reviewer", "投稿", "body.tex",
+    "reproduce", "reproducibility", "provenance", "canonical", "table 3",
+    "table 6", "mdd retention", "stationary bootstrap", "hln", "k1192",
+    "k1376", "k1417", "gemini", "codex review correction",
+]
+
+_METHODOLOGY_TEST_MARKERS = [
+    "bootstrap", "confidence interval", "ci", "robustness", "穩健性",
+    "驗證", "審查", "baseline", "lower bound", "下界", "重現",
+    "復現", "source binding", "溯源",
+]
+
 _MULTI_HORIZON_PATTERNS = [
     r"multi[-\s]?horizon",
     r"across horizons?",
@@ -311,6 +374,49 @@ def classify_time_horizon(text: str) -> str:
     return "unspecified"
 
 
+def classify_narrative_axis(text: str) -> str:
+    """Classify the reader-facing narrative axis.
+
+    Mechanism labels answer "what statistical channel is used"; this axis
+    answers "what kind of story is the reader being offered". The distinction
+    matters for release dedup: a paper-methodology robustness note and an ETF
+    product-myth article can share SPY/VIX/momentum/null keywords while clearly
+    not being the same reader-facing arc.
+    """
+    raw = text or ""
+    lower = raw.lower()
+    has_paper_marker = any(marker in lower for marker in _METHODOLOGY_PAPER_MARKERS)
+    has_method_marker = any(marker in lower for marker in _METHODOLOGY_TEST_MARKERS)
+    if has_paper_marker and has_method_marker:
+        return "methodology_robustness"
+
+    for axis in _NARRATIVE_AXIS_ORDER:
+        if axis == "methodology_robustness":
+            continue
+        if any(keyword.lower() in lower for keyword in _NARRATIVE_AXIS_KEYWORDS.get(axis, [])):
+            return axis
+    return "unspecified"
+
+
+def _entity_groups_for_axis(entities: set[str], narrative_axis: str) -> dict[str, list[str]]:
+    """Split entities into reader-facing vs paper-methodology scope.
+
+    The same token (e.g. SPY/VIX/momentum) has a different dedup meaning inside
+    a paper reproducibility article than inside an ETF product article. Persisting
+    both groups makes this distinction auditable and lets v3 avoid cross-scope
+    collisions without losing the original extracted entities.
+    """
+    if narrative_axis == "methodology_robustness":
+        return {
+            "reader_narrative": [],
+            "paper_methodology": sorted(entities),
+        }
+    return {
+        "reader_narrative": sorted(entities),
+        "paper_methodology": [],
+    }
+
+
 def arc_signature(title: str, content: str | None = "") -> dict:
     """Return the metadata schema used by the arc-dedup gate.
 
@@ -319,10 +425,14 @@ def arc_signature(title: str, content: str | None = "") -> dict:
     have been backfilled yet.
     """
     text = f"{title or ''}\n{content or ''}"
+    entities = extract_entities(text)
+    narrative_axis = classify_narrative_axis(text)
     return {
-        "schema_version": "arc_dedup_v2",
-        "entities": sorted(extract_entities(text)),
+        "schema_version": "arc_dedup_v3",
+        "entities": sorted(entities),
+        "entity_groups": _entity_groups_for_axis(entities, narrative_axis),
         "conclusion_class": classify_conclusion(text),
+        "narrative_axis": narrative_axis,
         "mechanisms": sorted(classify_mechanisms(text)),
         "time_horizon": classify_time_horizon(text),
     }
@@ -334,13 +444,32 @@ def _signature_from_feed_item(item: dict) -> dict:
     if isinstance(sig, dict):
         entities = sig.get("entities")
         conclusion = sig.get("conclusion_class")
+        narrative_axis = sig.get("narrative_axis")
         mechanisms = sig.get("mechanisms")
         horizon = sig.get("time_horizon")
-        if isinstance(entities, list) and isinstance(conclusion, str):
+        entity_groups = sig.get("entity_groups")
+        if (
+            sig.get("schema_version") == "arc_dedup_v3"
+            and isinstance(entities, list)
+            and isinstance(conclusion, str)
+            and isinstance(narrative_axis, str)
+            and isinstance(entity_groups, dict)
+        ):
             return {
-                "schema_version": str(sig.get("schema_version") or "arc_dedup_v2"),
+                "schema_version": "arc_dedup_v3",
                 "entities": sorted(str(e) for e in entities),
+                "entity_groups": {
+                    "reader_narrative": sorted(
+                        str(e) for e in _axis_values(entity_groups.get("reader_narrative"))
+                        if e != "unspecified"
+                    ),
+                    "paper_methodology": sorted(
+                        str(e) for e in _axis_values(entity_groups.get("paper_methodology"))
+                        if e != "unspecified"
+                    ),
+                },
                 "conclusion_class": conclusion,
+                "narrative_axis": narrative_axis,
                 "mechanisms": sorted(_axis_values(mechanisms)),
                 "time_horizon": str(horizon or "unspecified"),
             }
@@ -398,6 +527,33 @@ def _horizons_compatible(new_horizon: str, old_horizon: str) -> bool:
     if new_horizon == "unspecified" or old_horizon == "unspecified":
         return True
     return new_horizon == old_horizon
+
+
+def _narrative_axes_compatible(new_axis: str, old_axis: str) -> bool:
+    if new_axis == "unspecified" or old_axis == "unspecified":
+        return True
+    return new_axis == old_axis
+
+
+def _axis_mismatch_raw_entity_backstop(new_raw_ents: set[str], old_raw_ents: set[str]) -> bool:
+    """Keep a broad-overlap backstop even when narrative axes differ.
+
+    Task constraint (2026-06-24): v3 must not become "all different axes are
+    automatically not duplicates". If two pieces share five or more raw entities,
+    keep evaluating them as a possible duplicate despite an axis mismatch.
+    """
+    return len(new_raw_ents & old_raw_ents) >= 5
+
+
+def _entities_for_matching(sig: dict) -> set[str]:
+    groups = sig.get("entity_groups")
+    axis = str(sig.get("narrative_axis") or "unspecified")
+    if isinstance(groups, dict):
+        key = "paper_methodology" if axis == "methodology_robustness" else "reader_narrative"
+        vals = groups.get(key)
+        if isinstance(vals, list):
+            return {str(v) for v in vals}
+    return set(sig.get("entities") or [])
 
 
 def _title_tokens(title: str) -> set[str]:
@@ -515,8 +671,10 @@ def find_arc_duplicates(
     re-published mile_c481c8cf, both K1054, both 'descriptive', neither blocked).
     """
     new_sig = arc_signature(title, content)
-    new_ents = set(new_sig["entities"])
+    new_ents = _entities_for_matching(new_sig)
+    new_raw_ents = set(new_sig.get("entities") or [])
     new_cls = str(new_sig["conclusion_class"])
+    new_axis = str(new_sig.get("narrative_axis") or "unspecified")
     new_mechanisms = _axis_values(new_sig.get("mechanisms"))
     new_horizon = str(new_sig.get("time_horizon") or "unspecified")
     new_ref_set = {_normalize_ref(r) for r in (new_refs or []) if str(r or "").strip()}
@@ -564,12 +722,15 @@ def find_arc_duplicates(
                 exc,
             )
         ex_sig = _signature_from_feed_item(existing)
-        ex_ents = set(ex_sig["entities"])
+        ex_ents = _entities_for_matching(ex_sig)
+        ex_raw_ents = set(ex_sig.get("entities") or [])
         ex_cls = str(ex_sig["conclusion_class"])
+        ex_axis = str(ex_sig.get("narrative_axis") or "unspecified")
         ex_mechanisms = _axis_values(ex_sig.get("mechanisms"))
         ex_horizon = str(ex_sig.get("time_horizon") or "unspecified")
         ex_refs = _refs_from_feed_item(existing)
         shared_refs = new_ref_set & ex_refs
+        axis_raw_backstop = False
 
         if descriptive_mode:
             # Stricter descriptive-path test (vuln 1 fix). Avoids the SpaceX
@@ -585,7 +746,15 @@ def find_arc_duplicates(
             if not match:
                 continue
         else:
-            if not _is_significant_overlap(new_ents, ex_ents):
+            axes_compatible = _narrative_axes_compatible(new_axis, ex_axis)
+            axis_raw_backstop = (
+                not axes_compatible
+                and _axis_mismatch_raw_entity_backstop(new_raw_ents, ex_raw_ents)
+            )
+            significant_overlap = _is_significant_overlap(new_ents, ex_ents) or (
+                axis_raw_backstop and _is_significant_overlap(new_raw_ents, ex_raw_ents)
+            )
+            if not significant_overlap:
                 # Same explicit experiment_ref is itself a duplicate signal even
                 # when the surface entities are all core (US_EQUITY/VIX). Without
                 # this, a recycled K-article with only core entities would slip
@@ -595,6 +764,8 @@ def find_arc_duplicates(
                     continue
             if ex_cls != new_cls:
                 continue
+            if not axes_compatible and not axis_raw_backstop:
+                continue
             if not _mechanisms_compatible(new_mechanisms, ex_mechanisms):
                 continue
             if not _horizons_compatible(new_horizon, ex_horizon):
@@ -603,8 +774,10 @@ def find_arc_duplicates(
             {
                 "id": existing.get("id", "?"),
                 "title": existing.get("title", "?"),
-                "shared_entities": sorted(new_ents & ex_ents),
+                "shared_entities": sorted((new_raw_ents & ex_raw_ents) if axis_raw_backstop else (new_ents & ex_ents)),
                 "conclusion_class": new_cls,
+                "narrative_axis": new_axis,
+                "existing_narrative_axis": ex_axis,
                 "shared_mechanisms": sorted(new_mechanisms & ex_mechanisms),
                 "new_mechanisms": sorted(new_mechanisms),
                 "existing_mechanisms": sorted(ex_mechanisms),

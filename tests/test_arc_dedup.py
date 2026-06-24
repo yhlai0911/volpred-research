@@ -11,6 +11,7 @@ import pytest
 
 from volpred.publisher.arc_dedup import (
     arc_signature,
+    classify_narrative_axis,
     classify_conclusion,
     classify_mechanisms,
     classify_time_horizon,
@@ -112,6 +113,25 @@ class TestArcAxes:
         )
         assert "factor_causality" not in sig["mechanisms"]
         assert "cross_asset_spillover" in sig["mechanisms"]
+
+    def test_narrative_axis_separates_methodology_from_product_myth(self):
+        paper_text = (
+            "K1417: Stationary Bootstrap 驗證 Paper 三 MDD Retention CI 穩健性。"
+            "Paper reviewer H2 不成立，SPY、VIX、TSMOM momentum 的 canonical K1192 "
+            "baseline 與 Table 6 provenance 已修正。"
+        )
+        product_text = (
+            "CTA ETF 比 SPY 更耐跌嗎？DBMF、KMLM、CTA 的免費 ETF proxy 顯示 "
+            "trend-following crisis alpha 在 stress regime 不穩健。"
+        )
+        assert classify_narrative_axis(paper_text) == "methodology_robustness"
+        assert classify_narrative_axis(product_text) == "product_myth"
+        paper_sig = arc_signature("K1417 Paper 三 bootstrap robustness", paper_text)
+        product_sig = arc_signature("CTA ETF crisis alpha myth", product_text)
+        assert paper_sig["entity_groups"]["paper_methodology"]
+        assert paper_sig["entity_groups"]["reader_narrative"] == []
+        assert product_sig["entity_groups"]["reader_narrative"]
+        assert product_sig["entity_groups"]["paper_methodology"] == []
 
     def test_same_asset_different_mechanism_not_blocked(self):
         """Same entity+conclusion can be publishable when the mechanism differs."""
@@ -308,6 +328,81 @@ class TestArcDuplicates:
         dups = find_arc_duplicates(broad_b_title, broad_b_content, [broad_a])
         assert dups, "two broad surveys on same conclusion class should still be dup"
 
+    def test_k1547_cta_product_myth_not_blocked_by_k1417_paper_methodology(self):
+        """2026-06-24 incident: K1547 CTA crisis-alpha product-myth was rejected
+        against K1417 Paper 3 stationary-bootstrap methodology robustness because
+        both shared SPY/VIX/momentum/null-ish words. Different narrative_axis
+        must prevent that over-match."""
+        k1417_article = {
+            "id": "mile_2849a7b5",
+            "title": (
+                "K1417: Stationary Bootstrap 驗證 Paper 三 MDD Retention CI 穩健性 "
+                "— H2 不成立，但基線需改用 canonical"
+            ),
+            "description": (
+                "Paper 三 v4 reviewer H2 質疑 K1192 固定 252-day block bootstrap 會切碎 "
+                "SPY/VIX/TSMOM drawdown path。K1417 用 stationary bootstrap、MDD retention、"
+                "canonical baseline 重算，H2 不成立，provenance caveat 已修正。"
+            ),
+            "status": "published",
+            "published_at": _ts(days_ago=1),
+        }
+        k1547_title = "CTA ETF 比 SPY 更耐跌嗎？KMLM、DBMF 給的是一半答案"
+        k1547_content = (
+            "免費 ETF proxy 下 CTA / managed-futures / trend-following 在 lagged VIX stress "
+            "regime 沒有 robust crisis alpha。CTA_EW 與 252d momentum timing overlay "
+            "相對 SPY 的壓力期 excess return 不顯著，bootstrap CI crosses zero。"
+        )
+        assert classify_narrative_axis(k1417_article["title"] + "\n" + k1417_article["description"]) == "methodology_robustness"
+        assert classify_narrative_axis(k1547_title + "\n" + k1547_content) == "product_myth"
+        dups = find_arc_duplicates(k1547_title, k1547_content, [k1417_article])
+        assert dups == [], "product-myth article must not be absorbed by paper-methodology robustness"
+
+    def test_same_cta_product_myth_still_blocked(self):
+        existing = {
+            "id": "mile_cta_old",
+            "title": "CTA ETF 的 crisis alpha 沒有想像中穩",
+            "description": (
+                "DBMF、KMLM、CTA managed-futures ETF proxy 在 VIX stress regime "
+                "相對 SPY 不顯著，trend-following momentum timing 沒有穩健改善。"
+            ),
+            "status": "published",
+            "published_at": _ts(days_ago=1),
+        }
+        new_title = "免費 CTA ETF 真有避險 alpha 嗎？"
+        new_content = (
+            "DBMF、KMLM、CTA 的 managed-futures ETF proxy 和 252d trend-following "
+            "momentum overlay 對 SPY 壓力期 excess return 不顯著，沒有 robust crisis alpha。"
+        )
+        dups = find_arc_duplicates(new_title, new_content, [existing])
+        assert dups and dups[0]["id"] == "mile_cta_old"
+        assert dups[0]["narrative_axis"] == "product_myth"
+
+    def test_different_axis_keeps_raw_entity_overlap_five_backstop(self):
+        """Task guard: v3 must not become 'different narrative_axis always allow'.
+        If two pieces share >=5 raw entities and still match on conclusion,
+        mechanism, and horizon, keep the duplicate backstop."""
+        existing = {
+            "id": "mile_method_broad",
+            "title": "K1999 Paper 三 commodity GARCH robustness",
+            "description": (
+                "Paper 三 robustness check：BTC、GOLD、OIL、COPPER、SILVER、SPY 的 "
+                "GARCH forecast model 比較，無增量資訊，bootstrap CI 穩健性驗證。"
+            ),
+            "status": "published",
+            "published_at": _ts(days_ago=1),
+        }
+        new_title = "CTA ETF 大宗商品籃子真的有 crisis alpha 嗎？"
+        new_content = (
+            "CTA managed-futures ETF proxy 同時看 BTC、GOLD、OIL、COPPER、SILVER、SPY，"
+            "GARCH forecast model 顯示無增量資訊，沒有 robust crisis alpha。"
+        )
+        assert classify_narrative_axis(existing["title"] + "\n" + existing["description"]) == "methodology_robustness"
+        assert classify_narrative_axis(new_title + "\n" + new_content) == "product_myth"
+        dups = find_arc_duplicates(new_title, new_content, [existing])
+        assert dups and dups[0]["id"] == "mile_method_broad"
+        assert len(dups[0]["shared_entities"]) >= 5
+
 
 class TestPublisherGateWiring:
     def test_publish_milestone_warns_but_publishes_arc_dup(self, tmp_path, monkeypatch):
@@ -389,7 +484,9 @@ class TestPublisherGateWiring:
         feed = _json.loads((storage / "reports" / "feed.json").read_text(encoding="utf-8"))
         assert feed[0]["id"] == returned
         sig = feed[0]["details"]["arc_signature"]
-        assert sig["schema_version"] == "arc_dedup_v2"
+        assert sig["schema_version"] == "arc_dedup_v3"
+        assert "narrative_axis" in sig
+        assert "entity_groups" in sig
         assert "private_credit_stress" in sig["mechanisms"]
         assert sig["time_horizon"] == "multi_horizon"
 
