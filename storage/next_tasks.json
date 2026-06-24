@@ -36964,7 +36964,7 @@
     "title": "Paper review (Codex 24h-rule): 每日精選導讀｜分散投資的幻覺：你以為無關的資產，其實偷偷牽動著你整個組合",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1597b341 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_1597b341",
@@ -36972,7 +36972,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-24T03:08:04+00:00"
+    "created_at": "2026-06-24T03:08:04+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-24T04:02:43.018467+00:00",
+    "claim_session_id": "d0ef12dd51ea",
+    "started_at": "2026-06-24T04:02:47.173097+00:00",
+    "completed_at": "2026-06-24T04:12:29.419608+00:00",
+    "result": "Codex 24h review completed for mile_1597b341. Corrected K1538a->K1412 provenance, removed erroneous K1545 experiment citation, attributed SpaceX/Google segment to mile_10a52949/yfinance, and added storage/paper_reviews/mile_1597b341_codex_review.md. Local feed validation passed; remote sync hook/feed-sync require credentials or completed sync outside this environment."
   },
   {
     "id": "paper_review_mile_dc516a52",
