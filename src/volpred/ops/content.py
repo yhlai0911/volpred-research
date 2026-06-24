@@ -1125,7 +1125,18 @@ def preview_release_pool_by_settings(
             return True
         try:
             return datetime.fromisoformat(published_at.replace("Z", "+00:00")) <= now
-        except Exception:
+        except (ValueError, TypeError) as exc:
+            # Local import keeps the diagnostics dependency from shifting the
+            # module-level line numbers tracked by the silent-fallback baseline.
+            from .diagnostics import warn
+
+            warn(
+                "content",
+                "release pool: unparseable published_at; treating item as due (fail-open)",
+                err=str(exc),
+                item_id=item.get("id"),
+                published_at=published_at,
+            )
             return True
 
     def sort_key(item: dict) -> tuple:

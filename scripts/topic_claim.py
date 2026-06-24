@@ -70,7 +70,7 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
         finally:
             os.close(dir_fd)
     except OSError:
-        pass
+        pass  # silent-ok: directory fsync is a best-effort durability improvement, not part of claim correctness
 
 
 def _load_ledger(path: Path) -> dict[str, Any]:

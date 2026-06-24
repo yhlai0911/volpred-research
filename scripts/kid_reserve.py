@@ -21,6 +21,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+from volpred.ops.diagnostics import warn
+
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "storage" / "ops" / "k_id_registry.json"
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
@@ -46,7 +48,8 @@ def _extract_k_numbers(text: str | None) -> set[int]:
     for match in _K_RE.finditer(str(text)):
         try:
             out.add(int(match.group(1)))
-        except ValueError:
+        except ValueError as exc:
+            warn("kid_reserve", "k-number int parse failed", err=str(exc), token=match.group(0))
             continue
     return out
 
@@ -82,8 +85,7 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
         finally:
             os.close(dir_fd)
     except OSError:
-        # Directory fsync is a durability improvement, not part of uniqueness.
-        pass
+        pass  # silent-ok: directory fsync is a best-effort durability improvement, not part of K-id uniqueness/correctness
 
 
 def _load_registry(path: Path) -> dict[str, Any]:
@@ -110,8 +112,13 @@ def _registry_k_numbers(registry: dict[str, Any]) -> set[int]:
     out: set[int] = set()
     try:
         out.add(int(registry.get("last_k_id") or 0))
-    except (TypeError, ValueError):
-        pass
+    except (TypeError, ValueError) as exc:
+        warn(
+            "kid_reserve",
+            "registry last_k_id not coercible to int; excluded from known set (collision risk)",
+            err=str(exc),
+            last_k_id=registry.get("last_k_id"),
+        )
     for rec in registry.get("reservations", []):
         if not isinstance(rec, dict):
             continue
@@ -131,7 +138,13 @@ def _scan_experiment_dirs(root: Path) -> set[int]:
             continue
         try:
             children = list(base.iterdir())
-        except OSError:
+        except OSError as exc:
+            warn(
+                "kid_reserve",
+                "experiment dir scan failed; known K-ids may be undercounted (collision risk)",
+                err=str(exc),
+                path=str(base),
+            )
             continue
         for path in children:
             if path.is_dir():
@@ -146,7 +159,13 @@ def _scan_worktree_experiment_dirs(root: Path) -> set[int]:
             continue
         try:
             worktrees = list(worktree_base.iterdir())
-        except OSError:
+        except OSError as exc:
+            warn(
+                "kid_reserve",
+                "worktree base scan failed; known K-ids may be undercounted (collision risk)",
+                err=str(exc),
+                path=str(worktree_base),
+            )
             continue
         for wt in worktrees:
             exp_dir = wt / "experiments"
@@ -154,7 +173,13 @@ def _scan_worktree_experiment_dirs(root: Path) -> set[int]:
                 continue
             try:
                 children = list(exp_dir.iterdir())
-            except OSError:
+            except OSError as exc:
+                warn(
+                    "kid_reserve",
+                    "worktree experiment dir scan failed; known K-ids may be undercounted (collision risk)",
+                    err=str(exc),
+                    path=str(exp_dir),
+                )
                 continue
             for path in children:
                 if path.is_dir():

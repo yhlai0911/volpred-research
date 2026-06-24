@@ -11,6 +11,15 @@ from volpred.config import load_runtime_schedules
 from volpred.publisher.email_notifier import EmailNotifier
 
 from .common import dump_json, load_json, project_path
+from .diagnostics import warn
+from .health import (
+    DISK_USAGE_ALERT_PCT,
+    PAPER_TRADING_GAP_NULL_THRESHOLD,
+    STRATEGY_METRICS_STALE_HOURS,
+    check_disk_usage,
+    check_paper_trading_gaps,
+    check_strategy_metrics_freshness,
+)
 from .scheduler import get_scheduler_state
 
 ALERT_RECIPIENT = "yihao.lai@gmail.com"
@@ -51,7 +60,7 @@ def _parse_iso_datetime(raw: str | None) -> datetime | None:
     try:
         parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
     except ValueError:
-        return None
+        return None  # silent-ok: parse helper returns None for non-ISO input by design
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
@@ -70,7 +79,7 @@ def _parse_shell_timestamp(raw: str | None) -> datetime | None:
     try:
         parsed = datetime.strptime(normalized, "%a %b %d %H:%M:%S %Y")
     except ValueError:
-        return None
+        return None  # silent-ok: parse helper returns None for unrecognized format by design
     return parsed.replace(tzinfo=_TAIPEI_TZ).astimezone(timezone.utc)
 
 
@@ -533,7 +542,8 @@ def _latest_cron_exit(log_path: Path) -> dict[str, Any] | None:
                 "exit_code": int(match.group(1)),
                 "exited_at": _parse_shell_timestamp(match.group(2)),
             }
-    except OSError:
+    except OSError as exc:
+        warn("alerts", "cron log read failed", path=str(log_path), err=str(exc))
         return None
     if last_exit and isinstance(last_exit.get("exited_at"), datetime):
         last_exit["exited_at"] = last_exit["exited_at"].isoformat()
@@ -553,7 +563,8 @@ def _trailing_authoritative_exit_codes(log_path: Path, n: int = 6) -> list[int]:
             m = _CRON_EXIT_RE.match(raw_line.strip())
             if m:
                 codes.append(int(m.group(1)))
-    except OSError:
+    except OSError as exc:
+        warn("alerts", "cron log read failed for trailing exits", path=str(log_path), err=str(exc))
         return []
     return codes[-n:]
 
@@ -973,7 +984,8 @@ def _parse_paper_stale_state(now: datetime, paper_root: Path | None = None) -> d
                 continue
             try:
                 mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
-            except OSError:
+            except OSError as exc:
+                warn("alerts", "paper file stat failed", path=str(path), err=str(exc))
                 continue
             if latest is None or mtime > latest:
                 latest = mtime
@@ -1223,6 +1235,133 @@ def _parse_gmail_poll_freshness_state(storage_dir: str, now: datetime) -> dict[s
     }
 
 
+def _parse_strategy_metrics_freshness_state(storage_dir: str) -> dict[str, Any]:
+    """storage/strategy_metrics.json mtime > 26h (or missing) → stale (warn).
+
+    Migrated 2026-06-24 from the disabled cloud platform-ops-patrol routine.
+    """
+    check = check_strategy_metrics_freshness(storage_dir)
+    breached = check.get("status") == "stale"
+    age = check.get("age_hours")
+    metrics_path = _storage_root(storage_dir).joinpath("strategy_metrics.json")
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            f"strategy_metrics.json mtime 距今 > {STRATEGY_METRICS_STALE_HOURS}h（或檔案不存在）。",
+            f"- 檔案: {_relative_repo_path(metrics_path)}",
+            f"- exists: {check.get('exists')}",
+            f"- age_hours: {age if age is not None else '不可讀/不存在'}",
+            f"- 門檻: {STRATEGY_METRICS_STALE_HOURS}h",
+            "",
+            "## 影響",
+            "此檔每日由 strategy-metrics 刷新 job 重寫；mtime 落後代表該 job 停擺，",
+            "線上策略卡 metrics 與排序會用到過期數據（違反 Mission 第 4 條：策略表現公正）。",
+            "",
+            "## 建議行動",
+            "1. 查刷新 job log：tail -20 storage/logs/cron/*.log（找 strategy_metrics / daily_update）。",
+            "2. 手動補：uv run python scripts/daily_update.py（或對應 metrics 刷新 CLI）。",
+            "3. 確認 cron schedule 仍 active：config/runtime_schedules.json。",
+        ]
+    )
+    return {
+        "id": "strategy_metrics_freshness",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        "title": (
+            "策略 metrics 過期（strategy_metrics.json 停止更新）"
+            if breached
+            else "strategy_metrics_freshness ok"
+        ),
+        "body": body if breached else "",
+        "details": check,
+    }
+
+
+def _parse_paper_trading_gaps_state(storage_dir: str) -> dict[str, Any]:
+    """Per strategy, >2 nulls in last 3 paper_trading entries → gap alert (warn).
+
+    Migrated 2026-06-24 from the disabled cloud platform-ops-patrol routine.
+    """
+    check = check_paper_trading_gaps(storage_dir)
+    gap_strategies = check.get("gap_strategies", [])
+    breached = check.get("status") == "gap"
+    gap_lines = [
+        f"- {g.get('strategy')}: {g.get('null_count')} nulls"
+        for g in gap_strategies
+    ] or ["- (none)"]
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            f"某策略最後 3 筆 paper_trading entries 中 > {PAPER_TRADING_GAP_NULL_THRESHOLD} 筆 "
+            "portfolio_return 為 null。",
+            *gap_lines,
+            f"- 檔案: {_relative_repo_path(_storage_root(storage_dir).joinpath('paper_trading.json'))}",
+            "",
+            "## 影響",
+            "1 個 trailing null 是週末結算 lag（正常），>2 代表該策略 forward-tracking "
+            "/ recalc pipeline 卡住、績效曲線停更（違反 Mission 第 4 條：策略表現公正、第 2 條：可復現）。",
+            "",
+            "## 建議行動",
+            "1. 不要手補 JSON（違反『永遠修流程不修資料』）— 讓 forward tracking / recalc 自然修正。",
+            "2. 查 recalc job：tail -20 storage/logs/cron/*.log；確認 paper_trading 更新 job 有 fire。",
+            "3. 手動觸發 recalc（對應 CLI），驗證 null 被填回。",
+        ]
+    )
+    return {
+        "id": "paper_trading_gaps",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        # title 穩定（不含動態策略名/數量）— 維持 24h dedup 有效，明細放 body/details。
+        "title": (
+            "Paper trading 績效斷層（策略 forward-tracking 停更）"
+            if breached
+            else "paper_trading_gaps ok"
+        ),
+        "body": body if breached else "",
+        "details": check,
+    }
+
+
+def _parse_disk_usage_state(storage_dir: str) -> dict[str, Any]:
+    """Root-filesystem usage > 85% → alert (warn).
+
+    Migrated 2026-06-24 from the disabled cloud platform-ops-patrol routine.
+    """
+    check = check_disk_usage(storage_dir)
+    pct = check.get("pct")
+    breached = check.get("status") == "alert"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            f"根目錄磁碟使用率 > {DISK_USAGE_ALERT_PCT}%。",
+            f"- 使用率: {pct if pct is not None else '不可讀'}%",
+            f"- 門檻: {DISK_USAGE_ALERT_PCT}%",
+            "",
+            "## 影響",
+            "磁碟接近滿載 → experiment 輸出 / log / sync 寫入可能失敗，造成 silent data loss "
+            "或 pipeline 中斷（影響全 Mission：研究/論文/平台運營皆需可寫盤）。",
+            "",
+            "## 建議行動",
+            "1. 查大檔：du -sh storage/logs/* storage/ops/* | sort -h | tail -20。",
+            "2. 清過期 log / 暫存（不刪 storage/ 的 canonical 資料）。",
+            "3. 評估 knowledge.json / log rotation（memory-health skill）。",
+        ]
+    )
+    return {
+        "id": "disk_usage",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        # title 穩定（不含動態 pct）— 維持 24h dedup 有效，動態值放 body/details。
+        "title": (
+            f"磁碟使用率超標（> {DISK_USAGE_ALERT_PCT}%）"
+            if breached
+            else "disk_usage ok"
+        ),
+        "body": body if breached else "",
+        "details": check,
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -1241,6 +1380,9 @@ def build_alert_condition_report(
         _parse_supabase_sync_state(storage_dir),
         _parse_knowledge_stale_state(storage_dir, current),
         _parse_paper_stale_state(current, paper_root),
+        _parse_strategy_metrics_freshness_state(storage_dir),     # 2026-06-24 migrated from cloud platform-ops-patrol
+        _parse_paper_trading_gaps_state(storage_dir),             # 2026-06-24 migrated from cloud platform-ops-patrol
+        _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol
     ]
     return {
         "generated_at": current.isoformat(),

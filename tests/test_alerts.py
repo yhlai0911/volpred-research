@@ -190,7 +190,21 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     storage_dir = tmp_path / "storage"
     now = datetime(2026, 4, 19, 12, 0, tzinfo=timezone.utc)
     _write_json(storage_dir / ".release_settings.json", {"mode": "auto", "include_drafts": True})
-    _write_json(storage_dir / "reports" / "feed.json", [])
+    # Published (not draft) item keeps draft_pool_low breaching (0 drafts) while
+    # quieting publishing_freshness (a recent published_at < 5h before `now`).
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [{"status": "published", "published_at": "2026-04-19T11:00:00+00:00"}],
+    )
+    # Isolate the newer (non cron/pool) conditions so this test asserts only the
+    # cron/pool set: strategy_metrics + gmail-poll state present (fresh mtime),
+    # disk usage forced low. (paper_trading absent → gap check is ok.)
+    _write_json(storage_dir / "strategy_metrics.json", {"x": 1})
+    _write_json(storage_dir / "ops" / "gmail_inbox_state.json", {"last_poll": "ok"})
+    monkeypatch.setattr(
+        "volpred.ops.health.shutil.disk_usage",
+        lambda _p: __import__("collections").namedtuple("U", ["total", "used", "free"])(100, 10, 90),
+    )
     # exit 1 in the NEW canonical wrapper format (`=== [job] exit N at ... ===`) so
     # both release_pool_gap (no recent fire) and host_cron_fail (non-zero exit) breach.
     _write_text(
