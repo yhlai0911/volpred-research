@@ -1,0 +1,733 @@
+{
+  "experiment_id": "K1548",
+  "title": "Taiwan-investor USD/TWD equity currency hedge-ratio comparison",
+  "created_at_utc": "2026-06-24T07:37:16.352496+00:00",
+  "seed": 1548,
+  "data_source": {
+    "provider": "yfinance",
+    "tickers_requested": [
+      "SPY",
+      "EFA",
+      "EEM",
+      "QQQ",
+      "0050.TW",
+      "^TWII",
+      "TWD=X",
+      "USDTWD=X"
+    ],
+    "usd_twd_ticker_used": "TWD=X",
+    "start": "2015-01-01",
+    "downloaded_price_start": "2015-01-01",
+    "downloaded_price_end": "2026-06-24",
+    "raw_return_csv": "data/k1548_daily_returns.csv"
+  },
+  "literature_basis": [
+    {
+      "citation": "Engle (2002), Dynamic Conditional Correlation",
+      "url": "https://www.tandfonline.com/doi/abs/10.1198/073500102288618487",
+      "role": "Motivates time-varying covariance hedge ratios; implemented here as EWMA/DCC-lite, not full DCC-GARCH."
+    },
+    {
+      "citation": "Kroner and Sultan (1993), time-varying distributions and dynamic hedging with FX futures",
+      "url": "https://ideas.repec.org/a/cup/jfinqa/v28y1993i04p535-551_00.html",
+      "role": "Canonical dynamic FX hedging benchmark."
+    },
+    {
+      "citation": "Campbell, Serfaty-de Medeiros, and Viceira style optimal currency hedging literature",
+      "url": "https://www.tandfonline.com/doi/full/10.1080/0015198X.2019.1628556",
+      "role": "Frames strategic currency-hedging policy for international equity portfolios."
+    }
+  ],
+  "design": {
+    "train_end": "2019-12-31",
+    "oos_start": "2020-01-02",
+    "portfolio_return_formula": "(1+r_asset_usd)*(1+(1-h_t)*r_usdtwd)-1",
+    "hedge_ratio_clip": [
+      0.0,
+      1.5
+    ],
+    "policies": {
+      "unhedged": "h=0; full USD/TWD exposure",
+      "full_hedge": "h=1; USD/TWD return removed; no carry or transaction cost model",
+      "static_mv": "training-period minimum-variance h=1+cov(asset,fx)/var(fx)",
+      "ewma_dcc_lite": "lambda=0.94 EWMA covariance/variance, h_t set before observing return_t",
+      "hmm_regime": "2-state Gaussian HMM fit only on training returns; OOS h_t uses previous-day inferred state"
+    },
+    "lookahead_controls": [
+      "EWMA h_t is computed before updating covariance with return_t.",
+      "HMM model parameters and state-specific hedge ratios are train-only.",
+      "OOS HMM hedge ratio for day t uses the state inferred through t-1, not day-t return."
+    ],
+    "statistical_gate": "Positive daily squared-return reduction vs unhedged with HAC t>3 and block-bootstrap 95% CI above zero."
+  },
+  "sample_summary": {
+    "SPY": {
+      "train_start": "2015-01-05",
+      "train_end": "2019-12-31",
+      "train_observations": 1206,
+      "oos_start": "2020-01-03",
+      "oos_end": "2026-06-23",
+      "oos_observations": 1564,
+      "static_mv_hedge_ratio": 0.9160744939506592
+    },
+    "EFA": {
+      "train_start": "2015-01-05",
+      "train_end": "2019-12-31",
+      "train_observations": 1206,
+      "oos_start": "2020-01-03",
+      "oos_end": "2026-06-23",
+      "oos_observations": 1564,
+      "static_mv_hedge_ratio": 0.9166077953173234
+    },
+    "EEM": {
+      "train_start": "2015-01-05",
+      "train_end": "2019-12-31",
+      "train_observations": 1206,
+      "oos_start": "2020-01-03",
+      "oos_end": "2026-06-23",
+      "oos_observations": 1564,
+      "static_mv_hedge_ratio": 0.9025068410744657
+    },
+    "QQQ": {
+      "train_start": "2015-01-05",
+      "train_end": "2019-12-31",
+      "train_observations": 1206,
+      "oos_start": "2020-01-03",
+      "oos_end": "2026-06-23",
+      "oos_observations": 1564,
+      "static_mv_hedge_ratio": 0.8916959799396181
+    }
+  },
+  "local_twd_benchmarks": {
+    "0050.TW": {
+      "oos_start": "2020-01-03",
+      "oos_end": "2026-06-24",
+      "observations": 1512,
+      "annual_vol": 0.2146922074959748,
+      "annual_return": 0.3077800888995927,
+      "max_drawdown": -0.32598221970732455
+    },
+    "^TWII": {
+      "oos_start": "2020-01-03",
+      "oos_end": "2026-06-24",
+      "observations": 1512,
+      "annual_vol": 0.19732958156113925,
+      "annual_return": 0.25033777773628096,
+      "max_drawdown": -0.30876658973217164
+    }
+  },
+  "metrics": [
+    {
+      "asset": "SPY",
+      "policy": "unhedged",
+      "observations": 1564,
+      "total_return": 1.9332522134056567,
+      "annual_return": 0.19688702502157548,
+      "annual_vol": 0.21630251399692138,
+      "downside_semivol": 0.15224283809302835,
+      "sharpe": 0.9102391894732105,
+      "max_drawdown": -0.33245303825310313,
+      "var_5": -0.01890880811052259,
+      "cvar_5": -0.03263147828401047,
+      "avg_hedge_ratio": 0.0,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.0,
+      "downside_reduction_vs_unhedged": 0.0,
+      "cvar_improvement_vs_unhedged": 0.0
+    },
+    {
+      "asset": "SPY",
+      "policy": "full_hedge",
+      "observations": 1564,
+      "total_return": 1.7027535349057539,
+      "annual_return": 0.1811982086651663,
+      "annual_vol": 0.20443427421725494,
+      "downside_semivol": 0.1442196156418922,
+      "sharpe": 0.8863396774290628,
+      "max_drawdown": -0.3371725284698911,
+      "var_5": -0.017603447482462203,
+      "cvar_5": -0.0305528661207489,
+      "avg_hedge_ratio": 1.0,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.05486870938465083,
+      "downside_reduction_vs_unhedged": 0.05270016344698947,
+      "cvar_improvement_vs_unhedged": -0.06369960150656434
+    },
+    {
+      "asset": "SPY",
+      "policy": "static_mv",
+      "observations": 1564,
+      "total_return": 1.7242223645933201,
+      "annual_return": 0.18251490051719327,
+      "annual_vol": 0.20464296688105624,
+      "downside_semivol": 0.14431147208397221,
+      "sharpe": 0.891869890760896,
+      "max_drawdown": -0.3367623902086321,
+      "var_5": -0.01749478331675127,
+      "cvar_5": -0.030590962699190268,
+      "avg_hedge_ratio": 0.9160744939506592,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.05390389089990466,
+      "downside_reduction_vs_unhedged": 0.05209680868015387,
+      "cvar_improvement_vs_unhedged": -0.06253212211412637
+    },
+    {
+      "asset": "SPY",
+      "policy": "ewma_dcc_lite",
+      "observations": 1564,
+      "total_return": 1.816341914138536,
+      "annual_return": 0.18828916695870831,
+      "annual_vol": 0.2066251884299027,
+      "downside_semivol": 0.1455248981093583,
+      "sharpe": 0.9112595051429808,
+      "max_drawdown": -0.33575850779420036,
+      "var_5": -0.017885335462055833,
+      "cvar_5": -0.03080181058762951,
+      "avg_hedge_ratio": 0.9972416683064579,
+      "hedge_ratio_std": 0.37859770599862713,
+      "vol_reduction_vs_unhedged": 0.04473977388518191,
+      "downside_reduction_vs_unhedged": 0.044126476278411375,
+      "cvar_improvement_vs_unhedged": -0.05607063463249553
+    },
+    {
+      "asset": "SPY",
+      "policy": "hmm_regime",
+      "observations": 1564,
+      "total_return": 1.7248500671162508,
+      "annual_return": 0.18254185541888907,
+      "annual_vol": 0.20459373933220004,
+      "downside_semivol": 0.14429289809194765,
+      "sharpe": 0.8922162330807923,
+      "max_drawdown": -0.33704478180856723,
+      "var_5": -0.017502864759037274,
+      "cvar_5": -0.030588823697528696,
+      "avg_hedge_ratio": 0.9575455657081505,
+      "hedge_ratio_std": 0.019437387288457803,
+      "vol_reduction_vs_unhedged": 0.05413147747736302,
+      "downside_reduction_vs_unhedged": 0.05221881108274451,
+      "cvar_improvement_vs_unhedged": -0.06259767236725787
+    },
+    {
+      "asset": "EFA",
+      "policy": "unhedged",
+      "observations": 1564,
+      "total_return": 1.0026225551859378,
+      "annual_return": 0.13341629350438006,
+      "annual_vol": 0.20689718191794698,
+      "downside_semivol": 0.1473890749291726,
+      "sharpe": 0.6448434544521318,
+      "max_drawdown": -0.32672291004128506,
+      "var_5": -0.01828380696099594,
+      "cvar_5": -0.03039447516146777,
+      "avg_hedge_ratio": 0.0,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.0,
+      "downside_reduction_vs_unhedged": 0.0,
+      "cvar_improvement_vs_unhedged": 0.0
+    },
+    {
+      "asset": "EFA",
+      "policy": "full_hedge",
+      "observations": 1564,
+      "total_return": 0.8452539353329349,
+      "annual_return": 0.1177461142529735,
+      "annual_vol": 0.19447364515585713,
+      "downside_semivol": 0.13928418842328114,
+      "sharpe": 0.6054605196432049,
+      "max_drawdown": -0.3310812325086404,
+      "var_5": -0.016798957814809643,
+      "cvar_5": -0.028026619265980924,
+      "avg_hedge_ratio": 1.0,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.060046911451007046,
+      "downside_reduction_vs_unhedged": 0.054989737263676064,
+      "cvar_improvement_vs_unhedged": -0.07790415471587636
+    },
+    {
+      "asset": "EFA",
+      "policy": "static_mv",
+      "observations": 1564,
+      "total_return": 0.8598189842313693,
+      "annual_return": 0.11905288504852145,
+      "annual_vol": 0.1946884355813518,
+      "downside_semivol": 0.13931738841304392,
+      "sharpe": 0.6115046571360139,
+      "max_drawdown": -0.3306977848164917,
+      "var_5": -0.016781483519239904,
+      "cvar_5": -0.028077458149207698,
+      "avg_hedge_ratio": 0.9166077953173234,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.059008760889923795,
+      "downside_reduction_vs_unhedged": 0.054764483188509794,
+      "cvar_improvement_vs_unhedged": -0.07623151904914097
+    },
+    {
+      "asset": "EFA",
+      "policy": "ewma_dcc_lite",
+      "observations": 1564,
+      "total_return": 0.8763371203732158,
+      "annual_return": 0.12097042267738016,
+      "annual_vol": 0.19714023559505559,
+      "downside_semivol": 0.14127659123054973,
+      "sharpe": 0.6136262458662405,
+      "max_drawdown": -0.33357330142428354,
+      "var_5": -0.01685312980469783,
+      "cvar_5": -0.02856617162725244,
+      "avg_hedge_ratio": 1.0165616877464994,
+      "hedge_ratio_std": 0.4111271486738429,
+      "vol_reduction_vs_unhedged": 0.047158430252379646,
+      "downside_reduction_vs_unhedged": 0.041471755634264085,
+      "cvar_improvement_vs_unhedged": -0.06015249562634795
+    },
+    {
+      "asset": "EFA",
+      "policy": "hmm_regime",
+      "observations": 1564,
+      "total_return": 0.8588615639367108,
+      "annual_return": 0.11896650406782106,
+      "annual_vol": 0.19467019672021676,
+      "downside_semivol": 0.13931234472036377,
+      "sharpe": 0.6111182198002383,
+      "max_drawdown": -0.33073071854556013,
+      "var_5": -0.016785482217017866,
+      "cvar_5": -0.02807351228021504,
+      "avg_hedge_ratio": 0.921872633965387,
+      "hedge_ratio_std": 0.00027669672153292753,
+      "vol_reduction_vs_unhedged": 0.05909691511689752,
+      "downside_reduction_vs_unhedged": 0.054798703449967956,
+      "cvar_improvement_vs_unhedged": -0.0763613409648574
+    },
+    {
+      "asset": "EEM",
+      "policy": "unhedged",
+      "observations": 1564,
+      "total_return": 0.918023810879312,
+      "annual_return": 0.13274330773609178,
+      "annual_vol": 0.23516114094261206,
+      "downside_semivol": 0.16708721349616967,
+      "sharpe": 0.5644780732225058,
+      "max_drawdown": -0.31734737132223156,
+      "var_5": -0.02128769498791853,
+      "cvar_5": -0.03409511343454935,
+      "avg_hedge_ratio": 0.0,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.0,
+      "downside_reduction_vs_unhedged": 0.0,
+      "cvar_improvement_vs_unhedged": 0.0
+    },
+    {
+      "asset": "EEM",
+      "policy": "full_hedge",
+      "observations": 1564,
+      "total_return": 0.7673030676310888,
+      "annual_return": 0.11704764722284203,
+      "annual_vol": 0.22417602122414834,
+      "downside_semivol": 0.16046023379564597,
+      "sharpe": 0.5221238497484476,
+      "max_drawdown": -0.3720432871040601,
+      "var_5": -0.020200234744330997,
+      "cvar_5": -0.03241814316758725,
+      "avg_hedge_ratio": 1.0,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.04671315879158999,
+      "downside_reduction_vs_unhedged": 0.03966180033683797,
+      "cvar_improvement_vs_unhedged": -0.049185061964415876
+    },
+    {
+      "asset": "EEM",
+      "policy": "static_mv",
+      "observations": 1564,
+      "total_return": 0.7835893511756951,
+      "annual_return": 0.11857786674770128,
+      "annual_vol": 0.224419844334987,
+      "downside_semivol": 0.1604664546777349,
+      "sharpe": 0.5283751403494537,
+      "max_drawdown": -0.3626014791235629,
+      "var_5": -0.019927919287806507,
+      "cvar_5": -0.032417521493591527,
+      "avg_hedge_ratio": 0.9025068410744657,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.04567632460265336,
+      "downside_reduction_vs_unhedged": 0.03962456898945499,
+      "cvar_improvement_vs_unhedged": -0.0492032954862641
+    },
+    {
+      "asset": "EEM",
+      "policy": "ewma_dcc_lite",
+      "observations": 1564,
+      "total_return": 0.7697098769951374,
+      "annual_return": 0.11788645391305191,
+      "annual_vol": 0.22688995587071778,
+      "downside_semivol": 0.16252738738700623,
+      "sharpe": 0.5195754631827941,
+      "max_drawdown": -0.36644163423948617,
+      "var_5": -0.020098384435135973,
+      "cvar_5": -0.03281981022795283,
+      "avg_hedge_ratio": 0.977894083984266,
+      "hedge_ratio_std": 0.4466980033863389,
+      "vol_reduction_vs_unhedged": 0.03517241428043916,
+      "downside_reduction_vs_unhedged": 0.027290096074694348,
+      "cvar_improvement_vs_unhedged": -0.03740428108692636
+    },
+    {
+      "asset": "EEM",
+      "policy": "hmm_regime",
+      "observations": 1564,
+      "total_return": 0.7666679886071164,
+      "annual_return": 0.11701134866831803,
+      "annual_vol": 0.2242869386868802,
+      "downside_semivol": 0.1604646984358924,
+      "sharpe": 0.5217038020732621,
+      "max_drawdown": -0.36752953905994645,
+      "var_5": -0.020174834689293035,
+      "cvar_5": -0.03244306837405401,
+      "avg_hedge_ratio": 0.9778858060259338,
+      "hedge_ratio_std": 0.030591341317049808,
+      "vol_reduction_vs_unhedged": 0.046241493012595836,
+      "downside_reduction_vs_unhedged": 0.03963507991848281,
+      "cvar_improvement_vs_unhedged": -0.04845401273313518
+    },
+    {
+      "asset": "QQQ",
+      "policy": "unhedged",
+      "observations": 1564,
+      "total_return": 2.953789786121584,
+      "annual_return": 0.2557703585500485,
+      "annual_vol": 0.26134321129779764,
+      "downside_semivol": 0.18215922039689625,
+      "sharpe": 0.9786761143705434,
+      "max_drawdown": -0.28435773721581603,
+      "var_5": -0.025631220853018825,
+      "cvar_5": -0.03853529076994593,
+      "avg_hedge_ratio": 0.0,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.0,
+      "downside_reduction_vs_unhedged": 0.0,
+      "cvar_improvement_vs_unhedged": 0.0
+    },
+    {
+      "asset": "QQQ",
+      "policy": "full_hedge",
+      "observations": 1564,
+      "total_return": 2.6430959710441324,
+      "annual_return": 0.23998736432242634,
+      "annual_vol": 0.251226471966472,
+      "downside_semivol": 0.17535648776405496,
+      "sharpe": 0.9552630439138372,
+      "max_drawdown": -0.3532396018150522,
+      "var_5": -0.02493522246203659,
+      "cvar_5": -0.03670397846128887,
+      "avg_hedge_ratio": 1.0,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.038710549553161,
+      "downside_reduction_vs_unhedged": 0.03734498104471029,
+      "cvar_improvement_vs_unhedged": -0.04752299183597491
+    },
+    {
+      "asset": "QQQ",
+      "policy": "static_mv",
+      "observations": 1564,
+      "total_return": 2.680351859625078,
+      "annual_return": 0.2416967260458679,
+      "annual_vol": 0.2515091511481734,
+      "downside_semivol": 0.17548346897103642,
+      "sharpe": 0.9609858128123352,
+      "max_drawdown": -0.3424051620587719,
+      "var_5": -0.025080860244233266,
+      "cvar_5": -0.036780848072113966,
+      "avg_hedge_ratio": 0.8916959799396181,
+      "hedge_ratio_std": 0.0,
+      "vol_reduction_vs_unhedged": 0.037628909895112694,
+      "downside_reduction_vs_unhedged": 0.036647891944829425,
+      "cvar_improvement_vs_unhedged": -0.04552820707402772
+    },
+    {
+      "asset": "QQQ",
+      "policy": "ewma_dcc_lite",
+      "observations": 1564,
+      "total_return": 2.8359544557449916,
+      "annual_return": 0.24876607950792398,
+      "annual_vol": 0.25305070908084204,
+      "downside_semivol": 0.17636491209969665,
+      "sharpe": 0.98306809892578,
+      "max_drawdown": -0.34666888842167387,
+      "var_5": -0.025411008606264884,
+      "cvar_5": -0.03683424073265073,
+      "avg_hedge_ratio": 0.9677599834185524,
+      "hedge_ratio_std": 0.46082149964233154,
+      "vol_reduction_vs_unhedged": 0.03173031423229278,
+      "downside_reduction_vs_unhedged": 0.03180903104753474,
+      "cvar_improvement_vs_unhedged": -0.04414265477975504
+    },
+    {
+      "asset": "QQQ",
+      "policy": "hmm_regime",
+      "observations": 1564,
+      "total_return": 2.7037074849500136,
+      "annual_return": 0.24269035646843742,
+      "annual_vol": 0.25140618482567784,
+      "downside_semivol": 0.17539563381245682,
+      "sharpe": 0.9653316867948819,
+      "max_drawdown": -0.34426705393701507,
+      "var_5": -0.024953298150217577,
+      "cvar_5": -0.036761803229523944,
+      "avg_hedge_ratio": 0.967759886130245,
+      "hedge_ratio_std": 0.03635064820308976,
+      "vol_reduction_vs_unhedged": 0.038022898788048765,
+      "downside_reduction_vs_unhedged": 0.03713008086937697,
+      "cvar_improvement_vs_unhedged": -0.04602242528828017
+    }
+  ],
+  "loss_reduction_tests": [
+    {
+      "asset": "SPY",
+      "policy": "full_hedge",
+      "mean_daily_squared_return_reduction": 1.989583691805064e-05,
+      "annualized_squared_return_reduction": 0.005013750903348761,
+      "hac_tstat": 3.8798092317036263,
+      "bootstrap_ci_low": 1.099017836901715e-05,
+      "bootstrap_ci_high": 3.18981957435127e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "SPY",
+      "policy": "static_mv",
+      "mean_daily_squared_return_reduction": 1.954973682648558e-05,
+      "annualized_squared_return_reduction": 0.004926533680274366,
+      "hac_tstat": 3.975818489396113,
+      "bootstrap_ci_low": 1.1216651949211695e-05,
+      "bootstrap_ci_high": 3.0299677471714736e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "SPY",
+      "policy": "ewma_dcc_lite",
+      "mean_daily_squared_return_reduction": 1.6283070674566215e-05,
+      "annualized_squared_return_reduction": 0.004103333809990686,
+      "hac_tstat": 3.191445882609124,
+      "bootstrap_ci_low": 7.741217427186187e-06,
+      "bootstrap_ci_high": 2.711963936541012e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "SPY",
+      "policy": "hmm_regime",
+      "mean_daily_squared_return_reduction": 1.96294740929976e-05,
+      "annualized_squared_return_reduction": 0.0049466274714353945,
+      "hac_tstat": 3.967642238051623,
+      "bootstrap_ci_low": 1.1404204152873143e-05,
+      "bootstrap_ci_high": 3.063254712936889e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "EFA",
+      "policy": "full_hedge",
+      "mean_daily_squared_return_reduction": 1.9836805778626824e-05,
+      "annualized_squared_return_reduction": 0.0049988750562139595,
+      "hac_tstat": 4.698123456754398,
+      "bootstrap_ci_low": 1.2422693645160886e-05,
+      "bootstrap_ci_high": 2.897832779995907e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "EFA",
+      "policy": "static_mv",
+      "mean_daily_squared_return_reduction": 1.9500445507908037e-05,
+      "annualized_squared_return_reduction": 0.004914112267992825,
+      "hac_tstat": 4.780660249741566,
+      "bootstrap_ci_low": 1.2553706546206954e-05,
+      "bootstrap_ci_high": 2.8035470260437895e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "EFA",
+      "policy": "ewma_dcc_lite",
+      "mean_daily_squared_return_reduction": 1.5683391158857955e-05,
+      "annualized_squared_return_reduction": 0.0039522145720322045,
+      "hac_tstat": 3.7708134574739747,
+      "bootstrap_ci_low": 8.059622352612677e-06,
+      "bootstrap_ci_high": 2.4121717181323658e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "EFA",
+      "policy": "hmm_regime",
+      "mean_daily_squared_return_reduction": 1.952893164336692e-05,
+      "annualized_squared_return_reduction": 0.0049212907741284645,
+      "hac_tstat": 4.775118552690189,
+      "bootstrap_ci_low": 1.2369209420489479e-05,
+      "bootstrap_ci_high": 2.88522359176546e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "EEM",
+      "policy": "full_hedge",
+      "mean_daily_squared_return_reduction": 2.007224415521607e-05,
+      "annualized_squared_return_reduction": 0.00505820552711445,
+      "hac_tstat": 4.773313306656951,
+      "bootstrap_ci_low": 1.2240252403765973e-05,
+      "bootstrap_ci_high": 2.929492747688006e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "EEM",
+      "policy": "static_mv",
+      "mean_daily_squared_return_reduction": 1.9632804102119295e-05,
+      "annualized_squared_return_reduction": 0.004947466633734063,
+      "hac_tstat": 4.886197684871653,
+      "bootstrap_ci_low": 1.2466388646992822e-05,
+      "bootstrap_ci_high": 2.81694420000485e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "EEM",
+      "policy": "ewma_dcc_lite",
+      "mean_daily_squared_return_reduction": 1.5214454984534418e-05,
+      "annualized_squared_return_reduction": 0.0038340426561026732,
+      "hac_tstat": 3.6543266320737184,
+      "bootstrap_ci_low": 6.997038603583562e-06,
+      "bootstrap_ci_high": 2.432208667242328e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "EEM",
+      "policy": "hmm_regime",
+      "mean_daily_squared_return_reduction": 1.987511377919493e-05,
+      "annualized_squared_return_reduction": 0.005008528672357122,
+      "hac_tstat": 4.857358131198891,
+      "bootstrap_ci_low": 1.2344513455296637e-05,
+      "bootstrap_ci_high": 2.857892422437118e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "QQQ",
+      "policy": "full_hedge",
+      "mean_daily_squared_return_reduction": 2.0687571757774105e-05,
+      "annualized_squared_return_reduction": 0.005213268082959075,
+      "hac_tstat": 3.733750892271581,
+      "bootstrap_ci_low": 1.1042737909621762e-05,
+      "bootstrap_ci_high": 3.2564589920725206e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "QQQ",
+      "policy": "static_mv",
+      "mean_daily_squared_return_reduction": 2.011102659858797e-05,
+      "annualized_squared_return_reduction": 0.005067978702844169,
+      "hac_tstat": 3.8682280163438354,
+      "bootstrap_ci_low": 1.0833686823909459e-05,
+      "bootstrap_ci_high": 3.162602359821286e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "QQQ",
+      "policy": "ewma_dcc_lite",
+      "mean_daily_squared_return_reduction": 1.6971860394894763e-05,
+      "annualized_squared_return_reduction": 0.00427690881951348,
+      "hac_tstat": 3.0340931782936287,
+      "bootstrap_ci_low": 7.378248481171393e-06,
+      "bootstrap_ci_high": 2.950971558444855e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    },
+    {
+      "asset": "QQQ",
+      "policy": "hmm_regime",
+      "mean_daily_squared_return_reduction": 2.0308805588953573e-05,
+      "annualized_squared_return_reduction": 0.005117819008416301,
+      "hac_tstat": 3.84731684625205,
+      "bootstrap_ci_low": 1.1006153009280479e-05,
+      "bootstrap_ci_high": 3.1692923502533974e-05,
+      "bootstrap_reps": 3000,
+      "passes_harvey_gate": true
+    }
+  ],
+  "hmm_metadata": {
+    "SPY": {
+      "fallback": null,
+      "state_ratios": {
+        "0": 0.9654279414492138,
+        "1": 0.9096449746663049
+      },
+      "state_counts": {
+        "0": 1018,
+        "1": 187
+      },
+      "model_converged": true,
+      "train_log_likelihood": -2401.6613815487963
+    },
+    "EFA": {
+      "fallback": null,
+      "state_ratios": {
+        "0": 0.9217731926737194,
+        "1": 0.9226420540154426
+      },
+      "state_counts": {
+        "0": 1038,
+        "1": 167
+      },
+      "model_converged": true,
+      "train_log_likelihood": -2399.634150070595
+    },
+    "EEM": {
+      "fallback": null,
+      "state_ratios": {
+        "0": 0.9866218837937197,
+        "1": 0.8708318360918768
+      },
+      "state_counts": {
+        "0": 1051,
+        "1": 154
+      },
+      "model_converged": true,
+      "train_log_likelihood": -2454.528697121755
+    },
+    "QQQ": {
+      "fallback": null,
+      "state_ratios": {
+        "0": 0.9818735729534552,
+        "1": 0.8741964695802791
+      },
+      "state_counts": {
+        "0": 1021,
+        "1": 184
+      },
+      "model_converged": true,
+      "train_log_likelihood": -2437.2638196141147
+    }
+  },
+  "figures": [
+    "figures/k1548_spy_cumulative_returns.png",
+    "figures/k1548_vol_reduction.png",
+    "figures/k1548_downside_reduction.png",
+    "figures/k1548_average_hedge_ratios.png",
+    "figures/k1548_ewma_hedge_paths.png"
+  ],
+  "verdict": "STATIC_OR_FULL_HEDGE_DOMINATES_DYNAMIC_IN_FREE_DATA_OOS",
+  "main_findings": [
+    "Average OOS vol reduction is highest for full_hedge: 5.01%.",
+    "Harvey-style support counts by policy: full_hedge=4/4, static_mv=4/4, ewma_dcc_lite=4/4, hmm_regime=4/4",
+    "Dynamic policies are labelled EWMA/DCC-lite and train-only HMM regime overlays; the experiment does not claim a full DCC-GARCH implementation."
+  ],
+  "limitations": [
+    "FX overlay ignores forward points, transaction costs, taxes, and actual hedge-instrument roll mechanics.",
+    "EWMA/DCC-lite is a covariance proxy, not a full DCC-GARCH maximum-likelihood implementation.",
+    "HMM parameters are train-only to avoid lookahead; regime classification may be too static for post-2020 shifts.",
+    "USD ETFs are used as liquid proxies for Taiwan investors' global equity exposure; local fund wrappers may differ.",
+    "No knowledge.json write is performed by this Codex experiment; promotion is left to the main K1259 writer gate."
+  ]
+}
