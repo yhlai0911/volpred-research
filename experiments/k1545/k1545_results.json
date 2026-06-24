@@ -1,0 +1,151 @@
+{
+  "experiment_id": "k1545",
+  "title": "Carbon auction regime events as KRBN RV prior",
+  "run_date": "2026-06-24",
+  "seed": 20260624,
+  "data_window": {
+    "start": "1998-12-22",
+    "end": "2026-06-23",
+    "n_trading_days": 6916
+  },
+  "events": {
+    "n_total": 25,
+    "class_counts": {
+      "EU_ETS": 12,
+      "OTHER": 5,
+      "CCA": 5,
+      "RGGI": 3
+    },
+    "limitation": "Hand-coded from public news (Reuters, Carbon Pulse, EU Commission press). EEX per-auction CSV paywalled; this approximation makes the study PRELIMINARY per task brief (<50 events \u21d2 no PASS)."
+  },
+  "method": {
+    "rv_window_days": 5,
+    "baseline_window_days": [
+      30,
+      6
+    ],
+    "post_window_days": [
+      1,
+      5
+    ],
+    "bootstrap_n": 10000,
+    "hac_lag": 5,
+    "multiple_testing": "Bonferroni across 5 asset hypotheses",
+    "lookahead_audit": "RV_fwd5 uses rolling().std().shift(-5); event-day RV strictly post; baseline strictly pre."
+  },
+  "results_per_asset": [
+    {
+      "asset": "KRBN",
+      "metric": "rv_fwd5_vs_baseline_30d",
+      "n_events": 22,
+      "pre_mean": 0.24744321043476702,
+      "post_mean": 0.2851018755506157,
+      "diff": 0.03765866511584876,
+      "diff_ci_low": -0.01641456451365451,
+      "diff_ci_high": 0.10984742369812464,
+      "nw_se": 0.026121642952226496,
+      "nw_tstat": 1.4416652576073474,
+      "p_value_raw": 0.1493968291518093,
+      "p_value_bonf": 0.7469841457590465,
+      "effect_size_cohen_d": 0.2427168664035109
+    },
+    {
+      "asset": "GRN",
+      "metric": "rv_fwd5_vs_baseline_30d",
+      "n_events": 24,
+      "pre_mean": 0.37110196596338696,
+      "post_mean": 0.43443512808236223,
+      "diff": 0.06333316211897531,
+      "diff_ci_low": -0.009555139049357746,
+      "diff_ci_high": 0.14930715814155082,
+      "nw_se": 0.04111368611725306,
+      "nw_tstat": 1.5404398899761511,
+      "p_value_raw": 0.12345316432404951,
+      "p_value_bonf": 0.6172658216202476,
+      "effect_size_cohen_d": 0.31438682233889126
+    },
+    {
+      "asset": "KCCA",
+      "metric": "rv_fwd5_vs_baseline_30d",
+      "n_events": 20,
+      "pre_mean": 0.1858006568518171,
+      "post_mean": 0.19509179684417013,
+      "diff": 0.009291139992353013,
+      "diff_ci_low": -0.07175342142245017,
+      "diff_ci_high": 0.08673953083367479,
+      "nw_se": 0.03758872760189277,
+      "nw_tstat": 0.2471788907237488,
+      "p_value_raw": 0.8047697812817352,
+      "p_value_bonf": 1.0,
+      "effect_size_cohen_d": 0.04915603370373378
+    },
+    {
+      "asset": "XLE",
+      "metric": "rv_fwd5_vs_baseline_30d",
+      "n_events": 25,
+      "pre_mean": 0.2948560027861687,
+      "post_mean": 0.25162963548519707,
+      "diff": -0.043226367300971666,
+      "diff_ci_low": -0.14734384055283697,
+      "diff_ci_high": 0.05143092980210851,
+      "nw_se": 0.023189998709497877,
+      "nw_tstat": -1.8640090429702154,
+      "p_value_raw": 0.0623204344351862,
+      "p_value_bonf": 0.311602172175931,
+      "effect_size_cohen_d": -0.17079157806035175
+    },
+    {
+      "asset": "XLU",
+      "metric": "rv_fwd5_vs_baseline_30d",
+      "n_events": 25,
+      "pre_mean": 0.19637369086737716,
+      "post_mean": 0.18105221524904846,
+      "diff": -0.015321475618328745,
+      "diff_ci_low": -0.05780231886020098,
+      "diff_ci_high": 0.026184817595623112,
+      "nw_se": 0.009575352402481177,
+      "nw_tstat": -1.600095220971567,
+      "p_value_raw": 0.1095774610289324,
+      "p_value_bonf": 0.547887305144662,
+      "effect_size_cohen_d": -0.14159306273911568
+    }
+  ],
+  "cross_asset_aggregated": {
+    "n_dates": 24,
+    "diff_mean": 0.05312525620947325,
+    "ci_low": -0.006273167739259515,
+    "ci_high": 0.12019725993780027,
+    "nw_se": 0.02940154291615605,
+    "nw_tstat": 1.80688667805529,
+    "p_value_raw": 0.07077995010355509,
+    "n_assets_per_date_mean": 2.75
+  },
+  "gap_risk": {
+    "KRBN": {
+      "asset": "KRBN",
+      "n_events": 22,
+      "baseline_abs_ret": 0.01290651117185009,
+      "event_t1_abs_ret_mean": 0.012848826161900462,
+      "ratio_event_over_baseline": 0.9955305497216441,
+      "t_stat": -0.025644203942787058,
+      "p_value_raw": 0.9797832567611843
+    },
+    "GRN": {
+      "asset": "GRN",
+      "n_events": 24,
+      "baseline_abs_ret": 0.01825126695298426,
+      "event_t1_abs_ret_mean": 0.019431001213664204,
+      "ratio_event_over_baseline": 1.0646384858497204,
+      "t_stat": 0.3613086277775036,
+      "p_value_raw": 0.7211665729176256
+    }
+  },
+  "verdict": "PRELIMINARY",
+  "verdict_reasons": [
+    "n_events=25 < 50 \u21d2 PRELIMINARY tag per task brief (statistical power insufficient for PASS).",
+    "No asset rejects H0 at Bonferroni 10%.",
+    "Date-aggregated cross-asset p_raw=0.0708 (K1355-compliant: per-date agg before HAC).",
+    "KRBN gap-risk ratio (event t+1 |ret| / baseline) = 0.996",
+    "Hand-coded event list (Reuters / Carbon Pulse / EU Commission); EEX per-auction CSV is paywalled \u2014 strict 'demand-depth' / 'reserve-price bindingness' measure not extractable from public data and replaced by regime-event proxy."
+  ]
+}
