@@ -36138,5 +36138,18 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-24T09:49:57.640219"
+  },
+  {
+    "item_id": "de1cf022",
+    "category": "experiment",
+    "content": "Index inclusion event-study proxy (research_index_inclusion_fast_entry_mechanism_sector_rv, 2026-06-24): recent public S&P 500/Nasdaq-100 addition/reconstitution events do not show a supported post-inclusion RV uplift relative to same-sector peers. Sample: 16 valid events from 2024-03-18 to 2025-05-19 using yfinance adjusted close through 2026-06-23. Primary stock-minus-peer post60/pre RV log-ratio differential mean=0.0107, t=0.07, bootstrap CI [-0.2753, 0.3396], date-cluster CI [-0.1544, 0.2012]. Jump-rate and pairwise-correlation deltas are weak positive means but CIs cross zero and t-stats are below 3. This is a recent-inclusion proxy only, not a direct causal test of the 2026 Nasdaq fast-entry rule or mega-IPO fast-entry mechanism.",
+    "evidence": [
+      "experiments/research_index_inclusion_fast_entry_mechanism_sector_rv/research_index_inclusion_fast_entry_mechanism_sector_rv_results.json",
+      "experiments/research_index_inclusion_fast_entry_mechanism_sector_rv/summary_table.csv",
+      "experiments/research_index_inclusion_fast_entry_mechanism_sector_rv/codex_review.md",
+      "research_program.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-06-24T11:00:59.712800"
   }
 ]

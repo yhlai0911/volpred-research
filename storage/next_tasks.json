@@ -36617,7 +36617,7 @@
     "title": "研究 backlog fallback: Index inclusion fast-entry mechanism 對被納入個股 + 同 sector 對手 RV 的事件研究",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Index inclusion fast-entry mechanism 對被納入個股 + 同 sector 對手 RV 的事件研究 — 用 S&P 500 / Nasdaq-100 公開 fast-entry 規則 2024-2026 案例（特別 mega-cap IPO 或快速納入），對被納入個股 + 同 sector ETF（XLK/XLC）+ 同 sector 對手做 [-30,+60] event window RV、jump frequency、cross-sectional correlation 變化的 event study，明確 shift(1) lag；與既有 secto | 來源 section: 期刊主題挖掘 batch 2026-06-24（journal_discovery_20260624_0；websearch jbf/joe/rfs/jpm/faj/jfec/jfe/qje/econometrica/jof/ijf/jfqa/jai/jod/jot/jfm/jbes/aer 2025-26 趨勢層級；selectivity gate 後 13 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -36626,7 +36626,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-23T19:08:23+00:00"
+    "created_at": "2026-06-23T19:08:23+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-24T02:51:43.594378+00:00",
+    "claim_session_id": "f07d11e22aa8",
+    "started_at": "2026-06-24T02:51:48.915521+00:00",
+    "completed_at": "2026-06-24T03:01:21.576257+00:00",
+    "result": "Completed index-inclusion RV event-study proxy in experiments/research_index_inclusion_fast_entry_mechanism_sector_rv. 16 recent S&P 500/Nasdaq-100 inclusion/reconstitution events tested with [-30,+60] windows; primary stock-minus-peer RV differential mean=0.0107, t=0.07, bootstrap CI crosses zero. Verdict: weak_or_mixed_event_diagnostic; knowledge item de1cf022 recorded."
   },
   {
     "id": "research_tips_breakeven_volatility_corporate_bond_return",
