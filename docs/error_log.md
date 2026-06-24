@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 collect_vixtwn TAIFEX row parse failure 靜默跳過
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/collect_vixtwn.py::fetch_month()`：TAIFEX 月檔中某列日期有效但 VIX 數值不可 parse 時，直接 `continue`，該日資料缺口不會出現在 cron log。
+
+**根因**：VIXTWN collector 應容忍單列格式污染，避免一筆壞 row 阻塞整月資料收集；但舊實作把「跳過壞列」做成完全靜默，若 TAIFEX 格式 drift 或單日欄位壞掉，長期 CSV 會少日資料而 operator 看不到 row-level 根因。
+
+**解決方法**：新增 `_warn_vixtwn()`，每月前 5 個 row parse failure 會輸出 `[collect_vixtwn] WARN row parse failed; skipping row ...`，包含 year_month、line_no 與 exception；超過 5 個後合併 suppressed count。新增 regression test 模擬一筆壞數字 row 與一筆正常 row，確認壞 row 被警示且正常資料仍保留。
+
 ## 2026-06-25 check_persistence_stability GARCH fit failure 靜默跳窗
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/check_persistence_stability.py` rolling GARCH fit 失敗時直接 `continue`。這個 monthly audit 最後仍會輸出 asset-specific optimal window recommendation，但 operator 看不出推薦是基於完整 rolling windows，還是大量 fit failure 後的殘餘樣本。

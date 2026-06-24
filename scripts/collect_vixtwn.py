@@ -36,6 +36,14 @@ FIELDNAMES = ["date", "vixtwn_close", "vixtwn_1min_avg"]
 TAIFEX_URL = "https://www.taifex.com.tw/file/taifex/Dailydownload/vix/log2data/{ym}new.txt"
 
 
+def _warn_vixtwn(message, *, exc=None, **context):
+    parts = [f"{key}={value}" for key, value in context.items() if value is not None]
+    if exc is not None:
+        parts.append(f"error={type(exc).__name__}: {exc}")
+    suffix = f" {' '.join(parts)}" if parts else ""
+    print(f"[collect_vixtwn] WARN {message}{suffix}", file=sys.stderr)
+
+
 def fetch_month(year_month: str) -> list[dict]:
     """Fetch VIXTWN daily data for a given YYYYMM."""
     url = TAIFEX_URL.format(ym=year_month)
@@ -57,7 +65,8 @@ def fetch_month(year_month: str) -> list[dict]:
             text = r.text
 
     records = []
-    for line in text.strip().split("\n"):
+    parse_failures = 0
+    for line_no, line in enumerate(text.strip().split("\n"), start=1):
         parts = line.strip().split("\t")
         # TAIFEX format: 7 tab-separated fields with empty fields
         # [date, time, '', '', vix_close, '', vix_avg]
@@ -75,8 +84,22 @@ def fetch_month(year_month: str) -> list[dict]:
                             "vixtwn_close": vix_close,
                             "vixtwn_1min_avg": vix_avg,
                         })
-                    except ValueError:
+                    except ValueError as exc:
+                        parse_failures += 1
+                        if parse_failures <= 5:
+                            _warn_vixtwn(
+                                "row parse failed; skipping row",
+                                year_month=year_month,
+                                line_no=line_no,
+                                exc=exc,
+                            )
                         continue
+    if parse_failures > 5:
+        _warn_vixtwn(
+            "additional row parse failures suppressed",
+            year_month=year_month,
+            count=parse_failures - 5,
+        )
 
     return records
 
