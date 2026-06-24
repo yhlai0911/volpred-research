@@ -29983,7 +29983,7 @@
       "tolerance": "|Δγ|≤0.001 / |Δt|≤0.05",
       "2317.TW": {
         "gamma": 0.032,
-        "delta_gamma": 2e-05,
+        "delta_gamma": 0.00002,
         "t": 1.741,
         "delta_t": 0.001,
         "verdict": "PASS"
@@ -30004,7 +30004,7 @@
       },
       "2886.TW": {
         "gamma": 0.0379,
-        "delta_gamma": 7e-05,
+        "delta_gamma": 0.00007,
         "t": 1.552,
         "delta_t": 0.002,
         "verdict": "PASS"
@@ -30328,7 +30328,7 @@
       "N_start_alternative": 100,
       "max_abs_delta": 0.092,
       "mean_abs_delta": 0.005,
-      "median_abs_delta": 1.9e-05,
+      "median_abs_delta": 0.000019,
       "n_delta_gt_0_1": 0,
       "n_delta_gt_0_5": 0,
       "v2_median_amp": 3.839,
@@ -30654,7 +30654,7 @@
       "n_events": 226,
       "cohens_d_pooled": 0.305,
       "t_stat": 4.019,
-      "p_value": 7.9e-05,
+      "p_value": 0.000079,
       "ex_ctrl_ratio": 1.342,
       "sector_d": {
         "Tech": 0.09,
@@ -30773,7 +30773,7 @@
       "whar_db4_qlike": 1.7455,
       "gjr_garch_qlike": 1.5308,
       "dm_har_vs_whar_t": 5.954,
-      "dm_har_vs_whar_p": 3.14e-09,
+      "dm_har_vs_whar_p": 3.14E-9,
       "har_r2_oos": 0.2226,
       "whar_db4_r2_oos": -0.0545,
       "gjr_r2_oos": 0.2551,
@@ -31002,7 +31002,7 @@
         "expected_violations": 12.570000000000011,
         "violation_rate": 0.02784407319013524,
         "kupiec_lr": 27.22918925738609,
-        "kupiec_p": 1.8070975393857935e-07,
+        "kupiec_p": 1.8070975393857935E-7,
         "christoffersen_lr": 0.8864222213877611,
         "christoffersen_p": 0.3464486970473164,
         "kupiec_pass": false,
@@ -31024,7 +31024,7 @@
         "expected_violations": 12.570000000000011,
         "violation_rate": 0.02386634844868735,
         "kupiec_lr": 17.578341168201874,
-        "kupiec_p": 2.7571072103493854e-05,
+        "kupiec_p": 0.000027571072103493854,
         "christoffersen_lr": 0.10527802230546968,
         "christoffersen_p": 0.7455854490902305,
         "kupiec_pass": false,
@@ -31502,12 +31502,12 @@
         "CR": 0.662
       },
       "cc_p_alpha_005": {
-        "HS-252": 7e-07,
-        "CU": 2.17e-05,
+        "HS-252": 7E-7,
+        "CU": 0.0000217,
         "CR": 0.538
       },
       "cc_p_alpha_001": {
-        "HS-252": 2.84e-07,
+        "HS-252": 2.84E-7,
         "CU": 0.0017,
         "CR": 0.123
       },
@@ -35706,14 +35706,14 @@
           "sample_end": "2026-06-15",
           "beta_signal_std": 0.04682083274549272,
           "hac_t": 4.857127578511834,
-          "hac_p": 1.1910086120610071e-06,
+          "hac_p": 0.0000011910086120610071,
           "r2": 0.7008442889631104,
           "target_mean_raw": 0.17586081312895932,
           "signal_mean_raw": 0.08362725117675099,
           "status": "ok",
           "hac_maxlags": 5,
           "model": "z(log(target)) ~ z(signal_l1) + z(log(target_l1)) + z(total_dollar_volume_l1), OLS-HAC",
-          "bh_q_all_regressions": 2.858420668946417e-05,
+          "bh_q_all_regressions": 0.00002858420668946417,
           "harvey_abs_t_ge_3": true,
           "positive_harvey_t_ge_3": true
         },
@@ -35733,14 +35733,14 @@
           "sample_end": "2026-06-15",
           "beta_signal_std": 0.047200688917475545,
           "hac_t": 4.865980247173926,
-          "hac_p": 1.138908929857465e-06,
+          "hac_p": 0.000001138908929857465,
           "r2": 0.700877818355834,
           "target_mean_raw": 0.17586081312895932,
           "signal_mean_raw": 0.08434901953181577,
           "status": "ok",
           "hac_maxlags": 5,
           "model": "z(log(target)) ~ z(signal_l1) + z(log(target_l1)) + z(total_dollar_volume_l1), OLS-HAC",
-          "bh_q_all_regressions": 2.858420668946417e-05,
+          "bh_q_all_regressions": 0.00002858420668946417,
           "harvey_abs_t_ge_3": true,
           "positive_harvey_t_ge_3": true
         }
@@ -36151,5 +36151,17 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-06-24T11:00:59.712800"
+  },
+  {
+    "item_id": "k1546_vrp_term_structure_drawdown_null",
+    "category": "research_finding",
+    "confidence": 0.85,
+    "content": "K1546: VRP term-structure slope (1M/3M/6M) FAILS to predict SPY forward drawdown (verdict NULL; CONDITIONAL_PASS). Headline VRP_slope_6M_1M_lag1 → fwd_dd_21: NW HAC t=-0.98 (p>0.3), AUC=0.447, Spearman ρ=-0.047 (N=4500, 2008-2026). KEY EVIDENCE: encompassing regression VIX_level (t=-6.43) FULLY subsumes VRP_slope_6M_1M (t=-0.39 → null). Subsample fragility: 2010-2019 NW t=-4.79 sig, 2020-2026 t=-0.80 insig (COVID/post-COVID regime confound, not cherry-picked split but informative). IV_slope_3M_1M (raw VIX slope without subtracting RV) sig benchmark t=+5.67 AUC=0.65 — so the INFORMATION exists in IV term structure but VRP transformation DESTROYS it (RV subtraction adds noise without disentangling premium component when predicting drawdown). Differentiates K429 (raw VIX slope null for VOL prediction) — drawdown target gives IV slope sig but VRP slope still null. PUBLICATION TRAP avoided: cross-horizon VRP slope looks intuitive but VIX_level encompasses all signal. Methodology: signal.shift(1) lookahead defense ✓ / NW HAC lag=N ✓ / block bootstrap block=N B=1000 seed=42 ✓ / VRP=IV²-RV² Bollerslev-Tauchen-Zhou 2009 canonical ✓ / Hanley-McNeil AUC CI ✓ / 6 figures + 4648-day data CSV.",
+    "evidence": "experiments/k1546/{README.md,k1546.py,k1546_results.json,fig1-4} (commit 085761703 batched with JBF prep by parallel hourly-13 session). NW HAC encompassing test (N=4500): const t=-0.26 / VIX_level t=-6.43 / VRP_slope_6M_1M t=-0.39. Subsamples: 2010-2019 (N=2516) t=-4.79 p=1.6e-6 / 2020-2026 (N=1606) t=-0.80 p=0.426. Benchmarks: IV_slope_3M_1M t=+5.67 AUC=0.646, VIX_level t=-6.21 AUC=0.284. Reviewer source: 主線程 code review (Codex CLI stdin-wait stuck per K1259 fallback path, 8min timeout); manual audit: VRP variance scale canonical, lookahead defense .shift(1), NW lag=N overlap, block bootstrap block=N B=1000 seed=42 all verified.",
+    "created_at": "2026-06-24T13:30:00+08:00",
+    "experiment_id": "K1546",
+    "experiment_path": "experiments/k1546/",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer_source": "main_thread_code_review_fallback (codex stdin-wait stuck, k1546.py L86-100 VRP/RV formula + L120-133 forward DD strict t+1..t+N + L137-161 NW HAC + L165-186 block bootstrap + L255 shift(1) — manual line-by-line)"
   }
 ]
