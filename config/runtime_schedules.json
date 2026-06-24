@@ -390,12 +390,21 @@
         ],
         "piggy_back_skip": true,
         "piggy_back_skip_reason": "host crontab fires reliably at minute 0; pipeline is idempotent but double-fire wastes yfinance quota."
+      },
+      {
+        "id": "git_push_backup",
+        "cron": "17 */2 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_git_push_backup.sh",
+        "log_path": "storage/logs/cron/git_push_backup.log",
+        "description": "每 2 小時：本機研究 commit fast-forward push 到 origin/main 備份（2026-06-24 建，雲端 routines 停用後本地為唯一 push 源；偵測分岔則發 alert 不強推）",
+        "host_crontab_managed": true,
+        "piggy_back_enabled": false
       }
     ]
   },
   "remote_triggers": {
     "source_label": "Canonical remote trigger spec",
-    "note": "Cloud triggers survive across local sessions. Cron expressions here are UTC, not Asia/Taipei.",
+    "note": "Cloud triggers survive across local sessions. Cron expressions here are UTC, not Asia/Taipei. [2026-06-24] platform_ops_patrol + token_usage_daily_report 已停用（dual-source 分岔治理）。",
     "items": [
       {
         "id": "platform_ops_patrol",
@@ -405,7 +414,10 @@
         "local_time": "每 6 小時（台灣時間）",
         "description": "平台巡檢雲端 trigger。",
         "prompt": "平台巡檢：執行 platform-patrol-maintain --stub-if-no-work；若有訊號再看 detail CLI 並建立後續任務",
-        "trigger_id": "trig_01HzWX2ZUmsGHnzwciGpHeNz"
+        "trigger_id": "trig_01HzWX2ZUmsGHnzwciGpHeNz",
+        "enabled": false,
+        "disabled_at": "2026-06-24",
+        "disabled_reason": "停用以消除 dual-source git 分岔（與本機研究主線從 6/4 分岔，雲端 push origin/main 造成 history divergence + 假警報）。本機 cron git_push_backup 接手備份。詳見 memory project_cloud_agent_git_divergence。"
       },
       {
         "id": "token_usage_daily_report",
@@ -414,7 +426,10 @@
         "timezone": "UTC",
         "local_time": "每日 22:43（台灣時間）",
         "description": "Token 日報雲端 trigger。",
-        "trigger_id": "trig_015iaE6yv3V9V1opjUAA5R2V"
+        "trigger_id": "trig_015iaE6yv3V9V1opjUAA5R2V",
+        "enabled": false,
+        "disabled_at": "2026-06-24",
+        "disabled_reason": "停用以消除 dual-source git 分岔（與本機研究主線從 6/4 分岔，雲端 push origin/main 造成 history divergence + 假警報）。本機 cron git_push_backup 接手備份。詳見 memory project_cloud_agent_git_divergence。"
       }
     ]
   },
