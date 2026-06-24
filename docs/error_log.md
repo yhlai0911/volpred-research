@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 boss_report warning collector 未被 silent-fallback audit 辨識
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/boss_report.py::_cycle_intent()` 的 exception handler：讀 `current_cycle_intent.json` 失敗後記 report warning 再 `return {}`，但 helper 名稱是 `_record_warning()`，靜態 audit 不認得，仍列為 silent default return。
+
+**根因**：2026-06-22 已把 boss report 局部讀取失敗改成 `_REPORT_WARNINGS`，會在 HTML / plain-text 報告中顯示；但治理工具的可觀察性規則只辨識 `print/log/warn/error` 或 `_warn*` helper。實際行為可觀察，但 helper 命名與 lint contract 不一致，導致後續 fallback sweep 重複報同一類假陽性。
+
+**解決方法**：將 `_record_warning()` 重新命名為 `_warn_report()`，所有局部讀取失敗維持原本「不中斷報告、寫入 Report generation warnings」語意不變，但讓 `audit_silent_fallbacks.py` 正確辨識該 handler 有診斷。新增 `test_boss_report_has_no_silent_fallback_audit_findings()` 直接用 silent fallback audit 鎖住。
+
 ## 2026-06-24 audit_publish_sync transport failure 被混成 mismatch
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/audit_publish_sync.py`，掃到 `http_status()` 對 generic exception 直接 `return 0`。同檔 `fetch_supabase_slugs()` 查詢失敗時也回空 set；這兩種情況都會讓 audit 報告看起來像正常完成後發現 missing / 404，而不是 audit 本身的上游讀取失敗。

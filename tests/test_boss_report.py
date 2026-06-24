@@ -4,6 +4,8 @@ import ast
 import importlib.util
 from pathlib import Path
 
+from scripts import audit_silent_fallbacks
+
 
 def _load_module(name: str, rel_path: str):
     module_path = Path(__file__).resolve().parents[1] / rel_path
@@ -49,3 +51,11 @@ def test_boss_report_has_no_bare_except_pass() -> None:
                 offenders.append(node.lineno)
 
     assert offenders == []
+
+
+def test_boss_report_has_no_silent_fallback_audit_findings() -> None:
+    script = Path(__file__).resolve().parents[1] / "scripts" / "boss_report.py"
+
+    findings = audit_silent_fallbacks.audit_file(script)
+
+    assert findings == []

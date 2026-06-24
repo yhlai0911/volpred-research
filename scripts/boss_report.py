@@ -41,7 +41,7 @@ SINCE = NOW - WINDOW
 _REPORT_WARNINGS: list[str] = []
 
 
-def _record_warning(source: str, exc: Exception) -> None:
+def _warn_report(source: str, exc: Exception) -> None:
     _REPORT_WARNINGS.append(f"{source}: {type(exc).__name__}: {str(exc)[:200]}")
 
 
@@ -91,7 +91,7 @@ def _dashboard():
         try:
             return json.loads(e.output)
         except Exception as parse_exc:
-            _record_warning("ops_dashboard JSON parse failed", parse_exc)
+            _warn_report("ops_dashboard JSON parse failed", parse_exc)
             return {"overall_status": "error", "sections": [], "_err": str(e)[:200]}
     except Exception as e:
         return {"overall_status": "error", "sections": [], "_err": str(e)[:200]}
@@ -114,7 +114,7 @@ def _paper_portfolio():
                         status = line.split(":" if ":" in line else "：", 1)[1].strip()[:40]
                         break
             except Exception as exc:
-                _record_warning(f"paper README parse failed ({sub.name})", exc)
+                _warn_report(f"paper README parse failed ({sub.name})", exc)
         out.append({"name": sub.name, "status": status})
     return out
 
@@ -131,7 +131,7 @@ def _pending_tasks():
             bp[str(t.get("priority", "?"))] = bp.get(str(t.get("priority", "?")), 0) + 1
         return {"total": len(pending), "by_type": bt, "by_priority": bp}
     except Exception as exc:
-        _record_warning("next_tasks read failed", exc)
+        _warn_report("next_tasks read failed", exc)
         return {"total": 0, "by_type": {}, "by_priority": {}}
 
 
@@ -148,9 +148,9 @@ def _autonomous_decisions():
                     if ts >= SINCE.isoformat():
                         out.append(d)
                 except Exception as exc:
-                    _record_warning("autonomous_decisions line parse failed", exc)
+                    _warn_report("autonomous_decisions line parse failed", exc)
         except Exception as exc:
-            _record_warning("autonomous_decisions read failed", exc)
+            _warn_report("autonomous_decisions read failed", exc)
     return out
 
 
@@ -160,7 +160,7 @@ def _cycle_intent():
     if not f.exists(): return {}
     try: return json.loads(f.read_text())
     except Exception as exc:
-        _record_warning("current_cycle_intent read failed", exc)
+        _warn_report("current_cycle_intent read failed", exc)
         return {}
 
 
