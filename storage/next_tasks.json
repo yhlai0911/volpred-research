@@ -36949,7 +36949,7 @@
     "title": "Paper review (Codex 24h-rule): 每日精選導讀｜隔夜波動率：學術上很重要，實戰裡很尷尬",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f3e389cf needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_f3e389cf",
@@ -36957,7 +36957,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-24T03:08:04+00:00"
+    "created_at": "2026-06-24T03:08:04+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-24T05:14:01.528643+00:00",
+    "claim_session_id": "8479192fba36",
+    "started_at": "2026-06-24T05:14:05.925968+00:00",
+    "completed_at": "2026-06-24T05:17:12.823963+00:00",
+    "result": "Codex 24h review completed for mile_f3e389cf. Verified K772/K886/K1006/K1264/K935 provenance, corrected K1006/K1264 date wording, tightened overnight-model wording to avoid daily-close overstatement, and added storage/paper_reviews/mile_f3e389cf_codex_review.md. Local JSON validation passed; remote mirror hook returned HTTP 401."
   },
   {
     "id": "paper_review_mile_1597b341",
