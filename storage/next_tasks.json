@@ -36985,7 +36985,7 @@
     "title": "Paper review (Codex 24h-rule): 氣候新聞延燒越久，綠棕 ETF 的尾端風險不會跟著升",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_dc516a52 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_dc516a52",
@@ -36993,7 +36993,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-24T03:08:04+00:00"
+    "created_at": "2026-06-24T03:08:04+00:00",
+    "claimed_by": "hourly-12",
+    "claimed_at": "2026-06-24T04:08:24.111187+00:00",
+    "claim_session_id": "9d3b75965947",
+    "started_at": "2026-06-24T04:08:27.753022+00:00",
+    "completed_at": "2026-06-24T04:15:39.313861+00:00",
+    "result": "Codex 24h-rule narrative review CONDITIONAL_PASS → 5 issues fixed (1 critical: Welch p=0.20 was wrongly stated as 達顯著, 1 title overclaim, 1 method label, 2 literature precision). Corrigenda 寫入 details + Supabase sync 完成. Report: experiments/K1367/codex_review_24h_narrative.md"
   },
   {
     "id": "journal_discovery_20260624_0",
