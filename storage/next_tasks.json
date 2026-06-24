@@ -36806,12 +36806,18 @@
     "id": "paper_body_prg_v6_major7_har_target_mismatch_scope",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "[paper_body] PRG v6 MAJOR #7 — HAR target-mismatch claim scope (TAIFEX-only or replicate cross-market)",
     "description": "Codex v5_independent MAJOR #7: paper claims HAR underperforms PRG due to target mismatch (DM t=0.57 on sigma^2_full); this finding currently uses TAIFEX evidence only but is framed as a general HAR-versus-GJR adjudication. Action: (a) explicitly scope claim to 'TAIFEX sample examined here'; (b) frame as 'consistent with broader target-mismatch concern in the volatility-forecasting literature' rather than general adjudication; OR (c) replicate the target-mismatch test on remaining 5 markets and report. Path (a)+(b) is minimum-effort fix; path (c) is full evidence. Files: paper/prg-periodic-garch/main.tex §5 (conclusion line 361 area).",
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
-    "parent_task_id": "paper_body_prg_v6_major_fixes"
+    "parent_task_id": "paper_body_prg_v6_major_fixes",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-06-24T06:08:30.063345+00:00",
+    "claim_session_id": "1b1acac24fde",
+    "started_at": "2026-06-24T06:08:45.118322+00:00",
+    "completed_at": "2026-06-24T06:10:11.683638+00:00",
+    "result": "Abstract L63 HAR-vs-GJR target-mismatch claim scoped down: prepended 'in the TAIFEX sample examined here'; reframed as 'evidence consistent with a broader target-mismatch concern in the volatility-forecasting literature rather than as a general adjudication of HAR versus GJR' (parallel wording to §5 conclusion L362 already in MAJOR #6). §5 main text L214 already TAIFEX-scoped. Path (a)+(b) minimum-effort fix. xelatex 20pp 109KB OK; paper-update synced (updated_at 2026-06-24T06:09:58Z). Codex v5_independent MAJOR #7 closed."
   },
   {
     "id": "paper_body_prg_v6_minor8_table1_mcs_row_consistency",
