@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 content_correction_scanner 壞 report/feed 被靜默漏掃
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/content_correction_scanner.py`，掃到 `load_articles()`：單篇 `storage/reports/*.json` 壞 JSON 時直接 `continue`，`feed.json` 壞 JSON 時直接 `pass`。內容修正巡檢會把壞來源當成沒有文章，可能漏掉需要撤回或更新的舊內容。
+
+**根因**：content correction scanner 必須 fail-open，避免一個壞 report 阻塞全站掃描；但 fail-open 不能靜默，否則內容品質巡檢層會重演「只有人工才發現」的漏掃問題。Feed schema 或單筆 entry schema drift 也需要可觀察，否則 fallback pool 是否完整不可判斷。
+
+**解決方法**：新增 `_warn_content_correction()`，單篇 report 讀取失敗 / schema invalid、feed 讀取失敗 / schema invalid、以及 feed 單筆非 object entry 都輸出 `[content_correction_scanner] WARN ...`，同時保留跳過壞來源、繼續掃合法文章的行為。新增 regression tests 覆蓋壞單篇 report、壞 feed JSON，並用 `audit_silent_fallbacks.audit_file()` 鎖定此腳本無 findings。
+
 ## 2026-06-25 compute_queue worker lock failure 缺少診斷
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/compute_queue.py`，掃到 worker lock helper：lock 檔被其他 process 先刪除時用 `pass`，lock 寫入失敗時直接 `return False`。後者會讓 `run-next` 只輸出 `worker already running (lock held); skip`，看不出是另一個 worker 正在跑，還是本機無法建立 lock。

@@ -31,6 +31,14 @@ REPORTS_DIR = PROJECT / "storage" / "reports"
 FEED_PATH = REPORTS_DIR / "feed.json"
 DEFAULT_OUTPUT = PROJECT / "storage" / "content_correction_report.json"
 
+
+def _warn_content_correction(message: str, path: Path, exc: Exception) -> None:
+    print(
+        f"[content_correction_scanner] WARN {message}: "
+        f"path={path} error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
 # ---------------------------------------------------------------------------
 # 1. Self-correction detection patterns
 # ---------------------------------------------------------------------------
@@ -379,7 +387,15 @@ def load_articles() -> list[dict]:
             try:
                 with open(fpath) as f:
                     data = json.load(f)
-            except (json.JSONDecodeError, UnicodeDecodeError):
+            except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+                _warn_content_correction("report JSON read failed; skipping", fpath, exc)
+                continue
+            if not isinstance(data, dict):
+                _warn_content_correction(
+                    "report JSON schema invalid; skipping",
+                    fpath,
+                    TypeError(f"expected dict, got {type(data).__name__}"),
+                )
                 continue
 
             aid = data.get("id", fpath.stem)
@@ -404,25 +420,44 @@ def load_articles() -> list[dict]:
         try:
             with open(FEED_PATH) as f:
                 feed = json.load(f)
-            for item in feed:
-                aid = item.get("id", "")
-                if aid in articles:
-                    continue
-                content = item.get("content", "") or ""
-                description = item.get("description", "") or ""
-                title = item.get("title", "") or ""
-                text = f"{title} {content} {description}".strip()
-                if len(text) < 30:
-                    continue
-                articles[aid] = {
-                    "id": aid,
-                    "title": title,
-                    "status": item.get("status", "unknown"),
-                    "text": text,
-                    "source_file": "storage/reports/feed.json",
-                }
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            pass
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            _warn_content_correction(
+                "feed JSON read failed; skipping feed fallback",
+                FEED_PATH,
+                exc,
+            )
+            feed = []
+        if not isinstance(feed, list):
+            _warn_content_correction(
+                "feed JSON schema invalid; skipping feed fallback",
+                FEED_PATH,
+                TypeError(f"expected list, got {type(feed).__name__}"),
+            )
+            feed = []
+        for index, item in enumerate(feed):
+            if not isinstance(item, dict):
+                _warn_content_correction(
+                    f"feed entry schema invalid at index={index}; skipping",
+                    FEED_PATH,
+                    TypeError(f"expected dict, got {type(item).__name__}"),
+                )
+                continue
+            aid = item.get("id", "")
+            if aid in articles:
+                continue
+            content = item.get("content", "") or ""
+            description = item.get("description", "") or ""
+            title = item.get("title", "") or ""
+            text = f"{title} {content} {description}".strip()
+            if len(text) < 30:
+                continue
+            articles[aid] = {
+                "id": aid,
+                "title": title,
+                "status": item.get("status", "unknown"),
+                "text": text,
+                "source_file": "storage/reports/feed.json",
+            }
 
     return list(articles.values())
 
