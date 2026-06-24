@@ -1,0 +1,601 @@
+{
+  "experiment_id": "research_hedge_fund_alpha_dispersion_regime_strategy_etf",
+  "run_timestamp_local": "2026-06-24T08:39:18.032844+08:00",
+  "data_sources": {
+    "strategy_etfs": {
+      "tickers_requested": [
+        "QAI",
+        "MNA",
+        "CTA",
+        "DBMF",
+        "MRGR",
+        "HFXI",
+        "RPAR"
+      ],
+      "tickers_downloaded": [
+        "CTA",
+        "DBMF",
+        "RPAR",
+        "HFXI",
+        "MRGR",
+        "MNA",
+        "QAI"
+      ],
+      "first_date": "2009-03-25",
+      "last_date": "2026-06-23"
+    },
+    "market_controls": {
+      "tickers": [
+        "SPY",
+        "^VIX"
+      ],
+      "first_date": "2018-01-02",
+      "last_date": "2026-06-23"
+    },
+    "sp500_constituents": {
+      "source": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+      "constituents_requested": 503,
+      "tickers_downloaded": 494,
+      "first_date": "2018-01-02",
+      "last_date": "2026-06-23",
+      "survivorship_note": "Current S&P 500 constituents as of run date; not historical membership."
+    },
+    "iwm_iwr_top_holdings": {
+      "source": "yfinance funds_data.top_holdings",
+      "IWM_top_holdings": [
+        "BE",
+        "CRDO",
+        "STRL",
+        "IONQ",
+        "FN",
+        "NXT",
+        "CDE",
+        "TTMI",
+        "SATS",
+        "GH"
+      ],
+      "IWR_top_holdings": [
+        "SNDK",
+        "WDC",
+        "GLW",
+        "VRT",
+        "PWR",
+        "HWM",
+        "BNY",
+        "CMI",
+        "CIEN",
+        "DDOG"
+      ],
+      "IWM_downloaded": [
+        "IONQ",
+        "STRL",
+        "NXT",
+        "CRDO",
+        "BE",
+        "GH",
+        "TTMI",
+        "FN",
+        "CDE",
+        "SATS"
+      ],
+      "IWR_downloaded": [
+        "SNDK",
+        "DDOG",
+        "HWM",
+        "CMI",
+        "PWR",
+        "VRT",
+        "WDC",
+        "CIEN",
+        "BNY",
+        "GLW"
+      ],
+      "limitation": "Only top holdings exposed by yfinance, not the full Russell 2000 or Russell Midcap membership."
+    }
+  },
+  "literature_checked": [
+    {
+      "title": "J.P. Morgan Alternative Investments Outlook 2026",
+      "url": "https://am.jpmorgan.com/content/dam/jpm-am-aem/global/en/insights/portfolio-insights/alternative-outlook.pdf",
+      "role": "2026 practitioner motivation: elevated volatility and dispersion as hedge-fund alpha backdrop."
+    },
+    {
+      "title": "Wellington: Goldilocks and the three drivers of hedge fund outperformance",
+      "url": "https://www.wellington.com/en-us/intermediary/insights/3-drivers-of-hedge-fund-outperformance",
+      "role": "motivation linking dispersion, volatility, and hedge-fund opportunity set."
+    },
+    {
+      "title": "ECB Working Paper 1658: Commonality in hedge fund returns",
+      "url": "https://www.ecb.europa.eu/pub/pdf/scpwps/ecbwp1658.pdf",
+      "role": "academic background for hedge-fund commonality/strategy-return structure."
+    }
+  ],
+  "design": {
+    "strategy_dispersion_proxy": "Daily cross-sectional std. of strategy ETF log returns, smoothed as 21d and 63d rolling means; requires at least five ETFs available.",
+    "feature_lag_rule": "All strategy and market controls are shifted by one trading day via raw.shift(1).",
+    "target_alignment": "Target at date t is the forward 22-trading-day variance quantity; OOS training at forecast date t excludes rows whose target window ends after t-1.",
+    "baseline_model": "log target OLS with own lagged target, SPY 22d return/RV, VIX level, and VIX 22d change.",
+    "augmented_model": "baseline plus lagged 21d and 63d strategy-ETF dispersion.",
+    "loss": "QLIKE(actual, predicted) = actual/predicted - log(actual/predicted) - 1; positive DM diff means augmented model has lower loss.",
+    "formal_test": "HAC/DM test on baseline loss minus augmented loss; Harvey-style practical threshold |t| > 3."
+  },
+  "summary": {
+    "n_ok_cells": 4,
+    "positive_harvey_cells": 0,
+    "negative_harvey_cells": 0,
+    "median_qlike_improvement_pct": -10.440021788008636,
+    "mean_qlike_improvement_pct": -9.812787493462467,
+    "verdict": "null_or_mixed_negative",
+    "conclusion": "Strategy-ETF dispersion does not provide robust OOS QLIKE improvement for next-month stock cross-sectional dispersion or individual-RV targets after market-volatility and own-target persistence controls."
+  },
+  "summary_rows": [
+    {
+      "target": "SP500_current_constituents_avg_individual_rv_22d",
+      "status": "ok",
+      "oos_rows": 1100,
+      "first_oos_date": "2022-01-03",
+      "last_oos_date": "2026-05-21",
+      "qlike_base": 0.06776996330286529,
+      "qlike_aug": 0.07110153918548293,
+      "qlike_improvement_pct": -4.916006620409041,
+      "qlike_dm_t": -2.118300960997224,
+      "qlike_dm_mean": -0.003331575882617628,
+      "mse_improvement_pct": -4.226924353811062,
+      "mse_dm_t": -2.052043491551853
+    },
+    {
+      "target": "SP500_current_constituents_xs_return_var_22d",
+      "status": "ok",
+      "oos_rows": 1100,
+      "first_oos_date": "2022-01-03",
+      "last_oos_date": "2026-05-21",
+      "qlike_base": 0.10323772329055075,
+      "qlike_aug": 0.1171284619672348,
+      "qlike_improvement_pct": -13.455099777423557,
+      "qlike_dm_t": -1.99866278469106,
+      "qlike_dm_mean": -0.013890738676684063,
+      "mse_improvement_pct": -7.26047903499411,
+      "mse_dm_t": -1.9461663720984086
+    },
+    {
+      "target": "IWM_yfinance_top_holdings_avg_individual_rv_22d",
+      "status": "ok",
+      "oos_rows": 1100,
+      "first_oos_date": "2022-01-03",
+      "last_oos_date": "2026-05-21",
+      "qlike_base": 0.1185577683842577,
+      "qlike_aug": 0.13383452829106146,
+      "qlike_improvement_pct": -12.885498871141229,
+      "qlike_dm_t": -1.8752545048454337,
+      "qlike_dm_mean": -0.015276759906803786,
+      "mse_improvement_pct": -5.87194900024462,
+      "mse_dm_t": -2.0691241220759062
+    },
+    {
+      "target": "IWR_yfinance_top_holdings_avg_individual_rv_22d",
+      "status": "ok",
+      "oos_rows": 1100,
+      "first_oos_date": "2022-01-03",
+      "last_oos_date": "2026-05-21",
+      "qlike_base": 0.22028326015943284,
+      "qlike_aug": 0.2378939038702371,
+      "qlike_improvement_pct": -7.994544704876043,
+      "qlike_dm_t": -2.5683579457433083,
+      "qlike_dm_mean": -0.017610643710804244,
+      "mse_improvement_pct": -4.216730747085921,
+      "mse_dm_t": -2.650036668221476
+    }
+  ],
+  "detailed_results": {
+    "SP500_current_constituents_avg_individual_rv_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 1724,
+        "oos_rows": 1100,
+        "first_clean_date": "2019-07-15",
+        "last_clean_date": "2026-05-21",
+        "first_oos_date": "2022-01-03",
+        "last_oos_date": "2026-05-21",
+        "min_train": 504,
+        "refit_every": 21,
+        "refit_count": 53
+      },
+      "eval": {
+        "status": "ok",
+        "qlike_base": 0.06776996330286529,
+        "qlike_aug": 0.07110153918548293,
+        "qlike_improvement_pct": -4.916006620409041,
+        "qlike_dm": {
+          "mean": -0.003331575882617628,
+          "t": -2.118300960997224,
+          "p": 0.0341495873082059,
+          "n": 1100
+        },
+        "mse_base": 1.8075900633997972e-05,
+        "mse_aug": 1.883995528006712e-05,
+        "mse_improvement_pct": -4.226924353811062,
+        "mse_dm": {
+          "mean": -7.640546460691478e-07,
+          "t": -2.052043491551853,
+          "p": 0.04016543589607383,
+          "n": 1100
+        }
+      },
+      "strategy_signal_hac_coefficients": {
+        "strategy_disp21_lag1": {
+          "coef": 0.0064421303921426976,
+          "t": 0.09398274495544039,
+          "p": 0.925122863591359
+        },
+        "strategy_disp63_lag1": {
+          "coef": 0.04515341210545898,
+          "t": 0.7362615558324761,
+          "p": 0.4615715374437769
+        }
+      },
+      "quintile_diagnostic_full_sample_descriptive": [
+        {
+          "quintile": 1,
+          "n": 351,
+          "strategy_disp21_mean": 0.0034716908425569365,
+          "target_mean": 0.010629560555031002,
+          "target_median": 0.007591448041647179
+        },
+        {
+          "quintile": 2,
+          "n": 351,
+          "strategy_disp21_mean": 0.004206127453316075,
+          "target_mean": 0.009370886063817196,
+          "target_median": 0.008073248093288996
+        },
+        {
+          "quintile": 3,
+          "n": 350,
+          "strategy_disp21_mean": 0.004761365909075005,
+          "target_mean": 0.011711142871876369,
+          "target_median": 0.008317386961192393
+        },
+        {
+          "quintile": 4,
+          "n": 351,
+          "strategy_disp21_mean": 0.00556803597447456,
+          "target_mean": 0.011505889520098327,
+          "target_median": 0.00918259362140158
+        },
+        {
+          "quintile": 5,
+          "n": 351,
+          "strategy_disp21_mean": 0.0083909682055168,
+          "target_mean": 0.01664530982202937,
+          "target_median": 0.0131863735363617
+        }
+      ],
+      "base_columns": [
+        "target_back_lag1",
+        "spy_ret22_lag1",
+        "spy_rv22_lag1",
+        "vix_level_lag1",
+        "vix_chg22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_ret22_lag1",
+        "spy_rv22_lag1",
+        "vix_level_lag1",
+        "vix_chg22_lag1",
+        "strategy_disp21_lag1",
+        "strategy_disp63_lag1"
+      ]
+    },
+    "SP500_current_constituents_xs_return_var_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 1724,
+        "oos_rows": 1100,
+        "first_clean_date": "2019-07-15",
+        "last_clean_date": "2026-05-21",
+        "first_oos_date": "2022-01-03",
+        "last_oos_date": "2026-05-21",
+        "min_train": 504,
+        "refit_every": 21,
+        "refit_count": 53
+      },
+      "eval": {
+        "status": "ok",
+        "qlike_base": 0.10323772329055075,
+        "qlike_aug": 0.1171284619672348,
+        "qlike_improvement_pct": -13.455099777423557,
+        "qlike_dm": {
+          "mean": -0.013890738676684063,
+          "t": -1.99866278469106,
+          "p": 0.045644852206748736,
+          "n": 1100
+        },
+        "mse_base": 1.2917373582236798e-05,
+        "mse_aug": 1.3855236783046968e-05,
+        "mse_improvement_pct": -7.26047903499411,
+        "mse_dm": {
+          "mean": -9.378632008101703e-07,
+          "t": -1.9461663720984086,
+          "p": 0.051634757936609724,
+          "n": 1100
+        }
+      },
+      "strategy_signal_hac_coefficients": {
+        "strategy_disp21_lag1": {
+          "coef": 0.07348504112398013,
+          "t": 0.7384121498853842,
+          "p": 0.4602640336091106
+        },
+        "strategy_disp63_lag1": {
+          "coef": -0.0374448733337025,
+          "t": -0.6231879072570827,
+          "p": 0.5331610474043005
+        }
+      },
+      "quintile_diagnostic_full_sample_descriptive": [
+        {
+          "quintile": 1,
+          "n": 351,
+          "strategy_disp21_mean": 0.0034716908425569365,
+          "target_mean": 0.00814135424075633,
+          "target_median": 0.00623411358942454
+        },
+        {
+          "quintile": 2,
+          "n": 351,
+          "strategy_disp21_mean": 0.004206127453316075,
+          "target_mean": 0.0070695546318533566,
+          "target_median": 0.0061511346123627585
+        },
+        {
+          "quintile": 3,
+          "n": 350,
+          "strategy_disp21_mean": 0.004761365909075005,
+          "target_mean": 0.007652456526284562,
+          "target_median": 0.006239912774467067
+        },
+        {
+          "quintile": 4,
+          "n": 351,
+          "strategy_disp21_mean": 0.00556803597447456,
+          "target_mean": 0.007061726543965193,
+          "target_median": 0.006431167612854907
+        },
+        {
+          "quintile": 5,
+          "n": 351,
+          "strategy_disp21_mean": 0.0083909682055168,
+          "target_mean": 0.008971080319412208,
+          "target_median": 0.007830941433951662
+        }
+      ],
+      "base_columns": [
+        "target_back_lag1",
+        "spy_ret22_lag1",
+        "spy_rv22_lag1",
+        "vix_level_lag1",
+        "vix_chg22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_ret22_lag1",
+        "spy_rv22_lag1",
+        "vix_level_lag1",
+        "vix_chg22_lag1",
+        "strategy_disp21_lag1",
+        "strategy_disp63_lag1"
+      ]
+    },
+    "IWM_yfinance_top_holdings_avg_individual_rv_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 1724,
+        "oos_rows": 1100,
+        "first_clean_date": "2019-07-15",
+        "last_clean_date": "2026-05-21",
+        "first_oos_date": "2022-01-03",
+        "last_oos_date": "2026-05-21",
+        "min_train": 504,
+        "refit_every": 21,
+        "refit_count": 53
+      },
+      "eval": {
+        "status": "ok",
+        "qlike_base": 0.1185577683842577,
+        "qlike_aug": 0.13383452829106146,
+        "qlike_improvement_pct": -12.885498871141229,
+        "qlike_dm": {
+          "mean": -0.015276759906803786,
+          "t": -1.8752545048454337,
+          "p": 0.06075771900259107,
+          "n": 1100
+        },
+        "mse_base": 0.000414266029679505,
+        "mse_aug": 0.00043859151966762377,
+        "mse_improvement_pct": -5.87194900024462,
+        "mse_dm": {
+          "mean": -2.4325489988118827e-05,
+          "t": -2.0691241220759062,
+          "p": 0.03853444067021045,
+          "n": 1100
+        }
+      },
+      "strategy_signal_hac_coefficients": {
+        "strategy_disp21_lag1": {
+          "coef": 0.01770985751454901,
+          "t": 0.23148966004188884,
+          "p": 0.8169344174051093
+        },
+        "strategy_disp63_lag1": {
+          "coef": 0.030891444021719505,
+          "t": 0.5475641965497325,
+          "p": 0.5839911791768448
+        }
+      },
+      "quintile_diagnostic_full_sample_descriptive": [
+        {
+          "quintile": 1,
+          "n": 351,
+          "strategy_disp21_mean": 0.0034716908425569365,
+          "target_mean": 0.03877027874296394,
+          "target_median": 0.03160759869644515
+        },
+        {
+          "quintile": 2,
+          "n": 351,
+          "strategy_disp21_mean": 0.004206127453316075,
+          "target_mean": 0.03677322504476343,
+          "target_median": 0.033764114927893045
+        },
+        {
+          "quintile": 3,
+          "n": 350,
+          "strategy_disp21_mean": 0.004761365909075005,
+          "target_mean": 0.044786084210395614,
+          "target_median": 0.038723079202105756
+        },
+        {
+          "quintile": 4,
+          "n": 351,
+          "strategy_disp21_mean": 0.00556803597447456,
+          "target_mean": 0.04309746766628349,
+          "target_median": 0.03900914691519118
+        },
+        {
+          "quintile": 5,
+          "n": 351,
+          "strategy_disp21_mean": 0.0083909682055168,
+          "target_mean": 0.04819448765296743,
+          "target_median": 0.04278072942688134
+        }
+      ],
+      "base_columns": [
+        "target_back_lag1",
+        "spy_ret22_lag1",
+        "spy_rv22_lag1",
+        "vix_level_lag1",
+        "vix_chg22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_ret22_lag1",
+        "spy_rv22_lag1",
+        "vix_level_lag1",
+        "vix_chg22_lag1",
+        "strategy_disp21_lag1",
+        "strategy_disp63_lag1"
+      ]
+    },
+    "IWR_yfinance_top_holdings_avg_individual_rv_22d": {
+      "meta": {
+        "status": "ok",
+        "clean_rows": 1724,
+        "oos_rows": 1100,
+        "first_clean_date": "2019-07-15",
+        "last_clean_date": "2026-05-21",
+        "first_oos_date": "2022-01-03",
+        "last_oos_date": "2026-05-21",
+        "min_train": 504,
+        "refit_every": 21,
+        "refit_count": 53
+      },
+      "eval": {
+        "status": "ok",
+        "qlike_base": 0.22028326015943284,
+        "qlike_aug": 0.2378939038702371,
+        "qlike_improvement_pct": -7.994544704876043,
+        "qlike_dm": {
+          "mean": -0.017610643710804244,
+          "t": -2.5683579457433083,
+          "p": 0.010218158296739397,
+          "n": 1100
+        },
+        "mse_base": 0.0001573698325698899,
+        "mse_aug": 0.0001640056946865021,
+        "mse_improvement_pct": -4.216730747085921,
+        "mse_dm": {
+          "mean": -6.635862116612166e-06,
+          "t": -2.650036668221476,
+          "p": 0.008048303526385954,
+          "n": 1100
+        }
+      },
+      "strategy_signal_hac_coefficients": {
+        "strategy_disp21_lag1": {
+          "coef": -0.006704224448268514,
+          "t": -0.07787394621760395,
+          "p": 0.9379283243650085
+        },
+        "strategy_disp63_lag1": {
+          "coef": 0.041606765045048455,
+          "t": 0.6486119455416794,
+          "p": 0.5165892323678316
+        }
+      },
+      "quintile_diagnostic_full_sample_descriptive": [
+        {
+          "quintile": 1,
+          "n": 351,
+          "strategy_disp21_mean": 0.0034716908425569365,
+          "target_mean": 0.014482457368586351,
+          "target_median": 0.010379269979161948
+        },
+        {
+          "quintile": 2,
+          "n": 351,
+          "strategy_disp21_mean": 0.004206127453316075,
+          "target_mean": 0.014215356691575828,
+          "target_median": 0.011256950006285316
+        },
+        {
+          "quintile": 3,
+          "n": 350,
+          "strategy_disp21_mean": 0.004761365909075005,
+          "target_mean": 0.021127289227437108,
+          "target_median": 0.014168063690531113
+        },
+        {
+          "quintile": 4,
+          "n": 351,
+          "strategy_disp21_mean": 0.00556803597447456,
+          "target_mean": 0.019481670299455717,
+          "target_median": 0.01287142560751334
+        },
+        {
+          "quintile": 5,
+          "n": 351,
+          "strategy_disp21_mean": 0.0083909682055168,
+          "target_mean": 0.02344522105364067,
+          "target_median": 0.018875565416599044
+        }
+      ],
+      "base_columns": [
+        "target_back_lag1",
+        "spy_ret22_lag1",
+        "spy_rv22_lag1",
+        "vix_level_lag1",
+        "vix_chg22_lag1"
+      ],
+      "augmented_columns": [
+        "target_back_lag1",
+        "spy_ret22_lag1",
+        "spy_rv22_lag1",
+        "vix_level_lag1",
+        "vix_chg22_lag1",
+        "strategy_disp21_lag1",
+        "strategy_disp63_lag1"
+      ]
+    }
+  },
+  "figures": {
+    "strategy_dispersion_timeseries": "figures/strategy_dispersion_timeseries.png",
+    "oos_qlike_dm_tstats": "figures/oos_qlike_dm_tstats.png"
+  },
+  "limitations": [
+    "S&P 500 target uses current constituents from Wikipedia, so it has survivorship bias and is best treated as a public-proxy screening test.",
+    "IWM/IWR individual-RV targets use yfinance top holdings only because full holdings CSV download was not reliably available in this session.",
+    "Strategy ETF composition changes through time as DBMF/RPAR/CTA launch, so early signal values use fewer alternative-strategy ETFs.",
+    "ETF proxies are not hedge-fund indices and include fee, replication, and retail ETF construction effects."
+  ]
+}

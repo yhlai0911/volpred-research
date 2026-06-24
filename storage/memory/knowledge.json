@@ -36096,5 +36096,20 @@
     ],
     "confidence": 0.68,
     "created_at": "2026-06-24T07:29:19.408853"
+  },
+  {
+    "item_id": "8eeaf131",
+    "category": "null_findings",
+    "content": "Strategy-ETF dispersion proxy experiment (research_hedge_fund_alpha_dispersion_regime_strategy_etf, 2026-06-24): lagged 21d/63d cross-sectional dispersion of alternative-strategy ETF returns (QAI/MNA/CTA/DBMF/MRGR/HFXI/RPAR, requiring at least five ETFs) did not improve next-month stock cross-sectional risk forecasts after controls. Baseline controlled own lagged target, SPY 22d return/RV, VIX level, and VIX 22d change; augmented model added strategy-dispersion terms. Four OOS cells (S&P 500 current-constituent average individual RV and cross-sectional return variance; IWM/IWR yfinance top-holdings average RV) all had negative QLIKE improvements, with median -10.44% and mean -9.81%. This is a null/mixed-negative finding for the free ETF proxy, not a rejection of hedge-fund return-dispersion measures using true fund data.",
+    "evidence": [
+      "experiments/research_hedge_fund_alpha_dispersion_regime_strategy_etf/research_hedge_fund_alpha_dispersion_regime_strategy_etf_results.json",
+      "experiments/research_hedge_fund_alpha_dispersion_regime_strategy_etf/summary_table.csv",
+      "experiments/research_hedge_fund_alpha_dispersion_regime_strategy_etf/codex_review.md",
+      "https://am.jpmorgan.com/content/dam/jpm-am-aem/global/en/insights/portfolio-insights/alternative-outlook.pdf",
+      "https://www.wellington.com/en-us/intermediary/insights/3-drivers-of-hedge-fund-outperformance",
+      "https://www.ecb.europa.eu/pub/pdf/scpwps/ecbwp1658.pdf"
+    ],
+    "confidence": 0.69,
+    "created_at": "2026-06-24T08:40:43.110844"
   }
 ]
