@@ -11,6 +11,19 @@ def _write(tmp_path: Path, text: str) -> Path:
     return path
 
 
+def test_audit_file_warns_when_source_cannot_be_decoded(tmp_path: Path, capsys) -> None:
+    path = tmp_path / "bad_encoding.py"
+    path.write_bytes(b"\xff\xfe\xfa")
+
+    findings = audit_file(path)
+
+    captured = capsys.readouterr()
+    assert findings == []
+    assert "[lookahead_audit] WARN source read failed; skipping file" in captured.err
+    assert "UnicodeDecodeError" in captured.err
+    assert str(path) in captured.err
+
+
 def test_arch_origin_aligned_oos_loss_is_flagged(tmp_path: Path) -> None:
     path = _write(
         tmp_path,

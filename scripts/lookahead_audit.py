@@ -113,6 +113,21 @@ KNOWN_BUG_FAMILY = {"k547", "k570"}
 KNOWN_ARCH_ALIGNMENT_CAVEAT = {"k445"}
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def _warn_lookup_audit(message: str, *, path: Path, exc: BaseException) -> None:
+    print(
+        f"[lookahead_audit] WARN {message} path={_display_path(path)} "
+        f"error={type(exc).__name__}: {exc}",
+        file=sys.stderr,
+    )
+
+
 def audit_file(path: Path) -> list[dict]:
     """Return list of suspect dicts (empty = clean).
 
@@ -130,7 +145,8 @@ def audit_file(path: Path) -> list[dict]:
     """
     try:
         text = path.read_text(encoding="utf-8")
-    except (UnicodeDecodeError, OSError):
+    except (UnicodeDecodeError, OSError) as exc:
+        _warn_lookup_audit("source read failed; skipping file", path=path, exc=exc)
         return []
     lines = text.splitlines()
     file_has_lag = bool(LAG_REGEX.search(text))

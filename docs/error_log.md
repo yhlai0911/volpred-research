@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-24 lookahead_audit 壞 source 讀取被當成 clean
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/lookahead_audit.py`，掃到 `audit_file()` 對 `UnicodeDecodeError` / `OSError` 直接 `return []`。若某個 experiment source 不是 UTF-8 或暫時不可讀，lookahead audit 會把該檔視為「沒有 suspect pattern」，而不是告知掃描缺口。
+
+**根因**：lookahead audit 必須 fail-open，不能因單一實驗檔壞掉中斷整批 CI / cron 掃描；但舊實作把「跳過不可讀檔案」和「該檔 clean」混成同一個空 list 回傳，對研究誠實防線尤其危險。
+
+**解決方法**：新增 `_warn_lookup_audit()`，source read failure 仍回空結果以保留批次容錯，但會向 stderr 輸出 `[lookahead_audit] WARN source read failed; skipping file ...`，包含 path 與 exception type/message。新增 regression test 用壞 UTF-8 檔確認 warning，不再讓掃描缺口靜默。
+
 ## 2026-06-24 build_topic_diversity_audit jq 壞行被靜默跳過
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/build_topic_diversity_audit.py` 三個 jq streaming 解析點：feed tags、feed latest date、knowledge keyword hits 遇到單行壞 JSON 時直接 `continue`，沒有任何 warning。
