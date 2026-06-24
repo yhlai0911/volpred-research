@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 daily_update JSON retry 最終 fallback 缺少 exception 診斷
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/daily_update.py::_load_json_retry()`：讀 JSON 遇到 `JSONDecodeError` / `OSError` 時每次 retry 都 `pass`，最後只印「unreadable after N tries」，沒有保留實際 exception 類型與訊息。
+
+**根因**：daily_update 需要容忍 feed / runtime JSON 被其他 writer 短暫改寫，retry 後仍失敗時用 default 是正確 fail-open；但完全丟掉最後錯誤會讓 operator 看不出是壞 JSON、讀取權限、還是空檔案造成 fallback。
+
+**解決方法**：`_load_json_retry()` 改為記錄 `last_exc`，最終 fallback 時用既有 `_warn_daily_update()` 輸出 exception type/message；若檔案只是空內容才輸出 empty fallback。新增 regression test 覆蓋壞 JSON 一次 retry 後回 default 且 warning 包含 `JSONDecodeError`。
+
 ## 2026-06-25 cron_review git commit scan failure 靜默當無近期產出
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/cron_review.py::git_commits_since()`：`git log` subprocess 失敗時直接 `return []`。Cron review / boss report 會把「commit 掃描失敗」呈現成「最近沒有 commit」，削弱 hourly dispatch 是否有產出的 proxy 訊號。

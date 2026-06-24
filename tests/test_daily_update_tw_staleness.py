@@ -62,6 +62,11 @@ def _import_load_vix_level():
     return _load_vix_level
 
 
+def _import_load_json_retry():
+    from daily_update import _load_json_retry  # type: ignore
+    return _load_json_retry
+
+
 class _FailingDataManager:
     def get_model_data(self, *args, **kwargs):
         raise RuntimeError("vix3m down")
@@ -82,6 +87,20 @@ def test_load_vix_level_warns_on_fetch_failure(capsys) -> None:
     assert "^VIX fetch failed" in output
     assert "VIX-based strategies will fall back to GARCH" in output
     assert "vix3m down" in output
+
+
+def test_load_json_retry_warns_with_exception_type_after_retries(tmp_path, capsys) -> None:
+    load_json_retry = _import_load_json_retry()
+    bad_json = tmp_path / "feed.json"
+    bad_json.write_text("{bad json", encoding="utf-8")
+
+    result = load_json_retry(bad_json, {"fallback": True}, retries=1, delay=0)
+
+    output = capsys.readouterr().out
+    assert result == {"fallback": True}
+    assert "unreadable after 1 tries" in output
+    assert "JSONDecodeError" in output
+    assert str(bad_json) in output
 
 
 def test_load_vix_level_warns_on_empty_data(capsys) -> None:

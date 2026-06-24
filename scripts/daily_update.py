@@ -31,16 +31,20 @@ def _load_json_retry(path: Path, default, retries: int = 4, delay: float = 0.25)
     persistently bad file falls through to `default`.
     """
     import time
+    last_exc = None
     for attempt in range(retries):
         try:
             txt = path.read_text()
             if txt.strip():
                 return json.loads(txt)
-        except (json.JSONDecodeError, OSError):
-            pass
+        except (json.JSONDecodeError, OSError) as exc:
+            last_exc = exc
         if attempt < retries - 1:
             time.sleep(delay)
-    print(f"  ⚠️ {path} unreadable after {retries} tries — using default")
+    if last_exc is not None:
+        _warn_daily_update(f"{path} unreadable after {retries} tries — using default", last_exc)
+    else:
+        _warn_daily_update(f"{path} empty after {retries} tries — using default")
     return default
 
 
