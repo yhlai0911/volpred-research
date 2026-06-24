@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 
 
@@ -10,6 +11,42 @@ SPEC = importlib.util.spec_from_file_location("refill_task_pool", MODULE_PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(MODULE)
+
+
+def test_ensure_candidates_fresh_times_out_builder(tmp_path, monkeypatch):
+    scripts_dir = tmp_path / "scripts"
+    scripts_dir.mkdir(parents=True)
+    builder = scripts_dir / "build_publication_candidates.py"
+    builder.write_text("print('slow')\n", encoding="utf-8")
+    candidates = tmp_path / "storage" / "publication_candidates.json"
+
+    calls: list[dict] = []
+
+    def fake_run(cmd, *, capture_output, timeout, check):
+        calls.append(
+            {
+                "cmd": cmd,
+                "capture_output": capture_output,
+                "timeout": timeout,
+                "check": check,
+            }
+        )
+        raise subprocess.TimeoutExpired(cmd=cmd, timeout=timeout)
+
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "CANDIDATES", candidates)
+    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+    monkeypatch.setenv("REFILL_CANDIDATES_TIMEOUT_SECONDS", "7")
+
+    result = MODULE._ensure_candidates_fresh()
+
+    assert result == {
+        "rebuilt": False,
+        "reason": "rebuild_timeout",
+        "timeout_seconds": 7,
+    }
+    assert calls and calls[0]["timeout"] == 7
+    assert calls[0]["cmd"] == ["uv", "run", "python", str(builder)]
 
 
 def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):

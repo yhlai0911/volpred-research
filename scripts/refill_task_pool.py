@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import fcntl
 import json
+import os
 import re
 import subprocess
 import sys
@@ -1005,6 +1006,22 @@ def _make_research_task(title: str, full_line: str, header: str, slug: str, task
 
 
 CANDIDATES_STALE_HOURS = 6
+DEFAULT_CANDIDATE_REBUILD_TIMEOUT_SECONDS = 45
+
+
+def _candidate_rebuild_timeout_seconds() -> int:
+    raw = os.environ.get("REFILL_CANDIDATES_TIMEOUT_SECONDS", "").strip()
+    if not raw:
+        return DEFAULT_CANDIDATE_REBUILD_TIMEOUT_SECONDS
+    try:
+        value = int(raw)
+    except ValueError:
+        _warn_refill(
+            "REFILL_CANDIDATES_TIMEOUT_SECONDS invalid; using default",
+            ValueError(raw),
+        )
+        return DEFAULT_CANDIDATE_REBUILD_TIMEOUT_SECONDS
+    return max(value, 1)
 
 
 def _ensure_candidates_fresh(max_age_hours: float = CANDIDATES_STALE_HOURS) -> dict | None:
@@ -1036,20 +1053,26 @@ def _ensure_candidates_fresh(max_age_hours: float = CANDIDATES_STALE_HOURS) -> d
     builder = ROOT / "scripts" / "build_publication_candidates.py"
     if not builder.exists():
         return {"rebuilt": False, "reason": "builder_missing"}
+    timeout_seconds = _candidate_rebuild_timeout_seconds()
     try:
         proc = subprocess.run(
             ["uv", "run", "python", str(builder)],
             capture_output=True,
-            timeout=900,  # 15 min cap; observed ~3min on this host
+            timeout=timeout_seconds,
             check=False,
         )
         return {
             "rebuilt": proc.returncode == 0,
             "exit_code": proc.returncode,
             "reason": "stale_rebuilt" if proc.returncode == 0 else "rebuild_failed",
+            "timeout_seconds": timeout_seconds,
         }
     except subprocess.TimeoutExpired:
-        return {"rebuilt": False, "reason": "rebuild_timeout"}
+        return {
+            "rebuilt": False,
+            "reason": "rebuild_timeout",
+            "timeout_seconds": timeout_seconds,
+        }
 
 
 def refill(target: int, dry_run: bool = False) -> dict:

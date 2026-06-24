@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-24 refill_task_pool 直接 CLI 仍會卡在 publication candidate rebuild
+
+**問題**：Codex hourly tick 在「Codex-eligible pending=0」fallback 時手動跑 `uv run python scripts/refill_task_pool.py --dry-run --json --target 6`，程序長時間無輸出；`ps` 顯示子程序 `scripts/build_publication_candidates.py` 100% CPU，父程序卡在 `subprocess.run(...).communicate()`。
+
+**根因**：先前 `continue_task_dispatch.py --report` 已對 article refill wrapper 加 45s timeout，避免 dispatcher 卡在 refill；但 `scripts/refill_task_pool.py` 直接 CLI path 仍保留 `build_publication_candidates.py` hard-coded 900s timeout。也就是 dispatcher 已有 guard，但人工/cron 直接跑 refill 仍可長時間卡住。
+
+**解決方法**：`scripts/refill_task_pool.py::_ensure_candidates_fresh()` 改用 `REFILL_CANDIDATES_TIMEOUT_SECONDS` 可設定 timeout，預設 45s，超時回傳 `reason="rebuild_timeout"` 與 `timeout_seconds`，不再等待 15 分鐘。新增 regression test 模擬 builder timeout，鎖定 timeout env 與 no-hang 回傳。
+
+**防再發**：凡是 dispatcher wrapper 加了 timeout 的長跑子流程，direct CLI path 也要有同等 timeout / diagnostics；不可只保護上游 orchestrator。
+
+---
+
 ## 2026-06-24 arc_dedup gate 過粗的 entity granularity → K1547 (CTA crisis alpha) 被 K1417 (paper3 H2 bootstrap) 誤判同 arc
 
 **問題**：本日 hourly-15 fire 巡檢 release pool — 全 9 candidates + K1547 共 10 條 reader-facing 機會中，**9/10 被 arc_dedup gate ban**（exit 1）。具體 K1547 案例：
