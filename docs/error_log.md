@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 compute_queue worker lock failure 缺少診斷
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/compute_queue.py`，掃到 worker lock helper：lock 檔被其他 process 先刪除時用 `pass`，lock 寫入失敗時直接 `return False`。後者會讓 `run-next` 只輸出 `worker already running (lock held); skip`，看不出是另一個 worker 正在跑，還是本機無法建立 lock。
+
+**根因**：lock 的 `FileNotFoundError` 是正常 cross-process race，應保持安靜；但 `OSError` 代表 queue lock source 無法寫入，會讓 heavy compute worker fail-open 跳過，必須出現在 cron stderr，否則 compute backlog 可能靜默不動。
+
+**解決方法**：`_acquire_lock()` 對 lock write `OSError` 呼叫既有 `_warn_compute_queue()`，保留回 `False` 的 fail-open 行為；兩個 race-safe `FileNotFoundError` 加上 `silent-ok` 註解，讓 governance audit 不再誤報正常競態。新增 regression test 覆蓋 lock write failure warning，並用 `audit_silent_fallbacks.audit_file()` 鎖定 `scripts/compute_queue.py` 無 findings。
+
 ## 2026-06-25 check_alerts piggy-back 單一 job timestamp parse failure 靜默略過
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/check_alerts.py`，掃到 `_check_piggy_back_drift()`：`cron_last_run.json` 裡單一 job timestamp 不可 parse 時直接 `continue`。這會讓 piggy-back drift 檢查少看一個 job，cron log 只顯示 `piggy-back-drift: none`。

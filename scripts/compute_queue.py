@@ -178,11 +178,12 @@ def _acquire_lock() -> bool:
             else:
                 return False
         except FileNotFoundError:
-            pass
+            pass  # silent-ok: another worker removed the lock; retry write below.
     try:
         LOCK_FILE.write_text(f"{os.getpid()} {utc_now()}\n")
         return True
-    except OSError:
+    except OSError as exc:
+        _warn_compute_queue("worker lock write failed; skipping run", LOCK_FILE, exc)
         return False
 
 
@@ -190,7 +191,7 @@ def _release_lock():
     try:
         LOCK_FILE.unlink()
     except FileNotFoundError:
-        pass
+        pass  # silent-ok: lock was already removed by another cleanup path.
 
 
 def run_next(args) -> int:

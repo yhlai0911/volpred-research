@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+from scripts import audit_silent_fallbacks
 import scripts.compute_queue as module
 
 
@@ -53,3 +54,25 @@ def test_run_next_warns_and_skips_bad_job_json(tmp_path: Path, monkeypatch, caps
     assert rc == 0
     assert "[compute_queue] WARN run-next job JSON read failed; skipping" in captured.err
     assert "no queued jobs" in captured.out
+
+
+def test_acquire_lock_warns_when_lock_cannot_be_written(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+):
+    lock_path = tmp_path / "missing-parent" / ".worker.lock"
+    monkeypatch.setattr(module, "LOCK_FILE", lock_path)
+
+    assert module._acquire_lock() is False
+
+    captured = capsys.readouterr()
+    assert "[compute_queue] WARN worker lock write failed; skipping run" in captured.err
+    assert ".worker.lock" in captured.err
+    assert "FileNotFoundError" in captured.err
+
+
+def test_compute_queue_has_no_silent_fallback_audit_findings() -> None:
+    findings = audit_silent_fallbacks.audit_file(Path(module.__file__))
+
+    assert findings == []
