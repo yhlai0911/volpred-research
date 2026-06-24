@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-24 audit_publish_sync transport failure 被混成 mismatch
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/audit_publish_sync.py`，掃到 `http_status()` 對 generic exception 直接 `return 0`。同檔 `fetch_supabase_slugs()` 查詢失敗時也回空 set；這兩種情況都會讓 audit 報告看起來像正常完成後發現 missing / 404，而不是 audit 本身的上游讀取失敗。
+
+**根因**：publish-sync audit 應 fail-open，避免網路暫時失敗中斷整個 cron；但 fail-open 不能靜默，否則 operator 會把 transport / PostgREST failure 誤判成真實發佈同步差異，或反過來忽略 audit source 已經壞掉。
+
+**解決方法**：新增 `_warn_publish_sync()`，live URL transport failure 回 `0` 前輸出 `[publish-sync-audit] WARN live URL check failed ...`；Supabase slug fetch failure 回空 set 前輸出 article_count 與 exception。新增 regression tests 覆蓋兩個 fail-open path，並確認 `scripts/audit_silent_fallbacks.py --json scripts/audit_publish_sync.py` 不再報該 silent return。
+
 ## 2026-06-24 lookahead_audit 壞 source 讀取被當成 clean
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/lookahead_audit.py`，掃到 `audit_file()` 對 `UnicodeDecodeError` / `OSError` 直接 `return []`。若某個 experiment source 不是 UTF-8 或暫時不可讀，lookahead audit 會把該檔視為「沒有 suspect pattern」，而不是告知掃描缺口。

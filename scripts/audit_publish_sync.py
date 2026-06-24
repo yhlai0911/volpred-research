@@ -26,6 +26,14 @@ SUPA_REST_TEMPLATE = "{base}/rest/v1/articles?select=slug,status&slug=in.({ids})
 WINDOW_HOURS = 72  # only audit articles published in last N hours
 
 
+def _warn_publish_sync(message, *, exc=None, **context):
+    parts = [f"{key}={value}" for key, value in context.items() if value is not None]
+    if exc is not None:
+        parts.append(f"error={type(exc).__name__}: {exc}")
+    suffix = f" {' '.join(parts)}" if parts else ""
+    print(f"[publish-sync-audit] WARN {message}{suffix}", file=sys.stderr)
+
+
 def load_env():
     env = {}
     for fname in (".env.local", ".env"):
@@ -48,7 +56,8 @@ def http_status(url, timeout=10):
             return resp.status
     except error.HTTPError as e:
         return e.code
-    except Exception:
+    except Exception as e:
+        _warn_publish_sync("live URL check failed; returning status 0", url=url, exc=e)
         return 0
 
 
@@ -64,7 +73,12 @@ def fetch_supabase_slugs(env, mile_ids):
         with request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode())
             return {r["slug"] for r in data if r.get("status") == "published"}
-    except Exception:
+    except Exception as e:
+        _warn_publish_sync(
+            "supabase slug fetch failed; treating remote slug set as empty",
+            article_count=len(mile_ids),
+            exc=e,
+        )
         return set()
 
 
