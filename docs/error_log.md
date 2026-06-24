@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 check_alerts piggy-back 單一 job timestamp parse failure 靜默略過
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/check_alerts.py`，掃到 `_check_piggy_back_drift()`：`cron_last_run.json` 裡單一 job timestamp 不可 parse 時直接 `continue`。這會讓 piggy-back drift 檢查少看一個 job，cron log 只顯示 `piggy-back-drift: none`。
+
+**根因**：壞 timestamp 不該中斷整個 hourly alert 檢查，所以 fail-open 略過該 job 是合理的；但沒有 warning 時，operator 看不出是該 job 新鮮、缺 state，還是 timestamp schema 漂移導致 staleness check 被跳過。
+
+**解決方法**：`_check_piggy_back_drift()` 在 timestamp parse failure 時呼叫既有 `_warn_check_alerts()`，輸出 job_id、state path 與 exception type/message，原本略過單一壞 job 的 fail-open 行為不變。新增 regression test 覆蓋壞 `paper_sync_all` timestamp 會 warning 且仍回 `piggy-back-drift: none`。
+
 ## 2026-06-25 daily_update JSON retry 最終 fallback 缺少 exception 診斷
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/daily_update.py::_load_json_retry()`：讀 JSON 遇到 `JSONDecodeError` / `OSError` 時每次 retry 都 `pass`，最後只印「unreadable after N tries」，沒有保留實際 exception 類型與訊息。

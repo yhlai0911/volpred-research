@@ -215,7 +215,13 @@ def _check_piggy_back_drift(due_summary: dict) -> dict:
             continue
         try:
             last_dt = datetime.fromisoformat(str(last_iso).replace("Z", "+00:00"))
-        except Exception:
+        except Exception as exc:
+            _warn_check_alerts(
+                f"cron_last_run timestamp parse failed for job_id={job_id}; "
+                "skipping staleness check",
+                state_path,
+                exc,
+            )
             continue
         period_min = period_map.get(cron)
         if period_min is None:

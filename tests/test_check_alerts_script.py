@@ -95,3 +95,41 @@ def test_piggy_back_drift_warns_on_bad_state_source(tmp_path: Path, monkeypatch,
     assert result == {"drift_count": 0, "drifts": []}
     assert "[check_alerts] WARN cron_last_run JSON read failed; using empty object" in captured.err
     assert "piggy-back-drift: none" in captured.out
+
+
+def test_piggy_back_drift_warns_on_bad_job_timestamp(tmp_path: Path, monkeypatch, capsys):
+    check_alerts = _load_check_alerts_module()
+    monkeypatch.setattr(check_alerts, "PROJECT_ROOT", tmp_path)
+    state_path = tmp_path / "storage" / "ops" / "cron_last_run.json"
+    config_path = tmp_path / "config" / "runtime_schedules.json"
+    state_path.parent.mkdir(parents=True)
+    config_path.parent.mkdir(parents=True)
+    state_path.write_text(
+        json.dumps({"paper_sync_all": "not-a-timestamp"}),
+        encoding="utf-8",
+    )
+    config_path.write_text(
+        json.dumps(
+            {
+                "system_crontab": {
+                    "items": [
+                        {
+                            "id": "paper_sync_all",
+                            "cron": "0 * * * *",
+                            "host_crontab_managed": True,
+                        }
+                    ]
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = check_alerts._check_piggy_back_drift({"ok": True, "jobs": []})
+
+    captured = capsys.readouterr()
+    assert result == {"drift_count": 0, "drifts": []}
+    assert "[check_alerts] WARN cron_last_run timestamp parse failed" in captured.err
+    assert "job_id=paper_sync_all" in captured.err
+    assert "Invalid isoformat string" in captured.err
+    assert "piggy-back-drift: none" in captured.out
