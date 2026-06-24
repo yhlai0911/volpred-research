@@ -29983,7 +29983,7 @@
       "tolerance": "|Δγ|≤0.001 / |Δt|≤0.05",
       "2317.TW": {
         "gamma": 0.032,
-        "delta_gamma": 0.00002,
+        "delta_gamma": 2e-05,
         "t": 1.741,
         "delta_t": 0.001,
         "verdict": "PASS"
@@ -30004,7 +30004,7 @@
       },
       "2886.TW": {
         "gamma": 0.0379,
-        "delta_gamma": 0.00007,
+        "delta_gamma": 7e-05,
         "t": 1.552,
         "delta_t": 0.002,
         "verdict": "PASS"
@@ -30328,7 +30328,7 @@
       "N_start_alternative": 100,
       "max_abs_delta": 0.092,
       "mean_abs_delta": 0.005,
-      "median_abs_delta": 0.000019,
+      "median_abs_delta": 1.9e-05,
       "n_delta_gt_0_1": 0,
       "n_delta_gt_0_5": 0,
       "v2_median_amp": 3.839,
@@ -30654,7 +30654,7 @@
       "n_events": 226,
       "cohens_d_pooled": 0.305,
       "t_stat": 4.019,
-      "p_value": 0.000079,
+      "p_value": 7.9e-05,
       "ex_ctrl_ratio": 1.342,
       "sector_d": {
         "Tech": 0.09,
@@ -30773,7 +30773,7 @@
       "whar_db4_qlike": 1.7455,
       "gjr_garch_qlike": 1.5308,
       "dm_har_vs_whar_t": 5.954,
-      "dm_har_vs_whar_p": 3.14E-9,
+      "dm_har_vs_whar_p": 3.14e-09,
       "har_r2_oos": 0.2226,
       "whar_db4_r2_oos": -0.0545,
       "gjr_r2_oos": 0.2551,
@@ -31002,7 +31002,7 @@
         "expected_violations": 12.570000000000011,
         "violation_rate": 0.02784407319013524,
         "kupiec_lr": 27.22918925738609,
-        "kupiec_p": 1.8070975393857935E-7,
+        "kupiec_p": 1.8070975393857935e-07,
         "christoffersen_lr": 0.8864222213877611,
         "christoffersen_p": 0.3464486970473164,
         "kupiec_pass": false,
@@ -31024,7 +31024,7 @@
         "expected_violations": 12.570000000000011,
         "violation_rate": 0.02386634844868735,
         "kupiec_lr": 17.578341168201874,
-        "kupiec_p": 0.000027571072103493854,
+        "kupiec_p": 2.7571072103493854e-05,
         "christoffersen_lr": 0.10527802230546968,
         "christoffersen_p": 0.7455854490902305,
         "kupiec_pass": false,
@@ -31502,12 +31502,12 @@
         "CR": 0.662
       },
       "cc_p_alpha_005": {
-        "HS-252": 7E-7,
-        "CU": 0.0000217,
+        "HS-252": 7e-07,
+        "CU": 2.17e-05,
         "CR": 0.538
       },
       "cc_p_alpha_001": {
-        "HS-252": 2.84E-7,
+        "HS-252": 2.84e-07,
         "CU": 0.0017,
         "CR": 0.123
       },
@@ -35706,14 +35706,14 @@
           "sample_end": "2026-06-15",
           "beta_signal_std": 0.04682083274549272,
           "hac_t": 4.857127578511834,
-          "hac_p": 0.0000011910086120610071,
+          "hac_p": 1.1910086120610071e-06,
           "r2": 0.7008442889631104,
           "target_mean_raw": 0.17586081312895932,
           "signal_mean_raw": 0.08362725117675099,
           "status": "ok",
           "hac_maxlags": 5,
           "model": "z(log(target)) ~ z(signal_l1) + z(log(target_l1)) + z(total_dollar_volume_l1), OLS-HAC",
-          "bh_q_all_regressions": 0.00002858420668946417,
+          "bh_q_all_regressions": 2.858420668946417e-05,
           "harvey_abs_t_ge_3": true,
           "positive_harvey_t_ge_3": true
         },
@@ -35733,14 +35733,14 @@
           "sample_end": "2026-06-15",
           "beta_signal_std": 0.047200688917475545,
           "hac_t": 4.865980247173926,
-          "hac_p": 0.000001138908929857465,
+          "hac_p": 1.138908929857465e-06,
           "r2": 0.700877818355834,
           "target_mean_raw": 0.17586081312895932,
           "signal_mean_raw": 0.08434901953181577,
           "status": "ok",
           "hac_maxlags": 5,
           "model": "z(log(target)) ~ z(signal_l1) + z(log(target_l1)) + z(total_dollar_volume_l1), OLS-HAC",
-          "bh_q_all_regressions": 0.00002858420668946417,
+          "bh_q_all_regressions": 2.858420668946417e-05,
           "harvey_abs_t_ge_3": true,
           "positive_harvey_t_ge_3": true
         }
@@ -36163,5 +36163,74 @@
     "experiment_path": "experiments/k1546/",
     "verdict": "CONDITIONAL_PASS",
     "reviewer_source": "main_thread_code_review_fallback (codex stdin-wait stuck, k1546.py L86-100 VRP/RV formula + L120-133 forward DD strict t+1..t+N + L137-161 NW HAC + L165-186 block bootstrap + L255 shift(1) — manual line-by-line)"
+  },
+  {
+    "k_id": "K1549",
+    "experiment_id": "K1549",
+    "experiment_path": "experiments/K1549/",
+    "verdict": "CONDITIONAL_PASS",
+    "topic": "Russell reconstitution announcement-to-effective window event study on small-cap ETFs (IWM/IWO/IWN/IWP)",
+    "summary": "NULL on 12/12 Bonferroni-corrected family (m=12, α=0.00417). Smallest raw p=0.0189 (IWP volume). All 12 ratios geometric-mean < 1 — event window (announcement → effective, ~30 cal-days) is quieter than 90-day pre-event baseline on RV / volume / abs-return for all four ETFs. Sign opposite of front-running narrative. Caveat: baseline overlaps Mar-May earnings + FOMC season (likely contributes to baseline elevation), and ETF-level aggregation dilutes single-day reconstitution-Friday shocks (K1341 turf).",
+    "key_numbers": {
+      "n_years": 16,
+      "sample_period": "2010-2025",
+      "bonferroni_alpha": 0.00417,
+      "smallest_raw_p": {
+        "etf": "IWP",
+        "metric": "volume",
+        "p": 0.0189
+      },
+      "per_etf_pooled_geom_ratio": {
+        "IWM": {
+          "sq_ret": 0.681,
+          "volume": 0.987,
+          "abs_ret": 0.871
+        },
+        "IWO": {
+          "sq_ret": 0.673,
+          "volume": 0.918,
+          "abs_ret": 0.87
+        },
+        "IWN": {
+          "sq_ret": 0.728,
+          "volume": 0.966,
+          "abs_ret": 0.877
+        },
+        "IWP": {
+          "sq_ret": 0.628,
+          "volume": 0.828,
+          "abs_ret": 0.815
+        }
+      }
+    },
+    "reviewer": "self_audit",
+    "reviewer_source": "codex_timeout_fallback_self_audit",
+    "codex_review": "Codex CLI 0.141.0 invocation timed out at 5min; 3-pass self-audit (lookahead / seed / Bonferroni-NaN) verdict CONDITIONAL_PASS — methodology sound, fallback documented per K1259 gate",
+    "method": "16 Russell reconstitution years (FTSE official calendar) × 4 ETFs × 3 metrics (sq_ret RV / volume / abs_ret). Event window = [announcement_date, effective_date] ~30 cal-days. Baseline = T-90 to T-31 (pre-announcement, ex-ante). Pooled t-test + Wilcoxon on log-ratio. Bootstrap CI seed=42.",
+    "caveats": [
+      "n=16 modest (~15 df t-test); Bonferroni m=12 conservative given IWM/IWO/IWN share Russell 2000 components",
+      "Baseline overlaps Mar-May earnings + FOMC — partly explains why event window looks quieter",
+      "ETF-level aggregation dilutes single-day reconstitution-Friday shocks (K1341 turf) and single-name flow effects (Madhavan 2003 / Cai & Houge 2008)",
+      "Sensitivity to alternative baseline lengths not run"
+    ],
+    "publication_status": "not_for_release",
+    "publication_status_reason": "NULL + ETF-aggregation caveats; narrative-axis already covered by INDEX_RECONSTITUTION arc (K1341 NULL on S&P inclusion)",
+    "research_program_link": "research_program.md line 1251",
+    "orthogonal_to": [
+      "K1341 (S&P 500 inclusion, NULL)"
+    ],
+    "literature": [
+      "Madhavan (2003) Russell rebalance",
+      "Cai & Houge (2008) Russell index reconstitution"
+    ],
+    "timestamp": "2026-06-24T08:15:00+00:00",
+    "tags": [
+      "experiment",
+      "event-study",
+      "russell-reconstitution",
+      "small-cap",
+      "NULL",
+      "etf-aggregation"
+    ]
   }
 ]

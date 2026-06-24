@@ -37162,7 +37162,7 @@
     "description": "Gmail UID: 11980\nMessage-ID: <9E561D3F-D2FF-4D47-A053-DF2C9021A203@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 24 Jun 2026 13:35:21 +0800\nSubject: Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting\n\n--- 用戶回信內容 ---\n我都開好了 你自己去看\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月24日 13:18 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting\r\n> Alert level: info\r\n> INFO\r\n> Re: 關於 FB 貼文 — 老闆糾正回覆\r\n> \r\n> 回覆兩個問題：\r\n> 1. FB App Review 狀況\r\n> \r\n> 老實說：我不知道當前 App Review 確切狀態。\r\n> 之前 session（2026-05-29）標 wont_fix 時的依據是「卡 App Review」，但那是 prior session 判斷，未實際登入 Meta Developer Portal 查證。\r\n> 可行的查證路徑：\r\n> Meta Developer Portal (developers.facebook.com/apps <http://developers.facebook.com/apps>) 需 Chrome 登入 — 不是 headless 能完成\r\n> 需要互動 session（你開著 Chrome + 我用 Claude in Chrome 操作）才能查 App 狀態 / 重新申請\r\n> 建議下一次互動 session 我做這 3 步：\r\n> 開 developers.facebook.com/apps <http://developers.facebook.com/apps> 查 App ID（你的個人 / VolPred 粉專 app）狀態\r\n> 看 pages_manage_posts / publish_actions 等 permission 是否被 reject 或 stale pending\r\n> 如有 reject reason 對症補 review note 重送；如未送過就跑首次 review\r\n> 2. Ivan Lai 個人 FB Chrome 操作\r\n> \r\n> 已糾正：你說對了 — Ivan FB 本來就是 Chrome 路徑，不該標 wont_fix。\r\n> 剛才做的：把 5 個誤標 wont_fix 的 FB 文章改回 awaiting_interactive_session：\r\n> Mile ID\t標題\r\n> mile_b221e550\t法說季開打前，Mag 7 的期權市場悄悄在說一件事\r\n> mile_057f178b\t為什麼 NVDA 每天都讓人心跳加速\r\n> mile_671d4c75\t債市和股市同時在怕，但怕的不是同一件事\r\n> mile_89889d46\t裁員八千人，同一季燒掉 $680 億\r\n> mile_5b3569c3\t配息數字背後的風險帳\r\n> 加上 handoff 已有的 9+ 篇 awaiting，FB backlog 約 14 篇待你下次開 Chrome 時批次處理（或我 Claude in Chrome）。\r\n> 自我檢討\r\n> \r\n> 「卡 App Review」這個結論我沒實證就標 wont_fix，違反研究誠實原則（時間/狀態也是數據）。下次遇到「不能完成」的判斷會先查證實際狀態。\r\n> 下一步\r\n> \r\n> 本 tick 完成：5 篇 wont_fix → awaiting flip + email 回覆\r\n> 待你下次開 Chrome 互動 session：(a) Meta Dev Portal 查 App Review (b) Ivan FB 14 篇 backlog 批次貼\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "in_progress",
     "tags": [
       "email_reply",
       "user_input"
@@ -37173,9 +37173,12 @@
     "email_message_id": "<9E561D3F-D2FF-4D47-A053-DF2C9021A203@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting",
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "last_released_at": "2026-06-24T07:50:06.292199+00:00",
+    "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-24T05:45:34.451339+00:00",
-    "claim_session_id": "211f7b4c40e0"
+    "claimed_at": "2026-06-24T08:01:11.269409+00:00",
+    "claim_session_id": "a9d11896ded9",
+    "started_at": "2026-06-24T08:01:11.504298+00:00"
   },
   {
     "id": "research_short_interest_borrow_rate_proxy_squeeze_risk_sm",
@@ -37209,5 +37212,27 @@
       "strike_2",
       "treatment_root_cause"
     ]
+  },
+  {
+    "id": "K1549",
+    "title": "K1549: Russell reconstitution 1-month rebalance window 對 small-cap RV 與 IWM/IWO 流動性的 robust event study** — Russell 公開 reconsti",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1251). Original: Russell reconstitution 1-month rebalance window 對 small-cap RV 與 IWM/IWO 流動性的 robust event study** — Russell 公開 reconstitution 日曆（每年 6 月 announcement + late June effective），對 IWM/IWO/IWN/IWP 與 newly added/deleted constituents 做 announcement-to-effective period RV、相關性、premium-discount proxy；與 line 1221 S&P 500 index inclusion NULL 正交，這裡是 Russell 不同 mechanism（單日 effective vs S&P 連續審查）（來源：經典 Russell reconstitution 文獻 Madhavan + 2026 Russell 重大 mega-cap 重劃實務影響）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1549.py with signal.shift(1) + seed=42, (c) K1549_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1251,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-24T08:08:00Z",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-24T08:08:28.458994+00:00",
+    "claim_session_id": "438d29980b4a",
+    "started_at": "2026-06-24T08:08:32.355233+00:00",
+    "completed_at": "2026-06-24T08:21:46.146759+00:00",
+    "result": "CONDITIONAL_PASS NULL on 12/12 Bonferroni family (m=12 α=0.00417). All ratios geom-mean<1 — event window quieter than baseline (caveat earnings+FOMC overlap). n=16 yr, IWM/IWO/IWN/IWP. self_audit reviewer (Codex 5min timeout). Orthogonal K1341. knowledge.json + work_log written."
   }
 ]

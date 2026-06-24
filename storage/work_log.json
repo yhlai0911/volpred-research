@@ -11373,5 +11373,14 @@
     "evidence": "K1547 narrative=投資商品反迷思 vs K1417 narrative=paper methodology robustness, reader-facing 主題完全不同但 dedup gate 用 entity bag + conclusion bucket + mechanism tag 三元組粗粒度判 dup. dedup output 證據在 /tmp/k1547_dedup.json (truncated to terminal).",
     "verdict": "diagnostic_completed_treatment_enqueued",
     "timestamp": "2026-06-24T15:15:56+08:00"
+  },
+  {
+    "timestamp": "2026-06-24T16:15:00+08:00",
+    "task_type": "experiment",
+    "k_id": "K1549",
+    "verdict": "CONDITIONAL_PASS",
+    "summary": "K1549 Russell reconstitution event study — NULL on 12/12 Bonferroni family (m=12, α=0.00417). All 12 ratios geom-mean <1: event window quieter than baseline (caveat: baseline overlaps earnings + FOMC). n=16 years, IWM/IWO/IWN/IWP. Reviewer=self_audit (Codex 5min timeout fallback per K1259 gate). Orthogonal to K1341 S&P inclusion NULL.",
+    "commit": "merged from worktree-agent-a591aea499df5f634",
+    "owner": "hourly-16"
   }
 ]
