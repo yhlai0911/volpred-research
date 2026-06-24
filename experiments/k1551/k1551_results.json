@@ -1,0 +1,233 @@
+{
+  "experiment_id": "K1551",
+  "title": "Bond ETF AP-fragility proxy, stress-day fair-value residuals, and forward RV",
+  "created_at_utc": "2026-06-24T11:12:59.940840+00:00",
+  "seed": 1551,
+  "data": {
+    "price_source": "yfinance daily OHLCV",
+    "fund_metadata_source": "yfinance funds_data snapshot",
+    "start": "2015-01-01",
+    "end": "2026-06-25",
+    "etf_tickers": [
+      "AGG",
+      "BND",
+      "LQD",
+      "HYG",
+      "MUB",
+      "EMB",
+      "TLT",
+      "IEF"
+    ],
+    "factor_tickers": [
+      "SHY",
+      "IEI",
+      "TLT",
+      "LQD",
+      "HYG",
+      "SPY"
+    ],
+    "market_stress_definition": "VIX > 25 or MOVE > 120 on date t",
+    "ap_concentration_data_available": false,
+    "ap_concentration_data_note": "yfinance institutional_holders returned empty/404 for all tested bond ETFs; no ETF-level AP activity or 13F AP concentration is observed.",
+    "panel_rows": 23088
+  },
+  "design": {
+    "fragility_proxy": "cross-sectional mean z-score of credit complexity, category complexity, holdings turnover, high-low spread proxy, and inverse dollar-volume depth",
+    "dislocation_proxy": "absolute residual from a rolling t-1 OLS fair-value model using same-day broad ETF factor returns",
+    "lookahead_control": "OLS coefficients use only prior observations; stress-day forward RV target uses t+1 through t+5; no same-day signal is multiplied by same-day future return.",
+    "formal_tests": [
+      "date-level high-fragility minus low-fragility spread, normal vs stress Welch t-test",
+      "5000-rep date bootstrap CI for stress high-low spread net of normal high-low mean",
+      "cross-sectional Spearman correlation between fragility score and per-ETF stress lift"
+    ]
+  },
+  "etf_results": [
+    {
+      "ticker": "AGG",
+      "category": "Intermediate Core Bond",
+      "fragility_score": -0.08911496290440658,
+      "high_fragility_group": false,
+      "observations": 2620,
+      "stress_days": 570,
+      "stress_abs_residual_mean": 0.0008370198889385428,
+      "normal_abs_residual_mean": 0.0003897114178673702,
+      "abs_residual_stress_lift": 0.0004473084710711726,
+      "stress_fwd5_rv_mean": 0.0001395735940933553,
+      "normal_fwd5_rv_mean": 3.340099882774083e-05,
+      "fwd5_rv_stress_lift": 0.00010617259526561447
+    },
+    {
+      "ticker": "BND",
+      "category": "Intermediate Core Bond",
+      "fragility_score": -0.2220107363241898,
+      "high_fragility_group": false,
+      "observations": 2620,
+      "stress_days": 570,
+      "stress_abs_residual_mean": 0.0008769376762651716,
+      "normal_abs_residual_mean": 0.0003592815766252404,
+      "abs_residual_stress_lift": 0.0005176560996399312,
+      "stress_fwd5_rv_mean": 0.00015123059986257669,
+      "normal_fwd5_rv_mean": 3.353052414938109e-05,
+      "fwd5_rv_stress_lift": 0.0001177000757131956
+    },
+    {
+      "ticker": "EMB",
+      "category": "Emerging Markets Bond",
+      "fragility_score": 0.512372387383082,
+      "high_fragility_group": true,
+      "observations": 2620,
+      "stress_days": 570,
+      "stress_abs_residual_mean": 0.0038042720024518578,
+      "normal_abs_residual_mean": 0.0017548218144138178,
+      "abs_residual_stress_lift": 0.00204945018803804,
+      "stress_fwd5_rv_mean": 0.0005723455103022075,
+      "normal_fwd5_rv_mean": 8.982722911562699e-05,
+      "fwd5_rv_stress_lift": 0.00048251828118658056
+    },
+    {
+      "ticker": "HYG",
+      "category": "High Yield Bond",
+      "fragility_score": 0.33187812872466316,
+      "high_fragility_group": true,
+      "observations": 2620,
+      "stress_days": 570,
+      "stress_abs_residual_mean": 0.00298817400802848,
+      "normal_abs_residual_mean": 0.0013682832953366114,
+      "abs_residual_stress_lift": 0.0016198907126918685,
+      "stress_fwd5_rv_mean": 0.00042708364143276143,
+      "normal_fwd5_rv_mean": 5.678266052881409e-05,
+      "fwd5_rv_stress_lift": 0.0003703009809039473
+    },
+    {
+      "ticker": "IEF",
+      "category": "Long Government",
+      "fragility_score": -0.14306759140695174,
+      "high_fragility_group": false,
+      "observations": 2620,
+      "stress_days": 570,
+      "stress_abs_residual_mean": 0.0005237348231483574,
+      "normal_abs_residual_mean": 0.0003169397518044656,
+      "abs_residual_stress_lift": 0.0002067950713438918,
+      "stress_fwd5_rv_mean": 0.00017094134011528378,
+      "normal_fwd5_rv_mean": 6.212971274207393e-05,
+      "fwd5_rv_stress_lift": 0.00010881162737320986
+    },
+    {
+      "ticker": "LQD",
+      "category": "Corporate Bond",
+      "fragility_score": -0.06456463051569354,
+      "high_fragility_group": true,
+      "observations": 2620,
+      "stress_days": 570,
+      "stress_abs_residual_mean": 0.00241311353905125,
+      "normal_abs_residual_mean": 0.0009595979142214112,
+      "abs_residual_stress_lift": 0.0014535156248298388,
+      "stress_fwd5_rv_mean": 0.0004100642484074632,
+      "normal_fwd5_rv_mean": 7.135690619278727e-05,
+      "fwd5_rv_stress_lift": 0.0003387073422146759
+    },
+    {
+      "ticker": "MUB",
+      "category": "Muni National Interm",
+      "fragility_score": -0.03772089506325442,
+      "high_fragility_group": true,
+      "observations": 2620,
+      "stress_days": 570,
+      "stress_abs_residual_mean": 0.0025043402977967554,
+      "normal_abs_residual_mean": 0.0008955462980402659,
+      "abs_residual_stress_lift": 0.0016087939997564897,
+      "stress_fwd5_rv_mean": 0.00015361610331006339,
+      "normal_fwd5_rv_mean": 1.721901612556051e-05,
+      "fwd5_rv_stress_lift": 0.00013639708718450288
+    },
+    {
+      "ticker": "TLT",
+      "category": "Long Government",
+      "fragility_score": -0.2877716998932508,
+      "high_fragility_group": false,
+      "observations": 2620,
+      "stress_days": 570,
+      "stress_abs_residual_mean": 0.0044881051485688404,
+      "normal_abs_residual_mean": 0.002364744231556968,
+      "abs_residual_stress_lift": 0.0021233609170118726,
+      "stress_fwd5_rv_mean": 0.0008832181812603316,
+      "normal_fwd5_rv_mean": 0.00030949123081098443,
+      "fwd5_rv_stress_lift": 0.0005737269504493471
+    }
+  ],
+  "aggregate": {
+    "tickers_tested": 8,
+    "stress_days": 584,
+    "valid_dates": 2886,
+    "high_fragility_tickers": [
+      "EMB",
+      "HYG",
+      "LQD",
+      "MUB"
+    ],
+    "low_fragility_tickers": [
+      "AGG",
+      "BND",
+      "IEF",
+      "TLT"
+    ],
+    "abs_residual_high_minus_low_normal": 0.0003856103641815342,
+    "abs_residual_high_minus_low_stress": 0.0012460255776018574,
+    "abs_residual_did": 0.0008604152134203232,
+    "abs_residual_did_welch_t": 8.344320363333987,
+    "abs_residual_did_welch_p": 4.930832411327472e-16,
+    "abs_residual_did_bootstrap_ci": [
+      0.000671848116436632,
+      0.001068852106327398
+    ],
+    "fwd5_rv_high_minus_low_normal": -5.5065492922822496e-05,
+    "fwd5_rv_high_minus_low_stress": 5.204696910250572e-05,
+    "fwd5_rv_did": 0.00010711246202532821,
+    "fwd5_rv_did_welch_t": 4.884968144860224,
+    "fwd5_rv_did_welch_p": 1.3351543752818052e-06,
+    "fwd5_rv_did_bootstrap_ci": [
+      6.716759160362572e-05,
+      0.00015288248232788807
+    ],
+    "spearman_fragility_vs_abs_residual_lift": {
+      "rho": 0.261904761904762,
+      "pvalue": 0.5309228615658009
+    },
+    "spearman_fragility_vs_fwd5_rv_lift": {
+      "rho": 0.2142857142857143,
+      "pvalue": 0.6103444156452668
+    }
+  },
+  "figures": [
+    "figures/k1551_fragility_scores.png",
+    "figures/k1551_stress_lifts.png",
+    "figures/k1551_group_spreads.png"
+  ],
+  "verdict": "PARTIAL_GROUP_SUPPORT_MIXED_ETF_RANKING",
+  "limitations": [
+    "This is not an AP concentration replication; no ETF-level AP activity or AP market share is observed.",
+    "The price/NAV gap is proxied by a rolling fair-value residual, not actual NAV premium/discount.",
+    "Fund metadata is a current yfinance snapshot and may not match historical ETF characteristics.",
+    "Only eight large bond ETFs are tested; cross-sectional power is low.",
+    "Stress-day tests are diagnostic event studies, not a trading strategy.",
+    "Knowledge promotion is deferred to the main K1259 writer gate."
+  ],
+  "literature_basis": [
+    {
+      "name": "Bank of Canada Staff Analytical Note 2020-27, Concentration in the market of authorized participants of US fixed-income ETFs",
+      "url": "https://www.bankofcanada.ca/2020/11/staff-analytical-note-2020-27/"
+    },
+    {
+      "name": "BIS Quarterly Review, The anatomy of bond ETF arbitrage",
+      "url": "https://www.bis.org/publ/qtrpdf/r_qt2103d.htm"
+    },
+    {
+      "name": "Stress-Tested: Municipal Bond ETFs During Market Turmoil",
+      "url": "https://afajof.org/management/viewp.php?n=192668"
+    },
+    {
+      "name": "ICI, The Role and Activities of Authorized Participants of Exchange-Traded Funds",
+      "url": "https://www.ici.org/pubfile_pdf/ppr_15_aps_etfs.pdf"
+    }
+  ]
+}
