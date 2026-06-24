@@ -3361,3 +3361,18 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 - 新增 `tests/test_reader_facing_refill.py::test_refill_trending_skips_arc_duplicate` 覆蓋 dup+fresh 兩條候選的混合場景
 
 **Why pre-check 必要**：publish-time block 是 last-resort；upstream gate 才能避免 pool 堆積 → 主線程選題 noise → diversity rotation 卡死。修流程不修資料原則。
+
+## 2026-06-24 14:22 台灣時間 — Dual-source git 分岔：雲端 routines push origin/main 與本機研究線分岔
+
+**Incident**：互動 session 巡檢發現本地領先 origin/main 645 commit（fetch 後實為 1119 本機 vs 30 遠端 divergent，merge base 6/4）。origin tracking 停在 6/14，10 天 1100+ research commit 只存在本機（備份 gap）。手動 push rejected（`fetch first`）。fetch 顯示 origin 曾被 forced update（`70ad4b3d→a3a6bbbeb`）。
+
+**Root cause（dual-source，結構性）**：兩個 Claude 實例在同一 origin/main 各自 commit、無協調 — 本機 Mac Studio（研究主線 + 本地 cron + 互動 session）+ 雲端 Claude scheduled routines（`platform-ops-patrol` 每6h + `token-usage-daily-report` 每日，author=`Claude <noreply@anthropic.com>`，用 `git pull && git push origin main`）。雲端持續 push ops/token 報告到 main，本機從 6/14 後從未 push（**無自動 push 機制**）→ 永久分岔。額外害處：雲端報 `strategy_metrics.json missing since 5/31 (critical)` 是**假警報**，實為它分岔看不到本機檔（本機該檔正常每日更新）。
+
+**Fix（2026-06-24）**：
+1. `git merge origin/main` 保留兩邊（本機研究 + 雲端 ops/token 報告）+ push，遠端本地同步 0/0。衝突僅 `ops_patrol_report.json`（取遠端最新）。不 force、不破壞遠端、治理檔未回退。
+2. `/schedule` skill + `RemoteTrigger` API 停用 4 個 cloud routines（兩個 push-main 的 `enabled=false`：trig_01HzWX2ZUmsGHnzwciGpHeNz / trig_015iaE6yv3V9V1opjUAA5R2V）。RemoteTrigger 可 disable 不可 delete。
+3. 建 `~/.volpred/bin/cron_git_push_backup.sh`（crontab `17 */2 * * *`）：本地為唯一 push 源 → 永遠 fast-forward；偵測 behind>0 分岔則 `send-alert` 不強推、絕不 force。端到端測過（nothing-to-push / 真 push / 0-0 同步）。
+4. `config/runtime_schedules.json` 同步：system_crontab.items 加 `git_push_backup`，remote_triggers 兩個標 `enabled:false`+disabled_reason。
+5. memory `project_cloud_agent_git_divergence`。
+
+**防再發**：single push source = 本機。任何雲端 routine **不可**再 `git push origin main`（會重啟分岔）。若要雲端 off-site watchdog，改 email-only 或 push 專用 branch `ops-cloud/*`，絕不碰 main。雲端 routine 管理入口 = `/schedule` skill（非 computer-use）。
