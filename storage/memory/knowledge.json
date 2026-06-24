@@ -36111,5 +36111,17 @@
     ],
     "confidence": 0.69,
     "created_at": "2026-06-24T08:40:43.110844"
+  },
+  {
+    "item_id": "3fd2d451",
+    "category": "experiment_result_k1545",
+    "content": "[K1545 verdict=PRELIMINARY reviewer=feature-dev:code-reviewer (Codex CLI hung; subagent fallback documented)] Carbon-auction RV event prior on KRBN/GRN/KCCA. k_id=K1545 experiment_id=k1545 experiment_path=experiments/k1545/. n_events=25 hand-coded EU ETS/CARB/RGGI regime events (MSR launch, REPowerEU, Fit-for-55, ETS revision, ETS2, quarterly auctions); EEX per-auction microstructure paywalled (4 sources 403/404) — degraded to regime-event proxy, fully disclosed. Per-asset post-event 5-day RV (vs pre-30d baseline, Newey-West HAC): KRBN n=22 Δ=+0.0377 NW-t=1.44 p_bonf=0.747; GRN n=24 Δ=+0.0633 NW-t=1.54 p_bonf=0.617; KCCA n=20 Δ=+0.0093 NW-t=0.25 p_bonf=1.000. Sector spillover null/negative: XLE Δ=-0.0432 NW-t=-1.86 p_bonf=0.312; XLU Δ=-0.0153 NW-t=-1.60 p_bonf=0.548 → events are carbon-specific, no energy/utility contagion. Cross-asset date-aggregated (K1355-compliant per-date agg before HAC): n=24 Δ=+0.0531 NW-t=1.81 p_raw=0.071 (strongest but PRELIMINARY-capped). Gap-risk: KRBN t+1 |ret|/baseline=0.996 (no elevation). Lookahead audit PASS: RV_fwd5=rolling(5).std().shift(-5); baseline strictly past window [t-29..t-6]; bootstrap seed=20260624. Reviewer: feature-dev:code-reviewer subagent CONDITIONAL_PASS (Codex CLI hang fallback per K1259 precedent; codex_review.md documents). Implications: directional consistency with carbon-asset post-event RV bump but no Bonferroni-protected rejection; needs >100 events (extend window 2010-2026 + per-auction microstructure access) for PASS-tier claim. Orthogonal to K1445 (URA/KRBN descriptive vol clustering) — K1545 focuses on primary-market auction mechanism. Follow-ups: (1) K1259 v2 process — when Codex CLI free, re-verify K1545 with primary-path Codex (subagent ≠ Codex closure); (2) extend events via Carbon Pulse archive scrape (paid source) or partner with academic data provider for EEX raw. Files: experiments/k1545/{README.md, REFERENCES.md, codex_review.md, k1545.py, k1545_results.json, data/, figures/}. commit=cherry-pick of 58c02e68.",
+    "evidence": [
+      "experiments/k1545/k1545_results.json",
+      "experiments/k1545/README.md",
+      "experiments/k1545/codex_review.md"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-24T09:18:36.754005"
   }
 ]
