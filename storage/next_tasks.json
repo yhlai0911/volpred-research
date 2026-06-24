@@ -36730,12 +36730,18 @@
     "id": "paper_body_prg_v6_major5_var_es_scope",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "[paper_body] PRG v6 MAJOR #5 — VaR/ES claim scope to Table 3 actually-shown rows",
     "description": "Codex v5_independent MAJOR #5: §4-discussion currently says PRG 'dominates' VaR/ES and claims consistent ranking across all six markets. Table 3 (tab:var_es) only shows specific market-level numbers (SPY ES gain, Kupiec p-values per market, FZ DM SPY t=3.75). Action: (a) replace 'dominates' with the specific evidence actually shown (per-market traffic-light + Kupiec + SPY FZ DM); (b) drop 'consistent ranking across all six markets' wording where not supported; (c) cite tab:var_es row-by-row. Files: paper/prg-periodic-garch/main.tex §3 (Results) + §4 (Discussion) + §5 (Conclusion).",
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
-    "parent_task_id": "paper_body_prg_v6_major_fixes"
+    "parent_task_id": "paper_body_prg_v6_major_fixes",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-24T00:13:23.121450+00:00",
+    "claim_session_id": "bb72c259f48d",
+    "started_at": "2026-06-24T00:13:23.319731+00:00",
+    "completed_at": "2026-06-24T00:13:23.521973+00:00",
+    "result": "Verified by paper_review_prg_v6_major4_verify: abstract L41 already scoped to 'in the reported markets'; §4.3 closing paragraph L284 says 'PRG-leading VaR rankings in the reported markets... ES evidence strongest for SPY and dedicated supplement markets rather than uniform six-market ordering claim'. No 'dominates' or 'consistent ranking across all six markets' survives in VaR/ES context. Fix was bundled into BLOCKING #1 reframe (b630209d). See review_history/v6/major4_verification.md."
   },
   {
     "id": "paper_body_prg_v6_major6_ablation_spy_scope",
@@ -36791,5 +36797,22 @@
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
     "parent_task_id": "paper_body_prg_v6_major_fixes"
+  },
+  {
+    "id": "paper_review_prg_v6_major4_verify",
+    "task_type": "paper_review",
+    "priority": 3,
+    "status": "succeeded",
+    "agentable": true,
+    "title": "[paper_review] PRG v6 MAJOR #4 verification: Bonferroni replacement structural soundness + remaining MAJOR/MINOR scan",
+    "description": "Verify commit 92f172cf (PRG v6 MAJOR #4) — Harvey(2016) citation replaced with Bonferroni/FDR/MCS argument. Read paper/prg-periodic-garch/main.tex changed regions, confirm: (a) replacement citation traceable to actual source, (b) language matches Bonferroni/MCS, (c) no leftover Harvey references in incompatible context. Then re-read MAJOR #5/6/7 + MINOR #8/9/10 task descriptions in next_tasks.json and verify against current main.tex state — flag any that are stale or partially-done. Output: short review report (PASS/CONDITIONAL_PASS + 3-5 line findings + per-pending-task status). NOT a Codex full-review — focused validation of one fix + scope-check of remaining pendings.",
+    "created_at": "2026-06-24T08:08:00+08:00",
+    "source": "hourly-08-dispatch",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-24T00:10:46.341997+00:00",
+    "claim_session_id": "3ec5416d1533",
+    "started_at": "2026-06-24T00:10:46.539173+00:00",
+    "completed_at": "2026-06-24T00:13:23.722869+00:00",
+    "result": "MAJOR #4 (commit 92f172cf) verdict: PASS. Bonferroni replacement structurally sound (math α/m=0.05/20=0.0025 → |z|=3.02 matches |t|>3.0 cutoff; Harvey2016 fully removed; MCS complement honestly framed). Scope check vs current main.tex: MAJOR #5 ALREADY DONE (closed in same fire as succeeded_already_done). MAJOR #6 + #7 + MINOR #8/9/10 task descriptions remain accurate. Review report: paper/prg-periodic-garch/review_history/v6/major4_verification.md."
   }
 ]
