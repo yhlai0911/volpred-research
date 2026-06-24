@@ -36789,12 +36789,18 @@
     "id": "paper_body_prg_v6_major6_ablation_spy_scope",
     "task_type": "paper_body",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "[paper_body] PRG v6 MAJOR #6 — ablation generalization scope-pull-in (SPY-only evidence wording)",
     "description": "Codex v5_independent MAJOR #6: paper currently generalizes ablation (e.g., timing convention robustness) from SPY evidence to all six markets in §3.2 / §5 wording. Action: scope down all SPY-only sentences to 'SPY' or 'illustrated for SPY'; explicitly note that cross-market replication of the timing-convention ablation is left for follow-up. Files: paper/prg-periodic-garch/main.tex abstract (line 41) + §3.2 (tab:timing_convention context) + §5 (conclusion).",
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
-    "parent_task_id": "paper_body_prg_v6_major_fixes"
+    "parent_task_id": "paper_body_prg_v6_major_fixes",
+    "claimed_by": "hourly-13-followup",
+    "claimed_at": "2026-06-24T05:50:00.139516+00:00",
+    "claim_session_id": "9499164e5a51",
+    "started_at": "2026-06-24T05:50:04.956698+00:00",
+    "completed_at": "2026-06-24T05:51:59.057988+00:00",
+    "result": "Scope-down 3 sentences in main.tex (abstract L41, §3.2 timing_convention L241, §5 conclusion L362): explicit 'SPY-only' qualifier + 'cross-market replication left for follow-up' on K880v2 ablation claims. xelatex re-compiled 20pp 109KB OK; paper-update synced to Supabase (updated_at 2026-06-24T05:51:45Z). Codex v5_independent MAJOR #6 addressed."
   },
   {
     "id": "paper_body_prg_v6_major7_har_target_mismatch_scope",
@@ -37131,5 +37137,42 @@
     "claim_session_id": "f76042bb6770",
     "completed_at": "2026-06-24T05:19:03.501672+00:00",
     "result": "Reply sent: (1) App Review status unknown — needs Chrome MCP for Meta Dev Portal verification (待互動 session); (2) Flipped 5 wont_fix FB items back to awaiting_interactive_session per boss correction (Ivan FB = Chrome path, not wont_fix). FB backlog ~14 items pending Chrome ops."
+  },
+  {
+    "id": "email-11980-d951a2",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiti",
+    "description": "Gmail UID: 11980\nMessage-ID: <9E561D3F-D2FF-4D47-A053-DF2C9021A203@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 24 Jun 2026 13:35:21 +0800\nSubject: Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting\n\n--- 用戶回信內容 ---\n我都開好了 你自己去看\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月24日 13:18 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting\r\n> Alert level: info\r\n> INFO\r\n> Re: 關於 FB 貼文 — 老闆糾正回覆\r\n> \r\n> 回覆兩個問題：\r\n> 1. FB App Review 狀況\r\n> \r\n> 老實說：我不知道當前 App Review 確切狀態。\r\n> 之前 session（2026-05-29）標 wont_fix 時的依據是「卡 App Review」，但那是 prior session 判斷，未實際登入 Meta Developer Portal 查證。\r\n> 可行的查證路徑：\r\n> Meta Developer Portal (developers.facebook.com/apps <http://developers.facebook.com/apps>) 需 Chrome 登入 — 不是 headless 能完成\r\n> 需要互動 session（你開著 Chrome + 我用 Claude in Chrome 操作）才能查 App 狀態 / 重新申請\r\n> 建議下一次互動 session 我做這 3 步：\r\n> 開 developers.facebook.com/apps <http://developers.facebook.com/apps> 查 App ID（你的個人 / VolPred 粉專 app）狀態\r\n> 看 pages_manage_posts / publish_actions 等 permission 是否被 reject 或 stale pending\r\n> 如有 reject reason 對症補 review note 重送；如未送過就跑首次 review\r\n> 2. Ivan Lai 個人 FB Chrome 操作\r\n> \r\n> 已糾正：你說對了 — Ivan FB 本來就是 Chrome 路徑，不該標 wont_fix。\r\n> 剛才做的：把 5 個誤標 wont_fix 的 FB 文章改回 awaiting_interactive_session：\r\n> Mile ID\t標題\r\n> mile_b221e550\t法說季開打前，Mag 7 的期權市場悄悄在說一件事\r\n> mile_057f178b\t為什麼 NVDA 每天都讓人心跳加速\r\n> mile_671d4c75\t債市和股市同時在怕，但怕的不是同一件事\r\n> mile_89889d46\t裁員八千人，同一季燒掉 $680 億\r\n> mile_5b3569c3\t配息數字背後的風險帳\r\n> 加上 handoff 已有的 9+ 篇 awaiting，FB backlog 約 14 篇待你下次開 Chrome 時批次處理（或我 Claude in Chrome）。\r\n> 自我檢討\r\n> \r\n> 「卡 App Review」這個結論我沒實證就標 wont_fix，違反研究誠實原則（時間/狀態也是數據）。下次遇到「不能完成」的判斷會先查證實際狀態。\r\n> 下一步\r\n> \r\n> 本 tick 完成：5 篇 wont_fix → awaiting flip + email 回覆\r\n> 待你下次開 Chrome 互動 session：(a) Meta Dev Portal 查 App Review (b) Ivan FB 14 篇 backlog 批次貼\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-24T05:45:06.659091+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 11980,
+    "email_message_id": "<9E561D3F-D2FF-4D47-A053-DF2C9021A203@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-24T05:45:34.451339+00:00",
+    "claim_session_id": "211f7b4c40e0"
+  },
+  {
+    "id": "research_short_interest_borrow_rate_proxy_squeeze_risk_sm",
+    "title": "研究 backlog fallback: Short interest 急升 + borrow rate proxy：squeeze-risk 是否預測 small-cap 個股下 5d 高 RV",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Short interest 急升 + borrow rate proxy：squeeze-risk 是否預測 small-cap 個股下 5d 高 RV — FINRA 公開 short interest semi-monthly + yfinance Russell 2000 constituents（IWM holdings），建 short interest ratio 21d change z-score + days-to-cover proxy（shares short ÷ avg volume），shift(1) 後檢定 top-decile shock 是否預測 5d RV、 | 來源 section: 期刊主題挖掘 batch 2026-06-24b（journal_discovery_20260624_0 重生 fire；websearch jfm/jbes/jfutmkts/jfqa/math.finance/cfa/jai/jfra/corp.gov./emerald/efm 2025-26 趨勢層級；selectivity gate 後 13→11 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "short_interest_borrow_rate_proxy_squeeze_risk_sm",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-24T05:47:37+00:00"
   }
 ]
