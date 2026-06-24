@@ -36943,5 +36943,70 @@
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-06-24T02:00:26.637486+00:00",
     "claim_session_id": "3a341404eb4e"
+  },
+  {
+    "id": "paper_review_mile_f3e389cf",
+    "title": "Paper review (Codex 24h-rule): 每日精選導讀｜隔夜波動率：學術上很重要，實戰裡很尷尬",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_f3e389cf needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_f3e389cf",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-24T03:08:04+00:00"
+  },
+  {
+    "id": "paper_review_mile_1597b341",
+    "title": "Paper review (Codex 24h-rule): 每日精選導讀｜分散投資的幻覺：你以為無關的資產，其實偷偷牽動著你整個組合",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_1597b341 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_1597b341",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-24T03:08:04+00:00"
+  },
+  {
+    "id": "paper_review_mile_dc516a52",
+    "title": "Paper review (Codex 24h-rule): 氣候新聞延燒越久，綠棕 ETF 的尾端風險不會跟著升",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_dc516a52 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_dc516a52",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-24T03:08:04+00:00"
+  },
+  {
+    "id": "journal_discovery_20260624_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "in_progress",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-06-24T03:08:49+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-24T03:09:27.224058+00:00",
+    "claim_session_id": "a8560437fca6",
+    "started_at": "2026-06-24T03:09:30.047941+00:00"
   }
 ]
