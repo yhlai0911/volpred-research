@@ -1,0 +1,369 @@
+{
+  "experiment_id": "K1552",
+  "generated_at": "2026-06-25T04:22:18.362381+00:00",
+  "seed": 42,
+  "verdict": "NULL_AMPLIFICATION_WITH_OPPOSITE_RALLY_DECOMPRESSION",
+  "data": {
+    "source": "yfinance daily adjusted OHLCV for US ETFs and ^VIX",
+    "download_window": {
+      "start": "2000-01-01",
+      "end": "2026-06-26"
+    },
+    "asset_tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "XLB",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLU",
+      "XLV",
+      "XLY",
+      "XLRE"
+    ],
+    "control_tickers": [
+      "^VIX"
+    ],
+    "asset_panel_rows": 82487,
+    "aggregate_rows": 5375,
+    "availability": [
+      {
+        "ticker": "SPY",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "QQQ",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "IWM",
+        "first_price_date": "2000-05-26",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6557,
+        "valid_memory_signal_rows": 5274
+      },
+      {
+        "ticker": "XLB",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLE",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLF",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLI",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLK",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLP",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLU",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLV",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLY",
+        "first_price_date": "2000-01-03",
+        "last_price_date": "2026-06-24",
+        "price_rows": 6658,
+        "valid_memory_signal_rows": 5375
+      },
+      {
+        "ticker": "XLRE",
+        "first_price_date": "2015-10-08",
+        "last_price_date": "2026-06-24",
+        "price_rows": 2692,
+        "valid_memory_signal_rows": 1409
+      }
+    ]
+  },
+  "method": {
+    "episode_library_window_days": 1260,
+    "episode_library_gap_days": 22,
+    "extreme_episode_quantile": 0.05,
+    "lookahead_guard": "raw memory cue computed at d; predictive variables use signal = raw_memory_cue.shift(1)",
+    "primary_targets": [
+      "log_range_var",
+      "log_fwd5_rv",
+      "volume_z",
+      "downside_ret"
+    ],
+    "signals": [
+      "loss_memory_lag1",
+      "rally_memory_lag1"
+    ],
+    "hac_lags": 5,
+    "multiple_testing": "Bonferroni 5% over 8 primary signal-target cells",
+    "bootstrap": {
+      "reps": 1000,
+      "block_size_days": 21,
+      "seed": 42
+    }
+  },
+  "primary_regressions": [
+    {
+      "target": "log_range_var",
+      "signal": "loss_memory_lag1",
+      "coef": 0.09322851,
+      "t_stat": 1.11905229,
+      "p_value": 0.26311783,
+      "bonferroni_pass": false,
+      "expected_direction_pass": true
+    },
+    {
+      "target": "log_range_var",
+      "signal": "rally_memory_lag1",
+      "coef": -0.26157807,
+      "t_stat": -3.71810996,
+      "p_value": 0.00020072,
+      "bonferroni_pass": true,
+      "expected_direction_pass": false
+    },
+    {
+      "target": "log_fwd5_rv",
+      "signal": "loss_memory_lag1",
+      "coef": -0.05230549,
+      "t_stat": -0.44319297,
+      "p_value": 0.65762617,
+      "bonferroni_pass": false,
+      "expected_direction_pass": false
+    },
+    {
+      "target": "log_fwd5_rv",
+      "signal": "rally_memory_lag1",
+      "coef": -0.52611294,
+      "t_stat": -4.71913527,
+      "p_value": 2.37e-06,
+      "bonferroni_pass": true,
+      "expected_direction_pass": false
+    },
+    {
+      "target": "volume_z",
+      "signal": "loss_memory_lag1",
+      "coef": 0.06222299,
+      "t_stat": 0.93869521,
+      "p_value": 0.34788725,
+      "bonferroni_pass": false,
+      "expected_direction_pass": true
+    },
+    {
+      "target": "volume_z",
+      "signal": "rally_memory_lag1",
+      "coef": -0.32151204,
+      "t_stat": -5.57711666,
+      "p_value": 2e-08,
+      "bonferroni_pass": true,
+      "expected_direction_pass": false
+    },
+    {
+      "target": "downside_ret",
+      "signal": "loss_memory_lag1",
+      "coef": 0.00539496,
+      "t_stat": 2.43645601,
+      "p_value": 0.01483197,
+      "bonferroni_pass": false,
+      "expected_direction_pass": false
+    },
+    {
+      "target": "downside_ret",
+      "signal": "rally_memory_lag1",
+      "coef": 0.00664195,
+      "t_stat": 3.42908258,
+      "p_value": 0.00060563,
+      "bonferroni_pass": true,
+      "expected_direction_pass": false
+    }
+  ],
+  "harvey_expected_direction_passes": [],
+  "bonferroni_expected_direction_passes": [],
+  "bonferroni_opposite_direction_cells": [
+    {
+      "target": "log_range_var",
+      "signal": "rally_memory_lag1",
+      "coef": -0.2615780656188955,
+      "t_stat": -3.7181099632638452,
+      "p_value": 0.00020071890099458765,
+      "bonferroni_pass": true,
+      "expected_direction_pass": false
+    },
+    {
+      "target": "log_fwd5_rv",
+      "signal": "rally_memory_lag1",
+      "coef": -0.5261129433819236,
+      "t_stat": -4.719135266650467,
+      "p_value": 2.368492954574936e-06,
+      "bonferroni_pass": true,
+      "expected_direction_pass": false
+    },
+    {
+      "target": "volume_z",
+      "signal": "rally_memory_lag1",
+      "coef": -0.3215120418276537,
+      "t_stat": -5.5771166560017775,
+      "p_value": 2.445378894084141e-08,
+      "bonferroni_pass": true,
+      "expected_direction_pass": false
+    },
+    {
+      "target": "downside_ret",
+      "signal": "rally_memory_lag1",
+      "coef": 0.006641954715586771,
+      "t_stat": 3.4290825848837767,
+      "p_value": 0.0006056252158459847,
+      "bonferroni_pass": true,
+      "expected_direction_pass": false
+    }
+  ],
+  "best_abs_t_cell": {
+    "target": "volume_z",
+    "signal": "rally_memory_lag1",
+    "t_stat": -5.5771166560017775
+  },
+  "bootstrap_best_cell": {
+    "target": "volume_z",
+    "signal": "rally_memory_lag1",
+    "reps_requested": 1000,
+    "reps_completed": 1000,
+    "block_size_days": 21,
+    "coef_mean": -0.32368596,
+    "coef_ci_2_5": -0.45733284,
+    "coef_ci_97_5": -0.1893733
+  },
+  "event_spreads": [
+    {
+      "target": "log_range_var",
+      "signal": "loss_memory_lag1",
+      "high_n": 1104,
+      "other_n": 4271,
+      "high_mean": -3.57425428,
+      "other_mean": -4.40022716,
+      "high_minus_other": 0.82597288
+    },
+    {
+      "target": "log_fwd5_rv",
+      "signal": "loss_memory_lag1",
+      "high_n": 1104,
+      "other_n": 4267,
+      "high_mean": -3.18401559,
+      "other_mean": -4.02225837,
+      "high_minus_other": 0.83824278
+    },
+    {
+      "target": "volume_z",
+      "signal": "loss_memory_lag1",
+      "high_n": 1104,
+      "other_n": 4271,
+      "high_mean": 0.6415915,
+      "other_mean": -0.06804211,
+      "high_minus_other": 0.70963361
+    },
+    {
+      "target": "downside_ret",
+      "signal": "loss_memory_lag1",
+      "high_n": 1104,
+      "other_n": 4271,
+      "high_mean": -0.00609489,
+      "other_mean": -0.00401181,
+      "high_minus_other": -0.00208308
+    },
+    {
+      "target": "log_range_var",
+      "signal": "rally_memory_lag1",
+      "high_n": 1012,
+      "other_n": 4363,
+      "high_mean": -4.42157881,
+      "other_mean": -4.18627302,
+      "high_minus_other": -0.2353058
+    },
+    {
+      "target": "log_fwd5_rv",
+      "signal": "rally_memory_lag1",
+      "high_n": 1012,
+      "other_n": 4359,
+      "high_mean": -4.06056353,
+      "other_mean": -3.80106432,
+      "high_minus_other": -0.25949921
+    },
+    {
+      "target": "volume_z",
+      "signal": "rally_memory_lag1",
+      "high_n": 1012,
+      "other_n": 4363,
+      "high_mean": -0.24588224,
+      "other_mean": 0.15277149,
+      "high_minus_other": -0.39865373
+    },
+    {
+      "target": "downside_ret",
+      "signal": "rally_memory_lag1",
+      "high_n": 1012,
+      "other_n": 4363,
+      "high_mean": -0.00379539,
+      "other_mean": -0.00458911,
+      "high_minus_other": 0.00079372
+    }
+  ],
+  "per_ticker_summary": {
+    "rows": 78,
+    "expected_direction_harvey_pass_count": 3,
+    "expected_direction_positive_share": 0.3974359
+  },
+  "figures": [
+    "figures/k1552_memory_cues.png",
+    "figures/k1552_primary_tstats.png",
+    "figures/k1552_event_spreads.png"
+  ],
+  "limitations": [
+    "This is not a replication of investor-level memory survey or transaction data.",
+    "Sector ETF similarity cues are public-market proxies and may capture momentum/volatility clustering despite lagged controls.",
+    "Daily OHLCV cannot observe news headline salience or investor recall directly.",
+    "XLRE has shorter history; aggregate coverage varies over time.",
+    "Per-ticker tests are secondary diagnostics and not promoted as independent discoveries."
+  ]
+}

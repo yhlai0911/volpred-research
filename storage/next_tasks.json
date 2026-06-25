@@ -37358,5 +37358,57 @@
     "started_at": "2026-06-25T01:59:03.386317+00:00",
     "completed_at": "2026-06-25T02:09:09.917034+00:00",
     "result": "發布每日精選導讀 mile_bdd3b732：尾部風控不是預言明天。策展 6 篇 2026-03-15~06-23 archive 文章，details.content_type=daily_digest、digest_articles=6、含懶人包圖；Supabase incremental sync 成功，feed index 重建。"
+  },
+  {
+    "id": "paper_review_mile_bdd3b732",
+    "title": "Paper review (Codex 24h-rule): 每日精選導讀｜尾部風控不是預言明天：低波動、厚尾與風險模型的煞車距離",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_bdd3b732 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_bdd3b732",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-25T04:14:01+00:00"
+  },
+  {
+    "id": "governance_error_log_review_240",
+    "title": "Governance: error_log has 252 entries — sweep for systemic patterns",
+    "description": "docs/error_log.md accumulated 252 top-level entries (bucket 240, threshold 40). Read recent 20 entries; identify recurring root cause patterns; run `uv run python scripts/audit_silent_fallbacks.py --json` when silent fallback appears in the cluster; consolidate repeats into rules / skills / lint. Per CLAUDE.md `永遠修流程，不修資料`.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "governance",
+    "source": "diverse_gen",
+    "tags": [
+      "governance",
+      "error-log-sweep",
+      "main-thread-only"
+    ],
+    "created_at": "2026-06-25T04:14:01+00:00"
+  },
+  {
+    "id": "K1552",
+    "title": "K1552: Investor-memory cue 對 RV persistence 的公開代理：當前報酬像過去 crash/rally 時，市場是否過度回想並放大成交與波動** — 用美股大樣本 / sector ETF，為每檔建立歷史 5d/21d",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1264). Original: Investor-memory cue 對 RV persistence 的公開代理：當前報酬像過去 crash/rally 時，市場是否過度回想並放大成交與波動** — 用美股大樣本 / sector ETF，為每檔建立歷史 5d/21d return episode library，當今日 return cue 與過去極端 loss/gain episode 相似時，檢定後續 turnover、range-vol、left-tail 與 reversal/continuation 是否異常；可加入新聞 headline count 作 salience control。與 generic sentiment / retail-flow 題不同，這裡是 similarity-based recall cue，而非情緒 level（來源：QJE 2025 Investor Memory and Biased Beliefs；相似回憶會影響預期與交易）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1552.py with signal.shift(1) + seed=42, (c) K1552_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1264,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-25T04:14:47Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-25T04:15:00.709857+00:00",
+    "claim_session_id": "92460f9a4a29",
+    "started_at": "2026-06-25T04:15:06.226738+00:00",
+    "completed_at": "2026-06-25T04:23:13.541944+00:00",
+    "result": "K1552 completed: yfinance sector ETF investor-memory cue proxy, 2000-2026, 82,487 asset-day rows. Verdict NULL_AMPLIFICATION_WITH_OPPOSITE_RALLY_DECOMPRESSION: 0 expected-direction Bonferroni/Harvey passes; rally-memory cue significant in opposite direction. Artifacts in experiments/k1552/, knowledge write deferred to canonical gate."
   }
 ]
