@@ -615,7 +615,16 @@ def _release_dedup_flag_active(item: dict, *, now: datetime) -> bool:
         # _RELEASE_DEDUP_FLAG_TTL_DAYS. After the cooldown the draft is
         # re-evaluated fresh by the live dedup gates each release run.
         return (now - flagged_dt) < timedelta(days=_RELEASE_DEDUP_FLAG_TTL_DAYS)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError) as exc:
+        from .diagnostics import warn
+
+        warn(
+            "release_pool",
+            "release_dedup_skipped_at parse failed; re-evaluating draft",
+            item_id=str(item.get("id") or ""),
+            release_dedup_skipped_at=str(flagged_at),
+            err=f"{type(exc).__name__}: {exc}",
+        )
         return False
 
 
@@ -648,7 +657,16 @@ def release_pool_articles(
             return True
         try:
             return datetime.fromisoformat(published_at.replace("Z", "+00:00")) <= now
-        except Exception:
+        except Exception as exc:
+            from .diagnostics import warn
+
+            warn(
+                "release_pool",
+                "published_at parse failed; treating item as due",
+                item_id=str(item.get("id") or ""),
+                published_at=str(published_at),
+                err=f"{type(exc).__name__}: {exc}",
+            )
             return True
 
     def sort_key(item: dict) -> tuple:

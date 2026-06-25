@@ -108,6 +108,22 @@ def test_baseline_diff_reports_only_new_findings() -> None:
     assert resolved_findings == []
 
 
+def test_human_report_prints_summary(capsys) -> None:
+    findings = [
+        audit_silent_fallbacks.Finding("scripts/a.py", 10, "Exception", "return None"),
+        audit_silent_fallbacks.Finding("scripts/a.py", 20, "ValueError", "continue"),
+        audit_silent_fallbacks.Finding("src/volpred/b.py", 30, "OSError", "continue"),
+    ]
+
+    audit_silent_fallbacks._human_report(findings, limit=1)
+
+    out = capsys.readouterr().out
+    assert "[silent-fallback-audit] findings=3" in out
+    assert "[silent-fallback-audit] by_action: continue=2, return None=1" in out
+    assert "[silent-fallback-audit] by_root: scripts=2, src=1" in out
+    assert "[silent-fallback-audit] top_paths: scripts/a.py=2" in out
+
+
 def test_load_baseline_accepts_metadata_object(tmp_path: Path) -> None:
     baseline_path = tmp_path / "baseline.json"
     baseline_path.write_text(

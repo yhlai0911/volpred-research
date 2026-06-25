@@ -24,6 +24,7 @@ import argparse
 import ast
 import json
 import sys
+from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -266,6 +267,16 @@ def write_baseline(path: Path, findings: list[Finding]) -> None:
 
 def _human_report(findings: list[Finding], *, limit: int | None) -> None:
     print(f"[silent-fallback-audit] findings={len(findings)}")
+    if findings:
+        by_action = Counter(item.action for item in findings)
+        by_root = Counter(item.path.split("/", 1)[0] for item in findings)
+        by_path = Counter(item.path for item in findings)
+        action_summary = ", ".join(f"{action}={count}" for action, count in by_action.most_common())
+        root_summary = ", ".join(f"{root}={count}" for root, count in by_root.most_common())
+        path_summary = ", ".join(f"{path}={count}" for path, count in by_path.most_common(8))
+        print(f"[silent-fallback-audit] by_action: {action_summary}")
+        print(f"[silent-fallback-audit] by_root: {root_summary}")
+        print(f"[silent-fallback-audit] top_paths: {path_summary}")
     rows = findings if limit is None else findings[:limit]
     for item in rows:
         print(f"{item.path}:{item.line} except {item.exception}: {item.action}")

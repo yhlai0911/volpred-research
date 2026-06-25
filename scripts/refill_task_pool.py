@@ -215,7 +215,7 @@ def _kids_with_terminal_article_attempts(tasks: list) -> set[str]:
                 ts = datetime.fromisoformat(c)
             except ValueError:
                 # date-only like "2026-05-05" → pre-gate
-                continue
+                continue  # silent-ok: legacy date-only completed_at is pre-gate by construction
             if ts.tzinfo is None:
                 continue  # naive timestamp — skip, treat as ambiguous (pre-gate)
             if ts >= gate_ts:
@@ -663,7 +663,8 @@ def _breached_clusters() -> set[str]:
         if not total:
             return set()
         return {cl for cl, n in counts.items() if (n / total) > DOMINANT_RATIO_LIMIT}
-    except Exception:
+    except Exception as exc:
+        _warn_refill("dominant cluster detection failed; treating as no dominant clusters", exc)
         return set()
 
 
@@ -674,7 +675,12 @@ def _cand_cluster(cand: dict) -> str | None:
             str(cand.get("title") or ""),
             [str(t) for t in (cand.get("tags") or [])],
         )
-    except Exception:
+    except Exception as exc:
+        _warn_refill(
+            f"topic cluster classification failed; excluding candidate from cluster check "
+            f"title={(cand.get('title') or '')!r}",
+            exc,
+        )
         return None
 
 
