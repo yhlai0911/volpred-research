@@ -37364,7 +37364,7 @@
     "title": "Paper review (Codex 24h-rule): 每日精選導讀｜尾部風控不是預言明天：低波動、厚尾與風險模型的煞車距離",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_bdd3b732 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_bdd3b732",
@@ -37372,7 +37372,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-25T04:14:01+00:00"
+    "created_at": "2026-06-25T04:14:01+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-25T04:37:47.065725+00:00",
+    "claim_session_id": "4ff26a966db9",
+    "started_at": "2026-06-25T04:37:56.519277+00:00",
+    "completed_at": "2026-06-25T04:47:02.814978+00:00",
+    "result": "Codex 24h review completed. Found a publication blocker: the daily digest inherited K802 Basel green/Trinity PASS framing after K802 had been source-review FAIL. Fixed the digest via publish_draft update with explicit K802 caveat, synced the single article to Supabase, and added review receipt. Verdict: FAIL -> CONDITIONAL_PASS_AFTER_FIX; K802 itself still requires K802-v2 before formal reuse."
   },
   {
     "id": "governance_error_log_review_240",
