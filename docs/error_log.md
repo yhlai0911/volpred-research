@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-25 dispatch article-refill 與 candidates rebuild 同為 45s timeout 互相抵消
+
+**問題**：Codex 接手 tick 後，`continue_task_dispatch.py --report` 在 agentable=0 時只新增 `platform_ops_dispatch_pool_dry_diagnostic_20260625`，並警告 `article_refill: timed out after 45s`。但手動跑 `uv run python scripts/refill_task_pool.py --dry-run --target 4 --json` 約 49 秒後其實能用既有 `publication_candidates.json` fallback 產生 3 個候選（K1339/K1529/K1347）。
+
+**根因**：2026-06-24 的直接 CLI 修正把 `refill_task_pool.py` 的 candidate rebuild timeout 設為 45 秒；2026-06-18 的 dispatcher 外層 article-refill hard timeout 也是 45 秒。當 `build_publication_candidates.py` 慢到內層 45 秒 timeout 時，外層 SIGALRM 同時觸發，直接切掉 `refill()`，導致「內層本來會超時後降級補任務」的正常 fallback 永遠跑不到。
+
+**解決方法**：`DEFAULT_CANDIDATE_REBUILD_TIMEOUT_SECONDS` 改為 30 秒，明確低於 dispatcher article-refill 45 秒預算，讓 stale candidate rebuild fail-fast 後仍有時間 materialize fallback article tasks。新增 regression test 鎖定預設 rebuild timeout 必須小於 45 秒，避免內外 timeout 再次同值。
+
+**防再發**：巢狀 timeout 不能同值；內層 dependency timeout 要小於外層 orchestration timeout，且要保留降級邏輯執行時間。只加外層 hard timeout 會防 hang，但可能誤殺內層已有的 fallback。
+
 ## 2026-06-25 content_correction_scanner 壞 report/feed 被靜默漏掃
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/content_correction_scanner.py`，掃到 `load_articles()`：單篇 `storage/reports/*.json` 壞 JSON 時直接 `continue`，`feed.json` 壞 JSON 時直接 `pass`。內容修正巡檢會把壞來源當成沒有文章，可能漏掉需要撤回或更新的舊內容。

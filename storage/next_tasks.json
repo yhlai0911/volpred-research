@@ -1,5 +1,27 @@
 [
   {
+    "id": "platform_ops_dispatch_pool_dry_diagnostic_20260625",
+    "title": "Dispatcher pool-dry diagnostic: all refill sources returned no new tasks",
+    "description": "continue_task_dispatch saw agentable=0, and diverse/event/article/research refill all added 0 tasks. Diagnose why the pool is dry, verify publication_candidates/research_program/backlog freshness, and either fix the generator or explicitly document that the pool is intentionally exhausted.",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "succeeded",
+    "created_at": "2026-06-25T04:50:02.451609+00:00",
+    "source": "continue_task_dispatch_pool_dry_breaker",
+    "tags": [
+      "dispatch",
+      "refill",
+      "pool-dry",
+      "platform_ops"
+    ],
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-25T04:50:14.788373+00:00",
+    "claim_session_id": "3e09d1682324",
+    "started_at": "2026-06-25T04:50:17.826729+00:00",
+    "completed_at": "2026-06-25T04:55:17.793428+00:00",
+    "result": "Diagnosed dispatch pool-dry false diagnostic. Root cause: refill_task_pool candidate rebuild timeout and continue_task_dispatch article-refill timeout were both 45s, so outer SIGALRM killed refill before its stale-candidate fallback could materialize tasks. Fixed rebuild default to 30s, added regression coverage and error_log entry. Verified direct refill dry-run returns fallback candidates with timeout_seconds=30 and dispatch --report added K1339/K1529/K1347 article tasks."
+  },
+  {
     "id": "paper_decision_leverage_direction_jbf_submission_356440a2d6dd",
     "priority": "P1",
     "task_type": "paper_decision",
@@ -37422,5 +37444,53 @@
     "started_at": "2026-06-25T04:15:06.226738+00:00",
     "completed_at": "2026-06-25T04:23:13.541944+00:00",
     "result": "K1552 completed: yfinance sector ETF investor-memory cue proxy, 2000-2026, 82,487 asset-day rows. Verdict NULL_AMPLIFICATION_WITH_OPPOSITE_RALLY_DECOMPRESSION: 0 expected-direction Bonferroni/Harvey passes; rally-memory cue significant in opposite direction. Artifacts in experiments/k1552/, knowledge write deferred to canonical gate."
+  },
+  {
+    "id": "K1339_article_general",
+    "title": "K1339: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1339 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1339 (CONDITIONAL_PASS): commodity ETF 21d-vs-63d momentum-regime switch as event-study signal for vol jump.\n\nMethod: USO/UNG/CPER 21d-63d momentum slope sign as backwardation/contango proxy; sustained-10d filter + cross-asset confirmation; forward [event+1, event+H] vol jump at",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1339",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-25T04:54:53+00:00"
+  },
+  {
+    "id": "K1529_article_general",
+    "title": "K1529: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1529 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: [提出: research_program.md 2026-06-17c backlog; 執行: Codex] K1529 credit-spread FOMC volatility precursor ETF-proxy pilot. Data: yfinance daily OHLC HYG/LQD/VCIT/VCSH/SPY/^VIX + sector ETFs, SF Fed monetary-policy-surprise chart CSV, 102 FOMC events 2012-01-25 to 2023-12-13, OOS fro",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1529",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-25T04:54:56+00:00"
+  },
+  {
+    "id": "K1347_article_general",
+    "title": "K1347: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1347 has verdict signal (score=5, reasons=['methodology/mechanism lesson', 'paradigm/decisive null', 'robust inference']) but no general article in feed.json.  Verdict preview: K1347 [FAIL, Codex PASS] CVaR-RP vs Sigma-RP (ERC) on SPY/TLT/GLD/PDBC — 用 tail-risk 重定義 risk parity 沒能 robust 改善 stress MDD\n\n**結論**: FAIL — CVaR-based equal risk contribution (α=0.05) 對比 sigma-based ERC，在 SPY/TLT/GLD/PDBC 4-asset 2019-01-02 至 2025-12-30 共 1759 OOS days 下：(a) ful",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1347",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-25T04:54:59+00:00"
   }
 ]

@@ -1012,7 +1012,10 @@ def _make_research_task(title: str, full_line: str, header: str, slug: str, task
 
 
 CANDIDATES_STALE_HOURS = 6
-DEFAULT_CANDIDATE_REBUILD_TIMEOUT_SECONDS = 45
+# Must remain below continue_task_dispatch.ARTICLE_REFILL_TIMEOUT_SECONDS (45s)
+# so a stale candidate rebuild can time out and still leave time for fallback
+# candidate materialization inside the dispatcher's article-refill budget.
+DEFAULT_CANDIDATE_REBUILD_TIMEOUT_SECONDS = 30
 
 
 def _candidate_rebuild_timeout_seconds() -> int:

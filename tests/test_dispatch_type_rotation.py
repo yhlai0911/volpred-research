@@ -107,7 +107,7 @@ def test_invalid_blocked_until_warns_and_keeps_explicit_block(capsys):
 
     captured = capsys.readouterr()
     assert reason == "external_auth"
-    assert "[dispatch] WARN invalid blocked_until" in captured.err
+    assert "[dispatch] WARN blocked_until parse failed" in captured.err
     assert "bad-until" in captured.err
     assert "not-a-date" in captured.err
 

@@ -49,6 +49,14 @@ def test_ensure_candidates_fresh_times_out_builder(tmp_path, monkeypatch):
     assert calls[0]["cmd"] == ["uv", "run", "python", str(builder)]
 
 
+def test_default_candidate_rebuild_timeout_leaves_dispatch_headroom(monkeypatch):
+    """Default rebuild timeout must not consume dispatch's full refill budget."""
+    monkeypatch.delenv("REFILL_CANDIDATES_TIMEOUT_SECONDS", raising=False)
+
+    assert MODULE._candidate_rebuild_timeout_seconds() == 30
+    assert MODULE.DEFAULT_CANDIDATE_REBUILD_TIMEOUT_SECONDS < 45
+
+
 def test_refill_skips_blank_title_candidates(tmp_path, monkeypatch):
     next_tasks = tmp_path / "storage" / "next_tasks.json"
     candidates = tmp_path / "storage" / "publication_candidates.json"
