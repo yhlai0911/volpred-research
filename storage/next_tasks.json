@@ -37249,5 +37249,27 @@
     "started_at": "2026-06-24T08:08:32.355233+00:00",
     "completed_at": "2026-06-24T08:21:46.146759+00:00",
     "result": "CONDITIONAL_PASS NULL on 12/12 Bonferroni family (m=12 α=0.00417). All ratios geom-mean<1 — event window quieter than baseline (caveat earnings+FOMC overlap). n=16 yr, IWM/IWO/IWN/IWP. self_audit reviewer (Codex 5min timeout). Orthogonal K1341. knowledge.json + work_log written."
+  },
+  {
+    "id": "journal_discovery_20260625_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-06-25T00:00:00+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-25T00:50:47.804036+00:00",
+    "claim_session_id": "63afc262a7db",
+    "started_at": "2026-06-25T00:50:52.829954+00:00",
+    "completed_at": "2026-06-25T00:56:02.417662+00:00",
+    "result": "補 research_program.md journal-discovery 2026-06-25 batch：新增 6 條去重後研究方向，涵蓋 realized covariance tail、admissible MHAR/vMEM、QV estimator disagreement、missing-data risk、investor memory、attention utility；dry-run 確認 generate_research_backlog.py 可取到新增方向。"
   }
 ]
