@@ -3502,3 +3502,13 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 5. memory `project_cloud_agent_git_divergence`。
 
 **防再發**：single push source = 本機。任何雲端 routine **不可**再 `git push origin main`（會重啟分岔）。若要雲端 off-site watchdog，改 email-only 或 push 專用 branch `ops-cloud/*`，絕不碰 main。雲端 routine 管理入口 = `/schedule` skill（非 computer-use）。
+
+## 2026-06-25 — PRG submission-ready artifact stale after K1544 benchmark reversal
+
+**症狀**：`research_program.md` 已在 2026-06-24 記錄 K1544：true current-overnight GJR-X 在 canonical `h_overnight + h_intraday` timing 下六市場 QLIKE 全勝 PRG Extended；但 `paper/prg-periodic-garch/SUBMISSION_READY.md` 與 `paper/prg-periodic-garch/README.md` 仍在頂部顯示 submission-ready，容易讓後續 agent 誤以為只剩 minor citation / economic-value patch 就能投稿。
+
+**根因**：K1544 正確更新了 portfolio-level source (`research_program.md`)，但沒有同步回 paper-local status artifacts。舊的 submission-ready 檔案原本是 2026-04-27 gate snapshot；在 2026-05-21 independent review override 與 2026-06-24 K1544 之後，已經只能當歷史 audit artifact，不能再當 current status。
+
+**修法**：在 `SUBMISSION_READY.md` 與 README 頂部加入 2026-06-24 status override，明確標示 K1544 已 supersede 舊 submission-ready 狀態；paper body 不改，因為 K1544 README 已明確要求先做 forecast-timing narrative decision，再做 body integration。
+
+**防再發**：任何 paper portfolio 結論被新實驗或 independent review 推翻時，除了更新 `research_program.md`，也必須同步 paper-local `README.md` / `SUBMISSION_READY.md` / submission checklist 類 artifact，避免 stale local status 反向污染任務池。

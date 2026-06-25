@@ -1,5 +1,13 @@
 # P6 PRG — SUBMISSION READY 2026-04-27
 
+> **Status override (2026-06-24)**: This submission-ready note is now an
+> historical audit artifact, not the current paper status. K1544
+> (`experiments/k1544_prg_fair_info_gjr/`) found that a true current-overnight
+> GJR-X benchmark beats the canonical PRG Extended forecast on QLIKE in all six
+> markets under the old `h_overnight + h_intraday` convention. The paper must
+> first decide and rewrite the forecast-timing convention before any body
+> integration or submission action. See `research_program.md` P6/K1544 update.
+
 **Paper**: Periodic Realized GARCH: Session-Boundary Information Transfers and Volatility Forecasting
 **Author**: Yi-Hao Lai (賴奕豪, 大葉大學財金系)
 **Target journal**: Finance Research Letters (FRL)

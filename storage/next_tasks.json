@@ -36823,34 +36823,52 @@
     "id": "paper_body_prg_v6_minor8_table1_mcs_row_consistency",
     "task_type": "paper_body",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "title": "[paper_body] PRG v6 MINOR #8 — Table 1 MCS row consistency (PRG Basic vs PRG Extended)",
     "description": "Codex v5_independent MINOR #8: Table 1 MCS column reports survivors at 10% — for TAIFEX both PRG Basic and PRG Extended survive; for other markets MCS row sometimes lists 'PRG only' or 'all models'. Check row-level consistency: does 'PRG' in MCS column mean PRG Extended specifically or PRG family? Standardize wording per row. Files: paper/prg-periodic-garch/main.tex tab:main_results.",
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
-    "parent_task_id": "paper_body_prg_v6_major_fixes"
+    "parent_task_id": "paper_body_prg_v6_major_fixes",
+    "claimed_by": "claude-standin",
+    "claimed_at": "2026-06-25T02:49:56.222290+00:00",
+    "claim_session_id": "498f70404f7e",
+    "started_at": "2026-06-25T02:49:56.420694+00:00",
+    "completed_at": "2026-06-25T02:49:56.618774+00:00",
+    "result": "Verified current paper/prg-periodic-garch/main.tex Table 1 already uses explicit MCS row wording: TAIFEX = PRG Basic+Ext; other markets = All; text below table states both PRG Basic and PRG Extended survive. No additional body edit needed."
   },
   {
     "id": "paper_body_prg_v6_minor9_discussion_mechanism_citation_gaps",
     "task_type": "paper_body",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "title": "[paper_body] PRG v6 MINOR #9 — discussion-mechanism citation gaps",
     "description": "Codex v5_independent MINOR #9: §4 Discussion mentions overnight information mechanisms, session-boundary effects, and intraday volatility patterns but cites few mechanism papers. Add references: Andersen-Bollerslev (overnight returns), Hansen-Lunde (RV decomposition), Tsiakas (overnight risk premium). Verify each citation actually supports claim made.",
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
-    "parent_task_id": "paper_body_prg_v6_major_fixes"
+    "parent_task_id": "paper_body_prg_v6_major_fixes",
+    "claimed_by": "claude-standin",
+    "claimed_at": "2026-06-25T02:50:06.893575+00:00",
+    "claim_session_id": "744e45fecb3b",
+    "started_at": "2026-06-25T02:50:07.094710+00:00",
+    "completed_at": "2026-06-25T02:50:07.297282+00:00",
+    "result": "Blocked by post-K1544 narrative state: adding mechanism citations to §4/Discussion would reinforce the old PRG bridge/dominance story before forecast-timing decision. K1544 (2026-06-24) shows current-overnight GJR-X beats canonical PRG in all six markets; paper body integration must wait for user-confirmed convention/narrative rewrite. Existing main.tex already cites Todorova2014/Linton2020/Opschoor2021 for session-aware overnight mechanisms."
   },
   {
     "id": "paper_body_prg_v6_minor10_economic_value_formal_test",
     "task_type": "paper_body",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "title": "[paper_body] PRG v6 MINOR #10 — economic-value formal test (Sharpe diff / bootstrap CI / TC sensitivity)",
     "description": "Codex v5_independent MINOR #10: §3.3 Economic significance reports TAIFEX volatility timing Sharpe but lacks formal Sharpe-difference test, bootstrap CI, and transaction-cost sensitivity table. Action: (a) add Jobson-Korkie / Memmel Sharpe difference test PRG vs GJR; (b) report 95% bootstrap CI for Sharpe diff; (c) sensitivity table at TC = {1, 3, 5, 10} bps. Run scripts/economic_value_eval.py or new script. May trigger compute_queue if pooled.",
     "created_at": "2026-06-24T06:15:00+08:00",
     "source": "codex_v5_independent_round1_split",
-    "parent_task_id": "paper_body_prg_v6_major_fixes"
+    "parent_task_id": "paper_body_prg_v6_major_fixes",
+    "claimed_by": "claude-standin",
+    "claimed_at": "2026-06-25T02:50:20.218028+00:00",
+    "claim_session_id": "7e6b5ccc6f6a",
+    "started_at": "2026-06-25T02:50:20.427320+00:00",
+    "completed_at": "2026-06-25T02:50:20.626406+00:00",
+    "result": "Blocked by K1544 / paper narrative gate. Economic-value formal tests for the existing TAIFEX VT section would validate a canonical PRG timing convention that K1544 has just challenged: current-overnight GJR-X beats canonical PRG across all six markets, while PRG only regains advantage under full-day-at-open x_overnight+h_intraday convention. Need user/narrative decision and likely new economic-value evaluation under the chosen convention before Sharpe diff/bootstrap/TC table can be added to main.tex."
   },
   {
     "id": "paper_review_prg_v6_major4_verify",
@@ -37168,7 +37186,7 @@
     "description": "Gmail UID: 11980\nMessage-ID: <9E561D3F-D2FF-4D47-A053-DF2C9021A203@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 24 Jun 2026 13:35:21 +0800\nSubject: Re: [VolPred Alert][INFO] 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting\n\n--- 用戶回信內容 ---\n我都開好了 你自己去看\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月24日 13:18 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Re: 關於 FB 貼文 — App Review 待查 + wont_fix 5 篇已 flip 回 awaiting\r\n> Alert level: info\r\n> INFO\r\n> Re: 關於 FB 貼文 — 老闆糾正回覆\r\n> \r\n> 回覆兩個問題：\r\n> 1. FB App Review 狀況\r\n> \r\n> 老實說：我不知道當前 App Review 確切狀態。\r\n> 之前 session（2026-05-29）標 wont_fix 時的依據是「卡 App Review」，但那是 prior session 判斷，未實際登入 Meta Developer Portal 查證。\r\n> 可行的查證路徑：\r\n> Meta Developer Portal (developers.facebook.com/apps <http://developers.facebook.com/apps>) 需 Chrome 登入 — 不是 headless 能完成\r\n> 需要互動 session（你開著 Chrome + 我用 Claude in Chrome 操作）才能查 App 狀態 / 重新申請\r\n> 建議下一次互動 session 我做這 3 步：\r\n> 開 developers.facebook.com/apps <http://developers.facebook.com/apps> 查 App ID（你的個人 / VolPred 粉專 app）狀態\r\n> 看 pages_manage_posts / publish_actions 等 permission 是否被 reject 或 stale pending\r\n> 如有 reject reason 對症補 review note 重送；如未送過就跑首次 review\r\n> 2. Ivan Lai 個人 FB Chrome 操作\r\n> \r\n> 已糾正：你說對了 — Ivan FB 本來就是 Chrome 路徑，不該標 wont_fix。\r\n> 剛才做的：把 5 個誤標 wont_fix 的 FB 文章改回 awaiting_interactive_session：\r\n> Mile ID\t標題\r\n> mile_b221e550\t法說季開打前，Mag 7 的期權市場悄悄在說一件事\r\n> mile_057f178b\t為什麼 NVDA 每天都讓人心跳加速\r\n> mile_671d4c75\t債市和股市同時在怕，但怕的不是同一件事\r\n> mile_89889d46\t裁員八千人，同一季燒掉 $680 億\r\n> mile_5b3569c3\t配息數字背後的風險帳\r\n> 加上 handoff 已有的 9+ 篇 awaiting，FB backlog 約 14 篇待你下次開 Chrome 時批次處理（或我 Claude in Chrome）。\r\n> 自我檢討\r\n> \r\n> 「卡 App Review」這個結論我沒實證就標 wont_fix，違反研究誠實原則（時間/狀態也是數據）。下次遇到「不能完成」的判斷會先查證實際狀態。\r\n> 下一步\r\n> \r\n> 本 tick 完成：5 篇 wont_fix → awaiting flip + email 回覆\r\n> 待你下次開 Chrome 互動 session：(a) Meta Dev Portal 查 App Review (b) Ivan FB 14 篇 backlog 批次貼\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "tags": [
       "email_reply",
       "user_input"
@@ -37181,7 +37199,12 @@
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
     "last_released_at": "2026-06-24T10:50:05.505769+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "started_at": "2026-06-24T08:01:11.504298+00:00"
+    "started_at": "2026-06-25T02:44:41.942322+00:00",
+    "claimed_by": "claude-standin",
+    "claimed_at": "2026-06-25T02:44:41.741566+00:00",
+    "claim_session_id": "f8e6825f382c",
+    "completed_at": "2026-06-25T02:48:06.639017+00:00",
+    "result": "Close email sent (notification f70cd41e). Chrome tabs confirmed open for Meta Developers and Ivan FB. Meta tab claim timed out; Facebook content read blocked by browser-use enterprise policy. No Meta form/FB post side effects performed; task blocked until user provides screenshot/status or an allowed interactive environment."
   },
   {
     "id": "research_short_interest_borrow_rate_proxy_squeeze_risk_sm",
@@ -37249,6 +37272,48 @@
     "started_at": "2026-06-24T08:08:32.355233+00:00",
     "completed_at": "2026-06-24T08:21:46.146759+00:00",
     "result": "CONDITIONAL_PASS NULL on 12/12 Bonferroni family (m=12 α=0.00417). All ratios geom-mean<1 — event window quieter than baseline (caveat earnings+FOMC overlap). n=16 yr, IWM/IWO/IWN/IWP. self_audit reviewer (Codex 5min timeout). Orthogonal K1341. knowledge.json + work_log written."
+  },
+  {
+    "id": "trending_repost_2026_06_25_ai_roi",
+    "title": "[trending_repost] 科技股半導體急跌，AI資本支出ROI質疑下的波動率定價",
+    "description": "從6月下旬半導體大跌與科技股隱含波動率急升切入，探討市場對AI巨額投資變現能力的疑慮。可量化：科技巨頭CapEx營收比率與費半指數隱含波動率(IV)偏斜度的歷史相關性。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "blocked",
+    "created_at": "2026-06-24T22:00:21+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "claimed_by": "claude-standin",
+    "claimed_at": "2026-06-25T02:39:35.745320+00:00",
+    "claim_session_id": "7164b3f5c47e",
+    "started_at": "2026-06-25T02:39:47.496936+00:00",
+    "completed_at": "2026-06-25T02:43:25.370916+00:00",
+    "result": "Blocked by trending_repost dedup gate: topic overlaps recent AI CapEx/options/skew posts (6/2 mile_49616ac2, 6/23 mile_057f178b, 6/24 mile_b221e550). Fresh yfinance check also did not support a new downside-skew thesis for SMH/SOXX, so publishing would be low-incremental repackage."
+  },
+  {
+    "id": "trending_repost_2026_06_25_套利交易",
+    "title": "[trending_repost] 日圓空倉創九年新高，VIX 定價是否低估尾部風險？",
+    "description": "對比 2026 年 6 月 CFTC 日圓淨空倉高點與 2024 年 8 月大解倉歷史。量化分析在高擁擠度下，USD/JPY 匯率變動對 VIX 的不對稱敏感度，評估當前 VIX 是否低估平倉風險。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "blocked",
+    "created_at": "2026-06-24T22:00:29+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "claimed_by": "claude-standin",
+    "claimed_at": "2026-06-25T02:43:40.604882+00:00",
+    "claim_session_id": "4d1e4eeda1ab",
+    "started_at": "2026-06-25T02:43:40.802027+00:00",
+    "completed_at": "2026-06-25T02:44:06.789073+00:00",
+    "result": "Blocked by ARC/topic dedup: 2026-06-17 mile_19fa8ca1 already covers JPY carry-trade crowding, 9-year-high yen shorts, and VIX tail-risk underpricing; check_arc_dedup also exited 1 for JPY/VIX systemic-crowding arc. No genuinely new angle in task brief."
   },
   {
     "id": "journal_discovery_20260625_0",
