@@ -64,3 +64,26 @@ def test_load_storage_experiments_warns_on_bad_json(tmp_path, monkeypatch, capsy
     assert docs == []
     assert "storage experiment skipped (broken.json)" in output
     assert "JSONDecodeError" in output
+
+
+def test_index_row_normalizes_schema_sensitive_fields() -> None:
+    import build_knowledge_index as bki  # type: ignore
+
+    row = bki._index_row(  # noqa: SLF001 - regression guard for LanceDB row schema
+        {
+            "source": "knowledge",
+            "category": None,
+            "text": "schema regression",
+            "timestamp": None,
+            "confidence": "HIGH",
+            "evidence": None,
+        },
+        [0.1, 0.2],
+        "abc123",
+    )
+
+    assert row["category"] == ""
+    assert row["timestamp"] == ""
+    assert row["confidence"] == 0.9
+    assert isinstance(row["confidence"], float)
+    assert row["evidence"] == ""

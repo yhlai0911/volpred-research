@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 knowledge index incremental update 再次遇到 LanceDB confidence 型別混合
+
+**問題**：hourly tick 跑 `uv run volpred ops knowledge-index-maintain --stub-if-no-work` 時，`build_knowledge_index.py auto` 已成功刪除 695 筆 stale entries 並生成 3578 筆 embedding，但 `table.add(new_data)` 失敗：`pyarrow.lib.ArrowInvalid: Could not convert 'high' with type str: tried to convert to double`。索引因此維持 stale，`knowledge-index-summary` 顯示 changed_files_count=11。
+
+**根因**：`storage/memory/knowledge.json` 部分條目的 `confidence` 使用 `"high"` / `"medium"` / `"HIGH"` 文字等級，但既有 LanceDB table schema 把 `confidence` 固定為 double。舊錯誤日誌早已記錄「confidence/category 欄位混合 int/str 類型」要在 ingestion 層統一，這次 incremental add path 沒有集中 schema normalization，導致同類 bug 回歸。
+
+**解決方法**：`scripts/build_knowledge_index.py` 新增 `_normalize_confidence()` 與 `_index_row()`，build/update 兩條寫入路徑都先把 `confidence` 轉成 0-1 float，並把 `source/category/timestamp/evidence/text` 統一為 string；不手改 `knowledge.json`。新增 regression test `test_index_row_normalizes_schema_sensitive_fields()`。驗證：`uv run pytest tests/test_build_knowledge_index_warnings.py -q` 5 passed；重新跑 `knowledge-index-maintain` 後 after=fresh、entries=8210、state_synced=true。
+
 ## 2026-06-28 run_due_jobs ISO timestamp parse failure 靜默當 missing timestamp
 
 **問題**：hourly handoff 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/run_due_jobs.py`，掃到 `_parse_iso()`：`cron_last_run.json` 或 `pending_sessions.json` 內 timestamp 不可 parse 時直接 `return None`。這會讓排程判斷把壞 timestamp 當成缺值 / 從未執行，但 cron log 看不到是哪個 state source metadata 漂移。

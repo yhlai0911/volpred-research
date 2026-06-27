@@ -134,6 +134,47 @@ def compute_doc_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _normalize_confidence(value) -> float:
+    """Keep LanceDB's confidence column numeric across old and new memory rows."""
+    if value is None:
+        return 0.0
+    if isinstance(value, bool):
+        return 1.0 if value else 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return 0.0
+        try:
+            return float(text)
+        except ValueError:
+            label_scores = {
+                "low": 0.25,
+                "medium": 0.50,
+                "med": 0.50,
+                "high": 0.90,
+                "strong": 0.90,
+                "critical": 1.00,
+            }
+            return label_scores.get(text.lower(), 0.0)
+    return 0.0
+
+
+def _index_row(doc: dict, vec: list[float], doc_hash: str) -> dict:
+    """Return a schema-stable LanceDB row for one loaded document."""
+    return {
+        "vector": vec,
+        "source": str(doc.get("source") or ""),
+        "category": str(doc.get("category") or ""),
+        "text": str(doc.get("text") or ""),
+        "timestamp": str(doc.get("timestamp") or ""),
+        "confidence": _normalize_confidence(doc.get("confidence", 0)),
+        "evidence": str(doc.get("evidence") or ""),
+        "doc_hash": doc_hash,
+    }
+
+
 # ── Document Loaders ──────────────────────────────────────────────────
 def load_knowledge() -> list[dict]:
     """Load knowledge.json entries."""
@@ -492,16 +533,7 @@ def build_index():
     # Prepare data with vectors and doc hashes
     data = []
     for doc, vec in zip(all_docs, vectors):
-        data.append({
-            "vector": vec,
-            "source": doc["source"],
-            "category": doc["category"],
-            "text": doc["text"],
-            "timestamp": doc["timestamp"],
-            "confidence": doc["confidence"],
-            "evidence": doc["evidence"],
-            "doc_hash": compute_doc_hash(doc["text"]),
-        })
+        data.append(_index_row(doc, vec, compute_doc_hash(doc["text"])))
 
     # Drop and recreate
     if TABLE_NAME in db.table_names():
@@ -614,16 +646,7 @@ def update_index():
     # Prepare new rows
     new_data = []
     for doc, vec in zip(new_docs, vectors):
-        new_data.append({
-            "vector": vec,
-            "source": doc["source"],
-            "category": doc["category"],
-            "text": doc["text"],
-            "timestamp": doc["timestamp"],
-            "confidence": doc["confidence"],
-            "evidence": doc["evidence"],
-            "doc_hash": doc["_hash"],
-        })
+        new_data.append(_index_row(doc, vec, doc["_hash"]))
 
     # Add to existing table
     table.add(new_data)
