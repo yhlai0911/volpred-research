@@ -72,11 +72,14 @@ def test_job_is_due_skipped_when_anchor_exceeded():
     assert _job_is_due("0 8 * * 1", last_run=None, now_local=now_local) is False
 
 
-def test_parse_iso_handles_z_suffix_and_naive():
+def test_parse_iso_handles_z_suffix_and_naive(capsys):
     assert _parse_iso("2026-04-20T00:00:00Z").tzinfo is not None
     assert _parse_iso("2026-04-20T00:00:00") is not None
     assert _parse_iso(None) is None
     assert _parse_iso("not-a-date") is None
+    err = capsys.readouterr().err
+    assert "[run_due_jobs] WARN ISO timestamp parse failed" in err
+    assert "raw='not-a-date'" in err
 
 
 def test_write_pending_sessions_records_due_and_dedupes(tmp_path, monkeypatch):

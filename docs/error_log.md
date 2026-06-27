@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 run_due_jobs ISO timestamp parse failure 靜默當 missing timestamp
+
+**問題**：hourly handoff 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/run_due_jobs.py`，掃到 `_parse_iso()`：`cron_last_run.json` 或 `pending_sessions.json` 內 timestamp 不可 parse 時直接 `return None`。這會讓排程判斷把壞 timestamp 當成缺值 / 從未執行，但 cron log 看不到是哪個 state source metadata 漂移。
+
+**根因**：timestamp 壞掉時回 `None` 是保守 fail-open，可避免 piggy-back scheduler 整體中斷；但缺少 path / field / raw value 診斷會讓 due / not-due 決策失去 provenance。尤其 `last_run` 與 session replay reference 都會走同一 helper，必須在 helper 層保證可觀察。
+
+**解決方法**：`_parse_iso()` 改成接受 `source_path` 與 `field` context，`ValueError` 時用既有 `_warn_run_due_jobs()` 輸出 source、field、raw value 與 exception，仍保留回 `None` 的 fail-open 行為；呼叫端分別標記 `last_run[<job>]` 與 `session_job[<job>].last_ref`。新增 regression test 覆蓋 invalid ISO warning，並確認 `scripts/audit_silent_fallbacks.py --json scripts/run_due_jobs.py` 回 `[]`。
+
 ## 2026-06-27 session_replay_pending ERROR helper 未被 silent-fallback audit 辨識
 
 **問題**：hourly handoff 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/session_replay_pending.py`，掃到兩處：`_load_pending_state()` 讀 pending_sessions 失敗後已輸出 `[session-replay] ERROR ...`，但 helper 名稱 `_error_session_replay()` 不符合 audit contract；另在 total recorded_count 加總時，單筆壞 `recorded_count` 會直接 `continue`，沒有診斷。

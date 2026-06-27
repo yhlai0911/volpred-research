@@ -114,12 +114,22 @@ def _save_last_run(state: dict[str, str]) -> None:
     LAST_RUN_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False))
 
 
-def _parse_iso(raw: str | None) -> datetime | None:
+def _parse_iso(
+    raw: str | None,
+    *,
+    source_path: Path = LAST_RUN_PATH,
+    field: str = "timestamp",
+) -> datetime | None:
     if not raw:
         return None
     try:
         parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-    except ValueError:
+    except ValueError as exc:
+        _warn_run_due_jobs(
+            f"ISO timestamp parse failed; treating as missing field={field} raw={raw!r}",
+            source_path,
+            exc,
+        )
         return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
@@ -209,7 +219,11 @@ def _write_pending_sessions(
             or job_pending.get("recorded_at")
             or last_run_state.get(job_id)
         )
-        last_ref = _parse_iso(last_ref_iso)
+        last_ref = _parse_iso(
+            last_ref_iso,
+            source_path=PENDING_SESSIONS_PATH,
+            field=f"session_job[{job_id}].last_ref",
+        )
         if not _job_is_due(cron_expr, last_ref, now_local):
             skipped.append(job_id)
             continue
@@ -315,7 +329,11 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
             results.append({"job_id": job_id, "action": "skip", "reason": "wrapper_missing", "path": str(wrapper_path)})
             continue
 
-        last_run = _parse_iso(state.get(job_id))
+        last_run = _parse_iso(
+            state.get(job_id),
+            source_path=LAST_RUN_PATH,
+            field=f"last_run[{job_id}]",
+        )
         if not _job_is_due(cron_expr, last_run, now_local):
             results.append({"job_id": job_id, "action": "skip", "reason": "not_due",
                            "last_run": state.get(job_id), "cron": cron_expr})
