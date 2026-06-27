@@ -301,7 +301,7 @@ Agent 提供的 audience 只是 **hint**。Publisher 的 `_infer_audience()` 會
 
 **前端 render 約束（硬性，缺一不可）**：
 - `details.content_type='daily_digest'`（首頁 `getDigestColumn` / `listDigestSlugsAsc` 偵測唯一依據；漏設則整篇不被視為 digest、期數算錯）。
-- `title` 以 `每日精選導讀｜` 起頭 + 專題式標題（非「今日 N 篇摘要」）。
+- `title` 用專題式標題（非「今日 N 篇摘要」），且**不可**以 `每日精選導讀｜` 起頭；前端區塊已顯示「每日精選導讀」，重複前綴會觸發 content-quality alert。
 - `content` = 完整繁中 Markdown **單篇 essay**（詳情頁 `/digest/[slug]` 直接 render），**至少含一張圖** `![alt](url)`（首頁主圖靠正則抓第一張）。
 - `details.digest_articles` = **curated 來源文章 slug 陣列**（前端側欄「本期精選」唯一資料源；slug 須對應 archive 中真實存在的已發佈文章，查不到 title 會靜默消失；陣列順序 = 顯示順序）。
 - `status='published'` 立即發（非 draft）；`tags` 含 `精選導讀`；`excerpt` 填編按導言。

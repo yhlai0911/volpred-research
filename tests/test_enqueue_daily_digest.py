@@ -6,6 +6,11 @@ from pathlib import Path
 import scripts.enqueue_daily_digest as module
 
 
+def test_digest_brief_forbids_redundant_title_prefix():
+    assert "不可**以 '每日精選導讀｜' 起頭" in module.DESCRIPTION
+    assert "title 以 '每日精選導讀｜' 起頭" not in module.DESCRIPTION
+
+
 def _patch_paths(tmp_path: Path, monkeypatch) -> tuple[Path, Path]:
     feed = tmp_path / "feed.json"
     next_tasks = tmp_path / "next_tasks.json"

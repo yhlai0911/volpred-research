@@ -1,33 +1,38 @@
 {
-  "generated_at": "2026-06-24T09:14:40.176046+00:00",
+  "generated_at": "2026-06-27T18:16:29.912588+00:00",
   "publish_rhythm": {
-    "status": "burst",
-    "in_active_window": true,
-    "tpe_hour": 17,
+    "status": "inactive_window",
+    "in_active_window": false,
+    "tpe_hour": 2,
     "recent_count": 10,
-    "newest_published_at": "2026-06-24T02:34:06.046888+00:00",
-    "age_since_newest_min": 400.57,
+    "newest_published_at": "2026-06-27T17:06:47.826009+00:00",
+    "age_since_newest_min": 69.7,
     "gaps_min_newest_first": [
-      150.79,
+      126.43,
+      324.1,
+      155.95,
+      417.01,
       0.15,
-      48.81,
-      253.99,
-      214.54,
-      405.63,
-      188.72,
-      181.22,
-      0.29
+      1082.84,
+      0.0,
+      180.02,
+      0.0
     ],
     "burst_pairs": [
       {
-        "newer_id": "mile_366ef29b",
-        "older_id": "mile_964dbe85",
+        "newer_id": "mile_8cafdb97",
+        "older_id": "mile_892a02ee",
         "gap_minutes": 0.15
       },
       {
-        "newer_id": "mile_246e4d3d",
-        "older_id": "mile_0f134a08",
-        "gap_minutes": 0.29
+        "newer_id": "mile_02c9eb89",
+        "older_id": "mile_59f60989",
+        "gap_minutes": 0.0
+      },
+      {
+        "newer_id": "mile_2657bb72",
+        "older_id": "mile_3607af6a",
+        "gap_minutes": 0.0
       }
     ],
     "burst_gap_threshold_min": 30,
@@ -35,52 +40,14 @@
   },
   "daily_digest_uniqueness": {
     "status": "ok",
-    "date_tpe": "2026-06-24",
-    "published_count": 1,
-    "items": [
-      {
-        "id": "mile_1597b341",
-        "title": "每日精選導讀｜分散投資的幻覺：你以為無關的資產，其實偷偷牽動著你整個組合",
-        "published_at": "2026-06-24T02:34:06.046888+00:00"
-      }
-    ]
+    "date_tpe": "2026-06-28",
+    "published_count": 0,
+    "items": []
   },
   "title_format": {
-    "status": "issues",
+    "status": "ok",
     "scanned": 30,
     "lookback": 30,
-    "findings": [
-      {
-        "id": "mile_1597b341",
-        "issue": "digest_prefix_duplicates_section_header",
-        "title": "每日精選導讀｜分散投資的幻覺：你以為無關的資產，其實偷偷牽動著你整個組合",
-        "note": "Title 重複了前端 '每日精選導讀' 區塊標頭；前端 header 或 title 擇一移除前綴"
-      },
-      {
-        "id": "mile_2849a7b5",
-        "issue": "too_long",
-        "length": 85,
-        "threshold": 80,
-        "title": "K1417: Stationary Bootstrap 驗證 Paper 三 MDD Retention CI 穩健性 — H2 不成立，但基線需改用 cano"
-      },
-      {
-        "id": "mile_a0eb0ddc",
-        "issue": "digest_prefix_duplicates_section_header",
-        "title": "每日精選導讀｜越聰明越難贏：波動率模型的複雜度天花板",
-        "note": "Title 重複了前端 '每日精選導讀' 區塊標頭；前端 header 或 title 擇一移除前綴"
-      },
-      {
-        "id": "mile_30c640e2",
-        "issue": "digest_prefix_duplicates_section_header",
-        "title": "每日精選導讀｜債市喊了一個月，股市才剛聽懂半句：MOVE 與 VIX 這場分裂的來龍去脈",
-        "note": "Title 重複了前端 '每日精選導讀' 區塊標頭；前端 header 或 title 擇一移除前綴"
-      },
-      {
-        "id": "mile_a1fd229a",
-        "issue": "digest_prefix_duplicates_section_header",
-        "title": "每日精選導讀｜市場很安靜，你該緊張還是放鬆？我們把 VIX 這件事一次講清楚",
-        "note": "Title 重複了前端 '每日精選導讀' 區塊標頭；前端 header 或 title 擇一移除前綴"
-      }
-    ]
+    "findings": []
   }
 }

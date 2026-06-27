@@ -42,8 +42,9 @@ DESCRIPTION = (
     "9-checklist）+ 文末懶人包圖組；走 feed-publisher 正式入口發佈，**details.content_type 必設 "
     "'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 "
     "details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中"
-    "真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 以 '每日精選導讀｜' 起頭"
-    "並帶專題式標題（非『今日 N 篇摘要』）；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 "
+    "真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，"
+    "**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），"
+    "也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 "
     "![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號"
     "與資料來源要標清楚。"
 )
