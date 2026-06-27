@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-27 prune_rollback_points invalid timestamp 靜默變成 undated preserve
+
+**問題**：hourly handoff 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/prune_rollback_points.py`，掃到 `parse_timestamp()`：snapshot 名稱尾端符合 `YYYYMMDDTHHMMSSZ` regex，但日期本身不可解析時直接 `return None`。這會讓壞命名 rollback snapshot 被歸入 undated/preserve，但 dry-run log 看不到原因。
+
+**根因**：無 timestamp 的 snapshot 保守保留是正確清理策略；但「有 timestamp-looking suffix 卻 parse 失敗」是 metadata corruption，應和真正無日期命名區分，否則使用者只能看到 undated count 增加，無法追壞名稱或上游命名流程。
+
+**解決方法**：`parse_timestamp()` 的 `ValueError` path 改用既有 `_warn_prune()` 輸出 snapshot name 與 exception，保留回 `None` 的 preserve 行為。新增 regression test 覆蓋 invalid timestamp warning，並確認 `scripts/audit_silent_fallbacks.py --json scripts/prune_rollback_points.py` 回 `[]`。
+
 ## 2026-06-27 generate_diverse_tasks cron interval parse failure 靜默退回 unknown cadence
 
 **問題**：hourly handoff 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/generate_diverse_tasks.py::_parse_cron_gap_seconds()` 兩個 path：`*/bad` minute interval 與 `*/bad` hour interval 解析失敗時直接 `return None`。這會讓 platform_ops staleness generator 把 malformed cron cadence 當成「未知排程形狀」，但 cron log 看不到是 runtime schedule metadata 壞掉。

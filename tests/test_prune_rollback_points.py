@@ -16,6 +16,16 @@ def _load_module():
     return module
 
 
+def test_parse_timestamp_warns_when_timestamp_is_invalid(capsys) -> None:
+    module = _load_module()
+
+    assert module.parse_timestamp("snapshot_20261340T250000Z") is None
+    err = capsys.readouterr().err
+    assert "[prune-rollback] WARN timestamp parse failed" in err
+    assert "snapshot_20261340T250000Z" in err
+    assert "ValueError:" in err
+
+
 def test_dir_size_bytes_warns_when_file_stat_fails(tmp_path: Path, monkeypatch, capsys) -> None:
     module = _load_module()
     ok = tmp_path / "ok.txt"

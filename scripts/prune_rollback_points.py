@@ -35,7 +35,12 @@ def parse_timestamp(name: str) -> datetime | None:
         return None
     try:
         return datetime.strptime(m.group(1), "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
-    except ValueError:
+    except ValueError as exc:
+        _warn_prune(
+            "timestamp parse failed; treating snapshot as undated/preserved",
+            Path(name),
+            exc,
+        )
         return None
 
 
