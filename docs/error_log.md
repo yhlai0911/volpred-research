@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-27 session_replay_pending ERROR helper 未被 silent-fallback audit 辨識
+
+**問題**：hourly handoff 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/session_replay_pending.py`，掃到兩處：`_load_pending_state()` 讀 pending_sessions 失敗後已輸出 `[session-replay] ERROR ...`，但 helper 名稱 `_error_session_replay()` 不符合 audit contract；另在 total recorded_count 加總時，單筆壞 `recorded_count` 會直接 `continue`，沒有診斷。
+
+**根因**：2026-06-23 已把 session replay 的壞 pending state 改成可觀察，但治理 audit 只辨識 `print/log/warn/error` 或 `_warn*` helper。自訂 `_error*` helper 造成假陽性；加總段落則是真實 silent fallback，會讓 total missed-fire 數字少算但不顯示哪個 job metadata 壞掉。
+
+**解決方法**：將 ERROR helper 重新命名為 `_warn_session_replay_error()`，輸出文字仍保留 `ERROR`，讓 audit 可辨識；recorded_count 加總遇到 parse failure 時補 `_warn_session_replay()`，並記錄已在主 loop warning 過的 invalid job id，避免重複噪音。新增 `test_session_replay_pending_has_no_silent_fallback_audit_findings()` 鎖住此檔 audit 回 `[]`。
+
 ## 2026-06-27 prune_rollback_points invalid timestamp 靜默變成 undated preserve
 
 **問題**：hourly handoff 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/prune_rollback_points.py`，掃到 `parse_timestamp()`：snapshot 名稱尾端符合 `YYYYMMDDTHHMMSSZ` regex，但日期本身不可解析時直接 `return None`。這會讓壞命名 rollback snapshot 被歸入 undated/preserve，但 dry-run log 看不到原因。

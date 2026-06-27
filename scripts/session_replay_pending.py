@@ -36,7 +36,7 @@ def _warn_session_replay(message: str, exc: Exception | None = None) -> None:
     print(f"[session-replay] WARN {message} path={PENDING_PATH}{suffix}", file=sys.stderr)
 
 
-def _error_session_replay(message: str, exc: Exception | None = None) -> None:
+def _warn_session_replay_error(message: str, exc: Exception | None = None) -> None:
     suffix = f" error={type(exc).__name__}: {exc}" if exc is not None else ""
     print(f"[session-replay] ERROR {message} path={PENDING_PATH}{suffix}", file=sys.stderr)
 
@@ -45,10 +45,12 @@ def _load_pending_state() -> dict | None:
     try:
         state = json.loads(PENDING_PATH.read_text())
     except (OSError, json.JSONDecodeError) as exc:
-        _error_session_replay("pending_sessions read failed; cannot mark replayed", exc)
+        _warn_session_replay_error("pending_sessions read failed; cannot mark replayed", exc)
         return None
     if not isinstance(state, dict):
-        _error_session_replay(f"pending_sessions schema invalid; expected object got {type(state).__name__}")
+        _warn_session_replay_error(
+            f"pending_sessions schema invalid; expected object got {type(state).__name__}"
+        )
         return None
     return state
 
@@ -67,12 +69,15 @@ def main() -> int:
         return 1
     jobs = state.get("jobs", {}) or {}
     if not isinstance(jobs, dict):
-        _error_session_replay(f"pending_sessions jobs schema invalid; expected object got {type(jobs).__name__}")
+        _warn_session_replay_error(
+            f"pending_sessions jobs schema invalid; expected object got {type(jobs).__name__}"
+        )
         return 1
     now_iso = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     marked: list[str] = []
     skipped: list[str] = []
+    invalid_recorded_count_job_ids: set[str] = set()
 
     for job_id, job in jobs.items():
         if not isinstance(job, dict):
@@ -86,6 +91,7 @@ def main() -> int:
         except (TypeError, ValueError) as exc:
             _warn_session_replay(f"pending_sessions recorded_count invalid; skipping job_id={job_id}", exc)
             skipped.append(f"{job_id}(invalid_recorded_count)")
+            invalid_recorded_count_job_ids.add(str(job_id))
             continue
         recorded_at = job.get("recorded_at")
         replayed_at = job.get("replayed_at")
@@ -107,11 +113,18 @@ def main() -> int:
         PENDING_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n")
 
     total_recorded_count = 0
-    for job in jobs.values():
+    for job_id, job in jobs.items():
         if isinstance(job, dict):
+            if str(job_id) in invalid_recorded_count_job_ids:
+                continue
             try:
                 total_recorded_count += int(job.get("recorded_count", 0))
-            except (TypeError, ValueError):
+            except (TypeError, ValueError) as exc:
+                _warn_session_replay(
+                    f"pending_sessions recorded_count invalid while summing total; "
+                    f"excluding job_id={job_id}",
+                    exc,
+                )
                 continue
     print(f"[session-replay] mode={'DRY-RUN' if args.dry_run else 'WRITE'}")
     print(f"  Total jobs in pending_sessions: {len(jobs)}")

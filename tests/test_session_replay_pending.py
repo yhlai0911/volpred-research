@@ -4,6 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+from scripts import audit_silent_fallbacks
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "session_replay_pending.py"
 SPEC = importlib.util.spec_from_file_location("session_replay_pending", MODULE_PATH)
@@ -55,3 +57,9 @@ def test_main_skips_bad_job_entries_but_marks_valid_job(tmp_path, monkeypatch, c
     assert "Marked replayed: 1" in captured.out
     assert "ok_job" in captured.out
     assert "Total recorded_count" in captured.out
+
+
+def test_session_replay_pending_has_no_silent_fallback_audit_findings():
+    findings = audit_silent_fallbacks.audit_file(MODULE_PATH)
+
+    assert findings == []
