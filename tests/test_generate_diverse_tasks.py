@@ -470,6 +470,24 @@ def test_parse_banner_ts_warns_on_date_like_invalid_banner(capsys) -> None:
     assert "daily_update.log" in err
 
 
+def test_parse_cron_gap_warns_on_bad_minute_interval(capsys) -> None:
+    gap = generate_diverse_tasks._parse_cron_gap_seconds("*/bad * * * *")
+
+    assert gap is None
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN cron minute interval parse failed" in err
+    assert "*/bad * * * *" in err
+
+
+def test_parse_cron_gap_warns_on_bad_hour_interval(capsys) -> None:
+    gap = generate_diverse_tasks._parse_cron_gap_seconds("0 */bad * * *")
+
+    assert gap is None
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN cron hour interval parse failed" in err
+    assert "0 */bad * * *" in err
+
+
 def test_bad_cron_last_run_timestamp_uses_fresh_log_fallback(
     tmp_path, monkeypatch, capsys
 ) -> None:

@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-27 generate_diverse_tasks cron interval parse failure 靜默退回 unknown cadence
+
+**問題**：hourly handoff 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json`，掃到 `scripts/generate_diverse_tasks.py::_parse_cron_gap_seconds()` 兩個 path：`*/bad` minute interval 與 `*/bad` hour interval 解析失敗時直接 `return None`。這會讓 platform_ops staleness generator 把 malformed cron cadence 當成「未知排程形狀」，但 cron log 看不到是 runtime schedule metadata 壞掉。
+
+**根因**：未知 cron shape 回 `None` 是合理保守行為，避免 generator false-flag；但「看起來是支援形狀、只是 interval 數字壞掉」屬於 metadata parse failure，不應和真正不支援的 cron pattern 混在一起靜默處理。
+
+**解決方法**：兩個 `ValueError` path 改用既有 `_warn_diverse()` 輸出 cron expression、壞欄位值與 exception type/message，保留回 `None` 的 fail-open 行為。新增 regression tests 覆蓋壞 minute/hour interval，並用 `scripts/audit_silent_fallbacks.py --json scripts/generate_diverse_tasks.py` 確認該檔無 findings。
+
 ## 2026-06-25 dispatch article-refill 與 candidates rebuild 同為 45s timeout 互相抵消
 
 **問題**：Codex 接手 tick 後，`continue_task_dispatch.py --report` 在 agentable=0 時只新增 `platform_ops_dispatch_pool_dry_diagnostic_20260625`，並警告 `article_refill: timed out after 45s`。但手動跑 `uv run python scripts/refill_task_pool.py --dry-run --target 4 --json` 約 49 秒後其實能用既有 `publication_candidates.json` fallback 產生 3 個候選（K1339/K1529/K1347）。

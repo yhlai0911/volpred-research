@@ -230,12 +230,20 @@ def _parse_cron_gap_seconds(cron: str) -> int | None:
     if minute.startswith("*/") and hour == "*":
         try:
             return int(minute[2:]) * 60
-        except ValueError:
+        except ValueError as exc:
+            _warn_diverse(
+                "cron minute interval parse failed; treating cadence as unknown "
+                f"cron={cron!r} value={minute!r} error={type(exc).__name__}: {exc}"
+            )
             return None
     if minute.isdigit() and hour.startswith("*/"):
         try:
             return int(hour[2:]) * 3600
-        except ValueError:
+        except ValueError as exc:
+            _warn_diverse(
+                "cron hour interval parse failed; treating cadence as unknown "
+                f"cron={cron!r} value={hour!r} error={type(exc).__name__}: {exc}"
+            )
             return None
     if minute.isdigit() and hour == "*":
         return 3600
