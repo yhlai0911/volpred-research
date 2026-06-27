@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 git_push_backup alert body-md 誤用與 cron env 未固定
+
+**問題**：上一輪修正 `cron_git_push_backup.sh` 後，06:17 direct crontab 再次觸發，`uv: command not found` 已消失，但 push 仍失敗，且告警 path 改成 Click 參數錯誤：`Error: Invalid value for '--body-md': Path 'git push origin main 失敗...' does not exist.` 這代表失敗時仍不會正確寄出 alert。
+
+**根因**：`volpred ops send-alert --body-md` 期待的是 markdown 檔案路徑，不是 inline 文字；此 wrapper 兩個失敗分支都把短字串塞進 `--body-md`。另外 direct crontab 環境與互動 shell / piggy-back 不同，backup wrapper 沒明確固定 `HOME` / `PATH` / `GH_CONFIG_DIR`，導致 credential helper 仍可能落到 HTTPS username prompt。
+
+**解決方法**：兩個失敗分支改用 `--body`；wrapper 開頭固定 `HOME=/Users/yhlai0911`、把 `/opt/homebrew/bin` 放入 `PATH`、並設定 `GH_CONFIG_DIR=$HOME/.config/gh`，讓 `gh auth git-credential` 不依賴互動 shell。同步 runtime copy。測試 `tests/test_cron_git_push_backup.py` 加上 `--body-md` 禁止回歸與 cron env 契約。
+
 ## 2026-06-28 git_push_backup 直跑 cron 失敗但 piggy-back 成功
 
 **問題**：hourly fallback 巡檢 `log-summary` 顯示 `storage/logs/cron/git_push_backup.log` 在 18:17/20:17/22:17/00:17/02:17/04:17 direct crontab fire 連續失敗：`fatal: could not read Username for 'https://github.com': Device not configured`，且失敗告警 path 又噴 `/Users/yhlai0911/.volpred/bin/cron_git_push_backup.sh: line 41: uv: command not found`。同一時間 piggy-back fire（19:00/21:00/23:00/01:00/03:00）可成功 push，造成「整體有備份，但 direct cron 自己壞掉」的半失效狀態。

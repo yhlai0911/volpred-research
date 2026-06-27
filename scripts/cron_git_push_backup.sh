@@ -6,6 +6,9 @@
 # 詳見 memory project_cloud_agent_git_divergence + docs/error_log.md。
 set -uo pipefail
 REPO=/Users/yhlai0911/Desktop/volpred-research
+export HOME="${HOME:-/Users/yhlai0911}"
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
+export GH_CONFIG_DIR="${GH_CONFIG_DIR:-$HOME/.config/gh}"
 UV_BIN="${UV_BIN:-/opt/homebrew/bin/uv}"
 GH_BIN="${GH_BIN:-/opt/homebrew/bin/gh}"
 cd "$REPO" || exit 1
@@ -36,7 +39,7 @@ if [ -n "$behind" ] && [ "$behind" != "0" ]; then
   echo "[$(ts)] WARN: remote ahead by $behind — divergence, NOT pushing" >> "$LOG"
   "$UV_BIN" run volpred ops send-alert --level warn \
     --title "git-push-backup: 偵測到 origin 分岔" \
-    --body-md "origin/main 領先本地 ${behind} commit，可能有未知 push 源（雲端 routines 應已全關）。自動 push 已暫停避免複雜 merge，需主線程檢查 RemoteTrigger list + git log。" >> "$LOG" 2>&1 || true
+    --body "origin/main 領先本地 ${behind} commit，可能有未知 push 源（雲端 routines 應已全關）。自動 push 已暫停避免複雜 merge，需主線程檢查 RemoteTrigger list + git log。" >> "$LOG" 2>&1 || true
   exit 1
 fi
 
@@ -48,6 +51,6 @@ else
   echo "[$(ts)] PUSH FAILED" >> "$LOG"
   "$UV_BIN" run volpred ops send-alert --level warn \
     --title "git-push-backup: push 失敗" \
-    --body-md "git push origin main 失敗，本地領先 ${ahead} commit 未備份到遠端。需檢查認證 / 網路。" >> "$LOG" 2>&1 || true
+    --body "git push origin main 失敗，本地領先 ${ahead} commit 未備份到遠端。需檢查認證 / 網路。" >> "$LOG" 2>&1 || true
   exit 1
 fi
