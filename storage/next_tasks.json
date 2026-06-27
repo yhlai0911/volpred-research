@@ -37510,5 +37510,27 @@
     "started_at": "2026-06-25T05:03:55.091448+00:00",
     "completed_at": "2026-06-25T05:10:04.757336+00:00",
     "result": "Published general-audience draft for K1347 as mile_59f60989: 尾部風控聽起來更聰明，實測卻只贏了一次. Anti-AI gate and publish gate passed; article keeps K1347 metadata and two real PNG charts."
+  },
+  {
+    "id": "daily_digest_20260626",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **先選定一個專題（theme）**（例：波動率模型複雜度天花板 / MOVE-VIX 跨資產分裂 / 尾部風險 VaR 監管現實 / 研究誠實 audit），整篇圍繞單一 thesis；(2) **從過去累積的 archive 撈同主題的 3-6 篇舊文**（用 grep/jq 掃 storage/reports/feed.json 的 title/tags），發佈日期須橫跨 >1 週、至少 3 篇來自當天以外 — **不可只挑今天/昨天剛發的湊數**；排除 digest 自身與每日建議類日報；(3) **掛一個最近時事/市場狀態 hook 開場**（當前 VIX 水位 / 近期 FOMC·NFP·CPI / MOVE-VIX 分裂等，數據須取自真實 archive 文章或 results.json，不可臆造），把過去研究與當下市場連起來；(4) **串成有觀點的敘事弧**（演進/對照/反差，告訴讀者『這主題上我們做過什麼、結論如何演進、彼此如何呼應』），不是逐篇『這篇講 X、那篇講 Y』的並列摘要；(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ 文末懶人包圖組；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 以 '每日精選導讀｜' 起頭並帶專題式標題（非『今日 N 篇摘要』）；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "created_at": "2026-06-26T09:00:04.762640+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ],
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-27T09:30:59.011701+00:00",
+    "claim_session_id": "afb2840e50c8",
+    "started_at": "2026-06-27T09:31:08.105837+00:00",
+    "completed_at": "2026-06-27T09:39:56.811109+00:00",
+    "result": "Published daily digest mile_8a5e80b0 on AI capex / Mag-7 dispersion / options skew. Curated 6 published archive articles, added Supabase lazy-pack image, and verified single-article Supabase sync/read-back. Full feed-sync --apply hung on historical drift and was interrupted; single sync_article fallback succeeded."
   }
 ]
