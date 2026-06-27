@@ -51,6 +51,20 @@ def test_ops_dashboard_jl_warns_on_json_read_failure(tmp_path, capsys) -> None:
     assert "JSONDecodeError" in captured.out
 
 
+def test_ops_dashboard_http_ok_warns_on_failure(monkeypatch, capsys) -> None:
+    def fail_urlopen(url: str, timeout: int = 8):  # noqa: ARG001
+        raise OSError("network down")
+
+    monkeypatch.setattr(ops_dashboard.request, "urlopen", fail_urlopen)
+
+    assert ops_dashboard.http_ok("https://example.invalid") is False
+
+    captured = capsys.readouterr()
+    assert "[ops_dashboard] WARN HTTP check failed" in captured.out
+    assert "https://example.invalid" in captured.out
+    assert "OSError: network down" in captured.out
+
+
 def test_ops_dashboard_returns_zero_even_when_sections_are_critical(tmp_path, monkeypatch) -> None:
     repo = tmp_path
     (repo / "storage" / "reports").mkdir(parents=True)
@@ -300,6 +314,39 @@ def test_ops_dashboard_production_pending_counts_pending_main_thread(tmp_path, m
     assert section["status"] == "warn"
     assert section["pending_count"] == 0
     assert section["pending_main_thread_count"] == 2
+
+
+def test_ops_dashboard_warns_on_invalid_inflight_timestamp(tmp_path, monkeypatch, capsys) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    tasks = [
+        {"id": "bad-age", "status": "compute_queued", "task_type": "experiment", "created_at": "not-a-date"},
+    ]
+    (repo / "storage" / "next_tasks.json").write_text(json.dumps(tasks, ensure_ascii=False), encoding="utf-8")
+    (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text('{"system_crontab":{"items":[]}}\n', encoding="utf-8")
+
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    assert ops_dashboard.main() == 0
+
+    captured = capsys.readouterr()
+    assert "[ops_dashboard] WARN in-flight timestamp parse failed" in captured.out
+    assert "bad-age" in captured.out
+    assert "not-a-date" in captured.out
 
 
 def test_ops_dashboard_marks_claude_only_pending_hint(tmp_path, monkeypatch) -> None:

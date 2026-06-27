@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 ops_dashboard HTTP / in-flight timestamp fallback 缺診斷
+
+**問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/ops_dashboard.py`，掃到兩處：`http_ok()` 網路/HTTP probe 失敗時直接 `return False`，以及 `_inflight_age_h()` 解析 compute_queued / claimed / in_progress task timestamp 失敗時直接 `return None`。這會讓 dashboard 把外部 probe failure 或 task metadata 壞值當成普通 false/unknown，看不到根因。
+
+**根因**：兩個 fail-open 行為本身合理，dashboard 不應因一個 URL probe 或一筆壞 timestamp 中斷；但缺少 `[ops_dashboard] WARN ...` 使 operator 無法區分「真的 unhealthy」與「讀取/解析失敗」。此外 silent-fallback audit 只認 `_warn*` helper 或標準 print/log 名稱，新增診斷 helper 需符合命名契約。
+
+**解決方法**：新增 `_warn_http_check_failed()` 與 `_warn_inflight_timestamp_failed()`，保留原本回 `False` / `None` 行為但輸出 URL、task_id、raw timestamp 與 exception。新增測試覆蓋 HTTP failure warning 與 invalid in-flight timestamp warning。驗證：`uv run python scripts/audit_silent_fallbacks.py --json scripts/ops_dashboard.py` 回 `[]`，`uv run pytest tests/test_fb_pipeline_status.py -q` 22 passed。
+
 ## 2026-06-28 git_push_backup alert body-md 誤用與 cron env 未固定
 
 **問題**：上一輪修正 `cron_git_push_backup.sh` 後，06:17 direct crontab 再次觸發，`uv: command not found` 已消失，但 push 仍失敗，且告警 path 改成 Click 參數錯誤：`Error: Invalid value for '--body-md': Path 'git push origin main 失敗...' does not exist.` 這代表失敗時仍不會正確寄出 alert。

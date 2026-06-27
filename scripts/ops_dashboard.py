@@ -57,6 +57,20 @@ def warn_json_read_failed(path: Path, exc: Exception) -> None:
     )
 
 
+def _warn_http_check_failed(url: str, exc: Exception) -> None:
+    print(
+        f"[ops_dashboard] WARN HTTP check failed: "
+        f"url={url} error={type(exc).__name__}: {exc}"
+    )
+
+
+def _warn_inflight_timestamp_failed(task_id: str, raw_ts: object, exc: Exception) -> None:
+    print(
+        f"[ops_dashboard] WARN in-flight timestamp parse failed: "
+        f"task_id={task_id} raw={raw_ts!r} error={type(exc).__name__}: {exc}"
+    )
+
+
 def jl(p, default=None):
     path = Path(p)
     try:
@@ -70,7 +84,8 @@ def http_ok(url, timeout=8):
     try:
         with request.urlopen(url, timeout=timeout) as r:
             return r.status == 200
-    except Exception:
+    except Exception as exc:
+        _warn_http_check_failed(url, exc)
         return False
 
 
@@ -133,7 +148,8 @@ def main():
         try:
             dt = time.mktime(time.strptime(str(ts)[:19], "%Y-%m-%dT%H:%M:%S"))
             return (_now - dt) / 3600.0
-        except Exception:
+        except Exception as exc:
+            _warn_inflight_timestamp_failed(str(t.get("id") or "?"), ts, exc)
             return None
     _all_inflight = [t for t in nt if t.get("status") in ("compute_queued", "claimed", "in_progress")]
     in_flight = []
