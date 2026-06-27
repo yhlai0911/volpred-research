@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 git_push_backup 直跑 cron 失敗但 piggy-back 成功
+
+**問題**：hourly fallback 巡檢 `log-summary` 顯示 `storage/logs/cron/git_push_backup.log` 在 18:17/20:17/22:17/00:17/02:17/04:17 direct crontab fire 連續失敗：`fatal: could not read Username for 'https://github.com': Device not configured`，且失敗告警 path 又噴 `/Users/yhlai0911/.volpred/bin/cron_git_push_backup.sh: line 41: uv: command not found`。同一時間 piggy-back fire（19:00/21:00/23:00/01:00/03:00）可成功 push，造成「整體有備份，但 direct cron 自己壞掉」的半失效狀態。
+
+**根因**：`cron_git_push_backup.sh` 是較新的 wrapper，沒有沿用其他 cron wrapper 的絕對 `/opt/homebrew/bin/uv` 慣例；同時 direct crontab 的乾淨環境依賴 osxkeychain HTTPS credential，會在 cron context 下無法提供 GitHub username/password。piggy-back path 能成功是因為執行環境不同，不能用它掩蓋 direct wrapper 的 credential/path 缺陷。
+
+**解決方法**：wrapper 新增 `UV_BIN=/opt/homebrew/bin/uv` 與 `GH_BIN=/opt/homebrew/bin/gh` 預設；把 `fetch` / `push` 改成局部 `git_auth` function，對該命令清掉預設 credential helper 並使用 `gh auth git-credential`，不改全域 git config、不把 token 寫入腳本。同步 runtime copy 到 `~/.volpred/bin/cron_git_push_backup.sh`。驗證：`bash -n scripts/cron_git_push_backup.sh` 通過；`env -i HOME="$HOME" PATH="/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin" git -c credential.helper= -c 'credential.https://github.com.helper=!/opt/homebrew/bin/gh auth git-credential' ls-remote --heads origin main` 成功；新增 `tests/test_cron_git_push_backup.py` 鎖住 wrapper 不再裸用 `uv` 且 fetch/push 必須走 `git_auth`。
+
 ## 2026-06-28 knowledge index incremental update 再次遇到 LanceDB confidence 型別混合
 
 **問題**：hourly tick 跑 `uv run volpred ops knowledge-index-maintain --stub-if-no-work` 時，`build_knowledge_index.py auto` 已成功刪除 695 筆 stale entries 並生成 3578 筆 embedding，但 `table.add(new_data)` 失敗：`pyarrow.lib.ArrowInvalid: Could not convert 'high' with type str: tried to convert to double`。索引因此維持 stale，`knowledge-index-summary` 顯示 changed_files_count=11。
