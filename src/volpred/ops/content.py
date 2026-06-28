@@ -17,6 +17,7 @@ from volpred.publisher.publisher import (
 from volpred.topic_clusters import classify_topic_cluster
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
+from .content_quality import DIGEST_TITLE_PREFIX
 from scripts.supabase_sync import _delete_where, _get_article_id, _patch_where, _select_rows, delete_article, sync_article
 
 DEFAULT_RELEASE_SETTINGS = {
@@ -230,6 +231,24 @@ def _article_audience(item: dict) -> str:
     return "uncategorized"
 
 
+def _is_reader_facing_published(item: dict) -> bool:
+    """A published article that counts toward the reader-facing cadence used by
+    the drought circuit-breaker.
+
+    Reader-facing = general / research articles, plus the daily digest roundup
+    (title prefix DIGEST_TITLE_PREFIX). The templated daily VIX / holdings
+    bulletin (audience='daily', non-digest), member_qa and event pieces do NOT
+    count: they publish on their own fixed cadence and would otherwise mask a
+    genuine drought of real reader-facing content.
+    """
+    if not isinstance(item, dict) or item.get("status") != "published":
+        return False
+    if _article_audience(item) in _RELEASE_DEDUP_AUDIENCES:
+        return True
+    title = str(item.get("title") or "")
+    return title.startswith(DIGEST_TITLE_PREFIX)
+
+
 # --- Release-time anti-flood dedup gate -------------------------------------
 # 2026-06-16 incident: release_pool promoted drafts with ZERO dedup vs
 # already-published → 2026-06-15 dumped 5 "model-comparison / complexity-
@@ -256,6 +275,13 @@ _RELEASE_DEDUP_JACCARD = 0.45
 _RELEASE_DEDUP_AUDIENCES = {"general", "research"}
 _RELEASE_LAST_N_CLUSTER_WINDOW = 3
 _RELEASE_LAST_N_CLUSTER_THRESHOLD = 2
+# Drought circuit-breaker threshold (2026-06-24). A publishing gap hurts
+# Mission #1 (content) / #5 (traffic) more than an occasional borderline-similar
+# article — the same fail-open stance as .claude/rules/dedup-gate-audit.md
+# ("寧錯放可接受重複也不要 invisible content gap"). Kept below the 5h
+# publishing-freshness dead-man critical (alerts.PUBLISH_FRESHNESS_CRITICAL_HOURS)
+# so the breaker self-remediates BEFORE that alert fires, with buffer.
+_RELEASE_DROUGHT_HOURS = 4.0
 
 _NARRATIVE_CLUSTER_PATTERNS = {
     "garch": re.compile(r"\b(ST)?GARCH\b|GJR|EGARCH|GARCH-MIDAS|MF-GJR|EWMA", re.I),
@@ -297,6 +323,35 @@ def _release_content_dup(item: dict, recent_pub: list[dict]) -> dict | None:
     if best is not None and best_j >= _RELEASE_DEDUP_JACCARD:
         return {"id": best.get("id"), "title": best.get("title"), "jaccard": round(best_j, 3)}
     return None
+
+
+def _release_max_jaccard(item: dict, recent_pub: list[dict]) -> float:
+    """Max title+body bigram Jaccard of `item` vs any recently-published
+    reader-facing article (0.0 when nothing comparable / too short to judge).
+
+    Unlike `_release_content_dup` this returns the raw similarity even below the
+    dedup threshold — used by the drought breaker to pick the LEAST dup-like
+    blocked draft to force-release."""
+    title = str(item.get("title") or "")
+    body = str(item.get("content") or item.get("description") or "")[:2000]
+    prof = _bigram_profile(title + "\n" + body)
+    if len(prof) < 20:
+        return 0.0
+    best_j = 0.0
+    for other in recent_pub:
+        if other.get("id") == item.get("id"):
+            continue
+        oprof = _bigram_profile(
+            str(other.get("title") or "")
+            + "\n"
+            + str(other.get("content") or other.get("description") or "")[:2000]
+        )
+        if not oprof:
+            continue
+        j = len(prof & oprof) / len(prof | oprof)
+        if j > best_j:
+            best_j = j
+    return round(best_j, 3)
 
 
 def _item_narrative_axis(item: dict) -> str:
@@ -689,6 +744,181 @@ def _release_dedup_flag_active(item: dict, *, now: datetime) -> bool:
         return False
 
 
+def _maybe_drought_release(
+    *,
+    blocked_items: list[dict],
+    feed: list[dict],
+    recent_pub: list[dict],
+    now: datetime,
+    released_at: str,
+    publisher: Publisher,
+    storage_dir: str,
+    released: list[dict],
+) -> dict | None:
+    """Force-release exactly ONE dedup-blocked draft when the feed is in a
+    reader-facing drought.
+
+    Called only when the normal release pass produced nothing yet content-clean
+    drafts WERE available and got dedup-blocked. Fail-open stance per
+    .claude/rules/dedup-gate-audit.md: an invisible content gap (Mission #1/#5)
+    is worse than an occasional borderline-similar article.
+
+    Drought = the newest genuinely reader-facing published article
+    (`_is_reader_facing_published`) is older than `_RELEASE_DROUGHT_HOURS`
+    (or there is none at all). Anti-thrash: one override per drought event —
+    skipped if the most recent `release_drought_override_at` stamp in the feed
+    is still inside the threshold window. The released draft is the LEAST
+    dup-like blocked one: lowest max bigram Jaccard vs recently-published
+    reader-facing articles, ties broken by newest created_at.
+
+    Note: the pool is restricted to dedup-blocked drafts (content-clean, only
+    blocked for surface similarity) — audit-blocked drafts (forbidden stats
+    terminology / tag-cap) are intentionally NOT eligible, so the breaker can
+    never publish low-quality content to escape a drought.
+
+    Returns an audit dict on override, else None. Appends the released summary
+    to `released` so the caller's existing persist/sync/verify path handles it.
+    """
+    from .diagnostics import warn
+
+    if not blocked_items:
+        return None
+
+    # Gap to the newest genuinely reader-facing published article.
+    reader_times = [
+        t
+        for t in (
+            _parse_datetime(a.get("published_at"))
+            for a in feed
+            if _is_reader_facing_published(a)
+        )
+        if t is not None
+    ]
+    newest = max(reader_times) if reader_times else None
+    gap_hours = (now - newest).total_seconds() / 3600.0 if newest is not None else None
+    in_drought = gap_hours is None or gap_hours > _RELEASE_DROUGHT_HOURS
+    if not in_drought:
+        return None
+
+    # Anti-thrash: at most one override per drought window.
+    override_times = [
+        t
+        for t in (
+            _parse_datetime((a.get("details") or {}).get("release_drought_override_at"))
+            for a in feed
+            if isinstance(a.get("details"), dict)
+        )
+        if t is not None
+    ]
+    last_override = max(override_times) if override_times else None
+    if (
+        last_override is not None
+        and (now - last_override).total_seconds() / 3600.0 < _RELEASE_DROUGHT_HOURS
+    ):
+        warn(
+            "release_drought",
+            "drought detected but a prior override is still inside the anti-thrash window; skipping",
+            gap_hours=round(gap_hours, 2) if gap_hours is not None else None,
+            last_override_at=last_override.isoformat(),
+        )
+        return None
+
+    # Pick the LEAST dup-like blocked draft: lowest max-Jaccard; ties -> newest
+    # created_at. Two stable sorts (created_at desc, then jaccard asc) realise
+    # the (jaccard asc, created_at desc) ordering.
+    scored = [
+        (_release_max_jaccard(it, recent_pub), str(it.get("created_at") or ""), it)
+        for it in blocked_items
+    ]
+    scored.sort(key=lambda x: x[1], reverse=True)
+    scored.sort(key=lambda x: x[0])
+    chosen_jaccard, _chosen_created, chosen = scored[0]
+
+    gap_text = f"{gap_hours:.2f}h" if gap_hours is not None else "no prior reader-facing article"
+    reason = (
+        f"reader-facing drought ({gap_text} > {_RELEASE_DROUGHT_HOURS}h threshold); "
+        f"force-released least dup-like blocked draft (max Jaccard={chosen_jaccard})"
+    )
+
+    warn(
+        "release_drought",
+        "forcing one release to break a reader-facing publishing drought",
+        chosen_id=str(chosen.get("id") or ""),
+        gap_hours=round(gap_hours, 2) if gap_hours is not None else None,
+        max_jaccard=chosen_jaccard,
+        blocked_pool=len(blocked_items),
+    )
+    print(f"  [release_pool] DROUGHT-OVERRIDE {chosen.get('id')} — {reason}; releasing.")
+
+    details = chosen.get("details")
+    if not isinstance(details, dict):
+        details = {}
+        chosen["details"] = details
+    details["release_drought_override"] = True
+    details["release_drought_override_at"] = now.isoformat()
+    details["release_drought_override_reason"] = reason
+    # We are intentionally publishing this draft; clear the dedup COOLDOWN flag
+    # so the now-published item carries a clean state (the override reason and
+    # the original release_dedup_of/jaccard audit fields remain for provenance).
+    details.pop("release_dedup_skipped", None)
+
+    chosen["status"] = "published"
+    chosen["published_at"] = released_at
+    article_slug = str(chosen.get("id", ""))
+    # Publish finalization mirrors the normal release loop (sync → failed-sync
+    # ledger → answer linked questions → notify). Kept inline (not shared) so a
+    # change to the hot normal path can't silently alter this rare path.
+    sync_ok = False
+    try:
+        sync_ok = bool(sync_article(chosen, storage_dir=publisher.reports_dir.parent))
+    except Exception as exc:
+        warn(
+            "release_drought",
+            "sync_article failed during drought override",
+            article=article_slug,
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        print(f"  [release_pool] sync_article exception for {article_slug}: {exc}")
+    released.append(
+        {
+            "id": article_slug,
+            "title": chosen.get("title"),
+            "status": chosen.get("status"),
+            "published_at": chosen.get("published_at"),
+            "supabase_synced": bool(sync_ok),
+            "drought_override": True,
+        }
+    )
+    if not sync_ok:
+        failed_path = publisher.reports_dir.parent / ".failed_supabase_syncs.json"
+        try:
+            failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
+            if not isinstance(failed, list):
+                raise ValueError(".failed_supabase_syncs.json must contain a list")
+        except Exception as exc:
+            _warn_release_pool("failed Supabase sync ledger unreadable; recreating", exc)
+            failed = []
+        if article_slug not in failed:
+            failed.append(article_slug)
+            failed_path.write_text(json.dumps(failed))
+        print(
+            f"  [release_pool] WARN Supabase sync failed for {article_slug} -- "
+            f"recorded to .failed_supabase_syncs.json. "
+            f"Run scripts/supabase_sync.py sync-article {article_slug} to retry."
+        )
+    _mark_questions_answered_on_publish(article_slug)
+    publisher._notify_article_published(chosen, reason="release_pool_drought")
+
+    return {
+        "id": article_slug,
+        "title": chosen.get("title"),
+        "gap_hours": round(gap_hours, 2) if gap_hours is not None else None,
+        "max_jaccard": chosen_jaccard,
+        "blocked_pool_size": len(blocked_items),
+        "reason": reason,
+    }
+
+
 def release_pool_articles(
     *,
     pub_id: str | None = None,
@@ -779,6 +1009,10 @@ def release_pool_articles(
     audit_skipped: list[dict] = []
     audit_materialized: list[dict] = []
     dedup_skipped: list[dict] = []
+    # Content-clean drafts blocked purely by the dedup gates this run — the only
+    # pool the drought breaker may force-release from (audit-blocked drafts are
+    # excluded so a drought can never publish low-quality content).
+    dedup_blocked_items: list[dict] = []
     theme_valves: list[dict] = []
     theme_valves_used: set[str] = set()
     released_at = now.isoformat()
@@ -1017,6 +1251,9 @@ def release_pool_articles(
                         "theme_recent_count": flood["recent_count"] if flood else None,
                     }
                 )
+                # Eligible for drought-breaker rescue (content-clean, blocked
+                # only for surface similarity / theme flood / arc overlap).
+                dedup_blocked_items.append(item)
                 reason = (
                     f"arc-dup of {arc_dups[0]['id']} ({arc_dups[0]['conclusion_class']})" if arc_dups
                     else f"near-dup of {dup['id']} (J={dup['jaccard']})" if dup
@@ -1075,6 +1312,23 @@ def release_pool_articles(
         # Auto-mark linked questions as answered now that article is published
         _mark_questions_answered_on_publish(article_slug)
         publisher._notify_article_published(item, reason="release_pool")
+
+    # Drought circuit-breaker: if the normal pass released nothing but
+    # content-clean drafts were dedup-blocked, and the feed has drifted past the
+    # reader-facing drought threshold, force-release exactly one (the least
+    # dup-like). Skipped for an explicit pub_id (manual single-article repair).
+    drought_override: dict | None = None
+    if not released and not pub_id:
+        drought_override = _maybe_drought_release(
+            blocked_items=dedup_blocked_items,
+            feed=feed,
+            recent_pub=recent_pub_for_dedup,
+            now=now,
+            released_at=released_at,
+            publisher=publisher,
+            storage_dir=storage_dir,
+            released=released,
+        )
 
     if (dedup_skipped or audit_skipped) and not released:
         # Persist release skip metadata even when nothing was released, so
@@ -1154,6 +1408,7 @@ def release_pool_articles(
         "audit_materialized": audit_materialized,
         "dedup_skipped": dedup_skipped,
         "theme_valves": theme_valves,
+        "drought_override": drought_override,
         "narrative_cluster_pressure": narrative_pressure,
         "narrative_cluster_filtered": narrative_cluster_filtered,
         "due_only": due_only,

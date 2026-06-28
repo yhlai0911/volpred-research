@@ -169,6 +169,62 @@ send_auth_preflight_alert() {
   rm -f "$tmp"
 }
 
+# ── Claude→Codex failover (2026-06-28, user directive「claude -p 失敗 → codex exec 重跑同任務」)──
+# When the Claude hourly dispatch cannot run (auth/quota dead OR all 3 model
+# attempts exhausted), fall back to Codex. Codex authenticates via ChatGPT
+# (~/.codex), wholly independent of the Claude subscription quota, and already
+# knows the handoff-driven hourly tick from AGENTS.md. On Codex success the
+# hourly slot still produced work, so the caller treats the run as recovered
+# (EXIT_CODE=0 → PHASE-Z commits whatever Codex left). Always warns the boss
+# that Claude degraded (visibility). codex exec is headless + workspace-write;
+# its stdout streams into this same dispatch log.
+CODEX_BIN="${CODEX_BIN:-$(command -v codex 2>/dev/null || echo /Users/yhlai0911/.nvm/versions/node/v22.20.0/bin/codex)}"
+FAILOVER_PROMPT_FILE="${FAILOVER_PROMPT_FILE:-$REPO_ROOT/scripts/cron_hourly_dispatch_codex_failover_prompt.md}"
+CODEX_FAILOVER_RC=1
+
+run_codex_failover() {
+  local reason="$1"
+  CODEX_FAILOVER_RC=1
+  echo "=== [FAILOVER] Claude dispatch unavailable ($reason) → Codex exec at $(date '+%H:%M:%S') ==="
+  if [ ! -x "$CODEX_BIN" ] && ! command -v codex >/dev/null 2>&1; then
+    echo "[FAILOVER] codex binary not found ($CODEX_BIN) — cannot failover"
+    CODEX_FAILOVER_RC=127
+    return 127
+  fi
+  local cp
+  if [ -f "$FAILOVER_PROMPT_FILE" ]; then
+    cp=$(cat "$FAILOVER_PROMPT_FILE")
+  else
+    cp="新一輪 hourly tick（Claude dispatch 失敗 failover）。cat storage/ops/handoff_latest.md，依同樣流程 claim 下一個 Codex-eligible pending task → 完整完成 → complete → commit [codex]。reader-facing / email_reply / FB / paper_body 類留給 Claude，不要碰。"
+  fi
+  # Same perl-alarm hang cap as the Claude path.
+  /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
+    "$CODEX_BIN" exec --skip-git-repo-check -s workspace-write "$cp"
+  CODEX_FAILOVER_RC=$?
+  echo "=== [FAILOVER] codex exec rc=$CODEX_FAILOVER_RC at $(date '+%H:%M:%S') ==="
+  local fbody tmp
+  fbody=$(printf '%s\n' \
+"## 觸發條件" \
+"- Claude hourly dispatch 失敗（${reason}）→ 啟動 Codex failover" \
+"- Codex exec 結果 exit code: ${CODEX_FAILOVER_RC}（0=Codex 接手成功，非0=雙雙失敗）" \
+"" \
+"## 影響" \
+"- Claude 那條線暫時不可用（額度/auth/API）；本輪由 Codex（ChatGPT auth，獨立額度）接手 Codex-eligible 工作" \
+"- reader-facing / email / FB / paper_body 仍需 Claude，Claude 恢復前會累積" \
+"" \
+"## 建議行動" \
+"- Codex 接手 = Claude 端有問題；查 Claude 額度 / status.claude.com" \
+"- 若 Claude 額度耗盡：加 Anthropic API key 當 overflow，或讓 Codex 主力撐到額度恢復")
+  tmp=$(mktemp -t hourly_failover.XXXXXX).md
+  echo "$fbody" > "$tmp"
+  "$UV_BIN" run volpred ops send-alert \
+    --level warn \
+    --title "hourly-dispatch Claude→Codex failover (codex rc=$CODEX_FAILOVER_RC) $(date '+%H:%M')" \
+    --body-md "$tmp" --force 2>&1 | tail -1
+  rm -f "$tmp"
+  return "$CODEX_FAILOVER_RC"
+}
+
 echo "=== auth-preflight $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 AUTH_PREFLIGHT_OUTPUT=$(run_auth_preflight)
 AUTH_PREFLIGHT_CODE=$?
@@ -197,7 +253,21 @@ if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
       echo "[AUTH-PREFLIGHT] 3rd attempt failed exit=$AUTH_PREFLIGHT_RETRY3_CODE"
       echo "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
       send_auth_preflight_alert "$AUTH_PREFLIGHT_OUTPUT" "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
-      echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=1 preflight-auth) ==="
+      # Claude auth/quota dead → Codex failover (ChatGPT auth is independent).
+      # Retrying claude -p in the 3-attempt main flow would be futile, so we
+      # hand the slot to Codex here and exit without touching the Claude path.
+      run_codex_failover "auth-preflight-dead"
+      if [ "$CODEX_FAILOVER_RC" -eq 0 ]; then
+        if [ -n "$(/usr/bin/git -C "$REPO_ROOT" status --porcelain 2>/dev/null)" ]; then
+          echo "[FAILOVER] committing work Codex left after auth-dead failover"
+          /usr/bin/git -C "$REPO_ROOT" add -A 2>&1 | tail -1
+          /usr/bin/git -C "$REPO_ROOT" commit -m "ops(hourly $(date '+%H:%M')): codex failover auto-commit (claude auth dead)" 2>&1 | tail -1
+        fi
+        echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=0 codex-failover-recovered) ==="
+        echo "=== [hourly_dispatch] exit 0 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
+        exit 0
+      fi
+      echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=1 preflight-auth + codex-failover-failed) ==="
       echo "=== [hourly_dispatch] exit 1 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
       exit 1
     fi
@@ -349,6 +419,19 @@ FAILEOF
     --title "hourly-dispatch 全 attempt 失敗 (exit $EXIT_CODE) $(date '+%H:%M')" \
     --body-md "$TMP" --force 2>&1 | tail -1
   rm -f "$TMP"
+fi
+
+# ── Claude→Codex failover after all retries exhausted (2026-06-28) ──
+# All 3 Claude attempts failed for a non-hang reason (529 storm / network /
+# quota / binary). Hand the slot to Codex before giving up. On Codex success
+# treat the run as recovered (EXIT_CODE=0) so PHASE-Z commits its work and the
+# exit banner reports success — the hourly slot did NOT go dark.
+if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 142 ] && [ $EXIT_CODE -ne 143 ] && [ $EXIT_CODE -ne 137 ]; then
+  run_codex_failover "retries-exhausted-exit-$EXIT_CODE"
+  if [ "$CODEX_FAILOVER_RC" -eq 0 ]; then
+    echo "[FAILOVER] Codex recovered the slot; treating run as success (EXIT_CODE 0)"
+    EXIT_CODE=0
+  fi
 fi
 
 # ── PHASE Z safety-net (2026-05-29): wrapper-enforced commit ──

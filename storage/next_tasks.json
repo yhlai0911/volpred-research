@@ -37558,14 +37558,17 @@
     "description": "針對AI半導體板塊回檔，分析外資在台指期與選擇權市場的波動率佈局。可量化：追蹤台股隱含波動率（Taiex VI）與外資台指選擇權未平倉量（OI）偏斜度，驗證波動率均值回歸的交易策略。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-25T22:00:20+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-28T10:50:23+00:00",
+    "blocked_note": "Arc dup: mile_02c71e74 '別再把美國 VIX 直接乘 1.4 來看台股風險了' 已 cover TW_EQUITY+TSMC+VIX descriptive arc。check_arc_dedup.py 主線程 2026-06-28 18:50 verify。"
   },
   {
     "id": "journal_discovery_20260626_0",
@@ -37699,14 +37702,17 @@
     "description": "分析輝達等晶片股暴跌後，費半指數與個別科技股隱含波動率偏斜（Skew）的變化。可量化：比較歷史修正期中，看跌期權溢價（Put Premium）對實際波動率超額回報的預測力。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-27T22:00:25+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-28T10:50:25+00:00",
+    "blocked_note": "Arc dup: mile_22d52561 'Broadcom 指引的風波，市場為什麼突然開始定價尾端風險' 已 cover SEMIS+VIX descriptive regime_signal arc。check_arc_dedup.py 主線程 2026-06-28 18:50 verify。"
   },
   {
     "id": "trending_repost_2026_06_28_ai變現",
@@ -37864,7 +37870,7 @@
     "description": "Codex 過去 3 天完成大量 task (K1553-K1556, daily_digest_20260628, 24+ commits) 但 storage/work_log.json 最後 entry 仍停在 2026-06-24，造成 diversity rotation 判斷錯誤 + boss report 完整性受損。\n\n根因：codex-vscode agent finish hook 沒呼叫 work_log writer (主線程靠 task_pool_claim.py complete 寫 work_log，codex 直接 commit experiment 沒走 ops CLI)。\n\nTask：\n1. 寫 scripts/backfill_work_log_from_commits.py：parse git log --since=2026-06-25 --pretty 抓 [codex] commits，從 commit subject 推 task_type (K\\d+ → experiment, daily_digest → daily_digest, etc) + 從 experiments/<k_id>/ mtime 抓 timestamp，append 進 work_log.json (dedup by task_id)\n2. 跑一次 backfill 6/25-6/28 補 24+ entries\n3. 改 codex agent finish hook：experiment commit 後 invoke task_pool_claim.py complete --status succeeded 補 work_log（或寫 work_log writer 給 codex 直接呼叫）\n4. 加 regression：tests/test_work_log_freshness.py — work_log 最新 entry > 24h stale 即 fail (alert 連動)\n\n預期：\n- 補 6/25-6/28 約 24 entries\n- 防止下次同問題：codex agents 任何 K-experiment commit 後 task_pool_claim.py complete 鏈\n- alert 加 work_log_stale，dashboard show\n\nPriority P2 (audit gap, not blocking ops but affects boss report accuracy + diversity rotation)。\n\nFollow-up of hourly-18 (2026-06-28) diagnosis — email_codex_takeover_reply.md section 三 #2 已向老闆 report 此 gap。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "audit_gap",
@@ -37873,6 +37879,135 @@
     ],
     "created_at": "2026-06-28T10:35:00+00:00",
     "source": "hourly_18_dispatcher",
+    "preferred_agent": "codex",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-28T10:50:26.695612+00:00",
+    "claim_session_id": "cf3487b5b237",
+    "started_at": "2026-06-28T10:50:30.107140+00:00",
+    "completed_at": "2026-06-28T10:52:59.086080+00:00",
+    "result": "Scope 1+2 done: backfill_work_log_from_commits.py (regex-classify [codex] commits → task_type/k_id, dedup by SHA, dry-run default), 42 entries 6/25-6/28 補入 work_log (1237→1279), idempotency 驗證 (skip 42 on rerun, no dup). last-3 diversity rotation 現顯示真實 codex 活動 (experiment×4/governance/digest/platform_ops×N) 而非 stale 2026-06-24 platform_ops. Scope 3+4 (codex finish hook + regression test + daily cron) → 拆 followup task platform_ops_codex_work_log_hook_regression_20260628 (P3)."
+  },
+  {
+    "id": "email-12069-094c65",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] Release pool starved > 6.0h (cron healthy)",
+    "description": "Gmail UID: 12069\nMessage-ID: <B98196A9-4EB3-49C4-A736-CD30500A0C8F@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 28 Jun 2026 18:40:43 +0800\nSubject: Re: [VolPred Alert][WARN] Release pool starved > 6.0h (cron healthy)\n\n--- 用戶回信內容 ---\n依照建議行動進行\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月28日 17:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Release pool starved > 6.0h (cron healthy)\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> 釋出機器 cron 正常 fire（machinery_gap=0.0h），但已超過 6.0h 沒有任何文章成功釋出。\r\n> last_released_at: 2026-06-28T02:01:24.831473+00:00\r\n> release_gap_hours: 6.98\r\n> machinery_last_at: 2026-06-28T09:00:30+00:00\r\n> release preview\r\n> \r\n> draft: 20\r\n> scheduled: 0\r\n> eligible_before_dedup: 20\r\n> dedup_flagged: 20\r\n> eligible_after_dedup: 0\r\n> 影響\r\n> \r\n> 通常是 due 草稿全落在已飽和主題、dedup 正確 skip 但釋出算法未 fall-through 到 fresh-theme 草稿；\r\n> 讀者端看不到新內容（Mission 第 1/5 條），但這不是 cron 停擺，是內容釋出層問題。\r\n> 建議行動\r\n> \r\n> 若 eligible_after_dedup=0：不要強行釋出已被 dedup TTL 排除的草稿，先補 fresh-theme draft 或等 TTL 到期。\r\n> 若還有 eligible_after_dedup>0：定向釋出一篇 fresh-theme 草稿（避開 model_complexity / vt_strategy / spy / vix / garch）：\r\n> jq '[.[]|select(.status==\"draft\")]|.[].title' storage/reports/feed.json 挑非飽和主題\r\n> VOLPRED_ACTOR=claude uv run volpred ops release-pool --pub-id <id> --include-drafts\r\n> 若 draft 池主題全飽和：派 daily_article 補 fresh-theme 草稿（publication-candidates skill）。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-28T10:45:05.428072+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12069,
+    "email_message_id": "<B98196A9-4EB3-49C4-A736-CD30500A0C8F@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] Release pool starved > 6.0h (cron healthy)",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-28T10:46:48.898176+00:00",
+    "claim_session_id": "f22d693de4d9"
+  },
+  {
+    "id": "email-12068-c4549c",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 5.0h 門檻）",
+    "description": "Gmail UID: 12068\nMessage-ID: <F7F03867-B3E4-4B4B-B229-C5E4B433B361@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 28 Jun 2026 18:40:08 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 5.0h 門檻）\n\n--- 用戶回信內容 ---\n依照建議行動進行\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月28日 16:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 發文脫班（無新文超過 5.0h 門檻）\r\n> Alert level: critical\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> 作用窗（台北 9:00–23:00）內，feed 最新已發佈文章距今 > 5.0h。\r\n> newest_published_at: 2026-06-28T02:01:24.831473+00:00\r\n> publish_gap_hours: 5.98\r\n> threshold_hours: 5.0\r\n> feed_path: storage/reports/feed.json\r\n> 影響\r\n> \r\n> 這是『發文脫班』的 outcome-level dead-man switch：不論成因（dispatch generator 死、\r\n> auth 失效、release cluster-filter 擋住、draft 池空），只要『實際沒發文』就觸發。\r\n> 直接打 Mission 第 1 條（內容）＋第 5 條（流量）。2026-06-22 整日脫班即此盲區。\r\n> 建議行動（主線程 auto-remediation）\r\n> \r\n> 查 generator 是否活著：tail -5 storage/logs/cron/hourly_dispatch.log\r\n> （看是否秒退 / auth-preflight fail；確認 ~/.local/bin/claude 存在可執行）\r\n> 立即釋出（draft 池有 fresh-theme 時）：\r\n> VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\r\n> 若 release 因 cluster-pressure 擋住（released 0）：定向釋出 fresh-theme 草稿，\r\n> 或派 daily_article 補非飽和主題（publication-candidates skill）。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-28T10:45:09.638336+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12068,
+    "email_message_id": "<F7F03867-B3E4-4B4B-B229-C5E4B433B361@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 5.0h 門檻）",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-28T10:46:49.118042+00:00",
+    "claim_session_id": "6cb899a8aa09"
+  },
+  {
+    "id": "email-12067-9c753c",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] gmail-poll 停擺（state 過期未更新）",
+    "description": "Gmail UID: 12067\nMessage-ID: <2C157762-93CD-4668-A100-1EDFA4B7D75F@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 28 Jun 2026 18:39:50 +0800\nSubject: Re: [VolPred Alert][CRITICAL] gmail-poll 停擺（state 過期未更新）\n\n--- 用戶回信內容 ---\n依照建議行動進行\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月28日 15:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> gmail-poll 停擺（state 過期未更新）\r\n> Alert level: critical\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> gmail-poll 的 state 檔（boss email 自動 queue pipeline 的 liveness 訊號）過期。\r\n> state 檔: storage/ops/gmail_inbox_state.json\r\n> 距今: 6.75 小時\r\n> 門檻: warn>2.0h / critical>6.0h\r\n> 影響\r\n> \r\n> poll 每 15min 跑、每次成功都更新此檔；mtime 落後代表 poll 連續失敗（通常是\r\n> wrapper alarm-timeout 把序列 IMAP fetch 砍掉，exit=142）。boss 回信不會被自動\r\n> queue 成 task → 老闆指示 silent 漏接（違反 AI 全自動運營 mission）。\r\n> 建議行動\r\n> \r\n> 看 ~/.volpred/logs/gmail_poll.log 是否有 'Alarm clock' / exit=142（timeout）。\r\n> 手動補 gap：uv run python scripts/gmail_inbox_poll.py --max 20（確認可完成）。\r\n> 若反覆 timeout，放寬 ~/.volpred/bin/cron_gmail_poll.sh 的 perl alarm 秒數，\r\n> 並考慮收斂 SINCE 窗 / 批次 IMAP fetch。詳 docs/error_log.md gmail-poll entry。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-28T10:45:14.697851+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12067,
+    "email_message_id": "<2C157762-93CD-4668-A100-1EDFA4B7D75F@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] gmail-poll 停擺（state 過期未更新）",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-28T10:46:49.329049+00:00",
+    "claim_session_id": "f9cacca025ed"
+  },
+  {
+    "id": "email-12065-dfc3f0",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] M2 knowledge closure stale > 3.98d",
+    "description": "Gmail UID: 12065\nMessage-ID: <65AD0403-0CAD-4A5B-9721-E30A3846883D@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 28 Jun 2026 18:38:51 +0800\nSubject: Re: [VolPred Alert][WARN] M2 knowledge closure stale > 3.98d\n\n--- 用戶回信內容 ---\n依照建議行動執行\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月28日 18:31 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> M2 knowledge closure stale > 3.98d\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> knowledge.json 已 3.98 天無新 entry（最後 closure: 2026-06-24T11:00:59.712800+00:00）。\r\n> n_entries: 2375\r\n> 影響\r\n> \r\n> M2（研究與實驗做好）closure 停滯 = 實驗有跑但結論沒寫進知識庫，研究產出不可見、\r\n> 不累積。Mission L5-9：研究與論文永遠不輸 ops。此 breach 不可用「正常變異/測量 bug」解釋掉，必須實際 close 實驗到 knowledge.json。\r\n> 建議行動（立即執行，不可 defer）\r\n> \r\n> 找已 review 但未 closure 的實驗：for k in experiments/k*/; do test -f $k/codex_review.md && ! grep -ql $(basename $k) ...; done\r\n> 對 complete + reviewed 實驗（含 NULL/PILOT — null 如實報告）寫 knowledge：\r\n> MemorySystem(storage_dir='storage').add_knowledge(category, content, evidence, confidence)\r\n> PASS/CONDITIONAL_PASS 需符 provenance gate（experiment_id + reviewer，見 experiments.md K1259）。\r\n> 若無可 close 實驗 → 主線程 dispatch 新實驗並跑到 closure，不是空等。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-28T10:45:19.769779+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12065,
+    "email_message_id": "<65AD0403-0CAD-4A5B-9721-E30A3846883D@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] M2 knowledge closure stale > 3.98d",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-28T10:46:49.549055+00:00",
+    "claim_session_id": "d4480072ca22"
+  },
+  {
+    "id": "email-12064-6c471b",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 🔴【需老闆回信】Re: [VolPred Boss Report] 2026-06-25 12:10 — C",
+    "description": "Gmail UID: 12064\nMessage-ID: <93D37085-EF4D-4D9D-9C51-46B442C84670@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 28 Jun 2026 18:38:23 +0800\nSubject: Re: [VolPred Alert][INFO] 🔴【需老闆回信】Re: [VolPred Boss Report] 2026-06-25 12:10 — Codex 全面接手評估\n\n--- 用戶回信內容 ---\nclaude code已恢復 由claude code接手\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月28日 18:33 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 🔴【需老闆回信】Re: [VolPred Boss Report] 2026-06-25 12:10 — Codex 全面接手評估\r\n> Alert level: info\r\n> INFO\r\n> 🔴 此 email 需老闆做出決定才能繼續推進。\r\n> 請看下方「需要的決定」段，回信告知選項即可。\r\n> Codex 是否可以暫時全面接手？\r\n> \r\n> TL;DR：可以「主力 codex + Claude 後備 hybrid」，但不建議全面接手。Codex 在 reader-facing 寫作、FB Chrome 互動、論文 body 三類任務上有實證短板。\r\n> 一、Codex 實證可接手的（過去 24 小時已跑通）\r\n> \r\n> 任務類型\tCodex 實績（claimed_by=codex-vscode）\t評估\r\n> experiment\tK1553/K1554/K1555/K1556 全 succeeded\t✅ 主力可接\r\n> daily_digest\tdaily_digest_20260628 succeeded\t✅ 程序型可接\r\n> paper_review\tlatex-academic-reviewer + citation-verifier 並行已驗證\t✅ 可接\r\n> platform_ops（compute_queue / refill / sync）\t多次成功\t✅ 可接\r\n> 佔 ops 工作量約 60-70%。\r\n> 二、Codex 實證短板 / 不建議接手的（30-40%）\r\n> \r\n> 任務類型\t障礙\t替代方案\r\n> FB 雙發佈（Ivan Lai 個人帳號）\t需 Claude in Chrome MCP；codex 無 browser 控制\t留 Claude，FB MCP backlog 累積 12 篇等互動 session 一次清\r\n> trending_repost / event_article 寫作\tanti-AI style 9-checklist + programmatic gate anti_ai_gate.py 需多輪自我修正；codex 一次過 fail rate 高\t留 Claude main thread\r\n> 論文 body rewrite\t數字 self-check + claim-evidence matching + Harvey(2016) rigor，需多輪 thinking\t留 Claude（per CLAUDE.md 禁止 background agent 寫 .tex）\r\n> Email reply（含本封）\t需讀 ops state + 個性化回應\t留 Claude\r\n> 互動 session 對應\t多輪 user 對話 + context-aware\t留 Claude\r\n> 三、結構性風險\r\n> \r\n> Quota / 7d 中斷：Codex CLI 有 ChatGPT account daily limit，前一陣子曾經有 quota 用完整天無法派 task 紀錄。Claude 作為 fallback 必須隨時可上。\r\n> work_log 未寫入：本次 audit 發現 codex 接的 task（6/25-6/28 期間 K1553-K1556 + daily_digest）沒有寫進 storage/work_log.json — 最後 entry 還停在 6/24。這影響 diversity rotation 判斷 + boss report 完整性。我會補一個 platform_ops task 修這個 audit gap。\r\n> Knowledge.json provenance：K1259 教訓 — agent 不應直接寫 knowledge.json，必須 reviewer-gated。Codex agents 需確保走 _append_to_index provenance gate（已 enforce in src/volpred/memory/system.py）。\r\n> 四、建議運作模式\r\n> \r\n> Hybrid（推薦）：\r\n> Codex 主力：experiments、paper_review、compute jobs、daily_digest、platform_ops（70%）\r\n> Claude 主線程：reader-facing 寫作、FB、論文 body、email reply、互動 session（30%）\r\n> Hourly dispatch：依 task_type 自動路由（model_router.py 已有此能力）\r\n> 完全 codex 接手（不推薦）：\r\n> 風險：FB 12 篇 backlog 持續累積、release pool deadlock 無人解、article 寫作品質下滑、quota 中斷無 fallback\r\n> 五、本 fire 立即行動\r\n> \r\n> 派 1 個 trending_repost agent（半導體 / 台股 angle）解 release pool starved 6h critical\r\n> 補 platform_ops task 修 work_log gap（codex agents 完成時要寫 work_log）\r\n> 發文脫班 + cron failure 兩個 critical 在下一輪繼續 triage\r\n> 老闆若要 codex 全面接手，請告知 — 我會改 dispatcher 預設路由表 + 把 reader-facing tasks 標 blocked_on_claude_only 暫停發文。否則維持 hybrid。\r\n> 本 fire 完成：close 此 email + 派 trending_repost agent + commit。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-28T10:45:25.989735+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12064,
+    "email_message_id": "<93D37085-EF4D-4D9D-9C51-46B442C84670@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 🔴【需老闆回信】Re: [VolPred Boss Report] 2026-06-25 12:10 — Codex 全面接手評估",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-28T10:46:49.763016+00:00",
+    "claim_session_id": "65a1d42691e1"
+  },
+  {
+    "id": "platform_ops_codex_work_log_hook_regression_20260628",
+    "title": "[platform_ops] Codex finish hook + work_log freshness regression (follow-up hourly-18)",
+    "description": "Hourly-18 (2026-06-28) backfill script + 42 entries 已落地解決 immediate diversity-rotation bug，但 prevent-recurrence 層未做：\n\n1. Codex finish hook：codex_loop daemon experiment/digest commit 後不會 invoke task_pool_claim.py complete → work_log 還是要 backfill 才會補。改 codex agent post-commit hook 自動 call work_log writer (或 task_pool_claim.py complete --status succeeded --commit <sha>)。需 inspect src/volpred/codex_loop/ 或 ~/.volpred/bin/codex_*.sh hook 路徑。\n\n2. Regression：\n   a. tests/test_backfill_work_log.py — unit test classify() / build_entry() patterns (5+ test cases)\n   b. tests/test_work_log_freshness.py 或 src/volpred/ops/alerts.py 加 build_alert_condition_report 子 check：work_log latest entry > 24h stale 即 warn alert\n\n3. 補 cron：scripts/backfill_work_log_from_commits.py 加進 daily cron (--since=$(date -d 2 day ago) --apply) 兜底 codex hook fail；entry 加進 config/runtime_schedules.json。\n\nPriority P3 (prevent-recurrence; not blocking since immediate bug已修)。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "codex_agents",
+      "work_log",
+      "regression",
+      "audit_gap"
+    ],
+    "created_at": "2026-06-28T10:52:54+00:00",
+    "source": "hourly_18_dispatcher_followup",
     "preferred_agent": "codex"
   }
 ]
