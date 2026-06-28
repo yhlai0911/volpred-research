@@ -1571,10 +1571,12 @@ def _parse_cluster_cap_drift_state(storage_dir: str) -> dict[str, Any]:
     `general`/`research` publishes, but timely event/trending publishes bypass
     the gate — so cap can drift far above ceiling without anyone noticing.
 
-    Severity ladder (worst overshoot wins):
-    - ratio >= 5x → critical (release pacing badly broken)
-    - ratio >= 3x → warn (release pacing drifting)
-    - ratio >= 1x → info (at cap, blocking discretionary publishes — expected)
+    Severity ladder (worst overshoot wins, aligned with publisher soft cap
+    SOFT_CAP_MULTIPLIER=2.5 → publisher blocks even timely types at 2.5x):
+    - ratio >= 2.5x → critical (soft cap hit, even timely types now blocked)
+    - ratio >= 1.5x → warn (release pacing drifting toward soft cap)
+    - ratio >= 1x → info (at hard cap, blocking discretionary publishes —
+      expected; timely still allowed up to soft cap)
     - else → ok
 
     Reads cluster state via `volpred.topic_clusters.recent_cluster_counts`.
@@ -1582,7 +1584,9 @@ def _parse_cluster_cap_drift_state(storage_dir: str) -> dict[str, Any]:
     try:
         from volpred.topic_clusters import (
             CLUSTER_HARD_CAPS,
+            SOFT_CAP_MULTIPLIER,
             cluster_cap,
+            cluster_soft_cap,
             recent_cluster_counts,
         )
     except Exception as exc:
@@ -1600,28 +1604,30 @@ def _parse_cluster_cap_drift_state(storage_dir: str) -> dict[str, Any]:
     for cluster_name in CLUSTER_HARD_CAPS:
         count = counts.get(cluster_name, 0)
         cap = cluster_cap(cluster_name)
+        soft_cap = cluster_soft_cap(cluster_name)
         ratio = (count / cap) if cap else 0.0
         rows.append({
             "cluster": cluster_name,
             "count": count,
             "cap": cap,
+            "soft_cap": soft_cap,
             "overshoot_ratio": round(ratio, 2),
             "share": round((count / total) if total else 0.0, 4),
         })
     rows.sort(key=lambda r: -r["overshoot_ratio"])
     worst_ratio = rows[0]["overshoot_ratio"] if rows else 0.0
 
-    if worst_ratio >= 5.0:
+    if worst_ratio >= SOFT_CAP_MULTIPLIER:
         level = "critical"
         breached = True
-    elif worst_ratio >= 3.0:
+    elif worst_ratio >= 1.5:
         level = "warn"
         breached = True
     else:
         level = "info"
         breached = False
 
-    overshoot_rows = [r for r in rows if r["overshoot_ratio"] >= 3.0]
+    overshoot_rows = [r for r in rows if r["overshoot_ratio"] >= 1.5]
 
     if breached:
         title = (
@@ -1629,32 +1635,34 @@ def _parse_cluster_cap_drift_state(storage_dir: str) -> dict[str, Any]:
         )
         lines = [
             "## 觸發條件",
-            f"30d feed items = {total}；ratio ≥ 3x 視為 release pacing drift。",
+            f"30d feed items = {total}；soft cap = hard×{SOFT_CAP_MULTIPLIER}（"
+            f"timely / topic-bound types 自 2026-06-29 起亦受此擋）。ratio ≥ 1.5x"
+            "→ warn；≥ 2.5x → critical（soft cap hit）。",
         ]
         for r in overshoot_rows[:5]:
             lines.append(
-                f"- {r['cluster']}: {r['count']}/{r['cap']} = "
-                f"{r['overshoot_ratio']:.1f}x cap, share={r['share']:.1%}"
+                f"- {r['cluster']}: {r['count']}/{r['cap']} "
+                f"(soft_cap={r['soft_cap']}) = "
+                f"{r['overshoot_ratio']:.1f}x hard, share={r['share']:.1%}"
             )
         lines.extend([
             "",
             "## 影響",
-            "Cluster cooldown gate 對 `general` / `research` 文章硬擋，但 "
-            "timely event/trending/member_qa 文章 type-exempt 直接發布 — "
-            "結果 cap 數倍 overshoot 卻不會在 publish path 報警。此狀態：(a) "
-            "用戶 feed 同主題重複度高（Mission 第 1 條內容深度、第 5 條曝光留存）"
-            "；(b) discretionary 主題（K-experiment general article）長期被排擠"
-            "不能發；(c) 釋出端紀律名存實亡。",
+            "Publisher 2026-06-29 已對 timely 類型加 soft cap (hard×2.5)。soft "
+            "cap 觸及後即便 trending_repost / event_article / member_qa / daily_* "
+            "也會被擋，除非 caller 顯式 `details['cluster_waiver']='<reason>'`。"
+            "此狀態：(a) Mission 第 1 條（文章品質）+ 第 5 條（曝光多樣性）已啟動"
+            "保護；(b) 真實事件（FOMC / CPI）可走 waiver 不受影響；(c) discretionary "
+            "K-experiment general 文章重獲 release slot。",
             "",
             "## 建議行動",
-            "1. 暫停同 cluster 的 event/trending 候選排程（手動或加 type-exempt"
-            "「軟 cap」如 2-3x hard cap）。",
-            "2. 主動 release fresh-cluster draft："
-            "`uv run volpred ops release-pool-by-settings`，挑非熱門 cluster K。",
-            "3. 評估 `CLUSTER_HARD_CAPS` 設計：vix=15 / spy=10 是否仍合理？"
-            "若 timely 路徑已合理消耗，調高 cap 或細分 sub-cluster。",
-            "4. 配合 release-layer deadlock 計畫 "
-            "(`docs/refactor_plan_release_layer_deadlock.md`) 同步處理。",
+            "1. 自動：dispatcher 下輪自動 rotate 非熱門 cluster K（research backlog "
+            "已 184+ uncovered，refill_task_pool 永不缺源）。",
+            "2. 觀察：`tail -50 storage/logs/dedup_decisions.jsonl | grep "
+            "block_cluster_soft_cap` 看哪些 timely 被擋；若是真實事件 → "
+            "在 caller 加 cluster_waiver。",
+            "3. 評估 `CLUSTER_HARD_CAPS`（vix=15 / spy=10）是否仍合理；若 timely "
+            "已合理消耗，重新校準 hard cap 或細分 sub-cluster。",
         ])
         body = "\n".join(lines)
     else:

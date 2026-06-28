@@ -1076,22 +1076,67 @@ class Publisher:
             audience, category, _ct, tag_list_for_cluster, phase
         )
         cluster_gate = cluster_gate_status(cluster)
+        # Defensive .get for soft_cap fields — older stubs / mocked gates may
+        # predate the 2026-06-29 soft cap schema and not return them.
+        _gate_soft_cap = cluster_gate.get("soft_cap")
+        _gate_soft_blocked = bool(cluster_gate.get("soft_blocked"))
+        _gate_soft_mult = cluster_gate.get("soft_cap_multiplier")
         if cluster:
             details.setdefault("topic_cluster", cluster)
-            details.setdefault(
-                "topic_cluster_30d",
-                {
-                    "count": cluster_gate["count"],
-                    "cap": cluster_gate["cap"],
-                    "ratio": round(cluster_gate["ratio"], 4),
-                    "exempt": is_type_locked,
-                },
-            )
+            topic_30d = {
+                "count": cluster_gate["count"],
+                "cap": cluster_gate["cap"],
+                "ratio": round(cluster_gate["ratio"], 4),
+                "exempt": is_type_locked,
+            }
+            if _gate_soft_cap is not None:
+                topic_30d["soft_cap"] = _gate_soft_cap
+            details.setdefault("topic_cluster_30d", topic_30d)
         if cluster_gate["blocked"] and not is_type_locked and not details.get("cluster_waiver"):
+            _log_dedup_decision(
+                str(self.reports_dir.parent),
+                "block_cluster_hard_cap",
+                title,
+                None,
+                f"cluster={cluster} count_30d={cluster_gate['count']} cap={cluster_gate['cap']}",
+            )
             raise ValueError(
                 "topic_cluster_cooldown_blocked: "
                 f"cluster={cluster} count_30d={cluster_gate['count']} cap={cluster_gate['cap']}. "
                 "Pick another topic or set details['cluster_waiver']=<reason>."
+            )
+        # 2026-06-29 soft cap (hard_cap × SOFT_CAP_MULTIPLIER): even timely /
+        # topic-bound types (event_article / trending_repost / member_qa /
+        # daily_*) stop here, because "exempt" was a free pass that let vix grow
+        # to 6.1x and spy to 8.3x in 30d (alerts.py cluster_cap_drift, boss
+        # escalation 2026-06-29). Real critical events still override via
+        # explicit details['cluster_waiver']='<reason>' — same waiver mechanism
+        # the hard cap uses. Logged unconditionally so a block is never silent
+        # (per .claude/rules/dedup-gate-audit.md).
+        if (
+            _gate_soft_blocked
+            and is_type_locked
+            and not details.get("cluster_waiver")
+        ):
+            _log_dedup_decision(
+                str(self.reports_dir.parent),
+                "block_cluster_soft_cap",
+                title,
+                None,
+                (
+                    f"cluster={cluster} count_30d={cluster_gate['count']} "
+                    f"soft_cap={_gate_soft_cap} "
+                    f"(hard_cap={cluster_gate['cap']} × {_gate_soft_mult}) "
+                    f"content_type={_ct or '?'} audience={audience or '?'}"
+                ),
+            )
+            raise ValueError(
+                "topic_cluster_soft_cap_blocked: "
+                f"cluster={cluster} count_30d={cluster_gate['count']} "
+                f"soft_cap={_gate_soft_cap} (hard_cap×{_gate_soft_mult}). "
+                "Even timely / topic-bound types stop here; pick another cluster, "
+                "wait for the 30d window to roll, or set details['cluster_waiver']="
+                "'<reason>' for a genuinely critical real-world event."
             )
 
         # --- Pre-publish content-vs-source provenance gate (2026-06-03 3-strike) ---

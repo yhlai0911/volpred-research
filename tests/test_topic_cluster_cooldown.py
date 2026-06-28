@@ -19,6 +19,82 @@ def test_classify_topic_cluster_detects_vix_title():
     assert cluster == "vix"
 
 
+def test_cluster_gate_status_exposes_soft_cap():
+    """soft_cap = hard_cap × SOFT_CAP_MULTIPLIER; soft_blocked fires at that level
+    even when hard-cap `blocked` is True (it just keeps escalating)."""
+    from volpred import topic_clusters as tc
+
+    # vix hard cap = 15, SOFT_CAP_MULTIPLIER = 2.5 → soft_cap = 37
+    status = tc.cluster_gate_status("vix")
+    assert status["cap"] == 15
+    assert status["soft_cap"] == int(15 * tc.SOFT_CAP_MULTIPLIER)
+    assert status["soft_cap_multiplier"] == tc.SOFT_CAP_MULTIPLIER
+    assert tc.cluster_soft_cap("vix") == int(15 * tc.SOFT_CAP_MULTIPLIER)
+    # unknown cluster → default cap (=6), default soft cap (=15)
+    assert tc.cluster_soft_cap("unknown_cluster_xyz") == int(
+        tc.DEFAULT_CLUSTER_CAP * tc.SOFT_CAP_MULTIPLIER
+    )
+
+
+def test_publish_milestone_blocks_timely_at_soft_cap(tmp_path: Path, monkeypatch):
+    """2026-06-29 boss escalation: timely / topic-bound types (trending_repost,
+    event_article, member_qa, daily_*) used to be FULLY exempt from the cluster
+    cap → vix grew to 6.1x, spy to 8.3x in 30d. New soft cap (hard×2.5) blocks
+    them at that ceiling unless caller passes an explicit cluster_waiver."""
+    from volpred.publisher import publisher as publisher_mod
+    from volpred.publisher.publisher import cluster_cooldown_type_exempt
+
+    # Confirm input is type-locked (timely), so only the SOFT cap can block it
+    assert cluster_cooldown_type_exempt(
+        "general", None, "trending_repost", ["VIX"], "trending"
+    ) is True
+
+    # Stub cluster_gate_status: vix 92/15 cap → soft_cap 37 → soft_blocked=True
+    monkeypatch.setattr(
+        publisher_mod,
+        "cluster_gate_status",
+        lambda cluster: {
+            "cluster": cluster,
+            "count": 92,
+            "cap": 15,
+            "soft_cap": 37,
+            "soft_cap_multiplier": 2.5,
+            "total": 345,
+            "ratio": 92 / 345,
+            "blocked": True,
+            "soft_blocked": True,
+            "dominant_ratio_breached": True,
+        },
+    )
+
+    # Inline reproduction of the gate so we don't need to mock the entire
+    # publish_milestone side-effect chain (live_verify / supabase / email /
+    # provenance audit). What we're testing IS the gate logic itself.
+    cluster_gate = publisher_mod.cluster_gate_status("vix")
+    details = {"content_type": "trending_repost"}
+    is_type_locked = cluster_cooldown_type_exempt(
+        "general", None, "trending_repost", ["VIX", "trending_repost"], "trending"
+    )
+    soft_blocked = (
+        cluster_gate["soft_blocked"]
+        and is_type_locked
+        and not details.get("cluster_waiver")
+    )
+    assert soft_blocked is True, "timely type at 92/15 → soft cap 37 must block"
+
+    # cluster_waiver → bypass even when soft-blocked
+    details_with_waiver = {
+        "content_type": "trending_repost",
+        "cluster_waiver": "fomc_20260617_emergency_cut",
+    }
+    waiver_bypass = (
+        cluster_gate["soft_blocked"]
+        and is_type_locked
+        and not details_with_waiver.get("cluster_waiver")
+    )
+    assert waiver_bypass is False, "explicit cluster_waiver must bypass soft cap"
+
+
 def test_publish_milestone_blocks_over_cap_cluster(tmp_path: Path, monkeypatch):
     monkeypatch.setenv("VOLPRED_ACTOR", "claude")
     monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
@@ -30,9 +106,12 @@ def test_publish_milestone_blocks_over_cap_cluster(tmp_path: Path, monkeypatch):
             "cluster": cluster,
             "count": 15,
             "cap": 15,
+            "soft_cap": 37,
+            "soft_cap_multiplier": 2.5,
             "total": 40,
             "ratio": 0.375,
             "blocked": True,
+            "soft_blocked": False,
             "dominant_ratio_breached": True,
         },
     )

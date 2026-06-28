@@ -44,6 +44,17 @@ CLUSTER_HARD_CAPS: dict[str, int] = {
 DEFAULT_CLUSTER_CAP = 6
 DOMINANT_RATIO_LIMIT = 0.25
 
+# 2026-06-29: soft cap for timely / topic-bound types (event_article,
+# trending_repost, member_qa, daily_*). They are exempt from the HARD cap
+# (cluster_gate_status.blocked) because their repetition is by design — a
+# trending take responds to a live event; the daily VIX bulletin is templated.
+# But "exempt" was a free pass that let vix grow to 92/15 = 6.1x and spy to
+# 83/10 = 8.3x in 30d (alerts.py cluster_cap_drift, boss escalation 2026-06-29).
+# So even timely types now stop at `hard_cap * SOFT_CAP_MULTIPLIER`. Real events
+# can still override via `details['cluster_waiver']='<reason>'` (e.g. an FOMC
+# day) — same waiver mechanism the hard cap already supports.
+SOFT_CAP_MULTIPLIER = 2.5
+
 
 def _warn_topic_clusters(
     message: str,
@@ -147,12 +158,27 @@ def cluster_gate_status(cluster: str | None, *, days: int = 30, feed_path: Path 
     count = counts.get(cluster or "", 0) if cluster else 0
     cap = cluster_cap(cluster)
     ratio = (count / total) if total else 0.0
+    soft_cap = int(cap * SOFT_CAP_MULTIPLIER)
     return {
         "cluster": cluster,
         "count": count,
         "cap": cap,
+        "soft_cap": soft_cap,
+        "soft_cap_multiplier": SOFT_CAP_MULTIPLIER,
         "total": total,
         "ratio": ratio,
         "blocked": bool(cluster and count >= cap),
+        "soft_blocked": bool(cluster and count >= soft_cap),
         "dominant_ratio_breached": bool(cluster and ratio > DOMINANT_RATIO_LIMIT),
     }
+
+
+def cluster_soft_cap(cluster: str | None) -> int:
+    """Hard cap × SOFT_CAP_MULTIPLIER, the ceiling that even timely / topic-bound
+    types must respect (FOMC / CPI / trending / daily_digest etc).
+
+    Hard cap blocks discretionary general/research; soft cap blocks everything
+    including timely — except an explicit ``details['cluster_waiver']`` set by
+    the caller for genuinely critical real-world events.
+    """
+    return int(cluster_cap(cluster) * SOFT_CAP_MULTIPLIER)

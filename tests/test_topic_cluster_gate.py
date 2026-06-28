@@ -41,9 +41,40 @@ def pub(tmp_path, monkeypatch):
                 monkeypatch.setattr(mod, "_post", lambda *a, **kw: False, raising=False)
         except (ImportError, ModuleNotFoundError):
             pass
-    # Redirect cluster gate to tmp feed so test feed doesn't pollute counter
+    # Redirect cluster gate to tmp feed. 2026-06-29: the FEED_PATH monkeypatch
+    # alone was ineffective because cluster_gate_status / recent_cluster_counts
+    # capture the original FEED_PATH as a default arg at import time. Tests
+    # previously "passed" only because the type-locked bypass was unconditional
+    # and the count value didn't matter. The new soft cap (hard×2.5) actually
+    # reads counts, so we monkeypatch publisher.cluster_gate_status to read
+    # from the temp feed explicitly.
     import volpred.topic_clusters as tc
-    monkeypatch.setattr(tc, "FEED_PATH", tmp_path / "reports" / "feed.json", raising=False)
+    temp_feed = tmp_path / "reports" / "feed.json"
+    monkeypatch.setattr(tc, "FEED_PATH", temp_feed, raising=False)
+
+    def _temp_cluster_gate_status(cluster):
+        counts, total = tc.recent_cluster_counts(days=30, feed_path=temp_feed)
+        count = counts.get(cluster or "", 0) if cluster else 0
+        cap = tc.cluster_cap(cluster)
+        soft_cap = int(cap * tc.SOFT_CAP_MULTIPLIER)
+        ratio = (count / total) if total else 0.0
+        return {
+            "cluster": cluster,
+            "count": count,
+            "cap": cap,
+            "soft_cap": soft_cap,
+            "soft_cap_multiplier": tc.SOFT_CAP_MULTIPLIER,
+            "total": total,
+            "ratio": ratio,
+            "blocked": bool(cluster and count >= cap),
+            "soft_blocked": bool(cluster and count >= soft_cap),
+            "dominant_ratio_breached": bool(cluster and ratio > tc.DOMINANT_RATIO_LIMIT),
+        }
+
+    monkeypatch.setattr(
+        "volpred.publisher.publisher.cluster_gate_status",
+        _temp_cluster_gate_status,
+    )
     return Publisher(storage_dir=str(tmp_path))
 
 
