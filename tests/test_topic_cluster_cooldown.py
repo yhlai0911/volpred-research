@@ -49,6 +49,32 @@ def test_publish_milestone_blocks_over_cap_cluster(tmp_path: Path, monkeypatch):
         )
 
 
+def test_cluster_cooldown_type_exempt_covers_trending_repost_content_type():
+    """2026-06-28 regression: a trending_repost declared by content_type (not via a
+    magic 'trending_repost' tag or 'trending_' phase) must be exempt. K1557
+    (content_type=trending_repost, tags=台股/波動率, phase=research) was wrongly
+    cluster-blocked before the fix, which only matched content_type=='daily_digest'."""
+    from volpred.publisher.publisher import cluster_cooldown_type_exempt
+
+    # K1557 case → exempt by content_type alone
+    assert cluster_cooldown_type_exempt(
+        "general", None, "trending_repost", ["台股", "波動率", "回測"], "research"
+    ) is True
+    # every timely content_type → exempt
+    for ct in ("event_article", "member_qa", "daily_digest", "daily_update"):
+        assert cluster_cooldown_type_exempt("general", None, ct, [], "research") is True
+    # plain general / research (no timely type) → still cluster-gated
+    assert cluster_cooldown_type_exempt(
+        "general", None, None, ["台股", "VIX"], "research"
+    ) is False
+    assert cluster_cooldown_type_exempt("research", None, "", [], "research") is False
+    # legacy tag / phase fallbacks still exempt older callers
+    assert cluster_cooldown_type_exempt(
+        "general", None, None, ["trending_repost"], "research"
+    ) is True
+    assert cluster_cooldown_type_exempt("general", None, None, [], "trending_2026") is True
+
+
 def test_build_publication_candidates_applies_cluster_penalty(tmp_path: Path, monkeypatch):
     script_path = Path(__file__).resolve().parents[1] / "scripts" / "build_publication_candidates.py"
     spec = importlib.util.spec_from_file_location("build_publication_candidates", script_path)

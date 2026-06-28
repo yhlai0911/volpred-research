@@ -576,6 +576,44 @@ def _sanitize_publish_tags(audience: str, tags: list[str]) -> list[str]:
         cleaned.append(tag)
     return cleaned[:_GENERAL_MAX_TAG_COUNT]
 
+
+# Topic-bound / timely article types are exempt from the 30-day topic-cluster
+# cooldown — their repetition is by design (a trending take responds to a live
+# event; the daily VIX bulletin is templated). Only discretionary general /
+# research articles are cluster-gated. Canonical truth is the content_type /
+# audience / category fields; tag & phase are belt-and-suspenders fallbacks for
+# older callers that didn't set content_type. (2026-06-28: content_type used to
+# only match 'daily_digest', so a trending_repost declared by content_type but
+# tagged 台股/波動率 — e.g. K1557 — was wrongly blocked.)
+_TIMELY_CONTENT_TYPES = frozenset({
+    "daily_digest", "trending_repost", "event_article",
+    "member_qa", "daily-update", "daily_update",
+})
+_TIMELY_TAGS = frozenset({
+    "每日建議", "daily-update", "daily_digest", "精選導讀", "會員提問",
+    "member_qa", "event_article", "trending_repost", "trending",
+})
+_TIMELY_PHASE_PREFIXES = ("daily_", "event_", "trending_", "member_")
+
+
+def cluster_cooldown_type_exempt(
+    audience: str | None,
+    category: str | None,
+    content_type: str | None,
+    tags: list[str] | None,
+    phase: str | None,
+) -> bool:
+    """True when the article's TYPE exempts it from the topic-cluster cooldown."""
+    tag_set = set(tags or [])
+    return (
+        (audience or "") in ("daily", "member_qa", "event")
+        or (category or "") in ("daily-update", "member_qa", "event_article", "daily_digest")
+        or str(content_type or "").strip() in _TIMELY_CONTENT_TYPES
+        or bool(tag_set & _TIMELY_TAGS)
+        or str(phase or "").startswith(_TIMELY_PHASE_PREFIXES)
+    )
+
+
 class Publisher:
     """Publishes research results to storage/reports/ for Web platform consumption.
 
@@ -1026,23 +1064,16 @@ class Publisher:
         tag_list_for_cluster = tags or []
         cluster = classify_topic_cluster(title, tag_list_for_cluster, description or "")
         # Determine if this publish is exempt from cluster cooldown:
-        is_type_locked = (
-            audience in ('daily', 'member_qa', 'event')
-            or category in ('daily-update', 'member_qa', 'event_article', 'daily_digest')
-            or str((details or {}).get('content_type') or '') == 'daily_digest'
-            or '每日建議' in tag_list_for_cluster
-            or 'daily-update' in tag_list_for_cluster
-            or 'daily_digest' in tag_list_for_cluster
-            or '精選導讀' in tag_list_for_cluster
-            or '會員提問' in tag_list_for_cluster
-            or 'member_qa' in tag_list_for_cluster
-            or 'event_article' in tag_list_for_cluster
-            or 'trending_repost' in tag_list_for_cluster
-            or 'trending' in tag_list_for_cluster
-            or (phase or '').startswith('daily_')
-            or (phase or '').startswith('event_')
-            or (phase or '').startswith('trending_')
-            or (phase or '').startswith('member_')
+        # 2026-06-28 fix: content_type was only exempting 'daily_digest', so a
+        # correctly-declared trending_repost / event_article whose tags/phase
+        # didn't carry the magic token (e.g. K1557, content_type=trending_repost
+        # tagged 台股/波動率, phase=research) got cluster-blocked despite the
+        # stated intent above ("trending_repost are topic-bound by definition").
+        # Exempt ALL topic-bound / timely content_types by the canonical field,
+        # not just by incidental tag/phase.
+        _ct = str((details or {}).get('content_type') or '').strip()
+        is_type_locked = cluster_cooldown_type_exempt(
+            audience, category, _ct, tag_list_for_cluster, phase
         )
         cluster_gate = cluster_gate_status(cluster)
         if cluster:
