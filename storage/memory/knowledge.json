@@ -36485,5 +36485,29 @@
       "K1259",
       "K445"
     ]
+  },
+  {
+    "item_id": "k1559_missing_stale_liquidity_prior",
+    "category": "market_microstructure",
+    "experiment_id": "K1559",
+    "k_id": "K1559",
+    "experiment_path": "experiments/k1559/",
+    "codex_review": "experiments/k1559/codex_review.md",
+    "verdict": "CONDITIONAL_PASS",
+    "content": "K1559 tests whether missing/stale daily market data in thin ETF histories is a liquidity-volatility prior. Using 28 yfinance ETFs from 2014-01-01 to the 2026-06-29 request date (86,148 estimation rows), data-quality event signals are measured at date t and future RV/gap/drawdown targets start at t+1. Controlled asset-FE panel regressions with lagged 22d RV, dollar volume, price level, and SPY absolute return show positive Holm-significant coefficients for any data-quality event on log next-5d RV (coef 0.860, t=5.99, Holm p=5.39e-08) and log next-22d RV (coef 0.884, t=17.33, Holm p=9.47e-66). Zero-volume and stale-price days also predict 22d gap risk in the controlled panel. The result is conditional, not broad: missing rows total only 1 observation, events with >=10 observations appear in only QAT/KSA/UAE, and within-asset positive RV22 ratios occur in QAT/KSA but not UAE. Conclusion: zero-volume/stale-price days in some thin country ETFs can be used as a conditional liquidity-risk prior, but K1559 does not support a universal missing-row alpha or a broad cross-ETF rule.",
+    "evidence": [
+      "experiments/k1559/k1559.py",
+      "experiments/k1559/k1559_results.json",
+      "experiments/k1559/README.md",
+      "experiments/k1559/codex_review.md",
+      "verdict: CONDITIONAL_PASS",
+      "data: 28 ETFs, 86,148 estimation rows, yfinance daily OHLCV, adjusted close returns",
+      "lookahead: event signal at t; future targets use returns[i+1:i+1+h]",
+      "primary tests: any DQ -> log_fwd_rv5 coef=0.860, t=5.99, Holm p=5.39e-08; any DQ -> log_fwd_rv22 coef=0.884, t=17.33, Holm p=9.47e-66",
+      "concentration caveat: any-DQ events >=10 only in QAT/KSA/UAE; missing_row total=1; QAT/KSA positive within-asset RV22 ratios, UAE negative",
+      "reviewer_source: experiments/k1559/codex_review.md PASS_WITH_CAVEATS"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-06-29T05:55:20.823684"
   }
 ]
