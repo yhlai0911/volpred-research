@@ -2,11 +2,41 @@ from __future__ import annotations
 
 import os
 import shutil
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from .common import load_json, project_path
 from .diagnostics import warn
 from .scheduler import get_scheduler_state
+
+_TAIPEI = ZoneInfo("Asia/Taipei")
+# strategy_metrics.json is refreshed by daily_update (cron `3 8 * * 1-6`,
+# Mon-Sat 08:03 Taipei). It does NOT run on Sunday, so a flat 26h staleness
+# threshold false-fires every Sunday/early-Monday. The freshness check is now
+# schedule-aware: stale only if the most recent SCHEDULED refresh (+grace)
+# failed to update the file — never on a day the writer wasn't expected to run.
+_METRICS_REFRESH_HOUR_TPE = 8       # daily_update fires ~08:03 Taipei
+_METRICS_REFRESH_MINUTE_TPE = 3
+_METRICS_REFRESH_GRACE_HOURS = 3.0  # piggy-back latency + run duration buffer
+
+
+def _last_expected_metrics_refresh(now_utc: datetime) -> datetime:
+    """Most recent Mon-Sat 08:03 Taipei that is at least GRACE hours in the past.
+
+    Returns a UTC datetime. Used so the staleness check only alerts when a run
+    that was actually scheduled (Mon-Sat) missed its update — Sunday is exempt
+    by construction (its previous scheduled run is Saturday)."""
+    cutoff = now_utc.astimezone(_TAIPEI) - timedelta(hours=_METRICS_REFRESH_GRACE_HOURS)
+    probe = cutoff.replace(
+        hour=_METRICS_REFRESH_HOUR_TPE, minute=_METRICS_REFRESH_MINUTE_TPE,
+        second=0, microsecond=0,
+    )
+    if probe > cutoff:
+        probe -= timedelta(days=1)
+    # Walk back to the nearest Mon-Sat (weekday(): Mon=0 .. Sun=6).
+    while probe.weekday() == 6:  # Sunday — writer doesn't run
+        probe -= timedelta(days=1)
+    return probe.astimezone(timezone.utc)
 
 # ---------------------------------------------------------------------------
 # Standalone health checks (migrated 2026-06-24 from the now-disabled cloud
@@ -51,12 +81,20 @@ def check_strategy_metrics_freshness(storage_dir: str = "storage") -> dict:
             "age_hours": None,
             "threshold_hours": STRATEGY_METRICS_STALE_HOURS,
         }
-    status = "stale" if age_hours > STRATEGY_METRICS_STALE_HOURS else "ok"
+    now_utc = datetime.now(timezone.utc)
+    mtime_dt = datetime.fromtimestamp(mtime, timezone.utc)
+    last_expected = _last_expected_metrics_refresh(now_utc)
+    # Schedule-aware (2026-06-28): stale only if the most recent SCHEDULED
+    # (Mon-Sat 08:03 TPE) daily_update failed to update the file. Sunday and
+    # early-Monday no longer false-fire because their previous scheduled run is
+    # Saturday and the file is fresh relative to that.
+    status = "stale" if mtime_dt < last_expected else "ok"
     return {
         "status": status,
         "exists": True,
         "age_hours": age_hours,
-        "threshold_hours": STRATEGY_METRICS_STALE_HOURS,
+        "last_expected_refresh_utc": last_expected.isoformat(),
+        "schedule": "daily_update Mon-Sat 08:03 TPE",
     }
 
 
