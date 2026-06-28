@@ -38126,7 +38126,7 @@
     "title": "Paper review (Codex 24h-rule): 模型多看幾個鄰居，不代表就更會預測波動",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_81df26b0 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_81df26b0",
@@ -38134,7 +38134,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-28T13:07:58+00:00"
+    "created_at": "2026-06-28T13:07:58+00:00",
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-06-28T15:10:21.236893+00:00",
+    "claim_session_id": "d5d9926eb1bb",
+    "started_at": "2026-06-28T15:10:32.864204+00:00",
+    "completed_at": "2026-06-28T15:15:36.321700+00:00",
+    "result": "Codex CONDITIONAL_PASS (verdict logged in feed.json details.codex_review_history). Lookahead NONE, SPY 14.1% number verified, multi-test SPY survives Bonferroni adj 3.8e-7. HIGH risk on single-seed placebo + overclaim wording → applied minor edits (caveat + date 2024-12-30). Follow-up K1314_v2_multiseed_placebo_bonferroni queued."
   },
   {
     "id": "paper_review_mile_76475146",
@@ -38177,5 +38183,98 @@
     "started_at": "2026-06-28T13:08:48.660218+00:00",
     "completed_at": "2026-06-28T13:11:29.108476+00:00",
     "result": "PASS — 文章 mile_127dc20d 全數字驗證對齊 K1403 results.json（點預測 44%/64%/35%、尾端 gap 六格、Kupiec p 0.31-0.93）。Lookahead 清（shift(1) 三 features + dropna）、DM sign convention 正確（d=ols-qmed, mean_diff<0 → OLS 勝對應 SIG_NEG）、Kupiec 標準 χ² LR。Aggregate verdict TAIL_CALIB_USABLE 與 article narrative 相符。Report: storage/ops/paper_reviews/mile_127dc20d.md。Caveats：fixed-origin no-refit + |return| HAR-RAV proxy 命名 imprecision，列 future K-series 改進，不阻 publish。"
+  },
+  {
+    "id": "research_admissible_constrained_multivariate_har_vmem_gua",
+    "title": "研究 backlog fallback: Admissible constrained multivariate HAR / vMEM guardrail：禁止負 variance 的約束是否比 unconstrained OLS 更穩",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Admissible constrained multivariate HAR / vMEM guardrail：禁止負 variance 的約束是否比 unconstrained OLS 更穩 — 用 SPY/QQQ/IWM/TLT/GLD/HYG 多資產 RV panel 建 MHAR / vMEM-lite（daily/weekly/monthly lag cross-effects），比較 unconstrained OLS、nonnegative projected coefficients、matrix-inequality/admissible approximation 三版本 | 來源 section: 期刊主題挖掘 batch 2026-06-25（journal_discovery_20260625_0；websearch jfec/rfs/qje/restud 2025-26 趨勢層級；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "admissible_constrained_multivariate_har_vmem_gua",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-28T15:07:59+00:00"
+  },
+  {
+    "id": "research_quadratic_variation_estimator_disagreement_forec",
+    "title": "研究 backlog fallback: Quadratic-variation estimator disagreement 作 forecast uncertainty：RV estimator risk band 是否預測下期 QLIKE error",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Quadratic-variation estimator disagreement 作 forecast uncertainty：RV estimator risk band 是否預測下期 QLIKE error — 用 yfinance 5-min 可得窗口 + daily OHLCV，對 SPY/QQQ/IWM/TLT/GLD/HYG 同時計算 5-min RV、subsampled RV、Parkinson/Garman-Klass/Yang-Zhang、realized-kernel-lite / noise-robust proxy；把 estimator dispersion 當 | 來源 section: 期刊主題挖掘 batch 2026-06-25（journal_discovery_20260625_0；websearch jfec/rfs/qje/restud 2025-26 趨勢層級；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "quadratic_variation_estimator_disagreement_forec",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-28T15:07:59+00:00",
+    "last_released_at": "2026-06-28T15:10:32.663494+00:00"
+  },
+  {
+    "id": "research_missing_stale_market_data_liquidity_vol_prior",
+    "title": "研究 backlog fallback: Missing / stale market data 作 liquidity-vol prior：缺資料不是清洗問題，而是風險訊號嗎",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Missing / stale market data 作 liquidity-vol prior：缺資料不是清洗問題，而是風險訊號嗎 — 用 yfinance 小型股 / microcap ETF / 低流動 ETF universe，記錄 missing row、zero volume、stale close、異常 corporate-action gap、以及資料恢復日，檢定這些 data-quality events 是否領先 next 5d/22d RV、gap risk、delisting-like drawdown；用大盤/成交額/價格 level 控制，避免把資料缺口誤當 al | 來源 section: 期刊主題挖掘 batch 2026-06-25（journal_discovery_20260625_0；websearch jfec/rfs/qje/restud 2025-26 趨勢層級；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "missing_stale_market_data_liquidity_vol_prior",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-28T15:07:59+00:00"
+  },
+  {
+    "id": "research_attention_utility_winner_focus_winner_side_rv_vo",
+    "title": "研究 backlog fallback: Attention-utility winner focus：贏家被看見、輸家被躲開是否造成 winner-side RV / volume asymmetry",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Attention-utility winner focus：贏家被看見、輸家被躲開是否造成 winner-side RV / volume asymmetry — 用 retail-heavy / meme-risk basket + large-cap control，標記近期新高/高報酬 winner 與近期 loser，測試 market-close 後、週一開盤、財報前後的成交量、range-vol、gap risk 是否對 winner-side attention 更敏感；若可取得 Google Trends/Reddit/Stocktwits public count 則作 a | 來源 section: 期刊主題挖掘 batch 2026-06-25（journal_discovery_20260625_0；websearch jfec/rfs/qje/restud 2025-26 趨勢層級；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "attention_utility_winner_focus_winner_side_rv_vo",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-28T15:07:59+00:00"
+  },
+  {
+    "id": "research_candlestick_spot_vol_estimator_ohlc_baseline_k_c",
+    "title": "研究 backlog fallback: Candlestick spot-vol estimator 作日頻 OHLC baseline：K線資訊是否足以打敗 close-to-close / range RV",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Candlestick spot-vol estimator 作日頻 OHLC baseline：K線資訊是否足以打敗 close-to-close / range RV — 用 yfinance 日 OHLCV 的 SPY/QQQ/IWM/TLT/GLD/HYG 與本機 5-min 片段作 validation，實作 candlestick-based spot volatility estimator、Parkinson/Garman-Klass/Yang-Zhang、close-to-close 三組，先比較 measurement error，再把 lagged estimator 加 | 來源 section: 期刊主題挖掘 batch 2026-06-27（journal_discovery_20260626_0；websearch jfec/rof/rfs/aea/restud 2025-26 趨勢層級；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "candlestick_spot_vol_estimator_ohlc_baseline_k_c",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-28T15:07:59+00:00",
+    "last_released_at": "2026-06-28T15:10:32.464619+00:00"
+  },
+  {
+    "id": "K1314_v2_multiseed_placebo_bonferroni",
+    "task_type": "experiment",
+    "priority": 3,
+    "title": "K1314 v2: multi-seed permutation placebo + Bonferroni/Holm/BH 標註於 DM results",
+    "description": "Follow-up from paper_review_mile_81df26b0 (Codex CONDITIONAL_PASS, 2026-06-28). Article published 2026-06-06 已加 single-seed caveat 不需 retract，但要補正式統計：(1) k1314_placebo.py 改為 ≥100 random-graph trials (seeds 1-100) → 算 SPY GSP-real vs random-graph distribution 的 permutation p-value；(2) k1314_results.json append Bonferroni / Holm / BH adjusted p-values 到 DM table（SPY raw 7.6e-8 adj 仍 < 1e-6 應 survive，其他 4 檔可能變更 NS）。(3) 若 SPY 真 permutation p < 0.01 → 更新文章 wording 移除 caveat。Codex review verdict 詳見 feed.json mile_81df26b0 details.codex_review_history.",
+    "status": "pending",
+    "created_at": "2026-06-28T15:15:32.948923+00:00",
+    "source": "paper_review_followup",
+    "parent_task_id": "paper_review_mile_81df26b0"
   }
 ]
