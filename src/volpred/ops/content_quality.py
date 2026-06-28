@@ -100,6 +100,9 @@ def _item_publish_time(item: dict[str, Any]) -> datetime | None:
 def _is_digest(item: dict[str, Any]) -> bool:
     if item.get("content_type") == DIGEST_CONTENT_TYPE:
         return True
+    details = item.get("details")
+    if isinstance(details, dict) and details.get("content_type") == DIGEST_CONTENT_TYPE:
+        return True
     title = item.get("title") or ""
     return isinstance(title, str) and title.startswith(DIGEST_TITLE_PREFIX)
 
@@ -273,8 +276,8 @@ def check_title_format(
             )
         # Digest prefix-redundancy: title `每日精選導讀｜<rest>` while the
         # frontend already labels the section `每日精選導讀`. We flag based
-        # solely on `content_type=daily_digest` items so non-digest titles
-        # using a normal `｜` are not false-positives.
+        # solely on digest content type (top-level legacy or details metadata)
+        # so non-digest titles using a normal `｜` are not false-positives.
         if _is_digest(item) and title.startswith(DIGEST_TITLE_PREFIX + "｜"):
             findings.append(
                 {

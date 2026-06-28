@@ -118,6 +118,25 @@ def test_digest_uniqueness_recognises_by_title_prefix_without_content_type(tmp_p
     assert result["status"] == "duplicate"
 
 
+def test_digest_uniqueness_recognises_details_content_type_without_prefix(tmp_path):
+    """Publisher writes daily_digest under details.content_type, not top-level."""
+    today_tpe = datetime(2026, 6, 24, 10, 0, tzinfo=TPE)
+    item = _entry(
+        "mile_digest",
+        published_at=today_tpe.replace(hour=2),
+        title="事件日前別急著躲",
+        content_type=None,
+    )
+    item["details"] = {"content_type": "daily_digest"}
+    storage = _write_feed(tmp_path, [item])
+
+    result = cq.check_daily_digest_uniqueness(str(storage), now=today_tpe)
+
+    assert result["status"] == "ok"
+    assert result["published_count"] == 1
+    assert result["items"][0]["id"] == "mile_digest"
+
+
 def test_digest_uniqueness_unpublished_excluded(tmp_path):
     today_tpe = datetime(2026, 6, 24, 10, 0, tzinfo=TPE)
     storage = _write_feed(
