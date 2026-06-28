@@ -43,6 +43,28 @@ if [ -n "$behind" ] && [ "$behind" != "0" ]; then
   exit 1
 fi
 
+# 2.5) silent-fallback gate (2026-06-28, boss「這問題一直無法解決」)
+# CI Silent Fallback Gate 反覆紅的根因：codex/agent commit 帶新 silent fallback
+# → push 上 origin → CI 才抓 → 紅信轟炸 boss。改成 push 前本地擋：HEAD 帶 new>0
+# 就 hold push（紅碼永不到 origin、CI 不會紅），發 calmer warn 讓下一班 dispatch 先修。
+# Fail-open：audit 本身出錯（uv 缺 / baseline 缺）→ 照推，備份優先不被 audit 故障擋。
+AUDIT_OUT=$("$UV_BIN" run python "$REPO/scripts/audit_silent_fallbacks.py" --strict \
+  --baseline "$REPO/storage/qa/silent_fallback_baseline.json" 2>&1)
+AUDIT_RC=$?
+NEW_COUNT=$(echo "$AUDIT_OUT" | grep -oE "new=[0-9]+" | head -1 | cut -d= -f2)
+if [ "$AUDIT_RC" -ne 0 ] && [ -n "$NEW_COUNT" ] && [ "$NEW_COUNT" -gt 0 ]; then
+  echo "[$(ts)] HELD: ${NEW_COUNT} new silent fallback(s) at HEAD — NOT pushing (CI would go red)" >> "$LOG"
+  echo "$AUDIT_OUT" | grep "^NEW " >> "$LOG"
+  NEWLINES=$(echo "$AUDIT_OUT" | grep "^NEW " | head -10)
+  "$UV_BIN" run volpred ops send-alert --level warn \
+    --title "git-push-backup: push held — ${NEW_COUNT} new silent fallback(s)" \
+    --body "本地領先 ${ahead} commit 但 HEAD 帶 ${NEW_COUNT} 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push（紅碼不上 origin、CI 不會紅）。下一班 hourly dispatch 必須先修（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）再讓 push 恢復。新發現：
+${NEWLINES}" >> "$LOG" 2>&1 || true
+  exit 1
+elif [ "$AUDIT_RC" -ne 0 ]; then
+  echo "[$(ts)] WARN audit rc=$AUDIT_RC new=${NEW_COUNT:-?} — audit error not a fallback breach, pushing anyway (backup priority)" >> "$LOG"
+fi
+
 # 3) fast-forward push
 if git_auth push origin main >> "$LOG" 2>&1; then
   echo "[$(ts)] pushed ${ahead} commit(s) OK" >> "$LOG"

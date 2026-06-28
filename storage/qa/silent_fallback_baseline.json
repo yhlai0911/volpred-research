@@ -1,151 +1,13 @@
 {
   "schema": "silent_fallback_baseline.v1",
   "description": "Known silent-fallback audit findings. CI strict mode fails only when current findings introduce keys absent from this baseline.",
-  "count": 126,
+  "count": 78,
   "findings": [
-    {
-      "path": "scripts/audit_publish_sync.py",
-      "line": 51,
-      "exception": "Exception",
-      "action": "return 0"
-    },
     {
       "path": "scripts/backtest_3yr_final.py",
       "line": 44,
       "exception": "Exception",
       "action": "return None"
-    },
-    {
-      "path": "scripts/boss_report.py",
-      "line": 162,
-      "exception": "Exception",
-      "action": "return {}"
-    },
-    {
-      "path": "scripts/build_experiments_index.py",
-      "line": 98,
-      "exception": "FileNotFoundError",
-      "action": "return ''"
-    },
-    {
-      "path": "scripts/build_experiments_index.py",
-      "line": 126,
-      "exception": "ValueError",
-      "action": "return None"
-    },
-    {
-      "path": "scripts/build_experiments_index.py",
-      "line": 149,
-      "exception": "Exception",
-      "action": "return None"
-    },
-    {
-      "path": "scripts/build_experiments_index.py",
-      "line": 370,
-      "exception": "Exception",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/build_topic_diversity_audit.py",
-      "line": 69,
-      "exception": "JSONDecodeError",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/build_topic_diversity_audit.py",
-      "line": 90,
-      "exception": "JSONDecodeError",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/build_topic_diversity_audit.py",
-      "line": 165,
-      "exception": "JSONDecodeError",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/check_alerts.py",
-      "line": 218,
-      "exception": "Exception",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/check_persistence_stability.py",
-      "line": 39,
-      "exception": "Exception",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/collect_vixtwn.py",
-      "line": 78,
-      "exception": "ValueError",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/compute_queue.py",
-      "line": 180,
-      "exception": "FileNotFoundError",
-      "action": "pass"
-    },
-    {
-      "path": "scripts/compute_queue.py",
-      "line": 185,
-      "exception": "OSError",
-      "action": "return False"
-    },
-    {
-      "path": "scripts/compute_queue.py",
-      "line": 192,
-      "exception": "FileNotFoundError",
-      "action": "pass"
-    },
-    {
-      "path": "scripts/content_correction_scanner.py",
-      "line": 382,
-      "exception": "JSONDecodeError|UnicodeDecodeError",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/content_correction_scanner.py",
-      "line": 424,
-      "exception": "JSONDecodeError|UnicodeDecodeError",
-      "action": "pass"
-    },
-    {
-      "path": "scripts/cron_review.py",
-      "line": 189,
-      "exception": "Exception",
-      "action": "return []"
-    },
-    {
-      "path": "scripts/daily_update.py",
-      "line": 39,
-      "exception": "JSONDecodeError|OSError",
-      "action": "pass"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/health.py",
-      "line": 37,
-      "exception": "ProcessLookupError",
-      "action": "return False"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/health.py",
-      "line": 39,
-      "exception": "PermissionError",
-      "action": "return True"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/health.py",
-      "line": 53,
-      "exception": "ProcessLookupError",
-      "action": "pass"
-    },
-    {
-      "path": "scripts/dispatch_supervisor/health.py",
-      "line": 55,
-      "exception": "ProcessLookupError",
-      "action": "pass"
     },
     {
       "path": "scripts/dispatch_supervisor/state.py",
@@ -250,18 +112,6 @@
       "action": "pass"
     },
     {
-      "path": "scripts/generate_diverse_tasks.py",
-      "line": 233,
-      "exception": "ValueError",
-      "action": "return None"
-    },
-    {
-      "path": "scripts/generate_diverse_tasks.py",
-      "line": 238,
-      "exception": "ValueError",
-      "action": "return None"
-    },
-    {
       "path": "scripts/gmail_inbox_poll.py",
       "line": 139,
       "exception": "Exception",
@@ -298,28 +148,10 @@
       "action": "continue"
     },
     {
-      "path": "scripts/lookahead_audit.py",
-      "line": 133,
-      "exception": "UnicodeDecodeError|OSError",
-      "action": "return []"
-    },
-    {
       "path": "scripts/master_var_panel.py",
       "line": 313,
       "exception": "Exception",
       "action": "continue"
-    },
-    {
-      "path": "scripts/ops_dashboard.py",
-      "line": 73,
-      "exception": "Exception",
-      "action": "return False"
-    },
-    {
-      "path": "scripts/ops_dashboard.py",
-      "line": 136,
-      "exception": "Exception",
-      "action": "return None"
     },
     {
       "path": "scripts/paper3_fixes.py",
@@ -338,12 +170,6 @@
       "line": 138,
       "exception": "Exception",
       "action": "continue"
-    },
-    {
-      "path": "scripts/prune_rollback_points.py",
-      "line": 38,
-      "exception": "ValueError",
-      "action": "return None"
     },
     {
       "path": "scripts/radar_holdings_risk.py",
@@ -382,39 +208,9 @@
       "action": "return []"
     },
     {
-      "path": "scripts/refill_task_pool.py",
-      "line": 215,
-      "exception": "ValueError",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/refill_task_pool.py",
-      "line": 676,
-      "exception": "Exception",
-      "action": "return None"
-    },
-    {
-      "path": "scripts/run_due_jobs.py",
-      "line": 122,
-      "exception": "ValueError",
-      "action": "return None"
-    },
-    {
       "path": "scripts/scan_arxiv_topics.py",
       "line": 145,
       "exception": "ValueError",
-      "action": "continue"
-    },
-    {
-      "path": "scripts/session_replay_pending.py",
-      "line": 47,
-      "exception": "OSError|JSONDecodeError",
-      "action": "return None"
-    },
-    {
-      "path": "scripts/session_replay_pending.py",
-      "line": 114,
-      "exception": "TypeError|ValueError",
       "action": "continue"
     },
     {
@@ -452,30 +248,6 @@
       "line": 113,
       "exception": "Exception",
       "action": "continue"
-    },
-    {
-      "path": "scripts/work_dashboard_server.py",
-      "line": 145,
-      "exception": "Exception",
-      "action": "return None"
-    },
-    {
-      "path": "scripts/work_dashboard_server.py",
-      "line": 189,
-      "exception": "Exception",
-      "action": "return False"
-    },
-    {
-      "path": "scripts/work_dashboard_server.py",
-      "line": 211,
-      "exception": "Exception",
-      "action": "return []"
-    },
-    {
-      "path": "scripts/work_dashboard_server.py",
-      "line": 464,
-      "exception": "Exception",
-      "action": "return None"
     },
     {
       "path": "scripts/work_summary_6h.py",
@@ -548,60 +320,6 @@
       "line": 165,
       "exception": "ValueError",
       "action": "continue"
-    },
-    {
-      "path": "src/volpred/ops/alerts.py",
-      "line": 53,
-      "exception": "ValueError",
-      "action": "return None"
-    },
-    {
-      "path": "src/volpred/ops/alerts.py",
-      "line": 72,
-      "exception": "ValueError",
-      "action": "return None"
-    },
-    {
-      "path": "src/volpred/ops/alerts.py",
-      "line": 536,
-      "exception": "OSError",
-      "action": "return None"
-    },
-    {
-      "path": "src/volpred/ops/alerts.py",
-      "line": 556,
-      "exception": "OSError",
-      "action": "return []"
-    },
-    {
-      "path": "src/volpred/ops/alerts.py",
-      "line": 976,
-      "exception": "OSError",
-      "action": "continue"
-    },
-    {
-      "path": "src/volpred/ops/content.py",
-      "line": 222,
-      "exception": "Exception",
-      "action": "return None"
-    },
-    {
-      "path": "src/volpred/ops/content.py",
-      "line": 618,
-      "exception": "ValueError|TypeError",
-      "action": "return False"
-    },
-    {
-      "path": "src/volpred/ops/content.py",
-      "line": 651,
-      "exception": "Exception",
-      "action": "return True"
-    },
-    {
-      "path": "src/volpred/ops/content.py",
-      "line": 1117,
-      "exception": "Exception",
-      "action": "return True"
     },
     {
       "path": "src/volpred/ops/execution_brief.py",
@@ -740,12 +458,6 @@
       "line": 973,
       "exception": "ImportError",
       "action": "pass"
-    },
-    {
-      "path": "src/volpred/publisher/publisher.py",
-      "line": 1680,
-      "exception": "Exception",
-      "action": "continue"
     },
     {
       "path": "src/volpred/research/conclusion_lint.py",
