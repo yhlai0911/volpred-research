@@ -38108,5 +38108,56 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-06-28T11:10:11+00:00"
+  },
+  {
+    "id": "paper_review_mile_81df26b0",
+    "title": "Paper review (Codex 24h-rule): 模型多看幾個鄰居，不代表就更會預測波動",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_81df26b0 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_81df26b0",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-28T13:07:58+00:00"
+  },
+  {
+    "id": "paper_review_mile_76475146",
+    "title": "Paper review (Codex 24h-rule): 事件日前別急著躲：NFP、CPI、FOMC 留下的共同線索",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_76475146 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_76475146",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-28T13:07:58+00:00"
+  },
+  {
+    "id": "paper_review_mile_127dc20d",
+    "title": "Paper review (Codex 24h-rule): 預測輸了，守底線卻贏了：一個模型的分裂成績單",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_127dc20d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_127dc20d",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-28T13:07:58+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-06-28T13:08:42.630050+00:00",
+    "claim_session_id": "c0e47a4c3337",
+    "started_at": "2026-06-28T13:08:48.660218+00:00",
+    "completed_at": "2026-06-28T13:11:29.108476+00:00",
+    "result": "PASS — 文章 mile_127dc20d 全數字驗證對齊 K1403 results.json（點預測 44%/64%/35%、尾端 gap 六格、Kupiec p 0.31-0.93）。Lookahead 清（shift(1) 三 features + dropna）、DM sign convention 正確（d=ols-qmed, mean_diff<0 → OLS 勝對應 SIG_NEG）、Kupiec 標準 χ² LR。Aggregate verdict TAIL_CALIB_USABLE 與 article narrative 相符。Report: storage/ops/paper_reviews/mile_127dc20d.md。Caveats：fixed-origin no-refit + |return| HAR-RAV proxy 命名 imprecision，列 future K-series 改進，不阻 publish。"
   }
 ]
