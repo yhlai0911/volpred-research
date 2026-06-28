@@ -37446,6 +37446,24 @@
     "result": "K1552 completed: yfinance sector ETF investor-memory cue proxy, 2000-2026, 82,487 asset-day rows. Verdict NULL_AMPLIFICATION_WITH_OPPOSITE_RALLY_DECOMPRESSION: 0 expected-direction Bonferroni/Harvey passes; rally-memory cue significant in opposite direction. Artifacts in experiments/k1552/, knowledge write deferred to canonical gate."
   },
   {
+    "id": "email-12019-f4e53b",
+    "title": "[email_reply] Re: [VolPred Boss Report] 2026-06-25 12:10 台灣時間 平台運營報告",
+    "description": "Gmail UID: 12019\nMessage-ID: <D4D1DA6F-4539-45F1-A4FF-DE511ACFAB62@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Thu, 25 Jun 2026 12:30:39 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-25 12:10 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\ncodex可以暫時全面接手？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月25日 12:10 寫道：\r\n> \r\n> VolPred Boss Report · 2026-06-25 12:10 台灣時間 · Overall CRITICAL\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tcritical\t0 pending tasks, 0 in-flight — platform idle (top types: [])\trefill pool (article candidates + research-backlog fallback)\r\n> production_throughput\twarn\t3 articles published last 24h (target 6/day)\t派 daily_article + trending_repost agent\r\n> distribution_supabase\tok\t3/3 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample report URLs ok; 3/3 core pages content-ok\t—\r\n> verification_fb_pipeline\tok\t0 FB posts pending sync\t—\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\twarn\t2 current warn/critical alert conditions\tingest alerts → run remediation per alert.md auto-action table\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。有需要掌握的項目 ↓\r\n> \r\n> === cron 成果掌握 review — 2026-06-25 12:10:06（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=148 exit=1 idle | last: 2026-06-25 12:07:33 (log-mtime)  🔴 last exit 1\r\n>   compute_worker    runs=674 exit=0 idle | last: 2026-06-25 12:00:05 (log-mtime)\r\n>   check_alerts      runs=169 exit=0 idle | last: 2026-06-25 12:00:21 (log-mtime)\r\n>   collect_tw        runs=5 exit=0 idle | last: 2026-06-24 15:00:14 (log-mtime)\r\n>   collect_us        runs=5 exit=0 idle | last: 2026-06-25 07:03:07 (log-mtime)\r\n>   daily_update      runs=6 exit=0 idle | last: 2026-06-25 08:06:21 (log-mtime)\r\n>   release_pool      runs=29 exit=0 idle | last: 2026-06-25 12:07:01 (log-mtime)\r\n>   market_cal        runs=1 exit=0 idle | last: 2026-06-22 08:00:02 (log-mtime)\r\n>   memory_health     runs=7 exit=0 idle | last: 2026-06-25 05:30:04 (log-mtime)\r\n>   work_summary      runs=29 exit=0 idle | last: 2026-06-25 12:05:10 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：0 筆\r\n> \r\n> 🔴 需要掌握/處理：\r\n>   - hourly_dispatch: 🔴 last exit 1\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 3 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 8bda42b57\t[codex] Clear Claude backlog and guard PRG status\t10:51\r\n> 42c6754d4\t[codex] publish tail risk daily digest\t10:12\r\n> c63cfba97\t[codex] add journal discovery backlog batch\t08:57\r\n> ③ Pending 池與論文組合\r\n> \r\n> Pending tasks: 0\r\n> \r\n> By type: \r\n> \r\n> 論文組合\r\n> \r\n> Paper\tStatus\r\n> btc-gas-negative\t`major_revision` — 2026-06-10 audit HIGH\r\n> crypto-fear-channel\t**MAJOR REVISION** (2026-06-11 audit syn\r\n> eav-universal-magnitude\t🔶 **MAJOR_REVISION（2026-06-10 全組合審查，5 HI\r\n> forecast-tail-divergence\t?\r\n> garch-x-vix\tsubmitted (under review) | Reproduce gat\r\n> k189_audit\t?\r\n> leverage-direction\t🟢 **REVISION COMPLETE — v12 確認輪通過（2026-0\r\n> prg-periodic-garch\tThe older submission-ready status below \r\n> taiwan-vt\t**Major Revision Required** — 2 HIGH blo\r\n> vix-sufficiency\t`MAJOR_REVISION` after audit 2026-06-10.\r\n> volatility-absorption\tMAJOR REVISION — active manuscript narro\r\n> vt-crowding-abm\t🔶 **narrative_rewrite_complete_pending_r\r\n> vt-insurance-cost\t`MAJOR_REVISION` after 2026-06-10 au\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-25T04:45:09.873997+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12019,
+    "email_message_id": "<D4D1DA6F-4539-45F1-A4FF-DE511ACFAB62@gmail.com>",
+    "email_subject": "Re: [VolPred Boss Report] 2026-06-25 12:10 台灣時間 平台運營報告",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+  },
+  {
     "id": "K1339_article_general",
     "title": "K1339: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1339 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1339 (CONDITIONAL_PASS): commodity ETF 21d-vs-63d momentum-regime switch as event-study signal for vol jump.\n\nMethod: USO/UNG/CPER 21d-63d momentum slope sign as backwardation/contango proxy; sustained-10d filter + cross-asset confirmation; forward [event+1, event+H] vol jump at",
@@ -37512,6 +37530,58 @@
     "result": "Published general-audience draft for K1347 as mile_59f60989: 尾部風控聽起來更聰明，實測卻只贏了一次. Anti-AI gate and publish gate passed; article keeps K1347 metadata and two real PNG charts."
   },
   {
+    "id": "trending_repost_2026_06_26_ai變現",
+    "title": "[trending_repost] AI投資回報期拉長，科技股隱含波動率的偏斜定價",
+    "description": "探討科技巨頭擴大資本支出但營收回報放緩的市場定價。可量化：比較 Nasdaq 100 偏斜度（Skew）與 AI 資本支出指引的變動相關性，評估市場對科技股下檔風險的隱含定價。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-25T22:00:12+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_26_台股ai險",
+    "title": "[trending_repost] 半導體高估值重置，台股權值股與外資選擇權避險策略",
+    "description": "針對AI半導體板塊回檔，分析外資在台指期與選擇權市場的波動率佈局。可量化：追蹤台股隱含波動率（Taiex VI）與外資台指選擇權未平倉量（OI）偏斜度，驗證波動率均值回歸的交易策略。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-25T22:00:20+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "journal_discovery_20260626_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-06-26T00:00:01+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-27T11:48:11.653877+00:00",
+    "claim_session_id": "5d2d7bb2cd06",
+    "started_at": "2026-06-27T11:48:19.620038+00:00",
+    "completed_at": "2026-06-27T11:55:02.526118+00:00",
+    "result": "Added 8 de-duplicated journal-discovery backlog directions to research_program.md from JFEC/RoF/RFS/AEA/REStud 2025-26: candlestick spot vol, coherent VaR/ES estimators, deep quantile VaR, social-transmission bias, factor implementation shortfall, probability-weighted skew-vol, tariff-FX vol, US macro global co-jump."
+  },
+  {
     "id": "daily_digest_20260626",
     "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
     "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **先選定一個專題（theme）**（例：波動率模型複雜度天花板 / MOVE-VIX 跨資產分裂 / 尾部風險 VaR 監管現實 / 研究誠實 audit），整篇圍繞單一 thesis；(2) **從過去累積的 archive 撈同主題的 3-6 篇舊文**（用 grep/jq 掃 storage/reports/feed.json 的 title/tags），發佈日期須橫跨 >1 週、至少 3 篇來自當天以外 — **不可只挑今天/昨天剛發的湊數**；排除 digest 自身與每日建議類日報；(3) **掛一個最近時事/市場狀態 hook 開場**（當前 VIX 水位 / 近期 FOMC·NFP·CPI / MOVE-VIX 分裂等，數據須取自真實 archive 文章或 results.json，不可臆造），把過去研究與當下市場連起來；(4) **串成有觀點的敘事弧**（演進/對照/反差，告訴讀者『這主題上我們做過什麼、結論如何演進、彼此如何呼應』），不是逐篇『這篇講 X、那篇講 Y』的並列摘要；(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ 文末懶人包圖組；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 以 '每日精選導讀｜' 起頭並帶專題式標題（非『今日 N 篇摘要』）；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
@@ -37532,6 +37602,57 @@
     "started_at": "2026-06-27T09:31:08.105837+00:00",
     "completed_at": "2026-06-27T09:39:56.811109+00:00",
     "result": "Published daily digest mile_8a5e80b0 on AI capex / Mag-7 dispersion / options skew. Curated 6 published archive articles, added Supabase lazy-pack image, and verified single-article Supabase sync/read-back. Full feed-sync --apply hung on historical drift and was interrupted; single sync_article fallback succeeded."
+  },
+  {
+    "id": "trending_repost_2026_06_27_ai變現",
+    "title": "[trending_repost] AI變現延遲，科技股隱含波動率與資本支出背離",
+    "description": "從科技廠資本支出攀升但股價回檔切入，分析市場對AI回報週期的質疑。可量化：大型科技股隱含波動率與資本支出指引修正之相關性，以及偏斜度如何反映下行風險。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-26T22:00:22+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "event_article_nfp_us_2026-07-03_tminus7",
+    "title": "[event_article] Event article: NFP_US 2026-07-03 T-7",
+    "description": "Auto-generated by refill_reader_facing_pool.py from event_jobs.\nref_event_job_id: nfp-2026-07-03-t7\nevent_key: NFP_US_2026_07_03\nevent_type: nfp_us\nevent_date: 2026-07-03\nevent_series_slot: T-7\n\nAuto-populated by populate_upcoming_events.py. NFP_US 2026-07-03 T-7 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-26T22:00:22+00:00",
+    "source": "reader_facing_refill",
+    "ref_event_job_id": "nfp-2026-07-03-t7",
+    "event_key": "NFP_US_2026_07_03",
+    "event_type": "nfp_us",
+    "event_date": "2026-07-03",
+    "event_series_slot": "T-7",
+    "tags": [
+      "event_article",
+      "reader_facing",
+      "nfp_us",
+      "T-7"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_27_ai資本支出",
+    "title": "[trending_repost] AI資本支出破萬億，科技股「營收鴻溝」的波動率交易",
+    "description": "探討 Hyperscaler 近兆美元 AI Capex 與獲利變現脫節引發的科技股劇烈震盪。可量化：分析 Nasdaq 100 隱含波動率（VXN）對 Capex 指引修正的彈性，以及科技巨頭隱含波動率溢價（IV Premium）的均值回歸特徵。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-26T22:00:23+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   },
   {
     "id": "daily_digest_20260627",
@@ -37556,7 +37677,101 @@
     "result": "台灣時間 2026-06-27 已有 published daily_digest mile_8a5e80b0（published_at=2026-06-27T09:36:15.833247+00:00，task_id=daily_digest_20260626）。依每日精選導讀每日唯一 gate，本輪不再發佈第二篇，將排程任務視為已滿足。"
   },
   {
-    "id": "journal_discovery_20260626_0",
+    "id": "trending_repost_2026_06_28_ai修正",
+    "title": "[trending_repost] 半導體巨頭千億失血，如何用隱含波動率偏斜定價回檔風險？",
+    "description": "分析輝達等晶片股暴跌後，費半指數與個別科技股隱含波動率偏斜（Skew）的變化。可量化：比較歷史修正期中，看跌期權溢價（Put Premium）對實際波動率超額回報的預測力。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-27T22:00:25+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_28_ai變現",
+    "title": "[trending_repost] AI年燒八千億，硬體與軟體隱含波動率背離預示了什麼？",
+    "description": "從科技巨頭高達8000億美元的CapEx切入，探討市場對AI回報週期的定價分歧。可量化角度：分析晶片硬體股與AI軟體服務股隱含波動率之差（IV Spread）的擴大，並檢驗其與下季財測修正的相關性。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-27T22:00:26+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "K1553",
+    "title": "K1553: Coherent VaR/ES estimator guardrail：風險量本身 coherent，不代表估計器 coherent** — 用 SPY/QQQ/IWM/TLT/HYG 日報酬建 rolling VaR/ES，對比 hist",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1273). Original: Coherent VaR/ES estimator guardrail：風險量本身 coherent，不代表估計器 coherent** — 用 SPY/QQQ/IWM/TLT/HYG 日報酬建 rolling VaR/ES，對比 historical simulation、EWMA、Cornish-Fisher、coherent L-estimator weight structure；檢查 ES backtest、capital adequacy ranking flip、以及 VT/DRP 降槓桿觸發次數是否因 estimator 不一致而改變。與 conformal VaR / CVaR-RP 不同，這裡是「risk estimator coherence」工程風控層（來源：JFEC 2026 \"Coherent Estimation of Risk Measures\"，指出 coherent risk measure 不必然導出 coherent estimator）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1553.py with signal.shift(1) + seed=42, (c) K1553_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1273,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-28T00:00:00Z"
+  },
+  {
+    "id": "K1554",
+    "title": "K1554: Social-transmission bias 的公開代理：被貼文成功經驗推上來的高波動股票是否隔日 RV 放大** — 用 Reddit/Stocktwits/Yahoo trending 免費貼文或標題量，標記「近期高報酬且高 RV」",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1277). Original: Social-transmission bias 的公開代理：被貼文成功經驗推上來的高波動股票是否隔日 RV 放大** — 用 Reddit/Stocktwits/Yahoo trending 免費貼文或標題量，標記「近期高報酬且高 RV」個股被討論的 social-transmission shock，檢定 t+1..t+5 abnormal volume、range-vol、gap risk 與 reversal；與 investor-memory/attention-utility 不同，這裡是網路節點傳播 + follow-up purchase channel，不是個人回憶或持股正面注意力（來源：Review of Finance 2025 \"Social transmission bias\"；高波動、近期贏家貼文更容易引發跟隨買入）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1554.py with signal.shift(1) + seed=42, (c) K1554_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1277,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-28T00:00:00Z"
+  },
+  {
+    "id": "K1555",
+    "title": "K1555: Tariff-uncertainty USD risk-premium wedge：關稅波動是否先進 FX vol 再外溢到 EM/commodity ETF** — 用 2025-26 tariff event calendar / GD",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1283). Original: Tariff-uncertainty USD risk-premium wedge：關稅波動是否先進 FX vol 再外溢到 EM/commodity ETF** — 用 2025-26 tariff event calendar / GDELT tariff headline intensity、UUP/DXY proxy、FXY/FXE/CEW/EMLC、EEM/DBC/GLD，檢定 tariff uncertainty shock 對 t+1..t+22 FX realized vol、USD drawdown、EM FX left-tail 的 lead-lag；與 line 1081 tariff sector RV 正交，這裡是 AEA macrotrade 的 exchange-rate risk-premium wedge（來源：AEA P&P 2026 \"Global Trade, Tariff Uncertainty, and the US Dollar\"）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1555.py with signal.shift(1) + seed=42, (c) K1555_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1283,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-28T00:00:00Z"
+  },
+  {
+    "id": "K1556",
+    "title": "K1556: US macro news global co-jump beta：各國 ETF 對美國數據驚喜的波動同步化程度** — 用 FRED/BLS/BEA release calendar + surprise proxy（actual-min",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1285). Original: US macro news global co-jump beta：各國 ETF 對美國數據驚喜的波動同步化程度** — 用 FRED/BLS/BEA release calendar + surprise proxy（actual-minus-consensus 若免費不可得則用 event-day absolute surprise proxy / Kalshi macro market shock 代理）、EFA/EEM/EWJ/EWG/EWT/EWY/EWZ/INDA，測 event-day cojump、VIX jump、t+5 RV persistence 與 country beta；與 generic EPU/macro-attention 不同，這裡是具體美國 macro release 造成 global financial cycle synchronized jump（來源：REStud 2026 \"The U.S., Economic News, and the Global Financial Cycle\"；27 國股指、VIX、商品對美國新聞同步跳動）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1556.py with signal.shift(1) + seed=42, (c) K1556_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1285,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-28T00:00:01Z"
+  },
+  {
+    "id": "journal_discovery_20260628_0",
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
     "priority": 2,
@@ -37569,12 +37784,12 @@
       "research-backlog-refresh",
       "all-covered-fallback"
     ],
-    "created_at": "2026-06-26T00:00:01+00:00",
+    "created_at": "2026-06-28T00:00:01+00:00",
     "claimed_by": "codex-vscode",
-    "claimed_at": "2026-06-27T11:48:11.653877+00:00",
-    "claim_session_id": "5d2d7bb2cd06",
-    "started_at": "2026-06-27T11:48:19.620038+00:00",
-    "completed_at": "2026-06-27T11:55:02.526118+00:00",
-    "result": "Added 8 de-duplicated journal-discovery backlog directions to research_program.md from JFEC/RoF/RFS/AEA/REStud 2025-26: candlestick spot vol, coherent VaR/ES estimators, deep quantile VaR, social-transmission bias, factor implementation shortfall, probability-weighted skew-vol, tariff-FX vol, US macro global co-jump."
+    "claimed_at": "2026-06-28T00:39:02.715534+00:00",
+    "claim_session_id": "a6db154b4bf2",
+    "started_at": "2026-06-28T00:39:08.465252+00:00",
+    "completed_at": "2026-06-28T00:49:43.603561+00:00",
+    "result": "Added 10 de-duplicated journal-discovery directions to research_program.md from RFS/AER/JEP/Fed/IMF/NATO/WEF/Nature/OECD/IEA 2025-26 sources: DEX priority-fee crypto RV, platform credit stress, compliance burden beta, legacy-asset overhang, office-CRE bank/REIT vol, semiconductor industrial-policy shocks, defense-spending beta, labor/immigration sector RV, maritime chokepoints, critical-minerals export restrictions. Verified generate_research_backlog dry-run now sees 5 addable experiment briefs instead of journal-discovery fallback."
   }
 ]
