@@ -95,7 +95,8 @@ def first_heading(readme: Path) -> str:
                 if line.startswith("# "):
                     title = line.lstrip("#").strip()
                     return title[:100]
-    except FileNotFoundError:
+    except FileNotFoundError as exc:
+        _warn_index("README missing; using UNKNOWN title", exc, readme)
         return ""
     except Exception as exc:
         _warn_index("README heading read failed; using UNKNOWN title", exc, readme)
@@ -122,8 +123,10 @@ def readme_date(readme: Path) -> Optional[str]:
         return None
     y, mm, dd = parts
     try:
-        return f"{int(y):04d}-{int(mm):02d}-{int(dd):02d}"
-    except ValueError:
+        dt = datetime(int(y), int(mm), int(dd)).date()
+        return dt.isoformat()
+    except ValueError as exc:
+        _warn_index("README date parse failed; using fallback date", exc, readme)
         return None
 
 
@@ -146,7 +149,10 @@ def git_first_commit_date(path: Path) -> Optional[str]:
             stderr=subprocess.DEVNULL,
             timeout=10,
         )
-    except Exception:
+    except subprocess.CalledProcessError:
+        return None  # silent-ok: untracked experiment directories have no first commit date yet.
+    except Exception as exc:
+        _warn_index("git first-commit date lookup failed; using fallback date", exc, path)
         return None
     lines = [ln.decode().strip() for ln in out.splitlines() if ln.strip()]
     if not lines:
@@ -367,7 +373,11 @@ def summarize(rows: list[dict]) -> dict:
             d = datetime.fromisoformat(r["date"]).date()
             if d >= cutoff:
                 recent += 1
-        except Exception:
+        except Exception as exc:
+            _warn_index(
+                f"explicit README date parse failed in summary k_id={r.get('k_id', '?')}; skipping recent count",
+                exc,
+            )
             continue
     return {
         "total": total,

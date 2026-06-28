@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 build_experiments_index residual fallback path 未完全可觀察
+
+**問題**：Codex hourly tick 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/build_experiments_index.py`，發現 2026-06-22 已修過的 experiments index warning framework 仍有殘留：`first_heading()` 遇 missing README 直接回空字串、`readme_date()` 對壞 Date 欄位只補零不驗證真日期、`git_first_commit_date()` probe 失敗直接回 `None`、`summarize()` 遇 explicit date 壞值直接 `continue`。
+
+**根因**：前輪修正主要覆蓋 unreadable README、knowledge/feed/paper 讀取失敗，但漏掉「來源存在但 metadata 語義壞掉」與 git fallback probe 本身壞掉的路徑。missing README / untracked experiment 仍是可接受 fail-open，但應分清楚：untracked path 是 normal no-commit 狀態可 `silent-ok`；probe OSError 或 explicit date 壞值要有診斷。
+
+**解決方法**：missing README heading、壞 README Date、git first-commit probe 非 `CalledProcessError` 失敗、summary explicit date parse 失敗都補 `[experiments_index] WARN ...`；`CalledProcessError` 用 inline `silent-ok` 標記 untracked experiment directory 無 git commit date 的正常降級。`readme_date()` 改用 `datetime(...).date()` 驗證真日期。新增 regression tests 覆蓋 5 條路徑。驗證：`uv run python scripts/audit_silent_fallbacks.py --json scripts/build_experiments_index.py` 回 `[]`，`uv run pytest tests/test_build_experiments_index_warnings.py -q` 8 passed，`uv run python -m py_compile scripts/build_experiments_index.py tests/test_build_experiments_index_warnings.py` 通過。
+
 ## 2026-06-28 work_dashboard_server probe / cron parse fallback 缺診斷
 
 **問題**：Codex hourly tick 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/work_dashboard_server.py`，掃到四處 fail-open：cron next-fire parse 失敗直接 `return None`、`launchctl` daemon probe 失敗直接 `return False`、`pgrep` process count 失敗直接 `return -1`、`git log` 讀取失敗直接 `return []`。另 invalid `/api/task` POST body 雖回 400 給 client，但 audit 不知道這是可觀察路徑。
