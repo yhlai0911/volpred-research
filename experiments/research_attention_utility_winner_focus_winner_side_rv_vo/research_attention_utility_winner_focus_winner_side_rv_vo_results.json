@@ -1,0 +1,3451 @@
+{
+  "experiment_id": "research_attention_utility_winner_focus_winner_side_rv_vo",
+  "run_timestamp_utc": "2026-06-28T20:41:01.597131+00:00",
+  "random_seed": 42,
+  "data": {
+    "source": "yfinance daily OHLCV",
+    "download_call": "yf.download(..., auto_adjust=True, actions=False)",
+    "start": "2020-01-01",
+    "end_exclusive": "2026-06-29",
+    "baskets": {
+      "retail_meme_risk": [
+        "GME",
+        "AMC",
+        "BB",
+        "PLTR",
+        "RIVN",
+        "SOFI",
+        "COIN",
+        "HOOD",
+        "DKNG",
+        "CVNA"
+      ],
+      "large_cap_control": [
+        "AAPL",
+        "MSFT",
+        "NVDA",
+        "AMZN",
+        "GOOGL",
+        "META",
+        "JPM",
+        "XOM",
+        "UNH",
+        "WMT"
+      ]
+    },
+    "missing_tickers": {
+      "retail_meme_risk": [],
+      "large_cap_control": []
+    },
+    "effective_date_range": {
+      "start": "2020-07-02",
+      "end": "2026-06-26"
+    },
+    "n_panel_rows_after_feature_build": 28432
+  },
+  "literature": [
+    {
+      "title": "Attention Utility: Evidence from Individual Investors",
+      "venue": "Review of Economic Studies, 2026",
+      "url": "https://academic.oup.com/restud/article/93/1/664/8149267",
+      "use_in_design": "Winner-side selective attention motivation; not directly replicated."
+    },
+    {
+      "title": "All that Glitters: The Effect of Attention and News on the Buying Behavior of Individual and Institutional Investors",
+      "venue": "Review of Financial Studies, 2008",
+      "url": "https://academic.oup.com/rfs/article-abstract/21/2/785/1607197",
+      "use_in_design": "Abnormal trading volume and extreme returns as attention-grabbing stock proxies."
+    },
+    {
+      "title": "In Search of Attention",
+      "venue": "Journal of Finance, 2011",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.2011.01679.x",
+      "use_in_design": "Google SVI motivation; unavailable here, so OHLCV proxy is labelled as indirect."
+    }
+  ],
+  "methodology": {
+    "unit": "ticker-day panel",
+    "event_label": {
+      "winner": "ret21_lag >= rolling252 q80 OR prior close within 2% of prior 63d high",
+      "loser": "ret21_lag <= rolling252 q20 OR prior close within 2% of prior 63d low",
+      "conflicts": "dropped from both sides"
+    },
+    "outcomes": {
+      "abn_volume_z": "log(volume)_t standardized by lagged 252d mean/std through t-1",
+      "range_vol_z": "(log(high_t/low_t)*100)^2 standardized by lagged 252d mean/std through t-1",
+      "gap_abs_z": "|log(open_t/close_{t-1})*100| standardized by lagged 252d mean/std through t-1",
+      "rv_z": "(log(close_t/close_{t-1})*100)^2 standardized by lagged 252d mean/std through t-1"
+    },
+    "windows": {
+      "all_next_sessions": "All next trading sessions after the t-1 winner/loser label",
+      "monday_post_weekend": "Monday sessions, proxying post-weekend attention release"
+    },
+    "test": "Ticker-level winner-minus-loser mean differences; one-sample t across tickers within each basket; Welch t for retail-minus-control DiD.",
+    "multiple_testing": "Holm adjustment across all within-group and DiD tests (24 total tests).",
+    "bootstrap": "5000 resamples across ticker-level effects, seed=42."
+  },
+  "lookahead_controls": {
+    "winner_loser_labels": "ret21_lag uses close.pct_change(21).shift(1); prior high/low uses close.shift(1).rolling(...). Event labels at date t never use close_t.",
+    "outcome_standardization": "Every outcome z-score uses series.shift(1).rolling(...) for mean/std, so t's outcome is not included in its own benchmark.",
+    "no_training_split": "This is an event-study diagnostic, not an OOS forecast. There is no model selection on the test window; all thresholds are fixed ex ante."
+  },
+  "sample_summary": {
+    "large_cap_control": {
+      "AAPL": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 525,
+        "loser_events": 356,
+        "post_weekend_observations": 280
+      },
+      "AMZN": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 485,
+        "loser_events": 396,
+        "post_weekend_observations": 280
+      },
+      "GOOGL": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 626,
+        "loser_events": 333,
+        "post_weekend_observations": 280
+      },
+      "JPM": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 619,
+        "loser_events": 363,
+        "post_weekend_observations": 280
+      },
+      "META": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 484,
+        "loser_events": 344,
+        "post_weekend_observations": 280
+      },
+      "MSFT": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 519,
+        "loser_events": 395,
+        "post_weekend_observations": 280
+      },
+      "NVDA": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 495,
+        "loser_events": 394,
+        "post_weekend_observations": 280
+      },
+      "UNH": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 529,
+        "loser_events": 351,
+        "post_weekend_observations": 280
+      },
+      "WMT": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 641,
+        "loser_events": 321,
+        "post_weekend_observations": 280
+      },
+      "XOM": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 502,
+        "loser_events": 334,
+        "post_weekend_observations": 280
+      }
+    },
+    "retail_meme_risk": {
+      "AMC": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 310,
+        "loser_events": 426,
+        "post_weekend_observations": 280
+      },
+      "BB": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 348,
+        "loser_events": 354,
+        "post_weekend_observations": 280
+      },
+      "COIN": {
+        "start": "2021-10-12",
+        "end": "2026-06-26",
+        "observations": 1181,
+        "winner_events": 247,
+        "loser_events": 315,
+        "post_weekend_observations": 219
+      },
+      "CVNA": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 390,
+        "loser_events": 397,
+        "post_weekend_observations": 280
+      },
+      "DKNG": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 353,
+        "loser_events": 353,
+        "post_weekend_observations": 280
+      },
+      "GME": {
+        "start": "2020-07-02",
+        "end": "2026-06-26",
+        "observations": 1503,
+        "winner_events": 307,
+        "loser_events": 357,
+        "post_weekend_observations": 280
+      },
+      "HOOD": {
+        "start": "2022-01-27",
+        "end": "2026-06-26",
+        "observations": 1107,
+        "winner_events": 339,
+        "loser_events": 235,
+        "post_weekend_observations": 205
+      },
+      "PLTR": {
+        "start": "2021-04-01",
+        "end": "2026-06-26",
+        "observations": 1315,
+        "winner_events": 353,
+        "loser_events": 324,
+        "post_weekend_observations": 244
+      },
+      "RIVN": {
+        "start": "2022-05-12",
+        "end": "2026-06-26",
+        "observations": 1034,
+        "winner_events": 251,
+        "loser_events": 211,
+        "post_weekend_observations": 191
+      },
+      "SOFI": {
+        "start": "2021-07-06",
+        "end": "2026-06-26",
+        "observations": 1250,
+        "winner_events": 288,
+        "loser_events": 294,
+        "post_weekend_observations": 232
+      }
+    }
+  },
+  "tests": {
+    "within_group": [
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "retail_meme_risk",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "abn_volume_z",
+        "outcome_label": "Abnormal volume z-score",
+        "n_tickers": 10,
+        "n_winner_events": 3186,
+        "n_loser_events": 3266,
+        "mean_winner": 0.5129446005842536,
+        "mean_loser": 0.13491529639688732,
+        "mean_winner_minus_loser": 0.37802930418736624,
+        "t_stat": 2.37745203979121,
+        "p_value_raw": 0.04140022895862655,
+        "bootstrap_ci_95": [
+          0.07387704545057242,
+          0.6634975765410291
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.9108504075249252,
+            "loser_mean": 0.4518374601838087,
+            "winner_minus_loser": 0.4590129473411165,
+            "n_winner": 310,
+            "n_loser": 426
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.8395072245204109,
+            "loser_mean": 0.02668526346683679,
+            "winner_minus_loser": 0.8128219610535742,
+            "n_winner": 348,
+            "n_loser": 354
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.6093655487703944,
+            "loser_mean": 0.09232526530220286,
+            "winner_minus_loser": 0.5170402834681915,
+            "n_winner": 247,
+            "n_loser": 315
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": 0.01603909582046188,
+            "loser_mean": 0.4408276300382254,
+            "winner_minus_loser": -0.4247885342177635,
+            "n_winner": 390,
+            "n_loser": 397
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.11778017728316864,
+            "loser_mean": 0.3166859967051489,
+            "winner_minus_loser": -0.43446617398831755,
+            "n_winner": 353,
+            "n_loser": 353
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.8762205028760949,
+            "loser_mean": -0.3140763262274845,
+            "winner_minus_loser": 1.1902968291035794,
+            "n_winner": 307,
+            "n_loser": 357
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": 0.523144507392293,
+            "loser_mean": 0.03562438017054376,
+            "winner_minus_loser": 0.48752012722174926,
+            "n_winner": 339,
+            "n_loser": 235
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.4081930550748632,
+            "loser_mean": -0.216939964547714,
+            "winner_minus_loser": 0.6251330196225772,
+            "n_winner": 353,
+            "n_loser": 324
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": 0.4442186802578851,
+            "loser_mean": 0.14445080738290708,
+            "winner_minus_loser": 0.29976787287497797,
+            "n_winner": 251,
+            "n_loser": 211
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.6196871608883759,
+            "loser_mean": 0.3717324514943982,
+            "winner_minus_loser": 0.24795470939397773,
+            "n_winner": 288,
+            "n_loser": 294
+          }
+        ],
+        "p_value_holm": 0.37260206062763895,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "retail_meme_risk",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "range_vol_z",
+        "outcome_label": "Range-vol z-score",
+        "n_tickers": 10,
+        "n_winner_events": 3186,
+        "n_loser_events": 3266,
+        "mean_winner": 0.15859602125670164,
+        "mean_loser": 0.08603111418720194,
+        "mean_winner_minus_loser": 0.07256490706949967,
+        "t_stat": 0.4726720595822579,
+        "p_value_raw": 0.6476993582026633,
+        "bootstrap_ci_95": [
+          -0.21443325230425342,
+          0.3557637905593912
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.5545150670959582,
+            "loser_mean": -0.03142343169295791,
+            "winner_minus_loser": 0.5859384987889161,
+            "n_winner": 310,
+            "n_loser": 426
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.5709650022220256,
+            "loser_mean": -0.05173618768540704,
+            "winner_minus_loser": 0.6227011899074326,
+            "n_winner": 348,
+            "n_loser": 354
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.05512835073591646,
+            "loser_mean": 0.29434228253498473,
+            "winner_minus_loser": -0.23921393179906827,
+            "n_winner": 247,
+            "n_loser": 315
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.10771697766157047,
+            "loser_mean": 0.5104580309710087,
+            "winner_minus_loser": -0.6181750086325792,
+            "n_winner": 390,
+            "n_loser": 397
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.22480983706660643,
+            "loser_mean": 0.21464152572683798,
+            "winner_minus_loser": -0.43945136279344443,
+            "n_winner": 353,
+            "n_loser": 353
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.6767672681841579,
+            "loser_mean": -0.15957879489274324,
+            "winner_minus_loser": 0.8363460630769011,
+            "n_winner": 307,
+            "n_loser": 357
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": 0.005111965319210094,
+            "loser_mean": 0.1555473571832909,
+            "winner_minus_loser": -0.1504353918640808,
+            "n_winner": 339,
+            "n_loser": 235
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.04563612074518488,
+            "loser_mean": 0.015111793045726508,
+            "winner_minus_loser": 0.030524327699458374,
+            "n_winner": 353,
+            "n_loser": 324
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.008856800765244739,
+            "loser_mean": -0.26064659046454225,
+            "winner_minus_loser": 0.2517897896992975,
+            "n_winner": 251,
+            "n_loser": 211
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.019220053757984617,
+            "loser_mean": 0.17359515714582088,
+            "winner_minus_loser": -0.15437510338783628,
+            "n_winner": 288,
+            "n_loser": 294
+          }
+        ],
+        "p_value_holm": 1.0,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "retail_meme_risk",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "gap_abs_z",
+        "outcome_label": "Absolute gap z-score",
+        "n_tickers": 10,
+        "n_winner_events": 3185,
+        "n_loser_events": 3264,
+        "mean_winner": 0.08582902685317251,
+        "mean_loser": 0.041420065123645676,
+        "mean_winner_minus_loser": 0.04440896172952683,
+        "t_stat": 0.43069022300749144,
+        "p_value_raw": 0.6768241312888711,
+        "bootstrap_ci_95": [
+          -0.13763717785709872,
+          0.24242664855892998
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.39075873425076296,
+            "loser_mean": -0.10219519328809197,
+            "winner_minus_loser": 0.4929539275388549,
+            "n_winner": 310,
+            "n_loser": 426
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.25991671248207376,
+            "loser_mean": -0.02224030164322032,
+            "winner_minus_loser": 0.2821570141252941,
+            "n_winner": 348,
+            "n_loser": 354
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.02621581443444564,
+            "loser_mean": 0.13453028393474262,
+            "winner_minus_loser": -0.10831446950029698,
+            "n_winner": 247,
+            "n_loser": 315
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.11207390079690284,
+            "loser_mean": 0.29948454616824405,
+            "winner_minus_loser": -0.4115584469651469,
+            "n_winner": 389,
+            "n_loser": 397
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.12844791445977372,
+            "loser_mean": 0.08465335107332755,
+            "winner_minus_loser": -0.21310126553310127,
+            "n_winner": 353,
+            "n_loser": 353
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.46455185183384257,
+            "loser_mean": -0.16772167725737613,
+            "winner_minus_loser": 0.6322735290912187,
+            "n_winner": 307,
+            "n_loser": 357
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": -0.00025890053502692343,
+            "loser_mean": 0.14245737742754855,
+            "winner_minus_loser": -0.14271627796257547,
+            "n_winner": 339,
+            "n_loser": 234
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": -0.04949076573750358,
+            "loser_mean": 0.025596421152578566,
+            "winner_minus_loser": -0.07508718689008215,
+            "n_winner": 353,
+            "n_loser": 324
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.07254266276918074,
+            "loser_mean": -0.03801372102638483,
+            "winner_minus_loser": -0.03452894174279591,
+            "n_winner": 251,
+            "n_loser": 210
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.0796612998289879,
+            "loser_mean": 0.05764956469508871,
+            "winner_minus_loser": 0.022011735133899188,
+            "n_winner": 288,
+            "n_loser": 294
+          }
+        ],
+        "p_value_holm": 1.0,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "retail_meme_risk",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "rv_z",
+        "outcome_label": "Squared-return z-score",
+        "n_tickers": 10,
+        "n_winner_events": 3185,
+        "n_loser_events": 3264,
+        "mean_winner": 0.14475762718372862,
+        "mean_loser": 0.07086812926984282,
+        "mean_winner_minus_loser": 0.07388949791388583,
+        "t_stat": 0.6162538634639694,
+        "p_value_raw": 0.5529924453549616,
+        "bootstrap_ci_95": [
+          -0.13590405438919462,
+          0.3146111950506089
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.6599110622410818,
+            "loser_mean": -0.021922918408614114,
+            "winner_minus_loser": 0.6818339806496959,
+            "n_winner": 310,
+            "n_loser": 426
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.3476851672573072,
+            "loser_mean": -0.024111905092639004,
+            "winner_minus_loser": 0.3717970723499462,
+            "n_winner": 348,
+            "n_loser": 354
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.05509312800624823,
+            "loser_mean": 0.2512464459624188,
+            "winner_minus_loser": -0.19615331795617058,
+            "n_winner": 247,
+            "n_loser": 315
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.03951609285740125,
+            "loser_mean": 0.32639663771005395,
+            "winner_minus_loser": -0.3659127305674552,
+            "n_winner": 389,
+            "n_loser": 397
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.13329980518627416,
+            "loser_mean": 0.16272906741008433,
+            "winner_minus_loser": -0.29602887259635846,
+            "n_winner": 353,
+            "n_loser": 353
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.6022395655716483,
+            "loser_mean": -0.08417434434854928,
+            "winner_minus_loser": 0.6864139099201976,
+            "n_winner": 307,
+            "n_loser": 357
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": -0.01922522029079086,
+            "loser_mean": 0.08127447300905843,
+            "winner_minus_loser": -0.1004996932998493,
+            "n_winner": 339,
+            "n_loser": 234
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": -0.034650894460887455,
+            "loser_mean": 0.026858351213897836,
+            "winner_minus_loser": -0.06150924567478529,
+            "n_winner": 353,
+            "n_loser": 324
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.05524990578124553,
+            "loser_mean": -0.07184519680391907,
+            "winner_minus_loser": 0.01659529102267354,
+            "n_winner": 251,
+            "n_loser": 210
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.06458926733760006,
+            "loser_mean": 0.06223068204663629,
+            "winner_minus_loser": 0.0023585852909637772,
+            "n_winner": 288,
+            "n_loser": 294
+          }
+        ],
+        "p_value_holm": 1.0,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "large_cap_control",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "abn_volume_z",
+        "outcome_label": "Abnormal volume z-score",
+        "n_tickers": 10,
+        "n_winner_events": 5425,
+        "n_loser_events": 3587,
+        "mean_winner": -0.2535047464547041,
+        "mean_loser": 0.2496364177510499,
+        "mean_winner_minus_loser": -0.5031411642057542,
+        "t_stat": -5.466768677855004,
+        "p_value_raw": 0.0003969209522208718,
+        "bootstrap_ci_95": [
+          -0.6693960244382282,
+          -0.32759348100539376
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.4061746549759946,
+            "loser_mean": 0.06298262962937015,
+            "winner_minus_loser": -0.46915728460536477,
+            "n_winner": 525,
+            "n_loser": 356
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.2757994404257267,
+            "loser_mean": 0.10541562442416189,
+            "winner_minus_loser": -0.38121506484988854,
+            "n_winner": 485,
+            "n_loser": 396
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.2279621867687696,
+            "loser_mean": 0.30339398087452524,
+            "winner_minus_loser": -0.5313561676432949,
+            "n_winner": 626,
+            "n_loser": 333
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.3858489994604771,
+            "loser_mean": 0.24310743993806258,
+            "winner_minus_loser": -0.6289564393985397,
+            "n_winner": 619,
+            "n_loser": 363
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.33474404454555656,
+            "loser_mean": 0.5219902061559537,
+            "winner_minus_loser": -0.8567342507015103,
+            "n_winner": 484,
+            "n_loser": 344
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.2901968094949115,
+            "loser_mean": 0.3758114728047079,
+            "winner_minus_loser": -0.6660082822996194,
+            "n_winner": 519,
+            "n_loser": 395
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.255241818345935,
+            "loser_mean": -0.11086856475603134,
+            "winner_minus_loser": -0.14437325358990366,
+            "n_winner": 495,
+            "n_loser": 394
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.20807692444573542,
+            "loser_mean": 0.668681386057027,
+            "winner_minus_loser": -0.8767583105027624,
+            "n_winner": 529,
+            "n_loser": 351
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.18525072838279696,
+            "loser_mean": 0.34447345974282717,
+            "winner_minus_loser": -0.5297241881256242,
+            "n_winner": 641,
+            "n_loser": 321
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": 0.034248142298861715,
+            "loser_mean": -0.018623457360105147,
+            "winner_minus_loser": 0.05287159965896686,
+            "n_winner": 502,
+            "n_loser": 334
+          }
+        ],
+        "p_value_holm": 0.0071445771399756925,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "large_cap_control",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "range_vol_z",
+        "outcome_label": "Range-vol z-score",
+        "n_tickers": 10,
+        "n_winner_events": 5425,
+        "n_loser_events": 3587,
+        "mean_winner": -0.16747116104919035,
+        "mean_loser": 0.3731949854197668,
+        "mean_winner_minus_loser": -0.540666146468957,
+        "t_stat": -7.998488758161443,
+        "p_value_raw": 2.2168251145576654e-05,
+        "bootstrap_ci_95": [
+          -0.656317972434974,
+          -0.4079660332074611
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.19517801999166892,
+            "loser_mean": 0.3696186308568305,
+            "winner_minus_loser": -0.5647966508484994,
+            "n_winner": 525,
+            "n_loser": 356
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.18663442210384976,
+            "loser_mean": 0.5084349665298,
+            "winner_minus_loser": -0.6950693886336498,
+            "n_winner": 485,
+            "n_loser": 396
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.20099982441431072,
+            "loser_mean": 0.5063783310620011,
+            "winner_minus_loser": -0.7073781554763119,
+            "n_winner": 626,
+            "n_loser": 333
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.17715336471109738,
+            "loser_mean": 0.4111227118916308,
+            "winner_minus_loser": -0.5882760766027282,
+            "n_winner": 619,
+            "n_loser": 363
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.2746001663872086,
+            "loser_mean": 0.48221906462880465,
+            "winner_minus_loser": -0.7568192310160132,
+            "n_winner": 484,
+            "n_loser": 344
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.25807841383398633,
+            "loser_mean": 0.4879321557120223,
+            "winner_minus_loser": -0.7460105695460086,
+            "n_winner": 519,
+            "n_loser": 395
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.13951310818205742,
+            "loser_mean": 0.20892095703151334,
+            "winner_minus_loser": -0.3484340652135708,
+            "n_winner": 495,
+            "n_loser": 394
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.09204545187653648,
+            "loser_mean": 0.313447145771869,
+            "winner_minus_loser": -0.4054925976484055,
+            "n_winner": 529,
+            "n_loser": 351
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.09772420728231428,
+            "loser_mean": 0.4163499577011253,
+            "winner_minus_loser": -0.5140741649834396,
+            "n_winner": 641,
+            "n_loser": 321
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": -0.052784631708873694,
+            "loser_mean": 0.02752593301207123,
+            "winner_minus_loser": -0.08031056472094492,
+            "n_winner": 502,
+            "n_loser": 334
+          }
+        ],
+        "p_value_holm": 0.000509869776348263,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "large_cap_control",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "gap_abs_z",
+        "outcome_label": "Absolute gap z-score",
+        "n_tickers": 10,
+        "n_winner_events": 5419,
+        "n_loser_events": 3586,
+        "mean_winner": -0.1524753791418229,
+        "mean_loser": 0.19132514149696428,
+        "mean_winner_minus_loser": -0.3438005206387872,
+        "t_stat": -10.042343808277352,
+        "p_value_raw": 3.4545367002047654e-06,
+        "bootstrap_ci_95": [
+          -0.4070741100853216,
+          -0.28196873549314994
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.2977245154633354,
+            "loser_mean": 0.20747122469253906,
+            "winner_minus_loser": -0.5051957401558744,
+            "n_winner": 524,
+            "n_loser": 356
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.16545346616259432,
+            "loser_mean": 0.25071130166978145,
+            "winner_minus_loser": -0.41616476783237577,
+            "n_winner": 484,
+            "n_loser": 396
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.1238073252217694,
+            "loser_mean": 0.23776088414011687,
+            "winner_minus_loser": -0.3615682093618863,
+            "n_winner": 625,
+            "n_loser": 333
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.2106972585093886,
+            "loser_mean": 0.17110952855164904,
+            "winner_minus_loser": -0.38180678706103766,
+            "n_winner": 619,
+            "n_loser": 363
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.16302374302767936,
+            "loser_mean": 0.3207478615519983,
+            "winner_minus_loser": -0.48377160457967766,
+            "n_winner": 483,
+            "n_loser": 344
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.138776774852511,
+            "loser_mean": 0.2073390222681494,
+            "winner_minus_loser": -0.34611579712066043,
+            "n_winner": 518,
+            "n_loser": 395
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.13836977598271397,
+            "loser_mean": 0.14217808189809353,
+            "winner_minus_loser": -0.2805478578808075,
+            "n_winner": 494,
+            "n_loser": 394
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.11857944639568065,
+            "loser_mean": 0.0622467789015215,
+            "winner_minus_loser": -0.18082622529720216,
+            "n_winner": 529,
+            "n_loser": 351
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.08592068733094826,
+            "loser_mean": 0.17901616504667778,
+            "winner_minus_loser": -0.26493685237762604,
+            "n_winner": 641,
+            "n_loser": 320
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": -0.08240079847160799,
+            "loser_mean": 0.13467056624911602,
+            "winner_minus_loser": -0.21707136472072402,
+            "n_winner": 502,
+            "n_loser": 334
+          }
+        ],
+        "p_value_holm": 8.290888080491437e-05,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "large_cap_control",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "rv_z",
+        "outcome_label": "Squared-return z-score",
+        "n_tickers": 10,
+        "n_winner_events": 5419,
+        "n_loser_events": 3586,
+        "mean_winner": -0.06703354155367051,
+        "mean_loser": 0.2343032514581111,
+        "mean_winner_minus_loser": -0.3013367930117816,
+        "t_stat": -4.2237020837927615,
+        "p_value_raw": 0.002227233238723993,
+        "bootstrap_ci_95": [
+          -0.432202172609346,
+          -0.17192967457473474
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.16298234197451483,
+            "loser_mean": 0.3475706001045129,
+            "winner_minus_loser": -0.5105529420790278,
+            "n_winner": 524,
+            "n_loser": 356
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.12544447733152816,
+            "loser_mean": 0.2688921979374424,
+            "winner_minus_loser": -0.39433667526897054,
+            "n_winner": 484,
+            "n_loser": 396
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.07335944376041804,
+            "loser_mean": 0.25451611432233734,
+            "winner_minus_loser": -0.32787555808275537,
+            "n_winner": 625,
+            "n_loser": 333
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.05937846019230344,
+            "loser_mean": 0.12023200572703788,
+            "winner_minus_loser": -0.17961046591934132,
+            "n_winner": 619,
+            "n_loser": 363
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.09775846020908287,
+            "loser_mean": 0.6114103105437679,
+            "winner_minus_loser": -0.7091687707528508,
+            "n_winner": 483,
+            "n_loser": 344
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.11112854100384774,
+            "loser_mean": 0.2316890260121644,
+            "winner_minus_loser": -0.3428175670160121,
+            "n_winner": 518,
+            "n_loser": 395
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.10603788374111406,
+            "loser_mean": 0.08378377721409795,
+            "winner_minus_loser": -0.18982166095521202,
+            "n_winner": 494,
+            "n_loser": 394
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": 0.08428060752171129,
+            "loser_mean": 0.0935607129528157,
+            "winner_minus_loser": -0.009280105431104413,
+            "n_winner": 529,
+            "n_loser": 351
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.02702637463602455,
+            "loser_mean": 0.36290421639660086,
+            "winner_minus_loser": -0.3899305910326254,
+            "n_winner": 641,
+            "n_loser": 320
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": 0.008499959790417198,
+            "loser_mean": -0.031526446629666346,
+            "winner_minus_loser": 0.040026406420083545,
+            "n_winner": 502,
+            "n_loser": 334
+          }
+        ],
+        "p_value_holm": 0.0334084985808599,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "retail_meme_risk",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "abn_volume_z",
+        "outcome_label": "Abnormal volume z-score",
+        "n_tickers": 10,
+        "n_winner_events": 573,
+        "n_loser_events": 611,
+        "mean_winner": 0.48984991376523757,
+        "mean_loser": 0.1664558197772541,
+        "mean_winner_minus_loser": 0.32339409398798347,
+        "t_stat": 1.9193419884679987,
+        "p_value_raw": 0.08714830112491628,
+        "bootstrap_ci_95": [
+          0.005132330356052607,
+          0.6361248370573092
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.8883966516632326,
+            "loser_mean": 0.5616669008265942,
+            "winner_minus_loser": 0.32672975083663836,
+            "n_winner": 57,
+            "n_loser": 80
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.7647217294924348,
+            "loser_mean": -0.013872885460798515,
+            "winner_minus_loser": 0.7785946149532333,
+            "n_winner": 63,
+            "n_loser": 70
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.5960400465818353,
+            "loser_mean": 0.14104500676665946,
+            "winner_minus_loser": 0.45499503981517586,
+            "n_winner": 43,
+            "n_loser": 54
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.17795327335723038,
+            "loser_mean": 0.33397722764569815,
+            "winner_minus_loser": -0.5119305010029285,
+            "n_winner": 65,
+            "n_loser": 74
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.1462247171271788,
+            "loser_mean": 0.3498413597846422,
+            "winner_minus_loser": -0.49606607691182103,
+            "n_winner": 67,
+            "n_loser": 66
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 1.0908035589529381,
+            "loser_mean": -0.16341681986772266,
+            "winner_minus_loser": 1.2542203788206607,
+            "n_winner": 54,
+            "n_loser": 67
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": 0.38571016141281833,
+            "loser_mean": 0.06539157167087369,
+            "winner_minus_loser": 0.32031858974194466,
+            "n_winner": 60,
+            "n_loser": 46
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.4348877796155113,
+            "loser_mean": -0.144484172957585,
+            "winner_minus_loser": 0.5793719525730963,
+            "n_winner": 65,
+            "n_loser": 61
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": 0.3781974654384637,
+            "loser_mean": 0.00902639174536872,
+            "winner_minus_loser": 0.369171073693095,
+            "n_winner": 48,
+            "n_loser": 37
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.6839197349795515,
+            "loser_mean": 0.5253836176188108,
+            "winner_minus_loser": 0.1585361173607407,
+            "n_winner": 51,
+            "n_loser": 56
+          }
+        ],
+        "p_value_holm": 0.6971864089993303,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "retail_meme_risk",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "range_vol_z",
+        "outcome_label": "Range-vol z-score",
+        "n_tickers": 10,
+        "n_winner_events": 573,
+        "n_loser_events": 611,
+        "mean_winner": 0.16548826404926806,
+        "mean_loser": 0.18490489416547642,
+        "mean_winner_minus_loser": -0.019416630116208405,
+        "t_stat": -0.08552707554341724,
+        "p_value_raw": 0.9337147987598649,
+        "bootstrap_ci_95": [
+          -0.4097317690994367,
+          0.4153867039545129
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.37210776014497937,
+            "loser_mean": 0.1002814433770733,
+            "winner_minus_loser": 0.2718263167679061,
+            "n_winner": 57,
+            "n_loser": 80
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.614463985218223,
+            "loser_mean": -0.06866849481793419,
+            "winner_minus_loser": 0.6831324800361571,
+            "n_winner": 63,
+            "n_loser": 70
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.05922340698094217,
+            "loser_mean": 0.22523914227159117,
+            "winner_minus_loser": -0.166015735290649,
+            "n_winner": 43,
+            "n_loser": 54
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.300361812409486,
+            "loser_mean": 0.48896288118445425,
+            "winner_minus_loser": -0.7893246935939402,
+            "n_winner": 65,
+            "n_loser": 74
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.2791388869270737,
+            "loser_mean": 0.29358331832585577,
+            "winner_minus_loser": -0.5727222052529295,
+            "n_winner": 67,
+            "n_loser": 66
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 1.2991408425306223,
+            "loser_mean": -0.12684167784717545,
+            "winner_minus_loser": 1.4259825203777978,
+            "n_winner": 54,
+            "n_loser": 67
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": -0.11334183810137527,
+            "loser_mean": 0.6745821779887824,
+            "winner_minus_loser": -0.7879240160901577,
+            "n_winner": 60,
+            "n_loser": 46
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.1001847262748213,
+            "loser_mean": 0.08050047221406724,
+            "winner_minus_loser": 0.019684254060754067,
+            "n_winner": 65,
+            "n_loser": 61
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.023480119925820164,
+            "loser_mean": -0.34757450425088954,
+            "winner_minus_loser": 0.3240943843250694,
+            "n_winner": 48,
+            "n_loser": 37
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": -0.07391542329315273,
+            "loser_mean": 0.5289841832089393,
+            "winner_minus_loser": -0.602899606502092,
+            "n_winner": 51,
+            "n_loser": 56
+          }
+        ],
+        "p_value_holm": 1.0,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "retail_meme_risk",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "gap_abs_z",
+        "outcome_label": "Absolute gap z-score",
+        "n_tickers": 10,
+        "n_winner_events": 573,
+        "n_loser_events": 611,
+        "mean_winner": 0.18945703990834772,
+        "mean_loser": 0.13127909852643999,
+        "mean_winner_minus_loser": 0.05817794138190775,
+        "t_stat": 0.3632823123897967,
+        "p_value_raw": 0.7247803651349185,
+        "bootstrap_ci_95": [
+          -0.21284686028970173,
+          0.38188676151353135
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.4728563230083767,
+            "loser_mean": 0.04061818687935544,
+            "winner_minus_loser": 0.4322381361290213,
+            "n_winner": 57,
+            "n_loser": 80
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.43859669591562417,
+            "loser_mean": -0.01119688366363377,
+            "winner_minus_loser": 0.4497935795792579,
+            "n_winner": 63,
+            "n_loser": 70
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.22065032279231772,
+            "loser_mean": 0.46633820854248703,
+            "winner_minus_loser": -0.2456878857501693,
+            "n_winner": 43,
+            "n_loser": 54
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.24633063596272053,
+            "loser_mean": 0.2261438421186745,
+            "winner_minus_loser": -0.47247447808139503,
+            "n_winner": 65,
+            "n_loser": 74
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.14488318524178817,
+            "loser_mean": 0.06269009379460788,
+            "winner_minus_loser": -0.20757327903639605,
+            "n_winner": 67,
+            "n_loser": 66
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.9439926157480754,
+            "loser_mean": -0.23190203867858594,
+            "winner_minus_loser": 1.1758946544266613,
+            "n_winner": 54,
+            "n_loser": 67
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": 0.05282333106894863,
+            "loser_mean": 0.4737662650708754,
+            "winner_minus_loser": -0.4209429340019267,
+            "n_winner": 60,
+            "n_loser": 46
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.08080585380170731,
+            "loser_mean": 0.2798862073415648,
+            "winner_minus_loser": -0.19908035353985748,
+            "n_winner": 65,
+            "n_loser": 61
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.09149387613839122,
+            "loser_mean": -0.23636733542128344,
+            "winner_minus_loser": 0.14487345928289222,
+            "n_winner": 48,
+            "n_loser": 37
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.16755295409132734,
+            "loser_mean": 0.24281443928033802,
+            "winner_minus_loser": -0.07526148518901069,
+            "n_winner": 51,
+            "n_loser": 56
+          }
+        ],
+        "p_value_holm": 1.0,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "retail_meme_risk",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "rv_z",
+        "outcome_label": "Squared-return z-score",
+        "n_tickers": 10,
+        "n_winner_events": 573,
+        "n_loser_events": 611,
+        "mean_winner": 0.1691527823274818,
+        "mean_loser": 0.13652536102140722,
+        "mean_winner_minus_loser": 0.032627421306074565,
+        "t_stat": 0.2074332127896101,
+        "p_value_raw": 0.8402891423806558,
+        "bootstrap_ci_95": [
+          -0.23207860828526147,
+          0.3429882328927569
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.39394504031629807,
+            "loser_mean": 0.09351222477165126,
+            "winner_minus_loser": 0.3004328155446468,
+            "n_winner": 57,
+            "n_loser": 80
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.4250327236911072,
+            "loser_mean": -0.08281444075346055,
+            "winner_minus_loser": 0.5078471644445677,
+            "n_winner": 63,
+            "n_loser": 70
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.1851689836809138,
+            "loser_mean": 0.3556777080333365,
+            "winner_minus_loser": -0.17050872435242267,
+            "n_winner": 43,
+            "n_loser": 54
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.18067526086027758,
+            "loser_mean": 0.20451074819387235,
+            "winner_minus_loser": -0.3851860090541499,
+            "n_winner": 65,
+            "n_loser": 74
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.14974581911688892,
+            "loser_mean": 0.10678397918292049,
+            "winner_minus_loser": -0.2565297982998094,
+            "n_winner": 67,
+            "n_loser": 66
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 1.0907190992124438,
+            "loser_mean": -0.02939158530833328,
+            "winner_minus_loser": 1.1201106845207771,
+            "n_winner": 54,
+            "n_loser": 67
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": -0.10366677873020273,
+            "loser_mean": 0.36524913302752693,
+            "winner_minus_loser": -0.4689159117577297,
+            "n_winner": 60,
+            "n_loser": 46
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.02712846996245906,
+            "loser_mean": 0.3206596825700945,
+            "winner_minus_loser": -0.29353121260763543,
+            "n_winner": 65,
+            "n_loser": 61
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.03423550669618607,
+            "loser_mean": -0.22643523998411838,
+            "winner_minus_loser": 0.1921997332879323,
+            "n_winner": 48,
+            "n_loser": 37
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.03785687181515139,
+            "loser_mean": 0.25750140048058245,
+            "winner_minus_loser": -0.21964452866543105,
+            "n_winner": 51,
+            "n_loser": 56
+          }
+        ],
+        "p_value_holm": 1.0,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "large_cap_control",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "abn_volume_z",
+        "outcome_label": "Abnormal volume z-score",
+        "n_tickers": 10,
+        "n_winner_events": 1006,
+        "n_loser_events": 694,
+        "mean_winner": -0.3241816397931484,
+        "mean_loser": 0.1658677633714373,
+        "mean_winner_minus_loser": -0.4900494031645857,
+        "t_stat": -5.385665341847513,
+        "p_value_raw": 0.00044120755217104613,
+        "bootstrap_ci_95": [
+          -0.6496879024177483,
+          -0.30901282734817137
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.4508870845516229,
+            "loser_mean": -0.015617149953888413,
+            "winner_minus_loser": -0.4352699345977345,
+            "n_winner": 100,
+            "n_loser": 70
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.35095754290306347,
+            "loser_mean": 0.06529129652588868,
+            "winner_minus_loser": -0.41624883942895213,
+            "n_winner": 91,
+            "n_loser": 76
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.2804559457743824,
+            "loser_mean": 0.20325723386939543,
+            "winner_minus_loser": -0.4837131796437778,
+            "n_winner": 113,
+            "n_loser": 65
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.4023317822424528,
+            "loser_mean": 0.16147061503220989,
+            "winner_minus_loser": -0.5638023972746626,
+            "n_winner": 119,
+            "n_loser": 69
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.3640341139570554,
+            "loser_mean": 0.4811543763907339,
+            "winner_minus_loser": -0.8451884903477893,
+            "n_winner": 81,
+            "n_loser": 67
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.42043077213648344,
+            "loser_mean": 0.26313245745654,
+            "winner_minus_loser": -0.6835632295930234,
+            "n_winner": 95,
+            "n_loser": 78
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.4103328905666064,
+            "loser_mean": -0.13012018797653802,
+            "winner_minus_loser": -0.28021270259006836,
+            "n_winner": 84,
+            "n_loser": 77
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.28994916863396436,
+            "loser_mean": 0.5398822682438297,
+            "winner_minus_loser": -0.829831436877794,
+            "n_winner": 102,
+            "n_loser": 66
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.31899941840309065,
+            "loser_mean": 0.19214689300800541,
+            "winner_minus_loser": -0.5111463114110961,
+            "n_winner": 123,
+            "n_loser": 64
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": 0.046562321237237615,
+            "loser_mean": -0.1019201688818037,
+            "winner_minus_loser": 0.14848249011904133,
+            "n_winner": 98,
+            "n_loser": 62
+          }
+        ],
+        "p_value_holm": 0.007500528386907784,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "large_cap_control",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "range_vol_z",
+        "outcome_label": "Range-vol z-score",
+        "n_tickers": 10,
+        "n_winner_events": 1006,
+        "n_loser_events": 694,
+        "mean_winner": -0.1800895234506587,
+        "mean_loser": 0.4250110624425215,
+        "mean_winner_minus_loser": -0.6051005858931803,
+        "t_stat": -7.183566157311507,
+        "p_value_raw": 5.17441983380683e-05,
+        "bootstrap_ci_95": [
+          -0.7496874351195598,
+          -0.43501623862445893
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.23944543217049977,
+            "loser_mean": 0.3332294273969046,
+            "winner_minus_loser": -0.5726748595674044,
+            "n_winner": 100,
+            "n_loser": 70
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.17579331631861195,
+            "loser_mean": 0.6788329246414201,
+            "winner_minus_loser": -0.854626240960032,
+            "n_winner": 91,
+            "n_loser": 76
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.21985091123708853,
+            "loser_mean": 0.6186076338839231,
+            "winner_minus_loser": -0.8384585451210117,
+            "n_winner": 113,
+            "n_loser": 65
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.19646100876282713,
+            "loser_mean": 0.45630917782946406,
+            "winner_minus_loser": -0.6527701865922912,
+            "n_winner": 119,
+            "n_loser": 69
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.25584916326080237,
+            "loser_mean": 0.5913583498168178,
+            "winner_minus_loser": -0.8472075130776202,
+            "n_winner": 81,
+            "n_loser": 67
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.2988789008176461,
+            "loser_mean": 0.5469528708206606,
+            "winner_minus_loser": -0.8458317716383067,
+            "n_winner": 95,
+            "n_loser": 78
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.17099088232492285,
+            "loser_mean": 0.3177056012403693,
+            "winner_minus_loser": -0.48869648356529216,
+            "n_winner": 84,
+            "n_loser": 77
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.1359395614027732,
+            "loser_mean": 0.25374382757371744,
+            "winner_minus_loser": -0.38968338897649063,
+            "n_winner": 102,
+            "n_loser": 66
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.07090314798554162,
+            "loser_mean": 0.465871693566259,
+            "winner_minus_loser": -0.5367748415518007,
+            "n_winner": 123,
+            "n_loser": 64
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": -0.03678291022587373,
+            "loser_mean": -0.012500882344321567,
+            "winner_minus_loser": -0.024282027881552162,
+            "n_winner": 98,
+            "n_loser": 62
+          }
+        ],
+        "p_value_holm": 0.001034883966761366,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "large_cap_control",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "gap_abs_z",
+        "outcome_label": "Absolute gap z-score",
+        "n_tickers": 10,
+        "n_winner_events": 1006,
+        "n_loser_events": 694,
+        "mean_winner": -0.16626038134776017,
+        "mean_loser": 0.2370484840173594,
+        "mean_winner_minus_loser": -0.4033088653651197,
+        "t_stat": -7.498777256879291,
+        "p_value_raw": 3.697482057209607e-05,
+        "bootstrap_ci_95": [
+          -0.5004239230044781,
+          -0.300746317619867
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.1913524037409167,
+            "loser_mean": 0.3146202122557343,
+            "winner_minus_loser": -0.505972615996651,
+            "n_winner": 100,
+            "n_loser": 70
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.2100893282950704,
+            "loser_mean": 0.16929046967728173,
+            "winner_minus_loser": -0.3793797979723521,
+            "n_winner": 91,
+            "n_loser": 76
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.12308532512388433,
+            "loser_mean": 0.41393771726975015,
+            "winner_minus_loser": -0.5370230423936345,
+            "n_winner": 113,
+            "n_loser": 65
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.22894010697008485,
+            "loser_mean": 0.41504063911766165,
+            "winner_minus_loser": -0.6439807460877465,
+            "n_winner": 119,
+            "n_loser": 69
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.23887072678484267,
+            "loser_mean": 0.2810679253295228,
+            "winner_minus_loser": -0.5199386521143654,
+            "n_winner": 81,
+            "n_loser": 67
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.24655980837392377,
+            "loser_mean": 0.24441992718562716,
+            "winner_minus_loser": -0.49097973555955093,
+            "n_winner": 95,
+            "n_loser": 78
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.1236882191325011,
+            "loser_mean": 0.19524768891459185,
+            "winner_minus_loser": -0.31893590804709293,
+            "n_winner": 84,
+            "n_loser": 77
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.17140901647730172,
+            "loser_mean": -0.11275998217968432,
+            "winner_minus_loser": -0.058649034297617406,
+            "n_winner": 102,
+            "n_loser": 66
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.1787337826612736,
+            "loser_mean": 0.11887495253501226,
+            "winner_minus_loser": -0.29760873519628583,
+            "n_winner": 123,
+            "n_loser": 64
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": 0.05012490408219751,
+            "loser_mean": 0.33074529006809666,
+            "winner_minus_loser": -0.28062038598589917,
+            "n_winner": 98,
+            "n_loser": 62
+          }
+        ],
+        "p_value_holm": 0.0007889905464286476,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "within_group_ticker_cluster_mean",
+        "group": "large_cap_control",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "rv_z",
+        "outcome_label": "Squared-return z-score",
+        "n_tickers": 10,
+        "n_winner_events": 1006,
+        "n_loser_events": 694,
+        "mean_winner": -0.13770300176345543,
+        "mean_loser": 0.0773775067390434,
+        "mean_winner_minus_loser": -0.21508050850249885,
+        "t_stat": -7.527909768108108,
+        "p_value_raw": 3.586320665584762e-05,
+        "bootstrap_ci_95": [
+          -0.26703367995789407,
+          -0.16389517500040326
+        ],
+        "ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.19156654626211198,
+            "loser_mean": 0.14819141019785978,
+            "winner_minus_loser": -0.33975795645997175,
+            "n_winner": 100,
+            "n_loser": 70
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.21106781646215186,
+            "loser_mean": -0.010369014357579706,
+            "winner_minus_loser": -0.20069880210457217,
+            "n_winner": 91,
+            "n_loser": 76
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.1142348931869035,
+            "loser_mean": 0.14605817091681614,
+            "winner_minus_loser": -0.26029306410371966,
+            "n_winner": 113,
+            "n_loser": 65
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.11436330775445733,
+            "loser_mean": 0.08651943924739133,
+            "winner_minus_loser": -0.20088274700184866,
+            "n_winner": 119,
+            "n_loser": 69
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.1610339125434048,
+            "loser_mean": 0.1037009428394257,
+            "winner_minus_loser": -0.2647348553828305,
+            "n_winner": 81,
+            "n_loser": 67
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.22641913300122157,
+            "loser_mean": 0.1294501002640386,
+            "winner_minus_loser": -0.3558692332652602,
+            "n_winner": 95,
+            "n_loser": 78
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.0950506242023861,
+            "loser_mean": 0.049876238006129364,
+            "winner_minus_loser": -0.14492686220851547,
+            "n_winner": 84,
+            "n_loser": 77
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.15165502607052533,
+            "loser_mean": 0.01979699473657597,
+            "winner_minus_loser": -0.1714520208071013,
+            "n_winner": 102,
+            "n_loser": 66
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.09471179638196654,
+            "loser_mean": -0.024691680811239007,
+            "winner_minus_loser": -0.07002011557072754,
+            "n_winner": 123,
+            "n_loser": 64
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": -0.016926961769425257,
+            "loser_mean": 0.1252424663510159,
+            "winner_minus_loser": -0.14216942812044117,
+            "n_winner": 98,
+            "n_loser": 62
+          }
+        ],
+        "p_value_holm": 0.0007889905464286476,
+        "holm_reject_5pct": true
+      }
+    ],
+    "difference_in_differences": [
+      {
+        "test_type": "difference_in_differences_ticker_cluster_mean",
+        "contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "abn_volume_z",
+        "outcome_label": "Abnormal volume z-score",
+        "n_retail_tickers": 10,
+        "n_control_tickers": 10,
+        "retail_mean_winner_minus_loser": 0.37802930418736624,
+        "control_mean_winner_minus_loser": -0.5031411642057542,
+        "did_retail_minus_control": 0.8811704683931204,
+        "t_stat": 4.796227944307118,
+        "p_value_raw": 0.00026230711890905034,
+        "bootstrap_ci_95": [
+          0.5316654271699016,
+          1.2086821289404086
+        ],
+        "retail_ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.9108504075249252,
+            "loser_mean": 0.4518374601838087,
+            "winner_minus_loser": 0.4590129473411165,
+            "n_winner": 310,
+            "n_loser": 426
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.8395072245204109,
+            "loser_mean": 0.02668526346683679,
+            "winner_minus_loser": 0.8128219610535742,
+            "n_winner": 348,
+            "n_loser": 354
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.6093655487703944,
+            "loser_mean": 0.09232526530220286,
+            "winner_minus_loser": 0.5170402834681915,
+            "n_winner": 247,
+            "n_loser": 315
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": 0.01603909582046188,
+            "loser_mean": 0.4408276300382254,
+            "winner_minus_loser": -0.4247885342177635,
+            "n_winner": 390,
+            "n_loser": 397
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.11778017728316864,
+            "loser_mean": 0.3166859967051489,
+            "winner_minus_loser": -0.43446617398831755,
+            "n_winner": 353,
+            "n_loser": 353
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.8762205028760949,
+            "loser_mean": -0.3140763262274845,
+            "winner_minus_loser": 1.1902968291035794,
+            "n_winner": 307,
+            "n_loser": 357
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": 0.523144507392293,
+            "loser_mean": 0.03562438017054376,
+            "winner_minus_loser": 0.48752012722174926,
+            "n_winner": 339,
+            "n_loser": 235
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.4081930550748632,
+            "loser_mean": -0.216939964547714,
+            "winner_minus_loser": 0.6251330196225772,
+            "n_winner": 353,
+            "n_loser": 324
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": 0.4442186802578851,
+            "loser_mean": 0.14445080738290708,
+            "winner_minus_loser": 0.29976787287497797,
+            "n_winner": 251,
+            "n_loser": 211
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.6196871608883759,
+            "loser_mean": 0.3717324514943982,
+            "winner_minus_loser": 0.24795470939397773,
+            "n_winner": 288,
+            "n_loser": 294
+          }
+        ],
+        "control_ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.4061746549759946,
+            "loser_mean": 0.06298262962937015,
+            "winner_minus_loser": -0.46915728460536477,
+            "n_winner": 525,
+            "n_loser": 356
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.2757994404257267,
+            "loser_mean": 0.10541562442416189,
+            "winner_minus_loser": -0.38121506484988854,
+            "n_winner": 485,
+            "n_loser": 396
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.2279621867687696,
+            "loser_mean": 0.30339398087452524,
+            "winner_minus_loser": -0.5313561676432949,
+            "n_winner": 626,
+            "n_loser": 333
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.3858489994604771,
+            "loser_mean": 0.24310743993806258,
+            "winner_minus_loser": -0.6289564393985397,
+            "n_winner": 619,
+            "n_loser": 363
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.33474404454555656,
+            "loser_mean": 0.5219902061559537,
+            "winner_minus_loser": -0.8567342507015103,
+            "n_winner": 484,
+            "n_loser": 344
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.2901968094949115,
+            "loser_mean": 0.3758114728047079,
+            "winner_minus_loser": -0.6660082822996194,
+            "n_winner": 519,
+            "n_loser": 395
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.255241818345935,
+            "loser_mean": -0.11086856475603134,
+            "winner_minus_loser": -0.14437325358990366,
+            "n_winner": 495,
+            "n_loser": 394
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.20807692444573542,
+            "loser_mean": 0.668681386057027,
+            "winner_minus_loser": -0.8767583105027624,
+            "n_winner": 529,
+            "n_loser": 351
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.18525072838279696,
+            "loser_mean": 0.34447345974282717,
+            "winner_minus_loser": -0.5297241881256242,
+            "n_winner": 641,
+            "n_loser": 321
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": 0.034248142298861715,
+            "loser_mean": -0.018623457360105147,
+            "winner_minus_loser": 0.05287159965896686,
+            "n_winner": 502,
+            "n_loser": 334
+          }
+        ],
+        "p_value_holm": 0.004983835259271956,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "difference_in_differences_ticker_cluster_mean",
+        "contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "range_vol_z",
+        "outcome_label": "Range-vol z-score",
+        "n_retail_tickers": 10,
+        "n_control_tickers": 10,
+        "retail_mean_winner_minus_loser": 0.07256490706949967,
+        "control_mean_winner_minus_loser": -0.540666146468957,
+        "did_retail_minus_control": 0.6132310535384567,
+        "t_stat": 3.6557714234441425,
+        "p_value_raw": 0.00314085476194479,
+        "bootstrap_ci_95": [
+          0.3081036011869269,
+          0.9270457355905998
+        ],
+        "retail_ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.5545150670959582,
+            "loser_mean": -0.03142343169295791,
+            "winner_minus_loser": 0.5859384987889161,
+            "n_winner": 310,
+            "n_loser": 426
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.5709650022220256,
+            "loser_mean": -0.05173618768540704,
+            "winner_minus_loser": 0.6227011899074326,
+            "n_winner": 348,
+            "n_loser": 354
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.05512835073591646,
+            "loser_mean": 0.29434228253498473,
+            "winner_minus_loser": -0.23921393179906827,
+            "n_winner": 247,
+            "n_loser": 315
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.10771697766157047,
+            "loser_mean": 0.5104580309710087,
+            "winner_minus_loser": -0.6181750086325792,
+            "n_winner": 390,
+            "n_loser": 397
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.22480983706660643,
+            "loser_mean": 0.21464152572683798,
+            "winner_minus_loser": -0.43945136279344443,
+            "n_winner": 353,
+            "n_loser": 353
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.6767672681841579,
+            "loser_mean": -0.15957879489274324,
+            "winner_minus_loser": 0.8363460630769011,
+            "n_winner": 307,
+            "n_loser": 357
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": 0.005111965319210094,
+            "loser_mean": 0.1555473571832909,
+            "winner_minus_loser": -0.1504353918640808,
+            "n_winner": 339,
+            "n_loser": 235
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.04563612074518488,
+            "loser_mean": 0.015111793045726508,
+            "winner_minus_loser": 0.030524327699458374,
+            "n_winner": 353,
+            "n_loser": 324
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.008856800765244739,
+            "loser_mean": -0.26064659046454225,
+            "winner_minus_loser": 0.2517897896992975,
+            "n_winner": 251,
+            "n_loser": 211
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.019220053757984617,
+            "loser_mean": 0.17359515714582088,
+            "winner_minus_loser": -0.15437510338783628,
+            "n_winner": 288,
+            "n_loser": 294
+          }
+        ],
+        "control_ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.19517801999166892,
+            "loser_mean": 0.3696186308568305,
+            "winner_minus_loser": -0.5647966508484994,
+            "n_winner": 525,
+            "n_loser": 356
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.18663442210384976,
+            "loser_mean": 0.5084349665298,
+            "winner_minus_loser": -0.6950693886336498,
+            "n_winner": 485,
+            "n_loser": 396
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.20099982441431072,
+            "loser_mean": 0.5063783310620011,
+            "winner_minus_loser": -0.7073781554763119,
+            "n_winner": 626,
+            "n_loser": 333
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.17715336471109738,
+            "loser_mean": 0.4111227118916308,
+            "winner_minus_loser": -0.5882760766027282,
+            "n_winner": 619,
+            "n_loser": 363
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.2746001663872086,
+            "loser_mean": 0.48221906462880465,
+            "winner_minus_loser": -0.7568192310160132,
+            "n_winner": 484,
+            "n_loser": 344
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.25807841383398633,
+            "loser_mean": 0.4879321557120223,
+            "winner_minus_loser": -0.7460105695460086,
+            "n_winner": 519,
+            "n_loser": 395
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.13951310818205742,
+            "loser_mean": 0.20892095703151334,
+            "winner_minus_loser": -0.3484340652135708,
+            "n_winner": 495,
+            "n_loser": 394
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.09204545187653648,
+            "loser_mean": 0.313447145771869,
+            "winner_minus_loser": -0.4054925976484055,
+            "n_winner": 529,
+            "n_loser": 351
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.09772420728231428,
+            "loser_mean": 0.4163499577011253,
+            "winner_minus_loser": -0.5140741649834396,
+            "n_winner": 641,
+            "n_loser": 321
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": -0.052784631708873694,
+            "loser_mean": 0.02752593301207123,
+            "winner_minus_loser": -0.08031056472094492,
+            "n_winner": 502,
+            "n_loser": 334
+          }
+        ],
+        "p_value_holm": 0.04397196666722706,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "difference_in_differences_ticker_cluster_mean",
+        "contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "gap_abs_z",
+        "outcome_label": "Absolute gap z-score",
+        "n_retail_tickers": 10,
+        "n_control_tickers": 10,
+        "retail_mean_winner_minus_loser": 0.04440896172952683,
+        "control_mean_winner_minus_loser": -0.3438005206387872,
+        "did_retail_minus_control": 0.38820948236831404,
+        "t_stat": 3.5731600641767223,
+        "p_value_raw": 0.0043950239720808686,
+        "bootstrap_ci_95": [
+          0.19885575358093285,
+          0.5945499072143703
+        ],
+        "retail_ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.39075873425076296,
+            "loser_mean": -0.10219519328809197,
+            "winner_minus_loser": 0.4929539275388549,
+            "n_winner": 310,
+            "n_loser": 426
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.25991671248207376,
+            "loser_mean": -0.02224030164322032,
+            "winner_minus_loser": 0.2821570141252941,
+            "n_winner": 348,
+            "n_loser": 354
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.02621581443444564,
+            "loser_mean": 0.13453028393474262,
+            "winner_minus_loser": -0.10831446950029698,
+            "n_winner": 247,
+            "n_loser": 315
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.11207390079690284,
+            "loser_mean": 0.29948454616824405,
+            "winner_minus_loser": -0.4115584469651469,
+            "n_winner": 389,
+            "n_loser": 397
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.12844791445977372,
+            "loser_mean": 0.08465335107332755,
+            "winner_minus_loser": -0.21310126553310127,
+            "n_winner": 353,
+            "n_loser": 353
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.46455185183384257,
+            "loser_mean": -0.16772167725737613,
+            "winner_minus_loser": 0.6322735290912187,
+            "n_winner": 307,
+            "n_loser": 357
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": -0.00025890053502692343,
+            "loser_mean": 0.14245737742754855,
+            "winner_minus_loser": -0.14271627796257547,
+            "n_winner": 339,
+            "n_loser": 234
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": -0.04949076573750358,
+            "loser_mean": 0.025596421152578566,
+            "winner_minus_loser": -0.07508718689008215,
+            "n_winner": 353,
+            "n_loser": 324
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.07254266276918074,
+            "loser_mean": -0.03801372102638483,
+            "winner_minus_loser": -0.03452894174279591,
+            "n_winner": 251,
+            "n_loser": 210
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.0796612998289879,
+            "loser_mean": 0.05764956469508871,
+            "winner_minus_loser": 0.022011735133899188,
+            "n_winner": 288,
+            "n_loser": 294
+          }
+        ],
+        "control_ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.2977245154633354,
+            "loser_mean": 0.20747122469253906,
+            "winner_minus_loser": -0.5051957401558744,
+            "n_winner": 524,
+            "n_loser": 356
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.16545346616259432,
+            "loser_mean": 0.25071130166978145,
+            "winner_minus_loser": -0.41616476783237577,
+            "n_winner": 484,
+            "n_loser": 396
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.1238073252217694,
+            "loser_mean": 0.23776088414011687,
+            "winner_minus_loser": -0.3615682093618863,
+            "n_winner": 625,
+            "n_loser": 333
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.2106972585093886,
+            "loser_mean": 0.17110952855164904,
+            "winner_minus_loser": -0.38180678706103766,
+            "n_winner": 619,
+            "n_loser": 363
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.16302374302767936,
+            "loser_mean": 0.3207478615519983,
+            "winner_minus_loser": -0.48377160457967766,
+            "n_winner": 483,
+            "n_loser": 344
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.138776774852511,
+            "loser_mean": 0.2073390222681494,
+            "winner_minus_loser": -0.34611579712066043,
+            "n_winner": 518,
+            "n_loser": 395
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.13836977598271397,
+            "loser_mean": 0.14217808189809353,
+            "winner_minus_loser": -0.2805478578808075,
+            "n_winner": 494,
+            "n_loser": 394
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.11857944639568065,
+            "loser_mean": 0.0622467789015215,
+            "winner_minus_loser": -0.18082622529720216,
+            "n_winner": 529,
+            "n_loser": 351
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.08592068733094826,
+            "loser_mean": 0.17901616504667778,
+            "winner_minus_loser": -0.26493685237762604,
+            "n_winner": 641,
+            "n_loser": 320
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": -0.08240079847160799,
+            "loser_mean": 0.13467056624911602,
+            "winner_minus_loser": -0.21707136472072402,
+            "n_winner": 502,
+            "n_loser": 334
+          }
+        ],
+        "p_value_holm": 0.057135311637051295,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "difference_in_differences_ticker_cluster_mean",
+        "contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "all_next_sessions",
+        "window_description": "All next trading sessions after the t-1 winner/loser label",
+        "outcome": "rv_z",
+        "outcome_label": "Squared-return z-score",
+        "n_retail_tickers": 10,
+        "n_control_tickers": 10,
+        "retail_mean_winner_minus_loser": 0.07388949791388583,
+        "control_mean_winner_minus_loser": -0.3013367930117816,
+        "did_retail_minus_control": 0.37522629092566745,
+        "t_stat": 2.6893784941321655,
+        "p_value_raw": 0.01707083053661513,
+        "bootstrap_ci_95": [
+          0.1321635568979741,
+          0.6475396278844546
+        ],
+        "retail_ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.6599110622410818,
+            "loser_mean": -0.021922918408614114,
+            "winner_minus_loser": 0.6818339806496959,
+            "n_winner": 310,
+            "n_loser": 426
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.3476851672573072,
+            "loser_mean": -0.024111905092639004,
+            "winner_minus_loser": 0.3717970723499462,
+            "n_winner": 348,
+            "n_loser": 354
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.05509312800624823,
+            "loser_mean": 0.2512464459624188,
+            "winner_minus_loser": -0.19615331795617058,
+            "n_winner": 247,
+            "n_loser": 315
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.03951609285740125,
+            "loser_mean": 0.32639663771005395,
+            "winner_minus_loser": -0.3659127305674552,
+            "n_winner": 389,
+            "n_loser": 397
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.13329980518627416,
+            "loser_mean": 0.16272906741008433,
+            "winner_minus_loser": -0.29602887259635846,
+            "n_winner": 353,
+            "n_loser": 353
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.6022395655716483,
+            "loser_mean": -0.08417434434854928,
+            "winner_minus_loser": 0.6864139099201976,
+            "n_winner": 307,
+            "n_loser": 357
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": -0.01922522029079086,
+            "loser_mean": 0.08127447300905843,
+            "winner_minus_loser": -0.1004996932998493,
+            "n_winner": 339,
+            "n_loser": 234
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": -0.034650894460887455,
+            "loser_mean": 0.026858351213897836,
+            "winner_minus_loser": -0.06150924567478529,
+            "n_winner": 353,
+            "n_loser": 324
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.05524990578124553,
+            "loser_mean": -0.07184519680391907,
+            "winner_minus_loser": 0.01659529102267354,
+            "n_winner": 251,
+            "n_loser": 210
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.06458926733760006,
+            "loser_mean": 0.06223068204663629,
+            "winner_minus_loser": 0.0023585852909637772,
+            "n_winner": 288,
+            "n_loser": 294
+          }
+        ],
+        "control_ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.16298234197451483,
+            "loser_mean": 0.3475706001045129,
+            "winner_minus_loser": -0.5105529420790278,
+            "n_winner": 524,
+            "n_loser": 356
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.12544447733152816,
+            "loser_mean": 0.2688921979374424,
+            "winner_minus_loser": -0.39433667526897054,
+            "n_winner": 484,
+            "n_loser": 396
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.07335944376041804,
+            "loser_mean": 0.25451611432233734,
+            "winner_minus_loser": -0.32787555808275537,
+            "n_winner": 625,
+            "n_loser": 333
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.05937846019230344,
+            "loser_mean": 0.12023200572703788,
+            "winner_minus_loser": -0.17961046591934132,
+            "n_winner": 619,
+            "n_loser": 363
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.09775846020908287,
+            "loser_mean": 0.6114103105437679,
+            "winner_minus_loser": -0.7091687707528508,
+            "n_winner": 483,
+            "n_loser": 344
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.11112854100384774,
+            "loser_mean": 0.2316890260121644,
+            "winner_minus_loser": -0.3428175670160121,
+            "n_winner": 518,
+            "n_loser": 395
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.10603788374111406,
+            "loser_mean": 0.08378377721409795,
+            "winner_minus_loser": -0.18982166095521202,
+            "n_winner": 494,
+            "n_loser": 394
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": 0.08428060752171129,
+            "loser_mean": 0.0935607129528157,
+            "winner_minus_loser": -0.009280105431104413,
+            "n_winner": 529,
+            "n_loser": 351
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.02702637463602455,
+            "loser_mean": 0.36290421639660086,
+            "winner_minus_loser": -0.3899305910326254,
+            "n_winner": 641,
+            "n_loser": 320
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": 0.008499959790417198,
+            "loser_mean": -0.031526446629666346,
+            "winner_minus_loser": 0.040026406420083545,
+            "n_winner": 502,
+            "n_loser": 334
+          }
+        ],
+        "p_value_holm": 0.20484996643938155,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "difference_in_differences_ticker_cluster_mean",
+        "contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "abn_volume_z",
+        "outcome_label": "Abnormal volume z-score",
+        "n_retail_tickers": 10,
+        "n_control_tickers": 10,
+        "retail_mean_winner_minus_loser": 0.32339409398798347,
+        "control_mean_winner_minus_loser": -0.4900494031645857,
+        "did_retail_minus_control": 0.8134434971525691,
+        "t_stat": 4.247931966728916,
+        "p_value_raw": 0.0008317227279397389,
+        "bootstrap_ci_95": [
+          0.4461142478459994,
+          1.1594455942049746
+        ],
+        "retail_ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.8883966516632326,
+            "loser_mean": 0.5616669008265942,
+            "winner_minus_loser": 0.32672975083663836,
+            "n_winner": 57,
+            "n_loser": 80
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.7647217294924348,
+            "loser_mean": -0.013872885460798515,
+            "winner_minus_loser": 0.7785946149532333,
+            "n_winner": 63,
+            "n_loser": 70
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.5960400465818353,
+            "loser_mean": 0.14104500676665946,
+            "winner_minus_loser": 0.45499503981517586,
+            "n_winner": 43,
+            "n_loser": 54
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.17795327335723038,
+            "loser_mean": 0.33397722764569815,
+            "winner_minus_loser": -0.5119305010029285,
+            "n_winner": 65,
+            "n_loser": 74
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.1462247171271788,
+            "loser_mean": 0.3498413597846422,
+            "winner_minus_loser": -0.49606607691182103,
+            "n_winner": 67,
+            "n_loser": 66
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 1.0908035589529381,
+            "loser_mean": -0.16341681986772266,
+            "winner_minus_loser": 1.2542203788206607,
+            "n_winner": 54,
+            "n_loser": 67
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": 0.38571016141281833,
+            "loser_mean": 0.06539157167087369,
+            "winner_minus_loser": 0.32031858974194466,
+            "n_winner": 60,
+            "n_loser": 46
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.4348877796155113,
+            "loser_mean": -0.144484172957585,
+            "winner_minus_loser": 0.5793719525730963,
+            "n_winner": 65,
+            "n_loser": 61
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": 0.3781974654384637,
+            "loser_mean": 0.00902639174536872,
+            "winner_minus_loser": 0.369171073693095,
+            "n_winner": 48,
+            "n_loser": 37
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.6839197349795515,
+            "loser_mean": 0.5253836176188108,
+            "winner_minus_loser": 0.1585361173607407,
+            "n_winner": 51,
+            "n_loser": 56
+          }
+        ],
+        "control_ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.4508870845516229,
+            "loser_mean": -0.015617149953888413,
+            "winner_minus_loser": -0.4352699345977345,
+            "n_winner": 100,
+            "n_loser": 70
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.35095754290306347,
+            "loser_mean": 0.06529129652588868,
+            "winner_minus_loser": -0.41624883942895213,
+            "n_winner": 91,
+            "n_loser": 76
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.2804559457743824,
+            "loser_mean": 0.20325723386939543,
+            "winner_minus_loser": -0.4837131796437778,
+            "n_winner": 113,
+            "n_loser": 65
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.4023317822424528,
+            "loser_mean": 0.16147061503220989,
+            "winner_minus_loser": -0.5638023972746626,
+            "n_winner": 119,
+            "n_loser": 69
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.3640341139570554,
+            "loser_mean": 0.4811543763907339,
+            "winner_minus_loser": -0.8451884903477893,
+            "n_winner": 81,
+            "n_loser": 67
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.42043077213648344,
+            "loser_mean": 0.26313245745654,
+            "winner_minus_loser": -0.6835632295930234,
+            "n_winner": 95,
+            "n_loser": 78
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.4103328905666064,
+            "loser_mean": -0.13012018797653802,
+            "winner_minus_loser": -0.28021270259006836,
+            "n_winner": 84,
+            "n_loser": 77
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.28994916863396436,
+            "loser_mean": 0.5398822682438297,
+            "winner_minus_loser": -0.829831436877794,
+            "n_winner": 102,
+            "n_loser": 66
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.31899941840309065,
+            "loser_mean": 0.19214689300800541,
+            "winner_minus_loser": -0.5111463114110961,
+            "n_winner": 123,
+            "n_loser": 64
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": 0.046562321237237615,
+            "loser_mean": -0.1019201688818037,
+            "winner_minus_loser": 0.14848249011904133,
+            "n_winner": 98,
+            "n_loser": 62
+          }
+        ],
+        "p_value_holm": 0.013307563647035822,
+        "holm_reject_5pct": true
+      },
+      {
+        "test_type": "difference_in_differences_ticker_cluster_mean",
+        "contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "range_vol_z",
+        "outcome_label": "Range-vol z-score",
+        "n_retail_tickers": 10,
+        "n_control_tickers": 10,
+        "retail_mean_winner_minus_loser": -0.019416630116208405,
+        "control_mean_winner_minus_loser": -0.6051005858931803,
+        "did_retail_minus_control": 0.5856839557769719,
+        "t_stat": 2.418717968968395,
+        "p_value_raw": 0.03331483154076042,
+        "bootstrap_ci_95": [
+          0.16566021187457242,
+          1.0648914876686255
+        ],
+        "retail_ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.37210776014497937,
+            "loser_mean": 0.1002814433770733,
+            "winner_minus_loser": 0.2718263167679061,
+            "n_winner": 57,
+            "n_loser": 80
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.614463985218223,
+            "loser_mean": -0.06866849481793419,
+            "winner_minus_loser": 0.6831324800361571,
+            "n_winner": 63,
+            "n_loser": 70
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.05922340698094217,
+            "loser_mean": 0.22523914227159117,
+            "winner_minus_loser": -0.166015735290649,
+            "n_winner": 43,
+            "n_loser": 54
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.300361812409486,
+            "loser_mean": 0.48896288118445425,
+            "winner_minus_loser": -0.7893246935939402,
+            "n_winner": 65,
+            "n_loser": 74
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.2791388869270737,
+            "loser_mean": 0.29358331832585577,
+            "winner_minus_loser": -0.5727222052529295,
+            "n_winner": 67,
+            "n_loser": 66
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 1.2991408425306223,
+            "loser_mean": -0.12684167784717545,
+            "winner_minus_loser": 1.4259825203777978,
+            "n_winner": 54,
+            "n_loser": 67
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": -0.11334183810137527,
+            "loser_mean": 0.6745821779887824,
+            "winner_minus_loser": -0.7879240160901577,
+            "n_winner": 60,
+            "n_loser": 46
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.1001847262748213,
+            "loser_mean": 0.08050047221406724,
+            "winner_minus_loser": 0.019684254060754067,
+            "n_winner": 65,
+            "n_loser": 61
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.023480119925820164,
+            "loser_mean": -0.34757450425088954,
+            "winner_minus_loser": 0.3240943843250694,
+            "n_winner": 48,
+            "n_loser": 37
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": -0.07391542329315273,
+            "loser_mean": 0.5289841832089393,
+            "winner_minus_loser": -0.602899606502092,
+            "n_winner": 51,
+            "n_loser": 56
+          }
+        ],
+        "control_ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.23944543217049977,
+            "loser_mean": 0.3332294273969046,
+            "winner_minus_loser": -0.5726748595674044,
+            "n_winner": 100,
+            "n_loser": 70
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.17579331631861195,
+            "loser_mean": 0.6788329246414201,
+            "winner_minus_loser": -0.854626240960032,
+            "n_winner": 91,
+            "n_loser": 76
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.21985091123708853,
+            "loser_mean": 0.6186076338839231,
+            "winner_minus_loser": -0.8384585451210117,
+            "n_winner": 113,
+            "n_loser": 65
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.19646100876282713,
+            "loser_mean": 0.45630917782946406,
+            "winner_minus_loser": -0.6527701865922912,
+            "n_winner": 119,
+            "n_loser": 69
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.25584916326080237,
+            "loser_mean": 0.5913583498168178,
+            "winner_minus_loser": -0.8472075130776202,
+            "n_winner": 81,
+            "n_loser": 67
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.2988789008176461,
+            "loser_mean": 0.5469528708206606,
+            "winner_minus_loser": -0.8458317716383067,
+            "n_winner": 95,
+            "n_loser": 78
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.17099088232492285,
+            "loser_mean": 0.3177056012403693,
+            "winner_minus_loser": -0.48869648356529216,
+            "n_winner": 84,
+            "n_loser": 77
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.1359395614027732,
+            "loser_mean": 0.25374382757371744,
+            "winner_minus_loser": -0.38968338897649063,
+            "n_winner": 102,
+            "n_loser": 66
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.07090314798554162,
+            "loser_mean": 0.465871693566259,
+            "winner_minus_loser": -0.5367748415518007,
+            "n_winner": 123,
+            "n_loser": 64
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": -0.03678291022587373,
+            "loser_mean": -0.012500882344321567,
+            "winner_minus_loser": -0.024282027881552162,
+            "n_winner": 98,
+            "n_loser": 62
+          }
+        ],
+        "p_value_holm": 0.3331483154076042,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "difference_in_differences_ticker_cluster_mean",
+        "contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "gap_abs_z",
+        "outcome_label": "Absolute gap z-score",
+        "n_retail_tickers": 10,
+        "n_control_tickers": 10,
+        "retail_mean_winner_minus_loser": 0.05817794138190775,
+        "control_mean_winner_minus_loser": -0.4033088653651197,
+        "did_retail_minus_control": 0.4614868067470274,
+        "t_stat": 2.7317364459385014,
+        "p_value_raw": 0.019510872109399308,
+        "bootstrap_ci_95": [
+          0.17055968291078089,
+          0.8027485813691811
+        ],
+        "retail_ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.4728563230083767,
+            "loser_mean": 0.04061818687935544,
+            "winner_minus_loser": 0.4322381361290213,
+            "n_winner": 57,
+            "n_loser": 80
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.43859669591562417,
+            "loser_mean": -0.01119688366363377,
+            "winner_minus_loser": 0.4497935795792579,
+            "n_winner": 63,
+            "n_loser": 70
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.22065032279231772,
+            "loser_mean": 0.46633820854248703,
+            "winner_minus_loser": -0.2456878857501693,
+            "n_winner": 43,
+            "n_loser": 54
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.24633063596272053,
+            "loser_mean": 0.2261438421186745,
+            "winner_minus_loser": -0.47247447808139503,
+            "n_winner": 65,
+            "n_loser": 74
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.14488318524178817,
+            "loser_mean": 0.06269009379460788,
+            "winner_minus_loser": -0.20757327903639605,
+            "n_winner": 67,
+            "n_loser": 66
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 0.9439926157480754,
+            "loser_mean": -0.23190203867858594,
+            "winner_minus_loser": 1.1758946544266613,
+            "n_winner": 54,
+            "n_loser": 67
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": 0.05282333106894863,
+            "loser_mean": 0.4737662650708754,
+            "winner_minus_loser": -0.4209429340019267,
+            "n_winner": 60,
+            "n_loser": 46
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.08080585380170731,
+            "loser_mean": 0.2798862073415648,
+            "winner_minus_loser": -0.19908035353985748,
+            "n_winner": 65,
+            "n_loser": 61
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.09149387613839122,
+            "loser_mean": -0.23636733542128344,
+            "winner_minus_loser": 0.14487345928289222,
+            "n_winner": 48,
+            "n_loser": 37
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.16755295409132734,
+            "loser_mean": 0.24281443928033802,
+            "winner_minus_loser": -0.07526148518901069,
+            "n_winner": 51,
+            "n_loser": 56
+          }
+        ],
+        "control_ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.1913524037409167,
+            "loser_mean": 0.3146202122557343,
+            "winner_minus_loser": -0.505972615996651,
+            "n_winner": 100,
+            "n_loser": 70
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.2100893282950704,
+            "loser_mean": 0.16929046967728173,
+            "winner_minus_loser": -0.3793797979723521,
+            "n_winner": 91,
+            "n_loser": 76
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.12308532512388433,
+            "loser_mean": 0.41393771726975015,
+            "winner_minus_loser": -0.5370230423936345,
+            "n_winner": 113,
+            "n_loser": 65
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.22894010697008485,
+            "loser_mean": 0.41504063911766165,
+            "winner_minus_loser": -0.6439807460877465,
+            "n_winner": 119,
+            "n_loser": 69
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.23887072678484267,
+            "loser_mean": 0.2810679253295228,
+            "winner_minus_loser": -0.5199386521143654,
+            "n_winner": 81,
+            "n_loser": 67
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.24655980837392377,
+            "loser_mean": 0.24441992718562716,
+            "winner_minus_loser": -0.49097973555955093,
+            "n_winner": 95,
+            "n_loser": 78
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.1236882191325011,
+            "loser_mean": 0.19524768891459185,
+            "winner_minus_loser": -0.31893590804709293,
+            "n_winner": 84,
+            "n_loser": 77
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.17140901647730172,
+            "loser_mean": -0.11275998217968432,
+            "winner_minus_loser": -0.058649034297617406,
+            "n_winner": 102,
+            "n_loser": 66
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.1787337826612736,
+            "loser_mean": 0.11887495253501226,
+            "winner_minus_loser": -0.29760873519628583,
+            "n_winner": 123,
+            "n_loser": 64
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": 0.05012490408219751,
+            "loser_mean": 0.33074529006809666,
+            "winner_minus_loser": -0.28062038598589917,
+            "n_winner": 98,
+            "n_loser": 62
+          }
+        ],
+        "p_value_holm": 0.21461959320339238,
+        "holm_reject_5pct": false
+      },
+      {
+        "test_type": "difference_in_differences_ticker_cluster_mean",
+        "contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "monday_post_weekend",
+        "window_description": "Monday sessions, proxying post-weekend attention release",
+        "outcome": "rv_z",
+        "outcome_label": "Squared-return z-score",
+        "n_retail_tickers": 10,
+        "n_control_tickers": 10,
+        "retail_mean_winner_minus_loser": 0.032627421306074565,
+        "control_mean_winner_minus_loser": -0.21508050850249885,
+        "did_retail_minus_control": 0.24770792980857342,
+        "t_stat": 1.5494815269804056,
+        "p_value_raw": 0.1535958222024054,
+        "bootstrap_ci_95": [
+          -0.023509924711145838,
+          0.5524105967168632
+        ],
+        "retail_ticker_effects": [
+          {
+            "ticker": "AMC",
+            "winner_mean": 0.39394504031629807,
+            "loser_mean": 0.09351222477165126,
+            "winner_minus_loser": 0.3004328155446468,
+            "n_winner": 57,
+            "n_loser": 80
+          },
+          {
+            "ticker": "BB",
+            "winner_mean": 0.4250327236911072,
+            "loser_mean": -0.08281444075346055,
+            "winner_minus_loser": 0.5078471644445677,
+            "n_winner": 63,
+            "n_loser": 70
+          },
+          {
+            "ticker": "COIN",
+            "winner_mean": 0.1851689836809138,
+            "loser_mean": 0.3556777080333365,
+            "winner_minus_loser": -0.17050872435242267,
+            "n_winner": 43,
+            "n_loser": 54
+          },
+          {
+            "ticker": "CVNA",
+            "winner_mean": -0.18067526086027758,
+            "loser_mean": 0.20451074819387235,
+            "winner_minus_loser": -0.3851860090541499,
+            "n_winner": 65,
+            "n_loser": 74
+          },
+          {
+            "ticker": "DKNG",
+            "winner_mean": -0.14974581911688892,
+            "loser_mean": 0.10678397918292049,
+            "winner_minus_loser": -0.2565297982998094,
+            "n_winner": 67,
+            "n_loser": 66
+          },
+          {
+            "ticker": "GME",
+            "winner_mean": 1.0907190992124438,
+            "loser_mean": -0.02939158530833328,
+            "winner_minus_loser": 1.1201106845207771,
+            "n_winner": 54,
+            "n_loser": 67
+          },
+          {
+            "ticker": "HOOD",
+            "winner_mean": -0.10366677873020273,
+            "loser_mean": 0.36524913302752693,
+            "winner_minus_loser": -0.4689159117577297,
+            "n_winner": 60,
+            "n_loser": 46
+          },
+          {
+            "ticker": "PLTR",
+            "winner_mean": 0.02712846996245906,
+            "loser_mean": 0.3206596825700945,
+            "winner_minus_loser": -0.29353121260763543,
+            "n_winner": 65,
+            "n_loser": 61
+          },
+          {
+            "ticker": "RIVN",
+            "winner_mean": -0.03423550669618607,
+            "loser_mean": -0.22643523998411838,
+            "winner_minus_loser": 0.1921997332879323,
+            "n_winner": 48,
+            "n_loser": 37
+          },
+          {
+            "ticker": "SOFI",
+            "winner_mean": 0.03785687181515139,
+            "loser_mean": 0.25750140048058245,
+            "winner_minus_loser": -0.21964452866543105,
+            "n_winner": 51,
+            "n_loser": 56
+          }
+        ],
+        "control_ticker_effects": [
+          {
+            "ticker": "AAPL",
+            "winner_mean": -0.19156654626211198,
+            "loser_mean": 0.14819141019785978,
+            "winner_minus_loser": -0.33975795645997175,
+            "n_winner": 100,
+            "n_loser": 70
+          },
+          {
+            "ticker": "AMZN",
+            "winner_mean": -0.21106781646215186,
+            "loser_mean": -0.010369014357579706,
+            "winner_minus_loser": -0.20069880210457217,
+            "n_winner": 91,
+            "n_loser": 76
+          },
+          {
+            "ticker": "GOOGL",
+            "winner_mean": -0.1142348931869035,
+            "loser_mean": 0.14605817091681614,
+            "winner_minus_loser": -0.26029306410371966,
+            "n_winner": 113,
+            "n_loser": 65
+          },
+          {
+            "ticker": "JPM",
+            "winner_mean": -0.11436330775445733,
+            "loser_mean": 0.08651943924739133,
+            "winner_minus_loser": -0.20088274700184866,
+            "n_winner": 119,
+            "n_loser": 69
+          },
+          {
+            "ticker": "META",
+            "winner_mean": -0.1610339125434048,
+            "loser_mean": 0.1037009428394257,
+            "winner_minus_loser": -0.2647348553828305,
+            "n_winner": 81,
+            "n_loser": 67
+          },
+          {
+            "ticker": "MSFT",
+            "winner_mean": -0.22641913300122157,
+            "loser_mean": 0.1294501002640386,
+            "winner_minus_loser": -0.3558692332652602,
+            "n_winner": 95,
+            "n_loser": 78
+          },
+          {
+            "ticker": "NVDA",
+            "winner_mean": -0.0950506242023861,
+            "loser_mean": 0.049876238006129364,
+            "winner_minus_loser": -0.14492686220851547,
+            "n_winner": 84,
+            "n_loser": 77
+          },
+          {
+            "ticker": "UNH",
+            "winner_mean": -0.15165502607052533,
+            "loser_mean": 0.01979699473657597,
+            "winner_minus_loser": -0.1714520208071013,
+            "n_winner": 102,
+            "n_loser": 66
+          },
+          {
+            "ticker": "WMT",
+            "winner_mean": -0.09471179638196654,
+            "loser_mean": -0.024691680811239007,
+            "winner_minus_loser": -0.07002011557072754,
+            "n_winner": 123,
+            "n_loser": 64
+          },
+          {
+            "ticker": "XOM",
+            "winner_mean": -0.016926961769425257,
+            "loser_mean": 0.1252424663510159,
+            "winner_minus_loser": -0.14216942812044117,
+            "n_winner": 98,
+            "n_loser": 62
+          }
+        ],
+        "p_value_holm": 1.0,
+        "holm_reject_5pct": false
+      }
+    ]
+  },
+  "primary_summary": {
+    "verdict": "RELATIVE_DID_ONLY_NO_ABSOLUTE_RETAIL_PASS",
+    "interpretation": "Retail-minus-control asymmetry survives Holm correction, but the retail basket's own winner-minus-loser effects do not. This is compatible with retail winner-side attention, but the evidence is relative and exploratory, not an absolute positive winner-side pass.",
+    "retail_positive_holm_passes": 0,
+    "control_positive_holm_passes": 0,
+    "did_positive_holm_passes": 3,
+    "retail_negative_holm_passes": 0,
+    "control_negative_holm_passes": 8,
+    "primary_pass_tests": [
+      {
+        "scope": "difference_in_differences_ticker_cluster_mean",
+        "group_or_contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "all_next_sessions",
+        "outcome": "abn_volume_z",
+        "effect": 0.8811704683931204,
+        "p_value_holm": 0.004983835259271956
+      },
+      {
+        "scope": "difference_in_differences_ticker_cluster_mean",
+        "group_or_contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "all_next_sessions",
+        "outcome": "range_vol_z",
+        "effect": 0.6132310535384567,
+        "p_value_holm": 0.04397196666722706
+      },
+      {
+        "scope": "difference_in_differences_ticker_cluster_mean",
+        "group_or_contrast": "retail_meme_risk_minus_large_cap_control",
+        "window": "monday_post_weekend",
+        "outcome": "abn_volume_z",
+        "effect": 0.8134434971525691,
+        "p_value_holm": 0.013307563647035822
+      }
+    ]
+  },
+  "limitations": [
+    "No brokerage-login, Google Trends, Reddit, or Stocktwits attention data were used.",
+    "Earnings-window attention is not tested; reliable point-in-time earnings dates were outside the free-data scope.",
+    "Daily OHLCV cannot separate market-close attention from intraday order flow.",
+    "Ticker-level t-tests reduce but do not eliminate common-date cross-sectional dependence.",
+    "This is a proxy mechanism screen and should not be treated as causal identification."
+  ],
+  "figure": "research_attention_utility_winner_focus_winner_side_rv_vo_summary.png"
+}

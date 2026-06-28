@@ -38244,7 +38244,7 @@
     "title": "研究 backlog fallback: Attention-utility winner focus：贏家被看見、輸家被躲開是否造成 winner-side RV / volume asymmetry",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Attention-utility winner focus：贏家被看見、輸家被躲開是否造成 winner-side RV / volume asymmetry — 用 retail-heavy / meme-risk basket + large-cap control，標記近期新高/高報酬 winner 與近期 loser，測試 market-close 後、週一開盤、財報前後的成交量、range-vol、gap risk 是否對 winner-side attention 更敏感；若可取得 Google Trends/Reddit/Stocktwits public count 則作 a | 來源 section: 期刊主題挖掘 batch 2026-06-25（journal_discovery_20260625_0；websearch jfec/rfs/qje/restud 2025-26 趨勢層級；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -38253,7 +38253,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-28T15:07:59+00:00"
+    "created_at": "2026-06-28T15:07:59+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T20:34:39.853247+00:00",
+    "claim_session_id": "889766726416",
+    "started_at": "2026-06-28T20:34:40.053486+00:00",
+    "completed_at": "2026-06-28T20:42:17.124103+00:00",
+    "result": "Completed proxy event-study experiment under experiments/research_attention_utility_winner_focus_winner_side_rv_vo. Verdict=RELATIVE_DID_ONLY_NO_ABSOLUTE_RETAIL_PASS: retail-minus-control abnormal-volume/range DiD has 3 Holm passes, but retail within-group winner-side effects do not survive Holm. All event labels/outcome benchmarks use t-1 lag; no earnings/Google/Reddit replication."
   },
   {
     "id": "research_candlestick_spot_vol_estimator_ohlc_baseline_k_c",
