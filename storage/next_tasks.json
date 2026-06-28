@@ -38254,7 +38254,7 @@
     "title": "研究 backlog fallback: Candlestick spot-vol estimator 作日頻 OHLC baseline：K線資訊是否足以打敗 close-to-close / range RV",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Candlestick spot-vol estimator 作日頻 OHLC baseline：K線資訊是否足以打敗 close-to-close / range RV — 用 yfinance 日 OHLCV 的 SPY/QQQ/IWM/TLT/GLD/HYG 與本機 5-min 片段作 validation，實作 candlestick-based spot volatility estimator、Parkinson/Garman-Klass/Yang-Zhang、close-to-close 三組，先比較 measurement error，再把 lagged estimator 加 | 來源 section: 期刊主題挖掘 batch 2026-06-27（journal_discovery_20260626_0；websearch jfec/rof/rfs/aea/restud 2025-26 趨勢層級；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -38264,7 +38264,11 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-28T15:07:59+00:00",
-    "last_released_at": "2026-06-28T15:10:32.464619+00:00"
+    "last_released_at": "2026-06-28T15:10:32.464619+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-06-28T19:10:08.486627+00:00",
+    "claim_session_id": "13d2c93c3ccf",
+    "started_at": "2026-06-28T19:10:19.132209+00:00"
   },
   {
     "id": "K1314_v2_multiseed_placebo_bonferroni",
