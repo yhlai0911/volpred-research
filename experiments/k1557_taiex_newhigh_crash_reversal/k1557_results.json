@@ -1,0 +1,326 @@
+{
+  "experiment_id": "K1557",
+  "title": "TAIEX new-1yr-high → sharp-crash → forward returns (FinLab claim verification)",
+  "data": {
+    "ticker": "^TWII",
+    "source": "yfinance",
+    "range": [
+      "1997-07-02",
+      "2026-06-26"
+    ],
+    "n_days": 7102
+  },
+  "method": {
+    "event_signal": "252d new high within last 5 td AND trailing-3d return <= 2nd percentile of prior-252d 3d returns (signal uses data<=t)",
+    "entry": "t+1 close (event confirmed at close[t]) — Codex fix",
+    "dedupe": "first trigger within 20 td (no retrospective trough-picking) — Codex fix",
+    "event_year_min": 1999
+  },
+  "n_events": 13,
+  "events": [
+    {
+      "event_date": "2007-07-27",
+      "entry_date": "2007-07-30",
+      "close": 9162.3,
+      "r3_pct": -5.97,
+      "3M": 7.04,
+      "6M": -16.49,
+      "1Y": -22.56
+    },
+    {
+      "event_date": "2007-11-02",
+      "entry_date": "2007-11-05",
+      "close": 9273.1,
+      "r3_pct": -4.97,
+      "3M": -17.56,
+      "6M": -3.43,
+      "1Y": -49.08
+    },
+    {
+      "event_date": "2011-02-11",
+      "entry_date": "2011-02-14",
+      "close": 8609.9,
+      "r3_pct": -5.51,
+      "3M": 2.99,
+      "6M": -10.21,
+      "1Y": -7.87
+    },
+    {
+      "event_date": "2014-02-05",
+      "entry_date": "2014-02-06",
+      "close": 8264.5,
+      "r3_pct": -3.85,
+      "3M": 6.96,
+      "6M": 9.87,
+      "1Y": 14.45
+    },
+    {
+      "event_date": "2015-03-27",
+      "entry_date": "2015-03-30",
+      "close": 9503.7,
+      "r3_pct": -2.34,
+      "3M": -1.54,
+      "6M": -12.87,
+      "1Y": -10.4
+    },
+    {
+      "event_date": "2016-09-12",
+      "entry_date": "2016-09-13",
+      "close": 8947.1,
+      "r3_pct": -3.37,
+      "3M": 4.32,
+      "6M": 10.46,
+      "1Y": 15.5
+    },
+    {
+      "event_date": "2017-11-30",
+      "entry_date": "2017-12-01",
+      "close": 10560.4,
+      "r3_pct": -1.77,
+      "3M": 3.79,
+      "6M": 5.4,
+      "1Y": -8.43
+    },
+    {
+      "event_date": "2020-01-30",
+      "entry_date": "2020-01-31",
+      "close": 11421.7,
+      "r3_pct": -5.35,
+      "3M": -6.27,
+      "6M": 10.57,
+      "1Y": 37.1
+    },
+    {
+      "event_date": "2021-05-04",
+      "entry_date": "2021-05-05",
+      "close": 16933.8,
+      "r3_pct": -3.61,
+      "3M": 4.22,
+      "6M": 1.65,
+      "1Y": -5.6
+    },
+    {
+      "event_date": "2024-04-16",
+      "entry_date": "2024-04-17",
+      "close": 19902.0,
+      "r3_pct": -4.1,
+      "3M": 17.59,
+      "6M": 16.44,
+      "1Y": 1.58
+    },
+    {
+      "event_date": "2024-05-31",
+      "entry_date": "2024-06-03",
+      "close": 21174.2,
+      "r3_pct": -3.13,
+      "3M": 2.58,
+      "6M": 7.69,
+      "1Y": 2.17
+    },
+    {
+      "event_date": "2026-02-02",
+      "entry_date": "2026-02-03",
+      "close": 31624.0,
+      "r3_pct": -3.6,
+      "3M": 27.01,
+      "6M": null,
+      "1Y": null
+    },
+    {
+      "event_date": "2026-06-08",
+      "entry_date": "2026-06-09",
+      "close": 43502.8,
+      "r3_pct": -6.36,
+      "3M": null,
+      "6M": null,
+      "1Y": null
+    }
+  ],
+  "conditional_forward": {
+    "3M": {
+      "n": 12,
+      "median_pct": 4.0,
+      "mean_pct": 4.26,
+      "win_rate": 0.75,
+      "win_rate_95ci": [
+        0.5,
+        1.0
+      ],
+      "min_pct": -17.56,
+      "max_pct": 27.01
+    },
+    "6M": {
+      "n": 11,
+      "median_pct": 5.4,
+      "mean_pct": 1.73,
+      "win_rate": 0.636,
+      "win_rate_95ci": [
+        0.364,
+        0.909
+      ],
+      "min_pct": -16.49,
+      "max_pct": 16.44
+    },
+    "1Y": {
+      "n": 11,
+      "median_pct": -5.6,
+      "mean_pct": -3.01,
+      "win_rate": 0.455,
+      "win_rate_95ci": [
+        0.182,
+        0.727
+      ],
+      "min_pct": -49.08,
+      "max_pct": 37.1
+    }
+  },
+  "unconditional_forward_1999plus": {
+    "3M": {
+      "median": 2.82,
+      "win_rate": 0.638,
+      "n": 6670
+    },
+    "6M": {
+      "median": 4.51,
+      "win_rate": 0.664,
+      "n": 6607
+    },
+    "1Y": {
+      "median": 9.12,
+      "win_rate": 0.684,
+      "n": 6481
+    }
+  },
+  "sensitivity": [
+    {
+      "lookback": 3,
+      "pctile": 2.0,
+      "n_events": 5,
+      "m3M": 5.68,
+      "m1Y": 2.17,
+      "win1Y": 0.667
+    },
+    {
+      "lookback": 3,
+      "pctile": 3.0,
+      "n_events": 7,
+      "m3M": 3.88,
+      "m1Y": 2.17,
+      "win1Y": 0.6
+    },
+    {
+      "lookback": 3,
+      "pctile": 5.0,
+      "n_events": 14,
+      "m3M": 3.43,
+      "m1Y": -2.17,
+      "win1Y": 0.5
+    },
+    {
+      "lookback": 5,
+      "pctile": 2.0,
+      "n_events": 13,
+      "m3M": 4.0,
+      "m1Y": -5.6,
+      "win1Y": 0.455
+    },
+    {
+      "lookback": 5,
+      "pctile": 3.0,
+      "n_events": 14,
+      "m3M": 3.43,
+      "m1Y": -2.01,
+      "win1Y": 0.5
+    },
+    {
+      "lookback": 5,
+      "pctile": 5.0,
+      "n_events": 22,
+      "m3M": 3.36,
+      "m1Y": 2.05,
+      "win1Y": 0.6
+    },
+    {
+      "lookback": 7,
+      "pctile": 2.0,
+      "n_events": 19,
+      "m3M": 3.39,
+      "m1Y": 1.58,
+      "win1Y": 0.588
+    },
+    {
+      "lookback": 7,
+      "pctile": 3.0,
+      "n_events": 20,
+      "m3M": 2.99,
+      "m1Y": 1.88,
+      "win1Y": 0.611
+    },
+    {
+      "lookback": 7,
+      "pctile": 5.0,
+      "n_events": 28,
+      "m3M": 3.36,
+      "m1Y": 3.38,
+      "win1Y": 0.615
+    }
+  ],
+  "robustness_verdict": {
+    "3M_bounce": "check across sensitivity m3M column",
+    "1Y_median_range_across_filters": [
+      -5.6,
+      3.38
+    ]
+  },
+  "finlab_claim": {
+    "n_events": 10,
+    "3M": {
+      "win": 0.88,
+      "median": 4.7
+    },
+    "6M": {
+      "median": -0.2,
+      "win": 0.4
+    },
+    "1Y": {
+      "median": -1.7,
+      "win_lt": 0.3,
+      "buyhold_median": 8.5
+    },
+    "worst_2007_1Y": -47.6
+  },
+  "seed": 42,
+  "placebo_bootstrap": {
+    "3M": {
+      "n_ev": 12,
+      "event_median": 4.0,
+      "event_winrate": 0.75,
+      "random_median_p50": 2.79,
+      "random_p5": -2.33,
+      "random_p95": 7.36,
+      "event_percentile_in_random": 0.687,
+      "distinguishable_from_random": false
+    },
+    "6M": {
+      "n_ev": 11,
+      "event_median": 5.4,
+      "event_winrate": 0.636,
+      "random_median_p50": 4.49,
+      "random_p5": -2.64,
+      "random_p95": 11.06,
+      "event_percentile_in_random": 0.612,
+      "distinguishable_from_random": false
+    },
+    "1Y": {
+      "n_ev": 11,
+      "event_median": -5.6,
+      "event_winrate": 0.455,
+      "random_median_p50": 9.24,
+      "random_p5": -2.96,
+      "random_p95": 18.1,
+      "event_percentile_in_random": 0.026,
+      "distinguishable_from_random": true
+    }
+  },
+  "honest_conclusion": "短彈(3M)落在隨機第69百分位=與隨機無異(雜訊); 1Y在主規格第3百分位看似異常但filter敏感(範圍-5.6~+3.4%)+9切法multiple-testing+n=11→無robust可下注edge。FinLab的可交易建議(搶短彈)統計上=雜訊。"
+}
