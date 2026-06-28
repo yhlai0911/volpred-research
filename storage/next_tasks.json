@@ -38076,7 +38076,7 @@
     "title": "K1347: write research-audience article (auto-discovered uncovered K)",
     "description": "K K1347 has verdict signal (score=5, reasons=['methodology/mechanism lesson', 'paradigm/decisive null', 'robust inference']) but no research article in feed.json.  Verdict preview: K1347 [FAIL, Codex PASS] CVaR-RP vs Sigma-RP (ERC) on SPY/TLT/GLD/PDBC — 用 tail-risk 重定義 risk parity 沒能 robust 改善 stress MDD\n\n**結論**: FAIL — CVaR-based equal risk contribution (α=0.05) 對比 sigma-based ERC，在 SPY/TLT/GLD/PDBC 4-asset 2019-01-02 至 2025-12-30 共 1759 OOS days 下：(a) ful",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1347",
@@ -38085,7 +38085,13 @@
       "audience-research"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-28T11:10:09+00:00"
+    "created_at": "2026-06-28T11:10:09+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T12:19:37.905968+00:00",
+    "claim_session_id": "8ac121a38f01",
+    "started_at": "2026-06-28T12:19:38.113318+00:00",
+    "completed_at": "2026-06-28T12:24:37.615176+00:00",
+    "result": "Created research draft mile_e6acc52c for K1347 CVaR-RP vs Sigma-RP. Article uses K1347 results/Codex review, includes Supabase charts, status=draft, anti-AI gate PASS, pre-publish audit PASS; Mirror API returned 401 but Supabase failed-sync queue is empty."
   },
   {
     "id": "K1546_article_general",
