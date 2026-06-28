@@ -1,0 +1,42 @@
+{
+  "id": "mile_c1f998c8",
+  "title": "銅 ETF 期貨期限結構翻轉：contango→backwardation 後 30 天波動率跳升 18%",
+  "description": "K1339 事件研究：CPER 銅 ETF 由 contango 轉入 backwardation 後，30 天已實現波動率平均跳升 +18%（bootstrap p=0.003，sign-flip null p=0.0026）。UNG 天然氣同方向有邊際訊號（p=0.079）。反向及 SPY 跨資產相關度全為 NULL。Codex 判定 CONDITIONAL_PASS：多重檢定未校正、事件非獨立為主要限制。",
+  "category": "milestone",
+  "phase": "research",
+  "audience": "research",
+  "status": "draft",
+  "content": "# 銅 ETF 期貨期限結構翻轉：contango→backwardation 後 30 天波動率跳升 18%\n\n**實驗 K1339** | 資料來源：yfinance（USO/UNG/CPER/SPY）| 期間：2015-01-01 至 2026-06-14 | 約 2878 個交易日\n\n---\n\n## 摘要\n\n本研究用 USO（原油）、UNG（天然氣）、CPER（銅）三個大宗商品 ETF 的 momentum-slope 指標，偵測跨資產確認的期限結構翻轉事件，並測量翻轉後 30/60/90 交易日的已實現波動率變化。主要發現：當 CPER 由 contango 型態轉入 backwardation 型態後，30 天已實現波動率平均跳升 **+18%**（bootstrap p=0.003，5000 次，種子 42），sign-flip 空值交叉驗證 p=0.0026。UNG 同方向 H=30 有邊際訊號（p=0.079，mean +10%）。相反方向（backwardation→contango）及所有 SPY 跨資產相關度變動，全為統計 NULL。\n\nCodex CLI 審查後判定：**CONDITIONAL_PASS**。多重檢定未校正、事件獨立性存疑，是降級主因。\n\n---\n\n## 我們在測什麼\n\nBackwardation 與 contango 是期貨曲線的兩種形狀。Backwardation 下，近月合約比遠月貴，持有者被動賺取 roll yield；contango 下，遠月比近月貴，持有者每次轉倉都要付出溢價，形成逆向拖累。\n\n問題是：**市場從一種形狀切換到另一種形狀時，該商品本身的波動率會如何？**\n\n直覺上，contango→backwardation 的翻轉可能伴隨供需緊張（緊俏的現貨市場推高近月）或避險需求上升，兩者都可能帶動波動率走高。另一方向（backwardation→contango）的意義就更模糊：可能是需求降溫、也可能只是季節性正常化。\n\n取得真實期貨曲線數據需要付費訂閱，因此 K1339 用 ETF 的 momentum-slope 做替代：21 日報酬減去 63 日報酬，正值代表近期動能強於中期，近似 backwardation 狀態；負值反之，近似 contango 狀態。翻轉事件必須同時滿足：(1) 單一 ETF 的信號翻轉後維持 10 個交易日，(2) 三個 ETF 中至少兩個在 21 個交易日窗口內同方向翻轉。事件日定義為確認翻轉第 10 天，前向窗口從隔日開始計算，無向前看問題。\n\n最終識別出：backwardation→contango 事件共 43 個、contango→backwardation 事件共 52 個，覆蓋 2015 至 2026 年，含 2020 年 WTI 負油價、2022 年商品超級循環、2024–25 年鋪底再翻轉。\n\n---\n\n## 主要結果\n\n### CPER（銅 ETF）contango→backwardation 翻轉後波動率變化\n\n| 窗口 | 波動率跳升均值 | 95% 信賴區間 | Bootstrap p | n |\n|------|-------------|------------|------------|---|\n| H=30 天 | **+18.0%** | [+7.2%, +29.2%] | **0.003** | 52 |\n| H=60 天 | +7.0% | [-0.5%, +14.7%] | 0.074 | 52 |\n\nUNG（天然氣 ETF）contango→backwardation 翻轉：\n\n| 窗口 | 波動率跳升均值 | 95% 信賴區間 | Bootstrap p | n |\n|------|-------------|------------|------------|---|\n| H=30 天 | +10.0% | [-0.2%, +22.6%] | 0.079 | 52 |\n\n### NULL 結果（全部不顯著）\n\n- **所有 backwardation→contango 方向**（USO/UNG/CPER × H=30/60/90）：p 值介於 0.15 至 0.90\n- **USO（原油 ETF）所有方向**：H=30 contango→back p=0.227，全窗口皆無顯著\n- **全部 SPY 跨相關度變動（Δρ）**：無任何方向、窗口達到 p<0.10\n- **效應量**：全部 18 個波動率 cell 中，效應量絕對值超過 0.25 者為 **0**\n\n圖 1 是 CPER 在三個窗口下的波動率跳升分布，可看到 H=30 最為集中、方向一致；H=60 已明顯衰減；H=90 分布扁平，幾乎無訊號。\n\n![CPER horizon decay](/api/storage/experiments/K1339/k1339_cper_horizon_decay.png)\n\n圖 2 顯示 52 個 contango→backwardation 事件的 H=30 波動率跳升個別觀察值，可看到多數事件跳升，但尾部存在反向大值（典型的小樣本高雜訊事件研究特徵）。\n\n![H30 vol jump distribution](/api/storage/experiments/K1339/k1339_h30_vol_jump.png)\n\n---\n\n## Bootstrap 與 sign-flip null：怎麼判讀\n\nK1339 用兩種方式交叉驗證 CPER H=30 的 p=0.003。\n\n**Paired bootstrap**（B=5000，seed=42）：對 52 個事件的波動率跳升值做重抽樣，計算重抽均值在零假設（均值=0）下的分布，雙尾 p 值為觀察均值落在尾部的比例。\n\n**Sign-flip null**：對每個事件隨機翻轉正負號，模擬「事件日期隨機」的虛擬世界，5000 次重複後計算 p 值。Sign-flip null 直接破壞事件的方向性，比單純 bootstrap 更直接檢驗訊號是否源於隨機偶然。\n\nCPER H=30：bootstrap p=0.003，sign-flip null p=0.0026——兩者高度一致，意思是這個 18% 的均值跳升不太可能是隨機運氣。\n\n但「不太可能是隨機」和「統計上顯著」之間，還差一個多重檢定的問題。\n\n---\n\n## 不得不說的 4 條限制\n\n**多重檢定未校正（MUST 承認）**：K1339 同時測了 3 個資產 × 2 個方向 × 3 個窗口 = 18 個波動率 cell（再加 18 個 ΔρSPY cell，合計 36 個）。名義 p=0.003 不等於家族顯著水準（family-wise significant）。做 Benjamini-Hochberg FDR 校正後，CPER H=30 仍是全表最強，但落在邊緣區域，不是壓倒性通過。這是 Codex 把 K1339 從 PASS 降為 CONDITIONAL_PASS 的主要原因。\n\n**事件非獨立性**：52 個 contango→backwardation 事件的 60 天、90 天前向窗口可能互相重疊，形成觀察值之間的相依關係，導致 paired bootstrap 的信賴區間偏窄。Block bootstrap（以時間區塊為單位重抽）可以修正，但 K1339 未實作。\n\n**ETF momentum-slope ≠ 真實期貨曲線**：21d-vs-63d 的 momentum-slope 是無需付費訂閱的替代品，但它捕捉的是 ETF 本身的動能形態，而非直接測量期貨曲線上近月與遠月之間的 roll yield 差。Codex 建議把這個研究框架稱為「momentum-regime switch in commodity ETFs」而非「backwardation/contango regime switch」，更準確。\n\n**Python hash() 的隨機性**：逐 cell 的 bootstrap 種子使用 `SEED + hash(direction, H, asset) % 10000`，Python 的 hash() 在不同 `PYTHONHASHSEED` 環境下會不同。Sign-flip null 在三個不同 `PYTHONHASHSEED` 下交叉確認 CPER H=30 p≈0.0026，顯示核心數字具有跨種子穩健性，但嚴格意義上仍非完全確定性可複現。\n\n---\n\n## 為何 contango→backwardation 後波動率可能升高？\n\n直覺機制有兩個方向。\n\n**供需緊張驅動**：銅的 contango→backwardation 翻轉，通常代表現貨市場相對期貨市場走強。可能原因包括庫存偏低、消費需求快速上升，或供給端擾動（礦山罷工、出口管制）。這些基本面壓力本身就帶來更高不確定性，反映在較高的已實現波動率上。\n\n**倉位擠壓驅動**：持有 ETF 多頭的投資人當 contango 形態消失、roll yield 條件改變時，往往重新評估倉位。局部的倉位擠壓與重組本身就是額外波動的來源，與基本面無關。\n\n兩種機制不互斥，且都在 H=30 較短窗口內最為明顯——H=60 開始衰減、H=90 幾乎消失，與「短期市場壓力事件」的典型衰減路徑一致。\n\nUSO 的 null 結果有其道理：原油市場的 CFTC 倉位報告更透明、市場深度更大，信號可能更快被吸收，30 天窗口不夠長捕捉持續效應；也可能真的沒有。\n\n---\n\n## 實務含義與研究邊界\n\nCONDITIONAL_PASS 意思很具體：這是一條弱訊號，不是強力交易策略。\n\n**可能的應用**：CPER 的 momentum-regime 翻轉作為波動率預測模型的一個 binary feature，在其他 GARCH 或 HAR-RV 基礎上疊加，而不是獨立使用。效應量（+18%，效應量≈0.2 中等偏小）不足以支撐「見翻轉就做 long volatility」的策略。\n\n**需要更多工作才能升級為強結論**：\n- 用真實 roll yield 數據（CFTC COT + Bloomberg 期貨曲線）替換 ETF momentum proxy\n- 對 H=60/90 窗口做 block bootstrap，正確處理事件重疊\n- 在全部 36 個 cell 上做 BH-FDR 並用調整後 p 值報告\n- 把觀察期延伸到 2014 年以前（更多大宗商品循環），增加事件樣本至 80+ 個\n\n---\n\n## 結論\n\nK1339 的判定是 CONDITIONAL_PASS，理由是 CPER contango→backwardation 翻轉後 30 天存在統計可辨別的波動率跳升（+18%，bootstrap p=0.003，sign-flip null p=0.0026），但多重檢定未校正、事件非獨立、proxy 間接，讓這個訊號停在「值得記錄、有待加強方法論」的層次，而非「可直接引用的強結論」。\n\n所有 backwardation→contango 反向、原油 USO 全方向、及所有跨 SPY 相關度變動均為 NULL。這個不對稱性——只有一個方向（contango→back）、只有一個資產（銅）、只有最短窗口（30 天）顯現訊號——本身就是一個有趣的研究結構，適合作為後續研究的起點。\n\n*本文基於實驗 K1339（腳本：experiments/K1339/K1339.py，結果：experiments/K1339/K1339_results.json）。數據來源：yfinance，ETF：USO/UNG/CPER/SPY，期間：2015-01-01 至 2026-06-14，交易日數：2878。[提出：Claude，執行：Claude]*\n",
+  "tags": [
+    "commodity",
+    "volatility",
+    "event study",
+    "roll yield",
+    "CPER",
+    "regime switch"
+  ],
+  "published_at": "2026-06-28T12:13:13.000000+00:00",
+  "created_at": "2026-06-28T12:13:13.000000+00:00",
+  "details": {
+    "experiment_refs": [
+      "K1339"
+    ],
+    "content_type": "daily_article",
+    "arc_signature": {
+      "schema_version": "arc_dedup_v3",
+      "entities": [
+        "COPPER",
+        "MOMENTUM",
+        "NATGAS",
+        "OIL",
+        "US_EQUITY"
+      ],
+      "conclusion_class": "null_no_info",
+      "narrative_axis": "event_window",
+      "mechanisms": [
+        "carry_regime"
+      ],
+      "time_horizon": "weekly"
+    }
+  }
+}
