@@ -220,7 +220,15 @@ def _parse_datetime(value: str | None) -> datetime | None:
         return None
     try:
         return datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except Exception:
+    except Exception as exc:
+        from .diagnostics import warn
+
+        warn(
+            "content_parse_datetime",
+            "datetime parse failed; treating as missing",
+            value=str(value)[:64],
+            err=f"{type(exc).__name__}: {exc}",
+        )
         return None
 
 
@@ -758,8 +766,10 @@ def _maybe_drought_release(
     """Force-release exactly ONE dedup-blocked draft when the feed is in a
     reader-facing drought.
 
-    Called only when the normal release pass produced nothing yet content-clean
-    drafts WERE available and got dedup-blocked. Fail-open stance per
+    Called only when the normal release pass produced nothing. `blocked_items`
+    is every content-clean reader-facing draft currently held back by dedup —
+    both those live-blocked in this run's loop and those excluded at selection
+    by the dedup-cooldown flag. Fail-open stance per
     .claude/rules/dedup-gate-audit.md: an invisible content gap (Mission #1/#5)
     is worse than an occasional borderline-similar article.
 
@@ -969,15 +979,32 @@ def release_pool_articles(
         # Sort: scheduled first, then audience priority, then FIFO (oldest created_at first)
         return (preferred_rank, 0 if status == "scheduled" else 1, created_at)
 
+    _eligible_statuses = {"scheduled", "draft"} if effective_include_drafts else {"scheduled"}
     candidates = [
         item for item in feed
-        if item.get("status") in ({"scheduled", "draft"} if effective_include_drafts else {"scheduled"})
+        if item.get("status") in _eligible_statuses
         and is_due(item)
         and not _release_dedup_flag_active(item, now=now)
     ]
     candidates.sort(key=sort_key)
     if pub_id:
         candidates = [item for item in candidates if item.get("id") == pub_id]
+
+    # Reader-facing drafts excluded *at selection* by the dedup-cooldown flag
+    # (`_release_dedup_skipped` within its TTL). These never enter the release
+    # loop, so they are not in dedup_blocked_items — but they ARE dedup-blocked
+    # drafts and must still be reachable by the drought breaker, otherwise a
+    # pool where every draft is cooldown-flagged (the common drought shape)
+    # would leave the breaker with nothing to release. Excluded for an explicit
+    # pub_id (manual single-article path).
+    cooldown_blocked_items = [
+        item for item in feed
+        if not pub_id
+        and item.get("status") in _eligible_statuses
+        and is_due(item)
+        and _release_dedup_flag_active(item, now=now)
+        and _article_audience(item) in _RELEASE_DEDUP_AUDIENCES
+    ]
 
     k_cluster = _knowledge_experiment_clusters(storage_dir)
     narrative_pressure = _recent_narrative_cluster_pressure(feed, k_cluster=k_cluster)
@@ -1316,11 +1343,19 @@ def release_pool_articles(
     # Drought circuit-breaker: if the normal pass released nothing but
     # content-clean drafts were dedup-blocked, and the feed has drifted past the
     # reader-facing drought threshold, force-release exactly one (the least
-    # dup-like). Skipped for an explicit pub_id (manual single-article repair).
+    # dup-like). The rescue pool is BOTH the drafts live-blocked in this run's
+    # loop AND the reader-facing drafts excluded at selection by the dedup
+    # cooldown flag (deduped by id) — otherwise a pool where every draft is
+    # cooldown-flagged would starve the breaker. Skipped for an explicit pub_id.
     drought_override: dict | None = None
     if not released and not pub_id:
+        _blocked_by_id: dict[str, dict] = {}
+        for _it in (*dedup_blocked_items, *cooldown_blocked_items):
+            _bid = str(_it.get("id") or "")
+            if _bid and _bid not in _blocked_by_id:
+                _blocked_by_id[_bid] = _it
         drought_override = _maybe_drought_release(
-            blocked_items=dedup_blocked_items,
+            blocked_items=list(_blocked_by_id.values()),
             feed=feed,
             recent_pub=recent_pub_for_dedup,
             now=now,

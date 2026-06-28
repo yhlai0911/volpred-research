@@ -407,6 +407,55 @@ def test_drought_not_triggered_when_normal_eligible_draft_releases(tmp_path: Pat
     assert "release_drought_override" not in fresh_after.get("details", {})
 
 
+def test_drought_rescues_cooldown_flagged_draft_when_pool_all_flagged(tmp_path: Path, monkeypatch):
+    """The common drought shape: every reader-facing draft is excluded at
+    selection by the dedup-cooldown flag (so the loop sees nothing and
+    dedup_blocked_items is empty). The breaker must still reach those
+    cooldown-flagged drafts and release the least dup-like one."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 6, 24, 14, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+
+    blocker = {
+        "id": "mile_pub_old",
+        "title": "共同主題標題",
+        "status": "published",
+        "audience": "general",
+        "published_at": (frozen_now - timedelta(hours=6)).isoformat(),  # gap 6h > 4h
+        "content": _BASE_BODY,
+    }
+    flagged = {
+        "id": "mile_draft_flagged",
+        "title": "共同主題標題",
+        "status": "draft",
+        "audience": "general",
+        "created_at": (frozen_now - timedelta(days=2)).isoformat(),
+        "content": _BASE_BODY + _NOVEL_TAIL,
+        # cooldown flag active (< 2-day TTL) -> excluded from candidates entirely
+        "details": {
+            "release_dedup_skipped": True,
+            "release_dedup_skipped_at": (frozen_now - timedelta(hours=12)).isoformat(),
+        },
+    }
+    _write_json(storage_dir / "reports" / "feed.json", [blocker, flagged])
+
+    # Sanity: the flagged draft is NOT an eligible candidate (cooldown active).
+    assert content._release_dedup_flag_active(flagged, now=frozen_now) is True
+
+    res = content.release_pool_articles(
+        limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir)
+    )
+
+    assert res["released_count"] == 1
+    assert res["drought_override"]["id"] == "mile_draft_flagged"
+    feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
+    chosen = next(a for a in feed_after if a["id"] == "mile_draft_flagged")
+    assert chosen["status"] == "published"
+    assert chosen["details"]["release_drought_override"] is True
+    assert "release_dedup_skipped" not in chosen["details"]
+
+
 def test_drought_anti_thrash_skips_when_recent_override_in_window(tmp_path: Path, monkeypatch):
     """A prior drought override still inside the anti-thrash window must block a
     second override even though the reader-facing gap exceeds the threshold."""
