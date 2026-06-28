@@ -38189,7 +38189,7 @@
     "title": "研究 backlog fallback: Admissible constrained multivariate HAR / vMEM guardrail：禁止負 variance 的約束是否比 unconstrained OLS 更穩",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Admissible constrained multivariate HAR / vMEM guardrail：禁止負 variance 的約束是否比 unconstrained OLS 更穩 — 用 SPY/QQQ/IWM/TLT/GLD/HYG 多資產 RV panel 建 MHAR / vMEM-lite（daily/weekly/monthly lag cross-effects），比較 unconstrained OLS、nonnegative projected coefficients、matrix-inequality/admissible approximation 三版本 | 來源 section: 期刊主題挖掘 batch 2026-06-25（journal_discovery_20260625_0；websearch jfec/rfs/qje/restud 2025-26 趨勢層級；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -38198,7 +38198,13 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-28T15:07:59+00:00"
+    "created_at": "2026-06-28T15:07:59+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T19:28:33.645144+00:00",
+    "claim_session_id": "02e6f119ece2",
+    "started_at": "2026-06-28T19:28:33.864705+00:00",
+    "completed_at": "2026-06-28T19:33:19.453522+00:00",
+    "result": "Completed experiment under experiments/research_admissible_constrained_multivariate_har_vmem_gua. OLS produced 886 negative variance forecasts and QLIKE explosion; ProjectedNonnegative/AdmissibleNNLS eliminated invalid forecasts. Guardrail result: constrained variants stabilize variance forecasts, but only SPY/GLD survive Holm DM vs OLS, so not a universal accuracy upgrade."
   },
   {
     "id": "research_quadratic_variation_estimator_disagreement_forec",

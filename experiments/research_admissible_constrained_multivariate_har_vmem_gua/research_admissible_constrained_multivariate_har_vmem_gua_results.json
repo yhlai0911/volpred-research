@@ -1,0 +1,888 @@
+{
+  "experiment_id": "research_admissible_constrained_multivariate_har_vmem_gua",
+  "title": "Admissible constrained multivariate HAR / vMEM-lite guardrail",
+  "created_at": "2026-06-28T19:32:09.446192+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance adjusted daily close",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "TLT",
+      "GLD",
+      "HYG"
+    ],
+    "download_start": "2007-01-01",
+    "download_end": "2026-06-28",
+    "close_panel_start": "2007-04-11",
+    "close_panel_end": "2026-06-26",
+    "n_close_rows": 4834,
+    "feature_panel_start": "2007-05-14",
+    "feature_panel_end": "2026-06-26",
+    "n_feature_rows": 4811
+  },
+  "methodology": {
+    "target": "next-day squared percent return r_t^2 for each ETF",
+    "features": "All features are RV daily/weekly/monthly aggregates shifted by 1 trading day.",
+    "lookahead_safety": [
+      "Feature construction uses shift(1) for daily, weekly, and monthly RV features.",
+      "At each refit, training rows satisfy train_date < forecast_date; assertion enforces this.",
+      "Forecasts are produced for the refit block before observing target-day returns."
+    ],
+    "models": {
+      "OLS": "Unconstrained equation-by-equation OLS; raw predictions may be negative.",
+      "ProjectedNonnegative": "OLS coefficients clipped to nonnegative values; simple positivity projection.",
+      "AdmissibleNNLS": "NNLS coefficients with lag coefficients scaled so sum(beta_lags)<=0.995."
+    },
+    "oos_start": "2020-01-01",
+    "refit_every_trading_days": 63,
+    "min_train_rows": 1500,
+    "qlike_floor_for_evaluation_only": 1e-10,
+    "admissible_max_lag_sum": 0.995,
+    "references": [
+      "Corsi (2009) JFEc HAR-RV heterogeneous autoregressive realized volatility",
+      "Engle and Gallo (2006) Journal of Econometrics multiple-indicator MEM",
+      "Cipollini, Engle, and Gallo (2013) vMEM representation and inference",
+      "Karanasos et al. (2026) JFEc admissible parameter space for vMEMs"
+    ]
+  },
+  "evaluation": {
+    "per_asset": {
+      "SPY": {
+        "OLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 254,
+          "negative_forecast_rate": 0.15592387968078575,
+          "QLIKE": 2180478979.69389,
+          "MSE": 39.05447916383907,
+          "Spearman_rho": 0.13162194193497184,
+          "Spearman_p": 9.740015737979729e-08,
+          "qlike_p95": 9320058632.782833,
+          "qlike_p99": 41251729253.4143,
+          "abs_error_p95": 5.806890791578923,
+          "abs_error_p99": 19.40725764402715,
+          "vol_target_overlay": {
+            "mean_weight": 0.9664909616015596,
+            "mean_daily_turnover": 0.283768807901944,
+            "annualized_return": 0.07883974983392172,
+            "annualized_vol": 0.1938103763876906,
+            "max_drawdown": -0.37616539667847226
+          }
+        },
+        "ProjectedNonnegative": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 2.5014629719479213,
+          "MSE": 298.00934107268824,
+          "Spearman_rho": 0.3155173896830752,
+          "Spearman_p": 5.587068490127185e-39,
+          "qlike_p95": 6.97351042899254,
+          "qlike_p99": 9.349859859182061,
+          "abs_error_p95": 22.070996393897882,
+          "abs_error_p99": 84.36044052541641,
+          "vol_target_overlay": {
+            "mean_weight": 0.3137659065109657,
+            "mean_daily_turnover": 0.03245635808609676,
+            "annualized_return": 0.043949227514803235,
+            "annualized_vol": 0.047812387780537355,
+            "max_drawdown": -0.05805118665736575
+          }
+        },
+        "AdmissibleNNLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.8148647205670256,
+          "MSE": 35.818562373896725,
+          "Spearman_rho": 0.2542848807129213,
+          "Spearman_p": 1.8641309186791036e-25,
+          "qlike_p95": 6.397146143776791,
+          "qlike_p99": 14.859155252665982,
+          "abs_error_p95": 4.8362771913373095,
+          "abs_error_p99": 16.19770402370097,
+          "vol_target_overlay": {
+            "mean_weight": 1.0119247977227845,
+            "mean_daily_turnover": 0.1549603341602399,
+            "annualized_return": 0.11497614182091942,
+            "annualized_vol": 0.16115547624959115,
+            "max_drawdown": -0.22834299998142515
+          }
+        }
+      },
+      "QQQ": {
+        "OLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 53,
+          "negative_forecast_rate": 0.032535297728667895,
+          "QLIKE": 979126541.5126045,
+          "MSE": 50.689602915208276,
+          "Spearman_rho": 0.1729359839536205,
+          "Spearman_p": 2.1026613507705872e-12,
+          "qlike_p95": 10.797845403628799,
+          "qlike_p99": 17020708316.524359,
+          "abs_error_p95": 7.746830128594355,
+          "abs_error_p99": 22.59291564203209,
+          "vol_target_overlay": {
+            "mean_weight": 0.6942270791834155,
+            "mean_daily_turnover": 0.15638063500558808,
+            "annualized_return": 0.10741788528225737,
+            "annualized_vol": 0.17360487613409456,
+            "max_drawdown": -0.3101100239973269
+          }
+        },
+        "ProjectedNonnegative": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.951884562892487,
+          "MSE": 184.90103358196487,
+          "Spearman_rho": 0.2909589838071688,
+          "Spearman_p": 3.783860219177901e-33,
+          "qlike_p95": 6.2525234166388195,
+          "qlike_p99": 9.314668756251324,
+          "abs_error_p95": 19.745139251177907,
+          "abs_error_p99": 68.75396531002798,
+          "vol_target_overlay": {
+            "mean_weight": 0.33454840551563303,
+            "mean_daily_turnover": 0.030569258239722057,
+            "annualized_return": 0.0641031363547262,
+            "annualized_vol": 0.06841954957997787,
+            "max_drawdown": -0.1041914472385107
+          }
+        },
+        "AdmissibleNNLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.6690241319564656,
+          "MSE": 49.21343632732609,
+          "Spearman_rho": 0.23886822486964843,
+          "Spearman_p": 1.4362906123977829e-22,
+          "qlike_p95": 6.268692593239606,
+          "qlike_p99": 10.532039760982704,
+          "abs_error_p95": 8.339516263126129,
+          "abs_error_p99": 22.776405144812202,
+          "vol_target_overlay": {
+            "mean_weight": 0.6923756174752433,
+            "mean_daily_turnover": 0.060242548881202375,
+            "annualized_return": 0.1239443696110254,
+            "annualized_vol": 0.1495873086132914,
+            "max_drawdown": -0.2347773872152561
+          }
+        }
+      },
+      "IWM": {
+        "OLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 18,
+          "negative_forecast_rate": 0.011049723756906077,
+          "QLIKE": 370450725.94554734,
+          "MSE": 53.414838254664694,
+          "Spearman_rho": 0.150922900909106,
+          "Spearman_p": 9.252381837689668e-10,
+          "qlike_p95": 6.278321543015593,
+          "qlike_p99": 134135194.33365607,
+          "abs_error_p95": 8.330034218426205,
+          "abs_error_p99": 25.918401584809292,
+          "vol_target_overlay": {
+            "mean_weight": 0.599231504268912,
+            "mean_daily_turnover": 0.09756887442524038,
+            "annualized_return": 0.04760380834629996,
+            "annualized_vol": 0.14985825893860055,
+            "max_drawdown": -0.29634086363482404
+          }
+        },
+        "ProjectedNonnegative": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.6188841615555316,
+          "MSE": 126.92130882326613,
+          "Spearman_rho": 0.22753858137577934,
+          "Spearman_p": 1.419847197261353e-20,
+          "qlike_p95": 5.32726230891532,
+          "qlike_p99": 8.711752885580657,
+          "abs_error_p95": 15.446151631180308,
+          "abs_error_p99": 58.052268262951884,
+          "vol_target_overlay": {
+            "mean_weight": 0.3539040991517687,
+            "mean_daily_turnover": 0.031915181525686606,
+            "annualized_return": 0.038390419581195045,
+            "annualized_vol": 0.07926234886361115,
+            "max_drawdown": -0.11754275637894862
+          }
+        },
+        "AdmissibleNNLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.6896988198441403,
+          "MSE": 55.12423944105649,
+          "Spearman_rho": 0.205370004714307,
+          "Spearman_p": 5.667679122917935e-17,
+          "qlike_p95": 6.199325747727194,
+          "qlike_p99": 15.273715411196068,
+          "abs_error_p95": 8.37421488959513,
+          "abs_error_p99": 24.130841797765505,
+          "vol_target_overlay": {
+            "mean_weight": 0.7551536272489132,
+            "mean_daily_turnover": 0.06826866966620655,
+            "annualized_return": 0.07861607198066722,
+            "annualized_vol": 0.17157806503972384,
+            "max_drawdown": -0.2540114106657355
+          }
+        }
+      },
+      "TLT": {
+        "OLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 23,
+          "negative_forecast_rate": 0.014119091467157766,
+          "QLIKE": 120825570.20887327,
+          "MSE": 6.3339811385120335,
+          "Spearman_rho": 0.18015372666812576,
+          "Spearman_p": 2.378419139587035e-13,
+          "qlike_p95": 5.521486310220478,
+          "qlike_p99": 627805925.516674,
+          "abs_error_p95": 3.3747298383104916,
+          "abs_error_p99": 7.709261634628687,
+          "vol_target_overlay": {
+            "mean_weight": 0.8746965188821587,
+            "mean_daily_turnover": 0.1300046174686546,
+            "annualized_return": -0.02235248970834125,
+            "annualized_vol": 0.1341312008106545,
+            "max_drawdown": -0.38632777019328257
+          }
+        },
+        "ProjectedNonnegative": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.2855468109343247,
+          "MSE": 6.780857772153297,
+          "Spearman_rho": 0.19533940561618232,
+          "Spearman_p": 1.794696771899647e-15,
+          "qlike_p95": 4.520471180348472,
+          "qlike_p99": 7.995631439747834,
+          "abs_error_p95": 4.132012574352468,
+          "abs_error_p99": 10.488488733601118,
+          "vol_target_overlay": {
+            "mean_weight": 0.6822619143355223,
+            "mean_daily_turnover": 0.07588410460888992,
+            "annualized_return": -0.015362495719251412,
+            "annualized_vol": 0.1013306497422799,
+            "max_drawdown": -0.30985119287267837
+          }
+        },
+        "AdmissibleNNLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.2194695633024135,
+          "MSE": 6.158245087418026,
+          "Spearman_rho": 0.21411263645916265,
+          "Spearman_p": 2.401284145078642e-18,
+          "qlike_p95": 4.430309571481508,
+          "qlike_p99": 8.09469230387735,
+          "abs_error_p95": 3.21690834479441,
+          "abs_error_p99": 7.75695285657436,
+          "vol_target_overlay": {
+            "mean_weight": 0.8581866891163404,
+            "mean_daily_turnover": 0.09667237625255841,
+            "annualized_return": -0.03000263699253858,
+            "annualized_vol": 0.1270943529509196,
+            "max_drawdown": -0.40682503097736045
+          }
+        }
+      },
+      "GLD": {
+        "OLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 21,
+          "negative_forecast_rate": 0.01289134438305709,
+          "QLIKE": 225881823.6472254,
+          "MSE": 13.863800922833603,
+          "Spearman_rho": 0.1576628035139829,
+          "Spearman_p": 1.5682739959380563e-10,
+          "qlike_p95": 6.413556574207797,
+          "qlike_p99": 927053341.2521658,
+          "abs_error_p95": 4.488410491305453,
+          "abs_error_p99": 11.809407669531009,
+          "vol_target_overlay": {
+            "mean_weight": 0.7922977970672387,
+            "mean_daily_turnover": 0.15201235733422,
+            "annualized_return": 0.13913119873996083,
+            "annualized_vol": 0.14062938348587992,
+            "max_drawdown": -0.1927697803871633
+          }
+        },
+        "ProjectedNonnegative": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.6334157940996075,
+          "MSE": 19.80287751404664,
+          "Spearman_rho": 0.17559574932384475,
+          "Spearman_p": 9.51952393424101e-13,
+          "qlike_p95": 5.551730591426818,
+          "qlike_p99": 9.039593352095833,
+          "abs_error_p95": 5.308934062104366,
+          "abs_error_p99": 16.310330434995766,
+          "vol_target_overlay": {
+            "mean_weight": 0.5958677397374461,
+            "mean_daily_turnover": 0.049246151817688585,
+            "annualized_return": 0.10201255993376313,
+            "annualized_vol": 0.09911023612209519,
+            "max_drawdown": -0.15376515158236181
+          }
+        },
+        "AdmissibleNNLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.533018836804074,
+          "MSE": 13.8458646244567,
+          "Spearman_rho": 0.18925325074869187,
+          "Spearman_p": 1.3367138996354527e-14,
+          "qlike_p95": 5.269778418761554,
+          "qlike_p99": 9.094868725156033,
+          "abs_error_p95": 4.349710103542135,
+          "abs_error_p99": 11.857795398289571,
+          "vol_target_overlay": {
+            "mean_weight": 0.7382217411744902,
+            "mean_daily_turnover": 0.050917815171017976,
+            "annualized_return": 0.12603250819866973,
+            "annualized_vol": 0.12091185449139322,
+            "max_drawdown": -0.18260062187348047
+          }
+        }
+      },
+      "HYG": {
+        "OLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 517,
+          "negative_forecast_rate": 0.3173726212400246,
+          "QLIKE": 1570155923.172022,
+          "MSE": 4.773820983590549,
+          "Spearman_rho": 0.08587875782891985,
+          "Spearman_p": 0.0005206661101144798,
+          "qlike_p95": 3326513525.78148,
+          "qlike_p99": 23102428625.40926,
+          "abs_error_p95": 2.802007565012017,
+          "abs_error_p99": 7.506389907543123,
+          "vol_target_overlay": {
+            "mean_weight": 1.3716136153106562,
+            "mean_daily_turnover": 0.3072490333254516,
+            "annualized_return": -0.00921176566233295,
+            "annualized_vol": 0.14138904999778307,
+            "max_drawdown": -0.4325391775234655
+          }
+        },
+        "ProjectedNonnegative": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 3.5561306677862525,
+          "MSE": 83.08314398658864,
+          "Spearman_rho": 0.3215380406018236,
+          "Spearman_p": 1.702047881312419e-40,
+          "qlike_p95": 8.112575487496553,
+          "qlike_p99": 36.103088854801584,
+          "abs_error_p95": 12.129141018390943,
+          "abs_error_p99": 44.734170506981464,
+          "vol_target_overlay": {
+            "mean_weight": 0.41867228853784755,
+            "mean_daily_turnover": 0.03915349624575609,
+            "annualized_return": 0.01677876824189073,
+            "annualized_vol": 0.027261107855214087,
+            "max_drawdown": -0.05822003679769938
+          }
+        },
+        "AdmissibleNNLS": {
+          "n_oos": 1629,
+          "negative_forecast_count": 0,
+          "negative_forecast_rate": 0.0,
+          "QLIKE": 1.8668152276811492,
+          "MSE": 3.440803818120678,
+          "Spearman_rho": 0.22055313267231053,
+          "Spearman_p": 2.1369666587959997e-19,
+          "qlike_p95": 6.090609693410047,
+          "qlike_p99": 33.53922057193148,
+          "abs_error_p95": 2.0607480046830156,
+          "abs_error_p99": 6.072793383850444,
+          "vol_target_overlay": {
+            "mean_weight": 1.2821917153079803,
+            "mean_daily_turnover": 0.34908787560300136,
+            "annualized_return": 0.0345893720437116,
+            "annualized_vol": 0.09008298727713941,
+            "max_drawdown": -0.20339114081570886
+          }
+        }
+      }
+    },
+    "aggregate": {
+      "OLS": {
+        "mean_QLIKE": 907819927.3633604,
+        "median_QLIKE": 674788633.7290759,
+        "total_negative_forecasts": 886,
+        "mean_negative_forecast_rate": 0.09064865970943319,
+        "mean_overlay_turnover": 0.18783072091018313,
+        "mean_overlay_mdd": -0.3323755020690891
+      },
+      "ProjectedNonnegative": {
+        "mean_QLIKE": 2.091220828202687,
+        "median_QLIKE": 1.7926501784960474,
+        "total_negative_forecasts": 0,
+        "mean_negative_forecast_rate": 0.0,
+        "mean_overlay_turnover": 0.043204091753973335,
+        "mean_overlay_mdd": -0.13360362858792743
+      },
+      "AdmissibleNNLS": {
+        "mean_QLIKE": 1.632148550025878,
+        "median_QLIKE": 1.6793614759003028,
+        "total_negative_forecasts": 0,
+        "mean_negative_forecast_rate": 0.0,
+        "mean_overlay_turnover": 0.1300249366223711,
+        "mean_overlay_mdd": -0.25165809858816107
+      }
+    },
+    "dm_tests": {
+      "SPY:ProjectedNonnegative_vs_OLS": {
+        "asset": "SPY",
+        "model_a": "OLS",
+        "model_b": "ProjectedNonnegative",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 3.438480560490316,
+        "DM_p": 0.0005997323785755793,
+        "n": 1629,
+        "gate_abs_t_gt_3": true,
+        "holm_p": 0.007196788502938922,
+        "holm_pass_5pct": true
+      },
+      "SPY:AdmissibleNNLS_vs_OLS": {
+        "asset": "SPY",
+        "model_a": "OLS",
+        "model_b": "AdmissibleNNLS",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 3.438480562004967,
+        "DM_p": 0.0005997323752449102,
+        "n": 1629,
+        "gate_abs_t_gt_3": true,
+        "holm_p": 0.007196788502938922,
+        "holm_pass_5pct": true
+      },
+      "QQQ:ProjectedNonnegative_vs_OLS": {
+        "asset": "QQQ",
+        "model_a": "OLS",
+        "model_b": "ProjectedNonnegative",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 1.8008085917644672,
+        "DM_p": 0.0719180631067462,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.3386284554459511,
+        "holm_pass_5pct": false
+      },
+      "QQQ:AdmissibleNNLS_vs_OLS": {
+        "asset": "QQQ",
+        "model_a": "OLS",
+        "model_b": "AdmissibleNNLS",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 1.8008085924050197,
+        "DM_p": 0.07191806300570303,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.3386284554459511,
+        "holm_pass_5pct": false
+      },
+      "IWM:ProjectedNonnegative_vs_OLS": {
+        "asset": "IWM",
+        "model_a": "OLS",
+        "model_b": "ProjectedNonnegative",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 1.9499599134206356,
+        "DM_p": 0.051352345128212074,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.3386284554459511,
+        "holm_pass_5pct": false
+      },
+      "IWM:AdmissibleNNLS_vs_OLS": {
+        "asset": "IWM",
+        "model_a": "OLS",
+        "model_b": "AdmissibleNNLS",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 1.9499599133013283,
+        "DM_p": 0.05135234514244602,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.3386284554459511,
+        "holm_pass_5pct": false
+      },
+      "TLT:ProjectedNonnegative_vs_OLS": {
+        "asset": "TLT",
+        "model_a": "OLS",
+        "model_b": "ProjectedNonnegative",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 1.8763133034849306,
+        "DM_p": 0.060791044403773586,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.3386284554459511,
+        "holm_pass_5pct": false
+      },
+      "TLT:AdmissibleNNLS_vs_OLS": {
+        "asset": "TLT",
+        "model_a": "OLS",
+        "model_b": "AdmissibleNNLS",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 1.876313304378367,
+        "DM_p": 0.06079104428108195,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.3386284554459511,
+        "holm_pass_5pct": false
+      },
+      "GLD:ProjectedNonnegative_vs_OLS": {
+        "asset": "GLD",
+        "model_a": "OLS",
+        "model_b": "ProjectedNonnegative",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 2.9892158202060823,
+        "DM_p": 0.0028388610266831815,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.028388610135217096,
+        "holm_pass_5pct": true
+      },
+      "GLD:AdmissibleNNLS_vs_OLS": {
+        "asset": "GLD",
+        "model_a": "OLS",
+        "model_b": "AdmissibleNNLS",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 2.9892158216304434,
+        "DM_p": 0.0028388610135217096,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.028388610135217096,
+        "holm_pass_5pct": true
+      },
+      "HYG:ProjectedNonnegative_vs_OLS": {
+        "asset": "HYG",
+        "model_a": "OLS",
+        "model_b": "ProjectedNonnegative",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 2.031873505315002,
+        "DM_p": 0.042328557162878866,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.3386284554459511,
+        "holm_pass_5pct": false
+      },
+      "HYG:AdmissibleNNLS_vs_OLS": {
+        "asset": "HYG",
+        "model_a": "OLS",
+        "model_b": "AdmissibleNNLS",
+        "loss": "QLIKE",
+        "dm_input": "loss_OLS - loss_constrained; positive t means constrained model lower loss",
+        "DM_t": 2.0318735076046943,
+        "DM_p": 0.04232855693074389,
+        "n": 1629,
+        "gate_abs_t_gt_3": false,
+        "holm_p": 0.3386284554459511,
+        "holm_pass_5pct": false
+      }
+    },
+    "model_wins": {
+      "ProjectedNonnegative": {
+        "wins_vs_OLS": 6,
+        "n_assets": 6,
+        "sign_test_p": 0.015625
+      },
+      "AdmissibleNNLS": {
+        "wins_vs_OLS": 6,
+        "n_assets": 6,
+        "sign_test_p": 0.015625
+      }
+    }
+  },
+  "fit_log_summary": {
+    "n_refits": 26,
+    "first_refit": {
+      "refit_date": "2020-01-02",
+      "train_end": "2019-12-31",
+      "train_n": 3182,
+      "block_n": 63,
+      "assets": {
+        "SPY": {
+          "OLS": {
+            "lag_sum": 1.8827857709556564,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 9
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 6.620024848250046,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 9
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.9949999999999999,
+            "admissible_scaled": true,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "QQQ": {
+          "OLS": {
+            "lag_sum": 1.5279519980634682,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 8
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 4.814181208072443,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 8
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.9949999999999999,
+            "admissible_scaled": true,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "IWM": {
+          "OLS": {
+            "lag_sum": 1.8162825417611441,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 6
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 3.9833152639455003,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 6
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.9949999999999999,
+            "admissible_scaled": true,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "TLT": {
+          "OLS": {
+            "lag_sum": 0.5613820382922688,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 7
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 0.8317755289308986,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 7
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.6142194626250951,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "GLD": {
+          "OLS": {
+            "lag_sum": 0.800704761240485,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 6
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 1.4934659238078787,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 6
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.8916657900801489,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "HYG": {
+          "OLS": {
+            "lag_sum": 0.9352258534138735,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 10
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 3.972334765826093,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 10
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.8610350838265697,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        }
+      }
+    },
+    "last_refit": {
+      "refit_date": "2026-04-10",
+      "train_end": "2026-04-09",
+      "train_n": 4757,
+      "block_n": 54,
+      "assets": {
+        "SPY": {
+          "OLS": {
+            "lag_sum": 1.8442049364251991,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 9
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 6.032084786876611,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 9
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.995,
+            "admissible_scaled": true,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "QQQ": {
+          "OLS": {
+            "lag_sum": 1.3172774141332366,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 8
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 4.721918345257799,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 8
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.995,
+            "admissible_scaled": true,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "IWM": {
+          "OLS": {
+            "lag_sum": 1.484032933422091,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 7
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 4.080619527714547,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 7
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.9949999999999999,
+            "admissible_scaled": true,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "TLT": {
+          "OLS": {
+            "lag_sum": 0.46224725663308097,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 9
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 0.8660084934728196,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 9
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.5561295311883275,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "GLD": {
+          "OLS": {
+            "lag_sum": 0.7007387143851347,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 7
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 1.218749991153097,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 7
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.8509369487152226,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        },
+        "HYG": {
+          "OLS": {
+            "lag_sum": 1.2045326840227448,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 9
+          },
+          "ProjectedNonnegative": {
+            "lag_sum": 3.2215376848334514,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": 9
+          },
+          "AdmissibleNNLS": {
+            "lag_sum": 0.7546262972087793,
+            "admissible_scaled": false,
+            "status": "ok",
+            "negative_coefficients_raw_ols": null
+          }
+        }
+      }
+    }
+  },
+  "artifacts": {
+    "chart": "research_admissible_constrained_multivariate_har_vmem_gua_summary.png"
+  },
+  "headline": {
+    "verdict": "MIXED_GUARDRAIL",
+    "summary": "AdmissibleNNLS eliminates negative forecasts (886->0) but mean QLIKE changes 907819927.3634->1.6321; treat as an engineering guardrail, not a robust accuracy upgrade unless per-asset DM supports it."
+  }
+}
