@@ -38104,7 +38104,7 @@
     "title": "K1546: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1546 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1546: VRP term-structure slope (1M/3M/6M) FAILS to predict SPY forward drawdown (verdict NULL; CONDITIONAL_PASS). Headline VRP_slope_6M_1M_lag1 → fwd_dd_21: NW HAC t=-0.98 (p>0.3), AUC=0.447, Spearman ρ=-0.047 (N=4500, 2008-2026). KEY EVIDENCE: encompassing regression VIX_level ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1546",
@@ -38113,7 +38113,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-28T11:10:11+00:00"
+    "created_at": "2026-06-28T11:10:11+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-28T14:09:01.946545+00:00",
+    "claim_session_id": "61106d3244e8",
+    "started_at": "2026-06-28T14:09:11.698302+00:00",
+    "completed_at": "2026-06-28T14:15:08.349308+00:00",
+    "result": "Published draft mile_410f7532. K1546 general-audience article (VRP-slope NULL for SPY drawdown). Anti-AI gate PASS (warn=2). Cluster waiver applied (contrarian NULL against VRP hype). Audience auto-reclassified to research due to academic keywords. Tier-2 audit flags non-blocking false positives (semantic field match)."
   },
   {
     "id": "paper_review_mile_81df26b0",
