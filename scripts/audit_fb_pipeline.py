@@ -106,13 +106,35 @@ def _load_entries() -> list:
         if not status:
             continue
         mid = a.get("mile_id") or a.get("id")
+        feed_date = (a.get("fb_post_status_at") or a.get("published_at")
+                     or a.get("created_at") or "")
         if mid in seen:
+            # 2026-06-28 dual-source-drift fix: feed.json top-level fb_post_status
+            # is canonical (per .claude/rules/publishing.md — mark_fb_post_status
+            # writes feed.json, often NOT the trending log). The old log-first dedup
+            # let a stale log status (e.g. wont_fix) SHADOW a feed 'awaiting', so
+            # the auto-expire never saw it and the backlog rotted invisibly. Make
+            # feed canonical: override the log entry's status with feed's when they
+            # drift, so the >72h auto-expire and stale scan operate on the truth.
+            for e in data:
+                if e.get("mile_id") != mid:
+                    continue
+                log_status = str(e.get("fb_post_status") or "").strip()
+                if log_status != status:
+                    _warn(
+                        f"fb_post_status drift mile_id={mid} log={log_status!r} "
+                        f"feed={status!r} — feed canonical, reconciling audit view"
+                    )
+                    e["fb_post_status"] = status
+                    e["date"] = feed_date or e.get("date")
+                    if a.get("fb_post_draft"):
+                        e["fb_post_draft"] = a.get("fb_post_draft")
+                break
             continue
         data.append({
             "mile_id": mid,
             "fb_post_status": status,
-            "date": (a.get("fb_post_status_at") or a.get("published_at")
-                     or a.get("created_at") or ""),
+            "date": feed_date,
             "fb_post_draft": a.get("fb_post_draft"),
             "source": "feed.json",
         })
