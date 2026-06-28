@@ -118,6 +118,77 @@ FIRST_PROMPT="${FIRST_PROMPT_OVERRIDE:-讀 AGENTS.md「Codex 每小時任務池�
 RESUME_PROMPT="新一輪 hourly tick。重新 cat storage/ops/handoff_latest.md（每小時 :50 已重生），依同樣流程 claim 下一個 pending task → 完整完成 → complete → commit [codex]。若上一輪有未完事項，先收尾再挑新工。"
 
 CODEX=/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin/codex
+UV_BIN="${UV_BIN:-/Users/yhlai0911/.local/bin/uv}"
+BACKFILL_WORK_LOG_SCRIPT="${BACKFILL_WORK_LOG_SCRIPT:-scripts/backfill_work_log_from_commits.py}"
+
+codex_work_log_backfill_since() {
+  if [ -n "${CODEX_WORK_LOG_BACKFILL_SINCE:-}" ]; then
+    printf '%s\n' "$CODEX_WORK_LOG_BACKFILL_SINCE"
+    return
+  fi
+  date -v-2d '+%Y-%m-%d 00:00 %z' 2>/dev/null && return
+  python3 - <<'PY'
+from datetime import datetime, timedelta
+
+now = datetime.now().astimezone()
+start = (now - timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
+print(start.strftime("%Y-%m-%d %H:%M %z"))
+PY
+}
+
+backfill_codex_work_log_after_tick() {
+  local rc="$1"
+  local before_head="$2"
+  local after_head="$3"
+
+  if [ "$rc" -ne 0 ]; then
+    echo "[work-log-hook] skip: codex rc=$rc"
+    return 0
+  fi
+  if [ -z "$before_head" ] || [ -z "$after_head" ] || [ "$before_head" = "$after_head" ]; then
+    echo "[work-log-hook] skip: no new commit from codex tick"
+    return 0
+  fi
+  if [ -n "$(/usr/bin/git status --porcelain -- storage/work_log.json 2>/dev/null)" ]; then
+    echo "[work-log-hook] skip: storage/work_log.json already dirty before backfill"
+    return 0
+  fi
+
+  local since
+  since="$(codex_work_log_backfill_since)"
+  echo "[work-log-hook] codex HEAD advanced ${before_head:0:9}→${after_head:0:9}; backfill since=${since}"
+  if ! "$UV_BIN" run python "$BACKFILL_WORK_LOG_SCRIPT" --since "$since" --apply; then
+    echo "[work-log-hook] WARN backfill_work_log_from_commits.py failed"
+    return 0
+  fi
+
+  if [ -z "$(/usr/bin/git status --porcelain -- storage/work_log.json 2>/dev/null)" ]; then
+    echo "[work-log-hook] no work_log changes after backfill"
+    return 0
+  fi
+
+  if [ "${CODEX_WORK_LOG_BACKFILL_AUTOCOMMIT:-1}" != "1" ]; then
+    echo "[work-log-hook] backfilled work_log; autocommit disabled"
+    return 0
+  fi
+
+  local short_after
+  short_after="$(/usr/bin/git rev-parse --short "$after_head" 2>/dev/null || printf '%s' "${after_head:0:9}")"
+  /usr/bin/git add storage/work_log.json
+  if /usr/bin/git commit -m "ops(codex-loop): backfill work_log after ${short_after}"; then
+    echo "[work-log-hook] committed work_log backfill for ${short_after}"
+  else
+    echo "[work-log-hook] WARN git commit failed after backfill"
+  fi
+}
+
+if [ "${CODEX_LOOP_BACKFILL_HOOK_ONLY:-0}" = "1" ]; then
+  backfill_codex_work_log_after_tick \
+    "${CODEX_LOOP_HOOK_RC:-0}" \
+    "${CODEX_LOOP_HOOK_BEFORE:-before}" \
+    "${CODEX_LOOP_HOOK_AFTER:-after}"
+  exit 0
+fi
 
 echo "[loop] start at $(date '+%Y-%m-%d %H:%M:%S')  interval=${INTERVAL_SEC}s  owner=${OWNER}"
 echo "[loop] Ctrl-C to stop. AGENTS.md is auto-loaded by Codex."
@@ -130,6 +201,7 @@ while true; do
   echo "[tick #${TICK}] $(date '+%Y-%m-%d %H:%M:%S')"
   echo "════════════════════════════════════════════════════════"
 
+  BEFORE_HEAD=$(/usr/bin/git rev-parse HEAD 2>/dev/null || true)
   if [ "$TICK" -eq 1 ]; then
     # 2026-06-18: dropped `-s workspace-write` — it overrode the global
     # config.toml `sandbox_mode = "danger-full-access"` and downgraded to a
@@ -143,9 +215,15 @@ while true; do
     "$CODEX" exec resume --last --skip-git-repo-check "$RESUME_PROMPT"
   fi
   RC=$?
+  AFTER_HEAD=$(/usr/bin/git rev-parse HEAD 2>/dev/null || true)
+  backfill_codex_work_log_after_tick "$RC" "$BEFORE_HEAD" "$AFTER_HEAD"
 
   echo
   echo "[tick #${TICK}] exit=$RC  done at $(date '+%H:%M:%S')"
+  if [ "${CODEX_LOOP_ONCE:-0}" = "1" ]; then
+    echo "[loop] CODEX_LOOP_ONCE=1; exiting after one tick"
+    exit "$RC"
+  fi
   echo "[loop] sleeping ${INTERVAL_SEC}s before next tick (Ctrl-C to stop)"
   sleep "$INTERVAL_SEC"
 done

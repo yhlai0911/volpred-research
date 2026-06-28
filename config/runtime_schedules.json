@@ -392,6 +392,21 @@
         "piggy_back_skip_reason": "host crontab fires reliably at minute 0; pipeline is idempotent but double-fire wastes yfinance quota."
       },
       {
+        "id": "codex_work_log_backfill",
+        "label": "Codex commit → work_log daily backfill safety net",
+        "cron": "35 4 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_backfill_work_log_from_commits.sh",
+        "log_path": "storage/logs/cron/codex_work_log_backfill.log",
+        "description": "每日 04:35 掃最近 2 天 [codex] commits，補 storage/work_log.json 缺漏 entries 並自動 commit。這是 codex_loop post-tick hook 的兜底，防 2026-06-28 work_log 停更造成 diversity rotation 誤判。若 work_log.json 事前已 dirty 會 skip，避免混入人工未收尾狀態。",
+        "host_crontab_managed": true,
+        "piggy_back_enabled": true,
+        "matchers": [
+          "backfill_work_log_from_commits.py",
+          "cron_backfill_work_log_from_commits.sh",
+          "codex_work_log_backfill"
+        ]
+      },
+      {
         "id": "git_push_backup",
         "cron": "17 */2 * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_git_push_backup.sh",

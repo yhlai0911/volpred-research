@@ -201,6 +201,10 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     # disk usage forced low. (paper_trading absent → gap check is ok.)
     _write_json(storage_dir / "strategy_metrics.json", {"x": 1})
     _write_json(storage_dir / "ops" / "gmail_inbox_state.json", {"last_poll": "ok"})
+    _write_json(
+        storage_dir / "work_log.json",
+        [{"timestamp": now.isoformat(), "task_type": "platform_ops"}],
+    )
     monkeypatch.setattr(
         "volpred.ops.health.shutil.disk_usage",
         lambda _p: __import__("collections").namedtuple("U", ["total", "used", "free"])(100, 10, 90),

@@ -23,7 +23,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -46,6 +46,24 @@ DEFAULT_TYPE = "platform_ops"
 
 KID_RE = re.compile(r"\b(K\d+[a-z]?)\b")
 CODEX_PREFIX = re.compile(r"^\[codex\]\s+", re.IGNORECASE)
+DEFAULT_LOOKBACK_DAYS = 2
+
+
+def _default_since() -> str:
+    local_now = datetime.now().astimezone()
+    start = (local_now - timedelta(days=DEFAULT_LOOKBACK_DAYS)).replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+    return start.strftime("%Y-%m-%d %H:%M %z")
+
+
+def _default_until() -> str:
+    local_now = datetime.now().astimezone()
+    end = local_now + timedelta(minutes=5)
+    return end.strftime("%Y-%m-%d %H:%M %z")
 
 
 def classify(subject: str) -> tuple[str, Optional[str]]:
@@ -131,16 +149,21 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--since",
-        default="2026-06-25 00:00 +0800",
-        help="git log --since (default 2026-06-25 00:00 +0800; **always** pass explicit tz, naked date defaults to UTC)",
+        help=(
+            "git log --since. Default: local midnight two days ago with an "
+            "explicit timezone; **always** pass explicit tz, naked date defaults to UTC"
+        ),
     )
-    parser.add_argument("--until", default="2026-06-28 23:59 +0800", help="git log --until")
+    parser.add_argument("--until", help="git log --until. Default: local now + 5 minutes")
     parser.add_argument("--apply", action="store_true", help="write to work_log.json (default dry-run)")
     args = parser.parse_args()
 
-    commits = git_log(args.since, args.until)
+    since = args.since or _default_since()
+    until = args.until or _default_until()
+
+    commits = git_log(since, until)
     if not commits:
-        print(f"[backfill] no [codex] commits in window since={args.since} until={args.until}")
+        print(f"[backfill] no [codex] commits in window since={since} until={until}")
         return 0
 
     existing = load_work_log()

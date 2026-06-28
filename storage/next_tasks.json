@@ -37702,7 +37702,7 @@
     "description": "分析輝達等晶片股暴跌後，費半指數與個別科技股隱含波動率偏斜（Skew）的變化。可量化：比較歷史修正期中，看跌期權溢價（Put Premium）對實際波動率超額回報的預測力。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "blocked",
+    "status": "in_progress",
     "created_at": "2026-06-27T22:00:25+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -37712,7 +37712,11 @@
     ],
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-28T10:50:25+00:00",
-    "blocked_note": "Arc dup: mile_22d52561 'Broadcom 指引的風波，市場為什麼突然開始定價尾端風險' 已 cover SEMIS+VIX descriptive regime_signal arc。check_arc_dedup.py 主線程 2026-06-28 18:50 verify。"
+    "blocked_note": "Arc dup: mile_22d52561 'Broadcom 指引的風波，市場為什麼突然開始定價尾端風險' 已 cover SEMIS+VIX descriptive regime_signal arc。check_arc_dedup.py 主線程 2026-06-28 18:50 verify。",
+    "claimed_by": "hourly-19",
+    "claimed_at": "2026-06-28T11:10:00.868730+00:00",
+    "claim_session_id": "46850e0d34e2",
+    "started_at": "2026-06-28T11:10:01.111030+00:00"
   },
   {
     "id": "trending_repost_2026_06_28_ai變現",
@@ -37998,7 +38002,7 @@
     "description": "Hourly-18 (2026-06-28) backfill script + 42 entries 已落地解決 immediate diversity-rotation bug，但 prevent-recurrence 層未做：\n\n1. Codex finish hook：codex_loop daemon experiment/digest commit 後不會 invoke task_pool_claim.py complete → work_log 還是要 backfill 才會補。改 codex agent post-commit hook 自動 call work_log writer (或 task_pool_claim.py complete --status succeeded --commit <sha>)。需 inspect src/volpred/codex_loop/ 或 ~/.volpred/bin/codex_*.sh hook 路徑。\n\n2. Regression：\n   a. tests/test_backfill_work_log.py — unit test classify() / build_entry() patterns (5+ test cases)\n   b. tests/test_work_log_freshness.py 或 src/volpred/ops/alerts.py 加 build_alert_condition_report 子 check：work_log latest entry > 24h stale 即 warn alert\n\n3. 補 cron：scripts/backfill_work_log_from_commits.py 加進 daily cron (--since=$(date -d 2 day ago) --apply) 兜底 codex hook fail；entry 加進 config/runtime_schedules.json。\n\nPriority P3 (prevent-recurrence; not blocking since immediate bug已修)。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "codex_agents",
@@ -38008,6 +38012,76 @@
     ],
     "created_at": "2026-06-28T10:52:54+00:00",
     "source": "hourly_18_dispatcher_followup",
-    "preferred_agent": "codex"
+    "preferred_agent": "codex",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T11:00:09.977980+00:00",
+    "claim_session_id": "b7c8f4160ff2",
+    "started_at": "2026-06-28T11:00:14.042239+00:00",
+    "completed_at": "2026-06-28T11:10:11.586980+00:00",
+    "result": "Implemented Codex loop post-tick work_log backfill hook with non-recursive ops autocommit; added dynamic 2-day backfill defaults, daily cron safety-net, work_log freshness alert, and regression tests for classifier/build_entry/hook/alert. Verified jq JSON, bash -n, and 33 targeted pytest tests."
+  },
+  {
+    "id": "K1339_article_research",
+    "title": "K1339: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1339 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: K1339 (CONDITIONAL_PASS): commodity ETF 21d-vs-63d momentum-regime switch as event-study signal for vol jump.\n\nMethod: USO/UNG/CPER 21d-63d momentum slope sign as backwardation/contango proxy; sustained-10d filter + cross-asset confirmation; forward [event+1, event+H] vol jump at",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1339",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-28T11:10:04+00:00"
+  },
+  {
+    "id": "K1529_article_research",
+    "title": "K1529: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1529 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no research article in feed.json.  Verdict preview: [提出: research_program.md 2026-06-17c backlog; 執行: Codex] K1529 credit-spread FOMC volatility precursor ETF-proxy pilot. Data: yfinance daily OHLC HYG/LQD/VCIT/VCSH/SPY/^VIX + sector ETFs, SF Fed monetary-policy-surprise chart CSV, 102 FOMC events 2012-01-25 to 2023-12-13, OOS fro",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1529",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-28T11:10:07+00:00"
+  },
+  {
+    "id": "K1347_article_research",
+    "title": "K1347: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1347 has verdict signal (score=5, reasons=['methodology/mechanism lesson', 'paradigm/decisive null', 'robust inference']) but no research article in feed.json.  Verdict preview: K1347 [FAIL, Codex PASS] CVaR-RP vs Sigma-RP (ERC) on SPY/TLT/GLD/PDBC — 用 tail-risk 重定義 risk parity 沒能 robust 改善 stress MDD\n\n**結論**: FAIL — CVaR-based equal risk contribution (α=0.05) 對比 sigma-based ERC，在 SPY/TLT/GLD/PDBC 4-asset 2019-01-02 至 2025-12-30 共 1759 OOS days 下：(a) ful",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1347",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-28T11:10:09+00:00"
+  },
+  {
+    "id": "K1546_article_general",
+    "title": "K1546: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1546 has verdict signal (score=3, reasons=['methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: K1546: VRP term-structure slope (1M/3M/6M) FAILS to predict SPY forward drawdown (verdict NULL; CONDITIONAL_PASS). Headline VRP_slope_6M_1M_lag1 → fwd_dd_21: NW HAC t=-0.98 (p>0.3), AUC=0.447, Spearman ρ=-0.047 (N=4500, 2008-2026). KEY EVIDENCE: encompassing regression VIX_level ",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1546",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-28T11:10:11+00:00"
   }
 ]

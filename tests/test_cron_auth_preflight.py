@@ -45,7 +45,7 @@ def test_auth_preflight_passes_without_fallback(tmp_path: Path) -> None:
     _write_executable(
         uv,
         "#!/bin/bash\n"
-        "echo \"$@\" > \"$HOME/uv_called.txt\"\n",
+        "echo \"$@\" >> \"$HOME/uv_called.txt\"\n",
     )
     zshrc.write_text("# no-op\n", encoding="utf-8")
 
@@ -58,7 +58,9 @@ def test_auth_preflight_passes_without_fallback(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0
-    assert not (tmp_path / "uv_called.txt").exists()
+    uv_calls = (tmp_path / "uv_called.txt").read_text(encoding="utf-8")
+    assert "git_conflict_guard.py --quiet" in uv_calls
+    assert "send-alert" not in uv_calls
     log = (tmp_path / ".volpred" / "logs" / "hourly_dispatch.log").read_text(encoding="utf-8")
     assert "[AUTH-PREFLIGHT] ok" in log
 
@@ -81,7 +83,7 @@ def test_auth_preflight_recovers_after_sourcing_zshrc(tmp_path: Path) -> None:
     _write_executable(
         uv,
         "#!/bin/bash\n"
-        "echo \"$@\" > \"$HOME/uv_called.txt\"\n",
+        "echo \"$@\" >> \"$HOME/uv_called.txt\"\n",
     )
     zshrc.write_text("export AUTH_OK=1\n", encoding="utf-8")
 
@@ -94,13 +96,16 @@ def test_auth_preflight_recovers_after_sourcing_zshrc(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0
-    assert not (tmp_path / "uv_called.txt").exists()
+    uv_calls = (tmp_path / "uv_called.txt").read_text(encoding="utf-8")
+    assert "git_conflict_guard.py --quiet" in uv_calls
+    assert "send-alert" not in uv_calls
     log = (tmp_path / ".volpred" / "logs" / "hourly_dispatch.log").read_text(encoding="utf-8")
     assert "[AUTH-PREFLIGHT] recovered after sourcing zshrc" in log
 
 
 def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path) -> None:
     claude = tmp_path / "claude"
+    codex = tmp_path / "codex"
     uv = tmp_path / "uv"
     zshrc = tmp_path / ".zshrc"
 
@@ -111,15 +116,22 @@ def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path)
         "exit 1\n",
     )
     _write_executable(
+        codex,
+        "#!/bin/bash\n"
+        "echo 'codex failover unavailable' >&2\n"
+        "exit 1\n",
+    )
+    _write_executable(
         uv,
         "#!/bin/bash\n"
         "out=\"$HOME/uv_args.txt\"\n"
         "body=\"$HOME/uv_body.txt\"\n"
-        "echo \"$@\" > \"$out\"\n"
+        "echo \"CALL: $@\" >> \"$out\"\n"
         "while [ $# -gt 0 ]; do\n"
         "  if [ \"$1\" = \"--body-md\" ]; then\n"
         "    shift\n"
-        "    cat \"$1\" > \"$body\"\n"
+        "    cat \"$1\" >> \"$body\"\n"
+        "    printf '\\n---\\n' >> \"$body\"\n"
         "    break\n"
         "  fi\n"
         "  shift\n"
@@ -127,10 +139,13 @@ def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path)
         "echo '{\"ok\":true}'\n",
     )
     zshrc.write_text("# no-op\n", encoding="utf-8")
+    env = _base_env(tmp_path, claude, uv, zshrc)
+    env["AUTH_PREFLIGHT_BACKOFF_SEC"] = "0"
+    env["CODEX_BIN"] = str(codex)
 
     result = subprocess.run(
         ["bash", str(SCRIPT)],
-        env=_base_env(tmp_path, claude, uv, zshrc),
+        env=env,
         capture_output=True,
         text=True,
         timeout=10,

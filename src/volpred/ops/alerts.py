@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -32,6 +33,7 @@ ALERT_LEVELS = ("info", "warn", "critical")
 ALERT_DEDUP_WINDOW = timedelta(hours=24)
 SCHEDULER_STALE_WINDOW = timedelta(minutes=30)
 RELEASE_POOL_GAP_BUFFER = timedelta(minutes=60)  # grace on top of configured interval
+WORK_LOG_STALE_WARN_HOURS = 24.0
 # 2026-05-17 bump 30→60min: piggy-back release fires only on check_alerts
 # hourly cron tick (`0 * * * *`). With 180min interval + 30min buffer = 210min
 # threshold, normal cycle could routinely hit 210-240min (release at HH:XX,
@@ -1240,6 +1242,86 @@ def _parse_gmail_poll_freshness_state(storage_dir: str, now: datetime) -> dict[s
     }
 
 
+def _parse_work_log_freshness_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """work_log latest timestamp >24h (or unreadable) → stale (warn).
+
+    `storage/work_log.json` drives diversity rotation and handoff context. A
+    stale log means completed Codex/Claude work is no longer visible to the
+    dispatcher, which was the root of the 2026-06-28 rotation bug.
+    """
+    work_log_path = Path(storage_dir) / "work_log.json"
+    newest: datetime | None = None
+    entry_count = 0
+    read_error: str | None = None
+
+    try:
+        raw = json.loads(work_log_path.read_text(encoding="utf-8"))
+        if not isinstance(raw, list):
+            read_error = f"expected list, got {type(raw).__name__}"
+            raw = []
+    except FileNotFoundError:
+        read_error = "missing"
+        raw = []
+    except Exception as exc:
+        read_error = f"{type(exc).__name__}: {str(exc)[:160]}"
+        raw = []
+
+    if isinstance(raw, list):
+        entry_count = len(raw)
+        for entry in raw:
+            if not isinstance(entry, dict):
+                continue
+            parsed = _parse_iso_datetime(entry.get("timestamp"))
+            if parsed is not None and (newest is None or parsed > newest):
+                newest = parsed
+
+    age_hours: float | None = None
+    if newest is not None:
+        age_hours = round((now - newest).total_seconds() / 3600.0, 2)
+
+    breached = read_error is not None or age_hours is None or age_hours > WORK_LOG_STALE_WARN_HOURS
+    newest_text = newest.isoformat() if newest else "missing"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            f"storage/work_log.json 最新 entry 距今 > {WORK_LOG_STALE_WARN_HOURS}h，或檔案缺失/不可讀。",
+            f"- 檔案: {_relative_repo_path(work_log_path)}",
+            f"- entry_count: {entry_count}",
+            f"- newest_timestamp: {newest_text}",
+            f"- age_hours: {age_hours if age_hours is not None else 'missing'}",
+            f"- read_error: {read_error or 'none'}",
+            "",
+            "## 影響",
+            "work_log 是 dispatch diversity rotation 與 handoff 最近工作脈絡的輸入。它停更時，"
+            "系統會誤以為某些 task_type 長時間沒做，導致重複派工或需要事後 backfill 才能修正。",
+            "",
+            "## 建議行動",
+            "1. 先跑兜底：uv run python scripts/backfill_work_log_from_commits.py --apply。",
+            "2. 查 Codex loop hook：tail -80 ~/.volpred/logs/codex_loop.log（找 [work-log-hook]）。",
+            "3. 若 daily 兜底也沒跑，確認 config/runtime_schedules.json 的 codex_work_log_backfill job。",
+        ]
+    )
+    return {
+        "id": "work_log_freshness",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        "title": (
+            "work_log 停止更新（最新 entry 超過 24h）"
+            if breached
+            else "work_log_freshness ok"
+        ),
+        "body": body if breached else "",
+        "details": {
+            "path": str(work_log_path),
+            "entry_count": entry_count,
+            "newest_timestamp": newest_text,
+            "age_hours": age_hours,
+            "warn_hours": WORK_LOG_STALE_WARN_HOURS,
+            "read_error": read_error,
+        },
+    }
+
+
 def _parse_strategy_metrics_freshness_state(storage_dir: str) -> dict[str, Any]:
     """storage/strategy_metrics.json mtime > 26h (or missing) → stale (warn).
 
@@ -1491,6 +1573,7 @@ def build_alert_condition_report(
         _parse_dispatch_health_state(storage_dir, current),       # 2026-06-22 generator binary 源頭健康
         _parse_gmail_poll_freshness_state(storage_dir, current),  # 2026-06-22 boss-email pipeline dead-man switch
         _parse_host_cron_state(storage_dir, current),
+        _parse_work_log_freshness_state(storage_dir, current),    # 2026-06-28 Codex/dispatch diversity dead-man switch
         _parse_member_qa_state(storage_dir, current),
         _parse_supabase_sync_state(storage_dir),
         _parse_knowledge_stale_state(storage_dir, current),
