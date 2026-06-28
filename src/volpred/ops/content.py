@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
 from scripts.article_backups import ensure_local_article_backups
-from volpred.publisher.arc_dedup import find_arc_duplicates
+from volpred.publisher.arc_dedup import classify_narrative_axis, find_arc_duplicates
 from volpred.publisher.publisher import (
     Publisher,
     _audit_general_content,
@@ -297,6 +297,67 @@ def _release_content_dup(item: dict, recent_pub: list[dict]) -> dict | None:
     if best is not None and best_j >= _RELEASE_DEDUP_JACCARD:
         return {"id": best.get("id"), "title": best.get("title"), "jaccard": round(best_j, 3)}
     return None
+
+
+def _item_narrative_axis(item: dict) -> str:
+    """Resolve an article's reader-facing narrative axis.
+
+    Prefers the persisted arc_signature (so we agree with the arc gate) and
+    falls back to recomputing from title+content. Fail-open to "unspecified"
+    with a trace so a bad signature never silently changes dedup behaviour.
+    """
+    try:
+        details = item.get("details")
+        if isinstance(details, dict):
+            sig = details.get("arc_signature")
+            if isinstance(sig, dict) and sig.get("schema_version") == "arc_dedup_v3":
+                axis = sig.get("narrative_axis")
+                if isinstance(axis, str) and axis:
+                    return axis
+        text = (
+            f"{item.get('title') or ''}\n"
+            f"{item.get('content') or item.get('description') or ''}"
+        )
+        return classify_narrative_axis(text)
+    except Exception as exc:  # noqa: BLE001
+        from .diagnostics import warn
+
+        warn(
+            "release_dedup_axis",
+            "narrative axis classification failed",
+            err=str(exc),
+            item_id=str(item.get("id") or ""),
+        )
+        return "unspecified"
+
+
+def _release_axis_waives_dup(item: dict, blockers: list[dict]) -> bool:
+    """Mirror arc_dedup v3: a text-similar pair on DIFFERENT narrative axes is
+    not a real duplicate.
+
+    The release gate's Jaccard / theme-flood checks are pure surface-text
+    similarity and (unlike `find_arc_duplicates`) have no narrative-axis
+    concept. A paper methodology-robustness note and an ETF product-myth piece
+    can share SPY/VIX/momentum tokens while telling completely different reader
+    stories. When BOTH the candidate and the blocker resolve to a SPECIFIED and
+    DIFFERENT axis, this returns True (waive the dup → release).
+
+    Conservative by design: if any axis is "unspecified", or any blocker shares
+    the candidate's axis, returns False (no waiver — keep the original Jaccard /
+    theme-flood verdict). It only ever RELAXES a near-dup; it never creates one.
+    """
+    cand_axis = _item_narrative_axis(item)
+    if cand_axis == "unspecified":
+        return False
+    for blocker in blockers:
+        if not isinstance(blocker, dict):
+            continue
+        block_axis = _item_narrative_axis(blocker)
+        # Any unspecified or matching axis means we cannot rule out a real dup;
+        # keep the conservative (original) verdict and do not waive.
+        if block_axis == "unspecified" or block_axis == cand_axis:
+            return False
+    return True
 
 
 def _extract_k_ids_from_item(item: dict) -> set[str]:
@@ -847,6 +908,55 @@ def release_pool_articles(
             )
             dup = _release_content_dup(item, recent_pub_for_dedup)
             flood = _release_theme_flood(item, recent_pub_for_dedup)
+
+            # Narrative-axis waiver (2026-06-24): mirror arc_dedup v3 on the
+            # release gate's surface-text checks. The Jaccard near-dup and the
+            # theme-flood gate are blind to reader-facing narrative axis: a
+            # paper methodology-robustness note and an ETF product-myth piece
+            # can be text-similar yet tell different reader stories. When the
+            # candidate AND every relevant blocker resolve to a SPECIFIED but
+            # DIFFERENT axis, waive the text-similarity verdict (release).
+            # arc_dups already carries this waiver inside find_arc_duplicates,
+            # so we never touch it here. Fail-open: any unspecified/matching
+            # axis keeps the original verdict.
+            if dup is not None:
+                dup_blocker = next(
+                    (a for a in recent_pub_for_dedup if a.get("id") == dup["id"]),
+                    None,
+                )
+                if dup_blocker is not None and _release_axis_waives_dup(item, [dup_blocker]):
+                    print(
+                        f"  [release_pool] AXIS-WAIVE {item.get('id')} — "
+                        f"near-dup of {dup['id']} (J={dup['jaccard']}) but narrative "
+                        f"axis '{_item_narrative_axis(item)}' != "
+                        f"'{_item_narrative_axis(dup_blocker)}'; releasing."
+                    )
+                    dup = None
+            if flood is not None:
+                flood_rx = _SATURATED_THEMES.get(flood["theme"])
+                flood_blockers = (
+                    [
+                        a
+                        for a in recent_pub_for_dedup
+                        if a.get("id") != item.get("id")
+                        and flood_rx.search(
+                            str(a.get("title") or "")
+                            + "\n"
+                            + str(a.get("content") or a.get("description") or "")
+                        )
+                    ]
+                    if flood_rx is not None
+                    else []
+                )
+                if flood_blockers and _release_axis_waives_dup(item, flood_blockers):
+                    print(
+                        f"  [release_pool] AXIS-WAIVE {item.get('id')} — "
+                        f"theme '{flood['theme']}' saturated but narrative axis "
+                        f"'{_item_narrative_axis(item)}' differs from all "
+                        f"{len(flood_blockers)} same-theme published pieces; releasing."
+                    )
+                    flood = None
+
             if (
                 flood is not None
                 and not arc_dups

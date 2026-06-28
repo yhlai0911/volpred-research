@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1552,
+  "last_k_id": 1556,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -40,8 +40,48 @@
       "status": "reserved",
       "topic": "Investor-memory cue 對 RV persistence 的公開代理：當前報酬像過去 crash/rally 時，市場是否過度回想並放大成交與波動** — 用美股大樣本 / sector ETF，為每檔建立歷史 5d/21d return episode library，當今日 return cue 與過去極端 loss/gain episode 相似時，檢定後續 turnover、range-vol、left-tail 與 reversal/continuation 是否異常；可加入新聞 headline count 作 salience control。與 generic sentiment / retail-flow 題不同，這裡是 similarity-based recall cue，而非情緒 level（來源：QJE 2025 Investor Memory and Biased Beliefs；相似回憶會影響預期與交易）",
       "topic_hash": "8ccb30a13018df1b"
+    },
+    {
+      "claimed_at": "2026-06-28T00:00:00.815414+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1553",
+      "number": 1553,
+      "source_max": 1552,
+      "status": "reserved",
+      "topic": "Coherent VaR/ES estimator guardrail：風險量本身 coherent，不代表估計器 coherent** — 用 SPY/QQQ/IWM/TLT/HYG 日報酬建 rolling VaR/ES，對比 historical simulation、EWMA、Cornish-Fisher、coherent L-estimator weight structure；檢查 ES backtest、capital adequacy ranking flip、以及 VT/DRP 降槓桿觸發次數是否因 estimator 不一致而改變。與 conformal VaR / CVaR-RP 不同，這裡是「risk estimator coherence」工程風控層（來源：JFEC 2026 \"Coherent Estimation of Risk Measures\"，指出 coherent risk measure 不必然導出 coherent estimator）。",
+      "topic_hash": "47c8702bc3e97cff"
+    },
+    {
+      "claimed_at": "2026-06-28T00:00:00.903675+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1554",
+      "number": 1554,
+      "source_max": 1553,
+      "status": "reserved",
+      "topic": "Social-transmission bias 的公開代理：被貼文成功經驗推上來的高波動股票是否隔日 RV 放大** — 用 Reddit/Stocktwits/Yahoo trending 免費貼文或標題量，標記「近期高報酬且高 RV」個股被討論的 social-transmission shock，檢定 t+1..t+5 abnormal volume、range-vol、gap risk 與 reversal；與 investor-memory/attention-utility 不同，這裡是網路節點傳播 + follow-up purchase channel，不是個人回憶或持股正面注意力（來源：Review of Finance 2025 \"Social transmission bias\"；高波動、近期贏家貼文更容易引發跟隨買入）。",
+      "topic_hash": "5a26106abc9a3a6a"
+    },
+    {
+      "claimed_at": "2026-06-28T00:00:00.981432+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1555",
+      "number": 1555,
+      "source_max": 1554,
+      "status": "reserved",
+      "topic": "Tariff-uncertainty USD risk-premium wedge：關稅波動是否先進 FX vol 再外溢到 EM/commodity ETF** — 用 2025-26 tariff event calendar / GDELT tariff headline intensity、UUP/DXY proxy、FXY/FXE/CEW/EMLC、EEM/DBC/GLD，檢定 tariff uncertainty shock 對 t+1..t+22 FX realized vol、USD drawdown、EM FX left-tail 的 lead-lag；與 line 1081 tariff sector RV 正交，這裡是 AEA macrotrade 的 exchange-rate risk-premium wedge（來源：AEA P&P 2026 \"Global Trade, Tariff Uncertainty, and the US Dollar\"）。",
+      "topic_hash": "bd67f0a5fea9eafc"
+    },
+    {
+      "claimed_at": "2026-06-28T00:00:01.050760+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1556",
+      "number": 1556,
+      "source_max": 1555,
+      "status": "reserved",
+      "topic": "US macro news global co-jump beta：各國 ETF 對美國數據驚喜的波動同步化程度** — 用 FRED/BLS/BEA release calendar + surprise proxy（actual-minus-consensus 若免費不可得則用 event-day absolute surprise proxy / Kalshi macro market shock 代理）、EFA/EEM/EWJ/EWG/EWT/EWY/EWZ/INDA，測 event-day cojump、VIX jump、t+5 RV persistence 與 country beta；與 generic EPU/macro-attention 不同，這裡是具體美國 macro release 造成 global financial cycle synchronized jump（來源：REStud 2026 \"The U.S., Economic News, and the Global Financial Cycle\"；27 國股指、VIX、商品對美國新聞同步跳動）。",
+      "topic_hash": "ae979720899a76ff"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-06-25T04:14:47.307003+00:00"
+  "updated_at": "2026-06-28T00:00:01.050760+00:00"
 }
