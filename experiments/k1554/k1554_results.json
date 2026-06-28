@@ -1,0 +1,726 @@
+{
+  "experiment_id": "K1554",
+  "created_at": "2026-06-28T04:29:46.407738+00:00",
+  "seed": 42,
+  "data": {
+    "price_source": "yfinance adjusted OHLCV",
+    "social_source": "Stocktwits unauthenticated public symbol streams",
+    "requested_price_start": "2024-01-01",
+    "requested_price_end": "2026-06-28",
+    "tickers": [
+      "GME",
+      "AMC",
+      "KOSS",
+      "KSS",
+      "OPEN",
+      "UPST",
+      "SOFI",
+      "PLTR",
+      "RIVN",
+      "LCID",
+      "HOOD",
+      "COIN",
+      "MSTR",
+      "MARA",
+      "RIOT",
+      "CVNA",
+      "DJT",
+      "RDDT"
+    ],
+    "stocktwits_max_pages_per_ticker": 15,
+    "price_rows": 11159,
+    "panel_rows": 11159,
+    "stocktwits_message_rows": 2959,
+    "stocktwits_daily_count_rows": 221,
+    "blocked_sources": [
+      "Stocktwits Firestream historical sentiment/chart endpoint returned 401 Unauthorized in this environment.",
+      "GDELT timeline probes returned 429 rate-limit responses during the live run; no media-title proxy is mixed into the Stocktwits result."
+    ]
+  },
+  "methods": {
+    "raw_signal": "message-count shock AND trailing 5d winner AND trailing 5d high-RV",
+    "lookahead_guard": "signal = raw_signal.shift(1); outcomes start on the applied day",
+    "thresholds": "message count rolling 63d 80th percentile shifted by one day; winner/high-RV rolling 126d 75th percentiles shifted by one day",
+    "tests": "pooled Welch diagnostics, ticker-level event-minus-control effects, seed-42 bootstrap over ticker effects, sign tests"
+  },
+  "stocktwits_fetch_diagnostics": [
+    {
+      "ticker": "GME",
+      "messages": 450,
+      "status_codes": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "oldest_created_at": "2026-06-26T05:29:00Z",
+      "newest_created_at": "2026-06-28T02:09:53Z",
+      "error": null
+    },
+    {
+      "ticker": "AMC",
+      "messages": 450,
+      "status_codes": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "oldest_created_at": "2026-06-26T14:14:02Z",
+      "newest_created_at": "2026-06-28T04:17:40Z",
+      "error": null
+    },
+    {
+      "ticker": "KOSS",
+      "messages": 439,
+      "status_codes": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "oldest_created_at": "2025-04-17T17:56:11Z",
+      "newest_created_at": "2026-06-24T19:00:06Z",
+      "error": null
+    },
+    {
+      "ticker": "KSS",
+      "messages": 450,
+      "status_codes": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "oldest_created_at": "2026-05-11T14:02:30Z",
+      "newest_created_at": "2026-06-27T23:23:16Z",
+      "error": null
+    },
+    {
+      "ticker": "OPEN",
+      "messages": 30,
+      "status_codes": [
+        200,
+        502
+      ],
+      "oldest_created_at": "2026-06-27T05:00:32Z",
+      "newest_created_at": "2026-06-28T01:19:50Z",
+      "error": "{\"type\":\"https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-502/\",\"title\":\"Error 502: Bad gateway\",\"status\":502,\"detail\":\"The origin web server returned an invalid or incomplete response to Cloudflare. This typically indicates the origin is overlo"
+    },
+    {
+      "ticker": "UPST",
+      "messages": 450,
+      "status_codes": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "oldest_created_at": "2026-06-10T10:01:54Z",
+      "newest_created_at": "2026-06-27T20:42:38Z",
+      "error": null
+    },
+    {
+      "ticker": "SOFI",
+      "messages": 450,
+      "status_codes": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "oldest_created_at": "2026-06-25T19:24:03Z",
+      "newest_created_at": "2026-06-28T03:50:17Z",
+      "error": null
+    },
+    {
+      "ticker": "PLTR",
+      "messages": 240,
+      "status_codes": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        429
+      ],
+      "oldest_created_at": "2026-06-26T17:24:54Z",
+      "newest_created_at": "2026-06-28T04:23:42Z",
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "RIVN",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "LCID",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "HOOD",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "COIN",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "MSTR",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "MARA",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "RIOT",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "CVNA",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "DJT",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    },
+    {
+      "ticker": "RDDT",
+      "messages": 0,
+      "status_codes": [
+        429
+      ],
+      "oldest_created_at": null,
+      "newest_created_at": null,
+      "error": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
+    }
+  ],
+  "verdict": {
+    "label": "UNDERPOWERED",
+    "conclusion": "Public Stocktwits stream history was too shallow for a serious social-transmission market test; usable events came from only 2 ticker(s).",
+    "total_event_rows": 22,
+    "event_tickers": 2,
+    "primary_abn_log_volume_5d_diff": 1.3045918057949144,
+    "range_vol_5d_diff": -0.005127334543553463
+  },
+  "coverage_by_ticker": [
+    {
+      "ticker": "AMC",
+      "price_rows": 623,
+      "stocktwits_days": 1,
+      "stocktwits_messages": 340.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "COIN",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "CVNA",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "DJT",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "GME",
+      "price_rows": 623,
+      "stocktwits_days": 1,
+      "stocktwits_messages": 347.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "HOOD",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "KOSS",
+      "price_rows": 623,
+      "stocktwits_days": 129,
+      "stocktwits_messages": 416.0,
+      "raw_signal_days": 15,
+      "applied_event_days": 15,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "KSS",
+      "price_rows": 623,
+      "stocktwits_days": 33,
+      "stocktwits_messages": 441.0,
+      "raw_signal_days": 7,
+      "applied_event_days": 7,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "LCID",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "MARA",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "MSTR",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "OPEN",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "PLTR",
+      "price_rows": 623,
+      "stocktwits_days": 1,
+      "stocktwits_messages": 142.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "RDDT",
+      "price_rows": 568,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-03-21T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "RIOT",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "RIVN",
+      "price_rows": 623,
+      "stocktwits_days": 0,
+      "stocktwits_messages": 0.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "SOFI",
+      "price_rows": 623,
+      "stocktwits_days": 2,
+      "stocktwits_messages": 389.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    },
+    {
+      "ticker": "UPST",
+      "price_rows": 623,
+      "stocktwits_days": 12,
+      "stocktwits_messages": 433.0,
+      "raw_signal_days": 0,
+      "applied_event_days": 0,
+      "first_price_date": "2024-01-02T00:00:00",
+      "last_price_date": "2026-06-26T00:00:00"
+    }
+  ],
+  "target_tests": {
+    "abn_log_volume_1d": {
+      "event_n": 22,
+      "control_n": 10633,
+      "event_mean": 0.38924515516092906,
+      "control_mean": 0.01046325914360992,
+      "diff": 0.37878189601731915,
+      "t_stat": 2.622696724531461,
+      "p_value": 0.015880263113055616
+    },
+    "abn_log_volume_5d": {
+      "event_n": 22,
+      "control_n": 10633,
+      "event_mean": 1.366435302962114,
+      "control_mean": 0.061843497167199585,
+      "diff": 1.3045918057949144,
+      "t_stat": 1.856409239147086,
+      "p_value": 0.07744706583319136
+    },
+    "range_vol_1d": {
+      "event_n": 22,
+      "control_n": 10633,
+      "event_mean": 0.06190594363343789,
+      "control_mean": 0.062035286818251746,
+      "diff": -0.0001293431848138557,
+      "t_stat": -0.027325300751612856,
+      "p_value": 0.9784548260725847
+    },
+    "range_vol_5d": {
+      "event_n": 22,
+      "control_n": 10633,
+      "event_mean": 0.3049712585708623,
+      "control_mean": 0.3100985931144158,
+      "diff": -0.005127334543553463,
+      "t_stat": -0.300657627688586,
+      "p_value": 0.7665897495446612
+    },
+    "abs_gap_1d": {
+      "event_n": 22,
+      "control_n": 10633,
+      "event_mean": 0.010150093509094071,
+      "control_mean": 0.0178056877505745,
+      "diff": -0.007655594241480428,
+      "t_stat": -3.1667500866521623,
+      "p_value": 0.004517375518939588
+    },
+    "reversal_5d": {
+      "event_n": 22,
+      "control_n": 10633,
+      "event_mean": 0.0038639590129042308,
+      "control_mean": -0.009731615529905788,
+      "diff": 0.013595574542810018,
+      "t_stat": 0.9671743787462613,
+      "p_value": 0.3443126821011924
+    }
+  },
+  "ticker_effects": {
+    "abn_log_volume_1d": {
+      "per_ticker": {
+        "KOSS": {
+          "event_n": 15,
+          "control_n": 580,
+          "diff": 0.4426780128357951
+        },
+        "KSS": {
+          "event_n": 7,
+          "control_n": 588,
+          "diff": 0.21598912335928677
+        }
+      },
+      "positive_tickers": 2,
+      "tested_tickers": 2,
+      "sign_test_p_value": 0.25,
+      "bootstrap": {
+        "n": 2,
+        "mean": 0.32933356809754094,
+        "ci95": [
+          0.21598912335928677,
+          0.4426780128357951
+        ]
+      }
+    },
+    "abn_log_volume_5d": {
+      "per_ticker": {
+        "KOSS": {
+          "event_n": 15,
+          "control_n": 580,
+          "diff": 1.5565968001252408
+        },
+        "KSS": {
+          "event_n": 7,
+          "control_n": 588,
+          "diff": 0.5770481163365608
+        }
+      },
+      "positive_tickers": 2,
+      "tested_tickers": 2,
+      "sign_test_p_value": 0.25,
+      "bootstrap": {
+        "n": 2,
+        "mean": 1.066822458230901,
+        "ci95": [
+          0.5770481163365608,
+          1.5565968001252408
+        ]
+      }
+    },
+    "range_vol_1d": {
+      "per_ticker": {
+        "KOSS": {
+          "event_n": 15,
+          "control_n": 580,
+          "diff": -0.0034267915372673124
+        },
+        "KSS": {
+          "event_n": 7,
+          "control_n": 588,
+          "diff": 0.006694330688950048
+        }
+      },
+      "positive_tickers": 1,
+      "tested_tickers": 2,
+      "sign_test_p_value": 0.75,
+      "bootstrap": {
+        "n": 2,
+        "mean": 0.0016337695758413678,
+        "ci95": [
+          -0.0034267915372673124,
+          0.006694330688950048
+        ]
+      }
+    },
+    "range_vol_5d": {
+      "per_ticker": {
+        "KOSS": {
+          "event_n": 15,
+          "control_n": 580,
+          "diff": -0.0227824984622923
+        },
+        "KSS": {
+          "event_n": 7,
+          "control_n": 588,
+          "diff": 0.031188900094562655
+        }
+      },
+      "positive_tickers": 1,
+      "tested_tickers": 2,
+      "sign_test_p_value": 0.75,
+      "bootstrap": {
+        "n": 2,
+        "mean": 0.0042032008161351775,
+        "ci95": [
+          -0.0227824984622923,
+          0.031188900094562655
+        ]
+      }
+    },
+    "abs_gap_1d": {
+      "per_ticker": {
+        "KOSS": {
+          "event_n": 15,
+          "control_n": 580,
+          "diff": -0.007180502033220451
+        },
+        "KSS": {
+          "event_n": 7,
+          "control_n": 588,
+          "diff": 0.00039301548520423446
+        }
+      },
+      "positive_tickers": 1,
+      "tested_tickers": 2,
+      "sign_test_p_value": 0.75,
+      "bootstrap": {
+        "n": 2,
+        "mean": -0.003393743274008108,
+        "ci95": [
+          -0.007180502033220451,
+          0.00039301548520423446
+        ]
+      }
+    },
+    "reversal_5d": {
+      "per_ticker": {
+        "KOSS": {
+          "event_n": 15,
+          "control_n": 580,
+          "diff": 0.04114759572015423
+        },
+        "KSS": {
+          "event_n": 7,
+          "control_n": 588,
+          "diff": -0.04153675782577258
+        }
+      },
+      "positive_tickers": 1,
+      "tested_tickers": 2,
+      "sign_test_p_value": 0.75,
+      "bootstrap": {
+        "n": 2,
+        "mean": -0.0001945810528091764,
+        "ci95": [
+          -0.04153675782577258,
+          0.04114759572015423
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "The public Stocktwits stream is recent-message pagination, not a full historical archive.",
+    "No follower graph, user portfolio, or transaction data are observed.",
+    "Message timestamps are aggregated by UTC date, not market-session-local post timing.",
+    "The fixed current ticker basket is not a survivorship-free historical universe.",
+    "Overlapping 5-day targets are diagnostic; this is not a tradable strategy backtest."
+  ]
+}

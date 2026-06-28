@@ -37733,7 +37733,7 @@
     "title": "K1554: Social-transmission bias 的公開代理：被貼文成功經驗推上來的高波動股票是否隔日 RV 放大** — 用 Reddit/Stocktwits/Yahoo trending 免費貼文或標題量，標記「近期高報酬且高 RV」",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1277). Original: Social-transmission bias 的公開代理：被貼文成功經驗推上來的高波動股票是否隔日 RV 放大** — 用 Reddit/Stocktwits/Yahoo trending 免費貼文或標題量，標記「近期高報酬且高 RV」個股被討論的 social-transmission shock，檢定 t+1..t+5 abnormal volume、range-vol、gap risk 與 reversal；與 investor-memory/attention-utility 不同，這裡是網路節點傳播 + follow-up purchase channel，不是個人回憶或持股正面注意力（來源：Review of Finance 2025 \"Social transmission bias\"；高波動、近期贏家貼文更容易引發跟隨買入）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1554.py with signal.shift(1) + seed=42, (c) K1554_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -37742,7 +37742,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-28T00:00:00Z"
+    "created_at": "2026-06-28T00:00:00Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T04:17:48.521023+00:00",
+    "claim_session_id": "58724558c981",
+    "started_at": "2026-06-28T04:17:48.735883+00:00",
+    "completed_at": "2026-06-28T04:29:00.571327+00:00",
+    "result": "K1554 public Stocktwits social-transmission proxy experiment complete: verdict UNDERPOWERED. Fetched 2,959 Stocktwits messages across 18-name basket; only 22 usable applied event rows from 2 tickers (KOSS/KSS), so abnormal-volume directional signal is not promotable. Added README, script, results JSON, chart, cached data, and Codex review; targeted lookahead audit returned no finding."
   },
   {
     "id": "K1555",
