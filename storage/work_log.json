@@ -11904,5 +11904,18 @@
     "verdict": "PASS",
     "details": "Article 數字 100% 對齊 K1403 results.json. Lookahead clean, DM convention 正確, Kupiec p 0.31-0.93 全 PASS. Caveats: fixed-origin no-refit + |return| HAR-RAV naming imprecision (列 future K-series).",
     "artifact": "storage/ops/paper_reviews/mile_127dc20d.md"
+  },
+  {
+    "timestamp": "2026-06-28T17:26:43Z",
+    "task_type": "experiment",
+    "task_id": "paper_k1133b_robustness_battery_btc_gas_negative",
+    "summary": "K1133b robustness battery: Codex CONDITIONAL_PASS → 2 high-impact fixes (multistart default 10→100 + raise <100; ETH/BNB cross-asset OOS alignment assert btc_p1.actual_start/end) → enqueued compute_queue id=k1133b-robustness-battery-20260629-0126 timeout=4h → followup paper_decision agent 解讀 §8 narrative",
+    "dispatched_by": "hourly-01",
+    "compute_queue_id": "k1133b-robustness-battery-20260629-0126",
+    "codex_verdict": "CONDITIONAL_PASS",
+    "fixes_applied": [
+      "multistart_seed_floor_100",
+      "cross_asset_oos_alignment_assert"
+    ]
   }
 ]

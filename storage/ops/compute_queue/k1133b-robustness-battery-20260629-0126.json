@@ -1,0 +1,23 @@
+{
+  "id": "k1133b-robustness-battery-20260629-0126",
+  "title": "K1133b robustness battery (6 sections, MULTISTART_SEEDS=100) — paper §8 blocker",
+  "script_path": "experiments/k1133b/k1133b_robustness.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-06-28T17:26:23Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1133b-robustness-battery-20260629-0126.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/k1133b-robustness-battery-20260629-0126.stderr",
+  "result_artifact": "experiments/k1133b/k1133b_robustness_results.json",
+  "claude_followup": {
+    "brief": "K1133b robustness battery 已跑完，read experiments/k1133b/k1133b_robustness_results.json + compare with experiments/k1133b/k1133b_results.json baseline。逐 section 解讀 verdict（6 項：period_cut ±60d / alt_loss MSE+Patton-b-1 / leave-one-year-out / multistart_dispersion / cross_asset ETH-BNB / alt_dist skewed-t+GED）。決定 §8 narrative 是否 robust enough 解 .tex blocker。若 cross_asset / alt_dist 與 baseline 方向不一致，回報 needs more work；若一致 → 標 task succeeded + 整合進 paper body §8 narrative 提案（不直接動 .tex，主線程整合）。研究誠實鐵則：每個數字必對齊 JSON。",
+    "task_type": "paper_decision",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 14400
+}
