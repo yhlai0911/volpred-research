@@ -299,7 +299,7 @@ def test_drought_forces_one_release_when_all_blocked_and_gap_exceeds_threshold(
     assert override["id"] == "mile_draft_low"
     assert override["gap_hours"] == 6.0
     # least dup-like: strictly below the byte-identical draft's 1.0 max-Jaccard
-    assert _RELEASE_DEDUP_JACCARD <= override["max_jaccard"] < 1.0
+    assert content._RELEASE_DEDUP_JACCARD <= override["max_jaccard"] < 1.0
     assert override["blocked_pool_size"] == 2
 
     feed_after = json.loads((storage_dir / "reports" / "feed.json").read_text(encoding="utf-8"))
