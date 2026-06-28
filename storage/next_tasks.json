@@ -38508,7 +38508,7 @@
     "title": "Paper review (Codex 24h-rule): 把 VIX 期限結構算成「波動風險溢酬」，能預測美股回檔嗎？4500 天回測，答案是不行",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_410f7532 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_410f7532",
@@ -38516,6 +38516,31 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-28T22:07:58+00:00"
+    "created_at": "2026-06-28T22:07:58+00:00",
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-06-28T23:08:19.919923+00:00",
+    "claim_session_id": "c850dcacf271",
+    "started_at": "2026-06-28T23:08:32.504525+00:00",
+    "completed_at": "2026-06-28T23:16:17.008309+00:00",
+    "result": "Codex review (gpt-5.4 medium primary path) verdict=CONDITIONAL_PASS. Headline NULL stands (VRP_slope_6M_1M t=-0.98, AUC=0.447, no lookahead). Findings: AUC direction blanket -signal bug (VIX_level=0.284 should ~0.716), quintile Welch ignores 21d overlap, MT disclosure missing, RV needs dropna. Article does NOT need retraction. Audit saved to experiments/k1546/codex_review_2026_06_29.md, knowledge entry item_id=bdef7ca8, remediation task enqueued (experiment_k1546_remediation_codex_findings_950bc3ac)."
+  },
+  {
+    "id": "experiment_k1546_remediation_codex_findings_950bc3ac",
+    "title": "K1546 remediation: AUC direction + quintile overlap + MT disclosure + RV dropna",
+    "description": "Per experiments/k1546/codex_review_2026_06_29.md (Codex CONDITIONAL_PASS): (1) k1546.py:215-233 AUC `score=-signal` blanket -> VIX_level/IV_slope 正向 score=+signal; (2) k1546.py:195-200 quintile Welch iid t-test -> block bootstrap or diagnostic-only label; (3) results.json + README 補 Bonferroni/Holm 揭露 (5 sig x 3 horiz); (4) k1546.py:84-88 RV add SPY dropna() before reindex -> VRP 延伸到 2026-06-23; (5) feed.json mile_410f7532 article 語氣縮減（白工 -> 'primary full-sample 下不成立'）. 完成後重跑 k1546.py 驗證 results.json 更新，無 lookahead bug，再寫 correction note 到 README。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "codex_review_remediation",
+    "linked_experiment": "k1546",
+    "linked_article": "mile_410f7532",
+    "linked_codex_review": "experiments/k1546/codex_review_2026_06_29.md",
+    "tags": [
+      "remediation",
+      "codex-finding",
+      "AUC-direction",
+      "multiple-testing"
+    ],
+    "created_at": "2026-06-29T07:16:08.952529+08:00"
   }
 ]

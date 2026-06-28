@@ -36533,5 +36533,28 @@
     ],
     "confidence": 0.55,
     "created_at": "2026-06-29T07:09:35"
+  },
+  {
+    "item_id": "bdef7ca8",
+    "category": "paper_review_24h_rule",
+    "k_id": "K1546",
+    "experiment_id": "k1546",
+    "experiment_path": "experiments/k1546",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex CLI 0.141.0 gpt-5.4 medium (ChatGPT auth)",
+    "reviewer_source": "codex_review_primary_path",
+    "codex_review": "experiments/k1546/codex_review_2026_06_29.md",
+    "title": "K1546 VRP slope predicting SPY drawdown — Codex 24h-rule review",
+    "content": "Headline NULL stands (VRP_slope_6M_1M NW t=-0.98, AUC=0.447, Spearman CI cross 0, N=4500). No lookahead (signal.shift(1) verified at k1546.py:253-255; fwd_dd slice [i+1:end]). Remediation needed: (1) AUC direction blanket -signal makes VIX_level=0.284 (should ~0.716) k1546.py:215-233; (2) quintile Welch ignores 21d overlap k1546.py:195-200; (3) multiple-testing (5 sig x 3 horiz) not disclosed; (4) RV without dropna leaves VRP last day 2026-05-22 not 2026-06-23; (5) article tone too absolute. Article publish (mile_410f7532) does NOT need retraction — headline NULL is correct. Remediation task scheduled.",
+    "evidence": [
+      "experiments/k1546/codex_review_2026_06_29.md",
+      "experiments/k1546/k1546.py",
+      "experiments/k1546/k1546_results.json",
+      "storage/reports/feed.json#mile_410f7532"
+    ],
+    "confidence": 0.85,
+    "article_id": "mile_410f7532",
+    "task_id": "paper_review_mile_410f7532",
+    "created_at": "2026-06-29T07:15:54.392159"
   }
 ]
