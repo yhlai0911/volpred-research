@@ -1,0 +1,2279 @@
+{
+  "k_id": "K1558",
+  "experiment_id": "k1558",
+  "experiment_path": "experiments/k1558/",
+  "title": "Candlestick OHLC Spot-Vol Estimators as Direct Day-Ahead Forecasters",
+  "run_timestamp": "2026-06-29 04:15:03",
+  "data": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "TLT",
+      "GLD",
+      "HYG"
+    ],
+    "start_date": "2010-01-01",
+    "end_date": "2026-06-29",
+    "n_oos_per_asset": {
+      "SPY": 3135,
+      "QQQ": 3135,
+      "IWM": 3135,
+      "TLT": 3135,
+      "GLD": 3135,
+      "HYG": 3135
+    },
+    "periods": {
+      "SPY": {
+        "start": "2010-01-04",
+        "end": "2026-06-26",
+        "n_total_days": 4145,
+        "n_oos_days": 3135
+      },
+      "QQQ": {
+        "start": "2010-01-04",
+        "end": "2026-06-26",
+        "n_total_days": 4145,
+        "n_oos_days": 3135
+      },
+      "IWM": {
+        "start": "2010-01-04",
+        "end": "2026-06-26",
+        "n_total_days": 4145,
+        "n_oos_days": 3135
+      },
+      "TLT": {
+        "start": "2010-01-04",
+        "end": "2026-06-26",
+        "n_total_days": 4145,
+        "n_oos_days": 3135
+      },
+      "GLD": {
+        "start": "2010-01-04",
+        "end": "2026-06-26",
+        "n_total_days": 4145,
+        "n_oos_days": 3135
+      },
+      "HYG": {
+        "start": "2010-01-04",
+        "end": "2026-06-26",
+        "n_total_days": 4145,
+        "n_oos_days": 3135
+      }
+    },
+    "target_proxy": "squared_close_to_close_log_return",
+    "target_proxy_caveat": "Primary target is squared CC log-return (Patton 2011 canonical proxy). 5-min RV not used: yfinance 1m intraday data quota-bounded to last ~60 days, insufficient for the 2010-present panel. r2 proxy is unbiased for sigma^2 under Patton's loss-robust conditions (E[r2|F]=sigma^2). For 5-min RV calibration on SPY, see K-references to K938 (r=0.46 corr Parkinson-RV5min documented as known noise-floor caveat)."
+  },
+  "methodology": {
+    "estimator_formulas": {
+      "Parkinson": "sigma2 = (ln(H/L))^2 / (4 ln 2)",
+      "GarmanKlass": "sigma2 = 0.5*(ln(H/L))^2 - (2 ln 2 - 1)*(ln(C/O))^2",
+      "RogersSatchell": "sigma2 = ln(H/C)*ln(H/O) + ln(L/C)*ln(L/O)",
+      "YangZhang": "sigma2 = sigma2_overnight + k*sigma2_OC + (1-k)*sigma2_RS, k=0.34/(1.34+(n+1)/(n-1)), n=20",
+      "GARCH": "GARCH(1,1) Normal, rolling refit every 21 days, expanding window from initial_window=1008",
+      "EqualEnsemble": "(sigma2_P + sigma2_GK + sigma2_RS + sigma2_YZ)/4"
+    },
+    "lookahead_control": "Estimator series computed on day t OHLC then SHIFTED(1) before joining with realized target on day t+1. GARCH forecast series produced directly indexed by target day (consistent with arch align='target' convention).",
+    "qlike_canonical": "Patton (2011): mean(a/f - log(a/f) - 1); via volpred.stats.model_evaluation.qlike()",
+    "dm_hln_settings": "Newey-West HAC, h=1; per-asset DM then Fisher combine; Bonferroni+Holm on full pair set",
+    "multiple_testing_n_pairs": 90,
+    "random_seed": 42,
+    "garch_initial_window": 1008,
+    "garch_refit_every": 21,
+    "yz_rolling_n": 20
+  },
+  "per_asset_metrics": {
+    "SPY": {
+      "QLIKE": {
+        "Parkinson": 2.387252192793952,
+        "GarmanKlass": 2.24059436311743,
+        "RogersSatchell": 13891.775769701413,
+        "YangZhang": 1.6250612087055383,
+        "GARCH": 1.5679377919597663,
+        "EqualEnsemble": 1.6823511812699508
+      },
+      "MSE": {
+        "Parkinson": 1.8253146997879098e-07,
+        "GarmanKlass": 1.780124285506053e-07,
+        "RogersSatchell": 1.7546532719282643e-07,
+        "YangZhang": 2.0900290931177133e-07,
+        "GARCH": 1.6982049053177782e-07,
+        "EqualEnsemble": 1.7379631379397165e-07
+      },
+      "n_oos": 3135,
+      "best_model_by_qlike": "GARCH"
+    },
+    "QQQ": {
+      "QLIKE": {
+        "Parkinson": 2.3077807128584906,
+        "GarmanKlass": 2.1830538807327398,
+        "RogersSatchell": 426.85484006574734,
+        "YangZhang": 1.5694633031651666,
+        "GARCH": 1.5425592239971921,
+        "EqualEnsemble": 1.6567284842961894
+      },
+      "MSE": {
+        "Parkinson": 3.1857450121919603e-07,
+        "GarmanKlass": 3.4682432926599197e-07,
+        "RogersSatchell": 3.6642940327208994e-07,
+        "YangZhang": 3.012572991141186e-07,
+        "GARCH": 2.6237680340150526e-07,
+        "EqualEnsemble": 3.0071084074016034e-07
+      },
+      "n_oos": 3135,
+      "best_model_by_qlike": "GARCH"
+    },
+    "IWM": {
+      "QLIKE": {
+        "Parkinson": 1.8292213857386899,
+        "GarmanKlass": 1.7440548073923483,
+        "RogersSatchell": 2.067700334324593,
+        "YangZhang": 1.3682212549385078,
+        "GARCH": 1.358503284052037,
+        "EqualEnsemble": 1.4195339467042547
+      },
+      "MSE": {
+        "Parkinson": 3.342276576494263e-07,
+        "GarmanKlass": 3.2565845784924787e-07,
+        "RogersSatchell": 3.0704073708050704e-07,
+        "YangZhang": 3.616527979483544e-07,
+        "GARCH": 3.199623471781913e-07,
+        "EqualEnsemble": 3.136684546270766e-07
+      },
+      "n_oos": 3135,
+      "best_model_by_qlike": "GARCH"
+    },
+    "TLT": {
+      "QLIKE": {
+        "Parkinson": 2.922739964771563,
+        "GarmanKlass": 2.72475272540077,
+        "RogersSatchell": 17016.195477151534,
+        "YangZhang": 1.2445104779602059,
+        "GARCH": 1.2283037861010926,
+        "EqualEnsemble": 1.5862938545881227
+      },
+      "MSE": {
+        "Parkinson": 4.0510687739970326e-08,
+        "GarmanKlass": 3.9770536556584936e-08,
+        "RogersSatchell": 4.0191666034750545e-08,
+        "YangZhang": 4.160570002529661e-08,
+        "GARCH": 3.98774148356715e-08,
+        "EqualEnsemble": 3.758362039360914e-08
+      },
+      "n_oos": 3135,
+      "best_model_by_qlike": "GARCH"
+    },
+    "GLD": {
+      "QLIKE": {
+        "Parkinson": 4.05771602630254,
+        "GarmanKlass": 3.7165862972713914,
+        "RogersSatchell": 4.5862836255366055,
+        "YangZhang": 1.5261102395623078,
+        "GARCH": 1.5053892633790147,
+        "EqualEnsemble": 1.9403289720062895
+      },
+      "MSE": {
+        "Parkinson": 8.145099956698534e-08,
+        "GarmanKlass": 7.826766537301328e-08,
+        "RogersSatchell": 7.786889808778604e-08,
+        "YangZhang": 9.125897130311847e-08,
+        "GARCH": 8.91865045285933e-08,
+        "EqualEnsemble": 7.737349991205246e-08
+      },
+      "n_oos": 3135,
+      "best_model_by_qlike": "GARCH"
+    },
+    "HYG": {
+      "QLIKE": {
+        "Parkinson": 2.60732876837542,
+        "GarmanKlass": 2.5580579121910216,
+        "RogersSatchell": 191362.6134976213,
+        "YangZhang": 1.4675916705535612,
+        "GARCH": 1.3915671838515211,
+        "EqualEnsemble": 1.6516934506724226
+      },
+      "MSE": {
+        "Parkinson": 1.4398780622013814e-08,
+        "GarmanKlass": 1.4128805439291267e-08,
+        "RogersSatchell": 1.4324349985133505e-08,
+        "YangZhang": 1.3700988417610999e-08,
+        "GARCH": 1.3760739663082823e-08,
+        "EqualEnsemble": 1.3015271230323263e-08
+      },
+      "n_oos": 3135,
+      "best_model_by_qlike": "GARCH"
+    }
+  },
+  "dm_hln_pairwise_per_asset": {
+    "SPY": {
+      "Parkinson": {
+        "GarmanKlass": {
+          "t": 4.44513201904399,
+          "p": 9.089077719570682e-06
+        },
+        "RogersSatchell": {
+          "t": -1.1272819721963028,
+          "p": 0.2597097466004019
+        },
+        "YangZhang": {
+          "t": 8.643108997216194,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 9.260857039462056,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 11.387904045441802,
+          "p": 0.0
+        }
+      },
+      "GarmanKlass": {
+        "Parkinson": {
+          "t": -4.44513201904399,
+          "p": 9.089077719570682e-06
+        },
+        "RogersSatchell": {
+          "t": -1.1272940475887638,
+          "p": 0.2597046435665311
+        },
+        "YangZhang": {
+          "t": 8.117197048316411,
+          "p": 6.661338147750939e-16
+        },
+        "GARCH": {
+          "t": 8.826301815340303,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 11.311026148217525,
+          "p": 0.0
+        }
+      },
+      "RogersSatchell": {
+        "Parkinson": {
+          "t": 1.1272819721963028,
+          "p": 0.2597097466004019
+        },
+        "GarmanKlass": {
+          "t": 1.1272940475887638,
+          "p": 0.2597046435665311
+        },
+        "YangZhang": {
+          "t": 1.1273440956563938,
+          "p": 0.25968349410550395
+        },
+        "GARCH": {
+          "t": 1.127348694876638,
+          "p": 0.2596815506132175
+        },
+        "EqualEnsemble": {
+          "t": 1.1273392958476973,
+          "p": 0.259685522371188
+        }
+      },
+      "YangZhang": {
+        "Parkinson": {
+          "t": -8.643108997216194,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -8.117197048316411,
+          "p": 6.661338147750939e-16
+        },
+        "RogersSatchell": {
+          "t": -1.1273440956563938,
+          "p": 0.25968349410550395
+        },
+        "GARCH": {
+          "t": 2.5392466360123955,
+          "p": 0.011157187322720308
+        },
+        "EqualEnsemble": {
+          "t": -1.7564906252894585,
+          "p": 0.07910251325324191
+        }
+      },
+      "GARCH": {
+        "Parkinson": {
+          "t": -9.260857039462056,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -8.826301815340303,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -1.127348694876638,
+          "p": 0.2596815506132175
+        },
+        "YangZhang": {
+          "t": -2.5392466360123955,
+          "p": 0.011157187322720308
+        },
+        "EqualEnsemble": {
+          "t": -3.2399867971873184,
+          "p": 0.0012078717200167954
+        }
+      },
+      "EqualEnsemble": {
+        "Parkinson": {
+          "t": -11.387904045441802,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -11.311026148217525,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -1.1273392958476973,
+          "p": 0.259685522371188
+        },
+        "YangZhang": {
+          "t": 1.7564906252894585,
+          "p": 0.07910251325324191
+        },
+        "GARCH": {
+          "t": 3.2399867971873184,
+          "p": 0.0012078717200167954
+        }
+      }
+    },
+    "QQQ": {
+      "Parkinson": {
+        "GarmanKlass": {
+          "t": 4.241258826218898,
+          "p": 2.2871260959789197e-05
+        },
+        "RogersSatchell": {
+          "t": -1.0036780456034735,
+          "p": 0.3156114566646897
+        },
+        "YangZhang": {
+          "t": 10.778049184365457,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 10.879103350538545,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 13.450689166283015,
+          "p": 0.0
+        }
+      },
+      "GarmanKlass": {
+        "Parkinson": {
+          "t": -4.241258826218898,
+          "p": 2.2871260959789197e-05
+        },
+        "RogersSatchell": {
+          "t": -1.003971283496601,
+          "p": 0.3154701120425516
+        },
+        "YangZhang": {
+          "t": 9.159077982772411,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 9.421980898573258,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 11.228156583283809,
+          "p": 0.0
+        }
+      },
+      "RogersSatchell": {
+        "Parkinson": {
+          "t": 1.0036780456034735,
+          "p": 0.3156114566646897
+        },
+        "GarmanKlass": {
+          "t": 1.003971283496601,
+          "p": 0.3154701120425516
+        },
+        "YangZhang": {
+          "t": 1.0054258373042357,
+          "p": 0.3147696125160586
+        },
+        "GARCH": {
+          "t": 1.005491052618343,
+          "p": 0.31473822940772744
+        },
+        "EqualEnsemble": {
+          "t": 1.0052191842416378,
+          "p": 0.3148690723122547
+        }
+      },
+      "YangZhang": {
+        "Parkinson": {
+          "t": -10.778049184365457,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -9.159077982772411,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -1.0054258373042357,
+          "p": 0.3147696125160586
+        },
+        "GARCH": {
+          "t": 1.5993984176906777,
+          "p": 0.1098330958124587
+        },
+        "EqualEnsemble": {
+          "t": -3.28524416259018,
+          "p": 0.001030175655984289
+        }
+      },
+      "GARCH": {
+        "Parkinson": {
+          "t": -10.879103350538545,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -9.421980898573258,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -1.005491052618343,
+          "p": 0.31473822940772744
+        },
+        "YangZhang": {
+          "t": -1.5993984176906777,
+          "p": 0.1098330958124587
+        },
+        "EqualEnsemble": {
+          "t": -3.8829131620716715,
+          "p": 0.00010534616650703654
+        }
+      },
+      "EqualEnsemble": {
+        "Parkinson": {
+          "t": -13.450689166283015,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -11.228156583283809,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -1.0052191842416378,
+          "p": 0.3148690723122547
+        },
+        "YangZhang": {
+          "t": 3.28524416259018,
+          "p": 0.001030175655984289
+        },
+        "GARCH": {
+          "t": 3.8829131620716715,
+          "p": 0.00010534616650703654
+        }
+      }
+    },
+    "IWM": {
+      "Parkinson": {
+        "GarmanKlass": {
+          "t": 3.7199717515824857,
+          "p": 0.00020274576077250472
+        },
+        "RogersSatchell": {
+          "t": -2.4439746053953284,
+          "p": 0.014581327589984205
+        },
+        "YangZhang": {
+          "t": 8.912228958583366,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 8.829132321436104,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 12.037105043978926,
+          "p": 0.0
+        }
+      },
+      "GarmanKlass": {
+        "Parkinson": {
+          "t": -3.7199717515824857,
+          "p": 0.00020274576077250472
+        },
+        "RogersSatchell": {
+          "t": -3.8696316815447895,
+          "p": 0.0001112240878564652
+        },
+        "YangZhang": {
+          "t": 7.69286126202309,
+          "p": 1.9095836023552692e-14
+        },
+        "GARCH": {
+          "t": 7.625702432931532,
+          "p": 3.197442310920451e-14
+        },
+        "EqualEnsemble": {
+          "t": 10.704434285588802,
+          "p": 0.0
+        }
+      },
+      "RogersSatchell": {
+        "Parkinson": {
+          "t": 2.4439746053953284,
+          "p": 0.014581327589984205
+        },
+        "GarmanKlass": {
+          "t": 3.8696316815447895,
+          "p": 0.0001112240878564652
+        },
+        "YangZhang": {
+          "t": 6.406701614206192,
+          "p": 1.7103651828165312e-10
+        },
+        "GARCH": {
+          "t": 6.375089443580563,
+          "p": 2.0976109738057858e-10
+        },
+        "EqualEnsemble": {
+          "t": 6.533002999586176,
+          "p": 7.497025222846787e-11
+        }
+      },
+      "YangZhang": {
+        "Parkinson": {
+          "t": -8.912228958583366,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -7.69286126202309,
+          "p": 1.9095836023552692e-14
+        },
+        "RogersSatchell": {
+          "t": -6.406701614206192,
+          "p": 1.7103651828165312e-10
+        },
+        "GARCH": {
+          "t": 0.8153537070245942,
+          "p": 0.41493195189174004
+        },
+        "EqualEnsemble": {
+          "t": -2.272682549357932,
+          "p": 0.023112877453258518
+        }
+      },
+      "GARCH": {
+        "Parkinson": {
+          "t": -8.829132321436104,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -7.625702432931532,
+          "p": 3.197442310920451e-14
+        },
+        "RogersSatchell": {
+          "t": -6.375089443580563,
+          "p": 2.0976109738057858e-10
+        },
+        "YangZhang": {
+          "t": -0.8153537070245942,
+          "p": 0.41493195189174004
+        },
+        "EqualEnsemble": {
+          "t": -2.487368792318977,
+          "p": 0.01292092107281717
+        }
+      },
+      "EqualEnsemble": {
+        "Parkinson": {
+          "t": -12.037105043978926,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -10.704434285588802,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -6.533002999586176,
+          "p": 7.497025222846787e-11
+        },
+        "YangZhang": {
+          "t": 2.272682549357932,
+          "p": 0.023112877453258518
+        },
+        "GARCH": {
+          "t": 2.487368792318977,
+          "p": 0.01292092107281717
+        }
+      }
+    },
+    "TLT": {
+      "Parkinson": {
+        "GarmanKlass": {
+          "t": 5.374583386421659,
+          "p": 8.240951587801248e-08
+        },
+        "RogersSatchell": {
+          "t": -1.197113497769038,
+          "p": 0.23135329618109157
+        },
+        "YangZhang": {
+          "t": 16.883440876616337,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 16.566208762273195,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 17.457190716584982,
+          "p": 0.0
+        }
+      },
+      "GarmanKlass": {
+        "Parkinson": {
+          "t": -5.374583386421659,
+          "p": 8.240951587801248e-08
+        },
+        "RogersSatchell": {
+          "t": -1.1971277522433075,
+          "p": 0.2313477418093297
+        },
+        "YangZhang": {
+          "t": 16.620908918564552,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 16.330436730580175,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 17.35690501354879,
+          "p": 0.0
+        }
+      },
+      "RogersSatchell": {
+        "Parkinson": {
+          "t": 1.197113497769038,
+          "p": 0.23135329618109157
+        },
+        "GarmanKlass": {
+          "t": 1.1971277522433075,
+          "p": 0.2313477418093297
+        },
+        "YangZhang": {
+          "t": 1.1972315757714964,
+          "p": 0.23130728898651842
+        },
+        "GARCH": {
+          "t": 1.1972327344244962,
+          "p": 0.231306837568229
+        },
+        "EqualEnsemble": {
+          "t": 1.1972075544426033,
+          "p": 0.23131664798410378
+        }
+      },
+      "YangZhang": {
+        "Parkinson": {
+          "t": -16.883440876616337,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -16.620908918564552,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -1.1972315757714964,
+          "p": 0.23130728898651842
+        },
+        "GARCH": {
+          "t": 1.4085708779640458,
+          "p": 0.1590617695311669
+        },
+        "EqualEnsemble": {
+          "t": -11.430270201759479,
+          "p": 0.0
+        }
+      },
+      "GARCH": {
+        "Parkinson": {
+          "t": -16.566208762273195,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -16.330436730580175,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -1.1972327344244962,
+          "p": 0.231306837568229
+        },
+        "YangZhang": {
+          "t": -1.4085708779640458,
+          "p": 0.1590617695311669
+        },
+        "EqualEnsemble": {
+          "t": -10.492664077281947,
+          "p": 0.0
+        }
+      },
+      "EqualEnsemble": {
+        "Parkinson": {
+          "t": -17.457190716584982,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -17.35690501354879,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -1.1972075544426033,
+          "p": 0.23131664798410378
+        },
+        "YangZhang": {
+          "t": 11.430270201759479,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 10.492664077281947,
+          "p": 0.0
+        }
+      }
+    },
+    "GLD": {
+      "Parkinson": {
+        "GarmanKlass": {
+          "t": 5.233079536778046,
+          "p": 1.777215645759611e-07
+        },
+        "RogersSatchell": {
+          "t": -1.6681057974537288,
+          "p": 0.09539494355939526
+        },
+        "YangZhang": {
+          "t": 14.601750533291163,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 14.41666483925476,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 14.578128490231737,
+          "p": 0.0
+        }
+      },
+      "GarmanKlass": {
+        "Parkinson": {
+          "t": -5.233079536778046,
+          "p": 1.777215645759611e-07
+        },
+        "RogersSatchell": {
+          "t": -3.1473644153826257,
+          "p": 0.0016630149723249055
+        },
+        "YangZhang": {
+          "t": 13.821561148807897,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 13.627442896834236,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 13.748624506279674,
+          "p": 0.0
+        }
+      },
+      "RogersSatchell": {
+        "Parkinson": {
+          "t": 1.6681057974537288,
+          "p": 0.09539494355939526
+        },
+        "GarmanKlass": {
+          "t": 3.1473644153826257,
+          "p": 0.0016630149723249055
+        },
+        "YangZhang": {
+          "t": 8.7762474901604,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 8.745042904755477,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 8.036990291469515,
+          "p": 1.3322676295501878e-15
+        }
+      },
+      "YangZhang": {
+        "Parkinson": {
+          "t": -14.601750533291163,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -13.821561148807897,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -8.7762474901604,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 1.4254149640951819,
+          "p": 0.1541371879308342
+        },
+        "EqualEnsemble": {
+          "t": -9.968115861495718,
+          "p": 0.0
+        }
+      },
+      "GARCH": {
+        "Parkinson": {
+          "t": -14.41666483925476,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -13.627442896834236,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -8.745042904755477,
+          "p": 0.0
+        },
+        "YangZhang": {
+          "t": -1.4254149640951819,
+          "p": 0.1541371879308342
+        },
+        "EqualEnsemble": {
+          "t": -8.84009376676717,
+          "p": 0.0
+        }
+      },
+      "EqualEnsemble": {
+        "Parkinson": {
+          "t": -14.578128490231737,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -13.748624506279674,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -8.036990291469515,
+          "p": 1.3322676295501878e-15
+        },
+        "YangZhang": {
+          "t": 9.968115861495718,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 8.84009376676717,
+          "p": 0.0
+        }
+      }
+    },
+    "HYG": {
+      "Parkinson": {
+        "GarmanKlass": {
+          "t": 0.847280348176736,
+          "p": 0.39690445349988446
+        },
+        "RogersSatchell": {
+          "t": -2.801184435855215,
+          "p": 0.005123202454164533
+        },
+        "YangZhang": {
+          "t": 8.648084971999952,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 8.795283538795962,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 9.910457416959403,
+          "p": 0.0
+        }
+      },
+      "GarmanKlass": {
+        "Parkinson": {
+          "t": -0.847280348176736,
+          "p": 0.39690445349988446
+        },
+        "RogersSatchell": {
+          "t": -2.8011858928453663,
+          "p": 0.0051231793817168025
+        },
+        "YangZhang": {
+          "t": 8.706868635322301,
+          "p": 0.0
+        },
+        "GARCH": {
+          "t": 8.892371886724488,
+          "p": 0.0
+        },
+        "EqualEnsemble": {
+          "t": 10.169782396983285,
+          "p": 0.0
+        }
+      },
+      "RogersSatchell": {
+        "Parkinson": {
+          "t": 2.801184435855215,
+          "p": 0.005123202454164533
+        },
+        "GarmanKlass": {
+          "t": 2.8011858928453663,
+          "p": 0.0051231793817168025
+        },
+        "YangZhang": {
+          "t": 2.801200842608601,
+          "p": 0.005122942647294515
+        },
+        "GARCH": {
+          "t": 2.8012018757679567,
+          "p": 0.005122926287241425
+        },
+        "EqualEnsemble": {
+          "t": 2.801198334213178,
+          "p": 0.005122982367871121
+        }
+      },
+      "YangZhang": {
+        "Parkinson": {
+          "t": -8.648084971999952,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -8.706868635322301,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -2.801200842608601,
+          "p": 0.005122942647294515
+        },
+        "GARCH": {
+          "t": 3.1189744285475305,
+          "p": 0.0018315233321399838
+        },
+        "EqualEnsemble": {
+          "t": -4.3039411419101405,
+          "p": 1.7299364985179366e-05
+        }
+      },
+      "GARCH": {
+        "Parkinson": {
+          "t": -8.795283538795962,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -8.892371886724488,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -2.8012018757679567,
+          "p": 0.005122926287241425
+        },
+        "YangZhang": {
+          "t": -3.1189744285475305,
+          "p": 0.0018315233321399838
+        },
+        "EqualEnsemble": {
+          "t": -5.0458137639944045,
+          "p": 4.776844744203146e-07
+        }
+      },
+      "EqualEnsemble": {
+        "Parkinson": {
+          "t": -9.910457416959403,
+          "p": 0.0
+        },
+        "GarmanKlass": {
+          "t": -10.169782396983285,
+          "p": 0.0
+        },
+        "RogersSatchell": {
+          "t": -2.801198334213178,
+          "p": 0.005122982367871121
+        },
+        "YangZhang": {
+          "t": 4.3039411419101405,
+          "p": 1.7299364985179366e-05
+        },
+        "GARCH": {
+          "t": 5.0458137639944045,
+          "p": 4.776844744203146e-07
+        }
+      }
+    }
+  },
+  "multiple_testing_table": [
+    {
+      "asset": "SPY",
+      "m1": "Parkinson",
+      "m2": "RogersSatchell",
+      "t": -1.1272819721963028,
+      "p_raw": 0.2597097466004019,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "SPY",
+      "m1": "Parkinson",
+      "m2": "YangZhang",
+      "t": 8.643108997216194,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "SPY",
+      "m1": "GarmanKlass",
+      "m2": "Parkinson",
+      "t": -4.44513201904399,
+      "p_raw": 9.089077719570682e-06,
+      "p_bonferroni": 0.0008180169947613614,
+      "p_holm": 0.00037265218650239795,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "SPY",
+      "m1": "GarmanKlass",
+      "m2": "RogersSatchell",
+      "t": -1.1272940475887638,
+      "p_raw": 0.2597046435665311,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "SPY",
+      "m1": "GarmanKlass",
+      "m2": "YangZhang",
+      "t": 8.117197048316411,
+      "p_raw": 6.661338147750939e-16,
+      "p_bonferroni": 5.995204332975845e-14,
+      "p_holm": 3.397282455352979e-14,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "SPY",
+      "m1": "RogersSatchell",
+      "m2": "YangZhang",
+      "t": 1.1273440956563938,
+      "p_raw": 0.25968349410550395,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "SPY",
+      "m1": "GARCH",
+      "m2": "Parkinson",
+      "t": -9.260857039462056,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "SPY",
+      "m1": "GARCH",
+      "m2": "GarmanKlass",
+      "t": -8.826301815340303,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "SPY",
+      "m1": "GARCH",
+      "m2": "RogersSatchell",
+      "t": -1.127348694876638,
+      "p_raw": 0.2596815506132175,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "SPY",
+      "m1": "GARCH",
+      "m2": "YangZhang",
+      "t": -2.5392466360123955,
+      "p_raw": 0.011157187322720308,
+      "p_bonferroni": 1.0,
+      "p_holm": 0.290086870390728,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "SPY",
+      "m1": "EqualEnsemble",
+      "m2": "Parkinson",
+      "t": -11.387904045441802,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "SPY",
+      "m1": "EqualEnsemble",
+      "m2": "GarmanKlass",
+      "t": -11.311026148217525,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "SPY",
+      "m1": "EqualEnsemble",
+      "m2": "RogersSatchell",
+      "t": -1.1273392958476973,
+      "p_raw": 0.259685522371188,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "SPY",
+      "m1": "EqualEnsemble",
+      "m2": "YangZhang",
+      "t": 1.7564906252894585,
+      "p_raw": 0.07910251325324191,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "SPY",
+      "m1": "EqualEnsemble",
+      "m2": "GARCH",
+      "t": 3.2399867971873184,
+      "p_raw": 0.0012078717200167954,
+      "p_bonferroni": 0.10870845480151159,
+      "p_holm": 0.041067638480571045,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "Parkinson",
+      "m2": "RogersSatchell",
+      "t": -1.0036780456034735,
+      "p_raw": 0.3156114566646897,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "QQQ",
+      "m1": "Parkinson",
+      "m2": "YangZhang",
+      "t": 10.778049184365457,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "GarmanKlass",
+      "m2": "Parkinson",
+      "t": -4.241258826218898,
+      "p_raw": 2.2871260959789197e-05,
+      "p_bonferroni": 0.0020584134863810277,
+      "p_holm": 0.0008919791774317787,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "GarmanKlass",
+      "m2": "RogersSatchell",
+      "t": -1.003971283496601,
+      "p_raw": 0.3154701120425516,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "QQQ",
+      "m1": "GarmanKlass",
+      "m2": "YangZhang",
+      "t": 9.159077982772411,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "RogersSatchell",
+      "m2": "YangZhang",
+      "t": 1.0054258373042357,
+      "p_raw": 0.3147696125160586,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "QQQ",
+      "m1": "GARCH",
+      "m2": "Parkinson",
+      "t": -10.879103350538545,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "GARCH",
+      "m2": "GarmanKlass",
+      "t": -9.421980898573258,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "GARCH",
+      "m2": "RogersSatchell",
+      "t": -1.005491052618343,
+      "p_raw": 0.31473822940772744,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "QQQ",
+      "m1": "GARCH",
+      "m2": "YangZhang",
+      "t": -1.5993984176906777,
+      "p_raw": 0.1098330958124587,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "QQQ",
+      "m1": "EqualEnsemble",
+      "m2": "Parkinson",
+      "t": -13.450689166283015,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "EqualEnsemble",
+      "m2": "GarmanKlass",
+      "t": -11.228156583283809,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "EqualEnsemble",
+      "m2": "RogersSatchell",
+      "t": -1.0052191842416378,
+      "p_raw": 0.3148690723122547,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "QQQ",
+      "m1": "EqualEnsemble",
+      "m2": "YangZhang",
+      "t": 3.28524416259018,
+      "p_raw": 0.001030175655984289,
+      "p_bonferroni": 0.092715809038586,
+      "p_holm": 0.03605614795945011,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "QQQ",
+      "m1": "EqualEnsemble",
+      "m2": "GARCH",
+      "t": 3.8829131620716715,
+      "p_raw": 0.00010534616650703654,
+      "p_bonferroni": 0.009481154985633289,
+      "p_holm": 0.004003154327267389,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "Parkinson",
+      "m2": "RogersSatchell",
+      "t": -2.4439746053953284,
+      "p_raw": 0.014581327589984205,
+      "p_bonferroni": 1.0,
+      "p_holm": 0.34995186215962093,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "IWM",
+      "m1": "Parkinson",
+      "m2": "YangZhang",
+      "t": 8.912228958583366,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "GarmanKlass",
+      "m2": "Parkinson",
+      "t": -3.7199717515824857,
+      "p_raw": 0.00020274576077250472,
+      "p_bonferroni": 0.018247118469525425,
+      "p_holm": 0.00729884738781017,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "GarmanKlass",
+      "m2": "RogersSatchell",
+      "t": -3.8696316815447895,
+      "p_raw": 0.0001112240878564652,
+      "p_bonferroni": 0.010010167907081868,
+      "p_holm": 0.0041152912506892125,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "GarmanKlass",
+      "m2": "YangZhang",
+      "t": 7.69286126202309,
+      "p_raw": 1.9095836023552692e-14,
+      "p_bonferroni": 1.7186252421197423e-12,
+      "p_holm": 9.35695965154082e-13,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "RogersSatchell",
+      "m2": "YangZhang",
+      "t": 6.406701614206192,
+      "p_raw": 1.7103651828165312e-10,
+      "p_bonferroni": 1.539328664534878e-08,
+      "p_holm": 7.867679840956043e-09,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "GARCH",
+      "m2": "Parkinson",
+      "t": -8.829132321436104,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "GARCH",
+      "m2": "GarmanKlass",
+      "t": -7.625702432931532,
+      "p_raw": 3.197442310920451e-14,
+      "p_bonferroni": 2.8776980798284058e-12,
+      "p_holm": 1.5347723092418164e-12,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "GARCH",
+      "m2": "RogersSatchell",
+      "t": -6.375089443580563,
+      "p_raw": 2.0976109738057858e-10,
+      "p_bonferroni": 1.8878498764252072e-08,
+      "p_holm": 9.439249382126036e-09,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "GARCH",
+      "m2": "YangZhang",
+      "t": -0.8153537070245942,
+      "p_raw": 0.41493195189174004,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "IWM",
+      "m1": "EqualEnsemble",
+      "m2": "Parkinson",
+      "t": -12.037105043978926,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "EqualEnsemble",
+      "m2": "GarmanKlass",
+      "t": -10.704434285588802,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "EqualEnsemble",
+      "m2": "RogersSatchell",
+      "t": -6.533002999586176,
+      "p_raw": 7.497025222846787e-11,
+      "p_bonferroni": 6.747322700562108e-09,
+      "p_holm": 3.52360185473799e-09,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "IWM",
+      "m1": "EqualEnsemble",
+      "m2": "YangZhang",
+      "t": 2.272682549357932,
+      "p_raw": 0.023112877453258518,
+      "p_bonferroni": 1.0,
+      "p_holm": 0.5315961814249459,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "IWM",
+      "m1": "EqualEnsemble",
+      "m2": "GARCH",
+      "t": 2.487368792318977,
+      "p_raw": 0.01292092107281717,
+      "p_bonferroni": 1.0,
+      "p_holm": 0.32302302682042927,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "TLT",
+      "m1": "Parkinson",
+      "m2": "RogersSatchell",
+      "t": -1.197113497769038,
+      "p_raw": 0.23135329618109157,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "TLT",
+      "m1": "Parkinson",
+      "m2": "YangZhang",
+      "t": 16.883440876616337,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "TLT",
+      "m1": "GarmanKlass",
+      "m2": "Parkinson",
+      "t": -5.374583386421659,
+      "p_raw": 8.240951587801248e-08,
+      "p_bonferroni": 7.416856429021124e-06,
+      "p_holm": 3.6260186986325493e-06,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "TLT",
+      "m1": "GarmanKlass",
+      "m2": "RogersSatchell",
+      "t": -1.1971277522433075,
+      "p_raw": 0.2313477418093297,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "TLT",
+      "m1": "GarmanKlass",
+      "m2": "YangZhang",
+      "t": 16.620908918564552,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "TLT",
+      "m1": "RogersSatchell",
+      "m2": "YangZhang",
+      "t": 1.1972315757714964,
+      "p_raw": 0.23130728898651842,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "TLT",
+      "m1": "GARCH",
+      "m2": "Parkinson",
+      "t": -16.566208762273195,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "TLT",
+      "m1": "GARCH",
+      "m2": "GarmanKlass",
+      "t": -16.330436730580175,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "TLT",
+      "m1": "GARCH",
+      "m2": "RogersSatchell",
+      "t": -1.1972327344244962,
+      "p_raw": 0.231306837568229,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "TLT",
+      "m1": "GARCH",
+      "m2": "YangZhang",
+      "t": -1.4085708779640458,
+      "p_raw": 0.1590617695311669,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "TLT",
+      "m1": "EqualEnsemble",
+      "m2": "Parkinson",
+      "t": -17.457190716584982,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "TLT",
+      "m1": "EqualEnsemble",
+      "m2": "GarmanKlass",
+      "t": -17.35690501354879,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "TLT",
+      "m1": "EqualEnsemble",
+      "m2": "RogersSatchell",
+      "t": -1.1972075544426033,
+      "p_raw": 0.23131664798410378,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "TLT",
+      "m1": "EqualEnsemble",
+      "m2": "YangZhang",
+      "t": 11.430270201759479,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "TLT",
+      "m1": "EqualEnsemble",
+      "m2": "GARCH",
+      "t": 10.492664077281947,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "Parkinson",
+      "m2": "RogersSatchell",
+      "t": -1.6681057974537288,
+      "p_raw": 0.09539494355939526,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "GLD",
+      "m1": "Parkinson",
+      "m2": "YangZhang",
+      "t": 14.601750533291163,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "GarmanKlass",
+      "m2": "Parkinson",
+      "t": -5.233079536778046,
+      "p_raw": 1.777215645759611e-07,
+      "p_bonferroni": 1.59949408118365e-05,
+      "p_holm": 7.642027276766328e-06,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "GarmanKlass",
+      "m2": "RogersSatchell",
+      "t": -3.1473644153826257,
+      "p_raw": 0.0016630149723249055,
+      "p_bonferroni": 0.1496713475092415,
+      "p_holm": 0.05487949408672188,
+      "harvey_significant": true,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "GLD",
+      "m1": "GarmanKlass",
+      "m2": "YangZhang",
+      "t": 13.821561148807897,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "RogersSatchell",
+      "m2": "YangZhang",
+      "t": 8.7762474901604,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "GARCH",
+      "m2": "Parkinson",
+      "t": -14.41666483925476,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "GARCH",
+      "m2": "GarmanKlass",
+      "t": -13.627442896834236,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "GARCH",
+      "m2": "RogersSatchell",
+      "t": -8.745042904755477,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "GARCH",
+      "m2": "YangZhang",
+      "t": -1.4254149640951819,
+      "p_raw": 0.1541371879308342,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "GLD",
+      "m1": "EqualEnsemble",
+      "m2": "Parkinson",
+      "t": -14.578128490231737,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "EqualEnsemble",
+      "m2": "GarmanKlass",
+      "t": -13.748624506279674,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "EqualEnsemble",
+      "m2": "RogersSatchell",
+      "t": -8.036990291469515,
+      "p_raw": 1.3322676295501878e-15,
+      "p_bonferroni": 1.199040866595169e-13,
+      "p_holm": 6.661338147750939e-14,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "EqualEnsemble",
+      "m2": "YangZhang",
+      "t": 9.968115861495718,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "GLD",
+      "m1": "EqualEnsemble",
+      "m2": "GARCH",
+      "t": 8.84009376676717,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "HYG",
+      "m1": "Parkinson",
+      "m2": "RogersSatchell",
+      "t": -2.801184435855215,
+      "p_raw": 0.005123202454164533,
+      "p_bonferroni": 0.46108822087480794,
+      "p_holm": 0.15881071490448417,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "HYG",
+      "m1": "Parkinson",
+      "m2": "YangZhang",
+      "t": 8.648084971999952,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "HYG",
+      "m1": "GarmanKlass",
+      "m2": "Parkinson",
+      "t": -0.847280348176736,
+      "p_raw": 0.39690445349988446,
+      "p_bonferroni": 1.0,
+      "p_holm": 1.0,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "HYG",
+      "m1": "GarmanKlass",
+      "m2": "RogersSatchell",
+      "t": -2.8011858928453663,
+      "p_raw": 0.0051231793817168025,
+      "p_bonferroni": 0.46108614435451223,
+      "p_holm": 0.15881071490448417,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "HYG",
+      "m1": "GarmanKlass",
+      "m2": "YangZhang",
+      "t": 8.706868635322301,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "HYG",
+      "m1": "RogersSatchell",
+      "m2": "YangZhang",
+      "t": 2.801200842608601,
+      "p_raw": 0.005122942647294515,
+      "p_bonferroni": 0.46106483825650635,
+      "p_holm": 0.15881071490448417,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "HYG",
+      "m1": "GARCH",
+      "m2": "Parkinson",
+      "t": -8.795283538795962,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "HYG",
+      "m1": "GARCH",
+      "m2": "GarmanKlass",
+      "t": -8.892371886724488,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "HYG",
+      "m1": "GARCH",
+      "m2": "RogersSatchell",
+      "t": -2.8012018757679567,
+      "p_raw": 0.005122926287241425,
+      "p_bonferroni": 0.46106336585172825,
+      "p_holm": 0.15881071490448417,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "HYG",
+      "m1": "GARCH",
+      "m2": "YangZhang",
+      "t": -3.1189744285475305,
+      "p_raw": 0.0018315233321399838,
+      "p_bonferroni": 0.16483709989259854,
+      "p_holm": 0.05860874662847948,
+      "harvey_significant": true,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "HYG",
+      "m1": "EqualEnsemble",
+      "m2": "Parkinson",
+      "t": -9.910457416959403,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "HYG",
+      "m1": "EqualEnsemble",
+      "m2": "GarmanKlass",
+      "t": -10.169782396983285,
+      "p_raw": 0.0,
+      "p_bonferroni": 0.0,
+      "p_holm": 0.0,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "HYG",
+      "m1": "EqualEnsemble",
+      "m2": "RogersSatchell",
+      "t": -2.801198334213178,
+      "p_raw": 0.005122982367871121,
+      "p_bonferroni": 0.46106841310840085,
+      "p_holm": 0.15881071490448417,
+      "harvey_significant": false,
+      "holm_significant_5pct": false
+    },
+    {
+      "asset": "HYG",
+      "m1": "EqualEnsemble",
+      "m2": "YangZhang",
+      "t": 4.3039411419101405,
+      "p_raw": 1.7299364985179366e-05,
+      "p_bonferroni": 0.001556942848666143,
+      "p_holm": 0.0006919745994071747,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    },
+    {
+      "asset": "HYG",
+      "m1": "EqualEnsemble",
+      "m2": "GARCH",
+      "t": 5.0458137639944045,
+      "p_raw": 4.776844744203146e-07,
+      "p_bonferroni": 4.299160269782831e-05,
+      "p_holm": 2.0062747925653213e-05,
+      "harvey_significant": true,
+      "holm_significant_5pct": true
+    }
+  ],
+  "pooled_cross_asset_pairwise_fisher": {
+    "Parkinson": {
+      "GarmanKlass": {
+        "fisher_chi2": 127.15259336364811,
+        "fisher_p": 0.0,
+        "mean_t": 3.976884311370302,
+        "n_assets_used": 6
+      },
+      "RogersSatchell": {
+        "fisher_chi2": 31.63392419590894,
+        "fisher_p": 0.0015755683539799836,
+        "mean_t": -1.7068897257121811,
+        "n_assets_used": 6
+      },
+      "YangZhang": {
+        "fisher_chi2": NaN,
+        "fisher_p": NaN,
+        "mean_t": 11.411110587012077,
+        "n_assets_used": 6
+      },
+      "GARCH": {
+        "fisher_chi2": NaN,
+        "fisher_p": NaN,
+        "mean_t": 11.457874975293437,
+        "n_assets_used": 6
+      },
+      "EqualEnsemble": {
+        "fisher_chi2": NaN,
+        "fisher_p": NaN,
+        "mean_t": 13.136912479913311,
+        "n_assets_used": 6
+      }
+    },
+    "GarmanKlass": {
+      "Parkinson": {
+        "fisher_chi2": 127.15259336364811,
+        "fisher_p": 0.0,
+        "mean_t": -3.976884311370302,
+        "n_assets_used": 6
+      },
+      "RogersSatchell": {
+        "fisher_chi2": 49.4856033111291,
+        "fisher_p": 1.7198353072789274e-06,
+        "mean_t": -2.191095845516909,
+        "n_assets_used": 6
+      },
+      "YangZhang": {
+        "fisher_chi2": 133.0686943866254,
+        "fisher_p": 0.0,
+        "mean_t": 10.686412499301111,
+        "n_assets_used": 6
+      },
+      "GARCH": {
+        "fisher_chi2": 62.14768017908231,
+        "fisher_p": 3.197442310920451e-14,
+        "mean_t": 10.787372776830665,
+        "n_assets_used": 6
+      },
+      "EqualEnsemble": {
+        "fisher_chi2": NaN,
+        "fisher_p": NaN,
+        "mean_t": 12.419821488983645,
+        "n_assets_used": 6
+      }
+    },
+    "RogersSatchell": {
+      "Parkinson": {
+        "fisher_chi2": 31.63392419590894,
+        "fisher_p": 0.0015755683539799836,
+        "mean_t": 1.7068897257121811,
+        "n_assets_used": 6
+      },
+      "GarmanKlass": {
+        "fisher_chi2": 49.4856033111291,
+        "fisher_p": 1.7198353072789274e-06,
+        "mean_t": 2.191095845516909,
+        "n_assets_used": 6
+      },
+      "YangZhang": {
+        "fisher_chi2": 63.462769015666346,
+        "fisher_p": 7.969084281356231e-10,
+        "mean_t": 3.5523585759512195,
+        "n_assets_used": 6
+      },
+      "GARCH": {
+        "fisher_chi2": 63.05480936628324,
+        "fisher_p": 9.531653244465588e-10,
+        "mean_t": 3.541901117670579,
+        "n_assets_used": 6
+      },
+      "EqualEnsemble": {
+        "fisher_chi2": 133.6153843394259,
+        "fisher_p": 0.0,
+        "mean_t": 3.4501596099668013,
+        "n_assets_used": 6
+      }
+    },
+    "YangZhang": {
+      "Parkinson": {
+        "fisher_chi2": NaN,
+        "fisher_p": NaN,
+        "mean_t": -11.411110587012077,
+        "n_assets_used": 6
+      },
+      "GarmanKlass": {
+        "fisher_chi2": 133.0686943866254,
+        "fisher_p": 0.0,
+        "mean_t": -10.686412499301111,
+        "n_assets_used": 6
+      },
+      "RogersSatchell": {
+        "fisher_chi2": 63.462769015666346,
+        "fisher_p": 7.969084281356231e-10,
+        "mean_t": -3.5523585759512195,
+        "n_assets_used": 6
+      },
+      "GARCH": {
+        "fisher_chi2": 35.190175298144126,
+        "fisher_p": 0.0004367368157519591,
+        "mean_t": 1.8178265052224045,
+        "n_assets_used": 6
+      },
+      "EqualEnsemble": {
+        "fisher_chi2": 48.29448539511054,
+        "fisher_p": 8.67791459802092e-08,
+        "mean_t": -5.50279075706715,
+        "n_assets_used": 6
+      }
+    },
+    "GARCH": {
+      "Parkinson": {
+        "fisher_chi2": NaN,
+        "fisher_p": NaN,
+        "mean_t": -11.457874975293437,
+        "n_assets_used": 6
+      },
+      "GarmanKlass": {
+        "fisher_chi2": 62.14768017908231,
+        "fisher_p": 3.197442310920451e-14,
+        "mean_t": -10.787372776830665,
+        "n_assets_used": 6
+      },
+      "RogersSatchell": {
+        "fisher_chi2": 63.05480936628324,
+        "fisher_p": 9.531653244465588e-10,
+        "mean_t": -3.541901117670579,
+        "n_assets_used": 6
+      },
+      "YangZhang": {
+        "fisher_chi2": 35.190175298144126,
+        "fisher_p": 0.0004367368157519591,
+        "mean_t": -1.8178265052224045,
+        "n_assets_used": 6
+      },
+      "EqualEnsemble": {
+        "fisher_chi2": 69.56075418831645,
+        "fisher_p": 6.0103033661107474e-12,
+        "mean_t": -5.66480672660358,
+        "n_assets_used": 6
+      }
+    },
+    "EqualEnsemble": {
+      "Parkinson": {
+        "fisher_chi2": NaN,
+        "fisher_p": NaN,
+        "mean_t": -13.136912479913311,
+        "n_assets_used": 6
+      },
+      "GarmanKlass": {
+        "fisher_chi2": NaN,
+        "fisher_p": NaN,
+        "mean_t": -12.419821488983645,
+        "n_assets_used": 6
+      },
+      "RogersSatchell": {
+        "fisher_chi2": 133.6153843394259,
+        "fisher_p": 0.0,
+        "mean_t": -3.4501596099668013,
+        "n_assets_used": 6
+      },
+      "YangZhang": {
+        "fisher_chi2": 48.29448539511054,
+        "fisher_p": 8.67791459802092e-08,
+        "mean_t": 5.50279075706715,
+        "n_assets_used": 6
+      },
+      "GARCH": {
+        "fisher_chi2": 69.56075418831645,
+        "fisher_p": 6.0103033661107474e-12,
+        "mean_t": 5.66480672660358,
+        "n_assets_used": 6
+      }
+    }
+  },
+  "summary": {
+    "per_asset_best_count": {
+      "GARCH": 6,
+      "YangZhang": 0,
+      "EqualEnsemble": 0,
+      "Parkinson": 0,
+      "GarmanKlass": 0,
+      "RogersSatchell": 0
+    },
+    "pooled_best_by_mean_rank": "GARCH",
+    "mean_rank_per_model": {
+      "GARCH": 1.0,
+      "YangZhang": 2.0,
+      "EqualEnsemble": 3.0,
+      "GarmanKlass": 4.0,
+      "Parkinson": 5.0,
+      "RogersSatchell": 6.0
+    },
+    "n_pairs_total": 90,
+    "n_pairs_harvey_significant_t_gt_3": 59,
+    "n_pairs_holm_significant_5pct": 57,
+    "lookahead_audit_sample": {
+      "SPY": [
+        "  audit 2014-01-08: fc_Parkinson=7.569e-06 == sigma2_P[2014-01-07]=7.569e-06 -> True",
+        "  audit 2014-01-09: fc_Parkinson=9.479e-06 == sigma2_P[2014-01-08]=9.479e-06 -> True",
+        "  audit 2014-01-10: fc_Parkinson=1.895e-05 == sigma2_P[2014-01-09]=1.895e-05 -> True"
+      ],
+      "QQQ": [
+        "  audit 2014-01-08: fc_Parkinson=2.274e-05 == sigma2_P[2014-01-07]=2.274e-05 -> True",
+        "  audit 2014-01-09: fc_Parkinson=1.706e-05 == sigma2_P[2014-01-08]=1.706e-05 -> True",
+        "  audit 2014-01-10: fc_Parkinson=4.017e-05 == sigma2_P[2014-01-09]=4.017e-05 -> True"
+      ],
+      "IWM": [
+        "  audit 2014-01-08: fc_Parkinson=3.026e-05 == sigma2_P[2014-01-07]=3.026e-05 -> True",
+        "  audit 2014-01-09: fc_Parkinson=2.803e-05 == sigma2_P[2014-01-08]=2.803e-05 -> True",
+        "  audit 2014-01-10: fc_Parkinson=4.142e-05 == sigma2_P[2014-01-09]=4.142e-05 -> True"
+      ],
+      "TLT": [
+        "  audit 2014-01-08: fc_Parkinson=6.314e-06 == sigma2_P[2014-01-07]=6.314e-06 -> True",
+        "  audit 2014-01-09: fc_Parkinson=1.197e-05 == sigma2_P[2014-01-08]=1.197e-05 -> True",
+        "  audit 2014-01-10: fc_Parkinson=1.670e-05 == sigma2_P[2014-01-09]=1.670e-05 -> True"
+      ],
+      "GLD": [
+        "  audit 2014-01-08: fc_Parkinson=1.602e-05 == sigma2_P[2014-01-07]=1.602e-05 -> True",
+        "  audit 2014-01-09: fc_Parkinson=2.695e-05 == sigma2_P[2014-01-08]=2.695e-05 -> True",
+        "  audit 2014-01-10: fc_Parkinson=1.262e-05 == sigma2_P[2014-01-09]=1.262e-05 -> True"
+      ],
+      "HYG": [
+        "  audit 2014-01-08: fc_Parkinson=9.335e-07 == sigma2_P[2014-01-07]=9.335e-07 -> True",
+        "  audit 2014-01-09: fc_Parkinson=1.200e-06 == sigma2_P[2014-01-08]=1.200e-06 -> True",
+        "  audit 2014-01-10: fc_Parkinson=5.019e-07 == sigma2_P[2014-01-09]=5.019e-07 -> True"
+      ]
+    }
+  },
+  "differentiation_vs_prior_k": {
+    "K441": "K441 used range estimators as evaluation PROXIES; K1558 uses them as FORECASTS.",
+    "K464": "K464 fit HAR autoregressive on log-range for 6 Asian markets; K1558 uses raw closed-form estimator with no autoregressive structure on US ETFs.",
+    "K934": "K934 ran CARR autoregressive on Parkinson range, lost to GARCH; K1558 isolates the estimator's raw forecast skill without CARR smoothing.",
+    "K935": "K935 added Gap-Adjusted CARR with YZ correction (still autoregressive). K1558 tests YZ directly without CARR wrapper.",
+    "K938": "K938 cross-asset CARR_YZ vs CARR_P (4 assets SPY/GLD/QQQ/0050.TW). K1558 expands panel to 6 US ETFs (SPY/QQQ/IWM/TLT/GLD/HYG) covering equity small-cap, treasuries, gold, high-yield credit; AND drops the autoregressive wrapper; AND adds GK+RS+EqualEnsemble for a full head-to-head."
+  },
+  "verdict": "NULL",
+  "verdict_reason": "GARCH(1,1) baseline wins per-asset QLIKE on majority of assets; direct closed-form OHLC estimators do not beat GARCH as 1-step-ahead variance forecasters. Replicates K464 GJR-best finding under direct-forecast framing.",
+  "caveats": [
+    "Target proxy is r2 (squared CC log-return) \u2014 Patton-canonical but noisy.",
+    "5-min RV not used (yfinance 1m quota constraint over 2010-present panel).",
+    "Yang-Zhang uses asymptotic k constant with n=20 \u2014 Yang-Zhang paper suggests numerical optimization may yield marginally different k.",
+    "GARCH(1,1) forecast uses manual recursion with refit every 21 days for efficiency; in-between days reuse last params (standard rolling-window practice).",
+    "Pooled cross-asset inference uses Fisher's combination of per-asset p-values (not stacked asset-day) per .claude/rules/experiments.md guidance; this is conservative.",
+    "TLT (treasuries) has different vol regime than equities \u2014 comparing range estimators on bond ETFs is exploratory; literature is sparse.",
+    "HYG (high-yield credit) often has smaller intraday range than its true vol due to limited price discovery in OTC-influenced ETF; OHLC estimators may underestimate."
+  ],
+  "files": {
+    "script": "experiments/k1558/k1558.py",
+    "results": "experiments/k1558/k1558_results.json",
+    "qlike_bar_chart": "experiments/k1558/k1558_qlike_bar.png",
+    "dm_heatmap": "experiments/k1558/k1558_dm_heatmap.png",
+    "readme": "experiments/k1558/README.md",
+    "run_log": "experiments/k1558/run.log"
+  }
+}

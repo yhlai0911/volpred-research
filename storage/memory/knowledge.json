@@ -36454,5 +36454,36 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-06-28T19:28:17.943779"
+  },
+  {
+    "item_id": "k1558_ohlc_direct_null",
+    "category": "model_behavior",
+    "content": "K1558: 在 6 個 ETF (SPY/QQQ/IWM/TLT/GLD/HYG) panel, 直接以 t-1 OHLC closed-form candlestick spot-vol estimator (Parkinson, Garman-Klass, Rogers-Satchell, Yang-Zhang) + EqualEnsemble 作 one-day-ahead variance forecast, 在 Patton QLIKE 全部輸給 GARCH(1,1) baseline. GARCH 6/6 assets per-asset QLIKE 全贏 (per_asset_best_count={GARCH:6}); pooled mean rank: GARCH=1.0, YZ=2.0, EqualEns=3.0, GK=4.0, Parkinson=5.0, RS=6.0. DM (h=1, NW HAC) 90 pairs total, 59 |t|>3, 57 Holm-Bonferroni 5% 顯著. Replicates K464 'GJR-best hard to beat' finding under direct-forecast framing. Yang-Zhang 是 OHLC estimators 中最強的 (與 K441 efficiency finding 一致), 但 estimating contemporaneous variance ≠ forecasting next-day variance. Mechanism: GARCH β term 提供 persistence, 而 raw OHLC estimator 沒有跨日記憶.",
+    "evidence": [
+      "experiments/k1558/k1558.py",
+      "experiments/k1558/k1558_results.json",
+      "experiments/k1558/k1558_qlike_bar.png",
+      "experiments/k1558/k1558_dm_heatmap.png"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-06-29T05:13:47.232589",
+    "verdict": "CONDITIONAL_PASS",
+    "verdict_reason": "Methodology PASS on lookahead / GARCH alignment / Patton QLIKE direction; CONDITIONAL on HLN finite-sample correction (not applied; negligible at n=3135) + GARCH res.convergence_flag (not checked; non-convergence would weaken GARCH baseline, biasing AGAINST NULL — direction-robust). NULL verdict on whether closed-form OHLC direct forecast beats GARCH; clear NO across 6/6 assets.",
+    "experiment_id": "K1558",
+    "k_id": "K1558",
+    "experiment_path": "experiments/k1558/",
+    "experiment_script": "experiments/k1558/k1558.py",
+    "reviewer": "Codex code-review subagent (codex-rescue agent a6637ddd22b026fa8) 2026-06-29",
+    "reviewer_source": "codex-subagent-audit",
+    "codex_review_verdict": "CONDITIONAL_PASS (5 checklist: 3 PASS, 2 CONDITIONAL — HLN factor + convergence_flag flagged but verdict direction unaffected)",
+    "related_experiments": [
+      "K441",
+      "K464",
+      "K934",
+      "K935",
+      "K938",
+      "K1259",
+      "K445"
+    ]
   }
 ]
