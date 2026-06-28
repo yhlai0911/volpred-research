@@ -38344,7 +38344,7 @@
     "description": "Gmail UID: 12093\nMessage-ID: <1A79F2F2-D7AF-40F7-8DD7-7A9F279982C2@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Mon, 29 Jun 2026 00:51:45 +0800\nSubject: Re: [VolPred Alert][CRITICAL] Cluster cap drift 發現 — spy 8.3x / vix 6.1x overshoot（修正已上線）\n\n--- 用戶回信內容 ---\n你是自主運營經理  你決定 不要叫我決定\r\n你要決定怎樣對平台是最好的\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月29日 00:22 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Cluster cap drift 發現 — spy 8.3x / vix 6.1x overshoot（修正已上線）\r\n> Alert level: critical\r\n> CRITICAL\r\n> Cluster cap drift discovery — release pacing 失控\r\n> \r\n> 觸發背景\r\n> \r\n> 本班 hourly-00 派 K1333 (VIX vol-of-vol CONDITIONAL_PASS) general article，publisher gate 擋下後我順手掃全 cluster 30d 狀況，發現嚴重 overshoot：\r\n> Cluster\t30d count\tHard cap\tOvershoot\t30d share\r\n> spy\t83\t10\t8.3x\t26.7%\r\n> vix\t92\t15\t6.1x\t29.6%\r\n> taiwan\t17\t8\t2.1x\t5.5%\r\n> garch\t17\t10\t1.7x\t5.5%\r\n> 30d feed total = 311 篇。SPY + VIX 合計佔 56%。\r\n> 根因\r\n> \r\n> publisher.py cluster cooldown gate 對 general/research 文章硬擋（K1333 就是這次撞到），但 event_article / trending_repost / member_qa 等 timely 類型 type-exempt 完全 bypass cap。設計初衷正確（時效性文章不該被排擠），但沒有對應的 drift detection — timely 路徑可無限累積，最終：\r\n> 讀者 feed 同主題高重複（Mission 第 1 條內容深度 + 第 5 條曝光留存受損）\r\n> K-experiment general article 一篇都進不去（K1333 是這次的具體 victim）\r\n> 釋出端紀律名存實亡，但 alerts.py 16 條檢查無一覆蓋此面向 — 您一直沒收到通報\r\n> 已落地修正\r\n> \r\n> src/volpred/ops/alerts.py 新增 _parse_cluster_cap_drift_state() parser\r\n> 接 build_alert_condition_report chain（成為第 16 條檢查）\r\n> Severity ladder：worst overshoot ≥5x → critical；≥3x → warn\r\n> 走 canonical topic_clusters.recent_cluster_counts(days=30) 不重造資料源\r\n> Body 三段格式（觸發 / 影響 / 建議）；title 穩定（dedup 有效）\r\n> 本次 fire 觸發 level=critical, worst=8.3x — 此 email 即為 alert chain 首發\r\n> 建議下一步（您決定）\r\n> \r\n> type-exempt 軟 cap：對 event/trending/member_qa 路徑加 2-3x 軟 cap，避免 timely 文章無限累積\r\n> 調整 hard cap：vix=15 / spy=10 是 2026-05 設定，若 timely 文章現實需要更多 → 調高 + 細分 sub-cluster\r\n> 配合 release-layer deadlock 重整：docs/refactor_plan_release_layer_deadlock.md 已有計畫，cluster drift 是同一問題的另一面\r\n> K1333 草稿已保留 storage/drafts/K1333_general_v2_draft.md，cluster 冷卻後可重派。\r\n> 本班其他動作\r\n> \r\n> 嘗試 K1333 publish（被 cluster gate 擋）\r\n> 標 task K1333_article_general_v2 status=failed（草稿保留）\r\n> 建 + 完成 platform_ops_cluster_cap_drift_alert_20260629 task\r\n> 寫入 docs/error_log.md 記錄根因\r\n> Commit 即將推送\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -38357,7 +38357,9 @@
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-06-28T17:07:30.795486+00:00",
-    "claim_session_id": "f1d2a3c0346f"
+    "claim_session_id": "f1d2a3c0346f",
+    "completed_at": "2026-06-28T18:24:17.760219+00:00",
+    "result": "cluster cap soft enforcement (×2.5) shipped commit 89a5c3f3a; close email sent (notification 1c0508c5)"
   },
   {
     "id": "email-12097-193d0c",
@@ -38365,7 +38367,7 @@
     "description": "Gmail UID: 12097\nMessage-ID: <CBFAF1CA-0F2D-4962-B4C8-BF7F0CE014BE@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Mon, 29 Jun 2026 01:10:07 +0800\nSubject: Re: [VolPred Alert][CRITICAL] Topic-cluster 30d 嚴重 overshoot（worst 8.3x cap）\n\n--- 用戶回信內容 ---\n所以你要解決這問題了嗎？\r\n還是只是一直等等等等等等\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月29日 01:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> Topic-cluster 30d 嚴重 overshoot（worst 8.3x cap）\r\n> Alert level: critical\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> 30d feed items = 310；ratio ≥ 3x 視為 release pacing drift。\r\n> spy: 83/10 = 8.3x cap, share=26.8%\r\n> vix: 92/15 = 6.1x cap, share=29.7%\r\n> 影響\r\n> \r\n> Cluster cooldown gate 對 general / research 文章硬擋，但 timely event/trending/member_qa 文章 type-exempt 直接發布 — 結果 cap 數倍 overshoot 卻不會在 publish path 報警。此狀態：(a) 用戶 feed 同主題重複度高（Mission 第 1 條內容深度、第 5 條曝光留存）；(b) discretionary 主題（K-experiment general article）長期被排擠不能發；(c) 釋出端紀律名存實亡。\r\n> 建議行動\r\n> \r\n> 暫停同 cluster 的 event/trending 候選排程（手動或加 type-exempt「軟 cap」如 2-3x hard cap）。\r\n> 主動 release fresh-cluster draft：uv run volpred ops release-pool-by-settings，挑非熱門 cluster K。\r\n> 評估 CLUSTER_HARD_CAPS 設計：vix=15 / spy=10 是否仍合理？若 timely 路徑已合理消耗，調高 cap 或細分 sub-cluster。\r\n> 配合 release-layer deadlock 計畫 (docs/refactor_plan_release_layer_deadlock.md) 同步處理。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -38375,6 +38377,11 @@
     "email_uid": 12097,
     "email_message_id": "<CBFAF1CA-0F2D-4962-B4C8-BF7F0CE014BE@gmail.com>",
     "email_subject": "Re: [VolPred Alert][CRITICAL] Topic-cluster 30d 嚴重 overshoot（worst 8.3x cap）",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-28T18:07:19.942514+00:00",
+    "claim_session_id": "e907fcaf5a13",
+    "completed_at": "2026-06-28T18:24:26.395899+00:00",
+    "result": "same root cause as email-12093 (cluster cap drift); covered by commit 89a5c3f3a + close email notification 1c0508c5 (info, soft cap shipped)"
   }
 ]
