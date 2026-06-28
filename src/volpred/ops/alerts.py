@@ -1563,6 +1563,118 @@ def _parse_content_quality_state(
     }
 
 
+def _parse_cluster_cap_drift_state(storage_dir: str) -> dict[str, Any]:
+    """Topic-cluster 30d overshoot vs hard cap → drift alert (2026-06-29 added).
+
+    Why: K1333 publish attempt (hourly-00 fire) discovered vix cluster 92/15 =
+    6.1x overshoot and spy 83/10 = 8.3x. Cluster cooldown gate blocks new
+    `general`/`research` publishes, but timely event/trending publishes bypass
+    the gate — so cap can drift far above ceiling without anyone noticing.
+
+    Severity ladder (worst overshoot wins):
+    - ratio >= 5x → critical (release pacing badly broken)
+    - ratio >= 3x → warn (release pacing drifting)
+    - ratio >= 1x → info (at cap, blocking discretionary publishes — expected)
+    - else → ok
+
+    Reads cluster state via `volpred.topic_clusters.recent_cluster_counts`.
+    """
+    try:
+        from volpred.topic_clusters import (
+            CLUSTER_HARD_CAPS,
+            cluster_cap,
+            recent_cluster_counts,
+        )
+    except Exception as exc:
+        return {
+            "id": "cluster_cap_drift",
+            "breached": False,
+            "level": "info",
+            "title": "cluster_cap_drift unavailable",
+            "body": "",
+            "details": {"import_error": str(exc)},
+        }
+
+    counts, total = recent_cluster_counts(days=30)
+    rows: list[dict[str, Any]] = []
+    for cluster_name in CLUSTER_HARD_CAPS:
+        count = counts.get(cluster_name, 0)
+        cap = cluster_cap(cluster_name)
+        ratio = (count / cap) if cap else 0.0
+        rows.append({
+            "cluster": cluster_name,
+            "count": count,
+            "cap": cap,
+            "overshoot_ratio": round(ratio, 2),
+            "share": round((count / total) if total else 0.0, 4),
+        })
+    rows.sort(key=lambda r: -r["overshoot_ratio"])
+    worst_ratio = rows[0]["overshoot_ratio"] if rows else 0.0
+
+    if worst_ratio >= 5.0:
+        level = "critical"
+        breached = True
+    elif worst_ratio >= 3.0:
+        level = "warn"
+        breached = True
+    else:
+        level = "info"
+        breached = False
+
+    overshoot_rows = [r for r in rows if r["overshoot_ratio"] >= 3.0]
+
+    if breached:
+        title = (
+            f"Topic-cluster 30d 嚴重 overshoot（worst {worst_ratio:.1f}x cap）"
+        )
+        lines = [
+            "## 觸發條件",
+            f"30d feed items = {total}；ratio ≥ 3x 視為 release pacing drift。",
+        ]
+        for r in overshoot_rows[:5]:
+            lines.append(
+                f"- {r['cluster']}: {r['count']}/{r['cap']} = "
+                f"{r['overshoot_ratio']:.1f}x cap, share={r['share']:.1%}"
+            )
+        lines.extend([
+            "",
+            "## 影響",
+            "Cluster cooldown gate 對 `general` / `research` 文章硬擋，但 "
+            "timely event/trending/member_qa 文章 type-exempt 直接發布 — "
+            "結果 cap 數倍 overshoot 卻不會在 publish path 報警。此狀態：(a) "
+            "用戶 feed 同主題重複度高（Mission 第 1 條內容深度、第 5 條曝光留存）"
+            "；(b) discretionary 主題（K-experiment general article）長期被排擠"
+            "不能發；(c) 釋出端紀律名存實亡。",
+            "",
+            "## 建議行動",
+            "1. 暫停同 cluster 的 event/trending 候選排程（手動或加 type-exempt"
+            "「軟 cap」如 2-3x hard cap）。",
+            "2. 主動 release fresh-cluster draft："
+            "`uv run volpred ops release-pool-by-settings`，挑非熱門 cluster K。",
+            "3. 評估 `CLUSTER_HARD_CAPS` 設計：vix=15 / spy=10 是否仍合理？"
+            "若 timely 路徑已合理消耗，調高 cap 或細分 sub-cluster。",
+            "4. 配合 release-layer deadlock 計畫 "
+            "(`docs/refactor_plan_release_layer_deadlock.md`) 同步處理。",
+        ])
+        body = "\n".join(lines)
+    else:
+        title = "cluster_cap_drift ok"
+        body = ""
+
+    return {
+        "id": "cluster_cap_drift",
+        "breached": breached,
+        "level": level,
+        "title": title,
+        "body": body,
+        "details": {
+            "total_30d": total,
+            "rows": rows,
+            "worst_overshoot_ratio": worst_ratio,
+        },
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -1586,6 +1698,7 @@ def build_alert_condition_report(
         _parse_paper_trading_gaps_state(storage_dir),             # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_content_quality_state(storage_dir, current),       # 2026-06-24 meta-fix: content patrol layer
+        _parse_cluster_cap_drift_state(storage_dir),              # 2026-06-29 K1333 publish discovered vix 6.1x / spy 8.3x overshoot
     ]
     return {
         "generated_at": current.isoformat(),

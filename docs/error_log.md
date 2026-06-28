@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-29 Topic-cluster 30d cap 嚴重 overshoot — release-layer 紀律名存實亡
+
+**問題**：hourly-00 嘗試 publish K1333 (VIX vol-of-vol CONDITIONAL_PASS general article) 被 publisher cluster cooldown gate 擋下 `vix count_30d=92 cap=15`。掃全 cluster 後發現 **spy 83/10=8.3x、vix 92/15=6.1x、taiwan 17/8=2.1x、garch 17/10=1.7x** 四個 cluster blocked，spy+vix 合計 56% of 30d feed (311 items)。
+
+**現象**：publisher.py L1051-1085 cluster cooldown gate 對 `general`/`research` 文章硬擋 — 看起來「在工作」。但 30d count 數倍 overshoot 卻**從來沒 alert 過老闆**；K-experiment general article 一篇都進不去而老闆一無所知。
+
+**根因**：cluster cooldown 設計把 `event_article` / `trending_repost` / `member_qa` / timely 文章透過 `cluster_cooldown_type_exempt` (L599-606) bypass 掉 cap，因為 timely 文章不該被排擠。但這個 bypass 沒有對應的「軟 cap」或 drift detection — timely 路徑可以無限累積，最後造成：(a) 用戶 feed 同主題重複度極高 (vix+spy 56% share)；(b) discretionary K-experiment general article 長期被排擠（K1333 也是這次撞到）；(c) 釋出端紀律名存實亡卻無人知道。alerts.py 16 條檢查無一覆蓋此面向。
+
+**解決方法**：`src/volpred/ops/alerts.py` 新增 `_parse_cluster_cap_drift_state()` 接 `build_alert_condition_report` chain，severity ladder：worst overshoot ≥5x → critical / ≥3x → warn。讀取走 canonical `volpred.topic_clusters.recent_cluster_counts(days=30)` 不重造資料源。Body 三段（觸發條件 / 影響 / 建議行動），title 穩定不含動態值（24h dedup 有效）。本次 fire 觸發 `level=critical, worst=8.3x` — 寄 email 通報老闆 + commit。後續行動：(1) 考慮對 type-exempt 路徑加軟 cap (e.g. 2-3x hard cap) 或將 cap 改成更合理數字；(2) 配合 `docs/refactor_plan_release_layer_deadlock.md` 重整生產端 arc-dedup 與釋出 pacing。本次 K1333 草稿保留 `storage/drafts/K1333_general_v2_draft.md`，等 vix cluster 冷卻後可重派。
+
 ## 2026-06-28 daily_update 監控 schedule-source drift（週日假警報 + 重複 schedule source）
 
 **問題**：監控顯示 `daily_update ... ⚠️ 上次完成 36.1h 前；預期 2026-06-28 06:00 該 fire（已 miss 21.9h）`。老闆點名要求從底層架構根治，不可再復發。
