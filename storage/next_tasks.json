@@ -37711,7 +37711,7 @@
     "title": "K1553: Coherent VaR/ES estimator guardrail：風險量本身 coherent，不代表估計器 coherent** — 用 SPY/QQQ/IWM/TLT/HYG 日報酬建 rolling VaR/ES，對比 hist",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1273). Original: Coherent VaR/ES estimator guardrail：風險量本身 coherent，不代表估計器 coherent** — 用 SPY/QQQ/IWM/TLT/HYG 日報酬建 rolling VaR/ES，對比 historical simulation、EWMA、Cornish-Fisher、coherent L-estimator weight structure；檢查 ES backtest、capital adequacy ranking flip、以及 VT/DRP 降槓桿觸發次數是否因 estimator 不一致而改變。與 conformal VaR / CVaR-RP 不同，這裡是「risk estimator coherence」工程風控層（來源：JFEC 2026 \"Coherent Estimation of Risk Measures\"，指出 coherent risk measure 不必然導出 coherent estimator）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1553.py with signal.shift(1) + seed=42, (c) K1553_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -37720,7 +37720,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-28T00:00:00Z"
+    "created_at": "2026-06-28T00:00:00Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T03:05:26.795739+00:00",
+    "claim_session_id": "0f74ba895b69",
+    "started_at": "2026-06-28T03:05:26.997955+00:00",
+    "completed_at": "2026-06-28T03:16:28.138962+00:00",
+    "result": "K1553 coherent VaR/ES estimator guardrail complete: rolling SPY/QQQ/IWM/TLT/HYG VaR/ES experiment produced PASS with EWMA 9.59% and Cornish-Fisher 4.28% ES subadditivity failures versus spectral L 0.00%. Added README, reproducible script, results JSON, chart, data snapshots, and Codex review; K1553 targeted lookahead audit returned no finding."
   },
   {
     "id": "K1554",
