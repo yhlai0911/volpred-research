@@ -3610,3 +3610,32 @@ Off-by-one 不產生 lookahead（方向正確），但 regime label 與規格不
 **修法**：在 `SUBMISSION_READY.md` 與 README 頂部加入 2026-06-24 status override，明確標示 K1544 已 supersede 舊 submission-ready 狀態；paper body 不改，因為 K1544 README 已明確要求先做 forecast-timing narrative decision，再做 body integration。
 
 **防再發**：任何 paper portfolio 結論被新實驗或 independent review 推翻時，除了更新 `research_program.md`，也必須同步 paper-local `README.md` / `SUBMISSION_READY.md` / submission checklist 類 artifact，避免 stale local status 反向污染任務池。
+
+---
+
+## 2026-06-28 18:53 台灣時間 — AUTO_MERGE leftover 注入 conflict markers 到 working tree
+
+### Incident
+hourly-18 ops fire 中，主線程 `git commit` 成功後 (3a8f70d06)，`git status` 突然顯示 10 個 UU/DU conflict 標記，包含剛 commit 的 `storage/work_log.json`、`storage/next_tasks.json`、`storage/reports/feed.json` 等。文件被注入 `<<<<<<<` markers，覆蓋 HEAD canonical 內容。
+
+### Diagnostic
+- `.git/AUTO_MERGE` 存在 (tree 4f13430a)；`.git/MERGE_HEAD` 不存在 → 半成中斷的 3-way merge
+- `git reflog` 無 merge entry → merge 沒到 commit 階段
+- `cron_git_push_backup.sh` 邏輯純 fast-forward push、不 merge → 排除
+- 唯一長跑背景 process = `scripts/codex_loop.sh` (49233, 4+ 天) → 嫌疑：codex_loop 內部某處 `git fetch + git merge --no-ff` 撞 conflict 後沒清 AUTO_MERGE
+
+### Fix (immediate)
+1. `git reset HEAD` 清 index
+2. `rm .git/AUTO_MERGE`
+3. `git checkout HEAD --` 6 conflict files (work_log.json / next_tasks.json / feed.json / settings.local.json / token_usage*.json/md) — HEAD 是 canonical
+4. 驗證 working tree 乾淨 + work_log 1279 entries（含本 fire 42 backfill）+ next_tasks 1 pending（其他 succeeded/blocked）
+
+### Root cause TBD (follow-up needed)
+- 查 codex_loop.sh / src/volpred/codex_loop/ 內所有 `git` 呼叫
+- 任何 `git merge`/`git pull` 必須 `--abort` on conflict + alert，禁 silent leave AUTO_MERGE
+- 加 watchdog: `.git/AUTO_MERGE` 存在 + 無 MERGE_HEAD > 10min → critical alert
+
+### 影響
+- 若主線程沒發現 → 下一個 commit 會把 conflict markers 寫進 work_log.json / next_tasks.json / feed.json 永久污染 canonical 資料
+- 這次 hourly-18 catch 是 PHASE Z `git status -s` 巡檢的功勞 — 證實 PHASE Z 是治理 backstop 不能省
+
