@@ -37968,7 +37968,7 @@
     "description": "Gmail UID: 12065\nMessage-ID: <65AD0403-0CAD-4A5B-9721-E30A3846883D@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Sun, 28 Jun 2026 18:38:51 +0800\nSubject: Re: [VolPred Alert][WARN] M2 knowledge closure stale > 3.98d\n\n--- 用戶回信內容 ---\n依照建議行動執行\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月28日 18:31 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> M2 knowledge closure stale > 3.98d\r\n> Alert level: warn\r\n> WARN\r\n> 觸發條件\r\n> \r\n> knowledge.json 已 3.98 天無新 entry（最後 closure: 2026-06-24T11:00:59.712800+00:00）。\r\n> n_entries: 2375\r\n> 影響\r\n> \r\n> M2（研究與實驗做好）closure 停滯 = 實驗有跑但結論沒寫進知識庫，研究產出不可見、\r\n> 不累積。Mission L5-9：研究與論文永遠不輸 ops。此 breach 不可用「正常變異/測量 bug」解釋掉，必須實際 close 實驗到 knowledge.json。\r\n> 建議行動（立即執行，不可 defer）\r\n> \r\n> 找已 review 但未 closure 的實驗：for k in experiments/k*/; do test -f $k/codex_review.md && ! grep -ql $(basename $k) ...; done\r\n> 對 complete + reviewed 實驗（含 NULL/PILOT — null 如實報告）寫 knowledge：\r\n> MemorySystem(storage_dir='storage').add_knowledge(category, content, evidence, confidence)\r\n> PASS/CONDITIONAL_PASS 需符 provenance gate（experiment_id + reviewer，見 experiments.md K1259）。\r\n> 若無可 close 實驗 → 主線程 dispatch 新實驗並跑到 closure，不是空等。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -37982,7 +37982,9 @@
     "last_released_at": "2026-06-28T11:11:52.958076+00:00",
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-06-28T11:19:27.022108+00:00",
-    "claim_session_id": "05660a0a4d88"
+    "claim_session_id": "05660a0a4d88",
+    "completed_at": "2026-06-28T11:37:58.264796+00:00",
+    "result": "依用戶指示執行 M2 knowledge closure：9 個 reviewed 但未 closure 實驗(K1547,1548,1550-1556, 7 PASS+2 CONDITIONAL_PASS 含 NULL 如實報告)經 workflow 草擬+主線程驗證後寫入 knowledge.json(provenance 含 k_id/verdict/reviewer)。M2 stale 解除。"
   },
   {
     "id": "email-12064-6c471b",
