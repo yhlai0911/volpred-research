@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 work_dashboard_server probe / cron parse fallback 缺診斷
+
+**問題**：Codex hourly tick 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/work_dashboard_server.py`，掃到四處 fail-open：cron next-fire parse 失敗直接 `return None`、`launchctl` daemon probe 失敗直接 `return False`、`pgrep` process count 失敗直接 `return -1`、`git log` 讀取失敗直接 `return []`。另 invalid `/api/task` POST body 雖回 400 給 client，但 audit 不知道這是可觀察路徑。
+
+**根因**：dashboard 應該 fail-open，不能因 cron expression、launchctl、pgrep 或 git 暫時失敗而整頁崩潰；但沒有 `[work_dashboard] WARN ...` 時，operator 無法區分「真的沒有 daemon / 沒有 commit」與「probe 自身壞掉」。POST 400 是 client-visible，但治理 audit 需要 stderr 診斷才能避免誤報。
+
+**解決方法**：`_next_fire_dt()`、`_daemon_alive()`、`_proc_count()`、`_git_recent()` 補 warning context（job/cron、label、pattern、cwd），仍保留原本 default 回傳；invalid task POST body 補 stderr warning 後照樣回 400。新增測試覆蓋 probe helper 與 cron parse fail-open warning，並更新既有 monkeypatch 簽名。驗證：`uv run python scripts/audit_silent_fallbacks.py --json scripts/work_dashboard_server.py` 回 `[]`，`uv run pytest tests/test_work_dashboard_server_warnings.py -q` 4 passed，`uv run python -m py_compile scripts/work_dashboard_server.py tests/test_work_dashboard_server_warnings.py` 通過。
+
 ## 2026-06-28 ops_dashboard HTTP / in-flight timestamp fallback 缺診斷
 
 **問題**：Codex hourly tick 在 Codex-eligible pending=0 的 error_log fallback 中跑 `scripts/audit_silent_fallbacks.py --json scripts/ops_dashboard.py`，掃到兩處：`http_ok()` 網路/HTTP probe 失敗時直接 `return False`，以及 `_inflight_age_h()` 解析 compute_queued / claimed / in_progress task timestamp 失敗時直接 `return None`。這會讓 dashboard 把外部 probe failure 或 task metadata 壞值當成普通 false/unknown，看不到根因。

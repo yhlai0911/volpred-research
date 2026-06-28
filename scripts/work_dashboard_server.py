@@ -138,11 +138,13 @@ def _now():
     return datetime.now(TZ)
 
 
-def _next_fire_dt(cron_expr: str):
+def _next_fire_dt(cron_expr: str, warnings: list[str] | None = None, job_id: str | None = None):
     try:
         from croniter import croniter
         return croniter(cron_expr, _now()).get_next(datetime)
-    except Exception:
+    except Exception as exc:
+        if warnings is not None:
+            _warn_dashboard(warnings, f"cron next-fire parse failed job={job_id or '?'} cron={cron_expr!r}", exc)
         return None
 
 
@@ -182,23 +184,27 @@ def _rel_time(iso: str):
         return iso[:16]
 
 
-def _daemon_alive(label: str) -> bool:
+def _daemon_alive(label: str, warnings: list[str] | None = None) -> bool:
     try:
         out = subprocess.run(["launchctl", "list"], capture_output=True, text=True, timeout=5).stdout
         return any(label in line for line in out.splitlines())
-    except Exception:
+    except Exception as exc:
+        if warnings is not None:
+            _warn_dashboard(warnings, f"launchctl daemon probe failed label={label}", exc)
         return False
 
 
-def _proc_count(pattern: str) -> int:
+def _proc_count(pattern: str, warnings: list[str] | None = None) -> int:
     try:
         out = subprocess.run(["pgrep", "-f", pattern], capture_output=True, text=True, timeout=5).stdout
         return len([x for x in out.split() if x.strip()])
-    except Exception:
+    except Exception as exc:
+        if warnings is not None:
+            _warn_dashboard(warnings, f"process-count probe failed pattern={pattern!r}", exc)
         return -1
 
 
-def _git_recent(n: int = 10) -> list[dict]:
+def _git_recent(n: int = 10, warnings: list[str] | None = None) -> list[dict]:
     try:
         out = subprocess.run(["git", "log", f"-{n}", "--format=%h\t%cr\t%s"],
                              cwd=ROOT, capture_output=True, text=True, timeout=10).stdout
@@ -208,7 +214,9 @@ def _git_recent(n: int = 10) -> list[dict]:
             if len(p) == 3:
                 rows.append({"hash": p[0], "when": p[1], "subject": p[2][:88]})
         return rows
-    except Exception:
+    except Exception as exc:
+        if warnings is not None:
+            _warn_dashboard(warnings, f"git recent commits read failed cwd={ROOT}", exc)
         return []
 
 
@@ -261,7 +269,7 @@ def build_work() -> dict:
     schedule = []
     for item in (scheds.get("system_crontab", {}) or {}).get("items", []):
         jid = item.get("id")
-        ntw, nrel, nsort, nday = _fmt_tw(_next_fire_dt(item.get("cron", "")))
+        ntw, nrel, nsort, nday = _fmt_tw(_next_fire_dt(item.get("cron", ""), warnings, str(jid or "?")))
         cat = JOB_CAT.get(jid, "other")
         cname, ccolor = CAT_META.get(cat, CAT_META["other"])
         schedule.append({
@@ -291,10 +299,10 @@ def build_work() -> dict:
     }
 
     daemons = {
-        "hourly_dispatch": _daemon_alive("com.volpred.hourly-dispatch"),
-        "check_alerts": _daemon_alive("com.volpred.check-alerts"),
-        "compute_worker": _daemon_alive("com.volpred.compute-worker"),
-        "codex_loop": _proc_count("codex_loop.sh"),
+        "hourly_dispatch": _daemon_alive("com.volpred.hourly-dispatch", warnings),
+        "check_alerts": _daemon_alive("com.volpred.check-alerts", warnings),
+        "compute_worker": _daemon_alive("com.volpred.compute-worker", warnings),
+        "codex_loop": _proc_count("codex_loop.sh", warnings),
     }
 
     return {
@@ -309,7 +317,7 @@ def build_work() -> dict:
         "slots": {"used": len(ongoing), "cap": 4},
         "counts": dict(Counter((t.get("status") or "?") for t in tasks if isinstance(t, dict))),
         "ongoing": ongoing, "future": future, "schedule": schedule,
-        "content": content, "past_tasks": past_tasks, "past_commits": _git_recent(),
+        "content": content, "past_tasks": past_tasks, "past_commits": _git_recent(warnings=warnings),
     }
 
 
@@ -462,6 +470,7 @@ class Handler(BaseHTTPRequestHandler):
             n = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(n) or "{}")
         except Exception as exc:
+            print(f"[work_dashboard] WARN invalid task POST body: {type(exc).__name__}: {exc}", file=sys.stderr)
             self._send(400, json.dumps({"ok": False, "error": str(exc)}))
             return
         r = adjust_task(payload.get("action", ""), payload.get("id", ""), payload.get("note", ""))
