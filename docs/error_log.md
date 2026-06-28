@@ -2,6 +2,14 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 dispatch_supervisor health process-race fallback 未標明
+
+**問題**：Codex hourly tick 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/dispatch_supervisor/health.py`，掃到 health monitor 四處 handler：`_pid_alive()` 對 `ProcessLookupError` 回 `False`、對 `PermissionError` 回 `True`，以及 `_force_kill_pgid()` 對 kill/probe 期間的 `ProcessLookupError` 直接 `pass`。
+
+**根因**：這些分支本身不是資料或流程錯誤，而是 Unix process liveness probe 的正常 race / 權限語意：`kill(pid, 0)` 遇 `ProcessLookupError` 代表 PID 不存在；`PermissionError` 反而代表 PID 存在但不可 signal；process group 可能在 SIGTERM 後、SIGKILL probe 前自然退出。但原始程式沒有用 audit 可辨識的 `silent-ok` 標註，也沒有 regression tests 鎖住這個語意。
+
+**解決方法**：在四個可接受的 process-race fallback 行補上 inline `silent-ok`，不改 health monitor 行為；新增測試覆蓋 missing PID、permission-denied PID alive、pgid 已消失、pgid 在 TERM 與 probe 間退出。驗證：`uv run python scripts/audit_silent_fallbacks.py --json scripts/dispatch_supervisor/health.py` 回 `[]`，`uv run pytest tests/test_dispatch_supervisor.py -q` 23 passed，`uv run python -m py_compile scripts/dispatch_supervisor/health.py tests/test_dispatch_supervisor.py` 通過。
+
 ## 2026-06-28 build_experiments_index residual fallback path 未完全可觀察
 
 **問題**：Codex hourly tick 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/build_experiments_index.py`，發現 2026-06-22 已修過的 experiments index warning framework 仍有殘留：`first_heading()` 遇 missing README 直接回空字串、`readme_date()` 對壞 Date 欄位只補零不驗證真日期、`git_first_commit_date()` probe 失敗直接回 `None`、`summarize()` 遇 explicit date 壞值直接 `continue`。

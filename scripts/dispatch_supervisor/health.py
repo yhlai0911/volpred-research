@@ -35,10 +35,10 @@ def _pid_alive(pid: int) -> bool:
         os.kill(pid, 0)
         return True
     except ProcessLookupError:
-        return False
+        return False  # silent-ok: kill(pid, 0) reports missing processes this way.
     except PermissionError:
         # Process exists but we lack signal permission — still "alive" for monitoring
-        return True
+        return True  # silent-ok: permission denial confirms the PID exists.
 
 
 def _force_kill_pgid(pgid: int) -> None:
@@ -51,9 +51,9 @@ def _force_kill_pgid(pgid: int) -> None:
             os.killpg(pgid, 0)
             os.killpg(pgid, signal.SIGKILL)
         except ProcessLookupError:
-            pass
+            pass  # silent-ok: process group exited between SIGTERM and probe.
     except ProcessLookupError:
-        pass
+        pass  # silent-ok: process group was already gone before SIGTERM.
     except PermissionError as exc:
         LOG.warning("force_kill pgid=%d denied: %s", pgid, exc)
 

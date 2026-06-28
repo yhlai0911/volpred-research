@@ -304,6 +304,51 @@ def test_health_check_marks_silent_death(tmp_path: Path, monkeypatch) -> None:
     assert completions[-1]["outcome"] == "failure"
 
 
+def test_pid_alive_handles_process_lookup_and_permission(monkeypatch) -> None:
+    def missing_pid(pid: int, sig: int) -> None:
+        raise ProcessLookupError
+
+    monkeypatch.setattr(health.os, "kill", missing_pid)
+    assert health._pid_alive(123) is False
+
+    def permission_denied(pid: int, sig: int) -> None:
+        raise PermissionError("denied")
+
+    monkeypatch.setattr(health.os, "kill", permission_denied)
+    assert health._pid_alive(123) is True
+
+
+def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch) -> None:
+    calls: list[int] = []
+
+    def missing_pgid(pgid: int, sig: int) -> None:
+        calls.append(sig)
+        raise ProcessLookupError
+
+    monkeypatch.setattr(health.os, "killpg", missing_pgid)
+    monkeypatch.setattr(health.time, "sleep", lambda seconds: None)
+
+    health._force_kill_pgid(456)
+
+    assert calls == [health.signal.SIGTERM]
+
+
+def test_force_kill_pgid_tolerates_exit_between_term_and_probe(monkeypatch) -> None:
+    calls: list[int] = []
+
+    def exits_after_term(pgid: int, sig: int) -> None:
+        calls.append(sig)
+        if sig == 0:
+            raise ProcessLookupError
+
+    monkeypatch.setattr(health.os, "killpg", exits_after_term)
+    monkeypatch.setattr(health.time, "sleep", lambda seconds: None)
+
+    health._force_kill_pgid(456)
+
+    assert calls == [health.signal.SIGTERM, 0]
+
+
 def test_supervisor_set_runtime_env_raises_soft_limit(monkeypatch) -> None:
     calls: list[tuple[int, tuple[int, int]]] = []
 
