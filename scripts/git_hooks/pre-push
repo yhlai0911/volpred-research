@@ -1,0 +1,34 @@
+#!/bin/bash
+# Pre-push silent-fallback gate (2026-06-28).
+# The git_push_backup wrapper gates AUTONOMOUS pushes, but MANUAL `git push`
+# bypasses it — that's how dbcddc032 reached origin with new=1 and turned CI red.
+# This git-level pre-push hook covers BOTH manual and scripted pushes: it runs
+# the audit and blocks the push if HEAD carries new silent fallbacks, so red code
+# can never reach origin regardless of who pushes.
+#
+# Install (idempotent): bash scripts/git_hooks/install.sh
+# (copies this to .git/hooks/pre-push + chmod +x)
+#
+# Fail-open on audit error (uv missing / baseline absent): a broken gate must not
+# block backups. Only a definitive new>0 blocks.
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+cd "$ROOT" || exit 0
+UV_BIN="${UV_BIN:-/opt/homebrew/bin/uv}"
+[ -x "$UV_BIN" ] || UV_BIN="$(command -v uv 2>/dev/null)"
+[ -n "$UV_BIN" ] || exit 0  # no uv → can't gate → fail-open
+
+OUT="$("$UV_BIN" run python scripts/audit_silent_fallbacks.py --strict \
+  --baseline storage/qa/silent_fallback_baseline.json 2>&1)"
+RC=$?
+NEW="$(printf '%s\n' "$OUT" | grep -oE 'new=[0-9]+' | head -1 | cut -d= -f2)"
+if [ "$RC" -ne 0 ] && [ -n "$NEW" ] && [ "$NEW" -gt 0 ]; then
+  printf '%s\n' "$OUT" | grep '^NEW '
+  echo ""
+  echo "[pre-push] BLOCKED: ${NEW} new silent fallback(s) — CI Silent Fallback Gate would go red."
+  echo "[pre-push] Fix each (add 'from volpred.ops.diagnostics import warn' + warn(), or '# silent-ok: <reason>')."
+  echo "[pre-push] If the NEW lines are only a line-shift of an existing baselined entry:"
+  echo "[pre-push]   $UV_BIN run python scripts/audit_silent_fallbacks.py --write-baseline storage/qa/silent_fallback_baseline.json"
+  echo "[pre-push] then retry the push."
+  exit 1
+fi
+exit 0
