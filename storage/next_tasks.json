@@ -37755,7 +37755,7 @@
     "title": "K1555: Tariff-uncertainty USD risk-premium wedge：關稅波動是否先進 FX vol 再外溢到 EM/commodity ETF** — 用 2025-26 tariff event calendar / GD",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1283). Original: Tariff-uncertainty USD risk-premium wedge：關稅波動是否先進 FX vol 再外溢到 EM/commodity ETF** — 用 2025-26 tariff event calendar / GDELT tariff headline intensity、UUP/DXY proxy、FXY/FXE/CEW/EMLC、EEM/DBC/GLD，檢定 tariff uncertainty shock 對 t+1..t+22 FX realized vol、USD drawdown、EM FX left-tail 的 lead-lag；與 line 1081 tariff sector RV 正交，這裡是 AEA macrotrade 的 exchange-rate risk-premium wedge（來源：AEA P&P 2026 \"Global Trade, Tariff Uncertainty, and the US Dollar\"）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1555.py with signal.shift(1) + seed=42, (c) K1555_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -37764,7 +37764,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-28T00:00:00Z"
+    "created_at": "2026-06-28T00:00:00Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T05:31:10.867711+00:00",
+    "claim_session_id": "1730da5fed68",
+    "started_at": "2026-06-28T05:31:11.066423+00:00",
+    "completed_at": "2026-06-28T05:36:19.882408+00:00",
+    "result": "K1555 tariff-uncertainty USD risk-premium wedge proxy complete: verdict CONDITIONAL_PASS with strong caveats. 9 applied tariff events show positive FX 1d RV and USD drawdown direction; strongest leg is USD drawdown 1d z diff +1.75 (t=2.84), but no target clears t>=3 and EM left-tail spillover is not supported. Added README, script, results JSON, chart, data snapshots, and Codex review; targeted lookahead audit returned no finding."
   },
   {
     "id": "K1556",

@@ -1,0 +1,450 @@
+{
+  "experiment_id": "K1555",
+  "created_at": "2026-06-28T05:36:03.070946+00:00",
+  "seed": 42,
+  "data": {
+    "price_source": "yfinance adjusted OHLCV",
+    "tickers": [
+      "UUP",
+      "DX-Y.NYB",
+      "FXY",
+      "FXE",
+      "CEW",
+      "EMLC",
+      "EEM",
+      "DBC",
+      "GLD"
+    ],
+    "requested_price_start": "2024-01-01",
+    "requested_price_end": "2026-06-28",
+    "price_rows": 5609,
+    "daily_rows": 625,
+    "event_calendar_rows": 9,
+    "blocked_sources": [
+      "GDELT DOC timeline headline-intensity was not used because project experience and current probes hit HTTP 429 rate limits.",
+      "No proprietary tariff-volatility state variable, dealer flow, forward points, or investor-level FX risk premium data are observed."
+    ]
+  },
+  "methods": {
+    "event_alignment": "calendar event mapped to next trading day; raw_event signal then shifted one trading day before outcomes",
+    "lookahead_guard": "event_abs_signal = raw_event_abs.shift(1); abnormal baselines use trailing realized windows only",
+    "targets": [
+      "fx_rv_1d_z",
+      "fx_rv_5d_z",
+      "fx_rv_22d_z",
+      "usd_drawdown_1d_z",
+      "usd_drawdown_5d_z",
+      "usd_drawdown_22d_z",
+      "em_left_tail_5d_z",
+      "em_left_tail_22d_z",
+      "commodity_rv_5d_z",
+      "commodity_rv_22d_z"
+    ],
+    "tests": "Welch event-vs-control diagnostics and seed-42 event-date bootstrap"
+  },
+  "events": [
+    {
+      "date": "2025-02-13",
+      "label": "Reciprocal tariff memorandum directs review",
+      "signed_intensity": 1.0,
+      "abs_intensity": 1.0,
+      "source": "White House reciprocal tariff memorandum cited by Apr 2 order",
+      "mapped_trading_date": "2025-02-13"
+    },
+    {
+      "date": "2025-04-02",
+      "label": "Liberation Day reciprocal tariff executive order",
+      "signed_intensity": 3.0,
+      "abs_intensity": 3.0,
+      "source": "White House Executive Order 14257",
+      "mapped_trading_date": "2025-04-02"
+    },
+    {
+      "date": "2025-04-09",
+      "label": "Ninety-day pause excluding China; China tariff raised",
+      "signed_intensity": 2.0,
+      "abs_intensity": 2.0,
+      "source": "CFR trade calendar / USTR presidential tariff actions",
+      "mapped_trading_date": "2025-04-09"
+    },
+    {
+      "date": "2025-05-12",
+      "label": "US-China 90-day tariff reduction",
+      "signed_intensity": -2.0,
+      "abs_intensity": 2.0,
+      "source": "USTR Executive Order 14298 / public trade-calendar sources",
+      "mapped_trading_date": "2025-05-12"
+    },
+    {
+      "date": "2025-07-07",
+      "label": "Extension of reciprocal tariff-rate modification",
+      "signed_intensity": 1.0,
+      "abs_intensity": 1.0,
+      "source": "USTR presidential tariff actions",
+      "mapped_trading_date": "2025-07-07"
+    },
+    {
+      "date": "2025-07-31",
+      "label": "Further modification of reciprocal tariff rates",
+      "signed_intensity": 2.0,
+      "abs_intensity": 2.0,
+      "source": "White House / USTR presidential tariff actions",
+      "mapped_trading_date": "2025-07-31"
+    },
+    {
+      "date": "2025-08-11",
+      "label": "Further China-rate modification during ongoing discussions",
+      "signed_intensity": -1.0,
+      "abs_intensity": 1.0,
+      "source": "White House / USTR presidential tariff actions",
+      "mapped_trading_date": "2025-08-11"
+    },
+    {
+      "date": "2025-09-05",
+      "label": "Scope/procedure changes for trade and security agreements",
+      "signed_intensity": -1.0,
+      "abs_intensity": 1.0,
+      "source": "USTR presidential tariff actions",
+      "mapped_trading_date": "2025-09-05"
+    },
+    {
+      "date": "2026-02-23",
+      "label": "Temporary global tariff threat after legal ruling",
+      "signed_intensity": 3.0,
+      "abs_intensity": 3.0,
+      "source": "The Guardian live market report, 2026-02-23",
+      "mapped_trading_date": "2026-02-23"
+    }
+  ],
+  "verdict": {
+    "label": "CONDITIONAL_PASS",
+    "conclusion": "Direction is broadly coherent, but evidence is event-count limited and does not clear strict statistical gates.",
+    "event_rows": 9,
+    "coherent_direction_flags": {
+      "fx_1d_positive": true,
+      "usd_drawdown_5d_positive": true,
+      "em_left_tail_5d_positive": false,
+      "commodity_rv_5d_positive": true
+    },
+    "t_ge_3_targets": [],
+    "positive_bootstrap_ci_targets": [
+      "usd_drawdown_1d_z"
+    ]
+  },
+  "target_tests": {
+    "fx_rv_1d_z": {
+      "event_n": 9,
+      "control_n": 402,
+      "event_mean": 1.1135182285870282,
+      "control_mean": -0.02426896055358748,
+      "diff": 1.1377871891406157,
+      "t_stat": 1.6720383198770494,
+      "p_value": 0.1326685845988686,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": 1.1135182285870282,
+        "ci95": [
+          -0.03618365412404321,
+          2.491650625806806
+        ]
+      }
+    },
+    "fx_rv_5d_z": {
+      "event_n": 9,
+      "control_n": 394,
+      "event_mean": 0.7013684864942008,
+      "control_mean": 0.0026822269672175515,
+      "diff": 0.6986862595269833,
+      "t_stat": 0.9835210054017584,
+      "p_value": 0.35383994294442134,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": 0.7013684864942008,
+        "ci95": [
+          -0.500801352204478,
+          2.1816357014772283
+        ]
+      }
+    },
+    "fx_rv_22d_z": {
+      "event_n": 9,
+      "control_n": 360,
+      "event_mean": 0.7846627210717472,
+      "control_mean": 0.24005780205526786,
+      "diff": 0.5446049190164793,
+      "t_stat": 0.7209745030986858,
+      "p_value": 0.49104786668197625,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": 0.7846627210717472,
+        "ci95": [
+          -0.487849280191369,
+          2.4152629637829346
+        ]
+      }
+    },
+    "usd_drawdown_1d_z": {
+      "event_n": 9,
+      "control_n": 402,
+      "event_mean": 1.7369284254428836,
+      "control_mean": -0.010721767040587044,
+      "diff": 1.7476501924834706,
+      "t_stat": 2.841882339376833,
+      "p_value": 0.021458189418219146,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": 1.7369284254428836,
+        "ci95": [
+          0.7144250829239036,
+          3.0404019075284654
+        ]
+      }
+    },
+    "usd_drawdown_5d_z": {
+      "event_n": 9,
+      "control_n": 394,
+      "event_mean": 0.8330469417888449,
+      "control_mean": 0.026959183932939154,
+      "diff": 0.8060877578559057,
+      "t_stat": 1.5657834779010298,
+      "p_value": 0.1552528212979294,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": 0.8330469417888449,
+        "ci95": [
+          -0.030023794551751647,
+          1.8992789574787814
+        ]
+      }
+    },
+    "usd_drawdown_22d_z": {
+      "event_n": 9,
+      "control_n": 360,
+      "event_mean": 0.48333505544273286,
+      "control_mean": 0.022778898817809454,
+      "diff": 0.4605561566249234,
+      "t_stat": 1.068240702415416,
+      "p_value": 0.31504122938106865,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": 0.48333505544273286,
+        "ci95": [
+          -0.3313051973674906,
+          1.2492537421555578
+        ]
+      }
+    },
+    "em_left_tail_5d_z": {
+      "event_n": 9,
+      "control_n": 394,
+      "event_mean": -0.1663608856537709,
+      "control_mean": -0.06840752473412044,
+      "diff": -0.09795336091965047,
+      "t_stat": -0.2863138631621078,
+      "p_value": 0.781493445514632,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": -0.1663608856537709,
+        "ci95": [
+          -0.7466831947361973,
+          0.5262179823886958
+        ]
+      }
+    },
+    "em_left_tail_22d_z": {
+      "event_n": 9,
+      "control_n": 360,
+      "event_mean": -0.41191023256014836,
+      "control_mean": 0.040965182262449266,
+      "diff": -0.45287541482259763,
+      "t_stat": -0.8654414134792342,
+      "p_value": 0.4112542445114159,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": -0.41191023256014836,
+        "ci95": [
+          -1.257836179508061,
+          0.6794859750693786
+        ]
+      }
+    },
+    "commodity_rv_5d_z": {
+      "event_n": 9,
+      "control_n": 394,
+      "event_mean": 0.9587697304515527,
+      "control_mean": 0.5816023851662842,
+      "diff": 0.3771673452852685,
+      "t_stat": 0.3565198070344874,
+      "p_value": 0.7305922234857685,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": 0.9587697304515527,
+        "ci95": [
+          -0.5851713227314574,
+          3.179324329175472
+        ]
+      }
+    },
+    "commodity_rv_22d_z": {
+      "event_n": 9,
+      "control_n": 360,
+      "event_mean": 1.0396218638928627,
+      "control_mean": 1.05174384939078,
+      "diff": -0.01212198549791732,
+      "t_stat": -0.0120967887254848,
+      "p_value": 0.9906394517264856,
+      "event_bootstrap": {
+        "n": 9,
+        "mean": 1.0396218638928627,
+        "ci95": [
+          -0.6102703273285884,
+          3.2286859856583714
+        ]
+      }
+    }
+  },
+  "event_rows": [
+    {
+      "date": "2025-02-14",
+      "event_abs_signal": 1.0,
+      "event_signed_signal": 1.0,
+      "fx_rv_1d_z": 0.37475514891836664,
+      "fx_rv_5d_z": 0.2583408662516478,
+      "fx_rv_22d_z": 0.4471259414110374,
+      "usd_drawdown_1d_z": 0.8063658278245894,
+      "usd_drawdown_5d_z": 0.7607758600416672,
+      "usd_drawdown_22d_z": 2.45797791795491,
+      "em_left_tail_5d_z": -0.7223026122653793,
+      "em_left_tail_22d_z": -0.7311438070601626,
+      "commodity_rv_5d_z": 0.529164364398921,
+      "commodity_rv_22d_z": -0.5662281717894326
+    },
+    {
+      "date": "2025-04-03",
+      "event_abs_signal": 3.0,
+      "event_signed_signal": 3.0,
+      "fx_rv_1d_z": 4.247175727014046,
+      "fx_rv_5d_z": 5.232898414503957,
+      "fx_rv_22d_z": 5.516351474889833,
+      "usd_drawdown_1d_z": 4.354664450893624,
+      "usd_drawdown_5d_z": 0.7412090807757263,
+      "usd_drawdown_22d_z": 1.9613851295960778,
+      "em_left_tail_5d_z": 1.9716678051046783,
+      "em_left_tail_22d_z": -1.382504648083077,
+      "commodity_rv_5d_z": 8.68800720744372,
+      "commodity_rv_22d_z": 7.483893198311899
+    },
+    {
+      "date": "2025-04-10",
+      "event_abs_signal": 2.0,
+      "event_signed_signal": 2.0,
+      "fx_rv_1d_z": 3.4974566952977946,
+      "fx_rv_5d_z": 2.7149269625568735,
+      "fx_rv_22d_z": 3.2896574101685996,
+      "usd_drawdown_1d_z": 4.889610323709877,
+      "usd_drawdown_5d_z": 4.139019659688712,
+      "usd_drawdown_22d_z": 0.6271826348644658,
+      "em_left_tail_5d_z": -0.9898034409704426,
+      "em_left_tail_22d_z": -2.270910829702396,
+      "commodity_rv_5d_z": 2.629298108281368,
+      "commodity_rv_22d_z": 4.282712607765828
+    },
+    {
+      "date": "2025-05-13",
+      "event_abs_signal": 2.0,
+      "event_signed_signal": -2.0,
+      "fx_rv_1d_z": 0.6407771001949103,
+      "fx_rv_5d_z": 0.248829996513541,
+      "fx_rv_22d_z": -0.4251184879386717,
+      "usd_drawdown_1d_z": 1.8468112881048808,
+      "usd_drawdown_5d_z": 1.3446584242690578,
+      "usd_drawdown_22d_z": 1.2138163955981258,
+      "em_left_tail_5d_z": -0.5763698026678308,
+      "em_left_tail_22d_z": -0.9853427369521052,
+      "commodity_rv_5d_z": 0.5492362797153427,
+      "commodity_rv_22d_z": 0.26784479602547917
+    },
+    {
+      "date": "2025-07-08",
+      "event_abs_signal": 1.0,
+      "event_signed_signal": 1.0,
+      "fx_rv_1d_z": -0.8834569566585487,
+      "fx_rv_5d_z": -1.4844823216541725,
+      "fx_rv_22d_z": -0.1667447437717623,
+      "usd_drawdown_1d_z": -0.17211189972761448,
+      "usd_drawdown_5d_z": -0.8669752066939193,
+      "usd_drawdown_22d_z": -0.6077061000469437,
+      "em_left_tail_5d_z": 0.21747972770190538,
+      "em_left_tail_22d_z": 0.07113206006761644,
+      "commodity_rv_5d_z": -0.8542868761347189,
+      "commodity_rv_22d_z": -0.8742360029704428
+    },
+    {
+      "date": "2025-08-01",
+      "event_abs_signal": 2.0,
+      "event_signed_signal": 2.0,
+      "fx_rv_1d_z": 3.4395438843352424,
+      "fx_rv_5d_z": 1.0330171898979414,
+      "fx_rv_22d_z": -0.4015325601376254,
+      "usd_drawdown_1d_z": 2.385317732639297,
+      "usd_drawdown_5d_z": 1.7892375884202514,
+      "usd_drawdown_22d_z": 0.5027574880952806,
+      "em_left_tail_5d_z": -0.9426846722321941,
+      "em_left_tail_22d_z": -0.3771935479416647,
+      "commodity_rv_5d_z": -0.15687053423624964,
+      "commodity_rv_22d_z": -0.9618324029408161
+    },
+    {
+      "date": "2025-08-12",
+      "event_abs_signal": 1.0,
+      "event_signed_signal": -1.0,
+      "fx_rv_1d_z": -0.015720340067061286,
+      "fx_rv_5d_z": -0.6304386572908671,
+      "fx_rv_22d_z": -1.2179550777094876,
+      "usd_drawdown_1d_z": 1.0271549537693048,
+      "usd_drawdown_5d_z": 0.46078022423580517,
+      "usd_drawdown_22d_z": 0.29300396733746575,
+      "em_left_tail_5d_z": -0.4239128140795508,
+      "em_left_tail_22d_z": -0.7924510513921968,
+      "commodity_rv_5d_z": -1.9085496953075316,
+      "commodity_rv_22d_z": -1.1033635040726477
+    },
+    {
+      "date": "2025-09-08",
+      "event_abs_signal": 1.0,
+      "event_signed_signal": -1.0,
+      "fx_rv_1d_z": -0.8344299325680865,
+      "fx_rv_5d_z": -1.3794380980306145,
+      "fx_rv_22d_z": -1.1937877631298746,
+      "usd_drawdown_1d_z": 0.6784486420525438,
+      "usd_drawdown_5d_z": 0.07270554134178406,
+      "usd_drawdown_22d_z": -0.5623994335118387,
+      "em_left_tail_5d_z": -0.9066521060508295,
+      "em_left_tail_22d_z": -0.5916941022243015,
+      "commodity_rv_5d_z": -1.0429357671503505,
+      "commodity_rv_22d_z": -0.8877129593904269
+    },
+    {
+      "date": "2026-02-24",
+      "event_abs_signal": 3.0,
+      "event_signed_signal": 3.0,
+      "fx_rv_1d_z": -0.4444372691834101,
+      "fx_rv_5d_z": 0.3186620256994998,
+      "fx_rv_22d_z": 1.2139682958636766,
+      "usd_drawdown_1d_z": -0.18390549028055164,
+      "usd_drawdown_5d_z": -0.943988695979482,
+      "usd_drawdown_22d_z": -1.5360025009029472,
+      "em_left_tail_5d_z": 0.8753299445757052,
+      "em_left_tail_22d_z": 3.352916570246952,
+      "commodity_rv_5d_z": 0.1958644870534751,
+      "commodity_rv_22d_z": 1.7155192140963247
+    }
+  ],
+  "limitations": [
+    "Event calendar is hand-curated from public tariff-policy pages, not a continuous tariff-uncertainty index.",
+    "The event count is small and 5/22-day targets overlap.",
+    "ETF proxies mix local equity, commodity, duration, and USD-liquidity effects.",
+    "CEW/EMLC/EEM are imperfect EM FX/risk-premium proxies.",
+    "A null public ETF proxy result would not refute the AEA/NBER model mechanism."
+  ]
+}
