@@ -36509,5 +36509,29 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-06-29T05:55:20.823684"
+  },
+  {
+    "item_id": "k1560_qv_estimator_disagreement_null",
+    "category": "volatility_forecasting",
+    "experiment_id": "K1560",
+    "k_id": "K1560",
+    "experiment_path": "experiments/k1560/",
+    "codex_review": "experiments/k1560/codex_review.md",
+    "verdict": "NULL_SHORT_WINDOW",
+    "content": "K1560 tests whether disagreement among quadratic-variation and OHLC volatility estimators at origin date t predicts next-day forecast uncertainty on SPY/QQQ/IWM/TLT/GLD/HYG. Using yfinance daily OHLCV from 2018-01-01 to the 2026-06-29 request date plus the available yfinance 5-minute rolling window from 2026-04-01 to 2026-06-26, the experiment computes 5m RV, 10m subsampled RV, a Bartlett realized-kernel-lite proxy, close-to-close RV, and Parkinson/Garman-Klass/Rogers-Satchell/Yang-Zhang estimators. All estimator-dispersion signals and direct OHLC/RV forecasts are shifted from origin t to target t+1, and GARCH forecasts are manually target-indexed. The final panel has 354 asset-day rows (59 per ETF). The main result is null/underpowered: GARCH QLIKE has a positive signal coefficient (0.236, HAC t=1.72, raw p=0.0847), and GARCH vol-target absolute log sizing error is also positive (0.141, t=1.79, raw p=0.0731), but both Holm-adjust to p=0.512 and no signal test is Holm-significant. GARCH QLIKE rank signs are positive in 5/6 assets, but HAR QLIKE and vol-target excess-risk signs are much weaker. Conclusion: this short-window pilot does not support using estimator-disagreement risk bands as a robust next-day QLIKE-error predictor or mechanical vol-target deleveraging rule; it should be retested only with a cached long intraday history.",
+    "evidence": [
+      "experiments/k1560/k1560.py",
+      "experiments/k1560/k1560_results.json",
+      "experiments/k1560/README.md",
+      "experiments/k1560/codex_review.md",
+      "verdict: NULL_SHORT_WINDOW",
+      "data: yfinance daily OHLCV 2018-01-01 to 2026-06-29 request; yfinance 5m 2026-04-01 to 2026-06-26; 354 panel rows",
+      "lookahead: origin t estimator-dispersion and direct forecasts shifted to target t+1; audit all_passed=true",
+      "primary null tests: GARCH QLIKE coef=0.236 t=1.72 raw p=0.0847 Holm p=0.512; GARCH VT abs log error coef=0.141 t=1.79 raw p=0.0731 Holm p=0.512",
+      "MCS/DM diagnostics: 216 DM pairs, 107 Harvey |t|>3, 42 Holm-significant; MCS size 3 for GLD and 5 for other ETFs",
+      "reviewer_source: experiments/k1560/codex_review.md PASS_WITH_NULL_RESULT_CAVEAT"
+    ],
+    "confidence": 0.55,
+    "created_at": "2026-06-29T07:09:35"
   }
 ]
