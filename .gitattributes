@@ -1,0 +1,36 @@
+# 2026-06-28: conflict-proof the high-churn, locally-canonical state files.
+#
+# Root cause (docs/error_log.md 2026-06-28 AUTO_MERGE incident): two dispatchers
+# write the same branch concurrently — the Claude hourly LaunchAgent AND the
+# always-on codex_loop.sh — so a 3-way merge (or codex's internal git) can
+# conflict on these constantly-rewritten JSON/JSONL files and inject
+# `<<<<<<<` markers into feed.json / next_tasks.json / work_log.json, which are
+# then read by the live site + dispatcher = corruption.
+#
+# These files are LOCAL-canonical (this machine's loop is the only writer;
+# origin/main is a backup mirror). On any merge conflict we always want OUR
+# (local) version — never a marker-laden 3-way text merge. `merge=ours` makes
+# git keep the local blob verbatim. Requires the local driver (idempotent):
+#     git config merge.ours.driver true
+# (set by scripts/setup_git_conflict_guard.sh; the AUTO_MERGE watchdog also
+#  re-asserts it so a fresh clone / reset can't silently lose protection.)
+
+storage/reports/feed.json            merge=ours
+storage/reports/index.json           merge=ours
+storage/reports/INDEX.md             merge=ours
+storage/reports/feed/**              merge=ours
+storage/reports/token_usage/**       merge=ours
+storage/next_tasks.json              merge=ours
+storage/work_log.json                merge=ours
+storage/session_state.json           merge=ours
+storage/strategy_metrics.json        merge=ours
+storage/strategy_signals.json        merge=ours
+storage/paper_trading.json           merge=ours
+storage/notifications/**             merge=ours
+storage/ops/writer_log.jsonl         merge=ours
+storage/ops/**.json                  merge=ours
+storage/ops/event_ledger/**          merge=ours
+storage/memory/**.json               merge=ours
+storage/macro/**                     merge=ours
+storage/indicator_arena/**           merge=ours
+.claude/settings.local.json          merge=ours

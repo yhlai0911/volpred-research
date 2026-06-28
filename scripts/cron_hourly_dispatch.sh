@@ -55,6 +55,15 @@ cd "$REPO_ROOT" || exit 1
 # Use -Sn (soft only) — hard is unlimited so the soft raise always succeeds.
 ulimit -Sn 65536 2>/dev/null || true
 
+# ── git conflict guard (2026-06-28) ──
+# Two dispatchers write this branch concurrently (Claude hourly + always-on
+# codex_loop), so a 3-way merge can orphan .git/AUTO_MERGE and inject conflict
+# markers into feed.json / next_tasks.json / work_log.json. Run the watchdog
+# FIRST so every hourly slot starts on a clean, valid tree (it auto-restores the
+# canonical HEAD blob + alerts). Fail-open: never blocks dispatch.
+"$UV_BIN" run python "$REPO_ROOT/scripts/git_conflict_guard.py" --quiet 2>&1 || \
+  echo "[git-conflict-guard] WARN guard exited non-zero (continuing dispatch)"
+
 # Enable job control so background subshells get their own process group;
 # `kill -- -PGID` then propagates to all descendants (claude + its forks).
 set -m
