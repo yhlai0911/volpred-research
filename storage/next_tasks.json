@@ -38260,7 +38260,7 @@
     "title": "研究 backlog fallback: Candlestick spot-vol estimator 作日頻 OHLC baseline：K線資訊是否足以打敗 close-to-close / range RV",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Candlestick spot-vol estimator 作日頻 OHLC baseline：K線資訊是否足以打敗 close-to-close / range RV — 用 yfinance 日 OHLCV 的 SPY/QQQ/IWM/TLT/GLD/HYG 與本機 5-min 片段作 validation，實作 candlestick-based spot volatility estimator、Parkinson/Garman-Klass/Yang-Zhang、close-to-close 三組，先比較 measurement error，再把 lagged estimator 加 | 來源 section: 期刊主題挖掘 batch 2026-06-27（journal_discovery_20260626_0；websearch jfec/rof/rfs/aea/restud 2025-26 趨勢層級；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -38274,7 +38274,9 @@
     "claimed_by": "hourly-03",
     "claimed_at": "2026-06-28T19:10:08.486627+00:00",
     "claim_session_id": "13d2c93c3ccf",
-    "started_at": "2026-06-28T19:10:19.132209+00:00"
+    "started_at": "2026-06-28T19:10:19.132209+00:00",
+    "completed_at": "2026-06-28T20:10:35.833942+00:00",
+    "result": "K1558 script (795 lines) committed + merged; orphan rescue from hourly-03 (agent died before run). Enqueued to compute: compute-k1558-candlestick-ohlc-spot-vol-direct-forecast-6-etfs-4-est-1782677424. Interpretation followup will spawn next fire via Phase A (writes README + knowledge.json with Codex review)."
   },
   {
     "id": "K1314_v2_multiseed_placebo_bonferroni",
@@ -38395,5 +38397,56 @@
     "claim_session_id": "e907fcaf5a13",
     "completed_at": "2026-06-28T18:24:26.395899+00:00",
     "result": "same root cause as email-12093 (cluster cap drift); covered by commit 89a5c3f3a + close email notification 1c0508c5 (info, soft cap shipped)"
+  },
+  {
+    "id": "paper_review_mile_164f88ce",
+    "title": "Paper review (Codex 24h-rule): K1529: FOMC 前後的信用債 ETF stress 沒有成為 SPY 波動率前哨",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_164f88ce needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_164f88ce",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-28T20:10:54+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-28T20:11:15.098747+00:00",
+    "claim_session_id": "5af377779b10",
+    "started_at": "2026-06-28T20:11:15.299380+00:00",
+    "completed_at": "2026-06-28T20:12:59.766767+00:00",
+    "result": "PASS — article numbers fully match k1529_credit_spread_fomc_vol_results.json (n=97, t=0.3361, p=0.737525, etc.). Verdict NULL_ETF_PROXY honestly reported. DM t=-1.294 correctly framed as far from Harvey threshold. ETF-proxy boundary disclosed. Review saved to storage/ops/article_reviews/mile_164f88ce_codex_review.md. Prior experiment-level Codex review (2026-06-17) already PASS on hygiene + lookahead. No correction needed."
+  },
+  {
+    "id": "paper_review_mile_c1f998c8",
+    "title": "Paper review (Codex 24h-rule): K1339: 商品 ETF 動量體制切換後，銅 30 日波動率平均跳升 18%",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c1f998c8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c1f998c8",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-28T20:10:54+00:00"
+  },
+  {
+    "id": "paper_review_mile_b87cc779",
+    "title": "Paper review (Codex 24h-rule): K1422：HAR 分位數迴歸在三種公平 Baseline 比較下的商品 ETF 尾部風險預測",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b87cc779 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_b87cc779",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-28T20:10:54+00:00"
   }
 ]

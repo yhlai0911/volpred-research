@@ -1,0 +1,23 @@
+{
+  "id": "compute-k1558-candlestick-ohlc-spot-vol-direct-forecast-6-etfs-4-est-1782677424",
+  "title": "K1558 candlestick OHLC spot-vol direct forecast (6 ETFs × 4 estimators + GARCH + ensemble)",
+  "script_path": "experiments/k1558/k1558.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-06-28T20:10:24Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1558-candlestick-ohlc-spot-vol-direct-forecast-6-etfs-4-est-1782677424.stdout",
+  "stderr_file": "/Users/yhlai0911/Desktop/volpred-research/storage/logs/compute/compute-k1558-candlestick-ohlc-spot-vol-direct-forecast-6-etfs-4-est-1782677424.stderr",
+  "result_artifact": "experiments/k1558/k1558_results.json",
+  "claude_followup": {
+    "brief": "K1558 跑完讀 experiments/k1558/k1558_results.json: (1) summary.per_asset_best_count 看哪個 model 最常贏 (2) summary.pooled_best_by_mean_rank (3) summary.n_pairs_harvey_significant_t_gt_3 / n_pairs_holm_significant_5pct (4) verdict + verdict_reason (5) per_asset_metrics QLIKE/MSE。寫 README.md + knowledge.json entry (verdict + provenance experiment_id=k1558 + reviewer=Codex)。前置 Codex audit code (look-ahead .shift(1) / pooled Fisher / Patton QLIKE 方向 / GARCH target alignment per K445)。Bar = CONDITIONAL_PASS 以上才入 knowledge.json。task=research_candlestick_spot_vol_estimator_ohlc_baseline_k_c",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 3600
+}
