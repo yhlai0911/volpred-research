@@ -1,0 +1,297 @@
+{
+  "generated_at": "2026-06-28T19:14:31.302754",
+  "sample_period": "2024-01-01 to 2026-06-27",
+  "data_source": "yfinance",
+  "key_numbers": {
+    "NVDA_last": 192.53,
+    "NVDA_52w_high": 235.47,
+    "NVDA_dd_from_high_pct": -18.2,
+    "SMH_last": 611.61,
+    "SMH_52w_high": 668.91,
+    "SMH_dd_from_high_pct": -8.6,
+    "VIX_last": 18.4,
+    "NVDA_RV30_current_pct": 43.3,
+    "NVDA_RV30_12m_avg_pct": 34.1
+  },
+  "median_event_stats": {
+    "n_episodes": 24,
+    "median_pre_rv30_pct": 39.0,
+    "median_post_rv30_pct": 73.2,
+    "median_rv_increase_ppt": 14.1
+  },
+  "nvda_options": [
+    {
+      "ticker": "NVDA",
+      "expiry": "2026-06-29",
+      "spot": 192.53,
+      "atm_call_iv_pct": 30.3,
+      "atm_put_iv_pct": 43.7,
+      "skew_25d_pct": 8.78,
+      "skew_note": "OTM 0.90-0.97/1.03-1.10 proxy",
+      "put_oi": 75617,
+      "call_oi": 62670,
+      "put_call_oi_ratio": 1.21
+    },
+    {
+      "ticker": "NVDA",
+      "expiry": "2026-07-01",
+      "spot": 192.53,
+      "atm_call_iv_pct": 38.4,
+      "atm_put_iv_pct": 48.7,
+      "skew_25d_pct": 7.11,
+      "skew_note": "OTM 0.90-0.97/1.03-1.10 proxy",
+      "put_oi": 13336,
+      "call_oi": 34390,
+      "put_call_oi_ratio": 0.39
+    },
+    {
+      "ticker": "NVDA",
+      "expiry": "2026-07-02",
+      "spot": 192.53,
+      "atm_call_iv_pct": 38.8,
+      "atm_put_iv_pct": 45.2,
+      "skew_25d_pct": 5.85,
+      "skew_note": "OTM 0.90-0.97/1.03-1.10 proxy",
+      "put_oi": 222901,
+      "call_oi": 342135,
+      "put_call_oi_ratio": 0.65
+    }
+  ],
+  "smh_options": [
+    {
+      "ticker": "SMH",
+      "expiry": "2026-07-02",
+      "spot": 611.61,
+      "atm_call_iv_pct": 60.7,
+      "atm_put_iv_pct": 66.8,
+      "skew_25d_pct": 17.45,
+      "skew_note": "OTM 0.90-0.97/1.03-1.10 proxy",
+      "put_oi": 190880,
+      "call_oi": 21590,
+      "put_call_oi_ratio": 8.84
+    },
+    {
+      "ticker": "SMH",
+      "expiry": "2026-07-10",
+      "spot": 611.61,
+      "atm_call_iv_pct": 57.4,
+      "atm_put_iv_pct": 59.6,
+      "skew_25d_pct": 9.54,
+      "skew_note": "OTM 0.90-0.97/1.03-1.10 proxy",
+      "put_oi": 42836,
+      "call_oi": 9675,
+      "put_call_oi_ratio": 4.43
+    },
+    {
+      "ticker": "SMH",
+      "expiry": "2026-07-17",
+      "spot": 611.61,
+      "atm_call_iv_pct": 57.5,
+      "atm_put_iv_pct": 59.7,
+      "skew_25d_pct": 6.8,
+      "skew_note": "OTM 0.90-0.97/1.03-1.10 proxy",
+      "put_oi": 572417,
+      "call_oi": 161959,
+      "put_call_oi_ratio": 3.53
+    }
+  ],
+  "event_episodes": [
+    {
+      "episode_start": "2024-04-09",
+      "trough_date": "2024-08-07",
+      "max_drawdown_pct": -27.0,
+      "pre_rv30_ann_pct": 57.6,
+      "post_rv30_ann_pct": 73.2,
+      "rv_increase_ppt": 15.5
+    },
+    {
+      "episode_start": "2024-04-17",
+      "trough_date": "2024-08-07",
+      "max_drawdown_pct": -27.0,
+      "pre_rv30_ann_pct": 55.4,
+      "post_rv30_ann_pct": 73.2,
+      "rv_increase_ppt": 17.7
+    },
+    {
+      "episode_start": "2024-05-01",
+      "trough_date": "2024-08-07",
+      "max_drawdown_pct": -27.0,
+      "pre_rv30_ann_pct": 52.0,
+      "post_rv30_ann_pct": 73.2,
+      "rv_increase_ppt": 21.2
+    },
+    {
+      "episode_start": "2024-06-24",
+      "trough_date": "2024-08-07",
+      "max_drawdown_pct": -27.0,
+      "pre_rv30_ann_pct": 51.9,
+      "post_rv30_ann_pct": 73.2,
+      "rv_increase_ppt": 21.3
+    },
+    {
+      "episode_start": "2024-07-17",
+      "trough_date": "2024-08-07",
+      "max_drawdown_pct": -27.0,
+      "pre_rv30_ann_pct": 50.2,
+      "post_rv30_ann_pct": 73.2,
+      "rv_increase_ppt": 22.9
+    },
+    {
+      "episode_start": "2024-07-24",
+      "trough_date": "2024-08-07",
+      "max_drawdown_pct": -27.0,
+      "pre_rv30_ann_pct": 50.9,
+      "post_rv30_ann_pct": 73.2,
+      "rv_increase_ppt": 22.2
+    },
+    {
+      "episode_start": "2024-08-29",
+      "trough_date": "2024-09-06",
+      "max_drawdown_pct": -24.2,
+      "pre_rv30_ann_pct": 68.0,
+      "post_rv30_ann_pct": 58.5,
+      "rv_increase_ppt": -9.6
+    },
+    {
+      "episode_start": "2024-09-27",
+      "trough_date": "2025-02-03",
+      "max_drawdown_pct": -21.9,
+      "pre_rv30_ann_pct": 70.3,
+      "post_rv30_ann_pct": 74.3,
+      "rv_increase_ppt": 4.0
+    },
+    {
+      "episode_start": "2024-12-16",
+      "trough_date": "2025-04-04",
+      "max_drawdown_pct": -36.9,
+      "pre_rv30_ann_pct": 37.9,
+      "post_rv30_ann_pct": 76.9,
+      "rv_increase_ppt": 39.0
+    },
+    {
+      "episode_start": "2025-01-13",
+      "trough_date": "2025-04-04",
+      "max_drawdown_pct": -36.9,
+      "pre_rv30_ann_pct": 37.5,
+      "post_rv30_ann_pct": 76.9,
+      "rv_increase_ppt": 39.3
+    },
+    {
+      "episode_start": "2025-01-16",
+      "trough_date": "2025-04-04",
+      "max_drawdown_pct": -36.9,
+      "pre_rv30_ann_pct": 37.8,
+      "post_rv30_ann_pct": 76.9,
+      "rv_increase_ppt": 39.0
+    },
+    {
+      "episode_start": "2025-01-27",
+      "trough_date": "2025-04-04",
+      "max_drawdown_pct": -36.9,
+      "pre_rv30_ann_pct": 39.8,
+      "post_rv30_ann_pct": 76.9,
+      "rv_increase_ppt": 37.1
+    },
+    {
+      "episode_start": "2025-02-21",
+      "trough_date": "2025-04-04",
+      "max_drawdown_pct": -36.9,
+      "pre_rv30_ann_pct": 62.7,
+      "post_rv30_ann_pct": 76.9,
+      "rv_increase_ppt": 14.1
+    },
+    {
+      "episode_start": "2025-05-20",
+      "trough_date": "2025-05-23",
+      "max_drawdown_pct": -12.1,
+      "pre_rv30_ann_pct": 76.9,
+      "post_rv30_ann_pct": 33.8,
+      "rv_increase_ppt": -43.1
+    },
+    {
+      "episode_start": "2025-11-18",
+      "trough_date": "2026-03-30",
+      "max_drawdown_pct": -20.2,
+      "pre_rv30_ann_pct": 36.3,
+      "post_rv30_ann_pct": 35.8,
+      "rv_increase_ppt": -0.6
+    },
+    {
+      "episode_start": "2025-11-20",
+      "trough_date": "2026-03-30",
+      "max_drawdown_pct": -20.2,
+      "pre_rv30_ann_pct": 37.3,
+      "post_rv30_ann_pct": 35.8,
+      "rv_increase_ppt": -1.5
+    },
+    {
+      "episode_start": "2026-01-08",
+      "trough_date": "2026-03-30",
+      "max_drawdown_pct": -20.2,
+      "pre_rv30_ann_pct": 36.5,
+      "post_rv30_ann_pct": 35.8,
+      "rv_increase_ppt": -0.8
+    },
+    {
+      "episode_start": "2026-01-16",
+      "trough_date": "2026-03-30",
+      "max_drawdown_pct": -20.2,
+      "pre_rv30_ann_pct": 33.7,
+      "post_rv30_ann_pct": 35.8,
+      "rv_increase_ppt": 2.0
+    },
+    {
+      "episode_start": "2026-02-02",
+      "trough_date": "2026-03-30",
+      "max_drawdown_pct": -20.2,
+      "pre_rv30_ann_pct": 30.7,
+      "post_rv30_ann_pct": 35.8,
+      "rv_increase_ppt": 5.1
+    },
+    {
+      "episode_start": "2026-02-13",
+      "trough_date": "2026-03-30",
+      "max_drawdown_pct": -20.2,
+      "pre_rv30_ann_pct": 30.2,
+      "post_rv30_ann_pct": 35.8,
+      "rv_increase_ppt": 5.5
+    },
+    {
+      "episode_start": "2026-02-26",
+      "trough_date": "2026-03-30",
+      "max_drawdown_pct": -20.2,
+      "pre_rv30_ann_pct": 32.5,
+      "post_rv30_ann_pct": 35.8,
+      "rv_increase_ppt": 3.2
+    },
+    {
+      "episode_start": "2026-05-29",
+      "trough_date": "2026-06-26",
+      "max_drawdown_pct": -18.2,
+      "pre_rv30_ann_pct": 36.3,
+      "post_rv30_ann_pct": NaN,
+      "rv_increase_ppt": NaN
+    },
+    {
+      "episode_start": "2026-06-05",
+      "trough_date": "2026-06-26",
+      "max_drawdown_pct": -18.2,
+      "pre_rv30_ann_pct": 38.2,
+      "post_rv30_ann_pct": NaN,
+      "rv_increase_ppt": NaN
+    },
+    {
+      "episode_start": "2026-06-16",
+      "trough_date": "2026-06-26",
+      "max_drawdown_pct": -18.2,
+      "pre_rv30_ann_pct": 40.4,
+      "post_rv30_ann_pct": NaN,
+      "rv_increase_ppt": NaN
+    }
+  ],
+  "figures": {
+    "fig1": "experiments/trending_2026_06_28_semis_skew/figures/nvda_price_rv30.png",
+    "fig2": "experiments/trending_2026_06_28_semis_skew/figures/nvda_iv_skew_bar.png",
+    "fig3": "experiments/trending_2026_06_28_semis_skew/figures/nvda_iv_rv_gap.png"
+  }
+}
