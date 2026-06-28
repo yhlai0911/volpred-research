@@ -1,0 +1,385 @@
+{
+  "experiment_id": "K1556",
+  "seed": 42,
+  "verdict": "NULL_PROXY",
+  "conclusion": "Daily ETF and free macro-calendar proxies do not clear strict global cojump gates.",
+  "data": {
+    "price_start": "2014-01-01",
+    "price_end": "2026-06-28",
+    "analysis_start": "2025-01-01",
+    "tickers": [
+      "SPY",
+      "^VIX",
+      "EFA",
+      "EEM",
+      "EWJ",
+      "EWG",
+      "EWT",
+      "EWY",
+      "EWZ",
+      "INDA"
+    ],
+    "country_etfs": [
+      "EFA",
+      "EEM",
+      "EWJ",
+      "EWG",
+      "EWT",
+      "EWY",
+      "EWZ",
+      "INDA"
+    ],
+    "price_rows": 31391,
+    "daily_feature_rows": 368,
+    "release_calendar_rows": 69,
+    "mapped_release_rows": 51,
+    "macro_release_days": 50,
+    "source_files": {
+      "prices": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1556/data/prices.csv",
+      "fred_release_calendar": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1556/data/fred_release_calendar.csv",
+      "macro_release_surprises": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1556/data/macro_release_surprises.csv",
+      "release_events_mapped": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1556/data/release_events_mapped.csv",
+      "daily_features": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1556/data/daily_features.csv"
+    }
+  },
+  "methodology": {
+    "release_calendar": "FRED release-calendar pages for CPI rid=10, Employment rid=50, GDP rid=53.",
+    "surprise_proxy": "FRED actual-minus-trailing-nowcast; not paid consensus and not real-time vintage.",
+    "event_day_diagnostics": "Contemporaneous response only, not tradable signal.",
+    "lookahead_policy": [
+      "Rolling z-score baselines use .shift(1).",
+      "macro_release_signal = macro_release_day.shift(1).fillna(0.0)",
+      "macro_abs_surprise_signal = macro_abs_surprise_proxy.shift(1).fillna(0.0)",
+      "macro_market_abs_signal = macro_market_abs_proxy.shift(1).fillna(0.0)"
+    ]
+  },
+  "event_tests": [
+    {
+      "target": "global_cojump_count",
+      "group": "macro_release_day",
+      "n_event": 50,
+      "n_control": 227,
+      "event_mean": 0.72,
+      "control_mean": 0.5506607929515418,
+      "diff": 0.16933920704845817,
+      "welch_t": 0.6825392584572679,
+      "welch_p": 0.4973764334849487,
+      "mann_whitney_u": 5713.5,
+      "mann_whitney_p": 0.9221302593698479,
+      "bootstrap_ci_95": [
+        -0.2798392070484582,
+        0.6863149779735681
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": false
+    },
+    {
+      "target": "avg_country_abs_ret_z",
+      "group": "macro_release_day",
+      "n_event": 50,
+      "n_control": 227,
+      "event_mean": 0.9572754673575146,
+      "control_mean": 0.7743562980031695,
+      "diff": 0.18291916935434505,
+      "welch_t": 1.5417927023662035,
+      "welch_p": 0.12864381465213745,
+      "mann_whitney_u": 6461.0,
+      "mann_whitney_p": 0.1255592429763181,
+      "bootstrap_ci_95": [
+        -0.023276865276391646,
+        0.4368350381819627
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": false
+    },
+    {
+      "target": "vix_jump_z",
+      "group": "macro_release_day",
+      "n_event": 50,
+      "n_control": 227,
+      "event_mean": 0.4632589741996506,
+      "control_mean": 0.3066518795107854,
+      "diff": 0.15660709468886524,
+      "welch_t": 1.0453826031565994,
+      "welch_p": 0.3004386842102352,
+      "mann_whitney_u": 5319.0,
+      "mann_whitney_p": 0.4452412264189415,
+      "bootstrap_ci_95": [
+        -0.10822058530778213,
+        0.4594621303497859
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": false
+    },
+    {
+      "target": "avg_country_fwd5_rv_z",
+      "group": "macro_release_day",
+      "n_event": 50,
+      "n_control": 227,
+      "event_mean": 0.023016095304546225,
+      "control_mean": 0.09701196200877442,
+      "diff": -0.0739958667042282,
+      "welch_t": -0.33265143119271745,
+      "welch_p": 0.7405281340720057,
+      "mann_whitney_u": 5300.0,
+      "mann_whitney_p": 0.46518543680210256,
+      "bootstrap_ci_95": [
+        -0.5139511163062547,
+        0.3444070714796234
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": false
+    },
+    {
+      "target": "global_cojump_count",
+      "group": "top_actual_surprise_day",
+      "n_event": 13,
+      "n_control": 227,
+      "event_mean": 0.5384615384615384,
+      "control_mean": 0.5506607929515418,
+      "diff": -0.012199254490003364,
+      "welch_t": -0.040120246674278146,
+      "welch_p": 0.9685537833017889,
+      "mann_whitney_u": 1475.5,
+      "mann_whitney_p": 1.0,
+      "bootstrap_ci_95": [
+        -0.5374449339207048,
+        0.645188071840054
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": false
+    },
+    {
+      "target": "avg_country_abs_ret_z",
+      "group": "top_actual_surprise_day",
+      "n_event": 13,
+      "n_control": 227,
+      "event_mean": 0.8916872692163037,
+      "control_mean": 0.7743562980031695,
+      "diff": 0.11733097121313418,
+      "welch_t": 0.9132993596716256,
+      "welch_p": 0.3768958591496389,
+      "mann_whitney_u": 1794.0,
+      "mann_whitney_p": 0.19146927886577447,
+      "bootstrap_ci_95": [
+        -0.10770149307470897,
+        0.3751646382302152
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": false
+    },
+    {
+      "target": "vix_jump_z",
+      "group": "top_actual_surprise_day",
+      "n_event": 13,
+      "n_control": 227,
+      "event_mean": 0.7059593554545316,
+      "control_mean": 0.3066518795107854,
+      "diff": 0.3993074759437462,
+      "welch_t": 1.499092724330378,
+      "welch_p": 0.15882431867654603,
+      "mann_whitney_u": 1667.5,
+      "mann_whitney_p": 0.3910448583812758,
+      "bootstrap_ci_95": [
+        -0.07807792156921978,
+        0.9308176693425895
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": false
+    },
+    {
+      "target": "avg_country_fwd5_rv_z",
+      "group": "top_actual_surprise_day",
+      "n_event": 13,
+      "n_control": 227,
+      "event_mean": -0.7366390435471905,
+      "control_mean": 0.09701196200877442,
+      "diff": -0.8336510055559648,
+      "welch_t": -1.8516193193489732,
+      "welch_p": 0.08752957021923478,
+      "mann_whitney_u": 1034.0,
+      "mann_whitney_p": 0.07006494175759553,
+      "bootstrap_ci_95": [
+        -1.7824562946459217,
+        -0.09787216765313908
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": true
+    }
+  ],
+  "beta_tests": [
+    {
+      "ticker": "EFA",
+      "n": 277,
+      "normal_beta": 0.708415005018399,
+      "macro_day_beta": 0.9655015263826549,
+      "beta_interaction": 0.2570865213642558,
+      "interaction_t": 2.064419129828808,
+      "interaction_p": 0.03897799424402445,
+      "macro_day_alpha": 0.008537168244647078,
+      "macro_day_alpha_t": 0.103593151927921,
+      "harvey_pass_interaction_t_ge_3": false
+    },
+    {
+      "ticker": "EEM",
+      "n": 277,
+      "normal_beta": 0.9006599492200575,
+      "macro_day_beta": 0.9003764353460957,
+      "beta_interaction": -0.000283513873961902,
+      "interaction_t": -0.0021485231839739375,
+      "interaction_p": 0.9982857278418704,
+      "macro_day_alpha": 0.13228664933022355,
+      "macro_day_alpha_t": 1.1167143446001866,
+      "harvey_pass_interaction_t_ge_3": false
+    },
+    {
+      "ticker": "EWJ",
+      "n": 277,
+      "normal_beta": 0.6484876688553197,
+      "macro_day_beta": 0.8014469514939047,
+      "beta_interaction": 0.1529592826385849,
+      "interaction_t": 1.7765029725781143,
+      "interaction_p": 0.07565005240493801,
+      "macro_day_alpha": -0.05200644720525837,
+      "macro_day_alpha_t": -0.515122299123783,
+      "harvey_pass_interaction_t_ge_3": false
+    },
+    {
+      "ticker": "EWG",
+      "n": 277,
+      "normal_beta": 0.7248734324228241,
+      "macro_day_beta": 0.7824301967485898,
+      "beta_interaction": 0.05755676432576577,
+      "interaction_t": 0.4461507657076796,
+      "interaction_p": 0.6554883443994245,
+      "macro_day_alpha": -0.12091709150694561,
+      "macro_day_alpha_t": -1.2762348288246157,
+      "harvey_pass_interaction_t_ge_3": false
+    },
+    {
+      "ticker": "EWT",
+      "n": 277,
+      "normal_beta": 0.858374511015148,
+      "macro_day_beta": 0.7784223338590962,
+      "beta_interaction": -0.0799521771560517,
+      "interaction_t": -0.4373304849357355,
+      "interaction_p": 0.6618716900169788,
+      "macro_day_alpha": 0.09866215948922658,
+      "macro_day_alpha_t": 0.6798359640571081,
+      "harvey_pass_interaction_t_ge_3": false
+    },
+    {
+      "ticker": "EWY",
+      "n": 277,
+      "normal_beta": 0.8525350649671508,
+      "macro_day_beta": 0.7804193977683087,
+      "beta_interaction": -0.07211566719884205,
+      "interaction_t": -0.312149318789618,
+      "interaction_p": 0.7549270467053318,
+      "macro_day_alpha": 0.17037626176197468,
+      "macro_day_alpha_t": 1.1223010179368258,
+      "harvey_pass_interaction_t_ge_3": false
+    },
+    {
+      "ticker": "EWZ",
+      "n": 277,
+      "normal_beta": 0.5202273475754626,
+      "macro_day_beta": 0.688130808615121,
+      "beta_interaction": 0.1679034610396583,
+      "interaction_t": 1.5187313754445795,
+      "interaction_p": 0.12883012565134322,
+      "macro_day_alpha": 0.24405793301045817,
+      "macro_day_alpha_t": 1.9352512458710138,
+      "harvey_pass_interaction_t_ge_3": false
+    },
+    {
+      "ticker": "INDA",
+      "n": 277,
+      "normal_beta": 0.5535964047049522,
+      "macro_day_beta": 0.5655841944559308,
+      "beta_interaction": 0.011987789750978611,
+      "interaction_t": 0.10207007512582521,
+      "interaction_p": 0.9187010535209854,
+      "macro_day_alpha": -0.057466050985495544,
+      "macro_day_alpha_t": -0.46616847023192953,
+      "harvey_pass_interaction_t_ge_3": false
+    }
+  ],
+  "persistence_tests": [
+    {
+      "target": "avg_country_fwd5_rv_z",
+      "group": "macro_release_signal",
+      "n_event": 50,
+      "n_control": 227,
+      "event_mean": -0.2484533175478166,
+      "control_mean": 0.09701196200877442,
+      "diff": -0.345465279556591,
+      "welch_t": -2.0598453288751934,
+      "welch_p": 0.04292501555923434,
+      "mann_whitney_u": 4684.0,
+      "mann_whitney_p": 0.053404732996951275,
+      "bootstrap_ci_95": [
+        -0.685280896676367,
+        -0.019429042122570444
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": true
+    },
+    {
+      "target": "avg_country_fwd5_rv_z",
+      "group": "macro_abs_surprise_signal",
+      "n_event": 50,
+      "n_control": 227,
+      "event_mean": -0.2484533175478166,
+      "control_mean": 0.09701196200877442,
+      "diff": -0.345465279556591,
+      "welch_t": -2.0598453288751934,
+      "welch_p": 0.04292501555923434,
+      "mann_whitney_u": 4684.0,
+      "mann_whitney_p": 0.053404732996951275,
+      "bootstrap_ci_95": [
+        -0.685280896676367,
+        -0.019429042122570444
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": true
+    },
+    {
+      "target": "avg_country_fwd5_rv_z",
+      "group": "macro_market_abs_signal",
+      "n_event": 50,
+      "n_control": 227,
+      "event_mean": -0.2484533175478166,
+      "control_mean": 0.09701196200877442,
+      "diff": -0.345465279556591,
+      "welch_t": -2.0598453288751934,
+      "welch_p": 0.04292501555923434,
+      "mann_whitney_u": 4684.0,
+      "mann_whitney_p": 0.053404732996951275,
+      "bootstrap_ci_95": [
+        -0.685280896676367,
+        -0.019429042122570444
+      ],
+      "harvey_pass_abs_t_ge_3": false,
+      "bootstrap_ci_excludes_zero": true
+    }
+  ],
+  "gate_summary": {
+    "event_day_harvey_passes": [],
+    "beta_interaction_passes": [],
+    "positive_beta_interactions": [
+      "EFA",
+      "EWJ",
+      "EWG",
+      "EWZ",
+      "INDA"
+    ],
+    "persistence_harvey_passes": []
+  },
+  "limitations": [
+    "Daily ETF close-to-close data cannot reproduce intraday announcement-window identification.",
+    "Actual-minus-consensus surprises are unavailable; trailing-nowcast and market-shock proxies are weaker.",
+    "FRED macro levels are current-vintage, so the actual-surprise proxy is not a real-time vintage dataset.",
+    "Country ETFs are USD-listed and embed U.S. trading-hour/liquidity effects."
+  ]
+}

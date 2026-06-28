@@ -37777,7 +37777,7 @@
     "title": "K1556: US macro news global co-jump beta：各國 ETF 對美國數據驚喜的波動同步化程度** — 用 FRED/BLS/BEA release calendar + surprise proxy（actual-min",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1285). Original: US macro news global co-jump beta：各國 ETF 對美國數據驚喜的波動同步化程度** — 用 FRED/BLS/BEA release calendar + surprise proxy（actual-minus-consensus 若免費不可得則用 event-day absolute surprise proxy / Kalshi macro market shock 代理）、EFA/EEM/EWJ/EWG/EWT/EWY/EWZ/INDA，測 event-day cojump、VIX jump、t+5 RV persistence 與 country beta；與 generic EPU/macro-attention 不同，這裡是具體美國 macro release 造成 global financial cycle synchronized jump（來源：REStud 2026 \"The U.S., Economic News, and the Global Financial Cycle\"；27 國股指、VIX、商品對美國新聞同步跳動）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1556.py with signal.shift(1) + seed=42, (c) K1556_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -37786,7 +37786,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-28T00:00:01Z"
+    "created_at": "2026-06-28T00:00:01Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T06:38:35.088075+00:00",
+    "claim_session_id": "f31272dbbaa3",
+    "started_at": "2026-06-28T06:38:35.287276+00:00",
+    "completed_at": "2026-06-28T06:48:17.057686+00:00",
+    "result": "K1556 US macro-news global cojump beta proxy complete: verdict NULL_PROXY. Using FRED CPI/Employment/GDP release calendars plus yfinance global ETF/VIX data, 50 release days vs 227 controls show directionally higher cojump/abs-ret/VIX jump, but no event-day statistic clears |t|>=3; strongest beta amplification EFA t=2.06; lagged t+5 RV persistence is negative (diff -0.35, t=-2.06). Added README, script, results JSON, data snapshots, chart, and Codex review; targeted lookahead audit returned no finding."
   },
   {
     "id": "journal_discovery_20260628_0",
