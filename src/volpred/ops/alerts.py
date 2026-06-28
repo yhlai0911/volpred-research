@@ -21,7 +21,6 @@ from .health import (
     DISK_USAGE_ALERT_PCT,
     DISK_USAGE_MIN_FREE_GB,
     PAPER_TRADING_GAP_NULL_THRESHOLD,
-    STRATEGY_METRICS_STALE_HOURS,
     check_disk_usage,
     check_paper_trading_gaps,
     check_strategy_metrics_freshness,
@@ -1331,23 +1330,28 @@ def _parse_strategy_metrics_freshness_state(storage_dir: str) -> dict[str, Any]:
     breached = check.get("status") == "stale"
     age = check.get("age_hours")
     metrics_path = _storage_root(storage_dir).joinpath("strategy_metrics.json")
+    schedule = check.get("schedule") or "daily_update (canonical config cron)"
+    last_expected = check.get("last_expected_refresh_utc") or "n/a"
     body = "\n".join(
         [
             "## 觸發條件",
-            f"strategy_metrics.json mtime 距今 > {STRATEGY_METRICS_STALE_HOURS}h（或檔案不存在）。",
+            "strategy_metrics.json mtime 落後於最近一次「排定」的 daily_update 刷新（schedule-aware，",
+            "非固定 26h；週日不誤報，因前次排定 fire 是週六）。",
             f"- 檔案: {_relative_repo_path(metrics_path)}",
             f"- exists: {check.get('exists')}",
             f"- age_hours: {age if age is not None else '不可讀/不存在'}",
-            f"- 門檻: {STRATEGY_METRICS_STALE_HOURS}h",
+            f"- 排程: {schedule}",
+            f"- 最近排定刷新(UTC): {last_expected}",
             "",
             "## 影響",
-            "此檔每日由 strategy-metrics 刷新 job 重寫；mtime 落後代表該 job 停擺，",
+            "此檔由 daily_update job 重寫；mtime 落後於排定刷新代表該 job 停擺，",
             "線上策略卡 metrics 與排序會用到過期數據（違反 Mission 第 4 條：策略表現公正）。",
             "",
             "## 建議行動",
-            "1. 查刷新 job log：tail -20 storage/logs/cron/*.log（找 strategy_metrics / daily_update）。",
-            "2. 手動補：uv run python scripts/daily_update.py（或對應 metrics 刷新 CLI）。",
-            "3. 確認 cron schedule 仍 active：config/runtime_schedules.json。",
+            "1. 查刷新 job log：tail -20 storage/logs/cron/daily_update.log。",
+            "2. 確認排程是否該跑：uv run volpred ops schedule-due daily_update。",
+            "3. 若確為 miss，手動補：VOLPRED_ALLOW_OFFSCHEDULE_DAILY_UPDATE=1 ~/.volpred/bin/cron_daily_update.sh。",
+            "4. 確認 cron schedule 仍 active：config/runtime_schedules.json。",
         ]
     )
     return {

@@ -7,25 +7,33 @@ from zoneinfo import ZoneInfo
 
 from .common import load_json, project_path
 from .diagnostics import warn
+from .schedules import get_job_cron, previous_scheduled_fire
 from .scheduler import get_scheduler_state
 
 _TAIPEI = ZoneInfo("Asia/Taipei")
-# strategy_metrics.json is refreshed by daily_update (cron `3 8 * * 1-6`,
-# Mon-Sat 08:03 Taipei). It does NOT run on Sunday, so a flat 26h staleness
-# threshold false-fires every Sunday/early-Monday. The freshness check is now
-# schedule-aware: stale only if the most recent SCHEDULED refresh (+grace)
-# failed to update the file — never on a day the writer wasn't expected to run.
-_METRICS_REFRESH_HOUR_TPE = 8       # daily_update fires ~08:03 Taipei
-_METRICS_REFRESH_MINUTE_TPE = 3
+# strategy_metrics.json is refreshed by the daily_update job. Its schedule is
+# resolved from canonical config (single source of truth) so the freshness check
+# can never drift from the actual cron. daily_update does NOT run on Sunday, so a
+# flat 26h staleness threshold false-fires every Sunday/early-Monday; the check is
+# schedule-aware: stale only if the most recent SCHEDULED refresh (+grace) failed
+# to update the file — never on a day the writer wasn't expected to run.
+#
+# 2026-06-28 root cause: scripts/cron_review.py hardcoded a duplicate daily_update
+# cron ('0 6 * * *') that drifted from canonical ('3 8 * * 1-6'), false-flagging
+# every Sunday. To avoid the same class of bug here, the schedule below is read
+# from config via get_job_cron(); the hardcoded fallback is a crash-guard only.
+_DAILY_UPDATE_JOB_ID = "daily_update"
+_DAILY_UPDATE_CRON_FALLBACK = "3 8 * * 1-6"  # canonical as of 2026-06-28; last-resort only
+_METRICS_REFRESH_HOUR_TPE = 8       # fallback only — must track _DAILY_UPDATE_CRON_FALLBACK
+_METRICS_REFRESH_MINUTE_TPE = 3     # fallback only
 _METRICS_REFRESH_GRACE_HOURS = 3.0  # piggy-back latency + run duration buffer
 
 
-def _last_expected_metrics_refresh(now_utc: datetime) -> datetime:
-    """Most recent Mon-Sat 08:03 Taipei that is at least GRACE hours in the past.
+def _fallback_last_expected_metrics_refresh(now_utc: datetime) -> datetime:
+    """Crash-guard used only when croniter/config resolution fails.
 
-    Returns a UTC datetime. Used so the staleness check only alerts when a run
-    that was actually scheduled (Mon-Sat) missed its update — Sunday is exempt
-    by construction (its previous scheduled run is Saturday)."""
+    Replicates the Mon-Sat 08:03 Taipei walk-back without croniter. Must stay in
+    sync with _DAILY_UPDATE_CRON_FALLBACK; primary path derives from config."""
     cutoff = now_utc.astimezone(_TAIPEI) - timedelta(hours=_METRICS_REFRESH_GRACE_HOURS)
     probe = cutoff.replace(
         hour=_METRICS_REFRESH_HOUR_TPE, minute=_METRICS_REFRESH_MINUTE_TPE,
@@ -33,10 +41,43 @@ def _last_expected_metrics_refresh(now_utc: datetime) -> datetime:
     )
     if probe > cutoff:
         probe -= timedelta(days=1)
-    # Walk back to the nearest Mon-Sat (weekday(): Mon=0 .. Sun=6).
     while probe.weekday() == 6:  # Sunday — writer doesn't run
         probe -= timedelta(days=1)
     return probe.astimezone(timezone.utc)
+
+
+def _last_expected_metrics_refresh(now_utc: datetime) -> datetime:
+    """Most recent scheduled daily_update fire >= GRACE hours before now (UTC).
+
+    Schedule is resolved from canonical config (get_job_cron) so it auto-follows
+    the real cron — Sunday is exempt by construction (a Mon-Sat schedule's prior
+    fire is Saturday). Falls back to a hardcoded Mon-Sat 08:03 walk-back only if
+    config lookup or croniter is unavailable (warned, never silent)."""
+    cron = get_job_cron(_DAILY_UPDATE_JOB_ID)
+    if not cron:
+        warn(
+            "health_strategy_metrics",
+            "daily_update cron absent from canonical schedule; using fallback",
+            job_id=_DAILY_UPDATE_JOB_ID,
+            fallback=_DAILY_UPDATE_CRON_FALLBACK,
+        )
+        cron = _DAILY_UPDATE_CRON_FALLBACK
+    try:
+        prev = previous_scheduled_fire(
+            cron,
+            now=now_utc.astimezone(_TAIPEI),
+            tz=_TAIPEI,
+            grace_hours=_METRICS_REFRESH_GRACE_HOURS,
+        )
+        return prev.astimezone(timezone.utc)
+    except Exception as exc:  # croniter missing / malformed cron — crash-guard
+        warn(
+            "health_strategy_metrics",
+            "previous_scheduled_fire failed; using hardcoded Mon-Sat walk-back",
+            cron=cron,
+            err=str(exc),
+        )
+        return _fallback_last_expected_metrics_refresh(now_utc)
 
 # ---------------------------------------------------------------------------
 # Standalone health checks (migrated 2026-06-24 from the now-disabled cloud
@@ -85,16 +126,17 @@ def check_strategy_metrics_freshness(storage_dir: str = "storage") -> dict:
     mtime_dt = datetime.fromtimestamp(mtime, timezone.utc)
     last_expected = _last_expected_metrics_refresh(now_utc)
     # Schedule-aware (2026-06-28): stale only if the most recent SCHEDULED
-    # (Mon-Sat 08:03 TPE) daily_update failed to update the file. Sunday and
-    # early-Monday no longer false-fire because their previous scheduled run is
-    # Saturday and the file is fresh relative to that.
+    # daily_update fire (canonical config cron) failed to update the file. Sunday
+    # and early-Monday no longer false-fire because their previous scheduled run
+    # is Saturday and the file is fresh relative to that.
     status = "stale" if mtime_dt < last_expected else "ok"
+    cron = get_job_cron(_DAILY_UPDATE_JOB_ID) or _DAILY_UPDATE_CRON_FALLBACK
     return {
         "status": status,
         "exists": True,
         "age_hours": age_hours,
         "last_expected_refresh_utc": last_expected.isoformat(),
-        "schedule": "daily_update Mon-Sat 08:03 TPE",
+        "schedule": f"daily_update cron {cron} (Asia/Taipei)",
     }
 
 

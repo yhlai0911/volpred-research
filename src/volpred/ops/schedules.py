@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone, tzinfo
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -113,6 +113,54 @@ def _iter_schedule_items(config: dict[str, Any]) -> list[tuple[str, dict[str, An
             if isinstance(item, dict)
         )
     return items
+
+
+def get_job_cron(job_id: str, *, config: dict[str, Any] | None = None) -> str | None:
+    """Canonical cron expression for a scheduled job id, or None if absent.
+
+    Single source of truth for "when is job X expected to fire". Monitors and
+    freshness checks MUST resolve cron here instead of hardcoding expressions in
+    their own tables.
+
+    2026-06-28 root cause: scripts/cron_review.py hardcoded daily_update's cron
+    as '0 6 * * *' (daily 06:00) while canonical is '3 8 * * 1-6' (Mon-Sat
+    08:03), false-flagging every Sunday as a ~22h missed run. health.py hardcoded
+    the same 08:03/Mon-Sat assumption as module constants. Both now derive from
+    here, so a single config edit can never silently drift the monitors again.
+    """
+    config = config if config is not None else load_runtime_schedules()
+    for _section, item in _iter_schedule_items(config):
+        if str(item.get("id") or "") == job_id:
+            cron = item.get("cron") or item.get("schedule")
+            if isinstance(cron, str) and cron.strip():
+                return cron.strip()
+            return None
+    return None
+
+
+def previous_scheduled_fire(
+    cron_expr: str,
+    *,
+    now: datetime | None = None,
+    tz: tzinfo | None = None,
+    grace_hours: float = 0.0,
+) -> datetime:
+    """Most recent scheduled fire of `cron_expr` that is >= grace_hours before now.
+
+    Returns a tz-aware datetime in `tz` (default Asia/Taipei). Uses croniter so
+    day-of-week restrictions (e.g. Mon-Sat `1-6`) are honoured: on a Sunday the
+    previous fire of a Mon-Sat schedule correctly resolves to the prior Saturday.
+    Raises ImportError if croniter is unavailable (callers on the alert path
+    should catch and fall back rather than crash).
+    """
+    from croniter import croniter
+
+    tz = tz or _TAIPEI_TZ
+    anchor = (now or datetime.now(tz)).astimezone(tz) - timedelta(hours=grace_hours)
+    prev = croniter(cron_expr, anchor).get_prev(datetime)
+    if prev.tzinfo is None:
+        prev = prev.replace(tzinfo=tz)
+    return prev.astimezone(tz)
 
 
 def build_schedule_due_report(

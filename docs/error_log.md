@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-28 daily_update 監控 schedule-source drift（週日假警報 + 重複 schedule source）
+
+**問題**：監控顯示 `daily_update ... ⚠️ 上次完成 36.1h 前；預期 2026-06-28 06:00 該 fire（已 miss 21.9h）`。老闆點名要求從底層架構根治，不可再復發。
+
+**現象**：daily_update 自 2026-06-27 08:06（週六）後沒再「跑」，週日（6/28）監控說該跑卻沒跑。但 canonical schedule（`config/runtime_schedules.json` cron `3 8 * * 1-6`、LaunchAgent `com.volpred.daily-update` plist `StartCalendarInterval` Weekday 1-6 @ 08:03、wrapper guard `volpred ops schedule-due daily_update`）三者**一致**＝ Mon-Sat 08:03。**唯一 drift 的是監控期望（每天 06:00）**。
+
+**根因**：`scripts/cron_review.py` 的 `JOBS` table 在 2026-06-08（commit 4635bc473）新增 cron_expr 欄位時，把 daily_update **hardcode 成 `0 6 * * *`（每天 06:00）**，與 canonical `3 8 * * 1-6` drift——時間錯（06:00 vs 08:03）＋ 天數錯（每天 vs Mon-Sat）。週日 `expected_prev_fire('0 6 * * *')` 回週日 06:00，last_end 是週六 08:06 < 週日 06:00−slack → 假 miss。同表 work_summary 也 drift（`5 6 * * *` vs canonical `5 */6 * * *`，良性 under-expect）。結構性 root cause = **重複 schedule source**：cron_review.py 在自己的表 hardcode cron，沒讀 canonical config。`src/volpred/ops/health.py` 的 schedule-aware fix（同日稍早 commit 18888bdc6）雖行為正確，但也把 Mon-Sat 08:03 hardcode 成 module 常數＝同類 latent drift。
+
+**判定**：daily_update **正確排程 = Mon-Sat 08:03（週日不跑）**。依據：plist + config + wrapper guard 三者一致；wrapper 內 off-schedule guard 註解明載 2026-06-21 incident「canonical cron is Monday-Saturday」；內容上 daily_update 只刷新 strategy_metrics / Supabase sync / paper_trading forward-tracking / market status（週末無交易，週六 run 已含週五美股收盤，週日無新資料）。故週日無 miss、無 catch-up 需求；手動跑反而重演 2026-06-21 off-schedule incident（wrapper guard 也會 exit 75 擋下）。
+
+**解決方法**：建立**單一 schedule source API** `volpred.ops.schedules.get_job_cron(job_id)` + `previous_scheduled_fire(cron, now, grace)`，從 canonical config 解析 cron。(1) `cron_review.py` JOBS 最後一欄改成 config job id，runtime 用 `get_job_cron()` 解析，None 則 `warn()` + max-gap fallback（不再 hardcode cron，殺掉 daily_update + work_summary 兩處 drift 與未來同類）。(2) `health.py` `_last_expected_metrics_refresh` 改從 `get_job_cron("daily_update")` + `previous_scheduled_fire` 推導（行為與 team-lead fix 完全一致：週日→週六、週一早上 grace 內→週六、週一 grace 後→週一），croniter/config 失敗才退回 hardcoded Mon-Sat walk-back（warn，非 silent）。(3) alert body 由「flat 26h」改成 schedule-aware 措辭 + 排定刷新時間 + override catch-up 指令。miss-detection：genuine Mon-Sat miss 仍由 `strategy_metrics_freshness` alert（config-derived）與 cron_review 偵測；daily_update 在 `run_due_jobs` SKIP_JOB_IDS（2026-05-17 hang）故不走 piggy-back auto-rerun，catch-up 維持「alert→手動 override」既有設計，避免重現 hang。**損害評估：無 gap、無資料缺漏**——strategy_metrics.json（含 frontend mirror）mtime 2026-06-27 08:04、paper_trading.json 08:03、strategy_signals（Supabase）updated_at 2026-06-27 皆 fresh，paper_trading_gaps health = ok。驗證：`pytest tests/test_health_checks.py tests/test_cron_review.py tests/test_daily_update_schedule_drift.py tests/test_alerts.py tests/test_schedule_report.py tests/test_runtime_schedules.py tests/test_scheduler.py` 62 passed 2 skipped；`audit_silent_fallbacks.py --strict --baseline` new=0；cron_review 端到端假警報消失（「✅ 所有 cron 排程器」）；wrapper guard 模擬 cron env exit 75 且未誤跑。新增 regression `tests/test_daily_update_schedule_drift.py`（鎖 canonical cron + 全 JOBS 解析 + 週日不誤報 + genuine miss flagged）。
+
 ## 2026-06-28 dispatch_supervisor health process-race fallback 未標明
 
 **問題**：Codex hourly tick 顯示 Codex-eligible pending=0，依 error_log fallback 跑 `scripts/audit_silent_fallbacks.py --json scripts/dispatch_supervisor/health.py`，掃到 health monitor 四處 handler：`_pid_alive()` 對 `ProcessLookupError` 回 `False`、對 `PermissionError` 回 `True`，以及 `_force_kill_pgid()` 對 kill/probe 期間的 `ProcessLookupError` 直接 `pass`。

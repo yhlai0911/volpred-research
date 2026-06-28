@@ -41,7 +41,11 @@ def test_strategy_metrics_stale_when_old(tmp_path: Path):
     storage = tmp_path / "storage"
     path = storage / "strategy_metrics.json"
     _write_json(path, {"x": 1})
-    old = time.time() - 30 * 3600  # 30h ago > 26h threshold
+    # 2026-06-28: freshness is schedule-aware (stale iff mtime < last SCHEDULED
+    # daily_update fire). On a Sunday the previous scheduled fire is Saturday
+    # ~40h back, so a 30h-old file is NOT stale. Use 8 days to be older than the
+    # most recent scheduled fire on any weekday.
+    old = time.time() - 8 * 24 * 3600  # 8 days ago — before any scheduled fire
     os.utime(path, (old, old))
     result = check_strategy_metrics_freshness(str(storage))
     assert result["status"] == "stale"
@@ -173,10 +177,11 @@ def test_health_snapshot_includes_three_new_checks(tmp_path: Path):
 # --------------------------------------------------------------------------- #
 def test_alert_chain_surfaces_new_breaches(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     storage = tmp_path / "storage"
-    # strategy_metrics: stale (old mtime)
+    # strategy_metrics: stale (old mtime — 8 days, before any scheduled fire on
+    # any weekday now that freshness is schedule-aware; see test above).
     sm = storage / "strategy_metrics.json"
     _write_json(sm, {"x": 1})
-    old = time.time() - 30 * 3600
+    old = time.time() - 8 * 24 * 3600
     os.utime(sm, (old, old))
     # paper_trading: gap (3 nulls)
     _write_json(

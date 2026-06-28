@@ -35,32 +35,37 @@ TPE = timezone(timedelta(hours=8))
 
 sys.path.insert(0, str(REPO / "src"))
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.schedules import get_job_cron  # noqa: E402
 
-# job → (launchd label, log file, fallback max gap hours, piggy_back_id, cron_expr)
+# job → (launchd label, log file, fallback max gap hours, piggy_back_id, config_job_id)
 #
 # 2026-05-27: market_cal / memory_health 的 LaunchAgent 從未可靠 fire（macOS cron
 # 限制），實際靠 piggy-back via check_alerts. cron_review v1 只看 launchctl + log
 # banner → 持續 false-flag stale 數天。Fix: piggy_back_id 從 cron_last_run.json
 # 補 fallback timestamp。
 #
-# 2026-06-08 (3-strike fix): collect_tw / collect_us 是 weekday-only cron
-# (`0 15 * * 1-5` / `3 7 * * 2-6`)。原本只用通用 max_gap_h（30h）→ 週六日
-# last fire 必超 30h false-flag stale。Boss report 因此反覆寄假警報 → 老闆 6/8
-# 直接寫信「立刻徹底解決 warning」。Wrong domain model：staleness 不是 wallclock
-# 函數，是 cron schedule 函數。Fix: 新增 cron_expr 欄位，用 croniter 算
-# expected_last_fire = get_prev(now)；actual_last_fire >= expected_last_fire -
-# slack → OK；否則 stale。cron_expr 缺省 fallback 回舊 max_gap_h 行為。
+# 2026-06-08 (3-strike fix): collect_tw / collect_us 是 weekday-only cron。原本只
+# 用通用 max_gap_h（30h）→ 週六日 last fire 必超 30h false-flag stale。Wrong domain
+# model：staleness 不是 wallclock 函數，是 cron schedule 函數。Fix: 用 croniter 算
+# expected_last_fire = get_prev(now)；actual_last_fire >= expected - slack → OK。
+#
+# 2026-06-28 (drift fix): cron 表達式**不再 hardcode 在此**。最後一欄是 canonical
+# config 的 job id，runtime 由 get_job_cron() 從 config/runtime_schedules.json 解析。
+# 原本 hardcode 的 cron_expr 欄位已 drift —— daily_update 寫成 '0 6 * * *' 但
+# canonical 是 '3 8 * * 1-6'（Mon-Sat 08:03），每週日 false-flag ~22h missed run；
+# work_summary 寫成 '5 6 * * *' 但 canonical 是 '5 */6 * * *'。Root cause = 重複
+# schedule source。改讀 config 後單一來源，未來改 cron 不會再 drift 監控。
 JOBS = {
-    "hourly_dispatch":  ("com.volpred.hourly-dispatch",      "hourly_dispatch.log", 2,   None,                    "7 * * * *"),
-    "compute_worker":   ("com.volpred.compute-worker",       "compute_worker.log",  1,   None,                    "*/15 * * * *"),
-    "check_alerts":     ("com.volpred.check-alerts",         "check_alerts.log",    2,   None,                    "0 * * * *"),
-    "collect_tw":       ("com.volpred.collect-tw-data",      "collect_tw.log",      30,  "collect_tw_data",       "0 15 * * 1-5"),
-    "collect_us":       ("com.volpred.collect-us-data",      "collect_us.log",      30,  "collect_us_data",       "3 7 * * 2-6"),
-    "daily_update":     ("com.volpred.daily-update",         "daily_update.log",    30,  "daily_update",          "0 6 * * *"),
-    "release_pool":     ("com.volpred.release-pool",         "release_pool.log",    8,   "release_pool",          "7 */3 * * *"),
-    "market_cal":       ("com.volpred.market-calendar-sync", "market_cal.log",      200, "market_calendar_sync",  "0 8 * * 1"),
-    "memory_health":    ("com.volpred.memory-health-daily",  "memory_health.log",   30,  "memory_health_daily",   "30 5 * * *"),
-    "work_summary":     ("com.volpred.work-summary",         "work_summary.log",    12,  None,                    "5 6 * * *"),
+    "hourly_dispatch":  ("com.volpred.hourly-dispatch",      "hourly_dispatch.log", 2,   None,                    "volpred-hourly-dispatch"),
+    "compute_worker":   ("com.volpred.compute-worker",       "compute_worker.log",  1,   None,                    "volpred-compute-worker"),
+    "check_alerts":     ("com.volpred.check-alerts",         "check_alerts.log",    2,   None,                    "check_alerts"),
+    "collect_tw":       ("com.volpred.collect-tw-data",      "collect_tw.log",      30,  "collect_tw_data",       "collect_tw_data"),
+    "collect_us":       ("com.volpred.collect-us-data",      "collect_us.log",      30,  "collect_us_data",       "collect_us_data"),
+    "daily_update":     ("com.volpred.daily-update",         "daily_update.log",    30,  "daily_update",          "daily_update"),
+    "release_pool":     ("com.volpred.release-pool",         "release_pool.log",    8,   "release_pool",          "release_pool"),
+    "market_cal":       ("com.volpred.market-calendar-sync", "market_cal.log",      200, "market_calendar_sync",  "market_calendar_sync"),
+    "memory_health":    ("com.volpred.memory-health-daily",  "memory_health.log",   30,  "memory_health_daily",   "memory_health_daily"),
+    "work_summary":     ("com.volpred.work-summary",         "work_summary.log",    12,  None,                    "work_summary_6h"),
 }
 
 # Slack: 容許 actual_last_fire 比 expected_last_fire 慢多少還算 OK。
@@ -243,7 +248,15 @@ def main() -> int:
     now = datetime.now(TPE)
     print(f"=== cron 成果掌握 review — {now:%Y-%m-%d %H:%M:%S}（台灣時間）===\n")
     attention = []
-    for job, (label, logname, max_gap_h, piggy_id, cron_expr) in JOBS.items():
+    for job, (label, logname, max_gap_h, piggy_id, config_job_id) in JOBS.items():
+        # Resolve cron from canonical config (single source of truth); never
+        # hardcode here (2026-06-28 drift fix). None → fall back to max-gap.
+        cron_expr = get_job_cron(config_job_id)
+        if cron_expr is None:
+            _warn_cron_review(
+                f"canonical cron not found for config_job_id={config_job_id!r}; "
+                f"using max-gap fallback (max_gap_h={max_gap_h})"
+            )
         st = launchctl_state(label)
         lg = last_log_run(LOGS / logname)
         flags = []

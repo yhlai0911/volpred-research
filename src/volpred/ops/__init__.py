@@ -63,7 +63,13 @@ from .local_control_plane import (
 )
 from .papers import get_paper, list_papers, migrate_paper_pdf_to_storage, upload_paper_pdf, upsert_paper_metadata
 from .rollback import create_rollback_point, list_rollback_points, restore_rollback_point
-from .schedules import build_schedule_due_report, build_schedule_report, cron_matches_date
+from .schedules import (
+    build_schedule_due_report,
+    build_schedule_report,
+    cron_matches_date,
+    get_job_cron,
+    previous_scheduled_fire,
+)
 from .shared_lock import shared_state_lock
 from .agent_spec import check_agent_specs, import_agent_specs, render_agent_specs, sync_agent_specs
 from .session import session_bootstrap, session_finish_task, session_next_task, session_shutdown
@@ -165,6 +171,8 @@ __all__ = [
     "create_rollback_point",
     "create_task",
     "cron_matches_date",
+    "get_job_cron",
+    "previous_scheduled_fire",
     "curate_task",
     "deactivate_strategy",
     "ensure_execution_brief",
