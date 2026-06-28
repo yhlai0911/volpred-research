@@ -38304,7 +38304,7 @@
     "title": "[paper] btc-gas-negative robustness battery — 解開 §8/.tex blocker (K1133b)",
     "description": "推進 btc-gas-negative 論文(JBF/IJF, 目前 major_revision)的唯一 blocker: 跑 planned robustness battery 寫入 experiments/k1133b/k1133b_robustness_results.json,讓 §8 能有真實數字、解開 .tex 轉換。\n基礎: experiments/k1133b/k1133b.py(1398行, 5-model GAS-t × 3-period + MS)。review_history/v1/r0_review_opus.md C1 已列出精確要求(每項必寫真實 JSON,禁捏造):\n1. Period-cut ±60d boundary 重跑 Period-1 DM-HLN (M3 vs M1)\n2. 替代 loss: MSE + Patton robust loss L2 重評 (M4 vs M3 DM-HLN)\n3. Leave-one-year-out: M3 vs M1 逐年剔除\n4. Per-window multistart 最佳 log-likelihood dispersion (cross-seed)\n5. ETH/BNB 跨資產 factorial (Period-1 reversal 方向一致性)\n6. skewed-t / GED 規格 (Period-1 DM-HLN 方向)\n研究誠實鐵則: 每個數字必對齊新生成的 JSON, 禁 fabricate; lag/seed 固定; 跑完 Codex review 才寫 knowledge。完成後回報哪些 robustness 項通過、§8 可否成立。主線程會驗證後整合進 paper narrative。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "main_thread_proactive_paper_pipeline",
@@ -38320,7 +38320,9 @@
     "claimed_by": "codex-vscode",
     "claimed_at": "2026-06-28T16:55:47.110950+00:00",
     "claim_session_id": "63b69b64a6e5",
-    "started_at": "2026-06-28T16:55:57.603507+00:00"
+    "started_at": "2026-06-28T16:55:57.603507+00:00",
+    "completed_at": "2026-06-28T18:27:07.402909+00:00",
+    "result": "K1133b robustness battery completed into experiments/k1133b/k1133b_robustness_results.json with 100-start multistart. Results are mixed: boundary/alt-loss M3-vs-M1/LOO direction pass, but M4-vs-M3 fails MSE/Patton, ETH/BNB fail-fast on data alignment, section8_ready_without_caveat=false."
   },
   {
     "id": "platform_ops_cluster_cap_drift_alert_20260629",

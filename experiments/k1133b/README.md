@@ -1,6 +1,7 @@
 # K1133b: BTC GAS-t decomposition — innovation vs GAS dynamics vs regime-switching
 
 **Status**: completed (2026-04-17)
+**Robustness addendum**: completed with caveats (2026-06-29; see `k1133b_robustness_results.json`)
 **Proposer**: Claude
 **Executor**: Claude (worktree `agent-a97b4fe0`)
 **Parent**: K1133 (BTC GAS-t sub-period split)
@@ -110,6 +111,23 @@ Decomposing the M3 GAS-t reversal QLIKE gap vs M1 (-9.92%):
 
 Therefore **~75% of the BTC P1 GAS-t reversal is attributable to the Student-t innovation, not to GAS dynamics**. The remaining ~25% gap of M4 vs M1 is not statistically significant.
 
+## Robustness addendum (2026-06-29)
+
+The planned §8 robustness battery now exists in `k1133b_robustness_results.json`, but it does **not** support the old uncaveated robustness prose. It supports a narrower, caveated narrative:
+
+| Check | Result | Paper implication |
+|---|---:|---|
+| Rebuilt BTC P1 baseline | M1/M2/M4/M5 exactly match `k1133b_results.json`; rebuilt M3 QLIKE drifts from 2.19037 to 2.20755 and DM M3 vs M1 weakens from -4.67 to -4.03 | Direction survives, but M3 GAS-t has optimizer/rebuild sensitivity |
+| Period-cut ±60d around 2020-12-31 | DM M3 vs M1 = -3.43 / -4.03 / -3.66 for strict / baseline / permissive cuts | Reversal direction survives abs(t)>3, but prior claims like "below -4.9" are false |
+| Alternative loss | M3 vs M1 remains negative under QLIKE (-4.03), MSE (-5.14), Patton b=-1 (-6.01) | Heavy-tail GAS-t underperformance is not QLIKE-only |
+| M4 vs M3 under alternative loss | QLIKE +2.97, but MSE -1.01 and Patton b=-1 -0.32 | The "GAS-N beats GAS-t" innovation-decomposition contrast is loss-function sensitive |
+| Leave-one-year-out jackknife | M3 vs M1 remains negative: excl. 2017 -3.64, 2018 -3.47, 2019 -4.19, 2020 -2.84 | Direction survives; 2020 exclusion falls below abs(t)>3. This is an evaluation-window jackknife, not a gap-deletion refit |
+| 100-start per-window multistart | 23 windows x 5 models x 100 starts; max-minus-best dispersion is large for all models, especially M3/M4 | Old "96% windows <0.5" stability claim is false under this diagnostic |
+| ETH/BNB cross-asset | Fail-fast: Yahoo ETH/BNB histories begin 2017-11-10, not 2015-01-02, so they cannot align to BTC P1 | Cross-asset generalisation remains unresolved; do not cite ETH/BNB as completed evidence |
+| Skewed-t / GED GAS variants | Skewed-t vs M1 DM=-5.02; GED vs M1 DM=-1.23; M4 vs skewed-t DM=+3.73; M4 vs GED DM=-0.16 | Skewed-t reinforces the fat-tail penalty; GED is neutral. This is finite-difference identity-score GAS with annual refit, not analytic Fisher-scaled GAS |
+
+Bottom line: §8 can now cite real numbers, but only as a mixed robustness battery. The robust claim is that BTC P1 GAS-t underperformance survives boundary shifts, alternative losses for M3-vs-M1, and evaluation-year jackknife direction. The stronger claim that the Normal-vs-Student-t decomposition is uniformly robust across losses, optimizers, and ETH/BNB does **not** pass.
+
 ## Conclusions
 
 1. **Primary verdict (P1)**: The BTC P1 GAS-t reversal documented in K1129 and K1133 is **primarily a Student-t innovation penalty, not a GAS score-driven dynamics penalty**. GAS-Normal recovers three quarters of the QLIKE gap and is no longer Harvey-significant. This matches the secondary observation in K1133 (GJR-t also reversed in P1), now quantified cleanly.
@@ -125,6 +143,8 @@ Therefore **~75% of the BTC P1 GAS-t reversal is attributable to the Student-t i
 |---|---|
 | `k1133b.py` | Main experiment script |
 | `k1133b_results.json` | Full numeric output (all 5 models × 3 periods, MS-GAS-t OOS, verdict, state-prob samples) |
+| `k1133b_robustness.py` | §8 robustness battery runner |
+| `k1133b_robustness_results.json` | Robustness output: boundary, alternative loss, jackknife, 100-start multistart, ETH/BNB fail-fast, skewed-t/GED |
 | `k1133b_qlike_5model.png` | Grouped bar: QLIKE by period × 5 models |
 | `k1133b_ms_state_prob.png` | MS-GAS-t ξ_{t|t-1} timeseries stacked by period |
 | `k1133b_dm_heatmap.png` | DM-HLN heatmap across key contrasts |
