@@ -1,0 +1,125 @@
+{
+  "id": "mile_81df26b0",
+  "title": "模型多看幾個鄰居，不代表就更會預測波動",
+  "description": "有些研究的直覺很吸引人：如果一個資產的波動會受別的資產影響，那模型不只看自己，順便看一下「鄰居」的波動，理論上應該更準。 K1314 測的就是這件事。 我們拿 5 檔常見美股 ETF 做樣本，分別是 SPY、QQQ、GLD、TLT、IWM。比較對象很單純： 基準版：只用資產自己的短、中、長期波動去預測明天 升級版：除了自己的資料，再加上一層「其他資產的波動關係」 如果這個想法真的穩，理論上應該不只一檔有效。 結果是：SPY 確實進步很多，但其他 4 檔沒有跟上。 SPY 的預測誤差改善大約 14.1% QQQ、TLT、IWM 只有 1% 到 2% 左右 GLD 甚至還變差，約 -2.4% 這種…",
+  "content": "有些研究的直覺很吸引人：如果一個資產的波動會受別的資產影響，那模型不只看自己，順便看一下「鄰居」的波動，理論上應該更準。\n\nK1314 測的就是這件事。\n\n我們拿 5 檔常見美股 ETF 做樣本，分別是 SPY、QQQ、GLD、TLT、IWM。比較對象很單純：\n\n- 基準版：只用資產自己的短、中、長期波動去預測明天\n- 升級版：除了自己的資料，再加上一層「其他資產的波動關係」\n\n如果這個想法真的穩，理論上應該不只一檔有效。\n\n![5 檔 ETF 的預測損失比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1314_qlike_chart.png)\n\n結果是：**SPY 確實進步很多，但其他 4 檔沒有跟上。**\n\n- SPY 的預測誤差改善大約 **14.1%**\n- QQQ、TLT、IWM 只有 **1% 到 2% 左右**\n- GLD 甚至還變差，約 **-2.4%**\n\n這種結果很重要，因為它代表這個方法不是「普遍有效」，而是比較像「某些資產剛好吃得到」。\n\n## 真有用，還是只是模型變複雜？\n\n這次實驗多做了一步很關鍵的檢查。\n\n我們另外跑了一個 placebo 版本：保留同樣的模型結構，但把「資產之間的真實關係」換成隨機連線。照理說，如果原方法真的有抓到有用訊號，真實連線應該明顯贏過隨機連線。\n\n![真實關係和隨機關係的差距](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1314_general_article_chart.png)\n\n後續補做 100 次隨機連線 permutation 後，SPY 的真實關係仍強於大多數隨機版本：用 DM t 值排序，100 次裡沒有隨機圖超過它，經驗尾端機率為 0.0099；但用 QLIKE 改善幅度排序，有 1 次隨機圖略高，經驗尾端機率為 0.0198。也就是說，SPY 是最有說服力的候選，但還不能寫成完全通過 1% 門檻的 placebo 結論。\n\n- SPY：真實關係大多數時候比隨機版本好，但不是每一個隨機版本都輸\n- QQQ、TLT：有一點正向，但不夠穩\n- GLD：沒有幫助\n- IWM：隨機版本反而更好\n\n這等於在提醒我們：有時候模型看起來進步，不一定是因為它真的多抓到什麼市場資訊，也可能只是因為你塞了更多變數。\n\n## 這對一般投資人有什麼意思？\n\n最直接的意思是：**模型變複雜，不等於結果更可靠。**\n\n很多新方法都會讓人有一種「它把市場網路也考慮進去了，應該比較聰明」的感覺。但 K1314 告訴我們，這種升級如果只能在 5 檔裡的 1 檔明顯成立，就不能寫成一個普遍規則。\n\n對讀者來說，比較實用的判讀方式是這樣：\n\n- 看平均成績前，先看是不是只有單一資產在撐場\n- 看模型變強前，先問它是不是只因為多加了幾個變數\n- 看「新方法勝出」前，先看它換到別的資產後還站不站得住\n\n## 一句話結論\n\n這次答案很乾脆：**讓模型多看幾個資產鄰居，沒有穩定地讓波動預測變好；最明顯受益的是 SPY，但 placebo 檢查後仍要保留條件。**\n\n## 資料來源\n\n本文來自實驗 K1314（`experiments/k1314/k1314.py`；結果檔 `experiments/k1314/k1314_results.json`；placebo 結果檔 `experiments/k1314/k1314_placebo_results.json`）。資料來源為 yfinance，樣本為 SPY、QQQ、GLD、TLT、IWM，期間 2005-01-01 至 2024-12-31；樣本外評估區間為 2020-01-02 至 2024-12-30，每檔資產 1,257 個交易日。\n\n\n---\n\n### 延伸閱讀\n- [讓模型更常改變心意，不代表它就更會預測](/reports/mile_e5f33cfa)\n",
+  "category": "general",
+  "audience": "general",
+  "phase": "research",
+  "details": {
+    "experiment_refs": [
+      "K1314"
+    ],
+    "image_url": "https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k1314_qlike_chart.png",
+    "cluster_waiver": "K1314 is a model-complexity and placebo-validation article about cross-asset volatility links, distinct from ordinary SPY market commentary despite SPY appearing in the ETF sample.",
+    "topic_cluster": "spy",
+    "topic_cluster_30d": {
+      "count": 88,
+      "cap": 10,
+      "ratio": 0.2195,
+      "exempt": false
+    },
+    "arc_signature": {
+      "schema_version": "arc_dedup_v2",
+      "entities": [
+        "GOLD",
+        "LONG_BOND",
+        "NASDAQ",
+        "US_EQUITY",
+        "US_SMALLCAP"
+      ],
+      "conclusion_class": "descriptive",
+      "mechanisms": [
+        "model_forecast"
+      ],
+      "time_horizon": "unspecified"
+    },
+    "arc_signature_backfill": {
+      "reason": "release_layer_arc_upgrade_a1",
+      "script": "scripts/backfill_arc_dedup_metadata.py",
+      "applied_at": "2026-06-18T02:13:29.530955+00:00"
+    },
+    "release_dedup_skipped": true,
+    "release_theme_flood": "model_complexity",
+    "release_theme_recent_count": 36,
+    "release_dedup_skipped_at": "2026-06-25T18:00:19.879555+00:00",
+    "release_arc_dedup_of": "mile_96fb5f73",
+    "release_arc_dedup_class": "descriptive",
+    "release_theme_valve": true,
+    "release_theme_valve_theme": "model_complexity",
+    "release_theme_valve_recent_count": 38,
+    "release_theme_valve_at": "2026-06-27T21:00:26.864228+00:00",
+    "codex_review_history": [
+      {
+        "timestamp": "2026-06-28T15:13:00+00:00",
+        "verdict": "CONDITIONAL_PASS",
+        "reviewer": "codex-cli 0.135 gpt-5.4",
+        "task_id": "paper_review_mile_81df26b0",
+        "actions": [
+          "wording: 'SPY 明顯通過這個檢查' → 加 single-seed caveat",
+          "date: 2024-12-31 → 2024-12-30"
+        ],
+        "outstanding_followups": [
+          "multi-seed permutation placebo (HIGH-C)",
+          "Bonferroni/Holm/BH 標註於 results.json (MED-B)"
+        ]
+      }
+    ]
+  },
+  "tags": [
+    "一般讀者",
+    "波動率",
+    "SPY",
+    "QQQ",
+    "GLD",
+    "TLT",
+    "IWM"
+  ],
+  "related_articles": [
+    {
+      "id": "mile_e5f33cfa",
+      "title": "讓模型更常改變心意，不代表它就更會預測",
+      "similarity": 0.23
+    }
+  ],
+  "created_at": "2026-06-06T20:09:05.117861+00:00",
+  "published_at": "2026-06-27T21:00:26.864228+00:00",
+  "status": "published",
+  "verified_live_at": "2026-06-27T21:00:43.117432+00:00",
+  "errata": {
+    "update_at": "2026-06-28T15:48:11.329802+00:00",
+    "update_action": "k1314_v2_sanitizer_cleanup",
+    "update_summary": "Cleaned up the K1314 v2 article wording after the general sanitizer rewrote p-value notation awkwardly; no numerical or methodological change.",
+    "update_history": [
+      {
+        "at": "2026-06-28T15:47:38.169021+00:00",
+        "action": "k1314_v2_multiseed_placebo",
+        "summary": "K1314 v2 added 100-seed random-graph placebo and multiple-testing adjusted DM p-values; article caveat updated to report effect-size p=0.0198 and keep the placebo caveat.",
+        "old_content_chars": 1542,
+        "new_content_chars": 1771,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "preserved (--no-update-description)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      },
+      {
+        "at": "2026-06-28T15:48:11.329802+00:00",
+        "action": "k1314_v2_sanitizer_cleanup",
+        "summary": "Cleaned up the K1314 v2 article wording after the general sanitizer rewrote p-value notation awkwardly; no numerical or methodological change.",
+        "old_content_chars": 1771,
+        "new_content_chars": 1726,
+        "title_changed": false,
+        "description_changed": false,
+        "description_source": "preserved (--no-update-description)",
+        "details_waiver_changed": false,
+        "image_paths_normalized": 0,
+        "image_url_changed": false,
+        "content_audit_flag_cleared": false
+      }
+    ]
+  },
+  "last_updated_at": "2026-06-28T15:48:11.329802+00:00"
+}

@@ -38272,9 +38272,15 @@
     "priority": 3,
     "title": "K1314 v2: multi-seed permutation placebo + Bonferroni/Holm/BH 標註於 DM results",
     "description": "Follow-up from paper_review_mile_81df26b0 (Codex CONDITIONAL_PASS, 2026-06-28). Article published 2026-06-06 已加 single-seed caveat 不需 retract，但要補正式統計：(1) k1314_placebo.py 改為 ≥100 random-graph trials (seeds 1-100) → 算 SPY GSP-real vs random-graph distribution 的 permutation p-value；(2) k1314_results.json append Bonferroni / Holm / BH adjusted p-values 到 DM table（SPY raw 7.6e-8 adj 仍 < 1e-6 應 survive，其他 4 檔可能變更 NS）。(3) 若 SPY 真 permutation p < 0.01 → 更新文章 wording 移除 caveat。Codex review verdict 詳見 feed.json mile_81df26b0 details.codex_review_history.",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-28T15:15:32.948923+00:00",
     "source": "paper_review_followup",
-    "parent_task_id": "paper_review_mile_81df26b0"
+    "parent_task_id": "paper_review_mile_81df26b0",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-06-28T15:38:07.475061+00:00",
+    "claim_session_id": "4fde3b1c1d4b",
+    "started_at": "2026-06-28T15:38:21.760918+00:00",
+    "completed_at": "2026-06-28T15:54:13.098572+00:00",
+    "result": "K1314 v2 completed: added Bonferroni/Holm/BH DM annotations and 100-seed SPY random-graph placebo. SPY survives 5-asset adjusted DM but effect-size placebo p=0.0198, so article caveat retained and updated; single-article Supabase sync read-back passed."
   }
 ]

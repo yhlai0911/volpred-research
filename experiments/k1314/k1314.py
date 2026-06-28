@@ -73,7 +73,7 @@ def build_graph_filter(rv_history: pd.DataFrame, tau: float = TAU, k: int = K_NN
     rv_history: DataFrame of RV up to t-1 (strictly past).
     Returns: (N, N) filter matrix H = exp(-tau * L).
     """
-    corr = rv_history.corr().abs().values
+    corr = rv_history.corr().abs().to_numpy(copy=True)
     n = corr.shape[0]
     np.fill_diagonal(corr, 0.0)
     A = np.zeros_like(corr)
@@ -252,6 +252,45 @@ def dm_hln_test(d: np.ndarray, h: int = 1) -> dict:
     }
 
 
+def multiple_testing_adjustments(p_values: dict[str, float]) -> dict[str, dict[str, float]]:
+    """Bonferroni, Holm, and Benjamini-Hochberg adjusted p-values.
+
+    Family is the five per-asset DM-HLN tests. Non-finite p-values remain NaN.
+    """
+    finite = [(k, float(v)) for k, v in p_values.items() if np.isfinite(v)]
+    m = len(finite)
+    out = {
+        k: {
+            "p_value_bonferroni": float("nan"),
+            "p_value_holm": float("nan"),
+            "p_value_bh_fdr": float("nan"),
+        }
+        for k in p_values
+    }
+    if m == 0:
+        return out
+
+    for k, p in finite:
+        out[k]["p_value_bonferroni"] = float(min(p * m, 1.0))
+
+    ordered = sorted(finite, key=lambda kv: kv[1])
+    running_max = 0.0
+    for rank, (k, p) in enumerate(ordered, start=1):
+        adj = min((m - rank + 1) * p, 1.0)
+        running_max = max(running_max, adj)
+        out[k]["p_value_holm"] = float(running_max)
+
+    raw_bh = []
+    for rank, (k, p) in enumerate(ordered, start=1):
+        raw_bh.append((k, min(p * m / rank, 1.0)))
+    running_min = 1.0
+    for k, adj in reversed(raw_bh):
+        running_min = min(running_min, adj)
+        out[k]["p_value_bh_fdr"] = float(running_min)
+
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -315,6 +354,21 @@ def main() -> None:
             f"DM t={dm['t_stat']:.3f} p={dm['p_value']:.4f}"
         )
 
+    p_raw = {t: results_per_asset[t]["dm_hln"]["p_value"] for t in TICKERS}
+    p_adjusted = multiple_testing_adjustments(p_raw)
+    for ticker in TICKERS:
+        adj = p_adjusted[ticker]
+        results_per_asset[ticker]["dm_hln"].update(
+            {
+                **adj,
+                "reject_5pct_raw": bool(results_per_asset[ticker]["dm_hln"]["p_value"] < 0.05),
+                "reject_5pct_bonferroni": bool(adj["p_value_bonferroni"] < 0.05),
+                "reject_5pct_holm": bool(adj["p_value_holm"] < 0.05),
+                "reject_5pct_bh_fdr": bool(adj["p_value_bh_fdr"] < 0.05),
+                "multiple_testing_family": "5 per-asset DM-HLN tests",
+            }
+        )
+
     pooled = np.concatenate(stacked_d_list)
     pooled_dm = dm_hln_test(pooled)
 
@@ -362,8 +416,11 @@ def main() -> None:
                         "dm_t_stat": d["dm_hln"]["t_stat"],
                         "improvement_pct": d["improvement_pct"],
                     }
-                    for t, d in placebo["per_asset"].items()
+                    for t, d in placebo.get(
+                        "single_seed_reference", placebo.get("per_asset", {})
+                    ).items()
                 },
+                "permutation_tests": placebo.get("permutation_tests"),
             }
         except Exception as e:
             placebo_summary = {"error": str(e)}
@@ -392,9 +449,22 @@ def main() -> None:
             )
             final_verdict = "MARGINAL_PLACEBO_INCONCLUSIVE"
         elif robust_passes:
-            placebo_warning = (
-                f"Survives placebo in: {robust_passes}. Real signal candidate."
-            )
+            placebo_warning = f"Survives single-seed placebo in: {robust_passes}."
+        spy_perm = (placebo_summary.get("permutation_tests") or {}).get("SPY")
+        if spy_perm:
+            p_perm = spy_perm["random_distribution"][
+                "p_value_ge_observed_improvement_pct"
+            ]
+            if np.isfinite(p_perm) and p_perm < 0.01:
+                placebo_warning = (
+                    "SPY survives 100-seed random-graph permutation placebo "
+                    f"(empirical p={p_perm:.4f}); other assets remain non-robust."
+                )
+            elif np.isfinite(p_perm):
+                placebo_warning = (
+                    "SPY does not pass the pre-registered p<0.01 permutation placebo "
+                    f"gate (empirical p={p_perm:.4f})."
+                )
 
     out = {
         "experiment_id": "k1314",
@@ -409,6 +479,15 @@ def main() -> None:
         },
         "per_asset": results_per_asset,
         "cross_asset": cross_avg,
+        "multiple_testing_adjustment": {
+            "family": "5 per-asset DM-HLN tests",
+            "methods": ["Bonferroni", "Holm", "Benjamini-Hochberg FDR"],
+            "alpha": 0.05,
+            "note": (
+                "Adjusted p-values are annotations for the per-asset DM table. "
+                "QLIKE improvement percentages are raw effect sizes, not p-values."
+            ),
+        },
         "verdict_raw": verdict,
         "verdict": final_verdict,
         "verdict_definition": {
@@ -448,6 +527,8 @@ def main() -> None:
             "Corsi F. (2009) JFE HAR-RV",
             "Patton A. (2011) JoE robust loss functions",
             "Harvey D., Leybourne S., Newbold P. (1997) IJoF DM small-sample",
+            "Holm S. (1979) Scandinavian Journal of Statistics sequential Bonferroni",
+            "Benjamini Y., Hochberg Y. (1995) JRSS-B false discovery rate",
         ],
     }
     out_path = OUT_DIR / "k1314_results.json"

@@ -87,19 +87,61 @@ Given (a) daily squared-return RV proxy noise, (b) simplified graph (Pearson 2-N
 
 These simplifications make the test conservative — if even *this* simple GSP augmentation produces a positive DM, the full paper's claim is plausible. If NULL, the paper's gain may come from architectural complexity (learned filters, NN fusion) rather than the GSP idea itself.
 
-## Placebo robustness check
+## Multiple-testing and placebo robustness checks
 
-Implementation issue worry: SPY DM t=5.41 was suspiciously strong. We ran a
-random-graph placebo (`k1314_placebo.py`) — same architecture, but the graph
-adjacency is replaced with a seeded random sparse symmetric matrix carrying
-zero cross-asset correlation information. Any DM significance from this
-placebo can only come from extra-regressor variance, not from real graph
-signal.
+Post-publication Codex source review (`paper_review_mile_81df26b0`, 2026-06-28)
+flagged two inferential gaps in the original K1314 artifacts:
 
-Decision rule (encoded in `k1314.py`): asset is a "robust real signal" iff
-`main_t > 3.0 AND main_t > placebo_t + 1.0`.
+1. The five per-asset DM-HLN p-values were raw only.
+2. The random-graph placebo was a single seed, not an empirical randomization
+   distribution.
 
-| asset | main DM t | placebo DM t | diff | survives |
+K1314 v2 fixes both issues without changing the model specification.
+
+### Multiple testing
+
+`k1314.py` now annotates each per-asset DM-HLN result with Bonferroni, Holm, and
+Benjamini-Hochberg adjusted p-values over the 5-asset family. SPY remains
+significant after all three corrections; QQQ, GLD, TLT, and IWM remain
+non-significant.
+
+| asset | raw p | Bonferroni | Holm | BH-FDR | conclusion |
+|---|---:|---:|---:|---:|---|
+| SPY | 7.60e-08 | 3.80e-07 | 3.80e-07 | 3.80e-07 | survives |
+| QQQ | 0.3772 | 1.0000 | 0.6260 | 0.3772 | NS |
+| GLD | 0.3130 | 1.0000 | 0.6260 | 0.3772 | NS |
+| TLT | 0.1409 | 0.7043 | 0.5438 | 0.2348 | NS |
+| IWM | 0.1359 | 0.6797 | 0.5438 | 0.2348 | NS |
+
+The 14.1% SPY improvement is a raw QLIKE effect size, not an adjusted p-value.
+
+### Random-graph placebo
+
+Implementation issue worry: SPY DM t=5.41 was suspiciously strong. We now run
+two placebo layers in `k1314_placebo.py`:
+
+1. A seed=42 all-asset reference table, preserving the original K1314 sanity
+   check.
+2. A 100-seed SPY random-graph distribution using seeds 1..100.
+
+The primary empirical placebo p-value compares SPY's real-graph QLIKE
+improvement against the random-graph improvement distribution with +1 smoothing:
+`p = (count(random >= observed) + 1) / (100 + 1)`.
+
+| statistic | observed real graph | random mean | random median | random max | empirical p |
+|---|---:|---:|---:|---:|---:|
+| QLIKE improvement % | 14.065 | 4.421 | 4.055 | 14.245 | 0.0198 |
+| mean loss reduction | 0.801 | 0.252 | 0.233 | 0.811 | 0.0198 |
+| DM-HLN t | 5.409 | 1.901 | 1.783 | 4.562 | 0.0099 |
+
+Interpretation: SPY is stronger than almost all random graphs, but one random
+seed (`84`) slightly beats the real graph on raw QLIKE improvement. Therefore
+SPY passes the DM-t placebo tail but **does not pass the pre-registered
+p<0.01 effect-size placebo gate**.
+
+The original seed=42 all-asset reference remains:
+
+| asset | main DM t | seed=42 placebo DM t | diff | survives single-seed check |
 |---|---|---|---|---|
 | SPY | +5.41 | +2.69 | +2.72 | YES |
 | QQQ | +0.88 | -2.53 | +3.41 | no (main NS) |
@@ -107,16 +149,22 @@ Decision rule (encoded in `k1314.py`): asset is a "robust real signal" iff
 | TLT | +1.47 | +0.74 | +0.73 | no (main NS) |
 | IWM | +1.49 | +4.30 | -2.81 | no (placebo wins) |
 
-**Robust real signal: 1/5 (SPY only).** IWM in particular shows placebo > main,
-strongly suggesting that 4/5 of the apparent gain (and the favorable pooled
-DM t=3.73) is extra-regressor fitting, not graph information.
+**Robustness read:** SPY is the only asset with a strong real-graph result, and
+it survives multiple-testing adjustment. However, the 100-seed placebo shows
+that random graph structure can occasionally match or slightly exceed the SPY
+effect size. The correct language is therefore **SPY is a real-signal
+candidate, not a fully placebo-confirmed result at p<0.01 on effect size**.
+IWM in particular shows seed=42 placebo > main, strongly suggesting that much
+of the favorable pooled DM t=3.73 is extra-regressor fitting, not graph
+information.
 
 ## Final verdict
 
 **MARGINAL with placebo caveat** — does not support the paper's
 "consistently outperforms" claim under our simplified replication. SPY
-result is real (likely captures genuine US-equity cross-asset RV spillover
-via the Pearson-2NN graph), but 4/5 of the universe shows NULL or worse.
+result is statistically strong versus HAR and survives 5-asset multiple-testing
+adjustment, but it is not fully confirmed by the 100-seed random-graph
+effect-size placebo at p<0.01. 4/5 of the universe shows NULL or worse.
 
 Honest interpretation: the GSP idea may have merit on broader universes with
 cleaner (5-min) RV proxies and learned filters, but a minimal-config
