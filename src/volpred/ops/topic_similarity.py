@@ -39,7 +39,9 @@ import sys
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
-from .common import project_path
+from datetime import datetime, timezone
+
+from .common import load_json, project_path
 from .diagnostics import warn
 
 # Near-duplicate cosine threshold for text-embedding-3-small (768-dim) on
@@ -277,3 +279,52 @@ def near_duplicates(
         "threshold": threshold,
         "matches": sorted(matches, key=lambda m: -m["similarity"]),
     }
+
+
+# ---------------------------------------------------------------------------
+# Feed-level report (the boss's directive on real content)
+# ---------------------------------------------------------------------------
+def _recent_published_items(storage_dir: str, lookback: int) -> list[dict[str, Any]]:
+    feed = load_json(project_path(storage_dir) / "reports" / "feed.json", [])
+    if not isinstance(feed, list):
+        return []
+    pub = [x for x in feed if isinstance(x, dict) and x.get("status") == "published"]
+
+    def _ts(item: dict[str, Any]) -> str:
+        return str(item.get("published_at") or item.get("created_at") or "")
+
+    pub.sort(key=_ts, reverse=True)
+    return pub[:lookback]
+
+
+def semantic_concentration_report(
+    storage_dir: str = "storage",
+    *,
+    lookback: int = 20,
+    embedder: Embedder | None = None,
+    threshold: float = DEFAULT_NEAR_DUP_THRESHOLD,
+    use_cache: bool = True,
+) -> dict[str, Any]:
+    """Semantic concentration of the recent published feed (the boss's directive).
+
+    Unlike the keyword cluster cap (which counts every VIX-mentioning article as
+    the same), this embeds each article's WHOLE TOPIC (title + description +
+    conclusion) and reports the fraction that are a genuine semantic rehash of
+    another recent article. Fail-open: `semantic_unavailable` if embeddings are
+    down — never blocks. Cached, so steady-state cost is ~the new articles only.
+    """
+    items = _recent_published_items(storage_dir, lookback)
+    if len(items) < 2:
+        return {"status": "ok", "sample": len(items), "note": "too few published items"}
+    topics = [article_topic_text(it) for it in items]
+    report = topic_concentration(
+        topics,
+        embedder=embedder,
+        threshold=threshold,
+        storage_dir=storage_dir,
+        use_cache=use_cache,
+    )
+    report["generated_at"] = datetime.now(timezone.utc).isoformat()
+    report["lookback"] = lookback
+    report["basis"] = "whole_topic_semantic"
+    return report

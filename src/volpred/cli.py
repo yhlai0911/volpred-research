@@ -703,6 +703,27 @@ def ops_loop_health(storage_dir: str) -> None:
     _print_json(snapshot)
 
 
+@ops.command("semantic-concentration")
+@click.option("--storage-dir", default="storage", show_default=True)
+@click.option("--lookback", default=20, show_default=True, type=int)
+def ops_semantic_concentration(storage_dir: str, lookback: int) -> None:
+    """Semantic concentration of recent published feed (boss email-12139 directive).
+
+    Embeds each article's WHOLE TOPIC (title+description+conclusion) and reports
+    the fraction that are a genuine semantic rehash — NOT keyword overlap. Two
+    different vol subtopics don't count; paraphrases do. Fail-open if embeddings
+    are unavailable. Costs ~the new articles only (cached).
+    """
+    from volpred.ops.topic_similarity import semantic_concentration_report
+
+    report = semantic_concentration_report(storage_dir, lookback=lookback)
+    console.print(
+        f"[green]Semantic concentration[/green] status=[bold]{report.get('status')}[/bold] "
+        f"sample={report.get('sample')} rehash_rate={report.get('rehash_rate')}"
+    )
+    _print_json(report)
+
+
 @ops.command("dreaming-run")
 @click.option("--storage-dir", default="storage", show_default=True)
 @click.option("--dry-run", is_flag=True, help="Detect + write report only; no task dispatch, retract, or email")

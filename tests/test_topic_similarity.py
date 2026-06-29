@@ -102,6 +102,38 @@ def test_article_topic_text_combines_whole_topic():
     assert ts.article_topic_text({}) == ""
 
 
+def test_semantic_concentration_report_reads_feed(tmp_path: Path):
+    import json as _json
+
+    storage = tmp_path / "storage"
+    (storage / "reports").mkdir(parents=True)
+    feed = [
+        {"id": "a", "status": "published", "title": "VIX 期限結構預測回檔",
+         "description": "用 term structure 訊號", "published_at": "2026-06-29T03:00:00Z"},
+        {"id": "b", "status": "published", "title": "VIX term structure 預測股市修正",
+         "description": "同一套訊號改寫", "published_at": "2026-06-29T02:00:00Z"},
+        {"id": "c", "status": "published", "title": "台股波動率擇時回測",
+         "description": "完全不同", "published_at": "2026-06-29T01:00:00Z"},
+        {"id": "d", "status": "draft", "title": "草稿不算", "published_at": "2026-06-29T00:00:00Z"},
+    ]
+    (storage / "reports" / "feed.json").write_text(_json.dumps(feed, ensure_ascii=False), encoding="utf-8")
+
+    # Fake embedder: a≈b (rehash), c distinct. Keyed by whole-topic text.
+    def embed(texts):
+        out = []
+        for t in texts:
+            if "term structure" in t or "期限結構" in t:
+                out.append([1.0, 0.0, 0.0])
+            else:
+                out.append([0.0, 1.0, 0.0])
+        return out
+
+    r = ts.semantic_concentration_report(str(storage), embedder=embed, use_cache=False)
+    assert r["sample"] == 3  # draft excluded
+    assert r["basis"] == "whole_topic_semantic"
+    assert r["rehash_count"] == 2  # a and b are semantic twins
+
+
 def test_cache_avoids_reembedding(tmp_path: Path):
     calls = {"n": 0}
 
