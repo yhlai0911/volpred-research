@@ -36634,5 +36634,18 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-06-29T12:12:44.429525"
+  },
+  {
+    "item_id": "4cd0fc49",
+    "category": "experiment",
+    "content": "K1570 Office-CRE refinancing pressure public proxy WEAK_PARTIAL: FRED CRE delinquency (quarter-end +50d release lag), DGS10 pressure, and office REIT basket stress were tested on yfinance daily data 2012-01-03 to 2026-06-26 for KRE/KBE/VNQ/IYR/XLRE/REM/CMBS/office-basket forward RV and downside variance. All signals are shift(1); forward labels use [t+1,t+H]; HAC maxlags=H; primary family has 96 tests with Holm/Bonferroni. Only CMBS 5d forward RV survived positive Holm + Harvey |t|>=3: combined CRE pressure coef=0.214 t=4.30 Holm p=0.00166; office market stress coef=0.166 t=4.04 Holm p=0.00511. KRE/KBE/broad REIT/mortgage REIT/office-basket cells did not survive. Top-decile combined pressure events show high unconditional future RV (e.g. REM 4.15x, CMBS 2.02x), but controls absorb most broad lead-lag evidence. Conclusion: narrow public-market CMBS proxy signal only; no broad claim that office-CRE refinancing wall predicts regional-bank or REIT volatility.",
+    "evidence": [
+      "experiments/k1570/k1570.py",
+      "experiments/k1570/k1570_results.json",
+      "experiments/k1570/README.md",
+      "experiments/k1570/codex_review.md"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-06-29T14:33:32.857127"
   }
 ]

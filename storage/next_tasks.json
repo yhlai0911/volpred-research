@@ -38642,7 +38642,7 @@
     "title": "K1570: Office-CRE refinancing wall 對 regional bank / REIT vol 的 lead-lag** — 用 FRED CRE delinquency、Fed Financial Stability Rep",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1298). Original: Office-CRE refinancing wall 對 regional bank / REIT vol 的 lead-lag** — 用 FRED CRE delinquency、Fed Financial Stability Report、AER remote-work CRE evidence、KRE/IYR/office REIT basket，檢定 CRE stress proxy 是否領先 KRE、office REIT、CMBS/REIT ETF RV 與 tail co-movement（來源：AER remote-work CRE evidence + Fed Financial Stability Report 2026；remote work → CRE → bank risk 仍在升溫）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1570.py with signal.shift(1) + seed=42, (c) K1570_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38651,7 +38651,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-29T00:00:01Z"
+    "created_at": "2026-06-29T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T06:22:41.967416+00:00",
+    "claim_session_id": "33658b4d4cf4",
+    "started_at": "2026-06-29T06:22:53.325948+00:00",
+    "completed_at": "2026-06-29T06:34:25.392228+00:00",
+    "result": "K1570 completed. Built lookahead-safe public-proxy experiment for Office-CRE refinancing pressure vs KRE/KBE/VNQ/IYR/XLRE/REM/CMBS/office-basket RV. Verdict WEAK_PARTIAL: only CMBS 5d forward RV survives Holm+Harvey; no broad regional-bank/REIT pass. Knowledge item 4cd0fc49; research_program updated."
   },
   {
     "id": "daily_digest_20260629",
