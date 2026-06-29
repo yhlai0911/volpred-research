@@ -18,6 +18,7 @@ A **decreasing / negative VRP slope** (VRP_6M shrinks toward or below VRP_1M) si
 - Source: yfinance (no mock data).
 - Tickers: `SPY`, `^VIX`, `^VIX3M`, `^VIX6M`. (All four available, ~2008-01-02 → 2026-06-23.)
 - N = 4,648 trading days.
+- Remediation note (2026-06-29): SPY realized-volatility inputs are computed on SPY trading days after `dropna()` and then reindexed to the IV calendar. This prevents non-SPY calendar rows from contaminating rolling RV windows.
 
 ## Method
 
@@ -29,10 +30,11 @@ A **decreasing / negative VRP slope** (VRP_6M shrinks toward or below VRP_1M) si
 - **Tests**:
   1. Spearman rank correlation with block-bootstrap 95% CI (block=N, B=1000, seed=42).
   2. Newey-West HAC SE OLS regression `fwd_dd_N ~ const + signal`, lag = N.
-  3. ROC AUC for tail event (`fwd_dd_21 ≤ −5%`) with Hanley-McNeil 95% CI.
-  4. Quantile-5 portfolio: mean `fwd_dd_21` by signal-quintile; Welch t-test top vs bottom.
+  3. ROC AUC for tail event (`fwd_dd_21 ≤ −5%`) with Hanley-McNeil 95% CI. Direction is signal-specific: lower term slope = higher tail-risk score; higher VIX level = higher tail-risk score.
+  4. Quantile-5 portfolio: mean `fwd_dd_21` by signal-quintile; Welch t-test top vs bottom reported as diagnostic only because forward drawdown windows overlap.
   5. Subsample stability: 2010-2019 vs 2020-2026.
   6. Encompassing regression: `fwd_dd_21 ~ const + VIX_level + VRP_slope_6M_1M` (HAC).
+  7. Multiple-testing disclosure: 5 signals × 3 horizons = 15 primary NW HAC p-values, with Bonferroni and Holm-Bonferroni summaries in `k1546_results.json`.
 
 ## Differentiation from prior K
 
@@ -108,4 +110,16 @@ Subsample reveals a **regime-fragile** pattern: VRP slope had measurable predict
 - ✅ Baseline (`VIX_level`, `IV_slope`) uses same `_lag1` shift convention.
 - ✅ Real yfinance data (no mock).
 - ✅ Subsample stability test reported separately from full-sample headline (no cherry-pick).
-- ⚠️ Codex review **not** performed by worktree agent — main thread to schedule pre-knowledge-write Codex review per K1259 process gate.
+- ✅ Codex review CONDITIONAL_PASS 2026-06-29 (see `codex_review_2026_06_29.md`); 5 remediation items resolved in this revision (see correction note below).
+
+## Correction note (2026-06-29, post-Codex review)
+
+Per Codex 24h-rule findings (`codex_review_2026_06_29.md`), the following remediations were applied without changing the headline NULL verdict:
+
+1. **AUC direction** (`roc_auc_with_ci`): VRP_slope uses `score = -signal` (low slope → tail), VIX_level + IV_slope use `score = +signal` (high level → tail per Codex spec). Caller now passes `direction` per signal name. This corrects the previously inverted VIX_level AUC of 0.284 to 0.716.
+2. **Quintile portfolio** (`quantile_portfolio`): Welch iid t-test relabelled diagnostic-only because forward N-day DD samples overlap; primary inference uses NW HAC + Spearman block bootstrap.
+3. **Multiple-testing disclosure**: Results JSON now carries `multiple_testing` block with Bonferroni (α/15) and Holm-Bonferroni survivors. VRP_slope_* signals fail at raw α=0.05; IV_slope_3M_1M, IV_slope_6M_1M, and VIX_level survive Bonferroni at all three horizons.
+4. **RV dropna**: `build_vrp` now operates on SPY-aligned returns (`np.log(df["SPY"]).diff().dropna()`) and reindexes back, extending the last valid VRP day from 2026-05-22 to 2026-06-23.
+5. **Article tone** (`mile_410f7532`): "白工" wording softened to "primary full-sample 下不成立"; correction note appended; `content_audit_flagged` cleared.
+
+Headline verdict remains NULL: VRP_slope_6M_1M_lag1 N21 t=−0.98, AUC=0.448, Spearman CI95 crosses zero.

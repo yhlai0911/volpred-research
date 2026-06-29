@@ -38529,7 +38529,7 @@
     "title": "K1546 remediation: AUC direction + quintile overlap + MT disclosure + RV dropna",
     "description": "Per experiments/k1546/codex_review_2026_06_29.md (Codex CONDITIONAL_PASS): (1) k1546.py:215-233 AUC `score=-signal` blanket -> VIX_level/IV_slope 正向 score=+signal; (2) k1546.py:195-200 quintile Welch iid t-test -> block bootstrap or diagnostic-only label; (3) results.json + README 補 Bonferroni/Holm 揭露 (5 sig x 3 horiz); (4) k1546.py:84-88 RV add SPY dropna() before reindex -> VRP 延伸到 2026-06-23; (5) feed.json mile_410f7532 article 語氣縮減（白工 -> 'primary full-sample 下不成立'）. 完成後重跑 k1546.py 驗證 results.json 更新，無 lookahead bug，再寫 correction note 到 README。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "codex_review_remediation",
     "linked_experiment": "k1546",
@@ -38541,6 +38541,92 @@
       "AUC-direction",
       "multiple-testing"
     ],
-    "created_at": "2026-06-29T07:16:08.952529+08:00"
+    "created_at": "2026-06-29T07:16:08.952529+08:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-29T00:10:53.605111+00:00",
+    "claim_session_id": "2de9470cd1e8",
+    "started_at": "2026-06-29T00:11:09.312657+00:00",
+    "completed_at": "2026-06-29T00:15:44.875369+00:00",
+    "result": "5 fixes applied per Codex 2026-06-29 review: (1) AUC direction param + caller dispatch (VIX_level AUC fixed 0.284→0.716, IV_slope per spec +signal), (2) quintile portfolio Welch t labelled diagnostic-only with overlap note, (3) MT disclosure bonferroni/holm-bonferroni 15-hypothesis grid (VRP_slope NULL, VIX+IV_slope survive at all horizons), (4) RV dropna SPY-aligned (sample extends 2026-05-22→06-23), (5) feed.json mile_410f7532 白工→primary full-sample 下不成立 + correction note + content_audit_flagged cleared. README correction section added. Rerun verdict NULL unchanged (t=-0.98, AUC=0.448). Codex CONDITIONAL_PASS findings closed."
+  },
+  {
+    "id": "K1566",
+    "title": "K1566: DEX priority-fee pressure 作 ETH/BTC 短期 RV 訊號** — 用 Etherscan/gas fee、DefiLlama DEX volume、Uniswap public data 與 BTC-USD/",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1290). Original: DEX priority-fee pressure 作 ETH/BTC 短期 RV 訊號** — 用 Etherscan/gas fee、DefiLlama DEX volume、Uniswap public data 與 BTC-USD/ETH-USD，建 priority-fee / DEX-volume shock，檢定 t+1/t+5 RV、left-tail、CEX-crypto ETF spillover；免費資料只能做鏈上 proxy，不冒充 address-level mempool replication（來源：RFS 2026 decentralized-exchange price-discovery / on-chain microstructure stream；on-chain market microstructure 進入頂刊）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1566.py with signal.shift(1) + seed=42, (c) K1566_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1290,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-29T00:00:01Z"
+  },
+  {
+    "id": "K1567",
+    "title": "K1567: BigTech / merchant-platform credit stress 的公開市場 proxy** — 用 SHOP/SQ/PYPL/MELI/AFRM/UPST、IWM/XRT/KRE/HYG，搭 FRED small-bus",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1292). Original: BigTech / merchant-platform credit stress 的公開市場 proxy** — 用 SHOP/SQ/PYPL/MELI/AFRM/UPST、IWM/XRT/KRE/HYG，搭 FRED small-business credit 與 delinquency proxy，檢定平台信用收縮是否領先 small-cap / retail / fintech RV；與 BNPL consumer-credit 題不同，聚焦 merchant-platform enforcement 與 bank-credit substitution（來源：RFS 2026 platform lending / platform-bank competition stream；平台金融與銀行競爭成熱門）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1567.py with signal.shift(1) + seed=42, (c) K1567_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1292,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-29T00:00:01Z"
+  },
+  {
+    "id": "K1568",
+    "title": "K1568: Regulatory-compliance burden beta 作 mid-cap / small-bank RV regime** — 用 Federal Register rule count、RegData / paperwork",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1294). Original: Regulatory-compliance burden beta 作 mid-cap / small-bank RV regime** — 用 Federal Register rule count、RegData / paperwork-burden proxy、行業 compliance-labor exposure，映射 IJR/IWM/KRE/XLF/sector ETF，檢定高 compliance-beta 產業在 regulatory shock 後 RV、downside semivariance、成交量是否放大（來源：RFS 2026 regulatory-compliance stream；法規成本異質性與 business dynamism 成新軸）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1568.py with signal.shift(1) + seed=42, (c) K1568_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1294,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-29T00:00:01Z"
+  },
+  {
+    "id": "K1569",
+    "title": "K1569: Legacy-asset overhang：技術轉型是否讓舊資產 sector 的信用與 RV 同步惡化** — 用 SEC/XBRL PP&E/intangible proxy、sector ETF、銀行/能源/汽車/工業籃，搭 gree",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1296). Original: Legacy-asset overhang：技術轉型是否讓舊資產 sector 的信用與 RV 同步惡化** — 用 SEC/XBRL PP&E/intangible proxy、sector ETF、銀行/能源/汽車/工業籃，搭 green-tech / automation / transition-news shock，檢定 legacy-heavy sector 是否有更高 RV persistence 與 credit-spread beta；資料限制標為 public-disclosure proxy（來源：RFS 2026 technological-change / asset-overhang stream；技術轉型金融摩擦成新軸）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1569.py with signal.shift(1) + seed=42, (c) K1569_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1296,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-29T00:00:01Z"
+  },
+  {
+    "id": "K1570",
+    "title": "K1570: Office-CRE refinancing wall 對 regional bank / REIT vol 的 lead-lag** — 用 FRED CRE delinquency、Fed Financial Stability Rep",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 1298). Original: Office-CRE refinancing wall 對 regional bank / REIT vol 的 lead-lag** — 用 FRED CRE delinquency、Fed Financial Stability Report、AER remote-work CRE evidence、KRE/IYR/office REIT basket，檢定 CRE stress proxy 是否領先 KRE、office REIT、CMBS/REIT ETF RV 與 tail co-movement（來源：AER remote-work CRE evidence + Fed Financial Stability Report 2026；remote work → CRE → bank risk 仍在升溫）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1570.py with signal.shift(1) + seed=42, (c) K1570_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 1298,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-29T00:00:01Z"
   }
 ]

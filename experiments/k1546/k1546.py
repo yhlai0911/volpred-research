@@ -82,11 +82,14 @@ def build_vrp(df: pd.DataFrame) -> pd.DataFrame:
     RV from rolling SPY return std * sqrt(252) (annualized %).
     """
     out = pd.DataFrame(index=df.index)
-    spy_ret = np.log(df["SPY"]).diff()
+    # Drop NaN SPY rows first (holidays / data gaps); rolling on trading-day-aligned
+    # series avoids RV becoming NaN whenever any holiday falls inside the window.
+    # Per Codex 2026-06-29 A3 finding (RV last valid extends 2026-05-22 -> 2026-06-23).
+    spy_ret_clean = np.log(df["SPY"]).diff().dropna()
     # Realized vol over lookback windows (NO lookahead — std uses past)
     for h, win in [("1M", 21), ("3M", 63), ("6M", 126)]:
-        rv = spy_ret.rolling(win).std() * np.sqrt(TRADING_DAYS) * 100.0  # %
-        out[f"RV_{h}"] = rv
+        rv = spy_ret_clean.rolling(win).std() * np.sqrt(TRADING_DAYS) * 100.0  # %
+        out[f"RV_{h}"] = rv.reindex(out.index)
     # IV
     if "VIX" in df.columns:
         out["IV_1M"] = df["VIX"]
@@ -192,11 +195,13 @@ def quantile_portfolio(signal: pd.Series, target: pd.Series, q: int = 5):
     df.columns = ["sig", "tgt"]
     df["bucket"] = pd.qcut(df["sig"], q=q, labels=False, duplicates="drop")
     grouped = df.groupby("bucket")["tgt"].agg(["mean", "std", "count"])
-    # top vs bottom HAC t-test (approximate, since not time-aligned panel)
+    # DIAGNOSTIC ONLY: iid Welch t-test on overlapping N-day forward DD samples.
+    # Per Codex 2026-06-29 B4: 21d forward DD has serial overlap, so iid Welch
+    # standard errors are anti-conservative. Reported as diagnostic; primary
+    # inference is Spearman block-bootstrap CI + NW HAC on the slope regression.
     bot = df[df["bucket"] == 0]["tgt"].values
     top = df[df["bucket"] == grouped.index.max()]["tgt"].values
     if len(bot) > 30 and len(top) > 30:
-        # Welch t-test (independent samples; conservative)
         t_test = stats.ttest_ind(top, bot, equal_var=False)
         diff_t, diff_p = float(t_test.statistic), float(t_test.pvalue)
     else:
@@ -205,16 +210,17 @@ def quantile_portfolio(signal: pd.Series, target: pd.Series, q: int = 5):
 
 
 # ----------------------------- ROC AUC + DeLong CI ------------------------ #
-def roc_auc_with_ci(signal: pd.Series, target: pd.Series, threshold: float = -0.05):
+def roc_auc_with_ci(signal: pd.Series, target: pd.Series, threshold: float = -0.05, direction: str = "negative"):
+    """direction='negative': lower signal predicts tail event (score=-s); used by term slopes.
+       direction='positive': higher signal predicts tail event (score=+s); used by VIX_level.
+       Per Codex 2026-06-29 B3: blanket score=-s flipped VIX_level AUC (0.284 reported vs ~0.716 true)."""
     df = pd.concat([signal, target], axis=1).dropna()
     df.columns = ["sig", "tgt"]
     y = (df["tgt"] <= threshold).astype(int).values
     s = df["sig"].values
     if y.sum() < 10 or (1 - y).sum() < 10:
         return np.nan, (np.nan, np.nan), int(y.sum())
-    # AUC: lower slope predicts tail event -> use -signal for "higher score = more event"
-    # We compute AUC for direction: hypothesis = lower VRP_slope -> more drawdown -> use -s
-    score = -s
+    score = -s if direction == "negative" else s
     # Mann-Whitney based AUC
     pos = score[y == 1]
     neg = score[y == 0]
@@ -294,8 +300,14 @@ def run() -> dict:
             # NW HAC OLS
             beta, t_nw, p_nw = newey_west_se(x, y, lag=N)
             # ROC AUC for tail event (only meaningful for N>=21)
+            # Direction: term slopes (lower slope / backwardation -> more DD) use -signal;
+            # VIX_level (higher level -> more DD) uses +signal. Per Codex 2026-06-29 B3 fix.
+            if "VIX_level" in sig:
+                roc_direction = "positive"
+            else:
+                roc_direction = "negative"
             if N >= 21:
-                auc, (auc_lo, auc_hi), n_pos = roc_auc_with_ci(sub[sig], sub[tgt], threshold=-0.05)
+                auc, (auc_lo, auc_hi), n_pos = roc_auc_with_ci(sub[sig], sub[tgt], threshold=-0.05, direction=roc_direction)
             else:
                 auc, (auc_lo, auc_hi), n_pos = np.nan, (np.nan, np.nan), 0
             # Quantile portfolio
@@ -415,6 +427,44 @@ def run() -> dict:
         "nw_t_stat": head.get("nw_t_stat"),
         "auc": head_auc,
         "spearman_rho": head.get("spearman_rho"),
+    }
+
+    # ============= Multiple-testing disclosure (Codex 2026-06-29 C1 fix) ============= #
+    # Primary test grid: signals_to_test × horizons → up to 5 × 3 = 15 NW p-values.
+    n_signals = len(signals_to_test)
+    n_horizons = len(horizons)
+    n_hypotheses = n_signals * n_horizons
+    bonf_alpha = 0.05 / n_hypotheses if n_hypotheses > 0 else float("nan")
+    # Collect all primary p-values for Holm-Bonferroni
+    pvals = []
+    for sig in signals_to_test:
+        for N in horizons:
+            entry = results["tests"].get(sig, {}).get(f"N{N}", {})
+            p = entry.get("nw_p_value")
+            if p is not None and not (isinstance(p, float) and np.isnan(p)):
+                pvals.append((sig, N, float(p)))
+    pvals_sorted = sorted(pvals, key=lambda x: x[2])
+    holm_survivors = []
+    for k, (sig, N, p) in enumerate(pvals_sorted, start=1):
+        holm_threshold = 0.05 / (n_hypotheses - k + 1)
+        if p < holm_threshold:
+            holm_survivors.append({"signal": sig, "horizon": N, "p": p, "holm_threshold": holm_threshold})
+        else:
+            break  # Holm sequential: stop at first failure
+    bonferroni_survivors = [{"signal": s, "horizon": N, "p": p} for s, N, p in pvals if p < bonf_alpha]
+    results["multiple_testing"] = {
+        "n_signals": n_signals,
+        "n_horizons": n_horizons,
+        "n_hypotheses": n_hypotheses,
+        "bonferroni_alpha_at_0.05": bonf_alpha,
+        "bonferroni_survivors": bonferroni_survivors,
+        "holm_bonferroni_survivors": holm_survivors,
+        "note": (
+            f"Primary grid = {n_signals} signals × {n_horizons} horizons = {n_hypotheses} NW HAC OLS "
+            "p-values. Bonferroni applies α/n; Holm-Bonferroni sequentially tests sorted p-values "
+            "against α/(n−k+1). VRP_slope_* headline signals are NULL even at raw α=0.05; "
+            "the significant corrected results are benchmarks, not the new VRP-slope hypothesis."
+        ),
     }
 
     # ============= Save results ============= #
