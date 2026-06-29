@@ -39555,7 +39555,7 @@
     "title": "Paper review (Codex 24h-rule): 商品 ETF 的方向對了一半，可惜統計撐不住：波動分高低之後的動能 vs 反轉拼圖",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_dc4035e4 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_dc4035e4",
@@ -39563,7 +39563,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-29T18:08:01+00:00"
+    "created_at": "2026-06-29T18:08:01+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-06-29T21:10:14.730011+00:00",
+    "claim_session_id": "ce7f06922257",
+    "started_at": "2026-06-29T21:10:17.863736+00:00",
+    "completed_at": "2026-06-29T21:17:56.170357+00:00",
+    "result": "Codex 24h-rule review verdict: CONDITIONAL_PASS. Source code passes lookahead/DM-HAC/Bonferroni/cost-symmetry/seed checks. Issue caught: README + article mile_dc4035e4 mis-identified raw-α high-vol H1-consistent cell as PDBC monthly N=1 (actual dm_t=-2.19 → momentum dominates = counter-H1); the true H1-consistent cell is CPER weekly N=1 (dm_t=+1.99). Raw-α total undercounted (article said 4, actually 6 = 3 high + 3 low). GLD low-vol cells were mis-described as counter-example (actually H1-consistent since low-vol H1 = momentum dominates). Inline fixes applied to experiments/k1513/README.md (3 paragraphs) and storage/reports/feed.json mile_dc4035e4 content (3 paragraphs). Verdict NULL unchanged. Sharpe wording scoped to full-sample (regime-split inflates to 0.93)."
   },
   {
     "id": "paper_review_mile_7b95b816",
@@ -39654,7 +39660,7 @@
     "id": "k1575_daily_article_critical_minerals",
     "task_type": "daily_article",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "title": "K1575: 一般讀者文章 — 關鍵礦物出口管制與 ETF 波動率（NULL finding）",
     "description": "K1575 NULL finding：8 場關鍵礦物出口管制公告（2023-07-03 ~ 2025-10-09）對 13 檔 ETF（COPX/REMX/LIT/URA/SMH/SOXX/ITA/...）的事件研究 — 312 個 RV tests Bonferroni 0/312 顯著；jump5_abs 2/104 顯著但被同期 broad tariff vol 混淆，無 clean sector-specific transmission。draft_pool_low CRITICAL 補池。",
     "source": "hourly-04_critical_alert_response",
@@ -39662,6 +39668,8 @@
     "claimed_by": "hourly-04",
     "claimed_at": "2026-06-29T20:10:17.183442+00:00",
     "claim_session_id": "c61666277626",
-    "started_at": "2026-06-29T20:10:17.383285+00:00"
+    "started_at": "2026-06-29T20:10:17.383285+00:00",
+    "completed_at": "2026-06-29T21:08:26.413150+00:00",
+    "result": "Published mile_9839822d at 2026-06-29T21:00:38Z (K1575 critical minerals NULL finding, 312 tests with 0 surviving multiple-testing correction). Task stale-released from hourly-04 claim and reconciled with actual feed state."
   }
 ]

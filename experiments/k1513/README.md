@@ -76,16 +76,24 @@ coexistence + return PnL framing (not event-study), and vol regime as the
 * 36 cells in total; 18 cells (50%) show the H1-consistent direction
   (`mean_rev_high > mean_mom_high` AND `mean_mom_low > mean_rev_low`).
 * DM significance after Bonferroni (α ≈ 0.00139): **0 / 36 in either regime**.
-* DM significance at raw α = 0.05: 1 cell in high-vol regime
-  (reversal-dominates), 3 cells in low-vol regime (momentum-dominates).
-* Sharpe magnitudes are modest and symmetric (|Sharpe| ≤ 0.62 across all
-  asset/N/freq combinations), consistent with the well-known fact that
-  unconditional commodity short-horizon momentum is weak after the 2010s
-  financialisation era.
-* Notable counter-examples that **break** the H1 direction: GLD monthly N=1/2/4
-  all show DM t negative in the *low*-vol regime — reversal wins where the
-  hypothesis predicted momentum. PDBC monthly N=1 shows reversal dominates in
-  the high-vol regime (DM t = -2.19) — consistent with H1.
+* DM significance at raw α = 0.05 — **6 cells total** survive |t|>1.96:
+  high-vol regime 3 cells (CPER weekly N=1 reversal-dominates, dm_t=+1.99;
+  USO monthly N=1 momentum-dominates, dm_t=-2.42; PDBC monthly N=1
+  momentum-dominates, dm_t=-2.19); low-vol regime 3 cells (GLD monthly N=1/2/4
+  all momentum-dominates, dm_t=-2.54/-2.61/-2.02). Of these 6, **4 are
+  H1-consistent** (1 high-vol reversal + 3 low-vol momentum); **2 are
+  counter-H1** (high-vol momentum surprises on USO/PDBC monthly).
+* Sharpe magnitudes (full-sample) are modest and symmetric (|Sharpe| ≤ 0.62
+  across all asset/N/freq combinations); per-regime split |Sharpe| reaches
+  ~0.93 (small-sample inflated). The full-sample figure is the headline,
+  consistent with the well-known fact that unconditional commodity
+  short-horizon momentum is weak after the 2010s financialisation era.
+* H1-consistent cell: **CPER weekly N=1** is the only raw-α reversal-dominates
+  high-vol cell (DM t = +1.99). H1-consistent low-vol cells: GLD monthly N=1/2/4
+  all show DM t < 0 meaning *momentum > reversal*, which matches H1 (low vol →
+  momentum dominates). Counter-H1 surprises: USO monthly N=1 (DM t = -2.42) and
+  PDBC monthly N=1 (DM t = -2.19) both have momentum > reversal in the
+  *high*-vol regime — opposite of what H1 predicts.
 
 Full per-cell grid (Sharpe mom/rev, MDD, DM t/p in three slices) is in
 `k1513_results.json`. Visualisation: `k1513_regime_split.png`.
@@ -93,11 +101,16 @@ Full per-cell grid (Sharpe mom/rev, MDD, DM t/p in three slices) is in
 ## 6. Verdict
 
 **NULL** — sign-consistent direction in half the grid (18/36, directionally
-suggestive) but no cell survives Bonferroni. Raw-α positives total 4 across
-both regimes (1 high + 3 low); under H0 the expected count is ~1.8 per
-regime-family (36 tests) or ~3.6 across both (72 tests), so the raw-α tally is
-**statistically indistinguishable from noise**. Direction is consistent with
-the H1 hypothesis but magnitude/power are insufficient to claim regime
+suggestive) but no cell survives Bonferroni. Raw-α |t|>1.96 cells total **6**
+across both regimes (3 high + 3 low); of these 4 are H1-consistent (1 high-vol
+reversal-dominates: CPER weekly N=1; 3 low-vol momentum-dominates: GLD monthly
+N=1/2/4) and 2 are counter-H1 (USO/PDBC monthly N=1 — high-vol momentum
+surprises). Under H0 the expected count is ~1.8 per regime-family (36 tests)
+or ~3.6 across both (72 tests); raw-α tally of 6 is mildly above 3.6 noise
+expectation but the 3 GLD low-vol cells share most observations (highly
+correlated tests), so effective independent count is closer to 4, leaving the
+result **statistically indistinguishable from noise**. Direction is consistent
+with the H1 hypothesis but magnitude/power are insufficient to claim regime
 separation as a robust effect on yfinance ETF proxies.
 
 **Codex review (2026-06-16, primary path)**: `CONDITIONAL_PASS` — lookahead,
@@ -108,6 +121,19 @@ family of 36, not across 72; under 72-test family threshold is α = 0.05/72 ≈
 data-audit table (CPER/PDBC weekly samples are ~683/528, monthly PDBC ~122 —
 shorter than full 2010-2026), (c) the original raw-α overclaim now corrected
 above.
+
+**Codex review (2026-06-30, 24h post-publish K1018 routine)**: `CONDITIONAL_PASS` —
+all source-code-level checks pass (lookahead, NW lag, Bonferroni accounting, cost
+symmetry, seed). Issues caught & fixed inline by main thread on 2026-06-30:
+(i) raw-α high-vol identification was wrong — README previously said PDBC monthly
+N=1 reversal-dominates (consistent with H1) but DM `r_rev - r_mom` has dm_t=-2.19
+which is **momentum-dominates** (counter-H1); the true H1-consistent raw-α high-vol
+cell is **CPER weekly N=1** (dm_t=+1.99). (ii) Raw-α total count was undercounted
+(reported 4, actual 6 — 3 high + 3 low). (iii) Low-vol GLD monthly N=1/2/4 cells
+were mis-described as "counter-example" but are actually H1-consistent (low-vol
+H1 = momentum dominates → dm_t<0 is correct H1 direction). (iv) Sharpe ≤0.62 wording
+scoped to full-sample (per-regime split |Sharpe| reaches 0.93). Verdict (NULL)
+unchanged. Article `mile_dc4035e4` patched in parallel.
 
 The result does **not** falsify the JFEM/SSRN 2025-26 thesis; it shows that
 when proxied with broad commodity ETFs and `signal.shift(1)`-strict design, the
