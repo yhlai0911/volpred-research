@@ -36621,5 +36621,18 @@
       "weak_signal",
       "null_after_correction"
     ]
+  },
+  {
+    "item_id": "3655ff46",
+    "category": "technological_transition_volatility_proxy",
+    "content": "K1569 legacy-asset overhang public proxy — NULL with reversed RV evidence. Using SEC CompanyFacts annual 10-K XBRL ratios (PP&E/assets minus goodwill+intangibles/assets; available only after filing date+1 day) and yfinance adjusted OHLCV for sector/thematic ETFs, 2018-01-02 to 2026-06-26 (n=2,132), the primary date-level high-legacy minus low-legacy design tested transition_shock, credit_stress, and transition_credit_stress across 18 HAC cells. No positive high-minus-low response is raw-significant and no positive Bonferroni/Holm survivor exists. The two family-corrected survivors are reversed: HL 5d log-RV transition_shock coef=-0.112, HAC t=-4.20, p=2.63e-05; HL 21d log-RV coef=-0.115, t=-3.68, p=0.000230. Interpretation: this public disclosure/ETF proxy does not support the claim that legacy-heavy sectors have amplified RV/downside/volume or credit beta after green-tech/automation transition shocks; negative survivors likely reflect low-legacy green/automation/tech baskets being more volatile during transition-market shocks. experiment_id=K1569; experiment_path=experiments/k1569; reviewer=Codex CLI; codex_review=CONDITIONAL_PASS; result_verdict=NULL.",
+    "evidence": [
+      "experiments/k1569/k1569.py",
+      "experiments/k1569/k1569_results.json",
+      "experiments/k1569/README.md",
+      "experiments/k1569/codex_review.md"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-06-29T12:12:44.429525"
   }
 ]

@@ -38620,7 +38620,7 @@
     "title": "K1569: Legacy-asset overhang：技術轉型是否讓舊資產 sector 的信用與 RV 同步惡化** — 用 SEC/XBRL PP&E/intangible proxy、sector ETF、銀行/能源/汽車/工業籃，搭 gree",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1296). Original: Legacy-asset overhang：技術轉型是否讓舊資產 sector 的信用與 RV 同步惡化** — 用 SEC/XBRL PP&E/intangible proxy、sector ETF、銀行/能源/汽車/工業籃，搭 green-tech / automation / transition-news shock，檢定 legacy-heavy sector 是否有更高 RV persistence 與 credit-spread beta；資料限制標為 public-disclosure proxy（來源：RFS 2026 technological-change / asset-overhang stream；技術轉型金融摩擦成新軸）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1569.py with signal.shift(1) + seed=42, (c) K1569_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38629,7 +38629,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-29T00:00:01Z"
+    "created_at": "2026-06-29T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T03:59:58.328709+00:00",
+    "claim_session_id": "8236b8363dcd",
+    "started_at": "2026-06-29T04:00:07.555118+00:00",
+    "completed_at": "2026-06-29T04:15:11.502546+00:00",
+    "result": "K1569 completed: SEC CompanyFacts PP&E/intangible public proxy + yfinance sector/thematic ETF transition-shock test. Verdict NULL: no positive high-minus-low legacy response; two family-corrected survivors are negative RV responses (5d t=-4.20, 21d t=-3.68), so proxy evidence reverses rather than supports legacy-overhang fragility. Artifacts/review stored in experiments/k1569; knowledge item 3655ff46."
   },
   {
     "id": "K1570",
