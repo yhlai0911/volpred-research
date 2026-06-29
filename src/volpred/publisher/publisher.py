@@ -105,7 +105,64 @@ def _log_dedup_decision(storage_dir: str, action: str, new_title: str | None,
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     except Exception:
-        pass
+        pass  # silent-ok: dedup logging must never break a publish
+
+
+def _semantic_dup_warn(storage_dir: str, item: dict, feed: list[dict]) -> None:
+    """WARN-ONLY semantic near-dup check at publish (boss email-12139 directive).
+
+    The keyword gate (`_find_same_ref_feed_duplicate`) only catches dups that
+    SHARE experiment refs + are byte-similar. A semantic rehash (same topic, new
+    framing, possibly different refs — e.g. RECH-X written twice) slips through.
+    This embeds the candidate's WHOLE TOPIC and compares it against recent
+    published topics; on a near-dup it logs `warn_semantic_dup` to
+    dedup_decisions.jsonl. Per `.claude/rules/dedup-gate-audit.md`, a FUZZY signal
+    must be WARN-ONLY (never a hard block — no content gap) and FAIL-OPEN. Wrapped
+    so it can never break a publish; daily-templated bulletins are skipped.
+    """
+    try:
+        from volpred.ops.topic_similarity import (
+            DEFAULT_NEAR_DUP_THRESHOLD,
+            _is_daily_templated,
+            article_topic_text,
+            cosine,
+            embed_with_cache,
+        )
+
+        if _is_daily_templated(item):
+            return
+        item_id = item.get("id")
+        query = article_topic_text(item)
+        if not query.strip():
+            return
+        recent = [
+            x for x in feed
+            if isinstance(x, dict)
+            and x.get("status") == "published"
+            and x.get("id") != item_id
+            and not _is_daily_templated(x)
+        ]
+        recent.sort(key=lambda x: x.get("published_at") or x.get("created_at") or "", reverse=True)
+        recent = recent[:15]
+        if not recent:
+            return
+        topics = [article_topic_text(x) for x in recent]
+        vecs = embed_with_cache([query, *topics], storage_dir=storage_dir)
+        if vecs is None:
+            return  # fail-open: embeddings unavailable
+        qv = vecs[0]
+        for x, tv in zip(recent, vecs[1:]):
+            sim = cosine(qv, tv)
+            if sim >= DEFAULT_NEAR_DUP_THRESHOLD:
+                _log_dedup_decision(
+                    storage_dir, "warn_semantic_dup", item.get("title"), x.get("id"),
+                    f"whole-topic semantic similarity {round(sim, 3)} >= {DEFAULT_NEAR_DUP_THRESHOLD} "
+                    f"vs {x.get('id')} (keyword gate missed; warn-only per dedup-gate-audit)",
+                )
+                break  # one warning per publish is enough
+    except Exception as exc:
+        # Observable (not silent) but never blocks the publish — fail-open.
+        print(f"  ⚠️ semantic dedup warn-check skipped (publish proceeds): {exc}")
 
 
 # 2026-06-23: base64 data-URI image gate. One-time Codex publish scripts embedded
@@ -1674,6 +1731,11 @@ class Publisher:
                         f"refs={sorted(_item_experiment_refs(item) & _item_experiment_refs(duplicate))})"
                     )
                     return str(existing_id)
+                # Semantic near-dup WARN (boss email-12139): catches same-topic
+                # rehashes the keyword gate above misses. Warn-only + fail-open —
+                # never blocks (per dedup-gate-audit fuzzy rule).
+                if not _item_is_digest:
+                    _semantic_dup_warn(str(self.reports_dir.parent), item, feed)
                 feed.append(item)
                 # Sort newest first — use published_at (consistent with frontend display)
                 feed.sort(key=lambda x: x.get('published_at') or x.get('created_at') or '', reverse=True)
