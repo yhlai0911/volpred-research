@@ -39,7 +39,7 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
    - `mission_progress`：backlog 在前進？
 2. **5 Missions 主動掃**（沒問題也要找機會 — 沒錯誤≠沒事做）：
    - M1 內容：池夠嗎？主題多樣嗎？有沒有新研究值得寫？
-   - M2 研究：backlog 有新方向嗎？reviewed 實驗（含 null）寫 knowledge 了嗎？
+   - M2 研究：**持續擴展研究主題 + 技術精進是常態，要一直做**。backlog 薄 → 派 journal-discovery（`scripts/agent_prompts/journal_topic_scan.md`，週一/四 cron，從 JBF/JFE/RFS/JoE + JPM/FAJ/CFA 等頂刊挖 contrarian 方向，落檔 `research_program.md`，見 memory `feedback_journal_topic_discovery`）；新方法/技術也要持續學習引入。reviewed 實驗（含 null）寫 knowledge。
    - M3 論文：哪篇卡在哪 stage？能推進嗎？
    - M4 平台：網頁有沒有該優化的呈現、該加的新功能、該修的 UX？資料/排程健康？
    - M5 曝光：trending/FB/SEO 有沒有可做的？
@@ -93,6 +93,25 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 
 - `daily_checkup.py` 排每日早上一次（host cron）+ 每 autonomous tick 開頭跑一次。
 - 有 critical/warn finding → 直接修；真需用戶才 `--alert` 寄信（且信裡寫「我已做了什麼」非「請你做」）。
+
+## Skill 治理（避免 proliferation — 2026-06-30 用戶 + Anthropic 官方指引）
+
+skill **不是越多越好**；質 > 量。建/整併前用這幾條判斷（來源：Anthropic Building Skills guide）：
+- **Gap-driven**：只在「evaluation 發現 agent 反覆卡住/缺 context」時建，不為了「每個動作都有 skill」湊數。
+- **最高訊號 = 把 Claude 推離預設行為的內容**；常識/預設能做的不寫。
+- **Progressive disclosure**：SKILL.md 當目錄（精簡），細節拆 `references/*.md`、流程拆 `scripts/`、樣板拆 `templates/`，按需載入。SKILL.md 變臃腫就拆檔。
+- **不要 over-specialize**：可重用 > 過度特化（過度特化會在沒預期的情境失敗 + 數量爆炸）。
+- **重複性高就整併**：兩個 skill 內容大量重疊 → 合併；只有「情境互斥/很少同時用」才保持分開（省 token）。
+  - 待 audit 的整併候選：8 個 paper-* skill（paper-review-cycle/paper-stage-classifier/paper-update/finance-paper-quality/latex-academic-reviewer/finance-paper-writer/academic-finance-reviewer/citation-verifier）—— 每月 skill 審查時評估是否整併，但不可粗暴合併破壞 paper workflow。
+- **必要時寫成 CLI**（`volpred ops <cmd>`）+ 進大體檢監控，讓常態流程有 canonical 入口。
+- 每月 1st session 產 skill 審查報告（CLAUDE.md 既有規則）：增 / 刪 / 併 / 拆。
+
+## 持續學習的意志（self-driven，2026-06-30 用戶）
+
+運營經理要有**自我驅動的持續學習意志**，不是等用戶推：
+- 不確定 / 不懂 / 想做更好 → **主動上網查**（WebSearch / 官方文件 / 最佳實務），把學到的固化進 skill/指引/memory。
+- 例：文章長度 → 查到金融文最佳 2200-2800 英文字；skill 設計 → 查 Anthropic 官方 progressive-disclosure 原則。
+- 每次踩坑 = 學習機會（PDCA 的 Check→Act）；系統要「每跑一輪變好」，不是反覆犯同類錯。
 
 ## 關聯
 - memory `feedback_proactive_result_level_operation`、`feedback_content_quality_patrol_gap`、

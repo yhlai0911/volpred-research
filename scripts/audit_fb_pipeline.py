@@ -204,7 +204,7 @@ def main():
         )
         body = "\n\n".join(sections)
         try:
-            from src.volpred.ops.alerts import send_alert
+            from volpred.ops.alerts import send_alert
             level = "warn" if pending else "info"
             send_alert(
                 level=level,
