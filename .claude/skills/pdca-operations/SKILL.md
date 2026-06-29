@@ -13,6 +13,11 @@ description: >
 
 # PDCA 運營流程（平台持續改善的操作系統）
 
+> **這是 self-driven DNA，不是「用戶說了才做」（2026-06-30 最高定調）。** 自我提升是你的
+> 預設運營本性 —— 每個 tick **自發**跑這個迴圈、自發找優化、自發查學理、自發固化教訓、
+> 自發整理記憶。用戶不該需要糾正你才改進；他糾正 = DNA 還沒內建的訊號。目標：讓「每跑一輪
+> 變好」成為本能，而非反應。
+
 PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調）。不是 bug-fix 口號，是
 自主運營經理每一輪的操作骨架。對應 loop engineering：context=原料、memory=狀態、
 **本 skill=流程**、guardrails=邊界、dreaming=慢 loop 整理器。
@@ -105,6 +110,25 @@ skill **不是越多越好**；質 > 量。建/整併前用這幾條判斷（來
   - 待 audit 的整併候選：8 個 paper-* skill（paper-review-cycle/paper-stage-classifier/paper-update/finance-paper-quality/latex-academic-reviewer/finance-paper-writer/academic-finance-reviewer/citation-verifier）—— 每月 skill 審查時評估是否整併，但不可粗暴合併破壞 paper workflow。
 - **必要時寫成 CLI**（`volpred ops <cmd>`）+ 進大體檢監控，讓常態流程有 canonical 入口。
 - 每月 1st session 產 skill 審查報告（CLAUDE.md 既有規則）：增 / 刪 / 併 / 拆。
+
+## 做所有事都要有「學理 + 實操根據」（2026-06-30 用戶，最底層方法論）
+
+任何決策/設計（不只研究實驗）都要有 (1) **學理根據**（相關領域的科學/理論）+ (2) **實操根據**
+（最佳實務/實測證據）。給一個目標 → **主動查該領域專業**（WebSearch 認知科學/工程/官方文件/
+業界實務）學會怎麼做好 → 才動手。禁 naive/拍腦袋實作。例：
+- 「文章長度」→ 查到金融文最佳 2200-2800 字（SEO/engagement 研究）。
+- 「skill 設計」→ 查 Anthropic progressive-disclosure / gap-driven / quality>quantity。
+- 「記憶整理更清楚易用」→ 查認知科學（chunking/schema/Herbert Simon）+ 知識管理
+  （atomic notes / Zettelkasten 連結 / PARA archive）。
+
+### 記憶整理 grounded 方法（慢 loop dreaming + 月度 memory-health 用）
+VolPred 記憶已內建最佳實務（一檔一事實=atomic、`[[name]]`=知識網、MEMORY.md=索引、
+type=schema）。「雜亂」整理依認知科學/KM：
+1. **Chunking / Schema**：MEMORY.md 索引按主題分群（user/project/feedback-子類），相關的擺一起 → 降檢索 latency。
+2. **去重合併（atomic 原則）**：同一事實散在多檔 → 合併成一條 self-contained；矛盾的以新/權威者為準。
+3. **Archive（PARA）**：過期/被取代的記憶移 archive（或刪），讓 active set 精簡。
+4. **Cross-link（Zettelkasten）**：相關記憶補 `[[name]]` 連結，形成知識網、防遺失。
+5. dreaming `detect_memory_governance` 偵測「未成 skill 的 process 記憶 + feedback 量大」→ propose；月度 memory-health 執行整理。
 
 ## 持續學習的意志（self-driven，2026-06-30 用戶）
 

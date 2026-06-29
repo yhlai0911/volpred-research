@@ -428,6 +428,68 @@ def detect_semantic_concentration(
     return out
 
 
+def detect_memory_governance(
+    storage_dir: str, snapshot: dict[str, Any], now: datetime
+) -> list[DreamFinding]:
+    """慢 loop 記憶治理（2026-06-30 用戶）：(a) 萃取「描述 recurring process/cadence 但
+    還沒成 skill」的記憶 → 提議 promote 成 skill / 加排程；(b) feedback 記憶量大 → 提議
+    整併去重澄清，讓記憶更清楚易用。propose_only（記憶治理敏感，不自動改）。"""
+    import pathlib
+
+    out: list[DreamFinding] = []
+    mem_dir = (
+        pathlib.Path.home() / ".claude" / "projects"
+        / "-Users-yhlai0911-Desktop-volpred-research" / "memory"
+    )
+    index = mem_dir / "MEMORY.md"
+    if not index.exists():
+        return out  # silent-ok: auto-memory 不在此機就跳過（fail-open）
+    skills_dir = pathlib.Path(storage_dir).resolve().parent / ".claude" / "skills"
+    skills = (
+        {p.name.lower() for p in skills_dir.iterdir() if p.is_dir()}
+        if skills_dir.exists() else set()
+    )
+    lines = [
+        ln.strip() for ln in index.read_text(errors="replace").splitlines()
+        if ln.strip().startswith("- [")
+    ]
+    proc_kw = ("流程", "排程", "每日", "每週", "cadence", "持續", "patrol", "巡檢", "workflow", "auto")
+    candidates: list[str] = []
+    for ln in lines:
+        low = ln.lower()
+        if not any(k in ln or k in low for k in proc_kw):
+            continue
+        covered = any(
+            s.replace("-", "").replace("_", "") in low.replace("-", "").replace("_", "")
+            for s in skills if len(s) > 5
+        )
+        if not covered:
+            candidates.append(ln[:120])
+    if candidates:
+        out.append(DreamFinding(
+            pattern_type="memory_skill_gap",
+            signature="memory_skill_gap:uncodified_process",
+            severity="info",
+            evidence=candidates[:6],
+            proposal="這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 "
+                     "skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。",
+            governance_target=".claude/skills/",
+            occurrences=len(candidates),
+        ))
+    feedback = [ln for ln in lines if "feedback_" in ln]
+    if len(feedback) >= 45:
+        out.append(DreamFinding(
+            pattern_type="memory_hygiene",
+            signature="memory_hygiene:consolidation_review",
+            severity="info",
+            evidence=[f"{len(feedback)} 條 feedback 記憶（>=45，疑有重疊）"],
+            proposal="feedback 記憶量大：月度做整併/去重/澄清，讓記憶更清楚易用（避免垃圾桶化）。",
+            governance_target="memory/",
+            occurrences=len(feedback),
+        ))
+    return out
+
+
 DETECTORS = (
     detect_repeated_tool_failures,
     detect_recurring_errors,
@@ -435,6 +497,7 @@ DETECTORS = (
     detect_missing_retry_strategy,
     detect_loop_metric_regression,
     detect_semantic_concentration,
+    detect_memory_governance,
 )
 
 
