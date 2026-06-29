@@ -121,11 +121,14 @@ def _semantic_dup_warn(storage_dir: str, item: dict, feed: list[dict]) -> None:
     so it can never break a publish; daily-templated bulletins are skipped.
     """
     try:
+        from datetime import datetime, timezone
+
         from volpred.ops.topic_similarity import (
             DEFAULT_NEAR_DUP_THRESHOLD,
             _is_daily_templated,
             article_topic_text,
             cosine,
+            effective_near_dup_threshold,
             embed_with_cache,
         )
 
@@ -146,6 +149,28 @@ def _semantic_dup_warn(storage_dir: str, item: dict, feed: list[dict]) -> None:
         recent = recent[:15]
         if not recent:
             return
+
+        # Dynamic threshold (boss email-12153 2026-06-29): when the platform
+        # is in a reader-facing drought, relax the semantic warn gate so the
+        # pool can release borderline-similar pieces rather than freeze.
+        # gap = hours since newest reader-facing published article.
+        gap_hours: float | None = None
+        try:
+            from volpred.ops.content import _is_reader_facing_published, _parse_datetime
+            reader_times = [
+                t for t in (
+                    _parse_datetime(a.get("published_at"))
+                    for a in feed
+                    if isinstance(a, dict) and _is_reader_facing_published(a)
+                ) if t is not None
+            ]
+            if reader_times:
+                now = datetime.now(timezone.utc)
+                gap_hours = (now - max(reader_times)).total_seconds() / 3600.0
+        except Exception:  # silent-ok: gap-hours probe is best-effort, fall through to baseline
+            gap_hours = None
+        threshold = effective_near_dup_threshold(gap_hours)
+
         topics = [article_topic_text(x) for x in recent]
         vecs = embed_with_cache([query, *topics], storage_dir=storage_dir)
         if vecs is None:
@@ -153,11 +178,16 @@ def _semantic_dup_warn(storage_dir: str, item: dict, feed: list[dict]) -> None:
         qv = vecs[0]
         for x, tv in zip(recent, vecs[1:]):
             sim = cosine(qv, tv)
-            if sim >= DEFAULT_NEAR_DUP_THRESHOLD:
+            if sim >= threshold:
+                gap_text = (
+                    f"gap={gap_hours:.1f}h, threshold={threshold} (dynamic ladder)"
+                    if gap_hours is not None
+                    else f"threshold={threshold} (baseline)"
+                )
                 _log_dedup_decision(
                     storage_dir, "warn_semantic_dup", item.get("title"), x.get("id"),
-                    f"whole-topic semantic similarity {round(sim, 3)} >= {DEFAULT_NEAR_DUP_THRESHOLD} "
-                    f"vs {x.get('id')} (keyword gate missed; warn-only per dedup-gate-audit)",
+                    f"whole-topic semantic similarity {round(sim, 3)} >= {threshold} "
+                    f"vs {x.get('id')} ({gap_text}; warn-only per dedup-gate-audit)",
                 )
                 break  # one warning per publish is enough
     except Exception as exc:

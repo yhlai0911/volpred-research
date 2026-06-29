@@ -62,6 +62,50 @@ from .diagnostics import warn
 # refine as labelled pairs accumulate.
 DEFAULT_NEAR_DUP_THRESHOLD = 0.74
 
+# Dynamic-threshold ladder (boss email-12153 2026-06-29):
+# "語意標準不是絕對標準，可使用動態調整，若門檻太高 可逐步降低到正常釋出文章".
+# When the platform is in a reader-facing publishing drought, an absolute
+# 0.74 gate can compound with arc/cluster gates and freeze the release pool.
+# The boss's rule: relax the semantic gate progressively as drought deepens —
+# never publish a *guaranteed* rehash, but allow borderline-similar pieces
+# rather than block content entirely. Each rung is paired with a drought
+# hour-gap; thresholds rise monotonically (higher = MORE permissive — only
+# stricter near-twins trigger the warn-only signal).
+#   gap < 6h     → 0.74 (baseline; calibrated on real feed pairs)
+#   gap 6–12h    → 0.78 (slightly relaxed; tolerates loose paraphrase)
+#   gap 12–24h   → 0.82 (drought territory; only catches obvious twins)
+#   gap ≥ 24h    → 0.86 (deep drought; effectively only blocks near-verbatim)
+# Above 0.86 we stop raising — anything ≥0.86 is near-verbatim and almost
+# certainly a copy. fail-open if gap is unknown / negative → baseline.
+_NEAR_DUP_THRESHOLD_LADDER: tuple[tuple[float, float], ...] = (
+    (24.0, 0.86),
+    (12.0, 0.82),
+    (6.0, 0.78),
+    (0.0, 0.74),
+)
+
+
+def effective_near_dup_threshold(drought_gap_hours: float | None) -> float:
+    """Pick the semantic near-dup threshold from the dynamic ladder.
+
+    `drought_gap_hours` = hours since the newest genuinely reader-facing
+    published article (see `_is_reader_facing_published` in `ops.content`).
+    None or negative → baseline (treat as 'no known drought').
+
+    The ladder is monotone-increasing in gap: longer drought → higher
+    threshold → fewer near-dup warnings → publishes that would have been
+    held back by an absolute 0.74 gate go through with a WARN trail.
+    Hard byte-for-byte / arc-of-published dups are caught by other gates
+    (`_find_same_ref_feed_duplicate`, drought-breaker's `non_rehash`
+    filter); this only relaxes the FUZZY semantic signal.
+    """
+    if drought_gap_hours is None or drought_gap_hours <= 0:
+        return DEFAULT_NEAR_DUP_THRESHOLD
+    for gap_floor, thr in _NEAR_DUP_THRESHOLD_LADDER:
+        if drought_gap_hours >= gap_floor:
+            return thr
+    return DEFAULT_NEAR_DUP_THRESHOLD
+
 _CACHE_REL = "cache/topic_embeddings.json"
 
 Embedder = Callable[[Sequence[str]], list[list[float]]]

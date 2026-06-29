@@ -25,6 +25,37 @@ def test_cosine_basic():
     assert abs(ts.cosine([1, 1], [1, 0]) - 0.7071) < 1e-3
 
 
+def test_effective_near_dup_threshold_dynamic_ladder():
+    """Boss email-12153 directive: threshold relaxes as drought deepens.
+
+    Lower gap → stricter (lower) threshold; longer drought → more permissive
+    (higher threshold). None / zero / negative → baseline (no known drought).
+    """
+    base = ts.DEFAULT_NEAR_DUP_THRESHOLD  # 0.74
+    # No drought info → baseline
+    assert ts.effective_near_dup_threshold(None) == base
+    assert ts.effective_near_dup_threshold(0.0) == base
+    assert ts.effective_near_dup_threshold(-1.0) == base
+    # Sub-6h: still baseline
+    assert ts.effective_near_dup_threshold(2.5) == base
+    assert ts.effective_near_dup_threshold(5.9) == base
+    # 6–12h: slight relax
+    assert ts.effective_near_dup_threshold(6.0) == 0.78
+    assert ts.effective_near_dup_threshold(11.9) == 0.78
+    # 12–24h: drought territory
+    assert ts.effective_near_dup_threshold(12.0) == 0.82
+    assert ts.effective_near_dup_threshold(23.9) == 0.82
+    # ≥24h: deep drought (caps at 0.86; only near-verbatim triggers)
+    assert ts.effective_near_dup_threshold(24.0) == 0.86
+    assert ts.effective_near_dup_threshold(72.0) == 0.86
+    # Monotone: longer gap never returns a stricter threshold
+    prev = base
+    for gap in (0.5, 5.0, 6.0, 10.0, 12.0, 20.0, 24.0, 48.0, 100.0):
+        thr = ts.effective_near_dup_threshold(gap)
+        assert thr >= prev, f"non-monotone at gap={gap}: {thr} < {prev}"
+        prev = thr
+
+
 def test_concentration_detects_semantic_twin(tmp_path: Path):
     # A and A2 are the same topic (identical vectors → cosine 1.0); B is distinct.
     vecs = {
