@@ -38598,7 +38598,7 @@
     "title": "K1568: Regulatory-compliance burden beta 作 mid-cap / small-bank RV regime** — 用 Federal Register rule count、RegData / paperwork",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1294). Original: Regulatory-compliance burden beta 作 mid-cap / small-bank RV regime** — 用 Federal Register rule count、RegData / paperwork-burden proxy、行業 compliance-labor exposure，映射 IJR/IWM/KRE/XLF/sector ETF，檢定高 compliance-beta 產業在 regulatory shock 後 RV、downside semivariance、成交量是否放大（來源：RFS 2026 regulatory-compliance stream；法規成本異質性與 business dynamism 成新軸）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1568.py with signal.shift(1) + seed=42, (c) K1568_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38607,7 +38607,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-29T00:00:01Z"
+    "created_at": "2026-06-29T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T02:42:20.882836+00:00",
+    "claim_session_id": "2b7c95c98061",
+    "started_at": "2026-06-29T02:42:32.265682+00:00",
+    "completed_at": "2026-06-29T02:58:14.383881+00:00",
+    "result": "K1568 completed: Federal Register RULE/PRORULE flow proxy tested on IJR/IWM/KRE/KBE/XLF/XLV/XLI/XRT RV, downside, and volume outcomes. Verdict WEAK_RAW_ONLY: strongest raw cell XLI 5d downside proposed-rule t=3.19 p=0.0014, but 0 positive Bonferroni/Holm survivors across 144 tests. Artifacts and Codex source review stored in experiments/k1568; knowledge item 1c434b7f."
   },
   {
     "id": "K1569",

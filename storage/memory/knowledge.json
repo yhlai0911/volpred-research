@@ -36582,5 +36582,18 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-29T09:39:46.414633"
+  },
+  {
+    "item_id": "1c434b7f",
+    "category": "regulatory_policy_volatility_proxy",
+    "content": "K1568 Federal Register rule-flow compliance-burden proxy experiment — WEAK_RAW_ONLY. Using Federal Register RULE/PRORULE publication flow (78,564 docs, aligned to next ETF trading date then signal.shift(1)) and yfinance adjusted OHLCV for IJR/IWM/KRE/KBE/XLF/XLV/XLI/XRT, 2012-01-03 to 2026-06-26 (n=3,641), the public rule-flow proxy produced several raw positive controlled-HAC associations, strongest XLI 5d downside proposed-rule flow t=3.19 p=0.0014 and XLV 5d RV proposed-rule flow t=3.16 p=0.0016. However, the primary family has 144 controlled-HAC tests and no positive Bonferroni/Holm survivor (Bonferroni alpha=0.000347). Conclusion: useful hypothesis-generation proxy for industrial/health-care regulatory-flow sensitivity, but not evidence that true regulatory-compliance burden beta robustly predicts ETF RV/downside/volume. experiment_id=K1568; experiment_path=experiments/k1568; reviewer=Codex CLI; codex_review=CONDITIONAL_PASS; result_verdict=WEAK_RAW_ONLY.",
+    "evidence": [
+      "experiments/k1568/k1568.py",
+      "experiments/k1568/k1568_results.json",
+      "experiments/k1568/README.md",
+      "experiments/k1568/codex_review.md"
+    ],
+    "confidence": 0.58,
+    "created_at": "2026-06-29T10:57:46.742710"
   }
 ]
