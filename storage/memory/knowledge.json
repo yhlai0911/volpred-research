@@ -36569,5 +36569,18 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-06-29T08:29:30.053893"
+  },
+  {
+    "item_id": "c3803960",
+    "category": "credit_volatility_proxy",
+    "content": "K1567 WEAK_RAW_ONLY / corrected-primary NULL: Public merchant-platform credit-stress proxy (SHOP/XYZ/PYPL/MELI plus AFRM/UPST equity stress, FRED BUSLOANS/DRBLACBS/NFCI/STLFSI4 background) was tested against IWM/XRT/KRE/HYG forward 5d/21d log RV from 2018-01-02 to 2026-06-26. Signals are explicitly shifted by one trading day; FRED series use conservative release lags; US ETF target calendar is enforced. Several cells are directionally positive after controls (own RV, SPY RV, VIX): IWM 5d credit-fintech t=2.50, HYG 21d credit-fintech t=2.56, but no primary cell survives 24-test Bonferroni/Holm correction. Conclusion: useful weak diagnostic for future merchant-platform loan-book data, not evidence of a robust platform-credit volatility edge.",
+    "evidence": [
+      "experiments/k1567/k1567.py",
+      "experiments/k1567/k1567_results.json",
+      "experiments/k1567/README.md",
+      "experiments/k1567/codex_review.md"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-29T09:39:46.414633"
   }
 ]

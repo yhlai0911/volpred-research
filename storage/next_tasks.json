@@ -38576,7 +38576,7 @@
     "title": "K1567: BigTech / merchant-platform credit stress 的公開市場 proxy** — 用 SHOP/SQ/PYPL/MELI/AFRM/UPST、IWM/XRT/KRE/HYG，搭 FRED small-bus",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1292). Original: BigTech / merchant-platform credit stress 的公開市場 proxy** — 用 SHOP/SQ/PYPL/MELI/AFRM/UPST、IWM/XRT/KRE/HYG，搭 FRED small-business credit 與 delinquency proxy，檢定平台信用收縮是否領先 small-cap / retail / fintech RV；與 BNPL consumer-credit 題不同，聚焦 merchant-platform enforcement 與 bank-credit substitution（來源：RFS 2026 platform lending / platform-bank competition stream；平台金融與銀行競爭成熱門）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1567.py with signal.shift(1) + seed=42, (c) K1567_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38585,7 +38585,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-29T00:00:01Z"
+    "created_at": "2026-06-29T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T01:31:04.927191+00:00",
+    "claim_session_id": "72350f4dfcf5",
+    "started_at": "2026-06-29T01:31:16.847138+00:00",
+    "completed_at": "2026-06-29T01:39:56.379798+00:00",
+    "result": "K1567 completed: public merchant-platform/credit-fintech equity stress proxy + FRED background vs IWM/XRT/KRE/HYG 5d/21d forward RV. Verdict WEAK_RAW_ONLY / corrected-primary NULL: IWM 5d credit-fintech controlled HAC t=2.50 and HYG 21d credit-fintech t=2.56, but no 24-test Bonferroni/Holm survivor; no causal merchant-credit or trading claim. Outputs in experiments/k1567/, Codex review CONDITIONAL_PASS, knowledge item c3803960."
   },
   {
     "id": "K1568",
