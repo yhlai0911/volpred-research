@@ -39082,7 +39082,7 @@
     "title": "Paper review (Codex 24h-rule): K1568：Federal Register 監管文件流量能預測 ETF 波動率嗎？144 個檢定、14 個 raw 顯著、Bonferroni 全滅",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_153d2908 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_153d2908",
@@ -39090,7 +39090,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-29T12:08:12+00:00"
+    "created_at": "2026-06-29T12:08:12+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T12:43:37.372892+00:00",
+    "claim_session_id": "d2388268c836",
+    "started_at": "2026-06-29T12:43:37.575405+00:00",
+    "completed_at": "2026-06-29T12:45:49.513118+00:00",
+    "result": "Codex 24h review PASS_WITH_MINOR_CAVEATS. Added storage/reviews/codex_24h/mile_153d2908_review.md; verified K1568 numeric claims, lookahead timing, 144-test multiple-correction framing, image URLs, research audience, live URL, and py_compile. No article correction required; caveats are derived-count provenance false positives and a non-blocking 'IPO IJR' typo."
   },
   {
     "id": "paper_review_mile_082f0578",
