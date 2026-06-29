@@ -36756,5 +36756,41 @@
       "null_result",
       "codex_reviewed"
     ]
+  },
+  {
+    "item_id": "8891fab0",
+    "category": "experiment_result",
+    "title": "K1575: Critical-minerals export restrictions show no robust sector-specific RV transmission",
+    "experiment_id": "K1575",
+    "k_id": "K1575",
+    "experiment_path": "experiments/K1575/",
+    "experiment_file": "experiments/K1575/k1575.py",
+    "results_path": "experiments/K1575/k1575_results.json",
+    "reviewer_source": "experiments/K1575/codex_review.md",
+    "codex_review_verdict": "CONDITIONAL_PASS",
+    "verdict": "MIXED",
+    "confidence": 0.72,
+    "created_at": "2026-06-29T23:17:20",
+    "content": "K1575 tests 8 critical-minerals export-restriction announcements (2023-07-03..2025-10-09) against 13 ETF / benchmark proxies (REMX, LIT, COPX, URA, PICK, ICLN, TAN, SMH, SOXX, ITA, XLI, SPY, QQQ) using yfinance adjusted closes from 2023-01-04 to 2026-04-07. Windows are lookahead-safe: pre baseline T-30..T-6, post metrics start strictly at T+1, seed=42 random-anchor bootstrap, Bonferroni alpha=0.000120 over 416 p-values. Confirmatory RV family (t1_r2, rv5, rv22) has 312 event-ticker-metric tests, mean ratio=2.452 but median=0.869, frac ratio>1=0.462, pooled sign-test p=0.922, and 0/312 Bonferroni-significant RV tests. jump5_abs has 2/104 Bonferroni-significant tests: LIT ratio=10.456 and REMX ratio=9.248 after the 2025-04-04 China medium/heavy rare-earth controls. However, the same window has broad benchmark stress (SPY rv5=15.83, jump5=9.44; QQQ rv5=10.56, jump5=7.97), and direct-minerals mean rv5/jump ratios do not exceed benchmark means. Conclusion: no robust sector-specific RV transmission in daily ETF data; jump-only signal is real as a return-series observation but market-confounded, not clean causal evidence. jump5_abs is bootstrap-only because max(abs return over 5 days) / pre mean abs return is not centered at 1 under the null.",
+    "evidence": [
+      "experiments/K1575/README.md",
+      "experiments/K1575/k1575.py",
+      "experiments/K1575/k1575_results.json",
+      "experiments/K1575/codex_review.md",
+      "experiments/K1575/events.csv",
+      "experiments/K1575/event_ticker_metric_results.csv",
+      "experiments/K1575/fig_a.png",
+      "experiments/K1575/fig_b.png"
+    ],
+    "tags": [
+      "K1575",
+      "critical_minerals",
+      "export_restrictions",
+      "event_study",
+      "realized_volatility",
+      "ETF_proxy",
+      "mixed_result",
+      "market_confounding"
+    ]
   }
 ]

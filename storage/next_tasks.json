@@ -39162,5 +39162,75 @@
     "started_at": "2026-06-29T12:09:32.667291+00:00",
     "completed_at": "2026-06-29T12:25:09.428432+00:00",
     "result": "K1573: CHIPS Act 半導體政策補助 RV spillover NULL (17 events × 13 tickers, ratio 0.950, sign p=0.997, 0/146 Bonferroni-sig); Codex CONDITIONAL_PASS; knowledge item_id=b38a3669; commit experiments/K1573/"
+  },
+  {
+    "id": "research_defense_spending_boom_beta_rearmament_shock_defe",
+    "title": "研究 backlog fallback: Defense-spending boom beta：rearmament 財政 shock 是否改變 defense / industrial / rate vol",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Defense-spending boom beta：rearmament 財政 shock 是否改變 defense / industrial / rate vol — 用 NATO spending path、SIPRI/IMF defense-spending data、ITA/PPA/XAR/European defense proxy、TLT/UUP，檢定 defense-budget surprise 是否領先 defense ETF RV、工業股 beta、長債 vol；與 generic GPR 不同，聚焦可量化財政採購路徑（來源：IMF WEO defense-spendin | 來源 section: 期刊主題挖掘 batch 2026-06-28（journal_discovery_20260628_0；websearch rfs/aer/jep/fed/imf/nato/wef/nature/oecd/iea 2025-26 趨勢層級；selectivity gate 後 10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "defense_spending_boom_beta_rearmament_shock_defe",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-29T15:01:20+00:00"
+  },
+  {
+    "id": "research_labor_force_growth_immigration_shock_wage_sensit",
+    "title": "研究 backlog fallback: Labor-force growth / immigration shock 作 wage-sensitive sector RV prior",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Labor-force growth / immigration shock 作 wage-sensitive sector RV prior — 用 Fed breakeven-employment estimates、FRBSF immigration-flow evidence、BLS/JOLTS/FRED labor series，映射 construction/homebuilder/retail/manufacturing ETF，檢定低 immigration / labor-supply shock 是否領先 XHB/XRT/XLI RV 與 wage-inflation be | 來源 section: 期刊主題挖掘 batch 2026-06-28（journal_discovery_20260628_0；websearch rfs/aer/jep/fed/imf/nato/wef/nature/oecd/iea 2025-26 趨勢層級；selectivity gate 後 10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "labor_force_growth_immigration_shock_wage_sensit",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-29T15:01:20+00:00"
+  },
+  {
+    "id": "research_maritime_chokepoint_stress_commodity_retail_ship",
+    "title": "研究 backlog fallback: Maritime chokepoint stress 指數作 commodity / retail / shipping vol 訊號",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Maritime chokepoint stress 指數作 commodity / retail / shipping vol 訊號 — 用 GSCPI、Freightos/Harpex/FRED shipping proxies、Panama/Suez/Red Sea/Hormuz event calendar、USO/DBA/XRT/IYT/BDRY，檢定 chokepoint stress 是否領先商品 RV、retail margin-risk RV 與 cross-asset correlation spike；與 tariff event study 正交，聚焦物流節點而非關稅稅 | 來源 section: 期刊主題挖掘 batch 2026-06-28（journal_discovery_20260628_0；websearch rfs/aer/jep/fed/imf/nato/wef/nature/oecd/iea 2025-26 趨勢層級；selectivity gate 後 10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "maritime_chokepoint_stress_commodity_retail_ship",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-29T15:01:20+00:00"
+  },
+  {
+    "id": "research_critical_minerals_export_restriction_shock_clean",
+    "title": "研究 backlog fallback: Critical-minerals export-restriction shock 對 clean-tech / defense / semiconductor RV 的傳導",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Critical-minerals export-restriction shock 對 clean-tech / defense / semiconductor RV 的傳導 — 用 OECD export-restriction inventory、IEA critical-minerals outlook、REMX/LIT/COPX/URA/SMH/ITA，建立 rare-earth / graphite / cobalt restriction event set，檢定 t+1/t+22 RV、jump、sector spillover；免費資料只能做 listed ETF / ann | 來源 section: 期刊主題挖掘 batch 2026-06-28（journal_discovery_20260628_0；websearch rfs/aer/jep/fed/imf/nato/wef/nature/oecd/iea 2025-26 趨勢層級；selectivity gate 後 10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "critical_minerals_export_restriction_shock_clean",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-29T15:01:20+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T15:01:39.501956+00:00",
+    "claim_session_id": "1641db5caf7b",
+    "started_at": "2026-06-29T15:01:49.012470+00:00",
+    "completed_at": "2026-06-29T15:17:43.145797+00:00",
+    "result": "K1575 completed: critical-minerals export-restriction event study on 8 announcements x 13 ETF proxies. Confirmatory RV metrics have 0/312 Bonferroni-significant tests; jump-only LIT/REMX signal on 2025-04-04 is market-confounded. Wrote experiments/K1575 and knowledge entry 8891fab0."
   }
 ]
