@@ -703,6 +703,48 @@ def ops_loop_health(storage_dir: str) -> None:
     _print_json(snapshot)
 
 
+@ops.command("daily-checkup")
+@click.option("--json", "as_json", is_flag=True, help="輸出完整 JSON")
+@click.option("--alert", is_flag=True, help="有 critical/warn 時 send-alert email")
+def ops_daily_checkup(as_json: bool, alert: bool) -> None:
+    """每日大體檢（result-level）— 確認所有任務確實完成、結果是否良好。
+
+    7 維度（data_freshness / cron_completion / content_pipeline 含「文章必有真圖表+
+    數據表」/ live_freshness / live_cache / mission_progress），查「結果好不好」而非
+    只查「程式有沒有報錯」。有 finding 直接修不只 alert。完整流程見 skill pdca-operations。
+    """
+    import importlib.util
+    import pathlib
+
+    repo = pathlib.Path(__file__).resolve().parents[2]
+    spec = importlib.util.spec_from_file_location(
+        "daily_checkup", repo / "scripts" / "daily_checkup.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    report = mod.run_all()
+    console.print(
+        f"[bold]每日大體檢[/bold] overall=[bold]{report['overall']}[/bold] "
+        f"(critical={report['critical_count']}, warn={report['warn_count']})"
+    )
+    for f in report["findings"]:
+        mark = "🔴" if f["severity"] == "critical" else "🟡"
+        console.print(f"  {mark} [{f['dimension']}] {f['message']}")
+        if f.get("recovery"):
+            console.print(f"      ↳ recovery: {f['recovery']}")
+    if report["overall"] == "ok":
+        console.print("  ✅ 全部維度通過")
+    if as_json:
+        _print_json(report)
+    if alert and report["overall"] in ("critical", "warn"):
+        import subprocess
+
+        subprocess.run(
+            ["uv", "run", "python", "scripts/daily_checkup.py", "--alert"],
+            cwd=str(repo), check=False,
+        )
+
+
 @ops.command("semantic-concentration")
 @click.option("--storage-dir", default="storage", show_default=True)
 @click.option("--lookback", default=20, show_default=True, type=int)
