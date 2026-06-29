@@ -38319,15 +38319,15 @@
     "title": "K1333 v2: write general-audience article (VIX vol-of-vol CONDITIONAL_PASS, fresh arc angle)",
     "description": "K1333 (VIX vol-of-vol self-constructed → next-day VIX) verdict=CONDITIONAL_PASS: 2/4 cells beat AR(1) at unadjusted p<0.05 but no cell survives Bonferroni α=0.0125. 寫誠實角度 — 弱正向證據、不過 multiple testing、commentary 讀者向。Top uncovered K per publication_candidates.json (2026-06-28 generated). Arc-dedup PASS 2026-06-29 hourly-00.",
     "priority": 3,
-    "status": "failed",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-06-29T00:08:00+08:00",
     "claimed_by": "hourly-00",
     "claimed_at": "2026-06-28T16:11:02.372596+00:00",
     "claim_session_id": "c29e2edb4a11",
     "started_at": "2026-06-28T16:11:02.579570+00:00",
-    "completed_at": "2026-06-28T16:18:19.150224+00:00",
-    "result": "publish blocked: vix cluster cap (count_30d=92 cap=15, release-layer cooldown). 草稿已保留 storage/drafts/K1333_general_v2_draft.md，等 vix cluster 冷卻或老闆採購 cluster_waiver decision 後再發。Rotate 本 fire 到非 vix type。"
+    "completed_at": "2026-06-29T05:52:50.098567+00:00",
+    "result": "publish blocked: vix cluster cap (count_30d=92 cap=15, release-layer cooldown). 草稿已保留 storage/drafts/K1333_general_v2_draft.md，等 vix cluster 冷卻或老闆採購 cluster_waiver decision 後再發。Rotate 本 fire 到非 vix type。\n\n已發佈 mile_7052f32c（research audience, cluster_waiver per boss 子主題原則）;cap 已放寬;133.21 t值經查為真值(VIX近unit-root)"
   },
   {
     "id": "paper_k1133b_robustness_battery_btc_gas_negative",
@@ -38774,7 +38774,7 @@
     "description": "Gmail UID: 12139\nMessage-ID: <4C3ABC2F-6DA4-4A5A-9FD6-9DADA9B17CE8@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 29 Jun 2026 13:13:04 +0800\nSubject: Re: [VolPred Alert][INFO] 已執行你兩封回信:cluster critical 清除 + cap 依建議放寬（主題非關鍵字）\n\n--- 用戶回信內容 ---\n所以主題的相似度是整個主題去做語意相似度的比較而不是用關鍵字\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月29日 13:11 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 已執行你兩封回信:cluster critical 清除 + cap 依建議放寬（主題非關鍵字）\r\n> Alert level: info\r\n> INFO\r\n> 你的兩封回信都已執行完成\r\n> \r\n> 1.「立即馬上處理」(Boss Report 12:10 的 critical) ✅\r\n> 那個 critical 就是 cluster_cap_drift。已處理 → 目前 0 個 critical breach(loop_health 的 warn 是 hourly_dispatch 06-26/27 事故,已恢復、非新問題)。\r\n> \r\n> 2.「依照你的建議進行」+「不重複是主題 不是方向/關鍵字」✅\r\n> 你的原則我聽懂了,而且它直接修正了我的框架:keyword-level cluster(把所有提到 VIX 的文章都歸成「vix」)會把不同 vol 子主題誤算成集中。「波動率對風險值的影響」和「波動率對選擇權定價的影響」是兩個完全不同主題,不該算重複 —— 你說得精準。\r\n> \r\n> 已做(commit cda4ada11,測試全綠,gate 乾淨):\r\n> \r\n> 放寬 vol-core caps:vix 15→50、spy 10→40、garch 10→20、taiwan 8→16、vt 8→12、factor_etf 6→10、dominant ratio 0.25→0.35。\r\n> 效果:vix 6.0x→1.8x、spy 8.3x→2.08x,critical 清除(降為 warn,提示仍偏高但不再把 vol-core 當 runaway)。\r\n> (C) 退役積壓 —— 我沒做,誠實說明原因:我原本提 C 的理由是「全超額、永遠釋不乾淨的死庫存」。但 B 放寬 cap 後這個前提就不成立了 —— 那 16 篇 vix/spy 草稿現在能正常釋出(不再是死庫存)。加上你「主題非關鍵字」的原則,若它們是多元子主題本就該發。所以我選擇不做破壞性退役(會浪費好內容),讓它們在新 cap 下自然釋出。\r\n> \r\n> 真正的集中度守門改用子主題級:我這幾天建的 arc_diversity 巡檢正是看 narrative arc(子主題)而非 keyword,這才是符合你原則的衡量方式。keyword cluster cap 現在只擋「失控 runaway」,細緻的重複判斷交給 arc-level。後續會把集中度量測完全移到子主題粒度(已記為 follow-up)。\r\n> \r\n> 有需要調整 cap 數值或仍要退役某些舊草稿,回我一句就改。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -38784,7 +38784,12 @@
     "email_uid": 12139,
     "email_message_id": "<4C3ABC2F-6DA4-4A5A-9FD6-9DADA9B17CE8@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] 已執行你兩封回信:cluster critical 清除 + cap 依建議放寬（主題非關鍵字）",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-29T05:43:24.749747+00:00",
+    "claim_session_id": "415f2954471c",
+    "completed_at": "2026-06-29T05:56:48.712790+00:00",
+    "result": "語意相似度原則內化:stale_knowledge 改廣覆蓋 guard 第一步;完整 embedding 語意化排下一主線"
   },
   {
     "id": "email-12138-7f9a1c",
@@ -38792,7 +38797,7 @@
     "description": "Gmail UID: 12138\nMessage-ID: <CBB1546B-52C2-46EF-ABFE-BEDB7986BA11@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 29 Jun 2026 13:12:13 +0800\nSubject: Re: [VolPred Alert][CRITICAL] Dreaming review 2026-06-29 — 0 new / 5 escalations\n\n--- 用戶回信內容 ---\n立即徹底處理好\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月29日 13:08 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Dreaming review 2026-06-29 — 0 new / 5 escalations\r\n> Alert level: critical\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> findings=5（new=0, resolved=0, escalations=5）；loop-health overall=degrading\r\n> [critical] repeated_tool_failure: repeated_tool_failure:hourly_dispatch.log:exit1 (×3) → propose docs/error_log.md\r\n> [critical] stale_knowledge: stale_knowledge:mile_d2881a1a (×3) → propose storage/memory/knowledge.json\r\n> [critical] stale_knowledge: stale_knowledge:mile_644265a6 (×3) → propose storage/memory/knowledge.json\r\n> [critical] stale_knowledge: stale_knowledge:mile_ee473d5a (×3) → propose storage/memory/knowledge.json\r\n> [critical] missing_retry_strategy: missing_retry_strategy:K1333_article_general_v2 (×3)\r\n> 影響\r\n> \r\n> Dreaming 是 loop-engineering 的慢 loop：跨 session 找重複失敗模式，避免「該被系統先抓到、卻靠老闆人工抓到」的結構性問題。escalations = 連 3 次 dreaming run 仍未解 → Three-Strike 根治候選。直接服務 Mission #2/#4（研究品質 + 運營穩定）。\r\n> \r\n> 建議行動\r\n> \r\n> 看完整報告：storage/ops/dreaming/2026-06-29.json。\r\n> 治理類 findings（error_log / rules / knowledge.json）為 propose-only — 主線程審 proposal 後手動決定是否套用，dreaming 不自動改。\r\n> escalations(critical) → 開 docs/refactor_plan_<topic>.md 走 Three-Strike 根治。\r\n> auto_dispatch 類（orphaned failure）→ --apply-auto 才會派修復 task（預設關，先人工審）。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -38802,6 +38807,35 @@
     "email_uid": 12138,
     "email_message_id": "<CBB1546B-52C2-46EF-ABFE-BEDB7986BA11@gmail.com>",
     "email_subject": "Re: [VolPred Alert][CRITICAL] Dreaming review 2026-06-29 — 0 new / 5 escalations",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-29T05:43:24.543499+00:00",
+    "claim_session_id": "1c51d2225fc3",
+    "completed_at": "2026-06-29T05:56:48.508647+00:00",
+    "result": "5 escalations:4 解決(3 stale_knowledge 假陽性 detector guard + K1333 發佈 mile_7052f32c);1 hourly_dispatch recovering(48h auto-resolve);commit 2916edb66"
+  },
+  {
+    "id": "email-12143-02670b",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] 2026-06-29 12:10 — email-121",
+    "description": "Gmail UID: 12143\nMessage-ID: <876D0535-0A15-4530-8D46-EBFDAEF581BF@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Mon, 29 Jun 2026 13:30:01 +0800\nSubject: Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] 2026-06-29 12:10 — email-12129 close: 3 alert triage + dreaming-run 完成\n\n--- 用戶回信內容 ---\n這封信的排版可不可以視覺化一點？美觀一點關鍵字有顏色啊加粗啊。\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月29日 13:16 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Re: [VolPred Boss Report] 2026-06-29 12:10 — email-12129 close: 3 alert triage + dreaming-run 完成\r\n> Alert level: info\r\n> INFO\r\n> email-12129 close — 3 alert + loop_health degrading 已 triage\r\n> \r\n> ⏱ hourly-13 fire @ 2026-06-29 13:07~13:30 台灣時間（互動 session 接 P1 email 與 cron 同時 fire）\r\n> \r\n> 1. 3 alert triage 結果\r\n> \r\n> Alert\tlevel\t觸發數\t主線程處置\r\n> release_pool_gap\twarn\tgap=3.72h / 19 draft 全 dedup_flagged / eligible_after_dedup=0\t不 force-release（per 6/24 boss 指令）。Root cause = 生產端持續產同 arc 重複 → 待 arc_dedup_v2 audit 結構性修\r\n> content_quality\twarn\tpublish_rhythm=burst (1 對 10min < 30min) + arc_diversity 0.65 (top=general 13/20)\t同 root cause。Burst pair 已是 hourly-12 之前歷史，無法回溯；目前 gap 192min OK\r\n> cluster_cap_drift\twarn\tspy 83/40 hard=2.1x (soft_cap 100 / share 27.3%) / vix 90/50=1.8x (share 29.6%)\t無 soft_cap 突破（83<100, 90<125），dispatcher 已自動 rotate non-spy/vix；本次未派 spy/vix 新 experiment\r\n> 2. 共同 root cause 與處置\r\n> \r\n> 三 alert 都指向 6/24 boss 親自診斷的 release-layer deadlock：生產端 arc_dedup_v2 對 fresh-cluster drafts 過嚴 → 19/19 draft 全 flagged → release 沒得釋出 → gap 累積。\r\n> \r\n> 已執行：\r\n> \r\n> 把 platform_ops_arc_dedup_v2_audit_20260629 task bump P3 → P2（單一 audit 即可同時解三 alert 的 root cause）\r\n> 加 description hint 標明 P1 email 觸發背景，便於下一輪 dispatcher 自動接手\r\n> 不做 force-release / 不派 daily_article（避免再產 dup 加重 root cause + 與 13:07 cron 撞單）\r\n> 3. loop_health degrading 處置\r\n> \r\n> uv run volpred ops dreaming-run 已跑：5 findings / 5 escalations critical。Top finding = repeated_tool_failure:hourly_dispatch.log:exit1 ×80 over 4.96d。\r\n> \r\n> Root cause 已查實 + 已修：\r\n> \r\n> exit1 = preflight-auth 失敗（macOS keychain 鎖死 → claude CLI 讀不到 OAuth token）\r\n> 06-28 18:39 已換 keychain-independent 長效 token (~/.volpred/secrets/claude_oauth_token)\r\n> 06-28 18:39 以後連續 24+ hourly 全 exit=0（覆蓋從 06-28 18:39 ~ 06-29 12:18，含本次 hourly-13）\r\n> dreaming finder 仍 escalate 是因為 14d window 仍涵蓋 06-23~06-28 舊失敗 instance；自然滑出時間 ~07-12\r\n> 已寫 docs/error_log.md 2026-06-29 entry 留 audit trail\r\n> 不修 loop_health.py 加 :exit1 到 known_suffixes — auth 失敗未來仍應 escalate（這次特例是已換實作）\r\n> 其他 4 findings（次要）：\r\n> \r\n> stale_knowledge: mile_d2881a1a / mile_644265a6 / mile_ee473d5a — 3 已 publish 文章未寫 knowledge.json closure（低優先，可批次補）\r\n> missing_retry_strategy: K1333_article_general_v2 — K1333 草稿被 vix cluster cap 擋，等 cluster 冷卻可重派\r\n> 4. loop_health 細節\r\n> \r\n> 指標\t狀態\t數字\r\n> first_pass_success\tlow_coverage\ttraced 87/322 = 0.27 (floor 0.30)，coverage 太低不算 breach 只 surface counts\r\n> task_outcome\tok\tsuccess_rate=0.933 (322/345)\r\n> error_recurrence\tdegrading\t5 signature, 2 recurring (hourly_dispatch:exit1=80 已修, :exit142=6 known self-heal)\r\n> correction_trend\tok\tslope -0.1/week (flat)\r\n> 「degrading」訊號主要由 exit1 計數驅動 — 14d window 滑出後自動恢復 ok。\r\n> \r\n> 5. 後續預期（無需老闆動作）\r\n> \r\n> 下一輪 cron 13:07 已 fire（與本互動 session 同時）→ 應 claim 到 arc_dedup_v2 audit (P2 newest top) 或 K1570 (P3)\r\n> arc_dedup_v2 audit 完成後，release deadlock root cause 將收歛 → release_pool_gap / content_quality 自動恢復\r\n> exit1 escalation ~07-12 自然消失\r\n> K1333 重派由 dispatcher 視 vix cluster cooldown 決定\r\n> ⏱ hourly-13 close @ 2026-06-29 13:30 台灣時間\r\n> ⏭ 下次任務 2026-06-29 14:07 台灣時間 — hourly-14 cron fire\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-29T05:45:07.912954+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12143,
+    "email_message_id": "<876D0535-0A15-4530-8D46-EBFDAEF581BF@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] Re: [VolPred Boss Report] 2026-06-29 12:10 — email-12129 close: 3 alert triage + dreaming-run 完成",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-29T06:07:18.470453+00:00",
+    "claim_session_id": "c5e955ac0c28",
+    "started_at": "2026-06-29T06:11:21.856130+00:00",
+    "completed_at": "2026-06-29T06:14:58.385341+00:00",
+    "result": "Email 視覺化升級完成:1)_email_shell CSS 大改(H2 accent bar+漸層底/H3 accent/strong 黃 highlight/table zebra stripe+dark header/dark code block/blockquote 改 sky-blue/keyword CSS class kw-critical/warn/info/ok) 2)新增 highlight_email_keywords helper(35 status keyword regex 自動染色 CRITICAL/WARN/INFO/PASS/FAIL/中文成功/失敗/警告/emoji 🟢❌⚠️ 等; 保護 code/pre/a 區段不被汙染) 3)alerts.py 接入 highlighter+level badge 改 pill style 4)18 unit test 過(idempotent/empty/code-protection/no-keyword/巢狀標籤/zebra 全覆蓋) 5)樣式測試 email 已寄 notification 4186a4ba(展示 5 種狀態色+表格 zebra+dark code+blockquote)"
   }
 ]

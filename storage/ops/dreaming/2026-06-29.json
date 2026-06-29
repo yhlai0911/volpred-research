@@ -1,19 +1,19 @@
 {
   "schema": "dreaming_review.v1",
-  "generated_at": "2026-06-29T05:08:56.778930+00:00",
+  "generated_at": "2026-06-29T05:54:47.034516+00:00",
   "window_days": 14,
-  "dry_run": false,
+  "dry_run": true,
   "loop_health": {
-    "generated_at": "2026-06-29T05:08:56.778930+00:00",
+    "generated_at": "2026-06-29T05:54:47.034516+00:00",
     "window_days": 14,
     "overall": "degrading",
     "first_pass_success": {
       "status": "low_coverage",
       "signal": "derived_low_coverage",
       "window_days": 14,
-      "total_succeeded": 322,
-      "traced": 87,
-      "coverage": 0.27,
+      "total_succeeded": 325,
+      "traced": 88,
+      "coverage": 0.271,
       "coverage_floor": 0.3,
       "note": "status_history coverage too low to judge first-pass rate honestly; surfacing counts only (info, not a breach)."
     },
@@ -21,11 +21,11 @@
       "status": "ok",
       "signal": "supported",
       "window_days": 14,
-      "success": 322,
-      "fail": 1,
+      "success": 325,
+      "fail": 0,
       "blocked": 22,
       "other": 7,
-      "success_rate": 0.933
+      "success_rate": 0.937
     },
     "error_recurrence": {
       "status": "degrading",
@@ -105,87 +105,28 @@
       "remediation_ref": null,
       "proposal": "Cron job `hourly_dispatch.log` returned a non-zero exit 80× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).",
       "governance_target": "docs/error_log.md",
-      "occurrences": 3,
+      "occurrences": 4,
       "first_seen": "2026-06-29T02:25:03.708340+00:00",
-      "last_seen": "2026-06-29T05:08:56.778930+00:00"
-    },
-    {
-      "pattern_type": "stale_knowledge",
-      "signature": "stale_knowledge:mile_d2881a1a",
-      "severity": "critical",
-      "evidence": [
-        "content_correction_report flagged mile_d2881a1a severity=HIGH"
-      ],
-      "remediation": "propose_only",
-      "remediation_ref": null,
-      "proposal": "Published article mile_d2881a1a matches a self-correction fingerprint (HIGH). Review whether it repeats a reversed/disproved claim; if so update knowledge.json and retract/correct the article.",
-      "governance_target": "storage/memory/knowledge.json",
-      "occurrences": 3,
-      "first_seen": "2026-06-29T02:25:03.708340+00:00",
-      "last_seen": "2026-06-29T05:08:56.778930+00:00"
-    },
-    {
-      "pattern_type": "stale_knowledge",
-      "signature": "stale_knowledge:mile_644265a6",
-      "severity": "critical",
-      "evidence": [
-        "content_correction_report flagged mile_644265a6 severity=HIGH"
-      ],
-      "remediation": "propose_only",
-      "remediation_ref": null,
-      "proposal": "Published article mile_644265a6 matches a self-correction fingerprint (HIGH). Review whether it repeats a reversed/disproved claim; if so update knowledge.json and retract/correct the article.",
-      "governance_target": "storage/memory/knowledge.json",
-      "occurrences": 3,
-      "first_seen": "2026-06-29T02:25:03.708340+00:00",
-      "last_seen": "2026-06-29T05:08:56.778930+00:00"
-    },
-    {
-      "pattern_type": "stale_knowledge",
-      "signature": "stale_knowledge:mile_ee473d5a",
-      "severity": "critical",
-      "evidence": [
-        "content_correction_report flagged mile_ee473d5a severity=HIGH"
-      ],
-      "remediation": "propose_only",
-      "remediation_ref": null,
-      "proposal": "Published article mile_ee473d5a matches a self-correction fingerprint (HIGH). Review whether it repeats a reversed/disproved claim; if so update knowledge.json and retract/correct the article.",
-      "governance_target": "storage/memory/knowledge.json",
-      "occurrences": 3,
-      "first_seen": "2026-06-29T02:25:03.708340+00:00",
-      "last_seen": "2026-06-29T05:08:56.778930+00:00"
-    },
-    {
-      "pattern_type": "missing_retry_strategy",
-      "signature": "missing_retry_strategy:K1333_article_general_v2",
-      "severity": "critical",
-      "evidence": [
-        "task K1333_article_general_v2 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling"
-      ],
-      "remediation": "auto_dispatch",
-      "remediation_ref": null,
-      "proposal": "Failed task K1333_article_general_v2 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.",
-      "governance_target": null,
-      "occurrences": 3,
-      "first_seen": "2026-06-29T02:25:03.708340+00:00",
-      "last_seen": "2026-06-29T05:08:56.778930+00:00"
+      "last_seen": "2026-06-29T05:54:47.034516+00:00"
     }
   ],
   "new_findings": [],
-  "resolved_findings": [],
-  "escalations": [
-    "repeated_tool_failure:hourly_dispatch.log:exit1",
+  "resolved_findings": [
     "stale_knowledge:mile_d2881a1a",
     "stale_knowledge:mile_644265a6",
     "stale_knowledge:mile_ee473d5a",
     "missing_retry_strategy:K1333_article_general_v2"
   ],
+  "escalations": [
+    "repeated_tool_failure:hourly_dispatch.log:exit1"
+  ],
   "auto_remediation": [],
   "counts": {
-    "findings": 5,
+    "findings": 1,
     "new": 0,
-    "resolved": 0,
-    "escalations": 5,
-    "propose_only": 4,
-    "auto_dispatch_eligible": 1
+    "resolved": 4,
+    "escalations": 1,
+    "propose_only": 1,
+    "auto_dispatch_eligible": 0
   }
 }

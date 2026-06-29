@@ -178,22 +178,37 @@ def _dispatch_alert_email(
     # Build HTML body via markdown→HTML + _email_shell wrapper (per user
     # 2026-05-25 directive: 所有 Claude 寄出的信都用 HTML 高資訊性編排)
     try:
-        from volpred.publisher.email_notifier import _email_shell, _try_markdown_to_html
+        from volpred.publisher.email_notifier import (
+            _email_shell,
+            _try_markdown_to_html,
+            highlight_email_keywords,
+        )
         inner_html = _try_markdown_to_html(body.strip())
+        # 2026-06-29 (email-12143): 對 body 套 keyword highlighter，
+        # CRITICAL/WARN/INFO/PASS/FAIL/中文狀態詞/emoji 都會自動染色加粗
+        inner_html = highlight_email_keywords(inner_html)
         level_color = {"info": "#2563eb", "warn": "#d97706", "critical": "#dc2626"}.get(level, "#6b7280")
+        level_glyph = {"info": "ℹ", "warn": "⚠", "critical": "✖"}.get(level, "•")
         # Level badge + body content
         body_html = (
-            f'<div style="display:inline-block;padding:4px 12px;border-radius:6px;'
-            f'background:{level_color};color:#fff;font-size:12px;font-weight:600;'
-            f'letter-spacing:1px;margin-bottom:12px;">{level.upper()}</div>'
-            f'<div style="color:#1f2937;font-size:14px;line-height:1.65;">'
+            f'<div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;'
+            f'background:{level_color};color:#fff;font-size:12px;font-weight:700;'
+            f'letter-spacing:1.5px;margin-bottom:18px;box-shadow:0 2px 4px rgba(15,23,42,.12);">'
+            f'<span style="font-size:14px;line-height:1;">{level_glyph}</span>'
+            f'<span>{level.upper()}</span>'
+            f'</div>'
+            f'<div style="color:#1f2937;font-size:14.5px;line-height:1.7;">'
             f'{inner_html}'
             f'</div>'
         )
         subtitle = f"Alert level: {level}"
         html_body = _email_shell(title, subtitle, body_html)
-    except Exception:
-        html_body = None  # fallback to plain text only
+    except Exception as exc:
+        # silent-ok: HTML 編排失敗 fallback 純文字（已有 text_body）
+        # 但留 stderr trace，避免 invisible failure（no-silent-fallback rule）
+        import sys as _sys
+        print(f"[alerts] html_render_failed level={level} err={exc}", file=_sys.stderr)
+        html_body = None
 
     notification_id = notifier.notify(
         subject=subject,

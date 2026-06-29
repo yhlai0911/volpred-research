@@ -150,8 +150,103 @@ def _try_markdown_to_html(markdown_text: str) -> str:
         )
 
 
+_KEYWORD_HIGHLIGHT_RULES: tuple[tuple[str, str], ...] = (
+    # (regex, css-class) — 順序敏感（先 match 長 token，避免 PASS 吃到 PASSED）
+    (r"\bCRITICAL\b", "kw-critical"),
+    (r"\bFAIL(?:ED|URE)?\b", "kw-critical"),
+    (r"\bBLOCKED\b", "kw-critical"),
+    (r"\bERROR\b", "kw-critical"),
+    (r"\bWARN(?:ING)?\b", "kw-warn"),
+    (r"\bDEGRADING\b", "kw-warn"),
+    (r"\bSTALE\b", "kw-warn"),
+    (r"\bPENDING\b", "kw-warn"),
+    (r"\bINFO\b", "kw-info"),
+    (r"\bPASS(?:ED|ING)?\b", "kw-ok"),
+    (r"\bOK\b", "kw-ok"),
+    (r"\bSUCCEEDED\b", "kw-ok"),
+    (r"\bRESOLVED\b", "kw-ok"),
+    # 中文狀態詞
+    (r"嚴重", "kw-critical"),
+    (r"失敗", "kw-critical"),
+    (r"異常", "kw-critical"),
+    (r"警告", "kw-warn"),
+    (r"待處理", "kw-warn"),
+    (r"成功", "kw-ok"),
+    (r"完成", "kw-ok"),
+    (r"通過", "kw-ok"),
+    # Emoji 狀態符號（emoji 沒有 word boundary，直接 match）
+    (r"🔴", "kw-critical"),
+    (r"❌", "kw-critical"),
+    (r"🚫", "kw-critical"),
+    (r"⚠️|⚠", "kw-warn"),
+    (r"🟡", "kw-warn"),
+    (r"🟢", "kw-ok"),
+    (r"✅", "kw-ok"),
+    (r"☑️|☑", "kw-ok"),
+    (r"📈", "kw-ok"),
+    (r"📉", "kw-critical"),
+)
+
+_CODE_PLACEHOLDER_PATTERN = re.compile(r"<(code|pre|a)\b[^>]*>.*?</\1>", re.DOTALL | re.IGNORECASE)
+_HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
+
+
+def highlight_email_keywords(html: str) -> str:
+    """Wrap status keywords with colored spans, safe against existing tags / code / links.
+
+    2026-06-29 升級：用戶 (email-12143) 要 email 「視覺化、關鍵字有顏色、加粗」。
+    先把 <code> / <pre> / <a> 區段挖掉換 placeholder（不染色，避免破壞 code），
+    再對剩餘文字節點套 keyword regex；最後 restore。
+
+    Idempotent：已包過 span.kw-* 的 keyword 不會重複包（regex match 純文字）。
+    """
+    if not html:
+        return html
+    # 1. Stash code/pre/a 區段
+    stash: dict[str, str] = {}
+
+    def _stash_match(match: re.Match[str]) -> str:
+        token = f"\x00KWSTASH{len(stash)}\x00"
+        stash[token] = match.group(0)
+        return token
+
+    masked = _CODE_PLACEHOLDER_PATTERN.sub(_stash_match, html)
+
+    # 2. 對 text node 套 keyword highlight — 用 segment-aware 替換：
+    #    split by HTML tag，只對非 tag segment 跑 regex。
+    parts: list[str] = []
+    last_end = 0
+    for tag in _HTML_TAG_PATTERN.finditer(masked):
+        text_seg = masked[last_end : tag.start()]
+        if text_seg:
+            parts.append(_apply_keyword_rules(text_seg))
+        parts.append(tag.group(0))
+        last_end = tag.end()
+    tail = masked[last_end:]
+    if tail:
+        parts.append(_apply_keyword_rules(tail))
+    rebuilt = "".join(parts)
+
+    # 3. Restore stashed segments
+    for token, original in stash.items():
+        rebuilt = rebuilt.replace(token, original)
+    return rebuilt
+
+
+def _apply_keyword_rules(segment: str) -> str:
+    """Run all keyword regex rules over a plain-text segment."""
+    out = segment
+    for pattern, css_class in _KEYWORD_HIGHLIGHT_RULES:
+        out = re.sub(
+            pattern,
+            lambda m, _c=css_class: f'<span class="{_c}">{m.group(0)}</span>',
+            out,
+        )
+    return out
+
+
 def _email_shell(title: str, subtitle: str | None, body_html: str) -> str:
-    subtitle_html = f'<p style="margin:6px 0 0;color:#6b7280;font-size:14px;">{escape(subtitle)}</p>' if subtitle else ""
+    subtitle_html = f'<p style="margin:6px 0 0;color:#cbd5e1;font-size:14px;">{escape(subtitle)}</p>' if subtitle else ""
     return f"""<!doctype html>
 <html lang="zh-Hant">
   <head>
@@ -169,22 +264,39 @@ def _email_shell(title: str, subtitle: str | None, body_html: str) -> str:
         </div>
         <div style="padding:28px;line-height:1.75;font-size:15px;">
           <style>
-            h1,h2,h3{{color:#0f172a;line-height:1.35;margin:1.2em 0 .5em}}
-            p{{margin:.8em 0}}
-            /* table-layout:fixed + word-break 防 mobile 溢出（2026-05-30 boss 回饋：
-               HTML 表格超過頁面寬度且無法捲動）。fixed 讓表格 honor width:100%、
-               cell 內長文字/路徑/hash 換行而非撐破容器 viewport。 */
-            table{{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px;table-layout:fixed}}
-            th,td{{border:1px solid #d1d5db;padding:8px 10px;text-align:left;vertical-align:top;word-break:break-word;overflow-wrap:anywhere}}
+            h1,h2,h3,h4{{color:#0f172a;line-height:1.35;margin:1.4em 0 .55em;font-weight:700}}
+            h2{{font-size:20px;border-left:4px solid #2563eb;padding-left:12px;background:linear-gradient(90deg,#eff6ff 0%,transparent 60%);padding-top:4px;padding-bottom:4px;border-radius:0 6px 6px 0}}
+            h3{{font-size:17px;border-left:3px solid #6366f1;padding-left:10px;color:#1e293b}}
+            h4{{font-size:15px;color:#475569}}
+            p{{margin:.85em 0}}
+            strong{{color:#0f172a;font-weight:700;background:#fef9c3;padding:1px 4px;border-radius:3px}}
+            em{{color:#7c3aed;font-style:italic}}
+            ul,ol{{margin:.6em 0 .8em 1.4em;padding:0}}
+            li{{margin:.35em 0}}
+            li>strong:first-child{{display:inline-block;min-width:96px}}
+            hr{{border:0;border-top:1px solid #e5e7eb;margin:1.5em 0}}
+            /* table-layout:fixed + word-break 防 mobile 溢出（2026-05-30 boss 回饋）。
+               2026-06-29 加 zebra stripe + th color，提升可讀性（boss 12143 要視覺化）。 */
+            table{{width:100%;border-collapse:collapse;margin:1em 0;font-size:14px;table-layout:fixed;border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.04)}}
+            th,td{{border:1px solid #e5e7eb;padding:9px 12px;text-align:left;vertical-align:top;word-break:break-word;overflow-wrap:anywhere}}
             td code,th code{{word-break:break-all;white-space:normal}}
-            th{{background:#f9fafb}}
-            code{{background:#f3f4f6;color:#111827;border-radius:4px;padding:2px 5px;font-size:13px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}}
-            pre{{background:#f9fafb;color:#111827;border:1px solid #e5e7eb;padding:14px;border-radius:10px;overflow:auto;font-size:13px;line-height:1.5;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}}
-            pre code{{background:transparent;padding:0;font-size:13px;color:inherit}}
-            blockquote{{border-left:5px solid #dc2626;background:#fef2f2;color:#7f1d1d;padding:12px 16px;margin:1em 0;border-radius:6px;font-weight:500}}
-            blockquote strong{{color:#991b1b}}
-            blockquote{{border-left:4px solid #10b981;padding-left:14px;color:#475569;margin:1em 0}}
-            a{{color:#2563eb}}
+            th{{background:#1e293b;color:#ffffff;font-weight:600;font-size:13px;letter-spacing:.02em}}
+            tr:nth-child(even) td{{background:#f8fafc}}
+            tr:nth-child(odd) td{{background:#ffffff}}
+            tr td:first-child{{font-weight:600;color:#1e293b}}
+            code{{background:#f1f5f9;color:#0f172a;border:1px solid #e2e8f0;border-radius:4px;padding:2px 6px;font-size:13px;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}}
+            pre{{background:#0f172a;color:#e2e8f0;border:1px solid #1e293b;padding:16px;border-radius:10px;overflow:auto;font-size:13px;line-height:1.55;font-family:'SF Mono',Menlo,Monaco,Consolas,monospace}}
+            pre code{{background:transparent;padding:0;font-size:13px;color:inherit;border:0}}
+            blockquote{{border-left:4px solid #0ea5e9;background:#f0f9ff;color:#0c4a6e;padding:12px 16px;margin:1em 0;border-radius:6px}}
+            blockquote strong{{background:transparent;color:#0369a1}}
+            a{{color:#2563eb;text-decoration:underline;text-decoration-color:#93c5fd;text-underline-offset:2px}}
+            a:hover{{color:#1d4ed8}}
+            /* Keyword highlight spans — 由 highlight_email_keywords() 注入 */
+            .kw-critical{{color:#b91c1c;font-weight:700;background:#fee2e2;padding:1px 5px;border-radius:3px}}
+            .kw-warn{{color:#b45309;font-weight:700;background:#fef3c7;padding:1px 5px;border-radius:3px}}
+            .kw-info{{color:#1e40af;font-weight:700;background:#dbeafe;padding:1px 5px;border-radius:3px}}
+            .kw-ok{{color:#15803d;font-weight:700;background:#dcfce7;padding:1px 5px;border-radius:3px}}
+            .kw-metric{{color:#7c3aed;font-weight:600;font-family:'SF Mono',Menlo,Monaco,monospace}}
           </style>
           {body_html}
         </div>
