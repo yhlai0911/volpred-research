@@ -940,3 +940,57 @@ def test_release_pool_pub_id_bypasses_narrative_cluster_filter_for_manual_repair
     assert target["details"]["release_audit_status"] == "resolved"
     assert target["details"]["release_audit_resolved_issues"] == ["general 內容含禁用統計術語"]
     assert "release_audit_issues" not in target["details"]
+
+
+def test_release_prefers_under_cap_cluster_over_fifo(tmp_path: Path, monkeypatch):
+    """Cluster-headroom tiebreaker (2026-06-29): when the draft pool mixes an
+    over-cap cluster and an under-cap one, the under-cap draft releases first even
+    if it is NEWER (FIFO would have picked the older over-cap draft). Drought-safe:
+    this is a reorder, never a block (cannot recreate the pool-freeze incident)."""
+    storage_dir = tmp_path / "storage"
+    frozen_now = datetime(2026, 4, 19, 8, 0, tzinfo=timezone.utc)
+    _freeze_content_now(monkeypatch, frozen_now)
+    _stub_release_side_effects(monkeypatch)
+
+    recent = (frozen_now - timedelta(days=2)).isoformat()
+    # 6 published factor_etf articles → factor_etf at its hard cap (6) = over-cap.
+    feed = [
+        {
+            "id": f"pub_fe_{i}",
+            "status": "published",
+            "title": "因子 ETF 動能策略回顧",
+            "tags": ["factor"],
+            "audience": "一般讀者",
+            "published_at": recent,
+        }
+        for i in range(6)
+    ]
+    # Draft A: factor_etf (over-cap), OLDER created_at → pure FIFO would pick this.
+    feed.append({
+        "id": "draft_factor_old",
+        "status": "draft",
+        "title": "因子 ETF 新視角",
+        "tags": ["factor"],
+        "audience": "一般讀者",
+        "content": "x" * 50,
+        "created_at": (frozen_now - timedelta(days=10)).isoformat(),
+    })
+    # Draft B: vt (0 published → under-cap), NEWER created_at.
+    feed.append({
+        "id": "draft_vt_new",
+        "status": "draft",
+        "title": "VT 全球資產配置思考",
+        "tags": ["VT"],
+        "audience": "一般讀者",
+        "content": "y" * 50,
+        "created_at": (frozen_now - timedelta(days=1)).isoformat(),
+    })
+    _write_json(storage_dir / "reports" / "feed.json", feed)
+
+    result = content.release_pool_articles(
+        limit=1, due_only=False, include_drafts=True, storage_dir=str(storage_dir),
+    )
+    released_ids = [r.get("id") for r in result.get("released", [])]
+    assert released_ids == ["draft_vt_new"], (
+        f"expected under-cap vt draft first, got {released_ids}"
+    )

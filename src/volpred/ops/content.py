@@ -14,7 +14,7 @@ from volpred.publisher.publisher import (
     _audit_general_content,
     _extract_experiment_refs,
 )
-from volpred.topic_clusters import classify_topic_cluster
+from volpred.topic_clusters import classify_topic_cluster, cluster_cap
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
 from .content_quality import DIGEST_TITLE_PREFIX
@@ -970,14 +970,52 @@ def release_pool_articles(
             )
             return True
 
+    # Cluster-headroom-aware release ordering (2026-06-29). The draft pool can be
+    # dominated by one topic cluster (observed: 84% vix/spy), and pure FIFO release
+    # keeps feeding the over-concentration that trips cluster_cap_drift (vix 6x /
+    # spy 8x over cap) + arc_diversity. Prefer releasing drafts whose 30d cluster
+    # count is UNDER its hard cap; over-cap drafts sort last but are NEVER blocked
+    # (drought-safe — if every eligible draft is over-cap, one still releases). This
+    # is a pure tiebreaker (reorder, not a lock), so it cannot recreate the
+    # 2026-06-23 pool-freeze incident (that was a per-draft 21-day hard lock). Counts
+    # come from the local `feed` (storage_dir-correct + deterministic for tests),
+    # not recent_cluster_counts (which ignores storage_dir).
+    _cluster_cutoff = now - timedelta(days=30)
+    _cluster_pub_counts: dict[str, int] = {}
+    for _it in feed:
+        if _it.get("status") != "published":
+            continue
+        _ts = _parse_datetime(_it.get("published_at") or _it.get("created_at"))
+        if _ts is None or _ts < _cluster_cutoff:
+            continue
+        _cl = classify_topic_cluster(
+            _it.get("title") or "", _it.get("tags") or [], _it.get("category") or ""
+        )
+        _cluster_pub_counts[_cl] = _cluster_pub_counts.get(_cl, 0) + 1
+
+    def _over_cap_rank(item: dict) -> int:
+        cl = classify_topic_cluster(
+            item.get("title") or "",
+            item.get("tags") or [],
+            item.get("category") or item.get("description") or "",
+        )
+        cap = cluster_cap(cl)
+        return 1 if (cap and _cluster_pub_counts.get(cl, 0) >= cap) else 0
+
     def sort_key(item: dict) -> tuple:
         published_at = str(item.get("published_at") or "")
         created_at = str(item.get("created_at") or "")
         audience = _article_audience(item)
         preferred_rank = audience_priority.get(audience, len(audience_priority))
         status = str(item.get("status") or "")
-        # Sort: scheduled first, then audience priority, then FIFO (oldest created_at first)
-        return (preferred_rank, 0 if status == "scheduled" else 1, created_at)
+        # Sort: audience priority → scheduled first → under-cap clusters first
+        # (diversity tiebreaker) → FIFO (oldest created_at first).
+        return (
+            preferred_rank,
+            0 if status == "scheduled" else 1,
+            _over_cap_rank(item),
+            created_at,
+        )
 
     _eligible_statuses = {"scheduled", "draft"} if effective_include_drafts else {"scheduled"}
     candidates = [
