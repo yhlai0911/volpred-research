@@ -39597,7 +39597,7 @@
     "title": "Paper review (Codex 24h-rule): 市場看起來越複雜，不代表波動率就更好預測",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_96ec845f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_96ec845f",
@@ -39605,7 +39605,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-29T18:08:01+00:00"
+    "created_at": "2026-06-29T18:08:01+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T22:06:38.806980+00:00",
+    "claim_session_id": "78f4babd5287",
+    "started_at": "2026-06-29T22:06:39.007137+00:00",
+    "completed_at": "2026-06-29T22:10:47.009573+00:00",
+    "result": "VERDICT: FAIL. Source review found K478 21-day forward-label training leakage, DM/HAC h=1 despite overlapping 21-day target, placeholder README/path bug, and embedded DM figure mislabeled VIX direction. Added review artifact, soft-unpublished mile_96ec845f, sync-all succeeded, and created K478_v2_fix_forward_label_dm follow-up."
   },
   {
     "id": "experiment_scaffold_k1291",
@@ -39671,5 +39677,86 @@
     "started_at": "2026-06-29T20:10:17.383285+00:00",
     "completed_at": "2026-06-29T21:08:26.413150+00:00",
     "result": "Published mile_9839822d at 2026-06-29T21:00:38Z (K1575 critical minerals NULL finding, 312 tests with 0 surviving multiple-testing correction). Task stale-released from hourly-04 claim and reconciled with actual feed state."
+  },
+  {
+    "id": "trending_repost_2026_06_30_ai泡沫疑慮",
+    "title": "[trending_repost] 科技巨頭退潮與防禦股崛起，如何用波動率偏斜度捕捉輪動機會？",
+    "description": "分析資金從高估值 AI 股撤出至防禦板塊的過程。從科技股與價值股的隱含波動率偏斜（Skew）切入，量化兩者波動率風險溢價的消長以設計跨板塊配對交易策略。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-29T22:00:17+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "trending_repost_2026_06_30_ai資本支出",
+    "title": "[trending_repost] 科技巨頭資本支出爆表，AI變現期的隱含波動率拐點",
+    "description": "量化對比微軟、亞馬遜等巨頭的 AI CapEx 與實際營收回報率（變現缺口）。分析大型科技股隱含波動率偏斜度（Skew），驗證市場何時從成長熱情轉向對折現率風險的保護定價。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-29T22:00:22+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "K1576_article_general",
+    "title": "K1576: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1576 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1576 tests 9 NATO/UK/EU/Germany defence-spending or rearmament-path announcements (2014-09-05..2025-06-25) against 10 listed ETF proxies: defense (ITA/PPA/XAR), industrials (XLI/IYT), rates (TLT/IEF), dollar (UUP), benchmarks (SPY/QQQ). Data are yfinance adjusted closes from 201",
+    "priority": 4,
+    "status": "in_progress",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1576",
+    "tags": [
+      "K1576",
+      "defense_spending",
+      "rearmament",
+      "NATO",
+      "event_study",
+      "realized_volatility",
+      "beta",
+      "ETF_proxy",
+      "null_result",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-06-29T22:09:50+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-06-29T22:10:20.043772+00:00",
+    "claim_session_id": "eb4133dbe5a8",
+    "started_at": "2026-06-29T22:10:20.244651+00:00"
+  },
+  {
+    "id": "K478_v2_fix_forward_label_dm",
+    "title": "K478-v2: fix forward-label embargo, DM horizon, and regenerate article figures",
+    "description": "Codex 24h review for mile_96ec845f returned VERDICT: FAIL. Fix experiments/k478/k478_entropy_vol.py so 21-day forward RV OOS training enforces target_end < forecast_origin, use horizon-aware HAC/DM (h=21 or bootstrap/HLN), fix DM direction labels, write results to experiments/k478/, replace placeholder README, rerun, regenerate figures, and only then republish a corrected article. Review: storage/reviews/codex_24h/mile_96ec845f_review.md",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "experiment",
+    "source": "codex_24h_review",
+    "created_at": "2026-06-29T22:09:58.136464+00:00",
+    "k_id": "K478",
+    "article_id": "mile_96ec845f",
+    "predecessor": "K478",
+    "predecessor_codex_review_task": "paper_review_mile_96ec845f",
+    "dispatch_lane": "agent",
+    "preferred_agent": "codex",
+    "tags": [
+      "codex-review-fail",
+      "methodology-fix",
+      "lookahead",
+      "dm-hac"
+    ]
   }
 ]

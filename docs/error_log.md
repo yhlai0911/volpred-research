@@ -2,6 +2,26 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-30 K478 entropy-vol article source review FAIL — forward-label embargo + DM horizon
+
+**問題**：`mile_96ec845f`（「市場看起來越複雜，不代表波動率就更好預測」）24h Codex source review 發現 K478 的 OOS / DM source 不能支撐 production article 的「當下以前資訊」與顯著性敘述。
+
+**現象**：
+- `experiments/k478/k478_entropy_vol.py` 將 target 設為 `rv21_fwd = rv21.shift(-21)`，但 expanding OLS 訓練列直接用 `X_all[:train_end] / y_all[:train_end]`，沒有 enforce `target_end < forecast_origin`。
+- 固定 IS/OOS split 同樣讓 2022 年底訓練列的 `rv21_fwd` 看進 2023 年 1 月，和文章「2023-2025 真正樣本外」敘述衝突。
+- DM test 對 21-day overlapping forward RV target 仍使用預設 `h=1`，Newey-West loop 沒有加入任何 autocovariance；p-value 不能當 21-day target 的正式 HAC/HLN inference。
+- `make_figs.py` / saved DM p-value 圖方向標籤錯，把 VIX 那根標成「Baseline 勝」，但 results JSON 與文章文字都顯示 VIX QLIKE 較低、約改善 17.8%。
+- `experiments/k478/README.md` 仍是 placeholder；script 從 repo root rerun 會寫到 `experiments/k478_entropy_vol_results.json`，不是 canonical `experiments/k478/k478_entropy_vol_results.json`。
+
+**根因**：K478 是較早期 forward-label forecast 實驗，只有 feature lag (`rv21_lag` / `vix_lag` / entropy lag) 但缺少 target-end embargo；後來 `.claude/rules/experiments.md` 已把 forward-label train-tail leak 納入硬規則，但舊實驗未回溯。DM helper 也沿用 one-step target 的 `h=1` 慣例，沒有跟 21-day overlapping loss 對齊。
+
+**解決方法**：
+- 新增 source review `storage/reviews/codex_24h/mile_96ec845f_review.md`，verdict=FAIL。
+- 用 `uv run volpred ops unpublish mile_96ec845f` 將文章本地 soft-unpublish，並在 `details.errata_24h_review` 記錄 FAIL 原因；初次 mirror sync 401 後，`uv run volpred ops sync-all` 成功同步 `articles: 1`。
+- 在 `storage/next_tasks.json` materialize `K478_v2_fix_forward_label_dm`：重做 target-end embargo、horizon-aware DM/HAC、修圖表方向、補 README、修 canonical output path，重跑後再決定是否 republish。
+
+**教訓**：Forward-label forecast 實驗不能只查 feature `shift(1)`；訓練資料也必須按 horizon embargo。多日 overlapping target 的 DM/HAC horizon 必須等於 target horizon 或用 block bootstrap / HLN，不能沿用 `h=1`。圖表方向標籤也是 public claim，一樣要納入 24h-rule source review。
+
 ## 2026-06-29 synthesis / daily_digest article cross-source mismatch — date/count/proxy wording drift
 
 **問題**：`mile_abe9e68f`（「每一次失敗都在說同一件事：日頻資料的訊號天花板」）24h Codex review 發現綜述型文章在彙整六篇來源文章時出現多處 public-facing mismatch。
