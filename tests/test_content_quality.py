@@ -376,6 +376,45 @@ def test_arc_diversity_ok_when_varied(tmp_path):
     assert r["status"] == "ok"
 
 
+def test_arc_diversity_handles_dict_arc_signature(tmp_path):
+    base = datetime(2026, 6, 24, 12, 0, tzinfo=TPE)
+    items = [
+        _entry_full(
+            f"m{i}",
+            published_at=base - timedelta(hours=i),
+            arc={
+                "schema_version": "arc_dedup_v3",
+                "entities": [f"ASSET_{i}", "US_EQUITY"],
+                "conclusion_class": "null_no_info",
+            },
+        )
+        for i in range(10)
+    ]
+    storage = _write_feed(tmp_path, items)
+    r = cq.check_arc_diversity(str(storage))
+    assert r["status"] == "ok"
+    assert r["distinct_axes"] == 10
+    assert r["top_share"] <= 0.2
+
+
+def test_arc_diversity_dict_same_entities_flag_concentration(tmp_path):
+    base = datetime(2026, 6, 24, 12, 0, tzinfo=TPE)
+    same_sig = {
+        "schema_version": "arc_dedup_v3",
+        "entities": ["GOLD", "US_EQUITY"],
+        "conclusion_class": "descriptive",
+    }
+    items = [
+        _entry_full(f"m{i}", published_at=base - timedelta(hours=i), arc=same_sig)
+        for i in range(10)
+    ]
+    storage = _write_feed(tmp_path, items)
+    r = cq.check_arc_diversity(str(storage))
+    assert r["status"] == "concentrated"
+    assert r["top_share"] == 1.0
+    assert "GOLD" in r["top_axis"] and "US_EQUITY" in r["top_axis"]
+
+
 def test_content_completeness_chartable_details_not_flagged(tmp_path):
     base = datetime(2026, 6, 24, 12, 0, tzinfo=TPE)
     # No inline chart marker, but details carries numeric metric data the frontend

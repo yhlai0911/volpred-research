@@ -1,19 +1,19 @@
 {
   "schema": "dreaming_review.v1",
-  "generated_at": "2026-06-29T11:17:28.603415+00:00",
+  "generated_at": "2026-06-29T22:00:03.262893+00:00",
   "window_days": 14,
-  "dry_run": true,
+  "dry_run": false,
   "loop_health": {
-    "generated_at": "2026-06-29T11:17:28.603415+00:00",
+    "generated_at": "2026-06-29T22:00:03.262893+00:00",
     "window_days": 14,
     "overall": "ok",
     "first_pass_success": {
       "status": "low_coverage",
       "signal": "derived_low_coverage",
       "window_days": 14,
-      "total_succeeded": 327,
-      "traced": 87,
-      "coverage": 0.266,
+      "total_succeeded": 338,
+      "traced": 92,
+      "coverage": 0.272,
       "coverage_floor": 0.3,
       "note": "status_history coverage too low to judge first-pass rate honestly; surfacing counts only (info, not a breach)."
     },
@@ -21,11 +21,11 @@
       "status": "ok",
       "signal": "supported",
       "window_days": 14,
-      "success": 327,
+      "success": 338,
       "fail": 0,
       "blocked": 22,
-      "other": 3,
-      "success_rate": 0.937
+      "other": 1,
+      "success_rate": 0.939
     },
     "error_recurrence": {
       "status": "ok",
@@ -37,20 +37,20 @@
       "top_recurring": [
         {
           "signature": "hourly_dispatch.log:exit1",
-          "count": 80,
+          "count": 81,
           "first_seen": "2026-06-23T01:01:02+00:00",
-          "last_seen": "2026-06-28T00:07:36+00:00",
+          "last_seen": "2026-06-29T15:59:17+00:00",
           "recovered": true,
-          "span_days": 4.96,
+          "span_days": 6.62,
           "known": false
         },
         {
           "signature": "hourly_dispatch.log:exit142",
-          "count": 5,
-          "first_seen": "2026-06-15T13:57:32+00:00",
+          "count": 4,
+          "first_seen": "2026-06-16T04:57:31+00:00",
           "last_seen": "2026-06-17T16:57:50+00:00",
           "recovered": true,
-          "span_days": 2.13,
+          "span_days": 1.5,
           "known": true
         },
         {

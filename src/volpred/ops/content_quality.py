@@ -317,13 +317,28 @@ def check_title_format(
 
 
 def _arc_axis(item: dict[str, Any]) -> str:
-    """Best-available narrative-arc key for an item (real fields only)."""
+    """Best-available narrative-arc key for an item (real fields only).
+
+    Handles both legacy string arc_signature and current dict shape
+    (`arc_dedup_v2`/`v3` schema). For dicts, the key is the sorted entity tuple
+    + conclusion_class — different entity sets / different conclusion classes
+    become distinct axes (fixes 2026-06-30 false-positive where dict
+    arc_signature fell through to coarse category=general/milestone).
+    """
     details = item.get("details")
     if isinstance(details, dict):
         for key in ("arc_signature", "arc_signature_backfill"):
             val = details.get(key)
             if isinstance(val, str) and val.strip():
                 return val.strip()
+            if isinstance(val, dict) and val:
+                entities = val.get("entities") or []
+                concl = val.get("conclusion_class") or ""
+                if isinstance(entities, list) and entities:
+                    ent_key = "|".join(sorted(str(e) for e in entities))
+                    return f"{ent_key}::{concl}" if concl else ent_key
+                if isinstance(concl, str) and concl.strip():
+                    return f"::{concl.strip()}"
     cat = item.get("category")
     return cat.strip() if isinstance(cat, str) and cat.strip() else "(unaxised)"
 
