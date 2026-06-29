@@ -1066,7 +1066,7 @@ class Publisher:
                                         title, d['id'],
                                         f"entities={d['shared_entities']} class={d['conclusion_class']}")
             except ImportError:
-                pass
+                pass  # silent-ok: optional arc-dedup module; absent → skip arc-dup check
 
         high_overlap = [s for s in similar if s['similarity'] > 0.30]
         if high_overlap:
