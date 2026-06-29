@@ -38951,7 +38951,7 @@
     "id": "research_k1571_stage2_dnn_quantile_var",
     "task_type": "experiment",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "title": "K1571 Stage 2: DNN quantile VaR vs Stage 1 plateau (HARQ/CAViaR/LinearQR)",
     "description": "K1571 Stage 1 已建立 covariate-aware baseline plateau (HARQ/CAViaR/LinearQR on TLT/HYG, OOS 2015-2026, monthly refit, mean_pinball ~0.00048 on HYG_05). 詳見 experiments/k1571/README.md + knowledge entry 70a92526.\n\nStage 2 任務: 在**完全相同 setup**下跑 DNN quantile VaR (建議 CAR-CARNN per Taylor 2000 或 RNN-pinball), 用 DM HAC + HLN 比較 vs (HS250, LinearQR, HARQ, CAViaR-SAV)。\n\n硬規則:\n- 同 covariate set [rv5, ief_mom, lqd_mom, credit_chg, vix] + signal.shift(1)\n- 同 OOS window 2015-01-01..2026-06-26\n- 同 monthly expanding refit cadence\n- seed 1571\n- DM vs plateau median + 個別 baseline\n\n成功標準: clean experiments/k1572/ 三件套, Codex CONDITIONAL_PASS+, 不論 DNN 贏輸都寫 knowledge。\n若 DNN beat plateau median (DM p<0.05) → 報告 information gain magnitude + non-linear source 解釋。\n若 DNN NS or worse → null claim, 寫文章「複雜模型未必勝」。\n\n建議走 compute_queue (DNN training ~30min+, hourly cap 撐不住)。",
     "source": "auto_followup_k1571_stage1",
@@ -38960,7 +38960,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-29T10:01:29.868909+00:00",
     "started_at": "2026-06-29T10:01:35.812832+00:00",
-    "claim_session_id": "0649c840b5d8"
+    "claim_session_id": "0649c840b5d8",
+    "completed_at": "2026-06-29T10:25:05.512512+00:00",
+    "result": "K1572 Stage 2 completed: experiments/k1572/三件套 + charts + knowledge entry k1572_dnn_quantile_var_null. DNN-QR uses same lagged covariates/monthly expanding setup; verdict NULL_OR_WORSE_VS_PLATEAU. DNN worse than plateau in all 4 cells; HYG VaR5 +5.96% mean pinball worse, DM p=0.011."
   },
   {
     "id": "email-12158-a517f7",

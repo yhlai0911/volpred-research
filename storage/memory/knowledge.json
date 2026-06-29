@@ -36686,5 +36686,30 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-06-29T17:29:06.013264"
+  },
+  {
+    "item_id": "k1572_dnn_quantile_var_null",
+    "category": "experiment_finding",
+    "experiment_id": "k1572",
+    "k_id": "K1572",
+    "parent_k_id": "K1571",
+    "experiment_path": "experiments/k1572/",
+    "experiment_file": "experiments/k1572/k1572.py",
+    "results_file": "experiments/k1572/k1572_results.json",
+    "verdict": "NULL",
+    "reviewer": "Codex",
+    "reviewer_source": "codex-cli hourly tick 2026-06-29",
+    "content": "K1572 — DNN Quantile VaR vs K1571 fair baseline plateau\n\nverdict: NULL\nreviewer: Codex (codex-cli, 2026-06-29 hourly tick)\nexperiment_id: k1572\nexperiment_path: experiments/k1572/\nk_id: K1572\nparent_k_id: K1571\n\nDesign: TLT/HYG daily returns, yfinance adjusted close cache from K1571, OOS 2015-01-01..2026-06-26 (n=2,887 per asset-alpha), monthly expanding refit, seed=1571, DNN-QR uses exactly the K1571 lagged covariate set [rv5, ief_mom, lqd_mom, credit_chg, vix]. K1571 build_panel applies feature .shift(1), so forecasts use t-1 information for return_t. DNN architecture: feed-forward quantile net, hidden sizes 16 and 8, ReLU, pinball loss, AdamW lr=0.01, weight_decay=1e-4, 120 epochs per monthly refit. Baselines: HS250, LinearQR, HARQ, CAViaR-SAV; main plateau benchmark is pointwise median loss across LinearQR/HARQ/CAViaR-SAV.\n\nCore results vs PlateauMedianLoss (negative would favor DNN):\n- TLT VaR(5%): DNN mean pinball 0.00098793 vs plateau 0.00096115, +2.79% worse, DM t=1.128, p=0.259\n- TLT VaR(1%): DNN 0.00027314 vs plateau 0.00026076, +4.75% worse, DM t=1.147, p=0.251\n- HYG VaR(5%): DNN 0.00051282 vs plateau 0.00048397, +5.96% worse, DM t=2.535, p=0.011 (significant in the wrong direction)\n- HYG VaR(1%): DNN 0.00015667 vs plateau 0.00014659, +6.87% worse, DM t=0.754, p=0.451\n\nDNN beats HS250 mean pinball in all four cells, but that is not a real Stage 2 win because K1571 already showed HS250 is an easy and sometimes mis-calibrated baseline. Against the fair covariate-aware plateau, DNN-QR is worse in all four cells and never achieves a statistically significant improvement.\n\nConclusion: In this constrained but fair setup, DNN quantile VaR does not add nonlinear information value beyond the K1571 plateau. Literature-style claims that DNN beats historical simulation can be baseline artifacts unless they beat same-information LinearQR/HARQ/CAViaR baselines. Null result should be reported as such.\n\nCaveats: CAViaR in K1572 uses the same SAV recurrence and monthly refit but warm-starts optimization for runtime; mean-pinball drift vs K1571 is disclosed in k1572_results.json (largest absolute drift 1.504% on TLT_01 CAViaR, others <=0.079%). This is a feed-forward DNN, not a full RNN/CAR-CARNN. ES/FZ joint scoring was not tested.\n\nTags: VaR, quantile_regression, DNN, baseline_audit, CAViaR, HARQ, LinearQR, TLT, HYG, DM_test, null_result\n",
+    "evidence": [
+      "experiments/k1572/k1572.py",
+      "experiments/k1572/k1572_results.json",
+      "experiments/k1572/README.md",
+      "experiments/k1572/fig_k1572_cumulative_pinball.png",
+      "experiments/k1572/fig_k1572_dnn_edges.png",
+      "experiments/k1571/README.md",
+      "storage/memory/knowledge.json item 70a92526"
+    ],
+    "confidence": 0.84,
+    "created_at": "2026-06-29T18:24:13.743322"
   }
 ]
