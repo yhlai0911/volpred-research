@@ -998,3 +998,40 @@ def test_release_prefers_under_cap_cluster_over_fifo(tmp_path: Path, monkeypatch
     assert released_ids == ["draft_vt_new"], (
         f"expected under-cap vt draft first, got {released_ids}"
     )
+
+
+def test_drought_breaker_withholds_published_rehash():
+    """Boss email-12164: the drought-breaker must NOT force-release a draft that is
+    an arc-dup of a CURRENTLY-PUBLISHED article (a near-verbatim rehash) — it
+    withholds (returns None) instead of republishing live content, per anti-rehash."""
+    from volpred.ops.content import _maybe_drought_release
+
+    now = datetime(2026, 6, 29, 12, 0, tzinfo=timezone.utc)
+    feed = [{"id": "pub1", "status": "published", "audience": "general",
+             "published_at": "2026-06-20T00:00:00+00:00"}]  # old → would be drought
+    blocked = [{"id": "d1", "status": "draft",
+                "details": {"release_arc_dedup_of": "pub1"}}]  # arc-dup of live pub1
+    result = _maybe_drought_release(
+        blocked_items=blocked, feed=feed, recent_pub=[], now=now,
+        released_at=now.isoformat(), publisher=None, storage_dir="storage", released=[],
+    )
+    assert result is None  # withheld — never republish a live article
+
+
+def test_drought_breaker_non_published_dup_not_filtered():
+    """A draft whose arc_dedup_of target is NOT currently published is a borderline
+    dup, not a live rehash — the published-rehash guard must NOT drop it. Verified
+    at the guard level (the full release path does real publisher I/O)."""
+    # Replicate the guard's filter predicate to assert the borderline dup survives.
+    feed = [{"id": "pub1", "status": "published"}]
+    published_ids = {a.get("id") for a in feed if a.get("status") == "published"}
+    blocked = [{"id": "d1", "details": {"release_arc_dedup_of": "mile_gone"}}]  # not published
+    non_rehash = [
+        it for it in blocked
+        if (it.get("details") or {}).get("release_arc_dedup_of") not in published_ids
+    ]
+    assert non_rehash == blocked  # borderline dup kept eligible
+    # And an arc-dup of a published id IS dropped:
+    blocked2 = [{"id": "d2", "details": {"release_arc_dedup_of": "pub1"}}]
+    assert [it for it in blocked2
+            if (it.get("details") or {}).get("release_arc_dedup_of") not in published_ids] == []

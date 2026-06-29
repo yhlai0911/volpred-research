@@ -794,6 +794,30 @@ def _maybe_drought_release(
     if not blocked_items:
         return None
 
+    # 2026-06-29 (boss email-12164): never force-release a draft that is an arc-dup
+    # of a CURRENTLY-PUBLISHED article — that republishes a near-verbatim rehash of
+    # live content, directly contradicting the anti-rehash directive (email-12139).
+    # Borderline dedup-blocked drafts (similar to recent but NOT an exact
+    # published-dup) STAY eligible, so the breaker still relaxes dedup to avoid a
+    # drought (email-12153: the dedup standard is not absolute) — it just won't
+    # republish a live article. If excluding leaves nothing, signal drought
+    # (return None) so fresh content is generated instead of a guaranteed rehash.
+    _published_ids = {a.get("id") for a in feed if a.get("status") == "published"}
+    non_rehash = [
+        it
+        for it in blocked_items
+        if (it.get("details") or {}).get("release_arc_dedup_of") not in _published_ids
+    ]
+    if not non_rehash:
+        warn(
+            "release_drought",
+            "all drought-eligible drafts are arc-dups of published articles; "
+            "withholding rehash + signalling for fresh content (boss anti-rehash)",
+            blocked_pool=len(blocked_items),
+        )
+        return None
+    blocked_items = non_rehash
+
     # Gap to the newest genuinely reader-facing published article.
     reader_times = [
         t
