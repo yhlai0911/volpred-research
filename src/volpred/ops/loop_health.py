@@ -394,7 +394,7 @@ def _parse_banner_ts(line: str) -> datetime | None:
         try:
             return datetime.fromisoformat(m.group(0)).astimezone(timezone.utc)
         except ValueError:
-            return None
+            return None  # silent-ok: best-effort line parser, "no timestamp" is normal flow
     m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}", line)
     if m:
         try:
@@ -402,7 +402,7 @@ def _parse_banner_ts(line: str) -> datetime | None:
             naive = datetime.strptime(m.group(0).replace("T", " "), "%Y-%m-%d %H:%M:%S")
             return naive.replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
         except ValueError:
-            return None
+            return None  # silent-ok: best-effort line parser, "no timestamp" is normal flow
     return None
 
 
