@@ -47,15 +47,23 @@ A **decreasing / negative VRP slope** (VRP_6M shrinks toward or below VRP_1M) si
 
 | Signal | N | NW t-stat | AUC (-5% tail) | Spearman ρ | 95% CI |
 |---|---|---|---|---|---|
-| **VRP_slope_3M_1M** | 4,563 | **−0.44** | 0.473 | −0.030 | [−0.10, 0.04] |
-| **VRP_slope_6M_1M** (headline) | 4,500 | **−0.98** | 0.447 | −0.047 | [−0.13, 0.04] |
+| **VRP_slope_3M_1M** | 4,571 | **−0.44** | 0.473 | −0.029 | [−0.13, 0.07] |
+| **VRP_slope_6M_1M** (headline) | 4,508 | **−0.98** | 0.448 | −0.048 | [−0.16, 0.06] |
 | IV_slope_3M_1M (benchmark) | 4,635 | +5.67 | 0.646 | +0.226 | sig |
 | IV_slope_6M_1M (benchmark) | 4,635 | +5.54 | 0.664 | +0.264 | sig |
-| **VIX_level** (benchmark) | 4,636 | **−6.21** | 0.284 | −0.415 | dominant |
+| **VIX_level** (benchmark) | 4,636 | **−6.21** | 0.716 | −0.415 | dominant |
 
 > Headline: `|t| = 0.98 < 2` and `AUC = 0.447 < 0.55`. **NULL.**
 
-Both VRP slope variants are statistically indistinguishable from zero predictors of forward 21-day drawdown over the full sample. Raw IV slope and VIX level remain strongly significant in the **expected directions** — confirming pipeline validity (signals that should predict, do).
+Both VRP slope variants are statistically indistinguishable from zero predictors of forward 21-day drawdown over the full sample. Raw IV slope and VIX level remain strongly significant in the **expected directions** — confirming pipeline validity (signals that should predict, do). The VIX-level AUC is now direction-corrected: high VIX is treated as a higher tail-risk score.
+
+## Multiple-testing disclosure
+
+The primary test grid contains 5 signals × 3 horizons = 15 NW HAC OLS p-values. Bonferroni uses α/15 = 0.0033; Holm-Bonferroni is also reported in `k1546_results.json`.
+
+- Both VRP slope headline signals remain NULL even before adjustment (`p=0.657` for 3M-1M, `p=0.328` for 6M-1M at N=21).
+- Corrected significant results are benchmarks (`IV_slope_*`, `VIX_level`), not the new VRP-slope hypothesis.
+- Quintile Welch p-values are kept as diagnostics only because 21-day forward drawdown windows overlap.
 
 ## Encompassing regression
 
@@ -63,17 +71,17 @@ Both VRP slope variants are statistically indistinguishable from zero predictors
 
 | Term | Coefficient | NW t-stat |
 |---|---|---|
-| VIX_level | −0.00192 | **−6.43** |
+| VIX_level | −0.00192 | **−6.42** |
 | VRP_slope_6M_1M | −2.08e-6 | −0.39 |
 
-VRP slope coefficient collapses to zero once VIX level is included. **VIX level subsumes the VRP slope signal entirely** — no incremental predictive power.
+VRP slope coefficient collapses to zero once VIX level is included. In this primary full-sample linear specification, **VIX level subsumes the VRP slope signal** — no incremental predictive power.
 
 ## Subsample stability (headline signal `VRP_slope_6M_1M`, target `fwd_dd_21`)
 
 | Subsample | N | NW t-stat | Spearman ρ | Verdict |
 |---|---|---|---|---|
 | 2010-2019 | 2,516 | **−4.79** (p < 1e-6) | −0.065 | **sig negative** |
-| 2020-2026 | 1,606 | −0.80 (p=0.43) | −0.087 | insig |
+| 2020-2026 | 1,614 | −0.80 (p=0.43) | −0.087 | insig |
 
 Subsample reveals a **regime-fragile** pattern: VRP slope had measurable predictive power in the post-GFC / pre-COVID regime, but the relationship collapsed in 2020-2026 (COVID shock + 2022 bear market + 2024-25 vol regime). The full-sample headline NULL is partly a consequence of regime averaging — but per K1416 / Harvey rigor, we do not retroactively rebrand this as PASS based on cherry-picked sub-window.
 
@@ -81,7 +89,7 @@ Subsample reveals a **regime-fragile** pattern: VRP slope had measurable predict
 
 - **Full-sample**: NULL.
 - **Regime-conditional**: 2010-2019 sig, 2020-2026 insig → **fragile**, not robust.
-- **Methodological message**: VRP-slope adds **nothing incremental** over raw VIX level (encompassing test t = −0.39). VIX level is the dominant tail-risk signal; constructing a slope from `IV² − RV²` is computationally costly without economic payoff in this drawdown framework.
+- **Methodological message**: VRP-slope adds **nothing incremental** over raw VIX level in the primary full-sample specification (encompassing test t = −0.39). VIX level is the dominant tail-risk benchmark; constructing a slope from `IV² − RV²` did not add economic payoff in this drawdown framework.
 - **Honest framing**: this is a useful **null result** that pre-empts the temptation to publish "VRP term-structure predicts drawdown" — it doesn't, once you control for VIX level. Save authors from the K430 trap.
 
 ## Outputs
