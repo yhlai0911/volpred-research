@@ -242,7 +242,15 @@ def _check_piggy_back_drift(due_summary: dict) -> dict:
 
 
 def main() -> int:
+    import os
+
     from volpred.ops import check_alert_conditions  # noqa: WPS433 (deferred for sys.path)
+
+    # 2026-06-29: this is the canonical hourly alert path — opt into the
+    # content-quality frontend render probe here (network call). content_quality_
+    # snapshot defaults it OFF so tests/dashboard stay offline; turning it on for
+    # the hourly check gives live React-error / 5xx detection (2026-06-24 #418).
+    os.environ.setdefault("VOLPRED_FRONTEND_PROBE", "1")
 
     # 2026-04-20 universal piggy-back scheduler: macOS host cron daemon only
     # reliably fires `0 * * * *` pattern on this machine (confirmed via

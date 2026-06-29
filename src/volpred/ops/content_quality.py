@@ -33,6 +33,7 @@ Design constraints:
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -58,6 +59,22 @@ DIGEST_CONTENT_TYPE = "daily_digest"
 # Title format thresholds.
 TITLE_MAX_LEN = 80  # frontend truncates beyond this; flag for tightening
 TITLE_BAD_CHARS = ("\x00", "\r", "\t")
+
+# --- 2026-06-29 patrol completion (the 4 checks designed but not yet built) ---
+# arc diversity: over-concentration of one narrative arc among recent published.
+ARC_DIVERSITY_LOOKBACK = 20
+ARC_DIVERSITY_MIN_SAMPLE = 8
+ARC_DOMINANCE_THRESHOLD = 0.50  # top arc share > 50% over the sample → warn
+# content completeness: chart + source markers expected in every article.
+COMPLETENESS_LOOKBACK = 12
+_CHART_MARKERS = ("![", ".png", ".svg", ".jpg", "chart", "figure", "圖", "<img")
+_SOURCE_MARKERS = ("來源", "資料來源", "data source", "experiment", "實驗", "回測", "樣本")
+_KID_RE = re.compile(r"\bK\d{2,}\b")  # K-id citation (K123, K1557, ...)
+# release deadlock: the candidate source feeding the draft/release pool.
+RELEASE_CANDIDATE_FIELDS = ("candidates", "top_10_uncovered")
+# frontend render probe.
+FRONTEND_PROBE_TIMEOUT_S = 6.0
+_FRONTEND_ERROR_MARKERS = ("Minified React error", "Application error", "500 Internal")
 
 
 def _feed_path(storage_dir: str) -> Any:
@@ -299,15 +316,225 @@ def check_title_format(
     }
 
 
+def _arc_axis(item: dict[str, Any]) -> str:
+    """Best-available narrative-arc key for an item (real fields only)."""
+    details = item.get("details")
+    if isinstance(details, dict):
+        for key in ("arc_signature", "arc_signature_backfill"):
+            val = details.get(key)
+            if isinstance(val, str) and val.strip():
+                return val.strip()
+    cat = item.get("category")
+    return cat.strip() if isinstance(cat, str) and cat.strip() else "(unaxised)"
+
+
+def check_arc_diversity(
+    storage_dir: str = "storage",
+    *,
+    lookback: int = ARC_DIVERSITY_LOOKBACK,
+) -> dict[str, Any]:
+    """Over-concentration of one narrative arc among recent published items.
+
+    Reader retention dies when every recent article is the same arc in a new
+    shell. Flags when the top arc exceeds ARC_DOMINANCE_THRESHOLD of a
+    sufficiently large recent sample (uses `details.arc_signature`, falling back
+    to `category`). Remediation: dispatch a fresh-arc / journal-discovery topic.
+    """
+    feed = _load_feed(storage_dir)
+    timed = [
+        (item, ts)
+        for item in _published_items(feed)
+        if (ts := _item_publish_time(item)) is not None
+    ]
+    timed.sort(key=lambda kv: kv[1], reverse=True)
+    recent = [item for item, _ in timed[:lookback]]
+    if len(recent) < ARC_DIVERSITY_MIN_SAMPLE:
+        return {
+            "status": "ok",
+            "sample": len(recent),
+            "note": "too few recent published items to judge diversity",
+        }
+    counts: dict[str, int] = {}
+    for item in recent:
+        axis = _arc_axis(item)
+        counts[axis] = counts.get(axis, 0) + 1
+    top_axis, top_count = max(counts.items(), key=lambda kv: kv[1])
+    share = round(top_count / len(recent), 3)
+    status = "concentrated" if share > ARC_DOMINANCE_THRESHOLD else "ok"
+    return {
+        "status": status,
+        "sample": len(recent),
+        "distinct_axes": len(counts),
+        "top_axis": top_axis,
+        "top_share": share,
+        "threshold": ARC_DOMINANCE_THRESHOLD,
+        "distribution": dict(sorted(counts.items(), key=lambda kv: kv[1], reverse=True)),
+    }
+
+
+def check_content_completeness(
+    storage_dir: str = "storage",
+    *,
+    lookback: int = COMPLETENESS_LOOKBACK,
+) -> dict[str, Any]:
+    """Recent published articles must carry a real chart AND a source citation.
+
+    Per the project rule (每篇文章都要有真圖表 + 標明數據來源). Scans the
+    rendered `content` for chart/image markers and source/experiment markers;
+    flags items missing either. Conservative: only flags when BOTH the content
+    body and structured fields lack the marker (avoids false positives on items
+    whose chart lives in a `charts`/`images` field).
+    """
+    feed = _load_feed(storage_dir)
+    timed = [
+        (item, ts)
+        for item in _published_items(feed)
+        if (ts := _item_publish_time(item)) is not None
+    ]
+    timed.sort(key=lambda kv: kv[1], reverse=True)
+    recent = [item for item, _ in timed[:lookback]]
+
+    findings: list[dict[str, Any]] = []
+    for item in recent:
+        content = item.get("content")
+        text = content if isinstance(content, str) else ""
+        text_low = text.lower()
+        details = item.get("details") if isinstance(item.get("details"), dict) else {}
+        # A chart is present if the body has an inline marker, a structured
+        # charts/images field, OR `details` carries numeric metric data the
+        # frontend renders into a chart component (avoids flagging articles whose
+        # chart is frontend-rendered from details — e.g. dm_stat/pvalue fields).
+        has_chartable_details = any(isinstance(v, (int, float)) for v in details.values())
+        has_chart = (
+            any(m.lower() in text_low for m in _CHART_MARKERS)
+            or bool(item.get("charts") or item.get("images"))
+            or bool(details.get("charts") or details.get("chart_path"))
+            or has_chartable_details
+        )
+        has_source = (
+            any(m.lower() in text_low for m in _SOURCE_MARKERS)
+            or bool(_KID_RE.search(text))
+            or bool(details.get("experiment_refs") or details.get("experiment_id"))
+        )
+        if not has_chart or not has_source:
+            findings.append(
+                {
+                    "id": item.get("id"),
+                    "missing_chart": not has_chart,
+                    "missing_source": not has_source,
+                    "title": (item.get("title") or "")[:60],
+                }
+            )
+    return {
+        "status": "ok" if not findings else "incomplete",
+        "scanned": len(recent),
+        "findings": findings,
+    }
+
+
+def check_release_deadlock(storage_dir: str = "storage") -> dict[str, Any]:
+    """Early warning: the candidate source feeding the release pool is empty.
+
+    `draft_pool_low` (alerts.py) fires once the draft pool drains; this fires
+    UPSTREAM — when `publication_candidates.json` itself has no candidates, the
+    refill source is exhausted and the pool will inevitably empty next. Critical
+    because a dry source = the release pipeline deadlocks (2026-06-23 8-day gap).
+    """
+    path = project_path(storage_dir) / "publication_candidates.json"
+    if not path.exists():
+        # Missing file is a setup/provisioning problem, not a release deadlock —
+        # don't fire a false critical (e.g. in test/sandbox storage dirs).
+        return {"status": "unknown", "exists": False}
+    data = load_json(path, {})
+    if not isinstance(data, dict):
+        warn("content_quality_release", "publication_candidates not a dict", type=type(data).__name__)
+        return {"status": "unknown", "exists": True}
+    counts = {}
+    total = 0
+    for field in RELEASE_CANDIDATE_FIELDS:
+        val = data.get(field)
+        n = len(val) if isinstance(val, list) else 0
+        counts[field] = n
+        total += n
+    status = "deadlock" if total == 0 else "ok"
+    return {
+        "status": status,
+        "exists": path.exists(),
+        "candidate_counts": counts,
+        "total": total,
+    }
+
+
+def _default_fetcher(url: str, timeout: float) -> tuple[int, str]:
+    import urllib.request
+
+    req = urllib.request.Request(url, headers={"User-Agent": "volpred-content-patrol"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310 (fixed https target)
+        body = resp.read(4096).decode("utf-8", errors="replace")
+        return resp.status, body
+
+
+def check_frontend_render(
+    storage_dir: str = "storage",
+    *,
+    fetcher=None,
+    probe: bool = True,
+) -> dict[str, Any]:
+    """Best-effort probe that the live homepage returns 200 with no React error.
+
+    Network-dependent → fail-open: any error / disabled probe → `unknown` (never
+    a breach). `fetcher` is injectable for tests (default urllib). Reads the live
+    URL from config/project_targets.json (single source of truth).
+    """
+    if not probe:
+        return {"status": "unknown", "probed": False, "note": "probe disabled"}
+    try:
+        from volpred.config import load_project_targets
+
+        targets = load_project_targets()
+        url = (targets.get("site") or {}).get("default_remote_url") if isinstance(targets, dict) else None
+    except Exception as exc:
+        warn("content_quality_frontend", "target URL resolve failed; skipping probe", err=str(exc))
+        return {"status": "unknown", "probed": False, "error": str(exc)}
+    if not url:
+        return {"status": "unknown", "probed": False, "note": "no site URL in project_targets"}
+
+    fetch = fetcher or _default_fetcher
+    try:
+        status_code, body = fetch(url, FRONTEND_PROBE_TIMEOUT_S)
+    except Exception as exc:
+        warn("content_quality_frontend", "frontend probe failed; treating as unknown", url=url, err=str(exc))
+        return {"status": "unknown", "probed": True, "url": url, "error": str(exc)}
+    react_error = any(marker in body for marker in _FRONTEND_ERROR_MARKERS)
+    if status_code != 200:
+        status = "error"
+    elif react_error:
+        status = "error"
+    else:
+        status = "ok"
+    return {
+        "status": status,
+        "probed": True,
+        "url": url,
+        "http_status": status_code,
+        "react_error": react_error,
+    }
+
+
 def content_quality_snapshot(
     storage_dir: str = "storage",
     *,
     now: datetime | None = None,
+    probe_frontend: bool = False,
+    fetcher=None,
 ) -> dict[str, Any]:
-    """Aggregate the MVP checks into one report.
+    """Aggregate all content-quality checks into one report.
 
     Mirrors `health.py::health_snapshot` shape so callers (alerts.py, CLI)
-    can treat the two reports uniformly.
+    can treat the two reports uniformly. `probe_frontend` defaults OFF so the
+    snapshot is pure/offline (safe for tests + the dashboard); the hourly alert
+    path opts in via env (see alerts._parse_content_quality_state). `fetcher` is
+    injectable for tests.
     """
     current = now or datetime.now(timezone.utc)
     return {
@@ -317,4 +544,11 @@ def content_quality_snapshot(
             storage_dir, now=current
         ),
         "title_format": check_title_format(storage_dir),
+        # 2026-06-29 patrol completion (4 designed checks now built).
+        "arc_diversity": check_arc_diversity(storage_dir),
+        "content_completeness": check_content_completeness(storage_dir),
+        "release_deadlock": check_release_deadlock(storage_dir),
+        "frontend_render": check_frontend_render(
+            storage_dir, fetcher=fetcher, probe=probe_frontend
+        ),
     }

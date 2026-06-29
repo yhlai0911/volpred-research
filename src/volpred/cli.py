@@ -681,6 +681,49 @@ def ops_hygiene_report() -> None:
     _print_json(report)
 
 
+@ops.command("loop-health")
+@click.option("--storage-dir", default="storage", show_default=True)
+def ops_loop_health(storage_dir: str) -> None:
+    """Loop-health snapshot — is the autonomous loop improving? (fast loop)
+
+    Four derived metrics: first_pass_success / task_outcome / error_recurrence /
+    correction_trend. Read-only aggregation of existing audit trails; mirrors
+    `memory-health-summary` in spirit. The slow-loop pattern miner that proposes
+    fixes is `ops dreaming-run`.
+    """
+    from volpred.ops.loop_health import loop_health_snapshot
+
+    snapshot = loop_health_snapshot(storage_dir)
+    console.print(
+        f"[green]Loop-health[/green] overall=[bold]{snapshot['overall']}[/bold] "
+        f"window={snapshot['window_days']}d"
+    )
+    for name in ("first_pass_success", "task_outcome", "error_recurrence", "correction_trend"):
+        console.print(f"  {name}: {snapshot[name].get('status')}")
+    _print_json(snapshot)
+
+
+@ops.command("dreaming-run")
+@click.option("--storage-dir", default="storage", show_default=True)
+@click.option("--dry-run", is_flag=True, help="Detect + write report only; no task dispatch, retract, or email")
+def ops_dreaming_run(storage_dir: str, dry_run: bool) -> None:
+    """Dreaming review — slow loop: mine cross-session failure patterns.
+
+    Reads work_log / cron logs / ops receipts / loop-health, detects repeated
+    tool failures, recurring errors, stale knowledge and missing retry
+    strategies, then auto-remediates low-risk derived state and PROPOSES (never
+    auto-applies) governance changes. Writes storage/ops/dreaming/<date>.json.
+    """
+    import sys as _sys
+    from pathlib import Path as _Path
+
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[2] / "scripts"))
+    import dreaming_review
+
+    rc = dreaming_review.main(storage_dir=storage_dir, dry_run=dry_run)
+    raise SystemExit(rc)
+
+
 @ops.group("experiments")
 def ops_experiments() -> None:
     """Inspect and gradually normalize experiments/ structure."""

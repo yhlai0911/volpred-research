@@ -4,7 +4,12 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from volpred.ops.alerts import build_alert_condition_report, check_alert_conditions, send_alert
+from volpred.ops.alerts import (
+    _parse_loop_health_state,
+    build_alert_condition_report,
+    check_alert_conditions,
+    send_alert,
+)
 
 
 def _write_text(path: Path, content: str) -> None:
@@ -15,6 +20,37 @@ def _write_text(path: Path, content: str) -> None:
 def _write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def test_parse_loop_health_breaches_on_task_outcome_with_stable_title(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 6, 29, 12, 0, tzinfo=timezone.utc)
+    recent = (now - timedelta(days=1)).isoformat()
+    # Mostly-failed terminal tasks → task_outcome degrading → breach.
+    _write_json(
+        storage_dir / "next_tasks.json",
+        [{"id": f"f{i}", "status": "failed", "completed_at": recent} for i in range(8)]
+        + [{"id": "s1", "status": "succeeded", "completed_at": recent}],
+    )
+    result = _parse_loop_health_state(str(storage_dir), now)
+    assert result["breached"] is True
+    assert result["id"] == "loop_health"
+    # Title lists the metric NAME (stable for sha256(level+title) dedup), not numbers.
+    assert "task_outcome" in result["title"]
+    assert "Loop-health" in result["title"]
+
+
+def test_parse_loop_health_not_breached_on_clean_state(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 6, 29, 12, 0, tzinfo=timezone.utc)
+    recent = (now - timedelta(days=1)).isoformat()
+    _write_json(
+        storage_dir / "next_tasks.json",
+        [{"id": f"s{i}", "status": "succeeded", "completed_at": recent} for i in range(10)],
+    )
+    result = _parse_loop_health_state(str(storage_dir), now)
+    assert result["breached"] is False
+    assert result["title"] == "loop_health ok"
 
 
 def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypatch):
@@ -209,6 +245,12 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
         "volpred.ops.health.shutil.disk_usage",
         lambda _p: __import__("collections").namedtuple("U", ["total", "used", "free"])(100, 10, 90),
     )
+    # cluster_cap_drift reads the REAL feed via topic_clusters.recent_cluster_counts
+    # (it does not honour storage_dir), so without this stub it leaks production
+    # cluster overshoot into the fixture and breaches non-deterministically. Quiet
+    # it so this test isolates only the cron/pool set. (storage_dir bug tracked
+    # separately — surfaced by the 2026-06-29 loop-health work.)
+    monkeypatch.setattr("volpred.topic_clusters.recent_cluster_counts", lambda days=30: ({}, 0))
     # exit 1 in the NEW canonical wrapper format (`=== [job] exit N at ... ===`) so
     # both release_pool_gap (no recent fire) and host_cron_fail (non-zero exit) breach.
     _write_text(

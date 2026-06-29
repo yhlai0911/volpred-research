@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -17,6 +18,7 @@ from .content_quality import (
     content_quality_snapshot,
 )
 from .diagnostics import warn
+from .loop_health import loop_health_snapshot
 from .health import (
     DISK_USAGE_ALERT_PCT,
     DISK_USAGE_MIN_FREE_GB,
@@ -1472,12 +1474,21 @@ def _parse_content_quality_state(
     Body lists the breached sub-checks plus pointers; details carries the
     full snapshot for `ops_dashboard` consumers.
     """
-    snapshot = content_quality_snapshot(storage_dir, now=now)
+    # Frontend probe is a network call — opt in only on the hourly alert path
+    # (check_alerts sets VOLPRED_FRONTEND_PROBE=1); off by default so tests and
+    # the dashboard stay offline/deterministic.
+    probe_frontend = os.environ.get("VOLPRED_FRONTEND_PROBE", "").strip().lower() in ("1", "true", "yes", "on")
+    snapshot = content_quality_snapshot(storage_dir, now=now, probe_frontend=probe_frontend)
     digest = snapshot["daily_digest_uniqueness"]
     rhythm = snapshot["publish_rhythm"]
     title = snapshot["title_format"]
+    arc = snapshot.get("arc_diversity", {})
+    release = snapshot.get("release_deadlock", {})
+    frontend = snapshot.get("frontend_render", {})
+    completeness = snapshot.get("content_completeness", {})
 
     breached_subchecks: list[str] = []
+    critical_subchecks: list[str] = []
     if digest["status"] == "duplicate":
         breached_subchecks.append("daily_digest_uniqueness")
     if rhythm["status"] in ("burst", "drought"):
@@ -1487,6 +1498,17 @@ def _parse_content_quality_state(
         for f in title["findings"]
     ):
         breached_subchecks.append("title_format:digest_prefix")
+    # 2026-06-29 patrol completion: 4 new checks wired into the breach decision.
+    if release.get("status") == "deadlock":
+        breached_subchecks.append("release_deadlock")
+        critical_subchecks.append("release_deadlock")
+    if frontend.get("status") == "error":
+        breached_subchecks.append("frontend_render")
+        critical_subchecks.append("frontend_render")
+    if arc.get("status") == "concentrated":
+        breached_subchecks.append("arc_diversity")
+    # content_completeness is a heuristic (frontend-rendered charts can't be seen
+    # from feed content) → surfaced as context, NOT an independent breach driver.
 
     breached = bool(breached_subchecks)
 
@@ -1522,6 +1544,28 @@ def _parse_content_quality_state(
             f"- title_format: {len(dup_titles)} 篇 digest title 重複前端區塊"
             "標頭 `每日精選導讀`"
         )
+    if release.get("status") == "deadlock":
+        lines.append(
+            f"- release_deadlock: publication_candidates 來源枯竭 "
+            f"(total={release.get('total')}, {release.get('candidate_counts')}) "
+            "→ 釋出池上游將斷貨"
+        )
+    if frontend.get("status") == "error":
+        lines.append(
+            f"- frontend_render: 線上首頁異常 (http={frontend.get('http_status')}, "
+            f"react_error={frontend.get('react_error')}, url={frontend.get('url')})"
+        )
+    if arc.get("status") == "concentrated":
+        lines.append(
+            f"- arc_diversity: 近 {arc.get('sample')} 篇最高 arc `{arc.get('top_axis')}` "
+            f"佔 {arc.get('top_share')} > {arc.get('threshold')} 門檻（主題過度集中）"
+        )
+    if completeness.get("status") == "incomplete":
+        miss = completeness.get("findings", [])
+        lines.append(
+            f"- (context) content_completeness: {len(miss)}/{completeness.get('scanned')} "
+            "篇缺圖表或來源 marker（heuristic，可能含 frontend-rendered chart 誤判，供人工複查）"
+        )
     if not breached:
         lines.append("- (none)")
 
@@ -1552,11 +1596,117 @@ def _parse_content_quality_state(
     return {
         "id": "content_quality",
         "breached": breached,
-        "level": "warn" if breached else "info",
+        "level": "critical" if critical_subchecks else ("warn" if breached else "info"),
         "title": (
             "內容品質巡檢觸發（" + " / ".join(breached_subchecks) + "）"
             if breached
             else "content_quality ok"
+        ),
+        "body": body if breached else "",
+        "details": snapshot,
+    }
+
+
+def _parse_loop_health_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Loop-health regression breach (2026-06-29 loop-engineering layer).
+
+    Aggregates `loop_health_snapshot` — "is the autonomous loop *improving*?" —
+    into the alert chain. This is the fast loop; the slow loop that mines
+    cross-session patterns and proposes fixes is `scripts/dreaming_review.py`.
+
+    Breach drivers are deliberately scoped to signals NOT already owned by
+    another condition, to avoid duplicate alerting:
+    - `task_outcome` degrading/warn (recent terminal success share dropping)
+    - `correction_trend` worsening (boss/self catching more content errors)
+    - `first_pass_success` degrading/warn — only when coverage is sufficient
+      (low_coverage self-suppresses; it's info, never a breach)
+
+    `error_recurrence` is intentionally NOT a breach driver here: real-time
+    cron-exit failures are owned by `host_cron_fail`, and cross-run three-strike
+    escalation is owned by the dreaming job. It is still shown in the body as
+    context and carried in details for the dashboard + dreaming consumers.
+
+    Title lists the breached metric NAMES (stable across runs) so the
+    sha256(level+title) dedup key is stable; numbers live in the body.
+    """
+    snapshot = loop_health_snapshot(storage_dir, now=now)
+    first_pass = snapshot["first_pass_success"]
+    task_outcome = snapshot["task_outcome"]
+    recurrence = snapshot["error_recurrence"]
+    correction = snapshot["correction_trend"]
+
+    breached_metrics: list[str] = []
+    if task_outcome.get("status") in ("warn", "degrading"):
+        breached_metrics.append("task_outcome")
+    if correction.get("status") == "warn":
+        breached_metrics.append("correction_trend")
+    if first_pass.get("status") in ("warn", "degrading"):
+        breached_metrics.append("first_pass_success")
+
+    breached = bool(breached_metrics)
+
+    lines = ["## 觸發條件"]
+    if "task_outcome" in breached_metrics:
+        lines.append(
+            f"- task_outcome: 近 {task_outcome.get('window_days')}d 任務終態成功率 "
+            f"{task_outcome.get('success_rate')}（success={task_outcome.get('success')} "
+            f"/ fail={task_outcome.get('fail')} / blocked={task_outcome.get('blocked')}）"
+            f"→ {task_outcome.get('status')}"
+        )
+    if "correction_trend" in breached_metrics:
+        lines.append(
+            f"- correction_trend: 近 {correction.get('weeks')} 週糾正事件上升 "
+            f"(weekly recent-first {correction.get('weekly_counts_recent_first')}, "
+            f"slope={correction.get('slope_per_week')}/wk)"
+        )
+    if "first_pass_success" in breached_metrics:
+        lines.append(
+            f"- first_pass_success: 一次完成率 {first_pass.get('first_pass_rate')} "
+            f"(traced={first_pass.get('traced')}, coverage={first_pass.get('coverage')}) "
+            f"→ {first_pass.get('status')}"
+        )
+    if not breached:
+        lines.append("- (none — loop-health ok)")
+
+    # error_recurrence context (informational, never the sole breach driver here).
+    top = recurrence.get("top_recurring") or []
+    if top:
+        worst = top[0]
+        lines.append(
+            f"- (context) error_recurrence={recurrence.get('status')}; 最高重複簽章 "
+            f"`{worst.get('signature')}` ×{worst.get('count')}"
+            f"{'（已知自癒）' if worst.get('known') else ''} — cron-exit 即時告警由 "
+            "host_cron_fail 負責，跨 run 升級由 dreaming 負責。"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## 影響",
+            "Loop-health 衡量「系統有沒有在變好」（一次完成率 / 任務成功率 / 同類錯誤重複 "
+            "/ 糾正趨勢）。退化代表自主迴圈品質下滑，會增加老闆人工介入、拖慢內容與研究產出"
+            "（Mission #2 研究 + #1 內容 + #4 運營）。",
+            "",
+            "## 建議行動",
+            "1. `task_outcome` 退化 → 查 `storage/work_log.json` 近 14d failed/blocked "
+            "task 的共同根因（資料源死 / agent brief 不清 / 重複 dispatch）。",
+            "2. `correction_trend` 上升 → 內容糾正變多，查 `content_correction_report.json` "
+            "HIGH/MEDIUM 命中，補 publish 前 gate 或退回相關文章。",
+            "3. `first_pass_success` 退化 → 任務反覆重試，查 dispatch brief 品質。",
+            "4. 完整跨 session 模式分析 → `uv run volpred ops dreaming-run`（slow loop，"
+            "產 findings + proposal，治理檔只建議不自動改）。",
+        ]
+    )
+
+    body = "\n".join(lines)
+    return {
+        "id": "loop_health",
+        "breached": breached,
+        "level": "warn" if breached else "info",
+        "title": (
+            "Loop-health 退化（" + " / ".join(breached_metrics) + "）"
+            if breached
+            else "loop_health ok"
         ),
         "body": body if breached else "",
         "details": snapshot,
@@ -1707,6 +1857,7 @@ def build_alert_condition_report(
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_content_quality_state(storage_dir, current),       # 2026-06-24 meta-fix: content patrol layer
         _parse_cluster_cap_drift_state(storage_dir),              # 2026-06-29 K1333 publish discovered vix 6.1x / spy 8.3x overshoot
+        _parse_loop_health_state(storage_dir, current),           # 2026-06-29 loop-engineering: is the loop improving?
     ]
     return {
         "generated_at": current.isoformat(),
