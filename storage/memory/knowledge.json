@@ -36671,5 +36671,20 @@
     "overclaim_status_before_patch": "major",
     "overclaim_status_after_patch": "none",
     "research_honesty": "推翻文章宣稱層級而非統計層級；統計三層驗證仍成立；Q95 GLD null finding 已誠實標示"
+  },
+  {
+    "item_id": "70a92526",
+    "category": "experiment_finding",
+    "content": "K1571 — Deep Quantile VaR 的公平 Baseline 審計 (Stage 1 plateau)\n\nverdict: CONDITIONAL_PASS\nreviewer: Codex (codex_cli_0.132_chatgpt_auth)\nexperiment_id: k1571\nexperiment_path: experiments/k1571/\nk_id: K1571\n\n設計: TLT/HYG 2015-2026 OOS (n=2887/combo), monthly expanding refit, 4 baselines (HS250 / LinearQR / HARQ / CAViaR-SAV), DM HAC Newey-West + HLN h=1, Kupiec POF + Christoffersen independence, seed=1571, signal.shift(1) on all features.\n\n核心結果:\n- HYG VaR(5%): 3 covariate-aware 模型全顯著贏 HS250 (DM p: LinearQR 0.031, CAViaR 0.017, HARQ 0.013); HS Kupiec p=0.040, Christoffersen p=4e-9 (mis-calibrated)\n- HYG VaR(1%): borderline (CAViaR p=0.044, HARQ 0.057, LinearQR 0.067)\n- TLT VaR(5%): 僅 CAViaR 顯著 (p=0.047); HARQ 0.090; LinearQR NS (0.317)\n- TLT VaR(1%): 全 NS (p>=0.095)\n- 三 covariate 模型彼此 statistically indistinguishable (pairwise DM p>0.22): 形成 mean_pinball ~0.00048 plateau on HYG_05\n\n結論: Deep quantile VaR 文獻常見 \"vs HS-only\" claim 並非公平 baseline。本 Stage 1 確認 covariate 本身能擠出顯著 information value, 特別是 credit-sensitive assets (HYG) > rate-sensitive (TLT)。Stage 2 任何 DNN claim 必須打敗本 plateau (HARQ / CAViaR / LinearQR 中位數) 才算 real non-linear advantage。\n\nCaveats (Codex CONDITIONAL_PASS 提示):\n- HLN at h=1 用 1.0 而非 sqrt((n-1)/n)=0.99983 (對 n=2887 影響 <0.02%, 不翻 significance)\n- HAC autocov 分母用 n-lag 非嚴格 NW n (~0.5% bias)\n這兩個是二階偏差, 不影響核心 plateau / DM significance pattern。\n\n下一步: 排 compute_queue Stage 2 DNN quantile (CAR-CARNN / RNN-quantile) on 同 covariate set, 同 OOS window, 跑 DM vs (HS250, LinearQR, HARQ, CAViaR)。若 DNN 沒打敗 plateau median → null claim 文章「複雜未必勝」。\n\nTags: VaR, quantile_regression, baseline_audit, CAViaR, HARQ, TLT, HYG, credit_risk, DM_test\n",
+    "evidence": [
+      "experiments/k1571/k1571.py",
+      "experiments/k1571/k1571_results.json",
+      "experiments/k1571/README.md",
+      "experiments/k1571/fig_quantile_loss_compare.png",
+      "experiments/k1571/fig_var_violations.png",
+      "/tmp/k1571_codex_review.txt"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-06-29T17:29:06.013264"
   }
 ]
