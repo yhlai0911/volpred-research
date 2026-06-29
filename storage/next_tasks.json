@@ -38855,5 +38855,76 @@
     "started_at": "2026-06-29T06:11:21.856130+00:00",
     "completed_at": "2026-06-29T06:14:58.385341+00:00",
     "result": "Email 視覺化升級完成:1)_email_shell CSS 大改(H2 accent bar+漸層底/H3 accent/strong 黃 highlight/table zebra stripe+dark header/dark code block/blockquote 改 sky-blue/keyword CSS class kw-critical/warn/info/ok) 2)新增 highlight_email_keywords helper(35 status keyword regex 自動染色 CRITICAL/WARN/INFO/PASS/FAIL/中文成功/失敗/警告/emoji 🟢❌⚠️ 等; 保護 code/pre/a 區段不被汙染) 3)alerts.py 接入 highlighter+level badge 改 pill style 4)18 unit test 過(idempotent/empty/code-protection/no-keyword/巢狀標籤/zebra 全覆蓋) 5)樣式測試 email 已寄 notification 4186a4ba(展示 5 種狀態色+表格 zebra+dark code+blockquote)"
+  },
+  {
+    "id": "email-12153-4afbb2",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 語意相似度 directive 測量半邊已上線:整主題勝標題(實證)+真實 feed 30% 同主題 reh",
+    "description": "Gmail UID: 12153\nMessage-ID: <334CD032-C202-426D-92AA-5A8B4B328E63@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Mon, 29 Jun 2026 15:49:07 +0800\nSubject: Re: [VolPred Alert][INFO] 語意相似度 directive 測量半邊已上線:整主題勝標題(實證)+真實 feed 30% 同主題 rehash\n\n--- 用戶回信內容 ---\n語意標準不是絕對標準\r\n可使用動態調整\r\n若門檻太高 可逐步降低到正常釋出文章\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月29日 15:47 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 語意相似度 directive 測量半邊已上線:整主題勝標題(實證)+真實 feed 30% 同主題 rehash\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 你的「整主題語意相似度」directive — 測量半邊已上線（live 每日訊號）\r\n> \r\n> 你 email-12139 講的「相似度是整個主題語意比較不是關鍵字」，我做成了實際運作的系統，不只概念。\r\n> 做了什麼（commit 1357f9b7a / 187608c03 / f5c5ad9f1，全測試綠）\r\n> \r\n> topic_similarity 模組：embedding（重用既有 LanceDB pipeline）+ 整主題語意相似度 + cache 控成本 + fail-open（embedding 掛掉不會卡內容流程）。\r\n> volpred ops semantic-concentration：隨時查 feed 的語意集中度。\r\n> dreaming 每日 live 訊號：detect_semantic_concentration 每天自動跑，rehash 率高就 flag。\r\n> 兩個用你原則驗證出的關鍵發現\r\n> \r\n> 「整個主題」你說得精準：光用標題 embedding 會失敗 —— 短標題「波動率對X的影響」按句構算，cos(風險值, 選擇權定價)=0.760 反而比真改寫 cos(風險值, VaR改寫)=0.706 還高。改用整主題（標題+描述+結論）就對了：改寫 0.752 > 不同主題 0.569。你的用詞直接決定了設計。\r\n> 跑你真實 feed 抓到 keyword 抓不到的真重複：排除每日公告後，近 20 篇有 30% 是語意 rehash（同主題換殼又寫一次）：\r\n> 「深度學習波動率模型 RECH-X 跨市場」↔「AI 波動率模型 RECH-X 的答案很克制」(0.766) — 同一個 RECH-X 實驗寫了兩篇\r\n> 「K1339 商品 ETF 動量體制 銅波動率」↔「商品 ETF 翻向時銅先把警報拉高」(0.757) — 同主題兩篇\r\n> keyword cluster 完全抓不到這些（它們關鍵字不同），但語意上就是重複。這正是你要的訊號。\r\n> 對比舊 keyword 訊號\r\n> \r\n> keyword 說「57% 提到 vix/spy」（你說過不一定是問題）；語意說「30% 是同主題又寫一次」（這才是真集中問題）。\r\n> 下一步（測量→預防）\r\n> \r\n> 測量半邊已 live。下一個增量：publish 時的語意 dedup gate（near_duplicates 已備）—— 釋出前先比語意，是 rehash 就擋/降級，從源頭防重複。做好會回報。\r\n> cap 哲學或 threshold（目前 0.74，preliminary）要調，回我一句即可。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-29T08:00:03.225777+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12153,
+    "email_message_id": "<334CD032-C202-426D-92AA-5A8B4B328E63@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 語意相似度 directive 測量半邊已上線:整主題勝標題(實證)+真實 feed 30% 同主題 rehash",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-29T08:07:22.151671+00:00",
+    "claim_session_id": "37ab62933bd9"
+  },
+  {
+    "id": "paper_review_mile_190c7e3c",
+    "title": "Paper review (Codex 24h-rule): 把美股最熱門的 5 種因子輪著買，最後還是沒贏最笨的那個組合",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_190c7e3c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_190c7e3c",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-29T08:09:49+00:00"
+  },
+  {
+    "id": "paper_review_mile_abe9e68f",
+    "title": "Paper review (Codex 24h-rule): 每一次失敗都在說同一件事：日頻資料的訊號天花板",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_abe9e68f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_abe9e68f",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-29T08:09:49+00:00"
+  },
+  {
+    "id": "research_deep_quantile_var_baseline_dnn_quantile_covariat",
+    "title": "研究 backlog fallback: Deep quantile VaR 的公平 baseline 審計：DNN quantile 是否只是吃到高維 covariate advantage",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Deep quantile VaR 的公平 baseline 審計：DNN quantile 是否只是吃到高維 covariate advantage — 用 SPY/QQQ/TLT/HYG 日報酬 + VIX/MOVE/FRED macro lagged features，對 deep quantile estimator、linear quantile regression、CAViaR、HAR-quantile / nonlinear MIDAS 做 VaR/ES forecast，固定 `signal.shift(1)`，用 quantile score、DM/GW、VaR viola | 來源 section: 期刊主題挖掘 batch 2026-06-27（journal_discovery_20260626_0；websearch jfec/rof/rfs/aea/restud 2025-26 趨勢層級；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "in_progress",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "deep_quantile_var_baseline_dnn_quantile_covariat",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-06-29T08:10:23+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-29T08:12:40.426605+00:00",
+    "claim_session_id": "35ba2235b6ef",
+    "started_at": "2026-06-29T08:13:06.237718+00:00"
   }
 ]

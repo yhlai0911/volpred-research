@@ -1,19 +1,19 @@
 {
   "schema": "dreaming_review.v1",
-  "generated_at": "2026-06-29T05:54:47.034516+00:00",
+  "generated_at": "2026-06-29T07:45:12.615108+00:00",
   "window_days": 14,
   "dry_run": true,
   "loop_health": {
-    "generated_at": "2026-06-29T05:54:47.034516+00:00",
+    "generated_at": "2026-06-29T07:45:12.615108+00:00",
     "window_days": 14,
     "overall": "degrading",
     "first_pass_success": {
       "status": "low_coverage",
       "signal": "derived_low_coverage",
       "window_days": 14,
-      "total_succeeded": 325,
-      "traced": 88,
-      "coverage": 0.271,
+      "total_succeeded": 328,
+      "traced": 87,
+      "coverage": 0.265,
       "coverage_floor": 0.3,
       "note": "status_history coverage too low to judge first-pass rate honestly; surfacing counts only (info, not a breach)."
     },
@@ -21,10 +21,10 @@
       "status": "ok",
       "signal": "supported",
       "window_days": 14,
-      "success": 325,
+      "success": 328,
       "fail": 0,
       "blocked": 22,
-      "other": 7,
+      "other": 1,
       "success_rate": 0.937
     },
     "error_recurrence": {
@@ -45,10 +45,10 @@
         },
         {
           "signature": "hourly_dispatch.log:exit142",
-          "count": 6,
-          "first_seen": "2026-06-15T06:59:07+00:00",
+          "count": 5,
+          "first_seen": "2026-06-15T13:57:32+00:00",
           "last_seen": "2026-06-17T16:57:50+00:00",
-          "span_days": 2.42,
+          "span_days": 2.13,
           "known": true
         },
         {
@@ -107,10 +107,27 @@
       "governance_target": "docs/error_log.md",
       "occurrences": 4,
       "first_seen": "2026-06-29T02:25:03.708340+00:00",
-      "last_seen": "2026-06-29T05:54:47.034516+00:00"
+      "last_seen": "2026-06-29T07:45:12.615108+00:00"
+    },
+    {
+      "pattern_type": "semantic_concentration",
+      "signature": "semantic_concentration:feed",
+      "severity": "warn",
+      "evidence": [
+        "semantic rehash_rate=0.3 over 20 non-daily articles; top pairs — 0.766: 深度學習波動率模型的部分複製：RECH-X 跨市場實測，第九 || AI 波動率模型真的比較聰明嗎？RECH-X 的答案很克制。; 0.757: K1339: 商品 ETF 動量體制切換後，銅 30 日波動 || 商品 ETF 翻向時，銅先把警報拉高。很多人看商品 ETF，; 0.756: 預測輸了，守底線卻贏了：一個模型的分裂成績單。預測輸了，守底 || 模型多看幾個鄰居，不代表就更會預測波動。有些研究的直覺很吸引"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "6/20 recent non-daily articles are SEMANTIC rehashes (same topic, different framing) of another recent article — keyword clustering misses these. Diversify topic selection; consider a semantic dedup gate at publish (near_duplicates) before releasing a rehash.",
+      "governance_target": null,
+      "occurrences": 1,
+      "first_seen": "2026-06-29T07:45:12.615108+00:00",
+      "last_seen": "2026-06-29T07:45:12.615108+00:00"
     }
   ],
-  "new_findings": [],
+  "new_findings": [
+    "semantic_concentration:feed"
+  ],
   "resolved_findings": [
     "stale_knowledge:mile_d2881a1a",
     "stale_knowledge:mile_644265a6",
@@ -122,11 +139,11 @@
   ],
   "auto_remediation": [],
   "counts": {
-    "findings": 1,
-    "new": 0,
+    "findings": 2,
+    "new": 1,
     "resolved": 4,
     "escalations": 1,
-    "propose_only": 1,
+    "propose_only": 2,
     "auto_dispatch_eligible": 0
   }
 }
