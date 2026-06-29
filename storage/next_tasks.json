@@ -38505,7 +38505,7 @@
     "title": "Paper review (Codex 24h-rule): 日頻波動率，HAR-RV 贏不了 GARCH：60 場跨資產對戰的紀錄",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_e8d4f335 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "claimed",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_e8d4f335",
@@ -38513,7 +38513,10 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-28T22:07:58+00:00"
+    "created_at": "2026-06-28T22:07:58+00:00",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-29T08:59:16.913008+00:00",
+    "claim_session_id": "db5998cfe7b7"
   },
   {
     "id": "paper_review_mile_410f7532",
@@ -38903,7 +38906,7 @@
     "title": "Paper review (Codex 24h-rule): 每一次失敗都在說同一件事：日頻資料的訊號天花板",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_abe9e68f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_abe9e68f",
@@ -38911,7 +38914,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-29T08:09:49+00:00"
+    "created_at": "2026-06-29T08:09:49+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T08:52:32.277535+00:00",
+    "claim_session_id": "f6dfea620daa",
+    "started_at": "2026-06-29T08:52:32.515306+00:00",
+    "completed_at": "2026-06-29T09:00:03.170681+00:00",
+    "result": "Codex 24h review found synthesis-level mismatches in mile_abe9e68f: wrong self-audit date range, K998 t-stat, five-vs-six article count, K188 OHLC proxy wording, and weekend VIX date wording. Updated published article via publish_draft, synced single article to Supabase with read-back, and recorded review artifact/error_log."
   },
   {
     "id": "research_deep_quantile_var_baseline_dnn_quantile_covariat",

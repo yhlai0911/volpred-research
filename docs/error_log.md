@@ -2,6 +2,26 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-29 synthesis / daily_digest article cross-source mismatch — date/count/proxy wording drift
+
+**問題**：`mile_abe9e68f`（「每一次失敗都在說同一件事：日頻資料的訊號天花板」）24h Codex review 發現綜述型文章在彙整六篇來源文章時出現多處 public-facing mismatch。
+
+**現象**：
+- 來源 `mile_23312ae9` 明確寫研究體檢期間為 2026-03-14 至 2026-03-22；綜述文誤寫成「三月十四日到三十二日」。
+- 文章前後混用「六個角度」與「這五篇文章」，但正文與 `details.digest_articles` 實際引用六篇。
+- K998 的 controlled predictive regression 表中最大絕對 t 統計量約 2.15；綜述文誤寫 2.119。
+- K188 使用的是 daily OHLC 的 Parkinson / Garman-Klass / Rogers-Satchell 代理，不是五分鐘 realized volatility；綜述文「高頻數據代理 / 高頻代理」措辭容易讓一般讀者誤解。
+- 文末 VIX 註記寫 2026-06-27 收盤，但 2026-06-27 是週六；本地快照沒有可驗證的 6/27 交易日收盤列。
+
+**根因**：綜述 / digest 文章把「多篇已發報告」當作 secondary source 使用，但生成流程沒有逐條回查來源報告與實驗 results.json；相對日期、篇數、方法分類與非核心市場水位註記最容易在 summary layer drift。
+
+**解決方法**：
+- 用 `scripts/publish_draft.py --update` 正式更新 `mile_abe9e68f`，修正日期、篇數、K998 t 統計量、K188 OHLC 代理措辭與 VIX 週末日期註記。
+- 用 `scripts.supabase_sync.sync_article()` 做單篇同步，Supabase read-back 確認修正字句存在且舊錯字串消失。
+- 新增審查紀錄 `storage/ops/paper_reviews/2026-06-29/codex_review_mile_abe9e68f_digest_ceiling.md`。
+
+**教訓**：daily_digest / synthesis article 不可只把已發文章當作可信文字來源；仍要建立 claim table，逐條對照來源 article + underlying `results.json`。特別是「篇數、日期、K 編號、方法名稱、資料頻率」這五類看似 editorial 的資訊，也必須進 24h-rule numeric/method audit。
+
 ## 2026-06-29 K566 因子輪動文章 source review — same-day VIX / momentum lookahead
 
 **問題**：`mile_190c7e3c`（K566 因子 ETF 月頻輪動 vs SPY+GLD+VIX 基準）24h Codex review 發現 source code 未滿足最高優先規則 `signal from t-1, return at t`。
