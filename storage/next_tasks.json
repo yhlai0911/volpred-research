@@ -39263,7 +39263,7 @@
     "title": "研究 backlog fallback: Maritime chokepoint stress 指數作 commodity / retail / shipping vol 訊號",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Maritime chokepoint stress 指數作 commodity / retail / shipping vol 訊號 — 用 GSCPI、Freightos/Harpex/FRED shipping proxies、Panama/Suez/Red Sea/Hormuz event calendar、USO/DBA/XRT/IYT/BDRY，檢定 chokepoint stress 是否領先商品 RV、retail margin-risk RV 與 cross-asset correlation spike；與 tariff event study 正交，聚焦物流節點而非關稅稅 | 來源 section: 期刊主題挖掘 batch 2026-06-28（journal_discovery_20260628_0；websearch rfs/aer/jep/fed/imf/nato/wef/nature/oecd/iea 2025-26 趨勢層級；selectivity gate 後 10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -39273,10 +39273,8 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-29T15:01:20+00:00",
-    "claimed_by": "hourly-02",
-    "claimed_at": "2026-06-29T18:08:38.196088+00:00",
     "claim_session_id": "152b93873c07",
-    "started_at": "2026-06-29T18:08:38.403532+00:00"
+    "last_error": "released by hourly-04: stale claim by hourly-02 (2.05h, no worktree/agent output)"
   },
   {
     "id": "research_critical_minerals_export_restriction_shock_clean",
@@ -39646,5 +39644,19 @@
     "started_at": "2026-06-29T19:10:02.598907+00:00",
     "completed_at": "2026-06-29T19:22:24.873665+00:00",
     "result": "K1574 general-audience article published as draft. mile_id=mile_5399bf01, anti-AI gate PASS (1/3 warn ok). Editor-SOP 9-checklist 全綠. 2 真圖 (alpha_and_factor_loading + risk_and_cost_proxies) + 7 ETF 核心數字表. Verdict: EXPOSURE_DILUTION_WITHOUT_SIGNIFICANT_ALPHA_SHORTFALL — null borderline (sign p=0.0625, bootstrap CI [-2.03%, +0.80%] 跨 0). Audience auto-overridden general→research by _infer_audience (K-id + HAC + Holm keywords)."
+  },
+  {
+    "id": "k1575_daily_article_critical_minerals",
+    "task_type": "daily_article",
+    "priority": 1,
+    "status": "in_progress",
+    "title": "K1575: 一般讀者文章 — 關鍵礦物出口管制與 ETF 波動率（NULL finding）",
+    "description": "K1575 NULL finding：8 場關鍵礦物出口管制公告（2023-07-03 ~ 2025-10-09）對 13 檔 ETF（COPX/REMX/LIT/URA/SMH/SOXX/ITA/...）的事件研究 — 312 個 RV tests Bonferroni 0/312 顯著；jump5_abs 2/104 顯著但被同期 broad tariff vol 混淆，無 clean sector-specific transmission。draft_pool_low CRITICAL 補池。",
+    "source": "hourly-04_critical_alert_response",
+    "created_at": "2026-06-29T20:10:16Z",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-29T20:10:17.183442+00:00",
+    "claim_session_id": "c61666277626",
+    "started_at": "2026-06-29T20:10:17.383285+00:00"
   }
 ]
