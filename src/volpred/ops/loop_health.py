@@ -86,6 +86,12 @@ RECURRENCE_DEGRADING_SPAN_DAYS = 3
 #     COUNTED and surfaced (honest recurrence data) but annotated `known`.
 _KNOWN_SELF_HEALING_SUFFIXES = (":exit142",)
 
+# A cron-exit failure whose latest fire is exit 0 and whose last failure is older
+# than this many hours is RECOVERED (root fixed) — its finding clears immediately
+# rather than lingering as a false-critical until the 14d window rolls. 6h ≈ a few
+# hourly cycles of success, enough to trust the recovery.
+RECOVERY_GRACE_HOURS = 6
+
 # Execution-failure tokens. Substring match, case-insensitive. Deliberately does
 # NOT include null/mixed/conditional/partial — those are research/review verdicts,
 # not task-execution failures (would otherwise mark honest null results as "fails").
@@ -341,14 +347,22 @@ def compute_task_outcome(
 # 3. error_recurrence
 # ---------------------------------------------------------------------------
 def _scan_cron_exit_signatures(
-    storage_dir: str, cutoff: datetime
+    storage_dir: str, cutoff: datetime, now: datetime
 ) -> dict[str, dict[str, Any]]:
-    """signature -> {count, first_seen, last_seen} for non-zero cron exits.
+    """signature -> {count, first_seen, last_seen, recovered} for non-zero cron exits.
 
     A cron log appends a banner per fire; we count non-zero `=== ... exit N ===`
     lines, attributing each to the nearest preceding parseable timestamp so the
     window bound is honoured. Lines without a resolvable timestamp are counted
     (fail-open toward inclusion) but do not move first/last_seen.
+
+    2026-06-29 (boss demand: handle resolved criticals at the architecture level,
+    not on a fixed timer): a signature is marked `recovered` when the job's MOST
+    RECENT fire is exit 0 AND its last failure is older than RECOVERY_GRACE_HOURS.
+    This is RECOVERY-AWARE — a finding clears as soon as the cron actually recovers
+    (evidence: recent clean fires), instead of lingering as a false-critical until
+    the historical spike ages out of the 14d window (which made the 06-28-fixed
+    hourly_dispatch keychain incident still read CRITICAL 35h later).
     """
     sigs: dict[str, dict[str, Any]] = {}
     logs_dir = project_path(storage_dir) / "logs" / "cron"
@@ -364,6 +378,8 @@ def _scan_cron_exit_signatures(
             warn("loop_health_cron", "cron log read failed; skipping", path=str(log_path), err=str(exc))
             continue
         last_ts: datetime | None = None
+        last_exit_code: str | None = None  # most recent exit banner, ANY code
+        log_sigs: list[str] = []
         for ln in lines:
             ts = _parse_banner_ts(ln)
             if ts is not None:
@@ -372,6 +388,7 @@ def _scan_cron_exit_signatures(
             if not m:
                 continue
             code = m.group(1)
+            last_exit_code = code  # track recovery: latest fire's exit code
             if code == "0":
                 continue
             if last_ts is not None and last_ts < cutoff:
@@ -379,11 +396,20 @@ def _scan_cron_exit_signatures(
             sig = f"{log_path.name}:exit{code}"
             entry = sigs.setdefault(sig, {"count": 0, "first_seen": None, "last_seen": None})
             entry["count"] += 1
+            if sig not in log_sigs:
+                log_sigs.append(sig)
             if last_ts is not None:
                 if entry["first_seen"] is None or last_ts < _parse_iso(entry["first_seen"]):
                     entry["first_seen"] = last_ts.isoformat()
                 if entry["last_seen"] is None or last_ts > _parse_iso(entry["last_seen"]):
                     entry["last_seen"] = last_ts.isoformat()
+        # Recovery: the job's latest fire succeeded AND its failures are old →
+        # the underlying problem is fixed; clear the false-critical immediately.
+        if last_exit_code == "0":
+            for sig in log_sigs:
+                ls = _parse_iso(sigs[sig].get("last_seen"))
+                if ls is not None and (now - ls) >= timedelta(hours=RECOVERY_GRACE_HOURS):
+                    sigs[sig]["recovered"] = True
     return sigs
 
 
@@ -455,9 +481,10 @@ def compute_error_recurrence(
 ) -> dict[str, Any]:
     """Repeated failure signatures (cron exits + diagnostics tags) in the window."""
     try:
-        cutoff = _now_utc(now) - timedelta(days=window_days)
+        current = _now_utc(now)
+        cutoff = current - timedelta(days=window_days)
         sigs: dict[str, dict[str, Any]] = {}
-        sigs.update(_scan_cron_exit_signatures(storage_dir, cutoff))
+        sigs.update(_scan_cron_exit_signatures(storage_dir, cutoff, current))
         for sig, entry in _scan_diagnostics_signatures(storage_dir, cutoff).items():
             sigs[sig] = entry
 
@@ -480,13 +507,20 @@ def compute_error_recurrence(
             return any(sig.endswith(sfx) for sfx in _KNOWN_SELF_HEALING_SUFFIXES)
 
         top = [
-            {"signature": s, **e, "span_days": _span_days(e), "known": _is_known(s)}
+            {
+                "signature": s,
+                **e,
+                "span_days": _span_days(e),
+                "known": _is_known(s),
+                "recovered": bool(e.get("recovered")),
+            }
             for s, e in ranked[:5]
         ]
 
         # Status is driven only by signatures NOT already structurally tracked
-        # (self-healing exit142 etc.) — they stay visible but don't re-raise noise.
-        escalating = [t for t in top if not t["known"]]
+        # (self-healing exit142 etc.) and NOT already recovered (root fixed, recent
+        # fires clean) — they stay visible but don't re-raise noise / false-critical.
+        escalating = [t for t in top if not t["known"] and not t["recovered"]]
         worst = escalating[0] if escalating else None
         status = "ok"
         if worst:

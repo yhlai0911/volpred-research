@@ -167,6 +167,8 @@ def detect_repeated_tool_failures(
             continue
         if entry.get("known"):  # self-healing (exit142) tracked elsewhere
             continue
+        if entry.get("recovered"):  # root fixed + recent fires clean → not active
+            continue
         count = int(entry.get("count") or 0)
         if count < RECURRENCE_WARN_COUNT:
             continue

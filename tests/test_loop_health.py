@@ -141,6 +141,38 @@ def test_error_recurrence_flags_repeated_exit(tmp_path):
     assert r["status"] in ("warn", "degrading")
 
 
+def test_error_recurrence_recovered_job_does_not_escalate(tmp_path):
+    """Boss 2026-06-29: a failure cluster whose latest fire is exit 0 and whose last
+    failure is older than RECOVERY_GRACE_HOURS is RECOVERED (root fixed) — it must
+    NOT keep reading degrading/critical just because the historical spike is still
+    in the 14d window (the 06-28-fixed hourly_dispatch keychain false-critical)."""
+    storage = _storage(tmp_path)
+    # 8 old exit1 (≥2 days ago) then a recent exit 0 (the job recovered).
+    lines = [
+        f"=== [myjob] exit 1 at {(NOW - timedelta(days=t)).strftime('%Y-%m-%d %H:%M:%S')} CST ==="
+        for t in [8, 7, 6, 5, 4, 3, 2.5, 2]
+    ]
+    lines.append(
+        f"=== [myjob] exit 0 at {(NOW - timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')} CST ==="
+    )
+    (storage / "logs" / "cron" / "myjob.log").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+    top = r["top_recurring"][0]
+    assert top["signature"] == "myjob.log:exit1"
+    assert top["recovered"] is True  # latest fire exit0 + failures >6h old
+    assert r["status"] == "ok"  # recovered → does not escalate
+
+
+def test_error_recurrence_still_active_failure_escalates(tmp_path):
+    """A failure whose LATEST fire is still non-zero (not recovered) keeps escalating."""
+    storage = _storage(tmp_path)
+    _cron_log(storage, "myjob", 1, [4, 3, 2, 1, 0.1])  # most recent is still exit1
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+    assert r["top_recurring"][0].get("recovered") is False
+    assert r["status"] in ("warn", "degrading")
+
+
 def test_error_recurrence_exit142_marked_known_and_not_escalating(tmp_path):
     storage = _storage(tmp_path)
     _cron_log(storage, "hourly_dispatch", 142, [1, 2, 3, 4, 5, 6, 7, 8])  # would degrade if not known
