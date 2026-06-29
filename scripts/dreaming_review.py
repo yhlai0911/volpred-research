@@ -82,6 +82,14 @@ def _correction_report(storage_dir: str):
 
 SCHEMA = "dreaming_review.v1"
 THREE_STRIKE = 3
+# Above this many matched correction keywords, a flagged article is a broad
+# review/survey (keyword-overlap false positive), not a specific reversed claim.
+# Observed false positives: 23/34/43 matched keywords on 全景/完整報告/完全指南
+# survey articles. A specific disputed claim matches only a handful.
+BROAD_REVIEW_KEYWORD_FLOOR = 12
+# A cron failure cluster with no occurrence in this many hours has RECOVERED and
+# is a past incident, not an active failure — it stops being a finding.
+RECOVERED_THRESHOLD_HOURS = 48
 
 # Governance files dreaming may PROPOSE changes to but must NEVER write.
 GOVERNANCE_FILES = (
@@ -140,8 +148,17 @@ class DreamFinding:
 def detect_repeated_tool_failures(
     storage_dir: str, snapshot: dict[str, Any], now: datetime
 ) -> list[DreamFinding]:
-    """Recurring non-zero cron exits (from loop_health.error_recurrence)."""
+    """Recurring non-zero cron exits (from loop_health.error_recurrence).
+
+    2026-06-29: recency-aware. A failure cluster that has RECOVERED (no occurrence
+    in RECOVERED_THRESHOLD_HOURS) is a PAST incident, not an active failure — it
+    must not keep escalating to critical just because the historical spike is still
+    inside the 14d window (hourly_dispatch exit1 spiked 06-26/27 on API death, then
+    recovered 06-29, yet kept re-escalating). Only ACTIVE recurrences are findings;
+    recovered ones drop out (and resolve in the baseline).
+    """
     out: list[DreamFinding] = []
+    cutoff_recovered = now.astimezone(timezone.utc) - timedelta(hours=RECOVERED_THRESHOLD_HOURS)
     for entry in snapshot.get("error_recurrence", {}).get("top_recurring", []):
         sig = str(entry.get("signature") or "")
         if ":exit" not in sig:  # cron-exit signatures only here
@@ -151,6 +168,9 @@ def detect_repeated_tool_failures(
         count = int(entry.get("count") or 0)
         if count < RECURRENCE_WARN_COUNT:
             continue
+        last_seen = _parse_iso(entry.get("last_seen"))
+        if last_seen is not None and last_seen < cutoff_recovered:
+            continue  # recovered past incident — not an active failure
         span = entry.get("span_days") or 0
         # Severity is "warn" on sight; critical is EARNED by persistence
         # (three-strike across dreaming runs in reconcile), not by a single
@@ -213,6 +233,15 @@ def detect_stale_knowledge(
     Reads the EXISTING report (cheap) rather than re-running the full scan inline.
     A HIGH match = a published article likely repeats a reversed/disproved claim →
     propose a knowledge.json review (governance: propose-only).
+
+    2026-06-29 (boss email-12132/12139): broad-review/summary articles (e.g.
+    「波動率預測研究全景：150+ 實驗」) keyword-match dozens of correction
+    fingerprints simply because a comprehensive survey mentions every methodology
+    — that is a KEYWORD-overlap false positive, not a specific reversed claim. The
+    boss's principle is that similarity must be SEMANTIC over the whole topic, not
+    keyword count. As a first guard (pending full semantic dedup), skip articles
+    whose matched-keyword count is high enough to indicate broad coverage rather
+    than a specific disputed claim.
     """
     out: list[DreamFinding] = []
     report_path = _correction_report(storage_dir)
@@ -231,6 +260,11 @@ def detect_stale_knowledge(
             continue
         sev = str(match.get("max_severity") or match.get("severity") or "").upper()
         if sev not in ("HIGH", "MEDIUM"):
+            continue
+        # Broad-review guard: a comprehensive survey naturally matches many
+        # keywords (keyword-overlap), which is NOT a specific reversed claim.
+        matched_kw = match.get("matched_keywords")
+        if isinstance(matched_kw, list) and len(matched_kw) >= BROAD_REVIEW_KEYWORD_FLOOR:
             continue
         aid = str(match.get("id") or match.get("article_id") or "unknown")
         out.append(

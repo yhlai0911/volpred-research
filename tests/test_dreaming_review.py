@@ -70,6 +70,30 @@ def test_detect_stale_knowledge_high_severity(tmp_path):
     assert findings[0].remediation == "propose_only"
 
 
+def test_detect_stale_knowledge_skips_broad_review_false_positives(tmp_path):
+    """A comprehensive survey keyword-matches dozens of correction fingerprints
+    without repeating any specific reversed claim — that is a keyword-overlap
+    false positive (boss email-12139: similarity must be semantic, not keyword).
+    Broad-review articles (matched_keywords >= floor) must be skipped; a specific
+    low-keyword match is still flagged."""
+    storage = _storage(tmp_path)
+    _write(
+        storage / "content_correction_report.json",
+        {
+            "flagged_articles": [
+                {"article_id": "mile_survey", "max_severity": "HIGH",
+                 "matched_keywords": [f"kw{i}" for i in range(30)]},  # broad review
+                {"article_id": "mile_specific", "max_severity": "HIGH",
+                 "matched_keywords": ["VaR", "reversed"]},  # specific claim
+            ]
+        },
+    )
+    findings = dr.detect_stale_knowledge(str(storage), {}, NOW)
+    sigs = {f.signature for f in findings}
+    assert "stale_knowledge:mile_specific" in sigs
+    assert "stale_knowledge:mile_survey" not in sigs  # broad-review false positive skipped
+
+
 def test_detect_missing_retry_strategy_flags_orphaned_failure(tmp_path):
     storage = _storage(tmp_path)
     _write(
