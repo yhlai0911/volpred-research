@@ -36647,5 +36647,29 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-06-29T14:33:32.857127"
+  },
+  {
+    "id": "paper_review_k1422_mile_b87cc779_codex_24h",
+    "experiment_id": "K1422",
+    "experiment_ids": [
+      "K1422"
+    ],
+    "experiment_path": "experiments/k1422",
+    "k_id": "K1422",
+    "verdict": "CONDITIONAL_PASS",
+    "reviewer": "Codex",
+    "reviewer_source": "codex-cli 0.142.3 ChatGPT auth",
+    "codex_review": true,
+    "type": "published_article_review",
+    "milestone_id": "mile_b87cc779",
+    "published_at": "2026-06-28T21:00:00Z",
+    "reviewed_at": "2026-06-29T07:14:00Z",
+    "scope": "Codex 24h-rule review of published article on commodity HAR-QR fair-baseline rerun",
+    "summary": "Codex CONDITIONAL_PASS / major overclaim. K1422 underlying experiment passes (3/3 fair baselines, centered-null joint bootstrap), but published article had 5 issues: (1) abstract claimed q05+q95 both significant on all three commodities — actually GLD q95 not significant (p 0.17-0.41), only USO+UNG q95 are; (2) DM table mislabeled as one-sided while code stores two-sided p-values with dm_stat>0 gate; (3) section 2 title '三戰三勝' overclaim; (4) consumer-facing hedging/VaR language went beyond evidence (q95 GK-vol forecasts not validated as VaR/ES/hedge P&L); (5) unsupported GLD-UNG correlation <0.4 claim with no source. All 5 patched on 2026-06-29; errata recorded in feed.json + supabase synced. Underlying methodology (fair baselines A/B/C, centered-null stationary bootstrap, shift(1) lookahead-clean) verified correct.",
+    "actionable_revisions_applied": 5,
+    "lookahead_status": "clean",
+    "overclaim_status_before_patch": "major",
+    "overclaim_status_after_patch": "none",
+    "research_honesty": "推翻文章宣稱層級而非統計層級；統計三層驗證仍成立；Q95 GLD null finding 已誠實標示"
   }
 ]

@@ -38457,7 +38457,7 @@
     "title": "Paper review (Codex 24h-rule): K1422：HAR 分位數迴歸在三種公平 Baseline 比較下的商品 ETF 尾部風險預測",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b87cc779 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_b87cc779",
@@ -38465,7 +38465,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-28T20:10:54+00:00"
+    "created_at": "2026-06-28T20:10:54+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-06-29T07:10:06.921460+00:00",
+    "claim_session_id": "cadc21a2878c",
+    "started_at": "2026-06-29T07:10:15.193498+00:00",
+    "completed_at": "2026-06-29T07:19:09.277900+00:00",
+    "result": "Codex CONDITIONAL_PASS / major overclaim. 5 revisions patched in feed.json + errata; supabase synced; knowledge entry added; error_log root cause documented."
   },
   {
     "id": "trending_repost_2026_06_29_ai硬體",

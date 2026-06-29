@@ -2,6 +2,33 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-29 K1422 published article overclaim — q95 GLD null 在文章被誇大、未驗證的 hedging 語言（Codex 24h-rule 抓出）
+
+**問題**：mile_b87cc779（K1422 商品 ETF HAR-Quantile fair-baseline rerun，2026-06-28 published）發佈後 24h 內 Codex review 發現 5 處 overclaim。**research-honesty rule「結論強度不超過證據 + 推翻舊結論必回溯更正」直接適用**。
+
+**現象**：
+- 文章摘要 + 段標題寫「q05、q95 在三個商品 ETF 上**均**達到顯著改善」「三戰三勝」，但實際 results.json 顯示 GLD q95 對 A/B/C baseline 的 DM p-value 為 0.173 / 0.188 / 0.409（全不顯著）。文章後段 line 246+254 自己其實寫對了「黃金 q95 未達顯著」— 整篇**自相矛盾**，摘要+段標題與結論段不一致。
+- DM 表格描述為「單尾」但 code 儲存的是 two-sided p-values 配合 dm_stat>0 解讀；用語不一致。
+- 「GLD 配 UNG 通常相關性低於 0.4」這個宣稱在 results.json / code / README 都查無依據。
+- q95 consumer-facing 語言「可以直接用來設定尾部停損或對沖量」「動態對沖觸發點」— K1422 沒做任何 P&L / drawdown 驗證，把統計層改善直接外推到部位層。
+
+**根因**：
+1. 摘要往往是「先寫」+「最後沒回頭對齊正式結論」— 結論段已 honestly 寫 GLD q95 null，但摘要與段標題的版本沒同步降級。需要 publish 前 self-consistency check。
+2. Hedging/VaR 語言是 author-side 自然發揮，超出實驗 scope。需要「statistical claim → application claim」邊界規則 — 統計顯著 ≠ 已驗證可用作交易訊號。
+
+**解決方法**（2026-06-29 15:14-15:25 hourly-15 派工）：
+- Codex CLI（0.142.3, ChatGPT auth）對 published article + experiment code + results.json 做 review，產出 5 條 actionable revision。
+- 直接 patch feed.json mile_b87cc779.content 5 處 + 加 errata metadata（reviewer / verdict / date / revisions）。
+- 跑 `scripts/supabase_sync.py full` 同步線上（articles: 7）。
+- 寫 knowledge.json entry `paper_review_k1422_mile_b87cc779_codex_24h` verdict=CONDITIONAL_PASS reviewer=Codex（per provenance gate enforce）。
+- 標 next_tasks `paper_review_mile_b87cc779` succeeded。
+- 統計三層驗證（公平 baseline、DM、centered-null joint bootstrap）**仍成立** — 推翻的是文章宣稱層級，不是底層研究。
+
+**教訓**：
+- **publish 前 self-consistency rule**：摘要 / 段標題 / 表格描述 / 正式結論段必須口徑一致。建議 publisher pipeline 加 LLM-based self-consistency check（abstract claim 是否與 conclusion claim 一致）。
+- **statistical → application 邊界**：article 若包含「對沖 / 止損 / 部位 / option 倉位」等實務語言，必須在文中 explicit caveat 「未做 P&L / drawdown 驗證」否則算 overclaim。建議寫一份 `.claude/rules/publishing-consumer-language.md` enforce 此規則。
+- **24h Codex review 機制有效**：published article 24h 內 Codex review 抓到 major overclaim 並即時 patch。Pipeline 對 research-honesty 保護有貢獻。
+
 ## 2026-06-29 keyword 比對假陽性跨多處（cluster cap / stale_knowledge / audit）— 老闆指令移向語意相似度
 
 **問題**：dreaming 連 3 輪 5 個 critical escalations，老闆 email-12138「立即徹底處理好」+ email-12139「相似度是整個主題語意比較不是關鍵字」。
