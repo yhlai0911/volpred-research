@@ -336,3 +336,120 @@ def test_snapshot_empty_feed(tmp_path):
     snapshot = cq.content_quality_snapshot(str(storage))
     assert snapshot["daily_digest_uniqueness"]["status"] == "ok"
     assert snapshot["title_format"]["status"] == "ok"
+
+
+# ---------------------------------------------------------------------------
+# 2026-06-29 patrol completion: arc_diversity / content_completeness /
+# release_deadlock / frontend_render
+# ---------------------------------------------------------------------------
+def _entry_full(item_id, *, published_at, arc=None, content="", details=None):
+    e = _entry(item_id, published_at=published_at)
+    e["content"] = content
+    if arc is not None:
+        e.setdefault("details", {})["arc_signature"] = arc
+    if details is not None:
+        e["details"] = {**e.get("details", {}), **details}
+    return e
+
+
+def test_arc_diversity_flags_concentration(tmp_path):
+    base = datetime(2026, 6, 24, 12, 0, tzinfo=TPE)
+    items = [
+        _entry_full(f"m{i}", published_at=base - timedelta(hours=i), arc="same_arc")
+        for i in range(10)
+    ]
+    storage = _write_feed(tmp_path, items)
+    r = cq.check_arc_diversity(str(storage))
+    assert r["status"] == "concentrated"
+    assert r["top_axis"] == "same_arc"
+    assert r["top_share"] == 1.0
+
+
+def test_arc_diversity_ok_when_varied(tmp_path):
+    base = datetime(2026, 6, 24, 12, 0, tzinfo=TPE)
+    items = [
+        _entry_full(f"m{i}", published_at=base - timedelta(hours=i), arc=f"arc_{i}")
+        for i in range(10)
+    ]
+    storage = _write_feed(tmp_path, items)
+    r = cq.check_arc_diversity(str(storage))
+    assert r["status"] == "ok"
+
+
+def test_content_completeness_chartable_details_not_flagged(tmp_path):
+    base = datetime(2026, 6, 24, 12, 0, tzinfo=TPE)
+    # No inline chart marker, but details carries numeric metric data the frontend
+    # renders → must NOT be flagged missing_chart. Source via K-id in content.
+    items = [
+        _entry_full(
+            "m1",
+            published_at=base,
+            content="本文回測 K1234 的結果。",
+            details={"dm_stat": 2.1, "pvalue": 0.03},
+        )
+    ]
+    storage = _write_feed(tmp_path, items)
+    r = cq.check_content_completeness(str(storage))
+    assert r["status"] == "ok"
+
+
+def test_content_completeness_flags_missing_chart(tmp_path):
+    base = datetime(2026, 6, 24, 12, 0, tzinfo=TPE)
+    items = [
+        _entry_full("m1", published_at=base, content="這是純文字內容，引用 K123 為來源。", details={})
+    ]
+    storage = _write_feed(tmp_path, items)
+    r = cq.check_content_completeness(str(storage))
+    assert r["status"] == "incomplete"
+    assert r["findings"][0]["missing_chart"] is True
+    assert r["findings"][0]["missing_source"] is False  # K-id + 來源 present
+
+
+def test_release_deadlock_when_candidates_empty(tmp_path):
+    storage = tmp_path / "storage"
+    (storage).mkdir(parents=True)
+    (storage / "publication_candidates.json").write_text(
+        json.dumps({"candidates": [], "top_10_uncovered": []}), encoding="utf-8"
+    )
+    r = cq.check_release_deadlock(str(storage))
+    assert r["status"] == "deadlock"
+    assert r["total"] == 0
+
+
+def test_release_deadlock_unknown_when_file_missing(tmp_path):
+    storage = tmp_path / "storage"
+    storage.mkdir(parents=True)
+    r = cq.check_release_deadlock(str(storage))
+    assert r["status"] == "unknown"  # missing file ≠ deadlock (no false critical)
+
+
+def test_frontend_render_uses_injected_fetcher(tmp_path):
+    storage = tmp_path / "storage"
+    storage.mkdir(parents=True)
+    ok = cq.check_frontend_render(str(storage), fetcher=lambda u, t: (200, "<html>fine</html>"))
+    assert ok["status"] == "ok"
+    react = cq.check_frontend_render(
+        str(storage), fetcher=lambda u, t: (200, "Minified React error #418")
+    )
+    assert react["status"] == "error"
+    down = cq.check_frontend_render(str(storage), fetcher=lambda u, t: (500, "oops"))
+    assert down["status"] == "error"
+
+
+def test_frontend_render_fail_open_on_network_error(tmp_path):
+    storage = tmp_path / "storage"
+    storage.mkdir(parents=True)
+
+    def boom(url, timeout):
+        raise OSError("network down")
+
+    r = cq.check_frontend_render(str(storage), fetcher=boom)
+    assert r["status"] == "unknown"  # fail-open, never a breach
+
+
+def test_frontend_render_disabled_probe(tmp_path):
+    storage = tmp_path / "storage"
+    storage.mkdir(parents=True)
+    r = cq.check_frontend_render(str(storage), probe=False)
+    assert r["status"] == "unknown"
+    assert r["probed"] is False

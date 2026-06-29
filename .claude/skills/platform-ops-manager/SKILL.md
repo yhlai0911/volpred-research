@@ -201,8 +201,19 @@ Interval tuning:
 | Same idle summary 2 fires in a row | Expand scope — actively dispatch tasks |
 | Treat task-notification as "no work" | task-notification = trigger to run ops cycle |
 
+## Loop-health + Dreaming（系統有沒有在變好）
+
+ops cycle 除了「loop 還活著嗎」（freshness）+「基礎設施健康嗎」（health），還要看「loop 有沒有在變好」：
+
+- **Fast loop** `uv run volpred ops loop-health` — 4 指標（first_pass_success / task_outcome / error_recurrence / correction_trend），搭 hourly fire 便車、零新排程，breach 走既有 alert email。
+- **Slow loop** `uv run volpred ops dreaming-run [--dry-run]` — 每日 05:25 cron，跨 session 找重複失敗模式，產 findings + proposal，new/escalation 寄 email。
+- **硬邊界**：治理檔（error_log / rules / CLAUDE.md / knowledge.json）一律 **propose-only**（dreaming 只建議+email，不自動改）；只有派修復 task（`--apply-auto`，預設關）/ retract 重複 digest 才 auto。
+- 收到 dreaming email → 讀 `storage/ops/dreaming/<date>.json`，治理 proposal 手動審後套用，escalations(critical) 開 refactor_plan 走 Three-Strike。
+- 完整 SOP：`references/loop-health-and-dreaming.md`。
+
 ## Cross-references
 
+- `references/loop-health-and-dreaming.md` — loop-health 指標 + dreaming 慢 loop SOP
 - `storage/ops/autonomous_loop_protocol.md` — full 4-step detail
 - `scripts/cron_hourly_dispatch_prompt.md` — hourly cron's parallel protocol
 - `.claude/rules/agent-delegation.md` — task type × model routing

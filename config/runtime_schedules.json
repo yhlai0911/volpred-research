@@ -177,6 +177,20 @@
         "piggy_back_skip_reason": "host crontab fires reliably; 2026-05-29 incident confirmed double-fire (host + piggy-back). See docs/error_log.md."
       },
       {
+        "id": "dreaming_review",
+        "label": "Dreaming — cross-session 失敗模式盤點 + loop-health 回饋",
+        "cron": "25 5 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_dreaming_review.sh",
+        "log_path": "storage/logs/cron/dreaming_review.log",
+        "command_deprecated": "volpred ops dreaming-run",
+        "description": "每日 05:25（避開 05:30 memory_health / 08:03 daily_update）跑 loop-engineering 慢 loop：讀 work_log / cron logs / loop-health 找跨 session 重複失敗模式，產 findings + proposal（治理檔只建議不自動改），new/escalation 寄 email。Piggy-back via check_alerts hourly fire（host cron 只可靠 0 * * * * pattern）。exit_semantics=findings 讓 host_cron_fail 排除其非零退出（雖然 dreaming 一律 exit 0）。",
+        "exit_semantics": "findings",
+        "matchers": [
+          "dreaming_review.py",
+          "cron_dreaming_review.sh"
+        ]
+      },
+      {
         "id": "refresh_paper_snapshots",
         "label": "Paper data snapshot weekly refresh",
         "cron": "0 6 * * 1",
