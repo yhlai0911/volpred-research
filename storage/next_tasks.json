@@ -38706,14 +38706,20 @@
     "title": "Audit arc_dedup_v2 over-aggressive on fresh-cluster drafts",
     "description": "Hourly-12 triage finding: 19/19 drafts arc-blocked while spy 8.3x / vix 6x 30d cap overshoot. Most blocks legitimate (同 K research↔general dedup), but some fresh-cluster blocks suspicious: mile_377b569a (K1439 COMMODITY/GOLD/OIL/USD) arc_of=mile_2c758888, mile_3942eab2 (K1435 FOMC/GOLD/RATES/USD) arc_of=mile_df7a8bce. 範圍: (1) 對這 2 案例查 arc_of target 真實主題與相似度; (2) 若 mistaken-dedup → 提出 arc_dedup_v2 entity-weight 調整方案 (commodity / FOMC entity 對 spy/vix 主軸 cross-similarity 應降權); (3) PR 不在此 task — 先 audit report 進 docs/error_log.md。配 references: docs/error_log.md 2026-06-29 hourly-12 entry, memory feedback_narrative_arc_dedup.\n\n[hourly-13 P2 bump @ 2026-06-29T05:08Z] boss P1 email-12129 三 alert（release_pool_gap / content_quality / cluster_cap_drift）共同 root cause 都指向此 audit — 19/19 drafts 全 dedup-flagged 且 spy/vix cluster overshoot 2.1x/1.8x。優先派工修此 audit 才能根治 release deadlock；勿再 surface-patch force-release。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "platform_ops",
       "arc_dedup",
       "hourly_discovered"
     ],
     "source": "hourly_discovered",
-    "created_at": "2026-06-29T12:25:00+08:00"
+    "created_at": "2026-06-29T12:25:00+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T05:17:44.938676+00:00",
+    "claim_session_id": "aff626d4032f",
+    "started_at": "2026-06-29T05:17:56.851030+00:00",
+    "completed_at": "2026-06-29T05:21:27.373696+00:00",
+    "result": "Codex audit completed. mile_377b569a→mile_2c758888 is a correct same-K K1439/stale-draft block; mile_3942eab2→mile_df7a8bce is a false positive from incidental FOMC/USD + over-broad methodology axis. Added remediation plan to docs/error_log.md and verified arc-dedup tests."
   },
   {
     "id": "email-12129-775dfd",

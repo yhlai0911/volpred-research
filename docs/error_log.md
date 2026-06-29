@@ -3711,3 +3711,55 @@ release-pool cron `*/60` 連續釋出 0 篇（log 2026-06-29 01:07 起每小時 
 - arc_dedup_v2 已正確攔截 99% pollution，但偶有 fresh-cluster mistaken-dedup → 不可手動繞，要修算法
 - 平台運營 mission #1 (good articles) 與 #5 (exposure) 在 cluster diversity 上是 strict 要求 — 不能靠加 spy/vix 文增量蓋 30d concentration
 
+---
+
+## 2026-06-29 hourly-13 Codex audit — arc_dedup_v2 fresh-cluster suspicious cases
+
+### Audit scope
+Task `platform_ops_arc_dedup_v2_audit_20260629` 要求只做 source-level / data-level audit，不在本 task 直接改 dedup PR。檢查兩個 hourly-12 指出的 suspicious cases：
+
+1. `mile_377b569a` (K1439 general draft: 美元一轉強，原油和商品通常比黃金更會抖) blocked by `mile_2c758888` (K1439 research canonical)
+2. `mile_3942eab2` (K1435 GLD-UUP FOMC article) blocked by `mile_df7a8bce` (K1437 USD/TWD-TWII spillover article)
+
+Commands used:
+- `uv run python scripts/audit_arc_dedup_overmatches.py --days 30 --limit 30`
+- direct recompute of `arc_signature()` and `find_arc_duplicates()` for the two candidate/blocker pairs from `storage/reports/feed.json`
+
+### Finding 1: `mile_377b569a` is a correct block, not a false positive
+
+Evidence:
+- Candidate and blocker both reference `K1439`.
+- Recomputed v3 signatures share the full entity set: `COMMODITY_BROAD`, `GOLD`, `OIL`, `USD`.
+- Current duplicate path returns `shared_experiment_refs=["K1439"]`, `match_reason="descriptive_strict"`.
+- Title/body surface overlap is low (`title_jaccard=0.093`, rough word overlap `0.041`), but same K + same entity scope is the intended guard against "same evidence, different shell".
+- The draft is also stale relative to the canonical K1439 correction: it still tells the broad "4/5 assets move more under strong USD" reader story, while `mile_2c758888` correctly downscopes K1439 to HAC/Bonferroni robust USO-only.
+
+Conclusion: keep blocked. Do not force-release. If this topic is needed, rewrite from canonical K1439 as a new general article that says "oil is the only robust survivor; DBC/EEM/DBB are suggestive only", or deprecate the stale draft.
+
+### Finding 2: `mile_3942eab2` blocked by `mile_df7a8bce` is a false positive
+
+Evidence:
+- Candidate refs `K1435`; blocker refs `K1437`; no shared K.
+- Candidate topic is GLD-UUP DCC correlation on FOMC announcement days. Blocker topic is USD/TWD volatility spillover into TWII. Asset pair, event channel, and empirical question differ.
+- Surface overlap is extremely low (`title_jaccard=0.068`, rough word overlap `0.032`).
+- Recomputed duplicate path returns `shared_entities=["FOMC","USD"]`, `conclusion_class="null_no_info"`, `shared_mechanisms=["macro_policy"]`, `time_horizon="intraday"`, `match_reason="entity_conclusion_arc"`.
+- The blocker picked up `FOMC` only from a background phrase about the 2022-2023 Fed hiking cycle, not from an FOMC event-study design. This incidental macro context should not make K1437 a FOMC article.
+- Both pieces are classified as `methodology_robustness` because article footers/provenance contain terms like `Reviewer`, `reproduce`, `paper`, `審查`, `穩健性`, etc. That collapses ordinary research articles into the same narrative axis and prevents the event-window / cross-asset distinction from protecting them.
+- `scripts/audit_arc_dedup_overmatches.py` is insufficient for this case because it only reports candidate/blocker pairs with different known narrative axes; same-axis false positives like K1435 vs K1437 are invisible to that helper.
+
+Conclusion: this is a mistaken dedup block. It is not a SPY/VIX cap problem; it is a low-specificity macro-entity + over-broad methodology-axis problem.
+
+### Recommended fix for the follow-up PR
+
+1. Add a regression test with `mile_3942eab2`-style K1435 text vs `mile_df7a8bce`-style K1437 text: expected `find_arc_duplicates(...)=[]`.
+2. Keep a regression test with `mile_377b569a` vs `mile_2c758888`: expected duplicate via shared `K1439`.
+3. Change narrative-axis classification so boilerplate/provenance markers (`Reviewer`, `Codex review`, `reproduce`, `paper`, `canonical`, `審查`) do not by themselves convert a research article into `methodology_robustness`. Prefer title + lead/body before metadata footer, or strip reviewer/provenance sections before classification.
+4. Downweight incidental macro entities:
+   - `FOMC` should require title/lead presence or repeated event-study context, not one background `Fed` mention.
+   - `USD`, `FOMC`, and `RATES` should not be sufficient entity overlap for non-shared-K NULL articles unless a specific mechanism also matches.
+5. Tighten mechanism compatibility: when one side has `event_study` and the other has `factor_causality`, a shared broad `macro_policy` tag alone should not make them compatible unless they share K-id or a narrow asset/event entity.
+6. Extend `scripts/audit_arc_dedup_overmatches.py` with a "same-axis low surface overlap, no shared K" mode so future false positives like K1435/K1437 surface in hourly audit.
+
+### Operational implication
+
+Do not force-release all dedup-flagged drafts. Some blocks are correctly protecting against stale or duplicate same-K content. The next platform_ops task should implement the targeted classifier/entity fixes above, then rerun release-pool preview to see whether the fresh-cluster pool opens without reintroducing K ghost recycling.
