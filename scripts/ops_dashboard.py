@@ -510,6 +510,28 @@ def main():
         breaches=recent_breach[:8],
     ))
 
+    # Loop-health — is the autonomous loop *improving*? (2026-06-29 loop-engineering
+    # fast loop). Shows the 4 derived metrics even when not breaching. degrading is
+    # surfaced as warn (not critical) — error_recurrence cron-exit signals are owned
+    # by host_cron_fail; the dashboard just makes the trend visible.
+    try:
+        from volpred.ops.loop_health import loop_health_snapshot
+        lh = loop_health_snapshot(str(REPO / "storage"))
+        lh_status = "warn" if lh.get("overall") in ("warn", "degrading") else "ok"
+        out.append(section(
+            "loop_health",
+            lh_status,
+            f"overall={lh.get('overall')} | "
+            + " ".join(f"{k}={lh[k].get('status')}" for k in
+                       ("first_pass_success", "task_outcome", "error_recurrence", "correction_trend")),
+            "`uv run volpred ops dreaming-run` for cross-session pattern analysis" if lh_status != "ok" else None,
+            metrics={k: lh[k].get("status") for k in
+                     ("first_pass_success", "task_outcome", "error_recurrence", "correction_trend")},
+        ))
+    except Exception as exc:  # dashboard must never crash on one section
+        from volpred.ops.diagnostics import warn as _warn
+        _warn("ops_dashboard", "loop_health section failed; skipping", err=str(exc))
+
     # Summary header
     breaches = sum(1 for s in out if s["status"] in ("warn", "critical"))
     critical = sum(1 for s in out if s["status"] == "critical")
