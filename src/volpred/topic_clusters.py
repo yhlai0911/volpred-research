@@ -32,17 +32,27 @@ CLUSTER_VARIANTS: dict[str, list[str]] = {
     "taiwan": ["0050.TW", "0056.TW", "00878", "00919", "00929", "00940", "2330.TW", "台股", "台灣市場", "TAIFEX", "台指期"],
 }
 
+# 2026-06-29 boss decision (email-12132「依照你的建議進行」): for a VOLATILITY
+# research platform, the prior caps (vix 5% / spy 3% of a ~306-article month) were
+# too tight — they treated the platform's CORE subject as runaway concentration.
+# The boss's clarifying principle: "不重複是主題 不是方向/關鍵字" — e.g. 「波動率對
+# 風險值的影響」 vs 「波動率對選擇權定價的影響」 are two DIFFERENT topics, not
+# over-concentration, even though both keyword-classify as a vol cluster. Since the
+# keyword classifier can't see subtopics, caps are raised to give vol/TW core
+# clusters realistic headroom (still catching true runaway). Genuine subtopic-level
+# concentration is measured by arc_diversity (content_quality), not these caps.
+# Follow-up: move concentration measurement to arc/subtopic granularity.
 CLUSTER_HARD_CAPS: dict[str, int] = {
-    "vix": 15,
-    "spy": 10,
-    "factor_etf": 6,
-    "garch": 10,
-    "vt": 8,
-    "taiwan": 8,
+    "vix": 50,
+    "spy": 40,
+    "factor_etf": 10,
+    "garch": 20,
+    "vt": 12,
+    "taiwan": 16,
 }
 
-DEFAULT_CLUSTER_CAP = 6
-DOMINANT_RATIO_LIMIT = 0.25
+DEFAULT_CLUSTER_CAP = 10
+DOMINANT_RATIO_LIMIT = 0.35  # 2026-06-29: vol is core for a vol platform; was 0.25
 
 # 2026-06-29: soft cap for timely / topic-bound types (event_article,
 # trending_repost, member_qa, daily_*). They are exempt from the HARD cap

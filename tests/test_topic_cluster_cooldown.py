@@ -24,13 +24,16 @@ def test_cluster_gate_status_exposes_soft_cap():
     even when hard-cap `blocked` is True (it just keeps escalating)."""
     from volpred import topic_clusters as tc
 
-    # vix hard cap = 15, SOFT_CAP_MULTIPLIER = 2.5 → soft_cap = 37
+    # soft_cap = hard_cap × SOFT_CAP_MULTIPLIER. Reference the constants (not magic
+    # numbers) so a cap recalibration (e.g. 2026-06-29 boss decision raising vol
+    # core caps) doesn't falsely break this invariant test.
+    vix_cap = tc.CLUSTER_HARD_CAPS["vix"]
     status = tc.cluster_gate_status("vix")
-    assert status["cap"] == 15
-    assert status["soft_cap"] == int(15 * tc.SOFT_CAP_MULTIPLIER)
+    assert status["cap"] == vix_cap
+    assert status["soft_cap"] == int(vix_cap * tc.SOFT_CAP_MULTIPLIER)
     assert status["soft_cap_multiplier"] == tc.SOFT_CAP_MULTIPLIER
-    assert tc.cluster_soft_cap("vix") == int(15 * tc.SOFT_CAP_MULTIPLIER)
-    # unknown cluster → default cap (=6), default soft cap (=15)
+    assert tc.cluster_soft_cap("vix") == int(vix_cap * tc.SOFT_CAP_MULTIPLIER)
+    # unknown cluster → default cap, default soft cap
     assert tc.cluster_soft_cap("unknown_cluster_xyz") == int(
         tc.DEFAULT_CLUSTER_CAP * tc.SOFT_CAP_MULTIPLIER
     )

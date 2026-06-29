@@ -952,8 +952,12 @@ def test_release_prefers_under_cap_cluster_over_fifo(tmp_path: Path, monkeypatch
     _freeze_content_now(monkeypatch, frozen_now)
     _stub_release_side_effects(monkeypatch)
 
+    from volpred.topic_clusters import cluster_cap
+
     recent = (frozen_now - timedelta(days=2)).isoformat()
-    # 6 published factor_etf articles → factor_etf at its hard cap (6) = over-cap.
+    # Publish exactly the factor_etf hard cap → factor_etf at cap = over-cap.
+    # Derive from the constant so a cap recalibration doesn't break the premise.
+    _fe_cap = cluster_cap("factor_etf")
     feed = [
         {
             "id": f"pub_fe_{i}",
@@ -963,7 +967,7 @@ def test_release_prefers_under_cap_cluster_over_fifo(tmp_path: Path, monkeypatch
             "audience": "一般讀者",
             "published_at": recent,
         }
-        for i in range(6)
+        for i in range(_fe_cap)
     ]
     # Draft A: factor_etf (over-cap), OLDER created_at → pure FIFO would pick this.
     feed.append({
