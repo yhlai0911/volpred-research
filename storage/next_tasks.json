@@ -39040,7 +39040,7 @@
     "title": "K1559: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1559 has verdict signal (score=3, reasons=['cross-market/universal']) but no general article in feed.json.  Verdict preview: K1559 tests whether missing/stale daily market data in thin ETF histories is a liquidity-volatility prior. Using 28 yfinance ETFs from 2014-01-01 to the 2026-06-29 request date (86,148 estimation rows), data-quality event signals are measured at date t and future RV/gap/drawdown ",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1559",
@@ -39049,7 +39049,13 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-06-29T11:09:50+00:00"
+    "created_at": "2026-06-29T11:09:50+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T11:27:39.552752+00:00",
+    "claim_session_id": "10b5ff940d96",
+    "started_at": "2026-06-29T11:27:44.703595+00:00",
+    "completed_at": "2026-06-29T11:36:52.582639+00:00",
+    "result": "Published general-audience draft mile_082f0578 for K1559 using Publisher.publish_milestone; status=draft, audience=general, charts uploaded to Supabase. Validated provenance/image/general-style gates and single-article Supabase sync read-back succeeded. Full feed-sync --apply still hangs on bulk legacy diff, so this run used sync_article fallback for the new article."
   },
   {
     "id": "email-12169-8d92d9",
