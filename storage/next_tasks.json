@@ -39505,9 +39505,36 @@
     "title": "[daily_article] K1580 年度等權再平衡 vs 買進持有 NULL finding (台灣+美國3籃子)",
     "description": "K1580 已跑完: 11年(2014-2024)+台灣大型股+美國大型股+美國產業ETF三籃子+三條腿(再平衡/B&H/指數)+三種成本+block-bootstrap(seed=42)。\n\n結論NULL但細緻:\n- 再平衡並未系統性優於買進持有 (-0.06% ~ -1.41%/yr, CI95全含0)\n- 無存活者偏差的乾淨檢定(產業ETF) P(rebal>BH)=0.48 → 機制本身中性\n- 但2/3籃子AnnVol與MDD低於B&H, 美國大型股Sharpe略高(1.05 vs 1.02)\n- 本質=溫和反動量/再平衡紀律, 輪動年贏(2022 +15.5%)單邊強勢年輸(2020科技/2024台積電)\n\n寫法要求:\n1. 讀 experiments/K1580/{README.md, k1580_results.json} 取數字\n2. 讀 anti-ai-style + publishing.md + trending-repost SKILL 三 canonical\n3. 寫前跑 scripts/check_arc_dedup.py (rebalancing arc 過去 30d 查重)\n4. 嵌真圖 fig_a/b/c\n5. 引用 Willenbrock 2011 + Bouchey et al 2012\n6. anti-ai-style editor-sop + anti_ai_gate.py 必過\n7. 含真實 disclaimer (NULL 不過度宣稱、不變成投資建議)\n8. **FOLLOWUP**: 跑完後也要補 codex_review.md (README 提到但檔案缺), 然後寫 knowledge.json K1580 entry",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-00-followup",
     "created_at": "2026-06-29T16:59:01.536149+00:00",
-    "agent_eligible": true
+    "agent_eligible": true,
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-29T17:09:18.679184+00:00",
+    "claim_session_id": "da4f9fda1bb1",
+    "completed_at": "2026-06-29T17:10:46.599536+00:00",
+    "result": "ARC-DEDUP GATE 阻擋（11 篇同 null_no_info × methodology_robustness arc 已 cover；最近 mile_26d8616d 已寫過類股輪動 daily/monthly rebalance 對比，K1580 共享 8 entities）。K1580 NULL finding 已在 knowledge.json 與 README 完整記錄，article path 關閉 per arc-dedup gate hard rule。"
+  },
+  {
+    "id": "journal_discovery_20260629_2",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (refill pool dry fallback)",
+    "description": "Article candidate pool + research-backlog 都 dry (refill no_new_candidates_passing_filter). 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 refill 自動取用。 24h 內 idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "succeeded",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "tier3-fallback"
+    ],
+    "created_at": "2026-06-29T17:15:31+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-29T17:16:12.559465+00:00",
+    "claim_session_id": "55f997f33335",
+    "started_at": "2026-06-29T17:16:17.198428+00:00",
+    "completed_at": "2026-06-29T17:22:56.147008+00:00",
+    "result": "Agent opus/high (a12702dc03ace3a1c) 4min, 120k tokens. WebSearch 8 期刊軸：JBF FX vol/JFEC crypto/JFI HYG-LQD/RoF merger arb/arXiv SSR/Macro CDS/JRI cat bond/JFutMkt crypto vol-of-vol。10→7 條 selectivity gate（砍 convertibles/prediction market/Baltic Dry）。Append research_program.md line 1311-1326 (+17)。7 條 fresh-entity priority CRYPTO/FX_AMBIGUITY/HY_RATIO/MERGER_ARB/SSR/SOVEREIGN_CDS/CAT_BOND，全 yfinance/FRED 免費資料，無捏造論文標題。"
   }
 ]
