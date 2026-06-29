@@ -1,0 +1,368 @@
+{
+  "experiment_id": "K1573",
+  "title": "Semiconductor industrial-policy award shock and sector volatility spillover",
+  "timestamp": "2026-06-29T20:18:44",
+  "seed": 42,
+  "data": {
+    "tickers_requested": [
+      "AMAT",
+      "AMD",
+      "ASML",
+      "GFS",
+      "INTC",
+      "KLAC",
+      "LRCX",
+      "MU",
+      "NVDA",
+      "SMH",
+      "SOXX",
+      "TSM",
+      "WOLF"
+    ],
+    "tickers_missing_or_sparse": [],
+    "tickers_used": [
+      "AMAT",
+      "AMD",
+      "ASML",
+      "GFS",
+      "INTC",
+      "KLAC",
+      "LRCX",
+      "MU",
+      "NVDA",
+      "SMH",
+      "SOXX",
+      "TSM",
+      "WOLF"
+    ],
+    "n_tickers_requested": 13,
+    "n_tickers_used": 13,
+    "n_events_total": 17,
+    "n_event_ticker_tests": 146,
+    "sample_start": "2023-10-22",
+    "sample_end": "2025-12-20",
+    "yfinance_auto_adjust": true,
+    "holiday_alignment_note": "Event date falling on non-trading day maps T=0 to first trading day >= event_date (e.g. Sat 2024-02-17 announcement -> T=0=Tue 2024-02-20 after Presidents' Day holiday). Post window therefore excludes the first market-reaction day in those cases; conservative for detecting announcement effect."
+  },
+  "windows": {
+    "pre": [
+      -30,
+      -6
+    ],
+    "post": [
+      1,
+      5
+    ]
+  },
+  "bootstrap": {
+    "method": "random-anchor null distribution of ratio under H0",
+    "B_reps": 1000,
+    "alpha_unadj": 0.05,
+    "bonferroni_alpha": 0.00034246575342465754,
+    "n_pvalues": 146,
+    "n_sig_unadj_0p05": 1,
+    "n_sig_bonferroni": 0
+  },
+  "H1_per_ticker_pooled": [
+    {
+      "ticker": "AMAT",
+      "n_events": 17,
+      "mean_ratio": 0.8188559640745419,
+      "median_ratio": 0.6294832494992468,
+      "frac_ratio_gt1": 0.29411764705882354,
+      "sign_test_p_one_sided": 0.9754791259765625
+    },
+    {
+      "ticker": "AMD",
+      "n_events": 17,
+      "mean_ratio": 0.8541569515601936,
+      "median_ratio": 0.721859526680478,
+      "frac_ratio_gt1": 0.35294117647058826,
+      "sign_test_p_one_sided": 0.9282684326171875
+    },
+    {
+      "ticker": "ASML",
+      "n_events": 17,
+      "mean_ratio": 0.7079050272719247,
+      "median_ratio": 0.6089030288353797,
+      "frac_ratio_gt1": 0.29411764705882354,
+      "sign_test_p_one_sided": 0.9754791259765625
+    },
+    {
+      "ticker": "GFS",
+      "n_events": 2,
+      "mean_ratio": 0.4108793496649774,
+      "median_ratio": 0.4108793496649774,
+      "frac_ratio_gt1": 0.0,
+      "sign_test_p_one_sided": 1.0
+    },
+    {
+      "ticker": "INTC",
+      "n_events": 4,
+      "mean_ratio": 1.3170030215330621,
+      "median_ratio": 1.4239555704138247,
+      "frac_ratio_gt1": 0.5,
+      "sign_test_p_one_sided": 0.6875
+    },
+    {
+      "ticker": "KLAC",
+      "n_events": 17,
+      "mean_ratio": 0.9153315672786001,
+      "median_ratio": 0.8146354270226901,
+      "frac_ratio_gt1": 0.35294117647058826,
+      "sign_test_p_one_sided": 0.9282684326171875
+    },
+    {
+      "ticker": "LRCX",
+      "n_events": 17,
+      "mean_ratio": 1.009723547427984,
+      "median_ratio": 0.9146049260123867,
+      "frac_ratio_gt1": 0.4117647058823529,
+      "sign_test_p_one_sided": 0.8338470458984375
+    },
+    {
+      "ticker": "MU",
+      "n_events": 2,
+      "mean_ratio": 0.6996796218864755,
+      "median_ratio": 0.6996796218864755,
+      "frac_ratio_gt1": 0.5,
+      "sign_test_p_one_sided": 0.75
+    },
+    {
+      "ticker": "NVDA",
+      "n_events": 17,
+      "mean_ratio": 1.32204493459991,
+      "median_ratio": 1.014502339587765,
+      "frac_ratio_gt1": 0.5294117647058824,
+      "sign_test_p_one_sided": 0.5
+    },
+    {
+      "ticker": "SMH",
+      "n_events": 17,
+      "mean_ratio": 1.0437340192895515,
+      "median_ratio": 0.9591110232879014,
+      "frac_ratio_gt1": 0.4117647058823529,
+      "sign_test_p_one_sided": 0.8338470458984375
+    },
+    {
+      "ticker": "SOXX",
+      "n_events": 17,
+      "mean_ratio": 1.0037652069717318,
+      "median_ratio": 1.0330612026113595,
+      "frac_ratio_gt1": 0.5294117647058824,
+      "sign_test_p_one_sided": 0.5
+    },
+    {
+      "ticker": "TSM",
+      "n_events": 2,
+      "mean_ratio": 0.3536221640244812,
+      "median_ratio": 0.3536221640244812,
+      "frac_ratio_gt1": 0.0,
+      "sign_test_p_one_sided": 1.0
+    }
+  ],
+  "H3_by_event_type": [
+    {
+      "event_type": "award",
+      "n_tests": 68,
+      "mean_ratio": 1.1355567542097127,
+      "median_ratio": 0.8545437409274225,
+      "frac_ratio_gt1": 0.47058823529411764,
+      "sign_test_p_one_sided": 0.7276938882903704
+    },
+    {
+      "event_type": "award_final",
+      "n_tests": 52,
+      "mean_ratio": 0.709241652756693,
+      "median_ratio": 0.6638318756005741,
+      "frac_ratio_gt1": 0.2692307692307692,
+      "sign_test_p_one_sided": 0.9997952292731087
+    },
+    {
+      "event_type": "delay",
+      "n_tests": 17,
+      "mean_ratio": 1.0239076060198564,
+      "median_ratio": 0.8456023078352071,
+      "frac_ratio_gt1": 0.4117647058823529,
+      "sign_test_p_one_sided": 0.8338470458984375
+    },
+    {
+      "event_type": "equity_swap",
+      "n_tests": 9,
+      "mean_ratio": 0.7972569488226093,
+      "median_ratio": 0.6918244985060913,
+      "frac_ratio_gt1": 0.4444444444444444,
+      "sign_test_p_one_sided": 0.74609375
+    }
+  ],
+  "H2_spillover_per_event": [
+    {
+      "event_date": "2024-02-19",
+      "event_type": "award",
+      "recipient": "GlobalFoundries",
+      "primary_ratio": 0.530862206594728,
+      "SMH_ratio": 3.089675750728627,
+      "SMH_boot_p": 0.062
+    },
+    {
+      "event_date": "2024-02-19",
+      "event_type": "award",
+      "recipient": "GlobalFoundries",
+      "primary_ratio": 0.530862206594728,
+      "SOXX_ratio": 1.8342359415465113,
+      "SOXX_boot_p": 0.191
+    },
+    {
+      "event_date": "2024-03-20",
+      "event_type": "award",
+      "recipient": "Intel",
+      "primary_ratio": 0.7486037738976575,
+      "SMH_ratio": 0.22097773549193767,
+      "SMH_boot_p": 0.902
+    },
+    {
+      "event_date": "2024-03-20",
+      "event_type": "award",
+      "recipient": "Intel",
+      "primary_ratio": 0.7486037738976575,
+      "SOXX_ratio": 0.3035853312855934,
+      "SOXX_boot_p": 0.878
+    },
+    {
+      "event_date": "2024-04-08",
+      "event_type": "award",
+      "recipient": "TSMC Arizona",
+      "primary_ratio": 0.564931814294137,
+      "SMH_ratio": 0.9462439565192663,
+      "SMH_boot_p": 0.456
+    },
+    {
+      "event_date": "2024-04-08",
+      "event_type": "award",
+      "recipient": "TSMC Arizona",
+      "primary_ratio": 0.564931814294137,
+      "SOXX_ratio": 1.1912008791539535,
+      "SOXX_boot_p": 0.321
+    },
+    {
+      "event_date": "2024-04-26",
+      "event_type": "award",
+      "recipient": "Micron",
+      "primary_ratio": 0.27962616742080365,
+      "SMH_ratio": 2.1192200915586876,
+      "SMH_boot_p": 0.111
+    },
+    {
+      "event_date": "2024-04-26",
+      "event_type": "award",
+      "recipient": "Micron",
+      "primary_ratio": 0.27962616742080365,
+      "SOXX_ratio": 2.117193489474187,
+      "SOXX_boot_p": 0.119
+    },
+    {
+      "event_date": "2024-11-15",
+      "event_type": "award_final",
+      "recipient": "TSMC Arizona",
+      "primary_ratio": 0.14231251375482548,
+      "SMH_ratio": 0.25816123126401264,
+      "SMH_boot_p": 0.897
+    },
+    {
+      "event_date": "2024-11-15",
+      "event_type": "award_final",
+      "recipient": "TSMC Arizona",
+      "primary_ratio": 0.14231251375482548,
+      "SOXX_ratio": 0.26512328148387904,
+      "SOXX_boot_p": 0.886
+    },
+    {
+      "event_date": "2024-11-26",
+      "event_type": "award_final",
+      "recipient": "GlobalFoundries",
+      "primary_ratio": 0.2908964927352268,
+      "SMH_ratio": 0.639903027968239,
+      "SMH_boot_p": 0.632
+    },
+    {
+      "event_date": "2024-11-26",
+      "event_type": "award_final",
+      "recipient": "GlobalFoundries",
+      "primary_ratio": 0.2908964927352268,
+      "SOXX_ratio": 0.5819384739564254,
+      "SOXX_boot_p": 0.653
+    },
+    {
+      "event_date": "2024-12-03",
+      "event_type": "award_final",
+      "recipient": "Micron",
+      "primary_ratio": 1.1197330763521474,
+      "SMH_ratio": 0.9591110232879014,
+      "SMH_boot_p": 0.423
+    },
+    {
+      "event_date": "2024-12-03",
+      "event_type": "award_final",
+      "recipient": "Micron",
+      "primary_ratio": 1.1197330763521474,
+      "SOXX_ratio": 0.7316699184663032,
+      "SOXX_boot_p": 0.56
+    },
+    {
+      "event_date": "2025-01-15",
+      "event_type": "award_final",
+      "recipient": "Intel",
+      "primary_ratio": 2.1813203846377798,
+      "SMH_ratio": 0.6514788269453049,
+      "SMH_boot_p": 0.622
+    },
+    {
+      "event_date": "2025-01-15",
+      "event_type": "award_final",
+      "recipient": "Intel",
+      "primary_ratio": 2.1813203846377798,
+      "SOXX_ratio": 0.6125163145726897,
+      "SOXX_boot_p": 0.611
+    },
+    {
+      "event_date": "2025-03-07",
+      "event_type": "delay",
+      "recipient": "Intel",
+      "primary_ratio": 2.0993073669299918,
+      "SMH_ratio": 0.996753052390763,
+      "SMH_boot_p": 0.445
+    },
+    {
+      "event_date": "2025-03-07",
+      "event_type": "delay",
+      "recipient": "Intel",
+      "primary_ratio": 2.0993073669299918,
+      "SOXX_ratio": 1.2237361910701121,
+      "SOXX_boot_p": 0.313
+    },
+    {
+      "event_date": "2025-08-22",
+      "event_type": "equity_swap",
+      "recipient": "Intel",
+      "primary_ratio": 0.23878056066681966,
+      "SMH_ratio": 1.3444205143566472,
+      "SMH_boot_p": 0.281
+    },
+    {
+      "event_date": "2025-08-22",
+      "event_type": "equity_swap",
+      "recipient": "Intel",
+      "primary_ratio": 0.23878056066681966,
+      "SOXX_ratio": 1.2596966003419676,
+      "SOXX_boot_p": 0.3
+    }
+  ],
+  "honest_summary": {
+    "n_events": 17,
+    "n_tickers": 13,
+    "verdict": "NULL \u2014 no detectable announcement effect on semiconductor sector RV in the T+1..+5 window after CHIPS Act award/delay events. Aggregate post/pre ratio = 0.950, sign test p=0.997, 0/146 per-event tests significant after Bonferroni. LOW POWER CAVEAT: N=17 events x 12 tickers => only 146 per-event tests; the random-anchor null is conservative (uses full sample including the event window itself as anchors), and Bonferroni at alpha=0.05/146 is extremely strict. A genuine moderate-size effect (ratio ~1.2-1.5) is detectable only if highly clustered; diffuse or heterogeneous announcement effects would also produce this NULL. Interpret as 'no strong, concentrated, systematically positive RV spike', not 'no effect at all'.",
+    "aggregate_mean_ratio": 0.9498641580229422,
+    "aggregate_frac_gt1": 0.3904109589041096,
+    "pooled_sign_test_p": 0.9969406483122681
+  }
+}
