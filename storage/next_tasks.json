@@ -39744,7 +39744,7 @@
     "title": "K478-v2: fix forward-label embargo, DM horizon, and regenerate article figures",
     "description": "Codex 24h review for mile_96ec845f returned VERDICT: FAIL. Fix experiments/k478/k478_entropy_vol.py so 21-day forward RV OOS training enforces target_end < forecast_origin, use horizon-aware HAC/DM (h=21 or bootstrap/HLN), fix DM direction labels, write results to experiments/k478/, replace placeholder README, rerun, regenerate figures, and only then republish a corrected article. Review: storage/reviews/codex_24h/mile_96ec845f_review.md",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "codex_24h_review",
     "created_at": "2026-06-29T22:09:58.136464+00:00",
@@ -39759,7 +39759,13 @@
       "methodology-fix",
       "lookahead",
       "dm-hac"
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T23:14:13.258908+00:00",
+    "claim_session_id": "20435acca58d",
+    "started_at": "2026-06-29T23:14:13.495214+00:00",
+    "completed_at": "2026-06-29T23:20:10.244329+00:00",
+    "result": "Fixed K478 forward-label embargo (j+21 < forecast_pos), DM-HAC lag=21 with common-date loss alignment, canonical output path, and regenerated figures. Corrected rerun preserves entropy NULL; VIX QLIKE best but only borderline after HAC (p=0.065), so mile_96ec845f remains HOLD for article rewrite."
   },
   {
     "id": "email-12229-22fe1c",

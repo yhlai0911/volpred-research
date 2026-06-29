@@ -68,6 +68,7 @@ def fig_qlike() -> None:
 def fig_dm() -> None:
     """DM p-values per challenger model (vs HAR baseline)."""
     dm = RESULTS["dm_tests_vs_baseline"]
+    hac_lag = RESULTS["methodology"]["dm_test"]["hac_lag"]
     # Order: entropy variants first, then VIX last for contrast.
     order = ["M3_pe", "M4_shannon", "M6_vix"]
     pretty = {
@@ -77,12 +78,10 @@ def fig_dm() -> None:
     }
     pvals = [dm[m]["dm_qlike_p"] for m in order]
     gains = [dm[m]["qlike_gain_pct"] for m in order]
-    # winner_against_baseline = (t > 0 means baseline beats challenger)
-    # In this JSON dm_qlike_t < 0 means challenger beats baseline.
-    t_stats = [dm[m]["dm_qlike_t"] for m in order]
+    common_n = [dm[m]["common_n_qlike"] for m in order]
     direction = [
-        "挑戰者勝（QLIKE 更低）" if t < 0 else "Baseline 勝（QLIKE 更低）"
-        for t in t_stats
+        "挑戰者勝（QLIKE 更低）" if g < 0 else "Baseline 勝（QLIKE 更低）"
+        for g in gains
     ]
 
     fig, ax = plt.subplots(figsize=(8.4, 5))
@@ -90,11 +89,11 @@ def fig_dm() -> None:
     colors = ["#7C9885", "#7C9885", "#E15759"]
     bars = ax.bar(x, [-np.log10(p) for p in pvals], color=colors, edgecolor="black", linewidth=0.6)
 
-    for bar, p, g, d in zip(bars, pvals, gains, direction):
+    for bar, p, g, d, n in zip(bars, pvals, gains, direction, common_n):
         ax.text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 0.05,
-            f"顯著性 {p:.3g}\n方向：{d}\nQLIKE 改善 {g:+.2f}%",
+            f"顯著性 {p:.3g}\n方向：{d}\nQLIKE gain {g:+.2f}%\n共同 n={n}",
             ha="center",
             va="bottom",
             fontsize=8.5,
@@ -103,7 +102,7 @@ def fig_dm() -> None:
     ax.set_xticks(x)
     ax.set_xticklabels([pretty[m] for m in order])
     ax.set_ylabel("-log10(顯著性 p)")
-    ax.set_title("K478：兩模型比較 vs HAR baseline — entropy 即便顯著也是反向（baseline 勝）")
+    ax.set_title(f"K478：DM-HAC vs HAR baseline（21日 forward RV；NW lag={hac_lag}）")
     ax.set_ylim(0, max(-np.log10(p) for p in pvals) * 1.45)
     ax.legend(loc="upper left", fontsize=9)
     ax.grid(axis="y", alpha=0.25)

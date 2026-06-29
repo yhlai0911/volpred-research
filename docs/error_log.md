@@ -22,6 +22,8 @@
 
 **教訓**：Forward-label forecast 實驗不能只查 feature `shift(1)`；訓練資料也必須按 horizon embargo。多日 overlapping target 的 DM/HAC horizon 必須等於 target horizon 或用 block bootstrap / HLN，不能沿用 `h=1`。圖表方向標籤也是 public claim，一樣要納入 24h-rule source review。
 
+**2026-06-30 resolution**：`K478_v2_fix_forward_label_dm` 已修正並重跑：`experiments/k478/k478_entropy_vol.py` 現在用 `j + 21 < forecast_pos` target-end embargo、DM-HAC lag=21、共同 forecast date 對齊與 canonical output path。修正後 entropy 仍為 NULL；VIX 平均 QLIKE 仍最佳但 DM-HAC p=0.065，因此 `mile_96ec845f` 不可原樣復刊，需改寫為 borderline 10% evidence。
+
 ## 2026-06-29 synthesis / daily_digest article cross-source mismatch — date/count/proxy wording drift
 
 **問題**：`mile_abe9e68f`（「每一次失敗都在說同一件事：日頻資料的訊號天花板」）24h Codex review 發現綜述型文章在彙整六篇來源文章時出現多處 public-facing mismatch。

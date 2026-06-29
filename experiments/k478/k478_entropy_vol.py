@@ -48,6 +48,7 @@ import time
 import math
 from datetime import datetime, timezone
 from collections import Counter
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -60,9 +61,15 @@ warnings.filterwarnings('ignore')
 # ============================================================
 OOS_START = '2023-01-01'
 DATA_START = '2005-01-01'
+DATA_END = '2026-01-01'
 ASSET = 'SPY'
 WINDOW = 21  # rolling window for entropy
+HORIZON = 21  # forward realized-variance target horizon
 N_BINS_SHANNON = 20  # bins for Shannon entropy
+SAMPEN_R_MULT = 0.2
+MIN_TRAINING_WINDOW = 504
+DM_HAC_LAG = HORIZON
+OUT_DIR = Path(__file__).resolve().parent
 
 # ============================================================
 # Entropy Functions
@@ -211,7 +218,7 @@ def compute_rolling_entropy(returns, window=21, n_bins=20):
             continue
 
         # Sample Entropy (m=2, r=0.2*std)
-        sampen_arr[i] = sample_entropy(w, m=2, r_mult=0.2)
+        sampen_arr[i] = sample_entropy(w, m=2, r_mult=SAMPEN_R_MULT)
 
         # Permutation Entropy (order=3, delay=1)
         pe_arr[i] = permutation_entropy(w, order=3, delay=1, normalize=True)
@@ -252,69 +259,108 @@ def mse_loss(realized, forecast):
     return np.mean((realized[valid] - forecast[valid]) ** 2)
 
 
-def dm_test(loss1, loss2, h=1):
+def dm_test(loss1, loss2, hac_lag=DM_HAC_LAG):
     """
-    Diebold-Mariano test (two-sided)
+    Diebold-Mariano test with Newey-West HAC standard error.
+
     H0: equal predictive accuracy
-    Negative t-stat means model 2 is better (lower loss)
+    d_t = loss1_t - loss2_t, so positive t-stat means model 2 has
+    lower average loss than model 1.
     """
     d = loss1 - loss2
     d = d[np.isfinite(d)]
     n = len(d)
     if n < 10:
-        return np.nan, np.nan
+        return np.nan, np.nan, np.nan
+
     d_mean = np.mean(d)
-    gamma0 = np.var(d, ddof=1)
-    hac_var = gamma0
-    for k in range(1, h):
-        gamma_k = np.cov(d[k:], d[:-k])[0, 1]
-        hac_var += 2 * (1 - k / h) * gamma_k
-    hac_var = max(hac_var, 1e-20)
-    dm_stat = d_mean / np.sqrt(hac_var / n)
+    centered = d - d_mean
+    gamma0 = np.mean(centered * centered)
+    long_run_var = gamma0
+    max_lag = min(int(hac_lag), n - 1)
+
+    for k in range(1, max_lag + 1):
+        gamma_k = np.mean(centered[k:] * centered[:-k])
+        weight = 1 - k / (max_lag + 1)
+        long_run_var += 2 * weight * gamma_k
+
+    long_run_var = max(long_run_var, 1e-20)
+    dm_stat = d_mean / np.sqrt(long_run_var / n)
     p_value = 2 * (1 - stats.t.cdf(abs(dm_stat), df=n - 1))
-    return dm_stat, p_value
+    return dm_stat, p_value, d_mean
 
 
-def expanding_ols_forecast(features_is, target_is, features_oos, target_oos, min_window=504):
+def align_losses(result_a, result_b, loss_key):
     """
-    Expanding window OLS forecast.
-    Returns OOS forecasts array (same length as features_oos).
+    Align model loss arrays by forecast date before pairwise comparison.
     """
-    n_is = len(features_is)
-    n_oos = len(features_oos)
+    losses_a = dict(zip(result_a['loss_dates'], result_a[loss_key]))
+    losses_b = dict(zip(result_b['loss_dates'], result_b[loss_key]))
+    common_dates = sorted(set(losses_a).intersection(losses_b))
+    a = np.array([losses_a[d] for d in common_dates], dtype=float)
+    b = np.array([losses_b[d] for d in common_dates], dtype=float)
+    return a, b, common_dates
 
-    # Stack IS and OOS features
-    X_all = np.vstack([features_is, features_oos])
-    y_all = np.concatenate([target_is, target_oos])
 
-    forecasts = np.full(n_oos, np.nan)
+def expanding_ols_forecast_panel(data, feature_cols, target_col, oos_start,
+                                 horizon=HORIZON, min_window=MIN_TRAINING_WINDOW):
+    """
+    Expanding-window OLS forecast with forward-label embargo.
 
-    for i in range(n_oos):
-        train_end = n_is + i
-        X_train = X_all[:train_end]
-        y_train = y_all[:train_end]
+    For a forecast origin at row i, a training row j is eligible only when
+    j + horizon < i, so the training target's last realized return is known
+    before the forecast origin.
+    """
+    X_all = data[feature_cols].to_numpy(dtype=float)
+    y_all = data[target_col].to_numpy(dtype=float)
+    idx = data.index
+    positions = np.arange(len(data))
+    oos_positions = np.where(idx >= pd.Timestamp(oos_start))[0]
 
-        # Remove NaN rows
-        valid = np.isfinite(y_train) & np.all(np.isfinite(X_train), axis=1)
-        if valid.sum() < min_window:
+    finite_X = np.all(np.isfinite(X_all), axis=1)
+    finite_y = np.isfinite(y_all)
+
+    forecasts = []
+    realized = []
+    dates = []
+    train_counts = []
+
+    for pos in oos_positions:
+        if not finite_y[pos] or not finite_X[pos]:
             continue
 
-        Xv = X_train[valid]
-        yv = y_train[valid]
+        train_mask = finite_X & finite_y & ((positions + horizon) < pos)
+        n_train = int(train_mask.sum())
+        if n_train < min_window:
+            continue
 
-        # Add intercept
-        Xv_c = np.column_stack([np.ones(len(Xv)), Xv])
+        Xv = X_all[train_mask]
+        yv = y_all[train_mask]
+        Xv_c = np.column_stack([np.ones(n_train), Xv])
 
         try:
             beta = np.linalg.lstsq(Xv_c, yv, rcond=None)[0]
-            x_new = np.concatenate([[1.0], X_all[train_end]])
+            x_new = np.concatenate([[1.0], X_all[pos]])
             pred = x_new @ beta
-            # Clip to positive (vol forecast must be > 0)
-            forecasts[i] = max(pred, 1e-8)
+            forecasts.append(max(float(pred), 1e-8))
+            realized.append(float(y_all[pos]))
+            dates.append(idx[pos].strftime('%Y-%m-%d'))
+            train_counts.append(n_train)
         except Exception:
             continue
 
-    return forecasts
+    return {
+        'forecast': np.array(forecasts, dtype=float),
+        'realized': np.array(realized, dtype=float),
+        'dates': dates,
+        'train_counts': train_counts,
+        'n_valid': int(len(forecasts)),
+        'n_total': int(len(oos_positions)),
+        'first_forecast_date': dates[0] if dates else None,
+        'last_forecast_date': dates[-1] if dates else None,
+        'min_train_count': int(min(train_counts)) if train_counts else None,
+        'max_train_count': int(max(train_counts)) if train_counts else None,
+    }
 
 
 # ============================================================
@@ -331,8 +377,8 @@ def main():
     # 1. Data Download
     # ----------------------------------------------------------
     print("\n[1] Downloading data...")
-    spy = yf.download(ASSET, start=DATA_START, end='2026-01-01', progress=False)
-    vix = yf.download('^VIX', start=DATA_START, end='2026-01-01', progress=False)
+    spy = yf.download(ASSET, start=DATA_START, end=DATA_END, progress=False)
+    vix = yf.download('^VIX', start=DATA_START, end=DATA_END, progress=False)
 
     # Handle MultiIndex columns
     if isinstance(spy.columns, pd.MultiIndex):
@@ -355,8 +401,8 @@ def main():
     # Realized Variance (21-day)
     spy['rv21'] = spy['ret2'].rolling(window=21).sum()
 
-    # Forward realized variance (target)
-    spy['rv21_fwd'] = spy['rv21'].shift(-21)
+    # Forward realized variance target: sum of squared returns t+1 ... t+21.
+    spy['rv21_fwd'] = sum(spy['ret2'].shift(-i) for i in range(1, HORIZON + 1))
 
     # Lagged RV (predictor)
     spy['rv21_lag'] = spy['rv21'].shift(1)
@@ -454,31 +500,15 @@ def main():
     for model_name, feature_cols in models.items():
         print(f"\n  {model_name} ({feature_cols})...")
 
-        # Prepare data
-        cols_needed = feature_cols + [target]
-
-        # IS data
-        is_valid = spy_is[cols_needed].dropna()
-        X_is = is_valid[feature_cols].values
-        y_is = is_valid[target].values
-
-        # OOS data
-        oos_valid = spy_oos[cols_needed].dropna()
-        X_oos = oos_valid[feature_cols].values
-        y_oos = oos_valid[target].values
-
-        # Run expanding window forecast
-        fc = expanding_ols_forecast(X_is, y_is, X_oos, y_oos, min_window=504)
-
-        # Store aligned forecasts and realized
-        valid_fc = np.isfinite(fc)
-        forecasts[model_name] = {
-            'forecast': fc[valid_fc],
-            'realized': y_oos[valid_fc],
-            'n_valid': int(valid_fc.sum()),
-            'n_total': int(len(fc)),
-        }
-        print(f"    Valid forecasts: {valid_fc.sum()}/{len(fc)}")
+        forecasts[model_name] = expanding_ols_forecast_panel(
+            spy,
+            feature_cols,
+            target,
+            OOS_START,
+            horizon=HORIZON,
+            min_window=MIN_TRAINING_WINDOW,
+        )
+        print(f"    Valid forecasts: {forecasts[model_name]['n_valid']}/{forecasts[model_name]['n_total']}")
 
     # ----------------------------------------------------------
     # 7. Evaluation
@@ -506,8 +536,14 @@ def main():
             'qlike': float(q),
             'mse': float(m),
             'n_obs': int(fdata['n_valid']),
+            'n_total': int(fdata['n_total']),
+            'first_forecast_date': fdata['first_forecast_date'],
+            'last_forecast_date': fdata['last_forecast_date'],
+            'min_train_count': fdata['min_train_count'],
+            'max_train_count': fdata['max_train_count'],
             'qlike_losses': qlike_losses,
             'mse_losses': mse_losses,
+            'loss_dates': np.array(fdata['dates'])[valid].tolist(),
         }
         print(f"\n  {model_name}: QLIKE={q:.6f}, MSE={m:.4e}, n={fdata['n_valid']}")
 
@@ -515,33 +551,49 @@ def main():
     print("\n  DM Tests vs Baseline (M1_baseline):")
     print("  " + "-" * 60)
 
-    base_qlike_losses = results[baseline_key]['qlike_losses']
-    base_mse_losses = results[baseline_key]['mse_losses']
-    base_qlike = results[baseline_key]['qlike']
-
     dm_results = {}
     for model_name in models:
         if model_name == baseline_key:
             continue
 
-        # Align lengths
-        ql = results[model_name]['qlike_losses']
-        ml = results[model_name]['mse_losses']
+        base_ql, model_ql, common_q_dates = align_losses(
+            results[baseline_key],
+            results[model_name],
+            'qlike_losses',
+        )
+        base_ml, model_ml, common_m_dates = align_losses(
+            results[baseline_key],
+            results[model_name],
+            'mse_losses',
+        )
 
-        min_len_q = min(len(base_qlike_losses), len(ql))
-        min_len_m = min(len(base_mse_losses), len(ml))
+        dm_q, p_q, mean_d_q = dm_test(base_ql, model_ql, hac_lag=DM_HAC_LAG)
+        dm_m, p_m, mean_d_m = dm_test(base_ml, model_ml, hac_lag=DM_HAC_LAG)
 
-        dm_q, p_q = dm_test(base_qlike_losses[:min_len_q], ql[:min_len_q])
-        dm_m, p_m = dm_test(base_mse_losses[:min_len_m], ml[:min_len_m])
-
-        qlike_gain = (results[model_name]['qlike'] - base_qlike) / abs(base_qlike) * 100
+        base_common_qlike = float(np.mean(base_ql)) if len(base_ql) else np.nan
+        model_common_qlike = float(np.mean(model_ql)) if len(model_ql) else np.nan
+        qlike_gain = (
+            (model_common_qlike - base_common_qlike) / abs(base_common_qlike) * 100
+            if np.isfinite(base_common_qlike) and base_common_qlike != 0
+            else np.nan
+        )
 
         dm_results[model_name] = {
             'dm_qlike_t': float(dm_q) if np.isfinite(dm_q) else None,
             'dm_qlike_p': float(p_q) if np.isfinite(p_q) else None,
+            'dm_qlike_mean_loss_diff': float(mean_d_q) if np.isfinite(mean_d_q) else None,
             'dm_mse_t': float(dm_m) if np.isfinite(dm_m) else None,
             'dm_mse_p': float(p_m) if np.isfinite(p_m) else None,
+            'dm_mse_mean_loss_diff': float(mean_d_m) if np.isfinite(mean_d_m) else None,
             'qlike_gain_pct': float(qlike_gain),
+            'baseline_common_qlike': base_common_qlike,
+            'challenger_common_qlike': model_common_qlike,
+            'common_n_qlike': int(len(common_q_dates)),
+            'common_n_mse': int(len(common_m_dates)),
+            'common_start': common_q_dates[0] if common_q_dates else None,
+            'common_end': common_q_dates[-1] if common_q_dates else None,
+            'dm_hac_lag': DM_HAC_LAG,
+            'loss_diff_convention': 'baseline_loss_minus_challenger_loss; positive t means challenger lower loss',
         }
 
         sig_q = "***" if (p_q or 1) < 0.01 else "**" if (p_q or 1) < 0.05 else "*" if (p_q or 1) < 0.10 else ""
@@ -767,6 +819,12 @@ def main():
             'qlike': rdata['qlike'],
             'mse': rdata['mse'],
             'n_obs': rdata['n_obs'],
+            'n_total': rdata['n_total'],
+            'first_forecast_date': rdata['first_forecast_date'],
+            'last_forecast_date': rdata['last_forecast_date'],
+            'min_train_count': rdata['min_train_count'],
+            'max_train_count': rdata['max_train_count'],
+            'target_end_embargo_enforced': True,
         }
 
     output = {
@@ -776,19 +834,39 @@ def main():
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'data_source': 'yfinance',
         'asset': ASSET,
+        'data': {
+            'source': 'yfinance',
+            'asset': ASSET,
+            'vix_symbol': '^VIX',
+            'asset_rows': int(len(spy)),
+            'vix_rows': int(len(vix)),
+            'actual_start': spy.index[0].strftime('%Y-%m-%d'),
+            'actual_end': spy.index[-1].strftime('%Y-%m-%d'),
+            'oos_rows': int(len(spy_oos)),
+        },
         'data_period': {
             'start': DATA_START,
-            'end': '2025-12-31',
+            'end': spy.index[-1].strftime('%Y-%m-%d'),
             'is_period': f'{DATA_START} to {OOS_START}',
-            'oos_period': f'{OOS_START} to 2025-12-31',
+            'oos_period': f"{OOS_START} to {spy_oos.index[-1].strftime('%Y-%m-%d')}",
         },
         'methodology': {
             'entropy_window': WINDOW,
-            'sampen_params': {'m': 2, 'r_mult': 0.3},
+            'forecast_target': f'sum of squared SPY log returns from t+1 through t+{HORIZON}',
+            'target_horizon_trading_days': HORIZON,
+            'feature_lag': 'all predictors are shifted by one trading day before forecasting',
+            'target_end_embargo': 'training row j is eligible for forecast row i only if j + horizon < i',
+            'sampen_params': {'m': 2, 'r_mult': SAMPEN_R_MULT},
             'pe_params': {'order': 3, 'delay': 1, 'normalized': True},
             'shannon_params': {'n_bins': N_BINS_SHANNON},
             'forecast_method': 'expanding_window_OLS',
-            'min_training_window': 504,
+            'min_training_window': MIN_TRAINING_WINDOW,
+            'dm_test': {
+                'loss_diff': 'baseline_loss_minus_challenger_loss',
+                'positive_t_means': 'challenger_has_lower_average_loss',
+                'hac_lag': DM_HAC_LAG,
+                'pairwise_alignment': 'forecast dates intersected before computing loss differentials',
+            },
         },
         'descriptive_stats': desc_stats,
         'oos_results': clean_results,
@@ -812,10 +890,11 @@ def main():
         },
     }
 
-    with open('experiments/k478_entropy_vol_results.json', 'w') as f:
+    out_path = OUT_DIR / 'k478_entropy_vol_results.json'
+    with out_path.open('w') as f:
         json.dump(output, f, indent=2, default=str)
 
-    print("  Saved to experiments/k478_entropy_vol_results.json")
+    print(f"  Saved to {out_path}")
     print("\nDone!")
 
     return output
