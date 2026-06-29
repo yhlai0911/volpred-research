@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-29 hourly_dispatch.log exit1 ×80 / 5d — RESOLVED 由 06-28 keychain-independent OAuth fix
+
+**問題**：hourly-13 triage email-12129（boss P1 急件 health_alerts + loop_health）跑 `volpred ops dreaming-run` 後 5 個 critical findings，top = `repeated_tool_failure:hourly_dispatch.log:exit1 ×80 over 4.96d (first 2026-06-23T01:01:02 → last 2026-06-28T00:07:36)`。
+
+**現象**：`grep "exit 1" storage/logs/cron/hourly_dispatch.log` 確認 06-23 ~ 06-28 06:07 連續 hourly fire 大量 `(exit=1 preflight-auth)`；06-28 18:39 以後**全部 exit=0**（連續 24+ hourly 成功）。`loop_health.py:_KNOWN_SELF_HEALING_SUFFIXES` 只標 `:exit142`（perl-alarm hang），未涵蓋 `:exit1`，故 dreaming finder 持續 escalate。
+
+**根因**：preflight-auth 失敗是 macOS keychain 鎖死導致 `claude-code` CLI 無法讀 OAuth token（手動或重啟才會解）。06-28 已換為 keychain-independent 長效 token `/Users/yhlai0911/.volpred/secrets/claude_oauth_token`（log 顯示 `[auth] using long-lived CLAUDE_CODE_OAUTH_TOKEN ... (keychain-independent)`），徹底繞過 keychain 死鎖路徑。
+
+**解決方法**：root cause **已修**（06-28 OAuth token 改 keychain-independent 路徑，hourly 連 24h+ exit=0）；本 entry 為 audit trail，記錄此 80× 失敗事件以解釋 dreaming-run 為何持續 escalate 已修問題。**Window 自然滑動**：dreaming 14d window 內舊 exit1 將於 06-28 後 14 天（~07-12）完全滑出，escalation 自然消失。**不**需立即修 `loop_health.py` 加 `:exit1` 到 known_suffixes — 該 list 是給結構性 self-healing pattern 用（如 exit142 perl-alarm），不該把 auth 失敗也標 known（未來真 auth fail 仍需 escalate）。**教訓**：(L1) dreaming finder 顯示「已修但仍 escalate」屬正常 — 因 evidence 來自 log file 而非 live state；(L2) 真正關鍵是 root cause 何時修、後續是否復發，看 latest timestamp（exit1 latest=06-28 06:07，已 28h 無新 instance）。
+
 ## 2026-06-29 Topic-cluster 30d cap 嚴重 overshoot — release-layer 紀律名存實亡
 
 **問題**：hourly-00 嘗試 publish K1333 (VIX vol-of-vol CONDITIONAL_PASS general article) 被 publisher cluster cooldown gate 擋下 `vix count_30d=92 cap=15`。掃全 cluster 後發現 **spy 83/10=8.3x、vix 92/15=6.1x、taiwan 17/8=2.1x、garch 17/10=1.7x** 四個 cluster blocked，spy+vix 合計 56% of 30d feed (311 items)。
