@@ -36595,5 +36595,31 @@
     ],
     "confidence": 0.58,
     "created_at": "2026-06-29T10:57:46.742710"
+  },
+  {
+    "item_id": "9bbbaa92",
+    "k_id": "K1568",
+    "experiment_id": "K1568",
+    "experiment_path": "experiments/k1568/",
+    "category": "regulation_signals",
+    "verdict": "WEAK_RAW_ONLY",
+    "reviewer": "Codex CLI source-level review 2026-06-29 — CONDITIONAL_PASS (artifact integrity); research verdict WEAK_RAW_ONLY (no Bonferroni/Holm survivor)",
+    "reviewer_source": "codex_review",
+    "codex_review": "experiments/k1568/codex_review.md",
+    "confidence": 0.45,
+    "evidence": [
+      "experiments/k1568/k1568_results.json",
+      "experiments/k1568/codex_review.md",
+      "experiments/k1568/README.md"
+    ],
+    "content": "K1568 — Federal Register rule-flow 作 regulatory-compliance burden proxy 對 mid-cap / small-bank / sector RV 預測。Sample: 2012-01-03 ~ 2026-06-26, 3,641 trading rows, 78,564 Federal Register documents. Targets: IJR/IWM/KRE/KBE/XLF/XLV/XLI/XRT (n=8) × horizons {1d, 5d} × outcomes {log_rv, log_downside_var, cum_return, volume} × signals {rule_flow, proposed_rule_flow, stress} = 144 控制檢定. 結果：strongest raw-significant cell = XLI|5d|log_downside_var|proposed_rule_flow_stress (HAC t=3.19, p=0.0014, ρ=0.075)，但 144-test Bonferroni α=0.000347 之下無倖存者。Verdict: WEAK_RAW_ONLY — Federal Register rule-flow 不是 RegData / OIRA paperwork burden / firm-level compliance cost；regulatory burden 訊號需 OIRA 或 RegData 直接代理才能立 robust claim. Codex source-level review verdict: CONDITIONAL_PASS（lookahead PASS, HAC/bootstrap/multiple-testing PASS, verdict honesty PASS）；唯一 WARN = log_downside_var 5d 視窗有 zero-mass。Caveats per Codex: (a) proxy validity（rule count ≠ compliance burden）；(b) downside-target lower point mass.",
+    "created_at": "2026-06-29T11:10:04.896718",
+    "tags": [
+      "regulation",
+      "federal_register",
+      "compliance_burden",
+      "weak_signal",
+      "null_after_correction"
+    ]
   }
 ]
