@@ -39597,7 +39597,7 @@
     "title": "Experiment scaffold: K1291 (research_program backlog)",
     "description": "K1291 mentioned in research_program.md but no experiments/k1291/ directory yet. Create three-part scaffold per CLAUDE.md `.claude/rules/experiments.md`: (a) README.md (motivation + method + expected output + lookahead policy), (b) k1291.py initial implementation (with signal.shift(1) + seed), (c) plan placeholder k1291_results.json schema. Do NOT run the experiment — just scaffold + stage for main thread to review.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "diverse_gen",
@@ -39606,6 +39606,12 @@
       "scaffold",
       "research-program-backlog"
     ],
-    "created_at": "2026-06-29T18:08:01+00:00"
+    "created_at": "2026-06-29T18:08:01+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T18:44:04.975861+00:00",
+    "claim_session_id": "a47297174f71",
+    "started_at": "2026-06-29T18:44:18.013066+00:00",
+    "completed_at": "2026-06-29T18:47:02.077275+00:00",
+    "result": "完成 K1291 scaffold：新增 experiments/k1291/README.md、k1291.py、k1291_results.json。未執行實驗；results 明確標 scaffold_only_not_run。腳本含 SEED=42、signal.shift(1)、forward RV [t+1,t+H]、OOS target_end < forecast_origin gate。"
   }
 ]

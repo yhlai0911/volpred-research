@@ -1,0 +1,76 @@
+{
+  "experiment_id": "K1291",
+  "status": "scaffold_only_not_run",
+  "seed": 42,
+  "data_sources_planned": {
+    "market": {
+      "provider": "yfinance",
+      "primary_assets": [
+        "ETH-USD",
+        "BTC-USD"
+      ],
+      "diagnostic_assets": [
+        "COIN",
+        "IBIT",
+        "ETHA"
+      ],
+      "price_field": "adjusted close / OHLCV"
+    },
+    "chain_side": [
+      {
+        "name": "priority_fee_pressure",
+        "source": "public Ethereum priority-fee / mempool-pressure source",
+        "required": true,
+        "description": "Priority-fee pressure standardized by a rolling baseline ending at t-1. Must not be replaced by aggregate average gas price unless the verdict is downgraded to DATA_BLOCKED / proxy-only."
+      },
+      {
+        "name": "base_fee_pressure",
+        "source": "Ethereum base-fee source",
+        "required": true,
+        "description": "Base-fee control to separate congestion trend from priority-fee pressure."
+      },
+      {
+        "name": "dex_volume_pressure",
+        "source": "DefiLlama / Uniswap / reproducible DEX volume source",
+        "required": false,
+        "description": "Secondary DEX liquidity-pressure proxy."
+      }
+    ]
+  },
+  "lookahead_policy": {
+    "signal_lag": "apply_signal_lag() uses signal.shift(1)",
+    "target_window": "forward RV labels use [t+1, t+H]",
+    "oos_training_gate": "target_end < forecast_origin"
+  },
+  "planned_tests": {
+    "primary_assets": [
+      "ETH-USD",
+      "BTC-USD"
+    ],
+    "horizons_days": [
+      1,
+      5
+    ],
+    "primary_signals": [
+      "priority_fee_pressure",
+      "base_fee_pressure"
+    ],
+    "baseline": "HAR-style price-only RV regression",
+    "augmented": "same baseline plus lagged chain-side pressure signal",
+    "primary_metric": "OOS QLIKE or log-RV loss improvement vs fair baseline",
+    "gate": "DM-HLN Harvey |t| > 3 after horizon-correct inference"
+  },
+  "result_fields_reserved": {
+    "sample": null,
+    "data_quality": null,
+    "oos_loss_table": [],
+    "dm_hln_tests": [],
+    "hac_diagnostics": [],
+    "verdict": null
+  },
+  "research_honesty_notes": [
+    "No empirical results have been computed.",
+    "Do not claim priority-fee alpha unless a true priority-fee source is available.",
+    "If only average gas price is available, use K1566 or mark K1291 DATA_BLOCKED/proxy-only."
+  ]
+}
