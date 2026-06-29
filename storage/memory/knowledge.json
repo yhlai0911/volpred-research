@@ -36792,5 +36792,43 @@
       "mixed_result",
       "market_confounding"
     ]
+  },
+  {
+    "item_id": "cb43dbec",
+    "category": "experiment_result",
+    "title": "K1576: Defence-spending announcements do not show robust defense-specific ETF RV or beta effects",
+    "experiment_id": "K1576",
+    "k_id": "K1576",
+    "experiment_path": "experiments/K1576/",
+    "experiment_file": "experiments/K1576/k1576.py",
+    "results_path": "experiments/K1576/k1576_results.json",
+    "reviewer_source": "experiments/K1576/codex_review.md",
+    "codex_review_verdict": "CONDITIONAL_PASS",
+    "verdict": "NULL",
+    "confidence": 0.74,
+    "created_at": "2026-06-30T00:29:41",
+    "content": "K1576 tests 9 NATO/UK/EU/Germany defence-spending or rearmament-path announcements (2014-09-05..2025-06-25) against 10 listed ETF proxies: defense (ITA/PPA/XAR), industrials (XLI/IYT), rates (TLT/IEF), dollar (UUP), benchmarks (SPY/QQQ). Data are yfinance adjusted closes from 2014-01-28 to 2026-01-31. Event windows are lookahead-safe: RV post metrics start at T+1, pre baseline is T-30..T-6, beta pre is T-90..T-6, beta post is T+1..T+63. Random-anchor bootstrap uses seed=42 with 1000 reps; Bonferroni alpha across 315 p-values is 0.000159. Results: RV family (t1_r2/rv5/rv22) has 270 tests, mean ratio=1.426 but median=0.901, frac ratio>1=0.456, sign-test p=0.936, and 0/270 Bonferroni-significant tests. beta63_delta has 45 tests, mean=-0.041, median=-0.030, frac delta>0=0.422, sign-test p=0.884, and 0/45 Bonferroni-significant tests. rv22 is weakly descriptive positive (mean=1.825, sign p=0.036) but defense-minus-benchmark is negative (mean diff=-0.434, sign p=0.910), and defense-minus-industrial beta delta is also negative (mean diff=-0.042). Conclusion: defence-spending headlines are large macro narratives, but daily ETF data do not support a robust defense-specific RV spike or market-beta increase. Any article should frame this as a null finding, not a defense boom beta trade.",
+    "evidence": [
+      "experiments/K1576/README.md",
+      "experiments/K1576/k1576.py",
+      "experiments/K1576/k1576_results.json",
+      "experiments/K1576/codex_review.md",
+      "experiments/K1576/events.csv",
+      "experiments/K1576/event_ticker_metric_results.csv",
+      "experiments/K1576/fig_a.png",
+      "experiments/K1576/fig_b.png",
+      "experiments/K1576/fig_c.png"
+    ],
+    "tags": [
+      "K1576",
+      "defense_spending",
+      "rearmament",
+      "NATO",
+      "event_study",
+      "realized_volatility",
+      "beta",
+      "ETF_proxy",
+      "null_result"
+    ]
   }
 ]

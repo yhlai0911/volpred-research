@@ -1,0 +1,1161 @@
+{
+  "experiment_id": "K1576",
+  "title": "Defence-spending boom announcements and ETF volatility / beta response",
+  "timestamp": "2026-06-30T00:27:36",
+  "seed": 42,
+  "data": {
+    "n_events": 9,
+    "events_file": "events.csv",
+    "events": [
+      {
+        "event_date": "2014-09-05",
+        "event_id": "nato_wales_defence_investment_pledge",
+        "region": "NATO",
+        "announcement_type": "alliance_spending_target",
+        "source_url": "https://www.nato.int/en/about-us/official-texts-and-resources/official-texts/2014/09/05/wales-summit-declaration",
+        "source_note": "NATO Wales Summit declaration established the Defence Investment Pledge and the 2% GDP benchmark path."
+      },
+      {
+        "event_date": "2022-02-27",
+        "event_id": "germany_zeitenwende_100bn",
+        "region": "Germany",
+        "announcement_type": "national_special_fund",
+        "source_url": "https://www.bundesregierung.de/breg-en/service/archive/policy-statement-by-olaf-scholz-chancellor-of-the-federal-republic-of-germany-and-member-of-the-german-bundestag-27-february-2022-in-berlin-2008378",
+        "source_note": "Chancellor Scholz announced a EUR 100bn Bundeswehr special fund and annual defence investment above 2% of GDP."
+      },
+      {
+        "event_date": "2023-07-11",
+        "event_id": "nato_vilnius_two_percent_floor",
+        "region": "NATO",
+        "announcement_type": "alliance_spending_target",
+        "source_url": "https://www.nato.int/en/about-us/official-texts-and-resources/official-texts/2023/07/11/vilnius-summit-communique",
+        "source_note": "NATO Vilnius communique framed 2% of GDP as a floor rather than a ceiling for defence spending."
+      },
+      {
+        "event_date": "2024-02-14",
+        "event_id": "nato_2024_18_allies_two_percent",
+        "region": "NATO",
+        "announcement_type": "spending_path_update",
+        "source_url": "https://www.nato.int/en/news-and-events/articles/news/2024/02/14/secretary-general-welcomes-unprecedented-rise-in-nato-defence-spending",
+        "source_note": "NATO Secretary General said 18 Allies were expected to spend 2% of GDP on defence in 2024."
+      },
+      {
+        "event_date": "2024-04-23",
+        "event_id": "uk_two_point_five_by_2030",
+        "region": "United_Kingdom",
+        "announcement_type": "national_spending_target",
+        "source_url": "https://www.gov.uk/government/speeches/prime-ministers-defence-speech-in-warsaw-23-april-2024",
+        "source_note": "UK Prime Minister announced defence spending would rise to 2.5% of GDP by 2030."
+      },
+      {
+        "event_date": "2024-07-10",
+        "event_id": "nato_washington_beyond_two_percent",
+        "region": "NATO",
+        "announcement_type": "alliance_spending_target",
+        "source_url": "https://www.nato.int/en/about-us/official-texts-and-resources/official-texts/2024/07/10/washington-summit-declaration",
+        "source_note": "NATO Washington declaration said more than 2% would be needed in many cases and highlighted 18% growth by European Allies and Canada in 2024."
+      },
+      {
+        "event_date": "2025-02-25",
+        "event_id": "uk_two_point_five_by_2027",
+        "region": "United_Kingdom",
+        "announcement_type": "national_spending_target",
+        "source_url": "https://www.gov.uk/government/speeches/pm-statement-on-defence-spending-25-february-2025",
+        "source_note": "UK Prime Minister brought forward the 2.5% GDP defence-spending target to 2027 and set a 3% ambition for the next parliament."
+      },
+      {
+        "event_date": "2025-03-19",
+        "event_id": "eu_rearm_europe_readiness_2030",
+        "region": "European_Union",
+        "announcement_type": "eu_financing_plan",
+        "source_url": "https://commission.europa.eu/topics/defence/future-european-defence_en",
+        "source_note": "European Commission ReArm Europe / Readiness 2030 plan aimed to mobilise up to EUR 800bn for defence investment."
+      },
+      {
+        "event_date": "2025-06-25",
+        "event_id": "nato_hague_five_percent_commitment",
+        "region": "NATO",
+        "announcement_type": "alliance_spending_target",
+        "source_url": "https://www.nato.int/en/about-us/official-texts-and-resources/official-texts/2025/06/25/the-hague-summit-declaration",
+        "source_note": "NATO Hague Summit declaration committed Allies to investing 5% of GDP annually in defence and security-related spending by 2035."
+      }
+    ],
+    "tickers_requested": [
+      "IEF",
+      "ITA",
+      "IYT",
+      "PPA",
+      "QQQ",
+      "SPY",
+      "TLT",
+      "UUP",
+      "XAR",
+      "XLI"
+    ],
+    "tickers_used": [
+      "IEF",
+      "ITA",
+      "IYT",
+      "PPA",
+      "QQQ",
+      "SPY",
+      "TLT",
+      "UUP",
+      "XAR",
+      "XLI"
+    ],
+    "tickers_missing_or_sparse": [],
+    "ticker_meta": {
+      "ITA": {
+        "channel": "defense",
+        "description": "US aerospace and defense ETF"
+      },
+      "PPA": {
+        "channel": "defense",
+        "description": "US aerospace and defense ETF"
+      },
+      "XAR": {
+        "channel": "defense",
+        "description": "equal-weight aerospace and defense ETF"
+      },
+      "XLI": {
+        "channel": "industrials",
+        "description": "US industrial sector ETF"
+      },
+      "IYT": {
+        "channel": "transport_industrials",
+        "description": "transportation ETF"
+      },
+      "TLT": {
+        "channel": "rates",
+        "description": "20+ year US Treasury ETF"
+      },
+      "IEF": {
+        "channel": "rates",
+        "description": "7-10 year US Treasury ETF"
+      },
+      "UUP": {
+        "channel": "dollar",
+        "description": "US dollar ETF"
+      },
+      "SPY": {
+        "channel": "benchmark",
+        "description": "S&P 500 ETF benchmark"
+      },
+      "QQQ": {
+        "channel": "benchmark",
+        "description": "Nasdaq 100 ETF benchmark"
+      }
+    },
+    "sample_start": "2014-01-28",
+    "sample_end": "2026-01-31",
+    "price_source": "yfinance adjusted close, auto_adjust=True",
+    "price_cache": "close_yfinance.csv"
+  },
+  "method": {
+    "lookahead_protection": "T=0 maps to first trading day >= announcement date; post metrics start strictly at T+1. Pre RV window ends at T-6. Beta pre window is T-90..T-6 and beta post window is T+1..T+63.",
+    "rv_metrics": {
+      "t1_r2": {
+        "post_len": 1
+      },
+      "rv5": {
+        "post_len": 5
+      },
+      "rv22": {
+        "post_len": 22
+      }
+    },
+    "beta_metric": {
+      "metric": "beta63_delta",
+      "definition": "OLS beta to SPY over T+1..T+63 minus OLS beta over T-90..T-6",
+      "tickers": [
+        "ITA",
+        "PPA",
+        "XAR",
+        "XLI",
+        "IYT"
+      ]
+    },
+    "bootstrap": {
+      "method": "random-anchor one-sided right-tail p-value on ticker full sample",
+      "B_reps": 1000,
+      "seed": 42
+    }
+  },
+  "literature_and_context": [
+    {
+      "source": "Ramey (2011), Identifying Government Spending Shocks: It's All in the Timing",
+      "url": "https://www.nber.org/papers/w15464",
+      "use": "Motivates treating defence-news timing as the shock rather than realized spending alone."
+    },
+    {
+      "source": "Caldara and Iacoviello geopolitical risk research",
+      "url": "https://www.matteoiacoviello.com/gpr.htm",
+      "use": "Motivates separating budget-news events from generic geopolitical-risk shocks."
+    },
+    {
+      "source": "SIPRI Trends in World Military Expenditure 2024",
+      "url": "https://www.sipri.org/sites/default/files/2025-04/2504_fs_milex_2024.pdf",
+      "use": "Context for the post-2022 global military-spending surge."
+    },
+    {
+      "source": "NATO defence expenditures and 5% commitment",
+      "url": "https://www.nato.int/en/what-we-do/introduction-to-nato/defence-expenditures-and-natos-5-commitment",
+      "use": "Official NATO context for 2% and 5% spending-path commitments."
+    }
+  ],
+  "outputs": {
+    "detail_csv": "event_ticker_metric_results.csv",
+    "figures": [
+      "fig_a.png",
+      "fig_b.png",
+      "fig_c.png"
+    ]
+  },
+  "multiple_testing": {
+    "n_pvalues_all": 315,
+    "bonferroni_alpha_all": 0.00015873015873015873,
+    "n_sig_unadj_0p05_all": 22,
+    "n_sig_bonferroni_all": 0
+  },
+  "rv_aggregate": {
+    "n": 270,
+    "mean": 1.4262112913901441,
+    "median": 0.9007719026110717,
+    "frac_gt_threshold": 0.45555555555555555,
+    "sign_test_p": 0.936004088355153,
+    "n_tests": 270,
+    "n_pvalues": 270,
+    "n_sig_unadj_0p05": 21,
+    "n_sig_bonferroni": 0,
+    "bonferroni_alpha_all_pvalues": 0.00015873015873015873
+  },
+  "beta_aggregate": {
+    "n": 45,
+    "mean": -0.041188753856879215,
+    "median": -0.030377395417214625,
+    "frac_gt_threshold": 0.4222222222222222,
+    "sign_test_p": 0.8836534040458446,
+    "n_tests": 45,
+    "n_pvalues": 45,
+    "n_sig_unadj_0p05": 1,
+    "n_sig_bonferroni": 0,
+    "bonferroni_alpha_all_pvalues": 0.00015873015873015873
+  },
+  "metric_summary": [
+    {
+      "metric": "beta63_delta",
+      "metric_family": "beta_delta",
+      "threshold_for_sign_test": 0.0,
+      "n": 45,
+      "mean": -0.041188753856879215,
+      "median": -0.030377395417214625,
+      "frac_gt_threshold": 0.4222222222222222,
+      "sign_test_p": 0.8836534040458446,
+      "n_sig_unadj_0p05": 1,
+      "n_sig_bonferroni": 0
+    },
+    {
+      "metric": "rv22",
+      "metric_family": "rv_ratio",
+      "threshold_for_sign_test": 1.0,
+      "n": 90,
+      "mean": 1.8245082158315111,
+      "median": 1.1679991550108666,
+      "frac_gt_threshold": 0.6,
+      "sign_test_p": 0.036274766096230884,
+      "n_sig_unadj_0p05": 12,
+      "n_sig_bonferroni": 0
+    },
+    {
+      "metric": "rv5",
+      "metric_family": "rv_ratio",
+      "threshold_for_sign_test": 1.0,
+      "n": 90,
+      "mean": 1.2992843758640353,
+      "median": 0.8924591659551555,
+      "frac_gt_threshold": 0.4777777777777778,
+      "sign_test_p": 0.7007941408832403,
+      "n_sig_unadj_0p05": 3,
+      "n_sig_bonferroni": 0
+    },
+    {
+      "metric": "t1_r2",
+      "metric_family": "rv_ratio",
+      "threshold_for_sign_test": 1.0,
+      "n": 90,
+      "mean": 1.1548412824748862,
+      "median": 0.5271719672329005,
+      "frac_gt_threshold": 0.28888888888888886,
+      "sign_test_p": 0.9999851677353874,
+      "n_sig_unadj_0p05": 6,
+      "n_sig_bonferroni": 0
+    }
+  ],
+  "channel_summary": [
+    {
+      "metric": "beta63_delta",
+      "channel": "defense",
+      "n": 27,
+      "mean": -0.05789303584929236,
+      "median": -0.052334232531978664,
+      "frac_gt_threshold": 0.3333333333333333,
+      "sign_test_p": 0.9738805070519447
+    },
+    {
+      "metric": "beta63_delta",
+      "channel": "industrials",
+      "n": 9,
+      "mean": -0.029474823720908445,
+      "median": 0.03512666651171559,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.5
+    },
+    {
+      "metric": "beta63_delta",
+      "channel": "transport_industrials",
+      "n": 9,
+      "mean": -0.002789838015610502,
+      "median": 0.05004431517102015,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.5
+    },
+    {
+      "metric": "rv22",
+      "channel": "benchmark",
+      "n": 18,
+      "mean": 2.3647438197939232,
+      "median": 1.138765880284664,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.40726470947265625
+    },
+    {
+      "metric": "rv22",
+      "channel": "defense",
+      "n": 27,
+      "mean": 1.9307649994052538,
+      "median": 1.204649947527927,
+      "frac_gt_threshold": 0.6666666666666666,
+      "sign_test_p": 0.06103906035423279
+    },
+    {
+      "metric": "rv22",
+      "channel": "dollar",
+      "n": 9,
+      "mean": 1.619796938596177,
+      "median": 1.0873440702121124,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.5
+    },
+    {
+      "metric": "rv22",
+      "channel": "industrials",
+      "n": 9,
+      "mean": 1.9292182111799479,
+      "median": 1.0432743867139793,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.5
+    },
+    {
+      "metric": "rv22",
+      "channel": "rates",
+      "n": 18,
+      "mean": 1.0910208584514678,
+      "median": 1.0654747338302346,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.40726470947265625
+    },
+    {
+      "metric": "rv22",
+      "channel": "transport_industrials",
+      "n": 9,
+      "mean": 1.9922426538324427,
+      "median": 1.2344879014818597,
+      "frac_gt_threshold": 0.6666666666666666,
+      "sign_test_p": 0.25390625
+    },
+    {
+      "metric": "rv5",
+      "channel": "benchmark",
+      "n": 18,
+      "mean": 1.5601131806977568,
+      "median": 1.301711836663252,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.40726470947265625
+    },
+    {
+      "metric": "rv5",
+      "channel": "defense",
+      "n": 27,
+      "mean": 1.1734103496290889,
+      "median": 1.1564651193086093,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.3505540192127228
+    },
+    {
+      "metric": "rv5",
+      "channel": "dollar",
+      "n": 9,
+      "mean": 1.315941700572196,
+      "median": 1.1005114934834828,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.5
+    },
+    {
+      "metric": "rv5",
+      "channel": "industrials",
+      "n": 9,
+      "mean": 1.3043400097781828,
+      "median": 0.8676169991136518,
+      "frac_gt_threshold": 0.4444444444444444,
+      "sign_test_p": 0.74609375
+    },
+    {
+      "metric": "rv5",
+      "channel": "rates",
+      "n": 18,
+      "mean": 1.0083229447116433,
+      "median": 0.6736986046425355,
+      "frac_gt_threshold": 0.2222222222222222,
+      "sign_test_p": 0.9962310791015625
+    },
+    {
+      "metric": "rv5",
+      "channel": "transport_industrials",
+      "n": 9,
+      "mean": 1.7154587485839052,
+      "median": 1.0239129843924726,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.5
+    },
+    {
+      "metric": "t1_r2",
+      "channel": "benchmark",
+      "n": 18,
+      "mean": 1.007141992305299,
+      "median": 0.363732953477546,
+      "frac_gt_threshold": 0.2777777777777778,
+      "sign_test_p": 0.98455810546875
+    },
+    {
+      "metric": "t1_r2",
+      "channel": "defense",
+      "n": 27,
+      "mean": 0.7444094738936573,
+      "median": 0.5048442035889629,
+      "frac_gt_threshold": 0.14814814814814814,
+      "sign_test_p": 0.9999753832817078
+    },
+    {
+      "metric": "t1_r2",
+      "channel": "dollar",
+      "n": 9,
+      "mean": 2.6599631818403733,
+      "median": 1.0794221147594933,
+      "frac_gt_threshold": 0.5555555555555556,
+      "sign_test_p": 0.5
+    },
+    {
+      "metric": "t1_r2",
+      "channel": "industrials",
+      "n": 9,
+      "mean": 0.9127915180408378,
+      "median": 0.8678365821329759,
+      "frac_gt_threshold": 0.4444444444444444,
+      "sign_test_p": 0.74609375
+    },
+    {
+      "metric": "t1_r2",
+      "channel": "rates",
+      "n": 18,
+      "mean": 0.9363678109712653,
+      "median": 0.47855130716851624,
+      "frac_gt_threshold": 0.2777777777777778,
+      "sign_test_p": 0.98455810546875
+    },
+    {
+      "metric": "t1_r2",
+      "channel": "transport_industrials",
+      "n": 9,
+      "mean": 1.8554100966335487,
+      "median": 0.5125143596386338,
+      "frac_gt_threshold": 0.3333333333333333,
+      "sign_test_p": 0.91015625
+    }
+  ],
+  "announcement_summary": [
+    {
+      "metric": "beta63_delta",
+      "announcement_type": "alliance_spending_target",
+      "n": 20,
+      "mean": -0.02270251722779674,
+      "median": -0.0009207720337225389,
+      "frac_gt_threshold": 0.5,
+      "sign_test_p": 0.5880985260009766
+    },
+    {
+      "metric": "beta63_delta",
+      "announcement_type": "eu_financing_plan",
+      "n": 5,
+      "mean": 0.011678525244331772,
+      "median": -0.01275408788338872,
+      "frac_gt_threshold": 0.4,
+      "sign_test_p": 0.8125
+    },
+    {
+      "metric": "beta63_delta",
+      "announcement_type": "national_special_fund",
+      "n": 5,
+      "mean": -0.031057255980859864,
+      "median": -0.027229747189173703,
+      "frac_gt_threshold": 0.4,
+      "sign_test_p": 0.8125
+    },
+    {
+      "metric": "beta63_delta",
+      "announcement_type": "national_spending_target",
+      "n": 10,
+      "mean": 0.004954449132158478,
+      "median": 0.0033727343453900938,
+      "frac_gt_threshold": 0.5,
+      "sign_test_p": 0.623046875
+    },
+    {
+      "metric": "beta63_delta",
+      "announcement_type": "spending_path_update",
+      "n": 5,
+      "mean": -0.2704188833285147,
+      "median": -0.25239015382890034,
+      "frac_gt_threshold": 0.0,
+      "sign_test_p": 1.0
+    },
+    {
+      "metric": "rv22",
+      "announcement_type": "alliance_spending_target",
+      "n": 40,
+      "mean": 1.7359178984152517,
+      "median": 1.1994685017832356,
+      "frac_gt_threshold": 0.625,
+      "sign_test_p": 0.07692997208141605
+    },
+    {
+      "metric": "rv22",
+      "announcement_type": "eu_financing_plan",
+      "n": 10,
+      "mean": 5.167918002187921,
+      "median": 5.702445447282294,
+      "frac_gt_threshold": 1.0,
+      "sign_test_p": 0.0009765625
+    },
+    {
+      "metric": "rv22",
+      "announcement_type": "national_special_fund",
+      "n": 10,
+      "mean": 1.3407309687916182,
+      "median": 1.1087344632404443,
+      "frac_gt_threshold": 0.8,
+      "sign_test_p": 0.0546875
+    },
+    {
+      "metric": "rv22",
+      "announcement_type": "national_spending_target",
+      "n": 20,
+      "mean": 1.208126006553838,
+      "median": 1.0277847492410728,
+      "frac_gt_threshold": 0.5,
+      "sign_test_p": 0.5880985260009766
+    },
+    {
+      "metric": "rv22",
+      "announcement_type": "spending_path_update",
+      "n": 10,
+      "mean": 0.5520013647353771,
+      "median": 0.4286157161552,
+      "frac_gt_threshold": 0.1,
+      "sign_test_p": 0.9990234375
+    },
+    {
+      "metric": "rv5",
+      "announcement_type": "alliance_spending_target",
+      "n": 40,
+      "mean": 1.266825964183613,
+      "median": 0.7281465007661917,
+      "frac_gt_threshold": 0.35,
+      "sign_test_p": 0.9807613458578999
+    },
+    {
+      "metric": "rv5",
+      "announcement_type": "eu_financing_plan",
+      "n": 10,
+      "mean": 0.8220712866739046,
+      "median": 0.794165826126479,
+      "frac_gt_threshold": 0.3,
+      "sign_test_p": 0.9453125
+    },
+    {
+      "metric": "rv5",
+      "announcement_type": "national_special_fund",
+      "n": 10,
+      "mean": 2.0096250189235274,
+      "median": 1.9977474110782047,
+      "frac_gt_threshold": 0.8,
+      "sign_test_p": 0.0546875
+    },
+    {
+      "metric": "rv5",
+      "announcement_type": "national_spending_target",
+      "n": 20,
+      "mean": 1.5118329381123163,
+      "median": 1.4436717399736323,
+      "frac_gt_threshold": 0.75,
+      "sign_test_p": 0.020694732666015625
+    },
+    {
+      "metric": "rv5",
+      "announcement_type": "spending_path_update",
+      "n": 10,
+      "mean": 0.7708933442197999,
+      "median": 0.4231352030477116,
+      "frac_gt_threshold": 0.3,
+      "sign_test_p": 0.9453125
+    },
+    {
+      "metric": "t1_r2",
+      "announcement_type": "alliance_spending_target",
+      "n": 40,
+      "mean": 1.643688674962121,
+      "median": 0.6244276971594969,
+      "frac_gt_threshold": 0.4,
+      "sign_test_p": 0.923070027918584
+    },
+    {
+      "metric": "t1_r2",
+      "announcement_type": "eu_financing_plan",
+      "n": 10,
+      "mean": 0.2533250899362146,
+      "median": 0.18258912839987354,
+      "frac_gt_threshold": 0.0,
+      "sign_test_p": 1.0
+    },
+    {
+      "metric": "t1_r2",
+      "announcement_type": "national_special_fund",
+      "n": 10,
+      "mean": 1.6674121295022342,
+      "median": 1.2784475959768615,
+      "frac_gt_threshold": 0.6,
+      "sign_test_p": 0.376953125
+    },
+    {
+      "metric": "t1_r2",
+      "announcement_type": "national_spending_target",
+      "n": 20,
+      "mean": 0.6232046270110161,
+      "median": 0.203153743219258,
+      "frac_gt_threshold": 0.15,
+      "sign_test_p": 0.9997987747192383
+    },
+    {
+      "metric": "t1_r2",
+      "announcement_type": "spending_path_update",
+      "n": 10,
+      "mean": 0.6516703689650089,
+      "median": 0.7707734674790621,
+      "frac_gt_threshold": 0.1,
+      "sign_test_p": 0.9990234375
+    }
+  ],
+  "event_contrasts": [
+    {
+      "event_id": "eu_rearm_europe_readiness_2030",
+      "event_date": "2025-03-19",
+      "metric": "beta63_delta",
+      "defense_mean": -0.10520674119401581,
+      "industrial_mean": 0.18700642490185315,
+      "defense_minus_industrial": -0.29221316609586895
+    },
+    {
+      "event_id": "eu_rearm_europe_readiness_2030",
+      "event_date": "2025-03-19",
+      "metric": "rv22",
+      "defense_mean": 6.317717697732632,
+      "benchmark_mean": 6.697326388073829,
+      "industrial_mean": 7.033350555437722,
+      "rates_mean": 1.64340752353497,
+      "defense_minus_benchmark": -0.3796086903411977,
+      "defense_minus_industrial": -0.7156328577050903,
+      "rates_minus_benchmark": -5.0539188645388595
+    },
+    {
+      "event_id": "eu_rearm_europe_readiness_2030",
+      "event_date": "2025-03-19",
+      "metric": "rv5",
+      "defense_mean": 1.3755223061149426,
+      "benchmark_mean": 0.794165826126479,
+      "industrial_mean": 0.6507237520214,
+      "rates_mean": 0.4569136716532351,
+      "defense_minus_benchmark": 0.5813564799884636,
+      "defense_minus_industrial": 0.7247985540935427,
+      "rates_minus_benchmark": -0.3372521544732439
+    },
+    {
+      "event_id": "eu_rearm_europe_readiness_2030",
+      "event_date": "2025-03-19",
+      "metric": "t1_r2",
+      "defense_mean": 0.5898008889207335,
+      "benchmark_mean": 0.061635600658628414,
+      "industrial_mean": 0.12540048790079264,
+      "rates_mean": 0.05999006237573057,
+      "defense_minus_benchmark": 0.5281652882621051,
+      "defense_minus_industrial": 0.46440040101994084,
+      "rates_minus_benchmark": -0.001645538282897846
+    },
+    {
+      "event_id": "germany_zeitenwende_100bn",
+      "event_date": "2022-02-27",
+      "metric": "beta63_delta",
+      "defense_mean": -0.05936694929538192,
+      "industrial_mean": 0.011407283990923223,
+      "defense_minus_industrial": -0.07077423328630514
+    },
+    {
+      "event_id": "germany_zeitenwende_100bn",
+      "event_date": "2022-02-27",
+      "metric": "rv22",
+      "defense_mean": 1.0297701682660803,
+      "benchmark_mean": 1.0325616144600642,
+      "industrial_mean": 1.1388811440979194,
+      "rates_mean": 2.14330544404913,
+      "defense_minus_benchmark": -0.0027914461939839708,
+      "defense_minus_industrial": -0.10911097583183915,
+      "rates_minus_benchmark": 1.110743829589066
+    },
+    {
+      "event_id": "germany_zeitenwende_100bn",
+      "event_date": "2022-02-27",
+      "metric": "rv5",
+      "defense_mean": 0.8301502679258106,
+      "benchmark_mean": 1.3690916027437225,
+      "industrial_mean": 2.3852988517282188,
+      "rates_mean": 3.6493439036050255,
+      "defense_minus_benchmark": -0.538941334817912,
+      "defense_minus_industrial": -1.5551485838024082,
+      "rates_minus_benchmark": 2.280252300861303
+    },
+    {
+      "event_id": "germany_zeitenwende_100bn",
+      "event_date": "2022-02-27",
+      "metric": "t1_r2",
+      "defense_mean": 0.43513428050757086,
+      "benchmark_mean": 0.8999957131481773,
+      "industrial_mean": 1.9604745400284254,
+      "rates_mean": 2.5719758277251774,
+      "defense_minus_benchmark": -0.4648614326406064,
+      "defense_minus_industrial": -1.5253402595208545,
+      "rates_minus_benchmark": 1.6719801145770001
+    },
+    {
+      "event_id": "nato_2024_18_allies_two_percent",
+      "event_date": "2024-02-14",
+      "metric": "beta63_delta",
+      "defense_mean": -0.2618662667788079,
+      "industrial_mean": -0.2832478081530748,
+      "defense_minus_industrial": 0.0213815413742669
+    },
+    {
+      "event_id": "nato_2024_18_allies_two_percent",
+      "event_date": "2024-02-14",
+      "metric": "rv22",
+      "defense_mean": 0.4530407153413,
+      "benchmark_mean": 1.0736510356760012,
+      "industrial_mean": 0.41674215676384574,
+      "rates_mean": 0.41681051747731923,
+      "defense_minus_benchmark": -0.6206103203347011,
+      "defense_minus_industrial": 0.03629855857745429,
+      "rates_minus_benchmark": -0.6568405181986819
+    },
+    {
+      "event_id": "nato_2024_18_allies_two_percent",
+      "event_date": "2024-02-14",
+      "metric": "rv5",
+      "defense_mean": 0.3688294964615692,
+      "benchmark_mean": 1.974417706617761,
+      "industrial_mean": 0.9321748393489857,
+      "rates_mean": 0.2633662017479781,
+      "defense_minus_benchmark": -1.6055882101561918,
+      "defense_minus_industrial": -0.5633453428874164,
+      "rates_minus_benchmark": -1.711051504869783
+    },
+    {
+      "event_id": "nato_2024_18_allies_two_percent",
+      "event_date": "2024-02-14",
+      "metric": "t1_r2",
+      "defense_mean": 0.7577954254782536,
+      "benchmark_mean": 0.4967572338971919,
+      "industrial_mean": 0.8300172533215634,
+      "rates_mean": 0.2551731620091622,
+      "defense_minus_benchmark": 0.26103819158106173,
+      "defense_minus_industrial": -0.07222182784330977,
+      "rates_minus_benchmark": -0.24158407188802972
+    },
+    {
+      "event_id": "nato_hague_five_percent_commitment",
+      "event_date": "2025-06-25",
+      "metric": "beta63_delta",
+      "defense_mean": -0.05372153725914915,
+      "industrial_mean": 0.10947559027042925,
+      "defense_minus_industrial": -0.1631971275295784
+    },
+    {
+      "event_id": "nato_hague_five_percent_commitment",
+      "event_date": "2025-06-25",
+      "metric": "rv22",
+      "defense_mean": 1.2044673442610145,
+      "benchmark_mean": 0.21477517838306348,
+      "industrial_mean": 0.45889033587844363,
+      "rates_mean": 0.5546168835269556,
+      "defense_minus_benchmark": 0.9896921658779511,
+      "defense_minus_industrial": 0.7455770083825709,
+      "rates_minus_benchmark": 0.3398417051438921
+    },
+    {
+      "event_id": "nato_hague_five_percent_commitment",
+      "event_date": "2025-06-25",
+      "metric": "rv5",
+      "defense_mean": 1.7820358621037116,
+      "benchmark_mean": 0.31999505745124096,
+      "industrial_mean": 0.47549136374593887,
+      "rates_mean": 0.5432486106811243,
+      "defense_minus_benchmark": 1.4620408046524707,
+      "defense_minus_industrial": 1.3065444983577728,
+      "rates_minus_benchmark": 0.22325355322988333
+    },
+    {
+      "event_id": "nato_hague_five_percent_commitment",
+      "event_date": "2025-06-25",
+      "metric": "t1_r2",
+      "defense_mean": 3.0907897976479206,
+      "benchmark_mean": 0.6244276971594969,
+      "industrial_mean": 0.9256473882935514,
+      "rates_mean": 0.5477336663399528,
+      "defense_minus_benchmark": 2.466362100488424,
+      "defense_minus_industrial": 2.1651424093543694,
+      "rates_minus_benchmark": -0.07669403081954407
+    },
+    {
+      "event_id": "nato_vilnius_two_percent_floor",
+      "event_date": "2023-07-11",
+      "metric": "beta63_delta",
+      "defense_mean": -0.09156573895383731,
+      "industrial_mean": -0.16533394524872214,
+      "defense_minus_industrial": 0.07376820629488483
+    },
+    {
+      "event_id": "nato_vilnius_two_percent_floor",
+      "event_date": "2023-07-11",
+      "metric": "rv22",
+      "defense_mean": 0.7067798126545952,
+      "benchmark_mean": 0.7008067685652721,
+      "industrial_mean": 0.5986583338065463,
+      "rates_mean": 1.486337295524896,
+      "defense_minus_benchmark": 0.005973044089323087,
+      "defense_minus_industrial": 0.1081214788480489,
+      "rates_minus_benchmark": 0.7855305269596238
+    },
+    {
+      "event_id": "nato_vilnius_two_percent_floor",
+      "event_date": "2023-07-11",
+      "metric": "rv5",
+      "defense_mean": 0.45001980966406735,
+      "benchmark_mean": 0.7737909068082669,
+      "industrial_mean": 0.5037807007759431,
+      "rates_mean": 1.1359042762533136,
+      "defense_minus_benchmark": -0.32377109714419955,
+      "defense_minus_industrial": -0.05376089111187571,
+      "rates_minus_benchmark": 0.3621133694450467
+    },
+    {
+      "event_id": "nato_vilnius_two_percent_floor",
+      "event_date": "2023-07-11",
+      "metric": "t1_r2",
+      "defense_mean": 0.261904137050021,
+      "benchmark_mean": 1.1464830070858367,
+      "industrial_mean": 0.01473824353599388,
+      "rates_mean": 2.668604447974845,
+      "defense_minus_benchmark": -0.8845788700358157,
+      "defense_minus_industrial": 0.24716589351402715,
+      "rates_minus_benchmark": 1.5221214408890082
+    },
+    {
+      "event_id": "nato_wales_defence_investment_pledge",
+      "event_date": "2014-09-05",
+      "metric": "beta63_delta",
+      "defense_mean": -0.20536606817405612,
+      "industrial_mean": 0.06709154965157671,
+      "defense_minus_industrial": -0.2724576178256328
+    },
+    {
+      "event_id": "nato_wales_defence_investment_pledge",
+      "event_date": "2014-09-05",
+      "metric": "rv22",
+      "defense_mean": 1.3322713564813857,
+      "benchmark_mean": 1.7643984247712794,
+      "industrial_mean": 1.78294250323215,
+      "rates_mean": 1.2827829328945812,
+      "defense_minus_benchmark": -0.43212706828989367,
+      "defense_minus_industrial": -0.45067114675076425,
+      "rates_minus_benchmark": -0.48161549187669817
+    },
+    {
+      "event_id": "nato_wales_defence_investment_pledge",
+      "event_date": "2014-09-05",
+      "metric": "rv5",
+      "defense_mean": 0.2439118018396067,
+      "benchmark_mean": 0.6935165414713587,
+      "industrial_mean": 0.15192616217080793,
+      "rates_mean": 0.7109091784273216,
+      "defense_minus_benchmark": -0.44960473963175196,
+      "defense_minus_industrial": 0.09198563966879877,
+      "rates_minus_benchmark": 0.017392636955962937
+    },
+    {
+      "event_id": "nato_wales_defence_investment_pledge",
+      "event_date": "2014-09-05",
+      "metric": "t1_r2",
+      "defense_mean": 0.10529553171691147,
+      "benchmark_mean": 0.13392835783556198,
+      "industrial_mean": 0.11860213575394438,
+      "rates_mean": 0.06996235778896248,
+      "defense_minus_benchmark": -0.028632826118650506,
+      "defense_minus_industrial": -0.013306604037032904,
+      "rates_minus_benchmark": -0.0639660000465995
+    },
+    {
+      "event_id": "nato_washington_beyond_two_percent",
+      "event_date": "2024-07-10",
+      "metric": "beta63_delta",
+      "defense_mean": 0.18665523619315594,
+      "industrial_mean": 0.007738795339578719,
+      "defense_minus_industrial": 0.17891644085357722
+    },
+    {
+      "event_id": "nato_washington_beyond_two_percent",
+      "event_date": "2024-07-10",
+      "metric": "rv22",
+      "defense_mean": 3.787142514724273,
+      "benchmark_mean": 6.3722568781816165,
+      "industrial_mean": 3.5043603435229094,
+      "rates_mean": 1.0654747338302346,
+      "defense_minus_benchmark": -2.5851143634573432,
+      "defense_minus_industrial": 0.28278217120136384,
+      "rates_minus_benchmark": -5.306782144351382
+    },
+    {
+      "event_id": "nato_washington_beyond_two_percent",
+      "event_date": "2024-07-10",
+      "metric": "rv5",
+      "defense_mean": 2.959727137737687,
+      "benchmark_mean": 3.844787945472425,
+      "industrial_mean": 4.691901814989222,
+      "rates_mean": 0.6988552341526069,
+      "defense_minus_benchmark": -0.8850608077347379,
+      "defense_minus_industrial": -1.7321746772515354,
+      "rates_minus_benchmark": -3.1459327113198183
+    },
+    {
+      "event_id": "nato_washington_beyond_two_percent",
+      "event_date": "2024-07-10",
+      "metric": "t1_r2",
+      "defense_mean": 0.4231284216107847,
+      "benchmark_mean": 5.6047927619297075,
+      "industrial_mean": 5.026395846079813,
+      "rates_mean": 1.2594492167141476,
+      "defense_minus_benchmark": -5.181664340318923,
+      "defense_minus_industrial": -4.603267424469029,
+      "rates_minus_benchmark": -4.3453435452155595
+    },
+    {
+      "event_id": "uk_two_point_five_by_2027",
+      "event_date": "2025-02-25",
+      "metric": "beta63_delta",
+      "defense_mean": -0.13396506617766904,
+      "industrial_mean": 0.21776826083510975,
+      "defense_minus_industrial": -0.3517333270127788
+    },
+    {
+      "event_id": "uk_two_point_five_by_2027",
+      "event_date": "2025-02-25",
+      "metric": "rv22",
+      "defense_mean": 1.485890483251845,
+      "benchmark_mean": 2.4771647801100136,
+      "industrial_mean": 1.7498238245741216,
+      "rates_mean": 0.6850164245019774,
+      "defense_minus_benchmark": -0.9912742968581687,
+      "defense_minus_industrial": -0.26393334132227664,
+      "rates_minus_benchmark": -1.7921483556080362
+    },
+    {
+      "event_id": "uk_two_point_five_by_2027",
+      "event_date": "2025-02-25",
+      "metric": "rv5",
+      "defense_mean": 1.3842686668043396,
+      "benchmark_mean": 2.729633030979417,
+      "industrial_mean": 1.8266863879016655,
+      "rates_mean": 0.9727701787709628,
+      "defense_minus_benchmark": -1.3453643641750774,
+      "defense_minus_industrial": -0.4424177210973259,
+      "rates_minus_benchmark": -1.7568628522084542
+    },
+    {
+      "event_id": "uk_two_point_five_by_2027",
+      "event_date": "2025-02-25",
+      "metric": "t1_r2",
+      "defense_mean": 0.30920799156023876,
+      "benchmark_mean": 0.024468595402539546,
+      "industrial_mean": 0.0031925628589417037,
+      "rates_mean": 0.47855130716851624,
+      "defense_minus_benchmark": 0.2847393961576992,
+      "defense_minus_industrial": 0.30601542870129705,
+      "rates_minus_benchmark": 0.4540827117659767
+    },
+    {
+      "event_id": "uk_two_point_five_by_2030",
+      "event_date": "2024-04-23",
+      "metric": "beta63_delta",
+      "defense_mean": 0.2033658089961302,
+      "industrial_mean": -0.2970971294020091,
+      "defense_minus_industrial": 0.5004629383981393
+    },
+    {
+      "event_id": "uk_two_point_five_by_2030",
+      "event_date": "2024-04-23",
+      "metric": "rv22",
+      "defense_mean": 1.059804901934159,
+      "benchmark_mean": 0.9497533099241653,
+      "industrial_mean": 0.9629246952420997,
+      "rates_mean": 0.5414359707231469,
+      "defense_minus_benchmark": 0.11005159200999381,
+      "defense_minus_industrial": 0.09688020669205943,
+      "rates_minus_benchmark": -0.4083173392010184
+    },
+    {
+      "event_id": "uk_two_point_five_by_2030",
+      "event_date": "2024-04-23",
+      "metric": "rv5",
+      "defense_mean": 1.1662277980100646,
+      "benchmark_mean": 1.5416200086091387,
+      "industrial_mean": 1.9711105399472144,
+      "rates_mean": 0.6435952471132231,
+      "defense_minus_benchmark": -0.3753922105990741,
+      "defense_minus_industrial": -0.8048827419371498,
+      "rates_minus_benchmark": -0.8980247614959156
+    },
+    {
+      "event_id": "uk_two_point_five_by_2030",
+      "event_date": "2024-04-23",
+      "metric": "t1_r2",
+      "defense_mean": 0.7266287905504812,
+      "benchmark_mean": 0.07178896363055334,
+      "industrial_mean": 3.452438808261712,
+      "rates_mean": 0.5158702506448932,
+      "defense_minus_benchmark": 0.6548398269199279,
+      "defense_minus_industrial": -2.7258100177112308,
+      "rates_minus_benchmark": 0.4440812870143399
+    }
+  ],
+  "contrast_summary": [
+    {
+      "metric": "beta63_delta",
+      "contrast": "defense_minus_industrial",
+      "n_events": 9,
+      "mean_diff": -0.041760704981032876,
+      "median_diff": -0.07077423328630514,
+      "frac_positive": 0.4444444444444444,
+      "sign_test_p_one_sided": 0.74609375
+    },
+    {
+      "metric": "rv22",
+      "contrast": "defense_minus_benchmark",
+      "n_events": 9,
+      "mean_diff": -0.433978820388669,
+      "median_diff": -0.3796086903411977,
+      "frac_positive": 0.3333333333333333,
+      "sign_test_p_one_sided": 0.91015625
+    },
+    {
+      "metric": "rv22",
+      "contrast": "defense_minus_industrial",
+      "n_events": 9,
+      "mean_diff": -0.02996543310094144,
+      "median_diff": 0.03629855857745429,
+      "frac_positive": 0.5555555555555556,
+      "sign_test_p_one_sided": 0.5
+    },
+    {
+      "metric": "rv22",
+      "contrast": "rates_minus_benchmark",
+      "n_events": 9,
+      "mean_diff": -1.2737229613424548,
+      "median_diff": -0.48161549187669817,
+      "frac_positive": 0.3333333333333333,
+      "sign_test_p_one_sided": 0.91015625
+    },
+    {
+      "metric": "rv5",
+      "contrast": "defense_minus_benchmark",
+      "n_events": 9,
+      "mean_diff": -0.3867028310686679,
+      "median_diff": -0.44960473963175196,
+      "frac_positive": 0.2222222222222222,
+      "sign_test_p_one_sided": 0.98046875
+    },
+    {
+      "metric": "rv5",
+      "contrast": "defense_minus_industrial",
+      "n_events": 9,
+      "mean_diff": -0.3364890295519552,
+      "median_diff": -0.4424177210973259,
+      "frac_positive": 0.3333333333333333,
+      "sign_test_p_one_sided": 0.91015625
+    },
+    {
+      "metric": "rv5",
+      "contrast": "rates_minus_benchmark",
+      "n_events": 9,
+      "mean_diff": -0.5517902359861132,
+      "median_diff": -0.3372521544732439,
+      "frac_positive": 0.4444444444444444,
+      "sign_test_p_one_sided": 0.74609375
+    },
+    {
+      "metric": "t1_r2",
+      "contrast": "defense_minus_benchmark",
+      "n_events": 9,
+      "mean_diff": -0.26273251841164186,
+      "median_diff": 0.26103819158106173,
+      "frac_positive": 0.5555555555555556,
+      "sign_test_p_one_sided": 0.5
+    },
+    {
+      "metric": "t1_r2",
+      "contrast": "defense_minus_industrial",
+      "n_events": 9,
+      "mean_diff": -0.6396913334435358,
+      "median_diff": -0.013306604037032904,
+      "frac_positive": 0.4444444444444444,
+      "sign_test_p_one_sided": 0.74609375
+    },
+    {
+      "metric": "t1_r2",
+      "contrast": "rates_minus_benchmark",
+      "n_events": 9,
+      "mean_diff": -0.07077418133403404,
+      "median_diff": -0.001645538282897846,
+      "frac_positive": 0.4444444444444444,
+      "sign_test_p_one_sided": 0.74609375
+    }
+  ],
+  "significant_tests_after_bonferroni": [],
+  "verdict_code": "NULL_NO_ROBUST_DEFENSE_SPENDING_RV_OR_BETA_EFFECT",
+  "honest_summary": "NULL_NO_ROBUST_DEFENSE_SPENDING_RV_OR_BETA_EFFECT: RV family 270 tests, mean=1.426, median=0.901, frac>1=0.456, sign p=0.936, Bonferroni RV sig=0/270; beta family 45 tests, mean delta=-0.041, frac>0=0.422, Bonferroni beta sig=0/45."
+}
