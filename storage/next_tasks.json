@@ -38554,7 +38554,7 @@
     "title": "K1566: DEX priority-fee pressure 作 ETH/BTC 短期 RV 訊號** — 用 Etherscan/gas fee、DefiLlama DEX volume、Uniswap public data 與 BTC-USD/",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1290). Original: DEX priority-fee pressure 作 ETH/BTC 短期 RV 訊號** — 用 Etherscan/gas fee、DefiLlama DEX volume、Uniswap public data 與 BTC-USD/ETH-USD，建 priority-fee / DEX-volume shock，檢定 t+1/t+5 RV、left-tail、CEX-crypto ETF spillover；免費資料只能做鏈上 proxy，不冒充 address-level mempool replication（來源：RFS 2026 decentralized-exchange price-discovery / on-chain microstructure stream；on-chain market microstructure 進入頂刊）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1566.py with signal.shift(1) + seed=42, (c) K1566_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -38563,7 +38563,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-29T00:00:01Z"
+    "created_at": "2026-06-29T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T00:18:33.177932+00:00",
+    "claim_session_id": "2d5d2144273a",
+    "started_at": "2026-06-29T00:18:51.314752+00:00",
+    "completed_at": "2026-06-29T00:29:37.278686+00:00",
+    "result": "K1566 completed: Etherscan avg gas-price + DefiLlama Ethereum DEX-volume blockspace proxy vs ETH/BTC t+1/t+5 RV. Verdict WEAK_RAW_ONLY / corrected-primary NULL: BTC 1d raw HAC t=2.43 p=0.015, but no 12-test Bonferroni/Holm survivor; AUC ~0.50; ETH and COIN/IBIT/ETHA diagnostics null. Outputs in experiments/k1566/, Codex review CONDITIONAL_PASS, knowledge item 4e123ffe."
   },
   {
     "id": "K1567",

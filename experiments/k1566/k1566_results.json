@@ -1,0 +1,1096 @@
+{
+  "metadata": {
+    "experiment_id": "K1566",
+    "title": "DEX blockspace-pressure proxy as ETH/BTC short-RV signal",
+    "created_at_utc": "2026-06-29T00:28:40.995768+00:00",
+    "seed": 42,
+    "git_commit": "e2428f6c7",
+    "verdict": "WEAK_RAW_ONLY"
+  },
+  "data_sources": {
+    "etherscan_gasprice": {
+      "url": "https://etherscan.io/chart/gasprice?output=csv",
+      "path": "data/etherscan_gasprice.csv",
+      "sha256": "ba7a986acbd2b3587514b408bd6c3bc4f6c581a58126a165e21a99f5c834e9a1",
+      "note": "Etherscan chart CSV; average gas price, not true priority fee / tip."
+    },
+    "etherscan_gasused": {
+      "url": "https://etherscan.io/chart/gasused?output=csv",
+      "path": "data/etherscan_gasused.csv",
+      "sha256": "79de72e05898f5520b051f70ad2050a424121f42c65b48df986cd284b4e617b5"
+    },
+    "defillama_ethereum_dex_volume": {
+      "url": "https://api.llama.fi/overview/dexs/Ethereum",
+      "path": "data/defillama_ethereum_dexs_overview.json",
+      "sha256": "319926a0f47c3c19e0767b5627e3362c39f37363267f2a051191bd66b28a3481"
+    },
+    "yfinance_prices": {
+      "url": "yfinance adjusted close 2019-01-01 to 2026-06-29",
+      "path": "data/yfinance_prices.csv",
+      "sha256": "f5c9f72b2121523951ec15029d9c65b8bbf461e4dfb9712b35d7d452dd4d0ffe"
+    },
+    "analysis_dataset": {
+      "path": "k1566_analysis_dataset.csv",
+      "sha256": "d2d84f48bd8c3c09acb143401d99a92200dd3152d4bc119d8ce36a63e1688fb9"
+    }
+  },
+  "sample": {
+    "start": "2019-01-01",
+    "end": "2026-06-28",
+    "n_calendar_rows": 2736,
+    "primary_assets": [
+      "ETH-USD",
+      "BTC-USD"
+    ],
+    "spillover_assets_available": [
+      "COIN",
+      "IBIT",
+      "ETHA"
+    ]
+  },
+  "methodology": {
+    "proxy_limit": "Etherscan free chart CSV gives average gas price, not a decomposition into base fee and priority fee/tip. The experiment therefore tests a blockspace-pressure proxy, not address-level mempool priority-fee replication.",
+    "signal_construction": "log daily innovations standardized by a 90-day rolling mean/std ending at t-1; tested predictors are signal.shift(1).",
+    "forward_target": "Forward realized variance uses strictly close-to-close returns in [t+1, t+H].",
+    "sample_cutoff": "Rows after the last complete UTC date (2026-06-28) are dropped to avoid incomplete current-day crypto bars.",
+    "hac_lag": "HAC maxlags equals forecast horizon H.",
+    "spearman_ci": "moving-block bootstrap with block=H, B=1000, seed=42.",
+    "auc_ci": "Hanley-McNeil normal approximation for fixed left-tail thresholds.",
+    "primary_family": "ETH/BTC × {1d,5d} × {gas_price_shock,dex_volume_shock,blockspace_pressure} = 12 tests.",
+    "success_gate": "Positive HAC coefficient must survive family correction; AUC and spillover tests are supporting diagnostics."
+  },
+  "descriptive": {
+    "signals": {
+      "avg_gas_price_gwei": {
+        "n": 2736,
+        "start": "2019-01-01",
+        "end": "2026-06-28",
+        "mean": 38.41948294755446,
+        "std": 52.549886324231046,
+        "p01": 0.5040865015,
+        "p05": 0.7715503025,
+        "p50": 19.257310431999997,
+        "p95": 142.806661268,
+        "p99": 214.38579529370006
+      },
+      "gas_used": {
+        "n": 2736,
+        "start": "2019-01-01",
+        "end": "2026-06-28",
+        "mean": 103015378502.11366,
+        "std": 44564943569.43748,
+        "p01": 31574995771.8,
+        "p05": 40944024185.0,
+        "p50": 106672017585.5,
+        "p95": 217467622119.5,
+        "p99": 218547715201.55002
+      },
+      "dex_volume_usd": {
+        "n": 2736,
+        "start": "2019-01-01",
+        "end": "2026-06-28",
+        "mean": 1443750975.2613304,
+        "std": 1243989986.9264727,
+        "p01": 49374.200000000004,
+        "p05": 634112.0,
+        "p50": 1337704951.0,
+        "p95": 3713545053.75,
+        "p99": 5128506037.250005
+      },
+      "gas_price_shock": {
+        "n": 2645,
+        "start": "2019-04-02",
+        "end": "2026-06-28",
+        "mean": 0.00697329527072917,
+        "std": 1.1009617332400907,
+        "p01": -2.5744681740637274,
+        "p05": -1.5112675740225228,
+        "p50": -0.035707796463381826,
+        "p95": 1.660519051528807,
+        "p99": 2.8664229214371155
+      },
+      "dex_volume_shock": {
+        "n": 2645,
+        "start": "2019-04-02",
+        "end": "2026-06-28",
+        "mean": -0.0015739294606762898,
+        "std": 1.037550527671754,
+        "p01": -2.3784128841306837,
+        "p05": -1.6848508721948876,
+        "p50": -0.02553554882859587,
+        "p95": 1.6571739242289647,
+        "p99": 2.7718339973260813
+      },
+      "blockspace_pressure": {
+        "n": 2645,
+        "start": "2019-04-02",
+        "end": "2026-06-28",
+        "mean": 0.0026996829050264415,
+        "std": 0.9264457660730113,
+        "p01": -2.2233061379335184,
+        "p05": -1.4259093692763951,
+        "p50": -0.023820048818666867,
+        "p95": 1.4694675482624635,
+        "p99": 2.3774741106095605
+      }
+    },
+    "targets": {
+      "ETH-USD": {
+        "price": {
+          "n": 2735,
+          "start": "2019-01-01",
+          "end": "2026-06-27",
+          "mean": 1903.228952573117,
+          "std": 1257.138536545828,
+          "p01": 121.329609375,
+          "p05": 145.79295349121094,
+          "p50": 1881.22412109375,
+          "p95": 3981.1620605468747,
+          "p99": 4527.366552734375
+        },
+        "ret": {
+          "n": 2734,
+          "start": "2019-01-02",
+          "end": "2026-06-27",
+          "mean": 0.0008823568801632627,
+          "std": 0.04253923305319222,
+          "p01": -0.12373338727898656,
+          "p05": -0.0648221249208164,
+          "p50": 0.0007019408529101807,
+          "p95": 0.06618608016031341,
+          "p99": 0.11541191242739104
+        },
+        "fwd_rv_1d": {
+          "n": 2734,
+          "start": "2019-01-01",
+          "end": "2026-06-26",
+          "mean": 0.6605416023242224,
+          "std": 2.6385738795287312,
+          "p01": 3.156852081299308e-05,
+          "p05": 0.0007246905831836647,
+          "p50": 0.13788928576863968,
+          "p95": 2.6313251185700612,
+          "p99": 7.6422839889414345
+        },
+        "fwd_rv_5d": {
+          "n": 2730,
+          "start": "2019-01-01",
+          "end": "2026-06-22",
+          "mean": 0.6602369158201103,
+          "std": 1.336741255359735,
+          "p01": 0.015275251943641393,
+          "p05": 0.04800545976083372,
+          "p50": 0.3533435758392075,
+          "p95": 2.167037883544741,
+          "p99": 4.398816708147026
+        }
+      },
+      "BTC-USD": {
+        "price": {
+          "n": 2735,
+          "start": "2019-01-01",
+          "end": "2026-06-27",
+          "mean": 43647.86096008412,
+          "std": 32315.524991216284,
+          "p01": 3655.969892578125,
+          "p05": 6116.907421875003,
+          "p50": 36693.125,
+          "p95": 107154.21484374999,
+          "p99": 117812.82749999998
+        },
+        "ret": {
+          "n": 2734,
+          "start": "2019-01-02",
+          "end": "2026-06-27",
+          "mean": 0.0010047392365234078,
+          "std": 0.032413415103026054,
+          "p01": -0.09026735179187691,
+          "p05": -0.04735963400025706,
+          "p50": 0.0004560259358888137,
+          "p95": 0.049007718525569496,
+          "p99": 0.09552720839759937
+        },
+        "fwd_rv_1d": {
+          "n": 2734,
+          "start": "2019-01-01",
+          "end": "2026-06-26",
+          "mean": 0.38370796428217724,
+          "std": 1.7394821006402583,
+          "p01": 2.885070246347165e-05,
+          "p05": 0.0003983436349520866,
+          "p50": 0.07029966284143094,
+          "p95": 1.644952675327009,
+          "p99": 4.33640572375383
+        },
+        "fwd_rv_5d": {
+          "n": 2730,
+          "start": "2019-01-01",
+          "end": "2026-06-22",
+          "mean": 0.38409206589870476,
+          "std": 0.8486723289846446,
+          "p01": 0.007514479519970479,
+          "p05": 0.024446647673623204,
+          "p50": 0.19871657896853465,
+          "p95": 1.1967430434941848,
+          "p99": 2.6230903030783286
+        }
+      },
+      "COIN": {
+        "price": {
+          "n": 1307,
+          "start": "2021-04-14",
+          "end": "2026-06-26",
+          "mean": 184.60697032516936,
+          "std": 92.84690044544038,
+          "p01": 37.716800689697266,
+          "p05": 53.135999298095705,
+          "p50": 194.52999877929688,
+          "p95": 331.6620056152344,
+          "p99": 386.9442004394532
+        },
+        "ret": {
+          "n": 1021,
+          "start": "2021-04-15",
+          "end": "2026-06-26",
+          "mean": -0.0014880910017008682,
+          "std": 0.05315365372096103,
+          "p01": -0.1291871744252205,
+          "p05": -0.08129988268467114,
+          "p50": -0.004354742010704017,
+          "p95": 0.08439318544171179,
+          "p99": 0.14810429545726986
+        },
+        "fwd_rv_1d": {
+          "n": 1021,
+          "start": "2021-04-14",
+          "end": "2026-06-25",
+          "mean": 0.7118390459898141,
+          "std": 1.578128763927449,
+          "p01": 0.00010597033343717149,
+          "p05": 0.002360044860465714,
+          "p50": 0.21589448032524788,
+          "p95": 2.915388580258104,
+          "p99": 6.454914540122078
+        },
+        "fwd_rv_5d": {
+          "n": 0
+        }
+      },
+      "IBIT": {
+        "price": {
+          "n": 616,
+          "start": "2024-01-11",
+          "end": "2026-06-26",
+          "mean": 46.79581165623355,
+          "std": 11.634255073572762,
+          "p01": 24.01999988555908,
+          "p05": 30.462499618530273,
+          "p50": 45.400001525878906,
+          "p95": 66.21249771118164,
+          "p99": 68.65599822998048
+        },
+        "ret": {
+          "n": 477,
+          "start": "2024-01-12",
+          "end": "2026-06-26",
+          "mean": -0.0004334160263008248,
+          "std": 0.029001938571968647,
+          "p01": -0.06268423546773053,
+          "p05": -0.0416492962832918,
+          "p50": -0.0015969542675512097,
+          "p95": 0.050535164251439786,
+          "p99": 0.07156072762167538
+        },
+        "fwd_rv_1d": {
+          "n": 477,
+          "start": "2024-01-11",
+          "end": "2026-06-25",
+          "mean": 0.21156331188724334,
+          "std": 0.37578602817562073,
+          "p01": 3.700597027257296e-05,
+          "p05": 0.0006370631854802172,
+          "p50": 0.09260647193524468,
+          "p95": 0.826287791732552,
+          "p99": 1.6624049111313781
+        },
+        "fwd_rv_5d": {
+          "n": 0
+        }
+      },
+      "ETHA": {
+        "price": {
+          "n": 484,
+          "start": "2024-07-23",
+          "end": "2026-06-26",
+          "mean": 21.318564089861784,
+          "std": 5.936989850063562,
+          "p01": 11.866599969863891,
+          "p05": 13.372999954223634,
+          "p50": 19.949999809265137,
+          "p95": 32.81849994659424,
+          "p99": 34.74529956817627
+        },
+        "ret": {
+          "n": 375,
+          "start": "2024-07-24",
+          "end": "2026-06-26",
+          "mean": -0.0011851469192231995,
+          "std": 0.041676153435713674,
+          "p01": -0.08642104086463426,
+          "p05": -0.06018365638182051,
+          "p50": -0.0038313882454670757,
+          "p95": 0.07285425675456693,
+          "p99": 0.10828426283327308
+        },
+        "fwd_rv_1d": {
+          "n": 375,
+          "start": "2024-07-23",
+          "end": "2026-06-25",
+          "mean": 0.43688599929494526,
+          "std": 0.7536926849675828,
+          "p01": 4.787523175897939e-05,
+          "p05": 0.0011516140374107045,
+          "p50": 0.19874041875706705,
+          "p95": 1.73368702190678,
+          "p99": 3.4204457503906918
+        },
+        "fwd_rv_5d": {
+          "n": 0
+        }
+      }
+    }
+  },
+  "primary_tests": {
+    "ETH-USD": {
+      "1d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "n": 2642,
+            "coef": -0.024407452368604997,
+            "hac_t": -0.5290100109015761,
+            "p_value": 0.5967985053125051,
+            "r2": 0.00010996481331537744,
+            "y_mean": -2.371509428763603,
+            "x_mean": 0.007423830675343686
+          },
+          "spearman": {
+            "n": 2642,
+            "rho": -0.005647198010145007,
+            "p_value": 0.7717143951668035,
+            "block": 1,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.041442459926651014,
+              0.03147692033108066
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 421,
+            "n_nonevent": 2223,
+            "auc": 0.4677742837512809,
+            "ci95": [
+              0.4382144064382186,
+              0.4973341610643432
+            ],
+            "se_hanley_mcneil": 0.015081570057684861
+          },
+          "tail_threshold": -0.03
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "n": 2642,
+            "coef": -0.0032639658657127426,
+            "hac_t": -0.07011486665800809,
+            "p_value": 0.9441022339422201,
+            "r2": 1.7424575980973245e-06,
+            "y_mean": -2.371509428763603,
+            "x_mean": -0.0006146115689530389
+          },
+          "spearman": {
+            "n": 2642,
+            "rho": -0.0074326147148120565,
+            "p_value": 0.7025624145896587,
+            "block": 1,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.044670421610858595,
+              0.030166064834712288
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 421,
+            "n_nonevent": 2223,
+            "auc": 0.5039123480178612,
+            "ci95": [
+              0.47378078724607564,
+              0.5340439087896468
+            ],
+            "se_hanley_mcneil": 0.015373245291727324
+          },
+          "tail_threshold": -0.03
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "n": 2642,
+            "coef": -0.019299286592680657,
+            "hac_t": -0.35787124706952433,
+            "p_value": 0.7204396690980124,
+            "r2": 4.86267270970453e-05,
+            "y_mean": -2.371509428763603,
+            "x_mean": 0.003404609553195325
+          },
+          "spearman": {
+            "n": 2642,
+            "rho": -0.011800493687197312,
+            "p_value": 0.5443261562692366,
+            "block": 1,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.04965719071407167,
+              0.026682177284231518
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 421,
+            "n_nonevent": 2223,
+            "auc": 0.48421223593120083,
+            "ci95": [
+              0.4543676839297904,
+              0.5140567879326113
+            ],
+            "se_hanley_mcneil": 0.01522681224561758
+          },
+          "tail_threshold": -0.03
+        }
+      },
+      "5d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "n": 2638,
+            "coef": -0.03040861358109126,
+            "hac_t": -1.7234522930948537,
+            "p_value": 0.0848067653009989,
+            "r2": 0.0008177803468903955,
+            "y_mean": -1.0874003430897239,
+            "x_mean": 0.006434778448017567
+          },
+          "spearman": {
+            "n": 2638,
+            "rho": -0.03465905537724491,
+            "p_value": 0.07510364753375749,
+            "block": 5,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.06649893795954923,
+              -0.004014387491273246
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 558,
+            "n_nonevent": 2086,
+            "auc": 0.48400842620370654,
+            "ci95": [
+              0.45722043143884666,
+              0.5107964209685664
+            ],
+            "se_hanley_mcneil": 0.01366734426778564
+          },
+          "tail_threshold": -0.05
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "n": 2638,
+            "coef": -0.019961521306102053,
+            "hac_t": -1.3988444557839153,
+            "p_value": 0.16185963185508379,
+            "r2": 0.00031218528925480715,
+            "y_mean": -1.0874003430897239,
+            "x_mean": -0.0013877848125477814
+          },
+          "spearman": {
+            "n": 2638,
+            "rho": -0.022308991841297005,
+            "p_value": 0.2520344028543906,
+            "block": 5,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.0501417181645996,
+              0.0039939250181601415
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 558,
+            "n_nonevent": 2086,
+            "auc": 0.49743038588026683,
+            "ci95": [
+              0.47048609212539627,
+              0.5243746796351374
+            ],
+            "se_hanley_mcneil": 0.013747088650444158
+          },
+          "tail_threshold": -0.05
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "n": 2638,
+            "coef": -0.03400699352546332,
+            "hac_t": -1.787149639871578,
+            "p_value": 0.073913306245029,
+            "r2": 0.0007231995758163468,
+            "y_mean": -1.0874003430897239,
+            "x_mean": 0.0025234968177348938
+          },
+          "spearman": {
+            "n": 2638,
+            "rho": -0.029685757107280275,
+            "p_value": 0.12742948224189074,
+            "block": 5,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.060852825490716335,
+              0.000275435507743856
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 558,
+            "n_nonevent": 2086,
+            "auc": 0.4886760000962209,
+            "ci95": [
+              0.46183088829550145,
+              0.5155211118969404
+            ],
+            "se_hanley_mcneil": 0.013696485612611983
+          },
+          "tail_threshold": -0.05
+        }
+      }
+    },
+    "BTC-USD": {
+      "1d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "n": 2642,
+            "coef": 0.09987598587730717,
+            "hac_t": 2.2350624942454576,
+            "p_value": 0.025413246227272618,
+            "r2": 0.0017957466215876572,
+            "y_mean": -2.9958008675011008,
+            "x_mean": 0.007423830675343686
+          },
+          "spearman": {
+            "n": 2642,
+            "rho": 0.032660830920820984,
+            "p_value": 0.09326265217572137,
+            "block": 1,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.005210131401297075,
+              0.07063974694824804
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 288,
+            "n_nonevent": 2356,
+            "auc": 0.49175863044708545,
+            "ci95": [
+              0.45659056525715774,
+              0.5269266956370132
+            ],
+            "se_hanley_mcneil": 0.017942890403024346
+          },
+          "tail_threshold": -0.03
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "n": 2642,
+            "coef": 0.0945228462566345,
+            "hac_t": 1.9759196168286963,
+            "p_value": 0.0481638820314582,
+            "r2": 0.0014251436506407256,
+            "y_mean": -2.9958008675011008,
+            "x_mean": -0.0006146115689530389
+          },
+          "spearman": {
+            "n": 2642,
+            "rho": 0.03157378455997206,
+            "p_value": 0.10468749426052427,
+            "block": 1,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.005861466752475614,
+              0.06768150846012132
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 288,
+            "n_nonevent": 2356,
+            "auc": 0.5123782658932277,
+            "ci95": [
+              0.4768383472805792,
+              0.5479181845058761
+            ],
+            "se_hanley_mcneil": 0.018132611537065538
+          },
+          "tail_threshold": -0.03
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "n": 2642,
+            "coef": 0.12981560567225828,
+            "hac_t": 2.427134143522038,
+            "p_value": 0.015218627643458322,
+            "r2": 0.0021456574843899956,
+            "y_mean": -2.9958008675011008,
+            "x_mean": 0.003404609553195325
+          },
+          "spearman": {
+            "n": 2642,
+            "rho": 0.03745764100613688,
+            "p_value": 0.05421662886992376,
+            "block": 1,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.0013846069507113341,
+              0.07562805387512854
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 288,
+            "n_nonevent": 2356,
+            "auc": 0.5017935884738729,
+            "ci95": [
+              0.4664348614326806,
+              0.5371523155150653
+            ],
+            "se_hanley_mcneil": 0.01804016685775118
+          },
+          "tail_threshold": -0.03
+        }
+      },
+      "5d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "n": 2638,
+            "coef": -0.033025472811971573,
+            "hac_t": -1.830159759180433,
+            "p_value": 0.06722605313752229,
+            "r2": 0.0009250327426187921,
+            "y_mean": -1.6508379604893548,
+            "x_mean": 0.006434778448017567
+          },
+          "spearman": {
+            "n": 2638,
+            "rho": -0.04174520200548386,
+            "p_value": 0.03203183827029536,
+            "block": 5,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.07542224293411047,
+              -0.010162110581342735
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 438,
+            "n_nonevent": 2206,
+            "auc": 0.49893089415748665,
+            "ci95": [
+              0.4693418960262881,
+              0.5285198922886851
+            ],
+            "se_hanley_mcneil": 0.015096427617958432
+          },
+          "tail_threshold": -0.05
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "n": 2638,
+            "coef": -0.028112225687297945,
+            "hac_t": -1.8983365930015172,
+            "p_value": 0.057651756458208775,
+            "r2": 0.0005937877181977358,
+            "y_mean": -1.6508379604893548,
+            "x_mean": -0.0013877848125477814
+          },
+          "spearman": {
+            "n": 2638,
+            "rho": -0.030311775186543908,
+            "p_value": 0.11959472719489844,
+            "block": 5,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.06020444021700022,
+              0.0004686944857013674
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 438,
+            "n_nonevent": 2206,
+            "auc": 0.4993821334095058,
+            "ci95": [
+              0.46978712532585615,
+              0.5289771414931556
+            ],
+            "se_hanley_mcneil": 0.015099493920229431
+          },
+          "tail_threshold": -0.05
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "n": 2638,
+            "coef": -0.04096327788239936,
+            "hac_t": -2.09225370636787,
+            "p_value": 0.03641582650285209,
+            "r2": 0.001006298154866525,
+            "y_mean": -1.6508379604893548,
+            "x_mean": 0.0025234968177348938
+          },
+          "spearman": {
+            "n": 2638,
+            "rho": -0.036710690382864564,
+            "p_value": 0.05939519957804283,
+            "block": 5,
+            "bootstrap_reps": 1000,
+            "ci95": [
+              -0.06583293409873735,
+              -0.006835711178322343
+            ]
+          },
+          "left_tail_auc": {
+            "n": 2644,
+            "n_event": 438,
+            "n_nonevent": 2206,
+            "auc": 0.5005350703974631,
+            "ci95": [
+              0.4709248458269387,
+              0.5301452949679876
+            ],
+            "se_hanley_mcneil": 0.015107257433941031
+          },
+          "tail_threshold": -0.05
+        }
+      }
+    }
+  },
+  "spillover_diagnostics": {
+    "COIN": {
+      "1d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "n": 1021,
+            "coef": 0.041185746018501015,
+            "hac_t": 0.6401755333997968,
+            "p_value": 0.522058487227467,
+            "r2": 0.00038340744499787416,
+            "y_mean": -1.8972583079262029,
+            "x_mean": 0.31332764334974783
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "n": 1021,
+            "coef": -0.0983685365879452,
+            "hac_t": -1.3985856115617037,
+            "p_value": 0.16193728353621117,
+            "r2": 0.0017188642408402233,
+            "y_mean": -1.8972583079262029,
+            "x_mean": 0.31171942925296514
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "n": 1021,
+            "coef": -0.027130864898759224,
+            "hac_t": -0.3489870558413461,
+            "p_value": 0.7270990273258009,
+            "r2": 0.00011075487948575269,
+            "y_mean": -1.8972583079262029,
+            "x_mean": 0.3125235363013565
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        }
+      },
+      "5d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        }
+      }
+    },
+    "IBIT": {
+      "1d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "n": 477,
+            "coef": -0.006669817410202485,
+            "hac_t": -0.07925820906576025,
+            "p_value": 0.9368272460212932,
+            "r2": 1.1276880921173849e-05,
+            "y_mean": -2.8434876538125566,
+            "x_mean": 0.28362283501288577
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "n": 477,
+            "coef": 0.025448884784446138,
+            "hac_t": 0.2605889516010716,
+            "p_value": 0.7944095107280942,
+            "r2": 0.00012130628105366803,
+            "y_mean": -2.8434876538125566,
+            "x_mean": 0.33260888481087997
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "n": 477,
+            "coef": 0.008756594346930262,
+            "hac_t": 0.08996236392005731,
+            "p_value": 0.9283171227549113,
+            "r2": 1.3467339335715423e-05,
+            "y_mean": -2.8434876538125566,
+            "x_mean": 0.30811585991188284
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        }
+      },
+      "5d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        }
+      }
+    },
+    "ETHA": {
+      "1d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "n": 375,
+            "coef": -0.009776456006787712,
+            "hac_t": -0.1079105504227002,
+            "p_value": 0.9140666479688961,
+            "r2": 1.393079871037095e-05,
+            "y_mean": -2.3279382149675447,
+            "x_mean": 0.24884636780121064
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "n": 375,
+            "coef": 0.04404427516207675,
+            "hac_t": 0.3621512032339545,
+            "p_value": 0.7172390421575968,
+            "r2": 0.00021323169207698722,
+            "y_mean": -2.3279382149675447,
+            "x_mean": 0.3390242186069895
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "n": 375,
+            "coef": 0.01666849041937523,
+            "hac_t": 0.14894351887987384,
+            "p_value": 0.8815982010835532,
+            "r2": 2.8472863968564965e-05,
+            "y_mean": -2.3279382149675447,
+            "x_mean": 0.2939352932041001
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        }
+      },
+      "5d": {
+        "gas_price_shock": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "dex_volume_shock": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        },
+        "blockspace_pressure": {
+          "hac_ols": {
+            "error": "insufficient_or_constant",
+            "n": 0
+          },
+          "sample_note": "diagnostic only; ETF/equity proxy samples are shorter than ETH/BTC."
+        }
+      }
+    }
+  },
+  "multiple_testing": {
+    "alpha": 0.05,
+    "n_tests": 12,
+    "bonferroni_alpha": 0.004166666666666667,
+    "bonferroni_survivors": [],
+    "holm_decisions": [
+      {
+        "label": "BTC-USD|1d|blockspace_pressure",
+        "p_value": 0.015218627643458322,
+        "holm_threshold": 0.004166666666666667,
+        "reject": false,
+        "coef": 0.12981560567225828,
+        "hac_t": 2.427134143522038
+      },
+      {
+        "label": "BTC-USD|1d|gas_price_shock",
+        "p_value": 0.025413246227272618,
+        "holm_threshold": 0.004545454545454546,
+        "reject": false,
+        "coef": 0.09987598587730717,
+        "hac_t": 2.2350624942454576
+      },
+      {
+        "label": "BTC-USD|5d|blockspace_pressure",
+        "p_value": 0.03641582650285209,
+        "holm_threshold": 0.005,
+        "reject": false,
+        "coef": -0.04096327788239936,
+        "hac_t": -2.09225370636787
+      },
+      {
+        "label": "BTC-USD|1d|dex_volume_shock",
+        "p_value": 0.0481638820314582,
+        "holm_threshold": 0.005555555555555556,
+        "reject": false,
+        "coef": 0.0945228462566345,
+        "hac_t": 1.9759196168286963
+      },
+      {
+        "label": "BTC-USD|5d|dex_volume_shock",
+        "p_value": 0.057651756458208775,
+        "holm_threshold": 0.00625,
+        "reject": false,
+        "coef": -0.028112225687297945,
+        "hac_t": -1.8983365930015172
+      },
+      {
+        "label": "BTC-USD|5d|gas_price_shock",
+        "p_value": 0.06722605313752229,
+        "holm_threshold": 0.0071428571428571435,
+        "reject": false,
+        "coef": -0.033025472811971573,
+        "hac_t": -1.830159759180433
+      },
+      {
+        "label": "ETH-USD|5d|blockspace_pressure",
+        "p_value": 0.073913306245029,
+        "holm_threshold": 0.008333333333333333,
+        "reject": false,
+        "coef": -0.03400699352546332,
+        "hac_t": -1.787149639871578
+      },
+      {
+        "label": "ETH-USD|5d|gas_price_shock",
+        "p_value": 0.0848067653009989,
+        "holm_threshold": 0.01,
+        "reject": false,
+        "coef": -0.03040861358109126,
+        "hac_t": -1.7234522930948537
+      },
+      {
+        "label": "ETH-USD|5d|dex_volume_shock",
+        "p_value": 0.16185963185508379,
+        "holm_threshold": 0.0125,
+        "reject": false,
+        "coef": -0.019961521306102053,
+        "hac_t": -1.3988444557839153
+      },
+      {
+        "label": "ETH-USD|1d|gas_price_shock",
+        "p_value": 0.5967985053125051,
+        "holm_threshold": 0.016666666666666666,
+        "reject": false,
+        "coef": -0.024407452368604997,
+        "hac_t": -0.5290100109015761
+      },
+      {
+        "label": "ETH-USD|1d|blockspace_pressure",
+        "p_value": 0.7204396690980124,
+        "holm_threshold": 0.025,
+        "reject": false,
+        "coef": -0.019299286592680657,
+        "hac_t": -0.35787124706952433
+      },
+      {
+        "label": "ETH-USD|1d|dex_volume_shock",
+        "p_value": 0.9441022339422201,
+        "holm_threshold": 0.05,
+        "reject": false,
+        "coef": -0.0032639658657127426,
+        "hac_t": -0.07011486665800809
+      }
+    ],
+    "holm_survivors": []
+  },
+  "verdict_assessment": {
+    "verdict": "WEAK_RAW_ONLY",
+    "positive_raw_p_lt_0_05": [
+      "BTC-USD|1d|gas_price_shock",
+      "BTC-USD|1d|dex_volume_shock",
+      "BTC-USD|1d|blockspace_pressure"
+    ],
+    "positive_bonferroni_survivors": [],
+    "rationale": "Some positive coefficients are raw-significant, but none survive the 12-test primary-family correction."
+  },
+  "figures": [
+    "fig1_blockspace_inputs.png",
+    "fig2_pressure_vs_crypto_rv.png",
+    "fig3_hac_tstat_heatmap.png"
+  ]
+}
