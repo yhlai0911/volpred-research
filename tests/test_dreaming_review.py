@@ -116,6 +116,38 @@ def test_detect_missing_retry_strategy_flags_orphaned_failure(tmp_path):
     assert findings[0].remediation == "auto_dispatch"  # low-risk derived state
 
 
+def test_detect_semantic_concentration_flags_high_rehash(tmp_path, monkeypatch):
+    # High semantic rehash rate → finding (boss email-12139 semantic directive).
+    monkeypatch.setattr(
+        "volpred.ops.topic_similarity.semantic_concentration_report",
+        lambda *a, **k: {
+            "status": "concentrated", "sample": 20, "rehash_count": 8, "rehash_rate": 0.4,
+            "near_twin_pairs": [{"title": "RECH-X 跨市場", "twin": "AI 波動率模型 RECH-X", "similarity": 0.77}],
+        },
+    )
+    findings = dr.detect_semantic_concentration(str(tmp_path / "storage"), {}, NOW)
+    assert len(findings) == 1
+    assert findings[0].signature == "semantic_concentration:feed"
+    assert findings[0].remediation == "propose_only"
+
+
+def test_detect_semantic_concentration_fail_open(tmp_path, monkeypatch):
+    # Embeddings down → no finding (never breaks the run).
+    monkeypatch.setattr(
+        "volpred.ops.topic_similarity.semantic_concentration_report",
+        lambda *a, **k: {"status": "semantic_unavailable", "sample": 20},
+    )
+    assert dr.detect_semantic_concentration(str(tmp_path / "storage"), {}, NOW) == []
+
+
+def test_detect_semantic_concentration_low_rate_no_finding(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        "volpred.ops.topic_similarity.semantic_concentration_report",
+        lambda *a, **k: {"status": "ok", "sample": 20, "rehash_rate": 0.1, "near_twin_pairs": []},
+    )
+    assert dr.detect_semantic_concentration(str(tmp_path / "storage"), {}, NOW) == []
+
+
 def test_detect_loop_metric_regression(tmp_path):
     storage = _storage(tmp_path)
     snap = {

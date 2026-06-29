@@ -54,9 +54,13 @@ from .diagnostics import warn
 #   WHOLE-TOPIC text fixes it: paraphrase=0.752 > different-subtopic=0.569. This
 #   confirms the boss's wording 「整個主題」 — callers MUST pass the full topic
 #   (use `article_topic_text`), not just the keyword-laden title.
-# Threshold sits between the different-subtopic (~0.57) and paraphrase (~0.75)
-# bands. Preliminary (one validated example) — refine as more pairs accumulate.
-DEFAULT_NEAR_DUP_THRESHOLD = 0.72
+# Threshold sits between the different-subtopic and paraphrase bands. Refined
+# 2026-06-29 on real feed pairs: clear rehashes (RECH-X ML article ×2 = 0.766,
+# copper-ETF vol ×2 = 0.757) and the boss's deliberate paraphrase (0.752) all land
+# ≥0.75, while a related-but-DISTINCT pair (K1333 vol-of-vol vs VIX→VRP = 0.724)
+# sits just below. 0.74 catches the former, spares the latter. Preliminary —
+# refine as labelled pairs accumulate.
+DEFAULT_NEAR_DUP_THRESHOLD = 0.74
 
 _CACHE_REL = "cache/topic_embeddings.json"
 
@@ -284,11 +288,33 @@ def near_duplicates(
 # ---------------------------------------------------------------------------
 # Feed-level report (the boss's directive on real content)
 # ---------------------------------------------------------------------------
-def _recent_published_items(storage_dir: str, lookback: int) -> list[dict[str, Any]]:
+# Daily-templated article types are by-design repetitive (a daily bulletin/digest
+# is supposed to look like yesterday's) — same rationale the cluster cooldown
+# exempts timely types. They must NOT count as semantic over-concentration.
+_DAILY_TEMPLATED_TITLE_PREFIXES = ("每日", "本日", "daily", "Daily")
+_DAILY_TEMPLATED_TYPES = {"daily_digest", "daily_update", "daily-update"}
+
+
+def _is_daily_templated(item: dict[str, Any]) -> bool:
+    ct = str(item.get("content_type") or "").strip()
+    if ct in _DAILY_TEMPLATED_TYPES:
+        return True
+    details = item.get("details")
+    if isinstance(details, dict) and str(details.get("content_type") or "") in _DAILY_TEMPLATED_TYPES:
+        return True
+    title = item.get("title")
+    return isinstance(title, str) and title.strip().startswith(_DAILY_TEMPLATED_TITLE_PREFIXES)
+
+
+def _recent_published_items(
+    storage_dir: str, lookback: int, *, exclude_daily: bool = True
+) -> list[dict[str, Any]]:
     feed = load_json(project_path(storage_dir) / "reports" / "feed.json", [])
     if not isinstance(feed, list):
         return []
     pub = [x for x in feed if isinstance(x, dict) and x.get("status") == "published"]
+    if exclude_daily:
+        pub = [x for x in pub if not _is_daily_templated(x)]
 
     def _ts(item: dict[str, Any]) -> str:
         return str(item.get("published_at") or item.get("created_at") or "")
@@ -304,16 +330,18 @@ def semantic_concentration_report(
     embedder: Embedder | None = None,
     threshold: float = DEFAULT_NEAR_DUP_THRESHOLD,
     use_cache: bool = True,
+    exclude_daily: bool = True,
 ) -> dict[str, Any]:
     """Semantic concentration of the recent published feed (the boss's directive).
 
     Unlike the keyword cluster cap (which counts every VIX-mentioning article as
     the same), this embeds each article's WHOLE TOPIC (title + description +
     conclusion) and reports the fraction that are a genuine semantic rehash of
-    another recent article. Fail-open: `semantic_unavailable` if embeddings are
+    another recent article. Daily-templated bulletins are excluded by default
+    (by-design repetitive). Fail-open: `semantic_unavailable` if embeddings are
     down — never blocks. Cached, so steady-state cost is ~the new articles only.
     """
-    items = _recent_published_items(storage_dir, lookback)
+    items = _recent_published_items(storage_dir, lookback, exclude_daily=exclude_daily)
     if len(items) < 2:
         return {"status": "ok", "sample": len(items), "note": "too few published items"}
     topics = [article_topic_text(it) for it in items]

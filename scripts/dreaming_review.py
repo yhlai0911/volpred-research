@@ -90,6 +90,8 @@ BROAD_REVIEW_KEYWORD_FLOOR = 12
 # A cron failure cluster with no occurrence in this many hours has RECOVERED and
 # is a past incident, not an active failure — it stops being a finding.
 RECOVERED_THRESHOLD_HOURS = 48
+# Flag when this fraction of recent NON-daily articles are semantic rehashes.
+SEMANTIC_REHASH_WARN_RATE = 0.30
 
 # Governance files dreaming may PROPOSE changes to but must NEVER write.
 GOVERNANCE_FILES = (
@@ -377,12 +379,60 @@ def detect_loop_metric_regression(
     return out
 
 
+def detect_semantic_concentration(
+    storage_dir: str, snapshot: dict[str, Any], now: datetime
+) -> list[DreamFinding]:
+    """Genuine SEMANTIC rehash of recent topics (boss email-12139 directive).
+
+    Unlike keyword cluster cap, this embeds each article's whole topic and flags
+    when many recent non-daily articles are the same topic said again (different
+    framing). Fail-open: no finding if embeddings are unavailable. Daily-templated
+    bulletins are excluded (by-design repetitive). Cost: cached, ~daily.
+    """
+    out: list[DreamFinding] = []
+    try:
+        from volpred.ops.topic_similarity import semantic_concentration_report
+    except Exception as exc:
+        warn("dreaming", "topic_similarity import failed; skipping semantic check", err=str(exc))
+        return out
+    report = semantic_concentration_report(storage_dir)
+    if report.get("status") in ("semantic_unavailable", None):
+        return out
+    rate = report.get("rehash_rate") or 0.0
+    pairs = report.get("near_twin_pairs") or []
+    if rate < SEMANTIC_REHASH_WARN_RATE or not pairs:
+        return out
+    top = "; ".join(
+        f"{p['similarity']}: {p['title'][:30]} || {p['twin'][:30]}" for p in pairs[:3]
+    )
+    out.append(
+        DreamFinding(
+            pattern_type="semantic_concentration",
+            signature="semantic_concentration:feed",
+            severity="warn",
+            evidence=[
+                f"semantic rehash_rate={rate} over {report.get('sample')} non-daily articles; "
+                f"top pairs — {top}"
+            ],
+            remediation="propose_only",
+            proposal=(
+                f"{report.get('rehash_count')}/{report.get('sample')} recent non-daily articles "
+                f"are SEMANTIC rehashes (same topic, different framing) of another recent article "
+                f"— keyword clustering misses these. Diversify topic selection; consider a "
+                f"semantic dedup gate at publish (near_duplicates) before releasing a rehash."
+            ),
+        )
+    )
+    return out
+
+
 DETECTORS = (
     detect_repeated_tool_failures,
     detect_recurring_errors,
     detect_stale_knowledge,
     detect_missing_retry_strategy,
     detect_loop_metric_regression,
+    detect_semantic_concentration,
 )
 
 
