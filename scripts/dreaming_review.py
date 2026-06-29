@@ -537,8 +537,15 @@ def apply_auto_dispatch(
 ) -> list[dict[str, Any]]:
     """Create follow-up tasks for auto_dispatch findings (gated by --apply-auto).
 
-    Uses the canonical create_task path; NEVER touches governance files. Only
+    Uses the canonical `create_task` API; NEVER touches governance files. Only
     escalated (three-strike) auto_dispatch findings dispatch, to stay conservative.
+
+    NOTE (honest limitation): `create_task` writes a control-plane TaskRecord
+    under `storage/ops/tasks/` (audit/receipt system), NOT the `next_tasks.json`
+    pending queue the hourly dispatcher reads. Bridging the TaskRecord into the
+    pending queue is a deliberate follow-up; until then an --apply-auto dispatch
+    surfaces the task in the control plane for the main thread to action. This is
+    why --apply-auto defaults OFF (the flow is unproven, per the approved design).
     """
     actions: list[dict[str, Any]] = []
     eligible = [f for f in findings if f.remediation == "auto_dispatch" and f.severity == "critical"]
@@ -551,16 +558,22 @@ def apply_auto_dispatch(
         return actions
     for f in eligible:
         try:
+            # create_task is keyword-only with a validated vocab: task_family ∈
+            # {ops,research,...}, source ∈ {agent,schedule,user}, priority is int
+            # (lower = higher; platform_ops convention ≈ 3). dreaming provenance
+            # rides in payload since "dreaming" is not a valid TASK_SOURCE.
             task = create_task(
                 title=f"[dreaming] 調查 {f.signature}",
                 description=f.proposal or f.signature,
-                task_type="platform_ops",
-                priority="P2",
-                source="dreaming",
+                task_family="ops",
+                source="agent",
+                priority=3,
+                preferred_agent="claude",
+                payload={"origin": "dreaming", "signature": f.signature, "pattern_type": f.pattern_type},
                 storage_dir=storage_dir,
             )
             ref = task.get("id") if isinstance(task, dict) else str(task)
-            f.remediation_ref = f"next_tasks:{ref}"
+            f.remediation_ref = f"ops_task:{ref}"
             actions.append({"signature": f.signature, "action": "auto_dispatched", "task_id": ref})
         except Exception as exc:
             warn("dreaming", "create_task failed; finding stays propose-only", sig=f.signature, err=str(exc))

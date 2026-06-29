@@ -214,6 +214,53 @@ def test_main_non_dry_writes_baseline_and_emails(tmp_path, monkeypatch):
     assert len(sent) == 1  # new findings → one boss email
 
 
+def test_apply_auto_dispatch_calls_create_task_with_valid_vocab(tmp_path, monkeypatch):
+    # Lock in the create_task call shape: keyword-only, validated vocab. A prior
+    # bug passed task_type=/priority="P2"/source="dreaming" which would TypeError /
+    # fail validation. This test fails if the call shape regresses.
+    from volpred.ops.local_control_plane import TASK_FAMILIES, TASK_SOURCES
+
+    captured = {}
+
+    def fake_create_task(**kwargs):
+        captured.update(kwargs)
+        return {"id": "task_abc123"}
+
+    monkeypatch.setattr("volpred.ops.local_control_plane.create_task", fake_create_task)
+    f = dr.DreamFinding(
+        pattern_type="missing_retry_strategy",
+        signature="missing_retry_strategy:K9",
+        severity="critical",  # three-strike escalated → eligible
+        remediation="auto_dispatch",
+    )
+    actions = dr.apply_auto_dispatch([f], str(tmp_path / "storage"), NOW)
+    assert actions and actions[0]["task_id"] == "task_abc123"
+    assert f.remediation_ref == "ops_task:task_abc123"
+    # Valid vocab (would have raised _validate_choice otherwise):
+    assert captured["task_family"] in TASK_FAMILIES
+    assert captured["source"] in TASK_SOURCES
+    assert isinstance(captured["priority"], int)
+    assert "task_type" not in captured  # the old invalid kwarg must be gone
+
+
+def test_apply_auto_dispatch_skips_non_critical(tmp_path, monkeypatch):
+    # warn-severity auto_dispatch findings must NOT dispatch (only three-strike).
+    called = []
+    monkeypatch.setattr(
+        "volpred.ops.local_control_plane.create_task",
+        lambda **k: called.append(k) or {"id": "x"},
+    )
+    f = dr.DreamFinding(
+        pattern_type="missing_retry_strategy",
+        signature="missing_retry_strategy:K9",
+        severity="warn",
+        remediation="auto_dispatch",
+    )
+    actions = dr.apply_auto_dispatch([f], str(tmp_path / "storage"), NOW)
+    assert actions == []
+    assert called == []
+
+
 def test_main_exits_zero_even_when_all_detectors_fail(tmp_path, monkeypatch):
     storage = _storage(tmp_path)
 
