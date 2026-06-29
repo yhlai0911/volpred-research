@@ -95,7 +95,7 @@ def chart_b_fullperiod():
     ax.set_xticks(x)
     ax.set_xticklabels([BASKET_ZH[b] + f"\n{periods[i]}" for i, b in enumerate(baskets)], fontsize=8)
     ax.set_ylabel("年化報酬 CAGR (%)")
-    ax.set_title("全期年化報酬：再平衡 vs 買進持有 vs 大盤指數（7 籃子）\n"
+    ax.set_title(f"全期年化報酬：再平衡 vs 買進持有 vs 大盤指數（{len(baskets)} 籃子）\n"
                  "再平衡與買進持有在每個籃子都幾乎打平（差異全部統計不顯著）", fontsize=11)
     ax.legend(fontsize=9)
     ax.grid(axis="y", alpha=0.3)

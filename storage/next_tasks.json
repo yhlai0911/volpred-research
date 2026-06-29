@@ -39567,7 +39567,7 @@
     "title": "Paper review (Codex 24h-rule): 年度等權再平衡，真的比抱著不動強嗎？台美 30 年實測拆給你看",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_7b95b816 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_7b95b816",
@@ -39575,7 +39575,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-29T18:08:01+00:00"
+    "created_at": "2026-06-29T18:08:01+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T19:49:08.682849+00:00",
+    "claim_session_id": "6349c0634a19",
+    "started_at": "2026-06-29T19:49:18.879523+00:00",
+    "completed_at": "2026-06-29T19:53:15.558665+00:00",
+    "result": "Codex 24h review completed for mile_7b95b816/K1580. Found one true issue: Figure B title hard-coded 7 baskets while experiment/article use 6; patched generate_charts.py, regenerated fig_b_fullperiod_bar.png, and upserted the public article-images object. Core article claims, lookahead/accounting, bootstrap/significance, and regime conclusion verified as supported."
   },
   {
     "id": "paper_review_mile_96ec845f",
