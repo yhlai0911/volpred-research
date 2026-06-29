@@ -38442,7 +38442,7 @@
     "title": "Paper review (Codex 24h-rule): K1339: 商品 ETF 動量體制切換後，銅 30 日波動率平均跳升 18%",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c1f998c8 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c1f998c8",
@@ -38450,7 +38450,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-28T20:10:54+00:00"
+    "created_at": "2026-06-28T20:10:54+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T07:37:29.138650+00:00",
+    "claim_session_id": "36583c98474e",
+    "started_at": "2026-06-29T07:37:29.342444+00:00",
+    "completed_at": "2026-06-29T07:42:34.828058+00:00",
+    "result": "Codex 24h review PASS for published feed version: K1339 numbers, lookahead, and CONDITIONAL_PASS framing match source. Found stale single-report sync risk; fixed supabase_sync to ignore reports/<id>.json content and added regression test + review artifact."
   },
   {
     "id": "paper_review_mile_b87cc779",

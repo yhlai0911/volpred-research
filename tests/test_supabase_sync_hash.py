@@ -8,6 +8,7 @@ detection content-based and timestamp-decoupled.
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -82,6 +83,51 @@ def test_non_syncable_field_change_ignored():
 def test_hash_field_set_matches_plan():
     expected = {"content", "title", "excerpt", "status", "audience", "category", "details"}
     assert set(supabase_sync._ARTICLE_HASH_FIELDS) == expected
+
+
+def test_sync_full_ignores_stale_single_report_content(tmp_path, monkeypatch):
+    storage = tmp_path / "storage"
+    reports = storage / "reports"
+    reports.mkdir(parents=True)
+
+    feed_item = {
+        "id": "mile_stale_single",
+        "title": "Current feed article",
+        "content": "CURRENT FEED CONTENT",
+        "status": "published",
+        "audience": "research",
+        "category": "milestone",
+        "details": {"experiment_refs": ["K1339"]},
+        "published_at": "2026-06-29T00:00:00+00:00",
+    }
+    (reports / "feed.json").write_text(json.dumps([feed_item]), encoding="utf-8")
+    (reports / "mile_stale_single.json").write_text(
+        json.dumps(
+            {
+                "id": "mile_stale_single",
+                "title": "Old single article",
+                "content": "STALE SINGLE CONTENT",
+                "status": "draft",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    synced: list[dict] = []
+
+    def fake_sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
+        synced.append(dict(item))
+        return True
+
+    monkeypatch.setattr(supabase_sync, "sync_article", fake_sync_article)
+
+    counts = supabase_sync.sync_full(storage)
+
+    assert counts["articles"] == 1
+    assert synced[0]["content"] == "CURRENT FEED CONTENT"
+    assert synced[0]["status"] == "published"
+    assert synced[0]["title"] == "Current feed article"
+    assert synced[0]["content"] != "STALE SINGLE CONTENT"
 
 
 if __name__ == "__main__":

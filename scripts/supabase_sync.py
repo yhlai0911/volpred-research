@@ -821,21 +821,6 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             for item in items:
                 if isinstance(item, dict) and item.get("id") not in seen_ids:
                     feed.append(item)
-    # 2026-06-03 code-review Issue 4: the change-detection block below is gated
-    # by `feed_mtime > last_feed_sync`. Article bodies can be corrected in a
-    # per-article reports/<id>.json WITHOUT touching feed.json (the merge at
-    # ~L827 pulls body from there) — that edit would otherwise leave feed_mtime
-    # unchanged and silently skip the hash check, re-creating the exact
-    # silent-drift the hash refactor fixes. Fold every reports/*.json mtime into
-    # feed_mtime so any body edit re-opens the block; the per-article hash then
-    # decides which single article actually re-syncs.
-    reports_dir = storage / "reports"
-    if reports_dir.exists():
-        for rp in reports_dir.glob("*.json"):
-            try:
-                feed_mtime = max(feed_mtime, rp.stat().st_mtime)
-            except OSError:
-                pass
     if feed:
         last_feed_sync = state.get("feed_mtime", 0)
         if feed_mtime > last_feed_sync:
@@ -844,8 +829,9 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             if not isinstance(article_hashes, dict):
                 article_hashes = {}
             # 2026-06-03 3-strike (根因 B): content-hash-based change detection.
-            # First merge the canonical body from reports/<id>.json so the hash
-            # reflects exactly what gets synced, THEN decide what changed.
+            # 2026-06-29 correction: feed.json is the article source of truth.
+            # Legacy reports/<id>.json files are intentionally ignored here; a
+            # stale single file must never overwrite a corrected feed entry.
             # Selection condition (OR'd, defence-in-depth):
             #   (a) article content hash differs from last-synced hash, OR
             #   (b) legacy timestamp condition (back-compat; updated_at/published_at/
@@ -853,14 +839,6 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             #   (c) no last_sync_ts (first run -> full).
             to_sync = []
             for item in feed:
-                report_path = storage / "reports" / f"{item['id']}.json"
-                if report_path.exists():
-                    try:
-                        report = json.loads(report_path.read_text())
-                    except (json.JSONDecodeError, OSError):
-                        report = {}
-                    if report.get("content"):
-                        item["content"] = report["content"]
                 slug = item.get("id")
                 cur_hash = _article_hash(item)
                 hash_changed = article_hashes.get(slug) != cur_hash

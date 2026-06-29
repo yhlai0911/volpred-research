@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-29 Supabase article sync 仍用 stale single report 覆蓋 feed content — K1339 24h review 抓出
+
+**問題**：`mile_c1f998c8` 24h review 時發現 `storage/reports/feed.json` 中已發布文章是較新的「商品 ETF 動量體制」保守版本，但 `storage/reports/mile_c1f998c8.json` 仍是舊版 draft，標題與內容使用較強的「期貨期限結構翻轉 / contango→backwardation」口徑。
+
+**現象**：專案治理與 `scripts/article_backups.py` 都已宣告 Contentlayer pattern：`feed.json` 是文章唯一 canonical source，legacy `mile_*.json` single files 不應再是 live source。但 `scripts/supabase_sync.py::sync_full()` 仍在 incremental article sync 時讀 `reports/<id>.json`，若單篇檔有 `content`，就覆蓋 feed entry 的 `content` 後再計算 hash / sync。這代表 stale single file 可能把已修正的 feed 文章舊稿重新推到 Supabase。
+
+**根因**：2026-06-03 content-hash sync fix 為了支援「單篇檔 body 修正但 feed mtime 未變」場景，把 single report merge 回 sync payload；後續 Contentlayer cutover 已改成 feed-only canonical，但這段 fallback 沒跟著移除，形成 canonical 規則與 sync 實作 drift。
+
+**解決方法**：
+- 移除 `supabase_sync.py` 中的 single-report mtime scan 與 `report["content"]` 覆蓋邏輯；incremental sync 現在只從 `storage/reports/feed.json` 產生 article payload。
+- 更新註解，明確寫下 stale `reports/<id>.json` 不得覆蓋 corrected feed entry。
+- 新增 regression test `tests/test_supabase_sync_hash.py::test_sync_full_ignores_stale_single_report_content`：feed content 為 current、single content 為 stale 時，`sync_full()` 送出的 payload 必須保留 feed content/status/title。
+- K1339 published feed article 本身判定 PASS for published feed version；問題在 sync path，不是文章核心數字。
+
+**教訓**：canonical source 變更後，所有「舊 fallback / repair / compatibility」路徑都要一起 audit。尤其 article content 這種 public surface，不可同時允許 feed 與 single files 雙向覆蓋；legacy artifacts 只能讀作審計背景，不能進同步 payload。
+
 ## 2026-06-29 K1422 published article overclaim — q95 GLD null 在文章被誇大、未驗證的 hedging 語言（Codex 24h-rule 抓出）
 
 **問題**：mile_b87cc779（K1422 商品 ETF HAR-Quantile fair-baseline rerun，2026-06-28 published）發佈後 24h 內 Codex review 發現 5 處 overclaim。**research-honesty rule「結論強度不超過證據 + 推翻舊結論必回溯更正」直接適用**。
