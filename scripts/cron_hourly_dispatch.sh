@@ -189,6 +189,19 @@ send_auth_preflight_alert() {
 # its stdout streams into this same dispatch log.
 CODEX_BIN="${CODEX_BIN:-$(command -v codex 2>/dev/null || echo /Users/yhlai0911/.nvm/versions/node/v22.20.0/bin/codex)}"
 FAILOVER_PROMPT_FILE="${FAILOVER_PROMPT_FILE:-$REPO_ROOT/scripts/cron_hourly_dispatch_codex_failover_prompt.md}"
+# Codex failover budget (2026-06-30 fix #1, after 2026-06-29 21:07 incident).
+# Root cause: failover gave Codex the full 50min HOURLY_CAP_SEC, so when both
+# Anthropic and ChatGPT API outage'd together, Codex SIGALRM'd at 50min and the
+# 21:07 fire ran 2h52min wall-clock total (incl. 1h57min post-codex hang) →
+# LaunchAgent skipped 22:07 + 23:07 fires (same Label no-concurrency rule).
+# Fix: (a) cheap local-binary preflight (codex --version, ~80ms, 0 tokens) so
+# truly dead/missing binary aborts immediately, (b) failover task cap = 10min
+# not 50min — if Codex API also dead the wrapper exits 21:13 not 22:02, leaving
+# enough buffer for 22:07 LaunchAgent fire. Trade-off: large failover tasks
+# won't fit 10min; acceptable since the primary path is Claude and failover is
+# supposed to handle simple Codex-eligible items.
+CODEX_PREFLIGHT_TIMEOUT_SEC="${CODEX_PREFLIGHT_TIMEOUT_SEC:-30}"
+CODEX_FAILOVER_CAP_SEC="${CODEX_FAILOVER_CAP_SEC:-600}"
 CODEX_FAILOVER_RC=1
 
 run_codex_failover() {
@@ -200,14 +213,55 @@ run_codex_failover() {
     CODEX_FAILOVER_RC=127
     return 127
   fi
+  # ── Local-binary preflight (2026-06-30 fix #1a) ──
+  # codex --version: ~80ms + 0 tokens, no API call. Confirms binary exists and
+  # node runtime can load it. Doesn't test API reachability — that's covered by
+  # the short CODEX_FAILOVER_CAP_SEC (fix #1b) so a dead API can't burn 50min.
+  echo "[FAILOVER] codex --version preflight (${CODEX_PREFLIGHT_TIMEOUT_SEC}s ceiling) at $(date '+%H:%M:%S')"
+  /usr/bin/perl -e 'alarm shift; exec @ARGV' "$CODEX_PREFLIGHT_TIMEOUT_SEC" \
+    "$CODEX_BIN" --version >/dev/null 2>&1
+  local preflight_rc=$?
+  if [ "$preflight_rc" -ne 0 ]; then
+    echo "[FAILOVER] codex --version preflight failed rc=$preflight_rc at $(date '+%H:%M:%S') — binary broken, abort failover"
+    CODEX_FAILOVER_RC=$preflight_rc
+    local pbody ptmp
+    pbody=$(printf '%s\n' \
+"## 觸發條件" \
+"- Claude hourly dispatch 失敗（${reason}）→ 啟動 Codex failover" \
+"- Codex --version 也失敗 rc=${preflight_rc}（${CODEX_PREFLIGHT_TIMEOUT_SEC}s ceiling）" \
+"- Codex binary 損壞 / node runtime 問題 / 系統資源耗盡" \
+"" \
+"## 影響" \
+"- 本班 hourly dispatch 直接 abort，不會浪費時間跑死 task" \
+"- 下班 LaunchAgent fire (HH+1:07) 能正常啟動" \
+"" \
+"## 建議行動" \
+"- 跑 \`codex --version\` 看 binary 狀態" \
+"- 跑 \`ls -la $CODEX_BIN\` 確認檔案存在" \
+"- 必要時 npm reinstall codex-cli")
+    ptmp=$(mktemp -t codex_preflight_fail.XXXXXX).md
+    echo "$pbody" > "$ptmp"
+    "$UV_BIN" run volpred ops send-alert \
+      --level critical \
+      --title "hourly-dispatch Codex binary preflight 失敗 $(date '+%H:%M')" \
+      --body-md "$ptmp" --force 2>&1 | tail -1
+    rm -f "$ptmp"
+    return "$CODEX_FAILOVER_RC"
+  fi
+  echo "[FAILOVER] codex --version preflight OK — proceeding to full failover at $(date '+%H:%M:%S')"
   local cp
   if [ -f "$FAILOVER_PROMPT_FILE" ]; then
     cp=$(cat "$FAILOVER_PROMPT_FILE")
   else
     cp="新一輪 hourly tick（Claude dispatch 失敗 failover）。cat storage/ops/handoff_latest.md，依同樣流程 claim 下一個 Codex-eligible pending task → 完整完成 → complete → commit [codex]。reader-facing / email_reply / FB / paper_body 類留給 Claude，不要碰。"
   fi
-  # Same perl-alarm hang cap as the Claude path.
-  /usr/bin/perl -e 'alarm shift; exec @ARGV' "$HOURLY_CAP_SEC" \
+  # ── Short failover cap (2026-06-30 fix #1b) ──
+  # 10min cap not 50min: failover is supposed to do *something* not everything.
+  # If Codex API is also dead, SIGALRM fires at 10min not 50min, and the next
+  # LaunchAgent slot at HH+1:07 isn't starved. Large failover tasks won't fit
+  # 10min — acceptable since primary path is Claude and failover is best-effort.
+  echo "[FAILOVER] codex exec start (cap=${CODEX_FAILOVER_CAP_SEC}s) at $(date '+%H:%M:%S')"
+  /usr/bin/perl -e 'alarm shift; exec @ARGV' "$CODEX_FAILOVER_CAP_SEC" \
     "$CODEX_BIN" exec --skip-git-repo-check -s workspace-write "$cp"
   CODEX_FAILOVER_RC=$?
   echo "=== [FAILOVER] codex exec rc=$CODEX_FAILOVER_RC at $(date '+%H:%M:%S') ==="
@@ -448,13 +502,26 @@ fi
 # fire left scan_trending_agy.py untracked despite git-add-A instruction).
 # This deterministic post-dispatch commit catches whatever the agent missed.
 # All state/log noise is gitignored, so `git add -A` only stages real work.
-if [ -n "$(/usr/bin/git -C "$REPO_ROOT" status --porcelain 2>/dev/null)" ]; then
+# 2026-06-30 fix #3: timestamp echo to diagnose 22:02→23:59 1h57min hang
+# (2026-06-29 21:07 incident — wrapper invisibly hung after codex failover exit;
+# unclear if hang was in `git status`, send-alert subprocess boot, or git commit).
+echo "[PHASE-Z-safety] start $(date '+%H:%M:%S')"
+echo "[PHASE-Z-safety] git status check $(date '+%H:%M:%S')"
+PHASE_Z_STATUS=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 30 \
+  /usr/bin/git -C "$REPO_ROOT" status --porcelain 2>/dev/null)
+echo "[PHASE-Z-safety] git status returned $(date '+%H:%M:%S')"
+if [ -n "$PHASE_Z_STATUS" ]; then
   echo "[PHASE-Z-safety] uncommitted changes after dispatch — auto-committing"
-  /usr/bin/git -C "$REPO_ROOT" add -A 2>&1 | tail -1
-  /usr/bin/git -C "$REPO_ROOT" commit -m "ops(hourly $(date '+%H:%M')): PHASE-Z safety-net auto-commit (agent left uncommitted)" 2>&1 | tail -1
+  /usr/bin/perl -e 'alarm shift; exec @ARGV' 30 \
+    /usr/bin/git -C "$REPO_ROOT" add -A 2>&1 | tail -1
+  echo "[PHASE-Z-safety] git add done $(date '+%H:%M:%S')"
+  /usr/bin/perl -e 'alarm shift; exec @ARGV' 60 \
+    /usr/bin/git -C "$REPO_ROOT" commit -m "ops(hourly $(date '+%H:%M')): PHASE-Z safety-net auto-commit (agent left uncommitted)" 2>&1 | tail -1
+  echo "[PHASE-Z-safety] git commit done $(date '+%H:%M:%S')"
 else
   echo "[PHASE-Z-safety] working tree clean — agent PHASE Z committed everything"
 fi
+echo "[PHASE-Z-safety] end $(date '+%H:%M:%S')"
 
 echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=$EXIT_CODE) ==="
 # Canonical exit banner — host_cron_fail alert (src/volpred/ops/alerts.py
