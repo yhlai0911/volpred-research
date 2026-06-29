@@ -12,7 +12,7 @@
 
 - **下載下限** 1990-01-01；各籃子實際起點 = 「全員（含對照）都有資料的最早日」自動決定（`_basket_window`）。
 - **資料**：yfinance `Close`（`auto_adjust=True`，已還原配息/拆股）。
-- **7 籃子**：
+- **6 籃子**（含 2 個台灣對照口徑 0050/^TWII）：
   | 籃子 | 標的 | 對照 | 存活者偏差 |
   |---|---|---|---|
   | TW_large_caps | 台灣 10 大型股 | 0050.TW（經 `clean_tw50_data` 修拆股） | 有 |
@@ -55,7 +55,7 @@
 
 ## 結論（NULL / 細緻版）
 
-1. **長期報酬：年度等權再平衡 ≈ 買進持有** — 6 籃子差異全部統計不顯著。方向上，**無存活者偏差的籃子（TWII/產業/多資產/跨國）rebal 點估計略勝**（P(reb>BH)=0.53~0.97，與「diversification return」文獻一致）；只有兩個「今日贏家選樣」的個股籃子（0050、US大型股）rebal 略輸——因為買進持有那條腿被預先選中的 mega-winner（台積電、科技巨頭）撐高。
+1. **長期報酬：年度等權再平衡 ≈ 買進持有，沒有穩健的再平衡 alpha** — 6 籃子差異全部統計不顯著（CI95 全含 0）。CAGR 點估計**混合但偏正**：6 籃子中 5 個 rebal CAGR 持平或略高（TWII +1.50、產業 +0.72、跨國 +0.47、美國大型股 +0.05、多資產 +0.04 %/年），**只有台股 0050 籃子 rebal 略低（−1.18%/年）**——因為買進持有那條腿被預先選中的 mega-winner（台積電）撐高（存活者偏差）。降低個股偏差的籃子（產業/多資產/跨國）方向與「diversification return」文獻一致（小幅正向），但皆不顯著。
 2. **風險調整後 rebal ≥ BH**：多數籃子再平衡的最大回撤與波動低於買進持有，Sharpe 相當或更高（美國大型股 0.94 vs 0.86、MDD −37.6% vs −46.2%）。
 3. **不是成本問題**：年度頻率交易極少，三種成本下 CAGR 幾乎不變。
 4. **本質是「溫和反動量 / 再平衡紀律」策略**：輪動/均值回歸年佔便宜、單邊強勢年讓出動量；長期互相抵銷 → 與買進持有打平偏正。
@@ -63,7 +63,7 @@
 
 ## 檔案
 - `k1580.py` — 回測腳本（SEED=42）
-- `k1580_results.json` — 完整結果（7 籃子 × 3 成本 × metrics + bootstrap + 分時期）
+- `k1580_results.json` — 完整結果（6 籃子 × 3 成本 × metrics + bootstrap + 分時期）
 - `generate_charts.py` + `fig_a_regime_heatmap.png` / `fig_b_fullperiod_bar.png` / `fig_c_us_cumulative.png`
 - `codex_review.md` — Codex code review（v1 CONDITIONAL_PASS 6 點 + 最終複審）
 

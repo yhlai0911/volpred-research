@@ -6,11 +6,11 @@
 持有一年後再平衡，年復一年。對照組 = 同籃子買進持有 + 大盤指數（台灣 0050、美國 SPY）。
 
 研究誠實守則（對應 .claude/rules/experiments.md）:
-- 無 lookahead：再平衡在「該年第一個交易日」用『當日』收盤價執行（決策時已知），
-  不使用任何未來資訊。買進持有與指數同樣在期初一次建倉。
+- 無 lookahead：再平衡在「該年第一個交易日」用『當日』收盤價執行（理想化同日收盤 MOC
+  執行假設；新權重不乘同日報酬，非 lookahead alpha，但非保證成交價）。買進持有與指數同樣期初一次建倉。
 - 交易成本：台股 30bps、美股 10bps（單邊，charge 在成交名目上），另含 no_cost 對照。
 - Survivorship bias：個股籃子用「今日已知的大型股」必然偏向存活者 → 明確揭露，
-  並加 sector ETF 籃子（產業 ETF 不下市，無存活者偏差）作為再平衡『機制本身』的乾淨檢定。
+  並加 sector ETF / 多資產 / 跨國籃子（不下市，降低個股存活者偏差，仍有集合選擇）作為再平衡『機制本身』的較乾淨檢定。
 - 固定 seed：block bootstrap n_boot=5000, seed=42。
 - 公平比較：再平衡 / 買進持有 / 指數同期間、同成本慣例、同籃子。
 - 顯著性：對「再平衡 - 買進持有」的每日報酬差做 block bootstrap（block=21）取年化差 CI95；
@@ -91,7 +91,7 @@ BASKETS = {
         "benchmark": "SPY",
         "default_cost": "us_10bps",
         "survivorship": False,
-        "label": "美國產業 ETF（9 檔，產業不下市 → 無存活者偏差；起點受 SPDR 上市 1999 限制）",
+        "label": "美國產業 ETF（9 檔，產業不下市 → 降低個股存活者偏差（仍有集合選擇）；起點受 SPDR 上市 1999 限制）",
     },
     "US_multi_asset": {
         "tickers": ["SPY", "TLT", "GLD", "VNQ", "DBC"],
@@ -105,7 +105,7 @@ BASKETS = {
         "benchmark": "ACWI",
         "default_cost": "us_10bps",
         "survivorship": False,
-        "label": "跨國家 ETF（9 國 iShares，不下市 → 無存活者偏差；對照 ACWI 全球指數，起點受 ACWI 上市 2008 限制）",
+        "label": "跨國家 ETF（9 國 iShares，不下市 → 降低個股存活者偏差（仍有國家集合選擇）；對照 ACWI 全球指數，起點受 ACWI 上市 2008 限制）",
     },
 }
 
@@ -289,6 +289,8 @@ def _subperiod_breakdown(rebal_val: pd.Series, bh_val: pd.Series,
             "boot_ann_diff": boot.get("ann_mean_diff"),
             "boot_ci95": [boot.get("ci95_low"), boot.get("ci95_high")],
             "boot_significant": boot.get("significant"),
+            "boot_low_power": True,
+            "boot_note": "短窗 + 7 期多重比較 → 顯著性 power 低，分期 CI 僅作描述，不作正式 inference",
         })
     return out
 

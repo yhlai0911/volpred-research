@@ -36830,5 +36830,20 @@
       "ETF_proxy",
       "null_result"
     ]
+  },
+  {
+    "item_id": "128c67d4",
+    "category": "strategy_evaluation",
+    "content": "K1580 [CONDITIONAL_PASS, reviewer=Codex CLI gpt-5.4]: 年度等權再平衡(annual equal-weight rebalancing) vs 買進持有 vs 大盤指數，6 籃子(台股×2/美股/美產業ETF/多資產/跨國9國)，1993-2024，含交易成本+block bootstrap(seed=42)+分7時期+0050用clean_tw50_data修拆股。核心: 再平衡無顯著穩健 alpha — 6 籃子 reb-BH 差異全部不顯著(CI95含0); CAGR 點估計混合偏正, 5/6 籃子 rebal 持平或略高(TWII+1.50/產業+0.72/跨國+0.47/美大型股+0.05/多資產+0.04 %/yr), 只有台股0050略低(-1.18%, 存活者偏差墊高 BH 的台積電). 風險: 多數籃子 rebal MDD/vol < BH, Sharpe 相當或更高(美大型股0.94 vs 0.86, MDD-37.6 vs -46.2). Regime(分時期靈魂發現): 危機/輪動年(2008金融海嘯,2022升息)再平衡全綠(美股2022 reb-BH +21.7%/yr); 單邊大型股年(2020-21 COVID科技,2023-24 AI台積電)轉紅(美股-17.3,台股-14.1). → 本質溫和反動量/再平衡紀律策略, 輪動年佔便宜單邊年讓動量, 長期互抵≈BH. 無籃子負總報酬(CAGR 3-16%). 不是成本問題(年頻交易少). 方法論: 理想化MOC執行(無lookahead alpha), 建倉成本進CAGR, fixed-point self-financing cost. 數據坑教訓: yfinance 0050.TW 把2025-06-18的1:4拆股只回溯到2014-01-02→假-75%報酬, 必用 volpred.utils.clean_tw50_data 修(external-data-sources skill).",
+    "evidence": [
+      "experiments/K1580/k1580.py",
+      "experiments/K1580/k1580_results.json",
+      "experiments/K1580/README.md",
+      "experiments/K1580/codex_review.md",
+      "experiment_id=K1580",
+      "reviewer=Codex CLI (gpt-5.4) primary-path, CONDITIONAL_PASS"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-06-30T01:06:02.189144"
   }
 ]
