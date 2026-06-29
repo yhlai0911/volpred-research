@@ -69,18 +69,11 @@
 
 違反任一條 = 違反最高指引，需即時自我糾正並記 `docs/error_log.md`。
 
-## 自主運營 = 主動 + result-level + PDCA（2026-06-30 用戶連續硬性糾正，凌駕「安靜就停」）
+## 自主運營 = 主動 + result-level + PDCA（2026-06-30 用戶硬性糾正）
 
-**核心原則（每個 turn / tick 都適用）**：身為**自主運營經理**，你知道 5 missions、平台定位與目標，就**該自己知道要做什麼並直接做** —— 不是等錯誤、不是凡事問用戶、不是「發現問題就寄信」。
+一句話：**你是運營經理，知道 5 missions 與目標就該知道做什麼並直接做** —— 發現問題直接修（不是只寄信報告）、沒錯誤就主動掃 missions 找工作（不空轉）、宣告完成前用線上數據 Check（不假設）、踩坑就把流程固化成 skill/指引/memory（PDCA 連續改善）、不確定就上網查（不凡事問用戶）。
 
-1. **發現問題 = 直接修，不是只報告**：當你寄 alert / email 給老闆的當下，你已經知道「問題 + 解法」了 → 那就**直接執行解法**。只有真正不可逆（push --force / 刪原始資料 / 關線上服務）或 policy（投稿 / 研究 pivot）才問用戶。「報告而不做」是被禁的反模式。
-2. **沒錯誤 ≠ 沒事做**：reactive 監控（等 critical/warn）是偷懶。每個 tick 主動掃 5 missions 找可優化的工作並**派工執行** —— 補池 / 跑新實驗 / 寫新文章 / 推進論文 / 拉曝光 / **平台需要的新功能、網頁新呈現、給用戶的新服務都直接做**。永不空轉。
-3. **每日大體檢（result-level，非 exit-code）**：`uv run python scripts/daily_checkup.py --alert` —— 7 維度驗證「結果好不好」（資料新鮮 / cron 真完成 / 文章含真圖表+數據表 / 線上頁顯示最新 / 非長效快取 / mission 前進），不只查「程式有沒有報錯」。**老闆不該是最後一道 QA**。每日 + 每 autonomous tick 開頭跑；有 finding 直接修不只 alert。
-4. **不繞過正規流程**：文章走 feed-publisher（圖嵌 content 的 `![](url)`，非只放 metadata）；資料走 canonical CLI；不自寫一次性 script 繞過 gate。
-5. **時效性資料優先**：盤中 / tick / order flow 錯過窗口可能**永久無法補** = 致命。data_freshness 緊盯，落後即補。
-6. **PDCA 持續改善（Plan-Do-Check-Act）**：每次踩坑 → Check 根因 → Act：**必要時新建/調整/優化 skill、修正指引文件（CLAUDE.md / rules / docs）、把教訓寫進 memory**，讓下一輪不再犯（這就是 loop engineering 的快/慢 loop）。不確定 / 不懂的 → **上網查**（WebSearch / 官方文件），不卡住、不亂猜、不問用戶。
-
-詳細 result-level SOP：`.claude/skills/platform-ops-manager/SKILL.md` + memory `feedback_proactive_result_level_operation`。
+完整流程（每 tick / 每日的 Plan-Do-Check-Act 迴圈、每日大體檢 SOP、find+fix vs escalate）→ **skill `pdca-operations`**（autonomous tick / 大體檢時 auto-load）。每日大體檢工具：`scripts/daily_checkup.py`。
 
 ## Bootstrap 原則
 
