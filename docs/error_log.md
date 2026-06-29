@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-29 keyword 比對假陽性跨多處（cluster cap / stale_knowledge / audit）— 老闆指令移向語意相似度
+
+**問題**：dreaming 連 3 輪 5 個 critical escalations，老闆 email-12138「立即徹底處理好」+ email-12139「相似度是整個主題語意比較不是關鍵字」。
+
+**現象**：5 escalations 中 4 個是 **keyword 比對假陽性**：(a) 3 篇 stale_knowledge（mile_d2881a1a/644265a6/ee473d5a）其實是綜述文章（「波動率預測研究全景：150+ 實驗」等），因提到幾十個方法論關鍵字（23/34/43 個）而 keyword-overlap 命中一堆 correction，非真重複被推翻 claim；(b) K1333 被 keyword vix cluster cap 擋（count 92>15），但「VIX vol-of-vol」是 distinct 子主題；(c) 同源：cluster_cap_drift 也是 keyword 把不同 vol 子主題誤算成集中。第 5 個（hourly_dispatch exit1）是已恢復事故仍 escalate。
+
+**根因**：系統多處用 **keyword 比對代替語意相似度**。老闆原則：「波動率對風險值」vs「波動率對選擇權定價」是兩個不同主題、不算重複，但 keyword 都歸成 vix。
+
+**解決方法**：
+- **cap 放寬**（commit cda4ada11，老闆 email-12132 授權）：vix 15→50/spy 10→40/garch 10→20/taiwan 8→16/vt 8→12/factor_etf 6→10、dominant ratio 0.25→0.35。critical→warn，0 remaining critical。
+- **dreaming stale_knowledge broad-review guard**（commit 2916edb66）：matched_keywords ≥12 的廣覆蓋文章跳過（keyword-overlap 假陽性）。語意化第一步。
+- **dreaming repeated_tool_failure recency guard**（同 commit）：已恢復（48h 無再犯）的失敗不再 escalate critical（補 hourly_dispatch entry 的「window 自然滑動」— 改為 48h 主動 resolve，且能區分 recovered vs active）。
+- **K1333 發佈**：用 cluster_waiver（子主題正當）發為 mile_7052f32c（research）。附帶查證 prepublish_audit「t=133.21 不存在」也是假陽性（拿 t-stat 比錯陣列；133.21 經查在 results.json 為真值，VIX 近 unit-root）。
+- **效果**：dreaming findings 5→1（1 = hourly_dispatch recovering，~06-30 滿 48h 自動清）。
+- **教訓 + follow-up**：keyword 比對假陽性是 cluster_cap_drift / stale_knowledge / audit number-check 的**同一根因**。**策略方向（老闆 directive）**：把集中度/重複/staleness 全移到「整主題 embedding 語意相似度」（用 LanceDB + embedding 基礎設施），keyword 只留粗篩 runaway。排為下一主線 build。
+
 ## 2026-06-29 hourly_dispatch.log exit1 ×80 / 5d — RESOLVED 由 06-28 keychain-independent OAuth fix
 
 **問題**：hourly-13 triage email-12129（boss P1 急件 health_alerts + loop_health）跑 `volpred ops dreaming-run` 後 5 個 critical findings，top = `repeated_tool_failure:hourly_dispatch.log:exit1 ×80 over 4.96d (first 2026-06-23T01:01:02 → last 2026-06-28T00:07:36)`。
