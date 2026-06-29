@@ -36711,5 +36711,19 @@
     ],
     "confidence": 0.84,
     "created_at": "2026-06-29T18:24:13.743322"
+  },
+  {
+    "item_id": "b38a3669",
+    "category": "event_study",
+    "content": "[K1573][NULL][reviewer:Codex CONDITIONAL_PASS] CHIPS Act 半導體產業政策補助公告對 sector RV 無 T+1..+5 announcement effect。17 events × 13 tickers = 146 per-event tests, Politis-Romano stationary bootstrap (B=1000, seed=42)。aggregate post/pre ratio = 0.950 (post 反低於 pre)、pooled sign test p = 0.997、0/146 per-event Bonferroni-sig (α=0.05/146 = 3.4e-4)。Per-ticker 中 INTC (mean 1.32, n=4) / NVDA (1.32, n=17) 看似偏高但 n 太少或 sign-test p > 0.5；Per-event-type 中 award (1.14) > award_final (0.71) 符合 「資訊在 preliminary 已 priced in、final 是行政完成」直覺，但 pooled sign-test 全部 p > 0.7。Cross-event spillover 個別存在 (INTC 2025-01-15 self 2.18 + 個別 ETF 0.65) 但無 systematic pattern。Honest caveat: N=17 small + daily r² window 可能漏 intraday micro-spike + Bonferroni 嚴格 + random-anchor null 保守 → 結論「無強、集中、systematically positive RV spike」，不是「無 effect」。後續 K 方向: (a) 5min intraday RV 重做、(b) T+22 持久效應、(c) ASML 歐 / TSM ADR 跨時區。Article angle: 「CHIPS Act 公告日為什麼半導體股沒大震？market efficiency / info already priced in」(避免「補助無用」過度宣稱)。experiment_id=K1573, experiment_path=experiments/K1573/, reviewer_source=Codex gpt-5.4 CONDITIONAL_PASS (4 minor fixes applied + reran)。Lookahead: T+1 strict post, pre ends T-6, squared-return symmetric, seed=42。",
+    "evidence": [
+      "experiments/K1573/k1573_results.json",
+      "experiments/K1573/README.md",
+      "experiments/K1573/events.csv",
+      "experiments/K1573/event_ticker_results.csv",
+      "experiments/K1573/fig_a.png"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-06-29T20:24:59.271387"
   }
 ]
