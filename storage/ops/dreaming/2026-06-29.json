@@ -1,19 +1,19 @@
 {
   "schema": "dreaming_review.v1",
-  "generated_at": "2026-06-29T07:45:12.615108+00:00",
+  "generated_at": "2026-06-29T11:17:28.603415+00:00",
   "window_days": 14,
   "dry_run": true,
   "loop_health": {
-    "generated_at": "2026-06-29T07:45:12.615108+00:00",
+    "generated_at": "2026-06-29T11:17:28.603415+00:00",
     "window_days": 14,
-    "overall": "degrading",
+    "overall": "ok",
     "first_pass_success": {
       "status": "low_coverage",
       "signal": "derived_low_coverage",
       "window_days": 14,
-      "total_succeeded": 328,
+      "total_succeeded": 327,
       "traced": 87,
-      "coverage": 0.265,
+      "coverage": 0.266,
       "coverage_floor": 0.3,
       "note": "status_history coverage too low to judge first-pass rate honestly; surfacing counts only (info, not a breach)."
     },
@@ -21,14 +21,14 @@
       "status": "ok",
       "signal": "supported",
       "window_days": 14,
-      "success": 328,
+      "success": 327,
       "fail": 0,
       "blocked": 22,
-      "other": 1,
+      "other": 3,
       "success_rate": 0.937
     },
     "error_recurrence": {
-      "status": "degrading",
+      "status": "ok",
       "signal": "supported",
       "window_days": 14,
       "distinct_signatures": 5,
@@ -40,6 +40,7 @@
           "count": 80,
           "first_seen": "2026-06-23T01:01:02+00:00",
           "last_seen": "2026-06-28T00:07:36+00:00",
+          "recovered": true,
           "span_days": 4.96,
           "known": false
         },
@@ -48,6 +49,7 @@
           "count": 5,
           "first_seen": "2026-06-15T13:57:32+00:00",
           "last_seen": "2026-06-17T16:57:50+00:00",
+          "recovered": true,
           "span_days": 2.13,
           "known": true
         },
@@ -56,6 +58,7 @@
           "count": 1,
           "first_seen": "2026-06-23T01:00:12+00:00",
           "last_seen": "2026-06-23T01:00:12+00:00",
+          "recovered": true,
           "span_days": 0.0,
           "known": false
         },
@@ -64,6 +67,7 @@
           "count": 1,
           "first_seen": "2026-06-19T23:00:16+00:00",
           "last_seen": "2026-06-19T23:00:16+00:00",
+          "recovered": true,
           "span_days": 0.0,
           "known": false
         },
@@ -72,6 +76,7 @@
           "count": 1,
           "first_seen": "2026-06-22T17:30:21+00:00",
           "last_seen": "2026-06-22T17:30:21+00:00",
+          "recovered": true,
           "span_days": 0.0,
           "known": false
         }
@@ -93,57 +98,23 @@
       "current_correction_report_medium": null
     }
   },
-  "findings": [
-    {
-      "pattern_type": "repeated_tool_failure",
-      "signature": "repeated_tool_failure:hourly_dispatch.log:exit1",
-      "severity": "critical",
-      "evidence": [
-        "hourly_dispatch.log:exit1 ×80 over 4.96d (first 2026-06-23T01:01:02+00:00 → last 2026-06-28T00:07:36+00:00)"
-      ],
-      "remediation": "propose_only",
-      "remediation_ref": null,
-      "proposal": "Cron job `hourly_dispatch.log` returned a non-zero exit 80× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).",
-      "governance_target": "docs/error_log.md",
-      "occurrences": 4,
-      "first_seen": "2026-06-29T02:25:03.708340+00:00",
-      "last_seen": "2026-06-29T07:45:12.615108+00:00"
-    },
-    {
-      "pattern_type": "semantic_concentration",
-      "signature": "semantic_concentration:feed",
-      "severity": "warn",
-      "evidence": [
-        "semantic rehash_rate=0.3 over 20 non-daily articles; top pairs — 0.766: 深度學習波動率模型的部分複製：RECH-X 跨市場實測，第九 || AI 波動率模型真的比較聰明嗎？RECH-X 的答案很克制。; 0.757: K1339: 商品 ETF 動量體制切換後，銅 30 日波動 || 商品 ETF 翻向時，銅先把警報拉高。很多人看商品 ETF，; 0.756: 預測輸了，守底線卻贏了：一個模型的分裂成績單。預測輸了，守底 || 模型多看幾個鄰居，不代表就更會預測波動。有些研究的直覺很吸引"
-      ],
-      "remediation": "propose_only",
-      "remediation_ref": null,
-      "proposal": "6/20 recent non-daily articles are SEMANTIC rehashes (same topic, different framing) of another recent article — keyword clustering misses these. Diversify topic selection; consider a semantic dedup gate at publish (near_duplicates) before releasing a rehash.",
-      "governance_target": null,
-      "occurrences": 1,
-      "first_seen": "2026-06-29T07:45:12.615108+00:00",
-      "last_seen": "2026-06-29T07:45:12.615108+00:00"
-    }
-  ],
-  "new_findings": [
-    "semantic_concentration:feed"
-  ],
+  "findings": [],
+  "new_findings": [],
   "resolved_findings": [
+    "repeated_tool_failure:hourly_dispatch.log:exit1",
     "stale_knowledge:mile_d2881a1a",
     "stale_knowledge:mile_644265a6",
     "stale_knowledge:mile_ee473d5a",
     "missing_retry_strategy:K1333_article_general_v2"
   ],
-  "escalations": [
-    "repeated_tool_failure:hourly_dispatch.log:exit1"
-  ],
+  "escalations": [],
   "auto_remediation": [],
   "counts": {
-    "findings": 2,
-    "new": 1,
-    "resolved": 4,
-    "escalations": 1,
-    "propose_only": 2,
+    "findings": 0,
+    "new": 0,
+    "resolved": 5,
+    "escalations": 0,
+    "propose_only": 0,
     "auto_dispatch_eligible": 0
   }
 }
