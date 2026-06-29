@@ -476,7 +476,26 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 - [ ] 銅作為景氣領先的 vol 訊號：CPER/銅期貨代理 vol 與股市 vol 的 lead-lag，「銅博士」在 vol 維度成立嗎（yfinance，明確 lag）
 - [ ] REIT 波動率與利率敏感度：VNQ realized vol 在升息/降息 regime 下的差異，REIT 是股是債（yfinance）
 
-### 期刊主題挖掘 batch（2026-06-11；五新軸 microstructure/ETF flow/GPR/氣候/retail，全免費資料 yfinance/FRED/TAIFEX tick/TWSE/FINRA/NOAA/CWB/GPR 官網）
+### 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 QJE/AER/JPE/Econometrica/ReStud/JoE/JFE/Quantitative Economics/JFEC/JBES/NBER/AEJ，6 agents、dedup 2402 K，研究總監篩 31→11）
+
+**建模升級軸（直接精進 VolPred vol-forecast 核心，Mission 2+3）**
+- [ ] **Rough volatility / ARRV / fractional OU 進賽馬**（JoE 2023 fOU + arXiv 2504.15985 + IJTAF 2025）：TAIFEX/SPY 5-min RV 估 Hurst（change-of-frequency），賽馬加 ARRV/fOU，QLIKE-DM 檢高-VIX regime 是否勝 HAR/HARQ，Hurst 當粗糙度 regime 診斷。全免費。
+- [ ] **HARQ/SHARK 測量誤差修正 HAR**（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照。
+- [ ] **Conditional / Sequential MCS 評估升級**（JRSS-B 2025 qkag066 + arXiv 2505.21278 + Conditional SPA）：重用 1400+ K 的 loss/VaR，conditioning＝VIX regime/FRED 衰退，conditional MCS + 線上 sequential 監控勝負漂移 → 「哪模型在哪 regime 稱王」meta 結論。零新資料。
+- [ ] **Co-jump / HAR-CJ jump 軸**（JFE 2017 systemic co-jumps + JoE 2023 networks + Hawkes）：tick BNS bipower/Lee-Mykland 拆 RV＝continuous+jump 建 HAR-CJ，同日跨資產 co-jump 計數當 vol regime 觸發器（VolPred jump 軸最薄）。
+- [ ] **內生轉移 MS-GARCH**（Quantitative Economics 16 (2025) Endogenous Regime-Switching）：high-vol regime 進入機率＝信用利差(BAMLH0A0HYM2)/term spread(DGS10-2)/drawdown 的 logistic 函數，檢 stress 期(2020/2022/2025 tariff) OOS QLIKE 是否勝 constant-Markov。資料全在 storage/macro，≥100 multistart(K1213)。
+- [ ] **Agreed vs Disagreed Uncertainty 二維 regime**（Gambetti-Forni arXiv 2302.01621, CEPR VoxEU 2025）：level＝VIX/JLN，disagreement＝Philly Fed SPF IQR，2×2 regime 檢「高不確定×低分歧(agreed)」格的 forward RV/tail 是否更高；disagreement 當 VIX 之外增量 predictor（正面挑戰 VIX-sufficient K43/730）。
+
+**外生衝擊軸（Mission 1+2+5；新可觀測變數，避開 K1367/K1576 已壓重的 proxy-NULL 區）**
+- [ ] **穩定幣儲備 → 短端 T-bill vol**（GENIUS Act 2025 簽署 + Eichengreen fire-sale）：鏈上穩定幣淨發行(DefiLlama/CoinGecko)對 DGS1MO/3MO realized vol(MOVE proxy) 領先；脫鉤事件(USDC-SVB)當 event window 量 SHY/BIL vol spike。全免費，timely 高分享。
+- [ ] **AI 電力超級循環 → 公用事業 vol regime**（IEA Energy&AI 2025 + PJM 容量拍賣清算 $28.9→$329 暴漲 10x）：PJM/MISO 拍賣公佈日 event window 量 XLU/IPP(VST/CEG/NRG)/鈾礦(URA) 隔日 abnormal vol；hyperscaler capex 上修(EDGAR 10-Q)→電力曝險籃子截面 vol；utility 防禦→週期 vol-beta 斷點。PJM CSV/EIA API 免費，高 monetization。
+- [ ] **PM2.5 情緒型外生 regressor**（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）。識別乾淨（純情緒管道），補行為 vol 軸。
+- [ ] **Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。
+- [ ] **NatCat / 保險板塊 vol 重定價**（Swiss Re sigma 1/2025 ~$145B + BIS FSI No.65 + AEJ:Macro 2025 ACI）：NOAA HURDAT2 具名颶風登陸日 event window 量 KIE/IAK/再保(RNR/EG/TRV) abnormal vol/下行半變異；Q3 颶風季 vol-of-vol 季節性。用實體災害事件繞過專有 Cat Bond Index（避 K1367 NULL_PROXY）。
+
+**次批候選（前 11 飽和後）**：GenAI 勞動曝險×截面 vol（occupation→firm 映射工大）、財政/term premium、人口老化 TDF、realized covariance(RCov)、prediction market、FOMC 資訊 shock、DL/transformer vol — 詳見 workflow 輸出。
+
+
 > 來源：journal-topic-discovery agent batch 2（JFM/JBF/JFE/JEF/RoF/JFQA + Cboe/IMF GFSR/OFR/arXiv 趨勢層級，非捏造論文）。已對 06-10 batch 與既有 arcs 去重。台灣在地優勢題 ×3（台海 GPR、颱風假停市、當沖比率）。
 - [ ] Order-flow imbalance 的 regime 依賴預測力：台指期 tick OFI → 短期 RV — TAIFEX tick 建 5-min OFI，檢定對 5min/30min/日 RV 增量預測力是否隨 vol regime 與 horizon 變化，明確 lag（來源：JFM/Quantitative Finance 2025-26 OFI-vol 統一框架）
 - [ ] 免 tick 的「realized illiquidity」作 vol 預測增量因子 — 日 OHLCV 算 Amihud/Corwin-Schultz/range-volume 比，加入 HAR-RV 檢定美股/台股 OOS 增量 QLIKE+DM（來源：JEF 2024-25 低頻流動性測度賽馬）
