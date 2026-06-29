@@ -38882,7 +38882,7 @@
     "title": "Paper review (Codex 24h-rule): 把美股最熱門的 5 種因子輪著買，最後還是沒贏最笨的那個組合",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_190c7e3c needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_190c7e3c",
@@ -38890,7 +38890,13 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-29T08:09:49+00:00"
+    "created_at": "2026-06-29T08:09:49+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-29T08:43:44.390796+00:00",
+    "claim_session_id": "5436baa9293b",
+    "started_at": "2026-06-29T08:43:44.629170+00:00",
+    "completed_at": "2026-06-29T08:50:41.125472+00:00",
+    "result": "Codex 24h review found K566 same-day VIX/factor-momentum lookahead. Numeric article claims match results, but exact Sharpe/DM are pre-lag audit figures; added published caveat via publish_draft update, synced single article to Supabase, and recorded review/error_log."
   },
   {
     "id": "paper_review_mile_abe9e68f",

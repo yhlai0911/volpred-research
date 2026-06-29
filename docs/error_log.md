@@ -2,6 +2,25 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-29 K566 因子輪動文章 source review — same-day VIX / momentum lookahead
+
+**問題**：`mile_190c7e3c`（K566 因子 ETF 月頻輪動 vs SPY+GLD+VIX 基準）24h Codex review 發現 source code 未滿足最高優先規則 `signal from t-1, return at t`。
+
+**現象**：
+- `experiments/k566/k566_factor_timing_vt.py` 先用同日 `VIX` 算 `vt_weight = 12/VIX`，再直接乘同日 SPY/factor return。
+- 60d/20d momentum rolling sums 使用含當日報酬的資料；月底 rebal date 當天更新 selection 後，立即把新 selection 套到同一天 return。
+- 文章文字寫「每個月底決定下個月要抱哪個因子 ETF」，但 code 實際包含 rebalance day 的 same-day signal/return alignment。
+- 本次結論是 null（即使 bias-friendly 版本也沒讓月頻因子輪動贏 benchmark），因此方向上沒有誇大 alpha；但 exact Sharpe / DM / cross-OOS 數字不能當成 lag-clean formal evidence。
+
+**根因**：K566 是早期策略實驗，沿用「當日 VIX 控當日部位」和「當日 rolling signal 控當日報酬」的舊寫法；後來的 lookahead discipline 沒回溯套到這組已發布文章。README 仍是 placeholder，也缺少實驗三件套中應有的方法論與防錯說明。
+
+**解決方法**：
+- 用 `scripts/publish_draft.py --update` 正式更新 `mile_190c7e3c`，在文章開頭加入 Codex 24h caveat：K566 數字是 pre-lag audit numbers，不是 lag-clean 可交易回測；保留的只是不支持因子輪動的保守 null takeaway。
+- 全量 `feed-sync --apply` 卡住後中斷，改用 `scripts.supabase_sync.sync_article()` 單篇同步；Supabase read-back 確認 `remote_has_caveat=true`。
+- 新增審查紀錄 `storage/ops/paper_reviews/2026-06-29/codex_review_mile_190c7e3c_k566.md`。
+
+**教訓**：Null result 也不能免除 lookahead audit；「沒有贏」雖然比「贏很多」安全，但 exact statistics 仍需 lag-clean 才能進 knowledge/paper。舊策略實驗若含 `12/VIX`、rolling momentum、month-end rebalance，review checklist 必須同時查 `weight.shift(1)` 與「rebalance day 是否從隔日才生效」。
+
 ## 2026-06-29 Supabase article sync 仍用 stale single report 覆蓋 feed content — K1339 24h review 抓出
 
 **問題**：`mile_c1f998c8` 24h review 時發現 `storage/reports/feed.json` 中已發布文章是較新的「商品 ETF 動量體制」保守版本，但 `storage/reports/mile_c1f998c8.json` 仍是舊版 draft，標題與內容使用較強的「期貨期限結構翻轉 / contango→backwardation」口徑。
