@@ -36725,5 +36725,36 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-06-29T20:24:59.271387"
+  },
+  {
+    "item_id": "ba94ad4a",
+    "category": "knowledge",
+    "title": "K1574: Factor ETF implementation shows exposure dilution but no robust alpha shortfall",
+    "experiment_id": "K1574",
+    "k_id": "K1574",
+    "experiment_path": "experiments/K1574/",
+    "experiment_file": "experiments/K1574/k1574.py",
+    "results_path": "experiments/K1574/k1574_results.json",
+    "reviewer": "Codex",
+    "reviewer_source": "experiments/K1574/codex_review.md",
+    "verdict": "NULL",
+    "content": "K1574 tests tradable factor ETF implementation shortfall using yfinance adjusted OHLCV for MTUM/VLUE/QUAL/USMV/RPV/IVE/IWF plus Kenneth French daily FF5+Momentum factors, aligned 2013-07-19 to 2026-04-30 (n=3,215 daily rows). Daily ETF excess returns are attributed to Mkt-RF/SMB/HML/RMW/CMA/Mom with Newey-West HAC alpha tests, Holm alpha correction across 7 ETFs, and a stationary bootstrap over common date indices (seed=42, 1,000 reps, mean block 21d). Result: directional primary factor beta is positive for all 6 scorable ETF mappings, but alpha shortfall is not statistically robust. Median annual alpha is -0.55%, 6/7 alphas are negative (one-sided sign p=0.0625), 0/7 are Holm-significant negative, 0/7 fall in the -2% to -4% shortfall band, and bootstrap median-alpha 95% CI is [-2.03%, +0.80%]. Median residual-vol share is 27.0%, median tracking error vs SPY is 7.57%. Conclusion: factor ETFs are diluted, long-only, benchmark-constrained implementations of paper factors, but this sample does not support a robust 2-4% annual negative-alpha implementation shortfall. This is an ex-post attribution diagnostic, not a causal cost estimate or tradable signal. Codex review: CONDITIONAL_PASS.",
+    "evidence": [
+      "experiments/K1574/README.md",
+      "experiments/K1574/k1574.py",
+      "experiments/K1574/k1574_results.json",
+      "experiments/K1574/codex_review.md",
+      "experiments/K1574/figures/k1574_alpha_and_factor_loading.png",
+      "experiments/K1574/figures/k1574_risk_and_cost_proxies.png"
+    ],
+    "confidence": 0.84,
+    "created_at": "2026-06-29T21:57:37.124720",
+    "tags": [
+      "factor_etf",
+      "implementation_shortfall",
+      "fama_french",
+      "null_result",
+      "codex_reviewed"
+    ]
   }
 ]
