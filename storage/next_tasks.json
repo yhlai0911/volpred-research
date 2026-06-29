@@ -38699,5 +38699,20 @@
     "started_at": "2026-06-29T02:10:00.286792+00:00",
     "completed_at": "2026-06-29T02:15:07.680136+00:00",
     "result": "Closed: cluster_cap_drift critical 為 30d 歷史餘量，soft cap 今日已上線擋未來 + 6/6 pending 已 rotate 非熱門 cluster + 30d 窗口自然清掉。content_quality warn burst+arc 不可逆且 pending 全非 reader-facing 不會復發。額外發現 loop_health degrading (hourly_dispatch exit1 ×80) 待下一 fire 診斷。Close email sent 5781d60e."
+  },
+  {
+    "id": "platform_ops_arc_dedup_v2_audit_20260629",
+    "task_type": "platform_ops",
+    "title": "Audit arc_dedup_v2 over-aggressive on fresh-cluster drafts",
+    "description": "Hourly-12 triage finding: 19/19 drafts arc-blocked while spy 8.3x / vix 6x 30d cap overshoot. Most blocks legitimate (同 K research↔general dedup), but some fresh-cluster blocks suspicious: mile_377b569a (K1439 COMMODITY/GOLD/OIL/USD) arc_of=mile_2c758888, mile_3942eab2 (K1435 FOMC/GOLD/RATES/USD) arc_of=mile_df7a8bce. 範圍: (1) 對這 2 案例查 arc_of target 真實主題與相似度; (2) 若 mistaken-dedup → 提出 arc_dedup_v2 entity-weight 調整方案 (commodity / FOMC entity 對 spy/vix 主軸 cross-similarity 應降權); (3) PR 不在此 task — 先 audit report 進 docs/error_log.md。配 references: docs/error_log.md 2026-06-29 hourly-12 entry, memory feedback_narrative_arc_dedup.",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "arc_dedup",
+      "hourly_discovered"
+    ],
+    "source": "hourly_discovered",
+    "created_at": "2026-06-29T12:25:00+08:00"
   }
 ]

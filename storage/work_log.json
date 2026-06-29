@@ -12041,5 +12041,13 @@
     "actor": "hourly-11",
     "result": "succeeded",
     "note": "K1568 Federal Register rule-flow proxy — Codex source-level review CONDITIONAL_PASS, research verdict WEAK_RAW_ONLY (144-test Bonferroni 無倖存者). Knowledge.json entry 9bbbaa92 written with full provenance (experiment_id + reviewer + codex_review)."
+  },
+  {
+    "timestamp": "2026-06-29T12:25",
+    "task_type": "platform_ops",
+    "id": "cluster_overshoot_triage_hourly12",
+    "actor": "hourly-12",
+    "result": "succeeded",
+    "note": "Dashboard CRITICAL topic-cluster 8.3x triage: 確認 alert 是 30d 滯後指標 (gap to last publish 2.73h < 4h drought threshold; release-pool 自然 cadence 工作中). 19 drafts arc-blocked: 多數同 K research↔general 合理 dedup, 但 mile_377b569a (K1439 commodity) / mile_3942eab2 (K1435 FOMC) 是 fresh cluster 也被 dedup 可能 over-aggressive. Mitigation: docs/error_log.md 2026-06-29 hourly-12 entry + platform_ops_arc_dedup_v2_audit_20260629 task 排後續 fire. 不 force-release (尊重 dedup) 不派 spy/vix experiment (不雪上加霜)."
   }
 ]

@@ -3661,3 +3661,43 @@ hourly-18 ops fire 中，主線程 `git commit` 成功後 (3a8f70d06)，`git sta
 - 若主線程沒發現 → 下一個 commit 會把 conflict markers 寫進 work_log.json / next_tasks.json / feed.json 永久污染 canonical 資料
 - 這次 hourly-18 catch 是 PHASE Z `git status -s` 巡檢的功勞 — 證實 PHASE Z 是治理 backstop 不能省
 
+---
+
+## 2026-06-29 hourly-12 — Topic-cluster 8.3x CRITICAL alert 是滯後指標 + arc_dedup_v2 對同 K 跨 audience 過嚴
+
+### 現象
+Dashboard CRITICAL: `health_alerts_unhandled :: 3 alert conditions`，最嚴 = `Topic-cluster 30d 嚴重 overshoot（worst 8.3x cap）`。Refresh `topic_cluster_audit`：spy 83/10=8.3x、vix 90/15=6x、garch 18/10=1.8x、taiwan 17/8=2.1x，總 306 篇 / 30d。
+release-pool cron `*/60` 連續釋出 0 篇（log 2026-06-29 01:07 起每小時 fire）。
+
+### 根因分層
+
+**Layer 1: alert 本質是滯後**
+- 30d window 是過去歷史，無法 immediate revert
+- gap to last reader-facing published = 2.73h，drought breaker threshold 4h → 不該 fire（正確設計）
+- 系統 release cadence 3-4h/article — 隨時間自然降低 30d concentration
+
+**Layer 2: arc_dedup_v2 對同 K 跨 audience 過嚴**
+- 19 drafts 全 dedup-blocked
+- 多數合理（同 K research 版已發 → general 版正確 dedup）：mile_103338aa↔mile_6606a448 同 K1341、entities 完全一致
+- 但部分 fresh-cluster arc 也被 dedup（mile_377b569a K1439 commodity entities=[COMMODITY_BROAD/GOLD/OIL/USD] dedup of mile_2c758888 / mile_3942eab2 K1435 FOMC dedup of mile_df7a8bce）→ 需驗證 arc 相似度算法
+- 結果：fresh cluster 草稿被 blocking 同時 spy/vix 進 30d window 退場 → 自然 rebalance 緩慢
+
+**Layer 3: 草稿生產偏 spy/vix root cause（已記 memory `feedback_recycling_is_release_layer_not_research`）**
+- 文章「鬼打牆」根因在釋出端 + draft 池本身就偏 vix/spy/US_EQUITY
+- mile_001458ce / mile_b3e68ca2 / mile_a4baba0f / mile_d5746aab / mile_b62392bc / mile_6a4554d4 / mile_47ad5dc0 / mile_77ef5c00 / mile_323788f8 等 9+ 篇全帶 VIX 或 US_EQUITY entity
+
+### 緩解（本 fire）
+- 不 force-release（避免錯誤繞 dedup gate；mile_103338aa 同 K1341 dedup 是正確的）
+- 不派 spy/vix 新 experiment（會雪上加霜）
+- 建 platform_ops task `platform_ops_arc_dedup_v2_audit_20260629`：審查 arc_dedup_v2 對 fresh-cluster mistaken-dedup（檢查 mile_377b569a / mile_3942eab2 與其 arc_of target 真實相似度）
+
+### 結構性 fix（排後續 fire）
+1. `src/volpred/...` arc_dedup_v2 算法：fresh cluster (COMMODITY / FOMC / JAPAN_EQ) entity 應降低 weight 與 spy/vix 主軸的 cross-similarity
+2. 草稿生產端：未來 K1500+ 議題優先 fresh entity（commodity / FX / crypto / IG bonds / merger arb / volatility surface 等）— 已在 `feedback_journal_topic_discovery` 記
+3. 同 K 跨 audience 草稿：規則化只生一篇 dominant audience 版（避免 dual-version 注定 50% dedup-blocked）
+
+### 教訓
+- CRITICAL alert 等級不代表 immediate action；先看是滯後 vs 即時
+- arc_dedup_v2 已正確攔截 99% pollution，但偶有 fresh-cluster mistaken-dedup → 不可手動繞，要修算法
+- 平台運營 mission #1 (good articles) 與 #5 (exposure) 在 cluster diversity 上是 strict 要求 — 不能靠加 spy/vix 文增量蓋 30d concentration
+
