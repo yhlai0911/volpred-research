@@ -72,6 +72,21 @@ def main() -> int:
     else:
         content = content.rstrip() + "\n\n" + new_section
     art["content"] = content
+    # Stamp the content edit so the webpage shows "更新於 <date hh:mm>" (boss
+    # 2026-07-01: 內容有改 → 網頁日期要對應改). Keeps published_at intact; the
+    # frontend (ArticleReader) surfaces last_updated_at when it post-dates publish.
+    from datetime import datetime, timezone
+    now_iso = datetime.now(timezone.utc).isoformat()
+    art["last_updated_at"] = now_iso
+    errata = art.get("errata") if isinstance(art.get("errata"), dict) else {}
+    errata["update_at"] = now_iso
+    errata["update_action"] = "lazypack_codex_replace"
+    errata["update_summary"] = "Replaced the lazypack section with codex-exec generated, data-bound infographic panels."
+    hist = errata.get("update_history") if isinstance(errata.get("update_history"), list) else []
+    hist.append({"at": now_iso, "action": "lazypack_codex_replace",
+                 "summary": f"codex-exec lazypack ({len(urls)} panels)"})
+    errata["update_history"] = hist
+    art["errata"] = errata
     feed_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"feed.json updated: {a.article_id} lazypack section replaced ({len(urls)} panels)")
     print("has_lazypack_section:", has_lazypack_section(content))
