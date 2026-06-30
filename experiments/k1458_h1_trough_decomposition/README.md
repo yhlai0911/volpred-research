@@ -106,7 +106,7 @@ uv run python scripts/compute_queue.py enqueue \
   --script experiments/k1458_h1_trough_decomposition/k1458_h1_trough_decomposition.py \
   --title "K1458 H1 trough decomposition (Paper 6 v5)" \
   --result-artifact experiments/k1458_h1_trough_decomposition/k1458_results.json \
-  --followup-brief "Interpret k1458_results.json cross_asset_summary.median_share for 2009-03 and 2020-03 troughs. If median_share > 0.5 → support Gemini H1 concern (mechanical rebound dominates), recommend body.tex Section 3.x add quantitative decomposition table. If < 0.2 → reject Gemini H1 concern, recommend strengthen verbal caveat by citing this experiment. Update paper/vt-trend-following/review_history/v6/README.md with H1 closure verdict." \
+  --followup-brief "Interpret k1458_results.json cross_asset_summary.median_share for 2009-03 and 2020-03 troughs. If median_share > 0.5 → support Gemini H1 concern (mechanical rebound dominates), recommend body.tex Section 3.x add quantitative decomposition table. If < 0.2 → reject Gemini H1 concern, recommend strengthen verbal caveat by citing this experiment. Update paper/vt-trend-following/review_history/v6/README.md with H1 PARTIAL SUGGESTIVE EVIDENCE verdict (non-closure language; see v7 review_history)." \
   --followup-task-type paper_review \
   --timeout 1200
 ```

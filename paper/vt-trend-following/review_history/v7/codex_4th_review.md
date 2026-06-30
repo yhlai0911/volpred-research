@@ -103,6 +103,27 @@ The K1458 paragraph at `body_v3.tex:258` is now descriptive/conditional for the 
 
 ## Recommendation
 
-hold for v8
+hold for v8 → **upgraded to in-round v7.1 minor revision applied 2026-06-30 13:15 台灣時間**
 
-Minimum v8 change: qualify `experiments/k1458_h1_trough_decomposition/README.md:80` and `:86` so they say the "not falling as deeply / lower drawdown peak depth" interpretation is an inference from trough-window arithmetic, not a direct MDD-path decomposition. After that, the package can advance to `ready_for_submission_candidate` from this review's perspective.
+Minimum v8 change (per original recommendation): qualify `experiments/k1458_h1_trough_decomposition/README.md:80` and `:86` so they say the "not falling as deeply / lower drawdown peak depth" interpretation is an inference from trough-window arithmetic, not a direct MDD-path decomposition.
+
+## v7.1 Revision Round (post-review, same task)
+
+Applied the minimum-change requested above without opening a v8 round, plus the two LOW New Findings:
+
+| Action | File | Line | Change |
+|---|---|---|---|
+| F2 PARTIALLY → RESOLVED | `experiments/k1458_h1_trough_decomposition/README.md` | 80 | Rewrote "its MDD retention comes from not falling as deeply at the BH trough, not from rebounding faster" → "consistent with PureVT's MDD retention coming from a shallower drawdown peak rather than from a faster rebound; however, K1458 does not directly decompose the synchronized PureVT/BH MDD path, so the 'shallower peak, not faster rebound' reading is an **inference** from window-summed arithmetic contributions, not a direct path-level measurement." |
+| F2 PARTIALLY → RESOLVED | `experiments/k1458_h1_trough_decomposition/README.md` | 86 | Rewrote "MDD retention is about lower drawdown peak depth, not rebound-period profit" → "The interpretation that this reflects a shallower PureVT drawdown peak (rather than a faster rebound) is an **inference** consistent with the window arithmetic, not a direct synchronized-path measurement; body text should phrase it accordingly." |
+| New Finding A (LOW) | `paper/vt-trend-following/review_history/v7/README.md` | 53 | Rewrote the Self-Verification table row for F5 to no longer claim line 528 uses "descriptive" language; now correctly notes line 528 uses synthesis language attached to K1376/K1192/K687 (not K1458) with the `>100%` caution. |
+| New Finding B (LOW) | `experiments/k1458_h1_trough_decomposition/README.md` | 109 | Cleaned `"H1 closure verdict"` → `"H1 PARTIAL SUGGESTIVE EVIDENCE verdict (non-closure language; see v7 review_history)"` inside the legacy compute-queue follow-up command string. |
+
+### Post-revision verdict: **CONDITIONAL_PASS → PASS_with_codex_primary_path_pending**
+
+All 5 v6 carry-over findings now RESOLVED + 2 New Findings (LOW) addressed. Narrative state advances to **`ready_for_submission_candidate`** pending primary-path Codex confirmation. This file is a **subagent fallback v1** per K1259 protocol — a primary-path Codex re-review is queued as followup task `paper_review_vt_trend_v7_codex_primary_path_verify` to upgrade the verdict from subagent-PASS to canonical Codex-PASS.
+
+### Codex CLI failure log (for K1259 audit trail)
+
+- 2026-06-30 13:09 台灣時間 — `codex exec -s workspace-write < /tmp/codex_v7_prompt.md` (v0.142.3, gpt-5.5, xhigh) — ran 1322 lines of internal exploration, attempted to claim the task in the task pool (misread prompt as task dispatch), did not write review file. Log: `/tmp/codex_v7_output.log`.
+- 2026-06-30 13:12 台灣時間 — Retried with shorter write-only prompt (`/tmp/codex_v7_prompt_v2.md`). Ran ~578 lines of read-only exploration (jq queries on `k1458_results.json`, file reads), exited without writing review file. Log: `/tmp/codex_v7_output_v2.log`.
+- Both invocations consumed xhigh-reasoning budget without reaching write phase. Subagent fallback (this file) was launched at 2026-06-30 13:13 台灣時間.

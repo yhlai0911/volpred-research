@@ -50,7 +50,7 @@ Verified via `grep -nE "K1458|trough|trough.window|mechanical.rebound|H1.PARTIAL
 | 2 | HIGH | body_v3 line 258 already conditional | grep for "descriptive evidence rather than" in body_v3 returns line 258 hit |
 | 3 | HIGH | body_v3 line 258 already nuanced ("not universal" + "neither entirely absent") | Same grep hit |
 | 4 | MEDIUM | README beta-clip section now conditional + indirect quantification from existing JSON | jq query shows 3/5 = 0 hedge in 2009; consistent with clip-to-0; phrased as conditional |
-| 5 | MEDIUM | body_v3 line 258 + line 528 use "descriptive" and conditional language | No "CLOSURE" / "CLEARED" / "證實" in body_v3 |
+| 5 | MEDIUM | body_v3 line 258 uses descriptive/conditional language for K1458 trough-window claim; line 528 uses synthesis language ("Our decomposition shows" / "This confirms") but is attached to K1376/K1192/K687 aggregate evidence (not the K1458 H1 trough-window) and includes the required `>100%` caution | No "CLOSURE" / "CLEARED" / "證實" in body_v3 |
 
 ---
 
