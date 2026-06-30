@@ -23,7 +23,7 @@ SLV & 0.082 & 1.76 & -0.13 & 5.8 & -13.6 & 9.1 & 2260 \\
 
 \begin{table}[H]
 \centering
-\caption{GJR-GARCH $\gamma$ Parameter: Rolling Quarterly Estimates ($w = 504$, step $= 63$, 2010--2026; HAC $t$ uses Newey--West with 8 lags). The GLD row reflects the K903 canonical replication ($n = 58$ quarterly windows, mean $+0.002$, HAC $t = +0.15$ NS), replacing an earlier-draft estimate (mean $-0.067$, HAC $t = -5.79$) whose source experiment could not be re-located in the current ledger.}
+\caption{GJR-GARCH $\gamma$ Parameter: Rolling Quarterly Estimates ($w = 504$, step $= 63$, 2010--2026; HAC $t$ uses Newey--West with 8 lags). The GLD row reflects an updated canonical replication ($n = 58$ quarterly windows, mean $+0.002$, HAC $t = +0.15$ NS), replacing an earlier-draft estimate (mean $-0.067$, HAC $t = -5.79$) whose source experiment could not be re-located in the current ledger.}
 \label{tab:gamma}
 \begin{tabular}{lrrrrl}
 \toprule
@@ -80,7 +80,7 @@ Student-$t$ (df=5) & 18 & 1.2\% & $-$45.5\% \\
 \bottomrule
 \end{tabular}
 
-{\footnotesize \textit{Notes:} Violation counts were computed from the 2025-Q4 canonical replication vintage; minor yfinance backfill revisions may shift individual counts by up to $\pm 3$ on re-run without changing the qualitative ordering. In the K1185 canonical reconstruction, the baseline ``Normal'' row uses symmetric GARCH(1,1), the Student-$t$ row applies fixed $df=5$ with scale correction $\sqrt{(df-2)/df}$, and the adaptive row uses a 20-day rolling maximum of $\hat{\sigma}_t$.}
+{\footnotesize \textit{Notes:} Violation counts were computed from the 2025-Q4 canonical replication vintage; minor yfinance backfill revisions may shift individual counts by up to $\pm 3$ on re-run without changing the qualitative ordering. In the canonical reconstruction, the baseline ``Normal'' row uses symmetric GARCH(1,1), the Student-$t$ row applies fixed $df=5$ with scale correction $\sqrt{(df-2)/df}$, and the adaptive row uses a 20-day rolling maximum of $\hat{\sigma}_t$.}
 \end{table}
 
 % v2-NEW-H1: Orthogonality of GARCH equation and distributional assumption (K799/K802)
