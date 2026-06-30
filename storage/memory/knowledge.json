@@ -36980,5 +36980,24 @@
     "task_id": "K1586",
     "commit": "0b5121697",
     "created_at": "2026-06-30T15:26:19.913894"
+  },
+  {
+    "item_id": "8b4e16bb",
+    "category": "experiment_result",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1590",
+    "reviewer": "Codex CLI primary path",
+    "reviewer_source": "experiments/k1590/codex_review.md",
+    "content": "K1590 merger-arbitrage deal-spread volatility diagnostic is a GO for Phase 2, with Codex review verdict CONDITIONAL_PASS. Data: yfinance adjusted closes (auto_adjust=False) for MNA/SPY/IWM/HYG/^VIX, price range 2020-01-02 to 2026-06-30, MNA return sample N=1629. Core gate evidence: high-VIX (>30) MNA |daily log return| mean=0.006409 vs low-VIX (<20) mean=0.002101, Welch t=5.13, p=8.79e-7, high/low magnitude ratio=3.05; lagged t-1 VIX classification robustness t=4.77, p=4.33e-6. MNA is not a near-SPY clone: Pearson(MNA,SPY)=0.517; tail shape is structurally distinct (skew=-2.89, excess kurtosis=66.4). Interpretation: MNA carries a portfolio-level stress-volatility signal that justifies a Phase-2 merger-arb vol research line. Limits: descriptive diagnostic only, same-day VIX primary split is not a forecasting design, |log return| is a coarse daily vol proxy, and no conclusion yet about antitrust causality, individual deal spreads, OOS forecast skill, or trading profitability. Phase 2 should add bootstrap/rank robustness, deal-level EDGAR data, GJR-GARCH/HAR-RV, FTC/DOJ event study, and OOS DM/QLIKE tests.",
+    "evidence": [
+      "experiments/k1590/k1590_diagnostic.py",
+      "experiments/k1590/k1590_diagnostic_results.json",
+      "experiments/k1590/README.md",
+      "experiments/k1590/codex_review.md",
+      "experiments/k1590/plots/rolling_vol_vs_vix.png",
+      "experiments/k1590/plots/regime_split_box.png"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-07-01T00:28:39.690224"
   }
 ]

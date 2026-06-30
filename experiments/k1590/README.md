@@ -1,7 +1,9 @@
 # K1590 — Merger Arbitrage Deal-Spread Vol (Diagnostic Phase)
 
-**Status**: Diagnostic complete. **Verdict: GO** (with caveats — see §6).
-**Run**: 2026-07-01 00:06 Asia/Taipei. Sample 2020-01-02 .. 2026-06-30, N=1,629 trading days.
+**Status**: Diagnostic complete. **Verdict: GO** (Codex review:
+**CONDITIONAL_PASS**, with caveats — see §6).
+**Run**: 2026-07-01 00:28 Asia/Taipei. Price request window
+2020-01-01 .. 2026-07-01; MNA return sample N=1,629 trading days.
 **Code**: `experiments/k1590/k1590_diagnostic.py` (reproducible, seed=42).
 
 ---
@@ -76,7 +78,7 @@ lookahead claim is made; no model is trained.
 | max | +5.04% |
 
 The skew/kurt profile is **extreme** for an equity ETF — strongly left-tailed
-and fat-tailed. SPY in the same sample has skew ~−0.6 and excess kurt ~10.
+and fat-tailed. SPY in the same sample has skew ~−0.6 and excess kurt ~13.6.
 This is consistent with the merger-arb payoff structure: long stream of small
 positive carry punctuated by deal-break crashes — **not a SPY characteristic**.
 First piece of evidence MNA is structurally distinct.
@@ -85,7 +87,7 @@ First piece of evidence MNA is structurally distinct.
 
 | | SPY | IWM | HYG | VIX return | VIX level |
 |---|---|---|---|---|---|
-| MNA | **0.517** | 0.518 | **0.487** | **−0.317** | −0.32 |
+| MNA | **0.517** | 0.537 | **0.487** | **−0.317** | −0.103 |
 
 MNA's SPY correlation 0.52 is far from a clone (cond_c PASS). VIX-return
 correlation −0.32 is meaningful (VIX up days hurt MNA). HYG correlation 0.49
@@ -99,8 +101,8 @@ Day counts: low (VIX<20) = 924, mid (20-30) = 556, high (>30) = 149.
 |stat | low VIX | high VIX |
 |---|---|---|
 | n | 924 | 149 |
-| mean \|MNA\| × 10⁴ | — | — |
-| mean abs return | 0.00153 | 0.00467 |
+| mean \|MNA\| × 10⁴ | 21.01 | 64.09 |
+| mean abs return | 0.00210 | 0.00641 |
 
 (Full per-regime mean/std/skew/kurt in `k1590_diagnostic_results.json` →
 `vix_regime_stats`.)
@@ -112,12 +114,12 @@ Welch two-sample t-test on |MNA daily log return|, classification by same-day VI
 | | low VIX (<20) | high VIX (>30) |
 |---|---|---|
 | n | 924 | 149 |
-| mean abs ret | 0.00153 | 0.00467 |
-| std abs ret | 0.00226 | 0.00733 |
+| mean abs ret | 0.00210 | 0.00641 |
+| std abs ret | 0.00190 | 0.01022 |
 
 **t = 5.13, p = 8.79 × 10⁻⁷, magnitude ratio (high/low) = 3.05.**
 
-Robustness (lagged t-1 VIX classification): t = 4.66, p = 4.33 × 10⁻⁶. Effect
+Robustness (lagged t-1 VIX classification): t = 4.77, p = 4.33 × 10⁻⁶. Effect
 survives forward-safe formulation.
 
 ### 4.5 Plots
@@ -157,8 +159,9 @@ equity.
    required: parse SEC EDGAR DEF14A and FTC HSR filings).
 6. **No GARCH / HAR-RV / forecasting**: this is descriptive only. Phase 2
    needs MLE-based vol modeling + OOS DM tests before any prediction claim.
-7. **Codex review not yet run** — per scope brief, knowledge.json write is
-   deferred; this diagnostic is preliminary signal only.
+7. **Codex review completed 2026-07-01** with CONDITIONAL_PASS. The
+   diagnostic GO is acceptable as a Phase-2 gate, but not as a prediction,
+   causal antitrust, or trading claim.
 
 ## 7. Suggested Phase-2 Roadmap (if approved)
 
@@ -194,3 +197,4 @@ equity.
 - `plots/rolling_vol_vs_vix.png` — 21d RV vs VIX time series
 - `plots/regime_split_box.png` — VIX-regime distribution boxplot
 - `README.md` — this file
+- `codex_review.md` — Codex review receipt and caveats

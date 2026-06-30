@@ -41066,7 +41066,7 @@
     "title": "K1590 Codex review (diagnostic.py) + knowledge.json GO entry",
     "description": "K1590 Merger Arbitrage diagnostic phase 已 GO (3/3 conds pass)。下一步: (1) Codex CLI review experiments/k1590/k1590_diagnostic.py (focus: yfinance Adj Close 對齊、VIX regime t-test 的 Welch 假設、skew/kurt 計算 sample bias、|MNA|=abs(log_ret) 的 vol proxy 合理性); (2) Codex PASS / CONDITIONAL_PASS 才寫 knowledge.json entry（reviewer=Codex CLI primary path，provenance 含 experiment_id=k1590）; (3) Codex FAIL 則記 error_log + 派 修正 agent。Per .claude/rules/experiments.md Codex diagnostic 5-step 順序，若 Codex 不可用 fallback 派 feature-dev:code-reviewer。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "dispatch_lane": "agent",
     "source": "k1590_phase2_followup",
@@ -41076,6 +41076,32 @@
       "merger-arb",
       "phase2-followup"
     ],
-    "created_at": "2026-06-30T16:09:46+00:00"
+    "created_at": "2026-06-30T16:09:46+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T16:25:58.513638+00:00",
+    "claim_session_id": "9379578b1447",
+    "status_history": [
+      {
+        "ts": "2026-06-30T16:25:58.513844+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T16:26:08.653370+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T16:30:08.719839+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-06-30T16:26:08.653089+00:00",
+    "completed_at": "2026-06-30T16:30:08.719496+00:00",
+    "result": "Codex review completed for K1590 diagnostic: CONDITIONAL_PASS. Fixed README numeric drift, added experiments/k1590/codex_review.md, reran diagnostic, and wrote knowledge.json GO diagnostic entry item_id=8b4e16bb with provenance/reviewer."
   }
 ]
