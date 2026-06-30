@@ -41191,10 +41191,36 @@
     "title": "[論文管線] leverage-direction 合規 scrub（JBF，僅差 1 footnote）",
     "description": "leverage-direction(JBF) 技術 ready，合規 audit 只剩 1 violation：body.tex:231 footnote 提到 \"VolPred Research Program internal experiment record\" + K1092 內部 ID。fix（見 storage/ops/paper_compliance_audit_20260701.json）：改成 \"Asset-matched DCC-A4f Fissler-Ziegel evaluation; supplementary experiment record available in the paper replication package\"，K1092→Experiment S1。作者已 clean（僅 Yi-Hao Lai）。主線程做（.tex surgical edit），改完重 compile + 進 multi_round_review stage。",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "source": "paper_compliance_workflow",
-    "created_at": "2026-06-30T17:15:57.821300+00:00"
+    "created_at": "2026-06-30T17:15:57.821300+00:00",
+    "claimed_by": "hourly-02",
+    "claimed_at": "2026-06-30T18:09:05.273920+00:00",
+    "claim_session_id": "968dfab9a77b",
+    "status_history": [
+      {
+        "ts": "2026-06-30T18:09:05.274178+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-06-30T18:09:16.430746+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-06-30T18:13:26.490168+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-02"
+      }
+    ],
+    "started_at": "2026-06-30T18:09:16.430463+00:00",
+    "completed_at": "2026-06-30T18:13:26.489873+00:00",
+    "result": "Submission scope (main.tex + body.tex + tables_main.tex + cover_letter + supplementary) verified CLEAN via scripts/check_paper_compliance.py — no VolPred/K1092 hits. Prior commit 89a795b70 already achieved compliance scrub on submission set; main_v3.tex bibitem K1092 is in version archive (scope boundary: archives must NOT be scrubbed — they document honest AI-system provenance). Task description (body.tex:231) outdated post-89a795b70. Next stage: multi_round_review (codex exec)."
   },
   {
     "task_id": "paper_compliance_scrub_vt_trend_following",
@@ -41323,5 +41349,18 @@
     "started_at": "2026-06-30T17:38:16.378780+00:00",
     "completed_at": "2026-06-30T17:41:38.348899+00:00",
     "result": "Added post-publish corrective errata gate to paper-review task generation: articles with last_updated_at > published_at and errata action/history containing rewrite/correction/corrected/fix are skipped instead of being re-opened from stale pre-correction evidence. Regression covers mile_48c8328b-style corrected rewrite; tests pass."
+  },
+  {
+    "task_id": "paper_multi_round_review_leverage_direction",
+    "task_type": "paper_review",
+    "title": "[論文管線] leverage-direction multi-round review (JBF) — codex exec",
+    "description": "leverage-direction(JBF) compliance scrub complete (submission scope CLEAN verified by check_paper_compliance.py 2026-07-01). 下一階段 = codex exec 多輪 review：(1) latex-academic-reviewer 跑 main.tex + body.tex (2) citation-verifier 跑 references (3) journal-review 跑 JBF profile (scope/format/distinctive rules)。Owner 硬規則：codex 額度無限制，全部走 codex exec 省 Claude token；contribution gate（看真貢獻/經濟意義，非單純計量練習）。Review 收斂後修到最終版 → 進 arxiv_ready stage。Skill: paper-submission-pipeline + journal-review.",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "codex",
+    "source": "paper_compliance_workflow",
+    "created_at": "2026-07-01T02:15:00+08:00",
+    "blocked_until": null,
+    "preferred_agent": "codex"
   }
 ]

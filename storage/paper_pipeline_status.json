@@ -16,17 +16,20 @@
     ],
     "stall_days": 7,
     "baseline_set_at": "2026-07-01T00:00:00+08:00",
-    "audit_source": "2026-07-01 paper portfolio audit"
+    "audit_source": "2026-07-01 paper portfolio audit",
+    "updated_at": "2026-07-01T02:15:00+08:00"
   },
   "papers": [
     {
       "paper": "leverage-direction",
       "journal_target": "JBF",
-      "stage": "compliance_scrub",
-      "stage_entered_at": "2026-07-01T00:00:00+08:00",
-      "last_advance_at": "2026-07-01T00:00:00+08:00",
-      "blocker": "awaiting compliance scrub then owner submit decision",
-      "owner_decision_pending": true
+      "stage": "multi_round_review",
+      "stage_entered_at": "2026-07-01T02:15:00+08:00",
+      "last_advance_at": "2026-07-01T02:15:00+08:00",
+      "blocker": "awaiting multi-round review (contribution gate + latex-academic-reviewer + citation-verifier via codex exec)",
+      "owner_decision_pending": false,
+      "compliance_scrub_done": true,
+      "compliance_note": "submission set gate CLEAN (scripts/check_paper_compliance.py); body/tables/main thanks/cover_letter scrubbed of K-id/VolPred/AI; author=Yi-Hao Lai only; compiles 49pp"
     },
     {
       "paper": "vt-trend-following",
@@ -145,5 +148,13 @@
       "blocker": "audit paper; confirm state",
       "owner_decision_pending": false
     }
-  ]
+  ],
+  "_portfolio_notes": {
+    "compliance_sweep_2026_07_01": {
+      "finding": "Systemic across portfolio: fabricated acknowledgments (seminar participants / anonymous reviewers), VolPred listed as co-author (vix-sufficiency, vt-insurance-cost), AI-tool disclosure (OpenAI Codex, Claude), VolPred/K-id mentions.",
+      "fixed": "All canonical submission files scrubbed of VolPred/AI/co-author/fabricated-ack. Internal provenance/diff files intentionally left honest (not shipped).",
+      "remaining": "111 K-id tags across 8 papers' submission files (deferred to each paper's compliance_scrub, gate-tracked).",
+      "gate": "scripts/check_paper_compliance.py"
+    }
+  }
 }
