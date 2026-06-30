@@ -75,6 +75,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import os
 import re
 import subprocess
 import sys
@@ -82,6 +83,44 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _refresh_publication_candidates_after_feed_change(reason: str) -> None:
+    """Best-effort refresh after feed mutations so K coverage is immediately current.
+
+    Daily cron is a useful backstop, but the stale-candidate failure mode happens
+    at publish time: a newly covered K remains in publication_candidates.json
+    until the next rebuild. Never block publishing on this helper.
+    """
+    if os.environ.get("VOLPRED_SKIP_PUBLICATION_CANDIDATES_REFRESH") == "1":
+        print("[publish_draft] publication_candidates refresh skipped by env")
+        return
+    wrapper = ROOT / "scripts" / "cron_build_publication_candidates.sh"
+    required_inputs = [
+        ROOT / "storage" / "memory" / "knowledge.json",
+        ROOT / "storage" / "reports" / "feed.json",
+    ]
+    if not wrapper.exists() or any(not p.exists() for p in required_inputs):
+        print("[publish_draft] publication_candidates refresh skipped (missing wrapper or inputs)")
+        return
+    try:
+        result = subprocess.run(
+            [str(wrapper)],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=210,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[publish_draft] publication_candidates refresh failed after {reason}: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return
+    if result.returncode == 0:
+        print(f"[publish_draft] publication_candidates refreshed after {reason}")
+    else:
+        print(
+            f"[publish_draft] publication_candidates refresh rc={result.returncode} after {reason}",
+            file=sys.stderr,
+        )
 
 # 2026-05-08: HTTPS image-URL enforcement (P2 platform_ops structural fix).
 #
@@ -1102,6 +1141,8 @@ def apply_update(args) -> int:
     )
     print(f"[publish_draft] wrote {single_path.relative_to(ROOT)}")
 
+    _refresh_publication_candidates_after_feed_change("update")
+
     # Optional Supabase sync (decoupled by default)
     if getattr(args, "sync_supabase", False):
         cmd = ["uv", "run", "volpred", "ops", "feed-sync", "--apply"]
@@ -1412,6 +1453,8 @@ def main() -> int:
         print(f"[publish_draft] stdout: {result.stdout[-400:]}")
     if result.returncode != 0 and result.stderr:
         print(f"[publish_draft] stderr: {result.stderr[-700:]}", file=sys.stderr)
+    if result.returncode == 0:
+        _refresh_publication_candidates_after_feed_change("new_publish")
     return result.returncode
 
 

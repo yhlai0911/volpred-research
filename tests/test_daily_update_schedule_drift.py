@@ -45,6 +45,11 @@ def test_canonical_daily_update_intraday_cron_is_mon_sat_1400():
     assert get_job_cron("daily_update_intraday") == "0 14 * * 1-6"
 
 
+def test_canonical_publication_candidates_refresh_cron_is_daily_0530():
+    """Candidate freshness must update before the morning dispatch picks K topics."""
+    assert get_job_cron("publication_candidates_refresh") == "30 5 * * *"
+
+
 def test_cron_review_jobs_all_resolve_to_canonical_cron():
     """Every cron_review JOBS entry must point at a config job id that resolves
     to a real canonical cron — a None means the monitor would silently fall back

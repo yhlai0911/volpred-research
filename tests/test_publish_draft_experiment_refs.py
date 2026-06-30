@@ -247,6 +247,12 @@ def test_update_mode_merges_frontmatter_into_existing_refs(tmp_path, monkeypatch
     import publish_draft
 
     monkeypatch.setattr(publish_draft, "ROOT", tmp_path)
+    refresh_reasons = []
+    monkeypatch.setattr(
+        publish_draft,
+        "_refresh_publication_candidates_after_feed_change",
+        lambda reason: refresh_reasons.append(reason),
+    )
 
     args = SimpleNamespace(
         draft_path=str(draft),
@@ -267,6 +273,7 @@ def test_update_mode_merges_frontmatter_into_existing_refs(tmp_path, monkeypatch
     refs = feed[0]["details"]["experiment_refs"]
     # Existing wins ordering; frontmatter contributes K687, K700 in that order
     assert refs == ["K703", "K697", "K687", "K700"]
+    assert refresh_reasons == ["update"]
 
 
 def test_update_mode_no_frontmatter_refs_preserves_existing(tmp_path, monkeypatch):

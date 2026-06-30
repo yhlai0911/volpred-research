@@ -40090,7 +40090,7 @@
     "description": "2026-06-30 08:21 incident: K1574 寫作 agent 從 publication_candidates top_10_uncovered 派出，主線程二次驗證發現 K1574 已於前一晚 2026-06-29 20:00 published 為 mile_5399bf01。Candidates snapshot 是 publish 之前的 stale 版本，造成派錯 agent。根因: scripts/build_publication_candidates.py 沒有 cron，候選池與實際 covered list 永遠 lag。本次主線程 mid-flight pivot K1574→K1066 救回，但這是手動。永久解：把 build_publication_candidates.py 排進 daily cron（例如 05:30 台灣時間，hourly_dispatch :07 之前），確保每天第一個 hourly fire 派工前候選池新鮮。實作：(a) 新增 wrapper script scripts/cron_build_publication_candidates.sh + ~/.volpred/bin/ 同步；(b) 加 schedule entry 到 config/runtime_schedules.json (cron )；(c) install_host_crontab.sh 重跑 OR 走 piggy-back via check_alerts；(d) 跑一次手動驗證 output 寫入 storage/publication_candidates.json；(e) audit publish 後 candidates 是否同步。注意：是否要 publish hook 即時 invalidate 由本 task 評估後決定（daily 已 sufficient or need event-driven）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-06-30T00:25:15.179253+00:00",
     "source": "incident_2026_06_30_k1574_stale_candidates",
     "tags": [
@@ -40098,7 +40098,13 @@
       "cron",
       "stale_fix",
       "root_cause"
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T01:35:29.498651+00:00",
+    "claim_session_id": "24287d0823c5",
+    "started_at": "2026-06-30T01:35:29.701829+00:00",
+    "completed_at": "2026-06-30T01:42:10.079841+00:00",
+    "result": "Added publication_candidates_refresh schedule (30 5 * * *) with cron_build_publication_candidates wrapper, installed runtime copy, added cron_review/ops_dashboard monitoring, added publish_draft best-effort refresh hook for new publish/update, manually rebuilt storage/publication_candidates.json exit 0 (generated_at 2026-06-30T01:40:54Z; K1066 no longer in general gap), and verified tests."
   },
   {
     "task_id": "platform_ops_strategy_card_regime_presentation",

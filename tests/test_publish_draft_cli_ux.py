@@ -294,6 +294,37 @@ def test_tmp_path_draft_publishes_without_subpath_error(tmp_path, monkeypatch, c
     assert str(draft) in out or draft.name in out
 
 
+def test_successful_new_publish_refreshes_publication_candidates(tmp_path, monkeypatch):
+    """Publishing a K article should immediately invalidate/rebuild candidate coverage."""
+    draft = tmp_path / "test.md"
+    _write_draft(draft, {
+        "title": "CandidateRefresh",
+        "audience": "general",
+        "tags": ["a"],
+    },
+    body="Body.\n\n![x](https://example.com/a.png)\n![y](https://example.com/b.png)\n",
+    )
+
+    refresh_reasons = []
+    monkeypatch.setattr(publish_draft.subprocess, "run", lambda cmd, *a, **k: _StubResult(0))
+    monkeypatch.setattr(
+        publish_draft,
+        "_refresh_publication_candidates_after_feed_change",
+        lambda reason: refresh_reasons.append(reason),
+    )
+    monkeypatch.setattr(sys, "argv", [
+        "publish_draft.py",
+        str(draft),
+        "--phase", "research",
+        "--force-duplicate",
+    ])
+
+    rc = publish_draft.main()
+
+    assert rc == 0
+    assert refresh_reasons == ["new_publish"]
+
+
 # ---------------------------------------------------------------------------
 # Combined: --draft + frontmatter phase + tmp path (regression)
 # ---------------------------------------------------------------------------

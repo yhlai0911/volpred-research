@@ -385,6 +385,7 @@ def main():
         "check_alerts": 30, "paper_sync_all": 60, "memory_health_daily": 60,
         "market_calendar_sync": 120, "refresh_paper_snapshots": 120,
         "daily_update_intraday": 30,
+        "publication_candidates_refresh": 120,
         # 2026-06-10 process-audit HIGH 4-1: the four MOST critical jobs were
         # absent — a dead LaunchAgent (log frozen at exit 0) never breached
         # anything. hourly_dispatch/compute_worker live in cron_jobs (not

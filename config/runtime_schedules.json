@@ -206,6 +206,21 @@
         ]
       },
       {
+        "id": "publication_candidates_refresh",
+        "label": "Publication candidates daily freshness rebuild",
+        "cron": "30 5 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_build_publication_candidates.sh",
+        "log_path": "storage/logs/cron/publication_candidates_refresh.log",
+        "command_deprecated": "python scripts/build_publication_candidates.py",
+        "description": "每日 05:30 台北重建 storage/publication_candidates.json。由 check_alerts piggy-back 在 06:00 前後執行，早於 06:07/07:07 hourly dispatch，避免 publication_candidates 在前一晚發文後 stale 造成派錯 K。Publish/update 成功路徑另有 best-effort event-driven refresh；此 job 是每日兜底。",
+        "host_crontab_managed": true,
+        "matchers": [
+          "build_publication_candidates.py",
+          "cron_build_publication_candidates.sh",
+          "publication_candidates.json"
+        ]
+      },
+      {
         "id": "refresh_paper_snapshots",
         "label": "Paper data snapshot weekly refresh",
         "cron": "0 6 * * 1",
