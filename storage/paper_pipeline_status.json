@@ -17,7 +17,7 @@
     "stall_days": 7,
     "baseline_set_at": "2026-07-01T00:00:00+08:00",
     "audit_source": "2026-07-01 paper portfolio audit",
-    "updated_at": "2026-07-01T04:15:00+08:00"
+    "updated_at": "2026-07-01T07:15:00+08:00"
   },
   "papers": [
     {
@@ -26,7 +26,7 @@
       "stage": "revision",
       "stage_entered_at": "2026-07-01T02:25:00+08:00",
       "last_advance_at": "2026-07-01T02:25:00+08:00",
-      "blocker": "codex contribution-gate (gpt-5.5 xhigh) verdict: BORDERLINE - needs reframing; NOT arXiv-ready. Likely desk-reject at JBF in current form.",
+      "blocker": "Stage 1 reframing in progress (contribution_gate BORDERLINE → 4 P1 sub-tasks queued + 3 P2 stage 2 blocked-on-stage1)",
       "owner_decision_pending": false,
       "compliance_scrub_done": true,
       "compliance_note": "submission set gate CLEAN (scripts/check_paper_compliance.py); body/tables/main thanks/cover_letter scrubbed of K-id/VolPred/AI; author=Yi-Hao Lai only; compiles 49pp",
@@ -61,6 +61,24 @@
           "OOS/sample-map not submission-grade",
           "corroborates CONTRIBUTION BORDERLINE"
         ]
+      },
+      "reframing_decision": {
+        "doc": "paper/leverage-direction/reframing_decision_20260701.md",
+        "decided_at": "2026-07-01T07:15:00+08:00",
+        "decided_by": "hourly-07 autonomous (per CLAUDE.md L19 + feedback_no_user_policy_block)",
+        "option": "A pragmatic (deep reframe, stage 1 quick wins + stage 2 core rebuild, stage 3 deferred to future paper)",
+        "stage1_subtasks": [
+          "paper_leverage_direction_stage1_cover_letter_scrub",
+          "paper_leverage_direction_stage1_intro_abstract_rewrite",
+          "paper_leverage_direction_stage1_appendix_offload",
+          "paper_leverage_direction_stage1_sample_split_unify"
+        ],
+        "stage2_subtasks_blocked": [
+          "paper_leverage_direction_stage2_gold_regime_design",
+          "paper_leverage_direction_stage2_oos_horse_race",
+          "paper_leverage_direction_stage2_replication_freeze"
+        ],
+        "boss_notified": true
       }
     },
     {

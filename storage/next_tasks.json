@@ -41301,13 +41301,26 @@
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-06-30T22:50:01.276758+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "interactive-claude",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-06-30T23:07:18.462056+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
       }
     ],
-    "last_released_at": "2026-06-30T19:50:05.230317+00:00",
+    "last_released_at": "2026-06-30T22:50:01.276749+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-30T20:07:18.771780+00:00",
-    "claim_session_id": "30ef3eb6ac33"
+    "claimed_at": "2026-06-30T23:07:18.461752+00:00",
+    "claim_session_id": "179dcdff0768"
   },
   {
     "id": "paper_review_mile_c16d94b7",
@@ -41639,7 +41652,7 @@
     "title": "[論文管線] leverage-direction(JBF) contribution gate BORDERLINE → reframing 策略決策",
     "description": "Codex contribution-gate (gpt-5.5 xhigh, 2026-07-01) verdict: BORDERLINE - needs reframing; NOT arXiv-ready. Likely desk-reject at JBF in current form. Multi-round review (codex agent 7d548f099) overall: not converged — all 3 passes FAIL_MAJOR_REVISION (latex_academic 8H/7M).\n\n5 reframing agenda（需老闆策略決定哪個方向）:\n1. Narrow to ONE contribution: economic content of leverage direction; drop time-zone, move VaR/VIX/HAR/crowding to online appendix\n2. Rebuild gold result around PRE-SPECIFIED regimes (stop claiming unconditional inverted leverage; mean gamma is NS)\n3. Turn model selection into a genuine OOS horse race (pre-specify on one universe/period, test on disjoint; DM/MCS + multiple-testing)\n4. Fix internal inconsistencies (cover-letter stale gold t=-5.79 [已 fixed], DM count, sample-split consistency, frozen data vintage)\n5. Identify VT channel independently of GJR construction; report economic magnitudes/turnover/costs/utility not just correlations\n\nOptions for owner: (A) 深度 reframe 主走 (1)+(2) 重投 JBF；(B) 把現版本 lower-tier journal (FRL/IJF) 不 reframe；(C) split 成 2 短篇；(D) shelve 改推 vt-trend-following 為下一棒。\n\n詳細 verdict 報告：paper/leverage-direction/review_history/codex_contribution_gate_20260701.md\n\nPipeline tracker：storage/paper_pipeline_status.json paper #0 (stage=revision, blocker=contribution_gate BORDERLINE).\n\nDispatch lane: main_thread (策略決策，非 mechanical review)。",
     "priority": 1,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "task_type": "paper_decision",
     "dispatch_lane": "main_thread",
     "source": "hourly_dispatch_2026_07_01_06",
@@ -41652,6 +41665,170 @@
       "strategic_decision",
       "owner_required"
     ],
-    "created_at": "2026-07-01T06:08:00+08:00"
+    "created_at": "2026-07-01T06:08:00+08:00",
+    "claimed_by": "hourly-07",
+    "claimed_at": "2026-06-30T23:10:55.734677+00:00",
+    "claim_session_id": "ffc037818cbf",
+    "status_history": [
+      {
+        "ts": "2026-06-30T23:10:55.734966+00:00",
+        "from": "pending_main_thread",
+        "to": "claimed",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-06-30T23:10:59.630229+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-06-30T23:14:09.103065+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-07"
+      }
+    ],
+    "started_at": "2026-06-30T23:10:59.629957+00:00",
+    "completed_at": "2026-06-30T23:14:09.102789+00:00",
+    "result": "Autonomous Option A (pragmatic reframe). 7 sub-tasks enqueued (4 P1 stage 1 + 3 P2 stage 2 blocked-on-stage1). Decision doc + tracker updated. Boss notified (alert 63f5e249). ETA stage 1 ~10-14 day, stage 2 ~21-28 day, submission ~5-8 weeks."
+  },
+  {
+    "id": "paper_leverage_direction_stage1_cover_letter_scrub",
+    "title": "[論文管線] leverage-direction Stage 1.1 - cover letter scrub (t=-5.79 + 12DM + time-zone)",
+    "description": "Stage 1 quick win. Scope: cover_letter.tex. (a) Line 29 「Gold exhibits a statistically significant inverted leverage effect (t = -5.79)」改 regime-dependent only（unconditional mean t=+0.15 NS；bull/bear regime t=-3.79）； (b) 「twelve Diebold-Mariano comparisons」改 eleven（BTC 2025 無 canonical source row）；(c) Line 33 third time-zone contribution 整段刪除（manuscript body 無對應 section，bolted on）；(d) 重編 cover_letter.pdf (xelatex)。\n\n參考：paper/leverage-direction/reframing_decision_20260701.md Stage 1；paper/leverage-direction/review_history/codex_contribution_gate_20260701.md §1 + §2 + §4 item 1+4。\n\nDispatch: 主線程或 sonnet medium subagent（純編輯 + xelatex）。Codex review 不需（純 mechanical scrub）。",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "paper_body",
+    "source": "leverage_direction_reframing_decision_20260701",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "JBF",
+      "stage1",
+      "cover_letter_scrub"
+    ],
+    "parent_decision": "paper_leverage_direction_reframing_decision",
+    "created_at": "2026-07-01T07:15:00+08:00"
+  },
+  {
+    "id": "paper_leverage_direction_stage1_intro_abstract_rewrite",
+    "title": "[論文管線] leverage-direction Stage 1.2 - intro+abstract+conclusion 改單一 contribution",
+    "description": "Stage 1 quick win. Scope: main.tex abstract + body.tex Section 1 (intro) + body.tex Conclusion。\n\n核心修改：(a) 全文「two contributions」→「one central contribution: economic content of leverage direction」；(b) abstract 刪「direct implications for model selection, risk management, and portfolio construction」這種廣告式 framing，改聚焦「when does asymmetric volatility have economic value for forecasting and allocation」；(c) intro/conclusion 刪 time-zone arbitrage 提及；(d) 弱化 method-selection 角度（Codex 說「JBF will not be excited by 'estimate GJR, use GJR if asymmetry significant'」），改強調 economic mechanism；(e) 維持 honest framing（gold unconditional NS、regime-dependent only）。\n\n參考：reframing_decision Stage 1；codex_contribution_gate §1（central claim）+ §4 item 1。\n\nDispatch: 主線程（narrative writing，非 mechanical）。寫完跑 xelatex + codex latex_academic 短審。",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "paper_body",
+    "source": "leverage_direction_reframing_decision_20260701",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "JBF",
+      "stage1",
+      "narrative_rewrite"
+    ],
+    "parent_decision": "paper_leverage_direction_reframing_decision",
+    "created_at": "2026-07-01T07:15:00+08:00"
+  },
+  {
+    "id": "paper_leverage_direction_stage1_appendix_offload",
+    "title": "[論文管線] leverage-direction Stage 1.3 - 移 VaR/ES/VIX/HAR/crowding 到 online appendix",
+    "description": "Stage 1 quick win. Scope: body.tex 移以下 sections 到 online_appendix.tex（建新檔），主文僅保留 short reference + cross-link：\n\n- VaR backtesting under Basel III（除非直接 test leverage-direction mechanism）\n- ES regression（六 exceedances 不足，Codex 明說「ES should not be a main JBF contribution」）\n- VIX timing\n- HAR-ABS paradox\n- Crowding risk\n- Behavioral costs\n- VVIX 相關\n\n主文只留：leverage direction taxonomy + GJR gamma + gold regime + VT mechanism（聚焦 6-asset equity domain）+ model selection（OOS horse race，stage 2 重做後）。\n\n參考：reframing_decision Stage 1；codex_contribution_gate §1 (complexity ceiling) + §2 (ES claim) + §4 item 1。Tables `var_ortho` / `complexity_ceiling` 全移 appendix。\n\nDispatch: 主線程或 sonnet medium subagent。寫完 xelatex 確認編譯通過。",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "paper_body",
+    "source": "leverage_direction_reframing_decision_20260701",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "JBF",
+      "stage1",
+      "appendix_offload"
+    ],
+    "parent_decision": "paper_leverage_direction_reframing_decision",
+    "created_at": "2026-07-01T07:15:00+08:00"
+  },
+  {
+    "id": "paper_leverage_direction_stage1_sample_split_unify",
+    "title": "[論文管線] leverage-direction Stage 1.4 - sample split unification",
+    "description": "Stage 1 quick win. Scope: body.tex Section 3 (data) + descriptive stats + Table 1 caption + Table 3 OOS + cover letter。\n\n當前不一致（Codex §2 in-sample/OOS honesty）：\n- body.tex:34 寫「January 2017 through March 2026」\n- body.tex:41-42 寫「2023-2024 as the main out-of-sample period and 2025-March 2026 as validation」\n- body.tex:120 寫「2017-2025 the in-sample period」\n- Table 1 caption: 「In-Sample Period: 2017-2025」\n- Table 3 把 2025 當 OOS\n\n決議：採 **train 2017-01 to 2022-12, OOS-main 2023-01 to 2024-12, OOS-validation 2025-01 to 2026-03** 一套，全文一致。Descriptive stats 用 train+OOS-main 全 sample。所有 OOS 表用 main + validation 兩段分開。Cover letter 同步。\n\n參考：reframing_decision Stage 1；codex_contribution_gate §2 sample-split inconsistency。\n\nDispatch: 主線程。需 grep 找出所有 sample-period 提及一次性改齊。寫完跑 xelatex。",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "paper_body",
+    "source": "leverage_direction_reframing_decision_20260701",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "JBF",
+      "stage1",
+      "sample_split"
+    ],
+    "parent_decision": "paper_leverage_direction_reframing_decision",
+    "created_at": "2026-07-01T07:15:00+08:00"
+  },
+  {
+    "id": "paper_leverage_direction_stage2_gold_regime_design",
+    "title": "[論文管線] leverage-direction Stage 2.1 - gold pre-specified regime design",
+    "description": "Stage 2 core rebuild。Stage 1 全 succeeded 才 unblock。\n\nScope: 重新設計 gold regime experiment：(a) regime 定義改用 ex ante 外生 instrument (VIX threshold + DXY trend + Treasury basis)，不再事後切；(b) holdout period validate；(c) compare to Chevallier (2017), Chang et al. (2021), Baur-Lucey safe-haven literature；(d) 結論 framing 限 regime-dependent，不 claim unconditional。\n\n參考：reframing_decision Stage 2；codex_contribution_gate §1 (gold taxonomy fragile) + §4 item 2。\n\nDispatch: 新 experiment K1XXX，opus high (research design heavy)。Compute heavy 走 compute_queue。",
+    "priority": 2,
+    "status": "blocked",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_at": "2026-07-01T07:15:00+08:00",
+    "blocked_note": "Blocked on Stage 1 four sub-tasks completion. Will unblock once stage1_cover_letter/intro/appendix/sample_split all succeeded.",
+    "task_type": "experiment",
+    "source": "leverage_direction_reframing_decision_20260701",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "JBF",
+      "stage2",
+      "gold_regime",
+      "blocked_on_stage1"
+    ],
+    "parent_decision": "paper_leverage_direction_reframing_decision",
+    "created_at": "2026-07-01T07:15:00+08:00"
+  },
+  {
+    "id": "paper_leverage_direction_stage2_oos_horse_race",
+    "title": "[論文管線] leverage-direction Stage 2.2 - genuine OOS horse race",
+    "description": "Stage 2 core rebuild。Stage 1 全 succeeded 才 unblock。\n\nScope: 重做 model selection 為 genuine pre-specified OOS horse race。(a) Pre-specify gamma rule on initial training universe/period (eg 2017-2020 + 6 ETF equity domain)；(b) test on disjoint universe + future period (2023-2026 + extra ETF/commodity)；(c) DM + MCS + multiple-testing 校正；(d) forecast-origin decision log (date / estimated gamma / SE / chosen model / realized OOS loss differential / DM result)；(e) 區分 'significant superiority' vs 'non-rejection of equal accuracy'；(f) 刪 'never significantly beaten' headline。\n\n參考：reframing_decision Stage 2；codex_contribution_gate §2 in-sample/OOS + §4 item 3。\n\nDispatch: 新 experiment K1XXX，opus high。Heavy compute（DM/MCS bootstrap）走 compute_queue。",
+    "priority": 2,
+    "status": "blocked",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_at": "2026-07-01T07:15:00+08:00",
+    "blocked_note": "Blocked on Stage 1 four sub-tasks completion.",
+    "task_type": "experiment",
+    "source": "leverage_direction_reframing_decision_20260701",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "JBF",
+      "stage2",
+      "oos_horse_race",
+      "blocked_on_stage1"
+    ],
+    "parent_decision": "paper_leverage_direction_reframing_decision",
+    "created_at": "2026-07-01T07:15:00+08:00"
+  },
+  {
+    "id": "paper_leverage_direction_stage2_replication_freeze",
+    "title": "[論文管線] leverage-direction Stage 2.3 - data vintage freeze + replication package",
+    "description": "Stage 2 core rebuild。Stage 1 全 succeeded 才 unblock。\n\nScope: (a) 凍結 paper/leverage-direction/data/ 為 final replication vintage（不再 update yfinance）；(b) 刪掉所有 table notes 暗示主表無法 reconstruct（Table vt:146-147 '6/20 cells matched'、Table var:84 '+/- 3 violation revision'、Table gamma:24 'vintage could not be re-located'）；(c) 建 reproduce.py 從 frozen data + scripts/ 一鍵重產所有主表；(d) 寫 replication README。\n\n參考：reframing_decision Stage 2；codex_contribution_gate §2 replication/data-vintage visibility + §4 item 4。\n\nDispatch: 主線程 + sonnet medium 雙線；reproduce.py 跑通才算 done。",
+    "priority": 2,
+    "status": "blocked",
+    "blocked_reason": "prior_attempts_failed",
+    "blocked_at": "2026-07-01T07:15:00+08:00",
+    "blocked_note": "Blocked on Stage 1 four sub-tasks completion.",
+    "task_type": "platform_ops",
+    "source": "leverage_direction_reframing_decision_20260701",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "JBF",
+      "stage2",
+      "replication_freeze",
+      "blocked_on_stage1"
+    ],
+    "parent_decision": "paper_leverage_direction_reframing_decision",
+    "created_at": "2026-07-01T07:15:00+08:00"
   }
 ]
