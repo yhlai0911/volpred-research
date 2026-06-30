@@ -89,6 +89,9 @@ ARC_DOMINANCE_THRESHOLD = 0.50  # top arc share > 50% over the sample → warn
 # content completeness: chart + source markers expected in every article.
 COMPLETENESS_LOOKBACK = 12
 _CHART_MARKERS = ("![", ".png", ".svg", ".jpg", "chart", "figure", "圖", "<img")
+# 2026-06-30 (boss)：general 讀者文章文末須附「懶人包圖組」（lazypack-infographic skill）。
+_LAZYPACK_MARKER = "懶人包"
+LAZYPACK_MIN_COVERAGE = 0.6  # general 文章含懶人包比率低於此 → lazypack_gap
 _SOURCE_MARKERS = ("來源", "資料來源", "data source", "experiment", "實驗", "回測", "樣本")
 _KID_RE = re.compile(r"\bK\d{2,}\b")  # K-id citation (K123, K1557, ...)
 # release deadlock: the candidate source feeding the draft/release pool.
@@ -487,11 +490,19 @@ def check_content_completeness(
     recent = [item for item, _ in timed[:lookback]]
 
     findings: list[dict[str, Any]] = []
+    gen_total = 0          # general 讀者文章數（懶人包規則適用對象）
+    gen_with_lazypack = 0  # 其中含「懶人包」圖組者
     for item in recent:
         content = item.get("content")
         text = content if isinstance(content, str) else ""
         text_low = text.lower()
         details = item.get("details") if isinstance(item.get("details"), dict) else {}
+        # 2026-06-30 (boss)：general 讀者文章除專業圖表外，文末須附「懶人包圖組」讓
+        # 非專業讀者快速掌握（publishing rule + lazypack-infographic skill）。
+        if (item.get("audience") or "") == "general":
+            gen_total += 1
+            if _LAZYPACK_MARKER in text:
+                gen_with_lazypack += 1
         # A chart is present if the body has an inline marker, a structured
         # charts/images field, OR `details` carries numeric metric data the
         # frontend renders into a chart component (avoids flagging articles whose
@@ -517,10 +528,25 @@ def check_content_completeness(
                     "title": (item.get("title") or "")[:60],
                 }
             )
+    lazypack_rate = round(gen_with_lazypack / gen_total, 2) if gen_total else None
+    # 懶人包覆蓋率過低 → 內容缺非專業讀者快速掌握層。rate-based（不逐篇 flag 避免洗版）。
+    lazypack_low = lazypack_rate is not None and lazypack_rate < LAZYPACK_MIN_COVERAGE
+    status = "ok"
+    if findings:
+        status = "incomplete"
+    elif lazypack_low:
+        status = "lazypack_gap"
     return {
-        "status": "ok" if not findings else "incomplete",
+        "status": status,
         "scanned": len(recent),
         "findings": findings,
+        "lazypack": {
+            "general_total": gen_total,
+            "with_lazypack": gen_with_lazypack,
+            "coverage": lazypack_rate,
+            "threshold": LAZYPACK_MIN_COVERAGE,
+            "below_threshold": lazypack_low,
+        },
     }
 
 
