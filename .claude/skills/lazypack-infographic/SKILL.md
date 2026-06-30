@@ -4,20 +4,33 @@ description: |
   Use this skill when producing a 懶人包 (cheat-sheet) infographic SET for a
   reader-facing article (audience='general', and reader-facing event/daily/
   trending pieces). Generates multiple poster-session-style PNGs — concept /
-  method / results, each its own image — via NotebookLM for FREE (no paid image
-  API). Activates during article writing (fed by the evidence package) and at
-  the publish step (append to article end). Triggered by intent like "幫這篇生懶人包圖"
-  or the publishing rule that every general-reader article carries one.
+  method / results, each its own image. PRIMARY generator = codex exec (writes a
+  render script fed by the evidence package → data-accurate, reproducible, free on
+  the ChatGPT subscription); NotebookLM is the FALLBACK. Activates during article
+  writing and at the publish step (append to article end). Triggered by intent like
+  "幫這篇生懶人包圖" or the publishing rule that every general-reader article carries one.
 ---
 
 # lazypack-infographic — 懶人包資訊圖（多圖 poster 模式）
 
 每篇**一般讀者**文章（`audience='general'`，以及 reader-facing 的 event / daily / trending）發佈時，**文末必附一組懶人包圖**（用戶 2026-06-04 硬性要求）。
 
-## 三條鐵則
+## 生成方法：codex exec 為主，NotebookLM 為 fallback（用戶 2026-06-30 硬性糾正）
 
-1. **零費用**：只用 **NotebookLM**（`notebooklm` CLI / notebooklm-py，驅動用戶免費的 NotebookLM 網頁產品）。**絕對禁止**付費影像 API：`gpt-image-2`（OpenAI 按張收費）、付費 Gemini key（`gemini_ask.py` 那支）。NotebookLM `generate infographic` 直接出 .png。
-2. **餵 source 數據，不是餵成品文字**（用戶 2026-06-04 糾正）：在**寫文過程中**就用「寫這篇文章的全部素材」生圖 —— `experiments/<k>/<k>_results.json` + `README.md` + `draft.md` + 任何 refs/數據檔，**一起加進同一個 notebook**。文章 prose 是 lossy 壓縮；餵 source 數據才能把**方法圖**畫準、數字對得上 results.json。不要等文章寫完才用文字去生。
+**PRIMARY = `codex exec`**：用 Codex CLI（ChatGPT 訂閱 auth，**flat-rate 非按張計費**）讓 codex **寫一支 render 程式**（PIL / SVG→PNG / matplotlib 自訂版面）餵 evidence package 出圖。為什麼優於 NotebookLM：
+- **數字精確**：圖上每個數字直接從 `<k>_results.json` 取，不經 AI 生圖的 hallucination 風險（研究誠實）。
+- **可復現**：render 程式存檔，同 input 同 output；審稿/回溯可重跑。
+- **零增量成本**：codex 走 ChatGPT 訂閱（flat），本機 render 不打任何按張計費影像 API。
+- **可控品質**：poster 版面（bento-grid / 分區 / 圖示 / 字級）由程式精準控制，不靠 AI 抽卡。
+
+**FALLBACK = NotebookLM**（`notebooklm` CLI / notebooklm-py，免費網頁產品）：只在 codex exec 不可用、或某張圖確實更適合 AI-poster 美術風時用。`scripts/gen_lazypack_infographic.py` 走此路。
+
+**仍然絕對禁止**：按張計費影像 API —— `gpt-image-2`（OpenAI 按張收費）、付費 Gemini key（`gemini_ask.py` 那支）。「零費用」的本意是禁 metered billing，**codex 訂閱與 NotebookLM 都不違反**。
+
+## 三條鐵則（兩種生成法都適用）
+
+1. **零（增量）費用**：codex exec（訂閱 flat）或 NotebookLM（免費）；禁按張計費影像 API（見上）。
+2. **餵 source 數據，不是餵成品文字**（用戶 2026-06-04 糾正）：用「寫這篇文章的全部素材」生圖 —— `experiments/<k>/<k>_results.json` + `README.md` + `draft.md` + 任何 refs/數據檔。codex 路徑：把這些路徑當 context 餵給 codex exec，要求數字逐一對齊 results.json。文章 prose 是 lossy 壓縮；餵 source 數據才能把**方法圖**畫準、數字對得上 results.json。不要等文章寫完才用文字去生。
 3. **多圖、不要一張塞爆**（poster-session 感）：一篇通常 **2–4 張**，每張只講**一種資訊型態**：
    - **概念/框架**（必）：這篇在講什麼、核心框架/名詞
    - **方法**（文章有研究方法時）：怎麼量/怎麼算的，**非技術白話**（像研討會壁報的方法說明）
@@ -27,8 +40,28 @@ description: |
 
 ## 一鍵指令
 
+### PRIMARY — codex exec（codex 寫 render 程式出圖）
+
 ```bash
-# 多圖（poster，推薦）— 餵 evidence package + plan
+# 推薦：scripts/gen_lazypack_codex.py（codex exec 驅動；2–4 panel；數字對齊 results.json）
+uv run python scripts/gen_lazypack_codex.py \
+  --experiment K1413 \                 # 自動帶 results.json + README + draft 當 context
+  --source experiments/k1413/refs.md \ # 額外 refs/數據（可重複）
+  --title "K1413 懶人包" \
+  --plan /tmp/plan.json \              # 每個 panel 一張圖（同下 plan.json 格式）
+  --out-dir /tmp/k1413_poster
+```
+codex exec 內部流程：餵 evidence package + panel plan → codex 寫 PIL/SVG/matplotlib render
+程式 → 本機跑出 PNG → 自我核對每個數字 vs results.json。零按張計費（ChatGPT 訂閱）。
+`--dry-run` 先看組出來的 codex prompt；`--model` 可覆寫 codex model。
+
+> 既有 data-bound Pillow 範例（codex 可參考的寫法）：`scripts/lazypack_render_example_spacex.py`
+> （SpaceX 文章專用 templates，僅供結構參考，每篇要重寫對應自己數據）。
+
+### FALLBACK — NotebookLM（AI poster；codex 不可用時）
+
+```bash
+# 多圖（poster）— 餵 evidence package + plan
 uv run python scripts/gen_lazypack_infographic.py \
   --experiment K1413 \                 # 自動加 results.json + README + draft
   --source experiments/k1413/refs.md \ # 額外 refs/數據（可重複）

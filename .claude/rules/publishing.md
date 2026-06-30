@@ -98,8 +98,8 @@ paths:
    - 2000+ 字繁中正文（research）或 1500+ 字（general）
    - **一般讀者（audience='general'，含 reader-facing event/daily/trending）文章 → 文末必附「懶人包圖組」**（2026-06-04 用戶硬性要求）。完整 SOP 走 **`lazypack-infographic` skill**。三鐵則：
      - **多圖 poster 模式**：通常 2–4 張,每張只講**一種資訊型態**(概念/框架、方法、結果、結論),**禁止全塞一張**。
-     - **餵 source 數據、寫文中生**:用 `notebooklm` + `scripts/gen_lazypack_infographic.py`,source 餵**全部 evidence package**(`experiments/<k>/<k>_results.json` + README + draft + refs),**不是**等文章寫完用 prose 去生(prose 是 lossy,方法圖會不準)。
-     - **零 API 費**:只用 NotebookLM(免費網頁產品,CLI 可 headless)。**禁用**付費影像 API(`gpt-image-2` / 付費 Gemini key `gemini_ask.py`)。
+     - **餵 source 數據、寫文中生**:source 餵**全部 evidence package**(`experiments/<k>/<k>_results.json` + README + draft + refs),**不是**等文章寫完用 prose 去生(prose 是 lossy,方法圖會不準)。
+     - **生成法 codex exec 為主、NotebookLM 為 fallback**(用戶 2026-06-30 糾正):PRIMARY = `codex exec`(ChatGPT 訂閱 flat-rate,codex 寫 render 程式 → 數字對齊 results.json、可復現);FALLBACK = NotebookLM(`scripts/gen_lazypack_infographic.py`,AI poster,codex 不可用時)。**禁用按張計費影像 API**(`gpt-image-2` / 付費 Gemini key `gemini_ask.py`);codex 訂閱與 NotebookLM 都不違反零增量費。
      - png → Supabase `article-images` upload → append 文末「## 懶人包」圖區。
 5. **寫前必做主題查重**：
    - `grep -i "關鍵詞" storage/reports/feed.json | head` 或

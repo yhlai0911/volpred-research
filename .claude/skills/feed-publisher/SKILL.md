@@ -245,9 +245,11 @@ pub.publish_milestone(
 
 **⚠️ 2026-06-30 lazypack hard gate（boss 硬性，coverage 曾低到 12%）**：`audience='general'` 文章發佈時**強制檢查文末有 `## 懶人包圖組` 區塊（heading + ≥1 張圖）**，缺則 **raise/exit 阻擋發佈**（雙層：`publish_draft.py` CLI `check_lazypack_gate` + `publish_milestone` chokepoint；共用 `has_lazypack_section`）。所以**寫 general 文章時必先生懶人包圖**：
 ```bash
-# 餵 evidence package（results.json + README + draft），免費走 NotebookLM
-uv run python scripts/gen_lazypack_infographic.py --experiment K<id> \
+# PRIMARY: codex exec（ChatGPT 訂閱 flat，codex 寫 render 程式餵 results.json → 數字精確可復現）
+uv run python scripts/gen_lazypack_codex.py --experiment K<id> \
   --title "K<id> 懶人包" --plan <plan.json> --out-dir <dir>
+# FALLBACK（codex 不可用）: NotebookLM AI poster
+#   uv run python scripts/gen_lazypack_infographic.py --experiment K<id> ...
 # 每張 PNG → upload_chart() 上傳 Supabase → append 文末「## 懶人包圖組」
 ```
 完整 SOP 走 `lazypack-infographic` skill（2-4 張 poster：概念/方法/結果，禁卡通風）。逃生門：CLI `--no-lazypack-gate` / API `audit_strict=False`，**僅限**真正非讀者向 / 批次遷移（會被 content_quality coverage 監看）。
