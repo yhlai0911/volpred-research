@@ -39984,7 +39984,7 @@
     "title": "K1584: Co-jump / HAR-CJ jump 軸**（JFE 2017 systemic co-jumps + JoE 2023 networks + Hawkes）：tick BNS bipower/Lee-Mykland 拆 RV＝con",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 485). Original: Co-jump / HAR-CJ jump 軸**（JFE 2017 systemic co-jumps + JoE 2023 networks + Hawkes）：tick BNS bipower/Lee-Mykland 拆 RV＝continuous+jump 建 HAR-CJ，同日跨資產 co-jump 計數當 vol regime 觸發器（VolPred jump 軸最薄）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1584.py with signal.shift(1) + seed=42, (c) K1584_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -39997,7 +39997,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-30T05:13:47.101075+00:00",
     "claim_session_id": "bee746ee4b74",
-    "started_at": "2026-06-30T05:13:58.106133+00:00"
+    "started_at": "2026-06-30T05:13:58.106133+00:00",
+    "completed_at": "2026-06-30T05:33:46.335943+00:00",
+    "result": "K1584 completed as NULL: TX gateable HAR-CJ test uses 2,219 daily rows / 1,697 OOS forecasts; HAR remains best QLIKE and all jump-split variants worsen QLIKE. Added README, results JSON, forecast CSV, diagnostic figure, and Codex source review (CONDITIONAL_PASS). SPY/0050 co-jump diagnostic is non-gateable same-calendar-date only."
   },
   {
     "id": "K1585",
