@@ -41038,7 +41038,7 @@
     "description": "Gmail UID: 12327\nMessage-ID: <15647143-D567-425E-A8DC-67C7EAE044FF@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 23:54:47 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 22:58 — 解決 host_cron_fail critical（audit_fb_pipeline exit_semantics gap-fill，breaches 1→0）\n\n--- 用戶回信內容 ---\nFb都開著 你自己切換啊\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 23:06 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 22:58 — 解決 host_cron_fail critical（audit_fb_pipeline exit_semantics gap-fill，breaches 1→0）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 22:58 tick — 解決 host_cron_fail critical（process fix）\r\n> \r\n> 巡檢發現 dashboard 出現 host_cron_fail = critical，root-cause + 修復：\r\n> \r\n> 根因：audit_fb_pipeline.py 在有 ≥2 篇 FB post 等 Chrome 互動發文時 exit 1 作 findings signal（findings 另經自己的 warn alert surface），不是 infra 失敗。但 runtime_schedules.json 漏標 exit_semantics:\"findings\"，host_cron_fail 把 exit1 誤讀為 cron crash → critical。這是 2026-06-20 STRIKE-3 建立 exit_semantics 機制要解的同 class，audit_fb_pipeline 當時沒被一起標。\r\n> \r\n> 修復（commit bec991e25）：加 exit_semantics:\"findings\" → host_cron_fail 排除。check-alerts breaches 1→0，dashboard 只剩 loop_health stale advisory（會隨 14d 窗自清）。\r\n> \r\n> 順手：\r\n> \r\n> 22:17 git_push_backup transient PUSH FAILED 也貢獻 host_cron_fail → 手動 push + 23:00 自然 run 清除，ahead=0 同步。\r\n> error_log 記錄 + queue 系統性 follow-up（audit 所有 exit-as-findings job 是否都標 exit_semantics，杜絕同類 gap）。\r\n> 待你動作：2 篇 FB post（mile_bd564eb7 半導體 / mile_0941e2f0）仍 awaiting interactive session（等 Chrome 發 FB）—— 由 audit warn alert 追蹤，>72h 自動 expire。lazypack 320-backfill scale 問題仍待回覆。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -41049,17 +41049,46 @@
     "email_message_id": "<15647143-D567-425E-A8DC-67C7EAE044FF@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 22:58 — 解決 host_cron_fail critical（audit_fb_pipeline exit_semantics gap-fill，breaches 1→0）",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-30T16:00:37.388373+00:00",
-    "claim_session_id": "64ad7c27ce2a",
     "status_history": [
       {
         "ts": "2026-06-30T16:00:37.388636+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-06-30T17:09:37.153704+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "interactive-claude",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-06-30T17:10:05.245397+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-06-30T17:10:05.497963+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-01"
+      },
+      {
+        "ts": "2026-06-30T17:12:03.928016+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-01"
       }
-    ]
+    ],
+    "last_released_at": "2026-06-30T17:09:37.153379+00:00",
+    "claimed_by": "hourly-01",
+    "claimed_at": "2026-06-30T17:10:05.245125+00:00",
+    "claim_session_id": "ce4c085e10ac",
+    "started_at": "2026-06-30T17:10:05.497695+00:00",
+    "completed_at": "2026-06-30T17:12:03.927736+00:00",
+    "result": "Close reply sent (notification 1ccee5c0) — 誠實說明 hourly cron 無 Chrome MCP 做不了 FB；已加 handoff KEEP block 🔴 FB URGENT BANNER 列 5 篇 awaiting + SOP 給下個 interactive session；queue structural follow-up platform_ops_fb_awaiting_72h_to_48h_expire (P3)。"
   },
   {
     "id": "K1590_phase2_codex_review_knowledge",
@@ -41103,5 +41132,27 @@
     "started_at": "2026-06-30T16:26:08.653089+00:00",
     "completed_at": "2026-06-30T16:30:08.719496+00:00",
     "result": "Codex review completed for K1590 diagnostic: CONDITIONAL_PASS. Fixed README numeric drift, added experiments/k1590/codex_review.md, reran diagnostic, and wrote knowledge.json GO diagnostic entry item_id=8b4e16bb with provenance/reviewer."
+  },
+  {
+    "task_id": "content_erratum_mile_48c8328b_k189_reversed",
+    "task_type": "platform_ops",
+    "title": "[誠信] mile_48c8328b erratum：結論與 K189 相反需更正",
+    "description": "研究誠信 erratum（paper-audit workflow 2026-07-01 抓到，Codex FAIL）：已發佈文章 mile_48c8328b 的結論與 K189 實驗結果**完全相反** —— 文章說 attention model 6/6 輸給 GJR，但 K189 實際是 attention 6/6 **贏**。依研究誠實原則 §6（推翻舊結論必回溯更正）必發 erratum：(1) 用正確 K189 結果改寫文章結論；(2) 標 errata + last_updated_at；(3) 更新 knowledge.json 若有誤；(4) sync 上線。主線程做（涉結論判斷，不外包）。",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "source": "paper_audit_workflow",
+    "created_at": "2026-06-30T17:09:15.449848+00:00"
+  },
+  {
+    "id": "platform_ops_fb_awaiting_72h_to_48h_expire",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "title": "FB awaiting auto-expire: 72h → 48h + early-warn 階段",
+    "description": "Per 老闆 email-12327 (2026-06-30 23:54) 指出 FB awaiting 太久。當前 audit_fb_pipeline.py 72h auto-expire，5 篇 awaiting 中 3 篇已 >64h、2 篇 >74h（半導體偏斜 6/27-6/28 數據過 3 天 timely insight 大幅衰減）。改 48h 嚴格 expire + 24h early-warn audit warn surface（不是 fail）+ retract policy 確保 expire 後 mile_xxx 不再 stuck。Files: src/volpred/ops/audit_fb_pipeline.py、reports retract path、config/runtime_schedules.json (audit_fb_pipeline 排程不變)、tests/test_audit_fb_pipeline.py。Reasoning: timely insight half-life ≤ 48h；超 48h 的 article 強發 FB 反而稀釋 Ivan Lai 個人 feed 即時感。",
+    "created_at": "2026-07-01T01:11:59+08:00",
+    "source": "boss_email_followup",
+    "ttl_days": 14
   }
 ]
