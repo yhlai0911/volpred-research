@@ -40930,7 +40930,7 @@
     "title": "K1583: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1583 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1380_v4 17 個 SPY vol forecast spec（GARCH-X A1-A5/A2f/A4f/A3f/A2n/A4n + MIDAS B1-B3/C2-C3/B0；C1 因 0 valid 排除→16 specs）在 Model Confidence Set 三層分析全 retained：\n1. Unconditional MCS (B=1000, α=0.10)：16/16 全保留，p_set=0.438\n2. Conditional MCS (VIX high≥20 / mid / low<15)：每 regime 同樣 16/",
     "priority": 4,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1583",
@@ -40949,7 +40949,10 @@
       "audience-general"
     ],
     "topic_cluster": "garch",
-    "created_at": "2026-06-30T14:26:45+00:00"
+    "created_at": "2026-06-30T14:26:45+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-06-30T22:10:42+00:00",
+    "blocked_note": "arc-dedup gate exit-message: 3 existing articles tell same MCS/methodology_robustness story (entities GOLD/NASDAQ/TW_EQUITY/US_EQUITY/VIX, conclusion_class=descriptive); writing new general piece would repeat narrative arc. K1583 verdict surface (16/16 MCS retained NULL) is methodology-only, not reader-facing news worthy. Per CLAUDE.md arc-dedup hard rule."
   },
   {
     "id": "email-12322-bf6984",
@@ -41589,5 +41592,40 @@
     "started_at": "2026-06-30T21:15:01.367739+00:00",
     "completed_at": "2026-06-30T21:24:24.397236+00:00",
     "result": "Active v3 JBF gate completed: three read-only Codex review passes plus local compile/package checks all returned NEEDS_MAJOR_REVISION/NEEDS_REVISION with arXiv HOLD. Added active_v3_final_gate_20260701.md and updated multi-round README; no manuscript source edits."
+  },
+  {
+    "id": "trending_repost_2026_07_01_ai資本支出",
+    "title": "[trending_repost] 千億級支出ROI成謎，科技股高波動是買點或警訊？",
+    "description": "從科技巨頭2026年預估7000億美元資本支出切入，探討市場對AI變現速度的焦慮。這有助於釐清科技股近期隱含波動率飆升的底層邏輯。可量化：Nasdaq-100偏斜度與巨頭Capex變現率的背離。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-06-30T22:00:19+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
+    "id": "paper_leverage_direction_reframing_decision",
+    "title": "[論文管線] leverage-direction(JBF) contribution gate BORDERLINE → reframing 策略決策",
+    "description": "Codex contribution-gate (gpt-5.5 xhigh, 2026-07-01) verdict: BORDERLINE - needs reframing; NOT arXiv-ready. Likely desk-reject at JBF in current form. Multi-round review (codex agent 7d548f099) overall: not converged — all 3 passes FAIL_MAJOR_REVISION (latex_academic 8H/7M).\n\n5 reframing agenda（需老闆策略決定哪個方向）:\n1. Narrow to ONE contribution: economic content of leverage direction; drop time-zone, move VaR/VIX/HAR/crowding to online appendix\n2. Rebuild gold result around PRE-SPECIFIED regimes (stop claiming unconditional inverted leverage; mean gamma is NS)\n3. Turn model selection into a genuine OOS horse race (pre-specify on one universe/period, test on disjoint; DM/MCS + multiple-testing)\n4. Fix internal inconsistencies (cover-letter stale gold t=-5.79 [已 fixed], DM count, sample-split consistency, frozen data vintage)\n5. Identify VT channel independently of GJR construction; report economic magnitudes/turnover/costs/utility not just correlations\n\nOptions for owner: (A) 深度 reframe 主走 (1)+(2) 重投 JBF；(B) 把現版本 lower-tier journal (FRL/IJF) 不 reframe；(C) split 成 2 短篇；(D) shelve 改推 vt-trend-following 為下一棒。\n\n詳細 verdict 報告：paper/leverage-direction/review_history/codex_contribution_gate_20260701.md\n\nPipeline tracker：storage/paper_pipeline_status.json paper #0 (stage=revision, blocker=contribution_gate BORDERLINE).\n\nDispatch lane: main_thread (策略決策，非 mechanical review)。",
+    "priority": 1,
+    "status": "pending_main_thread",
+    "task_type": "paper_decision",
+    "dispatch_lane": "main_thread",
+    "source": "hourly_dispatch_2026_07_01_06",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "JBF",
+      "contribution_gate",
+      "BORDERLINE",
+      "strategic_decision",
+      "owner_required"
+    ],
+    "created_at": "2026-07-01T06:08:00+08:00"
   }
 ]
