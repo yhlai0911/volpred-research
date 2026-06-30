@@ -40441,7 +40441,7 @@
     "description": "Gmail UID: 12281\nMessage-ID: <4A759D9E-7889-489D-BC04-CB539A64C478@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 13:02:09 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-30 13:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n兩個Warn已經存在很久 到底怎麼回事\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 13:00 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-06-30 13:00 台灣時間 · Overall WARN\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t10 pending tasks (top types: [('experiment', 7), ('email_reply', 2), ('paper_review', 1)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t13 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t13/13 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample report URLs ok; 3/3 core pages content-ok\t—\r\n> verification_fb_pipeline\twarn\t1 FB posts pending sync\thandoff doc + manual paste or retry MCP\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\twarn\t1 current warn/critical alert conditions\tingest alerts → run remediation per alert.md auto-action table\r\n> loop_health\tok\toverall=ok | first_pass_success=low_coverage task_outcome=ok error_recurrence=ok correction_trend=ok\t—\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。全部正常\r\n> \r\n> === cron 成果掌握 review — 2026-06-30 13:00:23（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=257 exit=0 idle | last: 2026-06-30 13:00:15 (log-mtime)\r\n>   compute_worker    runs=1156 exit=0 idle | last: 2026-06-30 13:00:00 (log-mtime)\r\n>   check_alerts      runs=290 exit=0 running | last: 2026-06-30 13:00:00 (log-mtime)\r\n>   collect_tw        runs=8 exit=0 idle | last: 2026-06-29 15:00:08 (log-mtime)\r\n>   collect_us        runs=8 exit=0 idle | last: 2026-06-30 07:03:10 (log-mtime)\r\n>   daily_update      runs=10 exit=0 idle | last: 2026-06-30 08:06:33 (log-mtime)\r\n>   daily_update_intraday runs=0 exit=(never exited) idle | last: 2026-06-30 08:31:02 (log-mtime)\r\n>   publication_candidates runs=None exit=None idle | last: 2026-06-30 10:01:36 (log-mtime)\r\n>   release_pool      runs=49 exit=0 idle | last: 2026-06-30 13:00:01 (log-mtime)\r\n>   market_cal        runs=2 exit=0 idle | last: 2026-06-29 08:00:03 (log-mtime)\r\n>   memory_health     runs=12 exit=0 idle | last: 2026-06-30 05:30:04 (log-mtime)\r\n>   work_summary      runs=49 exit=0 idle | last: 2026-06-30 12:05:40 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：5 筆\r\n>   cc17f58ea hourly-12 | K1583 MCS meta-eval close (CONDITIONAL_PASS 82) + email-12270 reply (K1573 撤回)\r\n>   f08b12263 paper(vt-trend): 2009 trough 敘述精準化回應 v6 HIGH Finding 3（研究誠實）\r\n>   57d8996be hourly-12 | publish_rhythm:burst 語意化根治 + 3 email reply (boss email-12253/12260/12261)\r\n>   73846ac5a [codex] K1582 HARQ measurement error pilot\r\n>   d8f070c0f ops(hourly 12:02): PHASE-Z safety-net auto-commit (agent left uncommitted)\r\n> \r\n> ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 16 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> cc17f58ea\thourly-12\tmeta-\r\n> f08b12263\tpaper(vt-trend): 2009 trough 敘述精準化回應 v6 HIGH Finding 3（研究誠實）\t12:44\r\n> 57d8996be\thourly-12\tythm:\r\n> 73846ac5a\t[codex] K1582 HARQ measurement error pilot\t12:12\r\n> d8f070c0f\tops(hourly 12:02): PHASE-Z safety-net auto-commit (agent left uncommitt\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -40451,7 +40451,14 @@
     "email_uid": 12281,
     "email_message_id": "<4A759D9E-7889-489D-BC04-CB539A64C478@gmail.com>",
     "email_subject": "Re: [VolPred Boss Report] 2026-06-30 13:00 台灣時間 平台運營報告",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-06-30T05:19:11.845623+00:00",
+    "claim_session_id": "b39399431b38",
+    "started_at": "2026-06-30T05:19:12.047710+00:00",
+    "resolution": "2 warn 都是誤報根治：cluster spy catch-all 語意化(今晨) + publish_rhythm burst 排除非節奏 fixture(剛修)。breach_count 1→0。已 email。",
+    "completed_at": "2026-06-30T05:24:42.514142+00:00",
+    "result": "兩 warn 已即時 clear (dashboard overall_status=ok)，根因查清 + 寄回信給老闆 + 兩 followup deep-fix task 入單。Warn #1 fb_pipeline: mile_f5f4cb43 標 awaiting_interactive_session 統一狀態 → fb_pending=0；深 fix=platform_ops_fb_awaiting_ttl_auto_expire (TTL 14天 auto-expire)。Warn #2 publish_rhythm:burst: 02:53/02:56 兩篇 reader-facing 2.73min 間距，content_quality regenerate 後 burst_pairs=[]、status=ok；深 fix=platform_ops_publish_rhythm_pre_publish_throttle (publisher pre-publish 30min gate)。回信 notification_id 由 send-alert 產生。"
   },
   {
     "id": "paper_review_vt_trend_v7_codex_primary_path_verify",
@@ -40463,5 +40470,37 @@
     "source": "k1259_fallback_followup_2026-06-30",
     "preferred_agent": "codex",
     "created_at": "2026-06-30T05:15:50+00:00"
+  },
+  {
+    "task_id": "platform_ops_dreaming_persistent_alert_detector",
+    "task_type": "platform_ops",
+    "title": "dreaming 加 persistent-alert detector：同 alert_key 連續 fire N 天自動升級 root-cause",
+    "description": "系統性 gap（boss email-12281 觸發）：dreaming_review.py error_recurrence 只 mine cron exits + diagnostics tags，不 mine 持續 fire 的 alert condition（如 publish_rhythm/cluster 每天誤報）→ 長期重複 warn 無自動升級，只能等 boss 人工發現。修法：新增 detector 讀 storage/ops/alert_dedup.json，偵測同 alert_key 的 first_seen 久遠(≥3天) + 近期仍 last_sent → 升級為 persistent_alert finding（severity warn，建議 root-cause 而非再 patch），寄 dreaming email。對齊 loop-engineering「系統該先抓到、而非靠 boss 抓」。需 clean context 建（讀 dreaming_review.py 結構 + alert_dedup format）。",
+    "priority": 2,
+    "status": "pending",
+    "source": "main_thread_discovered_2026-06-30",
+    "created_at": "2026-06-30T05:21:55.999617+00:00"
+  },
+  {
+    "id": "platform_ops_fb_awaiting_ttl_auto_expire",
+    "title": "FB pipeline awaiting_interactive_session 加 TTL auto-expire (≥14天自動 wont_fix)",
+    "description": "Root cause: 4-5 mile awaiting_interactive_session 無 TTL → backlog 無限累積 → dashboard verification_fb_pipeline 永久 warn (老闆 2026-06-30 email-12281 抱怨「兩個 Warn 已存在很久」根因之一)。當前 backlog: mile_819af916 (06-29), mile_a0b174f9 (06-28), mile_bd564eb7 (06-28), mile_0941e2f0 (06-28), mile_f5f4cb43 (06-30 剛標)。修法: (a) scripts/mark_fb_post_status.py 加 --auto-expire <days> flag (default 14); (b) 加 cron job 每天掃描 fb_post_status=awaiting_interactive_session 且 published_at > N 天 → mark wont_fix + log 原因「Chrome MCP 不可用 + 用戶人工 backlog 過期」; (c) dashboard ops_dashboard.py FB section 把 wont_fix 從 warn count 排除。Bar: TTL flip 後 dashboard verification_fb_pipeline 應自動回 ok (除非新 awaiting 進來)。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "boss_email_12281_root_cause_fix_2026-06-30",
+    "preferred_agent": null,
+    "created_at": "2026-06-30T05:23:49+00:00"
+  },
+  {
+    "id": "platform_ops_publish_rhythm_pre_publish_throttle",
+    "title": "Publisher 加 pre-publish 30min reader-facing throttle gate (預防 burst)",
+    "description": "Root cause: 2026-06-30 02:53 mile_44ab1acc + 02:56 mile_f5f4cb43 連派兩篇 reader-facing 間距 2.73min < 30min burst_gap_threshold → content_quality publish_rhythm:burst alert 觸發 (老闆 2026-06-30 email-12281 抱怨「兩個 Warn 已存在很久」根因之二)。當前 content_quality.py 只 detect (事後 patrol)，無預防機制 → 同樣 root cause 反覆觸發 alert (歷史已多次)。修法: (a) src/volpred/publisher/_append_to_feed 加 pre-publish gate: 若 audience=general 且 feed 內 newest published article gap < 30min 且亦 reader-facing → reject publish + raise PublishThrottleError (caller 改 schedule 或 defer); (b) dispatcher 派 reader-facing 前同 check (避免到 publisher 才 fail); (c) 加 unit test scripts/tests/test_publisher_throttle.py 覆蓋 burst case。Bar: 連續派兩篇 reader-facing 第二篇被 gate 擋；alert publish_rhythm:burst 不再觸發。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "boss_email_12281_root_cause_fix_2026-06-30",
+    "preferred_agent": null,
+    "created_at": "2026-06-30T05:23:49+00:00"
   }
 ]

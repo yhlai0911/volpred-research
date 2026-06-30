@@ -12365,5 +12365,16 @@
     "agent": "main_thread_hourly-13 + feature-dev:code-reviewer subagent fallback",
     "result": "CONDITIONAL_PASS → v7.1 minor revision applied → 5/5 v6 findings RESOLVED + 2 LOW addressed; narrative state ready_for_submission_candidate pending Codex primary-path verify followup",
     "followup_task": "paper_review_vt_trend_v7_codex_primary_path_verify"
+  },
+  {
+    "timestamp": "2026-06-30T05:24:51+00:00",
+    "task_type": "email_reply",
+    "task_id": "email-12281-ca77da",
+    "agent": "main_thread_hourly-13",
+    "result": "兩 warn 即時 clear (FB pipeline / publish_rhythm:burst)；根因分析 + 寄回信 + 2 deep-fix followup task 入單",
+    "followup_tasks": [
+      "platform_ops_fb_awaiting_ttl_auto_expire",
+      "platform_ops_publish_rhythm_pre_publish_throttle"
+    ]
   }
 ]
