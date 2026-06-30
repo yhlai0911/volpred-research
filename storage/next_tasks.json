@@ -40837,7 +40837,7 @@
     "title": "Paper review (Codex 24h-rule): 國防預算翻倍喊得這麼大聲，國防 ETF 卻沒按劇本震盪",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_68285aa0 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_68285aa0",
@@ -40845,7 +40845,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-06-30T13:07:58+00:00"
+    "created_at": "2026-06-30T13:07:58+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T23:44:00.773062+00:00",
+    "claim_session_id": "65707641b04a",
+    "status_history": [
+      {
+        "ts": "2026-06-30T23:44:00.773303+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T23:44:00.998664+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T23:47:26.509704+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-06-30T23:44:00.998409+00:00",
+    "completed_at": "2026-06-30T23:47:26.509427+00:00",
+    "result": "Codex 24h source-level review completed for mile_68285aa0 / K1576. Verdict PASS; article claims match K1576 source/results/detail CSV, no lookahead found, 315/315 p-values checked with 0 Bonferroni significant tests. Review file: storage/ops/paper_reviews/2026-07-01/codex_review_mile_68285aa0_k1576.md"
   },
   {
     "id": "paper_review_mile_5399bf01",
