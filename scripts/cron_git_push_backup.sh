@@ -80,8 +80,25 @@ if git_auth push origin main >> "$LOG" 2>&1; then
   exit 0
 else
   echo "[$(ts)] PUSH FAILED" >> "$LOG"
+  # 2026-06-30 transient-suppress：直接 cron (`17 */2`) 走 macOS keychain credential helper
+  # 失敗率 ~43%（131 次假警報轟炸 boss）；piggy-back HH:00 hourly 走 check_alerts
+  # subprocess env 成功率 ~96%。若上一次成功 push 在 90 min 內，視為 transient
+  # （piggy-back 已 / 即將補上），suppress alert 避免假警報；只記 log 供 audit。
+  LAST_OK_TS=$(grep -E "pushed [0-9]+ commit\(s\) OK|nothing to push \(ahead=0\)" "$LOG" 2>/dev/null \
+    | grep -oE "\[[0-9-]+ [0-9:]+\]" | tail -1 | tr -d '[]')
+  if [ -n "$LAST_OK_TS" ]; then
+    NOW_EPOCH=$(date '+%s')
+    LAST_OK_EPOCH=$(date -j -f '%Y-%m-%d %H:%M:%S' "$LAST_OK_TS" '+%s' 2>/dev/null || echo 0)
+    if [ "$LAST_OK_EPOCH" -gt 0 ]; then
+      AGE_MIN=$(( (NOW_EPOCH - LAST_OK_EPOCH) / 60 ))
+      if [ "$AGE_MIN" -lt 90 ]; then
+        echo "[$(ts)] SUPPRESSED alert (last OK ${AGE_MIN}m ago < 90m, piggy-back covers)" >> "$LOG"
+        exit 0
+      fi
+    fi
+  fi
   "$UV_BIN" run volpred ops send-alert --level warn \
     --title "git-push-backup: push 失敗" \
-    --body "git push origin main 失敗，本地領先 ${ahead} commit 未備份到遠端。需檢查認證 / 網路。" >> "$LOG" 2>&1 || true
+    --body "git push origin main 失敗，本地領先 ${ahead} commit 未備份到遠端。最近 90 min 內無成功 push（已超 piggy-back 寬限）。需檢查認證 / 網路 / gh keychain。" >> "$LOG" 2>&1 || true
   exit 1
 fi

@@ -40905,7 +40905,7 @@
     "description": "Gmail UID: 12322\nMessage-ID: <DDFC1B59-4588-44D0-A23D-924192C416D0@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 22:35:17 +0800\nSubject: Re: [VolPred Alert][WARN] git-push-backup: push 失敗\n\n--- 用戶回信內容 ---\n立刻處理\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 22:17 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> git-push-backup: push 失敗\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> git push origin main 失敗，本地領先 7 commit 未備份到遠端。需檢查認證 / 網路。\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "in_progress",
     "tags": [
       "email_reply",
       "user_input"
@@ -40925,7 +40925,25 @@
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-06-30T15:08:21.618439+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
       }
-    ]
+    ],
+    "started_at": "2026-06-30T15:08:21.618158+00:00"
+  },
+  {
+    "task_id": "platform_ops_audit_exit_semantics_findings_jobs",
+    "task_type": "platform_ops",
+    "title": "系統性 audit cron exit-as-findings job 的 exit_semantics 標記",
+    "description": "系統性 audit：所有 cron job 中「send alert + 非零 exit 作 findings signal」者，確認 config/runtime_schedules.json 都標了 exit_semantics:findings，否則 host_cron_fail 會 false-critical（2026-06-30 audit_fb_pipeline 漏標 incident commit bec991e25）。方法：grep scripts/*.py 找 return/exit 非零且鄰近 send_alert 的 job → 比對 runtime_schedules.json exit_semantics → 補標。參考 alerts.py::_findings_exit_logs_from_schedule_config + 2026-06-20 STRIKE-3。",
+    "priority": 3,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "source": "main_thread_followup",
+    "created_at": "2026-06-30T15:05:28.647821+00:00"
   }
 ]
