@@ -41287,7 +41287,7 @@
     "title": "platform_ops: paper-audit workflow 加 errata-gate 避免對已修正文章重開 erratum task",
     "description": "2026-07-01 paper-audit workflow 對 mile_48c8328b 開了 P1 erratum task，但該文章 2026-06-15 已 in-place corrected (errata 紀錄完整、content 符合 K189 真實結果)。audit 邏輯應該在開 erratum task 前 check feed.json 條目的 .errata 欄位，若 last_updated_at > original published_at 且 update_action 含 'rewrite'/'correction'，就 cross-check 修正後 content 是否仍與 experiment results 衝突。Fix: 找到 audit workflow script (paper-audit / mile-audit) → 加 errata gate → regression test: mile_48c8328b 不該再被誤標。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "hourly_01_followup",
@@ -41312,8 +41312,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T17:41:38.349220+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-06-30T17:38:16.378780+00:00"
+    "started_at": "2026-06-30T17:38:16.378780+00:00",
+    "completed_at": "2026-06-30T17:41:38.348899+00:00",
+    "result": "Added post-publish corrective errata gate to paper-review task generation: articles with last_updated_at > published_at and errata action/history containing rewrite/correction/corrected/fix are skipped instead of being re-opened from stale pre-correction evidence. Regression covers mile_48c8328b-style corrected rewrite; tests pass."
   }
 ]
