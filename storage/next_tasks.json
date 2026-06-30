@@ -40815,5 +40815,117 @@
     "started_at": "2026-06-30T13:11:01.837274+00:00",
     "completed_at": "2026-06-30T13:12:44.192588+00:00",
     "result": "PASS (article-level 24h-rule review by main-thread, Codex primary-path 已在 K1574 experiment-level 跑過 CONDITIONAL_PASS); article narrative 數字/方法/結論強度全與 K1574 codex_review.md 對齊; 無 lookahead 風險 (ex-post attribution); 無 DM/Harvey overclaim (文章明示 borderline null finding); 1 LOW informational, 不阻塞. Review note: experiments/K1574/article_review_mile_5399bf01.md"
+  },
+  {
+    "id": "K1586_article_general",
+    "title": "K1586: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1586 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: 穩定幣 (USDT+USDC+DAI) Δlog(總 mcap) 對短端 T-bill realized vol (DGS1MO/3MO 22-day std bps) 是否領先：\n1. H1 lead-lag (Granger F-test, lag 1..5 × DGS1MO/3MO)：**NULL** — p > 0.29 across all 10 combos. HAC OLS |t|≈4.1 marginal association 但 未控 lagged RV，不可作 causal claim。\n2. H2 USDC-SVB depeg 2",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1586",
+    "tags": [
+      "stablecoin",
+      "T-bill",
+      "USDT",
+      "USDC",
+      "DAI",
+      "USDC_SVB_depeg",
+      "GENIUS_Act_2025",
+      "event_study",
+      "Granger",
+      "duration_mechanism",
+      "DGS1MO",
+      "DGS3MO",
+      "SHY",
+      "BIL",
+      "NULL_PARTIAL",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "forecast_method",
+    "created_at": "2026-06-30T14:26:44+00:00",
+    "claimed_by": "hourly-22",
+    "claimed_at": "2026-06-30T14:48:57.236079+00:00",
+    "claim_session_id": "333295ff6468",
+    "status_history": [
+      {
+        "ts": "2026-06-30T14:48:57.236345+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-06-30T14:49:10.424921+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-22"
+      },
+      {
+        "ts": "2026-06-30T14:59:01.600347+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-22"
+      }
+    ],
+    "started_at": "2026-06-30T14:49:10.424643+00:00",
+    "completed_at": "2026-06-30T14:59:01.600105+00:00",
+    "result": "已 publish mile_c1ce6550 (K1586 USDC depeg duration story, audience=general, status=draft, lazypack 2 PNGs generated)"
+  },
+  {
+    "id": "K1583_article_general",
+    "title": "K1583: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1583 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1380_v4 17 個 SPY vol forecast spec（GARCH-X A1-A5/A2f/A4f/A3f/A2n/A4n + MIDAS B1-B3/C2-C3/B0；C1 因 0 valid 排除→16 specs）在 Model Confidence Set 三層分析全 retained：\n1. Unconditional MCS (B=1000, α=0.10)：16/16 全保留，p_set=0.438\n2. Conditional MCS (VIX high≥20 / mid / low<15)：每 regime 同樣 16/",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1583",
+    "tags": [
+      "MCS",
+      "Model Confidence Set",
+      "meta-evaluation",
+      "QLIKE",
+      "GARCH-X",
+      "MIDAS",
+      "SPY",
+      "K1380_v4",
+      "NULL",
+      "methodology",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": "garch",
+    "created_at": "2026-06-30T14:26:45+00:00"
+  },
+  {
+    "id": "email-12322-bf6984",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] git-push-backup: push 失敗",
+    "description": "Gmail UID: 12322\nMessage-ID: <DDFC1B59-4588-44D0-A23D-924192C416D0@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 22:35:17 +0800\nSubject: Re: [VolPred Alert][WARN] git-push-backup: push 失敗\n\n--- 用戶回信內容 ---\n立刻處理\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 22:17 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> git-push-backup: push 失敗\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> git push origin main 失敗，本地領先 7 commit 未備份到遠端。需檢查認證 / 網路。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-30T14:45:03.451773+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12322,
+    "email_message_id": "<DDFC1B59-4588-44D0-A23D-924192C416D0@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] git-push-backup: push 失敗",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-30T14:45:25.605421+00:00",
+    "claim_session_id": "fac5b165a0ee",
+    "status_history": [
+      {
+        "ts": "2026-06-30T14:45:25.605710+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      }
+    ]
   }
 ]
