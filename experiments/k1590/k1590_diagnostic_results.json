@@ -1,0 +1,325 @@
+{
+  "meta": {
+    "experiment_id": "k1590",
+    "title": "Merger Arbitrage Deal-Spread Vol \u2014 Diagnostic Phase",
+    "run_at": "2026-07-01T00:06:46.480093",
+    "data_source": "yfinance Adj Close (auto_adjust=False)",
+    "tickers": [
+      "MNA",
+      "SPY",
+      "IWM",
+      "HYG",
+      "^VIX"
+    ],
+    "period": {
+      "start": "2020-01-01",
+      "end": "2026-07-01",
+      "n_trading_days": 1629
+    },
+    "seed": 42,
+    "code_path": "experiments/k1590/k1590_diagnostic.py"
+  },
+  "full_sample_stats": {
+    "MNA": {
+      "n": 1629,
+      "mean": 7.836182911414269e-05,
+      "std": 0.0047302576129739215,
+      "skew": -2.8879487243097017,
+      "kurt_excess": 66.40082765059614,
+      "min": -0.07694778612772049,
+      "max": 0.05040225422141047
+    },
+    "MNA_minus_SPY": {
+      "n": 1629,
+      "mean": -0.00048496608125619034,
+      "std": 0.011150766467068569,
+      "skew": 0.029326619628836165,
+      "kurt_excess": 7.94244040977439,
+      "min": -0.0876766735333471,
+      "max": 0.06881080994026068
+    },
+    "MNA_minus_HYG": {
+      "n": 1629,
+      "mean": -7.038406127010281e-05,
+      "std": 0.005562600451280333,
+      "skew": -0.26419286652908,
+      "kurt_excess": 20.475913352596017,
+      "min": -0.059833819119514665,
+      "max": 0.05414861504694149
+    },
+    "SPY": {
+      "n": 1629,
+      "mean": 0.000563327910370333,
+      "std": 0.01283503409043154,
+      "skew": -0.5538078502451822,
+      "kurt_excess": 13.568391565860885,
+      "min": -0.11588641648517453,
+      "max": 0.09986275864061825
+    },
+    "HYG": {
+      "n": 1629,
+      "mean": 0.00014874589038424554,
+      "std": 0.006030352832872131,
+      "skew": -0.10785492380324117,
+      "kurt_excess": 22.5506347113666,
+      "min": -0.05653471043966609,
+      "max": 0.06340584473092013
+    },
+    "VIX_level": {
+      "n": 1629,
+      "mean": 20.893572775698498,
+      "std": 7.676514051732756,
+      "skew": 2.7055311480805666,
+      "kurt_excess": 12.776320501319827,
+      "min": 11.859999656677246,
+      "max": 82.69000244140625
+    }
+  },
+  "vix_regime_stats": {
+    "low_vix_lt20": {
+      "n_days": 924,
+      "MNA": {
+        "n": 924,
+        "mean": 0.00015537159478731718,
+        "std": 0.0028316714142325823,
+        "skew": -0.27197673551782303,
+        "kurt_excess": 2.6985616416727876,
+        "min": -0.015548497504212739,
+        "max": 0.011338782668968804
+      },
+      "MNA_minus_SPY": {
+        "n": 924,
+        "mean": -0.0016376403503797858,
+        "std": 0.006625040546096514,
+        "skew": -0.07953504508795214,
+        "kurt_excess": 0.9043601654290523,
+        "min": -0.03568361277301281,
+        "max": 0.0232349779217394
+      },
+      "MNA_minus_HYG": {
+        "n": 924,
+        "mean": -0.0002955206567171409,
+        "std": 0.003394808591796295,
+        "skew": -0.2118593302874782,
+        "kurt_excess": 1.0114457201118876,
+        "min": -0.013051322935192716,
+        "max": 0.012782465415503045
+      }
+    },
+    "mid_vix_20_30": {
+      "n_days": 556,
+      "MNA": {
+        "n": 556,
+        "mean": 0.00027399104847445764,
+        "std": 0.003651393818925113,
+        "skew": -0.2034369674850001,
+        "kurt_excess": 3.0246904558912107,
+        "min": -0.02025593991628991,
+        "max": 0.013575623719652877
+      },
+      "MNA_minus_SPY": {
+        "n": 556,
+        "mean": 0.00027580993685836076,
+        "std": 0.011186767910947082,
+        "skew": -0.02824800350994199,
+        "kurt_excess": 0.4594939239511313,
+        "min": -0.044508534038830525,
+        "max": 0.04007433028996331
+      },
+      "MNA_minus_HYG": {
+        "n": 556,
+        "mean": -3.3261893333835545e-06,
+        "std": 0.005536718646066759,
+        "skew": -0.38000153536152764,
+        "kurt_excess": 2.8151369854633703,
+        "min": -0.027853494488090304,
+        "max": 0.021029386623217187
+      }
+    },
+    "high_vix_gt30": {
+      "n_days": 149,
+      "MNA": {
+        "n": 149,
+        "mean": -0.001129201053076115,
+        "std": 0.012019812680335912,
+        "skew": -1.633432597325867,
+        "kurt_excess": 14.889546616575913,
+        "min": -0.07694778612772049,
+        "max": 0.05040225422141047
+      },
+      "MNA_minus_SPY": {
+        "n": 149,
+        "mean": 0.003824292701284158,
+        "std": 0.024403996929821817,
+        "skew": -0.49920170150085064,
+        "kurt_excess": 1.8091004604371523,
+        "min": -0.0876766735333471,
+        "max": 0.06881080994026068
+      },
+      "MNA_minus_HYG": {
+        "n": 149,
+        "mean": 0.0010755356527986707,
+        "std": 0.012324018078836662,
+        "skew": -0.38186246287564335,
+        "kurt_excess": 7.0857130527682095,
+        "min": -0.059833819119514665,
+        "max": 0.05414861504694149
+      }
+    }
+  },
+  "correlations": {
+    "pearson": {
+      "MNA": {
+        "MNA": 1.0,
+        "SPY": 0.517,
+        "IWM": 0.5368,
+        "HYG": 0.4873,
+        "VIX_ret": -0.3165,
+        "VIX_lvl": -0.1029
+      },
+      "SPY": {
+        "MNA": 0.517,
+        "SPY": 1.0,
+        "IWM": 0.867,
+        "HYG": 0.7877,
+        "VIX_ret": -0.7326,
+        "VIX_lvl": -0.1796
+      },
+      "IWM": {
+        "MNA": 0.5368,
+        "SPY": 0.867,
+        "IWM": 1.0,
+        "HYG": 0.7461,
+        "VIX_ret": -0.6727,
+        "VIX_lvl": -0.1651
+      },
+      "HYG": {
+        "MNA": 0.4873,
+        "SPY": 0.7877,
+        "IWM": 0.7461,
+        "HYG": 1.0,
+        "VIX_ret": -0.5109,
+        "VIX_lvl": -0.1585
+      },
+      "VIX_ret": {
+        "MNA": -0.3165,
+        "SPY": -0.7326,
+        "IWM": -0.6727,
+        "HYG": -0.5109,
+        "VIX_ret": 1.0,
+        "VIX_lvl": 0.1322
+      },
+      "VIX_lvl": {
+        "MNA": -0.1029,
+        "SPY": -0.1796,
+        "IWM": -0.1651,
+        "HYG": -0.1585,
+        "VIX_ret": 0.1322,
+        "VIX_lvl": 1.0
+      }
+    },
+    "spearman": {
+      "MNA": {
+        "MNA": 1.0,
+        "SPY": 0.4067,
+        "IWM": 0.4633,
+        "HYG": 0.3778,
+        "VIX_ret": -0.3332,
+        "VIX_lvl": -0.0403
+      },
+      "SPY": {
+        "MNA": 0.4067,
+        "SPY": 1.0,
+        "IWM": 0.8199,
+        "HYG": 0.7434,
+        "VIX_ret": -0.76,
+        "VIX_lvl": -0.1327
+      },
+      "IWM": {
+        "MNA": 0.4633,
+        "SPY": 0.8199,
+        "IWM": 1.0,
+        "HYG": 0.7019,
+        "VIX_ret": -0.6667,
+        "VIX_lvl": -0.0901
+      },
+      "HYG": {
+        "MNA": 0.3778,
+        "SPY": 0.7434,
+        "IWM": 0.7019,
+        "HYG": 1.0,
+        "VIX_ret": -0.5952,
+        "VIX_lvl": -0.0783
+      },
+      "VIX_ret": {
+        "MNA": -0.3332,
+        "SPY": -0.76,
+        "IWM": -0.6667,
+        "HYG": -0.5952,
+        "VIX_ret": 1.0,
+        "VIX_lvl": 0.0556
+      },
+      "VIX_lvl": {
+        "MNA": -0.0403,
+        "SPY": -0.1327,
+        "IWM": -0.0901,
+        "HYG": -0.0783,
+        "VIX_ret": 0.0556,
+        "VIX_lvl": 1.0
+      }
+    },
+    "n_obs_for_corr": 1629
+  },
+  "vol_regime_test": {
+    "method": "Welch two-sample t-test on |daily log return| (MNA) classified by same-day VIX level",
+    "low_vix_lt20": {
+      "n": 924,
+      "mean_abs_ret": 0.002101388896178553,
+      "std_abs_ret": 0.0019031316222532075
+    },
+    "high_vix_gt30": {
+      "n": 149,
+      "mean_abs_ret": 0.006408963233741403,
+      "std_abs_ret": 0.010217987334396038
+    },
+    "t_stat": 5.131557763225066,
+    "p_value": 8.788880576741882e-07,
+    "magnitude_ratio_high_over_low": 3.0498701336988696,
+    "robustness_lag1_vix_classification": {
+      "t_stat": 4.770461452398621,
+      "p_value": 4.326047446415052e-06,
+      "n_low": 923,
+      "n_high": 149
+    }
+  },
+  "verdict": "GO",
+  "verdict_reasoning": {
+    "cond_a_p_lt_0.05": {
+      "pass": true,
+      "p_value": 8.788880576741882e-07
+    },
+    "cond_b_mag_ratio_ge_1.5": {
+      "pass": true,
+      "ratio": 3.0498701336988696
+    },
+    "cond_c_not_spy_clone_pearson_lt_0.9": {
+      "pass": true,
+      "pearson_mna_spy": 0.5169718681669696
+    },
+    "decision_rule": "GO requires all three; NO-GO if cond_c fails (i.e. MNA is SPY clone) OR neither (a) nor (b) passes; otherwise INCONCLUSIVE."
+  },
+  "limitations": [
+    "MNA is a portfolio-level proxy for cross-deal merger-arb spread vol; individual deal-spread data not used.",
+    "Sample window 2020-01-01 onward includes COVID shock + 2022 rate hikes + 2023-24 antitrust activism; small-sample regime stats can be noisy.",
+    "VIX regime breakpoints {20,30} are conventional but not optimized; sensitivity to breakpoints not tested in this diagnostic.",
+    "No event-study around FTC/DOJ filings (deferred to Phase 2).",
+    "No formal GARCH / HAR-RV MLE; descriptive only.",
+    "Vol regime test uses |daily log return| not 5-min RV (yfinance daily granularity); legitimate descriptor but coarser than intraday RV."
+  ],
+  "next_phase_suggestions": [
+    "Phase 2a (if GO): pull individual deal-spread time series from SEC EDGAR DEF14A + cash-merger price data; align deal-window to announcement-to-close.",
+    "Phase 2b (if GO): GJR-GARCH on MNA daily returns with VIX exogenous regressor; HAR-RV on intraday MNA tick data (poly via Polygon or Databento).",
+    "Phase 2c (event study): FTC second-request / DOJ filing windows -> MNA spread vol pulse.",
+    "Phase 2d (regime-switching): Markov 2-state on MNA |ret|, label state-2 as 'antitrust-stress' regime."
+  ]
+}
