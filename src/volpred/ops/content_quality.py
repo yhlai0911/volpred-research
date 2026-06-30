@@ -66,6 +66,13 @@ _NON_RHYTHM_PHASES = {
 }
 _NON_RHYTHM_CATEGORIES = {"event_article", "trending_repost"}
 
+# 2026-06-30 (boss email-12281 / boss 設 release=6h)：drought 門檻須跟 release 節奏
+# 對齊。固定 3h 門檻 < 6h release interval → 正常 6h gap 就誤報 drought（同 burst 的
+# 測量-政策錯配）。drought 真正要抓的是「pipeline stall」，門檻 = release interval +
+# grace（涵蓋 piggy-back latency + 偶爾 skip cycle），floor 仍是 RHYTHM_DROUGHT_GAP_HOURS。
+RHYTHM_DROUGHT_GRACE_HOURS = 2.0
+_DEFAULT_RELEASE_INTERVAL_HOURS = 6.0  # fallback 若 .release_settings.json 不可讀
+
 # Digest detection markers.
 DIGEST_TITLE_PREFIX = "每日精選導讀"
 DIGEST_CONTENT_TYPE = "daily_digest"
@@ -136,6 +143,23 @@ def _is_digest(item: dict[str, Any]) -> bool:
         return True
     title = item.get("title") or ""
     return isinstance(title, str) and title.startswith(DIGEST_TITLE_PREFIX)
+
+
+def _release_interval_hours(storage_dir: str) -> float:
+    """Canonical release cadence (hours) from .release_settings.json.
+
+    Used to make the drought threshold track the boss-configured release rhythm
+    (6h since 2026-06-30) instead of a static 3h that false-fires on normal gaps.
+    """
+    path = project_path(storage_dir) / ".release_settings.json"
+    try:
+        raw = load_json(path, default={})
+        minutes = float((raw or {}).get("interval_minutes") or 0)
+        if minutes > 0:
+            return minutes / 60.0
+    except (OSError, ValueError, TypeError) as exc:
+        warn("content_quality", "release interval read failed; using default", err=str(exc))
+    return _DEFAULT_RELEASE_INTERVAL_HOURS
 
 
 def check_publish_rhythm(
@@ -222,10 +246,14 @@ def check_publish_rhythm(
         else None
     )
 
+    drought_threshold_h = max(
+        RHYTHM_DROUGHT_GAP_HOURS,
+        _release_interval_hours(storage_dir) + RHYTHM_DROUGHT_GRACE_HOURS,
+    )
     drought = (
         in_active
         and age_min is not None
-        and age_min > RHYTHM_DROUGHT_GAP_HOURS * 60
+        and age_min > drought_threshold_h * 60
     )
 
     if not in_active:
@@ -247,7 +275,7 @@ def check_publish_rhythm(
         "gaps_min_newest_first": gaps_min,
         "burst_pairs": burst_pairs,
         "burst_gap_threshold_min": RHYTHM_BURST_GAP_MIN,
-        "drought_gap_threshold_hours": RHYTHM_DROUGHT_GAP_HOURS,
+        "drought_gap_threshold_hours": round(drought_threshold_h, 1),
     }
 
 

@@ -257,6 +257,24 @@ def test_rhythm_burst_detected_inside_active_window(tmp_path):
 
 
 def test_rhythm_drought_detected_inside_active_window(tmp_path):
+    # 2026-06-30: drought 門檻 interval-aware (release interval + 2h grace)。tmp_path
+    # 無 .release_settings.json → default 6h → 門檻 8h。newest 必須 >8h 才觸發 drought
+    # （正常 6h 節奏的 4-6h gap 不再誤報）。
+    now_tpe = datetime(2026, 6, 24, 14, 0, tzinfo=TPE)
+    storage = _write_feed(
+        tmp_path,
+        [
+            _entry("a", published_at=now_tpe - timedelta(hours=9)),
+            _entry("b", published_at=now_tpe - timedelta(hours=13)),
+        ],
+    )
+    result = cq.check_publish_rhythm(str(storage), now=now_tpe.astimezone(timezone.utc))
+    assert result["status"] == "drought"
+    assert result["drought_gap_threshold_hours"] == 8.0
+
+
+def test_rhythm_no_drought_within_release_cadence(tmp_path):
+    # 4h gap 在 6h release 節奏內 → 不該 drought（boss 設 6h 後的測量對齊回歸測試）。
     now_tpe = datetime(2026, 6, 24, 14, 0, tzinfo=TPE)
     storage = _write_feed(
         tmp_path,
@@ -266,7 +284,7 @@ def test_rhythm_drought_detected_inside_active_window(tmp_path):
         ],
     )
     result = cq.check_publish_rhythm(str(storage), now=now_tpe.astimezone(timezone.utc))
-    assert result["status"] == "drought"
+    assert result["status"] == "ok"
 
 
 def test_rhythm_quiet_outside_active_window(tmp_path):
