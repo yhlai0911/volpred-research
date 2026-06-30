@@ -10,26 +10,38 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 
+# 2026-06-30 boss escalation (email-12256「不是改語意分析且動態調整了嗎 立刻檢查」):
+# 舊 spy cluster 是 catch-all 災難 — keyword「美股」過廣 + spy 排在 garch/vt/taiwan
+# 之前 + 缺粒度主題 cluster → 整個波動率研究 corpus（HAR-RV/GARCH/VaR/避險/隔夜/
+# return 預測/事件研究…，全用 SPY 當測試資產）被掃進 spy → 74/40=1.9x 假超標。
+# 修法（語意化）：(1) 加粒度「主題」cluster 反映文章「關於什麼」而非「用什麼資料」；
+# (2) 排序 = specific market/model/strategy 先、thematic 次、spy catch-all 最後；
+# (3) spy 收窄成只認真正 S&P/SPY-index 主題（移除「美股」）。
+# classify 仍是 first-match-in-order，但 order 現在 encode 主題優先序（語意近似）。
+# 對齊 boss 原則「不重複是主題 不是關鍵字」(line 35-44 註解的 follow-up 落地)。
 CLUSTER_VARIANTS: dict[str, list[str]] = {
+    # ── 特定市場 / 模型 / 策略（最具體，優先） ──
+    "taiwan": ["0050.TW", "0056.TW", "00878", "00919", "00929", "00940", "2330.TW", "台股", "台灣市場", "TAIFEX", "台指期"],
     "vix": ["VIX", "VVIX", "VIX9D", "12/VIX", "恐慌指數", "VIX 條件槓桿"],
     "factor_etf": [
-        "MTUM",
-        "QUAL",
-        "USMV",
-        "VLUE",
-        "SPLV",
-        "SPHQ",
-        "USHY",
-        "因子 ETF",
-        "低波動 ETF",
-        "smart beta",
-        "smart-beta",
-        "美股 ETF",
+        "MTUM", "QUAL", "USMV", "VLUE", "SPLV", "SPHQ", "USHY",
+        "因子 ETF", "因子ETF", "因子投資", "因子輪", "低波動 ETF", "smart beta", "smart-beta", "美股 ETF",
     ],
-    "spy": ["SPY", "QQQ", "美股", "S&P 500", "標普"],
+    "vt": ["VT", "VT策略", "Hybrid-VT", "波動率目標", "volatility targeting", "risk parity", "Risk-Parity", "再平衡"],
     "garch": ["GARCH", "GJR-GARCH", "GJR", "EGARCH", "EWMA", "GARCH-MIDAS", "MF-GJR"],
-    "vt": ["VT", "VT策略", "Hybrid-VT", "波動率目標", "volatility targeting", "risk parity", "Risk-Parity"],
-    "taiwan": ["0050.TW", "0056.TW", "00878", "00919", "00929", "00940", "2330.TW", "台股", "台灣市場", "TAIFEX", "台指期"],
+    # ── 主題型（thematic）：反映文章「關於什麼」，把舊 spy catch-all 拆開 ──
+    "risk_mgmt": ["VaR", "ES", "Expected Shortfall", "風險管理", "風險值", "極端風險", "尾端風險", "尾端", "traffic light", "Basel", "回撤", "MDD"],
+    "forecast_method": [
+        "HAR-RV", "HAR", "RECH", "LSTM", "神經網路", "機器學習", "深度學習",
+        "wavelet", "小波", "BMA", "模型評比", "conformal", "transformer",
+        "realized vol", "已實現波動", "高頻", "5分鐘", "5 分鐘", "盤中訊號", "集成", "ensemble",
+    ],
+    "event_study": ["FOMC", "CPI", "NFP", "財報", "earnings", "殖利率曲線", "倒掛", "監管", "Federal Register", "事件研究"],
+    "hedging": ["避險", "hedge", "futures-hedging", "hedge-ratio", "hedge ratio", "對沖"],
+    "microstructure": ["隔夜", "overnight", "盤中", "order flow", "委託", "買賣壓", "microstructure", "流動性", "薄市場"],
+    "return_predict": ["return 預測", "return-predictability", "報酬預測", "動能", "momentum", "反轉", "reversal", "跟單", "選股", "alpha"],
+    # ── 一般美股（catch-all，最後；已移除過廣的「美股」，只認真正 index 主題） ──
+    "spy": ["SPY", "QQQ", "S&P 500", "標普", "S&P500"],
 }
 
 # 2026-06-29 boss decision (email-12132「依照你的建議進行」): for a VOLATILITY
@@ -42,17 +54,29 @@ CLUSTER_VARIANTS: dict[str, list[str]] = {
 # clusters realistic headroom (still catching true runaway). Genuine subtopic-level
 # concentration is measured by arc_diversity (content_quality), not these caps.
 # Follow-up: move concentration measurement to arc/subtopic granularity.
+# 2026-06-30：語意化分類後重設 caps。原則（boss）：核心主題（vix/risk_mgmt/garch/
+# taiwan）給 ~40% headroom（current count × ~1.4），讓健康狀態 ~0.7x、真正翻倍才 warn；
+# 不把平台核心主題當 runaway。相對集中度由 DOMINANT_RATIO_LIMIT（share-based，隨總量
+# 動態縮放）兜底。current 30d 分布：vix62 / risk_mgmt55 / taiwan34 / garch28 / spy14 /
+# event12 / vt11 / forecast8 / factor6 / return3 / micro2 / hedge1。
 CLUSTER_HARD_CAPS: dict[str, int] = {
-    "vix": 50,
-    "spy": 40,
-    "factor_etf": 10,
-    "garch": 20,
-    "vt": 12,
-    "taiwan": 16,
+    "vix": 80,
+    "risk_mgmt": 70,
+    "taiwan": 45,
+    "garch": 40,
+    "spy": 30,
+    "forecast_method": 25,
+    "event_study": 25,
+    "vt": 20,
+    "factor_etf": 15,
+    "return_predict": 15,
+    "microstructure": 15,
+    "hedging": 15,
 }
 
-DEFAULT_CLUSTER_CAP = 10
+DEFAULT_CLUSTER_CAP = 15
 DOMINANT_RATIO_LIMIT = 0.35  # 2026-06-29: vol is core for a vol platform; was 0.25
+                             # (share-based = 動態：隨 30d 總量縮放，補 static cap)
 
 # 2026-06-29: soft cap for timely / topic-bound types (event_article,
 # trending_repost, member_qa, daily_*). They are exempt from the HARD cap
