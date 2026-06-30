@@ -40952,7 +40952,33 @@
     "created_at": "2026-06-30T14:26:45+00:00",
     "blocked_reason": "deprecated",
     "blocked_at": "2026-06-30T22:10:42+00:00",
-    "blocked_note": "arc-dedup gate exit-message: 3 existing articles tell same MCS/methodology_robustness story (entities GOLD/NASDAQ/TW_EQUITY/US_EQUITY/VIX, conclusion_class=descriptive); writing new general piece would repeat narrative arc. K1583 verdict surface (16/16 MCS retained NULL) is methodology-only, not reader-facing news worthy. Per CLAUDE.md arc-dedup hard rule."
+    "blocked_note": "arc-dedup gate exit-message: 3 existing articles tell same MCS/methodology_robustness story (entities GOLD/NASDAQ/TW_EQUITY/US_EQUITY/VIX, conclusion_class=descriptive); writing new general piece would repeat narrative arc. K1583 verdict surface (16/16 MCS retained NULL) is methodology-only, not reader-facing news worthy. Per CLAUDE.md arc-dedup hard rule.",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T22:42:09.681937+00:00",
+    "claim_session_id": "77c980023546",
+    "status_history": [
+      {
+        "ts": "2026-06-30T22:42:09.682409+00:00",
+        "from": "blocked",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T22:42:09.900644+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T22:43:15.177785+00:00",
+        "from": "in_progress",
+        "to": "blocked",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-06-30T22:42:09.900419+00:00",
+    "completed_at": "2026-06-30T22:43:15.177521+00:00",
+    "result": "Did not write article: task record already carried blocked_reason=deprecated and blocked_note from arc-dedup gate saying three existing articles cover the same MCS/methodology_robustness narrative; K1583 is methodology-only and not reader-facing news-worthy. Preserved gate by marking blocked."
   },
   {
     "id": "email-12322-bf6984",
