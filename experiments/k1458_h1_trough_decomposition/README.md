@@ -16,12 +16,30 @@ For each of 5 canonical assets (SPY / 50-50 SPY+GLD / DIA / QQQ / IWM):
 1. Find Buy-and-Hold drawdown trough date inside calendar windows 2008-06 → 2010-06 and 2019-06 → 2021-06.
 2. ±63 trading-day window around trough.
 3. Decompose `PureVT_t = VT_t + (-beta_t * TSMOM_t)`:
-   - `VIX-timing contribution = VT_t - BH_t`
-   - `TSMOM-hedge contribution = -beta_t * TSMOM_t`
+   - `VIX-timing contribution_t = VT_t - BH_t`
+   - `TSMOM-hedge contribution_t = -beta_t * TSMOM_t`
 4. Partition window days by `sign(TSMOM_t)`:
    - `TSMOM<0`: market rebounding while past-12m return negative, hedge mechanically positive.
    - `TSMOM>=0`: other.
 5. Headline ratio: cumulative TSMOM-hedge contribution on `TSMOM<0` days divided by total PureVT excess over BH inside window.
+
+### Decomposition identity (additive — clarified per v6 Codex CRITICAL)
+
+Daily and window-aggregated identities are both strictly **additive** (sums of arithmetic returns):
+
+```
+Daily:    PureVT_excess_t  =  VIX_timing_contrib_t  +  TSMOM_hedge_contrib_t
+Window:   sum(PureVT_excess) =  sum(VIX_timing)     +  sum(TSMOM_hedge_full)
+```
+
+**Important**: `VIX_timing_contrib` is **NOT equal to** `PureVT_excess_vs_BH`. The two are equal only in the degenerate case `TSMOM_hedge_full = 0` (i.e., beta clipped to 0 throughout the window). Reading any prior text that conflates the two is a documentation error; the JSON numbers themselves obey the additive identity above. Verifiable from `k1458_results.json`:
+
+| Asset | Trough | `pure_vt_excess_bh_total_arith` | `vix_timing_total_arith` | `tsmom_hedge_total_arith` | Sum check |
+|---|---|---|---|---|---|
+| SPY | 2020-03 | +0.0377 | −0.0843 | +0.1220 | −0.0843 + 0.1220 = +0.0377 ✓ |
+| QQQ | 2020-03 | −0.1102 | −0.1406 | +0.0304 | −0.1406 + 0.0304 = −0.1102 ✓ |
+
+Per-asset windowed identity holds exactly because contributions are summed in arithmetic-return space (no log compounding inside the sum). Cross-asset *medians* do not preserve this identity (median is not a linear operator), so `cross_asset_summary` medians should be read componentwise, not added together.
 
 ## Output
 
@@ -46,7 +64,9 @@ For each of 5 canonical assets (SPY / 50-50 SPY+GLD / DIA / QQQ / IWM):
 | TSMOM-hedge contribution (full window) | **+0.000** |
 | TSMOM-hedge contribution (TSMOM<0 days only) | **+0.000** |
 
-3 of 5 assets had rolling-beta clipped to 0 (early in 21-year window, beta hadn't accumulated). 2 assets had positive valid-share: QQQ (0.17) and 50/50 (1.79). PureVT lost to BH in trough window across all 5 assets — **Gemini H1 concern NOT validated for 2009-03**: mechanical rebound hedge contributed ≈ 0, so it can't be the source of PureVT MDD retention here.
+**Beta-clip evidence (per v6 Codex Finding 4 quantification)** — 3 of 5 assets (SPY, DIA, IWM) had `tsmom_hedge_total_arith = 0` across the full 127-day window. Because `hedge_t = -beta_t × TSMOM_t` and `TSMOM_t` is non-zero on most days, a window-wide hedge sum of exactly 0 implies `beta_t = 0` for every day in the window — consistent with the `.clip(0, 0.5)` operation in `k1458_h1_trough_decomposition.py:215` binding at 0 for assets whose rolling-beta lookback has not yet accumulated from the 2004-06-01 data start. The remaining 2 of 5 assets (50/50 SPY+GLD: +0.021; QQQ: −0.035) show partial beta accumulation. This is an **indirect** quantification — we do not store the beta path in `k1458_results.json`, so the conclusion is *conditional* on the assumption that a 127-day window-summed hedge of exactly zero arises only from beta-clipping (not from offsetting signed contributions; verified by per-asset partition `tsmom_neg_partition.tsmom_hedge.sum_arith_return = 0` for SPY/DIA/IWM, which confirms the all-zero pattern is not a sum-to-zero coincidence).
+
+2 assets had positive valid-share: QQQ (0.17) and 50/50 (1.79). PureVT lost to BH in trough window across all 5 assets — **Gemini H1 concern NOT validated for 2009-03**: mechanical rebound hedge contributed ≈ 0 (for the 3 clipped assets) or had small offsetting contributions (50/50 +2.1pp, QQQ −3.5pp), so it cannot be the dominant source of PureVT MDD retention here.
 
 ### 2020-03 trough
 
@@ -64,7 +84,7 @@ Mechanical rebound hedge DID contribute positively (median +3.0pp full / +30pp o
 The original body v3 caveat ("MDD improvement can arise mechanically when the hedge trims exposure during rebound windows") is empirically validated for 2020 but NOT for 2009. Body should be revised to acknowledge:
 1. K1458 Table: per-trough, per-asset decomposition into VIX-timing vs TSMOM-hedge contributions.
 2. PureVT does NOT outperform BH in either trough window — MDD retention is about lower drawdown peak depth, not rebound-period profit.
-3. Mechanical rebound hedge is real for 2020 (median TSMOM-hedge contribution on TSMOM<0 days = +30pp) but absent for 2009 due to rolling-beta clipping in early sample. Body should note this asymmetry.
+3. Mechanical rebound hedge is empirically present in 2020 (median TSMOM-hedge contribution on TSMOM<0 days = +30pp; 4/5 assets non-zero hedge) but **largely absent in 2009** for 3/5 assets, consistent with rolling-beta being clipped to 0 in early sample (see Beta-clip evidence above). The 2/5 unclipped 2009 assets show small offsetting contributions (50/50 +2.1pp, QQQ −3.5pp), so the asymmetry between 2009 and 2020 reflects mechanical hedge availability, not just market dynamics. Body should note this conditional caveat.
 
 ## Provenance
 
