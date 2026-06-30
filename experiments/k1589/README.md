@@ -202,12 +202,45 @@ Outputs to:
 
 - `verdict_internal = NULL` (any_reinsurer_holm_p < 0.10 fails;
   identification only trivially passes)
-- **Reviewer: [pending — Codex primary path]**
-- This is a legitimate null finding to be reported faithfully per the
-  research-honesty principle. Direction-of-effect is consistent with
-  intuition but the dose-response signal is not statistically
-  distinguishable from broader insurance-sector / macro-vol comovement
-  given the available 2010-2024 Atlantic landfall sample.
+- **Reviewer (Codex primary path, 2026-06-30 16:44): NEEDS_REVISION**
+- This is a legitimate null finding in direction, but the inference
+  pipeline has methodological issues that prevent a clean PASS. The null
+  conclusion is **not yet** publication-grade; a K1589_v2 revision is
+  queued to address the blockers below.
+
+### Codex review blockers (must address in v2 before knowledge.json write)
+
+1. **HAC chronological ordering (high)** — Newey-West lag structure
+   requires events sorted by `landfall_date` (chronological), but the
+   current pipeline sorts by `storm_id`. Result: HAC p-values not
+   meaningful. Fix: sort by landfall date before HAC SE estimation.
+2. **KIE identification not formally tested (high)** —
+   `mean(reinsurer β) − KIE β = +0.0012` is a descriptive gap with no
+   formal SE/interaction test. Replace with stacked panel + reinsurer
+   dummy × category interaction, or downgrade KIE comparison to
+   descriptive only.
+3. **ΔSPY_RV control is ex-post (high)** — Control variable uses the
+   post-event window, not a t<t0 observable. Replace with a t-1 SPY RV
+   or other ex-ante control, or explicitly frame the estimand as
+   ex-post abnormal vol (not deployable forecast).
+4. **Holm multiple-testing scope (medium)** — Holm applied over 5
+   outcomes including KIE; success criterion
+   `any_reinsurer_beta_pos_holm_p_lt_0p10` loops over all `STOCKS`
+   instead of the 4 reinsurers only. Fix scope.
+5. **RV window misalignment with brief (medium)** — Brief asked for
+   21-day baseline / 5-day event window; implementation produces 16-19
+   trading-day pre window and 10-day post window. Either align the
+   spec to the brief or document the trading-day implementation as
+   deliberate and add a robustness check at the brief's nominal window.
+
+### Honest interpretation (pending v2)
+
+Direction-of-effect is consistent with intuition (all reinsurer β > 0
+after VIX + SPY ΔRV controls) but the dose-response signal is not
+statistically distinguishable from broader insurance-sector / macro-vol
+comovement given the available 2010-2024 Atlantic landfall sample —
+and even this null finding requires the v2 methodological fixes before
+it can be reported with confidence.
 
 ## Related K-series
 
