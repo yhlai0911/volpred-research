@@ -150,6 +150,7 @@ def _build_prompt(title: str, panels: list[dict], sources: list[Path], out_dir: 
   **檢查不可有缺字方框（tofu）**；若主字型缺字就換另一個 CJK 字型重跑。
 - **專業、資料導向、非卡通**: 乾淨圖表 + 圖示 + 大數字 + 分區；**禁卡通人物 / 可愛插畫 / 手繪塗鴉**。
 - **每張底部標資料來源**: 例「資料來源：experiment K####」（K 編號從 evidence 檔名/內容判斷）。
+- **不要把 panel 的 info / 資訊型態（concept/method/results）當文字標籤畫在圖上** — 那是內部分類，讀者不需要看到。
 - **尺寸**: 橫式約 1600x1000 px、150 dpi、白底，邊距充足，字夠大（一眼看懂）。
 - **不要**輸出 base64 或 data-URI；輸出實體 .png 檔到 {out_dir}。
 
