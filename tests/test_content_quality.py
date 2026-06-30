@@ -293,6 +293,61 @@ def test_rhythm_ok_steady_inside_active_window(tmp_path):
     assert result["status"] == "ok"
 
 
+def test_rhythm_paired_siblings_excluded_from_burst(tmp_path):
+    """daily_update.py publishes 策略建議 + 持倉 sibling within seconds.
+
+    Boss email-12253 (2026-06-30): these are semantically one publish event
+    (same script run, paired_sibling_group=daily_update_<date>), they must
+    NOT trigger publish_rhythm:burst. Real bursts (different group keys
+    within <30 min) must still trigger.
+    """
+    now_tpe = datetime(2026, 6, 30, 11, 0, tzinfo=TPE)
+    storage = _write_feed(
+        tmp_path,
+        [
+            # Two siblings 8 seconds apart with the same group key.
+            {
+                **_entry("sib_new", published_at=now_tpe - timedelta(minutes=15)),
+                "details": {"paired_sibling_group": "daily_update_2026-06-30"},
+            },
+            {
+                **_entry("sib_old", published_at=now_tpe - timedelta(minutes=15, seconds=8)),
+                "details": {"paired_sibling_group": "daily_update_2026-06-30"},
+            },
+            # Earlier steady article (60+ min gap to siblings — no burst).
+            _entry("c", published_at=now_tpe - timedelta(minutes=90)),
+        ],
+    )
+    result = cq.check_publish_rhythm(str(storage), now=now_tpe.astimezone(timezone.utc))
+    assert result["status"] == "ok", f"expected ok, got {result['status']} pairs={result['burst_pairs']}"
+    assert result["burst_pairs"] == []
+
+
+def test_rhythm_different_group_keys_still_burst(tmp_path):
+    """Sibling exclusion must not weaken real burst detection.
+
+    Two articles <30 min apart with DIFFERENT group keys (or no group) must
+    still trigger burst — only same-key pairs are exempt.
+    """
+    now_tpe = datetime(2026, 6, 30, 11, 0, tzinfo=TPE)
+    storage = _write_feed(
+        tmp_path,
+        [
+            {
+                **_entry("a", published_at=now_tpe - timedelta(minutes=5)),
+                "details": {"paired_sibling_group": "daily_update_2026-06-30"},
+            },
+            {
+                **_entry("b", published_at=now_tpe - timedelta(minutes=10)),
+                "details": {"paired_sibling_group": "trending_repost_2026-06-30"},
+            },
+        ],
+    )
+    result = cq.check_publish_rhythm(str(storage), now=now_tpe.astimezone(timezone.utc))
+    assert result["status"] == "burst"
+    assert len(result["burst_pairs"]) >= 1
+
+
 # ---------------------------------------------------------------------------
 # content_quality_snapshot
 # ---------------------------------------------------------------------------

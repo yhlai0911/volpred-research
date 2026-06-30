@@ -155,9 +155,25 @@ def check_publish_rhythm(
         delta = (recent[i][1] - recent[i + 1][1]).total_seconds() / 60.0
         gaps_min.append(round(delta, 2))
 
+    # 2026-06-30 (boss email-12253): pairs sharing the same
+    # `details.paired_sibling_group` (e.g. daily_update.py's strategy +
+    # 持倉 sibling articles that fire together in one script run) are
+    # semantically one publish event and must NOT count as a burst.
+    def _sibling_group(item: dict[str, Any]) -> str | None:
+        det = item.get("details")
+        if isinstance(det, dict):
+            grp = det.get("paired_sibling_group")
+            if isinstance(grp, str) and grp:
+                return grp
+        return None
+
     burst_pairs: list[dict[str, Any]] = []
     for i in range(len(recent) - 1):
         if gaps_min[i] < RHYTHM_BURST_GAP_MIN:
+            g_new = _sibling_group(recent[i][0])
+            g_old = _sibling_group(recent[i + 1][0])
+            if g_new and g_new == g_old:
+                continue
             burst_pairs.append(
                 {
                     "newer_id": recent[i][0].get("id"),

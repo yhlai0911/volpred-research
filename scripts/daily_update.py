@@ -372,6 +372,11 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
             # PUBLISH-time near-dup gate too. Non-trading-day repetition is still
             # prevented upstream by the spy_date skip_publish guard.
             "dup_waiver": True,
+            # 2026-06-30 (boss email-12253 publish_rhythm:burst): daily_update
+            # publishes 2 sibling articles in the same script run (策略建議 +
+            # 持倉比率). They share semantics by design and should not count as
+            # a "burst" in publish_rhythm. Mark both with the same group key.
+            "paired_sibling_group": f"daily_update_{today}",
         },
     )
 
@@ -985,6 +990,11 @@ def main():
                 # PUBLISH-time near-dup gate; spy_date skip_publish still guards
                 # non-trading-day repeats.
                 "dup_waiver": True,
+                # 2026-06-30 (boss email-12253 publish_rhythm:burst): paired sibling
+                # of 每日策略建議, both fire from same daily_update.py run within
+                # seconds (~8s observed). Same group key → check_publish_rhythm
+                # excludes this intra-group gap from burst detection.
+                "paired_sibling_group": f"daily_update_{today}",
             },
         )
 
