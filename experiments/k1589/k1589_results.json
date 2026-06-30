@@ -1,0 +1,442 @@
+{
+  "experiment_id": "k1589",
+  "title": "Reinsurer / cat-bond carrier vol dose-response to Atlantic hurricane landfall",
+  "run_date_utc": "2026-06-30T08:40:30.798280Z",
+  "seed": 42,
+  "lookahead_policy": "pre-event window: t-30..t-6 cal days (closed strictly before landfall); event window: t+1..t+10 trading days after first trading day \u2265 landfall; VIX control uses last close strictly before t0.",
+  "universe": {
+    "outcome_stocks": [
+      "RNR",
+      "EG",
+      "ACGL",
+      "AXS",
+      "KIE"
+    ],
+    "reinsurer_stocks": [
+      "RNR",
+      "EG",
+      "ACGL",
+      "AXS"
+    ],
+    "sanity_baseline": "KIE",
+    "controls": [
+      "VIX_t-1",
+      "\u0394SPY_RV"
+    ]
+  },
+  "n_events_eligible": 42,
+  "n_events_used": 42,
+  "events_used": [
+    {
+      "storm_id": "AL012014",
+      "name": "ARTHUR",
+      "landfall_date": "2014-07-04",
+      "wind_kt": 85,
+      "category": 2
+    },
+    {
+      "storm_id": "AL022019",
+      "name": "BARRY",
+      "landfall_date": "2019-07-13",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL022024",
+      "name": "BERYL",
+      "landfall_date": "2024-07-01",
+      "wind_kt": 120,
+      "category": 4
+    },
+    {
+      "storm_id": "AL042024",
+      "name": "DEBBY",
+      "landfall_date": "2024-08-05",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL052012",
+      "name": "ERNESTO",
+      "landfall_date": "2012-08-08",
+      "wind_kt": 80,
+      "category": 1
+    },
+    {
+      "storm_id": "AL052016",
+      "name": "EARL",
+      "landfall_date": "2016-08-04",
+      "wind_kt": 75,
+      "category": 1
+    },
+    {
+      "storm_id": "AL062018",
+      "name": "FLORENCE",
+      "landfall_date": "2018-09-14",
+      "wind_kt": 80,
+      "category": 1
+    },
+    {
+      "storm_id": "AL062024",
+      "name": "FRANCINE",
+      "landfall_date": "2024-09-11",
+      "wind_kt": 90,
+      "category": 2
+    },
+    {
+      "storm_id": "AL072010",
+      "name": "EARL",
+      "landfall_date": "2010-09-04",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL072014",
+      "name": "FAY",
+      "landfall_date": "2014-10-12",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL082012",
+      "name": "GORDON",
+      "landfall_date": "2012-08-20",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL082014",
+      "name": "GONZALO",
+      "landfall_date": "2014-10-13",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL082020",
+      "name": "HANNA",
+      "landfall_date": "2020-07-25",
+      "wind_kt": 80,
+      "category": 1
+    },
+    {
+      "storm_id": "AL092016",
+      "name": "HERMINE",
+      "landfall_date": "2016-09-02",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL092021",
+      "name": "IDA",
+      "landfall_date": "2021-08-27",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL092022",
+      "name": "IAN",
+      "landfall_date": "2022-09-27",
+      "wind_kt": 110,
+      "category": 3
+    },
+    {
+      "storm_id": "AL092024",
+      "name": "HELENE",
+      "landfall_date": "2024-09-27",
+      "wind_kt": 120,
+      "category": 4
+    },
+    {
+      "storm_id": "AL112010",
+      "name": "IGOR",
+      "landfall_date": "2010-09-21",
+      "wind_kt": 75,
+      "category": 1
+    },
+    {
+      "storm_id": "AL112015",
+      "name": "JOAQUIN",
+      "landfall_date": "2015-10-01",
+      "wind_kt": 115,
+      "category": 4
+    },
+    {
+      "storm_id": "AL112017",
+      "name": "IRMA",
+      "landfall_date": "2017-09-06",
+      "wind_kt": 155,
+      "category": 5
+    },
+    {
+      "storm_id": "AL122021",
+      "name": "LARRY",
+      "landfall_date": "2021-09-11",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL132017",
+      "name": "KATIA",
+      "landfall_date": "2017-09-09",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL142016",
+      "name": "MATTHEW",
+      "landfall_date": "2016-10-04",
+      "wind_kt": 130,
+      "category": 4
+    },
+    {
+      "storm_id": "AL142018",
+      "name": "MICHAEL",
+      "landfall_date": "2018-10-10",
+      "wind_kt": 140,
+      "category": 5
+    },
+    {
+      "storm_id": "AL142021",
+      "name": "NICHOLAS",
+      "landfall_date": "2021-09-14",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL142024",
+      "name": "MILTON",
+      "landfall_date": "2024-10-10",
+      "wind_kt": 100,
+      "category": 3
+    },
+    {
+      "storm_id": "AL152017",
+      "name": "MARIA",
+      "landfall_date": "2017-09-19",
+      "wind_kt": 145,
+      "category": 5
+    },
+    {
+      "storm_id": "AL152022",
+      "name": "LISA",
+      "landfall_date": "2022-11-02",
+      "wind_kt": 80,
+      "category": 1
+    },
+    {
+      "storm_id": "AL162016",
+      "name": "OTTO",
+      "landfall_date": "2016-11-24",
+      "wind_kt": 100,
+      "category": 3
+    },
+    {
+      "storm_id": "AL162020",
+      "name": "NANA",
+      "landfall_date": "2020-09-03",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL162024",
+      "name": "OSCAR",
+      "landfall_date": "2024-10-19",
+      "wind_kt": 75,
+      "category": 1
+    },
+    {
+      "storm_id": "AL172017",
+      "name": "OPHELIA",
+      "landfall_date": "2017-10-16",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL172020",
+      "name": "PAULETTE",
+      "landfall_date": "2020-09-14",
+      "wind_kt": 85,
+      "category": 2
+    },
+    {
+      "storm_id": "AL182012",
+      "name": "SANDY",
+      "landfall_date": "2012-10-24",
+      "wind_kt": 75,
+      "category": 1
+    },
+    {
+      "storm_id": "AL182024",
+      "name": "RAFAEL",
+      "landfall_date": "2024-11-06",
+      "wind_kt": 100,
+      "category": 3
+    },
+    {
+      "storm_id": "AL192010",
+      "name": "RICHARD",
+      "landfall_date": "2010-10-25",
+      "wind_kt": 85,
+      "category": 2
+    },
+    {
+      "storm_id": "AL202023",
+      "name": "TAMMY",
+      "landfall_date": "2023-10-22",
+      "wind_kt": 80,
+      "category": 1
+    },
+    {
+      "storm_id": "AL252020",
+      "name": "GAMMA",
+      "landfall_date": "2020-10-03",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL262020",
+      "name": "DELTA",
+      "landfall_date": "2020-10-07",
+      "wind_kt": 90,
+      "category": 2
+    },
+    {
+      "storm_id": "AL282020",
+      "name": "ZETA",
+      "landfall_date": "2020-10-27",
+      "wind_kt": 75,
+      "category": 1
+    },
+    {
+      "storm_id": "AL292020",
+      "name": "ETA",
+      "landfall_date": "2020-11-03",
+      "wind_kt": 120,
+      "category": 4
+    },
+    {
+      "storm_id": "AL312020",
+      "name": "IOTA",
+      "landfall_date": "2020-11-17",
+      "wind_kt": 125,
+      "category": 4
+    }
+  ],
+  "regression": {
+    "RNR": {
+      "n": 42,
+      "alpha": -0.10056047492342018,
+      "beta_category": 0.020559751634803346,
+      "gamma_vix": 0.003729361287120845,
+      "delta_spy_rv": 0.38770087498794814,
+      "se_beta": 0.017736786118457373,
+      "t_beta": 1.1591587955953486,
+      "p_beta": 0.24639146351413332,
+      "rsq": 0.09475305232473796,
+      "y_mean": 0.013552752626779624,
+      "y_std": 0.14161022948873786,
+      "p_beta_holm": 0.9855658540565333
+    },
+    "EG": {
+      "n": 42,
+      "alpha": -0.09061740885952466,
+      "beta_category": 0.017496483419203065,
+      "gamma_vix": 0.003329889799467688,
+      "delta_spy_rv": 0.4278575460761397,
+      "se_beta": 0.01889717878887325,
+      "t_beta": 0.9258780696674722,
+      "p_beta": 0.35450934938623624,
+      "rsq": 0.07452904616909373,
+      "y_mean": 0.009440074304986825,
+      "y_std": 0.15265767315009723,
+      "p_beta_holm": 0.9855658540565333
+    },
+    "ACGL": {
+      "n": 42,
+      "alpha": -0.05575814840056388,
+      "beta_category": 0.014473077697917738,
+      "gamma_vix": 0.002413334424354816,
+      "delta_spy_rv": 0.506141975277082,
+      "se_beta": 0.01441527312251356,
+      "t_beta": 1.0040099535342069,
+      "p_beta": 0.315373815951851,
+      "rsq": 0.13279062356586357,
+      "y_mean": 0.020170203598008717,
+      "y_std": 0.11215608556570747,
+      "p_beta_holm": 0.9855658540565333
+    },
+    "AXS": {
+      "n": 42,
+      "alpha": -0.10460823585156545,
+      "beta_category": 0.006413907751794047,
+      "gamma_vix": 0.004858372287118756,
+      "delta_spy_rv": 0.4826416599821739,
+      "se_beta": 0.015818370743977336,
+      "t_beta": 0.40547208404734536,
+      "p_beta": 0.6851305342730565,
+      "rsq": 0.14033598839527095,
+      "y_mean": 0.002850817729840157,
+      "y_std": 0.1260371579289133,
+      "p_beta_holm": 0.9855658540565333
+    },
+    "KIE": {
+      "n": 42,
+      "alpha": -0.08792026482757806,
+      "beta_category": 0.01350291834158311,
+      "gamma_vix": 0.0031831202744677985,
+      "delta_spy_rv": 0.7008162229666061,
+      "se_beta": 0.007482344363356128,
+      "t_beta": 1.8046373817960064,
+      "p_beta": 0.07113144442018025,
+      "rsq": 0.38860410384761124,
+      "y_mean": 0.000884154963943098,
+      "y_std": 0.08600756194239273,
+      "p_beta_holm": 0.3556572221009013
+    }
+  },
+  "identification_check": {
+    "reinsurer_mean_beta": 0.01473580512592955,
+    "kie_beta": 0.01350291834158311,
+    "reinsurer_minus_kie": 0.0012328867843464392
+  },
+  "rv_diagnostics": {
+    "RNR": {
+      "pre_rv_mean": 0.216203278096874,
+      "post_rv_mean": 0.22975603072365366,
+      "drv_mean": 0.013552752626779624
+    },
+    "EG": {
+      "pre_rv_mean": 0.2239031099171853,
+      "post_rv_mean": 0.23334318422217212,
+      "drv_mean": 0.009440074304986825
+    },
+    "ACGL": {
+      "pre_rv_mean": 0.2057284752981131,
+      "post_rv_mean": 0.22589867889612186,
+      "drv_mean": 0.020170203598008717
+    },
+    "AXS": {
+      "pre_rv_mean": 0.2227173177914575,
+      "post_rv_mean": 0.2255681355212976,
+      "drv_mean": 0.002850817729840157
+    },
+    "KIE": {
+      "pre_rv_mean": 0.16813328949248363,
+      "post_rv_mean": 0.16901744445642675,
+      "drv_mean": 0.000884154963943098
+    },
+    "SPY": {
+      "pre_rv_mean": 0.1315807793732097,
+      "post_rv_mean": 0.1304794020078444,
+      "drv_mean": -0.001101377365365271
+    }
+  },
+  "success_criteria": {
+    "any_reinsurer_beta_pos_holm_p_lt_0p10": false,
+    "reinsurer_mean_beta_gt_kie_beta": true,
+    "n_events_ge_12": true,
+    "n_events_ge_20": true
+  },
+  "verdict_internal": "NULL",
+  "reviewer": "pending \u2014 Codex primary path"
+}
