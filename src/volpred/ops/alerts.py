@@ -18,6 +18,11 @@ from .content_quality import (
     content_quality_snapshot,
 )
 from .diagnostics import warn
+from .release_cadence import (
+    get_release_interval_minutes,
+    release_cadence_threshold_hours,
+    release_interval_timedelta,
+)
 from .loop_health import loop_health_snapshot
 from .health import (
     DISK_USAGE_ALERT_PCT,
@@ -375,13 +380,16 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
     # (was hardcoded 2h, which false-positived every fire after user changed
     # cadence 2h→12h). Alert fires only when gap exceeds the cadence the user
     # actually chose. Critical tier = 2x interval (genuine silent outage).
-    interval_minutes = 120  # default fallback
-    if isinstance(settings_data, dict):
-        try:
-            interval_minutes = int(settings_data.get("interval_minutes") or 120)
-        except (TypeError, ValueError):
-            interval_minutes = 120
-    interval_td = timedelta(minutes=max(5, interval_minutes))
+    interval_minutes = get_release_interval_minutes(
+        storage_dir,
+        settings=settings_data if isinstance(settings_data, dict) else None,
+        warn_key="release_pool_gap",
+    )
+    interval_td = release_interval_timedelta(
+        storage_dir,
+        settings=settings_data if isinstance(settings_data, dict) else None,
+        warn_key="release_pool_gap",
+    )
     warn_threshold = interval_td + RELEASE_POOL_GAP_BUFFER
     critical_threshold = interval_td * 2
     threshold_hours = round(warn_threshold.total_seconds() / 3600.0, 2)
@@ -1096,15 +1104,14 @@ def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[s
     # 2026-04-20 教訓：hardcoded 門檻在 cadence 變更後 false-positive）。boss 改 6h 後，
     # 固定 5h 門檻 < 6h interval → 每個 release cycle 末（5h 後、下個 release 前）誤報。
     # threshold = interval + grace（dead-man switch 要避免 false critical，給足 buffer）。
-    settings = load_json(_storage_root(storage_dir).joinpath(".release_settings.json"), {})
-    interval_min = 360
-    if isinstance(settings, dict):
-        try:
-            interval_min = int(settings.get("interval_minutes") or 360)
-        except (TypeError, ValueError) as exc:
-            warn("publishing_freshness", "bad interval_minutes; using 360", err=str(exc))
-            interval_min = 360
-    threshold_hours = round(max(5, interval_min) / 60.0 + PUBLISH_FRESHNESS_GRACE_HOURS, 1)
+    interval_min = get_release_interval_minutes(storage_dir, warn_key="publishing_freshness")
+    threshold_hours = release_cadence_threshold_hours(
+        storage_dir,
+        grace_hours=PUBLISH_FRESHNESS_GRACE_HOURS,
+        floor_hours=PUBLISH_FRESHNESS_CRITICAL_HOURS,
+        precision=1,
+        warn_key="publishing_freshness",
+    )
     breached = bool(
         in_active_window
         and (newest is None or (gap_hours is not None and gap_hours > threshold_hours))

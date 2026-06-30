@@ -40,6 +40,12 @@ from zoneinfo import ZoneInfo
 
 from .common import load_json, project_path
 from .diagnostics import warn
+from .release_cadence import (
+    RHYTHM_BURST_GAP_MIN,
+    is_rhythm_controlled,
+    release_cadence_threshold_hours,
+    sibling_group,
+)
 
 _TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 
@@ -49,29 +55,13 @@ ACTIVE_WINDOW_END_HOUR = 23
 
 # Rhythm thresholds (sliding window over last N published items).
 RHYTHM_LOOKBACK = 10
-RHYTHM_BURST_GAP_MIN = 30  # consecutive items < 30 min apart = burst
 RHYTHM_DROUGHT_GAP_HOURS = 3.0  # > 3 h gap inside active window = drought
-
-# Phases / categories whose publish timing is NOT controlled by the 6h
-# release_pool rhythm — fixtures (digest/daily_update fire at fixed times) and
-# event-driven types (trending/event publish when news breaks). Excluded from
-# burst detection: two of them coinciding is not a rhythm violation.
-_NON_RHYTHM_PHASES = {
-    "digest",
-    "daily_update",
-    "daily_recommendation",
-    "trending_repost",
-    "event",
-    "event_article",
-}
-_NON_RHYTHM_CATEGORIES = {"event_article", "trending_repost"}
 
 # 2026-06-30 (boss email-12281 / boss 設 release=6h)：drought 門檻須跟 release 節奏
 # 對齊。固定 3h 門檻 < 6h release interval → 正常 6h gap 就誤報 drought（同 burst 的
 # 測量-政策錯配）。drought 真正要抓的是「pipeline stall」，門檻 = release interval +
 # grace（涵蓋 piggy-back latency + 偶爾 skip cycle），floor 仍是 RHYTHM_DROUGHT_GAP_HOURS。
 RHYTHM_DROUGHT_GRACE_HOURS = 2.0
-_DEFAULT_RELEASE_INTERVAL_HOURS = 6.0  # fallback 若 .release_settings.json 不可讀
 
 # Digest detection markers.
 DIGEST_TITLE_PREFIX = "每日精選導讀"
@@ -148,23 +138,6 @@ def _is_digest(item: dict[str, Any]) -> bool:
     return isinstance(title, str) and title.startswith(DIGEST_TITLE_PREFIX)
 
 
-def _release_interval_hours(storage_dir: str) -> float:
-    """Canonical release cadence (hours) from .release_settings.json.
-
-    Used to make the drought threshold track the boss-configured release rhythm
-    (6h since 2026-06-30) instead of a static 3h that false-fires on normal gaps.
-    """
-    path = project_path(storage_dir) / ".release_settings.json"
-    try:
-        raw = load_json(path, default={})
-        minutes = float((raw or {}).get("interval_minutes") or 0)
-        if minutes > 0:
-            return minutes / 60.0
-    except (OSError, ValueError, TypeError) as exc:
-        warn("content_quality", "release interval read failed; using default", err=str(exc))
-    return _DEFAULT_RELEASE_INTERVAL_HOURS
-
-
 def check_publish_rhythm(
     storage_dir: str = "storage",
     *,
@@ -200,38 +173,19 @@ def check_publish_rhythm(
     # `details.paired_sibling_group` (e.g. daily_update.py's strategy +
     # 持倉 sibling articles that fire together in one script run) are
     # semantically one publish event and must NOT count as a burst.
-    def _sibling_group(item: dict[str, Any]) -> str | None:
-        det = item.get("details")
-        if isinstance(det, dict):
-            grp = det.get("paired_sibling_group")
-            if isinstance(grp, str) and grp:
-                return grp
-        return None
-
     # 2026-06-30 (boss email-12281「兩個 Warn 已經存在很久」): burst 只衡量
     # *discretionary* 文章（受 6h release_pool 節奏控制者）clumping。獨立排程的
     # fixture / 事件驅動文章——daily_digest（晨間固定）、daily_update（每日固定）、
     # trending_repost / event_article（事件驅動，新聞一來就發）——各依自己邏輯擇時，
     # 兩個不同 type 偶然相近不是 6h 節奏違規。把它們算進 burst → 每天晨間 digest+
     # trending 撞在一起就永久誤報（root cause of「存在很久」的 warn）。
-    def _is_rhythm_controlled(item: dict[str, Any]) -> bool:
-        if (item.get("audience") or "").lower() == "daily":
-            return False
-        phase = (item.get("phase") or "").lower()
-        if phase in _NON_RHYTHM_PHASES:
-            return False
-        cat = (item.get("category") or "").lower()
-        if cat in _NON_RHYTHM_CATEGORIES:
-            return False
-        return True
-
-    disc = [kv for kv in recent if _is_rhythm_controlled(kv[0])]
+    disc = [kv for kv in recent if is_rhythm_controlled(kv[0])]
     burst_pairs: list[dict[str, Any]] = []
     for i in range(len(disc) - 1):
         gap = round((disc[i][1] - disc[i + 1][1]).total_seconds() / 60.0, 2)
         if gap < RHYTHM_BURST_GAP_MIN:
-            g_new = _sibling_group(disc[i][0])
-            g_old = _sibling_group(disc[i + 1][0])
+            g_new = sibling_group(disc[i][0])
+            g_old = sibling_group(disc[i + 1][0])
             if g_new and g_new == g_old:
                 continue
             burst_pairs.append(
@@ -249,9 +203,12 @@ def check_publish_rhythm(
         else None
     )
 
-    drought_threshold_h = max(
-        RHYTHM_DROUGHT_GAP_HOURS,
-        _release_interval_hours(storage_dir) + RHYTHM_DROUGHT_GRACE_HOURS,
+    drought_threshold_h = release_cadence_threshold_hours(
+        storage_dir,
+        grace_hours=RHYTHM_DROUGHT_GRACE_HOURS,
+        floor_hours=RHYTHM_DROUGHT_GAP_HOURS,
+        precision=1,
+        warn_key="content_quality",
     )
     drought = (
         in_active

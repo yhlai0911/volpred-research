@@ -40619,13 +40619,15 @@
     "title": "集中化 release-cadence-derived 門檻（防 boss 改 interval 又要逐一追修）",
     "description": "系統性脆弱（2026-06-30 一天修了 3 個）：release interval 是單一 config(.release_settings.json interval_minutes)，但多個 publish-gap 門檻各自獨立讀/hardcode → boss 改 cadence(3h→6h) 時 burst/drought(content_quality)+publishing_freshness/release_pool_gap(alerts) 全 false-fire 要逐一追修。修法：抽一個共用 helper get_release_interval_hours()(已在 content_quality 有 _release_interval_hours，alerts 有 inline) → 統一成 single source，所有 gap 門檻 = interval + 各自 grace。並加 test：mock interval 變更，斷言所有門檻同步。需 clean context。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "main_thread_discovered_2026-06-30",
     "created_at": "2026-06-30T08:24:22.389171+00:00",
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-30T12:18:55.351249+00:00",
     "claim_session_id": "94b8421d7f1f",
-    "started_at": "2026-06-30T12:18:59.246268+00:00"
+    "started_at": "2026-06-30T12:18:59.246268+00:00",
+    "completed_at": "2026-06-30T12:23:36.727419+00:00",
+    "result": "Centralized release cadence policy in volpred.ops.release_cadence and rewired content_quality, alerts, and publisher throttle. Added regression coverage that mock interval changes move drought/freshness/release_pool thresholds together; focused tests 69 passed."
   },
   {
     "id": "email-12296-0e7d60",

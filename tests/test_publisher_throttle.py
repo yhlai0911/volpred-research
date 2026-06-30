@@ -192,18 +192,17 @@ def test_block_skipped_when_prev_is_non_rhythm(tmp_path: Path):
 # ----------------------------------------------------------------------------
 
 
-def test_constants_match_content_quality():
-    """If content_quality.py changes the rhythm constants, throttle.py must too.
-
-    Until platform_ops_centralize_release_cadence_thresholds lands, these are
-    duplicated in two files; this test is the only thing keeping them in sync.
-    """
-    from volpred.ops import content_quality as cq
+def test_throttle_uses_shared_release_cadence_policy():
+    """Throttle and content-quality patrol share one cadence policy module."""
     from volpred.publisher import throttle as th
+    from volpred.ops import content_quality as cq
+    from volpred.ops import release_cadence as rc
 
-    assert th.RHYTHM_BURST_GAP_MIN == cq.RHYTHM_BURST_GAP_MIN
-    assert set(th._NON_RHYTHM_PHASES) == set(cq._NON_RHYTHM_PHASES)
-    assert set(th._NON_RHYTHM_CATEGORIES) == set(cq._NON_RHYTHM_CATEGORIES)
+    assert th.RHYTHM_BURST_GAP_MIN == rc.RHYTHM_BURST_GAP_MIN
+    assert cq.RHYTHM_BURST_GAP_MIN == rc.RHYTHM_BURST_GAP_MIN
+    assert set(th._NON_RHYTHM_PHASES) == set(rc.NON_RHYTHM_PHASES)
+    assert set(th._NON_RHYTHM_CATEGORIES) == set(rc.NON_RHYTHM_CATEGORIES)
+    assert th.is_rhythm_controlled is rc.is_rhythm_controlled
 
 
 # ----------------------------------------------------------------------------

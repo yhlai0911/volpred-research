@@ -14,14 +14,8 @@ True and whose gap to the most recent rhythm-controlled feed entry is below
 RHYTHM_BURST_GAP_MIN is rejected with PublishThrottleError — caller defers,
 reschedules, or drops the work item. Fixtures (`digest` / `daily_update` /
 `daily_recommendation`) and event-driven publishes (`trending_repost` /
-`event_article`) bypass the gate; their cadence is governed by their own
-schedules, not the 6-h release_pool rhythm.
-
-Constants mirror `volpred.ops.content_quality` (RHYTHM_BURST_GAP_MIN,
-_NON_RHYTHM_PHASES, _NON_RHYTHM_CATEGORIES). Single-source-of-truth refactor
-is tracked under task platform_ops_centralize_release_cadence_thresholds;
-until that lands, `tests/test_publisher_throttle.py::test_constants_match`
-guards against drift.
+`event_article`) bypass through the shared cadence policy in
+`volpred.ops.release_cadence`.
 
 Audit: every gate decision (pass / block) writes a record to
 `storage/logs/dedup_decisions.jsonl` per `.claude/rules/dedup-gate-audit.md`.
@@ -34,19 +28,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-# Mirror of content_quality.py constants — see module docstring for why.
-RHYTHM_BURST_GAP_MIN = 30
-_NON_RHYTHM_PHASES = frozenset(
-    {
-        "digest",
-        "daily_update",
-        "daily_recommendation",
-        "trending_repost",
-        "event",
-        "event_article",
-    }
+from volpred.ops.release_cadence import (
+    NON_RHYTHM_CATEGORIES as _NON_RHYTHM_CATEGORIES,
+    NON_RHYTHM_PHASES as _NON_RHYTHM_PHASES,
+    RHYTHM_BURST_GAP_MIN,
+    is_rhythm_controlled,
+    sibling_group as _sibling_group,
 )
-_NON_RHYTHM_CATEGORIES = frozenset({"event_article", "trending_repost"})
 
 
 class PublishThrottleError(Exception):
@@ -64,34 +52,6 @@ class PublishThrottleError(Exception):
         self.previous_id = previous_id
         self.gap_minutes = gap_minutes
         self.threshold_minutes = threshold_minutes
-
-
-def is_rhythm_controlled(item: dict[str, Any]) -> bool:
-    """Mirror of content_quality.check_publish_rhythm._is_rhythm_controlled.
-
-    Returns True iff the item's publish timing is governed by the 6-h
-    release_pool rhythm — i.e. it is a *discretionary* reader-facing article
-    that clumping would actually violate. Returns False for fixtures and
-    event-driven types.
-    """
-    if (item.get("audience") or "").lower() == "daily":
-        return False
-    phase = (item.get("phase") or "").lower()
-    if phase in _NON_RHYTHM_PHASES:
-        return False
-    cat = (item.get("category") or "").lower()
-    if cat in _NON_RHYTHM_CATEGORIES:
-        return False
-    return True
-
-
-def _sibling_group(item: dict[str, Any]) -> str | None:
-    det = item.get("details")
-    if isinstance(det, dict):
-        grp = det.get("paired_sibling_group")
-        if isinstance(grp, str) and grp:
-            return grp
-    return None
 
 
 def _parse_ts(raw: Any) -> datetime | None:
