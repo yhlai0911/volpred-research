@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-30 host_cron_fail false-critical：audit_fb_pipeline 漏標 exit_semantics=findings
+
+**問題**：autonomous tick 巡檢發現 dashboard host_cron_fail=critical（check-alerts breaches=1）。
+
+**現象 / 根因**：`audit_fb_pipeline.py:216 return 0 if not pending else 1` —— 有 ≥2 篇 FB post 在 `awaiting_interactive_session`（等 Chrome 互動發文）時 exit1 作 **findings signal**（findings 另經自己的 warn/info send_alert surface），**不是 infra 失敗**。但 `config/runtime_schedules.json` 的 audit_fb_pipeline 條目缺 `exit_semantics:"findings"`，host_cron_fail（`alerts.py::_findings_exit_logs_from_schedule_config`）把 exit1 誤讀為 cron crash → critical。這正是 **2026-06-20 STRIKE-3**（host_cron_fail false-critical on exit-as-findings jobs）建立 exit_semantics 機制要解的 class，但 audit_fb_pipeline 當時沒被一起標。
+
+**解決方法**：runtime_schedules.json 的 audit_fb_pipeline 加 `exit_semantics:"findings"`（commit bec991e25）→ host_cron_fail 排除。check-alerts breaches 1→0。（另：22:17 git_push_backup transient PUSH FAILED 也貢獻 host_cron_fail，已手動 push + 23:00 自然 run 寫 exit0 清除。）
+
+**Follow-up**：應系統性 audit 所有「send alert + 非零 exit 作 findings」的 cron job 是否都標了 exit_semantics（task `platform_ops_audit_exit_semantics_findings_jobs`），杜絕同類 gap。
+
 ## 2026-06-30 publish_rhythm burst 誤報 + 系統性 gap：長期重複 warn 無自動升級
 
 **問題**：boss email-12281「兩個 Warn 已經存在很久 到底怎麼回事」。13:00 boss report Overall WARN。
