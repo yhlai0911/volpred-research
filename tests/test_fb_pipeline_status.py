@@ -530,6 +530,120 @@ def test_mark_fb_post_status_updates_feed_and_log(tmp_path, monkeypatch) -> None
     assert log[0]["fb_post_note"] == "Needs Chrome MCP session"
 
 
+def test_mark_fb_post_status_auto_expire_flips_only_stale_awaiting(tmp_path, monkeypatch) -> None:
+    """14-day TTL: only awaiting_interactive_session entries older than the
+    cutoff flip to wont_fix; recent ones and non-awaiting statuses untouched."""
+    from datetime import timedelta as _td
+
+    feed_path = tmp_path / "feed.json"
+    log_path = tmp_path / "trending_repost_log.json"
+    now = datetime.now(UTC)
+    old_iso = (now - _td(days=20)).isoformat()
+    recent_iso = (now - _td(days=3)).isoformat()
+
+    feed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_stale",
+                    "fb_post_status": "awaiting_interactive_session",
+                    "fb_post_status_updated_at": old_iso,
+                    "published_at": old_iso,
+                },
+                {
+                    "id": "mile_recent",
+                    "fb_post_status": "awaiting_interactive_session",
+                    "fb_post_status_updated_at": recent_iso,
+                    "published_at": recent_iso,
+                },
+                {
+                    "id": "mile_other_status",
+                    "fb_post_status": "pending",
+                    "fb_post_status_updated_at": old_iso,
+                    "published_at": old_iso,
+                },
+                {
+                    "id": "mile_already_terminal",
+                    "fb_post_status": "wont_fix",
+                    "fb_post_status_updated_at": old_iso,
+                    "published_at": old_iso,
+                },
+            ],
+            ensure_ascii=False, indent=2,
+        ) + "\n",
+        encoding="utf-8",
+    )
+    log_path.write_text("[]\n", encoding="utf-8")
+
+    monkeypatch.setattr(mark_fb_post_status, "FEED_PATH", feed_path)
+    monkeypatch.setattr(mark_fb_post_status, "TRENDING_LOG_PATH", log_path)
+
+    result = mark_fb_post_status.auto_expire_stale(days=14)
+
+    assert result["mode"] == "auto_expire"
+    assert result["days"] == 14
+    assert result["dry_run"] is False
+    assert result["expired_count"] == 1
+    assert result["expired"][0]["mile_id"] == "mile_stale"
+    assert {x["mile_id"] for x in result["skipped_recent"]} == {"mile_recent"}
+
+    feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    by_id = {e["id"]: e for e in feed}
+    assert by_id["mile_stale"]["fb_post_status"] == "wont_fix"
+    assert "auto-expired by mark_fb_post_status TTL" in by_id["mile_stale"]["fb_post_note"]
+    # Recent awaiting + other status + already-terminal must NOT be touched.
+    assert by_id["mile_recent"]["fb_post_status"] == "awaiting_interactive_session"
+    assert by_id["mile_other_status"]["fb_post_status"] == "pending"
+    assert by_id["mile_already_terminal"]["fb_post_status"] == "wont_fix"
+
+
+def test_mark_fb_post_status_auto_expire_dry_run_does_not_write(tmp_path, monkeypatch) -> None:
+    from datetime import timedelta as _td
+
+    feed_path = tmp_path / "feed.json"
+    log_path = tmp_path / "trending_repost_log.json"
+    old_iso = (datetime.now(UTC) - _td(days=30)).isoformat()
+    feed_path.write_text(
+        json.dumps(
+            [{
+                "id": "mile_stale",
+                "fb_post_status": "awaiting_interactive_session",
+                "fb_post_status_updated_at": old_iso,
+                "published_at": old_iso,
+            }],
+            ensure_ascii=False, indent=2,
+        ) + "\n",
+        encoding="utf-8",
+    )
+    log_path.write_text("[]\n", encoding="utf-8")
+
+    monkeypatch.setattr(mark_fb_post_status, "FEED_PATH", feed_path)
+    monkeypatch.setattr(mark_fb_post_status, "TRENDING_LOG_PATH", log_path)
+
+    result = mark_fb_post_status.auto_expire_stale(days=14, dry_run=True)
+
+    assert result["expired_count"] == 1
+    assert result["dry_run"] is True
+    # File untouched.
+    feed = json.loads(feed_path.read_text(encoding="utf-8"))
+    assert feed[0]["fb_post_status"] == "awaiting_interactive_session"
+    assert "fb_post_note" not in feed[0]
+
+
+def test_mark_fb_post_status_auto_expire_rejects_nonpositive_days(tmp_path, monkeypatch) -> None:
+    feed_path = tmp_path / "feed.json"
+    log_path = tmp_path / "trending_repost_log.json"
+    feed_path.write_text("[]\n", encoding="utf-8")
+    log_path.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(mark_fb_post_status, "FEED_PATH", feed_path)
+    monkeypatch.setattr(mark_fb_post_status, "TRENDING_LOG_PATH", log_path)
+
+    with pytest.raises(ValueError):
+        mark_fb_post_status.auto_expire_stale(days=0)
+    with pytest.raises(ValueError):
+        mark_fb_post_status.auto_expire_stale(days=-5)
+
+
 def test_mark_fb_post_status_warns_and_refuses_bad_json(tmp_path, capsys) -> None:
     bad_path = tmp_path / "feed.json"
     bad_path.write_text("{bad json", encoding="utf-8")

@@ -40050,7 +40050,7 @@
     "title": "K1587: PM2.5 情緒型外生 regressor**（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 492). Original: PM2.5 情緒型外生 regressor**（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）。識別乾淨（純情緒管道），補行為 vol 軸。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1587.py with signal.shift(1) + seed=42, (c) K1587_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -40059,7 +40059,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-30T00:00:02Z"
+    "created_at": "2026-06-30T00:00:02Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T07:50:14.785380+00:00",
+    "claim_session_id": "e64c9ce3af53",
+    "started_at": "2026-06-30T07:50:14.988282+00:00"
   },
   {
     "id": "K1588",
@@ -40512,11 +40516,17 @@
     "description": "Root cause: 4-5 mile awaiting_interactive_session 無 TTL → backlog 無限累積 → dashboard verification_fb_pipeline 永久 warn (老闆 2026-06-30 email-12281 抱怨「兩個 Warn 已存在很久」根因之一)。當前 backlog: mile_819af916 (06-29), mile_a0b174f9 (06-28), mile_bd564eb7 (06-28), mile_0941e2f0 (06-28), mile_f5f4cb43 (06-30 剛標)。修法: (a) scripts/mark_fb_post_status.py 加 --auto-expire <days> flag (default 14); (b) 加 cron job 每天掃描 fb_post_status=awaiting_interactive_session 且 published_at > N 天 → mark wont_fix + log 原因「Chrome MCP 不可用 + 用戶人工 backlog 過期」; (c) dashboard ops_dashboard.py FB section 把 wont_fix 從 warn count 排除。Bar: TTL flip 後 dashboard verification_fb_pipeline 應自動回 ok (除非新 awaiting 進來)。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "boss_email_12281_root_cause_fix_2026-06-30",
     "preferred_agent": null,
     "created_at": "2026-06-30T05:23:49+00:00",
-    "last_released_at": "2026-06-30T07:07:13.990162+00:00"
+    "last_released_at": "2026-06-30T07:07:13.990162+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-06-30T08:10:28.254924+00:00",
+    "claim_session_id": "3396ce5fa6e2",
+    "started_at": "2026-06-30T08:10:28.458097+00:00",
+    "completed_at": "2026-06-30T08:18:49.221383+00:00",
+    "result": "Added --auto-expire <days> to mark_fb_post_status.py (default 14d → wont_fix). New cron fb_ttl_expire daily 03:25 (piggy-back enabled). Dashboard already excluded wont_fix from FB warn count. 3 new tests + 22 existing all green. Piggy-back dry-run verified job fires correctly. Wrapper sync'd to ~/.volpred/bin/."
   },
   {
     "id": "platform_ops_publish_rhythm_pre_publish_throttle",

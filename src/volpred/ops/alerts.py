@@ -1069,7 +1069,8 @@ def _parse_paper_stale_state(now: datetime, paper_root: Path | None = None) -> d
 # 12h 只發 1 篇，但 breach_count=0（每個 job exit 0）。以下兩個 check 直接監看 OUTCOME
 # （feed 新鮮度，active-window aware，CRITICAL）+ generator binary 源頭健康，與 job
 # exit code 完全脫鉤，補上這層盲區。
-PUBLISH_FRESHNESS_CRITICAL_HOURS = 5.0
+PUBLISH_FRESHNESS_CRITICAL_HOURS = 5.0  # legacy floor; 實際門檻 = release interval + grace（見下）
+PUBLISH_FRESHNESS_GRACE_HOURS = 2.0  # dead-man switch buffer on top of release cadence
 _TAIPEI_TZ = ZoneInfo("Asia/Taipei")
 PUBLISH_ACTIVE_START_HOUR = 9   # 台北時間：此窗內才預期有新內容
 PUBLISH_ACTIVE_END_HOUR = 23
@@ -1091,18 +1092,30 @@ def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[s
     gap_hours = round((now - newest).total_seconds() / 3600.0, 2) if newest is not None else None
     tpe_hour = now.astimezone(_TAIPEI_TZ).hour
     in_active_window = PUBLISH_ACTIVE_START_HOUR <= tpe_hour < PUBLISH_ACTIVE_END_HOUR
+    # 2026-06-30: 門檻須跟 boss-configured release cadence 對齊（同 release_pool_gap
+    # 2026-04-20 教訓：hardcoded 門檻在 cadence 變更後 false-positive）。boss 改 6h 後，
+    # 固定 5h 門檻 < 6h interval → 每個 release cycle 末（5h 後、下個 release 前）誤報。
+    # threshold = interval + grace（dead-man switch 要避免 false critical，給足 buffer）。
+    settings = load_json(_storage_root(storage_dir).joinpath(".release_settings.json"), {})
+    interval_min = 360
+    if isinstance(settings, dict):
+        try:
+            interval_min = int(settings.get("interval_minutes") or 360)
+        except (TypeError, ValueError):
+            interval_min = 360
+    threshold_hours = round(max(5, interval_min) / 60.0 + PUBLISH_FRESHNESS_GRACE_HOURS, 1)
     breached = bool(
         in_active_window
-        and (newest is None or (gap_hours is not None and gap_hours > PUBLISH_FRESHNESS_CRITICAL_HOURS))
+        and (newest is None or (gap_hours is not None and gap_hours > threshold_hours))
     )
     newest_text = newest.isoformat() if newest else "missing"
     body = "\n".join(
         [
             "## 觸發條件",
-            f"作用窗（台北 {PUBLISH_ACTIVE_START_HOUR}:00–{PUBLISH_ACTIVE_END_HOUR}:00）內，feed 最新已發佈文章距今 > {PUBLISH_FRESHNESS_CRITICAL_HOURS}h。",
+            f"作用窗（台北 {PUBLISH_ACTIVE_START_HOUR}:00–{PUBLISH_ACTIVE_END_HOUR}:00）內，feed 最新已發佈文章距今 > {threshold_hours}h（= release interval {round(interval_min/60,1)}h + {PUBLISH_FRESHNESS_GRACE_HOURS}h grace）。",
             f"- newest_published_at: {newest_text}",
             f"- publish_gap_hours: {gap_hours if gap_hours is not None else 'missing'}",
-            f"- threshold_hours: {PUBLISH_FRESHNESS_CRITICAL_HOURS}",
+            f"- threshold_hours: {threshold_hours}",
             f"- feed_path: {_relative_repo_path(feed_path)}",
             "",
             "## 影響",
@@ -1126,7 +1139,7 @@ def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[s
         # title 必須穩定（不含動態數字）— 否則 sha256(level+title) 24h dedup 失效、
         # 持續 breach 時每小時洗版。動態 gap 放 body / details（2026-06-23 dedup 修正）。
         "title": (
-            f"發文脫班（無新文超過 {PUBLISH_FRESHNESS_CRITICAL_HOURS}h 門檻）"
+            "發文脫班（無新文超過 release 節奏門檻）"
             if breached
             else "publishing_freshness ok"
         ),
@@ -1136,7 +1149,7 @@ def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[s
             "publish_gap_hours": gap_hours,
             "in_active_window": in_active_window,
             "tpe_hour": tpe_hour,
-            "threshold_hours": PUBLISH_FRESHNESS_CRITICAL_HOURS,
+            "threshold_hours": threshold_hours,
         },
     }
 

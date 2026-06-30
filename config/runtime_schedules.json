@@ -359,6 +359,15 @@
         "piggy_back_enabled": true
       },
       {
+        "id": "fb_ttl_expire",
+        "cron": "25 3 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_fb_ttl_expire.sh",
+        "log_path": "storage/logs/cron/fb_ttl_expire.log",
+        "description": "Daily 03:25: final TTL purge — awaiting_interactive_session >14d → wont_fix (Chrome MCP unavailable + boss backlog gone stale; clears dashboard verification_fb_pipeline awaiting count)",
+        "host_crontab_managed": true,
+        "piggy_back_enabled": true
+      },
+      {
         "id": "ops_dashboard",
         "cron": "30 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_ops_dashboard.sh",

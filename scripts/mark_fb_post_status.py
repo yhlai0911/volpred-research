@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,6 +29,9 @@ VALID_STATUSES = {
     "awaiting_interactive_session",
     "expired_skip",
 }
+AUTO_EXPIRE_SOURCE_STATUSES = {"awaiting_interactive_session"}
+AUTO_EXPIRE_TARGET_STATUS = "wont_fix"
+AUTO_EXPIRE_DEFAULT_DAYS = 14
 
 
 def _warn_mark_fb(message: str) -> None:
@@ -98,12 +101,186 @@ def update_fb_status(mile_id: str, *, status: str, note: str | None = None) -> d
     }
 
 
+def _parse_iso_naive(value: str) -> datetime | None:
+    """Parse ISO timestamp tolerating 'Z' suffix and microseconds; return UTC-aware."""
+    s = (value or "").strip()
+    if not s:
+        return None
+    if s.endswith("Z"):
+        s = s[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(s)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
+def _entry_age_anchor(item: dict) -> datetime | None:
+    """Pick the anchor timestamp for TTL: prefer fb_post_status_updated_at,
+    fall back to published_at / created_at. This matches when the status
+    last changed (or first surfaced) rather than article publish time."""
+    for key in ("fb_post_status_updated_at", "fb_post_status_at",
+                "published_at", "created_at", "date", "timestamp"):
+        anchor = _parse_iso_naive(item.get(key) or "")
+        if anchor is not None:
+            return anchor
+    return None
+
+
+def auto_expire_stale(
+    *, days: int, dry_run: bool = False
+) -> dict:
+    """Batch flip fb_post_status=awaiting_interactive_session entries older
+    than `days` days to wont_fix. Used as a 14-day final TTL after the 72h
+    expired_skip pass in audit_fb_pipeline. Rationale: Chrome MCP for the
+    personal FB account is not available headlessly; entries older than two
+    weeks have effectively been abandoned and should stop polluting the
+    dashboard verification_fb_pipeline awaiting count."""
+    if days <= 0:
+        raise ValueError("--auto-expire days must be > 0")
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=days)
+    note = (
+        f"auto-expired by mark_fb_post_status TTL (>{days}d "
+        "Chrome MCP 不可用 + 用戶人工 backlog 過期)"
+    )
+
+    expired = []
+    skipped_recent = []
+    skipped_no_anchor = []
+    seen_mile_ids: set[str] = set()
+
+    feed = _load_json(FEED_PATH, [])
+    for item in feed:
+        if not isinstance(item, dict):
+            continue
+        status = str(item.get("fb_post_status") or "").strip()
+        if status not in AUTO_EXPIRE_SOURCE_STATUSES:
+            continue
+        mile_id = item.get("mile_id") or item.get("id")
+        if not mile_id or mile_id in seen_mile_ids:
+            continue
+        seen_mile_ids.add(mile_id)
+        anchor = _entry_age_anchor(item)
+        if anchor is None:
+            skipped_no_anchor.append({"mile_id": mile_id, "source": "feed"})
+            continue
+        age_days = (now - anchor).total_seconds() / 86400.0
+        if anchor > cutoff:
+            skipped_recent.append({
+                "mile_id": mile_id,
+                "age_days": round(age_days, 2),
+                "source": "feed",
+            })
+            continue
+        expired.append({
+            "mile_id": mile_id,
+            "age_days": round(age_days, 2),
+            "anchor": anchor.isoformat(timespec="seconds"),
+            "source": "feed",
+        })
+
+    # Also pick up trending_log-only entries (rare; trending posts usually
+    # also appear in feed but be safe — same dedup rule applies).
+    trending = _load_json(TRENDING_LOG_PATH, [])
+    for item in trending:
+        if not isinstance(item, dict):
+            continue
+        status = str(item.get("fb_post_status") or "").strip()
+        if status not in AUTO_EXPIRE_SOURCE_STATUSES:
+            continue
+        mile_id = item.get("mile_id")
+        if not mile_id or mile_id in seen_mile_ids:
+            continue
+        seen_mile_ids.add(mile_id)
+        anchor = _entry_age_anchor(item)
+        if anchor is None:
+            skipped_no_anchor.append({"mile_id": mile_id, "source": "trending_log"})
+            continue
+        age_days = (now - anchor).total_seconds() / 86400.0
+        if anchor > cutoff:
+            skipped_recent.append({
+                "mile_id": mile_id,
+                "age_days": round(age_days, 2),
+                "source": "trending_log",
+            })
+            continue
+        expired.append({
+            "mile_id": mile_id,
+            "age_days": round(age_days, 2),
+            "anchor": anchor.isoformat(timespec="seconds"),
+            "source": "trending_log",
+        })
+
+    if not dry_run:
+        for entry in expired:
+            try:
+                update_fb_status(
+                    entry["mile_id"],
+                    status=AUTO_EXPIRE_TARGET_STATUS,
+                    note=note,
+                )
+            except Exception as exc:
+                _warn_mark_fb(
+                    f"auto-expire write failed mile_id={entry['mile_id']} "
+                    f"error={type(exc).__name__}: {exc}"
+                )
+                entry["write_error"] = f"{type(exc).__name__}: {exc}"
+
+    return {
+        "mode": "auto_expire",
+        "days": days,
+        "dry_run": dry_run,
+        "cutoff_iso": cutoff.isoformat(timespec="seconds"),
+        "expired_count": len(expired),
+        "expired": expired,
+        "skipped_recent_count": len(skipped_recent),
+        "skipped_recent": skipped_recent,
+        "skipped_no_anchor_count": len(skipped_no_anchor),
+        "skipped_no_anchor": skipped_no_anchor,
+        "target_status": AUTO_EXPIRE_TARGET_STATUS,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mile-id", required=True)
-    parser.add_argument("--status", required=True, choices=sorted(VALID_STATUSES))
+    parser.add_argument("--mile-id")
+    parser.add_argument("--status", choices=sorted(VALID_STATUSES))
     parser.add_argument("--note")
+    parser.add_argument(
+        "--auto-expire",
+        type=int,
+        nargs="?",
+        const=AUTO_EXPIRE_DEFAULT_DAYS,
+        default=None,
+        metavar="DAYS",
+        help=(
+            "Batch mode: flip fb_post_status=awaiting_interactive_session "
+            f"older than DAYS to wont_fix (default {AUTO_EXPIRE_DEFAULT_DAYS}). "
+            "Mutually exclusive with --mile-id/--status."
+        ),
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Auto-expire only: report what would change without writing.",
+    )
     args = parser.parse_args()
+
+    if args.auto_expire is not None:
+        if args.mile_id or args.status:
+            parser.error("--auto-expire cannot be combined with --mile-id/--status")
+        try:
+            result = auto_expire_stale(days=args.auto_expire, dry_run=args.dry_run)
+        except ValueError as exc:
+            parser.error(str(exc))
+        print(json.dumps({"ok": True, **result}, ensure_ascii=False, indent=2))
+        return 0
+
+    if not args.mile_id or not args.status:
+        parser.error("--mile-id and --status are required (or use --auto-expire)")
 
     result = update_fb_status(args.mile_id, status=args.status, note=args.note)
     if result["updated_feed"] == 0 and result["updated_log"] == 0:
