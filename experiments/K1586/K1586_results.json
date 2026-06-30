@@ -1,0 +1,281 @@
+{
+  "experiment_id": "K1586",
+  "title": "Stablecoin reserves -> short-end T-bill realized vol",
+  "run_timestamp_utc": "2026-06-30T07:19:28.159057Z",
+  "seed": 42,
+  "sample": {
+    "start": "2020-04-06",
+    "end": "2026-06-26",
+    "n_business_days": 1557
+  },
+  "data_sources": {
+    "stablecoin": "DefiLlama free (https://stablecoins.llama.fi)",
+    "fred": "FRED CSV (https://fred.stlouisfed.org)",
+    "etf": "yfinance (SHY, BIL)"
+  },
+  "lookahead_policy": {
+    "stablecoin_predictor_lag": "shift(k>=1) enforced in H1; no contemporaneous regression",
+    "rv_window": "trailing 22-day rolling std (pandas default)",
+    "forward_label": false
+  },
+  "hypotheses": {
+    "H1_lead_lag": {
+      "target": "DGS1MO_RV / DGS3MO_RV",
+      "predictor": "sb_dlog (USDT+USDC+DAI)",
+      "DGS1MO_RV": {
+        "pearson_corr_by_lag": {
+          "lag_1": {
+            "corr": -0.14012621661099348,
+            "n": 1556
+          },
+          "lag_2": {
+            "corr": -0.14045413568641996,
+            "n": 1555
+          },
+          "lag_3": {
+            "corr": -0.13952036263725287,
+            "n": 1554
+          },
+          "lag_4": {
+            "corr": -0.1411694633717297,
+            "n": 1553
+          },
+          "lag_5": {
+            "corr": -0.14089256955159382,
+            "n": 1552
+          }
+        },
+        "ols_hac": {
+          "lag_1": {
+            "beta": -74.0623481330789,
+            "se_hac": 18.128404145275294,
+            "t_stat": -4.085431212784461,
+            "p_value": 4.3995033332604283e-05,
+            "r_squared": 0.019635356581710894
+          },
+          "lag_2": {
+            "beta": -74.22756673487409,
+            "se_hac": 18.16068994708166,
+            "t_stat": -4.087265789524815,
+            "p_value": 4.364869602902145e-05,
+            "r_squared": 0.019727364231419298
+          },
+          "lag_3": {
+            "beta": -73.7340278509395,
+            "se_hac": 18.082445539972202,
+            "t_stat": -4.077657952180557,
+            "p_value": 4.5491624514999544e-05,
+            "r_squared": 0.019465931590430308
+          },
+          "lag_4": {
+            "beta": -74.60518086376209,
+            "se_hac": 18.274785586724025,
+            "t_stat": -4.082410735257001,
+            "p_value": 4.4570933799243315e-05,
+            "r_squared": 0.019928817388662257
+          },
+          "lag_5": {
+            "beta": -74.45876825753318,
+            "se_hac": 18.186707771468974,
+            "t_stat": -4.094131229971317,
+            "p_value": 4.237542669333993e-05,
+            "r_squared": 0.01985071615485079
+          }
+        },
+        "granger": {
+          "lag_1": {
+            "F": 0.5827677246541332,
+            "p_value": 0.4453454514688238,
+            "df_denom": 1553.0,
+            "df_num": 1
+          },
+          "lag_2": {
+            "F": 0.3708079475373024,
+            "p_value": 0.6902376867956257,
+            "df_denom": 1550.0,
+            "df_num": 2
+          },
+          "lag_3": {
+            "F": 0.26977831481697945,
+            "p_value": 0.8472210350132527,
+            "df_denom": 1547.0,
+            "df_num": 3
+          },
+          "lag_4": {
+            "F": 0.3251682438135488,
+            "p_value": 0.8612114181170792,
+            "df_denom": 1544.0,
+            "df_num": 4
+          },
+          "lag_5": {
+            "F": 0.2540343391772491,
+            "p_value": 0.9378989998449934,
+            "df_denom": 1541.0,
+            "df_num": 5
+          }
+        }
+      },
+      "DGS3MO_RV": {
+        "pearson_corr_by_lag": {
+          "lag_1": {
+            "corr": -0.17803585513400771,
+            "n": 1556
+          },
+          "lag_2": {
+            "corr": -0.18057430813412112,
+            "n": 1555
+          },
+          "lag_3": {
+            "corr": -0.1835181031692937,
+            "n": 1554
+          },
+          "lag_4": {
+            "corr": -0.18593302970393663,
+            "n": 1553
+          },
+          "lag_5": {
+            "corr": -0.18997008976175025,
+            "n": 1552
+          }
+        },
+        "ols_hac": {
+          "lag_1": {
+            "beta": -43.180920159137536,
+            "se_hac": 10.494584951758283,
+            "t_stat": -4.11459055861975,
+            "p_value": 3.8786726609843566e-05,
+            "r_squared": 0.03169676571329738
+          },
+          "lag_2": {
+            "beta": -43.75564461407576,
+            "se_hac": 10.620023981739807,
+            "t_stat": -4.120107891404928,
+            "p_value": 3.786950265217576e-05,
+            "r_squared": 0.03260708075811647
+          },
+          "lag_3": {
+            "beta": -44.43109347792634,
+            "se_hac": 10.744466955168875,
+            "t_stat": -4.135253397242916,
+            "p_value": 3.5456318024013585e-05,
+            "r_squared": 0.03367889419085557
+          },
+          "lag_4": {
+            "beta": -44.98872307582084,
+            "se_hac": 10.894396140519534,
+            "t_stat": -4.12952884175877,
+            "p_value": 3.635074018210799e-05,
+            "r_squared": 0.034571091534885245
+          },
+          "lag_5": {
+            "beta": -45.935740219093525,
+            "se_hac": 10.836898443353043,
+            "t_stat": -4.238827230799494,
+            "p_value": 2.246904890078985e-05,
+            "r_squared": 0.03608863500408732
+          }
+        },
+        "granger": {
+          "lag_1": {
+            "F": 0.5760404621037583,
+            "p_value": 0.44798370760931117,
+            "df_denom": 1553.0,
+            "df_num": 1
+          },
+          "lag_2": {
+            "F": 0.9984610631753735,
+            "p_value": 0.3686828690378884,
+            "df_denom": 1550.0,
+            "df_num": 2
+          },
+          "lag_3": {
+            "F": 1.1879784774178082,
+            "p_value": 0.3129380889009218,
+            "df_denom": 1547.0,
+            "df_num": 3
+          },
+          "lag_4": {
+            "F": 1.0617824952305683,
+            "p_value": 0.3739843279578209,
+            "df_denom": 1544.0,
+            "df_num": 4
+          },
+          "lag_5": {
+            "F": 1.2308389013198913,
+            "p_value": 0.2920913355110394,
+            "df_denom": 1541.0,
+            "df_num": 5
+          }
+        }
+      }
+    },
+    "H2_USDC_SVB_event": {
+      "event_date": "2023-03-10",
+      "event_window_days": 5,
+      "control_window_days": 30,
+      "event_date_aligned": "2023-03-10",
+      "SHY": {
+        "event_n": 11,
+        "control_n": 50,
+        "event_mean_abs_bps": 37.24058793692286,
+        "control_mean_abs_bps": 13.175865840962658,
+        "ratio": 2.826424341779878,
+        "welch_t_stat": 2.751794755086565,
+        "p_value": 0.019134696327888626,
+        "p_value_bonf_n2": 0.03826939265577725,
+        "block_bootstrap": {
+          "n_boot": 5000,
+          "block_size": 5,
+          "p_value_two_sided": 0.0114,
+          "p_bonf_n2": 0.0228
+        }
+      },
+      "BIL": {
+        "event_n": 11,
+        "control_n": 50,
+        "event_mean_abs_bps": 2.2824563101452906,
+        "control_mean_abs_bps": 1.9490361133263052,
+        "ratio": 1.1710692760073884,
+        "welch_t_stat": 0.6489829236204093,
+        "p_value": 0.5253566987712046,
+        "p_value_bonf_n2": 1.0,
+        "block_bootstrap": {
+          "n_boot": 5000,
+          "block_size": 5,
+          "p_value_two_sided": 0.4402,
+          "p_bonf_n2": 0.8804
+        }
+      }
+    },
+    "H3_GENIUS_Act_event": {
+      "event_date": "2025-07-18",
+      "DGS1MO_RV": {
+        "event_n": 11,
+        "control_n": 50,
+        "event_mean_rv": 3.892111783329604,
+        "control_mean_rv": 2.8077329739374335,
+        "welch_t_stat": 5.155443216223408,
+        "p_value": 9.80678716753924e-06
+      },
+      "DGS3MO_RV": {
+        "event_n": 11,
+        "control_n": 50,
+        "event_mean_rv": 1.010181073480107,
+        "control_mean_rv": 1.8747784898119246,
+        "welch_t_stat": -10.243771543239877,
+        "p_value": 1.6566057177751774e-14
+      },
+      "status": "in_sample"
+    }
+  },
+  "verdict": "NULL_PARTIAL",
+  "verdict_detail": {
+    "H1_pass": false,
+    "H1_passing_lags": [],
+    "H2_pass": true,
+    "H2_passing": [
+      "SHY (t=2.75, p_bonf_welch=0.0383, p_bonf_boot=0.0228)"
+    ]
+  },
+  "runtime_seconds": 0.42
+}
