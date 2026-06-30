@@ -41494,7 +41494,7 @@
     "id": "paper_compliance_scrub_vt_trend_body_v3_kid_remove",
     "task_type": "paper_body",
     "priority": "P1",
-    "status": "in_progress",
+    "status": "succeeded",
     "title": "[論文管線] vt-trend-following body_v3.tex K-id scrub（11 unique visible Internal experiment tags 移除）",
     "description": "Per paper_pipeline_status.json vt-trend-following blocker：codex gate confirms body_v3.tex has 11 unique visible K-ids in abstract/body/conclusion (K1192/K1178/K1376/K1417/K898/K1193/K1457/K1458 等). 機械清掉 K-id phrasings (e.g. 'K1192 canonical', 'K1178 canonical:', 'K1376 task audit') 保留數字。xelatex 重編 → compliance gate verify clean → update paper_pipeline_status.json compliance_scrub_done=true. 老闆 KEEP block 列 P1 queued.",
     "source": "hourly-04-dispatch",
@@ -41514,8 +41514,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-04"
+      },
+      {
+        "ts": "2026-06-30T20:16:10.500294+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
       }
     ],
-    "started_at": "2026-06-30T20:11:35.942400+00:00"
+    "started_at": "2026-06-30T20:11:35.942400+00:00",
+    "completed_at": "2026-06-30T20:16:10.500025+00:00",
+    "result": "vt-trend body_v3.tex K-id scrub complete: 11 unique K-ids removed across 57 violations. xelatex recompile 40pp OK, compliance gate CLEAN (0 findings), paper-update CLI synced Supabase 04:14. paper_pipeline_status.json compliance_scrub_done=true; closes reframing item 2 of 11. commit e54c21136."
   }
 ]
