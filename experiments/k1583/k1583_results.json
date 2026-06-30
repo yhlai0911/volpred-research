@@ -2505,8 +2505,8 @@
   "limitations": [
     "Loss inventory is restricted to a single asset (SPY) and a single OOS sample. The K1258 multi-asset panels are inventoried but NOT pooled (K1355 rule against asset-day stacked inference); cross-market conditional results would require per-asset MCS or a panel-HAC re-design (out of scope here).",
     "Conditional MCS via subsample slicing is a coarse approximation. A proper conditional MCS (Liu, Pelger & Yang 2025 JRSS-B, qkag066) uses kernel-weighted loss differentials; reproducing it would require a separate implementation pass.",
-    "NBER recession sample in OOS is small (61 days, COVID 2020-03 to 2020-04). The recession-regime MCS is therefore underpowered; results should be read as descriptive, not inferential.",
-    "Sequential drift detection here is rolling-window MCS top-1 with a 252-day window and 21-day stride. This is not equivalent to Inoue, Jin & Rossi-style online SPA tests; change-points should be read as visualization aids, not formal break-tests.",
+    "NBER recession sample in OOS is small (61 raw regime-labeled trading days, 43 days actually used in the MCS after joint NaN cleaning; covers only COVID 2020-03 to 2020-04). The recession-regime MCS is therefore underpowered; results should be read as descriptive, not inferential.",
+    "Sequential drift detection here is rolling-window MCS top-1 with a 252-day window and 21-day stride. Of 77 rolling windows, 74/77 retain MCS size=16 and only 3/77 (2021-11-30, 2021-12-30, 2022-01-31; all top_model=B0) shrink to size=15. This is not equivalent to Inoue, Jin & Rossi-style online SPA tests; change-points should be read as visualization aids, not formal break-tests. The reported per-spec p-values are MCS survivor-set stopping p (worst-model bootstrap p at termination), NOT individual per-model scores.",
     "Tie-breaking in 'top-1' uses min mean QLIKE within tied MCS p-values, which biases the winner toward low-mean models; alternative tie-breaks (e.g. mean rank) would shift the timeline marginally."
   ]
 }

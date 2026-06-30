@@ -36858,5 +36858,60 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-06-30T11:19:34.963908"
+  },
+  {
+    "item_id": "2e9fbbd9",
+    "category": "methodology",
+    "title": "K1583: K1380_v4 17-spec SPY MCS — 全 16 retained, p=0.438 identical (NULL)",
+    "content": "K1380_v4 17 個 SPY vol forecast spec（GARCH-X A1-A5/A2f/A4f/A3f/A2n/A4n + MIDAS B1-B3/C2-C3/B0；C1 因 0 valid 排除→16 specs）在 Model Confidence Set 三層分析全 retained：\n1. Unconditional MCS (B=1000, α=0.10)：16/16 全保留，p_set=0.438\n2. Conditional MCS (VIX high≥20 / mid / low<15)：每 regime 同樣 16/16 全保留，p_set ~0.38-0.44\n3. Conditional MCS (NBER recession, N=43)：underpowered\n4. Sequential drift (rolling 252-day, stride 21d, 77 windows)：74/77 size=16, 3/77 (2021-11/12/2022-01) size=15\n\n結論：K1380_v4 17-spec horse race 的 GARCH-X / MIDAS 變體在 QLIKE loss 上**統計不可區分**。\nIdentical p=0.438 不是 bug — 是 MCS 第一輪 worst-model bootstrap p>=α 時整 set 共享 stopping p (mcs.py:225 行為)。\n\nImplication：未來比較 GARCH-X / MIDAS variants 應預期 MCS 難以區分 → effort 投入 conceptually distinct models (jump 軸 / regime-switching / 外生 regressor)，不是 GARCH parameterization 變體。",
+    "evidence": [
+      "experiments/k1583/k1583_results.json",
+      "experiments/k1583/k1583.py",
+      "experiments/k1583/README.md",
+      "experiments/k1583/k1583_conditional_mcs_heatmap.png",
+      "experiments/k1583/k1583_sequential_winner_timeline.png",
+      "src/volpred/stats/mcs.py (HLN 2011 T_R, stationary bootstrap, HAC SE)",
+      "K1380_v4 cached losses: storage/k1380_v4/spy_losses.npy shape (17, 1866)"
+    ],
+    "confidence": 0.82,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1583",
+    "experiment_path": "experiments/k1583/",
+    "k_id": "K1583",
+    "reviewer": "Codex (codex-cli 0.142.3, ChatGPT auth)",
+    "reviewer_source": "codex_review",
+    "codex_review": {
+      "score": 82,
+      "verdict": "CONDITIONAL_PASS",
+      "major_findings": [
+        "artifact 同步：script 更新 limitations 但 results.json 舊版本（已修）",
+        "缺 README.md（已補）"
+      ],
+      "med_findings": [
+        "sequential drift 不應強解讀 — 74/77 size=16, 只 3/77 (2021-11/12/2022-01) 縮到 15"
+      ],
+      "p_value_explanation": "16/16 identical p=0.438 不是 bug — MCS 第一輪 worst-model bootstrap p=0.438 >= α=0.10 → 無淘汰 → 整 set 共享 stopping p (mcs.py:225 行為)",
+      "verified_by": "Codex 手算 worst=A5 T_R≈1.138, manual bootstrap p=0.438 與 results 吻合",
+      "lookahead_check": "PASS — 同日 VIX 用於 ex-post regime 描述 (非預測訊號); rolling MCS at origin t 只用 past 252 days losses; 無 forward leak"
+    },
+    "tags": [
+      "MCS",
+      "Model Confidence Set",
+      "meta-evaluation",
+      "QLIKE",
+      "GARCH-X",
+      "MIDAS",
+      "SPY",
+      "K1380_v4",
+      "NULL",
+      "methodology"
+    ],
+    "references": [
+      "Hansen, Lunde, Nason (2011) — MCS T_R statistic",
+      "Liu, Pelger & Yang (2025) JRSS-B qkag066 — Conditional MCS kernel-weighted",
+      "Hansen (2005) — Sequential SPA",
+      "arXiv 2505.21278 — Online/sequential MCS"
+    ],
+    "created_at": "2026-06-30T12:45:23.926417"
   }
 ]
