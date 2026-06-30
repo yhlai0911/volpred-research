@@ -163,6 +163,100 @@ def test_detect_loop_metric_regression(tmp_path):
     assert all(f.severity == "warn" for f in findings)  # critical via three-strike only
 
 
+def _write_alert_dedup(storage: Path, alerts: dict) -> None:
+    (storage / "ops" / "alert_dedup.json").write_text(
+        json.dumps({"alerts": alerts, "updated_at": NOW.isoformat()}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+
+def test_detect_persistent_alerts_flags_recurring_root_cause(tmp_path):
+    """Same alert_key fired N times across M days → root cause unhandled."""
+    storage = _storage(tmp_path)
+    _write_alert_dedup(
+        storage,
+        {
+            "abc123def456" + "0" * 52: {
+                "title": "Host cron failure detected",
+                "send_count": 26,
+                "first_sent_at": _iso(60),
+                "last_sent_at": _iso(0.5),  # last fire 12h ago — still active
+            }
+        },
+    )
+    findings = dr.detect_persistent_alerts(str(storage), {}, NOW)
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.pattern_type == "persistent_alert"
+    assert f.severity == "warn"  # critical via three-strike only
+    assert f.remediation == "propose_only"
+    assert f.governance_target == "docs/error_log.md"
+    assert "26" in f.evidence[0]  # send_count surfaced
+
+
+def test_detect_persistent_alerts_skips_recovered_past_incident(tmp_path):
+    """Last fire >48h ago = recovered/past incident, no finding."""
+    storage = _storage(tmp_path)
+    _write_alert_dedup(
+        storage,
+        {
+            "k" * 64: {
+                "title": "old spike now quiet",
+                "send_count": 10,
+                "first_sent_at": _iso(30),
+                "last_sent_at": _iso(3),  # 3d ago — beyond 48h recovered cutoff
+            }
+        },
+    )
+    findings = dr.detect_persistent_alerts(str(storage), {}, NOW)
+    assert findings == []
+
+
+def test_detect_persistent_alerts_skips_short_burst(tmp_path):
+    """5 fires in one hour ≠ multi-day persistence — needs M-day span."""
+    storage = _storage(tmp_path)
+    _write_alert_dedup(
+        storage,
+        {
+            "b" * 64: {
+                "title": "transient burst",
+                "send_count": 5,
+                "first_sent_at": _iso(0.04),  # ≈1h ago
+                "last_sent_at": _iso(0.0),
+            }
+        },
+    )
+    findings = dr.detect_persistent_alerts(str(storage), {}, NOW)
+    assert findings == []
+
+
+def test_detect_persistent_alerts_skips_low_send_count(tmp_path):
+    """send_count below threshold = not yet recurring, no finding (filters
+    out one-off ACK / Re: communication noise even if span happened to be wide)."""
+    storage = _storage(tmp_path)
+    _write_alert_dedup(
+        storage,
+        {
+            "c" * 64: {
+                "title": "[ACK] Re: ... one-off reply",
+                "send_count": 2,
+                "first_sent_at": _iso(5),
+                "last_sent_at": _iso(0.1),
+            }
+        },
+    )
+    findings = dr.detect_persistent_alerts(str(storage), {}, NOW)
+    assert findings == []
+
+
+def test_detect_persistent_alerts_fail_open_missing_file(tmp_path):
+    """No alert_dedup.json = fresh storage; detector returns [] not raises."""
+    storage = _storage(tmp_path)
+    # no alert_dedup.json written
+    findings = dr.detect_persistent_alerts(str(storage), {}, NOW)
+    assert findings == []
+
+
 # ---------------------------------------------------------------------------
 # Baseline reconciliation + three-strike
 # ---------------------------------------------------------------------------

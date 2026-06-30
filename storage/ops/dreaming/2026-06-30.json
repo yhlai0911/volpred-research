@@ -1,0 +1,249 @@
+{
+  "schema": "dreaming_review.v1",
+  "generated_at": "2026-06-30T06:15:16.345564+00:00",
+  "window_days": 14,
+  "dry_run": true,
+  "loop_health": {
+    "generated_at": "2026-06-30T06:15:16.345564+00:00",
+    "window_days": 14,
+    "overall": "ok",
+    "first_pass_success": {
+      "status": "low_coverage",
+      "signal": "derived_low_coverage",
+      "window_days": 14,
+      "total_succeeded": 351,
+      "traced": 90,
+      "coverage": 0.256,
+      "coverage_floor": 0.3,
+      "note": "status_history coverage too low to judge first-pass rate honestly; surfacing counts only (info, not a breach)."
+    },
+    "task_outcome": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "success": 351,
+      "fail": 2,
+      "blocked": 22,
+      "other": 11,
+      "success_rate": 0.936
+    },
+    "error_recurrence": {
+      "status": "ok",
+      "signal": "supported",
+      "window_days": 14,
+      "distinct_signatures": 6,
+      "recurring": 2,
+      "recurrence_rate": 0.333,
+      "top_recurring": [
+        {
+          "signature": "hourly_dispatch.log:exit1",
+          "count": 81,
+          "first_seen": "2026-06-23T01:01:02+00:00",
+          "last_seen": "2026-06-29T15:59:17+00:00",
+          "recovered": true,
+          "span_days": 6.62,
+          "known": false
+        },
+        {
+          "signature": "hourly_dispatch.log:exit142",
+          "count": 3,
+          "first_seen": "2026-06-16T20:57:32+00:00",
+          "last_seen": "2026-06-17T16:57:50+00:00",
+          "recovered": true,
+          "span_days": 0.83,
+          "known": true
+        },
+        {
+          "signature": "check_alerts.log:exit1",
+          "count": 1,
+          "first_seen": "2026-06-23T01:00:12+00:00",
+          "last_seen": "2026-06-23T01:00:12+00:00",
+          "recovered": true,
+          "span_days": 0.0,
+          "known": false
+        },
+        {
+          "signature": "git_push_backup.log:exit1",
+          "count": 1,
+          "first_seen": "2026-06-29T23:00:34.396358+00:00",
+          "last_seen": "2026-06-29T23:00:34.396358+00:00",
+          "recovered": true,
+          "span_days": 0.0,
+          "known": false
+        },
+        {
+          "signature": "indicator_arena_daily.log:exit1",
+          "count": 1,
+          "first_seen": "2026-06-19T23:00:16+00:00",
+          "last_seen": "2026-06-19T23:00:16+00:00",
+          "recovered": true,
+          "span_days": 0.0,
+          "known": false
+        }
+      ]
+    },
+    "correction_trend": {
+      "status": "ok",
+      "signal": "supported",
+      "weeks": 4,
+      "weekly_counts_recent_first": [
+        0,
+        1,
+        2,
+        0
+      ],
+      "slope_per_week": -0.1,
+      "trend": "flat",
+      "current_correction_report_high": null,
+      "current_correction_report_medium": null
+    }
+  },
+  "findings": [
+    {
+      "pattern_type": "memory_skill_gap",
+      "signature": "memory_skill_gap:uncodified_process",
+      "severity": "info",
+      "evidence": [
+        "- [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — NotebookLM 作為論文 / 文件 RAG 資料庫；cross-pape",
+        "- [project_loop_engineering_layer.md](project_loop_engineering_layer.md) — 2026-06-29 上線 loop-engineering 閉環：loop-health",
+        "- [project_fb_page_operation.md](project_fb_page_operation.md) — VolPred 粉專(id 61590464616031)由 AI 全權經營+優化+固定巡檢；Chrome 發",
+        "- [project_strategy_lifecycle_standing_directive.md](project_strategy_lifecycle_standing_directive.md) — boss standing d",
+        "- [feedback_website_article_quality_4dim.md](feedback_website_article_quality_4dim.md) — 文章必有 4 維度（深度/可讀性/資訊性/參考性）才能持續吸引",
+        "- [feedback_email_on_major_decisions.md](feedback_email_on_major_decisions.md) — 重要決策後主動 send_alert email 通知用戶（paper sta"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。",
+      "governance_target": ".claude/skills/",
+      "occurrences": 1,
+      "first_seen": "2026-06-30T06:15:16.345564+00:00",
+      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+    },
+    {
+      "pattern_type": "memory_hygiene",
+      "signature": "memory_hygiene:consolidation_review",
+      "severity": "info",
+      "evidence": [
+        "66 條 feedback 記憶（>=45，疑有重疊）"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "feedback 記憶量大：月度做整併/去重/澄清，讓記憶更清楚易用（避免垃圾桶化）。",
+      "governance_target": "memory/",
+      "occurrences": 1,
+      "first_seen": "2026-06-30T06:15:16.345564+00:00",
+      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:a4a7ca551f8626b2",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=a4a7ca551f8626b2 title='Host cron failure detected' send_count=26 span=71.4d (first 2026-04-19T05:41:24.589787+00:00 → last 2026-06-29T16:00:36.944112+00:00)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `Host cron failure detected` fired 26× over 71.4d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-06-30T06:15:16.345564+00:00",
+      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:9a39f7aa6399dfee",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=9a39f7aa6399dfee title='Draft pool below threshold (<4)' send_count=4 span=71.1d (first 2026-04-19T08:00:01.534314+00:00 → last 2026-06-29T11:08:32.335432+00:00)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `Draft pool below threshold (<4)` fired 4× over 71.1d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-06-30T06:15:16.345564+00:00",
+      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:858fd148098b197e",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=858fd148098b197e title='Release pool starved > 6.0h (cron healthy)' send_count=6 span=8.9d (first 2026-06-19T10:13:59.623112+00:00 → last 2026-06-28T09:00:31.840167+00:00)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `Release pool starved > 6.0h (cron healthy)` fired 6× over 8.9d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-06-30T06:15:16.345564+00:00",
+      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:122e34a624da56ed",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=122e34a624da56ed title='gmail-poll 停擺（state 過期未更新）' send_count=4 span=6.9d (first 2026-06-22T18:00:21.687927+00:00 → last 2026-06-29T16:00:33.601088+00:00)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `gmail-poll 停擺（state 過期未更新）` fired 4× over 6.9d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-06-30T06:15:16.345564+00:00",
+      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:c1f20deaaa1f8de6",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=c1f20deaaa1f8de6 title='gmail-poll 停擺（state 過期未更新）' send_count=3 span=5.4d (first 2026-06-22T22:00:43.785468+00:00 → last 2026-06-28T07:00:20.595345+00:00)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `gmail-poll 停擺（state 過期未更新）` fired 3× over 5.4d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-06-30T06:15:16.345564+00:00",
+      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+    },
+    {
+      "pattern_type": "persistent_alert",
+      "signature": "persistent_alert:72b3d80c2fc482ef",
+      "severity": "warn",
+      "evidence": [
+        "alert_key=72b3d80c2fc482ef title='發文脫班（無新文超過 5.0h 門檻）' send_count=4 span=5.2d (first 2026-06-23T02:00:31.850652+00:00 → last 2026-06-28T08:00:17.030758+00:00)"
+      ],
+      "remediation": "propose_only",
+      "remediation_ref": null,
+      "proposal": "Alert `發文脫班（無新文超過 5.0h 門檻）` fired 4× over 5.2d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
+      "governance_target": "docs/error_log.md",
+      "occurrences": 1,
+      "first_seen": "2026-06-30T06:15:16.345564+00:00",
+      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+    }
+  ],
+  "new_findings": [
+    "memory_skill_gap:uncodified_process",
+    "memory_hygiene:consolidation_review",
+    "persistent_alert:a4a7ca551f8626b2",
+    "persistent_alert:9a39f7aa6399dfee",
+    "persistent_alert:858fd148098b197e",
+    "persistent_alert:122e34a624da56ed",
+    "persistent_alert:c1f20deaaa1f8de6",
+    "persistent_alert:72b3d80c2fc482ef"
+  ],
+  "resolved_findings": [],
+  "escalations": [],
+  "auto_remediation": [],
+  "counts": {
+    "findings": 8,
+    "new": 8,
+    "resolved": 0,
+    "escalations": 0,
+    "propose_only": 8,
+    "auto_dispatch_eligible": 0
+  }
+}

@@ -92,6 +92,13 @@ BROAD_REVIEW_KEYWORD_FLOOR = 12
 RECOVERED_THRESHOLD_HOURS = 48
 # Flag when this fraction of recent NON-daily articles are semantic rehashes.
 SEMANTIC_REHASH_WARN_RATE = 0.30
+# Persistent-alert detector thresholds (boss email-12281 / handoff 2026-06-30):
+# same alert_key fired ≥N times across ≥M days = root cause unhandled, surface
+# it before the boss has to. Aligned with detect_repeated_tool_failures' 48h
+# recovered guard so a one-off spike that resolved isn't kept alive.
+PERSISTENT_ALERT_MIN_FIRE_COUNT = 3
+PERSISTENT_ALERT_MIN_SPAN_DAYS = 3
+PERSISTENT_ALERT_RECOVERED_HOURS = 48
 
 # Governance files dreaming may PROPOSE changes to but must NEVER write.
 GOVERNANCE_FILES = (
@@ -490,6 +497,91 @@ def detect_memory_governance(
     return out
 
 
+def detect_persistent_alerts(
+    storage_dir: str, snapshot: dict[str, Any], now: datetime
+) -> list[DreamFinding]:
+    """Same alert_key recurring across multiple days = root cause unhandled.
+
+    Reads `storage/ops/alert_dedup.json` and surfaces any alert where
+    `send_count ≥ PERSISTENT_ALERT_MIN_FIRE_COUNT` AND
+    `(last_sent - first_sent) ≥ PERSISTENT_ALERT_MIN_SPAN_DAYS days` AND
+    `last_sent ≥ now - PERSISTENT_ALERT_RECOVERED_HOURS` (still active).
+    Three-strike across consecutive dreaming runs escalates to critical.
+
+    Why (boss email-12281 / handoff 2026-06-30): historical examples that the
+    system NEVER surfaced and only the boss caught — "Host cron failure"
+    fired 26× over 2 months, "Release pool starved" 6× over 9 days,
+    "hourly-dispatch auth preflight failed" 6× over 16 days. Same key
+    recurring means the upstream condition isn't being fixed; the dreaming
+    slow loop already audits cross-session trails, so this is the right
+    place to surface it. Communication noise (ACK / Re: / boss-report
+    summaries) is naturally filtered: each carries unique content → a unique
+    alert_key with send_count=1, so the threshold excludes them without a
+    title allowlist.
+    """
+    out: list[DreamFinding] = []
+    dedup_path = project_path(storage_dir) / "ops" / "alert_dedup.json"
+    if not dedup_path.exists():
+        return out  # silent-ok: fresh storage or alerts disabled — no signal yet
+    try:
+        raw = json.loads(dedup_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        warn("dreaming", "alert_dedup read failed; skipping", err=str(exc))
+        return out
+    alerts = raw.get("alerts") if isinstance(raw, dict) else None
+    if not isinstance(alerts, dict):
+        return out
+
+    cutoff_recovered = now.astimezone(timezone.utc) - timedelta(
+        hours=PERSISTENT_ALERT_RECOVERED_HOURS
+    )
+    min_span = timedelta(days=PERSISTENT_ALERT_MIN_SPAN_DAYS)
+
+    for key, entry in alerts.items():
+        if not isinstance(entry, dict):
+            continue
+        try:
+            send_count = int(entry.get("send_count") or 0)
+        except (TypeError, ValueError):
+            continue
+        if send_count < PERSISTENT_ALERT_MIN_FIRE_COUNT:
+            continue
+        first = _parse_iso(entry.get("first_sent_at"))
+        last = _parse_iso(entry.get("last_sent_at"))
+        if first is None or last is None:
+            continue
+        if last < cutoff_recovered:
+            continue  # recovered: last fire >48h ago → past incident, not active
+        if (last - first) < min_span:
+            continue  # short burst (e.g. 5 fires in one hour) — not multi-day persistence
+        title = str(entry.get("title") or "")[:80] or key[:16]
+        span_days = (last - first).total_seconds() / 86400
+        out.append(
+            DreamFinding(
+                pattern_type="persistent_alert",
+                signature=f"persistent_alert:{key[:16]}",
+                # warn on sight; critical earned via three-strike persistence
+                # across dreaming runs (same as detect_repeated_tool_failures).
+                severity="warn",
+                evidence=[
+                    f"alert_key={key[:16]} title={title!r} "
+                    f"send_count={send_count} span={span_days:.1f}d "
+                    f"(first {entry.get('first_sent_at')} → last {entry.get('last_sent_at')})"
+                ],
+                remediation="propose_only",
+                proposal=(
+                    f"Alert `{title}` fired {send_count}× over {span_days:.1f}d — same "
+                    f"alert_key recurring = root cause unhandled (fix the source, not "
+                    f"the symptom). Investigate the upstream condition; if sustained "
+                    f"across 3 dreaming runs, open docs/refactor_plan_<topic>.md "
+                    f"(Three-Strike)."
+                ),
+                governance_target="docs/error_log.md",
+            )
+        )
+    return out
+
+
 DETECTORS = (
     detect_repeated_tool_failures,
     detect_recurring_errors,
@@ -498,6 +590,7 @@ DETECTORS = (
     detect_loop_metric_regression,
     detect_semantic_concentration,
     detect_memory_governance,
+    detect_persistent_alerts,
 )
 
 
