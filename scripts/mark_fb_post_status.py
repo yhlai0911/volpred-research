@@ -111,7 +111,7 @@ def _parse_iso_naive(value: str) -> datetime | None:
     try:
         dt = datetime.fromisoformat(s)
     except ValueError:
-        return None
+        return None  # silent-ok: malformed timestamp → None is the parse contract (caller handles None)
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt.astimezone(timezone.utc)
