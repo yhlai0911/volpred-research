@@ -40796,7 +40796,7 @@
     "title": "Paper review (Codex 24h-rule): 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_9839822d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_9839822d",
@@ -40820,9 +40820,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-00"
+      },
+      {
+        "ts": "2026-06-30T16:22:13.146581+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-00"
       }
     ],
-    "started_at": "2026-06-30T16:10:00.705160+00:00"
+    "started_at": "2026-06-30T16:10:00.705160+00:00",
+    "completed_at": "2026-06-30T16:22:13.146301+00:00",
+    "result": "Codex 24h-rule audit FAIL → fixed → re-verified online. 4 處錯誤：(1) Lead REMX/LIT 倍數對調且寫成「跌幅」(實際是 absolute jump, 4/9 反彈); (2) overclaim「勝率不會高/是運氣」超出 event-study scope; (3) 七種中重稀土/川普關稅 K1575 source 無記載; (4) 兩三個極端值實際是 17 個。Sync 到 Supabase 已驗證 (content size 3851→4020, updated_at 16:18 UTC, 4/4 new + 3/3 old absent). Audit log: experiments/K1575/article_audit_mile_9839822d.md"
   },
   {
     "id": "paper_review_mile_68285aa0",
