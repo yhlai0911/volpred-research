@@ -356,7 +356,8 @@
         "log_path": "storage/logs/cron/audit_fb_pipeline.log",
         "description": "6h: FB stale pending audit",
         "host_crontab_managed": true,
-        "piggy_back_enabled": true
+        "piggy_back_enabled": true,
+        "exit_semantics": "findings"
       },
       {
         "id": "fb_ttl_expire",
