@@ -1,0 +1,771 @@
+{
+  "experiment_id": "K1588",
+  "title": "Social connectedness and earnings-announcement volatility reactions",
+  "created_at": "2026-06-30T14:13:01.352455+00:00",
+  "seed": 42,
+  "data": {
+    "data_source": [
+      "HDX Social Connectedness Index us_counties.csv (public county pair SCI snapshot)",
+      "datasets/s-and-p-500-companies constituents.csv (public S&P 500 HQ snapshot)",
+      "OpenStreetMap Nominatim geocoder (public HQ county lookup)",
+      "yfinance daily OHLCV and earnings dates"
+    ],
+    "period": {
+      "start": "2018-01-01",
+      "end": "2026-06-30"
+    },
+    "selection": {
+      "max_tickers": 120,
+      "earnings_limit_per_ticker": 24,
+      "lookback_days": 22,
+      "post_horizon_days": 5,
+      "panic_vix_threshold": 20.0
+    },
+    "diagnostics": {
+      "n_constituents": 503,
+      "n_us_selected": 120,
+      "n_geocoded_ok": 119,
+      "n_missing_county": 0,
+      "n_errors": 1,
+      "n_county_fips_matched": 112
+    },
+    "sample_size": {
+      "tickers": 112,
+      "events": 2663,
+      "profile_rows": 15978,
+      "train_events": 1545,
+      "oos_events": 1118
+    },
+    "coverage": {
+      "median_vix": 18.63999938964844,
+      "share_high_vix": 0.42358242583552386,
+      "county_sci_matched_share": 1.0,
+      "earnings_surprise_available_share": 0.9996244836650394
+    }
+  },
+  "methods": {
+    "target": "daily close-to-close abnormal absolute return and squared return around earnings announcements",
+    "lookahead_guard": "reaction day = first trading day after the earnings timestamp date; pre-baseline excludes t-1 and event day",
+    "main_outcomes": [
+      "jump_log_abs = log(event_abs / pre_mean_abs)",
+      "jump_log_rv = log(event_rv / pre_mean_rv)",
+      "decay_speed_log_abs = log(event_abs / post_1_5_mean_abs)",
+      "decay_speed_log_rv = log(event_rv / post_1_5_mean_rv)"
+    ],
+    "covariates": [
+      "county_sci_z",
+      "earnings surprise pct (winsorized z-score)",
+      "pre-event log absolute return baseline",
+      "sector fixed effects",
+      "sample-year fixed effects",
+      "VIX regime and SCI×VIX interaction"
+    ],
+    "tests": [
+      "cluster-robust OLS by ticker",
+      "cluster bootstrap over tickers (seed=42, 300 reps)",
+      "tercile high-vs-low bootstrap over tickers (seed=42, 1000 reps)",
+      "Welch t-test and tercile split for high SCI vs low SCI",
+      "horizon profile regressions for h=0..5"
+    ]
+  },
+  "model": {
+    "full_sample": {
+      "jump_log_abs": {
+        "params": {
+          "const": -1.500617761054079,
+          "county_sci_z": 0.021331754815857022,
+          "surprise_z": 0.029346158922804566,
+          "pre_log_abs": -0.39892602653420256,
+          "high_vix": 0.04090457682776121,
+          "sci_x_high_vix": 0.052132616333653674,
+          "sector_Consumer Discretionary": 0.4254675954060436,
+          "sector_Consumer Staples": -0.0982151610208002,
+          "sector_Energy": -0.09401747658549497,
+          "sector_Financials": -0.09593557767535127,
+          "sector_Health Care": 0.052861316869282894,
+          "sector_Industrials": -0.1694515862177524,
+          "sector_Information Technology": 0.5092486552728032,
+          "sector_Materials": -0.04465356741472701,
+          "sector_Real Estate": -0.12344545314657411,
+          "sector_Utilities": -0.6065516604525186,
+          "sample_year_2021": -0.16495462141406086,
+          "sample_year_2022": 0.03231036254158884,
+          "sample_year_2023": 0.14940065527291455,
+          "sample_year_2024": 0.18658601083256354,
+          "sample_year_2025": 0.08881826689236902,
+          "sample_year_2026": 0.1064181830529203
+        },
+        "pvalues": {
+          "const": 0.003030608274144793,
+          "county_sci_z": 0.7429852215037288,
+          "surprise_z": 0.2250034674032495,
+          "pre_log_abs": 0.0001862605072972089,
+          "high_vix": 0.5563674809035062,
+          "sci_x_high_vix": 0.38217425726249543,
+          "sector_Consumer Discretionary": 0.07274224454202759,
+          "sector_Consumer Staples": 0.5852157723895014,
+          "sector_Energy": 0.6986667795366489,
+          "sector_Financials": 0.38667014636474484,
+          "sector_Health Care": 0.6789415423903506,
+          "sector_Industrials": 0.3080659599439717,
+          "sector_Information Technology": 0.002060896250663924,
+          "sector_Materials": 0.7712577113594711,
+          "sector_Real Estate": 0.27736933667445884,
+          "sector_Utilities": 0.00040110822871157454,
+          "sample_year_2021": 0.13342356321019896,
+          "sample_year_2022": 0.7394284364417303,
+          "sample_year_2023": 0.174988769035621,
+          "sample_year_2024": 0.08586102123495382,
+          "sample_year_2025": 0.3718699852877444,
+          "sample_year_2026": 0.4097452191814872
+        },
+        "cluster_bootstrap": {
+          "n_boot": 300,
+          "ci": {
+            "county_sci_z": {
+              "lo": -0.10147647398638163,
+              "hi": 0.14455271332368191
+            },
+            "sci_x_high_vix": {
+              "lo": -0.05635499121317124,
+              "hi": 0.15160841821098942
+            }
+          },
+          "boot_sd": {
+            "county_sci_z": 0.06621412296313407,
+            "sci_x_high_vix": 0.054917580275504654
+          },
+          "draws_n": {
+            "county_sci_z": 300,
+            "sci_x_high_vix": 300
+          }
+        },
+        "nobs": 2662,
+        "rsquared": 0.052767789819337385
+      },
+      "decay_speed_log_abs": {
+        "params": {
+          "const": 0.04045010930833024,
+          "county_sci_z": 0.022846053490707133,
+          "surprise_z": 0.03475466667270588,
+          "pre_log_abs": -0.04273214992075785,
+          "high_vix": -0.0019768834625151117,
+          "sci_x_high_vix": 0.02504559022828999,
+          "sector_Consumer Discretionary": 0.2252663898199938,
+          "sector_Consumer Staples": -0.08820500838194334,
+          "sector_Energy": -0.16803310564839247,
+          "sector_Financials": -0.12985797537041505,
+          "sector_Health Care": 0.0261479999389925,
+          "sector_Industrials": -0.20970633274249326,
+          "sector_Information Technology": 0.3477675990013484,
+          "sector_Materials": -0.13742834946733326,
+          "sector_Real Estate": -0.15638388447197699,
+          "sector_Utilities": -0.5321395950011791,
+          "sample_year_2021": -0.06978274800170128,
+          "sample_year_2022": 0.012923490115977682,
+          "sample_year_2023": 0.24774679253658255,
+          "sample_year_2024": 0.2130994398219341,
+          "sample_year_2025": 0.23517047267934063,
+          "sample_year_2026": 0.08738265637270205
+        },
+        "pvalues": {
+          "const": 0.927117412060078,
+          "county_sci_z": 0.7116812214304149,
+          "surprise_z": 0.07273869924311602,
+          "pre_log_abs": 0.6441735585640596,
+          "high_vix": 0.9766795134484711,
+          "sci_x_high_vix": 0.6435152780264927,
+          "sector_Consumer Discretionary": 0.2840606473929854,
+          "sector_Consumer Staples": 0.6028696927605048,
+          "sector_Energy": 0.42641621847619593,
+          "sector_Financials": 0.23279569396393074,
+          "sector_Health Care": 0.8290555323798114,
+          "sector_Industrials": 0.18904476929672354,
+          "sector_Information Technology": 0.026598252701004896,
+          "sector_Materials": 0.21139341156176727,
+          "sector_Real Estate": 0.11390971274131141,
+          "sector_Utilities": 0.0013010086435287795,
+          "sample_year_2021": 0.530625525119777,
+          "sample_year_2022": 0.8993073118957498,
+          "sample_year_2023": 0.02665500254499177,
+          "sample_year_2024": 0.05009954318151563,
+          "sample_year_2025": 0.022390687386312766,
+          "sample_year_2026": 0.519567262088207
+        },
+        "cluster_bootstrap": {
+          "n_boot": 300,
+          "ci": {
+            "county_sci_z": {
+              "lo": -0.08952089145295976,
+              "hi": 0.15399796243404637
+            },
+            "sci_x_high_vix": {
+              "lo": -0.08770753715903243,
+              "hi": 0.11946761423069391
+            }
+          },
+          "boot_sd": {
+            "county_sci_z": 0.06470202832748943,
+            "sci_x_high_vix": 0.052452646283554734
+          },
+          "draws_n": {
+            "county_sci_z": 300,
+            "sci_x_high_vix": 300
+          }
+        },
+        "nobs": 2662,
+        "rsquared": 0.035469220262315915
+      },
+      "jump_log_rv": {
+        "params": {
+          "const": -3.5096588660699006,
+          "county_sci_z": 0.06336310748071339,
+          "surprise_z": 0.054504635271781635,
+          "pre_log_abs": -0.8268123057956729,
+          "high_vix": -0.012624678851397814,
+          "sci_x_high_vix": 0.0742151068796265,
+          "sector_Consumer Discretionary": 0.8500287445834668,
+          "sector_Consumer Staples": -0.20633472162808786,
+          "sector_Energy": -0.21136039637452209,
+          "sector_Financials": -0.21568685353712125,
+          "sector_Health Care": 0.06799468113818685,
+          "sector_Industrials": -0.37805079818237886,
+          "sector_Information Technology": 1.0254368092571933,
+          "sector_Materials": -0.09990014645185152,
+          "sector_Real Estate": -0.24082071483048512,
+          "sector_Utilities": -1.0971691007304538,
+          "sample_year_2021": -0.3285029091270977,
+          "sample_year_2022": 0.10440467421379146,
+          "sample_year_2023": 0.22412576615806265,
+          "sample_year_2024": 0.2733636543656932,
+          "sample_year_2025": 0.05469959154873269,
+          "sample_year_2026": 0.12948217459001338
+        },
+        "pvalues": {
+          "const": 0.0005576173551822897,
+          "county_sci_z": 0.6143764683977868,
+          "surprise_z": 0.25869427218618224,
+          "pre_log_abs": 0.00011039816982699646,
+          "high_vix": 0.9181415184642874,
+          "sci_x_high_vix": 0.4979947179001074,
+          "sector_Consumer Discretionary": 0.07774364204043432,
+          "sector_Consumer Staples": 0.5712203609902711,
+          "sector_Energy": 0.660980799310557,
+          "sector_Financials": 0.3287906037840126,
+          "sector_Health Care": 0.7903806035480216,
+          "sector_Industrials": 0.25459681693022695,
+          "sector_Information Technology": 0.0008765372978708416,
+          "sector_Materials": 0.7383333209860017,
+          "sector_Real Estate": 0.2897812972992606,
+          "sector_Utilities": 7.96427433523928e-05,
+          "sample_year_2021": 0.12546156597772265,
+          "sample_year_2022": 0.5811367009238022,
+          "sample_year_2023": 0.2957999930807621,
+          "sample_year_2024": 0.1920776259559842,
+          "sample_year_2025": 0.780619118517042,
+          "sample_year_2026": 0.614719460398943
+        },
+        "nobs": 2662,
+        "rsquared": 0.05550982464574794
+      },
+      "decay_speed_log_rv": {
+        "params": {
+          "const": -0.24270466603046295,
+          "county_sci_z": 0.06818429063851535,
+          "surprise_z": 0.06253647199212248,
+          "pre_log_abs": -0.08994086792735156,
+          "high_vix": -0.07284356784529729,
+          "sci_x_high_vix": 0.028680777896791715,
+          "sector_Consumer Discretionary": 0.43079407595272917,
+          "sector_Consumer Staples": -0.2144221124752059,
+          "sector_Energy": -0.357898575699721,
+          "sector_Financials": -0.2817047532926795,
+          "sector_Health Care": 0.04097269423612804,
+          "sector_Industrials": -0.4841857732875879,
+          "sector_Information Technology": 0.6972286984209201,
+          "sector_Materials": -0.2921759038277657,
+          "sector_Real Estate": -0.3233118026686695,
+          "sector_Utilities": -0.9537089611460212,
+          "sample_year_2021": -0.10775063459416825,
+          "sample_year_2022": 0.058133730255159416,
+          "sample_year_2023": 0.453321340501802,
+          "sample_year_2024": 0.3588628298856753,
+          "sample_year_2025": 0.4075381552432301,
+          "sample_year_2026": 0.13280664390508823
+        },
+        "pvalues": {
+          "const": 0.784382198316613,
+          "county_sci_z": 0.5703893944646885,
+          "surprise_z": 0.10904777893427213,
+          "pre_log_abs": 0.6264038647936656,
+          "high_vix": 0.5450615969382375,
+          "sci_x_high_vix": 0.7761357105968163,
+          "sector_Consumer Discretionary": 0.3136279703598418,
+          "sector_Consumer Staples": 0.5232909619309105,
+          "sector_Energy": 0.43557721605944544,
+          "sector_Financials": 0.18993579536983285,
+          "sector_Health Care": 0.8649277582902115,
+          "sector_Industrials": 0.12992757420209505,
+          "sector_Information Technology": 0.019656766750591737,
+          "sector_Materials": 0.17952411062694862,
+          "sector_Real Estate": 0.11346211149479288,
+          "sector_Utilities": 0.00034708687137865237,
+          "sample_year_2021": 0.6167524460770701,
+          "sample_year_2022": 0.7711587143041359,
+          "sample_year_2023": 0.03665899365371219,
+          "sample_year_2024": 0.09166279143385965,
+          "sample_year_2025": 0.04605650100310819,
+          "sample_year_2026": 0.6179259650114528
+        },
+        "nobs": 2662,
+        "rsquared": 0.03584589737713173
+      }
+    },
+    "train_split": {
+      "train_end": "2023-12-31",
+      "jump_log_abs": {
+        "params": {
+          "const": -1.4372554771077142,
+          "county_sci_z": -0.00888464408335511,
+          "surprise_z": 0.022805104079303196,
+          "pre_log_abs": -0.36657757727380336,
+          "high_vix": 0.07565934400207924,
+          "sci_x_high_vix": 0.0619896734136656,
+          "sector_Consumer Discretionary": 0.537669707954026,
+          "sector_Consumer Staples": 0.003360958120716351,
+          "sector_Energy": -0.022378836142623343,
+          "sector_Financials": 0.019669168893057837,
+          "sector_Health Care": 0.002812786506169257,
+          "sector_Industrials": -0.1296300721481164,
+          "sector_Information Technology": 0.452716569783124,
+          "sector_Materials": 0.21511584824311988,
+          "sector_Real Estate": -0.19208654045886178,
+          "sector_Utilities": -0.522772565788815,
+          "sample_year_2021": -0.13720926597455174,
+          "sample_year_2022": 0.023995830053301408,
+          "sample_year_2023": 0.17728379538460096
+        },
+        "pvalues": {
+          "const": 0.022165470104692966,
+          "county_sci_z": 0.9130363931802649,
+          "surprise_z": 0.5311209791233861,
+          "pre_log_abs": 0.005135115952346319,
+          "high_vix": 0.5535316288350021,
+          "sci_x_high_vix": 0.49337350559149995,
+          "sector_Consumer Discretionary": 0.026604142122796656,
+          "sector_Consumer Staples": 0.9855405679963927,
+          "sector_Energy": 0.8950075960439947,
+          "sector_Financials": 0.8675754208560869,
+          "sector_Health Care": 0.983946043159336,
+          "sector_Industrials": 0.4123687235733332,
+          "sector_Information Technology": 0.02399328605905698,
+          "sector_Materials": 0.1967804998549899,
+          "sector_Real Estate": 0.08751136939334211,
+          "sector_Utilities": 0.017335540780003315,
+          "sample_year_2021": 0.2871870175104375,
+          "sample_year_2022": 0.806191655616789,
+          "sample_year_2023": 0.2247221503470085
+        },
+        "nobs": 1544,
+        "rsquared": 0.04515275346275771
+      },
+      "decay_speed_log_abs": {
+        "params": {
+          "const": 0.05060354835759079,
+          "county_sci_z": -0.00480921434539743,
+          "surprise_z": 0.03911830465388999,
+          "pre_log_abs": -0.04441451369293503,
+          "high_vix": -0.013511300793827424,
+          "sci_x_high_vix": 0.03843375576331823,
+          "sector_Consumer Discretionary": 0.3219607106494171,
+          "sector_Consumer Staples": -0.08246270092011626,
+          "sector_Energy": -0.17844743975292054,
+          "sector_Financials": -0.07668680573008044,
+          "sector_Health Care": -0.07024131589760974,
+          "sector_Industrials": -0.21967544485888957,
+          "sector_Information Technology": 0.2839031438573937,
+          "sector_Materials": 0.05109133726827547,
+          "sector_Real Estate": -0.27776994717438214,
+          "sector_Utilities": -0.4983621877212842,
+          "sample_year_2021": -0.08042658456859729,
+          "sample_year_2022": 0.010442851956199688,
+          "sample_year_2023": 0.2349978951209849
+        },
+        "pvalues": {
+          "const": 0.9289133767054019,
+          "county_sci_z": 0.9513383904719906,
+          "surprise_z": 0.20521932504573892,
+          "pre_log_abs": 0.7114859424174425,
+          "high_vix": 0.913704673882633,
+          "sci_x_high_vix": 0.6490003536543802,
+          "sector_Consumer Discretionary": 0.16309353772141266,
+          "sector_Consumer Staples": 0.6356963484853122,
+          "sector_Energy": 0.2566153938372021,
+          "sector_Financials": 0.4847549820588867,
+          "sector_Health Care": 0.5820600889685106,
+          "sector_Industrials": 0.15166870467814664,
+          "sector_Information Technology": 0.14756691336224315,
+          "sector_Materials": 0.755934161869427,
+          "sector_Real Estate": 0.005901845828197552,
+          "sector_Utilities": 0.016617191923567552,
+          "sample_year_2021": 0.5314870823672002,
+          "sample_year_2022": 0.9188797060998516,
+          "sample_year_2023": 0.10936130817227356
+        },
+        "nobs": 1544,
+        "rsquared": 0.03446410650881526
+      },
+      "oos_jump_log_abs": {
+        "params": {
+          "const": -1.6591418377631117,
+          "county_sci_z": 0.06657396615856268,
+          "surprise_z": 0.06606265841647001,
+          "pre_log_abs": -0.4899091475649224,
+          "high_vix": 0.02707439543170819,
+          "sci_x_high_vix": 0.006312489560537343,
+          "sector_Consumer Discretionary": 0.24266421750906664,
+          "sector_Consumer Staples": -0.236847708286259,
+          "sector_Energy": -0.20388536053090828,
+          "sector_Financials": -0.26235575285555146,
+          "sector_Health Care": 0.12620724213861628,
+          "sector_Industrials": -0.22257698297104664,
+          "sector_Information Technology": 0.6091131169560535,
+          "sector_Materials": -0.41538320273765417,
+          "sector_Real Estate": -0.03768609988028168,
+          "sector_Utilities": -0.7179633876953464,
+          "sample_year_2025": -0.07616534097982691,
+          "sample_year_2026": -0.05267303325148788
+        },
+        "pvalues": {
+          "const": 0.006529298998006493,
+          "county_sci_z": 0.32359273139785405,
+          "surprise_z": 0.08096502905420401,
+          "pre_log_abs": 0.00015071606507914857,
+          "high_vix": 0.7511800207871001,
+          "sci_x_high_vix": 0.9413306745808052,
+          "sector_Consumer Discretionary": 0.32902581178115997,
+          "sector_Consumer Staples": 0.24913441555106697,
+          "sector_Energy": 0.5990908181054331,
+          "sector_Financials": 0.059573148030959776,
+          "sector_Health Care": 0.38463120304532383,
+          "sector_Industrials": 0.2908005756123625,
+          "sector_Information Technology": 0.0010365246374454836,
+          "sector_Materials": 0.0673760472093901,
+          "sector_Real Estate": 0.830907021660185,
+          "sector_Utilities": 7.148333806935296e-07,
+          "sample_year_2025": 0.3474067843415901,
+          "sample_year_2026": 0.6184975384801845
+        },
+        "nobs": 1118
+      },
+      "oos_decay_speed_log_abs": {
+        "params": {
+          "const": 0.04922384335775429,
+          "county_sci_z": 0.06134087686507959,
+          "surprise_z": 0.04666480635949928,
+          "pre_log_abs": -0.0843321335883558,
+          "high_vix": 0.01633068677904194,
+          "sci_x_high_vix": -0.023206471820855723,
+          "sector_Consumer Discretionary": 0.0940859440451291,
+          "sector_Consumer Staples": -0.09433457314117885,
+          "sector_Energy": -0.14031416918741502,
+          "sector_Financials": -0.19676070692892092,
+          "sector_Health Care": 0.16684322559884282,
+          "sector_Industrials": -0.186196743364103,
+          "sector_Information Technology": 0.45946652529053933,
+          "sector_Materials": -0.39442444777971986,
+          "sector_Real Estate": 0.014301269963531676,
+          "sector_Utilities": -0.5687598540810246,
+          "sample_year_2025": 0.029005263456279684,
+          "sample_year_2026": -0.11502425195347266
+        },
+        "pvalues": {
+          "const": 0.9283459302169856,
+          "county_sci_z": 0.342687664536118,
+          "surprise_z": 0.13349514519320466,
+          "pre_log_abs": 0.46472219659839364,
+          "high_vix": 0.8520203513549364,
+          "sci_x_high_vix": 0.7882294169924163,
+          "sector_Consumer Discretionary": 0.6713810080253035,
+          "sector_Consumer Staples": 0.644322087141413,
+          "sector_Energy": 0.6797593860252796,
+          "sector_Financials": 0.15611407600094415,
+          "sector_Health Care": 0.27699698151621965,
+          "sector_Industrials": 0.36210867862174156,
+          "sector_Information Technology": 0.006244783080443595,
+          "sector_Materials": 0.041692286759092666,
+          "sector_Real Estate": 0.9239468169013761,
+          "sector_Utilities": 0.00013548947321895044,
+          "sample_year_2025": 0.7210395102612732,
+          "sample_year_2026": 0.27152247825962705
+        },
+        "nobs": 1118
+      }
+    },
+    "horizon_profile": {
+      "abs": [
+        {
+          "h": 0,
+          "nobs": 2662,
+          "coef_sci": 0.021331754815857022,
+          "t_sci": 0.3279027141476053,
+          "p_sci": 0.7429852215037288,
+          "coef_high_vix": 0.04090457682776121,
+          "coef_interaction": 0.052132616333653674,
+          "rsquared": 0.052767789819337385
+        },
+        {
+          "h": 1,
+          "nobs": 2662,
+          "coef_sci": -0.08264595838301372,
+          "t_sci": -1.4825828341184077,
+          "p_sci": 0.138185280666261,
+          "coef_high_vix": 0.09352009420967226,
+          "coef_interaction": 0.06368854319170413,
+          "rsquared": 0.02562467715155403
+        },
+        {
+          "h": 2,
+          "nobs": 2662,
+          "coef_sci": 0.03511643933036102,
+          "t_sci": 0.9622332563127568,
+          "p_sci": 0.3359324472363324,
+          "coef_high_vix": 0.041296959740463005,
+          "coef_interaction": 0.012641763657497215,
+          "rsquared": 0.017231519127269168
+        },
+        {
+          "h": 3,
+          "nobs": 2662,
+          "coef_sci": -0.012459433219547992,
+          "t_sci": -0.3534320034367353,
+          "p_sci": 0.7237645966991659,
+          "coef_high_vix": -0.019219487556630242,
+          "coef_interaction": 0.09964361515029299,
+          "rsquared": 0.01976836994211395
+        },
+        {
+          "h": 4,
+          "nobs": 2662,
+          "coef_sci": -0.0027106170268211063,
+          "t_sci": -0.07191757705297663,
+          "p_sci": 0.942667501804626,
+          "coef_high_vix": 0.09451526759525976,
+          "coef_interaction": -0.05155291353818674,
+          "rsquared": 0.018888704047884564
+        },
+        {
+          "h": 5,
+          "nobs": 2662,
+          "coef_sci": 0.06783321926847595,
+          "t_sci": 1.7336347384779007,
+          "p_sci": 0.08298291267950157,
+          "coef_high_vix": -0.027101353427224983,
+          "coef_interaction": 0.03950812372520142,
+          "rsquared": 0.021896631305743597
+        }
+      ],
+      "rv": [
+        {
+          "h": 0,
+          "nobs": 2662,
+          "coef_sci": 0.06336310748071339,
+          "t_sci": 0.5038362264291812,
+          "p_sci": 0.6143764683977868,
+          "coef_high_vix": -0.012624678851397814,
+          "coef_interaction": 0.0742151068796265,
+          "rsquared": 0.05550982464574794
+        },
+        {
+          "h": 1,
+          "nobs": 2662,
+          "coef_sci": -0.13296954367702157,
+          "t_sci": -1.5678059896734247,
+          "p_sci": 0.11692641663675886,
+          "coef_high_vix": 0.10846107890811002,
+          "coef_interaction": 0.06986184876502595,
+          "rsquared": 0.027213876494597722
+        },
+        {
+          "h": 2,
+          "nobs": 2662,
+          "coef_sci": 0.052864051463661355,
+          "t_sci": 0.7759521416934695,
+          "p_sci": 0.4377772440727554,
+          "coef_high_vix": 0.06671898760701651,
+          "coef_interaction": -0.006619093112568367,
+          "rsquared": 0.02351701547482965
+        },
+        {
+          "h": 3,
+          "nobs": 2662,
+          "coef_sci": -0.0059406403827411795,
+          "t_sci": -0.0976737243188412,
+          "p_sci": 0.9221913807253298,
+          "coef_high_vix": -0.06761627250812259,
+          "coef_interaction": 0.13015171253395036,
+          "rsquared": 0.026303466310851342
+        },
+        {
+          "h": 4,
+          "nobs": 2662,
+          "coef_sci": 0.008079448677369674,
+          "t_sci": 0.11294115686171138,
+          "p_sci": 0.9100772066034519,
+          "coef_high_vix": 0.13077292433840426,
+          "coef_interaction": -0.0899118171838458,
+          "rsquared": 0.022564291255276037
+        },
+        {
+          "h": 5,
+          "nobs": 2662,
+          "coef_sci": 0.12753884721460998,
+          "t_sci": 1.7992570500616647,
+          "p_sci": 0.07197802872177865,
+          "coef_high_vix": -0.08548686149630103,
+          "coef_interaction": 0.05633663426671812,
+          "rsquared": 0.02822384290258484
+        }
+      ]
+    }
+  },
+  "results": {
+    "jump_tercile_summary": [
+      {
+        "tercile": "Low SCI",
+        "n": 917,
+        "mean": 0.44276511131144136,
+        "median": 0.5475374648756971,
+        "std": 1.3348027179042303
+      },
+      {
+        "tercile": "Mid SCI",
+        "n": 858,
+        "mean": 0.25419215023688346,
+        "median": 0.465837722643346,
+        "std": 1.2152080319109568
+      },
+      {
+        "tercile": "High SCI",
+        "n": 888,
+        "mean": 0.26733498564218394,
+        "median": 0.4970315965273133,
+        "std": 1.428946776833675
+      }
+    ],
+    "decay_tercile_summary": [
+      {
+        "tercile": "Low SCI",
+        "n": 917,
+        "mean": 0.42673460432036836,
+        "median": 0.5743143319310493,
+        "std": 1.3284634382521308
+      },
+      {
+        "tercile": "Mid SCI",
+        "n": 858,
+        "mean": 0.21811487809361121,
+        "median": 0.42483374791922884,
+        "std": 1.2279414280191447
+      },
+      {
+        "tercile": "High SCI",
+        "n": 888,
+        "mean": 0.22787214008630471,
+        "median": 0.4478366791026183,
+        "std": 1.4311163817907602
+      }
+    ],
+    "welch_tests": {
+      "jump_log_abs_high_vs_low": {
+        "t": -2.6933881350215034,
+        "p": 0.00713918511763751,
+        "mean_diff": -0.17543012566925742
+      },
+      "decay_speed_log_abs_high_vs_low": {
+        "t": -3.0572650111534942,
+        "p": 0.0022668575853522313,
+        "mean_diff": -0.19886246423406365
+      }
+    },
+    "bootstrap_group_diff": {
+      "jump_log_abs": {
+        "n_boot": 1000,
+        "draws_n": 1000,
+        "ci": {
+          "lo": -0.453465346752832,
+          "hi": 0.09499015830019912
+        },
+        "boot_sd": 0.1407570907748822
+      },
+      "decay_speed_log_abs": {
+        "n_boot": 1000,
+        "draws_n": 1000,
+        "ci": {
+          "lo": -0.4431520045616296,
+          "hi": 0.039690014395813225
+        },
+        "boot_sd": 0.1273640607908992
+      }
+    },
+    "interpretive_cut": {
+      "jump_sign_expected": "positive",
+      "decay_sign_expected": "positive"
+    }
+  },
+  "verdict": "NULL",
+  "limitations": [
+    "SCI is a contemporaneous county-pair snapshot, not a time-varying panel; this is an associational proxy, not causal identification.",
+    "HQ county is inferred from current public headquarters locations and geocoded via Nominatim; historical relocations are not tracked.",
+    "Earnings timestamps from yfinance are used as the announcement date; the market reaction is aligned to the first trading day after the timestamp date to avoid lookahead, but exact pre/post-open timing is unavailable.",
+    "Daily close-to-close |log return| and squared return are proxies for realized volatility; intraday RV would be cleaner but is not publicly available here at scale.",
+    "The selected universe is a public S&P 500 snapshot trimmed to US-headquartered tickers with available earnings history; coverage is broad but not exhaustive."
+  ],
+  "literature": [
+    {
+      "authors": "Bailey, Kuchler, Stroebel, and Wong",
+      "year": 2018,
+      "title": "Social Connectedness: Measurement, Determinants, and Effects",
+      "venue": "Journal of Economic Perspectives",
+      "url": "https://www.aeaweb.org/articles?id=10.1257/jep.32.3.259",
+      "relevance": "Foundational SCI paper and the public county-pair network used here as the connectivity proxy."
+    },
+    {
+      "authors": "Hirshleifer, Peng, and Wang",
+      "year": 2025,
+      "title": "Social Networks and Market Reactions to Earnings News",
+      "venue": "Review of Financial Studies",
+      "url": "https://academic.oup.com/rfs",
+      "relevance": "Closest finance target: social-network connectedness and earnings-announcement market reactions."
+    },
+    {
+      "authors": "Sui and Wang",
+      "year": 2025,
+      "title": "Social transmission bias: evidence from an online investor platform",
+      "venue": "Review of Finance",
+      "url": "https://academic.oup.com/rof",
+      "relevance": "Related social-transmission mechanism for post-news trading and volatility spillovers."
+    }
+  ],
+  "artifacts": {
+    "hq_geocodes": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/data/hq_county_geocodes.csv",
+    "hq_with_sci": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/data/hq_with_sci.csv",
+    "county_centrality": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/data/sci_us_county_centrality.csv",
+    "prices": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/data/prices_long.csv",
+    "earnings_dates": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/data/earnings_dates.csv",
+    "event_panel": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/data/event_panel.csv",
+    "event_profile_panel": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/data/event_profile_panel.csv",
+    "figures": [
+      "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/figures/k1588_event_profile_by_sci_tercile.png",
+      "/Users/yhlai0911/Desktop/volpred-research/experiments/k1588/figures/k1588_sci_horizon_coefficients.png"
+    ]
+  },
+  "verdict_reason": {
+    "jump_log_abs_sci_coef": 0.021331754815857022,
+    "jump_log_abs_sci_pvalue": 0.7429852215037288,
+    "decay_speed_log_abs_sci_coef": 0.022846053490707133,
+    "decay_speed_log_abs_sci_pvalue": 0.7116812214304149,
+    "oos_jump_log_abs_sci_coef": 0.06657396615856268,
+    "oos_decay_speed_log_abs_sci_coef": 0.06134087686507959
+  }
+}
