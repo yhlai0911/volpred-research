@@ -43,6 +43,24 @@
           "Identify VT channel independently of GJR construction; report economic magnitudes/turnover/costs/utility not just correlations"
         ],
         "cover_letter_stale_gold_tstat_fixed": true
+      },
+      "multi_round_review": {
+        "date": "2026-07-01",
+        "reviewer": "codex (concurrent agent 7d548f099)",
+        "overall": "not converged — all 3 passes FAIL_MAJOR_REVISION",
+        "passes": {
+          "latex_academic": "FAIL_MAJOR_REVISION (8H/7M)",
+          "citation_verification": "FAIL_MAJOR_REVISION (3H/6M)",
+          "jbf_submission_gate": "FAIL_MAJOR_REVISION (5H/4M)"
+        },
+        "report_dir": "paper/leverage-direction/review_history/multi_round_20260701/",
+        "key_jbf_findings": [
+          "main file not double-blind (needs anonymized main + separate title page)",
+          "highlights too long + time-zone bullet not in manuscript",
+          "cover letter claims 3 contributions vs manuscript's 2; JBF doesn't request suggested reviewers",
+          "OOS/sample-map not submission-grade",
+          "corroborates CONTRIBUTION BORDERLINE"
+        ]
       }
     },
     {
@@ -52,7 +70,9 @@
       "stage_entered_at": "2026-07-01T00:00:00+08:00",
       "last_advance_at": "2026-07-01T00:00:00+08:00",
       "blocker": "awaiting compliance scrub then owner submit decision",
-      "owner_decision_pending": true
+      "owner_decision_pending": true,
+      "compliance_scrub_done": true,
+      "compliance_note": "gate CLEAN (2026-07-01): submission set has no VolPred/AI/co-author/fabricated-ack; 8 main.tex K-ids are %-comment source annotations (don't render). Still needs contribution-gate review before arXiv (same as leverage-direction)."
     },
     {
       "paper": "prg-periodic-garch",
