@@ -77,13 +77,13 @@ Per-asset windowed identity holds exactly because contributions are summed in ar
 | TSMOM-hedge contribution (full window) | **+0.030** |
 | TSMOM-hedge contribution (TSMOM<0 days only) | **+0.300** |
 
-Mechanical rebound hedge DID contribute positively (median +3.0pp full / +30pp on TSMOM<0 days; SPY = +12pp full, QQQ = +56pp on TSMOM<0 days). But VIX-timing component lost money during the trough window (median −7.8pp), so PureVT overall still underperformed BH (median −4.3pp). **Gemini H1 concern PARTIALLY validated for 2020-03**: mechanical hedge is empirically present and material, but PureVT does not actually "beat" BH in the trough window — its MDD retention comes from not falling as deeply at the BH trough, not from rebounding faster.
+Mechanical rebound hedge DID contribute positively (median +3.0pp full / +30pp on TSMOM<0 days; SPY = +12pp full, QQQ = +56pp on TSMOM<0 days). But VIX-timing component lost money during the trough window (median −7.8pp), so PureVT overall still underperformed BH (median −4.3pp). **Gemini H1 concern PARTIALLY validated for 2020-03**: mechanical hedge is empirically present and material, but PureVT does not actually "beat" BH in the trough window. The within-window arithmetic-sum negative result is consistent with PureVT's MDD retention coming from a shallower drawdown peak rather than from a faster rebound; however, K1458 does not directly decompose the synchronized PureVT/BH MDD path, so the "shallower peak, not faster rebound" reading is an **inference** from window-summed arithmetic contributions, not a direct path-level measurement.
 
 ### Narrative implication for Paper 6 v6 body.tex
 
 The original body v3 caveat ("MDD improvement can arise mechanically when the hedge trims exposure during rebound windows") is empirically validated for 2020 but NOT for 2009. Body should be revised to acknowledge:
 1. K1458 Table: per-trough, per-asset decomposition into VIX-timing vs TSMOM-hedge contributions.
-2. PureVT does NOT outperform BH in either trough window — MDD retention is about lower drawdown peak depth, not rebound-period profit.
+2. PureVT does NOT outperform BH in either trough window (window-summed arithmetic returns are negative or near-zero). The interpretation that this reflects a shallower PureVT drawdown peak (rather than a faster rebound) is an **inference** consistent with the window arithmetic, not a direct synchronized-path measurement; body text should phrase it accordingly.
 3. Mechanical rebound hedge is empirically present in 2020 (median TSMOM-hedge contribution on TSMOM<0 days = +30pp; 4/5 assets non-zero hedge) but **largely absent in 2009** for 3/5 assets, consistent with rolling-beta being clipped to 0 in early sample (see Beta-clip evidence above). The 2/5 unclipped 2009 assets show small offsetting contributions (50/50 +2.1pp, QQQ −3.5pp), so the asymmetry between 2009 and 2020 reflects mechanical hedge availability, not just market dynamics. Body should note this conditional caveat.
 
 ## Provenance
