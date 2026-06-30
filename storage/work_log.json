@@ -12444,5 +12444,12 @@
     "actor": "hourly-01",
     "summary": "P1 [誠信] erratum task 驗證為 FALSE POSITIVE。mile_48c8328b 文章 2026-06-15 in-place corrected (errata 紀錄完整、title='K189 修正版'、內文 5/6 Bonferroni-sig 與 results.json 一致)。paper-audit workflow 2026-07-01 漏 check errata 才誤開 task。Close + 加 platform_ops follow-up 修 audit errata-gate。",
     "result": "succeeded"
+  },
+  {
+    "task_type": "experiment",
+    "task_id": "research_rough_volatility_arrv_fractional_ou_joe_2023_fou",
+    "ts": "2026-06-30T19:05:26.717220+00:00",
+    "status": "succeeded",
+    "result": "Completed rough-volatility ARRV/fOU 5-min RV race. TAIFEX formal OOS n=488: HARQ best QLIKE=0.2269 but t=-1.87 vs HAR, no Harvey pass; ARRV/fOU-lite lose. SPY 2026 diagnostic n=40 also no rough-model win. Codex review PASS_WITH_LIMITATIONS; knowledge.json updated."
   }
 ]

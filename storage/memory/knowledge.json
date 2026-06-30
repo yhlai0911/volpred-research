@@ -36999,5 +36999,37 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-07-01T00:28:39.690224"
+  },
+  {
+    "item_id": "fae873b0",
+    "category": "experiment_result",
+    "verdict": "PASS_WITH_LIMITATIONS",
+    "experiment_id": "research_rough_volatility_arrv_fractional_ou_joe_2023_fou",
+    "reviewer": "Codex CLI primary path",
+    "reviewer_source": "experiments/research_rough_volatility_arrv_fractional_ou_joe_2023_fou/codex_review.md",
+    "content": "Rough volatility / ARRV / fractional OU 5-minute RV race is a bounded NULL result. TAIFEX TX day-session 5-min RV sample: 2017-05-16..2021-12-30, 1,138 trading days; formal OOS 2020-01-02..2021-12-30, n=488. Roughness is visible in the daily sequence of 5-min RV estimates: frequency-ratio H=0.0545 and variogram H=0.1428 (R2=0.9794), both <0.5. Forecast race on 5-min RV target (QLIKE): HAR=0.2444, HARQ=0.2269, ARRV=0.2697, fOU_lite=0.4980. DM vs HAR: HARQ t=-1.87 (not Harvey), ARRV t=+1.35, fOU_lite t=+2.17; no rough proxy beats HAR/HARQ under |t|>3. High-VIX subgroup (VIX>=20, n=291) also fails: HARQ t=-1.65 and rough proxies lose. SPY local 5-min archive is diagnostic only: 114 raw files / 113 valid days, OOS diagnostic n=40, HARQ best but not significant, rough proxies do not beat HAR. Interpretation: measurement-versus-allocation again. High-frequency RV reveals low-H roughness, but these transparent ARRV/fOU-lite proxies do not break the HAR/HARQ forecasting ceiling. Scope limits: proxy rough models, TAIFEX day-session only, ex-post high-VIX split, SPY short sample; not a rejection of full structural rough-volatility models.",
+    "evidence": [
+      "experiments/research_rough_volatility_arrv_fractional_ou_joe_2023_fou/research_rough_volatility_arrv_fractional_ou_joe_2023_fou.py",
+      "experiments/research_rough_volatility_arrv_fractional_ou_joe_2023_fou/research_rough_volatility_arrv_fractional_ou_joe_2023_fou_results.json",
+      "experiments/research_rough_volatility_arrv_fractional_ou_joe_2023_fou/README.md",
+      "experiments/research_rough_volatility_arrv_fractional_ou_joe_2023_fou/codex_review.md",
+      "experiments/research_rough_volatility_arrv_fractional_ou_joe_2023_fou/rough_vol_model_race.png"
+    ],
+    "confidence": 0.78,
+    "task_id": "research_rough_volatility_arrv_fractional_ou_joe_2023_fou",
+    "tags": [
+      "rough_volatility",
+      "ARRV",
+      "fractional_OU",
+      "HAR_RV",
+      "HARQ",
+      "TAIFEX",
+      "SPY",
+      "5min_RV",
+      "QLIKE",
+      "DM_test",
+      "NULL"
+    ],
+    "created_at": "2026-06-30T19:05:26.717220+00:00"
   }
 ]
