@@ -1,0 +1,280 @@
+{
+  "agreed_vs_disagreed_tests": {
+    "fwd_drawdown21": {
+      "ci95_high": 0.004688403027148784,
+      "ci95_low": -0.027614988752633587,
+      "metric": "fwd_drawdown21",
+      "n_agreed": 976,
+      "n_disagreed": 1009,
+      "observed_diff_agreed_minus_disagreed": -0.011052807925276797,
+      "p_one_sided_agreed_greater": 0.917
+    },
+    "fwd_rv21": {
+      "ci95_high": 0.006390902595752672,
+      "ci95_low": -0.00037527246901920255,
+      "metric": "fwd_rv21",
+      "n_agreed": 976,
+      "n_disagreed": 1009,
+      "observed_diff_agreed_minus_disagreed": 0.002792951439173133,
+      "p_one_sided_agreed_greater": 0.044
+    },
+    "fwd_rv5": {
+      "ci95_high": 0.0016483277832702236,
+      "ci95_low": -0.0002128997195705721,
+      "metric": "fwd_rv5",
+      "n_agreed": 979,
+      "n_disagreed": 1009,
+      "observed_diff_agreed_minus_disagreed": 0.0006429546100986147,
+      "p_one_sided_agreed_greater": 0.0875
+    },
+    "tail_event21": {
+      "ci95_high": 0.1893701055256787,
+      "ci95_low": -0.07237010857203201,
+      "metric": "tail_event21",
+      "n_agreed": 976,
+      "n_disagreed": 1009,
+      "observed_diff_agreed_minus_disagreed": 0.055422305805130856,
+      "p_one_sided_agreed_greater": 0.1875
+    }
+  },
+  "created_at_utc": "2026-06-30T06:48:03.216910+00:00",
+  "data": {
+    "daily_date_end": "2026-06-26",
+    "daily_date_start": "2000-01-03",
+    "daily_rows_raw": 6670,
+    "regression_rows_h21": 6398,
+    "regression_rows_h5": 6414,
+    "spf_quarter_end": "2026Q2",
+    "spf_quarter_start": "1968Q4",
+    "spf_quarterly_rows": 226,
+    "spf_source": "experiments/k1585/data/Dispersion_2.xlsx",
+    "spf_url": "https://www.philadelphiafed.org/-/media/FRBP/Assets/Surveys-And-Data/survey-of-professional-forecasters/historical-data/Dispersion_2.xlsx",
+    "spy_vix_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv"
+  },
+  "experiment_id": "K1585",
+  "figure": "experiments/k1585/figures/k1585_regime_diagnostics.png",
+  "in_sample_hac_regressions": {
+    "h21": {
+      "augmented_vix_spf": {
+        "adj_r2": 0.5260863788742245,
+        "aic": 13336.600026113807,
+        "bic": 13383.946211157374,
+        "coefficients": {
+          "abs_ret5_lag": 1.1411431430137338,
+          "const": -4.8334124704409955,
+          "disagreement_z": 0.06945745329386874,
+          "log_rv21_lag": 0.23804511089760727,
+          "ret21_lag": -1.7172732598517024,
+          "vix_x_disagreement": -0.015578327529305908,
+          "vix_z": 0.3905404422570684
+        },
+        "pvalues_hac": {
+          "abs_ret5_lag": 0.3593103029435015,
+          "const": 4.527295517498032e-42,
+          "disagreement_z": 0.010355628183740525,
+          "log_rv21_lag": 5.746213096918063e-06,
+          "ret21_lag": 0.0022492348878744056,
+          "vix_x_disagreement": 0.511036259296269,
+          "vix_z": 4.676458623568673e-18
+        },
+        "r2": 0.5265308812545206,
+        "tvalues_hac": {
+          "abs_ret5_lag": 0.9166800885835704,
+          "const": -13.591019551524424,
+          "disagreement_z": 2.563722569983033,
+          "log_rv21_lag": 4.535518536117339,
+          "ret21_lag": -3.0551826619070077,
+          "vix_x_disagreement": -0.6572249900869728,
+          "vix_z": 8.660999434163235
+        }
+      },
+      "baseline_vix_only": {
+        "adj_r2": 0.5194468978640693,
+        "aic": 13423.615137078747,
+        "bic": 13457.433840681293,
+        "coefficients": {
+          "abs_ret5_lag": 1.0917798462574524,
+          "const": -4.731614304158331,
+          "log_rv21_lag": 0.25710165420508824,
+          "ret21_lag": -1.4865566694561425,
+          "vix_z": 0.4010924118764664
+        },
+        "pvalues_hac": {
+          "abs_ret5_lag": 0.3901651141000173,
+          "const": 1.4433094427753054e-39,
+          "log_rv21_lag": 1.2384837193639082e-06,
+          "ret21_lag": 0.010941465611952455,
+          "vix_z": 1.3461167884634683e-17
+        },
+        "r2": 0.5197473844059708,
+        "tvalues_hac": {
+          "abs_ret5_lag": 0.8593179672460656,
+          "const": -13.162448829229017,
+          "log_rv21_lag": 4.849379348096511,
+          "ret21_lag": -2.5445627331724188,
+          "vix_z": 8.539664861968557
+        }
+      },
+      "delta_adj_r2_aug_minus_base": 0.006639481010155213,
+      "horizon": 21,
+      "n": 6398
+    },
+    "h5": {
+      "augmented_vix_spf": {
+        "adj_r2": 0.5068840602545259,
+        "aic": 16475.898074011362,
+        "bic": 16523.261742673134,
+        "coefficients": {
+          "abs_ret5_lag": 0.21636027457184276,
+          "const": -5.735134041377169,
+          "disagreement_z": 0.0787818844886158,
+          "log_rv21_lag": 0.3465520090513334,
+          "ret21_lag": -4.339135087758108,
+          "vix_x_disagreement": -0.009411845749296543,
+          "vix_z": 0.40551227834094233
+        },
+        "pvalues_hac": {
+          "abs_ret5_lag": 0.8657236133483042,
+          "const": 1.1396175512971258e-88,
+          "disagreement_z": 1.0690822897819824e-05,
+          "log_rv21_lag": 4.9932364124262014e-17,
+          "ret21_lag": 1.8959965743038304e-20,
+          "vix_x_disagreement": 0.6103652260745809,
+          "vix_z": 1.0853545910345322e-29
+        },
+        "r2": 0.5073454193124509,
+        "tvalues_hac": {
+          "abs_ret5_lag": 0.16909284424687987,
+          "const": -19.96369680638074,
+          "disagreement_z": 4.402707559226894,
+          "log_rv21_lag": 8.386854201160961,
+          "ret21_lag": -9.26803895440017,
+          "vix_x_disagreement": -0.5095521899288389,
+          "vix_z": 11.316654324856716
+        }
+      },
+      "baseline_vix_only": {
+        "adj_r2": 0.5015497114178699,
+        "aic": 16542.91166277478,
+        "bic": 16576.742854676046,
+        "coefficients": {
+          "abs_ret5_lag": 0.11058323708068529,
+          "const": -5.6175588061349355,
+          "log_rv21_lag": 0.36789390698662056,
+          "ret21_lag": -4.063165046458878,
+          "vix_z": 0.4166267812206577
+        },
+        "pvalues_hac": {
+          "abs_ret5_lag": 0.9329244954441467,
+          "const": 1.1887762606260349e-82,
+          "log_rv21_lag": 1.0141878442535976e-18,
+          "ret21_lag": 4.623934047626505e-17,
+          "vix_z": 1.214821304054093e-29
+        },
+        "r2": 0.5018606113327816,
+        "tvalues_hac": {
+          "abs_ret5_lag": 0.08416594323164572,
+          "const": -19.258899781442786,
+          "log_rv21_lag": 8.833534776994693,
+          "ret21_lag": -8.395886179241055,
+          "vix_z": 11.306768161501825
+        }
+      },
+      "delta_adj_r2_aug_minus_base": 0.0053343488366560665,
+      "horizon": 5,
+      "n": 6414
+    }
+  },
+  "method": {
+    "disagreement_proxy": "Philly Fed SPF D2(T+4) IQR composite: mean(log1p(RGDP), log1p(PGDP)).",
+    "formal_gate": "Support requires OOS QLIKE improvement with DM t < -3 and HAC SPF/disagreement term |t| > 3.",
+    "oos_training_guard": "For horizon h, an OOS row i trains only on rows j <= i-h, so overlapping targets are fully observed.",
+    "regime_rule": "High uncertainty/disagreement means expanding z-score > 0.",
+    "spf_availability_lag": "Survey quarter end + 45 calendar days, daily forward-fill, then signal.shift(1).",
+    "targets": "Forward 5d/21d SPY close-to-close realized variance and forward 21d max drawdown <= -5%.",
+    "uncertainty_level": "VIX close, shifted by one trading day, then expanding z-score."
+  },
+  "oos_forecast": {
+    "h21": {
+      "dm_p_augmented_vs_baseline": 0.07053137062912396,
+      "dm_t_augmented_vs_baseline": 1.8088421622267346,
+      "end_date": "2026-05-28",
+      "horizon": 21,
+      "mean_qlike_augmented_vix_spf": 0.3466085076858598,
+      "mean_qlike_baseline_vix_only": 0.33594672647712454,
+      "mse_log_augmented": 0.5301539333178039,
+      "mse_log_baseline": 0.5296273226669428,
+      "mse_log_improvement_pct_augmented_vs_baseline": -0.09943041612909496,
+      "n_oos": 5377,
+      "qlike_improvement_pct_augmented_vs_baseline": -3.1736523586757666,
+      "start_date": "2005-01-27"
+    },
+    "h5": {
+      "dm_p_augmented_vs_baseline": 0.38238151485315086,
+      "dm_t_augmented_vs_baseline": 0.8735878851402642,
+      "end_date": "2026-06-22",
+      "horizon": 5,
+      "mean_qlike_augmented_vix_spf": 0.4063755416902444,
+      "mean_qlike_baseline_vix_only": 0.40349533233138574,
+      "mse_log_augmented": 0.8265288863177553,
+      "mse_log_baseline": 0.831192114379607,
+      "mse_log_improvement_pct_augmented_vs_baseline": 0.5610289103058075,
+      "n_oos": 5409,
+      "qlike_improvement_pct_augmented_vs_baseline": -0.7138147899300127,
+      "start_date": "2005-01-04"
+    }
+  },
+  "regime_summary": {
+    "high_uncertainty_high_disagreement": {
+      "annualized_vol_from_mean_fwd_rv21": 0.2436276814662011,
+      "mean_fwd_drawdown21": -0.034738809366143035,
+      "mean_fwd_rv21": 0.004946203931383062,
+      "mean_fwd_rv5": 0.0013514958927451177,
+      "median_spf_disagreement": 0.6746729041271134,
+      "median_vix_signal": 26.290000915527344,
+      "n": 1009,
+      "tail_event21_rate": 0.2755203171456888
+    },
+    "high_uncertainty_low_disagreement": {
+      "annualized_vol_from_mean_fwd_rv21": 0.30474557330119556,
+      "mean_fwd_drawdown21": -0.04579161729141983,
+      "mean_fwd_rv21": 0.007739155370556195,
+      "mean_fwd_rv5": 0.001998396409875691,
+      "median_spf_disagreement": 0.47295300010020064,
+      "median_vix_signal": 26.0649995803833,
+      "n": 976,
+      "tail_event21_rate": 0.33094262295081966
+    },
+    "low_uncertainty_high_disagreement": {
+      "annualized_vol_from_mean_fwd_rv21": 0.14287779319172642,
+      "mean_fwd_drawdown21": -0.023856051331704722,
+      "mean_fwd_rv21": 0.0017011719822781451,
+      "mean_fwd_rv5": 0.00034715444334598,
+      "median_spf_disagreement": 0.6167418997997514,
+      "median_vix_signal": 17.6200008392334,
+      "n": 1444,
+      "tail_event21_rate": 0.15027700831024932
+    },
+    "low_uncertainty_low_disagreement": {
+      "annualized_vol_from_mean_fwd_rv21": 0.13370047499795165,
+      "mean_fwd_drawdown21": -0.020921211265033015,
+      "mean_fwd_rv21": 0.0014896514178898243,
+      "mean_fwd_rv5": 0.00027381134038469303,
+      "median_spf_disagreement": 0.4719687760513294,
+      "median_vix_signal": 13.880000114440918,
+      "n": 2969,
+      "tail_event21_rate": 0.11047490737622095
+    }
+  },
+  "seed": 42,
+  "verdict": {
+    "label": "WEAK_RAW_ONLY",
+    "reason": "Regime contrast is positive, but formal incremental forecast gates are not all met.",
+    "regime_support_21d": true,
+    "supportive_horizons": [],
+    "weak_horizons": [
+      5,
+      21
+    ]
+  }
+}

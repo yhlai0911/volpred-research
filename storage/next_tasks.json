@@ -40006,7 +40006,7 @@
     "title": "K1585: Agreed vs Disagreed Uncertainty 二維 regime**（Gambetti-Forni arXiv 2302.01621, CEPR VoxEU 2025）：level＝VIX/JLN，disagreement",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 487). Original: Agreed vs Disagreed Uncertainty 二維 regime**（Gambetti-Forni arXiv 2302.01621, CEPR VoxEU 2025）：level＝VIX/JLN，disagreement＝Philly Fed SPF IQR，2×2 regime 檢「高不確定×低分歧(agreed)」格的 forward RV/tail 是否更高；disagreement 當 VIX 之外增量 predictor（正面挑戰 VIX-sufficient K43/730）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1585.py with signal.shift(1) + seed=42, (c) K1585_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -40015,7 +40015,13 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-30T00:00:01Z"
+    "created_at": "2026-06-30T00:00:01Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T06:36:00.991038+00:00",
+    "claim_session_id": "56c051c6d065",
+    "started_at": "2026-06-30T06:36:06.172796+00:00",
+    "completed_at": "2026-06-30T06:48:32.122916+00:00",
+    "result": "Completed K1585 agreed-vs-disagreed uncertainty pilot. Result: WEAK_RAW_ONLY; high-VIX/low-SPF regime has higher raw RV21, but VIX+SPF worsens OOS QLIKE vs VIX baseline, so no positive knowledge claim."
   },
   {
     "id": "K1586",
