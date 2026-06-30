@@ -425,6 +425,13 @@ def _entry_full(item_id, *, published_at, arc=None, content="", details=None):
     return e
 
 
+def _chart_source_content(*, lazypack: bool = False) -> str:
+    body = "本文引用 K123，資料來源：yfinance。\n\n![主圖](https://example.com/chart.png)\n"
+    if lazypack:
+        body += "\n## 懶人包圖組\n\n![概念](https://example.com/lazypack.png)\n"
+    return body
+
+
 def test_arc_diversity_flags_concentration(tmp_path):
     base = datetime(2026, 6, 24, 12, 0, tzinfo=TPE)
     items = [
@@ -515,6 +522,61 @@ def test_content_completeness_flags_missing_chart(tmp_path):
     assert r["status"] == "incomplete"
     assert r["findings"][0]["missing_chart"] is True
     assert r["findings"][0]["missing_source"] is False  # K-id + 來源 present
+
+
+def test_content_completeness_flags_lazypack_gap_for_general_articles(tmp_path):
+    base = datetime(2026, 6, 30, 12, 0, tzinfo=TPE)
+    items = [
+        {
+            **_entry_full(
+                "m1",
+                published_at=base,
+                content=_chart_source_content(lazypack=True),
+            ),
+            "audience": "general",
+        },
+        {
+            **_entry_full(
+                "m2",
+                published_at=base - timedelta(minutes=10),
+                content=_chart_source_content(lazypack=False),
+            ),
+            "audience": "general",
+        },
+        {
+            **_entry_full(
+                "m3",
+                published_at=base - timedelta(minutes=20),
+                content=_chart_source_content(lazypack=False),
+            ),
+            "audience": "general",
+        },
+    ]
+    storage = _write_feed(tmp_path, items)
+    r = cq.check_content_completeness(str(storage))
+    assert r["status"] == "lazypack_gap"
+    assert r["findings"] == []
+    assert r["lazypack"]["coverage"] == 0.33
+    assert [x["id"] for x in r["lazypack"]["missing_examples"]] == ["m2", "m3"]
+
+
+def test_content_completeness_lazypack_ok_when_general_articles_have_sections(tmp_path):
+    base = datetime(2026, 6, 30, 12, 0, tzinfo=TPE)
+    items = [
+        {
+            **_entry_full(
+                f"m{i}",
+                published_at=base - timedelta(minutes=i),
+                content=_chart_source_content(lazypack=True),
+            ),
+            "audience": "general",
+        }
+        for i in range(3)
+    ]
+    storage = _write_feed(tmp_path, items)
+    r = cq.check_content_completeness(str(storage))
+    assert r["status"] == "ok"
+    assert r["lazypack"]["coverage"] == 1.0
 
 
 def test_release_deadlock_when_candidates_empty(tmp_path):

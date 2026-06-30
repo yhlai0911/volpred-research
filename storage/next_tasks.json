@@ -40668,8 +40668,14 @@
     "title": "強制 general 文章懶人包圖：feed-publisher 流程 enforce + 回補（boss 2026-06-30）",
     "description": "boss 指出 general 讀者文章除專業圖表外文末須附懶人包圖組，但實測近 12 篇只 1 篇有（coverage 12%）→ 規則 silent skip。已加 content_quality lazypack coverage 偵測(commit e74ca8be4)。真正修法：(1) feed-publisher / daily_article 流程強制：general 文章 publish 前若無懶人包 → 走 lazypack-infographic skill 用 NotebookLM 生成(禁付費 API)貼文末「## 懶人包」；(2) 把 content_quality lazypack_gap 接成 alert/daily-checkup 可見 breach(目前只在 snapshot)；(3) 回補近期高流量 general 文章的懶人包。需 clean context + NotebookLM 互動。參考 memory feedback_lazypack_infographic + lazypack-infographic skill + .claude/skills/feed-publisher。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "main_thread_discovered_2026-06-30",
-    "created_at": "2026-06-30T09:18:06.634814+00:00"
+    "created_at": "2026-06-30T09:18:06.634814+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T10:42:31.621113+00:00",
+    "claim_session_id": "5998d3b44258",
+    "started_at": "2026-06-30T10:42:31.829520+00:00",
+    "completed_at": "2026-06-30T10:51:28.069707+00:00",
+    "result": "ENFORCE 完成（主線程，commits de92bb067 + cd6f55ac7）：(1) 共用 has_lazypack_section() helper（單一 source）；(2) publish_draft.py CLI check_lazypack_gate rc=6 + --no-lazypack-gate；(3) publish_milestone chokepoint raise ValueError（covers 直接 Python 路徑）；(4) content_quality coverage 對齊同 helper；(5) feed-publisher SKILL §6 文件化 + gen 指令；74 tests green。NotebookLM auth 已驗證可用。注意：18:42 codex-cli orphaned claim（無 lazypack 活動）。BACKFILL 另開任務：實測 327/333 published general 缺 lazypack（遠多於預估 7），屬重 NotebookLM 批次需主線程驗圖品質 → scoped 子任務。"
   }
 ]

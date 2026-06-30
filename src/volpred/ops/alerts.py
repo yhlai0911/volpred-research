@@ -1515,6 +1515,7 @@ def _parse_content_quality_state(
     release = snapshot.get("release_deadlock", {})
     frontend = snapshot.get("frontend_render", {})
     completeness = snapshot.get("content_completeness", {})
+    lazypack_gap = bool(completeness.get("lazypack", {}).get("below_threshold"))
 
     breached_subchecks: list[str] = []
     critical_subchecks: list[str] = []
@@ -1536,8 +1537,12 @@ def _parse_content_quality_state(
         critical_subchecks.append("frontend_render")
     if arc.get("status") == "concentrated":
         breached_subchecks.append("arc_diversity")
-    # content_completeness is a heuristic (frontend-rendered charts can't be seen
-    # from feed content) → surfaced as context, NOT an independent breach driver.
+    if lazypack_gap:
+        breached_subchecks.append("content_completeness:lazypack_gap")
+    # Missing-chart/source content_completeness is a heuristic (frontend-rendered
+    # charts can't be seen from feed content) → surfaced as context, NOT an
+    # independent breach driver. Lazypack coverage is deterministic because it uses
+    # the same section parser as the publish gate, so low coverage is a WARN breach.
 
     breached = bool(breached_subchecks)
 
@@ -1595,6 +1600,15 @@ def _parse_content_quality_state(
             f"- (context) content_completeness: {len(miss)}/{completeness.get('scanned')} "
             "篇缺圖表或來源 marker（heuristic，可能含 frontend-rendered chart 誤判，供人工複查）"
         )
+    if lazypack_gap:
+        lz = completeness.get("lazypack", {})
+        examples = ", ".join(x.get("id", "?") for x in lz.get("missing_examples", [])[:5])
+        lines.append(
+            f"- content_completeness:lazypack_gap — general 文章懶人包覆蓋 "
+            f"{lz.get('coverage')} < {lz.get('threshold')} "
+            f"({lz.get('with_lazypack')}/{lz.get('general_total')}); "
+            f"待回補 examples: {examples or 'n/a'}"
+        )
     if not breached:
         lines.append("- (none)")
 
@@ -1618,6 +1632,9 @@ def _parse_content_quality_state(
             "(`docs/refactor_plan_release_layer_deadlock.md`)。",
             "4. `title_format:digest_prefix` → 前端 header 與 title 擇一移除前綴；"
             "前端在 `frontend-v2-fix/src/app/page.tsx` + `digest/[id]/page.tsx`。",
+            "5. `content_completeness:lazypack_gap` → 針對 missing_examples 走 "
+            "`lazypack-infographic`/NotebookLM 生圖，append `## 懶人包圖組` 後 "
+            "用正式 publish/update 流程同步；新 general 文會被 publish gate 阻擋。",
         ]
     )
 

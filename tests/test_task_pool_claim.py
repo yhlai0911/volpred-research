@@ -347,6 +347,65 @@ def test_list_does_not_rewrite_next_tasks_file(tmp_path, monkeypatch, capsys) ->
     assert next_tasks.read_text(encoding="utf-8") == original
 
 
+def test_legacy_task_id_field_is_claimable_and_listed(tmp_path, monkeypatch, capsys) -> None:
+    """Legacy queue rows may use `task_id`; claim flow must still be atomic."""
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "task_id": "platform_ops_legacy_key",
+                    "task_type": "platform_ops",
+                    "status": "pending",
+                    "priority": 2,
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "list",
+            "--status",
+            "pending",
+            "--codex-eligible",
+        ],
+    )
+
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["tasks"][0]["id"] == "platform_ops_legacy_key"
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_claim.py",
+            "claim",
+            "--id",
+            "platform_ops_legacy_key",
+            "--owner",
+            "codex-cli",
+        ],
+    )
+    rc = task_pool_claim.main()
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "claimed"
+    assert saved[0]["claimed_by"] == "codex-cli"
+
+
 def test_list_stale_warns_on_invalid_claimed_at(tmp_path, monkeypatch, capsys) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(
@@ -385,7 +444,8 @@ def test_list_stale_warns_on_invalid_claimed_at(tmp_path, monkeypatch, capsys) -
     captured = capsys.readouterr()
     payload = json.loads(captured.out)
     assert payload["count"] == 0
-    assert "[task_pool_claim] WARN invalid claimed_at while listing stale claims" in captured.err
+    assert "[claim] WARN claimed_at parse failed" in captured.err
+    assert "site=list_stale" in captured.err
     assert "task_id=bad_claim_timestamp" in captured.err
 
 
@@ -426,7 +486,8 @@ def test_cleanup_warns_on_invalid_claimed_at_without_releasing(tmp_path, monkeyp
     captured = capsys.readouterr()
     payload = json.loads(captured.out)
     assert payload["count"] == 0
-    assert "[task_pool_claim] WARN invalid claimed_at while cleaning stale claims" in captured.err
+    assert "[claim] WARN claimed_at parse failed" in captured.err
+    assert "site=cleanup_stale" in captured.err
     assert "task_id=bad_cleanup_timestamp" in captured.err
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "in_progress"

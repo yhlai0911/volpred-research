@@ -112,8 +112,12 @@ def _locked_readonly() -> Iterator[list[dict[str, Any]]]:
         fh.close()
 
 
+def _task_key(task: dict[str, Any]) -> str:
+    return str(task.get("id") or task.get("task_id") or "")
+
+
 def _matches(tasks: list[dict[str, Any]], task_id: str) -> list[dict[str, Any]]:
-    return [t for t in tasks if t.get("id") == task_id]
+    return [t for t in tasks if _task_key(t) == task_id]
 
 
 def _find(tasks: list[dict[str, Any]], task_id: str) -> dict[str, Any]:
@@ -196,7 +200,7 @@ def _extract_review_verdict(result: str) -> str | None:
 
 
 def _codex_review_followup_k_id(task: dict[str, Any]) -> str | None:
-    task_id = str(task.get("id") or "")
+    task_id = _task_key(task)
     for key in ("related_k_id", "source_k_id", "predecessor", "k_id", "experiment_id"):
         value = str(task.get(key) or "").upper()
         if _K_ID_RE.fullmatch(value):
@@ -218,7 +222,7 @@ def _find_source_experiment_task(
 ) -> dict[str, Any] | None:
     exact = [
         t for t in tasks
-        if str(t.get("id") or "").upper() == k_id
+        if _task_key(t).upper() == k_id
         and str(t.get("task_type") or "") == "experiment"
     ]
     if len(exact) == 1:
@@ -226,7 +230,7 @@ def _find_source_experiment_task(
 
     keyed = []
     for t in tasks:
-        if str(t.get("id") or "") == review_task_id:
+        if _task_key(t) == review_task_id:
             continue
         if str(t.get("task_type") or "") != "experiment":
             continue
@@ -259,7 +263,7 @@ def _apply_codex_review_followup_fail(
     source experiment must still be downgraded when the completed review says
     the methodology or claims failed.
     """
-    task_id = str(review_task.get("id") or "")
+    task_id = _task_key(review_task)
     if not re.search(r"_codex_review_followup$", task_id, flags=re.IGNORECASE):
         return None
     verdict = _extract_review_verdict(result)
@@ -294,7 +298,7 @@ def _apply_codex_review_followup_fail(
         effect["source_status"] = "failed"
 
     v2_id = f"{k_id}_v2_fix_methodology"
-    if any(str(t.get("id") or "") == v2_id for t in tasks):
+    if any(_task_key(t) == v2_id for t in tasks):
         effect["v2_task"] = "already_exists"
         return effect
 
@@ -425,7 +429,7 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                     field_name="claimed_at",
                     fallback=None,
                     site="list_stale",
-                    task_id=str(t.get("id") or ""),
+                    task_id=_task_key(t),
                 )
                 if claimed_dt is None:
                     continue
@@ -439,7 +443,7 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
             if args.codex_eligible and not _is_codex_eligible_task(t):
                 continue
             out.append({
-                "id": t.get("id"),
+                "id": _task_key(t),
                 "title": t.get("title"),
                 "task_type": t.get("task_type"),
                 "priority": t.get("priority"),
@@ -477,13 +481,13 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                 field_name="claimed_at",
                 fallback=None,
                 site="cleanup_stale",
-                task_id=str(t.get("id") or ""),
+                    task_id=_task_key(t),
             )
             if claimed_dt is None:
                 continue
             age_h = (now - claimed_dt).total_seconds() / 3600
             if age_h >= args.stale_hours:
-                released.append({"id": t.get("id"), "owner": t.get("claimed_by"), "age_h": round(age_h, 1)})
+                released.append({"id": _task_key(t), "owner": t.get("claimed_by"), "age_h": round(age_h, 1)})
                 t["status"] = "pending"
                 t.pop("claimed_by", None)
                 t.pop("claimed_at", None)

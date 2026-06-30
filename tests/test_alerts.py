@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from volpred.ops.alerts import (
+    _parse_content_quality_state,
     _parse_loop_health_state,
     build_alert_condition_report,
     check_alert_conditions,
@@ -51,6 +52,55 @@ def test_parse_loop_health_not_breached_on_clean_state(tmp_path: Path):
     result = _parse_loop_health_state(str(storage_dir), now)
     assert result["breached"] is False
     assert result["title"] == "loop_health ok"
+
+
+def test_parse_content_quality_breaches_on_lazypack_gap(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    now = datetime(2026, 6, 30, 4, 0, tzinfo=timezone.utc)
+    base = datetime(2026, 6, 30, 3, 0, tzinfo=timezone.utc)
+    good = (
+        "本文引用 K123，資料來源：yfinance。\n\n"
+        "![主圖](https://example.com/chart.png)\n\n"
+        "## 懶人包圖組\n\n"
+        "![概念](https://example.com/lazypack.png)\n"
+    )
+    missing = "本文引用 K124，資料來源：yfinance。\n\n![主圖](https://example.com/chart.png)\n"
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {
+                "id": "m1",
+                "status": "published",
+                "audience": "general",
+                "title": "有懶人包",
+                "content": good,
+                "published_at": base.isoformat(),
+            },
+            {
+                "id": "m2",
+                "status": "published",
+                "audience": "general",
+                "title": "缺懶人包 A",
+                "content": missing,
+                "published_at": (base - timedelta(minutes=60)).isoformat(),
+            },
+            {
+                "id": "m3",
+                "status": "published",
+                "audience": "general",
+                "title": "缺懶人包 B",
+                "content": missing,
+                "published_at": (base - timedelta(minutes=120)).isoformat(),
+            },
+        ],
+    )
+
+    result = _parse_content_quality_state(str(storage_dir), now)
+
+    assert result["breached"] is True
+    assert result["level"] == "warn"
+    assert "content_completeness:lazypack_gap" in result["title"]
+    assert "m2, m3" in result["body"]
 
 
 def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypatch):
