@@ -439,6 +439,14 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
                 )
         except Exception as exc:
             print(f"  [supabase_sync] emdash_normalizer error: {exc}")
+    # last_updated_at is not a column on the articles table, so carry it inside the
+    # synced `details` JSON blob (the frontend reads details.last_updated_at to show
+    # "更新於 <date hh:mm>" when content was edited after publish — boss 2026-07-01).
+    details = item.get("details")
+    if not isinstance(details, dict):
+        details = {} if details is None else {"_legacy": details}
+    if item.get("last_updated_at"):
+        details = {**details, "last_updated_at": item.get("last_updated_at")}
     row = {
         "slug": item.get("id", ""),
         "title": item.get("title", ""),
@@ -450,7 +458,7 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         "category": item.get("category") or ("member_qa" if classify_audience(item) == "member_qa" else "milestone"),
         "proposer": extract_proposer(item),
         "author_id": "claude",
-        "details": item.get("details"),
+        "details": details,
         "published_at": item.get("published_at"),
     }
     ok = _post("articles", row)
