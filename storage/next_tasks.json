@@ -41356,11 +41356,37 @@
     "title": "[論文管線] leverage-direction multi-round review (JBF) — codex exec",
     "description": "leverage-direction(JBF) compliance scrub complete (submission scope CLEAN verified by check_paper_compliance.py 2026-07-01). 下一階段 = codex exec 多輪 review：(1) latex-academic-reviewer 跑 main.tex + body.tex (2) citation-verifier 跑 references (3) journal-review 跑 JBF profile (scope/format/distinctive rules)。Owner 硬規則：codex 額度無限制，全部走 codex exec 省 Claude token；contribution gate（看真貢獻/經濟意義，非單純計量練習）。Review 收斂後修到最終版 → 進 arxiv_ready stage。Skill: paper-submission-pipeline + journal-review.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "codex",
     "source": "paper_compliance_workflow",
     "created_at": "2026-07-01T02:15:00+08:00",
     "blocked_until": null,
-    "preferred_agent": "codex"
+    "preferred_agent": "codex",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T18:42:46.671683+00:00",
+    "claim_session_id": "f82382f3ea0b",
+    "status_history": [
+      {
+        "ts": "2026-06-30T18:42:46.671938+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T18:42:46.876088+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T18:52:12.635798+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-06-30T18:42:46.875799+00:00",
+    "completed_at": "2026-06-30T18:52:12.635517+00:00",
+    "result": "Ran three Codex review passes for leverage-direction: latex academic, citation verification, and JBF submission gate. All three returned FAIL_MAJOR_REVISION; paper remains revision/not arXiv-ready, with reports under paper/leverage-direction/review_history/multi_round_20260701/."
   }
 ]
