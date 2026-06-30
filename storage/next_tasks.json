@@ -40483,14 +40483,16 @@
     "title": "dreaming 加 persistent-alert detector：同 alert_key 連續 fire N 天自動升級 root-cause",
     "description": "系統性 gap（boss email-12281 觸發）：dreaming_review.py error_recurrence 只 mine cron exits + diagnostics tags，不 mine 持續 fire 的 alert condition（如 publish_rhythm/cluster 每天誤報）→ 長期重複 warn 無自動升級，只能等 boss 人工發現。修法：新增 detector 讀 storage/ops/alert_dedup.json，偵測同 alert_key 的 first_seen 久遠(≥3天) + 近期仍 last_sent → 升級為 persistent_alert finding（severity warn，建議 root-cause 而非再 patch），寄 dreaming email。對齊 loop-engineering「系統該先抓到、而非靠 boss 抓」。需 clean context 建（讀 dreaming_review.py 結構 + alert_dedup format）。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "main_thread_discovered_2026-06-30",
     "created_at": "2026-06-30T05:21:55.999617+00:00",
     "id": "platform_ops_dreaming_persistent_alert_detector",
     "claimed_by": "hourly-14",
     "claimed_at": "2026-06-30T06:12:10.486797+00:00",
     "claim_session_id": "4db8c3549bca",
-    "started_at": "2026-06-30T06:12:10.689402+00:00"
+    "started_at": "2026-06-30T06:12:10.689402+00:00",
+    "completed_at": "2026-06-30T06:17:11.505352+00:00",
+    "result": "Dreaming 加 detect_persistent_alerts (第 8 detector)。Threshold: send_count >=3 AND span >=3d AND last_sent >=now-48h → propose_only warn finding; baseline 三 strike 升 critical。5 新 unit test 全綠 (23 total)。Real storage dry-run 抓 6 個 active persistent alert (Host cron 26x 71d / Release pool starved 6x 9d / gmail-poll x2 / 發文脫班 / Draft pool)。commit ac741afba"
   },
   {
     "id": "platform_ops_fb_awaiting_ttl_auto_expire",
