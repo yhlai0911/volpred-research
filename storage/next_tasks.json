@@ -40069,7 +40069,7 @@
     "description": "用戶 2026-06-30 06:24 詢問策略整併。問題：VolPred 上架 3 檔 VT 策略（保守/標準/積極）在 VIX 15-20 區段（過去 1 年 VIX 12 月均值 ~17，大多時間落此區）portfolio weight 算出來幾乎相同（都是 ~70% SPY + 30% 債），讀者翻訂閱頁分不出差異。3 個解：(a) 整併成 1 檔；(b) 改 VT 參數讓 3 檔在 15-20 也有區別（e.g. 保守強制 SPY≤50%、積極強制 SPY≥85%）；(c) 下架重合者保留 1-2 檔。建議解 = (b) 差異化參數，保留 3 personas marketing 賣點 + 不浪費 paper trading 歷史。Task: 跑 VT 3 檔同期 cross-OOS sensitivity test（VIX 15-20 區段 vs 全期）+ (b) 方案具體參數草擬 + 期望差異化效果模擬 + 跨期間 robustness 檢定（含 2020 covid 月、2022 縮表月、2024 yen carry unwind）。完成後 email 老闆審後再上架。輸出: experiments/<id>/ + strategy_lifecycle/<vt_3spec_audit>.md。",
     "task_type": "strategy_lifecycle",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-06-30T00:15:00+00:00",
     "source": "user_directive_email_12235",
     "tags": [
@@ -40078,7 +40078,11 @@
       "differentiation",
       "vix_regime",
       "user_directive"
-    ]
+    ],
+    "claimed_by": "hourly-09",
+    "claimed_at": "2026-06-30T01:08:58.700579+00:00",
+    "claim_session_id": "4556cc57282e",
+    "started_at": "2026-06-30T01:09:08.676342+00:00"
   },
   {
     "id": "platform_ops_publication_candidates_daily_refresh_cron",
@@ -40094,6 +40098,32 @@
       "cron",
       "stale_fix",
       "root_cause"
+    ]
+  },
+  {
+    "task_id": "platform_ops_strategy_card_regime_presentation",
+    "task_type": "platform_ops",
+    "title": "策略卡 regime-conditional 配置呈現（VIX<15 / 15-20 / >20 三段表）",
+    "description": "問題：VIX 15-20 normal 段，recommended_5050 / vix_cond_leverage / adaptive_tier 三檔退化成同配置 {SPY 0.34, GLD 0.34}，taiwan_8.63vix / taiwan_hybrid_leverage 也相同 → 用戶看 3 張同配置卡片以為重複。根因：它們在 tail regime（低/高 VIX）才分歧，normal 段巧合相同。解法（非整併，保留 tail 差異化）：每張策略卡加 mini 表顯示三段 VIX regime 的配置，讓用戶看出何時/為何分歧。Mission 4 UX。frontend-v2-fix（獨立巢狀 git repo，build+deploy-zeabur-safe）。verify=線上三段表 render + 三策略卡可見差異。",
+    "priority": 3,
+    "status": "pending",
+    "source": "main_thread_discovered_2026-06-30",
+    "created_at": "2026-06-30T00:39:20.263830+00:00"
+  },
+  {
+    "id": "daily_digest_20260630",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **先選定一個專題（theme）**（例：波動率模型複雜度天花板 / MOVE-VIX 跨資產分裂 / 尾部風險 VaR 監管現實 / 研究誠實 audit），整篇圍繞單一 thesis；(2) **從過去累積的 archive 撈同主題的 3-6 篇舊文**（用 grep/jq 掃 storage/reports/feed.json 的 title/tags），發佈日期須橫跨 >1 週、至少 3 篇來自當天以外 — **不可只挑今天/昨天剛發的湊數**；排除 digest 自身與每日建議類日報；(3) **掛一個最近時事/市場狀態 hook 開場**（當前 VIX 水位 / 近期 FOMC·NFP·CPI / MOVE-VIX 分裂等，數據須取自真實 archive 文章或 results.json，不可臆造），把過去研究與當下市場連起來；(4) **串成有觀點的敘事弧**（演進/對照/反差，告訴讀者『這主題上我們做過什麼、結論如何演進、彼此如何呼應』），不是逐篇『這篇講 X、那篇講 Y』的並列摘要；(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ 文末懶人包圖組；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "created_at": "2026-06-30T09:00:03.187015+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
     ]
   }
 ]
