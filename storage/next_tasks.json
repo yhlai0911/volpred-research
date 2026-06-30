@@ -39834,7 +39834,7 @@
     "description": "Gmail UID: 12235\nMessage-ID: <7C5B1D5F-D596-4AC9-8D64-5F99EB60C0D0@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 06:24:39 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 03:08 — 巡檢健康，session 工作收尾（portfolio 93%瘦身+K1580報告文上線+auth守住）\n\n--- 用戶回信內容 ---\ndaily_update cron 這是更新資料嗎？那應該是要增加一個更新的時間點而不是改變\r\n策略 VIX 15-20 區段重合（3 檔退化成同配置）要不要走 strategy_lifecycle 整併/差異化？\r\n這是什麼意思？我不懂\r\n\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 03:11 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 03:08 — 巡檢健康，session 工作收尾（portfolio 93%瘦身+K1580報告文上線+auth守住）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 自主 loop fire 03:08 — 巡檢健康，本 session 工作全數收尾\r\n> \r\n> 本 session 交付（全部上線驗證）\r\n> \r\n> portfolio 效率（老闆回報的「效率很差」）：payload 2.78MB→194KB（93% 縮減）+ CDN cache + 交易紀錄 lazy-load。caa7e3a + 5xx 自動重試韌性 + ticker% 修正 124d126，兩頁 live 驗證通過。\r\n> K1580 年度等權再平衡嚴謹驗證：6 籃子台美全球 1993-2024 + 分時期 + 0050 數據修復 + Codex 兩輪審。報告文 mile_7b95b816 已由文章池於 02:00 自動釋出、上線。\r\n> hourly_dispatch Claude auth 修復：token 重生寫入，preflight 驗證通過。\r\n> 本 tick 巡檢\r\n> \r\n> hourly_dispatch exit1 count 仍 81（未增加） → auth 修復後零新失敗，holding。error_recurrence 仍 degrading 是歷史 spike 在 14 天窗（距上次失敗 23:59 才 ~3h、未滿 6h grace），約 06:00 自清。\r\n> K1580 報告文：published ✓\r\n> portfolio 部署穩定（無新 commit）、無新 critical breach\r\n> 待老闆定奪（2 件 policy，我不擅自決定）\r\n> \r\n> daily_update cron 改 14:00（台股收盤後）讓當日台股收盤當天進 paper_trading？trade-off：08:03 是為美股盤前時效（error_log 2026-05-08）\r\n> 策略 VIX 15-20 區段重合（3 檔退化成同配置）要不要走 strategy_lifecycle 整併/差異化？\r\n> （K1580 報告文發布問題已自然解決 —— 文章池 02:00 已釋出。）\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -39845,9 +39845,13 @@
     "email_message_id": "<7C5B1D5F-D596-4AC9-8D64-5F99EB60C0D0@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 03:08 — 巡檢健康，session 工作收尾（portfolio 93%瘦身+K1580報告文上線+auth守住）",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-29T23:14:29.801829+00:00",
-    "claim_session_id": "8cffb52d6387"
+    "last_released_at": "2026-06-30T00:09:15.916629+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-30T00:12:04.281031+00:00",
+    "claim_session_id": "19ff2a8d13d6",
+    "started_at": "2026-06-30T00:12:04.506060+00:00",
+    "completed_at": "2026-06-30T00:30:16.624701+00:00",
+    "result": "本 fire 08:11 寄統合 reply email (notification_id 6a59e02a) 覆 4 條; 派 K1066 general companion article mile_549aaaa4 (draft); 派 2 條 followup task (daily_update 14:00 + VT 3 檔差異化); refresh publication_candidates 修 stale; append 第 3 條 followup (candidates daily cron)"
   },
   {
     "id": "email-12234-0931b0",
@@ -39855,7 +39859,7 @@
     "description": "Gmail UID: 12234\nMessage-ID: <42C578B1-9DD6-4A88-94F2-2CE40F4DB0C1@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 06:20:35 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 03:42 — 無變化 heartbeat（hourly auth holding, count 81）\n\n--- 用戶回信內容 ---\n你的loop engineering\r\n就是要在朝向優化5種missions為基礎下持續找出可以優化的工作，然後派工執行\r\n持續自我提升優化\r\n怎麼可能沒有新工作可以做？\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 03:43 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 03:42 — 無變化 heartbeat（hourly auth holding, count 81）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 自主 loop fire 03:42 — 無變化 heartbeat\r\n> \r\n> 夜間安靜 tick，狀態與 03:08 相同：\r\n> \r\n> hourly_dispatch exit1 count 仍 81（零新失敗）→ auth holding；error_recurrence degrading 仍是歷史 spike（14 天窗），約 06:00 滿 6h grace 自清\r\n> 無新 commit、無新 critical breach\r\n> 本 session 工作全數收尾並穩定（portfolio 93% 瘦身、K1580 報告文已上線、auth 守住）\r\n> 待老闆定奪 2 件 policy（cron 14:00 / 策略整併）。loop 續行，下次 04:12。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -39866,9 +39870,13 @@
     "email_message_id": "<42C578B1-9DD6-4A88-94F2-2CE40F4DB0C1@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 03:42 — 無變化 heartbeat（hourly auth holding, count 81）",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-29T23:14:30.022085+00:00",
-    "claim_session_id": "a9f8780eab1c"
+    "last_released_at": "2026-06-30T00:09:16.138932+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-30T00:12:04.729436+00:00",
+    "claim_session_id": "ca181b1812cd",
+    "started_at": "2026-06-30T00:12:04.954123+00:00",
+    "completed_at": "2026-06-30T00:30:16.852378+00:00",
+    "result": "本 fire 08:11 寄統合 reply email (notification_id 6a59e02a) 覆 4 條; 派 K1066 general companion article mile_549aaaa4 (draft); 派 2 條 followup task (daily_update 14:00 + VT 3 檔差異化); refresh publication_candidates 修 stale; append 第 3 條 followup (candidates daily cron)"
   },
   {
     "id": "email-12232-6b8f94",
@@ -39876,7 +39884,7 @@
     "description": "Gmail UID: 12232\nMessage-ID: <C1B91611-4671-4E56-986C-0D45A5ADA544@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 06:17:40 +0800\nSubject: Re: [VolPred Alert][INFO] 自主 loop fire 04:14 — 第3連續安靜，間隔拉長到60min降噪（auth holding）\n\n--- 用戶回信內容 ---\n你不是要根據完善我們的missions找出各種優化工作去做嗎？\r\n怎麼可能會有空白的時間？\r\n沒有錯誤，那就要找其他的事情去做啊\r\n你有五種missions總可以安排或派發任務吧\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 04:15 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 04:14 — 第3連續安靜，間隔拉長到60min降噪（auth holding）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 自主 loop fire 04:14 — 第 3 連續安靜 tick，拉長間隔降噪\r\n> \r\n> 夜間連續第 3 個無變化 tick，一切穩定：\r\n> \r\n> hourly_dispatch exit1 count 仍 81（零新失敗，auth holding）；degrading 約 06:00 滿 6h grace 自清\r\n> 無新 commit、無新 critical（最新 alert 為 06-24 舊檔）\r\n> 本 session 工作全數收尾上線（portfolio 93%、K1580 報告文、auth 守住）\r\n> 降噪措施：夜間安靜，loop 間隔拉長到 60 分，下次約 05:14（再下次約 06:14 應見 degrading 自清）。有新狀況（critical / hourly 新失敗）會立即恢復密集巡檢 + 通知。\r\n> \r\n> 待老闆定奪 2 件 policy（cron 14:00 / 策略整併）。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -39887,9 +39895,13 @@
     "email_message_id": "<C1B91611-4671-4E56-986C-0D45A5ADA544@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] 自主 loop fire 04:14 — 第3連續安靜，間隔拉長到60min降噪（auth holding）",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-29T23:14:30.255075+00:00",
-    "claim_session_id": "be1832d5c176"
+    "last_released_at": "2026-06-30T00:09:16.364282+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-30T00:12:05.165806+00:00",
+    "claim_session_id": "8c0273b1f4f3",
+    "started_at": "2026-06-30T00:12:05.386851+00:00",
+    "completed_at": "2026-06-30T00:30:17.084451+00:00",
+    "result": "本 fire 08:11 寄統合 reply email (notification_id 6a59e02a) 覆 4 條; 派 K1066 general companion article mile_549aaaa4 (draft); 派 2 條 followup task (daily_update 14:00 + VT 3 檔差異化); refresh publication_candidates 修 stale; append 第 3 條 followup (candidates daily cron)"
   },
   {
     "id": "email-12231-31f3f7",
@@ -39897,7 +39909,7 @@
     "description": "Gmail UID: 12231\nMessage-ID: <F2058430-ADB2-4085-92F3-38BC17E6AC11@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 06:15:54 +0800\nSubject: Re: [VolPred Boss Report] 2026-06-30 05:00 台灣時間 平台運營報告\n\n--- 用戶回信內容 ---\n立刻解決critical和warn問題\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 05:00 寫道：\r\n> \r\n> ﻿\r\n> VolPred Boss Report · 2026-06-30 05:00 台灣時間 · Overall CRITICAL\r\n> \r\n> ⓪ 本 cycle 意圖 / 目標 / 規劃\r\n> \r\n> 意圖 Intent\t從反應式 firefighting 轉成主動 ops 結構。建 dashboard + audit + boss report 三件套，然後 cycle 化主線程運營。\r\n> 本週目標 Weekly Goal\t• Mission 4: 0 stale cron 持續一週、live URL 100% 自動驗證\r\n> • Mission 1: 維持 ≥6 articles/day 同時把 narrative-arc dedup Layer 4 落地（已 ✅）\r\n> • Mission 3: Paper 4 body_v4 完成 rewrite gate\r\n> • Mission 5: FB MCP ext popup gate 找根因 + 解（不再說『修不到』）\r\n> 本 cycle 計劃 Plan\t• Cycle 1: 建 dashboard + 2 audit + boss report email infra（✅ 本 cycle 完成）\r\n> • Cycle 2-3: Paper 4 body_v4 rewrite main thread + 派 review agent 並行\r\n> • Cycle 4: free_tier_growth_plan.md spec + 識別 P1 analytics 工具選型\r\n> • Cycle 5+: MCP ext 根因 deep-dive；若不解，準備 Anthropic issue text\r\n> 成功標準 Success Criteria\t• 每 cycle 開頭 dashboard read 不再有 surprise critical（即 standing audit catch 問題早於我）\r\n> • 每 4h boss email 自動寄出無 fail\r\n> • 次次 cycle 至少 1 個結構性改善（不只 patch）+ 2 個 article 產出\r\n> 已知風險 Known Risks\t• main thread context 易爆（已多次 compact），需要更積極派 agent 卸載\r\n> • FB MCP root cause 可能要花 ≥2 cycles 才找到\r\n> • Paper 4 rewrite 過長吃掉太多 main thread bandwidth\r\n> ① 平台狀態\r\n> \r\n> 區段\t狀態\t說明\t建議行動\r\n> production_pending\tok\t2 pending tasks + 2 in-flight (top types: [('paper_review', 2)])\tdispatch top P1-P3 if slots free\r\n> production_throughput\tok\t11 articles published last 24h (target 6/day)\t—\r\n> distribution_supabase\tok\t11/11 last-24h articles synced\t—\r\n> verification_live_url\tok\t3/3 sample report URLs ok; 3/3 core pages content-ok\t—\r\n> verification_fb_pipeline\tok\t3 FB posts awaiting interactive session\tinteractive session / Chrome MCP available時接手貼文與留言\r\n> health_cron\tok\t0 cron jobs stale (over max-age)\t—\r\n> health_alerts_unhandled\tcritical\t3 current warn/critical alert conditions\tingest alerts → run remediation per alert.md auto-action table\r\n> loop_health\twarn\toverall=degrading | first_pass_success=low_coverage task_outcome=ok error_recurrence=degrading correction_trend=ok\t`uv run volpred ops dreaming-run` for cross-session pattern analysis\r\n> ①-b 排程器成果掌握（cron 跑完沒 / 成功沒）\r\n> \r\n> 每個定時排程器的 runs / exit / 完成狀態。全部正常\r\n> \r\n> === cron 成果掌握 review — 2026-06-30 05:00:26（台灣時間）===\r\n> \r\n>   hourly_dispatch   runs=249 exit=0 idle | last: 2026-06-30 04:22:23 (log-mtime)\r\n>   compute_worker    runs=1124 exit=0 idle | last: 2026-06-30 05:00:05 (log-mtime)\r\n>   check_alerts      runs=282 exit=0 running | last: 2026-06-30 05:00:05 (log-mtime)\r\n>   collect_tw        runs=8 exit=0 idle | last: 2026-06-29 15:00:08 (log-mtime)\r\n>   collect_us        runs=7 exit=0 idle | last: 2026-06-27 07:03:10 (log-mtime)\r\n>   daily_update      runs=9 exit=0 idle | last: 2026-06-29 08:06:16 (log-mtime)\r\n>   release_pool      runs=47 exit=0 idle | last: 2026-06-30 04:00:13 (log-mtime)\r\n>   market_cal        runs=2 exit=0 idle | last: 2026-06-29 08:00:03 (log-mtime)\r\n>   memory_health     runs=11 exit=0 idle | last: 2026-06-29 05:30:04 (log-mtime)\r\n>   work_summary      runs=47 exit=0 idle | last: 2026-06-30 00:05:11 (log-mtime)\r\n> \r\n> 近 75 分鐘 git commits（hourly_dispatch 產出代理）：2 筆\r\n>   4f806e105 ops(hourly 04:22): PHASE-Z safety-net auto-commit (agent left uncommitted)\r\n>   5caf80713 [codex] review K1580 article\r\n> \r\n> ✅ 所有 cron 排程器：last exit 0、無逾時、無中斷班。\r\n> ② 本 cycle 活動（過去 4h）\r\n> \r\n> 10 commits\r\n> \r\n> SHA\tSubject\tTime\r\n> 4f806e105\tops(hourly 04:22): PHASE-Z safety-net auto-commit (agent left uncommitted)\t04:22\r\n> 5caf80713\t[codex] review K1580 article\t03:53\r\n> 0dcea0168\tops(hourly 03:22): PHASE-Z safety-net auto-commit (agent left uncommitted)\t03:22\r\n> 9df636256\t[codex] scaffold K1291 experiment\t02:47\r\n> 4cec3512e\tops(hourly 02:26): PHASE-Z safety-net auto-commit (agent left uncommitted)\t02:26\r\n> 55ca6d0f4\t[claude] K1581 GSCPI vs commodity/shipping/retail vol — NULL\t02:17\r\n> a62131c59\t[codex] complete labor supply RV proxy experiment\t01:43\r\n> 9e9e548cb\tjournal_discovery_20260629_2\t補 res\r\n> 4f15b42e0\t[claude] K1580 年度等權再平衡嚴謹驗證（台美+全球, 1993-2024, 分時期）\t01:06\r\n> 76e2c6e13\tops(hourly 01:00): PHA\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -39908,8 +39920,180 @@
     "email_message_id": "<F2058430-ADB2-4085-92F3-38BC17E6AC11@gmail.com>",
     "email_subject": "Re: [VolPred Boss Report] 2026-06-30 05:00 台灣時間 平台運營報告",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-29T23:14:23.700770+00:00",
-    "claim_session_id": "ad055f69baab"
+    "last_released_at": "2026-06-30T00:09:16.589682+00:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-06-30T00:12:03.831084+00:00",
+    "claim_session_id": "1e946ea704ec",
+    "started_at": "2026-06-30T00:12:04.058332+00:00",
+    "completed_at": "2026-06-30T00:30:16.391316+00:00",
+    "result": "本 fire 08:11 寄統合 reply email (notification_id 6a59e02a) 覆 4 條; 派 K1066 general companion article mile_549aaaa4 (draft); 派 2 條 followup task (daily_update 14:00 + VT 3 檔差異化); refresh publication_candidates 修 stale; append 第 3 條 followup (candidates daily cron)"
+  },
+  {
+    "id": "K1582",
+    "title": "K1582: HARQ/SHARK 測量誤差修正 HAR**（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 483). Original: HARQ/SHARK 測量誤差修正 HAR**（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1582.py with signal.shift(1) + seed=42, (c) K1582_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 483,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-30T00:00:00Z"
+  },
+  {
+    "id": "K1583",
+    "title": "K1583: Conditional / Sequential MCS 評估升級**（JRSS-B 2025 qkag066 + arXiv 2505.21278 + Conditional SPA）：重用 1400+ K 的 loss/VaR，cond",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 484). Original: Conditional / Sequential MCS 評估升級**（JRSS-B 2025 qkag066 + arXiv 2505.21278 + Conditional SPA）：重用 1400+ K 的 loss/VaR，conditioning＝VIX regime/FRED 衰退，conditional MCS + 線上 sequential 監控勝負漂移 → 「哪模型在哪 regime 稱王」meta 結論。零新資料。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1583.py with signal.shift(1) + seed=42, (c) K1583_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 484,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-30T00:00:01Z"
+  },
+  {
+    "id": "K1584",
+    "title": "K1584: Co-jump / HAR-CJ jump 軸**（JFE 2017 systemic co-jumps + JoE 2023 networks + Hawkes）：tick BNS bipower/Lee-Mykland 拆 RV＝con",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 485). Original: Co-jump / HAR-CJ jump 軸**（JFE 2017 systemic co-jumps + JoE 2023 networks + Hawkes）：tick BNS bipower/Lee-Mykland 拆 RV＝continuous+jump 建 HAR-CJ，同日跨資產 co-jump 計數當 vol regime 觸發器（VolPred jump 軸最薄）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1584.py with signal.shift(1) + seed=42, (c) K1584_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 485,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-30T00:00:01Z"
+  },
+  {
+    "id": "K1585",
+    "title": "K1585: Agreed vs Disagreed Uncertainty 二維 regime**（Gambetti-Forni arXiv 2302.01621, CEPR VoxEU 2025）：level＝VIX/JLN，disagreement",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 487). Original: Agreed vs Disagreed Uncertainty 二維 regime**（Gambetti-Forni arXiv 2302.01621, CEPR VoxEU 2025）：level＝VIX/JLN，disagreement＝Philly Fed SPF IQR，2×2 regime 檢「高不確定×低分歧(agreed)」格的 forward RV/tail 是否更高；disagreement 當 VIX 之外增量 predictor（正面挑戰 VIX-sufficient K43/730）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1585.py with signal.shift(1) + seed=42, (c) K1585_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 487,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-30T00:00:01Z"
+  },
+  {
+    "id": "K1586",
+    "title": "K1586: 穩定幣儲備 → 短端 T-bill vol**（GENIUS Act 2025 簽署 + Eichengreen fire-sale）：鏈上穩定幣淨發行(DefiLlama/CoinGecko)對 DGS1MO/3MO realized v",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 490). Original: 穩定幣儲備 → 短端 T-bill vol**（GENIUS Act 2025 簽署 + Eichengreen fire-sale）：鏈上穩定幣淨發行(DefiLlama/CoinGecko)對 DGS1MO/3MO realized vol(MOVE proxy) 領先；脫鉤事件(USDC-SVB)當 event window 量 SHY/BIL vol spike。全免費，timely 高分享。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1586.py with signal.shift(1) + seed=42, (c) K1586_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 490,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-30T00:00:01Z"
+  },
+  {
+    "id": "K1587",
+    "title": "K1587: PM2.5 情緒型外生 regressor**（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 492). Original: PM2.5 情緒型外生 regressor**（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）。識別乾淨（純情緒管道），補行為 vol 軸。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1587.py with signal.shift(1) + seed=42, (c) K1587_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 492,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-30T00:00:02Z"
+  },
+  {
+    "id": "K1588",
+    "title": "K1588: Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部",
+    "priority": 3,
+    "description": "Auto-generated from research_program.md unchecked item (line 493). Original: Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1588.py with signal.shift(1) + seed=42, (c) K1588_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "source_line": 493,
+    "tags": [
+      "experiment",
+      "autonomous-research"
+    ],
+    "created_at": "2026-06-30T00:00:02Z"
+  },
+  {
+    "id": "platform_ops_daily_update_intraday_1400_schedule",
+    "title": "[platform_ops] daily_update 新增 14:00 intraday fire（不改 08:03，加時點）",
+    "description": "用戶 2026-06-30 06:24 指示：daily_update cron 應該『增加』時間點而不是『改變』。當前 LaunchAgent com.volpred.daily-update schedule=3 8 * * 1-6，跑策略計算+Supabase 同步+績效重算+heartbeat。新增 14:00 額外 fire（intraday，台股 13:30 收盤後 + 期貨夜盤前的 sweet spot）。實作：(a) 新增 LaunchAgent com.volpred.daily-update-intraday，或在現有 LaunchAgent 加第 2 個 StartCalendarInterval；(b) 評估是否需要新 wrapper script（cron_daily_update_intraday.sh）區分 mode；(c) 加 schedule entry 到 config/runtime_schedules.json；(d) install_host_crontab.sh 不動（LaunchAgent 不走 host crontab）；(e) 跑一次手動驗證確認 strategy_signals/metrics 兩次刷新都 OK；(f) email 通知老闆完成。注意：08:03 那一班不可動，純增加時點不改變。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "created_at": "2026-06-30T00:15:00+00:00",
+    "source": "user_directive_email_12235",
+    "tags": [
+      "daily_update",
+      "schedule",
+      "launchagent",
+      "intraday",
+      "user_directive"
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T00:23:10.593812+00:00",
+    "claim_session_id": "95c1cd6b9d12",
+    "started_at": "2026-06-30T00:31:46.854662+00:00",
+    "completed_at": "2026-06-30T00:31:48.710507+00:00",
+    "result": "K1066 agent 順手完成: (a) ops/launchd/com.volpred.daily-update-intraday.plist (14:00 cron Mon-Sat); (b) scripts/cron_daily_update_intraday.sh wrapper (lock 共用 morning 防雙寫 + schedule-due guard); (c) config/runtime_schedules.json daily_update_intraday entry; (d) scripts/cron_review.py + scripts/ops_dashboard.py 加入 monitor; (e) ~/.volpred/bin/ install + launchctl bootstrap → state=loaded waiting 14:00 fire\n\nAdded daily_update_intraday canonical schedule (0 14 * * 1-6) without changing 08:03, installed LaunchAgent com.volpred.daily-update-intraday and runtime wrapper, added cron_review/ops_dashboard monitoring, ran manual intraday refresh exit 0 (signals/trades/market_daily/metrics synced), and sent info alert e1e1a5a2."
+  },
+  {
+    "id": "strategy_lifecycle_vt_3strategy_differentiation_audit",
+    "title": "[strategy_lifecycle] VT 3 檔策略（保守/標準/積極）VIX 15-20 區段同質化 audit + 差異化方案",
+    "description": "用戶 2026-06-30 06:24 詢問策略整併。問題：VolPred 上架 3 檔 VT 策略（保守/標準/積極）在 VIX 15-20 區段（過去 1 年 VIX 12 月均值 ~17，大多時間落此區）portfolio weight 算出來幾乎相同（都是 ~70% SPY + 30% 債），讀者翻訂閱頁分不出差異。3 個解：(a) 整併成 1 檔；(b) 改 VT 參數讓 3 檔在 15-20 也有區別（e.g. 保守強制 SPY≤50%、積極強制 SPY≥85%）；(c) 下架重合者保留 1-2 檔。建議解 = (b) 差異化參數，保留 3 personas marketing 賣點 + 不浪費 paper trading 歷史。Task: 跑 VT 3 檔同期 cross-OOS sensitivity test（VIX 15-20 區段 vs 全期）+ (b) 方案具體參數草擬 + 期望差異化效果模擬 + 跨期間 robustness 檢定（含 2020 covid 月、2022 縮表月、2024 yen carry unwind）。完成後 email 老闆審後再上架。輸出: experiments/<id>/ + strategy_lifecycle/<vt_3spec_audit>.md。",
+    "task_type": "strategy_lifecycle",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-06-30T00:15:00+00:00",
+    "source": "user_directive_email_12235",
+    "tags": [
+      "vt",
+      "strategy_lifecycle",
+      "differentiation",
+      "vix_regime",
+      "user_directive"
+    ]
+  },
+  {
+    "id": "platform_ops_publication_candidates_daily_refresh_cron",
+    "title": "[platform_ops] publication_candidates.json daily cron refresh（避免 candidates STALE 派錯 K）",
+    "description": "2026-06-30 08:21 incident: K1574 寫作 agent 從 publication_candidates top_10_uncovered 派出，主線程二次驗證發現 K1574 已於前一晚 2026-06-29 20:00 published 為 mile_5399bf01。Candidates snapshot 是 publish 之前的 stale 版本，造成派錯 agent。根因: scripts/build_publication_candidates.py 沒有 cron，候選池與實際 covered list 永遠 lag。本次主線程 mid-flight pivot K1574→K1066 救回，但這是手動。永久解：把 build_publication_candidates.py 排進 daily cron（例如 05:30 台灣時間，hourly_dispatch :07 之前），確保每天第一個 hourly fire 派工前候選池新鮮。實作：(a) 新增 wrapper script scripts/cron_build_publication_candidates.sh + ~/.volpred/bin/ 同步；(b) 加 schedule entry 到 config/runtime_schedules.json (cron )；(c) install_host_crontab.sh 重跑 OR 走 piggy-back via check_alerts；(d) 跑一次手動驗證 output 寫入 storage/publication_candidates.json；(e) audit publish 後 candidates 是否同步。注意：是否要 publish hook 即時 invalidate 由本 task 評估後決定（daily 已 sufficient or need event-driven）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-06-30T00:25:15.179253+00:00",
+    "source": "incident_2026_06_30_k1574_stale_candidates",
+    "tags": [
+      "publication_candidates",
+      "cron",
+      "stale_fix",
+      "root_cause"
+    ]
   }
 ]

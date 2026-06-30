@@ -1,30 +1,38 @@
 # Feed Index
 
-_Last built: 2026-06-29 22:48 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-06-30 00:29 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1695**  (with thumbnail: 68)
-- Last 30 days: **342**
-- Total chars (content): 5,083,134
+- Total articles: **1703**  (with thumbnail: 68)
+- Last 30 days: **350**
+- Total chars (content): 5,104,345
 
-**Status**: published=1504, archived=123, unpublished=53, retracted=12, draft=2, wont_fix=1
+**Status**: published=1505, archived=123, unpublished=58, retracted=12, draft=4, wont_fix=1
 
-**Audience**: research=1101, general=376, daily=124, unknown=77, member_qa=12, event=5
+**Audience**: research=1102, general=383, daily=124, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=854, general=726, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
+**Category**: milestone=854, general=734, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
 
-## 最近 30 天 (342)
+## 最近 30 天 (350)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-29 | `mile_819af916` | 防禦股悄悄贏了：XLV 一個月漲 8%，科技 ETF 卻原地踏步，波動率說了什麼 | general | general | published | 3024 |  | 一般讀者, trending, sector-rotation, vol-skew, XLK, XLP |
+| 2026-06-29 | `mile_c16d94b7` | 同一個指數好幾檔 ETF，短線交易全擠在最老那一檔——拿來當風險訊號靈不靈？ | general | general | draft | 2621 |  | 一般讀者, ETF, 成交量, 流動性, 新興市場, 跨市場 |
+| 2026-06-29 | `mile_c0d6676f` | K 棒記了四個價格，收盤只用一個——剩下三個能預測明天的波動嗎？ | general | general | draft | 2661 |  | 一般讀者, ETF, 波動率, K棒, 隔日波動, 量化方法 |
+| 2026-06-29 | `mile_ef22df7c` | 同一個指數好幾檔 ETF，短線交易卻全擠在最老那一檔——這能拿來當風險訊號嗎？ | general | general | unpublished | 2356 |  | 一般讀者, ETF, 成交量, 流動性, 新興市場, 跨市場 |
+| 2026-06-29 | `mile_fce646f0` | 同一個指數有好幾檔 ETF，短線交易卻全擠在最老那檔——能當風險訊號嗎？ | general | general | unpublished | 2294 |  | 一般讀者, ETF, 成交量, 流動性, 新興市場, 跨市場 |
+| 2026-06-29 | `mile_c9778082` | K 棒有四個價格，收盤只用了一個——多出來那三個能預測明天的波動嗎？ | general | general | unpublished | 2379 |  | 一般讀者, ETF, 波動率, K棒, 隔日波動, 量化方法 |
+| 2026-06-29 | `mile_c430db8f` | 同一個指數有好幾檔 ETF，交易卻擠在最老那檔——這能當風險訊號嗎？ | general | general | unpublished | 2198 |  | 一般讀者, ETF, 成交量, 流動性, 新興市場, 跨市場 |
+| 2026-06-29 | `mile_9312bb19` | 收盤價只用一個數字，K 棒給你四個——多出來的三個能預測明天的波動嗎？ | research | general | unpublished | 2311 |  | 研究, ETF, 波動率, K棒估計, 量化方法, GARCH |
 | 2026-06-29 | `mile_35dfee97` | 每日策略建議：VIX 17.65（正常）— 2026-06-30 | daily | general | published | 1581 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-29 | `mile_2a80d569` | 2026-06-30 本日持倉比率建議（依據 2026-06-29 收盤數據） | daily | milestone | published | 949 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-06-29 | `mile_30438396` | 把學術因子裝進 ETF 後，到底掉了多少？我們做了一次 13 年的記帳 | general | general | draft | 3641 |  | 一般讀者, 因子投資, 美股 ETF, MTUM, VLUE, QUAL |
 | 2026-06-29 | `mile_68285aa0` | 國防預算翻倍喊得這麼大聲，國防 ETF 卻沒按劇本震盪 | general | general | draft | 3751 |  | 一般讀者, 國防, ETF, 事件研究, 波動率 |
 | 2026-06-29 | `mile_9839822d` | 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？ | general | general | published | 3451 |  | 一般讀者, 關鍵礦物, 稀土, 出口管制, 事件研究, REMX |
 | 2026-06-29 | `mile_5399bf01` | 你買 MTUM 真的買到 Momentum 嗎？7 檔因子 ETF 對紙上學術因子的 13 年體檢 | research | milestone | published | 5432 |  | 研究, 因子ETF, Fama-French, MTUM, VLUE, QUAL |
-| 2026-06-29 | `mile_7b95b816` | 年度等權再平衡，真的比抱著不動強嗎？台美 30 年實測拆給你看 | general | milestone | published | 1739 |  | 一般讀者, 再平衡, 資產配置, 買進持有, 風險管理 |
+| 2026-06-29 | `mile_7b95b816` | 年度等權再平衡，真的比抱著不動強嗎？台美 30 年實測拆給你看 | general | milestone | published | 2801 |  | 一般讀者, 再平衡, 資產配置, 買進持有, 風險管理 |
 | 2026-06-29 | `mile_dc4035e4` | 商品 ETF 的方向對了一半，可惜統計撐不住：波動分高低之後的動能 vs 反轉拼圖 | general | general | published | 3027 |  | 一般讀者, 商品ETF, 動能, 反轉, 波動率, 方法論 |
 | 2026-06-29 | `mile_96ec845f` | 市場看起來越複雜，不代表波動率就更好預測 | general | general | unpublished | 2168 |  | 一般讀者, 波動率預測, SPY, VIX, null-result |
 | 2026-06-29 | `mile_082f0578` | 交易量歸零那天，薄市場 ETF 後面 22 天更容易出事 | general | general | published | 1139 |  | 一般讀者, ETF, 流動性, 風險管理, 資料品質 |
@@ -39,7 +47,7 @@ _Last built: 2026-06-29 22:48 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-28 | `mile_c1f998c8` | K1339: 商品 ETF 動量體制切換後，銅 30 日波動率平均跳升 18% | research | milestone | published | 3982 |  | commodity, volatility, event study, CPER, USO, UNG |
 | 2026-06-28 | `mile_bd564eb7` | 創新高然後急殺，網路上那套「短彈可搶、抱一年會死」是真的嗎？我把它丟進 bootstrap | general | general | published | 2657 |  | 一般讀者, 台股, 波動率, 回測, bootstrap, 研究誠實 |
 | 2026-06-28 | `mile_e6acc52c` | K1347: CVaR 風險平價未能穩定改善四資產壓力回撤 | research | milestone | unpublished | 5157 |  | 研究, CVaR, risk parity, SPY, TLT, GLD |
-| 2026-06-28 | `mile_0941e2f0` | 半導體修正進行中：選擇權偏斜告訴你市場還沒放心 | general | general | published | 2646 |  | 一般讀者, 波動率, 半導體, 選擇權偏斜, NVDA, 風險管理 |
+| 2026-06-28 | `mile_0941e2f0` | 半導體修正進行中：選擇權偏斜告訴你市場還沒放心 | general | general | published | 2951 |  | 一般讀者, 波動率, 半導體, 選擇權偏斜, NVDA, 風險管理 |
 | 2026-06-28 | `mile_b87cc779` | K1422：HAR 分位數迴歸在三種公平 Baseline 比較下的商品 ETF 尾部風險預測 | research | milestone | published | 10943 |  | 研究, volatility, quantile-regression, commodity, har-rv, methodology |
 | 2026-06-28 | `mile_76475146` | 事件日前別急著躲：NFP、CPI、FOMC 留下的共同線索 | general | general | published | 2215 |  | 一般讀者, 精選導讀, daily_digest, 事件風險, NFP, CPI |
 | 2026-06-28 | `mile_127dc20d` | 預測輸了，守底線卻贏了：一個模型的分裂成績單 | general | general | published | 2457 |  | 一般讀者, 波動率, 風險管理, 跨資產, QQQ, GLD |

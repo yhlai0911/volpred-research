@@ -40,6 +40,11 @@ def test_canonical_daily_update_cron_is_mon_sat_0803():
     assert get_job_cron("daily_update") == "3 8 * * 1-6"
 
 
+def test_canonical_daily_update_intraday_cron_is_mon_sat_1400():
+    """The intraday refresh is an added fire, not a mutation of the 08:03 job."""
+    assert get_job_cron("daily_update_intraday") == "0 14 * * 1-6"
+
+
 def test_cron_review_jobs_all_resolve_to_canonical_cron():
     """Every cron_review JOBS entry must point at a config job id that resolves
     to a real canonical cron — a None means the monitor would silently fall back

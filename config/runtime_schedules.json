@@ -2,7 +2,7 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-05-26",
+    "updated_at": "2026-06-30",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection."
   },
   "system_crontab": {
@@ -87,6 +87,21 @@
         ],
         "host_crontab_managed": false,
         "host_crontab_managed_note": "2026-05-22: LaunchAgent com.volpred.daily-update 為 canonical;移除 host crontab 重複源（雙 fire 致 08:03 文章重複發兩篇）"
+      },
+      {
+        "id": "daily_update_intraday",
+        "label": "daily_update 14:00 intraday 更新與同步",
+        "cron": "0 14 * * 1-6",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_daily_update_intraday.sh",
+        "log_path": "storage/logs/cron/daily_update_intraday.log",
+        "command_deprecated": "daily_update.py",
+        "description": "2026-06-30 老闆要求『增加一個更新的時間點而不是改變』：08:03 morning 班保留；14:00 台股收盤後額外刷新策略計算、Supabase 同步、績效重算與 heartbeat。⚠️ 不雙發文章：daily_update.py 的 spy_date skip_publish guard 偵測美股資料未變時會跳過每日文章，只刷新資料/metrics/sync。共用 morning 班同一 lock，避免重疊寫入。",
+        "matchers": [
+          "daily_update.py",
+          "cron_daily_update_intraday.sh"
+        ],
+        "host_crontab_managed": false,
+        "host_crontab_managed_note": "2026-06-30: LaunchAgent com.volpred.daily-update-intraday 為 canonical；純增加 14:00 fire，不改 08:03 daily_update。"
       },
       {
         "id": "radar_strategy_snapshot",

@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1576,
+  "last_k_id": 1588,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -210,8 +210,78 @@
       "status": "reserved",
       "topic": "defense_spending_boom_beta_rearmament_shock_defe",
       "topic_hash": "a83c494b110d9c72"
+    },
+    {
+      "claimed_at": "2026-06-30T00:00:00.875005+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1582",
+      "number": 1582,
+      "source_max": 1581,
+      "status": "reserved",
+      "topic": "HARQ/SHARK 測量誤差修正 HAR**（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照。",
+      "topic_hash": "e0698124b9d22587"
+    },
+    {
+      "claimed_at": "2026-06-30T00:00:01.077774+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1583",
+      "number": 1583,
+      "source_max": 1582,
+      "status": "reserved",
+      "topic": "Conditional / Sequential MCS 評估升級**（JRSS-B 2025 qkag066 + arXiv 2505.21278 + Conditional SPA）：重用 1400+ K 的 loss/VaR，conditioning＝VIX regime/FRED 衰退，conditional MCS + 線上 sequential 監控勝負漂移 → 「哪模型在哪 regime 稱王」meta 結論。零新資料。",
+      "topic_hash": "7a16c9d0b45b100f"
+    },
+    {
+      "claimed_at": "2026-06-30T00:00:01.205224+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1584",
+      "number": 1584,
+      "source_max": 1583,
+      "status": "reserved",
+      "topic": "Co-jump / HAR-CJ jump 軸**（JFE 2017 systemic co-jumps + JoE 2023 networks + Hawkes）：tick BNS bipower/Lee-Mykland 拆 RV＝continuous+jump 建 HAR-CJ，同日跨資產 co-jump 計數當 vol regime 觸發器（VolPred jump 軸最薄）。",
+      "topic_hash": "262b7154381ea3a4"
+    },
+    {
+      "claimed_at": "2026-06-30T00:00:01.341141+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1585",
+      "number": 1585,
+      "source_max": 1584,
+      "status": "reserved",
+      "topic": "Agreed vs Disagreed Uncertainty 二維 regime**（Gambetti-Forni arXiv 2302.01621, CEPR VoxEU 2025）：level＝VIX/JLN，disagreement＝Philly Fed SPF IQR，2×2 regime 檢「高不確定×低分歧(agreed)」格的 forward RV/tail 是否更高；disagreement 當 VIX 之外增量 predictor（正面挑戰 VIX-sufficient K43/730）。",
+      "topic_hash": "6ec8ed7d3ccd46de"
+    },
+    {
+      "claimed_at": "2026-06-30T00:00:01.458693+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1586",
+      "number": 1586,
+      "source_max": 1585,
+      "status": "reserved",
+      "topic": "穩定幣儲備 → 短端 T-bill vol**（GENIUS Act 2025 簽署 + Eichengreen fire-sale）：鏈上穩定幣淨發行(DefiLlama/CoinGecko)對 DGS1MO/3MO realized vol(MOVE proxy) 領先；脫鉤事件(USDC-SVB)當 event window 量 SHY/BIL vol spike。全免費，timely 高分享。",
+      "topic_hash": "fec56f68d98395b4"
+    },
+    {
+      "claimed_at": "2026-06-30T00:00:02.473296+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1587",
+      "number": 1587,
+      "source_max": 1586,
+      "status": "reserved",
+      "topic": "PM2.5 情緒型外生 regressor**（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）。識別乾淨（純情緒管道），補行為 vol 軸。",
+      "topic_hash": "f5aafc1c06095072"
+    },
+    {
+      "claimed_at": "2026-06-30T00:00:02.537978+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1588",
+      "number": 1588,
+      "source_max": 1587,
+      "status": "reserved",
+      "topic": "Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。",
+      "topic_hash": "4d33512e6aa8dd35"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-06-29T16:20:32.869291+00:00"
+  "updated_at": "2026-06-30T00:00:02.537978+00:00"
 }
