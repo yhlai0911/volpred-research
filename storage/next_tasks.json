@@ -40050,7 +40050,7 @@
     "title": "K1587: PM2.5 情緒型外生 regressor**（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 492). Original: PM2.5 情緒型外生 regressor**（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）。識別乾淨（純情緒管道），補行為 vol 軸。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1587.py with signal.shift(1) + seed=42, (c) K1587_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -40063,7 +40063,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-30T07:50:14.785380+00:00",
     "claim_session_id": "e64c9ce3af53",
-    "started_at": "2026-06-30T07:50:14.988282+00:00"
+    "started_at": "2026-06-30T07:50:14.988282+00:00",
+    "completed_at": "2026-06-30T08:26:38.581535+00:00",
+    "result": "Completed K1587 NYC PM2.5 volatility pilot. Verdict NULL: lagged PM2.5 worsens OOS QLIKE vs HAR/VIX baseline at 1d/5d, AQI>=100 and top-decile PM2.5 buckets do not show elevated future RV; no positive knowledge claim."
   },
   {
     "id": "K1588",
