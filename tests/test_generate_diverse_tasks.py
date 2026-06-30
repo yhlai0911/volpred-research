@@ -603,6 +603,58 @@ def test_paper_review_tasks_are_codex_agentable_not_main_thread_only(tmp_path, m
     assert "main-thread-only" not in tasks[0]["tags"]
 
 
+def test_paper_review_tasks_skip_post_publish_corrective_errata(tmp_path, monkeypatch) -> None:
+    feed = tmp_path / "feed.json"
+    feed.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "mile_48c8328b",
+                    "title": "K189 修正版",
+                    "status": "published",
+                    "published_at": "2026-07-01T00:00:00+00:00",
+                    "last_updated_at": "2026-07-01T01:00:00+00:00",
+                    "tags": ["research"],
+                    "audience": "research",
+                    "details": {"experiment_refs": ["K189"]},
+                    "errata": {
+                        "update_at": "2026-07-01T01:00:00+00:00",
+                        "update_action": "codex_review_k189_corrected_rewrite",
+                        "update_summary": "Rewrote from corrected K189 rerun.",
+                        "update_history": [
+                            {
+                                "at": "2026-07-01T01:00:00+00:00",
+                                "action": "codex_review_k189_corrected_rewrite",
+                                "summary": "Corrected stale conclusion.",
+                            }
+                        ],
+                    },
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(generate_diverse_tasks, "FEED", feed)
+
+    tasks = generate_diverse_tasks.gen_paper_review_tasks(
+        existing=set(),
+        rng=generate_diverse_tasks.random.Random(42),
+    )
+
+    assert tasks == []
+
+
+def test_post_publish_corrective_errata_gate_requires_update_after_publish() -> None:
+    article = {
+        "published_at": "2026-07-01T01:00:00+00:00",
+        "last_updated_at": "2026-07-01T00:59:00+00:00",
+        "errata": {"update_action": "codex_review_fix"},
+    }
+
+    assert not generate_diverse_tasks._article_has_post_publish_corrective_errata(article)
+
+
 def test_paper_review_tasks_warns_on_bad_feed_json(tmp_path, monkeypatch, capsys) -> None:
     feed = tmp_path / "feed.json"
     feed.write_text("{bad json", encoding="utf-8")

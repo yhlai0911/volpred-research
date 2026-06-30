@@ -49,6 +49,12 @@ QUOTA_EXPERIMENT = 2     # 2026-05-08 v2 extension: backlog scan
 PAPER_REVIEW_AGE_HOURS = 24
 SKILL_STALE_DAYS = 30
 ERROR_LOG_REVIEW_THRESHOLD = 40  # top-level `## ` error entries per governance sweep
+CORRECTIVE_ERRATA_TOKENS = (
+    "rewrite",
+    "correction",
+    "corrected",
+    "fix",
+)
 
 EXPERIMENTS_DIR = ROOT / "experiments"
 RESEARCH_PROGRAM = ROOT / "research_program.md"
@@ -91,6 +97,13 @@ def _existing_ids(tasks: list) -> set[str]:
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _parse_iso_datetime(value: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
 
 
 def _warn_diverse(message: str) -> None:
@@ -157,6 +170,53 @@ def _experiment_dir_covers_kid(dirname: str, kid_lower: str) -> bool:
     return name == kid_lower or name.startswith(f"{kid_lower}_")
 
 
+def _article_has_post_publish_corrective_errata(article: dict) -> bool:
+    """Return True when an article has already been corrected after publish.
+
+    Paper-audit task emitters should not open a fresh "unreviewed article" or
+    erratum task from stale pre-correction evidence when the feed entry already
+    records a post-publish rewrite/correction/fix. This is a skip gate, not a
+    claim that the corrected article is substantively right.
+    """
+    errata = article.get("errata")
+    if not isinstance(errata, dict):
+        return False
+
+    published_at = str(article.get("published_at") or "")
+    last_updated_at = str(
+        article.get("last_updated_at")
+        or article.get("updated_at")
+        or errata.get("update_at")
+        or ""
+    )
+    if not published_at or not last_updated_at:
+        return False
+    published_dt = _parse_iso_datetime(published_at)
+    updated_dt = _parse_iso_datetime(last_updated_at)
+    if published_dt is not None and updated_dt is not None:
+        if updated_dt <= published_dt:
+            return False
+    elif last_updated_at <= published_at:
+        return False
+
+    text_parts = [
+        errata.get("update_action", ""),
+        errata.get("update_summary", ""),
+    ]
+    history = errata.get("update_history")
+    if isinstance(history, list):
+        for item in history:
+            if not isinstance(item, dict):
+                continue
+            text_parts.extend([
+                item.get("action", ""),
+                item.get("summary", ""),
+            ])
+
+    haystack = " ".join(str(part).lower() for part in text_parts if part)
+    return any(token in haystack for token in CORRECTIVE_ERRATA_TOKENS)
+
+
 def gen_paper_review_tasks(existing: set[str], rng: random.Random) -> list[dict]:
     """Sample articles published in last 24h that lack Codex review tag."""
     if not FEED.exists():
@@ -175,6 +235,8 @@ def gen_paper_review_tasks(existing: set[str], rng: random.Random) -> list[dict]
             continue
         tags = art.get("tags") or []
         if any("codex-reviewed" in t.lower() or "post-review" in t.lower() for t in tags):
+            continue
+        if _article_has_post_publish_corrective_errata(art):
             continue
         audience = art.get("audience") or (art.get("details") or {}).get("audience") or ""
         if audience == "daily":

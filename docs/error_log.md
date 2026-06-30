@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-01 paper-audit 對已 in-place corrected 文章重開 P1 erratum
+
+**問題**：paper-audit workflow 對 `mile_48c8328b` 開出 P1「K189 結論相反」erratum，但該文章已在 2026-06-15 透過 `errata.update_action=codex_review_k189_corrected_rewrite` in-place corrected，現行 title / content 已與 K189 rerun 結果一致。
+
+**現象 / 根因**：audit 任務生成只看舊版 FAIL 證據，沒有先檢查 feed entry 的 post-publish `errata` / `last_updated_at`。因此已修正文仍會被當成未修正文章重複開誠信任務，浪費高優先權 slot，還可能造成不必要的 retraction 壓力。
+
+**解決方法**：`scripts/generate_diverse_tasks.py` 新增 `_article_has_post_publish_corrective_errata()` gate：若 `last_updated_at > published_at` 且 errata action/history 含 rewrite / correction / corrected / fix，24h paper-review 補池不再開新 task。新增 regression test 覆蓋 `mile_48c8328b` 型 corrected-rewrite 會被 skip，且更新時間未晚於 publish 時不會誤 skip。
+
+**教訓**：post-hoc audit 不能只讀舊 review 結論；開 erratum / re-review task 前要先看文章目前狀態與 errata trail。已修正文若仍需質疑，必須基於現行 content 重新比對來源，而不是重放舊版 failure。
+
 ## 2026-07-01 FB awaiting auto-expire 72h 過慢，timely insight 衰減才被看見
 
 **問題**：handoff 新增 FB urgent banner 後，5 篇 awaiting interactive FB 文中已有 3 篇等待 64h+，原 `audit_fb_pipeline.py` 要到 72h 才 `expired_skip`，時效性內容已明顯衰減；同時 24h 以前沒有 early warning 階段，會太晚 surface 給互動 session。
