@@ -40565,7 +40565,7 @@
     "description": "Gmail UID: 12290\nMessage-ID: <F4B33D18-DDDE-4D94-B1C0-76C1098F5C1F@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 14:56:42 +0800\nSubject: Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fallback(s)\n\n--- 用戶回信內容 ---\n要立刻徹底解決吧\r\n總不能一直暫停？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 14:17 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> git-push-backup: push held — 1 new silent fallback(s)\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 本地領先 9 commit 但 HEAD 帶 1 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push（紅碼不上 origin、CI 不會紅）。下一班 hourly dispatch 必須先修（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）再讓 push 恢復。新發現：\r\n> NEW scripts/dreaming_review.py:545 except TypeError|ValueError: continue\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -40576,9 +40576,13 @@
     "email_message_id": "<F4B33D18-DDDE-4D94-B1C0-76C1098F5C1F@gmail.com>",
     "email_subject": "Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fallback(s)",
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-30T07:00:33.591809+00:00",
-    "claim_session_id": "043f30996ec3"
+    "last_released_at": "2026-06-30T09:10:47.984526+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-30T09:10:48.393231+00:00",
+    "claim_session_id": "41ec7b6ec5e7",
+    "started_at": "2026-06-30T09:10:48.810268+00:00",
+    "completed_at": "2026-06-30T09:12:16.536044+00:00",
+    "result": "底層根治已落地：dreaming_review.py:545 silent fallback fix commit 0b17b7b82（加 warn before continue），audit new=0/baseline=75，push wrapper gate 在運作（17:01 push 8 commit OK）。Alert 為系統正確攔截 + 自我修復的證明（push hold 防 origin/CI 紅）。close email 已寄 19affe90。"
   },
   {
     "id": "platform_ops_drought_threshold_align_release_interval",
@@ -40613,7 +40617,7 @@
     "description": "Gmail UID: 12296\nMessage-ID: <01E2E3C5-1986-46EA-B647-6DC4A81ADA7B@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 16:17:44 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 5.0h 門檻）\n\n--- 用戶回信內容 ---\n依照建議立刻徹底找出原因 並從底層修好\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 16:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 發文脫班（無新文超過 5.0h 門檻）\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> 作用窗（台北 9:00–23:00）內，feed 最新已發佈文章距今 > 5.0h。\r\n> newest_published_at: 2026-06-30T02:56:42.708658+00:00\r\n> publish_gap_hours: 5.06\r\n> threshold_hours: 5.0\r\n> feed_path: storage/reports/feed.json\r\n> 影響\r\n> \r\n> 這是『發文脫班』的 outcome-level dead-man switch：不論成因（dispatch generator 死、\r\n> auth 失效、release cluster-filter 擋住、draft 池空），只要『實際沒發文』就觸發。\r\n> 直接打 Mission 第 1 條（內容）＋第 5 條（流量）。2026-06-22 整日脫班即此盲區。\r\n> 建議行動（主線程 auto-remediation）\r\n> \r\n> 查 generator 是否活著：tail -5 storage/logs/cron/hourly_dispatch.log\r\n> （看是否秒退 / auth-preflight fail；確認 ~/.local/bin/claude 存在可執行）\r\n> 立即釋出（draft 池有 fresh-theme 時）：\r\n> VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\r\n> 若 release 因 cluster-pressure 擋住（released 0）：定向釋出 fresh-theme 草稿，\r\n> 或派 daily_article 補非飽和主題（publication-candidates skill）。\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -40624,9 +40628,13 @@
     "email_message_id": "<01E2E3C5-1986-46EA-B647-6DC4A81ADA7B@gmail.com>",
     "email_subject": "Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 5.0h 門檻）",
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-30T08:30:30.923276+00:00",
-    "claim_session_id": "eeb16e2988f8"
+    "last_released_at": "2026-06-30T09:10:48.189547+00:00",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-06-30T09:10:48.600945+00:00",
+    "claim_session_id": "49638a8864d7",
+    "started_at": "2026-06-30T09:10:49.015522+00:00",
+    "completed_at": "2026-06-30T09:12:16.753779+00:00",
+    "result": "底層根治已落地：publishing_freshness threshold interval-aware fix commit 215c88302（threshold=max(5h, interval_min/60+2h_grace)），release_interval=6h 時 threshold=8h 不再過敏。17:01 mile_68285aa0 已發佈，6.1h gap 正在 6h release cycle 自然 window 內。Followup task 集中化 cadence-derived 門檻 P3 pending。test_alerts 10 passed。close email 已寄 14956a6d。"
   },
   {
     "id": "K1589_v2",

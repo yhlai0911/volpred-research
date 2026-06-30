@@ -37,7 +37,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # 從未重新校準 → 估出 122.4% 但實際僅 54%（cap 被低估 2.26x；Anthropic 可能在這
 # 期間調高 Max 20x weekly limit）。新 anchor 反推 cap ≈ 213M。
 ANCHOR_PCT = 54.0
-ANCHOR_BILLABLE = 115_179_056
+ANCHOR_BILLABLE = 116_120_599  # Sunday-aligned quota week（週日16:00→週日，boss 確認的邊界）
 ANCHOR_DATE = "2026-06-30T17:00+08:00"
 ANCHOR_STALE_DAYS = 10  # 超過此天數印再校準警告（防再漂 7 週）
 WEEKLY_CAP_BILLABLE = int(ANCHOR_BILLABLE / (ANCHOR_PCT / 100.0))  # ≈ 213.3M

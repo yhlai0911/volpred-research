@@ -680,15 +680,37 @@ def compute_cost_usd(usage, model):
     )
 
 
-def get_friday_week_range(target_date=None):
-    """計算包含 target_date 的週五-週五區間"""
-    if target_date is None:
-        target_date = datetime.now(timezone.utc).date()
-    weekday = target_date.weekday()  # Monday=0, Friday=4
-    days_since_friday = (weekday - 4) % 7
-    week_start = target_date - timedelta(days=days_since_friday)
+# Claude Max 20x weekly quota 重置：週日 16:00 台灣時間 → 次週日 15:59（boss 2026-06-30
+# 確認；dashboard「resets Jul 5」= 週日）。舊版用週五對齊（差 2 天）→ 計到錯期間的 token
+# → quota % 失真。aggregation 按 ts_date（date-level），故 16:00 內的 sub-day 精度有限：
+# 週選擇 honor 16:00 reset（週日 16:00 前算上一週），但同一 Sunday 00:00–16:00 的 token
+# 會計入新週（date-level 限制，估算用途可接受；如需 exact 16:00 須改 _scan_jsonl 為 datetime 過濾）。
+_TAIPEI_TZ_QUOTA = timezone(timedelta(hours=8))
+QUOTA_RESET_HOUR_TPE = 16
+
+
+def get_quota_week_range(target=None):
+    """Quota week = 週日 16:00 台灣 → 次週日（date-level 區間，供 token 聚合）。"""
+    if target is None:
+        target = datetime.now(timezone.utc)
+    if isinstance(target, datetime):
+        tpe = target.astimezone(_TAIPEI_TZ_QUOTA)
+    else:  # date → 視為當日 00:00 UTC
+        tpe = datetime(target.year, target.month, target.day, tzinfo=timezone.utc).astimezone(_TAIPEI_TZ_QUOTA)
+    days_since_sunday = (tpe.weekday() - 6) % 7  # Sunday=6
+    reset = (tpe - timedelta(days=days_since_sunday)).replace(
+        hour=QUOTA_RESET_HOUR_TPE, minute=0, second=0, microsecond=0
+    )
+    if reset > tpe:  # 今天是週日但還沒到 16:00 → quota 屬上一週
+        reset -= timedelta(days=7)
+    week_start = reset.date()
     week_end = week_start + timedelta(days=7)
     return week_start, week_end
+
+
+# 向後相容 alias（舊呼叫點）
+def get_friday_week_range(target_date=None):
+    return get_quota_week_range(target_date)
 
 
 def get_git_commits(since, until):
