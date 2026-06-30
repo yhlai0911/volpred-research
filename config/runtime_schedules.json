@@ -467,6 +467,18 @@
         "description": "每 2 小時：本機研究 commit fast-forward push 到 origin/main 備份（2026-06-24 建，雲端 routines 停用後本地為唯一 push 源；偵測分岔則發 alert 不強推）",
         "host_crontab_managed": true,
         "piggy_back_enabled": false
+      },
+      {
+        "id": "backup_user_claude",
+        "label": "每日快照 user-level ~/.claude（換機保留）",
+        "cron": "35 5 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_backup_user_claude.sh",
+        "log_path": "storage/logs/cron/backup_user_claude.log",
+        "description": "每日 05:35 把 user-level ~/.claude（global CLAUDE.md + user skills + memory 100 檔）快照進 ops/claude_user_backup/，隨 git_push_backup commit+push 保鮮。boss 2026-06-30 要求換機完整保留 user-level config。經 piggy-back run_due_jobs 執行。",
+        "matchers": [
+          "cron_backup_user_claude.sh",
+          "backup_user_claude.sh"
+        ]
       }
     ]
   },
