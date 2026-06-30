@@ -39705,7 +39705,7 @@
     "description": "量化對比微軟、亞馬遜等巨頭的 AI CapEx 與實際營收回報率（變現缺口）。分析大型科技股隱含波動率偏斜度（Skew），驗證市場何時從成長熱情轉向對折現率風險的保護定價。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-06-29T22:00:22+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -39713,8 +39713,11 @@
       "reader_facing",
       "auto_refill"
     ],
-    "started_at": "2026-06-30T02:12:52.444372+00:00",
-    "last_released_at": "2026-06-30T02:13:38.472033+00:00"
+    "started_at": "2026-06-30T02:48:32.614012+00:00",
+    "last_released_at": "2026-06-30T02:13:38.472033+00:00",
+    "claimed_by": "hourly-10",
+    "claimed_at": "2026-06-30T02:48:24.261552+00:00",
+    "claim_session_id": "a28f5a37d839"
   },
   {
     "id": "K1576_article_general",
@@ -40161,5 +40164,39 @@
       "k1573"
     ],
     "parent_task_id": "strategy_lifecycle_vt_3strategy_differentiation_audit"
+  },
+  {
+    "id": "email-12253-706838",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] 內容品質巡檢觸發（publish_rhythm:burst）",
+    "description": "Gmail UID: 12253\nMessage-ID: <AAA49D62-4C52-4158-9484-F8D7D0482B46@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 10:38:25 +0800\nSubject: Re: [VolPred Alert][WARN] 內容品質巡檢觸發（publish_rhythm:burst）\n\n--- 用戶回信內容 ---\n立刻採取行動\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 10:01 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 內容品質巡檢觸發（publish_rhythm:burst）\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 觸發條件\r\n> \r\n> publish_rhythm: burst — 1 對 間距 < 30min（最新間距列表：[36.08, 0.13, 106.74]）\r\n> (context) content_completeness: 1/12 篇缺圖表或來源 marker（heuristic，可能含 frontend-rendered chart 誤判，供人工複查）\r\n> 影響\r\n> \r\n> 內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\r\n> \r\n> 建議行動（主線程 auto-remediation）\r\n> \r\n> daily_digest_uniqueness=duplicate → 檢視 storage/ops/content_quality_report.json items，挑 1 篇 retract：uv run volpred ops unpublish --mile-id <id>；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\r\n> publish_rhythm=burst → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\r\n> publish_rhythm=drought → 立即 release-pool-by-settings 或派 fresh-arc daily_article 補位；同時查 release deadlock (docs/refactor_plan_release_layer_deadlock.md)。\r\n> title_format:digest_prefix → 前端 header 與 title 擇一移除前綴；前端在 frontend-v2-fix/src/app/page.tsx + digest/[id]/page.tsx。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-30T02:45:06.497249+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12253,
+    "email_message_id": "<AAA49D62-4C52-4158-9484-F8D7D0482B46@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] 內容品質巡檢觸發（publish_rhythm:burst）",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-30T02:45:34.651668+00:00",
+    "claim_session_id": "6e8610a8407e"
+  },
+  {
+    "id": "trending_repost_fb_post_2026_06_30_ai資本支出",
+    "task_type": "trending_repost",
+    "title": "FB 發文：科技巨頭 AI CapEx 變現缺口 + IV skew 拐點",
+    "description": "發佈 FB Ivan Lai 貼文（草稿在 /tmp/fb_post_trending_ai_capex.md）。需要 Chrome MCP。mile_id: mile_f5f4cb43。主貼文不放連結，VolPred 連結放第一則留言：https://volpred.zeabur.app/v3/reports/mile_f5f4cb43",
+    "priority": "P2",
+    "status": "pending",
+    "requires_interactive": true,
+    "requires_chrome_mcp": true,
+    "created_at": "2026-06-30T10:56:00+08:00",
+    "fb_draft_path": "/tmp/fb_post_trending_ai_capex.md",
+    "feed_mile_id": "mile_f5f4cb43"
   }
 ]
