@@ -542,7 +542,8 @@ def detect_persistent_alerts(
             continue
         try:
             send_count = int(entry.get("send_count") or 0)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as e:
+            warn("detect_persistent_alerts", "bad send_count", key=key, val=entry.get("send_count"), err=str(e))
             continue
         if send_count < PERSISTENT_ALERT_MIN_FIRE_COUNT:
             continue
