@@ -1,0 +1,149 @@
+{
+  "_meta": {
+    "description": "Paper-submission pipeline stage tracker. Source of truth for each paper's position in the staged-gate state machine. Driven by .claude/skills/paper-submission-pipeline/SKILL.md (PDCA loop); stall-detected + gate-verified by scripts/paper_pipeline_check.py.",
+    "state_machine": [
+      "draft",
+      "revision",
+      "compliance_scrub",
+      "multi_round_review",
+      "review_converged",
+      "arxiv_ready",
+      "arxiv_posted",
+      "journal_submitted",
+      "under_journal_review",
+      "accepted",
+      "rejected"
+    ],
+    "stall_days": 7,
+    "baseline_set_at": "2026-07-01T00:00:00+08:00",
+    "audit_source": "2026-07-01 paper portfolio audit"
+  },
+  "papers": [
+    {
+      "paper": "leverage-direction",
+      "journal_target": "JBF",
+      "stage": "compliance_scrub",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "awaiting compliance scrub then owner submit decision",
+      "owner_decision_pending": true
+    },
+    {
+      "paper": "vt-trend-following",
+      "journal_target": "JPM/FAJ",
+      "stage": "compliance_scrub",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "awaiting compliance scrub then owner submit decision",
+      "owner_decision_pending": true
+    },
+    {
+      "paper": "prg-periodic-garch",
+      "journal_target": "FRL",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "K1544 timing-convention ambiguity narrative not converged",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "taiwan-vt",
+      "journal_target": "PBFJ",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "2 HIGH: 0050.TW gamma 3-way inconsistency; 2383.TW in Table 2 not in data description",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "vix-sufficiency",
+      "journal_target": "Journal of Forecasting",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "main_v4.tex updated but reproduce.py still v3, gate not re-run",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "garch-x-vix",
+      "journal_target": "decide",
+      "stage": "under_journal_review",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "awaiting R1; K1066/K1583 robustness ready",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "volatility-absorption",
+      "journal_target": "decide",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "reproduce/convergence finishing",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "vt-crowding-abm",
+      "journal_target": "decide",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "finishing",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "vt-insurance-cost",
+      "journal_target": "decide",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "finishing/journal choice",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "eav-universal-magnitude",
+      "journal_target": "decide",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "finishing",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "btc-gas-negative",
+      "journal_target": "decide",
+      "stage": "draft",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "markdown done, needs LaTeX + reproduce.py",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "forecast-tail-divergence",
+      "journal_target": "decide",
+      "stage": "draft",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "outline only; can fold in K1390 + K1553",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "crypto-fear-channel",
+      "journal_target": "decide",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "recently touched; confirm state",
+      "owner_decision_pending": false
+    },
+    {
+      "paper": "k189_audit",
+      "journal_target": "decide",
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T00:00:00+08:00",
+      "last_advance_at": "2026-07-01T00:00:00+08:00",
+      "blocker": "audit paper; confirm state",
+      "owner_decision_pending": false
+    }
+  ]
+}

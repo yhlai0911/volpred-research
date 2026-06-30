@@ -41154,5 +41154,27 @@
     "created_at": "2026-07-01T01:11:59+08:00",
     "source": "boss_email_followup",
     "ttl_days": 14
+  },
+  {
+    "task_id": "paper_compliance_scrub_leverage_direction",
+    "task_type": "paper_review",
+    "title": "[論文管線] leverage-direction 合規 scrub（JBF，僅差 1 footnote）",
+    "description": "leverage-direction(JBF) 技術 ready，合規 audit 只剩 1 violation：body.tex:231 footnote 提到 \"VolPred Research Program internal experiment record\" + K1092 內部 ID。fix（見 storage/ops/paper_compliance_audit_20260701.json）：改成 \"Asset-matched DCC-A4f Fissler-Ziegel evaluation; supplementary experiment record available in the paper replication package\"，K1092→Experiment S1。作者已 clean（僅 Yi-Hao Lai）。主線程做（.tex surgical edit），改完重 compile + 進 multi_round_review stage。",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "source": "paper_compliance_workflow",
+    "created_at": "2026-06-30T17:15:57.821300+00:00"
+  },
+  {
+    "task_id": "paper_compliance_scrub_vt_trend_following",
+    "task_type": "paper_review",
+    "title": "[論文管線] vt-trend-following 合規 scrub（JPM/FAJ，~10 個 K-id tags）",
+    "description": "vt-trend-following(JPM/FAJ) v7 PASS，合規 audit 有 ~10 個內部實驗 ID（K1192/K1376/K1417/K1193/K1178/K898 等 \"Kxxxx canonical\" 在 abstract/intro/table notes，洩漏自動化 pipeline）。fix（見 storage/ops/paper_compliance_audit_20260701.json）：刪所有 (Kxxxx ...) tag + canonical 字眼，改引用論文自己的 Table（如 Table 5/6）。主線程做（.tex surgical edit）→ 重 compile → multi_round_review。",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "source": "paper_compliance_workflow",
+    "created_at": "2026-06-30T17:15:57.821625+00:00"
   }
 ]
