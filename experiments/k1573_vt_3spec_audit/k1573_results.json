@@ -1,0 +1,780 @@
+{
+  "k_id": "K1573",
+  "experiment_id": "k1573_vt_3spec_audit",
+  "run_at": "2026-06-30T01:17:55.495561Z",
+  "seed": 42,
+  "data_sources": {
+    "paper_trading": "storage/paper_trading.json",
+    "market_data": "yfinance via volpred.data.DataManager (SPY, GLD, SHY, ^VIX)",
+    "period": [
+      "2015-01-05",
+      "2026-06-29"
+    ],
+    "n_days_market": 2887
+  },
+  "spec_mapping_canonical": {
+    "conservative": "piecewise_conservative (scripts/daily_update.py:752-780)",
+    "standard": "simple_12vix (scripts/daily_update.py:615)",
+    "aggressive": "adaptive_tier (scripts/daily_update.py:809-842)"
+  },
+  "phase1_homogeneity_audit": {
+    "paper_trading_realized": {
+      "by_regime": {
+        "low(<15)": {
+          "days": 261,
+          "pct_of_total": 0.30490654205607476,
+          "risky_w_mean": {
+            "aggressive": 1.2730268199233716,
+            "conservative": 0.7822222222222222,
+            "standard": 0.8845180076628353
+          },
+          "spy_w_mean": {
+            "aggressive": 0.6365134099616858,
+            "conservative": 0.3911111111111111,
+            "standard": 0.8845180076628353
+          },
+          "pairwise_absdiff": {
+            "aggressive_vs_conservative_risky_absdiff": 0.49080459770114954,
+            "aggressive_vs_standard_risky_absdiff": 0.4027363984674329,
+            "conservative_vs_standard_risky_absdiff": 0.10681455938697318
+          },
+          "pairwise_corr": {
+            "aggressive": {
+              "aggressive": 1.0,
+              "conservative": 0.9050352959499206,
+              "standard": 0.6396047153110739
+            },
+            "conservative": {
+              "aggressive": 0.9050352959499206,
+              "conservative": 1.0,
+              "standard": 0.7698749431667435
+            },
+            "standard": {
+              "aggressive": 0.6396047153110739,
+              "conservative": 0.7698749431667435,
+              "standard": 1.0
+            }
+          }
+        },
+        "mid(15-20)": {
+          "days": 429,
+          "pct_of_total": 0.5011682242990654,
+          "risky_w_mean": {
+            "aggressive": 0.68,
+            "conservative": 0.34009324009324005,
+            "standard": 0.6988703962703964
+          },
+          "spy_w_mean": {
+            "aggressive": 0.34,
+            "conservative": 0.17004662004662002,
+            "standard": 0.6988703962703964
+          },
+          "pairwise_absdiff": {
+            "aggressive_vs_conservative_risky_absdiff": 0.3399067599067599,
+            "aggressive_vs_standard_risky_absdiff": 0.10752540792540792,
+            "conservative_vs_standard_risky_absdiff": 0.35880000000000006
+          },
+          "pairwise_corr": {
+            "aggressive": {
+              "aggressive": 1.0,
+              "conservative": 0.7903622362987425,
+              "standard": 0.5461564706905975
+            },
+            "conservative": {
+              "aggressive": 0.7903622362987425,
+              "conservative": 1.0,
+              "standard": 0.7672708419581279
+            },
+            "standard": {
+              "aggressive": 0.5461564706905975,
+              "conservative": 0.7672708419581279,
+              "standard": 1.0
+            }
+          }
+        },
+        "high(>20)": {
+          "days": 166,
+          "pct_of_total": 0.1939252336448598,
+          "risky_w_mean": {
+            "aggressive": 0.13795180722891565,
+            "conservative": 0.028433734939759033,
+            "standard": 0.5162024096385542
+          },
+          "spy_w_mean": {
+            "aggressive": 0.06897590361445782,
+            "conservative": 0.014216867469879517,
+            "standard": 0.5162024096385542
+          },
+          "pairwise_absdiff": {
+            "aggressive_vs_conservative_risky_absdiff": 0.10951807228915662,
+            "aggressive_vs_standard_risky_absdiff": 0.40297108433734946,
+            "conservative_vs_standard_risky_absdiff": 0.48776867469879526
+          },
+          "pairwise_corr": {
+            "aggressive": {
+              "aggressive": 1.0,
+              "conservative": 0.7560264460186714,
+              "standard": 0.4353620026403668
+            },
+            "conservative": {
+              "aggressive": 0.7560264460186714,
+              "conservative": 1.0,
+              "standard": 0.3179621478069935
+            },
+            "standard": {
+              "aggressive": 0.4353620026403668,
+              "conservative": 0.3179621478069935,
+              "standard": 1.0
+            }
+          }
+        }
+      },
+      "overall": {
+        "days": 856,
+        "date_range": [
+          "2023-01-04",
+          "2026-06-29"
+        ],
+        "risky_w_corr_matrix": [
+          [
+            1.0,
+            0.914385766104915,
+            0.9378791064505706
+          ],
+          [
+            0.914385766104915,
+            1.0,
+            0.8940715687671583
+          ],
+          [
+            0.9378791064505706,
+            0.8940715687671583,
+            1.0
+          ]
+        ],
+        "risky_w_corr_labels": [
+          "conservative",
+          "standard",
+          "aggressive"
+        ],
+        "vix_15_20_pct_of_days": 0.5011682242990654
+      }
+    },
+    "recomputed_current": {
+      "regime_breakdown": {
+        "low(<15)": {
+          "days": 1037,
+          "pct_of_total": 0.35932085932085933,
+          "specs": {
+            "conservative": {
+              "spy_w_mean": 0.43226494704056156,
+              "spy_w_std": 0.06047593451522218,
+              "risky_w_mean": 0.8645298940811231,
+              "risky_w_std": 0.12095186903044436
+            },
+            "standard": {
+              "spy_w_mean": 0.9220796031979427,
+              "spy_w_std": 0.06659839106747736,
+              "risky_w_mean": 0.9220796031979427,
+              "risky_w_std": 0.06659839106747736
+            },
+            "aggressive": {
+              "spy_w_mean": 0.7148599489645002,
+              "spy_w_std": 0.08849091779335203,
+              "risky_w_mean": 1.4297198979290004,
+              "risky_w_std": 0.17698183558670405
+            }
+          }
+        },
+        "mid(15-20)": {
+          "days": 988,
+          "pct_of_total": 0.34234234234234234,
+          "specs": {
+            "conservative": {
+              "spy_w_mean": 0.17149607770838718,
+              "spy_w_std": 0.08845658576411601,
+              "risky_w_mean": 0.34299215541677436,
+              "risky_w_std": 0.17691317152823202
+            },
+            "standard": {
+              "spy_w_mean": 0.7000427373428278,
+              "spy_w_std": 0.056723297697334786,
+              "risky_w_mean": 0.7000427373428278,
+              "risky_w_std": 0.056723297697334786
+            },
+            "aggressive": {
+              "spy_w_mean": 0.3500213686714139,
+              "spy_w_std": 0.028361648848667393,
+              "risky_w_mean": 0.7000427373428278,
+              "risky_w_std": 0.056723297697334786
+            }
+          }
+        },
+        "high(>20)": {
+          "days": 861,
+          "pct_of_total": 0.2983367983367983,
+          "specs": {
+            "conservative": {
+              "spy_w_mean": 0.0,
+              "spy_w_std": 0.0,
+              "risky_w_mean": 0.0,
+              "risky_w_std": 0.0
+            },
+            "standard": {
+              "spy_w_mean": 0.4772616221411527,
+              "spy_w_std": 0.0888543890402884,
+              "risky_w_mean": 0.4772616221411527,
+              "risky_w_std": 0.0888543890402884
+            },
+            "aggressive": {
+              "spy_w_mean": 0.0,
+              "spy_w_std": 0.0,
+              "risky_w_mean": 0.0,
+              "risky_w_std": 0.0
+            }
+          }
+        }
+      },
+      "weight_corr": {
+        "labels": [
+          "conservative",
+          "standard",
+          "aggressive"
+        ],
+        "weight_corr": [
+          [
+            1.0,
+            0.9564625987301173,
+            0.9649253531083091
+          ],
+          [
+            0.9564625987301172,
+            1.0,
+            0.955397853709589
+          ],
+          [
+            0.964925353108309,
+            0.955397853709589,
+            1.0
+          ]
+        ],
+        "return_corr": [
+          [
+            1.0,
+            0.41592803939587225,
+            0.9653457316908958
+          ],
+          [
+            0.4159280393958723,
+            1.0,
+            0.46794666216426045
+          ],
+          [
+            0.9653457316908958,
+            0.4679466621642605,
+            1.0
+          ]
+        ]
+      },
+      "regime_weight_spread": {
+        "low(<15)": {
+          "conservative_vs_standard_spy_w_absdiff": 0.4898146561573811,
+          "conservative_vs_aggressive_spy_w_absdiff": 0.28259500192393866,
+          "standard_vs_aggressive_spy_w_absdiff": 0.20721965423344246
+        },
+        "mid(15-20)": {
+          "conservative_vs_standard_spy_w_absdiff": 0.5285466596344407,
+          "conservative_vs_aggressive_spy_w_absdiff": 0.17852529096302674,
+          "standard_vs_aggressive_spy_w_absdiff": 0.3500213686714139
+        },
+        "high(>20)": {
+          "conservative_vs_standard_spy_w_absdiff": 0.4772616221411527,
+          "conservative_vs_aggressive_spy_w_absdiff": 0.0,
+          "standard_vs_aggressive_spy_w_absdiff": 0.4772616221411527
+        }
+      },
+      "fullperiod_metrics": {
+        "conservative": {
+          "n": 2886,
+          "sharpe": 0.5833761497075823,
+          "cagr": 0.027310236946638033,
+          "vol_ann": 0.048179176056800097,
+          "mdd": -0.12907783715591925
+        },
+        "standard": {
+          "n": 2886,
+          "sharpe": 0.7729680354118511,
+          "cagr": 0.07049863821227298,
+          "vol_ann": 0.0938527630783358,
+          "mdd": -0.17049117824126658
+        },
+        "aggressive": {
+          "n": 2886,
+          "sharpe": 0.6607726295095077,
+          "cagr": 0.050772844316914645,
+          "vol_ann": 0.07978094503363163,
+          "mdd": -0.19452936019666167
+        }
+      }
+    },
+    "homogeneity_definition": "weight pairwise corr > 0.95 AND mean abs diff < 5pp",
+    "differentiated_target": "weight pairwise corr < 0.85 AND mean abs diff > 15pp"
+  },
+  "phase2_proposed_specs": {
+    "params": {
+      "conservative": "VIX<15 \u2192 SPY=0.30, GLD=0.30 (total risky 60%); 15<=VIX<20 \u2192 SPY=0.20, GLD=0.20 (total risky 40%); 20<=VIX<25 \u2192 ramp to 0; VIX>=25 \u2192 cash",
+      "standard": "Unchanged: SPY = min(12/VIX, 1) (canonical 12/VIX anchor)",
+      "aggressive": "VIX<15 \u2192 SPY = min(1.5\u00d712/VIX, 2.0) (leverage to 2x); 15<=VIX<20 \u2192 SPY=1.0 (100% SPY floor; clear differentiator); 20<=VIX<25 \u2192 ramp 1.0\u21920.40; 25<=VIX<35 \u2192 ramp 0.40\u21920; VIX>=35 \u2192 cash"
+    },
+    "simulated": {
+      "regime_breakdown": {
+        "low(<15)": {
+          "days": 1037,
+          "pct_of_total": 0.35932085932085933,
+          "specs": {
+            "conservative": {
+              "spy_w_mean": 0.29999999999999993,
+              "spy_w_std": 5.553793586549736e-17,
+              "risky_w_mean": 0.5999999999999999,
+              "risky_w_std": 1.1107587173099472e-16
+            },
+            "standard": {
+              "spy_w_mean": 0.9220796031979427,
+              "spy_w_std": 0.06659839106747736,
+              "risky_w_mean": 0.9220796031979427,
+              "risky_w_std": 0.06659839106747736
+            },
+            "aggressive": {
+              "spy_w_mean": 1.4297198979290004,
+              "spy_w_std": 0.17698183558670405,
+              "risky_w_mean": 1.4297198979290004,
+              "risky_w_std": 0.17698183558670405
+            }
+          }
+        },
+        "mid(15-20)": {
+          "days": 988,
+          "pct_of_total": 0.34234234234234234,
+          "specs": {
+            "conservative": {
+              "spy_w_mean": 0.2,
+              "spy_w_std": 0.0,
+              "risky_w_mean": 0.4,
+              "risky_w_std": 0.0
+            },
+            "standard": {
+              "spy_w_mean": 0.7000427373428278,
+              "spy_w_std": 0.056723297697334786,
+              "risky_w_mean": 0.7000427373428278,
+              "risky_w_std": 0.056723297697334786
+            },
+            "aggressive": {
+              "spy_w_mean": 1.0,
+              "spy_w_std": 0.0,
+              "risky_w_mean": 1.0,
+              "risky_w_std": 0.0
+            }
+          }
+        },
+        "high(>20)": {
+          "days": 861,
+          "pct_of_total": 0.2983367983367983,
+          "specs": {
+            "conservative": {
+              "spy_w_mean": 0.0608622525488735,
+              "spy_w_std": 0.06915982841329812,
+              "risky_w_mean": 0.121724505097747,
+              "risky_w_std": 0.13831965682659625
+            },
+            "standard": {
+              "spy_w_mean": 0.4772616221411527,
+              "spy_w_std": 0.0888543890402884,
+              "risky_w_mean": 0.4772616221411527,
+              "risky_w_std": 0.0888543890402884
+            },
+            "aggressive": {
+              "spy_w_mean": 0.4993807178811883,
+              "spy_w_std": 0.2998103304623181,
+              "risky_w_mean": 0.4993807178811883,
+              "risky_w_std": 0.2998103304623181
+            }
+          }
+        }
+      },
+      "weight_corr": {
+        "labels": [
+          "conservative",
+          "standard",
+          "aggressive"
+        ],
+        "weight_corr": [
+          [
+            1.0,
+            0.9364570009408387,
+            0.9573712329903907
+          ],
+          [
+            0.9364570009408388,
+            1.0,
+            0.9620008631454681
+          ],
+          [
+            0.9573712329903907,
+            0.9620008631454681,
+            1.0
+          ]
+        ],
+        "return_corr": [
+          [
+            1.0,
+            0.5208278393282032,
+            0.5742806158626058
+          ],
+          [
+            0.5208278393282033,
+            1.0,
+            0.9375625004565087
+          ],
+          [
+            0.5742806158626058,
+            0.9375625004565087,
+            1.0
+          ]
+        ]
+      },
+      "regime_weight_spread": {
+        "low(<15)": {
+          "conservative_vs_standard_spy_w_absdiff": 0.6220796031979428,
+          "conservative_vs_aggressive_spy_w_absdiff": 1.1297198979290006,
+          "standard_vs_aggressive_spy_w_absdiff": 0.5076402947310578
+        },
+        "mid(15-20)": {
+          "conservative_vs_standard_spy_w_absdiff": 0.5000427373428278,
+          "conservative_vs_aggressive_spy_w_absdiff": 0.8,
+          "standard_vs_aggressive_spy_w_absdiff": 0.29995726265717215
+        },
+        "high(>20)": {
+          "conservative_vs_standard_spy_w_absdiff": 0.4163993695922792,
+          "conservative_vs_aggressive_spy_w_absdiff": 0.4385184653323148,
+          "standard_vs_aggressive_spy_w_absdiff": 0.02211909574003562
+        }
+      },
+      "fullperiod_metrics": {
+        "conservative": {
+          "n": 2886,
+          "sharpe": 0.7689262388988052,
+          "cagr": 0.03286306037657605,
+          "vol_ann": 0.04327241822685407,
+          "mdd": -0.09167029073411703
+        },
+        "standard": {
+          "n": 2886,
+          "sharpe": 0.7729680354118511,
+          "cagr": 0.07049863821227298,
+          "vol_ann": 0.0938527630783358,
+          "mdd": -0.17049117824126658
+        },
+        "aggressive": {
+          "n": 2886,
+          "sharpe": 0.7169321968237679,
+          "cagr": 0.0845215866965856,
+          "vol_ann": 0.1239331213401765,
+          "mdd": -0.2441327247936529
+        }
+      }
+    }
+  },
+  "phase3_robustness": {
+    "stress_periods_current": {
+      "2020_covid": {
+        "start": "2020-02-19",
+        "end": "2020-04-30",
+        "days": 51,
+        "specs": {
+          "conservative": {
+            "n": 51,
+            "sharpe": 3.8549581949063425,
+            "cagr": 0.10817718656950182,
+            "vol_ann": 0.026741600867846358,
+            "mdd": -0.006461261917903083,
+            "cumret": 0.021005433914370597
+          },
+          "standard": {
+            "n": 51,
+            "sharpe": -1.8063423824344715,
+            "cagr": -0.2587646723812933,
+            "vol_ann": 0.15880459271059372,
+            "mdd": -0.12119205135088695,
+            "cumret": -0.058800704013984295
+          },
+          "aggressive": {
+            "n": 51,
+            "sharpe": 2.845401951707726,
+            "cagr": 0.10024990610020956,
+            "vol_ann": 0.033779073013255674,
+            "mdd": -0.008004540436758134,
+            "cumret": 0.01952306859047881
+          }
+        }
+      },
+      "2022_qt": {
+        "start": "2022-01-01",
+        "end": "2022-06-30",
+        "days": 124,
+        "specs": {
+          "conservative": {
+            "n": 124,
+            "sharpe": -3.1564239715715994,
+            "cagr": -0.07814343790237588,
+            "vol_ann": 0.025670005165833013,
+            "mdd": -0.04818762106952379,
+            "cumret": -0.03924616800226388
+          },
+          "standard": {
+            "n": 124,
+            "sharpe": -2.49084715773955,
+            "cagr": -0.2567457064212738,
+            "vol_ann": 0.11634986853295237,
+            "mdd": -0.15128747505847728,
+            "cumret": -0.13584542768187224
+          },
+          "aggressive": {
+            "n": 124,
+            "sharpe": -2.8550906295881293,
+            "cagr": -0.09851519968391986,
+            "vol_ann": 0.036091203234899706,
+            "mdd": -0.05821937777185637,
+            "cumret": -0.04975262788029289
+          }
+        }
+      },
+      "2024_carry": {
+        "start": "2024-07-15",
+        "end": "2024-09-30",
+        "days": 55,
+        "specs": {
+          "conservative": {
+            "n": 55,
+            "sharpe": 1.5908746130860811,
+            "cagr": 0.09750931516352646,
+            "vol_ann": 0.05959252218977467,
+            "mdd": -0.02691497435543566,
+            "cumret": 0.020514672716256177
+          },
+          "standard": {
+            "n": 55,
+            "sharpe": 0.47253289016004874,
+            "cagr": 0.047459808567859696,
+            "vol_ann": 0.11096481864479023,
+            "mdd": -0.05935905117583162,
+            "cumret": 0.010171381075571029
+          },
+          "aggressive": {
+            "n": 55,
+            "sharpe": 1.174472624104802,
+            "cagr": 0.11780435494547259,
+            "vol_ann": 0.09893392208885214,
+            "mdd": -0.04782608406924416,
+            "cumret": 0.024603953237956278
+          }
+        }
+      }
+    },
+    "stress_periods_proposed": {
+      "2020_covid": {
+        "start": "2020-02-19",
+        "end": "2020-04-30",
+        "days": 51,
+        "specs": {
+          "conservative": {
+            "n": 51,
+            "sharpe": 3.658371668539,
+            "cagr": 0.10307134423631115,
+            "vol_ann": 0.02691702951826092,
+            "mdd": -0.006461261917903194,
+            "cumret": 0.02005163820021849
+          },
+          "standard": {
+            "n": 51,
+            "sharpe": -1.8063423824344715,
+            "cagr": -0.2587646723812933,
+            "vol_ann": 0.15880459271059372,
+            "mdd": -0.12119205135088695,
+            "cumret": -0.058800704013984295
+          },
+          "aggressive": {
+            "n": 51,
+            "sharpe": -3.1984810732053095,
+            "cagr": -0.2525737394237537,
+            "vol_ann": 0.08971200671601534,
+            "mdd": -0.07125579080843181,
+            "cumret": -0.0572150463800114
+          }
+        }
+      },
+      "2022_qt": {
+        "start": "2022-01-01",
+        "end": "2022-06-30",
+        "days": 124,
+        "specs": {
+          "conservative": {
+            "n": 124,
+            "sharpe": -3.0947063501352896,
+            "cagr": -0.09429788556555896,
+            "vol_ann": 0.03183569311041447,
+            "mdd": -0.056182581178386926,
+            "cumret": -0.047567784665545676
+          },
+          "standard": {
+            "n": 124,
+            "sharpe": -2.49084715773955,
+            "cagr": -0.2567457064212738,
+            "vol_ann": 0.11634986853295237,
+            "mdd": -0.15128747505847728,
+            "cumret": -0.13584542768187224
+          },
+          "aggressive": {
+            "n": 124,
+            "sharpe": -3.434811755129911,
+            "cagr": -0.32030836057064405,
+            "vol_ann": 0.11055354760544184,
+            "mdd": -0.1836145235562776,
+            "cumret": -0.17303558541673292
+          }
+        }
+      },
+      "2024_carry": {
+        "start": "2024-07-15",
+        "end": "2024-09-30",
+        "days": 55,
+        "specs": {
+          "conservative": {
+            "n": 55,
+            "sharpe": 2.030995664537682,
+            "cagr": 0.11881338032268074,
+            "vol_ann": 0.056049009441982114,
+            "mdd": -0.023741676591812366,
+            "cumret": 0.024805744003652652
+          },
+          "standard": {
+            "n": 55,
+            "sharpe": 0.47253289016004874,
+            "cagr": 0.047459808567859696,
+            "vol_ann": 0.11096481864479023,
+            "mdd": -0.05935905117583162,
+            "cumret": 0.010171381075571029
+          },
+          "aggressive": {
+            "n": 55,
+            "sharpe": 0.09690094992370349,
+            "cagr": 0.003152455652519315,
+            "vol_ann": 0.15550660065907476,
+            "mdd": -0.08785159636734285,
+            "cumret": 0.0006871897350921863
+          }
+        }
+      }
+    },
+    "bootstrap_sharpe_current": {
+      "conservative": {
+        "boot_sharpe_mean": 0.6001247598418441,
+        "boot_sharpe_p2.5": -0.002825769921255456,
+        "boot_sharpe_p97.5": 1.2178597828472297
+      },
+      "standard": {
+        "boot_sharpe_mean": 0.7922939202825192,
+        "boot_sharpe_p2.5": 0.22545696105932878,
+        "boot_sharpe_p97.5": 1.362408752450027
+      },
+      "aggressive": {
+        "boot_sharpe_mean": 0.6971300329192908,
+        "boot_sharpe_p2.5": 0.11344874775135778,
+        "boot_sharpe_p97.5": 1.326722282936268
+      }
+    },
+    "bootstrap_sharpe_proposed": {
+      "conservative": {
+        "boot_sharpe_mean": 0.7829058054789264,
+        "boot_sharpe_p2.5": 0.19298979316963474,
+        "boot_sharpe_p97.5": 1.3804599424244703
+      },
+      "standard": {
+        "boot_sharpe_mean": 0.7772380728685082,
+        "boot_sharpe_p2.5": 0.19411507447311124,
+        "boot_sharpe_p97.5": 1.403888956321042
+      },
+      "aggressive": {
+        "boot_sharpe_mean": 0.7356420151125619,
+        "boot_sharpe_p2.5": 0.16321081787204714,
+        "boot_sharpe_p97.5": 1.3909863602573629
+      }
+    },
+    "n_bootstrap": 500,
+    "bootstrap_block_length": 20
+  },
+  "figures": {
+    "fig1": "figs/fig1_weight_timeseries.png",
+    "fig2": "figs/fig2_regime_histogram.png",
+    "fig3": "figs/fig3_stress_returns.png"
+  },
+  "summary": {
+    "vix_15_20_pct_of_days_full_market_2015_2026": 0.34234234234234234,
+    "vix_15_20_pct_of_days_paper_trading": 0.5011682242990654,
+    "current_mid_pairwise_spy_absdiff": {
+      "conservative_vs_standard_spy_w_absdiff": 0.5285466596344407,
+      "conservative_vs_aggressive_spy_w_absdiff": 0.17852529096302674,
+      "standard_vs_aggressive_spy_w_absdiff": 0.3500213686714139
+    },
+    "proposed_mid_pairwise_spy_absdiff": {
+      "conservative_vs_standard_spy_w_absdiff": 0.5000427373428278,
+      "conservative_vs_aggressive_spy_w_absdiff": 0.8,
+      "standard_vs_aggressive_spy_w_absdiff": 0.29995726265717215
+    },
+    "paper_trading_mid_pairwise_risky_absdiff": {
+      "aggressive_vs_conservative_risky_absdiff": 0.3399067599067599,
+      "aggressive_vs_standard_risky_absdiff": 0.10752540792540792,
+      "conservative_vs_standard_risky_absdiff": 0.35880000000000006
+    },
+    "paper_trading_mid_avg_absdiff": 0.268744055944056,
+    "homogeneity_confirmed": false,
+    "current_weight_corr_matrix": [
+      [
+        1.0,
+        0.9564625987301173,
+        0.9649253531083091
+      ],
+      [
+        0.9564625987301172,
+        1.0,
+        0.955397853709589
+      ],
+      [
+        0.964925353108309,
+        0.955397853709589,
+        1.0
+      ]
+    ],
+    "proposed_weight_corr_matrix": [
+      [
+        1.0,
+        0.9364570009408387,
+        0.9573712329903907
+      ],
+      [
+        0.9364570009408388,
+        1.0,
+        0.9620008631454681
+      ],
+      [
+        0.9573712329903907,
+        0.9620008631454681,
+        1.0
+      ]
+    ],
+    "weight_corr_labels": [
+      "conservative",
+      "standard",
+      "aggressive"
+    ]
+  }
+}
