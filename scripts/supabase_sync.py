@@ -684,7 +684,7 @@ def _get_article_id(slug: str) -> str | None:
             data = json.loads(resp.read().decode())
             return data[0]["id"] if data else None
     except Exception:
-        return None
+        return None  # silent-ok: best-effort id lookup; None = caller treats as not-found
 
 
 def sync_paper_trade(strategy: str, entry: dict, trade_date: str) -> bool:

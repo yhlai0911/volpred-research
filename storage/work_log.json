@@ -12436,5 +12436,13 @@
     "ts": "2026-06-30T16:08:25.430415+00:00",
     "status": "succeeded",
     "result": "K1590 Merger Arbitrage Deal-Spread Vol diagnostic phase complete. Verdict GO (3/3 conds pass): vol-regime t-test t=5.13 p=8.8e-07 mag_ratio=3.05 (high-VIX |MNA| vs low-VIX), Pearson(MNA,SPY)=0.517 confirms not a clone, skew=-2.89 kurt=66.4 distinct payoff profile vs equity. Sample 2020-01-02..2026-06-30 N=1629. Codex review deferred (knowledge.json NOT written per scope). Files: experiments/k1590/{README.md, k1590_diagnostic.py, k1590_diagnostic_results.json, plots/rolling_vol_vs_vix.png, plots/regime_split_box.png}. Phase-2 roadmap in README §7 (event study + GJR-GARCH + EDGAR deal data)."
+  },
+  {
+    "timestamp": "2026-07-01T01:32:18+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_erratum_mile_48c8328b_false_positive",
+    "actor": "hourly-01",
+    "summary": "P1 [誠信] erratum task 驗證為 FALSE POSITIVE。mile_48c8328b 文章 2026-06-15 in-place corrected (errata 紀錄完整、title='K189 修正版'、內文 5/6 Bonferroni-sig 與 results.json 一致)。paper-audit workflow 2026-07-01 漏 check errata 才誤開 task。Close + 加 platform_ops follow-up 修 audit errata-gate。",
+    "result": "succeeded"
   }
 ]
