@@ -15,6 +15,15 @@ cd "$REPO" || exit 1
 LOG="$REPO/storage/logs/cron/git_push_backup.log"
 mkdir -p "$(dirname "$LOG")"
 ts() { TZ='Asia/Taipei' date '+%Y-%m-%d %H:%M:%S'; }
+# shellcheck disable=SC1091
+source "$REPO/scripts/cron_lib.sh"
+# 2026-06-30 (hourly-15 host_cron_fail root cause): wrapper 沒走 cron_lib
+# 標準 emit_exit banner → alerts.py `_latest_cron_exit` 永遠讀到上一次 exit=1
+# 即便 push 成功也不會 heal。違反 .claude/rules/hooks-exit-code.md。trap EXIT
+# 確保即便 set -uo pipefail 提早 exit 也 emit。
+_GPB_START=$SECONDS
+trap 'cron_emit_exit "git_push_backup" "$?" "$_GPB_START" >> "$LOG" 2>&1' EXIT
+cron_emit_start "git_push_backup" >> "$LOG"
 git_auth() {
   git \
     -c credential.helper= \

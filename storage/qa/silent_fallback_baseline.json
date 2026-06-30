@@ -1,7 +1,7 @@
 {
   "schema": "silent_fallback_baseline.v1",
   "description": "Known silent-fallback audit findings. CI strict mode fails only when current findings introduce keys absent from this baseline.",
-  "count": 78,
+  "count": 75,
   "findings": [
     {
       "path": "scripts/backtest_3yr_final.py",
@@ -226,12 +226,6 @@
       "action": "return None"
     },
     {
-      "path": "scripts/supabase_sync.py",
-      "line": 837,
-      "exception": "OSError",
-      "action": "pass"
-    },
-    {
       "path": "scripts/validate_garch_midas_cross_asset.py",
       "line": 171,
       "exception": "Exception",
@@ -446,18 +440,6 @@
       "line": 383,
       "exception": "JSONDecodeError",
       "action": "return None"
-    },
-    {
-      "path": "src/volpred/publisher/publisher.py",
-      "line": 107,
-      "exception": "Exception",
-      "action": "pass"
-    },
-    {
-      "path": "src/volpred/publisher/publisher.py",
-      "line": 1011,
-      "exception": "ImportError",
-      "action": "pass"
     },
     {
       "path": "src/volpred/research/conclusion_lint.py",

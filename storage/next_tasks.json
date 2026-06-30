@@ -40566,13 +40566,13 @@
     "description": "Root cause: 2026-06-30 用戶把 release_pool interval 從 3h 改 6h (cron 7 */6, .release_settings.json interval_minutes=360)，但 content_quality.py RHYTHM_DROUGHT_GAP_HOURS 仍是 3.0 → 每個 6h release cycle 內必然有 ~3h drought window (release 後 3h 開始 fire warn 直到下次 release)。這是 boss email-12281 抱怨「兩個 Warn 已存在很久」根因之二 (#1 burst 已於同 commit 修)。修法: drought 線 → 6.5h (容忍 6h cycle + 30min cron slippage/piggy-back delay)，並從 release_settings.interval_minutes 動態讀取避免再次 drift。Bar: drought 不再在每個 6h cycle 中段誤觸發，dashboard publish_rhythm 回到單純『真的沒文發』才 warn。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "boss_email_12281_root_cause_fix_2026-06-30_followup",
     "preferred_agent": null,
     "created_at": "2026-06-30T07:05:00+00:00",
     "claimed_by": "hourly-15",
     "claimed_at": "2026-06-30T07:08:10.549555+00:00",
     "claim_session_id": "75eeee1a72ce",
-    "started_at": "2026-06-30T07:08:10.762650+00:00"
-  }
-]
+    "started_at": "2026-06-30T07:08:10.762650+00:00",
+    "completed_at": "2026-06-30T07:13:44.643002+00:00",
+    "result": 
