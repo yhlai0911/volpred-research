@@ -1,17 +1,17 @@
 {
   "schema": "dreaming_review.v1",
-  "generated_at": "2026-06-30T06:15:16.345564+00:00",
+  "generated_at": "2026-06-30T06:28:37.322107+00:00",
   "window_days": 14,
   "dry_run": true,
   "loop_health": {
-    "generated_at": "2026-06-30T06:15:16.345564+00:00",
+    "generated_at": "2026-06-30T06:28:37.322107+00:00",
     "window_days": 14,
     "overall": "ok",
     "first_pass_success": {
       "status": "low_coverage",
       "signal": "derived_low_coverage",
       "window_days": 14,
-      "total_succeeded": 351,
+      "total_succeeded": 352,
       "traced": 90,
       "coverage": 0.256,
       "coverage_floor": 0.3,
@@ -21,10 +21,10 @@
       "status": "ok",
       "signal": "supported",
       "window_days": 14,
-      "success": 351,
+      "success": 352,
       "fail": 2,
       "blocked": 22,
-      "other": 11,
+      "other": 10,
       "success_rate": 0.936
     },
     "error_recurrence": {
@@ -116,8 +116,8 @@
       "proposal": "這些記憶描述 recurring process/cadence 但無對應 skill；評估 promote 成 skill 或加排程/cadence（見 pdca-operations 技能治理 + operations-cadence）。",
       "governance_target": ".claude/skills/",
       "occurrences": 1,
-      "first_seen": "2026-06-30T06:15:16.345564+00:00",
-      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+      "first_seen": "2026-06-30T06:28:37.322107+00:00",
+      "last_seen": "2026-06-30T06:28:37.322107+00:00"
     },
     {
       "pattern_type": "memory_hygiene",
@@ -131,8 +131,8 @@
       "proposal": "feedback 記憶量大：月度做整併/去重/澄清，讓記憶更清楚易用（避免垃圾桶化）。",
       "governance_target": "memory/",
       "occurrences": 1,
-      "first_seen": "2026-06-30T06:15:16.345564+00:00",
-      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+      "first_seen": "2026-06-30T06:28:37.322107+00:00",
+      "last_seen": "2026-06-30T06:28:37.322107+00:00"
     },
     {
       "pattern_type": "persistent_alert",
@@ -146,8 +146,8 @@
       "proposal": "Alert `Host cron failure detected` fired 26× over 71.4d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
       "governance_target": "docs/error_log.md",
       "occurrences": 1,
-      "first_seen": "2026-06-30T06:15:16.345564+00:00",
-      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+      "first_seen": "2026-06-30T06:28:37.322107+00:00",
+      "last_seen": "2026-06-30T06:28:37.322107+00:00"
     },
     {
       "pattern_type": "persistent_alert",
@@ -161,8 +161,8 @@
       "proposal": "Alert `Draft pool below threshold (<4)` fired 4× over 71.1d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
       "governance_target": "docs/error_log.md",
       "occurrences": 1,
-      "first_seen": "2026-06-30T06:15:16.345564+00:00",
-      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+      "first_seen": "2026-06-30T06:28:37.322107+00:00",
+      "last_seen": "2026-06-30T06:28:37.322107+00:00"
     },
     {
       "pattern_type": "persistent_alert",
@@ -176,8 +176,8 @@
       "proposal": "Alert `Release pool starved > 6.0h (cron healthy)` fired 6× over 8.9d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
       "governance_target": "docs/error_log.md",
       "occurrences": 1,
-      "first_seen": "2026-06-30T06:15:16.345564+00:00",
-      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+      "first_seen": "2026-06-30T06:28:37.322107+00:00",
+      "last_seen": "2026-06-30T06:28:37.322107+00:00"
     },
     {
       "pattern_type": "persistent_alert",
@@ -191,8 +191,8 @@
       "proposal": "Alert `gmail-poll 停擺（state 過期未更新）` fired 4× over 6.9d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
       "governance_target": "docs/error_log.md",
       "occurrences": 1,
-      "first_seen": "2026-06-30T06:15:16.345564+00:00",
-      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+      "first_seen": "2026-06-30T06:28:37.322107+00:00",
+      "last_seen": "2026-06-30T06:28:37.322107+00:00"
     },
     {
       "pattern_type": "persistent_alert",
@@ -206,8 +206,8 @@
       "proposal": "Alert `gmail-poll 停擺（state 過期未更新）` fired 3× over 5.4d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
       "governance_target": "docs/error_log.md",
       "occurrences": 1,
-      "first_seen": "2026-06-30T06:15:16.345564+00:00",
-      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+      "first_seen": "2026-06-30T06:28:37.322107+00:00",
+      "last_seen": "2026-06-30T06:28:37.322107+00:00"
     },
     {
       "pattern_type": "persistent_alert",
@@ -221,8 +221,8 @@
       "proposal": "Alert `發文脫班（無新文超過 5.0h 門檻）` fired 4× over 5.2d — same alert_key recurring = root cause unhandled (fix the source, not the symptom). Investigate the upstream condition; if sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).",
       "governance_target": "docs/error_log.md",
       "occurrences": 1,
-      "first_seen": "2026-06-30T06:15:16.345564+00:00",
-      "last_seen": "2026-06-30T06:15:16.345564+00:00"
+      "first_seen": "2026-06-30T06:28:37.322107+00:00",
+      "last_seen": "2026-06-30T06:28:37.322107+00:00"
     }
   ],
   "new_findings": [

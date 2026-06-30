@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-06-30T13:53:41.614978",
-  "overall": "ok",
+  "generated_at": "2026-06-30T15:02:44.803152",
+  "overall": "warn",
   "critical_count": 0,
-  "warn_count": 0,
-  "findings": []
+  "warn_count": 1,
+  "findings": [
+    {
+      "dimension": "cron_completion",
+      "severity": "warn",
+      "message": "git_push_backup: 最近一輪 exit=1（非 0）",
+      "recovery": "tail storage/logs/cron/git_push_backup.log"
+    }
+  ]
 }
