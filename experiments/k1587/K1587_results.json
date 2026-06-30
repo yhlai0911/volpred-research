@@ -1,0 +1,409 @@
+{
+  "created_at_utc": "2026-06-30T08:20:56.577822+00:00",
+  "data": {
+    "epa_parameter_code": "88101 PM2.5 - Local Conditions",
+    "epa_source_template": "https://aqs.epa.gov/aqsweb/airdata/daily_88101_{year}.zip",
+    "epa_years": [
+      2018,
+      2025
+    ],
+    "nyc_counties": {
+      "005": "Bronx",
+      "047": "Kings",
+      "061": "New York",
+      "081": "Queens",
+      "085": "Richmond"
+    },
+    "nyc_pm25_cache": "experiments/k1587/data/nyc_pm25_daily.csv",
+    "panel_end": "2025-12-31",
+    "panel_path": "experiments/k1587/data/k1587_panel.csv",
+    "panel_rows": 2011,
+    "panel_start": "2018-01-02",
+    "regression_rows_h1": 1755,
+    "regression_rows_h5": 1753,
+    "spy_vix_source": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv"
+  },
+  "experiment_id": "K1587",
+  "figure": "experiments/k1587/figures/k1587_pm25_vol_diagnostics.png",
+  "in_sample_hac_regressions": {
+    "h1": {
+      "augmented_pm25": {
+        "adj_r2": 0.16690451793703898,
+        "aic": 7801.44085610425,
+        "bic": 7861.6133215991495,
+        "coefficients": {
+          "abs_ret5_lag": 1.6657996116945348,
+          "const": -13.96481355390973,
+          "high_aqi100_3d_signal": 0.2783531954446137,
+          "high_aqi100_signal": 0.8339655481416118,
+          "log_parkinson22_lag": 0.9989119685225133,
+          "log_rv22_lag": -0.6623128670442764,
+          "pm25_3d_z": -0.022034427919302324,
+          "pm25_x_vix": -0.046803196045077954,
+          "pm25_z": 0.009022661260881401,
+          "ret5_lag": -11.351332561007137,
+          "vix_log_signal": 1.935799525308544
+        },
+        "pvalues_hac": {
+          "abs_ret5_lag": 0.5847827833419086,
+          "const": 2.6874534453667305e-17,
+          "high_aqi100_3d_signal": 0.6483817275612251,
+          "high_aqi100_signal": 0.43636885382433166,
+          "log_parkinson22_lag": 4.354704640817124e-06,
+          "log_rv22_lag": 0.0009709485493080227,
+          "pm25_3d_z": 0.7111234530249435,
+          "pm25_x_vix": 0.3793202913201411,
+          "pm25_z": 0.8902831278273261,
+          "ret5_lag": 2.3233888266676909e-07,
+          "vix_log_signal": 4.720090464599129e-08
+        },
+        "r2": 0.17165420711641732,
+        "tvalues_hac": {
+          "abs_ret5_lag": 0.5464119707272295,
+          "const": -8.459404926188803,
+          "high_aqi100_3d_signal": 0.4560114736656468,
+          "high_aqi100_signal": 0.7783395697789456,
+          "log_parkinson22_lag": 4.593692724769578,
+          "log_rv22_lag": -3.298812171031422,
+          "pm25_3d_z": -0.37034767844532096,
+          "pm25_x_vix": -0.8791493713503621,
+          "pm25_z": 0.13794595866255988,
+          "ret5_lag": -5.1714062079526935,
+          "vix_log_signal": 5.4615448188168685
+        }
+      },
+      "baseline_har_vix": {
+        "adj_r2": 0.16839264884145544,
+        "aic": 7793.327492245331,
+        "bic": 7826.148837060731,
+        "coefficients": {
+          "abs_ret5_lag": 2.1420704335538194,
+          "const": -13.956161261331049,
+          "log_parkinson22_lag": 0.9821514735870817,
+          "log_rv22_lag": -0.6485036206164374,
+          "ret5_lag": -11.254963993367687,
+          "vix_log_signal": 1.9200732761126345
+        },
+        "pvalues_hac": {
+          "abs_ret5_lag": 0.46777217159357165,
+          "const": 2.8369725224884276e-17,
+          "log_parkinson22_lag": 6.7233094855405816e-06,
+          "log_rv22_lag": 0.0013416044255090917,
+          "ret5_lag": 3.1442377347633555e-07,
+          "vix_log_signal": 5.963825792838645e-08
+        },
+        "r2": 0.17076325132480352,
+        "tvalues_hac": {
+          "abs_ret5_lag": 0.7261086419641979,
+          "const": -8.453088178810304,
+          "log_parkinson22_lag": 4.502264944016421,
+          "log_rv22_lag": -3.206928271794266,
+          "ret5_lag": -5.114589625153563,
+          "vix_log_signal": 5.419882385445235
+        }
+      },
+      "delta_adj_r2_aug_minus_base": -0.0014881309044164626,
+      "horizon": 1,
+      "n": 1755
+    },
+    "h5": {
+      "augmented_pm25": {
+        "adj_r2": 0.5037825181013333,
+        "aic": 4330.512852640972,
+        "bic": 4390.672775375106,
+        "coefficients": {
+          "abs_ret5_lag": 3.6686744082546454,
+          "const": -10.342423754808399,
+          "high_aqi100_3d_signal": -0.07228700231149499,
+          "high_aqi100_signal": 0.26413535417854717,
+          "log_parkinson22_lag": 0.5278994152462734,
+          "log_rv22_lag": -0.2382287484893495,
+          "pm25_3d_z": 0.020482299721315933,
+          "pm25_x_vix": 0.000680666886506795,
+          "pm25_z": -0.014669287821868347,
+          "ret5_lag": -8.74648538403113,
+          "vix_log_signal": 1.43575184411712
+        },
+        "pvalues_hac": {
+          "abs_ret5_lag": 0.07337908642935378,
+          "const": 4.332948984892208e-18,
+          "high_aqi100_3d_signal": 0.6142205670022927,
+          "high_aqi100_signal": 0.04460497053616369,
+          "log_parkinson22_lag": 0.000489495091375062,
+          "log_rv22_lag": 0.09637667270382438,
+          "pm25_3d_z": 0.4077880059142548,
+          "pm25_x_vix": 0.9779780604663442,
+          "pm25_z": 0.4096743267749865,
+          "ret5_lag": 6.224084134853051e-09,
+          "vix_log_signal": 1.3269239101668385e-08
+        },
+        "r2": 0.5066148096646819,
+        "tvalues_hac": {
+          "abs_ret5_lag": 1.790465638570656,
+          "const": -8.669690931512926,
+          "high_aqi100_3d_signal": -0.5040580753130617,
+          "high_aqi100_signal": 2.008360750676948,
+          "log_parkinson22_lag": 3.48644004516889,
+          "log_rv22_lag": -1.6626791763055953,
+          "pm25_3d_z": 0.8277925299425622,
+          "pm25_x_vix": 0.027603913334720575,
+          "pm25_z": -0.8244668806156945,
+          "ret5_lag": -5.810622844461096,
+          "vix_log_signal": 5.682561220329212
+        }
+      },
+      "baseline_har_vix": {
+        "adj_r2": 0.5048929815867471,
+        "aic": 4321.6098599570305,
+        "bic": 4354.4243632665575,
+        "coefficients": {
+          "abs_ret5_lag": 3.6660035736907624,
+          "const": -10.337450833325738,
+          "log_parkinson22_lag": 0.5311329252314633,
+          "log_rv22_lag": -0.24233332139425,
+          "ret5_lag": -8.740924322404002,
+          "vix_log_signal": 1.4330260556390715
+        },
+        "pvalues_hac": {
+          "abs_ret5_lag": 0.07325868589112355,
+          "const": 4.633548821505532e-18,
+          "log_parkinson22_lag": 0.00041133633326332307,
+          "log_rv22_lag": 0.08800195586158463,
+          "ret5_lag": 6.3200848140281116e-09,
+          "vix_log_signal": 1.3143756042195049e-08
+        },
+        "r2": 0.5063059582374698,
+        "tvalues_hac": {
+          "abs_ret5_lag": 1.7912157115186693,
+          "const": -8.662050034681814,
+          "log_parkinson22_lag": 3.532701688016329,
+          "log_rv22_lag": -1.7060328913227532,
+          "ret5_lag": -5.80806005611633,
+          "vix_log_signal": 5.684185491478055
+        }
+      },
+      "delta_adj_r2_aug_minus_base": -0.0011104634854137707,
+      "horizon": 5,
+      "n": 1753
+    }
+  },
+  "method": {
+    "augmented_terms": [
+      "pm25_z",
+      "pm25_3d_z",
+      "high_aqi100_signal",
+      "high_aqi100_3d_signal",
+      "pm25_x_vix"
+    ],
+    "controls": [
+      "vix_log_signal",
+      "log_rv22_lag",
+      "log_parkinson22_lag",
+      "ret5_lag",
+      "abs_ret5_lag"
+    ],
+    "formal_gate": "Support requires OOS QLIKE improvement with DM t<-3 and a PM2.5 HAC term |t|>3.",
+    "limitation": "Daily SPY proxy, not intraday RV/spread; NYC pilot, not a 47-city replication.",
+    "market_target": "SPY close-to-close forward realized variance, h in {1,5}.",
+    "oos_guard": "For horizon h, forecast row i trains only on rows j <= i-h.",
+    "pollution_signal": "NYC monitor-day PM2.5 mean and AQI max from EPA daily_88101 files; signal.shift(1)."
+  },
+  "oos_forecast": {
+    "h1": {
+      "dm_p_augmented_vs_baseline": 0.2839310085727689,
+      "dm_t_augmented_vs_baseline": 1.0722951743981968,
+      "end_date": "2025-12-31",
+      "horizon": 1,
+      "mean_qlike_augmented_pm25": 1.7613693432843809,
+      "mean_qlike_baseline_har_vix": 1.7525211125269546,
+      "mse_log_augmented": 5.496913512768306,
+      "mse_log_baseline": 5.464884322864239,
+      "mse_log_improvement_pct_augmented_vs_baseline": -0.5860909035176096,
+      "n_oos": 754,
+      "qlike_improvement_pct_augmented_vs_baseline": -0.5048858295731462,
+      "start_date": "2022-12-28"
+    },
+    "h5": {
+      "dm_p_augmented_vs_baseline": 0.1394239043198091,
+      "dm_t_augmented_vs_baseline": 1.4795164986680043,
+      "end_date": "2025-12-24",
+      "horizon": 5,
+      "mean_qlike_augmented_pm25": 0.3236053777329686,
+      "mean_qlike_baseline_har_vix": 0.3187198274432986,
+      "mse_log_augmented": 0.6297949311092903,
+      "mse_log_baseline": 0.6206520886149004,
+      "mse_log_improvement_pct_augmented_vs_baseline": -1.4731026709011552,
+      "n_oos": 748,
+      "qlike_improvement_pct_augmented_vs_baseline": -1.5328667591410465,
+      "start_date": "2023-01-03"
+    }
+  },
+  "pollution_event_tests": {
+    "high_aqi100_fwd_rv1": {
+      "ci95_high": -4.507235854032062e-05,
+      "ci95_low": -0.00017002175277331224,
+      "control_mean": 0.00015143291978243504,
+      "diff": -0.000108473252829999,
+      "flag": "high_aqi100_signal",
+      "n_control": 2005,
+      "n_treated": 5,
+      "p_one_sided_treated_greater": 1.0,
+      "ratio": 0.28368776758816083,
+      "target": "fwd_rv1",
+      "treated_mean": 4.2959666952436035e-05
+    },
+    "high_aqi100_fwd_rv5": {
+      "ci95_high": -0.00034187323823136755,
+      "ci95_low": -0.0007543239307907269,
+      "control_mean": 0.0007583626811709959,
+      "diff": -0.0005282741676339888,
+      "flag": "high_aqi100_signal",
+      "n_control": 2001,
+      "n_treated": 5,
+      "p_one_sided_treated_greater": 1.0,
+      "ratio": 0.3034016826641903,
+      "target": "fwd_rv5",
+      "treated_mean": 0.000230088513537007
+    },
+    "high_aqi150_fwd_rv1": {
+      "ci95_high": null,
+      "ci95_low": null,
+      "control_mean": 0.00015123672921548323,
+      "diff": null,
+      "flag": "high_aqi150_signal",
+      "n_control": 2009,
+      "n_treated": 1,
+      "p_one_sided_treated_greater": null,
+      "target": "fwd_rv1",
+      "treated_mean": 3.2135046386382244e-06
+    },
+    "high_aqi150_fwd_rv5": {
+      "ci95_high": null,
+      "ci95_low": null,
+      "control_mean": 0.0007572832807923814,
+      "diff": null,
+      "flag": "high_aqi150_signal",
+      "n_control": 2005,
+      "n_treated": 1,
+      "p_one_sided_treated_greater": null,
+      "target": "fwd_rv5",
+      "treated_mean": 0.0002811896021231539
+    },
+    "top_decile_fwd_rv1": {
+      "ci95_high": -3.983954922935266e-05,
+      "ci95_low": -0.00013986024711308618,
+      "control_mean": 0.00016019151953230412,
+      "diff": -8.682847732720999e-05,
+      "flag": "pm25_top_decile_signal",
+      "n_control": 1801,
+      "n_treated": 209,
+      "p_one_sided_treated_greater": 1.0,
+      "ratio": 0.4579708240441517,
+      "target": "fwd_rv1",
+      "treated_mean": 7.336304220509414e-05
+    },
+    "top_decile_fwd_rv5": {
+      "ci95_high": -8.984820560537605e-05,
+      "ci95_low": -0.0005756098009448196,
+      "control_mean": 0.000790204302959577,
+      "diff": -0.00031825676624910713,
+      "flag": "pm25_top_decile_signal",
+      "n_control": 1797,
+      "n_treated": 209,
+      "p_one_sided_treated_greater": 0.998,
+      "ratio": 0.5972474902286281,
+      "target": "fwd_rv5",
+      "treated_mean": 0.00047194753671046986
+    }
+  },
+  "pollution_summary": {
+    "aqi_signal_max": 155.0,
+    "aqi_signal_rows": 638,
+    "high_aqi100_signal_days": 5,
+    "high_aqi150_signal_days": 1,
+    "pm25_signal_mean": 7.592729750897744,
+    "pm25_signal_rows": 2010,
+    "pm25_signal_std": 6.535639006924666,
+    "pm25_top_decile_signal_days": 209,
+    "top_aqi_signal_dates": [
+      {
+        "aqi_signal": 155.0,
+        "date": "2023-06-09",
+        "fwd_rv1": 3.2135046386382244e-06,
+        "fwd_rv5": 0.0002811896021231539,
+        "pm25_signal": 71.77083333333333
+      },
+      {
+        "aqi_signal": 127.0,
+        "date": "2023-07-06",
+        "fwd_rv1": 6.18024012643577e-05,
+        "fwd_rv5": 0.00017910202749368885,
+        "pm25_signal": 24.630303
+      },
+      {
+        "aqi_signal": 120.0,
+        "date": "2023-07-17",
+        "fwd_rv1": 1.201461966632206e-05,
+        "fwd_rv5": 0.00011606955571952289,
+        "pm25_signal": 14.071972
+      },
+      {
+        "aqi_signal": 113.0,
+        "date": "2018-03-07",
+        "fwd_rv1": 1.345177246225212e-07,
+        "fwd_rv5": 0.0003647186188718885,
+        "pm25_signal": 8.419444444444444
+      },
+      {
+        "aqi_signal": 111.0,
+        "date": "2023-06-30",
+        "fwd_rv1": 0.0001376332914682397,
+        "fwd_rv5": 0.000209362763476781,
+        "pm25_signal": 33.621875
+      },
+      {
+        "aqi_signal": 88.0,
+        "date": "2021-07-22",
+        "fwd_rv1": 4.375723133035875e-06,
+        "fwd_rv5": 0.00013618741757805632,
+        "pm25_signal": 27.880952428571423
+      },
+      {
+        "aqi_signal": 86.0,
+        "date": "2021-07-28",
+        "fwd_rv1": 1.6824823867883613e-07,
+        "fwd_rv5": 0.00011106409066227374,
+        "pm25_signal": 26.630357142857143
+      },
+      {
+        "aqi_signal": 85.0,
+        "date": "2025-08-06",
+        "fwd_rv1": 5.8222940365734695e-05,
+        "fwd_rv5": 0.00023531922056522017,
+        "pm25_signal": 29.64659090909091
+      },
+      {
+        "aqi_signal": 85.0,
+        "date": "2024-07-08",
+        "fwd_rv1": 1.330302303016942e-06,
+        "fwd_rv5": 0.00021375833316387947,
+        "pm25_signal": 20.819318272727273
+      },
+      {
+        "aqi_signal": 84.0,
+        "date": "2018-03-13",
+        "fwd_rv1": 4.203633655812323e-05,
+        "fwd_rv5": 0.00025645058018210676,
+        "pm25_signal": 6.995833333333334
+      }
+    ]
+  },
+  "seed": 42,
+  "verdict": {
+    "event_support": false,
+    "label": "NULL",
+    "pass_horizons": [],
+    "reason": "PM2.5 does not improve OOS volatility forecasts and pollution-bucket evidence is weak.",
+    "weak_horizons": []
+  }
+}
