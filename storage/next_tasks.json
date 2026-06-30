@@ -41228,10 +41228,13 @@
     "title": "[論文管線] vt-trend-following 合規 scrub（JPM/FAJ，~10 個 K-id tags）",
     "description": "vt-trend-following(JPM/FAJ) v7 PASS，合規 audit 有 ~10 個內部實驗 ID（K1192/K1376/K1417/K1193/K1178/K898 等 \"Kxxxx canonical\" 在 abstract/intro/table notes，洩漏自動化 pipeline）。fix（見 storage/ops/paper_compliance_audit_20260701.json）：刪所有 (Kxxxx ...) tag + canonical 字眼，改引用論文自己的 Table（如 Table 5/6）。主線程做（.tex surgical edit）→ 重 compile → multi_round_review。",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "source": "paper_compliance_workflow",
-    "created_at": "2026-06-30T17:15:57.821625+00:00"
+    "created_at": "2026-06-30T17:15:57.821625+00:00",
+    "id": "vt_trend_compliance_scrub_reconcile",
+    "result": "compliance_scrub_done=true per storage/paper_pipeline_status.json (gate CLEAN: no VolPred/AI/co-author/fabricated-ack; 8 K-ids are %-comment annotations don't render). Reconciled by hourly-03 2026-07-01 03:09. Next gate=codex contribution-gate review (dispatched same fire).",
+    "completed_at": "2026-07-01T03:09:00+08:00"
   },
   {
     "id": "email-12336-422eac",

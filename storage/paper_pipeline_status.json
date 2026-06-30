@@ -66,13 +66,32 @@
     {
       "paper": "vt-trend-following",
       "journal_target": "JPM/FAJ",
-      "stage": "compliance_scrub",
-      "stage_entered_at": "2026-07-01T00:00:00+08:00",
-      "last_advance_at": "2026-07-01T00:00:00+08:00",
-      "blocker": "awaiting compliance scrub then owner submit decision",
-      "owner_decision_pending": true,
+      "stage": "revision",
+      "stage_entered_at": "2026-07-01T03:18:00+08:00",
+      "last_advance_at": "2026-07-01T03:18:00+08:00",
+      "blocker": "codex contribution-gate (gpt-5.x) verdict: BORDERLINE — Major revision required; NOT arXiv-ready. 11 reframing items including visible internal experiment tags in body, stale Figure 2, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload, missing cover letter.",
+      "owner_decision_pending": false,
       "compliance_scrub_done": true,
-      "compliance_note": "gate CLEAN (2026-07-01): submission set has no VolPred/AI/co-author/fabricated-ack; 8 main.tex K-ids are %-comment source annotations (don't render). Still needs contribution-gate review before arXiv (same as leverage-direction)."
+      "compliance_note": "gate CLEAN (2026-07-01): submission set has no VolPred/AI/co-author/fabricated-ack; 8 main.tex K-ids are %-comment source annotations (don't render). Still needs contribution-gate review before arXiv (same as leverage-direction).",
+      "contribution_gate": {
+        "reviewer": "codex exec gpt-5.x",
+        "date": "2026-07-01",
+        "verdict": "CONTRIBUTION BORDERLINE — needs reframing (Major revision)",
+        "report": "paper/vt-trend-following/review_history/codex_contribution_gate_20260701.md",
+        "reframing_agenda": [
+          "Fix canonical submission entry (main.tex stale, main_v3.tex is real source)",
+          "Remove all visible internal experiment tags from body prose + abstract + conclusion",
+          "Regenerate Figure 2 from current Table 5 values (stale 28.7pp vs current 24.9pp)",
+          "Recompute/remove earlier-vintage Calmar cells in Table 3",
+          "Resolve BAB source and sample-size conflict (AQR vs ETF proxy)",
+          "Rewrite abstract+contribution around ONE claim (drawdown insurance overlay)",
+          "Move forensic revision notes out of main text into appendix",
+          "Clarify economic cost units (Sharpe drag vs return cost)",
+          "Reduce side claims (427-spec search etc) to appendix",
+          "Add Asness/Liew or practitioner trend-following citation",
+          "Create JPM/FAJ cover letter"
+        ]
+      }
     },
     {
       "paper": "prg-periodic-garch",
