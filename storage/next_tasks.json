@@ -40562,14 +40562,20 @@
   {
     "id": "platform_ops_strategy_candidate_funnel_monitor",
     "task_type": "platform_ops",
-    "priority": "P3",
-    "status": "pending",
+    "priority": 3,
+    "status": "succeeded",
     "title": "策略候選 funnel monitor — 每月掃 recent K experiment 看有無 actionable forecast signal 進 strategy_lifecycle",
     "description": "Standing directive (per memory feedback_strategy_dev_over_audit, 老闆 email-12278 2026-06-30): 策略 effort 重新策略開發 > audit 舊策略。\n\n本 task 是 standing platform_ops（每月跑一次或事件觸發）：\n1. Scan recent 30 days K experiment（knowledge.json with verdict=PASS/CONDITIONAL_PASS）找「actionable forecast signal」— 即 (a) OOS-verified vol forecast improvement DM significant；(b) 有清晰 long/short/timing rule；(c) Sharpe gate 可 pass\n2. 對候選 K：spec out paper-trade shadow（candidate strategy spec）→ 派 strategy_lifecycle subtask 跑 paper-trade shadow → gate（per docs/strategy-registry.md）\n3. 對非 actionable K：skip，純當 research insight\n\n禁止：因為 audit 發現「同質性」觸發舊策略下架 / paper-trade shadow（per K1573 incident 教訓 - vol-targeting 數學特徵不是 bug）\n\nNext fire: 2026-07-30 (monthly cadence)",
     "created_at": "2026-06-30T06:08:00+00:00",
     "source": "user-assigned-via-email-12278",
     "blocked_reason": null,
-    "blocked_until": null
+    "blocked_until": null,
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-30T12:33:31.235333+00:00",
+    "claim_session_id": "1d7330950837",
+    "started_at": "2026-06-30T12:33:34.204267+00:00",
+    "completed_at": "2026-06-30T12:35:52.705092+00:00",
+    "result": "Monthly scan 2026-06-30: 0 actionable forecast signal candidates 進 strategy_lifecycle. 12 K manual review 後全部排除（K1422 calibration 待修, K1341/K1334/K1471 NULL, 其餘 descriptive/既有策略 review）. Report: storage/ops/strategy_funnel/2026-06-30_monthly_scan.md. Forward proposal: 3 new strategy dev directions logged. Next fire: 2026-07-30."
   },
   {
     "id": "email-12290-e15b8f",
@@ -40696,9 +40702,49 @@
     "title": "codex-exec 重做 7 篇 prose-dump lazypack + 補近期可見子集（禁用爛腳本）",
     "description": "用 codex exec 重做/補 lazypack（boss 指令 + 品質審查 2026-06-30）。背景：並行 agent 的 scripts/backfill_lazypack_sections.py 產出 prose-dump 爛圖（截斷散文 + 抓表面數字如 2% GDP 目標、漏掉真結果），8 篇 live 中招。已用 codex-exec 修好 mile_68285aa0（commit 5cfc1a6e5）。\n\nPHASE 1（先做，live 品質問題）：用 scripts/gen_lazypack_codex.py 重做以下 7 篇 prose-dump 文章的 lazypack（每篇：找 source K/experiment_refs → 建 panel plan → codex exec 生圖 → 主線程 Read 看圖核對 results.json → upload_chart 上傳 *_lazypack_codex_* → 替換 ## 懶人包圖組 section → sync_article）：\n  mile_f5f4cb43, mile_819af916, mile_9839822d, mile_7b95b816, mile_dc4035e4, mile_082f0578, mile_71dd116b\n  注意：部分文章 experiment_refs 可能為空（如 mile_f5f4cb43）→ 從文章內容/標題推 source K 或用 article-id 餵 codex（--article-id）。\n\nPHASE 2（boss 裁示 scale 後）：320 篇缺 lazypack 的 published general 文章，補近期可見子集（非全 320，codex-exec 每篇多分鐘 + quota，優先 published_at 最新 ~15 篇）。\n\n硬規則：(1) 只用 gen_lazypack_codex.py（codex exec primary），**禁用** backfill_lazypack_sections.py （已標 DEPRECATED）；(2) 數字逐欄對齊 results.json；(3) 主線程 Read 看圖驗品質（CJK 無缺字 + 數字對 + 非 prose-dump）才 append；(4) idempotent，先查 has_lazypack_section 跳過已 codex 化的。\nDISPATCH_LANE=main_thread（需主線程驗圖品質，不可 codex 無監督批次）。",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "main_thread",
     "source": "main_thread_quality_review",
-    "created_at": "2026-06-30T11:57:55.011847+00:00"
+    "created_at": "2026-06-30T11:57:55.011847+00:00",
+    "claimed_by": "interactive",
+    "claimed_at": "2026-06-30T12:30:46.653312+00:00",
+    "claim_session_id": "d0472b1cda9a",
+    "started_at": "2026-06-30T12:30:46.870163+00:00"
+  },
+  {
+    "id": "email-12310-611a8d",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] lazypack 品質審查：並行批次腳本產出 prose-dump 爛圖（8 篇 live），已修 1 + ",
+    "description": "Gmail UID: 12310\nMessage-ID: <9C2F2396-6BF2-47A5-8C60-2497B6DBBA88@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 20:27:55 +0800\nSubject: Re: [VolPred Alert][WARN] lazypack 品質審查：並行批次腳本產出 prose-dump 爛圖（8 篇 live），已修 1 + deprecate + queue codex 重做\n\n--- 用戶回信內容 ---\n同意只補部分圖\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 19:58 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> lazypack 品質審查：並行批次腳本產出 prose-dump 爛圖（8 篇 live），已修 1 + deprecate + queue codex 重做\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 觸發條件\r\n> \r\n> Autonomous tick 19:49。上 tick 發現並行 Opus 4.7 agent 在跑 lazypack 批次 backfill；本 tick 審查其產出品質。\r\n> \r\n> 主要發現：並行批次腳本品質差\r\n> \r\n> scripts/backfill_lazypack_sections.py（並行 agent 建的確定性 Pillow 渲染器）產出 prose-dump 爛圖：\r\n> \r\n> 把文章散文切成框（sent[:86]）+ 抓含數字的第一句 → 截斷在句子中間、headline 抓到表面數字（如 mile_68285aa0 兩個框都 headline「2%」= GDP 目標，漏掉真結果 1.426x 波動倍數 / 0-of-315 multiple-testing NULL）。\r\n> 通過了 enforce gate（有 ## 懶人包圖組 section）但品質低 + 誤導數據。\r\n> 8 篇 live 文章中招（含 mile_71dd116b — 諷刺地正是你 6/5 最初抱怨「沒看到懶人包圖」那篇）。\r\n> 對比我 codex-exec 的 K1576：真資料區塊 + 方法時間軸 + 真結果表，數字綁 results.json。品質天差地別 → 你的 codex-exec 指令正確。\r\n> \r\n> 本 tick 行動（3 commits）\r\n> \r\n> 修好最可見的 mile_68285aa0（5cfc1a6e5）：上傳 3 張 codex 圖（lazypack_codex）→ 替換爛 section → sync，live 已更新。\r\n> backfill_lazypack_sections.py 標 DEPRECATED（f69e6db7a）：docstring 警告品質問題，primary 改 gen_lazypack_codex.py，此腳本只當最後 fallback。\r\n> queue codex-redo 任務 platform_ops_lazypack_codex_redo_and_backfill（P2, main_thread）：Phase 1 用 codex-exec 重做剩 7 篇 prose-dump；Phase 2（你裁示 scale 後）補 320 缺圖的可見子集。\r\n> 需你裁示\r\n> \r\n> 320 篇全缺 + 7 篇待重做的 backfill scale：codex-exec 每篇多分鐘 + 燒 codex quota，全做 320 很貴。我建議只補近期可見子集（~15-20 篇最新）+ 重做 7 篇 prose-dump，其餘舊文低 ROI 暫不補。你同意此 scope 嗎？\r\n> enforce gate 的 gap：gate 只擋「沒 lazypack」，擋不了「爛 lazypack」→ 品質靠 codex-exec by-construction + 主線程驗圖，不靠 gate。\r\n> 其他\r\n> \r\n> dashboard section 7 loop_health = warn（error_recurrence）；advisory 非 breach，下 tick 跑 dreaming-run 看 pattern。\r\n> git ahead 4（hourly git_push_backup 會推）。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-30T12:30:08.607844+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12310,
+    "email_message_id": "<9C2F2396-6BF2-47A5-8C60-2497B6DBBA88@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] lazypack 品質審查：並行批次腳本產出 prose-dump 爛圖（8 篇 live），已修 1 + deprecate + queue codex 重做",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-30T12:30:34.958477+00:00",
+    "claim_session_id": "f73b37b61ba1",
+    "completed_at": "2026-06-30T12:31:49.973872+00:00",
+    "result": "用戶同意只補部分圖（近期 ~15 篇 + 重做 7 篇 prose-dump）。ack 信已寄出 9af6596a。執行 platform_ops_lazypack_codex_redo_and_backfill (in_progress)。"
+  },
+  {
+    "id": "platform_ops_strategy_candidate_funnel_monitor_2026_07_30",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "blocked",
+    "title": "策略候選 funnel monitor — 月度 scan recent K experiment 找 actionable forecast signal",
+    "description": "Standing directive per email-12278 (老闆 2026-06-30): 策略 effort 重新策略開發 > audit 舊策略.\n\n月度 scan workflow:\n1. Scan recent 30d knowledge.json verdict=PASS/CONDITIONAL_PASS\n2. Filter actionable forecast signal (OOS DM sig + clear long/short/timing rule + Sharpe gate)\n3. Actionable → spec paper-trade shadow + 派 strategy_lifecycle subtask\n4. 非 actionable → research insight only\n\n禁: K1573 教訓 — vol-targeting 同質性不是 bug，不觸發舊策略下架\n\n上次 scan: 2026-06-30 → 0 candidates (report: storage/ops/strategy_funnel/2026-06-30_monthly_scan.md)",
+    "created_at": "2026-06-30T20:36:00+00:00",
+    "source": "auto_requeue_post_2026-06-30_scan",
+    "blocked_reason": "awaiting_event_window",
+    "blocked_until": "2026-07-30T00:00:00+00:00",
+    "blocked_note": "Monthly cadence — auto-unblock 2026-07-30"
   }
 ]
