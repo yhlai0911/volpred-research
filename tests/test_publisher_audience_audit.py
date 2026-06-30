@@ -17,6 +17,17 @@ from volpred.publisher.publisher import (
     _extract_experiment_refs,
 )
 
+# A valid general-audience article must carry a 懶人包圖組 (publishing.md §4,
+# enforced by publish_milestone). These audit tests are about the audience-content
+# consistency gate, not lazypack coverage, so they append a minimal lazypack to the
+# general-audience descriptions to clear that orthogonal gate.
+_LZ_BASE = "https://supabase.test/storage/v1/object/public/article-images"
+_LZ = (
+    "\n\n## 懶人包圖組\n\n"
+    f"![概念]({_LZ_BASE}/lz1.png)\n\n"
+    f"![結果]({_LZ_BASE}/lz2.png)\n"
+)
+
 
 def test_extract_experiment_refs_separates_k_ids():
     tags = ["一般讀者", "FOMC", "T-2", "K513", "K820", "K1100g", "macro"]
@@ -124,7 +135,7 @@ def test_publish_milestone_strict_passes_clean_general(
 
     clean_content = (
         "想像你今天要參加一個重要會議。Fed 也是。94.8% 的人猜對結果，"
-        "但市場為什麼還在緊張？因為剩下的 5% 機率太刺激了。"
+        "但市場為什麼還在緊張？因為剩下的 5% 機率太刺激了。" + _LZ
     )
 
     pub_id = pub.publish_milestone(
@@ -156,7 +167,7 @@ def test_publish_milestone_strips_redundant_audience_aliases(
 
     pub_id = pub.publish_milestone(
         title="散戶可讀的方法論文章",
-        description="一個白話故事，不含 jargon。",
+        description="一個白話故事，不含 jargon。" + _LZ,
         phase="research",
         audience="general",
         # Polluted brief: Chinese + English audience tags + wrong-audience tag
@@ -221,7 +232,7 @@ def test_publish_milestone_extracts_k_ids_to_metadata(
 
     pub_id = pub.publish_milestone(
         title="散戶可讀的方法論文章",
-        description="一個白話故事，沒有 jargon",
+        description="一個白話故事，沒有 jargon" + _LZ,
         phase="research",
         audience="general",
         tags=["一般讀者", "K513", "FOMC", "K820", "macro"],
@@ -234,3 +245,76 @@ def test_publish_milestone_extracts_k_ids_to_metadata(
     assert "K820" not in item["tags"]
     assert "FOMC" in item["tags"]
     assert sorted(item["details"]["experiment_refs"]) == ["K513", "K820"]
+
+
+# ---------------------------------------------------------------------------
+# 2026-06-30 (boss): lazypack gate at the Publisher chokepoint
+# ---------------------------------------------------------------------------
+
+
+def _patch_remote(monkeypatch):
+    monkeypatch.setenv("VOLPRED_ACTOR", "claude")
+    monkeypatch.setattr(Publisher, "REMOTE_URL", "", raising=False)
+    monkeypatch.setattr(Publisher, "_sync_feed_to_remote", lambda self: None, raising=False)
+    monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
+
+
+def test_publish_milestone_blocks_general_without_lazypack(tmp_path: Path, monkeypatch):
+    """audience='general' + audit_strict + no 懶人包圖組 → ValueError."""
+    _patch_remote(monkeypatch)
+    pub = Publisher(storage_dir=str(tmp_path))
+    with pytest.raises(ValueError, match="懶人包"):
+        pub.publish_milestone(
+            title="散戶白話文無懶人包",
+            description="一個白話故事，沒有 jargon，但忘了附懶人包圖。",
+            phase="research",
+            audience="general",
+            tags=["一般讀者", "教學"],
+            status="draft",
+        )
+
+
+def test_publish_milestone_general_with_lazypack_passes(tmp_path: Path, monkeypatch):
+    """audience='general' WITH a 懶人包圖組 → publishes."""
+    _patch_remote(monkeypatch)
+    pub = Publisher(storage_dir=str(tmp_path))
+    pub_id = pub.publish_milestone(
+        title="散戶白話文有懶人包",
+        description="一個白話故事，沒有 jargon。" + _LZ,
+        phase="research",
+        audience="general",
+        tags=["一般讀者", "教學"],
+        status="draft",
+    )
+    assert pub_id.startswith("mile_")
+
+
+def test_publish_milestone_audit_strict_false_bypasses_lazypack(tmp_path: Path, monkeypatch):
+    """audit_strict=False is the documented escape hatch (batch / non-reader)."""
+    _patch_remote(monkeypatch)
+    pub = Publisher(storage_dir=str(tmp_path))
+    pub_id = pub.publish_milestone(
+        title="批次遷移無懶人包",
+        description="一個白話故事，沒有 jargon，批次遷移略過 gate。",
+        phase="research",
+        audience="general",
+        tags=["一般讀者"],
+        status="draft",
+        audit_strict=False,
+    )
+    assert pub_id.startswith("mile_")
+
+
+def test_publish_milestone_daily_audience_exempt_from_lazypack(tmp_path: Path, monkeypatch):
+    """Non-general reader audiences (daily) are exempt from the lazypack gate."""
+    _patch_remote(monkeypatch)
+    pub = Publisher(storage_dir=str(tmp_path))
+    pub_id = pub.publish_milestone(
+        title="每日建議無懶人包",
+        description="今日市場：VIX 16，維持中性配置。",
+        phase="research",
+        audience="daily",
+        tags=["每日建議"],
+        status="draft",
+    )
+    assert pub_id.startswith("mile_")

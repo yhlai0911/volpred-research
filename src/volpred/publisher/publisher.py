@@ -596,6 +596,32 @@ def _find_same_ref_feed_duplicate(feed: list[dict], item: dict) -> dict | None:
     return None
 
 
+_LAZYPACK_HEADING_RE = re.compile(r"^#+\s*.*懶人包.*$", re.MULTILINE)
+_LAZYPACK_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]+\)")
+
+
+def has_lazypack_section(content: str) -> bool:
+    """True iff `content` carries a real 懶人包圖組 (lazypack) section.
+
+    Single source of truth for the lazypack requirement, shared by the
+    publish_draft.py CLI gate (`check_lazypack_gate`) and the Publisher
+    chokepoint gate (publish_milestone). A valid lazypack = a markdown heading
+    containing 懶人包 (## 懶人包 / ## 懶人包圖組) WITH at least one markdown image
+    appearing after it — so a bare prose mention or an empty heading does not pass.
+
+    Fail-open contract (callers rely on this): on any internal error return True
+    (treat as present) so a malfunctioning check never over-blocks content, per
+    .claude/rules/no-silent-fallback.md + dedup-gate-audit.md.
+    """
+    try:
+        headings = list(_LAZYPACK_HEADING_RE.finditer(content))
+        if not headings:
+            return False
+        return bool(_LAZYPACK_IMAGE_RE.search(content[headings[0].end():]))
+    except Exception:
+        return True  # silent-ok: fail-open so a gate malfunction never over-blocks
+
+
 def _audit_general_content(audience: str, tags: list[str], content: str) -> list[str]:
     """Return list of audience-content consistency issues. Empty list = clean.
 
@@ -1454,6 +1480,21 @@ class Publisher:
             print(f"  ⚠️ general audit issues (audit_strict=False bypass):")
             for issue in audit_issues:
                 print(f"     - {issue}")
+
+        # 2026-06-30 (boss): every general-audience reader article must carry a
+        # 懶人包圖組 (lazypack) at the end. The publish_draft.py CLI gates this at
+        # the file-system stage, but direct Publisher callers (skill §6 Python API)
+        # bypass that — enforce here too so the chokepoint is universal. Scope =
+        # audience='general' only; daily/event/research/member_qa exempt. Shares
+        # the audit_strict escape (batch migrations) with the consistency gate.
+        if audience == 'general' and audit_strict and not has_lazypack_section(description):
+            raise ValueError(
+                "audience='general' is missing a 懶人包圖組 (lazypack) section.\n"
+                "Per .claude/rules/publishing.md §4 + lazypack-infographic skill, "
+                "append a `## 懶人包圖組` section with 2-4 poster-style PNGs "
+                "(generate FREE via scripts/gen_lazypack_infographic.py), then retry.\n"
+                "Set audit_strict=False only for genuinely non-reader pieces / batch migrations."
+            )
 
         # Build related_articles list for metadata
         related_articles = []

@@ -346,7 +346,9 @@ def test_cli_override_beats_frontmatter(tmp_path, monkeypatch):
         "---\n\n"
         "Body paragraph.\n\n"
         "![chart](https://example.com/a.png)\n"
-        "![chart](https://example.com/b.png)\n",
+        "![chart](https://example.com/b.png)\n\n"
+        # frontmatter without audience key infers general → needs 懶人包圖組
+        "## 懶人包圖組\n\n![概念](https://example.com/lz.png)\n",
     )
 
     import publish_draft
@@ -378,7 +380,9 @@ def test_no_update_description_beats_all(tmp_path, monkeypatch):
         "---\n\n"
         "Body paragraph that would normally be extracted.\n\n"
         "![chart](https://example.com/a.png)\n"
-        "![chart](https://example.com/b.png)\n",
+        "![chart](https://example.com/b.png)\n\n"
+        # frontmatter without audience key infers general → needs 懶人包圖組
+        "## 懶人包圖組\n\n![概念](https://example.com/lz.png)\n",
     )
 
     import publish_draft

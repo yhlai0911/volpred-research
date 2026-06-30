@@ -837,6 +837,59 @@ def check_image_gate(body: str, audience: str, bypass: bool) -> int:
     return 0
 
 
+def check_lazypack_gate(body: str, audience: str, bypass: bool) -> int:
+    """Return 0 if pass, 6 if the 懶人包 (lazypack) gate fails.
+
+    Per .claude/rules/publishing.md §4 + lazypack-infographic skill (boss 2026-06-04
+    hard requirement, re-raised 2026-06-30 at 12% coverage): every general-audience
+    reader article must append a 懶人包圖組 (cheat-sheet infographic SET) at the end
+    so non-expert readers can grasp it quickly. The detection layer
+    (content_quality lazypack coverage) only WARNED — coverage stayed at 12% for
+    weeks — so enforce deterministically at the publish chokepoint (mirrors the
+    ≥2-image gate above; lazypack generation is FREE via NotebookLM, auth verified).
+
+    Scope = audience == 'general' only (research/member_qa are for專業讀者; daily/
+    event go through other entry points). Requires BOTH:
+      1. a markdown heading containing 懶人包 (## 懶人包 / ## 懶人包圖組), AND
+      2. at least one markdown image appearing after that heading
+    so a bare mention of 懶人包 in prose, or an empty heading, does not pass.
+
+    Fail-open on gate malfunction per .claude/rules/no-silent-fallback.md +
+    dedup-gate-audit.md (a content gate must never silently swallow OR over-block
+    on its own error): if the check itself throws, log a warn and PASS.
+    """
+    if bypass or audience != 'general':
+        return 0
+    try:
+        import sys as _sys
+        src_dir = ROOT / "src"
+        if str(src_dir) not in _sys.path:
+            _sys.path.insert(0, str(src_dir))
+        from volpred.publisher.publisher import has_lazypack_section  # noqa: WPS433
+
+        if has_lazypack_section(body):
+            return 0
+        # else: no 懶人包 heading, or heading present but no image after it → block
+    except Exception as e:  # fail-open: a gate malfunction must not block content
+        print(f"[publish_draft] LAZYPACK GATE fail-open (check error): "
+              f"{type(e).__name__}: {e}", file=sys.stderr)
+        return 0
+    print(f"\n[publish_draft] LAZYPACK GATE: audience=general requires a "
+          f"懶人包圖組 (cheat-sheet infographic SET) at the article end; none found.",
+          file=sys.stderr)
+    print(f"\n  Per .claude/rules/publishing.md §4 + lazypack-infographic skill, "
+          f"every general-reader article needs a `## 懶人包圖組` section with 2-4 "
+          f"poster-style PNGs (concept / method / results), generated FREE via "
+          f"NotebookLM:\n"
+          f"    uv run python scripts/gen_lazypack_infographic.py --experiment K<id> \\\n"
+          f"      --title \"K<id> 懶人包\" --plan <plan.json> --out-dir <dir>\n"
+          f"  Upload each PNG to Supabase article-images, append under a `## 懶人包圖組` "
+          f"heading, then retry. Use `--no-lazypack-gate` only for genuinely "
+          f"non-reader pieces (rare).",
+          file=sys.stderr)
+    return 6
+
+
 def infer_publish_audience(title: str, body: str, publish_tags: list[str]) -> str:
     """Mirror publisher-side audience inference for preflight validation.
 
@@ -989,6 +1042,9 @@ def apply_update(args) -> int:
     if rc != 0:
         return rc
     rc = check_image_gate(body, audience, args.no_image_gate)
+    if rc != 0:
+        return rc
+    rc = check_lazypack_gate(body, audience, getattr(args, 'no_lazypack_gate', False))
     if rc != 0:
         return rc
 
@@ -1200,6 +1256,10 @@ def main() -> int:
     parser.add_argument("--no-image-gate", action="store_true",
                         help="bypass ≥2 PNG check (use only for genuinely text-only "
                              "commentary; default enforces .claude/rules/publishing.md)")
+    parser.add_argument("--no-lazypack-gate", action="store_true",
+                        help="bypass the 懶人包圖組 (lazypack) requirement for "
+                             "audience=general (use only for genuinely non-reader "
+                             "pieces; default enforces .claude/rules/publishing.md §4)")
     parser.add_argument("--dry-run", action="store_true",
                         help="print metadata + sanitize report; do not invoke CLI")
 
@@ -1363,6 +1423,9 @@ def main() -> int:
     if rc != 0:
         return rc
     rc = check_image_gate(body, audience, getattr(args, 'no_image_gate', False))
+    if rc != 0:
+        return rc
+    rc = check_lazypack_gate(body, audience, getattr(args, 'no_lazypack_gate', False))
     if rc != 0:
         return rc
 

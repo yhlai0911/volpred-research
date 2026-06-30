@@ -38,10 +38,23 @@ if str(SCRIPTS) not in sys.path:
 import publish_draft  # noqa: E402
 
 
+# A valid general-audience draft must carry a 懶人包圖組 section (publishing.md §4,
+# enforced by check_lazypack_gate). These CLI-ergonomics tests are not about content
+# completeness, so the fixture auto-appends a minimal lazypack to general drafts that
+# omit one — mirroring how they already supply ≥2 images to satisfy the image gate.
+_FIXTURE_LAZYPACK = (
+    "\n\n## 懶人包圖組\n\n"
+    "![概念](https://example.com/lz1.png)\n\n"
+    "![結果](https://example.com/lz2.png)\n"
+)
+
+
 def _write_draft(path: Path, frontmatter: dict | None, body: str = "Body content.") -> None:
     if frontmatter is None:
         path.write_text(body, encoding="utf-8")
         return
+    if (frontmatter.get("audience") == "general") and ("懶人包" not in body):
+        body = body + _FIXTURE_LAZYPACK
     fm_lines = ["---"]
     for k, v in frontmatter.items():
         if isinstance(v, list):

@@ -350,6 +350,10 @@ def test_apply_update_image_url_frontmatter_field(tmp_path, monkeypatch):
         "Body paragraph.\n\n"
         "![chart](experiments/k202/body.png)\n"
         "![chart2](https://supabase.test/article-images/extra.png)\n"
+        # general-audience draft (no audience in fm → inferred general) must
+        # carry a 懶人包圖組 to clear check_lazypack_gate (publishing.md §4).
+        "\n## 懶人包圖組\n\n"
+        "![概念](https://supabase.test/article-images/lz1.png)\n"
     )
     draft = _write_draft(
         tmp_path,

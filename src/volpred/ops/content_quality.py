@@ -490,6 +490,7 @@ def check_content_completeness(
     recent = [item for item, _ in timed[:lookback]]
 
     findings: list[dict[str, Any]] = []
+    missing_lazypack: list[dict[str, Any]] = []
     gen_total = 0          # general 讀者文章數（懶人包規則適用對象）
     gen_with_lazypack = 0  # 其中含「懶人包」圖組者
     for item in recent:
@@ -501,8 +502,26 @@ def check_content_completeness(
         # 非專業讀者快速掌握（publishing rule + lazypack-infographic skill）。
         if (item.get("audience") or "") == "general":
             gen_total += 1
-            if _LAZYPACK_MARKER in text:
+            # Use the same has_lazypack_section() the publish gate enforces, so the
+            # coverage metric matches enforcement (a bare prose mention of 懶人包 no
+            # longer counts as covered). Fall back to the loose substring marker if
+            # the publisher import is unavailable, per no-silent-fallback.md.
+            try:
+                from volpred.publisher.publisher import has_lazypack_section
+                covered = has_lazypack_section(text)
+            except Exception as _lz_exc:
+                warn("lazypack_coverage", "has_lazypack_section import failed; "
+                     "falling back to substring marker", err=str(_lz_exc))
+                covered = _LAZYPACK_MARKER in text
+            if covered:
                 gen_with_lazypack += 1
+            else:
+                missing_lazypack.append(
+                    {
+                        "id": item.get("id"),
+                        "title": (item.get("title") or "")[:80],
+                    }
+                )
         # A chart is present if the body has an inline marker, a structured
         # charts/images field, OR `details` carries numeric metric data the
         # frontend renders into a chart component (avoids flagging articles whose
@@ -546,6 +565,7 @@ def check_content_completeness(
             "coverage": lazypack_rate,
             "threshold": LAZYPACK_MIN_COVERAGE,
             "below_threshold": lazypack_low,
+            "missing_examples": missing_lazypack[:10],
         },
     }
 
