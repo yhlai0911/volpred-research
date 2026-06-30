@@ -2,6 +2,23 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-30 daily_update 結尾 sync 在 transient 網路 blip 時無限 hang（持有 lock）
+
+**問題**：smoke-test 新建的 14:00 `daily_update_intraday` LaunchAgent 時，`daily_update.py` 在「Supabase market_daily synced 30/30」之後 hang 13+ 分鐘（無 exit marker），持有 `/tmp/volpred_daily_update.lock`，後續所有 daily_update / intraday run 都撞 lock skip。同時段 `volpred ops feed-sync --apply`（PID 85444）也獨立卡 ~4 分鐘 → 證實是共同的 network/endpoint 條件而非單一程式 bug。
+
+**現象**：
+- `sample` 卡住 process → 主執行緒 1481/1525 samples 在 `select_poll_poll → poll`（socket 等待），少量 `__fork`/`read`。
+- `supabase_sync.py` 所有 `urlopen` 其實都帶 `timeout=15`（line 123/157/178/218/244/262）、Mirror sync 帶 `timeout=30`、sync_health 帶 `timeout=15` → HTTP 層 timeout 齊全，但仍 hang 超過 timeout。
+- Codex agent 同時段留言：「publisher 的 mirror sync 回報 SSL EOF」「已有其他 feed-sync process 卡住」。
+- 殺掉後測 DNS（getaddrinfo api.github.com / twse / google）全 <0.3s 正常 → 本地 DNS 沒問題，是遠端 Supabase/Mirror endpoint 的 SSL/connection transient。
+
+**根因**：`urlopen(timeout=N)` 的 timeout **不涵蓋 TLS handshake 後 server 不送 EOF / 半開連線**的情形（socket 已連上、poll 永遠等不到資料）；transient SSL EOF 窗口下會吃掉 timeout 保護而無限等。morning 08:03 run 走同一 sync tail 卻完成 → 證實非 deterministic bug，是 endpoint transient（被 smoke-test + 並發卡住的 feed-sync 同時撞上而放大）。LaunchAgent wrapper 無 hard timeout → 一旦 hang，lock 被無限持有，理論上會 cascade 擋下一班 morning run。
+
+**解決方法（本次）**：
+- 止血：`kill` 卡住的 daily_update（81789/81790）+ feed-sync（85444）；`rmdir` 釋放殘留 lock。確認 daily-checkup 回 ok、無殘留 process/lock。
+- 判定為 transient（DNS 正常、endpoint SSL EOF 已過、morning run 正常）→ **不**對 supabase_sync 做 timeout 重構（HTTP timeout 已齊）。
+- **防禦待辦（若復發即做，3-strike 意識）**：在 `cron_daily_update.sh` / `cron_daily_update_intraday.sh` 外層加 hard watchdog timeout（macOS 無 `timeout`，用 `gtimeout` 或 perl alarm wrapper），確保任何 hang ≤ N 分鐘自殺 + trap EXIT 釋放 lock，杜絕 lock cascade。記錄此 pattern 供 dreaming `repeated_tool_failure` detector 追蹤。
+
 ## 2026-06-30 K478 entropy-vol article source review FAIL — forward-label embargo + DM horizon
 
 **問題**：`mile_96ec845f`（「市場看起來越複雜，不代表波動率就更好預測」）24h Codex source review 發現 K478 的 OOS / DM source 不能支撐 production article 的「當下以前資訊」與顯著性敘述。
