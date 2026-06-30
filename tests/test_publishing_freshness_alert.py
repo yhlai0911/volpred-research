@@ -47,9 +47,12 @@ def _write_feed(storage_dir: Path, newest_published: datetime | None) -> None:
 
 
 def test_breaches_critical_when_stale_in_active_window(tmp_path: Path) -> None:
-    # now = 14:00 Taipei (active window); newest published 08:00 Taipei = 6h gap.
+    # now = 14:00 Taipei (active window); newest published 04:00 Taipei = 10h gap.
+    # The threshold is interval-aware (2026-06-30): default release interval 6h +
+    # 2h grace = 8h, so a genuinely-stale 10h gap (a missed release cycle, like the
+    # 2026-06-22 ~12h 脫班 incident) breaches; a normal ~6h cadence gap does not.
     now = datetime(2026, 6, 22, 14, 0, tzinfo=_TPE)
-    _write_feed(tmp_path, datetime(2026, 6, 22, 8, 0, tzinfo=_TPE))
+    _write_feed(tmp_path, datetime(2026, 6, 22, 4, 0, tzinfo=_TPE))
     state = _parse_publishing_freshness_state(str(tmp_path), now.astimezone(timezone.utc))
     assert state["breached"] is True
     assert state["level"] == "critical"
