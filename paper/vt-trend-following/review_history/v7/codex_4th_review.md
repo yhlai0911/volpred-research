@@ -122,6 +122,19 @@ Applied the minimum-change requested above without opening a v8 round, plus the 
 
 All 5 v6 carry-over findings now RESOLVED + 2 New Findings (LOW) addressed. Narrative state advances to **`ready_for_submission_candidate`** pending primary-path Codex confirmation. This file is a **subagent fallback v1** per K1259 protocol — a primary-path Codex re-review is queued as followup task `paper_review_vt_trend_v7_codex_primary_path_verify` to upgrade the verdict from subagent-PASS to canonical Codex-PASS.
 
+---
+
+## Canonical Upgrade (K1259 protocol closure) — 2026-06-30 18:10 台灣時間
+
+**Primary-path Codex re-verification completed**: see `codex_primary_path_verify.md` in this directory.
+
+- **Codex version**: codex-cli 0.142.3, gpt-5.5, medium-reasoning (previous xhigh attempts in 13:09/13:12 both ran out of budget without writing; the medium-effort retry succeeded in 35,551 tokens)
+- **Verdict**: **PASS** — all 5 v6 findings genuinely RESOLVED + 2 LOW new findings addressed, with file:line citations cross-checked against `body_v3.tex` and `k1458_results.json`
+- **Effect**: This v7 round is now upgraded from subagent-fallback PASS to **canonical primary-path Codex PASS**. Narrative state confirmed `ready_for_submission_candidate` (still subject to submit gate per `feedback_finish_task_before_standby` / boss decision).
+- **No new findings from primary-path re-review.**
+
+Followup task `paper_review_vt_trend_v7_codex_primary_path_verify` closed succeeded.
+
 ### Codex CLI failure log (for K1259 audit trail)
 
 - 2026-06-30 13:09 台灣時間 — `codex exec -s workspace-write < /tmp/codex_v7_prompt.md` (v0.142.3, gpt-5.5, xhigh) — ran 1322 lines of internal exploration, attempted to claim the task in the task pool (misread prompt as task dispatch), did not write review file. Log: `/tmp/codex_v7_output.log`.

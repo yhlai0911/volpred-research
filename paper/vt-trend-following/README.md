@@ -2,7 +2,7 @@
 
 **Full title**: Is Volatility Targeting Just Trend Following? Decomposing the Benefits of Volatility Targeting
 **Target Journal**: Journal of Portfolio Management / Financial Analysts Journal
-**Status**: `Paper3_v4_revision_gemini_2h` 已整合進 `body_v3.tex`: H1 以保守口徑重寫（$>100\%$ retention 不再過度解讀為獨立增強機制）、H2 補入 stationary-bootstrap robustness 說明（K1417 task audit）、M1/M2 加入 regime/safe-haven 與 VRP confound 限定語、3 個缺 citation 已補。**Ready for next review pass**；是否可投稿仍取決於下一輪審查。 Stage = **review/revision**.
+**Status**: `Paper3_v4_revision_gemini_2h` 已整合進 `body_v3.tex`: H1 以保守口徑重寫（$>100\%$ retention 不再過度解讀為獨立增強機制）、H2 補入 stationary-bootstrap robustness 說明（K1417 task audit）、M1/M2 加入 regime/safe-haven 與 VRP confound 限定語、3 個缺 citation 已補。**v7 round PASS** (2026-06-30): 5 v6 Codex findings 全 RESOLVED + 2 LOW addressed; canonical primary-path Codex re-verification PASS (`review_history/v7/codex_primary_path_verify.md`). Stage = **ready_for_submission_candidate**（仍待 submit gate / boss decision）.
 **Current body**: `body_v3.tex` / `main_v3.tex` (supersedes v1 and v2)
 **Pages**: 33 | **Citations**: 21
 

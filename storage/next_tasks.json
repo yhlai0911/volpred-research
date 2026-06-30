@@ -40496,10 +40496,16 @@
     "description": "K1259 protocol followup. Subagent feature-dev:code-reviewer v1 已給 CONDITIONAL_PASS（hold for v8 → 2026-06-30 v7.1 minor revision 已應用，全 5 v6 findings 現 RESOLVED + 2 LOW addressed）。Codex CLI 0.142.3 2026-06-30 hourly-13 兩次嘗試（/tmp/codex_v7_prompt*.md）跑超時 xhigh-reasoning budget 沒寫 review 檔。等 Codex 恢復後（或下次 reasoning effort 改 medium）重派 primary-path：read paper/vt-trend-following/review_history/v7/README.md + codex_4th_review.md（subagent v1 report） + experiments/k1458_h1_trough_decomposition/README.md，驗證所有 RESOLVED claim 是否成立。PASS → 將 codex_4th_review.md 升級成 canonical Codex review（append primary-path verdict block）；narrative state 進 ready_for_submission_candidate（仍需 submit gate 通過）。FAIL → reopen v8。",
     "task_type": "paper_review",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "k1259_fallback_followup_2026-06-30",
     "preferred_agent": "codex",
-    "created_at": "2026-06-30T05:15:50+00:00"
+    "created_at": "2026-06-30T05:15:50+00:00",
+    "claimed_by": "hourly-18",
+    "claimed_at": "2026-06-30T10:08:45.113863+00:00",
+    "claim_session_id": "05adda0128d3",
+    "started_at": "2026-06-30T10:08:48.250051+00:00",
+    "completed_at": "2026-06-30T10:11:47.793787+00:00",
+    "result": "Codex primary-path PASS (codex-cli 0.142.3, medium effort, 35K tokens). All 5 v6 findings RESOLVED + 2 LOW addressed. codex_4th_review.md 升級成 canonical (append closure block). Paper README stage 推進 ready_for_submission_candidate. 仍待 submit gate / boss decision."
   },
   {
     "task_id": "platform_ops_dreaming_persistent_alert_detector",
@@ -40655,5 +40661,15 @@
     "started_at": "2026-06-30T09:30:11.103314+00:00",
     "completed_at": "2026-06-30T09:37:06.986752+00:00",
     "result": "K1589_v2 fixed 5 Codex blockers: chronological HAC, 21d pre/5d post RV, ex-ante VIX/SPY controls, Holm-4 reinsurer scope, formal KIE interaction test. Rerun n=42: ACGL survives Holm-4, but KIE interaction p=0.615 so verdict_internal remains NULL; methodology CONDITIONAL_PASS, knowledge write gate cleared for main thread."
+  },
+  {
+    "task_id": "platform_ops_enforce_lazypack_in_publish_pipeline",
+    "task_type": "platform_ops",
+    "title": "強制 general 文章懶人包圖：feed-publisher 流程 enforce + 回補（boss 2026-06-30）",
+    "description": "boss 指出 general 讀者文章除專業圖表外文末須附懶人包圖組，但實測近 12 篇只 1 篇有（coverage 12%）→ 規則 silent skip。已加 content_quality lazypack coverage 偵測(commit e74ca8be4)。真正修法：(1) feed-publisher / daily_article 流程強制：general 文章 publish 前若無懶人包 → 走 lazypack-infographic skill 用 NotebookLM 生成(禁付費 API)貼文末「## 懶人包」；(2) 把 content_quality lazypack_gap 接成 alert/daily-checkup 可見 breach(目前只在 snapshot)；(3) 回補近期高流量 general 文章的懶人包。需 clean context + NotebookLM 互動。參考 memory feedback_lazypack_infographic + lazypack-infographic skill + .claude/skills/feed-publisher。",
+    "priority": 2,
+    "status": "pending",
+    "source": "main_thread_discovered_2026-06-30",
+    "created_at": "2026-06-30T09:18:06.634814+00:00"
   }
 ]
