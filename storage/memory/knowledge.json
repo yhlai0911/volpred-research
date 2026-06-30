@@ -36913,5 +36913,72 @@
       "arXiv 2505.21278 — Online/sequential MCS"
     ],
     "created_at": "2026-06-30T12:45:23.926417"
+  },
+  {
+    "item_id": "7641cfcb",
+    "category": "methodology",
+    "title": "K1586: 穩定幣儲備 → 短端 T-bill realized vol — NULL_PARTIAL",
+    "content": "穩定幣 (USDT+USDC+DAI) Δlog(總 mcap) 對短端 T-bill realized vol (DGS1MO/3MO 22-day std bps) 是否領先：\n1. H1 lead-lag (Granger F-test, lag 1..5 × DGS1MO/3MO)：**NULL** — p > 0.29 across all 10 combos. HAC OLS |t|≈4.1 marginal association 但 未控 lagged RV，不可作 causal claim。\n2. H2 USDC-SVB depeg 2023-03-10 event study (ED±5d vs ED±30d ex)：**PASS for SHY (1-3yr)** — Welch t=2.75, p_bonf_welch=0.038, block-bootstrap p_bonf=0.023 (n_boot=5000, block_size=5), ratio=2.83x。**BIL (1-3mo) NULL** ratio=1.17 p_bonf>0.5。Duration mechanism consistent — 1-3yr 承受 depeg 壓力，1-3mo 不受影響。\n3. H3 GENIUS Act 2025-07-18 in-sample diagnostic：descriptive only — DGS1MO_RV event ↑ (t=5.16) vs DGS3MO_RV ↓ (t=-10.24) 方向相反 → coincident regime change, not causal。\n\nImplication：穩定幣供給變動 daily-level 不能 Granger-predict 短端 T-bill vol (平靜期 net flow 太小)；但急性 depeg event 透過 1-3yr T-bill 傳染 (USDT/USDC backing 集中 1-3yr 區段)。風險管理 angle 可作。",
+    "evidence": [
+      "experiments/K1586/K1586_results.json",
+      "experiments/K1586/K1586.py",
+      "experiments/K1586/README.md",
+      "experiments/K1586/figures/leadlag_corr.png",
+      "experiments/K1586/figures/svb_event_study.png",
+      "experiments/K1586/data/panel.csv (n=1557 business days 2020-04-06→2026-06-26)",
+      "Codex CLI 0.142.3 (gpt-5.4) 2-pass review"
+    ],
+    "confidence": 0.78,
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1586",
+    "experiment_path": "experiments/K1586/",
+    "k_id": "K1586",
+    "reviewer": "Codex CLI 0.142.3 (ChatGPT auth, gpt-5.4)",
+    "reviewer_source": "codex_review",
+    "codex_review": {
+      "passes": 2,
+      "pass1_verdict": "NEEDS_REVISION",
+      "pass1_findings": [
+        "verdict logic bug: marginal 不能用 hypothesis 自己升自己 (symmetric ladder fix)",
+        "Granger ssr_ftest df labels 順序錯 (df_denom/df_num)",
+        "H2 vol clustering 建議加 block bootstrap robustness"
+      ],
+      "pass2_verdict": "PASS",
+      "pass2_resolution": "三項修正：symmetric verdict ladder + Granger df 順序修正 + block bootstrap (n_boot=5000, block_size=5) Bonferroni 雙 gate",
+      "lookahead_check": "PASS — 全 signal shift(1); event windows pre-defined ED±5d vs control ED±30d ex"
+    },
+    "sample": {
+      "start": "2020-04-06",
+      "end": "2026-06-26",
+      "n_business_days": 1557
+    },
+    "seed": 42,
+    "tags": [
+      "stablecoin",
+      "T-bill",
+      "USDT",
+      "USDC",
+      "DAI",
+      "USDC_SVB_depeg",
+      "GENIUS_Act_2025",
+      "event_study",
+      "Granger",
+      "duration_mechanism",
+      "DGS1MO",
+      "DGS3MO",
+      "SHY",
+      "BIL",
+      "NULL_PARTIAL"
+    ],
+    "references": [
+      "Eichengreen, Lazaridis, Viswanath-Natraj (2023) NBER WP 30537 — Stablecoin Reserves & Treasury Bill Market",
+      "President's Working Group on Financial Markets (2021) Stablecoin Report",
+      "Liao & Caramichael (2022) IFDP 1334 — Stablecoins & Crypto Shocks",
+      "Choi, Lehar, Stauffer (2024) JIMF 145 — Stablecoin Run Dynamics",
+      "Adrian, Iyer, Qureshi (2023) IMF WP/23/72 — Crypto Liquidity"
+    ],
+    "task_id": "K1586",
+    "commit": "0b5121697",
+    "created_at": "2026-06-30T15:26:19.913894"
   }
 ]

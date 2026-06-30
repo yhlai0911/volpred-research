@@ -40028,7 +40028,7 @@
     "title": "K1586: 穩定幣儲備 → 短端 T-bill vol**（GENIUS Act 2025 簽署 + Eichengreen fire-sale）：鏈上穩定幣淨發行(DefiLlama/CoinGecko)對 DGS1MO/3MO realized v",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 490). Original: 穩定幣儲備 → 短端 T-bill vol**（GENIUS Act 2025 簽署 + Eichengreen fire-sale）：鏈上穩定幣淨發行(DefiLlama/CoinGecko)對 DGS1MO/3MO realized vol(MOVE proxy) 領先；脫鉤事件(USDC-SVB)當 event window 量 SHY/BIL vol spike。全免費，timely 高分享。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1586.py with signal.shift(1) + seed=42, (c) K1586_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -40041,7 +40041,9 @@
     "claimed_by": "hourly-15",
     "claimed_at": "2026-06-30T07:08:23.522943+00:00",
     "claim_session_id": "893ddb6c42e4",
-    "started_at": "2026-06-30T07:08:26.696586+00:00"
+    "started_at": "2026-06-30T07:08:26.696586+00:00",
+    "completed_at": "2026-06-30T07:26:25.390356+00:00",
+    "result": "NULL_PARTIAL: H1 lead-lag NULL (Granger p>0.29 all 10 lags); H2 USDC-SVB SHY 1-3yr PASS (block-boot p_bonf=0.023, ratio=2.83x), BIL NULL; H3 GENIUS Act descriptive only. Codex 2-pass PASS. Knowledge 7641cfcb. Commit 0b5121697."
   },
   {
     "id": "K1587",
