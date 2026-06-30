@@ -39940,7 +39940,7 @@
     "title": "K1582: HARQ/SHARK 測量誤差修正 HAR**（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 483). Original: HARQ/SHARK 測量誤差修正 HAR**（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1582.py with signal.shift(1) + seed=42, (c) K1582_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -39949,14 +39949,18 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-30T00:00:00Z"
+    "created_at": "2026-06-30T00:00:00Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T03:58:14.729837+00:00",
+    "claim_session_id": "6b723b4f4145",
+    "started_at": "2026-06-30T03:58:22.642292+00:00"
   },
   {
     "id": "K1583",
     "title": "K1583: Conditional / Sequential MCS 評估升級**（JRSS-B 2025 qkag066 + arXiv 2505.21278 + Conditional SPA）：重用 1400+ K 的 loss/VaR，cond",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 484). Original: Conditional / Sequential MCS 評估升級**（JRSS-B 2025 qkag066 + arXiv 2505.21278 + Conditional SPA）：重用 1400+ K 的 loss/VaR，conditioning＝VIX regime/FRED 衰退，conditional MCS + 線上 sequential 監控勝負漂移 → 「哪模型在哪 regime 稱王」meta 結論。零新資料。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1583.py with signal.shift(1) + seed=42, (c) K1583_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -39965,7 +39969,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-30T00:00:01Z"
+    "created_at": "2026-06-30T00:00:01Z",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-06-30T03:50:20.763368+00:00",
+    "claim_session_id": "800d7f7d497a",
+    "started_at": "2026-06-30T03:50:20.966172+00:00"
   },
   {
     "id": "K1584",
@@ -40200,12 +40208,15 @@
     "title": "FB 發文：科技巨頭 AI CapEx 變現缺口 + IV skew 拐點",
     "description": "發佈 FB Ivan Lai 貼文（草稿在 /tmp/fb_post_trending_ai_capex.md）。需要 Chrome MCP。mile_id: mile_f5f4cb43。主貼文不放連結，VolPred 連結放第一則留言：https://volpred.zeabur.app/v3/reports/mile_f5f4cb43",
     "priority": "P2",
-    "status": "pending",
+    "status": "blocked",
     "requires_interactive": true,
     "requires_chrome_mcp": true,
     "created_at": "2026-06-30T10:56:00+08:00",
     "fb_draft_path": "/tmp/fb_post_trending_ai_capex.md",
-    "feed_mile_id": "mile_f5f4cb43"
+    "feed_mile_id": "mile_f5f4cb43",
+    "blocked_reason": "awaiting_interactive_session",
+    "blocked_at": "2026-06-30T03:48:51+00:00",
+    "blocked_note": "requires_interactive=true + requires_chrome_mcp=true; hourly headless 無法處理 FB 個人帳號發文（per memory feedback_fb_personal_account_chrome_only）。需互動 session + Chrome MCP 選 MAX STUDIO browser 發佈 /tmp/fb_post_trending_ai_capex.md。draft 已備妥，互動 session 拉起即可貼。"
   },
   {
     "id": "email-12256-0251f2",
@@ -40213,7 +40224,7 @@
     "description": "Gmail UID: 12256\nMessage-ID: <80CDBE39-9624-401B-9A77-02D070F11F04@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 11:07:16 +0800\nSubject: Re: [VolPred Alert][WARN] Topic-cluster 30d 嚴重 overshoot（worst 1.9x cap）\n\n--- 用戶回信內容 ---\n你他媽的 不是改語意分析且動態調整了嗎\r\n立刻檢查\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 11:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Topic-cluster 30d 嚴重 overshoot（worst 1.9x cap）\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 觸發條件\r\n> \r\n> 30d feed items = 275；soft cap = hard×2.5（timely / topic-bound types 自 2026-06-29 起亦受此擋）。ratio ≥ 1.5x→ warn；≥ 2.5x → critical（soft cap hit）。\r\n> \r\n> spy: 74/40 (soft_cap=100) = 1.9x hard, share=26.9%\r\n> 影響\r\n> \r\n> Publisher 2026-06-29 已對 timely 類型加 soft cap (hard×2.5)。soft cap 觸及後即便 trending_repost / event_article / member_qa / daily_* 也會被擋，除非 caller 顯式 details['cluster_waiver']='<reason>'。此狀態：(a) Mission 第 1 條（文章品質）+ 第 5 條（曝光多樣性）已啟動保護；(b) 真實事件（FOMC / CPI）可走 waiver 不受影響；(c) discretionary K-experiment general 文章重獲 release slot。\r\n> \r\n> 建議行動\r\n> \r\n> 自動：dispatcher 下輪自動 rotate 非熱門 cluster K（research backlog 已 184+ uncovered，refill_task_pool 永不缺源）。\r\n> 觀察：tail -50 storage/logs/dedup_decisions.jsonl | grep block_cluster_soft_cap 看哪些 timely 被擋；若是真實事件 → 在 caller 加 cluster_waiver。\r\n> 評估 CLUSTER_HARD_CAPS（vix=15 / spy=10）是否仍合理；若 timely 已合理消耗，重新校準 hard cap 或細分 sub-cluster。\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -40223,7 +40234,9 @@
     "email_uid": 12256,
     "email_message_id": "<80CDBE39-9624-401B-9A77-02D070F11F04@gmail.com>",
     "email_subject": "Re: [VolPred Alert][WARN] Topic-cluster 30d 嚴重 overshoot（worst 1.9x cap）",
-    "email_from": "Ivan Lai <yihao.lai@gmail.com>"
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "resolution": "spy catch-all 語意化修正（加 6 粒度 cluster + specific-first + spy 收窄），spy 74→14、worst 0.79x、alert breached=False。commit bd2b68bff + error_log 84a9cb1c8。已 email 回報。",
+    "completed_at": "2026-06-30T03:25:34.737110+00:00"
   },
   {
     "id": "strategy_lifecycle_k1573_paper_trade_shadow_window",
@@ -40268,5 +40281,47 @@
       "k1573"
     ],
     "parent_task_id": "strategy_lifecycle_k1573_paper_trade_shadow_window"
+  },
+  {
+    "id": "email-12261-ba411e",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 已修復：topic-cluster spy catch-all 語意化（回 email-12256）",
+    "description": "Gmail UID: 12261\nMessage-ID: <E326A1E2-3600-4AD7-9D82-CC598705886A@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 11:32:02 +0800\nSubject: Re: [VolPred Alert][INFO] 已修復：topic-cluster spy catch-all 語意化（回 email-12256）\n\n--- 用戶回信內容 ---\n那昨天跟你講了半天，結果你什麼都沒做早就已經跟你說要做語義分析加動態你也跟我說你做了，結果現在跟我說沒有立刻馬上給我完成\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 11:25 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 已修復：topic-cluster spy catch-all 語意化（回 email-12256）\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 已修復並驗證（root-cause，非表面）\r\n> \r\n> 你的判斷完全正確 — overshoot 沒解決。我稍早只做了 audience=daily 排除（讓 alert 誠實），沒做語意分析。立刻檢查後找到真 root cause：\r\n> \r\n> spy 是 catch-all 災難。classify_topic_cluster 是 keyword 掃描，三層 bug：\r\n> \r\n> spy keyword 含「美股」過廣 → 任何提美股的文章都進 spy\r\n> spy 排在 garch/vt/taiwan 之前 → 方法論文章被搶分\r\n> 缺粒度主題 cluster → 風險管理/方法論/事件/避險/隔夜/return 預測全無歸屬落 spy\r\n> → 74 篇「用 SPY 當測試資產的波動率研究」（HAR-RV/GARCH/VaR/CTA…）被誤計為 spy 主題 = 74/40=1.9x 假超標。keyword 無法區分「關於 SPY」vs「用 SPY 當資料」。\r\n> \r\n> 修法（語意化 + 動態）\r\n> \r\n> 加 6 個粒度主題 cluster（risk_mgmt/forecast_method/event_study/hedging/microstructure/return_predict）反映文章「關於什麼」\r\n> 分類改 specific-first 排序、spy 收窄移除「美股」只認真正 index 主題\r\n> caps 給核心主題 40% headroom（vol 是 core 不算 runaway）\r\n> 動態維度：DOMINANT_RATIO_LIMIT（share-based 隨總量縮放）\r\n> 驗證\r\n> \r\n> spy 74→14、所有 cluster ≤0.79x、cluster_cap_drift alert breached=False、test 全綠。後端即時生效（gate+alert），無需 deploy。記 docs/error_log.md。\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-30T03:45:06.204059+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12261,
+    "email_message_id": "<E326A1E2-3600-4AD7-9D82-CC598705886A@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 已修復：topic-cluster spy catch-all 語意化（回 email-12256）",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-30T03:45:35.505078+00:00",
+    "claim_session_id": "912ded7910b9"
+  },
+  {
+    "id": "email-12260-3b1609",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 🔴【需老闆回信】自主 loop fire 11:07 — K1573 VT 3-spec Codex rev",
+    "description": "Gmail UID: 12260\nMessage-ID: <2D56BC95-D444-4B4A-BAE6-D124DD1980A4@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Tue, 30 Jun 2026 11:31:04 +0800\nSubject: Re: [VolPred Alert][INFO] 🔴【需老闆回信】自主 loop fire 11:07 — K1573 VT 3-spec Codex review gate 收尾 (CONDITIONAL_PASS 82, 2 MAJOR 已修)\n\n--- 用戶回信內容 ---\n我不懂你要我審批的意思是什麼？\r\n到底是新的策略呢？還是原本的策略有什麼狀況？\r\n說明清楚一點吧\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年6月30日 11:21 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 🔴【需老闆回信】自主 loop fire 11:07 — K1573 VT 3-spec Codex review gate 收尾 (CONDITIONAL_PASS 82, 2 MAJOR 已修)\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 🔴 此 email 需老闆做出決定才能繼續推進。\r\n> 請看下方「需要的決定」段，回信告知選項即可。\r\n> \r\n> 自主 loop fire 11:07 — K1573 VT 3-spec audit Codex review gate 收尾\r\n> \r\n> 派工\r\n> \r\n> Task: strategy_lifecycle_k1573_codex_review_gate (P2)\r\n> Model: opus / high (per task-type routing)\r\n> Reviewer: Codex CLI 0.142.3 (gpt-5.4, ChatGPT auth)\r\n> Codex 結論\r\n> \r\n> VERDICT: CONDITIONAL_PASS, SCORE: 82/100\r\n> \r\n> 3 hard requirements 全 PASS:\r\n> \r\n> ✅ Lookahead-free: simulate_strategy line 221 explicit vix.shift(1)\r\n> ✅ Bootstrap stability: seed=42 / block=20 / n=500 / np.quantile CI\r\n> ✅ Stress + regime calc: endpoint inclusive, weight time-series corr\r\n> 但抓出 2 個 MAJOR issues 需修才能進 paper-trade gate。\r\n> \r\n> MAJOR fixes applied\r\n> \r\n> Fix 1: paper_trading audit VIX 雙 lag\r\n> \r\n> 原 code 用 vix_raw.shift(1) join realized weights by data_date\r\n> 生產端 daily_update.py 是用同日 data_date VIX 當 signal → 不該 shift\r\n> 修正: vix_lag → vix_signal (rename + 無 shift) + 註解標記 K1573 incident\r\n> 影響數字: paper_trading mid regime (50.2% of 2023-2026 days) 真實 standard-vs-aggressive risky absdiff:\r\n> 報告 10.8pp → 實際 3.2pp\r\n> 老闆觀察其實更嚴重 — 生產端 standard ≈ aggressive 根本同質化\r\n> Fix 2: regime_weight_spread metric 錯誤\r\n> \r\n> 原 code 報 abs(spy_w_mean_a - spy_w_mean_b) (mean of means, SPY-only)\r\n> 應為 pairwise (risky_w_a - risky_w_b).abs().mean() over observations\r\n> 修正: regime_breakdown 加 pairwise_risky_absdiff; regime_weight_spread 同時輸出 risky (canonical) + spy (diagnostic)\r\n> 影響數字: proposed mid regime pair risky absdiff:\r\n> cons-std 29.8pp (原報告 SPY 50pp) ✓\r\n> cons-agg 60.0pp (原報告 SPY 80pp) ✓\r\n> std-agg 30.2pp (原報告 30pp) ✓\r\n> 結論不變: 3 pair 皆 ≥ 15pp differentiated target\r\n> Re-run 後完整數字 (2016-2026, 因 market 資料從 2016-01-05 開始)\r\n> \r\n> spec\tSharpe\tCAGR\tMDD\tvol\tBootstrap 95% CI\r\n> conservative\t0.940\t+4.0%\t-9.2%\t4.3%\t[0.36, 1.58]\r\n> standard\t0.896\t+8.2%\t-17.0%\t9.3%\t[0.31, 1.60]\r\n> aggressive\t0.860\t+10.3%\t-24.4%\t12.2%\t[0.28, 1.54]\r\n> 3 specs bootstrap CI 完全重疊 → Sharpe 統計上不可區別。Persona 賣的是 risk-return profile (vol/MDD/CAGR ladder)，不是 alpha rank — 正是 retail product line 應有的定位。\r\n> \r\n> 上架 gate 狀態 (更新)\r\n> \r\n> [x] lookahead-free verified\r\n> [x] bootstrap stability + stress robustness\r\n> [x] Codex review CONDITIONAL_PASS + issues 已修 + re-run + README sync\r\n> [ ] 老闆 approve ← 需老闆 review 修正版 audit report\r\n> [ ] 6 個月 paper-trade shadow window\r\n> [ ] frontend 明確 disclose CAGR/MDD/Sharpe persona ladder\r\n> [ ] OOS PASS 後 hot-swap registry\r\n> 產出\r\n> \r\n> Commit: f3438ac9d (9 files: audit script + results.json + 3 figs + README + knowledge + next_tasks)\r\n> Knowledge: 3ca16d67 (strategy_lifecycle, confidence 0.82)\r\n> 2 follow-up tasks (both blocked until 2027-01-01):\r\n> strategy_lifecycle_k1573_paper_trade_shadow_window (P2)\r\n> platform_ops_k1573_frontend_persona_disclose (P3)\r\n> 需老闆審批\r\n> \r\n> 修正版 audit report 是否同意進 6 個月 paper-trade shadow window (2026-07 → 2027-01)？\r\n> paper-trade 期間 mid regime monthly verify 排程 OK 嗎？\r\n> 時間戳\r\n> \r\n> ⏱ 開始 2026-06-30 11:07:29 台灣時間\r\n> ⏱ 停止 2026-06-30 11:30:00 台灣時間\r\n> 總時間 ~23 min (含 Codex review ~5 min + 修 code + re-run + README + commit)\r\n> ⏭ 下次 hourly fire 2026-06-30 12:07 台灣時間\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-06-30T03:45:10.284636+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12260,
+    "email_message_id": "<2D56BC95-D444-4B4A-BAE6-D124DD1980A4@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 🔴【需老闆回信】自主 loop fire 11:07 — K1573 VT 3-spec Codex review gate 收尾 (CONDITIONAL_PASS 82, 2 MAJOR 已修)",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-30T03:45:40.812838+00:00",
+    "claim_session_id": "a986387f9441"
   }
 ]
