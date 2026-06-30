@@ -40078,7 +40078,7 @@
     "title": "K1588: Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 493). Original: Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1588.py with signal.shift(1) + seed=42, (c) K1588_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -40091,7 +40091,17 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-30T13:32:45.253585+00:00",
     "claim_session_id": "d84eff9f22cf",
-    "started_at": "2026-06-30T13:32:56.878169+00:00"
+    "started_at": "2026-06-30T13:32:56.878169+00:00",
+    "completed_at": "2026-06-30T14:18:12.048920+00:00",
+    "status_history": [
+      {
+        "ts": "2026-06-30T14:18:12.049185+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "result": "K1588 completed as honest NULL. Public SCI county-centrality proxy + S&P500 HQ/yfinance earnings sample: 112 tickers, 2,663 earnings events, 15,978 profile rows. Main SCI effects not significant: jump_log_abs coef +0.0213 p=0.7430; decay_speed_log_abs coef +0.0228 p=0.7117. Rerun verified; results JSON parse + figures nonempty."
   },
   {
     "id": "platform_ops_daily_update_intraday_1400_schedule",
