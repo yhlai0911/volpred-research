@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-30 topic-cluster spy catch-all — keyword 分類把整個 vol 研究 corpus 誤計為 spy
+
+**問題**：cluster_cap_drift alert 反覆 fire「spy 30d overshoot 1.9x」（boss email-12256 震怒升級「不是改語意分析且動態調整了嗎 立刻檢查」）。稍早只做了 `audience=daily` 排除（讓 alert 誠實指向 spy），未解決 spy 本身為何 74 篇。
+
+**現象**：列出 74 篇 spy-cluster 文章 → 絕大多數**不是 SPY 主題**，而是「用 SPY 當測試資產的波動率研究」：HAR-RV/GARCH/BMA/wavelet/LSTM 方法論、VaR/ES 風險管理、CTA/鈾礦/防禦/factor ETF 策略、隔夜微結構、return 預測、事件研究。只因 title/tags 提到「SPY/美股/標普」就被掃進 spy。
+
+**根因**：`classify_topic_cluster` 是 first-match keyword 掃描，三層結構缺陷：(1) spy keyword 含「美股」過廣 → 任何提美股都進 spy；(2) spy 排在 garch/vt/taiwan 之前 → 同時含「美股」+「GARCH」的方法論文章被 spy 搶分；(3) **缺粒度主題 cluster** → 風險管理/方法論/事件/避險/隔夜/return 預測全無歸屬落 spy catch-all。code line 35-44 早自承待辦「move concentration to arc/subtopic granularity」未落地。keyword 分類無法區分「**關於** SPY」vs「**用** SPY 當資料」。
+
+**解決方法**（語意化，src/volpred/topic_clusters.py）：(a) 加 6 個粒度主題 cluster（risk_mgmt / forecast_method / event_study / hedging / microstructure / return_predict）反映文章「關於什麼」；(b) CLUSTER_VARIANTS 改 specific-first 排序（市場/模型/策略 → 主題 → spy catch-all 末）；(c) spy 收窄移除過廣的「美股」，只認真正 S&P/SPY-index；(d) 重設 caps 給核心主題 ~40% headroom（boss 原則「vol 是 core 不算 runaway」）；(e) 動態維度由 DOMINANT_RATIO_LIMIT（share-based 隨總量縮放）兜底。**驗證**：spy 74→14、所有 cluster ≤0.79x、alert breached=False、test_topic_clusters+test_alerts 全綠。改動 committed in bd2b68bff（hourly safety-net 先收，rationale 在 code 註解 + 本 entry）。**教訓**：keyword 分類對「核心 benchmark 資產」(SPY) 必然 catch-all — 任何主題都用它當測試資產；分類要按主題優先序 + 粒度 cluster，generic 詞（美股）不可當 cluster key。
+
 ## 2026-06-30 daily_update 結尾 sync 在 transient 網路 blip 時無限 hang（持有 lock）
 
 **問題**：smoke-test 新建的 14:00 `daily_update_intraday` LaunchAgent 時，`daily_update.py` 在「Supabase market_daily synced 30/30」之後 hang 13+ 分鐘（無 exit marker），持有 `/tmp/volpred_daily_update.lock`，後續所有 daily_update / intraday run 都撞 lock skip。同時段 `volpred ops feed-sync --apply`（PID 85444）也獨立卡 ~4 分鐘 → 證實是共同的 network/endpoint 條件而非單一程式 bug。
