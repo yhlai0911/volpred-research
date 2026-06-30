@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
 """Generate local, free lazypack PNGs and update drafts for existing articles.
 
-This is the deterministic fallback for the NotebookLM lazypack workflow. It never
-calls a paid image API. Inputs are existing feed articles; displayed claims are
-short excerpts from the article body, so the backfill does not invent new data.
-The generated draft is intended for:
+⚠️ DEPRECATED for primary use (2026-06-30, boss directive + quality review).
+This renderer chops article PROSE to short excerpts (numeric_snippets → sent[:86])
+and grabs the first number it sees, so its panels truncate mid-sentence and headline
+superficial prose numbers (e.g. a "2% GDP target" instead of the article's actual
+1.426x vol-multiplier / 0-of-315 multiple-testing NULL result). Two panels can even
+share the same wrong headline. Output passed the enforce gate (a 懶人包圖組 section
+exists) but is LOW QUALITY and can MISREPRESENT the data.
+
+PRIMARY lazypack generator is now `scripts/gen_lazypack_codex.py` (codex exec writes
+a bespoke render script per article, numbers bound to results.json). Use THIS script
+only as a last-resort fallback when codex exec AND NotebookLM are both unavailable,
+and only after main-thread review of the output.
+
+This is a deterministic, free renderer (never calls a paid image API). The generated
+draft is intended for:
 
     uv run python scripts/publish_draft.py <draft> --update <mile_id> ...
 """
