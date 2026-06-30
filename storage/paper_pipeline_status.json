@@ -17,7 +17,7 @@
     "stall_days": 7,
     "baseline_set_at": "2026-07-01T00:00:00+08:00",
     "audit_source": "2026-07-01 paper portfolio audit",
-    "updated_at": "2026-07-01T02:15:00+08:00"
+    "updated_at": "2026-07-01T04:15:00+08:00"
   },
   "papers": [
     {
@@ -68,11 +68,11 @@
       "journal_target": "JPM/FAJ",
       "stage": "revision",
       "stage_entered_at": "2026-07-01T03:18:00+08:00",
-      "last_advance_at": "2026-07-01T03:18:00+08:00",
-      "blocker": "codex contribution-gate (gpt-5.x) verdict: BORDERLINE — Major revision required; NOT arXiv-ready. 11 reframing items including visible internal experiment tags in body, stale Figure 2, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload, missing cover letter.",
+      "last_advance_at": "2026-07-01T04:15:00+08:00",
+      "blocker": "codex contribution-gate (gpt-5.x) verdict: BORDERLINE — Major revision required; NOT arXiv-ready. 10 reframing items remaining (K-id scrub item resolved 04:15): stale Figure 2, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload, missing cover letter.",
       "owner_decision_pending": false,
-      "compliance_scrub_done": false,
-      "compliance_note": "CORRECTION (2026-07-01 tick): NOT clean. Last tick's CLEAN was a GATE BUG — the gate scanned only main.tex (K-ids in comments) but the canonical manuscript is main_v3.tex -> body_v3.tex with 72 VISIBLE K-ids in abstract/body/conclusion (codex gate confirmed). Gate fixed to scan main_vN + \\input closures. K-id scrub of body_v3 belongs to its reframing.",
+      "compliance_scrub_done": true,
+      "compliance_note": "RESOLVED 2026-07-01 04:15 (hourly-04 fire): mechanical K-id scrub of body_v3.tex — 11 unique visible K-ids removed across 57 violations (K687/K688/K697/K898/K1178/K1192/K1193/K1376/K1417/K1457/K1458). Numbers/citations/narrative preserved. xelatex recompile OK (main_v3.pdf 40pp, 282KB). scripts/check_paper_compliance.py vt-trend-following → CLEAN (0 findings). Compliance gate item 2 of reframing agenda closed; remaining 10 items still gate arXiv readiness.",
       "contribution_gate": {
         "reviewer": "codex exec gpt-5.x",
         "date": "2026-07-01",

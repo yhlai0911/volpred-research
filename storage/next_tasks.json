@@ -41253,17 +41253,32 @@
     "email_message_id": "<EF247C40-25C7-4F55-97F1-A6B7A889A17A@gmail.com>",
     "email_subject": "Re: [VolPred Alert][INFO] FB awaiting 5 篇切換 Chrome 發文 — hourly cron 環境限制 + 立刻派活 banner",
     "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-06-30T17:30:38.799934+00:00",
-    "claim_session_id": "642939499d85",
     "status_history": [
       {
         "ts": "2026-06-30T17:30:38.800216+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-06-30T19:50:05.230323+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "interactive-claude",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-06-30T20:07:18.772052+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
       }
-    ]
+    ],
+    "last_released_at": "2026-06-30T19:50:05.230317+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-06-30T20:07:18.771780+00:00",
+    "claim_session_id": "30ef3eb6ac33"
   },
   {
     "id": "paper_review_mile_c16d94b7",
@@ -41443,5 +41458,64 @@
     "started_at": "2026-06-30T18:42:46.875799+00:00",
     "completed_at": "2026-06-30T18:52:12.635517+00:00",
     "result": "Ran three Codex review passes for leverage-direction: latex academic, citation verification, and JBF submission gate. All three returned FAIL_MAJOR_REVISION; paper remains revision/not arXiv-ready, with reports under paper/leverage-direction/review_history/multi_round_20260701/."
+  },
+  {
+    "id": "K1586_article_research",
+    "title": "K1586: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1586 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no research article in feed.json.  Verdict preview: 穩定幣 (USDT+USDC+DAI) Δlog(總 mcap) 對短端 T-bill realized vol (DGS1MO/3MO 22-day std bps) 是否領先：\n1. H1 lead-lag (Granger F-test, lag 1..5 × DGS1MO/3MO)：**NULL** — p > 0.29 across all 10 combos. HAC OLS |t|≈4.1 marginal association 但 未控 lagged RV，不可作 causal claim。\n2. H2 USDC-SVB depeg 2",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1586",
+    "tags": [
+      "stablecoin",
+      "T-bill",
+      "USDT",
+      "USDC",
+      "DAI",
+      "USDC_SVB_depeg",
+      "GENIUS_Act_2025",
+      "event_study",
+      "Granger",
+      "duration_mechanism",
+      "DGS1MO",
+      "DGS3MO",
+      "SHY",
+      "BIL",
+      "NULL_PARTIAL",
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": "forecast_method",
+    "created_at": "2026-06-30T20:10:22+00:00"
+  },
+  {
+    "id": "paper_compliance_scrub_vt_trend_body_v3_kid_remove",
+    "task_type": "paper_body",
+    "priority": "P1",
+    "status": "in_progress",
+    "title": "[論文管線] vt-trend-following body_v3.tex K-id scrub（11 unique visible Internal experiment tags 移除）",
+    "description": "Per paper_pipeline_status.json vt-trend-following blocker：codex gate confirms body_v3.tex has 11 unique visible K-ids in abstract/body/conclusion (K1192/K1178/K1376/K1417/K898/K1193/K1457/K1458 等). 機械清掉 K-id phrasings (e.g. 'K1192 canonical', 'K1178 canonical:', 'K1376 task audit') 保留數字。xelatex 重編 → compliance gate verify clean → update paper_pipeline_status.json compliance_scrub_done=true. 老闆 KEEP block 列 P1 queued.",
+    "source": "hourly-04-dispatch",
+    "created_at": "2026-07-01T04:10:00+08:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-06-30T20:11:35.739505+00:00",
+    "claim_session_id": "973a3fe783dd",
+    "status_history": [
+      {
+        "ts": "2026-06-30T20:11:35.739763+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-06-30T20:11:35.942674+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      }
+    ],
+    "started_at": "2026-06-30T20:11:35.942400+00:00"
   }
 ]
