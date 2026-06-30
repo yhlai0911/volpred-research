@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-01 FB awaiting auto-expire 72h 過慢，timely insight 衰減才被看見
+
+**問題**：handoff 新增 FB urgent banner 後，5 篇 awaiting interactive FB 文中已有 3 篇等待 64h+，原 `audit_fb_pipeline.py` 要到 72h 才 `expired_skip`，時效性內容已明顯衰減；同時 24h 以前沒有 early warning 階段，會太晚 surface 給互動 session。
+
+**現象 / 根因**：個人 FB 帳號只能靠 Claude-in-Chrome interactive session 發文，headless cron 無法真正完成。這個物理限制已知，但治理門檻仍沿用 72h auto-expire，等於允許事件型 / trending 型 insight 在隊列裡老化 3 天才收掉；24h stale 前也沒有早期提醒，導致「快要失去時效」不夠早可見。
+
+**解決方法**：`scripts/audit_fb_pipeline.py` 改成三段：`EARLY_WARN_HOURS=12`（12h..24h 先列 early warning，不回 findings exit）、`STALE_HOURS=24`（維持 stale findings）、`AUTO_EXPIRE_HOURS=48`（pending/awaiting 超過 48h 自動 `expired_skip`）。同步更新 `docs/fb_pipeline_permanent_fix.md`、`scripts/cron_fb_ttl_expire.sh` 與 `scripts/mark_fb_post_status.py` 註解；新增 regression test 鎖定 12/24/48h 分層與 early-warning 不 double-count stale。
+
+**教訓**：互動式外部發佈的 TTL 應跟內容半衰期一致，不是只看「技術上還能補發」。trending / event insight 的 FB backlog 需要 early warning + short expiry，否則 dashboard 看起來只是 awaiting，實際上 reader value 已經過期。
+
 ## 2026-06-30 host_cron_fail false-critical：audit_fb_pipeline 漏標 exit_semantics=findings
 
 **問題**：autonomous tick 巡檢發現 dashboard host_cron_fail=critical（check-alerts breaches=1）。

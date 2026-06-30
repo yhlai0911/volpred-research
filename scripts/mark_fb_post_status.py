@@ -133,7 +133,7 @@ def auto_expire_stale(
     *, days: int, dry_run: bool = False
 ) -> dict:
     """Batch flip fb_post_status=awaiting_interactive_session entries older
-    than `days` days to wont_fix. Used as a 14-day final TTL after the 72h
+    than `days` days to wont_fix. Used as a 14-day final TTL after the 48h
     expired_skip pass in audit_fb_pipeline. Rationale: Chrome MCP for the
     personal FB account is not available headlessly; entries older than two
     weeks have effectively been abandoned and should stop polluting the

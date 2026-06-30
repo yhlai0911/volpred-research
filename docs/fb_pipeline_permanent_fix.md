@@ -25,8 +25,9 @@
 
 **改**（已 commit）：
 - 移出 terminal set
-- `AUTO_EXPIRE_HOURS=72` — `pending_*` / `awaiting_*` >72h 自動降 `expired_skip`（補無 ROI）
-- `pending_*` / `awaiting_*` >24h 計 stale_pending + alert
+- `EARLY_WARN_HOURS=12` — `pending_*` / `awaiting_*` 12h..24h 先進 early warning，提早 surface 但不當作 findings exit
+- `STALE_HOURS=24` — `pending_*` / `awaiting_*` >24h 計 stale_pending + findings alert
+- `AUTO_EXPIRE_HOURS=48` — `pending_*` / `awaiting_*` >48h 自動降 `expired_skip`（補無 ROI）
 
 ### Fix B：`expired_skip` enum
 
@@ -56,7 +57,7 @@
 | 項目 | 狀態 |
 |---|---|
 | 24/7 自動發 FB | ❌ 物理不可能，**不再承諾** |
-| Cron-driven trending 雙發 | ❌ FB 段若 pending/awaiting → 72h 後 expired_skip |
+| Cron-driven trending 雙發 | ❌ FB 段若 pending/awaiting → 48h 後 expired_skip |
 | 互動 session 內 trending 雙發 | ✅ 寫 feed + Claude in Chrome 同步發 FB |
 | 排程貼文（已發後補留言貼 VolPred 連結） | ✅ 只在互動 session 內做（handoff KEEP 區記 follow-up） |
 
@@ -64,7 +65,7 @@
 
 當 hourly cron 寫 trending feed published 但發不到 FB：
 1. 留 `awaiting_interactive_session` 狀態 + 寫 work_log entry `fb_post_awaiting`（**不阻塞** feed publish）
-2. 72h 內若有互動 session 接手 → 走 claude-in-chrome 發；否則 audit auto-expire
+2. 48h 內若有互動 session 接手 → 走 claude-in-chrome 發；否則 audit auto-expire
 3. dashboard 不再對 awaiting 警報 — 這是預期狀態，不是 bug
 
 ### 互動 session 的 FB 發文 SOP
@@ -112,7 +113,7 @@ Hourly cron / autonomous fire 寄的 boss report **禁止**：
 
 **How**:
 1. cron 寫 FB awaiting 後**只**記 work_log + 留 status；boss report 不列
-2. 流程保護已就位：72h auto-expire + dashboard awaiting 不警報 + `expired_skip` enum
-3. 互動 session 自然接管做（trending dual-publish）；沒接管 → 72h 後 auto-expire 成本可接受
+2. 流程保護已就位：12h early warning + 24h stale alert + 48h auto-expire + `expired_skip` enum
+3. 互動 session 自然接管做（trending dual-publish）；沒接管 → 48h 後 auto-expire 成本可接受
 4. Boss report 真要 mention FB（罕見）→ 用「FB 狀態」純資訊段、無 imperative「你 / 請」字眼
 5. memory `feedback_boss_report_no_fb_handback` 紀錄此規則

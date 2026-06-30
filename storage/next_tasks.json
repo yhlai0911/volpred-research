@@ -41148,12 +41148,38 @@
     "id": "platform_ops_fb_awaiting_72h_to_48h_expire",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "title": "FB awaiting auto-expire: 72h → 48h + early-warn 階段",
     "description": "Per 老闆 email-12327 (2026-06-30 23:54) 指出 FB awaiting 太久。當前 audit_fb_pipeline.py 72h auto-expire，5 篇 awaiting 中 3 篇已 >64h、2 篇 >74h（半導體偏斜 6/27-6/28 數據過 3 天 timely insight 大幅衰減）。改 48h 嚴格 expire + 24h early-warn audit warn surface（不是 fail）+ retract policy 確保 expire 後 mile_xxx 不再 stuck。Files: src/volpred/ops/audit_fb_pipeline.py、reports retract path、config/runtime_schedules.json (audit_fb_pipeline 排程不變)、tests/test_audit_fb_pipeline.py。Reasoning: timely insight half-life ≤ 48h；超 48h 的 article 強發 FB 反而稀釋 Ivan Lai 個人 feed 即時感。",
     "created_at": "2026-07-01T01:11:59+08:00",
     "source": "boss_email_followup",
-    "ttl_days": 14
+    "ttl_days": 14,
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T17:31:36.767032+00:00",
+    "claim_session_id": "bc0a01180b29",
+    "status_history": [
+      {
+        "ts": "2026-06-30T17:31:36.767310+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T17:31:46.126437+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T17:36:53.846581+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-06-30T17:31:46.126125+00:00",
+    "completed_at": "2026-06-30T17:36:53.846315+00:00",
+    "result": "Updated FB pipeline audit to 12h early-warning / 24h stale findings / 48h auto-expire; updated docs/comments and regression tests; did not run live audit to avoid expiring interactive-claimed FB backlog."
   },
   {
     "task_id": "paper_compliance_scrub_leverage_direction",

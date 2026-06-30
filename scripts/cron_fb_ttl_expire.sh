@@ -1,6 +1,6 @@
 #!/bin/bash
 # FB TTL auto-expire: flip awaiting_interactive_session > 14d → wont_fix.
-# Final purge after audit_fb_pipeline's 72h expired_skip pass — clears the
+# Final purge after audit_fb_pipeline's 48h expired_skip pass — clears the
 # verification_fb_pipeline dashboard awaiting count for items that the
 # personal-FB Chrome MCP workflow effectively abandoned.
 #

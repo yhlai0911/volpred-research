@@ -394,6 +394,12 @@ def test_audit_terminal_or_handoff_statuses_include_interactive() -> None:
     assert "awaiting_interactive_session" in audit_fb_pipeline.TERMINAL_OR_HANDOFF_STATUSES
 
 
+def test_audit_fb_pipeline_thresholds_are_timely() -> None:
+    assert audit_fb_pipeline.EARLY_WARN_HOURS == 12
+    assert audit_fb_pipeline.STALE_HOURS == 24
+    assert audit_fb_pipeline.AUTO_EXPIRE_HOURS == 48
+
+
 def test_audit_auto_expires_stale_pending_and_handoff_statuses(monkeypatch) -> None:
     calls: list[list[str]] = []
 
@@ -431,6 +437,41 @@ def test_audit_auto_expires_stale_pending_and_handoff_statuses(monkeypatch) -> N
     assert [item["mile_id"] for item in expired] == ["mile_permission", "mile_wait"]
     assert len(calls) == 2
     assert all("--status" in call and "expired_skip" in call for call in calls)
+
+
+def test_audit_collects_early_warning_without_double_counting_stale() -> None:
+    data = [
+        {
+            "mile_id": "mile_early",
+            "fb_post_status": "awaiting_interactive_session",
+            "date": "2026-07-01T01:00:00",
+            "fb_post_draft": "draft",
+        },
+        {
+            "mile_id": "mile_stale",
+            "fb_post_status": "awaiting_interactive_session",
+            "date": "2026-06-30T12:00:00",
+        },
+        {
+            "mile_id": "mile_done",
+            "fb_post_status": "success",
+            "date": "2026-07-01T01:00:00",
+        },
+    ]
+
+    early = audit_fb_pipeline._collect_pending_by_age(
+        data,
+        older_than_iso="2026-07-01T02:00:00",
+        newer_or_equal_iso="2026-07-01T00:00:00",
+    )
+    stale = audit_fb_pipeline._collect_pending_by_age(
+        data,
+        older_than_iso="2026-07-01T00:00:00",
+    )
+
+    assert [item["mile_id"] for item in early] == ["mile_early"]
+    assert early[0]["has_draft"] is True
+    assert [item["mile_id"] for item in stale] == ["mile_stale"]
 
 
 def test_audit_load_entries_warns_on_bad_trending_log(tmp_path, monkeypatch, capsys) -> None:

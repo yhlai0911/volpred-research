@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""FB pipeline audit: detect stale fb_post_status > 24h + auto-expire >72h pending/handoff states.
+"""FB pipeline audit: detect stale fb_post_status and expire old pending/handoff states.
 
 Cron: every 6h. Alert if stale count >= 2.
 
 2026-06-03 改寫（email-11939 用戶抱怨「FB 一直發不出去」根因追蹤）：
 - awaiting_interactive_session 從 TERMINAL set 拿掉 — 它不是 terminal，是「無限期等」
   → 之前 4 篇 5/29-6/01 連續 4 天卡這狀態，audit 0 alert，dashboard 沒抓到
-- pending/awaiting >72h 自動降為 expired_skip（時效已過，補發無 ROI）
+- pending/awaiting >48h 自動降為 expired_skip（時效已過，補發無 ROI）
 - 仍 pending/awaiting >24h 計入 stale_pending，觸發 alert
+- 12h..24h 進 early-warning 階段，提早 surface 但不回傳 findings exit
 """
 from __future__ import annotations
 import json, subprocess, sys, time
@@ -18,11 +19,12 @@ LOG = REPO / "storage" / "reports" / "trending_repost_log.json"
 # 2026-06-10 process-audit CRITICAL #2: event_article FB statuses live as
 # top-level fb_post_status on feed.json entries (publishing.md canonical),
 # NOT in trending_repost_log.json — this audit was blind to them (6 awaiting,
-# oldest 06-05, past the 72h auto-expire bar; structural repeat of the
+# oldest 06-05, past the old auto-expire bar; structural repeat of the
 # 2026-06-03 wrong-source incident this script's own docstring records).
 FEED = REPO / "storage" / "reports" / "feed.json"
+EARLY_WARN_HOURS = 12
 STALE_HOURS = 24
-AUTO_EXPIRE_HOURS = 72
+AUTO_EXPIRE_HOURS = 48
 AUTO_EXPIRE_STATUS_PREFIXES = ("awaiting_", "pending")
 TERMINAL_STATUSES = {
     "success",
@@ -60,7 +62,7 @@ def _is_auto_expirable_status(status: str) -> bool:
 
 
 def _auto_expire_stale_pending(data: list, expire_cutoff_iso: str) -> list[dict]:
-    """pending*/awaiting* > 72h → auto-mark expired_skip。回傳被處理的條目清單。"""
+    """pending*/awaiting* > AUTO_EXPIRE_HOURS → auto-mark expired_skip."""
     expired = []
     for e in data:
         s = str(e.get("fb_post_status", "")).strip().lower()
@@ -91,6 +93,36 @@ def _auto_expire_stale_pending(data: list, expire_cutoff_iso: str) -> list[dict]
     return expired
 
 
+def _collect_pending_by_age(
+    data: list,
+    *,
+    older_than_iso: str,
+    newer_or_equal_iso: str | None = None,
+) -> list[dict]:
+    """Collect non-terminal FB entries older than a cutoff.
+
+    `newer_or_equal_iso` creates a bounded stage such as 12h..24h early
+    warning without double-counting the same items in the stale bucket.
+    """
+    pending = []
+    for e in data:
+        s = str(e.get("fb_post_status", "")).strip().lower()
+        if s in TERMINAL_STATUSES:
+            continue
+        created = e.get("date") or e.get("created_at") or e.get("timestamp", "")
+        if not created or created >= older_than_iso:
+            continue
+        if newer_or_equal_iso is not None and created < newer_or_equal_iso:
+            continue
+        pending.append({
+            "mile_id": e.get("mile_id"),
+            "fb_post_status": s,
+            "date": created,
+            "has_draft": bool(e.get("fb_post_draft") or e.get("fb_draft")),
+        })
+    return pending
+
+
 def _load_entries() -> list:
     """Merge trending log entries with feed.json top-level fb_post_status
     entries (event_article path). Feed entries are normalized to carry
@@ -115,7 +147,7 @@ def _load_entries() -> list:
             # let a stale log status (e.g. wont_fix) SHADOW a feed 'awaiting', so
             # the auto-expire never saw it and the backlog rotted invisibly. Make
             # feed canonical: override the log entry's status with feed's when they
-            # drift, so the >72h auto-expire and stale scan operate on the truth.
+            # drift, so the age-based auto-expire and stale scan operate on the truth.
             for e in data:
                 if e.get("mile_id") != mid:
                     continue
@@ -147,34 +179,31 @@ def main():
         return 0
     data = _load_entries()
     now = time.time()
+    early_cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - EARLY_WARN_HOURS * 3600))
     stale_cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - STALE_HOURS * 3600))
     expire_cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - AUTO_EXPIRE_HOURS * 3600))
 
-    # 1) Auto-expire pending/awaiting >72h（不再無限期等）
+    # 1) Auto-expire pending/awaiting >48h（不再無限期等）
     auto_expired = _auto_expire_stale_pending(data, expire_cutoff_iso)
     if auto_expired:
         # 重 load（mark_fb_post_status 已寫盤；feed 端 status 也可能已被改）
         data = _load_entries()
 
-    # 2) 掃 stale pending（含仍未過 72h 的 awaiting）
-    pending = []
-    for e in data:
-        s = str(e.get("fb_post_status", "")).strip().lower()
-        if s in TERMINAL_STATUSES:
-            continue
-        created = e.get("date") or e.get("created_at") or e.get("timestamp", "")
-        if created and created < stale_cutoff_iso:
-            pending.append({
-                "mile_id": e.get("mile_id"),
-                "fb_post_status": s,
-                "date": created,
-                "has_draft": bool(e.get("fb_post_draft") or e.get("fb_draft")),
-            })
+    # 2) 掃 24h stale pending（findings exit），以及 12h..24h early warning。
+    pending = _collect_pending_by_age(data, older_than_iso=stale_cutoff_iso)
+    early_warning = _collect_pending_by_age(
+        data,
+        older_than_iso=early_cutoff_iso,
+        newer_or_equal_iso=stale_cutoff_iso,
+    )
 
     report = {
         "audit": "fb_pipeline",
+        "early_warn_hours": EARLY_WARN_HOURS,
         "stale_hours": STALE_HOURS,
         "auto_expire_hours": AUTO_EXPIRE_HOURS,
+        "early_warning_count": len(early_warning),
+        "early_warning": early_warning,
         "stale_pending_count": len(pending),
         "stale_pending": pending,
         "auto_expired_count": len(auto_expired),
@@ -183,8 +212,16 @@ def main():
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
-    if len(pending) >= 2 or len(auto_expired) >= 1:
+    if len(early_warning) >= 2 or len(pending) >= 2 or len(auto_expired) >= 1:
         sections = []
+        if len(early_warning) >= 2:
+            sections.append(
+                f"## Early warning（>={EARLY_WARN_HOURS}h, <{STALE_HOURS}h）{len(early_warning)} 篇\n"
+                + "\n".join(
+                    f"- {p['mile_id']} status={p['fb_post_status']} date={p['date']} has_draft={p['has_draft']}"
+                    for p in early_warning
+                )
+            )
         if len(pending) >= 2:
             sections.append(
                 f"## Stale pending（>={STALE_HOURS}h）{len(pending)} 篇\n"
@@ -205,10 +242,13 @@ def main():
         body = "\n\n".join(sections)
         try:
             from volpred.ops.alerts import send_alert
-            level = "warn" if pending else "info"
+            level = "warn" if pending or auto_expired else "info"
             send_alert(
                 level=level,
-                title=f"FB pipeline: {len(pending)} stale + {len(auto_expired)} auto-expired",
+                title=(
+                    f"FB pipeline: {len(pending)} stale + {len(early_warning)} early "
+                    f"+ {len(auto_expired)} auto-expired"
+                ),
                 body=body,
             )
         except Exception as e:
