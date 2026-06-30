@@ -41,6 +41,16 @@ STATUS_RANK = {
 }
 
 
+def _task_key(task: dict[str, Any]) -> str:
+    """Return the queue key used by task_pool_claim.py.
+
+    Some legacy rows still use `task_id` instead of `id`; claim/list accepts
+    both, so dedupe must group both forms or zombie pending duplicates can
+    continue blocking claims.
+    """
+    return str(task.get("id") or task.get("task_id") or "")
+
+
 def _utc_iso_z() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -86,7 +96,7 @@ def dedupe(tasks: list[Any]) -> tuple[list[Any], list[dict[str, Any]]]:
             )
             passthrough.append(task)
             continue
-        task_id = str(task.get("id") or "")
+        task_id = _task_key(task)
         if not task_id:
             passthrough.append(task)
             continue

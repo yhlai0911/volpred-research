@@ -116,6 +116,30 @@ def _task_key(task: dict[str, Any]) -> str:
     return str(task.get("id") or task.get("task_id") or "")
 
 
+def _record_status_history(
+    task: dict[str, Any],
+    *,
+    frm: str,
+    to: str,
+    by: str,
+    note: str | None = None,
+) -> None:
+    """Append a status-transition trace so loop_health can judge first-pass rate.
+
+    Why: `loop_health.compute_first_pass_success` infers retry vs first-pass from
+    `status_history`. Without it, only the small subset of tasks that also appear
+    in work_log by their tid/kid is traceable (~23% coverage as of 2026-06-30),
+    forcing the metric into perpetual `low_coverage`. Logging on every transition
+    here closes that gap for hourly-dispatched tasks.
+    """
+    if not isinstance(task.get("status_history"), list):
+        task["status_history"] = []
+    entry: dict[str, Any] = {"ts": _now(), "from": frm, "to": to, "by": by}
+    if note:
+        entry["note"] = note
+    task["status_history"].append(entry)
+
+
 def _matches(tasks: list[dict[str, Any]], task_id: str) -> list[dict[str, Any]]:
     return [t for t in tasks if _task_key(t) == task_id]
 
@@ -349,20 +373,27 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
                 "dispatch_lane": task.get("dispatch_lane"),
                 "status": existing_status,
             }
+        prev = existing_status or "pending"
         task["status"] = "claimed"
         task["claimed_by"] = args.owner
         task["claimed_at"] = _now()
         task["claim_session_id"] = session
+        _record_status_history(task, frm=prev, to="claimed", by=args.owner)
         return {"ok": True, "task_id": args.id, "owner": args.owner, "session": session, "status": "claimed"}
 
 
 def cmd_start(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
-        if task.get("status") not in {"claimed", "in_progress"}:
+        prev = (task.get("status") or "").lower()
+        if prev not in {"claimed", "in_progress"}:
             return {"ok": False, "reason": "not_claimed", "status": task.get("status")}
         task["status"] = "in_progress"
         task["started_at"] = _now()
+        if prev != "in_progress":
+            _record_status_history(
+                task, frm=prev, to="in_progress", by=task.get("claimed_by") or "unknown"
+            )
         return {"ok": True, "task_id": args.id, "status": "in_progress"}
 
 
@@ -370,11 +401,19 @@ def cmd_release(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
         prev_owner = task.get("claimed_by")
+        prev_status = (task.get("status") or "").lower() or "claimed"
         task["status"] = "pending"
         task.pop("claimed_by", None)
         task.pop("claimed_at", None)
         task.pop("claim_session_id", None)
         task["last_released_at"] = _now()
+        _record_status_history(
+            task,
+            frm=prev_status,
+            to="pending",
+            by=prev_owner or "release",
+            note="manual_release",
+        )
         return {"ok": True, "task_id": args.id, "released_from": prev_owner}
 
 
@@ -384,20 +423,35 @@ def cmd_handoff_main_thread(args: argparse.Namespace) -> dict[str, Any]:
         prev_status = (task.get("status") or "").lower()
         if prev_status not in {"claimed", "in_progress", "pending", "pending_main_thread"}:
             return {"ok": False, "reason": "wrong_status", "status": task.get("status")}
+        prev_owner = task.get("claimed_by") or "handoff"
         task["status"] = "pending_main_thread"
         task["handoff_note"] = args.note
         task["handoff_at"] = _now()
         task.pop("claimed_by", None)
         task.pop("claimed_at", None)
         task.pop("claim_session_id", None)
+        _record_status_history(
+            task,
+            frm=prev_status or "claimed",
+            to="pending_main_thread",
+            by=prev_owner,
+            note=args.note,
+        )
         return {"ok": True, "task_id": args.id, "status": "pending_main_thread"}
 
 
 def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
+        prev_status = (task.get("status") or "").lower() or "in_progress"
         task["status"] = args.status
         task["completed_at"] = _now()
+        _record_status_history(
+            task,
+            frm=prev_status,
+            to=args.status,
+            by=task.get("claimed_by") or "complete",
+        )
         result_text = args.result or ""
         if args.result:
             existing = task.get("result") or ""
@@ -487,13 +541,21 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                 continue
             age_h = (now - claimed_dt).total_seconds() / 3600
             if age_h >= args.stale_hours:
-                released.append({"id": _task_key(t), "owner": t.get("claimed_by"), "age_h": round(age_h, 1)})
+                prev_owner = t.get("claimed_by")
+                released.append({"id": _task_key(t), "owner": prev_owner, "age_h": round(age_h, 1)})
                 t["status"] = "pending"
                 t.pop("claimed_by", None)
                 t.pop("claimed_at", None)
                 t.pop("claim_session_id", None)
                 t["last_released_at"] = _now()
                 t["last_release_reason"] = f"auto_release_stale_{args.stale_hours}h"
+                _record_status_history(
+                    t,
+                    frm=status or "claimed",
+                    to="pending",
+                    by=prev_owner or "cleanup",
+                    note=f"auto_release_stale_{args.stale_hours}h",
+                )
     return {"ok": True, "released": released, "count": len(released)}
 
 

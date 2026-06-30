@@ -40078,7 +40078,7 @@
     "title": "K1588: Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 493). Original: Social Connectedness → 財報 vol 反應**（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1588.py with signal.shift(1) + seed=42, (c) K1588_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -40087,7 +40087,11 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-06-30T00:00:02Z"
+    "created_at": "2026-06-30T00:00:02Z",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T13:32:45.253585+00:00",
+    "claim_session_id": "d84eff9f22cf",
+    "started_at": "2026-06-30T13:32:56.878169+00:00"
   },
   {
     "id": "platform_ops_daily_update_intraday_1400_schedule",
@@ -40694,7 +40698,9 @@
     "claim_session_id": "5998d3b44258",
     "started_at": "2026-06-30T10:42:31.829520+00:00",
     "completed_at": "2026-06-30T10:51:28.069707+00:00",
-    "result": "ENFORCE 完成（主線程，commits de92bb067 + cd6f55ac7）：(1) 共用 has_lazypack_section() helper（單一 source）；(2) publish_draft.py CLI check_lazypack_gate rc=6 + --no-lazypack-gate；(3) publish_milestone chokepoint raise ValueError（covers 直接 Python 路徑）；(4) content_quality coverage 對齊同 helper；(5) feed-publisher SKILL §6 文件化 + gen 指令；74 tests green。NotebookLM auth 已驗證可用。注意：18:42 codex-cli orphaned claim（無 lazypack 活動）。BACKFILL 另開任務：實測 327/333 published general 缺 lazypack（遠多於預估 7），屬重 NotebookLM 批次需主線程驗圖品質 → scoped 子任務。"
+    "result": "ENFORCE 完成（主線程，commits de92bb067 + cd6f55ac7）：(1) 共用 has_lazypack_section() helper（單一 source）；(2) publish_draft.py CLI check_lazypack_gate rc=6 + --no-lazypack-gate；(3) publish_milestone chokepoint raise ValueError（covers 直接 Python 路徑）；(4) content_quality coverage 對齊同 helper；(5) feed-publisher SKILL §6 文件化 + gen 指令；74 tests green。NotebookLM auth 已驗證可用。注意：18:42 codex-cli orphaned claim（無 lazypack 活動）。BACKFILL 另開任務：實測 327/333 published general 缺 lazypack（遠多於預估 7），屬重 NotebookLM 批次需主線程驗圖品質 → scoped 子任務。",
+    "dedup_kept_at": "2026-06-30T13:32:17.709613Z",
+    "dedup_kept_reason": "kept among 2 duplicates by status/receipt precedence; statuses=['succeeded', 'pending']"
   },
   {
     "task_id": "platform_ops_lazypack_codex_redo_and_backfill",
@@ -40702,14 +40708,16 @@
     "title": "codex-exec 重做 7 篇 prose-dump lazypack + 補近期可見子集（禁用爛腳本）",
     "description": "用 codex exec 重做/補 lazypack（boss 指令 + 品質審查 2026-06-30）。背景：並行 agent 的 scripts/backfill_lazypack_sections.py 產出 prose-dump 爛圖（截斷散文 + 抓表面數字如 2% GDP 目標、漏掉真結果），8 篇 live 中招。已用 codex-exec 修好 mile_68285aa0（commit 5cfc1a6e5）。\n\nPHASE 1（先做，live 品質問題）：用 scripts/gen_lazypack_codex.py 重做以下 7 篇 prose-dump 文章的 lazypack（每篇：找 source K/experiment_refs → 建 panel plan → codex exec 生圖 → 主線程 Read 看圖核對 results.json → upload_chart 上傳 *_lazypack_codex_* → 替換 ## 懶人包圖組 section → sync_article）：\n  mile_f5f4cb43, mile_819af916, mile_9839822d, mile_7b95b816, mile_dc4035e4, mile_082f0578, mile_71dd116b\n  注意：部分文章 experiment_refs 可能為空（如 mile_f5f4cb43）→ 從文章內容/標題推 source K 或用 article-id 餵 codex（--article-id）。\n\nPHASE 2（boss 裁示 scale 後）：320 篇缺 lazypack 的 published general 文章，補近期可見子集（非全 320，codex-exec 每篇多分鐘 + quota，優先 published_at 最新 ~15 篇）。\n\n硬規則：(1) 只用 gen_lazypack_codex.py（codex exec primary），**禁用** backfill_lazypack_sections.py （已標 DEPRECATED）；(2) 數字逐欄對齊 results.json；(3) 主線程 Read 看圖驗品質（CJK 無缺字 + 數字對 + 非 prose-dump）才 append；(4) idempotent，先查 has_lazypack_section 跳過已 codex 化的。\nDISPATCH_LANE=main_thread（需主線程驗圖品質，不可 codex 無監督批次）。",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "source": "main_thread_quality_review",
     "created_at": "2026-06-30T11:57:55.011847+00:00",
     "claimed_by": "interactive",
     "claimed_at": "2026-06-30T12:30:46.653312+00:00",
     "claim_session_id": "d0472b1cda9a",
-    "started_at": "2026-06-30T12:30:46.870163+00:00"
+    "started_at": "2026-06-30T12:30:46.870163+00:00",
+    "completed_at": "2026-06-30T13:49:44.569554+00:00",
+    "result": "Phase 1 完成：8 篇 prose-dump 文章全部用 codex-exec 重做 lazypack（mile_68285aa0/9839822d/dc4035e4/7b95b816/082f0578/71dd116b/f5f4cb43/819af916），每篇 3 panel 數字逐一驗證對齊 results.json 或文章內容（無臆造），live 已 sync。commits 5cfc1a6e5→(8 commits)。Phase 2（320 篇全缺 backfill）需 boss scale 裁示（已 email），暫不啟動避免燒 codex quota 在低 ROI 舊文。"
   },
   {
     "id": "email-12310-611a8d",
@@ -40797,27 +40805,5 @@
     "started_at": "2026-06-30T13:11:01.837274+00:00",
     "completed_at": "2026-06-30T13:12:44.192588+00:00",
     "result": "PASS (article-level 24h-rule review by main-thread, Codex primary-path 已在 K1574 experiment-level 跑過 CONDITIONAL_PASS); article narrative 數字/方法/結論強度全與 K1574 codex_review.md 對齊; 無 lookahead 風險 (ex-post attribution); 無 DM/Harvey overclaim (文章明示 borderline null finding); 1 LOW informational, 不阻塞. Review note: experiments/K1574/article_review_mile_5399bf01.md"
-  },
-  {
-    "id": "platform_ops_enforce_lazypack_in_publish_pipeline",
-    "title": "Lazypack enforce in publisher pipeline + backfill general audience articles missing 懶人包圖",
-    "description": "Boss 2026-06-30 hard rule: 所有 general-audience reader-facing articles 必須附懶人包圖組 (concept/method/results panels). 實測近 12 篇 general articles 只 1 篇有 = 12% coverage, content_quality.py 已加 lazypack_gap detector. 缺生成 + enforce + 回補. Scope: (a) Publisher pipeline hard gate: append_to_feed 前若 audience=general 且 details.lazypack_panels 缺/空 → block publish 並要求生成 (走 codex-exec + 既有 reusable replace tool, 不再用 backfill_lazypack_sections.py DEPRECATED prose-dump 腳本); (b) Backfill: 掃 storage/reports/feed.json 近 30 天 audience=general 缺 lazypack 的 articles (估 ~10 篇), 逐篇 codex-exec 重做 (參考最近 commits 7d7d792af/ae24a0311/c5933ef8e pattern 一次一 mile); (c) 圖必走 NotebookLM 或 codex-exec render script (per .claude/skills/lazypack-infographic/SKILL.md — primary = codex-exec, NotebookLM = fallback); (d) Test gate: 加 1 個 publisher pipeline test 確認 missing lazypack on general → SystemExit / explicit error. 預估 ~3-4 hours total (pipeline 1h + 10 篇 backfill 各 ~15 min). 優先給 codex-cli (擅長 render script 寫作+lazypack tool reuse). 需相對乾淨 context, 避免堆在 long session 草率做.",
-    "task_type": "platform_ops",
-    "priority": 2,
-    "status": "pending",
-    "created_at": "2026-06-30T13:11:00.000000+00:00",
-    "source": "hourly-21_queued_per_keep_block",
-    "tags": [
-      "lazypack",
-      "publisher",
-      "content_quality",
-      "boss_directive",
-      "general_audience"
-    ],
-    "preferred_agent": "codex-cli",
-    "claimed_by": null,
-    "claimed_at": null,
-    "started_at": null,
-    "completed_at": null
   }
 ]

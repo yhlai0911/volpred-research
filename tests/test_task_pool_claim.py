@@ -591,3 +591,114 @@ def test_non_codex_owner_can_claim_reader_facing_task(tmp_path, monkeypatch, cap
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "claimed"
     assert saved[0]["claimed_by"] == "hourly-dispatch"
+
+
+def _run(monkeypatch, *argv) -> int:
+    monkeypatch.setattr(sys, "argv", ["task_pool_claim.py", *argv])
+    return task_pool_claim.main()
+
+
+def test_status_history_recorded_across_full_lifecycle(tmp_path, monkeypatch) -> None:
+    """claim → start → complete writes 3 status_history entries with from/to/by."""
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps([{"id": "tk1", "status": "pending"}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assert _run(monkeypatch, "claim", "--id", "tk1", "--owner", "hourly-22") == 0
+    assert _run(monkeypatch, "start", "--id", "tk1") == 0
+    assert _run(monkeypatch, "complete", "--id", "tk1", "--status", "succeeded", "--result", "ok") == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    hist = saved["status_history"]
+    assert [(h["from"], h["to"]) for h in hist] == [
+        ("pending", "claimed"),
+        ("claimed", "in_progress"),
+        ("in_progress", "succeeded"),
+    ]
+    assert all(h.get("ts") and h.get("by") for h in hist)
+    assert hist[0]["by"] == "hourly-22"
+
+
+def test_status_history_release_records_manual_release(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps([{"id": "tk2", "status": "pending"}], ensure_ascii=False),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assert _run(monkeypatch, "claim", "--id", "tk2", "--owner", "hourly-22") == 0
+    assert _run(monkeypatch, "release", "--id", "tk2") == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    hist = saved["status_history"]
+    assert hist[-1]["from"] == "claimed"
+    assert hist[-1]["to"] == "pending"
+    assert hist[-1].get("note") == "manual_release"
+
+
+def test_status_history_handoff_main_thread_records_note(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "tk3",
+                    "status": "in_progress",
+                    "claimed_by": "hourly-22",
+                    "claimed_at": "2026-06-30T14:00:00+00:00",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assert _run(
+        monkeypatch,
+        "handoff-main-thread",
+        "--id",
+        "tk3",
+        "--note",
+        "paper_body owner",
+    ) == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    hist = saved["status_history"]
+    assert hist[-1]["from"] == "in_progress"
+    assert hist[-1]["to"] == "pending_main_thread"
+    assert hist[-1].get("note") == "paper_body owner"
+    assert hist[-1]["by"] == "hourly-22"
+
+
+def test_status_history_cleanup_auto_release_marks_note(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    # Claim aged 24h → cleanup should release with note.
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "tk4",
+                    "status": "claimed",
+                    "claimed_by": "hourly-old",
+                    "claimed_at": "2026-06-29T14:00:00+00:00",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assert _run(monkeypatch, "cleanup", "--stale-hours", "6") == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    hist = saved["status_history"]
+    assert hist[-1]["from"] == "claimed"
+    assert hist[-1]["to"] == "pending"
+    assert "auto_release_stale_6h" in hist[-1].get("note", "")
+    assert hist[-1]["by"] == "hourly-old"

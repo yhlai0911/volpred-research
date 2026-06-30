@@ -64,6 +64,35 @@ def test_dedupe_warns_and_preserves_non_object_entries(capsys) -> None:
     assert "type=str" in captured.err
 
 
+def test_dedupe_groups_legacy_task_id_with_id() -> None:
+    tasks = [
+        {
+            "task_id": "platform_ops_legacy_duplicate",
+            "status": "succeeded",
+            "completed_at": "2026-06-30T10:00:00Z",
+        },
+        {
+            "id": "platform_ops_legacy_duplicate",
+            "status": "pending",
+            "created_at": "2026-06-30T13:00:00Z",
+        },
+    ]
+
+    deduped, dropped = dedupe_next_tasks.dedupe(tasks)
+
+    assert len(deduped) == 1
+    assert deduped[0]["task_id"] == "platform_ops_legacy_duplicate"
+    assert deduped[0]["status"] == "succeeded"
+    assert dropped == [
+        {
+            "id": "platform_ops_legacy_duplicate",
+            "dropped_status": "pending",
+            "kept_status": "succeeded",
+            "created_at": "2026-06-30T13:00:00Z",
+        }
+    ]
+
+
 def test_load_tasks_warns_and_fails_on_non_list_schema(tmp_path, monkeypatch, capsys) -> None:
     next_tasks = tmp_path / "storage" / "next_tasks.json"
     next_tasks.parent.mkdir(parents=True)
