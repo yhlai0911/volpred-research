@@ -39940,7 +39940,7 @@
     "title": "K1582: HARQ/SHARK 測量誤差修正 HAR**（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 483). Original: HARQ/SHARK 測量誤差修正 HAR**（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1582.py with signal.shift(1) + seed=42, (c) K1582_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -39953,7 +39953,9 @@
     "claimed_by": "codex-cli",
     "claimed_at": "2026-06-30T03:58:14.729837+00:00",
     "claim_session_id": "6b723b4f4145",
-    "started_at": "2026-06-30T03:58:22.642292+00:00"
+    "started_at": "2026-06-30T03:58:22.642292+00:00",
+    "completed_at": "2026-06-30T04:11:30.011016+00:00",
+    "result": "K1582 HARQ/SHARK-style measurement-error pilot completed. TX active-contract long sample: directional-only improvement (SHARK_like +2.05% QLIKE vs HAR, DM t=-1.77; HARQ +1.94%, DM t=-2.60), no Harvey pass. SPY/0050 local 5-min panels non-gateable (n_oos=51/38). Outputs: experiments/k1582/K1582.py, K1582_results.json, README.md, forecasts, figure."
   },
   {
     "id": "K1583",
