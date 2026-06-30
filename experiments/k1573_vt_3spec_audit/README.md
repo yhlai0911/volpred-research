@@ -74,35 +74,28 @@ Block-bootstrap (block=20, n=500, seed=42) on 2015-2026 daily returns → 95% CI
 
 ## 4. 結果
 
-### 4.1 Phase 1 — 同質化 audit（confirmed but nuanced）
+### 4.1 Phase 1 — 同質化 audit（confirmed and MORE severe than original observation）
 
-**VIX 15-20 區段佔比**：
-- 全期 (2015-2026)：34.2% of trading days
-- paper_trading 期 (2023-2026)：**50.1%** of trading days — 確認老闆觀察「過去 1 年大多時間落此區段」
+**Codex review 2026-06-30 修正**：原 v1 audit 用 `vix.shift(1)` 對 paper_trading `data_date` 做 regime 切片，等於用「前一日 VIX」分類「今日寫入的權重」— 但生產端 `daily_update.py` 是用 **同日 data_date VIX** 當 signal 算權重 → 應 join unshifted VIX。修正後 standard-vs-aggressive 差距比原報告更小。
 
-**paper_trading 真實 mid(15-20) regime — 平均 SPY 權重**：
+**VIX 15-20 區段佔比**（修正後）：
+- 全期 (2016-2026, market 資料起算)：33.7% of trading days
+- paper_trading 期 (2023-2026)：**50.2%** of trading days — 確認老闆觀察「過去 1 年大多時間落此區段」
 
-| spec | mean SPY weight | mean total risky |
-|------|-----------------|------------------|
-| conservative (piecewise) | 17.0% | 34.0% (= 17 SPY + 17 GLD) |
-| standard (12/VIX) | 69.9% | 70.0% (SPY only) |
-| aggressive (adaptive_tier) | 34.0% | 68.0% (= 34 SPY + 34 GLD) |
+**paper_trading 真實 mid(15-20) regime — pairwise risky absdiff**（修正後 same-day VIX 對齊）：
 
-**老闆觀察的精確內涵**：
-- ✅ **standard vs aggressive 的「總投入比例」非常接近**（70% vs 68%，僅 2pp）— 是真正的同質化
-- ✅ standard vs aggressive 在 mid regime 的 pairwise risky absdiff 僅 10.8pp，遠低於 differentiated target 15pp
-- ❌ **conservative 其實已有顯著區別**（risky 34% vs 70%）— 並非全面同質化
+| pair | risky absdiff (mean over obs) | 結論 |
+|------|------------------------------|------|
+| **standard vs aggressive** | **3.2pp** | ❌ 嚴重同質化（遠低於 5pp homogeneous gate） |
+| conservative vs standard | 35.6pp | ✅ 已差異化 |
+| conservative vs aggressive | 35.9pp | ✅ 已差異化 |
 
-**真正的問題**：aggressive 在 mid VIX 用 `12/VIX/2` 配 50/50 SPY/GLD，總風險敞口跟 simple_12vix SPY-only 幾乎相同；只有資產配置不同（GLD vs SPY 混合）。
+**老闆觀察的精確內涵（修正版）**：
+- ✅ **standard vs aggressive 的「總風險敞口」實際只差 3.2pp**（**比原報告 10.8pp 更嚴重**）— 確認且加重老闆判斷
+- ✅ conservative vs 其他兩 spec 已明確區別（35-36pp）— 並非全面同質化
+- 真正的問題集中在 **standard vs aggressive 的 risk ladder 缺一階**
 
-**對應的 risky weight correlation matrix (mid regime, paper_trading)**：
-| | conservative | standard | aggressive |
-|---|---|---|---|
-| conservative | 1.00 | 0.77 | 0.79 |
-| standard | 0.77 | 1.00 | 0.55 |
-| aggressive | 0.79 | 0.55 | 1.00 |
-
-corr 看似分離，但搭配 absdiff 結論：standard 與 aggressive 的「level」幾乎一致（重要），雖然 timing 因為 leverage trigger 不一致導致 corr 較低。
+**根因**：aggressive (`adaptive_tier`) 在 mid VIX 用 `12/VIX/2` × 2-asset（SPY+GLD 各半）配置；數學上總風險敞口 ≈ standard 的 `12/VIX` SPY-only。只有資產配置不同（GLD vs SPY 混合），讀者翻訂閱頁無法區分兩者的 risk profile。
 
 ### 4.2 Phase 2 — 差異化方案（proposed）
 
@@ -118,15 +111,17 @@ corr 看似分離，但搭配 absdiff 結論：standard 與 aggressive 的「lev
 | **standard** | SPY=min(12/VIX, 1) | SPY=12/VIX | SPY=12/VIX | SPY=12/VIX |
 | **aggressive** | SPY=min(1.5×12/VIX, 2.0) (leverage) | SPY=1.0 (100% floor) | ramp 1.0 → 0.40 | ramp 0.40 → 0 by VIX 35 |
 
-**Mid (15-20) regime — proposed SPY weight separation**：
+**Mid (15-20) regime — proposed risky weight separation**（Codex review 修正：canonical metric 改為 pairwise risky absdiff over observations）：
 
-| pair | absdiff (SPY weight) | status |
-|------|----------------------|--------|
-| conservative vs standard | 50.0pp | ✅ > 15pp |
-| conservative vs aggressive | 80.0pp | ✅ > 15pp |
-| standard vs aggressive | 30.0pp | ✅ > 15pp |
+| pair | risky absdiff | spy_w absdiff (diagnostic) | status |
+|------|---------------|----------------------------|--------|
+| conservative vs standard | 29.8pp | 49.8pp | ✅ > 15pp |
+| conservative vs aggressive | 60.0pp | 80.0pp | ✅ > 15pp |
+| standard vs aggressive | 30.2pp | 30.2pp | ✅ > 15pp |
 
-**Risky weight correlation (2015-2026, proposed)**：
+✅ 3 pair 皆 ≥ 15pp differentiated target — proposed 方案在 mid VIX 完全打破現行 standard ≈ aggressive 同質化。
+
+**Risky weight correlation (2016-2026, proposed)**：
 
 | | conservative | standard | aggressive |
 |---|---|---|---|
@@ -134,22 +129,24 @@ corr 看似分離，但搭配 absdiff 結論：standard 與 aggressive 的「lev
 | standard | 0.94 | 1.00 | 0.96 |
 | aggressive | 0.96 | 0.96 | 1.00 |
 
-corr 仍高（同樣是 VIX-driven 同向 co-movement），但 **level (absdiff)** 已完全達到 differentiated target。
+corr 仍高（同樣是 VIX-driven 同向 co-movement），但 **level (risky absdiff)** 已完全達到 differentiated target。Codex 確認：corr 衡量 timing，absdiff 衡量 level，產品 differentiation 看 level。
 
 ### 4.3 Phase 3 — Robustness
 
-**Full-period 2015-2026 metrics (proposed)**：
+**Full-period 2016-2026 metrics (proposed)** — Codex review 後 re-run 取 market 可用最早起始 2016-01-05：
 
 | spec | n | Sharpe | CAGR | MDD | vol (ann) |
 |------|---|--------|------|-----|-----------|
-| conservative | 2,886 | 0.769 | +3.3% | -9.2% | 4.3% |
-| standard | 2,886 | 0.773 | +7.0% | -17.0% | 9.4% |
-| aggressive | 2,886 | 0.717 | +8.5% | -24.4% | 12.4% |
+| conservative | 2,634 | 0.940 | +4.0% | -9.2% | 4.3% |
+| standard | 2,634 | 0.896 | +8.2% | -17.0% | 9.3% |
+| aggressive | 2,634 | 0.860 | +10.3% | -24.4% | 12.2% |
 
 ✅ 3 specs 形成清楚的 risk-return ladder：
-- Conservative: 低 vol, 低 return, 最小 MDD — 適合風險規避用戶
-- Standard: 中等 — 學術 12/VIX anchor
-- Aggressive: 高 return, 高 vol, 高 MDD — 適合風險容忍用戶（仍 Sharpe > 0.7，非投機策略）
+- Conservative: 最低 vol/MDD/CAGR + 最高 Sharpe 0.940 — 適合風險規避用戶
+- Standard: 中等 vol/CAGR + Sharpe 0.896 — 學術 12/VIX anchor
+- Aggressive: 高 vol/CAGR/MDD + Sharpe 0.860 — 適合風險容忍用戶（仍 Sharpe > 0.85，非投機策略）
+
+**注意**：persona 賣的是 risk-return profile，不是「Sharpe 最高」。三者 Sharpe 在 [0.86, 0.94] 區間內，bootstrap CI 重疊（§4.3 後段），統計上不可區別 → 正是 retail product line 應有的定位（用戶自選 risk profile，platform 不暗示哪檔更優）。
 
 **Stress periods (proposed, cumulative return)**：
 
@@ -163,13 +160,13 @@ corr 仍高（同樣是 VIX-driven 同向 co-movement），但 **level (absdiff)
 ✅ Aggressive 在 2020 COVID 反而比 standard 稍好（leverage 已被 VIX>20 規則關閉，避免崩盤；mid regime floor 1.0 沒擾動）
 ⚠️ Aggressive 在 2022 QT 持續 drawdown 比 standard 多 3.7pp — 此為「高 conviction」persona 的合理代價，需在前端 disclose
 
-**Bootstrap Sharpe 95% CI (proposed)**：
+**Bootstrap Sharpe 95% CI (proposed, 2016-2026, block=20, n=500, seed=42)**：
 
 | spec | mean Sharpe | 2.5% | 97.5% |
 |------|-------------|------|-------|
-| conservative | 0.78 | 0.19 | 1.38 |
-| standard | 0.78 | 0.19 | 1.40 |
-| aggressive | 0.74 | 0.16 | 1.39 |
+| conservative | 0.96 | 0.36 | 1.58 |
+| standard | 0.94 | 0.31 | 1.60 |
+| aggressive | 0.90 | 0.28 | 1.54 |
 
 3 specs CI 高度重疊 — 證明全期 Sharpe 差異**不顯著**（與 H_0: 平均 Sharpe 相同無法拒絕），但**權重分佈差異顯著**。意思：產品 differentiation 賣的是 risk-profile / persona，不是「哪個策略 Sharpe 更高」 — 這正是 retail product line 應有的定位。
 
@@ -193,11 +190,11 @@ corr 仍高（同樣是 VIX-driven 同向 co-movement），但 **level (absdiff)
 
 ### 5.3 上架前 gate checklist
 
-- [x] VT 公式有 explicit `vix.shift(1)` — verified at `k1573_audit.py:simulate_strategy()`
+- [x] VT 公式有 explicit `vix.shift(1)` — verified at `k1573_audit.py:simulate_strategy()` line 221（Codex review confirmed）
 - [x] Bootstrap stability — 3 specs Sharpe CI 都正、都重疊
 - [x] Stress robustness — 3 stress 期間皆 reasonable
-- [ ] Codex review — 待 Phase 5
-- [ ] 用戶 approve audit report (`storage/strategy_lifecycle/vt_3spec_audit_2026_06_30.md`)
+- [x] **Codex review — CONDITIONAL_PASS 82/100**（2026-06-30；找出 paper_trading VIX 雙 lag + spy-only diff metric 2 個 MAJOR issues，已修正並 re-run 重生 results.json + README §4）
+- [ ] 用戶 approve audit report
 - [ ] 6 個月 paper-trade in shadow mode（不上線）
 - [ ] 上線時 frontend 需明確說明 3 檔 risk profile 差異（CAGR/MDD ladder）
 

@@ -283,19 +283,32 @@ def regime_breakdown(mkt: pd.DataFrame, sims: dict[str, pd.DataFrame]) -> dict:
     regime_full = vix_lag_full.apply(lambda v: vix_regime(v) if pd.notna(v) else None)
     out = {}
     total_valid = regime_full.notna().sum()
+    spec_keys = list(sims.keys())
     for regime in ["low(<15)", "mid(15-20)", "high(>20)"]:
         mask = (regime_full == regime)
         pct = float(mask.sum() / total_valid) if total_valid else 0.0
         out[regime] = {"days": int(mask.sum()), "pct_of_total": pct, "specs": {}}
+        sub_by_spec = {}
         for spec, sim in sims.items():
-            # sim is reindexed on mkt.index, so mask aligns naturally
             sub = sim.loc[mask].dropna(subset=["spy_w", "risky_w"])
+            sub_by_spec[spec] = sub
             out[regime]["specs"][spec] = {
                 "spy_w_mean": float(sub["spy_w"].mean()) if len(sub) else None,
                 "spy_w_std": float(sub["spy_w"].std()) if len(sub) else None,
                 "risky_w_mean": float(sub["risky_w"].mean()) if len(sub) else None,
                 "risky_w_std": float(sub["risky_w"].std()) if len(sub) else None,
             }
+        pair_diffs = {}
+        for i, a in enumerate(spec_keys):
+            for b in spec_keys[i + 1:]:
+                merged = sub_by_spec[a][["risky_w"]].join(
+                    sub_by_spec[b][["risky_w"]], lsuffix="_a", rsuffix="_b", how="inner"
+                ).dropna()
+                if len(merged):
+                    pair_diffs[f"{a}_vs_{b}"] = float(
+                        (merged["risky_w_a"] - merged["risky_w_b"]).abs().mean()
+                    )
+        out[regime]["pairwise_risky_absdiff"] = pair_diffs
     return out
 
 
@@ -318,7 +331,12 @@ def weight_corr_matrix(sims: dict[str, pd.DataFrame]) -> dict:
 
 
 def regime_weight_spread(regime_data: dict) -> dict:
-    """Compute pairwise abs-diff of spy_w_mean within each regime."""
+    """Pairwise mean absolute difference of risky_w (primary) and spy_w (diagnostic).
+
+    risky_w_absdiff is the canonical homogeneity metric per audit definition
+    (mean over observations of |risky_w_a - risky_w_b|). spy_w mean-of-means
+    diff retained for backward-compat / asset-allocation diagnostic.
+    """
     out = {}
     for regime, info in regime_data.items():
         specs = info["specs"]
@@ -326,6 +344,9 @@ def regime_weight_spread(regime_data: dict) -> dict:
         diffs = {}
         for i, a in enumerate(keys):
             for b in keys[i + 1:]:
+                pair_abs = info.get("pairwise_risky_absdiff", {}).get(f"{a}_vs_{b}")
+                if pair_abs is not None:
+                    diffs[f"{a}_vs_{b}_risky_absdiff"] = float(pair_abs)
                 diffs[f"{a}_vs_{b}_spy_w_absdiff"] = abs(
                     specs[a]["spy_w_mean"] - specs[b]["spy_w_mean"]
                 )
@@ -426,20 +447,28 @@ def fig_stress_returns(mkt: pd.DataFrame, sims_current: dict, sims_proposed: dic
 # -----------------------------------------------------------------------------
 
 def audit_paper_trading(pt_df: pd.DataFrame) -> dict:
-    """Use real paper_trading weights (from daily_update.py) to confirm 同質化."""
+    """Use real paper_trading weights (from daily_update.py) to confirm 同質化.
+
+    Alignment: daily_update.py writes weights using the data_date market close
+    + same-day VIX as the signal, then applies them forward (paid out on
+    next session). For signal-regime audit ("when VIX was X, how did each
+    spec react?"), the canonical join is realized weight at data_date ↔ VIX
+    on the same data_date (no shift). Prior code used vix.shift(1), which
+    classified weights by the previous day's VIX → spurious extra separation
+    in the mid regime (K1573 Codex review issue 1, 2026-06-30).
+    """
     # Pivot to per-date weight matrix
     spy_piv = pt_df.pivot_table(index="data_date", columns="spec", values="spy", aggfunc="first")
     risky_piv = pt_df.pivot_table(index="data_date", columns="spec", values="risky", aggfunc="first")
-    # Need a VIX series aligned to paper_trading dates → recompute from market data
+    # VIX = signal VIX at data_date (no shift). Production spec.
     dm = DataManager()
     vix_raw = dm.get_price_data("^VIX", "2022-06-01", datetime.now().strftime("%Y-%m-%d"))["close"]
     vix_raw.index = pd.to_datetime(vix_raw.index)
-    vix_lag = vix_raw.shift(1)
-    vix_lag.name = "vix_lag"
-    aligned = risky_piv.join(vix_lag.to_frame(), how="left").dropna(subset=["vix_lag"])
-    aligned["regime"] = aligned["vix_lag"].apply(vix_regime)
-    spy_aligned = spy_piv.join(vix_lag.to_frame(), how="left").dropna(subset=["vix_lag"])
-    spy_aligned["regime"] = spy_aligned["vix_lag"].apply(vix_regime)
+    vix_signal = vix_raw.rename("vix_signal")
+    aligned = risky_piv.join(vix_signal.to_frame(), how="left").dropna(subset=["vix_signal"])
+    aligned["regime"] = aligned["vix_signal"].apply(vix_regime)
+    spy_aligned = spy_piv.join(vix_signal.to_frame(), how="left").dropna(subset=["vix_signal"])
+    spy_aligned["regime"] = spy_aligned["vix_signal"].apply(vix_regime)
 
     out = {"by_regime": {}}
     for regime in ["low(<15)", "mid(15-20)", "high(>20)"]:

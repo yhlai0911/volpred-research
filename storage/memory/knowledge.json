@@ -36845,5 +36845,18 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-06-30T01:06:02.189144"
+  },
+  {
+    "item_id": "3ca16d67",
+    "category": "strategy_lifecycle",
+    "content": "K1573 — VT 3-spec (保守/標準/積極) 差異化方案 audit + Codex review CONDITIONAL_PASS 82/100。\n\n# 結論\nCodex 抓出 2 個 MAJOR issue 已修：\n1. audit_paper_trading 用 vix.shift(1) join data_date 造成雙 lag（生產端是同日 signal VIX）→ 修正後 paper_trading mid regime (50.2% of days) standard-vs-aggressive risky absdiff 從報告 10.8pp 降到實際 **3.2pp**（老闆觀察更嚴重，根本同質化）。\n2. regime_weight_spread 用 spy_w mean-of-means 而非 risky_w pairwise abs diff over obs → 修正後 proposed mid 真實 risky absdiff 30/60/30pp（非 SPY-only 50/80/30pp）。\n\n# 數據（修正後）\n- 全期 2016-2026 Sharpe: conservative 0.940 / standard 0.896 / aggressive 0.860\n- Bootstrap 95% CI (block=20, n=500, seed=42): cons [0.36, 1.58] / std [0.31, 1.60] / agg [0.28, 1.54] 完全重疊 → Sharpe 統計上不可區別\n- Proposed mid pair risky absdiff: cons-std 29.8pp / cons-agg 60.0pp / std-agg 30.2pp 皆 ≥ 15pp differentiated target ✓\n- Stress (cumret): COVID 2020 cons +2.0% / std -5.9% / agg -5.7%; QT 2022 cons -4.8% / std -13.6% / agg -17.3%; carry 2024 全正\n\n# 上架 gate 狀態\n[x] lookahead-free verified at simulate_strategy:221 (vix.shift(1))\n[x] bootstrap stability + stress robustness PASS\n[x] Codex review CONDITIONAL_PASS（issues 已修並 re-run）\n[ ] 6m paper-trade shadow window\n[ ] frontend 明確 disclose CAGR/MDD ladder\n[ ] OOS PASS 後 hot-swap registry\n\n# Persona\nSharpe 統計上 indistinguishable → persona 賣 risk-return profile（vol/MDD/CAGR ladder），不是 Sharpe-rank。retail product line 設計正確。\n\n# Monetization\nVT 3 檔分流 → 不同 risk tolerance 用戶各匹配，aggressive (Sharpe 0.86 + CAGR 10.3%) 對高風險容忍用戶有更強付費誘因。\n\n# Reviewer\nCodex CLI 0.142.3 (gpt-5.4, ChatGPT auth, 2026-06-30 11:20 CST) | Score 82/100 | issue 1 + 2 已修 + re-run + README §4 已 sync。\n",
+    "evidence": [
+      "experiments/k1573_vt_3spec_audit/k1573_audit.py",
+      "experiments/k1573_vt_3spec_audit/k1573_results.json",
+      "experiments/k1573_vt_3spec_audit/README.md",
+      "/tmp/k1573_codex_review_output.log"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-06-30T11:19:34.963908"
   }
 ]
