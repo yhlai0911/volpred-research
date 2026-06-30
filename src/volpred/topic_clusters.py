@@ -134,6 +134,13 @@ def recent_cluster_counts(
     for item in feed:
         if not isinstance(item, dict):
             continue
+        # 2026-06-30: 排除每日操作型 fixture（audience="daily" = 每日策略建議 / 持倉比率），
+        # 它們是強制每日自動貼文、非 cap 要 pace 的 discretionary 編輯內容。
+        # 過去把 19 篇 daily fixture 全 classify 成 vix → 灌爆 vix cap（87 vs 50）→ 永久
+        # false-alarm 並遮蔽真正的編輯集中（spy 73/40=1.8x）。cap/cooldown gate 本就只擋
+        # general/research discretionary publish，count 也應同口徑只算 discretionary。
+        if (item.get("audience") or "") == "daily":
+            continue
         if item.get("status") not in statuses:
             continue
         ts = item.get("published_at") or item.get("created_at")

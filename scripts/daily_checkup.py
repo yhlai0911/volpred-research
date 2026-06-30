@@ -46,11 +46,19 @@ DATA_JOBS_EXPECTED_H = {
     "collect_tw": 30,              # 工作日 15:00
     "collect_us": 30,             # 週二-六 07:03（跳週一，故放寬）
     "fred_backfill_guard": 30,
-    "collect_twse_orderflow": 48,  # backfill 型；不該超過 2 天沒補
     "radar_strategy_snapshot": 30,
     "indicator_arena_daily": 30,
     "populate_events": 200,        # 週度
 }
+
+# Result-level 資料檔新鮮度：某些資料沒有獨立 cron log（是別的 job 的子步驟），
+# 改查實際落地的資料檔最新 mtime。weekend-aware → 窗口放寬到涵蓋 Fri→Mon gap。
+# (job_name, glob, expected_h, parent_job)
+DATA_FILE_JOBS = [
+    # TWSE order-flow (MI_5MINS) 由 collect_tw_data.py 第 4 步 --date today 收，
+    # 寫 data/intraday/twse_orderflow/，無獨立 log。80h 涵蓋週一早上(latest=週五15:00→~65h)。
+    ("twse_orderflow", "data/intraday/twse_orderflow/*.csv", 80, "collect_tw"),
+]
 
 _now = datetime.datetime.now()
 
@@ -81,6 +89,23 @@ def check_data_freshness() -> list[dict]:
                 "data_freshness", sev,
                 f"{job}: 已 {a:.0f}h 沒跑（預期 ≤{expected}h）—— 資料可能落後/漏",
                 recovery=f"uv run python scripts/{job}.py  # 或對應 wrapper",
+            ))
+    # result-level：查實際資料檔最新 mtime（無獨立 cron log 的子步驟型 job）
+    for job, pattern, expected, parent in DATA_FILE_JOBS:
+        files = glob.glob(str(ROOT / pattern))
+        if not files:
+            out.append(_finding("data_freshness", "warn",
+                                f"{job}: 資料目錄無檔（{pattern}）—— 從未收集？",
+                                recovery=f"uv run python scripts/{parent}_data.py"))
+            continue
+        newest = max(files, key=lambda p: os.path.getmtime(p))
+        a = _age_h(newest)
+        if a is not None and a > expected * 1.5:
+            sev = "critical" if a > expected * 3 else "warn"
+            out.append(_finding(
+                "data_freshness", sev,
+                f"{job}: 最新資料檔已 {a:.0f}h（預期 ≤{expected}h，由 {parent} 子步驟收）—— 資料落後",
+                recovery=f"uv run python scripts/collect_twse_orderflow.py --date today  # 或回補 --backfill",
             ))
     return out
 
