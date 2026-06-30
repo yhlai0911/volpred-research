@@ -49,7 +49,11 @@ fi
 # and a crashing daily_update (e.g. 2026-05-19 JSONDecodeError) alerted
 # nobody. NOT `exec` — the shell must survive to write the banner.
 _start=$(date +%s)
-/opt/homebrew/bin/uv run python scripts/daily_update.py
+# 2026-06-30: hard watchdog timeout (600s) — daily_update 結尾 sync 曾在 Supabase/Mirror
+# transient SSL EOF 下卡 poll 無限 hang 並持有共用 lock /tmp/volpred_daily_update.lock，
+# 理論上會 cascade 擋下一班。perl alarm 在 600s（正常 ~2min 的 5x）強制 SIGALRM 殺掉，
+# 之後 trap EXIT rmdir 釋放 lock，杜絕 lock cascade。見 docs/error_log.md 2026-06-30。
+/usr/bin/perl -e 'alarm shift; exec @ARGV' 600 /opt/homebrew/bin/uv run python scripts/daily_update.py
 _ec=$?
 echo "=== [daily_update] exit ${_ec} at $(date '+%Y-%m-%dT%H:%M:%S%z') (duration=$(($(date +%s) - _start))s) ==="
 exit ${_ec}

@@ -34,7 +34,10 @@ fi
 
 _start=$(date +%s)
 echo "=== [daily_update_intraday] start at $(date '+%Y-%m-%dT%H:%M:%S%z') ==="
-/opt/homebrew/bin/uv run python scripts/daily_update.py
+# 2026-06-30: hard watchdog timeout (600s) — 結尾 sync 在 transient SSL EOF 下曾卡 poll
+# 無限 hang 持有共用 lock。perl alarm 600s（正常 ~2min 的 5x）SIGALRM 殺掉 → trap EXIT
+# 釋放 lock，杜絕 lock cascade（intraday hang 擋下一班 morning）。見 error_log 2026-06-30。
+/usr/bin/perl -e 'alarm shift; exec @ARGV' 600 /opt/homebrew/bin/uv run python scripts/daily_update.py
 _ec=$?
 echo "=== [daily_update_intraday] exit ${_ec} at $(date '+%Y-%m-%dT%H:%M:%S%z') (duration=$(($(date +%s) - _start))s) ==="
 exit ${_ec}
