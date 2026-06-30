@@ -40746,5 +40746,78 @@
     "blocked_reason": "awaiting_event_window",
     "blocked_until": "2026-07-30T00:00:00+00:00",
     "blocked_note": "Monthly cadence — auto-unblock 2026-07-30"
+  },
+  {
+    "id": "paper_review_mile_9839822d",
+    "title": "Paper review (Codex 24h-rule): 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_9839822d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_9839822d",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-30T13:07:58+00:00"
+  },
+  {
+    "id": "paper_review_mile_68285aa0",
+    "title": "Paper review (Codex 24h-rule): 國防預算翻倍喊得這麼大聲，國防 ETF 卻沒按劇本震盪",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_68285aa0 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_68285aa0",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-30T13:07:58+00:00"
+  },
+  {
+    "id": "paper_review_mile_5399bf01",
+    "title": "Paper review (Codex 24h-rule): 你買 MTUM 真的買到 Momentum 嗎？7 檔因子 ETF 對紙上學術因子的 13 年體檢",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_5399bf01 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_5399bf01",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-06-30T13:07:58+00:00",
+    "claimed_by": "hourly-21",
+    "claimed_at": "2026-06-30T13:10:56.827426+00:00",
+    "claim_session_id": "a12b6a7edd9f",
+    "started_at": "2026-06-30T13:11:01.837274+00:00",
+    "completed_at": "2026-06-30T13:12:44.192588+00:00",
+    "result": "PASS (article-level 24h-rule review by main-thread, Codex primary-path 已在 K1574 experiment-level 跑過 CONDITIONAL_PASS); article narrative 數字/方法/結論強度全與 K1574 codex_review.md 對齊; 無 lookahead 風險 (ex-post attribution); 無 DM/Harvey overclaim (文章明示 borderline null finding); 1 LOW informational, 不阻塞. Review note: experiments/K1574/article_review_mile_5399bf01.md"
+  },
+  {
+    "id": "platform_ops_enforce_lazypack_in_publish_pipeline",
+    "title": "Lazypack enforce in publisher pipeline + backfill general audience articles missing 懶人包圖",
+    "description": "Boss 2026-06-30 hard rule: 所有 general-audience reader-facing articles 必須附懶人包圖組 (concept/method/results panels). 實測近 12 篇 general articles 只 1 篇有 = 12% coverage, content_quality.py 已加 lazypack_gap detector. 缺生成 + enforce + 回補. Scope: (a) Publisher pipeline hard gate: append_to_feed 前若 audience=general 且 details.lazypack_panels 缺/空 → block publish 並要求生成 (走 codex-exec + 既有 reusable replace tool, 不再用 backfill_lazypack_sections.py DEPRECATED prose-dump 腳本); (b) Backfill: 掃 storage/reports/feed.json 近 30 天 audience=general 缺 lazypack 的 articles (估 ~10 篇), 逐篇 codex-exec 重做 (參考最近 commits 7d7d792af/ae24a0311/c5933ef8e pattern 一次一 mile); (c) 圖必走 NotebookLM 或 codex-exec render script (per .claude/skills/lazypack-infographic/SKILL.md — primary = codex-exec, NotebookLM = fallback); (d) Test gate: 加 1 個 publisher pipeline test 確認 missing lazypack on general → SystemExit / explicit error. 預估 ~3-4 hours total (pipeline 1h + 10 篇 backfill 各 ~15 min). 優先給 codex-cli (擅長 render script 寫作+lazypack tool reuse). 需相對乾淨 context, 避免堆在 long session 草率做.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-06-30T13:11:00.000000+00:00",
+    "source": "hourly-21_queued_per_keep_block",
+    "tags": [
+      "lazypack",
+      "publisher",
+      "content_quality",
+      "boss_directive",
+      "general_audience"
+    ],
+    "preferred_agent": "codex-cli",
+    "claimed_by": null,
+    "claimed_at": null,
+    "started_at": null,
+    "completed_at": null
   }
 ]
