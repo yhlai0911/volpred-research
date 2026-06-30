@@ -1101,7 +1101,8 @@ def _parse_publishing_freshness_state(storage_dir: str, now: datetime) -> dict[s
     if isinstance(settings, dict):
         try:
             interval_min = int(settings.get("interval_minutes") or 360)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as exc:
+            warn("publishing_freshness", "bad interval_minutes; using 360", err=str(exc))
             interval_min = 360
     threshold_hours = round(max(5, interval_min) / 60.0 + PUBLISH_FRESHNESS_GRACE_HOURS, 1)
     breached = bool(
