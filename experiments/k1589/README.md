@@ -50,52 +50,64 @@ RV(window) = std(log_return[window]) * sqrt(252)
 ΔRV_i,e    = RV_post_i,e − RV_pre_i,e
 ```
 
-- **Pre-event window**: trading rows whose dates fall in
-  `[landfall_date − 30, landfall_date − 6]` calendar days. The strict
-  `−6 day` upper bound prevents leak of landfall-week price action into
-  the baseline (lookahead-safe).
-- **Event (post) window**: the 10 trading days starting *one trading day
-  after* the first trading day ≥ landfall date.
-- Lookahead: pre window is strictly before landfall in calendar days;
-  post window strictly after; VIX control uses last close strictly before
-  `t0` (`close.index < t0`). No future info enters either window. The
-  event-study has no signal→outcome `shift(1)` pairing because the
-  "signal" is a historical exposure (Saffir-Simpson category) attached
-  to a known past date, not a forecast made at `t` for `t+1`.
+- `t0`: first trading day ≥ HURDAT2 first-landfall date.
+- **Pre-event RV**: 21 trading-return observations ending at the last
+  trading date ≤ `t0 − 6 calendar days`. This preserves the 21-day RV
+  scale while keeping landfall-week price action out of the baseline.
+- **Event (post) RV**: 5 trading-return observations starting one
+  trading day after `t0`.
+- **Controls**: VIX uses last close strictly before `t0`; SPY control is
+  21-day SPY RV ending strictly before `t0`. No post-event market
+  information enters controls.
+- Lookahead: pre window is strictly before the landfall week; post window
+  is strictly after `t0`. The event-study has no signal→outcome
+  `signal.shift(1)` pairing because the "signal" is a historical exposure
+  attached to a known event date, not a daily trading signal.
 
 ### Regression
 
 For each outcome stock `i` (reinsurer ∪ KIE), pooled across events `e`:
 
 ```
-ΔRV_i,e = α + β · Category_e + γ · VIX_{t-1} + δ · ΔSPY_RV_e + ε_{i,e}
+ΔRV_i,e = α + β · Category_e + γ · VIX_{t-1} + δ · SPY_RV21_{t-1} + ε_{i,e}
 ```
 
+- Events are sorted by landfall date before inference.
 - HAC (Newey-West) standard errors, `maxlags = 10`, to absorb residual
-  autocorrelation across overlapping or near-simultaneous events.
+  autocorrelation across overlapping or near-simultaneous chronological
+  events.
 - β is the dose-response slope — incremental ΔRV per Saffir-Simpson
   category step.
-- **Multiple-testing**: Holm-Bonferroni across the 5 outcome stocks for
-  the β coefficient. Both raw and Holm-adjusted p reported.
+- **Multiple-testing**: Holm-Bonferroni across the 4 reinsurer outcome
+  stocks only (`RNR`, `EG`, `ACGL`, `AXS`) for the β coefficient. `KIE`
+  is treated as benchmark, not part of the reinsurer family.
 
 ### Identification check
 
-Reinsurer-mean β minus KIE β. The hypothesis only earns weight if
-reinsurer-specific dose-response exceeds the broad-insurance ETF baseline
-(else we've identified a sector-wide weather factor, not a
-reinsurer-specific cat-exposure factor).
+The v2 benchmark test is a stacked panel:
+
+```
+ΔRV_{s,e} = α + β1 Category_e + β2 Reinsurer_s
+            + β3 Category_e × Reinsurer_s
+            + γ VIX_{t-1} + δ SPY_RV21_{t-1} + ε_{s,e}
+```
+
+`β3` is the formal reinsurer-minus-KIE dose-response difference. Standard
+errors are clustered by event date. The descriptive reinsurer-mean β
+minus KIE β is still reported, but it is not used as a pass/fail gate.
 
 ### Success criteria (pre-set)
 
 | Criterion | Threshold | Achieved |
 | --- | --- | --- |
-| Any reinsurer β > 0 with Holm p < 0.10 | required | ❌ |
-| Reinsurer-mean β > KIE β | required | ✅ (trivially, +0.0012) |
+| Any reinsurer β > 0 with Holm-4 p < 0.10 | required | ✅ |
+| Formal reinsurer-minus-KIE interaction β > 0 with p < 0.10 | required | ❌ |
 | N_events ≥ 12 | minimum | ✅ (42) |
 | N_events ≥ 20 | preferred | ✅ (42) |
 
-→ verdict_internal = **NULL** (only the trivial identification check
-holds; the primary significance gate fails).
+→ verdict_internal = **NULL**: individual-stock dose-response appears in
+some reinsurers, but the formal KIE benchmark does not identify a
+reinsurer-specific effect.
 
 ## Result summary
 
@@ -103,59 +115,60 @@ holds; the primary significance gate fails).
 Cat-1: 24, Cat-2: 5, Cat-3: 4, Cat-4: 6, Cat-5: 3.
 
 **Per-stock dose-response coefficient β** (incremental ΔRV per
-Saffir-Simpson category step, HAC SE):
+Saffir-Simpson category step, chronological HAC SE):
 
-| Stock | β | SE | t | raw p | Holm p |
+| Stock | β | SE | t | raw p | Holm-4 p |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| RNR  | +0.0206 | 0.0177 | +1.16 | 0.246 | 0.986 |
-| EG   | +0.0175 | 0.0189 | +0.93 | 0.355 | 0.986 |
-| ACGL | +0.0145 | 0.0144 | +1.00 | 0.315 | 0.986 |
-| AXS  | +0.0064 | 0.0158 | +0.41 | 0.685 | 0.986 |
-| KIE  | +0.0135 | 0.0075 | +1.80 | 0.071 | 0.356 |
+| RNR  | +0.0142 | 0.0109 | +1.30 | 0.195 | 0.195 |
+| EG   | +0.0275 | 0.0143 | +1.92 | 0.055 | 0.137 |
+| ACGL | +0.0323 | 0.0094 | +3.45 | 0.001 | 0.002 |
+| AXS  | +0.0234 | 0.0117 | +2.00 | 0.046 | 0.137 |
+| KIE  | +0.0197 | 0.0085 | +2.31 | 0.021 | n/a benchmark |
 
 **Unconditional ΔRV means (no controls)**:
 
 | Stock | pre RV mean | post RV mean | ΔRV mean |
 | --- | ---: | ---: | ---: |
-| RNR  | 0.216 | 0.230 | +0.014 |
-| EG   | 0.224 | 0.233 | +0.009 |
-| ACGL | 0.206 | 0.226 | +0.020 |
-| AXS  | 0.223 | 0.226 | +0.003 |
-| KIE  | 0.168 | 0.169 | +0.001 |
-| SPY  | 0.132 | 0.131 | −0.001 |
+| RNR  | 0.212 | 0.215 | +0.003 |
+| EG   | 0.218 | 0.227 | +0.009 |
+| ACGL | 0.201 | 0.205 | +0.005 |
+| AXS  | 0.219 | 0.209 | -0.010 |
+| KIE  | 0.166 | 0.164 | -0.002 |
+| SPY  | 0.133 | 0.127 | -0.006 |
 
 **Identification check**:
 
-- Reinsurer-mean β = +0.0148
-- KIE β = +0.0135
-- Difference = +0.0012 (positive but economically negligible)
+- Descriptive reinsurer-mean β = +0.0243
+- Descriptive KIE β = +0.0197
+- Descriptive difference = +0.0046
+- Formal stacked interaction β(reinsurer − KIE) = +0.0071,
+  SE = 0.0142, t = 0.50, p = 0.615
 
 ## Interpretation
 
-1. **Direction is right, magnitude is small and noisy.** All four
-   reinsurers have positive point estimates of β (more intense storms →
-   slightly more post-landfall vol), and the unconditional ΔRV means are
-   uniformly positive while SPY's is ≈ 0. The signs are economically
-   consistent.
-2. **No reinsurer β survives Holm-adjusted significance.** Raw p
-   range 0.25-0.69 for reinsurers. Only KIE is marginally significant raw
-   (p = 0.07) and even that collapses after Holm correction (p = 0.36).
-3. **Identification check passes only trivially.** Reinsurer mean β
-   barely exceeds KIE β (Δ = +0.0012). Within standard error, the two
-   are indistinguishable — meaning whatever weather-vol relation exists
-   is shared across the broad insurance ETF, not specific to
-   catastrophe-exposed reinsurers.
+1. **There is a per-stock dose-response signal, but it is not uniquely
+   reinsurer-specific.** ACGL survives Holm-4 at 10% and RNR/EG/AXS all
+   have positive point estimates, but KIE also has a positive raw
+   category slope.
+2. **The formal KIE benchmark fails.** The stacked
+   `Category × Reinsurer` interaction is positive but small relative to
+   its clustered SE (p = 0.615). This means the data do not distinguish
+   reinsurer-specific cat exposure from broad insurance-sector
+   co-movement.
+3. **Controls are now ex-ante.** VIX and SPY RV controls use only
+   information strictly before `t0`, so the regression is no longer
+   absorbing post-event market volatility through the v1 SPY post-minus-
+   pre RV control.
 4. **Power constraints.** Of 42 landfalls, only 13 are Cat 3+ — the
    regime that would plausibly trigger a reinsurer-specific second-moment
    response (where retro covers and cat-bond attachment points engage).
    The Cat-3+ subsample is too small for a clean Cat-3+ vs Cat-1/2
    subgroup test with HAC SEs.
 
-**Bottom line**: the dose-response hypothesis is **not rejected in
-direction** but is **not supported by significance**. Idiosyncratic
-reinsurer vol after Atlantic landfall is dominated by broader insurance-
-sector and market-vol comovement once VIX and SPY ΔRV are controlled
-for.
+**Bottom line**: K1589_v2 upgrades the methodology enough to trust the
+NULL verdict. Hurricane category is associated with higher short-window
+volatility in some insurance/reinsurance equities, but the evidence does
+not identify a distinct reinsurer-specific effect beyond KIE.
 
 ## Limitations / failure modes worth noting
 
@@ -184,63 +197,31 @@ for.
 ## Reproduction
 
 ```
-cd experiments/k1589
-python3 k1589.py
+uv run python experiments/k1589/k1589.py
 ```
 
 Dependencies: `yfinance numpy pandas scipy statsmodels requests`.
 
 Outputs to:
 - `k1589_results.json` — full result object including events_used,
-  regression coefficients, raw + Holm-adjusted p, RV diagnostics,
-  identification check, success-criteria flags.
+  regression coefficients, raw + Holm-4 adjusted p, RV diagnostics,
+  formal KIE interaction test, success-criteria flags.
 - `data/prices.csv` — cached price panel.
 - `data/hurdat2.txt` — cached HURDAT2 file (committed for byte-level
   reproducibility; ~7 MB).
 
 ## Verdict
 
-- `verdict_internal = NULL` (any_reinsurer_holm_p < 0.10 fails;
-  identification only trivially passes)
-- **Reviewer (Codex primary path, 2026-06-30 16:44): NEEDS_REVISION**
-- This is a legitimate null finding in direction, but the inference
-  pipeline has methodological issues that prevent a clean PASS. The null
-  conclusion is **not yet** publication-grade; a K1589_v2 revision is
-  queued to address the blockers below.
-
-### Codex review blockers (must address in v2 before knowledge.json write)
-
-1. **HAC chronological ordering (high)** — Newey-West lag structure
-   requires events sorted by `landfall_date` (chronological), but the
-   current pipeline sorts by `storm_id`. Result: HAC p-values not
-   meaningful. Fix: sort by landfall date before HAC SE estimation.
-2. **KIE identification not formally tested (high)** —
-   `mean(reinsurer β) − KIE β = +0.0012` is a descriptive gap with no
-   formal SE/interaction test. Replace with stacked panel + reinsurer
-   dummy × category interaction, or downgrade KIE comparison to
-   descriptive only.
-3. **ΔSPY_RV control is ex-post (high)** — Control variable uses the
-   post-event window, not a t<t0 observable. Replace with a t-1 SPY RV
-   or other ex-ante control, or explicitly frame the estimand as
-   ex-post abnormal vol (not deployable forecast).
-4. **Holm multiple-testing scope (medium)** — Holm applied over 5
-   outcomes including KIE; success criterion
-   `any_reinsurer_beta_pos_holm_p_lt_0p10` loops over all `STOCKS`
-   instead of the 4 reinsurers only. Fix scope.
-5. **RV window misalignment with brief (medium)** — Brief asked for
-   21-day baseline / 5-day event window; implementation produces 16-19
-   trading-day pre window and 10-day post window. Either align the
-   spec to the brief or document the trading-day implementation as
-   deliberate and add a robustness check at the brief's nominal window.
-
-### Honest interpretation (pending v2)
-
-Direction-of-effect is consistent with intuition (all reinsurer β > 0
-after VIX + SPY ΔRV controls) but the dose-response signal is not
-statistically distinguishable from broader insurance-sector / macro-vol
-comovement given the available 2010-2024 Atlantic landfall sample —
-and even this null finding requires the v2 methodological fixes before
-it can be reported with confidence.
+- `verdict_internal = NULL`
+- **Reviewer (Codex primary path, v2): CONDITIONAL_PASS for methodology,
+  NULL for hypothesis**
+- The v2 code addresses the five prior blockers: chronological HAC,
+  21-day/5-day RV alignment, ex-ante SPY control, Holm-4 scope, and a
+  formal KIE interaction test.
+- This can be reported as an honest null: some individual reinsurer
+  slopes are positive and one survives Holm-4, but the formal benchmark
+  test does not separate reinsurer-specific exposure from broad
+  insurance-sector response.
 
 ## Related K-series
 

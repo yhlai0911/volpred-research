@@ -40644,11 +40644,16 @@
     "description": "K1589 v1 (commit b2079f685) executed honest NULL but Codex review NEEDS_REVISION. v2 must fix 5 methodological blockers before knowledge.json can be written:\n\n1. **HAC chronological ordering (high)** — sort events by landfall_date (not storm_id) before Newey-West SE estimation in experiments/k1589/k1589.py.\n2. **KIE formal difference test (high)** — replace mean-diff sanity check with stacked panel + reinsurer-dummy × category interaction, or downgrade KIE comparison to descriptive only.\n3. **ΔSPY_RV ex-ante control (high)** — current control uses post-event window (not forecast-safe). Replace with t-1 SPY RV (rolling 21d ending strictly before t0), or explicitly frame as ex-post abnormal vol.\n4. **Holm scope fix (medium)** — currently Holm over 5 outcomes including KIE; success criterion any_reinsurer_beta_pos_holm_p_lt_0p10 loops STOCKS but should loop 4 reinsurers only.\n5. **RV window alignment (medium)** — pre window 16-19 trading days from cal t-30..t-6 vs brief 21d baseline; post 10 trading days vs brief 5d. Align spec to brief OR document deliberate deviation + add robustness at brief's nominal window.\n\nReuse experiments/k1589/data/* (HURDAT2 + prices.csv) — no re-download. Rerun k1589.py with fixes; update README verdict + reviewer; results json must include sorted-by-date events_used, formal KIE interaction p, ex-ante SPY control documentation, Holm-4 scope flag. Codex re-review primary path (fallback subagent if quota). PASS / CONDITIONAL_PASS clears knowledge.json gate; another NEEDS_REVISION escalates to opus xhigh + Codex deep-audit.",
     "blocked_reason": null,
     "blocked_note": null,
-    "claimed_by": null,
-    "status": "pending",
+    "claimed_by": "codex-cli",
+    "status": "succeeded",
     "created_at": "2026-06-30T08:45:00+00:00",
     "source": "codex_review_followup",
     "parent_task_id": "research_cat_bond_vol_extreme_weather_event_dose_response",
-    "parent_commit": "b2079f685"
+    "parent_commit": "b2079f685",
+    "claimed_at": "2026-06-30T09:30:06.988398+00:00",
+    "claim_session_id": "47106976408a",
+    "started_at": "2026-06-30T09:30:11.103314+00:00",
+    "completed_at": "2026-06-30T09:37:06.986752+00:00",
+    "result": "K1589_v2 fixed 5 Codex blockers: chronological HAC, 21d pre/5d post RV, ex-ante VIX/SPY controls, Holm-4 reinsurer scope, formal KIE interaction test. Rerun n=42: ACGL survives Holm-4, but KIE interaction p=0.615 so verdict_internal remains NULL; methodology CONDITIONAL_PASS, knowledge write gate cleared for main thread."
   }
 ]

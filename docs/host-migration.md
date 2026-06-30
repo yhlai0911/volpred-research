@@ -12,15 +12,17 @@
 
 **結論**：可以換機，但 C 層必須手動處理 —— 主要是 **secrets**、**user-level `~/.claude`（含 100 個 memory 檔 + global CLAUDE.md + 6 user skills）**、**data/intraday 948MB**、**LaunchAgents/crontab**。
 
-## 1. 取得 A + B（git）
+## 1. 一鍵 bootstrap（boss 要的「clone → 填 env → 運作」路徑）
 
 ```bash
-git clone https://github.com/yhlai0911/volpred-research.git
-cd volpred-research
-git clone https://github.com/yhlai0911/volpred-v2.git frontend-v2-fix   # 前端獨立 repo
-uv sync                                    # Python deps（重建 .venv）
-cd frontend-v2-fix && npm install && cd .. # 前端 deps（重建 node_modules）
+git clone https://github.com/yhlai0911/volpred-research.git && cd volpred-research
+cp .env.example .env        # 依 .env.example 內註解拆出 .env / .env.local / frontend-v2-fix/.env.local 並填真值
+bash scripts/bootstrap_new_host.sh
 ```
+`bootstrap_new_host.sh` 自動：檢查 env、`uv sync`、clone 前端 volpred-v2 + npm install、
+還原 `~/.claude`、cp cron wrapper、rebuild 知識索引、跑 daily-checkup 驗證。
+**仍須手動**（macOS 限制）：填 `.env*` 真值、跑 `install_launchd_jobs.sh`+`install_host_crontab.sh`
+（會碰 TCC 權限提示，須給 Full Disk Access）、換 user 名要改硬編路徑。
 
 ## 2. Secrets（gitignore，**無真值在 git**）
 

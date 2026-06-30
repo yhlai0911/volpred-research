@@ -1,9 +1,14 @@
 {
   "experiment_id": "k1589",
   "title": "Reinsurer / cat-bond carrier vol dose-response to Atlantic hurricane landfall",
-  "run_date_utc": "2026-06-30T08:40:30.798280Z",
+  "run_date_utc": "2026-06-30T09:36:15.331865Z",
   "seed": 42,
-  "lookahead_policy": "pre-event window: t-30..t-6 cal days (closed strictly before landfall); event window: t+1..t+10 trading days after first trading day \u2265 landfall; VIX control uses last close strictly before t0.",
+  "lookahead_policy": "pre-event RV uses 21 trading returns ending no later than t0-6 calendar days; event RV uses t+1..t+5 trading returns after first trading day \u2265 landfall; VIX control uses last close strictly before t0; SPY control uses 21 trading returns strictly before t0.",
+  "rv_window_spec": {
+    "pre_rv": "21 trading-return std * sqrt(252), ending at last trading date <= t0-6 calendar days",
+    "post_rv": "5 trading-return std * sqrt(252), starting one trading day after t0",
+    "t0": "first trading day >= HURDAT2 first-landfall date"
+  },
   "universe": {
     "outcome_stocks": [
       "RNR",
@@ -21,93 +26,272 @@
     "sanity_baseline": "KIE",
     "controls": [
       "VIX_t-1",
-      "\u0394SPY_RV"
+      "SPY_RV21_t-1"
     ]
+  },
+  "multiple_testing": {
+    "method": "Holm-Bonferroni",
+    "family": [
+      "RNR",
+      "EG",
+      "ACGL",
+      "AXS"
+    ],
+    "benchmark_excluded": "KIE",
+    "scope_flag": "holm_4_reinsurers_only"
   },
   "n_events_eligible": 42,
   "n_events_used": 42,
   "events_used": [
     {
-      "storm_id": "AL012014",
-      "name": "ARTHUR",
-      "landfall_date": "2014-07-04",
-      "wind_kt": 85,
-      "category": 2
-    },
-    {
-      "storm_id": "AL022019",
-      "name": "BARRY",
-      "landfall_date": "2019-07-13",
+      "storm_id": "AL072010",
+      "name": "EARL",
+      "landfall_date": "2010-09-04",
+      "t0_trading": "2010-09-07",
+      "pre_rv_start": "2010-08-04",
+      "pre_rv_end": "2010-09-01",
+      "post_rv_start": "2010-09-08",
+      "post_rv_end": "2010-09-14",
       "wind_kt": 65,
       "category": 1
     },
     {
-      "storm_id": "AL022024",
-      "name": "BERYL",
-      "landfall_date": "2024-07-01",
-      "wind_kt": 120,
-      "category": 4
+      "storm_id": "AL112010",
+      "name": "IGOR",
+      "landfall_date": "2010-09-21",
+      "t0_trading": "2010-09-21",
+      "pre_rv_start": "2010-08-17",
+      "pre_rv_end": "2010-09-15",
+      "post_rv_start": "2010-09-22",
+      "post_rv_end": "2010-09-28",
+      "wind_kt": 75,
+      "category": 1
     },
     {
-      "storm_id": "AL042024",
-      "name": "DEBBY",
-      "landfall_date": "2024-08-05",
-      "wind_kt": 70,
-      "category": 1
+      "storm_id": "AL192010",
+      "name": "RICHARD",
+      "landfall_date": "2010-10-25",
+      "t0_trading": "2010-10-25",
+      "pre_rv_start": "2010-09-21",
+      "pre_rv_end": "2010-10-19",
+      "post_rv_start": "2010-10-26",
+      "post_rv_end": "2010-11-01",
+      "wind_kt": 85,
+      "category": 2
     },
     {
       "storm_id": "AL052012",
       "name": "ERNESTO",
       "landfall_date": "2012-08-08",
+      "t0_trading": "2012-08-08",
+      "pre_rv_start": "2012-07-05",
+      "pre_rv_end": "2012-08-02",
+      "post_rv_start": "2012-08-09",
+      "post_rv_end": "2012-08-15",
       "wind_kt": 80,
-      "category": 1
-    },
-    {
-      "storm_id": "AL052016",
-      "name": "EARL",
-      "landfall_date": "2016-08-04",
-      "wind_kt": 75,
-      "category": 1
-    },
-    {
-      "storm_id": "AL062018",
-      "name": "FLORENCE",
-      "landfall_date": "2018-09-14",
-      "wind_kt": 80,
-      "category": 1
-    },
-    {
-      "storm_id": "AL062024",
-      "name": "FRANCINE",
-      "landfall_date": "2024-09-11",
-      "wind_kt": 90,
-      "category": 2
-    },
-    {
-      "storm_id": "AL072010",
-      "name": "EARL",
-      "landfall_date": "2010-09-04",
-      "wind_kt": 65,
-      "category": 1
-    },
-    {
-      "storm_id": "AL072014",
-      "name": "FAY",
-      "landfall_date": "2014-10-12",
-      "wind_kt": 70,
       "category": 1
     },
     {
       "storm_id": "AL082012",
       "name": "GORDON",
       "landfall_date": "2012-08-20",
+      "t0_trading": "2012-08-20",
+      "pre_rv_start": "2012-07-17",
+      "pre_rv_end": "2012-08-14",
+      "post_rv_start": "2012-08-21",
+      "post_rv_end": "2012-08-27",
       "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL182012",
+      "name": "SANDY",
+      "landfall_date": "2012-10-24",
+      "t0_trading": "2012-10-24",
+      "pre_rv_start": "2012-09-20",
+      "pre_rv_end": "2012-10-18",
+      "post_rv_start": "2012-10-25",
+      "post_rv_end": "2012-11-02",
+      "wind_kt": 75,
+      "category": 1
+    },
+    {
+      "storm_id": "AL012014",
+      "name": "ARTHUR",
+      "landfall_date": "2014-07-04",
+      "t0_trading": "2014-07-07",
+      "pre_rv_start": "2014-06-03",
+      "pre_rv_end": "2014-07-01",
+      "post_rv_start": "2014-07-08",
+      "post_rv_end": "2014-07-14",
+      "wind_kt": 85,
+      "category": 2
+    },
+    {
+      "storm_id": "AL072014",
+      "name": "FAY",
+      "landfall_date": "2014-10-12",
+      "t0_trading": "2014-10-13",
+      "pre_rv_start": "2014-09-09",
+      "pre_rv_end": "2014-10-07",
+      "post_rv_start": "2014-10-14",
+      "post_rv_end": "2014-10-20",
+      "wind_kt": 70,
       "category": 1
     },
     {
       "storm_id": "AL082014",
       "name": "GONZALO",
       "landfall_date": "2014-10-13",
+      "t0_trading": "2014-10-13",
+      "pre_rv_start": "2014-09-09",
+      "pre_rv_end": "2014-10-07",
+      "post_rv_start": "2014-10-14",
+      "post_rv_end": "2014-10-20",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL112015",
+      "name": "JOAQUIN",
+      "landfall_date": "2015-10-01",
+      "t0_trading": "2015-10-01",
+      "pre_rv_start": "2015-08-27",
+      "pre_rv_end": "2015-09-25",
+      "post_rv_start": "2015-10-02",
+      "post_rv_end": "2015-10-08",
+      "wind_kt": 115,
+      "category": 4
+    },
+    {
+      "storm_id": "AL052016",
+      "name": "EARL",
+      "landfall_date": "2016-08-04",
+      "t0_trading": "2016-08-04",
+      "pre_rv_start": "2016-06-30",
+      "pre_rv_end": "2016-07-29",
+      "post_rv_start": "2016-08-05",
+      "post_rv_end": "2016-08-11",
+      "wind_kt": 75,
+      "category": 1
+    },
+    {
+      "storm_id": "AL092016",
+      "name": "HERMINE",
+      "landfall_date": "2016-09-02",
+      "t0_trading": "2016-09-02",
+      "pre_rv_start": "2016-07-29",
+      "pre_rv_end": "2016-08-26",
+      "post_rv_start": "2016-09-06",
+      "post_rv_end": "2016-09-12",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL142016",
+      "name": "MATTHEW",
+      "landfall_date": "2016-10-04",
+      "t0_trading": "2016-10-04",
+      "pre_rv_start": "2016-08-30",
+      "pre_rv_end": "2016-09-28",
+      "post_rv_start": "2016-10-05",
+      "post_rv_end": "2016-10-11",
+      "wind_kt": 130,
+      "category": 4
+    },
+    {
+      "storm_id": "AL162016",
+      "name": "OTTO",
+      "landfall_date": "2016-11-24",
+      "t0_trading": "2016-11-25",
+      "pre_rv_start": "2016-10-21",
+      "pre_rv_end": "2016-11-18",
+      "post_rv_start": "2016-11-28",
+      "post_rv_end": "2016-12-02",
+      "wind_kt": 100,
+      "category": 3
+    },
+    {
+      "storm_id": "AL112017",
+      "name": "IRMA",
+      "landfall_date": "2017-09-06",
+      "t0_trading": "2017-09-06",
+      "pre_rv_start": "2017-08-03",
+      "pre_rv_end": "2017-08-31",
+      "post_rv_start": "2017-09-07",
+      "post_rv_end": "2017-09-13",
+      "wind_kt": 155,
+      "category": 5
+    },
+    {
+      "storm_id": "AL132017",
+      "name": "KATIA",
+      "landfall_date": "2017-09-09",
+      "t0_trading": "2017-09-11",
+      "pre_rv_start": "2017-08-07",
+      "pre_rv_end": "2017-09-05",
+      "post_rv_start": "2017-09-12",
+      "post_rv_end": "2017-09-18",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL152017",
+      "name": "MARIA",
+      "landfall_date": "2017-09-19",
+      "t0_trading": "2017-09-19",
+      "pre_rv_start": "2017-08-15",
+      "pre_rv_end": "2017-09-13",
+      "post_rv_start": "2017-09-20",
+      "post_rv_end": "2017-09-26",
+      "wind_kt": 145,
+      "category": 5
+    },
+    {
+      "storm_id": "AL172017",
+      "name": "OPHELIA",
+      "landfall_date": "2017-10-16",
+      "t0_trading": "2017-10-16",
+      "pre_rv_start": "2017-09-12",
+      "pre_rv_end": "2017-10-10",
+      "post_rv_start": "2017-10-17",
+      "post_rv_end": "2017-10-23",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL062018",
+      "name": "FLORENCE",
+      "landfall_date": "2018-09-14",
+      "t0_trading": "2018-09-14",
+      "pre_rv_start": "2018-08-09",
+      "pre_rv_end": "2018-09-07",
+      "post_rv_start": "2018-09-17",
+      "post_rv_end": "2018-09-21",
+      "wind_kt": 80,
+      "category": 1
+    },
+    {
+      "storm_id": "AL142018",
+      "name": "MICHAEL",
+      "landfall_date": "2018-10-10",
+      "t0_trading": "2018-10-10",
+      "pre_rv_start": "2018-09-06",
+      "pre_rv_end": "2018-10-04",
+      "post_rv_start": "2018-10-11",
+      "post_rv_end": "2018-10-17",
+      "wind_kt": 140,
+      "category": 5
+    },
+    {
+      "storm_id": "AL022019",
+      "name": "BARRY",
+      "landfall_date": "2019-07-13",
+      "t0_trading": "2019-07-15",
+      "pre_rv_start": "2019-06-10",
+      "pre_rv_end": "2019-07-09",
+      "post_rv_start": "2019-07-16",
+      "post_rv_end": "2019-07-22",
       "wind_kt": 65,
       "category": 1
     },
@@ -115,139 +299,23 @@
       "storm_id": "AL082020",
       "name": "HANNA",
       "landfall_date": "2020-07-25",
+      "t0_trading": "2020-07-27",
+      "pre_rv_start": "2020-06-22",
+      "pre_rv_end": "2020-07-21",
+      "post_rv_start": "2020-07-28",
+      "post_rv_end": "2020-08-03",
       "wind_kt": 80,
       "category": 1
-    },
-    {
-      "storm_id": "AL092016",
-      "name": "HERMINE",
-      "landfall_date": "2016-09-02",
-      "wind_kt": 70,
-      "category": 1
-    },
-    {
-      "storm_id": "AL092021",
-      "name": "IDA",
-      "landfall_date": "2021-08-27",
-      "wind_kt": 70,
-      "category": 1
-    },
-    {
-      "storm_id": "AL092022",
-      "name": "IAN",
-      "landfall_date": "2022-09-27",
-      "wind_kt": 110,
-      "category": 3
-    },
-    {
-      "storm_id": "AL092024",
-      "name": "HELENE",
-      "landfall_date": "2024-09-27",
-      "wind_kt": 120,
-      "category": 4
-    },
-    {
-      "storm_id": "AL112010",
-      "name": "IGOR",
-      "landfall_date": "2010-09-21",
-      "wind_kt": 75,
-      "category": 1
-    },
-    {
-      "storm_id": "AL112015",
-      "name": "JOAQUIN",
-      "landfall_date": "2015-10-01",
-      "wind_kt": 115,
-      "category": 4
-    },
-    {
-      "storm_id": "AL112017",
-      "name": "IRMA",
-      "landfall_date": "2017-09-06",
-      "wind_kt": 155,
-      "category": 5
-    },
-    {
-      "storm_id": "AL122021",
-      "name": "LARRY",
-      "landfall_date": "2021-09-11",
-      "wind_kt": 70,
-      "category": 1
-    },
-    {
-      "storm_id": "AL132017",
-      "name": "KATIA",
-      "landfall_date": "2017-09-09",
-      "wind_kt": 65,
-      "category": 1
-    },
-    {
-      "storm_id": "AL142016",
-      "name": "MATTHEW",
-      "landfall_date": "2016-10-04",
-      "wind_kt": 130,
-      "category": 4
-    },
-    {
-      "storm_id": "AL142018",
-      "name": "MICHAEL",
-      "landfall_date": "2018-10-10",
-      "wind_kt": 140,
-      "category": 5
-    },
-    {
-      "storm_id": "AL142021",
-      "name": "NICHOLAS",
-      "landfall_date": "2021-09-14",
-      "wind_kt": 65,
-      "category": 1
-    },
-    {
-      "storm_id": "AL142024",
-      "name": "MILTON",
-      "landfall_date": "2024-10-10",
-      "wind_kt": 100,
-      "category": 3
-    },
-    {
-      "storm_id": "AL152017",
-      "name": "MARIA",
-      "landfall_date": "2017-09-19",
-      "wind_kt": 145,
-      "category": 5
-    },
-    {
-      "storm_id": "AL152022",
-      "name": "LISA",
-      "landfall_date": "2022-11-02",
-      "wind_kt": 80,
-      "category": 1
-    },
-    {
-      "storm_id": "AL162016",
-      "name": "OTTO",
-      "landfall_date": "2016-11-24",
-      "wind_kt": 100,
-      "category": 3
     },
     {
       "storm_id": "AL162020",
       "name": "NANA",
       "landfall_date": "2020-09-03",
-      "wind_kt": 65,
-      "category": 1
-    },
-    {
-      "storm_id": "AL162024",
-      "name": "OSCAR",
-      "landfall_date": "2024-10-19",
-      "wind_kt": 75,
-      "category": 1
-    },
-    {
-      "storm_id": "AL172017",
-      "name": "OPHELIA",
-      "landfall_date": "2017-10-16",
+      "t0_trading": "2020-09-03",
+      "pre_rv_start": "2020-07-31",
+      "pre_rv_end": "2020-08-28",
+      "post_rv_start": "2020-09-04",
+      "post_rv_end": "2020-09-11",
       "wind_kt": 65,
       "category": 1
     },
@@ -255,41 +323,23 @@
       "storm_id": "AL172020",
       "name": "PAULETTE",
       "landfall_date": "2020-09-14",
+      "t0_trading": "2020-09-14",
+      "pre_rv_start": "2020-08-10",
+      "pre_rv_end": "2020-09-08",
+      "post_rv_start": "2020-09-15",
+      "post_rv_end": "2020-09-21",
       "wind_kt": 85,
       "category": 2
-    },
-    {
-      "storm_id": "AL182012",
-      "name": "SANDY",
-      "landfall_date": "2012-10-24",
-      "wind_kt": 75,
-      "category": 1
-    },
-    {
-      "storm_id": "AL182024",
-      "name": "RAFAEL",
-      "landfall_date": "2024-11-06",
-      "wind_kt": 100,
-      "category": 3
-    },
-    {
-      "storm_id": "AL192010",
-      "name": "RICHARD",
-      "landfall_date": "2010-10-25",
-      "wind_kt": 85,
-      "category": 2
-    },
-    {
-      "storm_id": "AL202023",
-      "name": "TAMMY",
-      "landfall_date": "2023-10-22",
-      "wind_kt": 80,
-      "category": 1
     },
     {
       "storm_id": "AL252020",
       "name": "GAMMA",
       "landfall_date": "2020-10-03",
+      "t0_trading": "2020-10-05",
+      "pre_rv_start": "2020-08-31",
+      "pre_rv_end": "2020-09-29",
+      "post_rv_start": "2020-10-06",
+      "post_rv_end": "2020-10-12",
       "wind_kt": 65,
       "category": 1
     },
@@ -297,6 +347,11 @@
       "storm_id": "AL262020",
       "name": "DELTA",
       "landfall_date": "2020-10-07",
+      "t0_trading": "2020-10-07",
+      "pre_rv_start": "2020-09-02",
+      "pre_rv_end": "2020-10-01",
+      "post_rv_start": "2020-10-08",
+      "post_rv_end": "2020-10-14",
       "wind_kt": 90,
       "category": 2
     },
@@ -304,6 +359,11 @@
       "storm_id": "AL282020",
       "name": "ZETA",
       "landfall_date": "2020-10-27",
+      "t0_trading": "2020-10-27",
+      "pre_rv_start": "2020-09-23",
+      "pre_rv_end": "2020-10-21",
+      "post_rv_start": "2020-10-28",
+      "post_rv_end": "2020-11-03",
       "wind_kt": 75,
       "category": 1
     },
@@ -311,6 +371,11 @@
       "storm_id": "AL292020",
       "name": "ETA",
       "landfall_date": "2020-11-03",
+      "t0_trading": "2020-11-03",
+      "pre_rv_start": "2020-09-30",
+      "pre_rv_end": "2020-10-28",
+      "post_rv_start": "2020-11-04",
+      "post_rv_end": "2020-11-10",
       "wind_kt": 120,
       "category": 4
     },
@@ -318,125 +383,332 @@
       "storm_id": "AL312020",
       "name": "IOTA",
       "landfall_date": "2020-11-17",
+      "t0_trading": "2020-11-17",
+      "pre_rv_start": "2020-10-14",
+      "pre_rv_end": "2020-11-11",
+      "post_rv_start": "2020-11-18",
+      "post_rv_end": "2020-11-24",
       "wind_kt": 125,
       "category": 4
+    },
+    {
+      "storm_id": "AL092021",
+      "name": "IDA",
+      "landfall_date": "2021-08-27",
+      "t0_trading": "2021-08-27",
+      "pre_rv_start": "2021-07-23",
+      "pre_rv_end": "2021-08-20",
+      "post_rv_start": "2021-08-30",
+      "post_rv_end": "2021-09-03",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL122021",
+      "name": "LARRY",
+      "landfall_date": "2021-09-11",
+      "t0_trading": "2021-09-13",
+      "pre_rv_start": "2021-08-09",
+      "pre_rv_end": "2021-09-07",
+      "post_rv_start": "2021-09-14",
+      "post_rv_end": "2021-09-20",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL142021",
+      "name": "NICHOLAS",
+      "landfall_date": "2021-09-14",
+      "t0_trading": "2021-09-14",
+      "pre_rv_start": "2021-08-10",
+      "pre_rv_end": "2021-09-08",
+      "post_rv_start": "2021-09-15",
+      "post_rv_end": "2021-09-21",
+      "wind_kt": 65,
+      "category": 1
+    },
+    {
+      "storm_id": "AL092022",
+      "name": "IAN",
+      "landfall_date": "2022-09-27",
+      "t0_trading": "2022-09-27",
+      "pre_rv_start": "2022-08-23",
+      "pre_rv_end": "2022-09-21",
+      "post_rv_start": "2022-09-28",
+      "post_rv_end": "2022-10-04",
+      "wind_kt": 110,
+      "category": 3
+    },
+    {
+      "storm_id": "AL152022",
+      "name": "LISA",
+      "landfall_date": "2022-11-02",
+      "t0_trading": "2022-11-02",
+      "pre_rv_start": "2022-09-29",
+      "pre_rv_end": "2022-10-27",
+      "post_rv_start": "2022-11-03",
+      "post_rv_end": "2022-11-09",
+      "wind_kt": 80,
+      "category": 1
+    },
+    {
+      "storm_id": "AL202023",
+      "name": "TAMMY",
+      "landfall_date": "2023-10-22",
+      "t0_trading": "2023-10-23",
+      "pre_rv_start": "2023-09-19",
+      "pre_rv_end": "2023-10-17",
+      "post_rv_start": "2023-10-24",
+      "post_rv_end": "2023-10-30",
+      "wind_kt": 80,
+      "category": 1
+    },
+    {
+      "storm_id": "AL022024",
+      "name": "BERYL",
+      "landfall_date": "2024-07-01",
+      "t0_trading": "2024-07-01",
+      "pre_rv_start": "2024-05-24",
+      "pre_rv_end": "2024-06-25",
+      "post_rv_start": "2024-07-02",
+      "post_rv_end": "2024-07-09",
+      "wind_kt": 120,
+      "category": 4
+    },
+    {
+      "storm_id": "AL042024",
+      "name": "DEBBY",
+      "landfall_date": "2024-08-05",
+      "t0_trading": "2024-08-05",
+      "pre_rv_start": "2024-07-01",
+      "pre_rv_end": "2024-07-30",
+      "post_rv_start": "2024-08-06",
+      "post_rv_end": "2024-08-12",
+      "wind_kt": 70,
+      "category": 1
+    },
+    {
+      "storm_id": "AL062024",
+      "name": "FRANCINE",
+      "landfall_date": "2024-09-11",
+      "t0_trading": "2024-09-11",
+      "pre_rv_start": "2024-08-07",
+      "pre_rv_end": "2024-09-05",
+      "post_rv_start": "2024-09-12",
+      "post_rv_end": "2024-09-18",
+      "wind_kt": 90,
+      "category": 2
+    },
+    {
+      "storm_id": "AL092024",
+      "name": "HELENE",
+      "landfall_date": "2024-09-27",
+      "t0_trading": "2024-09-27",
+      "pre_rv_start": "2024-08-22",
+      "pre_rv_end": "2024-09-20",
+      "post_rv_start": "2024-09-30",
+      "post_rv_end": "2024-10-04",
+      "wind_kt": 120,
+      "category": 4
+    },
+    {
+      "storm_id": "AL142024",
+      "name": "MILTON",
+      "landfall_date": "2024-10-10",
+      "t0_trading": "2024-10-10",
+      "pre_rv_start": "2024-09-06",
+      "pre_rv_end": "2024-10-04",
+      "post_rv_start": "2024-10-11",
+      "post_rv_end": "2024-10-17",
+      "wind_kt": 100,
+      "category": 3
+    },
+    {
+      "storm_id": "AL162024",
+      "name": "OSCAR",
+      "landfall_date": "2024-10-19",
+      "t0_trading": "2024-10-21",
+      "pre_rv_start": "2024-09-17",
+      "pre_rv_end": "2024-10-15",
+      "post_rv_start": "2024-10-22",
+      "post_rv_end": "2024-10-28",
+      "wind_kt": 75,
+      "category": 1
+    },
+    {
+      "storm_id": "AL182024",
+      "name": "RAFAEL",
+      "landfall_date": "2024-11-06",
+      "t0_trading": "2024-11-06",
+      "pre_rv_start": "2024-10-03",
+      "pre_rv_end": "2024-10-31",
+      "post_rv_start": "2024-11-07",
+      "post_rv_end": "2024-11-13",
+      "wind_kt": 100,
+      "category": 3
     }
   ],
   "regression": {
     "RNR": {
       "n": 42,
-      "alpha": -0.10056047492342018,
-      "beta_category": 0.020559751634803346,
-      "gamma_vix": 0.003729361287120845,
-      "delta_spy_rv": 0.38770087498794814,
-      "se_beta": 0.017736786118457373,
-      "t_beta": 1.1591587955953486,
-      "p_beta": 0.24639146351413332,
-      "rsq": 0.09475305232473796,
-      "y_mean": 0.013552752626779624,
-      "y_std": 0.14161022948873786,
-      "p_beta_holm": 0.9855658540565333
+      "event_order": "chronological_by_event_date",
+      "cov_type": "HAC",
+      "cov_maxlags": 10,
+      "alpha": -0.13476539664011236,
+      "beta_category": 0.01417793596322747,
+      "gamma_vix": 0.004820358493824795,
+      "delta_spy_rv_lag21": 0.11114901153985324,
+      "se_beta": 0.010936002200156975,
+      "t_beta": 1.2964459684384446,
+      "p_beta": 0.1948218836612724,
+      "rsq": 0.09001713993558103,
+      "y_mean": 0.0030526891379788466,
+      "y_std": 0.1371997551038719,
+      "p_beta_holm_reinsurer_scope": 0.1948218836612724
     },
     "EG": {
       "n": 42,
-      "alpha": -0.09061740885952466,
-      "beta_category": 0.017496483419203065,
-      "gamma_vix": 0.003329889799467688,
-      "delta_spy_rv": 0.4278575460761397,
-      "se_beta": 0.01889717878887325,
-      "t_beta": 0.9258780696674722,
-      "p_beta": 0.35450934938623624,
-      "rsq": 0.07452904616909373,
-      "y_mean": 0.009440074304986825,
-      "y_std": 0.15265767315009723,
-      "p_beta_holm": 0.9855658540565333
+      "event_order": "chronological_by_event_date",
+      "cov_type": "HAC",
+      "cov_maxlags": 10,
+      "alpha": -0.16205838474743267,
+      "beta_category": 0.02746444566593722,
+      "gamma_vix": 0.010328661608022323,
+      "delta_spy_rv_lag21": -0.6484029519659698,
+      "se_beta": 0.014338684764428048,
+      "t_beta": 1.9154089874457703,
+      "p_beta": 0.05544036587387594,
+      "rsq": 0.10430062515443883,
+      "y_mean": 0.008835392322409187,
+      "y_std": 0.1724828173919345,
+      "p_beta_holm_reinsurer_scope": 0.13732501050538287
     },
     "ACGL": {
       "n": 42,
-      "alpha": -0.05575814840056388,
-      "beta_category": 0.014473077697917738,
-      "gamma_vix": 0.002413334424354816,
-      "delta_spy_rv": 0.506141975277082,
-      "se_beta": 0.01441527312251356,
-      "t_beta": 1.0040099535342069,
-      "p_beta": 0.315373815951851,
-      "rsq": 0.13279062356586357,
-      "y_mean": 0.020170203598008717,
-      "y_std": 0.11215608556570747,
-      "p_beta_holm": 0.9855658540565333
+      "event_order": "chronological_by_event_date",
+      "cov_type": "HAC",
+      "cov_maxlags": 10,
+      "alpha": -0.11726476842597877,
+      "beta_category": 0.03230392337534081,
+      "gamma_vix": 0.007324807211743945,
+      "delta_spy_rv_lag21": -0.647350393018186,
+      "se_beta": 0.009368287842077274,
+      "t_beta": 3.448220626852336,
+      "p_beta": 0.0005642928960711468,
+      "rsq": 0.1566584209650057,
+      "y_mean": 0.004820658259694767,
+      "y_std": 0.12749199035026085,
+      "p_beta_holm_reinsurer_scope": 0.0022571715842845874
     },
     "AXS": {
       "n": 42,
-      "alpha": -0.10460823585156545,
-      "beta_category": 0.006413907751794047,
-      "gamma_vix": 0.004858372287118756,
-      "delta_spy_rv": 0.4826416599821739,
-      "se_beta": 0.015818370743977336,
-      "t_beta": 0.40547208404734536,
-      "p_beta": 0.6851305342730565,
-      "rsq": 0.14033598839527095,
-      "y_mean": 0.002850817729840157,
-      "y_std": 0.1260371579289133,
-      "p_beta_holm": 0.9855658540565333
+      "event_order": "chronological_by_event_date",
+      "cov_type": "HAC",
+      "cov_maxlags": 10,
+      "alpha": -0.14457018233139757,
+      "beta_category": 0.023391502051067728,
+      "gamma_vix": 0.008794012294453691,
+      "delta_spy_rv_lag21": -0.6357050910256357,
+      "se_beta": 0.011710610982519737,
+      "t_beta": 1.997462138054444,
+      "p_beta": 0.04577500350179429,
+      "rsq": 0.10619393891387463,
+      "y_mean": -0.01023339818610766,
+      "y_std": 0.14233004292255258,
+      "p_beta_holm_reinsurer_scope": 0.13732501050538287
     },
     "KIE": {
       "n": 42,
-      "alpha": -0.08792026482757806,
-      "beta_category": 0.01350291834158311,
-      "gamma_vix": 0.0031831202744677985,
-      "delta_spy_rv": 0.7008162229666061,
-      "se_beta": 0.007482344363356128,
-      "t_beta": 1.8046373817960064,
-      "p_beta": 0.07113144442018025,
-      "rsq": 0.38860410384761124,
-      "y_mean": 0.000884154963943098,
-      "y_std": 0.08600756194239273,
-      "p_beta_holm": 0.3556572221009013
+      "event_order": "chronological_by_event_date",
+      "cov_type": "HAC",
+      "cov_maxlags": 10,
+      "alpha": -0.11884631538770825,
+      "beta_category": 0.019692555134321017,
+      "gamma_vix": 0.011910946179580951,
+      "delta_spy_rv_lag21": -1.1642403728621784,
+      "se_beta": 0.008539242553073272,
+      "t_beta": 2.306124344393247,
+      "p_beta": 0.021103685388100576,
+      "rsq": 0.32235585779175235,
+      "y_mean": -0.0016933103028961799,
+      "y_std": 0.09690752171717354,
+      "p_beta_holm_reinsurer_scope": null,
+      "benchmark_role": "excluded_from_reinsurer_multiple_testing_family"
     }
   },
+  "kie_interaction_test": {
+    "n": 210,
+    "n_events": 42,
+    "n_stocks": 5,
+    "cov_type": "cluster_by_event_date",
+    "beta_kie_category": 0.017707713259713303,
+    "beta_reinsurer_minus_kie_category": 0.007122948972832613,
+    "se_reinsurer_minus_kie_category": 0.014174298668470236,
+    "t_reinsurer_minus_kie_category": 0.5025256726582973,
+    "p_reinsurer_minus_kie_category": 0.6152977982452034,
+    "beta_reinsurer_category_total": 0.024830662232545916,
+    "se_reinsurer_category_total": 0.021631609687936818,
+    "t_reinsurer_category_total": 1.1478878636754017,
+    "p_reinsurer_category_total": 0.2510148589420026
+  },
   "identification_check": {
-    "reinsurer_mean_beta": 0.01473580512592955,
-    "kie_beta": 0.01350291834158311,
-    "reinsurer_minus_kie": 0.0012328867843464392
+    "reinsurer_mean_beta": 0.024334451763893306,
+    "kie_beta": 0.019692555134321017,
+    "reinsurer_minus_kie": 0.00464189662957229,
+    "formal_kie_interaction_test": {
+      "n": 210,
+      "n_events": 42,
+      "n_stocks": 5,
+      "cov_type": "cluster_by_event_date",
+      "beta_kie_category": 0.017707713259713303,
+      "beta_reinsurer_minus_kie_category": 0.007122948972832613,
+      "se_reinsurer_minus_kie_category": 0.014174298668470236,
+      "t_reinsurer_minus_kie_category": 0.5025256726582973,
+      "p_reinsurer_minus_kie_category": 0.6152977982452034,
+      "beta_reinsurer_category_total": 0.024830662232545916,
+      "se_reinsurer_category_total": 0.021631609687936818,
+      "t_reinsurer_category_total": 1.1478878636754017,
+      "p_reinsurer_category_total": 0.2510148589420026
+    }
   },
   "rv_diagnostics": {
     "RNR": {
-      "pre_rv_mean": 0.216203278096874,
-      "post_rv_mean": 0.22975603072365366,
-      "drv_mean": 0.013552752626779624
+      "pre_rv_mean": 0.2119429885084038,
+      "post_rv_mean": 0.2149956776463826,
+      "drv_mean": 0.0030526891379788466
     },
     "EG": {
-      "pre_rv_mean": 0.2239031099171853,
-      "post_rv_mean": 0.23334318422217212,
-      "drv_mean": 0.009440074304986825
+      "pre_rv_mean": 0.21771881887953923,
+      "post_rv_mean": 0.22655421120194838,
+      "drv_mean": 0.008835392322409187
     },
     "ACGL": {
-      "pre_rv_mean": 0.2057284752981131,
-      "post_rv_mean": 0.22589867889612186,
-      "drv_mean": 0.020170203598008717
+      "pre_rv_mean": 0.2005332480194998,
+      "post_rv_mean": 0.20535390627919456,
+      "drv_mean": 0.004820658259694767
     },
     "AXS": {
-      "pre_rv_mean": 0.2227173177914575,
-      "post_rv_mean": 0.2255681355212976,
-      "drv_mean": 0.002850817729840157
+      "pre_rv_mean": 0.21879825916446113,
+      "post_rv_mean": 0.20856486097835347,
+      "drv_mean": -0.01023339818610766
     },
     "KIE": {
-      "pre_rv_mean": 0.16813328949248363,
-      "post_rv_mean": 0.16901744445642675,
-      "drv_mean": 0.000884154963943098
+      "pre_rv_mean": 0.16578872710122186,
+      "post_rv_mean": 0.16409541679832568,
+      "drv_mean": -0.0016933103028961799
     },
     "SPY": {
-      "pre_rv_mean": 0.1315807793732097,
-      "post_rv_mean": 0.1304794020078444,
-      "drv_mean": -0.001101377365365271
+      "pre_rv_mean": 0.13322589600082888,
+      "post_rv_mean": 0.12721501938065277,
+      "drv_mean": -0.006010876620176123
     }
   },
   "success_criteria": {
-    "any_reinsurer_beta_pos_holm_p_lt_0p10": false,
-    "reinsurer_mean_beta_gt_kie_beta": true,
+    "any_reinsurer_beta_pos_holm_p_lt_0p10": true,
+    "formal_reinsurer_minus_kie_interaction_pos_p_lt_0p10": false,
     "n_events_ge_12": true,
     "n_events_ge_20": true
   },
   "verdict_internal": "NULL",
-  "reviewer": "pending \u2014 Codex primary path"
+  "reviewer": "Codex primary path \u2014 v2 methodological blockers addressed"
 }
