@@ -99,15 +99,19 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def _parse_iso_datetime(value: str) -> datetime | None:
-    try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-
-
 def _warn_diverse(message: str) -> None:
     print(f"[diverse_gen] WARN {message}", file=sys.stderr)
+
+
+def _parse_iso_datetime(value: str, *, field: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        _warn_diverse(
+            f"{field} timestamp parse failed; treating timestamp gate as unsafe "
+            f"value={value!r} error={type(exc).__name__}: {exc}"
+        )
+        return None
 
 
 def _error_log_entry_count(path: Path) -> int:
@@ -191,12 +195,11 @@ def _article_has_post_publish_corrective_errata(article: dict) -> bool:
     )
     if not published_at or not last_updated_at:
         return False
-    published_dt = _parse_iso_datetime(published_at)
-    updated_dt = _parse_iso_datetime(last_updated_at)
-    if published_dt is not None and updated_dt is not None:
-        if updated_dt <= published_dt:
-            return False
-    elif last_updated_at <= published_at:
+    published_dt = _parse_iso_datetime(published_at, field="published_at")
+    updated_dt = _parse_iso_datetime(last_updated_at, field="last_updated_at")
+    if published_dt is None or updated_dt is None:
+        return False
+    if updated_dt <= published_dt:
         return False
 
     text_parts = [

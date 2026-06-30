@@ -655,6 +655,32 @@ def test_post_publish_corrective_errata_gate_requires_update_after_publish() -> 
     assert not generate_diverse_tasks._article_has_post_publish_corrective_errata(article)
 
 
+def test_post_publish_corrective_errata_gate_warns_on_bad_updated_timestamp(capsys) -> None:
+    article = {
+        "published_at": "2026-07-01T00:00:00+00:00",
+        "last_updated_at": "not-a-date",
+        "errata": {"update_action": "codex_review_fix"},
+    }
+
+    assert not generate_diverse_tasks._article_has_post_publish_corrective_errata(article)
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN last_updated_at timestamp parse failed" in err
+    assert "not-a-date" in err
+
+
+def test_post_publish_corrective_errata_gate_warns_on_bad_published_timestamp(capsys) -> None:
+    article = {
+        "published_at": "not-a-date",
+        "last_updated_at": "2026-07-01T01:00:00+00:00",
+        "errata": {"update_action": "codex_review_fix"},
+    }
+
+    assert not generate_diverse_tasks._article_has_post_publish_corrective_errata(article)
+    err = capsys.readouterr().err
+    assert "[diverse_gen] WARN published_at timestamp parse failed" in err
+    assert "not-a-date" in err
+
+
 def test_paper_review_tasks_warns_on_bad_feed_json(tmp_path, monkeypatch, capsys) -> None:
     feed = tmp_path / "feed.json"
     feed.write_text("{bad json", encoding="utf-8")
