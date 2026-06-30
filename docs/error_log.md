@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-06-30 publish_rhythm burst 誤報 + 系統性 gap：長期重複 warn 無自動升級
+
+**問題**：boss email-12281「兩個 Warn 已經存在很久 到底怎麼回事」。13:00 boss report Overall WARN。
+
+**現象 / 根因**：兩個 warn 都不是真問題，是**測量太粗誤報合法模式**，每天重複 fire：
+- **cluster overshoot**（今晨已修，見上面 entry）：spy keyword catch-all。
+- **publish_rhythm:burst**：burst 偵測把任何 <30min 的兩篇發佈當 burst（除 same sibling_group）。但 digest（晨間 02:53 固定）+ trending_repost（事件驅動 02:56）各依自己排程擇時，偶然相近 2.73min → 每天晨間撞在一起就永久誤報。hourly-12 只排除 daily_update siblings，沒處理跨 type fixture。
+
+**解決方法**：`content_quality.py::check_publish_rhythm` burst 只衡量 discretionary 文章（受 6h release_pool 節奏控制者）clumping，排除 `_NON_RHYTHM_PHASES`（digest/daily_update/trending/event）+ audience=daily；drought 仍用全部文章。breach_count 1→0，test_content_quality 28 passed。
+
+**Meta-lesson + 系統性 gap**：兩個 warn 都是「測量粗→誤報→fire 太頻繁變噪音→真問題被淹沒，且**只能等 boss 人工發現**」。`dreaming_review.py` 的 error_recurrence detector 只 mine cron exits + diagnostics tags，**不 mine 持續 fire 的 alert**（alert_dedup.json 的 repeated alert_key + 久遠 first_seen）→ 長期重複 warn 無自動升級成「該 root-cause 不該再 patch」。Follow-up：dreaming 加 persistent-alert detector（task `platform_ops_dreaming_persistent_alert_detector`），讓「同 alert_key 連續 fire N 天」自動升級為 root-cause finding，杜絕「warn 存在很久才被 boss 抓到」。
+
 ## 2026-06-30 topic-cluster spy catch-all — keyword 分類把整個 vol 研究 corpus 誤計為 spy
 
 **問題**：cluster_cap_drift alert 反覆 fire「spy 30d overshoot 1.9x」（boss email-12256 震怒升級「不是改語意分析且動態調整了嗎 立刻檢查」）。稍早只做了 `audience=daily` 排除（讓 alert 誠實指向 spy），未解決 spy 本身為何 74 篇。
