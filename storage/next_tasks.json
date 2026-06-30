@@ -40949,9 +40949,35 @@
     "title": "系統性 audit cron exit-as-findings job 的 exit_semantics 標記",
     "description": "系統性 audit：所有 cron job 中「send alert + 非零 exit 作 findings signal」者，確認 config/runtime_schedules.json 都標了 exit_semantics:findings，否則 host_cron_fail 會 false-critical（2026-06-30 audit_fb_pipeline 漏標 incident commit bec991e25）。方法：grep scripts/*.py 找 return/exit 非零且鄰近 send_alert 的 job → 比對 runtime_schedules.json exit_semantics → 補標。參考 alerts.py::_findings_exit_logs_from_schedule_config + 2026-06-20 STRIKE-3。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "source": "main_thread_followup",
-    "created_at": "2026-06-30T15:05:28.647821+00:00"
+    "created_at": "2026-06-30T15:05:28.647821+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T15:20:40.910155+00:00",
+    "claim_session_id": "41c796f121cf",
+    "status_history": [
+      {
+        "ts": "2026-06-30T15:20:40.910435+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T15:20:41.116263+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T15:24:43.875449+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-06-30T15:20:41.115985+00:00",
+    "completed_at": "2026-06-30T15:24:43.875172+00:00",
+    "result": "Audit completed: audit_publish_sync was the missing findings-as-exit cron; added exit_semantics=findings and documented gmail_poll/git_push_backup as intentionally unmarked. Validation: jq config/runtime_schedules.json and uv run pytest tests/test_alerts.py (12 passed)."
   }
 ]

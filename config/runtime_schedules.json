@@ -345,9 +345,10 @@
         "cron": "15 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_audit_publish_sync.sh",
         "log_path": "storage/logs/cron/audit_publish_sync.log",
-        "description": "Hourly: local published vs supabase vs live URL parity audit",
+        "description": "Hourly: local published vs supabase vs live URL parity audit. exit!=0 表示 mismatch findings，不是 cron infra failure。",
         "host_crontab_managed": true,
-        "piggy_back_enabled": true
+        "piggy_back_enabled": true,
+        "exit_semantics": "findings"
       },
       {
         "id": "audit_fb_pipeline",

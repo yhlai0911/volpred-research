@@ -12,6 +12,8 @@
 
 **Follow-up**：應系統性 audit 所有「send alert + 非零 exit 作 findings」的 cron job 是否都標了 exit_semantics（task `platform_ops_audit_exit_semantics_findings_jobs`），杜絕同類 gap。
 
+**Follow-up closeout（2026-06-30 Codex）**：已系統性掃 `runtime_schedules.json` 對應 wrapper / Python 入口。真正漏標的是 `audit_publish_sync`：`mismatch_total>0` 時寄 warn alert 且 `return 1` 作 findings signal，已補 `exit_semantics:"findings"`。既有 `audit_fb_pipeline`、`indicator_arena_daily`、`dreaming_review` 已標。`gmail_poll` / `git_push_backup` 刻意不標：前者 `ok=False` 代表 poll/ack/IMAP 路徑失敗，後者 push 分岔、silent-fallback gate 或認證/網路失敗都表示備份 job 未完成，應保留 host_cron_fail 可見性。新增 regression test 鎖住 real config。
+
 ## 2026-06-30 publish_rhythm burst 誤報 + 系統性 gap：長期重複 warn 無自動升級
 
 **問題**：boss email-12281「兩個 Warn 已經存在很久 到底怎麼回事」。13:00 boss report Overall WARN。

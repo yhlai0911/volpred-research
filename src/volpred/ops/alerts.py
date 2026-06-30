@@ -613,9 +613,11 @@ def _trailing_consecutive_failures(codes: list[int]) -> int:
 def _findings_exit_logs_from_schedule_config(config: dict[str, Any] | None = None) -> set[str]:
     """Return cron log names whose non-zero exit is a findings signal.
 
-    Audit jobs keep the historical `audit_*.log` convention. Non-audit jobs must
-    declare `exit_semantics: "findings"` in config/runtime_schedules.json so the
-    alert layer does not grow another hardcoded registry.
+    Runtime schedule metadata is the canonical source. The parser still keeps the
+    historical `audit_*.log` fallback below for old logs/configs, but every current
+    findings-as-exit cron should declare `exit_semantics: "findings"` in
+    config/runtime_schedules.json so the alert layer does not grow another
+    hardcoded registry.
     """
     if config is None:
         try:
@@ -657,19 +659,18 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     # tracked structurally in docs/refactor_plan_hourly_dispatch.md (Three-Strike).
     max_consec_fail = 0
     any_non_hang_fail = False
-    # 2026-06-07 (strike-2 structural fix): audit_* scripts use the exit code as a
-    # FINDINGS signal by convention — audit_fb_pipeline.py returns 1 when it finds
-    # stale-pending FB posts (scripts/audit_fb_pipeline.py:132); audit_publish_sync.py
-    # returns 1 when it finds published-vs-live mismatches (mismatch_total>0). That is
-    # NOT an infra-failure signal. Those findings are surfaced via their own dashboard
-    # sections / report JSON. host_cron_fail is about *infrastructure* health
-    # (dispatch/collect/sync), so treating "audit found a backlog/mismatch" as a
-    # CRITICAL host-cron-failure is a false-critical.
+    # 2026-06-07 (strike-2 structural fix): audit_* scripts may use the exit code as
+    # a FINDINGS signal — audit_fb_pipeline.py returns 1 when it finds stale-pending
+    # FB posts; audit_publish_sync.py returns 1 when it finds published-vs-live
+    # mismatches. That is NOT an infra-failure signal. Those findings are surfaced
+    # via their own dashboard sections / report JSON. host_cron_fail is about
+    # *infrastructure* health (dispatch/collect/sync), so treating "audit found a
+    # backlog/mismatch" as a CRITICAL host-cron-failure is a false-critical.
     #
     # Originally this was a hardcoded set {"audit_fb_pipeline.log"}; the same
-    # false-positive recurred on audit_publish_sync.log (strike 2) — so exclude ANY
-    # log whose script follows the audit-exit-as-findings convention via the
-    # `audit_*.log` name prefix, instead of whack-a-mole adding each file.
+    # false-positive recurred on audit_publish_sync.log (strike 2). Current
+    # runtime_schedules entries should self-declare exit_semantics=findings; the
+    # `audit_*.log` name prefix remains as a legacy fallback.
     # 2026-06-20 (STRIKE-3 — host_cron_fail false-critical on exit-as-findings jobs):
     # Same class as audit_* (strike-1 audit_fb_pipeline, strike-2 audit_publish_sync):
     # a daily pipeline that RAN FINE but returns non-zero to SIGNAL benign findings/

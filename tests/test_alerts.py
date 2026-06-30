@@ -439,6 +439,22 @@ def test_findings_exit_logs_from_schedule_config():
     }
 
 
+def test_runtime_schedule_marks_known_findings_exit_jobs():
+    from volpred.ops.alerts import _findings_exit_logs_from_schedule_config
+
+    config = json.loads(Path("config/runtime_schedules.json").read_text(encoding="utf-8"))
+    logs = _findings_exit_logs_from_schedule_config(config)
+
+    assert {
+        "audit_publish_sync.log",
+        "audit_fb_pipeline.log",
+        "indicator_arena_daily.log",
+        "dreaming_review.log",
+    } <= logs
+    assert "git_push_backup.log" not in logs
+    assert "gmail_poll.log" not in logs
+
+
 def test_paper_stale_severity_and_isolation(tmp_path: Path):
     """M3 paper-line staleness (2026-06-21 boss email-11851/11854 對稱補強): the whole
     paper/ line going >7d without any .tex/.md edit = warn, >14d = critical. Signal is
