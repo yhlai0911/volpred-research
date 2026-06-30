@@ -71,8 +71,8 @@
       "last_advance_at": "2026-07-01T03:18:00+08:00",
       "blocker": "codex contribution-gate (gpt-5.x) verdict: BORDERLINE — Major revision required; NOT arXiv-ready. 11 reframing items including visible internal experiment tags in body, stale Figure 2, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload, missing cover letter.",
       "owner_decision_pending": false,
-      "compliance_scrub_done": true,
-      "compliance_note": "gate CLEAN (2026-07-01): submission set has no VolPred/AI/co-author/fabricated-ack; 8 main.tex K-ids are %-comment source annotations (don't render). Still needs contribution-gate review before arXiv (same as leverage-direction).",
+      "compliance_scrub_done": false,
+      "compliance_note": "CORRECTION (2026-07-01 tick): NOT clean. Last tick's CLEAN was a GATE BUG — the gate scanned only main.tex (K-ids in comments) but the canonical manuscript is main_v3.tex -> body_v3.tex with 72 VISIBLE K-ids in abstract/body/conclusion (codex gate confirmed). Gate fixed to scan main_vN + \\input closures. K-id scrub of body_v3 belongs to its reframing.",
       "contribution_gate": {
         "reviewer": "codex exec gpt-5.x",
         "date": "2026-07-01",
@@ -208,6 +208,14 @@
       "fixed": "All canonical submission files scrubbed of VolPred/AI/co-author/fabricated-ack. Internal provenance/diff files intentionally left honest (not shipped).",
       "remaining": "111 K-id tags across 8 papers' submission files (deferred to each paper's compliance_scrub, gate-tracked).",
       "gate": "scripts/check_paper_compliance.py"
+    },
+    "divergent_manuscript_blocker_2026_07_01": {
+      "severity": "BLOCKER — needs owner decision before scrub/submit of affected papers",
+      "finding": "Several papers carry TWO divergent manuscript versions, e.g. leverage-direction has main.tex->body.tex (515 lines, recently scrubbed) AND main_v3.tex->body_v3.tex (680 lines). vt-trend-following and vix-sufficiency similarly have main_v3/main_v4 modular versions.",
+      "risk": "paper-update/_count_tex_metrics picks the MOST-RECENTLY-MODIFIED main*.tex as canonical (papers.py:250-261). leverage main_v3.tex (02:13) is now newer than main.tex (02:00) because the acknowledgment scrub touched it -> next paper-sync-all would publish the STALE 680-line main_v3 abstract/metadata. This is the exact 2026-06-11 incident the code comment warns about, recurring.",
+      "owner_decision_needed": "For each affected paper: which version IS the manuscript? Archive/remove the other so there is ONE canonical file. mtime-based selection is too fragile to leave as-is.",
+      "not_done_by_me": "Did NOT touch files / guess canonical / mask via mtime — that would be a workaround hiding the flow defect.",
+      "gate_fix": "scripts/check_paper_compliance.py now scans main_vN entries + \\input closures (catches the divergence)."
     }
   }
 }

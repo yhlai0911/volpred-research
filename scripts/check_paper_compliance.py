@@ -53,10 +53,23 @@ EXCLUDE_RE = re.compile(
 EXCLUDE_DIRS = {"review_history", "reviews", "reproducibility_audit", "experiments", "data"}
 
 
+# An entry-point candidate is a *clearly-old* version we must NOT treat as the
+# current submission manuscript. NOTE: _v3+ are kept as candidate entries because
+# papers diverge in convention (leverage-direction → main.tex is canonical;
+# vt-trend-following / vix-sufficiency → main_v3 / main_v4 \input the live body).
+# 2026-07-01 bug: the old gate hard-scanned only main.tex and excluded `_v\d`, so
+# vt-trend-following's real manuscript (main_v3 → body_v3, 72 visible K-ids) was
+# never scanned and returned a false CLEAN. Over-report across entries beats a
+# false CLEAN; a human confirms which entry actually ships.
+_OLD_ENTRY_RE = re.compile(r"(_v1|_v2|_backup|_predecessor|_pre[_.]|_diff|review_)", re.I)
+
+
 def submission_files(paper_dir: Path) -> list[Path]:
-    """Resolve the compile closure of main.tex + standalone cover/supplement files."""
+    r"""Resolve the compile closure of every current manuscript entry point
+    (main.tex + main_vN.tex for N>=3) plus standalone cover/supplement files.
+    \input'd files are ALWAYS scanned regardless of name — they are part of the
+    manuscript even when named body_v3.tex."""
     files: list[Path] = []
-    main = paper_dir / "main.tex"
     seen: set[Path] = set()
 
     def add(p: Path):
@@ -64,19 +77,33 @@ def submission_files(paper_dir: Path) -> list[Path]:
             seen.add(p)
             files.append(p)
 
-    if main.exists():
-        add(main)
-        txt = main.read_text(encoding="utf-8", errors="replace")
+    # current manuscript entry points
+    entries = []
+    for cand in sorted(paper_dir.glob("main*.tex")):
+        if _OLD_ENTRY_RE.search(cand.name):
+            continue
+        try:
+            head = cand.read_text(encoding="utf-8", errors="replace")[:3000]
+        except OSError as e:
+            from sys import stderr
+            print(f"warn: cannot read {cand}: {e}", file=stderr)  # silent-ok would hide a real read failure
+            continue
+        if "\\documentclass" in head:
+            entries.append(cand)
+
+    for entry in entries:
+        add(entry)
+        txt = entry.read_text(encoding="utf-8", errors="replace")
         # strip comment lines before resolving \input so commented-out inputs are ignored
         for m in re.finditer(r"^[^%\n]*\\(?:input|include)\{([^}]+)\}", txt, re.M):
             name = m.group(1).strip()
             cand = paper_dir / (name if name.endswith(".tex") else name + ".tex")
-            add(cand)
-    # standalone submission documents not \input by main
+            add(cand)  # always scan \input'd body, even body_v3.tex
+
+    # standalone submission documents not \input by a main file
     for pat in ("cover_letter.tex", "supplementary.tex", "supplementary_content.tex"):
         add(paper_dir / pat)
-    # filter out anything matching the archive/provenance exclusion
-    return [f for f in files if not EXCLUDE_RE.search(f.name)]
+    return files
 
 
 def scan_file(path: Path) -> list[dict]:
