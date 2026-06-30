@@ -41530,12 +41530,38 @@
     "id": "paper_codex_multiround_review_leverage_direction_jbf_20260701",
     "task_type": "paper_review",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "title": "leverage-direction JBF 多輪 codex review (compliance ✅ → contribution gate → arXiv decision)",
     "description": "leverage-direction body+tables 已全 compliance clean (commit 40eea8f6e, 2026-07-01 05:11)。下一階段: 用 codex exec 跑 (1) latex-academic-reviewer 全文 review (2) citation-verifier 引用對照 (3) journal-review JBF profile 期刊適配 (4) contribution gate 真正貢獻/經濟意義非單純計量練習。所有 review 走 codex 省 Claude token。通過後 → 上 arXiv → JBF submission package。\\n\\n上下文: 老闆 2026-07-01 ~00:45-02:00 連發 ~14 指令推動論文線 (handoff_latest.md KEEP)；leverage-direction 是 14 篇唯一 ready 篇；6/11 技術定稿。\\n\\n硬規則 (老闆 standing):\\n1. 作者僅 'Yi-Hao Lai'，禁 volpred/claude/ai/llm\\n2. contribution gate: 要看真正貢獻非計量練習\\n3. arXiv 只給 ready-for-submission 的\\n4. 多輪 review 全 codex exec\\n\\n預期產出: review reports/<round>.md (≤5 rounds) + final verdict (READY|NEEDS_REVISION) + arXiv decision (POST|HOLD)。",
     "source": "auto_discovered",
     "agentable": true,
     "preferred_agent": "codex",
-    "created_at": "2026-07-01T05:11:00+08:00"
+    "created_at": "2026-07-01T05:11:00+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-06-30T21:15:01.136665+00:00",
+    "claim_session_id": "531ceb5f4d9a",
+    "status_history": [
+      {
+        "ts": "2026-06-30T21:15:01.136914+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T21:15:01.367995+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-06-30T21:24:24.397514+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-06-30T21:15:01.367739+00:00",
+    "completed_at": "2026-06-30T21:24:24.397236+00:00",
+    "result": "Active v3 JBF gate completed: three read-only Codex review passes plus local compile/package checks all returned NEEDS_MAJOR_REVISION/NEEDS_REVISION with arXiv HOLD. Added active_v3_final_gate_20260701.md and updated multi-round README; no manuscript source edits."
   }
 ]

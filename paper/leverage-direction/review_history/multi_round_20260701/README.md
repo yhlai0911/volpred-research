@@ -10,11 +10,19 @@ Scope: ran three independent Codex review passes requested by the task brief:
 
 No manuscript source files were edited in this review pass.
 
+2026-07-01 active-v3 addendum: after the compliance scrub, a second read-only
+gate was run against `main_v3.tex` / `body_v3.tex` / `tables.tex` and current
+submission materials. That active-v3 pass is recorded in
+`active_v3_final_gate_20260701.md` and supersedes any stale package-ready
+interpretation.
+
 ## Gate Result
 
 Overall result: **not converged**.
 
 The earlier contribution gate already recorded `CONTRIBUTION BORDERLINE - needs reframing` in `review_history/codex_contribution_gate_20260701.md`. The three follow-up reviews all independently returned `FAIL_MAJOR_REVISION`, so the paper should remain in `revision` status and should not be treated as arXiv-ready or JBF-submission-ready.
+
+The active-v3 addendum also returns `NEEDS_MAJOR_REVISION` with arXiv `HOLD`.
 
 ## Review Outputs
 
@@ -23,6 +31,7 @@ The earlier contribution gate already recorded `CONTRIBUTION BORDERLINE - needs 
 | Latex academic review | `latex_academic_review.md` | `FAIL_MAJOR_REVISION` | 8 | 7 |
 | Citation verification | `citation_verification_review.md` | `FAIL_MAJOR_REVISION` | 3 | 6 |
 | JBF submission gate | `jbf_submission_gate_review.md` | `FAIL_MAJOR_REVISION` | 5 | 4 |
+| Active v3 final gate | `active_v3_final_gate_20260701.md` | `NEEDS_MAJOR_REVISION` | n/a | n/a |
 
 ## Main Blocking Themes
 
@@ -40,4 +49,3 @@ Do not advance `leverage-direction` to `review_converged`, arXiv upload, or JBF 
 2. Demote or remove time-zone, broad complexity-ceiling, HAR/VIX/crowding, and crisis-validation side claims unless they directly support that anchor.
 3. Rebuild the sample/OOS map and model-selection rule as a pre-specified, auditable protocol.
 4. Repair JBF package compliance only after the contribution and evidence map are stable.
-
