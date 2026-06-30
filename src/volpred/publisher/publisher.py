@@ -1783,6 +1783,27 @@ class Publisher:
         try:
             with shared_state_lock("publisher_feed", storage_dir=storage_dir):
                 feed = self._load_feed()
+                # 2026-06-30 boss email-12281: pre-publish throttle gate. The
+                # content_quality.py publish_rhythm check was patrol-only —
+                # detected bursts but did not prevent them. Reject a discretionary
+                # reader-facing publish that would land within RHYTHM_BURST_GAP_MIN
+                # of the previous one. Fixtures (digest / daily_update) and event-
+                # driven (trending_repost / event_article) bypass via
+                # is_rhythm_controlled. See src/volpred/publisher/throttle.py.
+                from volpred.publisher.throttle import (
+                    PublishThrottleError,
+                    check_publish_throttle,
+                )
+
+                try:
+                    check_publish_throttle(item, feed, storage_dir=storage_dir)
+                except PublishThrottleError as throttle_exc:
+                    result_label = (
+                        f"throttled:prev={throttle_exc.previous_id}:"
+                        f"gap={throttle_exc.gap_minutes}min"
+                    )[:200]
+                    log_record_id = item.get("id")
+                    raise
                 # 2026-06-23: daily_digest is exempt from the same-experiment-ref
                 # gate here too (matching publish_milestone's _is_digest
                 # exemptions). A digest curates several past articles and

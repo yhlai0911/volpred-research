@@ -435,7 +435,14 @@ class TestPublisherGateWiring:
         # The arc-dup was not silent: a warn_arc_dup record was logged.
         log_path = storage / "logs" / "dedup_decisions.jsonl"
         assert log_path.exists(), "arc-dup warn must be logged (never silent)"
-        actions = [_json.loads(line)["action"] for line in log_path.read_text().splitlines() if line.strip()]
+        # Filter to arc_dedup records — the shared log also carries other
+        # gates' decisions (e.g. publish_throttle since 2026-06-30), which use a
+        # `decision`/`gate` schema rather than `action`.
+        actions = [
+            rec.get("action")
+            for rec in (_json.loads(line) for line in log_path.read_text().splitlines() if line.strip())
+            if rec.get("action") is not None
+        ]
         assert "warn_arc_dup" in actions
 
     def test_dup_waiver_overrides(self, tmp_path):

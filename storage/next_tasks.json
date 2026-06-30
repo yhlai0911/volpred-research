@@ -40548,10 +40548,16 @@
     "description": "Root cause: 2026-06-30 02:53 mile_44ab1acc + 02:56 mile_f5f4cb43 連派兩篇 reader-facing 間距 2.73min < 30min burst_gap_threshold → content_quality publish_rhythm:burst alert 觸發 (老闆 2026-06-30 email-12281 抱怨「兩個 Warn 已存在很久」根因之二)。當前 content_quality.py 只 detect (事後 patrol)，無預防機制 → 同樣 root cause 反覆觸發 alert (歷史已多次)。修法: (a) src/volpred/publisher/_append_to_feed 加 pre-publish gate: 若 audience=general 且 feed 內 newest published article gap < 30min 且亦 reader-facing → reject publish + raise PublishThrottleError (caller 改 schedule 或 defer); (b) dispatcher 派 reader-facing 前同 check (避免到 publisher 才 fail); (c) 加 unit test scripts/tests/test_publisher_throttle.py 覆蓋 burst case。Bar: 連續派兩篇 reader-facing 第二篇被 gate 擋；alert publish_rhythm:burst 不再觸發。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "boss_email_12281_root_cause_fix_2026-06-30",
     "preferred_agent": null,
-    "created_at": "2026-06-30T05:23:49+00:00"
+    "created_at": "2026-06-30T05:23:49+00:00",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-06-30T12:08:38.758017+00:00",
+    "claim_session_id": "a742af849ed3",
+    "started_at": "2026-06-30T12:08:38.963452+00:00",
+    "completed_at": "2026-06-30T12:17:57.936140+00:00",
+    "result": "Pre-publish 30-min throttle gate landed (src/volpred/publisher/throttle.py + _append_to_feed wired). 21 new tests + 0 silent-fallback regressions. Bar met: second discretionary reader-facing publish within 30min raises PublishThrottleError."
   },
   {
     "id": "platform_ops_strategy_candidate_funnel_monitor",
@@ -40677,5 +40683,16 @@
     "started_at": "2026-06-30T10:42:31.829520+00:00",
     "completed_at": "2026-06-30T10:51:28.069707+00:00",
     "result": "ENFORCE 完成（主線程，commits de92bb067 + cd6f55ac7）：(1) 共用 has_lazypack_section() helper（單一 source）；(2) publish_draft.py CLI check_lazypack_gate rc=6 + --no-lazypack-gate；(3) publish_milestone chokepoint raise ValueError（covers 直接 Python 路徑）；(4) content_quality coverage 對齊同 helper；(5) feed-publisher SKILL §6 文件化 + gen 指令；74 tests green。NotebookLM auth 已驗證可用。注意：18:42 codex-cli orphaned claim（無 lazypack 活動）。BACKFILL 另開任務：實測 327/333 published general 缺 lazypack（遠多於預估 7），屬重 NotebookLM 批次需主線程驗圖品質 → scoped 子任務。"
+  },
+  {
+    "task_id": "platform_ops_lazypack_codex_redo_and_backfill",
+    "task_type": "platform_ops",
+    "title": "codex-exec 重做 7 篇 prose-dump lazypack + 補近期可見子集（禁用爛腳本）",
+    "description": "用 codex exec 重做/補 lazypack（boss 指令 + 品質審查 2026-06-30）。背景：並行 agent 的 scripts/backfill_lazypack_sections.py 產出 prose-dump 爛圖（截斷散文 + 抓表面數字如 2% GDP 目標、漏掉真結果），8 篇 live 中招。已用 codex-exec 修好 mile_68285aa0（commit 5cfc1a6e5）。\n\nPHASE 1（先做，live 品質問題）：用 scripts/gen_lazypack_codex.py 重做以下 7 篇 prose-dump 文章的 lazypack（每篇：找 source K/experiment_refs → 建 panel plan → codex exec 生圖 → 主線程 Read 看圖核對 results.json → upload_chart 上傳 *_lazypack_codex_* → 替換 ## 懶人包圖組 section → sync_article）：\n  mile_f5f4cb43, mile_819af916, mile_9839822d, mile_7b95b816, mile_dc4035e4, mile_082f0578, mile_71dd116b\n  注意：部分文章 experiment_refs 可能為空（如 mile_f5f4cb43）→ 從文章內容/標題推 source K 或用 article-id 餵 codex（--article-id）。\n\nPHASE 2（boss 裁示 scale 後）：320 篇缺 lazypack 的 published general 文章，補近期可見子集（非全 320，codex-exec 每篇多分鐘 + quota，優先 published_at 最新 ~15 篇）。\n\n硬規則：(1) 只用 gen_lazypack_codex.py（codex exec primary），**禁用** backfill_lazypack_sections.py （已標 DEPRECATED）；(2) 數字逐欄對齊 results.json；(3) 主線程 Read 看圖驗品質（CJK 無缺字 + 數字對 + 非 prose-dump）才 append；(4) idempotent，先查 has_lazypack_section 跳過已 codex 化的。\nDISPATCH_LANE=main_thread（需主線程驗圖品質，不可 codex 無監督批次）。",
+    "priority": 2,
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "source": "main_thread_quality_review",
+    "created_at": "2026-06-30T11:57:55.011847+00:00"
   }
 ]
