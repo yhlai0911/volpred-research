@@ -39712,7 +39712,9 @@
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "started_at": "2026-06-30T02:12:52.444372+00:00",
+    "last_released_at": "2026-06-30T02:13:38.472033+00:00"
   },
   {
     "id": "K1576_article_general",
@@ -40069,7 +40071,7 @@
     "description": "用戶 2026-06-30 06:24 詢問策略整併。問題：VolPred 上架 3 檔 VT 策略（保守/標準/積極）在 VIX 15-20 區段（過去 1 年 VIX 12 月均值 ~17，大多時間落此區）portfolio weight 算出來幾乎相同（都是 ~70% SPY + 30% 債），讀者翻訂閱頁分不出差異。3 個解：(a) 整併成 1 檔；(b) 改 VT 參數讓 3 檔在 15-20 也有區別（e.g. 保守強制 SPY≤50%、積極強制 SPY≥85%）；(c) 下架重合者保留 1-2 檔。建議解 = (b) 差異化參數，保留 3 personas marketing 賣點 + 不浪費 paper trading 歷史。Task: 跑 VT 3 檔同期 cross-OOS sensitivity test（VIX 15-20 區段 vs 全期）+ (b) 方案具體參數草擬 + 期望差異化效果模擬 + 跨期間 robustness 檢定（含 2020 covid 月、2022 縮表月、2024 yen carry unwind）。完成後 email 老闆審後再上架。輸出: experiments/<id>/ + strategy_lifecycle/<vt_3spec_audit>.md。",
     "task_type": "strategy_lifecycle",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-06-30T00:15:00+00:00",
     "source": "user_directive_email_12235",
     "tags": [
@@ -40082,7 +40084,9 @@
     "claimed_by": "hourly-09",
     "claimed_at": "2026-06-30T01:08:58.700579+00:00",
     "claim_session_id": "4556cc57282e",
-    "started_at": "2026-06-30T01:09:08.676342+00:00"
+    "started_at": "2026-06-30T01:09:08.676342+00:00",
+    "completed_at": "2026-06-30T02:10:49.733181+00:00",
+    "result": "K1573 audit + 差異化方案完成 (commit d85fe61da). 結論: std vs aggressive 在 VIX 15-20 risky exposure 僅差 2pp 確為同質化（老闆觀察為真），解 (b) 差異化參數可行（≥15pp absdiff + Sharpe 0.71-0.77 維持）+ stress robustness OK. Recommendation: ADOPT_B with caveats (paper-trade 6 個月 OOS + Codex review before hot-swap). Output: experiments/k1573_vt_3spec_audit/ + storage/strategy_lifecycle/vt_3spec_audit_2026_06_30.md"
   },
   {
     "id": "platform_ops_publication_candidates_daily_refresh_cron",
@@ -40112,9 +40116,11 @@
     "title": "策略卡 regime-conditional 配置呈現（VIX<15 / 15-20 / >20 三段表）",
     "description": "問題：VIX 15-20 normal 段，recommended_5050 / vix_cond_leverage / adaptive_tier 三檔退化成同配置 {SPY 0.34, GLD 0.34}，taiwan_8.63vix / taiwan_hybrid_leverage 也相同 → 用戶看 3 張同配置卡片以為重複。根因：它們在 tail regime（低/高 VIX）才分歧，normal 段巧合相同。解法（非整併，保留 tail 差異化）：每張策略卡加 mini 表顯示三段 VIX regime 的配置，讓用戶看出何時/為何分歧。Mission 4 UX。frontend-v2-fix（獨立巢狀 git repo，build+deploy-zeabur-safe）。verify=線上三段表 render + 三策略卡可見差異。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "main_thread_discovered_2026-06-30",
-    "created_at": "2026-06-30T00:39:20.263830+00:00"
+    "created_at": "2026-06-30T00:39:20.263830+00:00",
+    "resolution": "策略卡加 VIX 情景軌跡，揭露 recommended_5050/vix_cond_leverage/adaptive_tier 在 VIX17 相同但低/高 VIX 分歧。frontend 40d86fa deploy 上線，live 驗證 11 卡全渲染。",
+    "completed_at": "2026-06-30T02:05:50.940288+00:00"
   },
   {
     "id": "daily_digest_20260630",
@@ -40131,5 +40137,23 @@
       "reader_facing",
       "精選導讀"
     ]
+  },
+  {
+    "id": "strategy_lifecycle_k1573_codex_review_gate",
+    "title": "[strategy_lifecycle] K1573 VT 3-spec 差異化方案 Codex review (上架 gate)",
+    "description": "K1573 audit 完成 (commit d85fe61da)，ADOPT_B with caveats。上架前 gate: (1) Codex review k1573_audit.py 確認 simulate_strategy lookahead-free + bootstrap stability + stress robustness 計算正確 (2) Codex approve 後 paper-trade 6 個月 OOS validate (3) OOS PASS 才考慮 hot-swap registry。完成寫 knowledge.json K1573 + 寄 email 給老闆審批 paper-trade window. 參考: experiments/k1573_vt_3spec_audit/README.md §5.3 上架 gate checklist.",
+    "task_type": "strategy_lifecycle",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-06-30T02:11:05+00:00",
+    "source": "k1573_audit_followup",
+    "tags": [
+      "vt",
+      "strategy_lifecycle",
+      "codex_review",
+      "gate",
+      "k1573"
+    ],
+    "parent_task_id": "strategy_lifecycle_vt_3strategy_differentiation_audit"
   }
 ]
