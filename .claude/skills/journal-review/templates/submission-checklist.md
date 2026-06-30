@@ -18,6 +18,30 @@ data policy, anonymization model). Run this FIRST, then the journal's own list.
 - [ ] **No AI-style phrasing** in reader-facing prose (abstract, introduction) —
       run `anti-ai-style` editor SOP.
 
+- [ ] **No fabricated acknowledgments** (boss 2026-07-01). An unpublished
+      manuscript has NOT been presented at a seminar/conference and has NOT been
+      peer-reviewed, so "I/we thank seminar participants / conference participants
+      / (two) anonymous referees for helpful comments" is *fabrication*. Remove it.
+      Honest floor: "All errors are my own. Data and replication code are available
+      upon request." Add real thanks only after a real presentation/review.
+- [ ] **No internal experiment-registry IDs (K123 / K1234)** in any reader-facing
+      text, table caption, footnote, or bibliography `\bibitem`. Reword to the
+      paper's own "canonical replication" / Section / Table refs or "(replication
+      package)". They are meaningless to a referee and leak the internal system.
+- [ ] **Unpublished integrity ("尚未發表")**: the manuscript must not reveal that
+      its findings were previously disseminated on a public platform/blog/feed.
+      ("Online supplement / online appendix" referring to the paper's *own*
+      accompanying file is standard and fine — not a prior-publication signal.)
+- [ ] **Scope boundary**: scrub the *submission set only* (main.tex compile
+      closure + cover_letter + supplementary). Internal provenance — version
+      archives (`*_v2/_v3/_backup`) and `*_diff.tex` revision records that honestly
+      attribute work to the AI system — stay honest (do NOT falsify) and must NOT
+      ship in the replication package.
+- [ ] **Automated gate (run last, must be CLEAN)**:
+      `python scripts/check_paper_compliance.py <paper-dir>` exits non-zero on any
+      VolPred / OpenAI / Codex / Claude / co-author (`\and`) / fabricated-ack /
+      K-id finding in the submission set. CI-style proof, not eyeballing.
+
 ## Reproducibility (hard — cross-ref `experiments.md`)
 - [ ] Replication package regenerates EVERY table and figure from raw or
       clearly-instructed data (fixed seeds for bootstrap/MC/CV/train-test split).
