@@ -481,7 +481,7 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                 field_name="claimed_at",
                 fallback=None,
                 site="cleanup_stale",
-                    task_id=_task_key(t),
+                task_id=_task_key(t),
             )
             if claimed_dt is None:
                 continue
