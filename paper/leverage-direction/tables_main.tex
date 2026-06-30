@@ -21,7 +21,7 @@ SLV & 0.082 & 1.76 & -0.13 & 5.8 & -13.6 & 9.1 & 2260 \\
 
 \begin{table}[H]
 \centering
-\caption{GJR-GARCH $\gamma$ Parameter: Rolling Quarterly Estimates ($w = 504$, step $= 63$, 2010--2026; HAC $t$ uses Newey--West with 8 lags). All rows reflect the K903 canonical replication ($n = 58$--$60$ quarterly windows per asset; \texttt{k903\_table2.csv}); earlier drafts carried estimates from a vintage whose source experiment could not be re-located (most notably GLD mean $-0.067$, HAC $t=-5.79$, since reversed to $+0.002$ NS, and SLV $t=-2.91$, since revised to $-0.68$ NS). Model Choice applies the $t > 1.65$ rule to the HAC column.}
+\caption{GJR-GARCH $\gamma$ Parameter: Rolling Quarterly Estimates ($w = 504$, step $= 63$, 2010--2026; HAC $t$ uses Newey--West with 8 lags). All rows reflect the canonical replication ($n = 58$--$60$ quarterly windows per asset); earlier drafts carried estimates from a vintage whose source experiment could not be re-located (most notably GLD mean $-0.067$, HAC $t=-5.79$, since reversed to $+0.002$ NS, and SLV $t=-2.91$, since revised to $-0.68$ NS). Model Choice applies the $t > 1.65$ rule to the HAC column.}
 \label{tab:gamma}
 \begin{tabular}{lrrrrl}
 \toprule
@@ -81,7 +81,7 @@ Student-$t$ (df=5) & 18 & 1.2\% & $-$45.5\% \\
 \bottomrule
 \end{tabular}
 
-{\footnotesize \textit{Notes:} Violation counts were computed from the 2025-Q4 canonical replication vintage; minor yfinance backfill revisions may shift individual counts by up to $\pm 3$ on re-run without changing the qualitative ordering. In the K1185 canonical reconstruction, the baseline ``Normal'' row uses symmetric GARCH(1,1), the Student-$t$ row applies fixed $df=5$ with scale correction $\sqrt{(df-2)/df}$, and the adaptive row uses a 20-day rolling maximum of $\hat{\sigma}_t$.}
+{\footnotesize \textit{Notes:} Violation counts were computed from the 2025-Q4 canonical replication vintage; minor yfinance backfill revisions may shift individual counts by up to $\pm 3$ on re-run without changing the qualitative ordering. In the canonical reconstruction, the baseline ``Normal'' row uses symmetric GARCH(1,1), the Student-$t$ row applies fixed $df=5$ with scale correction $\sqrt{(df-2)/df}$, and the adaptive row uses a 20-day rolling maximum of $\hat{\sigma}_t$.}
 \end{table}
 
 \begin{table}[H]

@@ -32,9 +32,9 @@
 \newtheorem{hypothesis}{Hypothesis}
 
 % ─── Title ───────────────────────────────────────────────────
-\title{Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Thirteen Signal Families for Equity Volatility Forecasting and Volatility Timing\thanks{We thank the VolPred Research System for computational support. Data and replication code available upon request.}}
+\title{Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Thirteen Signal Families for Equity Volatility Forecasting and Volatility Timing\thanks{All errors are my own. Data and replication code are available upon request.}}
 
-\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw} \and VolPred Research System}
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
 
 \date{March 2026}
 
@@ -75,7 +75,7 @@ We address this gap by conducting the first comprehensive, pre-specified horse r
 
 \begin{enumerate}[label=(\roman*)]
     \item \textbf{Pre-specification}: All thirteen signal families and their construction rules are defined before examining out-of-sample results, eliminating data-snooping in signal selection.
-    \item \textbf{Strict lag enforcement}: Every signal is lagged one trading day (\texttt{signal.shift(1)}) before being applied to returns, preventing look-ahead bias---a surprisingly common error that we document has inflated Sharpe ratios by up to 373\% in prior work.\footnote{In our own research program, Codex code review identified look-ahead bias in four separate experiments (K618, K621, K679, K698), with one case producing a Sharpe ratio of 1.68 that collapsed to 0.355 after lag correction.}
+    \item \textbf{Strict lag enforcement}: Every signal is lagged one trading day (\texttt{signal.shift(1)}) before being applied to returns, preventing look-ahead bias---a surprisingly common error that we document has inflated Sharpe ratios by up to 373\% in prior work.\footnote{In separate robustness analysis, careful code review identified look-ahead bias in four backtests, one of which produced a Sharpe ratio of 1.68 that collapsed to 0.355 after lag correction.}
     \item \textbf{Transaction costs}: All strategies deduct 5 basis points per leg on each weight change, applied to both buy and sell sides.
     \item \textbf{Multiple-testing control}: We adopt the approximate conservative threshold of $|t| > 3.0$ motivated by \citet{harvey2016} and implement formal Holm-Bonferroni sequential correction across all Diebold-Mariano tests in the full family set (including the two revision-added families), controlling the family-wise error rate at $\alpha = 0.05$.
     \item \textbf{Proxy-robust evaluation}: Following \citet{patton2011}, we evaluate forecasts using QLIKE on $r_t^2$ (a proxy-robust loss function), supplemented by Spearman rank correlations and the Model Confidence Set of \citet{hansen2011mcs}, ensuring that our rankings are not artifacts of the volatility proxy choice.

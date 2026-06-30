@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""Submission-compliance gate for paper LaTeX sources.
+
+Boss directives (2026-07-01): a manuscript headed for arXiv / a journal must read
+as a standalone, *unpublished*, single-author academic work:
+  - author solely "Yi-Hao Lai" (no co-authors, no "\\and ... Research System")
+  - zero platform / tooling disclosure (VolPred, OpenAI, Codex, Claude, Anthropic, GPT, LLM)
+  - zero internal experiment-registry identifiers (K123 / K1234 tags)
+  - no fabricated acknowledgments (seminar participants / anonymous reviewers — neither
+    happened for an unpublished manuscript; claiming them is fabrication)
+  - no self-referential "our research program" platform phrasing
+
+Scope boundary (this is the whole point of the gate):
+  - We scan ONLY the *submission set*: main.tex, every file it \\input/\\include's
+    (the compile closure), plus cover_letter.tex and supplementary*.tex.
+  - Internal provenance is intentionally EXCLUDED and must NOT be scrubbed: version
+    archives (main_v*, body_v*, *_backup, *_predecessor) and revision-diff documents
+    (*_diff.tex, review_history/, reviews/). Those honestly record that the AI system
+    did the work; falsifying them would be dishonest. They simply must not ship in the
+    replication package.
+
+Usage:
+  python scripts/check_paper_compliance.py                 # all papers, summary
+  python scripts/check_paper_compliance.py leverage-direction   # one paper, verbose
+  python scripts/check_paper_compliance.py --json          # machine-readable
+Exit code: 0 = all scanned submission files clean; 1 = at least one violation.
+"""
+from __future__ import annotations
+import json
+import re
+import sys
+from pathlib import Path
+
+PAPER_ROOT = Path(__file__).resolve().parent.parent / "paper"
+
+# (label, compiled regex, explanation)
+RULES = [
+    ("platform_or_ai", re.compile(r"\bVolPred\b|\bOpenAI\b|\bCodex\b|\bClaude\b|\bAnthropic\b|\bGPT-?\d|\bLLM\b|language model|AI assistant|code-reviewer", re.I),
+     "platform/AI-tool disclosure"),
+    ("co_author", re.compile(r"\\and\s"),
+     "possible co-author (\\and) — author must be Yi-Hao Lai alone"),
+    ("fabricated_ack", re.compile(r"anonymous reviewer|anonymous referee|seminar participant|conference participant|workshop participant", re.I),
+     "fabricated acknowledgment (no seminar/review occurred for an unpublished MS)"),
+    ("self_ref_program", re.compile(r"our (own )?research program", re.I),
+     "self-referential internal-platform phrasing"),
+    ("k_id", re.compile(r"\bK\d{3,4}[a-z]?\b"),
+     "internal experiment-registry identifier (K-id)"),
+]
+
+# files that are internal provenance / archives — never part of the submission set
+EXCLUDE_RE = re.compile(
+    r"(_v\d|_backup|_predecessor|_diff|_pre_|_pre[_.]|review_report|review_v)", re.I)
+EXCLUDE_DIRS = {"review_history", "reviews", "reproducibility_audit", "experiments", "data"}
+
+
+def submission_files(paper_dir: Path) -> list[Path]:
+    """Resolve the compile closure of main.tex + standalone cover/supplement files."""
+    files: list[Path] = []
+    main = paper_dir / "main.tex"
+    seen: set[Path] = set()
+
+    def add(p: Path):
+        if p.exists() and p not in seen:
+            seen.add(p)
+            files.append(p)
+
+    if main.exists():
+        add(main)
+        txt = main.read_text(encoding="utf-8", errors="replace")
+        # strip comment lines before resolving \input so commented-out inputs are ignored
+        for m in re.finditer(r"^[^%\n]*\\(?:input|include)\{([^}]+)\}", txt, re.M):
+            name = m.group(1).strip()
+            cand = paper_dir / (name if name.endswith(".tex") else name + ".tex")
+            add(cand)
+    # standalone submission documents not \input by main
+    for pat in ("cover_letter.tex", "supplementary.tex", "supplementary_content.tex"):
+        add(paper_dir / pat)
+    # filter out anything matching the archive/provenance exclusion
+    return [f for f in files if not EXCLUDE_RE.search(f.name)]
+
+
+def scan_file(path: Path) -> list[dict]:
+    out = []
+    for i, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+        # ignore pure-comment lines (won't render) for non-co-author rules,
+        # but still flag platform/AI even in comments inside submission files
+        stripped = line.lstrip()
+        is_comment = stripped.startswith("%")
+        for label, rx, why in RULES:
+            for mm in rx.finditer(line):
+                # co_author / k_id / fabricated / self_ref in a comment line are not shipped
+                if is_comment and label != "platform_or_ai":
+                    continue
+                out.append({"line": i, "rule": label, "why": why,
+                            "match": mm.group(0), "text": line.strip()[:140]})
+    return out
+
+
+def check_paper(paper_dir: Path) -> dict:
+    files = submission_files(paper_dir)
+    findings = {}
+    for f in files:
+        hits = scan_file(f)
+        if hits:
+            findings[f.name] = hits
+    return {"paper": paper_dir.name,
+            "scanned": [f.name for f in files],
+            "clean": not findings,
+            "findings": findings}
+
+
+def main(argv: list[str]) -> int:
+    as_json = "--json" in argv
+    args = [a for a in argv if not a.startswith("--")]
+    if args:
+        dirs = [PAPER_ROOT / args[0]]
+    else:
+        dirs = sorted(d for d in PAPER_ROOT.iterdir()
+                      if d.is_dir() and d.name not in EXCLUDE_DIRS and (d / "main.tex").exists())
+
+    results = [check_paper(d) for d in dirs if d.exists()]
+    any_dirty = any(not r["clean"] for r in results)
+
+    if as_json:
+        print(json.dumps({"clean": not any_dirty, "papers": results}, ensure_ascii=False, indent=2))
+        return 1 if any_dirty else 0
+
+    for r in results:
+        status = "✓ CLEAN" if r["clean"] else "✗ VIOLATIONS"
+        print(f"\n[{status}] {r['paper']}  (scanned: {', '.join(r['scanned']) or 'none'})")
+        for fname, hits in r["findings"].items():
+            print(f"  {fname}:")
+            for h in hits:
+                print(f"    L{h['line']} [{h['rule']}] '{h['match']}'  — {h['text']}")
+    total_v = sum(len(h) for r in results for h in r["findings"].values())
+    print(f"\n{'='*60}")
+    print(f"Papers scanned: {len(results)}  |  clean: {sum(r['clean'] for r in results)}  |  "
+          f"with violations: {sum(not r['clean'] for r in results)}  |  total findings: {total_v}")
+    return 1 if any_dirty else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
