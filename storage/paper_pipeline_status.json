@@ -215,7 +215,9 @@
       "risk": "paper-update/_count_tex_metrics picks the MOST-RECENTLY-MODIFIED main*.tex as canonical (papers.py:250-261). leverage main_v3.tex (02:13) is now newer than main.tex (02:00) because the acknowledgment scrub touched it -> next paper-sync-all would publish the STALE 680-line main_v3 abstract/metadata. This is the exact 2026-06-11 incident the code comment warns about, recurring.",
       "owner_decision_needed": "For each affected paper: which version IS the manuscript? Archive/remove the other so there is ONE canonical file. mtime-based selection is too fragile to leave as-is.",
       "not_done_by_me": "Did NOT touch files / guess canonical / mask via mtime — that would be a workaround hiding the flow defect.",
-      "gate_fix": "scripts/check_paper_compliance.py now scans main_vN entries + \\input closures (catches the divergence)."
+      "gate_fix": "scripts/check_paper_compliance.py now scans main_vN entries + \\input closures (catches the divergence).",
+      "update_0532": "CLARIFIED: the autonomous pipeline treats main_v3/body_v3/tables.tex as leverage's ACTIVE canonical (codex 'active_v3_final_gate_20260701' reviewed exactly those; commit 40eea8f6e scrubbed main_v3's tables.tex). The pipeline's active-v3 gate verdict = NEEDS_MAJOR_REVISION / arXiv HOLD (matches my contribution gate run on main.tex). So the system's working canonical is main_v3 (680-line), NOT the main.tex (515-line) I scrubbed. My last-tick VolPred guard landed on main_v3 — correct version. Owner still needs to CONFIRM main_v3 is the real manuscript so main.tex/body.tex/tables_main can be archived and the parallel-version divergence stops.",
+      "recommendation_if_no_owner_reply": "Default to the pipeline's choice (main_v3 = canonical); archive main.tex/body.tex/tables_main as superseded. Hold this until owner confirms to avoid discarding the wrong version."
     }
   }
 }
