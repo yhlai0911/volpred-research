@@ -79,6 +79,22 @@
           "paper_leverage_direction_stage2_replication_freeze"
         ],
         "boss_notified": true
+      },
+      "stage2_progress": {
+        "k1591_gold_regime": {
+          "date": "2026-07-01",
+          "experiment": "experiments/k1591",
+          "main_thread_verification": "PASS (research-honesty)",
+          "checks": [
+            "no-lookahead verified in code (shift(1) on all instruments + rolling-then-shift RV)",
+            "pre-specified external regimes (VIX/DXY/Treasury basis), not ex-post gamma signs",
+            "proper train<=2018 / holdout>=2019 split",
+            "honest: stress-regime gamma_diff mostly NS (holdout safe-haven t=-0.66, liquidation t=0.27); liquidation train n=27 reported None not force-fit",
+            "conclusion forbids restoring unconditional inverted-leverage claim"
+          ],
+          "implication": "Honest gold rebuild is WEAK (stress-regime effects largely null) -> paper's gold component can only be a weak regime-dependent claim; overall leverage-direction contribution now leans more on model-selection + VT-channel (Stage 2 oos_horse_race) than gold. Feeds back into contribution-strength assessment.",
+          "caveat": "No independent review file (codex created the experiment); needs independent codex review before writing to knowledge.json per CLAUDE.md."
+        }
       }
     },
     {
