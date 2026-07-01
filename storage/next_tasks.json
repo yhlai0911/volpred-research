@@ -41958,7 +41958,7 @@
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "source": "auto_journal_discovery_fallback",
@@ -41967,6 +41967,48 @@
       "research-backlog-refresh",
       "all-covered-fallback"
     ],
-    "created_at": "2026-07-01T00:00:01+00:00"
+    "created_at": "2026-07-01T00:00:01+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-01T00:48:30.564499+00:00",
+    "claim_session_id": "3e1d893c6f2c",
+    "status_history": [
+      {
+        "ts": "2026-07-01T00:48:30.564753+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T00:48:30.768260+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T01:02:52.562591+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-01T00:48:30.767980+00:00",
+    "completed_at": "2026-07-01T01:02:52.562320+00:00",
+    "result": "Added 8 deduped journal-discovery directions to research_program.md under the 2026-07-01 batch: direct indexing TLH, N-PX vote risk, anti-stock identity, mortgage lock-in, tokenised MMF/Treasury AUM, ETF conversions, sports betting, and GLP-1 sector repricing.\\nValidation: git diff --check clean; rg confirms section at research_program.md:1347; backlog dry-run respected recent/live idempotency."
+  },
+  {
+    "id": "daily_digest_20260701",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **先選定一個專題（theme）**（例：波動率模型複雜度天花板 / MOVE-VIX 跨資產分裂 / 尾部風險 VaR 監管現實 / 研究誠實 audit），整篇圍繞單一 thesis；(2) **從過去累積的 archive 撈同主題的 3-6 篇舊文**（用 grep/jq 掃 storage/reports/feed.json 的 title/tags），發佈日期須橫跨 >1 週、至少 3 篇來自當天以外 — **不可只挑今天/昨天剛發的湊數**；排除 digest 自身與每日建議類日報；(3) **掛一個最近時事/市場狀態 hook 開場**（當前 VIX 水位 / 近期 FOMC·NFP·CPI / MOVE-VIX 分裂等，數據須取自真實 archive 文章或 results.json，不可臆造），把過去研究與當下市場連起來；(4) **串成有觀點的敘事弧**（演進/對照/反差，告訴讀者『這主題上我們做過什麼、結論如何演進、彼此如何呼應』），不是逐篇『這篇講 X、那篇講 Y』的並列摘要；(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ 文末懶人包圖組；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-01T09:00:07.053170+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ]
   }
 ]
