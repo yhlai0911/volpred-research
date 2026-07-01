@@ -42112,7 +42112,7 @@
     "description": "Gmail UID: 12380\nMessage-ID: <1B6B897E-8159-4681-85D5-AE7BE6DFA646@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 1 Jul 2026 09:38:57 +0800\nSubject: Re: [VolPred Alert][WARN] 自主 loop fire 03:34 — 🔴 BLOCKER：論文兩套分歧 manuscript + stale-publish 風險（需你裁定 canonical）\n\n--- 用戶回信內容 ---\n你立刻用Codex閱讀之後判斷要留誰\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月1日 03:41 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 03:34 — 🔴 BLOCKER：論文兩套分歧 manuscript + stale-publish 風險（需你裁定 canonical）\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 自主 loop fire 03:34（台灣時間 2026-07-01）\r\n> \r\n> 並行 pipeline 進展（cron/codex 自主完成，我綜整）\r\n> \r\n> fd0f8ddae Rough volatility/ARRV/fOU 實驗完成（+ knowledge）\r\n> c91d9c866 vt-trend-following contribution-gate → BORDERLINE, NOT arXiv-ready（與 leverage 同模式）\r\n> → 兩篇最強論文都過不了 contribution gate。\r\n> 🔴 本 tick 找到兩個真問題\r\n> \r\n> 1. Compliance gate BUG（已修）\r\n> \r\n> 我建的 check_paper_compliance.py 只掃 main.tex 且排除 _v3，所以 vt-trend-following 的真 manuscript（main_v3 → body_v3，72 個 visible K-id）從沒被掃到 → 上 tick 我誤標它 CLEAN。codex gate 才抓到那些 K-id。已修（掃 main_vN + \\input 閉包），並更正 tracker。\r\n> \r\n> 2. 🔴 BLOCKER：論文有「兩套分歧 manuscript」+ stale-publish 風險（需老闆決定）\r\n> \r\n> leverage-direction 同時有 main.tex→body.tex（515 行，我剛 scrub）和 main_v3.tex→body_v3.tex（680 行）。vt-trend、vix 也有類似 main_v3/v4 modular 版本。\r\n> paper-update 選 canonical = 最近修改的 main.tex*（papers.py:250-261）。leverage 的 main_v3.tex（02:13）現在比 main.tex（02:00）新（因 scrub 觸碰）→ 下次 paper-sync-all 會發佈 stale 680 行舊版 —— 正是 2026-06-11 incident 重演。\r\n> 我沒 touch 檔案掩蓋（那是違反「修流程不修資料」的 workaround，且會用猜測決定 canonical）。\r\n> 需老闆決定：每篇論文「哪個版本才是真 manuscript」→ 封存/刪除另一個，留唯一 canonical。mtime-based 選擇太脆弱。\r\n> 對 mission 的影響\r\n> \r\n> 在 canonical 版本確定前，任何 scrub/投稿都站在流沙上（不確定改的是不是會 ship 的檔）。這是 paper line 的前置 blocker，優先於 reframing。\r\n> Commits this tick\r\n> \r\n> a79dec4d6 fix(compliance-gate): scan main_vN + \\input closures; surface divergent-manuscript blocker\r\n> 建議下一步（待老闆指示）\r\n> \r\n> 老闆裁定每篇 canonical 版本（或授權我以「最近實際 review/compile 的版本」為準封存其餘）\r\n> canonical 定後：leverage 走 reframing；其餘論文走各自 compliance scrub（gate 現可信）\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -42148,13 +42148,21 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-10"
+      },
+      {
+        "ts": "2026-07-01T02:20:43.513389+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-10"
       }
     ],
     "last_released_at": "2026-07-01T02:10:41.876672+00:00",
     "claimed_by": "hourly-10",
     "claimed_at": "2026-07-01T02:11:02.625212+00:00",
     "claim_session_id": "eef5ce4b701f",
-    "started_at": "2026-07-01T02:11:02.908396+00:00"
+    "started_at": "2026-07-01T02:11:02.908396+00:00",
+    "completed_at": "2026-07-01T02:20:43.513103+00:00",
+    "result": "canonical 裁定: main.tex+body.tex (Codex verdict v3_obsolete=true); git mv 6 檔 → _archived/; 修 2 stale ref; commit 39572e419; close-reply email 867e645c 已寄; stale-publish blocker 根治 (papers.py mtime pick 自動排除 _archived/)"
   },
   {
     "id": "email-12379-d73e1b",
