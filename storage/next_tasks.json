@@ -43370,7 +43370,7 @@
     "title": "Paper review (Codex 24h-rule): 同一個波動率模型，換個計算方式還能贏嗎？五個市場階段的穩定性測試",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_549aaaa4 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_549aaaa4",
@@ -43394,9 +43394,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T18:39:18.506309+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
     ],
-    "started_at": "2026-07-01T18:30:10.056839+00:00"
+    "started_at": "2026-07-01T18:30:10.056839+00:00",
+    "completed_at": "2026-07-01T18:39:18.506029+00:00",
+    "result": "PASS AFTER PATCH: K1066 numbers and lookahead passed. Patched published article mile_549aaaa4 to downgrade H2 wording (no test of DM 4.04 vs 4.48 difference) and clarify H3 as directional binomial evidence, not per-period Harvey significance. Single-article Supabase sync/read-back confirmed."
   },
   {
     "id": "event_article_nfp_us_2026-07-03_tminus2",
