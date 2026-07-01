@@ -25321,7 +25321,7 @@
     "title": "研究 backlog fallback: Proxy-Reliance Control in Conformal VaR",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Proxy-Reliance Control in Conformal VaR — arXiv:2603.22569 (2026)。校準 one-sided VaR 時控制 proxy 依賴。直接相關我們的 Patton (2011) proxy-robust 框架。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "proxy_reliance_control_in_conformal_var",
@@ -25336,8 +25336,32 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-01)"
+      },
+      {
+        "ts": "2026-07-01T15:07:40.090414+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T15:07:50.066632+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T15:09:37.871967+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
       }
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-01T15:07:40.090099+00:00",
+    "claim_session_id": "e0a28f01714c",
+    "started_at": "2026-07-01T15:07:50.066425+00:00",
+    "completed_at": "2026-07-01T15:09:37.871721+00:00",
+    "result": "Duplicate backlog closed: K1026 already covers proxy-reliance conformal VaR; revalidated literature/memory, marked research_program item resolved, and updated k1026 backlog resolution with 2026-07-01 note."
   },
   {
     "id": "research_online_conformal_via_universal_portfolio",
@@ -42941,17 +42965,32 @@
     "email_message_id": "<DA5D8DE4-0138-4CE5-A884-BE387A1D732C@gmail.com>",
     "email_subject": "Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fallback(s)",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-01T12:45:36.865260+00:00",
-    "claim_session_id": "ed970de81d4e",
     "status_history": [
       {
         "ts": "2026-07-01T12:45:36.865536+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-01T14:50:06.164944+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "interactive-claude",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-01T15:04:41.410693+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
       }
-    ]
+    ],
+    "last_released_at": "2026-07-01T14:50:06.164937+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-01T15:04:41.410386+00:00",
+    "claim_session_id": "cc35b4575f85"
   },
   {
     "id": "email-12419-a4c282",
@@ -42970,16 +43009,31 @@
     "email_message_id": "<A6037124-6683-4477-A689-1B211E04199B@gmail.com>",
     "email_subject": "Re: [VolPred Alert][CRITICAL] Dreaming review 2026-07-01 — 0 new / 8 escalations",
     "email_from": "Ivan Lai <yihao.lai@gmail.com>",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-01T12:45:41.041764+00:00",
-    "claim_session_id": "9b6d515b8050",
     "status_history": [
       {
         "ts": "2026-07-01T12:45:41.042034+00:00",
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-01T14:50:06.164952+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "interactive-claude",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-01T15:04:41.628371+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
       }
-    ]
+    ],
+    "last_released_at": "2026-07-01T14:50:06.164950+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-01T15:04:41.628080+00:00",
+    "claim_session_id": "1f29cf2cdcfd"
   }
 ]
