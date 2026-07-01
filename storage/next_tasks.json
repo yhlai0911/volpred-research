@@ -42237,7 +42237,7 @@
     "description": "Stage 1 reframing DONE (body.tex/main.tex 10:01-10:04). 需 rerun 3 codex passes on reframed manuscript: (1) latex_academic_reviewer (2) citation_verification (3) jbf_submission_gate. Boss 授權「依判斷立即執行」(email-12379 09:36). If converges → arXiv-ready gate. If not → identify highest-priority items for next stage.",
     "task_type": "paper_review",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "tags": [
       "paper_review",
       "leverage_direction",
@@ -42268,8 +42268,16 @@
         "to": "in_progress",
         "by": "hourly-12",
         "note": "orphan re-claim (hourly-11 stale 57min, no live process)"
+      },
+      {
+        "ts": "2026-07-01T04:37:35.471394+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-12"
       }
     ],
-    "started_at": "2026-07-01T03:10:27.262325+00:00"
+    "started_at": "2026-07-01T03:10:27.262325+00:00",
+    "completed_at": "2026-07-01T04:37:35.471150+00:00",
+    "result": "Completed 3-pass rerun on main.tex/body.tex/tables_main.tex/README.md. Verdict: MAJOR_REVISION_REQUIRED / DO_NOT_POST_YET. Artifact: paper/leverage-direction/review_history/main_tex_body_tables_stage1_rerun_20260701_1150.md"
   }
 ]
