@@ -4157,3 +4157,17 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 1. **任何被自動化腳本呼叫、預期「秒回不做事」的 agent 健康檢查，payload 必須顯式聲明「這不是工作 session」並列出禁止事項**，不能依賴訊息長度或字面意思讓模型自行判斷「這只是探針」——尤其當 CLAUDE.md 存在「自主運營、永不空手而回」這類高優先強制指令時，短訊息的預設解讀反而會被拉向「開始做事」而不是「秒回」。
 2. **`exit=142`（SIGALRM）不等於「auth 壞了」**——它只代表「被檢測的進程在時限內沒完成」，可能是 auth 真的死、也可能是被檢測對象在時限內做了完全不相關但耗時的事。診斷 timeout 類失敗時，先看「是秒退還是跑滿時限被砍」，這兩種訊號指向完全不同的根因。
 3. 這是一次「機器自己重現了自己要調查的 bug」的案例——收到 `"ping"` 當下的第一直覺就是去做 ops 巡檢，這正是本 entry 要修的行為模式；之所以能抓到，是因為中途停下來檢查了 `ps aux` 與 log 時間戳，發現自己正身處一個被 90 秒 perl alarm 包住的 auth-preflight 情境。
+
+---
+
+## 2026-07-02 — 已發佈 event article 統計檢定歸因錯誤（24h-rule Codex 複審抓到）
+
+**Incident**：NFP 7/3 event article `mile_35eef830`（7/1 published）宣稱「改用非 NFP 的週五當基準…兩種不同的統計檢定這次都顯示差距達到顯著」。Codex 24h-rule source-level 複審 + 主線程代碼覆核發現：k528.py 中只有 Welch t-test（`k528_nfp_event_study.py:209`）比較 NFP vs 週五；Mann-Whitney U（`:213`）比較的是 NFP vs **全體非 NFP 日**（`non_nfp_abs_returns`），不是週五基準。故「週五基準下兩種檢定都顯著」是 misattribution。
+
+**根因**：撰稿時把「統計檢定清單」（Welch + Mann-Whitney 都用了、都顯著）當成「同一個對照組下的兩種檢定」，未逐一核對每個檢定的**比較對象**。三模 review 的文字層審查看不出來，要 source-code-level 才抓得到。
+
+**Fix（回溯更正已發佈內容）**：feed.json content 改為正確歸因（Welch=週五顯著；Mann-Whitney=vs 全體非NFP 顯著），methodology 段補明兩檢定各自的對照組 + VIX 用前一交易日收盤值。順帶降 D 過度宣稱（r≈0.45「高度可靠」→「穩定、統計上顯著的歷史關聯」+ 條件相關 caveat）+ C 措辭（「公布當時 VIX」→「前一交易日收盤 VIX」，代碼 pre_vix=t-1 確認無 lookahead）。anti_ai_gate PASS → sync-all → Supabase 線上驗證入庫 0 殘留。
+
+**教訓（PDCA / 防再犯）**：
+1. **讀者向文章講「N 種檢定都顯著」時，必逐一標明每個檢定的比較對象**——同名統計量（如「兩種檢定」）可能各自對照不同 baseline，不可合併宣稱。撰稿 evidence package 階段就該把 `test → (group A vs group B) → p` 三元組列清楚。
+2. **24h-rule Codex source-level 複審對「已發佈但數字都對」的文章仍有價值**——本案所有數字都對得上 results.json，唯一錯的是敘事把檢定歸錯對照組，純文字/數字核對抓不到，只有讀代碼才發現。
