@@ -25959,7 +25959,7 @@
     "title": "研究 backlog fallback: RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025 | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "rgarch_carr_sk_realized_garch_carr_2025",
@@ -25986,12 +25986,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-01T16:17:40.128687+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
       }
     ],
     "claimed_by": "codex-failover",
     "claimed_at": "2026-07-01T16:11:31.783353+00:00",
     "claim_session_id": "1462a15e2032",
-    "started_at": "2026-07-01T16:11:37.110588+00:00"
+    "started_at": "2026-07-01T16:11:37.110588+00:00",
+    "completed_at": "2026-07-01T16:17:40.128396+00:00",
+    "result": "Completed experiments/research_rgarch_carr_sk_realized_garch_carr_2025/ with README, script, results JSON, chart, and codex_review. Verdict=NULL_VS_PRIMARY_BASELINE: daily OHLC proxy finds HAR+range (CARR-lite) strongest, but adding daily skew/kurt worsens QLIKE vs har_range (mean diff +0.0418, wins 0/8, bootstrap CI [+0.0228,+0.0627]). Knowledge promotion deferred to main-thread gate; no knowledge.json edit."
   },
   {
     "id": "research_k1090b_nested_loocv",
