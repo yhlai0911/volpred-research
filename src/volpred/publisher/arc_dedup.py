@@ -96,10 +96,27 @@ _ENTITY_SURFACE: dict[str, str] = {
     # 資產實體 → arc-dedup 漏判（mile_ec28b1cc/mile_1a6d9369 同 arc）。這些是
     # distinctive 策略實體，搭配 conclusion class 才觸發 dedup，不會誤擋。
     "波動率目標": "VOL_TARGETING", "波動率目標策略": "VOL_TARGETING",
-    "vol target": "VOL_TARGETING", "vol-target": "VOL_TARGETING",
-    "volatility target": "VOL_TARGETING", "volatility-target": "VOL_TARGETING",
+    # 2026-07-01 (K1590): English surface forms require the gerund "targeting".
+    # The bare nouns "vol target" / "volatility target" collide with sentences
+    # like "MNA is a usable portfolio-level vol target" (= a target *variable*
+    # for vol research, NOT the vol-targeting strategy) → spurious VOL_TARGETING
+    # extraction that falsely arc-blocked K1590 merger-arb. The strategy is
+    # always written "targeting"; Chinese 波動率目標 / VT 策略 keep strategy detection.
+    "vol targeting": "VOL_TARGETING", "vol-targeting": "VOL_TARGETING",
+    "volatility targeting": "VOL_TARGETING", "volatility-targeting": "VOL_TARGETING",
     "vt 策略": "VOL_TARGETING", "vt策略": "VOL_TARGETING",
     "風險平價": "RISK_PARITY", "risk parity": "RISK_PARITY", "risk-parity": "RISK_PARITY",
+    # Merger arbitrage / risk arbitrage (2026-07-01 K1590): deal-spread vol is a
+    # brand-new arc. The diagnostic uses SPY/HYG/IWM/VIX only as comparison
+    # proxies, so the extractor saw no subject entity and collapsed the article
+    # into the generic vol bucket → false arc-dup block. Register merger-arb as a
+    # distinctive entity so the true subject is visible and future merger-arb
+    # pieces dedupe against each other, not against unrelated VT articles.
+    "mna": "MERGER_ARB", "併購套利": "MERGER_ARB", "并购套利": "MERGER_ARB",
+    "merger arbitrage": "MERGER_ARB", "merger arb": "MERGER_ARB",
+    "risk arbitrage": "MERGER_ARB", "risk-arbitrage": "MERGER_ARB",
+    "deal spread": "MERGER_ARB", "deal-spread": "MERGER_ARB",
+    "deal break": "MERGER_ARB", "deal-break": "MERGER_ARB", "套利價差": "MERGER_ARB",
     # EM / regional
     "vnm": "VIETNAM", "越南": "VIETNAM", "eido": "INDONESIA", "印尼": "INDONESIA",
     "thd": "THAILAND", "泰國": "THAILAND", "ephe": "PHILIPPINES", "菲律賓": "PHILIPPINES",
@@ -645,7 +662,15 @@ def _is_significant_overlap(new_ents: set[str], old_ents: set[str]) -> bool:
     # shares the VIX mechanism (e.g. copper × VIX null) or both sides are the
     # exact same narrow asset/topic. Core US_EQUITY alone is not enough.
     if len(distinctive_overlap) == 1:
-        if "VIX" in overlap:
+        (single,) = tuple(distinctive_overlap)
+        # A broad-market proxy (IWM/NASDAQ/bonds) shared alongside VIX is still a
+        # generic "US market" overlap, not a distinctive topic anchor. Requiring
+        # the VIX shortcut only for genuinely narrow entities prevents a
+        # multi-proxy diagnostic from matching any unrelated descriptive piece
+        # that happens to reference the same broad proxies. (2026-07-01 K1590:
+        # merger-arb diagnostic shared only US_SMALLCAP+VIX with unrelated
+        # AI-capex / regulatory-flow articles.)
+        if "VIX" in overlap and single not in _BROAD_MARKET_ENTITIES:
             return True
         return new_distinctive == old_distinctive == distinctive_overlap
     return False

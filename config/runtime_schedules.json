@@ -463,12 +463,13 @@
       },
       {
         "id": "git_push_backup",
-        "cron": "17 */2 * * *",
+        "cron": "0 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_git_push_backup.sh",
         "log_path": "storage/logs/cron/git_push_backup.log",
-        "description": "每 2 小時：本機研究 commit fast-forward push 到 origin/main 備份（2026-06-24 建，雲端 routines 停用後本地為唯一 push 源；偵測分岔則發 alert 不強推）",
-        "host_crontab_managed": true,
-        "piggy_back_enabled": false
+        "description": "每小時：本機研究 commit fast-forward push 到 origin/main 備份（2026-06-24 建，雲端 routines 停用後本地為唯一 push 源；偵測分岔則發 alert 不強推）。2026-07-01 3-STRIKE 修正：直接 host crontab `17 */2 * * *` 因 macOS Keychain 在無登入 session 的 cron 環境下不可讀（`could not read Username for 'https://github.com': Device not configured`）100% 結構性失敗；`check_alerts` LaunchAgent 的 piggy-back fire（有登入 session、Keychain 可讀）100% 成功。移除壞掉的直接 host cron leg，改純靠 piggy-back（cadence 從 2h 提升為 1h，是改善不是降級）。",
+        "host_crontab_managed": false,
+        "host_crontab_managed_note": "2026-07-01: LaunchAgent-piggy-back（經 com.volpred.check-alerts hourly fire → run_due_jobs）為 canonical；移除結構性失敗的直接 host crontab leg（Keychain-under-cron 3-strike）。",
+        "piggy_back_enabled": true
       },
       {
         "id": "backup_user_claude",

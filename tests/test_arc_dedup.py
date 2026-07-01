@@ -724,3 +724,71 @@ def test_vt_different_conclusion_not_blocked():
         existing, days=3650,
     )
     assert not dups, "different VT conclusion classes should not be deduped"
+
+
+def test_vol_target_noun_not_vol_targeting_strategy():
+    """2026-07-01 (K1590): the noun phrase 'vol target' (a target variable for
+    vol research) must NOT extract VOL_TARGETING, but the strategy gerund must.
+    """
+    assert "VOL_TARGETING" not in extract_entities(
+        "MNA is a usable portfolio-level vol target for volatility research."
+    )
+    assert "VOL_TARGETING" not in extract_entities(
+        "We treat MNA realized vol as the target; a portfolio-level volatility target."
+    )
+    assert "VOL_TARGETING" in extract_entities("A vol targeting strategy scaling to a vol budget.")
+    assert "VOL_TARGETING" in extract_entities("volatility-targeting overlay on the portfolio")
+    # Chinese strategy detection unchanged.
+    assert "VOL_TARGETING" in extract_entities("波動率目標策略的槓桿調整")
+
+
+def test_merger_arb_entity_extracted():
+    """2026-07-01 (K1590): merger arbitrage is a distinctive registered entity."""
+    assert "MERGER_ARB" in extract_entities("IQ Merger Arbitrage ETF (MNA) deal-spread vol")
+    assert "MERGER_ARB" in extract_entities("併購套利的價差波動率診斷")
+    assert "MERGER_ARB" in extract_entities("risk arbitrage deal-break probability")
+    # Word boundary: 'mna' must not fire inside unrelated words.
+    assert "MERGER_ARB" not in extract_entities("Kilimanjaro amnale spelled oddly")
+
+
+def test_k1590_merger_arb_not_blocked_by_vt_event_study():
+    """2026-07-01 regression: K1590 merger-arb diagnostic was falsely arc-blocked
+    against unrelated 台股 VT event-study descriptive articles. Root cause: the
+    diagnostic's only extracted entities were comparison proxies (SPY/HYG/IWM/VIX)
+    plus a spurious VOL_TARGETING from the phrase 'portfolio-level vol target';
+    both sides shared the generic event_study mechanism → descriptive_strict block.
+    After registering MERGER_ARB and tightening the vol-target noun, the shared
+    entities collapse to core VIX only → no significant overlap → not blocked.
+    """
+    existing = [
+        {
+            "id": "mile_c11a2ced", "status": "published",
+            "published_at": "2026-06-20T04:00:00+00:00",
+            "title": "把兩個工具換著用，反而更差？台股波動率策略的一場假設破功",
+            "content": (
+                "台股波動率目標策略在事件窗的公告後表現，與 VIX 訊號的搭配一場假設破功。"
+            ),
+        },
+        {
+            # Broad-market-proxy false positive: shares only US_EQUITY+US_SMALLCAP+VIX
+            # (all core/broad proxies) with the merger-arb diagnostic.
+            "id": "mile_4901f7bc", "status": "published",
+            "published_at": "2026-06-25T04:00:00+00:00",
+            "title": "AI 一季燒五百億，該擔心嗎？別看 VIX，看波動率市場真正在怕的三件事",
+            "content": (
+                "SPY 與 IWM 的隱含波動率結構在公告後的事件窗透露，VIX 沒說出來的三件事。"
+            ),
+        },
+    ]
+    k1590_title = "併購套利的價差波動率：MNA 能不能當波動率研究的目標"
+    k1590_content = (
+        "IQ Merger Arbitrage ETF (MNA) 是併購套利的 portfolio-level 代理。"
+        "we test whether MNA is a usable portfolio-level vol target versus SPY / IWM / HYG "
+        "and VIX proxies. post-announcement deal-spread widens with deal-break risk. "
+        "N=1629 交易日 2020-2026。"
+    )
+    ents = extract_entities(k1590_title + "\n" + k1590_content)
+    assert "MERGER_ARB" in ents
+    assert "VOL_TARGETING" not in ents, "the 'vol target' noun must not extract the strategy"
+    dups = find_arc_duplicates(k1590_title, k1590_content, existing, days=3650)
+    assert not dups, "merger-arb deal-spread arc must not be blocked by a 台股 VT event-study piece"
