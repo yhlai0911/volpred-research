@@ -35,7 +35,19 @@ WORK_LOG = ROOT / "storage" / "work_log.json"
 WORKTREES_DIR = ROOT / ".claude" / "worktrees"
 AGENTS_DIR = ROOT / "storage" / "ops" / "agents"
 REPORT_PATH = ROOT / "storage" / "ops" / "dispatch_report_latest.json"
+FEED_PATH = ROOT / "storage" / "reports" / "feed.json"
 SLOT_CAP = 4
+# 2026-07-01 3-STRIKE fix (dreaming persistent_alert draft_pool_low, 5x/73d):
+# `draft_pool_low` alert (src/volpred/ops/alerts.py::_parse_draft_pool_state)
+# measures feed.json `status=="draft"` article count directly — a DIFFERENT
+# signal from `REFILL_FLOOR` below, which only counts pending `next_tasks.json`
+# agentable tasks (any task_type). Root cause of the recurring breach: a pool
+# can satisfy REFILL_FLOOR with 4 agentable `experiment`/`platform_ops` tasks
+# while daily_article production silently starves — `_maybe_refill` never
+# looks at feed.json, so draft-pool depletion never forces a daily_article-
+# specific top-up. This constant is the dedicated floor for that separate
+# signal; see `_draft_pool_deficit()` / `_maybe_refill_draft_pool()`.
+DRAFT_POOL_FLOOR = 4
 # Refill threshold: when agentable count drops below this, dispatcher
 # auto-runs refill_task_pool.py to top up. Keeps the rule "任務池永遠要有
 # 待辦任務" enforceable by mechanism, not by main-thread discipline.

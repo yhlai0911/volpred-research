@@ -80,9 +80,9 @@ def panel2_method():
     ax.axis("off")
 
     steps = [
-        ("1", "分情境", "把 2020–2026 的每個交易日，依當天 VIX 指數\n分成三種情境：\n\n平靜期（VIX < 20）／緊張期（VIX 20–30）\n恐慌期（VIX > 30）"),
-        ("2", "量震盪", "計算併購套利基金在每個情境下的\n單日絕對報酬平均值——\n也就是「平均一天會抖動多大幅度」"),
-        ("3", "做檢定", "用統計上的兩樣本檢定，確認恐慌期跟\n平靜期的震盪差異不是巧合，\n同時檢查它和大盤（SPY）的相關程度，\n排除「只是跟著大盤動」的可能"),
+        ("1", "分情境", "把 2020–2026 的每個交易日，\n依當天 VIX 指數分成三種情境：\n\n平靜期（VIX < 20）\n緊張期（VIX 20–30）\n恐慌期（VIX > 30）"),
+        ("2", "量震盪", "計算併購套利基金在\n每個情境下的單日絕對報酬\n平均值，也就是「平均一天\n會抖動多大幅度」"),
+        ("3", "做檢定", "用統計上的兩樣本檢定，\n確認恐慌期跟平靜期的震盪\n差異不是巧合，同時檢查它\n和大盤（SPY）的相關程度，\n排除「只是跟著大盤動」\n的可能"),
     ]
     x0 = 0.3
     w = 3.0
@@ -92,17 +92,17 @@ def panel2_method():
         ax.add_patch(mpatches.FancyBboxPatch(
             (x, 3.6), w, 5.4, boxstyle="round,pad=0.08,rounding_size=0.25",
             linewidth=1.2, edgecolor="#999999", facecolor="#ffffff"))
-        ax.add_patch(mpatches.Circle((x + 0.55, 8.35), 0.42, facecolor=BLUE, edgecolor="none"))
-        ax.text(x + 0.55, 8.35, num, fontsize=16, color="white", ha="center", va="center", fontweight="bold")
-        ax.text(x + 0.2, 7.55, head, fontsize=13.5, fontweight="bold", color=NAVY)
-        ax.text(x + 0.2, 7.05, body, fontsize=9.8, color="#222222", va="top", linespacing=1.55)
+        ax.add_patch(mpatches.Circle((x + 0.55, 8.55), 0.42, facecolor=BLUE, edgecolor="none"))
+        ax.text(x + 0.55, 8.55, num, fontsize=16, color="white", ha="center", va="center", fontweight="bold")
+        ax.text(x + 0.2, 7.65, head, fontsize=13.5, fontweight="bold", color=NAVY)
+        ax.text(x + 0.2, 7.15, body, fontsize=9.8, color="#222222", va="top", linespacing=1.6)
 
     n_low = R["vix_regime_stats"]["low_vix_lt20"]["n_days"]
     n_mid = R["vix_regime_stats"]["mid_vix_20_30"]["n_days"]
     n_high = R["vix_regime_stats"]["high_vix_gt30"]["n_days"]
     n_total = R["meta"]["period"]["n_trading_days"]
     ax.add_patch(mpatches.FancyBboxPatch(
-        (0.3, 0.7, ) if False else (0.3, 0.7), 9.4, 2.5, boxstyle="round,pad=0.08,rounding_size=0.25",
+        (0.3, 0.7), 9.4, 2.5, boxstyle="round,pad=0.08,rounding_size=0.25",
         linewidth=1.2, edgecolor="#999999", facecolor="#f0f0eb"))
     ax.text(5.0, 2.55, "樣本規模", fontsize=13, fontweight="bold", color=NAVY, ha="center")
     ax.text(5.0, 1.55,
