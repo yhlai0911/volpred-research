@@ -55,6 +55,61 @@ def _report(*flags) -> dict:
     return json.loads(out.stdout)
 
 
+def _thinking_estimate(week_range: str) -> dict:
+    """Deduped-by-message.id estimate of reasoning(thinking) as a share of output.
+    thinking = output - text_tokens - tool_tokens (text/tool measurable; thinking
+    redacted). Calibrated chars/token from text-only turns. Best-effort, honest."""
+    import glob
+    try:
+        ws, we = [s.strip() for s in week_range.split("→")]
+    except Exception:
+        return {}
+    from datetime import date as _date, timedelta as _td
+    we_excl = (_date.fromisoformat(we) + _td(days=1)).isoformat()
+    proj = Path.home() / ".claude" / "projects" / "-Users-yhlai0911-Desktop-volpred-research"
+    turns: dict = {}
+    files = glob.glob(str(proj / "*.jsonl")) + glob.glob(str(proj / "subagents" / "**" / "*.jsonl"), recursive=True)
+    for f in files:
+        try:
+            for line in open(f, encoding="utf-8"):
+                try:
+                    o = json.loads(line)
+                except Exception:
+                    continue
+                mm = o.get("message", {})
+                if not isinstance(mm, dict) or mm.get("role") != "assistant":
+                    continue
+                d = str(o.get("timestamp", ""))[:10]
+                if not (ws <= d < we_excl):
+                    continue
+                mid = mm.get("id")
+                if not mid:
+                    continue
+                e = turns.setdefault(mid, {"out": 0, "txt": 0, "tool": 0, "think": False})
+                u = mm.get("usage") or {}
+                e["out"] = max(e["out"], u.get("output_tokens", 0) or 0)
+                for b in (mm.get("content") or []):
+                    if not isinstance(b, dict):
+                        continue
+                    if b.get("type") == "text":
+                        e["txt"] += len(b.get("text", "") or "")
+                    elif b.get("type") == "tool_use":
+                        e["tool"] += len(json.dumps(b.get("input", {}), ensure_ascii=False))
+                    elif b.get("type") == "thinking":
+                        e["think"] = True
+        except Exception:
+            continue
+    cc = co = 0
+    for e in turns.values():
+        if not e["think"] and e["tool"] == 0 and e["out"] > 50:
+            cc += e["txt"]; co += e["out"]
+    ratio = cc / co if co else 1.5
+    out_tot = sum(e["out"] for e in turns.values())
+    think = sum(max(0, e["out"] - e["txt"] / ratio - e["tool"] / 3.5) for e in turns.values() if e["think"])
+    return {"thinking": int(think), "output_total": out_tot,
+            "pct": (think / out_tot * 100) if out_tot else 0}
+
+
 def _bill(d: dict) -> int:
     if "billable_total" in d:
         return int(d.get("billable_total") or 0)
@@ -171,6 +226,24 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
                  f"<td class='num sub' style='width:44px'>{pct:.0f}%</td>"
                  f"<td class='num sub' style='width:66px'>${cost:,.0f}</td></tr>")
     p.append("</table>")
+
+    # output composition (reasoning) + cached context
+    th = _thinking_estimate(week.get("week_range", ""))
+    cr_w = int(tot_w.get("cache_read_tokens", 0) or 0)
+    p.append("<h2>輸出組成（reasoning）＋ cached context</h2><table>")
+    if th and th.get("output_total"):
+        tk = th["thinking"]; ot = th["output_total"]; tx = max(0, ot - tk)
+        p.append(f"<tr><td style='width:150px'>reasoning（thinking）</td>"
+                 f"<td>{_bar(th['pct'], '#7c3aed')}</td>"
+                 f"<td class='num' style='width:70px'>{m(tk)}</td><td class='num sub' style='width:44px'>{th['pct']:.0f}%</td></tr>")
+        p.append(f"<tr><td>text / 工具輸出</td><td>{_bar(100-th['pct'], '#2563eb')}</td>"
+                 f"<td class='num'>{m(tx)}</td><td class='num sub'>{100-th['pct']:.0f}%</td></tr>")
+    p.append("</table>")
+    p.append(f"<div class='sub'>reasoning 佔 output 約 {th.get('pct',0):.0f}%（去重後估算：output − text − tool；thinking 已 redact 故用相減）。"
+             f"上表 % 是「佔 output」，output 只是總 billable 的一小片。</div>")
+    p.append(f"<div class='card' style='margin-top:12px'><span class='sub'>cached context 本週被重讀（cache_read）</span><br>"
+             f"<span class='n' style='font-size:22px;font-weight:700'>{m(cr_w)}</span> "
+             f"<span class='sub'>tokens —— 每個 turn 都把整段 context 重讀一次；量最大但以約 0.1× input 計費（不進 billable）。長 session／不 compact 會放大這塊。</span></div>")
 
     # caveats
     p.append("<h2>說明（誠實 caveat）</h2><div class='sub'>")

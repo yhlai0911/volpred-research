@@ -481,6 +481,19 @@
           "cron_backup_user_claude.sh",
           "backup_user_claude.sh"
         ]
+      },
+      {
+        "id": "token_report_daily",
+        "label": "每日 token 使用報表 email",
+        "cron": "0 8 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_token_report.sh",
+        "log_path": "storage/logs/cron/token_report.log",
+        "description": "每日 08:00 台灣寄多角度 token 使用報表(HTML)給 admin: 週cap(校準官方)/當日/當週每日/使用類型/模型/reasoning佔比/cache_read。走 piggy-back run_due_jobs。",
+        "matchers": [
+          "token_report_email.py",
+          "cron_token_report.sh"
+        ],
+        "host_crontab_managed": true
       }
     ]
   },
