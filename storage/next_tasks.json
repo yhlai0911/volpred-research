@@ -25664,7 +25664,7 @@
     "title": "研究 backlog fallback: Transfer Learning for New Issues Vol",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Transfer Learning for New Issues Vol — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。 | 來源 section: 新發現（2026-04-01 文獻搜尋）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "transfer_learning_for_new_issues_vol",
@@ -25679,8 +25679,24 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-01)"
+      },
+      {
+        "ts": "2026-07-01T15:12:40.643794+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-01T15:12:40.849296+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
       }
-    ]
+    ],
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-01T15:12:40.643544+00:00",
+    "claim_session_id": "a340c007cdfb",
+    "started_at": "2026-07-01T15:12:40.849021+00:00"
   },
   {
     "id": "K1076_daily_article_fz_vares_general",
@@ -42954,7 +42970,7 @@
     "description": "Gmail UID: 12420\nMessage-ID: <DA5D8DE4-0138-4CE5-A884-BE387A1D732C@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 1 Jul 2026 20:43:42 +0800\nSubject: Re: [VolPred Alert][WARN] git-push-backup: push held — 1 new silent fallback(s)\n\n--- 用戶回信內容 ---\n立刻解決底層邏輯與架構問題\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月1日 20:00 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> git-push-backup: push held — 1 new silent fallback(s)\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 本地領先 7 commit 但 HEAD 帶 1 個新 silent fallback，push 會讓 CI Silent Fallback Gate 紅。已暫停 push（紅碼不上 origin、CI 不會紅）。下一班 hourly dispatch 必須先修（每處加 'from volpred.ops.diagnostics import warn' 再 fallback，或標 '# silent-ok: 理由'）再讓 push 恢復。新發現：\r\n> NEW scripts/continue_task_dispatch.py:479 except Exception: return 0\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -42984,13 +43000,21 @@
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-01T15:15:10.717235+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "interactive-claude"
       }
     ],
     "last_released_at": "2026-07-01T14:50:06.164937+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-07-01T15:04:41.410386+00:00",
-    "claim_session_id": "cc35b4575f85"
+    "claim_session_id": "cc35b4575f85",
+    "completed_at": "2026-07-01T15:15:10.716955+00:00",
+    "result": "根因已修（commit 12d0f2f23）：_draft_pool_deficit bare-except 補 _warn_dispatch；驗證 audit new=0 + 連續多次 push exit=0。回信已寄 e7051f04。"
   },
   {
     "id": "email-12419-a4c282",
@@ -42998,7 +43022,7 @@
     "description": "Gmail UID: 12419\nMessage-ID: <A6037124-6683-4477-A689-1B211E04199B@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Wed, 1 Jul 2026 20:43:17 +0800\nSubject: Re: [VolPred Alert][CRITICAL] Dreaming review 2026-07-01 — 0 new / 8 escalations\n\n--- 用戶回信內容 ---\n立刻徹底解決Critical的問題\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月1日 19:19 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> Dreaming review 2026-07-01 — 0 new / 8 escalations\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> findings=8（new=0, resolved=0, escalations=8）；loop-health overall=warn\r\n> [critical] repeated_tool_failure: repeated_tool_failure:git_push_backup.log:exit1 (×3) → propose docs/error_log.md\r\n> [critical] memory_skill_gap: memory_skill_gap:uncodified_process (×3) → propose .claude/skills/\r\n> [critical] memory_hygiene: memory_hygiene:consolidation_review (×3) → propose memory/\r\n> [critical] persistent_alert: persistent_alert:a4a7ca551f8626b2 (×3) → propose docs/error_log.md\r\n> [critical] persistent_alert: persistent_alert:9a39f7aa6399dfee (×3) → propose docs/error_log.md\r\n> [critical] persistent_alert: persistent_alert:122e34a624da56ed (×3) → propose docs/error_log.md\r\n> [critical] persistent_alert: persistent_alert:72b3d80c2fc482ef (×3) → propose docs/error_log.md\r\n> [critical] persistent_alert: persistent_alert:0e22d758c43af180 (×3) → propose docs/error_log.md\r\n> 影響\r\n> \r\n> Dreaming 是 loop-engineering 的慢 loop：跨 session 找重複失敗模式，避免「該被系統先抓到、卻靠老闆人工抓到」的結構性問題。escalations = 連 3 次 dreaming run 仍未解 → Three-Strike 根治候選。直接服務 Mission #2/#4（研究品質 + 運營穩定）。\r\n> \r\n> 建議行動\r\n> \r\n> 看完整報告：storage/ops/dreaming/2026-07-01.json。\r\n> 治理類 findings（error_log / rules / knowledge.json）為 propose-only — 主線程審 proposal 後手動決定是否套用，dreaming 不自動改。\r\n> escalations(critical) → 開 docs/refactor_plan_<topic>.md 走 Three-Strike 根治。\r\n> auto_dispatch 類（orphaned failure）→ --apply-auto 才會派修復 task（預設關，先人工審）。\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -43028,12 +43052,20 @@
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-01T15:15:10.938824+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "interactive-claude"
       }
     ],
     "last_released_at": "2026-07-01T14:50:06.164950+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "claimed_by": "interactive-claude",
     "claimed_at": "2026-07-01T15:04:41.628080+00:00",
-    "claim_session_id": "1f29cf2cdcfd"
+    "claim_session_id": "1f29cf2cdcfd",
+    "completed_at": "2026-07-01T15:15:10.938528+00:00",
+    "result": "8 finding 逐項核對根因皆已修復（check_alerts.log 證據）；額外修復 dreaming_review.py 兩個結構性誤報根因（48h cooldown 缺 recency 標示 + memory_*類永久觸發卻套 critical ladder），commit f48ae9cee。回信已寄 3c21bfb9。"
   }
 ]
