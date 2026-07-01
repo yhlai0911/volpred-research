@@ -41807,14 +41807,17 @@
     "description": "從科技巨頭2026年預估7000億美元資本支出切入，探討市場對AI變現速度的焦慮。這有助於釐清科技股近期隱含波動率飆升的底層邏輯。可量化：Nasdaq-100偏斜度與巨頭Capex變現率的背離。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-06-30T22:00:19+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-01T07:04:24+00:00",
+    "blocked_note": "同 narrative arc 與今日 digest mile_4901f7bc AI-capex 專欄撞題（feedback_narrative_arc_dedup）— 資產(科技巨頭)×結論(vol/skew 隱含焦慮)同構"
   },
   {
     "id": "paper_leverage_direction_reframing_decision",
@@ -42506,7 +42509,7 @@
     "description": "Gmail UID: 12393\nMessage-ID: <CD78CDF2-8F20-4A2D-9081-CFDB71E01B9A@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 1 Jul 2026 14:22:36 +0800\nSubject: Re: [VolPred Alert][INFO] 🔴【需老闆回信】leverage-direction 投稿選項 decision memo — 需 5 分鐘拍板 A/B/C/D\n\n--- 用戶回信內容 ---\n[VolPred] Re: leverage-direction 選 A/B/C/D\r\n選：B\r\n補充：以後你要我判斷或決策的話 應該直接給我html的選項/文字框之類的 引導我直接填寫就好\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月1日 14:14 寫道：\r\n> \r\n> [VolPred] Re: leverage-direction 選 A/B/C/D\r\n> 選：<A/B/C/D>\r\n> 補充：<可空>\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "claimed",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -42526,7 +42529,56 @@
         "from": "pending",
         "to": "claimed",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-01T07:06:28.994228+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "interactive-claude"
+      }
+    ],
+    "completed_at": "2026-07-01T07:06:28.993948+00:00",
+    "result": "Boss 選 B (Downshift FRL/IJF). Actions: (1) paper_body_leverage_direction_downshift_FRL_20260701 P2 task queued; (2) pipeline_status.json updated: journal_target=FRL primary/IJF fallback, do_not_advance=false, owner_decision_pending=false, decision_log entry added; (3) 撞題 trending_repost blocked deprecated; (4) 待寄 close email + save boss meta-rule (HTML forms in future decision emails)."
+  },
+  {
+    "id": "email-12398-9535b6",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] 🔴【需老闆回信】hourly-14 fire — leverage-direction Top-3 期刊評估",
+    "description": "Gmail UID: 12398\nMessage-ID: <0CF0D0A8-4B71-42FC-8A4F-DDE2AC342CE1@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Wed, 1 Jul 2026 14:53:16 +0800\nSubject: Re: [VolPred Alert][INFO] 🔴【需老闆回信】hourly-14 fire — leverage-direction Top-3 期刊評估完成 (JFinEc/JEmpFin/EmpEcon) 待老闆 ack\n\n--- 用戶回信內容 ---\n你覺得到底這文章的品質和等級 說老實話適合哪一個期刊 你決定\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月1日 14:50 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 🔴【需老闆回信】hourly-14 fire — leverage-direction Top-3 期刊評估完成 (JFinEc/JEmpFin/EmpEcon) 待老闆 ack\r\n> Alert level: info\r\n> ℹ\r\n> INFO\r\n> 🔴 此 email 需老闆做出決定才能繼續推進。\r\n> 請看下方「需要的決定」段，回信告知選項即可。\r\n> leverage-direction pivot 期刊評估完成 — Top-3 shortlist 待老闆 ack\r\n> \r\n> 老闆 email-12388 指示：「搜尋資料分析適合的期刊 + 本文接受勝率 + 建 review skill 中的期刊要求 reference 檔，目標 SSCI/SCI Tier 1-2」 — hourly-14 fire 完整交付。\r\n> Top-3 建議投稿順序（Serial pipeline）\r\n> \r\n> 順序\t期刊\tTier\tIF 2024\tFee\tFit\tAccept prob\tRationale\r\n> 1st\tJFinEc(Journal of Financial Econometrics, Oxford)\tSSCI Q1\t2.42\t$65(SoFiE 會員免費)\tStrong\tMedium 15-20%\tGJR-γ「method + finance」pairing 正中 scope；replicability review = acceptance 條件，我方 reproduce.py GREEN + self-contained package 是罕見優勢\r\n> 2nd\tJEmpFin(Journal of Empirical Finance, Elsevier)\tSSCI Q1\t2.52\t無\tStrong\tMedium 12-18%\t專為 rigorous empirical finance；Stage 2.2 null + classification framing 符合 honesty 期待；85% desk-reject 多打 scope 混淆者，本文清楚屬 empirical finance\r\n> 3rd\tEmpEcon(Empirical Economics, Springer)\tSSCI Q1\t2.25\t無\tStrong\tHigh 20-25%\t接受度最高的 realistic fallback；cross-country/panel welcome，對 Stage 2.2 null 最寬容；tier 略低但 hit rate 最高的 safety net\r\n> 4th (fallback)\tJBF (原目標)\tTop-field\t—\t$350\tModerate\tLow 5-10%\t若上述三家皆拒，再回原目標\r\n> 不建議：JFE / RFS（Trinity 對 null result 幾乎不收）、JoE（要 NEW methodology theory，我方非）、JBES（methodology gate 過高）、PBFJ（US-only 資料被排除）、FRL（單國 replication 排除）、FAJ / JPM（practitioner gate 且本文太 quant）。\r\n> 8 個新 SSCI/SCI Tier 1-2 期刊 profile（reference 檔已建）\r\n> \r\n> 期刊\t檔案\tIF 2024\tFee\t特點\r\n> JAE\t.claude/skills/journal-review/references/jae.md\t3.45\t無\tJAE Data Archive mandatory\r\n> JBES\t.claude/skills/journal-review/references/jbes.md\t3.20\t無\tMethodology-heavy gate\r\n> JEmpFin\t.claude/skills/journal-review/references/jempfin.md\t2.52\t無\t85% desk-reject\r\n> JFinEc\t.claude/skills/journal-review/references/jfinec.md\t2.42\t$65\tReplicability review = 條件；SoFiE 會員免費\r\n> QF\t.claude/skills/journal-review/references/qf.md\t1.71\t無\tSingle-blind\r\n> EmpEcon\t.claude/skills/journal-review/references/empecon.md\t2.25\t無\tCross-country welcome\r\n> EFM\t.claude/skills/journal-review/references/efm.md\t4.42\t$600\t4-week decision\r\n> SNDE\t.claude/skills/journal-review/references/snde.md\t0.9\t無 (S2O OA)\tNonlinear-dynamics gate\r\n> journal-index.md 從 10 rows 擴充到 18 rows + routing heuristics 加 8 條 + fee snapshot 更新。\r\n> 完整 evaluation memo\r\n> \r\n> 檔案：storage/paper_submission_target_evaluation/leverage_direction_20260701.md\r\n> 含 18 期刊逐一評估（fit / acceptance probability / rationale），並列出未 verify 的關鍵數據（多數 acceptance rate 官方未公佈，用 comparable-journal estimate；已在 memo 明確標記）。\r\n> Pipeline status 更新\r\n> \r\n> storage/paper_pipeline_status.json 已同步：\r\n> journal_target = \"Top-3 pivot pending owner ack: JFinEc → JEmpFin → EmpEcon (was JBF)\"\r\n> owner_decision_pending = true\r\n> notes = 完整 Top-3 摘要\r\n> 老闆下一步（等您 ack）\r\n> \r\n> 確認 Top-3 序（JFinEc → JEmpFin → EmpEcon）— 或 override 指定其他順序\r\n> Ack 後主線程接下一 stage：\r\n> 派 codex 多輪 review（latex-academic-reviewer + citation-verifier + journal-review for JFinEc）\r\n> Contribution gate 加審（老闆 KEEP #2 硬規則：非單純計量練習）\r\n> 修到最終 → arXiv 佔 priority → JFinEc 送\r\n> 若您回信只寫「go」或「confirm Top-3」→ 我下一 fire 自動派 JFinEc 多輪 review（老闆 KEEP #4 用 codex exec 省 Claude token）。若要 override（如「跳到 EmpEcon 直接投」）請明說。\r\n> Task: email-12388-4689b5 status → succeeded\r\n> Deliverables: 8 profile files + journal-index update + 120-line evaluation memo + pipeline status update\r\n> Timing: hourly-14 fire 14:32-14:50 (18 min), agent 134K tokens\r\n> ⏭ 下一 fire: 15:07 台灣時間（等您 ack 決定接下一 stage 走哪家）\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "claimed",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-01T07:00:05.289273+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12398,
+    "email_message_id": "<0CF0D0A8-4B71-42FC-8A4F-DDE2AC342CE1@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] 🔴【需老闆回信】hourly-14 fire — leverage-direction Top-3 期刊評估完成 (JFinEc/JEmpFin/EmpEcon) 待老闆 ack",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-01T07:00:47.798180+00:00",
+    "claim_session_id": "abee5456f928",
+    "status_history": [
+      {
+        "ts": "2026-07-01T07:00:47.798443+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
       }
     ]
+  },
+  {
+    "id": "paper_body_leverage_direction_downshift_FRL_20260701",
+    "task_type": "paper_body",
+    "priority": 2,
+    "status": "pending",
+    "title": "[論文管線] leverage-direction Downshift → FRL 主線 body 重寫（boss email-12393 選 B）",
+    "description": "Boss 2026-07-01 14:22 (email-12393) 回覆 decision memo 選 B = Downshift to FRL/IJF diagnostic + honest null paper.\n\n**主線 target = FRL** (SSCI IF 7.1, 2500 words hard cap, highlights mandatory, $200 submission fee)\n**Fallback = IJF** (若 FRL scope 不合或 desk-reject)\n**Note**: hourly-14 另建 SSCI Top-3 shortlist (JFinEc/JEmpFin/EmpEcon)，若 FRL/IJF 皆失敗可考慮此線；但 boss 明確選 B 對照 memo = FRL/IJF 為主。\n\n**主要動作**（分 hourly tick 執行，總 effort 2-3 週）:\n1. Body rewrite (25-35% 幅度)：intro / abstract / conclusion 重寫定位為 diagnostic + honest null；method/tables 大致保留\n2. Highlights 拆檔（3-5 bullets ≤85 chars each）\n3. Trim main text ≤2500 words 硬上限（in-text cites + footnotes 算入；abstract / refs / tables / figures 不算）\n4. Central claim 窄化：'即使窄到 equity-type domain, rule works; 跨到 commodities/bonds/crypto 失效 — 有訊號但不 universal'\n5. Standalone abstract ≤250 words，避免 refs\n6. 標題重擬避免 overclaim（如 'Leverage Direction as a State Variable for Volatility Model Selection: Cross-Asset Evidence and Limits'）\n7. Refs 改 Elsevier author-date (Harvard); et al. for 3+; alphabetical-then-chronological; LTWA journal abbreviations; DOIs\n8. Reproduce gate: 確保 paper/leverage-direction/reproduce.py match_rate ≥ 95% (per paper-workflow rule)\n9. Compliance scrub 已 CLEAN 保留\n\n**Skill 依賴**:\n- `.claude/skills/journal-review/references/frl.md` — FRL 全 spec\n- `.claude/skills/paper-update/` — paper-update CLI + reproduce gate\n- `.claude/skills/paper-submission-pipeline/` — stage advancement\n- `.claude/skills/finance-paper-quality/` — claim-evidence matching\n\n**Timeline**: 2026-07-01 → 2026-07-21 (三週 target)；hourly tick 每次做一小塊。\n\n**Deliverables**:\n- `paper/leverage-direction/body_v_frl.tex`（FRL 版本，並存 body.tex 為 JBF 歷史 archive）\n- `paper/leverage-direction/highlights.txt`\n- `paper/leverage-direction/cover_letter_frl.tex`\n- 送 arXiv 後再送 FRL Editorial Manager\n\n**PDCA gate（advance 前）**:\n- 3-pass multi-round review (codex) 全 PASS or CONDITIONAL_PASS\n- Word count actual verified ≤ 2500\n- Highlights char count actual verified ≤ 85 each\n- Reproduce.py exit 0 + match_rate ≥ 95%\n- 合規: author = Yi-Hao Lai only; K-id/VolPred/AI 全清\n\n**Refs 準備**（自主 execute 不問）:\n- FRL Editorial Manager URL: https://www.editorialmanager.com/frl/\n- $200 fee budget: 從 platform ops budget 確認可支出\n\n**Model routing**: paper_body → opus high (per routing table)",
+    "source": "hourly-15-dispatch-boss-decision-B",
+    "created_at": "2026-07-01T15:05:23+08:00",
+    "linked_email_task_id": "email-12393-2fd40c",
+    "linked_decision_memo": "paper/leverage-direction/decision_memo_20260701.md"
   }
 ]

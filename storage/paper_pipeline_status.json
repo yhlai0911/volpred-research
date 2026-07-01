@@ -22,12 +22,12 @@
   "papers": [
     {
       "paper": "leverage-direction",
-      "journal_target": "Top-3 pivot pending owner ack: JFinEc → JEmpFin → EmpEcon (was JBF)",
+      "journal_target": "FRL (primary) → IJF (fallback)",
       "stage": "revision",
       "stage_entered_at": "2026-07-01T02:25:00+08:00",
-      "last_advance_at": "2026-07-01T02:06:46+00:00",
+      "last_advance_at": "2026-07-01T15:05:23+08:00",
       "blocker": "Stage 1+2 reframe COMPLETE, but main-thread verification found BOTH honest Stage 2 pillars weak: gold regime (K1591) weak/mostly-NS; model-selection OOS (K1592) NULL_OR_WEAK, 0 Harvey-Holm significant. leverage-direction has NO JBF-grade empirical result after rigorous rebuild. GATE: do NOT advance to arxiv/submission. Owner research-direction decision pending (WARN email sent 2026-07-01 12:46): re-target FRL/IJF (diagnostic+nulls) / reframe as negative-results paper / shelve.",
-      "owner_decision_pending": true,
+      "owner_decision_pending": false,
       "compliance_scrub_done": true,
       "compliance_note": "submission set gate CLEAN (scripts/check_paper_compliance.py); body/tables/main thanks/cover_letter scrubbed of K-id/VolPred/AI; author=Yi-Hao Lai only; compiles 49pp",
       "contribution_gate": {
@@ -120,8 +120,19 @@
           "note": "This is the honest research-integrity outcome; the reframe did its job = it revealed the results don't support the strong claim. NOT a failure of the reframe — a failure of the original claim to survive rigor."
         }
       },
-      "do_not_advance": true,
-      "notes": "2026-07-01 14:47 owner email-12388 replied → agent hourly-14 built 8 new SSCI journal profiles + evaluation memo (storage/paper_submission_target_evaluation/leverage_direction_20260701.md). Top-3 reco: (1) JFinEc IF 2.42 Strong/Medium 15-20%; (2) JEmpFin IF 2.52 Strong/Medium 12-18%; (3) EmpEcon IF 2.25 Strong/High 20-25%. Serial pipeline JFinEc→JEmpFin→EmpEcon→JBF fallback. Awaiting owner ack of Top-3 shortlist before advancing to compliance_scrub."
+      "do_not_advance": false,
+      "notes": "2026-07-01 14:47 owner email-12388 replied → agent hourly-14 built 8 new SSCI journal profiles + evaluation memo (storage/paper_submission_target_evaluation/leverage_direction_20260701.md). Top-3 reco: (1) JFinEc IF 2.42 Strong/Medium 15-20%; (2) JEmpFin IF 2.52 Strong/Medium 12-18%; (3) EmpEcon IF 2.25 Strong/High 20-25%. Serial pipeline JFinEc→JEmpFin→EmpEcon→JBF fallback. Awaiting owner ack of Top-3 shortlist before advancing to compliance_scrub.\n2026-07-01 15:05 hourly-15 fire: boss email-12393 replied B (FRL/IJF); paper_body task queued (paper_body_leverage_direction_downshift_FRL_20260701); do_not_advance=false; awaiting body rewrite over 2-3 weeks per FRL 2500-word cap.",
+      "decision_log": [
+        {
+          "date": "2026-07-01T14:22:36+08:00",
+          "email_id": "email-12393-2fd40c",
+          "decided_by": "owner",
+          "decision": "B (Downshift to FRL/IJF)",
+          "reference_memo": "paper/leverage-direction/decision_memo_20260701.md",
+          "action_task_id": "paper_body_leverage_direction_downshift_FRL_20260701",
+          "supersedes": "Top-3 SSCI shortlist (JFinEc/JEmpFin/EmpEcon) — kept as tertiary fallback if FRL/IJF fail"
+        }
+      ]
     },
     {
       "paper": "vt-trend-following",
