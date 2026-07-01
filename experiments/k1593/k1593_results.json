@@ -1,0 +1,880 @@
+{
+  "experiment_id": "k1593",
+  "created_at": "2026-07-01T13:55:27.692672+08:00",
+  "seed": 1593,
+  "task": "research_cnn_transformer_hybrid",
+  "runtime_seconds": 29.948,
+  "data": {
+    "source": "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv",
+    "source_rows": 5466,
+    "assets": [
+      "SPY",
+      "QQQ",
+      "EEM",
+      "GLD",
+      "TLT",
+      "IWM",
+      "SLV"
+    ],
+    "target": "next-day Parkinson realized variance in percent-squared units",
+    "feature_set": [
+      "log_rv1",
+      "log_rv5",
+      "log_rv22",
+      "log_vix_var",
+      "abs_ret",
+      "neg_ret"
+    ],
+    "train_end": "2020-12-31",
+    "validation_window": [
+      "2021-01-01",
+      "2022-12-31"
+    ],
+    "oos_window": [
+      "2023-01-01",
+      "2026-06-30"
+    ],
+    "sequence_length": 22
+  },
+  "model_design": {
+    "cnn_transformer": {
+      "conv1d_kernel": 3,
+      "d_model": 24,
+      "transformer_layers": 1,
+      "attention_heads": 4,
+      "epochs_max": 50,
+      "patience": 8,
+      "target_transform": "log(target_rv)"
+    },
+    "baselines": [
+      "RollingMean22 from lagged RV only",
+      "HAR-X linear log-RV regression on the same lagged features",
+      "Ridge-HAR-X with alpha selected on 2021-2022 validation only"
+    ]
+  },
+  "asset_summary": [
+    {
+      "asset": "SPY",
+      "n_total_rows": 3484,
+      "n_train_seq": 2380,
+      "n_valid_seq": 397,
+      "n_oos": 686,
+      "oos_start": "2023-01-04",
+      "oos_end": "2026-06-26",
+      "qlike": {
+        "HAR-X": 0.4336603217171117,
+        "Ridge-HAR-X": 0.4343797240219875,
+        "RollingMean22": 0.49724718693362957,
+        "CNNTransformer": 0.4504110749646853
+      },
+      "best_mean_loss_model": "HAR-X",
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "HAR-X",
+          "qlike": 0.4336603217171117
+        },
+        {
+          "rank": 2,
+          "model": "Ridge-HAR-X",
+          "qlike": 0.4343797240219875
+        },
+        {
+          "rank": 3,
+          "model": "CNNTransformer",
+          "qlike": 0.4504110749646853
+        },
+        {
+          "rank": 4,
+          "model": "RollingMean22",
+          "qlike": 0.49724718693362957
+        }
+      ],
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": 1.1599267432929914,
+          "p": 0.24648275864797364,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": 1.1198535187733214,
+          "p": 0.2631686814061056,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": -1.423604175334964,
+          "p": 0.1550164013939077,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "HAR-X",
+          "Ridge-HAR-X",
+          "RollingMean22",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "HAR-X": 0.316,
+          "Ridge-HAR-X": 0.316,
+          "RollingMean22": 0.316,
+          "CNNTransformer": 0.316
+        }
+      },
+      "cnn_training": {
+        "best_val_loss_standardized_log_rv": 0.5045502781867981,
+        "best_epoch": 13,
+        "epochs_run": 21
+      },
+      "fit_meta": {
+        "ridge_alpha": 100.0,
+        "har_n_trainval": 2798
+      },
+      "lookahead_guard": {
+        "max_training_feature_date": "2020-12-30",
+        "first_oos_feature_date": "2022-12-30",
+        "first_oos_target_date": "2023-01-04",
+        "oos_feature_before_target_all_rows": true
+      },
+      "dm_cnn_vs_harx_holm_p": 0.9292006612023584,
+      "cnn_strict_holm_win_vs_harx": false
+    },
+    {
+      "asset": "QQQ",
+      "n_total_rows": 3484,
+      "n_train_seq": 2380,
+      "n_valid_seq": 397,
+      "n_oos": 686,
+      "oos_start": "2023-01-04",
+      "oos_end": "2026-06-26",
+      "qlike": {
+        "HAR-X": 0.4392336049725006,
+        "Ridge-HAR-X": 0.43910440418111324,
+        "RollingMean22": 0.4259204922139612,
+        "CNNTransformer": 0.45080884973578295
+      },
+      "best_mean_loss_model": "RollingMean22",
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "RollingMean22",
+          "qlike": 0.4259204922139612
+        },
+        {
+          "rank": 2,
+          "model": "Ridge-HAR-X",
+          "qlike": 0.43910440418111324
+        },
+        {
+          "rank": 3,
+          "model": "HAR-X",
+          "qlike": 0.4392336049725006
+        },
+        {
+          "rank": 4,
+          "model": "CNNTransformer",
+          "qlike": 0.45080884973578295
+        }
+      ],
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": 0.496123270394371,
+          "p": 0.6199665893499049,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": 0.5023243340682302,
+          "p": 0.6156008310476562,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": 0.9318694862405372,
+          "p": 0.35173229530336014,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "HAR-X",
+          "Ridge-HAR-X",
+          "RollingMean22",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "HAR-X": 0.631,
+          "Ridge-HAR-X": 0.631,
+          "RollingMean22": 0.631,
+          "CNNTransformer": 0.631
+        }
+      },
+      "cnn_training": {
+        "best_val_loss_standardized_log_rv": 0.483090877532959,
+        "best_epoch": 8,
+        "epochs_run": 16
+      },
+      "fit_meta": {
+        "ridge_alpha": 10.0,
+        "har_n_trainval": 2798
+      },
+      "lookahead_guard": {
+        "max_training_feature_date": "2020-12-30",
+        "first_oos_feature_date": "2022-12-30",
+        "first_oos_target_date": "2023-01-04",
+        "oos_feature_before_target_all_rows": true
+      },
+      "dm_cnn_vs_harx_holm_p": 1.0,
+      "cnn_strict_holm_win_vs_harx": false
+    },
+    {
+      "asset": "EEM",
+      "n_total_rows": 3484,
+      "n_train_seq": 2380,
+      "n_valid_seq": 397,
+      "n_oos": 686,
+      "oos_start": "2023-01-04",
+      "oos_end": "2026-06-26",
+      "qlike": {
+        "HAR-X": 0.4199464664086433,
+        "Ridge-HAR-X": 0.42048073380418105,
+        "RollingMean22": 0.48468311808161835,
+        "CNNTransformer": 0.44373599507602707
+      },
+      "best_mean_loss_model": "HAR-X",
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "HAR-X",
+          "qlike": 0.4199464664086433
+        },
+        {
+          "rank": 2,
+          "model": "Ridge-HAR-X",
+          "qlike": 0.42048073380418105
+        },
+        {
+          "rank": 3,
+          "model": "CNNTransformer",
+          "qlike": 0.44373599507602707
+        },
+        {
+          "rank": 4,
+          "model": "RollingMean22",
+          "qlike": 0.48468311808161835
+        }
+      ],
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": 1.2532589839781434,
+          "p": 0.2105390733741943,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": 1.2502475371277197,
+          "p": 0.2116360673549289,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": -1.1074477323228091,
+          "p": 0.2684891194430894,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "HAR-X",
+          "Ridge-HAR-X",
+          "RollingMean22",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "HAR-X": 0.382,
+          "Ridge-HAR-X": 0.382,
+          "RollingMean22": 0.382,
+          "CNNTransformer": 0.382
+        }
+      },
+      "cnn_training": {
+        "best_val_loss_standardized_log_rv": 0.5446750521659851,
+        "best_epoch": 6,
+        "epochs_run": 14
+      },
+      "fit_meta": {
+        "ridge_alpha": 100.0,
+        "har_n_trainval": 2798
+      },
+      "lookahead_guard": {
+        "max_training_feature_date": "2020-12-30",
+        "first_oos_feature_date": "2022-12-30",
+        "first_oos_target_date": "2023-01-04",
+        "oos_feature_before_target_all_rows": true
+      },
+      "dm_cnn_vs_harx_holm_p": 0.9292006612023584,
+      "cnn_strict_holm_win_vs_harx": false
+    },
+    {
+      "asset": "GLD",
+      "n_total_rows": 3484,
+      "n_train_seq": 2380,
+      "n_valid_seq": 397,
+      "n_oos": 686,
+      "oos_start": "2023-01-04",
+      "oos_end": "2026-06-26",
+      "qlike": {
+        "HAR-X": 0.6535365430949528,
+        "Ridge-HAR-X": 0.6561114495942545,
+        "RollingMean22": 0.48515291182440456,
+        "CNNTransformer": 0.71400562299478
+      },
+      "best_mean_loss_model": "RollingMean22",
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "RollingMean22",
+          "qlike": 0.48515291182440456
+        },
+        {
+          "rank": 2,
+          "model": "HAR-X",
+          "qlike": 0.6535365430949528
+        },
+        {
+          "rank": 3,
+          "model": "Ridge-HAR-X",
+          "qlike": 0.6561114495942545
+        },
+        {
+          "rank": 4,
+          "model": "CNNTransformer",
+          "qlike": 0.71400562299478
+        }
+      ],
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": 1.424121131580367,
+          "p": 0.15486677686705974,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": 1.3863741789431476,
+          "p": 0.16608373804858934,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": 2.6036893454694936,
+          "p": 0.009422421861827956,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "HAR-X",
+          "Ridge-HAR-X",
+          "RollingMean22",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "HAR-X": 0.128,
+          "Ridge-HAR-X": 0.128,
+          "RollingMean22": 0.128,
+          "CNNTransformer": 0.128
+        }
+      },
+      "cnn_training": {
+        "best_val_loss_standardized_log_rv": 0.6400443911552429,
+        "best_epoch": 12,
+        "epochs_run": 20
+      },
+      "fit_meta": {
+        "ridge_alpha": 100.0,
+        "har_n_trainval": 2798
+      },
+      "lookahead_guard": {
+        "max_training_feature_date": "2020-12-30",
+        "first_oos_feature_date": "2022-12-30",
+        "first_oos_target_date": "2023-01-04",
+        "oos_feature_before_target_all_rows": true
+      },
+      "dm_cnn_vs_harx_holm_p": 0.9292006612023584,
+      "cnn_strict_holm_win_vs_harx": false
+    },
+    {
+      "asset": "TLT",
+      "n_total_rows": 3484,
+      "n_train_seq": 2380,
+      "n_valid_seq": 397,
+      "n_oos": 686,
+      "oos_start": "2023-01-04",
+      "oos_end": "2026-06-26",
+      "qlike": {
+        "HAR-X": 0.3373998040867186,
+        "Ridge-HAR-X": 0.3373998464729703,
+        "RollingMean22": 0.3075317447606557,
+        "CNNTransformer": 0.2829275234609216
+      },
+      "best_mean_loss_model": "CNNTransformer",
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "CNNTransformer",
+          "qlike": 0.2829275234609216
+        },
+        {
+          "rank": 2,
+          "model": "RollingMean22",
+          "qlike": 0.3075317447606557
+        },
+        {
+          "rank": 3,
+          "model": "HAR-X",
+          "qlike": 0.3373998040867186
+        },
+        {
+          "rank": 4,
+          "model": "Ridge-HAR-X",
+          "qlike": 0.3373998464729703
+        }
+      ],
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": -5.452896218983492,
+          "p": 6.924757989246189e-08,
+          "n": 686,
+          "interpretation": "model_a_strict_win"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": -5.452890364971347,
+          "p": 6.924976547750816e-08,
+          "n": 686,
+          "interpretation": "model_a_strict_win"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": -2.377512597353025,
+          "p": 0.017703372061998346,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "CNNTransformer"
+        ],
+        "eliminated": [
+          [
+            "HAR-X",
+            0.012
+          ],
+          [
+            "Ridge-HAR-X",
+            0.023
+          ],
+          [
+            "RollingMean22",
+            0.056
+          ]
+        ],
+        "p_values": {
+          "HAR-X": 0.012,
+          "Ridge-HAR-X": 0.023,
+          "RollingMean22": 0.056,
+          "CNNTransformer": 1.0
+        }
+      },
+      "cnn_training": {
+        "best_val_loss_standardized_log_rv": 0.6425192356109619,
+        "best_epoch": 3,
+        "epochs_run": 11
+      },
+      "fit_meta": {
+        "ridge_alpha": 0.01,
+        "har_n_trainval": 2798
+      },
+      "lookahead_guard": {
+        "max_training_feature_date": "2020-12-30",
+        "first_oos_feature_date": "2022-12-30",
+        "first_oos_target_date": "2023-01-04",
+        "oos_feature_before_target_all_rows": true
+      },
+      "dm_cnn_vs_harx_holm_p": 4.847330592472332e-07,
+      "cnn_strict_holm_win_vs_harx": true
+    },
+    {
+      "asset": "IWM",
+      "n_total_rows": 3484,
+      "n_train_seq": 2380,
+      "n_valid_seq": 397,
+      "n_oos": 686,
+      "oos_start": "2023-01-04",
+      "oos_end": "2026-06-26",
+      "qlike": {
+        "HAR-X": 0.4080076797335694,
+        "Ridge-HAR-X": 0.40800704783405795,
+        "RollingMean22": 0.38783758686674313,
+        "CNNTransformer": 0.40302963248360774
+      },
+      "best_mean_loss_model": "RollingMean22",
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "RollingMean22",
+          "qlike": 0.38783758686674313
+        },
+        {
+          "rank": 2,
+          "model": "CNNTransformer",
+          "qlike": 0.40302963248360774
+        },
+        {
+          "rank": 3,
+          "model": "Ridge-HAR-X",
+          "qlike": 0.40800704783405795
+        },
+        {
+          "rank": 4,
+          "model": "HAR-X",
+          "qlike": 0.4080076797335694
+        }
+      ],
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": -0.43953454639850226,
+          "p": 0.6604128829508173,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": -0.43948431218601963,
+          "p": 0.6604492560100439,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": 0.5198752256266334,
+          "p": 0.6033185000806696,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "HAR-X",
+          "Ridge-HAR-X",
+          "RollingMean22",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "HAR-X": 0.802,
+          "Ridge-HAR-X": 0.802,
+          "RollingMean22": 0.802,
+          "CNNTransformer": 0.802
+        }
+      },
+      "cnn_training": {
+        "best_val_loss_standardized_log_rv": 0.4643247127532959,
+        "best_epoch": 7,
+        "epochs_run": 15
+      },
+      "fit_meta": {
+        "ridge_alpha": 0.01,
+        "har_n_trainval": 2798
+      },
+      "lookahead_guard": {
+        "max_training_feature_date": "2020-12-30",
+        "first_oos_feature_date": "2022-12-30",
+        "first_oos_target_date": "2023-01-04",
+        "oos_feature_before_target_all_rows": true
+      },
+      "dm_cnn_vs_harx_holm_p": 1.0,
+      "cnn_strict_holm_win_vs_harx": false
+    },
+    {
+      "asset": "SLV",
+      "n_total_rows": 3439,
+      "n_train_seq": 2380,
+      "n_valid_seq": 397,
+      "n_oos": 641,
+      "oos_start": "2023-01-04",
+      "oos_end": "2026-04-17",
+      "qlike": {
+        "HAR-X": 0.6791941680718615,
+        "Ridge-HAR-X": 0.6826717826811297,
+        "RollingMean22": 0.458879264140426,
+        "CNNTransformer": 0.8732393831679025
+      },
+      "best_mean_loss_model": "RollingMean22",
+      "ranking_by_qlike": [
+        {
+          "rank": 1,
+          "model": "RollingMean22",
+          "qlike": 0.458879264140426
+        },
+        {
+          "rank": 2,
+          "model": "HAR-X",
+          "qlike": 0.6791941680718615
+        },
+        {
+          "rank": 3,
+          "model": "Ridge-HAR-X",
+          "qlike": 0.6826717826811297
+        },
+        {
+          "rank": 4,
+          "model": "CNNTransformer",
+          "qlike": 0.8732393831679025
+        }
+      ],
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": 1.3244804921833253,
+          "p": 0.18581627986224536,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": 1.3176009251337735,
+          "p": 0.18810874313974413,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": 1.8756902309333932,
+          "p": 0.06115281915591653,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "HAR-X",
+          "Ridge-HAR-X",
+          "RollingMean22",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "HAR-X": 0.399,
+          "Ridge-HAR-X": 0.399,
+          "RollingMean22": 0.399,
+          "CNNTransformer": 0.399
+        }
+      },
+      "cnn_training": {
+        "best_val_loss_standardized_log_rv": 0.5042510628700256,
+        "best_epoch": 2,
+        "epochs_run": 10
+      },
+      "fit_meta": {
+        "ridge_alpha": 100.0,
+        "har_n_trainval": 2798
+      },
+      "lookahead_guard": {
+        "max_training_feature_date": "2020-12-30",
+        "first_oos_feature_date": "2022-12-30",
+        "first_oos_target_date": "2023-01-04",
+        "oos_feature_before_target_all_rows": true
+      },
+      "dm_cnn_vs_harx_holm_p": 0.9292006612023584,
+      "cnn_strict_holm_win_vs_harx": false
+    }
+  ],
+  "panel_summary": {
+    "all_assets": {
+      "assets": [
+        "SPY",
+        "QQQ",
+        "EEM",
+        "GLD",
+        "TLT",
+        "IWM",
+        "SLV"
+      ],
+      "n_common_dates": 641,
+      "date_start": "2023-01-04",
+      "date_end": "2026-04-17",
+      "date_alignment": "common dates only; panel loss is the cross-asset mean by target date",
+      "mean_losses": {
+        "RollingMean22": 0.4337199236913407,
+        "HAR-X": 0.47196643495207424,
+        "Ridge-HAR-X": 0.47281200328463535,
+        "CNNTransformer": 0.5107701376647522
+      },
+      "best_mean_loss_model": "RollingMean22",
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": 1.3434817852987613,
+          "p": 0.17959217053053167,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": 1.3362239670002036,
+          "p": 0.18195096856945692,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": 1.6027016373641254,
+          "p": 0.10949393403640162,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "RollingMean22",
+          "HAR-X",
+          "Ridge-HAR-X",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "RollingMean22": 0.346,
+          "HAR-X": 0.346,
+          "Ridge-HAR-X": 0.346,
+          "CNNTransformer": 0.346
+        }
+      }
+    },
+    "equity_risk_assets": {
+      "assets": [
+        "SPY",
+        "QQQ",
+        "EEM",
+        "IWM"
+      ],
+      "n_common_dates": 686,
+      "date_start": "2023-01-04",
+      "date_end": "2026-06-26",
+      "date_alignment": "common dates only; panel loss is the cross-asset mean by target date",
+      "mean_losses": {
+        "RollingMean22": 0.4489220960239881,
+        "HAR-X": 0.4252120182079563,
+        "Ridge-HAR-X": 0.42549297746033493,
+        "CNNTransformer": 0.43699638806502566
+      },
+      "best_mean_loss_model": "HAR-X",
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": 0.8030746256501927,
+          "p": 0.42221015987312827,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": 0.7924073764134827,
+          "p": 0.42839751837242535,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": -0.4433183752907098,
+          "p": 0.657675444480665,
+          "n": 686,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "RollingMean22",
+          "HAR-X",
+          "Ridge-HAR-X",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "RollingMean22": 0.764,
+          "HAR-X": 0.764,
+          "Ridge-HAR-X": 0.764,
+          "CNNTransformer": 0.764
+        }
+      }
+    },
+    "defensive_commodity_bond_assets": {
+      "assets": [
+        "GLD",
+        "TLT",
+        "SLV"
+      ],
+      "n_common_dates": 641,
+      "date_start": "2023-01-04",
+      "date_end": "2026-04-17",
+      "date_alignment": "common dates only; panel loss is the cross-asset mean by target date",
+      "mean_losses": {
+        "RollingMean22": 0.41706133451524835,
+        "HAR-X": 0.5540076495441207,
+        "Ridge-HAR-X": 0.5558461806581931,
+        "CNNTransformer": 0.6220144168367006
+      },
+      "best_mean_loss_model": "RollingMean22",
+      "dm_tests": {
+        "CNNTransformer_minus_HAR-X": {
+          "t": 1.068178401892768,
+          "p": 0.28584277996524365,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_Ridge-HAR-X": {
+          "t": 1.0547228521342313,
+          "p": 0.29195009821064843,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        },
+        "CNNTransformer_minus_RollingMean22": {
+          "t": 1.972432278589897,
+          "p": 0.04899033381518669,
+          "n": 641,
+          "interpretation": "equal_accuracy_not_rejected"
+        }
+      },
+      "mcs": {
+        "mcs_models": [
+          "RollingMean22",
+          "HAR-X",
+          "Ridge-HAR-X",
+          "CNNTransformer"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "RollingMean22": 0.319,
+          "HAR-X": 0.319,
+          "Ridge-HAR-X": 0.319,
+          "CNNTransformer": 0.319
+        }
+      }
+    }
+  },
+  "conclusion": {
+    "verdict": "NULL_VS_HARX",
+    "cnn_best_mean_loss_assets": 1,
+    "cnn_harvey_holm_wins_vs_harx": 1,
+    "panel_all_best_model": "RollingMean22",
+    "panel_all_cnn_minus_harx_dm_t": 1.3434817852987613,
+    "headline": "CNN-Transformer does not deliver a robust OOS architecture edge over a same-information HAR-X baseline."
+  },
+  "artifacts": {
+    "predictions_csv": "experiments/k1593/k1593_oos_predictions.csv",
+    "losses_csv": "experiments/k1593/k1593_oos_losses.csv",
+    "figures": [
+      "experiments/k1593/figures/fig1_oos_qlike_by_asset.png",
+      "experiments/k1593/figures/fig2_cnn_vs_harx_dm.png",
+      "experiments/k1593/figures/fig3_panel_cumulative_loss_diff.png"
+    ]
+  }
+}
