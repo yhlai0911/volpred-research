@@ -1,0 +1,219 @@
+% =====================================================================
+%  main_v_ijf.tex  —  International Journal of Forecasting (IJF) submission wrapper
+%  Full-length reframe around the complexity ceiling / measurement-vs-allocation
+%  wedge. Body prose lives in body_v_ijf.tex (ticks 1--5); tables in
+%  tables_main.tex. This wrapper (tick-6) supplies the preamble, standalone
+%  abstract, title, author block, and a pruned author-date reference list
+%  containing only the works actually cited in body_v_ijf.tex.
+%
+%  NOTE ON DOCUMENT CLASS: Elsevier's elsarticle.cls is not installed in this
+%  build environment, so we compile with the standard article class under the
+%  same xelatex toolchain that already builds main.tex cleanly. The reference
+%  style is author-date (Harvard/APA via natbib apalike), consistent with IJF
+%  requirements. Conversion to elsarticle.cls is a production-stage step and
+%  does not affect the arXiv preprint or the initial-submission PDF.
+%
+%  JBF-era archive: main.tex + body.tex are preserved unchanged.
+% =====================================================================
+
+\documentclass[12pt,a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fontspec}           % XeLaTeX for Unicode support
+\usepackage{xeCJK}
+\IfFontExistsTF{PingFang TC}{\setCJKmainfont{PingFang TC}}{\setCJKmainfont{Songti TC}}
+
+\usepackage{pifont}% for \ding check/cross marks
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\doublespacing
+
+% The IJF version is self-contained: body_v_ijf.tex references only its own
+% sections and the six tables in tables_main.tex. No external supplement is
+% cross-referenced, so xr-hyper/externaldocument is intentionally omitted.
+
+% ─── Title ───────────────────────────────────────────────────
+\title{When Does Better Volatility Measurement Improve Allocation? A Cross-Asset Complexity Ceiling\thanks{All errors are my own. A self-contained replication package (data and code) accompanies the paper.}}
+
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
+
+\date{July 2026}
+
+\begin{document}
+
+\maketitle
+
+% ─── Abstract (standalone; 147 words; no refs/jargon/math) ───
+\begin{abstract}
+\noindent
+A large literature refines volatility models---adding asymmetry, regime
+dependence, and fat tails---on the presumption that a better in-sample fit
+carries through to better decisions. We ask when improved volatility
+measurement actually improves portfolio allocation, using a pre-specified
+out-of-sample evaluation across seven primary assets spanning equities,
+precious metals, government bonds, and cryptocurrency, extended to
+twenty-six assets. Asymmetric models beat symmetric ones out of sample only
+under narrow conditions: a statistically significant asymmetry within a
+homogeneous equity domain. At the allocation level the dominant benefit of
+volatility targeting---drawdown reduction---is governed by an asset's base
+volatility level, not by asymmetric structure. The sign of the asymmetry is
+economically interpretable but does not travel across asset classes. These
+results document a complexity ceiling: once the first-order volatility level
+is captured, added model sophistication rarely earns its keep, for
+researchers and practitioners alike.
+
+\medskip
+\noindent
+\textbf{Keywords:} volatility forecasting; out-of-sample evaluation; GARCH; asymmetric volatility; volatility targeting; complexity ceiling; cross-asset
+
+\medskip
+\noindent
+\textbf{JEL Classification:} C22, C53, G11, G17
+\end{abstract}
+
+% ─── Body (prose + embedded figure) ──────────────────────────
+\input{body_v_ijf}
+
+% ─── Formal tables ───────────────────────────────────────────
+\input{tables_main}
+
+% ─── References (author-date; only works cited in body_v_ijf.tex; ──
+%     alphabetical by first-author surname, then chronological) ──────
+\bibliographystyle{apalike}
+\begingroup
+\singlespacing
+\small
+\begin{thebibliography}{99}
+
+\bibitem[Bali et al.(2016)]{bali2016}
+Bali, T.~G., Engle, R.~F., \& Murray, S. (2016). \textit{Empirical Asset Pricing: The Cross Section of Stock Returns}. John Wiley \& Sons.
+
+\bibitem[Batten et al.(2010)]{batten2010}
+Batten, J.~A., Ciner, C., \& Lucey, B.~M. (2010). The macroeconomic determinants of volatility in precious metals markets. \textit{Resources Policy}, 35(2), 65--71. https://doi.org/10.1016/j.resourpol.2009.12.002
+
+\bibitem[Baur and Lucey(2010)]{baur2010hedge}
+Baur, D.~G., \& Lucey, B.~M. (2010). Is gold a hedge or a safe haven? An analysis of stocks, bonds and gold. \textit{Financial Review}, 45(2), 217--229. https://doi.org/10.1111/j.1540-6288.2010.00244.x
+
+\bibitem[Baur and McDermott(2010)]{baur2010safe}
+Baur, D.~G., \& McDermott, T.~K. (2010). Is gold a safe haven? International evidence. \textit{Journal of Banking \& Finance}, 34(8), 1886--1898. https://doi.org/10.1016/j.jbankfin.2009.12.008
+
+\bibitem[BCBS(2006)]{bcbs2006}
+Basel Committee on Banking Supervision. (2006). \textit{International Convergence of Capital Measurement and Capital Standards: A Revised Framework}. Bank for International Settlements.
+
+\bibitem[BCBS(2019)]{bcbs2019}
+Basel Committee on Banking Supervision. (2019). \textit{Minimum Capital Requirements for Market Risk}. Bank for International Settlements.
+
+\bibitem[Black(1976)]{black1976}
+Black, F. (1976). Studies of stock price volatility changes. \textit{Proceedings of the Business and Economics Statistics Section, ASA}, 177--181.
+
+\bibitem[Bollerslev(1986)]{bollerslev1986}
+Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. \textit{Journal of Econometrics}, 31(3), 307--327. https://doi.org/10.1016/0304-4076(86)90063-1
+
+\bibitem[Bollerslev(1987)]{bollerslev1987}
+Bollerslev, T. (1987). A conditionally heteroskedastic time series model for speculative prices and rates of return. \textit{Review of Economics and Statistics}, 69(3), 542--547. https://doi.org/10.2307/1925546
+
+\bibitem[Bozovic(2024)]{bozovic2024}
+Bozovic, M. (2024). VIX-managed portfolios. \textit{International Review of Financial Analysis}, 95, 103353. https://doi.org/10.1016/j.irfa.2024.103353
+
+\bibitem[Cederburg et al.(2020)]{cederburg2020}
+Cederburg, S., O'Doherty, M.~S., Wang, F., \& Yan, X.~S. (2020). On the performance of volatility-managed portfolios. \textit{Journal of Financial Economics}, 138(1), 95--117. https://doi.org/10.1016/j.jfineco.2020.04.015
+
+\bibitem[Chang et al.(2021)]{chang2021}
+Chang, M.-S., Kung, C.-C., Chen, M.-W., \& Tian, Y. (2021). Volatility regime, inverted asymmetry, contagion, and flights in the gold market. \textit{Pacific-Basin Finance Journal}, 67, 101522. https://doi.org/10.1016/j.pacfin.2021.101522
+
+\bibitem[Chevallier and Ielpo(2017)]{chevallier2017}
+Chevallier, J., \& Ielpo, F. (2017). Investigating the leverage effect in commodity markets with a recursive estimation approach. \textit{Research in International Business and Finance}, 39, 763--778. https://doi.org/10.1016/j.ribaf.2014.09.010
+
+\bibitem[Christie(1982)]{christie1982}
+Christie, A.~A. (1982). The stochastic behavior of common stock variances: Value, leverage and interest rate effects. \textit{Journal of Financial Economics}, 10(4), 407--432. https://doi.org/10.1016/0304-405X(82)90018-6
+
+\bibitem[Christoffersen(1998)]{christoffersen1998}
+Christoffersen, P.~F. (1998). Evaluating interval forecasts. \textit{International Economic Review}, 39(4), 841--862. https://doi.org/10.2307/2527341
+
+\bibitem[DeMiguel et al.(2024)]{demiguel2024}
+DeMiguel, V., Martin-Utrera, A., \& Uppal, R. (2024). A multifactor perspective on volatility-managed portfolios. \textit{Journal of Finance}, 79(6), 3859--3891. https://doi.org/10.1111/jofi.13395
+
+\bibitem[Diebold and Mariano(1995)]{diebold1995}
+Diebold, F.~X., \& Mariano, R.~S. (1995). Comparing predictive accuracy. \textit{Journal of Business \& Economic Statistics}, 13(3), 253--263. https://doi.org/10.1080/07350015.1995.10524599
+
+\bibitem[Engle(1982)]{engle1982}
+Engle, R.~F. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. \textit{Econometrica}, 50(4), 987--1007. https://doi.org/10.2307/1912773
+
+\bibitem[Engle and Siriwardane(2018)]{engle2018}
+Engle, R.~F., \& Siriwardane, E.~N. (2018). Structural GARCH: The volatility-leverage connection. \textit{Review of Financial Studies}, 31(2), 449--492. https://doi.org/10.1093/rfs/hhx099
+
+\bibitem[Fleming et al.(2001)]{fleming2001}
+Fleming, J., Kirby, C., \& Ostdiek, B. (2001). The economic value of volatility timing. \textit{Journal of Finance}, 56(1), 329--352. https://doi.org/10.1111/0022-1082.00327
+
+\bibitem[Fleming et al.(2003)]{fleming2003}
+Fleming, J., Kirby, C., \& Ostdiek, B. (2003). The economic value of volatility timing using realized volatility. \textit{Journal of Financial Economics}, 67(3), 473--509. https://doi.org/10.1016/S0304-405X(02)00259-3
+
+\bibitem[Francq and Zako\"{\i}an(2004)]{francq2004}
+Francq, C., \& Zako\"{\i}an, J.-M. (2004). Maximum likelihood estimation of pure GARCH and ARMA-GARCH processes. \textit{Bernoulli}, 10(4), 605--637. https://doi.org/10.3150/bj/1093265632
+
+\bibitem[Glosten et al.(1993)]{glosten1993}
+Glosten, L.~R., Jagannathan, R., \& Runkle, D.~E. (1993). On the relation between the expected value and the volatility of the nominal excess return on stocks. \textit{Journal of Finance}, 48(5), 1779--1801. https://doi.org/10.1111/j.1540-6261.1993.tb05128.x
+
+\bibitem[Hansen(1994)]{hansen1994}
+Hansen, B.~E. (1994). Autoregressive conditional density estimation. \textit{International Economic Review}, 35(3), 705--730. https://doi.org/10.2307/2527081
+
+\bibitem[Hansen and Lunde(2005)]{hansen2005}
+Hansen, P.~R., \& Lunde, A. (2005). A forecast comparison of volatility models: Does anything beat a GARCH(1,1)? \textit{Journal of Applied Econometrics}, 20(7), 873--889. https://doi.org/10.1002/jae.800
+
+\bibitem[Hansen et al.(2011)]{hansen2011}
+Hansen, P.~R., Lunde, A., \& Nason, J.~M. (2011). The model confidence set. \textit{Econometrica}, 79(2), 453--497. https://doi.org/10.3982/ECTA5771
+
+\bibitem[Harvey et al.(2016)]{harvey2016}
+Harvey, C.~R., Liu, Y., \& Zhu, H. (2016). \ldots and the cross-section of expected returns. \textit{Review of Financial Studies}, 29(1), 5--68. https://doi.org/10.1093/rfs/hhv059
+
+\bibitem[Harvey et al.(2018)]{harvey2018}
+Harvey, C.~R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., \& Van Hemert, O. (2018). The impact of volatility targeting. \textit{Journal of Portfolio Management}, 45(1), 14--33. https://doi.org/10.3905/jpm.2018.45.1.014
+
+\bibitem[Henriksson and Merton(1981)]{henriksson1981}
+Henriksson, R.~D., \& Merton, R.~C. (1981). On market timing and investment performance. II. Statistical procedures for evaluating forecasting skills. \textit{Journal of Business}, 54(4), 513--533. https://doi.org/10.1086/296144
+
+\bibitem[Hood and Raughtigan(2025)]{hood2025}
+Hood, B., \& Raughtigan, C. (2025). Volatility targeting is trendy: How trend following explains alpha in volatility-managed strategies. \textit{Journal of Portfolio Management}, forthcoming. https://doi.org/10.3905/jpm.2025.1.764
+
+\bibitem[Hwang and Valls Pereira(2006)]{hwang2006}
+Hwang, S., \& Valls Pereira, P.~L. (2006). Small sample properties of GARCH estimates and persistence. \textit{European Journal of Finance}, 12(6--7), 473--494. https://doi.org/10.1080/13518470500039436
+
+\bibitem[Kuester et al.(2006)]{kuester2006}
+Kuester, K., Mittnik, S., \& Paolella, M.~S. (2006). Value-at-risk prediction: A comparison of alternative strategies. \textit{Journal of Financial Econometrics}, 4(1), 53--89. https://doi.org/10.1093/jjfinec/nbj002
+
+\bibitem[Kupiec(1995)]{kupiec1995}
+Kupiec, P.~H. (1995). Techniques for verifying the accuracy of risk measurement models. \textit{Journal of Derivatives}, 3(2), 73--84. https://doi.org/10.3905/jod.1995.407942
+
+\bibitem[Moreira and Muir(2017)]{moreira2017}
+Moreira, A., \& Muir, T. (2017). Volatility-managed portfolios. \textit{Journal of Finance}, 72(4), 1611--1644. https://doi.org/10.1111/jofi.12513
+
+\bibitem[Nelson(1991)]{nelson1991}
+Nelson, D.~B. (1991). Conditional heteroskedasticity in asset returns: A new approach. \textit{Econometrica}, 59(2), 347--370. https://doi.org/10.2307/2938260
+
+\bibitem[Nelson(2025)]{nelson2025}
+Nelson, R. (2025). Portfolio construction under correlation breakdowns and tail risk. SSRN Working Paper No.~5931154. https://doi.org/10.2139/ssrn.5931154
+
+\bibitem[Patton(2011)]{patton2011}
+Patton, A.~J. (2011). Volatility forecast comparison using imperfect volatility proxies. \textit{Journal of Econometrics}, 160(1), 246--256. https://doi.org/10.1016/j.jeconom.2010.03.034
+
+\bibitem[Sheppard(2023)]{sheppard2023}
+Sheppard, K. (2023). \textit{arch: ARCH and other financial models in Python} (Version 6.2) [Computer software]. https://github.com/bashtage/arch
+
+\bibitem[Xu(2024)]{xu2024}
+Xu, X. (2024). Improving volatility-managed portfolios in real time. \textit{Critical Finance Review}, forthcoming.
+
+\end{thebibliography}
+\endgroup
+
+\end{document}

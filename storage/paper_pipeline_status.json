@@ -17,16 +17,16 @@
     "stall_days": 7,
     "baseline_set_at": "2026-07-01T00:00:00+08:00",
     "audit_source": "2026-07-01 paper portfolio audit",
-    "updated_at": "2026-07-01T07:15:00+08:00"
+    "updated_at": "2026-07-02T03:17:43+08:00"
   },
   "papers": [
     {
       "paper": "leverage-direction",
       "journal_target": "IJF (primary) → EmpEcon (fallback)",
-      "stage": "revision",
-      "stage_entered_at": "2026-07-01T02:25:00+08:00",
-      "last_advance_at": "2026-07-01T15:05:23+08:00",
-      "blocker": "Stage 1+2 reframe COMPLETE, but main-thread verification found BOTH honest Stage 2 pillars weak: gold regime (K1591) weak/mostly-NS; model-selection OOS (K1592) NULL_OR_WEAK, 0 Harvey-Holm significant. leverage-direction has NO JBF-grade empirical result after rigorous rebuild. GATE: do NOT advance to arxiv/submission. Owner research-direction decision pending (WARN email sent 2026-07-01 12:46): re-target FRL/IJF (diagnostic+nulls) / reframe as negative-results paper / shelve.",
+      "stage": "multi_round_review",
+      "stage_entered_at": "2026-07-02T03:17:43+08:00",
+      "last_advance_at": "2026-07-02T03:17:43+08:00",
+      "blocker": "Owner decided IJF (email-12393/12398, 2026-07-01). IJF full-length body reframe (ticks 1-6) COMPLETE + gate-verified 2026-07-02: main_v_ijf.tex compiles 26pp 0-undefined; reproduce.py GREEN 100% (171/171); compliance CLEAN (author=Yi-Hao Lai only). Submission package assembled (body_v_ijf+main_v_ijf+highlights+cover_letter_ijf). The recorded JBF-era multi_round_review (all FAIL_MAJOR_REVISION) is SUPERSEDED. Fresh IJF multi-round codex review QUEUED as paper_review_leverage_direction_ijf_multiround_20260702 (P2). GATE: do NOT advance to arxiv until fresh IJF review converges.",
       "owner_decision_pending": false,
       "compliance_scrub_done": true,
       "compliance_note": "submission set gate CLEAN (scripts/check_paper_compliance.py); body/tables/main thanks/cover_letter scrubbed of K-id/VolPred/AI; author=Yi-Hao Lai only; compiles 49pp",
@@ -141,7 +141,27 @@
       ],
       "narrative_status": "ijf_reframe_body_v_ijf tick-1 done (abstract+title+intro+highlights); tick-2 port lit-review next",
       "last_update": "2026-07-01 17:22",
-      "note": "downshift->IJF per email-12393/12398; body_v_ijf.tex front-matter locked, method/results port pending"
+      "note": "downshift->IJF per email-12393/12398; body_v_ijf.tex front-matter locked, method/results port pending",
+      "ijf_reframe": {
+        "completed_at": "2026-07-02T03:17:43+08:00",
+        "target_journal": "International Journal of Forecasting (primary)",
+        "reframe_axis": "complexity ceiling / measurement-to-allocation wedge; leverage-direction taxonomy demoted to supporting",
+        "ticks_done": "1-6 (abstract/title/highlights/intro; lit review; data&methodology + canonical sample-split; empirical results wedge; implications+conclusion; main_v_ijf wrapper + gates)",
+        "deliverables": [
+          "body_v_ijf.tex",
+          "main_v_ijf.tex",
+          "highlights.txt",
+          "cover_letter_ijf.tex"
+        ],
+        "gates": {
+          "compile": "xelatex 2-pass exit0, 26pp, 0 undefined refs/citations",
+          "reproduce": "reproduce.py GREEN, traceable_match_rate 100% (171/171), MISMATCH=0",
+          "compliance": "CLEAN — no K-id/VolPred/AI; author=Yi-Hao Lai only",
+          "bibliography": "pruned to 39 cited keys, author-date apalike, alphabetical"
+        },
+        "class_note": "elsarticle.cls not installed in build env; compiled with article+natbib (author-date). elsarticle conversion is production-stage; does not affect arXiv/initial-submission PDF.",
+        "next_gate": "fresh IJF multi-round codex review (paper_review_leverage_direction_ijf_multiround_20260702) — old JBF review superseded"
+      }
     },
     {
       "paper": "vt-trend-following",

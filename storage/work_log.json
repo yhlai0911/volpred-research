@@ -12829,5 +12829,19 @@
       "experiments/k513/"
     ],
     "summary": "NFP 7/3 事件前瞻文發佈 mile_35eef830 (published, audience=general, 線上 v3 report 已驗證 render 標題+5圖+數字)。Fresh angle 錨定 k528(254次NFP,2005-2026): NFP事件本身不放大波動(NFP日0.842% vs 一般日0.763%=1.10x未達顯著; vs週五1.17x顯著)，真正分水嶺是進場VIX體制(高1.15% vs低0.53%=2.17x, 事前VIX預測r≈0.45)。當前VIX16.37落低體制下緣(18mo第27百分位,距分界16.71僅0.34點)→base case偏平靜~0.5%但貼近翻盤線；近月NFP溫和降溫(3月214K/4月179K/5月172K)。含2張分析圖+3張懶人包卡(matplotlib自render,免費data-accurate)。anti_ai_gate PASS(warn0/3)，general jargon(p=value)已改白話「達/未達顯著」。ARC-DUP僅warn非阻塞。FB標awaiting_interactive_session(hourly無Chrome)。"
+  },
+  {
+    "timestamp": "2026-07-02T03:18:00+08:00",
+    "task_type": "paper_body",
+    "task_id": "paper_body_leverage_direction_downshift_FRL_20260701",
+    "actor": "hourly-03",
+    "verdict": "succeeded",
+    "refs": [
+      "paper/leverage-direction/main_v_ijf.tex",
+      "paper/leverage-direction/cover_letter_ijf.tex",
+      "paper/leverage-direction/reproduce_report.json",
+      "storage/paper_pipeline_status.json"
+    ],
+    "summary": "leverage-direction IJF full-length reframe TICK-6 (final tick) 完成，論文線扣扳機。建 main_v_ijf.tex wrapper (standalone 147w abstract + title 'When Does Better Volatility Measurement Improve Allocation? A Cross-Asset Complexity Ceiling' + Yi-Hao Lai sole author + pruned author-date bib 只列 39 個實際 cite keys, alphabetical)。三 gate 全 GREEN: xelatex 2-pass exit0 26pp 0 undefined refs/cites; reproduce.py GREEN traceable_match_rate 100% (171/171, MISMATCH=0); compliance CLEAN (無 K-id/VolPred/AI, author=Yi-Hao Lai only)。順手完成 cover_letter_ijf.tex (IJF editor, 單一 complexity-ceiling claim, forecasting reviewers Patton/Hansen/Sheppard) compile 1pp clean。IJF submission package 全組裝: body_v_ijf+main_v_ijf+highlights+cover_letter_ijf。elsarticle 未安裝→用 article+natbib(author-date),已在檔內註明 production-stage 才轉。pipeline_status leverage stage revision→multi_round_review。下一階段 enqueue: paper_review_leverage_direction_ijf_multiround_20260702 (P2, codex exec fresh IJF 多輪; 舊 JBF multi_round_review 已 superseded)。"
   }
 ]

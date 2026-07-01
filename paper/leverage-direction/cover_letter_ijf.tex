@@ -1,0 +1,55 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=false}
+\pagestyle{empty}
+
+\begin{document}
+
+\noindent
+\today
+
+\bigskip
+
+\noindent
+The Editor-in-Chief\\
+\textit{International Journal of Forecasting}\\
+International Institute of Forecasters (Elsevier)
+
+\bigskip
+
+\noindent
+Dear Editor,
+
+\medskip
+
+I am pleased to submit ``When Does Better Volatility Measurement Improve Allocation? A Cross-Asset Complexity Ceiling'' for consideration in the \textit{International Journal of Forecasting}. The paper asks a deliberately narrow forecasting question---when does an improvement in volatility \emph{measurement} actually improve a downstream portfolio \emph{allocation}?---and answers it with a pre-specified out-of-sample evaluation carried through from forecast accuracy to a volatility-targeting decision.
+
+The central finding is a \emph{complexity ceiling}. Moving from a symmetric GARCH(1,1) to an asymmetric GJR-GARCH(1,1), and selecting on the sign and significance of the asymmetry parameter, earns statistically detectable out-of-sample forecast gains only in a restricted domain: a homogeneous equity universe with a significant asymmetry. Even where measurement improves at the forecast level, the improvement largely fails to reach the allocation level, where the dominant and universal benefit of volatility targeting---drawdown reduction---is governed by an asset's base volatility level rather than by its asymmetric structure. The economic content of the asymmetry (balance-sheet leverage for equities, regime-dependent flight-to-quality for gold, coupon-dominated pricing for bonds) is an interpretable classification device but does not travel across asset classes.
+
+The manuscript is well suited to this journal for three reasons. First, its contribution is squarely a forecast-evaluation result: it uses the QLIKE loss, Diebold--Mariano inference, and multiple-testing discipline to establish when added model complexity does---and does not---earn its keep out of sample. Second, it is an honest, decision-relevant negative result of the kind the \textit{International Journal of Forecasting} regularly publishes, showing that in-sample refinement does not reliably survive to the decision level. Third, credibility rests on a pre-specified evaluation protocol and a self-contained replication package (data and code) rather than on an ex-post specification search; a reproducibility checker verifies every reported table number against its canonical source.
+
+The manuscript has not been submitted elsewhere and is not under consideration at any other journal. I suggest the following potential referees, whose work is central to the forecast-evaluation methods the paper employs:
+
+\begin{enumerate}[nosep]
+\item \textbf{Andrew J.\ Patton} (Duke University) --- Volatility forecast comparison under imperfect proxies and the QLIKE loss.
+\item \textbf{Peter R.\ Hansen} (University of North Carolina at Chapel Hill) --- Model confidence sets and GARCH forecast comparison.
+\item \textbf{Kevin Sheppard} (University of Oxford) --- Volatility modelling and out-of-sample evaluation.
+\end{enumerate}
+
+\noindent Thank you for considering my work. I look forward to hearing from you.
+
+\bigskip
+
+\noindent
+Sincerely,
+
+\bigskip
+
+\noindent
+Yi-Hao Lai\\
+Department of Finance, Da-Yeh University\\
+Email: yhlai@mail.dyu.edu.tw
+
+\end{document}
