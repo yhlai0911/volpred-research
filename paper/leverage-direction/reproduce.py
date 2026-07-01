@@ -20,6 +20,29 @@ Deprecated (old 14-table layout, removed 2026-06-11 rewrite):
   (moved to supplementary), Patton-scale QLIKE delta checks (superseded by K903
   quasi-LL canonical numbers).
 
+2026-07-02 fix (tick-6, IJF reframe): Table 5 (tab:var_ortho) was moved from
+tables_main.tex to tables_supplement.tex by the Stage 1.3 appendix offload
+(commit 200d40a94), but this script's Table 5 extraction still pointed at
+tables_main.tex only, raising "table block tab:var_ortho not found" on every
+run since. Added TABLES_SUPPLEMENT and pointed the extraction there; no data
+changed, only the file this checker reads from.
+
+Scope note re: the new body_v_ijf.tex (IJF reframe, tick-1..5): the
+prose-literal checks below ("Prose (body.tex)", HM 3-spec footnote binding,
+"Abstract (main.tex)") intentionally still bind against the archived
+body.tex/main.tex, which remain byte-for-byte what they were reviewed
+against. body_v_ijf.tex is a differently-worded rewrite of the same
+argument and does not repeat these exact literal strings verbatim (it
+restates the same numbers in its own prose). Its table-row traceability was
+verified manually during drafting -- every number in body_v_ijf.tex's
+Empirical Results / Implications sections was cross-checked against
+tables_main.tex / tables_supplement.tex / body.tex's corrected footnotes
+row by row (see the TICK-4/TICK-5 entries in body_v_ijf.tex's own progress-
+tracker comment block), not by this script. The computational reproducibility
+this gate certifies -- that the underlying table/JSON pipeline reproduces
+match_rate >= 95% -- is identical for both prose files since they wrap the
+same tables_main.tex / tables_supplement.tex / experiments/ data.
+
 Status tiers:
   MATCH      traceable, agrees with source (within display rounding)
   MISMATCH   traceable, disagrees beyond rounding -> counts against gate
@@ -46,6 +69,7 @@ PROJECT_ROOT = SCRIPT_DIR.parent.parent
 PAPER_EXP_DIR = SCRIPT_DIR / "experiments"
 
 TABLES_MAIN = SCRIPT_DIR / "tables_main.tex"
+TABLES_SUPPLEMENT = SCRIPT_DIR / "tables_supplement.tex"
 BODY_TEX = SCRIPT_DIR / "body.tex"
 MAIN_TEX = SCRIPT_DIR / "main.tex"
 
@@ -134,6 +158,7 @@ def extract_table_block(tex: str, label: str) -> str:
 # ---------------------------------------------------------------------------
 
 tables_tex = TABLES_MAIN.read_text()
+tables_supplement_tex = TABLES_SUPPLEMENT.read_text()
 body_tex = BODY_TEX.read_text()
 main_tex = MAIN_TEX.read_text()
 
@@ -297,9 +322,11 @@ for name, viol_s, rate_s, impr_s in var_rows:
 
 # ===========================================================================
 # TABLE 5 (tab:var_ortho) — K799 / K802 + self-computed Kupiec
+# Moved from tables_main.tex to tables_supplement.tex by the Stage 1.3
+# appendix offload (commit 200d40a94); this gate check follows it there.
 # ===========================================================================
 
-ortho_block = extract_table_block(tables_tex, "tab:var_ortho")
+ortho_block = extract_table_block(tables_supplement_tex, "tab:var_ortho")
 ortho_rows = re.findall(
     r"^(GARCH\(1,1\)|GJR-GARCH)\s*&\s*(Normal|Student-\$t\$\(5\))\s*&\s*(\d+)\s*&\s*"
     r"(\d+\.\d+)\\%\s*&\s*(\d+\.\d+)\s*&\s*(Green|Yellow|Red)",
