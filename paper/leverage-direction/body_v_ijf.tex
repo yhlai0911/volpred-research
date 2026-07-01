@@ -68,11 +68,29 @@
 %            NOT the retracted -0.067/-5.79). fig_rolling_gamma.pdf ported
 %            (only figure actually referenced in body.tex); 6 other loose
 %            figure PDFs in the folder confirmed unreferenced anywhere and left
-%            out. No compile check yet (main_v_ijf.tex wrapper is tick-6).
-%   [tick-5+ TODO] Rewrite Implications + Conclusion around the ceiling;
-%            practitioner takeaway (don't over-engineer asymmetry) + researcher
-%            takeaway (in-sample refinement rarely survives honest OOS at the
-%            decision level).
+%            out. Verified via scratch xelatex compile (temp main wrapper
+%            swapping body.tex for body_v_ijf.tex, deleted after test): 3
+%            passes, exit 0, 0 undefined refs/citations.
+%   [tick-5  2026-07-02] DONE: Implications+Limitations and Conclusion written
+%            around the complexity ceiling. Implications = 3 subsections:
+%            (a) Synthesis -- the 3 forecast/allocation/VaR threads from tick-4
+%            read as one ceiling, sharpened with the HAR-ABS paradox (HAR wins
+%            QLIKE in 7/7 markets DM -11.11..-21.74 but worst VT Sharpe 1.12 vs
+%            12/VIX's 1.75, sourced from supplementary_content.tex sec:har_paradox,
+%            pointed to Online Supplement not reproduced as a live \ref); (b)
+%            Practitioner takeaway (invest in level not asymmetric fine-tuning;
+%            gamma IS a genuine crisis-period tail feature per tick-4 EWMA-vs-
+%            GJR COVID divergence, cited hood2025/nelson2025) + researcher
+%            takeaway (forecast-accuracy != decision-level evidence); (c)
+%            Limitations -- N=6 power caveat, single-asset gold regime +
+%            domain-restricted equity-only regularity (rho=-0.448 outside
+%            domain), Yahoo Finance data-source caveat, multiple-testing/
+%            Harvey-threshold caveat (harvey2016), asset-universe restriction
+%            (currencies/broader commodities -> future work). Conclusion is one
+%            tight forecasting-forward paragraph restating the single central
+%            claim, no overclaim. Verified via scratch xelatex compile: 3
+%            passes, exit 0, 0 undefined refs/citations. All new citations
+%            (hood2025, nelson2025, harvey2016) confirmed present in main.tex bib.
 %   [tick-6+ TODO] Standalone abstract into main_v_ijf.tex wrapper;
 %            elsarticle.cls; author-date (Harvard/APA) refs; double-anonymized;
 %            reproduce.py match_rate >= 95% gate; compliance re-scrub.
@@ -270,13 +288,27 @@ Table~\ref{tab:var} decomposes SPY's 1\% VaR violation count (2020--2025, 1508 d
 
 
 \section{Implications and Limitations}\label{sec:implications}
-% [TICK-5 TODO] Rewrite around the complexity ceiling. Practitioner takeaway:
-% invest in robust level, not asymmetric fine-tuning. Researcher takeaway:
-% in-sample refinement rarely survives honest OOS at the decision level.
-% Limitations: small cross-section (N=6 forecasting), single-asset gold regime
-% evidence, domain restriction to homogeneous equities.
+
+\subsection{The Complexity Ceiling: Synthesis}
+\label{sec:ceiling_synthesis}
+
+Three independent pieces of evidence in Section~\ref{sec:empirical_results} point to the same conclusion. First, the forecast-level gain from asymmetric modelling is conditional: it is detectable only when the asymmetry parameter is itself statistically significant, and even then it does not automatically translate into a gain of practical size (BTC-USD has significant $\gamma$ but statistically indistinguishable forecasts). Second, the allocation-level gain from volatility targeting is close to universal and is governed by an asset's base volatility level, essentially orthogonal to whether that asset has significant, zero, or inverted asymmetry. Third, a parsimonious, zero-parameter alternative (12/VIX) matches the carefully specified asymmetric GARCH model at the allocation level. Each piece independently narrows the space in which added modelling complexity earns its keep, and together they describe a ceiling: complexity that improves a statistical criterion (QLIKE) need not, and typically does not, improve the decision built on top of it.
+
+A sharper illustration of the same wedge comes from comparing loss functions directly. Using absolute returns as the realized-volatility target, an HAR specification outperforms GJR-GARCH(1,1) on QLIKE in all seven markets tested (SPY, QQQ, EFA, EWZ, GLD, TLT, 0050.TW; Diebold--Mariano statistics from $-11.11$ to $-21.74$, all $p<0.001$); yet the same HAR specification produces the \emph{lowest} volatility-targeting Sharpe ratio among the alternatives compared (1.12, versus 1.75 for 12/VIX), with $1.9\times$ higher turnover and a weight-path correlation of only 0.51 with 12/VIX. HAR's forecast-accuracy advantage is backward-looking: it aggregates historical return magnitudes efficiently across daily, weekly, and monthly horizons. The allocation gain instead rewards forward-looking risk pricing, which a purely backward-looking aggregator does not supply. A model can win decisively on the criterion a researcher optimises for and lose on the criterion an allocator actually needs; full detail is reported in the Online Supplement.
+
+\subsection{Practitioner and Researcher Takeaways}
+\label{sec:takeaways}
+
+For practitioners, the actionable message is to prioritise getting the volatility \emph{level} right --- with a GARCH model, an EWMA average, or a model-free VIX-based rule, whichever is operationally convenient --- over fine-tuning the asymmetric response. Asymmetric structure is not worthless: it is a genuine crisis-period risk-management feature (Section~\ref{sec:allocation_results} shows GJR-based targeting outperforming EWMA specifically during COVID-19, driven by faster deleveraging through the $\gamma$ channel), and its economic sign is informative about the mechanism driving an asset's price (balance-sheet leverage, safe-haven flows, or coupon-dominated neutrality). But it should be budgeted as a targeted, verifiable refinement --- justified asset by asset via a significance screen on $\gamma$ --- rather than treated as a default source of everyday allocation value, consistent with \citet{hood2025} and \citet{nelson2025}'s characterisations of volatility-managed strategies as risk-control rather than forecasting engines.
+
+For researchers, the message is methodological. A forecast-accuracy comparison, however carefully executed, is not evidence of decision-level value on its own; the pass-through from measurement to allocation has to be checked directly, on the same assets and periods, because it can and does fail even when the measurement result is genuine and correctly signed. In-sample or forecast-accuracy-only refinement that has not been carried through to an explicit decision rule should be reported and interpreted as exactly that --- a measurement result --- not extrapolated into an implied economic claim.
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+The forecast-level classification exercise of Section~\ref{sec:forecast_results} is based on a six-asset cross-section, so its formal statistical power is limited (even random classification succeeds with probability $2^{-6}\approx1.6\%$); we report it as supportive rather than decisive evidence and do not claim the specific $t$-statistic threshold generalises without independent validation on a larger asset universe. The gold safe-haven regime decomposition of Section~\ref{sec:interpretive_taxonomy} rests on a single asset, and the equity-only trend-following/contrarian regularity is explicitly domain-restricted: it holds within the six equity-type assets we test and fails outside that domain ($\rho=-0.448$ across a broader twelve-asset cross-section including bonds, commodities, and crypto). Neither should be extrapolated to asset classes outside the ones tested here. Our price data are sourced from Yahoo Finance rather than an institutional-grade vendor (CRSP, Bloomberg); validation checks show high concordance for large-cap ETFs, but replication with institutional data would strengthen confidence in the exact reported magnitudes. Finally, this study draws on a broader experimentation program; our primary claims are disciplined by a pre-specified Harvey-style significance threshold and by testing across two non-overlapping out-of-sample periods, but the window-size and proxy-choice robustness checks reported alongside the main results were not all pre-registered and should be read as corroborating rather than confirmatory \citep{harvey2016}. The asset universe itself is restricted to equities, precious metals, government bonds, and cryptocurrency; extending the taxonomy to currencies and a broader commodity set is a natural next step that we leave to future work.
 
 
 \section{Conclusion}\label{sec:conclusion}
-% [TICK-5 TODO] One-paragraph restatement of the ceiling result; forecasting-
-% forward, no overclaim; tie back to the single central claim.
+
+We asked a narrow question: when does better volatility measurement actually improve allocation? Across a pre-specified, out-of-sample design spanning seven primary assets and four asset classes, the answer is rarely, and only under conditions that can be checked directly rather than assumed. Moving from a symmetric GARCH(1,1) to an asymmetric GJR-GARCH(1,1) earns a statistically detectable forecasting gain only when the asymmetry parameter is itself significant, and a significant asymmetry does not guarantee that the gain is large enough to matter. At the allocation level, the dominant benefit of volatility targeting --- drawdown reduction --- is close to universal across our sample and is governed by an asset's base volatility level rather than by its asymmetric structure, to the point that a zero-parameter, implied-volatility rule matches a carefully specified asymmetric GARCH model. The sign of the asymmetry parameter remains a genuinely useful, economically legible device for reading which mechanism --- balance-sheet leverage, safe-haven flight-to-quality, or coupon-dominated neutrality --- is driving an asset's price, and within a homogeneous equity domain it even predicts whether volatility targeting behaves as trend-following or contrarian. But none of this licenses treating asymmetric refinement as a general-purpose forecasting or allocation engine: the mapping is domain-restricted, and it does not travel to the heterogeneous cross-section we also test. There is, in this sense, a complexity ceiling. Once a forecast captures the first-order level of volatility, additional model sophistication earns its keep only in specific, verifiable circumstances --- and researchers and practitioners are both better served by checking for those circumstances directly than by assuming that a better in-sample fit is itself the decision that matters.
