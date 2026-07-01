@@ -1,0 +1,1105 @@
+{
+  "experiment_id": "research_transfer_learning_for_new_issues_vol",
+  "created_at": "2026-07-01T15:51:32.980096+00:00",
+  "seed": 42,
+  "status": "completed",
+  "verdict": "NULL_VS_NAIVE_BASELINE",
+  "hypothesis": "For new issues/spin-offs with ~60 trading days of own history, source-similar cross-asset history improves one-day-ahead close-to-close variance forecasts versus a target-only cold-start Ridge/HAR proxy.",
+  "data": {
+    "source": "yfinance adjusted daily close, auto_adjust=True",
+    "download_start": "2015-01-01",
+    "download_end_exclusive": "2026-07-02",
+    "target_tickers": [
+      "ABNB",
+      "COIN",
+      "RIVN",
+      "HOOD",
+      "GEHC",
+      "KVUE",
+      "ARM",
+      "CAVA",
+      "VLTO",
+      "BIRK"
+    ],
+    "source_tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "DIA",
+      "XLK",
+      "XLF",
+      "XLY",
+      "XLI",
+      "XLV",
+      "XLE",
+      "XLP",
+      "XLU",
+      "SMH",
+      "HYG",
+      "TLT",
+      "GLD",
+      "USO",
+      "UUP",
+      "EEM",
+      "EFA"
+    ],
+    "data_cache": "experiments/research_transfer_learning_for_new_issues_vol/data/adjusted_close_yfinance.csv",
+    "coverage": {
+      "ABNB": {
+        "first": "2020-12-10",
+        "last": "2026-07-01",
+        "n_prices": 1394
+      },
+      "COIN": {
+        "first": "2021-04-14",
+        "last": "2026-07-01",
+        "n_prices": 1310
+      },
+      "RIVN": {
+        "first": "2021-11-10",
+        "last": "2026-07-01",
+        "n_prices": 1163
+      },
+      "HOOD": {
+        "first": "2021-07-29",
+        "last": "2026-07-01",
+        "n_prices": 1236
+      },
+      "GEHC": {
+        "first": "2022-12-15",
+        "last": "2026-07-01",
+        "n_prices": 887
+      },
+      "KVUE": {
+        "first": "2023-05-04",
+        "last": "2026-07-01",
+        "n_prices": 792
+      },
+      "ARM": {
+        "first": "2023-09-14",
+        "last": "2026-07-01",
+        "n_prices": 701
+      },
+      "CAVA": {
+        "first": "2023-06-15",
+        "last": "2026-07-01",
+        "n_prices": 763
+      },
+      "VLTO": {
+        "first": "2023-10-04",
+        "last": "2026-07-01",
+        "n_prices": 687
+      },
+      "BIRK": {
+        "first": "2023-10-11",
+        "last": "2026-07-01",
+        "n_prices": 682
+      },
+      "SPY": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "QQQ": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "IWM": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "DIA": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "XLK": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "XLF": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "XLY": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "XLI": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "XLV": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "XLE": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "XLP": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "XLU": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "SMH": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "HYG": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "TLT": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "GLD": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "USO": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "UUP": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "EEM": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      },
+      "EFA": {
+        "first": "2015-01-02",
+        "last": "2026-07-01",
+        "n_prices": 2890
+      }
+    },
+    "skipped_targets": {}
+  },
+  "method": {
+    "target": "close-to-close squared log return on date t",
+    "features": [
+      "log_rv_lag1",
+      "log_rv_lag5",
+      "log_rv_lag22",
+      "abs_ret_lag1",
+      "neg_ret_lag1"
+    ],
+    "lookahead_defense": "Feature construction uses signal.shift(1), rolling(...).mean().shift(1), and target-only training uses only the first 60 trading days; evaluation starts after day 60.",
+    "selection": {
+      "initial_target_days": 45,
+      "source_window_days": 40,
+      "top_source_windows": 12,
+      "distance": "mean squared distance between z-scored log realized-variance sequences",
+      "source_cutoff": "source windows must end before the target evaluation start date"
+    },
+    "models": [
+      "naive_har22: lagged 22-day mean variance",
+      "target_only_ridge: Ridge on first 60 target trading days only",
+      "all_source_transfer: Ridge on all eligible source rows before eval start + target train rows",
+      "similar_source_transfer: Ridge on selected source windows + target train rows"
+    ],
+    "loss": "normalized Patton-style QLIKE y/h - log(y/h) - 1",
+    "primary_baseline": "naive_har22 is the primary benchmark because target-only Ridge with only 60 trading days can be numerically unstable; target-only Ridge is retained as a cold-start overfitting diagnostic.",
+    "inference": [
+      "Newey-West t-stat on pooled target-day loss differentials, lag=5",
+      "target-level exact sign test",
+      "target-level bootstrap CI over mean loss differentials, B=1000, seed=42"
+    ]
+  },
+  "summary": {
+    "panel_qlike_loss_means": {
+      "naive_har22": 1.8237267372967427,
+      "target_only_ridge": 461006.1125960676,
+      "all_source_transfer": 5.297468031930107,
+      "similar_source_transfer": 6.894395165262005
+    },
+    "primary_baseline": "naive_har22",
+    "panel_diff_vs_target_only": {
+      "naive_har22": {
+        "n": 4900.0,
+        "mean": -461004.28886933025,
+        "t": -1.9151557603068494
+      },
+      "all_source_transfer": {
+        "n": 4900.0,
+        "mean": -461000.8151280357,
+        "t": -1.9151423029669543
+      },
+      "similar_source_transfer": {
+        "n": 4900.0,
+        "mean": -460999.21820090245,
+        "t": -1.9151426421127875
+      }
+    },
+    "panel_diff_vs_naive_har22": {
+      "target_only_ridge": {
+        "n": 4900.0,
+        "mean": 461004.28886933025,
+        "t": 1.9151557603068494
+      },
+      "all_source_transfer": {
+        "n": 4900.0,
+        "mean": 3.4737412946333643,
+        "t": 12.577990843256678
+      },
+      "similar_source_transfer": {
+        "n": 4900.0,
+        "mean": 5.070668427965261,
+        "t": 4.527918775235518
+      }
+    },
+    "target_level_sign_tests": {
+      "all_source_transfer": {
+        "wins": 5,
+        "n": 10,
+        "two_sided_p": 1.0
+      },
+      "similar_source_transfer": {
+        "wins": 5,
+        "n": 10,
+        "two_sided_p": 1.0
+      }
+    },
+    "target_level_sign_tests_vs_naive_har22": {
+      "all_source_transfer": {
+        "wins": 0,
+        "n": 10,
+        "two_sided_p": 0.001953125
+      },
+      "similar_source_transfer": {
+        "wins": 0,
+        "n": 10,
+        "two_sided_p": 0.001953125
+      }
+    },
+    "target_level_bootstrap_mean_loss_diff": {
+      "all_source_transfer_minus_target_only": {
+        "B": 1000,
+        "seed": 42,
+        "n_targets": 10,
+        "mean": -461000.8151280357,
+        "ci95": [
+          -1381380.263955032,
+          -2.794614792535777
+        ],
+        "prob_mean_below_zero": 0.996
+      },
+      "similar_source_transfer_minus_target_only": {
+        "B": 1000,
+        "seed": 42,
+        "n_targets": 10,
+        "mean": -460999.21820090245,
+        "ci95": [
+          -1381376.2752715736,
+          -2.34117458834121
+        ],
+        "prob_mean_below_zero": 0.991
+      },
+      "all_source_transfer_minus_naive_har22": {
+        "B": 1000,
+        "seed": 42,
+        "n_targets": 10,
+        "mean": 3.4737412946333643,
+        "ci95": [
+          3.022607076299585,
+          3.9925390532097143
+        ],
+        "prob_mean_below_zero": 0.0
+      },
+      "similar_source_transfer_minus_naive_har22": {
+        "B": 1000,
+        "seed": 42,
+        "n_targets": 10,
+        "mean": 5.070668427965262,
+        "ci95": [
+          3.0079485687455914,
+          8.267918462417418
+        ],
+        "prob_mean_below_zero": 0.0
+      }
+    },
+    "per_target": [
+      {
+        "ticker": "ABNB",
+        "first_price_date": "2020-12-10",
+        "eval_start_date": "2021-03-10",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 30660,
+        "selected_source_rows": 458,
+        "qlike_loss": {
+          "naive_har22": 1.5905632977710407,
+          "target_only_ridge": 3.3581086519563734,
+          "all_source_transfer": 4.77796598123461,
+          "similar_source_transfer": 4.538598026866217
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -1.7675453541853328,
+          "all_source_transfer": 1.4198573292782366,
+          "similar_source_transfer": 1.1804893749098437
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 1.7675453541853328,
+          "all_source_transfer": 3.1874026834635694,
+          "similar_source_transfer": 2.9480347290951765
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "HYG",
+            "start_date": "2017-07-20",
+            "end_date": "2017-09-14",
+            "distance": 0.8617773499743,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "GLD",
+            "start_date": "2015-01-05",
+            "end_date": "2015-03-03",
+            "distance": 0.9266860224246283,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "USO",
+            "start_date": "2018-08-29",
+            "end_date": "2018-10-24",
+            "distance": 1.0286545159374687,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLP",
+            "start_date": "2015-12-16",
+            "end_date": "2016-02-12",
+            "distance": 1.0546089631158064,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "SMH",
+            "start_date": "2016-10-03",
+            "end_date": "2016-11-28",
+            "distance": 1.1170213971792435,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "COIN",
+        "first_price_date": "2021-04-14",
+        "eval_start_date": "2021-07-09",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 32340,
+        "selected_source_rows": 458,
+        "qlike_loss": {
+          "naive_har22": 1.4023681111535373,
+          "target_only_ridge": 15.655871456340419,
+          "all_source_transfer": 4.886020172382787,
+          "similar_source_transfer": 4.080196470197659
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -14.253503345186882,
+          "all_source_transfer": -10.769851283957632,
+          "similar_source_transfer": -11.57567498614276
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 14.253503345186882,
+          "all_source_transfer": 3.4836520612292503,
+          "similar_source_transfer": 2.6778283590441223
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": true,
+          "similar_source_transfer": true
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "XLU",
+            "start_date": "2019-08-14",
+            "end_date": "2019-10-09",
+            "distance": 1.0144219832514623,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "SMH",
+            "start_date": "2019-02-22",
+            "end_date": "2019-04-18",
+            "distance": 1.1464749502687002,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "SPY",
+            "start_date": "2017-03-27",
+            "end_date": "2017-05-22",
+            "distance": 1.1650459882914639,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLF",
+            "start_date": "2017-03-27",
+            "end_date": "2017-05-22",
+            "distance": 1.2054111363046143,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "QQQ",
+            "start_date": "2018-01-10",
+            "end_date": "2018-03-08",
+            "distance": 1.2378872282569275,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "RIVN",
+        "first_price_date": "2021-11-10",
+        "eval_start_date": "2022-02-07",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 35280,
+        "selected_source_rows": 480,
+        "qlike_loss": {
+          "naive_har22": 1.6356001705301537,
+          "target_only_ridge": 2.5655453416772267,
+          "all_source_transfer": 5.2553899293970945,
+          "similar_source_transfer": 4.828966152744421
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -0.929945171147073,
+          "all_source_transfer": 2.689844587719868,
+          "similar_source_transfer": 2.2634208110671943
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 0.929945171147073,
+          "all_source_transfer": 3.6197897588669408,
+          "similar_source_transfer": 3.1933659822142673
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "XLI",
+            "start_date": "2019-04-22",
+            "end_date": "2019-06-17",
+            "distance": 0.8240916641012094,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "TLT",
+            "start_date": "2021-05-13",
+            "end_date": "2021-07-09",
+            "distance": 1.025798018369902,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "IWM",
+            "start_date": "2018-12-24",
+            "end_date": "2019-02-21",
+            "distance": 1.0291821677212947,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "SMH",
+            "start_date": "2018-07-03",
+            "end_date": "2018-08-28",
+            "distance": 1.0782261661605976,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "DIA",
+            "start_date": "2020-07-28",
+            "end_date": "2020-09-22",
+            "distance": 1.0805741822691342,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "HOOD",
+        "first_price_date": "2021-07-29",
+        "eval_start_date": "2021-10-22",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 33820,
+        "selected_source_rows": 480,
+        "qlike_loss": {
+          "naive_har22": 1.7887265651157767,
+          "target_only_ridge": 13.792341185488214,
+          "all_source_transfer": 5.324441912681252,
+          "similar_source_transfer": 7.7860257606109
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -12.003614620372437,
+          "all_source_transfer": -8.467899272806962,
+          "similar_source_transfer": -6.006315424877314
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 12.003614620372437,
+          "all_source_transfer": 3.535715347565475,
+          "similar_source_transfer": 5.997299195495123
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": true,
+          "similar_source_transfer": true
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "XLV",
+            "start_date": "2018-07-03",
+            "end_date": "2018-08-28",
+            "distance": 1.0002936779673413,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "GLD",
+            "start_date": "2020-06-01",
+            "end_date": "2020-07-27",
+            "distance": 1.0775980676158365,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLU",
+            "start_date": "2018-10-25",
+            "end_date": "2018-12-21",
+            "distance": 1.1322513890006265,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "UUP",
+            "start_date": "2017-09-15",
+            "end_date": "2017-11-09",
+            "distance": 1.132919800878812,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLV",
+            "start_date": "2019-08-14",
+            "end_date": "2019-10-09",
+            "distance": 1.1803682049022108,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "GEHC",
+        "first_price_date": "2022-12-15",
+        "eval_start_date": "2023-03-15",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 40800,
+        "selected_source_rows": 480,
+        "qlike_loss": {
+          "naive_har22": 2.053441606174407,
+          "target_only_ridge": 4.834990508513647,
+          "all_source_transfer": 5.628465063953185,
+          "similar_source_transfer": 5.861103025008554
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -2.7815489023392397,
+          "all_source_transfer": 0.7934745554395386,
+          "similar_source_transfer": 1.0261125164949076
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 2.7815489023392397,
+          "all_source_transfer": 3.5750234577787783,
+          "similar_source_transfer": 3.8076614188341473
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "XLK",
+            "start_date": "2018-03-09",
+            "end_date": "2018-05-04",
+            "distance": 0.8119897643947056,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "IWM",
+            "start_date": "2018-03-09",
+            "end_date": "2018-05-04",
+            "distance": 0.8504063505592226,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "SMH",
+            "start_date": "2020-07-28",
+            "end_date": "2020-09-22",
+            "distance": 0.9290819559658366,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "DIA",
+            "start_date": "2018-03-09",
+            "end_date": "2018-05-04",
+            "distance": 0.9535284466648791,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "EFA",
+            "start_date": "2018-03-09",
+            "end_date": "2018-05-04",
+            "distance": 1.025712843967052,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "KVUE",
+        "first_price_date": "2023-05-04",
+        "eval_start_date": "2023-08-01",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 42700,
+        "selected_source_rows": 480,
+        "qlike_loss": {
+          "naive_har22": 2.2112038372726603,
+          "target_only_ridge": 104.14828386472865,
+          "all_source_transfer": 4.961297700186573,
+          "similar_source_transfer": 4.492939975163635
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -101.93708002745599,
+          "all_source_transfer": -99.18698616454208,
+          "similar_source_transfer": -99.65534388956502
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 101.93708002745599,
+          "all_source_transfer": 2.7500938629139124,
+          "similar_source_transfer": 2.2817361378909746
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": true,
+          "similar_source_transfer": true
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "UUP",
+            "start_date": "2021-11-02",
+            "end_date": "2021-12-29",
+            "distance": 0.9689077971364825,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "HYG",
+            "start_date": "2019-12-06",
+            "end_date": "2020-02-04",
+            "distance": 0.9874497401348332,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "USO",
+            "start_date": "2022-04-26",
+            "end_date": "2022-06-22",
+            "distance": 1.0578509433292826,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLV",
+            "start_date": "2020-04-02",
+            "end_date": "2020-05-29",
+            "distance": 1.060964859944089,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLV",
+            "start_date": "2019-08-14",
+            "end_date": "2019-10-09",
+            "distance": 1.0930327949390786,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "ARM",
+        "first_price_date": "2023-09-14",
+        "eval_start_date": "2023-12-08",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 44520,
+        "selected_source_rows": 480,
+        "qlike_loss": {
+          "naive_har22": 2.021882784602325,
+          "target_only_ridge": 4601863.970621403,
+          "all_source_transfer": 7.571920527671454,
+          "similar_source_transfer": 20.4876154902617
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -4601861.948738619,
+          "all_source_transfer": -4601856.398700875,
+          "similar_source_transfer": -4601843.483005913
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 4601861.948738619,
+          "all_source_transfer": 5.550037743069129,
+          "similar_source_transfer": 18.465732705659374
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": true,
+          "similar_source_transfer": true
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "XLK",
+            "start_date": "2015-08-24",
+            "end_date": "2015-10-19",
+            "distance": 0.8953446337424763,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLV",
+            "start_date": "2021-11-02",
+            "end_date": "2021-12-29",
+            "distance": 1.0665921164728678,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "SMH",
+            "start_date": "2019-06-18",
+            "end_date": "2019-08-13",
+            "distance": 1.1036650228686018,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLY",
+            "start_date": "2021-05-13",
+            "end_date": "2021-07-09",
+            "distance": 1.1047331679611911,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLY",
+            "start_date": "2015-08-24",
+            "end_date": "2015-10-19",
+            "distance": 1.1211395911381359,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "CAVA",
+        "first_price_date": "2023-06-15",
+        "eval_start_date": "2023-09-12",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 43280,
+        "selected_source_rows": 480,
+        "qlike_loss": {
+          "naive_har22": 2.0856085097504184,
+          "target_only_ridge": 3.405391996657848,
+          "all_source_transfer": 5.8975419718233475,
+          "similar_source_transfer": 8.28114219224968
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -1.3197834869074296,
+          "all_source_transfer": 2.4921499751654994,
+          "similar_source_transfer": 4.8757501955918325
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 1.3197834869074296,
+          "all_source_transfer": 3.811933462072929,
+          "similar_source_transfer": 6.195533682499262
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "TLT",
+            "start_date": "2017-03-27",
+            "end_date": "2017-05-22",
+            "distance": 0.846570306885053,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLP",
+            "start_date": "2018-05-07",
+            "end_date": "2018-07-02",
+            "distance": 0.9737751976731991,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "GLD",
+            "start_date": "2022-12-13",
+            "end_date": "2023-02-09",
+            "distance": 1.0063758190381367,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "TLT",
+            "start_date": "2016-06-09",
+            "end_date": "2016-08-04",
+            "distance": 1.02174195739137,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLY",
+            "start_date": "2022-08-19",
+            "end_date": "2022-10-14",
+            "distance": 1.058427493091818,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "VLTO",
+        "first_price_date": "2023-10-04",
+        "eval_start_date": "2023-12-29",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 44800,
+        "selected_source_rows": 458,
+        "qlike_loss": {
+          "naive_har22": 1.633613710305148,
+          "target_only_ridge": 2.817032573866809,
+          "all_source_transfer": 3.845899662559114,
+          "similar_source_transfer": 4.0381306017368575
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -1.183418863561661,
+          "all_source_transfer": 1.028867088692305,
+          "similar_source_transfer": 1.2210980278700485
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 1.183418863561661,
+          "all_source_transfer": 2.212285952253966,
+          "similar_source_transfer": 2.4045168914317094
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "USO",
+            "start_date": "2017-11-10",
+            "end_date": "2018-01-09",
+            "distance": 1.0356431448246668,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLI",
+            "start_date": "2018-12-24",
+            "end_date": "2019-02-21",
+            "distance": 1.0414919897993387,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "DIA",
+            "start_date": "2018-12-24",
+            "end_date": "2019-02-21",
+            "distance": 1.1241534580846064,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "USO",
+            "start_date": "2018-12-24",
+            "end_date": "2019-02-21",
+            "distance": 1.1350527652883782,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "GLD",
+            "start_date": "2020-07-28",
+            "end_date": "2020-09-22",
+            "distance": 1.1625522583581414,
+            "n_days": 40
+          }
+        ]
+      },
+      {
+        "ticker": "BIRK",
+        "first_price_date": "2023-10-11",
+        "eval_start_date": "2024-01-08",
+        "train_rows": 37,
+        "eval_rows": 490,
+        "all_source_rows": 44900,
+        "selected_source_rows": 480,
+        "qlike_loss": {
+          "naive_har22": 1.8142587802919605,
+          "target_only_ridge": 8046.577773694307,
+          "all_source_transfer": 4.825737397411653,
+          "similar_source_transfer": 4.549233957780421
+        },
+        "diff_vs_target_only": {
+          "naive_har22": -8044.763514914015,
+          "all_source_transfer": -8041.752036296895,
+          "similar_source_transfer": -8042.028539736527
+        },
+        "diff_vs_naive_har22": {
+          "target_only_ridge": 8044.763514914015,
+          "all_source_transfer": 3.0114786171196926,
+          "similar_source_transfer": 2.7349751774884608
+        },
+        "improved_vs_target_only": {
+          "naive_har22": true,
+          "all_source_transfer": true,
+          "similar_source_transfer": true
+        },
+        "improved_vs_naive_har22": {
+          "target_only_ridge": false,
+          "all_source_transfer": false,
+          "similar_source_transfer": false
+        },
+        "top_selected_windows": [
+          {
+            "source_ticker": "XLU",
+            "start_date": "2017-11-10",
+            "end_date": "2018-01-09",
+            "distance": 0.7949060110713326,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "UUP",
+            "start_date": "2022-12-13",
+            "end_date": "2023-02-09",
+            "distance": 0.9288148488177512,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "SMH",
+            "start_date": "2022-12-13",
+            "end_date": "2023-02-09",
+            "distance": 0.9897857850748928,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "XLI",
+            "start_date": "2015-08-24",
+            "end_date": "2015-10-19",
+            "distance": 1.0159130598421826,
+            "n_days": 40
+          },
+          {
+            "source_ticker": "EFA",
+            "start_date": "2016-08-05",
+            "end_date": "2016-09-30",
+            "distance": 1.026932994662463,
+            "n_days": 40
+          }
+        ]
+      }
+    ],
+    "prediction_rows": 4900
+  },
+  "figure": "experiments/research_transfer_learning_for_new_issues_vol/research_transfer_learning_for_new_issues_vol_qlike_improvement.png",
+  "main_findings": [
+    "Primary result: similar-source transfer mean QLIKE diff vs naive HAR22 = 5.07067; positive means transfer is worse. Verdict=NULL_VS_NAIVE_BASELINE.",
+    "All-source pooled mean QLIKE diff vs naive HAR22 = 3.47374; naive pooling also fails to beat the simple HAR22 baseline.",
+    "Cold-start target-only Ridge is unstable: mean QLIKE diff vs naive HAR22 = 461004. Transfer models reduce this instability (similar-source vs target-only diff = -460999; all-source vs target-only diff = -461001) but do not beat the rolling-volatility baseline.",
+    "target-level similar-source wins = 0/10 against naive HAR22 (two-sided sign p=0.0020).",
+    "The experiment is lookahead-protected by one-day lagged features and fixed cold-start training windows; no evaluation-period target labels enter training."
+  ],
+  "limitations": [
+    "Daily close-to-close squared returns are a noisy proxy, not 5-minute realized variance.",
+    "The target universe contains recent public listings/spin-offs with yfinance coverage; it is not the exact 10-asset sample from Teller, Pigorsch & Pigorsch (2025).",
+    "Source-window selection is a simple z-scored Euclidean proxy, not full DTW multi-source transfer learning.",
+    "Pooled Newey-West inference ignores cross-sectional dependence across target tickers; target-level bootstrap is reported separately.",
+    "A positive result would be a cold-start public-data pilot, not a paper-grade new-issues transfer-learning claim."
+  ],
+  "literature_checked": [
+    {
+      "citation": "Teller, Pigorsch & Pigorsch (2025), Realized Volatility Forecasting for New Issues and Spin-Offs using Multi-Source Transfer Learning",
+      "url": "https://arxiv.org/abs/2503.12648",
+      "relevance": "Direct motivation: sparse target history and source-similar transfer for new issues/spin-offs."
+    },
+    {
+      "citation": "Liu, Tran, Wang, Gerlach & Kohn (2023), Data Scaling Effect of Deep Learning in Financial Time Series Forecasting",
+      "url": "https://arxiv.org/abs/2309.02072",
+      "relevance": "Global training across many stocks can help volatility forecasting, motivating pooled-source baselines."
+    },
+    {
+      "citation": "Christensen, Siggaard & Veliyev (2026), A machine learning approach to volatility forecasting",
+      "url": "https://arxiv.org/abs/2601.13014",
+      "relevance": "HAR-style realized-vol predictors and ML comparison frame for volatility forecasting."
+    },
+    {
+      "citation": "Corsi (2009), A simple approximate long-memory model of realized volatility",
+      "url": "https://doi.org/10.1093/jjfinec/nbp001",
+      "relevance": "Daily/weekly/monthly lag structure motivating the HAR proxy features."
+    }
+  ]
+}

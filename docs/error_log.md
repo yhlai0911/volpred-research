@@ -4111,3 +4111,32 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 2. **合規 gate 的資料夾發現邏輯必須覆蓋所有合法的論文進入點**（`main.tex` 與 bare `body.tex`），否則會有論文從未被掃描過而不自知 — 已修 `check_paper_compliance.py`。
 3. **`.tex` 文字合規掃描不能假設涵蓋全部洩漏面** — 內嵌圖片（matplotlib PDF/PNG 向量圖）可能把不該外洩的識別碼直接畫進圖表元素。未來新增圖表生成腳本時，圖表面向讀者的文字（標題/圖例/座標軸/資料標籤）應比照論文 prose 遵守同一套「不外洩內部代號」規則，不能只靠 `.tex` 層 gate 把關。
 4. **`_select_current_main_artifact()`（`src/volpred/ops/papers.py`）目前不認得 body.pdf-only 論文** — 本次仍用 `cp body.pdf main.pdf` 手動 workaround（沿用既有慣例），未在程式層修復；若未來新增更多 body.tex-only 論文，建議把此邏輯正式補上而非持續手動 workaround。
+
+---
+
+## 2026-07-01 **3-STRIKE TRIGGER**：`hourly_dispatch.log` auth-preflight 誤報 — bare "ping" 被當成真實 session 觸發全套自主運營指令
+
+### 觸發
+`loop_health` 的 `error_recurrence` 訊號顯示 signature `hourly_dispatch.log:exit1` 在 14 天窗口內出現 **82 次**（`first_seen=2026-06-23T01:01:02Z`, `last_seen=2026-07-01T15:22:03Z`, `span_days=8.6`，`known=false`, `recovered=false`）—— 遠超三振門檻。本次是一個原本被派來當純連線測試的互動 session 收到訊息 `"ping"`，session 本身（依 CLAUDE.md「session start 自動啟動 autonomous loop」與「回應用戶後不可停在等下一句」兩條硬性規則）立刻展開完整 ops 巡檢（`ops health`、`ops check-alerts`、讀 log），而不是單純回一句話 —— 這個行為本身就是在即時重現待查的 bug，因而觸發本次調查。
+
+### Root cause（證據鏈，非猜測）
+`scripts/cron_hourly_dispatch.sh::run_auth_preflight()` 用 `perl -e 'alarm shift; exec @ARGV' "$AUTH_PREFLIGHT_TIMEOUT_SEC"（預設 90s）"$CLAUDE_BIN" -p ... "ping"` 當作「auth 活著嗎」健康檢查。但 `claude -p "ping"` 會完整載入專案 `CLAUDE.md`，其中的自主運營最高指引要求：「任何 turn 結尾都要...」+「回應用戶後不可停在等下一句...必須自己流回日常 ops loop」。於是收到 `"ping"` 的模型沒有秒回，而是開始跑 dashboard 巡檢、`check-alerts`、讀檔等一整套流程 —— 遠超 90 秒的 alarm 預算，被 `perl alarm` SIGALRM 殺掉，回傳 **exit=142**。腳本把 142 誤判成「auth 真的壞了」，升級成 3 次重試 + `send_auth_preflight_alert`（CRITICAL）+ Codex failover，但 auth 其實從頭到尾沒問題 —— 純粹是健康檢查訊息被當成真人 session 開工。
+
+**現場驗證**（2026-07-01 23:52 TPE，同一台機器、同一支 binary）：
+- 舊 prompt 邏輯下的失敗模式已在 `storage/logs/cron/hourly_dispatch.log` 直接看到兩次連續 `exit=142`（attempt 1 launchd env、attempt 2 source zshrc 後重試皆然）——兩次都是「跑滿 90 秒被砍」而非「立刻回報登入失敗」的訊號模式（真正的 auth 失敗，如下方無 token 情境，是在 ~2 秒內乾淨返回 `exit=1` 加訊息 `Not logged in`，不是 142）。
+- 修正後的新 prompt（見下）在帶正確 `CLAUDE_CODE_OAUTH_TOKEN` 的乾淨環境下，`time` 量測僅 **8.7 秒**回傳 `PONG`、`exit=0`，完全在 90 秒預算內，且過程中未觸發任何工具呼叫。
+
+### Fix（3 層重構，非 patch）
+1. **底層邏輯**：健康檢查的 payload 語意錯了 —— 「ping」對一個裝載了完整自主運營人格的 agent 而言不是「請馬上回應」，而是可以被自由詮釋的一般訊息。修正為在 payload 本身用明確、居於指令最高優先層級的 override 框住：「SYSTEM AUTH-PREFLIGHT PROBE（非真人、非工作 session）：只回一個字 PONG，不要呼叫任何工具、不要讀檔、不要跑 ops loop、不要排 wakeup。」（`scripts/cron_hourly_dispatch.sh` `run_auth_preflight()`，同步 cp 到 `~/.volpred/bin/cron_hourly_dispatch.sh`）。
+2. **流程**：這暴露一個更通用的缺口 —— CLAUDE.md 的「自主運營 / 不可空手而回」指引沒有為「非使用者、系統健康檢查」類訊息留任何豁免通道，導致所有自動化 liveness probe 都有被誤判成正式工作請求的風險。本次先在 probe payload 層面解決（最小、可驗證、不影響真人 session 行為）；若未來出現其他地方也用類似 bare 短訊息當 healthcheck，比照同一 override 寫法處理，不要再假設模型會把「訊息很短」自動解讀成「這是探針」。
+3. **程式架構**：不需要換架構 —— perl alarm + 90s 預算的雙層防護設計本身是對的（且在此案例中正確攔下了失控行為），問題純粹出在被檢測對象（`claude -p "ping"`）的 prompt 內容上。
+
+### 驗證
+- `bash -n` 語法檢查通過；`diff` 確認 repo 版與 `~/.volpred/bin/` 部署版一致。
+- 手動重放：`env -i ... CLAUDE_CODE_OAUTH_TOKEN=... perl alarm 90 claude -p ... "<新 prompt>"` → 8.7s 內 `PONG` + `exit=0`，未觸發任何工具呼叫（對照組：無 token 情境 ~1.9s 內乾淨 `Not logged in` + `exit=1`，證實新 prompt 不會把真正的 auth 失敗也拖到 142）。
+- 後續驗證項（留給下次 hourly fire 自然驗證，非本次可控）：`storage/logs/cron/hourly_dispatch.log` 之後的 `auth-preflight` 區塊不應再出現 `exit=142`；`loop_health.error_recurrence` 的 `hourly_dispatch.log:exit1` signature 應該止血、`recovered` 轉 true。
+
+### 教訓（PDCA）
+1. **任何被自動化腳本呼叫、預期「秒回不做事」的 agent 健康檢查，payload 必須顯式聲明「這不是工作 session」並列出禁止事項**，不能依賴訊息長度或字面意思讓模型自行判斷「這只是探針」——尤其當 CLAUDE.md 存在「自主運營、永不空手而回」這類高優先強制指令時，短訊息的預設解讀反而會被拉向「開始做事」而不是「秒回」。
+2. **`exit=142`（SIGALRM）不等於「auth 壞了」**——它只代表「被檢測的進程在時限內沒完成」，可能是 auth 真的死、也可能是被檢測對象在時限內做了完全不相關但耗時的事。診斷 timeout 類失敗時，先看「是秒退還是跑滿時限被砍」，這兩種訊號指向完全不同的根因。
+3. 這是一次「機器自己重現了自己要調查的 bug」的案例——收到 `"ping"` 當下的第一直覺就是去做 ops 巡檢，這正是本 entry 要修的行為模式；之所以能抓到，是因為中途停下來檢查了 `ps aux` 與 log 時間戳，發現自己正身處一個被 90 秒 perl alarm 包住的 auth-preflight 情境。

@@ -144,10 +144,20 @@ HOURLY_CAP_SEC=3000
 #
 CLAUDE_CMD_PATTERN="claude"
 
+# 2026-07-01 fix (3-strike: hourly_dispatch.log:exit1 recurred 82x/8.6d, root
+# cause confirmed live): bare "ping" gets loaded with full CLAUDE.md, whose
+# autonomous-loop mandate tells the model to investigate ops state and keep
+# working after replying — that blows the 90s alarm and SIGALRM-kills the
+# probe (exit=142), which this script then misreads as an auth failure and
+# escalates to Codex failover / CRITICAL alert even though auth was fine the
+# whole time. Fix: make the probe text itself override the mandate — explicit,
+# example-cited "not a work session" framing outranks the general instruction.
+AUTH_PREFLIGHT_PROMPT='SYSTEM AUTH-PREFLIGHT PROBE (not a real user, not a work session): reply with exactly one word, PONG, and stop there. Do not call any tools, do not read files, do not run an ops loop, do not schedule a wakeup. This message only checks that you can respond at all.'
+
 run_auth_preflight() {
   /usr/bin/perl -e 'alarm shift; exec @ARGV' "$AUTH_PREFLIGHT_TIMEOUT_SEC" \
     "$CLAUDE_BIN" -p --dangerously-skip-permissions \
-    --model "$AUTH_PREFLIGHT_MODEL" "ping" 2>&1
+    --model "$AUTH_PREFLIGHT_MODEL" "$AUTH_PREFLIGHT_PROMPT" 2>&1
   return $?
 }
 

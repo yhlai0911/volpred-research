@@ -37046,5 +37046,17 @@
       "NULL"
     ],
     "created_at": "2026-06-30T19:05:26.717220+00:00"
+  },
+  {
+    "item_id": "27f117e4",
+    "category": "empirical_null",
+    "content": "research_transfer_learning_for_new_issues_vol (Codex review PASS as scoped null-result pilot): similarity-based transfer learning for cold-start volatility forecasting on 10 recent listings/spin-offs (4,900 target-day predictions, daily close-to-close public yfinance data) does NOT beat naive HAR22 baseline. Mean QLIKE diff vs naive HAR22 = +5.0707 (positive=worse), 0/10 targets win. Transfer DOES stabilize the unstable target-only Ridge cold-start blowup (similar-source vs target-only diff is negative), but that improvement is not enough to clear the simple rolling-volatility HAR22 baseline. Lookahead-protected via signal.shift(1)/rolling().shift(1) features and source-selection windows ending before each target's evaluation start; seed=42 fixed for target-level bootstrap (B=1000). Claim scope: daily close-to-close proxy only — do NOT cite as evidence against high-frequency realized-volatility transfer learning (that needs intraday RV data, not tested here).",
+    "evidence": [
+      "experiments/research_transfer_learning_for_new_issues_vol/research_transfer_learning_for_new_issues_vol_results.json",
+      "experiments/research_transfer_learning_for_new_issues_vol/codex_review.md (verdict: PASS as scoped null-result pilot)",
+      "experiments/research_transfer_learning_for_new_issues_vol/README.md"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-07-01T23:53:58.317425"
   }
 ]
