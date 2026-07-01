@@ -26,8 +26,8 @@
       "stage": "revision",
       "stage_entered_at": "2026-07-01T02:25:00+08:00",
       "last_advance_at": "2026-07-01T02:06:46+00:00",
-      "blocker": "Stage 1 reframing DONE (1.1 cover_letter_scrub / 1.2 intro-abstract-conclusion reframe / 1.3 appendix_offload / 1.4 sample_split_unify all complete). Next: rerun codex multi-round review on the reframed manuscript (all 3 passes previously FAIL_MAJOR_REVISION on pre-reframe body); if converges → arXiv.",
-      "owner_decision_pending": false,
+      "blocker": "Stage 1+2 reframe COMPLETE, but main-thread verification found BOTH honest Stage 2 pillars weak: gold regime (K1591) weak/mostly-NS; model-selection OOS (K1592) NULL_OR_WEAK, 0 Harvey-Holm significant. leverage-direction has NO JBF-grade empirical result after rigorous rebuild. GATE: do NOT advance to arxiv/submission. Owner research-direction decision pending (WARN email sent 2026-07-01 12:46): re-target FRL/IJF (diagnostic+nulls) / reframe as negative-results paper / shelve.",
+      "owner_decision_pending": true,
       "compliance_scrub_done": true,
       "compliance_note": "submission set gate CLEAN (scripts/check_paper_compliance.py); body/tables/main thanks/cover_letter scrubbed of K-id/VolPred/AI; author=Yi-Hao Lai only; compiles 49pp",
       "contribution_gate": {
@@ -119,7 +119,8 @@
           ],
           "note": "This is the honest research-integrity outcome; the reframe did its job = it revealed the results don't support the strong claim. NOT a failure of the reframe — a failure of the original claim to survive rigor."
         }
-      }
+      },
+      "do_not_advance": true
     },
     {
       "paper": "vt-trend-following",
