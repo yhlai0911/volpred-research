@@ -1,0 +1,1260 @@
+{
+  "experiment_id": "research_quantum_reservoir_computing_for_realized_volatil",
+  "created_at": "2026-07-01T16:00:38.635189+00:00",
+  "status": "completed",
+  "verdict": "NULL_VS_PRIMARY_BASELINE",
+  "seed": 42,
+  "hypothesis": "A classical echo-state reservoir proxy for QRC should improve one-day-ahead daily variance forecasts beyond linear HARX if the reservoir mechanism itself is reproducibly useful without quantum hardware.",
+  "literature_checked": [
+    "Li, Mukhopadhyay, Bayat, and Habibnia (2025/2026), Quantum Reservoir Computing for Realized Volatility Forecasting, arXiv:2505.13933.",
+    "Corsi (2009), A simple approximate long-memory model of realized volatility, Journal of Financial Econometrics.",
+    "Jaeger and Haas (2004), Harnessing nonlinearity: predicting chaotic systems and saving energy in wireless communication, Science.",
+    "Zhang, Zhang, Cucuringu, and Qian (2022/2024), Volatility forecasting with machine learning and intraday commonality, arXiv:2202.08962."
+  ],
+  "data": {
+    "source": "yfinance adjusted daily close, auto_adjust=True",
+    "download_start": "2010-01-01",
+    "download_end_exclusive": "2026-07-02",
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "GLD",
+      "TLT",
+      "HYG",
+      "EEM",
+      "USO"
+    ],
+    "data_cache": "experiments/research_quantum_reservoir_computing_for_realized_volatil/data/adjusted_close_yfinance.csv",
+    "coverage": {
+      "SPY": {
+        "first": "2010-01-04",
+        "last": "2026-07-01",
+        "n_prices": 4148
+      },
+      "QQQ": {
+        "first": "2010-01-04",
+        "last": "2026-07-01",
+        "n_prices": 4148
+      },
+      "IWM": {
+        "first": "2010-01-04",
+        "last": "2026-07-01",
+        "n_prices": 4148
+      },
+      "GLD": {
+        "first": "2010-01-04",
+        "last": "2026-07-01",
+        "n_prices": 4148
+      },
+      "TLT": {
+        "first": "2010-01-04",
+        "last": "2026-07-01",
+        "n_prices": 4148
+      },
+      "HYG": {
+        "first": "2010-01-04",
+        "last": "2026-07-01",
+        "n_prices": 4148
+      },
+      "EEM": {
+        "first": "2010-01-04",
+        "last": "2026-07-01",
+        "n_prices": 4148
+      },
+      "USO": {
+        "first": "2010-01-04",
+        "last": "2026-07-01",
+        "n_prices": 4148
+      }
+    },
+    "skipped": {}
+  },
+  "method": {
+    "target": "same-day close-to-close squared log return r_t^2; all predictors lagged through t-1",
+    "proxy_notice": "This is a daily public-data proxy, not the high-frequency realized-volatility target used in the QRC paper.",
+    "lookahead_guard": "features use signal.shift(1) and rolling(...).mean().shift(1); train rows date < 2019-01-02; OOS rows date >= 2019-01-02.",
+    "models": {
+      "naive_har22": "22-day lagged rolling mean variance",
+      "linear_har": "Ridge on lagged daily/weekly/monthly log variance",
+      "linear_harx": "Ridge on HAR lags plus lagged return/asymmetry features",
+      "random_features": "fixed tanh random features plus Ridge readout",
+      "reservoir_seed42": "fixed sparse echo-state reservoir plus Ridge readout, seed 42",
+      "reservoir_seed_median": "pointwise median forecast across eight fixed reservoir seeds"
+    },
+    "reservoir": {
+      "dim": 96,
+      "spectral_radius": 0.85,
+      "sparsity": 0.12,
+      "input_scale": 0.45,
+      "leak_rate": 0.35,
+      "seeds": [
+        7,
+        11,
+        23,
+        42,
+        73,
+        101,
+        131,
+        173
+      ]
+    },
+    "evaluation": "Patton QLIKE on r^2 after train-only scalar QLIKE calibration for every model; primary gate baseline is the strongest calibrated traditional benchmark among naive_har22, linear_har, and linear_harx; pairwise DM-HAC via volpred.stats.model_evaluation.dm_test; target-level bootstrap B=1000 seed=42."
+  },
+  "summary": {
+    "primary_baseline": "linear_har",
+    "panel_qlike_means": {
+      "naive_har22": 1.4933125399310727,
+      "linear_har": 1.4632104561934463,
+      "linear_harx": 1.4931585966224739,
+      "random_features": 1.50846824739547,
+      "reservoir_seed42": 1.4894601861952848,
+      "reservoir_seed_median": 1.4955167149376365
+    },
+    "diff_vs_primary_baseline": {
+      "naive_har22": {
+        "mean": 0.030102083737626517,
+        "asset_wins": 0,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": 0.030102083737626517,
+          "ci95": [
+            0.019876469620667355,
+            0.041383254545048286
+          ],
+          "prob_mean_below_zero": 0.0
+        }
+      },
+      "linear_harx": {
+        "mean": 0.02994814042902763,
+        "asset_wins": 2,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": 0.02994814042902763,
+          "ci95": [
+            0.0008141774692584425,
+            0.06997717339899326
+          ],
+          "prob_mean_below_zero": 0.017
+        }
+      },
+      "random_features": {
+        "mean": 0.04525779120202378,
+        "asset_wins": 0,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": 0.04525779120202378,
+          "ci95": [
+            0.0315206474522402,
+            0.058251916355325645
+          ],
+          "prob_mean_below_zero": 0.0
+        }
+      },
+      "reservoir_seed42": {
+        "mean": 0.026249730001838584,
+        "asset_wins": 1,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": 0.026249730001838584,
+          "ci95": [
+            -0.0020628361383209365,
+            0.0592273095942243
+          ],
+          "prob_mean_below_zero": 0.033
+        }
+      },
+      "reservoir_seed_median": {
+        "mean": 0.03230625874419024,
+        "asset_wins": 2,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": 0.03230625874419024,
+          "ci95": [
+            -0.0005883941624708825,
+            0.07055731475046537
+          ],
+          "prob_mean_below_zero": 0.031
+        }
+      }
+    },
+    "diff_vs_linear_harx": {
+      "naive_har22": {
+        "mean": 0.00015394330859888616,
+        "asset_wins": 2,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": 0.00015394330859888616,
+          "ci95": [
+            -0.031314916115639885,
+            0.02349822061939866
+          ],
+          "prob_mean_below_zero": 0.482
+        }
+      },
+      "linear_har": {
+        "mean": -0.02994814042902763,
+        "asset_wins": 6,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": -0.02994814042902763,
+          "ci95": [
+            -0.06997717339899327,
+            -0.000814177469258443
+          ],
+          "prob_mean_below_zero": 0.983
+        }
+      },
+      "random_features": {
+        "mean": 0.015309650772996147,
+        "asset_wins": 2,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": 0.015309650772996147,
+          "ci95": [
+            -0.025245609356160752,
+            0.04734855472292263
+          ],
+          "prob_mean_below_zero": 0.189
+        }
+      },
+      "reservoir_seed42": {
+        "mean": -0.0036984104271890472,
+        "asset_wins": 4,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": -0.0036984104271890472,
+          "ci95": [
+            -0.05124109771630038,
+            0.038040920168022185
+          ],
+          "prob_mean_below_zero": 0.541
+        }
+      },
+      "reservoir_seed_median": {
+        "mean": 0.0023581183151626106,
+        "asset_wins": 4,
+        "n_assets": 8,
+        "bootstrap": {
+          "B": 1000,
+          "seed": 42,
+          "n_assets": 8,
+          "mean": 0.0023581183151626106,
+          "ci95": [
+            -0.04362191090293274,
+            0.04847785881486277
+          ],
+          "prob_mean_below_zero": 0.447
+        }
+      }
+    },
+    "reservoir_seed_summary": {
+      "7": {
+        "mean_qlike": 1.5081961962896093,
+        "wins_vs_naive_har22": 3
+      },
+      "11": {
+        "mean_qlike": 1.4991727454138482,
+        "wins_vs_naive_har22": 4
+      },
+      "23": {
+        "mean_qlike": 1.4932461565157127,
+        "wins_vs_naive_har22": 6
+      },
+      "42": {
+        "mean_qlike": 1.4894601861952848,
+        "wins_vs_naive_har22": 5
+      },
+      "73": {
+        "mean_qlike": 1.500059830250665,
+        "wins_vs_naive_har22": 5
+      },
+      "101": {
+        "mean_qlike": 1.5067550550323308,
+        "wins_vs_naive_har22": 4
+      },
+      "131": {
+        "mean_qlike": 1.4953475466044885,
+        "wins_vs_naive_har22": 6
+      },
+      "173": {
+        "mean_qlike": 1.5189403548549922,
+        "wins_vs_naive_har22": 4
+      }
+    },
+    "reservoir_seed_mean_qlike_range": [
+      1.4894601861952848,
+      1.5189403548549922
+    ],
+    "verdict": "NULL_VS_PRIMARY_BASELINE"
+  },
+  "assets": [
+    {
+      "ticker": "SPY",
+      "train_start": "2010-02-05",
+      "train_end": "2018-12-31",
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-07-01",
+      "train_rows": 2241,
+      "oos_rows": 1884,
+      "calibration_factors": {
+        "naive_har22": 1.2923592619566566,
+        "linear_har": 5.454892419466605,
+        "linear_harx": 5.401338753300213,
+        "random_features": 5.233602856715004,
+        "reservoir_seed42": 4.860863998833197,
+        "reservoir_seed_median": 4.847886585076551
+      },
+      "qlike": {
+        "naive_har22": 1.5988351681104105,
+        "linear_har": 1.5421932492361494,
+        "linear_harx": 1.695011043358215,
+        "random_features": 1.5877986102427457,
+        "reservoir_seed42": 1.5700372145434986,
+        "reservoir_seed_median": 1.588432331068145
+      },
+      "dm_vs_naive_har22": {
+        "linear_har": {
+          "t": -3.1192456496435224,
+          "p": 0.0018406086427900092,
+          "mean_loss_diff": -0.05664191887426095
+        },
+        "random_features": {
+          "t": -0.33456592075540403,
+          "p": 0.7379898169078807,
+          "mean_loss_diff": -0.01103655786766503
+        },
+        "reservoir_seed42": {
+          "t": -0.426854039406034,
+          "p": 0.6695344413966346,
+          "mean_loss_diff": -0.02879795356691174
+        },
+        "reservoir_seed_median": {
+          "t": -0.1398424399414195,
+          "p": 0.8887994361181817,
+          "mean_loss_diff": -0.010402837042265613
+        }
+      },
+      "dm_vs_linear_har": {
+        "naive_har22": {
+          "t": 3.1192456496435224,
+          "p": 0.0018406086427900092,
+          "mean_loss_diff": 0.05664191887426095
+        },
+        "random_features": {
+          "t": 1.7477228022578442,
+          "p": 0.08067502954082295,
+          "mean_loss_diff": 0.04560536100659593
+        },
+        "reservoir_seed42": {
+          "t": 0.43749602230265816,
+          "p": 0.661801832707182,
+          "mean_loss_diff": 0.02784396530734922
+        },
+        "reservoir_seed_median": {
+          "t": 0.6628421121633935,
+          "p": 0.5075128057303879,
+          "mean_loss_diff": 0.04623908183199532
+        }
+      },
+      "dm_vs_linear_harx": {
+        "naive_har22": {
+          "t": -0.7834334494840818,
+          "p": 0.4334711451483315,
+          "mean_loss_diff": -0.09617587524780472
+        },
+        "linear_har": {
+          "t": -1.3168508143227222,
+          "p": 0.18804887425533656,
+          "mean_loss_diff": -0.15281779412206564
+        },
+        "random_features": {
+          "t": -0.9973327047407881,
+          "p": 0.31873118666339106,
+          "mean_loss_diff": -0.10721243311546974
+        },
+        "reservoir_seed42": {
+          "t": -1.1785545614413822,
+          "p": 0.23872450154119762,
+          "mean_loss_diff": -0.12497382881471651
+        },
+        "reservoir_seed_median": {
+          "t": -1.1076645697940046,
+          "p": 0.2681481744857117,
+          "mean_loss_diff": -0.10657871229007036
+        }
+      },
+      "reservoir_seed_qlike": {
+        "7": 1.6011926587814123,
+        "11": 1.57230587734737,
+        "23": 1.5678693720874555,
+        "42": 1.5700372145434986,
+        "73": 1.5938029577742066,
+        "101": 1.6358797883208998,
+        "131": 1.588228485994827,
+        "173": 1.5904932583576714
+      },
+      "reservoir_wins_vs_naive_har22": {
+        "7": false,
+        "11": true,
+        "23": true,
+        "42": true,
+        "73": true,
+        "101": false,
+        "131": true,
+        "173": true
+      }
+    },
+    {
+      "ticker": "QQQ",
+      "train_start": "2010-02-05",
+      "train_end": "2018-12-31",
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-07-01",
+      "train_rows": 2241,
+      "oos_rows": 1884,
+      "calibration_factors": {
+        "naive_har22": 1.2474770000193285,
+        "linear_har": 5.0695148471591684,
+        "linear_harx": 4.979168315317208,
+        "random_features": 4.855957244029087,
+        "reservoir_seed42": 4.4990702733767085,
+        "reservoir_seed_median": 4.506538767516471
+      },
+      "qlike": {
+        "naive_har22": 1.548573325438133,
+        "linear_har": 1.5083169834306966,
+        "linear_harx": 1.5638100128922492,
+        "random_features": 1.5691684857944845,
+        "reservoir_seed42": 1.627964714682372,
+        "reservoir_seed_median": 1.6354230201909232
+      },
+      "dm_vs_naive_har22": {
+        "linear_har": {
+          "t": -2.285374805573435,
+          "p": 0.02240156208392885,
+          "mean_loss_diff": -0.04025634200743612
+        },
+        "random_features": {
+          "t": 0.46545020221350863,
+          "p": 0.6416629158713918,
+          "mean_loss_diff": 0.02059516035635181
+        },
+        "reservoir_seed42": {
+          "t": 0.9975988482268408,
+          "p": 0.3186020966760452,
+          "mean_loss_diff": 0.07939138924423904
+        },
+        "reservoir_seed_median": {
+          "t": 0.9719646751267129,
+          "p": 0.3311929578652262,
+          "mean_loss_diff": 0.08684969475279024
+        }
+      },
+      "dm_vs_linear_har": {
+        "naive_har22": {
+          "t": 2.285374805573435,
+          "p": 0.02240156208392885,
+          "mean_loss_diff": 0.04025634200743612
+        },
+        "random_features": {
+          "t": 1.7417395981349721,
+          "p": 0.08171731199586363,
+          "mean_loss_diff": 0.06085150236378794
+        },
+        "reservoir_seed42": {
+          "t": 1.5984418764332737,
+          "p": 0.110112444375003,
+          "mean_loss_diff": 0.11964773125167517
+        },
+        "reservoir_seed_median": {
+          "t": 1.4993794976435917,
+          "p": 0.13394283969547227,
+          "mean_loss_diff": 0.12710603676022633
+        }
+      },
+      "dm_vs_linear_harx": {
+        "naive_har22": {
+          "t": -0.3214841787396123,
+          "p": 0.7478791803914064,
+          "mean_loss_diff": -0.015236687454116422
+        },
+        "linear_har": {
+          "t": -1.4648816808172769,
+          "p": 0.14312013872767748,
+          "mean_loss_diff": -0.05549302946155256
+        },
+        "random_features": {
+          "t": 0.21792678828962275,
+          "p": 0.8275097675445253,
+          "mean_loss_diff": 0.005358472902235395
+        },
+        "reservoir_seed42": {
+          "t": 0.8339538488782577,
+          "p": 0.40441276832799655,
+          "mean_loss_diff": 0.06415470179012261
+        },
+        "reservoir_seed_median": {
+          "t": 0.827523099122645,
+          "p": 0.40804549412874036,
+          "mean_loss_diff": 0.07161300729867379
+        }
+      },
+      "reservoir_seed_qlike": {
+        "7": 1.6914067473201435,
+        "11": 1.6119321904275083,
+        "23": 1.6434541896873354,
+        "42": 1.627964714682372,
+        "73": 1.61392786039007,
+        "101": 1.671921502114058,
+        "131": 1.6523917288757217,
+        "173": 1.6840300479410901
+      },
+      "reservoir_wins_vs_naive_har22": {
+        "7": false,
+        "11": false,
+        "23": false,
+        "42": false,
+        "73": false,
+        "101": false,
+        "131": false,
+        "173": false
+      }
+    },
+    {
+      "ticker": "IWM",
+      "train_start": "2010-02-05",
+      "train_end": "2018-12-31",
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-07-01",
+      "train_rows": 2241,
+      "oos_rows": 1884,
+      "calibration_factors": {
+        "naive_har22": 1.1784790632333157,
+        "linear_har": 4.060143038296364,
+        "linear_harx": 4.009616035504142,
+        "random_features": 3.9804023829272297,
+        "reservoir_seed42": 3.803356928325372,
+        "reservoir_seed_median": 3.7935206423546197
+      },
+      "qlike": {
+        "naive_har22": 1.4013781141197197,
+        "linear_har": 1.3727712907054788,
+        "linear_harx": 1.383792321915684,
+        "random_features": 1.4303487765945213,
+        "reservoir_seed42": 1.3738116259970274,
+        "reservoir_seed_median": 1.3652422612018733
+      },
+      "dm_vs_naive_har22": {
+        "linear_har": {
+          "t": -2.1441698567872765,
+          "p": 0.032146968845386814,
+          "mean_loss_diff": -0.028606823414241207
+        },
+        "random_features": {
+          "t": 1.2443162546018607,
+          "p": 0.2135380509344369,
+          "mean_loss_diff": 0.028970662474801123
+        },
+        "reservoir_seed42": {
+          "t": -1.0950145002317828,
+          "p": 0.27365032440288206,
+          "mean_loss_diff": -0.027566488122692658
+        },
+        "reservoir_seed_median": {
+          "t": -1.4363488508778934,
+          "p": 0.1510692122660986,
+          "mean_loss_diff": -0.036135852917846906
+        }
+      },
+      "dm_vs_linear_har": {
+        "naive_har22": {
+          "t": 2.1441698567872765,
+          "p": 0.032146968845386814,
+          "mean_loss_diff": 0.028606823414241207
+        },
+        "random_features": {
+          "t": 3.8142422928113864,
+          "p": 0.00014100398870242614,
+          "mean_loss_diff": 0.05757748588904234
+        },
+        "reservoir_seed42": {
+          "t": 0.041261658824013704,
+          "p": 0.9670916732305146,
+          "mean_loss_diff": 0.0010403352915485486
+        },
+        "reservoir_seed_median": {
+          "t": -0.2898961647134268,
+          "p": 0.7719275939654064,
+          "mean_loss_diff": -0.007529029503605698
+        }
+      },
+      "dm_vs_linear_harx": {
+        "naive_har22": {
+          "t": 0.9262341452105674,
+          "p": 0.35444300506380944,
+          "mean_loss_diff": 0.01758579220403612
+        },
+        "linear_har": {
+          "t": -1.0244248524000559,
+          "p": 0.305766232533055,
+          "mean_loss_diff": -0.01102103121020509
+        },
+        "random_features": {
+          "t": 3.549674914905766,
+          "p": 0.0003951709913656565,
+          "mean_loss_diff": 0.04655645467883724
+        },
+        "reservoir_seed42": {
+          "t": -0.3969456887835371,
+          "p": 0.6914524953590615,
+          "mean_loss_diff": -0.00998069591865655
+        },
+        "reservoir_seed_median": {
+          "t": -0.7087874972739203,
+          "p": 0.47854409627645156,
+          "mean_loss_diff": -0.018550060713810792
+        }
+      },
+      "reservoir_seed_qlike": {
+        "7": 1.3743975561930721,
+        "11": 1.3658894631426444,
+        "23": 1.38380090805816,
+        "42": 1.3738116259970274,
+        "73": 1.3765438182451724,
+        "101": 1.362834750029068,
+        "131": 1.3583211127050456,
+        "173": 1.3674075675393593
+      },
+      "reservoir_wins_vs_naive_har22": {
+        "7": true,
+        "11": true,
+        "23": true,
+        "42": true,
+        "73": true,
+        "101": true,
+        "131": true,
+        "173": true
+      }
+    },
+    {
+      "ticker": "GLD",
+      "train_start": "2010-02-05",
+      "train_end": "2018-12-31",
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-07-01",
+      "train_rows": 2241,
+      "oos_rows": 1884,
+      "calibration_factors": {
+        "naive_har22": 1.196099082971612,
+        "linear_har": 4.966173204526846,
+        "linear_harx": 4.90325511565084,
+        "random_features": 4.814232993407098,
+        "reservoir_seed42": 4.738978598726427,
+        "reservoir_seed_median": 4.724090794622596
+      },
+      "qlike": {
+        "naive_har22": 1.5581824771561237,
+        "linear_har": 1.5446194052139928,
+        "linear_harx": 1.5541158725625386,
+        "random_features": 1.566225295430219,
+        "reservoir_seed42": 1.5468991306084332,
+        "reservoir_seed_median": 1.5509104375674918
+      },
+      "dm_vs_naive_har22": {
+        "linear_har": {
+          "t": -0.9632403112248429,
+          "p": 0.33555062017127213,
+          "mean_loss_diff": -0.013563071942130968
+        },
+        "random_features": {
+          "t": 0.3721452749518439,
+          "p": 0.7098265648419946,
+          "mean_loss_diff": 0.008042818274095198
+        },
+        "reservoir_seed42": {
+          "t": -0.5504050419619674,
+          "p": 0.5821068767944637,
+          "mean_loss_diff": -0.01128334654769055
+        },
+        "reservoir_seed_median": {
+          "t": -0.40013959358482093,
+          "p": 0.6890990912827593,
+          "mean_loss_diff": -0.007272039588631978
+        }
+      },
+      "dm_vs_linear_har": {
+        "naive_har22": {
+          "t": 0.9632403112248429,
+          "p": 0.33555062017127213,
+          "mean_loss_diff": 0.013563071942130968
+        },
+        "random_features": {
+          "t": 1.5067655482273388,
+          "p": 0.132038498772314,
+          "mean_loss_diff": 0.02160589021622616
+        },
+        "reservoir_seed42": {
+          "t": 0.15664728841029954,
+          "p": 0.8755396246089551,
+          "mean_loss_diff": 0.002279725394440427
+        },
+        "reservoir_seed_median": {
+          "t": 0.471623632932987,
+          "p": 0.6372500954131692,
+          "mean_loss_diff": 0.006291032353498993
+        }
+      },
+      "dm_vs_linear_harx": {
+        "naive_har22": {
+          "t": 0.24773235023345255,
+          "p": 0.8043685099411257,
+          "mean_loss_diff": 0.004066604593585118
+        },
+        "linear_har": {
+          "t": -1.6609666193084849,
+          "p": 0.09688662828674888,
+          "mean_loss_diff": -0.009496467348545848
+        },
+        "random_features": {
+          "t": 0.9130925222604004,
+          "p": 0.36131077458637084,
+          "mean_loss_diff": 0.012109422867680318
+        },
+        "reservoir_seed42": {
+          "t": -0.4367924859627237,
+          "p": 0.6623119302428462,
+          "mean_loss_diff": -0.007216741954105423
+        },
+        "reservoir_seed_median": {
+          "t": -0.2071525768123602,
+          "p": 0.8359131006925775,
+          "mean_loss_diff": -0.003205434995046854
+        }
+      },
+      "reservoir_seed_qlike": {
+        "7": 1.5642899815998488,
+        "11": 1.5497822338223741,
+        "23": 1.542147660426987,
+        "42": 1.5468991306084332,
+        "73": 1.5519001567846358,
+        "101": 1.5465343775506426,
+        "131": 1.5506714816360467,
+        "173": 1.5776560865648084
+      },
+      "reservoir_wins_vs_naive_har22": {
+        "7": false,
+        "11": true,
+        "23": true,
+        "42": true,
+        "73": true,
+        "101": true,
+        "131": true,
+        "173": false
+      }
+    },
+    {
+      "ticker": "TLT",
+      "train_start": "2010-02-05",
+      "train_end": "2018-12-31",
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-07-01",
+      "train_rows": 2241,
+      "oos_rows": 1884,
+      "calibration_factors": {
+        "naive_har22": 1.1246476157028646,
+        "linear_har": 3.7469911808905048,
+        "linear_harx": 3.7596741260477504,
+        "random_features": 3.7032796033127187,
+        "reservoir_seed42": 3.7043163280390026,
+        "reservoir_seed_median": 3.670530720043951
+      },
+      "qlike": {
+        "naive_har22": 1.246246453550973,
+        "linear_har": 1.2370442672020476,
+        "linear_harx": 1.2336762982705936,
+        "random_features": 1.2587383140760906,
+        "reservoir_seed42": 1.26100436957774,
+        "reservoir_seed_median": 1.247982050732888
+      },
+      "dm_vs_naive_har22": {
+        "linear_har": {
+          "t": -0.9255331006115436,
+          "p": 0.3548072720595101,
+          "mean_loss_diff": -0.009202186348925515
+        },
+        "random_features": {
+          "t": 1.067214423780885,
+          "p": 0.2860118258407003,
+          "mean_loss_diff": 0.012491860525117573
+        },
+        "reservoir_seed42": {
+          "t": 1.1063011776448288,
+          "p": 0.26873749809584835,
+          "mean_loss_diff": 0.014757916026766831
+        },
+        "reservoir_seed_median": {
+          "t": 0.15885533026917023,
+          "p": 0.8737998901271726,
+          "mean_loss_diff": 0.0017355971819149841
+        }
+      },
+      "dm_vs_linear_har": {
+        "naive_har22": {
+          "t": 0.9255331006115436,
+          "p": 0.3548072720595101,
+          "mean_loss_diff": 0.009202186348925515
+        },
+        "random_features": {
+          "t": 2.9723901949562834,
+          "p": 0.0029923919097476492,
+          "mean_loss_diff": 0.02169404687404309
+        },
+        "reservoir_seed42": {
+          "t": 1.5605513085310887,
+          "p": 0.11879769567467413,
+          "mean_loss_diff": 0.023960102375692346
+        },
+        "reservoir_seed_median": {
+          "t": 0.8094382343168196,
+          "p": 0.4183653851332918,
+          "mean_loss_diff": 0.010937783530840493
+        }
+      },
+      "dm_vs_linear_harx": {
+        "naive_har22": {
+          "t": 1.8225737380873337,
+          "p": 0.06852649899443408,
+          "mean_loss_diff": 0.012570155280379443
+        },
+        "linear_har": {
+          "t": 0.393731097907384,
+          "p": 0.6938241577338,
+          "mean_loss_diff": 0.0033679689314539273
+        },
+        "random_features": {
+          "t": 2.630315354963404,
+          "p": 0.008600086387022143,
+          "mean_loss_diff": 0.025062015805497016
+        },
+        "reservoir_seed42": {
+          "t": 2.370344915182276,
+          "p": 0.017871718993023533,
+          "mean_loss_diff": 0.027328071307146276
+        },
+        "reservoir_seed_median": {
+          "t": 1.573349832848907,
+          "p": 0.11580583107780673,
+          "mean_loss_diff": 0.014305752462294423
+        }
+      },
+      "reservoir_seed_qlike": {
+        "7": 1.254722609518872,
+        "11": 1.2511146035266327,
+        "23": 1.243443625293285,
+        "42": 1.26100436957774,
+        "73": 1.2548520028362686,
+        "101": 1.2749818463348035,
+        "131": 1.238719728207537,
+        "173": 1.24413746382706
+      },
+      "reservoir_wins_vs_naive_har22": {
+        "7": false,
+        "11": false,
+        "23": true,
+        "42": false,
+        "73": false,
+        "101": false,
+        "131": true,
+        "173": true
+      }
+    },
+    {
+      "ticker": "HYG",
+      "train_start": "2010-02-05",
+      "train_end": "2018-12-31",
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-07-01",
+      "train_rows": 2241,
+      "oos_rows": 1884,
+      "calibration_factors": {
+        "naive_har22": 1.2737228294858594,
+        "linear_har": 4.929638377185728,
+        "linear_harx": 4.842862025395252,
+        "random_features": 4.8629613082290195,
+        "reservoir_seed42": 4.491513099830995,
+        "reservoir_seed_median": 4.50817181021307
+      },
+      "qlike": {
+        "naive_har22": 1.5103388384633867,
+        "linear_har": 1.4859268543196384,
+        "linear_harx": 1.5101826812135686,
+        "random_features": 1.5081900730045854,
+        "reservoir_seed42": 1.4349647806398034,
+        "reservoir_seed_median": 1.4407574790841775
+      },
+      "dm_vs_naive_har22": {
+        "linear_har": {
+          "t": -1.4931159134117247,
+          "p": 0.13557437696798735,
+          "mean_loss_diff": -0.024411984143748306
+        },
+        "random_features": {
+          "t": -0.07874646596025463,
+          "p": 0.9372426527189917,
+          "mean_loss_diff": -0.0021487654588010284
+        },
+        "reservoir_seed42": {
+          "t": -3.2036062708299493,
+          "p": 0.0013798682212260438,
+          "mean_loss_diff": -0.07537405782358304
+        },
+        "reservoir_seed_median": {
+          "t": -2.915905736543996,
+          "p": 0.003588518450335032,
+          "mean_loss_diff": -0.0695813593792091
+        }
+      },
+      "dm_vs_linear_har": {
+        "naive_har22": {
+          "t": 1.4931159134117247,
+          "p": 0.13557437696798735,
+          "mean_loss_diff": 0.024411984143748306
+        },
+        "random_features": {
+          "t": 1.0074212050070936,
+          "p": 0.3138618409742029,
+          "mean_loss_diff": 0.022263218684947277
+        },
+        "reservoir_seed42": {
+          "t": -2.5469345802048022,
+          "p": 0.010946333166823807,
+          "mean_loss_diff": -0.050962073679834734
+        },
+        "reservoir_seed_median": {
+          "t": -2.2837251115792148,
+          "p": 0.022498596246438796,
+          "mean_loss_diff": -0.04516937523546081
+        }
+      },
+      "dm_vs_linear_harx": {
+        "naive_har22": {
+          "t": 0.00519777175325418,
+          "p": 0.9958533474260447,
+          "mean_loss_diff": 0.00015615724981778395
+        },
+        "linear_har": {
+          "t": -1.056509869669832,
+          "p": 0.29087085943703306,
+          "mean_loss_diff": -0.024255826893930514
+        },
+        "random_features": {
+          "t": -0.06736307488513138,
+          "p": 0.9462998159694571,
+          "mean_loss_diff": -0.001992608208983235
+        },
+        "reservoir_seed42": {
+          "t": -2.8251593735874727,
+          "p": 0.004775525803962344,
+          "mean_loss_diff": -0.07521790057376526
+        },
+        "reservoir_seed_median": {
+          "t": -2.8106505826962747,
+          "p": 0.004995298970050577,
+          "mean_loss_diff": -0.06942520212939132
+        }
+      },
+      "reservoir_seed_qlike": {
+        "7": 1.4501537667741573,
+        "11": 1.4516390832941537,
+        "23": 1.4534256470252889,
+        "42": 1.4349647806398034,
+        "73": 1.4450162406138547,
+        "101": 1.4391617465295998,
+        "131": 1.438336227396888,
+        "173": 1.4537627919054608
+      },
+      "reservoir_wins_vs_naive_har22": {
+        "7": true,
+        "11": true,
+        "23": true,
+        "42": true,
+        "73": true,
+        "101": true,
+        "131": true,
+        "173": true
+      }
+    },
+    {
+      "ticker": "EEM",
+      "train_start": "2010-02-05",
+      "train_end": "2018-12-31",
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-07-01",
+      "train_rows": 2241,
+      "oos_rows": 1884,
+      "calibration_factors": {
+        "naive_har22": 1.158974762438026,
+        "linear_har": 4.091104389929725,
+        "linear_harx": 4.083698068217298,
+        "random_features": 4.017674799445353,
+        "reservoir_seed42": 3.982373320610848,
+        "reservoir_seed_median": 3.948508408853199
+      },
+      "qlike": {
+        "naive_har22": 1.5071329890924225,
+        "linear_har": 1.4631345141704228,
+        "linear_harx": 1.4745680792708016,
+        "random_features": 1.5382143451102412,
+        "reservoir_seed42": 1.49761251779739,
+        "reservoir_seed_median": 1.4910855187516059
+      },
+      "dm_vs_naive_har22": {
+        "linear_har": {
+          "t": -2.4373803108723124,
+          "p": 0.014886116287809115,
+          "mean_loss_diff": -0.043998474921999695
+        },
+        "random_features": {
+          "t": 0.6829155738897376,
+          "p": 0.4947442014851453,
+          "mean_loss_diff": 0.03108135601781895
+        },
+        "reservoir_seed42": {
+          "t": -0.34661881578921955,
+          "p": 0.7289164372405774,
+          "mean_loss_diff": -0.009520471295032546
+        },
+        "reservoir_seed_median": {
+          "t": -0.5766150819688932,
+          "p": 0.564268427946927,
+          "mean_loss_diff": -0.016047470340816605
+        }
+      },
+      "dm_vs_linear_har": {
+        "naive_har22": {
+          "t": 2.4373803108723124,
+          "p": 0.014886116287809115,
+          "mean_loss_diff": 0.043998474921999695
+        },
+        "random_features": {
+          "t": 2.1778659097835327,
+          "p": 0.029539753510081423,
+          "mean_loss_diff": 0.07507983093981868
+        },
+        "reservoir_seed42": {
+          "t": 1.444771671057586,
+          "p": 0.14868841017440126,
+          "mean_loss_diff": 0.034478003626967145
+        },
+        "reservoir_seed_median": {
+          "t": 1.3009792292052833,
+          "p": 0.19342473805122973,
+          "mean_loss_diff": 0.02795100458118309
+        }
+      },
+      "dm_vs_linear_harx": {
+        "naive_har22": {
+          "t": 0.9822771653936903,
+          "p": 0.32608950994423047,
+          "mean_loss_diff": 0.03256490982162118
+        },
+        "linear_har": {
+          "t": -0.5605141622193529,
+          "p": 0.5751954646331707,
+          "mean_loss_diff": -0.01143356510037851
+        },
+        "random_features": {
+          "t": 3.5729875254845314,
+          "p": 0.0003618078394043156,
+          "mean_loss_diff": 0.06364626583944015
+        },
+        "reservoir_seed42": {
+          "t": 0.68498291504993,
+          "p": 0.49343900881557534,
+          "mean_loss_diff": 0.023044438526588617
+        },
+        "reservoir_seed_median": {
+          "t": 0.5956818360624677,
+          "p": 0.5514593827551937,
+          "mean_loss_diff": 0.01651743948080456
+        }
+      },
+      "reservoir_seed_qlike": {
+        "7": 1.4855404900948261,
+        "11": 1.516154535610504,
+        "23": 1.4839988686730672,
+        "42": 1.49761251779739,
+        "73": 1.5030355271280798,
+        "101": 1.4852530120899146,
+        "131": 1.5019760443680537,
+        "173": 1.5127871849183165
+      },
+      "reservoir_wins_vs_naive_har22": {
+        "7": true,
+        "11": false,
+        "23": true,
+        "42": true,
+        "73": true,
+        "101": true,
+        "131": true,
+        "173": false
+      }
+    },
+    {
+      "ticker": "USO",
+      "train_start": "2010-02-05",
+      "train_end": "2018-12-31",
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-07-01",
+      "train_rows": 2241,
+      "oos_rows": 1884,
+      "calibration_factors": {
+        "naive_har22": 1.157989244806899,
+        "linear_har": 4.159268516991744,
+        "linear_harx": 4.1654805933816075,
+        "random_features": 4.098734851104905,
+        "reservoir_seed42": 4.018877382544793,
+        "reservoir_seed_median": 4.013141992720314
+      },
+      "qlike": {
+        "naive_har22": 1.575812953517413,
+        "linear_har": 1.5516770852691435,
+        "linear_harx": 1.5301124634961405,
+        "random_features": 1.6090620789108725,
+        "reservoir_seed42": 1.603387135716014,
+        "reservoir_seed_median": 1.6443006209039872
+      },
+      "dm_vs_naive_har22": {
+        "linear_har": {
+          "t": -2.084153191479185,
+          "p": 0.03728074033603068,
+          "mean_loss_diff": -0.02413586824826954
+        },
+        "random_features": {
+          "t": 1.4778699650738565,
+          "p": 0.13960982410615452,
+          "mean_loss_diff": 0.03324912539345946
+        },
+        "reservoir_seed42": {
+          "t": 1.0043794910443138,
+          "p": 0.31532477871561193,
+          "mean_loss_diff": 0.02757418219860096
+        },
+        "reservoir_seed_median": {
+          "t": 1.203471003942801,
+          "p": 0.22894538221026628,
+          "mean_loss_diff": 0.06848766738657407
+        }
+      },
+      "dm_vs_linear_har": {
+        "naive_har22": {
+          "t": 2.084153191479185,
+          "p": 0.03728074033603068,
+          "mean_loss_diff": 0.02413586824826954
+        },
+        "random_features": {
+          "t": 2.8568264553192484,
+          "p": 0.00432596650511563,
+          "mean_loss_diff": 0.057384993641729005
+        },
+        "reservoir_seed42": {
+          "t": 2.460458901626951,
+          "p": 0.013965154610169339,
+          "mean_loss_diff": 0.051710050446870486
+        },
+        "reservoir_seed_median": {
+          "t": 1.9450526297087425,
+          "p": 0.051917321870580624,
+          "mean_loss_diff": 0.09262353563484362
+        }
+      },
+      "dm_vs_linear_harx": {
+        "naive_har22": {
+          "t": 2.9046963644046775,
+          "p": 0.0037189627270357573,
+          "mean_loss_diff": 0.04570049002127285
+        },
+        "linear_har": {
+          "t": 0.9219618052038867,
+          "p": 0.35666660841531717,
+          "mean_loss_diff": 0.02156462177300332
+        },
+        "random_features": {
+          "t": 2.7868840179137115,
+          "p": 0.005375146351525917,
+          "mean_loss_diff": 0.07894961541473232
+        },
+        "reservoir_seed42": {
+          "t": 2.017881630709113,
+          "p": 0.04374517670760847,
+          "mean_loss_diff": 0.07327467221987381
+        },
+        "reservoir_seed_median": {
+          "t": 1.6790350302957542,
+          "p": 0.09331112615978121,
+          "mean_loss_diff": 0.11418815740784694
+        }
+      },
+      "reservoir_seed_qlike": {
+        "7": 1.6438657600345423,
+        "11": 1.6745639761395987,
+        "23": 1.6278289808741238,
+        "42": 1.603387135716014,
+        "73": 1.6614000782330316,
+        "101": 1.637473417289659,
+        "131": 1.6341355636517896,
+        "173": 1.7212484377861719
+      },
+      "reservoir_wins_vs_naive_har22": {
+        "7": false,
+        "11": false,
+        "23": false,
+        "42": false,
+        "73": false,
+        "101": false,
+        "131": false,
+        "173": false
+      }
+    }
+  ],
+  "main_findings": [
+    "The classical reservoir proxy does not beat the primary traditional baseline (linear_har) on panel QLIKE.",
+    "Reservoir seed-median mean QLIKE diff vs linear_har = 0.0323063, asset wins = 2/8, bootstrap CI = [-0.000588394, 0.0705573].",
+    "All predictors are lagged; no evaluation-period target labels are used in model fitting."
+  ],
+  "limitations": [
+    "No quantum Hamiltonian, qubit simulation, measurement noise, or hardware constraint is modeled.",
+    "Daily close-to-close squared returns are noisy proxies, not 5-minute realized variance.",
+    "Reservoir hyperparameters are fixed ex ante and not tuned; this is a gate, not an optimized ESN study.",
+    "Assets are liquid ETFs only; S&P 500 index RV and macro/microstructure feature sets from the QRC paper are not replicated."
+  ],
+  "figure": "experiments/research_quantum_reservoir_computing_for_realized_volatil/research_quantum_reservoir_computing_for_realized_volatil_qlike_improvement.png"
+}
