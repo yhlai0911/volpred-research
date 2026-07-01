@@ -17,7 +17,7 @@
     "stall_days": 7,
     "baseline_set_at": "2026-07-01T00:00:00+08:00",
     "audit_source": "2026-07-01 paper portfolio audit",
-    "updated_at": "2026-07-02T03:17:43+08:00"
+    "updated_at": "2026-07-02T03:55:00+08:00"
   },
   "papers": [
     {
@@ -26,7 +26,7 @@
       "stage": "multi_round_review",
       "stage_entered_at": "2026-07-02T03:17:43+08:00",
       "last_advance_at": "2026-07-02T03:17:43+08:00",
-      "blocker": "Owner decided IJF (email-12393/12398, 2026-07-01). IJF full-length body reframe (ticks 1-6) COMPLETE + gate-verified 2026-07-02: main_v_ijf.tex compiles 26pp 0-undefined; reproduce.py GREEN 100% (171/171); compliance CLEAN (author=Yi-Hao Lai only). Submission package assembled (body_v_ijf+main_v_ijf+highlights+cover_letter_ijf). The recorded JBF-era multi_round_review (all FAIL_MAJOR_REVISION) is SUPERSEDED. Fresh IJF multi-round codex review QUEUED as paper_review_leverage_direction_ijf_multiround_20260702 (P2). GATE: do NOT advance to arxiv until fresh IJF review converges.",
+      "blocker": "Fresh IJF multi-round review completed 2026-07-02 (task paper_review_leverage_direction_ijf_multiround_20260702) with overall FAIL_DO_NOT_ADVANCE. Archive: paper/leverage-direction/review_history/ijf_multi_round_20260702/. Mechanical gates: reproduce.py GREEN 171/171 traceable, compliance CLEAN after comment scrub, main_v_ijf.tex compiles 35pp with 0 undefined refs/cites. Blocking findings: allocation-level wedge still contradicts same-windows/single-protocol prose because tab:vt uses asset-native windows; body_v_ijf prose/VT/N=14 claims are not fully gated by reproduce.py; IJF package docs/title-page disclosure remain stale/draft. Route fixes back to main-thread paper_body/package; do NOT advance to arxiv_ready.",
       "owner_decision_pending": false,
       "compliance_scrub_done": true,
       "compliance_note": "submission set gate CLEAN (scripts/check_paper_compliance.py); body/tables/main thanks/cover_letter scrubbed of K-id/VolPred/AI; author=Yi-Hao Lai only; compiles 49pp",
@@ -61,6 +61,33 @@
           "OOS/sample-map not submission-grade",
           "corroborates CONTRIBUTION BORDERLINE"
         ]
+      },
+      "multi_round_review_ijf": {
+        "date": "2026-07-02",
+        "reviewer": "codex-cli",
+        "task_id": "paper_review_leverage_direction_ijf_multiround_20260702",
+        "overall": "FAIL_DO_NOT_ADVANCE",
+        "report_dir": "paper/leverage-direction/review_history/ijf_multi_round_20260702/",
+        "passes": {
+          "latex_academic": "FAIL_MAJOR_REVISION",
+          "citation_verification": "CONDITIONAL_PASS",
+          "ijf_submission_gate": "FAIL_MAJOR_REVISION",
+          "contribution_gate": "CONDITIONAL_PASS_ON_FRAMING"
+        },
+        "verified_gates": {
+          "compile": "latexmk/pdflatex exit0, main_v_ijf.pdf 35pp, no undefined refs/cites",
+          "reproduce": "GREEN, 171/171 traceable MATCH, 0 MISMATCH, 23 NOTE",
+          "compliance": "scripts/check_paper_compliance.py CLEAN after internal-comment scrub",
+          "bibliography": "39 body cite keys = 39 bibitems, no missing/orphan keys",
+          "highlights": "5 bullets, max length 80 chars"
+        },
+        "blocking_findings": [
+          "body_v_ijf claims same windows / single protocol, but tables_main tab:vt uses asset-native windows and REPLICATION.md documents uniform-window mismatch",
+          "reproduce.py is green for table sources but does not directly gate body_v_ijf prose, tab:vt, 6/6 OOS classification, or rho=0.83 N=14 extended claim",
+          "title_page_v_ijf contains a draft generative-AI disclosure requiring author sign-off before journal submission",
+          "REPLICATION.md and submission_package.md still describe stale JBF package/highlights; experiments/k903/README.md is placeholder"
+        ],
+        "decision": "Keep stage=multi_round_review; set do_not_advance=true; rerun IJF review only after fixes."
       },
       "reframing_decision": {
         "doc": "paper/leverage-direction/reframing_decision_20260701.md",
@@ -120,7 +147,7 @@
           "note": "This is the honest research-integrity outcome; the reframe did its job = it revealed the results don't support the strong claim. NOT a failure of the reframe — a failure of the original claim to survive rigor."
         }
       },
-      "do_not_advance": false,
+      "do_not_advance": true,
       "notes": "2026-07-01 16:14 hourly-16: owner email-12398 (\"你決定\") delegated journal choice to main-thread. HONEST verdict: solid method, weak/null finding (0 Harvey-Holm sig) → NOT top-3 finance nor a finding-driven Q1. DECISION: primary=International Journal of Forecasting (IJF), reframed around complexity-ceiling / measurement-vs-allocation (leverage-direction taxonomy demoted to supporting); fallback=Empirical Economics (EmpEcon). DROP FRL-primary (2500w cap guts cross-asset breadth) and JFinEc-first (needs positive finding). Decision email sent to owner with mailto override. Next: retarget body task FRL→IJF, codex multi-round review + contribution gate → arXiv → IJF.",
       "decision_log": [
         {
@@ -140,7 +167,7 @@
         }
       ],
       "narrative_status": "ijf_reframe_body_v_ijf tick-1 done (abstract+title+intro+highlights); tick-2 port lit-review next",
-      "last_update": "2026-07-01 17:22",
+      "last_update": "2026-07-02 03:55",
       "note": "downshift->IJF per email-12393/12398; body_v_ijf.tex front-matter locked, method/results port pending",
       "ijf_reframe": {
         "completed_at": "2026-07-02T03:17:43+08:00",
@@ -154,13 +181,13 @@
           "cover_letter_ijf.tex"
         ],
         "gates": {
-          "compile": "xelatex 2-pass exit0, 26pp, 0 undefined refs/citations",
+          "compile": "latexmk/pdflatex exit0, 35pp, 0 undefined refs/citations",
           "reproduce": "reproduce.py GREEN, traceable_match_rate 100% (171/171), MISMATCH=0",
           "compliance": "CLEAN — no K-id/VolPred/AI; author=Yi-Hao Lai only",
           "bibliography": "pruned to 39 cited keys, author-date apalike, alphabetical"
         },
-        "class_note": "elsarticle.cls not installed in build env; compiled with article+natbib (author-date). elsarticle conversion is production-stage; does not affect arXiv/initial-submission PDF.",
-        "next_gate": "fresh IJF multi-round codex review (paper_review_leverage_direction_ijf_multiround_20260702) — old JBF review superseded"
+        "class_note": "elsarticle.cls is installed and main_v_ijf.tex now compiles under elsarticle[review].",
+        "next_gate": "paper_body/package fixes for IJF review blockers, then rerun fresh IJF multi-round review"
       }
     },
     {

@@ -43561,7 +43561,7 @@
   {
     "id": "paper_review_leverage_direction_ijf_multiround_20260702",
     "task_type": "paper_review",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 2,
     "source": "pipeline_advance",
     "created_at": "2026-07-01T19:16:42+00:00",
@@ -43574,6 +43574,32 @@
       "pipeline"
     ],
     "title": "[論文管線] leverage-direction IJF version fresh multi-round review (codex exec)",
-    "description": "PIPELINE STAGE ADVANCE: leverage-direction IJF full-length body reframe (ticks 1-6) is COMPLETE as of 2026-07-02. The IJF submission package is assembled and gate-verified: main_v_ijf.tex (compiles 26pp, 0 undefined refs/cites), body_v_ijf.tex, tables_main.tex, highlights.txt, cover_letter_ijf.tex (1pp clean). reproduce.py GREEN 100% (171/171, MISMATCH=0). Compliance CLEAN (author=Yi-Hao Lai only; no K-id/VolPred/AI).\n\nThe multi_round_review recorded in paper_pipeline_status.json (all 3 passes FAIL_MAJOR_REVISION, 2026-07-01) was run on the OLD JBF framing (main.tex) and is SUPERSEDED. This task runs a FRESH multi-round review on the NEW IJF version.\n\n**RUN VIA codex exec (boss hard rule: multi-round review uses codex exec, unlimited quota; save Claude tokens). Target file = main_v_ijf.tex (NOT main.tex).**\n\nThree passes:\n1. latex-academic-reviewer (logic/structure/model-spec/symbol-consistency on the complexity-ceiling reframe)\n2. citation-verifier (39 cited keys; author-date Harvard; DOIs; et al. for 3+)\n3. journal-review with IJF profile (build .claude/skills/journal-review/references/ijf.md if missing: Elsevier/IIF, Editorial Manager, forecasting scope, honest-null tolerance, no word cap, highlights 3-5 bullets <=85 chars, author-date refs)\n\n**Verify the OLD JBF findings are now moot in the IJF version:**\n- 'main file not double-blind' -> arXiv preprint is named (author=Yi-Hao Lai correct); double-anonymized main + separate title page is a journal-submission-stage variant, note but do not block arXiv.\n- 'highlights too long + time-zone bullet not in manuscript' -> highlights.txt now 5 bullets, all reflected in manuscript, no time-zone bullet. Confirm.\n- 'cover letter claims 3 contributions vs manuscript 2' -> cover_letter_ijf.tex now states ONE central claim (complexity ceiling). Confirm consistency.\n- 'OOS/sample-map not submission-grade' -> tick-3 reconciled to one canonical partition (train 2017-2022 / main-OOS 2023-2024 / validation 2025-01..2026-03) with explicit forecast alignment. Verify no look-ahead.\n\n**Contribution gate re-audit**: lead claim MUST be the complexity-ceiling / measurement-to-allocation economic content (NOT a bare method rule). Taxonomy is supporting. Confirm the reframe cleared the earlier BORDERLINE verdict.\n\n**GATE to advance to arxiv_ready**: all 3 passes PASS or CONDITIONAL_PASS + contribution gate cleared + reproduce.py still GREEN. Archive reports to paper/leverage-direction/review_history/ijf_multi_round_<date>/. Update storage/paper_pipeline_status.json leverage entry. If any pass FAILs, list concrete fixes and route back to main-thread paper_body (do not silently advance).\n\nModel routing: paper_review -> codex exec (primary). Owner picks final submit timing after arXiv."
+    "description": "PIPELINE STAGE ADVANCE: leverage-direction IJF full-length body reframe (ticks 1-6) is COMPLETE as of 2026-07-02. The IJF submission package is assembled and gate-verified: main_v_ijf.tex (compiles 26pp, 0 undefined refs/cites), body_v_ijf.tex, tables_main.tex, highlights.txt, cover_letter_ijf.tex (1pp clean). reproduce.py GREEN 100% (171/171, MISMATCH=0). Compliance CLEAN (author=Yi-Hao Lai only; no K-id/VolPred/AI).\n\nThe multi_round_review recorded in paper_pipeline_status.json (all 3 passes FAIL_MAJOR_REVISION, 2026-07-01) was run on the OLD JBF framing (main.tex) and is SUPERSEDED. This task runs a FRESH multi-round review on the NEW IJF version.\n\n**RUN VIA codex exec (boss hard rule: multi-round review uses codex exec, unlimited quota; save Claude tokens). Target file = main_v_ijf.tex (NOT main.tex).**\n\nThree passes:\n1. latex-academic-reviewer (logic/structure/model-spec/symbol-consistency on the complexity-ceiling reframe)\n2. citation-verifier (39 cited keys; author-date Harvard; DOIs; et al. for 3+)\n3. journal-review with IJF profile (build .claude/skills/journal-review/references/ijf.md if missing: Elsevier/IIF, Editorial Manager, forecasting scope, honest-null tolerance, no word cap, highlights 3-5 bullets <=85 chars, author-date refs)\n\n**Verify the OLD JBF findings are now moot in the IJF version:**\n- 'main file not double-blind' -> arXiv preprint is named (author=Yi-Hao Lai correct); double-anonymized main + separate title page is a journal-submission-stage variant, note but do not block arXiv.\n- 'highlights too long + time-zone bullet not in manuscript' -> highlights.txt now 5 bullets, all reflected in manuscript, no time-zone bullet. Confirm.\n- 'cover letter claims 3 contributions vs manuscript 2' -> cover_letter_ijf.tex now states ONE central claim (complexity ceiling). Confirm consistency.\n- 'OOS/sample-map not submission-grade' -> tick-3 reconciled to one canonical partition (train 2017-2022 / main-OOS 2023-2024 / validation 2025-01..2026-03) with explicit forecast alignment. Verify no look-ahead.\n\n**Contribution gate re-audit**: lead claim MUST be the complexity-ceiling / measurement-to-allocation economic content (NOT a bare method rule). Taxonomy is supporting. Confirm the reframe cleared the earlier BORDERLINE verdict.\n\n**GATE to advance to arxiv_ready**: all 3 passes PASS or CONDITIONAL_PASS + contribution gate cleared + reproduce.py still GREEN. Archive reports to paper/leverage-direction/review_history/ijf_multi_round_<date>/. Update storage/paper_pipeline_status.json leverage entry. If any pass FAILs, list concrete fixes and route back to main-thread paper_body (do not silently advance).\n\nModel routing: paper_review -> codex exec (primary). Owner picks final submit timing after arXiv.",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-01T19:41:21.785050+00:00",
+    "claim_session_id": "812585bc9680",
+    "status_history": [
+      {
+        "ts": "2026-07-01T19:41:21.785530+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T19:41:35.604318+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T19:49:27.754240+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-01T19:41:35.603907+00:00",
+    "completed_at": "2026-07-01T19:49:27.753972+00:00",
+    "result": "Fresh IJF multi-round review archived at paper/leverage-direction/review_history/ijf_multi_round_20260702/. Overall FAIL_DO_NOT_ADVANCE: reproduce/compliance/compile green, but VT same-window contradiction, ungated body_v_ijf/VT claims, stale IJF package docs, and draft AI disclosure block arxiv_ready. storage/paper_pipeline_status.json kept at multi_round_review with do_not_advance=true."
   }
 ]
