@@ -114,6 +114,10 @@ this skill should interpret it as:
    - Failure to post FB does NOT block volpred publish, but log the failure
      to `storage/reports/trending_repost_log.json` for retry next cycle.
 
+   （粉專頁面本身的營運 backlog — 大頭照/簡介/vanity URL/追蹤者成長/巡檢節奏 —
+   見 [references/fb-page-operations.md](references/fb-page-operations.md)；
+   這裡只管單篇貼文文案。）
+
    **FB 貼文硬規則**（完整 SOP 在 references/fb-ivanlai-tone.md）：
    - FB 文案是 **改寫版** — 不可直接貼 VolPred 內文（重新組短文 200-400 字）
    - **主貼文不放連結** — 主 body 純文字 + 可選 1 張圖

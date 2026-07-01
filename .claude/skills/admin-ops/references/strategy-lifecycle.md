@@ -12,6 +12,19 @@ paths:
 
 策略 metadata 的唯一來源：`daily_update.py` 頂部的 `STRATEGY_REGISTRY`。Registry 驅動 Feed 文章（只列 active）、Supabase 同步、Paper trading。
 
+## Standing directive（boss 2026-06-21，非一次性 — idle tick 主動跑）
+
+策略要**持續增加** — 好的上架觀察、不好的下架，標準與流程與本文件既有一致（不另立標準）。
+不是「等 boss 逐次指示」的一次性任務；idle tick / 沒有 critical 待處理時可以主動跑
+「新策略實驗 → evaluate → gate → list」這條 lifecycle。上架前置 gate 見下方
+「新增策略」步驟 + `.claude/skills/autonomous-research/references/strategy-launch-gate.md`。
+
+**Sharpe 遠高於已上架中位數時的鐵律**：先懷疑 c2c measurement artifact / lookahead，
+不要直接慶祝可上架。反面教材：`tz_tw_jp_5050`(3.46) / `taiwan_spy_momentum`(3.23) /
+`global_vt_tz`(2.91) 三檔高 c2c Sharpe 經 o2o/lagged Harvey 驗證後 FAIL（隔夜跳空
+artifact，可交易 o2o 版 Sharpe~0.87），2026-06-21 audit 後維持 inactive。新策略候選
+一律先驗 o2o/lagged Harvey 再談上架。
+
 ## 新增策略（3 步驟）
 
 1. 在 `daily_update.py` 加入 `STRATEGY_REGISTRY`（含 id / name / active / metadata）

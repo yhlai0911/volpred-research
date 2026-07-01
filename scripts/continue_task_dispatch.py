@@ -460,6 +460,99 @@ def _run_article_refill(target: int, *, dry_run: bool = False) -> dict:
         signal.signal(signal.SIGALRM, previous_handler)
 
 
+def _draft_pool_deficit() -> int:
+    """Return how many more draft articles feed.json needs to reach DRAFT_POOL_FLOOR.
+
+    Reads storage/reports/feed.json directly (source of truth for the
+    `draft_pool_low` alert), independent of next_tasks.json agentable count.
+    Fail-open: any read error returns 0 (no forced refill) rather than raising —
+    this helper runs on every dispatch tick and must never crash dispatch.
+    """
+    try:
+        if not FEED_PATH.exists():
+            return 0
+        feed = json.loads(FEED_PATH.read_text(encoding="utf-8"))
+        if not isinstance(feed, list):
+            return 0
+        draft_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "draft")
+        return max(0, DRAFT_POOL_FLOOR - draft_count)
+    except Exception:  # noqa: BLE001  # silent-ok: fail-open, dispatch must not crash on feed read
+        return 0
+
+
+def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
+    """Force a daily_article-specific top-up when feed.json draft count is low.
+
+    2026-07-01 3-STRIKE fix: `_maybe_refill` below only reacts to the
+    next_tasks.json agentable-task-count signal, which can stay >= REFILL_FLOOR
+    while composed entirely of non-article task types (experiment,
+    platform_ops, ...). That leaves the actual publish-ready draft buffer
+    (feed.json status=="draft") free to run dry even though the dispatcher
+    "sees" a healthy pool — this was the root cause of `draft_pool_low` firing
+    5x over 73 days (docs/error_log.md 2026-07-01 entry). This function checks
+    the feed-level signal directly and, if deficient, calls the same
+    `refill_task_pool.refill()` used by `_maybe_refill` but targeted at the
+    feed deficit specifically — bypassing the diversity de-prioritization that
+    would otherwise let a thin draft buffer sit unaddressed while other task
+    types occupy the agentable queue.
+    """
+    if not auto_refill:
+        return None
+    deficit = _draft_pool_deficit()
+    if deficit <= 0:
+        return None
+    sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        article = _run_article_refill(target=deficit, dry_run=False)
+        added_ids = article.get("added_ids") or []
+        if article.get("added") and added_ids:
+            # refill_task_pool.refill() falls back to task_type="experiment"
+            # (auto_research_fallback) when the uncovered-K article candidate
+            # pool itself is exhausted (see _make_research_task in
+            # refill_task_pool.py). Report the REAL task_type mix instead of
+            # assuming daily_article, so dispatch_report_latest.json / dreaming
+            # don't get a false "draft pool problem solved" signal when the
+            # fallback actually queued research instead of an article.
+            by_type: dict[str, int] = {}
+            try:
+                pending_now = load_pending_tasks()
+                id_to_type = {
+                    t.get("id"): str(t.get("task_type") or "unknown")
+                    for t in pending_now
+                    if isinstance(t, dict)
+                }
+                for tid in added_ids:
+                    tt = id_to_type.get(tid, "unknown")
+                    by_type[tt] = by_type.get(tt, 0) + 1
+            except Exception:  # noqa: BLE001  # silent-ok: reporting-only, falls back below
+                by_type = {"daily_article": article["added"]}
+            return {
+                "ok": True,
+                "added": article["added"],
+                "added_ids": added_ids,
+                "by_type": by_type,
+                "reason": "draft_pool_deficit_forced_refill",
+                "deficit_at_check": deficit,
+                "note": (
+                    None
+                    if by_type.get("daily_article", 0) == article["added"]
+                    else "fallback_added_non_article_task; draft deficit NOT closed by this refill"
+                ),
+            }
+        if article.get("ok") is False:
+            return {
+                "ok": False,
+                "added": 0,
+                "reason": article.get("reason") or article.get("error") or "article_refill_failed",
+                "deficit_at_check": deficit,
+            }
+        return {"ok": True, "added": 0, "reason": "no_new_candidates", "deficit_at_check": deficit}
+    except ArticleRefillTimeoutError as exc:
+        return {"ok": False, "added": 0, "reason": f"timeout: {exc}", "deficit_at_check": deficit}
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "added": 0, "reason": f"error: {exc}", "deficit_at_check": deficit}
+
+
 def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
     """Auto-trigger pool refill when agentable < REFILL_FLOOR.
 
@@ -572,6 +665,14 @@ def build_report(*, auto_refill: bool = True) -> dict:
         pending = load_pending_tasks()
         cats = categorize(pending, recent_type_counts=recent_type_counts)
 
+    # 2026-07-01 3-STRIKE fix: draft-pool-specific top-up runs independently of
+    # the agentable-count-based `_maybe_refill` above — see `_maybe_refill_draft_pool`
+    # docstring for why the two signals can diverge (task-type mix vs feed content).
+    draft_refill_result = _maybe_refill_draft_pool(auto_refill=auto_refill)
+    if draft_refill_result and draft_refill_result.get("added"):
+        pending = load_pending_tasks()
+        cats = categorize(pending, recent_type_counts=recent_type_counts)
+
     free_slots = max(0, SLOT_CAP - slots["occupied"])
     candidates_to_dispatch = cats["agentable"][:free_slots]
     pending_summary = {
@@ -612,6 +713,7 @@ def build_report(*, auto_refill: bool = True) -> dict:
             for t in cats["main_thread"][:5]
         ],
         "refill": refill_result,
+        "draft_pool_refill": draft_refill_result,
         "blocked_tasks": [
             {
                 "id": b["task"].get("id"),
@@ -665,6 +767,15 @@ def print_report(report: dict) -> None:
         print(f"[dispatch] auto-refill: +{refill['added']} tasks {refill.get('added_ids')}")
     elif refill.get("ok") is False:
         print(f"[dispatch] auto-refill error: {refill.get('error') or refill.get('reason')}")
+
+    draft_refill = report.get("draft_pool_refill") or {}
+    if draft_refill.get("added"):
+        print(f"[dispatch] draft-pool refill: +{draft_refill['added']} tasks "
+              f"by_type={draft_refill.get('by_type')} (deficit_at_check={draft_refill.get('deficit_at_check')})")
+        if draft_refill.get("note"):
+            print(f"  NOTE: {draft_refill['note']}")
+    elif draft_refill.get("ok") is False:
+        print(f"[dispatch] draft-pool refill error: {draft_refill.get('reason')}")
 
     blocked = report.get("blocked_tasks") or []
     if blocked:

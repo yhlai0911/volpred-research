@@ -35,6 +35,17 @@ Do **not** use this skill for：
 
 每篇文章必須通過「讀者測試」：一個不認識你的人看完後，能學到什麼？
 
+## 文章 4 維度標準（發文前 + verify 時都要查）
+
+每篇文章（不論 audience）必須同時符合以下 4 個維度，才算達到 Mission 第 1（把文章寫好）+ 第 5（拉高流量）條的標準；只看「字數 + 圖表數量」等表面條件不夠。派 agent 前把這 4 維度寫進 brief 的 checklist；verify agent 結果時也用這個 checklist，不只看字數/圖表數。
+
+1. **深度**：解釋 mechanism（不只描述結果）；≥1 個 counter-intuitive insight 或方法論教訓；cross-reference ≥3 個相關 K；無廢話段落
+2. **可讀性**：punchy title（避免「K908: ...」式命名）；hook 式 intro；段落 ≤5 句；專有名詞首次定義；結尾一句話 take-away
+3. **資訊性**：真實圖表 ≥2 張（matplotlib PNG，禁 ASCII）；具體數字（不寫「顯著改善」空話）；標明資料來源 + 統計方法（Harvey/Kupiec/DM 等）+ 樣本數與期間
+4. **參考性**：cross-link ≥3 個相關 K/paper/experiment；延伸閱讀段落；reproduce method 簡述（script + results.json 路徑）；文末標 K 編號 + 資料來源
+
+同一 K 已有文章但不符 4 維度 → 可視為「不符合標準」重派（不算 3-layer dedup 的 duplicate）。既有文章定期回審（top-viewed 優先）不達標考慮重寫。反面教材：K908 mile_3eb8657c（達標範例，可作 reference template）；只給數字翻譯 + 兩張圖但無 mechanism 解釋、academic 標題、無 cross-link 的文章（缺深度/可讀性/參考性）。
+
 ## thinking ≠ content
 
 | | thinking（內部） | content（發佈） |

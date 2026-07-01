@@ -510,6 +510,19 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
     imap_host = os.environ.get("IMAP_HOST", "imap.gmail.com")
     imap_port = int(os.environ.get("IMAP_PORT", "993"))
     mailbox = os.environ.get("IMAP_MAILBOX", "INBOX")
+    # 2026-07-01 3-STRIKE fix (persistent_alert gmail_poll_freshness ×4/6.9d,
+    # docs/error_log.md 2026-06-22/06-23 entries): imaplib.IMAP4_SSL had NO
+    # socket-level timeout — a single stalled TCP read (connect/login/fetch)
+    # could hang indefinitely, relying entirely on the wrapper's external
+    # perl-alarm (180s) to eventually SIGALRM-kill the whole process. That
+    # means every individual IMAP op silently inherited the FULL 180s budget
+    # with zero fail-fast signal, and a bad connect could burn the entire
+    # window before a single fetch even started. Setting a per-socket-op
+    # timeout here makes each IMAP call fail fast and raise (caught below),
+    # instead of the wrapper being the only thing that can ever notice.
+    # Value kept well under the 180s wrapper alarm so a single slow op fails
+    # loud without itself becoming the new hang source.
+    imap_socket_timeout = float(os.environ.get("GMAIL_POLL_IMAP_TIMEOUT_SEC", "45"))
 
     state = _load_state()
     processed_ids = set(state.get("processed_message_ids", []))
@@ -522,7 +535,7 @@ def poll(max_messages: int = 20, dry_run: bool = False, since_days: int = 2) -> 
     skipped = 0
 
     try:
-        M = imaplib.IMAP4_SSL(imap_host, imap_port)
+        M = imaplib.IMAP4_SSL(imap_host, imap_port, timeout=imap_socket_timeout)
         M.login(user, pwd)
         M.select(mailbox)
 

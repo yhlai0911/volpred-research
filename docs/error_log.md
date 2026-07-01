@@ -2,6 +2,74 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-01 **3-STRIKE TRIGGER**：dreaming-run 7 findings 全 severity=critical + occurrences=3（`storage/ops/dreaming/2026-07-01.json`）
+
+**觸發**：`uv run volpred ops dreaming-run` 連續 3 次 run 都命中同一組 7 個 finding（three-strike 門檻）。逐一根因調查 + 結構性修復，記錄如下（不逐一開 `docs/refactor_plan_*.md`——大部分根因是「單一 job 的 execution path 錯誤」或「refill 邏輯漏一個訊號源」，屬於 CLAUDE.md three-strike 判準第 2/3 層的局部修正，非需要三層大重構的規模；已在下方逐項標注判斷理由）。
+
+### Finding 1（`repeated_tool_failure:git_push_backup.log:exit1` ×17/1.42d）— **FIXED**
+
+**根因**：`git_push_backup` 同時被兩條路徑觸發 — (a) 直接 host crontab `17 */2 * * *`（無登入 session，macOS Keychain 不可讀，`gh auth git-credential` 失敗於 `could not read Username for 'https://github.com': Device not configured`，**100% 結構性失敗**，非 transient）；(b) `check_alerts` LaunchAgent 觸發的 hourly piggy-back（`run_due_jobs.py`，繼承登入 session 的 Keychain 存取，**100% 成功**）。`config/runtime_schedules.json` 的 `git_push_backup` entry 只有 `piggy_back_enabled: false`（該欄位是 dead config，`run_due_jobs.py` 從未讀取）而非 `piggy_back_skip: true`（真正被讀取的欄位），導致壞掉的直接 cron leg 沒被排除。
+
+**修復**：
+1. `crontab -l` 手動移除 `17 */2 * * * .../cron_git_push_backup.sh` 這一行（backup 存於任務 scratchpad；diff 確認只刪這一行，其餘 17 行 host crontab 未動——遵守 memory `feedback_tasks_survive_session_close` 的「不可跑 `install_host_crontab.sh`」限制，改手動 surgical edit）
+2. `config/runtime_schedules.json`：`cron` 改 `"0 * * * *"`（cadence 2h→1h，是改善不是降級）+ 補充 description 記錄根因；`host_crontab_managed` 維持 `true`（因 `run_due_jobs.py` 對 `False` 的 item 會整個跳過 dispatch，這是既有耦合限制不是本次引入）
+
+**驗證**：`run_due_jobs.py` 手動跑確認讀到新 config、`_job_is_due` 對新 cron 正確判斷 not_due（`last_run=2026-07-01T11:00:26+00:00` vs `croniter.get_prev()=19:00:00 CST` 一致）；`crontab -l | grep -c git-push-backup` = 0（確認移除）；既有 `tests/test_cron_git_push_backup.py` 3/3 pass（無 test 寫死 cron 字串）。
+
+### Finding 2（`persistent_alert:a4a7ca551f8626b2` "Host cron failure detected" ×27/72.6d）— **INVESTIGATED, root causes resolved via Finding 1 + prior fix; alert design itself is correct (not a bug)**
+
+**根因**：此 alert 本質是「host cron 有任何一個 job 失敗」的 umbrella 訊號，27 次觸發實際是**兩波不同 job** 輪流觸發同一 alert title：(a) 2026-06-23~28 `hourly_dispatch.log exit=1`（OAuth token keychain-dependent path，已於 2026-06-28 修復——見同檔 2026-06-29 entry「hourly_dispatch.log exit1 ×80/5d」）；(b) 2026-06-29~07-01 `git_push_backup.log exit=1`（本次 Finding 1 修復）。用 `grep failing_logs storage/logs/cron/check_alerts.log` 逐次比對 `- storage/logs/cron/<job>.log exit=1` 確認兩波邊界清楚、無重疊、無第三波。
+
+**結論**：alert 聚合設計本身正確（umbrella dead-man switch 設計意圖就是「任何 host cron 失敗都要看到」），不是「alert 邏輯有 bug 需重構」；72.6 天持續觸發的真正原因是底層 job 反覆出現新的 Keychain/auth 相關故障——這是**同一類根因**（macOS Keychain 在無登入 session 的執行環境不可讀）反覆在不同 job 上出現的模式，Finding 1 修復後，`git_push_backup` 這條路徑的 host_cron_fail 貢獻已消除。**未發現需要修改 alert 本身聚合邏輯的理由**——精確拆解「哪個 job 觸發哪次」的能力已存在（`failing_logs` 欄位逐次記錄），只是需要人工/agent 主動 grep 比對，不需要重構。
+
+### Finding 3（`persistent_alert:9a39f7aa6399dfee` "Draft pool below threshold (<4)" ×5/73d）— **FIXED（結構性 gap，非壞 job）**
+
+**根因**：`scripts/continue_task_dispatch.py::_maybe_refill` 只監看 `next_tasks.json` 的 `agentable` 任務數（`REFILL_FLOOR=4`），從不檢查 `feed.json` 實際 `status=="draft"` 的文章數。兩個訊號可以分岔：task pool 可以被 4 個 `experiment`/`platform_ops` 任務填滿（滿足 REFILL_FLOOR，不觸發 refill），同時 `daily_article` 產出持續掉到 0，`draft_pool_low` alert 持續 warn/critical 卻沒有對應的自動 remediation（只有 alert body 裡的手動 SOP 指引，`.claude/rules/alert.md` 承諾的 auto-action「派 agent 寫 daily_article 補池」實際上並未被任何程式碼路徑執行）。
+
+**修復**：`scripts/continue_task_dispatch.py` 新增 `_draft_pool_deficit()`（直接讀 `storage/reports/feed.json` 計算 `DRAFT_POOL_FLOOR=4` 的缺口，fail-open）+ `_maybe_refill_draft_pool()`（deficit>0 時強制呼叫 `refill_task_pool.refill(target=deficit)`，準確回報 `by_type`——因為 `refill_task_pool.refill()` 在文章候選池耗盡時會 fallback 產生 `task_type="experiment"` 而非 `daily_article`，若盲目標記「+N daily_article」會產生假的「已解決」訊號，故新增 `note` 欄位在 fallback 情境明示「draft deficit NOT closed by this refill」）。`build_report()` 串接此新 refill 路徑，獨立於既有 `_maybe_refill`。
+
+**驗證**：即時線上驗證——修復當下 `draft_count=3`（deficit=1），跑 `continue_task_dispatch.py --report` 正確偵測 deficit 並新增 `K1590_article_general` daily_article task；該 task 隨後被背景 hourly-dispatch process 撿走並產出真實 draft 文章 `mile_4518e9d8`「併購案宣布之後，真正該盯的不是股價，是這檔基金的心跳」（`draft_count` 3→4，deficit 歸零）。新增 `tests/test_draft_pool_refill.py`（11 tests，涵蓋 floor/above-floor/fail-open-missing/fail-open-malformed/noop-when-disabled/noop-when-satisfied/accurate-by_type-on-fallback/accurate-by_type-on-clean-article/failure-path/timeout-path）全 pass；既有 `tests/test_refill_task_pool.py` + `tests/test_dispatch_supervisor.py` + `tests/test_dispatch_type_rotation.py` 共 74 tests 全 pass（無 regression）。
+
+### Finding 4（`persistent_alert:122e34a624da56ed` "gmail-poll 停擺" ×4/6.9d）— **FIXED（socket-level fail-fast，補完既有 3-strike 修復鏈的最後一層）**
+
+**根因**：`scripts/gmail_inbox_poll.py::poll()` 的 `imaplib.IMAP4_SSL(imap_host, imap_port)` 建構時從未傳 `timeout=` 參數。2026-06-22/23 已修過兩層（180s wrapper perl-alarm 加寬、header-only-first 減少 body fetch），但 2026-06-29 21:15-23:48 又復發 11 次連續 `exit=142`（每次都吃滿 180s wrapper alarm），證明「加寬外層 alarm」treats symptom 不 treats root cause：單一 IMAP op（connect/login/fetch）若卡住，完全沒有 fail-fast 訊號，只能被動等外層 180s 硬殺，且一次卡住就可能吃掉整輪 poll 的全部預算。
+
+**修復**：`imaplib.IMAP4_SSL(imap_host, imap_port, timeout=imap_socket_timeout)`，`imap_socket_timeout` 預設 45s（`GMAIL_POLL_IMAP_TIMEOUT_SEC` env override），遠低於 180s 外層 alarm，讓個別 IMAP op 先 fail-fast（`socket.timeout`）並被既有 `except Exception` 捕捉記錄（非 silent swallow——`_log()` 寫入），而非把所有故障診斷都推給外層 alarm。
+
+**驗證**：新增 `tests/test_gmail_poll_imap_timeout.py`（3 tests：確認 `IMAP4_SSL` 收到 `timeout` 參數且 <180s、env override 生效、`socket.timeout` 在 login 階段被 gracefully 捕捉不 crash）全 pass；既有 `tests/test_gmail_poll_freshness_alert.py` + `tests/test_gmail_inbox_filter.py` + `tests/test_gmail_inbox_poll_warnings.py`（25 tests）全 pass；live smoke test `uv run python scripts/gmail_inbox_poll.py --dry-run --max 5` 2 秒內正常完成真實 IMAP 連線。現況：`~/.volpred/logs/gmail_poll.log` 最後一次 `exit=142` 是 2026-06-29 23:48 CST，此後（截至驗證當下 2026-07-01 19:3x CST，43+ 小時）連續 100% `exit=0`。
+
+### Finding 5 + 7（`persistent_alert:72b3d80c2fc482ef` "發文脫班" ×5/7.2d + `persistent_alert:0e22d758c43af180` 對應 ACK reply ×3/7.3d）— **INVESTIGATED，已於 2026-06-30 修復，本次未復發（非只回信未修根因）**
+
+**根因（2026-06-30 09:12 UTC 已存在的 close-out email 記錄）**：`publishing_freshness` alert 閾值原是 hardcoded 5h，但 boss 於 6/22 把 release cadence 改為 6h interval，造成閾值系統性過緊（門檻過敏，非真實脫班）。
+
+**確認修復仍然生效（本次新查證，非重複 patch）**：`src/volpred/ops/alerts.py::_parse_publishing_freshness_state` 現讀 `release_cadence_threshold_hours()`（`src/volpred/ops/release_cadence.py`），閾值 = 實際 `interval_minutes`（`storage/.release_settings.json`，現值 360min=6h）+ 2h grace = 8h，非 hardcoded。`grep 發文脫班 storage/logs/cron/check_alerts.log` 確認最後一次觸發是 2026-06-30 16:00 CST 之前（close-out email 17:12 CST 之後零觸發），dreaming report 中的「3 occurrences / 3 runs」反映的是 alert **歷史**（14 天滾動窗）落在 dreaming 觀察窗內，不是持續復發的活躍問題。**本次未再 patch** — 已確認修復落地且持續 26+ 小時、跨多個 publish-active window 無再犯，符合「調查後判定非結構性問題」的如實記錄準則。
+
+### Finding 6（`memory_skill_gap:uncodified_process` — 6 個 memory 疑無 skill 覆蓋）— **PARTIALLY FIXED（4/6 已有 skill、2/6 補上 cross-link）**
+
+逐一核對：
+- `reference_notebooklm_rag_workflow` → 已有 user-level skill `~/.claude/skills/notebooklm/SKILL.md`（CLAUDE.md 直接引用）。非 gap。
+- `project_loop_engineering_layer` → 已有 `.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md`（memory 自己就寫了這個路徑）。非 gap。
+- `feedback_email_on_major_decisions` → 已有 `.claude/rules/alert.md`（operating rule 的正確歸屬，非 workflow SOP，不需要另立 skill）。非 gap。
+- `project_strategy_lifecycle_standing_directive` → 已有 `admin-ops/references/strategy-lifecycle.md` + `autonomous-research/references/strategy-launch-gate.md`，但缺「standing directive、idle tick 主動跑」的明確 framing → **已補**：`admin-ops/references/strategy-lifecycle.md` 新增「Standing directive」段。
+- `project_fb_page_operation` → 只有 `trending-repost/references/fb-ivanlai-tone.md`（管貼文文案風格），缺「粉專頁面本身營運」（大頭照/簡介/vanity URL/追蹤者成長 backlog）的 skill home → **已補**：新增 `.claude/skills/trending-repost/references/fb-page-operations.md` + 從 `trending-repost/SKILL.md` cross-link。
+- `feedback_website_article_quality_4dim` → `feed-publisher/SKILL.md` 原本只在文字散落提到「深度」等概念，缺結構化 4 維度 checklist → **已補**：`feed-publisher/SKILL.md` 新增「文章 4 維度標準」段（可驗證 checklist + 反面教材）。
+
+### Finding 7（`memory_hygiene:consolidation_review` — 67 條 feedback 記憶疑有重疊）— **PARTIALLY DONE（誠實記錄：非空泛交代）**
+
+人工抽樣核對約 12 組疑似重疊的 memory pair（決策自主性 4 則、CLAUDE.md 精簡 3 則、proactive posture 2 則、FB 相關 4 則）。**結論與預期不同**：VolPred 的 memory 多是「單一 incident 觸發、單一具體 actionable guidance」的窄範疇記錄，即使主題相近，各自的「How to apply」不重疊，合併會犧牲可操作性（正是 CLAUDE.md 警告的「垃圾桶化」反面）。
+
+**真正發現並修正的 2 個問題**：
+1. `feedback_claudemd_keep_inline`（Apr 11 14:52）與 `feedback_progressive_disclosure`（同日 21:29）字面矛盾（前者「絕不移出」vs 後者「用 skill 漸進揭露」）。比對現行 `CLAUDE.md` Bootstrap 原則段，確認後者是實際生效方向 → 已在前者附加「memory-hygiene 更正」annotation，指向後者為準，不刪除原文（保留診斷歷史）。
+2. `feedback_gemini_v042_skip_trust` + `feedback_gemini_cli_share_load` 記錄的是已於 2026-06-18 停服的 `gemini-cli` 操作細節 → 已各自附加「已棄用，繼任 `agy`/`gemini_ask.py`」annotation。
+
+**未完成（如實記錄，非假裝完成）**：完整 67-70 條的系統性去重仍需更完整的一輪掃描（本次抽樣 ~12 組，未覆蓋全部）；候選清單見上述已檢查的 pair，其餘留待下次月度 memory 審查（`feedback_skill_autonomy` 承諾的月度 review）處理。
+
+---
+
+**Commit**：`scripts/continue_task_dispatch.py`（Finding 3）+ `scripts/gmail_inbox_poll.py`（Finding 4）+ `config/runtime_schedules.json`（Finding 1）+ `.claude/skills/feed-publisher/SKILL.md` + `.claude/skills/admin-ops/references/strategy-lifecycle.md` + `.claude/skills/trending-repost/SKILL.md` + `.claude/skills/trending-repost/references/fb-page-operations.md`（Finding 6）+ `tests/test_draft_pool_refill.py` + `tests/test_gmail_poll_imap_timeout.py`（新測試）。crontab 手動 edit（Finding 1，非 git-tracked，見上）。
+
+**教訓**：(L1) config 欄位若存在但從未被讀取（`piggy_back_enabled` vs `piggy_back_skip`），會造成「看起來已設定」但實際無效的 silent gap — 新增 config 欄位時必須同步確認消費端程式碼真的讀取它。(L2) 「refill 池」類機制若只看 task-queue 層的數量訊號，可能與下游實際產出（feed 層）分岔——凡是「池子健康」的自動判斷都該問「這個訊號是 task 數量還是實際產出數量」。(L3) 外層 wall-clock cap（perl alarm）是最後防線，不是第一道防線；任何會員擴 IO（IMAP/HTTP/DB）的迴圈都該有自己的內層逐步 timeout，讓故障點精確定位而非整體被砍。(L4) alert 持續多日觸發不代表 alert 邏輯壞——先看是否為「同一 umbrella alert 被不同底層 job 輪流觸發」，這種情況修 job 比修 alert 聚合邏輯更正確。(L5) memory 數量多不等於需要合併——先看是否語意衝突或工具已棄用（真正的 hygiene 問題），而非用「筆數看起來很多」判斷需要精簡（可能犧牲可操作性）。
+
 ## 2026-07-01 hourly-dispatch pre-gate 的 `has_critical()` 讀不存在欄位，signal 從部署起就恆真
 
 **問題**：同日稍早部署的 `scripts/hourly_dispatch_pregate.py`（SHADOW 模式，commit `cde11502d` 15:20 CST / 部署 15:36 CST）目的是省掉無實質工作的 hourly fire 的 ~95K token 冷啟動。部署後第一批 shadow log（16:07、17:07 CST 兩次真實 fire）都顯示 `critical: true`，導致 `would_skip` 恆為 false —— gate 從上線起就沒有機會真正驗證「可省」的情境。
