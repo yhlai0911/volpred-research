@@ -470,13 +470,16 @@ def _draft_pool_deficit() -> int:
     """
     try:
         if not FEED_PATH.exists():
+            _warn_dispatch(f"draft_pool_deficit: feed path missing at {FEED_PATH}")
             return 0
         feed = json.loads(FEED_PATH.read_text(encoding="utf-8"))
         if not isinstance(feed, list):
+            _warn_dispatch(f"draft_pool_deficit: feed.json top-level is {type(feed).__name__}, expected list")
             return 0
         draft_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "draft")
         return max(0, DRAFT_POOL_FLOOR - draft_count)
-    except Exception:  # noqa: BLE001  # silent-ok: fail-open, dispatch must not crash on feed read
+    except Exception as e:  # noqa: BLE001 — fail-open by design, but must not be silent
+        _warn_dispatch(f"draft_pool_deficit: feed read/parse failed ({e!r}); treating as no deficit")
         return 0
 
 
@@ -653,8 +656,38 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
     return combined
 
 
+def _maybe_retire_covered_article_tasks(*, auto_refill: bool) -> dict | None:
+    """Retire pending `*_article_<audience>` tasks already covered in feed.json.
+
+    2026-07-01 root cause: an article task can be queued when the K is genuinely
+    uncovered, then the covering article gets written minutes later by another
+    path (Codex daemon / parallel refill). The stale task is never retracted, so
+    the dispatcher keeps offering it → duplicate-article dispatch (K1590 →
+    mile_4518e9d8, 7-min race; recurring class K1449/K1091).
+
+    Running the sweep here (gated on auto_refill, same as _maybe_refill) makes
+    every canonical dispatch self-heal instead of depending on prompt-level
+    discipline to run the standalone script.
+    """
+    if not auto_refill:
+        return None
+    try:
+        from mark_covered_article_tasks import sweep as _retire_covered
+    except Exception as exc:  # noqa: BLE001
+        _warn_dispatch(f"covered_article_dedup import failed: {exc}")
+        return None
+    try:
+        return _retire_covered(apply=True)
+    except Exception as exc:  # noqa: BLE001
+        _warn_dispatch(f"covered_article_dedup sweep failed: {exc}")
+        return None
+
+
 def build_report(*, auto_refill: bool = True) -> dict:
     slots = count_active_slots()
+    # Retire covered article tasks BEFORE categorizing so duplicates never reach
+    # the agentable candidate list this run.
+    _maybe_retire_covered_article_tasks(auto_refill=auto_refill)
     pending = load_pending_tasks()
     recent_type_counts = load_recent_task_type_counts()
     cats = categorize(pending, recent_type_counts=recent_type_counts)
