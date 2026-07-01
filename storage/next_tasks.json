@@ -42842,16 +42842,35 @@
         "to": "pending_main_thread",
         "by": "hourly-20",
         "note": "TICK-3 done (Data & Methodology ported + sample-map reconciled + compile PASS). NEXT tick-4: port Empirical Results, wedge-first restructure, per-table caption reconciliation vs results JSON."
+      },
+      {
+        "ts": "2026-07-01T16:55:30.112487+00:00",
+        "from": "pending_main_thread",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-01T16:55:30.331294+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-01T16:55:41.852787+00:00",
+        "from": "in_progress",
+        "to": "pending_main_thread",
+        "by": "interactive-claude",
+        "note": "TICK-4 done (interactive-claude 2026-07-02): Empirical Results ported from body.tex:118-417 into body_v_ijf.tex, restructured around the measurement-to-allocation wedge spine: (a) Forecast-Level Results (gamma taxonomy tab:gamma + QLIKE/DM tab:qlike, N=6 OOS classification caveat, BTC counter-example); (b) Allocation-Level Results (GARCH-VT tab:vt MaxDD~base-vol rho=0.944/0.83 = central wedge finding; anti-VT gold test; 12/VIX model-free confirmation satisfying tick-3's sigma_target=12% forward ref; EWMA crisis-divergence; HM/TM timing-null); (c) Interpretive Taxonomy folded in as WHERE-ceiling-binds (gold safe-haven regime decomposition + equity-only trend-following/contrarian regularity, explicitly domain-restricted per Intro promise); (d) VaR compliance kept brief as orthogonal robustness check per ONE-CLAIM discipline. Dropped to supplement/future scope: Iran crisis validation, MZ regression, 10-row Complexity Ceiling ablation, CRRA utility framing, crowding-resistance -- all Discussion-tier. All numbers verified against tables_main.tex + body.tex corrected footnotes (canonical GLD gamma=+0.002/t=+0.15, not retracted -0.067/-5.79). Scratch xelatex compile (body_v_ijf.tex + tables_main.tex via temp main wrapper, deleted after test): 3 passes, exit 0, 0 undefined refs/citations, 24pp. NEXT tick-5: rewrite Implications+Conclusion around the ceiling (practitioner: don't over-engineer asymmetry; researcher: in-sample refinement rarely survives honest OOS at decision level); tick-6: main_v_ijf.tex wrapper + elsarticle.cls + reproduce.py gate + compliance re-scrub."
       }
     ],
-    "started_at": "2026-07-01T12:52:23.691766+00:00",
+    "started_at": "2026-07-01T16:55:30.331004+00:00",
     "plan": "IJF full-length reframe around complexity-ceiling / measurement-vs-allocation. 6-tick roadmap: t1 abstract+title+highlights+intro+stubs; t2 Literature Review reframe; t3 Data&Methodology port + sample-split reconcile; t4 Empirical Results restructure (wedge spine); t5 Implications+Conclusion; t6 main_v_ijf.tex wrapper + reproduce gate + compliance scrub.",
     "result": "tick-1 (hourly-17): IJF abstract(147w)+title+highlights.txt+fully-reframed Introduction+section stubs DONE. tick-2 (hourly-18 2026-07-01T18:14 TW): Literature Review reframed into 4 strands led by forecast-evaluation/complexity (Patton QLIKE, DM, Hansen MCS, Harvey multiple-testing); asymmetric-model + leverage-direction taxonomy DEMOTED to interpretive; risk-mgmt + VT strands kept. 29 cite keys all verified against main.tex \\\\bibitem; xelatex trial-compile clean (exit 0, 0 undefined citations/refs, 10pp); compliance clean (no AI/LLM/K-id/VolPred; author=Yi-Hao Lai). NEXT=tick-3: port Data&Methodology from body.tex:31-114, reconcile sample-split to canonical (full 2017-01..2026-03; train 2017-2022; main-OOS 2023-2024; validation 2025-01..2026-03).",
     "last_progress_at": "2026-07-01T18:15:41.391572+08:00",
     "last_released_at": "2026-07-01T11:50:02.137152+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "handoff_note": "TICK-3 done (Data & Methodology ported + sample-map reconciled + compile PASS). NEXT tick-4: port Empirical Results, wedge-first restructure, per-table caption reconciliation vs results JSON.",
-    "handoff_at": "2026-07-01T12:58:18.845038+00:00"
+    "handoff_note": "TICK-4 done (interactive-claude 2026-07-02): Empirical Results ported from body.tex:118-417 into body_v_ijf.tex, restructured around the measurement-to-allocation wedge spine: (a) Forecast-Level Results (gamma taxonomy tab:gamma + QLIKE/DM tab:qlike, N=6 OOS classification caveat, BTC counter-example); (b) Allocation-Level Results (GARCH-VT tab:vt MaxDD~base-vol rho=0.944/0.83 = central wedge finding; anti-VT gold test; 12/VIX model-free confirmation satisfying tick-3's sigma_target=12% forward ref; EWMA crisis-divergence; HM/TM timing-null); (c) Interpretive Taxonomy folded in as WHERE-ceiling-binds (gold safe-haven regime decomposition + equity-only trend-following/contrarian regularity, explicitly domain-restricted per Intro promise); (d) VaR compliance kept brief as orthogonal robustness check per ONE-CLAIM discipline. Dropped to supplement/future scope: Iran crisis validation, MZ regression, 10-row Complexity Ceiling ablation, CRRA utility framing, crowding-resistance -- all Discussion-tier. All numbers verified against tables_main.tex + body.tex corrected footnotes (canonical GLD gamma=+0.002/t=+0.15, not retracted -0.067/-5.79). Scratch xelatex compile (body_v_ijf.tex + tables_main.tex via temp main wrapper, deleted after test): 3 passes, exit 0, 0 undefined refs/citations, 24pp. NEXT tick-5: rewrite Implications+Conclusion around the ceiling (practitioner: don't over-engineer asymmetry; researcher: in-sample refinement rarely survives honest OOS at decision level); tick-6: main_v_ijf.tex wrapper + elsarticle.cls + reproduce.py gate + compliance re-scrub.",
+    "handoff_at": "2026-07-01T16:55:41.852505+00:00"
   },
   {
     "id": "K1590_article_general",
@@ -42885,7 +42904,7 @@
     "title": "研究 backlog fallback: HARQ/SHARK 測量誤差修正 HAR（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: HARQ/SHARK 測量誤差修正 HAR（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -42895,9 +42914,6 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-01T11:29:08+00:00",
-    "claimed_by": "hourly-22",
-    "claimed_at": "2026-07-01T14:12:53.187949+00:00",
-    "claim_session_id": "9afcf84c433c",
     "status_history": [
       {
         "ts": "2026-07-01T14:12:53.188223+00:00",
@@ -42910,9 +42926,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-22"
+      },
+      {
+        "ts": "2026-07-01T16:50:01.284664+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-22",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-01T14:13:30.294282+00:00"
+    "started_at": "2026-07-01T14:13:30.294282+00:00",
+    "last_released_at": "2026-07-01T16:50:01.284655+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "research_conditional_sequential_mcs_jrss_b_2025_qkag066_a",

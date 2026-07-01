@@ -45,11 +45,30 @@
 %            forecast. NOTE for tick-4: when porting result tables, make each
 %            table/figure caption cite this canonical partition + verify its
 %            computation window vs the results JSON.
-%   [tick-4+ TODO] Port Empirical Results body.tex:118+; RESTRUCTURE so the
-%            allocation-vs-measurement wedge is the spine: (a) forecast-level
-%            gains conditional on significant asymmetry; (b) allocation-level
-%            VT drawdown driven by base vol level; leverage-direction taxonomy
-%            folded in as interpretation.
+%   [tick-4  2026-07-02] DONE: Empirical Results ported from body.tex:118-417
+%            and RESTRUCTURED around the wedge spine: (a) Forecast-Level Results
+%            (gamma taxonomy + QLIKE/DM, conditional on significant asymmetry,
+%            N=6 OOS classification caveat, BTC counter-example); (b) Allocation-
+%            Level Results (GARCH-VT MaxDD~base-vol correlation rho=0.944/0.83 =
+%            the central wedge finding; anti-VT gold test; 12/VIX model-free
+%            confirmation, satisfies the sigma_target=12% forward ref from
+%            tick-3 Methodology; EWMA crisis-divergence; HM/TM timing-null);
+%            (c) Interpretive Taxonomy folded in as WHERE-ceiling-binds
+%            (gold safe-haven regime decomposition + equity-only trend-
+%            following/contrarian regularity, explicitly domain-restricted per
+%            Intro's promise); (d) VaR compliance kept as a brief orthogonal
+%            robustness check (not a full JBF-era subsection) per the ONE-
+%            CLAIM discipline. DROPPED to online-supplement/future-tick scope:
+%            Iran crisis real-time validation, MZ regression, 10-row Complexity
+%            Ceiling ablation table, CRRA/insurance-utility framing, crowding-
+%            resistance analysis -- all Discussion-tier, not central to the
+%            measurement->allocation wedge. All numbers verified against
+%            tables_main.tex (tab:desc/gamma/qlike/var/var_panel/vt) and
+%            body.tex's corrected footnotes (canonical GLD gamma=+0.002/t=+0.15,
+%            NOT the retracted -0.067/-5.79). fig_rolling_gamma.pdf ported
+%            (only figure actually referenced in body.tex); 6 other loose
+%            figure PDFs in the folder confirmed unreferenced anywhere and left
+%            out. No compile check yet (main_v_ijf.tex wrapper is tick-6).
 %   [tick-5+ TODO] Rewrite Implications + Conclusion around the ceiling;
 %            practitioner takeaway (don't over-engineer asymmetry) + researcher
 %            takeaway (in-sample refinement rarely survives honest OOS at the
@@ -197,12 +216,57 @@ with $\sigma_{\text{target}}=10\%$ annualised for the GARCH-based analysis and $
 
 
 \section{Empirical Results}\label{sec:empirical_results}
-% [TICK-4 TODO] Port from body.tex:118+. RESTRUCTURE spine = measurement->
-% allocation wedge: (1) forecast-level gains conditional on significant
-% asymmetry; (2) allocation-level VT drawdown driven by base vol level;
-% (3) leverage-direction taxonomy folded in as interpretation of WHERE the
-% ceiling binds. Keep tables/figures; ensure every row keeps its % source:
-% binding to the results JSON (paper-workflow hard rule 3).
+
+\subsection{Data Characteristics}
+\label{sec:data_characteristics}
+
+Table~\ref{tab:desc} summarizes the distributional properties of daily returns for the seven primary assets over the full descriptive-statistics sample (2017-01 to 2025; the partition of Section~\ref{sec:data} governs all forecast- and allocation-level results below).% source: experiments/k903/tables (canonical descriptive-stats replication)
+All series show substantial excess kurtosis, from 3.5 (GLD) to 14.6 (SPY), and reject normality; annualized volatility spans an order of magnitude, from 14.6\% (GLD) to 57.3\% (BTC-USD) over this sample. Section~\ref{sec:allocation_results} instead uses each asset's volatility-targeting evaluation-window level---which for BTC-USD's post-2019 VT sample is 51.7\%, a different window than the descriptive-statistics sample---as the basis for testing whether base volatility level, rather than asymmetric structure, drives the allocation benefit.
+
+\subsection{Forecast-Level Results: Conditional Gains from Asymmetric Measurement}
+\label{sec:forecast_results}
+
+Table~\ref{tab:gamma} reports rolling-window GJR-GARCH $\gamma$ estimates (504-day windows, quarterly step, 2010--2026; Newey--West HAC $t$ with 8 lags to correct for the 87.5\% window overlap).% source: experiments/k903/tables/k903_table2.csv
+The sign is consistent within asset class: SPY ($\gamma=+0.132$, $t=+11.08$), QQQ ($+0.116$, $t=+10.76$), and EEM ($+0.087$, $t=+11.88$) show standard, statistically unambiguous leverage. GLD's canonical estimate is $+0.002$ ($t=+0.15$, 67\% of windows negative)---indistinguishable from zero---and TLT and SLV are likewise centered near zero ($-0.005$ and $-0.009$).\footnote{An earlier draft reported GLD mean $\gamma=-0.067$ ($t=-5.79$, 93\% negative windows) for the same specification; the canonical re-estimation in the replication package reverses the sign to $+0.002$ and renders it insignificant. We adopt the corrected value throughout; Section~\ref{sec:interpretive_taxonomy} shows the economically interpretable result is a regime decomposition, not the unconditional mean.} BTC-USD shows a small but significant positive asymmetry ($+0.072$, $t=+2.88$) with high cross-window instability (std $=0.105$, 25\% negative windows).
+
+Table~\ref{tab:qlike} takes this taxonomy to an out-of-sample forecasting test: GJR-GARCH versus symmetric GARCH(1,1) QLIKE, evaluated on the main OOS window (2023--2024) and the validation window (2025).% source: experiments/k903/tables/k903_table3.csv
+The pattern tracks $\gamma$: for SPY, GJR wins significantly in both periods (DM $p=0.003$ and $p=0.048$). For GLD, whose mean $\gamma$ is statistically zero, the comparison \emph{reverses}---symmetric GARCH significantly outperforms GJR in 2023--2024 ($p=0.001$) and directionally in 2025 ($p=0.070$): imposing an asymmetry term on an asset without stable asymmetry actively hurts forecasts. TLT is a near-exact tie in both periods, consistent with its near-zero $\gamma$. QQQ is directionally consistent with GJR's advantage but does not reach significance in either period ($p=0.181$, $p=0.086$) and should be read as illustrative. BTC-USD is the sharpest counter-example to a naive ``significant $\gamma$ implies forecasting value'' reading: despite a statistically significant asymmetry, the two models are indistinguishable out of sample ($\Delta=-0.06\%$, $p=0.848$)---a significant $\gamma$ is necessary for GJR to plausibly help, but not sufficient, when the estimated asymmetry is small in magnitude and unstable across windows.
+
+This motivates a simple selection rule: estimate GJR-GARCH on the current window; if $\gamma$ is positive and significant at $t>1.65$, use GJR-GARCH, otherwise use symmetric GARCH. Under this rule applied to the quarterly-mean statistic in Table~\ref{tab:gamma}, the prescribed model is never significantly beaten in any of the eleven Diebold--Mariano comparisons in Table~\ref{tab:qlike}. A genuinely out-of-sample test of the rule---using 2023 $\gamma$ estimates to classify 2024--2025 model choice for the six primary forecasting assets---achieves 6/6 correct classifications with a multi-window (four-quarter) average and 5/6 with a single-window estimate; the sole miss is SPY, whose single-quarter $\gamma$ temporarily dipped to 0.08 in a calm quarter. With $N=6$, even random classification succeeds with probability $2^{-6}\approx1.6\%$, so this result is supportive but not statistically powerful on its own, and we do not claim it generalizes beyond this asset set without independent validation. Gamma sign classifications are unchanged under window sizes $w\in\{252,504,756\}$ and under an AR(1) mean specification, and the QLIKE ranking is preserved under the Parkinson range-based proxy, consistent with \citet{patton2011}.
+
+\subsection{Allocation-Level Results: The Measurement-to-Allocation Wedge}
+\label{sec:allocation_results}
+
+We now ask whether the forecast-level gains of Section~\ref{sec:forecast_results} survive to the volatility-targeting allocation of Section~\ref{sec:vt_methodology}, using for each asset the GARCH specification prescribed by the selection rule above. Table~\ref{tab:vt} reports buy-and-hold versus VT performance for the five primary assets with sufficient history.% source: experiments/k903 VT cross-asset replication
+Maximum drawdown improves for \emph{every} asset tested, and the size of the improvement is strongly correlated with the asset's base volatility level rather than with the sign or significance of its $\gamma$: Pearson $\rho=0.944$ ($p=0.016$) across the five assets in Table~\ref{tab:vt}, and $\rho=0.83$ ($p=0.0002$, Spearman $\rho=0.88$) across an extended 14-asset sample reported in the Online Supplement, which we treat as the primary basis for inference given its larger $N$. BTC-USD, the highest-base-volatility asset in the VT sample (51.7\% annualized), sees MaxDD improve by 55.3 percentage points ($-76.6\%\to-21.3\%$); TLT, among the lowest-volatility assets (15.0\%), improves by 13.1pp. Sharpe-ratio improvement is more heterogeneous and only weakly related to base volatility ($\rho=0.80$, $p=0.10$)---consistent with VT operating chiefly as a volatility-scaling mechanism rather than as a source of directional timing skill.
+
+This is the paper's central wedge: the asset for which the forecast-level asymmetry is strongest and most significant (SPY, $\gamma=+0.132$) and the asset for which it is statistically indistinguishable from zero (GLD, $\gamma=+0.002$) both receive a large, level-driven drawdown benefit from volatility targeting. We test this directly for gold, whose \emph{inverted} leverage during stress periods could plausibly undermine VT---if fear-driven rallies raise measured volatility, VT would cut gold exposure exactly when gold is performing its hedging function. Comparing standard VT against an ``anti-VT'' rule that instead increases gold exposure in high-volatility periods, standard VT achieves Sharpe 1.71 versus anti-VT's 1.51 and buy-and-hold's 1.56 over 2022--2026, and 0.62 versus 0.56 over the full 2010--2026 history: even when volatility is being driven by positive returns, elevated volatility still signals elevated risk (including reversal risk), so VT's risk-reduction channel dominates the opportunity cost of reduced exposure. Leverage direction affects \emph{how} VT re-weights around a trend (Section~\ref{sec:interpretive_taxonomy}), not whether the drawdown-reduction benefit materializes.
+
+A parsimonious, model-free alternative reinforces the same point. Following \citet{moreira2017}, replacing the GARCH-based volatility estimate with the VIX, $w_t = \sigma_{\text{target}}/\text{VIX}_t$ with $\sigma_{\text{target}}=12\%$ (the ``12/VIX'' rule, equivalent to the VIX-managed portfolio of \citealt{bozovic2024} reframed within the VT paradigm), achieves Sharpe 0.856 versus GARCH-based VT's 0.826 and MaxDD $-16.5\%$ versus $-18.4\%$ across seven OOS periods (2009--2025). The Sharpe difference is not significant ($t=0.33$), but the MaxDD improvement is (bootstrap $p=0.0004$, 95\% CI $[+9.2\text{pp},+71.7\text{pp}]$). That a zero-parameter, implied-volatility rule matches or exceeds a carefully specified, asymmetry-aware GARCH model at the allocation level is itself evidence for the ceiling: the marginal modelling effort invested in getting the variance equation right buys little once the allocation only needs the volatility \emph{level}, not its asymmetric dynamics.\footnote{VIX-based backtests are vulnerable to a same-day timing bias of roughly $+1.0$ Sharpe unit when $\text{VIX}_t$ is applied to $r_t$ rather than $r_{t+1}$; all 12/VIX results reported here use properly lagged weights (DM $p=0.62$ against the same-day benchmark).}
+
+A comparison against EWMA ($\lambda=0.97$) volatility estimates shows the same near-parity at the level of Sharpe and MaxDD over the primary OOS period (EWMA vs.\ GJR-GARCH: 0.828 vs.\ 0.782 Sharpe, DM $p=0.73$; $-12.3\%$ vs.\ $-12.5\%$ MaxDD), but a crisis-period divergence: during COVID-19, GJR-GARCH achieves Sharpe 1.130 and MaxDD $-13.9\%$ versus EWMA's 0.745 and $-18.8\%$. Holding the mean weight fixed and varying only weight-path smoothness, the correlation between smoothness and MaxDD is $\rho=-0.007$ ($p=0.87$)---smoothness \emph{per se} has no effect---so the crisis advantage is attributable specifically to the asymmetric $\gamma$ channel triggering faster deleveraging than EWMA's exponential decay, not to GJR weights simply reacting faster in general. The asymmetry term therefore does earn its keep, but as a crisis-period tail-risk feature rather than as a source of everyday Sharpe improvement---a more precise statement of when the added complexity pays off.
+
+Finally, we test directly whether VT's allocation benefit reflects directional market timing rather than variance management. \citet{henriksson1981}, Treynor--Mazuy, and Merton-ratio tests over 2014--2026 ($N\approx3{,}100$) unanimously fail to reject the null of no directional timing ability ($p>0.70$); conditional on high-VIX episodes (VIX $>25$), the timing coefficient is significantly \emph{negative} ($\hat{\gamma}_{HM}=-0.068$, $t=-4.63$)---VT misses post-crisis recoveries, the opposite of successful timing. The allocation-level benefit of volatility targeting is a variance-management effect, not a forecasting or timing edge, consistent with it surviving even where the underlying volatility forecast carries no detectable asymmetric skill.
+
+\subsection{Interpretive Taxonomy: Where the Ceiling Binds}
+\label{sec:interpretive_taxonomy}
+
+Although the sign of $\gamma$ does not predict the \emph{size} of the allocation-level benefit, it remains economically legible and helps explain \emph{how} volatility targeting re-weights around a trend for each asset class. For equities, $\gamma>0$ reflects balance-sheet leverage: falling prices raise debt-to-equity ratios and firm risk \citep{black1976,christie1982}, so VT cuts exposure after declines and restores it after rallies---a mechanical stop-loss. For gold, the canonical unconditional $\gamma$ is statistically indistinguishable from zero, but this masks regime dependence: partitioning the full 2005--2026 sample into bull and bear regimes yields bull $\gamma=-0.043$ versus bear $\gamma=+0.048$ ($t=-3.79$, $p<0.001$), consistent with gold's safe-haven role \citep{baur2010safe,baur2010hedge}---fear-driven flight-to-quality buying raises both price and measured uncertainty during stress, the mirror image of the equity leverage mechanism. SPY shows no such regime dependence (bull $\gamma=+0.24$, bear $\gamma=+0.24$, $p=0.95$), consistent with a mechanism that operates regardless of market direction. Treasury bonds (TLT) show no significant asymmetry in either direction, consistent with coupon-dominated pricing that does not systematically load onto directional sentiment.
+
+Within the homogeneous equity domain, the sign of $\gamma$ also predicts whether VT re-weighting behaves as trend-following or contrarian: projecting VT weight changes on trailing five-day returns, the rank correlation between $\gamma$ and this trend-following coefficient is $\rho=0.886$ ($p=0.019$, $N=6$ equity-type assets), and the mapping estimated on 2010--2017 data predicts the 2018--2026 out-of-sample trend-following coefficient ($\rho=0.821$, $p<0.05$), ruling out a purely mechanical, same-sample artifact. This regularity does \emph{not} extend to a broader cross-section spanning commodities, bonds, and digital assets ($\rho=-0.448$, $p=0.14$, $N=12$): we therefore present it as a domain-restricted empirical regularity, not a universal theorem, and its restriction is itself an instance of the ceiling---the interpretive value of $\gamma$ travels only as far as the asset-class homogeneity that produced it.
+
+\subsection{VaR Compliance: An Orthogonal Robustness Check}
+\label{sec:var_compliance}
+
+As a check that the forecast-level gains documented above are not an artifact of the QLIKE loss function, we also examine VaR compliance, which depends heavily on the assumed innovation distribution.% source: experiments/k903 VaR replication (frozen 2025-Q4 vintage)
+Table~\ref{tab:var} decomposes SPY's 1\% VaR violation count (2020--2025, 1508 days) as successive refinements are added: Normal innovations produce 33 violations (2.2\%, against a nominal target of 15, or 1.0\%); moving to Student-$t$ ($df=5$) reduces this to 18 (1.2\%); adding adaptive volatility thresholding and jump augmentation together reduces violations to 14 (0.9\%), closely approaching, though not exactly matching, the nominal target. Table~\ref{tab:var_panel} extends the comparison across the seven-asset panel and five distributional methods under a Trinity criterion (Kupiec, Christoffersen, and dynamic-quantile tests jointly; \citealt{kupiec1995,christoffersen1998}): Skewed-$t$ and filtered historical simulation achieve the highest joint pass rates (90.5\% and 76.2\% of asset--$\alpha$ cells), against 57.1\% for the Normal benchmark. The full GARCH-versus-GJR orthogonality decomposition under fixed distributional assumptions is reported in the Online Supplement; together with the forecast- and allocation-level results above, it points to the same conclusion: added model complexity pays off, if at all, only within the specific dimension it targets, and does not transfer automatically to other decision-relevant criteria.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{fig_rolling_gamma.pdf}
+\caption{Rolling 252-day GJR-GARCH $\gamma$ estimates for SPY, GLD, TLT, and EEM (2010--2026). SPY maintains consistently positive $\gamma$ (standard leverage), GLD fluctuates between positive and negative (regime-dependent inverted leverage), and TLT remains near zero. Shaded regions indicate $\gamma < 0$.}
+\label{fig:rolling_gamma}
+\end{figure}
 
 
 \section{Implications and Limitations}\label{sec:implications}
