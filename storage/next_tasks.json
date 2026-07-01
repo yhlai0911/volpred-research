@@ -43377,7 +43377,7 @@
     "title": "Paper review (Codex 24h-rule): K 棒記了四個價格，收盤只用一個——剩下三個能預測明天的波動嗎？",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c0d6676f needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c0d6676f",
@@ -43385,7 +43385,33 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-01T17:08:13+00:00"
+    "created_at": "2026-07-01T17:08:13+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-07-01T20:09:32.209348+00:00",
+    "claim_session_id": "37f3e1be33d2",
+    "status_history": [
+      {
+        "ts": "2026-07-01T20:09:32.209611+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-01T20:09:38.832978+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-01T20:18:22.128064+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
+      }
+    ],
+    "started_at": "2026-07-01T20:09:38.832657+00:00",
+    "completed_at": "2026-07-01T20:18:22.127799+00:00",
+    "result": "Codex 24h-rule source review of K1558 (OHLC range estimators vs GARCH, mile_c0d6676f). Verdict CONDITIONAL_PASS: lookahead(shift1+align=target) PASS, QLIKE canonical direction PASS, target consistency PASS, GARCH no-leak PASS, seed42 PASS. Numbers verified vs results.json (SPY GARCH 1.57/YZ 1.63, RS blowup 13891/191362, n_oos 3135 all match). Fixed 1 reader-facing factual error: article period '2014-2025' -> '2014-2026' (actual OOS ends 2026-06-26); feed.json patched + Supabase synced + live cache-bust verified. DM-HLN label nuance already honestly caveated in README(L66/92, negligible at h=1); RS 1e-12 floor symmetric, blowup real -> non-issues."
   },
   {
     "id": "paper_review_mile_549aaaa4",
@@ -43601,5 +43627,37 @@
     "started_at": "2026-07-01T19:41:35.603907+00:00",
     "completed_at": "2026-07-01T19:49:27.753972+00:00",
     "result": "Fresh IJF multi-round review archived at paper/leverage-direction/review_history/ijf_multi_round_20260702/. Overall FAIL_DO_NOT_ADVANCE: reproduce/compliance/compile green, but VT same-window contradiction, ungated body_v_ijf/VT claims, stale IJF package docs, and draft AI disclosure block arxiv_ready. storage/paper_pipeline_status.json kept at multi_round_review with do_not_advance=true."
+  },
+  {
+    "id": "research_t_bill_vol_genius_act_2025_eichengreen_fire_sale",
+    "title": "研究 backlog fallback: 穩定幣儲備 → 短端 T-bill vol（GENIUS Act 2025 簽署 + Eichengreen fire-sale）：鏈上穩定幣淨發行(DefiLlama/CoinGecko)對 DGS1MO/3MO realized vol(MOVE proxy) 領先；脫鉤事件(USDC-SVB)當 event window 量 SHY/BIL vol spike",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 穩定幣儲備 → 短端 T-bill vol（GENIUS Act 2025 簽署 + Eichengreen fire-sale）：鏈上穩定幣淨發行(DefiLlama/CoinGecko)對 DGS1MO/3MO realized vol(MOVE proxy) 領先；脫鉤事件(USDC-SVB)當 event window 量 SHY/BIL vol spike。全免費，timely 高分享。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "t_bill_vol_genius_act_2025_eichengreen_fire_sale",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-01T20:09:03+00:00"
+  },
+  {
+    "id": "research_ai_vol_regime_iea_energy_ai_2025_pjm_28_9_329_10",
+    "title": "研究 backlog fallback: AI 電力超級循環 → 公用事業 vol regime（IEA Energy&AI 2025 + PJM 容量拍賣清算 $28.9→$329 暴漲 10x）：PJM/MISO 拍賣公佈日 event window 量 XLU/IPP(VST/CEG/NRG)/鈾礦(URA) 隔日 abnormal vol；hyperscaler capex 上修(EDGAR 10-Q)→電力曝險籃子截面 vol；utility 防禦→週期 vol-beta 斷點",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: AI 電力超級循環 → 公用事業 vol regime（IEA Energy&AI 2025 + PJM 容量拍賣清算 $28.9→$329 暴漲 10x）：PJM/MISO 拍賣公佈日 event window 量 XLU/IPP(VST/CEG/NRG)/鈾礦(URA) 隔日 abnormal vol；hyperscaler capex 上修(EDGAR 10-Q)→電力曝險籃子截面 vol；utility 防禦→週期 vol-beta 斷點。PJM CSV/EIA API 免費，高 monetization。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "ai_vol_regime_iea_energy_ai_2025_pjm_28_9_329_10",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-01T20:09:03+00:00"
   }
 ]
