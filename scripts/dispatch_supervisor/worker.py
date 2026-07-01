@@ -39,8 +39,8 @@ GRACE_PERIOD_S = 10        # SIGTERM grace before SIGKILL
 RETRY_BACKOFF_S = 90        # between transient-failure attempts
 MAX_ATTEMPTS = 3
 
-OPUS_MODEL = "claude-opus-4-7"
-SONNET_MODEL = "claude-sonnet-4-6"
+OPUS_MODEL = "claude-opus-4-8"
+SONNET_MODEL = "claude-sonnet-5"
 
 CLAUDE_BIN = os.environ.get("CLAUDE_BIN", "/Users/yhlai0911/.local/bin/claude")
 

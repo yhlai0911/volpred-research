@@ -23,11 +23,53 @@ Usage: uv run python scripts/check_model_roster.py [--max-age-days 30] [--json]
 from __future__ import annotations
 import argparse
 import json
+import re
 import sys
 from datetime import date
 from pathlib import Path
 
 CONFIG = Path(__file__).resolve().parent.parent / "config" / "models.json"
+
+# Model-CHOICE patterns (not pricing-table keys, which look like `"claude-x": {`).
+# Catches: `--model claude-...`, `SOME_MODEL = "claude-..."`, router `"opus": "claude-..."`.
+_PIN_PATTERNS = [
+    re.compile(r'--model\s+["\']?(claude-[\w.\-]+)'),
+    re.compile(r'\b[A-Z_]*MODEL[A-Z_]*\s*=\s*["\'](claude-[\w.\-]+)["\']'),
+    re.compile(r'["\'](?:opus|sonnet|haiku|fable)["\']\s*:\s*["\'](claude-[\w.\-]+)["\']'),
+]
+_SCAN_DIRS = ("scripts", "config", "src", ".claude")
+_SCAN_SKIP = ("_legacy", "__pycache__", ".git", "node_modules", "check_model_roster.py", "models.json")
+_SCAN_EXT = (".py", ".sh", ".json", ".md", ".ts", ".js", ".tsx")
+
+
+def scan_code_pins(current_ids: set[str]) -> list[dict]:
+    """Grep the codebase for hardcoded model-CHOICE IDs that are no longer current.
+
+    Closes the gap the 2026-07-01 token report exposed: config/models.json's
+    drift-check compared the tool enum but never scanned cron wrappers /
+    model_router for stale pins (hourly-dispatch was hardcoded to opus-4-7)."""
+    root = CONFIG.resolve().parent.parent
+    findings = []
+    for d in _SCAN_DIRS:
+        base = root / d
+        if not base.exists():
+            continue
+        for p in base.rglob("*"):
+            if not p.is_file() or p.suffix not in _SCAN_EXT:
+                continue
+            if any(skip in str(p) for skip in _SCAN_SKIP):
+                continue
+            try:
+                lines = p.read_text(encoding="utf-8", errors="ignore").splitlines()
+            except Exception:
+                continue
+            for i, line in enumerate(lines, 1):
+                for pat in _PIN_PATTERNS:
+                    for mid in pat.findall(line):
+                        if mid not in current_ids:
+                            findings.append({"file": str(p.relative_to(root)), "line": i,
+                                             "stale_id": mid, "text": line.strip()[:90]})
+    return findings
 
 
 def main(argv: list[str]) -> int:
@@ -71,6 +113,11 @@ def main(argv: list[str]) -> int:
         "how": "Authoritative availability = Claude Desktop model selector (owner screenshot). Compare vs config/models.json; update config + agent-delegation.md on drift; WebSearch a new model before assigning a tier; route around available=false.",
     }
 
+    current_ids = {v.get("id") for v in cfg.get("models", {}).values()
+                   if isinstance(v, dict) and v.get("id")}
+    pins = scan_code_pins(current_ids)
+    report["stale_code_pins"] = pins
+
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
@@ -81,7 +128,13 @@ def main(argv: list[str]) -> int:
                   "update config + agent-delegation.md on drift (WebSearch new aliases first).")
         else:
             print("  ✓ fresh")
-    return 1 if stale else 0
+        if pins:
+            print(f"  ⚠ {len(pins)} STALE MODEL PIN(S) in code (not current per config/models.json):")
+            for f in pins:
+                print(f"      {f['file']}:{f['line']}  {f['stale_id']}  | {f['text']}")
+        else:
+            print("  ✓ no stale model pins in code")
+    return 1 if (stale or pins) else 0
 
 
 if __name__ == "__main__":
