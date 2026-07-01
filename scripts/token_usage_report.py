@@ -459,6 +459,9 @@ def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_d
                     "is_subagent": is_subagent,
                     "content": msg.get("content", []),
                     "text_content": _extract_text_content(msg.get("content", [])),
+                    # Claude Code writes ONE record per content block, each carrying the
+                    # SAME turn-total usage. dedupe by msg_id so usage counts once/turn.
+                    "msg_id": msg.get("id"),
                 }
     except OSError as exc:
         _warn_token_usage("JSONL file read failed; returning no records", jsonl_path, exc)
@@ -487,35 +490,63 @@ def iter_session_records(target_date_start=None, target_date_end=None):
         )
 
 
+_GENERIC_CATS = {"text_only", "agent_delegation", "cache_diagnostics"}
+
+
+def _primary_category(cats, is_subagent):
+    """A turn's block-records span several categories (thinking/text -> text_only,
+    tool_use -> the tool). Attribute the turn to its ACTION category: prefer a
+    tool/action category over generic text_only / agent_delegation."""
+    for c in cats:
+        if c not in _GENERIC_CATS:
+            return c
+    if is_subagent and "text_only" in cats:
+        return "agent_delegation"
+    return cats[0] if cats else "text_only"
+
+
 def aggregate_usage(date_start, date_end):
-    """聚合指定日期區間的 token 用量"""
+    """聚合指定日期區間的 token 用量。
+
+    DEDUPE by message.id: Claude Code writes ONE JSONL record per content block
+    (thinking / text / tool_use), and EVERY block-record carries the SAME
+    turn-total usage. Summing per-record over-counts ~3-4x (verified 2026-07-01:
+    a turn's block-records all show identical output_tokens/cache_create). We
+    count each message.id's usage ONCE and attribute it to the turn's primary
+    (action) category so by_category / by_model sum back to the total."""
     totals = {**_empty_bucket(), "unique_sessions": set(), "subagent_messages": 0, "main_messages": 0}
     by_model = defaultdict(_empty_bucket)
     by_date = defaultdict(_empty_bucket)
     by_category = defaultdict(_empty_bucket)
 
+    turns = {}
     for record in iter_session_records(date_start, date_end):
-        ts_date = record["date"]
-        session_id = record["session_id"]
-        model = record["model"]
-        usage = _usage_breakdown(record["usage"])
-        category = record["category"]
-        is_subagent = record["is_subagent"]
+        mid = record.get("msg_id")
+        if not mid:  # no id -> synthetic unique key so it is still counted once
+            mid = f"_noid::{record['session_id']}::{record['timestamp'].isoformat()}"
+        t = turns.get(mid)
+        if t is None:
+            t = {"usage": record["usage"], "model": record["model"], "date": record["date"],
+                 "session_id": record["session_id"], "is_subagent": record["is_subagent"],
+                 "categories": []}
+            turns[mid] = t
+        t["categories"].append(record["category"])
 
+    for t in turns.values():
+        usage = _usage_breakdown(t["usage"])
+        cat = _primary_category(t["categories"], t["is_subagent"])
         inp = usage["input_tokens"]
         out = usage["output_tokens"]
         cr = usage["cache_read_tokens"]
         cc = usage["cache_create_tokens"]
-
-        for bucket in (totals, by_model[model], by_date[ts_date.isoformat()], by_category[category]):
+        for bucket in (totals, by_model[t["model"]], by_date[t["date"].isoformat()], by_category[cat]):
             bucket["input_tokens"] += inp
             bucket["output_tokens"] += out
             bucket["cache_read_tokens"] += cr
             bucket["cache_create_tokens"] += cc
             bucket["messages"] += 1
-
-        totals["unique_sessions"].add(session_id)
-        if is_subagent:
+        totals["unique_sessions"].add(t["session_id"])
+        if t["is_subagent"]:
             totals["subagent_messages"] += 1
         else:
             totals["main_messages"] += 1
