@@ -42701,16 +42701,13 @@
     "id": "paper_body_leverage_direction_downshift_FRL_20260701",
     "task_type": "paper_body",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "title": "[論文管線] leverage-direction → IJF 主線 body 重寫（owner email-12398 授權，complexity-ceiling reframe）",
     "description": "[TARGET RETARGETED 2026-07-01 16:14 hourly-16: FRL → IJF per owner email-12398 \"你決定\" → main-thread honest decision. Task id retained for continuity.]\n\nOwner email-12393 (14:22) 選 B (Downshift FRL/IJF). Owner email-12398 (14:53) then delegated the final journal pick to main-thread (\"說老實話適合哪個期刊 你決定\"). HONEST verdict: solid method + full reproducible package, but weak/null finding (Gold unconditional NULL; model-selection OOS 0 Harvey-Holm significant; Codex contribution gate BORDERLINE). Not top-3 finance, not a finding-driven Q1. Its true identity = a rigorous OOS volatility-model-selection study with honest cross-asset limits.\n\n**主線 target = International Journal of Forecasting (IJF)** — Elsevier, top forecasting journal (IF ~6), full-length (NO 2500-word cap). Routinely publishes informative nulls (\"more sophistication does not beat benchmark OOS\"). Our pre-specified OOS design + reproduce.py GREEN = real edge.\n**Fallback = Empirical Economics (EmpEcon)** — most null-tolerant, cross-country welcome, highest realistic hit rate.\n**DROPPED**: FRL-primary (2500w cap guts the cross-asset breadth that IS the contribution) and JFinEc-first (needs a positive finding we do not have).\n\n**REFRAME AXIS (critical change vs old FRL plan)**: headline is now the **complexity ceiling / measurement-vs-allocation wedge** (per Codex contribution gate: \"when does better volatility measurement translate into better allocation — answer: rarely; there is a ceiling\"). The leverage-direction taxonomy is DEMOTED to supporting descriptive material, not the lead. This is the paper's strongest honest angle AND squarely IJF's wheelhouse.\n\n**主要動作**（分 hourly tick 執行，總 effort 2-3 週；每 tick 做一小塊，heavy recompute 走 compute_queue）:\n1. Reframe intro/abstract/conclusion around complexity-ceiling / measurement-vs-allocation; lock ONE central claim. Method/tables largely preserved.\n2. Demote leverage-direction taxonomy to a supporting section; keep gold regime as tentative honest evidence, model-selection OOS as preliminary.\n3. Title rewrite avoiding overclaim, forecasting-forward, e.g. 'When Does Better Volatility Measurement Help Allocation? A Cross-Asset Complexity Ceiling' or 'Leverage Direction and the Limits of Volatility-Model Selection: Cross-Asset OOS Evidence'.\n4. Standalone abstract; Elsevier author-date (Harvard) refs; et al. for 3+; alphabetical-then-chronological; LTWA abbreviations; DOIs.\n5. Highlights file (Elsevier requires 3-5 bullets ≤85 chars each) — reframe around the forecasting/allocation message.\n6. Reproduce gate: paper/leverage-direction/reproduce.py match_rate ≥ 95%.\n7. Compliance scrub already CLEAN — re-verify (author = Yi-Hao Lai only; no K-id/VolPred/AI).\n\n**Skill 依賴**:\n- `.claude/skills/journal-review/references/` — build ijf.md profile if missing (Elsevier/IIF; Editorial Manager); IJF scope = forecasting methods + honest OOS evaluation\n- `.claude/skills/paper-update/` — paper-update CLI + reproduce gate\n- `.claude/skills/paper-submission-pipeline/` — stage advancement\n- `.claude/skills/finance-paper-quality/` — claim-evidence matching\n\n**Timeline**: 2026-07-01 → 2026-07-21 (三週 target); hourly tick 每次做一小塊.\n\n**Deliverables**:\n- `paper/leverage-direction/body_v_ijf.tex` (IJF full-length; keep body.tex as JBF-era archive)\n- `paper/leverage-direction/highlights.txt`\n- `paper/leverage-direction/cover_letter_ijf.tex`\n- 送 arXiv 佔 priority 後再送 IJF (owner picks submit timing)\n\n**PDCA gate（advance 前）**:\n- 3-pass multi-round review (codex exec: latex-academic-reviewer + citation-verifier + journal-review IJF) 全 PASS or CONDITIONAL_PASS\n- Contribution gate re-audit: lead claim = complexity-ceiling economic content, NOT a bare method rule\n- Reproduce.py exit 0 + match_rate ≥ 95%\n- 合規: author = Yi-Hao Lai only; K-id/VolPred/AI 全清\n\n**Model routing**: paper_body → opus high (per routing table). Body writing & narrative decisions in MAIN THREAD (per CLAUDE.md: no background agent for paper .tex).\n",
     "source": "hourly-15-dispatch-boss-decision-B",
     "created_at": "2026-07-01T15:05:23+08:00",
     "linked_email_task_id": "email-12393-2fd40c",
     "linked_decision_memo": "paper/leverage-direction/decision_memo_20260701.md",
-    "claimed_by": "hourly-18",
-    "claimed_at": "2026-07-01T09:15:19.934456+00:00",
-    "claim_session_id": "09b28df8428b",
     "status_history": [
       {
         "ts": "2026-07-01T09:15:19.934730+00:00",
@@ -42723,19 +42720,28 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-01T11:50:02.137162+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-18",
+        "note": "auto_release_stale_2h"
       }
     ],
     "started_at": "2026-07-01T09:15:38.464894+00:00",
     "plan": "IJF full-length reframe around complexity-ceiling / measurement-vs-allocation. 6-tick roadmap: t1 abstract+title+highlights+intro+stubs; t2 Literature Review reframe; t3 Data&Methodology port + sample-split reconcile; t4 Empirical Results restructure (wedge spine); t5 Implications+Conclusion; t6 main_v_ijf.tex wrapper + reproduce gate + compliance scrub.",
     "result": "tick-1 (hourly-17): IJF abstract(147w)+title+highlights.txt+fully-reframed Introduction+section stubs DONE. tick-2 (hourly-18 2026-07-01T18:14 TW): Literature Review reframed into 4 strands led by forecast-evaluation/complexity (Patton QLIKE, DM, Hansen MCS, Harvey multiple-testing); asymmetric-model + leverage-direction taxonomy DEMOTED to interpretive; risk-mgmt + VT strands kept. 29 cite keys all verified against main.tex \\\\bibitem; xelatex trial-compile clean (exit 0, 0 undefined citations/refs, 10pp); compliance clean (no AI/LLM/K-id/VolPred; author=Yi-Hao Lai). NEXT=tick-3: port Data&Methodology from body.tex:31-114, reconcile sample-split to canonical (full 2017-01..2026-03; train 2017-2022; main-OOS 2023-2024; validation 2025-01..2026-03).",
-    "last_progress_at": "2026-07-01T18:15:41.391572+08:00"
+    "last_progress_at": "2026-07-01T18:15:41.391572+08:00",
+    "last_released_at": "2026-07-01T11:50:02.137152+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "K1590_article_general",
     "title": "K1590: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1590 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1590 merger-arbitrage deal-spread volatility diagnostic is a GO for Phase 2, with Codex review verdict CONDITIONAL_PASS. Data: yfinance adjusted closes (auto_adjust=False) for MNA/SPY/IWM/HYG/^VIX, price range 2020-01-02 to 2026-06-30, MNA return sample N=1629. Core gate evidenc",
     "priority": 3,
-    "status": "pending",
+    "status": "blocked",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1590",
@@ -42744,6 +42750,87 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-01T11:23:07+00:00"
+    "created_at": "2026-07-01T11:23:07+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-01T12:17:03+00:00",
+    "blocked_note": "general-audience article for K1590 already in feed (mile_4518e9d8); auto-retired to prevent duplicate dispatch",
+    "status_history": [
+      {
+        "at": "2026-07-01T12:17:03+00:00",
+        "from": "pending",
+        "to": "blocked",
+        "reason": "general-audience article for K1590 already in feed (mile_4518e9d8); auto-retired to prevent duplicate dispatch"
+      }
+    ]
+  },
+  {
+    "id": "research_harq_shark_har_bollerslev_patton_quaedvlieg_joe",
+    "title": "研究 backlog fallback: HARQ/SHARK 測量誤差修正 HAR（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: HARQ/SHARK 測量誤差修正 HAR（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "harq_shark_har_bollerslev_patton_quaedvlieg_joe",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-01T11:29:08+00:00"
+  },
+  {
+    "id": "research_conditional_sequential_mcs_jrss_b_2025_qkag066_a",
+    "title": "研究 backlog fallback: Conditional / Sequential MCS 評估升級（JRSS-B 2025 qkag066 + arXiv 2505.21278 + Conditional SPA）：重用 1400+ K 的 loss/VaR，conditioning＝VIX regime/FRED 衰退，conditional MCS + 線上 sequential 監控勝負漂移 → 「哪模型在哪 regime 稱王」meta 結論",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Conditional / Sequential MCS 評估升級（JRSS-B 2025 qkag066 + arXiv 2505.21278 + Conditional SPA）：重用 1400+ K 的 loss/VaR，conditioning＝VIX regime/FRED 衰退，conditional MCS + 線上 sequential 監控勝負漂移 → 「哪模型在哪 regime 稱王」meta 結論。零新資料。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "conditional_sequential_mcs_jrss_b_2025_qkag066_a",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-01T11:29:29+00:00"
+  },
+  {
+    "id": "research_co_jump_har_cj_jump_jfe_2017_systemic_co_jumps_j",
+    "title": "研究 backlog fallback: Co-jump / HAR-CJ jump 軸（JFE 2017 systemic co-jumps + JoE 2023 networks + Hawkes）：tick BNS bipower/Lee-Mykland 拆 RV＝continuous+jump 建 HAR-CJ，同日跨資產 co-jump 計數當 vol regime 觸發器（VolPred jump 軸最薄）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Co-jump / HAR-CJ jump 軸（JFE 2017 systemic co-jumps + JoE 2023 networks + Hawkes）：tick BNS bipower/Lee-Mykland 拆 RV＝continuous+jump 建 HAR-CJ，同日跨資產 co-jump 計數當 vol regime 觸發器（VolPred jump 軸最薄）。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "co_jump_har_cj_jump_jfe_2017_systemic_co_jumps_j",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-01T11:29:44+00:00"
+  },
+  {
+    "id": "platform_ops_dispatch_covered_article_dedup_20260701",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "claimed_by": "hourly-20",
+    "claimed_at": "2026-07-01T12:15:06+00:00",
+    "title": "Dispatch-time dedup: pending *_article_<aud> tasks already covered in feed",
+    "description": "Root cause: K1590_article_general created 11:23Z, article mile_4518e9d8 written 11:30Z (7min later); task never cleaned up → dispatcher offered it → duplicate-article risk. Fix: sweep marks covered article tasks blocked=deprecated + wire into build_report self-heal. Recurring class (K1449/K1091/K1590).",
+    "source": "agent_discovered",
+    "dispatch_lane": "main_thread",
+    "completed_at": "2026-07-01T12:17:51.225438+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-01T12:17:51.225718+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-20"
+      }
+    ],
+    "result": "新 sweep mark_covered_article_tasks.py + wire 進 build_report self-heal + 7 regression tests；標 K1590_article_general blocked=deprecated（mile_4518e9d8 已覆蓋，7min race root cause）"
   }
 ]

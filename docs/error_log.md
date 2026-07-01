@@ -2,6 +2,19 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-01 covered-article dispatch race：已被 feed 覆蓋的 `*_article_<aud>` task 仍被 dispatcher 派出 → 重複文章風險 — **FIXED**
+
+**問題**：`K1590_article_general` (auto_discovered daily_article) 於 hourly-20 fire 仍列為 agentable candidate，但 K1590 的 general 文章 `mile_4518e9d8`（audience=general, refs=['K1590'], draft）**早已存在**。派工 = 寫重複文章（arc-dedup 該擋的 recurring class，同 K1449/K1091）。
+
+**現象/根因**：時序 = task `K1590_article_general` 建立 `2026-07-01T11:23:07Z` → 文章 `mile_4518e9d8` 建立 `11:30:21Z`（**晚 7 分鐘**）。`refill_task_pool._kids_with_audience_article` guard 只在**創建時**擋 dup task；task 排入時 K1590 確實還沒 general 文章（當下判斷正確），7 分鐘後文章由另一路徑（Codex daemon / parallel refill）寫出，但 pending task **從未被清掉**。`continue_task_dispatch.categorize` **沒有 dispatch-time feed-coverage dedup** → stale article task 一直被當 candidate。這是「creation-time guard 有、dispatch-time guard 無」的結構缺口。
+
+**修復（修流程不修資料）**：
+1. 新 sweep `scripts/mark_covered_article_tasks.py`：掃 pending `*_article_<aud>` task，其 K 已被 feed 覆蓋（audience-specific）→ 標 `status=blocked, blocked_reason=deprecated` + audit note（含覆蓋 mile_id）。**覆蓋判定 reuse `refill_task_pool._kids_with_audience_article`**（唯一權威，避免再造第三個 detector — 本 bug 正是兩 detector drift）。lock/load/save reuse `mark_task_blocked` helper。
+2. Wire 進 `continue_task_dispatch.build_report`（`_maybe_retire_covered_article_tasks`，gated on auto_refill，`categorize` 之前）→ **每次 canonical dispatch 自我修復**，不靠 prompt-level 紀律跑 standalone script。
+3. Regression test `tests/test_covered_article_dedup.py`（7 tests）：K1590 race 情境、audience 特異性（general 覆蓋不算 research）、wrong-status、already-blocked idempotency、compound k-id 解析。
+
+**驗證**：sweep --apply 只標 K1590（無誤傷）；`continue_task_dispatch.py --report` 確認 K1590 不再列 candidates（pending 9→8）；build_report self-heal idempotent；`pytest tests/test_covered_article_dedup.py tests/test_dispatch_type_rotation.py` 16 passed。
+
 ## 2026-07-01 **3-STRIKE TRIGGER**：dreaming-run 7 findings 全 severity=critical + occurrences=3（`storage/ops/dreaming/2026-07-01.json`）
 
 **觸發**：`uv run volpred ops dreaming-run` 連續 3 次 run 都命中同一組 7 個 finding（three-strike 門檻）。逐一根因調查 + 結構性修復，記錄如下（不逐一開 `docs/refactor_plan_*.md`——大部分根因是「單一 job 的 execution path 錯誤」或「refill 邏輯漏一個訊號源」，屬於 CLAUDE.md three-strike 判準第 2/3 層的局部修正，非需要三層大重構的規模；已在下方逐項標注判斷理由）。
