@@ -21,6 +21,15 @@
 \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 \doublespacing
 
+% ─── Cross-reference the Online Supplement (built separately) ───
+% Resolves refs to sec:var_compliance, sec:timing_tests, sec:complexity_ceiling,
+% sec:har_paradox, sec:aux_discussions, and tab:var_ortho — all now offloaded
+% to supplementary.tex per the Stage 1.3 appendix restructure.
+% Requires supplementary.aux to exist; the paper-update pipeline builds
+% supplementary.tex before main.tex so this dependency is satisfied.
+\usepackage{xr-hyper}
+\externaldocument{supplementary}
+
 % ─── Title ───────────────────────────────────────────────────
 \title{Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection and Volatility Targeting\thanks{All errors are my own. Data and replication code are available upon request.}}
 

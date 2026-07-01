@@ -2,6 +2,24 @@
 
 \begin{table}[H]
 \centering
+\caption{VaR 1\% Orthogonality: GARCH Equation $\times$ Distribution (SPY, 2023--2024, 502 days)}
+\label{tab:var_ortho}
+\begin{tabular}{llrrrll}
+\toprule
+GARCH Equation & Distribution & Violations & Rate & Kupiec $p$ & Basel Zone & Status \\
+\midrule
+GARCH(1,1) & Normal        & 7  & 1.39\% & 0.40 & Green & PASS \\
+GJR-GARCH  & Normal        & 10 & 1.99\% & 0.049 & Yellow & \textbf{Borderline FAIL} \\
+GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.67 & Green & PASS \\
+\midrule
+\multicolumn{7}{l}{\textit{GJR wins QLIKE ($-0.59\%$ quasi-LL scale, DM $p = 0.003$) but is borderline on VaR under Normal (9--10 violations, vintage-dependent).}} \\
+\multicolumn{7}{l}{\textit{Student-$t$ restores compliance: two optimization domains are independent.}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
 \caption{Window Size Robustness: GJR-GARCH QLIKE for SPY}
 \label{tab:window}
 \begin{tabular}{lrrrrr}
