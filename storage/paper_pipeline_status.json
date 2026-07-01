@@ -22,7 +22,7 @@
   "papers": [
     {
       "paper": "leverage-direction",
-      "journal_target": "FRL (primary) → IJF (fallback)",
+      "journal_target": "IJF (primary) → EmpEcon (fallback)",
       "stage": "revision",
       "stage_entered_at": "2026-07-01T02:25:00+08:00",
       "last_advance_at": "2026-07-01T15:05:23+08:00",
@@ -121,7 +121,7 @@
         }
       },
       "do_not_advance": false,
-      "notes": "2026-07-01 14:47 owner email-12388 replied → agent hourly-14 built 8 new SSCI journal profiles + evaluation memo (storage/paper_submission_target_evaluation/leverage_direction_20260701.md). Top-3 reco: (1) JFinEc IF 2.42 Strong/Medium 15-20%; (2) JEmpFin IF 2.52 Strong/Medium 12-18%; (3) EmpEcon IF 2.25 Strong/High 20-25%. Serial pipeline JFinEc→JEmpFin→EmpEcon→JBF fallback. Awaiting owner ack of Top-3 shortlist before advancing to compliance_scrub.\n2026-07-01 15:05 hourly-15 fire: boss email-12393 replied B (FRL/IJF); paper_body task queued (paper_body_leverage_direction_downshift_FRL_20260701); do_not_advance=false; awaiting body rewrite over 2-3 weeks per FRL 2500-word cap.",
+      "notes": "2026-07-01 16:14 hourly-16: owner email-12398 (\"你決定\") delegated journal choice to main-thread. HONEST verdict: solid method, weak/null finding (0 Harvey-Holm sig) → NOT top-3 finance nor a finding-driven Q1. DECISION: primary=International Journal of Forecasting (IJF), reframed around complexity-ceiling / measurement-vs-allocation (leverage-direction taxonomy demoted to supporting); fallback=Empirical Economics (EmpEcon). DROP FRL-primary (2500w cap guts cross-asset breadth) and JFinEc-first (needs positive finding). Decision email sent to owner with mailto override. Next: retarget body task FRL→IJF, codex multi-round review + contribution gate → arXiv → IJF.",
       "decision_log": [
         {
           "date": "2026-07-01T14:22:36+08:00",
@@ -131,6 +131,12 @@
           "reference_memo": "paper/leverage-direction/decision_memo_20260701.md",
           "action_task_id": "paper_body_leverage_direction_downshift_FRL_20260701",
           "supersedes": "Top-3 SSCI shortlist (JFinEc/JEmpFin/EmpEcon) — kept as tertiary fallback if FRL/IJF fail"
+        },
+        {
+          "ts": "2026-07-01T16:14+08:00",
+          "by": "hourly-16",
+          "event": "journal_decision",
+          "value": "IJF primary / EmpEcon fallback (owner-delegated via email-12398)"
         }
       ]
     },

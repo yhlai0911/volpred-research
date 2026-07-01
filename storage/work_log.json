@@ -12722,5 +12722,18 @@
       "paper/leverage-direction/decision_memo_20260701.md",
       "storage/paper_pipeline_status.json"
     ]
+  },
+  {
+    "timestamp": "2026-07-01T16:14:00+08:00",
+    "task_type": "email_reply",
+    "task_id": "email-12398-9535b6",
+    "actor": "hourly-16",
+    "verdict": "succeeded",
+    "summary": "Boss email-12398 (14:53) \"你決定\" delegated leverage-direction journal pick to main-thread. Took over orphaned interactive-claude claim (session exited). HONEST verdict: solid method + reproducible package but weak/null finding (Gold unconditional NULL, model-selection OOS 0 Harvey-Holm sig, Codex gate BORDERLINE) -> not top-3 finance nor finding-driven Q1. DECISION: primary=IJF (reframed around complexity-ceiling / measurement-vs-allocation), fallback=EmpEcon; dropped FRL-primary (2500w cap guts breadth) + JFinEc-first (needs positive finding). Actions: sent decision email w/ mailto override (notification_id 41378da7); updated pipeline_status journal_target=IJF/EmpEcon + decision_log; retargeted paper_body task FRL->IJF (id retained). ijf.md + empecon.md profiles already exist. Body rewrite continues via queued task over 2-3 wk.",
+    "refs": [
+      "storage/paper_pipeline_status.json",
+      "paper/leverage-direction/decision_memo_20260701.md",
+      "paper/leverage-direction/review_history/codex_contribution_gate_20260701.md"
+    ]
   }
 ]
