@@ -45,7 +45,10 @@ def test_auth_preflight_passes_without_fallback(tmp_path: Path) -> None:
     _write_executable(
         uv,
         "#!/bin/bash\n"
-        "echo \"$@\" >> \"$HOME/uv_called.txt\"\n",
+        "echo \"$@\" >> \"$HOME/uv_called.txt\"\n"
+        "if [[ \"$*\" == *\"hourly_dispatch_pregate.py\"* ]]; then\n"
+        "  exit 1\n"
+        "fi\n",
     )
     zshrc.write_text("# no-op\n", encoding="utf-8")
 
@@ -73,7 +76,14 @@ def test_auth_preflight_recovers_after_sourcing_zshrc(tmp_path: Path) -> None:
     _write_executable(
         claude,
         "#!/bin/bash\n"
-        "if [ \"${AUTH_OK:-0}\" = \"1\" ]; then\n"
+        "count_file=\"$HOME/claude_calls.txt\"\n"
+        "count=0\n"
+        "if [ -f \"$count_file\" ]; then\n"
+        "  count=$(cat \"$count_file\")\n"
+        "fi\n"
+        "count=$((count + 1))\n"
+        "echo \"$count\" > \"$count_file\"\n"
+        "if [ \"$count\" -ge 2 ]; then\n"
         "  echo 'Hi'\n"
         "  exit 0\n"
         "fi\n"
@@ -83,9 +93,12 @@ def test_auth_preflight_recovers_after_sourcing_zshrc(tmp_path: Path) -> None:
     _write_executable(
         uv,
         "#!/bin/bash\n"
-        "echo \"$@\" >> \"$HOME/uv_called.txt\"\n",
+        "echo \"$@\" >> \"$HOME/uv_called.txt\"\n"
+        "if [[ \"$*\" == *\"hourly_dispatch_pregate.py\"* ]]; then\n"
+        "  exit 1\n"
+        "fi\n",
     )
-    zshrc.write_text("export AUTH_OK=1\n", encoding="utf-8")
+    zshrc.write_text("# no-op\n", encoding="utf-8")
 
     result = subprocess.run(
         ["bash", str(SCRIPT)],
@@ -127,6 +140,9 @@ def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path)
         "out=\"$HOME/uv_args.txt\"\n"
         "body=\"$HOME/uv_body.txt\"\n"
         "echo \"CALL: $@\" >> \"$out\"\n"
+        "if [[ \"$*\" == *\"hourly_dispatch_pregate.py\"* ]]; then\n"
+        "  exit 1\n"
+        "fi\n"
         "while [ $# -gt 0 ]; do\n"
         "  if [ \"$1\" = \"--body-md\" ]; then\n"
         "    shift\n"
