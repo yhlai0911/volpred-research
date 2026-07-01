@@ -424,7 +424,7 @@ K1370 block-bootstrap CI 重跑揭露：論文 headline 10× 是 **spec mismatch
 ### Tail Risk & Conformal Prediction
 - [ ] Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)。控制非定態 portfolio VaR 超限率。regime-structured vol clustering。
 - [ ] Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。
-- [ ] ★ **Proxy-Reliance Control in Conformal VaR** — arXiv:2603.22569 (2026)。校準 one-sided VaR 時控制 proxy 依賴。直接相關我們的 Patton (2011) proxy-robust 框架。
+- [x] ~~★ **Proxy-Reliance Control in Conformal VaR**~~ — arXiv:2603.22569 (2026) → **K1026 已覆蓋 / duplicate backlog closed 2026-07-01**。K1026 已用 SPY 2005-2026、OOS 2013-2026 比較 parametric GJR/A4f Student-t VaR 與 rolling standardized-residual conformal VaR，並用 Kupiec / Christoffersen / DQ / Basel / ES backtests + VIX regime conditional calibration 評估；詳見 `experiments/k1026/backlog_task_resolution_2026-06-08.md`。後續若要做，應開「K1026 extension」而非重複此題：cross-asset、adaptive/weighted conformal windows、或精準 replication 2026 proxy-reliance parameter。
 - [ ] **Online Conformal via Universal Portfolio** — arXiv:2602.03168 (2026)。在線 conformal prediction + portfolio theory 交叉。
 - [ ] **KOWCPI (Kernel-Optimally-Weighted Conformal)** — arXiv:2405.16828。自適應權重 conformal prediction interval，適合波動率聚集。
 - [ ] Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)

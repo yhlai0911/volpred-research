@@ -3,6 +3,26 @@
 Date: 2026-06-08  
 Resolver: Codex CLI
 
+## 2026-07-01 revalidation
+
+The same task re-entered the pending pool after its blocked-until date expired.
+Codex rechecked the current backlog, memory, and literature pointers before
+closing it again as a duplicate:
+
+- `storage/memory/knowledge.json` already contains K1005 and K1026 entries for
+  proxy-reliance / conformal VaR.
+- `experiments/k825/`, `experiments/k1005/`, and `experiments/k1026/` all touch
+  this axis; K1026 is the cleanest existing match to the backlog prompt.
+- Literature checked: Zhong (2026) arXiv:2603.22569 on proxy-reliance controlled
+  one-sided VaR recalibration; Vovk, Gammerman, and Shafer (2005) for conformal
+  prediction foundations; Gibbs and Candes (2021) for adaptive conformal under
+  distribution shift; Patton (2011) for imperfect volatility proxy / QLIKE
+  robustness.
+
+Action taken: `research_program.md` now marks this backlog item as resolved by
+K1026. Any future work should be a new extension task, not a rerun of the same
+prompt.
+
 ## Verdict
 
 This pending backlog task is already substantively covered by existing experiment `K1026`.
