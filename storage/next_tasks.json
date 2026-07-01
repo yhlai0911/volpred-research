@@ -42014,7 +42014,7 @@
     "title": "[論文管線] leverage-direction Stage 2.2 - genuine OOS horse race",
     "description": "Stage 2 core rebuild。Stage 1 全 succeeded 才 unblock。\n\nScope: 重做 model selection 為 genuine pre-specified OOS horse race。(a) Pre-specify gamma rule on initial training universe/period (eg 2017-2020 + 6 ETF equity domain)；(b) test on disjoint universe + future period (2023-2026 + extra ETF/commodity)；(c) DM + MCS + multiple-testing 校正；(d) forecast-origin decision log (date / estimated gamma / SE / chosen model / realized OOS loss differential / DM result)；(e) 區分 'significant superiority' vs 'non-rejection of equal accuracy'；(f) 刪 'never significantly beaten' headline。\n\n參考：reframing_decision Stage 2；codex_contribution_gate §2 in-sample/OOS + §4 item 3。\n\nDispatch: 新 experiment K1XXX，opus high。Heavy compute（DM/MCS bootstrap）走 compute_queue。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "source": "leverage_direction_reframing_decision_20260701",
     "tags": [
@@ -42026,7 +42026,33 @@
       "blocked_on_stage1"
     ],
     "parent_decision": "paper_leverage_direction_reframing_decision",
-    "created_at": "2026-07-01T07:15:00+08:00"
+    "created_at": "2026-07-01T07:15:00+08:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-01T04:37:56.428959+00:00",
+    "claim_session_id": "b9e3b3b80b4c",
+    "status_history": [
+      {
+        "ts": "2026-07-01T04:37:56.429271+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T04:38:00.619529+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T04:48:08.260339+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-01T04:38:00.619252+00:00",
+    "completed_at": "2026-07-01T04:48:08.260091+00:00",
+    "result": "K1592 genuine OOS horse race completed. Verdict NULL_OR_WEAK: GammaRule best mean loss in 3/8 assets, 0 strict Harvey+Holm wins; disjoint holdout MCS retains GARCH/GJR/GammaRule. Artifacts: experiments/k1592/README.md, k1592_results.json, decision log, losses, figures, codex_review.md."
   },
   {
     "id": "paper_leverage_direction_stage2_replication_freeze",

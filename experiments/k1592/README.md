@@ -100,11 +100,13 @@ The rule has the lowest mean loss for 3 of 8 assets (`EEM`, `TLT`, `IWM`), but i
 
 ### Panel Tests
 
-| Panel | Best mean-loss model | Rule vs GARCH DM t | Rule vs GJR DM t | MCS survivors |
-|---|---:|---:|---:|---|
-| Development assets, future OOS | GJR | -2.90 | +0.73 | GJR, GammaRule |
-| Disjoint holdout assets, future OOS | GJR | -0.79 | +1.08 | GARCH, GJR, GammaRule |
-| All assets, future OOS | GJR | -2.75 | +1.20 | GJR, GammaRule |
+Panel tests use common dates only: every listed asset must have a valid loss on each panel date.
+
+| Panel | Common dates | Best mean-loss model | Rule vs GARCH DM t | Rule vs GJR DM t | MCS survivors |
+|---|---:|---:|---:|---:|---|
+| Development assets, future OOS | 873 | GJR | -2.90 | +0.73 | GJR, GammaRule |
+| Disjoint holdout assets, future OOS | 825 | GJR | -0.31 | +0.76 | GARCH, GJR, GammaRule |
+| All assets, future OOS | 825 | GJR | -2.96 | +1.33 | GJR, GammaRule |
 
 Interpretation:
 

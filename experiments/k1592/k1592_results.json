@@ -1,6 +1,6 @@
 {
   "experiment_id": "k1592",
-  "created_at": "2026-07-01T12:44:05.187619+08:00",
+  "created_at": "2026-07-01T12:45:40.897437+08:00",
   "seed": 1592,
   "task": "paper_leverage_direction_stage2_oos_horse_race",
   "data": {
@@ -391,6 +391,7 @@
         "TLT"
       ],
       "n_dates": 873,
+      "date_alignment": "common dates only; every listed asset has a valid loss on each panel date",
       "date_start": "2023-01-03",
       "date_end": "2026-06-26",
       "mean_losses": {
@@ -441,29 +442,30 @@
         "SLV",
         "BTC-USD"
       ],
-      "n_dates": 1250,
+      "n_dates": 825,
+      "date_alignment": "common dates only; every listed asset has a valid loss on each panel date",
       "date_start": "2023-01-03",
-      "date_end": "2026-06-26",
+      "date_end": "2026-04-17",
       "mean_losses": {
-        "GARCH": 2.1711237057966173,
-        "GJR": 2.1620720969748444,
-        "GammaRule": 2.1692542999901194
+        "GARCH": 1.639028244062668,
+        "GJR": 1.631233687659734,
+        "GammaRule": 1.6381488267829778
       },
       "best_mean_loss_model": "GJR",
       "dm_tests": {
         "GammaRule_minus_GARCH": {
-          "t": -0.7853566530558,
-          "p": 0.43239343497268434,
+          "t": -0.3085917315772679,
+          "p": 0.7577101109258093,
           "interpretation": "equal_accuracy_not_rejected"
         },
         "GammaRule_minus_GJR": {
-          "t": 1.0812574919261548,
-          "p": 0.27979131243555266,
+          "t": 0.7585038765089642,
+          "p": 0.4483662856785253,
           "interpretation": "equal_accuracy_not_rejected"
         },
         "GJR_minus_GARCH": {
-          "t": -1.2885781280387234,
-          "p": 0.1977834242239762,
+          "t": -0.8093186001462152,
+          "p": 0.41856553907841487,
           "interpretation": "equal_accuracy_not_rejected"
         }
       },
@@ -475,9 +477,9 @@
         ],
         "eliminated": [],
         "p_values": {
-          "GARCH": 0.381,
-          "GJR": 0.381,
-          "GammaRule": 0.381
+          "GARCH": 0.629,
+          "GJR": 0.629,
+          "GammaRule": 0.629
         }
       }
     },
@@ -493,29 +495,30 @@
         "SLV",
         "BTC-USD"
       ],
-      "n_dates": 1250,
+      "n_dates": 825,
+      "date_alignment": "common dates only; every listed asset has a valid loss on each panel date",
       "date_start": "2023-01-03",
-      "date_end": "2026-06-26",
+      "date_end": "2026-04-17",
       "mean_losses": {
-        "GARCH": 2.1401991400253246,
-        "GJR": 2.12525703322126,
-        "GammaRule": 2.1308598303842086
+        "GARCH": 1.5721193392809167,
+        "GJR": 1.5510046003711453,
+        "GammaRule": 1.5578178507841762
       },
       "best_mean_loss_model": "GJR",
       "dm_tests": {
         "GammaRule_minus_GARCH": {
-          "t": -2.745297823753861,
-          "p": 0.006132309074393882,
+          "t": -2.9574883024606686,
+          "p": 0.003190199595769494,
           "interpretation": "equal_accuracy_not_rejected"
         },
         "GammaRule_minus_GJR": {
-          "t": 1.1967199555515105,
-          "p": 0.23164282773228484,
+          "t": 1.3280232711028677,
+          "p": 0.184538153370835,
           "interpretation": "equal_accuracy_not_rejected"
         },
         "GJR_minus_GARCH": {
-          "t": -2.429506856949004,
-          "p": 0.015259609554999942,
+          "t": -2.912349797336674,
+          "p": 0.0036840894395977486,
           "interpretation": "equal_accuracy_not_rejected"
         }
       },
@@ -527,13 +530,13 @@
         "eliminated": [
           [
             "GARCH",
-            0.01
+            0.048
           ]
         ],
         "p_values": {
-          "GARCH": 0.01,
-          "GJR": 0.299,
-          "GammaRule": 0.299
+          "GARCH": 0.048,
+          "GJR": 0.287,
+          "GammaRule": 0.287
         }
       }
     }
