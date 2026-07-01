@@ -42246,9 +42246,9 @@
     ],
     "created_at": "2026-07-01T03:10:26+00:00",
     "source": "hourly_11_autonomous",
-    "claimed_by": "hourly-11",
+    "claimed_by": "hourly-12",
     "claimed_at": "2026-07-01T03:10:27.057300+00:00",
-    "claim_session_id": "f34fac16427f",
+    "claim_session_id": "hourly-12-repurpose",
     "status_history": [
       {
         "ts": "2026-07-01T03:10:27.057577+00:00",
@@ -42261,6 +42261,13 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-01T04:09:51.000000+00:00",
+        "from": "in_progress",
+        "to": "in_progress",
+        "by": "hourly-12",
+        "note": "orphan re-claim (hourly-11 stale 57min, no live process)"
       }
     ],
     "started_at": "2026-07-01T03:10:27.262325+00:00"
