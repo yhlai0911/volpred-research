@@ -41848,7 +41848,7 @@
     "title": "[論文管線] leverage-direction Stage 1.4 - sample split unification",
     "description": "Stage 1 quick win. Scope: body.tex Section 3 (data) + descriptive stats + Table 1 caption + Table 3 OOS + cover letter。\n\n當前不一致（Codex §2 in-sample/OOS honesty）：\n- body.tex:34 寫「January 2017 through March 2026」\n- body.tex:41-42 寫「2023-2024 as the main out-of-sample period and 2025-March 2026 as validation」\n- body.tex:120 寫「2017-2025 the in-sample period」\n- Table 1 caption: 「In-Sample Period: 2017-2025」\n- Table 3 把 2025 當 OOS\n\n決議：採 **train 2017-01 to 2022-12, OOS-main 2023-01 to 2024-12, OOS-validation 2025-01 to 2026-03** 一套，全文一致。Descriptive stats 用 train+OOS-main 全 sample。所有 OOS 表用 main + validation 兩段分開。Cover letter 同步。\n\n參考：reframing_decision Stage 1；codex_contribution_gate §2 sample-split inconsistency。\n\nDispatch: 主線程。需 grep 找出所有 sample-period 提及一次性改齊。寫完跑 xelatex。",
     "priority": 1,
-    "status": "claimed",
+    "status": "succeeded",
     "task_type": "paper_body",
     "source": "leverage_direction_reframing_decision_20260701",
     "tags": [
@@ -41869,8 +41869,23 @@
         "from": "pending",
         "to": "claimed",
         "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-01T00:15:20.141473+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-01T00:15:20.350125+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-08"
       }
-    ]
+    ],
+    "started_at": "2026-07-01T00:15:20.141217+00:00",
+    "completed_at": "2026-07-01T00:15:20.349841+00:00",
+    "result": "Sample-split 三窗口 (train 2017-01~2022-12 / main OOS 2023-01~2024-12 / validation 2025-01~2026-03) 統一到 body_v3.tex L69/155/603 + tables.tex Table 1&3 caption + body.tex 對稱鏡像。xelatex compile 70 頁 pass, reproduce gate GREEN 100% (171/0/23), Supabase paper-update sync OK, commit e2d7b82a8 pushed to origin/main."
   },
   {
     "id": "paper_leverage_direction_stage2_gold_regime_design",
