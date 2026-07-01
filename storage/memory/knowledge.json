@@ -37070,5 +37070,22 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-07-02T00:12:11.172528"
+  },
+  {
+    "item_id": "05793297",
+    "category": "experiment_result",
+    "content": "HARQ/SHARK-like measurement-error-corrected HAR (Bollerslev-Patton-Quaedvlieg JoE 2016 RQ-interaction + Buccheri-Corsi JFEC 2021-style signed-jump/semivariance features) tested cross-market on TAIFEX TX active-contract day-session RV (n_oos=1697), SPY (n_oos=51), and 0050.TW (n_oos=38). TX_active: HARQ improves QLIKE +1.94% (DM t=-2.60), SHARK_like +2.05% (DM t=-1.77) over plain HAR -- directionally favorable but neither passes the project's Harvey |t|>3 gate. SPY and 0050.TW are non-gateable (OOS n well below the 252-day minimum; SPY 5-min panel is a short 2026 snapshot) and are reported only as pipeline diagnostics, not as evidence for or against the original night-session-noise cross-market hypothesis. Verdict: DIRECTIONAL_ONLY / null-ish -- the core backlog hypothesis (measurement-error correction matters more where night-session noise is larger, i.e. TAIFEX vs SPY) is NOT confirmed at conventional significance in either market; TX shows the right sign but not the right size. Codex review (CONDITIONAL_PASS) confirmed lookahead is clean (all realized-measure features .shift(1)'d before forecasting log RV_t; expanding-window OOS trains on iloc[:pos], predicts iloc[[pos]]) and flagged one framing caveat: TX active-contract selection uses ex-post day-session volume, so this is an ex-post active-contract RV target, not a real-time tradeable-contract forecast.",
+    "evidence": [
+      "experiments/k1582/README.md",
+      "experiments/k1582/K1582.py",
+      "experiments/k1582/K1582_results.json"
+    ],
+    "confidence": 0.35,
+    "created_at": "2026-07-02T01:05:30.700132",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "K1582",
+    "k_id": "K1582",
+    "experiment_path": "experiments/k1582/",
+    "reviewer": "Codex CLI 0.142.3 (ChatGPT auth, gpt-5.4)"
   }
 ]

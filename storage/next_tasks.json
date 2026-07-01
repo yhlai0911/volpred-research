@@ -42904,7 +42904,7 @@
     "title": "研究 backlog fallback: HARQ/SHARK 測量誤差修正 HAR（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: HARQ/SHARK 測量誤差修正 HAR（Bollerslev-Patton-Quaedvlieg JoE 2016 + Buccheri-Corsi JFEC 2021 + Patton-Zhang 2025）：tick 算 RQ/半變異/signed-jump，HAR 係數隨 RQ 時變，MCS 篩選；假說「測量誤差修正在夜盤誤差大的台指期比 SPY 更顯著」cross-market 對照。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -42933,11 +42933,34 @@
         "to": "pending",
         "by": "hourly-22",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-01T16:57:10.942978+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude-dispatch-tick0056"
+      },
+      {
+        "ts": "2026-07-01T16:57:11.159607+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude-dispatch-tick0056"
+      },
+      {
+        "ts": "2026-07-01T17:06:05.579984+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude-dispatch-tick0056"
       }
     ],
-    "started_at": "2026-07-01T14:13:30.294282+00:00",
+    "started_at": "2026-07-01T16:57:11.159317+00:00",
     "last_released_at": "2026-07-01T16:50:01.284655+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "interactive-claude-dispatch-tick0056",
+    "claimed_at": "2026-07-01T16:57:10.942693+00:00",
+    "claim_session_id": "8b8ad7e654bc",
+    "completed_at": "2026-07-01T17:06:05.579713+00:00",
+    "result": "DEDUP: task duplicated experiments/k1582 (committed 2026-06-30, 2 days before this dispatch). Worktree agent correctly identified duplication via error_log/knowledge search and declined to redo the experiment (no new experiments/ files written). Main thread closed the loop instead: got Codex review of K1582.py (CONDITIONAL_PASS, verified lookahead clean + DM/Harvey/MCS usage correct + seed fixed), wrote knowledge.json entry item_id=05793297 (verdict=CONDITIONAL_PASS, experiment_id=K1582, reviewer=Codex CLI 0.142.3), and checked off research_program.md line 483 with a link to K1582 + DIRECTIONAL_ONLY verdict to prevent a 3rd duplicate dispatch. Root cause of the duplication: backlog checklist item was never reconciled against the completed K1582 experiment -- fixed by closing that gap, not by re-running the pipeline."
   },
   {
     "id": "research_conditional_sequential_mcs_jrss_b_2025_qkag066_a",
