@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 論文 TICK-6 忘記重新 claim，撞上 hourly-dispatch 同時處理同一 paper_body task — 現場緊急停手，未造成資料損失
+
+**觸發**：TICK-5 完成後用 `handoff-main-thread` 把 `paper_body_leverage_direction_downshift_FRL_20260701` 放回 `pending_main_thread`（正確流程）。下一個 autonomous tick（03:06）決定接續 TICK-6（main_v_ijf.tex wrapper），但**忘記在動手前重新 `claim`+`start`**——只顧著讀 IJF profile / 查 elsarticle.cls / 修 reproduce.py 的 pre-existing bug，跳過了每次 TICK 開工前都該做的 claim 步驟。
+
+**後果**：03:07 hourly-dispatch（PID 80069，`claude -p ... --model claude-opus-4-8`）依既有流程讀到 `pending_main_thread`，正常 claim 到同一個 task（`claimed_by=hourly-03`），也開始寫 `main_v_ijf.tex` + 編譯出 `main_v_ijf.pdf`。我在完成 reproduce.py 修復並 commit 後，準備自己也寫 `main_v_ijf.tex` 時才發現磁碟上已經有一份（2 分鐘前寫入、尚未 commit），且 `pgrep` 確認 hourly-03 的 process 仍在跑。
+
+**現場處置**：立刻停手，不覆寫、不強推：
+1. 沒有對 `main_v_ijf.tex` / `main_v_ijf.pdf`（untracked）做任何寫入或刪除。
+2. 沒有對 task record 呼叫 `complete`/`release`/`handoff`（那不是我現在該做的事——task 目前正確地被 hourly-03 持有中）。
+3. 已 commit 的 `reproduce.py` 修復（`075e55b75`，修 tab:var_ortho 檔案路徑 bug）是獨立、正當、不衝突的變更，保留——hourly-03 之後跑 reproduce.py 會直接受益於這個修復。
+4. hourly-03 產出的 `main_v_ijf.tex` 草稿本身有兩個實質問題（留給下一輪確認 hourly-03 完工後再處理，不是現在去改）：(a) 內文直接寫 `\author{Yi-Hao Lai...}` 含真實系所/email，違反 IJF 雙盲審查要求（應該用獨立 title page 分開）；(b) 檔案內註解宣稱「elsarticle.cls is not installed in this build environment」，但實際 `kpsewhich elsarticle.cls` 確認已安裝在 `/usr/local/texlive/2026/texmf-dist/tex/latex/elsarticle/elsarticle.cls`——這個判斷是錯的，可能是 hourly-03 沒有先驗證就假設不存在。
+
+**根本原因**：TICK-N 的 claim/start/handoff 紀律只在我自己記得做的時候才生效，沒有機制強制「每次接續 pending_main_thread 任務前必須先 claim」。這次純靠 06:03 巡檢時運氣好在寫入前发現，沒有真的撞車覆寫；但下一次可能沒這麼幸運。
+
+**Fix（流程面，不是資料面）**：往後任何 autonomous tick 要接續一個 `pending_main_thread` 的 paper_body / paper_decision 等 main-thread-only task 之前，第一個動作就是 `task_pool_claim.py claim` + `start`，不可以先做「研究/讀檔」再做 claim——claim 要在動手前，不是動手後才補。已記錄進本檔作為往後的檢查點；若要根治，可考慮讓 dispatch 前置一個「main-thread session 開工先掃 in_progress/claimed 且 claimed_by 非自己的 paper_* task，跳過」的 guard，但這屬於較大的排程重構，先以「牢記 claim-before-touch」處理，觀察是否再犯。
+
 ## 2026-07-02 auth-preflight 誤診為 keychain ACL 問題，實為系統負載造成的逾時 — **FIXED**
 
 **觸發**：23:07 / 23:45 兩次 hourly-dispatch 的 `AUTH-PREFLIGHT` 連續 3 次 attempt 全部 exit=142（SIGALRM @ 90s）→ 觸發 Codex failover + 一封「hourly-dispatch auth preflight failed」CRITICAL email，內建建議動作是跑 `security set-generic-password-partition-list ...`（沿用 2026-05-29 那次 keychain ACL 被 OAuth token refresh 重置的教訓）。老闆照做後回報「他根本沒讓我輸入的機會啊」——指令沒跳出密碼視窗就直接報錯，代表這次的根因跟 5/29 那次不一樣。
