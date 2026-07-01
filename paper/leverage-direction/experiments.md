@@ -2,8 +2,8 @@
 
 **Paper**: Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection and Volatility Targeting
 **Target Journal**: Journal of Banking and Finance (JBF)
-**Current body**: `body_v3.tex` / `main_v3.tex`
-**Last Updated**: 2026-05-25
+**Current body**: `body.tex` / `main.tex` (Stage 1.2/1.3/1.4 single-contribution revision line)
+**Last Updated**: 2026-07-01 (canonical 裁定: main.tex+body.tex; v3/v2 已封存到 _archived/)
 
 This file is the canonical table/figure → experiment K-id mapping. Companion
 docs: `README.md` (paper status), `data_sources.md` (data provenance),

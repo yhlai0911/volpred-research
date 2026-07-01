@@ -8,7 +8,7 @@
 
 - `main.tex` / `main.pdf` — main manuscript (~48 pages after v10 shortening)
 - `supplementary.tex` / `supplementary.pdf` — appendix / robustness moved out (~9 pages)
-- `body_v3.tex` — source body (compiled into `main.tex`)
+- `body.tex` — source body (compiled into `main.tex`; v3/v2 舊 revision lines 已封存到 `_archived/`)
 - `tables_main.tex` / `tables_supplement.tex` — split per v10 shortening
 
 ## Portal Upload Bundle

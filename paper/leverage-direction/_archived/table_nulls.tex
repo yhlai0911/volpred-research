@@ -1,0 +1,42 @@
+\begin{table}[H]
+\centering
+\caption{Comprehensive Null Results: Methods That Failed to Improve the GJR-GARCH Baseline}
+\label{tab:nulls}
+\footnotesize
+\begin{tabular}{llll}
+\toprule
+Method & Metric & Result & Reason \\
+\midrule
+\multicolumn{4}{l}{\textit{Prediction accuracy (10 methods)}} \\
+LSTM cascade & QLIKE & DM p=0.27 & Residuals iid \\
+GRU cascade & QLIKE & Not significant & Same as LSTM \\
+GARCH-LSTM & Stability & Unstable & Factor std=1.16 \\
+HAR multi-scale & QLIKE & +0.28\% & Collinear \\
+EMD & QLIKE & $-$0.04\% & Per-window unstable \\
+Ridge Stacking & QLIKE & $-$5.3\% & Zeroes all features \\
+GARCH-X (VIX) & QLIKE & 0\% & Scale mismatch \\
+Expanding window & QLIKE & $-$4.7\% & Regime contamination \\
+FIGARCH & QLIKE & +8.7\% & Long memory $\neq$ 1-step \\
+Hurst-augmented & QLIKE & +1.28\% & No OOS transfer \\
+\midrule
+\multicolumn{4}{l}{\textit{Strategy improvement (9 methods)}} \\
+VRP trading & Sharpe & Negative & Not directional \\
+VIX term structure & Sharpe & $-$0.012 & Redundant with ratio \\
+Short puts & P\&L & Net negative & Tail losses \\
+Regime overlay & Sharpe & Redundant & VT already adjusts \\
+Adaptive threshold & Sharpe & Worse & Fixed is robust \\
+Cross-asset VaR & $R^2$ & +0.06pp & GARCH sufficient \\
+VIX1D & Sharpe & $-$0.20 & 30d VIX less noisy \\
+Cond.\ correlation & Sharpe & p=0.913 & Lagging indicator \\
+Adaptive window & VaR & Identical & Student-t dominates \\
+\midrule
+\multicolumn{4}{l}{\textit{VIX sufficient statistic tests (6 methods)}} \\
+CNN Fear \& Greed & Partial $r$ & $-$0.063 & VIX subsumes sentiment \\
+AAII/SKEW/Credit/VVIX & Partial $r$ & $<$0.03 & No incremental signal \\
+42 FRED macro series & Partial $R^2$ & STLFSI2 16.5\% & $=$ VIX proxy \\
+27 TW DGBAS macro & QLIKE & Import YoY $+$5.6\% & Only exception (DM $p$=0.043) \\
+5-indicator ensemble & Ridge & Coefficients $\to$ 0 & $\alpha=100$ zeroes all \\
+Panel GARCH-X (5 vars) & QLIKE & $-$8.31\% & Overfitting ($p$=0.022, worse) \\
+\bottomrule
+\end{tabular}
+\end{table}
