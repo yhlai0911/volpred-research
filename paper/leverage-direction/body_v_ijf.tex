@@ -1,0 +1,134 @@
+% =====================================================================
+% body_v_ijf.tex — International Journal of Forecasting (IJF) version
+% =====================================================================
+% Target: International Journal of Forecasting (Elsevier / IIF), full-length,
+%   no rigid length cap. Fallback: Empirical Economics.
+% Owner decision: email-12393 (option B, downshift) + email-12398 (delegate
+%   journal pick to main thread) -> honest verdict = IJF primary (FRL's 2500w
+%   cap would gut the cross-asset breadth that IS the contribution).
+%
+% REFRAME AXIS (vs JBF-era body.tex, which is kept as archive):
+%   Lead is now the COMPLEXITY CEILING / measurement-vs-allocation wedge.
+%   The leverage-direction (GJR gamma sign) taxonomy is DEMOTED from headline
+%   to a supporting / interpretive section. This is the paper's strongest
+%   HONEST angle and squarely in IJF's forecasting-evaluation wheelhouse.
+%
+% ONE CENTRAL CLAIM (locked, tick-1 2026-07-01):
+%   Improved volatility measurement (asymmetric GJR vs symmetric GARCH; gamma-
+%   sign model selection) earns statistically detectable OOS forecast gains
+%   only under narrow conditions, and these gains rarely reach the allocation
+%   level: the dominant portfolio benefit of volatility targeting (drawdown
+%   reduction) is governed by an asset's base volatility level, not by
+%   asymmetric structure. There is a CEILING on how much added model
+%   complexity helps once the first-order volatility level is captured.
+%
+% -------------------------------------------------------------------
+% TICK PROGRESS TRACKER (this file is built incrementally per hourly tick)
+%   [tick-1  2026-07-01] DONE: IJF abstract + title + Highlights + fully
+%            reframed Introduction (complexity-ceiling lead; leverage-direction
+%            demoted). Section stubs laid out with port plan.
+%   [tick-2+ TODO] Port Literature Review from body.tex:23-27, reframe the
+%            third strand around forecast-evaluation / complexity, not taxonomy.
+%   [tick-3+ TODO] Port Data & Methodology from body.tex:31-114 (largely
+%            preserved; unify the sample-split map — memo issue (3): Data sec
+%            2017-01..2026-03 vs Table1 caption 2017-2025 vs Table3 2025-OOS
+%            must be reconciled to ONE consistent statement).
+%   [tick-4+ TODO] Port Empirical Results body.tex:118+; RESTRUCTURE so the
+%            allocation-vs-measurement wedge is the spine: (a) forecast-level
+%            gains conditional on significant asymmetry; (b) allocation-level
+%            VT drawdown driven by base vol level; leverage-direction taxonomy
+%            folded in as interpretation.
+%   [tick-5+ TODO] Rewrite Implications + Conclusion around the ceiling;
+%            practitioner takeaway (don't over-engineer asymmetry) + researcher
+%            takeaway (in-sample refinement rarely survives honest OOS at the
+%            decision level).
+%   [tick-6+ TODO] Standalone abstract into main_v_ijf.tex wrapper;
+%            elsarticle.cls; author-date (Harvard/APA) refs; double-anonymized;
+%            reproduce.py match_rate >= 95% gate; compliance re-scrub.
+% -------------------------------------------------------------------
+%
+% === IJF ABSTRACT (100-150 words, no refs/jargon/math — to be placed in
+%     main_v_ijf.tex \begin{abstract}; drafted & locked tick-1) ===========
+% A large literature refines volatility models---adding asymmetry, regime
+% dependence, and fat tails---on the presumption that a better in-sample fit
+% carries through to better decisions. We ask when improved volatility
+% measurement actually improves portfolio allocation, using a pre-specified
+% out-of-sample evaluation across seven primary assets spanning equities,
+% precious metals, government bonds, and cryptocurrency, extended to
+% twenty-six assets. Asymmetric models beat symmetric ones out of sample only
+% under narrow conditions: a statistically significant asymmetry within a
+% homogeneous equity domain. At the allocation level the dominant benefit of
+% volatility targeting---drawdown reduction---is governed by an asset's base
+% volatility level, not by asymmetric structure. The sign of the asymmetry is
+% economically interpretable but does not travel across asset classes. These
+% results document a complexity ceiling: once the first-order volatility level
+% is captured, added model sophistication rarely earns its keep, for
+% researchers and practitioners alike.
+% (147 words)
+% =====================================================================
+% === IJF TITLE (locked tick-1) =======================================
+%   When Does Better Volatility Measurement Improve Allocation?
+%   A Cross-Asset Complexity Ceiling
+% =====================================================================
+
+
+\section{Introduction}\label{sec:introduction}
+
+The GARCH family of models \citep{bollerslev1986} remains the workhorse for daily volatility forecasting, and a large applied literature has refined it in the direction of ever-richer conditional-variance dynamics: asymmetric responses to signed shocks \citep{glosten1993,nelson1991}, regime dependence, and fat-tailed innovations. The tacit premise of this refinement program is a pass-through assumption---that a model which fits conditional variance better in sample will, in turn, produce forecasts that support better downstream decisions such as risk measurement and portfolio construction. That premise is rarely tested directly. Most evaluations stop at forecast-accuracy comparisons, and most allocation studies fix a single volatility model rather than asking whether the choice of model is what drives the economic result.
+
+This paper asks a deliberately narrow question: \emph{when does better volatility measurement actually improve allocation?} Our central finding is that the answer is ``rarely, and only under narrow conditions''---there is a \emph{complexity ceiling}. Improved measurement, operationalised here as the move from a symmetric GARCH(1,1) to an asymmetric GJR-GARCH(1,1) and as model selection on the sign and significance of the asymmetry parameter $\gamma$, earns statistically detectable out-of-sample forecast gains only in a restricted domain; and even where it earns forecast gains, those gains largely fail to reach the allocation level, where the first-order volatility level---not the asymmetric structure---does the economic work.
+
+We establish this through a pre-specified out-of-sample design applied to seven primary assets spanning equities (SPY, QQQ, EEM), precious metals (GLD, SLV), government bonds (TLT), and cryptocurrency (BTC-USD), with validation extended to up to twenty-six assets. Forecasts are generated on rolling windows with explicit lagging, evaluated with the QLIKE loss and Diebold--Mariano tests, and taken through to a volatility-targeting (VT) allocation to measure decision-level, not merely statistical, value. The design is chosen so that the pass-through from measurement to allocation can be observed on the same assets, over the same periods, under a single evaluation protocol.
+
+The evidence separates into two levels that tell a consistent story. \textbf{At the forecast level}, asymmetric model selection beats the symmetric benchmark out of sample only when the asymmetry is itself statistically significant: under a $t$-statistic screen on the quarterly-mean HAC estimate, the prescribed model is never significantly beaten across the primary Diebold--Mariano comparisons, and a $\gamma$-based rule delivers correct classifications on a disjoint 2024--2025 sample using 2023 estimates. But the cross-section is small ($N=6$), and a statistically significant $\gamma$ is not sufficient: cryptocurrency carries a significant asymmetry yet its competing models are indistinguishable out of sample. We report this as a conditional, domain-restricted forecasting result---not a general-purpose rule.
+
+\textbf{At the allocation level}, the wedge appears. The dominant and \emph{universal} benefit of volatility targeting---drawdown reduction---is driven by an asset's base volatility level (across all tested assets), and is essentially independent of asymmetric structure. The measurement refinement that a modeller works hardest to get right is, at the decision level, largely orthogonal to the benefit the allocator actually captures. This is the sense in which there is a ceiling: once a forecast captures the first-order level of volatility, additional model sophistication rarely improves the allocation outcome enough to matter.
+
+Reading the asymmetry parameter itself as an economic object is a useful \emph{interpretive} device rather than a forecasting engine, and we treat it as such. The sign of $\gamma$ is economically legible---balance-sheet leverage for equities ($\gamma>0$), fear-driven flight-to-quality for gold ($\gamma<0$, conditional on stress regimes), coupon-dominated pricing for bonds ($\gamma\approx0$)---and within homogeneous equity markets it predicts whether volatility targeting behaves as trend-following or contrarian. But this mapping is a genuine domain restriction: it does not survive extension to heterogeneous asset classes, and gold's inverted asymmetry is regime-dependent rather than an unconditional property (the canonical rolling-window mean is statistically indistinguishable from zero). We therefore present the leverage-direction taxonomy as supporting structure that helps interpret \emph{where} the ceiling binds, not as the paper's headline claim.
+
+The contribution is thus an honest, decision-relevant negative result of the kind this journal's readership can act on. For researchers, it is direct out-of-sample evidence that in-sample model refinement does not reliably survive to the allocation level, which cautions against equating better conditional-variance fit with better decisions. For practitioners, it argues for concentrating modelling effort on capturing the volatility level robustly rather than on asymmetric fine-tuning whose economic payoff is conditional at best. The finding is made credible by a pre-specified evaluation protocol and a self-contained replication package rather than by an ex-post search over specifications.
+
+The remainder of the paper is organized as follows. Section~\ref{sec:literature} situates the study in the forecasting-evaluation, risk-management, and volatility-targeting literatures. Section~\ref{sec:data_methodology} describes the data and the pre-specified out-of-sample methodology. Section~\ref{sec:empirical_results} presents the forecast-level and allocation-level evidence and the interpretive leverage-direction taxonomy. Section~\ref{sec:implications} discusses implications and limitations. Section~\ref{sec:conclusion} concludes.
+
+
+% =====================================================================
+% SECTION STUBS — ported incrementally in later ticks (see TICK TRACKER)
+% Do NOT bulk-copy body.tex here; each port is a judgment step (reframe +
+% sample-map reconciliation + wedge-first restructuring), done main-thread.
+% =====================================================================
+
+\section{Literature Review}\label{sec:literature}
+% [TICK-2 TODO] Port from body.tex:23-27. Reframe the third strand: lead the
+% forecast-EVALUATION / complexity-cost literature (Patton loss, DM/MCS,
+% honest OOS), then risk mgmt, then VT. Position leverage-direction taxonomy
+% as interpretive, not as the gap being filled.
+
+
+\section{Data and Methodology}\label{sec:data_methodology}
+% [TICK-3 TODO] Port from body.tex:31-114 (data, GARCH/GJR spec, rolling
+% estimation, QLIKE, DM, VaR backtest, VT). RECONCILE the sample-split map to
+% ONE statement (memo issue 3): pick the canonical partition and make Data
+% section, Table 1 caption, and Table 3 agree. State forecast origin/horizon
+% alignment explicitly (IJF checklist).
+
+
+\section{Empirical Results}\label{sec:empirical_results}
+% [TICK-4 TODO] Port from body.tex:118+. RESTRUCTURE spine = measurement->
+% allocation wedge: (1) forecast-level gains conditional on significant
+% asymmetry; (2) allocation-level VT drawdown driven by base vol level;
+% (3) leverage-direction taxonomy folded in as interpretation of WHERE the
+% ceiling binds. Keep tables/figures; ensure every row keeps its % source:
+% binding to the results JSON (paper-workflow hard rule 3).
+
+
+\section{Implications and Limitations}\label{sec:implications}
+% [TICK-5 TODO] Rewrite around the complexity ceiling. Practitioner takeaway:
+% invest in robust level, not asymmetric fine-tuning. Researcher takeaway:
+% in-sample refinement rarely survives honest OOS at the decision level.
+% Limitations: small cross-section (N=6 forecasting), single-asset gold regime
+% evidence, domain restriction to homogeneous equities.
+
+
+\section{Conclusion}\label{sec:conclusion}
+% [TICK-5 TODO] One-paragraph restatement of the ceiling result; forecasting-
+% forward, no overclaim; tie back to the single central claim.

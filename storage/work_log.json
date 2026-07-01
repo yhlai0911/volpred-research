@@ -12735,5 +12735,18 @@
       "paper/leverage-direction/decision_memo_20260701.md",
       "paper/leverage-direction/review_history/codex_contribution_gate_20260701.md"
     ]
+  },
+  {
+    "timestamp": "2026-07-01T17:22:00+08:00",
+    "task_type": "paper_body",
+    "task_id": "paper_body_leverage_direction_downshift_FRL_20260701",
+    "actor": "hourly-17",
+    "verdict": "succeeded",
+    "summary": "leverage-direction IJF reframe TICK-1 (multi-tick paper_body, main-thread only per CLAUDE.md). Created paper/leverage-direction/body_v_ijf.tex: IJF-compliant abstract (147w, no math/refs/jargon), locked title (When Does Better Volatility Measurement Improve Allocation? A Cross-Asset Complexity Ceiling), fully reframed Introduction with ONE central claim = complexity-ceiling / measurement-vs-allocation wedge (leverage-direction taxonomy DEMOTED to interpretive support), + section stubs with per-tick port plan. Rewrote highlights.txt to IJF 5-bullet form (each <=85 chars, dropped time-zone momentum + refs). xelatex compile PASS (exit 0, PDF produced, 3 intro citations all in bib). body.tex kept as JBF-era archive. Task -> pending_main_thread for tick-2 (port Literature Review reframed around forecast-evaluation/complexity).",
+    "refs": [
+      "paper/leverage-direction/body_v_ijf.tex",
+      "paper/leverage-direction/highlights.txt",
+      "storage/paper_pipeline_status.json"
+    ]
   }
 ]

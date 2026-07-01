@@ -25885,7 +25885,7 @@
     "title": "研究 backlog fallback: Multiplicative Volatility Factor (MVF)",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Multiplicative Volatility Factor (MVF) — ScienceDirect 2025, J. Econometrics | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "multiplicative_volatility_factor_mvf",
@@ -25900,8 +25900,24 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-01)"
+      },
+      {
+        "ts": "2026-07-01T09:21:07.657660+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T09:21:07.877610+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
       }
-    ]
+    ],
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-01T09:21:07.657382+00:00",
+    "claim_session_id": "2abc81e83cec",
+    "started_at": "2026-07-01T09:21:07.877340+00:00"
   },
   {
     "id": "research_volare_har_har_q_mem_amem_arxiv_2602_19732",
@@ -42626,12 +42642,30 @@
     "id": "paper_body_leverage_direction_downshift_FRL_20260701",
     "task_type": "paper_body",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "title": "[論文管線] leverage-direction → IJF 主線 body 重寫（owner email-12398 授權，complexity-ceiling reframe）",
     "description": "[TARGET RETARGETED 2026-07-01 16:14 hourly-16: FRL → IJF per owner email-12398 \"你決定\" → main-thread honest decision. Task id retained for continuity.]\n\nOwner email-12393 (14:22) 選 B (Downshift FRL/IJF). Owner email-12398 (14:53) then delegated the final journal pick to main-thread (\"說老實話適合哪個期刊 你決定\"). HONEST verdict: solid method + full reproducible package, but weak/null finding (Gold unconditional NULL; model-selection OOS 0 Harvey-Holm significant; Codex contribution gate BORDERLINE). Not top-3 finance, not a finding-driven Q1. Its true identity = a rigorous OOS volatility-model-selection study with honest cross-asset limits.\n\n**主線 target = International Journal of Forecasting (IJF)** — Elsevier, top forecasting journal (IF ~6), full-length (NO 2500-word cap). Routinely publishes informative nulls (\"more sophistication does not beat benchmark OOS\"). Our pre-specified OOS design + reproduce.py GREEN = real edge.\n**Fallback = Empirical Economics (EmpEcon)** — most null-tolerant, cross-country welcome, highest realistic hit rate.\n**DROPPED**: FRL-primary (2500w cap guts the cross-asset breadth that IS the contribution) and JFinEc-first (needs a positive finding we do not have).\n\n**REFRAME AXIS (critical change vs old FRL plan)**: headline is now the **complexity ceiling / measurement-vs-allocation wedge** (per Codex contribution gate: \"when does better volatility measurement translate into better allocation — answer: rarely; there is a ceiling\"). The leverage-direction taxonomy is DEMOTED to supporting descriptive material, not the lead. This is the paper's strongest honest angle AND squarely IJF's wheelhouse.\n\n**主要動作**（分 hourly tick 執行，總 effort 2-3 週；每 tick 做一小塊，heavy recompute 走 compute_queue）:\n1. Reframe intro/abstract/conclusion around complexity-ceiling / measurement-vs-allocation; lock ONE central claim. Method/tables largely preserved.\n2. Demote leverage-direction taxonomy to a supporting section; keep gold regime as tentative honest evidence, model-selection OOS as preliminary.\n3. Title rewrite avoiding overclaim, forecasting-forward, e.g. 'When Does Better Volatility Measurement Help Allocation? A Cross-Asset Complexity Ceiling' or 'Leverage Direction and the Limits of Volatility-Model Selection: Cross-Asset OOS Evidence'.\n4. Standalone abstract; Elsevier author-date (Harvard) refs; et al. for 3+; alphabetical-then-chronological; LTWA abbreviations; DOIs.\n5. Highlights file (Elsevier requires 3-5 bullets ≤85 chars each) — reframe around the forecasting/allocation message.\n6. Reproduce gate: paper/leverage-direction/reproduce.py match_rate ≥ 95%.\n7. Compliance scrub already CLEAN — re-verify (author = Yi-Hao Lai only; no K-id/VolPred/AI).\n\n**Skill 依賴**:\n- `.claude/skills/journal-review/references/` — build ijf.md profile if missing (Elsevier/IIF; Editorial Manager); IJF scope = forecasting methods + honest OOS evaluation\n- `.claude/skills/paper-update/` — paper-update CLI + reproduce gate\n- `.claude/skills/paper-submission-pipeline/` — stage advancement\n- `.claude/skills/finance-paper-quality/` — claim-evidence matching\n\n**Timeline**: 2026-07-01 → 2026-07-21 (三週 target); hourly tick 每次做一小塊.\n\n**Deliverables**:\n- `paper/leverage-direction/body_v_ijf.tex` (IJF full-length; keep body.tex as JBF-era archive)\n- `paper/leverage-direction/highlights.txt`\n- `paper/leverage-direction/cover_letter_ijf.tex`\n- 送 arXiv 佔 priority 後再送 IJF (owner picks submit timing)\n\n**PDCA gate（advance 前）**:\n- 3-pass multi-round review (codex exec: latex-academic-reviewer + citation-verifier + journal-review IJF) 全 PASS or CONDITIONAL_PASS\n- Contribution gate re-audit: lead claim = complexity-ceiling economic content, NOT a bare method rule\n- Reproduce.py exit 0 + match_rate ≥ 95%\n- 合規: author = Yi-Hao Lai only; K-id/VolPred/AI 全清\n\n**Model routing**: paper_body → opus high (per routing table). Body writing & narrative decisions in MAIN THREAD (per CLAUDE.md: no background agent for paper .tex).\n",
     "source": "hourly-15-dispatch-boss-decision-B",
     "created_at": "2026-07-01T15:05:23+08:00",
     "linked_email_task_id": "email-12393-2fd40c",
-    "linked_decision_memo": "paper/leverage-direction/decision_memo_20260701.md"
+    "linked_decision_memo": "paper/leverage-direction/decision_memo_20260701.md",
+    "claimed_by": "hourly-17",
+    "claimed_at": "2026-07-01T09:15:19.934456+00:00",
+    "claim_session_id": "09b28df8428b",
+    "status_history": [
+      {
+        "ts": "2026-07-01T09:15:19.934730+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-17"
+      },
+      {
+        "ts": "2026-07-01T09:15:38.465163+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-17"
+      }
+    ],
+    "started_at": "2026-07-01T09:15:38.464894+00:00"
   }
 ]
