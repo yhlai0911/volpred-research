@@ -18,20 +18,19 @@
     "fable":  {"display": "Fable 5",   "id": "claude-fable-5",            "available": false, "note": "Mythos-class, ABOVE Opus, $10/$50, 1M ctx, best for long-horizon autonomous work — BUT shows 'Currently unavailable' in the desktop selector as of 2026-07-01, so do NOT route subagents to it until it returns."}
   },
 
-  "task_tier_mapping": {
-    "_note": "Pick the cheapest model that clears the task's difficulty. fable rows are aspirational — only use once fable.available becomes true.",
-    "ambitious_long_horizon_autonomous": {"model": "fable", "fallback": "opus", "effort": "high", "examples": ["multi-day paper reframe end-to-end", "large code migration", "deep multi-stage research with minimal oversight"], "note": "fable unavailable now -> fall back to opus"},
-    "research_methodology_highstakes_paper": {"model": "opus", "effort": "high", "examples": ["single experiment design", "methodology decision", "high-risk paper judgment", "paper-body verification"]},
-    "platform_ops_publishing_procedural": {"model": "sonnet", "effort": "medium", "examples": ["FB / feed posting", "paper-update run", "browser automation", "structured ops chore"]},
-    "verification_merge_scan_short": {"model": "sonnet", "effort": "low", "examples": ["merge safety check", "publication scan", "checklist verification"]},
-    "lookup_classification_datasource": {"model": "haiku", "effort": "low", "examples": ["fact lookup", "classification", "data-source query"]}
+  "subagent_policy": {
+    "_owner_directive_2026_07_01": "Main loop = opus (fixed). Subagents choose between sonnet and opus by task complexity/difficulty — a two-way pick, NOT the old 4-tier ladder. haiku is NOT in the default rotation. fable is unavailable; re-evaluate (top tier for long-horizon autonomous work) if/when it reopens.",
+    "opus": {"when": "high difficulty — research experiment design, methodology decisions, high-risk paper judgment, paper-body / research-honesty verification, anything where precision & domain expertise matter", "effort": "high"},
+    "sonnet": {"when": "medium/low difficulty — structured/procedural work: platform ops, FB/feed posting, paper-update runs, browser automation, verification/merge/publication-scan checklists, large search, lookup", "effort": "medium-or-low by sub-task"},
+    "haiku": {"status": "available but OFF the default rotation per owner directive; only consider for truly trivial bulk lookups if ever, else use sonnet"},
+    "fable": {"status": "UNAVAILABLE now; when it reopens, re-evaluate as the top tier for ambitious long-horizon autonomous work (multi-day agentic, large migrations, deep multi-stage research)"}
   },
 
   "rules": [
     "Respect skill frontmatter model default first; override via Agent tool `model` param only when skill has none or the task clearly escalates.",
-    "NEVER downgrade high-risk research/statistics/paper judgment below opus to save tokens.",
-    "Do NOT inline procedural side-tasks (browser automation, scans, large search) on the opus main loop — fork a sonnet/haiku subagent (context: fork). 2026-07-01 gap: FB posting ran inline on opus.",
-    "Do NOT route to a model whose available=false (e.g. fable now) — use its fallback."
+    "Subagent model is a sonnet<->opus pick by difficulty (owner directive 2026-07-01). NEVER downgrade high-risk research/statistics/paper judgment below opus.",
+    "Do NOT inline procedural side-tasks (browser automation, scans, large search) on the opus main loop — fork a SONNET subagent (context: fork). 2026-07-01 gap: FB posting ran inline on opus.",
+    "Do NOT route to a model whose available=false (e.g. fable now)."
   ],
 
   "reconcile": {
