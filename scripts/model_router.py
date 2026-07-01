@@ -56,7 +56,7 @@ TASK_TYPE_TO_MODEL: dict[str, tuple[str, str]] = {
 # Map to CLI flag (`claude -p --model <X>`)
 MODEL_TO_CLI_FLAG: dict[str, str] = {
     "opus":   "claude-opus-4-8",
-    "sonnet": "claude-sonnet-4-6",
+    "sonnet": "claude-sonnet-5",
     "haiku":  "claude-haiku-4-5-20251001",
 }
 

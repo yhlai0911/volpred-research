@@ -187,6 +187,24 @@ def classify_message(content):
 
 # Anthropic pricing (Opus 4.x as of 2026-04，USD per million tokens)
 PRICING = {
+    "claude-opus-4-8": {  # current opus (2026-07-01)
+        "input": 15.00,
+        "output": 75.00,
+        "cache_write": 18.75,
+        "cache_read": 1.50,
+    },
+    "claude-opus-4-7": {  # prior opus (still in this week's data)
+        "input": 15.00,
+        "output": 75.00,
+        "cache_write": 18.75,
+        "cache_read": 1.50,
+    },
+    "claude-sonnet-5": {  # current sonnet (2026-07-01)
+        "input": 3.00,
+        "output": 15.00,
+        "cache_write": 3.75,
+        "cache_read": 0.30,
+    },
     "claude-opus-4-6": {
         "input": 15.00,
         "output": 75.00,

@@ -1,0 +1,225 @@
+#!/usr/bin/env python3
+"""Daily token-usage report email — embedded beautiful HTML, multi-angle.
+
+Angles (每個都有真數據支撐，來源 = token_usage_report.py 讀 ~/.claude/projects JSONL):
+  - 當日總覽（billable / cost / messages / sessions, vs 昨日）
+  - 當週每日趨勢（daily_breakdown 每天 billable 長條）
+  - 當週 × 使用類型（by_category 19 類 = 使用類型/任務內容）
+  - 當週 × 模型（by_model）
+  - 週 cap 進度
+
+寄送：EmailNotifier.notify(html_body=...) 內嵌 HTML（非夾檔）。
+用法：
+  uv run python scripts/token_report_email.py --dry-run   # 只 render 到檔，不寄
+  uv run python scripts/token_report_email.py             # 寄給老闆
+  uv run python scripts/token_report_email.py --to me@x   # 寄指定收件人
+"""
+from __future__ import annotations
+import argparse
+import html
+import json
+import subprocess
+import sys
+from datetime import datetime, timedelta
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+ROOT = Path(__file__).resolve().parent.parent
+TPE = ZoneInfo("Asia/Taipei")
+WEEKLY_CAP = 215_000_000  # 週 cap 校準估計（單次截圖，非官方）
+
+C_INK = "#1f2937"; C_SUB = "#6b7280"; C_LINE = "#e5e7eb"
+BARS = ["#2563eb", "#7c3aed", "#0891b2", "#059669", "#d97706", "#dc2626",
+        "#db2777", "#65a30d", "#0d9488", "#9333ea", "#64748b"]
+
+
+def _report(*flags) -> dict:
+    """Call token_usage_report.py (stdlib-only) and return parsed JSON."""
+    cmd = [sys.executable, str(ROOT / "scripts" / "token_usage_report.py"),
+           "--json", "--no-save", *flags]
+    out = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    if out.returncode != 0:
+        raise RuntimeError(f"token_usage_report failed rc={out.returncode}: {out.stderr[:300]}")
+    return json.loads(out.stdout)
+
+
+def _bill(d: dict) -> int:
+    if "billable_total" in d:
+        return int(d.get("billable_total") or 0)
+    return int((d.get("input_tokens") or 0) + (d.get("output_tokens") or 0) + (d.get("cache_create_tokens") or 0))
+
+
+def m(n) -> str:
+    n = float(n or 0)
+    if n >= 1_000_000:
+        return f"{n/1_000_000:.1f}M"
+    if n >= 1_000:
+        return f"{n/1_000:.0f}K"
+    return f"{n:.0f}"
+
+
+def esc(s) -> str:
+    return html.escape(str(s if s is not None else ""))
+
+
+def _bar(pct: float, color: str, h: int = 14) -> str:
+    pct = max(0.0, min(100.0, pct))
+    return (f"<div style='background:#f1f5f9;border-radius:4px;height:{h}px;width:100%;overflow:hidden'>"
+            f"<div style='background:{color};height:{h}px;width:{pct:.1f}%'></div></div>")
+
+
+def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
+    tot_t = today.get("totals", {})
+    tot_w = week.get("totals", {})
+    day_bill = _bill(tot_t)
+    week_bill = _bill(tot_w)
+    cap_pct = week_bill / WEEKLY_CAP * 100 if WEEKLY_CAP else 0
+    week_range = esc(week.get("week_range", ""))
+
+    # per-day
+    db = week.get("daily_breakdown", {}) or {}
+    days = sorted(db.items())
+    day_max = max((_bill(v) for _, v in days), default=1) or 1
+    today_key = now_tw.strftime("%Y-%m-%d")
+
+    # categories (week)
+    cats = week.get("by_category", {}) or {}
+    cat_rows = sorted(((_bill(v), k, v.get("messages", 0)) for k, v in cats.items()), reverse=True)
+    cat_max = cat_rows[0][0] if cat_rows else 1
+
+    # models (week)
+    models = week.get("by_model", {}) or {}
+    mod_rows = sorted(((_bill(v), k, v.get("messages", 0)) for k, v in models.items() if k != "<synthetic>"), reverse=True)
+
+    css = """<style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:680px;margin:18px auto;padding:0 16px;color:#1f2937;line-height:1.55;background:#ffffff}
+    h1{font-size:19px;margin:0 0 4px}
+    h2{font-size:14px;margin:26px 0 8px;color:#111827;border-bottom:2px solid #e5e7eb;padding-bottom:5px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    td{padding:5px 6px;vertical-align:middle}
+    .sub{font-size:12px;color:#6b7280}
+    .big{font-size:30px;font-weight:700;letter-spacing:-.5px}
+    .card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px;margin:10px 0}
+    .kpi{display:inline-block;margin-right:26px}
+    .kpi .n{font-size:20px;font-weight:700}
+    .kpi .l{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}
+    .num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+    .tag{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+    </style>"""
+
+    p = [f"<!DOCTYPE html><html><head><meta charset='utf-8'>{css}</head><body>"]
+    p.append(f"<h1>VolPred Token 使用報表</h1>")
+    p.append(f"<div class='sub'>{esc(now_tw.strftime('%Y-%m-%d %H:%M'))} 台灣時間 · 本週 {week_range}</div>")
+
+    # headline: week cap progress
+    cap_color = "#059669" if cap_pct < 70 else ("#d97706" if cap_pct < 90 else "#dc2626")
+    p.append("<div class='card'>")
+    p.append(f"<div class='sub'>本週累計已用（billable）</div>")
+    p.append(f"<div class='big' style='color:{cap_color}'>{m(week_bill)} <span style='font-size:15px;color:#6b7280;font-weight:400'>/ {m(WEEKLY_CAP)} cap · {cap_pct:.0f}%</span></div>")
+    p.append(_bar(cap_pct, cap_color, 16))
+    p.append("<div style='margin-top:14px'>")
+    p.append(f"<span class='kpi'><span class='n'>{m(day_bill)}</span><br><span class='l'>今日 billable</span></span>")
+    p.append(f"<span class='kpi'><span class='n'>${float(tot_t.get('estimated_cost_usd',0)):,.0f}</span><br><span class='l'>今日估計成本</span></span>")
+    p.append(f"<span class='kpi'><span class='n'>{int(tot_t.get('assistant_messages',0)):,}</span><br><span class='l'>今日 AI 訊息</span></span>")
+    p.append(f"<span class='kpi'><span class='n'>{int(tot_t.get('unique_sessions',0))}</span><br><span class='l'>今日 session</span></span>")
+    p.append("</div></div>")
+
+    # per-day trend
+    p.append("<h2>當週每日趨勢（billable）</h2><table>")
+    for date, v in days:
+        b = _bill(v)
+        is_today = date == today_key
+        color = "#2563eb" if is_today else "#94a3b8"
+        label = f"<strong>{esc(date)}</strong> ·今日" if is_today else esc(date)
+        p.append(f"<tr><td style='width:130px'>{label}</td>"
+                 f"<td>{_bar(b/day_max*100, color)}</td>"
+                 f"<td class='num' style='width:70px'>{m(b)}</td></tr>")
+    p.append("</table>")
+
+    # by category
+    p.append("<h2>當週 × 使用類型 / 任務內容</h2><table>")
+    for b, k, msgs in cat_rows[:12]:
+        color = BARS[cat_rows.index((b, k, msgs)) % len(BARS)]
+        pct = b / week_bill * 100 if week_bill else 0
+        p.append(f"<tr><td class='tag' style='width:170px'>{esc(k)}</td>"
+                 f"<td>{_bar(b/cat_max*100, color)}</td>"
+                 f"<td class='num' style='width:70px'>{m(b)}</td>"
+                 f"<td class='num sub' style='width:44px'>{pct:.0f}%</td></tr>")
+    p.append("</table>")
+    p.append(f"<div class='sub'>共 {len(cat_rows)} 類；上表為前 12 大。</div>")
+
+    # by model
+    p.append("<h2>當週 × 模型</h2><table>")
+    for b, k, msgs in mod_rows:
+        pct = b / week_bill * 100 if week_bill else 0
+        cost = float(models.get(k, {}).get("estimated_cost_usd", 0))
+        p.append(f"<tr><td class='tag' style='width:170px'>{esc(k)}</td>"
+                 f"<td>{_bar(b/(mod_rows[0][0] or 1)*100, '#7c3aed')}</td>"
+                 f"<td class='num' style='width:70px'>{m(b)}</td>"
+                 f"<td class='num sub' style='width:44px'>{pct:.0f}%</td>"
+                 f"<td class='num sub' style='width:66px'>${cost:,.0f}</td></tr>")
+    p.append("</table>")
+
+    # caveats
+    p.append("<h2>說明（誠實 caveat）</h2><div class='sub'>")
+    p.append("· billable = input + output + cache_create（cache_read 量大但不以全費計）。<br>")
+    p.append("· 週 cap 215M 為單次截圖校準、非官方數字，僅供比例參考。<br>")
+    p.append("· 互動 session 內的 loop-tick token 與真實工作混在同 session，無法精確分離。<br>")
+    p.append("· 數據源：~/.claude/projects/*.jsonl 的 message.usage（含 subagent），由 token_usage_report.py 聚合。")
+    p.append("</div>")
+
+    p.append("</body></html>")
+    html_body = "".join(p)
+
+    text_body = (f"VolPred Token 報表 {now_tw.strftime('%Y-%m-%d %H:%M')} 台灣\n"
+                 f"本週 {week_bill:,} / {WEEKLY_CAP:,} billable ({cap_pct:.0f}% cap)\n"
+                 f"今日 {day_bill:,} billable, ${float(tot_t.get('estimated_cost_usd',0)):,.0f}\n"
+                 f"前 3 使用類型: " + ", ".join(f"{k}={m(b)}" for b, k, _ in cat_rows[:3]))
+    return html_body, text_body
+
+
+def main(argv: list) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true", help="render HTML to file, do not send")
+    ap.add_argument("--to", default=None, help="override recipient")
+    ap.add_argument("--force", action="store_true", help="bypass email dedup")
+    args = ap.parse_args(argv)
+
+    now_tw = datetime.now(TPE)
+    today = _report()
+    week = _report("--weekly")
+    html_body, text_body = build_html(today, week, now_tw)
+
+    if args.dry_run:
+        out = ROOT / "storage" / "logs" / f"token_report_{now_tw.strftime('%Y%m%d_%H%M')}.html"
+        out.write_text(html_body, encoding="utf-8")
+        print(f"[token-report] dry-run: wrote {out} ({len(html_body)} bytes)")
+        return 0
+
+    sys.path.insert(0, str(ROOT / "src"))
+    from volpred.publisher.email_notifier import EmailNotifier
+    try:
+        from volpred.ops.alerts import ALERT_RECIPIENT
+    except Exception:
+        ALERT_RECIPIENT = None
+    recipients = [args.to] if args.to else ([ALERT_RECIPIENT] if ALERT_RECIPIENT else [])
+    if not recipients:
+        print("[token-report] no recipient", file=sys.stderr)
+        return 1
+    notifier = EmailNotifier()
+    title = f"[VolPred Token 報表] {now_tw.strftime('%Y-%m-%d')} — 本週 {m(_bill(week.get('totals',{})))} / {m(WEEKLY_CAP)} cap"
+    result = notifier.notify(
+        subject=title,
+        body=text_body,
+        html_body=html_body,
+        recipients=recipients,
+        dedupe_type="token_report",
+        dedupe_key=now_tw.strftime("%Y-%m-%d"),
+        force_send=args.force,
+    )
+    print(f"[token-report] sent id={result.get('notification_id') if isinstance(result, dict) else result} subject={title}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

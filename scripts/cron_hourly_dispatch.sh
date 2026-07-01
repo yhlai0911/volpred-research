@@ -30,7 +30,7 @@ UV_BIN="${UV_BIN:-/Users/yhlai0911/.local/bin/uv}"
 PROMPT_FILE="${PROMPT_FILE:-$REPO_ROOT/scripts/cron_hourly_dispatch_prompt.md}"
 ZSHRC_PATH="${ZSHRC_PATH:-$HOME/.zshrc}"
 AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-90}"
-AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-sonnet-4-6}"
+AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-sonnet-5}"
 # Backoff before a 3rd preflight attempt — the first 2 attempts fire within
 # seconds (launchd-env + zshrc-source), so a transient Claude API blip
 # ("An unknown error occurred (Unexpected)") defeats both. ~8% of runs hit
@@ -132,7 +132,7 @@ trap cleanup EXIT TERM INT HUP
 # next hang triggers worker-daemon refactor per CLAUDE.md three-strike rule.
 HOURLY_CAP_SEC=3000
 
-# Orchestrator model = opus-4-7 (per CLAUDE.md model selection table; high-risk
+# Orchestrator model = opus-4-8 (current; 2026-07-01 un-pinned from stale opus-4-7; high-risk
 # decision tier for triage / claim / brief 撰寫 / routing). Subagents spawned
 # per-task get task-type-specific model via scripts/model_router.py.
 #
@@ -416,9 +416,9 @@ EXIT_CODE=1
 
 while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
   if [ $ATTEMPT -eq 3 ]; then
-    DISPATCH_MODEL=claude-sonnet-4-6  # fallback (downgrade)
+    DISPATCH_MODEL=claude-sonnet-5    # fallback (downgrade)
   else
-    DISPATCH_MODEL=claude-opus-4-7    # primary
+    DISPATCH_MODEL=claude-opus-4-8    # primary
   fi
   echo "=== attempt $ATTEMPT/$MAX_ATTEMPTS model=$DISPATCH_MODEL at $(date '+%H:%M:%S') ==="
 
