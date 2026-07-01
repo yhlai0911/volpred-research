@@ -203,7 +203,7 @@ EEM     & 0.664 & 6.63$^{***}$ & 6.34$^{***}$ & 6.30$^{***}$ & 0.469 & All \\
 \end{tabular}
 \begin{flushleft}
 \footnotesize
-\emph{Notes:} Best QLIKE refers to the PRG Extended model (PRG Basic for GLD). DM $t$-statistics are reported as benchmark loss minus PRG loss, so positive values favor PRG in every column. ``PRG vs Sep'' tests whether the cross-session recursion adds value beyond session-specific parameters. Spearman $\rho$ is between PRG Extended forecasts and realized $\sigma^2_{\text{full}}$. MCS reports surviving models at the 10\% level. $^{***}$Significant at the conservative $|t| > 3.0$ threshold adopted in this paper. The PRG full-day forecast $\hat{\sigma}^2_{\text{full},d}$ follows the two-phase timing convention in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_fullday}): the overnight component is issued at the day-$(d-1)$ close, while the intraday component is issued at the day-$d$ open conditional on the realized overnight return. Benchmarks (GJR, HAR) are evaluated under the more restrictive $\mathcal{F}_{d-1}^{\,c}$ information set. The SPY DM statistics in this table use the canonical (K880) timing convention defined above; under the alternative full-day-at-$t\!-\!1$-close convention the SPY PRG-vs-GJR statistic becomes $-0.57$ (see the footnote on Table~\ref{tab:var_es}).
+\emph{Notes:} Best QLIKE refers to the PRG Extended model (PRG Basic for GLD). DM $t$-statistics are reported as benchmark loss minus PRG loss, so positive values favor PRG in every column. ``PRG vs Sep'' tests whether the cross-session recursion adds value beyond session-specific parameters. Spearman $\rho$ is between PRG Extended forecasts and realized $\sigma^2_{\text{full}}$. MCS reports surviving models at the 10\% level. $^{***}$Significant at the conservative $|t| > 3.0$ threshold adopted in this paper. The PRG full-day forecast $\hat{\sigma}^2_{\text{full},d}$ follows the two-phase timing convention in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_fullday}): the overnight component is issued at the day-$(d-1)$ close, while the intraday component is issued at the day-$d$ open conditional on the realized overnight return. Benchmarks (GJR, HAR) are evaluated under the more restrictive $\mathcal{F}_{d-1}^{\,c}$ information set. The SPY DM statistics in this table use the canonical (Open) timing convention defined above; under the alternative full-day-at-$t\!-\!1$-close convention the SPY PRG-vs-GJR statistic becomes $-0.57$ (see the footnote on Table~\ref{tab:var_es}).
 \end{flushleft}
 \end{table}
 
@@ -213,38 +213,38 @@ The TAIFEX MCS analysis is particularly informative: at the 10\% significance le
 
 A notable finding concerns the GJR--HAR comparison. On the common $\sigma^2_{\text{full}}$ target, GJR and HAR are statistically indistinguishable on TAIFEX (DM $t = 0.57$). This stands in sharp contrast to results obtained when each model is evaluated on its native target, where HAR appears to dominate. The discrepancy illustrates the target-mismatch problem identified by \citet{Patton2011}: comparing models on different targets can produce spurious rankings.
 
-\subsection{Alternative timing convention comparison (K880 vs.\ K880v2)}
+\subsection{Alternative timing convention comparison (Open vs.\ Close)}
 \label{sec:timing_convention}
 
-The paper's canonical forecast convention, defined by Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}), issues the intraday-variance forecast \emph{at the day-$d$ open} conditional on the realized overnight return $r^2_{\text{overnight},d}$. We refer to this as the K880 convention. As a sensitivity exercise, we re-evaluate PRG Extended under an alternative convention---K880v2---that issues the full-day forecast at the day-$(d-1)$ close. Under K880v2, the overnight return is not yet observed, so the intraday variance must use the forecast $\hat h_{\text{overnight},d}$ rather than $r^2_{\text{overnight},d}$. Table~\ref{tab:ablation} reports the resulting SPY comparison; we emphasize that this is a horizon convention contrast, not a within-K880 ablation of the cross-session bridge (the latter is provided implicitly by the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results}; see the cross-market generalization paragraph below).
+The paper's canonical forecast convention, defined by Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}), issues the intraday-variance forecast \emph{at the day-$d$ open} conditional on the realized overnight return $r^2_{\text{overnight},d}$. We refer to this as the Open convention. As a sensitivity exercise, we re-evaluate PRG Extended under an alternative convention---Close---that issues the full-day forecast at the day-$(d-1)$ close. Under Close, the overnight return is not yet observed, so the intraday variance must use the forecast $\hat h_{\text{overnight},d}$ rather than $r^2_{\text{overnight},d}$. Table~\ref{tab:ablation} reports the resulting SPY comparison; we emphasize that this is a horizon convention contrast, not a within-Open ablation of the cross-session bridge (the latter is provided implicitly by the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results}; see the cross-market generalization paragraph below).
 
 \begin{table}[htbp]
 \centering
-\caption{Alternative timing convention comparison: K880 (forecast at day-$d$ open) vs.\ K880v2 (forecast at day-$(d-1)$ close), SPY}
+\caption{Alternative timing convention comparison: Open (forecast at day-$d$ open) vs.\ Close (forecast at day-$(d-1)$ close), SPY}
 \label{tab:ablation}
 \small
 \begin{tabular}{lcccc}
 \toprule
  & QLIKE & DM $t$ vs GJR & Spearman $\rho$ & MZ-$R^2$ \\
 \midrule
-PRG Extended, K880 (at open)   & 0.748 & 6.00$^{***}$ & 0.568 & 0.464 \\
-PRG Extended, K880v2 (at close) & 0.864 & $-$0.57      & 0.474 & 0.264 \\[2pt]
-\emph{Gap (K880 $-$ K880v2)} & $-$0.116 & \multicolumn{3}{c}{$\Delta(\text{DM } t) = 6.57$} \\
+PRG Extended, Open (at open)   & 0.748 & 6.00$^{***}$ & 0.568 & 0.464 \\
+PRG Extended, Close (at close) & 0.864 & $-$0.57      & 0.474 & 0.264 \\[2pt]
+\emph{Gap (Open $-$ Close)} & $-$0.116 & \multicolumn{3}{c}{$\Delta(\text{DM } t) = 6.57$} \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}
 \footnotesize
-\emph{Notes:} Both rows use the identical PRG Extended specification; only the forecast issuance horizon differs. K880 issues the intraday forecast at the day-$d$ open conditional on the already-realized $r^2_{\text{overnight},d}$ (the convention defined in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}) and standard in the session-based volatility literature). K880v2 issues the full-day forecast at the day-$(d-1)$ close, so the intraday-variance equation uses the model-implied forecast $\hat h_{\text{overnight},d}$ rather than the realized $r^2_{\text{overnight},d}$. The DM-$t$ gap of $6.57$ quantifies the value of evaluating the model at the natural intraday-forecast horizon (market open), where overnight information is fully observed.
+\emph{Notes:} Both rows use the identical PRG Extended specification; only the forecast issuance horizon differs. Open issues the intraday forecast at the day-$d$ open conditional on the already-realized $r^2_{\text{overnight},d}$ (the convention defined in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}) and standard in the session-based volatility literature). Close issues the full-day forecast at the day-$(d-1)$ close, so the intraday-variance equation uses the model-implied forecast $\hat h_{\text{overnight},d}$ rather than the realized $r^2_{\text{overnight},d}$. The DM-$t$ gap of $6.57$ quantifies the value of evaluating the model at the natural intraday-forecast horizon (market open), where overnight information is fully observed.
 \end{flushleft}
 \end{table}
 
-The contrast is informative for two reasons. First, K880v2 forecasts deteriorate substantially (QLIKE 0.748 $\to$ 0.864; MZ $R^2$ 0.464 $\to$ 0.264), and the DM statistic against GJR collapses from $6.00$ to $-0.57$. This is not because the session-boundary mechanism has been removed---both K880 and K880v2 retain the cross-session $h_{n-1}$ recursion---but because forecasting the intraday session before its overnight predecessor has even closed forces the model to plug in $\hat h_{\text{overnight},d}$ in place of the much more informative $r^2_{\text{overnight},d}$. Second, this validates the K880 convention used throughout the paper as the natural and admissible choice under the information-set definition in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}): the intraday forecast is issued at market open, when overnight information is already in the agent's information set. The K880v2 row therefore functions as an SPY-based robustness check against alternative-convention scepticism, not as a session-bridge ablation; replicating the K880-vs-K880v2 contrast across the remaining five markets is left for follow-up.
+The contrast is informative for two reasons. First, Close forecasts deteriorate substantially (QLIKE 0.748 $\to$ 0.864; MZ $R^2$ 0.464 $\to$ 0.264), and the DM statistic against GJR collapses from $6.00$ to $-0.57$. This is not because the session-boundary mechanism has been removed---both Open and Close retain the cross-session $h_{n-1}$ recursion---but because forecasting the intraday session before its overnight predecessor has even closed forces the model to plug in $\hat h_{\text{overnight},d}$ in place of the much more informative $r^2_{\text{overnight},d}$. Second, this validates the Open convention used throughout the paper as the natural and admissible choice under the information-set definition in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}): the intraday forecast is issued at market open, when overnight information is already in the agent's information set. The Close row therefore functions as an SPY-based robustness check against alternative-convention scepticism, not as a session-bridge ablation; replicating the Open-vs-Close contrast across the remaining five markets is left for follow-up.
 
-\paragraph{Cross-market session-boundary ablation.} The explicit within-K880 ablation of the session-boundary bridge is provided by the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results}. Separate GARCH retains identical session-specific parameterization but estimates the two sessions independently, removing the cross-session $h_{n-1}$ recursion; the PRG-vs-Separate gap therefore isolates exactly the bridge effect. The Harvey-significant gaps span DM $t = 4.07$ (TAIFEX) to 6.69 (SPY) across all six markets, providing the cross-market evidence that the session-boundary information transfer---not session-specific parameterization alone---is the mechanism behind PRG's advantage.
+\paragraph{Cross-market session-boundary ablation.} The explicit within-Open ablation of the session-boundary bridge is provided by the PRG-vs-Separate-GARCH comparisons in Table~\ref{tab:main_results}. Separate GARCH retains identical session-specific parameterization but estimates the two sessions independently, removing the cross-session $h_{n-1}$ recursion; the PRG-vs-Separate gap therefore isolates exactly the bridge effect. The Harvey-significant gaps span DM $t = 4.07$ (TAIFEX) to 6.69 (SPY) across all six markets, providing the cross-market evidence that the session-boundary information transfer---not session-specific parameterization alone---is the mechanism behind PRG's advantage.
 
 \subsection{VaR and Expected Shortfall evaluation}
 
-Table~\ref{tab:var_es} reports VaR and ES backtesting results. The PRG Extended model produces well-calibrated VaR forecasts: at the 1\% level, the violation rate on SPY is 0.93\% (Kupiec $p = 0.77$), compared to 1.92\% for GJR (Kupiec $p < 0.001$).\footnote{The SPY VaR row uses the canonical K880 timing convention, not K880v2. K880 conditions the intraday variance on the same-day overnight realized variance, which is admissible under the paper's information-set definition in Eqs.~(3)--(4): the forecast target is the intraday period formed at market open, when the overnight return is already observed. Under the alternative full-day-at-$t\!-\!1$-close convention of K880v2, the same PRG Extended row becomes 1.59\% violations with Kupiec $p = 0.0196$; see \texttt{experiments.md} and the 2026-05-29 source audit note for the provenance fork.} On TAIFEX, the PRG Extended VaR is conservative (0.24\% violations vs.\ the expected 1\%), reflecting the model's tendency to overestimate tail risk when using 5-minute realized variance---a desirable property for risk management.
+Table~\ref{tab:var_es} reports VaR and ES backtesting results. The PRG Extended model produces well-calibrated VaR forecasts: at the 1\% level, the violation rate on SPY is 0.93\% (Kupiec $p = 0.77$), compared to 1.92\% for GJR (Kupiec $p < 0.001$).\footnote{The SPY VaR row uses the canonical Open timing convention, not Close. Open conditions the intraday variance on the same-day overnight realized variance, which is admissible under the paper's information-set definition in Eqs.~(3)--(4): the forecast target is the intraday period formed at market open, when the overnight return is already observed. Under the alternative full-day-at-$t\!-\!1$-close convention of Close, the same PRG Extended row becomes 1.59\% violations with Kupiec $p = 0.0196$; see \texttt{experiments.md} and the 2026-05-29 source audit note for the provenance fork.} On TAIFEX, the PRG Extended VaR is conservative (0.24\% violations vs.\ the expected 1\%), reflecting the model's tendency to overestimate tail risk when using 5-minute realized variance---a desirable property for risk management.
 
 \begin{table}[htbp]
 \centering
@@ -312,7 +312,7 @@ To benchmark whether a standard daily GJR can benefit from overnight information
 \end{equation}
 where $r^2_{\text{overnight},t-1}$ is the lagged overnight squared return. Unlike PRG's intraday forecast in Eq.~(\ref{eq:prg_in_forecast}), GJR-X uses the stricter day-$t{-}1$ close information set and therefore cannot condition on the same-day realized overnight return at the market open.
 
-Table~\ref{tab:gjrx} reports OOS QLIKE losses and the two K1260-specific Diebold--Mariano contrasts; the canonical PRG-vs-GJR comparison for SPY is reported in Table~\ref{tab:main_results} ($t = 6.00$). PRG Extended yields the lowest QLIKE (0.7559), followed by standard GJR (0.8544) and GJR-X (0.8607). The GJR-X-vs-GJR comparison yields DM $t = -0.53$ (not significant), indicating that the lagged exogenous-regressor route is not out-of-sample robust despite an in-sample log-likelihood ratio test that is decisive ($\hat{\delta} = 0.13$, $\mathrm{LR} = 49.37$, $p < 0.0001$ over 4{,}778 in-sample days, with 16 random initializations used in the LR diagnostic's internal grid search to verify basin stability). PRG-vs-GJR-X yields DM $t = 7.72$ ($p = 1.84 \times 10^{-14}$, Harvey PASS), the strongest single DM statistic in the paper. The asymmetry---in-sample significance for $\delta$ but no out-of-sample improvement, alongside PRG's decisive OOS dominance over GJR-X---shows that a simple $t{-}1$ exogenous-regressor augmentation does not reproduce the gain delivered by PRG's two-phase session recursion.
+Table~\ref{tab:gjrx} reports OOS QLIKE losses and two Diebold--Mariano contrasts; the canonical PRG-vs-GJR comparison for SPY is reported in Table~\ref{tab:main_results} ($t = 6.00$). PRG Extended yields the lowest QLIKE (0.7559), followed by standard GJR (0.8544) and GJR-X (0.8607). The GJR-X-vs-GJR comparison yields DM $t = -0.53$ (not significant), indicating that the lagged exogenous-regressor route is not out-of-sample robust despite an in-sample log-likelihood ratio test that is decisive ($\hat{\delta} = 0.13$, $\mathrm{LR} = 49.37$, $p < 0.0001$ over 4{,}778 in-sample days, with 16 random initializations used in the LR diagnostic's internal grid search to verify basin stability). PRG-vs-GJR-X yields DM $t = 7.72$ ($p = 1.84 \times 10^{-14}$, Harvey PASS), the strongest single DM statistic in the paper. The asymmetry---in-sample significance for $\delta$ but no out-of-sample improvement, alongside PRG's decisive OOS dominance over GJR-X---shows that a simple $t{-}1$ exogenous-regressor augmentation does not reproduce the gain delivered by PRG's two-phase session recursion.
 
 \begin{table}[ht]
 \centering
@@ -370,19 +370,19 @@ The PRG extends the Periodic Regime-Switching (PRS) model of \citet{Lai2024} by 
 %% ONLINE APPENDIX
 %% =====================================================================
 \appendix
-\section{Online Appendix: K880v2 Alternative Timing Convention Robustness}
+\section{Online Appendix: Alternative Timing Convention (Close) Robustness}
 \label{app:k880v2_robustness}
 
 This appendix complements the timing-convention discussion in
 Section~\ref{sec:timing_convention} (Table~\ref{tab:ablation}) with a
 full set of VaR backtests under both conventions and Expected Shortfall
-backtests under K880v2. The objective is transparent, model-by-model
+backtests under Close. The objective is transparent, model-by-model
 disclosure of how the SPY risk metrics in Table~\ref{tab:var_es} respond
-when the forecast issuance horizon is shifted from market open (K880,
-canonical) to the previous-day close (K880v2). The convention itself is
+when the forecast issuance horizon is shifted from market open (the Open
+convention, canonical) to the previous-day close (the Close convention). The convention itself is
 defined in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}),
 which place the intraday forecast at the day-$d$ open with
-$r^2_{\text{overnight},d}$ already realized; K880v2 shifts that
+$r^2_{\text{overnight},d}$ already realized; Close shifts that
 forecast to the day-$(d{-}1)$ close, substituting the model-implied
 $\hat h_{\text{overnight},d}$ for the realized overnight quantity.
 
@@ -392,9 +392,9 @@ Table~\ref{app:tab:var_5models} reports SPY violation rates and Kupiec
 unconditional-coverage $p$-values at the 1\% and 5\% levels for all five
 competing models under both conventions ($n = 1{,}823$ OOS days; same
 sample as Table~\ref{tab:var_es}). Three patterns matter for review.
-First, under K880 the PRG Extended model attains the best calibration at
+First, under Open the PRG Extended model attains the best calibration at
 both levels (0.93\% violations at the 1\% level, $p_{K} = 0.77$;
-4.50\% at the 5\% level, $p_{K} = 0.32$). Second, under K880v2 the same
+4.50\% at the 5\% level, $p_{K} = 0.32$). Second, under Close the same
 PRG Extended row over-rejects at the 1\% level (1.59\%, $p_{K} = 0.020$,
 Kupiec fails at the 5\% size) while remaining within tolerance at the
 5\% level (5.49\%, $p_{K} = 0.35$). Third, the same degradation pattern
@@ -404,13 +404,13 @@ the cross-session $h_{n-1}$ bridge---as the source of the shift.
 
 \begin{table}[htbp]
 \centering
-\caption{SPY VaR backtests, K880 vs.\ K880v2, all five models}
+\caption{SPY VaR backtests, Open vs.\ Close, all five models}
 \label{app:tab:var_5models}
 \small
 \begin{tabular}{l cc cc cc cc}
 \toprule
- & \multicolumn{4}{c}{K880 (at day-$d$ open)}
- & \multicolumn{4}{c}{K880v2 (at day-$(d{-}1)$ close)} \\
+ & \multicolumn{4}{c}{Open (at day-$d$ open)}
+ & \multicolumn{4}{c}{Close (at day-$(d{-}1)$ close)} \\
 \cmidrule(lr){2-5} \cmidrule(lr){6-9}
  & \multicolumn{2}{c}{VaR 1\%} & \multicolumn{2}{c}{VaR 5\%}
  & \multicolumn{2}{c}{VaR 1\%} & \multicolumn{2}{c}{VaR 5\%} \\
@@ -430,26 +430,26 @@ PRG Extended   & \textbf{0.93\%} & \textbf{0.77} & 4.50\% & 0.32 & 1.59\% & 0.02
 fraction of OOS days on which the realized return falls below the
 $-\,\text{VaR}_\alpha$ threshold; $p_K$ is the Kupiec unconditional-coverage
 $p$-value, with $p_K \geq 0.05$ indicating that calibration is not
-rejected at the 5\% size. The PRG Extended K880 row reproduces the
+rejected at the 5\% size. The PRG Extended Open row reproduces the
 headline number in Table~\ref{tab:var_es}.
 Sources: \texttt{experiments/k880/k880\_results.json::layer4\_var};
 \texttt{experiments/k880v2/k880v2\_results.json::layer4\_var}.
 \end{flushleft}
 \end{table}
 
-\subsection*{Expected Shortfall under K880v2}
+\subsection*{Expected Shortfall under Close}
 
 Table~\ref{app:tab:es_k880v2} reports the Acerbi--Szekely
 \citeyearpar{Acerbi2014} $Z_2$ ES backtest at the 2.5\% tail under the
-K880v2 convention. None of the five models is rejected at the 5\% level
+Close convention. None of the five models is rejected at the 5\% level
 ($p > 0.49$ throughout), indicating that the predicted shortfall
 \emph{magnitudes}---conditional on a VaR$_{2.5\%}$ exceedance---are not
 statistically biased relative to the realized losses. We document an
 asymmetry in the experimental ledger: ES backtesting was added to the
-evaluation pipeline during the K880v2 batch and was not retroactively
-applied to the earlier K880 batch, so this table reports K880v2 results
-only.\footnote{The K880 results file (\texttt{experiments/k880/k880\_results.json})
-contains no \texttt{layer4b\_es} block, whereas the K880v2 file
+evaluation pipeline during the Close batch and was not retroactively
+applied to the earlier Open batch, so this table reports Close results
+only.\footnote{The Open results file (\texttt{experiments/k880/k880\_results.json})
+contains no \texttt{layer4b\_es} block, whereas the Close file
 populates the ES results reported here. The Acerbi--Szekely $Z_2$
 statistic averages the ratio of realized loss to predicted ES over
 VaR-exceedance days and rejects when the model systematically
@@ -458,7 +458,7 @@ the model's own quantile forecast.}
 
 \begin{table}[htbp]
 \centering
-\caption{SPY Expected Shortfall backtest, K880v2, 2.5\% tail}
+\caption{SPY Expected Shortfall backtest, Close, 2.5\% tail}
 \label{app:tab:es_k880v2}
 \small
 \begin{tabular}{lcccc}
@@ -478,7 +478,7 @@ PRG Extended   & 2.36 & 0.49 & 53  & No \\
 SPY OOS sample, $n = 1{,}823$ days. $n_{\text{viol}}$ counts days on
 which the realized loss exceeded the model's VaR$_{2.5\%}$ forecast.
 $p$-values are computed from the Acerbi--Szekely simulated null
-distribution. K880v2 convention only; the corresponding K880 batch did
+distribution. Close convention only; the corresponding Open batch did
 not include ES backtesting (see footnote in main text).
 Source: \texttt{experiments/k880v2/k880v2\_results.json::layer4b\_es}.
 \end{flushleft}
@@ -488,17 +488,17 @@ Source: \texttt{experiments/k880v2/k880v2\_results.json::layer4b\_es}.
 
 Three claims survive this disclosure. \textbf{(i)} The PRG Extended
 headline VaR calibration in Table~\ref{tab:var_es} is robust under the
-K880 convention used throughout the paper, which is the convention
+Open convention used throughout the paper, which is the convention
 admissible under the information-set definition in
 Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_in_forecast}).
-\textbf{(ii)} Under the alternative K880v2 convention the PRG-class
+\textbf{(ii)} Under the alternative Close convention the PRG-class
 1\%-VaR fit degrades to borderline-rejected; the 5\%-VaR fit remains
 acceptable. The deterioration is shared by Separate-GARCH and PRG Basic,
 which rules out the cross-session bridge as the cause and points to the
-timing horizon. \textbf{(iii)} Expected Shortfall under K880v2 is not
+timing horizon. \textbf{(iii)} Expected Shortfall under Close is not
 rejected at the 5\% level for any of the five models, so the
 tail-magnitude calibration appears robust to the timing convention even
-when unconditional coverage drifts. The K880v2 figures in this appendix
+when unconditional coverage drifts. The Close figures in this appendix
 therefore function as transparent disclosure rather than as a rebuttal
 of the canonical convention.
 

@@ -5,7 +5,7 @@ Figures:
     B  Panel Harvey |t| trajectory (joint log_analyst)
     C  Two-level R² structure (between vs within)
     D  EM residual taxonomy (θ_rel vs inst_pct by region)
-    E  K1163 EU robustness (K1153 N=18 vs K1163 N=30)
+    E  EU-coverage robustness (N=18 partial vs N=30 full)
 
 All figures saved as 300-dpi PNG + matching PDF.
 Random seed 42 for any jitter/bootstrap.
@@ -54,6 +54,13 @@ def save_fig(fig: plt.Figure, name: str) -> None:
     print(f"  wrote {png.name} and {pdf.name}")
 
 
+def _trajectory_step_label(results: dict[str, Any], experiment_id: str) -> str:
+    """Sequential display label for a trajectory iteration (avoids exposing internal IDs)."""
+
+    order = [row["experiment_id"] for row in results["n_extension_trajectory"]]
+    return f"Step {order.index(experiment_id) + 1}"
+
+
 def spearman_ci_fisher(rho: float, n: int, conf: float = 0.95) -> tuple[float, float]:
     """Approximate 95% CI for Spearman ρ via Fisher z-transform (small-n caveat)."""
 
@@ -71,7 +78,7 @@ def figure_A_trajectory(results: dict[str, Any]) -> None:
     """ρ across K-series with 95% CI band + significance lines."""
 
     traj = [row for row in results["n_extension_trajectory"] if row["spearman_rho"] is not None]
-    labels = [f"{row['experiment_id']}\nN={row['N']}" for row in traj]
+    labels = [f"{_trajectory_step_label(results, row['experiment_id'])}\nN={row['N']}" for row in traj]
     rhos = [row["spearman_rho"] for row in traj]
     ps = [row["spearman_p"] for row in traj]
     Ns = [row["N"] for row in traj]
@@ -107,7 +114,7 @@ def figure_A_trajectory(results: dict[str, Any]) -> None:
     ax.set_xticklabels(labels)
     ax.set_ylim(-0.05, 1.05)
     ax.set_ylabel("Cross-market Spearman ρ (inst_pct vs θ_rel)")
-    ax.set_title("Figure A — Cross-market ρ across N-extension trajectory (K1165 → K1171)")
+    ax.set_title("Figure A — Cross-market ρ across N-extension trajectory")
     ax.legend(loc="lower left")
 
     # Annotate each iteration's added markets below x-axis
@@ -133,7 +140,7 @@ def figure_B_panel_t(results: dict[str, Any]) -> None:
     """Panel joint log_analyst t monotonic strengthening."""
 
     seq = results["panel_harvey_t_joint"]["sequence"]
-    kids = [k for k, _ in seq]
+    kids = [_trajectory_step_label(results, k) for k, _ in seq]
     ts = [t for _, t in seq]
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
@@ -171,7 +178,7 @@ def figure_C_two_level(results: dict[str, Any]) -> None:
     """Between-market inst_pct R² vs within-market log_analyst R² side-by-side."""
 
     traj = [row for row in results["n_extension_trajectory"] if row["between_r2_inst_pct"] is not None]
-    kids = [row["experiment_id"] for row in traj]
+    kids = [_trajectory_step_label(results, row["experiment_id"]) for row in traj]
     between = [row["between_r2_inst_pct"] for row in traj]
     within = [row["within_r2_log_analyst"] for row in traj]
     ratios = [b / w if w else np.nan for b, w in zip(between, within)]
@@ -221,7 +228,7 @@ def figure_C_two_level(results: dict[str, Any]) -> None:
 
 
 def figure_D_em_taxonomy(results: dict[str, Any]) -> None:
-    """θ_rel vs inst_pct colored by region; K1173 refined layer overlaid."""
+    """θ_rel vs inst_pct colored by region; refined-proxy layer overlaid."""
 
     taxonomy = results["em_residual_taxonomy"]
     k1173 = results["k1173_em_proxy_refinement"]
@@ -270,9 +277,9 @@ def figure_D_em_taxonomy(results: dict[str, Any]) -> None:
                 weight="bold",
             )
 
-    # K1173 refined EM layer as lighter overlays with arrows
+    # Refined-proxy EM layer as lighter overlays with arrows
     refined_vals = k1173["per_market_diff_mean"]  # diff_mean = refined - yfinance
-    # We need baseline inst_pct from K1173 per-market; use baseline row from each market
+    # We need baseline inst_pct from the refined-proxy dataset per-market; use baseline row from each market
     baseline_inst = {row["market"]: row["inst_pct_mean"] for row in taxonomy}
     theta_rel_lookup = {row["market"]: row["theta_rel"] for row in taxonomy}
 
@@ -318,7 +325,7 @@ def figure_D_em_taxonomy(results: dict[str, Any]) -> None:
 
     purple_patch = mpatches.Patch(
         color="#8b2a8b",
-        label="K1173 refined-proxy shift (SEBI/simplywall.st)",
+        label="Refined-proxy shift (SEBI/simplywall.st)",
     )
     handles, _ = ax.get_legend_handles_labels()
     handles.append(purple_patch)
@@ -328,14 +335,14 @@ def figure_D_em_taxonomy(results: dict[str, Any]) -> None:
     ax.set_ylabel("θ_rel (cross-market relative EAV loading)")
     ax.set_title(
         "Figure D — EM residual taxonomy: EM above-ladder cost-of-capital scale factor + AU below-ladder exception\n"
-        f"K1173 refined proxy: Δρ = {k1173['delta_rho']:+.3f} (NULL; structural not proxy artefact)"
+        f"Refined-proxy layer: Δρ = {k1173['delta_rho']:+.3f} (NULL; structural not proxy artefact)"
     )
 
     save_fig(fig, "k1204_figure_D_em_residual_taxonomy")
 
 
 def figure_E_k1163_robustness(results: dict[str, Any]) -> None:
-    """K1163 EU full-coverage robustness: side-by-side bars + cluster bounds."""
+    """EU full-coverage robustness: side-by-side bars + cluster bounds."""
 
     r = results["k1163_eu_robustness"]
 
@@ -343,7 +350,7 @@ def figure_E_k1163_robustness(results: dict[str, Any]) -> None:
 
     # Panel E1: θ_rel comparison with cluster boundaries
     ax = axes[0]
-    labels = ["K1153\n(N=18 DAX-heavy)", "K1163\n(N=30 full EU)"]
+    labels = ["N=18\n(DAX-heavy)", "N=30\n(full EU)"]
     thetas = [r["theta_rel_k1153"], r["theta_rel_k1163"]]
     colors = ["#d47a0a", "#3b6ea8"]
     x = np.arange(2)
@@ -379,8 +386,8 @@ def figure_E_k1163_robustness(results: dict[str, Any]) -> None:
     k1163_vals = [r["boot_t_k1163"], r["placebo_z_k1163"]]
     xpos = np.arange(2)
     w = 0.35
-    ax2.bar(xpos - w / 2, k1153_vals, w, label="K1153 N=18", color="#d47a0a", edgecolor="black", lw=1)
-    ax2.bar(xpos + w / 2, k1163_vals, w, label="K1163 N=30", color="#3b6ea8", edgecolor="black", lw=1)
+    ax2.bar(xpos - w / 2, k1153_vals, w, label="N=18 (partial EU)", color="#d47a0a", edgecolor="black", lw=1)
+    ax2.bar(xpos + w / 2, k1163_vals, w, label="N=30 (full EU)", color="#3b6ea8", edgecolor="black", lw=1)
 
     for xi, v in zip(xpos - w / 2, k1153_vals):
         ax2.annotate(f"{v:.2f}", xy=(xi, v), xytext=(0, 3), textcoords="offset points", ha="center", fontsize=9)
@@ -395,7 +402,7 @@ def figure_E_k1163_robustness(results: dict[str, Any]) -> None:
     ax2.legend(loc="upper left", fontsize=8)
 
     fig.suptitle(
-        "Figure E — K1163 EU full-coverage robustness (verdict: "
+        "Figure E — EU full-coverage robustness (verdict: "
         f"{r['verdict_label']})",
         y=1.02,
     )

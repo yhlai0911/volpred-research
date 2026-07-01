@@ -3977,3 +3977,37 @@ Conclusion: this is a mistaken dedup block. It is not a SPY/VIX cap problem; it 
 ### Operational implication
 
 Do not force-release all dedup-flagged drafts. Some blocks are correctly protecting against stale or duplicate same-K content. The next platform_ops task should implement the targeted classifier/entity fixes above, then rerun release-pool preview to see whether the fresh-cluster pool opens without reintroducing K ghost recycling.
+
+---
+
+## 2026-07-01 論文 footnote/K-id AI 痕跡外洩 — 全 portfolio 稽核與三層洩漏
+
+### 觸發
+用戶發現 `eav-universal-magnitude` 線上 PDF footnote 含 `"The author thanks the VolPred Research System for computational assistance. Replication code and data are available at [GitHubrepoTBD]."`。用戶要求擴大範圍：「每一篇論文 所有ai/llm/volpred相關文字都要清洗」。
+
+### Root cause 1（原始違規）：source 已清、compiled PDF 從未重編
+`body.tex` 的 title footnote 早已是乾淨版（`\thanks{Replication code and data are available upon request.}`），違規文字只存在於**舊的、從未重新編譯上傳的 `main.pdf`**（stale artifact，5/18 版本）。這與先前 paper_website_drift 系列 incident 同根因：**source 修好 ≠ 部署的 artifact 跟著更新**；任何 `.tex` 修訂若沒有「編譯 → `paper-update` 上傳 → 重新下載驗證」的收尾，線上文件會繼續提供舊內容。
+
+### Root cause 2（gate 盲點）：`check_paper_compliance.py` 不認得 body.tex-only 論文
+`eav-universal-magnitude` 沒有 `main.tex`，只有 `body.tex` 直接 `\documentclass`。原本的 gate 只掃描存在 `main.tex` 的資料夾，導致這篇論文從未被合規掃描覆蓋過 — 不是漏檢一次，是**從沒被檢查過**。
+**Fix**：`scripts/check_paper_compliance.py::submission_files()` 在找不到任何 `main*.tex` entry 時，回退偵測 bare `body.tex`（確認開頭含 `\documentclass` 才納入）；`main()` 的資料夾篩選同步放寬為 `(main.tex 存在) OR (body.tex 存在)`。
+
+### Root cause 3（第三層洩漏，前兩層修完才被發現）：matplotlib 圖表把 K-id 烙進向量圖
+全 portfolio `.tex` 掃描 100% clean 後，對所有 11 篇線上 PDF 做最終雙掃描（AI/LLM/VolPred 詞 + `\bK[0-9]{3,4}[a-z]?\b` case-sensitive K-id regex）時，`eav-universal-magnitude` 仍驗出 22 個 K-id 命中，且 `.tex` 原始碼已確認乾淨。追蹤發現這些命中來自論文引用的 5 張 `experiments/k1204/k1204_figures.py` 產生的 matplotlib 向量圖 PDF —— K-id 被直接寫進 `ax.set_title()`、`label=`、`set_xticklabels()` 等圖表元素（標題、圖例、座標軸標籤、長條圖標籤），**這是任何 `.tex` 文字掃描工具完全看不到的洩漏管道**，因為合規檢查只讀 LaTeX 原始碼，不會對 `\includegraphics` 引入的圖片本身跑 OCR/text-extraction。
+
+**Fix**：改寫 `k1204_figures.py`，把所有面向讀者的圖表文字（標題、圖例、x 軸標籤）從硬編碼的 K-id 換成語意標籤（例如 trajectory 系列 K1165→K1171 改成依 JSON 內 `n_extension_trajectory` 順序推導的 `Step 1..5`；K1153/K1163 EU robustness 改成直接用樣本數 `N=18`/`N=30`）；新增 `_trajectory_step_label()` helper 從 `n_extension_trajectory` 的既有順序推導序號，不改動任何底層數值/JSON 結果（`k1204_results.json` 完全未變動，只改圖表渲染層）。重新產生全部 5 張圖、重新編譯 `body.tex`、`cp body.pdf main.pdf`、`paper-update` 重新上傳、重新下載線上 PDF 二次驗證確認 0/0。
+
+### 全 portfolio 掃描結果
+- 11 篇論文 `.tex` 全部 `check_paper_compliance.py` CLEAN（0 findings）：crypto-fear-channel、eav-universal-magnitude、garch-x-vix、leverage-direction、prg-periodic-garch、taiwan-vt、vix-sufficiency、volatility-absorption、vt-crowding-abm、vt-insurance-cost、vt-trend-following。leverage-direction、vt-trend-following 本就已乾淨，無需修改。
+- 7 篇重新編譯並透過 `uv run volpred ops paper-update` 重新部署、逐篇重新下載線上 PDF 二次驗證 0 K-id 命中：crypto-fear-channel、eav-universal-magnitude（含圖表修復）、garch-x-vix、prg-periodic-garch、taiwan-vt（main_v3）、vt-crowding-abm、vt-insurance-cost。
+- volatility-absorption：source 已清但線上 PDF 編輯前已是 0 K-id 命中，無需重新部署。
+- 對全部 11 篇論文的 `figures/*.pdf` 額外跑了嵌入圖表文字掃描（`find paper -iname "*.pdf" -path "*figure*" | pdftotext | grep K-id`），確認除 eav-universal-magnitude 外沒有其他論文有同類圖表洩漏。
+
+### 未解決 / 待辦（已知，非本次疏漏）
+**`vix-sufficiency/main.tex` 有一個與本次任務無關的既有 LaTeX 編譯錯誤**：`.tex` 原始碼已清乾淨（gate CLEAN），但 `main.tex`（對應線上 10 頁短版 `main.pdf`）編譯會產生 18 個結構性錯誤（`Missing \endgroup`/`Missing }` x 多、`threeparttable`/`tabular` 環境不匹配、`Package graphics Error: Division by 0`）。已用 `git show HEAD:paper/vix-sufficiency/main.tex`（本次編輯前的版本）在乾淨 scratch 目錄隔離編譯，確認同一組錯誤在完全沒有本次文字修改的情況下依然出現 —— **這是既存 bug，不是本次清洗造成的**。決定不部署一份可能格式錯亂的 PDF；`main_v3.tex`/`main_v4.tex` 已正常編譯並部署。`main.tex` 對應的線上 10 頁版本仍帶 3 個舊 K-id 提及（K745 x2、K1139 x1），需另開任務單獨排查編譯錯誤後才能重新部署清洗版。
+
+### 教訓（PDCA）
+1. **任何 `.tex` 修訂的「完成」定義必須包含編譯 + 上傳 + 重新下載驗證**，光改 source 不算完成 — 與 paper_website_drift 系列同一根因，這次在合規掃描情境再犯一次，已用本次全流程走過確認修正。
+2. **合規 gate 的資料夾發現邏輯必須覆蓋所有合法的論文進入點**（`main.tex` 與 bare `body.tex`），否則會有論文從未被掃描過而不自知 — 已修 `check_paper_compliance.py`。
+3. **`.tex` 文字合規掃描不能假設涵蓋全部洩漏面** — 內嵌圖片（matplotlib PDF/PNG 向量圖）可能把不該外洩的識別碼直接畫進圖表元素。未來新增圖表生成腳本時，圖表面向讀者的文字（標題/圖例/座標軸/資料標籤）應比照論文 prose 遵守同一套「不外洩內部代號」規則，不能只靠 `.tex` 層 gate 把關。
+4. **`_select_current_main_artifact()`（`src/volpred/ops/papers.py`）目前不認得 body.pdf-only 論文** — 本次仍用 `cp body.pdf main.pdf` 手動 workaround（沿用既有慣例），未在程式層修復；若未來新增更多 body.tex-only 論文，建議把此邏輯正式補上而非持續手動 workaround。

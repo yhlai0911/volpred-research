@@ -181,7 +181,7 @@ where the standardized return $u_{t-1}$ is defined under one of two normalizatio
 u_{t-1}^{(a)} &= \frac{r_{t-1}}{\sqrt{\tau_t}} \qquad (\text{contemporaneous normalization}), \label{eq:u_contemp} \\
 u_{t-1}^{(b)} &= \frac{r_{t-1}}{\sqrt{\tau_{t-1}}} \qquad (\text{lagged normalization}). \label{eq:u_lagged}
 \end{align}
-Contemporaneous normalization follows the recursive structure of \citet[Eq.~4]{engle2013}, where the current volatility environment determines how past shocks are interpreted.\footnote{This timing convention is a design choice rather than an identification necessity. In the replication archive, K988 and K988b explicitly compare the Engle-style recursion $u_{t-1}=r_{t-1}/\sqrt{\tau_t}$ against the more conservative DGP-timed alternative $u_{t-1}=r_{t-1}/\sqrt{\tau_{t-1}}$. The main paper adopts the former as its baseline because $\tau_t$ is predetermined by $\mathrm{VIX}_{t-1}$ and therefore known before $r_t$ is realized. A later source-code audit of downstream robustness scripts found that some follow-up experiments inherited this Engle-style recursion without always stating the convention explicitly; the dedicated refit K1056b confirms that the directional conclusions are preserved under the lagged-normalization alternative, although some magnitudes shift. We therefore interpret the $\tau_t$ baseline as an implementation convention inherited from \citet{engle2013}, not as the only admissible timing assumption.} Despite the shared time subscript, there is no simultaneity: $\tau_t$ is a deterministic function of $\mathrm{VIX}_{t-1}$, which is observed before $r_t$. Lagged normalization reflects a conservative timing choice in which the normalization denominator $\tau_{t-1}$ is fully predetermined before the shock $r_{t-1}$ is observed, since both $\tau_t$ and $u_{t-1}$ use $\mathrm{VIX}_{t-1}$ information. Our baseline specifications use contemporaneous normalization; lagged normalization is included for comparison (see Section~\ref{sec:taxonomy}).
+Contemporaneous normalization follows the recursive structure of \citet[Eq.~4]{engle2013}, where the current volatility environment determines how past shocks are interpreted.\footnote{This timing convention is a design choice rather than an identification necessity. We explicitly compare the Engle-style recursion $u_{t-1}=r_{t-1}/\sqrt{\tau_t}$ against the more conservative DGP-timed alternative $u_{t-1}=r_{t-1}/\sqrt{\tau_{t-1}}$. The main paper adopts the former as its baseline because $\tau_t$ is predetermined by $\mathrm{VIX}_{t-1}$ and therefore known before $r_t$ is realized. A later source-code audit of downstream robustness scripts found that some follow-up experiments inherited this Engle-style recursion without always stating the convention explicitly; a dedicated refit confirms that the directional conclusions are preserved under the lagged-normalization alternative, although some magnitudes shift. We therefore interpret the $\tau_t$ baseline as an implementation convention inherited from \citet{engle2013}, not as the only admissible timing assumption.} Despite the shared time subscript, there is no simultaneity: $\tau_t$ is a deterministic function of $\mathrm{VIX}_{t-1}$, which is observed before $r_t$. Lagged normalization reflects a conservative timing choice in which the normalization denominator $\tau_{t-1}$ is fully predetermined before the shock $r_{t-1}$ is observed, since both $\tau_t$ and $u_{t-1}$ use $\mathrm{VIX}_{t-1}$ information. Our baseline specifications use contemporaneous normalization; lagged normalization is included for comparison (see Section~\ref{sec:taxonomy}).
 
 Two intercept treatments are considered:
 \begin{enumerate}[label=(\roman*)]
@@ -205,7 +205,7 @@ Table~\ref{tab:specs} presents the full taxonomy of 17 specifications examined i
 \toprule
 \# & Name & $\tau_t$ function & $u_{t-1}$ denom. & $\omega_g$ & Category \\
 \midrule
-A1 & K889-original & log-exp & $\tau_t$ (est) / $\tau_{t-1}$ (OOS) & constrained & GARCH-X \\
+A1 & Original & log-exp & $\tau_t$ (est) / $\tau_{t-1}$ (OOS) & constrained & GARCH-X \\
 A2 & consistent-$\tau_t$ & log-exp & $\tau_t$ & constrained & GARCH-X \\
 A3 & consistent-$\tau_{t-1}$ & log-exp & $\tau_{t-1}$ & constrained & GARCH-X \\
 A4 & VIX-squared & VIX$^2$ & $\tau_t$ & constrained & GARCH-X \\
@@ -218,7 +218,7 @@ A4n & VIX$^2$-norm & VIX$^2$, norm & $\tau_t$ & constrained$^a$ & GARCH-X \\
 \midrule
 B1 & MIDAS-RW-K22 & Beta poly, $K=22$ & $\tau_t$ & constrained & MIDAS-RW \\
 B2 & MIDAS-RW-K65 & Beta poly, $K=65$ & $\tau_t$ & constrained & MIDAS-RW \\
-B3 & MIDAS-RW-K125 & Beta poly, $K=125$ & $\tau_t$ & constrained & MIDAS-RW \\
+B3 & MIDAS-RW ($K=125$) & Beta poly, $K=125$ & $\tau_t$ & constrained & MIDAS-RW \\
 C1 & MIDAS-FS-K6 & Beta poly, $K_m=6$ & $\tau_t$ & constrained & MIDAS-FS \\
 C2 & MIDAS-FS-K12 & Beta poly, $K_m=12$ & $\tau_t$ & constrained & MIDAS-FS \\
 C3 & MIDAS-FS-K24 & Beta poly, $K_m=24$ & $\tau_t$ & constrained & MIDAS-FS \\
@@ -405,7 +405,7 @@ Rank & Model & QLIKE & DM $t$ vs GJR & Harvey sig. & Category \\
 6  & A3 (log-exp, $\tau_{t-1}$) & $-8.350$ & 3.05 & Yes & GARCH-X \\
 7  & A2n (log-exp, norm) & $-8.350$ & 3.07 & Yes & GARCH-X \\
 8  & A4n (VIX$^2$, norm) & $-8.350$ & 3.45 & Yes & GARCH-X \\
-9  & A1 (K889 original) & $-8.349$ & 2.99 & No & GARCH-X \\
+9  & A1 (original) & $-8.349$ & 2.99 & No & GARCH-X \\
 10 & A3f ($\tau_{t-1}$, free $\omega$) & $-8.347$ & 2.92 & No & GARCH-X \\
 11 & B2 (MIDAS-RW, $K\!=\!65$) & $-8.342$ & 2.99 & No & MIDAS-RW \\
 12 & B3 (MIDAS-RW, $K\!=\!125$) & $-8.337$ & 3.06 & Yes & MIDAS-RW \\
@@ -433,7 +433,7 @@ Several findings emerge from Table~\ref{tab:main_results}.
 
 \textbf{Finding 4: Daily GARCH-X outperforms GARCH-MIDAS in point estimates, but the difference is small.} All GARCH-X specifications in Table~\ref{tab:main_results} achieve lower QLIKE than all GARCH-MIDAS variants. However, the Model Confidence Set analysis (Section~\ref{sec:robustness}) shows that these differences are not statistically significant at conventional levels---A4f is indistinguishable from B1 (the best MIDAS, $K=22$) in pairwise DM tests ($t = -0.90$). The ranking advantage of daily GARCH-X is consistent with VIX information being concentrated in the most recent observation, which the MIDAS Beta-polynomial weighting dilutes across 22--125 lags, but parsimony rather than statistical dominance is the practical argument for preferring the daily specification.
 
-\textbf{Finding 5: The A1 specification reveals the cost of inconsistency.} The original K889 specification (A1), which uses $\tau_t$ in estimation but $\tau_{t-1}$ in OOS forecasting, ranks 10th. Adopting a consistent denominator (either $\tau_t$ everywhere as in A2, or $\tau_{t-1}$ everywhere as in A3) improves performance, confirming that estimation/forecasting consistency is important in multiplicative models.
+\textbf{Finding 5: The A1 specification reveals the cost of inconsistency.} The original A1 specification, which uses $\tau_t$ in estimation but $\tau_{t-1}$ in OOS forecasting, ranks 10th. Adopting a consistent denominator (either $\tau_t$ everywhere as in A2, or $\tau_{t-1}$ everywhere as in A3) improves performance, confirming that estimation/forecasting consistency is important in multiplicative models.
 
 \subsection{Source Decomposition and the Variance Risk Premium}
 \label{sec:vrp}
@@ -528,7 +528,7 @@ GLD (with GVZ) & 0.38$^a$ & 1.530 & 1.457 & 3.17 & \textbf{Yes} \\
 STOXX50E & 0.44 & 1.565 & 1.513 & 3.64 & \textbf{Yes} \\
 FEZ & 0.44 & 1.422 & 1.371 & 3.45 & \textbf{Yes} \\
 EEM & 0.50 & 1.338 & 1.307 & 2.47 & No \\
-0050.TW & 0.28 & 1.458 & 1.432 & 1.44 & No \\ % source: experiments/k994/k994_results.json .assets["0050.TW"].dm_tests["A4f_vs_GJR"].dm_t=-1.4388 (Table reports absolute DM magnitude under note "positive values indicate A4f better"); this row is the paper-period VIX lag+1 setup, not the later K997/K1098 robustness variants
+0050.TW & 0.28 & 1.458 & 1.432 & 1.44 & No \\ % source: experiments/k994/k994_results.json .assets["0050.TW"].dm_tests["A4f_vs_GJR"].dm_t=-1.4388 (Table reports absolute DM magnitude under note "positive values indicate A4f better"); this row is the paper-period VIX lag+1 setup, not the later robustness variants
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -709,7 +709,7 @@ Dimension & Setting & QLIKE (GJR) & QLIKE (A4f) & DM $t$ & Harvey sig. \\
 \footnotesize
 \item $^a$ Sub-period DM tests have reduced power ($n \approx 500$); QLIKE improvement is directionally consistent in all sub-periods.
 \item VIX9D data begins 2011; sub-period and VIX variant tests use the shorter sample. SPY data from Yahoo Finance.
-\item Results replicated in K988\_sens (2026-04-17); DM $t$ values differ by $|\Delta| \le 0.82$ across cells (median $|\Delta| = 0.27$) due to a 5-day data vintage difference; Harvey significance count unchanged at 13/16. Replication script and cell-by-cell diff available in \texttt{experiments/k988\_sens/}.
+\item Results replicated in a sensitivity rerun (2026-04-17); DM $t$ values differ by $|\Delta| \le 0.82$ across cells (median $|\Delta| = 0.27$) due to a 5-day data vintage difference; Harvey significance count unchanged at 13/16. Replication script and cell-by-cell diff available in \texttt{experiments/k988\_sens/}.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -720,7 +720,7 @@ The sub-period results show that A4f improves QLIKE in all three sub-periods, bu
 
 To address the concern that A4f's advantage may be driven by a single extreme episode (e.g., the COVID-19 crash), we conduct an extended sub-period analysis using seven non-overlapping two-year windows spanning 2013--2026. A4f achieves lower QLIKE than GJR-GARCH in all seven periods (7/7), with improvements ranging from 4.80\% to 7.00\% (mean 6.42\%). The COVID period (2019--2020) shows the largest improvement (7.00\%), but removing it leaves the remaining six periods with improvements of 4.80--6.90\%---confirming that the model's advantage is not COVID-dependent. Of the seven individual periods, three pass the Harvey $|t| > 3.0$ threshold and six pass $|t| > 2.0$; the pooled full-period DM statistic is $t = 6.977$, far exceeding conventional thresholds. These results demonstrate that A4f's superiority is robust across low-volatility environments (2017--2018), crisis periods (2019--2020, 2025--2026), and recovery phases (2021--2022, 2023--2024).
 
-A complementary leave-COVID-out test provides a more stringent robustness check. Rather than splitting the OOS window into two-year periods, we remove the 104 trading days spanning 2020-02-01 to 2020-06-30 from the full OOS window and re-estimate the DM test on the remaining $n = 1{,}721$ observations. Table~\ref{tab:covid_robust} reports the results, computed in a dedicated K988-faithful replication run (\texttt{experiments/k1393/}); the comparison full-OOS benchmark $t = 4.03$ comes from the canonical pairwise DM matrix in \texttt{mcs\_dm\_results.json} used throughout Table~\ref{tab:main_results}, so the two statistics share specification but differ in OOS loss-path source. The non-COVID DM statistic ($t = 4.26$) \emph{exceeds} the primary full-OOS result (Table~\ref{tab:main_results}: $t = 4.03$), comfortably surpassing the Harvey $|t| > 3.0$ threshold---the opposite of what would be expected if the COVID-era volatility spike were the primary driver. Post-COVID observations (2021--2026, $n=1{,}448$) independently confirm Harvey significance ($t = 3.76$). Within the COVID window itself ($n = 104$), the DM statistic drops to $t = 1.48$, not because A4f underperforms---the mean QLIKE improvement during this window is approximately $2.5\times$ larger than outside it---but because 104 observations are insufficient for the HAC-corrected DM test to reach conventional significance. These results confirm that A4f's advantage is a persistent normal-market phenomenon, not an artifact of a single extreme episode.
+A complementary leave-COVID-out test provides a more stringent robustness check. Rather than splitting the OOS window into two-year periods, we remove the 104 trading days spanning 2020-02-01 to 2020-06-30 from the full OOS window and re-estimate the DM test on the remaining $n = 1{,}721$ observations. Table~\ref{tab:covid_robust} reports the results, computed in a dedicated baseline-faithful replication run (\texttt{experiments/k1393/}); the comparison full-OOS benchmark $t = 4.03$ comes from the canonical pairwise DM matrix in \texttt{mcs\_dm\_results.json} used throughout Table~\ref{tab:main_results}, so the two statistics share specification but differ in OOS loss-path source. The non-COVID DM statistic ($t = 4.26$) \emph{exceeds} the primary full-OOS result (Table~\ref{tab:main_results}: $t = 4.03$), comfortably surpassing the Harvey $|t| > 3.0$ threshold---the opposite of what would be expected if the COVID-era volatility spike were the primary driver. Post-COVID observations (2021--2026, $n=1{,}448$) independently confirm Harvey significance ($t = 3.76$). Within the COVID window itself ($n = 104$), the DM statistic drops to $t = 1.48$, not because A4f underperforms---the mean QLIKE improvement during this window is approximately $2.5\times$ larger than outside it---but because 104 observations are insufficient for the HAC-corrected DM test to reach conventional significance. These results confirm that A4f's advantage is a persistent normal-market phenomenon, not an artifact of a single extreme episode.
 
 \begin{table}[H]
 \centering
@@ -805,7 +805,7 @@ Under this common-proxy evaluation ($n = 1{,}852$), A4f achieves lower average l
 \end{itemize}
 These results indicate that A4f is statistically \emph{non-inferior} to HAR-type benchmarks under the $r_t^2$ proxy. Importantly, A4f achieves this parity without requiring high-frequency or realized-variance data as inputs---a practical advantage for daily risk management where intraday data may be unavailable or costly.
 
-We additionally evaluate this comparison under the proxy-robust Patton QLIKE loss used in the main horse race, employing an identical OOS period (2019--2026), rolling window ($W = 2{,}000$), and quarterly refit schedule ($n_{\mathrm{OOS}} = 1{,}866$, 30 refits; Experiment K1396). A4f uses its steady-state long-run variance at each refit boundary, a standard approximation for daily GARCH-X evaluated against HAR-family models on the same daily grid. Under QLIKE, A4f achieves a 1.4\% lower loss than HAR-RV (QLIKE 1.539 vs.\ 1.561), while HAR-RV-VIX attains the lowest loss of the three (QLIKE 1.523); none of the pairwise differences reach the \citet{harvey2016} threshold:
+We additionally evaluate this comparison under the proxy-robust Patton QLIKE loss used in the main horse race, employing an identical OOS period (2019--2026), rolling window ($W = 2{,}000$), and quarterly refit schedule ($n_{\mathrm{OOS}} = 1{,}866$, 30 refits). A4f uses its steady-state long-run variance at each refit boundary, a standard approximation for daily GARCH-X evaluated against HAR-family models on the same daily grid. Under QLIKE, A4f achieves a 1.4\% lower loss than HAR-RV (QLIKE 1.539 vs.\ 1.561), while HAR-RV-VIX attains the lowest loss of the three (QLIKE 1.523); none of the pairwise differences reach the \citet{harvey2016} threshold:
 \begin{itemize}
   \item A4f vs.\ HAR-RV (QLIKE): DM $t = +0.87$, $p = 0.39$ (not significant)
   \item A4f vs.\ HAR-RV-VIX (QLIKE): DM $t = -0.88$, $p = 0.38$ (not significant)
@@ -937,7 +937,7 @@ To address potential concerns about data mining and post-hoc specification selec
 \toprule
 Spec & Category & Ex-ante design rationale \\
 \midrule
-A1 & GARCH-X & Inherited from pilot K889; included \emph{only} to document the cost of estimation/forecasting inconsistency ($\tau_t$ in estimation, $\tau_{t-1}$ in OOS) \\
+A1 & GARCH-X & Inherited from an earlier pilot specification; included \emph{only} to document the cost of estimation/forecasting inconsistency ($\tau_t$ in estimation, $\tau_{t-1}$ in OOS) \\
 A2 & GARCH-X & Log-exponential: convention from the GARCH-MIDAS literature \citep{engle2013} \\
 A3 & GARCH-X & Log-exponential with lagged denominator ($\tau_{t-1}$): conservative timing variant \\
 A4 & GARCH-X & VIX-squared: dimensional consistency ($\mathrm{VIX}^2$ has variance units matching $\sigma_t^2$) \\

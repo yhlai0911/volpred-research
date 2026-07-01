@@ -146,7 +146,7 @@ component and clustering standard errors by stock (150 bootstrap replications).
 Across all three markets we find:
 %
 \begin{itemize}
-\item \textbf{Taiwan (K1145)}: $\hat{\theta}_{\mathrm{EAV}} = 6.36\times10^{-5}$,
+\item \textbf{Taiwan}: $\hat{\theta}_{\mathrm{EAV}} = 6.36\times10^{-5}$,
   cluster-bootstrap $t = 5.24$, 95\% CI $[4.13\times10^{-5},\,9.38\times10^{-5}]$.
   % source: experiments/k1145/k1145_results.json: main_fit_eav_window_1.theta_eav
   % source: experiments/k1145/k1145_results.json: cluster_bootstrap.t_stat
@@ -156,7 +156,7 @@ Across all three markets we find:
   % source: experiments/k1145/k1145_placebo_results.json: rejection_rate_one_sided
   % source: experiments/k1145/k1145_placebo_results.json: (obs-mean)/se = 13.27
 
-\item \textbf{United States (K1147)}: $\hat{\theta}_{\mathrm{EAV}} = 1.91\times10^{-4}$,
+\item \textbf{United States}: $\hat{\theta}_{\mathrm{EAV}} = 1.91\times10^{-4}$,
   cluster-bootstrap $t = 4.50$, 95\% CI $[1.29\times10^{-4},\,2.80\times10^{-4}]$.
   % source: experiments/k1147/k1147_results.json: main_fit_eav_window_1.theta_eav
   % source: experiments/k1147/k1147_results.json: cluster_bootstrap.t_stat
@@ -165,7 +165,7 @@ Across all three markets we find:
   standing 70.7$\sigma$ above the placebo distribution.
   % source: experiments/k1147/k1147_placebo_results.json: z_observed_relative_to_placebo
 
-\item \textbf{Japan (K1150)}: $\hat{\theta}_{\mathrm{EAV}} = 1.41\times10^{-4}$,
+\item \textbf{Japan}: $\hat{\theta}_{\mathrm{EAV}} = 1.41\times10^{-4}$,
   cluster-bootstrap $t = 11.99$, 95\% CI $[1.29\times10^{-4},\,1.76\times10^{-4}]$.
   % source: experiments/k1150/k1150_results.json: main_fit_eav_window_1.theta_eav
   % source: experiments/k1150/k1150_results.json: cluster_bootstrap.t_stat
@@ -187,7 +187,7 @@ A key substantive contribution of the paper concerns what we \emph{do not} find:
 no observable firm-attribute predictor of $\hat{\theta}_{\mathrm{EAV}}$---sector,
 market capitalization, beta, earnings frequency, trading volume, momentum, or
 rolling temporal trend---survives multiple-testing correction in four
-pre-registered within-market tests (K1109, K1113, K1114/K1140). This within-market
+pre-registered within-market tests. This within-market
 null result is not a weakness. Rather, it is the logical support for the
 magnitude-ordering interpretation: if $\hat{\theta}_{\mathrm{EAV}}$ behaved as
 a firm-level idiosyncratic parameter, the cross-market comparison would be
@@ -231,7 +231,7 @@ the EU, Hong Kong, Indonesia, India, Japan, Korea, Mexico, Taiwan, and the U.S.,
 2011--2025; see Section~\ref{sec:cross_market_panel}). The panel identifies three
 structural drivers of cross-market $\hat{\theta}_{\mathrm{EAV}}$ heterogeneity:
 (a)~within-market analyst attention (panel-OLS Harvey $|t|(\log\mathrm{analyst}) =
-3.236 \to 3.808$ across five N-extension iterations K1165$\to$K1171);
+3.236 \to 3.808$ across five successive N-extension iterations);
 (b)~within-market GICS sector composition (incremental adj.-$R^2 = 0.148$, joint
 $F = 689.5$, $p = 7.9 \times 10^{-14}$; sector and institutional ownership
 operate through orthogonal channels, cross-sector $\rho = -0.006$); and
@@ -256,7 +256,7 @@ on small panels.
 Section~\ref{sec:model} presents the multiplicative GARCH-EAV model and
 identifies the pooled-MLE estimation strategy. Section~\ref{sec:data} describes
 the three-market dataset. Section~\ref{sec:tw} reports the Taiwan in-sample
-evidence (K1145). Section~\ref{sec:cross} extends to the United States and Japan
+evidence. Section~\ref{sec:cross} extends to the United States and Japan
 and conducts the joint three-market test. Section~\ref{sec:regularity} synthesizes
 the evidence into the cross-market regularity claim, including the null
 heterogeneity chain, factor-absorption robustness, binary-vs-continuous
@@ -349,8 +349,8 @@ following the announcement, so the lag structure is correctly aligned across all
 three markets.\footnote{%
   For the U.S. and Japan, earnings calls typically occur during intraday or
   after-hours sessions; the $t-1$ lag similarly positions the indicator at the
-  first full-day response window. K1060 documents the T+1 timing for Taiwan;
-  K1147 and K1150 verify consistent timing for U.S. and Japan.}
+  first full-day response window. We document the T+1 timing for Taiwan
+  and verify consistent timing for U.S. and Japan.}
 
 \subsection{Estimation}
 
@@ -459,7 +459,7 @@ is not attributable to differences in the VIX scaling of the $\tau_t$ component.
   for 2014--2025. Taiwan listed companies are required to file quarterly
   financial statements by regulatory deadlines set by the Financial Supervisory
   Commission; the announced date corresponds to the actual filing or release
-  date. Following K1060, announcement effects are measured at $T+1$ (the first
+  date. Announcement effects are measured at $T+1$ (the first
   full trading day after the announcement), as Taiwan reporting typically occurs
   after market close.
 
@@ -576,7 +576,7 @@ inferential channel are numerically indistinguishable from zero.
 \label{sec:cross}
 %==============================================================
 
-\subsection{United States (K1147)}
+\subsection{United States}
 
 Applying the identical pooled MLE specification to N=30 S\&P 500
 large-caps over 90,479 stock--day observations (2014--2025):
@@ -601,7 +601,7 @@ Multi-window robustness: window-3 yields $\hat{\theta} = 7.73 \times 10^{-5}$
 ($t_{\mathrm{Hess}} = 32.11$).
 % source: experiments/k1147/k1147_results.json: robustness_eav_window
 
-\subsection{Japan (K1150)}
+\subsection{Japan}
 
 For N=30 TOPIX large-caps over 87,917 stock--day observations:
 % source: experiments/k1150/k1150_results.json: pooled_obs
@@ -644,7 +644,7 @@ independence is negligible.
 \protect\footnotemark}
 \label{tab:main_results}
 \footnotetext{Caveat: these headline estimates
-(K1145/K1147/K1150) are produced under default single-init L-BFGS-B and have
+(the three headline markets) are produced under default single-init L-BFGS-B and have
 \emph{not} yet been re-estimated under the 100-multistart protocol. Section~%
 \ref{sec:cross_market_panel} (the 9/10-market multistart audit,
 Table~\ref{tab:multistart_lr}) documents a two-basin likelihood pathology that is
@@ -653,7 +653,7 @@ coefficient $\hat{\theta}_{\mathrm{rel}}$ materially in every audited market.
 Whether the main three-market $\hat{\theta}_{\mathrm{EAV}}$ point estimates, their
 significance, and the US $>$ JP $>$ TW magnitude ordering survive a matched
 100-multistart re-estimation is an open verification item: the main specification
-(K1145/K1147/K1150) must be re-run under the same multistart protocol before these
+(the three headline markets) must be re-run under the same multistart protocol before these
 numbers can be treated as final. Results are reported here as the current
 single-init estimates pending that re-estimation.}
 \centering
@@ -663,11 +663,11 @@ single-init estimates pending that re-estimation.}
 Market & $N$ & Obs & $\hat{\theta}_{\mathrm{EAV}}$ & $t_{\mathrm{CB}}$
        & 95\% CI & Placebo ($z$) \\
 \midrule
-Taiwan (K1145) & 31 & 121,014 & $6.36\times10^{-5}$ & 5.24
+Taiwan & 31 & 121,014 & $6.36\times10^{-5}$ & 5.24
   & $[4.13, 9.38]\times10^{-5}$ & $13.3\sigma$ (0/60) \\
-United States (K1147) & 30 & 90,479 & $1.91\times10^{-4}$ & 4.50
+United States & 30 & 90,479 & $1.91\times10^{-4}$ & 4.50
   & $[1.29, 2.80]\times10^{-4}$ & $70.7\sigma$ (0/60) \\
-Japan (K1150) & 30 & 87,917 & $1.41\times10^{-4}$ & 11.99
+Japan & 30 & 87,917 & $1.41\times10^{-4}$ & 11.99
   & $[1.29, 1.76]\times10^{-4}$ & $38.6\sigma$ (0/60) \\
 \midrule
 \multicolumn{7}{l}{\textit{Bonferroni threshold ($k=3$): $|t_{\mathrm{CB}}|>2.39$
@@ -741,7 +741,7 @@ sample-composition differences (e.g., TW sample includes more
 low-coverage firms) rather than market-level structure. The null
 heterogeneity evidence chain addresses this concern directly.
 
-\textbf{K1109: Pre-registered sector ANOVA (TW).} A one-way ANOVA of
+\textbf{Pre-registered sector ANOVA (TW).} A one-way ANOVA of
 firm-level $\hat{\theta}_{\mathrm{EAV},i}$ (from single-firm GARCH fits)
 across 8 TWSE sectors yields a joint $F = 1.31$, $p = 0.297$
 (pre-registered; sector labels locked before estimation).
@@ -751,7 +751,7 @@ No sector dummy survives BH-FDR correction (minimum BH-adjusted
 $p = 0.278$ for the fabless sector).
 % source: experiments/k1109/k1109_results.json: bh_adjusted_pvalues: min = sector_fabless = 0.278
 
-\textbf{K1113: Six-covariate panel (TW).} We regress firm-level
+\textbf{Six-covariate panel (TW).} We regress firm-level
 $\hat{\theta}_{\mathrm{EAV},i}$ on six pre-registered covariates
 (log market cap, rolling beta vs.\ 0050, earnings frequency per year,
 log average volume, price volatility, industry momentum). All five
@@ -766,9 +766,9 @@ pre-registered hypotheses fail:
 % source: experiments/k1113/k1113_regression_results.json: tier_classification_summary: A.n_firms = 0
 \end{itemize}
 
-\textbf{K1114/K1140: Rolling temporal heterogeneity (TW).} K1114
+\textbf{Rolling temporal heterogeneity (TW).} A rolling-window analysis
 detects time-varying $\hat{\theta}_{\mathrm{EAV}}$ for three TW stocks
-under OLS standard errors, but K1140 shows all three pass collapse when
+under OLS standard errors, but a HAC re-check shows all three pass collapse when
 HAC Newey-West standard errors account for overlapping estimation windows
 (96\% sample overlap). No temporal trend in $\hat{\theta}_{\mathrm{EAV}}$
 survives robust inference.
@@ -782,11 +782,11 @@ the within-market heterogeneity tests would have detected size, volume, or
 sector effects. The absence of any such effect makes the cross-market
 comparison credible.
 
-\subsection{Factor Absorption and Stress Interaction (K1149 Scenario A+D)}
+\subsection{Factor Absorption and Stress Interaction (Scenario A+D)}
 \label{sec:factor}
 
 To verify that $\hat{\theta}_{\mathrm{EAV}}$ is orthogonal to systematic
-market-stress factors, K1149 applies PCA factor absorption.
+market-stress factors, we apply PCA factor absorption.
 
 \textbf{Scenario A: IS factor absorption.}  In-sample, the EAV effect
 survives PCA factor controls in both markets:
@@ -818,21 +818,21 @@ TW: stress interaction null). This asymmetry is consistent with the
 greater institutional investor positioning and options-market activity
 around U.S. earnings announcements during stress periods.
 
-\subsection{Binary vs.\ Continuous Specification (K1148)}
+\subsection{Binary vs.\ Continuous Specification}
 \label{sec:spec}
 
 A natural alternative to the binary $\mathrm{EAV}_{i,t-1}$ indicator is
 a continuous absolute earnings surprise $|\mathrm{SUE}_{i,t}|$.
-K1148 estimates both specifications for Taiwan; K1148\_d2 tests
+We estimate both specifications for Taiwan and test
 out-of-sample spec consistency on U.S.\ data.
 
 For Taiwan IS: the continuous-surprise specification yields a significant
 Hessian $t = 10.4$, confirming the effect exists in both forms.
 
-For U.S.\ OOS (K1148\_d2): applying the TW-fitted \emph{specification}
+For the U.S.\ OOS extension: applying the TW-fitted \emph{specification}
 (not the TW parameters) to U.S.\ data as a panel DM forecast evaluation
 test---this is a \emph{spec-consistency / OOS forecast superiority test},
-not an independent U.S.\ magnitude estimate (which is K1147):
+not an independent U.S.\ magnitude estimate (reported above for the U.S.\ headline result):
 binary OOS DM $t = -5.58$ (Harvey pass); continuous OOS DM $t = -5.25$
 (Harvey pass).
 
@@ -865,7 +865,7 @@ robustly identify the earnings-announcement effect.
 The three-market comparisons in Sections~\ref{sec:cross} and~\ref{sec:regularity} are
 corroborated by a broader 12-market panel analysis extending to Brazil (BR), Canada (CA),
 China (CH), the EU, Hong Kong (HK), Indonesia (ID), India (IN), Japan (JP), Korea (KR), Mexico
-(MX), Taiwan (TW), and the U.S.\ (K1165 through K1172; $N = 172$ stocks $\times$ mean
+(MX), Taiwan (TW), and the U.S.\ ($N = 172$ stocks $\times$ mean
 2{,}955 trading days). We summarise the three main findings.
 
 \subsubsection{Within-Market Analyst-Attention Mechanism}
@@ -881,8 +881,8 @@ is satisfied for $\log(\mathrm{analyst})$ across every successive N-extension:
 \label{eq:analyst_trajectory}
 \end{equation}
 
-corresponding to N = 7, N = 10, N = 10 (K1166 refit), N = 12, N = 13 markets
-(K1165 $\to$ K1166 $\to$ K1168 $\to$ K1172 $\to$ K1171), all above the Harvey threshold
+corresponding to N = 7, N = 10, N = 10 (refit), N = 12, N = 13 markets,
+all above the Harvey threshold
 (Figure~\ref{fig:5B}).
 % source: k1172_results.json: panel_ols.joint.coefs.log_analyst.t = 3.7893
 % source: k1222b_revision_guide.md §5.1 sequence table (K1165/K1166/K1168/K1171 values)
@@ -890,13 +890,13 @@ By contrast, $\mathrm{institutions\_pct}$ is insignificant within markets at
 every iteration ($|t| < 1$, $\hat{\beta} \approx -1.27 \times 10^{-3}$, stable).
 This panel Harvey t is independent of the pooled-MLE basin choice (it uses stock-level
 GJR volatility estimates, not the shared-MIDAS $\hat{\theta}_{\mathrm{EAV}}$), and is
-therefore invariant to the K1216c multistart revision discussed in
+therefore invariant to the Round 4 multistart revision discussed in
 Section~\ref{sec:spearman_panel} below.
 
 \subsubsection{Sector-Composition Dominates Institutional Ownership}
 \label{sec:sector_fe}
 
-K1207 augments the 12-market panel (K1171, $N = 182$ firm-market observations) with
+We augment the 12-market panel ($N = 182$ firm-market observations) with
 GICS sector fixed effects across 10 sectors. The incremental explanatory power
 reveals a clear hierarchy:
 
@@ -917,23 +917,23 @@ reveals a clear hierarchy:
 Sector composition (the GICS mix of each country's large-cap benchmark) is the dominant
 cross-market driver of $\hat{\theta}_{\mathrm{EAV}}$ variation, explaining $\approx 32\times$
 more variation than institutional ownership. Sector and ownership operate through orthogonal
-channels (cross-sector $\rho = -0.006$). The K1207 verdict is
+channels (cross-sector $\rho = -0.006$). The verdict is
 \texttt{SECTOR\_ORTHOGONAL\_CONFIRMED}.
 
 \subsubsection{Institutional-Ownership Ordering: Modestly Weaker but Surviving}
 \label{sec:spearman_panel}
 
-The K1165$\to$K1172 canonical trajectory reported a positive cross-market Spearman
+The successive N-extension trajectory reported a positive cross-market Spearman
 correlation between $\mathrm{institutions\_pct}$ and $\hat{\theta}_{\mathrm{rel}} \equiv
 \hat{\theta}_{\mathrm{EAV}} / \overline{\sigma^2}$, peaking at $\rho = +0.441$ ($p = 0.152$,
-$N = 12$) before the K1213/K1216/K1216b/K1216c multistart audits.
+$N = 12$) before the multistart audits described below.
 % source: k1172_results.json: cross_market_spearman.institutions_pct_vs_theta_rel.rho = 0.441, p = 0.152
 
-The multistart audits (K1213 AU; K1216 BR/IN/MX; K1216b CH/ID; K1216c US/EU/JP/TW) reveal
+The multistart audits (Round 1: AU; Round 2: BR/IN/MX; Round 3: CH/ID; Round 4: US/EU/JP/TW) reveal
 that all 9 audited markets' joint pooled-MLE canonical estimates are trapped in an inferior
 local minimum (Appendix~\ref{app:gradient}). An intermediate correction applying the
 multistart protocol only to the five EM markets while leaving DEV markets at single-init
-canonical values produces an artefactual collapse to $\rho = -0.071$ (K1216b asymmetric
+canonical values produces an artefactual collapse to $\rho = -0.071$ (Round 3 asymmetric
 refinement). Once the identical 100-start protocol is applied uniformly to all 9 fragile
 markets, the rank concordance rebounds:
 
@@ -945,9 +945,9 @@ markets, the rank concordance rebounds:
 \toprule
 Scenario & $N$ & $\rho$ & $p$ & Harvey $t$ & Status \\
 \midrule
-K1172 baseline (all canonical) & 12 & $+0.441$ & $0.152$ & $+1.55$ & Reference \\
-K1216b: 5-EM refined, DEV canonical & 13 & $-0.071$ & $0.817$ & $-0.24$ & Artefact (asymmetric) \\
-K1216c: 9-market uniform refinement & 13 & $\mathbf{+0.379}$ & $\mathbf{0.201}$ & $\mathbf{+1.36}$ & \textbf{FINAL} \\
+Pre-audit baseline (all canonical) & 12 & $+0.441$ & $0.152$ & $+1.55$ & Reference \\
+Round 3: 5-EM refined, DEV canonical & 13 & $-0.071$ & $0.817$ & $-0.24$ & Artefact (asymmetric) \\
+Round 4: 9-market uniform refinement & 13 & $\mathbf{+0.379}$ & $\mathbf{0.201}$ & $\mathbf{+1.36}$ & \textbf{FINAL} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -964,35 +964,35 @@ with the analyst-attention interpretation of Section~\ref{sec:within_analyst}
 (Figure~\ref{fig:5A}; Figure~\ref{fig:5C} presents the two-level $R^2$ decomposition).
 
 \paragraph{Pre-registration disclosure.}
-Canada, Hong Kong, and Korea carry K1172 canonical $\hat{\theta}_{\mathrm{rel}}$ in the
-K1216c rebuild (these three markets were not included in the 9-market multistart audit).
+Canada, Hong Kong, and Korea carry the pre-audit canonical $\hat{\theta}_{\mathrm{rel}}$ in the
+Round 4 rebuild (these three markets were not included in the 9-market multistart audit).
 Given the universal FRAGILE verdict across all 9 audited markets, a future audit on
 CA/HK/KR would likely shift their $\hat{\theta}_{\mathrm{rel}}$ upward; the final
 $\rho$ is expected to fall between $+0.30$ and $+0.50$.
 
-\paragraph{Residual caveat (i): emerging-market cost-of-capital scale factor (K1173).}
+\paragraph{Residual caveat (i): emerging-market cost-of-capital scale factor.}
 Institutional-ownership values for EM markets sit 3--25$\times$ above the developed-market
 reference range ($\hat{\theta}_{\mathrm{rel}}$: BR $= 1.89$, CA $= 1.45$, IN $= 1.17$,
 MX $= 1.20$ vs.\ TW $= 0.17$ through US $= 0.59$).\footnote{%
 Two distinct normalizations of $\hat{\theta}_{\mathrm{rel}}$ appear in this section
 and must not be conflated. The values quoted here and in the cross-market
 ladder/trajectory analysis (TW $= 0.167$, EU $= 0.194$, JP $= 0.388$, US $= 0.586$;
-K1163 four-market normalization) are computed under the K1163/K1172 four-market
+four-market normalization) are computed under the four-market
 pooled normalization used to construct the inst\_pct ladder.
 % source: k1163_results.json: tw_theta_rel=0.167, eu_k1163_theta_rel=0.19402, jp_theta_rel=0.388, us_theta_rel=0.586
 The canonical $\hat{\theta}_{\mathrm{rel}}$ values reported in
 Table~\ref{tab:multistart_lr} (TW $= 0.314$, US $= 0.415$, JP $= 1.668$)
-are estimated under the K1216c \emph{pooled-joint refit} specification, a different
+are estimated under the Round-4 \emph{pooled-joint refit} specification, a different
 estimation setup; the two systems share a symbol but differ in normalization base and
 therefore in absolute scale. The ``developed-market reference range $[0.17, 0.59]$''
-in this paragraph refers exclusively to the K1163 four-market normalization; under that
+in this paragraph refers exclusively to the four-market normalization; under that
 normalization, JP $= 0.388$ sits inside the developed range, consistent with the
 EM-versus-developed contrast. The larger JP $= 1.668$ in Table~\ref{tab:multistart_lr}
-is a K1216c-normalization canonical estimate and is not directly comparable to the
+is a Round-4-normalization canonical estimate and is not directly comparable to the
 $[0.17, 0.59]$ developed range.
 % source: k1216c_results.json: per_market.{TW,US,JP}.canonical_theta_rel = 0.31397, 0.41482, 1.66751
 }
-K1173 tests whether this off-ladder position reflects a data-quality artefact:
+We test whether this off-ladder position reflects a data-quality artefact:
 \texttt{yfinance} \texttt{major\_holders} can conflate promoter, government, and
 institutional blocks in EM filings.
 Using SEBI quarterly shareholding disclosures and Simplywall.st institutional-only
@@ -1004,16 +1004,16 @@ The null shift confirms that the EM off-ladder behaviour is \emph{structural}---
 a cost-of-capital scaling factor that amplifies earnings-announcement volatility in
 high-cost markets---not a measurement artefact.
 Figure~\ref{fig:5D} shows the $\hat{\theta}_{\mathrm{rel}}$ vs.\ $\mathrm{inst\_pct}$
-scatter with purple arrows marking the K1173 refined-proxy shift; the developed-market
+scatter with purple arrows marking the refined-proxy shift; the developed-market
 ladder slope is unchanged.
 
-\paragraph{Residual caveat (iii): EU full-coverage cluster robustness (K1163).}
-The original EU estimate (K1153, $N = 18$) relied on a DAX-heavy subsample because sparse
+\paragraph{Residual caveat (iii): EU full-coverage cluster robustness.}
+The original EU estimate ($N = 18$) relied on a DAX-heavy subsample because sparse
 yfinance earnings coverage forced skipping 12 Stoxx-600 candidates.
-K1163 refits with the full 30/30 EU stocks using hand-collected earnings dates from
+We refit with the full 30/30 EU stocks using hand-collected earnings dates from
 \textsc{ircalendar} for 10 tickers.
-The EU $\hat{\theta}_{\mathrm{rel}}$ shifts from $0.137$ (K1153) to $\mathbf{0.194}$
-(K1163), with 95\% bootstrap CI $[0.127, 0.277]$---remaining entirely within the
+The EU $\hat{\theta}_{\mathrm{rel}}$ shifts from $0.137$ to $\mathbf{0.194}$,
+with 95\% bootstrap CI $[0.127, 0.277]$---remaining entirely within the
 \emph{low-cluster} upper bound ($\leq 0.25$) and excluding the high-cluster lower bound
 $0.30$.
 % source: k1163_results.json: theta_rel = 0.1937; boot_ci = [0.127, 0.277]
@@ -1021,10 +1021,10 @@ Cluster-bootstrap $t = 4.81$; placebo $z = 22.27$.
 % source: k1163_results.json: cluster_boot_t = 4.807; placebo_z = 22.27
 The TW$+$EU (low-cluster) vs.\ JP$+$US (high-cluster) four-market classification
 \emph{survives} full EU coverage.
-Figure~\ref{fig:5E} compares K1153 ($N = 18$) and K1163 ($N = 30$) estimates with
+Figure~\ref{fig:5E} compares the $N = 18$ and $N = 30$ estimates with
 cluster-bootstrap confidence intervals.
 
-\paragraph{Section synthesis: MODESTLY WEAKER BUT SURVIVING --- K1222b FINAL.}
+\paragraph{Section synthesis: MODESTLY WEAKER BUT SURVIVING (FINAL).}
 % source: k1222b_revision_guide.md §5.5 narrative commitment (K1216c supersedes K1222/K1215/K1211)
 The within-market analyst-attention mechanism is robust: Panel Harvey $|t|(\log\mathrm{analyst})$
 grows monotonically $3.236 \to 3.808$ across five N-extension iterations ($N = 172$ stocks,
@@ -1032,10 +1032,10 @@ grows monotonically $3.236 \to 3.808$ across five N-extension iterations ($N = 1
 $\mathrm{institutions\_pct}$ is insignificant within market
 ($|t| < 1$, $\hat{\beta} \approx -1.25 \times 10^{-3}$, stable; Figure~\ref{fig:5B}).
 GICS sector FE add incremental adjusted $R^2 = 0.148$ ($\approx 32\times$ the
-inst-FE $0.0046$), $F = 689.5$, $p = 7.9 \times 10^{-14}$ (K1207; Figure~\ref{fig:5C}).
+inst-FE $0.0046$), $F = 689.5$, $p = 7.9 \times 10^{-14}$ (Figure~\ref{fig:5C}).
 Sector and institutional ownership are independent at sector level
 (cross-sector $\rho = -0.006$, $p = 0.987$).
-EU panel full-coverage robustness (K1163) keeps EU low-cluster at $N = 30$
+EU panel full-coverage robustness keeps EU low-cluster at $N = 30$
 (bootstrap $t = 4.81$, 95\% CI $\hat{\theta}_{\mathrm{rel}} \in [0.127, 0.277]$;
 Figure~\ref{fig:5E}).
 
@@ -1044,24 +1044,24 @@ under panel-wide 100-multistart audit.
 The canonical trajectory $\rho = +0.75 \to +0.44 \to +0.39$ updates to a 9-market
 consistent refined Spearman
 $\rho(\mathrm{inst\_pct},\hat{\theta}_{\mathrm{rel}}) = +0.379$, $p = 0.201$,
-Harvey $t = +1.36$ ($N = 13$, K1216c; Table~\ref{tab:spearman_traj}).
+Harvey $t = +1.36$ ($N = 13$, Round 4; Table~\ref{tab:spearman_traj}).
 % source: k1216c_results.json: spearman_variants.K1216c_FULL_9market_refined_plus_AU_N13.rho=0.3791, p=0.2014
 % source: k1216c_results.json: harvey_t_per_variant.K1216c_FULL_9market_refined_plus_AU_N13=1.3588
-The canonical $+0.441$ (K1172, $N = 12$) and refined $+0.379$ are statistically
+The canonical $+0.441$ ($N = 12$) and refined $+0.379$ are statistically
 indistinguishable under a Fisher $z$ comparison ($z$-stat $= 0.16$, two-sided $p \approx 0.87$);
 both are moderately positive and non-significant at 5\%.
-The intermediate K1216b $\rho = -0.071$ was an \textbf{asymmetric-refinement artefact}:
+The intermediate Round-3 $\rho = -0.071$ was an \textbf{asymmetric-refinement artefact}:
 refining 5 EM pools to basin-B while leaving 4 DEV pools at default-init basin-A broke the
-rank concordance. K1216c shows all 4 DEV pools are also FRAGILE
+rank concordance. Round 4 shows all 4 DEV pools are also FRAGILE
 (US LR $= 2837$, EU $838$, JP $236$, TW $588$); moving DEV to basin-B in parallel
 rebuilds concordance.
 
-Residual caveat (i)---EM cost-of-capital scaling (K1173 null-shift $\Delta\rho = -0.056$,
+Residual caveat (i)---EM cost-of-capital scaling (null-shift $\Delta\rho = -0.056$,
 Figure~\ref{fig:5D})---requires treating EM $\hat{\theta}_{\mathrm{rel}}$ as a separate
 structural regime whose distance from the developed-market ladder is not a measurement
 artefact.
-Residual caveat (ii)---CA/HK/KR disclosure: these three markets carry K1172 canonical
-$\hat{\theta}_{\mathrm{rel}}$ in the K1216c rebuild; given the universal FRAGILE verdict
+Residual caveat (ii)---CA/HK/KR disclosure: these three markets carry pre-audit canonical
+$\hat{\theta}_{\mathrm{rel}}$ in the Round 4 rebuild; given the universal FRAGILE verdict
 across all 9 audited markets, a future audit on CA/HK/KR is expected to shift the final
 $\rho$ to $[+0.30,\,+0.50]$.
 
@@ -1086,13 +1086,13 @@ All future extensions on this specification must follow the \S5.5.4 multistart p
 \label{sec:multistart_method}
 % source: k1222b_revision_guide.md §5.4 (promoted from K1222 appendix to §5.5.4 Paper 2 contribution)
 
-K1213, K1216, K1216b, and K1216c together establish that the shared-MIDAS $+$ stock-FE-GJR
-pooled-MLE specification (K1168/K1172) exhibits a \textbf{panel-wide two-basin likelihood
+The four multistart audit rounds together establish that the shared-MIDAS $+$ stock-FE-GJR
+pooled-MLE specification exhibits a \textbf{panel-wide two-basin likelihood
 surface}: all 9 audited markets (AU $+$ 5 EM $+$ 4 DEV) trap default-init L-BFGS-B in an
 inferior local minimum. This is a methodological contribution to cross-market
 systemic-volatility studies on small-$S$ pools ($S \leq 10$ stocks per market).
 
-\paragraph{Multistart protocol} (identical across K1213/K1216/K1216b/K1216c):
+\paragraph{Multistart protocol} (identical across all four audit rounds):
 \begin{enumerate}[label=\arabic*.]
 \item 100 random L-BFGS-B initialisations per market; log-uniform on
   $\hat{\theta}_{\mathrm{EAV}},\, \theta_0 \in [10^{-6},\, 5 \times 10^{-4}]$.
@@ -1121,27 +1121,27 @@ systemic-volatility studies on small-$S$ pools ($S \leq 10$ stocks per market).
 \small
 \begin{tabular}{llccccc}
 \toprule
-Market & Exp & Canon $\hat{\theta}_{\mathrm{rel}}$ & Refined $\hat{\theta}_{\mathrm{rel}}$ & LR stat & $\chi^2(1)$ multiple & Verdict \\
+Market & Round & Canon $\hat{\theta}_{\mathrm{rel}}$ & Refined $\hat{\theta}_{\mathrm{rel}}$ & LR stat & $\chi^2(1)$ multiple & Verdict \\
 \midrule
-AU & K1213  & 0.150 & 1.476 & 198.9   & $51.8\times$ & FRAGILE \\
-BR & K1216  & 1.887 & 2.691 & 145.66  & $37.9\times$ & FRAGILE \\
-IN & K1216  & 1.170 & 3.077 & 410.76  & $107\times$  & FRAGILE \\
-MX & K1216  & 1.202 & 1.845 & 347.27  & $90\times$   & FRAGILE \\
-CH & K1216b & 0.304 & 1.469 & 597.94  & $156\times$  & FRAGILE \\
-ID & K1216b & 0.238 & 1.917 & 365.36  & $95\times$   & FRAGILE \\
-US & K1216c & 0.415 & 8.614 & 2836.68 & $739\times$  & FRAGILE \\
-EU & K1216c & 0.196 & 1.434 & 837.97  & $218\times$  & FRAGILE \\
-JP & K1216c & 1.668 & 4.706 & 235.57  & $61.3\times$ & FRAGILE \\
-TW & K1216c & 0.314 & 1.364 & 587.78  & $153\times$  & FRAGILE \\
+AU & 1 & 0.150 & 1.476 & 198.9   & $51.8\times$ & FRAGILE \\
+BR & 2 & 1.887 & 2.691 & 145.66  & $37.9\times$ & FRAGILE \\
+IN & 2 & 1.170 & 3.077 & 410.76  & $107\times$  & FRAGILE \\
+MX & 2 & 1.202 & 1.845 & 347.27  & $90\times$   & FRAGILE \\
+CH & 3 & 0.304 & 1.469 & 597.94  & $156\times$  & FRAGILE \\
+ID & 3 & 0.238 & 1.917 & 365.36  & $95\times$   & FRAGILE \\
+US & 4 & 0.415 & 8.614 & 2836.68 & $739\times$  & FRAGILE \\
+EU & 4 & 0.196 & 1.434 & 837.97  & $218\times$  & FRAGILE \\
+JP & 4 & 1.668 & 4.706 & 235.57  & $61.3\times$ & FRAGILE \\
+TW & 4 & 0.314 & 1.364 & 587.78  & $153\times$  & FRAGILE \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
 \item[*] All 10 markets reject the canonical single-init estimate at $p < 10^{-30}$
-under nested LR. The 9/9 FRAGILE pattern is a feature of the K1168/K1172 joint
+under nested LR. The 9/9 FRAGILE pattern is a feature of the joint
 pooled-MLE specification on small-$S$ panels, not a market-specific anomaly.
 The two-basin pathology is \textbf{invisible} under default single-init L-BFGS-B
-(used in K1145/K1147/K1150/K1153/K1168/K1172); the multistart diagnostic reveals it
+(used across all headline market estimates); the multistart diagnostic reveals it
 only after $10 \times 100 = 1000$ fits.
 % sources: k1213_results.json, k1216_results.json, k1216b_results.json, k1216c_results.json (verbatim)
 \end{tablenotes}
@@ -1156,13 +1156,13 @@ only after $10 \times 100 = 1000$ fits.
 \centering
 \includegraphics[width=0.85\textwidth]{figures/k1204_figure_A_trajectory_rho.pdf}
 \caption{Cross-market Spearman $\rho$ (inst\_pct vs.\ $\hat{\theta}_{\mathrm{rel}}$)
-trajectory across N-extension iterations K1165--K1171. Error bars show Fisher-$z$ 95\%
+trajectory across five successive N-extension iterations. Error bars show Fisher-$z$ 95\%
 confidence intervals; colours indicate verdict
 (STRENGTHENED\,/\,PARTIAL\,/\,DATA\_LIMITED).
 $N$ increases from 7 to 13 markets across iterations.
-\textbf{FINAL annotation}: K1216c 9-market uniform refinement yields
+\textbf{FINAL annotation}: Round 4's 9-market uniform refinement yields
 $\rho = +0.379$, $p = 0.201$, $N = 13$ (rightmost point, solid border);
-K1216b asymmetric $\rho = -0.071$ (open border) is relegated to a methodology footnote.}
+Round 3's asymmetric $\rho = -0.071$ (open border) is relegated to a methodology footnote.}
 % source: k1222b_revision_guide.md cherry-pick instruction 10
 \label{fig:5A}
 \end{figure}
@@ -1171,8 +1171,7 @@ K1216b asymmetric $\rho = -0.071$ (open border) is relegated to a methodology fo
 \centering
 \includegraphics[width=0.85\textwidth]{figures/k1204_figure_B_panel_harvey_t.pdf}
 \caption{Panel joint $\log(\mathrm{analyst})$ $t$-statistic trajectory
-($3.236 \to 3.808$) across five N-extension iterations (K1165, K1166, K1168, K1172,
-K1171). The horizontal dashed line marks the Harvey--Liu--Zhu (2016) $|t| = 3.0$
+($3.236 \to 3.808$) across five N-extension iterations. The horizontal dashed line marks the Harvey--Liu--Zhu (2016) $|t| = 3.0$
 threshold; all five iterations exceed it.}
 \label{fig:5B}
 \end{figure}
@@ -1192,7 +1191,7 @@ confirming the hierarchical structure of the institutional-ownership mechanism.}
 \includegraphics[width=0.85\textwidth]{figures/k1204_figure_D_em_residual_taxonomy.pdf}
 \caption{$\hat{\theta}_{\mathrm{rel}}$ vs.\ $\mathrm{inst\_pct}$ scatter for all
 13 markets, colour-coded by region (developed / EM above-ladder / AU below-ladder).
-Purple arrows show the K1173 refined-proxy shift for EM markets under
+Purple arrows show the refined-proxy shift for EM markets under
 SEBI-/Simplywall.st-based institutional-only decompositions;
 the developed-market ladder slope is unchanged ($\Delta\rho = -0.056$, null).}
 \label{fig:5D}
@@ -1201,8 +1200,8 @@ the developed-market ladder slope is unchanged ($\Delta\rho = -0.056$, null).}
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{figures/k1204_figure_E_k1163_eu_robustness.pdf}
-\caption{EU full-coverage robustness check: K1153 ($N = 18$, DAX-heavy subsample) vs.\
-K1163 ($N = 30$, full Stoxx-600 coverage).
+\caption{EU full-coverage robustness check: $N = 18$ (DAX-heavy subsample) vs.\
+$N = 30$ (full Stoxx-600 coverage).
 $\hat{\theta}_{\mathrm{rel}}$ increases from $0.137$ to $0.194$ while remaining within
 the low-cluster bound ($\leq 0.25$); cluster-bootstrap $t$ increases from $4.19$ to
 $4.81$ and placebo $z$ from $14.77$ to $22.27$.
@@ -1226,7 +1225,7 @@ threshold at each layer.
 \begin{threeparttable}
 \begin{tabular}{llccc}
 \toprule
-Layer & Test & Taiwan (K1145) & US (K1147) & Japan (K1150) \\
+Layer & Test & Taiwan & US & Japan \\
 \midrule
 \multirow{2}{*}{(1) EAV window}
   & Window-3 $\hat{\theta}$ & $3.80\times10^{-5}$ & $7.73\times10^{-5}$ & $1.10\times10^{-4}$ \\
@@ -1254,8 +1253,8 @@ Layer & Test & Taiwan (K1145) & US (K1147) & Japan (K1150) \\
   $[-2,+2]$ event windows.
 \item[b] Drop-stock: five independent draws removing 5 of $N$ stocks
   (seeds 42--46); minimum across seeds.
-\item[c] Factor absorption (Layer 5) estimated from K1149 (US and TW only);
-  Japan not included in K1149 design.
+\item[c] Factor absorption (Layer 5) estimated from US and TW only;
+  Japan not included in this test's design.
 % source: experiments/k1145/k1145_results.json: robustness_eav_window, robustness_dropout, bh_fdr_table
 % source: experiments/k1147/k1147_results.json: robustness_eav_window, robustness_dropout, bh_fdr_table
 % source: experiments/k1150/k1150_results.json: robustness_eav_window, robustness_dropout, bh_fdr_table
@@ -1284,13 +1283,13 @@ $|t| > 3.0$. All three primary market estimates clear this bar
 specifications are explicitly labeled as robustness checks, not additional
 primary tests.
 
-\textbf{K1148\_d3 selection-bias caveat.}
-K1148\_d3 performs ex-post firm-characteristic heterogeneity tests
-conditional on the TW OOS pass from K1148\_d1. Because TW OOS is
+\textbf{Selection-bias caveat.}
+An ex-post firm-characteristic heterogeneity analysis performs these tests
+conditional on the TW OOS pass reported above. Because TW OOS is
 marginal ($p = 0.076$, NS), the selection is non-trivially biased.
-The primary null heterogeneity evidence is therefore K1109 and K1113,
+The primary null heterogeneity evidence is therefore the sector ANOVA and six-covariate panel tests,
 which are pre-registered and estimated ex-ante on the IS sample.
-K1148\_d3 results are consistent with K1109/K1113 but should not be
+This ex-post analysis is consistent with those pre-registered tests but should not be
 treated as independent confirmatory evidence.
 
 %==============================================================
@@ -1313,9 +1312,9 @@ $(6.36\times10^{-5})$, a 3:1 range consistent with cross-market
 differences in analyst coverage density, earnings-call culture, and
 institutional pre-announcement positioning. This ordering interpretation
 is supported by the null within-market heterogeneity chain: sector ANOVA
-(K1109, joint $F = 1.31$, $p = 0.297$), six-covariate cross-sectional
-regression (K1113, CV $R^2 = -0.661$, no BH-survivor), and HAC-robust
-temporal heterogeneity (K1140, all rolling $\hat{\theta}$ trends
+(joint $F = 1.31$, $p = 0.297$), six-covariate cross-sectional
+regression (CV $R^2 = -0.661$, no BH-survivor), and HAC-robust
+temporal heterogeneity (all rolling $\hat{\theta}$ trends
 collapse). Because no within-market firm attribute predicts
 $\hat{\theta}_{\mathrm{EAV}}$, the cross-market comparison is not
 confounded by sample-composition differences.
@@ -1333,7 +1332,7 @@ $\approx 32\times$ the explanatory weight of institutional ownership FE,
 operating through orthogonal channels at the sector level); and (c)~cross-market
 institutional ownership, characterised as \emph{modestly weaker but surviving}
 under the panel-wide multistart audit (refined Spearman $\rho = +0.379$,
-$p = 0.20$, $N = 13$, statistically indistinguishable from the K1172 canonical
+$p = 0.20$, $N = 13$, statistically indistinguishable from the pre-audit canonical
 $+0.441$ under a Fisher $z$ comparison, $p \approx 0.87$). A panel-wide
 $\geq 100$-multistart audit further establishes that the headline US$>$JP$>$TW
 ordering is preserved between canonical and refined estimates, with Taiwan
@@ -1346,7 +1345,7 @@ requirement for future small-$S$ shared-MIDAS$+$stock-FE-GJR pooled-MLE
 specifications.
 
 Open directions emerge along three axes. First, the stress-interaction
-asymmetry (K1149 Scenario D: US significant, TW null) warrants further
+asymmetry (Scenario D: US significant, TW null) warrants further
 investigation across additional markets to determine whether it reflects
 the U.S. options market's role in amplifying announcement volatility during
 stress episodes. Second, our period (2014--2025 for the three headline markets
@@ -1355,9 +1354,9 @@ structural-break analysis of $\hat{\theta}_{\mathrm{EAV}}$ around 2020 could
 test whether the announcement effect is regime-stable. Third, extending the
 panel beyond its present 13-market coverage---adding the United Kingdom,
 disaggregating the EU into member exchanges, and completing the
-CA/HK/KR multistart audit currently carrying K1172 canonical values---would
+CA/HK/KR multistart audit currently carrying pre-audit canonical values---would
 provide a richer test of the magnitude-ordering mechanism and tighten the
-refined cross-market Spearman estimate (the K1216c pre-registration band is
+refined cross-market Spearman estimate (the Round-4 pre-registration band is
 $\rho \in [+0.30, +0.50]$).
 
 %==============================================================

@@ -91,6 +91,28 @@ def submission_files(paper_dir: Path) -> list[Path]:
         if "\\documentclass" in head:
             entries.append(cand)
 
+    # 2026-07-01 fix: some papers compile directly from a bare body.tex with no
+    # main.tex at all (e.g. eav-universal-magnitude). The main*.tex glob above
+    # then finds zero entries, so the paper was silently never scanned by the
+    # default all-papers run — a compliance-scrub commit could fix the text and
+    # no CI gate would ever re-verify it afterwards (exactly how a stale
+    # "VolPred Research System" acknowledgment survived in the live PDF after
+    # the source .tex had already been scrubbed). Treat a bare body.tex (not
+    # body_vN.tex — those are archives, already excluded by _OLD_ENTRY_RE the
+    # same way main_vN.tex is) as an entry point when it is itself a
+    # \documentclass root and no main*.tex claimed the role.
+    if not entries:
+        body_entry = paper_dir / "body.tex"
+        if body_entry.exists() and not _OLD_ENTRY_RE.search(body_entry.name):
+            try:
+                head = body_entry.read_text(encoding="utf-8", errors="replace")[:3000]
+            except OSError as e:
+                from sys import stderr
+                print(f"warn: cannot read {body_entry}: {e}", file=stderr)  # silent-ok would hide a real read failure
+                head = ""
+            if "\\documentclass" in head:
+                entries.append(body_entry)
+
     for entry in entries:
         add(entry)
         txt = entry.read_text(encoding="utf-8", errors="replace")
@@ -142,8 +164,12 @@ def main(argv: list[str]) -> int:
     if args:
         dirs = [PAPER_ROOT / args[0]]
     else:
+        # 2026-07-01 fix: also pick up body.tex-only papers (no main.tex at all,
+        # e.g. eav-universal-magnitude) — see submission_files() for why the old
+        # main.tex-only filter silently dropped these from the default scan.
         dirs = sorted(d for d in PAPER_ROOT.iterdir()
-                      if d.is_dir() and d.name not in EXCLUDE_DIRS and (d / "main.tex").exists())
+                      if d.is_dir() and d.name not in EXCLUDE_DIRS
+                      and ((d / "main.tex").exists() or (d / "body.tex").exists()))
 
     results = [check_paper(d) for d in dirs if d.exists()]
     any_dirty = any(not r["clean"] for r in results)
