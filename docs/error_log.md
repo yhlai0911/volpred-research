@@ -2,6 +2,26 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 05:07 hourly-dispatch 整班 32 分鐘零產出——auth-preflight 恢復路徑內三處無逾時保護的呼叫連環卡住 — **FIXED**
+
+**觸發**：05:07 CST 那班 hourly-dispatch 的 auth-preflight 又遇到（跟 23:07/23:45 那次相同根因的）系統負載造成逾時。但這次進入「恢復路徑」後，**連續三個原本設計來處理失敗的呼叫本身也各自卡住**，讓整班從 05:07:04 跑到 05:39:29（32 分鐘），期間零實際派工:
+
+1. `source "$ZSHRC_PATH" 2>/dev/null || true`（第 1 次 attempt 失敗後的重試前置動作）卡了 15 分鐘以上。`ps -ef` 追出真正卡住的是 `.zshrc` 裡 conda 初始化區塊叫出的子行程 `conda shell.zsh hook`（PID 82363，父行程 82362 → 主行程 80927）。`2>/dev/null || true` 只吃掉 stderr 跟非零 exit code，**完全不處理「行程根本不返回」的 hang**——這行從一開始就沒有任何逾時保護，跟同檔案其他呼叫（`run_auth_preflight`/`codex --version`/`codex exec`）一律用 `perl -e 'alarm shift; exec @ARGV'` 包一層逾時上限的既有慣例不一致。手動 `kill -TERM 82363` 後才解卡。
+2. 解卡後 3 次 attempt 全部 exit=142（當晚系統負載偏高的同一現象，非新故障），觸發 `send_auth_preflight_alert()` 內的 `uv run volpred ops send-alert --level warn ...`（PID 893/894），這次**這個 email 呼叫本身也卡住 6 分鐘以上**，CPU 幾乎是 0、沒有子行程在做實際工作。手動 kill 才解卡。
+3. 接著進入 `run_codex_failover()`，其 `codex --version` 前置檢查（已用 perl alarm 包 30 秒逾時，行為正確）逾時回傳 rc=142，但腳本邏輯把**任何非零 rc 一律判為「binary broken, abort failover」**，不分辨是「逾時」還是「真的壞了」，於是又寄出一封 critical email（`uv run volpred ops send-alert --level critical ...`，PID 7286/7287），**這封也卡住 4 分鐘以上**。手動 kill 後整班才終於以 `exit=1 preflight-auth + codex-failover-failed` 結束。
+
+**獨立驗證「binary broken」判斷是假警報**：整段事故處理完，立刻手動執行 `codex --version`：`codex-cli 0.142.3`，rc=0，秒回——證明 codex binary 從頭到尾沒壞，第 3 點的判斷邏輯是結構性誤診，跟稍早已修好的 Claude auth-preflight「空白輸出被誤判成 keychain 問題」是同一類錯誤（把逾時當成真正的失敗，且套用了錯誤的補救建議）。
+
+**root cause 追查 `send-alert` 為何卡住**：沿路徑讀 `src/volpred/cli.py`（`ops send-alert` command）→ `src/volpred/ops/alerts.py`（`send_alert()`/`_dispatch_alert_email()`，確認 dedup 讀寫**沒有** file lock，排除鎖競爭）→ `src/volpred/publisher/email_notifier.py`（`EmailNotifier.notify()` 內 `smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=20)`）。`timeout=20` 只保證 socket 層的動作有上限，**不保證涵蓋 `smtplib.SMTP()` 建立連線階段內部的 DNS 解析（`getaddrinfo`）**——在系統負載/網路重載下，這個階段可能不受 20 秒約束而拖更久。此為合理懷疑但未取得 100% confirm 的 stack trace（環境內 `sample` 指令沒能拿到可用輸出）；不影響本次修法，因為修法是在呼叫端加 process-level 逾時保護，不依賴 email_notifier 內部行為改變。
+
+**Fix（流程面：所有「失敗恢復路徑」內的呼叫全部補上跟主流程一致的逾時保護，而非再加一次性 patch）**：
+1. `scripts/cron_hourly_dispatch.sh`（canonical，已同步到 `~/.volpred/bin/cron_hourly_dispatch.sh`）新增 `run_send_alert()` helper，用同一套 `perl -e 'alarm shift; exec @ARGV'` pattern（逾時 `SEND_ALERT_TIMEOUT_SEC=45`）包住 `uv run volpred ops send-alert`；檔案內全部 4 處直接呼叫 send-alert 的地方（auth-preflight 失敗信、codex preflight 失敗信、codex failover 結果信、全 attempt 失敗信）改走這個 wrapper，逾時只會跳過寄信、不再拖垮整班。
+2. `source "$ZSHRC_PATH"` 改成：用外部、可被 perl alarm 包住的 `zsh -c "source '...'; echo PATH=\$PATH"` 子行程（逾時 `ZSHRC_SOURCE_TIMEOUT_SEC=20`）取代 in-process `source`（bash builtin 無法被 perl exec 直接包），只取回 PATH（此處唯一可能有意義的副作用，供 keychain fallback 用）；逾時就跳過不影響主流程，因為真正的 auth 修復（`CLAUDE_CODE_OAUTH_TOKEN` 長效 token bypass）本來就不依賴這行成功。
+3. `run_codex_failover()` 的「binary broken」判斷改為區分 `preflight_rc -eq 142`（SIGALRM 逾時，可能是負載，寄 `warn` 並註明「非 binary 損壞」+ 建議先看 `uptime`/並行 process）vs 其他非零 rc（才寄 `critical` + 原本的 binary 檢查建議）。
+4. 三處修改都用 `bash -n` 驗證語法，且用真實會 hang 的指令（`sleep 30` 包 3 秒逾時）與真實 `~/.zshrc`（正常情況下 ~1.8 秒完成、PATH 正確取回）雙向煙霧測試過。
+
+**為什麼是結構性修法而非單點 patch**：三個卡住點雖然表面觸發原因不同（conda hook / send-alert 內部 / codex 誤診），但共通根因是同一個模式——「主流程的呼叫全部有逾時保護，但『失敗後的恢復/告警路徑』被視為次要，一路被漏掉」。這正是 Three-Strike 規則所指的「一旦看見結構性 root cause 就立刻整體重構，不用等滿 3 次」——本次一次性把該檔案內所有裸呼叫（含未來新增的告警呼叫）都收斂進 `run_send_alert()` 單一入口，避免下一個新告警點又重蹈覆轍。
+
 ## 2026-07-02 論文 TICK-6 忘記重新 claim，撞上 hourly-dispatch 同時處理同一 paper_body task — 現場緊急停手，未造成資料損失
 
 **觸發**：TICK-5 完成後用 `handoff-main-thread` 把 `paper_body_leverage_direction_downshift_FRL_20260701` 放回 `pending_main_thread`（正確流程）。下一個 autonomous tick（03:06）決定接續 TICK-6（main_v_ijf.tex wrapper），但**忘記在動手前重新 `claim`+`start`**——只顧著讀 IJF profile / 查 elsarticle.cls / 修 reproduce.py 的 pre-existing bug，跳過了每次 TICK 開工前都該做的 claim 步驟。

@@ -44,6 +44,23 @@ AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-sonnet-5}"
 # the same run instead of skipping a dispatch slot. 2026-05-30 (05:08 incident).
 AUTH_PREFLIGHT_BACKOFF_SEC="${AUTH_PREFLIGHT_BACKOFF_SEC:-20}"
 AUTH_HOTFIX_CMD="${AUTH_HOTFIX_CMD:-security set-generic-password-partition-list -S apple-tool:,apple:,launchd:,unsigned: -s \"Claude Code-credentials\" -k login.keychain}"
+# 2026-07-02 fix (05:07 incident: `source "$ZSHRC_PATH"` hung ~15min with zero
+# timeout protection — a stuck `conda shell.zsh hook` child blocked it; killing
+# that PID was the only way to unblock the run). `source` is a bash builtin so
+# perl's `alarm+exec` pattern can't wrap it in place. Scoped fix: probe the rc
+# file via an external, alarm-able `zsh -c` subprocess and only pull PATH back
+# (the one plausibly load-bearing side effect — finding `security`/nvm/conda
+# binaries for the keychain-fallback path); drop everything else on timeout.
+# The CLAUDE_CODE_OAUTH_TOKEN bypass above is the actual load-bearing auth
+# fix, so this has always been best-effort, never required for correctness.
+ZSHRC_SOURCE_TIMEOUT_SEC="${ZSHRC_SOURCE_TIMEOUT_SEC:-20}"
+# 2026-07-02 fix (same incident): two separate `send-alert` calls each hung
+# 4-6min with near-zero CPU (file-locking ruled out in alerts.py; suspected but
+# unconfirmed DNS-resolution stall inside smtplib.SMTP()'s connect phase, not
+# reliably bounded by its own timeout=20 param under load). Every send-alert
+# invocation in this script now goes through run_send_alert() below so a hung
+# email send can never again burn the rest of the hourly slot.
+SEND_ALERT_TIMEOUT_SEC="${SEND_ALERT_TIMEOUT_SEC:-45}"
 
 # Log target lives OUTSIDE Desktop/ — macOS TCC protects ~/Desktop and blocks
 # launchd-spawned processes from opening files there (2026-05-21 incident:
@@ -167,6 +184,19 @@ run_auth_preflight() {
   return $?
 }
 
+# 2026-07-02 fix — see SEND_ALERT_TIMEOUT_SEC comment above. Every
+# `send-alert` call in this script must go through this wrapper, never call
+# "$UV_BIN" run volpred ops send-alert directly.
+run_send_alert() {
+  /usr/bin/perl -e 'alarm shift; exec @ARGV' "$SEND_ALERT_TIMEOUT_SEC" \
+    "$UV_BIN" run volpred ops send-alert "$@"
+  local rc=$?
+  if [ "$rc" -eq 142 ]; then
+    echo "[send-alert] TIMED OUT after ${SEND_ALERT_TIMEOUT_SEC}s (rc=142) — email not sent this round, continuing (never block dispatch on alert delivery)"
+  fi
+  return "$rc"
+}
+
 send_auth_preflight_alert() {
   local first_output=$1
   local retry_output=$2
@@ -241,7 +271,7 @@ send_auth_preflight_alert() {
   fi
   tmp=$(mktemp -t hourly_auth_fail.XXXXXX).md
   echo "$auth_body" > "$tmp"
-  "$UV_BIN" run volpred ops send-alert \
+  run_send_alert \
     --level "$([ "$looks_like_real_auth_failure" -eq 1 ] && echo critical || echo warn)" \
     --title "hourly-dispatch auth preflight $([ "$looks_like_real_auth_failure" -eq 1 ] && echo "failed" || echo "timed out (likely load, not auth)") $(date '+%H:%M')" \
     --body-md "$tmp" --force 2>&1 | tail -1
@@ -292,28 +322,45 @@ run_codex_failover() {
     "$CODEX_BIN" --version >/dev/null 2>&1
   local preflight_rc=$?
   if [ "$preflight_rc" -ne 0 ]; then
-    echo "[FAILOVER] codex --version preflight failed rc=$preflight_rc at $(date '+%H:%M:%S') — binary broken, abort failover"
     CODEX_FAILOVER_RC=$preflight_rc
-    local pbody ptmp
+    # 2026-07-02 fix (05:07 incident): a bare non-zero rc here used to be
+    # unconditionally reported as "binary broken" — but rc=142 is perl's
+    # SIGALRM, meaning `codex --version` simply never returned within
+    # ${CODEX_PREFLIGHT_TIMEOUT_SEC}s, not that the binary is broken. Live
+    # verification that night: running `codex --version` manually right after
+    # this fired returned instantly with `codex-cli 0.142.3` rc=0 — the
+    # "binary broken" diagnosis was a false positive caused by system load,
+    # the exact same misdiagnosis class already fixed for the Claude
+    # auth-preflight above. Distinguish the two so the alert (and the human
+    # reading it) isn't sent chasing a phantom binary problem.
+    local pbody ptmp preflight_level preflight_reason preflight_action
+    if [ "$preflight_rc" -eq 142 ]; then
+      echo "[FAILOVER] codex --version preflight TIMED OUT rc=142 (${CODEX_PREFLIGHT_TIMEOUT_SEC}s ceiling, likely load not a broken binary) at $(date '+%H:%M:%S') — abort failover this round only"
+      preflight_level="warn"
+      preflight_reason="逾時（SIGALRM @ ${CODEX_PREFLIGHT_TIMEOUT_SEC}s），**輸出空白，非 binary 損壞的錯誤訊息**——通常是機器同時跑多個 claude/codex process 造成資源競爭"
+      preflight_action="- 通常負載降下來後下一輪會自行恢復，不需要人工介入\n- 可跑 \`uptime\` 確認 load average；\`ps aux | grep -E 'claude -p|codex exec'\` 看是否有多個並行 process\n- 只有再次手動跑 \`codex --version\` 也逾時/報錯時，才需要懷疑 binary 本身"
+    else
+      echo "[FAILOVER] codex --version preflight failed rc=$preflight_rc at $(date '+%H:%M:%S') — binary broken, abort failover"
+      preflight_level="critical"
+      preflight_reason="rc=${preflight_rc}（非逾時的 SIGALRM 142），可能是 binary 損壞 / node runtime 問題 / 系統資源耗盡"
+      preflight_action="- 跑 \`codex --version\` 看 binary 狀態\n- 跑 \`ls -la $CODEX_BIN\` 確認檔案存在\n- 必要時 npm reinstall codex-cli"
+    fi
     pbody=$(printf '%s\n' \
 "## 觸發條件" \
 "- Claude hourly dispatch 失敗（${reason}）→ 啟動 Codex failover" \
-"- Codex --version 也失敗 rc=${preflight_rc}（${CODEX_PREFLIGHT_TIMEOUT_SEC}s ceiling）" \
-"- Codex binary 損壞 / node runtime 問題 / 系統資源耗盡" \
+"- Codex --version 也失敗：${preflight_reason}" \
 "" \
 "## 影響" \
 "- 本班 hourly dispatch 直接 abort，不會浪費時間跑死 task" \
 "- 下班 LaunchAgent fire (HH+1:07) 能正常啟動" \
 "" \
 "## 建議行動" \
-"- 跑 \`codex --version\` 看 binary 狀態" \
-"- 跑 \`ls -la $CODEX_BIN\` 確認檔案存在" \
-"- 必要時 npm reinstall codex-cli")
+"$(printf '%b' "$preflight_action")")
     ptmp=$(mktemp -t codex_preflight_fail.XXXXXX).md
     echo "$pbody" > "$ptmp"
-    "$UV_BIN" run volpred ops send-alert \
-      --level critical \
-      --title "hourly-dispatch Codex binary preflight 失敗 $(date '+%H:%M')" \
+    run_send_alert \
+      --level "$preflight_level" \
+      --title "hourly-dispatch Codex binary preflight $([ "$preflight_rc" -eq 142 ] && echo "timed out (likely load)" || echo "失敗") $(date '+%H:%M')" \
       --body-md "$ptmp" --force 2>&1 | tail -1
     rm -f "$ptmp"
     return "$CODEX_FAILOVER_RC"
@@ -350,7 +397,7 @@ run_codex_failover() {
 "- 若 Claude 額度耗盡：加 Anthropic API key 當 overflow，或讓 Codex 主力撐到額度恢復")
   tmp=$(mktemp -t hourly_failover.XXXXXX).md
   echo "$fbody" > "$tmp"
-  "$UV_BIN" run volpred ops send-alert \
+  run_send_alert \
     --level warn \
     --title "hourly-dispatch Claude→Codex failover (codex rc=$CODEX_FAILOVER_RC) $(date '+%H:%M')" \
     --body-md "$tmp" --force 2>&1 | tail -1
@@ -365,9 +412,24 @@ if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
   echo "[AUTH-PREFLIGHT] launchd env failed exit=$AUTH_PREFLIGHT_CODE"
   echo "$AUTH_PREFLIGHT_OUTPUT"
   if [ -f "$ZSHRC_PATH" ]; then
-    echo "[AUTH-PREFLIGHT] sourcing $ZSHRC_PATH then retry"
-    # shellcheck source=/dev/null
-    source "$ZSHRC_PATH" 2>/dev/null || true
+    echo "[AUTH-PREFLIGHT] sourcing $ZSHRC_PATH then retry (${ZSHRC_SOURCE_TIMEOUT_SEC}s ceiling)"
+    # See ZSHRC_SOURCE_TIMEOUT_SEC comment above (2026-07-02 fix). `source` is
+    # a bash builtin so it can't be perl-alarm-wrapped in place; instead run
+    # the rc file in an external, alarm-able `zsh -c` subprocess and pull back
+    # only PATH (the one plausibly load-bearing side effect for the keychain
+    # fallback path below). On timeout, skip silently — never block on this.
+    ZSHRC_ENV_FILE=$(mktemp -t zshrc_env.XXXXXX)
+    /usr/bin/perl -e 'alarm shift; exec @ARGV' "$ZSHRC_SOURCE_TIMEOUT_SEC" \
+      /bin/zsh -c "source '$ZSHRC_PATH' >/dev/null 2>&1; echo \"PATH=\$PATH\"" \
+      > "$ZSHRC_ENV_FILE" 2>/dev/null
+    ZSHRC_SOURCE_RC=$?
+    if [ "$ZSHRC_SOURCE_RC" -eq 0 ] && grep -q '^PATH=' "$ZSHRC_ENV_FILE"; then
+      export PATH="$(grep '^PATH=' "$ZSHRC_ENV_FILE" | head -1 | cut -d= -f2-)"
+      echo "[AUTH-PREFLIGHT] zshrc sourced via subprocess ok (PATH refreshed)"
+    else
+      echo "[AUTH-PREFLIGHT] zshrc source timed out/failed rc=$ZSHRC_SOURCE_RC (${ZSHRC_SOURCE_TIMEOUT_SEC}s ceiling) — skipping; CLAUDE_CODE_OAUTH_TOKEN bypass above is the load-bearing auth path, this fallback is best-effort only"
+    fi
+    rm -f "$ZSHRC_ENV_FILE"
   else
     echo "[AUTH-PREFLIGHT] no zshrc at $ZSHRC_PATH"
   fi
@@ -547,7 +609,7 @@ FAILEOF
 )
   TMP=$(mktemp -t hourly_fail.XXXXXX).md
   echo "$FAIL_BODY" > "$TMP"
-  "$UV_BIN" run volpred ops send-alert \
+  run_send_alert \
     --level critical \
     --title "hourly-dispatch 全 attempt 失敗 (exit $EXIT_CODE) $(date '+%H:%M')" \
     --body-md "$TMP" --force 2>&1 | tail -1
