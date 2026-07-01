@@ -1,0 +1,503 @@
+{
+  "experiment_id": "research_ai_power_capacity_auction_vol",
+  "title": "AI power capacity-auction event windows and equity volatility",
+  "timestamp_utc": "2026-07-01T20:59:17.092261+00:00",
+  "seed": 42,
+  "verdict": "NULL_NO_ROBUST_CAPACITY_AUCTION_VOL_SPIKE",
+  "data": {
+    "source": "yfinance adjusted close",
+    "tickers": [
+      "CEG",
+      "NRG",
+      "QQQ",
+      "SPY",
+      "URA",
+      "VPU",
+      "VST",
+      "XLU"
+    ],
+    "groups": {
+      "utility_etf": [
+        "XLU",
+        "VPU"
+      ],
+      "ipp_capacity": [
+        "VST",
+        "CEG",
+        "NRG"
+      ],
+      "uranium": [
+        "URA"
+      ],
+      "market": [
+        "SPY",
+        "QQQ"
+      ]
+    },
+    "start_date": "2020-01-01",
+    "end_date_exclusive": "2026-07-02",
+    "sample_first_price_date": "2020-01-02",
+    "sample_last_price_date": "2026-07-01",
+    "n_price_dates": 1632
+  },
+  "design": {
+    "event_count": 8,
+    "primary_target": "next trading day after auction-result announcement",
+    "descriptive_only": "same-day event-trading-date ratios are reported but not used as the primary target",
+    "volatility_proxy": "daily squared log return",
+    "normalization": "squared return divided by its own lagged rolling 252-trading-day median; baseline uses rv.shift(1).rolling(252, min_periods=126).median()",
+    "bootstrap": {
+      "seed": 42,
+      "repetitions": 5000,
+      "matching": "random non-event trading dates matched by event calendar year",
+      "blackout_trading_days_around_events": 5,
+      "p_value": "one-sided upper tail: share of matched random-date means >= observed event mean"
+    },
+    "primary_gate": "utility_etf or ipp_capacity group must have mean next-day RV ratio > 2.0, year-matched bootstrap p_upper < 0.05, and mean next-day RV ratio at least 0.25 above the same-event market group"
+  },
+  "events": [
+    {
+      "event_id": "pjm_2023_2024_bra",
+      "date": "2022-06-21",
+      "market": "PJM",
+      "delivery_year": "2023/2024",
+      "headline": "RTO capacity price $34.13/MW-day versus $50.00 prior auction.",
+      "source_url": "https://insidelines.pjm.com/pjm-capacity-auction-secures-electricity-supplies-at-competitive-prices/",
+      "confidence": "high"
+    },
+    {
+      "event_id": "pjm_2024_2025_bra",
+      "date": "2023-02-27",
+      "market": "PJM",
+      "delivery_year": "2024/2025",
+      "headline": "RTO capacity price $28.92/MW-day.",
+      "source_url": "https://insidelines.pjm.com/pjm-capacity-auction-procures-adequate-resources/",
+      "confidence": "high"
+    },
+    {
+      "event_id": "miso_2024_2025_pra",
+      "date": "2024-04-26",
+      "market": "MISO",
+      "delivery_year": "2024/2025",
+      "headline": "MISO 2024/2025 PRA results posting.",
+      "source_url": "https://cdn.misoenergy.org/2024%20PRA%20Results%20Posting%2020240425632665.pdf",
+      "confidence": "medium"
+    },
+    {
+      "event_id": "pjm_2025_2026_bra",
+      "date": "2024-07-30",
+      "market": "PJM",
+      "delivery_year": "2025/2026",
+      "headline": "RTO capacity price $269.92/MW-day, up from $28.92.",
+      "source_url": "https://www.pjm.com/-/media/DotCom/markets-ops/rpm/rpm-auction-info/2025-2026/2025-2026-base-residual-auction-report.pdf",
+      "confidence": "high"
+    },
+    {
+      "event_id": "miso_2025_2026_pra",
+      "date": "2025-05-29",
+      "market": "MISO",
+      "delivery_year": "2025/2026",
+      "headline": "Summer clearing price $666.50/MW-day in a tight planning-resource auction.",
+      "source_url": "https://cdn.misoenergy.org/2025%20PRA%20Results%20Posting%2020250529_Corrections694160.pdf",
+      "confidence": "high"
+    },
+    {
+      "event_id": "pjm_2026_2027_bra",
+      "date": "2025-07-22",
+      "market": "PJM",
+      "delivery_year": "2026/2027",
+      "headline": "PJM capacity auction cleared near the price cap at $329.17/MW-day.",
+      "source_url": "https://insidelines.pjm.com/pjm-auction-procures-134311-mw-of-generation-resources-supply-responds-to-price-signal/",
+      "confidence": "high"
+    },
+    {
+      "event_id": "pjm_2027_2028_bra",
+      "date": "2025-12-17",
+      "market": "PJM",
+      "delivery_year": "2027/2028",
+      "headline": "PJM capacity auction cleared at the $333.44/MW-day price cap.",
+      "source_url": "https://insidelines.pjm.com/pjm-auction-procures-134479-mw-of-generation-resources/",
+      "confidence": "high"
+    },
+    {
+      "event_id": "miso_2026_2027_pra",
+      "date": "2026-04-28",
+      "market": "MISO",
+      "delivery_year": "2026/2027",
+      "headline": "MISO 2026/2027 PRA results released after the 2025/2026 price shock.",
+      "source_url": "https://www.misoenergy.org/markets-and-operations/resource-adequacy/",
+      "confidence": "medium"
+    }
+  ],
+  "literature_and_context": [
+    {
+      "citation": "IEA (2025), Energy and AI",
+      "url": "https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai",
+      "role": "Documents the data-centre electricity-demand acceleration motivating the AI power-capacity theme."
+    },
+    {
+      "citation": "Lawrence Berkeley National Laboratory (2024), United States Data Center Energy Usage Report",
+      "url": "https://eta.lbl.gov/publications/2024-lbnl-data-center-energy-usage-report",
+      "role": "Demand-growth validation source; not treated as a capacity-auction market shock in the primary test."
+    },
+    {
+      "citation": "U.S. Department of Energy (2026), Clean Energy Resources to Meet Data Center Electricity Demand",
+      "url": "https://www.energy.gov/oe/clean-energy-resources-meet-data-center-electricity-demand",
+      "role": "Policy and power-system framing source; not treated as a capacity-auction market shock in the primary test."
+    },
+    {
+      "citation": "PJM Base Residual Auction reports and PJM Inside Lines announcements",
+      "url": "https://www.pjm.com/markets-and-operations/rpm",
+      "role": "Primary source for PJM capacity-auction price announcements and delivery-year details."
+    },
+    {
+      "citation": "MISO Planning Resource Auction result postings",
+      "url": "https://www.misoenergy.org/markets-and-operations/resource-adequacy/",
+      "role": "Primary source family for MISO capacity-auction result dates."
+    },
+    {
+      "citation": "K1508: AI power-demand narrative and utility/grid ETF forward volatility",
+      "url": "../k1508_ai_power_utility_vol/README.md",
+      "role": "Prior broad-regime screen; this run isolates capacity-auction event timing."
+    },
+    {
+      "citation": "K_ai_infra_financing_spillover_2026_06_14",
+      "url": "../k_ai_infra_financing_spillover_2026_06_14/README.md",
+      "role": "Prior lead-lag spillover screen; this run tests an explicit power-market catalyst list."
+    }
+  ],
+  "group_summaries": [
+    {
+      "group": "utility_etf",
+      "tickers": [
+        "XLU",
+        "VPU"
+      ],
+      "n_event_group_obs": 8,
+      "n_unique_events": 8,
+      "mean_same_day_abs_ratio": 1.3365059748304735,
+      "mean_next_day_abs_ratio": 1.7890796859915337,
+      "mean_same_day_rv_ratio": 2.3527920241460345,
+      "mean_next_day_rv_ratio": 3.343799101341727,
+      "median_next_day_rv_ratio": 3.199569048848812,
+      "mean_next_day_rv_ratio_minus_market": 0.42066505530156784,
+      "bootstrap_random_mean_next_day_rv_ratio": 2.6765736134171054,
+      "bootstrap_ci95_next_day_rv_ratio": [
+        0.5739072540119088,
+        7.917372132402149
+      ],
+      "bootstrap_p_upper_next_day_rv_ratio": 0.2451509698060388,
+      "primary_gate_pass": false
+    },
+    {
+      "group": "ipp_capacity",
+      "tickers": [
+        "VST",
+        "CEG",
+        "NRG"
+      ],
+      "n_event_group_obs": 8,
+      "n_unique_events": 8,
+      "mean_same_day_abs_ratio": 1.4734920200233037,
+      "mean_next_day_abs_ratio": 2.4065836018916227,
+      "mean_same_day_rv_ratio": 3.7371116133440756,
+      "mean_next_day_rv_ratio": 12.579003528135397,
+      "median_next_day_rv_ratio": 5.069231681755049,
+      "mean_next_day_rv_ratio_minus_market": 9.655869482095238,
+      "bootstrap_random_mean_next_day_rv_ratio": 4.570436765606764,
+      "bootstrap_ci95_next_day_rv_ratio": [
+        1.020563321399678,
+        16.265114711330362
+      ],
+      "bootstrap_p_upper_next_day_rv_ratio": 0.052389522095580884,
+      "primary_gate_pass": false
+    },
+    {
+      "group": "uranium",
+      "tickers": [
+        "URA"
+      ],
+      "n_event_group_obs": 8,
+      "n_unique_events": 8,
+      "mean_same_day_abs_ratio": 1.0994603417855136,
+      "mean_next_day_abs_ratio": 1.5250290029825881,
+      "mean_same_day_rv_ratio": 1.7506473617078482,
+      "mean_next_day_rv_ratio": 2.831170689024191,
+      "median_next_day_rv_ratio": 2.569190354548188,
+      "mean_next_day_rv_ratio_minus_market": -0.0919633570159682,
+      "bootstrap_random_mean_next_day_rv_ratio": 2.8324020761102666,
+      "bootstrap_ci95_next_day_rv_ratio": [
+        0.616097175822176,
+        7.133088970563498
+      ],
+      "bootstrap_p_upper_next_day_rv_ratio": 0.39652069586082783,
+      "primary_gate_pass": false
+    },
+    {
+      "group": "market",
+      "tickers": [
+        "SPY",
+        "QQQ"
+      ],
+      "n_event_group_obs": 8,
+      "n_unique_events": 8,
+      "mean_same_day_abs_ratio": 1.509935819632406,
+      "mean_next_day_abs_ratio": 1.109391637536068,
+      "mean_same_day_rv_ratio": 3.3661595936646407,
+      "mean_next_day_rv_ratio": 2.923134046040159,
+      "median_next_day_rv_ratio": 0.4761687731509725,
+      "mean_next_day_rv_ratio_minus_market": 0.0,
+      "bootstrap_random_mean_next_day_rv_ratio": 4.168418391453131,
+      "bootstrap_ci95_next_day_rv_ratio": [
+        0.6693233902733222,
+        15.604091220739438
+      ],
+      "bootstrap_p_upper_next_day_rv_ratio": 0.4971005798840232,
+      "primary_gate_pass": false
+    }
+  ],
+  "passed_groups": [],
+  "event_group_panel_preview": [
+    {
+      "event_id": "pjm_2023_2024_bra",
+      "calendar_date": "2022-06-21",
+      "event_trading_date": "2022-06-21",
+      "primary_target_date": "2022-06-22",
+      "market": "PJM",
+      "delivery_year": "2023/2024",
+      "group": "ipp_capacity",
+      "tickers_with_data": "NRG,VST",
+      "n_tickers": 2,
+      "same_day_abs_ratio_mean": 1.8674650267709372,
+      "next_day_abs_ratio_mean": 0.7720614730658651,
+      "t_plus_2_abs_ratio_mean": 2.922314456202332,
+      "same_day_rv_ratio_mean": 3.5163171021645674,
+      "next_day_rv_ratio_mean": 0.8903163104584196,
+      "t_plus_2_rv_ratio_mean": 8.618381957005045,
+      "same_day_return_mean": 0.02084532837638199,
+      "next_day_return_mean": -0.008396287644376395
+    },
+    {
+      "event_id": "pjm_2023_2024_bra",
+      "calendar_date": "2022-06-21",
+      "event_trading_date": "2022-06-21",
+      "primary_target_date": "2022-06-22",
+      "market": "PJM",
+      "delivery_year": "2023/2024",
+      "group": "market",
+      "tickers_with_data": "QQQ,SPY",
+      "n_tickers": 2,
+      "same_day_abs_ratio_mean": 3.134681766135912,
+      "next_day_abs_ratio_mean": 0.209797461645978,
+      "t_plus_2_abs_ratio_mean": 1.486308638441769,
+      "same_day_rv_ratio_mean": 10.124458784074733,
+      "next_day_rv_ratio_mean": 0.0474799968298477,
+      "t_plus_2_rv_ratio_mean": 2.2108760986769744,
+      "same_day_return_mean": 0.024889500309543476,
+      "next_day_return_mean": -0.001637256576109622
+    },
+    {
+      "event_id": "pjm_2023_2024_bra",
+      "calendar_date": "2022-06-21",
+      "event_trading_date": "2022-06-21",
+      "primary_target_date": "2022-06-22",
+      "market": "PJM",
+      "delivery_year": "2023/2024",
+      "group": "uranium",
+      "tickers_with_data": "URA",
+      "n_tickers": 1,
+      "same_day_abs_ratio_mean": 1.3077483023357699,
+      "next_day_abs_ratio_mean": 2.0302597625992878,
+      "t_plus_2_abs_ratio_mean": 0.8653660915788893,
+      "same_day_rv_ratio_mean": 1.7102046506542292,
+      "next_day_rv_ratio_mean": 4.1218732760056715,
+      "t_plus_2_rv_ratio_mean": 0.7488381981715982,
+      "same_day_return_mean": 0.026682150326664513,
+      "next_day_return_mean": -0.04163993902282494
+    },
+    {
+      "event_id": "pjm_2023_2024_bra",
+      "calendar_date": "2022-06-21",
+      "event_trading_date": "2022-06-21",
+      "primary_target_date": "2022-06-22",
+      "market": "PJM",
+      "delivery_year": "2023/2024",
+      "group": "utility_etf",
+      "tickers_with_data": "VPU,XLU",
+      "n_tickers": 2,
+      "same_day_abs_ratio_mean": 2.7603918784137864,
+      "next_day_abs_ratio_mean": 1.5731783898522098,
+      "t_plus_2_abs_ratio_mean": 3.4117467398776027,
+      "same_day_rv_ratio_mean": 7.62313178100778,
+      "next_day_rv_ratio_mean": 2.4749558436037162,
+      "t_plus_2_rv_ratio_mean": 11.643290037587175,
+      "same_day_return_mean": 0.018223401569678742,
+      "next_day_return_mean": 0.010381959510189848
+    },
+    {
+      "event_id": "pjm_2024_2025_bra",
+      "calendar_date": "2023-02-27",
+      "event_trading_date": "2023-02-27",
+      "primary_target_date": "2023-02-28",
+      "market": "PJM",
+      "delivery_year": "2024/2025",
+      "group": "ipp_capacity",
+      "tickers_with_data": "CEG,NRG,VST",
+      "n_tickers": 3,
+      "same_day_abs_ratio_mean": 0.7909881730889933,
+      "next_day_abs_ratio_mean": 1.3857357191501205,
+      "t_plus_2_abs_ratio_mean": 0.6416638766498075,
+      "same_day_rv_ratio_mean": 0.7856207100191411,
+      "next_day_rv_ratio_mean": 2.8554991384411927,
+      "t_plus_2_rv_ratio_mean": 0.4658296776844897,
+      "same_day_return_mean": -0.011254190679154596,
+      "next_day_return_mean": -0.021388321053516384
+    },
+    {
+      "event_id": "pjm_2024_2025_bra",
+      "calendar_date": "2023-02-27",
+      "event_trading_date": "2023-02-27",
+      "primary_target_date": "2023-02-28",
+      "market": "PJM",
+      "delivery_year": "2024/2025",
+      "group": "market",
+      "tickers_with_data": "QQQ,SPY",
+      "n_tickers": 2,
+      "same_day_abs_ratio_mean": 0.424032758805752,
+      "next_day_abs_ratio_mean": 0.2368293838340409,
+      "t_plus_2_abs_ratio_mean": 0.4889132598912236,
+      "same_day_rv_ratio_mean": 0.18600440014552078,
+      "next_day_rv_ratio_mean": 0.07716485559278198,
+      "t_plus_2_rv_ratio_mean": 0.246792289616208,
+      "same_day_return_mean": 0.005267831743478606,
+      "next_day_return_mean": -0.0024982980690225302
+    },
+    {
+      "event_id": "pjm_2024_2025_bra",
+      "calendar_date": "2023-02-27",
+      "event_trading_date": "2023-02-27",
+      "primary_target_date": "2023-02-28",
+      "market": "PJM",
+      "delivery_year": "2024/2025",
+      "group": "uranium",
+      "tickers_with_data": "URA",
+      "n_tickers": 1,
+      "same_day_abs_ratio_mean": 0.34301286094119005,
+      "next_day_abs_ratio_mean": 0.42492351017504704,
+      "t_plus_2_abs_ratio_mean": 1.2668194867865752,
+      "same_day_rv_ratio_mean": 0.11765397464707202,
+      "next_day_rv_ratio_mean": 0.18055998829799821,
+      "t_plus_2_rv_ratio_mean": 1.6048292587773105,
+      "same_day_return_mean": 0.006183326120555533,
+      "next_day_return_mean": -0.007615461339685183
+    },
+    {
+      "event_id": "pjm_2024_2025_bra",
+      "calendar_date": "2023-02-27",
+      "event_trading_date": "2023-02-27",
+      "primary_target_date": "2023-02-28",
+      "market": "PJM",
+      "delivery_year": "2024/2025",
+      "group": "utility_etf",
+      "tickers_with_data": "VPU,XLU",
+      "n_tickers": 2,
+      "same_day_abs_ratio_mean": 0.7946130452794443,
+      "next_day_abs_ratio_mean": 2.0881362292266514,
+      "t_plus_2_abs_ratio_mean": 1.9690080946993263,
+      "same_day_rv_ratio_mean": 0.6332460122684465,
+      "next_day_rv_ratio_mean": 4.369749808122679,
+      "t_plus_2_rv_ratio_mean": 3.8836495550084678,
+      "same_day_return_mean": -0.006525181369960533,
+      "next_day_return_mean": -0.017139494682540217
+    },
+    {
+      "event_id": "miso_2024_2025_pra",
+      "calendar_date": "2024-04-26",
+      "event_trading_date": "2024-04-26",
+      "primary_target_date": "2024-04-29",
+      "market": "MISO",
+      "delivery_year": "2024/2025",
+      "group": "ipp_capacity",
+      "tickers_with_data": "CEG,NRG,VST",
+      "n_tickers": 3,
+      "same_day_abs_ratio_mean": 0.18091343855681843,
+      "next_day_abs_ratio_mean": 2.7290512931336313,
+      "t_plus_2_abs_ratio_mean": 1.7290179709645965,
+      "same_day_rv_ratio_mean": 0.04061799488636402,
+      "next_day_rv_ratio_mean": 15.070443066920966,
+      "t_plus_2_rv_ratio_mean": 3.359262878623767,
+      "same_day_return_mean": 0.0014190704625859768,
+      "next_day_return_mean": 0.02888792861738219
+    },
+    {
+      "event_id": "miso_2024_2025_pra",
+      "calendar_date": "2024-04-26",
+      "event_trading_date": "2024-04-26",
+      "primary_target_date": "2024-04-29",
+      "market": "MISO",
+      "delivery_year": "2024/2025",
+      "group": "market",
+      "tickers_with_data": "QQQ,SPY",
+      "n_tickers": 2,
+      "same_day_abs_ratio_mean": 2.1396071127302756,
+      "next_day_abs_ratio_mean": 0.6595182220659553,
+      "t_plus_2_abs_ratio_mean": 3.0823400530756437,
+      "same_day_rv_ratio_mean": 4.646817116398388,
+      "next_day_rv_ratio_mean": 0.43608875365651817,
+      "t_plus_2_rv_ratio_mean": 9.509829771435138,
+      "same_day_return_mean": 0.012371594049587953,
+      "next_day_return_mean": 0.0037936447424521754
+    },
+    {
+      "event_id": "miso_2024_2025_pra",
+      "calendar_date": "2024-04-26",
+      "event_trading_date": "2024-04-26",
+      "primary_target_date": "2024-04-29",
+      "market": "MISO",
+      "delivery_year": "2024/2025",
+      "group": "uranium",
+      "tickers_with_data": "URA",
+      "n_tickers": 1,
+      "same_day_abs_ratio_mean": 0.7905236320145435,
+      "next_day_abs_ratio_mean": 2.1305150712578143,
+      "t_plus_2_abs_ratio_mean": 3.946670324165092,
+      "same_day_rv_ratio_mean": 0.6249157141449069,
+      "next_day_rv_ratio_mean": 4.539008044448529,
+      "t_plus_2_rv_ratio_mean": 15.575910076501051,
+      "same_day_return_mean": 0.010906676769815674,
+      "next_day_return_mean": 0.029394237305991496
+    },
+    {
+      "event_id": "miso_2024_2025_pra",
+      "calendar_date": "2024-04-26",
+      "event_trading_date": "2024-04-26",
+      "primary_target_date": "2024-04-29",
+      "market": "MISO",
+      "delivery_year": "2024/2025",
+      "group": "utility_etf",
+      "tickers_with_data": "VPU,XLU",
+      "n_tickers": 2,
+      "same_day_abs_ratio_mean": 1.782274977328875,
+      "next_day_abs_ratio_mean": 2.2582106448466943,
+      "t_plus_2_abs_ratio_mean": 0.8765216920500805,
+      "same_day_rv_ratio_mean": 3.1791007905281674,
+      "next_day_rv_ratio_mean": 5.115522282726603,
+      "t_plus_2_rv_ratio_mean": 0.7708862919687066,
+      "same_day_return_mean": -0.011199372214894174,
+      "next_day_return_mean": 0.014186905084636586
+    }
+  ],
+  "outputs": {
+    "event_asset_panel": "data/capacity_auction_event_asset_panel.csv",
+    "event_group_panel": "data/capacity_auction_event_group_panel.csv",
+    "close_panel": "data/close_panel.csv",
+    "figure": "figures/capacity_auction_next_day_rv_ratio.png"
+  },
+  "research_honesty_notes": [
+    "This is an event-window diagnostic, not a tradable forecasting model.",
+    "Capacity-auction release times are not standardized in this script; same-day ratios are therefore descriptive only.",
+    "Daily closes are too coarse to identify intraday announcement reactions.",
+    "Ticker exposures are public-market proxies and do not map perfectly to individual PJM/MISO load zones.",
+    "The event list is small, so bootstrap p-values are screening evidence rather than a definitive structural test."
+  ]
+}

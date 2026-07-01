@@ -43649,7 +43649,7 @@
     "title": "研究 backlog fallback: AI 電力超級循環 → 公用事業 vol regime（IEA Energy&AI 2025 + PJM 容量拍賣清算 $28.9→$329 暴漲 10x）：PJM/MISO 拍賣公佈日 event window 量 XLU/IPP(VST/CEG/NRG)/鈾礦(URA) 隔日 abnormal vol；hyperscaler capex 上修(EDGAR 10-Q)→電力曝險籃子截面 vol；utility 防禦→週期 vol-beta 斷點",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: AI 電力超級循環 → 公用事業 vol regime（IEA Energy&AI 2025 + PJM 容量拍賣清算 $28.9→$329 暴漲 10x）：PJM/MISO 拍賣公佈日 event window 量 XLU/IPP(VST/CEG/NRG)/鈾礦(URA) 隔日 abnormal vol；hyperscaler capex 上修(EDGAR 10-Q)→電力曝險籃子截面 vol；utility 防禦→週期 vol-beta 斷點。PJM CSV/EIA API 免費，高 monetization。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -43658,6 +43658,32 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-01T20:09:03+00:00"
+    "created_at": "2026-07-01T20:09:03+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-01T20:50:58.895164+00:00",
+    "claim_session_id": "56eb0991b210",
+    "status_history": [
+      {
+        "ts": "2026-07-01T20:50:58.895404+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T20:51:09.055085+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-01T21:00:58.371418+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-01T20:51:09.054784+00:00",
+    "completed_at": "2026-07-01T21:00:58.371144+00:00",
+    "result": "Completed research_ai_power_capacity_auction_vol: 8 PJM/MISO capacity-auction announcement event windows, yfinance 2020-01-02..2026-07-01, next-day RV ratio target with lagged baseline and seed=42. Verdict NULL_NO_ROBUST_CAPACITY_AUCTION_VOL_SPIKE; IPP near-miss mean next-day RV ratio 12.579, p_upper=0.0524, not publication-strength PASS. Artifacts, Codex review, figure, CSVs, and knowledge entry b195ffd1 written."
   }
 ]

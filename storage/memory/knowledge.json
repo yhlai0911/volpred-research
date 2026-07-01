@@ -37087,5 +37087,18 @@
     "k_id": "K1582",
     "experiment_path": "experiments/k1582/",
     "reviewer": "Codex CLI 0.142.3 (ChatGPT auth, gpt-5.4)"
+  },
+  {
+    "item_id": "b195ffd1",
+    "category": "experiment_result",
+    "content": "Experiment research_ai_power_capacity_auction_vol (Codex reviewed) tested 8 PJM/MISO capacity-auction result announcement dates against next-trading-day volatility ratios for utility ETFs (XLU/VPU), IPP capacity names (VST/CEG/NRG), uranium proxy (URA), and SPY/QQQ market controls using yfinance adjusted closes from 2020-01-02 to 2026-07-01. Verdict: NULL_NO_ROBUST_CAPACITY_AUCTION_VOL_SPIKE. No group passed the pre-specified gate. IPP names showed a directional near miss (mean next-day RV ratio 12.579, minus market 9.656, year-matched bootstrap p_upper 0.0524), so this is screening evidence for richer exposure-based work, not a PASS or publication-strength claim. Lookahead controls: same-day ratios descriptive only, primary target is announcement+1 trading day, normalization uses rv.shift(1) rolling median, and bootstrap seed is fixed at 42.",
+    "evidence": [
+      "experiments/research_ai_power_capacity_auction_vol/research_ai_power_capacity_auction_vol.py",
+      "experiments/research_ai_power_capacity_auction_vol/research_ai_power_capacity_auction_vol_results.json",
+      "experiments/research_ai_power_capacity_auction_vol/README.md",
+      "experiments/research_ai_power_capacity_auction_vol/codex_review.md"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-07-02T05:00:39.957083"
   }
 ]
