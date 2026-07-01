@@ -35662,7 +35662,7 @@
     "experiment_path": "experiments/k1365",
     "verdict": "NULL_PROXY",
     "title": "K1365: same-index ETF leader-volume concentration does not predict higher vol; EM fragmentation is the reverse diagnostic",
-    "content": "K1365 tested same-index ETF liquidity-clientele concentration using yfinance daily adjusted OHLCV (SPY/IVV/VOO, QQQ/QQQM, IWM/VTWO, EEM/IEMG; group common samples through 2026-06-22). Primary signal = legacy leader dollar-volume share rolling z-score with explicit signal.shift(1); targets include next range vol, forward 5d RV, and same-index return dispersion; OLS-HAC maxlags=5 controls lagged target and total dollar-volume shock. Original concentration hypothesis FAILS: 0/16 primary leader-share tests have positive HAC t>=3; directional positives are 8/16. The robust signal is reverse and EM-only: EEM/IEMG leader share is negatively associated with forward5 RV (t=-5.34, BH q=8.9e-06), while EM fragmentation/entropy positively predicts forward5 RV (t=4.86/4.87, BH q=2.86e-05). Interpretation: do not claim ETF liquidity concentration raises same-index volatility from free OHLCV proxies; the actionable follow-up is EM fragmentation stress with NAV/spread/AUM/creation-redemption data.",
+    "content": "K1365 tested same-index ETF liquidity-clientele concentration using yfinance daily adjusted OHLCV (SPY/IVV/VOO, QQQ/QQQM, IWM/VTWO, EEM/IEMG; group common samples through 2026-06-22). Primary signal = legacy leader dollar-volume share rolling z-score with explicit signal.shift(1); targets include next range vol, forward 5d RV, and same-index return dispersion; OLS-HAC maxlags=5 controls lagged target and total dollar-volume shock. Original concentration hypothesis FAILS: 0/16 primary leader-share tests have positive HAC t>=3 (unchanged post-revision); directional positives 8/16. Reverse EM-only signal is confirmed but numerically softened after 2026-07-01 revision (see below). REVISED 2026-07-01 (Codex 24h-rule FAIL_MAJOR fix on mile_c16d94b7): the forward5_rv regressions originally used target_lag1 = forward5_rv.shift(1) as a control, but forward5_rv is built as rolling(5).std().shift(-4) so the shift(1) control still leaked returns t..t+3 at the t-1 origin. Fixed to shift(5) (previous completed 5-day block). Clean forward5 EM t drops from -5.34 to -2.65 (no longer passes Harvey +3 bar). Non-forward5 EM reverse signals remain source-clean and cross the |t|=3 bar: leader-share -> next_range_vol t=-3.22 (BH q=0.033); leader-share -> same-index dispersion / tracking-range t=-3.02 (BH q=0.033). Overall verdict unchanged (NULL_PROXY for the original concentration story); the reverse EM diagnostic is retained but downgraded from forward5-headline to same-day range/dispersion evidence. Article mile_c16d94b7 patched with clean headline (-3.2) + Errata block; feed synced to Supabase.",
     "evidence": [
       "experiments/k1365/K1365.py",
       "experiments/k1365/K1365_results.json",
@@ -35670,12 +35670,13 @@
       "experiments/k1365/codex_review.md",
       "https://academic.oup.com/rfs/article/37/10/3092/7738093",
       "https://onlinelibrary.wiley.com/doi/abs/10.1111/jofi.12727",
-      "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3001524"
+      "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3001524",
+      "experiments/K1365/review_history/codex_24h_rule_20260701.md"
     ],
     "confidence": 0.72,
-    "reviewer": "Codex source review 2026-06-23: CONDITIONAL_PASS for source and null/reverse-diagnostic conclusion",
+    "reviewer": "Codex 24h-rule source-level review 2026-07-01: FAIL_MAJOR (forward5 target-lag lookahead) -> fix applied + article corrected; superseded prior Codex source review 2026-06-23 CONDITIONAL_PASS.",
     "reviewer_source": "codex-vscode primary path",
-    "codex_review": "experiments/k1365/codex_review.md",
+    "codex_review": "experiments/K1365/review_history/codex_24h_rule_20260701.md",
     "created_at": "2026-06-23T01:58:05.947694+00:00",
     "data_source": "yfinance daily adjusted OHLCV, auto_adjust=True",
     "sample_end": "2026-06-22",
@@ -35684,7 +35685,7 @@
       "n_positive_hac_t": 8,
       "n_positive_harvey_t_ge_3": 0,
       "n_positive_harvey_and_bh_q_le_0_05": 0,
-      "n_negative_harvey_and_bh_q_le_0_05": 4
+      "n_negative_harvey_and_bh_q_le_0_05": 3
     },
     "secondary_reverse_signal": {
       "description": "Rows where higher fragmentation/entropy, rather than leader concentration, predicts higher vol/range targets with positive HAC t>=3 and BH q<=0.05.",
@@ -35751,6 +35752,20 @@
       "yfinance OHLCV cannot identify ETF NAV premiums, creations/redemptions, or historical AUM/fee dynamics.",
       "Forward 5-day targets overlap; HAC maxlags=5 mitigates but does not replace a non-overlapping robustness design.",
       "The leader ETF is pre-specified by historical liquidity (SPY/QQQ/IWM/EEM), not estimated from future data."
+    ],
+    "revision_history": [
+      {
+        "date": "2026-07-01",
+        "reviewer": "Codex 24h-rule source-level review",
+        "trigger": "24h-rule review of mile_c16d94b7 published 2026-06-30",
+        "finding": "forward5_rv target_lag1 control uses shift(1) but target already shift(-4), leaking 3 days of future returns",
+        "fix": "experiments/K1365/K1365.py:_known_target_control() -> shift(5) for forward5_rv, shift(1) otherwise",
+        "impact": "EM forward5 leader-share t: -5.34 -> -2.65 (no longer passes Harvey +3 bar); other EM reverse rows unchanged (next_range_vol -3.22, dispersion/tracking -3.02); NULL_PROXY verdict unchanged.",
+        "downstream_actions": [
+          "Article mile_c16d94b7 headline changed from -5.3 to -3.2 (next_range_vol) with Errata block",
+          "storage/reports/feed.json patched + Supabase synced (articles: 1)"
+        ]
+      }
     ]
   },
   {

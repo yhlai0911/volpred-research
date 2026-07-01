@@ -317,6 +317,17 @@ def _zscore_in_sample(series: pd.Series) -> pd.Series:
     return (series - series.mean()) / std
 
 
+def _known_target_control(gp: GroupPanel, target_name: str) -> pd.Series:
+    # forward5_rv is built as primary_ret.rolling(5).std().shift(-4), so row t
+    # already encodes returns t..t+4. A naive .shift(1) still leaks t..t+3 into
+    # the control at the t-1 forecast origin. Use the previous *completed*
+    # 5-day block instead (shift by 5) so the control is information-set clean.
+    # (Codex 24h-rule review 2026-07-01 FAIL_MAJOR fix.)
+    if target_name == "forward5_rv":
+        return gp.targets[target_name].shift(5)
+    return gp.targets[target_name].shift(1)
+
+
 def hac_predictive_regression(
     gp: GroupPanel,
     signal_name: str,
@@ -326,7 +337,7 @@ def hac_predictive_regression(
         {
             "target": gp.targets[target_name],
             "signal": gp.signals[signal_name],
-            "target_lag1": gp.targets[target_name].shift(1),
+            "target_lag1": _known_target_control(gp, target_name),
             "total_volume": gp.signals["total_dollar_volume_z_l1"],
         }
     ).replace([np.inf, -np.inf], np.nan).dropna()

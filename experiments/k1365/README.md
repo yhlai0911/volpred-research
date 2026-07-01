@@ -142,3 +142,12 @@ uv run python experiments/k1365/K1365.py
 ```bash
 uv run python experiments/k1365/K1365.py --refresh
 ```
+
+## Revision 2026-07-01（Codex 24h-rule source-level review）
+
+`review_history/codex_24h_rule_20260701.md`（verdict FAIL_MAJOR）抓到 `forward5_rv` regression 的 `target_lag1` 用 `.shift(1)` 但 `forward5_rv` 本身已 `.shift(-4)`，控制項仍含 3 天未來資訊。修 `_known_target_control()`（`forward5_rv` 用 `.shift(5)`，其他 target 保持 `.shift(1)`）並重跑：
+
+- 主結論 **NULL_PROXY 不變**：0/16 primary leader-share tests 過 Harvey +3 bar
+- EM forward5 leader-share t: **-5.34 → -2.65**（不再過 |t|=3）
+- Clean 反向 EM 訊號仍過 bar：`next_range_vol` t = -3.22（BH q=0.033）、dispersion/tracking t = -3.02
+- 已發表文章 `mile_c16d94b7` 內文由「-5.3」改為「-3.2」（改用 clean `next_range_vol` headline），feed.json 加 Errata + Supabase 同步。
