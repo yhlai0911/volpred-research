@@ -104,6 +104,18 @@ codex verdict, applies corrections (via `paper-update`), and advances the tracke
 4. **ACT** — Advance the stage in `storage/paper_pipeline_status.json` (update
    `stage`, `stage_entered_at`, `last_advance_at`; clear/replace `blocker`). If a
    recurring blocker pattern appears, codify the lesson (`docs/error_log.md` / a skill).
+   - **Sync the public website whenever `stage` or `journal_target` changes AND the
+     paper is already live on the site** (Supabase `papers` row exists). The pipeline
+     tracker is the DECISION truth; the Supabase `papers` table is the DISPLAY truth —
+     they do not reconcile automatically. Use the canonical CLI (never hand-edit the DB):
+     `uv run volpred ops paper-upsert --paper-id <id> --status <working|ready_for_submission|submitted|accepted|published> [--target-journal <name>]`.
+     Map `stage → website status` honestly: `draft/revision/compliance_scrub/multi_round_review → working`;
+     `review_converged/arxiv_ready → ready_for_submission`; `arxiv_posted/journal_submitted/under_journal_review → submitted`.
+     **Never let the website status be HIGHER than the stage warrants** (over-claim =
+     research-honesty breach). Both frontends (`/paper` + `/v3/paper`) read the same
+     `/api/papers` → one upsert syncs both. (2026-07-01 incident: leverage-direction
+     JBF→IJF + downgrade to revision, but the site sat on `ready_for_submission` +
+     JBF until the owner caught it — the drift alert below now auto-surfaces this.)
 
 ### Stall detection (loop-engineering)
 If a paper sits at one stage **> STALL_DAYS (default 7)**, `paper_pipeline_check.py`
@@ -112,6 +124,17 @@ listing the stalled papers — so "papers stalled" is an auto-surfaced signal, n
 owner discovery. The check exits 1 under FINDINGS semantics; if ever put on host cron,
 its `runtime_schedules.json` entry MUST carry `exit_semantics: "findings"` (2026-06-30
 host_cron_fail lesson).
+
+### Website over-claim detection (loop-engineering, 2026-07-01)
+`volpred.ops.alerts._parse_paper_website_drift_state` (condition `paper_website_drift`,
+wired into the hourly `check-alerts` pipeline) compares each paper's pipeline `stage`
+against its Supabase `papers.status`. If the public website status is **higher** than the
+stage warrants (over-claim), it fires a **warn** alert listing the drifted papers + the
+`paper-upsert` fix command. Under-claim (website more conservative than the stage) is NOT a
+breach — this deliberately protects papers whose pipeline stage is aspirational-but-unverified
+(e.g. `under_journal_review` while the site conservatively shows `working`). Journal
+name mismatch (abbreviation vs full name) is a body annotation only, never a breach.
+This makes "decision changed but website not synced" an auto-surfaced signal.
 
 ---
 

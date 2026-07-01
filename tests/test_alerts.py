@@ -7,6 +7,7 @@ from pathlib import Path
 from volpred.ops.alerts import (
     _parse_content_quality_state,
     _parse_loop_health_state,
+    _parse_paper_website_drift_state,
     build_alert_condition_report,
     check_alert_conditions,
     send_alert,
@@ -492,3 +493,73 @@ def test_paper_stale_severity_and_isolation(tmp_path: Path):
     empty_root.mkdir()
     r = _parse_paper_stale_state(base, empty_root)
     assert r["breached"] is True and r["level"] == "critical"
+
+
+# ï¿½”€ï¿½”€ paper_website_driftï¿½ˆ2026-07-01 loop-engï¿½šç¶²ï¿½ï¿½–ï¿½–‡ï¿½ï¿½ status vs pipeline æ±ºï¿½­– driftï¿½‰ï¿½”€ï¿½”€
+def _patch_drift_sources(monkeypatch, pipeline_papers, website_rows):
+    monkeypatch.setattr(
+        "volpred.ops.alerts.load_json",
+        lambda path, default=None: {"papers": pipeline_papers},
+    )
+    monkeypatch.setattr(
+        "volpred.ops.papers.list_papers",
+        lambda: website_rows,
+    )
+
+
+def test_paper_website_drift_breaches_on_overclaim(monkeypatch):
+    # pipeline stage=revisionï¿½ˆï¿½œ€ï¿½š workingï¿½‰ï¿½†ç¶²ï¿½é¡¯ç¤º submitted ï¿½†’ over-claimï¿½€‚
+    _patch_drift_sources(
+        monkeypatch,
+        pipeline_papers=[{"paper": "demo-A", "stage": "revision", "journal_target": "IJF (primary)"}],
+        website_rows=[{"id": "demo-A", "status": "submitted", "target_journal": None}],
+    )
+    r = _parse_paper_website_drift_state(datetime.now(timezone.utc))
+    assert r["breached"] is True
+    assert r["level"] == "warn"
+    assert r["details"]["over_claims"][0]["paper"] == "demo-A"
+    assert r["details"]["over_claims"][0]["max_acceptable_status"] == "working"
+    # journal ç¼ºï¿½ï¿½™„è¨»ï¿½ˆpipeline ï¿½œ‰ target ï¿½†ç¶²ï¿½ nullï¿½‰ï¿½Œï¿½†ï¿½ breach ï¿½ˆï¿½ï¿½–
+    assert r["details"]["journal_gaps"][0]["paper"] == "demo-A"
+
+
+def test_paper_website_drift_underclaim_is_not_a_breach(monkeypatch):
+    # pipeline stage=under_journal_reviewï¿½ˆï¿½…è¨±ï¿½ˆï¿½ submittedï¿½‰ï¿½†ç¶²ï¿½ï¿½ï¿½ˆé¡¯ working ï¿½†’ under-claimï¿½Œï¿½ breachï¿½€‚
+    # ï¿½€™ï¿½ï¿½­ï¿½ï¿½€Œpipeline aspirational ï¿½†ï¿½œï¿½ï¿½—ï¿½­‰ï¿½œŸï¿½Š•ï¿½€ï¿½™‚ç¶²ï¿½ï¿½ï¿½ˆé¡¯ç¤ºï¿½è¢«èª¤ï¿½€ï¿½ï¿½‡ï¿½šï¿½€‚
+    _patch_drift_sources(
+        monkeypatch,
+        pipeline_papers=[{"paper": "demo-B", "stage": "under_journal_review", "journal_target": "decide"}],
+        website_rows=[{"id": "demo-B", "status": "working", "target_journal": None}],
+    )
+    r = _parse_paper_website_drift_state(datetime.now(timezone.utc))
+    assert r["breached"] is False
+    assert r["details"]["over_claims"] == []
+    # journal_target=decide ï¿½ï¿½—ç¼ºï¿½
+    assert r["details"]["journal_gaps"] == []
+
+
+def test_paper_website_drift_in_sync_no_breach(monkeypatch):
+    _patch_drift_sources(
+        monkeypatch,
+        pipeline_papers=[{"paper": "demo-C", "stage": "working", "journal_target": "FRL"}],
+        website_rows=[{"id": "demo-C", "status": "working", "target_journal": "Finance Research Letters"}],
+    )
+    r = _parse_paper_website_drift_state(datetime.now(timezone.utc))
+    assert r["breached"] is False
+    assert r["title"] == "Paper website in sync with pipeline"
+
+
+def test_paper_website_drift_supabase_failure_is_fail_open(monkeypatch):
+    # Supabase ï¿½€å¤±ï¿½•— ï¿½†’ degradedï¿½€ï¿½ crashï¿½€ï¿½èª¤ breachï¿½€‚
+    monkeypatch.setattr(
+        "volpred.ops.alerts.load_json",
+        lambda path, default=None: {"papers": [{"paper": "x", "stage": "revision"}]},
+    )
+
+    def _boom():
+        raise RuntimeError("supabase down")
+
+    monkeypatch.setattr("volpred.ops.papers.list_papers", _boom)
+    r = _parse_paper_website_drift_state(datetime.now(timezone.utc))
+    assert r["breached"] is False
+    assert r["details"]["degraded"] is True

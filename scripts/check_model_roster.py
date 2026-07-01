@@ -23,6 +23,7 @@ Usage: uv run python scripts/check_model_roster.py [--max-age-days 30] [--json]
 from __future__ import annotations
 import argparse
 import json
+import logging
 import re
 import sys
 from datetime import date
@@ -61,7 +62,8 @@ def scan_code_pins(current_ids: set[str]) -> list[dict]:
                 continue
             try:
                 lines = p.read_text(encoding="utf-8", errors="ignore").splitlines()
-            except Exception:
+            except Exception as exc:
+                logging.debug("check_model_roster: failed reading %s: %s", p, exc)
                 continue
             for i, line in enumerate(lines, 1):
                 for pat in _PIN_PATTERNS:

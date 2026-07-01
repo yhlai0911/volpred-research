@@ -1070,6 +1070,173 @@ def _parse_paper_stale_state(now: datetime, paper_root: Path | None = None) -> d
     }
 
 
+# ── 2026-07-01 STRUCTURAL（boss loop-engineering / PDCA directive）──
+# Root cause: 論文投稿「決策真相」在 storage/paper_pipeline_status.json（journal_target/stage），
+# 但公開網頁「展示真相」在 Supabase papers 表（target_journal/status），兩者**無 reconciliation**。
+# incident（2026-07-01）：leverage-direction 投稿決策 JBF→IJF 且 downgrade 回 revision，但網頁仍
+# 停在 target_journal=JBF + status=ready_for_submission（over-claim），且無任何 check 會發現 —— 靠
+# boss 人工抓到。這是「dual source, no single-source-of-truth」結構缺陷。此 detector 讓「網頁高估
+# 論文成熟度」變 auto-surfaced breach。誠實設計：**只在網頁 status 高於 pipeline stage 對應的可接受
+# 上限時 breach**（over-claim = 研究誠實紅線）；網頁落後（under-claim，如 pipeline=under_review 但
+# 網頁保守顯 working）只 info 不 breach（未經驗證前寧可保守）。journal 全名 vs 縮寫模糊比對不做
+# breach（寧漏報不誤報洗版），只在「pipeline 有明確 primary 但網頁 null」時附註。
+_WEBSITE_STATUS_RANK = {
+    "working": 0,
+    "ready_for_submission": 1,
+    "submitted": 2,
+    "accepted": 3,
+    "published": 4,
+}
+_RANK_TO_STATUS = {v: k for k, v in _WEBSITE_STATUS_RANK.items()}
+# 每個 pipeline stage（paper_pipeline_status.json 的 11 態）允許的網頁 status 上限（rank）。
+# 網頁 status rank 超過此上限 = over-claim。
+_PIPELINE_STAGE_MAX_WEBSITE_RANK = {
+    "draft": 0,
+    "revision": 0,
+    "compliance_scrub": 0,
+    "multi_round_review": 0,
+    "review_converged": 1,
+    "arxiv_ready": 1,
+    "arxiv_posted": 2,
+    "journal_submitted": 2,
+    "under_journal_review": 2,
+    "accepted": 3,
+    "rejected": 0,
+    "published": 4,
+}
+
+
+def _parse_paper_website_drift_state(now: datetime) -> dict[str, Any]:
+    """公開網頁論文卡是否 over-claim（status 高於 pipeline 決策該有的成熟度）。
+
+    決策真相 = storage/paper_pipeline_status.json；展示真相 = Supabase papers 表。
+    只抓 over-claim（網頁高估）→ warn；under-claim（網頁保守）不 breach。
+    Fail-open：pipeline 讀失敗或 Supabase 連不上 → warn(diagnostics) + 標 degraded，不 crash、不誤 breach。
+    """
+    pipeline_path = project_path("storage/paper_pipeline_status.json")
+    try:
+        pipeline = load_json(pipeline_path, None)
+        if not isinstance(pipeline, dict):
+            raise ValueError(f"pipeline status missing or malformed: {pipeline_path}")
+        pipeline_papers = {
+            str(p.get("paper")): p
+            for p in (pipeline.get("papers") or [])
+            if p.get("paper")
+        }
+    except Exception as exc:  # noqa: BLE001 — fail-open per no-silent-fallback.md
+        warn("alerts", "paper_website_drift pipeline read failed", path=str(pipeline_path), err=str(exc))
+        return {
+            "id": "paper_website_drift",
+            "breached": False,
+            "level": "info",
+            "title": "paper_website_drift degraded (pipeline unreadable)",
+            "body": "",
+            "details": {"degraded": True, "reason": "pipeline_read_failed"},
+        }
+
+    website_rows: dict[str, dict[str, Any]] = {}
+    degraded = False
+    try:
+        from .papers import list_papers
+
+        for row in list_papers():
+            pid = str(row.get("id") or "")
+            if pid:
+                website_rows[pid] = row
+    except Exception as exc:  # noqa: BLE001 — Supabase 外部依賴 fail-open
+        warn("alerts", "paper_website_drift supabase read failed", err=str(exc))
+        degraded = True
+
+    over_claims: list[dict[str, Any]] = []
+    journal_gaps: list[dict[str, Any]] = []
+    if not degraded:
+        for pid, ppaper in pipeline_papers.items():
+            row = website_rows.get(pid)
+            if row is None:
+                continue  # pipeline 有、網頁未上架 = 可能故意，不算 drift
+            stage = str(ppaper.get("stage") or "").strip()
+            max_rank = _PIPELINE_STAGE_MAX_WEBSITE_RANK.get(stage)
+            web_status = str(row.get("status") or "working").strip()
+            web_rank = _WEBSITE_STATUS_RANK.get(web_status)
+            if max_rank is not None and web_rank is not None and web_rank > max_rank:
+                over_claims.append(
+                    {
+                        "paper": pid,
+                        "pipeline_stage": stage,
+                        "website_status": web_status,
+                        "max_acceptable_status": _RANK_TO_STATUS.get(max_rank, "working"),
+                    }
+                )
+            j_target = str(ppaper.get("journal_target") or "").strip()
+            if (
+                j_target
+                and j_target.lower() not in ("decide", "tbd", "none")
+                and not row.get("target_journal")
+            ):
+                journal_gaps.append({"paper": pid, "pipeline_journal_target": j_target})
+
+    breached = bool(over_claims)
+    details = {
+        "over_claims": over_claims,
+        "journal_gaps": journal_gaps,
+        "degraded": degraded,
+        "checked": len(pipeline_papers),
+    }
+    if not breached:
+        if degraded:
+            title = "paper_website_drift degraded (supabase unreadable)"
+        else:
+            title = "Paper website in sync with pipeline"
+        return {
+            "id": "paper_website_drift",
+            "breached": False,
+            "level": "info",
+            "title": title,
+            "body": "",
+            "details": details,
+        }
+
+    lines = [
+        "## 觸發條件",
+        f"{len(over_claims)} 篇論文的公開網頁 status **高於** pipeline 決策該有的成熟度（over-claim）：",
+        "",
+    ]
+    for oc in over_claims:
+        lines.append(
+            f"- **{oc['paper']}**：網頁顯示 `{oc['website_status']}`，但 pipeline stage="
+            f"`{oc['pipeline_stage']}` 最多只該到 `{oc['max_acceptable_status']}`"
+        )
+    if journal_gaps:
+        lines.append("")
+        lines.append("附註（journal 缺漏，非 breach 判準）：")
+        for jg in journal_gaps:
+            lines.append(
+                f"- {jg['paper']}：pipeline target=`{jg['pipeline_journal_target']}` 但網頁 target_journal 為空"
+            )
+    lines += [
+        "",
+        "## 影響",
+        "公開網頁高估論文成熟度 = 對讀者/機構過度宣稱（違反研究誠實）。投稿決策改了、網頁沒同步 =",
+        "M3 學術權威線 credibility 受損。",
+        "",
+        "## 建議行動（主線程判斷後執行，非自動 sync）",
+        "1. 對每篇 over-claim 確認 pipeline stage 是否為真實狀態（非 aspirational）。",
+        "2. 用 canonical CLI 對齊（**非**手改 DB）：",
+        "   `uv run volpred ops paper-upsert --paper-id <id> --status <working|ready_for_submission|"
+        "submitted> [--target-journal <name>]`",
+        "3. 不自動 sync 的原因：pipeline stage 有時 aspirational（如 under_journal_review 但未驗證真",
+        "   投），自動推公開網頁會反向製造 over-claim；由主線程判斷哪些該公開。",
+    ]
+    return {
+        "id": "paper_website_drift",
+        "breached": True,
+        "level": "warn",
+        "title": f"網頁論文 over-claim {len(over_claims)} 篇（決策改了網頁沒同步）",
+        "body": "\n".join(lines),
+        "details": details,
+    }
+
+
 # ── 2026-06-22 STRUCTURAL（boss directive「禁止脫班，徹底從底層架構解決」/ Three-Strike）──
 # 既有 alert 全部監看「機器/流程」（job 是否 fire）：release-pool-by-settings 每次 run
 # 都改寫 updated_at → machinery 永遠不顯 stale，即使 0 篇發出；沒有任何 check 監看
@@ -1906,6 +2073,7 @@ def build_alert_condition_report(
         _parse_supabase_sync_state(storage_dir),
         _parse_knowledge_stale_state(storage_dir, current),
         _parse_paper_stale_state(current, paper_root),
+        _parse_paper_website_drift_state(current),                # 2026-07-01 loop-eng: 網頁論文卡 status 是否 over-claim vs pipeline 決策
         _parse_strategy_metrics_freshness_state(storage_dir),     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_paper_trading_gaps_state(storage_dir),             # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol

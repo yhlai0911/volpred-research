@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import logging
 import subprocess
 import sys
 from datetime import datetime, timedelta
@@ -62,7 +63,8 @@ def _thinking_estimate(week_range: str) -> dict:
     import glob
     try:
         ws, we = [s.strip() for s in week_range.split("→")]
-    except Exception:
+    except Exception as exc:
+        logging.warning("thinking_estimate: unparseable week_range=%r: %s", week_range, exc)
         return {}
     from datetime import date as _date, timedelta as _td
     we_excl = (_date.fromisoformat(we) + _td(days=1)).isoformat()
@@ -74,7 +76,8 @@ def _thinking_estimate(week_range: str) -> dict:
             for line in open(f, encoding="utf-8"):
                 try:
                     o = json.loads(line)
-                except Exception:
+                except Exception as exc:
+                    logging.debug("thinking_estimate: malformed JSONL line in %s: %s", f, exc)
                     continue
                 mm = o.get("message", {})
                 if not isinstance(mm, dict) or mm.get("role") != "assistant":
@@ -97,7 +100,8 @@ def _thinking_estimate(week_range: str) -> dict:
                         e["tool"] += len(json.dumps(b.get("input", {}), ensure_ascii=False))
                     elif b.get("type") == "thinking":
                         e["think"] = True
-        except Exception:
+        except Exception as exc:
+            logging.warning("thinking_estimate: failed reading %s: %s", f, exc)
             continue
     cc = co = 0
     for e in turns.values():

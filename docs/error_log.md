@@ -2,6 +2,19 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-01 論文投稿決策改了、公開網頁沒同步（dual-source 無 reconciliation）
+
+**問題**：leverage-direction 投稿決策改動（JBF → IJF primary/EmpEcon fallback，且 rigorous rebuild 後 downgrade 回 revision、非 submission-ready），但公開網頁 `/paper` + `/v3/paper` 仍顯示 `target_journal=Journal of Banking and Finance` + `status=ready_for_submission`（over-claim）。靠老闆人工抓到才修。
+
+**現象 / 根因**：投稿決策的「真相」在 `storage/paper_pipeline_status.json`（`journal_target` / `stage`），公開網頁展示的「真相」在 Supabase `papers` 表（`target_journal` / `status`），兩者**無任何 reconciliation**。`scripts/paper_pipeline_check.py` 只讀 pipeline_status，完全不比對 Supabase → 決策改了沒有任何 check 會發現網頁 stale。這是「dual source, no single-source-of-truth」結構缺陷；`paper-submission-pipeline` skill 的 PDCA ACT step 也沒有「決策後同步網頁」這一步。
+
+**解決方法**（loop-engineering / PDCA，偵測 + 流程兩端固化）：
+1. `src/volpred/ops/alerts.py` 新增 condition `paper_website_drift`（`_parse_paper_website_drift_state`），接進 hourly `check-alerts`：把 pipeline `stage` 映射成「網頁可接受的最高 status rank」，網頁 status **高於**上限 = over-claim → warn（三段 body + `paper-upsert` 修正指令）。**只抓 over-claim**；under-claim（網頁比 stage 保守）不 breach，保護 aspirational-but-unverified stage（如 `under_journal_review` 但網頁保守顯 `working`）。journal 全名 vs 縮寫模糊比對不做 breach（寧漏報不誤報）。Fail-open：pipeline/Supabase 讀失敗 → `warn()` + degraded，不 crash、不誤 breach。
+2. `paper-submission-pipeline/SKILL.md` ACT step 加「`stage`/`journal_target` 變更且論文已上架 → `ops paper-upsert` 同步 Supabase」+ stage→status 誠實映射表 + website-drift alert 說明段。
+3. 測試 `tests/test_alerts.py` +4：over-claim breach、under-claim 不 breach、in-sync、Supabase fail-open。
+
+**教訓**：任何「決策真相」與「展示真相」分居兩個 source（本地 JSON vs Supabase / DB）時，必須有一個定期 reconciliation check 把 drift 變 auto-surfaced，否則「上游改了下游忘記同步」永遠靠人工抓。誠實方向：偵測只抓「公開面高估」（over-claim），不強制自動 sync（下游 aspirational 狀態自動推公開反而製造反向 over-claim）——偵測便宜確定性，執行留給主線程判斷。
+
 ## 2026-07-01 paper-audit 對已 in-place corrected 文章重開 P1 erratum
 
 **問題**：paper-audit workflow 對 `mile_48c8328b` 開出 P1「K189 結論相反」erratum，但該文章已在 2026-06-15 透過 `errata.update_action=codex_review_k189_corrected_rewrite` in-place corrected，現行 title / content 已與 K189 rerun 結果一致。

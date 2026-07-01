@@ -30,6 +30,7 @@ Usage:
 from __future__ import annotations
 import argparse
 import json
+import logging
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -67,7 +68,8 @@ def _parse_iso(s):
         return None
     try:
         return datetime.fromisoformat(str(s).replace("Z", "+00:00"))
-    except Exception:
+    except Exception as exc:
+        logging.debug("pregate: unparseable ISO timestamp %r: %s", s, exc)
         return None
 
 
@@ -93,7 +95,8 @@ def has_critical() -> bool:
     try:
         if int(bc) > 0 or int(crit) > 0:
             return True
-    except (TypeError, ValueError):
+    except (TypeError, ValueError) as exc:
+        logging.warning("pregate: unparseable dashboard breach counts, assuming critical: %s", exc)
         return True  # fail-open: unparseable -> assume critical
     if status and status not in ("ok", "healthy", "green", ""):
         return True

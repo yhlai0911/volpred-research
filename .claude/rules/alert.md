@@ -43,6 +43,7 @@ paths:
 | `Paper reviewer response` | 派 paper-review-cycle skill + 進 revision workflow |
 | `策略 MDD > 20%` | 暫停策略上架 + 派 strategy lifecycle review agent |
 | `member_qa_stale` (pending >24h / >72h) | 主線程**立即**跑 question-ranking-workflow → 4 維度評分 → question-rerank（不等下一個 6h cron tick）；ranked>0 後 dispatch claude subagent 走 research → answer → finish |
+| `paper_website_drift` (網頁 over-claim) | 對每篇 over-claim 先確認 pipeline `stage` 為真實狀態，再用 `uv run volpred ops paper-upsert --paper-id <id> --status <...> [--target-journal <...>]` 對齊（**非**自動 sync；兩前端讀同一 `/api/papers` 一次即同步）。決策改了、網頁沒同步 = M3 學術權威 credibility 受損 |
 
 **無 auto-action 情境**：alert 條件不明 / 需用戶 policy decision → 明標 "L11 policy pending" 於 signal_payload，**主線程立記 pending** 並每輪 check 是否用戶已回覆。
 
