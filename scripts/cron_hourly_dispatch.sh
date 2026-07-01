@@ -516,7 +516,26 @@ fi
 # PHASE Z in the dispatch prompt is agent-discretion → ~90% reliable (15:07
 # fire left scan_trending_agy.py untracked despite git-add-A instruction).
 # This deterministic post-dispatch commit catches whatever the agent missed.
-# All state/log noise is gitignored, so `git add -A` only stages real work.
+# All state/log noise is gitignored, so `git add -A` only stages real work —
+# BUT that assumption only holds while the file has never been tracked; once
+# any process (stash-pop, a stray `git add <path>`, an old pre-gitignore
+# commit) re-tracks a gitignored runtime-state file even once, `git add -A`
+# happily re-stages every future mutation forever, since gitignore does not
+# apply to already-tracked paths. 2026-07-01 incident: storage/.release_settings.json
+# (+ notification_log.json, session_state.json, writer_log.jsonl) had drifted
+# back into tracking this way; a PHASE-Z auto-commit captured a stale
+# interval_minutes=60 snapshot and silently reverted the boss's 2026-06-30
+# "3h→6h" cadence directive back to a 1h cadence. Line below untracks any
+# specific flat runtime-state file that matches .gitignore but is still
+# tracked, BEFORE staging, so this can't recur. Scoped to the known flat
+# state-file list (not storage/ops/{tasks,agents,executions,approvals,
+# rollback_points,locks}/ — those are directories with potentially large
+# historical content and need a separate, deliberate cleanup pass, not an
+# unattended hourly rm --cached) and never touches paper/*/main.pdf
+# (deliberately force-tracked exception). NOTE: `git check-ignore` reports
+# already-tracked paths as NOT ignored (by design) — must use
+# `git ls-files -ci --exclude-standard` instead, which is the only ls-files
+# combination that actually lists tracked-but-ignored paths.
 # 2026-06-30 fix #3: timestamp echo to diagnose 22:02→23:59 1h57min hang
 # (2026-06-29 21:07 incident — wrapper invisibly hung after codex failover exit;
 # unclear if hang was in `git status`, send-alert subprocess boot, or git commit).
@@ -527,6 +546,19 @@ PHASE_Z_STATUS=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 30 \
 echo "[PHASE-Z-safety] git status returned $(date '+%H:%M:%S')"
 if [ -n "$PHASE_Z_STATUS" ]; then
   echo "[PHASE-Z-safety] uncommitted changes after dispatch — auto-committing"
+  PHASE_Z_LEAKED_IGNORED=$(/usr/bin/git -C "$REPO_ROOT" ls-files -ci --exclude-standard -- \
+    storage/ops/dashboard_latest.json storage/ops/alert_dedup.json \
+    storage/ops/cron_last_run.json storage/ops/pending_sessions.json \
+    storage/ops/gmail_inbox_state.json storage/ops/dispatch_report_latest.json \
+    storage/ops/handoff_latest.md storage/ops/writer_log.jsonl \
+    storage/.release_settings.json storage/.supabase_sync_state.json \
+    storage/market_status.json 'storage/notifications/*.json' \
+    storage/session_state.json storage/work_log.json.append 2>/dev/null || true)
+  if [ -n "$PHASE_Z_LEAKED_IGNORED" ]; then
+    echo "[PHASE-Z-safety] untracking accidentally-tracked ignored state file(s):"
+    echo "$PHASE_Z_LEAKED_IGNORED" | sed 's/^/[PHASE-Z-safety]   /'
+    echo "$PHASE_Z_LEAKED_IGNORED" | /usr/bin/xargs -I{} /usr/bin/git -C "$REPO_ROOT" rm --cached -q -- "{}" 2>/dev/null || true
+  fi
   /usr/bin/perl -e 'alarm shift; exec @ARGV' 30 \
     /usr/bin/git -C "$REPO_ROOT" add -A 2>&1 | tail -1
   echo "[PHASE-Z-safety] git add done $(date '+%H:%M:%S')"
