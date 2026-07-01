@@ -1,0 +1,784 @@
+{
+  "experiment_id": "k1594",
+  "created_at": "2026-07-01T15:04:01.919726+08:00",
+  "seed": 1594,
+  "task": "research_kowcpi_kernel_optimally_weighted_conformal",
+  "data": {
+    "source": "experiments/k1571/data_cache.parquet",
+    "source_rows": 4145,
+    "assets": [
+      "TLT",
+      "HYG"
+    ],
+    "alphas": [
+      0.05,
+      0.01
+    ],
+    "validation_window": [
+      "2013-01-01",
+      "2014-12-31"
+    ],
+    "oos_window": [
+      "2015-01-01",
+      "2026-06-30"
+    ],
+    "calibration_window_days": 1000,
+    "features": [
+      "rv5",
+      "rv22",
+      "abs_ret",
+      "vix",
+      "credit_chg",
+      "ief_mom",
+      "lqd_mom"
+    ]
+  },
+  "method": {
+    "name": "KOWCPI-lite one-sided VaR",
+    "description": "Gaussian-kernel weighted lower-tail quantile over the past 1000 observations; bandwidth selected on 2013-2014 validation; weights shrunk toward uniform when Kish ESS falls below 125.",
+    "not_full_replication_note": "This is a finance-specific KOWCPI-style mechanism test, not an exact implementation of Lee-Xu-Xie KOWCPI."
+  },
+  "cells": {
+    "TLT_alpha0.05": {
+      "asset": "TLT",
+      "alpha": 0.05,
+      "n_oos": 2887,
+      "bandwidth_selection": {
+        "selected_bandwidth": 0.5,
+        "grid": [
+          {
+            "bandwidth": 0.35,
+            "validation_n": 235,
+            "validation_violation_rate": 0.02127659574468085,
+            "validation_mean_pinball": 0.0008383402728651797,
+            "validation_mean_ess": 125.00000000034153,
+            "score": 0.0018015397353060246
+          },
+          {
+            "bandwidth": 0.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.029787234042553193,
+            "validation_mean_pinball": 0.0008133908187786391,
+            "validation_mean_ess": 125.34439325281001,
+            "score": 0.0014710259488549856
+          },
+          {
+            "bandwidth": 0.75,
+            "validation_n": 235,
+            "validation_violation_rate": 0.02553191489361702,
+            "validation_mean_pinball": 0.0007997704188410979,
+            "validation_mean_ess": 202.6823571337019,
+            "score": 0.0015825244457919596
+          },
+          {
+            "bandwidth": 1.0,
+            "validation_n": 235,
+            "validation_violation_rate": 0.02127659574468085,
+            "validation_mean_pinball": 0.0008077210863007507,
+            "validation_mean_ess": 347.4820967401144,
+            "score": 0.0017357410577952303
+          },
+          {
+            "bandwidth": 1.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.02127659574468085,
+            "validation_mean_pinball": 0.0008115241776880966,
+            "validation_mean_ess": 589.9841963074773,
+            "score": 0.0017439136584361226
+          },
+          {
+            "bandwidth": 2.25,
+            "validation_n": 235,
+            "validation_violation_rate": 0.01702127659574468,
+            "validation_mean_pinball": 0.0008197601481401844,
+            "validation_mean_ess": 782.9898549530278,
+            "score": 0.0019011458754740445
+          },
+          {
+            "bandwidth": 3.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.01702127659574468,
+            "validation_mean_pinball": 0.0008334315807580394,
+            "validation_mean_ess": 907.0664216585544,
+            "score": 0.0019328519638856657
+          }
+        ]
+      },
+      "kowcpi_mean_ess": 128.63622228528808,
+      "kowcpi_median_ess": 125.00000000025703,
+      "kowcpi_mean_shrink_to_uniform": 0.495622503338393,
+      "best_mean_pinball_model": "HS250",
+      "narrowest_kupiec_valid_model": "HS250",
+      "oos_evaluation": {
+        "models": [
+          {
+            "model": "HS250",
+            "mean_pinball": 0.0010039590202435872,
+            "sum_pinball": 2.898429691443236,
+            "mean_var_width": 0.01442392121031963,
+            "rolling250_abs_coverage_error": 0.017968157695223655,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 165,
+              "violation_rate": 0.0571527537235885,
+              "expected_rate": 0.05,
+              "kupiec_lr": 2.9783773349699914,
+              "kupiec_p": 0.08438383286845164,
+              "christoffersen_ind_lr": 4.352442277749333,
+              "christoffersen_ind_p": 0.03695591346528326,
+              "basel_traffic_light": "yellow",
+              "basel_green_cutoff": 164,
+              "basel_yellow_cutoff": 190,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "HS1000",
+            "mean_pinball": 0.0010306203206711417,
+            "sum_pinball": 2.9754008657775857,
+            "mean_var_width": 0.014630705456770443,
+            "rolling250_abs_coverage_error": 0.031473843821076576,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 164,
+              "violation_rate": 0.056806373397990995,
+              "expected_rate": 0.05,
+              "kupiec_lr": 2.7022930141540655,
+              "kupiec_p": 0.10020403616543039,
+              "christoffersen_ind_lr": 5.87523415393207,
+              "christoffersen_ind_p": 0.015355330615619112,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 164,
+              "basel_yellow_cutoff": 190,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "VIXRegime1000",
+            "mean_pinball": 0.0010175651577256323,
+            "sum_pinball": 2.9377106103539004,
+            "mean_var_width": 0.014567285993100669,
+            "rolling250_abs_coverage_error": 0.027473843821076573,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 154,
+              "violation_rate": 0.05334257014201593,
+              "expected_rate": 0.05,
+              "kupiec_lr": 0.6651958294107772,
+              "kupiec_p": 0.4147315907613077,
+              "christoffersen_ind_lr": 1.725802265422999,
+              "christoffersen_ind_p": 0.188947876037737,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 164,
+              "basel_yellow_cutoff": 190,
+              "trinity_pass": true
+            }
+          },
+          {
+            "model": "KOWCPI-lite",
+            "mean_pinball": 0.001012377881698305,
+            "sum_pinball": 2.9227349444630066,
+            "mean_var_width": 0.014203324777021301,
+            "rolling250_abs_coverage_error": 0.027114480667172102,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 173,
+              "violation_rate": 0.05992379632836855,
+              "expected_rate": 0.05,
+              "kupiec_lr": 5.643866570802857,
+              "kupiec_p": 0.01751653552620991,
+              "christoffersen_ind_lr": 4.110778928347372,
+              "christoffersen_ind_p": 0.04261073307660124,
+              "basel_traffic_light": "yellow",
+              "basel_green_cutoff": 164,
+              "basel_yellow_cutoff": 190,
+              "trinity_pass": false
+            }
+          }
+        ],
+        "dm_tests": {
+          "KOWCPI-lite_minus_HS250": {
+            "t": 0.49470501616354934,
+            "p": 0.6208460166891494,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 1.0
+          },
+          "KOWCPI-lite_minus_HS1000": {
+            "t": -1.1581673309641891,
+            "p": 0.2468915893343584,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 1.0
+          },
+          "KOWCPI-lite_minus_VIXRegime1000": {
+            "t": -0.30628975425354377,
+            "p": 0.7594061331937918,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 1.0
+          }
+        }
+      },
+      "kowcpi_trinity_pass": false
+    },
+    "TLT_alpha0.01": {
+      "asset": "TLT",
+      "alpha": 0.01,
+      "n_oos": 2887,
+      "bandwidth_selection": {
+        "selected_bandwidth": 0.75,
+        "grid": [
+          {
+            "bandwidth": 0.35,
+            "validation_n": 235,
+            "validation_violation_rate": 0.0,
+            "validation_mean_pinball": 0.00022884786692847019,
+            "validation_mean_ess": 125.00000000034153,
+            "score": 0.0006865436007854105
+          },
+          {
+            "bandwidth": 0.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.0,
+            "validation_mean_pinball": 0.0002136975550182548,
+            "validation_mean_ess": 125.34439325281001,
+            "score": 0.0006410926650547644
+          },
+          {
+            "bandwidth": 0.75,
+            "validation_n": 235,
+            "validation_violation_rate": 0.00851063829787234,
+            "validation_mean_pinball": 0.00021525102524809392,
+            "validation_mean_ess": 202.6823571337019,
+            "score": 0.0002793683519177389
+          },
+          {
+            "bandwidth": 1.0,
+            "validation_n": 235,
+            "validation_violation_rate": 0.00425531914893617,
+            "validation_mean_pinball": 0.0002255369327477153,
+            "validation_mean_ess": 347.4820967401144,
+            "score": 0.0004846644725004095
+          },
+          {
+            "bandwidth": 1.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.00425531914893617,
+            "validation_mean_pinball": 0.00022573430502735312,
+            "validation_mean_ess": 589.9841963074773,
+            "score": 0.0004850886129311206
+          },
+          {
+            "bandwidth": 2.25,
+            "validation_n": 235,
+            "validation_violation_rate": 0.0,
+            "validation_mean_pinball": 0.00022788780140514393,
+            "validation_mean_ess": 782.9898549530278,
+            "score": 0.0006836634042154318
+          },
+          {
+            "bandwidth": 3.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.0,
+            "validation_mean_pinball": 0.00023177038585935107,
+            "validation_mean_ess": 907.0664216585544,
+            "score": 0.0006953111575780533
+          }
+        ]
+      },
+      "kowcpi_mean_ess": 189.51399580263882,
+      "kowcpi_median_ess": 135.7473986152695,
+      "kowcpi_mean_shrink_to_uniform": 0.20799388922393358,
+      "best_mean_pinball_model": "KOWCPI-lite",
+      "narrowest_kupiec_valid_model": "VIXRegime1000",
+      "oos_evaluation": {
+        "models": [
+          {
+            "model": "HS250",
+            "mean_pinball": 0.0003151721025098662,
+            "sum_pinball": 0.9099018599459838,
+            "mean_var_width": 0.022131785771791472,
+            "rolling250_abs_coverage_error": 0.008009097801364669,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 39,
+              "violation_rate": 0.013508832698302737,
+              "expected_rate": 0.01,
+              "kupiec_lr": 3.2351208944516543,
+              "kupiec_p": 0.07207498365298859,
+              "christoffersen_ind_lr": 5.815881222481266,
+              "christoffersen_ind_p": 0.015882093695879118,
+              "basel_traffic_light": "yellow",
+              "basel_green_cutoff": 38,
+              "basel_yellow_cutoff": 51,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "HS1000",
+            "mean_pinball": 0.00031287395614795164,
+            "sum_pinball": 0.9032671113991364,
+            "mean_var_width": 0.02176158732228099,
+            "rolling250_abs_coverage_error": 0.01206974981046247,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 40,
+              "violation_rate": 0.013855213023900243,
+              "expected_rate": 0.01,
+              "kupiec_lr": 3.869515145357923,
+              "kupiec_p": 0.04917072420412694,
+              "christoffersen_ind_lr": 5.551532102255578,
+              "christoffersen_ind_p": 0.018464517786867085,
+              "basel_traffic_light": "yellow",
+              "basel_green_cutoff": 38,
+              "basel_yellow_cutoff": 51,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "VIXRegime1000",
+            "mean_pinball": 0.00031562395407466244,
+            "sum_pinball": 0.9112063554135504,
+            "mean_var_width": 0.02202511075718171,
+            "rolling250_abs_coverage_error": 0.00925549658832449,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 35,
+              "violation_rate": 0.012123311395912712,
+              "expected_rate": 0.01,
+              "kupiec_lr": 1.2313115290104406,
+              "kupiec_p": 0.2671521284637015,
+              "christoffersen_ind_lr": 6.9781410578980285,
+              "christoffersen_ind_p": 0.008251127144548676,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 38,
+              "basel_yellow_cutoff": 51,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "KOWCPI-lite",
+            "mean_pinball": 0.00029051215002470825,
+            "sum_pinball": 0.8387085771213327,
+            "mean_var_width": 0.02052981293584349,
+            "rolling250_abs_coverage_error": 0.011181197877179682,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 45,
+              "violation_rate": 0.015587114651887772,
+              "expected_rate": 0.01,
+              "kupiec_lr": 7.7785568424210965,
+              "kupiec_p": 0.0052870016040846846,
+              "christoffersen_ind_lr": 0.11598922651432986,
+              "christoffersen_ind_p": 0.7334258783860128,
+              "basel_traffic_light": "yellow",
+              "basel_green_cutoff": 38,
+              "basel_yellow_cutoff": 51,
+              "trinity_pass": false
+            }
+          }
+        ],
+        "dm_tests": {
+          "KOWCPI-lite_minus_HS250": {
+            "t": -1.7694795469418847,
+            "p": 0.0769194648454643,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 0.6922751836091787
+          },
+          "KOWCPI-lite_minus_HS1000": {
+            "t": -1.148648331632906,
+            "p": 0.2507962115115254,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 1.0
+          },
+          "KOWCPI-lite_minus_VIXRegime1000": {
+            "t": -1.244497467119083,
+            "p": 0.21341758574965342,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 1.0
+          }
+        }
+      },
+      "kowcpi_trinity_pass": false
+    },
+    "HYG_alpha0.05": {
+      "asset": "HYG",
+      "alpha": 0.05,
+      "n_oos": 2887,
+      "bandwidth_selection": {
+        "selected_bandwidth": 0.35,
+        "grid": [
+          {
+            "bandwidth": 0.35,
+            "validation_n": 235,
+            "validation_violation_rate": 0.04680851063829787,
+            "validation_mean_pinball": 0.00042778768207636463,
+            "validation_mean_ess": 125.00000000029426,
+            "score": 0.0004823988755329219
+          },
+          {
+            "bandwidth": 0.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.05531914893617021,
+            "validation_mean_pinball": 0.0004116208752773602,
+            "validation_mean_ess": 136.1726863925054,
+            "score": 0.0017253045197795718
+          },
+          {
+            "bandwidth": 0.75,
+            "validation_n": 235,
+            "validation_violation_rate": 0.0425531914893617,
+            "validation_mean_pinball": 0.00040906940527029445,
+            "validation_mean_ess": 254.29113706147635,
+            "score": 0.0005309198664146375
+          },
+          {
+            "bandwidth": 1.0,
+            "validation_n": 235,
+            "validation_violation_rate": 0.0425531914893617,
+            "validation_mean_pinball": 0.0004165651207680408,
+            "validation_mean_ess": 395.80935175460553,
+            "score": 0.0005406483482308615
+          },
+          {
+            "bandwidth": 1.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.04680851063829787,
+            "validation_mean_pinball": 0.00043111665820151927,
+            "validation_mean_ess": 615.3973951267404,
+            "score": 0.0004861528273336282
+          },
+          {
+            "bandwidth": 2.25,
+            "validation_n": 235,
+            "validation_violation_rate": 0.0425531914893617,
+            "validation_mean_pinball": 0.0004362991865577287,
+            "validation_mean_ess": 792.7257274715612,
+            "score": 0.0005662606463834352
+          },
+          {
+            "bandwidth": 3.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.0425531914893617,
+            "validation_mean_pinball": 0.0004435225415486807,
+            "validation_mean_ess": 910.7197118883275,
+            "score": 0.0005756356390312665
+          }
+        ]
+      },
+      "kowcpi_mean_ess": 125.08783616163622,
+      "kowcpi_median_ess": 125.00000000026292,
+      "kowcpi_mean_shrink_to_uniform": 0.6112781550290948,
+      "best_mean_pinball_model": "KOWCPI-lite",
+      "narrowest_kupiec_valid_model": "KOWCPI-lite",
+      "oos_evaluation": {
+        "models": [
+          {
+            "model": "HS250",
+            "mean_pinball": 0.0006006791292171052,
+            "sum_pinball": 1.7341606460497827,
+            "mean_var_width": 0.0068507121035469645,
+            "rolling250_abs_coverage_error": 0.028994692949203944,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 169,
+              "violation_rate": 0.058538275025978526,
+              "expected_rate": 0.05,
+              "kupiec_lr": 4.210551871665302,
+              "kupiec_p": 0.040173265052116824,
+              "christoffersen_ind_lr": 34.62281812207448,
+              "christoffersen_ind_p": 4.001877162984613e-09,
+              "basel_traffic_light": "yellow",
+              "basel_green_cutoff": 164,
+              "basel_yellow_cutoff": 190,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "HS1000",
+            "mean_pinball": 0.0006184576794987367,
+            "sum_pinball": 1.7854873207128528,
+            "mean_var_width": 0.007186887848089182,
+            "rolling250_abs_coverage_error": 0.03793631539044731,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 139,
+              "violation_rate": 0.04814686525805334,
+              "expected_rate": 0.05,
+              "kupiec_lr": 0.2112108074832122,
+              "kupiec_p": 0.6458200363723006,
+              "christoffersen_ind_lr": 44.95486947302243,
+              "christoffersen_ind_p": 2.016287137251993e-11,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 164,
+              "basel_yellow_cutoff": 190,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "VIXRegime1000",
+            "mean_pinball": 0.0006126287216715591,
+            "sum_pinball": 1.7686591194657912,
+            "mean_var_width": 0.007332427666043211,
+            "rolling250_abs_coverage_error": 0.028943138741470812,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 144,
+              "violation_rate": 0.04987876688604087,
+              "expected_rate": 0.05,
+              "kupiec_lr": 0.0008939814440509508,
+              "kupiec_p": 0.9761471866926039,
+              "christoffersen_ind_lr": 34.812579318742564,
+              "christoffersen_ind_p": 3.6302031380941457e-09,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 164,
+              "basel_yellow_cutoff": 190,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "KOWCPI-lite",
+            "mean_pinball": 0.0005435428989935346,
+            "sum_pinball": 1.5692083493943345,
+            "mean_var_width": 0.006491871655764584,
+            "rolling250_abs_coverage_error": 0.03254435178165277,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 152,
+              "violation_rate": 0.052649809490820924,
+              "expected_rate": 0.05,
+              "kupiec_lr": 0.4198006865624393,
+              "kupiec_p": 0.5170365145429098,
+              "christoffersen_ind_lr": 8.794787864705768,
+              "christoffersen_ind_p": 0.003020923700231992,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 164,
+              "basel_yellow_cutoff": 190,
+              "trinity_pass": false
+            }
+          }
+        ],
+        "dm_tests": {
+          "KOWCPI-lite_minus_HS250": {
+            "t": -1.7613885730011323,
+            "p": 0.07827853314636757,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 0.6922751836091787
+          },
+          "KOWCPI-lite_minus_HS1000": {
+            "t": -2.174275332530606,
+            "p": 0.02976545726928248,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 0.35718548723138976
+          },
+          "KOWCPI-lite_minus_VIXRegime1000": {
+            "t": -1.8990041571942817,
+            "p": 0.0576635646248147,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 0.608852233891628
+          }
+        }
+      },
+      "kowcpi_trinity_pass": false
+    },
+    "HYG_alpha0.01": {
+      "asset": "HYG",
+      "alpha": 0.01,
+      "n_oos": 2887,
+      "bandwidth_selection": {
+        "selected_bandwidth": 2.25,
+        "grid": [
+          {
+            "bandwidth": 0.35,
+            "validation_n": 235,
+            "validation_violation_rate": 0.00425531914893617,
+            "validation_mean_pinball": 0.00013142915219348036,
+            "validation_mean_ess": 125.00000000029426,
+            "score": 0.00028243285896896843
+          },
+          {
+            "bandwidth": 0.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.01276595744680851,
+            "validation_mean_pinball": 0.0001200312391379229,
+            "validation_mean_ess": 136.1726863925054,
+            "score": 0.0011160351383674957
+          },
+          {
+            "bandwidth": 0.75,
+            "validation_n": 235,
+            "validation_violation_rate": 0.01702127659574468,
+            "validation_mean_pinball": 0.00011899232050671142,
+            "validation_mean_ess": 254.29113706147635,
+            "score": 0.0026254263056480795
+          },
+          {
+            "bandwidth": 1.0,
+            "validation_n": 235,
+            "validation_violation_rate": 0.01702127659574468,
+            "validation_mean_pinball": 0.0001144212959759223,
+            "validation_mean_ess": 395.80935175460553,
+            "score": 0.0025245719984474772
+          },
+          {
+            "bandwidth": 1.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.01276595744680851,
+            "validation_mean_pinball": 0.00011868167695662725,
+            "validation_mean_ess": 615.3973951267404,
+            "score": 0.0011034870814903425
+          },
+          {
+            "bandwidth": 2.25,
+            "validation_n": 235,
+            "validation_violation_rate": 0.00851063829787234,
+            "validation_mean_pinball": 0.00012028038334573132,
+            "validation_mean_ess": 792.7257274715612,
+            "score": 0.00015610858264020446
+          },
+          {
+            "bandwidth": 3.5,
+            "validation_n": 235,
+            "validation_violation_rate": 0.00425531914893617,
+            "validation_mean_pinball": 0.00012979526305420346,
+            "validation_mean_ess": 910.7197118883275,
+            "score": 0.0002789217354994585
+          }
+        ]
+      },
+      "kowcpi_mean_ess": 781.0019895379539,
+      "kowcpi_median_ess": 824.711896958006,
+      "kowcpi_mean_shrink_to_uniform": 0.013185910761989838,
+      "best_mean_pinball_model": "KOWCPI-lite",
+      "narrowest_kupiec_valid_model": "KOWCPI-lite",
+      "oos_evaluation": {
+        "models": [
+          {
+            "model": "HS250",
+            "mean_pinball": 0.0002195703488342474,
+            "sum_pinball": 0.6338995970844722,
+            "mean_var_width": 0.01316374003984375,
+            "rolling250_abs_coverage_error": 0.01270811220621683,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 47,
+              "violation_rate": 0.016279875303082784,
+              "expected_rate": 0.01,
+              "kupiec_lr": 9.66564127955661,
+              "kupiec_p": 0.001877462148067277,
+              "christoffersen_ind_lr": 20.29268245874846,
+              "christoffersen_ind_p": 6.645425567386454e-06,
+              "basel_traffic_light": "yellow",
+              "basel_green_cutoff": 38,
+              "basel_yellow_cutoff": 51,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "HS1000",
+            "mean_pinball": 0.00024541694222860854,
+            "sum_pinball": 0.7085187122139929,
+            "mean_var_width": 0.014725027805938783,
+            "rolling250_abs_coverage_error": 0.01269901440485216,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 31,
+              "violation_rate": 0.010737790093522688,
+              "expected_rate": 0.01,
+              "kupiec_lr": 0.15500883127481302,
+              "kupiec_p": 0.6937939692843811,
+              "christoffersen_ind_lr": 32.45478591331869,
+              "christoffersen_ind_p": 1.2199813714808272e-08,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 38,
+              "basel_yellow_cutoff": 51,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "VIXRegime1000",
+            "mean_pinball": 0.0002358262102879803,
+            "sum_pinball": 0.6808302691013991,
+            "mean_var_width": 0.013418961065296619,
+            "rolling250_abs_coverage_error": 0.01297952994692949,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 38,
+              "violation_rate": 0.013162452372705231,
+              "expected_rate": 0.01,
+              "kupiec_lr": 2.652716562845967,
+              "kupiec_p": 0.10337310501424468,
+              "christoffersen_ind_lr": 26.348714131770123,
+              "christoffersen_ind_p": 2.8500859439173354e-07,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 38,
+              "basel_yellow_cutoff": 51,
+              "trinity_pass": false
+            }
+          },
+          {
+            "model": "KOWCPI-lite",
+            "mean_pinball": 0.00018377735869688826,
+            "sum_pinball": 0.5305652345579164,
+            "mean_var_width": 0.011048966805675001,
+            "rolling250_abs_coverage_error": 0.010835481425322212,
+            "backtest": {
+              "n": 2887,
+              "n_violations": 35,
+              "violation_rate": 0.012123311395912712,
+              "expected_rate": 0.01,
+              "kupiec_lr": 1.2313115290104406,
+              "kupiec_p": 0.2671521284637015,
+              "christoffersen_ind_lr": 11.565669688653713,
+              "christoffersen_ind_p": 0.0006718068986890646,
+              "basel_traffic_light": "green",
+              "basel_green_cutoff": 38,
+              "basel_yellow_cutoff": 51,
+              "trinity_pass": false
+            }
+          }
+        ],
+        "dm_tests": {
+          "KOWCPI-lite_minus_HS250": {
+            "t": -1.9168927179790232,
+            "p": 0.05535020308105709,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 0.608852233891628
+          },
+          "KOWCPI-lite_minus_HS1000": {
+            "t": -1.6984643769878736,
+            "p": 0.0895279406299978,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 0.6922751836091787
+          },
+          "KOWCPI-lite_minus_VIXRegime1000": {
+            "t": -1.4140068867019082,
+            "p": 0.15746774254090345,
+            "interpretation": "equal_accuracy_not_rejected",
+            "holm_p_across_cells_pairs": 0.9448064552454207
+          }
+        }
+      },
+      "kowcpi_trinity_pass": false
+    }
+  },
+  "conclusion": {
+    "verdict": "MIXED_WEAK",
+    "kowcpi_best_mean_pinball_cells": 3,
+    "kowcpi_trinity_pass_cells": 0,
+    "kowcpi_strict_holm_wins_vs_vix_regime": 0,
+    "headline": "Kernel-weighted conformal VaR has useful cells but is not yet a clean cross-asset result."
+  },
+  "artifacts": {
+    "oos_forecasts": "experiments/k1594/k1594_oos_var_forecasts.csv",
+    "figures": [
+      "experiments/k1594/figures/fig1_mean_pinball.png",
+      "experiments/k1594/figures/fig2_violation_rates.png",
+      "experiments/k1594/figures/fig3_mean_var_width.png"
+    ]
+  },
+  "references_checked": [
+    "Lee, Xu and Xie (2024), arXiv:2405.16828",
+    "Tibshirani et al. (2019), Conformal Prediction Under Covariate Shift",
+    "Gibbs and Candes (2021), Adaptive Conformal Inference",
+    "Kupiec (1995) and Christoffersen (1998) VaR backtesting"
+  ]
+}
