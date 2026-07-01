@@ -12791,5 +12791,18 @@
       "storage/next_tasks.json"
     ],
     "summary": "leverage-direction IJF reframe TICK-3 (multi-tick paper_body, main-thread only per CLAUDE.md). Ported Data & Methodology into body_v_ijf.tex from the JBF-era body.tex: data (7 primary assets x 4 classes + 26-asset validation), the two competing measurements (symmetric GARCH vs asymmetric GJR + zero-mean spec with AR(1) robustness), rolling OOS forecasting scheme, forecast-level evaluation (QLIKE + Diebold-Mariano + MCS + Harvey multiple-testing), VaR backtesting, leverage-direction classification (demoted to interpretive), and the VT allocation testbed. KEY FIX (memo issue 3): reconciled the sample-split map into ONE canonical 'Sample partition' paragraph -- full 2017-01..2026-03 split IS(2017-22)/main-OOS(2023-24)/OOS-val(2025..2026-03); every table now refers to this single map, sub-windows labelled, no IS/OOS mixing. Added explicit forecast origin/horizon alignment (origin t-1, 1-day horizon, estimation window [t-w,t-1] => no look-ahead; IJF checklist + experiments.md lookahead rule). Reframed VT subsec so the measurement->allocation wedge is attributable to the decision rule, not the forecast. VERIFIED: all 35 cite keys resolve to main.tex bibitems (comm diff empty); temp-wrapper xelatex compile pass1+pass2 exit 0 with 0 undefined citations/refs, PDF 19pp; compliance clean (no AI/LLM/GPT/K-id/VolPred; author=Yi-Hao Lai only). Task -> pending_main_thread for tick-4 (port Empirical Results, wedge-first restructure, per-table caption reconciliation vs results JSON)."
+  },
+  {
+    "timestamp": "2026-07-01T21:51:39+08:00",
+    "task_type": "daily_article",
+    "task_id": "daily_article_k1074_general",
+    "actor": "hourly-21",
+    "verdict": "succeeded",
+    "refs": [
+      "storage/reports/feed.json",
+      "storage/drafts/k1074_general_draft.md",
+      "experiments/k1074/"
+    ],
+    "summary": "Published K1074 general-audience daily_article (mile_c8468b0d, status=draft) to clear draft_pool_low breach (3->4). Topic: 統計上更準的波動率模型(A4f)做成VT策略後,扣成本Net Sharpe 0.861(12/VIX) > 0.843(A4f) -- turnover多68%吃光精度優勢;誠實標不顯著(bootstrap p=0.64,CI跨零). audience-gap候選(有research版缺general版). 3-layer dedup PASS(Layer2抓出K1316/K1074/K1083已被research文覆蓋,選K1074做general重寫). 5 imgs: 2 bar charts + 3-panel lazypack(codex exec,數字對齊results.json). Gates PASS: anti_ai_gate/audience(jargon軟化)/number-audit(verbatim vs K1074+K988 results.json)/image/lazypack. commit bbb2f4c28. mirror-sync HTTP401(feed+Supabase圖已存,mirror auth另議)."
   }
 ]
