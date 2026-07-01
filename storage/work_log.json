@@ -12804,5 +12804,17 @@
       "experiments/k1074/"
     ],
     "summary": "Published K1074 general-audience daily_article (mile_c8468b0d, status=draft) to clear draft_pool_low breach (3->4). Topic: 統計上更準的波動率模型(A4f)做成VT策略後,扣成本Net Sharpe 0.861(12/VIX) > 0.843(A4f) -- turnover多68%吃光精度優勢;誠實標不顯著(bootstrap p=0.64,CI跨零). audience-gap候選(有research版缺general版). 3-layer dedup PASS(Layer2抓出K1316/K1074/K1083已被research文覆蓋,選K1074做general重寫). 5 imgs: 2 bar charts + 3-panel lazypack(codex exec,數字對齊results.json). Gates PASS: anti_ai_gate/audience(jargon軟化)/number-audit(verbatim vs K1074+K988 results.json)/image/lazypack. commit bbb2f4c28. mirror-sync HTTP401(feed+Supabase圖已存,mirror auth另議)."
+  },
+  {
+    "timestamp": "2026-07-02T00:12:33+08:00",
+    "task_type": "experiment",
+    "task_id": "research_quantum_reservoir_computing_for_realized_volatil",
+    "actor": "hourly-00",
+    "verdict": "succeeded",
+    "refs": [
+      "experiments/research_quantum_reservoir_computing_for_realized_volatil/",
+      "storage/memory/knowledge.json"
+    ],
+    "summary": "Finished orphan: codex-failover 上一班產出 Quantum Reservoir Computing(classical ESN proxy) 實驗 + Codex review(PASS as scoped gate) 並標 task succeeded, 但漏寫 knowledge.json + 未 commit。本班收尾: verdict=NULL_VS_PRIMARY_BASELINE (reservoir_seed_median panel QLIKE 1.4955 vs linear_har 1.4632, diff +0.0323, 2/8 wins, bootstrap prob_below_zero=0.031)。 補 knowledge.json null_result entry(item_id 6809dd3e, evidence 指 results.json+codex_review.md) + commit 實驗檔。 另 close P1 CRITICAL email-12435(老闆問auth preflight還有問題嗎) — 00:07 fire [AUTH-PREFLIGHT] ok 證實已修復, close email notification_id=ac1052ce。"
   }
 ]

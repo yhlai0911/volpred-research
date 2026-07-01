@@ -37058,5 +37058,17 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-07-01T23:53:58.317425"
+  },
+  {
+    "item_id": "6809dd3e",
+    "category": "null_result",
+    "content": "Quantum Reservoir Computing（classical ESN proxy）對 realized volatility 預測 = NULL vs primary baseline。experiment_id=research_quantum_reservoir_computing_for_realized_volatil。以透明 fixed classical echo-state reservoir 取代 quantum reservoir，8 資產 daily r_t^2 QLIKE 對比最佳傳統 baseline(linear_har)：reservoir_seed_median panel QLIKE mean=1.4955 vs linear_har=1.4632，diff +0.0323，僅 2/8 資產勝，bootstrap(B=1000, seed=42) CI95 [-0.0006, 0.0706]、prob_mean_below_zero=0.031 → reservoir 機制本身未優於 lagged-vol baseline。Scope 誠實限縮：classical ESN proxy，非 quantum Hamiltonian / qubit 模擬、非 HF RV panel — 不可引用為反駁 QRC 原論文(arXiv:2505.13933)的證據。Lookahead 防護：feature 用 signal.shift(1) + rolling().mean().shift(1)，train/calibration 僅用 <2019-01-02 列。seed=42 全程固定。Codex review verdict=PASS as scoped reproducibility gate。reviewer=Codex CLI。",
+    "evidence": [
+      "experiments/research_quantum_reservoir_computing_for_realized_volatil/research_quantum_reservoir_computing_for_realized_volatil_results.json",
+      "experiments/research_quantum_reservoir_computing_for_realized_volatil/codex_review.md",
+      "experiments/research_quantum_reservoir_computing_for_realized_volatil/README.md"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-07-02T00:12:11.172528"
   }
 ]
