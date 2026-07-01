@@ -45,8 +45,10 @@ def main(argv: list[str]) -> int:
 
     meta = cfg.get("_meta", {})
     last = meta.get("last_reconciled")
-    aliases = cfg.get("available_aliases", [])
-    versions = cfg.get("versions", {})
+    aliases = cfg.get("dispatchable_now", [])
+    unavailable = cfg.get("known_but_unavailable", [])
+    versions = {k: v.get("display", v.get("id")) if isinstance(v, dict) else v
+                for k, v in cfg.get("models", {}).items()}
 
     today = date.fromisoformat(args.today) if args.today else date.today()
     age_days = None
@@ -59,19 +61,20 @@ def main(argv: list[str]) -> int:
             stale = True  # unparseable date -> treat as stale
 
     report = {
-        "available_aliases": aliases,
+        "dispatchable_now": aliases,
+        "known_but_unavailable": unavailable,
         "versions": versions,
         "last_reconciled": last,
         "age_days": age_days,
         "max_age_days": args.max_age_days,
         "reconcile_due": stale,
-        "how": "Compare the in-session Agent/Workflow tool `model` enum vs available_aliases; update config/models.json + agent-delegation.md on drift; WebSearch a new alias before assigning a tier.",
+        "how": "Authoritative availability = Claude Desktop model selector (owner screenshot). Compare vs config/models.json; update config + agent-delegation.md on drift; WebSearch a new model before assigning a tier; route around available=false.",
     }
 
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
-        print(f"model roster: aliases={aliases} versions={versions}")
+        print(f"model roster: dispatchable={aliases} unavailable={unavailable} versions={versions}")
         print(f"  last_reconciled={last} (age {age_days}d, threshold {args.max_age_days}d)")
         if stale:
             print("  ⚠ RECONCILE DUE — compare live tool `model` enum vs config/models.json; "
