@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-01 hourly-dispatch pre-gate 的 `has_critical()` 讀不存在欄位，signal 從部署起就恆真
+
+**問題**：同日稍早部署的 `scripts/hourly_dispatch_pregate.py`（SHADOW 模式，commit `cde11502d` 15:20 CST / 部署 15:36 CST）目的是省掉無實質工作的 hourly fire 的 ~95K token 冷啟動。部署後第一批 shadow log（16:07、17:07 CST 兩次真實 fire）都顯示 `critical: true`，導致 `would_skip` 恆為 false —— gate 從上線起就沒有機會真正驗證「可省」的情境。
+
+**現象 / 根因**：`has_critical()` 讀 `dashboard_latest.json` 的 `breach_count` / `breaches` / `critical` / `critical_count` 欄位，但 `scripts/ops_dashboard.py` 實際輸出的 schema只有 `section_breaches`（含 warn+critical）/ `section_critical`（僅真 critical）/ `overall_status`。前四個欄位全是 `None`，函式因此永遠 fallback 到 `overall_status not in (ok, healthy, green, "")`。但 `overall_status` 幾乎恆為 `"warn"`（loop_health 依設計刻意用 warn 不用 critical 呈現 degrading trend；host_cron_fail 已知 reference-only false-positive 也算一個 warn breach）——導致這個訊號形同「永遠回傳 true」，完全喪失篩選能力。这是典型「讀 schema 已經 drift 的欄位、fallback 掩蓋了真正的 dead code」。
+
+**解決方法**：改讀 `section_critical`（`ops_dashboard.py` 定義為「status 字面等於 critical 的 section 數」，語意精準對應「真正需要立即 triage」），僅在該欄位完全不存在時才 fallback 到舊的 `overall_status` 判斷（相容舊/缺 schema）。修正後在目前現況（`section_critical=0`）下 `has_critical()` 正確回傳 `False`，`decide()` 首次產生有意義的 `would_skip=true`。新增 `tests/test_hourly_dispatch_pregate.py`（8 tests）鎖住新舊 schema 行為 + fail-open 路徑。**仍維持 SHADOW 模式**（`PREGATE_SHADOW=1` 預設不變），修正只影響 shadow log 的判讀品質，不影響真實 dispatch 行為。
+
+**教訓**：任何讀「其他腳本輸出 JSON」的判斷邏輯，寫的當下就該對照該腳本的**實際輸出程式碼**核對欄位名，不能憑欄位名稱直覺假設；`.get(x) or .get(y) or 0` 這種多重 fallback 語法特別危險 —— 全部欄位不存在時會安靜地落到最後一個 fallback，且不會拋錯，容易長期不被發現（這次是部署當天在整理 pre-gate 優化任務時交叉核對 log 才抓到，不是靠 test 抓到，因為原始設計沒寫這隻 test）。
+
 ## 2026-07-01 論文投稿決策改了、公開網頁沒同步（dual-source 無 reconciliation）
 
 **問題**：leverage-direction 投稿決策改動（JBF → IJF primary/EmpEcon fallback，且 rigorous rebuild 後 downgrade 回 revision、非 submission-ready），但公開網頁 `/paper` + `/v3/paper` 仍顯示 `target_journal=Journal of Banking and Finance` + `status=ready_for_submission`（over-claim）。靠老闆人工抓到才修。

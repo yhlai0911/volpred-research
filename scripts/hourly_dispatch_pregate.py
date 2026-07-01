@@ -88,16 +88,36 @@ def has_email_backlog(tasks: list) -> bool:
 
 
 def has_critical() -> bool:
+    """True only when the dashboard has a genuine CRITICAL-level section.
+
+    2026-07-01 bug fix: this previously read `breach_count`/`breaches`/`critical`/
+    `critical_count` — none of which exist in scripts/ops_dashboard.py's real
+    payload (it emits `section_breaches`/`section_critical`/`overall_status`
+    only). Those reads always evaluated to 0, so the function silently fell
+    through to `overall_status not in (ok, healthy, green, "")`. But
+    `overall_status` is "warn" almost continuously (loop_health soft-tracking,
+    reference-only host_cron_fail false-positive, routine content-quality
+    warns) — see scripts/ops_dashboard.py's own comment that loop_health
+    "degrading is surfaced as warn (not critical)". So this signal was
+    effectively always True regardless of real urgency, defeating the gate:
+    shadow-mode data from the first deploy (16:07/17:07 CST fires) showed
+    critical=True on both, driven entirely by this dead-field fallback.
+    Fix: use `section_critical` (count of sections whose status is literally
+    "critical" — real triage-worthy breaches only; see ops_dashboard.py
+    `critical = sum(1 for s in out if s["status"] == "critical")`). Routine
+    warns are already covered by the email/high_prio/cadence signals, so they
+    don't need to force PROCEED via this path too.
+    """
     d = json.loads(DASHBOARD.read_text(encoding="utf-8"))
-    bc = d.get("breach_count") or d.get("breaches") or 0
-    crit = d.get("critical") or d.get("critical_count") or 0
+    section_critical = d.get("section_critical")
+    if section_critical is not None:
+        try:
+            return int(section_critical) > 0
+        except (TypeError, ValueError) as exc:
+            logging.warning("pregate: unparseable section_critical=%r, assuming critical: %s", section_critical, exc)
+            return True  # fail-open: unparseable -> assume critical
+    # Fallback for an older/missing dashboard schema without section_critical.
     status = str(d.get("overall_status", "")).lower()
-    try:
-        if int(bc) > 0 or int(crit) > 0:
-            return True
-    except (TypeError, ValueError) as exc:
-        logging.warning("pregate: unparseable dashboard breach counts, assuming critical: %s", exc)
-        return True  # fail-open: unparseable -> assume critical
     if status and status not in ("ok", "healthy", "green", ""):
         return True
     return False
