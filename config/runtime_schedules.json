@@ -466,9 +466,9 @@
         "cron": "0 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_git_push_backup.sh",
         "log_path": "storage/logs/cron/git_push_backup.log",
-        "description": "每小時：本機研究 commit fast-forward push 到 origin/main 備份（2026-06-24 建，雲端 routines 停用後本地為唯一 push 源；偵測分岔則發 alert 不強推）。2026-07-01 3-STRIKE 修正：直接 host crontab `17 */2 * * *` 因 macOS Keychain 在無登入 session 的 cron 環境下不可讀（`could not read Username for 'https://github.com': Device not configured`）100% 結構性失敗；`check_alerts` LaunchAgent 的 piggy-back fire（有登入 session、Keychain 可讀）100% 成功。移除壞掉的直接 host cron leg，改純靠 piggy-back（cadence 從 2h 提升為 1h，是改善不是降級）。",
-        "host_crontab_managed": false,
-        "host_crontab_managed_note": "2026-07-01: LaunchAgent-piggy-back（經 com.volpred.check-alerts hourly fire → run_due_jobs）為 canonical；移除結構性失敗的直接 host crontab leg（Keychain-under-cron 3-strike）。",
+        "description": "每小時：本機研究 commit fast-forward push 到 origin/main 備份（2026-06-24 建，雲端 routines 停用後本地為唯一 push 源；偵測分岔則發 alert 不強推）。2026-07-01 3-STRIKE 修正：直接 host crontab `17 */2 * * *` 因 macOS Keychain 在無登入 session 的 cron 環境下不可讀（`could not read Username for 'https://github.com': Device not configured`）100% 結構性失敗；`check_alerts` LaunchAgent 觸發的 piggy-back fire（`run_due_jobs.py`，繼承有登入 session 的 Keychain 存取）100% 成功。**已移除**壞掉的直接 host crontab entry（`crontab -l` 不再含 `volpred-git-push-backup`），純靠 `host_crontab_managed: true` + piggy-back 覆蓋（cadence 從 2h 提升為 1h，是改善不是降級）。注意：`run_due_jobs.py` 對 `host_crontab_managed is False` 的 item 會整個跳過 dispatch（見 SKIP_JOB_IDS 旁的 managed-check），故此欄位刻意維持 `true`（代表『可由 host cron 管理』的抽象語意，不是『目前有 host crontab entry』）——真正的 canonical 執行路徑是 piggy-back，host crontab 這條 leg 已拔除。",
+        "host_crontab_managed": true,
+        "host_crontab_managed_note": "2026-07-01 3-STRIKE：直接 host crontab leg（`17 */2 * * *`）因 Keychain-under-cron 100% 失敗已從 crontab 移除；canonical 執行路徑改為純 piggy-back（run_due_jobs.py 經 check_alerts LaunchAgent hourly 觸發）。`host_crontab_managed` 維持 true 是為了不讓 run_due_jobs.py 把此 job 排除在 piggy-back dispatch 之外（該旗標同時控制『是否允許 host crontab 管理』與『是否讓 piggy-back dispatch』兩個語意，是既有程式碼的耦合限制，非本次新增）。",
         "piggy_back_enabled": true
       },
       {
