@@ -24342,7 +24342,7 @@
     "title": "K506: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K506 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: Reference: Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF Reference: Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
     "priority": 4,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K506",
@@ -24358,10 +24358,14 @@
     "topic_cluster": null,
     "created_at": "2026-06-07T15:35:31+00:00",
     "last_released_at": "2026-06-07T16:09:36.824075+00:00",
-    "blocked_reason": "awaiting_external_data",
-    "blocked_at": "2026-06-07T16:11:20+00:00",
-    "blocked_note": "K506 retry_in_progress：缺 EWT 2010-2021 原始價格，外網被 sandbox 擋；舊 results.json 已標失效不可引用；retry 完成且 Codex source-review PASS 才能寫 article",
-    "blocked_until": "2026-07-01"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675253+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "K676_article_general_v2",
@@ -25089,7 +25093,7 @@
     "title": "研究 backlog fallback: CNN-Transformer Hybrid",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: CNN-Transformer Hybrid — European J. Finance 2025 | 來源 section: ml-garch 混合. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "cnn_transformer_hybrid",
@@ -25098,10 +25102,14 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T02:11:17+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T17:12:20+00:00",
-    "blocked_until": "2026-07-01",
-    "blocked_note": "ML novel-method / conformal NULL-quartet rule (K1310-K1330 已 NULL 4 連) — pause 至 2026-07-01 重新評估 monetization angle 與差異化"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675270+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "research_time_varying_hurst_via_ewma",
@@ -25195,7 +25203,7 @@
     "title": "研究 backlog fallback: Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437 | 來源 section: rough volatility & hurst. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "non_gaussian_rough_vol_stable_increments_arxiv_2",
@@ -25204,10 +25212,14 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T02:34:03+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:30+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675275+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "K1423_codex_review_retry",
@@ -25258,7 +25270,7 @@
     "title": "研究 backlog fallback: Proxy-Reliance Control in Conformal VaR",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Proxy-Reliance Control in Conformal VaR — arXiv:2603.22569 (2026)。校準 one-sided VaR 時控制 proxy 依賴。直接相關我們的 Patton (2011) proxy-robust 框架。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "proxy_reliance_control_in_conformal_var",
@@ -25267,17 +25279,21 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T04:08:06+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T17:12:20+00:00",
-    "blocked_until": "2026-07-01",
-    "blocked_note": "ML novel-method / conformal NULL-quartet rule (K1310-K1330 已 NULL 4 連) — pause 至 2026-07-01 重新評估 monetization angle 與差異化"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675278+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "research_online_conformal_via_universal_portfolio",
     "title": "研究 backlog fallback: Online Conformal via Universal Portfolio",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Online Conformal via Universal Portfolio — arXiv:2602.03168 (2026)。在線 conformal prediction + portfolio theory 交叉。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "online_conformal_via_universal_portfolio",
@@ -25286,10 +25302,14 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T04:08:06+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T17:12:20+00:00",
-    "blocked_until": "2026-07-01",
-    "blocked_note": "ML novel-method / conformal NULL-quartet rule (K1310-K1330 已 NULL 4 連) — pause 至 2026-07-01 重新評估 monetization angle 與差異化"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675281+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "paper_review_mile_22d9d2a5",
@@ -25318,7 +25338,7 @@
     "title": "研究 backlog fallback: KOWCPI (Kernel-Optimally-Weighted Conformal)",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: KOWCPI (Kernel-Optimally-Weighted Conformal) — arXiv:2405.16828。自適應權重 conformal prediction interval，適合波動率聚集。 | 來源 section: tail risk & conformal prediction. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "kowcpi_kernel_optimally_weighted_conformal",
@@ -25327,10 +25347,14 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T05:08:20+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T17:12:20+00:00",
-    "blocked_until": "2026-07-01",
-    "blocked_note": "ML novel-method / conformal NULL-quartet rule (K1310-K1330 已 NULL 4 連) — pause 至 2026-07-01 重新評估 monetization angle 與差異化"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675283+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "research_quadratic_hedging_under_garch",
@@ -25494,7 +25518,7 @@
     "title": "研究 backlog fallback: Quantum Reservoir Computing for Realized Volatility Forecasting",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Quantum Reservoir Computing for Realized Volatility Forecasting — arXiv:2505.13933 (2026-04)。指出 GARCH 低維參數遞迴對複雜非線性/多尺度動態表達受限，改用 reservoir computing。面向A/D 觀察：方法新穎但需評估是否可在無量子硬體下以 echo-state network 近似復現（reproducibility gate）。 | 來源 section: 新發現（2026-05-29 arxiv 文獻搜尋；scan_arxiv_topics.py 能力建立）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "quantum_reservoir_computing_for_realized_volatil",
@@ -25503,17 +25527,21 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T08:08:08+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:31+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675286+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "research_transfer_learning_for_new_issues_vol",
     "title": "研究 backlog fallback: Transfer Learning for New Issues Vol",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Transfer Learning for New Issues Vol — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。 | 來源 section: 新發現（2026-04-01 文獻搜尋）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "transfer_learning_for_new_issues_vol",
@@ -25522,10 +25550,14 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T08:08:08+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:32+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675288+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "K1076_daily_article_fz_vares_general",
@@ -25756,7 +25788,7 @@
     "title": "研究 backlog fallback: RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025 | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "rgarch_carr_sk_realized_garch_carr_2025",
@@ -25765,10 +25797,14 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T14:08:40+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:32+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675291+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "research_k1090b_nested_loocv",
@@ -25801,7 +25837,7 @@
     "title": "研究 backlog fallback: Multiplicative Volatility Factor (MVF)",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Multiplicative Volatility Factor (MVF) — ScienceDirect 2025, J. Econometrics | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "multiplicative_volatility_factor_mvf",
@@ -25810,10 +25846,14 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T16:08:27+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:32+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675294+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "research_volare_har_har_q_mem_amem_arxiv_2602_19732",
@@ -25879,7 +25919,7 @@
     "title": "研究 backlog fallback: Multi-Transformer Vol Forecast",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Multi-Transformer Vol Forecast — Engineering App AI 2024 | 來源 section: 其他. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "experiment",
     "source": "auto_research_fallback",
     "research_slug": "multi_transformer_vol_forecast",
@@ -25888,10 +25928,14 @@
       "research-program-backlog"
     ],
     "created_at": "2026-06-08T17:07:58+00:00",
-    "blocked_reason": "diversity_rule_post_null_quartet",
-    "blocked_at": "2026-06-08T23:09:33+00:00",
-    "blocked_note": "ML novel-method NULL quartet (K1310-K1330); per CLAUDE.md PHASE B override; awaits non-ML diversity restore",
-    "blocked_until": "2026-07-01"
+    "status_history": [
+      {
+        "at": "2026-07-01T00:07:34.675296+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-01)"
+      }
+    ]
   },
   {
     "id": "paper_review_k1427_codex",
@@ -41724,7 +41768,7 @@
     "title": "[論文管線] leverage-direction Stage 1.1 - cover letter scrub (t=-5.79 + 12DM + time-zone)",
     "description": "Stage 1 quick win. Scope: cover_letter.tex. (a) Line 29 「Gold exhibits a statistically significant inverted leverage effect (t = -5.79)」改 regime-dependent only（unconditional mean t=+0.15 NS；bull/bear regime t=-3.79）； (b) 「twelve Diebold-Mariano comparisons」改 eleven（BTC 2025 無 canonical source row）；(c) Line 33 third time-zone contribution 整段刪除（manuscript body 無對應 section，bolted on）；(d) 重編 cover_letter.pdf (xelatex)。\n\n參考：paper/leverage-direction/reframing_decision_20260701.md Stage 1；paper/leverage-direction/review_history/codex_contribution_gate_20260701.md §1 + §2 + §4 item 1+4。\n\nDispatch: 主線程或 sonnet medium subagent（純編輯 + xelatex）。Codex review 不需（純 mechanical scrub）。",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "paper_body",
     "source": "leverage_direction_reframing_decision_20260701",
     "tags": [
@@ -41735,7 +41779,33 @@
       "cover_letter_scrub"
     ],
     "parent_decision": "paper_leverage_direction_reframing_decision",
-    "created_at": "2026-07-01T07:15:00+08:00"
+    "created_at": "2026-07-01T07:15:00+08:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-07-01T00:08:52.687410+00:00",
+    "claim_session_id": "99bc662fb5c3",
+    "status_history": [
+      {
+        "ts": "2026-07-01T00:08:52.687663+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-01T00:09:09.357009+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-08"
+      },
+      {
+        "ts": "2026-07-01T00:09:09.561704+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-08"
+      }
+    ],
+    "started_at": "2026-07-01T00:09:09.356738+00:00",
+    "completed_at": "2026-07-01T00:09:09.561430+00:00",
+    "result": "Cover letter scrub 已於 commit 675b082de 完成 (Option A)：line 29 gold t=-5.79→regime-dependent t=-3.79 + twelve→eleven DM + line 33 time-zone third contribution 移除。Verified 2026-07-01 08:08。"
   },
   {
     "id": "paper_leverage_direction_stage1_intro_abstract_rewrite",
@@ -41778,7 +41848,7 @@
     "title": "[論文管線] leverage-direction Stage 1.4 - sample split unification",
     "description": "Stage 1 quick win. Scope: body.tex Section 3 (data) + descriptive stats + Table 1 caption + Table 3 OOS + cover letter。\n\n當前不一致（Codex §2 in-sample/OOS honesty）：\n- body.tex:34 寫「January 2017 through March 2026」\n- body.tex:41-42 寫「2023-2024 as the main out-of-sample period and 2025-March 2026 as validation」\n- body.tex:120 寫「2017-2025 the in-sample period」\n- Table 1 caption: 「In-Sample Period: 2017-2025」\n- Table 3 把 2025 當 OOS\n\n決議：採 **train 2017-01 to 2022-12, OOS-main 2023-01 to 2024-12, OOS-validation 2025-01 to 2026-03** 一套，全文一致。Descriptive stats 用 train+OOS-main 全 sample。所有 OOS 表用 main + validation 兩段分開。Cover letter 同步。\n\n參考：reframing_decision Stage 1；codex_contribution_gate §2 sample-split inconsistency。\n\nDispatch: 主線程。需 grep 找出所有 sample-period 提及一次性改齊。寫完跑 xelatex。",
     "priority": 1,
-    "status": "pending",
+    "status": "claimed",
     "task_type": "paper_body",
     "source": "leverage_direction_reframing_decision_20260701",
     "tags": [
@@ -41789,7 +41859,18 @@
       "sample_split"
     ],
     "parent_decision": "paper_leverage_direction_reframing_decision",
-    "created_at": "2026-07-01T07:15:00+08:00"
+    "created_at": "2026-07-01T07:15:00+08:00",
+    "claimed_by": "hourly-08",
+    "claimed_at": "2026-07-01T00:09:10.394636+00:00",
+    "claim_session_id": "1784c90bde7c",
+    "status_history": [
+      {
+        "ts": "2026-07-01T00:09:10.394911+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-08"
+      }
+    ]
   },
   {
     "id": "paper_leverage_direction_stage2_gold_regime_design",
@@ -41856,5 +41937,21 @@
     ],
     "parent_decision": "paper_leverage_direction_reframing_decision",
     "created_at": "2026-07-01T07:15:00+08:00"
+  },
+  {
+    "id": "journal_discovery_20260701_0",
+    "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
+    "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "platform_ops",
+    "dispatch_lane": "agent",
+    "source": "auto_journal_discovery_fallback",
+    "tags": [
+      "auto-journal-discovery",
+      "research-backlog-refresh",
+      "all-covered-fallback"
+    ],
+    "created_at": "2026-07-01T00:00:01+00:00"
   }
 ]

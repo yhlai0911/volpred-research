@@ -1,28 +1,33 @@
 # Feed Index
 
-_Last built: 2026-06-30 06:01 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-01 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1706**  (with thumbnail: 68)
-- Last 30 days: **351**
-- Total chars (content): 5,114,153
+- Total articles: **1710**  (with thumbnail: 69)
+- Last 30 days: **348**
+- Total chars (content): 5,130,956
 
-**Status**: published=1507, archived=123, unpublished=58, retracted=12, draft=5, wont_fix=1
+**Status**: published=1512, archived=123, unpublished=58, retracted=12, draft=4, wont_fix=1
 
-**Audience**: research=1102, general=386, daily=124, unknown=77, member_qa=12, event=5
+**Audience**: research=1103, general=387, daily=126, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=855, general=736, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
+**Category**: milestone=857, general=738, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
 
-## 最近 30 天 (351)
+## 最近 30 天 (348)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
-| 2026-06-30 | `mile_f5f4cb43` | 科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點 | general | general | published | 4033 |  | 一般讀者, trending, AI, capex, implied-volatility, iv-skew |
+| 2026-07-01 | `mile_f0946e5d` | 每日策略建議：VIX 16.45（正常）— 2026-07-01 | daily | general | published | 1652 | Y | 每日建議, VIX, 策略配置 |
+| 2026-07-01 | `mile_d0fd432c` | 2026-07-01 本日持倉比率建議（依據 2026-06-30 收盤數據） | daily | milestone | published | 1050 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
+| 2026-06-30 | `mile_549aaaa4` | 同一個波動率模型，換個計算方式還能贏嗎？五個市場階段的穩定性測試 | general | milestone | published | 2426 |  | 一般讀者, 波動率模型, 穩健性測試, 風險管理, 學術研究, A4f框架 |
+| 2026-06-30 | `mile_cfa5eb89` | K1586：穩定幣儲備變化與短端 T-bill realized vol 的領先性檢定 | research | milestone | draft | 7790 |  | 研究, 穩定幣, 短期公債, USDC, SVB, Granger |
+| 2026-06-30 | `mile_c16d94b7` | 同一個指數好幾檔 ETF，短線交易全擠在最老那一檔——拿來當風險訊號靈不靈？ | general | general | published | 2621 |  | 一般讀者, ETF, 成交量, 流動性, 新興市場, 跨市場 |
+| 2026-06-30 | `mile_c1ce6550` | USDC 脫鉤那 5 天：1-3 年短券波動率飆 2.8 倍，1-3 個月卻沒事 | general | general | draft | 3366 |  | 一般讀者, 穩定幣, 短期公債, USDC, SVB, duration |
+| 2026-06-30 | `mile_68285aa0` | 國防預算翻倍喊得這麼大聲，國防 ETF 卻沒按劇本震盪 | general | general | published | 4151 |  | 一般讀者, 國防, ETF, 事件研究, 波動率 |
+| 2026-06-30 | `mile_f5f4cb43` | 科技巨頭資本支出爆表，AI 變現期的隱含波動率拐點 | general | general | published | 4438 |  | 一般讀者, trending, AI, capex, implied-volatility, iv-skew |
 | 2026-06-30 | `mile_44ab1acc` | 指數安靜，不代表風險沒聲音 | general | general | published | 3349 |  | 一般讀者, 精選導讀, daily_digest, 波動率, VIX, MOVE |
-| 2026-06-30 | `mile_549aaaa4` | 同一個波動率模型，換個計算方式還能贏嗎？五個市場階段的穩定性測試 | general | milestone | draft | 2426 |  | 一般讀者, 波動率模型, 穩健性測試, 風險管理, 學術研究, A4f框架 |
-| 2026-06-29 | `mile_819af916` | 防禦股悄悄贏了：XLV 一個月漲 8%，科技 ETF 卻原地踏步，波動率說了什麼 | general | general | published | 3024 |  | 一般讀者, trending, sector-rotation, vol-skew, XLK, XLP |
-| 2026-06-29 | `mile_c16d94b7` | 同一個指數好幾檔 ETF，短線交易全擠在最老那一檔——拿來當風險訊號靈不靈？ | general | general | draft | 2621 |  | 一般讀者, ETF, 成交量, 流動性, 新興市場, 跨市場 |
+| 2026-06-29 | `mile_819af916` | 防禦股悄悄贏了：XLV 一個月漲 8%，科技 ETF 卻原地踏步，波動率說了什麼 | general | general | published | 3424 |  | 一般讀者, trending, sector-rotation, vol-skew, XLK, XLP |
 | 2026-06-29 | `mile_c0d6676f` | K 棒記了四個價格，收盤只用一個——剩下三個能預測明天的波動嗎？ | general | general | draft | 2661 |  | 一般讀者, ETF, 波動率, K棒, 隔日波動, 量化方法 |
 | 2026-06-29 | `mile_ef22df7c` | 同一個指數好幾檔 ETF，短線交易卻全擠在最老那一檔——這能拿來當風險訊號嗎？ | general | general | unpublished | 2356 |  | 一般讀者, ETF, 成交量, 流動性, 新興市場, 跨市場 |
 | 2026-06-29 | `mile_fce646f0` | 同一個指數有好幾檔 ETF，短線交易卻全擠在最老那檔——能當風險訊號嗎？ | general | general | unpublished | 2294 |  | 一般讀者, ETF, 成交量, 流動性, 新興市場, 跨市場 |
@@ -32,13 +37,12 @@ _Last built: 2026-06-30 06:01 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-29 | `mile_35dfee97` | 每日策略建議：VIX 17.65（正常）— 2026-06-30 | daily | general | published | 1581 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-29 | `mile_2a80d569` | 2026-06-30 本日持倉比率建議（依據 2026-06-29 收盤數據） | daily | milestone | published | 949 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-06-29 | `mile_30438396` | 把學術因子裝進 ETF 後，到底掉了多少？我們做了一次 13 年的記帳 | general | general | draft | 3641 |  | 一般讀者, 因子投資, 美股 ETF, MTUM, VLUE, QUAL |
-| 2026-06-29 | `mile_68285aa0` | 國防預算翻倍喊得這麼大聲，國防 ETF 卻沒按劇本震盪 | general | general | draft | 3751 |  | 一般讀者, 國防, ETF, 事件研究, 波動率 |
-| 2026-06-29 | `mile_9839822d` | 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？ | general | general | published | 3451 |  | 一般讀者, 關鍵礦物, 稀土, 出口管制, 事件研究, REMX |
+| 2026-06-29 | `mile_9839822d` | 政策標題嚇人，數據沒這麼怕：八次稀土管制公告之後，礦業 ETF 都怎麼走？ | general | general | published | 4020 |  | 一般讀者, 關鍵礦物, 稀土, 出口管制, 事件研究, REMX |
 | 2026-06-29 | `mile_5399bf01` | 你買 MTUM 真的買到 Momentum 嗎？7 檔因子 ETF 對紙上學術因子的 13 年體檢 | research | milestone | published | 5432 |  | 研究, 因子ETF, Fama-French, MTUM, VLUE, QUAL |
-| 2026-06-29 | `mile_7b95b816` | 年度等權再平衡，真的比抱著不動強嗎？台美 30 年實測拆給你看 | general | milestone | published | 2801 |  | 一般讀者, 再平衡, 資產配置, 買進持有, 風險管理 |
-| 2026-06-29 | `mile_dc4035e4` | 商品 ETF 的方向對了一半，可惜統計撐不住：波動分高低之後的動能 vs 反轉拼圖 | general | general | published | 3027 |  | 一般讀者, 商品ETF, 動能, 反轉, 波動率, 方法論 |
+| 2026-06-29 | `mile_7b95b816` | 年度等權再平衡，真的比抱著不動強嗎？台美 30 年實測拆給你看 | general | milestone | published | 3201 |  | 一般讀者, 再平衡, 資產配置, 買進持有, 風險管理 |
+| 2026-06-29 | `mile_dc4035e4` | 商品 ETF 的方向對了一半，可惜統計撐不住：波動分高低之後的動能 vs 反轉拼圖 | general | general | published | 3428 |  | 一般讀者, 商品ETF, 動能, 反轉, 波動率, 方法論 |
 | 2026-06-29 | `mile_96ec845f` | 市場看起來越複雜，不代表波動率就更好預測 | general | general | unpublished | 2168 |  | 一般讀者, 波動率預測, SPY, VIX, null-result |
-| 2026-06-29 | `mile_082f0578` | 交易量歸零那天，薄市場 ETF 後面 22 天更容易出事 | general | general | published | 1139 |  | 一般讀者, ETF, 流動性, 風險管理, 資料品質 |
+| 2026-06-29 | `mile_082f0578` | 交易量歸零那天，薄市場 ETF 後面 22 天更容易出事 | general | general | published | 1539 |  | 一般讀者, ETF, 流動性, 風險管理, 資料品質 |
 | 2026-06-29 | `mile_153d2908` | K1568：Federal Register 監管文件流量能預測 ETF 波動率嗎？144 個檢定、14 個 raw 顯著、Bonferroni 全滅 | research | milestone | published | 6855 |  | 研究, Federal Register, compliance, ETF, multiple testing, Bonferroni |
 | 2026-06-29 | `mile_190c7e3c` | 把美股最熱門的 5 種因子輪著買，最後還是沒贏最笨的那個組合 | general | general | published | 3099 |  | 一般讀者, 美股, 因子ETF, 資產配置, 輪動策略, 黃金 |
 | 2026-06-29 | `mile_7052f32c` | VIX 自己的波動率，能不能預測 VIX？ | research | milestone | published | 4722 |  | 研究, vix, vol-of-vol, realized-vol, multiple-testing, bonferroni |
@@ -309,7 +313,7 @@ _Last built: 2026-06-30 06:01 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-05 | `mile_54f79768` | 把疫情那段拿掉之後，複雜模型還剩下什麼？ | general | general | published | 1646 |  | 一般讀者, 波動率, 美股, 模型比較, COVID, 研究誠實 |
 | 2026-06-05 | `mile_67f75353` | K1404：1978 年的方法在台股 1,305 天測試後 — 尾部區間比點預測更可信 | research | milestone | published | 4682 |  | 研究, HAR-RV, quantile-regression, ^TWII, VaR, 波動率預測 |
 | 2026-06-05 | `mile_b62810dd` | 模型分數明明贏了，為什麼我們還是不敢說它有效？ | general | general | published | 1908 |  | 一般讀者, 0050, 波動率, 小樣本, 研究誠實 |
-| 2026-06-05 | `mile_71dd116b` | VIX 從 17 降到 15：CPI 前市場已在說什麼 | general | general | published | 3301 |  | 一般讀者, CPI, VIX, 波動率, 事件研究, 市場前瞻 |
+| 2026-06-05 | `mile_71dd116b` | VIX 從 17 降到 15：CPI 前市場已在說什麼 | general | general | published | 3271 |  | 一般讀者, CPI, VIX, 波動率, 事件研究, 市場前瞻 |
 | 2026-06-04 | `mile_123a3855` | S&P 500 集中度突破 32%，指數波動率卻跌到 14%：這個缺口是怎麼來的 | general | general | published | 3347 |  | 一般讀者, 集中度, 波動率, dispersion, S&P500, 期權策略 |
 | 2026-06-04 | `mile_cc9c9573` | 同樣遇到壞消息，台股 5 檔代表股的波動反應差了快 7 倍 | general | milestone | published | 1461 |  | 一般讀者, 台股, 個股, 0056, 風險管理, 波動率 |
 | 2026-06-04 | `mile_8d8b8877` | NFP 前夕，VIX 跌到 15.4——市場算便宜了，但就業日波動還是會放大 1.5 倍 | general | general | published | 2069 |  | 一般讀者, VIX, NFP, 就業報告, 波動率, 事件研究 |
@@ -362,6 +366,11 @@ _Last built: 2026-06-30 06:01 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-01 | `mile_eeeee765` | 為什麼我們把『投資建議』改叫『風險管理工具』？K705 做了一次不太舒服但必要的自我審計 | research | general | published | 2526 |  | 研究, risk-management, VT, messaging, website-governance, drawdown |
 | 2026-06-01 | `mile_b427f3ba` | 比特幣半減後波動真的會降嗎？K1372 的答案是：看起來像，但還不能當鐵律 | research | general | published | 2485 |  | 研究, 比特幣, 半減, 波動率, GARCH, 事件研究 |
 | 2026-06-01 | `mile_cfcd4eaa` | 澳洲股市那個看起來特別低的財報波動，其實可能只是日期差兩天 | research | general | published | 2311 |  | 研究, 澳洲股市, 財報效應, 波動率, 資料品質, GARCH-MIDAS |
+
+<details><summary>## 2026-Q2 (690)</summary>
+
+| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
+|---|---|---|---|---|---|---|---|---|
 | 2026-05-31 | `mile_622a2b73` | 資本支出暴增八成，股票卻平靜如水：AI 巨頭的波動率定價迷局 | general | general | published | 2778 |  | 一般讀者, AI, 資本支出, 波動率, 科技股, MSFT |
 | 2026-05-31 | `mile_696c6063` | 澳洲股市的謎——我們以為找到了答案，結果發現問題出在資料本身 | research | milestone | published | 5366 |  | 研究, 跨市場分析, 財報事件, 法醫檢定, 波動率梯形, 資料品質 |
 | 2026-05-31 | `mile_5b6f9e1b` | 換掉 yfinance 也救不回來：新興市場法人持股階梯為何是結構問題 | research | milestone | published | 6885 |  | 研究, 新興市場, 法人持股, 跨市場研究, 法說會, 資本成本 |
@@ -369,11 +378,6 @@ _Last built: 2026-06-30 06:01 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-05-31 | `mile_34be417d` | K1207：GICS 行業別是法說會超額波動的獨立驅動因素——跨 12 市場 182 股驗證 | research | milestone | published | 5652 |  | 研究, 法說會波動, GICS行業, 法人持股, panel regression, 跨市場 |
 | 2026-05-31 | `mile_1fde450d` | 論文發出去之後，6 個數字裡有 3 個對不上：一場我們自己抓自己的核對 | research | general | published | 3369 |  | 研究, 研究誠實, 論文修訂, 可復現性, GJR-GARCH, 黃金 |
 | 2026-05-31 | `mile_c3c0ce07` | 我們抓到自己作弊：12 個策略的 Sharpe 在修正後平均掉了 0.62 | research | milestone | published | 3236 |  | 研究, 研究誠實, lookahead-bias, paper-trading, 自我審計, 策略修正 |
-
-<details><summary>## 2026-Q2 (683)</summary>
-
-| 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
-|---|---|---|---|---|---|---|---|---|
 | 2026-05-31 | `mile_fd36c6cd` | 我們把自己論文裡的兩個數字重做了一次：5.2 跟 −0.05 真的對嗎 | research | general | published | 4567 |  | 研究, 復現研究, 0050, 波動率, 風險管理, 方法論 |
 | 2026-05-31 | `mile_1a5263af` | 想用偏態 t 打敗波動率？商品市場給了個彆扭答案 — 波動預測沒救，但能救你的『最壞情境』 | research | general | published | 5650 |  | 研究, paper-4, GAS, skew-t, 商品, 風險管理 |
 | 2026-05-30 | `mile_1b0477a8` | VIX 15，個股波動率卻是兩倍半：期權市場在定價什麼？ | general | general | published | 3773 |  | 一般讀者, trending, AI, 集中度, implied-correlation, dispersion |

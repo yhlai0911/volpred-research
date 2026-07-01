@@ -3,7 +3,7 @@
 
 \begin{table}[H]
 \centering
-\caption{Descriptive Statistics of Daily Returns (In-Sample Period: 2017--2025)}
+\caption{Descriptive Statistics of Daily Returns (Full Sample: January 2017--December 2025; in-sample training window is 2017-01 to 2022-12, with 2023-01 to 2024-12 the main OOS period and 2025-01 to 2026-03 the validation period)}
 \label{tab:desc}
 \begin{tabular}{lrrrrrrr}
 \toprule
@@ -43,7 +43,7 @@ SLV & -0.041 & 0.058 & 72\% & -2.91 & GARCH \\
 
 \begin{table}[H]
 \centering
-\caption{Out-of-Sample QLIKE: GARCH(1,1) vs.\ GJR-GARCH(1,1), $w = 504$. Values are quasi-log-likelihood scores (Eq.~\eqref{eq:qlike}); lower (more negative) = better. $\Delta$ is percentage improvement of GJR over GARCH. * denotes DM significance at 5\%.}
+\caption{Out-of-Sample QLIKE: GARCH(1,1) vs.\ GJR-GARCH(1,1), $w = 504$. Values are quasi-log-likelihood scores (Eq.~\eqref{eq:qlike}); lower (more negative) = better. $\Delta$ is percentage improvement of GJR over GARCH. * denotes DM significance at 5\%. Sample-split mapping: rows labeled ``2023--2024'' are the main OOS window; rows labeled ``2025'' are the OOS validation subset (data through 2025-12; extension to 2025-01--2026-03 pending re-run of GLD/TLT/EEM/BTC).}
 \label{tab:qlike}
 \begin{tabular}{llrrrl}
 \toprule

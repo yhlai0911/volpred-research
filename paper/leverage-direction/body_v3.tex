@@ -51,7 +51,7 @@ Recent work has explored neural network approaches to volatility forecasting. Hy
 
 
 
-\section{Data and Methodology}
+\section{Data and Methodology}\label{sec:data}
 
 \subsection{Data}
 
@@ -67,7 +67,7 @@ While Yahoo Finance data may contain occasional errors---for example, delayed co
 Table 1 reports descriptive statistics. All return series reject normality (Jarque-Bera p < 0.001), exhibit significant ARCH effects (Engle's LM test p < 0.001), and are stationary (ADF p < 0.001). Excess kurtosis ranges from 3.52 (GLD) to 14.61 (SPY), motivating the consideration of fat-tailed distributions for VaR estimation.
 
 \paragraph{Sample period justification.} % H6 response: short sample period
-Our primary asset data span January 2017 through March 2026 (approximately 2,300 trading days per asset). We acknowledge that an eight-year primary sample is shorter than the multi-decade panels common in the GARCH forecasting literature. However, several design features mitigate this limitation.
+Our primary asset data span January 2017 through March 2026 (approximately 2,300 trading days per asset), partitioned into three non-overlapping windows for all in-sample-versus-out-of-sample analyses: in-sample training (2017-01 to 2022-12), main out-of-sample (2023-01 to 2024-12), and out-of-sample validation (2025-01 to 2026-03). We acknowledge that an eight-year primary sample is shorter than the multi-decade panels common in the GARCH forecasting literature. However, several design features mitigate this limitation.
 
 First, the rolling estimation window ($w = 504$) is re-estimated at every forecast origin, so each model fit draws on the most recent two years of data---a standard requirement for GARCH parameter stability \citep{hwang2006}. For extended-window robustness checks ($w \in \{2000, 3000, 5000\}$), training data reach back to 2006 or earlier, encompassing the Global Financial Crisis and subsequent recovery. The estimation sample therefore spans 11+ calendar years even when the evaluation window is shorter.
 
@@ -152,7 +152,7 @@ We set $\sigma_{\text{target}} = 10\%$ annualized for the GARCH-based analysis, 
 
 \subsection{Data Characteristics}
 
-Table 1 summarizes the distributional properties of daily returns for our seven assets over 2017--2025. All return series exhibit significant excess kurtosis, ranging from 3.52 (GLD) to 14.61 (SPY), and decisively reject normality (Jarque-Bera $p < 0.001$). The ARCH LM test confirms significant conditional heteroskedasticity in all series ($p < 0.001$), justifying GARCH-family models.
+Table 1 summarizes the distributional properties of daily returns for our seven assets over the full sample period (January 2017 to December 2025); the sample is partitioned into an in-sample training window (2017-01 to 2022-12), a main OOS window (2023-01 to 2024-12), and an OOS validation window (2025-01 to 2026-03), as described in Section~\ref{sec:data}. All return series exhibit significant excess kurtosis, ranging from 3.52 (GLD) to 14.61 (SPY), and decisively reject normality (Jarque-Bera $p < 0.001$). The ARCH LM test confirms significant conditional heteroskedasticity in all series ($p < 0.001$), justifying GARCH-family models.
 
 Return skewness varies across assets: SPY ($-0.315$), QQQ ($-0.189$), GLD ($-0.296$), and EEM ($-0.584$) show negative skewness, while TLT ($+0.155$) is approximately symmetric. A naive model selection approach based on skewness would suggest asymmetric GARCH for all negatively skewed assets. As we demonstrate in Section 4.2, this criterion is misleading for gold: despite negative skewness, gold's conditional variance responds asymmetrically to \textit{positive} shocks.
 
@@ -600,7 +600,7 @@ Yet HAR-ABS produces the \textit{lowest} VT Sharpe (1.12 vs.\ 1.75 for 12/VIX) w
 % Codex-R6-fix: strengthened multiple-testing disclosure and Harvey (2016) reference
 \textbf{Multiple testing.} Results were selected from 110+ experiments across 14 model families, creating data mining concern \citep{harvey2016}. We mitigate via: (i) the $t > 3.0$ threshold for significance; (ii) Benjamini-Hochberg FDR audit (30/32 survive at $q = 0.05$); (iii) null-to-positive ratio of 1.6:1. All thresholds remain in-sample estimates pending replication.
 
-\textbf{Other limitations.} Our rolling window of 504 observations creates a persistence bias of approximately $-3.0\%$ \citep{hwang2006}, though gamma sign classification is invariant to window choice. The primary sample covers 2017--2025 (seven assets), with 2026 data serving as out-of-sample validation; extending to pre-2017 data would strengthen generalizability. We use daily return data exclusively; the GARCH forecasting ceiling (Ljung-Box $p > 0.76$) applies specifically at daily frequency, and 5-minute realized variance may contain additional information \citep{hansen2012}. Our data are sourced from Yahoo Finance rather than institutional-grade databases (CRSP, Bloomberg); while validation checks show high concordance for large-cap ETFs (Section~3.1), replication with institutional data would strengthen confidence in the reported estimates.
+\textbf{Other limitations.} Our rolling window of 504 observations creates a persistence bias of approximately $-3.0\%$ \citep{hwang2006}, though gamma sign classification is invariant to window choice. The primary sample covers 2017-01 to 2026-03 (seven assets), partitioned into training (2017-01 to 2022-12), main OOS (2023-01 to 2024-12), and validation (2025-01 to 2026-03); extending to pre-2017 data would strengthen generalizability. We use daily return data exclusively; the GARCH forecasting ceiling (Ljung-Box $p > 0.76$) applies specifically at daily frequency, and 5-minute realized variance may contain additional information \citep{hansen2012}. Our data are sourced from Yahoo Finance rather than institutional-grade databases (CRSP, Bloomberg); while validation checks show high concordance for large-cap ETFs (Section~3.1), replication with institutional data would strengthen confidence in the reported estimates.
 
 \textbf{Crowding risk.} A natural concern is whether widespread adoption of VIX-based VT would erode its effectiveness through crowded trading. We analyze this through two channels. First, the 12/VIX weight function is inherently crowding-resistant: the concave $1/x$ mapping means that coordinated selling during high-VIX episodes produces diminishing marginal impact---each additional dollar of VT selling reduces VIX sensitivity by less than the previous dollar. Second, a feedback-loop simulation in which VT-induced selling raises VIX (which further reduces positions) always converges to a stable equilibrium rather than amplifying. Third, at plausible retail adoption levels ($<$\$1B AUM), the market impact is negligible relative to SPY's daily volume ($\sim$\$30B). These results suggest VT strategies can be published without responsible-disclosure concerns regarding market stability.
 
