@@ -22,6 +22,21 @@
 
 **為什麼是結構性修法而非單點 patch**：三個卡住點雖然表面觸發原因不同（conda hook / send-alert 內部 / codex 誤診），但共通根因是同一個模式——「主流程的呼叫全部有逾時保護，但『失敗後的恢復/告警路徑』被視為次要，一路被漏掉」。這正是 Three-Strike 規則所指的「一旦看見結構性 root cause 就立刻整體重構，不用等滿 3 次」——本次一次性把該檔案內所有裸呼叫（含未來新增的告警呼叫）都收斂進 `run_send_alert()` 單一入口，避免下一個新告警點又重蹈覆轍。
 
+**追加（06:07 那班上線驗證時，即時發現並修掉兩個「同一類但沒被涵蓋到」的漏網之魚）**：上面的修復 commit 好之後，緊接著 06:07 那班真的 fire，用來驗證修復效果——結果在**還沒進到本次已修好的 auth-preflight 區段之前**，腳本一開頭就先卡住兩次：
+
+1. `"$UV_BIN" run python scripts/git_conflict_guard.py --quiet`（腳本一開頭、auth-preflight 之前就會跑的 git 衝突守門）卡了 6 分鐘以上。用 `sample <pid> 2` 採樣到卡在 `__private_getcwd → __getcwd → open$NOCANCEL`——`uv` 自己在解析 cwd/尋找 workspace root 時卡在底層 syscall，不是 Python 程式邏輯問題。這行原本也**完全沒有逾時保護**。
+2. 解卡後繼續跑到 `"$UV_BIN" run python scripts/hourly_dispatch_pregate.py --shadow`（同樣在 auth-preflight 之前、宣稱「cheap pure-Python check, 0 token」的預檢），又卡了近 5 分鐘，`sample` 採樣顯示**一模一樣的 `__open_nocancel`/`__ulock_wait` 卡點**——證實這不是個別腳本的 bug，而是當晚機器對「新開 `uv run` 子行程」這個動作本身（cwd 解析 / 檔案系統存取）有系統性、間歇性的卡頓，跟先前判斷的「系統負載造成 API 回應變慢」是同一大類現象的另一種表現形式。兩次都手動 `kill -TERM` 解卡；`df -h` 確認磁碟未滿（root 11%、data volume 90% 但非臨界）、`top` 快照未見單一異常吃資源的行程。
+
+兩次手動介入後，這班終於進到已修好的 auth-preflight 區段，**live 驗證修復確實生效**：3 次 attempt 依舊因負載逾時（非新故障），但 `source zshrc` 正確在 20 秒卡點跳過（log: `zshrc source timed out/failed rc=142 (20s ceiling) — skipping`）、`send-alert` 正確在 45 秒卡點跳過（log: `[send-alert] TIMED OUT after 45s (rc=142)`）、codex failover 的 `codex --version` 逾時正確標記為「likely load」而非「binary broken」——全部沒有再無限期卡住，整班以 `exit=1 preflight-auth + codex-failover-failed` 正常結束（而不是再拖 32 分鐘）。
+
+**Fix（同一 commit 追加，補齊漏網呼叫，非另開新 patch）**：
+5. `git_conflict_guard.py` 呼叫加 `GIT_CONFLICT_GUARD_TIMEOUT_SEC=30` 的 perl alarm 包裝，逾時視同非零 exit，沿用原本「fail-open, WARN 後繼續派工」的邏輯（但這次是真的有 30 秒硬上限，不是名義上的 fail-open）。
+6. `hourly_dispatch_pregate.py` 呼叫加 `PREGATE_TIMEOUT_SEC=30` 的 perl alarm 包裝，逾時等同該次檢查失敗 → 依既有邏輯 fall through 到「PROCEED」（不會誤判為可以跳過本輪派工）。
+7. 順手把檔案內其餘僅存的裸 git 呼叫也補齊 perl alarm（codex-failover-recovered 後的 `git status/add/commit`、PHASE-Z 區塊的 `git ls-files -ci`、收尾用的 `git log -1`）——這些先前沒觀察到 hang，但屬於同一類「本地檔案系統操作，在當晚環境下不能再假設一定秒回」的呼叫，一次性補齊避免下一次又是逐一發現。
+8. 兩個新逾時點都用真實 hang 案例（`sleep 60` 包 3 秒逾時）與真實腳本（`git_conflict_guard.py` 現在 1.6 秒完成、`hourly_dispatch_pregate.py` 現在 0.19 秒完成，機器狀態已恢復正常）雙向驗證；全檔 `bash -n` 語法乾淨；已同步 `~/.volpred/bin/cron_hourly_dispatch.sh`。
+
+**教訓**：即使「先設計好修復方案」的當下自認已經涵蓋了同一份腳本裡的所有恢復路徑呼叫，**上線驗證時仍然抓到當初漏掉的兩處**——因為那兩處在此之前從未真正 hang 過，純靠「這次事故剛好逼出來」才被發現。這強化了本次「全面掃描同檔案內所有外部呼叫、一次補齊」的做法優於「發現一個修一個」；同時也提醒：修完就要**實際觀察下一次真實 fire**（而非只看 `bash -n` 過就結案），才抓得到這類「設計時遺漏、只有在真實負載下才會現形」的缺口。
+
 ## 2026-07-02 論文 TICK-6 忘記重新 claim，撞上 hourly-dispatch 同時處理同一 paper_body task — 現場緊急停手，未造成資料損失
 
 **觸發**：TICK-5 完成後用 `handoff-main-thread` 把 `paper_body_leverage_direction_downshift_FRL_20260701` 放回 `pending_main_thread`（正確流程）。下一個 autonomous tick（03:06）決定接續 TICK-6（main_v_ijf.tex wrapper），但**忘記在動手前重新 `claim`+`start`**——只顧著讀 IJF profile / 查 elsarticle.cls / 修 reproduce.py 的 pre-existing bug，跳過了每次 TICK 開工前都該做的 claim 步驟。

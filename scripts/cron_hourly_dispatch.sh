@@ -61,6 +61,18 @@ ZSHRC_SOURCE_TIMEOUT_SEC="${ZSHRC_SOURCE_TIMEOUT_SEC:-20}"
 # invocation in this script now goes through run_send_alert() below so a hung
 # email send can never again burn the rest of the hourly slot.
 SEND_ALERT_TIMEOUT_SEC="${SEND_ALERT_TIMEOUT_SEC:-45}"
+# 2026-07-02 fix (same incident, live during this very fix): the SAME 06:07
+# fire that this fix was meant to verify hit TWO MORE unguarded hangs before
+# even reaching the auth-preflight section this patch already covers —
+# `git_conflict_guard.py` (~6min, stuck in a getcwd()/open() syscall per
+# `sample`) and `hourly_dispatch_pregate.py` (~5min, identical stuck syscall).
+# Both are plain `uv run python ...` calls with zero timeout protection —
+# the same missing-ceiling pattern as the other three, just not yet
+# discovered because they'd never hung before tonight. Ceilings below are
+# generous relative to each check's normal (sub-second to low-single-digit
+# second) runtime.
+GIT_CONFLICT_GUARD_TIMEOUT_SEC="${GIT_CONFLICT_GUARD_TIMEOUT_SEC:-30}"
+PREGATE_TIMEOUT_SEC="${PREGATE_TIMEOUT_SEC:-30}"
 
 # Log target lives OUTSIDE Desktop/ — macOS TCC protects ~/Desktop and blocks
 # launchd-spawned processes from opening files there (2026-05-21 incident:
@@ -84,8 +96,11 @@ ulimit -Sn 65536 2>/dev/null || true
 # markers into feed.json / next_tasks.json / work_log.json. Run the watchdog
 # FIRST so every hourly slot starts on a clean, valid tree (it auto-restores the
 # canonical HEAD blob + alerts). Fail-open: never blocks dispatch.
-"$UV_BIN" run python "$REPO_ROOT/scripts/git_conflict_guard.py" --quiet 2>&1 || \
-  echo "[git-conflict-guard] WARN guard exited non-zero (continuing dispatch)"
+# 2026-07-02: perl-alarm ceiling — see GIT_CONFLICT_GUARD_TIMEOUT_SEC comment
+# above. A hang here used to block the entire slot before dispatch even began.
+/usr/bin/perl -e 'alarm shift; exec @ARGV' "$GIT_CONFLICT_GUARD_TIMEOUT_SEC" \
+  "$UV_BIN" run python "$REPO_ROOT/scripts/git_conflict_guard.py" --quiet 2>&1 || \
+  echo "[git-conflict-guard] WARN guard exited non-zero or timed out rc=$? (continuing dispatch)"
 
 # Enable job control so background subshells get their own process group;
 # `kill -- -PGID` then propagates to all descendants (claude + its forks).
@@ -121,7 +136,11 @@ fi
 # Flip PREGATE_SHADOW=0 (LaunchAgent env or here) to enable real skipping.
 PREGATE_ARGS="--window-hours ${PREGATE_WINDOW_HOURS:-3}"
 [ "${PREGATE_SHADOW:-1}" = "1" ] && PREGATE_ARGS="$PREGATE_ARGS --shadow"
-if "$UV_BIN" run python "$REPO_ROOT/scripts/hourly_dispatch_pregate.py" $PREGATE_ARGS 2>&1; then
+# 2026-07-02: perl-alarm ceiling — see PREGATE_TIMEOUT_SEC comment above. A
+# timeout here is treated as a fail-open PROCEED (same as any other non-zero
+# exit from this check), never a silent skip.
+if /usr/bin/perl -e 'alarm shift; exec @ARGV' "$PREGATE_TIMEOUT_SEC" \
+  "$UV_BIN" run python "$REPO_ROOT/scripts/hourly_dispatch_pregate.py" $PREGATE_ARGS 2>&1; then
   echo "[pre-gate] SKIP — no email/critical/high-prio work + backlog cadence not due ($(date '+%H:%M'))"
   echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=0, pre-gate skip) ==="
   exit 0
@@ -453,10 +472,14 @@ if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
       # hand the slot to Codex here and exit without touching the Claude path.
       run_codex_failover "auth-preflight-dead"
       if [ "$CODEX_FAILOVER_RC" -eq 0 ]; then
-        if [ -n "$(/usr/bin/git -C "$REPO_ROOT" status --porcelain 2>/dev/null)" ]; then
+        # 2026-07-02: same perl-alarm ceiling already used in the PHASE-Z
+        # block below — these git calls were the one spot that had been
+        # missed, and tonight showed even local git-adjacent filesystem
+        # syscalls can stall under load.
+        if [ -n "$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 30 /usr/bin/git -C "$REPO_ROOT" status --porcelain 2>/dev/null)" ]; then
           echo "[FAILOVER] committing work Codex left after auth-dead failover"
-          /usr/bin/git -C "$REPO_ROOT" add -A 2>&1 | tail -1
-          /usr/bin/git -C "$REPO_ROOT" commit -m "ops(hourly $(date '+%H:%M')): codex failover auto-commit (claude auth dead)" 2>&1 | tail -1
+          /usr/bin/perl -e 'alarm shift; exec @ARGV' 30 /usr/bin/git -C "$REPO_ROOT" add -A 2>&1 | tail -1
+          /usr/bin/perl -e 'alarm shift; exec @ARGV' 60 /usr/bin/git -C "$REPO_ROOT" commit -m "ops(hourly $(date '+%H:%M')): codex failover auto-commit (claude auth dead)" 2>&1 | tail -1
         fi
         echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=0 codex-failover-recovered) ==="
         echo "=== [hourly_dispatch] exit 0 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
@@ -663,7 +686,8 @@ PHASE_Z_STATUS=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 30 \
 echo "[PHASE-Z-safety] git status returned $(date '+%H:%M:%S')"
 if [ -n "$PHASE_Z_STATUS" ]; then
   echo "[PHASE-Z-safety] uncommitted changes after dispatch — auto-committing"
-  PHASE_Z_LEAKED_IGNORED=$(/usr/bin/git -C "$REPO_ROOT" ls-files -ci --exclude-standard -- \
+  PHASE_Z_LEAKED_IGNORED=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 30 \
+    /usr/bin/git -C "$REPO_ROOT" ls-files -ci --exclude-standard -- \
     storage/ops/dashboard_latest.json storage/ops/alert_dedup.json \
     storage/ops/cron_last_run.json storage/ops/pending_sessions.json \
     storage/ops/gmail_inbox_state.json storage/ops/dispatch_report_latest.json \
@@ -674,7 +698,7 @@ if [ -n "$PHASE_Z_STATUS" ]; then
   if [ -n "$PHASE_Z_LEAKED_IGNORED" ]; then
     echo "[PHASE-Z-safety] untracking accidentally-tracked ignored state file(s):"
     echo "$PHASE_Z_LEAKED_IGNORED" | sed 's/^/[PHASE-Z-safety]   /'
-    echo "$PHASE_Z_LEAKED_IGNORED" | /usr/bin/xargs -I{} /usr/bin/git -C "$REPO_ROOT" rm --cached -q -- "{}" 2>/dev/null || true
+    echo "$PHASE_Z_LEAKED_IGNORED" | /usr/bin/xargs -I{} /usr/bin/perl -e 'alarm shift; exec @ARGV' 30 /usr/bin/git -C "$REPO_ROOT" rm --cached -q -- "{}" 2>/dev/null || true
   fi
   /usr/bin/perl -e 'alarm shift; exec @ARGV' 30 \
     /usr/bin/git -C "$REPO_ROOT" add -A 2>&1 | tail -1
@@ -694,7 +718,7 @@ echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=$EXIT_CODE) 
 echo "=== [hourly_dispatch] exit $EXIT_CODE at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 
 # macOS notification (heredoc avoids nested-quote issues)
-LATEST_COMMIT=$(/usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100 | tr -d '"\\')
+LATEST_COMMIT=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 15 /usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100 | tr -d '"\\')
 NOW=$(date '+%H:%M')
 /usr/bin/osascript <<OSAEND 2>/dev/null || true
 display notification "${LATEST_COMMIT}" with title "volpred hourly-dispatch ${NOW}" sound name "Pop"
