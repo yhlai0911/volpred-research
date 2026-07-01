@@ -2,6 +2,23 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 auth-preflight 誤診為 keychain ACL 問題，實為系統負載造成的逾時 — **FIXED**
+
+**觸發**：23:07 / 23:45 兩次 hourly-dispatch 的 `AUTH-PREFLIGHT` 連續 3 次 attempt 全部 exit=142（SIGALRM @ 90s）→ 觸發 Codex failover + 一封「hourly-dispatch auth preflight failed」CRITICAL email，內建建議動作是跑 `security set-generic-password-partition-list ...`（沿用 2026-05-29 那次 keychain ACL 被 OAuth token refresh 重置的教訓）。老闆照做後回報「他根本沒讓我輸入的機會啊」——指令沒跳出密碼視窗就直接報錯，代表這次的根因跟 5/29 那次不一樣。
+
+**重新調查（不信任舊 patch 的診斷，重新驗證）**：
+- 直接用跟 cron 完全相同的長效 token 手動重現：`claude -p "ping"` 逾時 exit=142，**輸出完全空白**——不是收到「Not logged in」之類的明確拒絕訊息，是整個沒回應。
+- 移除 token、改用預設互動登入身份測試：第一次 40s 內也逾時；第二次給 120s 卻在 ~54s 內正常回應「pong」。
+- 同時間 `uptime` 顯示 load average 7.66/8.20/7.21（10 核機器），且有一個 hourly-dispatch 的 Codex failover process 正在跑；待負載降到 4.56 後同樣的呼叫就正常。
+
+**結論**：這次的 exit=142 是**系統同時跑多個 claude/codex process 造成資源競爭，回應變慢超過 90 秒逾時上限**，跟 keychain ACL 完全無關——`AUTH_HOTFIX_CMD` 建議是 2026-05-29 那次事故留下的**舊診斷**，被無條件套用在所有未來的 auth-preflight 失敗上，沒有先驗證這次的失敗特徵是否真的相符（空白輸出 vs 明確認證拒絕文字，兩者的根因完全不同）。
+
+**修復**（`scripts/cron_hourly_dispatch.sh`）：
+1. `send_auth_preflight_alert()` 現在會 grep 三次 attempt 的合併輸出，判斷是否含真正的認證拒絕訊號（`not logged in` / `please run` / `/login` / `401` / `403` 等）。有 → 才顯示 keychain ACL 建議（critical）；沒有（純逾時、空白輸出）→ 改用不同措辭的 warn 級信件，引導檢查 `uptime` / 並行 process 數，明確告知「不代表帳號額度或憑證壞掉」，不會誤導去跑不相干的系統指令。
+2. `AUTH_PREFLIGHT_TIMEOUT_SEC` 從 90s 提高到 120s（有實測證據：重載下合法回應可能要 ~54-90s，90s 上限本身偏緊）。
+
+**教訓**：同一個 alert title 沿用舊事故的修復建議前，要先驗證**這次**的失敗特徵是否真的符合舊診斷的證據模式（有沒有實際認證拒絕文字 vs 純逾時空白）——不然會像這次一樣，讓老闆對著一個跟他毫無關係的系統密碼問題團團轉。
+
 ## 2026-07-01 dreaming-run 誤發 CRITICAL email — 8 findings 全「已修好」但仍逐 escalate — **FIXED**
 
 **觸發**：老闆對兩封 alert email 回信「立刻解決底層邏輯與架構問題」「立刻徹底解決Critical的問題」——分別對應 `git-push-backup: push held` WARN（20:00）與 `Dreaming review — 0 new / 8 escalations` CRITICAL（19:19）。

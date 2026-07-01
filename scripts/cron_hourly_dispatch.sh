@@ -29,7 +29,13 @@ CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/bin/claude}"
 UV_BIN="${UV_BIN:-/Users/yhlai0911/.local/bin/uv}"
 PROMPT_FILE="${PROMPT_FILE:-$REPO_ROOT/scripts/cron_hourly_dispatch_prompt.md}"
 ZSHRC_PATH="${ZSHRC_PATH:-$HOME/.zshrc}"
-AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-90}"
+# 2026-07-02 fix (boss「他根本沒讓我輸入的機會啊」incident): 90s occasionally too
+# tight under real concurrent load on this machine — a live manual repro found
+# a genuinely-successful ping taking ~54s with load average ~7-8 (multiple
+# claude/codex processes running at once, which this platform does by design).
+# Bumped to 120s for headroom; 3 attempts + backoff still fits comfortably
+# inside the 50min hourly-slot budget.
+AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-120}"
 AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-sonnet-5}"
 # Backoff before a 3rd preflight attempt — the first 2 attempts fire within
 # seconds (launchd-env + zshrc-source), so a transient Claude API blip
@@ -164,11 +170,31 @@ run_auth_preflight() {
 send_auth_preflight_alert() {
   local first_output=$1
   local retry_output=$2
+  local retry3_output=$3
   local auth_body tmp
-  auth_body=$(printf '%s\n' \
+  # 2026-07-02 fix (boss「不是啊 他根本沒讓我輸入的機會啊」— the keychain-ACL
+  # remediation didn't even apply, because keychain ACL reset was never the
+  # cause THIS time): all 3 attempts return exit=142 (perl SIGALRM) with EMPTY
+  # output in the timeout-under-load case — no "Not logged in" / "please
+  # run /login" / auth-rejection text ever appears, because the process never
+  # got a response at all, it just ran out of time. That is a categorically
+  # different failure from a genuine credential rejection (which responds fast
+  # with explicit rejection text). Distinguish them by grepping the captured
+  # output for an actual auth-failure signature before recommending the
+  # keychain-ACL hotfix — a load-timeout call needs a longer timeout / less
+  # concurrent load, not a Keychain permission change.
+  local combined="${first_output}${retry_output}${retry3_output}"
+  local looks_like_real_auth_failure=0
+  if printf '%s' "$combined" | grep -qiE "not logged in|please run|/login|unauthorized|invalid_grant|re-?authenticate|401|403"; then
+    looks_like_real_auth_failure=1
+  fi
+
+  if [ "$looks_like_real_auth_failure" -eq 1 ]; then
+    auth_body=$(printf '%s\n' \
 "## 觸發條件" \
 "- \`cron_hourly_dispatch.sh\` auth pre-flight 在 launchd env 失敗，且 source \`~/.zshrc\` 後重試仍失敗" \
 "- pre-flight timeout: ${AUTH_PREFLIGHT_TIMEOUT_SEC}s" \
+"- 輸出內含明確的認證拒絕訊號（非純逾時），判定為真正的 auth/credential 問題" \
 "" \
 "首次輸出：" \
 '```' \
@@ -194,11 +220,30 @@ send_auth_preflight_alert() {
 "env -i HOME=\$HOME PATH=\$PATH ${CLAUDE_BIN} -p \"say hi\" 2>&1 | head -3" \
 '```' \
 "確認不再出現 \`Not logged in · Please run /login\`")
+  else
+    auth_body=$(printf '%s\n' \
+"## 觸發條件" \
+"- \`cron_hourly_dispatch.sh\` auth pre-flight 連 3 次都逾時（exit=142，SIGALRM @ ${AUTH_PREFLIGHT_TIMEOUT_SEC}s），**輸出完全空白**" \
+"- 空白輸出 = claude CLI 從未真正回應，不是收到了明確的認證拒絕訊息——這通常代表回應太慢（機器同時跑多個 claude/codex process 造成資源競爭、或 API 端暫時延遲），**不代表帳號額度或憑證真的壞掉**" \
+"- 這次 email 標題雖然沿用同一個 alert（歷史上 2026-05-29 曾發生過 keychain ACL 被 token refresh 重置），但**這次沒有偵測到任何認證拒絕文字**，请不要直接假設是同一根因" \
+"" \
+"## 影響" \
+"- 本輪 hourly dispatch 改由 Codex failover 接手（見下一封 codex failover 信）" \
+"- 通常下一輪（或機器負載降下來後）會自行恢復，不需要人工介入" \
+"" \
+"## 建議行動（診斷順序，不要一開始就跑 keychain 指令）" \
+"1. \`uptime\` 看目前 load average；\`ps aux | grep -E 'claude -p|codex exec'\` 看是否有多個並行的 claude/codex process 同時搶資源" \
+"2. 若 load 明顯偏高（此機器 10 核心，load > 8 算重載）→ 屬於資源競爭造成的暫時逾時，等負載降下來即可，不需改任何設定" \
+"3. 只有在輸出裡真的出現 \`Not logged in\` / \`please run /login\` 這類文字時，才需要跑 keychain ACL 指令：" \
+'```' \
+"${AUTH_HOTFIX_CMD}" \
+'```')
+  fi
   tmp=$(mktemp -t hourly_auth_fail.XXXXXX).md
   echo "$auth_body" > "$tmp"
   "$UV_BIN" run volpred ops send-alert \
-    --level critical \
-    --title "hourly-dispatch auth preflight failed $(date '+%H:%M')" \
+    --level "$([ "$looks_like_real_auth_failure" -eq 1 ] && echo critical || echo warn)" \
+    --title "hourly-dispatch auth preflight $([ "$looks_like_real_auth_failure" -eq 1 ] && echo "failed" || echo "timed out (likely load, not auth)") $(date '+%H:%M')" \
     --body-md "$tmp" --force 2>&1 | tail -1
   rm -f "$tmp"
 }
@@ -340,7 +385,7 @@ if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
     if [ $AUTH_PREFLIGHT_RETRY3_CODE -ne 0 ]; then
       echo "[AUTH-PREFLIGHT] 3rd attempt failed exit=$AUTH_PREFLIGHT_RETRY3_CODE"
       echo "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
-      send_auth_preflight_alert "$AUTH_PREFLIGHT_OUTPUT" "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
+      send_auth_preflight_alert "$AUTH_PREFLIGHT_OUTPUT" "$AUTH_PREFLIGHT_RETRY_OUTPUT" "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
       # Claude auth/quota dead → Codex failover (ChatGPT auth is independent).
       # Retrying claude -p in the 3-attempt main flow would be futile, so we
       # hand the slot to Codex here and exit without touching the Claude path.
