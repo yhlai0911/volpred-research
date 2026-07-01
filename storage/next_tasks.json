@@ -42059,7 +42059,7 @@
     "title": "[論文管線] leverage-direction Stage 2.3 - data vintage freeze + replication package",
     "description": "Stage 2 core rebuild。Stage 1 全 succeeded 才 unblock。\n\nScope: (a) 凍結 paper/leverage-direction/data/ 為 final replication vintage（不再 update yfinance）；(b) 刪掉所有 table notes 暗示主表無法 reconstruct（Table vt:146-147 '6/20 cells matched'、Table var:84 '+/- 3 violation revision'、Table gamma:24 'vintage could not be re-located'）；(c) 建 reproduce.py 從 frozen data + scripts/ 一鍵重產所有主表；(d) 寫 replication README。\n\n參考：reframing_decision Stage 2；codex_contribution_gate §2 replication/data-vintage visibility + §4 item 4。\n\nDispatch: 主線程 + sonnet medium 雙線；reproduce.py 跑通才算 done。",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "leverage_direction_reframing_decision_20260701",
     "tags": [
@@ -42071,7 +42071,33 @@
       "blocked_on_stage1"
     ],
     "parent_decision": "paper_leverage_direction_reframing_decision",
-    "created_at": "2026-07-01T07:15:00+08:00"
+    "created_at": "2026-07-01T07:15:00+08:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-07-01T05:10:02.235127+00:00",
+    "claim_session_id": "d7e1e1a882db",
+    "status_history": [
+      {
+        "ts": "2026-07-01T05:10:02.235362+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-01T05:10:02.452333+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-01T05:15:05.004691+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-13"
+      }
+    ],
+    "started_at": "2026-07-01T05:10:02.452091+00:00",
+    "completed_at": "2026-07-01T05:15:05.004456+00:00",
+    "result": "Stage 2.3 replication freeze 完成：tables_main.tex 3 處 offending notes 清除 (line 24/84/128)，建 REPLICATION.md 承接 audit history，建 data/README.md 標記 frozen vintage。reproduce.py 舊有 GREEN pass (171 match/23 note/0 mismatch/1.00 traceable)。xelatex 43p build + Supabase sync + curl 200 OK 驗證。同時發現 Stage 2.2 (K1592) verdict NULL_OR_WEAK — 已 email 通知老闆並提 A/B/C/D pivot 選項，建議 A (arXiv-first 佔 priority 後 JBF 硬送)。下一輪 hourly-14 若無老闆回信預設走 A 派 codex 多輪 review。"
   },
   {
     "id": "journal_discovery_20260701_0",
