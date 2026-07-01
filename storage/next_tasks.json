@@ -42410,5 +42410,41 @@
         "by": "interactive-claude"
       }
     ]
+  },
+  {
+    "id": "paper_decision_leverage_direction_reframe_20260701",
+    "task_type": "paper_decision",
+    "priority": 1,
+    "status": "succeeded",
+    "title": "[論文管線] leverage-direction reframe 選項決策 memo（打破 owner_decision_pending stall）",
+    "description": "leverage-direction 卡 owner_decision_pending：Stage 1+2 reframe 後 K1591/K1592 pillars 都 weak；3-pass multi-round review FAIL_MAJOR_REVISION；contribution gate BORDERLINE。老闆 WARN email 12:46 已寄。此 task 產出 decision memo 讓老闆能盡快拍板：A(reframe→JBF R&R)/B(降 FRL)/C(negative-results)/D(shelve)。",
+    "source": "hourly-14-dispatch",
+    "created_at": "2026-07-01T14:07:37+08:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-07-01T06:12:07.802746+00:00",
+    "claim_session_id": "4e0c6266fe9a",
+    "status_history": [
+      {
+        "ts": "2026-07-01T06:12:07.803030+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-01T06:12:08.012422+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-01T06:14:27.846517+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-14"
+      }
+    ],
+    "started_at": "2026-07-01T06:12:08.012163+00:00",
+    "completed_at": "2026-07-01T06:14:27.846252+00:00",
+    "result": "Decision memo written to paper/leverage-direction/decision_memo_20260701.md (4 選項評估 + 推薦 B FRL/IJF downshift); boss email sent notification_id 7fe6f588 needs-reply; pipeline_status.json updated with memo pointer; next tick 檢查 email reply if arrived → 派對應 paper_body task"
   }
 ]

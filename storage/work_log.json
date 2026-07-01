@@ -12704,5 +12704,11 @@
     "verdict": "FAIL_MAJOR fixed",
     "summary": "Codex 24h-rule source-level review on mile_c16d94b7/K1365 found forward5_rv target-lag lookahead (target_lag1=shift(1) but target=shift(-4) still leaks 3 future days). Fixed K1365.py:_known_target_control (shift(5) for forward5, shift(1) otherwise). Reran. EM forward5 leader-share t -5.34 -> -2.65; NULL_PROXY main verdict unchanged. Article headline patched -5.3 -> -3.2 (next_range_vol clean t=-3.22), Errata added, feed.json synced Supabase (articles: 1).",
     "review_report": "experiments/K1365/review_history/codex_24h_rule_20260701.md"
+  },
+  {
+    "timestamp": "2026-07-01T06:14:32+00:00",
+    "task_type": "paper_decision",
+    "task_id": "paper_decision_leverage_direction_reframe_20260701",
+    "note": "decision memo (4 選項評估+推薦 B); boss email 7fe6f588; pipeline_status updated"
   }
 ]
