@@ -12748,5 +12748,17 @@
       "paper/leverage-direction/highlights.txt",
       "storage/paper_pipeline_status.json"
     ]
+  },
+  {
+    "timestamp": "2026-07-01T18:15:59+08:00",
+    "task_type": "paper_body",
+    "task_id": "paper_body_leverage_direction_downshift_FRL_20260701",
+    "actor": "hourly-18",
+    "verdict": "succeeded",
+    "summary": "leverage-direction IJF reframe TICK-2 (multi-tick paper_body, main-thread). Replaced Literature Review stub in body_v_ijf.tex with full reframed section: FOUR strands ordered to lead with forecast-evaluation/complexity (Patton QLIKE proxy-robustness, Diebold-Mariano equal predictive accuracy, Hansen model confidence set, Harvey multiple-testing discipline) and the explicit gap = evaluation rarely carried through to the allocation decision; asymmetric-model + leverage-direction taxonomy DEMOTED to interpretive 'where the ceiling binds'; risk-mgmt (Basel/Student-t) + volatility-targeting strands preserved; closes on the single complexity-ceiling contribution. VERIFIED: 29 cite keys all resolve to main.tex \\bibitem; xelatex trial-compile (temp wrapper) exit 0 with 0 undefined citations + 0 undefined refs on 2nd pass, 10pp; compliance clean (no AI/LLM/K-id/VolPred; author=Yi-Hao Lai only). Task kept in_progress; NEXT=tick-3 port Data&Methodology + reconcile sample-split map.",
+    "refs": [
+      "paper/leverage-direction/body_v_ijf.tex",
+      "storage/next_tasks.json"
+    ]
   }
 ]

@@ -27,8 +27,11 @@
 %   [tick-1  2026-07-01] DONE: IJF abstract + title + Highlights + fully
 %            reframed Introduction (complexity-ceiling lead; leverage-direction
 %            demoted). Section stubs laid out with port plan.
-%   [tick-2+ TODO] Port Literature Review from body.tex:23-27, reframe the
-%            third strand around forecast-evaluation / complexity, not taxonomy.
+%   [tick-2  2026-07-01] DONE: Literature Review reframed into FOUR strands led
+%            by forecast-evaluation / complexity (Patton QLIKE, DM, MCS, Harvey
+%            multiple-testing); asymmetric-model + leverage-direction taxonomy
+%            demoted to interpretive "where the ceiling binds"; risk-mgmt and VT
+%            strands kept. All 30 cite keys verified present in main.tex bib.
 %   [tick-3+ TODO] Port Data & Methodology from body.tex:31-114 (largely
 %            preserved; unify the sample-split map — memo issue (3): Data sec
 %            2017-01..2026-03 vs Table1 caption 2017-2025 vs Table3 2025-OOS
@@ -98,10 +101,16 @@ The remainder of the paper is organized as follows. Section~\ref{sec:literature}
 % =====================================================================
 
 \section{Literature Review}\label{sec:literature}
-% [TICK-2 TODO] Port from body.tex:23-27. Reframe the third strand: lead the
-% forecast-EVALUATION / complexity-cost literature (Patton loss, DM/MCS,
-% honest OOS), then risk mgmt, then VT. Position leverage-direction taxonomy
-% as interpretive, not as the gap being filled.
+
+This study draws on four literatures, which we order to foreground the question of when---and whether---added model complexity earns its keep once a forecast is carried through to a decision.
+
+The first, and for our purposes the organising, literature is forecast evaluation. Robust comparison of volatility forecasts requires loss functions that preserve the true ranking under a noisy variance proxy, and the QLIKE loss has become the standard choice because its ranking is invariant to the proxy as long as the proxy is conditionally unbiased \citep{patton2011}. Formal inference on predictive accuracy follows \citet{diebold1995}, and the model confidence set \citep{hansen2011} recognises that a band of models is often statistically indistinguishable from the best rather than a single winner. A parallel methodological literature warns that comparisons drawn from a large specification search invite data mining and must be disciplined with multiple-testing corrections \citep{harvey2016}. What this literature establishes carefully at the forecast level it rarely carries through to the decision level: evaluations typically stop at accuracy comparisons, and allocation studies typically fix a single volatility model rather than asking whether the choice of model---the very complexity a modeller adds---is what moves the economic result. Our design is built to close exactly that gap, by observing the pass-through from measurement to allocation on the same assets, over the same periods, under one protocol.
+
+The second literature concerns the specific measurement refinement we test: asymmetric volatility dynamics and the sign of the asymmetry. GARCH captures volatility clustering \citep{bollerslev1986}, while GJR-GARCH and EGARCH let negative and positive shocks affect variance differently \citep{glosten1993,nelson1991}. In equities this leverage effect is standard and economically tied to balance-sheet amplification \citep{black1976,christie1982,engle2018}. A smaller literature shows that non-equity assets can reverse the sign of the asymmetry, notably gold and some commodities, but stops short of turning that sign into a model-selection rule \citep{chevallier2017,batten2010,chang2021}. We treat the sign and magnitude of the asymmetry parameter as an economically interpretable object rather than as a forecasting engine---a device for reading \emph{where} a complexity ceiling binds---and so position this taxonomy as supporting structure rather than as the headline gap the paper fills.
+
+The third literature concerns risk management, where the distributional assumption can matter as much as the variance equation. Basel backtesting places the tail model on an equal footing with the conditional-variance dynamics \citep{bcbs2006,bcbs2019,kupiec1995,christoffersen1998}, and Student-$t$ and skewed-$t$ innovations often improve tail coverage over Gaussian specifications \citep{bollerslev1987,hansen1994,kuester2006}. This strand is directly relevant to our VaR evidence, where the choice of innovation distribution dominates the choice of asymmetric variance dynamics.
+
+The fourth literature studies volatility targeting, which we use as the allocation-level testbed. Inverse-volatility scaling improves drawdown control and sometimes improves risk-adjusted returns, though the evidence is criterion- and asset-dependent \citep{fleming2001,fleming2003,moreira2017,harvey2018,cederburg2020,bozovic2024,demiguel2024,hood2025,xu2024}. Our contribution is to connect these four strands through a single empirical object and a single decision: we ask not only whether asymmetric measurement forecasts better, but whether that forecasting edge survives to the volatility-targeting allocation---and we find that it largely does not, because the dominant allocation benefit tracks an asset's base volatility level rather than its asymmetric structure. This is the sense in which the paper documents a complexity ceiling.
 
 
 \section{Data and Methodology}\label{sec:data_methodology}
