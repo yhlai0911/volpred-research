@@ -1,0 +1,44 @@
+{
+  "_meta": {
+    "purpose": "Single source of truth for Claude model roster + task-tier -> model mapping used when dispatching subagents. agent-delegation.md's model table points here.",
+    "authoritative_availability_source": "The Claude Desktop model selector (bottom-right of the app) is the ground truth for which models are AVAILABLE right now. The Agent/Workflow tool `model` enum lists dispatchable ALIASES but does NOT reflect live availability (e.g. fable is a valid alias yet currently unavailable). When reconciling, trust the desktop selector for availability.",
+    "main_loop_policy": "Main-thread (interactive) model is fixed by the session and CANNOT be hot-swapped per task. Owner directive 2026-07-01: keep main loop on opus. Only SUBAGENT models are chosen per task difficulty.",
+    "last_reconciled": "2026-07-01",
+    "reconciled_via": "Claude Desktop model selector screenshot (owner-provided 2026-07-01) — CORRECTED earlier guesses: Fable 5 is currently unavailable; Sonnet is v5 (not 4.6); a 'More models >' submenu exists and is not yet fully enumerated.",
+    "known_gaps": "The desktop selector shows a 'More models >' submenu that has not been enumerated — the roster below may be incomplete. Expand it (owner screenshot, since main thread cannot drive the native desktop UI) to complete."
+  },
+
+  "dispatchable_now": ["opus", "sonnet", "haiku"],
+  "known_but_unavailable": ["fable"],
+
+  "models": {
+    "opus":   {"display": "Opus 4.8",  "id": "claude-opus-4-8",           "available": true,  "shortcut": 1, "note": "Currently selected main loop."},
+    "sonnet": {"display": "Sonnet 5",  "id": "claude-sonnet-5",           "available": true,  "shortcut": 2, "note": "Exact API id to confirm; alias 'sonnet' dispatches to this."},
+    "haiku":  {"display": "Haiku 4.5", "id": "claude-haiku-4-5-20251001", "available": true,  "shortcut": 3},
+    "fable":  {"display": "Fable 5",   "id": "claude-fable-5",            "available": false, "note": "Mythos-class, ABOVE Opus, $10/$50, 1M ctx, best for long-horizon autonomous work — BUT shows 'Currently unavailable' in the desktop selector as of 2026-07-01, so do NOT route subagents to it until it returns."}
+  },
+
+  "task_tier_mapping": {
+    "_note": "Pick the cheapest model that clears the task's difficulty. fable rows are aspirational — only use once fable.available becomes true.",
+    "ambitious_long_horizon_autonomous": {"model": "fable", "fallback": "opus", "effort": "high", "examples": ["multi-day paper reframe end-to-end", "large code migration", "deep multi-stage research with minimal oversight"], "note": "fable unavailable now -> fall back to opus"},
+    "research_methodology_highstakes_paper": {"model": "opus", "effort": "high", "examples": ["single experiment design", "methodology decision", "high-risk paper judgment", "paper-body verification"]},
+    "platform_ops_publishing_procedural": {"model": "sonnet", "effort": "medium", "examples": ["FB / feed posting", "paper-update run", "browser automation", "structured ops chore"]},
+    "verification_merge_scan_short": {"model": "sonnet", "effort": "low", "examples": ["merge safety check", "publication scan", "checklist verification"]},
+    "lookup_classification_datasource": {"model": "haiku", "effort": "low", "examples": ["fact lookup", "classification", "data-source query"]}
+  },
+
+  "rules": [
+    "Respect skill frontmatter model default first; override via Agent tool `model` param only when skill has none or the task clearly escalates.",
+    "NEVER downgrade high-risk research/statistics/paper judgment below opus to save tokens.",
+    "Do NOT inline procedural side-tasks (browser automation, scans, large search) on the opus main loop — fork a sonnet/haiku subagent (context: fork). 2026-07-01 gap: FB posting ran inline on opus.",
+    "Do NOT route to a model whose available=false (e.g. fable now) — use its fallback."
+  ],
+
+  "reconcile": {
+    "authoritative": "Claude Desktop model selector (bottom-right). Owner can screenshot it (incl. expanding 'More models >'). Main thread canNOT click the native desktop UI (its computer-use is Chrome-tab-scoped), so this reconcile depends on an owner screenshot or a future OS-level computer-use tool.",
+    "secondary": "Agent/Workflow tool `model` enum = dispatchable aliases, but NOT a live availability signal.",
+    "cadence": "Session start + monthly governance; scripts/check_model_roster.py warns when last_reconciled is stale.",
+    "why_not_cron": "No ANTHROPIC_API_KEY, and a script cannot read the in-session tool enum nor the native desktop selector. Detection is a main-thread + owner-assisted discipline, not a cron.",
+    "version_bumps_auto": "Within-tier alias bumps (sonnet 4.6->5) still dispatch via the same alias; only update the display/id + availability here for accuracy."
+  }
+}

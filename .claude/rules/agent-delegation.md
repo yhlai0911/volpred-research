@@ -16,15 +16,20 @@ paths:
 
 ## 模型選擇（合併自舊 model-selection.md）
 
+**Single source of truth = `config/models.json`**（roster、版本、tier→model、drift-check 全在那）。下表是摘要，派工前以 config 為準。**主線模型固定不可換（owner directive 2026-07-01: 維持 opus）；只有 subagent 依任務難度選模型。**
+
 | 任務類型 | 預設模型 / effort | 原因 |
 |---|---|---|
-| 研究實驗 / 方法論 / 高風險論文判斷 | `opus / high` | 精確性與專業性要求高 |
-| 平台 ops / 發文 / paper-update 類程序型工作 | `sonnet / medium` | 結構化流程明確，不必全程重模型 |
+| 超大型/多日自主任務（大型遷移、深度多階段研究、需最少監督的長時程 agentic） | `fable / high`（**目前 unavailable → fallback `opus`**） | Fable 5 = Mythos-class，最強 GA 模型（Opus 之上），$10/$50、1M ctx；但 2026-07-01 Desktop 選單顯示 Currently unavailable，回來前一律 fallback opus |
+| 研究實驗 / 方法論 / 高風險論文判斷（單次高精確） | `opus / high` | 精確性與專業性要求高 |
+| 平台 ops / 發文 / paper-update / 瀏覽器自動化 類程序型工作 | `sonnet / medium` | 結構化流程明確，不必全程重模型 |
 | 驗證 / merge safety / publication scan 類短流程 | `sonnet / low` | 核心是精準比對與 checklist |
 | lookup / classification / data-source 查詢 | `haiku / low` | 參考型工作，應優先便宜快速 |
 | 需要讀很多背景但與主線脈絡可分離的任務 | `context: fork` + 對應 skill 預設 | 降低主線 context 汙染 |
 
-**規則**：先尊重 skill frontmatter；只有在 skill 沒定義或任務明顯升級時才手動覆寫。高風險研究/統計/論文判斷不可為省 token 降到 Sonnet 以下。
+**規則**：先尊重 skill frontmatter；只有在 skill 沒定義或任務明顯升級時才手動覆寫。高風險研究/統計/論文判斷不可為省 token 降到 Sonnet 以下。**程序型 side task（瀏覽器自動化、scan、大搜尋）不可 inline 在 opus 主線跑 → fork sonnet/haiku subagent**（2026-07-01 教訓：FB 發文整段 inline 在 opus）。
+
+**Drift-check（roster 變動偵測）**：**可用性真相來源 = Claude Desktop 右下角模型選單**（老闆可截圖，含展開「More models ›」）。Agent/Workflow tool 的 `model` enum 只列「可派別名」，**不反映當下可用性**（如 fable 是合法別名卻 Currently unavailable）。主線程 computer-use 是 Chrome-scoped，**碰不到 native desktop UI → 此 reconcile 需老闆截圖或未來 OS-level computer-use**。無 cron 自動偵測（無 `ANTHROPIC_API_KEY`）；`scripts/check_model_roster.py` 在 `config/models.json` 過期時提醒。**新 model 先查定位再指派 tier（不猜）；available=false 的 model 一律走 fallback。**
 
 ## Delegation Threshold（何時派 vs 自己做）
 
