@@ -12760,5 +12760,18 @@
       "paper/leverage-direction/body_v_ijf.tex",
       "storage/next_tasks.json"
     ]
+  },
+  {
+    "timestamp": "2026-07-01T19:25:41+08:00",
+    "task_type": "platform_ops",
+    "task_id": "arc_dedup_merger_arb_false_positive_fix",
+    "actor": "hourly-19",
+    "verdict": "succeeded",
+    "summary": "Root-caused + fixed arc-dedup false-positive that hard-blocked K1590 merger-arb fresh content (arc EXIT 1->0). 3 fixes in publisher/arc_dedup.py: (1) English vol target/volatility target nouns tightened to -ing gerund (portfolio-level vol target = target variable, not the strategy); (2) added MERGER_ARB distinctive entity (MNA/併購套利/deal-spread/...) so diagnostics comparing a novel target vs SPY/HYG/IWM/VIX proxies get correct identity; (3) single broad-market-proxy overlap (US_SMALLCAP)+VIX no longer counts as significant topic anchor. +3 regression tests; 43 arc_dedup + overmatch/backfill suites green; publisher import OK. Dropped K506_article_general_v2 (real arc-dup of mile_d8e36bcb). refill now admits K1590_article_general (fresh) -> serves draft_pool_low breach + breaks saturated-arc 鬼打牆. Discovered from dashboard draft_pool_low warn during hourly triage.",
+    "refs": [
+      "src/volpred/publisher/arc_dedup.py",
+      "tests/test_arc_dedup.py",
+      "storage/next_tasks.json"
+    ]
   }
 ]
