@@ -1,0 +1,1059 @@
+{
+  "conclusion": "Lagged daily co-jump proxy features clear the strict HAR-CJ forecast gate in this ETF panel.",
+  "dataset": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "XLB",
+      "XLE",
+      "XLF",
+      "XLI",
+      "XLK",
+      "XLP",
+      "XLU",
+      "XLV",
+      "XLY"
+    ],
+    "oos_start": "2016-01-01",
+    "sample_by_asset": {
+      "IWM": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "QQQ": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "SPY": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLB": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLE": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLF": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLI": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLK": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLP": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLU": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLV": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      },
+      "XLY": {
+        "end": "2026-06-24",
+        "n_oos_candidate": 2633,
+        "n_panel_rows": 5379,
+        "n_train_before_oos": 2746,
+        "start": "2005-02-04"
+      }
+    },
+    "source": "experiments/k1552/data/prices.parquet",
+    "train_start": "2005-01-01"
+  },
+  "event_diagnostic": {
+    "cojump_count_summary": {
+      "days_ge_3": 236,
+      "days_ge_6": 118,
+      "max": 12.0,
+      "mean": 0.37537037037037035,
+      "median": 0.0,
+      "p90": 1.0
+    },
+    "high_cojump_definition": "cojump_count >= 3 (max of 3 and 90th percentile)",
+    "next_market_abs_ret": {
+      "bootstrap_ci_95": [
+        0.0026687928163021744,
+        0.006473606731854419
+      ],
+      "diff": 0.004524534434915961,
+      "high_mean": 0.013585550224397683,
+      "low_mean": 0.009061015789481722,
+      "n_high": 236,
+      "n_low": 5164,
+      "p_value": 6.683880261800408e-06,
+      "welch_t": 4.604860628402873
+    },
+    "next_market_r2": {
+      "bootstrap_ci_95": [
+        0.00012568734948083902,
+        0.00047879205933491943
+      ],
+      "diff": 0.0002892698394164468,
+      "high_mean": 0.0004730960938994504,
+      "low_mean": 0.0001838262544830036,
+      "n_high": 236,
+      "n_low": 5164,
+      "p_value": 0.0023858694080783043,
+      "welch_t": 3.070416865749848
+    }
+  },
+  "experiment_id": "k1599",
+  "jump_detection": {
+    "bpv_window_days": 63,
+    "global_cojump_summary": {
+      "days_ge_3": 236,
+      "days_ge_6": 118,
+      "max": 12.0,
+      "mean": 0.37537037037037035,
+      "median": 0.0,
+      "p90": 1.0
+    },
+    "jump_summary_by_asset": {
+      "IWM": {
+        "down_jump_days": 105,
+        "jump_days": 158,
+        "jump_rate": 0.029253841881133124,
+        "n_return_days": 5401
+      },
+      "QQQ": {
+        "down_jump_days": 121,
+        "jump_days": 190,
+        "jump_rate": 0.03517867061655249,
+        "n_return_days": 5401
+      },
+      "SPY": {
+        "down_jump_days": 126,
+        "jump_days": 196,
+        "jump_rate": 0.03628957600444362,
+        "n_return_days": 5401
+      },
+      "XLB": {
+        "down_jump_days": 92,
+        "jump_days": 145,
+        "jump_rate": 0.026846880207369007,
+        "n_return_days": 5401
+      },
+      "XLE": {
+        "down_jump_days": 106,
+        "jump_days": 158,
+        "jump_rate": 0.029253841881133124,
+        "n_return_days": 5401
+      },
+      "XLF": {
+        "down_jump_days": 108,
+        "jump_days": 184,
+        "jump_rate": 0.03406776522866136,
+        "n_return_days": 5401
+      },
+      "XLI": {
+        "down_jump_days": 110,
+        "jump_days": 172,
+        "jump_rate": 0.0318459544528791,
+        "n_return_days": 5401
+      },
+      "XLK": {
+        "down_jump_days": 118,
+        "jump_days": 186,
+        "jump_rate": 0.03443806702462507,
+        "n_return_days": 5401
+      },
+      "XLP": {
+        "down_jump_days": 95,
+        "jump_days": 157,
+        "jump_rate": 0.02906869098315127,
+        "n_return_days": 5401
+      },
+      "XLU": {
+        "down_jump_days": 92,
+        "jump_days": 139,
+        "jump_rate": 0.025735974819477876,
+        "n_return_days": 5401
+      },
+      "XLV": {
+        "down_jump_days": 107,
+        "jump_days": 177,
+        "jump_rate": 0.03277170894278837,
+        "n_return_days": 5401
+      },
+      "XLY": {
+        "down_jump_days": 110,
+        "jump_days": 165,
+        "jump_rate": 0.03054989816700611,
+        "n_return_days": 5401
+      }
+    },
+    "status": "daily_proxy_not_high_frequency_replication",
+    "threshold": "|r_t| / sqrt((pi/2) * rolling_mean(|r_t-1|*|r_t-2|)) > 2.5"
+  },
+  "limitations": [
+    "This is a daily proxy; it is not a high-frequency BNS/Lee-Mykland replication.",
+    "Close-to-close squared returns are noisy volatility proxies and include overnight effects.",
+    "The co-jump threshold is fixed at 2.5 standardized daily BPV units; sensitivity and formal high-frequency thresholds are follow-ups.",
+    "Forecast models are annual-refit log-OLS HAR variants, not full realized-kernel or Hawkes-network models."
+  ],
+  "oos_model_race": {
+    "best_model_by_asset": {
+      "IWM": "HAR_CJ_proxy",
+      "QQQ": "HAR_CJ_proxy",
+      "SPY": "HAR_CJ_proxy",
+      "XLB": "HAR_CJ_proxy",
+      "XLE": "HAR_CJ_proxy",
+      "XLF": "HAR_CJ_proxy",
+      "XLI": "HAR_CJ_proxy",
+      "XLK": "HAR_CJ_proxy",
+      "XLP": "HAR_CJ_proxy",
+      "XLU": "HAR_CJ_proxy",
+      "XLV": "HAR_CJ_proxy",
+      "XLY": "HAR_CJ_proxy"
+    },
+    "dm_tests": {
+      "IWM_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "IWM",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": false,
+        "holm_5pct": false,
+        "holm_p_value": 0.08670320788978181,
+        "p_value": 0.021675801972445452,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -2.2973699186089553
+      },
+      "IWM_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "IWM",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 1.745712685763401e-05,
+        "p_value": 7.590055155493047e-07,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.957608352430178
+      },
+      "IWM_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "IWM",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.0005144338113225455,
+        "p_value": 3.026081243073797e-05,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.178797102669711
+      },
+      "QQQ_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "QQQ",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.0005144338113225455,
+        "p_value": 3.05482584208594e-05,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.176631812205828
+      },
+      "QQQ_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "QQQ",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 2.9387769995281587e-09,
+        "p_value": 8.396505712937596e-11,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -6.520035346066054
+      },
+      "QQQ_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "QQQ",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.0003487954100345192,
+        "p_value": 1.937752277969551e-05,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.279768650425092
+      },
+      "SPY_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "SPY",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.004475955797188735,
+        "p_value": 0.0004973284219098595,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -3.4865374817249206
+      },
+      "SPY_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "SPY",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 2.8874571400550053e-07,
+        "p_value": 9.956748758810363e-09,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -5.749942984112449
+      },
+      "SPY_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "SPY",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 5.8494916743701e-06,
+        "p_value": 2.33979666974804e-07,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -5.183740037644363
+      },
+      "XLB_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLB",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": false,
+        "holm_5pct": false,
+        "holm_p_value": 0.3609493706758826,
+        "p_value": 0.3609493706758826,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -0.913716790760647
+      },
+      "XLB_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLB",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 6.836196003678907e-05,
+        "p_value": 3.1073618198540487e-06,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.673688903961736
+      },
+      "XLB_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLB",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 2.815421362711845e-07,
+        "p_value": 9.38473787570615e-09,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -5.7600638861997
+      },
+      "XLE_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLE",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.008388586798425024,
+        "p_value": 0.001048573349803128,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -3.280816980138611
+      },
+      "XLE_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLE",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.00020516947186854928,
+        "p_value": 1.0798393256239436e-05,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.409062374052273
+      },
+      "XLE_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLE",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": false,
+        "holm_5pct": true,
+        "holm_p_value": 0.019358186569933267,
+        "p_value": 0.002765455224276181,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -2.995505964585601
+      },
+      "XLF_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLF",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": false,
+        "holm_5pct": false,
+        "holm_p_value": 0.13944563307063618,
+        "p_value": 0.05259779577794621,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -1.9390845448406695
+      },
+      "XLF_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLF",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.002812782176272677,
+        "p_value": 0.00025570747057024334,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -3.661471749711353
+      },
+      "XLF_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLF",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.0009417448038919751,
+        "p_value": 6.726748599228394e-05,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -3.992151361222097
+      },
+      "XLI_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLI",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": false,
+        "holm_5pct": true,
+        "holm_p_value": 0.019358186569933267,
+        "p_value": 0.0030298211284134346,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -2.967455132958537
+      },
+      "XLI_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLI",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 1.3707483592639846e-08,
+        "p_value": 4.0316128213646607e-10,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -6.276691522248484
+      },
+      "XLI_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLI",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 2.8705781836002586e-06,
+        "p_value": 1.1040685321539456e-07,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -5.323455489581237
+      },
+      "XLK_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLK",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.004268556316533445,
+        "p_value": 0.0004268556316533445,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -3.527390683897613
+      },
+      "XLK_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLK",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 1.338122826544108e-06,
+        "p_value": 4.956010468681882e-08,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -5.468840069914001
+      },
+      "XLK_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLK",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.00010415458633161734,
+        "p_value": 4.959742206267492e-06,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.575979258815769
+      },
+      "XLP_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLP",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.0007026273423615947,
+        "p_value": 4.6841822824106316e-05,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.0776549467083765
+      },
+      "XLP_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLP",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 4.7347101794770197e-07,
+        "p_value": 1.6909679212417927e-08,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -5.658600817127301
+      },
+      "XLP_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLP",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.0009692800147771408,
+        "p_value": 7.456000113670314e-05,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -3.967534086029407
+      },
+      "XLU_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLU",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": false,
+        "holm_5pct": false,
+        "holm_p_value": 0.13944563307063618,
+        "p_value": 0.04648187769021206,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -1.9919301951481254
+      },
+      "XLU_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLU",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 1.5499601602186885e-11,
+        "p_value": 4.305444889496357e-13,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -7.282586630159932
+      },
+      "XLU_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLU",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 5.8012517456518253e-08,
+        "p_value": 1.8128911705161954e-09,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -6.035035622203957
+      },
+      "XLV_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLV",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": false,
+        "holm_5pct": false,
+        "holm_p_value": 0.07100302089709909,
+        "p_value": 0.014200604179419818,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -2.4537829912627904
+      },
+      "XLV_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLV",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 2.3713314845075217e-07,
+        "p_value": 7.649456401637167e-09,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -5.794911548493499
+      },
+      "XLV_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLV",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 1.3663407733233157e-05,
+        "p_value": 5.693086555513815e-07,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -5.013732281307409
+      },
+      "XLY_HAR_CJ_proxy_vs_HAR_J_proxy": {
+        "asset": "XLY",
+        "benchmark": "HAR_J_proxy",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.001028584187106496,
+        "p_value": 8.571534892554133e-05,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -3.9339686512161927
+      },
+      "XLY_HAR_CJ_proxy_vs_HAR_daily": {
+        "asset": "XLY",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_CJ_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 5.004814296327709e-08,
+        "p_value": 1.5166103928265784e-09,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -6.064185297664417
+      },
+      "XLY_HAR_J_proxy_vs_HAR_daily": {
+        "asset": "XLY",
+        "benchmark": "HAR_daily",
+        "candidate": "HAR_J_proxy",
+        "candidate_lower_loss": true,
+        "harvey_abs_t_gt_3": true,
+        "holm_5pct": true,
+        "holm_p_value": 0.00010415458633161734,
+        "p_value": 5.064447134550676e-06,
+        "sign_convention": "negative t => candidate lower QLIKE loss than benchmark",
+        "t_stat": -4.57156949139028
+      }
+    },
+    "har_cj_strict_losses": [],
+    "har_cj_strict_wins": [
+      "IWM_HAR_CJ_proxy_vs_HAR_daily",
+      "QQQ_HAR_CJ_proxy_vs_HAR_daily",
+      "QQQ_HAR_CJ_proxy_vs_HAR_J_proxy",
+      "SPY_HAR_CJ_proxy_vs_HAR_daily",
+      "SPY_HAR_CJ_proxy_vs_HAR_J_proxy",
+      "XLB_HAR_CJ_proxy_vs_HAR_daily",
+      "XLE_HAR_CJ_proxy_vs_HAR_daily",
+      "XLE_HAR_CJ_proxy_vs_HAR_J_proxy",
+      "XLF_HAR_CJ_proxy_vs_HAR_daily",
+      "XLI_HAR_CJ_proxy_vs_HAR_daily",
+      "XLK_HAR_CJ_proxy_vs_HAR_daily",
+      "XLK_HAR_CJ_proxy_vs_HAR_J_proxy",
+      "XLP_HAR_CJ_proxy_vs_HAR_daily",
+      "XLP_HAR_CJ_proxy_vs_HAR_J_proxy",
+      "XLU_HAR_CJ_proxy_vs_HAR_daily",
+      "XLV_HAR_CJ_proxy_vs_HAR_daily",
+      "XLY_HAR_CJ_proxy_vs_HAR_daily",
+      "XLY_HAR_CJ_proxy_vs_HAR_J_proxy"
+    ],
+    "mean_qlike_by_model": {
+      "HAR_CJ_proxy": 2.248858641243463,
+      "HAR_J_proxy": 2.2638472977741704,
+      "HAR_daily": 2.2915152479305188
+    },
+    "metrics_by_asset_model": [
+      {
+        "asset": "IWM",
+        "mean_actual_r2": 0.00021061502500413935,
+        "mean_forecast_r2": 0.0007125104012025105,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 1.8899323192627757
+      },
+      {
+        "asset": "IWM",
+        "mean_actual_r2": 0.00021061502500413935,
+        "mean_forecast_r2": 0.0007000466583207285,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 1.8985810985546723
+      },
+      {
+        "asset": "IWM",
+        "mean_actual_r2": 0.00021061502500413935,
+        "mean_forecast_r2": 0.000673263863580362,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 1.9204785406455183
+      },
+      {
+        "asset": "QQQ",
+        "mean_actual_r2": 0.00019821764827153779,
+        "mean_forecast_r2": 0.0007959979675727579,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.2114345133394298
+      },
+      {
+        "asset": "QQQ",
+        "mean_actual_r2": 0.00019821764827153779,
+        "mean_forecast_r2": 0.0007545844769217133,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.234433627265241
+      },
+      {
+        "asset": "QQQ",
+        "mean_actual_r2": 0.00019821764827153779,
+        "mean_forecast_r2": 0.0007376227745788848,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.2568323899435425
+      },
+      {
+        "asset": "SPY",
+        "mean_actual_r2": 0.0001272705150499298,
+        "mean_forecast_r2": 0.0006261293070282983,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.2807313078436184
+      },
+      {
+        "asset": "SPY",
+        "mean_actual_r2": 0.0001272705150499298,
+        "mean_forecast_r2": 0.000565027426137533,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.300166723397232
+      },
+      {
+        "asset": "SPY",
+        "mean_actual_r2": 0.0001272705150499298,
+        "mean_forecast_r2": 0.0005031206594834194,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.33274110241533
+      },
+      {
+        "asset": "XLB",
+        "mean_actual_r2": 0.0001707210615303862,
+        "mean_forecast_r2": 0.0010055018201084091,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.3494416314779594
+      },
+      {
+        "asset": "XLB",
+        "mean_actual_r2": 0.0001707210615303862,
+        "mean_forecast_r2": 0.0009802594918428202,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.3540819163431235
+      },
+      {
+        "asset": "XLB",
+        "mean_actual_r2": 0.0001707210615303862,
+        "mean_forecast_r2": 0.0009645019431973513,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.3810912050645525
+      },
+      {
+        "asset": "XLE",
+        "mean_actual_r2": 0.0003510493928357831,
+        "mean_forecast_r2": 0.0011981776636147564,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.07759747123239
+      },
+      {
+        "asset": "XLE",
+        "mean_actual_r2": 0.0003510493928357831,
+        "mean_forecast_r2": 0.0011622282339126603,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.093977517038276
+      },
+      {
+        "asset": "XLE",
+        "mean_actual_r2": 0.0003510493928357831,
+        "mean_forecast_r2": 0.0011544697934377309,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.110262329113188
+      },
+      {
+        "asset": "XLF",
+        "mean_actual_r2": 0.0001943781547768447,
+        "mean_forecast_r2": 0.0014700346471285845,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.5558925373945036
+      },
+      {
+        "asset": "XLF",
+        "mean_actual_r2": 0.0001943781547768447,
+        "mean_forecast_r2": 0.001391955451900076,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.5663946378412037
+      },
+      {
+        "asset": "XLF",
+        "mean_actual_r2": 0.0001943781547768447,
+        "mean_forecast_r2": 0.0012861582573469588,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.588246509790982
+      },
+      {
+        "asset": "XLI",
+        "mean_actual_r2": 0.00015766914843300947,
+        "mean_forecast_r2": 0.0007409126961690695,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.264135857616694
+      },
+      {
+        "asset": "XLI",
+        "mean_actual_r2": 0.00015766914843300947,
+        "mean_forecast_r2": 0.0007055136827136373,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.278566950061416
+      },
+      {
+        "asset": "XLI",
+        "mean_actual_r2": 0.00015766914843300947,
+        "mean_forecast_r2": 0.0006801737723287181,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.3092893190346606
+      },
+      {
+        "asset": "XLK",
+        "mean_actual_r2": 0.0002381503446873068,
+        "mean_forecast_r2": 0.0014204493639380464,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.349165518647518
+      },
+      {
+        "asset": "XLK",
+        "mean_actual_r2": 0.0002381503446873068,
+        "mean_forecast_r2": 0.0012294798064674986,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.373145485837709
+      },
+      {
+        "asset": "XLK",
+        "mean_actual_r2": 0.0002381503446873068,
+        "mean_forecast_r2": 0.001148611335443585,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.4084145900869407
+      },
+      {
+        "asset": "XLP",
+        "mean_actual_r2": 8.57025073339971e-05,
+        "mean_forecast_r2": 0.0004247812740521432,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.31425819111682
+      },
+      {
+        "asset": "XLP",
+        "mean_actual_r2": 8.57025073339971e-05,
+        "mean_forecast_r2": 0.00040157365446784554,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.334206254792978
+      },
+      {
+        "asset": "XLP",
+        "mean_actual_r2": 8.57025073339971e-05,
+        "mean_forecast_r2": 0.0003849658243015869,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.3580735479542954
+      },
+      {
+        "asset": "XLU",
+        "mean_actual_r2": 0.00014461286768935688,
+        "mean_forecast_r2": 0.0006060994543528346,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.0988532412946617
+      },
+      {
+        "asset": "XLU",
+        "mean_actual_r2": 0.00014461286768935688,
+        "mean_forecast_r2": 0.0005640287331928201,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.1065348964384913
+      },
+      {
+        "asset": "XLU",
+        "mean_actual_r2": 0.00014461286768935688,
+        "mean_forecast_r2": 0.0004937882936411635,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.1415668487082224
+      },
+      {
+        "asset": "XLV",
+        "mean_actual_r2": 0.00010959027914418167,
+        "mean_forecast_r2": 0.0006443692053909546,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.4131397051500483
+      },
+      {
+        "asset": "XLV",
+        "mean_actual_r2": 0.00010959027914418167,
+        "mean_forecast_r2": 0.0006195512258555732,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.4281322763972275
+      },
+      {
+        "asset": "XLV",
+        "mean_actual_r2": 0.00010959027914418167,
+        "mean_forecast_r2": 0.0006167555228978963,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.466966717159113
+      },
+      {
+        "asset": "XLY",
+        "mean_actual_r2": 0.00019112367714953747,
+        "mean_forecast_r2": 0.0008311376758906727,
+        "model": "HAR_CJ_proxy",
+        "n_oos": 2633,
+        "qlike": 2.181721400545137
+      },
+      {
+        "asset": "XLY",
+        "mean_actual_r2": 0.00019112367714953747,
+        "mean_forecast_r2": 0.0008265345959664279,
+        "model": "HAR_J_proxy",
+        "n_oos": 2633,
+        "qlike": 2.1979461893224763
+      },
+      {
+        "asset": "XLY",
+        "mean_actual_r2": 0.00019112367714953747,
+        "mean_forecast_r2": 0.000800389999489333,
+        "model": "HAR_daily",
+        "n_oos": 2633,
+        "qlike": 2.2242198752498825
+      }
+    ]
+  },
+  "outputs": {
+    "figure": "experiments/k1599/k1599_cojump_har_proxy.png",
+    "forecast_csv": "experiments/k1599/k1599_oos_forecasts.csv.gz",
+    "results_json": "experiments/k1599/k1599_results.json"
+  },
+  "primary_test": {
+    "lookahead_rule": "all jump/co-jump variables are shifted at least one trading day before target date",
+    "loss": "QLIKE(actual_r2, forecast_r2)",
+    "models": [
+      "HAR_daily",
+      "HAR_J_proxy",
+      "HAR_CJ_proxy"
+    ],
+    "strict_gate": "HAR_CJ_proxy must have lower QLIKE loss with Harvey |DM t|>3 and Holm 5pct",
+    "target": "next-day close-to-close squared log return"
+  },
+  "references": [
+    {
+      "citation": "Bollerslev, Law, and Tauchen (2017), Journal of Financial Economics 126(3), 563-591",
+      "key": "bollerslev_law_tauchen_2017",
+      "role": "systemic co-jumps as market-wide events with short-run predictability and volatility/correlation persistence",
+      "url": "https://ideas.repec.org/a/eee/jfinec/v126y2017i3p563-591.html"
+    },
+    {
+      "citation": "Barndorff-Nielsen and Shephard (2004), Journal of Financial Econometrics 2(1), 1-37",
+      "key": "barndorff_nielsen_shephard_2004",
+      "role": "bipower variation as a continuous-variation estimator robust to rare jumps",
+      "url": "https://academic.oup.com/jfec/article-abstract/2/1/1/960705"
+    },
+    {
+      "citation": "Andersen, Bollerslev, and Diebold (2007), Review of Economics and Statistics 89(4), 701-720",
+      "key": "andersen_bollerslev_diebold_2007",
+      "role": "HAR-style volatility forecasts with separated jump and continuous components",
+      "url": "https://ideas.repec.org/a/tpr/restat/v89y2007i4p701-720.html"
+    },
+    {
+      "citation": "Lee and Mykland (2008), Review of Financial Studies 21(6), 2535-2563",
+      "key": "lee_mykland_2008",
+      "role": "nonparametric high-frequency jump-arrival detection",
+      "url": "https://academic.oup.com/rfs/article-abstract/21/6/2535/1574138"
+    },
+    {
+      "citation": "Lee, Lee, and Kim (2022), Journal of Risk and Financial Management 15(8), 334",
+      "key": "lee_lee_kim_2022",
+      "role": "sector ETF co-jumps and volatility forecasting motivation",
+      "url": "https://www.mdpi.com/1911-8074/15/8/334"
+    }
+  ],
+  "research_implication": "The co-jump axis remains interesting as a stress-state measurement channel, but this daily proxy does not yet justify a paper-level HAR-CJ forecasting claim.  A publishable test needs synchronized 5-minute cross-asset data and formal BNS/Lee-Mykland co-jump flags.",
+  "seed": 1599,
+  "task_id": "research_co_jump_har_cj_jump_jfe_2017_systemic_co_jumps_j",
+  "timestamp_utc": "2026-07-01T12:51:07.920269+00:00",
+  "title": "Daily Co-Jump Proxy and HAR-CJ-Style Volatility Forecast Test",
+  "verdict": "SUPPORTED_DAILY_PROXY"
+}
