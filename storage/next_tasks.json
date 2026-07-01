@@ -41812,7 +41812,7 @@
     "title": "[論文管線] leverage-direction Stage 1.2 - intro+abstract+conclusion 改單一 contribution",
     "description": "Stage 1 quick win. Scope: main.tex abstract + body.tex Section 1 (intro) + body.tex Conclusion。\n\n核心修改：(a) 全文「two contributions」→「one central contribution: economic content of leverage direction」；(b) abstract 刪「direct implications for model selection, risk management, and portfolio construction」這種廣告式 framing，改聚焦「when does asymmetric volatility have economic value for forecasting and allocation」；(c) intro/conclusion 刪 time-zone arbitrage 提及；(d) 弱化 method-selection 角度（Codex 說「JBF will not be excited by 'estimate GJR, use GJR if asymmetry significant'」），改強調 economic mechanism；(e) 維持 honest framing（gold unconditional NS、regime-dependent only）。\n\n參考：reframing_decision Stage 1；codex_contribution_gate §1（central claim）+ §4 item 1。\n\nDispatch: 主線程（narrative writing，非 mechanical）。寫完跑 xelatex + codex latex_academic 短審。",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_body",
     "source": "leverage_direction_reframing_decision_20260701",
     "tags": [
@@ -41839,9 +41839,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-09"
+      },
+      {
+        "ts": "2026-07-01T01:14:02.762926+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-09"
       }
     ],
-    "started_at": "2026-07-01T01:10:09.822659+00:00"
+    "started_at": "2026-07-01T01:10:09.822659+00:00",
+    "completed_at": "2026-07-01T01:14:02.762649+00:00",
+    "result": "Stage 1.2 complete: abstract + intro (body.tex Section 1) + Conclusion reframed from 'two contributions' → 'one central contribution: economic content of leverage direction'. Time-zone reference already absent; regime-conditional gold reading strengthened (explicit avoidance of unconditional inverted-leverage claim). Compiled xelatex 49pp, paper-update sync'd (Supabase updated_at 2026-07-01T01:12Z), commit 34610e4fd pushed. Contribution gate BORDERLINE → addressed."
   },
   {
     "id": "paper_leverage_direction_stage1_appendix_offload",
