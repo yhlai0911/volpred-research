@@ -94,6 +94,30 @@
           ],
           "implication": "Honest gold rebuild is WEAK (stress-regime effects largely null) -> paper's gold component can only be a weak regime-dependent claim; overall leverage-direction contribution now leans more on model-selection + VT-channel (Stage 2 oos_horse_race) than gold. Feeds back into contribution-strength assessment.",
           "caveat": "No independent review file (codex created the experiment); needs independent codex review before writing to knowledge.json per CLAUDE.md."
+        },
+        "k1592_oos_horse_race": {
+          "date": "2026-07-01",
+          "experiment": "experiments/k1592",
+          "main_thread_verification": "PASS (research-honesty) — null is sound, not a bug",
+          "verdict": "NULL_OR_WEAK",
+          "checks": [
+            "pre-specified rule (gamma>0 & t>1.65 -> GJR), window 504, refit 21d",
+            "no lookahead (params fit on prior 504 only; r_t updates after forecast)",
+            "correct Patton QLIKE via qlike_pointwise (not reversed)",
+            "panel = date-clustered mean loss then DM (K1355-compliant) + Harvey-Holm multiple-testing",
+            "best model = plain GJR; GammaRule does NOT beat always-GJR (t=0.73 p=0.47); 0 assets Harvey-Holm significant"
+          ],
+          "finding": "The pre-specified gamma-selection rule is NOT a JBF-grade OOS superiority result — 0 assets significant after Harvey-Holm; it is only a risk-controlled model-selection diagnostic. Experiment self-flags 'delete or demote' the superiority claim."
+        },
+        "stage2_combined_implication": {
+          "severity": "PLAN-CHANGING — research-direction decision for owner",
+          "summary": "Both honest Stage 2 rebuilds are weak: gold regime (K1591) weak/mostly-NS; model-selection OOS (K1592) NULL_OR_WEAK, 0 Harvey-Holm significant. After a pre-specified + OOS + multiple-testing-corrected rebuild, leverage-direction has NO JBF-grade empirical result. Option A's premise (a JBF-grade idea exists) does not survive the honest rebuild.",
+          "honest_options": [
+            "Re-target a lower tier (FRL/IJF) where an honest 'risk-controlled diagnostic + documented nulls' contribution fits",
+            "Reframe as a negative-results / 'what does NOT work in cross-asset gamma selection' paper (still publishable, honest)",
+            "Shelve leverage-direction; redirect effort to a stronger paper"
+          ],
+          "note": "This is the honest research-integrity outcome; the reframe did its job = it revealed the results don't support the strong claim. NOT a failure of the reframe — a failure of the original claim to survive rigor."
         }
       }
     },
