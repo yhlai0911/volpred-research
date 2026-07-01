@@ -1,0 +1,9 @@
+{
+  "_meta": "Weekly-cap calibration anchored to the OFFICIAL Claude usage display (the ground truth for the account's quota — official > any local estimate). The token report's per-record billable methodology (input+output+cache_create, summed per JSONL record) already tracks the official count closely (78% vs official 76% before calibration). This file pins the weekly cap so the report's % EQUALS the official %. Re-anchor whenever the official display drifts from the report: `uv run python scripts/token_report_email.py --calibrate <official_fraction>` (e.g. --calibrate 0.76) recomputes derived_weekly_cap from the current billable.",
+  "official_pct": 0.76,
+  "billable_at_reading": 169176923,
+  "reading_date": "2026-07-01",
+  "reset_day": "Jul 5 (weekly · all models)",
+  "derived_weekly_cap": 222601214,
+  "note": "Re-anchored 2026-07-01 15:57 台灣: official Weekly 76%, billable 169,176,923 -> cap 222,601,214."
+}

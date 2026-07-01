@@ -26,7 +26,19 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
 TPE = ZoneInfo("Asia/Taipei")
-WEEKLY_CAP = 215_000_000  # 週 cap 校準估計（單次截圖，非官方）
+CALIB_PATH = ROOT / "config" / "token_quota_calibration.json"
+
+
+def _load_calibration() -> dict:
+    """Weekly cap calibrated to the official Claude usage display (ground truth)."""
+    try:
+        return json.loads(CALIB_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {"derived_weekly_cap": 222_525_528, "official_pct": 0.76, "reading_date": "?"}
+
+
+CALIB = _load_calibration()
+WEEKLY_CAP = int(CALIB.get("derived_weekly_cap") or 222_525_528)
 
 C_INK = "#1f2937"; C_SUB = "#6b7280"; C_LINE = "#e5e7eb"
 BARS = ["#2563eb", "#7c3aed", "#0891b2", "#059669", "#d97706", "#dc2626",
@@ -162,9 +174,9 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
 
     # caveats
     p.append("<h2>說明（誠實 caveat）</h2><div class='sub'>")
-    p.append("· billable = input + output + cache_create（cache_read 量大但不以全費計）。<br>")
-    p.append("· 週 cap 215M 為單次截圖校準、非官方數字，僅供比例參考。<br>")
-    p.append("· 互動 session 內的 loop-tick token 與真實工作混在同 session，無法精確分離。<br>")
+    p.append("· billable = input + output + cache_create（cache_read 量大但不以全費計）；per-record 加總，口徑與官方一致。<br>")
+    p.append(f"· 週 cap {m(WEEKLY_CAP)} 由**官方用量顯示校準**（{esc(CALIB.get('reading_date','?'))} 官方 Weekly {int(CALIB.get('official_pct',0.76)*100)}% 反推）；官方是額度 ground truth，飄移時用 `--calibrate <官方%>` 重新錨定。<br>")
+    p.append("· reasoning(thinking) 已 redact 且 output 為合計，無法可靠單獨拆分，故不列。<br>")
     p.append("· 數據源：~/.claude/projects/*.jsonl 的 message.usage（含 subagent），由 token_usage_report.py 聚合。")
     p.append("</div>")
 
@@ -183,9 +195,33 @@ def main(argv: list) -> int:
     ap.add_argument("--dry-run", action="store_true", help="render HTML to file, do not send")
     ap.add_argument("--to", default=None, help="override recipient")
     ap.add_argument("--force", action="store_true", help="bypass email dedup")
+    ap.add_argument("--calibrate", type=float, default=None,
+                    help="re-anchor weekly cap to the official display: pass the official weekly fraction (e.g. 0.76). Recomputes derived_weekly_cap from current billable and exits.")
     args = ap.parse_args(argv)
 
     now_tw = datetime.now(TPE)
+
+    if args.calibrate is not None:
+        pct = args.calibrate
+        if not (0 < pct < 1):
+            print(f"[token-report] --calibrate expects a fraction in (0,1), got {pct}", file=sys.stderr)
+            return 1
+        week = _report("--weekly")
+        billable = _bill(week.get("totals", {}))
+        cap = int(round(billable / pct))
+        calib = {
+            "_meta": CALIB.get("_meta", "Weekly-cap calibration anchored to the official Claude usage display."),
+            "official_pct": pct,
+            "billable_at_reading": billable,
+            "reading_date": now_tw.strftime("%Y-%m-%d"),
+            "reset_day": CALIB.get("reset_day", ""),
+            "derived_weekly_cap": cap,
+            "note": f"Re-anchored {now_tw.strftime('%Y-%m-%d %H:%M')} 台灣: official Weekly {pct*100:.0f}%, billable {billable:,} -> cap {cap:,}.",
+        }
+        CALIB_PATH.write_text(json.dumps(calib, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"[token-report] calibrated: official {pct*100:.0f}% × billable {billable:,} -> weekly_cap {cap:,} ({cap/1e6:.0f}M), written {CALIB_PATH}")
+        return 0
+
     today = _report()
     week = _report("--weekly")
     html_body, text_body = build_html(today, week, now_tw)
