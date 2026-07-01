@@ -3,56 +3,71 @@
 %  Full-length reframe around the complexity ceiling / measurement-vs-allocation
 %  wedge. Body prose lives in body_v_ijf.tex (ticks 1--5); tables in
 %  tables_main.tex. This wrapper (tick-6) supplies the preamble, standalone
-%  abstract, title, author block, and a pruned author-date reference list
-%  containing only the works actually cited in body_v_ijf.tex.
+%  abstract, title, and a pruned author-date reference list containing only
+%  the works actually cited in body_v_ijf.tex.
 %
-%  NOTE ON DOCUMENT CLASS: Elsevier's elsarticle.cls is not installed in this
-%  build environment, so we compile with the standard article class under the
-%  same xelatex toolchain that already builds main.tex cleanly. The reference
-%  style is author-date (Harvard/APA via natbib apalike), consistent with IJF
-%  requirements. Conversion to elsarticle.cls is a production-stage step and
-%  does not affect the arXiv preprint or the initial-submission PDF.
+%  2026-07-02 post-tick-6 fix (interactive-claude, same day as hourly-03's
+%  tick-6 build): two compliance issues found and corrected before the
+%  fresh IJF multi-round review consumed this file.
+%  (1) DOUBLE-ANONYMIZATION: the prior version of this file had \author and
+%      an identifying \thanks (name/department/email) inline in the
+%      manuscript, violating IJF's explicit "fully anonymized manuscript
+%      (double-blind) + separate title page" requirement
+%      (.claude/skills/journal-review/references/ijf.md). Author identity
+%      now lives ONLY in the separate title_page_v_ijf.tex, submitted
+%      alongside but not part of the anonymized manuscript upload. This file
+%      carries no \author, no identifying \thanks, no acknowledgments.
+%  (2) ELSARTICLE.CLS: the prior version claimed "elsarticle.cls is not
+%      installed in this build environment" as the reason for using plain
+%      article.cls. That claim was checked and is false --
+%      `kpsewhich elsarticle.cls` resolves to
+%      /usr/local/texlive/2026/texmf-dist/tex/latex/elsarticle/elsarticle.cls.
+%      Switched to elsarticle's 'review' class option (double-spacing + line
+%      numbers, the standard option for a manuscript under review).
+%  Also fixed: two of the seven keywords ("complexity ceiling", "cross-asset")
+%  echoed title words, against the IJF guidance to avoid repeating title
+%  words in keywords; replaced with a title-word-free list.
+%  Everything else (abstract text, body_v_ijf.tex, tables_main.tex, the
+%  pruned bibliography) is unchanged from hourly-03's tick-6 build, which
+%  passed all three gates (compile, reproduce.py 100%, compliance clean).
 %
 %  JBF-era archive: main.tex + body.tex are preserved unchanged.
 % =====================================================================
 
-\documentclass[12pt,a4paper]{article}
+\documentclass[review,12pt]{elsarticle}
+
+\journal{International Journal of Forecasting}
 
 % ─── Packages ────────────────────────────────────────────────
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{natbib}
-\usepackage[margin=1in]{geometry}
 \usepackage{setspace}
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{float}
-\usepackage{fontspec}           % XeLaTeX for Unicode support
-\usepackage{xeCJK}
-\IfFontExistsTF{PingFang TC}{\setCJKmainfont{PingFang TC}}{\setCJKmainfont{Songti TC}}
 
 \usepackage{pifont}% for \ding check/cross marks
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
 
 \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
-\doublespacing
 
 % The IJF version is self-contained: body_v_ijf.tex references only its own
 % sections and the six tables in tables_main.tex. No external supplement is
 % cross-referenced, so xr-hyper/externaldocument is intentionally omitted.
 
-% ─── Title ───────────────────────────────────────────────────
-\title{When Does Better Volatility Measurement Improve Allocation? A Cross-Asset Complexity Ceiling\thanks{All errors are my own. A self-contained replication package (data and code) accompanies the paper.}}
-
-\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
-
-\date{July 2026}
-
 \begin{document}
 
-\maketitle
+\begin{frontmatter}
+
+% ─── Title ───────────────────────────────────────────────────
+\title{When Does Better Volatility Measurement Improve Allocation? A Cross-Asset Complexity Ceiling}
+
+% NOTE: \author and \address intentionally omitted for double-anonymized
+% review. See title_page_v_ijf.tex for author/affiliation/corresponding/ORCID
+% and the "all errors are my own / replication package" acknowledgment.
 
 % ─── Abstract (standalone; 147 words; no refs/jargon/math) ───
 \begin{abstract}
@@ -72,15 +87,13 @@ economically interpretable but does not travel across asset classes. These
 results document a complexity ceiling: once the first-order volatility level
 is captured, added model sophistication rarely earns its keep, for
 researchers and practitioners alike.
-
-\medskip
-\noindent
-\textbf{Keywords:} volatility forecasting; out-of-sample evaluation; GARCH; asymmetric volatility; volatility targeting; complexity ceiling; cross-asset
-
-\medskip
-\noindent
-\textbf{JEL Classification:} C22, C53, G11, G17
 \end{abstract}
+
+\begin{keyword}
+GARCH models \sep forecast evaluation \sep out-of-sample testing \sep volatility targeting \sep leverage effect \sep portfolio risk management
+\end{keyword}
+
+\end{frontmatter}
 
 % ─── Body (prose + embedded figure) ──────────────────────────
 \input{body_v_ijf}
