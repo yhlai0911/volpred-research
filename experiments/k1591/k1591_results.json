@@ -1,0 +1,365 @@
+{
+  "experiment_id": "k1591",
+  "created_at_utc": "2026-07-01T03:34:02.094425+00:00",
+  "seed": 1591,
+  "purpose": "Stage 2 ex-ante gold regime design for leverage-direction manuscript",
+  "data": {
+    "paper_data": "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv",
+    "macro_source": "yfinance:DX-Y.NYB,^TNX,^IRX",
+    "sample_start": "2010-04-07",
+    "sample_end": "2026-06-26",
+    "n_obs": 4091,
+    "regime_rule": {
+      "vix_stress": "lagged VIX >= 20.0",
+      "dxy_trend": "lagged 63-trading-day log DXY return > 0",
+      "treasury_basis": "10Y minus 13-week yield, lagged 63-trading-day change > 0",
+      "safe_haven_stress": "VIX stress, DXY not up, Treasury basis not steepening",
+      "liquidation_stress": "VIX stress, DXY up, Treasury basis steepening",
+      "neutral": "all other days",
+      "lookahead_guard": "all regime variables are shifted by one trading day"
+    }
+  },
+  "parameters": {
+    "train_end": "2018-12-31",
+    "holdout_start": "2019-01-01",
+    "vix_stress_threshold": 20.0,
+    "dxy_trend_days": 63,
+    "treasury_basis_days": 63,
+    "bootstrap_reps": 1000,
+    "bootstrap_block_len": 10,
+    "rolling_gjr_window": 504,
+    "rolling_gjr_step": 63
+  },
+  "regime_counts": {
+    "holdout_2019_2026": {
+      "liquidation_stress": 239,
+      "neutral": 1486,
+      "safe_haven_stress": 166
+    },
+    "train_2010_2018": {
+      "liquidation_stress": 27,
+      "neutral": 2051,
+      "safe_haven_stress": 122
+    }
+  },
+  "primary_news_impact_regressions": {
+    "train_2010_2018": {
+      "safe_haven_stress": {
+        "n_obs": 122,
+        "n_pos": 81,
+        "n_neg": 41,
+        "beta_pos": -0.08697357543878174,
+        "beta_neg": 0.0032921180641069248,
+        "gamma_diff": 0.09026569350288867,
+        "gamma_diff_se": 0.1274392078200637,
+        "gamma_diff_t": 0.7083039438721108,
+        "gamma_diff_p": 0.4787565284859423,
+        "r2_adj": 0.11068953808585336,
+        "status": "ok"
+      },
+      "liquidation_stress": {
+        "n_obs": 27,
+        "n_pos": 19,
+        "n_neg": 8,
+        "beta_pos": null,
+        "beta_neg": null,
+        "gamma_diff": null,
+        "gamma_diff_se": null,
+        "gamma_diff_t": null,
+        "gamma_diff_p": null,
+        "r2_adj": null,
+        "status": "insufficient_observations"
+      },
+      "neutral": {
+        "n_obs": 2051,
+        "n_pos": 1043,
+        "n_neg": 1008,
+        "beta_pos": -0.08940633300892692,
+        "beta_neg": 0.15117503432239204,
+        "gamma_diff": 0.24058136733131896,
+        "gamma_diff_se": 0.0780560143498007,
+        "gamma_diff_t": 3.0821631021688627,
+        "gamma_diff_p": 0.002055022035981846,
+        "r2_adj": 0.04489411196812154,
+        "status": "ok"
+      },
+      "all": {
+        "n_obs": 2200,
+        "n_pos": 1143,
+        "n_neg": 1057,
+        "beta_pos": -0.059963991525607004,
+        "beta_neg": 0.14471682154046325,
+        "gamma_diff": 0.20468081306607025,
+        "gamma_diff_se": 0.07645513383805362,
+        "gamma_diff_t": 2.677136286225367,
+        "gamma_diff_p": 0.007425442403000693,
+        "r2_adj": 0.04687314981689894,
+        "status": "ok"
+      }
+    },
+    "holdout_2019_2026": {
+      "safe_haven_stress": {
+        "n_obs": 166,
+        "n_pos": 100,
+        "n_neg": 66,
+        "beta_pos": -0.2242001645845857,
+        "beta_neg": -0.31120095608956333,
+        "gamma_diff": -0.08700079150497764,
+        "gamma_diff_se": 0.131214898950289,
+        "gamma_diff_t": -0.6630404946464047,
+        "gamma_diff_p": 0.5073046194119695,
+        "r2_adj": 0.07231142046373829,
+        "status": "ok"
+      },
+      "liquidation_stress": {
+        "n_obs": 239,
+        "n_pos": 118,
+        "n_neg": 121,
+        "beta_pos": 0.25730815031909215,
+        "beta_neg": 0.3001201330167422,
+        "gamma_diff": 0.04281198269765002,
+        "gamma_diff_se": 0.16041997446923542,
+        "gamma_diff_t": 0.2668743891731531,
+        "gamma_diff_p": 0.7895658761731137,
+        "r2_adj": 0.2179904670206173,
+        "status": "ok"
+      },
+      "neutral": {
+        "n_obs": 1486,
+        "n_pos": 819,
+        "n_neg": 667,
+        "beta_pos": -0.13195676021268632,
+        "beta_neg": -0.0024547512766278506,
+        "gamma_diff": 0.12950200893605845,
+        "gamma_diff_se": 0.2563991572634655,
+        "gamma_diff_t": 0.5050796980700969,
+        "gamma_diff_p": 0.6135028600691761,
+        "r2_adj": 0.06928439147364629,
+        "status": "ok"
+      },
+      "all": {
+        "n_obs": 1891,
+        "n_pos": 1037,
+        "n_neg": 854,
+        "beta_pos": -0.03176965918580337,
+        "beta_neg": 0.019147057268507402,
+        "gamma_diff": 0.05091671645431077,
+        "gamma_diff_se": 0.1777755908052316,
+        "gamma_diff_t": 0.28641005339194403,
+        "gamma_diff_p": 0.7745640755901235,
+        "r2_adj": 0.07872528493143038,
+        "status": "ok"
+      }
+    },
+    "full_2010_2026": {
+      "safe_haven_stress": {
+        "n_obs": 288,
+        "n_pos": 181,
+        "n_neg": 107,
+        "beta_pos": -0.14739801184478094,
+        "beta_neg": -0.13981404757592247,
+        "gamma_diff": 0.007583964268858462,
+        "gamma_diff_se": 0.10093326605392915,
+        "gamma_diff_t": 0.07513840149397635,
+        "gamma_diff_p": 0.9401045941944182,
+        "r2_adj": 0.09281278297551676,
+        "status": "ok"
+      },
+      "liquidation_stress": {
+        "n_obs": 266,
+        "n_pos": 137,
+        "n_neg": 129,
+        "beta_pos": 0.23178296530532105,
+        "beta_neg": 0.29810881938174827,
+        "gamma_diff": 0.06632585407642722,
+        "gamma_diff_se": 0.15683670709567646,
+        "gamma_diff_t": 0.42289751745403503,
+        "gamma_diff_p": 0.672370034167705,
+        "r2_adj": 0.20315017525459467,
+        "status": "ok"
+      },
+      "neutral": {
+        "n_obs": 3537,
+        "n_pos": 1862,
+        "n_neg": 1675,
+        "beta_pos": -0.0976149091742686,
+        "beta_neg": 0.05967849542261971,
+        "gamma_diff": 0.15729340459688831,
+        "gamma_diff_se": 0.12243843995539339,
+        "gamma_diff_t": 1.2846733807960413,
+        "gamma_diff_p": 0.19890644402964264,
+        "r2_adj": 0.05421179332972026,
+        "status": "ok"
+      },
+      "all": {
+        "n_obs": 4091,
+        "n_pos": 2180,
+        "n_neg": 1911,
+        "beta_pos": -0.03604685711284154,
+        "beta_neg": 0.06647405593762502,
+        "gamma_diff": 0.10252091305046657,
+        "gamma_diff_se": 0.09594312669406933,
+        "gamma_diff_t": 1.0685592244389908,
+        "gamma_diff_p": 0.2852683303434844,
+        "r2_adj": 0.06300526297701226,
+        "status": "ok"
+      }
+    }
+  },
+  "bootstrap_holdout_difference": {
+    "status": "ok",
+    "valid_draws": 1000,
+    "requested_draws": 1000,
+    "safe_haven_gamma_diff": {
+      "mean": -0.10073916070049546,
+      "median": -0.07653784746723272,
+      "ci_2p5": -0.5431422494089396,
+      "ci_97p5": 0.2033023668087777,
+      "pct_negative": 69.89999999999999,
+      "pct_positive": 30.099999999999998
+    },
+    "liquidation_gamma_diff": {
+      "mean": 0.04965934550065556,
+      "median": 0.04131255183316715,
+      "ci_2p5": -0.35987870076846484,
+      "ci_97p5": 0.43844327685691015,
+      "pct_negative": 41.0,
+      "pct_positive": 59.0
+    },
+    "safe_minus_liquidation": {
+      "mean": -0.150398506201151,
+      "median": -0.13848525906588455,
+      "ci_2p5": -0.7104741449142848,
+      "ci_97p5": 0.3940270739628145,
+      "pct_negative": 69.8,
+      "pct_positive": 30.2
+    }
+  },
+  "rolling_gjr_gamma_diagnostic": {
+    "train_2010_2018": {
+      "safe_haven_stress": {
+        "n_windows": 0,
+        "mean_gamma": null,
+        "median_gamma": null,
+        "pct_negative": null,
+        "hac_t_mean_zero": null,
+        "hac_p_mean_zero": null
+      },
+      "liquidation_stress": {
+        "n_windows": 0,
+        "mean_gamma": null,
+        "median_gamma": null,
+        "pct_negative": null,
+        "hac_t_mean_zero": null,
+        "hac_p_mean_zero": null
+      },
+      "neutral": {
+        "n_windows": 27,
+        "mean_gamma": -0.013119676133190232,
+        "median_gamma": -0.0026878141958889255,
+        "pct_negative": 55.55555555555556,
+        "hac_t_mean_zero": -1.088687255364198,
+        "hac_p_mean_zero": 0.2762918238382075
+      },
+      "all": {
+        "n_windows": 27,
+        "mean_gamma": -0.013119676133190232,
+        "median_gamma": -0.0026878141958889255,
+        "pct_negative": 55.55555555555556,
+        "hac_t_mean_zero": -1.088687255364198,
+        "hac_p_mean_zero": 0.2762918238382075
+      }
+    },
+    "holdout_2019_2026": {
+      "safe_haven_stress": {
+        "n_windows": 4,
+        "mean_gamma": -0.014614928398547531,
+        "median_gamma": -0.012633157219180931,
+        "pct_negative": 75.0,
+        "hac_t_mean_zero": null,
+        "hac_p_mean_zero": null
+      },
+      "liquidation_stress": {
+        "n_windows": 3,
+        "mean_gamma": -0.046915295287704696,
+        "median_gamma": -0.04598595060167023,
+        "pct_negative": 100.0,
+        "hac_t_mean_zero": null,
+        "hac_p_mean_zero": null
+      },
+      "neutral": {
+        "n_windows": 23,
+        "mean_gamma": -0.062449774334447594,
+        "median_gamma": -0.05329325877936076,
+        "pct_negative": 95.65217391304348,
+        "hac_t_mean_zero": -7.793616170237588,
+        "hac_p_mean_zero": 6.439293542825908e-15
+      },
+      "all": {
+        "n_windows": 30,
+        "mean_gamma": -0.054518346971653295,
+        "median_gamma": -0.04738231301266342,
+        "pct_negative": 93.33333333333333,
+        "hac_t_mean_zero": -6.836331899868099,
+        "hac_p_mean_zero": 8.124612094206896e-12
+      }
+    },
+    "full_2010_2026": {
+      "safe_haven_stress": {
+        "n_windows": 4,
+        "mean_gamma": -0.014614928398547531,
+        "median_gamma": -0.012633157219180931,
+        "pct_negative": 75.0,
+        "hac_t_mean_zero": null,
+        "hac_p_mean_zero": null
+      },
+      "liquidation_stress": {
+        "n_windows": 3,
+        "mean_gamma": -0.046915295287704696,
+        "median_gamma": -0.04598595060167023,
+        "pct_negative": 100.0,
+        "hac_t_mean_zero": null,
+        "hac_p_mean_zero": null
+      },
+      "neutral": {
+        "n_windows": 50,
+        "mean_gamma": -0.03581152130576862,
+        "median_gamma": -0.041092770919733075,
+        "pct_negative": 74.0,
+        "hac_t_mean_zero": -3.262837691670175,
+        "hac_p_mean_zero": 0.0011030267265412785
+      },
+      "all": {
+        "n_windows": 57,
+        "mean_gamma": -0.03490845025869711,
+        "median_gamma": -0.04017970541505611,
+        "pct_negative": 75.43859649122807,
+        "hac_t_mean_zero": -3.649774990923882,
+        "hac_p_mean_zero": 0.00026247012170133033
+      }
+    }
+  },
+  "conclusion": {
+    "status": "directionally_supportive",
+    "paper_claim_allowed": "Only a regime-dependent, externally defined gold claim is allowed; do not restore an unconditional inverted-leverage claim from this experiment.",
+    "rationale": [
+      "Holdout safe-haven gamma_diff (negative minus positive) =-0.0870, HAC t=-0.66.",
+      "Holdout liquidation gamma_diff =0.0428, HAC t=0.27.",
+      "Bootstrap safe-minus-liquidation median =-0.1385, 95% CI [-0.7105, 0.3940].",
+      "The regime contrast is not cleanly separated at the 95% bootstrap interval."
+    ]
+  },
+  "outputs": {
+    "daily_panel": "experiments/k1591/tables/k1591_daily_panel.csv",
+    "summary_table": "experiments/k1591/tables/k1591_regime_summary.csv",
+    "rolling_gjr_table": "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv",
+    "figure": "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png",
+    "macro_cache": "experiments/k1591/data/external_macro_yfinance_2010_2026.csv"
+  },
+  "limitations": [
+    "GLD ETF is a proxy for spot/futures gold; Stage 2 contribution gate still asks for futures/institutional validation.",
+    "Treasury basis is proxied by 10Y minus 13-week yield; this is an external curve/basis proxy, not repo specialness.",
+    "The primary news-impact regression is reduced-form and should not be described as a full structural GJR likelihood estimate.",
+    "Regime labels are pre-specified and lagged, but their economic interpretation remains a hypothesis requiring robustness."
+  ]
+}
