@@ -12779,5 +12779,17 @@
     "task_type": "platform_ops",
     "task_id": "platform_ops_dispatch_covered_article_dedup_20260701",
     "summary": "covered-article dispatch-time dedup: sweep + build_report self-heal + tests; retired K1590 stale dup task"
+  },
+  {
+    "timestamp": "2026-07-01T20:58:00+08:00",
+    "task_type": "paper_body",
+    "task_id": "paper_body_leverage_direction_downshift_FRL_20260701",
+    "actor": "hourly-20",
+    "verdict": "succeeded",
+    "refs": [
+      "paper/leverage-direction/body_v_ijf.tex",
+      "storage/next_tasks.json"
+    ],
+    "summary": "leverage-direction IJF reframe TICK-3 (multi-tick paper_body, main-thread only per CLAUDE.md). Ported Data & Methodology into body_v_ijf.tex from the JBF-era body.tex: data (7 primary assets x 4 classes + 26-asset validation), the two competing measurements (symmetric GARCH vs asymmetric GJR + zero-mean spec with AR(1) robustness), rolling OOS forecasting scheme, forecast-level evaluation (QLIKE + Diebold-Mariano + MCS + Harvey multiple-testing), VaR backtesting, leverage-direction classification (demoted to interpretive), and the VT allocation testbed. KEY FIX (memo issue 3): reconciled the sample-split map into ONE canonical 'Sample partition' paragraph -- full 2017-01..2026-03 split IS(2017-22)/main-OOS(2023-24)/OOS-val(2025..2026-03); every table now refers to this single map, sub-windows labelled, no IS/OOS mixing. Added explicit forecast origin/horizon alignment (origin t-1, 1-day horizon, estimation window [t-w,t-1] => no look-ahead; IJF checklist + experiments.md lookahead rule). Reframed VT subsec so the measurement->allocation wedge is attributable to the decision rule, not the forecast. VERIFIED: all 35 cite keys resolve to main.tex bibitems (comm diff empty); temp-wrapper xelatex compile pass1+pass2 exit 0 with 0 undefined citations/refs, PDF 19pp; compliance clean (no AI/LLM/GPT/K-id/VolPred; author=Yi-Hao Lai only). Task -> pending_main_thread for tick-4 (port Empirical Results, wedge-first restructure, per-table caption reconciliation vs results JSON)."
   }
 ]

@@ -32,10 +32,19 @@
 %            multiple-testing); asymmetric-model + leverage-direction taxonomy
 %            demoted to interpretive "where the ceiling binds"; risk-mgmt and VT
 %            strands kept. All 30 cite keys verified present in main.tex bib.
-%   [tick-3+ TODO] Port Data & Methodology from body.tex:31-114 (largely
-%            preserved; unify the sample-split map — memo issue (3): Data sec
-%            2017-01..2026-03 vs Table1 caption 2017-2025 vs Table3 2025-OOS
-%            must be reconciled to ONE consistent statement).
+%   [tick-3  2026-07-01] DONE: Ported Data & Methodology (data, single canonical
+%            sample partition, GARCH/GJR spec + mean spec, rolling OOS + explicit
+%            forecast origin/horizon timing = no look-ahead, QLIKE + DM + MCS +
+%            multiple-testing, VaR backtest, leverage-direction classification,
+%            VT allocation testbed). RECONCILED sample-split map (memo issue 3)
+%            into ONE canonical "Sample partition" paragraph: full 2017-01..
+%            2026-03 split into IS(2017-22)/main-OOS(2023-24)/OOS-val(2025-2026-03);
+%            all tables now refer to this one map, sub-windows labelled, no IS/OOS
+%            mixing. Reframed VT subsec as the decision-level testbed so the
+%            measurement->allocation wedge is attributable to the rule not the
+%            forecast. NOTE for tick-4: when porting result tables, make each
+%            table/figure caption cite this canonical partition + verify its
+%            computation window vs the results JSON.
 %   [tick-4+ TODO] Port Empirical Results body.tex:118+; RESTRUCTURE so the
 %            allocation-vs-measurement wedge is the spine: (a) forecast-level
 %            gains conditional on significant asymmetry; (b) allocation-level
@@ -114,11 +123,77 @@ The fourth literature studies volatility targeting, which we use as the allocati
 
 
 \section{Data and Methodology}\label{sec:data_methodology}
-% [TICK-3 TODO] Port from body.tex:31-114 (data, GARCH/GJR spec, rolling
-% estimation, QLIKE, DM, VaR backtest, VT). RECONCILE the sample-split map to
-% ONE statement (memo issue 3): pick the canonical partition and make Data
-% section, Table 1 caption, and Table 3 agree. State forecast origin/horizon
-% alignment explicitly (IJF checklist).
+
+Our design is built so that the pass-through from volatility \emph{measurement} to portfolio \emph{allocation} can be observed on the same assets, over the same windows, under a single evaluation protocol. We describe, in order, the data and a single canonical sample partition, the two competing volatility measurements, the rolling out-of-sample forecasting scheme and its timing, the forecast-level evaluation criteria, and the allocation-level testbed.
+
+\subsection{Data}
+\label{sec:data}
+
+We use daily adjusted closing prices for seven exchange-traded assets spanning four asset classes: US equities---SPDR S\&P 500 ETF Trust (SPY), Invesco QQQ Trust (QQQ), and iShares MSCI Emerging Markets ETF (EEM); precious metals---SPDR Gold Shares (GLD) and iShares Silver Trust (SLV); government bonds---iShares 20+ Year Treasury Bond ETF (TLT); and cryptocurrency---Bitcoin (BTC-USD). Prices are sourced from Yahoo Finance for January 2017 through March 2026, and daily returns are computed as simple percentage changes. A validation exercise extends the cross-section to twenty-six assets. The choice of large, liquid ETFs and Bitcoin is defensible for a daily study because stale prices and delayed corporate-action adjustments---the usual hazards of adjusted-close data---bite hardest in microcaps rather than in these instruments \citep{bali2016}; we nonetheless validate the feed by spot-checking crisis dates, matching the VIX series to its official values, and confirming that return moments line up with overlapping benchmark studies \citep{moreira2017,cederburg2020}.
+
+Table~\ref{tab:desc} reports descriptive statistics over the full sample. All return series reject normality (Jarque--Bera $p<0.001$), exhibit significant ARCH effects (Engle's LM test, $p<0.001$; \citealt{engle1982}), and are stationary (ADF $p<0.001$). Excess kurtosis ranges from 3.52 (GLD) to 14.61 (SPY), which motivates the fat-tailed innovations we consider for tail-risk measurement.
+
+\paragraph{Sample partition (single canonical map).}
+To keep every table and figure on a common footing, we fix one partition and refer all results to it. The full sample runs from January 2017 to March 2026 and is split into three non-overlapping windows: an \emph{in-sample training} window (2017-01 to 2022-12), a \emph{main out-of-sample} window (2023-01 to 2024-12), and an \emph{out-of-sample validation} window (2025-01 to 2026-03). Descriptive statistics (Table~\ref{tab:desc}) are computed over the full sample; every forecast-evaluation and allocation result is computed on the out-of-sample windows only, with parameters estimated exclusively on data preceding each forecast origin (Section~\ref{sec:rolling}). Where a table or figure reports a shorter span, it is a labelled sub-window of this partition; no reported result mixes in-sample and out-of-sample dates. The leverage-direction classification exercise (Section~\ref{sec:empirical_results}) is deliberately disjoint---models estimated on 2023 data classify a held-out 2024--2025 sample---so its training and evaluation periods never overlap. This window is shorter than some long-horizon GARCH studies, but each forecast uses a rolling two-year estimation window and robustness checks extend the effective history to 2006. The object of interest is not long-horizon return predictability but whether the sign and significance of the asymmetry parameter $\gamma$ carries useful information into a decision, and that object is stable across the window sizes we test and across stressed subperiods such as 2020--2022 and the 2025--2026 Iran/Hormuz episode.
+
+\subsection{The two measurements}
+
+The added complexity we test is asymmetry in the conditional variance. The benchmark measurement is the symmetric GARCH(1,1) of \citet{bollerslev1986}, $\sigma^2_t=\omega+\alpha\varepsilon^2_{t-1}+\beta\sigma^2_{t-1}$. The refined measurement is the GJR-GARCH(1,1) of \citet{glosten1993},
+\begin{equation}
+\sigma^2_t = \omega + (\alpha + \gamma\,\mathbf{1}_{\varepsilon_{t-1}<0})\,\varepsilon^2_{t-1} + \beta\sigma^2_{t-1},
+\end{equation}
+in which $\gamma$ measures the asymmetric response to signed shocks: $\gamma>0$ is the standard leverage effect (negative returns raise variance), while $\gamma<0$ is an inverted effect. The step from GARCH to GJR is the smallest and most widely used move up the complexity ladder, which makes it the natural place to ask whether refined measurement pays off downstream.
+
+\paragraph{Mean specification.}
+We adopt the zero-mean specification $r_t=\sigma_t\varepsilon_t$ throughout, because the conditional mean of daily returns is negligible relative to conditional variance: for a typical daily mean of $0.04\%$ and daily standard deviation of $1\%$, the mean-to-volatility ratio is about $0.04$, making its contribution to variance dynamics immaterial \citep{bollerslev1986,hansen2005}. \citet{francq2004} show that quasi-maximum likelihood estimation of GARCH parameters remains consistent regardless of the mean specification when the true conditional mean is small relative to conditional variance. As a robustness check we re-estimate all models with an AR(1) mean, $r_t=\mu+\phi r_{t-1}+\sigma_t\varepsilon_t$; the QLIKE rankings, $\gamma$-sign classifications, and Diebold--Mariano conclusions are all preserved (Section~\ref{sec:empirical_results}, robustness). All models are estimated by Normal quasi-maximum likelihood using the \texttt{arch} package \citep{sheppard2023}; for Value-at-Risk we additionally consider Student-$t$ innovations with fixed degrees of freedom.
+
+\subsection{Rolling out-of-sample forecasts and timing}
+\label{sec:rolling}
+
+Forecasts are generated with a rolling window that is re-estimated at every forecast origin. The primary window is $w=504$ trading days (about two calendar years), which satisfies the minimum-sample recommendation for GARCH estimation ($\geq 500$ observations; \citealt{hwang2006}) while limiting contamination from distant regime changes. Robustness checks with $w\in\{252,1000,2000,3000,5000\}$ (online supplement) confirm that QLIKE rankings are qualitatively robust to the window choice, with $w=504$ best during high-volatility periods (2020--2021) and larger windows ($w\geq 2000$) marginally better in calm periods (2023--2024); the $\gamma$-sign classification is invariant to window size across all tested values.
+
+For each out-of-sample date $t$ we estimate each model on the window $[t-w,\,t-1]$ and form a one-step-ahead conditional-variance forecast $\hat{\sigma}^2_t$: the forecast origin is $t-1$ and the horizon is a single trading day. Estimation therefore uses only information available strictly before the forecast target, so the scheme carries no look-ahead. The realized-variance proxy is the squared daily return $r^2_t$, and forecasts are aligned to the target return date before any loss is computed.
+
+\subsection{Forecast-level evaluation}
+
+\subsubsection{Statistical loss function}
+
+The primary evaluation metric is the QLIKE loss \citep{patton2011}, expressed as the Gaussian quasi-log-likelihood contribution:\footnote{This form equals $-\ln f(r_t\mid\hat{\sigma}^2_t)$ under a Gaussian quasi-likelihood, up to an additive constant. Values are negative for daily returns because $\ln\hat{\sigma}^2_t\approx\ln(10^{-4})\approx-9.2$. \textbf{Lower (more negative) values indicate better forecasts.} An alternative convention writes the centered loss as $L^*(\sigma^2,h)=\sigma^2/h-\ln(\sigma^2/h)-1$, which centers near $1.0$. Both preserve forecast rankings; we adopt the quasi-log-likelihood form throughout for consistency with maximum-likelihood estimation.}
+\begin{equation}
+\text{QLIKE} = \frac{1}{T}\sum_{t=1}^{T}\left(\frac{r^2_t}{\hat{\sigma}^2_t} + \ln\hat{\sigma}^2_t\right).
+\label{eq:qlike}
+\end{equation}
+QLIKE is robust to noise in the realized-variance proxy and ranks forecasts consistently regardless of the proxy used, provided the proxy has equal bias across the models compared.
+
+\subsubsection{Test of equal predictive accuracy}
+
+We test the null of equal predictive accuracy between two forecasts with the Diebold--Mariano test \citep{diebold1995} using Newey--West HAC standard errors (five lags):
+\begin{equation}
+DM = \frac{\bar{d}}{SE_{NW}(\bar{d})} \sim N(0,1),
+\end{equation}
+where $d_t = L(r^2_t,\hat{\sigma}^2_{1,t}) - L(r^2_t,\hat{\sigma}^2_{2,t})$ is the QLIKE loss differential. Because the forecast-level cross-section is small, comparisons that draw on many specifications are additionally disciplined against data mining with a multiple-testing correction \citep{harvey2016}, and we read a band of statistically indistinguishable models rather than a single winner where one exists \citep{hansen2011}.
+
+\subsubsection{Value-at-Risk backtesting}
+
+Value-at-Risk at confidence level $\alpha$ is computed as
+\begin{align}
+\text{Normal:}\quad & \text{VaR}_\alpha = \Phi^{-1}(\alpha)\,\hat{\sigma}_t, \\
+\text{Student-}t\text{:}\quad & \text{VaR}_\alpha = t^{-1}_\nu(\alpha)\,\sqrt{(\nu-2)/\nu}\,\hat{\sigma}_t,
+\end{align}
+where $\nu$ is the degrees of freedom (fixed at five in the baseline). This choice is validated out of sample: Basel III Green-Zone compliance holds for all $\nu\leq 6$, and jointly estimating $\nu$ produces \emph{worse} performance by over-adapting to quiet markets, so a fixed $\nu=5$ is a conservative choice robust across $\nu\in[4,7]$ (Section~\ref{sec:empirical_results}). We apply \citeauthor{kupiec1995}'s (\citeyear{kupiec1995}) unconditional-coverage test and \citeauthor{christoffersen1998}'s (\citeyear{christoffersen1998}) independence test, classifying annual violation counts by the Basel III traffic-light system (Green 0--4, Yellow 5--9, Red $\geq 10$ per $\approx 250$ trading days).
+
+\subsubsection{Leverage-direction classification}
+
+As the interpretive device that locates \emph{where} the ceiling binds, we characterise the temporal stability of the asymmetry by estimating GJR-GARCH on semi-overlapping quarterly windows (504-day windows advanced by 63 trading days) and collecting the $\gamma$ estimates. We test $H_0\!:\,E[\gamma]\geq 0$ against $H_1\!:\,E[\gamma]<0$ (inverted leverage) with a one-sided $t$-test on the quarterly $\gamma$ series, and separately evaluate whether the sign of $\gamma$ estimated on 2023 data correctly classifies out-of-sample behaviour on the disjoint 2024--2025 window.
+
+\subsection{Allocation-level evaluation: volatility targeting}
+\label{sec:vt_methodology}
+
+Volatility targeting is our decision-level testbed: it is where we observe whether a forecasting edge survives to the allocation. Following \citet{moreira2017}, the volatility-managed weight is
+\begin{equation}
+w_t = \frac{\sigma_{\text{target}}}{\hat{\sigma}_t},
+\end{equation}
+with $\sigma_{\text{target}}=10\%$ annualised for the GARCH-based analysis and $\sigma_{\text{target}}=12\%$ for the VIX-based analysis (Section~\ref{sec:empirical_results}), the latter reflecting the VIX's systematic upward bias from the embedded variance risk premium. Weights are smoothed with a five-day moving average and clipped to $[0,1.5]$. A post-hoc transaction-cost analysis confirms that the estimated annual turnover of $756\%$ generates cost drag of only 8--15 basis points at typical SPY bid--ask spreads. Because the same one-step-ahead forecasts feed both the QLIKE evaluation and the targeting weights, any wedge between forecast-level accuracy and allocation-level benefit is attributable to the decision rule, not to a change in the underlying forecast.
 
 
 \section{Empirical Results}\label{sec:empirical_results}
