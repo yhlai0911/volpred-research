@@ -100,6 +100,20 @@ PERSISTENT_ALERT_MIN_FIRE_COUNT = 3
 PERSISTENT_ALERT_MIN_SPAN_DAYS = 3
 PERSISTENT_ALERT_RECOVERED_HOURS = 48
 
+# 2026-07-01 fix (boss email-12419: CRITICAL email for something already fixed):
+# memory_skill_gap / memory_hygiene are periodic-curation findings, not acute
+# bug recurrences — their trigger condition (some memory line uses a process
+# keyword without an exact skill-name substring match; feedback-memory count
+# >= 45) is structurally near-permanent given this project's memory system
+# naturally grows past these thresholds and stays there. Feeding them through
+# the SAME three-strike → critical escalation ladder as detect_repeated_tool_
+# failures/detect_persistent_alerts (designed for things that SHOULD reach
+# zero) guarantees a false "critical, unresolved" alarm every ~3 runs forever,
+# even right after a genuine review pass. Their remediation is an explicit
+# MONTHLY cadence (feedback_skill_autonomy memory), not "fix immediately" — so
+# they are exempted from ever escalating past their initial severity ("info").
+NEVER_CRITICAL_PATTERN_TYPES = frozenset({"memory_skill_gap", "memory_hygiene"})
+
 # Governance files dreaming may PROPOSE changes to but must NEVER write.
 GOVERNANCE_FILES = (
     "docs/error_log.md",
@@ -183,6 +197,21 @@ def detect_repeated_tool_failures(
         if last_seen is not None and last_seen < cutoff_recovered:
             continue  # recovered past incident — not an active failure
         span = entry.get("span_days") or 0
+        # 2026-07-01: surface recency explicitly so a reader (or the boss) can
+        # tell "still actively failing" from "root-caused, cooling down toward
+        # the 48h auto-clear" without having to grep logs — this ambiguity is
+        # exactly what caused a false-alarm CRITICAL escalation (boss email-12419)
+        # for an issue already fixed hours earlier.
+        hours_since_last = (
+            (now.astimezone(timezone.utc) - last_seen).total_seconds() / 3600.0
+            if last_seen is not None else None
+        )
+        recency_note = (
+            f" — clean for {hours_since_last:.1f}h since last occurrence "
+            f"(auto-clears at {RECOVERED_THRESHOLD_HOURS}h if it stays clean)"
+            if hours_since_last is not None and hours_since_last >= 1.0
+            else ""
+        )
         # Severity is "warn" on sight; critical is EARNED by persistence
         # (three-strike across dreaming runs in reconcile), not by a single
         # in-window spike — a job that already recovered shouldn't cry critical.
@@ -194,6 +223,7 @@ def detect_repeated_tool_failures(
                 evidence=[
                     f"{sig} ×{count} over {span}d "
                     f"(first {entry.get('first_seen')} → last {entry.get('last_seen')})"
+                    f"{recency_note}"
                 ],
                 remediation="propose_only",
                 proposal=(
@@ -557,6 +587,16 @@ def detect_persistent_alerts(
             continue  # short burst (e.g. 5 fires in one hour) — not multi-day persistence
         title = str(entry.get("title") or "")[:80] or key[:16]
         span_days = (last - first).total_seconds() / 86400
+        # 2026-07-01: same recency annotation as detect_repeated_tool_failures —
+        # "send_count=N over M days" alone reads as "still broken" even when the
+        # last actual send was hours ago and root-caused; make cooldown explicit.
+        hours_since_last = (now.astimezone(timezone.utc) - last).total_seconds() / 3600.0
+        recency_note = (
+            f" — no fire in {hours_since_last:.1f}h "
+            f"(auto-clears at {PERSISTENT_ALERT_RECOVERED_HOURS}h if it stays clean)"
+            if hours_since_last >= 1.0
+            else ""
+        )
         out.append(
             DreamFinding(
                 pattern_type="persistent_alert",
@@ -568,6 +608,7 @@ def detect_persistent_alerts(
                     f"alert_key={key[:16]} title={title!r} "
                     f"send_count={send_count} span={span_days:.1f}d "
                     f"(first {entry.get('first_sent_at')} → last {entry.get('last_sent_at')})"
+                    f"{recency_note}"
                 ],
                 remediation="propose_only",
                 proposal=(
@@ -660,7 +701,7 @@ def reconcile(
             f.occurrences = prev["strike_count"]
             f.first_seen = prev.get("first_seen")
             f.last_seen = iso
-            if prev["strike_count"] >= THREE_STRIKE:
+            if prev["strike_count"] >= THREE_STRIKE and f.pattern_type not in NEVER_CRITICAL_PATTERN_TYPES:
                 f.severity = "critical"
                 escalations.append(f)
 

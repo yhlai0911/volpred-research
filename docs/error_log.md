@@ -2,6 +2,25 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-01 dreaming-run 誤發 CRITICAL email — 8 findings 全「已修好」但仍逐 escalate — **FIXED**
+
+**觸發**：老闆對兩封 alert email 回信「立刻解決底層邏輯與架構問題」「立刻徹底解決Critical的問題」——分別對應 `git-push-backup: push held` WARN（20:00）與 `Dreaming review — 0 new / 8 escalations` CRITICAL（19:19）。
+
+**驗證結果（逐項核對，非僅信任先前 subagent 說法）**：全部 8 個 finding 的**底層根因當時都已修復**，且用 `check_alerts.log` 直接證據確認 0 復發：
+- `git_push_backup.log:exit1`：根因（macOS Keychain 在無登入 session 的 cron 環境讀不到）已於 commit `12d0f2f23` 修復；最後一次失敗 2026-07-01T12:00:22 UTC，之後連續多次 hourly fire 皆 exit=0（含手動觸發驗證一次）。
+- `Host cron failure detected` / `Draft pool below threshold` / `gmail-poll 停擺` / `發文脫班`：`check_alerts.log` 顯示自各自修復時點起，後續評估全部 `[ok]`，0 復發。
+
+**為什麼還顯示 CRITICAL escalations=8（真正的結構性根因）**：
+1. `detect_repeated_tool_failures` / `detect_persistent_alerts` 用 48 小時 `RECOVERED_THRESHOLD_HOURS` 冷卻期才判定「已恢復」——這本身是合理防 flapping 設計，但 evidence 文字只印「送出次數 + 時間跨度」，**沒有標示「距上次真正發生已過多久」**，導致「已修好、正在冷卻」和「還在持續發生」在信件上完全無法區分，這正是老闆誤判為「還沒解決」的直接原因。
+2. `memory_skill_gap` / `memory_hygiene` 兩個 pattern type 是**結構性不會消失**的 finding——前者只要 MEMORY.md 有任何一行含「流程/排程/每日/cadence/workflow/auto」等泛用關鍵字且沒有精確對應的 skill 資料夾名稱字串就會命中（幾乎必中，因為關鍵字表過寬）；後者只要 feedback 記憶數 ≥45 就會命中（此專案自然增長早已超過且會持續超過）。這兩者的補救方式（`.claude/skills/platform-ops-manager` 月度 skill 審查、月度 memory 整併）**本質是月度例行工作，不是「等你去修的 bug」**，套用跟「該歸零的 cron 失敗」同一套 three-strike → critical escalation ladder，保證每 3 次 dreaming run 就會假警報一次 critical，即使剛做完審查也一樣。
+
+**修復**（`scripts/dreaming_review.py`）：
+1. 新增 `NEVER_CRITICAL_PATTERN_TYPES = {"memory_skill_gap", "memory_hygiene"}`，`reconcile()` 對這兩類 pattern type 永不升級到 critical（維持 info，仍會出現在報告但不再誤發 CRITICAL 信）。
+2. `detect_repeated_tool_failures` / `detect_persistent_alerts` 的 evidence 文字加上「clean for Xh / no fire in Xh（auto-clears at 48h if it stays clean）」明確標示冷卻進度，之後任何人（含老闆）看信就能立刻分辨「已修好在冷卻」vs「還在發生」。
+3. `uv run pytest tests/test_dreaming_review.py tests/test_loop_health.py` 37/37 綠；`dreaming-run --dry-run` 驗證 escalations 從 8 降到 6（排除 memory_* 兩項），且剩下 6 項 evidence 皆正確顯示冷卻時數。
+
+**教訓**：Critical escalation ladder 只適合「應該歸零的急性復發」；對「本質上永遠有一些待辦的例行治理」類 finding 套同一套會結構性保證定期假警報。設計新偵測器時要先問：這個 finding 的「解決」狀態是「可以真的變成 0」還是「例行工作，永遠有一些」？後者不該進 critical escalation ladder。
+
 ## 2026-07-01 covered-article dispatch race：已被 feed 覆蓋的 `*_article_<aud>` task 仍被 dispatcher 派出 → 重複文章風險 — **FIXED**
 
 **問題**：`K1590_article_general` (auto_discovered daily_article) 於 hourly-20 fire 仍列為 agentable candidate，但 K1590 的 general 文章 `mile_4518e9d8`（audience=general, refs=['K1590'], draft）**早已存在**。派工 = 寫重複文章（arc-dedup 該擋的 recurring class，同 K1449/K1091）。
