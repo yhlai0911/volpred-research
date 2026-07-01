@@ -90,6 +90,21 @@ else
   echo "[auth] no token file at $OAUTH_TOKEN_FILE — falling back to keychain (run 'claude setup-token' for permanent fix)"
 fi
 
+# ── Pre-gate (2026-07-01): skip the ~95K claude -p cold-load on pure-stub fires ──
+# Cheap pure-Python check (no LLM, 0 token): email backlog / dashboard critical /
+# P1-P2 agentable pending / backlog cadence (N h). Fail-open (any error -> PROCEED).
+# SHADOW default (PREGATE_SHADOW=1): logs the would-be decision to
+# storage/logs/hourly_pregate.jsonl, NEVER skips — validating for ~1 week.
+# Flip PREGATE_SHADOW=0 (LaunchAgent env or here) to enable real skipping.
+PREGATE_ARGS="--window-hours ${PREGATE_WINDOW_HOURS:-3}"
+[ "${PREGATE_SHADOW:-1}" = "1" ] && PREGATE_ARGS="$PREGATE_ARGS --shadow"
+if "$UV_BIN" run python "$REPO_ROOT/scripts/hourly_dispatch_pregate.py" $PREGATE_ARGS 2>&1; then
+  echo "[pre-gate] SKIP — no email/critical/high-prio work + backlog cadence not due ($(date '+%H:%M'))"
+  echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=0, pre-gate skip) ==="
+  exit 0
+fi
+echo "[pre-gate] PROCEED — real work or backlog cadence due"
+
 # Cleanup trap: if launchd / external kill / shell error terminates parent
 # mid-flight, ensure claude + watchdog don't orphan. Codex review 2026-05-14
 # CRITICAL #2.
