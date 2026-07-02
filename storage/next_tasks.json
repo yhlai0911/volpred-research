@@ -44525,7 +44525,7 @@
     "title": "研究 backlog fallback: Anti-stockholder identity /「不持股」情緒作 retail-risk-off volatility proxy",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Anti-stockholder identity /「不持股」情緒作 retail-risk-off volatility proxy — 用 Google Trends（stock market gambling / stocks are rigged / do not own stocks 類詞）、Gallup/Fed SCF stock-ownership low-frequency anchor、AAII sentiment、FINRA margin/retail proxy（若可得）建 anti-stock identity index，檢定其是否領先 meme/retail-he | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44534,7 +44534,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T07:08:36+00:00"
+    "created_at": "2026-07-02T07:08:36+00:00",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-02T12:40:01.060367+00:00",
+    "claim_session_id": "5f6e67151591",
+    "status_history": [
+      {
+        "ts": "2026-07-02T12:40:01.060614+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T12:40:05.434162+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T12:56:09.528102+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-02T12:40:05.433876+00:00",
+    "completed_at": "2026-07-02T12:56:09.527809+00:00",
+    "result": "Completed public-data fallback experiment in experiments/research_anti_stockholder_identity_retail_risk_off_volati. Verdict WEAK_RAW_ONLY_NO_ROBUST_OOS_PASS: retail/meme 22d RV raw HAC t=2.85 but Holm p=0.106 and OOS MSE worsens -4.22%. Canonical knowledge write deferred to Claude/K1259 gate; knowledge_candidate.json included."
   },
   {
     "id": "research_mortgage_rate_lock_in_housing_turnover_freeze_ho",
