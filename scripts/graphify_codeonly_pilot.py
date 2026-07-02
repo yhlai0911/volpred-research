@@ -14,6 +14,7 @@ import json
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import urllib.request
 from datetime import datetime, timezone
@@ -82,7 +83,8 @@ def _verify_graphify_source(timeout: int = 20) -> dict[str, Any]:
 def _load_json(path: Path) -> dict[str, Any] | None:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"[graphify-pilot] load_json failed: {path}: {e}", file=sys.stderr)
         return None
 
 

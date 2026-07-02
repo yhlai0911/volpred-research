@@ -48,7 +48,7 @@ def _last_assistant_block(transcript_path: str):
         try:
             rec = json.loads(raw)
         except (ValueError, UnicodeDecodeError):
-            continue
+            continue  # silent-ok: tail read may split a record mid-line
         if rec.get("type") != "assistant" or rec.get("isSidechain"):
             continue
         content = (rec.get("message") or {}).get("content")
