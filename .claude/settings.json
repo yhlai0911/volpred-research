@@ -46,6 +46,11 @@
             "type": "command",
             "command": "cd /Users/yhlai0911/volpred-research && bash scripts/save_session_state.sh 2>/dev/null || true",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "python3 /Users/yhlai0911/volpred-research/scripts/hooks/enforce_final_text.py",
+            "timeout": 10
           }
         ]
       }

@@ -2,6 +2,19 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 14:25 **3-STRIKE TRIGGER**：「turn 結尾無文字回報」同日第三波（symlink 移除後又無回報）— **Stop hook 硬性攔截落地**
+
+**三次 incident**：(1) 2026-06 首次糾正 → memory `feedback_final_text_after_schedulewakeup`；(2) 2026-07-02 上午連續 6 次質問 + 13:15 再犯 → CLAUDE.md 最高指引固化（13:23 entry）；(3) 2026-07-02 14:16 symlink 移除做完、驗證完，turn 又以 ScheduleWakeup 收尾無最終文字 → 老闆 14:19 質問「所以移除了？為什麼都不回報？」。
+
+**三層診斷**：
+- **底層邏輯**：把「回報」當成行為習慣去記憶（memory/CLAUDE.md 提醒）— 但 turn 收尾是機械性動作，提醒層在長 turn 末端 attention 稀釋時必然漏。正確 domain model：這是**輸出格式 invariant**，該由 harness 機械 enforce，不該靠模型自律。
+- **流程**：缺 enforcement 層 — 規則寫了兩層（memory + CLAUDE.md）都是「讀了才有效」的軟約束，無任何硬 gate 在 stop 時檢查。
+- **架構**：Claude Code 有 Stop hook 機制可 block stop 並注入指令 — 正是為此類 invariant 設計，此前未用。
+
+**解決方法**：`scripts/hooks/enforce_final_text.py`（Stop hook）— 讀 transcript 尾端 512KB，最後一條 main-chain assistant 輸出不是非空 text block 就 block stop 並要求補文字回報；`stop_hook_active` 放行防迴圈；解析失敗一律 fail-open + stderr trace（no-silent-fallback）。已註冊 `.claude/settings.json` hooks.Stop。Regression：`scripts/tests/test_enforce_final_text.sh` 5/5 PASS（含 incident 重現 case：tool_use 收尾必 block）。
+
+**廢棄面**：無並行舊 path 需清（memory 與 CLAUDE.md 條款保留 — 它們仍是「為什麼」的文檔層，hook 是 enforcement 層，兩者不重複）。
+
 ## 2026-07-02 14:15 搬家後遺症全面巡檢（13 agents / 6 維度 + 驗證 + 完整性批判）— 13:25「全數清零」聲稱之外還有 5 層活殘留 — **全數修復 + 全系統驗證清零**
 
 **現象**：老闆指示徹底巡檢搬家後遺症。Workflow 巡檢（36+6 findings）證實 13:25 commit 0f5366ea8 的清零只覆蓋 4 個 surface（crontab/LaunchAgents/shim/scripts），以下 5 層在聲稱範圍外且全是 CONFIRMED_LIVE：
