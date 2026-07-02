@@ -18,6 +18,10 @@
 
 **目前狀態**：**未自行執行重開機**——這是會中斷使用者當下所有工作階段、任何未存檔工作、以及這個互動 session 本身的高影響操作，屬於「明確需要用戶個人判斷」的情境，已透過 email + PushNotification 回報使用者，建議使用者評估是否方便重開機或至少手動 `launchctl kickstart` 相關 daemon 來驗證這個假說。在使用者回應前，逾時保護已經是目前能做到的最大止血；若使用者授權，下一步可嘗試 `sudo launchctl bootout`/`bootstrap` 重載受影響的 LaunchAgent 或用 `caffeinate`/`pmset` 調整電源設定作為侵入性較低的替代方案先試。
 
+**追加（09:21 巡檢：已嘗試低風險 `launchctl kickstart`，結果為陰性，強化「需要 reboot」的判斷）**：`launchctl kickstart -k gui/501/com.volpred.gmail-poll` 是重啟單一使用者 LaunchAgent、不影響其他任何行程/session 的低風險操作（不是系統設定變更），已自主嘗試——kickstart 後立刻觸發的那次執行（09:22:33 起）**仍然在 180 秒 ceiling 逾時**，代表問題**不是**單一 job 的 launchd 註冊過期/損壞這麼簡單，重載單一 job 沒用，暗示根因在更底層（launchd daemon 本身、或整個機器的核心資源狀態），跟原本懷疑的「需要整機 reboot 才能驗證」一致。
+
+**順帶發現（次要，非本次主因，但值得記一筆長期衛生問題）**：`ps` 掃到 5 個 `SkyComputerUseClient`（Codex computer-use 功能的 turn-ended 事件行程）從 **2026-06-18** 就一直存在、跑了 12-14 天沒被回收——雖然每個只佔 ~11MB RSS（5 個共 ~55MB，量體太小不足以單獨解釋本次大規模 syscall 卡頓），但這是一個明確的「事件處理完成後沒有正常退出」的 orphan process 洩漏模式，值得未來找時間清理／修正 Codex computer-use 的行程生命週期管理（不屬於本次事故的緊急處理範圍，僅記錄供之後 PDCA 用）。
+
 ## 2026-07-02 05:07/06:07/07:07 連續 3 班 auth-preflight 全 3 次 attempt 皆逾時——已達字面 three-strike 門檻，根因尚未確認（**逾時保護已生效，未再無限期卡住；但底層卡頓本身尚待根治**）
 
 **現象**：05:07、06:07、07:07 三個連續整點 fire，`[AUTH-PREFLIGHT]` 3 次 attempt **全部** exit=142（SIGALRM），無一次在 attempt 1/2 就恢復——這跟 00:07-04:07 五個連續 fire 全部 `[AUTH-PREFLIGHT] ok`（首次即通過）形成強烈對比，確認問題集中在 05:00 之後這個時段，不是全夜性、持續性故障。已用上面「05:07 事故」與「06:07 上線驗證」兩則記錄修好的逾時保護（`run_send_alert` / zshrc-source / `git_conflict_guard.py` / `hourly_dispatch_pregate.py` / codex preflight 誤診）在 07:07 這班全部正確生效——三個逾時點都在各自 ceiling（20s/30s/30s/45s）正確跳過，整班 07:07:35 開始、07:16:46 結束，約 9 分鐘（仍比修復前 32 分鐘短很多），沒有再無限期卡死。
