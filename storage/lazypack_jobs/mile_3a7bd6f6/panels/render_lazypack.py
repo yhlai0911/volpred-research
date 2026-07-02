@@ -26,7 +26,8 @@ HEIGHT = 1000
 DPI = 150
 FONT_SCALE = 0.62
 
-os.environ.setdefault("MPLCONFIGDIR", str(OUT_DIR / ".mplconfig"))
+TMP_ROOT = Path(os.environ.get("TMPDIR", "/tmp"))
+os.environ.setdefault("MPLCONFIGDIR", str(TMP_ROOT / "volpred_lazypack_mplconfig"))
 
 import matplotlib  # noqa: E402
 
