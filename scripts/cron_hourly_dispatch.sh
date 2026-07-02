@@ -477,12 +477,20 @@ run_codex_failover() {
   return "$CODEX_FAILOVER_RC"
 }
 
+# 2026-07-02: Claude Max rolling 5h session-limit ("You've hit your session
+# limit · resets HH:MMpm") returns exit=1 from the preflight probe but is NOT an
+# auth break — it self-resets on schedule and Codex failover covers the gap. Track
+# it so the failover reason + wrapper exit code (75 EX_TEMPFAIL, not 1) mark it a
+# self-recovering quota window rather than a CRITICAL host_cron_fail false-alarm.
+QUOTA_HIT=0
+_note_quota() { case "$1" in *"session limit"*|*"usage limit"*) QUOTA_HIT=1 ;; esac; }
 echo "=== auth-preflight $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 AUTH_PREFLIGHT_OUTPUT=$(run_auth_preflight)
 AUTH_PREFLIGHT_CODE=$?
 if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
   echo "[AUTH-PREFLIGHT] launchd env failed exit=$AUTH_PREFLIGHT_CODE"
   echo "$AUTH_PREFLIGHT_OUTPUT"
+  _note_quota "$AUTH_PREFLIGHT_OUTPUT"
   if [ -f "$ZSHRC_PATH" ]; then
     echo "[AUTH-PREFLIGHT] sourcing $ZSHRC_PATH then retry (${ZSHRC_SOURCE_TIMEOUT_SEC}s ceiling)"
     # See ZSHRC_SOURCE_TIMEOUT_SEC comment above (2026-07-02 fix). `source` is
@@ -510,6 +518,7 @@ if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
   if [ $AUTH_PREFLIGHT_RETRY_CODE -ne 0 ]; then
     echo "[AUTH-PREFLIGHT] retry failed exit=$AUTH_PREFLIGHT_RETRY_CODE"
     echo "$AUTH_PREFLIGHT_RETRY_OUTPUT"
+    _note_quota "$AUTH_PREFLIGHT_RETRY_OUTPUT"
     # 3rd attempt with backoff — env-source can't fix a transient API blip
     # because attempts 1-2 fire within seconds. Let the blip clear, then retry.
     echo "[AUTH-PREFLIGHT] backoff ${AUTH_PREFLIGHT_BACKOFF_SEC}s then 3rd attempt"
@@ -519,11 +528,18 @@ if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
     if [ $AUTH_PREFLIGHT_RETRY3_CODE -ne 0 ]; then
       echo "[AUTH-PREFLIGHT] 3rd attempt failed exit=$AUTH_PREFLIGHT_RETRY3_CODE"
       echo "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
+      _note_quota "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
+      if [ "$QUOTA_HIT" -eq 1 ]; then
+        PREFLIGHT_REASON="claude-quota-exhausted"
+        echo "[AUTH-PREFLIGHT] classified as Claude Max quota window (self-recovering); Codex failover covers this slot"
+      else
+        PREFLIGHT_REASON="auth-preflight-dead"
+      fi
       send_auth_preflight_alert "$AUTH_PREFLIGHT_OUTPUT" "$AUTH_PREFLIGHT_RETRY_OUTPUT" "$AUTH_PREFLIGHT_RETRY3_OUTPUT"
       # Claude auth/quota dead → Codex failover (ChatGPT auth is independent).
       # Retrying claude -p in the 3-attempt main flow would be futile, so we
       # hand the slot to Codex here and exit without touching the Claude path.
-      run_codex_failover "auth-preflight-dead"
+      run_codex_failover "$PREFLIGHT_REASON"
       if [ "$CODEX_FAILOVER_RC" -eq 0 ]; then
         # 2026-07-02: same perl-alarm ceiling already used in the PHASE-Z
         # block below — these git calls were the one spot that had been
@@ -537,6 +553,15 @@ if [ $AUTH_PREFLIGHT_CODE -ne 0 ]; then
         echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=0 codex-failover-recovered) ==="
         echo "=== [hourly_dispatch] exit 0 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
         exit 0
+      fi
+      # Codex failover also failed. Distinguish a self-recovering Claude Max quota
+      # window (exit=75 EX_TEMPFAIL → host_cron_fail treats it like a 142 hang,
+      # never CRITICAL, no consecutive escalation — Claude returns at session reset)
+      # from a genuine preflight-auth death (exit=1 → CRITICAL host_cron_fail).
+      if [ "$QUOTA_HIT" -eq 1 ]; then
+        echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=75 claude-quota-exhausted + codex-failover-failed; claude self-recovers at session reset) ==="
+        echo "=== [hourly_dispatch] exit 75 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
+        exit 75
       fi
       echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=1 preflight-auth + codex-failover-failed) ==="
       echo "=== [hourly_dispatch] exit 1 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="

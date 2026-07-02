@@ -13378,5 +13378,13 @@
     "owner": "codex",
     "backfilled_at": "2026-07-02T12:57:14.930323+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-02T21:19:29+08:00",
+    "task_type": "platform_ops",
+    "task_id": "platform_ops_host_cron_fail_quota_false_critical_20260702",
+    "outcome": "succeeded",
+    "summary": "host_cron_fail 誤報修正：Claude Max session 額度窗口(session limit)分類為自我恢復 exit=75，不再誤升 critical；wrapper+alerts.py+6案回歸測試",
+    "owner": "hourly-21"
   }
 ]

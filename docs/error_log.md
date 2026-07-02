@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 21:07 `host_cron_fail` CRITICAL 誤報 = Claude Max session 額度窗口被當成 auth 死亡 — **FIXED（quota → exit=75 自我恢復分類）**
+
+**現象**：21:07 hourly fire 巡檢時 dashboard `host_cron_fail` = **CRITICAL**（`storage/logs/cron/hourly_dispatch.log exit=1`）。但 21:07 fire 本身 auth-preflight `ok`、正常以 claude-opus-4-8 運行 — auth 根本沒壞。
+
+**根因**：19:17 與 20:17 兩班 fire 的 auth-preflight probe 回 `You've hit your session limit · resets 8:20pm (Asia/Taipei)`（Claude Max 5h rolling session 額度耗盡），wrapper 把它當 `auth-preflight-dead` → 3 次重試（env-source / backoff 全對 quota 無效）→ codex failover（本輪也失敗）→ 收 `exit 1`。`alerts.py::_parse_host_cron_state` 對 exit=1 判 `any_non_hang_fail=True` + 2 連續失敗 → CRITICAL。**分類粒度太粗**：把「額度窗口（排程自我重置、Codex failover 覆蓋、Claude reset 時自癒）」與「auth 真死」壓進同一 exit=1 桶，兩者都升 critical。額度窗口本質可跨 ≥2 fire（Max 5h 週期），必觸 `max_consec_fail>=2` 假 critical。
+
+**解決（anti-stacking：擴充既有 142 特例分類器，不加新 watchdog）**：
+1. `scripts/cron_hourly_dispatch.sh`（+ 同步 `~/.volpred/bin/`）：偵測 preflight 輸出含 `session limit`/`usage limit` → `QUOTA_HIT=1`；failover reason 改 `claude-quota-exhausted`；codex failover 也失敗時收 **exit=75（EX_TEMPFAIL）** 而非 1，並寫明確 banner。
+2. `src/volpred/ops/alerts.py`：新增 `_SELF_RECOVERING_EXIT_CODES={142,75}`；exit=75 與 142 同視為自我恢復（不設 `any_non_hang_fail`）；`_trailing_consecutive_failures` 加 `ignore_codes=(75,)` — 額度窗口不累積連續 critical，但 **142 hang chain 仍照升 critical**（stuck≠gap）。body note 加 exit=75 說明。
+3. 回歸測試 `tests/test_alerts.py::test_host_cron_fail_quota_window_is_self_recovering`（6 案：lone 75→warn / 2×75→warn / 75→0 not breached / 75 後真錯→critical / 真錯後 75→warn / 2×142 仍 critical）。全綠。
+
+**教訓（PDCA）**：
+1. **健康檢查的失敗分類必須區分「自我恢復的排程狀態」與「真正的 infra 死亡」**。額度窗口有明確 reset 時間 = 可預期、有界、自癒 → 至多 warn，附 reset 語境，不 alarm 老闆。
+2. exit code 是分類語意載體：142=hang、75=quota、1=hard-fail — wrapper 收尾用不同 code 表達不同 self-recovery 語意，alert 端據此校準 severity。
+3. 這是 auth-preflight「分類過粗」root cause 的第二變體（第一變體：`claude -p "ping"` 觸發 ops-loop→142，已由 probe prompt 改 PONG-only 修）。本次順同一結構性方向修，不 patch。
+
 ## 2026-07-02 16:20 `git checkout <sha>` 驗證歷史 commit 留下 detached HEAD → 後續 commit 落在孤兒 HEAD、`git push origin main` 假報 up-to-date
 
 **現象**：hourly-16 salvage lazypack 時，為驗證「2 個 test red 是否 main pre-existing」跑了 `git checkout edc1c59df`（測）→ `git checkout b3e0e9fed`（用 **SHA** 回到 cherry-pick 點）。SHA checkout = **detached HEAD**，不是回到 branch `main`。之後我的 2 個 commit（test fix、PHASE Z）+ 一個並行 telegram-responder process 的 commit 全落在 detached HEAD，`refs/heads/main` 卡在 b3e0e9fed。`git push origin main` 推的是 branch `main`（b3e0e9fed，已在 remote）→ 假報 "Everything up-to-date"，而我真正的工作（HEAD b7c41adbe）**沒被 push**、只存在 local detached HEAD + reflog。

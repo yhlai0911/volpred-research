@@ -617,10 +617,20 @@ def _trailing_authoritative_exit_codes(log_path: Path, n: int = 6) -> list[int]:
     return codes[-n:]
 
 
-def _trailing_consecutive_failures(codes: list[int]) -> int:
+def _trailing_consecutive_failures(
+    codes: list[int], ignore_codes: tuple[int, ...] = ()
+) -> int:
+    """Count trailing consecutive non-zero exit codes (newest→oldest).
+
+    ``ignore_codes`` are treated as chain-breakers, exactly like a clean exit 0.
+    Used so an expected, scheduled self-recovering gap (e.g. exit=75 Claude Max
+    session-limit quota window) does NOT accumulate toward the ">=2 consecutive
+    = sustained outage" CRITICAL threshold, while genuine failures (incl. exit=142
+    SIGALRM hang) still do.
+    """
     consec = 0
     for c in reversed(codes):
-        if c != 0:
+        if c != 0 and c not in ignore_codes:
             consec += 1
         else:
             break
@@ -660,6 +670,21 @@ def _findings_exit_logs_from_schedule_config(config: dict[str, Any] | None = Non
             if isinstance(raw, str) and raw.strip():
                 logs.add(Path(raw).name)
     return logs
+
+
+# 2026-07-02 (host_cron_fail false-critical on Claude Max quota window):
+# The hourly-dispatch auth-preflight probe returns exit=1 when the Claude Max
+# subscription hits its rolling 5h session limit ("You've hit your session limit
+# · resets 8:20pm"). That is NOT an infra failure — it is an expected, scheduled,
+# self-resetting quota window (the wrapper hands the slot to Codex failover in the
+# meantime, and Claude auth comes back on its own at the reset). The wrapper now
+# emits a distinct exit=75 (EX_TEMPFAIL) for that path so it is classified like the
+# self-recovering SIGALRM hang (142) rather than a hard failure. Both are self-
+# recovering per-fire; additionally 75 is EXCLUDED from the consecutive-failure
+# escalation because a quota window legitimately spans >=2 fires, whereas a hang
+# spanning 2 fires does mean automation is stuck.
+_QUOTA_EXHAUSTED_EXIT_CODE = 75
+_SELF_RECOVERING_EXIT_CODES = frozenset({142, _QUOTA_EXHAUSTED_EXIT_CODE})
 
 
 def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
@@ -710,12 +735,19 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
             if latest and int(latest.get("exit_code", 0)) != 0:
                 failing_logs.append(latest)
                 codes = _trailing_authoritative_exit_codes(log_path)
-                consec = _trailing_consecutive_failures(codes)
+                # Quota-window fires (exit=75) break the consecutive-failure chain:
+                # a Claude Max session-limit gap spanning >=2 fires is expected, not
+                # a sustained outage. A 142 hang chain is still counted (stuck != gap).
+                consec = _trailing_consecutive_failures(
+                    codes, ignore_codes=(_QUOTA_EXHAUSTED_EXIT_CODE,)
+                )
                 max_consec_fail = max(max_consec_fail, consec)
                 latest_code = int(latest.get("exit_code", 0))
-                # exit=142 = SIGALRM hang-kill that self-recovers next hourly fire.
-                # A NON-142 failure (126 perm / 1 error / FDA) does not self-heal.
-                if latest_code != 142:
+                # Self-recovering codes: exit=142 = SIGALRM hang-kill (self-recovers
+                # next hourly fire); exit=75 = Claude Max quota window (self-resets on
+                # schedule, Codex covers the gap). A hard failure (126 perm / 1 error /
+                # FDA) does not self-heal.
+                if latest_code not in _SELF_RECOVERING_EXIT_CODES:
                     any_non_hang_fail = True
                 latest["trailing_exit_codes"] = codes
                 latest["consecutive_failures"] = consec
@@ -741,7 +773,9 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         f"偵測到 host cron 失敗（最新 exit code != 0）。severity={host_cron_level}"
         f"（max_consecutive_failures={max_consec_fail}；non_hang_failure={any_non_hang_fail}）。",
         "註：exit=142 = SIGALRM hang-kill，單次會由下一輪 hourly fire 自我恢復（→warn）；"
-        "≥2 連續失敗或非-142 失敗才升 critical。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。",
+        "exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手，"
+        "永遠 warn 且不累積連續 critical）；≥2 連續失敗或非-{142,75} 失敗才升 critical。"
+        "反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。",
         f"- scheduler_last_tick_at: {scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else 'missing'}（僅供參考，v12 後不作為 breach 判準）",
         f"- scheduler_last_status: {scheduler_last_status}",
         f"- scheduler_age_minutes: {scheduler_age_minutes if scheduler_age_minutes is not None else 'missing'}",

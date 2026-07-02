@@ -408,6 +408,67 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
     assert r["breached"] is False
 
 
+def test_host_cron_fail_quota_window_is_self_recovering(tmp_path: Path):
+    """2026-07-02: Claude Max rolling-5h session-limit exhaustion (wrapper exit=75)
+    is an expected, scheduled, self-resetting quota window — Codex failover covers
+    the slot and Claude auth returns on its own at reset. It must never fire a
+    CRITICAL host_cron_fail, even across >=2 consecutive fires (a quota window
+    legitimately spans multiple fires), while a 142 hang chain still escalates."""
+    from datetime import datetime, timezone
+
+    from volpred.ops.alerts import _parse_host_cron_state
+
+    storage = tmp_path / "storage"
+    _write_json(
+        storage / "ops" / "scheduler_state.json",
+        {"last_tick_at": "2026-07-02T00:00:00+00:00", "last_status": "ok"},
+    )
+    now = datetime.now(timezone.utc)
+
+    def write_exits(codes):
+        lines = []
+        for i, c in enumerate(codes):
+            lines.append(f"=== [hourly_dispatch] fire run {i} ===")
+            lines.append(
+                f"=== [hourly_dispatch] exit {c} at Thu Jul 2 1{i}:00:00 CST 2026 ==="
+            )
+        _write_text(storage / "logs" / "cron" / "hourly_dispatch.log", "\n".join(lines))
+
+    # 1) lone quota window (latest=75) → breached WARN, not critical
+    write_exits([0, 0, 0, 75])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "warn"
+
+    # 2) sustained quota window (2 consecutive 75) → still WARN (expected gap,
+    #    NOT a sustained-outage critical like 2x 142 would be)
+    write_exits([0, 75, 75])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "warn"
+
+    # 3) quota then recovered (75 then 0) → not breached
+    write_exits([0, 75, 0])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is False
+
+    # 4) a real error AFTER a quota window (latest=1) → CRITICAL (quota does not
+    #    mask a genuine current failure)
+    write_exits([0, 75, 1])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "critical"
+
+    # 5) quota AFTER a real error (latest=75) → WARN (the old error is history;
+    #    if it were ongoing this fire would also be a hard fail, not quota)
+    write_exits([0, 1, 75])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "warn"
+
+    # 6) 142 hang chain still escalates (regression guard: excluding 75 from the
+    #    consecutive count must not weaken the 2x-142 → critical rule)
+    write_exits([0, 142, 142])
+    r = _parse_host_cron_state(str(storage), now)
+    assert r["breached"] is True and r["level"] == "critical"
+
+
 def test_findings_exit_logs_from_schedule_config():
     from volpred.ops.alerts import _findings_exit_logs_from_schedule_config
 
