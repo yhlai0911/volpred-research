@@ -2,6 +2,23 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 11:20 **徹底解決落地：repo 遷出 ~/Desktop（→ ~/volpred-research），TCC 從排程等式中永久移除** — **DONE + VERIFIED**
+
+老闆對 TCC 根因報告的裁示是「我要徹底解決」→ 執行選項 (a) 完整遷移。
+
+**為什麼這是徹底解決**：macOS TCC 只保護 Desktop/Documents/Downloads。repo 在 `~/Desktop` 下時，任何 launchd 排程行程觸碰 repo 都要過 TCC，而 TCC 授權綁 binary 路徑+雜湊 → claude CLI 每 1-2 天自動更新就會重演「新版本無授權 → 排程全滅數小時」。搬到 `~/volpred-research`（非保護區）後，**任何 binary 都不需要任何授權**——用完全無授權的 `/bin/sh` + `/bin/ls` 經 launchd 在新路徑執行：瞬間成功（對照 25 分鐘前同樣 binary 在舊路徑 `Operation not permitted`）。claude/uv/git 未來怎麼更新都不再影響排程。
+
+**遷移範圍**（全部完成並驗證，commit a27164840）：
+- `mv` repo + `volpred-refactor` worktree 到 home；舊 Desktop 路徑留 symlink 安全網（歷史 results JSON / log 內路徑仍可解析；但 launchd context 走 symlink 會重新過 TCC，殘留引用一律改新路徑）
+- 外部：42 個 `~/.volpred/bin/*.sh`、6 個 LaunchAgent plist（5 個已 bootout+bootstrap 重載；hourly-dispatch 因 11:07 班仍在跑 deferred 到跑完，其 script 內部已 cd 新路徑所以下一班行為已正確）、15 條 host crontab、`~/.codex/config.toml`
+- repo 內：321 個功能性檔案（scripts/config/.claude/src/docs/tests/experiments .py）。**刻意不改**：experiments `*_results.json`、`.log`、`docs/archived/`、`docs/handoffs/`（歷史紀錄，研究誠實）
+- `git worktree repair`；uv venv 驗證正常；Claude 專案記憶複製到新 slug（`-Users-yhlai0911-volpred-research`）+ 遷移記憶寫入兩個 slug
+- `control-plane.md` TCC 規則補現況註記（wrapper 留 `~/.volpred/bin` 從「TCC 必要」變「慣例」）
+
+**驗證清單**：無授權平台 binary launchd 執行 OK；gmail-poll kickstart 9 秒 exit=0；`HOURLY_PREFLIGHT_ONLY=1` wrapper 手動跑 `[AUTH-PREFLIGHT] ok` + exit 0；work-dashboard 重載後 HTTP 200；`git worktree list` 兩條都正常。
+
+**殘留待辦**（下一 tick 收）：hourly-dispatch plist 的 bootout+bootstrap（等 11:07 班結束）；觀察 12:07 自然班全程正常；`~/.claude.json` 新路徑 trust（老闆下次開新 session 時確認一次即可）。
+
 ## 2026-07-02 10:55 **結案：今晚 05:00 起全部 launchd 排程停擺的根因 = claude CLI 自動更新 rotate 版本 → 新 binary 無 Desktop TCC 授權 → launchd context 全滅；10:48 新版本重新取得授權後系統自癒** — **ROOT CAUSE CONFIRMED + RECOVERED**
 
 **老闆指示「立刻徹底盤查」（email-12482 + 互動指示）後的決定性調查結果。**
