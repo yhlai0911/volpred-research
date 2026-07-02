@@ -37223,5 +37223,27 @@
     ],
     "confidence": 0.45,
     "created_at": "2026-07-03T00:20:03.908126"
+  },
+  {
+    "item_id": "e2c022ad",
+    "category": "cross_sectional_prediction",
+    "content": "K1605 Phase-2 FORMAL (compute-queue k1605_formal.py, seed 20260702) — formal follow-up to the Phase-1 screen (knowledge item b2a6c74c). Completes the deferred DM/Harvey OOS test, block-bootstrap CIs, and 45/60/90d filing-lag robustness for the bank market-to-book (M/B) -> regional-bank RV hypothesis. Sample: 27 survivor US regional banks + KRE/KBE, yfinance free data, coverage-gated ~2023-03..2026 (CMA/SNV dropped, short n=0).\n\nFORMAL RESULTS:\n(A) Fama-MacBeth cross-sectional slope, circular block bootstrap (2000 reps, block=22): mean log(M/B) slope on forward RV NEGATIVE and CI95 EXCLUDES 0 at BOTH horizons across ALL 3 filing lags — q45_a75 h5 mean=-0.0168 CI[-0.0251,-0.0096] p~0.000, h22 mean=-0.0169 CI[-0.0250,-0.0082]; q60_a90 h5 -0.0149 p~0.000, h22 -0.0147 p=0.001; q90_a120 h5 -0.0113 p=0.007, h22 -0.0127 p=0.005. => the cross-sectional dispersion association (lower M/B -> higher subsequent RV, correct hypothesized sign) is ROBUST to bootstrap inference and to the filing-lag assumption.\n(B) OOS expanding-window DM test (M/B-augmented RV forecast vs RV-only HAR-lite baseline; target_end<forecast_origin guard verified via df.iloc[:i-h]): M/B does NOT improve OOS forecasts. EVERY rmse_improve_pct is NEGATIVE (M/B worsens the OOS forecast). Diebold-Mariano (Harvey small-sample) |t| NEVER exceeds 3; the only SIGNIFICANT effects are in the M/B-HURTS direction at short horizon h5 (q45 KRE t=-2.42 p=0.016, KBE t=-2.38 p=0.018; q60 KRE t=-2.08 p=0.038). h22 all NS.\n\nINTERPRETATION (honesty-bound; Codex-reviewed SOUND): the strong in-sample FM/HAC t-stats (Phase-1 t=-4) DO NOT translate into any out-of-sample forecasting/timing value — adding the cross-sectional-median M/B to a lagged-RV baseline is net harmful OOS. So K1605 is a *cross-sectional descriptive dispersion* relationship, NOT a *time-series forecasting/timing* signal.\n\nVERDICT: CONDITIONAL_PASS held tight (NOT upgraded to PASS). The pre-registered formal bar (DM |t|>3 AND price/value confound addressed) is NOT met: DM |t|<3, and the confound is UNRESOLVED — the FM regression controls trailing own-RV only, not past return / momentum / a pure value factor; M/B's numerator is price-driven, so the negative slope may repackage a low-price/leverage -> high-vol effect rather than isolated fundamental info. Combined with survivorship bias (SVB/SBNY/FRC excluded) and a single post-SVB regime (~3yr), this is NOT a publication-grade or tradeable signal. Timing/forecast claim = REFUTED out-of-sample; cross-sectional association = robust but confounded. To advance: add momentum/past-return + a pure value control and extend to a longer / multi-regime (or pre-2023) sample before making any fundamental-information claim.",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1605_formal",
+    "k_id": "K1605",
+    "experiment_path": "experiments/k1605/k1605_formal.py",
+    "supersedes": "b2a6c74c",
+    "reviewer": "Codex (codex exec, gpt-5.4 read-only)",
+    "reviewer_source": "codex_cli",
+    "codex_review": "VERDICT: CAVEAT - method sound; interpretation must stay limited. (1) SIGN CONVENTION YES: d=la-lb, negative dm_t => RV-only lower loss => M/B hurts. (2) LOOKAHEAD YES: df.iloc[:i-h] excludes row i-h; last training label ends i-1, no off-by-one leak. (3) FM-vs-OOS SPLIT YES coherent (not a bug): cross-sectional negative slope can coexist with zero OOS aggregate-median timing value. (4) CONFOUND YES: FM controls lagRV only; price/momentum/value/leverage channels unresolved.",
+    "evidence": [
+      "experiments/k1605/k1605_formal_results.json",
+      "experiments/k1605/k1605_formal.py",
+      "FM bootstrap slope CI95 excludes 0 all 3 filing-lags x 2 horizons (mean -0.011..-0.017)",
+      "OOS DM: all rmse_improve_pct<0; |t|<3; sig only in M/B-hurts direction at h5",
+      "compute_queue: compute-k1605-phase-2-formal-... exit_code=0 2026-07-02T16:30:35Z"
+    ],
+    "confidence": 0.4,
+    "created_at": "2026-07-03T01:15:29.809145"
   }
 ]

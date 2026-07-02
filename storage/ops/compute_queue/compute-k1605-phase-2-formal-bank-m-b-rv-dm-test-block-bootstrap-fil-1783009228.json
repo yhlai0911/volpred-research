@@ -5,11 +5,11 @@
   "interpreter": "uv run python",
   "args": [],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queued_at": "2026-07-02T16:20:28Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-02T16:30:00Z",
+  "completed_at": "2026-07-02T16:30:35Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1605-phase-2-formal-bank-m-b-rv-dm-test-block-bootstrap-fil-1783009228.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1605-phase-2-formal-bank-m-b-rv-dm-test-block-bootstrap-fil-1783009228.stderr",
   "result_artifact": "experiments/k1605/k1605_formal_results.json",
@@ -18,6 +18,8 @@
     "task_type": "paper_review",
     "priority": 3
   },
-  "followup_dispatched": false,
-  "timeout_seconds": 3600
+  "followup_dispatched": true,
+  "timeout_seconds": 3600,
+  "followup_dispatched_at": "2026-07-02T17:15:58Z",
+  "followup_next_task_id": "k1605_formal_interpreted_inline_kb_e2c022ad"
 }

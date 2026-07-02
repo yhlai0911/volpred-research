@@ -130,6 +130,42 @@ Phase-1 "signal/weak" is only a *screen*, never a publication claim.
   `target_end < forecast_origin` guard; (d) downside-semivol targets;
   (e) robustness to filing-lag assumption (45/60/90d).
 
+## 6b. Phase-2 formal results (2026-07-02, compute queue, Codex-reviewed SOUND)
+
+`k1605_formal.py` ran on the async compute worker (exit 0). Knowledge item
+`e2c022ad` (supersedes Phase-1 `b2a6c74c`); verdict **CONDITIONAL_PASS held tight
+— NOT upgraded to PASS**.
+
+- **(A) Fama-MacBeth cross-sectional slope, circular block bootstrap** (2000 reps,
+  block=22): mean `log(M/B)` slope on forward RV is **negative and CI95 excludes 0
+  at both horizons across all three filing lags** — e.g. `q45_a75` h5
+  mean=−0.0168 CI[−0.0251,−0.0096] p≈0.000, h22 mean=−0.0169 CI[−0.0250,−0.0082];
+  `q90_a120` h5 −0.0113 p=0.007. → the **cross-sectional dispersion association**
+  (lower M/B → higher subsequent RV, correct hypothesized sign) is **robust** to
+  bootstrap inference and to the filing-lag assumption.
+- **(B) OOS expanding-window DM test** (M/B-augmented forecast vs RV-only HAR-lite;
+  `target_end < forecast_origin` enforced by `df.iloc[: i - h]`): M/B does **NOT**
+  improve OOS forecasts. **Every** `rmse_improve_pct` is negative; Diebold–Mariano
+  (Harvey) **|t| never exceeds 3**, and the only *significant* effects are in the
+  **M/B-hurts** direction at short horizon h5 (q45 KRE t=−2.42; KBE t=−2.38; q60
+  KRE t=−2.08). h22 all NS.
+
+**Interpretation (honesty-bound):** strong Phase-1 in-sample FM/HAC t-stats (t≈−4)
+do **not** translate into any out-of-sample forecasting/timing value — K1605 is a
+*cross-sectional descriptive dispersion* relationship, **not** a *time-series
+forecasting/timing* signal. The pre-registered formal bar (DM |t|>3 **and** the
+price/value confound addressed) is **not met**: |t|<3, and the confound is
+**unresolved** (FM controls trailing own-RV only, not past return / momentum / a
+pure value factor; M/B's numerator is price-driven). With survivorship bias and a
+single post-SVB regime, this is **not a publication-grade or tradeable signal**.
+To advance: add momentum/past-return + a pure value control and extend to a longer
+/ multi-regime (or pre-2023) sample.
+
+Codex review (`codex exec`, gpt-5.4 read-only): sign convention correct
+(`d=la−lb`, negative dm_t ⇒ M/B hurts), no OOS off-by-one leak, FM-vs-OOS split
+methodologically coherent (not a bug), confound unresolved. **VERDICT: CAVEAT —
+method sound; interpretation must stay limited.**
+
 ## 7. Reproduce
 
 ```bash
