@@ -26,7 +26,7 @@ np.random.seed(42)
 
 OUT_DIR = Path(__file__).resolve().parent
 RESULTS = OUT_DIR / "k1204_results.json"
-MAIN_REPO_EXP_DIR = Path("/Users/yhlai0911/volpred-research/experiments")
+MAIN_REPO_EXP_DIR = Path("/Users/yhlai0911/Desktop/volpred-research/experiments")
 
 # Publication-quality rc
 plt.rcParams.update({

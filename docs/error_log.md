@@ -2,36 +2,6 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
-## 2026-07-02 11:25 **流程教訓：24h-rule paper_review 必須餵「完整 experiment artifacts」而非 knowledge.json 摘要 — 否則 reviewer 因 ground-truth 不完整而 false FAIL** — **PROCESS FIX**
-
-**問題**：hourly-11 跑 `paper_review_mile_c8468b0d`（文章「你花錢升級了預測模型，對帳單卻更難看：準 vs 賺」）的 Codex 24h-rule review。我把 source ground-truth 從 `knowledge.json` 抽 K1074/K988 摘要餵給 Codex。Codex 回 **FAIL / CRITICAL**：「文章的 net Sharpe 0.861/0.843/0.821、turnover 9.7/16.27、p=0.64/0.37、3338 日 2013-2026 vol-targeting 回測，在 source K1074/K988 中不存在 → 核心主張缺實證 → 疑似從 K988 variance-swap Sharpe 外推」。
-
-**現象/根因**：Codex verdict 是 **false positive**。`knowledge.json` 的 K1074 entry 只摘要了該 experiment 的**一部分**（17-spec VIX 乘法模型 QLIKE/DM model-selection），**沒收錄** K1074 experiment README §7 的 **vol-targeting 策略回測**（12/VIX-VT vs A4f-VT vs GJR-VT，5bp cost，block bootstrap Sharpe-diff）。實際查 `experiments/k1074/k1074_results.json` → 文章**每一個數字精確吻合**（A_12VIX_net 0.8612、B_A4f_net 0.8434、C_GJR_net 0.8205、gross 0.913/0.912、turnover 9.702/16.270、bootstrap diff −0.0217 p=0.636、50/50 p=0.368、BH_5050 0.8727、n_oos=3338）。文章 grounded、accurate、honest → **正確 verdict = PASS**。
-
-**教訓（可推廣，同 K1259「audit full population 不 audit subset」精神）**：
-- 一個 experiment 常是多部分的（model-selection + strategy-backtest + VaR/ES...），但 `knowledge.json` 單一 entry 往往只摘要其中一個 milestone。拿摘要當 review ground-truth → reviewer 看到「數字不在 source」→ false FAIL。
-- **24h-rule paper_review / 任何 content-vs-source 稽核，ground-truth 必須來自實際 experiment artifacts**：`experiments/<kid>/README.md` + `<kid>_results.json`（+ 圖），而非 `knowledge.json` 摘要。摘要只能當「有哪些 experiment」的索引，不能當「該 experiment 產出哪些數字」的真值。
-- 對照檢查：若 reviewer 判「數字不在 source」，先 `ls experiments/<kid>/` + 讀 README/results.json 確認摘要是否只覆蓋部分 milestone，再下 verdict。不可只憑摘要就 FAIL 或下架文章。
-
-**動作**：文章 mile_c8468b0d 判 PASS 保留（無需 erratum/下架）。experiment_refs=['K1074','K988'] 正確。本 entry 為流程固化。
-
-## 2026-07-02 11:20 **徹底解決落地：repo 遷出 ~/Desktop（→ ~/volpred-research），TCC 從排程等式中永久移除** — **DONE + VERIFIED**
-
-老闆對 TCC 根因報告的裁示是「我要徹底解決」→ 執行選項 (a) 完整遷移。
-
-**為什麼這是徹底解決**：macOS TCC 只保護 Desktop/Documents/Downloads。repo 在 `~/Desktop` 下時，任何 launchd 排程行程觸碰 repo 都要過 TCC，而 TCC 授權綁 binary 路徑+雜湊 → claude CLI 每 1-2 天自動更新就會重演「新版本無授權 → 排程全滅數小時」。搬到 `~/volpred-research`（非保護區）後，**任何 binary 都不需要任何授權**——用完全無授權的 `/bin/sh` + `/bin/ls` 經 launchd 在新路徑執行：瞬間成功（對照 25 分鐘前同樣 binary 在舊路徑 `Operation not permitted`）。claude/uv/git 未來怎麼更新都不再影響排程。
-
-**遷移範圍**（全部完成並驗證，commit a27164840）：
-- `mv` repo + `volpred-refactor` worktree 到 home；舊 Desktop 路徑留 symlink 安全網（歷史 results JSON / log 內路徑仍可解析；但 launchd context 走 symlink 會重新過 TCC，殘留引用一律改新路徑）
-- 外部：42 個 `~/.volpred/bin/*.sh`、6 個 LaunchAgent plist（5 個已 bootout+bootstrap 重載；hourly-dispatch 因 11:07 班仍在跑 deferred 到跑完，其 script 內部已 cd 新路徑所以下一班行為已正確）、15 條 host crontab、`~/.codex/config.toml`
-- repo 內：321 個功能性檔案（scripts/config/.claude/src/docs/tests/experiments .py）。**刻意不改**：experiments `*_results.json`、`.log`、`docs/archived/`、`docs/handoffs/`（歷史紀錄，研究誠實）
-- `git worktree repair`；uv venv 驗證正常；Claude 專案記憶複製到新 slug（`-Users-yhlai0911-volpred-research`）+ 遷移記憶寫入兩個 slug
-- `control-plane.md` TCC 規則補現況註記（wrapper 留 `~/.volpred/bin` 從「TCC 必要」變「慣例」）
-
-**驗證清單**：無授權平台 binary launchd 執行 OK；gmail-poll kickstart 9 秒 exit=0；`HOURLY_PREFLIGHT_ONLY=1` wrapper 手動跑 `[AUTH-PREFLIGHT] ok` + exit 0；work-dashboard 重載後 HTTP 200；`git worktree list` 兩條都正常。
-
-**殘留待辦**（下一 tick 收）：hourly-dispatch plist 的 bootout+bootstrap（等 11:07 班結束）；觀察 12:07 自然班全程正常；`~/.claude.json` 新路徑 trust（老闆下次開新 session 時確認一次即可）。
-
 ## 2026-07-02 10:55 **結案：今晚 05:00 起全部 launchd 排程停擺的根因 = claude CLI 自動更新 rotate 版本 → 新 binary 無 Desktop TCC 授權 → launchd context 全滅；10:48 新版本重新取得授權後系統自癒** — **ROOT CAUSE CONFIRMED + RECOVERED**
 
 **老闆指示「立刻徹底盤查」（email-12482 + 互動指示）後的決定性調查結果。**

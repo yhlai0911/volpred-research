@@ -1,0 +1,23 @@
+{
+  "id": "compute_k1602",
+  "title": "K1602 tax-loss-harvesting crowding year-end RV reversal (yfinance ~86 stocks + year-bootstrap)",
+  "script_path": "experiments/k1602/k1602.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queued_at": "2026-07-02T05:16:45Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute_k1602.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute_k1602.stderr",
+  "result_artifact": "experiments/k1602/k1602_results.json",
+  "claude_followup": {
+    "brief": "K1602 interpretation + close. 資料已由 compute worker 跑完，讀 experiments/k1602/k1602_results.json。\n\n步驟：\n1. 讀 results.json：n_years, stats.jan_ret (primary H2 reversal), dec_ret (H1), dec_rv (H3), pre2015 vs post2015 (H4 crowding). 用 agent-result-verification skill 對照 print 輸出與 JSON 數字一致。\n2. Codex primary-path review k1602.py（lookahead 由時間窗分離保證：分類窗 <=Nov30、outcome 窗 >=Dec1；year-clustered inference 非 pooled stock-year iid；seed=42）。Codex 故障走 code-reviewer subagent fallback，註明 reviewer source。\n3. 誠實報告：本 codebase seasonality 強 NULL prior（K35/K215/K666/K736/N153）。verdict 依 results（PASS 需 jan_ret |t|>=3 且 CI 排除 0；否則 NULL/SUGGESTIVE）。differentiation from K676（K676=個人 TLH 稅後報酬無用；K1602=市場橫斷面異常，不同問題）。\n4. 只有 CONDITIONAL_PASS 以上且帶 provenance（experiment_id=K1602 + reviewer 欄位）才寫 knowledge.json；NULL 也寫 knowledge（如實記 null + 方法 + survivorship caveat）。\n5. 若結果 noteworthy 且可讀者化，排 daily_article draft（走 anti-ai-style + arc-dedup gate）；NULL 也可寫「tax-loss selling 在現代美股是否還在？year-clustered 檢定」教育向 draft。\n6. 完成標 task_pool_claim complete + work_log + commit。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "timeout_seconds": 1800
+}

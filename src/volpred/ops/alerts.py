@@ -516,15 +516,12 @@ def _parse_draft_pool_state(storage_dir: str) -> dict[str, Any]:
     draft_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "draft")
     scheduled_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "scheduled")
     eligible_count = draft_count + scheduled_count
-    # 2026-07-02 boss email-12493: pool 長期貼著舊門檻 4 打平（24h 生產 7 = 消耗 7、
-    # 零 buffer），任何一次事故/慢班就跌破紅線。門檻 4→6：讓補池提早觸發，
-    # 目標是「維持 buffer」而不是「貼著下限跑」。
-    breached = draft_count < 6
+    breached = draft_count < 4
     level = "critical" if draft_count == 0 else "warn"
     body = "\n".join(
         [
             "## 觸發條件",
-            "Draft 池已低於最小 buffer 門檻（<6 篇；2026-07-02 由 4 上調）。",
+            "Draft 池已低於最小門檻（<4 篇）。",
             f"- draft_count: {draft_count}",
             f"- scheduled_count: {scheduled_count}",
             f"- eligible_count: {eligible_count}",
@@ -551,7 +548,7 @@ def _parse_draft_pool_state(storage_dir: str) -> dict[str, Any]:
         "id": "draft_pool_low",
         "breached": breached,
         "level": level if breached else "info",
-        "title": "Draft pool below threshold (<6)",
+        "title": "Draft pool below threshold (<4)",
         "body": body if breached else "",
         "details": {
             "draft_count": draft_count,

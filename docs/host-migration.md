@@ -52,7 +52,7 @@ cd volpred-research
 ```
 
 **預期**：`ls` 看到 `src/ scripts/ config/ storage/ paper/ experiments/ docs/ .claude/ .env.example`。
-**⚠️ 路徑**：大量 wrapper / plist / config 硬編 `/Users/yhlai0911/volpred-research`。新機若放別處或別的 user 名 → 見 §9。
+**⚠️ 路徑**：大量 wrapper / plist / config 硬編 `/Users/yhlai0911/Desktop/volpred-research`。新機若放別處或別的 user 名 → 見 §9。
 
 ---
 

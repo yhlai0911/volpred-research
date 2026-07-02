@@ -3,9 +3,9 @@
 # 14:00 Asia/Taipei intraday refresh for daily_update.
 # Canonical source for the LaunchAgent wrapper.
 # Runtime copy lives at ~/.volpred/bin/cron_daily_update_intraday.sh.
-exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/daily_update_intraday.log 2>&1
+exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/daily_update_intraday.log 2>&1
 
-cd /Users/yhlai0911/volpred-research
+cd /Users/yhlai0911/Desktop/volpred-research
 
 # Share the same lock as the 08:03 daily_update job. If the morning run ever
 # stretches into the intraday slot, skip rather than double-writing feed/sync state.
