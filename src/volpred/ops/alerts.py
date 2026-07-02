@@ -304,7 +304,14 @@ def send_alert(
     telegram_result: dict[str, Any] | None = None
     try:
         from volpred.ops.telegram import send_telegram
-        tg_text = f"[{normalized_level.upper()}] {normalized_title}\n\n{body}"
+        # 2026-07-02 (boss): Telegram 訊息要用 emoji 區隔/加強重點 — mirror 路徑
+        # 之前只送純 `[LEVEL] title` 前綴，boss 抱怨沒 emoji。依 level 加 emoji 前綴。
+        _level_emoji = {
+            "critical": "🔴", "warn": "⚠️", "info": "ℹ️",
+            "pass": "✅", "fail": "❌",
+        }
+        _emoji = _level_emoji.get(normalized_level, "🔔")
+        tg_text = f"{_emoji} [{normalized_level.upper()}] {normalized_title}\n\n{body}"
         # info 級靜音送達（不響鈴），warn/critical 才推播出聲 — 防 routine tick 騷擾
         telegram_result = send_telegram(
             tg_text, storage_dir=storage_dir,
