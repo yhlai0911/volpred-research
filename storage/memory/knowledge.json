@@ -37202,5 +37202,26 @@
     ],
     "confidence": 0.82,
     "created_at": "2026-07-02T20:20:59.857746"
+  },
+  {
+    "item_id": "b2a6c74c",
+    "category": "cross_sectional_prediction",
+    "content": "K1605 — Bank market-to-book (M/B) / Tobin's-Q divergence as a delayed-loss prior for regional-bank realized volatility (RV). Phase-1 first-look (data diagnostic + descriptive + lead-lag screen; heavy formal DM/Harvey/bootstrap/OOS deferred to compute queue via k1605_formal.py). Sample: 27 surviving US regional banks + KRE/KBE ETFs, yfinance free data, M/B window 2022-01-03..2026-07-02, coverage-gated to panel_effective_start=2023-03-16 (before that <10 banks have lag-safe book equity). Lookahead protection: book equity stepped from quarter_end+45d / fye+75d filing lag; all signals shift(1); forward RV strictly over (t, t+H], H in {5,22}. Fama-MacBeth (K1355-compliant: per-date cross-sectional slope then Newey-West HAC lag>=H on the slope series, NOT stacked asset-days). RESULT (Phase-1 |t|>2 screen -> verdict 'signal', 5 incremental lagRV-controlled hits): cross-sectional FM slope of log(M/B) on forward RV negative and significant h5 t=-4.00, h22 t=-4.01 (spec_B controls trailing own-RV; spec_A raw t=-10.2/-7.9 collapses to -4.0 after lagRV control). ETF-level xs-median log(M/B) level beta on forward RV: KRE h5 t=-3.90, KRE h22 t=-2.50, KBE h5 t=-3.25 (n~799 post-gating). M/B *change* (diff) betas NS (|t|<1.5). Direction consistent with hypothesis (lower/falling M/B -> higher forward RV). HONESTY CAVEATS (bound the claim -- NOT a publication-grade result): (1) PRICE CONFOUND (Codex-flagged): daily M/B is dominated by price; lagRV controls volatility persistence but NOT the price-level / value / momentum / reversal channel, so the negative slope is NOT evidence of *isolated* fundamental information -- it may repackage a low-price/value -> high-vol effect. (2) SURVIVORSHIP: SVB/SBNY/FRC (2023 failures) excluded -> survivors-only sample biases toward NULL (true effect could be stronger but unobservable in survivors). (3) SINGLE REGIME: gated window is post-SVB ~2023-03..2026 (~3yr, one stress regime); no cross-regime validation. (4) Phase-1 threshold |t|>2; formal DM/Harvey |t|>3 + block-bootstrap CIs + MB-augmented-vs-RV-only DM forecast test + OOS expanding refit all DEFERRED to compute queue (k1605_formal.py). REPRODUCIBILITY NOTE: initial results.json was stale relative to k1605.py (agent added coverage-gating fields post-run without re-running; Codex flagged FAIL). Main-thread re-ran k1605.py (seed=20260702); regenerated artifact now consistent with reviewed code (gated fields present, stale median_MB_pre gone). Verdict shifted weak(2 hits)->signal(5 hits) purely from removing the sparse pre-2023-03 window where the cross-sectional M/B median was built from too few banks (attenuation). Differentiation: extends the fundamental-feature->RV NULL precedents (K1481 inventory-surprise->commodity RV NULL; K1162 EAV binary NS) to a market-priced valuation signal in banks; complements K1001 (VIX GARCH-X beats macro fundamental).",
+    "verdict": "CONDITIONAL_PASS",
+    "experiment_id": "k1605",
+    "k_id": "K1605",
+    "experiment_path": "experiments/k1605/",
+    "reviewer": "Codex (codex exec, gpt-5.4 read-only)",
+    "reviewer_source": "codex_cli",
+    "codex_review": "Code PASS: no lookahead (forward_rv maps t->t+1..t+H; logmb.shift(1); book equity stepped quarter_end+45d/fye+75d), Fama-MacBeth/HAC correct (per-date XS slope then NW HAC lag=h), seed fixed. Flagged FAIL only on stale result artifact (JSON older than code) -> RESOLVED by main-thread re-run. Codex caveat retained: lagRV control does not isolate fundamental info from price/value channel; 'signal' is a Phase-1 screen not isolated evidence.",
+    "evidence": [
+      "experiments/k1605/k1605_results.json",
+      "experiments/k1605/k1605.py",
+      "FM h5 spec_B slope t=-4.00; h22 t=-4.01 (lagRV-controlled, HAC lag=H)",
+      "ETF KRE h5 logMB level t=-3.90; KRE h22 t=-2.50; KBE h5 t=-3.25 (n~799)",
+      "coverage-gated panel_effective_start=2023-03-16; 27 survivor banks"
+    ],
+    "confidence": 0.45,
+    "created_at": "2026-07-03T00:20:03.908126"
   }
 ]
