@@ -45029,5 +45029,125 @@
       }
     ],
     "completed_at": "2026-07-02T12:25:10.328309+00:00"
+  },
+  {
+    "id": "paper_review_mile_cd5d5740",
+    "title": "Paper review (Codex 24h-rule): 波動率「測不準」能不能當減碼訊號？六檔 ETF、六十天的老實答案",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_cd5d5740 needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_cd5d5740",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-02T13:07:52+00:00",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-02T13:57:55.568474+00:00",
+    "claim_session_id": "fd6ec68050f1",
+    "status_history": [
+      {
+        "ts": "2026-07-02T13:57:55.568732+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T13:58:02.250776+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T14:00:52.110442+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-02T13:58:02.250532+00:00",
+    "completed_at": "2026-07-02T14:00:52.110110+00:00",
+    "result": "Completed Codex 24h review at experiments/k1560/reviews/paper_review_mile_cd5d5740_codex_20260702.md. Verdict PASS_WITH_LOW_METADATA_GAP: no lookahead, QLIKE-direction, multiple-testing, DM/Harvey, or article-number overclaim issue found. Low follow-up: report metadata has experiment_refs/k_ids null; fix through publisher path before promotion."
+  },
+  {
+    "id": "K1568_article_general",
+    "title": "K1568: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1568 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1568 — Federal Register rule-flow 作 regulatory-compliance burden proxy 對 mid-cap / small-bank / sector RV 預測。Sample: 2012-01-03 ~ 2026-06-26, 3,641 trading rows, 78,564 Federal Register documents. Targets: IJR/IWM/KRE/KBE/XLF/XLV/XLI/XRT (n=8) × horizons {1d, 5d} × outcomes {log",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1568",
+    "tags": [
+      "regulation",
+      "federal_register",
+      "compliance_burden",
+      "weak_signal",
+      "null_after_correction",
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-02T13:07:54+00:00"
+  },
+  {
+    "id": "K1582_article_research",
+    "title": "K1582: write research-audience article (auto-discovered uncovered K)",
+    "description": "K K1582 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'cross-market/universal']) but no research article in feed.json.  Verdict preview: HARQ/SHARK-like measurement-error-corrected HAR (Bollerslev-Patton-Quaedvlieg JoE 2016 RQ-interaction + Buccheri-Corsi JFEC 2021-style signed-jump/semivariance features) tested cross-market on TAIFEX TX active-contract day-session RV (n_oos=1697), SPY (n_oos=51), and 0050.TW (n_o",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1582",
+    "tags": [
+      "auto-discovered",
+      "audience-research"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-02T13:07:57+00:00"
+  },
+  {
+    "id": "research_firm_level_labor_shortage_exposure_wage_sensitiv",
+    "title": "研究 backlog fallback: Firm-level labor-shortage exposure 對 wage-sensitive idio RV 的截面預測力",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Firm-level labor-shortage exposure 對 wage-sensitive idio RV 的截面預測力 — 用 SEC 10-K / 10-Q labor-shortage mention、BLS JOLTS industry openings-quits、yfinance listed firms / sector ETF 建 firm-level shortage exposure proxy，檢定高曝險公司在 t+5/t+22 idio RV、downside semivariance、automation/AI-capex basket relative  | 來源 section: 期刊主題挖掘 batch 2026-07-02（journal_discovery_20260702_0；websearch rfs/restud/rof/jfec/cfa/fed 2025-26 趨勢層級；硬約束避開 off-exchange short-volume、graph/gnn、thematic etf coherence、cre/nbfi、stablecoin、ai concentration 等已覆蓋 cluster；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "firm_level_labor_shortage_exposure_wage_sensitiv",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T13:08:00+00:00"
+  },
+  {
+    "id": "research_bank_market_to_book_tobin_s_q_divergence_delayed",
+    "title": "研究 backlog fallback: Bank market-to-book / Tobin's Q divergence 作 delayed-loss regional-bank RV prior",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Bank market-to-book / Tobin's Q divergence 作 delayed-loss regional-bank RV prior — 用 KRE/KBE constituent bank market cap、SEC XBRL book equity / HTM-AFS unrealized-loss disclosure、Call Report release-lagged balance sheet，建 market-to-book gap 與 book-vs-market leverage divergence，檢定是否領先銀行個股與 KRE/KBE 的  | 來源 section: 期刊主題挖掘 batch 2026-07-02（journal_discovery_20260702_0；websearch rfs/restud/rof/jfec/cfa/fed 2025-26 趨勢層級；硬約束避開 off-exchange short-volume、graph/gnn、thematic etf coherence、cre/nbfi、stablecoin、ai concentration 等已覆蓋 cluster；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "bank_market_to_book_tobin_s_q_divergence_delayed",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T13:08:00+00:00"
+  },
+  {
+    "id": "telegram-41",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "pending",
+    "created_at": "2026-07-02T14:00:57.695588+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 41）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n為什麼這幾則訊息都沒有emoji?\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。"
   }
 ]
