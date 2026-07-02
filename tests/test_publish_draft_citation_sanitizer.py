@@ -286,7 +286,8 @@ def test_audit_still_blocks_bare_jargon():
 
     content = "通過 Harvey threshold 檢驗，DM test 顯示 t=4.38, p<0.05."
     issues = _audit_general_content("general", ["一般讀者"], content)
-    assert any("禁用統計術語" in i for i in issues)
+    # 2026-07-02: message is translation-oriented (白話包裝) but must still flag
+    assert any("裸統計術語" in i for i in issues)
 
 
 def test_audit_mixed_citation_and_jargon():
@@ -299,4 +300,4 @@ def test_audit_mixed_citation_and_jargon():
     )
     issues = _audit_general_content("general", ["一般讀者"], content)
     # Bare jargon still flagged even though citation is present
-    assert any("禁用統計術語" in i for i in issues)
+    assert any("裸統計術語" in i for i in issues)

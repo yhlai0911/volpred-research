@@ -14,6 +14,8 @@
 
 **已修（全落既有機制，per anti-stacking）**：feed-publisher SKILL.md 5 處字數對齊 publishing.md（800-1500→1500-3000）；anti-ai-style 主文補回 ≤500 字限定；publisher chokepoint 新增 `_audit_content_depth` 下限 gate（general ≥1500/research ≥2000+≥1 表，digest/event/member_qa 豁免，block 寫 dedup_decisions.jsonl audit trail，fail-open）— `tests/test_content_depth_gate.py` 7 tests + draft 池 dry-run 0 誤傷。**深水區三修留 task**：術語 gate 刪除向→翻譯向（sanitize_general 替換表擴充）、lazypack 生圖搬 compute_queue async、arc-dedup 同 K 不同 axis 白名單。
 
+**2026-07-02 15:35 follow-up — 三修之一「術語 gate 刪除向→翻譯向」已落地**：`sanitize_general` 替換表改分級翻譯（t/p 值依強度分級白話化且保留數值，修掉舊表「p=0.30 也寫達顯著」的誠實漏洞；新增 p>N 與 95% CI 區間 patterns）；`_GENERAL_FORBIDDEN_PATTERNS` 維持禁裸術語但 hint/audit message 改白話包裝指引（不再暗示刪除）；feed-publisher SKILL.md 新增「統計表達白話包裝對照表」段。Tests：`tests/test_sanitize_general_translation.py` 24 tests（含 round-trip invariant：sanitize 輸出必 0 命中 publisher gate、idempotency、數值保留、citation 豁免回歸）全 PASS。
+
 **教訓**：(a) 品質退化不是單一 bug，是**多個「各自合理」的 gate/skill 疊加後形成單向壓縮漏斗** — 每次加壓縮向約束時必須問「下限誰在守」；(b) 治理文件（rules vs skills）數字規格必須有 code 仲裁者，散文對散文的矛盾會沉默存在 75 天；(c) skill 主文與 references 的適用範圍限定不可分離。
 
 ## 2026-07-02 14:25 **3-STRIKE TRIGGER**：「turn 結尾無文字回報」同日第三波（symlink 移除後又無回報）— **Stop hook 硬性攔截落地**

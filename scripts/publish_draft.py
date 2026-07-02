@@ -5,12 +5,20 @@ with YAML frontmatter; main thread runs this helper to sanitize banned terms,
 extract metadata, and invoke the publisher CLI. Replaces the per-publish
 Python heredoc that we wrote 3+ times manually.
 
-Sanitizer covers the publisher.py L46-52 strict-audit ban list for
-audience=general so that agents that "almost" complied still publish cleanly:
+Sanitizer covers the publisher.py `_GENERAL_FORBIDDEN_PATTERNS` strict-audit
+ban list for audience=general so that agents that "almost" complied still
+publish cleanly. It is TRANSLATION-oriented (2026-07-02, error_log 15:15):
+statistical information is kept and rephrased in plain words with the numeric
+value preserved — never deleted. Graded by magnitude so the plain-language
+claim never overstates the evidence:
 
-  - p=N        → 達顯著水準（p≈N）
-  - p<N        → 達顯著水準（p<N）
-  - t=N        → 統計強度 N
+  - t=N        → 依 |t| 分級（≥3 高度顯著 / ≥1.96 顯著（強度中上）/
+                 ≥1.645 接近顯著 / 其餘 未達統計顯著），數值保留
+  - p=N        → 依 N 分級（≤0.01 高度顯著 / ≤0.05 達顯著水準 /
+                 ≤0.10 接近顯著水準 / 其餘 未達顯著水準），數值保留
+  - p<N        → 同上分級（上界語意：顯著性低於 N）
+  - p>N        → 未達顯著水準（顯著性高於 N）
+  - X% CI [a, b] / 信賴區間 → 合理範圍約 a 到 b（X% 信心水準）
   - t-stat     → 統計強度
   - \\|t\\|    → 統計強度
   - Harvey     → 嚴格統計
@@ -75,6 +83,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import logging
 import os
 import re
 import subprocess
@@ -272,14 +281,102 @@ def normalize_image_url_field(
     return url
 
 
+# 2026-07-02 (error_log 15:15 root cause #1): the ban gate used to be
+# "deletion-oriented" — agents dropped whole statistics paragraphs just to
+# pass the audit, halving general-article depth (median -49%). The sanitizer
+# is the TRANSLATION path: keep the statistical claim, grade it by magnitude,
+# and preserve the number so the reader can still verify evidence strength.
+# Grading thresholds: |t| 1.645 / 1.96 / 3.0 ≈ two-sided 10% / 5% levels and
+# the Harvey-Liu-Zhu (2016) strict threshold; p 0.10 / 0.05 / 0.01 mirror them.
+# Research-honesty constraint: plain wording must never claim more than the
+# number supports — p=0.30 must NOT come out as 「達顯著水準」.
+
+
+def _translate_t_value(m: re.Match) -> str:
+    """t=N → graded plain-language wording, numeric value preserved."""
+    raw = m.group(1)
+    try:
+        strength = abs(float(raw))
+    except ValueError:
+        logging.warning(
+            "sanitize_general: unparseable t value %r — using generic wording", raw
+        )
+        return f"統計檢定值 {raw}"
+    if strength >= 3.0:
+        return f"統計檢定高度顯著（強度很強，統計值 {raw}）"
+    if strength >= 1.96:
+        return f"統計檢定顯著（強度中上，統計值 {raw}）"
+    if strength >= 1.645:
+        return f"統計檢定接近顯著（強度偏弱，統計值 {raw}）"
+    return f"未達統計顯著（統計值 {raw}）"
+
+
+def _translate_p_value(m: re.Match) -> str:
+    """p=N (point value) → graded plain-language wording."""
+    raw = m.group(1)
+    try:
+        p = float(raw)
+    except ValueError:
+        logging.warning(
+            "sanitize_general: unparseable p value %r — using generic wording", raw
+        )
+        return f"顯著性 {raw}"
+    if p <= 0.01:
+        return f"高度顯著（顯著性 {raw}）"
+    if p <= 0.05:
+        return f"達顯著水準（顯著性 {raw}）"
+    if p <= 0.10:
+        return f"接近顯著水準（顯著性 {raw}）"
+    return f"未達顯著水準（顯著性 {raw}）"
+
+
+def _translate_p_upper_bound(m: re.Match) -> str:
+    """p<N (upper bound) → graded plain-language wording."""
+    raw = m.group(1)
+    try:
+        bound = float(raw)
+    except ValueError:
+        logging.warning(
+            "sanitize_general: unparseable p bound %r — using generic wording", raw
+        )
+        return f"顯著性低於 {raw}"
+    if bound <= 0.01:
+        return f"高度顯著（顯著性低於 {raw}）"
+    if bound <= 0.05:
+        return f"達顯著水準（顯著性低於 {raw}）"
+    if bound <= 0.10:
+        return f"接近顯著水準（顯著性低於 {raw}）"
+    return f"顯著性低於 {raw}"
+
+
+# CI keyword needs \b guards so "CI" never matches inside a longer token
+# (e.g. the CITE0000 citation placeholders used by _stash_citations).
+_CI_KEYWORD = r'(?:CI\b|C\.I\.|conf(?:idence)?\s+interval\b|信賴區間|置信區間)'
+
 GENERAL_BAN_REPLACEMENTS = [
     # IMPORTANT: replacements must NOT regenerate any banned pattern.
     # Earlier bug: `p<\1` and `p≈\1` both contained `p` adjacent to digits
     # which the publisher's `\bp\s*=\s*\d` / `\bp\s*<\s*\d` regex re-flagged.
     # Solution: drop the `p` operator entirely from replacement text.
-    (re.compile(r'\bp\s*=\s*(\d[\d.]*)'), r'達顯著水準（顯著性 \1）'),
-    (re.compile(r'\bp\s*<\s*(\d[\d.]*)'), r'達顯著水準（顯著性低於 \1）'),
-    (re.compile(r'\bt\s*=\s*(-?\d[\d.]*)'), r'統計強度 \1'),
+    # Interval form first ("95% CI [1.2, 3.4]"), bare keyword second — order
+    # matters because the bare pattern is a prefix of the interval pattern.
+    (
+        re.compile(
+            r'(\d{1,2}(?:\.\d+)?)\s*%\s*' + _CI_KEYWORD +
+            r'\s*[:：]?\s*[\[（(［]\s*(-?\d+(?:\.\d+)?)\s*[,，]\s*'
+            r'(-?\d+(?:\.\d+)?)\s*[\]）)］]',
+            re.IGNORECASE,
+        ),
+        r'合理範圍約 \2 到 \3（\1% 信心水準）',
+    ),
+    (
+        re.compile(r'(\d{1,2}(?:\.\d+)?)\s*%\s*' + _CI_KEYWORD, re.IGNORECASE),
+        r'\1% 信心水準的合理範圍',
+    ),
+    (re.compile(r'\bp\s*=\s*(\d+(?:\.\d+)?)'), _translate_p_value),
+    (re.compile(r'\bp\s*<\s*(\d+(?:\.\d+)?)'), _translate_p_upper_bound),
+    (re.compile(r'\bp\s*>\s*(\d+(?:\.\d+)?)'), r'未達顯著水準（顯著性高於 \1）'),
+    (re.compile(r'\bt\s*=\s*(-?\d+(?:\.\d+)?)'), _translate_t_value),
     (re.compile(r'\bHarvey\s+threshold\b'), r'嚴格統計檢驗門檻'),
     (re.compile(r'\bHarvey\b'), r'嚴格統計'),
     (re.compile(r'\bDiebold-Mariano(?:\s+test)?\b'), r'兩模型比較顯著'),

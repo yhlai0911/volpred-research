@@ -279,16 +279,21 @@ _AUDIENCE_TAG_CANONICAL = {
     'member-qa': '會員提問',
 }
 _AUDIENCE_TAG_ALL_ALIASES = frozenset(_AUDIENCE_TAG_CANONICAL.keys())
+# 2026-07-02 (error_log 15:15 root cause #1): this gate bans BARE jargon
+# notation only — the statistical information itself must stay in the article,
+# rephrased in plain words with the number preserved. Hints below give the
+# translation template; scripts/publish_draft.py::sanitize_general applies the
+# same table automatically on the CLI publish path.
 _GENERAL_FORBIDDEN_PATTERNS = [
-    (re.compile(r'\bt\s*=\s*-?\d'), 't=value (use 「統計顯著」白話)'),
-    (re.compile(r'\bp\s*=\s*\d'), 'p=value (use 「達顯著水準」)'),
-    (re.compile(r'p\s*[<>]\s*0\.\d'), 'p<X.XX (use 「達顯著水準」)'),
-    (re.compile(r'\bHarvey\b'), 'Harvey threshold (use 「嚴格統計檢驗」)'),
-    (re.compile(r'\bDiebold-Mariano\b'), 'Diebold-Mariano (use 「兩模型比較顯著」)'),
-    (re.compile(r'\bDM\s*test\b', re.IGNORECASE), 'DM test (use 「比較檢定」)'),
-    (re.compile(r'\|t\|'), '|t| stat (use 白話)'),
-    (re.compile(r'\bt-stat\b', re.IGNORECASE), 't-stat (use 白話)'),
-    (re.compile(r'bootstrap\s+p[\s_=-]'), 'bootstrap p (use 白話)'),
+    (re.compile(r'\bt\s*=\s*-?\d'), 't=值 → 白話包裝保留數值，例「統計檢定顯著（強度中上，統計值 2.24）」'),
+    (re.compile(r'\bp\s*=\s*\d'), 'p=值 → 依大小分級，例「達顯著水準（顯著性 0.03）」；p=0.3 要寫「未達顯著水準」'),
+    (re.compile(r'p\s*[<>]\s*0\.\d'), 'p<X / p>X → 例「達顯著水準（顯著性低於 0.05）」/「未達顯著水準」'),
+    (re.compile(r'\bHarvey\b'), 'Harvey threshold → 「嚴格統計檢驗門檻」（引用格式 Harvey (2016) 可保留）'),
+    (re.compile(r'\bDiebold-Mariano\b'), 'Diebold-Mariano → 「兩模型比較顯著」'),
+    (re.compile(r'\bDM\s*test\b', re.IGNORECASE), 'DM test → 「比較檢定」'),
+    (re.compile(r'\|t\|'), '|t| → 「統計強度」，數值照列'),
+    (re.compile(r'\bt-stat\b', re.IGNORECASE), 't-stat → 「統計強度」，數值照列'),
+    (re.compile(r'bootstrap\s+p[\s_=-]'), 'bootstrap p → 「重抽樣比較」'),
 ]
 _GENERAL_MAX_TAG_COUNT = 8
 
@@ -656,7 +661,10 @@ def _audit_general_content(audience: str, tags: list[str], content: str) -> list
             forbidden_hits.append(hint)
     if forbidden_hits:
         issues.append(
-            f"general 內容含禁用統計術語 (SKILL.md L306): {forbidden_hits}"
+            "general 內容含裸統計術語 — 請依 hint 白話包裝保留統計資訊與數值，"
+            "不要整段刪除統計內容（自動翻譯: scripts/publish_draft.py::sanitize_general；"
+            "對照表: feed-publisher SKILL.md『統計表達白話包裝對照表』）: "
+            f"{forbidden_hits}"
         )
     return issues
 
