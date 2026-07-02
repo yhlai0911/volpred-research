@@ -75,6 +75,16 @@
             "command": "bash /Users/yhlai0911/volpred-research/.claude/hooks/pretooluse-bash-optimizer.sh"
           }
         ]
+      },
+      {
+        "matcher": "ScheduleWakeup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /Users/yhlai0911/volpred-research/scripts/hooks/deny_wakeup_interactive.py",
+            "timeout": 10
+          }
+        ]
       }
     ]
   }
