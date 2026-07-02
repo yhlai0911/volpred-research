@@ -238,6 +238,12 @@ def nested_name(value: dict | None) -> str:
     return str(name).strip() if name is not None else ""
 
 
+def clean_text(value: object) -> str:
+    text = str(value or "")
+    text = text.replace("\r\n", " ").replace("\n", " ").replace("\r", " ")
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def parse_vote_fraction(value: object) -> float | None:
     if value is None:
         return None
@@ -293,8 +299,8 @@ def normalize_proposals(proposals: list[dict]) -> pd.DataFrame:
         vote = item.get("vote_results") or {}
         general = nested_name(item.get("proposal_type_general"))
         specific = nested_name(item.get("proposal_type_specific"))
-        title = str(item.get("title") or "").strip()
-        description = str(item.get("description") or "").strip()
+        title = clean_text(item.get("title"))
+        description = clean_text(item.get("description"))
         event_date_raw = vote.get("date") or item.get("date")
         event_date = pd.to_datetime(event_date_raw, errors="coerce")
         if pd.isna(event_date):
@@ -309,7 +315,7 @@ def normalize_proposals(proposals: list[dict]) -> pd.DataFrame:
                 "accession_number": item.get("accession_number"),
                 "event_date": event_date.normalize(),
                 "year": int(event_date.year),
-                "company_name": str(company.get("name") or "").strip(),
+                "company_name": clean_text(company.get("name")),
                 "ticker": ticker,
                 "raw_ticker": company.get("ticker"),
                 "industry": nested_name(company.get("primary_industry")),
@@ -317,7 +323,7 @@ def normalize_proposals(proposals: list[dict]) -> pd.DataFrame:
                 "description": description,
                 "proposal_type_general": general,
                 "proposal_type_specific": specific,
-                "proponent_name": nested_name(item.get("proponent")),
+                "proponent_name": clean_text(nested_name(item.get("proponent"))),
                 "vote_for_fraction": vote_for,
                 "close_vote_30_70": bool(vote_for is not None and 0.30 <= vote_for <= 0.70),
                 "public_goods": bool(public_goods),
