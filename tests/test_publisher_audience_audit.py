@@ -28,6 +28,19 @@ _LZ = (
     f"![結果]({_LZ_BASE}/lz2.png)\n"
 )
 
+# 2026-07-02 minimum-depth floor (general ≥1500 / research ≥2000 + 表格)：
+# these tests target the audience/lazypack gates, so pad fixtures past the
+# orthogonal depth gate with clean、無統計術語的白話填充。
+_PAD_GENERAL = (
+    "市場觀察筆記：投資人今天關心的是資金流向與情緒變化，"
+    "我們用白話整理重點，幫你快速掌握全貌。"
+) * 40
+_TABLE = "\n\n| 項目 | 內容 |\n|---|---|\n| 重點 | 白話整理 |\n"
+_PAD_RESEARCH = (
+    "本研究完整交代資料來源、樣本期間、方法設計與穩健性檢查，"
+    "並將結果整理成表格供讀者驗證，附錄提供重現步驟。"
+) * 50 + _TABLE
+
 
 def test_extract_experiment_refs_separates_k_ids():
     tags = ["一般讀者", "FOMC", "T-2", "K513", "K820", "K1100g", "macro"]
@@ -101,7 +114,8 @@ def test_publish_milestone_research_jargon_overrides_general_audience(
 
     pub = Publisher(storage_dir=str(tmp_path))
 
-    polluted_content = "FOMC 會議前 t=4.38, Harvey |t|>3, DM test p=0.04."
+    polluted_content = ("FOMC 會議前 t=4.38, Harvey |t|>3, DM test p=0.04。"
+                        + _PAD_RESEARCH)
 
     # Should NOT raise ValueError — _infer_audience upgrades to 'research'
     pub_id = pub.publish_milestone(
@@ -135,7 +149,8 @@ def test_publish_milestone_strict_passes_clean_general(
 
     clean_content = (
         "想像你今天要參加一個重要會議。Fed 也是。94.8% 的人猜對結果，"
-        "但市場為什麼還在緊張？因為剩下的 5% 機率太刺激了。" + _LZ
+        "但市場為什麼還在緊張？因為剩下的 5% 機率太刺激了。"
+        + _PAD_GENERAL + _LZ
     )
 
     pub_id = pub.publish_milestone(
@@ -167,7 +182,7 @@ def test_publish_milestone_strips_redundant_audience_aliases(
 
     pub_id = pub.publish_milestone(
         title="散戶可讀的方法論文章",
-        description="一個白話故事，不含 jargon。" + _LZ,
+        description="一個白話故事，不含 jargon。" + _PAD_GENERAL + _LZ,
         phase="research",
         audience="general",
         # Polluted brief: Chinese + English audience tags + wrong-audience tag
@@ -232,7 +247,7 @@ def test_publish_milestone_extracts_k_ids_to_metadata(
 
     pub_id = pub.publish_milestone(
         title="散戶可讀的方法論文章",
-        description="一個白話故事，沒有 jargon" + _LZ,
+        description="一個白話故事，沒有 jargon" + _PAD_GENERAL + _LZ,
         phase="research",
         audience="general",
         tags=["一般讀者", "K513", "FOMC", "K820", "macro"],
@@ -259,19 +274,45 @@ def _patch_remote(monkeypatch):
     monkeypatch.setattr(Publisher, "_sync_report_to_remote", lambda self, *a, **kw: None, raising=False)
 
 
-def test_publish_milestone_blocks_general_without_lazypack(tmp_path: Path, monkeypatch):
-    """audience='general' + audit_strict + no 懶人包圖組 → ValueError."""
+def test_publish_milestone_blocks_immediate_publish_general_without_lazypack(
+    tmp_path: Path, monkeypatch
+):
+    """2026-07-02 boundary semantics: audience='general' + audit_strict + no
+    懶人包圖組 blocks ONLY at the reader-visible boundary (status='published',
+    i.e. immediate-publish event/trending paths)."""
     _patch_remote(monkeypatch)
     pub = Publisher(storage_dir=str(tmp_path))
     with pytest.raises(ValueError, match="懶人包"):
         pub.publish_milestone(
             title="散戶白話文無懶人包",
-            description="一個白話故事，沒有 jargon，但忘了附懶人包圖。",
+            description="一個白話故事，沒有 jargon，但忘了附懶人包圖。" + _PAD_GENERAL,
             phase="research",
             audience="general",
             tags=["一般讀者", "教學"],
-            status="draft",
+            status="published",
         )
+
+
+def test_publish_milestone_draft_without_lazypack_defers_to_async(
+    tmp_path: Path, monkeypatch, capsys
+):
+    """2026-07-02 async pipeline (error_log 15:15 #4): a general DRAFT may be
+    created without the 懶人包圖組 section — the codex render runs on the
+    compute_queue lane and the release_pool gate holds the flip to published.
+    publish_milestone must pass AND print the enqueue reminder."""
+    _patch_remote(monkeypatch)
+    pub = Publisher(storage_dir=str(tmp_path))
+    pub_id = pub.publish_milestone(
+        title="散戶白話文草稿走 async 懶人包",
+        description="一個白話故事，沒有 jargon，懶人包晚點由 compute worker 補。" + _PAD_GENERAL,
+        phase="research",
+        audience="general",
+        tags=["一般讀者", "教學"],
+        status="draft",
+    )
+    assert pub_id.startswith("mile_")
+    out = capsys.readouterr().out
+    assert "lazypack_async_render.py enqueue" in out
 
 
 def test_publish_milestone_general_with_lazypack_passes(tmp_path: Path, monkeypatch):
@@ -280,7 +321,7 @@ def test_publish_milestone_general_with_lazypack_passes(tmp_path: Path, monkeypa
     pub = Publisher(storage_dir=str(tmp_path))
     pub_id = pub.publish_milestone(
         title="散戶白話文有懶人包",
-        description="一個白話故事，沒有 jargon。" + _LZ,
+        description="一個白話故事，沒有 jargon。" + _PAD_GENERAL + _LZ,
         phase="research",
         audience="general",
         tags=["一般讀者", "教學"],

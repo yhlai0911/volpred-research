@@ -16,6 +16,8 @@
 
 **教訓**：(a) 品質退化不是單一 bug，是**多個「各自合理」的 gate/skill 疊加後形成單向壓縮漏斗** — 每次加壓縮向約束時必須問「下限誰在守」；(b) 治理文件（rules vs skills）數字規格必須有 code 仲裁者，散文對散文的矛盾會沉默存在 75 天；(c) skill 主文與 references 的適用範圍限定不可分離。
 
+**Root cause #4 已修（2026-07-02 16:20，lazypack async 管線落地）**：懶人包生圖搬離寫作 fire → 既有 compute_queue（`scripts/lazypack_async_render.py` enqueue/run；`*/15` worker 跑 codex render → upload → append → 單篇 re-sync，0 Claude token、不佔 50-min cap）。Gate 邊界收斂到 reader-visible（`publisher.lazypack_required_at()` 單一來源：draft/scheduled 建檔放行、published enforce；release_pool flip 前併入既有 release-audit skip/escalation — 設計二選一選了「release 時 enforce」而非「enqueue 證明過 gate」，因 enqueue 是 intent 不是 artifact，render fail 會讓無圖文章上線）。共用 install 抽到 `volpred/publisher/lazypack_install.py`（feed 寫入補 publisher_feed lock，順修 replace_lazypack_section.py 無鎖 race）。Tests：`tests/test_lazypack_async_pipeline.py` 13 條 + gate/publisher/release 系列全綠；smoke 走真 compute_queue run-next subprocess seam PASS。附帶發現：worktree venv 缺 dev extras 使 `uv run pytest` fallback 到系統 3.9 炸 `list | dict`（`uv sync --extra dev` 修）；main 47661b174 depth gate 未 pad `test_publisher_audience_audit.py` 短 fixtures（6 tests 自該 commit 起紅，本次一併修綠）。
+
 ## 2026-07-02 14:25 **3-STRIKE TRIGGER**：「turn 結尾無文字回報」同日第三波（symlink 移除後又無回報）— **Stop hook 硬性攔截落地**
 
 **三次 incident**：(1) 2026-06 首次糾正 → memory `feedback_final_text_after_schedulewakeup`；(2) 2026-07-02 上午連續 6 次質問 + 13:15 再犯 → CLAUDE.md 最高指引固化（13:23 entry）；(3) 2026-07-02 14:16 symlink 移除做完、驗證完，turn 又以 ScheduleWakeup 收尾無最終文字 → 老闆 14:19 質問「所以移除了？為什麼都不回報？」。

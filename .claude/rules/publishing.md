@@ -101,6 +101,7 @@ paths:
      - **餵 source 數據、寫文中生**:source 餵**全部 evidence package**(`experiments/<k>/<k>_results.json` + README + draft + refs),**不是**等文章寫完用 prose 去生(prose 是 lossy,方法圖會不準)。
      - **生成法 codex exec 為主、NotebookLM 為 fallback**(用戶 2026-06-30 糾正):PRIMARY = `codex exec`(ChatGPT 訂閱 flat-rate,codex 寫 render 程式 → 數字對齊 results.json、可復現);FALLBACK = NotebookLM(`scripts/gen_lazypack_infographic.py`,AI poster,codex 不可用時)。**禁用按張計費影像 API**(`gpt-image-2` / 付費 Gemini key `gemini_ask.py`);codex 訂閱與 NotebookLM 都不違反零增量費。
      - png → Supabase `article-images` upload → append 文末「## 懶人包」圖區。
+     - **生圖時機 = async 管線（2026-07-02，error_log 15:15 #4）**：懶人包 render（~5-15 min codex exec）**不佔寫作 agent 的 50 分鐘 cap**。draft 文章流程 = 寫作 agent 只寫正文 → publish draft → **`uv run python scripts/lazypack_async_render.py enqueue --article-id <mile_id> --experiment <K> --plan <plan.json>`**（plan 由寫作 agent 寫好，panel 規格同 gen_lazypack_codex.py）→ `*/15` compute worker 跑 codex render + upload + append + re-sync（0 Claude token）。**Gate 邊界 = reader-visible**：draft/scheduled 建檔不需懶人包；release_pool 在 flip published 前 enforce（缺 section → skip + 既有 release-audit 計數/escalation）；**立即發佈（event/trending status=published）仍須同步生好才能過 publish gate**（時效文不能等 async）。單一來源：`publisher.lazypack_required_at()`。
 5. **寫前必做主題查重**：
    - `grep -i "關鍵詞" storage/reports/feed.json | head` 或
    - LanceDB semantic search（dist < 0.45 視為 hard duplicate，需換角度或放棄）

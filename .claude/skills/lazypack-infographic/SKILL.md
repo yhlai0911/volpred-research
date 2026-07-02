@@ -15,6 +15,20 @@ description: |
 
 每篇**一般讀者**文章（`audience='general'`，以及 reader-facing 的 event / daily / trending）發佈時，**文末必附一組懶人包圖**（用戶 2026-06-04 硬性要求）。
 
+## 生圖時機：draft 走 async、立即發佈走同步（2026-07-02，error_log 15:15 #4）
+
+codex render 一組圖要 ~5-15 min，**不可佔用寫作 agent 的 50 分鐘 cap**（曾擠壓正文深度 -49%）。兩條路：
+
+- **draft 文章（daily_article 等非時效）＝ PREDEFINED async 路徑**：寫作 agent 只寫正文 + 寫好 plan.json → publish draft → 一行 enqueue：
+  ```bash
+  uv run python scripts/lazypack_async_render.py enqueue \
+    --article-id <mile_id> --experiment K1413 --plan /tmp/plan.json
+  ```
+  `*/15` compute worker 自動跑 codex render → upload → append `## 懶人包圖組` → 單篇 re-sync（0 Claude token）。**draft 建檔不需懶人包**；release_pool 在 flip published 前 enforce（缺 section 不釋出，計數 3 次後 materialize fix task）。檢查 job：`uv run python scripts/compute_queue.py show lazypack-<mile_id>`。
+- **立即發佈（event_article / trending_repost，status=published）＝ 同步路徑**：時效文不能等 async，publish gate 仍要求發佈當下就有 section — 照本 skill 下方「一鍵指令」同步生完再 publish。
+
+Gate 邊界單一來源：`volpred.publisher.publisher.lazypack_required_at()`（draft/scheduled 放行、published enforce）。
+
 ## 生成方法：codex exec 為主，NotebookLM 為 fallback（用戶 2026-06-30 硬性糾正）
 
 **PRIMARY = `codex exec`**：用 Codex CLI（ChatGPT 訂閱 auth，**flat-rate 非按張計費**）讓 codex **寫一支 render 程式**（PIL / SVG→PNG / matplotlib 自訂版面）餵 evidence package 出圖。為什麼優於 NotebookLM：

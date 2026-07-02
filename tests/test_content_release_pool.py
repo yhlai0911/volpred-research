@@ -12,6 +12,18 @@ def _write_json(path: Path, payload: object) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 2026-07-02 async lazypack pipeline: the release gate refuses to flip a
+# general draft/scheduled article to published without a 懶人包圖組 section.
+# These fixtures test OTHER release gates, so the to-be-released general
+# items carry a minimal valid section (heading + image) to clear the
+# orthogonal lazypack gate.
+_LZ = (
+    "\n\n## 懶人包圖組\n\n"
+    "![概念](https://supabase.test/article-images/lz_concept.png)\n\n"
+    "![結果](https://supabase.test/article-images/lz_results.png)\n"
+)
+
+
 def _freeze_content_now(monkeypatch, frozen_now: datetime) -> None:
     class FrozenDateTime(datetime):
         @classmethod
@@ -218,7 +230,7 @@ def test_release_pool_warns_when_failed_sync_ledger_is_corrupt(
                 "created_at": (frozen_now - timedelta(days=1)).isoformat(),
                 "category": "general",
                 "audience": "general",
-                "content": "General audience market note.",
+                "content": "General audience market note." + _LZ,
             }
         ],
     )
@@ -482,18 +494,18 @@ def test_release_pool_theme_flood_gate_throttles_saturated_theme(tmp_path: Path,
     feed.append({
         "id": "mile_draftmodel_old", "status": "draft", "audience": "general",
         "created_at": (frozen_now - timedelta(days=4)).isoformat(),
-        "title": "又一場模型擂台賽：花俏不等於更準", "content": valve_body,
+        "title": "又一場模型擂台賽：花俏不等於更準", "content": valve_body + _LZ,
     })
     feed.append({
         "id": "mile_draftdistinct", "status": "draft", "audience": "general",
         "created_at": (frozen_now - timedelta(days=3)).isoformat(),
         "title": "鈾礦 ETF 的流動性與庫存週期",
-        "content": "URA 基金 AUM 與鈾礦現貨庫存的關係，鈾礦 ETF 投資人結構與流動性主因。" * 4,
+        "content": "URA 基金 AUM 與鈾礦現貨庫存的關係，鈾礦 ETF 投資人結構與流動性主因。" * 4 + _LZ,
     })
     feed.append({
         "id": "mile_draftmodel_new", "status": "draft", "audience": "general",
         "created_at": (frozen_now - timedelta(days=2)).isoformat(),
-        "title": "模型加在一起也不一定打敗老方法", "content": second_body,
+        "title": "模型加在一起也不一定打敗老方法", "content": second_body + _LZ,
     })
     _write_json(storage_dir / "reports" / "feed.json", feed)
 
@@ -564,7 +576,7 @@ def test_release_pool_by_settings_releases_oldest_saturated_theme_via_valve(
                 "audience": "general",
                 "created_at": (frozen_now - timedelta(days=5)).isoformat(),
                 "title": "又一場模型擂台賽：花俏不等於更準",
-                "content": valve_body,
+                "content": valve_body + _LZ,
             },
             {
                 "id": "mile_fresh_theme",
@@ -572,7 +584,7 @@ def test_release_pool_by_settings_releases_oldest_saturated_theme_via_valve(
                 "audience": "general",
                 "created_at": (frozen_now - timedelta(days=4)).isoformat(),
                 "title": "鈾礦 ETF 的庫存週期與流動性",
-                "content": "URA 基金 AUM、鈾礦現貨庫存、ETF 投資人結構與流動性條件的關係。" * 4,
+                "content": "URA 基金 AUM、鈾礦現貨庫存、ETF 投資人結構與流動性條件的關係。" * 4 + _LZ,
             },
         ]
     )
@@ -739,7 +751,7 @@ def test_release_pool_relocates_internal_review_tag_before_general_audit(
                 "audience": "general",
                 "created_at": (frozen_now - timedelta(days=2)).isoformat(),
                 "title": "一般讀者審查標記不應卡住釋出",
-                "description": "這是一篇白話文章，沒有禁用統計術語，只有內部審查 tag 需要搬走。",
+                "description": "這是一篇白話文章，沒有禁用統計術語，只有內部審查 tag 需要搬走。" + _LZ,
                 "tags": [
                     "一般讀者",
                     "指數調整",
@@ -844,6 +856,7 @@ def test_release_pool_last3_narrative_cluster_filters_saturated_cluster(tmp_path
             "audience": "general",
             "created_at": (frozen_now - timedelta(days=2)).isoformat(),
             "title": "下一篇候選二",
+            "content": "白話的風險溢酬候選文。" + _LZ,
             "details": {"experiment_refs": ["K800"]},
         },
     ]
@@ -910,7 +923,7 @@ def test_release_pool_pub_id_bypasses_narrative_cluster_filter_for_manual_repair
             "audience": "general",
             "created_at": (frozen_now - timedelta(days=3)).isoformat(),
             "title": "GARCH 草稿已修正",
-            "description": "這篇一般讀者草稿已改成白話統計描述，可以重新釋出。",
+            "description": "這篇一般讀者草稿已改成白話統計描述，可以重新釋出。" + _LZ,
             "tags": ["一般讀者", "GARCH", "波動率"],
             "details": {
                 "release_audit_skipped_count": 3,

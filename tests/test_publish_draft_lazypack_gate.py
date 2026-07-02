@@ -79,3 +79,51 @@ def test_fail_open_on_gate_malfunction():
     # A non-str body makes the internal regex raise TypeError → fail-open (PASS),
     # per no-silent-fallback.md + dedup-gate-audit.md (never over-block on error).
     assert check_lazypack_gate(None, "general", bypass=False) == PASS  # type: ignore[arg-type]
+
+
+# ---------------------------------------------------------------------------
+# 2026-07-02 async pipeline (error_log 15:15 #4): enforcement moved to the
+# reader-visible boundary — draft/scheduled pass without the section (render
+# runs on compute_queue; release gate holds the flip), published still blocks.
+# ---------------------------------------------------------------------------
+
+_NO_LZ_BODY = "# 標題\n\n正文，無懶人包。\n"
+
+
+def test_draft_status_defers_lazypack_to_async(capsys):
+    assert check_lazypack_gate(_NO_LZ_BODY, "general", bypass=False,
+                               status="draft") == PASS
+    out = capsys.readouterr().out
+    assert "lazypack_async_render.py enqueue" in out
+
+
+def test_scheduled_status_defers_lazypack_to_async():
+    assert check_lazypack_gate(_NO_LZ_BODY, "general", bypass=False,
+                               status="scheduled") == PASS
+
+
+def test_published_status_still_blocks():
+    assert check_lazypack_gate(_NO_LZ_BODY, "general", bypass=False,
+                               status="published") == BLOCK
+
+
+def test_default_status_is_published_enforce():
+    # Callers that do not pass status must get the SAFE default (enforce) —
+    # a silently-relaxed default would reopen the 12%-coverage hole.
+    assert check_lazypack_gate(_NO_LZ_BODY, "general", bypass=False) == BLOCK
+
+
+def test_draft_with_lazypack_still_passes_quietly(capsys):
+    body = "# 標題\n\n正文…\n\n" + _LAZYPACK_SECTION
+    assert check_lazypack_gate(body, "general", bypass=False, status="draft") == PASS
+    assert "lazypack_async_render" not in capsys.readouterr().out
+
+
+def test_lazypack_required_at_boundary_semantics():
+    from volpred.publisher.publisher import lazypack_required_at
+
+    assert lazypack_required_at("published") is True
+    assert lazypack_required_at(None) is True          # safe default
+    assert lazypack_required_at(" Published ") is True
+    assert lazypack_required_at("draft") is False
+    assert lazypack_required_at("scheduled") is False
