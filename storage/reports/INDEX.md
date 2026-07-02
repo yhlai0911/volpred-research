@@ -1,23 +1,28 @@
 # Feed Index
 
-_Last built: 2026-07-02 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-02 06:37 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1716**  (with thumbnail: 70)
-- Last 30 days: **341**
-- Total chars (content): 5,150,931
+- Total articles: **1721**  (with thumbnail: 70)
+- Last 30 days: **343**
+- Total chars (content): 5,167,580
 
-**Status**: published=1519, archived=123, unpublished=58, retracted=12, draft=3, wont_fix=1
+**Status**: published=1520, archived=123, unpublished=59, retracted=12, draft=6, wont_fix=1
 
-**Audience**: research=1103, general=391, daily=128, unknown=77, member_qa=12, event=5
+**Audience**: research=1103, general=396, daily=128, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=859, general=742, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
+**Category**: milestone=859, general=747, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
 
-## 最近 30 天 (341)
+## 最近 30 天 (343)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-02 | `mile_cc2f70db` | AI agent 的記憶問題：把所有東西建成圖譜，救得了量化研究平台嗎 | general | general | unpublished | 2968 |  | 一般讀者, trending, AI工具, agent記憶, 知識庫, 檢索架構 |
+| 2026-07-02 | `mile_463f37f7` | 盯著最慘的那 1% 交易日調倉位，實測沒有比看普通波動率更安全 | general | general | draft | 3194 |  | 一般讀者, 風險管理, 尾部風險, 波動率目標, 資產配置, ETF |
+| 2026-07-02 | `mile_cd5d5740` | 波動率「測不準」能不能當減碼訊號？六檔 ETF、六十天的老實答案 | general | general | draft | 2833 |  | 一般讀者, 波動率, 風險管理, 波動率預測, ETF, 研究誠實 |
+| 2026-07-02 | `mile_b88ee7bc` | 把五分鐘資料切得更細，預測真的會更準嗎？台指期給了一個保守答案 | general | general | draft | 2171 |  | 一般讀者, 波動率預測, 台指期, 高頻資料, 研究誠實, 模型比較 |
+| 2026-07-02 | `mile_e511ff94` | 下半年調倉前，先過三道風險安檢 | general | general | published | 5483 |  | 一般讀者, 精選導讀, 下半年調倉, 風險管理, VIX, 分散投資 |
 | 2026-07-02 | `mile_9ac0c44b` | 每日策略建議：VIX 16.59（正常）— 2026-07-02 | daily | general | published | 1649 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-02 | `mile_c3621a1b` | 2026-07-02 本日持倉比率建議（依據 2026-07-01 收盤數據） | daily | milestone | published | 1048 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-02 | `mile_c8468b0d` | 你花錢升級了預測模型，對帳單卻更難看：一個關於「準」與「賺」的實測 | general | general | published | 3749 |  | 一般讀者, 波動率目標, 交易成本, 換手率, 策略回測, 研究誠實 |
@@ -356,14 +361,14 @@ _Last built: 2026-07-02 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-02 | `mile_69e17b83` | 為波動率量身打造的模型，真的比老牌非對稱模型更準嗎？三個 ETF 說「不」 | general | milestone | published | 2378 |  | 一般讀者, 波動率, ETF, 預測模型, 投資研究, 負面結果 |
 | 2026-06-02 | `mile_03796a84` | 同樣是模型投票，為什麼 0050 很快就只剩一個人說話？ | general | milestone | published | 1631 |  | 一般讀者, 台灣, 0050, 波動率預測, 模型比較, 投資研究 |
 | 2026-06-02 | `mile_323788f8` | 你以為把隔夜跳空算進去就能翻盤，結果只修好了一半 | general | general | unpublished | 2414 |  | 一般讀者, SPY, QQQ, EEM, 波動率代理, 隔夜跳空 |
-| 2026-06-02 | `mile_8a9ae3c8` | 波動率預測不是把指標愈疊愈多就會愈準 | general | milestone | published | 1318 |  | 一般讀者, 波動率預測, VIX, 模型比較, 負面結果, 投資研究 |
-| 2026-06-02 | `mile_47ad5dc0` | 相關性模型真的能幫你少虧嗎？三組 ETF 配對給了三個不同答案 | general | general | unpublished | 3618 |  | 一般讀者, SPY, GLD, TLT, 相關性預測, 資產配置 |
-| 2026-06-02 | `mile_487275d0` | 資料版本洗到最乾淨後，黃金美債比特幣的波動還是先看自己 | general | milestone | published | 1972 |  | 一般讀者, GLD, TLT, BTC, ALFRED, 波動率預測 |
 
-<details><summary>## 2026-Q2 (703)</summary>
+<details><summary>## 2026-Q2 (706)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-02 | `mile_8a9ae3c8` | 波動率預測不是把指標愈疊愈多就會愈準 | general | milestone | published | 1318 |  | 一般讀者, 波動率預測, VIX, 模型比較, 負面結果, 投資研究 |
+| 2026-06-02 | `mile_47ad5dc0` | 相關性模型真的能幫你少虧嗎？三組 ETF 配對給了三個不同答案 | general | general | unpublished | 3618 |  | 一般讀者, SPY, GLD, TLT, 相關性預測, 資產配置 |
+| 2026-06-02 | `mile_487275d0` | 資料版本洗到最乾淨後，黃金美債比特幣的波動還是先看自己 | general | milestone | published | 1972 |  | 一般讀者, GLD, TLT, BTC, ALFRED, 波動率預測 |
 | 2026-06-02 | `mile_3a3cf4b2` | 每日策略建議：VIX 16.05（正常）— 2026-06-02 | daily | general | published | 1461 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-02 | `mile_221a15db` | 2026-06-02 本日持倉比率建議（依據 2026-06-01 收盤數據） | daily | milestone | published | 858 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-06-01 | `mile_41441382` | 三種 ETF 配對，哪個模型幫你少虧？十年真實資料給的答案 | research | milestone | unpublished | 3538 |  | 研究, SPY, GLD, TLT, 相關性預測, 最小變異數 |
