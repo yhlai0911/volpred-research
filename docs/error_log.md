@@ -14,6 +14,8 @@
 
 **已修（全落既有機制，per anti-stacking）**：feed-publisher SKILL.md 5 處字數對齊 publishing.md（800-1500→1500-3000）；anti-ai-style 主文補回 ≤500 字限定；publisher chokepoint 新增 `_audit_content_depth` 下限 gate（general ≥1500/research ≥2000+≥1 表，digest/event/member_qa 豁免，block 寫 dedup_decisions.jsonl audit trail，fail-open）— `tests/test_content_depth_gate.py` 7 tests + draft 池 dry-run 0 誤傷。**深水區三修留 task**：術語 gate 刪除向→翻譯向（sanitize_general 替換表擴充）、lazypack 生圖搬 compute_queue async、arc-dedup 同 K 不同 axis 白名單。
 
+**深水區補修 #5（15:40 done）**：root cause #5（arc-dedup 砍富證據 K 系列深挖）落地 — refill 9th belt 加 `_same_k_axis_waiver`（hit 為**同 K** prior article 且雙方 narrative axis 明確不同 → 放行系列深挖；異 K / 同 axis / unspecified 照擋，K1054 ghost-recycle 保護與 v3 backstop 約束不變）+ pool sort 加 `_evidence_thickness_bonus`（results.json 總量 ≥20KB/≥38KB 或檢定 key ≥20/≥60 或圖表產物 ≥2 → +1~+3 併入 score 鍵；cluster 鍵仍居前，novelty quota 不受影響），抵消「永遠選新但薄」偏向。Per anti-stacking 全改在既有 gate 判斷條件與既有 sort 權重內，無新 gate。Regression：`tests/test_refill_task_pool.py` +6（K1590-class 同 K 異 axis 放行含非 vacuous 驗證 / 同 K 同 axis 照擋 / 異 K 異 axis 照擋 / waiver 條件單元 / 厚度 bonus 厚薄對照），arc_dedup+refill 相關套件 69/69 pass；真實資料 dry-run 乾淨（K1513/K1572 屬異 K dup 照擋，判定正確）。
+
 **教訓**：(a) 品質退化不是單一 bug，是**多個「各自合理」的 gate/skill 疊加後形成單向壓縮漏斗** — 每次加壓縮向約束時必須問「下限誰在守」；(b) 治理文件（rules vs skills）數字規格必須有 code 仲裁者，散文對散文的矛盾會沉默存在 75 天；(c) skill 主文與 references 的適用範圍限定不可分離。
 
 ## 2026-07-02 14:25 **3-STRIKE TRIGGER**：「turn 結尾無文字回報」同日第三波（symlink 移除後又無回報）— **Stop hook 硬性攔截落地**

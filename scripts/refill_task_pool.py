@@ -414,6 +414,69 @@ def _score_to_priority(score: int) -> int:
     return 4
 
 
+# --- Evidence-thickness ranking bonus (2026-07-02) ---------------------------
+# error_log 2026-07-02 15:15 root cause #5: after the 6/08-6/29 arc-dedup
+# tightening, evidence-rich K's (which accumulate coverage and hence arc twins)
+# were culled at refill while new-but-thin K's sailed through, so the
+# publishable set drifted thin. Counterweight inside the EXISTING pool sort
+# (anti-stacking: no new gate): at equal cluster pressure, a K with a thicker
+# evidence package (bigger results JSONs / more statistical tests / more
+# chart+table artifacts) outranks an equal-score thin K. Thresholds calibrated
+# on the 2026-07-02 corpus (n=1334 results.json: p75≈21KB, p90≈38KB).
+
+_EVIDENCE_BONUS_CACHE: dict[str, int] = {}
+_EVIDENCE_TEST_KEY_RE = re.compile(
+    r'"[^"]*(?:p_value|pvalue|p_val|t_stat|tstat|t_statistic|dm_stat|dm_test|'
+    r'hln|harvey|bootstrap|wilcoxon|welch|lr_stat|wald|f_stat|z_stat|mcs|spa)'
+    r'[^"]*"\s*:',
+    re.IGNORECASE,
+)
+
+
+def _evidence_thickness_bonus(k_id: str) -> int:
+    """Return a 0-3 score bonus from the K's evidence-package thickness.
+
+    +1 when total *_results.json size >= 20KB (~p75) OR test-stat keys >= 20;
+    +1 more when size >= 38KB (~p90) OR test-stat keys >= 60;
+    +1 when the experiment dir carries >= 2 chart/table artifacts (png/csv).
+    Cached per refill run; fail-open to 0 with a logged warning.
+    """
+    key = str(k_id or "").strip().lower()
+    if not key:
+        return 0
+    if key in _EVIDENCE_BONUS_CACHE:
+        return _EVIDENCE_BONUS_CACHE[key]
+    bonus = 0
+    kdir = ROOT / "experiments" / key
+    try:
+        if kdir.exists():
+            total_size = 0
+            n_tests = 0
+            artifacts = 0
+            for p in kdir.iterdir():
+                suffix = p.suffix.lower()
+                if p.name.endswith("_results.json"):
+                    total_size += p.stat().st_size
+                    n_tests += len(
+                        _EVIDENCE_TEST_KEY_RE.findall(
+                            p.read_text(encoding="utf-8", errors="replace")
+                        )
+                    )
+                elif suffix in (".png", ".csv"):
+                    artifacts += 1
+            if total_size >= 20_000 or n_tests >= 20:
+                bonus += 1
+            if total_size >= 38_000 or n_tests >= 60:
+                bonus += 1
+            if artifacts >= 2:
+                bonus += 1
+    except Exception as exc:
+        _warn_refill(f"evidence thickness scan failed for {k_id}; bonus=0", exc)
+        bonus = 0
+    _EVIDENCE_BONUS_CACHE[key] = bonus
+    return bonus
+
+
 def _has_publishable_title(cand: dict) -> bool:
     """Require a non-empty candidate title before enqueueing a reader-facing task.
 
@@ -540,6 +603,33 @@ def _load_feed_for_dedup() -> dict | None:
     return _FEED_CACHE
 
 
+def _same_k_axis_waiver(k_norm: str, dup: dict) -> bool:
+    """Same-K series-deep-dive waiver for the 9th belt (2026-07-02).
+
+    error_log 2026-07-02 15:15 root cause #5: the 6/08-6/29 arc-dedup
+    tightening systematically culled evidence-rich K's at refill — articles of
+    the SAME K inevitably share >=5 raw entities, so arc v3's axis-mismatch
+    raw-entity backstop (_axis_mismatch_raw_entity_backstop) re-blocked
+    same-K deep dives even when the narrative axis genuinely differed (the
+    K1590 class of false positives, acknowledged in 52cab9a6d). For a same-K
+    pair the entity overlap is trivially true and carries no duplicate
+    signal — the axis distinction is the only real test left.
+
+    Waive a hit ONLY when (a) the existing article references the same K and
+    (b) BOTH narrative axes are specified and different. Different-K hits and
+    same-axis same-K recycles (ghost-recycle protection, 2026-06-19 K1054)
+    keep their blocking verdict.
+    """
+    shared = {str(r).upper() for r in (dup.get("shared_experiment_refs") or [])}
+    if str(k_norm or "").upper() not in shared:
+        return False
+    new_axis = str(dup.get("narrative_axis") or "unspecified")
+    ex_axis = str(dup.get("existing_narrative_axis") or "unspecified")
+    if "unspecified" in (new_axis, ex_axis):
+        return False
+    return new_axis != ex_axis
+
+
 def _is_arc_duplicate_candidate(cand: dict) -> bool:
     """9th belt (2026-06-14): True if the planned article would hit the
     publisher's narrative-arc duplicate gate.
@@ -553,6 +643,10 @@ def _is_arc_duplicate_candidate(cand: dict) -> bool:
     narrative-arc twins. Skip on any arc duplicate hit — saves an agent slot
     that would otherwise produce a draft the publisher rejects.
 
+    Same-K axis waiver (2026-07-02): a hit whose existing article covers the
+    SAME K on a DIFFERENT specified narrative axis is a series deep-dive, not
+    a recycle — see _same_k_axis_waiver. Only non-waived hits block.
+
     Safe degradation: if arc_dedup module fails to import or experiment
     directory missing, return False (don't block refill on infra hiccup).
     """
@@ -563,7 +657,7 @@ def _is_arc_duplicate_candidate(cand: dict) -> bool:
         src = str(ROOT / "src")
         if src not in sys.path:
             sys.path.insert(0, src)
-        from volpred.publisher.arc_dedup import find_arc_duplicates  # noqa: E402
+        from volpred.publisher.arc_dedup import _normalize_ref, find_arc_duplicates  # noqa: E402
     except Exception as exc:
         _warn_refill("arc duplicate filter unavailable; candidate not blocked", exc)
         return False
@@ -586,11 +680,22 @@ def _is_arc_duplicate_candidate(cand: dict) -> bool:
         return False
     title_hint = str(cand.get("title") or "")
     try:
-        dups = find_arc_duplicates(title_hint, text, feed, days=90)
+        dups = find_arc_duplicates(title_hint, text, feed, days=90, new_refs=[k_id])
     except Exception as exc:
         _warn_refill(f"arc duplicate check failed for {k_id}; candidate not blocked", exc)
         return False
-    return bool(dups)
+    k_norm = _normalize_ref(k_id)
+    blocking: list[dict] = []
+    for d in dups:
+        if _same_k_axis_waiver(k_norm, d):
+            print(
+                f"  [refill] arc-dedup axis-waive {k_id}: prior same-K article "
+                f"{d.get('id')} is on axis '{d.get('existing_narrative_axis')}' != "
+                f"candidate axis '{d.get('narrative_axis')}' — series deep-dive allowed"
+            )
+            continue
+        blocking.append(d)
+    return bool(blocking)
 
 
 def _is_research_saturated(cand: dict) -> bool:
@@ -1194,11 +1299,15 @@ def refill(target: int, dry_run: bool = False) -> dict:
         fallback_pool.append(cand)
     fallback_pool.sort(key=lambda c: c.get("score") or 0, reverse=True)
     pool.extend(fallback_pool)
+    # 2026-07-02: score is augmented with the evidence-thickness bonus so that
+    # at equal cluster pressure a thick-evidence K outranks an equal-score thin
+    # one (error_log 15:15 root cause #5 counterweight). Cluster keys stay
+    # senior — the novelty quota still dominates the ordering.
     pool.sort(
         key=lambda c: (
             int(((c.get("topic_cluster_30d") or {}).get("count") or 0) > ((c.get("topic_cluster_30d") or {}).get("cap") or 999)),
             (c.get("topic_cluster_30d") or {}).get("count") or 0,
-            -(c.get("score") or 0),
+            -((c.get("score") or 0) + _evidence_thickness_bonus(str(c.get("k_id") or ""))),
             c.get("k_id") or "",
         )
     )

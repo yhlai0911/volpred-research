@@ -853,3 +853,151 @@ def test_journal_discovery_tier3_allows_after_24h():
     out = MODULE._journal_discovery_dispatch_task(tasks=existing_stale, existing_ids=set())
     assert len(out) == 1
     assert out[0]["id"].startswith("journal_discovery_")
+
+
+# ---------------------------------------------------------------------------
+# 9th-belt same-K axis waiver (2026-07-02, error_log 15:15 root cause #5 —
+# K1590-class false positives: same-K series deep-dives on a different
+# narrative axis were culled at refill by the axis-mismatch raw-entity
+# backstop, so evidence-rich K's systematically lost to new-but-thin topics).
+# ---------------------------------------------------------------------------
+
+_CAND_K = "K9901"
+# Classifies to narrative axis 'portfolio_allocation' ("hedge ratio" / "避險
+# 比例"), conclusion class 'positive_signal' ("顯著改善" + "通過檢定"), and
+# extracts 6 distinctive entities (GLD/SLV/copper/WTI/FXY/UNG) so arc v3's
+# >=5 raw-entity axis-mismatch backstop engages against same-entity priors.
+_CAND_README = (
+    "# K9901 黃金白銀銅避險比例\n"
+    "gld slv copper wti fxy ung 的 hedge ratio 與 asset allocation 檢驗。\n"
+    "結果顯著改善且通過檢定。\n"
+)
+
+
+def _arc_fixture(tmp_path, monkeypatch, existing_articles):
+    """Materialize experiments/k9901 + feed.json under tmp_path as MODULE.ROOT."""
+    kdir = tmp_path / "experiments" / _CAND_K.lower()
+    kdir.mkdir(parents=True)
+    (kdir / "README.md").write_text(_CAND_README, encoding="utf-8")
+    (kdir / f"{_CAND_K.lower()}_results.json").write_text("{}", encoding="utf-8")
+    feed = tmp_path / "storage" / "reports" / "feed.json"
+    feed.parent.mkdir(parents=True)
+    feed.write_text(json.dumps(existing_articles, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    monkeypatch.setattr(MODULE, "_FEED_CACHE", None)
+
+
+def _feed_article(*, refs, content, title):
+    from datetime import datetime, timezone
+
+    return {
+        "id": "mile_test_prior",
+        "title": title,
+        "content": content,
+        "status": "published",
+        "published_at": datetime.now(timezone.utc).isoformat(),
+        "details": {"experiment_refs": refs},
+    }
+
+
+def test_same_k_different_axis_waived_k1590_regression(tmp_path, monkeypatch):
+    """Same-K prior article on a DIFFERENT narrative axis must not block refill.
+
+    K1590-class false positive (52cab9a6d): a series deep-dive of the same K
+    inevitably shares >=5 raw entities with its prior article, so the v3
+    axis-mismatch backstop re-blocked it despite the genuinely different
+    reader-facing axis. The prior here classifies to 'regime_signal'
+    (壓力期/drawdown/回撤) while the candidate classifies to
+    'portfolio_allocation' (hedge ratio/避險比例) → waived, refill allowed.
+    """
+    prior = _feed_article(
+        refs=["K9901"],
+        title="壓力期回撤觀察",
+        content=(
+            "gld slv copper wti fxy ung 在壓力期的 drawdown 與回撤明顯。"
+            "結果顯著改善且通過檢定。"
+        ),
+    )
+    _arc_fixture(tmp_path, monkeypatch, [prior])
+    cand = {"k_id": _CAND_K, "title": "K9901 避險比例系列深挖"}
+    assert MODULE._is_arc_duplicate_candidate(cand) is False
+
+
+def test_same_k_same_axis_still_blocked(tmp_path, monkeypatch):
+    """Ghost-recycle protection intact: same K on the SAME axis keeps blocking."""
+    prior = _feed_article(
+        refs=["K9901"],
+        title="避險比例再檢驗",
+        content=(
+            "gld slv copper wti fxy ung 的 hedge ratio 與 asset allocation 檢驗。"
+            "結果顯著改善且通過檢定。"
+        ),
+    )
+    _arc_fixture(tmp_path, monkeypatch, [prior])
+    cand = {"k_id": _CAND_K, "title": "K9901 避險比例系列深挖"}
+    assert MODULE._is_arc_duplicate_candidate(cand) is True
+
+
+def test_different_k_different_axis_still_blocked(tmp_path, monkeypatch):
+    """Waiver is same-K-scoped: a different-K arc twin on another axis keeps
+    blocking via the >=5 raw-entity backstop (v3 2026-06-24 constraint that
+    'different axes' must not blanket-pass). This also proves the fixture
+    shape blocks absent the waiver — i.e. the waiver is what flips the
+    same-K case above."""
+    prior = _feed_article(
+        refs=["K8802"],
+        title="壓力期回撤觀察",
+        content=(
+            "gld slv copper wti fxy ung 在壓力期的 drawdown 與回撤明顯。"
+            "結果顯著改善且通過檢定。"
+        ),
+    )
+    _arc_fixture(tmp_path, monkeypatch, [prior])
+    cand = {"k_id": _CAND_K, "title": "K9901 避險比例系列深挖"}
+    assert MODULE._is_arc_duplicate_candidate(cand) is True
+
+
+def test_same_k_axis_waiver_conditions():
+    base = {
+        "shared_experiment_refs": ["K9901"],
+        "narrative_axis": "portfolio_allocation",
+        "existing_narrative_axis": "regime_signal",
+    }
+    assert MODULE._same_k_axis_waiver("K9901", base) is True
+    assert MODULE._same_k_axis_waiver(
+        "K9901", {**base, "existing_narrative_axis": "portfolio_allocation"}
+    ) is False
+    assert MODULE._same_k_axis_waiver(
+        "K9901", {**base, "narrative_axis": "unspecified"}
+    ) is False
+    assert MODULE._same_k_axis_waiver(
+        "K9901", {**base, "existing_narrative_axis": "unspecified"}
+    ) is False
+    assert MODULE._same_k_axis_waiver(
+        "K9901", {**base, "shared_experiment_refs": []}
+    ) is False
+    assert MODULE._same_k_axis_waiver("K8802", base) is False
+
+
+def test_evidence_thickness_bonus_thick_vs_thin(tmp_path, monkeypatch):
+    """Evidence-thickness counterweight (2026-07-02): thick evidence packages
+    (many test-stat keys + chart/table artifacts) earn +3; thin ones earn 0."""
+    monkeypatch.setattr(MODULE, "ROOT", tmp_path)
+    MODULE._EVIDENCE_BONUS_CACHE.clear()
+    thick = tmp_path / "experiments" / "k7701"
+    thick.mkdir(parents=True)
+    (thick / "k7701_results.json").write_text(
+        json.dumps({f"t_stat_{i}": 1.0 for i in range(80)}), encoding="utf-8"
+    )
+    (thick / "fig1.png").write_bytes(b"png")
+    (thick / "table1.csv").write_text("a,b\n", encoding="utf-8")
+    thin = tmp_path / "experiments" / "k7702"
+    thin.mkdir(parents=True)
+    (thin / "k7702_results.json").write_text('{"note": "thin"}', encoding="utf-8")
+    try:
+        assert MODULE._evidence_thickness_bonus("K7701") == 3
+        assert MODULE._evidence_thickness_bonus("K7702") == 0
+        assert MODULE._evidence_thickness_bonus("") == 0
+        assert MODULE._evidence_thickness_bonus("K_missing_dir") == 0
+    finally:
+        MODULE._EVIDENCE_BONUS_CACHE.clear()
