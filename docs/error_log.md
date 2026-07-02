@@ -28,6 +28,8 @@
 
 **教訓**：寫入含中文的 code/test 檔後至少跑一次 `pytest --collect-only`（或 `python -m py_compile`）；價值在防「測試檔本身壞掉」這種 gate 靜默失效。
 
+**CI sweep 已建（2026-07-02 14:30 follow-up）**：`scripts/audit_source_encoding.py` — src/tests/scripts 全部 .py 三檢（strict utf-8 decode 報 byte/line 位置、U+FFFD presence（`# fffd-ok:` escape hatch）、py_compile），0 容忍無 baseline，stdlib-only。掛載：`.github/workflows/source-encoding.yml`（CI）+ `scripts/git_hooks/pre-push` Gate 1（fail-open on env error、definitive corruption 才 block；`bash scripts/git_hooks/install.sh` 同步）。**首跑即抓到案例 #2**：`tests/test_alerts.py` 7 行註解同款 mojibake（commit 40705d839 loop-eng agent 寫入即損壞，collection 死掉還被 SUPABASE env error 掩蓋）— 已依語意重建，16/16 PASS。
+
 ## 2026-07-02 13:23 repo 遷移 backbone「宣稱已完成」與實測不符 — crontab 15 條 / 6 LaunchAgents / 41 shim 仍指 Desktop 舊路徑 — **FIXED + 全數驗證清零**
 
 **現象**：memory `project_repo_moved_out_of_desktop` 記載「同日已遷移：42 個 `~/.volpred/bin/*.sh`、6 個 LaunchAgent plist（已重載）、15 條 crontab」，但 13:17 實測：crontab 15 條 log 路徑、6 個 plist、41 個 shim script、repo 內 5 個 `scripts/cron_*.sh` 執行路徑 + `CLAUDE.md` workflow-index 連結**全部仍是** `/Users/yhlai0911/Desktop/volpred-research`。靠 Desktop symlink 能跑，但 launchd context 走 symlink 仍經過 Desktop TCC 檢查 — **遷移的根治目的（脫離 TCC）實際尚未達成**。
