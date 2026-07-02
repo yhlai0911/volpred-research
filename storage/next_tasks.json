@@ -43972,7 +43972,7 @@
     "title": "研究 backlog fallback: PM2.5 情緒型外生 regressor（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: PM2.5 情緒型外生 regressor（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）。識別乾淨（純情緒管道），補行為 vol 軸。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -43997,9 +43997,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-02T06:25:56.682169+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-02T06:07:14.800242+00:00"
+    "started_at": "2026-07-02T06:07:14.800242+00:00",
+    "completed_at": "2026-07-02T06:25:56.681964+00:00",
+    "result": "完成 PM2.5/AQI lagged regressor pilot：EPA NY County daily AQI 2020-2024 + SPY/^VIX daily data，三件套與圖表落在 experiments/research_pm2_5_regressor_nber_w22753_heyes_neidell_saberi/。結論 NULL：OOS 2023-2024 base QLIKE 0.40344 vs AQI add-on 0.40567，DM-HAC p=0.531；knowledge item dd67c40a 已寫入。"
   },
   {
     "id": "email-12487-f387d6",
