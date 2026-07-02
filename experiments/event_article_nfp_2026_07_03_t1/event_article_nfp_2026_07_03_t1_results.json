@@ -1,0 +1,121 @@
+{
+  "as_of_date": "2026-07-01",
+  "nfp_release_date": "2026-07-03",
+  "data_source": "yfinance (SPY, ^VIX, ^VIX9D daily close)",
+  "n_historical_nfp_events": 13,
+  "current_snapshot": {
+    "vix_close_latest": 16.59,
+    "vix_close_latest_date": "2026-07-01",
+    "vix9d_close_latest_print": 16.8,
+    "vix9d_close_latest_print_date": "2026-06-26",
+    "vix9d_data_lag_days_vs_vix": 5,
+    "vix9d_over_vix_ratio_same_date": 0.9125,
+    "vix9d_over_vix_ratio_same_date_basis": "2026-06-26",
+    "spy_5d_realized_vol_annualized_pct": 14.41,
+    "spy_20d_realized_vol_annualized_pct": 18.28
+  },
+  "historical_nfp_day_stats": {
+    "spy_ret_day0_mean_pct": -0.185,
+    "spy_ret_day0_median_pct": 0.098,
+    "spy_ret_day0_std_pct": 1.168,
+    "spy_up_day_win_rate_pct": 53.8,
+    "vix_chg_day0_mean_pts": 0.991,
+    "vix_chg_day0_median_pts": 0.02,
+    "pct_events_vix_fell_pct": 46.2,
+    "spy_ret_next_day_mean_pct": 0.411
+  },
+  "historical_nfp_table": [
+    {
+      "nfp_date_proxy": "2025-06-06",
+      "trading_day": "2025-06-06",
+      "spy_ret_day0_pct": 1.027,
+      "vix_chg_day0_pts": -1.71,
+      "spy_ret_next_day_pct": 0.09
+    },
+    {
+      "nfp_date_proxy": "2025-07-04",
+      "trading_day": "2025-07-07",
+      "spy_ret_day0_pct": -0.745,
+      "vix_chg_day0_pts": 1.41,
+      "spy_ret_next_day_pct": -0.055
+    },
+    {
+      "nfp_date_proxy": "2025-08-01",
+      "trading_day": "2025-08-01",
+      "spy_ret_day0_pct": -1.639,
+      "vix_chg_day0_pts": 3.66,
+      "spy_ret_next_day_pct": 1.52
+    },
+    {
+      "nfp_date_proxy": "2025-09-05",
+      "trading_day": "2025-09-05",
+      "spy_ret_day0_pct": -0.29,
+      "vix_chg_day0_pts": -0.12,
+      "spy_ret_next_day_pct": 0.246
+    },
+    {
+      "nfp_date_proxy": "2025-10-03",
+      "trading_day": "2025-10-03",
+      "spy_ret_day0_pct": -0.001,
+      "vix_chg_day0_pts": 0.02,
+      "spy_ret_next_day_pct": 0.359
+    },
+    {
+      "nfp_date_proxy": "2025-11-07",
+      "trading_day": "2025-11-07",
+      "spy_ret_day0_pct": 0.098,
+      "vix_chg_day0_pts": -0.42,
+      "spy_ret_next_day_pct": 1.56
+    },
+    {
+      "nfp_date_proxy": "2025-12-05",
+      "trading_day": "2025-12-05",
+      "spy_ret_day0_pct": 0.19,
+      "vix_chg_day0_pts": -0.37,
+      "spy_ret_next_day_pct": -0.3
+    },
+    {
+      "nfp_date_proxy": "2026-01-02",
+      "trading_day": "2026-01-02",
+      "spy_ret_day0_pct": 0.183,
+      "vix_chg_day0_pts": -0.44,
+      "spy_ret_next_day_pct": 0.666
+    },
+    {
+      "nfp_date_proxy": "2026-02-06",
+      "trading_day": "2026-02-06",
+      "spy_ret_day0_pct": 1.918,
+      "vix_chg_day0_pts": -1.4,
+      "spy_ret_next_day_pct": 0.482
+    },
+    {
+      "nfp_date_proxy": "2026-03-06",
+      "trading_day": "2026-03-06",
+      "spy_ret_day0_pct": -1.311,
+      "vix_chg_day0_pts": 5.74,
+      "spy_ret_next_day_pct": 0.876
+    },
+    {
+      "nfp_date_proxy": "2026-04-03",
+      "trading_day": "2026-04-06",
+      "spy_ret_day0_pct": 0.473,
+      "vix_chg_day0_pts": 0.3,
+      "spy_ret_next_day_pct": 0.044
+    },
+    {
+      "nfp_date_proxy": "2026-05-01",
+      "trading_day": "2026-05-01",
+      "spy_ret_day0_pct": 0.277,
+      "vix_chg_day0_pts": 0.1,
+      "spy_ret_next_day_pct": -0.366
+    },
+    {
+      "nfp_date_proxy": "2026-06-05",
+      "trading_day": "2026-06-05",
+      "spy_ret_day0_pct": -2.581,
+      "vix_chg_day0_pts": 6.11,
+      "spy_ret_next_day_pct": 0.226
+    }
+  ],
+  "notes": "NFP release dates approximated via first-Friday-of-month rule (standard BLS schedule pattern); a small number of months may shift by BLS holiday adjustment, not individually re-verified against BLS calendar for each of the 13 dates. spy_ret_day0 = close-to-close return on the trading day matching/following the release date. vix_chg_day0 = VIX close on release day minus VIX close on prior trading day. No lookahead: all stats use only data at/after each historical date; current_snapshot uses only data through as_of_date (2026-07-01), strictly before the 2026-07-03 release. KNOWN DATA GAP: yfinance ^VIX9D series stops printing 2026-06-26 (verified via yf.Ticker.history), i.e. it lags the ^VIX series by several trading sessions as of the as_of_date. To avoid mixing two different calendar dates into one ratio, vix9d_over_vix_ratio_same_date is computed on the last date BOTH series have a print (2026-06-26), not on the as_of_date. This is disclosed verbatim in the article; no value was invented to fill the gap."
+}
