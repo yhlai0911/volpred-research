@@ -44400,7 +44400,7 @@
     "id": "paper_body_leverage_direction_method_null_reframe_20260702",
     "task_type": "paper_body",
     "priority": 2,
-    "status": "pending_main_thread",
+    "status": "succeeded",
     "title": "[論文管線] leverage-direction → 方法診斷+null 重定位 body 重寫（owner email-12500 拍板 Option A，投 IJF methods / FRL）",
     "description": "**Owner email-12500 (2026-07-02 12:44) 拍板 Option A：降格重定位為『方法診斷 + honest null result』論文，投 IJF methods track / FRL。**\n\n背景：2026-07-02 IJF multi-round review = FAIL_DO_NOT_ADVANCE。前一次 complexity-ceiling reframe 雖 mechanical gates 全綠（reproduce 171/171、compliance CLEAN、compile 35pp），但 review 判 prose 仍隱含正向 wedge finding，與誠實 same-windows/single-protocol data 矛盾。誠實 rebuild（K1591 gold regime 弱/NS + K1592 model-selection OOS NULL, 0 Harvey-Holm sig）確認：**無 JBF-grade 正向實證結果**。Option A 正面承認 null，貢獻定位在方法框架 + 誠實 null 本身。\n\n**核心定位轉變（vs 舊 complexity-ceiling plan）**：headline 不再是任何正向『wedge/ceiling 效應』宣稱，而是**方法論診斷 + null result**——『measurement-to-allocation』框架下，leverage-direction taxonomy 的實證訊號在 pre-specified + OOS + multiple-testing 修正後為 null/weak；論文貢獻 = 嚴謹可復現的評估框架 + 誠實 null 的 forecasting/allocation 教訓，不是正向發現。IJF/FRL 皆歡迎 informative null。\n\n**必修 blocking findings（承接 IJF review FAIL）**：\n1. tab:vt 用 asset-native windows → allocation-level wedge prose 與 same-windows/single-protocol 宣稱矛盾。修法：要嘛統一到 same-windows、要嘛把 prose 改成明確承認 window heterogeneity 為 null-context，不留矛盾。\n2. body_v_ijf 的 VT/N=14 prose claims 未被 reproduce.py 完全 gate。修法：每個保留數字都要 traceable 進 reproduce.py，否則刪除或降為明確 caveat。\n3. IJF package docs / title-page disclosure 仍 stale/draft → 更新到 method-null 定位。\n4. **Divergent manuscript 收斂**：main.tex(515) vs main_v3.tex(680) 並存風險（paper-update 抓 most-recently-modified 為 canonical → 可能發佈 stale 680-line）。收斂到單一 canonical（method-null 版），其餘歸檔 _archive/，杜絕 parallel-version drift。\n\n**主要動作（分 hourly tick，主線程執行，heavy recompute 走 compute_queue）**：\nt1: abstract/title/highlights/intro 重寫為 method-diagnosis + null framing；lock ONE central claim（method + honest null）。\nt2: Empirical Results 全面 de-claim——移除所有 unconditional inverted-leverage / positive allocation-wedge 宣稱，改為明確 null/weak 陳述 + effect size + CI 橫跨 0。\nt3: 解決 tab:vt window 矛盾（統一或明確標 null-context）+ 確保每數字 reproduce-gated。\nt4: Implications/Conclusion 重寫（practitioner: 別 over-engineer；researcher: in-sample refinement 罕能撐過誠實 OOS）。\nt5: manuscript 收斂單一 canonical + package docs/title-page/cover-letter 更新為 IJF-methods/FRL 定位。\nt6: reproduce.py match_rate ≥95% + compliance re-scrub（author=Yi-Hao Lai only；無 K-id/VolPred/AI）。\n\n**PDCA advance gate**：新一輪 codex multi-round review（latex-academic-reviewer + citation-verifier + journal-review IJF/FRL）+ contribution gate（methods-track：貢獻=方法框架+誠實 null，非裸方法規則）全 PASS/CONDITIONAL_PASS → 才可 arXiv-ready。**在此之前 do_not_advance=True。**\n\n**Skill 依賴**：paper-update / paper-submission-pipeline / finance-paper-quality / journal-review。\n**Model routing**：paper_body → opus high。Body writing & narrative 一律 MAIN THREAD（CLAUDE.md：paper .tex 禁 background agent）。\n\n**Deliverables**：canonical method-null manuscript（收斂後單一版）+ 更新 highlights + cover_letter（IJF methods / FRL）。",
     "source": "email-12500-owner-decision-A-method-null-reframe",
@@ -44434,11 +44434,28 @@
         "to": "pending_main_thread",
         "by": "hourly-02",
         "note": "A-tick-1 DONE (2026-07-03, commit bc0630965): IJF title/abstract/highlights + intro/results-anchors/synthesis/conclusion reframed to method-null (K1591 gold CI spans 0, K1592 verdict NULL_OR_WEAK 0/N Harvey-Holm sig). Blocking finding #1 (same-windows overclaim) addressed at claim level. NEXT = A-tick-2: full Empirical Results de-claim + wire K1592/K1591 as reproduce-gated tabulated numbers + tab:vt window note; then A-tick-3 manuscript convergence (archive JBF-era main/body) + package docs + reproduce.py>=95% + compliance re-scrub. do_not_advance stays True until new codex multi-round review PASS."
+      },
+      {
+        "ts": "2026-07-02T19:10:24.128595+00:00",
+        "from": "pending_main_thread",
+        "to": "claimed",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-02T19:24:58.471572+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-03"
       }
     ],
     "started_at": "2026-07-02T18:15:18.571180+00:00",
     "handoff_note": "A-tick-1 DONE (2026-07-03, commit bc0630965): IJF title/abstract/highlights + intro/results-anchors/synthesis/conclusion reframed to method-null (K1591 gold CI spans 0, K1592 verdict NULL_OR_WEAK 0/N Harvey-Holm sig). Blocking finding #1 (same-windows overclaim) addressed at claim level. NEXT = A-tick-2: full Empirical Results de-claim + wire K1592/K1591 as reproduce-gated tabulated numbers + tab:vt window note; then A-tick-3 manuscript convergence (archive JBF-era main/body) + package docs + reproduce.py>=95% + compliance re-scrub. do_not_advance stays True until new codex multi-round review PASS.",
-    "handoff_at": "2026-07-02T18:22:43.537334+00:00"
+    "handoff_at": "2026-07-02T18:22:43.537334+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-07-02T19:10:24.128358+00:00",
+    "claim_session_id": "82ea791b010a",
+    "completed_at": "2026-07-02T19:24:58.471294+00:00",
+    "result": "A-tick-2 done + codex-verified: honest-null body reframe COMPLETE. Fixed 2 residual positive section headers (§5.2 Conditional Gains→No Robust OOS Superiority; §6.1 Complexity Ceiling→Synthesis: Three Views of the Null) + 2 loose 'gains' words; codex adversarial review found+fixed 5 more residual positive-wedge implications (SPY 'wins significantly', BTC 'necessary...plausibly help', intro 'predicts', §5.4 'ruling out', Table 3 caption 'improvement'/DM stars). xelatex 36pp exit0 clean, no undefined, no residual positive-wedge. Paper stays gated; next gate=fresh full multi-round IJF/FRL review (codex) queued as paper_review_leverage_direction_honest_null_reframe_multiround_20260703. title-page AI-disclosure + paper-update stale-main guard = separate (boss policy / interactive schema)."
   },
   {
     "id": "platform_ops_graphify_codeonly_14d_verdict_20260716",
@@ -45461,5 +45478,23 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-02T18:08:39+00:00"
+  },
+  {
+    "id": "paper_review_leverage_direction_honest_null_reframe_multiround_20260703",
+    "title": "leverage-direction honest-null reframe: fresh full multi-round IJF/FRL review (codex)",
+    "description": "leverage-direction body honest-null reframe (A-tick-1 + A-tick-2) COMPLETE + codex-verified (see paper/leverage-direction/reframe_atick2_complete_20260703.md). Prior IJF multi-round review FAILED on old positive-wedge prose; that prose is now removed. NEXT GATE per boss rule (多輪 review 全用 codex exec): run journal-review skill = latex-academic-reviewer + citation-verifier + IJF/FRL journal-specific format+substance+contribution-gate review of main_v_ijf.tex, ALL via codex exec. Confirm (a) no residual positive-wedge / over-claim, (b) contribution gate = genuine method+null contribution not mere econometric exercise, (c) compliance (author=Yi-Hao Lai only, no volpred/AI/LLM). Paper stays GATED (do_not_advance) + do NOT run paper-update (sees stale JBF main.tex) until review converges + owner submission decision. main-thread orchestrates; codex runs the passes.",
+    "priority": 2,
+    "status": "pending",
+    "task_type": "paper_review",
+    "created_at": "2026-07-03T03:24:48+08:00",
+    "source": "auto_followup",
+    "tags": [
+      "paper",
+      "leverage-direction",
+      "ijf",
+      "frl",
+      "honest-null",
+      "codex-review-gate"
+    ]
   }
 ]
