@@ -44129,7 +44129,7 @@
     "title": "研究 backlog fallback: Direct-indexing / tax-loss-harvesting crowding 是否製造年末 single-stock RV reversal",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Direct-indexing / tax-loss-harvesting crowding 是否製造年末 single-stock RV reversal — 用 S&P 500 / Russell 1000 current constituents（Wikipedia + yfinance/Stooq；承認 survivorship）建 YTD loser / high-unrealized-loss proxy，搭 December tax-loss window、wash-sale 31-day window、ETF replacement basket（sector ETF / sa | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44158,20 +44158,35 @@
         "to": "pending",
         "by": "hourly-13",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-02T07:11:31.741618+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-02T07:11:31.975439+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-15"
       }
     ],
-    "started_at": "2026-07-02T05:17:58.030031+00:00",
+    "started_at": "2026-07-02T07:11:31.975203+00:00",
     "compute_job": "compute_k1602",
     "k_id": "K1602",
     "dispatch_note": "hourly-13: full experiment script written+smoke-tested (experiments/k1602/), enqueued to compute_queue as compute_k1602; interpretation+Codex review+knowledge via followup next hourly PHASE A",
-    "last_released_at": "2026-07-02T06:13:05.558040+00:00"
+    "last_released_at": "2026-07-02T06:13:05.558040+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-07-02T07:11:31.741335+00:00",
+    "claim_session_id": "ba398b0b6e57"
   },
   {
     "id": "research_shareholder_democracy_public_goods_vote_risk_n_p",
     "title": "研究 backlog fallback: Shareholder-democracy public-goods vote risk：N-PX / contested ESG proposal 是否預測 firm RV 與 sector spillover",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Shareholder-democracy public-goods vote risk：N-PX / contested ESG proposal 是否預測 firm RV 與 sector spillover — 用 SEC Form N-PX、company proxy statements、annual-meeting dates、major shareholder proposal outcomes 建公開 vote-event set，標記 environmental/social/public-goods proposal、close vote、large index-manag | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44180,7 +44195,25 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T04:09:23+00:00"
+    "created_at": "2026-07-02T04:09:23+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-02T07:28:22.102347+00:00",
+    "claim_session_id": "02fdc262f080",
+    "status_history": [
+      {
+        "ts": "2026-07-02T07:28:22.102592+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-02T07:28:26.845736+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-02T07:28:26.845471+00:00"
   },
   {
     "id": "email-12493-c51a31",
@@ -44403,5 +44436,142 @@
     "started_at": "2026-07-02T06:41:27.474734+00:00",
     "completed_at": "2026-07-02T06:41:27.684120+00:00",
     "result": "回答'一切正常了？'：搬家後遺症 8 項即時 grep 全綠已確認；巡檢另抓到 daily_update_intraday cron 14:00 exit1(library load disallowed by system policy)=venv重建撞cron的transient失敗，重跑exit0(292s)清掉host_cron_fail critical breach；剩1個content_quality warn非搬家相關。close email fa7028ae 已寄"
+  },
+  {
+    "id": "paper_review_mile_b88ee7bc",
+    "title": "Paper review (Codex 24h-rule): 把五分鐘資料切得更細，預測真的會更準嗎？台指期給了一個保守答案",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_b88ee7bc needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_b88ee7bc",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-02T07:08:29+00:00",
+    "claimed_by": "hourly-15",
+    "claimed_at": "2026-07-02T07:27:35.880689+00:00",
+    "claim_session_id": "ea4612236785",
+    "status_history": [
+      {
+        "ts": "2026-07-02T07:27:35.880972+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-02T07:27:36.114221+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-02T07:39:58.583210+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-15"
+      }
+    ],
+    "started_at": "2026-07-02T07:27:36.113958+00:00",
+    "completed_at": "2026-07-02T07:39:58.582972+00:00",
+    "result": "Codex 24h-rule review (K1018): VERDICT=CONDITIONAL_PASS. Lookahead CLEAN (shift1+expanding OOS), 數字 MATCH (+1.94%/+2.05%/N=1697/2219d/SPY51/0050-38/252gate 對得上 K1582_results.json), QLIKE 方向 CLEAN, DM overclaim NONE (HARQ DM p=0.0094 但 t=-2.60 未過 Harvey t<-3, 文章正確標 directional-only). 唯一必修=模型數量透明度: 文章原寫兩修正版但實跑 4 模型, 漏 HARQ_full(+1.54%). 已透過 publish_draft.py --update codex_review_fix 在引言揭露第三版本+errata audit, feed.json+reports/<id>.json 同步, Supabase sync-all 傳播中(dead-letter drain backstop)."
+  },
+  {
+    "id": "research_anti_stockholder_identity_retail_risk_off_volati",
+    "title": "研究 backlog fallback: Anti-stockholder identity /「不持股」情緒作 retail-risk-off volatility proxy",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Anti-stockholder identity /「不持股」情緒作 retail-risk-off volatility proxy — 用 Google Trends（stock market gambling / stocks are rigged / do not own stocks 類詞）、Gallup/Fed SCF stock-ownership low-frequency anchor、AAII sentiment、FINRA margin/retail proxy（若可得）建 anti-stock identity index，檢定其是否領先 meme/retail-he | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "anti_stockholder_identity_retail_risk_off_volati",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T07:08:36+00:00"
+  },
+  {
+    "id": "research_mortgage_rate_lock_in_housing_turnover_freeze_ho",
+    "title": "研究 backlog fallback: Mortgage-rate lock-in / housing turnover freeze 是否領先 homebuilder、brokerage、regional-bank RV",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Mortgage-rate lock-in / housing turnover freeze 是否領先 homebuilder、brokerage、regional-bank RV — 用 FRED MORTGAGE30US、MBA/FHFA 或公開 outstanding mortgage rate proxy、existing-home sales / inventory / months-supply release-lagged series，建 lock-in wedge（current mortgage rate minus embedded mortgage-rate prox | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "mortgage_rate_lock_in_housing_turnover_freeze_ho",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T07:08:42+00:00"
+  },
+  {
+    "id": "research_tokenised_treasury_money_market_fund_aum_shock_t",
+    "title": "研究 backlog fallback: Tokenised Treasury / money-market fund AUM shock 是否外溢到 T-bill ETF liquidity-vol",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Tokenised Treasury / money-market fund AUM shock 是否外溢到 T-bill ETF liquidity-vol — 用 RWA.xyz / issuer public pages（BUIDL、OUSG 等）或 DefiLlama RWA dashboard 建 tokenised Treasury/MMF AUM growth，搭 SHV/BIL/SGOV/USFR/TFLO、SOFR/IORB、BTC/ETH ETF volume，檢定 AUM shock 是否領先 short-end Treasury ETF high-low spread  | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "tokenised_treasury_money_market_fund_aum_shock_t",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T07:22:36+00:00"
+  },
+  {
+    "id": "research_mutual_fund_to_etf_active_etf_conversion_event_w",
+    "title": "研究 backlog fallback: Mutual-fund-to-ETF / active ETF conversion event 是否改變 wrapper liquidity 與 underlying RV",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Mutual-fund-to-ETF / active ETF conversion event 是否改變 wrapper liquidity 與 underlying RV — 用 issuer press releases、SEC 425 / N-14 filings、Morningstar/JPMAM conversion lists 建 conversion event calendar，對 converted ETF、同 category ETF、underlying factor/sector basket 做 announcement-to-conversion 與 listin | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "mutual_fund_to_etf_active_etf_conversion_event_w",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T07:25:47+00:00"
+  },
+  {
+    "id": "research_sports_betting_legalization_betting_handle_shock",
+    "title": "研究 backlog fallback: Sports-betting legalization / betting-handle shock 是否抽走 retail risk budget 並放大 gambling-stock RV",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Sports-betting legalization / betting-handle shock 是否抽走 retail risk budget 並放大 gambling-stock RV — 用 state legalization / launch dates、public sports-betting handle/revenue、major sports calendar，映射 DKNG/FLUT/PENN/MGM/BETZ、lottery-like retail basket、IWM/ARKK，檢定 launch 或 handle-surprise 後 t+5/t+22 abno | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "sports_betting_legalization_betting_handle_shock",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T07:35:48+00:00"
+  },
+  {
+    "id": "research_glp_1_adoption_shock_sector_consumption_healthca",
+    "title": "研究 backlog fallback: GLP-1 adoption shock 作跨 sector consumption / healthcare repricing volatility factor",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: GLP-1 adoption shock 作跨 sector consumption / healthcare repricing volatility factor — 用 FDA approval / label-expansion dates、Google Trends（Ozempic/Wegovy/Mounjaro/Zepbound）、public earnings-call mention counts 或 SEC filing text 建 GLP-1 attention/adoption proxy，映射 LLY/NVO、DXCM/TNDM、XLP、restaurant bask | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "glp_1_adoption_shock_sector_consumption_healthca",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T07:35:48+00:00"
   }
 ]
