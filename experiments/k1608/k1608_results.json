@@ -1,0 +1,714 @@
+{
+  "experiment_id": "k1608",
+  "title": "Blockbuster movie / entertainment-attention shock as market mood and discretionary RV prior",
+  "run_at": "2026-07-02T23:39:09.679103+00:00",
+  "seed": 42,
+  "verdict": {
+    "verdict": "NULL",
+    "claim": "The public Wikipedia box-office proxy does not clear the strict SPY return/RV gate.",
+    "primary_gate": "SPY shock coefficient must have predicted sign and HAC |t| >= 3 for return and/or log RV ratio.",
+    "spy_return_hac_t": -0.8979537816653412,
+    "spy_return_coef": -0.0020094770893346356,
+    "spy_log_rv_ratio_hac_t": 0.03425573148134002,
+    "spy_log_rv_ratio_coef": 0.0017575153678622123
+  },
+  "literature": [
+    {
+      "citation": "Hong and Wei (2025), Review of Finance, 'Blockbuster or Bust? Silver Screen Effect and Stock Returns'",
+      "url": "https://academic.oup.com/rof/article/29/2/603/7990917",
+      "use_in_design": "Motivates blockbuster releases as exogenous entertainment mood shocks; this K tests a public proxy footprint on RV."
+    },
+    {
+      "citation": "Liu et al. (2024), Journal of Behavioral and Experimental Finance, 'When Hollywood movies steal the show...'",
+      "url": "https://www.sciencedirect.com/science/article/pii/S1057521924004332",
+      "use_in_design": "Motivates investor inattention / market-comovement channels around film releases."
+    },
+    {
+      "citation": "Da, Engelberg, and Gao (2011), Journal of Finance, 'In Search of Attention'",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.2011.01679.x",
+      "use_in_design": "Supports search / attention proxies as distinct from volume/news proxies; Google Trends is noted but not used here due API fragility."
+    },
+    {
+      "citation": "Edmans, Garcia, and Norli (2007), Journal of Finance, 'Sports Sentiment and Stock Returns'",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1540-6261.2007.01262.x",
+      "use_in_design": "Mood-event precedent; reinforces conservative event-window interpretation."
+    },
+    {
+      "citation": "Hirshleifer and Shumway (2003), Journal of Finance, 'Good Day Sunshine'",
+      "url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/1540-6261.00556",
+      "use_in_design": "Classic mood-market relation; treated as motivation, not proof for this proxy."
+    }
+  ],
+  "hypothesis": {
+    "primary": "If blockbuster entertainment shocks improve broad investor mood or crowd attention away from markets, subsequent-week SPY returns may be higher and/or realized volatility lower.",
+    "secondary": "Consumer-discretionary and entertainment-exposed assets may show larger return/RV footprint than broad market ETFs."
+  },
+  "data_sources": {
+    "box_office": "Wikipedia annual 'List of YYYY box office number-one films in the United States' tables",
+    "market_prices": "yfinance daily adjusted close via yf.download(auto_adjust=True)",
+    "vix_control": "yfinance ^VIX close, lagged to last close before weekend end"
+  },
+  "methodology": {
+    "shock_definition": "log(gross_usd) z-score relative to the prior 52 weekend number-one gross observations, shifted by one weekend; shock if z >= 1.5; minimum prior observations = 26.",
+    "event_timing": "Weekend end date is treated as the signal timestamp; outcomes are the next five trading days strictly after that date.",
+    "outcomes": [
+      "fwd5_return: sum of next five daily log returns",
+      "fwd5_rv_ann: annualized stdev of next five daily returns",
+      "log_fwd5_rv_ratio: log(fwd5_rv_ann / prior20_rv_ann)",
+      "downside_semivar_5d_ann: annualized mean squared negative returns over next five days"
+    ],
+    "controls": [
+      "SPY prior five-day return momentum",
+      "SPY prior 20-day realized volatility",
+      "lagged VIX close",
+      "holiday_or_closure_week",
+      "first-Friday NFP proxy week",
+      "mid-month CPI proxy week",
+      "FOMC-month Wednesday proxy week",
+      "month fixed effects"
+    ],
+    "inference": "OLS with Newey-West/HAC lag 4 for weekly rows plus year-cluster bootstrap difference in means (5000 reps, seed=42).",
+    "lookahead_controls": [
+      "gross_z_trailing52 uses .shift(1) trailing distribution",
+      "outcomes start after weekend_end via searchsorted(..., side='right')",
+      "financial controls are lagged to pre-target window"
+    ]
+  },
+  "sample": {
+    "calendar_start": "2005-01-09",
+    "calendar_end": "2026-06-21",
+    "n_weekends": 1098,
+    "n_signal_available": 1072,
+    "n_blockbuster_shocks": 96,
+    "n_assets": 8
+  },
+  "data_quality": {
+    "wiki_years_requested": [
+      2005,
+      2026
+    ],
+    "wiki_years_ok": [
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ],
+    "wiki_year_failures": [],
+    "box_office_rows_total": 1098,
+    "signal_available_rows": 1072,
+    "blockbuster_shock_rows": 96,
+    "price_columns_available": [
+      "AMC",
+      "CMCSA",
+      "DIS",
+      "EA",
+      "IWM",
+      "NFLX",
+      "QQQ",
+      "RBLX",
+      "SPY",
+      "TTWO",
+      "XLY",
+      "^VIX"
+    ],
+    "event_panel_rows": 8124,
+    "assets_with_rows": {
+      "AMC": 627,
+      "DIS": 1071,
+      "ENTERTAINMENT_BASKET": 1071,
+      "IWM": 1071,
+      "NFLX": 1071,
+      "QQQ": 1071,
+      "SPY": 1071,
+      "XLY": 1071
+    },
+    "entertainment_basket_members_configured": [
+      "DIS",
+      "NFLX",
+      "AMC",
+      "CMCSA",
+      "EA",
+      "TTWO",
+      "RBLX"
+    ],
+    "google_trends_status": "Not used. Prior project runs show pytrends is rate-limit fragile; this K keeps the reported result on reproducible Wikipedia + yfinance data and labels it a proxy diagnostic.",
+    "macro_calendar_control_status": "Uses deterministic public-calendar proxies: first-Friday NFP, mid-month CPI window, and mid-month Wednesday FOMC-month proxy. These are controls, not exact historical releases."
+  },
+  "asset_results": {
+    "AMC": {
+      "fwd5_return": {
+        "ols_hac": {
+          "ok": true,
+          "n": 626,
+          "n_shock": 61,
+          "coef": 0.01549971784721762,
+          "se_hac_lag4": 0.016986482294251974,
+          "t_hac_lag4": 0.9124736704586883,
+          "p_hac_lag4": 0.3615194236729138,
+          "ci95_low": -0.01779378744951625,
+          "ci95_high": 0.048793223143951486,
+          "r2": 0.029576044249388422
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": 0.016490019905354092,
+          "ci95_low": -0.00406641427642615,
+          "ci95_high": 0.03978618450357517,
+          "p_sign_two_sided": 0.1232
+        }
+      },
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 626,
+          "n_shock": 61,
+          "coef": 0.1555195459108457,
+          "se_hac_lag4": 0.08716517313460144,
+          "t_hac_lag4": 1.7841936213525404,
+          "p_hac_lag4": 0.07439220844683014,
+          "ci95_low": -0.015324193432973116,
+          "ci95_high": 0.3263632852546645,
+          "r2": 0.06009340374232952
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": 0.13330487436652527,
+          "ci95_low": -0.015371692525935197,
+          "ci95_high": 0.3455183232380349,
+          "p_sign_two_sided": 0.092
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 626,
+          "n_shock": 61,
+          "coef": 0.01033654791297662,
+          "se_hac_lag4": 0.10120316760843691,
+          "t_hac_lag4": 0.10213660458701791,
+          "p_hac_lag4": 0.9186482466678682,
+          "ci95_low": -0.18802166059955971,
+          "ci95_high": 0.20869475642551294,
+          "r2": 0.05658112615602573
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.08139318653335276,
+          "ci95_low": -0.2736258879392018,
+          "ci95_high": 0.13137064139157625,
+          "p_sign_two_sided": 0.4012
+        }
+      }
+    },
+    "DIS": {
+      "fwd5_return": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.004533775564956866,
+          "se_hac_lag4": 0.003233779219210593,
+          "t_hac_lag4": -1.4020052878141815,
+          "p_hac_lag4": 0.1609136676696853,
+          "ci95_low": -0.010871982834609628,
+          "ci95_high": 0.0018044317046958958,
+          "r2": 0.026634154077861738
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.0030926254307755674,
+          "ci95_low": -0.00850743471183796,
+          "ci95_high": 0.0020844594782138456,
+          "p_sign_two_sided": 0.2496
+        }
+      },
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.031152697048451874,
+          "se_hac_lag4": 0.06441066948317037,
+          "t_hac_lag4": -0.4836574017693086,
+          "p_hac_lag4": 0.6286290296796841,
+          "ci95_low": -0.1573976092354658,
+          "ci95_high": 0.09509221513856204,
+          "r2": 0.06960226187225815
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.039174653367297446,
+          "ci95_low": -0.15598403395038601,
+          "ci95_high": 0.06523047466764657,
+          "p_sign_two_sided": 0.49
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.001992327705732442,
+          "se_hac_lag4": 0.005730916933962604,
+          "t_hac_lag4": -0.3476455388710128,
+          "p_hac_lag4": 0.7281064018859538,
+          "ci95_low": -0.013224924896299145,
+          "ci95_high": 0.009240269484834262,
+          "r2": 0.25072156740991713
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.010545793576765862,
+          "ci95_low": -0.02748120220553845,
+          "ci95_high": 0.0023714381225973034,
+          "p_sign_two_sided": 0.1292
+        }
+      }
+    },
+    "ENTERTAINMENT_BASKET": {
+      "fwd5_return": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.001849094498552931,
+          "se_hac_lag4": 0.0034038703843180117,
+          "t_hac_lag4": 0.5432329348003095,
+          "p_hac_lag4": 0.5869694331005499,
+          "ci95_low": -0.004822491454710372,
+          "ci95_high": 0.008520680451816235,
+          "r2": 0.018776063972370305
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": 0.002738926149510175,
+          "ci95_low": -0.002914608425004539,
+          "ci95_high": 0.008382695425283273,
+          "p_sign_two_sided": 0.3396
+        }
+      },
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.038499307911428575,
+          "se_hac_lag4": 0.054644936760839626,
+          "t_hac_lag4": 0.7045356842469338,
+          "p_hac_lag4": 0.481099235562635,
+          "ci95_low": -0.06860476813981708,
+          "ci95_high": 0.14560338396267425,
+          "r2": 0.09093246858426507
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": 0.03208843633082244,
+          "ci95_low": -0.07376643540121042,
+          "ci95_high": 0.1374398115793168,
+          "p_sign_two_sided": 0.5412
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.0009735453467212463,
+          "se_hac_lag4": 0.005071669377356717,
+          "t_hac_lag4": -0.1919575733914746,
+          "p_hac_lag4": 0.8477754388599391,
+          "ci95_low": -0.010914017326340411,
+          "ci95_high": 0.008966926632897918,
+          "r2": 0.2577682028336662
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.011750739958934074,
+          "ci95_low": -0.02673860988618282,
+          "ci95_high": 0.0015342856609598893,
+          "p_sign_two_sided": 0.0852
+        }
+      }
+    },
+    "IWM": {
+      "fwd5_return": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.002495231667985644,
+          "se_hac_lag4": 0.0029722418839351625,
+          "t_hac_lag4": -0.8395116432051718,
+          "p_hac_lag4": 0.40118225828979537,
+          "ci95_low": -0.008320825760498562,
+          "ci95_high": 0.0033303624245272744,
+          "r2": 0.01698234220322925
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.0017532570246018525,
+          "ci95_low": -0.006615608240200348,
+          "ci95_high": 0.0032680055112095136,
+          "p_sign_two_sided": 0.4964
+        }
+      },
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.01323048653977969,
+          "se_hac_lag4": 0.048010116442745276,
+          "t_hac_lag4": -0.27557705583900793,
+          "p_hac_lag4": 0.7828729342986454,
+          "ci95_low": -0.10733031476756043,
+          "ci95_high": 0.08086934168800104,
+          "r2": 0.14447439416191143
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.007131890033839947,
+          "ci95_low": -0.13290862927548813,
+          "ci95_high": 0.1218831809998852,
+          "p_sign_two_sided": 0.9392
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.0006340369388571731,
+          "se_hac_lag4": 0.00391893726880168,
+          "t_hac_lag4": 0.1617879785687529,
+          "p_hac_lag4": 0.8714728200326013,
+          "ci95_low": -0.0070470801079941196,
+          "ci95_high": 0.008315153985708465,
+          "r2": 0.30651289928253456
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.00832649995607436,
+          "ci95_low": -0.024626879194570295,
+          "ci95_high": 0.005120076061504509,
+          "p_sign_two_sided": 0.2512
+        }
+      }
+    },
+    "NFLX": {
+      "fwd5_return": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.0017222977284852186,
+          "se_hac_lag4": 0.006128396648333427,
+          "t_hac_lag4": -0.2810356162167775,
+          "p_hac_lag4": 0.778683082422312,
+          "ci95_low": -0.013733955159218734,
+          "ci95_high": 0.010289359702248299,
+          "r2": 0.013265313947252833
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.003224660157382283,
+          "ci95_low": -0.016456751829598243,
+          "ci95_high": 0.006677488795580414,
+          "p_sign_two_sided": 0.6228
+        }
+      },
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.06767959688042927,
+          "se_hac_lag4": 0.05693624241470001,
+          "t_hac_lag4": 1.1886909639642025,
+          "p_hac_lag4": 0.2345612976725262,
+          "ci95_low": -0.043915438252382755,
+          "ci95_high": 0.1792746320132413,
+          "r2": 0.12094556765849185
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": 0.037833609410476365,
+          "ci95_low": -0.04931041692938926,
+          "ci95_high": 0.1350113495950015,
+          "p_sign_two_sided": 0.3988
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.011008955323254459,
+          "se_hac_lag4": 0.047925368775373504,
+          "t_hac_lag4": 0.2297103935674131,
+          "p_hac_lag4": 0.8183168179630352,
+          "ci95_low": -0.08292476747647762,
+          "ci95_high": 0.10494267812298652,
+          "r2": 0.049541333147261724
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.011614054319807901,
+          "ci95_low": -0.07978317132895812,
+          "ci95_high": 0.09881861043616841,
+          "p_sign_two_sided": 0.7024
+        }
+      }
+    },
+    "QQQ": {
+      "fwd5_return": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.0006838148923349827,
+          "se_hac_lag4": 0.002820674749421535,
+          "t_hac_lag4": 0.24242954366689026,
+          "p_hac_lag4": 0.8084473444795495,
+          "ci95_low": -0.0048447076165312256,
+          "ci95_high": 0.00621233740120119,
+          "r2": 0.022236797173955325
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": 0.0017254380786690749,
+          "ci95_low": -0.0033215064470472496,
+          "ci95_high": 0.006825336304890798,
+          "p_sign_two_sided": 0.5096
+        }
+      },
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.008201376405868203,
+          "se_hac_lag4": 0.056462022056274125,
+          "t_hac_lag4": -0.14525474127890992,
+          "p_hac_lag4": 0.8845097468906868,
+          "ci95_low": -0.11886693963616549,
+          "ci95_high": 0.10246418682442907,
+          "r2": 0.16477372418725944
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.00666482143389599,
+          "ci95_low": -0.11392402287049766,
+          "ci95_high": 0.11054506808823802,
+          "p_sign_two_sided": 0.9024
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.00015620348629576033,
+          "se_hac_lag4": 0.0029241435066469047,
+          "t_hac_lag4": 0.05341854322152533,
+          "p_hac_lag4": 0.9573984309514514,
+          "ci95_low": -0.0055751177867321726,
+          "ci95_high": 0.005887524759323693,
+          "r2": 0.28761181516961165
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.007026331579512483,
+          "ci95_low": -0.018915752676174624,
+          "ci95_high": 0.003544923164905567,
+          "p_sign_two_sided": 0.198
+        }
+      }
+    },
+    "SPY": {
+      "fwd5_return": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.0020094770893346356,
+          "se_hac_lag4": 0.0022378402211390746,
+          "t_hac_lag4": -0.8979537816653412,
+          "p_hac_lag4": 0.36921019027353785,
+          "ci95_low": -0.0063956439227672215,
+          "ci95_high": 0.0023766897440979508,
+          "r2": 0.025205852819925267
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.0008470156617086302,
+          "ci95_low": -0.005325206215650111,
+          "ci95_high": 0.0035058785458501295,
+          "p_sign_two_sided": 0.6804
+        }
+      },
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.0017575153678622123,
+          "se_hac_lag4": 0.051305731679370976,
+          "t_hac_lag4": 0.03425573148134002,
+          "p_hac_lag4": 0.9726732252938927,
+          "ci95_low": -0.0988017187237049,
+          "ci95_high": 0.10231674945942933,
+          "r2": 0.205214672418646
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": 0.003912736063908295,
+          "ci95_low": -0.11462553732615426,
+          "ci95_high": 0.13167796537703008,
+          "p_sign_two_sided": 0.9464
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.00037891435375844165,
+          "se_hac_lag4": 0.00235571422660481,
+          "t_hac_lag4": 0.16084903231431202,
+          "p_hac_lag4": 0.8722123057898798,
+          "ci95_low": -0.004238285530386986,
+          "ci95_high": 0.00499611423790387,
+          "r2": 0.3218951633519086
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.007318259398341423,
+          "ci95_low": -0.019123040515107912,
+          "ci95_high": 0.001980362318558856,
+          "p_sign_two_sided": 0.148
+        }
+      }
+    },
+    "XLY": {
+      "fwd5_return": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": -0.002168419295425341,
+          "se_hac_lag4": 0.002713642796482998,
+          "t_hac_lag4": -0.7990805931553367,
+          "p_hac_lag4": 0.4242436818357326,
+          "ci95_low": -0.007487159176532017,
+          "ci95_high": 0.003150320585681335,
+          "r2": 0.02311672741925186
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.001221280206471948,
+          "ci95_low": -0.006126796199575912,
+          "ci95_high": 0.003614469065494935,
+          "p_sign_two_sided": 0.6132
+        }
+      },
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.03487282641249894,
+          "se_hac_lag4": 0.051010898011961285,
+          "t_hac_lag4": 0.6836348265094606,
+          "p_hac_lag4": 0.4942057873499395,
+          "ci95_low": -0.06510853369094519,
+          "ci95_high": 0.13485418651594305,
+          "r2": 0.1332303105797501
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": 0.03629726278308264,
+          "ci95_low": -0.07671682162910405,
+          "ci95_high": 0.15767696987092816,
+          "p_sign_two_sided": 0.5348
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1070,
+          "n_shock": 96,
+          "coef": 0.0029797673027199163,
+          "se_hac_lag4": 0.003375222109926581,
+          "t_hac_lag4": 0.8828359158813205,
+          "p_hac_lag4": 0.3773249321298724,
+          "ci95_low": -0.0036356680327361826,
+          "ci95_high": 0.009595202638176016,
+          "r2": 0.34517057014100394
+        },
+        "year_cluster_bootstrap_diff_means": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_diff": -0.0049373766219090835,
+          "ci95_low": -0.019149358152926753,
+          "ci95_high": 0.008385778168012956,
+          "p_sign_two_sided": 0.4628
+        }
+      }
+    }
+  },
+  "figures": [
+    "/Users/yhlai0911/volpred-research/experiments/k1608/figures/fig1_box_office_shocks.png",
+    "/Users/yhlai0911/volpred-research/experiments/k1608/figures/fig2_shock_coefficients.png",
+    "/Users/yhlai0911/volpred-research/experiments/k1608/figures/fig3_spy_raw_means.png"
+  ],
+  "limitations": [
+    "Wikipedia weekend number-one gross is an entertainment-attention proxy, not full release-level Box Office Mojo microdata.",
+    "The shock uses reported weekend gross, so it is a Monday-after-weekend proxy rather than an ex-ante release-calendar-only signal.",
+    "Google Trends is not used in the reported result because unofficial pytrends access is rate-limit fragile in this environment.",
+    "Entertainment stock basket is current-listed/surviving and availability-weighted; it is not a point-in-time industry portfolio.",
+    "Macro controls are deterministic calendar proxies, not exact historical announcement timestamps.",
+    "This is an event-window diagnostic, not an OOS trading strategy or causal claim."
+  ]
+}
