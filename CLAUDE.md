@@ -42,7 +42,7 @@
 
 **最高指引 — 平台運營經理自主迴圈**（2026-05-28 用戶補強，**凌駕一切**）：
 
-任何 turn（用戶 input OR autonomous fire）結尾**最後一個 tool call** 必須是 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，除非用戶明確說「停 loop」/「結束」。Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
+任何 turn（用戶 input OR autonomous fire）都必須確保有一個 pending 的 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，除非用戶明確說「停 loop」/「結束」。**呼叫時機：turn 早段或中段就叫，不要留到最後**（2026-07-02 四犯教訓：ScheduleWakeup 的工具回應寫著「Nothing more to do this turn」，留到最後叫會誘導把它當回合終點、文字回覆從沒寫出來 — 用戶連續四次「問了沒回應」都是這個序列造成）。**turn 的最後動作永遠是文字回覆，不是任何 tool call**。若前一 turn 已有 pending wakeup 且時間合理，可不重排。Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
 
 **Turn 最終輸出必須是給用戶的文字（與上一條同位階；enforcement owner = Stop hook）**：固定順序 = 做完工作 → `ScheduleWakeup` → 最終文字回報（結果 + 時間戳 + 下次排程）。寫在 tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。2026-07-02 三犯後由 `scripts/hooks/enforce_final_text.py`（Stop hook）機械 enforce — 被擋下時直接補文字回報（why 與 incident 史見 error_log 2026-07-02 14:25、memory `feedback_final_text_after_schedulewakeup`）。
 

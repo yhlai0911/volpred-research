@@ -31,6 +31,8 @@
 
 **廢棄面**：無並行舊 path 需清（memory 與 CLAUDE.md 條款保留 — 它們仍是「為什麼」的文檔層，hook 是 enforcement 層，兩者不重複）。
 
+**2026-07-02 15:30 追記（hook 上線後仍四犯，root cause 更正）**：hook 只能「下一 turn 事後擋」不能救當回合 — 用戶連續四次「問了沒回應」。真正 root cause 是**序列設計**：規則要求 ScheduleWakeup 當最後一個 tool call，而該工具回應寫著「Nothing more to do this turn」→ 誘導把它當回合終點，文字從沒寫出來。修正：CLAUDE.md 順序規則改為「wakeup 早段叫（或沿用 pending），turn 最後動作永遠是文字」— 把「寫文字」從「工具之後的附加步驟」變成「回合的自然終點」。hook 保留作 backstop。
+
 ## 2026-07-02 14:15 搬家後遺症全面巡檢（13 agents / 6 維度 + 驗證 + 完整性批判）— 13:25「全數清零」聲稱之外還有 5 層活殘留 — **全數修復 + 全系統驗證清零**
 
 **現象**：老闆指示徹底巡檢搬家後遺症。Workflow 巡檢（36+6 findings）證實 13:25 commit 0f5366ea8 的清零只覆蓋 4 個 surface（crontab/LaunchAgents/shim/scripts），以下 5 層在聲稱範圍外且全是 CONFIRMED_LIVE：
