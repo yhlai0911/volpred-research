@@ -67,6 +67,17 @@ _NOVEL_TAIL = (
     "世界鯊魚在遠處巡遊章魚躲在岩石縫隙海星附著礁岩"
 )
 
+# 2026-07-02 async lazypack pipeline: the release audit gate holds general
+# drafts without a 懶人包圖組 section, which fires BEFORE the dedup gates these
+# tests target. Append the same minimal section to BOTH the published blockers
+# and the draft candidates so pairwise Jaccard relations (1.0 identical /
+# partial / below-threshold) are preserved while the lazypack gate clears.
+_LZ = (
+    "\n\n## 懶人包圖組\n\n"
+    "![概念](https://supabase.test/article-images/lz_c.png)\n\n"
+    "![結果](https://supabase.test/article-images/lz_r.png)\n"
+)
+
 
 def _arc_sig(axis: str) -> dict:
     return {"schema_version": "arc_dedup_v3", "narrative_axis": axis}
@@ -146,7 +157,7 @@ def _published_blocker(frozen_now: datetime, axis: str, *, hours_ago: float = 0.
         "audience": "general",
         "published_at": (frozen_now - timedelta(hours=hours_ago)).isoformat(),
         "created_at": (frozen_now - timedelta(days=2)).isoformat(),
-        "content": _BASE_BODY,
+        "content": _BASE_BODY + _LZ,
         "details": {"arc_signature": _arc_sig(axis)},
     }
 
@@ -161,7 +172,7 @@ def _draft_candidate(frozen_now: datetime, axis: str | None) -> dict:
         "status": "draft",
         "audience": "general",
         "created_at": (frozen_now - timedelta(days=1)).isoformat(),
-        "content": _BASE_BODY,  # Jaccard 1.0 vs blocker -> surface near-dup
+        "content": _BASE_BODY + _LZ,  # Jaccard 1.0 vs blocker -> surface near-dup
         "details": details,
     }
 
@@ -257,7 +268,7 @@ def _blocked_draft(draft_id: str, frozen_now: datetime, *, body: str, created_da
         "status": "draft",
         "audience": "general",
         "created_at": (frozen_now - timedelta(days=created_days)).isoformat(),
-        "content": body,
+        "content": body + _LZ,
     }
 
 
@@ -278,7 +289,7 @@ def test_drought_forces_one_release_when_all_blocked_and_gap_exceeds_threshold(
         "audience": "general",
         "published_at": (frozen_now - timedelta(hours=6)).isoformat(),  # gap 6h > 4h
         "created_at": (frozen_now - timedelta(hours=6)).isoformat(),
-        "content": _BASE_BODY,
+        "content": _BASE_BODY + _LZ,
     }
     # Both drafts are surface near-dups of the blocker (Jaccard >= 0.45) so both
     # are dedup-blocked. d_low has the LOWER max-Jaccard (0.557 vs 1.0) so the
@@ -330,7 +341,7 @@ def test_drought_breaks_tie_on_newest_created_at(tmp_path: Path, monkeypatch):
         "status": "published",
         "audience": "general",
         "published_at": (frozen_now - timedelta(hours=6)).isoformat(),
-        "content": _BASE_BODY,
+        "content": _BASE_BODY + _LZ,
     }
     older = _blocked_draft("mile_draft_older", frozen_now, body=_BASE_BODY, created_days=5)
     newer = _blocked_draft("mile_draft_newer", frozen_now, body=_BASE_BODY, created_days=1)
@@ -357,7 +368,7 @@ def test_drought_does_not_trigger_when_gap_below_threshold(tmp_path: Path, monke
         "status": "published",
         "audience": "general",
         "published_at": (frozen_now - timedelta(hours=2)).isoformat(),  # gap 2h < 4h
-        "content": _BASE_BODY,
+        "content": _BASE_BODY + _LZ,
     }
     d1 = _blocked_draft("mile_draft_1", frozen_now, body=_BASE_BODY, created_days=2)
     _write_json(storage_dir / "reports" / "feed.json", [blocker, d1])
@@ -389,7 +400,7 @@ def test_drought_not_triggered_when_normal_eligible_draft_releases(tmp_path: Pat
         "status": "published",
         "audience": "general",
         "published_at": (frozen_now - timedelta(hours=6)).isoformat(),
-        "content": _NOVEL_TAIL,
+        "content": _NOVEL_TAIL + _LZ,
     }
     fresh = _blocked_draft("mile_draft_fresh", frozen_now, body=_BASE_BODY, created_days=2)
     _write_json(storage_dir / "reports" / "feed.json", [blocker, fresh])
@@ -423,7 +434,7 @@ def test_drought_rescues_cooldown_flagged_draft_when_pool_all_flagged(tmp_path: 
         "status": "published",
         "audience": "general",
         "published_at": (frozen_now - timedelta(hours=6)).isoformat(),  # gap 6h > 4h
-        "content": _BASE_BODY,
+        "content": _BASE_BODY + _LZ,
     }
     flagged = {
         "id": "mile_draft_flagged",
@@ -431,7 +442,7 @@ def test_drought_rescues_cooldown_flagged_draft_when_pool_all_flagged(tmp_path: 
         "status": "draft",
         "audience": "general",
         "created_at": (frozen_now - timedelta(days=2)).isoformat(),
-        "content": _BASE_BODY + _NOVEL_TAIL,
+        "content": _BASE_BODY + _NOVEL_TAIL + _LZ,
         # cooldown flag active (< 2-day TTL) -> excluded from candidates entirely
         "details": {
             "release_dedup_skipped": True,
@@ -471,7 +482,7 @@ def test_drought_anti_thrash_skips_when_recent_override_in_window(tmp_path: Path
         "status": "published",
         "audience": "general",
         "published_at": (frozen_now - timedelta(hours=6)).isoformat(),
-        "content": _BASE_BODY,
+        "content": _BASE_BODY + _LZ,
     }
     # A recently-overridden article that was later retracted: it no longer counts
     # toward the reader-facing gap, but its override stamp (1h ago, < 4h window)

@@ -934,7 +934,8 @@ def check_image_gate(body: str, audience: str, bypass: bool) -> int:
     return 0
 
 
-def check_lazypack_gate(body: str, audience: str, bypass: bool) -> int:
+def check_lazypack_gate(body: str, audience: str, bypass: bool,
+                        status: str = "published") -> int:
     """Return 0 if pass, 6 if the 懶人包 (lazypack) gate fails.
 
     Per .claude/rules/publishing.md §4 + lazypack-infographic skill (boss 2026-06-04
@@ -943,7 +944,14 @@ def check_lazypack_gate(body: str, audience: str, bypass: bool) -> int:
     so non-expert readers can grasp it quickly. The detection layer
     (content_quality lazypack coverage) only WARNED — coverage stayed at 12% for
     weeks — so enforce deterministically at the publish chokepoint (mirrors the
-    ≥2-image gate above; lazypack generation is FREE via NotebookLM, auth verified).
+    ≥2-image gate above).
+
+    2026-07-02 async pipeline (error_log 15:15 #4): enforcement lives at the
+    reader-visible boundary (publisher.lazypack_required_at). status='published'
+    (immediate publish) blocks here as before; status='draft'/'scheduled' passes
+    without the section — the render runs async on compute_queue
+    (scripts/lazypack_async_render.py enqueue) and the release_pool audit gate
+    holds the flip to published until the section lands.
 
     Scope = audience == 'general' only (research/member_qa are for專業讀者; daily/
     event go through other entry points). Requires BOTH:
@@ -962,27 +970,38 @@ def check_lazypack_gate(body: str, audience: str, bypass: bool) -> int:
         src_dir = ROOT / "src"
         if str(src_dir) not in _sys.path:
             _sys.path.insert(0, str(src_dir))
-        from volpred.publisher.publisher import has_lazypack_section  # noqa: WPS433
+        from volpred.publisher.publisher import (  # noqa: WPS433
+            has_lazypack_section,
+            lazypack_required_at,
+        )
 
         if has_lazypack_section(body):
             return 0
-        # else: no 懶人包 heading, or heading present but no image after it → block
+        if not lazypack_required_at(status):
+            print(f"[publish_draft] lazypack deferred (status={status}): enqueue "
+                  f"the async render after publish — uv run python "
+                  f"scripts/lazypack_async_render.py enqueue --article-id <mile_id> "
+                  f"--experiment <K> --plan <plan.json>; release_pool holds the "
+                  f"publish flip until the section lands.")
+            return 0
+        # else: published + no 懶人包 heading (or heading without image) → block
     except Exception as e:  # fail-open: a gate malfunction must not block content
         print(f"[publish_draft] LAZYPACK GATE fail-open (check error): "
               f"{type(e).__name__}: {e}", file=sys.stderr)
         return 0
-    print(f"\n[publish_draft] LAZYPACK GATE: audience=general requires a "
-          f"懶人包圖組 (cheat-sheet infographic SET) at the article end; none found.",
+    print(f"\n[publish_draft] LAZYPACK GATE: audience=general with "
+          f"status=published requires a 懶人包圖組 (cheat-sheet infographic SET) "
+          f"at the article end; none found.",
           file=sys.stderr)
     print(f"\n  Per .claude/rules/publishing.md §4 + lazypack-infographic skill, "
-          f"every general-reader article needs a `## 懶人包圖組` section with 2-4 "
-          f"poster-style PNGs (concept / method / results), generated FREE via "
-          f"NotebookLM:\n"
-          f"    uv run python scripts/gen_lazypack_infographic.py --experiment K<id> \\\n"
+          f"immediate-publish general articles need a `## 懶人包圖組` section with "
+          f"2-4 poster-style PNGs (concept / method / results). Either generate "
+          f"synchronously (PRIMARY = codex exec):\n"
+          f"    uv run python scripts/gen_lazypack_codex.py --experiment K<id> \\\n"
           f"      --title \"K<id> 懶人包\" --plan <plan.json> --out-dir <dir>\n"
-          f"  Upload each PNG to Supabase article-images, append under a `## 懶人包圖組` "
-          f"heading, then retry. Use `--no-lazypack-gate` only for genuinely "
-          f"non-reader pieces (rare).",
+          f"  then append + retry — OR publish with --status draft and enqueue "
+          f"the async render (scripts/lazypack_async_render.py enqueue). Use "
+          f"`--no-lazypack-gate` only for genuinely non-reader pieces (rare).",
           file=sys.stderr)
     return 6
 
@@ -1141,7 +1160,11 @@ def apply_update(args) -> int:
     rc = check_image_gate(body, audience, args.no_image_gate)
     if rc != 0:
         return rc
-    rc = check_lazypack_gate(body, audience, getattr(args, 'no_lazypack_gate', False))
+    # In-place rewrite: enforce by the article's CURRENT status — a published
+    # general article must never lose its lazypack; drafts defer to the async
+    # pipeline + release gate (2026-07-02 error_log 15:15 #4).
+    rc = check_lazypack_gate(body, audience, getattr(args, 'no_lazypack_gate', False),
+                             status=str(art.get("status") or "published"))
     if rc != 0:
         return rc
 
@@ -1522,7 +1545,10 @@ def main() -> int:
     rc = check_image_gate(body, audience, getattr(args, 'no_image_gate', False))
     if rc != 0:
         return rc
-    rc = check_lazypack_gate(body, audience, getattr(args, 'no_lazypack_gate', False))
+    # New publish: enforce by the TARGET status — draft/scheduled defer the
+    # lazypack to the async pipeline + release gate (2026-07-02 error_log 15:15 #4).
+    rc = check_lazypack_gate(body, audience, getattr(args, 'no_lazypack_gate', False),
+                             status=status)
     if rc != 0:
         return rc
 

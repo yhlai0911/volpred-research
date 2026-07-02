@@ -627,6 +627,19 @@ def has_lazypack_section(content: str) -> bool:
         return True  # silent-ok: fail-open so a gate malfunction never over-blocks
 
 
+def lazypack_required_at(status: str | None) -> bool:
+    """Lazypack enforcement boundary (2026-07-02 async pipeline, error_log 15:15 #4).
+
+    The 懶人包圖組 section is required exactly when an article becomes
+    reader-visible (status='published'). Draft/scheduled creation defers the
+    render to the compute_queue async lane (scripts/lazypack_async_render.py);
+    the release_pool audit gate (volpred.ops.content) enforces the section
+    before flipping to published. Single source for this boundary — shared by
+    publish_milestone and publish_draft.py's check_lazypack_gate.
+    """
+    return str(status or "published").strip().lower() == "published"
+
+
 def _audit_general_content(audience: str, tags: list[str], content: str) -> list[str]:
     """Return list of audience-content consistency issues. Empty list = clean.
 
@@ -1615,14 +1628,34 @@ class Publisher:
         # bypass that — enforce here too so the chokepoint is universal. Scope =
         # audience='general' only; daily/event/research/member_qa exempt. Shares
         # the audit_strict escape (batch migrations) with the consistency gate.
-        if audience == 'general' and audit_strict and not has_lazypack_section(description):
-            raise ValueError(
-                "audience='general' is missing a 懶人包圖組 (lazypack) section.\n"
-                "Per .claude/rules/publishing.md §4 + lazypack-infographic skill, "
-                "append a `## 懶人包圖組` section with 2-4 poster-style PNGs "
-                "(generate FREE via scripts/gen_lazypack_infographic.py), then retry.\n"
-                "Set audit_strict=False only for genuinely non-reader pieces / batch migrations."
-            )
+        #
+        # 2026-07-02 (error_log 15:15 #4): enforcement moved to the
+        # reader-visible boundary. Immediate publish (status='published') still
+        # blocks here; draft/scheduled creation is allowed without the section —
+        # the render runs async on compute_queue (scripts/lazypack_async_render.py
+        # enqueue) and the release_pool audit gate holds the flip to published.
+        if audience == 'general' and not has_lazypack_section(description):
+            if lazypack_required_at(status):
+                if audit_strict:
+                    raise ValueError(
+                        "audience='general' is missing a 懶人包圖組 (lazypack) section.\n"
+                        "Per .claude/rules/publishing.md §4 + lazypack-infographic skill, "
+                        "immediate-publish reader articles must carry a `## 懶人包圖組` "
+                        "section with 2-4 poster-style PNGs (generate via "
+                        "scripts/gen_lazypack_codex.py), then retry — OR publish as "
+                        "status='draft' and enqueue the async render "
+                        "(scripts/lazypack_async_render.py enqueue).\n"
+                        "Set audit_strict=False only for genuinely non-reader pieces / batch migrations."
+                    )
+                print("  ⚠️ lazypack missing (audit_strict=False bypass, status=published)")
+            else:
+                print(
+                    "  [lazypack] general article created without 懶人包圖組 "
+                    f"(status={status}) — enqueue the async render now: "
+                    "uv run python scripts/lazypack_async_render.py enqueue "
+                    "--article-id <mile_id> --experiment <K> --plan <plan.json>; "
+                    "release_pool will hold the publish flip until the section lands."
+                )
 
         # Build related_articles list for metadata
         related_articles = []

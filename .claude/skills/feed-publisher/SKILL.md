@@ -254,7 +254,16 @@ pub.publish_milestone(
 
 **2026-04-14 教訓**：7 篇本該 general 的文章因為沒傳 audience，被 Publisher auto-classify 成 research，draft pool 變 R=13/G=4 不符 R≥4/G≥8 目標。修正: 此 skill 強制 audience 必填。
 
-**⚠️ 2026-06-30 lazypack hard gate（boss 硬性，coverage 曾低到 12%）**：`audience='general'` 文章發佈時**強制檢查文末有 `## 懶人包圖組` 區塊（heading + ≥1 張圖）**，缺則 **raise/exit 阻擋發佈**（雙層：`publish_draft.py` CLI `check_lazypack_gate` + `publish_milestone` chokepoint；共用 `has_lazypack_section`）。所以**寫 general 文章時必先生懶人包圖**：
+**⚠️ lazypack gate（boss 2026-06-30 硬性；2026-07-02 改 async 管線，error_log 15:15 #4）**：`audience='general'` 文章的 `## 懶人包圖組` 區塊（heading + ≥1 張圖）在 **reader-visible 邊界** enforce（單一來源 `publisher.lazypack_required_at()`）：
+
+- **status=draft（本 skill 預設）→ 不需先生圖，正文寫完 publish 後一行 enqueue**（render 走 `*/15` compute worker，不佔寫作 50-min cap；release_pool flip published 前會 enforce，缺 section 不釋出）：
+```bash
+uv run python scripts/lazypack_async_render.py enqueue \
+  --article-id <mile_id> --experiment K<id> --plan <plan.json>
+# plan.json 由寫作 agent 寫（panel 規格同 gen_lazypack_codex.py：2-4 張，概念/方法/結果）
+# 檢查 job：uv run python scripts/compute_queue.py show lazypack-<mile_id>
+```
+- **status=published（event/trending 立即發佈）→ 發佈當下就要有 section**，同步先生完再 publish：
 ```bash
 # PRIMARY: codex exec（ChatGPT 訂閱 flat，codex 寫 render 程式餵 results.json → 數字精確可復現）
 uv run python scripts/gen_lazypack_codex.py --experiment K<id> \

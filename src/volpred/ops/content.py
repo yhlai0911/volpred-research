@@ -13,6 +13,7 @@ from volpred.publisher.publisher import (
     Publisher,
     _audit_general_content,
     _extract_experiment_refs,
+    has_lazypack_section,
 )
 from volpred.topic_clusters import classify_topic_cluster, cluster_cap
 
@@ -1163,6 +1164,32 @@ def release_pool_articles(
             list(item.get("tags") or []),
             str(body_text),
         )
+        # 2026-07-02 lazypack async pipeline (error_log 15:15 #4): drafts are
+        # created WITHOUT the 懶人包圖組 section (the codex render runs on the
+        # compute_queue lane, not inside the writing agent's 50-min cap), but a
+        # general article must not flip to published until the section landed.
+        # Reuses the release-audit skip counter + fix-task escalation below
+        # (single enforcement owner — anti-stacking) and fails open on checker
+        # malfunction per dedup-gate-audit.md.
+        if audience == "general":
+            try:
+                # Read content-first (NOT the audit gate's description-first
+                # body_text): the installed section lives in item["content"];
+                # "description" is the ≤200-char SEO snippet and would never
+                # contain it. Mirrors content_quality's coverage scan.
+                _lz_text = item.get("content") or item.get("description") or ""
+                if not has_lazypack_section(str(_lz_text)):
+                    audit_issues = list(audit_issues) + [
+                        "missing 懶人包圖組 section (async lazypack render "
+                        "pending/failed — inspect: uv run python "
+                        "scripts/compute_queue.py show "
+                        f"lazypack-{item.get('id')} ; re-enqueue via "
+                        "scripts/lazypack_async_render.py enqueue)"
+                    ]
+            except Exception as exc:  # fail-open: never block release on a broken check
+                _warn_release_pool(
+                    "lazypack release gate check failed; fail-open", exc
+                )
         if audit_issues:
             details = item.get("details")
             if not isinstance(details, dict):
