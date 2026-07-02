@@ -54,8 +54,10 @@ def load_token() -> str | None:
             line = line.strip()
             if line.startswith("TELEGRAM_BOT_TOKEN="):
                 return line.split("=", 1)[1].strip().strip('"').strip("'") or None
-    except OSError:
-        pass
+    except FileNotFoundError:
+        pass  # silent-ok: .env is an optional fallback; primary token source is the env var
+    except OSError as e:
+        _warn("load_token .env read failed", path=str(env_path), err=str(e))
     return None
 
 
@@ -67,9 +69,13 @@ def state_path(storage_dir: str | Path = "storage") -> Path:
 
 
 def load_state(storage_dir: str | Path = "storage") -> dict[str, Any]:
+    p = state_path(storage_dir)
     try:
-        return json.loads(state_path(storage_dir).read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+        return json.loads(p.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}  # silent-ok: state absent before first /start is the normal initial condition
+    except (OSError, ValueError) as e:
+        _warn("load_state failed", path=str(p), err=str(e))
         return {}
 
 

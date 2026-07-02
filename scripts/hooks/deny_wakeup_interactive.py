@@ -71,7 +71,7 @@ def main() -> int:
     try:
         payload = json.load(sys.stdin)
     except ValueError:
-        return 0  # fail-open
+        return 0  # silent-ok: PreToolUse hook fails open; malformed stdin must not block the tool call
     if payload.get("tool_name") != "ScheduleWakeup":
         return 0
     transcript_path = payload.get("transcript_path") or ""
@@ -80,7 +80,7 @@ def main() -> int:
     try:
         last_user = _last_user_text(transcript_path)
     except OSError:
-        return 0  # fail-open
+        return 0  # silent-ok: PreToolUse hook fails open; transcript read error must not block the tool call
     if any(m in last_user for m in AUTONOMOUS_MARKERS):
         return 0  # autonomous fire turn — 放行
     print(DENY_MSG, file=sys.stderr)
