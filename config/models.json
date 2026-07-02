@@ -3,36 +3,69 @@
     "purpose": "Single source of truth for Claude model roster + task-tier -> model mapping used when dispatching subagents. agent-delegation.md's model table points here.",
     "authoritative_availability_source": "The Claude Desktop model selector (bottom-right of the app) is the ground truth for which models are AVAILABLE right now. The Agent/Workflow tool `model` enum lists dispatchable ALIASES but does NOT reflect live availability (e.g. fable is a valid alias yet currently unavailable). When reconciling, trust the desktop selector for availability.",
     "main_loop_policy": "Main-thread (interactive) model is fixed by the session and CANNOT be hot-swapped per task. Owner directive 2026-07-01: keep main loop on opus. Only SUBAGENT models are chosen per task difficulty.",
-    "last_reconciled": "2026-07-01",
-    "reconciled_via": "Claude Desktop model selector screenshot (owner-provided 2026-07-01) — CORRECTED earlier guesses: Fable 5 is currently unavailable; Sonnet is v5 (not 4.6); a 'More models >' submenu exists and is not yet fully enumerated.",
+    "last_reconciled": "2026-07-02",
+    "reconciled_via": "owner /model switch in live session + headless -p smoke test (both succeeded 2026-07-02)",
     "known_gaps": "The desktop selector shows a 'More models >' submenu that has not been enumerated — the roster below may be incomplete. Expand it (owner screenshot, since main thread cannot drive the native desktop UI) to complete."
   },
-
-  "dispatchable_now": ["opus", "sonnet", "haiku"],
-  "known_but_unavailable": ["fable"],
-
+  "dispatchable_now": [
+    "opus",
+    "sonnet",
+    "haiku"
+  ],
+  "known_but_unavailable": [
+    "fable"
+  ],
   "models": {
-    "opus":   {"display": "Opus 4.8",  "id": "claude-opus-4-8",           "available": true,  "shortcut": 1, "note": "Currently selected main loop."},
-    "sonnet": {"display": "Sonnet 5",  "id": "claude-sonnet-5",           "available": true,  "shortcut": 2, "note": "Exact API id to confirm; alias 'sonnet' dispatches to this."},
-    "haiku":  {"display": "Haiku 4.5", "id": "claude-haiku-4-5-20251001", "available": true,  "shortcut": 3},
-    "fable":  {"display": "Fable 5",   "id": "claude-fable-5",            "available": false, "note": "Mythos-class, ABOVE Opus, $10/$50, 1M ctx, best for long-horizon autonomous work — BUT shows 'Currently unavailable' in the desktop selector as of 2026-07-01, so do NOT route subagents to it until it returns."}
+    "opus": {
+      "display": "Opus 4.8",
+      "id": "claude-opus-4-8",
+      "available": true,
+      "shortcut": 1,
+      "note": "Currently selected main loop."
+    },
+    "sonnet": {
+      "display": "Sonnet 5",
+      "id": "claude-sonnet-5",
+      "available": true,
+      "shortcut": 2,
+      "note": "Exact API id to confirm; alias 'sonnet' dispatches to this."
+    },
+    "haiku": {
+      "display": "Haiku 4.5",
+      "id": "claude-haiku-4-5-20251001",
+      "available": true,
+      "shortcut": 3
+    },
+    "fable": {
+      "display": "Fable 5",
+      "id": "claude-fable-5",
+      "available": true,
+      "note": "Mythos-class, ABOVE Opus, $10/$50, 1M ctx, best for long-horizon autonomous work. 2026-07-02 availability CONFIRMED: owner /model 切換本 session 成功 + headless `claude -p --model claude-fable-5` 實測回應成功（16:06 台灣）。可作 TG responder owner 顯式指定 / 未來長時程自主任務頂層。"
+    }
   },
-
   "subagent_policy": {
     "_owner_directive_2026_07_01": "Main loop = opus (fixed). Subagents choose between sonnet and opus by task complexity/difficulty — a two-way pick, NOT the old 4-tier ladder. haiku is NOT in the default rotation. fable is unavailable; re-evaluate (top tier for long-horizon autonomous work) if/when it reopens.",
-    "opus": {"when": "high difficulty — research experiment design, methodology decisions, high-risk paper judgment, paper-body / research-honesty verification, anything where precision & domain expertise matter", "effort": "high"},
-    "sonnet": {"when": "medium/low difficulty — structured/procedural work: platform ops, FB/feed posting, paper-update runs, browser automation, verification/merge/publication-scan checklists, large search, lookup", "effort": "medium-or-low by sub-task"},
-    "haiku": {"status": "available but OFF the default rotation per owner directive; only consider for truly trivial bulk lookups if ever, else use sonnet"},
-    "fable": {"status": "UNAVAILABLE now; when it reopens, re-evaluate as the top tier for ambitious long-horizon autonomous work (multi-day agentic, large migrations, deep multi-stage research)"}
+    "opus": {
+      "when": "high difficulty — research experiment design, methodology decisions, high-risk paper judgment, paper-body / research-honesty verification, anything where precision & domain expertise matter",
+      "effort": "high"
+    },
+    "sonnet": {
+      "when": "medium/low difficulty — structured/procedural work: platform ops, FB/feed posting, paper-update runs, browser automation, verification/merge/publication-scan checklists, large search, lookup",
+      "effort": "medium-or-low by sub-task"
+    },
+    "haiku": {
+      "status": "available but OFF the default rotation per owner directive; only consider for truly trivial bulk lookups if ever, else use sonnet"
+    },
+    "fable": {
+      "status": "UNAVAILABLE now; when it reopens, re-evaluate as the top tier for ambitious long-horizon autonomous work (multi-day agentic, large migrations, deep multi-stage research)"
+    }
   },
-
   "rules": [
     "Respect skill frontmatter model default first; override via Agent tool `model` param only when skill has none or the task clearly escalates.",
     "Subagent model is a sonnet<->opus pick by difficulty (owner directive 2026-07-01). NEVER downgrade high-risk research/statistics/paper judgment below opus.",
     "Do NOT inline procedural side-tasks (browser automation, scans, large search) on the opus main loop — fork a SONNET subagent (context: fork). 2026-07-01 gap: FB posting ran inline on opus.",
     "Do NOT route to a model whose available=false (e.g. fable now)."
   ],
-
   "reconcile": {
     "authoritative": "Claude Desktop model selector (bottom-right). Owner can screenshot it (incl. expanding 'More models >'). Main thread canNOT click the native desktop UI (its computer-use is Chrome-tab-scoped), so this reconcile depends on an owner screenshot or a future OS-level computer-use tool.",
     "secondary": "Agent/Workflow tool `model` enum = dispatchable aliases, but NOT a live availability signal.",

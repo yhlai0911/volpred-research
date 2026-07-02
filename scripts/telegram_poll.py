@@ -121,6 +121,14 @@ def _pick_model(text: str) -> str:
     比預judge 重，本來就會 defer 到正規管線（opus tier），所以誤判 sonnet 有兜底。
     """
     t = text.strip()
+    # Owner 顯式指定 model 最優先（2026-07-02 boss：「在 telegram 要求該次派工用
+    # fable 可行嗎」→ 可。訊息含 model 名即覆寫 heuristic；fable headless 已實測）。
+    tl = t.lower()
+    explicit = (("fable", "claude-fable-5"), ("opus", "claude-opus-4-8"),
+                ("sonnet", "claude-sonnet-5"), ("haiku", "claude-haiku-4-5-20251001"))
+    for kw, model in explicit:
+        if kw in tl:
+            return model
     heavy_kw = ("為什麼", "分析", "研究", "實驗", "論文", "策略", "設計", "評估",
                 "規劃", "審查", "比較", "診斷", "重構", "部署", "修復", "怎麼辦",
                 "建議", "深度", "寫", "改")
