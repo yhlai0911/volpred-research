@@ -43739,6 +43739,21 @@
     "result": "Completed research_ai_power_capacity_auction_vol: 8 PJM/MISO capacity-auction announcement event windows, yfinance 2020-01-02..2026-07-01, next-day RV ratio target with lagged baseline and seed=42. Verdict NULL_NO_ROBUST_CAPACITY_AUCTION_VOL_SPIKE; IPP near-miss mean next-day RV ratio 12.579, p_upper=0.0524, not publication-strength PASS. Artifacts, Codex review, figure, CSVs, and knowledge entry b195ffd1 written."
   },
   {
+    "id": "trending_repost_2026_07_02_ai_資本",
+    "title": "[trending_repost] AI 變現難追資本支出，科技股波動率如何定價？",
+    "description": "從科技巨頭 CapEx 與營收回報率的缺口切入，分析市場是否低估了 AI 基建投資的執行風險。可量化：分析科技股隱含波動率（IV）與 CapEx 占營收比重、自由現金流指引修正的相關性，探討波動率溢價是否合理。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-01T22:00:24+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
+  },
+  {
     "id": "journal_discovery_20260702_0",
     "title": "Journal-discovery 派工: 補 research_program.md backlog (research_backlog all-covered fallback)",
     "description": "generate_research_backlog.py found no unqueued research_program.md directions because all visible items are already covered or in progress. 派 general-purpose agent 跑 scripts/agent_prompts/journal_topic_scan.md，從頂尖期刊（JBF/JFE/RFS/JoE/JPM/FAJ/CFA 等近 1-2 年）挖熱門主題，補 5-10 個新方向到 research_program.md 對應 section，完成後下一輪 research_backlog/refill 自動取用。6h idempotent；勿手動重派。",
@@ -43821,5 +43836,88 @@
     "started_at": "2026-07-02T01:38:17.459800+00:00",
     "completed_at": "2026-07-02T01:52:11.480113+00:00",
     "result": "Published daily digest mile_e511ff94: 下半年調倉前，先過三道風險安檢. Added 5.4k-char archive curation with 8 source articles, 4 Supabase images, daily_digest metadata, anti-ai scan PASS, local content-quality PASS, live curl 200; browser plugin unavailable."
+  },
+  {
+    "id": "email-12482-9505ca",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] 自主 loop fire 10:23 — 症狀惡化：逾時→EINTR 硬性失敗，跨行程同時發生，建議",
+    "description": "Gmail UID: 12482\nMessage-ID: <AC24C96C-CCE3-4FCE-97C9-2A669F700F77@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Thu, 2 Jul 2026 10:45:56 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 自主 loop fire 10:23 — 症狀惡化：逾時→EINTR 硬性失敗，跨行程同時發生，建議儘快處理\n\n--- 用戶回信內容 ---\n立刻徹底盤查\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月2日 10:23 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 10:23 — 症狀惡化：逾時→EINTR 硬性失敗，跨行程同時發生，建議儘快處理\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> Autonomous loop fire 10:21（台灣時間，2026-07-02）— 狀況惡化：從逾時變成 EINTR 硬性失敗，跨行程同時發生\r\n> \r\n> 症狀惡化，不是穩定狀態\r\n> \r\n> 09:45 之後，gmail-poll 與 hourly-dispatch 的失敗訊息從單純「逾時」變成明確的 Interrupted system call（EINTR）硬性錯誤：\r\n> \r\n> gmail-poll 連續 3 次（09:45、10:00、10:15）都在自己 script 最前面的 cd 就報 getcwd: cannot access parent directories: Interrupted system call（exit=1，不再是先前的逾時 exit=142）。\r\n> 10:07 那班 hourly-dispatch：auth-preflight 直接回 error: An internal error occurred (EINTR)、cat 指令也報 Interrupted system call、codex failover 也是 Error: Interrupted system call (os error 4)。\r\n> 這代表什麼：EINTR 是系統呼叫執行中被訊號打斷才會出現的錯誤——這次連 gmail-poll 自己 script 最前面、還沒執行到任何逾時包裝的 cd 都中鏢，證實這是機器層級、同時影響多個完全獨立行程的訊號/系統呼叫異常，不是任何單一 script 的邏輯問題。\r\n> \r\n> 誠實揭露：我稍早的逾時修復本身有新增多處 perl alarm 訊號包裝，無法完全排除這波新增訊號流量是否放大了這次的 EINTR 現象——但 gmail-poll 的 EINTR 發生在它自己完全獨立、還沒碰到任何 perl alarm 呼叫的地方，說明底層異常本身在我的修復之前就已存在，我的修復頂多是次要放大因素，不是起點。\r\n> \r\n> 目前立場\r\n> \r\n> 症狀持續惡化而非穩定，強化了盡快處理（重開機）的急迫性。依然沒有自行重開機——這需要老闆判斷時機，已再次用 email + 手機推播升級回報，語氣從「建議評估」改為「症狀惡化建議儘快處理」。\r\n> \r\n> ⏱ 開始/停止 2026-07-02 10:21-10:23（台灣時間）\r\n> ⏭ 下次任務 2026-07-02 10:45（台灣時間）— 縮短間隔緊盯是否持續惡化\n",
+    "task_type": "email_reply",
+    "priority": 1,
+    "status": "in_progress",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-02T02:56:52.588532+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12482,
+    "email_message_id": "<AC24C96C-CCE3-4FCE-97C9-2A669F700F77@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] 自主 loop fire 10:23 — 症狀惡化：逾時→EINTR 硬性失敗，跨行程同時發生，建議儘快處理",
+    "email_from": "Ivan Lai <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-02T02:57:42.521839+00:00",
+    "claim_session_id": "e319342e27c4",
+    "status_history": [
+      {
+        "ts": "2026-07-02T02:57:42.522100+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-02T02:58:19.192988+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      }
+    ],
+    "started_at": "2026-07-02T02:58:19.192630+00:00"
+  },
+  {
+    "id": "paper_review_mile_c8468b0d",
+    "title": "Paper review (Codex 24h-rule): 你花錢升級了預測模型，對帳單卻更難看：一個關於「準」與「賺」的實測",
+    "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c8468b0d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "paper_review",
+    "source": "diverse_gen",
+    "article_id": "mile_c8468b0d",
+    "tags": [
+      "paper-review",
+      "codex-24h-rule"
+    ],
+    "created_at": "2026-07-02T03:08:02+00:00"
+  },
+  {
+    "id": "K1582_article_general",
+    "title": "K1582: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1582 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'cross-market/universal']) but no general article in feed.json.  Verdict preview: HARQ/SHARK-like measurement-error-corrected HAR (Bollerslev-Patton-Quaedvlieg JoE 2016 RQ-interaction + Buccheri-Corsi JFEC 2021-style signed-jump/semivariance features) tested cross-market on TAIFEX TX active-contract day-session RV (n_oos=1697), SPY (n_oos=51), and 0050.TW (n_o",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1582",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-02T03:08:04+00:00"
+  },
+  {
+    "id": "research_pm2_5_regressor_nber_w22753_heyes_neidell_saberi",
+    "title": "研究 backlog fallback: PM2.5 情緒型外生 regressor（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: PM2.5 情緒型外生 regressor（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）。識別乾淨（純情緒管道），補行為 vol 軸。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "pm2_5_regressor_nber_w22753_heyes_neidell_saberi",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T03:08:17+00:00"
   }
 ]

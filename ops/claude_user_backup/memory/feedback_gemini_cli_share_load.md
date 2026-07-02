@@ -20,3 +20,14 @@ originSessionId: 91283b9e-7227-43f5-88bb-9d92168d243a
 - 不要派 gemini 做 multi-step git/shell 流程（harness 限制）
 - 不要把 secret pipe 進 gemini prompt
 - 不要拿 gemini 做 embeddings（走 SDK，由 build_knowledge_index.py 負責）
+
+---
+
+**2026-07-01 memory-hygiene 更正（dreaming consolidation_review finding）**：`gemini-cli` 已於
+2026-06-18 因 Google 停服棄用。此則的「額度分攤」cadence 概念**仍然有效**，但執行對象改變：
+**繼任者是 `agy`（Antigravity CLI）** — 見 `feedback_gemini_cli_share_load` 精神延續到
+`agy -p` headless 分攤輕量任務（second-opinion review / fact-check），`scripts/gemini_ask.py`
+僅作 fallback（且每次呼叫是 paid API，需 email 通知 + log，不可比照 gemini-cli 免費額度心態濫用）。
+新任務請依 CLAUDE.md「AI CLI 可用性」段 + user memory `reference_antigravity_cli` /
+`reference_dual_cli_availability` 操作，不要照抄此則的 `gemini -m gemini-2.5-pro -p` 語法
+（該 binary 已不存在）。

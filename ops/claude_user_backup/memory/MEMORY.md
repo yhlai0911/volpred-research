@@ -63,6 +63,7 @@
 - [feedback_gemini_cli_share_load.md](feedback_gemini_cli_share_load.md) — Gemini CLI 額度健康時主動分攤輕量任務（second-opinion review/大檔摘要/fact-check），prompt 必含 today date 降誤判
 - [feedback_dedup_3_layers_mainthread.md](feedback_dedup_3_layers_mainthread.md) — 派寫作 agent 前主線程必做 3-layer 主題查重（candidates/grep/matrix），不僅靠 agent LanceDB
 - [feedback_email_on_major_decisions.md](feedback_email_on_major_decisions.md) — 重要決策後主動 send_alert email 通知用戶（paper state 變、排程變、quota blocker 等）
+- [feedback_decision_email_html_form.md](feedback_decision_email_html_form.md) — 需老闆做決策的 email 一律嵌 HTML form (radio/textarea/mailto)，不寫「請回信 A/B/C/D」型純文字 prompt（boss email-12393 2026-07-01 硬性要求）
 - [feedback_3spec_disambiguation.md](feedback_3spec_disambiguation.md) — Paper 內同 symbol 多 spec 數值差異的 footnote disambiguation + reproduce.py NOTE tier pattern（P1 K1256 + P2 γ 驗證）
 - [feedback_agent_background_codex_polling_unreliable.md](feedback_agent_background_codex_polling_unreliable.md) — paper_review agent 用 background Codex + polling loop pattern 易留孤兒，改 foreground 同步
 

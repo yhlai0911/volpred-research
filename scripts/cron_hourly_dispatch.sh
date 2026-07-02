@@ -238,7 +238,49 @@ send_auth_preflight_alert() {
     looks_like_real_auth_failure=1
   fi
 
-  if [ "$looks_like_real_auth_failure" -eq 1 ]; then
+  # 2026-07-02 fix (c) — TCC-shaped failure recognition (docs/error_log.md 10:55 entry).
+  # When claude CLI auto-updates, the new binary loses its per-binary macOS TCC
+  # Desktop-folder grant; launchd-context jobs (cwd in ~/Desktop) then fail with
+  # Operation-not-permitted / getcwd / EINTR signatures — NOT auth, NOT load.
+  # Reboot and keychain hotfix are both wrong here; the fix is: open an
+  # interactive session (authorized context) to re-trigger the grant.
+  local looks_like_tcc_failure=0
+  if printf '%s' "$combined" | grep -qiE "operation not permitted|getcwd|cannot access parent director|interrupted system call|EINTR|current directory does not exist"; then
+    looks_like_tcc_failure=1
+  fi
+  # Did the claude symlink switch recently (~<=18h)? Strong corroboration that a
+  # CLI auto-update just invalidated the TCC grant.
+  local claude_link_age_h=999
+  local _link_mtime
+  _link_mtime=$(stat -f %m "$CLAUDE_BIN" 2>/dev/null)
+  if [ -n "$_link_mtime" ]; then
+    claude_link_age_h=$(( ( $(date +%s) - _link_mtime ) / 3600 ))
+  fi
+
+  if [ "$looks_like_tcc_failure" -eq 1 ]; then
+    local _updated_note
+    if [ "$claude_link_age_h" -le 18 ]; then
+      _updated_note="claude symlink 在約 ${claude_link_age_h}h 前才切換過（=CLI 剛自動更新）——**這就是根因**：新版 binary 尚未取得 Desktop TCC 授權。"
+    else
+      _updated_note="claude symlink 已 ${claude_link_age_h}h 未變更；TCC Desktop 授權可能因其他原因失效（仍非 auth/load 問題）。"
+    fi
+    auth_body=$(printf '%s\n' \
+"## 觸發條件（TCC-shaped 失敗，非 auth、非負載）" \
+"- auth-preflight 輸出含 \`Operation not permitted\` / \`getcwd\` / \`Interrupted system call (EINTR)\` / \`Current directory does not exist\` 特徵" \
+"- ${_updated_note}" \
+"" \
+"## 根因（已於 2026-07-02 決定性實驗確認）" \
+"- macOS TCC 的 Desktop 資料夾授權**綁定 binary 路徑+雜湊**；claude CLI 每 1-2 天自動更新，新版 binary 對 \`~/Desktop\` 預設**無授權**" \
+"- 所有排程 job 的 cwd 在 \`~/Desktop/volpred-research\`（TCC 保護區）→ launchd context 無 UI 可跳授權 → TCC 請求懸置 → 拖累 tccd → 跨行程逾時/EINTR 全滅" \
+"- 互動 session 不受影響（走已授權 parent app 快速路徑）" \
+"" \
+"## 正確處置（**不要**重開機、**不要**跑 keychain 指令）" \
+"1. **開一個互動 Claude session**（在 Desktop 下）即可從授權 context 重新觸發 TCC 授權，launchd 排程隨即自癒——這是唯一有效且必要的動作" \
+"2. SessionStart hook \`warm_tcc_authorization.sh\` 已會在偵測到版本變更時自動暖授權；若此信仍出現，代表更新後尚無互動 session 開啟" \
+"3. 重開機無效：TCC.db 是持久化資料庫，重開機不會補回缺失授權" \
+"" \
+"詳見 docs/error_log.md 2026-07-02 10:55「ROOT CAUSE CONFIRMED」條目。")
+  elif [ "$looks_like_real_auth_failure" -eq 1 ]; then
     auth_body=$(printf '%s\n' \
 "## 觸發條件" \
 "- \`cron_hourly_dispatch.sh\` auth pre-flight 在 launchd env 失敗，且 source \`~/.zshrc\` 後重試仍失敗" \
@@ -290,9 +332,20 @@ send_auth_preflight_alert() {
   fi
   tmp=$(mktemp -t hourly_auth_fail.XXXXXX).md
   echo "$auth_body" > "$tmp"
+  local alert_level alert_title
+  if [ "$looks_like_tcc_failure" -eq 1 ]; then
+    alert_level="critical"
+    alert_title="hourly-dispatch TCC 授權失效 (claude 更新 → Desktop 無授權，開互動 session 修復) $(date '+%H:%M')"
+  elif [ "$looks_like_real_auth_failure" -eq 1 ]; then
+    alert_level="critical"
+    alert_title="hourly-dispatch auth preflight failed $(date '+%H:%M')"
+  else
+    alert_level="warn"
+    alert_title="hourly-dispatch auth preflight timed out (likely load, not auth) $(date '+%H:%M')"
+  fi
   run_send_alert \
-    --level "$([ "$looks_like_real_auth_failure" -eq 1 ] && echo critical || echo warn)" \
-    --title "hourly-dispatch auth preflight $([ "$looks_like_real_auth_failure" -eq 1 ] && echo "failed" || echo "timed out (likely load, not auth)") $(date '+%H:%M')" \
+    --level "$alert_level" \
+    --title "$alert_title" \
     --body-md "$tmp" --force 2>&1 | tail -1
   rm -f "$tmp"
 }

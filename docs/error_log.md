@@ -23,6 +23,11 @@
 - **(c) auth-preflight 加 TCC-shaped 失敗辨識**：偵測到 `Operation not permitted`/`getcwd` 特徵 + claude symlink 剛變更時，alert 直接指出「claude 更新導致 TCC 授權失效，開一個互動 session 即可修復」，不再誤導為 load/auth 問題。成本低可先做。
 - 註：純 headless 重新授權**不可行**（TCC 授權需要 UI context / 用戶操作系統設定，AI 不可也不應繞過）。
 
+**2026-07-02 11:08 進度（互動 session 回應老闆「立刻徹底盤查」email-12482 後執行）**：低成本防復發修復 (b)+(c) **已落地並測試通過**，根治性選項 (a)/(停用自動更新) 已寄 HTML 決策表單給老闆待裁示。
+- **(b) DONE**：`scripts/warm_tcc_authorization.sh` + 掛進 `.claude/settings.json` SessionStart hook（timeout 35s）。偵測 claude symlink target 變更 → 在授權 context 下觸碰 Desktop 暖授權 + 記錄版本 state（`storage/ops/claude_version_state.json`）+ 寄 INFO 告警。unchanged 路徑為乾淨 no-op（已測）；changed 路徑正確更新 state + 記 log（已測，`WARM_TCC_NO_ALERT=1` 可靜音測試）。把授權空窗從「數小時」壓到「update 後第一次互動 session 開始」。
+- **(c) DONE**：`scripts/cron_hourly_dispatch.sh` `send_auth_preflight_alert()` 加第三分支 `looks_like_tcc_failure`（偵測 `Operation not permitted`/`getcwd`/`Interrupted system call`/`EINTR`/`Current directory does not exist` + symlink mtime ≤18h corroboration）→ 精準告警「TCC 授權失效（claude 更新），開互動 session 修復，**勿重開機、勿跑 keychain 指令**」，不再誤導成 auth/load 問題。回歸測試 `tests/test_cron_auth_preflight.py::test_auth_preflight_tcc_shaped_failure_diagnoses_claude_update`（4 tests 全過）。已同步 `~/.volpred/bin/cron_hourly_dispatch.sh`（diff 空）。
+- **(a)/(停用 CLI 自動更新) PENDING 老闆決策**：搬 repo 出 Desktop（根治但大遷移，nested frontend repo/hardcoded paths/plists 全要動）vs 停用 claude CLI 自動更新（最低成本根治復發空窗，改由互動 session 內手動更新即在授權 context 重取授權）— 有 policy/工程 tradeoff，已用 HTML 表單寄 boss。
+
 ## 2026-07-02 10:56 hourly-dispatch preflight-only 成功不寫 canonical exit banner，host_cron_fail 無法低風險清紅燈 — **FIXED（止血，不代表底層 EINTR 根因已解）**
 
 **問題**：`HOURLY_PREFLIGHT_ONLY=1 ~/.volpred/bin/cron_hourly_dispatch.sh` 是驗證 wrapper / pregate / auth-preflight 的低風險 manual fire，但成功路徑只印 `[AUTH-PREFLIGHT] test-only exit...` 後直接 `exit 0`，沒有寫 host-cron parser 認得的 `=== [hourly_dispatch] exit 0 at ... ===` canonical banner。結果是：即使 wrapper 手動 preflight 已恢復，`host_cron_fail` 仍只能看到上一筆 `exit 1`，dashboard 會繼續維持 CRITICAL，迫使操作者只能跑完整 hourly dispatch 才能清掉 infra 紅燈。

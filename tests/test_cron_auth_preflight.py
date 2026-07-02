@@ -176,3 +176,76 @@ def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path)
     assert "hourly-dispatch auth preflight failed" in args_text
     assert "security set-generic-password-partition-list" in body_text
     assert "Not logged in · Please run /login" in body_text
+
+
+def test_auth_preflight_tcc_shaped_failure_diagnoses_claude_update(tmp_path: Path) -> None:
+    # 2026-07-02 fix (c) regression: a TCC-shaped launchd failure (Operation not
+    # permitted / getcwd / EINTR) after a claude CLI auto-update must be diagnosed
+    # as a TCC-authorization loss — NOT as an auth-credential failure or a load
+    # timeout — and must recommend opening an interactive session (not reboot,
+    # not keychain hotfix).
+    claude = tmp_path / "claude"
+    codex = tmp_path / "codex"
+    uv = tmp_path / "uv"
+    zshrc = tmp_path / ".zshrc"
+
+    _write_executable(
+        claude,
+        "#!/bin/bash\n"
+        "echo 'getcwd: cannot access parent directories: Interrupted system call' >&2\n"
+        "echo 'Operation not permitted' >&2\n"
+        "exit 1\n",
+    )
+    _write_executable(
+        codex,
+        "#!/bin/bash\n"
+        "echo 'codex failover unavailable' >&2\n"
+        "exit 1\n",
+    )
+    _write_executable(
+        uv,
+        "#!/bin/bash\n"
+        "out=\"$HOME/uv_args.txt\"\n"
+        "body=\"$HOME/uv_body.txt\"\n"
+        "echo \"CALL: $@\" >> \"$out\"\n"
+        "if [[ \"$*\" == *\"hourly_dispatch_pregate.py\"* ]]; then\n"
+        "  exit 1\n"
+        "fi\n"
+        "while [ $# -gt 0 ]; do\n"
+        "  if [ \"$1\" = \"--body-md\" ]; then\n"
+        "    shift\n"
+        "    cat \"$1\" >> \"$body\"\n"
+        "    printf '\\n---\\n' >> \"$body\"\n"
+        "    break\n"
+        "  fi\n"
+        "  shift\n"
+        "done\n"
+        "echo '{\"ok\":true}'\n",
+    )
+    zshrc.write_text("# no-op\n", encoding="utf-8")
+    env = _base_env(tmp_path, claude, uv, zshrc)
+    env["AUTH_PREFLIGHT_BACKOFF_SEC"] = "0"
+    env["CODEX_BIN"] = str(codex)
+
+    result = subprocess.run(
+        ["bash", str(SCRIPT)],
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+
+    assert result.returncode == 1
+    args_text = (tmp_path / "uv_args.txt").read_text(encoding="utf-8")
+    body_text = (tmp_path / "uv_body.txt").read_text(encoding="utf-8")
+    assert "send-alert" in args_text
+    # TCC branch chosen — title flags TCC/claude-update, not generic auth-failed.
+    assert "TCC 授權失效" in args_text
+    assert "hourly-dispatch auth preflight failed" not in args_text
+    # Body must steer to interactive-session fix, explicitly away from reboot/keychain.
+    assert "開一個互動 Claude session" in body_text
+    assert "不要" in body_text and "重開機" in body_text
+    # Stub claude was just written → symlink-age heuristic flags a fresh update.
+    assert "這就是根因" in body_text
+    # Must NOT recommend the keychain hotfix for a TCC failure.
+    assert "security set-generic-password-partition-list" not in body_text

@@ -21,3 +21,12 @@ Gemini CLI **v0.42+** headless 模式必繞過 trusted-folder gate，否則 `-y`
 - Debug「為什麼 gemini 沒輸出」時**先看 stderr**（去掉 `2>/dev/null`），trust 錯誤只在 stderr
 - 相關記錄：[[feedback-3model-review-discipline]] / [[feedback-gemini-cli-share-load]]
 - Skill：[gemini-cli](/Users/yhlai0911/.claude/skills/gemini-cli/SKILL.md) 已更新
+
+---
+
+**2026-07-01 memory-hygiene 更正（dreaming consolidation_review finding）**：`gemini-cli` 本身已於
+2026-06-18 因 Google 停服而**棄用**（見 CLAUDE.md「已放棄：gemini-cli」+ skill 檔已標 DEPRECATED）。
+此則記錄的 `--skip-trust` hang bug / env var workaround 已無實際操作意義（工具不再使用）。**繼任工具是
+`agy`（Antigravity CLI，OAuth）headless / `scripts/gemini_ask.py`（直打 API，需 email 通知 + log 使用）**
+— 見 user memory `reference_antigravity_cli` + `reference_dual_cli_availability`。保留此檔作歷史記錄
+（研究誠實：不刪除已發生的診斷過程），但**新任務不要再依此則操作 gemini-cli**。
