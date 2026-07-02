@@ -2483,6 +2483,19 @@ def ops_send_daily_digest(target_date: str | None, force_send: bool, storage_dir
     _print_json({"action": "send_daily_digest", **result})
 
 
+@ops.command("telegram-send")
+@click.option("--text", required=True, help="Message text (auto-chunked at 4096 chars)")
+@click.option("--silent", is_flag=True, help="Send without notification sound")
+def ops_telegram_send(text: str, silent: bool) -> None:
+    """Send a message to the boss via Telegram (@Volpred_manager_bot)."""
+    from volpred.ops.telegram import send_telegram
+
+    result = send_telegram(text, disable_notification=silent)
+    click.echo(json.dumps(result, ensure_ascii=False))
+    if not result.get("sent"):
+        raise SystemExit(1)
+
+
 @ops.command("send-alert")
 @click.option(
     "--level",

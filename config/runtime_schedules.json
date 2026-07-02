@@ -403,6 +403,21 @@
         ]
       },
       {
+        "id": "telegram_poll",
+        "label": "Telegram long-poll daemon — boss two-way channel",
+        "cron": null,
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_telegram_poll.sh",
+        "log_path": "~/.volpred/logs/telegram_poll.log",
+        "description": "常駐 long-poll (getUpdates timeout=25s) — 即時雙向：boss 訊息 → telegram_reply P1 task 進 next_tasks.json + 即時 ack；send_alert 自動鏡射到 TG（email 仍 canonical）。首次 /start 自動握手抓 chat_id（storage/ops/telegram_state.json）。LaunchAgent KeepAlive canonical (com.volpred.telegram-poll, host_crontab_managed=false)。2026-07-02 boss 要求「除了 email 用 telegram 互動」。",
+        "host_crontab_managed": false,
+        "launchagent_label": "com.volpred.telegram-poll",
+        "matchers": [
+          "telegram_poll.py",
+          "cron_telegram_poll.sh",
+          "com.volpred.telegram-poll"
+        ]
+      },
+      {
         "id": "handoff_regen",
         "label": "Hourly handoff_latest.md regeneration + stale-claim cleanup",
         "cron": "50 * * * *",

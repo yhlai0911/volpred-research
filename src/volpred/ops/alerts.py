@@ -298,6 +298,18 @@ def send_alert(
         recipient=normalized_recipient,
         storage_dir=storage_dir,
     )
+    # 2026-07-02 (boss): mirror every alert to Telegram when the transport is
+    # configured (bot token + captured chat_id). Fail-open: a TG hiccup must
+    # never break the email path — email stays canonical, TG is the mirror.
+    telegram_result: dict[str, Any] | None = None
+    try:
+        from volpred.ops.telegram import send_telegram
+        tg_text = f"[{normalized_level.upper()}] {normalized_title}\n\n{body}"
+        telegram_result = send_telegram(tg_text, storage_dir=storage_dir)
+    except Exception as _tg_exc:  # noqa: BLE001 — mirror only, never fatal
+        warn("telegram_mirror", "alert mirror failed", err=str(_tg_exc)[:200])
+        telegram_result = {"sent": False, "reason": str(_tg_exc)[:200]}
+
     result = {
         "level": normalized_level,
         "title": normalized_title,
@@ -309,6 +321,7 @@ def send_alert(
         "subject": delivery["subject"],
         "configured": delivery["configured"],
         "send_error": delivery.get("send_error"),
+        "telegram": telegram_result,
         "dedup_path": str(_alert_dedup_path(storage_dir)),
         "timestamp": now.isoformat(),
     }
