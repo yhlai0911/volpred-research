@@ -1,0 +1,314 @@
+{
+  "experiment_id": "k1605",
+  "title": "Bank market-to-book divergence as a delayed-loss prior for regional-bank RV (Phase-1)",
+  "asof": "2026-07-02T16:15:18.572426+00:00",
+  "seed": 20260702,
+  "config": {
+    "banks": [
+      "ASB",
+      "BKU",
+      "BOKF",
+      "CBSH",
+      "CFG",
+      "CFR",
+      "CMA",
+      "EWBC",
+      "FHN",
+      "FITB",
+      "FNB",
+      "HBAN",
+      "HWC",
+      "KEY",
+      "MTB",
+      "ONB",
+      "PB",
+      "PNC",
+      "RF",
+      "RJF",
+      "SNV",
+      "TFC",
+      "UMBF",
+      "USB",
+      "VLY",
+      "WAL",
+      "WBS",
+      "WTFC",
+      "ZION"
+    ],
+    "etfs": [
+      "KRE",
+      "KBE"
+    ],
+    "start_price": "2020-01-01",
+    "start_analysis": "2022-01-01",
+    "rv_trail_win": 22,
+    "horizons": [
+      5,
+      22
+    ],
+    "q_lag_days": 45,
+    "a_lag_days": 75
+  },
+  "diagnostics": {
+    "asof": "2026-07-02T16:15:18.572426+00:00",
+    "end_date": "2026-07-02",
+    "n_banks_requested": 29,
+    "n_banks_price_ok": 27,
+    "n_banks_book_usable": 27,
+    "n_banks_mb_built": 27,
+    "price_fails": [
+      [
+        "CMA",
+        "short n=0"
+      ],
+      [
+        "SNV",
+        "short n=0"
+      ]
+    ],
+    "book_meta_sample": {
+      "ASB": {
+        "n_points": 8,
+        "earliest_avail": "2023-03-16",
+        "latest_avail": "2026-05-15",
+        "earliest_period_end": "2022-12-31",
+        "usable": true
+      },
+      "BKU": {
+        "n_points": 8,
+        "earliest_avail": "2023-03-16",
+        "latest_avail": "2026-05-15",
+        "earliest_period_end": "2022-12-31",
+        "usable": true
+      },
+      "BOKF": {
+        "n_points": 8,
+        "earliest_avail": "2023-03-16",
+        "latest_avail": "2026-05-15",
+        "earliest_period_end": "2022-12-31",
+        "usable": true
+      },
+      "CBSH": {
+        "n_points": 8,
+        "earliest_avail": "2023-03-16",
+        "latest_avail": "2026-05-15",
+        "earliest_period_end": "2022-12-31",
+        "usable": true
+      },
+      "CFG": {
+        "n_points": 8,
+        "earliest_avail": "2023-03-16",
+        "latest_avail": "2026-05-15",
+        "earliest_period_end": "2022-12-31",
+        "usable": true
+      },
+      "CFR": {
+        "n_points": 8,
+        "earliest_avail": "2023-03-16",
+        "latest_avail": "2026-05-15",
+        "earliest_period_end": "2022-12-31",
+        "usable": true
+      }
+    },
+    "mb_window": [
+      "2022-01-03",
+      "2026-07-02"
+    ],
+    "mb_coverage_days_median": 827,
+    "share_history_points_median": 537,
+    "survivorship_note": "SVB/SBNY/FRC (2023 failures) and merged names excluded; sample = survivors only -> bias toward NULL.",
+    "price_confound_note": "Daily M/B varies mostly via price; all predictive tests control for trailing own-RV to isolate incremental fundamental info."
+  },
+  "descriptive": {
+    "panel_effective_start": "2023-03-16",
+    "min_xs_coverage_for_stats": 10,
+    "sparse_early_period_note": "Before ~2023-03-16 fewer than 10 banks have lag-safe book equity (yfinance oldest annual column mostly NaN -> earliest usable = 2022 10-K). Cross-sectional levels reported only from panel_effective_start.",
+    "logmb_pooled_mean_gated": 0.1415384780689168,
+    "logmb_pooled_std_gated": 0.3496569971490406,
+    "mb_median_level_latest": 1.4127935271309289,
+    "frac_below_book_latest": 0.07407407407407407,
+    "frac_below_book_max": 0.8518518518518519,
+    "frac_below_book_max_date": "2023-05-03",
+    "stress_2023": {
+      "pre_window_coverage_banks_max": 1,
+      "pre_window_MB_not_reported_reason": "panel not populated (<10 banks) before ~2023-03-16",
+      "stress_window_coverage_banks_min": 27,
+      "median_MB_stress": 0.851414712522592,
+      "frac_below_book_stress_max": 0.8518518518518519,
+      "frac_below_book_stress_max_date": "2023-05-03",
+      "kre_rv22_pre_median": 0.2335822099442533,
+      "kre_rv22_stress_max": 0.7034362436688686
+    }
+  },
+  "firstlook": {
+    "timeseries_etf": {
+      "KRE": {
+        "h5": {
+          "n": 799,
+          "pearson_sig_vs_fwdRV": -0.27524795697940413,
+          "spearman_sig_vs_fwdRV": -0.3040435798545991,
+          "reg_level_beta": [
+            0.27028155471384957,
+            -0.23604371329198434,
+            0.06305353571713138
+          ],
+          "reg_level_t": [
+            9.70940917336582,
+            -3.8977117361489273,
+            0.7138958605275912
+          ],
+          "reg_chg_beta": [
+            0.20451945893047563,
+            -0.1480978725741681,
+            0.20043635579101884
+          ],
+          "reg_chg_t": [
+            7.114606116423187,
+            -1.4483079572399908,
+            1.9106176165860793
+          ],
+          "hac_lag": 5
+        },
+        "h22": {
+          "n": 782,
+          "pearson_sig_vs_fwdRV": -0.3146101598896906,
+          "spearman_sig_vs_fwdRV": -0.3004312191175916,
+          "reg_level_beta": [
+            0.27993760948905416,
+            -0.16882164008890183,
+            0.06301257117933545
+          ],
+          "reg_level_t": [
+            10.875436391848098,
+            -2.500023847737422,
+            0.918012755596254
+          ],
+          "reg_chg_beta": [
+            0.23423666579657473,
+            -0.11481738903463001,
+            0.15844030892370906
+          ],
+          "reg_chg_t": [
+            7.057613991646745,
+            -1.0863847627296583,
+            1.4314381719255853
+          ],
+          "hac_lag": 22
+        }
+      },
+      "KBE": {
+        "h5": {
+          "n": 799,
+          "pearson_sig_vs_fwdRV": -0.22465165429510897,
+          "spearman_sig_vs_fwdRV": -0.2621539255619634,
+          "reg_level_beta": [
+            0.23557337497062236,
+            -0.16882499356042788,
+            0.07398359564098238
+          ],
+          "reg_level_t": [
+            9.255218588669132,
+            -3.250340583380033,
+            0.7788832148895929
+          ],
+          "reg_chg_beta": [
+            0.19501842421302126,
+            -0.13398250687713245,
+            0.15905509868476683
+          ],
+          "reg_chg_t": [
+            7.704849256067988,
+            -1.4638141469858514,
+            1.5261332911874146
+          ],
+          "hac_lag": 5
+        },
+        "h22": {
+          "n": 782,
+          "pearson_sig_vs_fwdRV": -0.2250314556773935,
+          "spearman_sig_vs_fwdRV": -0.2099126627887011,
+          "reg_level_beta": [
+            0.24534505968007927,
+            -0.105034797712902,
+            0.06780715254641786
+          ],
+          "reg_level_t": [
+            11.129377940414663,
+            -1.740697626184677,
+            0.997577342215201
+          ],
+          "reg_chg_beta": [
+            0.22088685841071753,
+            -0.1094934847544888,
+            0.11997990234760815
+          ],
+          "reg_chg_t": [
+            8.561136170936544,
+            -1.1679336600930699,
+            1.306138798353389
+          ],
+          "hac_lag": 22
+        }
+      }
+    },
+    "fama_macbeth_xs": {
+      "h5": {
+        "spec_A_signal_only": {
+          "mean": -0.05107169278875319,
+          "hac_se": 0.005012352271560342,
+          "t": -10.189166686972422,
+          "n_days": 821
+        },
+        "spec_B_control_lagRV": {
+          "mean": -0.016829824634810836,
+          "hac_se": 0.004205723915656155,
+          "t": -4.001647509994753,
+          "n_days": 821
+        },
+        "n_days_used": 821,
+        "avg_xs_n": 27.0,
+        "median_slope_A": -0.04696320166661848,
+        "median_slope_B": -0.0168238038078199
+      },
+      "h22": {
+        "spec_A_signal_only": {
+          "mean": -0.05433230004667726,
+          "hac_se": 0.006871423654013465,
+          "t": -7.906993191278902,
+          "n_days": 804
+        },
+        "spec_B_control_lagRV": {
+          "mean": -0.016851689252855868,
+          "hac_se": 0.004203026364421953,
+          "t": -4.009417926925971,
+          "n_days": 804
+        },
+        "n_days_used": 804,
+        "avg_xs_n": 27.0,
+        "median_slope_A": -0.0471383842026902,
+        "median_slope_B": -0.0159243429905285
+      }
+    }
+  },
+  "verdict": {
+    "label": "signal",
+    "n_significant_incremental": 5,
+    "hits": [
+      "FM h5 controlled slope<0 t=-4.00",
+      "FM h22 controlled slope<0 t=-4.01",
+      "KRE h5 logMB beta<0 t=-3.90",
+      "KRE h22 logMB beta<0 t=-2.50",
+      "KBE h5 logMB beta<0 t=-3.25"
+    ],
+    "reason": "5 incremental (lagRV-controlled) tests with correct-sign |t|>2.0",
+    "threshold_note": "Phase-1 first-look uses |t|>2; formal DM/Harvey |t|>3 deferred to compute queue"
+  },
+  "provenance": {
+    "data_source": "yfinance (adjusted close, quarterly+annual balance_sheet, get_shares_full)",
+    "free_data_only": true,
+    "lookahead_protection": "book equity aligned to quarter_end+45d / fye+75d; signals shift(1); forward RV over (t,t+H]",
+    "k1355_compliance": "Fama-MacBeth: cross-sectional slope per date, then HAC(lag>=H) on the date series",
+    "price_confound_control": "trailing own-RV included in every predictive regression",
+    "deferred_to_compute_queue": "panel HAC w/ full controls, DM test (MB-augmented vs RV-only forecast), block bootstrap CIs, OOS expanding refit"
+  }
+}
