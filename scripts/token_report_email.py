@@ -26,6 +26,11 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _claude_project_dir import (  # noqa: E402
+    detect_claude_projects_dir as _detect_claude_projects_dir,
+)
+
 TPE = ZoneInfo("Asia/Taipei")
 CALIB_PATH = ROOT / "config" / "token_quota_calibration.json"
 
@@ -68,7 +73,7 @@ def _thinking_estimate(week_range: str) -> dict:
         return {}
     from datetime import date as _date, timedelta as _td
     we_excl = (_date.fromisoformat(we) + _td(days=1)).isoformat()
-    proj = Path.home() / ".claude" / "projects" / "-Users-yhlai0911-Desktop-volpred-research"
+    proj = _detect_claude_projects_dir()
     turns: dict = {}
     files = glob.glob(str(proj / "*.jsonl")) + glob.glob(str(proj / "subagents" / "**" / "*.jsonl"), recursive=True)
     for f in files:

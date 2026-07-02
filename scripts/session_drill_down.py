@@ -23,8 +23,13 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-PROJECT_DIR_SLUG = "-Users-yhlai0911-Desktop-volpred-research"
-CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects" / PROJECT_DIR_SLUG
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _claude_project_dir import (  # noqa: E402
+    detect_claude_projects_dir as _detect_claude_projects_dir,
+)
+
+CLAUDE_PROJECTS_DIR = _detect_claude_projects_dir()
+PROJECT_DIR_SLUG = CLAUDE_PROJECTS_DIR.name  # 實際使用中的目錄名稱（可能是 fallback，非推導 slug）
 
 PRICING = {
     "claude-opus-4-7": {"input": 15.0, "output": 75.0, "cw": 18.75, "cr": 1.50},

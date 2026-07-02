@@ -46,6 +46,7 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "src"))
+sys.path.insert(0, str(REPO / "scripts"))
 
 from volpred.ops.common import project_path  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
@@ -60,6 +61,7 @@ from volpred.ops.loop_health import (  # noqa: E402
     _task_terminal_time,
     loop_health_snapshot,
 )
+from _claude_project_dir import detect_claude_projects_dir  # noqa: E402
 
 
 # All output paths are storage_dir-scoped (single source of truth) so the job is
@@ -471,17 +473,12 @@ def detect_memory_governance(
     """慢 loop 記憶治理（2026-06-30 用戶）：(a) 萃取「描述 recurring process/cadence 但
     還沒成 skill」的記憶 → 提議 promote 成 skill / 加排程；(b) feedback 記憶量大 → 提議
     整併去重澄清，讓記憶更清楚易用。propose_only（記憶治理敏感，不自動改）。"""
-    import pathlib
-
     out: list[DreamFinding] = []
-    mem_dir = (
-        pathlib.Path.home() / ".claude" / "projects"
-        / "-Users-yhlai0911-Desktop-volpred-research" / "memory"
-    )
+    mem_dir = detect_claude_projects_dir() / "memory"
     index = mem_dir / "MEMORY.md"
     if not index.exists():
         return out  # silent-ok: auto-memory 不在此機就跳過（fail-open）
-    skills_dir = pathlib.Path(storage_dir).resolve().parent / ".claude" / "skills"
+    skills_dir = Path(storage_dir).resolve().parent / ".claude" / "skills"
     skills = (
         {p.name.lower() for p in skills_dir.iterdir() if p.is_dir()}
         if skills_dir.exists() else set()

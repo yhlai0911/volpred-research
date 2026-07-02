@@ -22,27 +22,13 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from collections import Counter, defaultdict
 
-def _detect_claude_projects_dir() -> Path:
-    """動態偵測正確的 Claude Code projects 目錄（跨 Mac/Linux 環境）"""
-    base = Path.home() / ".claude" / "projects"
-    if not base.exists():
-        return base / "-Users-yhlai0911-Desktop-volpred-research"
-    # 先試舊的 Mac slug
-    mac_slug = base / "-Users-yhlai0911-Desktop-volpred-research"
-    if mac_slug.exists():
-        return mac_slug
-    # 動態搜尋含有 volpred 的 slug
-    for candidate in sorted(base.iterdir()):
-        if "volpred" in candidate.name.lower() or "user" in candidate.name.lower():
-            return candidate
-    # fallback: 取最近修改的目錄（最可能是當前 project）
-    dirs = [d for d in base.iterdir() if d.is_dir()]
-    if dirs:
-        return max(dirs, key=lambda d: d.stat().st_mtime)
-    return mac_slug
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _claude_project_dir import (  # noqa: E402
+    detect_claude_projects_dir as _detect_claude_projects_dir,
+)
 
-PROJECT_DIR_SLUG = "-Users-yhlai0911-Desktop-volpred-research"
 CLAUDE_PROJECTS_DIR = _detect_claude_projects_dir()
+PROJECT_DIR_SLUG = CLAUDE_PROJECTS_DIR.name  # 實際使用中的目錄名稱（可能是 fallback，非推導 slug）
 STORAGE_DIR = Path(__file__).parent.parent / "storage" / "reports" / "token_usage"
 
 # Task categories with emoji + description
