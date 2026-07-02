@@ -37245,5 +37245,21 @@
     ],
     "confidence": 0.4,
     "created_at": "2026-07-03T01:15:29.809145"
+  },
+  {
+    "item_id": "61c0692f",
+    "category": "bank_liability_vol_prediction",
+    "content": "K1606 — Deposit-flightiness state variable 對區域銀行 RV 的時間序列預測（NULL）。\nVerdict: NULL。Reviewer: feature-dev:code-reviewer subagent fallback（fresh context）PASS — 無 lookahead / 無方向反轉 / 無 pooling bug；唯一 CONCERN（base/aug row population 對齊）已 hardening 修掉、重跑數字不變。Codex primary-path review 嘗試 exit 144（已知 background-polling 不可靠，非 Codex 故障：CLI 0.142.3 / ChatGPT 已登入）。\nReframe：原命題是 uninsured-deposit share 的『截面』預測力，需 FFIEC call-report bank-level 資料（平台無此源）→ 改做資料可得的『時間序列版』：FRED 總體週存款流量（DPSACBW027SBOG）建 deposit-flightiness state variable → 預測 KRE 未來 H=5 日 RV。不做任何截面 uniqueness claim。\nPrimary（KRE 單一 ETF，2015-01-01~2026-07-03，2891 交易日，OOS origins=1155）：HAR-RV baseline + deposit-flightiness(lagged) 相對純 HAR-RV，DM t=-0.382, p=0.703（h=5, Newey-West HAC；負 t=aug 較佳但不顯著）；block bootstrap（block=10, 2000 reps, seed=42）p=0.695, 95% CI [-0.0027, +0.0016] 跨 0；QLIKE 0.20181->0.20138（改善僅 0.21%=noise），MSE 改善 0.09%。In-sample 診斷：dep_flight 係數 -7.6e-06, NW-t=-1.21（不顯著，且符號為負=與『存款外逃領先波動上升』假說相反）。\nRobustness（7 檔成分股 ZION/KEY/RF/FITB/HBAN/MTB/WAL，按日期聚合 loss differential 再 DM，非 asset-day iid）：DM t=1.443, p=0.149（符號翻正=aug 略差，仍不顯著）。WAL 為 QLIKE outlier（41.6 vs 其餘~0.2，源自 2023-03 個股崩跌），含/不含 WAL 結論皆 NULL。\n結論：aggregate deposit-flightiness 對區域銀行 RV 無 robust incremental OOS 預測力；HAR-RV 已充分。限制：僅測 systematic time-series（總體存款流量），未觸及 bank-level 截面 uninsured-deposit share（需 FFIEC call-report）。Lookahead 防線：features 在 close of t、target 嚴格 (t,t+H]、存款訊號 obs+9d publication lag + merge_asof(backward)、OOS expanding refit + H-embargo（train row j 須 j+H < origin i）、canonical qlike_pointwise、seed=42。CMA 因 yfinance 404 略過（已記 diagnostics）。",
+    "evidence": [
+      "experiments/k1606/README.md",
+      "experiments/k1606/k1606.py",
+      "experiments/k1606/k1606_results.json",
+      "experiments/k1606/k1606_fig_state_vs_rv.png",
+      "experiments/k1606/k1606_fig_oos_compare.png",
+      "reviewer_source: feature-dev:code-reviewer subagent fallback (fresh context) PASS; codex primary exit 144 background-polling",
+      "experiment_id: K1606"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-07-03T04:48:51.704195"
   }
 ]

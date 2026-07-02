@@ -1,0 +1,139 @@
+{
+  "experiment_id": "K1606",
+  "title": "Deposit-flightiness state variable predicting regional-bank realized volatility (time-series reframe)",
+  "reframe_note": "Aggregate deposit-flightiness (FRED weekly total deposits) -> KRE regional-bank RV. NOT the original cross-sectional uninsured-deposit-share hypothesis (no bank-level FFIEC call-report data available). No cross-sectional uniqueness claim is made.",
+  "run_utc": "2026-07-02T20:38:25.939513Z",
+  "seed": 42,
+  "horizon_days": 5,
+  "rv_proxy": "Parkinson (high-low range) daily variance",
+  "target": "forward H-day average RV: y_t = mean(RV_{t+1..t+H})",
+  "oos_scheme": "expanding window, refit every step, embargo=H rows (train row j requires j+H < origin i)",
+  "train_frac": 0.6,
+  "deposit_signal": {
+    "series": "DPSACBW027SBOG",
+    "definition": "-zscore(weekly log deposit growth, rolling 52w)",
+    "publication_lag_days": 9,
+    "merge": "as-of backward on trading days (no lookahead)",
+    "n_weekly_obs": 703
+  },
+  "period": {
+    "start": "2015-01-01",
+    "end": "2026-07-03",
+    "n_trading_days_in_window": 2891
+  },
+  "data_sources": {
+    "prices": "yfinance (auto_adjust=True), KRE + components",
+    "deposits": "FRED DPSACBW027SBOG via api.stlouisfed.org"
+  },
+  "data_blocked": false,
+  "primary_KRE": {
+    "label": "KRE",
+    "n_oos": 1155,
+    "QLIKE_base": 0.2018105916930404,
+    "QLIKE_aug": 0.20137733850307485,
+    "QLIKE_improvement_pct": 0.21468307799450298,
+    "MSE_base": 7.17049174689e-08,
+    "MSE_aug": 7.164021598336775e-08,
+    "MSE_improvement_pct": 0.09023298236179261,
+    "DM_stat": -0.38158659284072327,
+    "DM_pvalue": 0.7028382781303733,
+    "DM_horizon": 5,
+    "DM_direction": "negative_t_means_augmented_better",
+    "block_bootstrap": {
+      "block_len": 10,
+      "n_boot": 2000,
+      "mean_loss_diff": -0.00043325318996555005,
+      "se": 0.0011063955373163204,
+      "z": -0.39158978444223624,
+      "p_two_sided": 0.6953613371450662,
+      "ci95": [
+        -0.002735351472101317,
+        0.0015686884530523588
+      ]
+    },
+    "n_floored_base": 0,
+    "n_floored_aug": 0,
+    "insample_diagnostic": {
+      "dep_flight_coef": -7.616694357192557e-06,
+      "dep_flight_nw_t": -1.2081102050166863,
+      "nw_lag": 10,
+      "note": "descriptive in-sample only; primary claim is OOS DM"
+    }
+  },
+  "robustness_components": {
+    "status": "ok",
+    "n_stocks": 7,
+    "stocks": [
+      "ZION",
+      "KEY",
+      "RF",
+      "FITB",
+      "HBAN",
+      "MTB",
+      "WAL"
+    ],
+    "aggregation": "cross-asset mean of loss differential per date, then DM/HAC",
+    "n_dates": 1155,
+    "mean_date_loss_diff": 0.005153553442248491,
+    "DM_stat": 1.443131706249203,
+    "DM_pvalue": 0.14925475424331847,
+    "DM_horizon": 5,
+    "DM_direction": "negative_t_means_augmented_better",
+    "block_bootstrap": {
+      "block_len": 10,
+      "se": 0.003583633044487696,
+      "z": 1.4380806790962117,
+      "p_two_sided": 0.15041116396021637,
+      "ci95": [
+        0.0001846034825001475,
+        0.013486318178410051
+      ]
+    },
+    "per_stock": {
+      "ZION": {
+        "n_oos": 1155,
+        "QLIKE_base": 0.4723992377624502,
+        "QLIKE_aug": 0.4704280868295755,
+        "mean_loss_diff": -0.0019711509328745732
+      },
+      "KEY": {
+        "n_oos": 1155,
+        "QLIKE_base": 0.2538749020437805,
+        "QLIKE_aug": 0.2583931928108313,
+        "mean_loss_diff": 0.004518290767050823
+      },
+      "RF": {
+        "n_oos": 1155,
+        "QLIKE_base": 0.3228831863661558,
+        "QLIKE_aug": 0.31996551323104533,
+        "mean_loss_diff": -0.0029176731351105312
+      },
+      "FITB": {
+        "n_oos": 1155,
+        "QLIKE_base": 0.2287230409049053,
+        "QLIKE_aug": 0.22931152398939444,
+        "mean_loss_diff": 0.0005884830844891258
+      },
+      "HBAN": {
+        "n_oos": 1155,
+        "QLIKE_base": 0.21766771113210448,
+        "QLIKE_aug": 0.2176074541295404,
+        "mean_loss_diff": -6.025700256407384e-05
+      },
+      "MTB": {
+        "n_oos": 1155,
+        "QLIKE_base": 0.21476132299533002,
+        "QLIKE_aug": 0.21455532233609154,
+        "mean_loss_diff": -0.0002060006592384758
+      },
+      "WAL": {
+        "n_oos": 1155,
+        "QLIKE_base": 41.63382133719786,
+        "QLIKE_aug": 41.66994451917183,
+        "mean_loss_diff": 0.036123181973987145
+      }
+    }
+  },
+  "conclusion": "NULL: deposit-flightiness does NOT add robust incremental OOS predictive power over HAR-RV for KRE.",
+  "harvey_significant": false
+}

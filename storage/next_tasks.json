@@ -45522,5 +45522,47 @@
     "started_at": "2026-07-02T19:45:10.958750+00:00",
     "completed_at": "2026-07-02T19:59:56.045818+00:00",
     "result": "Completed IJF/FRL multiround review gate for leverage-direction honest-null reframe. Verdict: FAIL_DO_NOT_ADVANCE; major blockers are residual positive allocation/crisis wording, sample/window auditability, multiple-testing transparency, citation verification, and submission-package compliance. Report: paper/leverage-direction/reviews/ijf_frl_multiround_review_20260703.md"
+  },
+  {
+    "id": "research_deposit_flightiness_uninsured_deposit_share_regi",
+    "title": "研究 backlog fallback: Deposit flightiness / uninsured-deposit share 作 regional-bank liability-side RV state variable",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Deposit flightiness / uninsured-deposit share 作 regional-bank liability-side RV state variable — 用 FDIC Call Report uninsured-deposit share、FRED deposits/MMF series、SOFR-IORB / rate-spread、KRE/KBE constituent returns，所有 quarterly bank data 加 release lag 後 `shift(1)`；檢定高 uninsured-deposit share 或 fli | 來源 section: 期刊主題挖掘 batch 2026-07-02（journal_discovery_20260702_0；websearch rfs/restud/rof/jfec/cfa/fed 2025-26 趨勢層級；硬約束避開 off-exchange short-volume、graph/gnn、thematic etf coherence、cre/nbfi、stablecoin、ai concentration 等已覆蓋 cluster；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "succeeded",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "deposit_flightiness_uninsured_deposit_share_regi",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T20:08:06+00:00",
+    "claimed_by": "hourly-04",
+    "claimed_at": "2026-07-02T20:11:14.047688+00:00",
+    "claim_session_id": "1d209555446b",
+    "status_history": [
+      {
+        "ts": "2026-07-02T20:11:14.047962+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-02T20:11:14.331453+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-04"
+      },
+      {
+        "ts": "2026-07-02T20:49:03.841260+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-04"
+      }
+    ],
+    "started_at": "2026-07-02T20:11:14.330823+00:00",
+    "completed_at": "2026-07-02T20:49:03.840997+00:00",
+    "result": "K1606 NULL: aggregate deposit-flightiness (FRED DPSACBW027SBOG) 對 KRE 未來5日RV 無 robust incremental OOS 預測力（DM t=-0.382 p=0.703; bootstrap p=0.695; QLIKE 改善 0.21%=noise; in-sample coef 符號為負與假說相反）。時間序列 reframe（原截面 uninsured-share 需 FFIEC call-report 無源）。reviewer=code-reviewer subagent fallback PASS。knowledge item 61c0692f。"
   }
 ]
