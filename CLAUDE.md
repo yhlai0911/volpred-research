@@ -45,17 +45,17 @@
 **ScheduleWakeup 只准在 autonomous fire 的 turn 使用，互動 turn（用戶在等回覆時）全面禁用**（2026-07-02 五犯後根治：該工具回應「Nothing more to do this turn」會誘導把 tool call 當回合終點，回覆永遠寫不出來 — 規則怎麼改序列都擋不住，唯一解是互動路徑移除此工具）。自主迴圈的存續**不靠** session 內 wakeup：OS backbone（hourly-dispatch / compute-worker / check-alerts 等 LaunchAgent+cron）session-independent 常駐，session 關掉迴圈照跑。autonomous fire 的 turn 結尾才排下一次 wakeup。互動 turn 的唯一收尾動作 = 文字回覆。
 Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
 
-**Turn 最終輸出必須是給用戶的文字（與上一條同位階；enforcement owner = Stop hook）**：固定順序 = 做完工作 → `ScheduleWakeup` → 最終文字回報（結果 + 時間戳 + 下次排程）。寫在 tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。2026-07-02 三犯後由 `scripts/hooks/enforce_final_text.py`（Stop hook）機械 enforce — 被擋下時直接補文字回報（why 與 incident 史見 error_log 2026-07-02 14:25、memory `feedback_final_text_after_schedulewakeup`）。
+**Turn 最終輸出必須是給用戶的文字（與上一條同位階；enforcement owner = Stop hook）**：互動 turn 收尾 = 文字回報（結果 + 時間戳）；寫在 tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。2026-07-02 三犯後由 `scripts/hooks/enforce_final_text.py`（Stop hook）機械 enforce — 被擋下時直接補文字回報（why 與 incident 史見 error_log 2026-07-02 14:25、memory `feedback_final_text_after_schedulewakeup`）。
 
 **Session start 自動啟動**（2026-05-29 用戶補強）：
-新 interactive session 一開始（識別方式：第一個 user message 不是「停」、「結束」、「stop」等明確終止指令，且 `git log --since='30 min ago'` 或 `storage/ops/last_autonomous_fire.json` 顯示 autonomous loop 已斷 ≥10 min），**主動在第一個回應結尾排 ScheduleWakeup**，不必等用戶明說。這彌補 `/exit` → session 關閉時 ScheduleWakeup chain 斷掉的 gap（2026-05-29 07:43 → 08:13 斷 30 min incident）。
+新 interactive session 一開始（識別方式：第一個 user message 不是「停」、「結束」、「stop」等明確終止指令，且 `git log --since='30 min ago'` 或 `storage/ops/last_autonomous_fire.json` 顯示 autonomous loop 已斷 ≥10 min），確認 OS backbone 活著即可（hourly-dispatch LaunchAgent 為主）；**不在互動回應中排 ScheduleWakeup**（2026-07-02 五犯根治後，session 內 wakeup 僅限 autonomous fire turn）。
 
 判斷流程（接收第一個 user message 時內建）：
 1. 用戶 message 含「停 loop / 結束 / stop autonomous / 暫停 autonomous」→ 不啟動
 2. 用戶 message 含「啟動 loop / 開始 / start autonomous / 接續」→ 立即啟動
 3. 其他情況（含一般 task request）→ 預設啟動（背景跑不打擾用戶）
 
-啟動方式 = 回應完用戶的當下需求後，turn 結尾排 `ScheduleWakeup(delaySeconds=1800, prompt="<<autonomous-loop-dynamic>>")`。
+啟動方式 = 驗證 backbone 排程活著（`launchctl list | grep volpred` + 最近 hourly log）；backbone 斷了才修 backbone，不用 session 內 wakeup 替代。
 
 **Autonomous fire 4-step protocol**（每次 `<<autonomous-loop-dynamic>>` fire）：
 1. Run ops cycle（dashboard breaches / handoff diff / hourly fire verify / email backlog / orphan commit）
