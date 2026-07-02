@@ -44599,7 +44599,7 @@
     "title": "研究 backlog fallback: Mutual-fund-to-ETF / active ETF conversion event 是否改變 wrapper liquidity 與 underlying RV",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Mutual-fund-to-ETF / active ETF conversion event 是否改變 wrapper liquidity 與 underlying RV — 用 issuer press releases、SEC 425 / N-14 filings、Morningstar/JPMAM conversion lists 建 conversion event calendar，對 converted ETF、同 category ETF、underlying factor/sector basket 做 announcement-to-conversion 與 listin | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44608,7 +44608,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T07:25:47+00:00"
+    "created_at": "2026-07-02T07:25:47+00:00",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-02T11:31:03.733212+00:00",
+    "claim_session_id": "2652d2c1b61b",
+    "status_history": [
+      {
+        "ts": "2026-07-02T11:31:03.733496+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T11:31:08.774274+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T11:38:08.657252+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-02T11:31:08.774006+00:00",
+    "completed_at": "2026-07-02T11:38:08.656951+00:00",
+    "result": "Codex failover completed mutual-fund-to-ETF conversion event study. Verdict weak_raw_only; wrapper tracking-noise raw signal but no formal Holm pass, underlying RV null, knowledge_id=5b7e1c91."
   },
   {
     "id": "research_sports_betting_legalization_betting_handle_shock",

@@ -37175,5 +37175,18 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-07-02T19:19:36.998387"
+  },
+  {
+    "item_id": "5b7e1c91",
+    "category": "etf_liquidity_conversion_event",
+    "content": "Mutual-fund-to-ETF conversion public-data pilot is WEAK_RAW_ONLY / underlying RV NULL. experiment_id=research_mutual_fund_to_etf_active_etf_conversion_event_w; path=experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w. Data: 10 public conversion/listing rows from Guinness Atkinson, Dimensional, and J.P. Morgan, 2021-03-26 to 2022-06-13; yfinance Adj Close and Volume from 2020-01-01; category proxies VIG/AAXJ/VTI/IWB/IWM/IWN/TIP/VNQ/EFA. Method: wrapper liquidity maturation T+1..T+21 vs T+43..T+63, adjusted by category proxy; tracking-noise improvement vs proxy; underlying proxy RV baseline T-60..T-11 vs T+1..T+5/T+22 with unique listing-date inference and same-year placebo anchors. Results: wrapper tracking-noise improvement raw mean +0.2484, one-sided p=0.014, bootstrap CI [+0.0819,+0.4363], but Holm p=0.0716 and sign-test Holm p=0.859, so weak raw only. Volume ramp and Amihud improvement are null. Underlying category RV is null: 5d mean -0.4021 p_two=0.341 placebo p=0.268; 22d mean -0.1551 p_two=0.578 placebo p=0.554. Scope: public ETF proxy only; not complete SEC N-14 universe, holdings-level replication, bid-ask spread, premium/discount, or creation/redemption evidence.",
+    "evidence": [
+      "experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/README.md",
+      "experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/research_mutual_fund_to_etf_active_etf_conversion_event_w.py",
+      "experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/research_mutual_fund_to_etf_active_etf_conversion_event_w_results.json",
+      "experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/codex_review.md"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-07-02T19:37:53.093415"
   }
 ]

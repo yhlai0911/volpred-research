@@ -1,0 +1,434 @@
+{
+  "experiment_id": "research_mutual_fund_to_etf_active_etf_conversion_event_w",
+  "created_at": "2026-07-02T19:36:07.070974+08:00",
+  "random_seed": 42,
+  "events": [
+    {
+      "batch_id": "guinness_20210326",
+      "issuer": "Guinness Atkinson / SmartETFs",
+      "fund": "Guinness Atkinson Dividend Builder Fund",
+      "ticker": "DIVS",
+      "proxy": "VIG",
+      "category": "dividend_equity",
+      "conversion_date": "2021-03-26",
+      "listing_date": "2021-03-26",
+      "source": "Business Wire 2021-03-02"
+    },
+    {
+      "batch_id": "guinness_20210326",
+      "issuer": "Guinness Atkinson / SmartETFs",
+      "fund": "Guinness Atkinson Asia Pacific Dividend Builder Fund",
+      "ticker": "ADIV",
+      "proxy": "AAXJ",
+      "category": "asia_pacific_equity",
+      "conversion_date": "2021-03-26",
+      "listing_date": "2021-03-26",
+      "source": "Business Wire 2021-03-02"
+    },
+    {
+      "batch_id": "dimensional_20210614",
+      "issuer": "Dimensional",
+      "fund": "DFA Tax-Managed US Equity Portfolio",
+      "ticker": "DFUS",
+      "proxy": "VTI",
+      "category": "us_total_equity",
+      "conversion_date": "2021-06-11",
+      "listing_date": "2021-06-14",
+      "source": "Dimensional 2021-06-14 / SEC 497"
+    },
+    {
+      "batch_id": "dimensional_20210614",
+      "issuer": "Dimensional",
+      "fund": "DFA T.A. US Core Equity 2 Portfolio",
+      "ticker": "DFAC",
+      "proxy": "IWB",
+      "category": "us_core_equity",
+      "conversion_date": "2021-06-11",
+      "listing_date": "2021-06-14",
+      "source": "Dimensional 2021-06-14 / SEC 497"
+    },
+    {
+      "batch_id": "dimensional_20210614",
+      "issuer": "Dimensional",
+      "fund": "DFA Tax-Managed US Small Cap Portfolio",
+      "ticker": "DFAS",
+      "proxy": "IWM",
+      "category": "us_small_cap",
+      "conversion_date": "2021-06-11",
+      "listing_date": "2021-06-14",
+      "source": "Dimensional 2021-06-14 / SEC 497"
+    },
+    {
+      "batch_id": "dimensional_20210614",
+      "issuer": "Dimensional",
+      "fund": "DFA Tax-Managed US Targeted Value Portfolio",
+      "ticker": "DFAT",
+      "proxy": "IWN",
+      "category": "us_small_value",
+      "conversion_date": "2021-06-11",
+      "listing_date": "2021-06-14",
+      "source": "Dimensional 2021-06-14 / SEC 497"
+    },
+    {
+      "batch_id": "jpm_20220411",
+      "issuer": "J.P. Morgan Asset Management",
+      "fund": "JPMorgan Inflation Managed Bond Fund",
+      "ticker": "JCPI",
+      "proxy": "TIP",
+      "category": "inflation_bond",
+      "conversion_date": "2022-04-08",
+      "listing_date": "2022-04-11",
+      "source": "Morningstar / J.P. Morgan conversion list"
+    },
+    {
+      "batch_id": "jpm_20220509",
+      "issuer": "J.P. Morgan Asset Management",
+      "fund": "JPMorgan Market Expansion Enhanced Index Fund",
+      "ticker": "JMEE",
+      "proxy": "IWM",
+      "category": "us_extended_market",
+      "conversion_date": "2022-05-06",
+      "listing_date": "2022-05-09",
+      "source": "Morningstar / J.P. Morgan conversion list"
+    },
+    {
+      "batch_id": "jpm_20220523",
+      "issuer": "J.P. Morgan Asset Management",
+      "fund": "JPMorgan Realty Income Fund",
+      "ticker": "JPRE",
+      "proxy": "VNQ",
+      "category": "real_estate",
+      "conversion_date": "2022-05-20",
+      "listing_date": "2022-05-23",
+      "source": "Morningstar / J.P. Morgan conversion list"
+    },
+    {
+      "batch_id": "jpm_20220613",
+      "issuer": "J.P. Morgan Asset Management",
+      "fund": "JPMorgan International Research Enhanced Equity Fund",
+      "ticker": "JIRE",
+      "proxy": "EFA",
+      "category": "international_equity",
+      "conversion_date": "2022-06-10",
+      "listing_date": "2022-06-13",
+      "source": "Morningstar / J.P. Morgan conversion list"
+    }
+  ],
+  "data_sources": {
+    "prices": {
+      "provider": "yfinance",
+      "auto_adjust": false,
+      "fields": [
+        "Adj Close",
+        "Volume"
+      ],
+      "start": "2020-01-01",
+      "price_meta": {
+        "AAXJ": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        },
+        "ADIV": {
+          "usable": true,
+          "start": "2021-03-29",
+          "end": "2026-07-01",
+          "n_obs": 1321
+        },
+        "DFAC": {
+          "usable": true,
+          "start": "2021-06-14",
+          "end": "2026-07-01",
+          "n_obs": 1268
+        },
+        "DFAS": {
+          "usable": true,
+          "start": "2021-06-14",
+          "end": "2026-07-01",
+          "n_obs": 1268
+        },
+        "DFAT": {
+          "usable": true,
+          "start": "2021-06-14",
+          "end": "2026-07-01",
+          "n_obs": 1268
+        },
+        "DFUS": {
+          "usable": true,
+          "start": "2021-06-14",
+          "end": "2026-07-01",
+          "n_obs": 1268
+        },
+        "DIVS": {
+          "usable": true,
+          "start": "2021-04-01",
+          "end": "2026-07-01",
+          "n_obs": 1318
+        },
+        "EFA": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        },
+        "IWB": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        },
+        "IWM": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        },
+        "IWN": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        },
+        "JCPI": {
+          "usable": true,
+          "start": "2022-04-11",
+          "end": "2026-07-01",
+          "n_obs": 1059
+        },
+        "JIRE": {
+          "usable": true,
+          "start": "2022-06-15",
+          "end": "2026-07-01",
+          "n_obs": 1014
+        },
+        "JMEE": {
+          "usable": true,
+          "start": "2022-05-09",
+          "end": "2026-07-01",
+          "n_obs": 1040
+        },
+        "JPRE": {
+          "usable": true,
+          "start": "2022-05-23",
+          "end": "2026-07-01",
+          "n_obs": 1030
+        },
+        "TIP": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        },
+        "VIG": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        },
+        "VNQ": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        },
+        "VTI": {
+          "usable": true,
+          "start": "2020-01-02",
+          "end": "2026-07-01",
+          "n_obs": 1632
+        }
+      }
+    },
+    "event_sources": [
+      "Business Wire Guinness Atkinson conversion date release",
+      "Dimensional 2021-06-14 conversion/listing release",
+      "SEC 497 Dimensional conversion information statement",
+      "Morningstar/J.P. Morgan conversion listing dates",
+      "Federal Reserve FEDS Notes 2025 mutual-fund-to-ETF conversion evidence"
+    ]
+  },
+  "method": {
+    "wrapper_liquidity": "Converted ETF T+1..T+21 vs T+43..T+63 dollar-volume ramp and Amihud improvement, adjusted by category proxy over the same windows.",
+    "tracking_noise": "Mean absolute converted ETF return minus category proxy return, T+1..T+21 vs T+43..T+63.",
+    "underlying_rv": "Category proxy log realized-variance ratio, baseline T-60..T-11 versus post T+1..T+5 or T+1..T+22.",
+    "underlying_inference_unit": "unique listing-date mean, so same-day Dimensional/Guinness conversions do not multiply the same market date.",
+    "same_day_treatment": "Listing/conversion day returns are excluded from primary RV windows.",
+    "bootstrap": {
+      "seed": 42,
+      "n_boot": 10000,
+      "unit": "ETF event for wrapper metrics; listing-date for underlying RV"
+    },
+    "placebo": {
+      "seed": 42,
+      "n_placebo": 3000,
+      "rule": "same-proxy, same-year non-event anchors excluding +/-30 calendar days around true listing dates"
+    }
+  },
+  "diagnostics": {
+    "n_conversion_rows": 10,
+    "n_wrapper_rows": 10,
+    "n_underlying_detail_rows": 20,
+    "n_underlying_listing_dates": 6,
+    "n_anchor_rows": 25029
+  },
+  "summary": {
+    "wrapper_adjusted_volume_ramp": {
+      "family": "wrapper",
+      "alternative": "upper",
+      "n": 10,
+      "mean": 0.05587666932926501,
+      "median": 0.12303842081267308,
+      "t_stat": 0.28647933936005315,
+      "p_t_upper": 0.39049819489690135,
+      "p_t_lower": 0.6095018051030987,
+      "p_t_two_sided": 0.7809963897938027,
+      "p_primary": 0.39049819489690135,
+      "sign_positive": 5,
+      "p_sign_upper": 0.623046875,
+      "p_sign_two_sided": 1.0,
+      "boot_ci_low": -0.3134617589545324,
+      "boot_ci_high": 0.4135373269390137,
+      "boot_prob_mean_le_0": 0.3796,
+      "n_placebo": null,
+      "placebo_mean": null,
+      "placebo_ci_low": null,
+      "placebo_ci_high": null,
+      "p_placebo_two_sided": null,
+      "p_placebo_upper": null,
+      "p_placebo_lower": null,
+      "p_primary_holm": 1.0,
+      "p_sign_upper_holm": 1.0,
+      "p_sign_two_sided_holm": 1.0,
+      "p_placebo_two_sided_holm": null
+    },
+    "wrapper_adjusted_amihud_improvement": {
+      "family": "wrapper",
+      "alternative": "upper",
+      "n": 10,
+      "mean": -0.043550330706962695,
+      "median": 0.05608230575839622,
+      "t_stat": -0.32680427980107746,
+      "p_t_upper": 0.6243559281464396,
+      "p_t_lower": 0.3756440718535604,
+      "p_t_two_sided": 0.7512881437071208,
+      "p_primary": 0.6243559281464396,
+      "sign_positive": 6,
+      "p_sign_upper": 0.376953125,
+      "p_sign_two_sided": 0.75390625,
+      "boot_ci_low": -0.2935398018157454,
+      "boot_ci_high": 0.1971511593714483,
+      "boot_prob_mean_le_0": 0.6249,
+      "n_placebo": null,
+      "placebo_mean": null,
+      "placebo_ci_low": null,
+      "placebo_ci_high": null,
+      "p_placebo_two_sided": null,
+      "p_placebo_upper": null,
+      "p_placebo_lower": null,
+      "p_primary_holm": 1.0,
+      "p_sign_upper_holm": 1.0,
+      "p_sign_two_sided_holm": 1.0,
+      "p_placebo_two_sided_holm": null
+    },
+    "wrapper_tracking_noise_improvement": {
+      "family": "wrapper",
+      "alternative": "upper",
+      "n": 10,
+      "mean": 0.24841048238399321,
+      "median": 0.20467423178840813,
+      "t_stat": 2.602503805648321,
+      "p_t_upper": 0.01431022831533659,
+      "p_t_lower": 0.9856897716846634,
+      "p_t_two_sided": 0.02862045663067318,
+      "p_primary": 0.01431022831533659,
+      "sign_positive": 7,
+      "p_sign_upper": 0.171875,
+      "p_sign_two_sided": 0.34375,
+      "boot_ci_low": 0.08185805994379342,
+      "boot_ci_high": 0.43627385326007834,
+      "boot_prob_mean_le_0": 0.0013,
+      "n_placebo": null,
+      "placebo_mean": null,
+      "placebo_ci_low": null,
+      "placebo_ci_high": null,
+      "p_placebo_two_sided": null,
+      "p_placebo_upper": null,
+      "p_placebo_lower": null,
+      "p_primary_holm": 0.07155114157668295,
+      "p_sign_upper_holm": 0.859375,
+      "p_sign_two_sided_holm": 1.0,
+      "p_placebo_two_sided_holm": null
+    },
+    "underlying_log_rv_ratio_5d": {
+      "family": "underlying",
+      "alternative": "two-sided",
+      "n": 6,
+      "mean": -0.40213160944839416,
+      "median": 0.06809467545120189,
+      "t_stat": -1.0519286888915076,
+      "p_t_upper": 0.8295045809397211,
+      "p_t_lower": 0.17049541906027887,
+      "p_t_two_sided": 0.34099083812055775,
+      "p_primary": 0.34099083812055775,
+      "sign_positive": 3,
+      "p_sign_upper": 0.65625,
+      "p_sign_two_sided": 1.0,
+      "boot_ci_low": -1.1355058392421344,
+      "boot_ci_high": 0.21741568005202974,
+      "boot_prob_mean_le_0": 0.8859,
+      "n_placebo": 3000.0,
+      "placebo_mean": -0.15487382085669676,
+      "placebo_ci_low": -0.8301676238877044,
+      "placebo_ci_high": 0.474295693557852,
+      "p_placebo_two_sided": 0.26824391869376873,
+      "p_placebo_upper": 0.773075641452849,
+      "p_placebo_lower": 0.22725758080639788,
+      "p_primary_holm": 1.0,
+      "p_sign_upper_holm": 1.0,
+      "p_sign_two_sided_holm": 1.0,
+      "p_placebo_two_sided_holm": 0.5364878373875375
+    },
+    "underlying_log_rv_ratio_22d": {
+      "family": "underlying",
+      "alternative": "two-sided",
+      "n": 6,
+      "mean": -0.15513816669531325,
+      "median": -0.028051558210747965,
+      "t_stat": -0.594938971987441,
+      "p_t_upper": 0.7111076989533469,
+      "p_t_lower": 0.28889230104665314,
+      "p_t_two_sided": 0.5777846020933063,
+      "p_primary": 0.5777846020933063,
+      "sign_positive": 2,
+      "p_sign_upper": 0.890625,
+      "p_sign_two_sided": 0.6875,
+      "boot_ci_low": -0.6610205644854933,
+      "boot_ci_high": 0.2718609932530911,
+      "boot_prob_mean_le_0": 0.7206,
+      "n_placebo": 3000.0,
+      "placebo_mean": 0.07575519949101137,
+      "placebo_ci_low": -0.37855432769060043,
+      "placebo_ci_high": 0.5240235277289245,
+      "p_placebo_two_sided": 0.5541486171276241,
+      "p_placebo_upper": 0.8247250916361213,
+      "p_placebo_lower": 0.17560813062312564,
+      "p_primary_holm": 1.0,
+      "p_sign_upper_holm": 1.0,
+      "p_sign_two_sided_holm": 1.0,
+      "p_placebo_two_sided_holm": 0.5541486171276241
+    }
+  },
+  "verdict": "weak_raw_only",
+  "files": {
+    "wrapper_liquidity_metrics": "/Users/yhlai0911/volpred-research/experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/data/wrapper_liquidity_metrics.csv",
+    "underlying_event_metrics": "/Users/yhlai0911/volpred-research/experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/data/underlying_event_metrics.csv",
+    "underlying_date_level_metrics": "/Users/yhlai0911/volpred-research/experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/data/underlying_date_level_metrics.csv",
+    "underlying_anchor_metrics": "/Users/yhlai0911/volpred-research/experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/data/underlying_anchor_metrics.csv",
+    "summary": "/Users/yhlai0911/volpred-research/experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/data/summary.csv",
+    "figures": [
+      "/Users/yhlai0911/volpred-research/experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/figures/wrapper_liquidity_diagnostics.png",
+      "/Users/yhlai0911/volpred-research/experiments/research_mutual_fund_to_etf_active_etf_conversion_event_w/figures/underlying_rv_event_heatmap.png"
+    ]
+  }
+}
