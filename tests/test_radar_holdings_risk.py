@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import importlib.util
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -34,6 +35,9 @@ def _load_engine():
     spec = importlib.util.spec_from_file_location("radar_holdings_risk", ENGINE_PATH)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
+    # 必須先註冊 sys.modules 再 exec：engine 有 `from __future__ import annotations`，
+    # @dataclass 解析字串 annotation 時會查 sys.modules[cls.__module__]，缺了直接 AttributeError。
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -71,7 +75,7 @@ def _isodates(n: int) -> list[str]:
 def _fetch_factory(returns_by_ticker: dict[str, list[float]]):
     """Returns a fetch(ticker, lookback) compatible with the engine.
     Aligns all tickers on a shared date axis (same length) so the inner-join keeps all."""
-    n = max(len(v) for v in returns_by_ticker.values())
+    n = max((len(v) for v in returns_by_ticker.values()), default=0)
     dates = _isodates(n + 1)
 
     def fetch(ticker: str, lookback_days: int):

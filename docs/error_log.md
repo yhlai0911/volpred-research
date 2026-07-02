@@ -2,6 +2,10 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 16:15 test_radar_holdings_risk collection error 中斷整套 pytest（gate 靜默失效同類）
+
+`tests/test_radar_holdings_risk.py` 的 `_load_engine` 用 `importlib` 載 `scripts/radar_holdings_risk.py` 時沒註冊 `sys.modules[spec.name]`，而 engine 有 `from __future__ import annotations` + `@dataclass` → dataclasses `_is_type` 查 `sys.modules.get(cls.__module__)` 得 None → collection AttributeError，**整個 `pytest tests/` collection interrupted、該檔 10 個 regression tests 從未跑過**（與 14:11 entry「測試檔壞掉 = gate 靜默失效」同類）。修復：(a) `_load_engine` 補 `sys.modules[spec.name] = module`（importlib 官方 recipe）；(b) gate 恢復後暴露 3 個潛伏 failure — 測試 helper `max()` 空 dict 炸（`default=0` 修）+ **engine 真 bug**：`base = total_input_pct` 把權重 renormalize 回投資部位，與自己的註解/note「現金零波動已計入全組合 VaR」矛盾（權重<100% 時高估 vol/VaR），修成 `base = max(total_input_pct, 100.0)`。教訓：**importlib 手動載入含 dataclass+future-annotations 的 script 必註冊 sys.modules**（tests/ 內 50+ 檔用同 pattern，其他檔目前無此組合故未炸）；測試檔 collection error 不只是該檔沒跑，是全套 gate 中斷。
+
 ## 2026-07-02 15:15 文章深度退化（老闆質問「越來越糟、越來越短、資訊量大幅下降」）— 量化屬實：general median -49%（4459→2293 chars），三個 high-confidence root cause 已修
 
 **現象**（4-agent workflow 取證 + 主線程獨立重算對齊）：12 週 weekly median 從 5/22-28 的 5057 chars 斷崖到 5/29-6/04 的 3018（-40%）持續至今；**general 同型腰斬 4459→2293（-49%）**、表格 3→1、K-refs 2-3.5→1；research 持平（4735→4729）。深讀對比：消失的是「證據鏈中段」— 結果表（5-8→0-1）、正式檢定（6-21 次→0）、方法專節、robustness、limitations、文獻全被抽掉，結論從條件化量化退化成不可覆核的格言。
