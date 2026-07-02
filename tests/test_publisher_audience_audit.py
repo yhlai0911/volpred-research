@@ -70,7 +70,8 @@ def test_audit_general_content_blocks_t_stat_and_p_value():
     tags = ["一般讀者"]
     issues = _audit_general_content("general", tags, content)
     assert len(issues) == 1
-    assert "禁用統計術語" in issues[0]
+    # 19daf2115 起 general-gate 訊息改「翻譯向」（裸統計術語→白話包裝指引），非舊「禁用統計術語」刪除向
+    assert "裸統計術語" in issues[0]
 
 
 def test_audit_general_content_blocks_harvey_dm_bootstrap():

@@ -662,7 +662,7 @@ def test_release_pool_audit_skip_materializes_fix_task_after_three_strikes(
     assert draft["status"] == "draft"
     assert draft["details"]["release_audit_skipped_count"] == 3
     assert draft["details"]["release_audit_task_id"] == "platform_ops_release_audit_fix_mile_audit_bad"
-    assert "禁用統計術語" in draft["details"]["release_audit_issues"][0]
+    assert "裸統計術語" in draft["details"]["release_audit_issues"][0]
 
     tasks = json.loads((storage_dir / "next_tasks.json").read_text(encoding="utf-8"))
     assert len(tasks) == 1
