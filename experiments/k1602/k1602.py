@@ -144,6 +144,7 @@ def annualized_rv(px: pd.Series, min_obs: int) -> float:
 def build_year_panel(prices: pd.DataFrame) -> pd.DataFrame:
     """One row per (year, ticker) with the lag-safe loss signal + outcome metrics."""
     rows = []
+    available_tickers = [t for t in TICKERS if t in prices.columns]
     years = sorted({d.year for d in prices.index})
     for y in years:
         class_start = pd.Timestamp(y, 1, 1)
@@ -165,7 +166,7 @@ def build_year_panel(prices: pd.DataFrame) -> pd.DataFrame:
         if jan_px.shape[0] < MIN_JAN_OBS or dec_px.shape[0] < MIN_DEC_OBS:
             continue
 
-        for t in TICKERS:
+        for t in available_tickers:
             cser = class_px[t].dropna()
             if len(cser) < MIN_CLASS_OBS:
                 continue
@@ -219,9 +220,10 @@ def ttest_mean_zero(x: np.ndarray) -> dict:
     mean = float(np.mean(x))
     se = float(np.std(x, ddof=1) / np.sqrt(n))
     t = mean / se if se > 0 else float("nan")
-    # two-sided p via normal approx (n modest; report t as primary Harvey gate)
-    from math import erf, sqrt
-    p = float(2 * (1 - 0.5 * (1 + erf(abs(t) / sqrt(2))))) if np.isfinite(t) else float("nan")
+    # two-sided p via Student-t; the Harvey |t| gate and bootstrap CI are primary.
+    from scipy import stats as scipy_stats
+
+    p = float(2 * scipy_stats.t.sf(abs(t), df=n - 1)) if np.isfinite(t) else float("nan")
     return dict(n=n, mean=mean, se=se, t=t, p=p)
 
 
@@ -330,6 +332,7 @@ def main() -> None:
     verdict = verdict_from(stats) if len(diffs) else "INSUFFICIENT_DATA"
 
     fig_paths = make_figures(diffs, stats) if len(diffs) else []
+    loaded_tickers = [t for t in TICKERS if t in prices.columns]
 
     results = dict(
         experiment_id="K1602",
@@ -338,7 +341,8 @@ def main() -> None:
         data_source="yfinance adjusted close (auto_adjust=True)",
         sample_start=START,
         n_tickers=len(TICKERS),
-        n_tickers_loaded=int(prices.shape[1]),
+        n_tickers_loaded=len(loaded_tickers),
+        market_loaded=bool(MARKET in prices.columns),
         failed_downloads=failed,
         n_years=int(len(diffs)),
         years=[int(y) for y in diffs["year"].tolist()],
@@ -370,7 +374,7 @@ def main() -> None:
     out = HERE / "k1602_results.json"
     out.write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    print(f"[K1602] years={len(diffs)} tickers_loaded={prices.shape[1]} failed={len(failed)}")
+    print(f"[K1602] years={len(diffs)} tickers_loaded={len(loaded_tickers)} failed={len(failed)}")
     for c in ["dec_ret", "jan_ret", "dec_rv"]:
         s = stats[c]
         print(f"  {c:10s} mean={s['mean']*100:+.3f}% t={s.get('t', float('nan')):+.2f} "

@@ -37137,5 +37137,17 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-07-02T17:15:58.752003"
+  },
+  {
+    "item_id": "43219f69",
+    "category": "market_microstructure_seasonality",
+    "content": "K1602 — Tax-loss-harvesting crowding and year-end single-stock RV reversal\n\nverdict: NULL\nreviewer: Codex failover source review (2026-07-02)\nexperiment_id: K1602\nexperiment_path: experiments/k1602/\nresults_file: experiments/k1602/k1602_results.json\n\nDesign: 83 configured liquid US single-stock tickers plus SPY market control, yfinance adjusted close auto_adjust=True, classification years 2004-2025, 82 stocks loaded (X failed with empty yfinance history). Lag-safe signal: each year Y classifies bottom/top YTD-return groups using data only through Nov 30; outcomes begin Dec 1 or Jan 1 of Y+1. Inference is on year-level loser-minus-winner differentials, not pooled stock-year iid. Bootstrap seed=42, 10,000 year-bootstrap reps.\n\nCore results:\n- H2 primary January reversal: loser-winner Jan return mean +0.570%, year-clustered t=0.37, Student-t p=0.715, bootstrap 95% CI [-2.31%, +3.63%]. Fails Harvey |t|>=3 and CI excludes zero gate.\n- H1 December selling pressure: mean -0.619%, t=-0.67, CI [-2.39%, +1.15%]. Directionally consistent but not significant.\n- H3 December RV: mean +3.00pp annualized, t=1.29, CI [-1.10pp, +7.79pp]. Directional-only, not robust.\n- H4 modern direct-indexing/TLH crowding amplification: not supported. Pre-2015 Jan reversal mean +1.91%; post-2015 mean -0.77%.\n\nCodex review notes: initial compute_k1602 failed because yfinance returned no X history and the script still iterated the full TICKERS list. Fixed build_year_panel to iterate loaded tickers only, separated stock count from SPY market control, and changed small-sample p-values to Student-t. Lookahead review PASS: Nov30 signal boundary precedes all Dec/Jan outcomes. Caveats remain material: survivorship bias from current-listed yfinance universe, fixed non-point-in-time universe, no direct observation of direct-indexing/TLH flows, and only 22 year-cluster observations.\n\nImplication: The classic tax-loss-selling / January-reversal story is not robust in this fixed current-liquid-stock screening sample, and the post-2015 direct-indexing-crowding amplification hypothesis fails outright in point estimate. Report as a null; do not use for trading or strong causal claims without point-in-time constituents and actual TLH/direct-indexing flow proxies.\n",
+    "evidence": [
+      "K1602",
+      "experiments/k1602/k1602_results.json",
+      "experiments/k1602/k1602.py"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-07-02T18:13:45.283951"
   }
 ]
