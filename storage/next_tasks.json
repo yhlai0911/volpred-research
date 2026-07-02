@@ -44615,7 +44615,7 @@
     "title": "研究 backlog fallback: Sports-betting legalization / betting-handle shock 是否抽走 retail risk budget 並放大 gambling-stock RV",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Sports-betting legalization / betting-handle shock 是否抽走 retail risk budget 並放大 gambling-stock RV — 用 state legalization / launch dates、public sports-betting handle/revenue、major sports calendar，映射 DKNG/FLUT/PENN/MGM/BETZ、lottery-like retail basket、IWM/ARKK，檢定 launch 或 handle-surprise 後 t+5/t+22 abno | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44624,7 +44624,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T07:35:48+00:00"
+    "created_at": "2026-07-02T07:35:48+00:00",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-02T10:19:06.880482+00:00",
+    "claim_session_id": "30787415094f",
+    "status_history": [
+      {
+        "ts": "2026-07-02T10:19:06.880764+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T10:19:12.391843+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T10:26:46.118065+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-02T10:19:12.391567+00:00",
+    "completed_at": "2026-07-02T10:26:46.117803+00:00",
+    "result": "K1604 completed by Codex failover: built public event-study for 23 online/mobile sports-betting launch dates, yfinance betting basket vs SPY/IWM/QQQ controls, generated results/CSV/figures, wrote knowledge entry e47a025a. Verdict NULL: adjusted T+5 RV log ratio mean +0.0167, t=0.30, p=0.767, bootstrap CI [-0.0904,+0.1224], same-year random-anchor p_upper=0.407; no robust volume shock."
   },
   {
     "id": "research_glp_1_adoption_shock_sector_consumption_healthca",

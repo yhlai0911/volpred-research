@@ -37149,5 +37149,18 @@
     ],
     "confidence": 0.78,
     "created_at": "2026-07-02T18:13:45.283951"
+  },
+  {
+    "item_id": "e47a025a",
+    "category": "market_microstructure_event_study",
+    "content": "K1604 — Sports-betting legalization / online launch shocks and gambling-stock RV\n\nverdict: NULL\nreviewer: Codex failover source review (2026-07-02)\nexperiment_id: K1604\nexperiment_path: experiments/k1604/\nresults_file: experiments/k1604/k1604_results.json\n\nDesign: public event-study screen of 23 U.S. online/mobile sports-betting launch dates from 2018-08-06 to 2025-12-01. Betting basket = DKNG/PENN/MGM/CZR/RSI/GENI/SRAD/BETZ; controls = SPY/IWM/QQQ. Data are yfinance adjusted close and volume from 2018-01-02 to 2026-07-01. Event window uses T as first trading day on or after launch date, baseline T-30..T-6, outcomes T+1..T+5 and T+1..T+22. Statistical unit is event-level equal-weighted betting-basket log ratio minus control-basket log ratio, not pooled ticker-event rows. Seed=42; event bootstrap B=10000; matched random-anchor placebo B=1000.\n\nCore results:\n- Primary adjusted T+5 RV log ratio: mean +0.0167, t=0.30, Student-t p=0.767, event-bootstrap 95% CI [-0.0904,+0.1224], random-anchor p_upper=0.407. NULL.\n- T+22 RV is directionally positive but weak: mean +0.0797, t=1.33, CI [-0.0336,+0.1986].\n- No launch-window volume surge: T+5 adjusted volume log ratio mean -0.0922, t=-1.17, CI [-0.2475,+0.0574]; T+22 volume mean +0.0715, t=0.89, CI [-0.0720,+0.2350].\n\nCodex review notes: timing is lookahead-clean because same-day launch returns are excluded and all outcomes begin T+1. The result is a bounded public-data screen, not a household transaction-data replication. It does not observe handle surprises or state-pure revenue exposure; public sportsbook equities can price legalization before launch and have national exposure.\n\nImplication: the household-finance literature may support a real crowd-out mechanism at the household level, but this public-equity event-study does not show a robust short-window gambling-stock RV or volume shock around online sports-betting launches. Do not promote this as a trading signal or causal volatility channel without state-level handle surprises and purer exposure data.\n",
+    "evidence": [
+      "K1604",
+      "experiments/k1604/k1604_results.json",
+      "experiments/k1604/k1604.py",
+      "experiments/k1604/README.md"
+    ],
+    "confidence": 0.76,
+    "created_at": "2026-07-02T18:26:16.613243"
   }
 ]
