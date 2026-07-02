@@ -2,6 +2,12 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 10:56 hourly-dispatch preflight-only 成功不寫 canonical exit banner，host_cron_fail 無法低風險清紅燈 — **FIXED（止血，不代表底層 EINTR 根因已解）**
+
+**問題**：`HOURLY_PREFLIGHT_ONLY=1 ~/.volpred/bin/cron_hourly_dispatch.sh` 是驗證 wrapper / pregate / auth-preflight 的低風險 manual fire，但成功路徑只印 `[AUTH-PREFLIGHT] test-only exit...` 後直接 `exit 0`，沒有寫 host-cron parser 認得的 `=== [hourly_dispatch] exit 0 at ... ===` canonical banner。結果是：即使 wrapper 手動 preflight 已恢復，`host_cron_fail` 仍只能看到上一筆 `exit 1`，dashboard 會繼續維持 CRITICAL，迫使操作者只能跑完整 hourly dispatch 才能清掉 infra 紅燈。
+
+**解決方法**：在 `scripts/cron_hourly_dispatch.sh` 的 `HOURLY_PREFLIGHT_ONLY` 成功出口補上一般 end banner + canonical `[hourly_dispatch] exit 0` banner，並在 `tests/test_cron_auth_preflight.py` 鎖住 pass / zshrc-recover 兩條成功 preflight 路徑都必須留下 exit 0。同步到 `~/.volpred/bin/cron_hourly_dispatch.sh` 後手動跑 `HOURLY_PREFLIGHT_ONLY=1`，log 最新 exit 已變 `0`；再手動 fire `cron_check_alerts.sh` / `cron_gmail_poll.sh` 並重算 `ops_dashboard.py`，dashboard 從 `overall_status=critical, section_critical=1` 降為 `overall_status=warn, section_critical=0`。剩餘 warn 是 draft pool / lazypack coverage 與 loop trend，不再是 host cron / gmail / check_alerts 基礎設施紅燈。
+
 ## 2026-07-02 10:00-10:15 CRITICAL 升級——症狀從「逾時」惡化成「EINTR 硬性失敗」，且跨多個獨立行程同時發生 — **尚未解決，已再次升級回報**
 
 **現象變化**：09:45 起，gmail-poll 與 hourly-dispatch 的失敗訊息從單純「逾時 exit=142」變成明確的 **`Interrupted system call`（EINTR，errno 4）** 硬性錯誤：

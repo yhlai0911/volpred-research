@@ -499,6 +499,8 @@ fi
 
 if [ "${HOURLY_PREFLIGHT_ONLY:-0}" = "1" ]; then
   echo "[AUTH-PREFLIGHT] test-only exit after successful preflight"
+  echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=0 preflight-only) ==="
+  echo "=== [hourly_dispatch] exit 0 at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
   exit 0
 fi
 

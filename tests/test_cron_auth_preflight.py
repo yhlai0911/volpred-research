@@ -66,6 +66,7 @@ def test_auth_preflight_passes_without_fallback(tmp_path: Path) -> None:
     assert "send-alert" not in uv_calls
     log = (tmp_path / ".volpred" / "logs" / "hourly_dispatch.log").read_text(encoding="utf-8")
     assert "[AUTH-PREFLIGHT] ok" in log
+    assert "=== [hourly_dispatch] exit 0 at " in log
 
 
 def test_auth_preflight_recovers_after_sourcing_zshrc(tmp_path: Path) -> None:
@@ -114,6 +115,7 @@ def test_auth_preflight_recovers_after_sourcing_zshrc(tmp_path: Path) -> None:
     assert "send-alert" not in uv_calls
     log = (tmp_path / ".volpred" / "logs" / "hourly_dispatch.log").read_text(encoding="utf-8")
     assert "[AUTH-PREFLIGHT] recovered after sourcing zshrc" in log
+    assert "=== [hourly_dispatch] exit 0 at " in log
 
 
 def test_auth_preflight_sends_actionable_alert_on_double_failure(tmp_path: Path) -> None:
