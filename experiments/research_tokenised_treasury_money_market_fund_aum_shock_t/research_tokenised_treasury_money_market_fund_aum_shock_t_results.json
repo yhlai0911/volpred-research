@@ -1,0 +1,699 @@
+{
+  "experiment_id": "research_tokenised_treasury_money_market_fund_aum_shock_t",
+  "title": "Tokenised Treasury / money-market-fund AUM shock to T-bill ETF liquidity-vol",
+  "run_timestamp_utc": "2026-07-02T12:21:39Z",
+  "seed": 42,
+  "verdict": "WEAK_RAW_ONLY_NO_ROBUST_OOS_PASS",
+  "sample": {
+    "start": "2023-04-11",
+    "end": "2026-07-01",
+    "n_trading_days": 809,
+    "min_tokenised_tvl_usd": 100000000,
+    "latest_tokenised_tvl_usd": 11724628201.0,
+    "latest_active_components": 9
+  },
+  "data_sources": {
+    "defillama_protocols": {
+      "blackrock-buidl": {
+        "label": "BlackRock BUIDL",
+        "slug": "blackrock-buidl",
+        "url": "https://api.llama.fi/protocol/blackrock-buidl",
+        "status": "ok_cache",
+        "first_date": "2024-07-06",
+        "last_date": "2026-07-02",
+        "n_obs": 727
+      },
+      "circle-usyc": {
+        "label": "Circle USYC / Hashnote USYC",
+        "slug": "circle-usyc",
+        "url": "https://api.llama.fi/protocol/circle-usyc",
+        "status": "ok_cache",
+        "first_date": "2023-07-07",
+        "last_date": "2026-07-02",
+        "n_obs": 1092
+      },
+      "ondo-yield-assets": {
+        "label": "Ondo Yield Assets",
+        "slug": "ondo-yield-assets",
+        "url": "https://api.llama.fi/protocol/ondo-yield-assets",
+        "status": "ok_cache",
+        "first_date": "2023-01-27",
+        "last_date": "2026-07-02",
+        "n_obs": 1241
+      },
+      "invesco-ustb": {
+        "label": "Invesco / Superstate USTB",
+        "slug": "invesco-ustb",
+        "url": "https://api.llama.fi/protocol/invesco-ustb",
+        "status": "ok_cache",
+        "first_date": "2024-03-08",
+        "last_date": "2026-07-02",
+        "n_obs": 778
+      },
+      "spiko": {
+        "label": "Spiko tokenised T-bill funds",
+        "slug": "spiko",
+        "url": "https://api.llama.fi/protocol/spiko",
+        "status": "ok_cache",
+        "first_date": "2024-08-13",
+        "last_date": "2026-07-02",
+        "n_obs": 688
+      },
+      "anemoy-capital": {
+        "label": "Anemoy Capital",
+        "slug": "anemoy-capital",
+        "url": "https://api.llama.fi/protocol/anemoy-capital",
+        "status": "ok_cache",
+        "first_date": "2024-12-09",
+        "last_date": "2026-07-02",
+        "n_obs": 567
+      },
+      "openeden-tbill": {
+        "label": "OpenEden TBILL",
+        "slug": "openeden-tbill",
+        "url": "https://api.llama.fi/protocol/openeden-tbill",
+        "status": "ok_cache",
+        "first_date": "2023-03-28",
+        "last_date": "2026-07-02",
+        "n_obs": 1192
+      },
+      "matrixdock-stbt": {
+        "label": "MatrixDock STBT",
+        "slug": "matrixdock-stbt",
+        "url": "https://api.llama.fi/protocol/matrixdock-stbt",
+        "status": "ok_cache",
+        "first_date": "2023-04-11",
+        "last_date": "2026-07-02",
+        "n_obs": 1179
+      },
+      "vaneck-treasury-fund": {
+        "label": "VanEck Treasury Fund",
+        "slug": "vaneck-treasury-fund",
+        "url": "https://api.llama.fi/protocol/vaneck-treasury-fund",
+        "status": "ok_cache",
+        "first_date": "2025-08-28",
+        "last_date": "2026-07-02",
+        "n_obs": 309
+      },
+      "arca-labs-arcoin": {
+        "label": "Arca Labs ArCoin",
+        "slug": "arca-labs-arcoin",
+        "url": "https://api.llama.fi/protocol/arca-labs-arcoin",
+        "status": "ok_cache",
+        "first_date": "2024-07-06",
+        "last_date": "2026-07-02",
+        "n_obs": 727
+      }
+    },
+    "yfinance": {
+      "symbols": [
+        "BIL",
+        "SHV",
+        "SGOV",
+        "USFR",
+        "TFLO",
+        "SPY",
+        "TLT",
+        "^VIX",
+        "BTC-USD",
+        "ETH-USD"
+      ],
+      "status": "ok_cache"
+    },
+    "fred": {
+      "sofr": {
+        "series_id": "SOFR",
+        "status": "ok",
+        "first_date": "2018-04-03",
+        "last_date": "2026-07-01",
+        "n_obs": 2059,
+        "url": "https://fred.stlouisfed.org/series/SOFR"
+      },
+      "iorb": {
+        "series_id": "IORB",
+        "status": "ok",
+        "first_date": "2021-07-29",
+        "last_date": "2026-07-02",
+        "n_obs": 1800,
+        "url": "https://fred.stlouisfed.org/series/IORB"
+      },
+      "retail_mmf_assets": {
+        "series_id": "WRMFNS",
+        "status": "ok",
+        "first_date": "1980-02-04",
+        "last_date": "2026-06-01",
+        "n_obs": 2418,
+        "url": "https://fred.stlouisfed.org/series/WRMFNS"
+      }
+    }
+  },
+  "method": {
+    "target_etfs": [
+      "BIL",
+      "SHV",
+      "SGOV",
+      "USFR",
+      "TFLO"
+    ],
+    "controls": [
+      "lagged own target family",
+      "VIX level",
+      "SPY/TLT trailing RV",
+      "SOFR-IORB spread",
+      "traditional retail MMF AUM growth",
+      "BTC/ETH dollar-volume activity"
+    ],
+    "primary_signal": "token_tvl_growth_21d_z_lag1",
+    "secondary_signal": "token_tvl_growth_7d_z_lag1",
+    "lookahead_guards": [
+      "token_tvl_growth signals use .shift(1)",
+      "traditional MMF control uses .shift(5)",
+      "targets are t+1..t+h",
+      "OOS expanding forecasts embargo train rows by horizon"
+    ],
+    "statistical_gate": "positive coefficient + |HAC t|>=3 + Holm p<0.05 + positive OOS MSE improvement with DM t>=3"
+  },
+  "tests": {
+    "primary_signal": "token_tvl_growth_21d_z_lag1",
+    "secondary_signal": "token_tvl_growth_7d_z_lag1",
+    "primary_hac": {
+      "future_log_rv_5d": {
+        "status": "ok",
+        "n": 804,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-06-24",
+        "controls": [
+          "lag_log_rv22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": -0.01063034941469665,
+        "t": -0.5834143083082539,
+        "p": 0.5596144279845636,
+        "r2": 0.349430140695112,
+        "hac_maxlags": 5,
+        "holm_p": 0.8286145720203647
+      },
+      "future_log_rv_22d": {
+        "status": "ok",
+        "n": 787,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-05-29",
+        "controls": [
+          "lag_log_rv22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": -0.02505410125018076,
+        "t": -0.9114501489600093,
+        "p": 0.36205824056080416,
+        "r2": 0.5684329773901904,
+        "hac_maxlags": 22,
+        "holm_p": 0.8286145720203647
+      },
+      "future_log_range_5d": {
+        "status": "ok",
+        "n": 804,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-06-24",
+        "controls": [
+          "lag_log_range22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": 0.03985251755124852,
+        "t": 2.05206374673332,
+        "p": 0.040163467621604096,
+        "r2": 0.34593422493980663,
+        "hac_maxlags": 5,
+        "holm_p": 0.2008173381080205
+      },
+      "future_log_range_22d": {
+        "status": "ok",
+        "n": 787,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-05-29",
+        "controls": [
+          "lag_log_range22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": 0.038553118908560946,
+        "t": 1.7032777260837026,
+        "p": 0.08851610690808615,
+        "r2": 0.537819184312259,
+        "hac_maxlags": 22,
+        "holm_p": 0.3540644276323446
+      },
+      "future_log_amihud_5d": {
+        "status": "ok",
+        "n": 804,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-06-24",
+        "controls": [
+          "lag_log_amihud22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": -0.018416777945930773,
+        "t": -2.4307953930866115,
+        "p": 0.01506571967295148,
+        "r2": 0.4951814296053857,
+        "hac_maxlags": 5,
+        "holm_p": 0.09039431803770888
+      },
+      "future_log_amihud_22d": {
+        "status": "ok",
+        "n": 787,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-05-29",
+        "controls": [
+          "lag_log_amihud22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": -0.009422078606671103,
+        "t": -1.0888844204975159,
+        "p": 0.27620485734012157,
+        "r2": 0.7131610684442189,
+        "hac_maxlags": 22,
+        "holm_p": 0.8286145720203647
+      }
+    },
+    "secondary_hac": {
+      "future_log_rv_5d": {
+        "status": "ok",
+        "n": 804,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-06-24",
+        "controls": [
+          "lag_log_rv22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": -0.021780339740974597,
+        "t": -1.4625278054011654,
+        "p": 0.14359663052732294,
+        "r2": 0.35166579323199654,
+        "hac_maxlags": 5
+      },
+      "future_log_rv_22d": {
+        "status": "ok",
+        "n": 787,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-05-29",
+        "controls": [
+          "lag_log_rv22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": -0.02148842810294782,
+        "t": -0.9580307980564986,
+        "p": 0.3380472287167626,
+        "r2": 0.5673207092298378,
+        "hac_maxlags": 22
+      },
+      "future_log_range_5d": {
+        "status": "ok",
+        "n": 804,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-06-24",
+        "controls": [
+          "lag_log_range22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": 0.00549741345928656,
+        "t": 0.3441506844784428,
+        "p": 0.7307329675473426,
+        "r2": 0.3315956221653693,
+        "hac_maxlags": 5
+      },
+      "future_log_range_22d": {
+        "status": "ok",
+        "n": 787,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-05-29",
+        "controls": [
+          "lag_log_range22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": 0.032416348808856965,
+        "t": 2.409222335155458,
+        "p": 0.01598655558995927,
+        "r2": 0.5325890189612978,
+        "hac_maxlags": 22
+      },
+      "future_log_amihud_5d": {
+        "status": "ok",
+        "n": 804,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-06-24",
+        "controls": [
+          "lag_log_amihud22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": -0.005647523572618329,
+        "t": -0.7955608427131992,
+        "p": 0.42628733379940886,
+        "r2": 0.48605653964050954,
+        "hac_maxlags": 5
+      },
+      "future_log_amihud_22d": {
+        "status": "ok",
+        "n": 787,
+        "sample_start": "2023-04-11",
+        "sample_end": "2026-05-29",
+        "controls": [
+          "lag_log_amihud22",
+          "vix_log_lag1",
+          "spy_log_rv22_lag1",
+          "tlt_log_rv22_lag1",
+          "sofr_iorb_spread_z_lag1",
+          "traditional_mmf_growth_21d_z_lag5",
+          "crypto_volume_z_lag1"
+        ],
+        "coef": -0.007978315711549389,
+        "t": -1.439846081084709,
+        "p": 0.14991095062356666,
+        "r2": 0.7121472096269237,
+        "hac_maxlags": 22
+      }
+    },
+    "oos": {
+      "future_log_rv_5d": {
+        "status": "ok",
+        "n": 546,
+        "sample_start": "2024-04-19",
+        "sample_end": "2026-06-24",
+        "base_mse": 0.10242169808800619,
+        "aug_mse": 0.10817187301898164,
+        "mse_improvement_pct": -5.614215579627069,
+        "dm_lossdiff_t": -2.371866909200279,
+        "dm_lossdiff_p": 0.01769846458006225,
+        "lossdiff_definition": "base squared-error loss minus augmented squared-error loss; positive means AUM signal improves",
+        "train_embargo_rows": 5,
+        "refit_every": 21
+      },
+      "future_log_rv_22d": {
+        "status": "ok",
+        "n": 512,
+        "sample_start": "2024-05-14",
+        "sample_end": "2026-05-29",
+        "base_mse": 0.06795571380171196,
+        "aug_mse": 0.07588288444509256,
+        "mse_improvement_pct": -11.665201055074338,
+        "dm_lossdiff_t": -1.0375469711406642,
+        "dm_lossdiff_p": 0.2994810169919925,
+        "lossdiff_definition": "base squared-error loss minus augmented squared-error loss; positive means AUM signal improves",
+        "train_embargo_rows": 22,
+        "refit_every": 21
+      },
+      "future_log_range_5d": {
+        "status": "ok",
+        "n": 546,
+        "sample_start": "2024-04-19",
+        "sample_end": "2026-06-24",
+        "base_mse": 0.0888645241147093,
+        "aug_mse": 0.08786701385920087,
+        "mse_improvement_pct": 1.122506720703087,
+        "dm_lossdiff_t": 0.5622433374927585,
+        "dm_lossdiff_p": 0.5739502381164537,
+        "lossdiff_definition": "base squared-error loss minus augmented squared-error loss; positive means AUM signal improves",
+        "train_embargo_rows": 5,
+        "refit_every": 21
+      },
+      "future_log_range_22d": {
+        "status": "ok",
+        "n": 512,
+        "sample_start": "2024-05-14",
+        "sample_end": "2026-05-29",
+        "base_mse": 0.05019831634541539,
+        "aug_mse": 0.04951064099201298,
+        "mse_improvement_pct": 1.3699171674812827,
+        "dm_lossdiff_t": 0.24916418229690052,
+        "dm_lossdiff_p": 0.8032337842088219,
+        "lossdiff_definition": "base squared-error loss minus augmented squared-error loss; positive means AUM signal improves",
+        "train_embargo_rows": 22,
+        "refit_every": 21
+      },
+      "future_log_amihud_5d": {
+        "status": "ok",
+        "n": 546,
+        "sample_start": "2024-04-19",
+        "sample_end": "2026-06-24",
+        "base_mse": 0.017262633067690263,
+        "aug_mse": 0.018440896735870994,
+        "mse_improvement_pct": -6.8255153403337765,
+        "dm_lossdiff_t": -1.2073534208394545,
+        "dm_lossdiff_p": 0.22729606568373673,
+        "lossdiff_definition": "base squared-error loss minus augmented squared-error loss; positive means AUM signal improves",
+        "train_embargo_rows": 5,
+        "refit_every": 21
+      },
+      "future_log_amihud_22d": {
+        "status": "ok",
+        "n": 512,
+        "sample_start": "2024-05-14",
+        "sample_end": "2026-05-29",
+        "base_mse": 0.008466874762473537,
+        "aug_mse": 0.010379254917436269,
+        "mse_improvement_pct": -22.586612045316755,
+        "dm_lossdiff_t": -2.326201509491249,
+        "dm_lossdiff_p": 0.02000780318594765,
+        "lossdiff_definition": "base squared-error loss minus augmented squared-error loss; positive means AUM signal improves",
+        "train_embargo_rows": 22,
+        "refit_every": 21
+      }
+    },
+    "shock_contrasts": {
+      "future_log_rv_5d": {
+        "status": "ok",
+        "threshold": 1.5092799206946295,
+        "n_high": 81,
+        "n_rest": 723,
+        "high_mean": -14.969831719786683,
+        "rest_mean": -15.007898341149952,
+        "diff_high_minus_rest": 0.03806662136326899,
+        "hac_t": 0.29955911372353966,
+        "hac_p": 0.7645134751602009,
+        "note": "descriptive top-decile contrast; daily overlapping windows are HAC-adjusted but not a causal event study"
+      },
+      "future_log_rv_22d": {
+        "status": "ok",
+        "threshold": 1.5206117432065571,
+        "n_high": 79,
+        "n_rest": 708,
+        "high_mean": -13.478550150018938,
+        "rest_mean": -13.489328309034716,
+        "diff_high_minus_rest": 0.010778159015778499,
+        "hac_t": 0.07793355991174956,
+        "hac_p": 0.9378809036354735,
+        "note": "descriptive top-decile contrast; daily overlapping windows are HAC-adjusted but not a causal event study"
+      },
+      "future_log_range_5d": {
+        "status": "ok",
+        "threshold": 1.5092799206946295,
+        "n_high": 81,
+        "n_rest": 723,
+        "high_mean": -15.418951091403937,
+        "rest_mean": -15.487718537713071,
+        "diff_high_minus_rest": 0.06876744630913478,
+        "hac_t": 0.6500727054653382,
+        "hac_p": 0.5156452590100697,
+        "note": "descriptive top-decile contrast; daily overlapping windows are HAC-adjusted but not a causal event study"
+      },
+      "future_log_range_22d": {
+        "status": "ok",
+        "threshold": 1.5206117432065571,
+        "n_high": 79,
+        "n_rest": 708,
+        "high_mean": -13.903817360958417,
+        "rest_mean": -13.98968227590729,
+        "diff_high_minus_rest": 0.08586491494887305,
+        "hac_t": 0.772082497516338,
+        "hac_p": 0.44006556779527195,
+        "note": "descriptive top-decile contrast; daily overlapping windows are HAC-adjusted but not a causal event study"
+      },
+      "future_log_amihud_5d": {
+        "status": "ok",
+        "threshold": 1.5092799206946295,
+        "n_high": 81,
+        "n_rest": 723,
+        "high_mean": -26.90815037459999,
+        "rest_mean": -26.887430645570635,
+        "diff_high_minus_rest": -0.020719729029355705,
+        "hac_t": -0.30001192352572237,
+        "hac_p": 0.764168060663506,
+        "note": "descriptive top-decile contrast; daily overlapping windows are HAC-adjusted but not a causal event study"
+      },
+      "future_log_amihud_22d": {
+        "status": "ok",
+        "threshold": 1.5206117432065571,
+        "n_high": 79,
+        "n_rest": 708,
+        "high_mean": -26.889932389547695,
+        "rest_mean": -26.887129687170574,
+        "diff_high_minus_rest": -0.0028027023771208803,
+        "hac_t": -0.043313887032125555,
+        "hac_p": 0.9654513213609218,
+        "note": "descriptive top-decile contrast; daily overlapping windows are HAC-adjusted but not a causal event study"
+      }
+    },
+    "summary_table_path": "/Users/yhlai0911/volpred-research/experiments/research_tokenised_treasury_money_market_fund_aum_shock_t/data/summary_table.csv"
+  },
+  "summary_table": [
+    {
+      "target": "future_log_rv_5d",
+      "horizon": 5,
+      "family": "rv",
+      "primary_coef": -0.01063034941469665,
+      "primary_t": -0.5834143083082539,
+      "primary_p": 0.5596144279845636,
+      "oos_mse_improvement_pct": -5.614215579627069,
+      "oos_dm_t": -2.371866909200279,
+      "oos_dm_p": 0.01769846458006225,
+      "n_hac": 804,
+      "n_oos": 546,
+      "controls": "lag_log_rv22,vix_log_lag1,spy_log_rv22_lag1,tlt_log_rv22_lag1,sofr_iorb_spread_z_lag1,traditional_mmf_growth_21d_z_lag5,crypto_volume_z_lag1",
+      "key": "future_log_rv_5d__token_tvl_growth_21d_z_lag1",
+      "primary_holm_p": 0.8286145720203647
+    },
+    {
+      "target": "future_log_rv_22d",
+      "horizon": 22,
+      "family": "rv",
+      "primary_coef": -0.02505410125018076,
+      "primary_t": -0.9114501489600093,
+      "primary_p": 0.36205824056080416,
+      "oos_mse_improvement_pct": -11.665201055074338,
+      "oos_dm_t": -1.0375469711406642,
+      "oos_dm_p": 0.2994810169919925,
+      "n_hac": 787,
+      "n_oos": 512,
+      "controls": "lag_log_rv22,vix_log_lag1,spy_log_rv22_lag1,tlt_log_rv22_lag1,sofr_iorb_spread_z_lag1,traditional_mmf_growth_21d_z_lag5,crypto_volume_z_lag1",
+      "key": "future_log_rv_22d__token_tvl_growth_21d_z_lag1",
+      "primary_holm_p": 0.8286145720203647
+    },
+    {
+      "target": "future_log_range_5d",
+      "horizon": 5,
+      "family": "range",
+      "primary_coef": 0.03985251755124852,
+      "primary_t": 2.05206374673332,
+      "primary_p": 0.040163467621604096,
+      "oos_mse_improvement_pct": 1.122506720703087,
+      "oos_dm_t": 0.5622433374927585,
+      "oos_dm_p": 0.5739502381164537,
+      "n_hac": 804,
+      "n_oos": 546,
+      "controls": "lag_log_range22,vix_log_lag1,spy_log_rv22_lag1,tlt_log_rv22_lag1,sofr_iorb_spread_z_lag1,traditional_mmf_growth_21d_z_lag5,crypto_volume_z_lag1",
+      "key": "future_log_range_5d__token_tvl_growth_21d_z_lag1",
+      "primary_holm_p": 0.2008173381080205
+    },
+    {
+      "target": "future_log_range_22d",
+      "horizon": 22,
+      "family": "range",
+      "primary_coef": 0.038553118908560946,
+      "primary_t": 1.7032777260837026,
+      "primary_p": 0.08851610690808615,
+      "oos_mse_improvement_pct": 1.3699171674812827,
+      "oos_dm_t": 0.24916418229690052,
+      "oos_dm_p": 0.8032337842088219,
+      "n_hac": 787,
+      "n_oos": 512,
+      "controls": "lag_log_range22,vix_log_lag1,spy_log_rv22_lag1,tlt_log_rv22_lag1,sofr_iorb_spread_z_lag1,traditional_mmf_growth_21d_z_lag5,crypto_volume_z_lag1",
+      "key": "future_log_range_22d__token_tvl_growth_21d_z_lag1",
+      "primary_holm_p": 0.3540644276323446
+    },
+    {
+      "target": "future_log_amihud_5d",
+      "horizon": 5,
+      "family": "amihud",
+      "primary_coef": -0.018416777945930773,
+      "primary_t": -2.4307953930866115,
+      "primary_p": 0.01506571967295148,
+      "oos_mse_improvement_pct": -6.8255153403337765,
+      "oos_dm_t": -1.2073534208394545,
+      "oos_dm_p": 0.22729606568373673,
+      "n_hac": 804,
+      "n_oos": 546,
+      "controls": "lag_log_amihud22,vix_log_lag1,spy_log_rv22_lag1,tlt_log_rv22_lag1,sofr_iorb_spread_z_lag1,traditional_mmf_growth_21d_z_lag5,crypto_volume_z_lag1",
+      "key": "future_log_amihud_5d__token_tvl_growth_21d_z_lag1",
+      "primary_holm_p": 0.09039431803770888
+    },
+    {
+      "target": "future_log_amihud_22d",
+      "horizon": 22,
+      "family": "amihud",
+      "primary_coef": -0.009422078606671103,
+      "primary_t": -1.0888844204975159,
+      "primary_p": 0.27620485734012157,
+      "oos_mse_improvement_pct": -22.586612045316755,
+      "oos_dm_t": -2.326201509491249,
+      "oos_dm_p": 0.02000780318594765,
+      "n_hac": 787,
+      "n_oos": 512,
+      "controls": "lag_log_amihud22,vix_log_lag1,spy_log_rv22_lag1,tlt_log_rv22_lag1,sofr_iorb_spread_z_lag1,traditional_mmf_growth_21d_z_lag5,crypto_volume_z_lag1",
+      "key": "future_log_amihud_22d__token_tvl_growth_21d_z_lag1",
+      "primary_holm_p": 0.8286145720203647
+    }
+  ],
+  "figures": [
+    "/Users/yhlai0911/volpred-research/experiments/research_tokenised_treasury_money_market_fund_aum_shock_t/figures/tokenised_tvl_signal.png",
+    "/Users/yhlai0911/volpred-research/experiments/research_tokenised_treasury_money_market_fund_aum_shock_t/figures/primary_test_diagnostics.png"
+  ],
+  "limitations": [
+    "DefiLlama protocol TVL is a public proxy, not a complete RWA.xyz or issuer-by-issuer collateral ledger.",
+    "Daily ETF OHLCV cannot observe bid-ask spreads, creation/redemption baskets, or primary-market Treasury bill flow.",
+    "Tokenised Treasury history is short and dominated by 2024-2026 adoption growth, so coefficients can reflect trend/regime timing.",
+    "The experiment is diagnostic for public proxy usefulness only; it is not a causal test of tokenised-fund flows."
+  ]
+}

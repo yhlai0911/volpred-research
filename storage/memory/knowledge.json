@@ -37188,5 +37188,19 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-07-02T19:37:53.093415"
+  },
+  {
+    "item_id": "05efbe80",
+    "category": "rwa_liquidity_volatility_proxy",
+    "content": "Tokenised Treasury / MMF-like AUM public-proxy experiment (research_tokenised_treasury_money_market_fund_aum_shock_t, Codex-reviewed 2026-07-02) is WEAK_RAW_ONLY_NO_ROBUST_OOS_PASS, not a publishable spillover signal. Data: DefiLlama protocol TVL for BUIDL/USYC/Ondo/USTB/Spiko/Anemoy/OpenEden/MatrixDock/VanEck/ArCoin, yfinance BIL/SHV/SGOV/USFR/TFLO daily OHLCV, controls SPY/TLT/VIX/BTC/ETH plus FRED SOFR/IORB/WRMFNS. Sample 2023-04-11..2026-07-01, 809 ETF trading days after aggregate tokenised TVL first exceeds $100m; latest proxy TVL $11.7246bn. All tokenised AUM signals use signal.shift(1); retail MMF control uses shift(5); targets are t+1..t+h; expanding OOS uses horizon embargo. Primary 21d TVL-growth z-score does not pass the conservative gate. 5d range-vol is only raw directional (coef +0.0399, HAC t=2.05, raw p=0.040, Holm p=0.201, OOS MSE +1.12%, DM t=0.56). 22d range-vol is weaker (t=1.70, Holm p=0.354). Close-to-close RV cells are negative/OOS-worse, and Amihud liquidity-vol cells are negative/OOS-worse. Conclusion scope: public daily TVL is not a robust standalone predictor of short-end Treasury ETF liquidity-vol; transaction-level RWA collateral data may still show mechanisms this proxy cannot observe.",
+    "evidence": [
+      "experiments/research_tokenised_treasury_money_market_fund_aum_shock_t/README.md",
+      "experiments/research_tokenised_treasury_money_market_fund_aum_shock_t/research_tokenised_treasury_money_market_fund_aum_shock_t.py",
+      "experiments/research_tokenised_treasury_money_market_fund_aum_shock_t/research_tokenised_treasury_money_market_fund_aum_shock_t_results.json",
+      "experiments/research_tokenised_treasury_money_market_fund_aum_shock_t/data/summary_table.csv",
+      "experiments/research_tokenised_treasury_money_market_fund_aum_shock_t/codex_review.md"
+    ],
+    "confidence": 0.82,
+    "created_at": "2026-07-02T20:20:59.857746"
   }
 ]
