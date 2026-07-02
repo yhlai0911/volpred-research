@@ -1,0 +1,411 @@
+{
+  "experiment_id": "research_mortgage_rate_lock_in_housing_turnover_freeze_ho",
+  "created_at": "2026-07-02T17:15:31.295892+08:00",
+  "random_seed": 20260702,
+  "data_sources": {
+    "fred": {
+      "url_template": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=<CODE>",
+      "series": {
+        "MORTGAGE30US": {
+          "label": "30-year fixed mortgage rate",
+          "start": "1971-04-02",
+          "end": "2026-06-25",
+          "n_obs": 2883
+        },
+        "ACTLISCOUUS": {
+          "label": "Realtor.com active listing count",
+          "start": "2016-07-01",
+          "end": "2026-05-01",
+          "n_obs": 119
+        },
+        "NEWLISCOUUS": {
+          "label": "Realtor.com new listing count",
+          "start": "2016-07-01",
+          "end": "2026-05-01",
+          "n_obs": 119
+        },
+        "MSACSR": {
+          "label": "New houses months supply",
+          "start": "1963-01-01",
+          "end": "2026-05-01",
+          "n_obs": 761
+        },
+        "HOUST": {
+          "label": "Housing starts",
+          "start": "1959-01-01",
+          "end": "2026-05-01",
+          "n_obs": 809
+        },
+        "PERMIT": {
+          "label": "Building permits",
+          "start": "1960-01-01",
+          "end": "2026-05-01",
+          "n_obs": 797
+        },
+        "HSN1F": {
+          "label": "New one-family houses sold",
+          "start": "1963-01-01",
+          "end": "2026-05-01",
+          "n_obs": 761
+        }
+      },
+      "excluded_preflight_series": {
+        "EXHOSLUSM495N": "Public FRED CSV exposed only 13 months during preflight.",
+        "EXHOSLUSM495S": "Public FRED CSV exposed only 13 months during preflight."
+      }
+    },
+    "prices": {
+      "provider": "yfinance",
+      "auto_adjust": false,
+      "field_used": "Adj Close",
+      "targets": {
+        "homebuilder": [
+          "XHB",
+          "ITB",
+          "DHI",
+          "LEN",
+          "PHM",
+          "TOL"
+        ],
+        "regional_bank": [
+          "KRE",
+          "KBE"
+        ],
+        "housing_platform": [
+          "Z",
+          "OPEN",
+          "RKT",
+          "UWMC"
+        ]
+      },
+      "price_meta": {
+        "XHB": {
+          "group": "homebuilder",
+          "usable": true,
+          "start": "2010-01-04",
+          "end": "2026-07-01",
+          "n_daily_prices": 4148,
+          "n_monthly_rv": 199
+        },
+        "ITB": {
+          "group": "homebuilder",
+          "usable": true,
+          "start": "2010-01-04",
+          "end": "2026-07-01",
+          "n_daily_prices": 4148,
+          "n_monthly_rv": 199
+        },
+        "DHI": {
+          "group": "homebuilder",
+          "usable": true,
+          "start": "2010-01-04",
+          "end": "2026-07-01",
+          "n_daily_prices": 4148,
+          "n_monthly_rv": 199
+        },
+        "LEN": {
+          "group": "homebuilder",
+          "usable": true,
+          "start": "2010-01-04",
+          "end": "2026-07-01",
+          "n_daily_prices": 4148,
+          "n_monthly_rv": 199
+        },
+        "PHM": {
+          "group": "homebuilder",
+          "usable": true,
+          "start": "2010-01-04",
+          "end": "2026-07-01",
+          "n_daily_prices": 4148,
+          "n_monthly_rv": 199
+        },
+        "TOL": {
+          "group": "homebuilder",
+          "usable": true,
+          "start": "2010-01-04",
+          "end": "2026-07-01",
+          "n_daily_prices": 4148,
+          "n_monthly_rv": 199
+        },
+        "KRE": {
+          "group": "regional_bank",
+          "usable": true,
+          "start": "2010-01-04",
+          "end": "2026-07-01",
+          "n_daily_prices": 4148,
+          "n_monthly_rv": 199
+        },
+        "KBE": {
+          "group": "regional_bank",
+          "usable": true,
+          "start": "2010-01-04",
+          "end": "2026-07-01",
+          "n_daily_prices": 4148,
+          "n_monthly_rv": 199
+        },
+        "Z": {
+          "group": "housing_platform",
+          "usable": true,
+          "start": "2015-08-03",
+          "end": "2026-07-01",
+          "n_daily_prices": 2744,
+          "n_monthly_rv": 132
+        },
+        "OPEN": {
+          "group": "housing_platform",
+          "usable": true,
+          "start": "2020-06-18",
+          "end": "2026-07-01",
+          "n_daily_prices": 1516,
+          "n_monthly_rv": 74
+        },
+        "RKT": {
+          "group": "housing_platform",
+          "usable": true,
+          "start": "2020-08-06",
+          "end": "2026-07-01",
+          "n_daily_prices": 1482,
+          "n_monthly_rv": 72
+        },
+        "UWMC": {
+          "group": "housing_platform",
+          "usable": true,
+          "start": "2020-05-01",
+          "end": "2026-07-01",
+          "n_daily_prices": 1549,
+          "n_monthly_rv": 75
+        }
+      }
+    }
+  },
+  "method": {
+    "embedded_rate_proxy": "36-month EWMA of MORTGAGE30US shifted by 6 months",
+    "lock_in_wedge": "monthly MORTGAGE30US minus embedded_rate_proxy",
+    "turnover_freeze_components": [
+      "negative causal z-score of new listings YoY",
+      "causal z-score of months supply",
+      "negative causal z-score of housing starts YoY",
+      "negative causal z-score of building permits YoY",
+      "negative causal z-score of new-home sales YoY"
+    ],
+    "lookahead_control": "All raw monthly features are shifted by one month before merging with target RV: raw_features.shift(1).",
+    "target": "Monthly realized variance from summed daily squared log returns.",
+    "baseline": "Trailing 12-month mean monthly RV shifted by one month.",
+    "train_test_split": "Train <= 2021-12-31, OOS > 2021-12-31",
+    "bootstrap": {
+      "seed": 20260702,
+      "n_boot": 3000,
+      "cluster_unit": "month"
+    }
+  },
+  "diagnostics": {
+    "signal_start": "2019-08-31",
+    "signal_end": "2026-06-30",
+    "n_signal_months": 83,
+    "latest_signal_month": "2026-06-30",
+    "latest_mortgage_rate_lag": 6.53,
+    "latest_embedded_rate_proxy_lag": 6.353661710996784,
+    "latest_lock_in_wedge_lag": 0.17633828900321635,
+    "latest_lock_in_wedge_z_lag": 0.16083830415570716,
+    "latest_turnover_freeze_z_lag": 0.6105142668625602,
+    "panel_start": "2019-08-31",
+    "panel_end": "2026-06-30",
+    "n_panel_rows": 938,
+    "n_panel_months": 83,
+    "n_assets": 12,
+    "rows_by_group": {
+      "homebuilder": 498,
+      "housing_platform": 274,
+      "regional_bank": 166
+    },
+    "assets_by_group": {
+      "homebuilder": 6,
+      "housing_platform": 4,
+      "regional_bank": 2
+    }
+  },
+  "lookahead_alignment_checks": {
+    "mortgage_rate_lag_equals_mortgage_rate_shift_1": {
+      "max_abs_diff": 0.0,
+      "passed": true
+    },
+    "embedded_rate_proxy_lag_equals_embedded_rate_proxy_shift_1": {
+      "max_abs_diff": 0.0,
+      "passed": true
+    },
+    "lock_in_wedge_lag_equals_lock_in_wedge_shift_1": {
+      "max_abs_diff": 0.0,
+      "passed": true
+    },
+    "lock_in_wedge_z_lag_equals_lock_in_wedge_z_shift_1": {
+      "max_abs_diff": 0.0,
+      "passed": true
+    },
+    "turnover_freeze_z_lag_equals_turnover_freeze_z_shift_1": {
+      "max_abs_diff": 0.0,
+      "passed": true
+    }
+  },
+  "clustered_ols": {
+    "n_rows": 938,
+    "n_months": 83,
+    "n_assets": 12,
+    "r_squared": 0.017425599236992828,
+    "params": {
+      "const": -0.2334742650143984,
+      "lock_in_wedge_z_lag": 0.05899043252400947,
+      "turnover_freeze_z_lag": 0.08296702661271482,
+      "group_housing_platform": -0.036395852593700206,
+      "group_regional_bank": -0.08513140989198235
+    },
+    "tvalues": {
+      "const": -2.289716716960525,
+      "lock_in_wedge_z_lag": 1.0179276669173367,
+      "turnover_freeze_z_lag": 0.9186516029985625,
+      "group_housing_platform": -0.4978828651900168,
+      "group_regional_bank": -1.1314728726404968
+    },
+    "pvalues": {
+      "const": 0.022037743701805827,
+      "lock_in_wedge_z_lag": 0.30871233229742323,
+      "turnover_freeze_z_lag": 0.35827783158500304,
+      "group_housing_platform": 0.6185666051574213,
+      "group_regional_bank": 0.2578561149161417
+    },
+    "conf_int_95": {
+      "const": {
+        "low": -0.43332481742361595,
+        "high": -0.033623712605180905
+      },
+      "lock_in_wedge_z_lag": {
+        "low": -0.0545924151940769,
+        "high": 0.17257328024209584
+      },
+      "turnover_freeze_z_lag": {
+        "low": -0.09404500225058396,
+        "high": 0.25997905547601363
+      },
+      "group_housing_platform": {
+        "low": -0.17967164145431164,
+        "high": 0.10687993626691122
+      },
+      "group_regional_bank": {
+        "low": -0.23259804508582232,
+        "high": 0.06233522530185763
+      }
+    },
+    "covariance": "clustered_by_month"
+  },
+  "oos_qlike": {
+    "train_start": "2019-08-31",
+    "train_end": "2021-12-31",
+    "test_start": "2022-01-31",
+    "test_end": "2026-06-30",
+    "n_train_rows": 290,
+    "n_test_rows": 648,
+    "n_test_months": 54,
+    "n_test_assets": 12,
+    "model_params": {
+      "const": -0.04112799409253974,
+      "lock_in_wedge_z_lag": 0.8333531650629571,
+      "turnover_freeze_z_lag": 0.14919933555412443,
+      "group_housing_platform": -0.013755621366302068,
+      "group_regional_bank": 0.06742115990444371
+    },
+    "mean_loss_diff_model_minus_baseline": {
+      "mean": 0.37614523322339727,
+      "ci_low": 0.254941817605962,
+      "ci_high": 0.514985044179976,
+      "p_two_sided": 0.0,
+      "n_clusters": 54
+    },
+    "by_group": {
+      "homebuilder": {
+        "mean": 0.3820200305817409,
+        "ci_low": 0.243307957903741,
+        "ci_high": 0.5239096377805582,
+        "p_two_sided": 0.0,
+        "n_clusters": 54
+      },
+      "housing_platform": {
+        "mean": 0.36350151298077327,
+        "ci_low": 0.2319557650970107,
+        "ci_high": 0.49448006998625366,
+        "p_two_sided": 0.0,
+        "n_clusters": 54
+      },
+      "regional_bank": {
+        "mean": 0.3838082816336147,
+        "ci_low": 0.15613958048585175,
+        "ci_high": 0.5748839720578771,
+        "p_two_sided": 0.0006666666666666666,
+        "n_clusters": 54
+      }
+    },
+    "interpretation": "negative loss_diff means the lock-in model improves QLIKE versus trailing-12-month RV baseline"
+  },
+  "regime_contrast": {
+    "lock_in_wedge_z_train_q75_threshold": -0.2751577367981529,
+    "overall": {
+      "high_lock_mean_scaled_rv": 0.04053014525397417,
+      "other_mean_scaled_rv": 1.622606367870876,
+      "diff_high_minus_other": -1.5820762226169018,
+      "ci_low": -5.333528783529725,
+      "ci_high": 0.43006298882195054,
+      "p_two_sided": 0.6313333333333333,
+      "n_high_months": 61,
+      "n_other_months": 22
+    },
+    "by_group": {
+      "homebuilder": {
+        "high_lock_mean_scaled_rv": 0.044430096569978476,
+        "other_mean_scaled_rv": 1.8230881655853286,
+        "diff_high_minus_other": -1.7786580690153502,
+        "ci_low": -6.083502018733512,
+        "ci_high": 0.5523432422024652,
+        "p_two_sided": 0.662,
+        "n_high_months": 61,
+        "n_other_months": 22
+      },
+      "housing_platform": {
+        "high_lock_mean_scaled_rv": 0.05509556868125747,
+        "other_mean_scaled_rv": 0.49156670684803144,
+        "diff_high_minus_other": -0.43647113816677396,
+        "ci_low": -1.5210761854346702,
+        "ci_high": 0.334088313859186,
+        "p_two_sided": 0.38,
+        "n_high_months": 61,
+        "n_other_months": 22
+      },
+      "regional_bank": {
+        "high_lock_mean_scaled_rv": -0.002187596057170641,
+        "other_mean_scaled_rv": 1.4004217637504757,
+        "diff_high_minus_other": -1.4026093598076463,
+        "ci_low": -4.706777532388338,
+        "ci_high": 0.4455694512015814,
+        "p_two_sided": 0.558,
+        "n_high_months": 61,
+        "n_other_months": 22
+      }
+    }
+  },
+  "verdict": {
+    "verdict": "null_or_inconclusive",
+    "conclusion": "This public-data pilot does not provide robust evidence that the mortgage-rate lock-in wedge and housing turnover-freeze proxies reliably forecast target RV.",
+    "criteria": {
+      "ols_support_any_core_predictor_p_lt_0_05": false,
+      "oos_qlike_ci_entirely_below_zero": false,
+      "high_lock_regime_ci_entirely_above_zero": false
+    }
+  },
+  "figures": [
+    "figures/lock_in_wedge_and_turnover_freeze.png",
+    "figures/oos_qlike_loss_diff_by_group.png",
+    "figures/high_lock_scaled_rv_by_group.png"
+  ],
+  "outputs": [
+    "data/monthly_signals.csv",
+    "data/monthly_rv_panel.csv",
+    "data/oos_predictions.csv"
+  ]
+}

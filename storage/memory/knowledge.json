@@ -37125,5 +37125,17 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-07-02T16:00:32.854218"
+  },
+  {
+    "item_id": "2719f142",
+    "category": "empirical_result",
+    "content": "[Codex experiment review: NULL/INCONCLUSIVE] Mortgage-rate lock-in / housing turnover-freeze public-data pilot did not provide robust RV signal. Experiment research_mortgage_rate_lock_in_housing_turnover_freeze_ho used FRED MORTGAGE30US plus ACTLISCOUUS/NEWLISCOUUS/MSACSR/HOUST/PERMIT/HSN1F and yfinance adjusted closes for 12 homebuilder, housing-platform/mortgage, and regional-bank targets. Sample 2019-08 to 2026-06, 938 asset-month rows, 83 months. All monthly features were shifted one month before target RV merge, with alignment checks max_abs_diff=0. Month-clustered OLS found lock-in wedge z p=0.309 and turnover-freeze z p=0.358; OOS QLIKE model minus trailing-12-month baseline was +0.376 with 95% bootstrap CI [+0.255,+0.515], meaning the model was worse than baseline. High-lock-in regime contrast was not significant (scaled RV diff -1.582, 95% CI [-5.334,+0.430]). Conclusion: do not promote this proxy as a standalone volatility forecasting signal; borrower-level coupon data would be required for a stronger mortgage lock-in test.",
+    "evidence": [
+      "research_mortgage_rate_lock_in_housing_turnover_freeze_ho",
+      "experiments/research_mortgage_rate_lock_in_housing_turnover_freeze_ho/research_mortgage_rate_lock_in_housing_turnover_freeze_ho_results.json",
+      "experiments/research_mortgage_rate_lock_in_housing_turnover_freeze_ho/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-07-02T17:15:58.752003"
   }
 ]
