@@ -45079,7 +45079,7 @@
     "title": "K1568: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1568 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1568 — Federal Register rule-flow 作 regulatory-compliance burden proxy 對 mid-cap / small-bank / sector RV 預測。Sample: 2012-01-03 ~ 2026-06-26, 3,641 trading rows, 78,564 Federal Register documents. Targets: IJR/IWM/KRE/KBE/XLF/XLV/XLI/XRT (n=8) × horizons {1d, 5d} × outcomes {log",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1568",
@@ -45109,9 +45109,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-02T17:22:28.880572+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-02T17:14:00.998397+00:00"
+    "started_at": "2026-07-02T17:14:00.998397+00:00",
+    "completed_at": "2026-07-02T17:22:28.880308+00:00",
+    "result": "Created general-audience draft mile_af40e182: 監管新聞很多，先別急著拿來當波動率訊號. Verified publisher gates, deterministic provenance, image URLs, and anti_ai_gate PASS; queued async lazypack job lazypack-mile_af40e182. Did not run full feed-sync apply because dry-run showed broad existing DB drift."
   },
   {
     "id": "K1582_article_research",
