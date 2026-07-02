@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 16:20 `git checkout <sha>` 驗證歷史 commit 留下 detached HEAD → 後續 commit 落在孤兒 HEAD、`git push origin main` 假報 up-to-date
+
+**現象**：hourly-16 salvage lazypack 時，為驗證「2 個 test red 是否 main pre-existing」跑了 `git checkout edc1c59df`（測）→ `git checkout b3e0e9fed`（用 **SHA** 回到 cherry-pick 點）。SHA checkout = **detached HEAD**，不是回到 branch `main`。之後我的 2 個 commit（test fix、PHASE Z）+ 一個並行 telegram-responder process 的 commit 全落在 detached HEAD，`refs/heads/main` 卡在 b3e0e9fed。`git push origin main` 推的是 branch `main`（b3e0e9fed，已在 remote）→ 假報 "Everything up-to-date"，而我真正的工作（HEAD b7c41adbe）**沒被 push**、只存在 local detached HEAD + reflog。
+
+**根因**：(1) 用 SHA 而非 branch name 做 checkout；(2) 驗證完只 `git checkout b3e0e9fed`（SHA）沒 `git checkout main` reattach；(3) push 前只看 `git push` 的 "up-to-date" 字面、沒交叉核對 `git rev-parse HEAD` vs `git rev-parse refs/heads/main` vs `git ls-remote`。三者不一致才是 ground truth。
+
+**解決**：`git merge-base --is-ancestor` 確認 main 是 HEAD 祖先（linear）→ `git branch -f main <HEAD-sha>` fast-forward branch → `git checkout main` reattach → push `b3e0e9fed..b7c41adbe`，remote 0/0 同步，無 commit 遺失。
+
+**教訓（PDCA / 防再犯）**：
+1. **在主 working tree 驗證歷史 commit 前，優先用臨時 worktree（`git worktree add`）或 `git stash`+`git -C`，不要在主 tree `git checkout <sha>`**——會 detach HEAD，之後任何 commit（含並行 process）都掉進孤兒狀態。
+2. 若非得 checkout 歷史點，**驗證完第一動作 = `git checkout <branch-name>`（branch 名，不是 SHA）reattach**，再繼續工作。
+3. **push 後不可只信 `git push` 的字面輸出**；PHASE Z 的 "verify" 要交叉核對 `HEAD` == `refs/heads/main` == `git ls-remote origin main` 三者一致，"Everything up-to-date" 在 detached HEAD 下會說謊。
+4. **同一 working tree 有並行 process（telegram-responder）也在 commit** 放大了此風險——它的 commit 也落在 detached HEAD。長期解：research/salvage 類工作與 telegram-responder 不該共用同一 checkout 的 HEAD，或 salvage 一律在獨立 worktree 做。
+
 ## 2026-07-02 16:15 test_radar_holdings_risk collection error 中斷整套 pytest（gate 靜默失效同類）
 
 `tests/test_radar_holdings_risk.py` 的 `_load_engine` 用 `importlib` 載 `scripts/radar_holdings_risk.py` 時沒註冊 `sys.modules[spec.name]`，而 engine 有 `from __future__ import annotations` + `@dataclass` → dataclasses `_is_type` 查 `sys.modules.get(cls.__module__)` 得 None → collection AttributeError，**整個 `pytest tests/` collection interrupted、該檔 10 個 regression tests 從未跑過**（與 14:11 entry「測試檔壞掉 = gate 靜默失效」同類）。修復：(a) `_load_engine` 補 `sys.modules[spec.name] = module`（importlib 官方 recipe）；(b) gate 恢復後暴露 3 個潛伏 failure — 測試 helper `max()` 空 dict 炸（`default=0` 修）+ **engine 真 bug**：`base = total_input_pct` 把權重 renormalize 回投資部位，與自己的註解/note「現金零波動已計入全組合 VaR」矛盾（權重<100% 時高估 vol/VaR），修成 `base = max(total_input_pct, 100.0)`。教訓：**importlib 手動載入含 dataclass+future-annotations 的 script 必註冊 sys.modules**（tests/ 內 50+ 檔用同 pattern，其他檔目前無此組合故未炸）；測試檔 collection error 不只是該檔沒跑，是全套 gate 中斷。
