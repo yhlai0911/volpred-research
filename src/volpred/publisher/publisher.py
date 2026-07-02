@@ -661,6 +661,85 @@ def _audit_general_content(audience: str, tags: list[str], content: str) -> list
     return issues
 
 
+# Depth floors from .claude/rules/publishing.md L98 (chars of body content).
+# 2026-07-02 boss escalation: general median length collapsed 4459→2293 chars
+# (-49%) May→June while every code gate pushed only in the compress/block
+# direction — the prose floors had ZERO code enforcement (and feed-publisher
+# SKILL.md even taught 800-1500, below the rule floor). This gate is the
+# single code arbiter for the floor, at the same chokepoint as the other
+# publish gates. Deterministic → hard-block is allowed per dedup-gate-audit.md
+# (fuzzy-only signals must stay warn-only; length/table counts are not fuzzy).
+_DEPTH_FLOOR_CHARS = {"general": 1500, "research": 2000}
+# Curated / timely formats with their own length conventions are exempt.
+_DEPTH_EXEMPT_CONTENT_TYPES = frozenset({"daily_digest", "event_article", "member_qa"})
+
+
+def _count_md_tables(content: str) -> int:
+    """Count markdown table blocks (runs of ≥2 consecutive lines starting with |)."""
+    blocks = 0
+    run = 0
+    for line in (content or "").splitlines():
+        if line.lstrip().startswith("|"):
+            run += 1
+        else:
+            if run >= 2:
+                blocks += 1
+            run = 0
+    if run >= 2:
+        blocks += 1
+    return blocks
+
+
+def _audit_content_depth(
+    audience: str,
+    content: str,
+    *,
+    content_type: str | None = None,
+) -> tuple[list[str], list[str]]:
+    """Return (blocking_issues, warnings) for the minimum-depth floor.
+
+    Scope: audience 'general' (≥1500 chars) and 'research' (≥2000 chars and
+    ≥1 markdown result table). content_type daily_digest / event_article /
+    member_qa are exempt (own specs; event is time-critical). general without
+    any table is a warning only (lazypack posters may carry the visuals).
+    Fail-open on internal errors — a broken depth check must never block.
+    """
+    try:
+        if str(content_type or "").strip() in _DEPTH_EXEMPT_CONTENT_TYPES:
+            return [], []
+        floor = _DEPTH_FLOOR_CHARS.get(audience)
+        if floor is None:
+            return [], []
+        issues: list[str] = []
+        warnings: list[str] = []
+        body_len = len((content or "").strip())
+        if body_len < floor:
+            issues.append(
+                f"content depth below floor: {body_len} chars < {floor} "
+                f"(audience='{audience}', publishing.md L98). 加深證據鏈（結果表 / "
+                f"檢定 / 方法交代 / robustness），不是灌水。"
+            )
+        tables = _count_md_tables(content or "")
+        if audience == "research" and tables < 1:
+            issues.append(
+                "research article has 0 markdown result tables — 至少 1 張真結果表"
+                "（publishing.md §4；讀者需可對表驗證）。"
+            )
+        elif audience == "general" and tables < 1:
+            warnings.append(
+                "general article has 0 markdown tables — 建議至少 1 張數據表支撐主論點"
+                "（懶人包圖不是可驗證表格）。"
+            )
+        return issues, warnings
+    except Exception as exc:
+        try:
+            from volpred.ops.diagnostics import warn
+            warn("content_depth", "depth audit failed; fail-open", err=str(exc))
+        except Exception:
+            print(f"  [content_depth] audit failed; fail-open: {exc}")
+        return [], []
+
+
 def _sanitize_publish_tags(audience: str, tags: list[str]) -> list[str]:
     """Canonical last-mile tag sanitizer before writing to feed.
 
@@ -1495,6 +1574,32 @@ class Publisher:
             print(f"  ⚠️ general audit issues (audit_strict=False bypass):")
             for issue in audit_issues:
                 print(f"     - {issue}")
+
+        # 2026-07-02 (boss): minimum-depth floor — general ≥1500 / research
+        # ≥2000 chars + research ≥1 result table (publishing.md L98, previously
+        # prose-only with zero code enforcement → May→June general median
+        # collapsed -49%). Shares the audit_strict escape; every block/warn is
+        # logged to dedup_decisions.jsonl so a non-publish is never silent.
+        _depth_ct = str((details or {}).get('content_type') or '')
+        depth_issues, depth_warnings = _audit_content_depth(
+            audience, description, content_type=_depth_ct or None
+        )
+        for _dw in depth_warnings:
+            print(f"  ⚠️ content depth warning: {_dw}")
+        if depth_issues:
+            _log_dedup_decision(
+                str(self.reports_dir.parent),
+                "block_depth_floor" if audit_strict else "warn_depth",
+                title, None, "; ".join(depth_issues)[:300],
+            )
+            if audit_strict:
+                issue_text = '\n  - '.join(depth_issues)
+                raise ValueError(
+                    f"content depth below publish floor:\n  - {issue_text}\n"
+                    f"Fix the article (加深證據鏈) or set audit_strict=False (batch migrations only)."
+                )
+            for issue in depth_issues:
+                print(f"  ⚠️ depth issue (audit_strict=False bypass): {issue}")
 
         # 2026-06-30 (boss): every general-audience reader article must carry a
         # 懶人包圖組 (lazypack) at the end. The publish_draft.py CLI gates this at

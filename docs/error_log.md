@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 15:15 文章深度退化（老闆質問「越來越糟、越來越短、資訊量大幅下降」）— 量化屬實：general median -49%（4459→2293 chars），三個 high-confidence root cause 已修
+
+**現象**（4-agent workflow 取證 + 主線程獨立重算對齊）：12 週 weekly median 從 5/22-28 的 5057 chars 斷崖到 5/29-6/04 的 3018（-40%）持續至今；**general 同型腰斬 4459→2293（-49%）**、表格 3→1、K-refs 2-3.5→1；research 持平（4735→4729）。深讀對比：消失的是「證據鏈中段」— 結果表（5-8→0-1）、正式檢定（6-21 次→0）、方法專節、robustness、limitations、文獻全被抽掉，結論從條件化量化退化成不可覆核的格言。
+
+**Root causes（依 confidence）**：
+1. **[high] 5/26 general 禁術語 gate 是「刪除向」**：`_GENERAL_FORBIDDEN_PATTERNS` 禁 t=/p=/檢定名，agent 為過 gate 整段不寫統計，時點精準對上 5/29 斷崖（commit dc9f26bba 在轉折前 3 天）。
+2. **[high] 治理文件自相矛盾 + 字數零 code enforcement**：publishing.md L98 寫 general 1500+/research 2000+，但 agent 實際載入的 feed-publisher SKILL.md 三處教 800-1500（規則下限 ≈ skill 上限，自 4/18 矛盾至今）；grep 全 publisher 代碼 0 個 min-length gate — 所有 code gate 全是壓縮/阻擋向，沒有任何「下限向」。
+3. **[high] anti-ai-style 壓縮漏斗 bug**：SKILL.md 主文把「裁到 300-400 字」列通用原則，references 裡的「僅限 ≤500 字短文」限定在主文遺失 — 每篇文章被迫通過只會變短的編輯漏斗。
+4. [medium] 50min hard cap + 懶人包硬 gate 搶時間；[medium] arc-dedup 逐週加嚴把富證據 K 系列深挖擋掉、refill 摻推測性方向；[high-次要] digest 佔比 +7.2pp 組成效應。
+
+**已修（全落既有機制，per anti-stacking）**：feed-publisher SKILL.md 5 處字數對齊 publishing.md（800-1500→1500-3000）；anti-ai-style 主文補回 ≤500 字限定；publisher chokepoint 新增 `_audit_content_depth` 下限 gate（general ≥1500/research ≥2000+≥1 表，digest/event/member_qa 豁免，block 寫 dedup_decisions.jsonl audit trail，fail-open）— `tests/test_content_depth_gate.py` 7 tests + draft 池 dry-run 0 誤傷。**深水區三修留 task**：術語 gate 刪除向→翻譯向（sanitize_general 替換表擴充）、lazypack 生圖搬 compute_queue async、arc-dedup 同 K 不同 axis 白名單。
+
+**教訓**：(a) 品質退化不是單一 bug，是**多個「各自合理」的 gate/skill 疊加後形成單向壓縮漏斗** — 每次加壓縮向約束時必須問「下限誰在守」；(b) 治理文件（rules vs skills）數字規格必須有 code 仲裁者，散文對散文的矛盾會沉默存在 75 天；(c) skill 主文與 references 的適用範圍限定不可分離。
+
 ## 2026-07-02 14:25 **3-STRIKE TRIGGER**：「turn 結尾無文字回報」同日第三波（symlink 移除後又無回報）— **Stop hook 硬性攔截落地**
 
 **三次 incident**：(1) 2026-06 首次糾正 → memory `feedback_final_text_after_schedulewakeup`；(2) 2026-07-02 上午連續 6 次質問 + 13:15 再犯 → CLAUDE.md 最高指引固化（13:23 entry）；(3) 2026-07-02 14:16 symlink 移除做完、驗證完，turn 又以 ScheduleWakeup 收尾無最終文字 → 老闆 14:19 質問「所以移除了？為什麼都不回報？」。
