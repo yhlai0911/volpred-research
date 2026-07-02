@@ -11,8 +11,8 @@
 # After editing this file:
 #   cp scripts/cron_check_alerts.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_check_alerts.sh
 
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/check_alerts.log 2>&1
-cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/check_alerts.log 2>&1
+cd /Users/yhlai0911/volpred-research || exit 1
 
 # Enable process group so cleanup signals propagate (Codex review pattern
 # applied to hourly_dispatch.sh 2026-05-14, mirrored here for consistency).

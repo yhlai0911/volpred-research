@@ -13,9 +13,9 @@ Backlog task:
 - `research_quadratic_hedging_under_garch`
 
 Existing experiment:
-- [README.md](/Users/yhlai0911/Desktop/volpred-research/experiments/k945/README.md:1)
-- [k945.py](/Users/yhlai0911/Desktop/volpred-research/experiments/k945/k945.py:1)
-- [k945_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k945/k945_results.json:1)
+- [README.md](/Users/yhlai0911/volpred-research/experiments/k945/README.md:1)
+- [k945.py](/Users/yhlai0911/volpred-research/experiments/k945/k945.py:1)
+- [k945_results.json](/Users/yhlai0911/volpred-research/experiments/k945/k945_results.json:1)
 
 The match is exact: `K945` is titled `Quadratic vs Minimum-Variance Hedging under GARCH`.
 

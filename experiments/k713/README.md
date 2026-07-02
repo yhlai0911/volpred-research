@@ -59,11 +59,11 @@
 
 ## 輸出檔案
 
-- Script: [`experiments/k713/k713.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/k713/k713.py)
-- Results: [`experiments/k713/k713_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k713/k713_results.json)
+- Script: [`experiments/k713/k713.py`](/Users/yhlai0911/volpred-research/experiments/k713/k713.py)
+- Results: [`experiments/k713/k713_results.json`](/Users/yhlai0911/volpred-research/experiments/k713/k713_results.json)
 - Figures:
-  - [`experiments/k713/k713_tlt_peak.png`](/Users/yhlai0911/Desktop/volpred-research/experiments/k713/k713_tlt_peak.png)
-  - [`experiments/k713/k713_return_vs_drawdown.png`](/Users/yhlai0911/Desktop/volpred-research/experiments/k713/k713_return_vs_drawdown.png)
+  - [`experiments/k713/k713_tlt_peak.png`](/Users/yhlai0911/volpred-research/experiments/k713/k713_tlt_peak.png)
+  - [`experiments/k713/k713_return_vs_drawdown.png`](/Users/yhlai0911/volpred-research/experiments/k713/k713_return_vs_drawdown.png)
 
 ## 主要發現
 

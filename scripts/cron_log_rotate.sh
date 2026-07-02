@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-injected: TCC bypass — self-redirect to Desktop log avoids launchd-process-level TCC denial
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/log_rotate.log 2>&1
+exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/log_rotate.log 2>&1
 # Canonical source for the host-cron wrapper.
 # IMPORTANT: host cron does NOT exec files under Desktop/ (macOS TCC/FDA blocks
 # the cron daemon). The cron-exec target lives at ~/.volpred/bin/cron_log_rotate.sh.
@@ -17,7 +17,7 @@ MAX_BYTES=$((5 * 1024 * 1024))   # 5 MB 門檻
 KEEP_LINES=4000                   # 截斷後保留最後 N 行
 
 LOG_DIRS=(
-  "/Users/yhlai0911/Desktop/volpred-research/storage/logs/cron"
+  "/Users/yhlai0911/volpred-research/storage/logs/cron"
   "/Users/yhlai0911/.volpred/logs"
 )
 

@@ -66,7 +66,7 @@ TWII_CSV = REPO_ROOT / "storage" / "macro" / "yf_TWII.csv"
 # Look for parent SPY results in worktree first, fallback to main repo.
 _CANDIDATE_PARENTS = [
     REPO_ROOT / "experiments" / "research_intraday_vs_overnight_vrp" / "research_intraday_vs_overnight_vrp_results.json",
-    Path("/Users/yhlai0911/Desktop/volpred-research/experiments/research_intraday_vs_overnight_vrp/research_intraday_vs_overnight_vrp_results.json"),
+    Path("/Users/yhlai0911/volpred-research/experiments/research_intraday_vs_overnight_vrp/research_intraday_vs_overnight_vrp_results.json"),
 ]
 PARENT_RESULTS = next((p for p in _CANDIDATE_PARENTS if p.exists()), _CANDIDATE_PARENTS[-1])
 

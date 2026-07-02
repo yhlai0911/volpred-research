@@ -42,7 +42,7 @@ from scipy import stats
 
 # In worktree, data/ may not have intraday — use main repo
 _repo_root = Path(__file__).resolve().parent.parent
-_main_repo = Path("/Users/yhlai0911/Desktop/volpred-research")
+_main_repo = Path("/Users/yhlai0911/volpred-research")
 DATA_DIR = (_main_repo / "data" / "intraday") if (_main_repo / "data" / "intraday").exists() else (_repo_root / "data" / "intraday")
 STORAGE_DIR = _repo_root / "storage" / "experiments"
 

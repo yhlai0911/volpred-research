@@ -41,7 +41,7 @@ TIME_VARIANTS = {
 }
 VIX_REGIME_THRESHOLDS = [15, 20, 25, 30]
 
-OUT_PATH = Path("/Users/yhlai0911/Desktop/volpred-research/storage/experiments/rebalancing_boundary.json")
+OUT_PATH = Path("/Users/yhlai0911/volpred-research/storage/experiments/rebalancing_boundary.json")
 
 
 def download_data():

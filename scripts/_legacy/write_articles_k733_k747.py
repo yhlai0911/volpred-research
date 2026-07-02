@@ -5,8 +5,8 @@ Generate and publish 2 feed articles:
 """
 import sys
 import os
-sys.path.insert(0, '/Users/yhlai0911/Desktop/volpred-research/src')
-os.chdir('/Users/yhlai0911/Desktop/volpred-research')
+sys.path.insert(0, '/Users/yhlai0911/volpred-research/src')
+os.chdir('/Users/yhlai0911/volpred-research')
 
 from volpred.charts import (
     generate_bar_chart,
@@ -154,7 +154,7 @@ VIX（市場恐懼指數）不是每天大幅跳動的。它的趨勢通常持�
     content = embed_chart(content, url, "調倉頻率 vs Sharpe Ratio（2006–2025）")
     content = embed_chart(content, url2, "年化交易成本拖累（基點）", position="before_conclusion")
 
-    pub = Publisher(storage_dir='/Users/yhlai0911/Desktop/volpred-research/storage')
+    pub = Publisher(storage_dir='/Users/yhlai0911/volpred-research/storage')
     pub_id = pub.publish_milestone(
         title="為什麼高手投資人反而更「懶」？月度調倉打敗日頻交易的秘密",
         description=content,
@@ -402,7 +402,7 @@ ERC 每月需要重新計算最優解，倉位變動比 50/50 更大。即使每
     content = embed_chart(content, url1, "各方法 Sharpe Ratio 比較（SPY+GLD，2023-2026）")
     content = embed_chart(content, url2, "多資產擴張的 Sharpe 降解", position="before_conclusion")
 
-    pub = Publisher(storage_dir='/Users/yhlai0911/Desktop/volpred-research/storage')
+    pub = Publisher(storage_dir='/Users/yhlai0911/volpred-research/storage')
     pub_id = pub.publish_milestone(
         title="K747: Equal Risk Contribution 的零溢價——數學精密度不等於投資績效",
         description=content,
@@ -435,7 +435,7 @@ if __name__ == "__main__":
     result = subprocess.run(
         ["uv", "run", "python", "scripts/supabase_sync.py", "full"],
         capture_output=True, text=True,
-        cwd='/Users/yhlai0911/Desktop/volpred-research'
+        cwd='/Users/yhlai0911/volpred-research'
     )
     print(result.stdout[-2000:] if result.stdout else "(no output)")
     if result.returncode != 0:

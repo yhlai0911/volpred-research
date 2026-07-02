@@ -450,7 +450,7 @@ output = {
     "created_at": datetime.now().isoformat(),
 }
 
-output_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/vix_term_structure_vol_pred/vix_term_structure_vol_pred_results.json"
+output_path = "/Users/yhlai0911/volpred-research/experiments/vix_term_structure_vol_pred/vix_term_structure_vol_pred_results.json"
 with open(output_path, "w") as f:
     json.dump(output, f, indent=2)
 print(f"\nResults saved to {output_path}")

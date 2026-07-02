@@ -43,7 +43,7 @@ warnings.filterwarnings("ignore")
 SEED = 42
 np.random.seed(SEED)
 
-REPO_ROOT = "/Users/yhlai0911/Desktop/volpred-research"
+REPO_ROOT = "/Users/yhlai0911/volpred-research"
 OUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 print("=" * 70)

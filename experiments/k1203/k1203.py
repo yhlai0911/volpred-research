@@ -64,7 +64,7 @@ K1118_RESULTS = EXP_ROOT / "k1118" / "k1118_results.json"
 # K1201 lives on main branch, not in this worktree; fall back to absolute path on host.
 K1201_RESULTS_CANDIDATES = [
     EXP_ROOT / "k1201" / "k1201_results.json",
-    Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k1201/k1201_results.json"),
+    Path("/Users/yhlai0911/volpred-research/experiments/k1201/k1201_results.json"),
 ]
 OUT_DIR = HERE
 

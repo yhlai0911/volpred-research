@@ -1135,7 +1135,7 @@ else:
     )
 
 # Save
-output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a820c0e7/experiments/k517_monthly_overnight_results.json'
+output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a820c0e7/experiments/k517_monthly_overnight_results.json'
 with open(output_path, 'w') as f:
     json.dump(output, f, indent=2, default=str)
 

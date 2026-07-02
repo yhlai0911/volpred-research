@@ -58,7 +58,7 @@ warnings.filterwarnings('ignore')
 # Configuration
 # ============================================================
 EXPERIMENT_ID = "K593"
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 
 # Window sizes to test (focused set for cross-OOS)
 WINDOWS = [252, 504, 1000, 2000]

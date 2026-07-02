@@ -41,7 +41,7 @@ warnings.filterwarnings('ignore')
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'intraday')
 if not os.path.exists(DATA_DIR) or len(glob.glob(os.path.join(DATA_DIR, 'SPY_5min_*.csv'))) == 0:
-    DATA_DIR = '/Users/yhlai0911/Desktop/volpred-research/data/intraday'
+    DATA_DIR = '/Users/yhlai0911/volpred-research/data/intraday'
 OUT_DIR = os.path.dirname(__file__)
 
 

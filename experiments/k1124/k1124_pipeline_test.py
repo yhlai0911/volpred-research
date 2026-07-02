@@ -1,7 +1,7 @@
 """Quick pipeline test after Codex bug fixes."""
 import sys
 import pandas as pd
-sys.path.insert(0, "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-k1124/experiments/k1124")
+sys.path.insert(0, "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-k1124/experiments/k1124")
 from k1124 import load_all_bars, make_model_data, fit_ols, predict_ols, qlike_loss, dm_hln
 import numpy as np
 

@@ -125,7 +125,7 @@ worse than the stronger calibrated linear HAR baseline.
 ## Reproduction
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python experiments/research_quantum_reservoir_computing_for_realized_volatil/research_quantum_reservoir_computing_for_realized_volatil.py
 ```
 

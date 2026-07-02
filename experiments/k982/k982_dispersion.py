@@ -386,7 +386,7 @@ for col, name in [('ret_bh', 'Buy & Hold'), ('ret_base', '12/VIX'), ('ret_overla
 # 9. Plots
 # ============================================================
 print("\n[Step 9] Generating plots...")
-exp_dir = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a7c71930/experiments/k982'
+exp_dir = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a7c71930/experiments/k982'
 
 # Plot 1: Rolling correlation + VIX overlay
 fig, ax1 = plt.subplots(figsize=(14, 6))

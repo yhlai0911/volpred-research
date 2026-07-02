@@ -203,7 +203,7 @@ referenced in K45 lit review).
 ## Reproducibility
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 python experiments/k1266/k1266.py
 # Runtime: ~30 seconds
 # Output: k1266_results.json + 2 PNG charts

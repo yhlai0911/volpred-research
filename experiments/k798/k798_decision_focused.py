@@ -599,7 +599,7 @@ for c in results["conclusions"]:
     print(f"  {c}")
 
 # Save
-out_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k798_decision_focused_results.json'
+out_path = '/Users/yhlai0911/volpred-research/experiments/k798_decision_focused_results.json'
 with open(out_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 print(f"\nResults saved to: {out_path}")

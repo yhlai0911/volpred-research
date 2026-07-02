@@ -38,7 +38,7 @@ if _env_file.exists():
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or os.environ.get("SUPABASE_KEY", "")
 BUCKET = "article-images"
-OUT_DIR = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/K620")
+OUT_DIR = Path("/Users/yhlai0911/volpred-research/experiments/K620")
 DPI = 150
 
 BRAND_BLUE = "#1565C0"
@@ -342,7 +342,7 @@ def main():
 
     urls = {"lazypack_1_concept": u1, "lazypack_2_results": u2,
             "lazypack_3_ci": u3, "lazypack_4_conclusion": u4}
-    out = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/K620") / "article_v2_lazypack_urls.json"
+    out = Path("/Users/yhlai0911/volpred-research/experiments/K620") / "article_v2_lazypack_urls.json"
     out.write_text(json.dumps(urls, indent=2))
     print(f"\nAll URLs saved: {out}")
     for k, v in urls.items():

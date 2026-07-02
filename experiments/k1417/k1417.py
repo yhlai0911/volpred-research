@@ -43,7 +43,7 @@ import numpy as np
 # Reuse K1192 strategy + data helpers. K1192 module-level logging hard-codes a
 # stale worktree path; stub FileHandler before importing so the import succeeds
 # in the canonical repo location.
-REPO_ROOT = '/Users/yhlai0911/Desktop/volpred-research'
+REPO_ROOT = '/Users/yhlai0911/volpred-research'
 sys.path.insert(0, os.path.join(REPO_ROOT, 'experiments', 'k1192'))
 
 _orig_file_handler = logging.FileHandler

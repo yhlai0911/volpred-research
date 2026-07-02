@@ -48,7 +48,7 @@ from matplotlib.ticker import PercentFormatter
 SEED = 20260621
 rng = np.random.default_rng(SEED)
 
-EXP_DIR = "/Users/yhlai0911/Desktop/volpred-research/experiments/k_vix_complacency_20260621"
+EXP_DIR = "/Users/yhlai0911/volpred-research/experiments/k_vix_complacency_20260621"
 START = "1990-01-01"
 TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 

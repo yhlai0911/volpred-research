@@ -36,7 +36,7 @@ OUT_DIR = Path(__file__).resolve().parent
 # Worktree may lack newer experiments committed on main after branch was cut;
 # fall back to the main repo's experiments/ directory when a JSON is missing
 # locally. This keeps k1204 strictly synthesis-only (no new estimation).
-MAIN_REPO_EXP_DIR = Path("/Users/yhlai0911/Desktop/volpred-research/experiments")
+MAIN_REPO_EXP_DIR = Path("/Users/yhlai0911/volpred-research/experiments")
 
 
 def load_json(kid: str) -> dict[str, Any]:

@@ -59,7 +59,7 @@ if str(_SRC_DIR) not in sys.path:
 
 # Data lives in main repo (worktree omits data/intraday); read-only access.
 # K1322 only consumes daily 5-min CSVs; we do not mutate them.
-DATA_GLOB_DIR = Path("/Users/yhlai0911/Desktop/volpred-research/data/intraday")
+DATA_GLOB_DIR = Path("/Users/yhlai0911/volpred-research/data/intraday")
 SYMBOL = "0050_TW_5min"
 REVISIT_GATE_DAYS = 200  # require n_total >= 200 before a verdict is trusted
 

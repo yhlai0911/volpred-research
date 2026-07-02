@@ -80,7 +80,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 # to main repo experiments path if needed.
 CACHE_CANDIDATES = [
     SCRIPT_DIR.parent / "k1124" / "_cache_bars_2017-01-01_2021-12-31.parquet",
-    Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k1124/"
+    Path("/Users/yhlai0911/volpred-research/experiments/k1124/"
          "_cache_bars_2017-01-01_2021-12-31.parquet"),
 ]
 

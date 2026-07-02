@@ -272,16 +272,16 @@ Full list from 2026-04-19 reproduce.py run. Each classified as:
 
 ## 7. Files referenced / read
 
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/main.tex` (shell)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/body.tex` (lines 44–62, 128–184, 198–214, 516–548)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/reproduce.py` (gate script)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/reproduce_report.json` (2026-04-19 ad5d95 batch)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/experiments/k892_verify_tw_gamma_results.json` (canonical γ source)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/experiments/k900_taiwan_vt_performance.py` lines 687–765 (rolling 252d amplification)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/experiments/k900_taiwan_vt_performance_results.json` `amplification.gamma_0050` block
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/reproducibility_audit/README.md`, `diff_report.md`, `nosource_rescan_report.md`, `main_tex_numbers.csv`
-- `/Users/yhlai0911/Desktop/volpred-research/paper/taiwan-vt/reviews/audit_step1_2.md` lines 25–52, 345–375
-- `/Users/yhlai0911/Desktop/volpred-research/.claude/rules/paper-workflow.md` (gate rule binding)
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/main.tex` (shell)
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/body.tex` (lines 44–62, 128–184, 198–214, 516–548)
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/reproduce.py` (gate script)
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/reproduce_report.json` (2026-04-19 ad5d95 batch)
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/experiments/k892_verify_tw_gamma_results.json` (canonical γ source)
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/experiments/k900_taiwan_vt_performance.py` lines 687–765 (rolling 252d amplification)
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/experiments/k900_taiwan_vt_performance_results.json` `amplification.gamma_0050` block
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/reproducibility_audit/README.md`, `diff_report.md`, `nosource_rescan_report.md`, `main_tex_numbers.csv`
+- `/Users/yhlai0911/volpred-research/paper/taiwan-vt/reviews/audit_step1_2.md` lines 25–52, 345–375
+- `/Users/yhlai0911/volpred-research/.claude/rules/paper-workflow.md` (gate rule binding)
 
 ## 8. One-line summary for task finish
 

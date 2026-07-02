@@ -73,7 +73,7 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files: []

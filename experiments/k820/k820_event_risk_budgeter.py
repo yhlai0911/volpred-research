@@ -54,7 +54,7 @@ import sys
 warnings.filterwarnings('ignore')
 
 # Import DM test
-sys.path.insert(0, '/Users/yhlai0911/Desktop/volpred-research')
+sys.path.insert(0, '/Users/yhlai0911/volpred-research')
 from volpred.stats.model_evaluation import strategy_dm_test
 
 print("=" * 70)
@@ -912,7 +912,7 @@ conclusion_parts.append(
 output['verdict']['conclusion'] = " ".join(conclusion_parts)
 
 # Save
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k820_event_risk_budgeter_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k820_event_risk_budgeter_results.json'
 with open(output_path, 'w') as f:
     json.dump(output, f, indent=2, default=str)
 

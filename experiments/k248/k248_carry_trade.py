@@ -672,7 +672,7 @@ output = {
     ],
 }
 
-results_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a752b2eb/experiments/k248_carry_trade_results.json"
+results_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a752b2eb/experiments/k248_carry_trade_results.json"
 with open(results_path, "w") as f:
     json.dump(output, f, indent=2, default=str)
 

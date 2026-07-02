@@ -493,7 +493,7 @@ def run_experiment():
         ]
     }
 
-    out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/k797v2_kan_garch_results.json"
+    out_path = "/Users/yhlai0911/volpred-research/experiments/k797v2_kan_garch_results.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"\nResults saved to: {out_path}")

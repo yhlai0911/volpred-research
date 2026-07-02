@@ -722,7 +722,7 @@ RESULTS['metadata'] = {
     ]
 }
 
-results_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a987ffa6/experiments/k409_options_mispricing_results.json'
+results_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a987ffa6/experiments/k409_options_mispricing_results.json'
 with open(results_path, 'w') as f:
     json.dump(RESULTS, f, indent=2, default=str)
 print(f"\n  Results saved to: {results_path}")

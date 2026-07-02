@@ -139,7 +139,7 @@ if __name__ == '__main__':
 
     # Save CSV
     df = pd.DataFrame(results)
-    out_dir = '/Users/yhlai0911/Desktop/volpred-research/experiments/trending_repost_2026_06_03_ai_capex_skew'
+    out_dir = '/Users/yhlai0911/volpred-research/experiments/trending_repost_2026_06_03_ai_capex_skew'
     df.to_csv(f'{out_dir}/data.csv', index=False)
     print(f"\nSaved {len(df)} rows to data.csv")
 

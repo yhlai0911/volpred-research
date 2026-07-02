@@ -586,7 +586,7 @@ results = {
 }
 
 # Save results
-results_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/k822_vix_product_trading_results.json"
+results_path = "/Users/yhlai0911/volpred-research/experiments/k822_vix_product_trading_results.json"
 with open(results_path, "w") as f:
     json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 

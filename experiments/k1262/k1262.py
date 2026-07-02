@@ -672,7 +672,7 @@ def write_softer_detector_table(output_dir):
     """Part B: recompute K1261 raw results under 3 detector variants."""
     k1261_path_candidates = [
         os.path.abspath(os.path.join(output_dir, '..', 'k1261', 'k1261_results.json')),
-        '/Users/yhlai0911/Desktop/volpred-research/experiments/k1261/k1261_results.json',
+        '/Users/yhlai0911/volpred-research/experiments/k1261/k1261_results.json',
     ]
     k1261_path = next((p for p in k1261_path_candidates if os.path.exists(p)), None)
     if k1261_path is None:
@@ -697,7 +697,7 @@ def write_softer_detector_table(output_dir):
     #   k1261.threshold_detection.VT_baseline_K827v3_stored.justification.per_adoption (raw VT in
     #   K827v3 source; we need to re-load VT raw from K827v3 path)
     k827v3_paths = [
-        '/Users/yhlai0911/Desktop/volpred-research/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json',
+        '/Users/yhlai0911/volpred-research/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json',
     ]
     k827v3_path = next((p for p in k827v3_paths if os.path.exists(p)), None)
 
@@ -860,7 +860,7 @@ def write_verdict(output_dir, threshold_per_cell, overall_elapsed, n_total_sims)
 
     # VT reference under softer detector — read from softer_detector_table source
     # (computed in write_softer_detector_table); we re-detect here for VT.
-    k827v3_path = '/Users/yhlai0911/Desktop/volpred-research/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json'
+    k827v3_path = '/Users/yhlai0911/volpred-research/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json'
     vt_softer_crit = None
     vt_strict_crit = None
     vt_p5_crit = None

@@ -775,7 +775,7 @@ final_results = {
 }
 
 # Save
-output_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/k823_congressional_trading_results.json"
+output_path = "/Users/yhlai0911/volpred-research/experiments/k823_congressional_trading_results.json"
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(final_results, f, ensure_ascii=False, indent=2, default=str)
 

@@ -608,7 +608,7 @@ output = {
     "verdict": "null" if f_pval >= 0.05 else "marginal",
 }
 
-out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/tda_vol_topology/tda_vol_topology_results.json"
+out_path = "/Users/yhlai0911/volpred-research/experiments/tda_vol_topology/tda_vol_topology_results.json"
 with open(out_path, "w") as f:
     json.dump(output, f, indent=2, ensure_ascii=False)
 print(f"   Saved to {out_path}")

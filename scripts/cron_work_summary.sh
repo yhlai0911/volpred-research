@@ -11,8 +11,8 @@
 # After editing:
 #   cp scripts/cron_work_summary.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_work_summary.sh
 
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/work_summary.log 2>&1
-cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/work_summary.log 2>&1
+cd /Users/yhlai0911/volpred-research || exit 1
 
 set -m
 

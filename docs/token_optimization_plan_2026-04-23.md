@@ -148,8 +148,8 @@ subagent frontmatter 支援：
 
 來源：
 
-- [weekly_2026-04-17.md](/Users/yhlai0911/Desktop/volpred-research/storage/reports/token_usage/weekly_2026-04-17.md:1)
-- [scripts/token_usage_report.py](/Users/yhlai0911/Desktop/volpred-research/scripts/token_usage_report.py:1)
+- [weekly_2026-04-17.md](/Users/yhlai0911/volpred-research/storage/reports/token_usage/weekly_2026-04-17.md:1)
+- [scripts/token_usage_report.py](/Users/yhlai0911/volpred-research/scripts/token_usage_report.py:1)
 
 結論不是「subagent 太多」這麼簡單，而是：
 
@@ -252,9 +252,9 @@ subagent frontmatter 支援：
 
 目前這個 repo 有三個問題：
 
-- [`.claude/settings.json`](</Users/yhlai0911/Desktop/volpred-research/.claude/settings.json:1>) 開了 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
-- [`.claude/settings.local.json`](</Users/yhlai0911/Desktop/volpred-research/.claude/settings.local.json:1>) 也開了
-- [`docs/hardware.md`](</Users/yhlai0911/Desktop/volpred-research/docs/hardware.md:21>) 還寫「優先使用 agent team」
+- [`.claude/settings.json`](</Users/yhlai0911/volpred-research/.claude/settings.json:1>) 開了 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`
+- [`.claude/settings.local.json`](</Users/yhlai0911/volpred-research/.claude/settings.local.json:1>) 也開了
+- [`docs/hardware.md`](</Users/yhlai0911/volpred-research/docs/hardware.md:21>) 還寫「優先使用 agent team」
 
 修正方向：
 
@@ -420,8 +420,8 @@ skill frontmatter 可寫：
 
 1. `.claude/skills/member-questions/SKILL.md` 與 `.claude/skills/taiwan-macro-data/SKILL.md` 已標準化；後續新增 provider-visible skill 時也維持統一使用 `SKILL.md`。
 2. 自訂 subagent 目前已存在：
-   - [docs-researcher](</Users/yhlai0911/Desktop/volpred-research/.claude/agents/docs-researcher.md:1>)：`model: haiku`
-   - [fresh-context-worker](</Users/yhlai0911/Desktop/volpred-research/.claude/agents/fresh-context-worker.md:1>)：`model: sonnet`
+   - [docs-researcher](</Users/yhlai0911/volpred-research/.claude/agents/docs-researcher.md:1>)：`model: haiku`
+   - [fresh-context-worker](</Users/yhlai0911/volpred-research/.claude/agents/fresh-context-worker.md:1>)：`model: sonnet`
    後續可直接把部分 `context: fork` 的 skills 綁到這兩類 worker，而不必每次臨時決定。
 
 ### Phase 3：建立「任務完成邊界」，但不要硬自動 clear

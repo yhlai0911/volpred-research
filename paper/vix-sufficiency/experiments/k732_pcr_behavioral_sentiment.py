@@ -654,7 +654,7 @@ conclusions.append("Data limitation: actual CBOE Put/Call ratio unavailable via 
 final_results['conclusions'] = conclusions
 
 # Save results
-results_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k732_pcr_behavioral_sentiment_results.json'
+results_path = '/Users/yhlai0911/volpred-research/experiments/k732_pcr_behavioral_sentiment_results.json'
 with open(results_path, 'w') as f:
     json.dump(final_results, f, indent=2, default=str)
 print(f"  Results saved to {results_path}")

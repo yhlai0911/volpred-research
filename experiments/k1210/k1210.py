@@ -61,7 +61,7 @@ K1171_DIR = Path(__file__).resolve().parents[1] / "k1171"
 sys.path.insert(0, str(K1171_DIR))
 
 # K1171 lives in main repo; our worktree only has k1210. Add main-repo path.
-MAIN_REPO = Path("/Users/yhlai0911/Desktop/volpred-research")
+MAIN_REPO = Path("/Users/yhlai0911/volpred-research")
 K1171_MAIN = MAIN_REPO / "experiments" / "k1171"
 sys.path.insert(0, str(K1171_MAIN))
 

@@ -519,7 +519,7 @@ print("\n" + "=" * 70)
 print("Part E: K757b (raw) vs K757bv2 (clean) Comparison")
 print("=" * 70)
 
-k757b_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k757b_taiwan_covar_fixed_results.json'
+k757b_path = '/Users/yhlai0911/volpred-research/experiments/k757b_taiwan_covar_fixed_results.json'
 comparison = {}
 try:
     with open(k757b_path) as f:
@@ -642,7 +642,7 @@ results['references'] = [
 results['timestamp'] = datetime.now().isoformat()
 
 # Save
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k757bv2_taiwan_covar_clean_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k757bv2_taiwan_covar_clean_results.json'
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 print(f"\nResults saved to {output_path}")

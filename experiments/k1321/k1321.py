@@ -20,7 +20,7 @@ from scipy import stats
 SEED = 42
 np.random.seed(SEED)
 
-REPO_ROOT = Path("/Users/yhlai0911/Desktop/volpred-research")
+REPO_ROOT = Path("/Users/yhlai0911/volpred-research")
 OUT_DIR = REPO_ROOT / "experiments" / "k1321"
 
 VIXTWN_PATH = REPO_ROOT / "data" / "vixtwn" / "vixtwn_daily.csv"

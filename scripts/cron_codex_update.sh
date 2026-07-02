@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-injected: TCC bypass — self-redirect to Desktop log avoids launchd-process-level TCC denial
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/codex_update.log 2>&1
+exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/codex_update.log 2>&1
 # Canonical source for the host-cron wrapper.
 # IMPORTANT: host cron does NOT exec files under Desktop/ (macOS TCC/FDA blocks
 # the cron daemon). The cron-exec target lives at ~/.volpred/bin/cron_codex_update.sh.
@@ -13,7 +13,7 @@ exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/codex_update
 # 僅在版本實際變動時寄 info email 給老闆，無變動安靜結束。
 
 set -u
-cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+cd /Users/yhlai0911/volpred-research || exit 1
 
 # nvm node 的 npm / codex 路徑（cron/launchd env 無 nvm shim）
 export PATH="/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin:$PATH"

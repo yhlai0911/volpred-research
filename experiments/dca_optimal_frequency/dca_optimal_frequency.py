@@ -500,7 +500,7 @@ for label in ["Weekly", "Weekly + VT", "Biweekly", "Biweekly + VT",
 # ================================================================
 # Save results
 # ================================================================
-output_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-af8b57cb/experiments/dca_frequency_results.json"
+output_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-af8b57cb/experiments/dca_frequency_results.json"
 
 save_results = {
     "experiment": "K122",

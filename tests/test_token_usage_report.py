@@ -74,7 +74,7 @@ def test_generate_drilldown_splits_text_bash_and_cache(monkeypatch):
                 {
                     "type": "tool_use",
                     "name": "Bash",
-                    "input": {"command": "cd /Users/yhlai0911/Desktop/volpred-research"},
+                    "input": {"command": "cd /Users/yhlai0911/volpred-research"},
                 }
             ],
             "text_content": "",

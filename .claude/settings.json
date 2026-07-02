@@ -17,12 +17,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /Users/yhlai0911/Desktop/volpred-research/scripts/auto_start_codex_loop.sh",
+            "command": "bash /Users/yhlai0911/volpred-research/scripts/auto_start_codex_loop.sh",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash /Users/yhlai0911/Desktop/volpred-research/scripts/warm_tcc_authorization.sh",
+            "command": "bash /Users/yhlai0911/volpred-research/scripts/warm_tcc_authorization.sh",
             "timeout": 35
           }
         ]
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /Users/yhlai0911/Desktop/volpred-research/.claude/hooks/email_pool_reminder.sh",
+            "command": "bash /Users/yhlai0911/volpred-research/.claude/hooks/email_pool_reminder.sh",
             "timeout": 5
           }
         ]
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/yhlai0911/Desktop/volpred-research && bash scripts/save_session_state.sh 2>/dev/null || true",
+            "command": "cd /Users/yhlai0911/volpred-research && bash scripts/save_session_state.sh 2>/dev/null || true",
             "timeout": 30
           }
         ]
@@ -55,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/yhlai0911/Desktop/volpred-research && bash scripts/save_session_state.sh",
+            "command": "cd /Users/yhlai0911/volpred-research && bash scripts/save_session_state.sh",
             "timeout": 30
           }
         ]
@@ -67,7 +67,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /Users/yhlai0911/Desktop/volpred-research/.claude/hooks/pretooluse-bash-optimizer.sh"
+            "command": "bash /Users/yhlai0911/volpred-research/.claude/hooks/pretooluse-bash-optimizer.sh"
           }
         ]
       }

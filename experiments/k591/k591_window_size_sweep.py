@@ -56,7 +56,7 @@ warnings.filterwarnings('ignore')
 # Configuration
 # ============================================================
 EXPERIMENT_ID = "K591"
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 
 # GARCH window sizes to test
 GARCH_WINDOWS = [252, 504, 756, 1000, 1260, 1500, 1750, 2000, 2500, 3000]

@@ -838,7 +838,7 @@ results = {
     'conclusion': 'VT is NOT a subset of TSMOM — cross-asset panel confirms frequency-dependent relationship with VT providing independent vol-reactive alpha in crisis environments where TSMOM fails.',
 }
 
-output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-acecaee7/experiments/vt_tsmom_cross_asset_results.json'
+output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-acecaee7/experiments/vt_tsmom_cross_asset_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

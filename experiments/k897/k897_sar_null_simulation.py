@@ -741,7 +741,7 @@ def main():
     print(f"\n  Regimes with empirical SAR outside simulated 95% CI: {n_outside}/{n_tested}")
 
     # Save results
-    output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa7ddc51/experiments/k897_sar_null_simulation_results.json'
+    output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-aa7ddc51/experiments/k897_sar_null_simulation_results.json'
     with open(output_path, 'w') as f:
         json.dump(output, f, indent=2, default=str)
     print(f"\n  Results saved to: {output_path}")

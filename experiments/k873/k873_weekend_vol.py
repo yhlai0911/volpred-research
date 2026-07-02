@@ -712,7 +712,7 @@ for c in conclusions:
     print(f"\n  {c}")
 
 # Save
-with open('/Users/yhlai0911/Desktop/volpred-research/experiments/k873_results.json', 'w') as f:
+with open('/Users/yhlai0911/volpred-research/experiments/k873_results.json', 'w') as f:
     json.dump(final_results, f, indent=2, default=str)
 
 print(f"\n\nResults saved to experiments/k873_results.json")

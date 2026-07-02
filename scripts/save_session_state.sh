@@ -2,7 +2,7 @@
 # PreCompact hook: save session state before context is compressed
 # This captures everything needed to resume work after compact/clear
 
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 
 STATE_FILE="storage/session_state.json"
 

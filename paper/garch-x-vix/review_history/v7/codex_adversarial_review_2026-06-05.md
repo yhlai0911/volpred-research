@@ -16,7 +16,7 @@ The paper body is materially improved versus v2/v3: MCS caveat, HAR-RV benchmark
 
 **Severity**: high
 
-`paper/garch-x-vix/README.md` still presents the old headline "`DM t=4.03` ... outperforming all GARCH-MIDAS variants" and lists K1085 as if it were the source of the GLD cross-asset claim, while the current body explicitly frames B1 as statistically indistinguishable and uses the paper-period GLD result `t=3.17` from K997. See [README.md](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/README.md:12), [README.md](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/README.md:37), [README.md](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/README.md:61), and [main.tex](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/main.tex:80). `reproduce_report.json` also still marks the core SPY number as a mismatch (`4.03` paper vs `4.148384` stored/live), so a reviewer reading the replication packet sees unresolved internal conflict rather than a controlled shelf erratum. See [reproduce_report.json](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/reproduce_report.json:1).
+`paper/garch-x-vix/README.md` still presents the old headline "`DM t=4.03` ... outperforming all GARCH-MIDAS variants" and lists K1085 as if it were the source of the GLD cross-asset claim, while the current body explicitly frames B1 as statistically indistinguishable and uses the paper-period GLD result `t=3.17` from K997. See [README.md](/Users/yhlai0911/volpred-research/paper/garch-x-vix/README.md:12), [README.md](/Users/yhlai0911/volpred-research/paper/garch-x-vix/README.md:37), [README.md](/Users/yhlai0911/volpred-research/paper/garch-x-vix/README.md:61), and [main.tex](/Users/yhlai0911/volpred-research/paper/garch-x-vix/main.tex:80). `reproduce_report.json` also still marks the core SPY number as a mismatch (`4.03` paper vs `4.148384` stored/live), so a reviewer reading the replication packet sees unresolved internal conflict rather than a controlled shelf erratum. See [reproduce_report.json](/Users/yhlai0911/volpred-research/paper/garch-x-vix/reproduce_report.json:1).
 
 **Why it matters**: this is no longer just an internal ops note. For an R1 package, conflicting “canonical” numbers and claim wording in the README/reproduce files weaken credibility even if the body text is now more careful.
 
@@ -26,7 +26,7 @@ The paper body is materially improved versus v2/v3: MCS caveat, HAR-RV benchmark
 
 **Severity**: medium-high
 
-The HAR section reports only ordinary DM non-rejections (`t=+0.29`, `t=+0.65`, `t=+0.87`, `t=-0.88`) but then concludes that A4f is “statistically non-inferior” to HAR-type benchmarks. See [main.tex](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/main.tex:806) and [main.tex](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/main.tex:813). The underlying experiments, [k1379_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k1379/k1379_results.json:1) and [k1396_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k1396/k1396_results.json:1), support only “no statistically significant difference under this protocol.” They do not implement a non-inferiority margin or equivalence design.
+The HAR section reports only ordinary DM non-rejections (`t=+0.29`, `t=+0.65`, `t=+0.87`, `t=-0.88`) but then concludes that A4f is “statistically non-inferior” to HAR-type benchmarks. See [main.tex](/Users/yhlai0911/volpred-research/paper/garch-x-vix/main.tex:806) and [main.tex](/Users/yhlai0911/volpred-research/paper/garch-x-vix/main.tex:813). The underlying experiments, [k1379_results.json](/Users/yhlai0911/volpred-research/experiments/k1379/k1379_results.json:1) and [k1396_results.json](/Users/yhlai0911/volpred-research/experiments/k1396/k1396_results.json:1), support only “no statistically significant difference under this protocol.” They do not implement a non-inferiority margin or equivalence design.
 
 **Why it matters**: a referee can reasonably object that failure to reject equality is not evidence of non-inferiority. This is a terminology problem, not a computation problem.
 
@@ -36,7 +36,7 @@ The HAR section reports only ordinary DM non-rejections (`t=+0.29`, `t=+0.65`, `
 
 **Severity**: medium-high
 
-The abstract, introduction, and conclusion say that “the `g_t` component” tracks VRP at `rho≈0.80`; however, Section 6 later states that model-recursion `g_t` is approximately orthogonal to VRP (`rho≈0.06`) and that the high correlation comes from a separate “g-proxy method.” See [main.tex](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/main.tex:52), [main.tex](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/main.tex:82), [main.tex](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/main.tex:893), and [main.tex](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/main.tex:909).
+The abstract, introduction, and conclusion say that “the `g_t` component” tracks VRP at `rho≈0.80`; however, Section 6 later states that model-recursion `g_t` is approximately orthogonal to VRP (`rho≈0.06`) and that the high correlation comes from a separate “g-proxy method.” See [main.tex](/Users/yhlai0911/volpred-research/paper/garch-x-vix/main.tex:52), [main.tex](/Users/yhlai0911/volpred-research/paper/garch-x-vix/main.tex:82), [main.tex](/Users/yhlai0911/volpred-research/paper/garch-x-vix/main.tex:893), and [main.tex](/Users/yhlai0911/volpred-research/paper/garch-x-vix/main.tex:909).
 
 **Why it matters**: this reads as a construct switch. A reviewer can say the paper advertises a property of latent `g_t` but later concedes the reported 0.80 belongs to a derived proxy, not the recursion state itself.
 
@@ -46,7 +46,7 @@ The abstract, introduction, and conclusion say that “the `g_t` component” tr
 
 **Severity**: medium
 
-The conclusion says the model is significant for “five of seven tested markets” and that VIX functions as a “global fear factor.” See [main.tex](/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/main.tex:911). But v6 already added the stricter Bonferroni note that GLD (`t=3.17`) falls marginally below the adjusted `|t|>3.22` threshold. The table caveat and the conclusion are not aligned.
+The conclusion says the model is significant for “five of seven tested markets” and that VIX functions as a “global fear factor.” See [main.tex](/Users/yhlai0911/volpred-research/paper/garch-x-vix/main.tex:911). But v6 already added the stricter Bonferroni note that GLD (`t=3.17`) falls marginally below the adjusted `|t|>3.22` threshold. The table caveat and the conclusion are not aligned.
 
 **Why it matters**: even if the main table is technically correct under the paper’s baseline threshold, the conclusion currently ignores the paper’s own more conservative multiple-testing qualification.
 

@@ -37,7 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT / 'src'))
 
 # Data may be in main repo, not worktree
-_main_repo = Path('/Users/yhlai0911/Desktop/volpred-research')
+_main_repo = Path('/Users/yhlai0911/volpred-research')
 INTRADAY_DIR = _main_repo / 'data' / 'intraday'
 if not INTRADAY_DIR.exists():
     INTRADAY_DIR = PROJECT_ROOT / 'data' / 'intraday'

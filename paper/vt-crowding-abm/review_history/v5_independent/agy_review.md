@@ -92,7 +92,7 @@
 1. **獨立學術評審報告**：
    我已針對該手稿撰寫了一份符合頂級財務學期刊標準的匿名審查報告，並已成功同步寫入以下兩個位置：
    * **系統 Artifact 存檔**：[review_report.md](file:///Users/yhlai0911/.gemini/antigravity-cli/brain/f5dd7f92-a4a3-41c9-abb5-bc9256c76216/review_report.md)
-   * **本機 Repository 指定路徑**：[agy_review.md](file:///Users/yhlai0911/Desktop/volpred-research/paper/vt-crowding-abm/review_history/v5_independent/agy_review.md)
+   * **本機 Repository 指定路徑**：[agy_review.md](file:///Users/yhlai0911/volpred-research/paper/vt-crowding-abm/review_history/v5_independent/agy_review.md)
 
 2. **核心盲點與問題提煉**：
    * **整體傾向**：**REJECT**

@@ -57,7 +57,7 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(
-            "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa2d76a6/experiments/k1184/run.log",
+            "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-aa2d76a6/experiments/k1184/run.log",
             mode="w"
         ),
     ],
@@ -509,7 +509,7 @@ results = {
     }
 }
 
-out_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa2d76a6/experiments/k1184/k1184_results.json"
+out_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-aa2d76a6/experiments/k1184/k1184_results.json"
 with open(out_path, "w") as f:
     json.dump(results, f, indent=2)
 log.info(f"Results saved to {out_path}")

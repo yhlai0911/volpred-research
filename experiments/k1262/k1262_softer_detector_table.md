@@ -1,7 +1,7 @@
 # K1262 Part B: Softer Detector Recompute of K1261 Raw Results
 
 **Date**: 2026-04-27 19:53:04
-**Source**: `/Users/yhlai0911/Desktop/volpred-research/experiments/k1261/k1261_results.json` (K1261 Phase 1 raw aggregates) + `/Users/yhlai0911/Desktop/volpred-research/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json` (K827v3 VT 500-MC baseline).
+**Source**: `/Users/yhlai0911/volpred-research/experiments/k1261/k1261_results.json` (K1261 Phase 1 raw aggregates) + `/Users/yhlai0911/volpred-research/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json` (K827v3 VT 500-MC baseline).
 
 ## Detector definitions
 

@@ -574,7 +574,7 @@ results = {
     'timestamp': datetime.now().isoformat(),
 }
 
-out_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a2179745/experiments/k796v2_vix_spike_taiwan_results.json'
+out_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a2179745/experiments/k796v2_vix_spike_taiwan_results.json'
 with open(out_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

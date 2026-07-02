@@ -1065,7 +1065,7 @@ conclusions.append("Implication: SSVS is better suited for volatility/variance p
 results['conclusions'] = conclusions
 
 # Save
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k818_ssvs_return_prediction_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k818_ssvs_return_prediction_results.json'
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 

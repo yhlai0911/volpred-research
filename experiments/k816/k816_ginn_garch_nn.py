@@ -789,7 +789,7 @@ results = {
     ],
 }
 
-out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/k816_ginn_garch_nn_results.json"
+out_path = "/Users/yhlai0911/volpred-research/experiments/k816_ginn_garch_nn_results.json"
 with open(out_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

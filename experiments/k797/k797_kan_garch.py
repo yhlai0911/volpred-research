@@ -525,7 +525,7 @@ def run_experiment():
     results["conclusion"] = conc
     print(f"\nConclusion: {conc}")
 
-    out = "/Users/yhlai0911/Desktop/volpred-research/experiments/k797_kan_garch_results.json"
+    out = "/Users/yhlai0911/volpred-research/experiments/k797_kan_garch_results.json"
     with open(out, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"\nSaved: {out}")

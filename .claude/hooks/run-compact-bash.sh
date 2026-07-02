@@ -5,7 +5,7 @@ set -uo pipefail
 MODE="${1:-}"
 ORIGINAL_COMMAND="${2:-}"
 
-ROOT="${VOLPRED_HOOK_ROOT:-/Users/yhlai0911/Desktop/volpred-research}"
+ROOT="${VOLPRED_HOOK_ROOT:-/Users/yhlai0911/volpred-research}"
 LOG_DIR="$ROOT/storage/logs/hooks"
 mkdir -p "$LOG_DIR"
 

@@ -371,8 +371,8 @@ def main():
             '..', 'paper', 'vt-crowding-abm', 'experiments',
             'k827v3_abm_fixed_liquidity_results.json'
         ),
-        '/Users/yhlai0911/Desktop/volpred-research/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json',
-        '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ab6a1ce4991cf48db/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json',
+        '/Users/yhlai0911/volpred-research/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json',
+        '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-ab6a1ce4991cf48db/paper/vt-crowding-abm/experiments/k827v3_abm_fixed_liquidity_results.json',
     ]
     k827v3_path = next((p for p in k827v3_paths if os.path.exists(p)), None)
     vt_threshold = None

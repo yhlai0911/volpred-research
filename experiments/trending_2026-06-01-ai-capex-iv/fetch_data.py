@@ -206,7 +206,7 @@ plt.tight_layout(rect=[0, 0, 1, 0.96])
 
 # Save to multiple locations
 chart_path_exp = OUT_DIR / 'capex_hv_chart.png'
-chart_path_assets = Path('/Users/yhlai0911/Desktop/volpred-research/storage/reports/assets/ai_capex_iv_2026_06.png')
+chart_path_assets = Path('/Users/yhlai0911/volpred-research/storage/reports/assets/ai_capex_iv_2026_06.png')
 plt.savefig(chart_path_exp, dpi=150, bbox_inches='tight')
 plt.savefig(chart_path_assets, dpi=150, bbox_inches='tight')
 print(f"Chart saved to {chart_path_exp}")

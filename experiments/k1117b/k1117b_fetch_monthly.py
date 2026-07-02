@@ -50,8 +50,8 @@ DATA_DIR = HERE / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Storage cache for pre-fetched series (much faster than re-downloading)
-STORAGE_MACRO = Path("/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/storage/macro")
-K1116C_DATA = Path("/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1116c/data")
+STORAGE_MACRO = Path("/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a6ef86dc/storage/macro")
+K1116C_DATA = Path("/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1116c/data")
 
 
 def log(msg: str) -> None:

@@ -16,7 +16,7 @@ from typing import Any
 from PIL import Image, ImageDraw, ImageFont
 
 
-ROOT = Path("/Users/yhlai0911/Desktop/volpred-research")
+ROOT = Path("/Users/yhlai0911/volpred-research")
 RESULTS_PATH = ROOT / "experiments/k1074/k1074_results.json"
 README_PATH = ROOT / "experiments/k1074/README.md"
 DRAFT_PATH = ROOT / "storage/drafts/k1074_general_draft.md"

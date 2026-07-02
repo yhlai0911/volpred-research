@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-ROOT="${VOLPRED_HOOK_ROOT:-/Users/yhlai0911/Desktop/volpred-research}"
+ROOT="${VOLPRED_HOOK_ROOT:-/Users/yhlai0911/volpred-research}"
 INPUT="$(cat)"
 COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')"
 

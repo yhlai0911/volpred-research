@@ -567,7 +567,7 @@ print("\n[3] Generating figures...")
 
 # Load K1235 for side-by-side A4f vs K1235 comparison
 try:
-    k1235_json = Path('/Users/yhlai0911/Desktop/volpred-research/experiments/k1235/k1235_results.json')
+    k1235_json = Path('/Users/yhlai0911/volpred-research/experiments/k1235/k1235_results.json')
     with open(k1235_json) as f:
         k1235_data = json.load(f)
 except Exception:

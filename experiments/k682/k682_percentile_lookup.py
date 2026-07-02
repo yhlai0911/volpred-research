@@ -683,7 +683,7 @@ else:
 output["key_findings"] = findings
 
 # Save
-outpath = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ad99a9ae/experiments/k682_results.json"
+outpath = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-ad99a9ae/experiments/k682_results.json"
 with open(outpath, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=2, ensure_ascii=False, default=str)
 

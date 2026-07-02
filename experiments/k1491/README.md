@@ -63,11 +63,11 @@ The explicit `.shift(1)` is the lookahead control.
 
 ## Outputs
 
-- Script: [`experiments/k1491/k1491.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1491/k1491.py)
-- Results: [`experiments/k1491/k1491_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1491/k1491_results.json)
+- Script: [`experiments/k1491/k1491.py`](/Users/yhlai0911/volpred-research/experiments/k1491/k1491.py)
+- Results: [`experiments/k1491/k1491_results.json`](/Users/yhlai0911/volpred-research/experiments/k1491/k1491_results.json)
 - Figures:
-  - [`experiments/k1491/k1491_spillover_heatmap.png`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1491/k1491_spillover_heatmap.png)
-  - [`experiments/k1491/k1491_tail_signal_timeseries.png`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1491/k1491_tail_signal_timeseries.png)
+  - [`experiments/k1491/k1491_spillover_heatmap.png`](/Users/yhlai0911/volpred-research/experiments/k1491/k1491_spillover_heatmap.png)
+  - [`experiments/k1491/k1491_tail_signal_timeseries.png`](/Users/yhlai0911/volpred-research/experiments/k1491/k1491_tail_signal_timeseries.png)
 
 ## Interpretation Rules
 

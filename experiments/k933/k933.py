@@ -806,7 +806,7 @@ output = {
     ]
 }
 
-output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a80934f6/experiments/k933/k933_results.json'
+output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a80934f6/experiments/k933/k933_results.json'
 with open(output_path, 'w') as f:
     json.dump(output, f, indent=2, default=str)
 print(f"\n  Results saved to {output_path}")
@@ -846,7 +846,7 @@ for bar, val in zip(bars2, spearman_vals):
 plt.suptitle('K933: FIGARCH-MF(VIX) vs MF-GJR(VIX)\nDoes long memory add value beyond VIX?',
              fontsize=14, fontweight='bold', y=1.02)
 plt.tight_layout()
-chart_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a80934f6/experiments/k933/k933_qlike_comparison.png'
+chart_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a80934f6/experiments/k933/k933_qlike_comparison.png'
 plt.savefig(chart_path, dpi=150, bbox_inches='tight')
 plt.close()
 print(f"  Chart saved to {chart_path}")

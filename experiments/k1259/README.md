@@ -138,7 +138,7 @@ canonical state。Phase 2 (`k1259_mcs.py`) 直接讀 Phase 1.5 ledger（`asset` 
 ## 重跑方式
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 python3 experiments/k1259/build_dm_ledger.py
 ```
 

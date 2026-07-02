@@ -793,7 +793,7 @@ results["summary"] = {
     "codex_review_note": "Codex found 1 HIGH (regime VIX lookahead) + 2 MEDIUM (date alignment, test naming). All fixed.",
 }
 
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k768_conformal_var_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k768_conformal_var_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

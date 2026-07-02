@@ -69,7 +69,7 @@ OOS_SIZE = 15           # larger OOS than K522's 10 for better DM power
 WARMUP_DAYS = 22        # monthly component needs 22-day history
 MIN_IS = 30             # minimum in-sample after warmup
 EWMA_LAMBDA = 0.94
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 
 print("=" * 70)
 print(f"{EXPERIMENT_ID}: Formal HAR-RV with 60+ Day 5-Min Data")

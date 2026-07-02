@@ -864,7 +864,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-charts_dir = '/Users/yhlai0911/Desktop/volpred-research/experiments/k814_charts'
+charts_dir = '/Users/yhlai0911/volpred-research/experiments/k814_charts'
 os.makedirs(charts_dir, exist_ok=True)
 
 # Chart 1: Posterior distributions (4 key params)
@@ -1205,7 +1205,7 @@ print(f"\n  Prediction: {prediction_conclusion}")
 print(f"\n  Identification: {identification_conclusion}")
 
 # Save results
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k814_bayesian_mcmc_garch_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k814_bayesian_mcmc_garch_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 print(f"\n  Results saved to: {output_path}")

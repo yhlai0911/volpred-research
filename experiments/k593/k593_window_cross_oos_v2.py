@@ -42,7 +42,7 @@ from scipy import stats
 warnings.filterwarnings('ignore')
 
 EXPERIMENT_ID = "K593-v2"
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 
 WINDOWS = [252, 504, 1000, 2000]
 

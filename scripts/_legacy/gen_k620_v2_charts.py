@@ -38,7 +38,7 @@ if _env_file.exists():
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "") or os.environ.get("SUPABASE_KEY", "")
 BUCKET = "article-images"
-OUT_DIR = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/K620")
+OUT_DIR = Path("/Users/yhlai0911/volpred-research/experiments/K620")
 DPI = 150
 
 

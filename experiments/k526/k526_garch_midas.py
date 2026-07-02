@@ -55,7 +55,7 @@ WINDOW = 2000
 OOS_MIN = 252
 MIDAS_K = 12        # 12 monthly lags (1 year of history)
 MIDAS_DAYS = 22     # trading days per month
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 
 print("=" * 70)
 print(f"{EXPERIMENT_ID}: GARCH-MIDAS for SPY Volatility Prediction")

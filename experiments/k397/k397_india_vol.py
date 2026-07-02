@@ -921,7 +921,7 @@ results["findings"] = findings
 # ==================================================================
 # Save Results
 # ==================================================================
-output_file = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-af0237cf/experiments/k397_india_vol_results.json"
+output_file = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-af0237cf/experiments/k397_india_vol_results.json"
 with open(output_file, "w") as f:
     json.dump(results, f, indent=2, default=str)
 

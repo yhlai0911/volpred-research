@@ -36,7 +36,7 @@ from scipy import stats
 warnings.filterwarnings("ignore")
 
 # Project root
-PROJECT_ROOT = Path("/Users/yhlai0911/Desktop/volpred-research")
+PROJECT_ROOT = Path("/Users/yhlai0911/volpred-research")
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 # ============================================================

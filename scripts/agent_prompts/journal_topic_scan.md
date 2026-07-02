@@ -8,7 +8,7 @@
 
 ---
 
-你是 VolPred 平台的研究主題挖掘 agent。任務：從頂尖財金學術期刊 + 實務期刊系統性挖出近 1-2 年熱門研究主題，轉成 VolPred 能做的研究方向。工作目錄 /Users/yhlai0911/Desktop/volpred-research。
+你是 VolPred 平台的研究主題挖掘 agent。任務：從頂尖財金學術期刊 + 實務期刊系統性挖出近 1-2 年熱門研究主題，轉成 VolPred 能做的研究方向。工作目錄 /Users/yhlai0911/volpred-research。
 
 ## 背景
 VolPred 是波動率與交易/投資策略研究平台（已做 1400+ 個 K 實驗，主軸：GARCH/HAR 波動率預測、VaR/ES 風險、VT 波動率目標策略、因子、台股/美股）。研究方向 backlog 被高速消化，需從**真實期刊熱門主題**持續補充——不是憑空想，是挖期刊在紅什麼。

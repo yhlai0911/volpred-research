@@ -102,20 +102,20 @@ Last updated: **2026-05-04 (system audit + 4-phase improvement plan)**
 
 ## 2026-04-23 Token Optimization Planning
 
-- ✅ 重寫 [Token 優化計劃（2026-04-23 修正版）](/Users/yhlai0911/Desktop/volpred-research/docs/token_optimization_plan_2026-04-23.md)：依 Claude Code 官方語義重新區分 `subagent` 與 `agent team`，補上 `skills/model/effort/context: fork` 的可用能力與限制。
+- ✅ 重寫 [Token 優化計劃（2026-04-23 修正版）](/Users/yhlai0911/volpred-research/docs/token_optimization_plan_2026-04-23.md)：依 Claude Code 官方語義重新區分 `subagent` 與 `agent team`，補上 `skills/model/effort/context: fork` 的可用能力與限制。
 - ✅ 補上既有 skills 配置矩陣：`admin-ops`、`autonomous-research`、`feed-publisher`、`paper-*`、`memory-health` 等已在計劃中對應預設 `model / effort / context: fork`，可作為下一輪實作 frontmatter 的直接依據。
 - ✅ 確認現況：全域 [~/.claude/settings.json](</Users/yhlai0911/.claude/settings.json:94>) 已有 `statusLine`，且 [~/.claude/statusline-command.sh](</Users/yhlai0911/.claude/statusline-command.sh:1>) 已顯示 `context_window.used_percentage`；缺的不是顯示，而是明確行為規則。
 - ✅ 專案層 `.claude/settings.json` / `.claude/settings.local.json` 已改為 `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=62`，並移除預設開啟 `agent team` 的 env。
 - ✅ chatty hooks 已瘦身：保留 `Stop` / `PreCompact` state save 與針對實驗 Bash 的 `PreToolUse` guard，移除會反覆把 meta 指令塞回 context 的 `SessionStart`、`SubagentStop`、`TaskCompleted`、`Notification`、`PostCompact` hooks。
 - ✅ 依官方 hooks lifecycle/cost 文檔補上 `PreToolUse` Bash optimizer：對 `pytest` / `npm test` / `go test` 等高噪音測試命令改走 compact wrapper，完整輸出寫到 `storage/logs/hooks/`，Claude 只看通過摘要或失敗片段；這是目前唯一直接作用在 agentic loop、能穩定減少 token 的 hook 週期。
 - ✅ 再把 `PreToolUse` Bash optimizer 擴到高頻人工巡檢輸出：`git status`（保留 `--porcelain` / `-z` 這類機器可讀模式）與大型 log `tail` 現在也會改走 compact wrapper，完整輸出仍落到 `storage/logs/hooks/`，Claude 只看 branch / dirty counts / path preview 或最後 40 行摘要，進一步降低 dirty worktree 與 log 巡檢的固定 context 稅。
-- ✅ 新增 [docs/workflow-index.md](/Users/yhlai0911/Desktop/volpred-research/docs/workflow-index.md)：把 workflow、執行模式、預設 `model / effort`、compact 邊界與 detail path 集中成輕量索引。
+- ✅ 新增 [docs/workflow-index.md](/Users/yhlai0911/volpred-research/docs/workflow-index.md)：把 workflow、執行模式、預設 `model / effort`、compact 邊界與 detail path 集中成輕量索引。
 - ✅ `CLAUDE.md`、`docs/hardware.md`、`.claude/rules/agent-delegation.md`、`autonomous-research` delegation playbook 已同步改成「單一主 session / forked subagent 為預設，agent team 為特例」。
 - ✅ 高頻 top-level skills 已補上 `model / effort`，並對 `citation-verifier`、`member-questions`、`memory-health`、`publication-candidates`、`latex-academic-reviewer` 補進 `context: fork` 路由。
-- ✅ 將完成任務後的 `bash say ...` 從 `AGENTS.md` / `CLAUDE.md` 這類 always-loaded guide 移出，改成 on-demand 的 [`.claude/commands/task-done.md`](/Users/yhlai0911/Desktop/volpred-research/.claude/commands/task-done.md)：收尾時才做摘要、讀 status line context %、給 `/compact` / `/clear` 建議，最後才播報，避免每個 session 都為這條規則付固定 token 稅。
+- ✅ 將完成任務後的 `bash say ...` 從 `AGENTS.md` / `CLAUDE.md` 這類 always-loaded guide 移出，改成 on-demand 的 [`.claude/commands/task-done.md`](/Users/yhlai0911/volpred-research/.claude/commands/task-done.md)：收尾時才做摘要、讀 status line context %、給 `/compact` / `/clear` 建議，最後才播報，避免每個 session 都為這條規則付固定 token 稅。
 - ✅ 補上 Phase 4.1 的固定低噪音 summary CLI：`uv run volpred ops queue-summary`、`scheduler-summary`、`token-summary`、`log-summary`。它們都用現有 control-plane / schedule / token report / logs 做 compact readout，取代日常巡檢時手動拼多個較吵命令，降低 context 汙染。
 - ✅ 補上 Phase 4.2 的 ID-based execution prompt：`execution_brief` 現在會帶 `workflow_id`，並把 executor / coordinator prompt 從整包 `TASK_JSON + BRIEF_JSON` 收斂成 compact task envelope / execution packet，只保留 `workflow_id`、`required_files`、`success_criteria` 等最小必要欄位，避免把 `updated_at`、`template_hash`、`source_type` 之類 metadata 一起塞進模型。
-- ✅ 補上 Phase 4.3 的開工前 boundary gate：新增 [`.claude/commands/task-start.md`](/Users/yhlai0911/Desktop/volpred-research/.claude/commands/task-start.md)，讓跨 workflow 或高成本任務在載入長 skill 前先看 status line context %、決定 `直接開始 / 先 compact / 先 clear`；`/research`、`/publish`、`/deploy` 也同步加上這層 gate，避免在高 context session 直接把長 SOP 再塞進主線。
+- ✅ 補上 Phase 4.3 的開工前 boundary gate：新增 [`.claude/commands/task-start.md`](/Users/yhlai0911/volpred-research/.claude/commands/task-start.md)，讓跨 workflow 或高成本任務在載入長 skill 前先看 status line context %、決定 `直接開始 / 先 compact / 先 clear`；`/research`、`/publish`、`/deploy` 也同步加上這層 gate，避免在高 context session 直接把長 SOP 再塞進主線。
 - ✅ 進一步瘦身 recurring prompt 範例：把 `autonomous-research`、`admin-ops` scheduling 參考與 `scripts/session_startup.md` 內的長 `CronCreate(prompt=\"...\")` 改成短 prompt，改用 `queue-summary`、`scheduler-summary`、`log-summary`、`token-summary` 等固定 CLI 當入口，保留行為意圖但移除冗長步驟描述，降低 session cron / skill 載入時的固定 token 稅。
 - ✅ 將 publication topic selection 也收斂到固定低噪音入口：新增 `uv run volpred ops publication-candidates-summary`，把 `publication-candidates`、`feed-publisher` 與 publishing rule 從 `cat/jq storage/publication_candidates.json` 改成 compact snapshot；每週 publication 巡檢 cron 也同步改成短 prompt，降低寫作前 workflow 的固定 token 與 shell glue 噪音。
 - ✅ 將平台巡檢也收斂到固定低噪音入口：新增 `uv run volpred ops platform-patrol-summary`，把原本常要交錯讀的 `platform-cycle-summary`、alert 條件、scheduler / health 關鍵欄位壓成單一 compact snapshot；session cron / admin-ops 參考改成先看 patrol summary，只有 breach / release_due / pending_questions 時才下鑽 detail CLI，確保巡檢效果不減損但日常 context 更乾淨。
@@ -751,13 +751,13 @@ Last updated: **2026-05-04 (system audit + 4-phase improvement plan)**
 
 - `crontab` 定時執行 `scripts/run_scheduler_tick.sh`
 - `run_scheduler_tick.sh` 固定內容：
-  - `cd /Users/yhlai0911/Desktop/volpred-research`
+  - `cd /Users/yhlai0911/volpred-research`
   - `set -a; source .env.local 2>/dev/null || true; set +a`
   - `export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"`
   - `exec uv run volpred ops scheduler-tick`
 - 正式派工由 `crontab -> shared scheduler tick` 驅動；`idle_policy` 只決定 slot 空出時如何挑 user / scheduled / discovery 任務，不是獨立自動觸發器
 - 建議 cron line：
-  - `*/10 * * * * /Users/yhlai0911/Desktop/volpred-research/scripts/run_scheduler_tick.sh # volpred-scheduler-tick`
+  - `*/10 * * * * /Users/yhlai0911/volpred-research/scripts/run_scheduler_tick.sh # volpred-scheduler-tick`
 - scheduler 先做便宜檢查與 event 展開
 - recurring/固定模式任務先查模板；模板足夠就直接派工
 - 模糊、事件複雜、研究 discovery 任務才喚起 Claude 協調輪生成 brief

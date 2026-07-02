@@ -119,7 +119,7 @@ PAPER_T3 = {
 PAPER_T6_SPY_CI = (86, 97)
 
 # Setup logging
-log_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-abe87ed7/experiments/k1194/run.log'
+log_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-abe87ed7/experiments/k1194/run.log'
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)s %(message)s',
@@ -792,7 +792,7 @@ def main():
             "Check paper's exact data version and VT construction details."
         )
 
-    out_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-abe87ed7/experiments/k1194/k1194_results.json'
+    out_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-abe87ed7/experiments/k1194/k1194_results.json'
     with open(out_path, 'w') as f:
         json.dump(output, f, indent=2, default=str)
     log.info(f"\nResults saved to: {out_path}")

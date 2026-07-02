@@ -610,7 +610,7 @@ for stype in type_order:
         }
 
 # Save results
-output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa0c111f/experiments/k903_paper8_robustness_results.json'
+output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-aa0c111f/experiments/k903_paper8_robustness_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 

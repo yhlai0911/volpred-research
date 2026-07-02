@@ -28,7 +28,7 @@ import yfinance as yf
 from arch import arch_model
 
 # MUST use clean_tw50_data for 0050.TW
-sys.path.insert(0, '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-adc7e97d')
+sys.path.insert(0, '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-adc7e97d')
 from volpred.utils import clean_tw50_data
 
 warnings.filterwarnings('ignore')
@@ -556,7 +556,7 @@ def main():
             print(f"  {ticker:<15} {fs['omega']:>10.6f} {fs['alpha']:>10.6f} {fs['gamma']:>10.6f} {fs['beta']:>10.6f} {fs['persistence']:>10.6f} {fs['gamma_t']:>10.3f} {fs['n_obs']:>8}")
 
     # Save results
-    output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-adc7e97d/experiments/k892_verify_tw_gamma_results.json'
+    output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-adc7e97d/experiments/k892_verify_tw_gamma_results.json'
 
     # Convert any remaining numpy types
     def convert_numpy(obj):

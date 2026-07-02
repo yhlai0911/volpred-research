@@ -13,8 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # Add project to path
-sys.path.insert(0, '/Users/yhlai0911/Desktop/volpred-research/src')
-os.chdir('/Users/yhlai0911/Desktop/volpred-research')
+sys.path.insert(0, '/Users/yhlai0911/volpred-research/src')
+os.chdir('/Users/yhlai0911/volpred-research')
 
 import matplotlib
 matplotlib.use('Agg')
@@ -572,7 +572,7 @@ articles = [
 # ─────────────────────────────────────────────
 # 5. Save to feed.json
 # ─────────────────────────────────────────────
-feed_path = Path('/Users/yhlai0911/Desktop/volpred-research/storage/feed.json')
+feed_path = Path('/Users/yhlai0911/volpred-research/storage/feed.json')
 if feed_path.exists():
     with open(feed_path, 'r', encoding='utf-8') as f:
         feed = json.load(f)
@@ -589,7 +589,7 @@ for a in articles:
     print(f"  - {a['id']}: {a['title']}")
 
 # Also save individual reports
-reports_dir = Path('/Users/yhlai0911/Desktop/volpred-research/storage/reports')
+reports_dir = Path('/Users/yhlai0911/volpred-research/storage/reports')
 reports_dir.mkdir(exist_ok=True)
 for a in articles:
     report_path = reports_dir / f"{a['id']}.json"

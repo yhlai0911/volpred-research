@@ -454,7 +454,7 @@ output = {
     }
 }
 
-out_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a961c101/experiments/transfer_entropy_results.json"
+out_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a961c101/experiments/transfer_entropy_results.json"
 with open(out_path, "w") as f:
     json.dump(output, f, indent=2, default=str)
 

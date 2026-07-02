@@ -176,24 +176,24 @@ Rerun `paper/leverage-direction/reproduce.py` after each stage; gate should reac
 ## 9. File Inventory (Absolute Paths)
 
 Read-only sources consulted:
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/reproduce_report.json`
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/reproduce.py` (lines 1–700)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/body.tex` (lines 320–410)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/body_v3.tex` (line 433 footnote)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/additions_jk.tex` (lines 40–150)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/main.tex`, `main_v2.tex`, `main_v3.tex` (input directives)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/experiments/k799_grand_evaluation_results.json` (existence check)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/experiments/k802_gjr_skewt_results.json` (existence check)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/experiments/k824v2_quantile_fixed_results.json` (existence check)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/experiments/k902_paper1_tables_supplement_results.json` (grepped for γ_HM; `gjr_gamma=-0.0359` confirmed for SPY; rolling γ window = 2017–2025)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/reproducibility_audit/diff_report.md` (lines 1–250)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/review_history/v2/README.md`
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/review_history/v2/academic_review_report.md` (HM γ CRITICAL-HIGH section)
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k1209/k1209_batch2_items.json` (items 1–8, item 8 dropped)
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k1219/k1219_session_actions.json` (K1209 batch scope)
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k1224/k1224_edit_items.json` (Sec 4.7 disambiguation drop decision)
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k274/k274_paper_mapping_results.json` (HM gamma=-0.035 in paper-mapping description)
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k628/k628_trim_plan.json` (§5.4 vs §4.9 duplication note)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/reproduce_report.json`
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/reproduce.py` (lines 1–700)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/body.tex` (lines 320–410)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/body_v3.tex` (line 433 footnote)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/additions_jk.tex` (lines 40–150)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/main.tex`, `main_v2.tex`, `main_v3.tex` (input directives)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/experiments/k799_grand_evaluation_results.json` (existence check)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/experiments/k802_gjr_skewt_results.json` (existence check)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/experiments/k824v2_quantile_fixed_results.json` (existence check)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/experiments/k902_paper1_tables_supplement_results.json` (grepped for γ_HM; `gjr_gamma=-0.0359` confirmed for SPY; rolling γ window = 2017–2025)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/reproducibility_audit/diff_report.md` (lines 1–250)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/review_history/v2/README.md`
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/review_history/v2/academic_review_report.md` (HM γ CRITICAL-HIGH section)
+- `/Users/yhlai0911/volpred-research/experiments/k1209/k1209_batch2_items.json` (items 1–8, item 8 dropped)
+- `/Users/yhlai0911/volpred-research/experiments/k1219/k1219_session_actions.json` (K1209 batch scope)
+- `/Users/yhlai0911/volpred-research/experiments/k1224/k1224_edit_items.json` (Sec 4.7 disambiguation drop decision)
+- `/Users/yhlai0911/volpred-research/experiments/k274/k274_paper_mapping_results.json` (HM gamma=-0.035 in paper-mapping description)
+- `/Users/yhlai0911/volpred-research/experiments/k628/k628_trim_plan.json` (§5.4 vs §4.9 duplication note)
 
 Output:
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/review_history/gate_fix_v1/proposal.md` (this file)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/review_history/gate_fix_v1/proposal.md` (this file)

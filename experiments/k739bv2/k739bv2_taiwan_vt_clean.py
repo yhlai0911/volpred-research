@@ -488,7 +488,7 @@ print("\n" + "=" * 70)
 print("COMPARISON: K739b (raw) vs K739bv2 (clean)")
 print("=" * 70)
 
-k739b_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k739b_taiwan_vt_fixed_results.json'
+k739b_path = '/Users/yhlai0911/volpred-research/experiments/k739b_taiwan_vt_fixed_results.json'
 comparison = {}
 try:
     with open(k739b_path) as f:
@@ -592,7 +592,7 @@ results['references'] = [
     'K82/K88: Taiwan VT guide (8.63/VIX target)',
 ]
 
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k739bv2_taiwan_vt_clean_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k739bv2_taiwan_vt_clean_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

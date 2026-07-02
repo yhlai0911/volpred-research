@@ -138,11 +138,11 @@ All three are **(a)-path execution**: fix the reproduce package so it reproduces
 
 ## 6. Appendix: File Paths Referenced
 
-- Paper body: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/main.tex`
-- Reproduce script: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/reproduce.py`
-- Reproduce report: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/reproduce_report.json`
-- Bundled data: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/data/`
-- Canonical K811v2: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/experiments/k811v2_insurance_premium_vov_fixed.py`
-- Canonical K811v2 results: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/experiments/k811v2_insurance_premium_vov_fixed_results.json`
-- Canonical K846: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/experiments/k846_rebalancing_premium.py`
-- Canonical K846 results: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/experiments/k846_rebalancing_premium_results.json`
+- Paper body: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/main.tex`
+- Reproduce script: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/reproduce.py`
+- Reproduce report: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/reproduce_report.json`
+- Bundled data: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/data/`
+- Canonical K811v2: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/experiments/k811v2_insurance_premium_vov_fixed.py`
+- Canonical K811v2 results: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/experiments/k811v2_insurance_premium_vov_fixed_results.json`
+- Canonical K846: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/experiments/k846_rebalancing_premium.py`
+- Canonical K846 results: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/experiments/k846_rebalancing_premium_results.json`

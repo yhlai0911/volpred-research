@@ -304,26 +304,26 @@ Rerun `uv run python paper/volatility-absorption/reproduce.py` after each stage;
 ## 12. File Inventory (Absolute Paths)
 
 Read-only sources consulted:
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/README.md`
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/experiments.md`
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/reproduce.py` (lines 1–557)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/reproduce_report.json` (full)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/main.tex` (Table 4/5/6/7/8 sections; diff vs main_v2)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/main_v2.tex` (full)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/scripts/README.md`
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/results/README.md`
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/experiments/k716_results.json` through `k741_nfp_event_study_results.json`
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/experiments/k903_paper8_robustness.py` (header + json.dump grep)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/reviews/review_r1.tex` (head section — R1 5 SEVERE summary)
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k716/k716.py` + `k716_reconstruction_diff.md` + `k716_results_reconstructed.json`
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k717/k717_reconstruction_diff.md` (head)
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k718/k718_reconstruction_diff.md`
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k719/k719_reconstruction_diff.md`
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k720/k720_reconstruction_diff.md`
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k721/k721_reconstruction_diff.md` + `k721_results_reconstructed.json`
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k722/k722_reconstruction_diff.md`
-- `/Users/yhlai0911/Desktop/volpred-research/experiments/k741/` (dir listing)
-- `/Users/yhlai0911/Desktop/volpred-research/paper/leverage-direction/review_history/gate_fix_v1/proposal.md` (P17 precedent template)
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/README.md`
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/experiments.md`
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/reproduce.py` (lines 1–557)
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/reproduce_report.json` (full)
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/main.tex` (Table 4/5/6/7/8 sections; diff vs main_v2)
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/main_v2.tex` (full)
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/scripts/README.md`
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/results/README.md`
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/experiments/k716_results.json` through `k741_nfp_event_study_results.json`
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/experiments/k903_paper8_robustness.py` (header + json.dump grep)
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/reviews/review_r1.tex` (head section — R1 5 SEVERE summary)
+- `/Users/yhlai0911/volpred-research/experiments/k716/k716.py` + `k716_reconstruction_diff.md` + `k716_results_reconstructed.json`
+- `/Users/yhlai0911/volpred-research/experiments/k717/k717_reconstruction_diff.md` (head)
+- `/Users/yhlai0911/volpred-research/experiments/k718/k718_reconstruction_diff.md`
+- `/Users/yhlai0911/volpred-research/experiments/k719/k719_reconstruction_diff.md`
+- `/Users/yhlai0911/volpred-research/experiments/k720/k720_reconstruction_diff.md`
+- `/Users/yhlai0911/volpred-research/experiments/k721/k721_reconstruction_diff.md` + `k721_results_reconstructed.json`
+- `/Users/yhlai0911/volpred-research/experiments/k722/k722_reconstruction_diff.md`
+- `/Users/yhlai0911/volpred-research/experiments/k741/` (dir listing)
+- `/Users/yhlai0911/volpred-research/paper/leverage-direction/review_history/gate_fix_v1/proposal.md` (P17 precedent template)
 
 Output (this task):
-- `/Users/yhlai0911/Desktop/volpred-research/paper/volatility-absorption/review_history/gate_fix_v1/proposal.md` (this file)
+- `/Users/yhlai0911/volpred-research/paper/volatility-absorption/review_history/gate_fix_v1/proposal.md` (this file)

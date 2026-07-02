@@ -688,7 +688,7 @@ output = {
     'transition_matrix': transition_matrix,
 }
 
-output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a040b711/experiments/vrp_regime_decomposition_results.json'
+output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a040b711/experiments/vrp_regime_decomposition_results.json'
 with open(output_path, 'w') as f:
     json.dump(output, f, indent=2, default=str)
 

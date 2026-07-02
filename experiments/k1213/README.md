@@ -281,7 +281,7 @@ looks like a near-symmetric shuffle around the median rank.
 
 ```bash
 # From repo root:
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python .claude/worktrees/agent-aa0eec23/experiments/k1213/k1213.py
 # Expected runtime: ~32s on M1 Max.
 # Expected: best LL ≈ 89146.69 at seed=53, verdict=ABOVE_LADDER_OVERTURNED.

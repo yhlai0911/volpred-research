@@ -47,7 +47,7 @@
 
 ## 本地開啟（預覽）
 ```bash
-open /Users/yhlai0911/Desktop/volpred-research/frontend-v3-design/index.html
+open /Users/yhlai0911/volpred-research/frontend-v3-design/index.html
 ```
 或等 `frontend-v2-fix` 部署完後：`https://volpred.zeabur.app/preview/v3-redesign/`
 
@@ -57,7 +57,7 @@ open /Users/yhlai0911/Desktop/volpred-research/frontend-v3-design/index.html
 2026-04-19 已完成 Phase 1：把新設計轉為真正的 Next.js 路由 `/v3/`，接上真實 feed 資料。所有新檔案都在新路徑，舊站零修改。回復指令：
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research/frontend-v2-fix
+cd /Users/yhlai0911/volpred-research/frontend-v2-fix
 rm -rf src/app/v3 src/components/v3 src/styles/v3-base.css
 npm run build   # 驗證
 ```
@@ -96,7 +96,7 @@ rm -rf frontend-v3-design
 
 **本地**：
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research/frontend-v2-fix
+cd /Users/yhlai0911/volpred-research/frontend-v2-fix
 npm run dev
 # 瀏覽 http://localhost:3000/v3/
 ```

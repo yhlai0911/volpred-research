@@ -678,7 +678,7 @@ results = {
     'timestamp': datetime.now().isoformat(),
 }
 
-with open('/Users/yhlai0911/Desktop/volpred-research/experiments/k734_vrp_trading_results.json', 'w') as f:
+with open('/Users/yhlai0911/volpred-research/experiments/k734_vrp_trading_results.json', 'w') as f:
     json.dump(results, f, indent=2, default=str)
 
 print("\nResults saved to experiments/k734_vrp_trading_results.json")

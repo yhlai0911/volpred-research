@@ -2,9 +2,9 @@
 
 # Canonical wrapper for refreshing storage/publication_candidates.json.
 # Runtime copy lives at ~/.volpred/bin/cron_build_publication_candidates.sh.
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/publication_candidates_refresh.log 2>&1
+exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/publication_candidates_refresh.log 2>&1
 
-cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+cd /Users/yhlai0911/volpred-research || exit 1
 source scripts/cron_lib.sh
 
 LOCKDIR=/tmp/volpred_publication_candidates_refresh.lock

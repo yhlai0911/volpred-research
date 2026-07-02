@@ -636,7 +636,7 @@ for tx in TX_COSTS:
         "turnover": all_results[best_freq][tx_label]["avg_ann_turnover"],
     }
 
-out_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a27b2abd/experiments/k220_rebalance_frequency_results.json"
+out_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a27b2abd/experiments/k220_rebalance_frequency_results.json"
 with open(out_path, "w") as f:
     json.dump(save_data, f, indent=2)
 print(f"\nResults saved to {out_path}")

@@ -13,9 +13,9 @@ Backlog task:
 - `research_regime_aware_in_context_learning`
 
 Existing experiment:
-- [README.md](/Users/yhlai0911/Desktop/volpred-research/experiments/k149/README.md:1)
-- [k149_regime_icl.py](/Users/yhlai0911/Desktop/volpred-research/experiments/k149/k149_regime_icl.py:1)
-- [k149_regime_icl_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k149/k149_regime_icl_results.json:1)
+- [README.md](/Users/yhlai0911/volpred-research/experiments/k149/README.md:1)
+- [k149_regime_icl.py](/Users/yhlai0911/volpred-research/experiments/k149/k149_regime_icl.py:1)
+- [k149_regime_icl_results.json](/Users/yhlai0911/volpred-research/experiments/k149/k149_regime_icl_results.json:1)
 
 `K149` is explicitly titled `Regime-aware In-Context Learning for Vol Forecasting`, so this is a direct topic match rather than a loose thematic overlap.
 

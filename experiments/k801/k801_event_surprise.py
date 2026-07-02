@@ -448,7 +448,7 @@ def run_experiment():
 if __name__ == "__main__":
     results = run_experiment()
 
-    out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/k801_event_surprise_results.json"
+    out_path = "/Users/yhlai0911/volpred-research/experiments/k801_event_surprise_results.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 

@@ -133,7 +133,7 @@ already captured by `past60_rv`.
 ## Reproduce
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python .claude/worktrees/agent-sue-dml-iv/experiments/k1510/k1510.py
 ```
 

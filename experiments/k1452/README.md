@@ -46,7 +46,7 @@
 
 ## 產物
 
-- 主程式：[k1452.py](/Users/yhlai0911/Desktop/volpred-research/experiments/k1452/k1452.py)
+- 主程式：[k1452.py](/Users/yhlai0911/volpred-research/experiments/k1452/k1452.py)
 - 結果 JSON：`k1452_results.json`
 - 圖：
   - `figures/segment_vrp_timeseries.png`

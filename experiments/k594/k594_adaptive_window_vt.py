@@ -60,7 +60,7 @@ warnings.filterwarnings('ignore')
 # Configuration
 # ============================================================
 EXPERIMENT_ID = "K594"
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 
 # VIX regime thresholds and corresponding windows
 REGIME_CONFIG = {

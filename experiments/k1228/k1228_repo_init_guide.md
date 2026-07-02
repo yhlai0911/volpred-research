@@ -113,7 +113,7 @@ Five-item compliance mapping:
 **Goal**: First PDF build + paper registered in platform so `paper-review-cycle` skill can target it.
 
 21. `cd paper/btc-gas-negative && xelatex main.tex && bibtex main && xelatex main.tex && xelatex main.tex` — confirm no undefined refs, no missing citations in log.
-22. `cd /Users/yhlai0911/Desktop/volpred-research && uv run volpred ops paper-upsert --paper-id btc-gas-negative --title "Why GAS-t Fails on Bitcoin" --target-journal "Journal of Empirical Finance" --status draft` — register in platform metadata store.
+22. `cd /Users/yhlai0911/volpred-research && uv run volpred ops paper-upsert --paper-id btc-gas-negative --title "Why GAS-t Fails on Bitcoin" --target-journal "Journal of Empirical Finance" --status draft` — register in platform metadata store.
 23. `uv run volpred ops paper-upload-pdf --paper-id btc-gas-negative --pdf paper/btc-gas-negative/main.pdf` — push PDF to Supabase + Mirror per canonical paper slug rule.
 24. Commit: `paper/btc-gas-negative/ initial compile + paper-upsert (K1228 guide phase 4)`.
 

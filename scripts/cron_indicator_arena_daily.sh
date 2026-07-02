@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-injected: TCC bypass — bash has FDA (System Settings), self-redirect to Desktop log avoids launchd-process-level TCC denial
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/indicator_arena_daily.log 2>&1
+exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/indicator_arena_daily.log 2>&1
 # Canonical source for the host-cron wrapper.
 # IMPORTANT: host cron does NOT exec this file — macOS TCC (FDA) blocks
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
@@ -13,7 +13,7 @@ exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/indicator_ar
 # + sync Supabase. 07:00 Taipei Mon-Sat (after US close ~05:00, before TW open
 # 09:00). Non-zero exit (fetch failure / stale-data skip / sync fail) fires a
 # warn alert — §4.5 skips must be visible, never silent.
-cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+cd /Users/yhlai0911/volpred-research || exit 1
 source scripts/cron_lib.sh
 _start=$SECONDS
 cron_emit_start "indicator_arena_daily"

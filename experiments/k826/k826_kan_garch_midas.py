@@ -59,7 +59,7 @@ RV_WINDOW = 22
 KAN_WIDTH = 5       # hidden neurons
 KAN_ORDER = 3       # B-spline order
 KAN_N_KNOTS = 10    # internal knots
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 
 print("=" * 70)
 print(f"{EXPERIMENT_ID}: KAN-GARCH-MIDAS — KAN for Long-Run Volatility")

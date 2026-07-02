@@ -9,7 +9,7 @@
 
 ## (A) 數字一致性 → PASS
 
-Article claims cross-checked against [`experiments/k675/k675_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k675/k675_results.json):
+Article claims cross-checked against [`experiments/k675/k675_results.json`](/Users/yhlai0911/volpred-research/experiments/k675/k675_results.json):
 
 | 文章宣稱 | Ground truth | Verdict |
 |---|---|---|
@@ -25,7 +25,7 @@ Article claims cross-checked against [`experiments/k675/k675_results.json`](/Use
 
 ## (B) Lookahead / 實作檢查 → PASS
 
-Source-level verification of [`experiments/k675/k675_wealth_inequality.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/k675/k675_wealth_inequality.py):
+Source-level verification of [`experiments/k675/k675_wealth_inequality.py`](/Users/yhlai0911/volpred-research/experiments/k675/k675_wealth_inequality.py):
 
 - `simulate_vt_aware()` uses `prev_vix = vix_series.shift(1)` and applies `prev_vix.iloc[i]` to day `i` returns. This respects `signal at t-1, return at t`.
 - `simulate_optimal()` also uses lagged VIX via `shift(1)` before position sizing and reserve deployment.
@@ -42,7 +42,7 @@ Source-level verification of [`experiments/k675/k675_wealth_inequality.py`](/Use
 
 The published article is numerically consistent, but the experiment package is not fully publication-grade:
 
-- [`experiments/k675/README.md`](/Users/yhlai0911/Desktop/volpred-research/experiments/k675/README.md) is still a placeholder with `Status: planning` and missing motivation / method / conclusion details.
+- [`experiments/k675/README.md`](/Users/yhlai0911/volpred-research/experiments/k675/README.md) is still a placeholder with `Status: planning` and missing motivation / method / conclusion details.
 - This violates the project rule that each experiment must have a meaningful `README.md` alongside script and results for full auditability.
 
 This is a **research-process issue**, not a published-content mismatch. It does not justify retracting or editing the article text, but it should be fixed before reusing K675 in paper-grade writing.
@@ -57,5 +57,5 @@ This is a **research-process issue**, not a published-content mismatch. It does 
 
 ## Recommended follow-up
 
-1. Upgrade [`experiments/k675/README.md`](/Users/yhlai0911/Desktop/volpred-research/experiments/k675/README.md) from placeholder to a real experiment record.
+1. Upgrade [`experiments/k675/README.md`](/Users/yhlai0911/volpred-research/experiments/k675/README.md) from placeholder to a real experiment record.
 2. Keep article `mile_5ef55c52` published as-is; no content correction is required from this review.

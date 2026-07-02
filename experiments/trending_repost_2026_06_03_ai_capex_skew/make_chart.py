@@ -81,7 +81,7 @@ ax2.text(0.98, 0.97, '×N = IV/RV ratio', transform=ax2.transAxes,
          bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.8))
 
 plt.tight_layout()
-out_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/trending_repost_2026_06_03_ai_capex_skew/chart_skew_crosssection.png'
+out_path = '/Users/yhlai0911/volpred-research/experiments/trending_repost_2026_06_03_ai_capex_skew/chart_skew_crosssection.png'
 plt.savefig(out_path, dpi=150, bbox_inches='tight', facecolor='white')
 print(f'Chart saved: {out_path}')
 plt.close()

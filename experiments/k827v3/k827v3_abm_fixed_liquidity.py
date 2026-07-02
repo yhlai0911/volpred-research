@@ -627,7 +627,7 @@ def analyze_results(part1_results, sensitivity_results):
                            'k827v2_abm_sensitivity_results.json')
     # Try main repo path too
     if not os.path.exists(v2_path):
-        v2_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k827v2_abm_sensitivity_results.json'
+        v2_path = '/Users/yhlai0911/volpred-research/experiments/k827v2_abm_sensitivity_results.json'
 
     if os.path.exists(v2_path):
         with open(v2_path, 'r') as f:

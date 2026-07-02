@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 warnings.filterwarnings('ignore')
 np.random.seed(42)
 
-OUTPUT_DIR = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8a170fc/experiments/k969'
+OUTPUT_DIR = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a8a170fc/experiments/k969'
 
 
 # =============================================================================

@@ -34,13 +34,13 @@ np.random.seed(42)
 # Try to import clean_tw50_data
 try:
     import sys
-    sys.path.insert(0, '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ae0eeaba')
+    sys.path.insert(0, '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-ae0eeaba')
     from src.volpred.utils import clean_tw50_data
     HAS_CLEAN = True
 except ImportError:
     HAS_CLEAN = False
 
-EXPERIMENT_DIR = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ae0eeaba/experiments/k983'
+EXPERIMENT_DIR = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-ae0eeaba/experiments/k983'
 
 ###############################################################################
 # 1. Data Download

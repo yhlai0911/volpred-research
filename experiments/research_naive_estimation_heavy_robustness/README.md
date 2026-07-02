@@ -106,6 +106,6 @@
 ## 重現
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python experiments/research_naive_estimation_heavy_robustness/research_naive_estimation_heavy_robustness.py
 ```

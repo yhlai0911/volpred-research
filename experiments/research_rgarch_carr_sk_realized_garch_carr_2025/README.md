@@ -123,7 +123,7 @@ mean diff `+0.041787`, wins `0/8`, bootstrap CI `[+0.022818, +0.062734]`.
 ## Reproduction
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python experiments/research_rgarch_carr_sk_realized_garch_carr_2025/research_rgarch_carr_sk_realized_garch_carr_2025.py
 ```
 

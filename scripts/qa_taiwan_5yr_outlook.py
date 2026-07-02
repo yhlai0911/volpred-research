@@ -17,8 +17,8 @@ import pandas as pd
 import numpy as np
 
 # Add project to path
-sys.path.insert(0, "/Users/yhlai0911/Desktop/volpred-research/src")
-sys.path.insert(0, "/Users/yhlai0911/Desktop/volpred-research/scripts")
+sys.path.insert(0, "/Users/yhlai0911/volpred-research/src")
+sys.path.insert(0, "/Users/yhlai0911/volpred-research/scripts")
 
 from volpred.utils import clean_tw50_data
 from volpred.charts import (

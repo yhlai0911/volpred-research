@@ -176,9 +176,9 @@ Reader-facing phrasing should be conservative:
 
 ## Artifacts
 
-- [`experiments/k1493/k1493.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1493/k1493.py)
-- [`experiments/k1493/k1493_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1493/k1493_results.json)
-- [`experiments/k1493/close_prices.csv`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1493/close_prices.csv)
-- ![VRP periods](/Users/yhlai0911/Desktop/volpred-research/experiments/k1493/fig_vrp_periods.png)
-- ![Short vol NAV](/Users/yhlai0911/Desktop/volpred-research/experiments/k1493/fig_short_vol_nav.png)
-- ![Strategy metrics](/Users/yhlai0911/Desktop/volpred-research/experiments/k1493/fig_strategy_metrics.png)
+- [`experiments/k1493/k1493.py`](/Users/yhlai0911/volpred-research/experiments/k1493/k1493.py)
+- [`experiments/k1493/k1493_results.json`](/Users/yhlai0911/volpred-research/experiments/k1493/k1493_results.json)
+- [`experiments/k1493/close_prices.csv`](/Users/yhlai0911/volpred-research/experiments/k1493/close_prices.csv)
+- ![VRP periods](/Users/yhlai0911/volpred-research/experiments/k1493/fig_vrp_periods.png)
+- ![Short vol NAV](/Users/yhlai0911/volpred-research/experiments/k1493/fig_short_vol_nav.png)
+- ![Strategy metrics](/Users/yhlai0911/volpred-research/experiments/k1493/fig_strategy_metrics.png)

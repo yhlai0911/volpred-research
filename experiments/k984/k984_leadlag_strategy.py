@@ -321,7 +321,7 @@ for name in ['Binary Signal', 'Proportional Signal', 'Threshold Signal', 'VT + L
 # ============================================================
 print("\n[7] Generating plots...")
 
-BASE_DIR = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a452eb2f/experiments/k984'
+BASE_DIR = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a452eb2f/experiments/k984'
 
 # Plot 1: Cumulative Returns
 fig, axes = plt.subplots(2, 1, figsize=(14, 10), sharex=True)

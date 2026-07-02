@@ -3,7 +3,7 @@
 # Canonical source: scripts/cron_backfill_work_log_from_commits.sh
 # Runtime copy: ~/.volpred/bin/cron_backfill_work_log_from_commits.sh
 
-REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/Desktop/volpred-research}"
+REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/volpred-research}"
 VOLPRED_HOME_DIR="${VOLPRED_HOME_DIR:-/Users/yhlai0911/.volpred}"
 UV_BIN="${UV_BIN:-/Users/yhlai0911/.local/bin/uv}"
 LOG_PATH="${LOG_PATH:-$VOLPRED_HOME_DIR/logs/codex_work_log_backfill.log}"

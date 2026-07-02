@@ -103,7 +103,7 @@ K1108C_DIR = PROJECT_ROOT / 'experiments' / 'k1108c'
 # If running inside a worktree where k1108c/ is not present, fall back to
 # the canonical main-tree path.
 if not (K1108C_DIR / 'k1108c_merged_pool.csv').exists():
-    _MAIN_TREE_K1108C = Path('/Users/yhlai0911/Desktop/volpred-research') / 'experiments' / 'k1108c'
+    _MAIN_TREE_K1108C = Path('/Users/yhlai0911/volpred-research') / 'experiments' / 'k1108c'
     if (_MAIN_TREE_K1108C / 'k1108c_merged_pool.csv').exists():
         K1108C_DIR = _MAIN_TREE_K1108C
 

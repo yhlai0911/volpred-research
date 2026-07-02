@@ -47,7 +47,7 @@ K1114_RESULTS = HERE.parent / "k1114" / "k1114_results.json"
 # If not present in worktree, fall back to repo root copy
 if not K1114_RESULTS.exists():
     # walk up until repo root
-    candidate = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k1114/k1114_results.json")
+    candidate = Path("/Users/yhlai0911/volpred-research/experiments/k1114/k1114_results.json")
     if candidate.exists():
         K1114_RESULTS = candidate
 

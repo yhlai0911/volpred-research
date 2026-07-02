@@ -558,7 +558,7 @@ def main():
     data_dir = base / "data" / "intraday"
     if not data_dir.exists():
         # Try main repo
-        data_dir = Path("/Users/yhlai0911/Desktop/volpred-research/data/intraday")
+        data_dir = Path("/Users/yhlai0911/volpred-research/data/intraday")
 
     print(f"Data directory: {data_dir}")
 

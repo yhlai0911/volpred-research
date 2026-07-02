@@ -27,7 +27,7 @@ np.random.seed(42)
 # ─── Paths ────────────────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parents[2]  # worktree root (script is at experiments/k1318/k1318.py)
 # Intraday RV data lives in the main repo, not the worktree (worktrees share git history but not untracked data/)
-MAIN_REPO_ROOT = Path("/Users/yhlai0911/Desktop/volpred-research")
+MAIN_REPO_ROOT = Path("/Users/yhlai0911/volpred-research")
 DATA_DIR = MAIN_REPO_ROOT / "data" / "intraday"
 OUT_DIR = Path(__file__).resolve().parent
 

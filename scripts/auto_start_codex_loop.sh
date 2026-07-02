@@ -7,7 +7,7 @@
 # Stop manually: pkill -f 'scripts/codex_loop.sh'
 
 set -e
-REPO=/Users/yhlai0911/Desktop/volpred-research
+REPO=/Users/yhlai0911/volpred-research
 LOG=/Users/yhlai0911/.volpred/logs/codex_loop.log
 LOOP=$REPO/scripts/codex_loop.sh
 

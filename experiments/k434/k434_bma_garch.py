@@ -800,7 +800,7 @@ for part in summary_parts:
     print(f"  {part}")
 
 # Save results
-output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a80d116f/experiments/k434_bma_garch_results.json'
+output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a80d116f/experiments/k434_bma_garch_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 print(f"\n  Results saved to {output_path}")

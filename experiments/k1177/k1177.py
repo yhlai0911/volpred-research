@@ -896,7 +896,7 @@ def main():
             'bootstrap_mdd_retention': r['bootstrap_mdd_retention'],
         }
 
-    out_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a9d575bd/experiments/k1177/k1177_results.json'
+    out_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a9d575bd/experiments/k1177/k1177_results.json'
     with open(out_path, 'w') as f:
         json.dump(output, f, indent=2, default=str)
     print(f"\n✓ Results saved to {out_path}")

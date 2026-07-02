@@ -20,7 +20,7 @@ from matplotlib.lines import Line2D
 warnings.filterwarnings("ignore")
 
 # ─── paths ────────────────────────────────────────────────────────────────────
-BASE = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/event_article_fomc_2026_06_17_t1_dotplot")
+BASE = Path("/Users/yhlai0911/volpred-research/experiments/event_article_fomc_2026_06_17_t1_dotplot")
 FIG_DIR = BASE / "figs"
 FIG_DIR.mkdir(exist_ok=True)
 

@@ -43,8 +43,8 @@ REBAL_FREQ = 'M'  # monthly rebalancing
 N_BINS = 5  # discretization bins for TE estimation
 TE_LAG = 1  # lag for TE (predict 1 day ahead)
 
-MACRO_DIR = Path('/Users/yhlai0911/Desktop/volpred-research/storage/macro')
-RESULTS_DIR = Path('/Users/yhlai0911/Desktop/volpred-research/experiments')
+MACRO_DIR = Path('/Users/yhlai0911/volpred-research/storage/macro')
+RESULTS_DIR = Path('/Users/yhlai0911/volpred-research/experiments')
 
 print("=" * 70)
 print("K769: Transfer Entropy VT Budgeting")

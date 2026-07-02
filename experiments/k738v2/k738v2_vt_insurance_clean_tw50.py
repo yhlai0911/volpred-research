@@ -59,7 +59,7 @@ RF_DAILY = RF_ANNUAL / 252
 GAMMAS = list(range(1, 31))
 BULL_THRESHOLD = 0.20
 
-RESULTS_DIR = Path("/Users/yhlai0911/Desktop/volpred-research/experiments")
+RESULTS_DIR = Path("/Users/yhlai0911/volpred-research/experiments")
 
 
 # ============================================================================

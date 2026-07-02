@@ -40,7 +40,7 @@ HALVINGS = {
 WINDOW = 90        # trading days on each side
 ROLL_VOL = 20      # rolling window for realized vol
 ANNUALIZE = np.sqrt(252)
-OUT_DIR = "/Users/yhlai0911/Desktop/volpred-research/experiments/k1372"
+OUT_DIR = "/Users/yhlai0911/volpred-research/experiments/k1372"
 
 # ── 1. Download data ──────────────────────────────────────────────────────────
 print("Downloading BTC-USD data...")

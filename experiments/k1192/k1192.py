@@ -82,7 +82,7 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aff924a6/experiments/k1192/run.log', mode='w'),
+        logging.FileHandler('/Users/yhlai0911/volpred-research/.claude/worktrees/agent-aff924a6/experiments/k1192/run.log', mode='w'),
     ]
 )
 log = logging.getLogger(__name__)
@@ -526,7 +526,7 @@ def main():
     for asset_key in ['SPY', '50/50', 'DIA', 'QQQ', 'IWM']:
         output['assets'][asset_key] = all_results[asset_key]
 
-    out_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aff924a6/experiments/k1192/k1192_results.json'
+    out_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-aff924a6/experiments/k1192/k1192_results.json'
     with open(out_path, 'w') as f:
         json.dump(output, f, indent=2, default=str)
     log.info(f"\nResults saved to {out_path}")

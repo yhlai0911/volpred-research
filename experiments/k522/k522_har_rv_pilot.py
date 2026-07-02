@@ -65,7 +65,7 @@ print("=" * 70)
 print("\n[1] Loading 5-min intraday data...")
 
 # Use main repo data directory (worktree may not have data/)
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 DATA_DIR = os.path.join(MAIN_REPO, 'data', 'intraday')
 if not os.path.exists(DATA_DIR):
     DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),

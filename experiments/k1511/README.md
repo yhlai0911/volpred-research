@@ -115,7 +115,7 @@ EFM 2026 "Who Drives Momentum Returns" 工作論文發現美股「角色反轉�
 ## 可復現性
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-k1511-rolereversal
+cd /Users/yhlai0911/volpred-research/.claude/worktrees/agent-k1511-rolereversal
 uv run python experiments/k1511/k1511.py
 # 輸出：experiments/k1511/k1511_results.json + fig_a_role_reversal_returns.png
 # 第一次跑會打 TWSE API 數百次（每月一次 BFI82U + 一次 MI_MARGN），耗時 ~10-20 min；

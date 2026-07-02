@@ -3,7 +3,7 @@
 # Logs timestamps so each fire leaves a footprint even if uv fails.
 set +e
 
-REPO=/Users/yhlai0911/Desktop/volpred-research
+REPO=/Users/yhlai0911/volpred-research
 LOG=$REPO/storage/logs/cron/release_pool.log
 
 exec >>"$LOG" 2>&1

@@ -54,7 +54,7 @@
 
 **Commands**:
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research/paper/crypto-fear-channel/
+cd /Users/yhlai0911/volpred-research/paper/crypto-fear-channel/
 cp body_v0_intro.tex body_v1.tex
 # Manually edit body_v1.tex:
 #  - Replace abstract (lines 23-28) with v1 abstract from k1243_abstract_draft.md
@@ -199,7 +199,7 @@ Record the decision in the integration log for reproducibility.
 
 **Commands**:
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research/paper/crypto-fear-channel/
+cd /Users/yhlai0911/volpred-research/paper/crypto-fear-channel/
 xelatex body_v1.tex
 bibtex body_v1
 xelatex body_v1.tex
@@ -217,7 +217,7 @@ xelatex body_v1.tex
 
 **Commands**:
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run volpred ops paper-update --paper-id crypto-fear-channel --version v1
 ```
 

@@ -541,7 +541,7 @@ else:
         "regime adaptation via the hyperbolic 1/VIX shape."
     )
 
-results_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a0d28816/experiments/k252_adaptive_vt_results.json"
+results_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a0d28816/experiments/k252_adaptive_vt_results.json"
 with open(results_path, "w") as f:
     json.dump(results_output, f, indent=2, ensure_ascii=False)
 

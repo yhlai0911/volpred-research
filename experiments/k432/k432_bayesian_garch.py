@@ -688,7 +688,7 @@ print(f"  VaR: MLE {mle_violations} violations ({kupiec_mle_p:.4f}), "
 print(f"\n  {results['conclusion']['summary']}")
 
 # Save
-output_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a87353fb/experiments/k432_bayesian_garch_results.json'
+output_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a87353fb/experiments/k432_bayesian_garch_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

@@ -38,7 +38,7 @@ from scipy import stats
 # ---------------------------------------------------------------------------
 # CONFIG
 # ---------------------------------------------------------------------------
-_main_repo = Path("/Users/yhlai0911/Desktop/volpred-research")
+_main_repo = Path("/Users/yhlai0911/volpred-research")
 DATA_DIR = _main_repo / "data" / "intraday"
 _repo_root = Path(__file__).resolve().parent.parent
 STORAGE_DIR = _repo_root / "storage" / "experiments"

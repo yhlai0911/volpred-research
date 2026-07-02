@@ -6,7 +6,7 @@
 # Per user 2026-05-25 directive: 「為什麼互動 session 沒先 claim email」.
 # Hooked via .claude/settings.json UserPromptSubmit.
 
-cd /Users/yhlai0911/Desktop/volpred-research || exit 0
+cd /Users/yhlai0911/volpred-research || exit 0
 
 # Silently exit if pool file missing (do not block prompt)
 [ -f storage/next_tasks.json ] || exit 0

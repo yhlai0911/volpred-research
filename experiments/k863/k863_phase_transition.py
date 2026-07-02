@@ -886,7 +886,7 @@ results["conclusions"]["vs_k98"] = (
 )
 
 # Save
-output_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/k863_results.json"
+output_path = "/Users/yhlai0911/volpred-research/experiments/k863_results.json"
 with open(output_path, "w") as f:
     json.dump(results, f, indent=2, default=str)
 

@@ -579,7 +579,7 @@ output = {
     ]
 }
 
-results_path = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k861_results.json")
+results_path = Path("/Users/yhlai0911/volpred-research/experiments/k861_results.json")
 with open(results_path, "w") as f:
     json.dump(output, f, indent=2, ensure_ascii=False)
 

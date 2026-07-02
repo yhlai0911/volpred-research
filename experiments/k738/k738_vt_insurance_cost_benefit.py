@@ -768,7 +768,7 @@ def main():
     output["conclusions"] = conclusions
 
     # Save
-    results_path = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k738_vt_insurance_cost_benefit_results.json")
+    results_path = Path("/Users/yhlai0911/volpred-research/experiments/k738_vt_insurance_cost_benefit_results.json")
     with open(results_path, "w") as f:
         json.dump(output, f, indent=2, default=str)
 

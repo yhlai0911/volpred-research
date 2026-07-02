@@ -108,7 +108,7 @@ Secondary diagnostic vs target-only Ridge:
 ## Reproduction
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python experiments/research_transfer_learning_for_new_issues_vol/research_transfer_learning_for_new_issues_vol.py
 ```
 

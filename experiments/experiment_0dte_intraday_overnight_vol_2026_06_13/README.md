@@ -9,7 +9,7 @@
 - `research_program.md` 已明列此題為待做方向，但現有 repo 尚無對應三件套。
 - 既有文獻對 0DTE 對波動的影響有**相反結論**：有研究指出 0DTE 提高 intraday / close-to-close volatility，也有研究指出流動性提供者的 hedging 平均降低波動。
 - 本實驗不直接估計 option gamma 或 order flow，而是退一步問更穩健的結構問題：**股票指數本身的隔夜/日內變異占比是否真的改變**。
-- 與 [`experiments/k1465/README.md`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1465/README.md) 的差異在於：K1465 研究 weekday clustering；本題研究的是 **2022 年 0DTE rollout 的制度斷點**。
+- 與 [`experiments/k1465/README.md`](/Users/yhlai0911/volpred-research/experiments/k1465/README.md) 的差異在於：K1465 研究 weekday clustering；本題研究的是 **2022 年 0DTE rollout 的制度斷點**。
 
 ## 資料
 
@@ -54,8 +54,8 @@
 
 ## 檔案
 
-- [`experiment_0dte_intraday_overnight_vol_2026_06_13.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/experiment_0dte_intraday_overnight_vol_2026_06_13/experiment_0dte_intraday_overnight_vol_2026_06_13.py)
-- [`experiment_0dte_intraday_overnight_vol_2026_06_13_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/experiment_0dte_intraday_overnight_vol_2026_06_13/experiment_0dte_intraday_overnight_vol_2026_06_13_results.json)
+- [`experiment_0dte_intraday_overnight_vol_2026_06_13.py`](/Users/yhlai0911/volpred-research/experiments/experiment_0dte_intraday_overnight_vol_2026_06_13/experiment_0dte_intraday_overnight_vol_2026_06_13.py)
+- [`experiment_0dte_intraday_overnight_vol_2026_06_13_results.json`](/Users/yhlai0911/volpred-research/experiments/experiment_0dte_intraday_overnight_vol_2026_06_13/experiment_0dte_intraday_overnight_vol_2026_06_13_results.json)
 - `figures/*.png`
 
 ## 本輪結果

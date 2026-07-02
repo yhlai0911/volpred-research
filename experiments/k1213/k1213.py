@@ -52,8 +52,8 @@ import pandas as pd
 warnings.filterwarnings("ignore")
 
 # Import K1171 pooled MLE primitives (no rewrite)
-K1171_MAIN = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k1171")
-K1172_MAIN = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k1172")
+K1171_MAIN = Path("/Users/yhlai0911/volpred-research/experiments/k1171")
+K1172_MAIN = Path("/Users/yhlai0911/volpred-research/experiments/k1172")
 sys.path.insert(0, str(K1171_MAIN))
 import k1171_per_stock_refit as k1171mod  # type: ignore
 

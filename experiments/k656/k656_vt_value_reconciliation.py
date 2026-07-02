@@ -837,7 +837,7 @@ results = {
     "created_at": datetime.now(timezone.utc).isoformat()
 }
 
-output_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a51faf45/experiments/k656_results.json"
+output_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a51faf45/experiments/k656_results.json"
 with open(output_path, "w") as f:
     json.dump(results, f, indent=2, default=str)
 

@@ -5,7 +5,7 @@
 #   claude CLI auto-updates every 1-2 days (versions/ shows 6/30, 7/1, 7/2 ...).
 #   macOS TCC Desktop-folder grants are bound to the binary path+hash, so each
 #   NEW claude version starts UNAUTHORIZED for ~/Desktop. Every launchd-context
-#   job (cwd = ~/Desktop/volpred-research, a TCC-protected path) then hangs on a
+#   job (cwd was ~/Desktop/volpred-research, a TCC-protected path — repo moved to ~/volpred-research on 2026-07-02, so this hook is now a defense layer for any stragglers still using the Desktop symlink) then hangs on a
 #   TCC prompt it can never answer (no UI in launchd) → the suspended authreqs
 #   drag down tccd → cascade timeout/EINTR across ALL schedules until an
 #   interactive session (authorized parent context) re-triggers the grant.
@@ -26,7 +26,7 @@
 #
 # Contract: always exit 0, fast, side-effect-safe. Never block a session start.
 
-REPO="/Users/yhlai0911/Desktop/volpred-research"
+REPO="/Users/yhlai0911/volpred-research"
 STATE="$REPO/storage/ops/claude_version_state.json"
 LINK="$HOME/.local/bin/claude"
 LOG="$HOME/.volpred/logs/warm_tcc.log"

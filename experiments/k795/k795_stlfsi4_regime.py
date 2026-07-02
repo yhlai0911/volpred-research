@@ -441,7 +441,7 @@ full_results = {
     "author": "[提出: Gemini, 執行: Claude]",
 }
 
-out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/k795_stlfsi4_regime_results.json"
+out_path = "/Users/yhlai0911/volpred-research/experiments/k795_stlfsi4_regime_results.json"
 with open(out_path, "w", encoding="utf-8") as f:
     json.dump(full_results, f, indent=2, ensure_ascii=False)
 print(f"  Saved: {out_path}")

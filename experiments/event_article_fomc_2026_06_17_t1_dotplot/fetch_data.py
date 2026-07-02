@@ -167,7 +167,7 @@ t1_vix_vals  = [r["t1_VIX"]  for r in fomc_data if r.get("t1_VIX")  is not None]
 spy_5d_vals  = [r["spy_t0_to_t5_pct"] for r in fomc_data if r.get("spy_t0_to_t5_pct") is not None]
 
 # ─── Save raw close for figure script ─────────────────────────────────────────
-out_csv = "/Users/yhlai0911/Desktop/volpred-research/experiments/event_article_fomc_2026_06_17_t1_dotplot/raw_close.csv"
+out_csv = "/Users/yhlai0911/volpred-research/experiments/event_article_fomc_2026_06_17_t1_dotplot/raw_close.csv"
 close.to_csv(out_csv)
 print(f"\nSaved raw data to {out_csv}")
 
@@ -213,7 +213,7 @@ results = {
     "note": "data_as_of is last trading day available in yfinance (may be T-2 or T-1 depending on time of fetch)",
 }
 
-out_json = "/Users/yhlai0911/Desktop/volpred-research/experiments/event_article_fomc_2026_06_17_t1_dotplot/results.json"
+out_json = "/Users/yhlai0911/volpred-research/experiments/event_article_fomc_2026_06_17_t1_dotplot/results.json"
 with open(out_json, "w") as f:
     json.dump(results, f, indent=2, default=str)
 print(f"Saved results to {out_json}")

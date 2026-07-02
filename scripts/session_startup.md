@@ -135,7 +135,7 @@ Monitor(
   description="feed.json ↔ Supabase drift alert (hourly)",
   persistent=True,
   timeout_ms=3600000,
-  command="""cd /Users/yhlai0911/Desktop/volpred-research.old_20260418 && while true; do
+  command="""cd /Users/yhlai0911/volpred-research.old_20260418 && while true; do
   uv run python -c "
 from volpred.ops.feed_sync import compute_diff
 import os
@@ -161,7 +161,7 @@ Monitor(
   description="Article pool + file bloat health (emit only on alert)",
   persistent=True,
   timeout_ms=3600000,
-  command="""cd /Users/yhlai0911/Desktop/volpred-research && while true; do
+  command="""cd /Users/yhlai0911/volpred-research && while true; do
   python3 -c "
 import json, os, subprocess
 from pathlib import Path

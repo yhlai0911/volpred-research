@@ -33,7 +33,7 @@ Supabase remains the source for product-facing tables such as:
 
 ### 1. `mirror-api`
 
-Deploy the existing Python API with [`Dockerfile.api`](/Users/yhlai0911/Desktop/volpred-research/Dockerfile.api).
+Deploy the existing Python API with [`Dockerfile.api`](/Users/yhlai0911/volpred-research/Dockerfile.api).
 
 Required env:
 

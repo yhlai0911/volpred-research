@@ -124,6 +124,6 @@ Graph propagation 在 1 日 horizon 對線性 spillover-VAR 有顯著 QLIKE 改�
 ## 重跑
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python experiments/research_graph_network_spillover_rv_var/research_graph_network_spillover_rv_var.py
 ```

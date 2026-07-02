@@ -668,7 +668,7 @@ print("  so the vol difference is expected to be small at the index level.")
 print("  Individual stock-level analysis with ESG scores would be more definitive.")
 
 # Save results
-results_file = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ad325b1a/experiments/k335_esg_vol_results.json'
+results_file = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-ad325b1a/experiments/k335_esg_vol_results.json'
 with open(results_file, 'w') as f:
     json.dump(summary, f, indent=2, default=str)
 print(f"\n  Results saved to: {results_file}")

@@ -261,7 +261,7 @@ Rationale:
 ## Reproduction
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python experiments/k1073/k1073.py
 uv run python experiments/k1073/k1073_postprocess.py  # per-refit tau stats
 ```

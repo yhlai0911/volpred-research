@@ -63,7 +63,7 @@ np.random.seed(42)
 
 # ── Paths ──
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 DATA_DIR = os.path.join(MAIN_REPO, 'data', 'intraday')
 OUTPUT_DIR = BASE_DIR
 

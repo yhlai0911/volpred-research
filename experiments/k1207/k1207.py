@@ -63,10 +63,10 @@ np.random.seed(42)
 
 ROOT = Path(__file__).resolve().parent
 K1171_TABLE = Path(
-    "/Users/yhlai0911/Desktop/volpred-research/experiments/k1171/k1171_per_stock_table.csv"
+    "/Users/yhlai0911/volpred-research/experiments/k1171/k1171_per_stock_table.csv"
 )
 K1171_POOLED = Path(
-    "/Users/yhlai0911/Desktop/volpred-research/experiments/k1171/k1171_pooled_by_market.json"
+    "/Users/yhlai0911/volpred-research/experiments/k1171/k1171_pooled_by_market.json"
 )
 SECTORS_CSV = ROOT / "k1207_stock_sectors.csv"
 

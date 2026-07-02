@@ -101,13 +101,13 @@ The dividend-convention decision for claim #9 is a paper-policy choice escalated
 
 ## 6. File Paths Referenced
 
-- Sub3 report snapshot: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/review_history/diagnosis_v1/reproduce_report_post_fix.json`
-- Diagnosis v1 breakdown: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/review_history/diagnosis_v1/divergence_breakdown.md`
-- Current reproduce script: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/reproduce.py`
-- Current reproduce report (live): `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/reproduce_report.json`
-- Paper body (untouched): `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/main.tex`
-- K811v2 canonical: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/experiments/k811v2_insurance_premium_vov_fixed.py`
-- K846 canonical: `/Users/yhlai0911/Desktop/volpred-research/paper/vt-insurance-cost/experiments/k846_rebalancing_premium.py`
+- Sub3 report snapshot: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/review_history/diagnosis_v1/reproduce_report_post_fix.json`
+- Diagnosis v1 breakdown: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/review_history/diagnosis_v1/divergence_breakdown.md`
+- Current reproduce script: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/reproduce.py`
+- Current reproduce report (live): `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/reproduce_report.json`
+- Paper body (untouched): `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/main.tex`
+- K811v2 canonical: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/experiments/k811v2_insurance_premium_vov_fixed.py`
+- K846 canonical: `/Users/yhlai0911/volpred-research/paper/vt-insurance-cost/experiments/k846_rebalancing_premium.py`
 
 ---
 

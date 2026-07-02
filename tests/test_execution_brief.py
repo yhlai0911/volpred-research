@@ -49,7 +49,7 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files:
@@ -129,7 +129,7 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files: []
@@ -175,7 +175,7 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "changed"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files: []
@@ -201,7 +201,7 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "missing/file.txt"
 recommended_files: []
@@ -247,7 +247,7 @@ task_summary: "generic ops"
 goal: "generic ops"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files: []
@@ -264,7 +264,7 @@ task_summary: "{{title}}"
 goal: "govern schedule changes for {{description}}\\n{{schedule_proposal_json}}"
 success_criteria:
   - "keep canonical schedule clean"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "config/runtime_schedules.json"
 recommended_files:
@@ -308,7 +308,7 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files: []
@@ -427,7 +427,7 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files: []
@@ -492,7 +492,7 @@ def test_run_coordinator_brief_unwraps_claude_json_envelope(tmp_path: Path, monk
                 "task_summary": "Envelope brief",
                 "goal": "Confirm envelope parsing works",
                 "success_criteria": ["return valid JSON"],
-                "repo_root": "/Users/yhlai0911/Desktop/volpred-research",
+                "repo_root": "/Users/yhlai0911/volpred-research",
                 "required_files": ["docs/project_improvement_status.md"],
                 "recommended_files": [],
                 "forbidden_large_files": [],
@@ -551,7 +551,7 @@ task_summary: "{{title}}"
 goal: "{{description}}"
 success_criteria:
   - "done"
-repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+repo_root: "/Users/yhlai0911/volpred-research"
 required_files:
   - "docs/project_improvement_status.md"
 recommended_files:

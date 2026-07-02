@@ -681,7 +681,7 @@ def main():
     plot2 = SCRIPT_DIR / 'k1157_us_vs_jp_comparison.png'
     fig, ax = plt.subplots(1, 1, figsize=(9, 5))
     # K1151 US results (load if available, fall back to documented values)
-    us_path = Path('/Users/yhlai0911/Desktop/volpred-research/experiments/k1151/k1151_results.json')
+    us_path = Path('/Users/yhlai0911/volpred-research/experiments/k1151/k1151_results.json')
     if us_path.exists():
         with open(us_path) as f:
             us_res = json.load(f)

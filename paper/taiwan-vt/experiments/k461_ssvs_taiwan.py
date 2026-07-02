@@ -850,7 +850,7 @@ else:
 results["conclusions"] = conclusions
 
 # Save results
-output_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-acad5d1b/experiments/k461_ssvs_taiwan_results.json"
+output_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-acad5d1b/experiments/k461_ssvs_taiwan_results.json"
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 

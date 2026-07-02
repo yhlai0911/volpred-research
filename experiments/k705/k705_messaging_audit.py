@@ -25,7 +25,7 @@ from datetime import datetime
 from pathlib import Path
 
 WORKTREE = Path(__file__).resolve().parent.parent
-MAIN_REPO = Path("/Users/yhlai0911/Desktop/volpred-research")
+MAIN_REPO = Path("/Users/yhlai0911/volpred-research")
 
 # ─── 1. Current Website Claims ───────────────────────────────────────────────
 

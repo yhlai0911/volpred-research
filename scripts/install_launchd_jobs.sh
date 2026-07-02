@@ -20,7 +20,7 @@ set -euo pipefail
 
 USER_UID="$(id -u)"
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
-PROJECT_ROOT="$HOME/Desktop/volpred-research"
+PROJECT_ROOT="$HOME/volpred-research"
 SCHEDULE_JSON="$PROJECT_ROOT/config/runtime_schedules.json"
 LAUNCHD_LOG_DIR="$HOME/.volpred/logs"
 

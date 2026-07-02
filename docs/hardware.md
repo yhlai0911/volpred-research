@@ -47,7 +47,7 @@ Claude Code 的 Agent 工具可啟動獨立子程序（subagent），有自己�
 
 ## 模型與 workflow 路由
 
-先看 [`docs/workflow-index.md`](/Users/yhlai0911/Desktop/volpred-research/docs/workflow-index.md)，再讀對應 skill。預設矩陣如下：
+先看 [`docs/workflow-index.md`](/Users/yhlai0911/volpred-research/docs/workflow-index.md)，再讀對應 skill。預設矩陣如下：
 
 | 工作類型 | 預設模式 | 預設 model / effort | 備註 |
 |---------|------|------|------|

@@ -78,10 +78,10 @@ START_TIME = time.time()
 EXPERIMENT_ID = "K1085"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = '/Users/yhlai0911/Desktop/volpred-research'
+PROJECT_ROOT = '/Users/yhlai0911/volpred-research'
 sys.path.insert(0, os.path.join(PROJECT_ROOT, 'src'))
 
-RESULTS_PATH = '/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/.repro_tmp/k1085/k1085_results.json'
+RESULTS_PATH = '/Users/yhlai0911/volpred-research/paper/garch-x-vix/.repro_tmp/k1085/k1085_results.json'
 
 # Configuration
 DATA_START = '2000-01-01'  # need pre-history for 2000-day window

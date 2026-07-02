@@ -125,7 +125,7 @@ Why 第 7 步：session cron（`CronCreate`）只在 Claude Code session alive �
 - **邏輯變動（flags、env、pre-exec 設定）**：直接改 `scripts/cron_*.sh` wrapper；crontab entry 本身不動，**無需重跑 install**（避免觸發 macOS TCC App Management prompt）
 - `scripts/cron_*.sh` 必維持最小結構：`#!/bin/bash` + `cd <repo>` + `exec <command>`；需要 env / PATH 擴展時參考 `scripts/run_scheduler_tick.sh`
 - 每個新 wrapper 必 `chmod +x`；install script 檢查到 non-executable 會 fail-fast
-- **FDA / macOS TCC（2026-04-19 確立）**：host-cron wrapper 實體檔案**必放** `~/.volpred/bin/cron_*.sh`，**不可**放 `Desktop/volpred-research/scripts/`。macOS TCC 擋 `cron` daemon exec Desktop/ 保護路徑內的 `.sh`（回 `Operation not permitted`），即便 cron 能 read Desktop 檔 + write Desktop log + exec `/opt/homebrew/bin/uv`
+- **FDA / macOS TCC（2026-04-19 確立；2026-07-02 現況更新）**：host-cron wrapper 實體檔案**必放** `~/.volpred/bin/cron_*.sh`。原因（歷史）：repo 曾在 `~/Desktop/volpred-research`，macOS TCC 擋 `cron` daemon exec Desktop/ 保護路徑內的 `.sh`（回 `Operation not permitted`）。**2026-07-02 起 repo 已搬到 `~/volpred-research`（非 TCC 保護區），TCC 不再適用於 repo 本身**——但 wrapper 留在 `~/.volpred/bin` 的慣例**維持不變**（獨立於 repo 移動 / rename 的穩定執行點 + 與 log 同層）。舊 Desktop 路徑留有 symlink 安全網，任何殘留引用仍可解析（但在 launchd context 走 symlink 會重新經過 Desktop TCC，發現殘留引用一律改為新路徑，不依賴 symlink）
   - `scripts/cron_*.sh` 仍是 canonical source，改動後 `cp scripts/cron_*.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_*.sh` 同步
   - `config/runtime_schedules.json` 的 `wrapper_script` 欄位**必填絕對路徑**（`/Users/<u>/.volpred/bin/cron_*.sh`）；install script 偵測 `/` 前綴 bypass REPO_ROOT prefix
   - 新增/修改 wrapper 後必跑 `env -i HOME=$HOME PATH=/usr/bin:/bin ~/.volpred/bin/cron_<id>.sh` 模擬 cron env 驗證能 exec

@@ -50,7 +50,7 @@ DATA = ROOT / "data"
 # K1172 / K1168 baselines live in mainline; worktree branches off earlier HEAD.
 # We reference mainline absolute paths for READ-ONLY dependency data.
 MAINLINE_EXPERIMENTS = Path(
-    "/Users/yhlai0911/Desktop/volpred-research/experiments")
+    "/Users/yhlai0911/volpred-research/experiments")
 K1172_ROOT = MAINLINE_EXPERIMENTS / "k1172"
 K1168_ROOT = MAINLINE_EXPERIMENTS / "k1168"
 K1168_DATA = K1168_ROOT / "data"

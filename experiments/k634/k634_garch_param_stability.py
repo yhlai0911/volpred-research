@@ -47,7 +47,7 @@ warnings.filterwarnings("ignore")
 
 START_TIME = time.time()
 EXPERIMENT_ID = "K634"
-MAIN_REPO = "/Users/yhlai0911/Desktop/volpred-research"
+MAIN_REPO = "/Users/yhlai0911/volpred-research"
 
 # ============================================================================
 # Configuration

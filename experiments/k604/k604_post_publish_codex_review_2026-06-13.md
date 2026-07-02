@@ -9,7 +9,7 @@
 
 ## (A) 表格數字一致性 → PASS
 
-Cross-check against [`experiments/k604/k604_implementation_costs_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k604/k604_implementation_costs_results.json):
+Cross-check against [`experiments/k604/k604_implementation_costs_results.json`](/Users/yhlai0911/volpred-research/experiments/k604/k604_implementation_costs_results.json):
 
 | 文章宣稱 | Ground truth | Verdict |
 |---|---|---|
@@ -26,7 +26,7 @@ Top-line table values and ranking claims are consistent with the current results
 ## (B) Lookahead / 方法檢查 → PASS
 
 - This experiment is an implementation-cost analysis driven by `paper_trading.json` weight histories, not a predictive backtest article.
-- No new trading signal is generated inside [`experiments/k604/k604_implementation_costs.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/k604/k604_implementation_costs.py); the script aggregates realized weights, turnover, spreads, commissions, taxes, and margin costs.
+- No new trading signal is generated inside [`experiments/k604/k604_implementation_costs.py`](/Users/yhlai0911/volpred-research/experiments/k604/k604_implementation_costs.py); the script aggregates realized weights, turnover, spreads, commissions, taxes, and margin costs.
 - Therefore the main review focus is source-to-prose fidelity rather than lookahead bias. No lookahead-specific issue is implicated here.
 
 ## (C) Major content-vs-source mismatch → FAIL
@@ -39,8 +39,8 @@ Article text says:
 
 But the source code defines this threshold differently:
 
-- [`experiments/k604/k604_implementation_costs.py:519`](/Users/yhlai0911/Desktop/volpred-research/experiments/k604/k604_implementation_costs.py:519) computes `min_for_commission = int(annual_commission / 0.005)`.
-- The docstring in [`experiments/k604/k604_implementation_costs.py:504`](/Users/yhlai0911/Desktop/volpred-research/experiments/k604/k604_implementation_costs.py:504) states the criterion is:
+- [`experiments/k604/k604_implementation_costs.py:519`](/Users/yhlai0911/volpred-research/experiments/k604/k604_implementation_costs.py:519) computes `min_for_commission = int(annual_commission / 0.005)`.
+- The docstring in [`experiments/k604/k604_implementation_costs.py:504`](/Users/yhlai0911/volpred-research/experiments/k604/k604_implementation_costs.py:504) states the criterion is:
   `Commission costs < 0.5% of portfolio per year`.
 - In results, `taiwan_8.63vix.minimum_portfolio.reason = "commission threshold"` and `minimum_portfolio_usd = 977005`.
 
@@ -60,7 +60,7 @@ Those are not equivalent claims.
 
 ## (D) Secondary research hygiene issue → CONDITIONAL
 
-- [`experiments/k604/README.md`](/Users/yhlai0911/Desktop/volpred-research/experiments/k604/README.md) is still a planning placeholder, which violates the experiment three-piece documentation standard.
+- [`experiments/k604/README.md`](/Users/yhlai0911/volpred-research/experiments/k604/README.md) is still a planning placeholder, which violates the experiment three-piece documentation standard.
 - This is not the article's main factual failure, but it weakens auditability.
 
 ## Overall verdict

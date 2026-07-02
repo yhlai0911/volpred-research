@@ -671,7 +671,7 @@ for thr in thresholds:
             "frequency": round(count / len(p_ret), 6),
         }
 
-results_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a127b8a6/experiments/k225_maximum_loss_results.json"
+results_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a127b8a6/experiments/k225_maximum_loss_results.json"
 with open(results_path, "w") as f:
     json.dump(output, f, indent=2)
 print(f"\nResults saved to: {results_path}")

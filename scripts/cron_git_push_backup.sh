@@ -5,7 +5,7 @@
 # 根治 dual-source 分岔 incident（origin 從 6/14 停在遠端、本地積壓 1100+ commit 無備份）。
 # 詳見 memory project_cloud_agent_git_divergence + docs/error_log.md。
 set -uo pipefail
-REPO=/Users/yhlai0911/Desktop/volpred-research
+REPO=/Users/yhlai0911/volpred-research
 export HOME="${HOME:-/Users/yhlai0911}"
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PATH:-}"
 export GH_CONFIG_DIR="${GH_CONFIG_DIR:-$HOME/.config/gh}"

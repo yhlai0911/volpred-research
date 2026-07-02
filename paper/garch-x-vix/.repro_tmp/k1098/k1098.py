@@ -79,13 +79,13 @@ START_TIME = time.time()
 EXPERIMENT_ID = "K1098"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = '/Users/yhlai0911/Desktop/volpred-research'
+PROJECT_ROOT = '/Users/yhlai0911/volpred-research'
 sys.path.insert(0, os.path.join(PROJECT_ROOT, 'src'))
 
 from volpred.utils import clean_tw50_data  # MANDATORY for 0050.TW
 
-RESULTS_PATH = '/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/.repro_tmp/k1098/k1098_results.json'
-VIXTWN_CSV_PATH = '/Users/yhlai0911/Desktop/volpred-research/paper/garch-x-vix/.repro_tmp/k1098/k1098_vixtwn_daily.csv'
+RESULTS_PATH = '/Users/yhlai0911/volpred-research/paper/garch-x-vix/.repro_tmp/k1098/k1098_results.json'
+VIXTWN_CSV_PATH = '/Users/yhlai0911/volpred-research/paper/garch-x-vix/.repro_tmp/k1098/k1098_vixtwn_daily.csv'
 
 # Configuration
 DATA_START = '2007-01-01'    # VIXTWN starts 2007 in Dropbox

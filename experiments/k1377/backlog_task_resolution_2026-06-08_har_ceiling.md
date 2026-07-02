@@ -10,14 +10,14 @@ This backlog task is already covered by an existing HAR experiment line. The rel
 ## Coverage mapping
 
 Primary baseline:
-- [k530_har_multiscale_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k530/k530_har_multiscale_results.json:1)
+- [k530_har_multiscale_results.json](/Users/yhlai0911/volpred-research/experiments/k530/k530_har_multiscale_results.json:1)
 
 Ceiling defense against richer alternatives:
-- [k764_rough_vol_multivariate_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k764/k764_rough_vol_multivariate_results.json:1)
+- [k764_rough_vol_multivariate_results.json](/Users/yhlai0911/volpred-research/experiments/k764/k764_rough_vol_multivariate_results.json:1)
 
 HAR internal extension / combination follow-up:
-- [README.md](/Users/yhlai0911/Desktop/volpred-research/experiments/k1377/README.md:1)
-- [k1377_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k1377/k1377_results.json:1)
+- [README.md](/Users/yhlai0911/volpred-research/experiments/k1377/README.md:1)
+- [k1377_results.json](/Users/yhlai0911/volpred-research/experiments/k1377/k1377_results.json:1)
 
 ## What is already established
 

@@ -50,7 +50,7 @@ from arch import arch_model
 from scipy import stats
 
 # Add project root for imports
-sys.path.insert(0, '/Users/yhlai0911/Desktop/volpred-research')
+sys.path.insert(0, '/Users/yhlai0911/volpred-research')
 from volpred.utils import clean_tw50_data
 
 warnings.filterwarnings('ignore')
@@ -59,7 +59,7 @@ warnings.filterwarnings('ignore')
 # Configuration
 # ============================================================
 EXPERIMENT_ID = "K783b"
-MAIN_REPO = '/Users/yhlai0911/Desktop/volpred-research'
+MAIN_REPO = '/Users/yhlai0911/volpred-research'
 
 # Assets to test
 ASSETS = {

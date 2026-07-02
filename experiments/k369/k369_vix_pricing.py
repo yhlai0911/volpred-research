@@ -823,7 +823,7 @@ print(f"     - Mean-reversion strategies lack statistical significance (Harvey t
 print(f"     - Survivorship bias in SVXY (similar products like XIV were liquidated)")
 
 # Save results
-results_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a97d70d0/experiments/k369_vix_pricing_results.json"
+results_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a97d70d0/experiments/k369_vix_pricing_results.json"
 with open(results_path, "w") as f:
     json.dump(results, f, indent=2, default=str)
 print(f"\n  Results saved to: {results_path}")

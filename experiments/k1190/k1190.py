@@ -97,7 +97,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a7880876/experiments/k1190/run.log'),
+        logging.FileHandler('/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a7880876/experiments/k1190/run.log'),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -561,7 +561,7 @@ def main():
         }
     }
 
-    out_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a7880876/experiments/k1190/k1190_results.json'
+    out_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a7880876/experiments/k1190/k1190_results.json'
     with open(out_path, 'w') as f:
         json.dump(results, f, indent=2, default=str)
 

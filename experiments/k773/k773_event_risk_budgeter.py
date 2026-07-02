@@ -700,7 +700,7 @@ results = {
 }
 
 # Save results
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k773_event_risk_budgeter_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k773_event_risk_budgeter_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 

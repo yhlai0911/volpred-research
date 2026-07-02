@@ -438,7 +438,7 @@ results["key_findings"] = [
     "Smooth-weight strategies (12/VIX, Risk Parity) tend to dominate on Robustness and Turnover",
 ]
 
-out_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a3cfb4a0/experiments/k793_strategy_evaluation_results.json'
+out_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a3cfb4a0/experiments/k793_strategy_evaluation_results.json'
 with open(out_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

@@ -9,7 +9,7 @@
 
 ## (A) Number Consistency — PASS
 
-Cross-check against [`experiments/k713/k713_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k713/k713_results.json):
+Cross-check against [`experiments/k713/k713_results.json`](/Users/yhlai0911/volpred-research/experiments/k713/k713_results.json):
 
 | Article claim | Ground truth | Verdict |
 |---|---|---|
@@ -25,10 +25,10 @@ The published quantitative claims are aligned with the current results artifact.
 
 K713 does not satisfy the current experiment audit standard:
 
-- [`experiments/k713/README.md`](/Users/yhlai0911/Desktop/volpred-research/experiments/k713/README.md) is a planning placeholder.
+- [`experiments/k713/README.md`](/Users/yhlai0911/volpred-research/experiments/k713/README.md) is a planning placeholder.
 - No `experiments/k713/k713.py` or equivalent script exists in the current repo.
 - `git log --all -- '*k713*'` shows the original K713 commit added only `experiments/k713_results.json`; no source script is recoverable from git history.
-- [`experiments/k713/k713_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k713/k713_results.json) contains only summary metrics. It does not record data source, sample period, rebalance rule, transaction-cost assumption, or exact portfolio construction details.
+- [`experiments/k713/k713_results.json`](/Users/yhlai0911/volpred-research/experiments/k713/k713_results.json) contains only summary metrics. It does not record data source, sample period, rebalance rule, transaction-cost assumption, or exact portfolio construction details.
 
 This is a publication-source problem rather than a numeric mismatch. The article's numbers are real relative to the stored JSON, but the stored JSON is not independently reproducible.
 

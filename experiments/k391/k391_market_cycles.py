@@ -625,7 +625,7 @@ output = {
     ],
 }
 
-output_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6a80c15/experiments/k391_market_cycles_results.json"
+output_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a6a80c15/experiments/k391_market_cycles_results.json"
 with open(output_path, "w") as f:
     json.dump(output, f, indent=2, default=str)
 

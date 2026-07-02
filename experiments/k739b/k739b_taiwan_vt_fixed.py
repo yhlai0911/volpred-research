@@ -679,7 +679,7 @@ print("COMPARISON: K739 (buggy) vs K739b (fixed)")
 print("=" * 70)
 
 # Load K739 results for comparison
-k739_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k739_taiwan_vt_crossval_results.json'
+k739_path = '/Users/yhlai0911/volpred-research/experiments/k739_taiwan_vt_crossval_results.json'
 try:
     with open(k739_path) as f:
         k739 = json.load(f)
@@ -812,7 +812,7 @@ results['references'] = [
 ]
 results['timestamp'] = datetime.now().isoformat()
 
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k739b_taiwan_vt_fixed_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k739b_taiwan_vt_fixed_results.json'
 with open(output_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 

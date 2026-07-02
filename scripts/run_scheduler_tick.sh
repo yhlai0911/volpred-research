@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 set -a
 source .env.local 2>/dev/null || true
 set +a

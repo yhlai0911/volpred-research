@@ -8,10 +8,10 @@ import numpy as np
 import os
 
 # Load results
-with open('/Users/yhlai0911/Desktop/volpred-research/experiments/k157/k157_correlation_forecasting_results.json') as f:
+with open('/Users/yhlai0911/volpred-research/experiments/k157/k157_correlation_forecasting_results.json') as f:
     data = json.load(f)
 
-out_dir = '/Users/yhlai0911/Desktop/volpred-research/experiments/k157/figures'
+out_dir = '/Users/yhlai0911/volpred-research/experiments/k157/figures'
 os.makedirs(out_dir, exist_ok=True)
 
 # Figure 1: RMSE comparison across models and pairs

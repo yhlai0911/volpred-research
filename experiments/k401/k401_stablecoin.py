@@ -805,7 +805,7 @@ results = {
     'granger_results': granger_results,
 }
 
-results_path = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a23ccdeb/experiments/k401_stablecoin_results.json'
+results_path = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a23ccdeb/experiments/k401_stablecoin_results.json'
 with open(results_path, 'w') as f:
     json.dump(results, f, indent=2, default=str)
 print(f"\nResults saved to: {results_path}")

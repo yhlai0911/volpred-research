@@ -26,7 +26,7 @@ MAIN_REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # If running from worktree, also check main repo
 EXPERIMENTS_DIRS = [
     os.path.join(MAIN_REPO, 'experiments'),
-    '/Users/yhlai0911/Desktop/volpred-research/experiments'
+    '/Users/yhlai0911/volpred-research/experiments'
 ]
 
 results = {}

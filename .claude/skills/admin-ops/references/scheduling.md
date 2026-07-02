@@ -63,9 +63,9 @@ emit_exit_banner() {
 }
 trap emit_exit_banner EXIT
 
-cd "${VOLPRED_ROOT:-/Users/yhlai0911/Desktop/volpred-research}"
+cd "${VOLPRED_ROOT:-/Users/yhlai0911/volpred-research}"
 
-PYTHON_RUN="${PYTHON_RUN:-/Users/yhlai0911/Desktop/volpred-research/.venv/bin/python}"
+PYTHON_RUN="${PYTHON_RUN:-/Users/yhlai0911/volpred-research/.venv/bin/python}"
 if [[ ! -x "$PYTHON_RUN" ]]; then
   PYTHON_RUN="uv run python"
 fi

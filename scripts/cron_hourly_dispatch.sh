@@ -8,7 +8,7 @@
 # TCC copy: ~/.volpred/bin/cron_hourly_dispatch.sh
 # After editing: cp scripts/cron_hourly_dispatch.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_hourly_dispatch.sh
 
-REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/Desktop/volpred-research}"
+REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/volpred-research}"
 VOLPRED_HOME_DIR="${VOLPRED_HOME_DIR:-/Users/yhlai0911/.volpred}"
 HOURLY_LOG_PATH="${HOURLY_LOG_PATH:-$VOLPRED_HOME_DIR/logs/hourly_dispatch.log}"
 # 2026-06-22: REVERTED the explicit-version pin back to the symlink.
@@ -271,7 +271,7 @@ send_auth_preflight_alert() {
 "" \
 "## 根因（已於 2026-07-02 決定性實驗確認）" \
 "- macOS TCC 的 Desktop 資料夾授權**綁定 binary 路徑+雜湊**；claude CLI 每 1-2 天自動更新，新版 binary 對 \`~/Desktop\` 預設**無授權**" \
-"- 所有排程 job 的 cwd 在 \`~/Desktop/volpred-research\`（TCC 保護區）→ launchd context 無 UI 可跳授權 → TCC 請求懸置 → 拖累 tccd → 跨行程逾時/EINTR 全滅" \
+"- 歷史事故（2026-07-02，當時 repo 還在 ~/Desktop/volpred-research TCC 保護區；現已搬至 ~/volpred-research，正常情況不應再出現此類失敗）→ launchd context 無 UI 可跳授權 → TCC 請求懸置 → 拖累 tccd → 跨行程逾時/EINTR 全滅" \
 "- 互動 session 不受影響（走已授權 parent app 快速路徑）" \
 "" \
 "## 正確處置（**不要**重開機、**不要**跑 keychain 指令）" \
@@ -773,7 +773,7 @@ echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=$EXIT_CODE) 
 echo "=== [hourly_dispatch] exit $EXIT_CODE at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 
 # macOS notification (heredoc avoids nested-quote issues)
-LATEST_COMMIT=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 15 /usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100 | tr -d '"\\')
+LATEST_COMMIT=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 15 /usr/bin/git -C /Users/yhlai0911/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100 | tr -d '"\\')
 NOW=$(date '+%H:%M')
 /usr/bin/osascript <<OSAEND 2>/dev/null || true
 display notification "${LATEST_COMMIT}" with title "volpred hourly-dispatch ${NOW}" sound name "Pop"

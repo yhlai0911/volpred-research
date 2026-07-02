@@ -14,7 +14,7 @@ This matters because the repo has many HAR-like baselines, and a naive "22-day m
 ## Data
 
 - Asset: TAIFEX TX1 day session
-- Source: local cached 5-minute realized variance panel from [`experiments/k1303/data/_tx1_daily_cj_2017-2026.parquet`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1303/data/_tx1_daily_cj_2017-2026.parquet)
+- Source: local cached 5-minute realized variance panel from [`experiments/k1303/data/_tx1_daily_cj_2017-2026.parquet`](/Users/yhlai0911/volpred-research/experiments/k1303/data/_tx1_daily_cj_2017-2026.parquet)
 - Sample: `2017-05-16` to `2026-05-08`
 - Daily rows: `2186`
 - RV definition: sum of 5-minute squared log returns over the day session
@@ -150,10 +150,10 @@ The defensible rule from this experiment is conservative:
 
 ## Files
 
-- Script: [`experiments/k1496/k1496.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1496/k1496.py)
-- Results: [`experiments/k1496/k1496_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1496/k1496_results.json)
-- Figure 1: ![primary](/Users/yhlai0911/Desktop/volpred-research/experiments/k1496/k1496_primary_regime_qlike.png)
-- Figure 2: ![robustness](/Users/yhlai0911/Desktop/volpred-research/experiments/k1496/k1496_robustness_heatmap.png)
+- Script: [`experiments/k1496/k1496.py`](/Users/yhlai0911/volpred-research/experiments/k1496/k1496.py)
+- Results: [`experiments/k1496/k1496_results.json`](/Users/yhlai0911/volpred-research/experiments/k1496/k1496_results.json)
+- Figure 1: ![primary](/Users/yhlai0911/volpred-research/experiments/k1496/k1496_primary_regime_qlike.png)
+- Figure 2: ![robustness](/Users/yhlai0911/volpred-research/experiments/k1496/k1496_robustness_heatmap.png)
 
 ## Caveats
 

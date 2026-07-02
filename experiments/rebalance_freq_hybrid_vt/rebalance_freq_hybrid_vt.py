@@ -348,7 +348,7 @@ for name in ["Daily Hybrid VT", "Weekly Hybrid VT (Fri)", "Monthly Hybrid VT"]:
     }
 
 import json
-out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/rebalance_freq_hybrid_vt/rebalance_freq_hybrid_vt_results.json"
+out_path = "/Users/yhlai0911/volpred-research/experiments/rebalance_freq_hybrid_vt/rebalance_freq_hybrid_vt_results.json"
 with open(out_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nResults saved to {out_path}")

@@ -36,7 +36,7 @@ EXPERIMENTS_DIR = None
 for candidate in [
     os.path.dirname(os.path.abspath(__file__)),
     os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'experiments'),
-    '/Users/yhlai0911/Desktop/volpred-research/experiments',
+    '/Users/yhlai0911/volpred-research/experiments',
 ]:
     candidate = os.path.abspath(candidate)
     if glob.glob(os.path.join(candidate, 'k414*_results.json')):

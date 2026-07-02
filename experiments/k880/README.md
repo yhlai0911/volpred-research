@@ -3,8 +3,8 @@
 - Experiment ID: `K880`
 - Type: empirical
 - Status: completed with post-publication code review follow-up
-- Script: [`experiments/k880/k880_prg_spy_validation.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/k880/k880_prg_spy_validation.py)
-- Results: [`experiments/k880/k880_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k880/k880_results.json)
+- Script: [`experiments/k880/k880_prg_spy_validation.py`](/Users/yhlai0911/volpred-research/experiments/k880/k880_prg_spy_validation.py)
+- Results: [`experiments/k880/k880_results.json`](/Users/yhlai0911/volpred-research/experiments/k880/k880_results.json)
 
 ## 問題描述
 
@@ -99,4 +99,4 @@ uv run python experiments/k880/k880_prg_spy_validation.py
 
 ## 相關審查
 
-- [`experiments/k880/reviews/codex_24h_review_mile_862223de.md`](/Users/yhlai0911/Desktop/volpred-research/experiments/k880/reviews/codex_24h_review_mile_862223de.md)
+- [`experiments/k880/reviews/codex_24h_review_mile_862223de.md`](/Users/yhlai0911/volpred-research/experiments/k880/reviews/codex_24h_review_mile_862223de.md)

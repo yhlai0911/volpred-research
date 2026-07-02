@@ -39,7 +39,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = _PROJECT_ROOT / "data" / "intraday"
 if not DATA_DIR.exists():
     # Fallback: main repo
-    DATA_DIR = Path("/Users/yhlai0911/Desktop/volpred-research/data/intraday")
+    DATA_DIR = Path("/Users/yhlai0911/volpred-research/data/intraday")
 TICKER = "SPY"
 # US market hours in UTC: 14:30 - 21:00 (9:30 AM - 4:00 PM ET)
 # yfinance timestamps are in UTC

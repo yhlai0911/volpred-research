@@ -107,7 +107,7 @@ FIG_SCATTER_PATH = SCRIPT_DIR / 'k1067e_scatter_noVIX_vs_full.png'
 FIG_SIGN_PATH = SCRIPT_DIR / 'k1067e_sign_consistency_hist.png'
 
 # Resolve a shared experiments directory: worktree or main project root.
-MAIN_PROJECT_ROOT = Path('/Users/yhlai0911/Desktop/volpred-research')
+MAIN_PROJECT_ROOT = Path('/Users/yhlai0911/volpred-research')
 
 
 def find_experiment_data_dir(rel: str) -> Path:

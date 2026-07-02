@@ -605,7 +605,7 @@ for pname in oos_results:
                 "max_dd": round(r["max_dd"], 4),
             }
 
-out_path = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa93f5b7/experiments/k279_weekly_vt_results.json"
+out_path = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-aa93f5b7/experiments/k279_weekly_vt_results.json"
 with open(out_path, "w") as f:
     json.dump(output, f, indent=2)
 print(f"  Results saved to {out_path}")

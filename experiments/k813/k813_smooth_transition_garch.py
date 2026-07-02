@@ -49,7 +49,7 @@ from arch import arch_model
 
 # Use project evaluation framework
 import sys
-sys.path.insert(0, '/Users/yhlai0911/Desktop/volpred-research')
+sys.path.insert(0, '/Users/yhlai0911/volpred-research')
 from volpred.stats.model_evaluation import (
     dm_test, qlike_pointwise, spearman_corr, qlike
 )
@@ -913,7 +913,7 @@ if __name__ == '__main__':
         ),
     }
 
-    out_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k813_smooth_transition_garch_results.json'
+    out_path = '/Users/yhlai0911/volpred-research/experiments/k813_smooth_transition_garch_results.json'
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False, default=str)
     print(f"\n  Saved: {out_path}")

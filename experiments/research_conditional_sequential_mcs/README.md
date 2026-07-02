@@ -89,7 +89,7 @@ Interpretation: the SPY/QLIKE superior set is not stable in early evidence prefi
 ## Reproduction
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 python experiments/research_conditional_sequential_mcs/research_conditional_sequential_mcs.py
 ```
 

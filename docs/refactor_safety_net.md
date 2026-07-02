@@ -19,7 +19,7 @@ volpred-refactor/   ← 獨立 git worktree，在 branch refactor/autonomy-overh
 
 ### A. 丟棄全部重構，回到乾淨狀態（最常用）
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 git worktree remove ../volpred-refactor      # ⚠️ 絕不加 --force（CLAUDE.md 硬禁止）
 git branch -D refactor/autonomy-overhaul
 # main 完全沒被動過，等於重構沒發生過
@@ -33,14 +33,14 @@ git reset --hard stable-pre-refactor-20260529
 
 ### C. 確認 main 本身沒被污染
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 git log --oneline -1                         # 應指向重構期間的正常 ops commit 或 2b252a8f
 git diff stable-pre-refactor-20260529 --stat  # 看 main 相對錨點被動了什麼（理想：只有 ops/data）
 ```
 
 ### D. 把重構成果合併進 main（重構成功、驗證通過後才做）
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 git merge refactor/autonomy-overhaul          # 或先 review diff 再 merge
 # 合併後可清 worktree：git worktree remove ../volpred-refactor
 ```

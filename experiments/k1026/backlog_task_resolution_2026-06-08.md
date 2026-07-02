@@ -34,9 +34,9 @@ Backlog task:
 - Source prompt: "Proxy-Reliance Control in Conformal VaR — arXiv:2603.22569 (2026)"
 
 Existing experiment:
-- [README.md](/Users/yhlai0911/Desktop/volpred-research/experiments/k1026/README.md:1)
-- [k1026.py](/Users/yhlai0911/Desktop/volpred-research/experiments/k1026/k1026.py:1)
-- [k1026_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k1026/k1026_results.json:1)
+- [README.md](/Users/yhlai0911/volpred-research/experiments/k1026/README.md:1)
+- [k1026.py](/Users/yhlai0911/volpred-research/experiments/k1026/k1026.py:1)
+- [k1026_results.json](/Users/yhlai0911/volpred-research/experiments/k1026/k1026_results.json:1)
 
 `K1026` explicitly implements conformal VaR using rolling empirical quantiles of standardized residuals, contrasts it against parametric GJR/A4f Student-t VaR, and evaluates with:
 - Kupiec UC

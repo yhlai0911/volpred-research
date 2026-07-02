@@ -5,7 +5,7 @@
 # TCC copy: ~/.volpred/bin/cron_handoff_regen.sh
 
 exec >> /Users/yhlai0911/.volpred/logs/handoff_regen.log 2>&1
-cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+cd /Users/yhlai0911/volpred-research || exit 1
 
 ulimit -Sn 65536 2>/dev/null || true
 
@@ -14,7 +14,7 @@ echo "=== handoff-regen $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 GENERATE_CAP_SEC=180
 CLEANUP_CAP_SEC=60
 
-PYTHON_BIN="/Users/yhlai0911/Desktop/volpred-research/.venv/bin/python"
+PYTHON_BIN="/Users/yhlai0911/volpred-research/.venv/bin/python"
 if [[ -x "$PYTHON_BIN" ]]; then
   PYTHON_RUN=("$PYTHON_BIN")
 else
@@ -24,7 +24,7 @@ fi
 echo "python_runner=${PYTHON_RUN[*]}"
 
 /usr/bin/perl -e 'alarm shift; exec @ARGV' "$GENERATE_CAP_SEC" \
-  "${PYTHON_RUN[@]}" /Users/yhlai0911/Desktop/volpred-research/scripts/generate_handoff.py
+  "${PYTHON_RUN[@]}" /Users/yhlai0911/volpred-research/scripts/generate_handoff.py
 RC1=$?
 
 # Also: cleanup stale claims (>2h) so claim mechanism self-heals.
@@ -32,7 +32,7 @@ RC1=$?
 # usually short-lived in VSCode; a 2h-stuck claim almost certainly = crash
 # or forgotten release rather than legitimate long work.
 /usr/bin/perl -e 'alarm shift; exec @ARGV' "$CLEANUP_CAP_SEC" \
-  "${PYTHON_RUN[@]}" /Users/yhlai0911/Desktop/volpred-research/scripts/task_pool_claim.py cleanup --stale-hours 2
+  "${PYTHON_RUN[@]}" /Users/yhlai0911/volpred-research/scripts/task_pool_claim.py cleanup --stale-hours 2
 RC2=$?
 
 EXIT_CODE=0

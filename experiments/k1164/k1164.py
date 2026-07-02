@@ -46,7 +46,7 @@ from scipy.stats import spearmanr
 
 np.random.seed(42)
 
-MAIN_REPO = Path("/Users/yhlai0911/Desktop/volpred-research")
+MAIN_REPO = Path("/Users/yhlai0911/volpred-research")
 THIS_DIR = Path(__file__).resolve().parent
 DATA_DIR = THIS_DIR / "data"
 

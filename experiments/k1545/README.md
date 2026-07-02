@@ -158,7 +158,7 @@ production-grade replication would need:
 ## Reproducibility
 
 ```
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python experiments/k1545/k1545.py
 ```
 

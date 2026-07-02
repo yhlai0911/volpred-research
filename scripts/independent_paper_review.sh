@@ -5,7 +5,7 @@
 # second/third models to catch self-review blind spots before submission.
 # 2026-05-21, triggered by user audit of "ready_for_submission" rigor.
 set -u
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 
 PAPERS=(crypto-fear-channel prg-periodic-garch vt-crowding-abm)
 LOG=/tmp/independent_review.log

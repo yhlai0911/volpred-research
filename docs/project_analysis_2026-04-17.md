@@ -3,7 +3,7 @@ title: VolPred 專案全面重新分析（2026-04-17）
 date: 2026-04-17
 author: Claude（Subagent 代勞，由賴奕豪教授委託執行）
 version: 1.0
-scope: /Users/yhlai0911/Desktop/volpred-research
+scope: /Users/yhlai0911/volpred-research
 method: 只讀分析，未修改任何檔案
 ---
 

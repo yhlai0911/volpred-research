@@ -128,7 +128,7 @@ NULL 結果下：
 ## Reproduce
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research
+cd /Users/yhlai0911/volpred-research
 uv run python experiments/k_leveraged_etf_eod_vol_amplification_2026_06_14/k_leveraged_etf_eod_vol_amplification_2026_06_14.py
 ```
 

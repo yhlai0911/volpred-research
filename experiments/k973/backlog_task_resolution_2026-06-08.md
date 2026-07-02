@@ -14,9 +14,9 @@ Backlog task:
 - Source wording: `Adaptive Fractal Dynamics — Frontiers Applied Math 2025`
 
 Existing experiment:
-- [README.md](/Users/yhlai0911/Desktop/volpred-research/experiments/k973/README.md:1)
-- [k973_hurst_vol.py](/Users/yhlai0911/Desktop/volpred-research/experiments/k973/k973_hurst_vol.py:1)
-- [k973_hurst_vol_results.json](/Users/yhlai0911/Desktop/volpred-research/experiments/k973/k973_hurst_vol_results.json:1)
+- [README.md](/Users/yhlai0911/volpred-research/experiments/k973/README.md:1)
+- [k973_hurst_vol.py](/Users/yhlai0911/volpred-research/experiments/k973/k973_hurst_vol.py:1)
+- [k973_hurst_vol_results.json](/Users/yhlai0911/volpred-research/experiments/k973/k973_hurst_vol_results.json:1)
 
 `K973` already tests the repo-local version of the same idea: a time-varying / adaptive Hurst-style state, smoothed with EWMA, added as a forecasting feature for volatility prediction.
 

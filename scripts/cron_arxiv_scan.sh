@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-injected: TCC bypass — self-redirect to Desktop log avoids launchd-process-level TCC denial
-exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/arxiv_scan.log 2>&1
+exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/arxiv_scan.log 2>&1
 # Canonical source for the host-cron wrapper.
 # IMPORTANT: host cron does NOT exec files under Desktop/ (macOS TCC/FDA blocks
 # the cron daemon). The cron-exec target lives at ~/.volpred/bin/cron_arxiv_scan.sh.
@@ -15,7 +15,7 @@ exec >> /Users/yhlai0911/Desktop/volpred-research/storage/logs/cron/arxiv_scan.l
 # 選題時 review staging、把真正相關的 promote。有新候選才寄 info email。
 
 set -u
-cd /Users/yhlai0911/Desktop/volpred-research || exit 1
+cd /Users/yhlai0911/volpred-research || exit 1
 
 echo "=== [arxiv_scan] $(date '+%Y-%m-%d %H:%M:%S %Z') start ==="
 

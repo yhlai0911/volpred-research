@@ -742,7 +742,7 @@ for lim in summary["limitations"]:
 # ================================================================
 # 13. SAVE RESULTS
 # ================================================================
-output_file = "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a31590c1/experiments/k385_survival_results.json"
+output_file = "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a31590c1/experiments/k385_survival_results.json"
 
 # Convert dates for JSON serialization
 episodes_list = []

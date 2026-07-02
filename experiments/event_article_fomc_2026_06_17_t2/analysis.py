@@ -479,7 +479,7 @@ fig.suptitle('FOMC 2026-06-17 T-2 市場定價解析', color='white', fontsize=1
 fig.text(0.99, 0.01, 'VolPred Research | FOMC T-2 2026-06-17 | Data: yfinance',
          ha='right', color='#555', fontsize=7)
 
-fig_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/event_article_fomc_2026_06_17_t2/figure.png'
+fig_path = '/Users/yhlai0911/volpred-research/experiments/event_article_fomc_2026_06_17_t2/figure.png'
 plt.savefig(fig_path, dpi=150, bbox_inches='tight', facecolor='#0d1117')
 plt.close()
 print(f"  Figure saved: {fig_path}")
@@ -577,7 +577,7 @@ results = {
     }
 }
 
-results_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/event_article_fomc_2026_06_17_t2/results.json'
+results_path = '/Users/yhlai0911/volpred-research/experiments/event_article_fomc_2026_06_17_t2/results.json'
 with open(results_path, 'w', encoding='utf-8') as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 

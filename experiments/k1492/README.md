@@ -150,8 +150,8 @@ OOS 採 expanding-window recursive refit，loss 用 QLIKE，比較用 DM-HLN sty
 
 ## Artifacts
 
-- [`experiments/k1492/k1492.py`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1492/k1492.py)
-- [`experiments/k1492/k1492_results.json`](/Users/yhlai0911/Desktop/volpred-research/experiments/k1492/k1492_results.json)
-- ![signal](/Users/yhlai0911/Desktop/volpred-research/experiments/k1492/fig_signal_timeseries.png)
-- ![qlike](/Users/yhlai0911/Desktop/volpred-research/experiments/k1492/fig_qlike_improvement.png)
-- ![event](/Users/yhlai0911/Desktop/volpred-research/experiments/k1492/fig_event_study.png)
+- [`experiments/k1492/k1492.py`](/Users/yhlai0911/volpred-research/experiments/k1492/k1492.py)
+- [`experiments/k1492/k1492_results.json`](/Users/yhlai0911/volpred-research/experiments/k1492/k1492_results.json)
+- ![signal](/Users/yhlai0911/volpred-research/experiments/k1492/fig_signal_timeseries.png)
+- ![qlike](/Users/yhlai0911/volpred-research/experiments/k1492/fig_qlike_improvement.png)
+- ![event](/Users/yhlai0911/volpred-research/experiments/k1492/fig_event_study.png)

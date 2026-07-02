@@ -225,7 +225,7 @@ is NOT supported by this pilot.** The cross-market asset-matched IV result
 ## 11. Reproduction
 
 ```bash
-cd /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac306346
+cd /Users/yhlai0911/volpred-research/.claude/worktrees/agent-ac306346
 uv run python experiments/k1098/k1098.py
 ```
 

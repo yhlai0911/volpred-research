@@ -711,7 +711,7 @@ results['conclusion'] = conclusion
 print(f"\nCONCLUSION: {conclusion}")
 
 # Save
-output_path = '/Users/yhlai0911/Desktop/volpred-research/experiments/k810_vix_mean_reversion_results.json'
+output_path = '/Users/yhlai0911/volpred-research/experiments/k810_vix_mean_reversion_results.json'
 def sanitize_for_json(obj):
     """Replace NaN/Inf with None for JSON serialization."""
     if isinstance(obj, dict):

@@ -29,7 +29,7 @@ warnings.filterwarnings('ignore')
 
 np.random.seed(42)
 
-SAVE_DIR = '/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a18b2ccf/experiments/k979'
+SAVE_DIR = '/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a18b2ccf/experiments/k979'
 
 # ============================================================
 # 1. Data Download

@@ -50,7 +50,7 @@ _repo_root = Path(__file__).resolve().parents[1]
 DATA_PATH = _repo_root / "data" / "congressional_trades_house.csv"
 if not DATA_PATH.exists():
     # Try main repo path
-    DATA_PATH = Path("/Users/yhlai0911/Desktop/volpred-research/data/congressional_trades_house.csv")
+    DATA_PATH = Path("/Users/yhlai0911/volpred-research/data/congressional_trades_house.csv")
 df = pd.read_csv(DATA_PATH)
 print(f"Raw data: {len(df)} rows")
 

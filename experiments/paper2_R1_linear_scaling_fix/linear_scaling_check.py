@@ -55,7 +55,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-REPO = Path("/Users/yhlai0911/Desktop/volpred-research")
+REPO = Path("/Users/yhlai0911/volpred-research")
 PAPER_CANONICAL_RATIO = 1.39
 PAPER_CANONICAL_RATIO_PRECISE = 1.393  # body.tex line 120
 SEED = 42

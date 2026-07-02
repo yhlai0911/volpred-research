@@ -77,8 +77,8 @@ warnings.filterwarnings("ignore")
 # =========================================================================
 # Import K1168 / K1172 pooled MLE primitives AS-IS (no rewrite)
 # =========================================================================
-K1168_MAIN = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k1168")
-K1172_MAIN = Path("/Users/yhlai0911/Desktop/volpred-research/experiments/k1172")
+K1168_MAIN = Path("/Users/yhlai0911/volpred-research/experiments/k1168")
+K1172_MAIN = Path("/Users/yhlai0911/volpred-research/experiments/k1172")
 sys.path.insert(0, str(K1168_MAIN))
 sys.path.insert(0, str(K1172_MAIN))
 # BR/IN pooled engine lives in k1168_per_stock_refit; MX lives in k1172_per_stock_refit.
@@ -470,7 +470,7 @@ def rebuild_spearman(corrections: dict[str, float], include_au: bool = False
     # Optionally add AU
     if include_au:
         k1171_res = json.load(
-            open("/Users/yhlai0911/Desktop/volpred-research/experiments/"
+            open("/Users/yhlai0911/volpred-research/experiments/"
                  "k1171/k1171_results.json"))
         au_inst = None
         for r in k1171_res["per_market_summary"]:
