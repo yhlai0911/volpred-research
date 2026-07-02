@@ -153,15 +153,24 @@ def ensure_dirs() -> None:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def fetch_json(url: str, params: dict | None = None, timeout: int = 30) -> dict:
+def fetch_json(url: str, params: dict | None = None, timeout: tuple[int, int] = (8, 20)) -> dict:
     headers = {"User-Agent": "volpred-codex-research/1.0"}
-    response = requests.get(url, params=params, timeout=timeout, headers=headers)
-    response.raise_for_status()
-    return response.json()
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            response = requests.get(url, params=params, timeout=timeout, headers=headers)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as exc:
+            last_error = exc
+            time.sleep(1.5 * (attempt + 1))
+    raise RuntimeError(f"GET failed after retries: {url} params={params}") from last_error
 
 
 def fetch_proxy_monitor(force: bool = False) -> list[dict]:
-    cache = RAW_DIR / "proxy_monitor_proposals_raw.json"
+    cache = RAW_DIR / "proxy_monitor_proposals_2020_2024_window_raw.json"
+    partial_cache = RAW_DIR / "proxy_monitor_proposals_2020_2024_window_partial.json"
+    meta_cache = RAW_DIR / "proxy_monitor_fetch_meta.json"
     if cache.exists() and not force:
         return json.loads(cache.read_text())
 
@@ -169,17 +178,45 @@ def fetch_proxy_monitor(force: bool = False) -> list[dict]:
     count = int(first.get("count", 0))
     proposals = list(first.get("results", []))
     offset = len(proposals)
+    stop_reason = "api_exhausted"
+    partial_cache.write_text(json.dumps(proposals, indent=2, sort_keys=True))
 
     while offset < count:
         payload = fetch_json(PROXY_MONITOR_URL, {"limit": 200, "offset": offset})
         batch = payload.get("results", [])
         if not batch:
+            stop_reason = "empty_batch"
             break
         proposals.extend(batch)
         offset += len(batch)
+        partial_cache.write_text(json.dumps(proposals, indent=2, sort_keys=True))
+
+        batch_dates = pd.to_datetime(
+            [((item.get("vote_results") or {}).get("date") or item.get("date")) for item in batch],
+            errors="coerce",
+        )
+        batch_years = [int(ts.year) for ts in batch_dates if not pd.isna(ts)]
+        if batch_years and max(batch_years) < START_YEAR:
+            stop_reason = f"reached_batch_before_{START_YEAR}"
+            break
+        if offset % 1000 == 0:
+            print(f"Fetched Proxy Monitor rows: {offset}/{count}", flush=True)
         time.sleep(0.05)
 
     cache.write_text(json.dumps(proposals, indent=2, sort_keys=True))
+    meta_cache.write_text(
+        json.dumps(
+            {
+                "api_reported_count": count,
+                "fetched_rows": len(proposals),
+                "analysis_window": [START_YEAR, END_YEAR],
+                "stop_reason": stop_reason,
+                "note": "API appears date-descending; fetch stops once a whole batch is before the analysis start year.",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+    )
     return proposals
 
 
@@ -775,6 +812,8 @@ def main() -> None:
     rng = np.random.default_rng(SEED)
 
     raw_proposals = fetch_proxy_monitor()
+    proxy_meta_path = RAW_DIR / "proxy_monitor_fetch_meta.json"
+    proxy_fetch_meta = json.loads(proxy_meta_path.read_text()) if proxy_meta_path.exists() else {}
     as_you_sow = fetch_as_you_sow_snapshot()
     proposals = normalize_proposals(raw_proposals)
     proposals.to_csv(DATA_DIR / "proxy_monitor_proposals_normalized.csv", index=False)
@@ -845,6 +884,8 @@ def main() -> None:
             "prices": "yfinance daily adjusted close downloaded with auto_adjust=False, then explicit Adj Close column",
         },
         "sample": {
+            "proxy_monitor_api_reported_count": proxy_fetch_meta.get("api_reported_count"),
+            "proxy_monitor_fetch_stop_reason": proxy_fetch_meta.get("stop_reason"),
             "proxy_monitor_raw_proposals": int(len(raw_proposals)),
             "proxy_monitor_normalized_proposals": int(len(proposals)),
             "analysis_years": [START_YEAR, END_YEAR],

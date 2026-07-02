@@ -33,7 +33,8 @@ This pilot is not a full Form N-PX mutual-fund-vote panel. It does not observe e
 
 - `research_shareholder_democracy_public_goods_vote_risk_n_p.py`: full reproducible script.
 - `research_shareholder_democracy_public_goods_vote_risk_n_p_results.json`: machine-readable results.
-- `data/raw/proxy_monitor_proposals_raw.json`: raw Proxy Monitor API cache.
+- `data/raw/proxy_monitor_proposals_2020_2024_window_raw.json`: raw Proxy Monitor API cache for the analysis window plus the cutoff boundary batch.
+- `data/raw/proxy_monitor_fetch_meta.json`: API reported count, fetched row count, and stop reason.
 - `data/raw/as_you_sow_resolutions_snapshot.json`: raw As You Sow snapshot cache.
 - `data/raw/yfinance_adj_close_*.csv`: yfinance price cache.
 - `data/proxy_monitor_proposals_normalized.csv`: normalized proposal table.
