@@ -44148,5 +44148,20 @@
     "result": "主線程 hourly-12 已寄 data-grounded 誠實回信（send-alert Re: 為什麼文章補不滿，2026-07-02 12:22 台灣）：釐清 6h=老闆自設節奏、發文率 5-15/日非1/6h、真根因=uncovered-K 庫存耗盡+arc 飽和（非實驗不足）。並派 fresh 事件文 agent（NFP 2026-07-03 T-1 preview，background）補未用的爆款 headroom。待該文 published 後寄連結 close。",
     "needs_close_reply": true,
     "linked_action": "nfp_2026_07_03_t1_event_article_dispatched"
+  },
+  {
+    "id": "platform_ops_graphify_codeonly_pilot_20260702",
+    "title": "[platform_ops] Graphify code-only 零成本試點：src/volpred + scripts 建 graph，量測 hourly agent token 變化",
+    "description": "Boss 2026-07-02 graphify 評估 follow-up。步驟：\n1. uv tool install graphifyy（確認官方來源 github.com/safishamsi/graphify，套件名雙 y）\n2. 只跑 code-only 掃描（純本地 Tree-sitter，不設 API key，不碰 storage/experiments/paper —— 零 API 費用）\n   目標範圍：src/volpred + scripts\n3. graph 輸出掛 MCP server，接給 hourly dispatch agent\n4. 記錄基線：安裝前 7 天 hourly dispatch 平均 token/班（storage/reports/token_usage/）\n5. 觀察 14 天，對比 token 消耗；無明顯下降（<10%）即移除，有下降寫 knowledge entry + 評估擴大\n成功標準：有數據結論（採用 or 移除），不留半掛狀態。",
+    "task_type": "platform_ops",
+    "priority": 4,
+    "status": "pending",
+    "tags": [
+      "platform_ops",
+      "graphify",
+      "pilot"
+    ],
+    "source": "boss_followup_20260702",
+    "created_at": "2026-07-02T04:29:20.089226+00:00"
   }
 ]
