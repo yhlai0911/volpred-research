@@ -1,0 +1,37 @@
+{
+  "captured_at": "2026-07-02T05:25:19.863090+00:00",
+  "metric_scope": "platform_ops category from scripts/token_usage_report.py",
+  "honesty_note": "Current token_usage reports do not isolate hourly-dispatch sessions; platform_ops is the closest reproducible proxy for this pilot.",
+  "baseline_files": [
+    {
+      "file": "storage/reports/token_usage/weekly_2026-06-26.json",
+      "window": "2026-06-26 → 2026-07-03",
+      "category": "platform_ops",
+      "messages": 128,
+      "billable_total": 1289625,
+      "estimated_cost_usd": 75.5933,
+      "billable_total_per_message": 10075.2,
+      "estimated_cost_usd_per_message": 0.590573
+    },
+    {
+      "file": "storage/reports/token_usage/weekly_2026-06-28.json",
+      "window": "2026-06-28 → 2026-07-05",
+      "category": "platform_ops",
+      "messages": 145,
+      "billable_total": 1230291,
+      "estimated_cost_usd": 92.31,
+      "billable_total_per_message": 8484.77,
+      "estimated_cost_usd_per_message": 0.636621
+    },
+    {
+      "file": "storage/reports/token_usage/daily_2026-06-30.json",
+      "window": "2026-06-28 → 2026-07-05",
+      "category": "platform_ops",
+      "messages": 61,
+      "billable_total": 216545,
+      "estimated_cost_usd": 25.2675,
+      "billable_total_per_message": 3549.92,
+      "estimated_cost_usd_per_message": 0.414221
+    }
+  ]
+}
