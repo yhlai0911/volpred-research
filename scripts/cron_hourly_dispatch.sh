@@ -8,7 +8,7 @@
 # TCC copy: ~/.volpred/bin/cron_hourly_dispatch.sh
 # After editing: cp scripts/cron_hourly_dispatch.sh ~/.volpred/bin/ && chmod +x ~/.volpred/bin/cron_hourly_dispatch.sh
 
-REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/Desktop/volpred-research}"
+REPO_ROOT="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/volpred-research}"
 VOLPRED_HOME_DIR="${VOLPRED_HOME_DIR:-/Users/yhlai0911/.volpred}"
 HOURLY_LOG_PATH="${HOURLY_LOG_PATH:-$VOLPRED_HOME_DIR/logs/hourly_dispatch.log}"
 # 2026-06-22: REVERTED the explicit-version pin back to the symlink.
@@ -773,7 +773,7 @@ echo "=== hourly-dispatch end $(date '+%Y-%m-%d %H:%M:%S %Z') (exit=$EXIT_CODE) 
 echo "=== [hourly_dispatch] exit $EXIT_CODE at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
 
 # macOS notification (heredoc avoids nested-quote issues)
-LATEST_COMMIT=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 15 /usr/bin/git -C /Users/yhlai0911/Desktop/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100 | tr -d '"\\')
+LATEST_COMMIT=$(/usr/bin/perl -e 'alarm shift; exec @ARGV' 15 /usr/bin/git -C /Users/yhlai0911/volpred-research log -1 --pretty=format:'%h %s' 2>&1 | head -c 100 | tr -d '"\\')
 NOW=$(date '+%H:%M')
 /usr/bin/osascript <<OSAEND 2>/dev/null || true
 display notification "${LATEST_COMMIT}" with title "volpred hourly-dispatch ${NOW}" sound name "Pop"

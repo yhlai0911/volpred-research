@@ -2,6 +2,27 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 13:23 repo 遷移 backbone「宣稱已完成」與實測不符 — crontab 15 條 / 6 LaunchAgents / 41 shim 仍指 Desktop 舊路徑 — **FIXED + 全數驗證清零**
+
+**現象**：memory `project_repo_moved_out_of_desktop` 記載「同日已遷移：42 個 `~/.volpred/bin/*.sh`、6 個 LaunchAgent plist（已重載）、15 條 crontab」，但 13:17 實測：crontab 15 條 log 路徑、6 個 plist、41 個 shim script、repo 內 5 個 `scripts/cron_*.sh` 執行路徑 + `CLAUDE.md` workflow-index 連結**全部仍是** `/Users/yhlai0911/Desktop/volpred-research`。靠 Desktop symlink 能跑，但 launchd context 走 symlink 仍經過 Desktop TCC 檢查 — **遷移的根治目的（脫離 TCC）實際尚未達成**。
+
+**根因（兩個假說並列，無決定性證據）**：(a) 前一 session 宣稱完成但未實際執行 backbone 切換（或執行失敗未驗證）— 違反「宣告完成前用線上數據 Check」；(b) 某個流程（如 install script / 舊 config 重灌）把 crontab/plist 還原。無論何者，教訓相同：**遷移類任務的「完成」必須以 `grep`/`crontab -l` 實測清零為準，不以改過為準**。
+
+**解決方法（13:17-13:22 本 session 實測補完）**：
+- repo scripts 5 檔（`cron_daily_update.sh`、`cron_hourly_dispatch.sh`、`cron_backup_user_claude.sh`、`cron_dreaming_review.sh`、`cron_daily_update_intraday.sh`、`cron_git_push_backup.sh`）+ `CLAUDE.md` → sed 替換，grep 驗證 0 殘留
+- `~/.volpred/bin/*.sh` 41 檔 → `LC_ALL=C sed`（一般 sed 遇非 UTF-8 byte 報 `illegal byte sequence`），驗證僅剩 `cron_hourly_dispatch.sh:274` 歷史事故敘述文字（刻意保留）
+- crontab 15 條 log 路徑 → `crontab -l | sed | crontab -`，驗證 0 殘留
+- 6 個 LaunchAgent plist → sed + `launchctl bootout`/`bootstrap` 逐一重載；work-dashboard 首次 bootstrap `Input/output error`，sleep 2s 重試成功，`curl http://127.0.0.1:8787` 回 200
+- 刻意不改：experiments `*_results.json` 等歷史紀錄（研究誠實）；`warm_tcc_authorization.sh` 註解與 hourly_dispatch 歷史敘述（描述歷史事實）
+
+## 2026-07-02 13:23 「給任務後 session 中沒有回覆」復發（同日第二波，老闆再次質問）— **CLAUDE.md 固化 turn 結尾順序規則**
+
+**現象**：老闆 13:15 質問「為什麼我現在給你任務後 你都不在 session 中回覆」。同日稍早已因「連續 6 次質問」記 memory `feedback_final_text_after_schedulewakeup`，仍復發 → memory 層級提醒不足。
+
+**根因**：turn 以 tool call（通常是 ScheduleWakeup）作結、給用戶的文字寫在 tool calls 之間 — harness 不顯示「後面還接 tool call 的文字」，用戶看到的是「給了任務、跑了工具、沒有回話」。回報若只走 email 也同樣不滿足「session 內回覆」。
+
+**解決方法**：規則從 memory 升級固化進 `CLAUDE.md` 最高指引段（與 ScheduleWakeup 條款同位階）：固定順序 = 做完工作 → ScheduleWakeup → **最終文字回報**（文字之後零 tool call）；email 不能替代 session 內回覆。復發即屬違反最高指引。
+
 ## 2026-07-02 10:55 **結案：今晚 05:00 起全部 launchd 排程停擺的根因 = claude CLI 自動更新 rotate 版本 → 新 binary 無 Desktop TCC 授權 → launchd context 全滅；10:48 新版本重新取得授權後系統自癒** — **ROOT CAUSE CONFIRMED + RECOVERED**
 
 **老闆指示「立刻徹底盤查」（email-12482 + 互動指示）後的決定性調查結果。**

@@ -44,6 +44,8 @@
 
 任何 turn（用戶 input OR autonomous fire）結尾**最後一個 tool call** 必須是 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，除非用戶明確說「停 loop」/「結束」。Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
 
+**Turn 最終輸出必須是給用戶的文字（2026-07-02 strike 2 固化，與上一條同位階）**：ScheduleWakeup 是「最後一個 tool call」，但 turn 的**最終輸出必須是完整文字回覆，寫在所有 tool calls 之後**。寫在 tool calls 之間的文字 harness 不會顯示給用戶；以 tool call 作結 = 用戶體驗「給了任務卻沒回話」。固定順序：做完工作 → `ScheduleWakeup` → 最終文字回報（結果 + 時間戳 + 下次排程）。email summary 不能替代 session 內文字回覆 — 用戶在 session 給的任務，回報就要在 session 裡。違者 = session 無回覆 incident（memory `feedback_final_text_after_schedulewakeup`；2026-06 首次糾正、2026-07-02 復發）。
+
 **Session start 自動啟動**（2026-05-29 用戶補強）：
 新 interactive session 一開始（識別方式：第一個 user message 不是「停」、「結束」、「stop」等明確終止指令，且 `git log --since='30 min ago'` 或 `storage/ops/last_autonomous_fire.json` 顯示 autonomous loop 已斷 ≥10 min），**主動在第一個回應結尾排 ScheduleWakeup**，不必等用戶明說。這彌補 `/exit` → session 關閉時 ScheduleWakeup chain 斷掉的 gap（2026-05-29 07:43 → 08:13 斷 30 min incident）。
 
@@ -210,7 +212,7 @@
 - **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。
 - `storage/memory/knowledge.json` 同理，禁止整檔讀取。
 - 重複性流程靠 skill，不要每次把長 SOP 貼進主對話。
-- 先看 [`docs/workflow-index.md`](/Users/yhlai0911/Desktop/volpred-research/docs/workflow-index.md) 判斷 workflow / 執行模式，再按需讀對應 skill 全文；不要一開始就把多份長 SOP 全載入。
+- 先看 [`docs/workflow-index.md`](/Users/yhlai0911/volpred-research/docs/workflow-index.md) 判斷 workflow / 執行模式，再按需讀對應 skill 全文；不要一開始就把多份長 SOP 全載入。
 - **若新任務與當前上下文、已載入 skills、或目前正在處理的專案文件無直接關聯，必須另開一個乾淨的 sub-agent 處理。**
 - 用 sub-agent 的目的是隔離大搜尋、大量 logs、文件探索與無關 side task，減少 context 汙染與 token 損耗。
 - **外部論文 / 文件 / 法規 / 大型網頁 RAG → `/notebooklm`**（不要拉整篇 PDF/HTML 進 context）。觸發時機：cross-paper meta-eval、prior-art audit、reviewer R1 drafting、開新方向深挖文獻、paper intro 寫作、法規/公告查詢。**主線程已被授權自主**判斷需要哪些文獻、自主下載 PDF 上傳建主題式 notebook、自主 query 作 RAG（不必逐次徵詢）— 只有大量 quota 消耗（≥10 notebook 或 ≥50 sources）/ audio·video 生成 / 投稿決策仍需確認。完整 SOP 見 `~/.claude/skills/notebooklm/SKILL.md`；專案觸發時機 + 授權範圍細節見 user memory `reference_notebooklm_rag_workflow`。對比：自家 `knowledge.json` / experiments 用 LanceDB（`scripts/build_knowledge_index.py update`），不混用。
