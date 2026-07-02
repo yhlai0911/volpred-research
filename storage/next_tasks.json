@@ -43889,7 +43889,7 @@
     "title": "Paper review (Codex 24h-rule): 你花錢升級了預測模型，對帳單卻更難看：一個關於「準」與「賺」的實測",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c8468b0d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c8468b0d",
@@ -43913,9 +43913,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-02T03:26:21.840243+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-11"
       }
     ],
-    "started_at": "2026-07-02T03:12:10.592988+00:00"
+    "started_at": "2026-07-02T03:12:10.592988+00:00",
+    "completed_at": "2026-07-02T03:26:21.839958+00:00",
+    "result": "24h-rule review PASS: 文章 mile_c8468b0d(準vs賺) 每個數字精確吻合 experiments/k1074/k1074_results.json (net Sharpe 0.861/0.843/0.821, turnover 9.7/16.27, bootstrap diff -0.022 p=0.64, 50/50 p=0.37, n=3338, 2013-2026 SPY/GLD/VIX). Codex 初判 FAIL 為 false-positive (我餵 knowledge.json 摘要而非完整 experiment README+results.json). 文章 grounded/accurate/honest, 無需 erratum. 流程教訓記 error_log 11:25."
   },
   {
     "id": "K1582_article_general",

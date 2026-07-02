@@ -2,6 +2,19 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 11:25 **流程教訓：24h-rule paper_review 必須餵「完整 experiment artifacts」而非 knowledge.json 摘要 — 否則 reviewer 因 ground-truth 不完整而 false FAIL** — **PROCESS FIX**
+
+**問題**：hourly-11 跑 `paper_review_mile_c8468b0d`（文章「你花錢升級了預測模型，對帳單卻更難看：準 vs 賺」）的 Codex 24h-rule review。我把 source ground-truth 從 `knowledge.json` 抽 K1074/K988 摘要餵給 Codex。Codex 回 **FAIL / CRITICAL**：「文章的 net Sharpe 0.861/0.843/0.821、turnover 9.7/16.27、p=0.64/0.37、3338 日 2013-2026 vol-targeting 回測，在 source K1074/K988 中不存在 → 核心主張缺實證 → 疑似從 K988 variance-swap Sharpe 外推」。
+
+**現象/根因**：Codex verdict 是 **false positive**。`knowledge.json` 的 K1074 entry 只摘要了該 experiment 的**一部分**（17-spec VIX 乘法模型 QLIKE/DM model-selection），**沒收錄** K1074 experiment README §7 的 **vol-targeting 策略回測**（12/VIX-VT vs A4f-VT vs GJR-VT，5bp cost，block bootstrap Sharpe-diff）。實際查 `experiments/k1074/k1074_results.json` → 文章**每一個數字精確吻合**（A_12VIX_net 0.8612、B_A4f_net 0.8434、C_GJR_net 0.8205、gross 0.913/0.912、turnover 9.702/16.270、bootstrap diff −0.0217 p=0.636、50/50 p=0.368、BH_5050 0.8727、n_oos=3338）。文章 grounded、accurate、honest → **正確 verdict = PASS**。
+
+**教訓（可推廣，同 K1259「audit full population 不 audit subset」精神）**：
+- 一個 experiment 常是多部分的（model-selection + strategy-backtest + VaR/ES...），但 `knowledge.json` 單一 entry 往往只摘要其中一個 milestone。拿摘要當 review ground-truth → reviewer 看到「數字不在 source」→ false FAIL。
+- **24h-rule paper_review / 任何 content-vs-source 稽核，ground-truth 必須來自實際 experiment artifacts**：`experiments/<kid>/README.md` + `<kid>_results.json`（+ 圖），而非 `knowledge.json` 摘要。摘要只能當「有哪些 experiment」的索引，不能當「該 experiment 產出哪些數字」的真值。
+- 對照檢查：若 reviewer 判「數字不在 source」，先 `ls experiments/<kid>/` + 讀 README/results.json 確認摘要是否只覆蓋部分 milestone，再下 verdict。不可只憑摘要就 FAIL 或下架文章。
+
+**動作**：文章 mile_c8468b0d 判 PASS 保留（無需 erratum/下架）。experiment_refs=['K1074','K988'] 正確。本 entry 為流程固化。
+
 ## 2026-07-02 11:20 **徹底解決落地：repo 遷出 ~/Desktop（→ ~/volpred-research），TCC 從排程等式中永久移除** — **DONE + VERIFIED**
 
 老闆對 TCC 根因報告的裁示是「我要徹底解決」→ 執行選項 (a) 完整遷移。
