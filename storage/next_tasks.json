@@ -44076,7 +44076,7 @@
     "title": "研究 backlog fallback: Direct-indexing / tax-loss-harvesting crowding 是否製造年末 single-stock RV reversal",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Direct-indexing / tax-loss-harvesting crowding 是否製造年末 single-stock RV reversal — 用 S&P 500 / Russell 1000 current constituents（Wikipedia + yfinance/Stooq；承認 survivorship）建 YTD loser / high-unrealized-loss proxy，搭 December tax-loss window、wash-sale 31-day window、ETF replacement basket（sector ETF / sa | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44085,7 +44085,28 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T04:09:23+00:00"
+    "created_at": "2026-07-02T04:09:23+00:00",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-07-02T05:10:31.059609+00:00",
+    "claim_session_id": "7a6ada59e0b7",
+    "status_history": [
+      {
+        "ts": "2026-07-02T05:10:31.059887+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-02T05:17:58.030303+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-13"
+      }
+    ],
+    "started_at": "2026-07-02T05:17:58.030031+00:00",
+    "compute_job": "compute_k1602",
+    "k_id": "K1602",
+    "dispatch_note": "hourly-13: full experiment script written+smoke-tested (experiments/k1602/), enqueued to compute_queue as compute_k1602; interpretation+Codex review+knowledge via followup next hourly PHASE A"
   },
   {
     "id": "research_shareholder_democracy_public_goods_vote_risk_n_p",
@@ -44155,14 +44176,32 @@
     "description": "Boss 2026-07-02 graphify 評估 follow-up。步驟：\n1. uv tool install graphifyy（確認官方來源 github.com/safishamsi/graphify，套件名雙 y）\n2. 只跑 code-only 掃描（純本地 Tree-sitter，不設 API key，不碰 storage/experiments/paper —— 零 API 費用）\n   目標範圍：src/volpred + scripts\n3. graph 輸出掛 MCP server，接給 hourly dispatch agent\n4. 記錄基線：安裝前 7 天 hourly dispatch 平均 token/班（storage/reports/token_usage/）\n5. 觀察 14 天，對比 token 消耗；無明顯下降（<10%）即移除，有下降寫 knowledge entry + 評估擴大\n成功標準：有數據結論（採用 or 移除），不留半掛狀態。",
     "task_type": "platform_ops",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "tags": [
       "platform_ops",
       "graphify",
       "pilot"
     ],
     "source": "boss_followup_20260702",
-    "created_at": "2026-07-02T04:29:20.089226+00:00"
+    "created_at": "2026-07-02T04:29:20.089226+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-02T05:16:04.403027+00:00",
+    "claim_session_id": "c75d756843c3",
+    "status_history": [
+      {
+        "ts": "2026-07-02T05:16:04.403269+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-02T05:16:16.455030+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-02T05:16:16.454781+00:00"
   },
   {
     "id": "email-12500-e17d6e",
