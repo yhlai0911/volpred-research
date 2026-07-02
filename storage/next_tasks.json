@@ -43972,7 +43972,7 @@
     "title": "研究 backlog fallback: PM2.5 情緒型外生 regressor（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: PM2.5 情緒型外生 regressor（NBER w22753 Heyes-Neidell-Saberian + 47-city 延伸）：交易所城市測站日均 PM2.5(環境部/EPA AirNow)當 HAR-RV add-on，檢高污染日(AQI>150)intraday RV/spread 是否升高、連續高污染→risk-off regime（控 VIX 殘差）。識別乾淨（純情緒管道），補行為 vol 軸。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -43981,7 +43981,25 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T03:08:17+00:00"
+    "created_at": "2026-07-02T03:08:17+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-02T06:07:06.182526+00:00",
+    "claim_session_id": "b56ca9c17024",
+    "status_history": [
+      {
+        "ts": "2026-07-02T06:07:06.182833+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-02T06:07:14.800516+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-02T06:07:14.800242+00:00"
   },
   {
     "id": "email-12487-f387d6",
@@ -44031,14 +44049,11 @@
     "id": "daily_article_k1316_vix_taiwan_null_20260702",
     "task_type": "daily_article",
     "priority": 2,
-    "status": "in_progress",
+    "status": "blocked",
     "title": "[daily_article] K1316: 美國 VIX 能預測台股波動嗎?誠實的 NULL — HAR-VIX vs HAR-RV 跨市場檢定",
     "description": "把 K1316 (NULL finding) 寫成一般讀者向 draft。核心:在 HAR-RV 台指期波動模型加入美國 VIX,DM QLIKE t=1.04 p=0.298 (NS,未過 Harvey 3σ),MSE t=-0.73 p=0.463 (NS) → 美 VIX 對台股波動預測無額外幫助,台股自身 RV 已含大部分資訊。arc-dedup 已通過(arc_duplicates=[])。證據:experiments/k1316/",
     "source": "draft_pool_refill",
     "created_at": "2026-07-02T03:39:30Z",
-    "claimed_by": "interactive-claude",
-    "claimed_at": "2026-07-02T03:39:30.384688+00:00",
-    "claim_session_id": "65e8a0854970",
     "status_history": [
       {
         "ts": "2026-07-02T03:39:30.384960+00:00",
@@ -44051,16 +44066,28 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-02T05:50:06.735221+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "interactive-claude",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-02T03:39:30.593020+00:00"
+    "started_at": "2026-07-02T03:39:30.593020+00:00",
+    "last_released_at": "2026-07-02T05:50:06.735207+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-02T06:12:00+00:00",
+    "blocked_note": "arc 已被 5 篇 feed 文章覆蓋，其中 mile_b46e313f (626天台指期實測, 2026-05-21 published) experiment_refs=[K1315,K1316] 即本實驗本身。再寫=第6篇同結論鬼打牆。arc-dedup gate false-negative 需另修。"
   },
   {
     "id": "research_social_connectedness_vol_hirshleifer_peng_wang_r",
     "title": "研究 backlog fallback: Social Connectedness → 財報 vol 反應（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Social Connectedness → 財報 vol 反應（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44069,14 +44096,32 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T04:09:23+00:00"
+    "created_at": "2026-07-02T04:09:23+00:00",
+    "claimed_by": "hourly-14",
+    "claimed_at": "2026-07-02T06:13:05.791393+00:00",
+    "claim_session_id": "3e8bd4b0fffc",
+    "status_history": [
+      {
+        "ts": "2026-07-02T06:13:05.791641+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-14"
+      },
+      {
+        "ts": "2026-07-02T06:13:06.025341+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-14"
+      }
+    ],
+    "started_at": "2026-07-02T06:13:06.025016+00:00"
   },
   {
     "id": "research_direct_indexing_tax_loss_harvesting_crowding_sin",
     "title": "研究 backlog fallback: Direct-indexing / tax-loss-harvesting crowding 是否製造年末 single-stock RV reversal",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Direct-indexing / tax-loss-harvesting crowding 是否製造年末 single-stock RV reversal — 用 S&P 500 / Russell 1000 current constituents（Wikipedia + yfinance/Stooq；承認 survivorship）建 YTD loser / high-unrealized-loss proxy，搭 December tax-loss window、wash-sale 31-day window、ETF replacement basket（sector ETF / sa | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44086,9 +44131,6 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-02T04:09:23+00:00",
-    "claimed_by": "hourly-13",
-    "claimed_at": "2026-07-02T05:10:31.059609+00:00",
-    "claim_session_id": "7a6ada59e0b7",
     "status_history": [
       {
         "ts": "2026-07-02T05:10:31.059887+00:00",
@@ -44101,12 +44143,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-02T06:13:05.558305+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-13",
+        "note": "manual_release"
       }
     ],
     "started_at": "2026-07-02T05:17:58.030031+00:00",
     "compute_job": "compute_k1602",
     "k_id": "K1602",
-    "dispatch_note": "hourly-13: full experiment script written+smoke-tested (experiments/k1602/), enqueued to compute_queue as compute_k1602; interpretation+Codex review+knowledge via followup next hourly PHASE A"
+    "dispatch_note": "hourly-13: full experiment script written+smoke-tested (experiments/k1602/), enqueued to compute_queue as compute_k1602; interpretation+Codex review+knowledge via followup next hourly PHASE A",
+    "last_released_at": "2026-07-02T06:13:05.558040+00:00"
   },
   {
     "id": "research_shareholder_democracy_public_goods_vote_risk_n_p",
