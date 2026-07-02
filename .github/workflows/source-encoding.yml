@@ -1,0 +1,24 @@
+name: Source Encoding Gate
+
+# Zero-tolerance sweep: every .py under src/ tests/ scripts/ must strict-UTF-8
+# decode, carry no U+FFFD, and py_compile. A mojibake-corrupted test file is a
+# silently-vanished gate (docs/error_log.md 2026-07-02 14:11 — 19 regression
+# tests stopped running unnoticed). No baseline, unlike the silent-fallback gate.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Audit source encoding
+        run: python scripts/audit_source_encoding.py

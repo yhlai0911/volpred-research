@@ -13,6 +13,28 @@
 # block backups. Only a definitive new>0 blocks.
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 cd "$ROOT" || exit 0
+
+# --- Gate 1: source encoding sweep (2026-07-02, zero tolerance) -------------
+# Mojibake in a .py silently kills its gate — pytest collection dies and
+# regression tests stop running unnoticed (docs/error_log.md 2026-07-02 14:11).
+# Stdlib-only script; fail-open when script/python absent or on env error
+# (exit 2). Only a definitive corruption (exit 1) blocks.
+if [ -f scripts/audit_source_encoding.py ]; then
+  PY_BIN="$(command -v python3 2>/dev/null)"
+  if [ -n "$PY_BIN" ]; then
+    ENC_OUT="$("$PY_BIN" scripts/audit_source_encoding.py 2>&1)"
+    ENC_RC=$?
+    if [ "$ENC_RC" -eq 1 ]; then
+      printf '%s\n' "$ENC_OUT" | grep '^BAD '
+      echo ""
+      echo "[pre-push] BLOCKED: corrupted .py source (utf-8/U+FFFD/py_compile) — CI Source Encoding Gate would go red."
+      echo "[pre-push] Rebuild the damaged lines from git history or semantics; do NOT delete the file."
+      exit 1
+    fi
+  fi
+fi
+
+# --- Gate 2: silent-fallback audit (2026-06-28, baseline) -------------------
 UV_BIN="${UV_BIN:-/opt/homebrew/bin/uv}"
 [ -x "$UV_BIN" ] || UV_BIN="$(command -v uv 2>/dev/null)"
 [ -n "$UV_BIN" ] || exit 0  # no uv → can't gate → fail-open
