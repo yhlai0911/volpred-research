@@ -46,13 +46,14 @@ gh auth status                    # 確認 Logged in to github.com
 ## 2. Clone 主 repo
 
 ```bash
-cd ~/Desktop                      # ⚠️ 路徑硬編在此：必須是 ~/Desktop/volpred-research
+cd ~                              # ⚠️ 路徑硬編在此：必須是 ~/volpred-research（家目錄根，**禁止放 ~/Desktop/**）
 git clone https://github.com/yhlai0911/volpred-research.git
 cd volpred-research
 ```
 
 **預期**：`ls` 看到 `src/ scripts/ config/ storage/ paper/ experiments/ docs/ .claude/ .env.example`。
-**⚠️ 路徑**：大量 wrapper / plist / config 硬編 `/Users/yhlai0911/Desktop/volpred-research`。新機若放別處或別的 user 名 → 見 §9。
+**⚠️ 路徑**：大量 wrapper / plist / config 硬編 `/Users/yhlai0911/volpred-research`。新機若放別處或別的 user 名 → 見 §9。
+**⚠️ TCC 教訓（2026-07-02）**：repo 曾放 `~/Desktop/`（macOS TCC 保護區），launchd/cron job 無 UI 可回應 TCC 授權 → 排程全面癱瘓 5.8 小時後以 3-strike 重構遷至 `~/volpred-research`。**任何新機都不得把 repo 裝回 Desktop/Documents/Downloads 等 TCC 保護目錄。**
 
 ---
 
@@ -145,7 +146,7 @@ launchctl list | grep volpred | wc -l       # → ~15
 TWSE order-flow + 5min 歷史，**只有特定實驗用，平台運作不需要**。要的話：
 ```bash
 # 法 A：從舊主機 rsync（快）
-rsync -av oldhost:~/Desktop/volpred-research/data/intraday/ data/intraday/
+rsync -av oldhost:~/volpred-research/data/intraday/ data/intraday/
 # 法 B：重新回補（慢，rate-limited，可斷點續傳）
 uv run python scripts/collect_twse_orderflow.py --backfill --start 20120102
 ```
@@ -154,7 +155,7 @@ uv run python scripts/collect_twse_orderflow.py --backfill --start 20120102
 
 ## 9.（只在「不同 user 名 / 不同路徑」時）修硬編
 
-預設假設 `~/Desktop/volpred-research` + user `yhlai0911`。若不同：
+預設假設 `~/volpred-research` + user `yhlai0911`（2026-07-02 起；Desktop 為 TCC 保護區已棄用）。若不同：
 ```bash
 grep -rl yhlai0911 scripts ~/.volpred ~/Library/LaunchAgents config | head -40
 # 全域替換（先備份）：把 /Users/yhlai0911 換成 /Users/<新user>，路徑同理

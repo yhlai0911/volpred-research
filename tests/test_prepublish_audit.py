@@ -183,12 +183,12 @@ if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))
 
 
-# ï¿½”€ï¿½”€ image-URL gate (2026-06-08 ç¼ºï¿½œ– incident) ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€
+# â”€â”€ image-URL gate (2026-06-08 ç¼ºåœ– incident) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 from volpred.publisher.prepublish_audit import audit_image_urls
 
 
 def test_experiments_path_image_blocked():
-    c = "![ï¿½œ–1](https://volpred.zeabur.app/experiments/k674/k674_dd_heatmap.png)"
+    c = "![åœ–1](https://volpred.zeabur.app/experiments/k674/k674_dd_heatmap.png)"
     r = audit_image_urls(c)
     assert r["total"] == 1
     assert len(r["broken"]) == 1
@@ -196,7 +196,7 @@ def test_experiments_path_image_blocked():
 
 
 def test_supabase_article_images_passes():
-    c = "![ï¿½œ–1](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k674_dd_heatmap.png)"
+    c = "![åœ–1](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k674_dd_heatmap.png)"
     r = audit_image_urls(c)
     assert r["total"] == 1
     assert r["broken"] == []
@@ -223,16 +223,16 @@ def test_placeholder_and_api_storage_and_local_blocked():
 
 
 def test_no_images_is_clean():
-    r = audit_image_urls("ï¿½”ï¿½–‡ï¿½­—ï¿½’ï¿½œ‰ï¿½œ–ï¿½€‚")
+    r = audit_image_urls("ç´”æ–‡å­—å…§å®¹ï¼Œå®Œå…¨æ²’æœ‰ä»»ä½•åœ–ç‰‡")
     assert r["total"] == 0
     assert r["broken"] == []
 
 
-# ï¿½”€ï¿½”€ non-stat label exclusions (2026-06-08 K1423 false-positive fix) ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€ï¿½”€
+# â”€â”€ non-stat label exclusions (2026-06-08 K1423 false-positive fix) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def test_tw_ticker_not_flagged_as_stat():
-    # 0050 / 2330.TW next to å ±ï¿½…ï¿½/è¿´ï¿½­ï¿½ must NOT be a provenance claim.
+    # 0050 / 2330.TW next to å ±é…¬/è¿´æ­¸ must NOT be a provenance claim.
     from volpred.publisher.prepublish_audit import extract_numeric_claims
-    c = "ï¿½Šï¿½ï¿½”ï¿½ƒï¿½­ï¿½ 0050 ï¿½š„ alpha ï¿½€ï¿½–‹ï¿½‹å°±ï¿½é¡¯ï¿½‘—ï¿½›ï¿½ï¿½ï¿½ï¿½›ï¿½ 2330.TW å¹´ï¿½Œ–å ±ï¿½…ï¿½ï¿½€‚"
+    c = "å…ƒå¤§ 0050 çš„è¿´æ­¸ alpha ä¸¦ä¸é¡¯è‘—ï¼›å°ç©é›» 2330.TW å¹´åŒ–å ±é…¬ç‡å¦è¨ˆã€‚"
     raws = {x["raw"] for x in extract_numeric_claims(c)}
     assert "0050" not in raws
     assert "2330" not in raws
@@ -240,7 +240,7 @@ def test_tw_ticker_not_flagged_as_stat():
 
 def test_index_name_500_not_flagged():
     from volpred.publisher.prepublish_audit import extract_numeric_claims
-    c = "ï¿½ï¿½™ï¿½™ï¿½ 500ï¿½ˆSPYï¿½‰ï¿½šè¿´ï¿½­ï¿½ï¿½Œå¹´ï¿½Œ– alpha ï¿½„ 9.2%ï¿½€‚"
+    c = "æ¨™æ™® 500ã€SPY çš„è¿´æ­¸é¡¯ç¤ºå¹´åŒ– alpha ç‚º 9.2%ã€‚"
     raws = {x["raw"] for x in extract_numeric_claims(c)}
     assert "500" not in raws
     assert "9.2%" in raws  # real stat still caught
@@ -248,7 +248,7 @@ def test_index_name_500_not_flagged():
 
 def test_methodology_constants_not_flagged():
     from volpred.publisher.prepublish_audit import extract_numeric_claims
-    c = "t ï¿½€ï¿½ï¿½”ï¿½ Newey-West HACï¿½ˆlag=5ï¿½‰ï¿½—ï¿½›å¹´ï¿½Œ– alpha = ï¿½—ï¿½ alpha ï¿½— 252ï¿½€‚"
+    c = "t æª¢å®šæ¡ Newey-West HACï¼ˆlag=5ï¼‰ï¼›å¹´åŒ– alpha = æ—¥ alpha Ã— 252ã€‚"
     raws = {x["raw"] for x in extract_numeric_claims(c)}
     assert "5" not in raws
     assert "252" not in raws

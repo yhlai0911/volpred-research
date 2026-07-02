@@ -1363,6 +1363,21 @@ class Publisher:
             content_audit_flagged = True
             print(f"  ⚠️ prepublish_audit image-URL findings (audit_strict=False bypass):\n  - {img_lines}")
 
+        # Chart-path provenance check — warn-only, never blocks (fail-open).
+        # Stale/machine-absolute chart refs survive publish as provenance and
+        # break future re-publish once the repo path changes (2026-07-02
+        # Desktop→home migration audit finding G3).
+        try:
+            from volpred.publisher.prepublish_audit import audit_details_chart_paths
+            chart_path_audit = audit_details_chart_paths(details)
+            for _cp_item in chart_path_audit.get("flagged", []):
+                print(
+                    "  ⚠️ prepublish_audit chart-path finding (warn-only): "
+                    f"{_cp_item['where']} = {_cp_item['value']} ({_cp_item['reason']})"
+                )
+        except Exception as _chart_exc:
+            print(f"  [prepublish_audit] chart-path check exception (degrading): {_chart_exc}")
+
         # Tier-2 LLM conclusion consistency — fully wrapped; never blocks.
         if not prov.get("skipped"):
             try:

@@ -2,6 +2,32 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 14:15 搬家後遺症全面巡檢（13 agents / 6 維度 + 驗證 + 完整性批判）— 13:25「全數清零」聲稱之外還有 5 層活殘留 — **全數修復 + 全系統驗證清零**
+
+**現象**：老闆指示徹底巡檢搬家後遺症。Workflow 巡檢（36+6 findings）證實 13:25 commit 0f5366ea8 的清零只覆蓋 4 個 surface（crontab/LaunchAgents/shim/scripts），以下 5 層在聲稱範圍外且全是 CONFIRMED_LIVE：
+1. **venv 層（critical）**：editable `.pth` + `direct_url.json` + 42/54 console-script shebang + activate 全指 Desktop → 每個排程 job 的 `import volpred` / `uv run volpred` 都穿越 Desktop symlink 重入 TCC（搬家目的實質未達成）
+2. **git config 層（critical/warn）**：主 repo + frontend 的 `core.hooksPath` 絕對路徑指 Desktop → TCC 一攔 pre-push silent-fallback gate 靜默失效（fail-open 無聲）；volpred-refactor 與 frontend agent worktree 的 back-pointer 指 Desktop
+3. **home 全域層（critical/warn）**：兩個 `~/.claude/projects/` 專案目錄 memory 分岔 — 老闆 13:00 的糾正 memory（feedback_answer_first_then_act）寫進舊目錄、新路徑 session 永遠載不到；`codex-cli` skill 範例命令 `-C` 硬編 Desktop；`settings.json` 16 條舊路徑 allowlist；zeabur MCP 註冊 stranded 在舊 project key
+4. **VS Code window-restore 持久層（warn，復發根源）**：`globalStorage/storage.json` 5 處 + workspace.json 全指 Desktop 且零新路徑條目 — 每次重開 VS Code 自動 restore 舊路徑 workspace → 孵化 Desktop-argv LSP/session → memory 再分岔（13:29 還有 session 寫舊專案目錄的硬證據）
+5. **模板/runbook 層（warn）**：`ops/launchd/` 3 個 plist 模板 7 處 Desktop、`docs/host-migration.md` runbook 教人裝回 `~/Desktop`、`k1204_figures.py` 硬編絕對路徑
+
+**解決方法（14:00-14:15 全數落地 + 逐項驗證）**：`rm -rf .venv && uv sync`（+`--extra dev` 補 pytest）→ shebang/pth/import 全新路徑 0 殘留；兩 repo `git config --unset core.hooksPath`（hook 本在 default 位置）；worktree pointer 檔手動改寫（`git worktree repair` 因 symlink 可解析而跳過）+ `rev-parse` 驗證；memory 合併回新目錄 + 舊 memory 目錄改 symlink 指新（根絕再分岔）；VS Code graceful quit → storage.json/workspace.json 路徑改寫 → 從新路徑重開（hot exit 保未存檔）；codex_loop 從新路徑重啟（PID 40246）+ 清 5 個 6/18 孤兒 notifier；skill/settings/MCP/模板/runbook/k1204 全改；新增 `audit_details_chart_paths`（warn-only、fail-open）防 feed charts 再寫機器絕對路徑。
+
+**教訓（固化）**：
+- **「migration 清零」的驗收單位是全系統不是 patch 範圍** — 自我聲稱的 surface 清單（crontab/plist/shim/scripts）天然漏掉 venv、git config、worktree pointer、home 全域、IDE 持久層這些「不在 repo 裡但持路徑」的層。日後任何路徑遷移，驗收必跑：`.venv` grep、`git config -l`+worktree list、`~/.claude`/`~/.codex`/`~/.gemini` grep、`ps auxww` argv、VS Code storage.json。已寫入 `docs/host-migration.md`。
+- **同 volume `mv` 的三個殘留向量**：running process 的 argv/env 凍結舊字串（cwd inode 會跟走但 re-exec 就炸）；venv 內部絕對路徑全滅；IDE window-restore 會反覆把人拉回舊路徑。
+- **compat symlink 是雙面刃**：讓斷鏈「能動」也讓 `git worktree repair` 這類自癒工具誤判無需修。清零驗證必須 grep 字串而非測「能不能跑」。
+
+## 2026-07-02 14:11 tests/test_prepublish_audit.py mojibake 損壞 → pytest collection 靜默失效（與搬家無關，巡檢途中發現）— **FIXED**
+
+**現象**：巡檢後跑 `pytest tests/test_prepublish_audit.py` 直接 collection ERROR（`invalid start byte`）。8 行中文內容的 lead byte 被 U+FFFD 替換（`圖`=E5 9C 96 變 EF BF BD+9C 96 孤兒 bytes）— image-URL gate（2026-06-08 缺圖 incident）的 19 個 regression tests 從損壞 commit 起**一直沒在跑**，且無人發現。
+
+**根因**：某次 agent 寫入時編碼損壞 + commit 前未跑該測試檔。測試檔壞掉 = gate 靜默消失，與 no-silent-fallback 同構。
+
+**解決方法**：依 assertion 語意重建 8 行（`_is_non_stat_label` 排除路徑逐一對齊：0050 leading-zero、2330.TW suffix、標普 500 prefix、lag=5、×252）→ 19/19 PASS + 相關測試群 30/30 PASS。
+
+**教訓**：寫入含中文的 code/test 檔後至少跑一次 `pytest --collect-only`（或 `python -m py_compile`）；價值在防「測試檔本身壞掉」這種 gate 靜默失效。
+
 ## 2026-07-02 13:23 repo 遷移 backbone「宣稱已完成」與實測不符 — crontab 15 條 / 6 LaunchAgents / 41 shim 仍指 Desktop 舊路徑 — **FIXED + 全數驗證清零**
 
 **現象**：memory `project_repo_moved_out_of_desktop` 記載「同日已遷移：42 個 `~/.volpred/bin/*.sh`、6 個 LaunchAgent plist（已重載）、15 條 crontab」，但 13:17 實測：crontab 15 條 log 路徑、6 個 plist、41 個 shim script、repo 內 5 個 `scripts/cron_*.sh` 執行路徑 + `CLAUDE.md` workflow-index 連結**全部仍是** `/Users/yhlai0911/Desktop/volpred-research`。靠 Desktop symlink 能跑，但 launchd context 走 symlink 仍經過 Desktop TCC 檢查 — **遷移的根治目的（脫離 TCC）實際尚未達成**。
@@ -4333,3 +4359,9 @@ Do not force-release all dedup-flagged drafts. Some blocks are correctly protect
 **教訓（PDCA / 防再犯）**：
 1. **讀者向文章講「N 種檢定都顯著」時，必逐一標明每個檢定的比較對象**——同名統計量（如「兩種檢定」）可能各自對照不同 baseline，不可合併宣稱。撰稿 evidence package 階段就該把 `test → (group A vs group B) → p` 三元組列清楚。
 2. **24h-rule Codex source-level 複審對「已發佈但數字都對」的文章仍有價值**——本案所有數字都對得上 results.json，唯一錯的是敘事把檢定歸錯對照組，純文字/數字核對抓不到，只有讀代碼才發現。
+
+## 2026-07-02 13:58 — turn 結尾無最終文字回覆（同日復發，**3-STRIKE TRIGGER**）
+- **症狀**：13:41 turn 以 ScheduleWakeup tool result 作結、文字寫在 tool calls 之間 → 用戶看到空回覆，連問「有在檢查嗎/又斷了」兩次。
+- **同類 incident**：2026-06 首次糾正（memory feedback_final_text_after_schedulewakeup）、2026-07-02 上午 strike 2（CLAUDE.md 已固化規則）、本次 strike 3。
+- **強制 reaction**：依 Three-Strike Rule 不可再靠「記得」— 需結構性 enforcement（候選：Stop hook 檢查 turn 最終輸出是否為 assistant text、或 turn-end checklist 進 harness config）。refactor plan 待 migration audit 收尾後立即補：docs/refactor_plan_turn_end_enforcement.md。
+- **本次補救**：即刻在本 turn 以正確順序回報（work → ScheduleWakeup → 最終文字）。

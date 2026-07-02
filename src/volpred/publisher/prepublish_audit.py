@@ -432,6 +432,55 @@ def _is_canonical_image_url(url: str) -> bool:
     return False
 
 
+# Repo roots that must NEVER appear in details.charts provenance again.
+# ~/Desktop location was retired 2026-07-02 (TCC migration); a stale absolute
+# path breaks future re-publish normalization once the compat symlink goes away.
+_STALE_REPO_ROOTS = ("/Users/yhlai0911/Desktop/volpred-research",)
+
+
+def audit_details_chart_paths(details: dict | None) -> dict:
+    """Warn-only provenance check on details.charts / image fields.
+
+    Flags (a) stale repo roots (pre-migration ~/Desktop path) and (b) any
+    machine-absolute /Users/ path — chart refs should be repo-relative so the
+    provenance survives host/path migrations. Never blocks publish (fail-open
+    is the caller's responsibility); network-free.
+
+    Returns {"flagged": [{"where","value","reason"}...]}.
+    """
+    flagged: list[dict] = []
+    if not isinstance(details, dict):
+        return {"flagged": flagged}
+
+    def _check(value, where: str) -> None:
+        if not isinstance(value, str) or not value:
+            return
+        for root in _STALE_REPO_ROOTS:
+            if root in value:
+                flagged.append({"where": where, "value": value,
+                                "reason": f"stale repo root ({root}) — repo moved 2026-07-02"})
+                return
+        if value.startswith("/Users/"):
+            flagged.append({"where": where, "value": value,
+                            "reason": "machine-absolute path (prefer repo-relative ref)"})
+
+    charts = details.get("charts")
+    if isinstance(charts, list):
+        for i, entry in enumerate(charts):
+            if isinstance(entry, str):
+                _check(entry, f"charts[{i}]")
+            elif isinstance(entry, dict):
+                for key in ("path", "url", "image_url", "src"):
+                    _check(entry.get(key), f"charts[{i}].{key}")
+    _check(details.get("image_url"), "image_url")
+    for list_key in ("image_urls", "chart_urls"):
+        values = details.get(list_key)
+        if isinstance(values, list):
+            for i, v in enumerate(values):
+                _check(v, f"{list_key}[{i}]")
+    return {"flagged": flagged}
+
+
 def audit_image_urls(content: str) -> dict:
     """Deterministic path-based image gate.
 

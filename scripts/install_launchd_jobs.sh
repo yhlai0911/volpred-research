@@ -11,10 +11,11 @@
 # entries to silent-miss. user-level launchd LaunchAgents stay active
 # by design.
 #
-# TCC FDA bypass: launchd-process itself doesn't have FDA → can't open
-# StandardOutPath in ~/Desktop/. Each cron_*.sh has `exec >> Desktop-log
-# 2>&1` injected at top (bash has FDA via System Settings grant); plist
-# StandardOut/StandardErr go to ~/.volpred/logs/ (non-TCC).
+# Logging layout: each cron_*.sh has `exec >> <repo>/storage/logs/cron/*.log
+# 2>&1` injected at top; plist StandardOut/StandardErr go to ~/.volpred/logs/.
+# (Historical note: repo lived in ~/Desktop/ until 2026-07-02 — a TCC-protected
+# dir that launchd jobs could not log into. Repo now at ~/volpred-research,
+# outside TCC; never install it back under Desktop/Documents/Downloads.)
 
 set -euo pipefail
 

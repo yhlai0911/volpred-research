@@ -26,7 +26,10 @@ np.random.seed(42)
 
 OUT_DIR = Path(__file__).resolve().parent
 RESULTS = OUT_DIR / "k1204_results.json"
-MAIN_REPO_EXP_DIR = Path("/Users/yhlai0911/Desktop/volpred-research/experiments")
+# Relative to this file (experiments/k1204/k1204_figures.py) — no machine-specific
+# absolute path so the replication package stays self-contained (repo relocated
+# out of ~/Desktop on 2026-07-02).
+MAIN_REPO_EXP_DIR = Path(__file__).resolve().parents[1]
 
 # Publication-quality rc
 plt.rcParams.update({

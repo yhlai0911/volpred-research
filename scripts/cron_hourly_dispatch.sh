@@ -271,7 +271,7 @@ send_auth_preflight_alert() {
 "" \
 "## 根因（已於 2026-07-02 決定性實驗確認）" \
 "- macOS TCC 的 Desktop 資料夾授權**綁定 binary 路徑+雜湊**；claude CLI 每 1-2 天自動更新，新版 binary 對 \`~/Desktop\` 預設**無授權**" \
-"- 所有排程 job 的 cwd 在 \`~/Desktop/volpred-research\`（TCC 保護區）→ launchd context 無 UI 可跳授權 → TCC 請求懸置 → 拖累 tccd → 跨行程逾時/EINTR 全滅" \
+"- 歷史事故（2026-07-02，當時 repo 還在 ~/Desktop/volpred-research TCC 保護區；現已搬至 ~/volpred-research，正常情況不應再出現此類失敗）→ launchd context 無 UI 可跳授權 → TCC 請求懸置 → 拖累 tccd → 跨行程逾時/EINTR 全滅" \
 "- 互動 session 不受影響（走已授權 parent app 快速路徑）" \
 "" \
 "## 正確處置（**不要**重開機、**不要**跑 keychain 指令）" \
