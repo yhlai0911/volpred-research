@@ -305,7 +305,11 @@ def send_alert(
     try:
         from volpred.ops.telegram import send_telegram
         tg_text = f"[{normalized_level.upper()}] {normalized_title}\n\n{body}"
-        telegram_result = send_telegram(tg_text, storage_dir=storage_dir)
+        # info 級靜音送達（不響鈴），warn/critical 才推播出聲 — 防 routine tick 騷擾
+        telegram_result = send_telegram(
+            tg_text, storage_dir=storage_dir,
+            disable_notification=(normalized_level == "info"),
+        )
     except Exception as _tg_exc:  # noqa: BLE001 — mirror only, never fatal
         warn("telegram_mirror", "alert mirror failed", err=str(_tg_exc)[:200])
         telegram_result = {"sent": False, "reason": str(_tg_exc)[:200]}
