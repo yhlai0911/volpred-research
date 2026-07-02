@@ -45639,7 +45639,7 @@
     "description": "從市場質疑科技巨頭 AI 資本支出回報率與高集中度切入。可量化：分析 mega-cap 個股的 IV Skew 與 Put/Call Ratio 變化，驗證市場對巨頭獲利不如預期之尾部風險的定價程度。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "in_progress",
+    "status": "blocked",
     "created_at": "2026-07-02T22:00:17+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -45647,9 +45647,6 @@
       "reader_facing",
       "auto_refill"
     ],
-    "claimed_by": "hourly-06",
-    "claimed_at": "2026-07-02T22:11:26.061146+00:00",
-    "claim_session_id": "49d1d7f7b1f0",
     "status_history": [
       {
         "ts": "2026-07-02T22:11:26.061376+00:00",
@@ -45662,9 +45659,39 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-06"
+      },
+      {
+        "ts": "2026-07-02T23:09:30.804676+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-06",
+        "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-02T23:09:31.030647+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-02T23:09:31.257349+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-07"
+      },
+      {
+        "ts": "2026-07-02T23:19:07.898200+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-07",
+        "note": "manual_release"
       }
     ],
-    "started_at": "2026-07-02T22:13:33.470004+00:00"
+    "started_at": "2026-07-02T23:09:31.257048+00:00",
+    "last_released_at": "2026-07-02T23:19:07.897912+00:00",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-02T23:19:08+00:00",
+    "blocked_note": "arc-covered by mile_49616ac2/mile_f5f4cb43/mile_8a5e80b0 (mega-cap skew 指數vs個股, 同metric); cluster 近5週4篇飽和; 07-03 fresh data + migration finding 記錄於 storage/drafts/trending_ai_capex_skew/FINDINGS.md 留待趨勢確認"
   },
   {
     "id": "K1605_article_research",
