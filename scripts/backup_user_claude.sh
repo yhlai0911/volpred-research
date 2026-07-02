@@ -8,7 +8,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$REPO_ROOT/ops/claude_user_backup"
 SRC="$HOME/.claude"
-PROJ_MEMORY="$SRC/projects/-Users-yhlai0911-Desktop-volpred-research/memory"
+# 動態推導當前 repo 對應的 Claude Code session memory 目錄。
+# 2026-07-03 修：原 hardcode 舊 Desktop 路徑（-Users-yhlai0911-Desktop-volpred-research），
+# repo 2026-07-02 搬到 ~/volpred-research 後 stale → 每日 cron 用錯 source + 有人把
+# ops/claude_user_backup/memory 改成 symlink（破壞 git 快照與換機可攜性）。改動態偵測治本。
+PROJ_SLUG="$(printf '%s' "$REPO_ROOT" | sed 's:/:-:g')"
+PROJ_MEMORY="$SRC/projects/$PROJ_SLUG/memory"
 
 mkdir -p "$DEST"
 

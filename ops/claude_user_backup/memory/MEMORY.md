@@ -17,6 +17,7 @@
 - [reference_trending_blog_sources.md](reference_trending_blog_sources.md) — trending_repost 強制掃描清單（havingchien + Stratechery + 凱基/Ranger/元大 + 國外 forums）+ high-viral 3 類 (AI 發展/token maxxing/矽谷裁員)
 
 ## Projects
+- [project_repo_moved_out_of_desktop.md](project_repo_moved_out_of_desktop.md) — 2026-07-02 repo 搬到 ~/volpred-research 根除 TCC；舊 Desktop 路徑=symlink
 - [project_platform_vision_full.md](project_platform_vision_full.md) — 用戶 2026-05-29 完整願景：全自動不間斷自我運營（研究→論文/多元策略/文章→曝光→獲利），所有結果可復現，email 回報+回信指示
 - [project_loop_engineering_layer.md](project_loop_engineering_layer.md) — 2026-06-29 上線 loop-engineering 閉環：loop-health 指標(fast loop)+dreaming 慢 loop(每日 propose-only)+內容巡檢補完；治理檔不自動改
 - [project_refactor_safety_net.md](project_refactor_safety_net.md) — 2026-05-29 大改重構：volpred-refactor worktree + tag stable-pre-refactor-20260529；回滾指令在 docs/refactor_safety_net.md
@@ -63,7 +64,7 @@
 - [feedback_gemini_cli_share_load.md](feedback_gemini_cli_share_load.md) — Gemini CLI 額度健康時主動分攤輕量任務（second-opinion review/大檔摘要/fact-check），prompt 必含 today date 降誤判
 - [feedback_dedup_3_layers_mainthread.md](feedback_dedup_3_layers_mainthread.md) — 派寫作 agent 前主線程必做 3-layer 主題查重（candidates/grep/matrix），不僅靠 agent LanceDB
 - [feedback_email_on_major_decisions.md](feedback_email_on_major_decisions.md) — 重要決策後主動 send_alert email 通知用戶（paper state 變、排程變、quota blocker 等）
-- [feedback_decision_email_html_form.md](feedback_decision_email_html_form.md) — 需老闆做決策的 email 一律嵌 HTML form (radio/textarea/mailto)，不寫「請回信 A/B/C/D」型純文字 prompt（boss email-12393 2026-07-01 硬性要求）
+- [feedback_decision_email_html_form.md](feedback_decision_email_html_form.md) — 需老闆做決策的 email 給可點選選項降摩擦，但 radio/textarea/<form> 在 email 裡破圖（html=False 逃逸+client strip）→ 改用每選項一個 mailto 連結（email-12487 2026-07-02 更正）
 - [feedback_3spec_disambiguation.md](feedback_3spec_disambiguation.md) — Paper 內同 symbol 多 spec 數值差異的 footnote disambiguation + reproduce.py NOTE tier pattern（P1 K1256 + P2 γ 驗證）
 - [feedback_agent_background_codex_polling_unreliable.md](feedback_agent_background_codex_polling_unreliable.md) — paper_review agent 用 background Codex + polling loop pattern 易留孤兒，改 foreground 同步
 
@@ -117,3 +118,7 @@
 - [reference_fb_chrome_browser_autoselect.md](reference_fb_chrome_browser_autoselect.md) — FB 發文固定自選 MAC STUDIO Chrome（deviceId bc09353b…）不問用戶；中文用 pbcopy+Cmd+V
 - [feedback_boss_report_no_fb_handback.md](feedback_boss_report_no_fb_handback.md) — Boss report 禁列「還需要你做：FB awaiting」section（2026-06-08 email-11728 觸發；違反 AI 全自動運營 mission）
 - [feedback_strategy_dev_over_audit.md](feedback_strategy_dev_over_audit.md) — 策略 effort 重發現/開發新策略 > audit 舊；舊策略是平台門面在沒更好的前先維持；audit 發現是 insight 不是 ops trigger
+
+- [feedback_final_text_after_schedulewakeup.md](feedback_final_text_after_schedulewakeup.md) — 回用戶的文字必須是 turn 最終輸出;ScheduleWakeup 先叫、文字最後,否則用戶看不到
+- [feedback_answer_first_then_act.md](feedback_answer_first_then_act.md) — 老闆問問題先答再動手；疑問句第一動作是文字回答不是跑指令；2026-07-02 三連糾正
+- [feedback_telegram_emoji_formatting.md](feedback_telegram_emoji_formatting.md) — Telegram 訊息用 emoji 區隔段落/項目符號、加強重點

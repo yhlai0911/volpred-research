@@ -2,6 +2,24 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-03 06:07 換機備份快照失效 = `ops/claude_user_backup/memory` 被改成 symlink + backup script hardcode 舊 Desktop 路徑 — **FIXED（動態推導路徑 + 恢復真實快照）**
+
+**現象**：hourly-06 fire 巡檢 `git status` 見 `ops/claude_user_backup/memory/` 下 40 檔標 deleted（未 commit），但 `ls` 顯示 105 檔實體存在 — git 與 FS 矛盾。`git add` 該路徑回 `致命錯誤: 路徑規格 ... 位於符號連結中`。
+
+**根因（兩層，皆 repo 搬家遺留）**：
+1. `ops/claude_user_backup/memory` 被某過程（疑 60e571384 TCC fix 時）從**真實快照目錄**改成 **symlink** → 指向活 memory 目錄。symlink 破壞三件事：(a) git 快照（symlink 目標內容不進 repo，原 tracked 的 100 檔真實快照全被判 deleted）、(b) 換機可攜性（symlink 目標是 machine-specific 絕對路徑 `/Users/yhlai0911/.claude/...`，clone 到新機失效 — 違反 backup 唯一目的）、(c) `git add` 拒絕 symlink 內路徑。
+2. `scripts/backup_user_claude.sh:11` `PROJ_MEMORY` **hardcode 舊 Desktop 路徑** `-Users-yhlai0911-Desktop-volpred-research/memory`。repo 2026-07-02 搬到 `~/volpred-research` 後，當前活 memory 已是 `-Users-yhlai0911-volpred-research/memory`（system-reminder 確認）→ 每日 05:35 cron 用 stale source（Desktop 舊 session dir 恰好還存在被舊 session 寫，所以不報錯、silent 用錯資料）。
+
+**解決（永遠修流程不修資料）**：
+1. `scripts/backup_user_claude.sh:11`：改**動態推導** `PROJ_SLUG="$(printf '%s' "$REPO_ROOT" | sed 's:/:-:g')"` → `PROJ_MEMORY="$SRC/projects/$PROJ_SLUG/memory"`。不再 hardcode 任何路徑，repo 搬到哪都自動對上。
+2. 重跑 `bash scripts/backup_user_claude.sh`：line 29 `rm -rf "$DEST/memory"`（無斜線 → 只刪 symlink 不跟隨）→ `cp -R` 真實活 memory → 恢復 105 檔真實快照。git deletion 歸零，backup memory 回正常 git track（M）。
+3. 驗證：`readlink` 推導路徑與活 memory 一致（105 檔）、settings.json.ref 密鑰掃描 clean、deletion count=0。
+
+**教訓（PDCA）**：
+1. **backup 快照必須是「真實檔案副本」不可是 symlink**。symlink 看似即時反映 source，但 backup 的唯一價值是「能隨 repo clone 到新機獨立存在」— symlink 目標一旦不在（換機）即失效，等於沒備份。
+2. **repo 搬家後掃全 codebase 的 hardcode 舊絕對路徑**（`grep -rn "Desktop-volpred-research"` 類）；silent-用錯-source 比 crash 更危險（Desktop 舊 session dir 還在 → script 不報錯照跑 stale 資料）。
+3. **git 說 deleted 但 FS 有檔 + `位於符號連結中` = 路徑被 symlink 化的訊號**，先 `readlink` 逐層定位再處置，勿盲目 commit deletion（會誤刪 git 快照記錄）。
+
 ## 2026-07-02 21:07 `host_cron_fail` CRITICAL 誤報 = Claude Max session 額度窗口被當成 auth 死亡 — **FIXED（quota → exit=75 自我恢復分類）**
 
 **現象**：21:07 hourly fire 巡檢時 dashboard `host_cron_fail` = **CRITICAL**（`storage/logs/cron/hourly_dispatch.log exit=1`）。但 21:07 fire 本身 auth-preflight `ok`、正常以 claude-opus-4-8 運行 — auth 根本沒壞。

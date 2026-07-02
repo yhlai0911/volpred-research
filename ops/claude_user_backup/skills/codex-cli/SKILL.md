@@ -76,7 +76,7 @@ codex exec "<prompt>" 2>/dev/null
 codex exec -m gpt-5.4 -c model_reasoning_effort='"high"' "<prompt>" 2>/dev/null
 
 # 改 working dir + 可寫 sandbox + 不問 approval
-codex exec -C /Users/yhlai0911/Desktop/volpred-research -s workspace-write -a never "<prompt>" 2>/dev/null
+codex exec -C /Users/yhlai0911/volpred-research -s workspace-write -a never "<prompt>" 2>/dev/null
 
 # 結構化輸出（JSON Schema 約束）
 codex exec --output-schema /tmp/schema.json -o /tmp/last.txt "<prompt>" 2>/dev/null
