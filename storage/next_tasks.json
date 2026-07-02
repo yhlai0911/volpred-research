@@ -44415,8 +44415,30 @@
         "to": "pending_main_thread",
         "by": "interactive-claude",
         "note": "created from owner email-12500 Option A decision"
+      },
+      {
+        "ts": "2026-07-02T18:15:13.220146+00:00",
+        "from": "pending_main_thread",
+        "to": "claimed",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-02T18:15:18.571479+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-02"
+      },
+      {
+        "ts": "2026-07-02T18:22:43.537604+00:00",
+        "from": "in_progress",
+        "to": "pending_main_thread",
+        "by": "hourly-02",
+        "note": "A-tick-1 DONE (2026-07-03, commit bc0630965): IJF title/abstract/highlights + intro/results-anchors/synthesis/conclusion reframed to method-null (K1591 gold CI spans 0, K1592 verdict NULL_OR_WEAK 0/N Harvey-Holm sig). Blocking finding #1 (same-windows overclaim) addressed at claim level. NEXT = A-tick-2: full Empirical Results de-claim + wire K1592/K1591 as reproduce-gated tabulated numbers + tab:vt window note; then A-tick-3 manuscript convergence (archive JBF-era main/body) + package docs + reproduce.py>=95% + compliance re-scrub. do_not_advance stays True until new codex multi-round review PASS."
       }
-    ]
+    ],
+    "started_at": "2026-07-02T18:15:18.571180+00:00",
+    "handoff_note": "A-tick-1 DONE (2026-07-03, commit bc0630965): IJF title/abstract/highlights + intro/results-anchors/synthesis/conclusion reframed to method-null (K1591 gold CI spans 0, K1592 verdict NULL_OR_WEAK 0/N Harvey-Holm sig). Blocking finding #1 (same-windows overclaim) addressed at claim level. NEXT = A-tick-2: full Empirical Results de-claim + wire K1592/K1591 as reproduce-gated tabulated numbers + tab:vt window note; then A-tick-3 manuscript convergence (archive JBF-era main/body) + package docs + reproduce.py>=95% + compliance re-scrub. do_not_advance stays True until new codex multi-round review PASS.",
+    "handoff_at": "2026-07-02T18:22:43.537334+00:00"
   },
   {
     "id": "platform_ops_graphify_codeonly_14d_verdict_20260716",
@@ -45397,5 +45419,21 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-02T16:08:47+00:00"
+  },
+  {
+    "id": "K1605_article_general",
+    "title": "K1605: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1605 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1605 — Bank market-to-book (M/B) / Tobin's-Q divergence as a delayed-loss prior for regional-bank realized volatility (RV). Phase-1 first-look (data diagnostic + descriptive + lead-lag screen; heavy formal DM/Harvey/bootstrap/OOS deferred to compute queue via k1605_formal.py). S",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "k_id": "K1605",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-02T18:08:39+00:00"
   }
 ]
