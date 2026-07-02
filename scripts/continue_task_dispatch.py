@@ -47,7 +47,7 @@ SLOT_CAP = 4
 # looks at feed.json, so draft-pool depletion never forces a daily_article-
 # specific top-up. This constant is the dedicated floor for that separate
 # signal; see `_draft_pool_deficit()` / `_maybe_refill_draft_pool()`.
-DRAFT_POOL_FLOOR = 4
+DRAFT_POOL_FLOOR = 6
 # Refill threshold: when agentable count drops below this, dispatcher
 # auto-runs refill_task_pool.py to top up. Keeps the rule "任務池永遠要有
 # 待辦任務" enforceable by mechanism, not by main-thread discipline.

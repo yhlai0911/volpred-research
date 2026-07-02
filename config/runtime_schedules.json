@@ -123,7 +123,7 @@
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_release_pool.sh",
         "log_path": "storage/logs/cron/release_pool.log",
         "command_deprecated": "release-pool-by-settings",
-        "description": "每 6 小時依節奏設定釋出文章池內容（2026-06-30 用戶指定 3h→6h）。對應 .release_settings.json interval_minutes=360。實際 fire 走 piggy-back via check_alerts hourly tick（host cron 只可靠執行 0 * * * *，crontab entry 不 fire 故不需改 crontab）。",
+        "description": "每 4 小時依節奏設定釋出文章池內容（2026-06-30 用戶指定 3h→6h；2026-07-02 用戶指定 6h→4h 加快曝光）。對應 .release_settings.json interval_minutes=240。實際 fire 走 piggy-back via check_alerts hourly tick（host cron 只可靠執行 0 * * * *，crontab entry 不 fire 故不需改 crontab）。",
         "matchers": [
           "release-pool-by-settings",
           "cron_release_pool.sh"
