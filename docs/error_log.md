@@ -2,6 +2,27 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 10:55 **結案：今晚 05:00 起全部 launchd 排程停擺的根因 = claude CLI 自動更新 rotate 版本 → 新 binary 無 Desktop TCC 授權 → launchd context 全滅；10:48 新版本重新取得授權後系統自癒** — **ROOT CAUSE CONFIRMED + RECOVERED**
+
+**老闆指示「立刻徹底盤查」（email-12482 + 互動指示）後的決定性調查結果。**
+
+**根因鏈（每一環都有硬證據）**：
+1. **04:51** claude CLI 自動更新 `2.1.197 → 2.1.198`（`ls -lat ~/.local/share/claude/versions/`：2.1.198 mtime = Jul 2 04:51；symlink `~/.local/bin/claude` 同時切換）。
+2. macOS TCC（隱私權限系統）的 Desktop 資料夾授權是**綁定 binary 路徑+雜湊**的——TCC.db 顯示每個 claude 版本（2.1.145→2.1.198）都有各自獨立的 `kTCCServiceSystemPolicyDesktopFolder` 授權紀錄。**新安裝的 2.1.198 沒有授權**。
+3. 所有排程 job 的工作目錄都在 `~/Desktop/volpred-research`（TCC 保護區）。05:07 起 hourly-dispatch 的 `claude -p`（透過無授權的 2.1.198）在 launchd context 觸發 TCC 檢查 → launchd context 無 UI 可跳授權視窗 → **請求懸置 → 就是我們看到的「卡在 `__open_nocancel`/`__ulock_wait` syscall」的 hang**。
+4. 這些懸置的 TCC authreq 拖累 user tccd（PID 1103），連帶讓**其他 launchd job**（gmail-poll 的 uv/python、git_conflict_guard、pregate、zsh、conda hook）的 TCC 檢查一起劣化——先是逾時（05:00-09:30），後是 EINTR/EPERM 硬拒絕（09:45+）。這解釋了「為什麼多個完全獨立的排程同時中鏢」以及「為什麼互動 session 完全不受影響」（互動 session 的 TCC attribution 走有授權的 parent app 快速路徑，不需要 tccd 做 prompting 決策）。
+5. **10:48:12** TCC.db 出現 2.1.198 的 Desktop 授權（auth_value=2 allowed）——由稍早互動 session 的手動 `claude -p` 測試（08:24）／session 內呼叫從有授權的 parent context 觸發自動授權。授權恢復後懸置請求消化，**10:56 kickstart gmail-poll 驗證：9 秒正常完成 exit=0**（連續 18 次失敗後首次成功），且新的 hourly-dispatch claude 行程（PID 66256）正常執行中。
+
+**決定性實驗（三個臨時診斷 LaunchAgent，已清理）**：A（cwd=/tmp，不碰 Desktop）瞬間正常；B（cwd=Desktop repo）`getcwd: Operation not permitted`；C（cwd=/tmp 但 `ls` Desktop）`Operation not permitted`——確立「launchd context + Desktop 存取」是唯一失敗條件。tccd log 同步顯示 `AUTHREQ kTCCServiceSystemPolicyDesktopFolder` + `Platform binary prompting is 'Deny'`。
+
+**重要修正先前的建議**：**重開機不需要也沒有用**——TCC 授權是持久化資料庫（TCC.db），重開機不會補回缺失的授權；若在 10:48 自癒之前重開機，launchd job 醒來還是一樣全滅，反而誤導。已通知老闆取消重開機建議。
+
+**結構性復發風險（真正要修的東西）**：claude CLI **每 1-2 天自動更新一次**（versions/ 目錄可見 6/30、7/1、7/2 連三天），**每次更新都會重演這齣**：凌晨 update → 白天第一次互動 session 使用前，所有 launchd 排程全滅數小時。歷史上 06-22 的「launchd auth regression」事件很可能也是同一根因被誤診（當時歸因於 CLI 版本 bug）。防復發選項（供決策）：
+- **(a) 搬 repo 出 ~/Desktop**（例如 `~/volpred-research`）：TCC 只保護 Desktop/Documents/Downloads，搬出去就徹底根除此類問題。最乾淨但工程大（全部 hardcoded path、plist、config、nested frontend repo 都要遷移）。
+- **(b) 互動 session 開始時主動「暖授權」**：SessionStart hook 偵測 claude symlink target 變更 → 立刻在 Desktop cwd 下跑一次新 binary 觸發授權——把授權空窗從「數小時」壓到「update 後第一次互動 session 開始」。成本低可先做。
+- **(c) auth-preflight 加 TCC-shaped 失敗辨識**：偵測到 `Operation not permitted`/`getcwd` 特徵 + claude symlink 剛變更時，alert 直接指出「claude 更新導致 TCC 授權失效，開一個互動 session 即可修復」，不再誤導為 load/auth 問題。成本低可先做。
+- 註：純 headless 重新授權**不可行**（TCC 授權需要 UI context / 用戶操作系統設定，AI 不可也不應繞過）。
+
 ## 2026-07-02 10:56 hourly-dispatch preflight-only 成功不寫 canonical exit banner，host_cron_fail 無法低風險清紅燈 — **FIXED（止血，不代表底層 EINTR 根因已解）**
 
 **問題**：`HOURLY_PREFLIGHT_ONLY=1 ~/.volpred/bin/cron_hourly_dispatch.sh` 是驗證 wrapper / pregate / auth-preflight 的低風險 manual fire，但成功路徑只印 `[AUTH-PREFLIGHT] test-only exit...` 後直接 `exit 0`，沒有寫 host-cron parser 認得的 `=== [hourly_dispatch] exit 0 at ... ===` canonical banner。結果是：即使 wrapper 手動 preflight 已恢復，`host_cron_fail` 仍只能看到上一筆 `exit 1`，dashboard 會繼續維持 CRITICAL，迫使操作者只能跑完整 hourly dispatch 才能清掉 infra 紅燈。
