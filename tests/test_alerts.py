@@ -347,7 +347,7 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     # each breached condition sends exactly once (unique titles), in condition order
     assert len(sent_titles) == 3 and len(set(sent_titles)) == 3
     assert sent_titles[0].startswith("Release pool cron gap")
-    assert sent_titles[1] == "Draft pool below threshold (<4)"
+    assert sent_titles[1] == "Draft pool below threshold (<6)"
     assert sent_titles[2] == "Host cron failure detected"
 
 

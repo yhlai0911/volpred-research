@@ -92,6 +92,11 @@ PHASE A — 檢查 compute queue 有無 completed 待 followup:
 
 PHASE B — 派新工:
 
+0. **Draft-pool buffer 優先權（2026-07-02 boss email-12493 硬性指示）**：先查
+   `jq '[.[] | select(.status=="draft")] | length' storage/reports/feed.json` —
+   **draft 數 < 6 時，本班 type 優先選 daily_article（覆寫多樣性規則）**，直到池回到 6。
+   池太薄的根因是「生產速率被設計成剛好等於消耗速率、零 buffer」；6h 釋出 1 篇 + 事件文即發
+   = 每天固定消耗 ~7 篇，補池必須跑在消耗前面而不是等破線再追。dedup / arc-gate 照常必跑。
 1. 跑 `uv run python scripts/continue_task_dispatch.py --report` 看 dispatch state + agentable candidates。
 2. 多樣性檢查: `jq '[.[-5:] | .[] | .task_type]' storage/work_log.json` — 從 11 type 池選不在 last-3 的 type（experiment / paper_decision / paper_body / paper_review / event_article / daily_article / member_qa / strategy_lifecycle / platform_ops / governance / **trending_repost**）。
 
