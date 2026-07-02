@@ -2,6 +2,18 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 10:00-10:15 CRITICAL 升級——症狀從「逾時」惡化成「EINTR 硬性失敗」，且跨多個獨立行程同時發生 — **尚未解決，已再次升級回報**
+
+**現象變化**：09:45 起，gmail-poll 與 hourly-dispatch 的失敗訊息從單純「逾時 exit=142」變成明確的 **`Interrupted system call`（EINTR，errno 4）** 硬性錯誤：
+- gmail-poll：`chdir: error retrieving current directory: getcwd: cannot access parent directories: Interrupted system call`（連續 3 次：09:45、10:00、10:15，皆 `exit=1`，不再是先前的 180s 逾時 `exit=142`）。
+- hourly-dispatch（10:07 那班）：auth-preflight 直接回 `error: An internal error occurred (EINTR)`；接著 `cat: .../cron_hourly_dispatch_codex_failover_prompt.md: Interrupted system call`；codex failover 本身也回 `Error: Interrupted system call (os error 4)`；最後又是一次 `Current directory does not exist`。
+
+**這比純逾時更嚴重的意義**：EINTR 是系統呼叫（`getcwd`/`chdir`/檔案 `read`）**正在執行時被一個訊號打斷**才會出現的 errno——代表這不只是「回應變慢」，而是**有訊號正在干擾這些完全不相關、分屬不同 LaunchAgent 的獨立行程**（gmail-poll 的 `cd` 發生在它自己 script 最前面，甚至還沒執行到任何 perl-alarm 呼叫）。這確認了問題性質是**機器層級、影響多個獨立行程的訊號/系統呼叫層異常**，不是單一 script 的邏輯問題。
+
+**誠實揭露一個無法排除的可能性**：本次事故稍早的修復（`d92c69759`/`1cdbf2ae9`）在 `cron_hourly_dispatch.sh` 內新增了多處 `perl -e 'alarm shift; exec @ARGV'` 逾時包裝，這會讓單一次 hourly-dispatch 執行過程中產生的 alarm-based 訊號事件數量比修復前更多。**無法排除這波新增的訊號流量是否間接助長了本次觀察到的 EINTR 骨牌效應**（例如透過 SIGCHLD 在同一 script 內傳遞、或系統訊號佇列在高頻訊號下產生副作用）——但即使真有這個因素，這仍然是在既有底層異常（05:00 起就開始的卡頓）之上的**次要放大因素**，不是本次事故的起點（gmail-poll 完全獨立的排程、獨立的 LaunchAgent、且其 EINTR 發生在自己 script 最前面尚未執行任何 perl alarm 呼叫之前，也出現一樣的症狀，說明機器層級異常本身早就存在）。
+
+**目前判斷**：症狀持續惡化（逾時 → 硬性 EINTR 失敗），跨行程/跨 LaunchAgent 同時發生，機器仍未重開機（`uptime` 持續累計，未重置）。已再次用 email + PushNotification 升級回報使用者，語氣從「建議評估」改為「症狀惡化，建議儘快處理」。仍然**不會自行執行重開機**（高影響、不可回復性質的操作，且是使用者的機器/工作階段，非我可片面決定）。
+
 ## 2026-07-02 08:25 CRITICAL — gmail-poll 從 05:00 起連續 13 次逾時（3.5+ 小時零成功），確認問題只發生在 launchd 執行環境、手動重跑完全正常 — **尚未解決，已升級回報使用者，懷疑需要 reboot**
 
 **現象**：`gmail_inbox_poll.py`（`*/15 * * * *` LaunchAgent，跟 hourly-dispatch 完全獨立的另一條排程）最後一次成功是 05:00:14，之後 **13 次連續執行**（05:15 → 08:15，每 15 分鐘一次）**全部**卡到自己的 180 秒 ceiling 逾時（exit=142），無一次成功，state 檔案（`storage/ops/gmail_inbox_state.json`）停在 05:00 沒再更新。Dashboard `overall_status` 已因累積的 alert breach 升級為 **critical**（`Host cron failure detected` + `gmail-poll 停擺` + `Draft pool below threshold` 等）。
