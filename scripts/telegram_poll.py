@@ -54,12 +54,16 @@ def _archive(update: dict) -> None:
         f.write(json.dumps(update, ensure_ascii=False) + "\n")
 
 
-def _append_task(text: str, msg_id: int, sender: str) -> str:
+def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -> str:
     """Append a P1 telegram_reply task to the pending queue (gmail-poll contract)."""
     tasks = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
     task_id = f"telegram-{msg_id}"
     if any(t.get("id") == task_id for t in tasks):
         return task_id  # idempotent on daemon restart replay
+    ctx_block = (
+        f"\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n{reply_context}\n---\n"
+        if reply_context else ""
+    )
     tasks.append({
         "id": task_id,
         "task_type": "telegram_reply",
@@ -69,7 +73,7 @@ def _append_task(text: str, msg_id: int, sender: str) -> str:
         "created_at": datetime.now(timezone.utc).isoformat(),
         "title": f"回覆老闆 Telegram 訊息（msg {msg_id}）",
         "description": (
-            f"老闆（{sender}）經 Telegram 傳來訊息，全文：\n---\n{text}\n---\n"
+            f"老闆（{sender}）經 Telegram 傳來訊息，全文：\n---\n{text}\n---\n{ctx_block}"
             "處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 "
             "Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 "
             "python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — "
@@ -106,7 +110,8 @@ def _handle_update(update: dict) -> None:
     if text == "/start":
         return  # handshake handled above; /start itself is not a task
     sender = (msg.get("from") or {}).get("first_name") or "boss"
-    task_id = _append_task(text, msg.get("message_id", 0), sender)
+    reply_ctx = ((msg.get("reply_to_message") or {}).get("text") or "")[:800]
+    task_id = _append_task(text, msg.get("message_id", 0), sender, reply_context=reply_ctx)
     _log(f"task queued: {task_id} ({text[:40]!r})")
     send_telegram(f"收到（已排 P1：{task_id}）。處理中，完成回報。", disable_notification=True)
     _spawn_responder(model=_pick_model(text))

@@ -44,22 +44,41 @@ PROMPT='你是 VolPred 平台的 Telegram 即時回應者。唯一任務：處�
 4. 研究誠實原則適用：數字必須真查真算，不確定就說不確定。時間戳用 `TZ=Asia/Taipei date`。
 5. 全部 drain 完就結束。不進 ops loop、不派 agent、不碰 feed/paper。15 分鐘內收尾。'
 
-# watchdog：CAP_SEC 後殺整個 process group
-(
-    "$CLAUDE_BIN" -p --dangerously-skip-permissions --model "$RESPONDER_MODEL" "$PROMPT" 2>&1 &
-    CPID=$!
+pending_count() {
+    /opt/homebrew/bin/uv run --no-sync python -c "
+import json
+tasks = json.load(open('storage/next_tasks.json'))
+print(sum(1 for t in tasks if t.get('task_type')=='telegram_reply' and t.get('status')=='pending'))" 2>/dev/null || echo 0
+}
+
+run_claude_pass() {
+    # watchdog：CAP_SEC 後殺 responder
     (
-        sleep "$CAP_SEC"
-        if kill -0 "$CPID" 2>/dev/null; then
-            echo "[WATCHDOG] cap ${CAP_SEC}s reached — killing responder $CPID"
-            kill -TERM "$CPID" 2>/dev/null; sleep 5; kill -KILL "$CPID" 2>/dev/null
-        fi
-    ) &
-    WPID=$!
-    wait "$CPID"; RC=$?
-    kill "$WPID" 2>/dev/null
-    exit "$RC"
-)
-RC=$?
+        "$CLAUDE_BIN" -p --dangerously-skip-permissions --model "$RESPONDER_MODEL" "$PROMPT" 2>&1 &
+        CPID=$!
+        (
+            sleep "$CAP_SEC"
+            if kill -0 "$CPID" 2>/dev/null; then
+                echo "[WATCHDOG] cap ${CAP_SEC}s reached — killing responder $CPID"
+                kill -TERM "$CPID" 2>/dev/null; sleep 5; kill -KILL "$CPID" 2>/dev/null
+            fi
+        ) &
+        WPID=$!
+        wait "$CPID"; RC=$?
+        kill "$WPID" 2>/dev/null
+        exit "$RC"
+    )
+}
+
+# Drain loop（2026-07-02 race fix：responder 跑的期間進來的新訊息會被單飛鎖 skip，
+# 原版收尾就走人 → 新任務卡到下則訊息才被撿。改為收尾前回頭看佇列，有 pending
+# 就再跑一輪；上限 3 輪防無限迴圈，剩的留 hourly 兜底）。
+RC=0
+for ROUND in 1 2 3; do
+    run_claude_pass; RC=$?
+    LEFT=$(pending_count)
+    echo "[round $ROUND] exit=$RC, pending 剩 $LEFT"
+    [ "$LEFT" = "0" ] && break
+done
 echo "=== telegram responder end $(date '+%F %T') (exit=$RC) ==="
 exit "$RC"
