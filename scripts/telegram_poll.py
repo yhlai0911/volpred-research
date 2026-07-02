@@ -109,6 +109,26 @@ def _handle_update(update: dict) -> None:
     task_id = _append_task(text, msg.get("message_id", 0), sender)
     _log(f"task queued: {task_id} ({text[:40]!r})")
     send_telegram(f"收到（已排 P1：{task_id}）。處理中，完成回報。", disable_notification=True)
+    _spawn_responder()
+
+
+def _spawn_responder() -> None:
+    """即時 spawn headless responder 處理剛進池的 telegram_reply 任務。
+
+    單飛鎖在 responder script 內（同時多訊息 → 一個 responder drain 全部）。
+    Fail-open：spawn 失敗不影響訊息入池（hourly dispatch 兜底，最壞 ~1h）。
+    """
+    import subprocess
+    script = ROOT / "scripts" / "telegram_responder.sh"
+    try:
+        subprocess.Popen(
+            ["bash", str(script)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        _log("responder spawned")
+    except Exception as exc:  # noqa: BLE001 — hourly dispatch 兜底
+        _log(f"responder spawn failed (hourly 兜底): {exc}")
 
 
 def poll_pass(timeout: int = 25) -> int:
