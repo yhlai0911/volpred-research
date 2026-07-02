@@ -2,6 +2,22 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-02 08:25 CRITICAL — gmail-poll 從 05:00 起連續 13 次逾時（3.5+ 小時零成功），確認問題只發生在 launchd 執行環境、手動重跑完全正常 — **尚未解決，已升級回報使用者，懷疑需要 reboot**
+
+**現象**：`gmail_inbox_poll.py`（`*/15 * * * *` LaunchAgent，跟 hourly-dispatch 完全獨立的另一條排程）最後一次成功是 05:00:14，之後 **13 次連續執行**（05:15 → 08:15，每 15 分鐘一次）**全部**卡到自己的 180 秒 ceiling 逾時（exit=142），無一次成功，state 檔案（`storage/ops/gmail_inbox_state.json`）停在 05:00 沒再更新。Dashboard `overall_status` 已因累積的 alert breach 升級為 **critical**（`Host cron failure detected` + `gmail-poll 停擺` + `Draft pool below threshold` 等）。
+
+**關鍵新證據（排除「機器整體資源耗盡」假說，縮小到 launchd 執行環境本身）**：在互動式 shell 手動重跑**一模一樣**的指令 `uv run python scripts/gmail_inbox_poll.py --max 20`，**9.7 秒內正常完成**，回傳正確結果（`queued=0 skipped=20`）。同一份程式碼、同一台機器、幾乎同一時刻——**LaunchAgent 排程呼叫的版本卡 180 秒逾時，手動互動式呼叫的版本秒回**。這排除了「CPU/記憶體全面耗盡導致任何行程都會變慢」這個先前的假說（若真是機器整體資源耗盡，手動呼叫也該被拖慢），把問題範圍縮小到**只有透過 `launchd`/cron 排程觸發的執行環境本身**才會卡住。
+
+**已檢查、排除或無法確認的因素**：
+- `hourly-dispatch` 的 plist 已設定 `ProcessType: Interactive`（理論上該有較高排程優先權），但仍跟完全沒設這個 key 的 `gmail-poll` 一樣卡住——顯示 `ProcessType` 不是決定性因素，或問題嚴重到這個設定補不回來。
+- `pmset -g` 顯示 `sleep 0 (sleep prevented by caffeinate, powerd, Codex, Claude)`——多個背景行程（含長駐的 `codex_loop.sh` 與 Claude Code 本身）持續持有喚醒鎖，機器 13 天未重啟（`uptime` 顯示 `up 13 days`）。
+- `log show` 對 launchd/jetsam/memorystatus 相關關鍵字查詢因 shell escaping 問題未能取得可用結果，尚未能從系統層日誌直接確認 launchd 內部是否有資源耗盡（thread/port/fd exhaustion）的訊號。
+- 已在另一則記錄中發現的雙常駐 hourly 迴圈（LaunchAgent hourly-dispatch + always-on `codex_loop.sh`）與磁碟 90% 滿、記憶體可用量在 853MB～5.6GB 間大幅波動——這些仍是合理的**間接**促成因素（launchd 要建立新行程時若系統資源緊繃，influenced 的可能是 launchd 本身管理 job 的路徑，而非單純使用者互動行程的路徑），但無法解釋「為什麼手動呼叫完全不受影響、只有 launchd 觸發的受影響」這個更精確的現象，需要更底層的系統診斷才能確認。
+
+**懷疑根因（未證實，需要人工介入才能驗證）**：機器已連續開機 13 天，`launchd` 本身或其管理的某個底層資源（thread pool / mach port / XPC 連線數等）可能已經劣化或耗盡到只影響「透過 launchd 排程觸發的新行程」，而不影響「使用者互動 session 內已存在的 shell 直接執行的新行程」——這類問題通常只能靠**重新開機**驗證是否解決，光靠修 script 或加逾時保護無法根治（逾時保護已經生效，把每次失敗控制在 180s/9-10min 內，避免資源持續累積惡化，但沒有解決「為什麼每次都失敗」）。
+
+**目前狀態**：**未自行執行重開機**——這是會中斷使用者當下所有工作階段、任何未存檔工作、以及這個互動 session 本身的高影響操作，屬於「明確需要用戶個人判斷」的情境，已透過 email + PushNotification 回報使用者，建議使用者評估是否方便重開機或至少手動 `launchctl kickstart` 相關 daemon 來驗證這個假說。在使用者回應前，逾時保護已經是目前能做到的最大止血；若使用者授權，下一步可嘗試 `sudo launchctl bootout`/`bootstrap` 重載受影響的 LaunchAgent 或用 `caffeinate`/`pmset` 調整電源設定作為侵入性較低的替代方案先試。
+
 ## 2026-07-02 05:07/06:07/07:07 連續 3 班 auth-preflight 全 3 次 attempt 皆逾時——已達字面 three-strike 門檻，根因尚未確認（**逾時保護已生效，未再無限期卡住；但底層卡頓本身尚待根治**）
 
 **現象**：05:07、06:07、07:07 三個連續整點 fire，`[AUTH-PREFLIGHT]` 3 次 attempt **全部** exit=142（SIGALRM），無一次在 attempt 1/2 就恢復——這跟 00:07-04:07 五個連續 fire 全部 `[AUTH-PREFLIGHT] ok`（首次即通過）形成強烈對比，確認問題集中在 05:00 之後這個時段，不是全夜性、持續性故障。已用上面「05:07 事故」與「06:07 上線驗證」兩則記錄修好的逾時保護（`run_send_alert` / zshrc-source / `git_conflict_guard.py` / `hourly_dispatch_pregate.py` / codex preflight 誤診）在 07:07 這班全部正確生效——三個逾時點都在各自 ceiling（20s/30s/30s/45s）正確跳過，整班 07:07:35 開始、07:16:46 結束，約 9 分鐘（仍比修復前 32 分鐘短很多），沒有再無限期卡死。
