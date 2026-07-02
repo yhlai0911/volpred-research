@@ -648,12 +648,18 @@ def _parse_draft_pool_state(storage_dir: str) -> dict[str, Any]:
     draft_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "draft")
     scheduled_count = sum(1 for item in feed if isinstance(item, dict) and item.get("status") == "scheduled")
     eligible_count = draft_count + scheduled_count
-    breached = draft_count < 4
-    level = "critical" if draft_count == 0 else "warn"
+    alert_floor = 4
+    # 2026-07-03 (boss telegram-49 follow-up): the dispatcher/refill loop now
+    # self-heals non-empty draft deficits. Keep draft_count=0 as the actionable
+    # page-worthy condition, but avoid noisy warn/critical alerts while 1-3 drafts
+    # still exist and the pool can refill without interrupting the release path.
+    self_healing_deficit = 0 < draft_count < alert_floor
+    breached = draft_count == 0
+    level = "critical" if breached else "info"
     body = "\n".join(
         [
             "## 觸發條件",
-            "Draft 池已低於最小門檻（<4 篇）。",
+            "Draft 池已空（draft_count=0）。",
             f"- draft_count: {draft_count}",
             f"- scheduled_count: {scheduled_count}",
             f"- eligible_count: {eligible_count}",
@@ -686,6 +692,9 @@ def _parse_draft_pool_state(storage_dir: str) -> dict[str, Any]:
             "draft_count": draft_count,
             "scheduled_count": scheduled_count,
             "eligible_count": eligible_count,
+            "alert_floor": alert_floor,
+            "self_healing": self_healing_deficit,
+            "escalates_when_draft_count": 0,
             "feed_path": _relative_repo_path(feed_path),
         },
     }

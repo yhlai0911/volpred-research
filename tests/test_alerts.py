@@ -7,6 +7,7 @@ from pathlib import Path
 from volpred.ops.alerts import (
     _format_telegram_alert_text,
     _parse_content_quality_state,
+    _parse_draft_pool_state,
     _parse_loop_health_state,
     _parse_paper_website_drift_state,
     build_alert_condition_report,
@@ -217,6 +218,80 @@ def test_format_telegram_alert_text_truncates_to_telegram_limit():
     assert len(text) <= 4096
     assert text.startswith("⚠️ [WARN] long body")
     assert text.endswith("…（已截斷，完整內容請看 email）")
+
+
+def test_parse_draft_pool_nonzero_deficit_is_info_observation(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [
+            {"id": "d1", "status": "draft"},
+            {"id": "d2", "status": "draft"},
+            {"id": "d3", "status": "draft"},
+        ],
+    )
+
+    condition = _parse_draft_pool_state(str(storage_dir))
+
+    assert condition["breached"] is False
+    assert condition["level"] == "info"
+    assert condition["body"] == ""
+    assert condition["details"]["draft_count"] == 3
+    assert condition["details"]["self_healing"] is True
+    assert condition["details"]["escalates_when_draft_count"] == 0
+
+
+def test_parse_draft_pool_empty_still_escalates(tmp_path: Path):
+    storage_dir = tmp_path / "storage"
+    _write_json(
+        storage_dir / "reports" / "feed.json",
+        [{"id": "p1", "status": "published"}],
+    )
+
+    condition = _parse_draft_pool_state(str(storage_dir))
+
+    assert condition["breached"] is True
+    assert condition["level"] == "critical"
+    assert condition["details"]["draft_count"] == 0
+    assert condition["details"]["self_healing"] is False
+    assert "Draft 池已空" in condition["body"]
+
+
+def test_check_alert_conditions_does_not_send_nonbreached_info_observations(
+    tmp_path: Path, monkeypatch
+):
+    send_calls: list[tuple[str, str, str]] = []
+
+    monkeypatch.setattr(
+        "volpred.ops.alerts.build_alert_condition_report",
+        lambda **kwargs: {
+            "generated_at": "2026-07-03T00:00:00+00:00",
+            "recipient": "yihao.lai@gmail.com",
+            "breach_count": 0,
+            "conditions": [
+                {
+                    "id": "draft_pool_low",
+                    "breached": False,
+                    "level": "info",
+                    "title": "Draft pool below threshold (<4)",
+                    "body": "",
+                    "details": {"draft_count": 3, "self_healing": True},
+                }
+            ],
+        },
+    )
+
+    def fake_send_alert(level: str, title: str, body: str, **kwargs):
+        send_calls.append((level, title, body))
+        return {"sent": True, "skipped": False}
+
+    monkeypatch.setattr("volpred.ops.alerts.send_alert", fake_send_alert)
+
+    result = check_alert_conditions(storage_dir=str(tmp_path / "storage"))
+
+    assert send_calls == []
+    assert result["sent_count"] == 0
+    assert result["skipped_count"] == 0
 
 
 def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
