@@ -43744,14 +43744,17 @@
     "description": "從科技巨頭 CapEx 與營收回報率的缺口切入，分析市場是否低估了 AI 基建投資的執行風險。可量化：分析科技股隱含波動率（IV）與 CapEx 占營收比重、自由現金流指引修正的相關性，探討波動率溢價是否合理。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "created_at": "2026-07-01T22:00:24+00:00",
     "source": "reader_facing_refill",
     "tags": [
       "trending_repost",
       "reader_facing",
       "auto_refill"
-    ]
+    ],
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-02T03:12:10+00:00",
+    "blocked_note": "arc-covered by today's digest mile_4901f7bc (AI 資本支出專欄 v2 已涵蓋『科技股波動率/選擇權怎麼定價』同邏輯 arc); per feedback_narrative_arc_dedup 同日不同外殼同 arc=dup; 換 fresh trending topic"
   },
   {
     "id": "journal_discovery_20260702_0",
@@ -43843,7 +43846,7 @@
     "description": "Gmail UID: 12482\nMessage-ID: <AC24C96C-CCE3-4FCE-97C9-2A669F700F77@gmail.com>\nFrom: Ivan Lai <yihao.lai@gmail.com>\nDate: Thu, 2 Jul 2026 10:45:56 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 自主 loop fire 10:23 — 症狀惡化：逾時→EINTR 硬性失敗，跨行程同時發生，建議儘快處理\n\n--- 用戶回信內容 ---\n立刻徹底盤查\r\n −−\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月2日 10:23 寫道：\r\n> \r\n> ﻿\r\n> VOLPRED 管理通知\r\n> 自主 loop fire 10:23 — 症狀惡化：逾時→EINTR 硬性失敗，跨行程同時發生，建議儘快處理\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> Autonomous loop fire 10:21（台灣時間，2026-07-02）— 狀況惡化：從逾時變成 EINTR 硬性失敗，跨行程同時發生\r\n> \r\n> 症狀惡化，不是穩定狀態\r\n> \r\n> 09:45 之後，gmail-poll 與 hourly-dispatch 的失敗訊息從單純「逾時」變成明確的 Interrupted system call（EINTR）硬性錯誤：\r\n> \r\n> gmail-poll 連續 3 次（09:45、10:00、10:15）都在自己 script 最前面的 cd 就報 getcwd: cannot access parent directories: Interrupted system call（exit=1，不再是先前的逾時 exit=142）。\r\n> 10:07 那班 hourly-dispatch：auth-preflight 直接回 error: An internal error occurred (EINTR)、cat 指令也報 Interrupted system call、codex failover 也是 Error: Interrupted system call (os error 4)。\r\n> 這代表什麼：EINTR 是系統呼叫執行中被訊號打斷才會出現的錯誤——這次連 gmail-poll 自己 script 最前面、還沒執行到任何逾時包裝的 cd 都中鏢，證實這是機器層級、同時影響多個完全獨立行程的訊號/系統呼叫異常，不是任何單一 script 的邏輯問題。\r\n> \r\n> 誠實揭露：我稍早的逾時修復本身有新增多處 perl alarm 訊號包裝，無法完全排除這波新增訊號流量是否放大了這次的 EINTR 現象——但 gmail-poll 的 EINTR 發生在它自己完全獨立、還沒碰到任何 perl alarm 呼叫的地方，說明底層異常本身在我的修復之前就已存在，我的修復頂多是次要放大因素，不是起點。\r\n> \r\n> 目前立場\r\n> \r\n> 症狀持續惡化而非穩定，強化了盡快處理（重開機）的急迫性。依然沒有自行重開機——這需要老闆判斷時機，已再次用 email + 手機推播升級回報，語氣從「建議評估」改為「症狀惡化建議儘快處理」。\r\n> \r\n> ⏱ 開始/停止 2026-07-02 10:21-10:23（台灣時間）\r\n> ⏭ 下次任務 2026-07-02 10:45（台灣時間）— 縮短間隔緊盯是否持續惡化\n",
     "task_type": "email_reply",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "tags": [
       "email_reply",
       "user_input"
@@ -43869,16 +43872,24 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-02T03:14:08.821863+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
       }
     ],
-    "started_at": "2026-07-02T02:58:19.192630+00:00"
+    "started_at": "2026-07-02T02:58:19.192630+00:00",
+    "completed_at": "2026-07-02T03:14:08.821611+00:00",
+    "result": "徹底盤查完成: 根因=claude CLI 04:51 自動更新(2.1.197→2.1.198)致新 binary 無 Desktop TCC 授權→launchd 排程全滅→tccd 拖累跨行程 EINTR;10:48 互動 session 觸發授權後系統自癒(10:56 gmail-poll 正常)。已落地防復發 (b)warm_tcc_authorization.sh SessionStart hook +(c)cron_hourly_dispatch.sh TCC-shaped 告警辨識,4 tests pass,commit 60e571384。根治選項(a 停用自動更新/b 搬 repo)已寄 HTML 決策表單待 boss 裁示。close-reply email d732090f 已寄。"
   },
   {
     "id": "paper_review_mile_c8468b0d",
     "title": "Paper review (Codex 24h-rule): 你花錢升級了預測模型，對帳單卻更難看：一個關於「準」與「賺」的實測",
     "description": "Per .claude/rules/agent-delegation.md 2026-05-02 K1018 lesson, production article mile_c8468b0d needs Codex source-code-level review within 24h of publish. Pipe article description through `codex exec --skip-git-repo-check` with prompt requesting algorithm/claim verification, esp. lookahead and DM/Harvey overclaims.",
     "priority": 4,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "paper_review",
     "source": "diverse_gen",
     "article_id": "mile_c8468b0d",
@@ -43886,7 +43897,25 @@
       "paper-review",
       "codex-24h-rule"
     ],
-    "created_at": "2026-07-02T03:08:02+00:00"
+    "created_at": "2026-07-02T03:08:02+00:00",
+    "claimed_by": "hourly-11",
+    "claimed_at": "2026-07-02T03:12:10.353431+00:00",
+    "claim_session_id": "11922cc9d4c3",
+    "status_history": [
+      {
+        "ts": "2026-07-02T03:12:10.353701+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-11"
+      },
+      {
+        "ts": "2026-07-02T03:12:10.593302+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-11"
+      }
+    ],
+    "started_at": "2026-07-02T03:12:10.592988+00:00"
   },
   {
     "id": "K1582_article_general",
