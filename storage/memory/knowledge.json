@@ -37162,5 +37162,18 @@
     ],
     "confidence": 0.76,
     "created_at": "2026-07-02T18:26:16.613243"
+  },
+  {
+    "item_id": "3678612e",
+    "category": "event_study_volatility_proxy",
+    "content": "GLP-1 adoption/repricing public-event volatility pilot is NULL/INCONCLUSIVE. experiment_id=research_glp_1_adoption_shock_sector_consumption_healthca; path=experiments/research_glp_1_adoption_shock_sector_consumption_healthca. Data: six GLP-1 adoption or repricing events from 2021-06-04 to 2024-08-20; yfinance adjusted closes from 2020-01-01; groups GLP makers, broad healthcare, diabetes medtech, food/beverage, restaurants; controls SPY/QQQ/IWM. Method: event-level group mean adjusted log RV ratios, baseline T-60..T-11, primary windows T+1..T+5 and T+1..T+22, same-day only diagnostic, event bootstrap B=10000, same-year placebo B=2000, Holm correction. Results: no group x horizon survives; GLP makers 5d mean +0.0137 p_t=0.493 placebo_p=0.320 Holm=1.0; GLP makers 22d mean +0.0793 p_t=0.360 placebo_p=0.353 Holm=1.0; food/beverage and restaurants are negative on 5d. Treat as bounded public-equity event-study null, not evidence against real GLP-1 consumption or healthcare impacts.",
+    "evidence": [
+      "experiments/research_glp_1_adoption_shock_sector_consumption_healthca/README.md",
+      "experiments/research_glp_1_adoption_shock_sector_consumption_healthca/research_glp_1_adoption_shock_sector_consumption_healthca.py",
+      "experiments/research_glp_1_adoption_shock_sector_consumption_healthca/research_glp_1_adoption_shock_sector_consumption_healthca_results.json",
+      "experiments/research_glp_1_adoption_shock_sector_consumption_healthca/codex_review.md"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-07-02T19:19:36.998387"
   }
 ]
