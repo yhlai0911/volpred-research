@@ -14,6 +14,20 @@
 
 **目前立場**：逾時保護（已 commit `d92c69759` + `1cdbf2ae9`）已把「單班無限期卡死、零產出」的立即風險徹底消除，這是 P0 的正確優先順序（先止血）。但連續 3 次同一時段全部 3-attempt 全滅，已達 Three-Strike Rule 字面門檻，**根本原因調查仍在進行中，不能就此結案**——待磁碟盤點結果與後續幾班觀察（是否 08:07 之後恢復正常）確認是否為磁碟空間壓力、或需要更底層的系統診斷（`fs_usage`/`log show` 等）。
 
+**追加（08:07 那班確認：連續第 4 次同樣全滅，找到更有力的根因候選）**：08:07 那班（第 4 個連續 fire）再次出現一模一樣的完整失敗序列（`git_conflict_guard`/`pregate` 逾時 → auth-preflight 3 次全滅 → zshrc/send-alert/codex-preflight 全部逾時但正確被 ceiling 擋下），07:07:35→08:16:41 累積四個小時、零實際派工。這次 08:2x 巡檢時系統已恢復正常（現場重跑 `claude -p ping` 4.2 秒內回應、DNS/Anthropic API 狀態頁均正常、`status.claude.com` 顯示 all systems operational），確認問題不是持續性外部故障，而是**間歇性、與特定時間窗相關**的機器內部資源競爭。
+
+深入追查發現一個先前沒注意到的關鍵因素——**這台機器上同時跑著兩個獨立、不同步的「每小時」派工迴圈**：
+1. `com.volpred.hourly-dispatch`（LaunchAgent，固定整點 `:07` 觸發，本次事故一直在追查的對象）
+2. **`scripts/codex_loop.sh`**（PID 49233，透過 `.claude/settings.json` 的 SessionStart hook 由 `auto_start_codex_loop.sh` 自動啟動，設計為「always-on，跟著 VSCode/Claude session 常駐」，自身排程是 tick 完成後 `sleep 3600s` 才觸發下一輪——**跟 LaunchAgent 的固定 `:07` 完全不同步**，且已經連續運作超過 8 天。這個迴圈本身也會呼叫 `codex exec resume --last` 做**同一份 repo** 的真實派工（claim task / commit），跟 hourly-dispatch 是完全獨立的第二個 writer）。
+
+`git_conflict_guard.py` 檔頭本身早就有註解點出「兩個 dispatcher 同時寫這個 branch（Claude hourly + always-on codex_loop）」，但先前只把這個事實用在處理「merge conflict 善後」，沒人往下推導「兩者的**重子行程**（`claude -p` / `codex exec`，皆為吃 CPU/記憶體的 LLM CLI 呼叫）若剛好同時執行，是否會造成資源競爭進而拖慢/卡住系統層級的 syscall」。
+
+佐證：本輪測到的 `vm_stat` 兩次讀數差異很大——事故調查當下（07:2x）free pages 只有 52059（**約 853MB**，64GB 實體記憶體的機器上這樣的可用記憶體相當吃緊），08:2x 系統恢復後再測則回升到 349839 free pages（**約 5.6GB**）。搭配磁碟 90% 滿（less swap/compress 空間）與兩個獨立 heavy-subprocess 迴圈可能重疊執行，構成一個連貫、可信的假說鏈：**兩個常駐 hourly 迴圈的重子行程偶爾同時執行 → 記憶體瞬間吃緊（加上磁碟已滿導致 OS 記憶體回收效率降低）→ 任何新開的子行程（含完全無關、輕量的本地 `uv run python` 呼叫）在 spawn 階段的底層 syscall 都可能被拖慢到數分鐘**。這比單純「load average 偏高」更精確地解釋了「當下 `ps aux` 查不到任何 claude/codex process，但 syscall 依然卡住數分鐘」這個先前無法解釋的觀察（重子行程可能已經執行完、釋放了 CPU，但其造成的記憶體/分頁壓力尚未完全消退）。
+
+**尚未做的事（刻意不在本輪自動執行，需要使用者判斷）**：
+- 這是一個**架構層級的取捨**（是否要讓兩個獨立 hourly 迴圈互相協調時序、合併成一個、或接受現狀靠已上線的逾時保護止血），不是單純的 bug fix——`codex_loop.sh` 是使用者透過 SessionStart hook 刻意設計成「跟著 session 常駐」的第二個 agent，不是我可以片面決定關掉或改排程的東西。
+- 已把數據與假說完整記錄，回報給使用者參考；若使用者同意，下一步可設計的方向包括：(a) 幫兩個迴圈的重子行程加一個共用 lock，同一時刻只准一個在跑（犧牲一點並行度換取穩定性）、(b) 讓 `codex_loop.sh` 避開 `:00-:20` 這個 hourly-dispatch 的高峰時段、(c) 純粹接受現狀，因為逾時保護已經把最壞情況從「無限期卡死」降到「每班浪費固定 ~9 分鐘」。
+
 ## 2026-07-02 05:07 hourly-dispatch 整班 32 分鐘零產出——auth-preflight 恢復路徑內三處無逾時保護的呼叫連環卡住 — **FIXED**
 
 **觸發**：05:07 CST 那班 hourly-dispatch 的 auth-preflight 又遇到（跟 23:07/23:45 那次相同根因的）系統負載造成逾時。但這次進入「恢復路徑」後，**連續三個原本設計來處理失敗的呼叫本身也各自卡住**，讓整班從 05:07:04 跑到 05:39:29（32 分鐘），期間零實際派工:
