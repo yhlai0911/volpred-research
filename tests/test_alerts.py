@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from volpred.ops.alerts import (
+    _format_telegram_alert_text,
     _parse_content_quality_state,
     _parse_loop_health_state,
     _parse_paper_website_drift_state,
@@ -142,6 +143,80 @@ def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypa
     dedup_path = storage_dir / "ops" / "alert_dedup.json"
     dedup = json.loads(dedup_path.read_text(encoding="utf-8"))
     assert dedup["alerts"][first["alert_key"]]["last_notification_id"] == "notif-1"
+
+
+def test_send_alert_telegram_mirror_formats_markdown_without_mutating_email_body(
+    tmp_path: Path, monkeypatch
+):
+    storage_dir = tmp_path / "storage"
+    email_bodies: list[str] = []
+    telegram_calls: list[dict[str, object]] = []
+    body = (
+        "# Hourly-22 send-alert smoke\n\n"
+        "## 觸發條件\n"
+        "- queue mirror check\n"
+        "| 項目 | 結果 |\n"
+        "|---|---|\n"
+        "| emoji | ok |\n"
+    )
+
+    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+        email_bodies.append(body)
+        return {
+            "notification_id": "notif-tg-format",
+            "subject": f"[VolPred Alert][{level.upper()}] {title}",
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        }
+
+    def fake_send_telegram(text: str, *, storage_dir: str, disable_notification: bool):
+        telegram_calls.append(
+            {
+                "text": text,
+                "storage_dir": storage_dir,
+                "disable_notification": disable_notification,
+            }
+        )
+        return {"sent": True, "message_ids": [123]}
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+    monkeypatch.setattr("volpred.ops.telegram.send_telegram", fake_send_telegram)
+
+    result = send_alert(
+        "info",
+        "tg mirror format",
+        body,
+        recipient="yihao.lai@gmail.com",
+        storage_dir=str(storage_dir),
+        force_send=True,
+    )
+
+    assert email_bodies == [body]
+    assert result["telegram"] == {"sent": True, "message_ids": [123]}
+    assert len(telegram_calls) == 1
+    tg_text = str(telegram_calls[0]["text"])
+    assert telegram_calls[0]["disable_notification"] is True
+    assert tg_text.startswith("ℹ️ [INFO] tg mirror format")
+    assert "📌 Hourly-22 send-alert smoke" in tg_text
+    assert "🚦 觸發條件" in tg_text
+    assert "• queue mirror check" in tg_text
+    assert "• 項目: 結果" in tg_text
+    assert "• emoji: ok" in tg_text
+    assert "## " not in tg_text
+    assert "|---" not in tg_text
+
+
+def test_format_telegram_alert_text_truncates_to_telegram_limit():
+    text = _format_telegram_alert_text(
+        level="warn",
+        title="long body",
+        body="x" * 5000,
+    )
+
+    assert len(text) <= 4096
+    assert text.startswith("⚠️ [WARN] long body")
+    assert text.endswith("…（已截斷，完整內容請看 email）")
 
 
 def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):

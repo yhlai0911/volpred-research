@@ -37,6 +37,7 @@ from .scheduler import get_scheduler_state
 ALERT_RECIPIENT = "yihao.lai@gmail.com"
 ALERT_LEVELS = ("info", "warn", "critical")
 ALERT_DEDUP_WINDOW = timedelta(hours=24)
+TELEGRAM_ALERT_MAX_CHARS = 4096
 SCHEDULER_STALE_WINDOW = timedelta(minutes=30)
 RELEASE_POOL_GAP_BUFFER = timedelta(minutes=60)  # grace on top of configured interval
 WORK_LOG_STALE_WARN_HOURS = 24.0
@@ -159,6 +160,116 @@ def _load_alert_dedup(storage_dir: str = "storage") -> dict[str, Any]:
 def _save_alert_dedup(storage_dir: str, payload: dict[str, Any]) -> None:
     payload["updated_at"] = _utc_now().isoformat()
     dump_json(_alert_dedup_path(storage_dir), payload)
+
+
+_TELEGRAM_LEVEL_EMOJI = {
+    "critical": "🔴",
+    "warn": "⚠️",
+    "info": "ℹ️",
+}
+
+_TABLE_SEPARATOR_RE = re.compile(
+    r"^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$"
+)
+
+
+def _telegram_heading_emoji(text: str) -> str:
+    lowered = text.lower()
+    if any(token in text for token in ("觸發", "條件", "門檻")):
+        return "🚦"
+    if any(token in text for token in ("結果", "狀態", "摘要", "進度")):
+        return "📊"
+    if any(token in text for token in ("行動", "下一步", "修復", "處理", "建議")):
+        return "🛠️"
+    if any(token in text for token in ("驗證", "測試", "檢查")):
+        return "🧪"
+    if any(token in text for token in ("風險", "錯誤", "失敗", "異常")) or any(
+        token in lowered for token in ("risk", "error", "fail")
+    ):
+        return "⚠️"
+    if any(token in text for token in ("資料", "來源", "連結")):
+        return "📎"
+    return "📌"
+
+
+def _clean_telegram_inline(text: str) -> str:
+    cleaned = text.strip()
+    cleaned = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1: \2", cleaned)
+    cleaned = re.sub(r"`([^`]+)`", r"\1", cleaned)
+    cleaned = re.sub(r"\*\*([^*]+)\*\*", r"\1", cleaned)
+    cleaned = re.sub(r"__([^_]+)__", r"\1", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned.strip()
+
+
+def _trim_telegram_alert_text(text: str, max_chars: int = TELEGRAM_ALERT_MAX_CHARS) -> str:
+    if len(text) <= max_chars:
+        return text
+    suffix = "\n\n…（已截斷，完整內容請看 email）"
+    if max_chars <= len(suffix):
+        return suffix[-max_chars:]
+    return f"{text[: max_chars - len(suffix)].rstrip()}{suffix}"
+
+
+def _format_telegram_alert_text(
+    *, level: str, title: str, body: str, max_chars: int = TELEGRAM_ALERT_MAX_CHARS
+) -> str:
+    """Format the Telegram mirror only; email keeps the original markdown body."""
+    level_emoji = _TELEGRAM_LEVEL_EMOJI.get(level, "🔔")
+    lines: list[str] = [f"{level_emoji} [{level.upper()}] {title.strip()}"]
+
+    for raw_line in (body or "").splitlines():
+        stripped = raw_line.strip()
+        if not stripped:
+            if lines[-1] != "":
+                lines.append("")
+            continue
+
+        heading = re.match(r"^(#{1,6})\s+(.+)$", stripped)
+        if heading:
+            text = _clean_telegram_inline(heading.group(2))
+            if lines[-1] != "":
+                lines.append("")
+            lines.append(f"{_telegram_heading_emoji(text)} {text}")
+            continue
+
+        if _TABLE_SEPARATOR_RE.match(stripped):
+            continue
+
+        if stripped.startswith("|") and stripped.endswith("|"):
+            cells = [
+                _clean_telegram_inline(cell)
+                for cell in stripped.strip("|").split("|")
+                if _clean_telegram_inline(cell)
+            ]
+            if not cells:
+                continue
+            if len(cells) == 1:
+                lines.append(f"• {cells[0]}")
+            else:
+                lines.append(f"• {cells[0]}: {' | '.join(cells[1:])}")
+            continue
+
+        bullet = re.match(r"^(?:[-*+]|\u2022)\s+(.+)$", stripped)
+        if bullet:
+            lines.append(f"• {_clean_telegram_inline(bullet.group(1))}")
+            continue
+
+        numbered = re.match(r"^(\d+)[.)]\s+(.+)$", stripped)
+        if numbered:
+            lines.append(f"{numbered.group(1)}. {_clean_telegram_inline(numbered.group(2))}")
+            continue
+
+        quote = re.match(r"^>\s+(.+)$", stripped)
+        if quote:
+            lines.append(f"💬 {_clean_telegram_inline(quote.group(1))}")
+            continue
+
+        lines.append(_clean_telegram_inline(stripped))
+
+    rendered = "\n".join(lines).strip()
+    rendered = re.sub(r"\n{3,}", "\n\n", rendered)
+    return _trim_telegram_alert_text(rendered, max_chars=max_chars)
 
 
 def _dispatch_alert_email(
@@ -304,14 +415,11 @@ def send_alert(
     telegram_result: dict[str, Any] | None = None
     try:
         from volpred.ops.telegram import send_telegram
-        # 2026-07-02 (boss): Telegram 訊息要用 emoji 區隔/加強重點 — mirror 路徑
-        # 之前只送純 `[LEVEL] title` 前綴，boss 抱怨沒 emoji。依 level 加 emoji 前綴。
-        _level_emoji = {
-            "critical": "🔴", "warn": "⚠️", "info": "ℹ️",
-            "pass": "✅", "fail": "❌",
-        }
-        _emoji = _level_emoji.get(normalized_level, "🔔")
-        tg_text = f"{_emoji} [{normalized_level.upper()}] {normalized_title}\n\n{body}"
+        tg_text = _format_telegram_alert_text(
+            level=normalized_level,
+            title=normalized_title,
+            body=body,
+        )
         # info 級靜音送達（不響鈴），warn/critical 才推播出聲 — 防 routine tick 騷擾
         telegram_result = send_telegram(
             tg_text, storage_dir=storage_dir,

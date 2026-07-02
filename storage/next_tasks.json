@@ -45161,5 +45161,41 @@
         "by": "complete"
       }
     ]
+  },
+  {
+    "id": "platform-ops-tg-emoji-mirror",
+    "task_type": "platform_ops",
+    "priority": "P3",
+    "source": "telegram-45-followup",
+    "status": "succeeded",
+    "created_at": "2026-07-02T14:40:00.000000+00:00",
+    "title": "send-alert → Telegram mirror 加 emoji 段落格式化",
+    "description": "老闆 telegram-45 反映：自主 loop 的 send-alert 巡檢 mirror 到 TG 時，body 直接沿用 email markdown（## 標題/表格），沒 emoji 段落區隔，與手打 telegram-send 訊息風格不一致。改 src/volpred/ops/alerts.py:306-321 mirror 前對 body 做輕量 TG 格式化（依 memory feedback_telegram_emoji_formatting：emoji 區隔段落/項目符號、加強重點），或抽一個 markdown→telegram 格式化 helper。注意 TG 4096 字上限與 send-alert email 版本不受影響（只轉 TG 分支）。改完 build/test + 實發一則 info alert 驗證 TG 端 emoji 呈現。",
+    "claimed_by": "codex-failover",
+    "claimed_at": "2026-07-02T15:03:04.758968+00:00",
+    "claim_session_id": "e92b0c1f49b9",
+    "status_history": [
+      {
+        "ts": "2026-07-02T15:03:04.759245+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T15:03:09.074785+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover"
+      },
+      {
+        "ts": "2026-07-02T15:06:52.788348+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover"
+      }
+    ],
+    "started_at": "2026-07-02T15:03:09.074518+00:00",
+    "completed_at": "2026-07-02T15:06:52.788076+00:00",
+    "result": "send-alert Telegram mirror now formats markdown into emoji-sectioned TG text only on the mirror branch; email body stays unchanged. Verified with tests/test_alerts.py (19 passed), py_compile, git diff --check, and live info alert notification_id=0e7a6c34 / TG message_id=51."
   }
 ]
