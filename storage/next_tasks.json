@@ -44186,7 +44186,7 @@
     "title": "研究 backlog fallback: Shareholder-democracy public-goods vote risk：N-PX / contested ESG proposal 是否預測 firm RV 與 sector spillover",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Shareholder-democracy public-goods vote risk：N-PX / contested ESG proposal 是否預測 firm RV 與 sector spillover — 用 SEC Form N-PX、company proxy statements、annual-meeting dates、major shareholder proposal outcomes 建公開 vote-event set，標記 environmental/social/public-goods proposal、close vote、large index-manag | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -44211,9 +44211,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-02T08:02:09.520385+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-02T07:28:26.845471+00:00"
+    "started_at": "2026-07-02T07:28:26.845471+00:00",
+    "completed_at": "2026-07-02T08:02:09.520013+00:00",
+    "result": "Completed bounded Proxy Monitor/yfinance shareholder public-goods vote-risk pilot. Verdict null_or_inconclusive: firm public-goods RV uplift weak but insignificant; sector ETF spillover null; knowledge item 5d93eceb recorded."
   },
   {
     "id": "email-12493-c51a31",

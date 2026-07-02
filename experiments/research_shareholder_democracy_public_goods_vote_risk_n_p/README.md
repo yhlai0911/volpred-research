@@ -52,10 +52,22 @@ This pilot is not a full Form N-PX mutual-fund-vote panel. It does not observe e
 
 ## Current Result
 
-Run:
+Completed run:
 
 ```bash
 uv run python experiments/research_shareholder_democracy_public_goods_vote_risk_n_p/research_shareholder_democracy_public_goods_vote_risk_n_p.py
 ```
 
-Then read `research_shareholder_democracy_public_goods_vote_risk_n_p_results.json` for the verdict and diagnostics.
+Verdict: `null_or_inconclusive`.
+
+Key diagnostics:
+
+- Proxy Monitor API reported 10,953 proposal rows; the script fetched 3,200 rows and stopped once the date-descending API crossed before the 2020 analysis window.
+- Analysis sample: 2,911 proposals from 2020-2024, 242 firms, 1,184 firm-date events.
+- Price coverage: 1,103/1,184 firm-date events with usable yfinance history and 340/340 sector ETF event rows.
+- Public-goods firm events: mean scaled abnormal next-day RV = 1.415, bootstrap 95% CI [-0.053, 3.510], t-test p = 0.127.
+- Public-goods vs other proposal events: mean difference = 1.240, bootstrap 95% CI [-0.227, 3.284], Welch p = 0.187.
+- OOS QLIKE public-goods event multiplier: loss difference = -0.784, bootstrap 95% CI [-2.612, 0.208], paired p = 0.300.
+- Sector ETF spillover: mean scaled abnormal RV = 0.053, bootstrap 95% CI [-0.156, 0.284], p = 0.645.
+
+Interpretation: this public-data pilot does not provide a statistically reliable firm-RV or sector-spillover signal. There is weak positive firm-level direction in some specifications, but confidence intervals include zero and the OOS QLIKE improvement is not significant. A full N-PX/ISS/FactSet panel remains required before making a stronger claim about large-manager vote pressure or contested ESG proposal channels.

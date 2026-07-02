@@ -265,6 +265,8 @@ def normalize_ticker(ticker: object) -> str | None:
     text = text.replace("/", "-").replace(".", "-")
     if not re.match(r"^[A-Z0-9-]+$", text):
         return None
+    if not re.search(r"[A-Z0-9]", text):
+        return None
     return text
 
 
@@ -398,6 +400,42 @@ def extract_adj_close(downloaded: pd.DataFrame, requested: list[str]) -> pd.Data
     return downloaded[[column]].rename(columns={column: symbol})
 
 
+def download_one_price_series(symbol: str, force: bool = False) -> pd.Series | None:
+    cache = RAW_DIR / f"yfinance_{symbol}_{PRICE_START}_{PRICE_END}_adj_close.csv"
+    if cache.exists() and not force:
+        frame = pd.read_csv(cache, parse_dates=["Date"], index_col="Date")
+        if "Adj Close" in frame.columns:
+            series = pd.to_numeric(frame["Adj Close"], errors="coerce").dropna()
+            series.name = symbol
+            return series
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            downloaded = yf.download(
+                symbol,
+                start=PRICE_START,
+                end=PRICE_END,
+                auto_adjust=False,
+                progress=False,
+                threads=False,
+                timeout=15,
+            )
+        except Exception:
+            return None
+    adj = extract_adj_close(downloaded, [symbol])
+    if adj.empty or symbol not in adj.columns:
+        return None
+    series = pd.to_numeric(adj[symbol], errors="coerce").dropna()
+    series.index = pd.to_datetime(series.index).tz_localize(None)
+    series = series[~series.index.duplicated(keep="last")].sort_index()
+    if series.size < ROLLING_BASELINE_DAYS + 5:
+        return None
+    series.to_frame("Adj Close").to_csv(cache, index_label="Date")
+    series.name = symbol
+    return series
+
+
 def download_price_panel(tickers: Iterable[str], force: bool = False) -> pd.DataFrame:
     requested = sorted({t for t in tickers if t})
     cache = RAW_DIR / f"yfinance_adj_close_{PRICE_START}_{PRICE_END}_{len(requested)}tickers.csv"
@@ -406,26 +444,21 @@ def download_price_panel(tickers: Iterable[str], force: bool = False) -> pd.Data
         prices.index = pd.to_datetime(prices.index).tz_localize(None)
         return prices.sort_index()
 
-    frames: list[pd.DataFrame] = []
-    for batch in chunks(requested, 80):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            try:
-                downloaded = yf.download(
-                    batch,
-                    start=PRICE_START,
-                    end=PRICE_END,
-                    auto_adjust=False,
-                    progress=False,
-                    group_by="ticker",
-                    threads=True,
-                )
-            except Exception:
-                downloaded = pd.DataFrame()
-        adj = extract_adj_close(downloaded, batch)
-        if not adj.empty:
-            frames.append(adj)
-        time.sleep(0.25)
+    frames: list[pd.Series] = []
+    failures: list[str] = []
+    for idx, symbol in enumerate(requested, start=1):
+        series = download_one_price_series(symbol, force=force)
+        if series is None:
+            failures.append(symbol)
+        else:
+            frames.append(series)
+        if idx % 25 == 0 or idx == len(requested):
+            print(
+                f"Downloaded yfinance symbols: {idx}/{len(requested)} "
+                f"(ok={len(frames)}, failed={len(failures)})",
+                flush=True,
+            )
+        time.sleep(0.05)
 
     if not frames:
         return pd.DataFrame()
@@ -433,6 +466,7 @@ def download_price_panel(tickers: Iterable[str], force: bool = False) -> pd.Data
     prices = prices.loc[:, ~prices.columns.duplicated()].sort_index()
     prices.index = pd.to_datetime(prices.index).tz_localize(None)
     prices.to_csv(cache, index_label="Date")
+    (RAW_DIR / "yfinance_failed_symbols.json").write_text(json.dumps(failures, indent=2, sort_keys=True))
     return prices
 
 
@@ -519,6 +553,7 @@ def build_event_rows(
                 "target_r2": target_r2,
                 "baseline_var": baseline_var,
                 "abnormal_var": target_r2 - baseline_var,
+                "abnormal_var_scaled": target_r2 / max(baseline_var, EPS) - 1.0,
                 "abnormal_log_rv": math.log(max(target_r2, EPS)) - math.log(max(baseline_var, EPS)),
                 "event_count": int(event_frame.get("proposal_count", pd.Series([1])).sum()),
                 "public_goods_count": int(event_frame.get("public_goods_count", pd.Series([0])).sum()),
@@ -601,7 +636,7 @@ def welch_summary(a: pd.Series, b: pd.Series, label: str, rng: np.random.Generat
 
 
 def clustered_ols_summary(rows: pd.DataFrame) -> dict:
-    needed = ["abnormal_log_rv", "public_goods_event", "democracy_event", "close_vote_event", "event_count", "target_date"]
+    needed = ["abnormal_var_scaled", "public_goods_event", "democracy_event", "close_vote_event", "event_count", "target_date"]
     frame = rows[needed].dropna().copy()
     if frame.empty or frame["target_date"].nunique() < 10:
         return {"available": False, "reason": "insufficient rows or date clusters"}
@@ -611,7 +646,7 @@ def clustered_ols_summary(rows: pd.DataFrame) -> dict:
     frame["close_vote_event"] = frame["close_vote_event"].astype(float)
     frame["log_event_count"] = np.log1p(frame["event_count"].astype(float))
     xcols = ["const", "public_goods_event", "democracy_event", "close_vote_event", "log_event_count"]
-    model = sm.OLS(frame["abnormal_log_rv"].astype(float), frame[xcols].astype(float))
+    model = sm.OLS(frame["abnormal_var_scaled"].astype(float), frame[xcols].astype(float))
     try:
         fit = model.fit().get_robustcov_results(cov_type="cluster", groups=frame["target_date"].astype(str))
         params = dict(zip(xcols, fit.params))
@@ -621,6 +656,7 @@ def clustered_ols_summary(rows: pd.DataFrame) -> dict:
         return {"available": False, "reason": f"clustered OLS failed: {exc}"}
     return {
         "available": True,
+        "dependent_variable": "target_r2 / prior_60d_baseline_var - 1",
         "n_obs": int(frame.shape[0]),
         "date_clusters": int(frame["target_date"].nunique()),
         "coefficients": {k: float(v) for k, v in params.items()},
@@ -646,10 +682,11 @@ def oos_qlike_test(rows: pd.DataFrame, rng: np.random.Generator) -> dict:
             "train_n": int(train.shape[0]),
             "test_n": int(test.shape[0]),
         }
-    beta = float((train["target_r2"] - train["baseline_var"]).mean())
+    gamma = float(train["abnormal_var_scaled"].mean())
+    multiplier = max(0.05, 1.0 + gamma)
     y = test["target_r2"].to_numpy(dtype=float)
     base = test["baseline_var"].to_numpy(dtype=float)
-    addon = np.maximum(base + beta, EPS)
+    addon = np.maximum(base * multiplier, EPS)
     base_loss = qlike(y, base)
     addon_loss = qlike(y, addon)
     loss_diff = addon_loss - base_loss
@@ -663,7 +700,8 @@ def oos_qlike_test(rows: pd.DataFrame, rng: np.random.Generator) -> dict:
         "available": True,
         "train_n": int(train.shape[0]),
         "test_n": int(test.shape[0]),
-        "train_mean_abnormal_var_beta": beta,
+        "train_mean_scaled_abnormal_var_gamma": gamma,
+        "forecast_variance_multiplier": multiplier,
         "baseline_mean_qlike": float(base_loss.mean()),
         "addon_mean_qlike": float(addon_loss.mean()),
         "loss_diff_addon_minus_baseline": float(loss_diff.mean()),
@@ -742,32 +780,32 @@ def make_figures(proposals: pd.DataFrame, firm_rows: pd.DataFrame, sector_rows: 
 
     if not firm_rows.empty:
         fig, ax = plt.subplots(figsize=(9, 5))
-        public_vals = firm_rows.loc[firm_rows["public_goods_event"], "abnormal_log_rv"]
-        control_vals = firm_rows.loc[~firm_rows["public_goods_event"], "abnormal_log_rv"]
+        public_vals = firm_rows.loc[firm_rows["public_goods_event"], "abnormal_var_scaled"].clip(-1, 5)
+        control_vals = firm_rows.loc[~firm_rows["public_goods_event"], "abnormal_var_scaled"].clip(-1, 5)
         ax.hist(control_vals, bins=50, alpha=0.55, label="other proposal events", color="#64748b", density=True)
         ax.hist(public_vals, bins=50, alpha=0.55, label="public-goods events", color="#dc2626", density=True)
         ax.axvline(0, color="black", linewidth=1)
-        ax.set_title("Firm next-day abnormal log realized variance")
-        ax.set_xlabel("log(r2 target) - log(prior 60-day baseline variance)")
+        ax.set_title("Firm next-day scaled abnormal realized variance")
+        ax.set_xlabel("target r2 / prior 60-day baseline variance - 1 (clipped at 5 for display)")
         ax.set_ylabel("Density")
         ax.legend()
         fig.tight_layout()
-        path = FIG_DIR / "firm_abnormal_log_rv_distribution.png"
+        path = FIG_DIR / "firm_scaled_abnormal_rv_distribution.png"
         fig.savefig(path, dpi=160)
         plt.close(fig)
         paths.append(str(path.relative_to(ROOT)))
 
     if not sector_rows.empty:
         fig, ax = plt.subplots(figsize=(9, 5))
-        sector_means = sector_rows.groupby("symbol")["abnormal_log_rv"].agg(["mean", "count"]).sort_values("mean")
+        sector_means = sector_rows.groupby("symbol")["abnormal_var_scaled"].agg(["mean", "count"]).sort_values("mean")
         sector_means["mean"].plot(kind="barh", ax=ax, color="#2563eb")
         ax.axvline(0, color="black", linewidth=1)
-        ax.set_title("Sector ETF next-day abnormal log RV after public-goods proposal events")
-        ax.set_xlabel("Mean abnormal log RV")
+        ax.set_title("Sector ETF next-day scaled abnormal RV after public-goods proposal events")
+        ax.set_xlabel("Mean target r2 / prior 60-day baseline variance - 1")
         for idx, (_, row) in enumerate(sector_means.iterrows()):
             ax.text(row["mean"], idx, f" n={int(row['count'])}", va="center", fontsize=8)
         fig.tight_layout()
-        path = FIG_DIR / "sector_spillover_abnormal_log_rv.png"
+        path = FIG_DIR / "sector_spillover_scaled_abnormal_rv.png"
         fig.savefig(path, dpi=160)
         plt.close(fig)
         paths.append(str(path.relative_to(ROOT)))
@@ -840,17 +878,29 @@ def main() -> None:
     democracy_rows = firm_rows[firm_rows["democracy_event"]] if not firm_rows.empty else pd.DataFrame()
     close_public_rows = firm_rows[firm_rows["public_goods_event"] & firm_rows["close_vote_event"]] if not firm_rows.empty else pd.DataFrame()
 
-    firm_public = one_sample_summary(public_rows.get("abnormal_log_rv", pd.Series(dtype=float)), "firm_public_goods_abnormal_log_rv", rng)
-    firm_other = one_sample_summary(other_rows.get("abnormal_log_rv", pd.Series(dtype=float)), "firm_other_proposal_abnormal_log_rv", rng)
-    firm_democracy = one_sample_summary(democracy_rows.get("abnormal_log_rv", pd.Series(dtype=float)), "firm_shareholder_democracy_abnormal_log_rv", rng)
+    firm_public = one_sample_summary(
+        public_rows.get("abnormal_var_scaled", pd.Series(dtype=float)),
+        "firm_public_goods_scaled_abnormal_rv",
+        rng,
+    )
+    firm_other = one_sample_summary(
+        other_rows.get("abnormal_var_scaled", pd.Series(dtype=float)),
+        "firm_other_proposal_scaled_abnormal_rv",
+        rng,
+    )
+    firm_democracy = one_sample_summary(
+        democracy_rows.get("abnormal_var_scaled", pd.Series(dtype=float)),
+        "firm_shareholder_democracy_scaled_abnormal_rv",
+        rng,
+    )
     firm_close_public = one_sample_summary(
-        close_public_rows.get("abnormal_log_rv", pd.Series(dtype=float)),
-        "firm_close_vote_public_goods_abnormal_log_rv",
+        close_public_rows.get("abnormal_var_scaled", pd.Series(dtype=float)),
+        "firm_close_vote_public_goods_scaled_abnormal_rv",
         rng,
     )
     diff_public_vs_other = welch_summary(
-        public_rows.get("abnormal_log_rv", pd.Series(dtype=float)),
-        other_rows.get("abnormal_log_rv", pd.Series(dtype=float)),
+        public_rows.get("abnormal_var_scaled", pd.Series(dtype=float)),
+        other_rows.get("abnormal_var_scaled", pd.Series(dtype=float)),
         "public_goods_minus_other_proposal_events",
         rng,
     )
@@ -858,8 +908,8 @@ def main() -> None:
     oos = oos_qlike_test(firm_rows, rng)
 
     sector_public = one_sample_summary(
-        sector_rows.get("abnormal_log_rv", pd.Series(dtype=float)),
-        "sector_etf_public_goods_event_abnormal_log_rv",
+        sector_rows.get("abnormal_var_scaled", pd.Series(dtype=float)),
+        "sector_etf_public_goods_event_scaled_abnormal_rv",
         rng,
     )
 

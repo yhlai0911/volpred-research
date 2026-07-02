@@ -109,24 +109,48 @@ def _handle_update(update: dict) -> None:
     task_id = _append_task(text, msg.get("message_id", 0), sender)
     _log(f"task queued: {task_id} ({text[:40]!r})")
     send_telegram(f"收到（已排 P1：{task_id}）。處理中，完成回報。", disable_notification=True)
-    _spawn_responder()
+    _spawn_responder(model=_pick_model(text))
 
 
-def _spawn_responder() -> None:
+def _pick_model(text: str) -> str:
+    """依訊息複雜度自選 model（owner 2026-07-02 指示「自己判斷要用什麼模型」）。
+
+    政策對齊 config/models.json：subagent 在 sonnet↔opus 二選。輕量狀態查詢走
+    sonnet-5（快、便宜）；分析/研究/決策/修改類或長訊息走 opus-4-8（品質優先）。
+    模糊時偏 opus — boss-facing 通道答錯的成本高於 token。responder 若發現任務
+    比預judge 重，本來就會 defer 到正規管線（opus tier），所以誤判 sonnet 有兜底。
+    """
+    t = text.strip()
+    heavy_kw = ("為什麼", "分析", "研究", "實驗", "論文", "策略", "設計", "評估",
+                "規劃", "審查", "比較", "診斷", "重構", "部署", "修復", "怎麼辦",
+                "建議", "深度", "寫", "改")
+    light_kw = ("狀態", "進度", "多少", "幾篇", "幾點", "有沒有", "是嗎", "了嗎",
+                "查一下", "看一下", "確認", "還好嗎", "正常")
+    if any(k in t for k in heavy_kw) or len(t) > 100:
+        return "claude-opus-4-8"
+    if any(k in t for k in light_kw) and len(t) <= 60:
+        return "claude-sonnet-5"
+    return "claude-opus-4-8"  # 模糊 → 品質優先
+
+
+def _spawn_responder(model: str = "claude-opus-4-8") -> None:
     """即時 spawn headless responder 處理剛進池的 telegram_reply 任務。
 
     單飛鎖在 responder script 內（同時多訊息 → 一個 responder drain 全部）。
     Fail-open：spawn 失敗不影響訊息入池（hourly dispatch 兜底，最壞 ~1h）。
     """
+    import os
     import subprocess
     script = ROOT / "scripts" / "telegram_responder.sh"
+    env = dict(os.environ)
+    env["TELEGRAM_RESPONDER_MODEL"] = model
     try:
         subprocess.Popen(
             ["bash", str(script)],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            start_new_session=True,
+            start_new_session=True, env=env,
         )
-        _log("responder spawned")
+        _log(f"responder spawned (model={model})")
     except Exception as exc:  # noqa: BLE001 — hourly dispatch 兜底
         _log(f"responder spawn failed (hourly 兜底): {exc}")
 
