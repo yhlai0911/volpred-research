@@ -164,10 +164,20 @@
           "by": "hourly-16",
           "event": "journal_decision",
           "value": "IJF primary / EmpEcon fallback (owner-delegated via email-12398)"
+        },
+        {
+          "ts": "2026-07-02T12:47:33+08:00",
+          "by": "interactive-claude (email-12500 reply)",
+          "email_id": "email-12500-e17d6e",
+          "decided_by": "owner",
+          "event": "narrative_reframe_decision",
+          "decision": "A — 降格重定位為『方法診斷 + null result』論文，投 IJF methods track / FRL",
+          "rationale": "IJF multi-round review 2026-07-02 = FAIL_DO_NOT_ADVANCE；誠實 rebuild(K1591 gold regime 弱/NS + K1592 model-selection OOS NULL, 0 Harvey-Holm sig) → 無 JBF-grade 實證結果。Option A 正面承認 null，把貢獻定位在 measurement-vs-allocation 方法診斷本身，避免 prose 再過度宣稱正向 wedge。",
+          "supersedes": "先前 complexity-ceiling reframe（仍隱含正向 wedge finding → review FAIL）"
         }
       ],
-      "narrative_status": "ijf_reframe_body_v_ijf tick-1 done (abstract+title+intro+highlights); tick-2 port lit-review next",
-      "last_update": "2026-07-02 03:55",
+      "narrative_status": "decision_made_awaiting_body_rewrite",
+      "last_update": "2026-07-02T12:47:33+08:00",
       "note": "downshift->IJF per email-12393/12398; body_v_ijf.tex front-matter locked, method/results port pending",
       "ijf_reframe": {
         "completed_at": "2026-07-02T03:17:43+08:00",
@@ -188,6 +198,22 @@
         },
         "class_note": "elsarticle.cls is installed and main_v_ijf.tex now compiles under elsarticle[review].",
         "next_gate": "paper_body/package fixes for IJF review blockers, then rerun fresh IJF multi-round review"
+      },
+      "method_null_reframe": {
+        "decided_at": "2026-07-02T12:47:33+08:00",
+        "decided_by": "owner (email-12500)",
+        "option": "A",
+        "positioning": "methodology diagnosis + honest null result",
+        "central_claim": "measurement-to-allocation wedge 的方法論診斷：同窗口/單協議下 leverage-direction taxonomy 的實證訊號在 pre-specified + OOS + multiple-testing 修正後為 null/weak；貢獻在方法框架與誠實 null，非正向發現",
+        "target_journal": "International Journal of Forecasting (methods track) primary / Finance Research Letters (FRL) fallback",
+        "must_do": [
+          "移除所有正向 unconditional inverted-leverage / allocation wedge 宣稱，改為明確 null/weak 陳述",
+          "abstract/intro/conclusion 重寫為 method-diagnosis + null framing",
+          "確保每個保留的數字都被 reproduce.py gate（body 不得有 reproduce 外的 claim）",
+          "解決 divergent manuscript（main.tex vs main_v3.tex）— 收斂到單一 canonical，其餘歸檔",
+          "重寫後跑新一輪 codex multi-round review（latex-academic-reviewer + citation-verifier + contribution gate for methods-track）"
+        ],
+        "body_rewrite_task_id": "paper_body_leverage_direction_method_null_reframe_20260702"
       }
     },
     {
@@ -359,5 +385,5 @@
       }
     ]
   },
-  "last_update": "2026-07-02T12:16:29+08:00"
+  "last_update": "2026-07-02T12:47:33+08:00"
 }

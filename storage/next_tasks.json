@@ -44163,5 +44163,76 @@
     ],
     "source": "boss_followup_20260702",
     "created_at": "2026-07-02T04:29:20.089226+00:00"
+  },
+  {
+    "id": "email-12500-e17d6e",
+    "title": "[email_reply] Re: [VolPred Alert][INFO] leverage-direction 論文｜誠實修正已上 + 需拍板研究方向",
+    "description": "Gmail UID: 12500\nMessage-ID: <C9C9A82E-FDE0-4655-B8CB-BF72A3FD16DA@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Thu, 2 Jul 2026 12:44:24 +0800\nSubject: Re: [VolPred Alert][INFO] leverage-direction 論文｜誠實修正已上 + 需拍板研究方向\n\n--- 用戶回信內容 ---\nA. 同意降格重定位（方法診斷+null，投 IJF methods / FRL） <mailto:yihao.lai@gmail.com?subject=Re:%20leverage-direction%20decision&body=A%20%E5%90%8C%E6%84%8F%E9%99%8D%E6%A0%BC%E9%87%8D%E5%AE%9A%E4%BD%8D>\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月2日 中午12:17 寫道：\r\n> \r\n> A. 同意降格重定位（方法診斷+null，投 IJF methods / FRL） <mailto:yihao.lai@gmail.com?subject=Re:%20leverage-direction%20decision&body=A%20%E5%90%8C%E6%84%8F%E9%99%8D%E6%A0%BC%E9%87%8D%E5%AE%9A%E4%BD%8D>\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-02T04:45:08.107113+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12500,
+    "email_message_id": "<C9C9A82E-FDE0-4655-B8CB-BF72A3FD16DA@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][INFO] leverage-direction 論文｜誠實修正已上 + 需拍板研究方向",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-02T04:46:04.660620+00:00",
+    "claim_session_id": "d95724c0af59",
+    "status_history": [
+      {
+        "ts": "2026-07-02T04:46:04.660890+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-02T04:46:27.052837+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-02T04:49:52.088559+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
+      }
+    ],
+    "started_at": "2026-07-02T04:46:27.052531+00:00",
+    "plan": "老闆選 A(方法診斷+null,IJF methods/FRL)。1.pipeline decision_log+narrative_status; 2.queue 主線程 body task; 3.close email。已全做。",
+    "linked_task_ids": [
+      "paper_body_leverage_direction_method_null_reframe_20260702"
+    ],
+    "needs_close_reply": false,
+    "completed_at": "2026-07-02T04:49:52.088318+00:00",
+    "result": "老闆 email-12500 拍板 Option A(方法診斷+null,投 IJF methods/FRL)。落地:pipeline decision_log+narrative_status=decision_made_awaiting_body_rewrite+method_null_reframe 定位; queue 主線程 paper_body_leverage_direction_method_null_reframe_20260702(P2,supersede complexity-ceiling FAIL 版); close email 已寄(notif 14b7ca3a)。do_not_advance 維持。"
+  },
+  {
+    "id": "paper_body_leverage_direction_method_null_reframe_20260702",
+    "task_type": "paper_body",
+    "priority": 2,
+    "status": "pending_main_thread",
+    "title": "[論文管線] leverage-direction → 方法診斷+null 重定位 body 重寫（owner email-12500 拍板 Option A，投 IJF methods / FRL）",
+    "description": "**Owner email-12500 (2026-07-02 12:44) 拍板 Option A：降格重定位為『方法診斷 + honest null result』論文，投 IJF methods track / FRL。**\n\n背景：2026-07-02 IJF multi-round review = FAIL_DO_NOT_ADVANCE。前一次 complexity-ceiling reframe 雖 mechanical gates 全綠（reproduce 171/171、compliance CLEAN、compile 35pp），但 review 判 prose 仍隱含正向 wedge finding，與誠實 same-windows/single-protocol data 矛盾。誠實 rebuild（K1591 gold regime 弱/NS + K1592 model-selection OOS NULL, 0 Harvey-Holm sig）確認：**無 JBF-grade 正向實證結果**。Option A 正面承認 null，貢獻定位在方法框架 + 誠實 null 本身。\n\n**核心定位轉變（vs 舊 complexity-ceiling plan）**：headline 不再是任何正向『wedge/ceiling 效應』宣稱，而是**方法論診斷 + null result**——『measurement-to-allocation』框架下，leverage-direction taxonomy 的實證訊號在 pre-specified + OOS + multiple-testing 修正後為 null/weak；論文貢獻 = 嚴謹可復現的評估框架 + 誠實 null 的 forecasting/allocation 教訓，不是正向發現。IJF/FRL 皆歡迎 informative null。\n\n**必修 blocking findings（承接 IJF review FAIL）**：\n1. tab:vt 用 asset-native windows → allocation-level wedge prose 與 same-windows/single-protocol 宣稱矛盾。修法：要嘛統一到 same-windows、要嘛把 prose 改成明確承認 window heterogeneity 為 null-context，不留矛盾。\n2. body_v_ijf 的 VT/N=14 prose claims 未被 reproduce.py 完全 gate。修法：每個保留數字都要 traceable 進 reproduce.py，否則刪除或降為明確 caveat。\n3. IJF package docs / title-page disclosure 仍 stale/draft → 更新到 method-null 定位。\n4. **Divergent manuscript 收斂**：main.tex(515) vs main_v3.tex(680) 並存風險（paper-update 抓 most-recently-modified 為 canonical → 可能發佈 stale 680-line）。收斂到單一 canonical（method-null 版），其餘歸檔 _archive/，杜絕 parallel-version drift。\n\n**主要動作（分 hourly tick，主線程執行，heavy recompute 走 compute_queue）**：\nt1: abstract/title/highlights/intro 重寫為 method-diagnosis + null framing；lock ONE central claim（method + honest null）。\nt2: Empirical Results 全面 de-claim——移除所有 unconditional inverted-leverage / positive allocation-wedge 宣稱，改為明確 null/weak 陳述 + effect size + CI 橫跨 0。\nt3: 解決 tab:vt window 矛盾（統一或明確標 null-context）+ 確保每數字 reproduce-gated。\nt4: Implications/Conclusion 重寫（practitioner: 別 over-engineer；researcher: in-sample refinement 罕能撐過誠實 OOS）。\nt5: manuscript 收斂單一 canonical + package docs/title-page/cover-letter 更新為 IJF-methods/FRL 定位。\nt6: reproduce.py match_rate ≥95% + compliance re-scrub（author=Yi-Hao Lai only；無 K-id/VolPred/AI）。\n\n**PDCA advance gate**：新一輪 codex multi-round review（latex-academic-reviewer + citation-verifier + journal-review IJF/FRL）+ contribution gate（methods-track：貢獻=方法框架+誠實 null，非裸方法規則）全 PASS/CONDITIONAL_PASS → 才可 arXiv-ready。**在此之前 do_not_advance=True。**\n\n**Skill 依賴**：paper-update / paper-submission-pipeline / finance-paper-quality / journal-review。\n**Model routing**：paper_body → opus high。Body writing & narrative 一律 MAIN THREAD（CLAUDE.md：paper .tex 禁 background agent）。\n\n**Deliverables**：canonical method-null manuscript（收斂後單一版）+ 更新 highlights + cover_letter（IJF methods / FRL）。",
+    "source": "email-12500-owner-decision-A-method-null-reframe",
+    "created_at": "2026-07-02T12:47:33+08:00",
+    "linked_email_task_id": "email-12500-e17d6e",
+    "linked_pipeline_paper": "leverage-direction",
+    "supersedes": "paper_body_leverage_direction_downshift_FRL_20260701 (complexity-ceiling reframe — review FAIL, 正向 wedge framing 被否)",
+    "status_history": [
+      {
+        "ts": "2026-07-02T12:47:33+08:00",
+        "from": "new",
+        "to": "pending_main_thread",
+        "by": "interactive-claude",
+        "note": "created from owner email-12500 Option A decision"
+      }
+    ]
   }
 ]
