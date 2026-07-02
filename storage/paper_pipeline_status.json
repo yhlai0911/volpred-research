@@ -346,5 +346,18 @@
       "update_0532": "CLARIFIED: the autonomous pipeline treats main_v3/body_v3/tables.tex as leverage's ACTIVE canonical (codex 'active_v3_final_gate_20260701' reviewed exactly those; commit 40eea8f6e scrubbed main_v3's tables.tex). The pipeline's active-v3 gate verdict = NEEDS_MAJOR_REVISION / arXiv HOLD (matches my contribution gate run on main.tex). So the system's working canonical is main_v3 (680-line), NOT the main.tex (515-line) I scrubbed. My last-tick VolPred guard landed on main_v3 — correct version. Owner still needs to CONFIRM main_v3 is the real manuscript so main.tex/body.tex/tables_main can be archived and the parallel-version divergence stops.",
       "recommendation_if_no_owner_reply": "Default to the pipeline's choice (main_v3 = canonical); archive main.tex/body.tex/tables_main as superseded. Hold this until owner confirms to avoid discarding the wrong version."
     }
-  }
+  },
+  "multi_round_review_ijf": {
+    "fixes_applied": [
+      {
+        "date": "2026-07-02T12:16:29+08:00",
+        "by": "hourly-12 (main-thread, research-honesty)",
+        "finding": "blocking_findings[0]: body_v_ijf claimed same-windows/single-protocol but tab:vt uses asset-native windows",
+        "fix": "Applied review option (b): reconciled 3 central-claim sentences (body_v_ijf L130/L153/L164) + tab:vt discussion (L258) to honestly distinguish forecast-level single common OOS protocol from allocation-level asset-native-window descriptive corroboration. No numbers changed (prose-only honesty fix).",
+        "verification": "main_v_ijf.tex compiles exit0, 35pp, 0 undefined refs/cites; compliance CLEAN (scripts/check_paper_compliance.py); residual same-windows/single-protocol grep = 0",
+        "note": "Remaining IJF blockers NOT cleared (reproduce.py does not gate body prose/tab:vt/N=14; title-page AI disclosure draft; stale REPLICATION.md/submission_package). do_not_advance stays true. Deeper research-direction decision (stage2 K1591/K1592 weak/null -> reframe vs shelve) surfaced to owner."
+      }
+    ]
+  },
+  "last_update": "2026-07-02T12:16:29+08:00"
 }
