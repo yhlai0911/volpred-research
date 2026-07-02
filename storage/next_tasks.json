@@ -43930,7 +43930,7 @@
     "title": "K1582: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1582 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'cross-market/universal']) but no general article in feed.json.  Verdict preview: HARQ/SHARK-like measurement-error-corrected HAR (Bollerslev-Patton-Quaedvlieg JoE 2016 RQ-interaction + Buccheri-Corsi JFEC 2021-style signed-jump/semivariance features) tested cross-market on TAIFEX TX active-contract day-session RV (n_oos=1697), SPY (n_oos=51), and 0050.TW (n_o",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1582",
@@ -43939,7 +43939,33 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-02T03:08:04+00:00"
+    "created_at": "2026-07-02T03:08:04+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-02T03:59:38.483289+00:00",
+    "claim_session_id": "02580b4a09d3",
+    "status_history": [
+      {
+        "ts": "2026-07-02T03:59:38.483554+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-02T03:59:46.146605+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-02T04:12:39.551252+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-02T03:59:46.146319+00:00",
+    "completed_at": "2026-07-02T04:12:39.550983+00:00",
+    "result": "Published K1582 general-reader draft mile_b88ee7bc. Framing kept DIRECTIONAL_ONLY: TX active day-session shows +1.94%/+2.05% directional forecast-error improvement but no strict victory claim; SPY/0050.TW stated as short-sample diagnostics only. Generated three data-bound lazypack PNGs, anti-AI gate PASS, image URLs HTTP 200, provenance/image audit clean, single-article Supabase sync succeeded."
   },
   {
     "id": "research_pm2_5_regressor_nber_w22753_heyes_neidell_saberi",
@@ -44028,5 +44054,53 @@
       }
     ],
     "started_at": "2026-07-02T03:39:30.593020+00:00"
+  },
+  {
+    "id": "research_social_connectedness_vol_hirshleifer_peng_wang_r",
+    "title": "研究 backlog fallback: Social Connectedness → 財報 vol 反應（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Social Connectedness → 財報 vol 反應（Hirshleifer-Peng-Wang RFS 38(3) 2025 + Bailey-Kuchler-Stroebel JPE 2018）：Meta SCI 對總部 county 算 centrality，預測財報日 RV jump 幅度與 HAR decay 隨 connectedness 變；高連結產業恐慌期 co-jump 同步性。全免費數千事件。 | 來源 section: 期刊主題挖掘 batch（2026-06-30；**經濟頂刊**＋計量頂刊 — 外生衝擊轉 vol 角度＋前沿建模方法。workflow econ-journal-topic-mining 跑 qje/aer/jpe/econometrica/restud/joe/jfe/quantitative economics/jfec/jbes/nber/aej，6 agents、dedup 2402 k，研究總監篩 31→11）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "social_connectedness_vol_hirshleifer_peng_wang_r",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T04:09:23+00:00"
+  },
+  {
+    "id": "research_direct_indexing_tax_loss_harvesting_crowding_sin",
+    "title": "研究 backlog fallback: Direct-indexing / tax-loss-harvesting crowding 是否製造年末 single-stock RV reversal",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Direct-indexing / tax-loss-harvesting crowding 是否製造年末 single-stock RV reversal — 用 S&P 500 / Russell 1000 current constituents（Wikipedia + yfinance/Stooq；承認 survivorship）建 YTD loser / high-unrealized-loss proxy，搭 December tax-loss window、wash-sale 31-day window、ETF replacement basket（sector ETF / sa | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "direct_indexing_tax_loss_harvesting_crowding_sin",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T04:09:23+00:00"
+  },
+  {
+    "id": "research_shareholder_democracy_public_goods_vote_risk_n_p",
+    "title": "研究 backlog fallback: Shareholder-democracy public-goods vote risk：N-PX / contested ESG proposal 是否預測 firm RV 與 sector spillover",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Shareholder-democracy public-goods vote risk：N-PX / contested ESG proposal 是否預測 firm RV 與 sector spillover — 用 SEC Form N-PX、company proxy statements、annual-meeting dates、major shareholder proposal outcomes 建公開 vote-event set，標記 environmental/social/public-goods proposal、close vote、large index-manag | 來源 section: 期刊主題挖掘 batch 2026-07-01（journal_discovery_20260701_0；websearch rfs/cfa/jpmam/nber/bis 2025-26 趨勢層級；硬約束避開 vt/vix/har-garch/etf fragility/credit-ratio/crypto-vol-of-vol/cre/defense/critical-minerals 已飽和 cluster；selectivity gate 後 8 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "shareholder_democracy_public_goods_vote_risk_n_p",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-02T04:09:23+00:00"
   }
 ]
