@@ -44,7 +44,7 @@
 
 任何 turn（用戶 input OR autonomous fire）結尾**最後一個 tool call** 必須是 `ScheduleWakeup(prompt="<<autonomous-loop-dynamic>>")`，除非用戶明確說「停 loop」/「結束」。Interactive turn-based 限制不該成為 idle 藉口 — 用 ScheduleWakeup self-pace 讓 session 變 24/7 自主迴圈。
 
-**Turn 最終輸出必須是給用戶的文字（2026-07-02 strike 2 固化，與上一條同位階）**：ScheduleWakeup 是「最後一個 tool call」，但 turn 的**最終輸出必須是完整文字回覆，寫在所有 tool calls 之後**。寫在 tool calls 之間的文字 harness 不會顯示給用戶；以 tool call 作結 = 用戶體驗「給了任務卻沒回話」。固定順序：做完工作 → `ScheduleWakeup` → 最終文字回報（結果 + 時間戳 + 下次排程）。email summary 不能替代 session 內文字回覆 — 用戶在 session 給的任務，回報就要在 session 裡。違者 = session 無回覆 incident（memory `feedback_final_text_after_schedulewakeup`；2026-06 首次糾正、2026-07-02 復發）。
+**Turn 最終輸出必須是給用戶的文字（與上一條同位階；enforcement owner = Stop hook）**：固定順序 = 做完工作 → `ScheduleWakeup` → 最終文字回報（結果 + 時間戳 + 下次排程）。寫在 tool calls 之間的文字用戶看不到；email 不能替代 session 內回覆。2026-07-02 三犯後由 `scripts/hooks/enforce_final_text.py`（Stop hook）機械 enforce — 被擋下時直接補文字回報（why 與 incident 史見 error_log 2026-07-02 14:25、memory `feedback_final_text_after_schedulewakeup`）。
 
 **Session start 自動啟動**（2026-05-29 用戶補強）：
 新 interactive session 一開始（識別方式：第一個 user message 不是「停」、「結束」、「stop」等明確終止指令，且 `git log --since='30 min ago'` 或 `storage/ops/last_autonomous_fire.json` 顯示 autonomous loop 已斷 ≥10 min），**主動在第一個回應結尾排 ScheduleWakeup**，不必等用戶明說。這彌補 `/exit` → session 關閉時 ScheduleWakeup chain 斷掉的 gap（2026-05-29 07:43 → 08:13 斷 30 min incident）。
@@ -189,6 +189,10 @@
 - (c) 重構落地後**廢棄原 patch 路徑**（move to `_legacy/` 或刪除），不留兩套並行
 - (d) Regression test 必須覆蓋三次 incident 的觸發條件 — 任一條件能重現舊 bug 即 fail
 - (e) 重構完成 commit 訊息開頭 `refactor(3-strike): <topic>` 便於日後 grep
+
+### Anti-stacking（不疊床架屋，2026-07-02 owner 指令）
+
+事故後的修正**不可**每次疊一層新機制。一個 concern 只有**一個 enforcement owner**；新增 gate/watchdog/hook 必須收編進既有機制（pre-push 加 check、check_alerts 加 entry、dreaming 加 detector、prepublish 加 audit fn），同 commit 把被取代的提醒層降級成一行 pointer。升級路徑：prose 提醒（strike 1）→ 機械 gate（strike 2+），機械化後 prose 縮 pointer。完整 layer map：`.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md` §Enforcement Layer Map。
 
 **為什麼**：patch 三次仍復發 = 模型/流程/架構有結構性缺陷，繼續 patch 是負債累積；研究誠實 + 平台穩定的長期成本遠高於一次重構成本。歷史例：cron_hourly_dispatch 2026-05-13 兩次 hang + 2026-05-14 同 root（這次只到 strike 2，但下一次 hang 即觸發重構：worker daemon + queue + health check 取代 shell + LaunchAgent + perl alarm）。
 

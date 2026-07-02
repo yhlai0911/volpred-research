@@ -52,3 +52,23 @@ repeated_tool_failure / recurring_error / stale_knowledge / missing_retry_strate
 
 - `alerts._parse_cluster_cap_drift_state` 的 `recent_cluster_counts` 不吃 `storage_dir` → 讀真實 feed，測試無法隔離（`tests/test_alerts.py` 用 monkeypatch quiet）。應 refactor 成 storage_dir-aware。
 - 首次 dreaming run 抓到 `hourly_dispatch.log:exit1` 在 06-26/27 近全班失敗（API 死，06-29 已恢復）—— 真事故，dreaming 正確 surface。
+
+## Enforcement Layer Map（2026-07-02 owner 指令「不要疊床架屋」落地）
+
+每個 concern 只有一個 enforcement owner。新增約束時**先查此表挑既有落點**，不開新 runner/cron/hook file：
+
+| 層 | Owner 機制 | 管什麼 | 現駐 checks |
+|---|---|---|---|
+| **L1 機械不變量** | `.claude/settings.json` hooks + `scripts/git_hooks/pre-push`（單一 runner）+ `.github/workflows/` | 每 turn / 每 push 必須成立的格式性約束 | Stop: final-text、save_session_state；pre-push: encoding sweep + silent-fallback baseline；CI: provenance、encoding |
+| **L2 營運存活** | `check_alerts`（hourly piggy-back，單一 alert registry）+ email dedup | 「X 還活著/新鮮嗎」 | release gap / draft low / host cron fail / knowledge stale / paper stale |
+| **L3 改善迴圈** | `loop_health`（fast）+ `dreaming_review`（slow，propose-only） | 「loop 有沒有在變好」 | 4 指標 + 5 detector；事故經 error_log 結構化 entry 餵進來，不另建 watchdog |
+| **L4 行為指引** | CLAUDE.md（頂層 mandate）→ `.claude/rules/`（path 觸發）→ memory（背景 why）→ skills（SOP） | 需要判斷的行為 | 同一 concern 在 L4 內也只佔一個主位，其他位置放 pointer |
+
+**收編規則**：
+1. 新 invariant → 落 L1（既有 hook/runner 加 check），不建新 hook file。
+2. 新 freshness/liveness 檢查 → 落 L2（alerts.py 加 entry），不建新 cron。
+3. 新失敗模式偵測 → 落 L3（dreaming 加 detector），不建新 patrol script。
+4. 行為被機械化（L4→L1）後，同 commit 把 L4 的長段 prose 縮成一行 pointer；why 留 error_log。
+5. 違反此表 = 疊床架屋，code review / dreaming 應標 finding。
+
+**前例**：encoding sweep（2026-07-02）正例 — 收進既有 pre-push runner + CI，零新層；final-text hook（同日）修正案例 — hook 上線同 commit 未收編 CLAUDE.md 長段，後補（見 error_log 14:25 entry）。
