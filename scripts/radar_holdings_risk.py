@@ -405,9 +405,10 @@ def compute_holdings_risk(
     total_priced_pct = sum(priced_weight_pct.values())
     cash_pct = max(0.0, 100.0 - total_input_pct)
 
-    # Portfolio risk computed on risk-asset weights normalized to 1 (cash has 0 vol).
-    # We weight by share-of-total-portfolio (incl cash) so VaR is of the WHOLE portfolio.
-    base = total_input_pct if total_input_pct > 0 else 100.0
+    # We weight by share-of-total-portfolio (incl cash, cash has 0 vol) so vol/VaR is of
+    # the WHOLE portfolio: input < 100% → base=100（餘額是現金）；input > 100% → base=input
+    # （槓桿輸入以原始權重比例計算，見下方 notes）。
+    base = max(total_input_pct, 100.0)
     weights_frac = {t: w / base for t, w in priced_weight_pct.items()}  # fractions of whole portfolio
 
     annual_vol, contrib = _portfolio_vol_annual(weights_frac, rets)
