@@ -45148,7 +45148,7 @@
     "title": "K1582: write research-audience article (auto-discovered uncovered K)",
     "description": "K K1582 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'cross-market/universal']) but no research article in feed.json.  Verdict preview: HARQ/SHARK-like measurement-error-corrected HAR (Bollerslev-Patton-Quaedvlieg JoE 2016 RQ-interaction + Buccheri-Corsi JFEC 2021-style signed-jump/semivariance features) tested cross-market on TAIFEX TX active-contract day-session RV (n_oos=1697), SPY (n_oos=51), and 0050.TW (n_o",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "k_id": "K1582",
@@ -45173,9 +45173,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-02T18:43:28.742547+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-02T18:25:38.541895+00:00"
+    "started_at": "2026-07-02T18:25:38.541895+00:00",
+    "completed_at": "2026-07-02T18:43:28.742254+00:00",
+    "result": "Published K1582 research draft mile_55f3ef61 with exact K1582 evidence stats and 3 article images. Verified local feed entry, Supabase image URLs HTTP 200, and uv run volpred ops sync-all completed."
   },
   {
     "id": "research_firm_level_labor_shortage_exposure_wage_sensitiv",
