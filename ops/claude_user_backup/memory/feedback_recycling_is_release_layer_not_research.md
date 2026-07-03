@@ -23,5 +23,3 @@ metadata:
 - 飽和判斷看 `topic_cluster` 30d 分佈：只有 spy/vix 爆，其餘全空 → 優先出非 spy/vix。
 
 相關：[[feedback_journal_topic_discovery]]（挖新題）、[[feedback_narrative_arc_dedup]]（同 arc 換殼算 dup）、[[feedback_dispatch_over_diversity]]。
-
-**2026-07-04 釋出層邊界**：回收舊主題要防，但不能讓 release_pool 用「主題/結論像」當萬用不發理由。真撞題是同一 K、同一明確 data source、或 same-ref near-identical recycle；其他 narrative-arc fuzzy hit 應改成 `ARC-WARN` + audit trail 後放行。若已出現發文脫班，優先釋出 fresh-theme/content-clean draft；dedup/cluster 只能擋強證據重發，不能擋不同研究不同數據的文章。

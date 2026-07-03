@@ -1,0 +1,214 @@
+{
+  "experiment_id": "k1619",
+  "generated_at": "2026-07-03T22:28:15.418281+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance",
+    "interval": "1h",
+    "period": "730d"
+  },
+  "design": {
+    "benchmark": "SPY",
+    "illiquid": [
+      "VNM",
+      "EWM",
+      "EIDO"
+    ],
+    "rv_naive": "sum of squared within-day hourly log returns",
+    "rv_corrected": "idle-time rescaling RV_naive/(1-f), f=exact-zero fraction",
+    "eval_target": "r2_oc = squared cumulative within-day log return (model-free, staleness-immune)",
+    "model": "HAR-RV (Corsi 2009), expanding-window one-step OOS OLS",
+    "dm": "Diebold-Mariano + Harvey-Leybourne-Newbold small-sample, h=1",
+    "warmup_days": 250,
+    "har_convention": "levels OLS; forecasts floored at 1st-pct of positive training RV (data-driven, symmetric naive/corr)"
+  },
+  "proxy_note": "Evaluation proxy r2_oc (squared cumulative intraday return) is model-free, conditionally-unbiased and staleness-ROBUST (depends only on the day's first/last observed price, so it is NOT mechanically tied to the count of zero intraday bars; endpoints could still be mildly stale), but very noisy. Mean QLIKE levels are large because the -log(actual) term blows up on near-zero-proxy days; this term is identical for naive vs corrected forecasts so it CANCELS in the DM differential. dm_hln_t/p is the valid significance test (Patton 2011 proxy-robust ranking). Median QLIKE and MSE are reported as interpretable descriptive stats.",
+  "staleness_diagnostic": {
+    "SPY": {
+      "n_days": 721,
+      "mean_idle_frac": 0.0018492834026814608,
+      "median_idle_frac": 0.0,
+      "mean_nearzero_frac": 0.04808136846971798,
+      "mean_bars_per_day": 6.0,
+      "period_start": "2023-08-04",
+      "period_end": "2026-07-02",
+      "mean_RV_naive": 4.117046510584024e-05,
+      "mean_RV_corr": 4.119542932097012e-05,
+      "mean_r2_oc": 4.7722357818975765e-05
+    },
+    "VNM": {
+      "n_days": 721,
+      "mean_idle_frac": 0.10263522884882108,
+      "median_idle_frac": 0.0,
+      "mean_nearzero_frac": 0.12159038372630604,
+      "mean_bars_per_day": 6.0,
+      "period_start": "2023-08-04",
+      "period_end": "2026-07-02",
+      "mean_RV_naive": 3.896693557128434e-05,
+      "mean_RV_corr": 4.090297791903695e-05,
+      "mean_r2_oc": 4.263460767511799e-05
+    },
+    "EWM": {
+      "n_days": 721,
+      "mean_idle_frac": 0.09200184928340267,
+      "median_idle_frac": 0.0,
+      "mean_nearzero_frac": 0.10957004160887657,
+      "mean_bars_per_day": 6.0,
+      "period_start": "2023-08-04",
+      "period_end": "2026-07-02",
+      "mean_RV_naive": 1.0939359041516908e-05,
+      "mean_RV_corr": 1.1648361955262833e-05,
+      "mean_r2_oc": 1.480724153996553e-05
+    },
+    "EIDO": {
+      "n_days": 721,
+      "mean_idle_frac": 0.08807212205270458,
+      "median_idle_frac": 0.0,
+      "mean_nearzero_frac": 0.10078594544613961,
+      "mean_bars_per_day": 6.0,
+      "period_start": "2023-08-04",
+      "period_end": "2026-07-02",
+      "mean_RV_naive": 1.8319346957459123e-05,
+      "mean_RV_corr": 2.0901100860231563e-05,
+      "mean_r2_oc": 2.0391267605667276e-05
+    }
+  },
+  "per_asset": {
+    "SPY": {
+      "n_oos": 449,
+      "oos_start": "2024-09-06",
+      "oos_end": "2026-07-02",
+      "qlike_naive": 1.9339413840225637,
+      "qlike_corrected": 1.934437122173669,
+      "qlike_delta_corr_minus_naive": 0.0004957381511052628,
+      "median_qlike_naive": 0.7027787523559632,
+      "median_qlike_corrected": 0.7032396685032152,
+      "median_qlike_delta_corr_minus_naive": 0.0004609161472519663,
+      "mse_naive": 1.977772395255097e-07,
+      "mse_corrected": 1.977778734770772e-07,
+      "mse_better": "naive",
+      "dm_hln_t": -1.8115038889151966,
+      "dm_hln_p": 0.07073241330067637,
+      "dm_mean_diff_naive_minus_corr": -0.0004957381511052054,
+      "dm_better": "naive",
+      "harvey_significant_|t|>3": false,
+      "conventional_significant_p<0.05": false,
+      "floored_naive": 1,
+      "floored_corr": 1
+    },
+    "VNM": {
+      "n_oos": 449,
+      "oos_start": "2024-09-06",
+      "oos_end": "2026-07-02",
+      "qlike_naive": 3.9907496514444945,
+      "qlike_corrected": 3.549304173999536,
+      "qlike_delta_corr_minus_naive": -0.44144547744495855,
+      "median_qlike_naive": 1.002792129640941,
+      "median_qlike_corrected": 0.9889897267819756,
+      "median_qlike_delta_corr_minus_naive": -0.01380240285896539,
+      "mse_naive": 1.7541680441626953e-05,
+      "mse_corrected": 1.0950870222405187e-05,
+      "mse_better": "corrected",
+      "dm_hln_t": 2.784060626417575,
+      "dm_hln_p": 0.0055955539672840615,
+      "dm_mean_diff_naive_minus_corr": 0.44144547744495816,
+      "dm_better": "corrected",
+      "harvey_significant_|t|>3": false,
+      "conventional_significant_p<0.05": true,
+      "floored_naive": 17,
+      "floored_corr": 17
+    },
+    "EWM": {
+      "n_oos": 449,
+      "oos_start": "2024-09-06",
+      "oos_end": "2026-07-02",
+      "qlike_naive": 2.130531421225942,
+      "qlike_corrected": 2.123261905912591,
+      "qlike_delta_corr_minus_naive": -0.0072695153133510715,
+      "median_qlike_naive": 0.6913056351324627,
+      "median_qlike_corrected": 0.6945718215197059,
+      "median_qlike_delta_corr_minus_naive": 0.0032661863872431862,
+      "mse_naive": 3.1264215127846534e-08,
+      "mse_corrected": 2.9168727879557792e-08,
+      "mse_better": "corrected",
+      "dm_hln_t": 0.5843710662814422,
+      "dm_hln_p": 0.5592648337851185,
+      "dm_mean_diff_naive_minus_corr": 0.0072695153133513915,
+      "dm_better": "corrected",
+      "harvey_significant_|t|>3": false,
+      "conventional_significant_p<0.05": false,
+      "floored_naive": 1,
+      "floored_corr": 1
+    },
+    "EIDO": {
+      "n_oos": 449,
+      "oos_start": "2024-09-06",
+      "oos_end": "2026-07-02",
+      "qlike_naive": 2.2494979212415536,
+      "qlike_corrected": 2.2907017195261528,
+      "qlike_delta_corr_minus_naive": 0.04120379828459919,
+      "median_qlike_naive": 0.8042329894565838,
+      "median_qlike_corrected": 0.8985902235364343,
+      "median_qlike_delta_corr_minus_naive": 0.09435723407985042,
+      "mse_naive": 1.657909294679983e-07,
+      "mse_corrected": 6.61147784270136e-07,
+      "mse_better": "naive",
+      "dm_hln_t": -2.5839623983461304,
+      "dm_hln_p": 0.01008278339747437,
+      "dm_mean_diff_naive_minus_corr": -0.041203798284599205,
+      "dm_better": "naive",
+      "harvey_significant_|t|>3": false,
+      "conventional_significant_p<0.05": true,
+      "floored_naive": 2,
+      "floored_corr": 1
+    }
+  },
+  "pooled_illiquid": {
+    "method": "cross-asset mean of daily (loss_naive - loss_corr) per DATE, then DM+HLN (K1355-compliant)",
+    "n_dates": 449,
+    "mean_diff_naive_minus_corr": 0.13583706482457014,
+    "dm_hln_t": 2.4907159578440092,
+    "dm_hln_p": 0.013109733405652912,
+    "better": "corrected",
+    "harvey_significant_|t|>3": false,
+    "conventional_significant_p<0.05": true
+  },
+  "robustness_log_har": {
+    "note": "log-HAR (fit on log RV, exp+smearing retransform) \u2014 no flooring; checks the NULL is not an artifact of negative-forecast flooring",
+    "SPY": {
+      "dm_hln_t": -1.7402241166797594,
+      "dm_hln_p": 0.08250633250577022,
+      "better": "naive",
+      "harvey_significant_|t|>3": false
+    },
+    "VNM": {
+      "dm_hln_t": -0.4616132433363214,
+      "dm_hln_p": 0.644582751351666,
+      "better": "naive",
+      "harvey_significant_|t|>3": false
+    },
+    "EWM": {
+      "dm_hln_t": 1.352991991085582,
+      "dm_hln_p": 0.17674056083964262,
+      "better": "corrected",
+      "harvey_significant_|t|>3": false
+    },
+    "EIDO": {
+      "dm_hln_t": 0.8511714219440859,
+      "dm_hln_p": 0.39512885549163745,
+      "better": "corrected",
+      "harvey_significant_|t|>3": false
+    },
+    "pooled_illiquid": {
+      "dm_hln_t": 0.44316320631684725,
+      "dm_hln_p": 0.6578616095512904,
+      "better": "corrected",
+      "harvey_significant_|t|>3": false
+    }
+  },
+  "verdict": {
+    "n_illiquid_qlike_improved_by_correction": 2,
+    "n_illiquid_harvey_significant_improvement": 0,
+    "summary": "NULL/NEGATIVE: staleness (idle-time) correction does not yield a Harvey-significant QLIKE improvement over naive RV in HAR OOS forecasting"
+  }
+}

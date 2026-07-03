@@ -46989,7 +46989,7 @@
     "title": "研究 backlog fallback: 非流動性資產「staleness bias」修正版 RV 估計量對 HAR 預測力的增量",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 非流動性資產「staleness bias」修正版 RV 估計量對 HAR 預測力的增量 — 用 yfinance 5-min 片段建 zero-return-run-length staleness proxy（低流動 small-cap ETF / ADR），實作 staleness-adjusted RV（staleness-weighted realized kernel）vs 標準 5-min RV，HAR OOS QLIKE + DM 檢定是否改善低流動標的預測；與 line 1400（noise-robust kernel/MedRV，今日已入單）正交——那是「微結構量測誤差」， | 來源 section: 期刊主題挖掘 batch 2026-07-03b（journal_discovery_20260703_2；websearch jbf/jfe/rfs/joe/jfqa/jfm + jpm/faj/j.alt inv/j.fixed income/j.futures markets + qje/aer/jpe/aej + jfec/jbes/jae 2025-26 趨勢層級；selectivity gate 後 13→10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -46998,7 +46998,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-03T13:07:48+00:00"
+    "created_at": "2026-07-03T13:07:48+00:00",
+    "claimed_by": "hourly-06",
+    "claimed_at": "2026-07-03T22:08:36.009049+00:00",
+    "claim_session_id": "62887d4049bb",
+    "status_history": [
+      {
+        "ts": "2026-07-03T22:08:36.009339+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-06"
+      },
+      {
+        "ts": "2026-07-03T22:09:53.923984+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-06"
+      },
+      {
+        "ts": "2026-07-03T22:36:08.863832+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-06"
+      }
+    ],
+    "started_at": "2026-07-03T22:09:53.923691+00:00",
+    "completed_at": "2026-07-03T22:36:08.863549+00:00",
+    "result": "K1619 NULL: staleness-corrected RV 對 HAR OOS 無穩健增量(0/3 Harvey sig)；experiments/k1619 已 merge 到 main；knowledge item 8614f182；Codex reviewed no Critical/High"
   },
   {
     "id": "event_article_nfp_us_2026-07-03_tplus0",
@@ -47654,5 +47680,20 @@
     "started_at": "2026-07-03T21:08:59.290544+00:00",
     "completed_at": "2026-07-03T21:43:19.356715+00:00",
     "result": "K1618 STRIKE-2 治本：真 root cause=MAIN_DIR 被 cwd 綁架(cwd 在 worktree 內+相對路徑→BASH_SOURCE-相對解析指到 worktree root→main_branch 自比自 0-commit→5 層防禦全繞過)。三層 fix：(1) resolve_main_dir 用 git -C script_dir git-common-dir anchor 腳本目錄+3 道 fail-loud guard；(2) ensure_cwd_outside_worktree 兩 remove 前擋；(3) test case 8/9/10。Codex FAIL→CONDITIONAL_PASS 額外修 2 pre-existing data-loss(cross-repo cwd anchor + -X ours drop auto-restore fail-closed)。全 10 cases/25 assertions PASS。"
+  },
+  {
+    "id": "trending_repost_2026_07_04_ai變現",
+    "title": "[trending_repost] AI資本支出翻倍，如何用期權對沖科技股「營收證偽」風險？",
+    "description": "聚焦四大科技股2026年預估8000億美元的基建投入。量化指標：追蹤隱含波動率偏斜度（Skewness）與各廠AI營收佔比、CapEx/營收比率的關聯，評估市場對「AI變現不及預期」的防禦成本。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-03T22:00:20+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ]
   }
 ]

@@ -110,6 +110,7 @@
 - [feedback_cross_machine_file_links.md](feedback_cross_machine_file_links.md) — Mac Studio 遠端機；給用戶看的圖/檔/連結用 SendUserFile 或 Tailscale URL，不丟本機路徑
 - [feedback_lazypack_infographic.md](feedback_lazypack_infographic.md) — 一般讀者文章文末附懶人包圖組；NotebookLM 能生圖、多圖 poster、餵 evidence package 寫文中生、禁付費 API
 - [reference_frontend_nested_git_repo.md](reference_frontend_nested_git_repo.md) — frontend-v2-fix 是獨立巢狀 git repo（主 repo gitignore）；commit 前端要 cd 進去
+- [feedback_no_cd_into_worktree_before_merge.md](feedback_no_cd_into_worktree_before_merge.md) — merge worktree 前勿 cd 進 worktree（持久 cwd 汙染使 merge_worktree.sh 誤刪未合併工作；K1032/K1618 root cause，merge 後必驗檔案存在）
 - [feedback_proactively_complete_red_alerts.md](feedback_proactively_complete_red_alerts.md) — 看到紅色/critical 主動完成或排程完成並告訴老闆，不被動回報
 - [feedback_continuous_work_and_read_mail.md](feedback_continuous_work_and_read_mail.md) — autonomous tick 要持續做實事不心跳空轉；mandate 直接讀 Gmail 最新信不靠 lagging task
 - [feedback_refill_check_saturation_and_running_hourly.md](feedback_refill_check_saturation_and_running_hourly.md) — 補池前必 pgrep hourly 避免 race + 判斷 K 可寫要查 narrative-arc 飽和不只 results.json
@@ -122,3 +123,6 @@
 - [feedback_final_text_after_schedulewakeup.md](feedback_final_text_after_schedulewakeup.md) — 回用戶的文字必須是 turn 最終輸出;ScheduleWakeup 先叫、文字最後,否則用戶看不到
 - [feedback_answer_first_then_act.md](feedback_answer_first_then_act.md) — 老闆問問題先答再動手；疑問句第一動作是文字回答不是跑指令；2026-07-02 三連糾正
 - [feedback_telegram_emoji_formatting.md](feedback_telegram_emoji_formatting.md) — Telegram 訊息用 emoji 區隔段落/項目符號、加強重點
+- [feedback_plain_language_boss_facing.md](feedback_plain_language_boss_facing.md) — 給老闆看的描述(alert/email/telegram/報告)用白話，不堆專有名詞；術語就地翻譯或替換
+- [feedback_alerts_auto_act_not_suggest.md](feedback_alerts_auto_act_not_suggest.md) — 有 auto-remediation 的 alert body 寫「已自動修復+結果」不是「建議老闆行動」；發文脫班已 wire remediate_publish_drought.py（email-12559）
+- [feedback_fix_silent_fallback_immediately.md](feedback_fix_silent_fallback_immediately.md) — git-push-backup 因 silent fallback hold push 時當場立刻修（warn/silent-ok + strict gate new=0 + 重跑 wrapper 解封），不丟給下一班 hourly（老闆 email-12564「以後自己立刻修」）
