@@ -43,14 +43,14 @@ def _write_feed(path: Path, draft_count: int, other_statuses: list[str] | None =
 
 def test_draft_pool_deficit_zero_when_at_floor(tmp_path, monkeypatch):
     feed_path = tmp_path / "feed.json"
-    _write_feed(feed_path, draft_count=4)
+    _write_feed(feed_path, draft_count=MODULE.DRAFT_POOL_FLOOR)
     monkeypatch.setattr(MODULE, "FEED_PATH", feed_path)
     assert MODULE._draft_pool_deficit() == 0
 
 
 def test_draft_pool_deficit_zero_when_above_floor(tmp_path, monkeypatch):
     feed_path = tmp_path / "feed.json"
-    _write_feed(feed_path, draft_count=9)
+    _write_feed(feed_path, draft_count=MODULE.DRAFT_POOL_FLOOR + 3)
     monkeypatch.setattr(MODULE, "FEED_PATH", feed_path)
     assert MODULE._draft_pool_deficit() == 0
 
@@ -84,8 +84,13 @@ def test_maybe_refill_draft_pool_noop_when_auto_refill_false(tmp_path, monkeypat
 
 def test_maybe_refill_draft_pool_noop_when_deficit_zero(tmp_path, monkeypatch):
     feed_path = tmp_path / "feed.json"
-    _write_feed(feed_path, draft_count=4)
+    _write_feed(feed_path, draft_count=MODULE.DRAFT_POOL_FLOOR)
     monkeypatch.setattr(MODULE, "FEED_PATH", feed_path)
+
+    def fail_refill(*_args, **_kwargs):
+        raise AssertionError("_run_article_refill must not run when draft pool has no deficit")
+
+    monkeypatch.setattr(MODULE, "_run_article_refill", fail_refill)
     assert MODULE._maybe_refill_draft_pool(auto_refill=True) is None
 
 

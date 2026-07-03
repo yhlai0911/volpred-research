@@ -47467,9 +47467,35 @@
     "description": "Pre-existing tech debt (發現於 2026-07-03 slot-aware coverage fire, 與該任務無關)。 tests/test_draft_pool_refill.py::test_draft_pool_deficit_zero_when_at_floor 與 ::test_maybe_refill_draft_pool_noop_when_deficit_zero 讀 live storage/ draft-pool state (現 pool 未達 floor → deficit != 0 → 斷言 deficit==0 失敗)。屬非 hermetic 測試, 應 mock draft-pool count / candidates 讓斷言不依賴 repo 當下狀態。測的是 continue_task_dispatch.py。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-03T15:23:45+00:00",
-    "source": "hourly_dispatch_pdca"
+    "source": "hourly_dispatch_pdca",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-03T20:08:36.702334+00:00",
+    "claim_session_id": "b669de09dce6",
+    "status_history": [
+      {
+        "ts": "2026-07-03T20:08:36.702600+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T20:08:45.306682+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T20:10:17.268295+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-03T20:08:45.306399+00:00",
+    "completed_at": "2026-07-03T20:10:17.268021+00:00",
+    "result": "tests/test_draft_pool_refill.py no longer hard-codes draft_count=4; at/above-floor cases use DRAFT_POOL_FLOOR so they track canonical config. No-deficit refill test now mocks _run_article_refill to fail if live refill is touched; targeted + dispatch refill tests pass."
   },
   {
     "id": "platform_ops_arc_dedup_calibrate_20260703",
