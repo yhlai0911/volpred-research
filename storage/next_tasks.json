@@ -47241,7 +47241,7 @@
     "title": "補 fresh reader 文章（事件/時事驅動）— 研究驅動候選 arc-dup 枯竭",
     "description": "老闆 Telegram 政策指示（telegram-89, 2026-07-03）：脫稿就得發、然後趕快補文章。今晚 refill 補 0（所有 knowledge-driven 候選皆 narrative-arc duplicate，publisher 會 reject）——這就是『沒有適合的文章』的技術根因。改走 fresh 非-knowledge 來源補 reader 文章：(a) 事件/時事驅動（近期市場數據公佈、財報、地緣、VIX regime 變化）走 publication-candidates 事件軌；或 (b) trending_repost（熱門主題 VolPred 角度改寫，≤2/day）。開工前讀 3 canonical（trending-repost SKILL + anti-ai-style SKILL + publishing rules）+ 主線程 3-layer 主題查重。目標：draft 池補進至少 1 篇 fresh 主題，避免明天仍靠 arc-dup 頂稿。",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "event_article",
     "dispatch_lane": "agent",
     "source": "telegram_boss_directive",
@@ -47251,7 +47251,25 @@
       "arc-dup-exhaustion",
       "fresh-source"
     ],
-    "created_at": "2026-07-03T15:07:15+00:00"
+    "created_at": "2026-07-03T15:07:15+00:00",
+    "claimed_by": "hourly-00",
+    "claimed_at": "2026-07-03T16:10:38.017988+00:00",
+    "claim_session_id": "be28bff9a671",
+    "status_history": [
+      {
+        "ts": "2026-07-03T16:10:38.018261+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-03T16:10:43.783058+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-00"
+      }
+    ],
+    "started_at": "2026-07-03T16:10:43.782753+00:00"
   },
   {
     "id": "telegram-92",
@@ -47346,9 +47364,35 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "telegram-95_boss_feedback",
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-03T15:28:22+00:00",
     "title": "[platform_ops] 校準主題撞題判準：只擋同一K/同數據源，勿靠結論句式誤判；脫稿時 dedup 不得阻擋釋出",
-    "description": "老闆 Telegram msg95 質疑『主題相同』被當不發/不寫藉口，要求列出比對。實查結果：draft 池 6 篇中，真撞題僅 1 篇（mile_3a7bd6f6 區域銀行帳面價值 = 已發 K1605 的讀者版 vs 研究版，同一K刻意雙寫）；誤判 1 篇（mile_463f37f7 最慘1%調倉 refs=K1334/K1494，被當成撞 mile_cd5d5740 波動率測不準 refs=K1560，實為不同研究不同數據，只是結論句式像）；其餘 4 篇為各自獨立主題。行動：(1) 校準 narrative-arc dedup — 撞題判定以『同一 K / 同一數據源』為主，結論句式相似不得單獨判撞；reader 版 vs 研究版視為互補不算重複。(2) 落實老闆規則：脫稿（發文脫班）時 dedup/cluster-filter 不得阻擋釋出——先發 fresh-theme 再補。(3) 回寫 memory feedback_narrative_arc_dedup 與 feedback_recycling_is_release_layer_not_research 的邊界。"
+    "description": "老闆 Telegram msg95 質疑『主題相同』被當不發/不寫藉口，要求列出比對。實查結果：draft 池 6 篇中，真撞題僅 1 篇（mile_3a7bd6f6 區域銀行帳面價值 = 已發 K1605 的讀者版 vs 研究版，同一K刻意雙寫）；誤判 1 篇（mile_463f37f7 最慘1%調倉 refs=K1334/K1494，被當成撞 mile_cd5d5740 波動率測不準 refs=K1560，實為不同研究不同數據，只是結論句式像）；其餘 4 篇為各自獨立主題。行動：(1) 校準 narrative-arc dedup — 撞題判定以『同一 K / 同一數據源』為主，結論句式相似不得單獨判撞；reader 版 vs 研究版視為互補不算重複。(2) 落實老闆規則：脫稿（發文脫班）時 dedup/cluster-filter 不得阻擋釋出——先發 fresh-theme 再補。(3) 回寫 memory feedback_narrative_arc_dedup 與 feedback_recycling_is_release_layer_not_research 的邊界。",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-03T16:47:58.914501+00:00",
+    "claim_session_id": "35a0e680498c",
+    "status_history": [
+      {
+        "ts": "2026-07-03T16:47:58.914798+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T16:48:06.755992+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T16:52:59.700118+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-03T16:48:06.755671+00:00",
+    "completed_at": "2026-07-03T16:52:59.699824+00:00",
+    "result": "release_pool arc dedup calibrated: arc/conclusion-only hits now warn+publish; hard release block limited to shared K or explicit shared data source. Added release gate regression tests and memory boundary notes."
   }
 ]
