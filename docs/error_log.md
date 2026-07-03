@@ -2,6 +2,20 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-04 04:25 `merge_worktree.sh` false-negative「0 commits」→ 未 merge 就移除 worktree（K1618 差點遺失）= **K1032 同 root-cause 第 2 次（STRIKE 2）** — **RECOVERED（檔案救回）+ 治本 queued P1**
+
+**現象**：hourly-04 派 K1618（realized semicovariance）worktree agent 完成並 commit（f14db3e91，7 檔 experiments/K1618/）。主線程跑 `bash scripts/merge_worktree.sh agent-a239cc7b982d98809` 合併，log 自相矛盾：先報「[OK] 沒有新的 commits（雙重確認 rev-list=0）+ experiments/ 也空，可安全移除」→「致命錯誤: 不能讀取目前工作目錄: No such file or directory」→「[WARN] branch -d 拒絕（branch 有未合併 commits），保留 branch」→「[DONE] 已移除 worktree」。結果 experiments/K1618/ **沒進 main**、worktree 被移除；所幸 branch `worktree-agent-a239cc7b982d98809` + commit f14db3e91 存活，`git checkout <branch> -- experiments/K1618/` 全數救回（7 檔 6770 行）。
+
+**根因（兩層，operational + structural）**：
+1. **operational（我的錯）**：先前為了跑 Codex review，我在一個 Bash 指令裡 `cd` 進 worktree 目錄（`cd .claude/worktrees/agent-a239cc7b982d98809 && codex exec ...`，該指令因 macOS 無 `timeout` 而 fail，但 `cd` 已先執行）。Bash 工具 cwd 跨呼叫**持久**，於是主線程 shell cwd 停在該 worktree 內。
+2. **structural（腳本缺陷，與 K1032 同 class）**：`merge_worktree.sh` 隨後 `git worktree remove` 移除該 worktree → 正在其中的 shell cwd 失效 → 後續 `git rev-list` 因「cannot read current working directory」**失敗回空字串** → 腳本把 git 指令失敗**silently 當成 rev-list=0（無新 commits）** → 走「可安全移除」destructive 路徑，未 merge 就砍 worktree。此為 no-silent-fallback rule 違規：git 指令 error 被當成 benign 的「0 commits」signal，且在**破壞性動作**（移除 worktree）前未 fail-loud。K1032（2026 早期）已是同一「rev-list 判 no-commits 但實際有 commit → 檔案遺失」root cause 的**第 1 次**；本次為**第 2 次 → STRIKE 2**。
+
+**即時處置（本 fire 已完成）**：(a) `git checkout worktree-agent-a239cc7b982d98809 -- experiments/K1618/` 救回 7 檔到 main working tree；(b) Codex review 已 CONDITIONAL_PASS（null 為 genuine 非 bug）；(c) knowledge.json 已寫（item 872a5af2）；(d) K1618 PHASE-Z commit 到 main；(e) 救回後刪除冗餘 branch。
+
+**治本 queued（`platform_ops_fix_merge_worktree_silent_revlist` P1，留 clean context + regression test）**：三層修 `merge_worktree.sh`：(1) **底層邏輯** — rev-list / git 指令**失敗必 fail-loud 中止**該 worktree 處理，禁把 non-zero exit 或空輸出當「0 commits」；判「可安全移除」須用 positive proof（`git rev-list <base>..<branch>` 成功且明確為空 AND `git worktree remove` 前 branch 無 unmerged commit），任一 git 指令失敗一律保留 worktree + branch 走人工路徑。(2) **流程** — 腳本開頭 `cd "$REPO_ROOT"` 固定 cwd，不依賴 caller cwd；移除 worktree 前檢查當前 shell cwd 是否在該 worktree 內。(3) regression test 覆蓋「shell cwd 在 worktree 內 + branch 有未合併 commit」情境，重現舊 bug 即 fail。同時修主線程 SOP：**merge worktree 前先 `cd $REPO_ROOT`，永不從 worktree 內部觸發 merge**。
+
+**教訓（PDCA）**：(i) 主線程操作 worktree 相關 Bash 一律用 repo 絕對路徑、勿 `cd` 進 worktree（cwd 持久會汙染後續破壞性動作）；(ii) 破壞性動作（移除 worktree / branch -D）前的「安全」判斷若源自可能失敗的 git 指令，git 失敗必須當成「不安全 → 保留」而非「安全 → 刪除」（fail-safe 方向）；(iii) worktree-merge-verification skill 的 K1032 checklist 生效：merge 後**必驗 main repo 檔案實際存在**（本次靠此驗證即時抓到遺失並救回）。
+
 ## 2026-07-03 22:07 `event_article` T+0 stale duplicate = refill 用排程預估公佈日排 slot，事件提前公佈+已發文仍生成 — **INTERCEPTED（出池）→ RESOLVED（slot-aware coverage 上線 2026-07-03 23:24 hourly-23）**
 
 **現象**：hourly-22 fire 從 dispatch main-thread queue 撈到最高優先 P1 `event_article_nfp_us_2026-07-03_tplus0`（今天 22:08 由 refill 生成）。人工查重發現 6月NFP(57K、失業率 4.2%) 的 T+0 波動率文章已由 `mile_35eef830`（2026-07-01 發佈）**完整**涵蓋 —— 含正式數據 / NFP日 vs 週五基準 1.17x / VIX regime 2.17x(k528,k513) / 7-2 實際反應 SPY 0.13% VIX 16.15 + 真圖表。硬寫必然是 arc dup（同事件同 57K 同 VIX regime 結論同 SPY/VIX 資產）。

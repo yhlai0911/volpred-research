@@ -1,0 +1,421 @@
+{
+  "experiment_id": "K1618",
+  "generated_utc": "2026-07-03T20:20:54.358648+00:00",
+  "seed": 42,
+  "meta": {
+    "tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "EFA",
+      "EEM",
+      "TLT",
+      "GLD",
+      "XLF",
+      "XLK",
+      "XLE"
+    ],
+    "start": "2005-01-04",
+    "end": "2026-06-30",
+    "n_trading_days": 5405,
+    "window_len_days": 21,
+    "horizon_windows": 1,
+    "burn_in_windows": 60,
+    "data_source": "yfinance daily adjusted close (auto_adjust=True)",
+    "frequency": "daily returns aggregated in non-overlapping 21-day windows (BPQ 2022 daily realized-semibeta convention)"
+  },
+  "return_diagnostics": {
+    "SPY": {
+      "mean": 0.0004105745001514931,
+      "std": 0.011950286847232875,
+      "min": -0.11588677414921822,
+      "max": 0.13557765440104658
+    },
+    "QQQ": {
+      "mean": 0.0005710955025608257,
+      "std": 0.013633827558687,
+      "min": -0.1275921094785144,
+      "max": 0.11479852067910117
+    },
+    "IWM": {
+      "mean": 0.0003390415320645589,
+      "std": 0.015210139636295215,
+      "min": -0.14233487122874056,
+      "max": 0.08754523100563195
+    },
+    "EFA": {
+      "mean": 0.000239278919340888,
+      "std": 0.013268883268989213,
+      "min": -0.11836883076104837,
+      "max": 0.14745067020257246
+    },
+    "EEM": {
+      "mean": 0.0002871863201388201,
+      "std": 0.017386147051334167,
+      "min": -0.1763338308652343,
+      "max": 0.20514116620399625
+    },
+    "TLT": {
+      "mean": 0.0001239564414306519,
+      "std": 0.009182524086832022,
+      "min": -0.06901016109724485,
+      "max": 0.07250261723057638
+    },
+    "GLD": {
+      "mean": 0.0003973080282822354,
+      "std": 0.011488128999149659,
+      "min": -0.10841233744964714,
+      "max": 0.10697398423801134
+    },
+    "XLF": {
+      "mean": 0.00022271727402292104,
+      "std": 0.0182348536151573,
+      "min": -0.18232173715348923,
+      "max": 0.152394079553646
+    },
+    "XLK": {
+      "mean": 0.000586320686981676,
+      "std": 0.014210994944975214,
+      "min": -0.14866243810866317,
+      "max": 0.1301357449766112
+    },
+    "XLE": {
+      "mean": 0.00031832550693089044,
+      "std": 0.018851794329328233,
+      "min": -0.2249100157225889,
+      "max": 0.1525028770570044
+    }
+  },
+  "identity_check": {
+    "definition": "RCov_ij == P_ij + N_ij + M_ij (per pair, per window)",
+    "max_abs_residual": 5.551115123125783e-17,
+    "mean_abs_residual": 3.1179451242886365e-19,
+    "n_pairs": 45,
+    "n_windows": 257,
+    "passes": true
+  },
+  "lead_lag_correlations": {
+    "N": {
+      "contemp_vs_corr": 0.20278786341280744,
+      "lead1_vs_future_corr": 0.13623446648189702,
+      "lead1_vs_future_rv": 0.6489546538767985
+    },
+    "P": {
+      "contemp_vs_corr": 0.2102277271738057,
+      "lead1_vs_future_corr": 0.15617668244143187,
+      "lead1_vs_future_rv": 0.5307247622676933
+    },
+    "M": {
+      "contemp_vs_corr": -9.62784393131625e-05,
+      "lead1_vs_future_corr": -0.08438135831473768,
+      "lead1_vs_future_rv": -0.723461170324227
+    },
+    "RCov": {
+      "contemp_vs_corr": 0.23799476756032106,
+      "lead1_vs_future_corr": 0.15562065448283946,
+      "lead1_vs_future_rv": 0.5878323290131292
+    },
+    "RV": {
+      "contemp_vs_corr": 0.17824462517148656,
+      "lead1_vs_future_corr": 0.14126958499201575,
+      "lead1_vs_future_rv": 0.6490221865864958
+    },
+    "avg_corr": {
+      "contemp_vs_corr": 1.0,
+      "lead1_vs_future_corr": 0.36138045349577297,
+      "lead1_vs_future_rv": 0.016828098902217977
+    }
+  },
+  "in_sample_regressions": {
+    "nw_maxlags": 4,
+    "n_obs": 256,
+    "corr~N": {
+      "beta": 4.441712767046653,
+      "hac_t": 4.015468529886402,
+      "hac_p": 5.9327815299251745e-05,
+      "r2": 0.01855982985760718
+    },
+    "corr~P": {
+      "beta": 6.490878093669203,
+      "hac_t": 3.8948019971088423,
+      "hac_p": 9.827897751942883e-05,
+      "r2": 0.02439115613841203
+    },
+    "corr~M": {
+      "beta": -12.666637497126734,
+      "hac_t": -1.8193555409208626,
+      "hac_p": 0.06885720491198798,
+      "r2": 0.0071202136310402064
+    },
+    "corr~RCov": {
+      "beta": 3.2841394331863163,
+      "hac_t": 3.9302391135741406,
+      "hac_p": 8.486142651567243e-05,
+      "r2": 0.024217788101667526
+    },
+    "corr~RV": {
+      "beta": 1.8436584575192914,
+      "hac_t": 3.9979318327157825,
+      "hac_p": 6.389834592206288e-05,
+      "r2": 0.019957095643816536
+    },
+    "corr~corr_lag+N": {
+      "beta_N": 2.1404722121154744,
+      "t_N": 1.7845554977738822,
+      "p_N": 0.07433344528548107,
+      "r2": 0.1347287402332209
+    },
+    "corr~N+P+M": {
+      "N": {
+        "beta": 4.661689311255925,
+        "t": 1.0079079159277073,
+        "p": 0.31349867108428586
+      },
+      "P": {
+        "beta": 8.349596510088826,
+        "t": 1.7753571504536043,
+        "p": 0.07583893443573433
+      },
+      "M": {
+        "beta": 31.241339501403814,
+        "t": 1.607809229612983,
+        "p": 0.10787696641839707
+      },
+      "r2": 0.03329329188745733
+    },
+    "rv~N": {
+      "beta": 1.6208521052553495,
+      "hac_t": 4.323712293118526,
+      "hac_p": 1.534253571345509e-05,
+      "r2": 0.42114214278835516
+    },
+    "rv~RCov": {
+      "beta": 0.9503276826276164,
+      "hac_t": 4.53120874567824,
+      "hac_p": 5.864715195177542e-06,
+      "r2": 0.34554684703299987
+    },
+    "rv~RV": {
+      "beta": 0.6488688219419505,
+      "hac_t": 5.011897697138853,
+      "hac_p": 5.38958570139351e-07,
+      "r2": 0.4212297986815158
+    },
+    "rv~rv_lag+N": {
+      "beta_N": 0.8187028682804419,
+      "t_N": 0.8005919595693348,
+      "p_N": 0.42336790701044824,
+      "r2": 0.427058964996472
+    }
+  },
+  "oos_dm_panel": {
+    "avg_corr": {
+      "n_oos": 196,
+      "oos_start": "2010-02-04",
+      "oos_end": "2026-05-18",
+      "mean_loss": {
+        "N": 0.011861781882310218,
+        "RCov": 0.011801575271762864,
+        "RV": 0.011824334492283742,
+        "persistence": 0.01597731034058967
+      },
+      "loss_metric": "MSE",
+      "dm_N_vs_RCov": {
+        "n": 196,
+        "mean_loss_diff": 6.0206610547355375e-05,
+        "dm_stat": 1.5208063124270923,
+        "dm_hln_stat": 1.5169217433436415,
+        "p_hln": 0.13090589969448896,
+        "p_asymptotic": 0.12830844987586554,
+        "hln_factor": 0.9974457174120672,
+        "nw_lags": 4,
+        "dm_hln_nw_stat": 1.1520538723706937,
+        "p_hln_nw": 0.25070938204353244,
+        "harvey_pass": false,
+        "better": "model2"
+      },
+      "dm_N_vs_RV": {
+        "n": 196,
+        "mean_loss_diff": 3.744739002647643e-05,
+        "dm_stat": 0.8382425679493489,
+        "dm_hln_stat": 0.8361014595535718,
+        "p_hln": 0.404121185632518,
+        "p_asymptotic": 0.40189448409092066,
+        "hln_factor": 0.9974457174120672,
+        "nw_lags": 4,
+        "dm_hln_nw_stat": 0.9824878422406442,
+        "p_hln_nw": 0.3270769833836382,
+        "harvey_pass": false,
+        "better": "model2"
+      },
+      "dm_N_vs_persistence": {
+        "n": 196,
+        "mean_loss_diff": -0.004115528458279453,
+        "dm_stat": -2.3480813714109674,
+        "dm_hln_stat": -2.342083708048923,
+        "p_hln": 0.020185263822726895,
+        "p_asymptotic": 0.01887039828820214,
+        "hln_factor": 0.9974457174120672,
+        "nw_lags": 4,
+        "dm_hln_nw_stat": -2.3399330597519246,
+        "p_hln_nw": 0.020298585684098258,
+        "harvey_pass": false,
+        "better": "model1"
+      },
+      "bootstrap_N_vs_RCov": {
+        "mean": 6.0206610547355375e-05,
+        "ci_lo": -5.017607838875687e-05,
+        "ci_hi": 0.00016174681964936275,
+        "excludes_zero": false
+      },
+      "bootstrap_N_vs_RV": {
+        "mean": 3.744739002647643e-05,
+        "ci_lo": -4.033258662759441e-05,
+        "ci_hi": 0.00011104701005749182,
+        "excludes_zero": false
+      }
+    },
+    "RV": {
+      "n_oos": 196,
+      "oos_start": "2010-02-04",
+      "oos_end": "2026-05-18",
+      "mean_loss": {
+        "N": 0.209576356702534,
+        "RCov": 0.2305042772100675,
+        "RV": 0.2028422364874944,
+        "persistence": 0.24809359882877416
+      },
+      "loss_metric": "QLIKE",
+      "dm_N_vs_RCov": {
+        "n": 196,
+        "mean_loss_diff": -0.020927920507533566,
+        "dm_stat": -2.541416315301996,
+        "dm_hln_stat": -2.534924819859132,
+        "p_hln": 0.012032377745490486,
+        "p_asymptotic": 0.011040437212215037,
+        "hln_factor": 0.9974457174120672,
+        "nw_lags": 4,
+        "dm_hln_nw_stat": -2.3240959442988673,
+        "p_hln_nw": 0.021150435056064287,
+        "harvey_pass": false,
+        "better": "model1"
+      },
+      "dm_N_vs_RV": {
+        "n": 196,
+        "mean_loss_diff": 0.006734120215039597,
+        "dm_stat": 0.8738666619910023,
+        "dm_hln_stat": 0.8716345595921037,
+        "p_hln": 0.38447966006595236,
+        "p_asymptotic": 0.3821908719765208,
+        "hln_factor": 0.9974457174120672,
+        "nw_lags": 4,
+        "dm_hln_nw_stat": 0.8302623118644009,
+        "p_hln_nw": 0.4074058173526365,
+        "harvey_pass": false,
+        "better": "model2"
+      },
+      "dm_N_vs_persistence": {
+        "n": 196,
+        "mean_loss_diff": -0.038517242126240206,
+        "dm_stat": -1.446036371724814,
+        "dm_hln_stat": -1.4423427861989997,
+        "p_hln": 0.15080992753190214,
+        "p_asymptotic": 0.14816700050665665,
+        "hln_factor": 0.9974457174120672,
+        "nw_lags": 4,
+        "dm_hln_nw_stat": -1.589616099100255,
+        "p_hln_nw": 0.11354133242861986,
+        "harvey_pass": false,
+        "better": "model1"
+      },
+      "bootstrap_N_vs_RCov": {
+        "mean": -0.020927920507533566,
+        "ci_lo": -0.0398576560740011,
+        "ci_hi": -0.005787123708591105,
+        "excludes_zero": true
+      },
+      "bootstrap_N_vs_RV": {
+        "mean": 0.006734120215039597,
+        "ci_lo": -0.009969516440878502,
+        "ci_hi": 0.02113791962805825,
+        "excludes_zero": false
+      }
+    }
+  },
+  "regime_classification": {
+    "avg_corr": {
+      "n_oos": 196,
+      "n_spikes": 28,
+      "spike_quantile": 0.8,
+      "auc_N": 0.546343537414966,
+      "auc_RCov": 0.5716411564625851,
+      "auc_RV": 0.5809948979591837,
+      "auc_N_minus_RCov": -0.025191886221727567,
+      "auc_diff_ci": [
+        -0.08949979766002783,
+        0.0352897184514831
+      ],
+      "auc_diff_excludes_zero": false
+    },
+    "RV": {
+      "n_oos": 196,
+      "n_spikes": 32,
+      "spike_quantile": 0.8,
+      "auc_N": 0.7829649390243902,
+      "auc_RCov": 0.7675304878048781,
+      "auc_RV": 0.8025914634146342,
+      "auc_N_minus_RCov": 0.015310277186586008,
+      "auc_diff_ci": [
+        -0.012511432926829331,
+        0.0435993975903615
+      ],
+      "auc_diff_excludes_zero": false
+    }
+  },
+  "cross_pair_robustness_k1355": {
+    "target": "future pair RCov_ij (window w+1)",
+    "loss_metric": "MSE",
+    "n_windows_aggregated": 196,
+    "n_stacked_pair_windows": 8820,
+    "date_aggregated": {
+      "n": 196,
+      "mean_loss_diff": -6.349953292657512e-07,
+      "dm_stat": -0.20942241358167202,
+      "dm_hln_stat": -0.20888748955713748,
+      "p_hln": 0.8347541135304479,
+      "p_asymptotic": 0.8341184971671307,
+      "hln_factor": 0.9974457174120672,
+      "nw_lags": 4,
+      "dm_hln_nw_stat": -0.4051595947081387,
+      "p_hln_nw": 0.6858043394232252,
+      "harvey_pass": false,
+      "better": "model1"
+    },
+    "stacked_diagnostic": {
+      "n": 8820,
+      "mean_loss_diff": -6.349953292657512e-07,
+      "dm_stat": -0.8079172931941352,
+      "dm_hln_stat": -0.8078714915957995,
+      "p_hln": 0.41918635398715165,
+      "p_asymptotic": 0.41913819543359243,
+      "hln_factor": 0.9999433090506645,
+      "nw_lags": 10,
+      "dm_hln_nw_stat": -0.42908513031546647,
+      "p_hln_nw": 0.6678717543033854,
+      "harvey_pass": false,
+      "better": "model1"
+    },
+    "note": "date_aggregated = mean pairwise (lossN - lossRCov) per window, then HLN-DM on the window series (K1355). stacked = raw pair-window array DM, reported ONLY as diagnostic (understates SE)."
+  },
+  "verdict": {
+    "label": "NULL_WITH_WEAK_SECONDARY",
+    "summary": "CORE HYPOTHESIS (N = correlation-regime early warning): NOT SUPPORTED. On the correlation-spike target N is the WEAKEST of the three (OOS AUC N=0.546 < RCov=0.572 < RV=0.581); OOS DM N vs RCov HLN t=+1.52 (p=0.131, better=model2), N vs RV t=+0.84 (p=0.404). SECONDARY (future cross-asset RV): N modestly beats total RCov (DM HLN t=-2.53, p=0.012, bootstrap CI excludes 0=True) \u2014 consistent with BPQ 'downside component carries the vol signal' \u2014 BUT does NOT beat simple total RV (t=+0.87, p=0.384) and clears NO Harvey |t|>3 bar. Cross-pair K1355 date-aggregated DM is null (t=-0.21). Conclusion: daily-frequency negative-semicovariance offers no robust early-warning edge over total RCov/RV for cross-asset correlation regimes.",
+    "core_hypothesis_supported": false,
+    "core_beats_rcov": false,
+    "core_beats_rv": false,
+    "core_auc_edge": false,
+    "secondary_beats_rcov": true,
+    "secondary_beats_rv": false,
+    "secondary_harvey_pass": false
+  }
+}

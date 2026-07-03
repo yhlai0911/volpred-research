@@ -37442,5 +37442,18 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-07-04T03:33:27.854893"
+  },
+  {
+    "item_id": "872a5af2",
+    "category": "null_result",
+    "content": "K1618 [NULL / core hypothesis rejected] Realized semicovariance N 分量作相關性 regime 早期預警。資料：10 檔跨資產 ETF（SPY QQQ IWM EFA EEM TLT GLD XLF XLK XLE）日報酬 2005-01-04→2026-06-30，5406 交易日 → 257 個 non-overlapping 21 日窗口（196 OOS，涵蓋 GFC/COVID/2022 熊市）。方法：BPQ(2020 JoE / 2022 JFE semibeta) signed semicovariance 分解 P/N/M（日頻月度窗口），檢定 N（downside co-movement）是否比 total RCov / total RV 更早預測相關性 regime spike 或跨資產 vol spike。\n核心發現（假說被拒）：對『未來相關性 spike』target，N 是三者中最弱 predictor —— OOS AUC N=0.546 < RCov=0.572 < RV=0.581；OOS DM N vs RCov HLN t=+1.52 p=0.131（better=RCov 非 N）、N vs RV t=+0.84 p=0.404；AUC(N)−AUC(RCov) bootstrap 95% CI [−0.089,+0.035] 含 0。\n次要（弱、不 robust）：對『未來跨資產 RV』target，N 微勝 total RCov（DM HLN t=−2.53 p=0.012，loss-diff bootstrap CI [−0.040,−0.006] 排除 0，符合 BPQ『downside 分量攜帶 vol 訊號』），但不勝簡單 total RV（t=+0.87 p=0.384，RV 勝）、且無任一 Harvey |t|>3。\nK1355 跨 pair robustness：date-aggregated N vs RCov HLN t=−0.21 p=0.835（null）。\n結論：日頻 negative-semicovariance 對跨資產相關性 regime 無 robust early-warning edge 勝過 total RCov/RV；N 的微弱 RV edge 更像 volatility 陳述而非 correlation 陳述（scale-confounded），correlation R²~0.02。\nProvenance：experiment_id=K1618，path=experiments/K1618/，reviewer=Codex CONDITIONAL_PASS（2026-07-04：lookahead/semicovariance identity(max resid 5.55e-17)/K1355 date-agg/DM-HLN/seed 全 pass；確認 null 為 genuine 非計算 bug；唯一條件為 forecast_origin 應解讀為 after-window-close refit 語義）。\n防錯遵守：明確 lag（X_w→Y_{w+1}）、seed=42、K1355 date-aggregated primary inference、K783c canonical qlike_pointwise、K1216b 對稱 univariate-OLS spec、HLN small-sample+Harvey bar。\n限制（誠實）：BPQ semicovariance 本為 intraday/HF 物件，本實驗用日報酬月度窗口（BPQ-2022 daily-semibeta 慣例），21 日 obs/窗口的 N/P/M 為 noisy proxy，未涵蓋 HF co-jump/diffusive 結構 → 不排除真正 5-min HF 實作可能找回日頻 proxy 無法捕捉的訊號。intraday 5-min 資料目前僅 2026 少數日檔、不足支撐 HF 版本。",
+    "evidence": [
+      "experiments/K1618/K1618_results.json",
+      "experiments/K1618/README.md",
+      "experiments/K1618/K1618.py",
+      "Codex review 2026-07-04 CONDITIONAL_PASS"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-07-04T04:29:50.986821"
   }
 ]
