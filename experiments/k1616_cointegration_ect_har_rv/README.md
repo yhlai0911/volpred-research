@@ -67,7 +67,7 @@ experiments used illiquidity (k1472), jump/macro regime (k1462), foreign flow
 |------|-----------|
 | **Lookahead (highest risk)** | HAR features all `.shift(1)` (known at end of `t-1`); `ECT_{t-1}` uses β fitted on `[0,i-1]` and price at `i-1`; forecast for day `i` uses no day-`i` info. Explicit in `run_oos`. |
 | **Forward-label / refit** | 1-step target = `RV_t`; training rows `j` have targets fully realized before day `i` (expanding, `target_end < forecast_origin`). |
-| **In-sample β leakage** | Cointegration β re-estimated expanding (monthly). Full-sample-β variant reported **only** as `*_static_beta` robustness (disclosed as mildly leaky). |
+| **In-sample β leakage** | Cointegration β re-estimated expanding (monthly). `*_static_beta` variant is a **hybrid sensitivity only** (forecast ECT feature uses full-sample β while the model coefficient stays expanding-β-trained; **not** a pure static-β model), disclosed as mildly leaky — not treated as formal robustness. |
 | **Seed fixed** | `SEED=20260704`, `np.random.seed`. |
 | **QLIKE direction** | `qlike_pointwise` (actual/predicted), not reversed. |
 | **DM + HLN + HAC** | `dm_test` (Newey-West) + `hln_correct`; single horizon = target H. |
@@ -100,10 +100,16 @@ experiments used illiquidity (k1472), jump/macro regime (k1462), foreign flow
   classic in-sample-vs-OOS gap.
 - **GLD-TLT → GLD** has in-sample ECT HAC t = 4.45, but the pair is **not
   cointegrated** → this is a **spurious** regression on a non-stationary
-  regressor. Under a static full-sample β the OOS effect even flips negative
+  regressor. Under a hybrid static-ECT-feature sensitivity (forecast ECT uses the
+  full-sample β while the model coefficient stays expanding-β-trained — **not** a
+  pure static-β model) the OOS effect even flips negative
   (`hln_t_static_beta = −2.18`), and the honest expanding-β OOS is insignificant
   (t = 1.30, p = 0.195). This is exactly why the cointegration gate matters: raw
-  in-sample ECT t-stats on non-cointegrated pairs are misleading.
+  in-sample ECT t-stats on non-cointegrated pairs are misleading. (Caveat: the
+  `any_pair_ect_helps_*` verdict flags scan all pairs and do not gate out
+  non-cointegrated ones; harmless here since every pair is insignificant, but the
+  "cointegrated-eligible-only" principle should be enforced in the flag logic
+  before any future positive is claimed.)
 
 ### Figures
 - `k1616_ect_vs_rv.png` — VIX-VIX3M ECT (term-structure slope) vs SPY annualized

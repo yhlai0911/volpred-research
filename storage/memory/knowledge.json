@@ -37415,5 +37415,17 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-07-03T20:15:51.025678"
+  },
+  {
+    "item_id": "29e09c8f",
+    "category": "volatility_forecasting",
+    "content": "k1616 [NULL] Cointegration error-correction term (ECT) as an extra HAR-RV covariate: no robust incremental out-of-sample volatility-forecasting power. Tested 4 pairs (SPY-QQQ, GLD-TLT, SPY-EEM, VIX-VIX3M) on daily price_cache.db 2016-2026, RV proxy = Garman-Klass daily variance, log-RV HAR baseline vs HAR+ECT, expanding cointegration beta (monthly refit), QLIKE (qlike_pointwise actual/predicted) + DM/HLN with Newey-West HAC. No config reaches even 5% significance (best SPY-QQQ->SPY QLIKE +0.47%, HLN p=0.55). Key lesson: the ONLY genuinely cointegrated pair (VIX-VIX3M term structure) has a highly IN-SAMPLE significant ECT (HAC t=4.26 on ECT, 3.54 on |ECT|) yet ZERO OOS value on SPY RV (DM t=+0.11, p=0.91) -- HAR own lagged RV already spans the VIX-term-structure information (collinear), so ECT is redundant conditional on HAR features. In-sample significance != OOS value. GLD-TLT in-sample ECT t=4.45 is spurious (pair not cointegrated -> non-stationary regressor); this is exactly the value of the cointegration gate. No lookahead (features .shift(1); ECT beta from [0,i-1]; forecast day i uses no day-i info; seed=20260704). Reviewer: Codex primary-path review CONDITIONAL_PASS (false-NULL risk absent; 2 minor README-overstatement fixes applied: static_beta variant is a hybrid sensitivity not a pure static-beta model; verdict flags do not gate non-cointegrated pairs). Provenance: experiment_id=k1616_cointegration_ect_har_rv, k_id=k1616, experiment_path=experiments/k1616_cointegration_ect_har_rv/.",
+    "evidence": [
+      "experiments/k1616_cointegration_ect_har_rv/k1616_cointegration_ect_har_rv_results.json",
+      "experiments/k1616_cointegration_ect_har_rv/README.md",
+      "Codex primary-path review CONDITIONAL_PASS 2026-07-04"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-07-04T01:29:28.338472"
   }
 ]
