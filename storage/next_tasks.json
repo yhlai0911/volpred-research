@@ -47590,7 +47590,7 @@
     "title": "修 merge_worktree.sh：invalid-cwd 使 git 指令失敗回空被當『0 commits』→ 未 merge 就移除 worktree（K1032 strike-2）",
     "description": "STRIKE 2（K1032 首次，K1618 2026-07-04 第 2 次，見 docs/error_log.md 2026-07-04 04:25 entry）。merge_worktree.sh 已有 5 層 K1032/K1114/K1262 防禦（rev-list ERROR sentinel / file-presence diff-tree / FS-defense / pre-remove scan），但全被『shell cwd 失效使 git 指令 error 回空字串』繞過 → 走 destructive 『可安全移除』path、未 merge 就砍 worktree（K1618 靠 branch 存活 + git checkout 救回）。\n三層治本（clean context + regression test，勿在 fire 尾倉促改 643 行安全腳本）：\n(1) 底層邏輯：所有 safety 檢查的 git 指令改『非零 exit / cwd-error 一律當不安全 → ABORT』，禁 `2>/dev/null || true` 把 git 失敗吞成空=safe（no-silent-fallback rule）；判『可安全移除』須 positive proof。\n(2) 流程：腳本開頭做 cwd sanity（pwd 必成功且非 worktree 內），破壞性移除前再驗 shell cwd 不在被移除 worktree 內；主線程 SOP：merge 前先 cd \\$REPO_ROOT、永不從 worktree 內部觸發 merge。\n(3) regression test：模擬『shell cwd 在 worktree 內 + branch 有未合併 commit』，重現舊 bug 即 fail。\n驗證 gate：test 覆蓋三次 incident 觸發條件；改完 commit prefix `refactor(3-strike)` 或 fix。",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "platform_ops",
     "source": "agent_discovered",
     "tags": [
@@ -47601,6 +47601,32 @@
       "no-silent-fallback",
       "data-loss-guard"
     ],
-    "created_at": "2026-07-03T20:34:54+00:00"
+    "created_at": "2026-07-03T20:34:54+00:00",
+    "claimed_by": "hourly-05",
+    "claimed_at": "2026-07-03T21:08:59.064925+00:00",
+    "claim_session_id": "cbf96b484219",
+    "status_history": [
+      {
+        "ts": "2026-07-03T21:08:59.065201+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-03T21:08:59.290837+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-05"
+      },
+      {
+        "ts": "2026-07-03T21:43:19.356996+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-05"
+      }
+    ],
+    "started_at": "2026-07-03T21:08:59.290544+00:00",
+    "completed_at": "2026-07-03T21:43:19.356715+00:00",
+    "result": "K1618 STRIKE-2 治本：真 root cause=MAIN_DIR 被 cwd 綁架(cwd 在 worktree 內+相對路徑→BASH_SOURCE-相對解析指到 worktree root→main_branch 自比自 0-commit→5 層防禦全繞過)。三層 fix：(1) resolve_main_dir 用 git -C script_dir git-common-dir anchor 腳本目錄+3 道 fail-loud guard；(2) ensure_cwd_outside_worktree 兩 remove 前擋；(3) test case 8/9/10。Codex FAIL→CONDITIONAL_PASS 額外修 2 pre-existing data-loss(cross-repo cwd anchor + -X ours drop auto-restore fail-closed)。全 10 cases/25 assertions PASS。"
   }
 ]

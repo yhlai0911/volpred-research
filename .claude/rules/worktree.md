@@ -56,4 +56,9 @@ paths:
   3. **K1262-v4 post-merge file-presence verification** — merge 後逐檔 `git cat-file -e HEAD:<path>` 驗證 K-experiment 真在 main HEAD git tree（不只 working tree）。失敗時 ABORT loud + 列 cherry-pick hint + 保留 worktree。
   4. **Locked worktree hint** — `git worktree remove` 失敗時印 unlock + remove + branch -D 三段式 recovery hint，**禁止** `--force` fallback (CLAUDE.md L168)。原 L444-458 的 `--force` / `unlock + -f -f` 階梯已移除。
   5. **Test gate 擴充** — `scripts/tests/test_merge_worktree.sh` 新增 case 5/6/7（rev-list false negative / post-merge verification / locked worktree hint），現為 7 cases / 17 assertions PASS 7/7。
+- **K1618** (2026-07-04) **STRIKE 2**（K1032 same root class 第 2 次）：主線程 shell cwd 停在待合併 worktree 內（Bash cwd 跨呼叫持久）+ 相對路徑 `bash scripts/merge_worktree.sh` 呼叫 → 舊版 `BASH_SOURCE`-相對解析把 `MAIN_DIR` 指到 **worktree root** → `main_branch` = worktree 自己的分支 → `main_branch..branch` 自比自 = 0-commit false-negative → 5 層防禦全繞過 → 未 merge 就砍 worktree（靠 branch 存活救回）。**systemic fix**（詳 `docs/error_log.md` 2026-07-04 04:25 RESOLVED）：
+  1. `resolve_main_dir()` 用 `git -C "$script_dir" rev-parse --git-common-dir` anchor 到**腳本實體目錄**（非裸 cwd），從任何 cwd 都回主 repo；`-d "$root/.git"` 拒絕誤指 worktree。
+  2. HEAD=worktree-agent 分支 / `main_branch==branch` self-compare / git log rc≠0 三道 fail-loud guard；`ensure_cwd_outside_worktree()` 在兩個 remove 前擋。
+  3. `-X ours` drop 了 modified 檔改**自動還原 agent 版本**（`git checkout branch -- <df>`+commit），add/commit 真失敗 fail-closed 保留 worktree+branch。
+  4. Test 加 case 8/9/10，現為 **10 cases / 25 assertions PASS 10/10**。**merge 前主線程必先 `cd $REPO_ROOT`、永不從 worktree 內部觸發 merge**（memory `feedback_no_cd_into_worktree_before_merge`）。
 - Session 停止時 `git worktree remove --force` 清掉未 merge worktree → 重要 session recovery 永遠走 reflog 不走 remove force。

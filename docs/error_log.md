@@ -16,6 +16,12 @@
 
 **教訓（PDCA）**：(i) 主線程操作 worktree 相關 Bash 一律用 repo 絕對路徑、勿 `cd` 進 worktree（cwd 持久會汙染後續破壞性動作）；(ii) 破壞性動作（移除 worktree / branch -D）前的「安全」判斷若源自可能失敗的 git 指令，git 失敗必須當成「不安全 → 保留」而非「安全 → 刪除」（fail-safe 方向）；(iii) worktree-merge-verification skill 的 K1032 checklist 生效：merge 後**必驗 main repo 檔案實際存在**（本次靠此驗證即時抓到遺失並救回）。
 
+**RESOLVED（2026-07-04 05:xx hourly-05，`platform_ops_fix_merge_worktree_silent_revlist`）**：三層治本 + Codex review（FAIL→CONDITIONAL_PASS→剩餘疑慮已閉合）落地。**真 root cause 比初判更深**：不是「git 指令失敗回空被吞」，而是 **MAIN_DIR 解析被 cwd 綁架** —— cwd 在 worktree 內 + 相對路徑呼叫時，`BASH_SOURCE`-相對解析把 `MAIN_DIR` 指到 **worktree root** → `main_branch=git rev-parse --abbrev-ref HEAD` 變成 worktree 自己的分支 → `main_branch..branch` 自比自 = 0 commits false-negative → 5 層防禦全繞過（FS-defense 因 `MAIN_DIR==wt_path` 失效）。修復：
+- **Layer 1（底層邏輯）**：`resolve_main_dir()` 用 `git -C "$script_dir" rev-parse --path-format=absolute --git-common-dir`（anchor 到**腳本實體目錄**，非裸 cwd）→ 從任何 cwd 含 worktree 內都回主 repo `.git`，parent = 真 main root；`-d "$root/.git"` 區分主 repo（目錄）vs worktree（檔案）。加 3 道 guard：HEAD 是 worktree-agent 分支 → FATAL；`main_branch==branch` self-compare → ABORT；git log rc≠0 → ABORT（no-silent-fallback）。
+- **Layer 2（流程）**：開頭 `cd "$MAIN_DIR"` 固定 cwd；`ensure_cwd_outside_worktree()` 在兩個 `git worktree remove` 前確認 cwd 不在待移除 worktree 內。主線程 SOP 見 memory `feedback_no_cd_into_worktree_before_merge`。
+- **Layer 3（regression test）**：`scripts/tests/test_merge_worktree.sh` 加 Case 8（cwd 在 worktree 內 + 相對路徑 = 真 K1618 觸發，舊版 FAIL 新版 PASS）、Case 9（Codex Finding 2）、Case 10（Codex Finding 1）。全 **10 cases / 25 assertions PASS**。
+- **Codex 額外抓 2 個 pre-existing 資料遺失路徑一併修**：(F1) `resolve_main_dir` cwd-first 會被無關 repo cwd 綁架 → 改 anchor 腳本目錄；(F2) `-X ours` 偵測 drop 了 modified 檔卻仍 `merge_ok=true` → 移除 worktree+branch -D 遺失 agent 修改 → 改自動 `git checkout branch -- <df>` 還原+commit，add/commit 真失敗 fail-closed 保留 worktree+branch（「無 diff 可提交」才算合法 skip）。
+
 ## 2026-07-03 22:07 `event_article` T+0 stale duplicate = refill 用排程預估公佈日排 slot，事件提前公佈+已發文仍生成 — **INTERCEPTED（出池）→ RESOLVED（slot-aware coverage 上線 2026-07-03 23:24 hourly-23）**
 
 **現象**：hourly-22 fire 從 dispatch main-thread queue 撈到最高優先 P1 `event_article_nfp_us_2026-07-03_tplus0`（今天 22:08 由 refill 生成）。人工查重發現 6月NFP(57K、失業率 4.2%) 的 T+0 波動率文章已由 `mile_35eef830`（2026-07-01 發佈）**完整**涵蓋 —— 含正式數據 / NFP日 vs 週五基準 1.17x / VIX regime 2.17x(k528,k513) / 7-2 實際反應 SPY 0.13% VIX 16.15 + 真圖表。硬寫必然是 arc dup（同事件同 57K 同 VIX regime 結論同 SPY/VIX 資產）。

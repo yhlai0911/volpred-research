@@ -18,6 +18,11 @@
 #           → post-merge file-presence verification 必 ABORT 並列出 cherry-pick hint
 #   Case 7 (K1262-v4): worktree locked (stale .git/worktrees/<name>/locked) 時 remove 失敗
 #           → script 必印 unlock + remove + branch -D hint，**禁止** --force fallback
+#   Case 8 (K1618 STRIKE-2): caller 的 shell cwd **停在待合併 worktree 內**（Bash cwd 持久污染），
+#           worktree branch 有未合併 commits。舊版 BASH_SOURCE-相對 MAIN_DIR 解析 → 指到
+#           worktree root → main_branch=worktree 分支 → 自比自 0-commit false-negative →
+#           走「可安全移除」未 merge 就砍 worktree（K1618 靠 branch 存活救回）。
+#           → 修後 script 必用 git-common-dir 解析真 main root，正確 merge、無 silent loss。
 #
 # 測試用獨立 git repo (不碰主 project state)
 
@@ -70,6 +75,27 @@ run_merge_in_test_dir() {
     local test_dir="$1"
     shift
     (cd "$test_dir" && bash "$test_dir/scripts/merge_worktree.sh" "$@" 2>&1) || true
+}
+
+# K1618: run the script with cwd stuck INSIDE the given worktree (reproduces the
+# persistent-cwd pollution that corrupted MAIN_DIR resolution). $2 = worktree relpath.
+# 關鍵：用 **相對路徑** `scripts/merge_worktree.sh` 呼叫（=真實 K1618 觸發條件）。
+# cwd 在 worktree 內時，相對路徑指到 worktree 自己的腳本副本，且 BASH_SOURCE 是相對路徑
+# → 舊版據此把 MAIN_DIR 解析成 worktree root（絕對路徑呼叫不會重現此 bug）。
+run_merge_from_inside_worktree() {
+    local test_dir="$1"
+    local wt_rel="$2"
+    shift 2
+    (cd "$test_dir/$wt_rel" && bash scripts/merge_worktree.sh "$@" 2>&1) || true
+}
+
+# K1618 review Finding 1: run the script from an arbitrary cwd via ABSOLUTE path.
+# $1 = the cwd to run from, $2 = the test_dir whose script to invoke.
+run_merge_from_cwd() {
+    local run_cwd="$1"
+    local test_dir="$2"
+    shift 2
+    (cd "$run_cwd" && bash "$test_dir/scripts/merge_worktree.sh" "$@" 2>&1) || true
 }
 
 # ============================================================
@@ -435,9 +461,170 @@ test_case_7_locked_worktree_hint() {
 }
 
 # ============================================================
+# Test Case 8 (K1618 STRIKE-2): caller cwd 停在待合併 worktree 內
+#   worktree branch 有未合併 commits。舊版 MAIN_DIR 誤解析成 worktree root →
+#   main_branch=worktree 分支 → 自比自 0-commit → 走「可安全移除」未 merge 就砍。
+#   修後必用 git-common-dir 解析真 main root，正確 merge、K-experiment 檔進 main、無 loss。
+# ============================================================
+test_case_8_cwd_inside_worktree() {
+    echo "=== Case 8 (K1618 STRIKE-2): cwd 停在 worktree 內 → 不可 silent drop ==="
+    local test_dir
+    test_dir=$(setup_test_env "case8")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase8"
+    local branch="worktree-agent-testcase8"
+
+    # Agent 在 worktree 裡 commit experiments/k1618sim/（真實未合併 commit）
+    mkdir -p "$wt/experiments/k1618sim"
+    echo "print('k1618sim implementation')" > "$wt/experiments/k1618sim/k1618sim.py"
+    echo "# K1618sim README" > "$wt/experiments/k1618sim/README.md"
+    echo '{"verdict":"real"}' > "$wt/experiments/k1618sim/k1618sim_results.json"
+    (cd "$wt" && git add -A && git commit -qm "K1618sim deliverables")
+
+    # 確認 setup：worktree branch 有未合併 commit
+    local commit_count
+    commit_count=$(git rev-list --count "main..$branch" 2>/dev/null || echo "0")
+    if [[ "$commit_count" -lt 1 ]]; then
+        fail "8-setup: 預期 worktree branch 有未合併 commit 但 rev-list 報 0（測試環境問題）"
+        return
+    fi
+
+    # 關鍵：從 worktree **內部** 執行 merge script（K1618 精確觸發條件）
+    local output
+    output=$(run_merge_from_inside_worktree "$test_dir" "$wt" agent-testcase8)
+
+    # 8-1: k1618sim.py 必進 main HEAD（不可 silent drop）
+    if git -C "$test_dir" cat-file -e "main:experiments/k1618sim/k1618sim.py" 2>/dev/null; then
+        pass "8-1: k1618sim.py 在 main HEAD（cwd 在 worktree 內仍正確 merge）"
+    else
+        fail "8-1: k1618sim.py 不在 main HEAD（K1618 silent drop 重現！）"
+        echo "$output" | tail -50
+    fi
+
+    # 8-2: 三件套齊全在 main HEAD
+    if git -C "$test_dir" cat-file -e "main:experiments/k1618sim/README.md" 2>/dev/null \
+       && git -C "$test_dir" cat-file -e "main:experiments/k1618sim/k1618sim_results.json" 2>/dev/null; then
+        pass "8-2: README + results.json 也在 main HEAD"
+    else
+        fail "8-2: 部分檔案遺失"
+    fi
+
+    # 8-3: script 絕不可誤判「沒有新的 commits...可安全移除」（K1618 false-negative pattern）
+    if echo "$output" | grep -q "沒有新的 commits.*可安全移除"; then
+        fail "8-3: script 誤判 no-commits（K1618 self-compare false negative 重現！）"
+        echo "$output" | grep -B2 -A2 "可安全移除"
+    else
+        pass "8-3: script 沒誤判 no-commits（MAIN_DIR robust 解析防住自比自）"
+    fi
+
+    # 8-4: MAIN_DIR 不可被誤解析成 worktree（不可出現 FATAL worktree-branch HEAD）
+    if echo "$output" | grep -qE "MAIN_DIR.*worktree 分支|main_branch.*== worktree branch"; then
+        fail "8-4: MAIN_DIR/main_branch 仍被解析成 worktree（fix 未生效或 guard 誤觸）"
+        echo "$output" | grep -E "FATAL|ABORT" | head -10
+    else
+        pass "8-4: MAIN_DIR 正確解析成主 repo（未觸發 worktree-branch guard）"
+    fi
+}
+
+# ============================================================
+# Test Case 9 (K1618 review Finding 2): -X ours drop 了 agent 對既有檔的修改
+#   → 舊版只警告仍移除 worktree+branch -D → agent 修改遺失。
+#   修後必 AUTO-RESTORE agent 版本並 commit，main HEAD 保留 agent 修改。
+# ============================================================
+test_case_9_ours_dropped_auto_restore() {
+    echo "=== Case 9 (Finding 2): -X ours drop modified 檔 → 自動還原不遺失 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case9")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase9"
+    local branch="worktree-agent-testcase9"
+
+    # seed 加一個既有檔 experiments/km9/km9.py（main + worktree 都會有）
+    mkdir -p experiments/km9
+    echo "v0" > experiments/km9/km9.py
+    git add -A && git commit -qm "seed km9.py v0"
+    # 讓 worktree 追上這個 commit
+    (cd "$wt" && git merge main --no-edit -q 2>&1 || git reset --hard main -q)
+
+    # agent 在 worktree 改 km9.py
+    echo "agent v1" > "$wt/experiments/km9/km9.py"
+    (cd "$wt" && git add -A && git commit -qm "agent modifies km9.py")
+
+    # main ALSO 改 km9.py（製造衝突 → -X ours 取 main → drop agent 版本）
+    echo "main v1" > experiments/km9/km9.py
+    git add -A && git commit -qm "main modifies km9.py"
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir")
+
+    # 9-1: main HEAD 的 km9.py 必是 agent 版本（auto-restore 生效）
+    local final_content
+    final_content=$(git -C "$test_dir" show "main:experiments/km9/km9.py" 2>/dev/null || echo "MISSING")
+    if [[ "$final_content" == "agent v1" ]]; then
+        pass "9-1: main HEAD km9.py = agent 版本（-X ours drop 已自動還原，無資料遺失）"
+    else
+        fail "9-1: km9.py = '$final_content'（agent 修改遺失！Finding 2 重現）"
+        echo "$output" | grep -E "DROPPED|RESTORE|還原" | head -10
+    fi
+
+    # 9-2: script 必印 AUTO-RESTORE 訊息
+    if echo "$output" | grep -q "AUTO-RESTORE"; then
+        pass "9-2: script 執行 auto-restore（非只警告）"
+    else
+        fail "9-2: script 沒 auto-restore"
+    fi
+}
+
+# ============================================================
+# Test Case 10 (K1618 review Finding 1): cwd 在**無關 git repo** + 絕對路徑呼叫
+#   → MAIN_DIR 必 anchor 到腳本所屬 repo（本 repo），不可被 cwd repo 綁架。
+# ============================================================
+test_case_10_cross_repo_cwd_anchor() {
+    echo "=== Case 10 (Finding 1): cwd 在無關 repo → MAIN_DIR anchor 腳本 repo ==="
+    local test_dir
+    test_dir=$(setup_test_env "case10")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase10"
+    local branch="worktree-agent-testcase10"
+    mkdir -p "$wt/experiments/kx10"
+    echo "print('kx10')" > "$wt/experiments/kx10/kx10.py"
+    (cd "$wt" && git add -A && git commit -qm "kx10 deliverables")
+
+    # 建無關 repo B
+    local repo_b="$TMP_BASE/unrelated_repo_b"
+    mkdir -p "$repo_b"
+    (cd "$repo_b" && git init -b main -q && git config user.email t@t && git config user.name t \
+        && echo x > x.txt && git add -A && git commit -qm "b")
+
+    # 從 repo B 的 cwd，絕對路徑呼叫 test_dir 的 script
+    local output
+    output=$(run_merge_from_cwd "$repo_b" "$test_dir" agent-testcase10)
+
+    # 10-1: kx10 必 merge 進 test_dir（腳本 repo），不是 repo B
+    if git -C "$test_dir" cat-file -e "main:experiments/kx10/kx10.py" 2>/dev/null; then
+        pass "10-1: kx10 merge 進腳本所屬 repo（MAIN_DIR anchor 正確）"
+    else
+        fail "10-1: kx10 沒進腳本 repo（MAIN_DIR 被 cwd repo 綁架，Finding 1 重現）"
+        echo "$output" | tail -30
+    fi
+
+    # 10-2: repo B 未被污染（仍只 1 commit、無 kx10）
+    local b_commits
+    b_commits=$(git -C "$repo_b" rev-list --count HEAD 2>/dev/null || echo "?")
+    if [[ "$b_commits" == "1" ]] && ! git -C "$repo_b" cat-file -e "HEAD:experiments/kx10/kx10.py" 2>/dev/null; then
+        pass "10-2: 無關 repo B 未被污染"
+    else
+        fail "10-2: 無關 repo B 被動到（commits=$b_commits）"
+    fi
+}
+
+# ============================================================
 # Run tests
 # ============================================================
-echo "### merge_worktree.sh 測試 (K1143-v2 + K1262-v4) ###"
+echo "### merge_worktree.sh 測試 (K1143-v2 + K1262-v4 + K1618) ###"
 echo ""
 
 test_case_a
@@ -454,12 +641,18 @@ test_case_6_post_merge_verification
 echo ""
 test_case_7_locked_worktree_hint
 echo ""
+test_case_8_cwd_inside_worktree
+echo ""
+test_case_9_ours_dropped_auto_restore
+echo ""
+test_case_10_cross_repo_cwd_anchor
+echo ""
 
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（7 cases = A/B/C/D + 5/6/7）
-TOTAL_CASES=7
+# Test case-level summary（10 cases = A/B/C/D + 5/6/7 + 8/9/10）
+TOTAL_CASES=10
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else

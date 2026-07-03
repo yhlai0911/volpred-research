@@ -18,14 +18,77 @@ set -euo pipefail
 # 防護：若 cwd 已失效（前次 worktree 被 force-rm 後 cwd 殘留），切回 HOME
 pwd >/dev/null 2>&1 || cd "$HOME"
 
-# 用 BASH_SOURCE 而非 $0，並 fallback 到絕對路徑 git rev-parse --show-toplevel
 SCRIPT_PATH="${BASH_SOURCE[0]:-$0}"
-if [[ -f "$SCRIPT_PATH" ]]; then
-    MAIN_DIR="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
-else
-    MAIN_DIR="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
-fi
+
+# ── K1618 (2026-07-04) STRIKE-2 FIX：robust MAIN_DIR 解析（cwd-agnostic）─────
+# 根因：若 caller 的 shell cwd 停在被合併的 worktree 內（Bash 工具 cwd 跨呼叫持久），
+# 舊版用 BASH_SOURCE-相對路徑解析 MAIN_DIR → 指到 **worktree root** 而非主 repo。
+# 於是 main_branch = worktree 自己的分支 → `main_branch..branch` 拿自己比自己 = 0 commits
+# false-negative → 5 層防禦全被繞過（FS-defense 也因 MAIN_DIR==wt_path 失效）→ 走
+# destructive「可安全移除」→ 未 merge 就砍 worktree（K1618 靠 branch 存活才救回）。
+# 正解：`git rev-parse --git-common-dir` 從任何 cwd（含 linked worktree 內）都回傳
+# **主 repo 的 .git**；其 parent 即真 main root。主 repo 的 .git 是「目錄」，
+# linked worktree 的 .git 是「檔案」→ 用 `-d "$root/.git"` 可靠區分、拒絕誤指 worktree。
+# K1618 review Finding 1 (2026-07-04)：anchor 到 **腳本實體所在目錄**，不用裸 cwd。
+# 否則從別的 git repo 用絕對路徑呼叫本腳本時，`git rev-parse --git-common-dir` 會依 cwd
+# 解析成那個 repo（fail-open，可能對錯 repo 跑 destructive remove）。腳本屬於特定 repo，
+# 故用 `git -C "$script_dir"`：K1618 相對路徑情境下 script_dir 在 worktree/scripts，但
+# worktree 屬本 repo → git-common-dir 照樣回主 repo 的 .git；絕對路徑呼叫更是直接命中本 repo。
+resolve_main_dir() {
+    local script_dir common_dir root
+    script_dir="$(cd "$(dirname "$SCRIPT_PATH")" 2>/dev/null && pwd)" || script_dir=""
+    if [[ -z "$script_dir" ]]; then
+        return 1  # 無法定位腳本目錄（BASH_SOURCE 空 + cwd 失效）→ fail-closed
+    fi
+    if common_dir=$(git -C "$script_dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) \
+        && [[ -n "$common_dir" ]] && [[ -d "$common_dir" ]]; then
+        root="$(cd "$(dirname "$common_dir")" 2>/dev/null && pwd)" || root=""
+        if [[ -n "$root" ]] && [[ -d "$root/.git" ]]; then
+            printf '%s' "$root"
+            return 0
+        fi
+    fi
+    # Fallback：script_dir 的 parent，但**只在** .git 是真目錄（非 worktree）時才信任
+    root="$(cd "$script_dir/.." 2>/dev/null && pwd)" || root=""
+    if [[ -n "$root" ]] && [[ -d "$root/.git" ]]; then
+        printf '%s' "$root"
+        return 0
+    fi
+    return 1
+}
+
+MAIN_DIR="$(resolve_main_dir)" || {
+    echo "[FATAL] 無法可靠解析主 repo 根目錄（cwd 可能停在已失效或 linked worktree 內）。"
+    echo "        請先 cd 到主 repo 根目錄（非 worktree）再重跑。"
+    exit 1
+}
+# 立刻 cd 到真 main root：確保後續所有動作（尤其 git worktree remove）永不從
+# 待移除的 worktree 內執行（cwd 失效會連鎖污染 git 指令 → K1618 root cause）。
 cd "$MAIN_DIR" || { echo "[FATAL] 無法 cd 至 MAIN_DIR=$MAIN_DIR"; exit 1; }
+
+# Sanity：MAIN_DIR 的 HEAD 不可是 worktree-agent 分支（若是 → 解析仍錯，fail-loud 拒絕）
+_mdir_head="$(git -C "$MAIN_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo UNKNOWN)"
+if [[ "$_mdir_head" == worktree-agent-* ]]; then
+    echo "[FATAL] MAIN_DIR=$MAIN_DIR 的 HEAD=$_mdir_head 是 worktree 分支 —"
+    echo "        代表主 repo 解析錯誤（cwd 汙染），拒絕繼續以防 K1618 STRIKE-2 資料遺失。"
+    exit 1
+fi
+
+# K1618 (2026-07-04): 破壞性移除前確認 shell cwd 不在待移除 worktree 內（defense-in-depth）。
+ensure_cwd_outside_worktree() {
+    local wt="$1"
+    local cur="$PWD"
+    if [[ "$wt" == "$MAIN_DIR" ]]; then
+        echo "  [ABORT] 拒絕移除 MAIN_DIR 本身（$wt）"
+        return 1
+    fi
+    if [[ "$cur" == "$wt" || "$cur" == "$wt"/* ]]; then
+        echo "  [FIX] 當前 cwd 在待移除 worktree 內（$cur）→ 先 cd 回 $MAIN_DIR"
+        cd "$MAIN_DIR" || { echo "  [ABORT] 無法 cd 回 MAIN_DIR，拒絕移除以防 cwd 失效"; return 1; }
+    fi
+    return 0
+}
+# ──────────────────────────────────────────────────────────────────────────
 
 DRY_RUN=false
 TARGET=""
@@ -133,8 +196,24 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
     local main_branch
     main_branch=$(git -C "$MAIN_DIR" rev-parse --abbrev-ref HEAD)
 
-    local new_commits
-    new_commits=$(git -C "$MAIN_DIR" log --oneline "$main_branch..$branch" 2>/dev/null || true)
+    # K1618 (2026-07-04): 若 main_branch == worktree branch，代表 MAIN_DIR 解析異常把
+    # worktree 自己的分支當成主分支 → `main_branch..branch` 自比自 = 0-commit false-negative
+    # （K1618 STRIKE-2 的直接症狀）。targeted guard：即便前段解析回歸也擋住自我比較。
+    if [[ "$main_branch" == "$branch" ]]; then
+        echo "  [ABORT] main_branch($main_branch) == worktree branch — 解析異常，"
+        echo "         拒絕繼續以防自我比較 0-commit false-negative（K1618 STRIKE-2）"
+        return 1
+    fi
+
+    # K1618 (2026-07-04) no-silent-fallback：git log 失敗必 fail-loud ABORT，不可把
+    # 「git 錯誤回空」silently 當成「0 commits」（rc=0 空輸出=合法無 commit；rc≠0=git 錯誤）。
+    local new_commits new_commits_rc=0
+    new_commits=$(git -C "$MAIN_DIR" log --oneline "$main_branch..$branch" 2>&1) || new_commits_rc=$?
+    if [[ $new_commits_rc -ne 0 ]]; then
+        echo "  [ABORT] git log $main_branch..$branch 失敗 (rc=$new_commits_rc)；拒絕繼續以防 silent data loss"
+        echo "         output: $new_commits"
+        return 1
+    fi
 
     # 雙重驗證：rev-list --count 防止 git log 靜默失敗（K1032/K1114/E067 教訓）
     local commit_count_verify
@@ -250,6 +329,11 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
 
         echo "  [OK] 沒有新的 commits（雙重確認 rev-list=0）+ experiments/ 也空，可安全移除"
         if ! $DRY_RUN; then
+            # K1618 (2026-07-04): 移除前確認 cwd 不在待移除 worktree 內
+            if ! ensure_cwd_outside_worktree "$wt_path"; then
+                echo "  [ABORT] cwd guard 失敗，保留 worktree 待手動處理"
+                return 1
+            fi
             # K1143-v2: 禁用 --force fallback (CLAUDE.md L168 禁止)。若 remove 失敗就 abort。
             if ! git worktree remove "$wt_path" 2>&1; then
                 echo "  [ABORT] git worktree remove 失敗（拒絕 --force fallback，CLAUDE.md L168 禁止）"
@@ -514,12 +598,41 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
                     echo ""
                     echo "  🚨 ============================================="
                     echo "  🚨 K1032/K1261 PATTERN: -X ours 靜默 drop $ours_dropped 個 modified file"
-                    echo "  🚨 不阻擋 merge（merge 已完成）但強烈建議手動恢復："
+                    # K1618 review Finding 2 (2026-07-04): 舊版只印警告仍 merge_ok=true → 之後
+                    # 移除 worktree + branch -D force-delete → agent 修改真的遺失（reflog 兜底脆弱）。
+                    # 改「永遠修流程不修資料」：自動從 worktree branch 還原這些檔並 commit；
+                    # 任一還原失敗 → merge_ok=false 保留 worktree + branch 待人工，不 destructive 移除。
+                    echo "  🔧 [AUTO-RESTORE] 自動從 $branch 還原被 drop 的 modified 檔..."
+                    local ours_restore_failed=0
                     for df in $dropped_files; do
-                        echo "  🚨   git checkout $branch -- $df"
+                        if git -C "$MAIN_DIR" checkout "$branch" -- "$df" 2>/dev/null; then
+                            echo "  🔧   [✓] 還原 $df"
+                        else
+                            echo "  🔧   [✗] 還原失敗 $df"
+                            ours_restore_failed=$((ours_restore_failed + 1))
+                        fi
                     done
-                    echo "  🚨   git add$dropped_files"
-                    echo "  🚨   git commit -m \"fix: restore agent modifications dropped by -X ours\""
+                    if [[ $ours_restore_failed -eq 0 ]]; then
+                        # K1618 review CONDITIONAL_PASS 精修：add/commit 真失敗必 fail-closed
+                        # 保留 worktree+branch（唯一 durable source），只有「無 diff 可提交」
+                        # （還原內容與 HEAD 相同）才算合法 skip。
+                        if ! git -C "$MAIN_DIR" add $dropped_files 2>/dev/null; then
+                            echo "  🛑 git add 還原檔失敗 → 保留 worktree+branch 待人工（不移除）"
+                            merge_ok=false
+                        elif git -C "$MAIN_DIR" diff --cached --quiet -- $dropped_files 2>/dev/null; then
+                            echo "  🔧 [OK] 還原檔與 main HEAD 內容相同，無需 commit（無資料遺失）"
+                        elif git -C "$MAIN_DIR" commit -m "fix: restore agent modifications dropped by -X ours ($wt_name)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>" 2>/dev/null; then
+                            echo "  🔧 [OK] 已自動還原並 commit $ours_dropped 個 agent 修改（無資料遺失）"
+                        else
+                            echo "  🛑 restore commit 失敗但有 staged 變更 → 保留 worktree+branch 待人工（不移除）"
+                            merge_ok=false
+                        fi
+                    else
+                        echo "  🛑 $ours_restore_failed 個檔還原失敗 → 保留 worktree + branch 待人工處理（不移除）"
+                        merge_ok=false
+                    fi
                     echo "  🚨 ============================================="
                     echo ""
                 else
@@ -539,6 +652,12 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
             # 失敗時印明確 hint：unlock + remove + branch -D；保留 worktree 待人工處理。
             local remove_ok=false
             local remove_err
+            # K1618 (2026-07-04): 移除前確認 cwd 不在待移除 worktree 內（此路徑 merge 已成功、
+            # 檔案已進 main，即使 guard 擋下保留 worktree 也是安全狀態）
+            if ! ensure_cwd_outside_worktree "$wt_path"; then
+                echo "  [SKIP] cwd guard 失敗，保留 worktree（merge 已完成、檔案已在 main）: $wt_path"
+                return 0
+            fi
             remove_err=$(git -C "$MAIN_DIR" worktree remove "$wt_path" 2>&1) && remove_ok=true || true
             if $remove_ok; then
                 git -C "$MAIN_DIR" branch -D "$branch" 2>&1 || echo "  [WARN] branch $branch 刪除失敗（可能已被 remove 連帶處理）"
