@@ -67,8 +67,6 @@ BOOT_REPS = 5000
 OASIS_BASE = "https://oasis.caiso.com/oasisapi/SingleZip"
 PRICE_NODES = {
     "NP15": "TH_NP15_GEN-APND",
-    "SP15": "TH_SP15_GEN-APND",
-    "ZP26": "TH_ZP26_GEN-APND",
 }
 
 
@@ -176,6 +174,7 @@ def fetch_oasis_csv(cache_name: str, queryname: str, refresh: bool = False, **kw
                 break
             time.sleep(2.0 * (attempt + 1))
         r.raise_for_status()
+        print(f"[{EXPERIMENT_ID}] fetched {queryname} {kwargs.get('node', kwargs.get('market_run_id', ''))} {start.date()}..{(end - pd.Timedelta(days=1)).date()}")
         try:
             zf = zipfile.ZipFile(io.BytesIO(r.content))
         except zipfile.BadZipFile as exc:
@@ -247,6 +246,7 @@ def build_renewable_daily(refresh: bool = False) -> pd.DataFrame:
         "SLD_FCST",
         refresh=refresh,
         market_run_id="DAM",
+        tac_area_name="CA ISO-TAC",
     )
 
     ren["date"] = pd.to_datetime(ren["OPR_DT"], errors="coerce").dt.normalize()
@@ -540,7 +540,7 @@ def main(refresh: bool = False) -> dict[str, Any]:
             "pass_hubs": pass_hubs,
             "positive_beta_hubs": positive_beta_hubs,
             "descriptive_high_hubs": descriptive_high_hubs,
-            "pass_rule": "PASS requires >=2 hubs with QLIKE improvement and DM t<-3 plus >=2 hubs with positive HAC t>3 lagged renewable-share coefficient.",
+            "pass_rule": "Publication-strength PASS is disabled for this NP15-only pilot. A multi-hub rerun would require QLIKE improvement with DM t<-3 plus positive HAC t>3 lagged renewable-share coefficients across multiple hubs.",
         },
         "outputs": {
             "panel": str(PANEL_PATH.relative_to(HERE)),
@@ -548,7 +548,7 @@ def main(refresh: bool = False) -> dict[str, Any]:
             "figure": str(FIG_PATH.relative_to(HERE)),
         },
     }
-    RESULTS_PATH.write_text(json.dumps(_json_safe(results), indent=2, ensure_ascii=False))
+    RESULTS_PATH.write_text(json.dumps(_json_safe(results), indent=2, ensure_ascii=False) + "\n")
     print(f"[{EXPERIMENT_ID}] verdict={verdict} -> {RESULTS_PATH}")
     return results
 

@@ -1,1 +1,97 @@
-{}
+{
+  "experiment_id": "research_rv_proxy",
+  "run_timestamp_utc": "2026-07-03T13:46:00.493378+00:00",
+  "seed": 42,
+  "verdict": "NULL",
+  "sample": {
+    "start": "2024-01-01",
+    "end": "2025-12-31",
+    "oos_start": "2025-01-01",
+    "n_daily_hub_rows": 730,
+    "hubs": [
+      "NP15"
+    ]
+  },
+  "data_sources": {
+    "primary": "CAISO OASIS public ZIP endpoints (PRC_LMP DAM, SLD_REN_FCST DAM, SLD_FCST DAM)",
+    "eia_status": "EIA v2 route tested but API key absent in local environment; no paid-data fallback used."
+  },
+  "literature": [
+    {
+      "citation": "Rintamäki, Siddiqui & Salo (2017), Energy Economics",
+      "role": "VRE can increase or decrease electricity price volatility depending on regional flexibility and wind/solar profiles.",
+      "url": "https://doi.org/10.1016/j.eneco.2016.12.019"
+    },
+    {
+      "citation": "Owolabi et al. (2023), Data Science in Science",
+      "role": "U.S. ISO evidence on nonlinear VRE penetration and electricity-price volatility.",
+      "url": "https://doi.org/10.1080/26941899.2022.2158145"
+    },
+    {
+      "citation": "Brown & Yucel (2024), Dallas Fed Working Paper 2408",
+      "role": "Fuel mix and marginal generation matter for real-time electricity price volatility; wind intensity changes the channel.",
+      "url": "https://www.dallasfed.org/research/papers/2024/wp2408"
+    }
+  ],
+  "lookahead_policy": {
+    "formal_forecast": "HAR uses log_rv lag1/week/month plus renewable_share_mean.shift(1); OOS train rows end strictly before forecast date.",
+    "same_day_diagnostics": "High-renewable same-day contrasts are descriptive only, not the PASS gate."
+  },
+  "forecast_summaries": [
+    {
+      "hub": "NP15",
+      "n_oos": 364,
+      "base_qlike": 0.13077712765422608,
+      "augmented_qlike": 0.13110156527030029,
+      "qlike_improve_pct": -0.24808437216331394,
+      "dm_t_aug_minus_base": 0.761088900602515,
+      "dm_p_value": 0.4470980928730772,
+      "log_mse_base": 0.2860864218984818,
+      "log_mse_augmented": 0.2855363673979451,
+      "log_mse_improve_pct": 0.19226864976204036
+    }
+  ],
+  "coef_summaries": [
+    {
+      "hub": "NP15",
+      "n_obs": 708,
+      "beta_renewable_share_lag1": 0.1516474128153713,
+      "t_renewable_share_lag1_hac5": 0.7057732857716198,
+      "p_renewable_share_lag1_hac5": 0.4803291376064097,
+      "r_squared": 0.6827320933918952
+    }
+  ],
+  "descriptive_summaries": [
+    {
+      "hub": "NP15",
+      "high_renew_threshold": 0.42225187692757876,
+      "n_high": 183,
+      "n_low": 547,
+      "mean_log_rv_high": 6.86802350042373,
+      "mean_log_rv_low": 6.4656865957185214,
+      "diff_high_minus_low": 0.40233690470520855,
+      "welch_t": 6.335918957981415,
+      "welch_p": 4.533188806380498e-10,
+      "bootstrap_ci95_diff": [
+        0.278895552208962,
+        0.5281738877352068
+      ],
+      "negative_price_day_rate_high": 0.47540983606557374,
+      "negative_price_day_rate_low": 0.029250457038391225,
+      "negative_price_rate_diff": 0.4461593790271825
+    }
+  ],
+  "gate": {
+    "pass_hubs": [],
+    "positive_beta_hubs": [],
+    "descriptive_high_hubs": [
+      "NP15"
+    ],
+    "pass_rule": "Publication-strength PASS is disabled for this NP15-only pilot. A multi-hub rerun would require QLIKE improvement with DM t<-3 plus positive HAC t>3 lagged renewable-share coefficients across multiple hubs."
+  },
+  "outputs": {
+    "panel": "data/caiso_daily_panel.csv",
+    "oos_forecasts": "data/oos_forecasts.csv",
+    "figure": "figures/caiso_renewable_rv_summary.png"
+  }
+}
