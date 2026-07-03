@@ -57,9 +57,10 @@ def test_load_json_warns_on_invalid_existing_file(tmp_path, capsys):
     assert MODULE._load_json(path, {"fallback": True}) == {"fallback": True}
 
     captured = capsys.readouterr()
-    assert "[reader_facing_refill] WARN JSON read failed; using default" in captured.out
-    assert "state.json" in captured.out
-    assert "JSONDecodeError" in captured.out
+    # diagnostics.warn emits structured warnings on stderr (no-silent-fallback rule)
+    assert "[reader_facing_refill] WARN JSON read failed; using default" in captured.err
+    assert "state.json" in captured.err
+    assert "JSONDecodeError" in captured.err
 
 
 def test_refill_event_candidates_adds_only_in_horizon(tmp_path, monkeypatch):
@@ -195,9 +196,10 @@ def test_refill_event_candidates_warns_on_bad_event_date(tmp_path, monkeypatch, 
     captured = capsys.readouterr()
     assert result["added"] == []
     assert result["skipped"] == [{"id": "bad-date", "reason": "bad_event_date"}]
-    assert "[reader_facing_refill] WARN event_date parse failed; skipping event item" in captured.out
-    assert "id=bad-date" in captured.out
-    assert "not-a-date" in captured.out
+    assert "[reader_facing_refill] WARN event_date parse failed" in captured.err
+    assert "field=event_date" in captured.err
+    assert "raw=not-a-date" in captured.err
+    assert "item_id=bad-date" in captured.err
     assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
 
 
@@ -277,7 +279,146 @@ def test_refill_event_candidates_warns_and_skips_on_bad_not_before(tmp_path, mon
     captured = capsys.readouterr()
     assert result["added"] == []
     assert result["skipped"] == [{"id": "bad-window", "reason": "bad_not_before"}]
-    assert "[reader_facing_refill] WARN not_before parse failed; skipping event item" in captured.out
-    assert "id=bad-window" in captured.out
-    assert "not-a-timestamp" in captured.out
+    assert "[reader_facing_refill] WARN not_before parse failed" in captured.err
+    assert "field=not_before" in captured.err
+    assert "raw=not-a-timestamp" in captured.err
+    assert "item_id=bad-window" in captured.err
     assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
+
+
+# --- Slot-aware event coverage (2026-07-03 NFP T+0 stale-duplicate fix) --------
+
+def test_slot_is_reaction_classification():
+    # Reaction (result-known) slots
+    assert MODULE._slot_is_reaction("T+0") is True
+    assert MODULE._slot_is_reaction("T-0") is True
+    assert MODULE._slot_is_reaction("T+1") is True
+    # Forward (pre-event) slots
+    assert MODULE._slot_is_reaction("T-7") is False
+    assert MODULE._slot_is_reaction("T-2") is False
+    # Unknown / empty -> treated as forward (never gate on surprise labels)
+    assert MODULE._slot_is_reaction("") is False
+    assert MODULE._slot_is_reaction("weird") is False
+
+
+def test_reaction_already_covered_fuzzy_early_release():
+    """The NFP incident: reaction article published early (no event metadata)."""
+    feed = [{
+        "id": "mile_35eef830",
+        "status": "published",
+        "title": "6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%",
+        "tags": ["NFP", "非農就業", "VIX"],
+        "published_at": "2026-07-01T17:24:08+00:00",
+    }]
+    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
+    assert hit is not None
+    assert hit["id"] == "mile_35eef830"
+    assert hit["match"] == "fuzzy"
+
+
+def test_reaction_coverage_excludes_forward_preview():
+    """A forward preview (前7天) must NOT count as reaction coverage."""
+    feed = [{
+        "id": "mile_forward",
+        "status": "published",
+        "title": "非農就業報告前7天：勞動市場到底在哪個位置？",
+        "tags": ["NFP", "非農就業"],
+        "published_at": "2026-07-01T09:00:00+00:00",  # inside the reaction window
+    }]
+    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
+    assert hit is None  # forward title excluded even though it's in the date window
+
+
+def _monkeypatch_event_env(tmp_path, monkeypatch, feed):
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(MODULE, "DEDUP_LOG", tmp_path / "dedup_decisions.jsonl")
+    monkeypatch.setattr(
+        MODULE, "_now_utc", lambda: MODULE.datetime(2026, 7, 3, 0, 0, tzinfo=MODULE.timezone.utc)
+    )
+    monkeypatch.setattr(MODULE, "_load_feed_for_dedup", lambda: feed)
+    monkeypatch.setattr(
+        MODULE,
+        "_load_runtime_event_items",
+        lambda: [{
+            "id": "nfp-2026-07-03-t0",
+            "event_key": "NFP_2026_07_03",
+            "task_template": {
+                "title": "Event article: NFP_US 2026-07-03 T+0",
+                "description": "reaction",
+                "payload_patch": {
+                    "event_type": "NFP_US",
+                    "event_date": "2026-07-03",
+                    "event_series_slot": "T+0",
+                },
+            },
+        }],
+    )
+    return next_tasks
+
+
+def test_refill_skips_reaction_when_already_covered(tmp_path, monkeypatch):
+    """T+0 發過則 skip T+0."""
+    feed = [{
+        "id": "mile_35eef830",
+        "status": "published",
+        "title": "6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%",
+        "tags": ["NFP", "非農就業"],
+        "published_at": "2026-07-01T17:24:08+00:00",
+    }]
+    next_tasks = _monkeypatch_event_env(tmp_path, monkeypatch, feed)
+
+    result = MODULE.refill_event_candidates(horizon_days=14)
+
+    assert result["added"] == []
+    skipped = [s for s in result["skipped"] if s.get("reason") == "reaction_already_covered"]
+    assert skipped and skipped[0]["dup_of"] == "mile_35eef830"
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
+    # audit trail written
+    log = (tmp_path / "dedup_decisions.jsonl").read_text(encoding="utf-8")
+    assert "reaction_already_covered" in log and "event_reaction_coverage" in log
+
+
+def test_refill_generates_reaction_when_only_forward_covered(tmp_path, monkeypatch):
+    """T-7 發過但 T+0 仍生成（forward article 不覆蓋 reaction slot）."""
+    feed = [{
+        "id": "mile_forward",
+        "status": "published",
+        "title": "非農就業報告前7天：勞動市場到底在哪個位置？",
+        "tags": ["NFP", "非農就業"],
+        "published_at": "2026-07-01T09:00:00+00:00",
+    }]
+    next_tasks = _monkeypatch_event_env(tmp_path, monkeypatch, feed)
+
+    result = MODULE.refill_event_candidates(horizon_days=14)
+
+    assert result["added"] == ["event_article_nfp_us_2026-07-03_tplus0"]
+    data = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert [t["id"] for t in data] == ["event_article_nfp_us_2026-07-03_tplus0"]
+
+
+def test_refill_generates_reaction_for_brand_new_event(tmp_path, monkeypatch):
+    """全新 event 正常生成（feed 無覆蓋）."""
+    feed = [{
+        "id": "mile_unrelated",
+        "status": "published",
+        "title": "台積電六月營收再創高，記憶體需求回溫",
+        "tags": ["台積電", "半導體"],
+        "published_at": "2026-07-02T09:00:00+00:00",
+    }]
+    next_tasks = _monkeypatch_event_env(tmp_path, monkeypatch, feed)
+
+    result = MODULE.refill_event_candidates(horizon_days=14)
+
+    assert result["added"] == ["event_article_nfp_us_2026-07-03_tplus0"]
+
+
+def test_reaction_coverage_fails_open_on_bad_feed(monkeypatch):
+    """Any error in the coverage check returns None (never blocks a real task)."""
+    # non-dict feed entries are skipped; a malformed published_at just skips that row
+    feed = ["not-a-dict", {"id": "x", "status": "published", "title": "非農",
+                           "published_at": "garbage"}]
+    hit = MODULE._reaction_already_covered("nfp_us", MODULE.date(2026, 7, 3), feed)
+    assert hit is None

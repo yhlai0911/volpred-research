@@ -47101,7 +47101,7 @@
     "description": "Root cause: refill_reader_facing_pool.py::refill_event_candidates 生成 event_article task 只靠 _task_exists(task_id) 冪等，無 coverage 檢查。event_job 用預估公佈日排 T+0 slot，事件提前公佈+已發文時仍生成 stale duplicate（2026-07-03 NFP incident，見 error_log 22:07 entry；當時靠主線程人工查重攔截 event_article_nfp_us_2026-07-03_tplus0 vs mile_35eef830）。\n\n正解（需 clean context + 完整測試，headless 勿草率——錯了會漏發真 event 文章）：\n(a) slot-aware coverage：T-7 前瞻 vs T+0 反應是不同內容，不能『event_key 有文就 skip』會漏發 T+0；\n(b) 發文時回寫 event_key metadata 到 feed report（現 feed 文章無 event_key，coverage 只能脆弱 title match）；\n(c) check_arc_dedup.py gate 補 arc_signature=None 舊文的 title/entity fuzzy fallback（現只比對有 signature 的文）；\n(d) 生成 T+0/T-0『結果已知才寫』slot 前查該 event 是否已有反應文覆蓋。\n\n測試必含：T-7 發過但 T+0 仍生成 / T+0 發過則 skip T+0 / 全新 event 正常生成。\nSkill: admin-ops + feed-publisher event templates。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-03T14:18:27+00:00",
     "source": "hourly_dispatch_pdca",
     "tags": [
@@ -47110,6 +47110,245 @@
       "event_article",
       "dedup",
       "content_quality"
-    ]
+    ],
+    "claimed_by": "hourly-23",
+    "claimed_at": "2026-07-03T15:10:12.452452+00:00",
+    "claim_session_id": "8f789cb40fa7",
+    "status_history": [
+      {
+        "ts": "2026-07-03T15:10:12.452781+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-03T15:11:03.074393+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-23"
+      },
+      {
+        "ts": "2026-07-03T15:27:50.842615+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-23"
+      }
+    ],
+    "started_at": "2026-07-03T15:11:03.074098+00:00",
+    "completed_at": "2026-07-03T15:27:50.842372+00:00",
+    "result": "slot-aware reaction coverage 上線於 refill_reader_facing_pool（只 gate T+0/T-0/T+N，forward slot 不動）：metadata-exact + fuzzy(alias+reaction時窗+排除前瞻詞) + fail-open + audit trail(dedup_decisions.jsonl)。順修 _diag_warn latent NameError bug + 3 stale 測試。real-feed smoke 命中 mile_35eef830。15 tests pass。silent-fallback strict new=0。(b)(c) 另立 P3 follow-up。"
+  },
+  {
+    "id": "telegram-86",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-03T14:50:21.801833+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 86）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n發文一直在脫班不立刻處理嗎？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-03T14:51:10.564314+00:00",
+    "claim_session_id": "dcda64145be7",
+    "status_history": [
+      {
+        "ts": "2026-07-03T14:51:10.564627+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-03T14:54:01.846081+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-03T14:54:01.845783+00:00"
+  },
+  {
+    "id": "research_image_rendered_candlestick_cnn_vol_vs",
+    "title": "研究 backlog fallback: Image-rendered candlestick + CNN 視覺分類預測 vol vs 傳統數值估計量",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Image-rendered candlestick + CNN 視覺分類預測 vol vs 傳統數值估計量 — 用 yfinance OHLCV 生成合成 K 線圖（mplfinance render），訓練輕量 CNN 做視覺 pattern classification 預測次日/次週 RV bucket，對比 HAR/GARCH 數值 baseline 的 QLIKE/rank accuracy；與 line 1291（JFEC 2026 Bollerslev candlestick 數值公式估計量）正交——那是解析公式，這裡是 pixel-level 電腦視覺，資料表徵完全不同（來源 | 來源 section: 期刊主題挖掘 batch 2026-07-03b（journal_discovery_20260703_2；websearch jbf/jfe/rfs/joe/jfqa/jfm + jpm/faj/j.alt inv/j.fixed income/j.futures markets + qje/aer/jpe/aej + jfec/jbes/jae 2025-26 趨勢層級；selectivity gate 後 13→10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "image_rendered_candlestick_cnn_vol_vs",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-03T14:52:11+00:00"
+  },
+  {
+    "id": "research_dispatch",
+    "title": "研究 backlog fallback: ⚠️ 中信心（dispatch 前須再查證轉譯）— 州最低工資調升生效日的邊界不連續設計 → 勞力密集零售/餐飲股波動反應",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: ⚠️ 中信心（dispatch 前須再查證轉譯）— 州最低工資調升生效日的邊界不連續設計 → 勞力密集零售/餐飲股波動反應 — 複用 AEJ:Applied 州界不連續識別設計，用公開州最低工資調升生效日曆，對勞力密集零售/餐飲類股（CMG/MCD/SBUX/TGT/M 等曝險不同州比例個股籃）做事件窗 RV/left-tail 比較 + 與非曝險對照股 DID；與既有 labor-shortage 軸（需求面稀缺）不同機制——這裡是明確法規生效日的成本面衝擊 + clean identification（來源：AEJ:Applied 州界最低工資不連續設計是勞動經濟學×asset prici | 來源 section: 期刊主題挖掘 batch 2026-07-03b（journal_discovery_20260703_2；websearch jbf/jfe/rfs/joe/jfqa/jfm + jpm/faj/j.alt inv/j.fixed income/j.futures markets + qje/aer/jpe/aej + jfec/jbes/jae 2025-26 趨勢層級；selectivity gate 後 13→10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "dispatch",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-03T14:52:11+00:00"
+  },
+  {
+    "id": "ops-drought-trigger-tighten",
+    "task_type": "platform_ops",
+    "priority": "P2",
+    "source": "telegram-responder",
+    "status": "pending",
+    "created_at": "2026-07-03T14:53:44.805372+00:00",
+    "title": "收緊發文脫班 remediation 觸發時機（破門檻即補，不等整點）",
+    "description": "老闆 telegram-86 抱怨發文脫班。root cause 已確認：remediation(remediate_publish_drought.py) 目前只掛在 check_alerts 每小時整點 fire 前跑，若 gap 剛好在整點後才破 6h 門檻，需等下一整點才自動補（本次 22:29 破門檻、等到 23:07，卡 ~40min）。優化方向（遵 anti-stacking single-owner，不新增平行 watchdog）：評估 (a) check_alerts 提高頻率 vs (b) 在既有高頻 job（compute-worker */15）piggy-back 一個 drought-only 輕量 check 委派回 single owner。實作前先讀 .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md §Enforcement Layer Map 確認不疊床架屋。"
+  },
+  {
+    "id": "telegram-89",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-03T15:01:43.924075+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 89）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n沒有適合的文章，但脫稿就得發 然後趕快補文章\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-03T15:02:25.395946+00:00",
+    "claim_session_id": "78c04aa3bd4e",
+    "status_history": [
+      {
+        "ts": "2026-07-03T15:02:25.396247+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-03T15:07:47.736322+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-03T15:07:47.736016+00:00"
+  },
+  {
+    "id": "event_article_fresh_source_20260703",
+    "title": "補 fresh reader 文章（事件/時事驅動）— 研究驅動候選 arc-dup 枯竭",
+    "description": "老闆 Telegram 政策指示（telegram-89, 2026-07-03）：脫稿就得發、然後趕快補文章。今晚 refill 補 0（所有 knowledge-driven 候選皆 narrative-arc duplicate，publisher 會 reject）——這就是『沒有適合的文章』的技術根因。改走 fresh 非-knowledge 來源補 reader 文章：(a) 事件/時事驅動（近期市場數據公佈、財報、地緣、VIX regime 變化）走 publication-candidates 事件軌；或 (b) trending_repost（熱門主題 VolPred 角度改寫，≤2/day）。開工前讀 3 canonical（trending-repost SKILL + anti-ai-style SKILL + publishing rules）+ 主線程 3-layer 主題查重。目標：draft 池補進至少 1 篇 fresh 主題，避免明天仍靠 arc-dup 頂稿。",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "event_article",
+    "dispatch_lane": "agent",
+    "source": "telegram_boss_directive",
+    "tags": [
+      "boss-directive",
+      "publish-cadence",
+      "arc-dup-exhaustion",
+      "fresh-source"
+    ],
+    "created_at": "2026-07-03T15:07:15+00:00"
+  },
+  {
+    "id": "telegram-92",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-03T15:08:09.518288+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 92）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n為什麼是明早九點？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-03T15:11:37.353930+00:00",
+    "claim_session_id": "a1ce9a51652c",
+    "status_history": [
+      {
+        "ts": "2026-07-03T15:11:37.354239+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-03T15:13:02.826258+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-03T15:13:02.825942+00:00"
+  },
+  {
+    "id": "telegram-95",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-03T15:22:39.989760+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 95）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n另外為什麼不寫新文章\n還有主題相同的定義先前就已經談過了難道真的主題完全相同嗎？你要不要列出來看看？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-03T15:23:28.299265+00:00",
+    "claim_session_id": "f3011b222fd8",
+    "status_history": [
+      {
+        "ts": "2026-07-03T15:23:28.299581+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-03T15:28:47.484290+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-03T15:28:47.483972+00:00"
+  },
+  {
+    "id": "platform_ops_event_publisher_write_event_metadata",
+    "title": "[platform_ops] 發 event 文章時回寫 event_key/type/date/slot 到 feed report（讓 coverage 由 fuzzy 升級 exact）",
+    "description": "Part (b) of slot-aware coverage (parent: platform_ops_event_refill_slot_aware_coverage, done 2026-07-03). 現況 feed event 文章全無 event_key/event_type/event_date/event_series_slot metadata（全 null），refill 的 reaction coverage 只能靠 title/entity fuzzy match（已上線, 見 refill_reader_facing_pool._reaction_already_covered）。正解: publisher publish_milestone 走 event_article 路徑時，把 originating event task 的 event_key/event_type/event_date/event_series_slot 寫進 feed report entry（頂層欄位）。落地後 coverage 的 metadata-exact 分支 會自動生效，降低對 fuzzy 的依賴。注意: 需可靠地把 task metadata 穿到 publish 呼叫（agent brief 或 publish payload），delicate + 需測試。Skill: feed-publisher。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-07-03T15:23:45+00:00",
+    "source": "hourly_dispatch_pdca",
+    "parent_task_id": "platform_ops_event_refill_slot_aware_coverage"
+  },
+  {
+    "id": "platform_ops_check_arc_dedup_fuzzy_legacy",
+    "title": "[platform_ops] check_arc_dedup.py 補 arc_signature=None 舊文的 title/entity fuzzy fallback",
+    "description": "Part (c) of slot-aware coverage (parent: platform_ops_event_refill_slot_aware_coverage). check_arc_dedup.py / arc_dedup gate 現只比對有 arc_signature 的文章; 大量舊文 arc_signature=None 落在 gate 盲區。補 title/entity fuzzy fallback（比照 refill_reader_facing_pool 的 event alias + window 手法）讓舊文也能被 arc-dedup 兜底。fail-open + audit trail（dedup-gate-audit rule）。 Skill: feed-publisher + publishing rules。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-07-03T15:23:45+00:00",
+    "source": "hourly_dispatch_pdca",
+    "parent_task_id": "platform_ops_event_refill_slot_aware_coverage"
+  },
+  {
+    "id": "platform_ops_test_draft_pool_refill_hermetic",
+    "title": "[platform_ops] test_draft_pool_refill 2 個 state-dependent 測試改 hermetic（mock storage state）",
+    "description": "Pre-existing tech debt (發現於 2026-07-03 slot-aware coverage fire, 與該任務無關)。 tests/test_draft_pool_refill.py::test_draft_pool_deficit_zero_when_at_floor 與 ::test_maybe_refill_draft_pool_noop_when_deficit_zero 讀 live storage/ draft-pool state (現 pool 未達 floor → deficit != 0 → 斷言 deficit==0 失敗)。屬非 hermetic 測試, 應 mock draft-pool count / candidates 讓斷言不依賴 repo 當下狀態。測的是 continue_task_dispatch.py。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "created_at": "2026-07-03T15:23:45+00:00",
+    "source": "hourly_dispatch_pdca"
+  },
+  {
+    "id": "platform_ops_arc_dedup_calibrate_20260703",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "telegram-95_boss_feedback",
+    "status": "pending",
+    "created_at": "2026-07-03T15:28:22+00:00",
+    "title": "[platform_ops] 校準主題撞題判準：只擋同一K/同數據源，勿靠結論句式誤判；脫稿時 dedup 不得阻擋釋出",
+    "description": "老闆 Telegram msg95 質疑『主題相同』被當不發/不寫藉口，要求列出比對。實查結果：draft 池 6 篇中，真撞題僅 1 篇（mile_3a7bd6f6 區域銀行帳面價值 = 已發 K1605 的讀者版 vs 研究版，同一K刻意雙寫）；誤判 1 篇（mile_463f37f7 最慘1%調倉 refs=K1334/K1494，被當成撞 mile_cd5d5740 波動率測不準 refs=K1560，實為不同研究不同數據，只是結論句式像）；其餘 4 篇為各自獨立主題。行動：(1) 校準 narrative-arc dedup — 撞題判定以『同一 K / 同一數據源』為主，結論句式相似不得單獨判撞；reader 版 vs 研究版視為互補不算重複。(2) 落實老闆規則：脫稿（發文脫班）時 dedup/cluster-filter 不得阻擋釋出——先發 fresh-theme 再補。(3) 回寫 memory feedback_narrative_arc_dedup 與 feedback_recycling_is_release_layer_not_research 的邊界。"
   }
 ]

@@ -4,9 +4,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -27,6 +28,9 @@ ARC_DEDUP_WINDOW_DAYS = 30
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+from volpred.ops.diagnostics import warn  # noqa: E402
+
+_diag_warn = warn  # legacy alias used by _warn_refill_reader (was undefined -> NameError)
 
 
 def _now_utc() -> datetime:
@@ -108,6 +112,148 @@ def _event_task_id(event_type: str, event_date: str, slot: str) -> str:
     return f"event_article_{event_type.lower()}_{event_date}_{slot_norm}"
 
 
+# --- Slot-aware event coverage (2026-07-03 NFP T+0 stale-duplicate fix) -------
+# Root cause: refill deduped only by task_id, so a reaction (result-known) task
+# (T+0/T-0/T+1) was regenerated even when a feed article already covered the
+# event. The scheduled event_date is an ESTIMATE; when the data releases early
+# and a reaction article publishes early, the estimated-date task becomes a
+# stale duplicate (mile_35eef830 vs event_article_nfp_us_2026-07-03_tplus0,
+# intercepted manually). Feed articles carry no event_key metadata yet (part-b
+# follow-up), so coverage falls back to event-type alias + reaction-window title
+# match. Only reaction slots are gated — forward slots (T-7/T-2) are distinct
+# pre-event pieces and keep the existing task_id idempotency untouched so a real
+# forward article is never suppressed. Risk asymmetry: a false-positive here
+# would MISS a real event article (unrecoverable), whereas a false-negative only
+# lets a duplicate through to the publish-time arc-dedup backstop (recoverable);
+# so the check is conservative + fail-open + audit-logged (dedup-gate-audit rule).
+DEDUP_LOG = STORAGE / "logs" / "dedup_decisions.jsonl"
+REACTION_EARLY_RELEASE_DAYS = 3   # data can print up to N days before scheduled date
+REACTION_POST_DAYS = 7            # reaction article publishes within N days after event
+FORWARD_TITLE_SIGNALS = (
+    "前瞻", "預告", "倒數", "前夕", "來臨", "即將", "展望",
+    "前7天", "前 7 天", "前七天", "前2天", "前 2 天", "前兩天",
+    "t-7", "t-2", "t-3", "t-5",
+)
+EVENT_TYPE_ALIASES = {
+    "nfp": ("非農", "非農就業", "nonfarm", "payroll", "就業報告", "nfp"),
+    "cpi": ("cpi", "消費者物價", "通膨", "通脹", "物價指數"),
+    "pce": ("pce", "個人消費支出", "個人消費"),
+    "ppi": ("ppi", "生產者物價"),
+    "fomc": ("fomc", "聯準會", "利率決策", "點陣圖", "議息", "降息", "升息", "fed"),
+    "gdp": ("gdp", "國內生產毛額", "經濟成長"),
+    "tsmc_revenue": ("台積電", "tsmc", "營收"),
+    "earnings": ("財報", "earnings"),
+}
+
+
+def _slot_is_reaction(slot: str) -> bool:
+    """T+0 / T-0 / T+N are result-known reaction slots; T-N (N>=1) is forward.
+
+    Unknown/unparseable slots are treated as forward (not gated) so we never
+    suppress a real article on an unexpected slot label.
+    """
+    m = re.match(r"^t([+-])(\d+)", str(slot or "").strip().lower().replace(" ", ""))
+    if not m:
+        return False
+    sign, num = m.group(1), int(m.group(2))
+    return not (sign == "-" and num >= 1)
+
+
+def _event_type_aliases(event_type: str) -> list[str]:
+    et = str(event_type or "").strip().lower()
+    aliases: set[str] = set()
+    if et:
+        aliases.add(et)
+        aliases.add(et.split("_")[0])  # e.g. nfp_us -> nfp
+    for key, vals in EVENT_TYPE_ALIASES.items():
+        if et.startswith(key) or key in et:
+            aliases.update(vals)
+    return [a for a in aliases if a]
+
+
+def _looks_forward(title: str) -> bool:
+    t = str(title or "").lower()
+    return any(sig in t for sig in FORWARD_TITLE_SIGNALS)
+
+
+def _log_coverage_decision(target_id: str, decision: str, reason: str, dup_of: str = "") -> None:
+    """Audit trail for the coverage gate (dedup-gate-audit rule). Never raises."""
+    try:
+        DEDUP_LOG.parent.mkdir(parents=True, exist_ok=True)
+        entry = {
+            "ts": _now_utc().isoformat(timespec="seconds"),
+            "gate": "event_reaction_coverage",
+            "target_id": target_id,
+            "decision": decision,   # "skip" | "pass"
+            "reason": reason,
+            "dup_of": dup_of,
+        }
+        with DEDUP_LOG.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception as exc:  # pragma: no cover - audit log must never block refill
+        warn("reader_facing_refill", "coverage audit log failed",
+             err=f"{type(exc).__name__}: {exc}")
+
+
+def _reaction_already_covered(
+    event_type: str, event_date: date | None, feed: list[dict[str, Any]]
+) -> dict[str, str] | None:
+    """Return the covering reaction article for this event, or None (fail-open).
+
+    Matching (published articles only):
+      1. EXACT metadata — article.event_type + event_date + a reaction slot
+         (activates once the part-b publisher metadata write lands).
+      2. FUZZY fallback (current reality: feed has no event metadata) — an
+         event-type alias appears in title/tags, the article published within
+         [event_date - EARLY, event_date + POST], and the title is NOT a
+         forward-looking preview (excludes T-7/T-2 pieces).
+    Any exception returns None so a real event task is still generated.
+    """
+    try:
+        aliases = _event_type_aliases(event_type)
+        if not aliases:
+            return None
+        et = str(event_type or "").strip().lower()
+        ev_iso = event_date.isoformat() if event_date else None
+        lo = event_date - timedelta(days=REACTION_EARLY_RELEASE_DAYS) if event_date else None
+        hi = event_date + timedelta(days=REACTION_POST_DAYS) if event_date else None
+        for art in feed:
+            if not isinstance(art, dict):
+                continue
+            if art.get("status") not in (None, "published"):
+                continue
+            # 1. exact metadata match (future articles once part-b lands)
+            a_type = str(art.get("event_type") or "").strip().lower()
+            if a_type and et and a_type == et and ev_iso and art.get("event_date") == ev_iso:
+                if _slot_is_reaction(art.get("event_series_slot") or ""):
+                    return {"id": str(art.get("id") or ""), "match": "metadata"}
+            # 2. fuzzy fallback on title/tags + reaction publish-window
+            title = str(art.get("title") or "")
+            tags = " ".join(str(t) for t in (art.get("tags") or []))
+            hay = (title + " " + tags).lower()
+            if not any(a in hay for a in aliases):
+                continue
+            if _looks_forward(title):
+                continue  # forward preview, not a reaction — do not gate
+            if lo is None or hi is None:
+                continue
+            pub_raw = art.get("published_at") or art.get("created_at")
+            pub_dt = parse_iso_warn(
+                pub_raw, tag="reader_facing_refill", field_name="published_at",
+                fallback=None, item_id=str(art.get("id") or ""), path=str(FEED_PATH),
+            ) if pub_raw else None
+            if pub_dt is None:
+                continue
+            pub_date = pub_dt.astimezone(LOCAL_TZ).date()
+            if lo <= pub_date <= hi:
+                return {"id": str(art.get("id") or ""), "match": "fuzzy"}
+        return None
+    except Exception as exc:  # fail-open: never block generating a real article
+        warn("reader_facing_refill", "reaction coverage check failed (fail-open)",
+             err=f"{type(exc).__name__}: {exc}")
+        return None
+
+
 def _build_event_task(item: dict[str, Any]) -> dict[str, Any]:
     payload_patch = ((item.get("task_template") or {}).get("payload_patch") or {})
     event_type = str(payload_patch.get("event_type") or item.get("event_key") or "event").lower()
@@ -145,6 +291,7 @@ def refill_event_candidates(*, horizon_days: int = 14) -> dict[str, Any]:
     now = _now_utc()
     added: list[str] = []
     skipped: list[dict[str, str]] = []
+    feed_cache: list[dict[str, Any]] | None = None  # loaded lazily on first reaction slot
     for item in _load_runtime_event_items():
         payload_patch = ((item.get("task_template") or {}).get("payload_patch") or {})
         event_date_raw = payload_patch.get("event_date")
@@ -187,6 +334,24 @@ def refill_event_candidates(*, horizon_days: int = 14) -> dict[str, Any]:
                 skipped.append({"id": str(item.get("id")), "reason": "not_yet_in_window"})
                 continue
         task = _build_event_task(item)
+        # Slot-aware coverage: only gate result-known reaction slots (T+0/T-0/T+N);
+        # forward slots keep plain task_id idempotency so a real preview is never lost.
+        if _slot_is_reaction(task.get("event_series_slot") or ""):
+            if feed_cache is None:
+                feed_cache = _load_feed_for_dedup()
+            covered = _reaction_already_covered(
+                str(task.get("event_type") or ""), event_date, feed_cache
+            )
+            if covered:
+                skipped.append({
+                    "id": task["id"],
+                    "reason": "reaction_already_covered",
+                    "dup_of": covered.get("id", ""),
+                })
+                _log_coverage_decision(
+                    task["id"], "skip", "reaction_already_covered", covered.get("id", "")
+                )
+                continue
         if _append_task(task):
             added.append(task["id"])
         else:

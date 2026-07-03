@@ -2,7 +2,7 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
-## 2026-07-03 22:07 `event_article` T+0 stale duplicate = refill 用排程預估公佈日排 slot，事件提前公佈+已發文仍生成 — **INTERCEPTED（出池）+ fix queued**
+## 2026-07-03 22:07 `event_article` T+0 stale duplicate = refill 用排程預估公佈日排 slot，事件提前公佈+已發文仍生成 — **INTERCEPTED（出池）→ RESOLVED（slot-aware coverage 上線 2026-07-03 23:24 hourly-23）**
 
 **現象**：hourly-22 fire 從 dispatch main-thread queue 撈到最高優先 P1 `event_article_nfp_us_2026-07-03_tplus0`（今天 22:08 由 refill 生成）。人工查重發現 6月NFP(57K、失業率 4.2%) 的 T+0 波動率文章已由 `mile_35eef830`（2026-07-01 發佈）**完整**涵蓋 —— 含正式數據 / NFP日 vs 週五基準 1.17x / VIX regime 2.17x(k528,k513) / 7-2 實際反應 SPY 0.13% VIX 16.15 + 真圖表。硬寫必然是 arc dup（同事件同 57K 同 VIX regime 結論同 SPY/VIX 資產）。
 
@@ -15,6 +15,15 @@
 **fix queued（`platform_ops_event_refill_slot_aware_coverage` P2，留 clean context + 完整測試，headless 不草率改核心派工/gate — 錯了會漏發真 event 文章比原問題更糟）**：正解需 (a) slot-aware coverage — T-7 前瞻 vs T+0 反應是**不同內容**，不能「event_key 有文就 skip」否則漏發 T+0；(b) 發文時回寫 event_key metadata 到 feed 讓 coverage 可靠比對（現 feed 文章無 event_key，只能脆弱 title match）；(c) arc-dedup gate 補 arc_signature=None 舊文的 title/entity fuzzy fallback；(d) T+0/T-0「結果已知才寫」slot 生成前查該 event 是否已有反應文。
 
 **教訓（PDCA）**：event slot 用「預估公佈日」排程，實際公佈日可能因假期/提前偏移 → 「結果反應型」slot(T+0/T-0) 需在生成/派工時檢查該 event 是否已有反應文覆蓋，不能只靠 task_id 冪等。automated arc-dedup gate 非 canonical，reader-facing 派工前主線程人工查重(3-layer)仍是最後防線。
+
+**RESOLVED（2026-07-03 23:24 hourly-23，`platform_ops_event_refill_slot_aware_coverage`）**：`refill_reader_facing_pool.py` 加 **slot-aware reaction coverage**（`_reaction_already_covered`）。設計要點：
+- **只 gate reaction slot（T+0/T-0/T+N）**；forward slot（T-7/T-2）維持原 task_id 冪等不動（`_slot_is_reaction`）→ 落實 (a) 「不能 event_key 有文就 skip 會漏發 T+0」＝T-7 前瞻已發但 T+0 仍生成。
+- **coverage = metadata-exact + fuzzy fallback**：現況 feed event 文章全無 event_key metadata（1730 篇實測），fuzzy = event-type alias（NFP→非農/nonfarm/payroll…）出現在 title/tags + 發佈日落在 reaction 時窗 `[event_date-3d, +7d]`（容忍提前公佈）+ **title 非前瞻詞**（前瞻/預告/倒數/前N天/T-N 排除，避免前瞻文誤當反應文覆蓋）。
+- **風險不對稱處理**：coverage false-positive=漏發真文章（不可回復）> false-negative=生成 dup 但 publish-time arc-dedup 兜底（可回復）→ 檢查保守 + **fail-open**（任何 exception 回 None 照生成）+ **audit trail**（`storage/logs/dedup_decisions.jsonl` gate=event_reaction_coverage，符合 dedup-gate-audit rule）。
+- **Real-feed smoke 驗證**：對 production feed，NFP 2026-07-03 T+0 → 命中 mile_35eef830（fuzzy），未來全新 NFP 2026-09-04 → None（照生成）。
+- **順帶修 latent bug**：`refill_reader_facing_pool._diag_warn` 全模組未定義（`_load_json` JSON 解析失敗會 NameError 而非 warn）→ 加 `from volpred.ops.diagnostics import warn as _diag_warn`（no-silent-fallback rule canonical helper）。同步修 3 個 stale 測試（斷言舊 stdout `; skipping event item` 格式 → 現行 stderr 結構化 `| field= | raw=`）。
+- 測試：`tests/test_reader_facing_refill.py` 15 passed（原 7 修綠 + 新增 8 coverage/helper/fail-open）。
+- **未做（另立 P3 follow-up）**：(b) `platform_ops_event_publisher_write_event_metadata`（publisher 發文回寫 event metadata → coverage 由 fuzzy 升 exact）；(c) `platform_ops_check_arc_dedup_fuzzy_legacy`（check_arc_dedup.py 補 arc_signature=None fuzzy fallback）。fuzzy coverage 已使系統對現況正確，(b)(c) 是 robustness 強化非阻塞。
 
 ## 2026-07-03 10:31 `git_push_backup` 連日 HELD（「Host cron failure」28×）= `_claude_project_dir._warn` 新增 silent-fallback 卡 pre-push guard — **FIXED**
 
