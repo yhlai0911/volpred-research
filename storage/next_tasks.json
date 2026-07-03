@@ -47267,7 +47267,7 @@
     "title": "補 fresh reader 文章（事件/時事驅動）— 研究驅動候選 arc-dup 枯竭",
     "description": "老闆 Telegram 政策指示（telegram-89, 2026-07-03）：脫稿就得發、然後趕快補文章。今晚 refill 補 0（所有 knowledge-driven 候選皆 narrative-arc duplicate，publisher 會 reject）——這就是『沒有適合的文章』的技術根因。改走 fresh 非-knowledge 來源補 reader 文章：(a) 事件/時事驅動（近期市場數據公佈、財報、地緣、VIX regime 變化）走 publication-candidates 事件軌；或 (b) trending_repost（熱門主題 VolPred 角度改寫，≤2/day）。開工前讀 3 canonical（trending-repost SKILL + anti-ai-style SKILL + publishing rules）+ 主線程 3-layer 主題查重。目標：draft 池補進至少 1 篇 fresh 主題，避免明天仍靠 arc-dup 頂稿。",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "event_article",
     "dispatch_lane": "agent",
     "source": "telegram_boss_directive",
@@ -47293,9 +47293,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-00"
+      },
+      {
+        "ts": "2026-07-03T18:11:20.631141+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-00"
       }
     ],
-    "started_at": "2026-07-03T16:10:43.782753+00:00"
+    "started_at": "2026-07-03T16:10:43.782753+00:00",
+    "completed_at": "2026-07-03T18:11:20.630817+00:00",
+    "result": "hourly-00 已完成研究+寫文+發佈(mile_64c33170,夏季波動率可預測性 seasonal general 文,live HTTP200)，但中斷未 mark complete。02:07 fire 接手驗證：experiment dir 完整(3主圖+3lazypack+results.json)、數字 byte 對齊 results.json(Pearson r=0.629 p=0.0022)、無前視、線上 live。補收尾 mark complete。"
   },
   {
     "id": "telegram-92",
