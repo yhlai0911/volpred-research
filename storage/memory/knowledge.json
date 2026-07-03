@@ -37398,5 +37398,22 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-07-03T19:00:24.510054"
+  },
+  {
+    "item_id": "166b88fd",
+    "category": "experiment",
+    "content": "K1614 natural-resource real-asset volatility/inflation/drought public-proxy diagnostic verdict DIRECTIONAL_ONLY_PUBLIC_PROXY_DIAGNOSTIC. Data: yfinance adjusted closes 2015-01-01..2026-07-03 for LAND/FPI/WY/RYN/PHO/CGW/FIW plus SPY/TIP/DBC (2,891 trading days each), FRED current-vintage CPIAUCSL/PPIACO/T10YIE, and U.S. Drought Monitor California weekly DSCI. Vol-structure diagnostics reject a homogeneous low-volatility safe-haven basket: 7-asset RV level avg corr=0.7179 but delta-RV avg corr=0.3881; farmland internal corr=0.3545, timber=0.9112, water=0.9701; high-SPY-vol regimes raise all 7 assets' RV with high/low ratios 1.26..2.25. Inflation/drought stress tests use conservative release lag plus shift(1) and next-21-trading-day forward RV/downside/correlation targets. Across 63 HAC regression cells with Holm correction, safe-haven gate pass count=0 and risk-amplifier gate pass count=0 (gate |t|>=3 and Holm p<=0.05). High/low splits are directional only: inflation/breakeven high states often show lower forward RV, while CA drought intensification high states raise forward RV ratios 1.18..1.33, but controlled/Holm-gated evidence supports no significant inflation hedge, climate-risk volatility premium, causal drought exposure, or tradable signal.",
+    "evidence": [
+      "experiments/k1614/k1614.py",
+      "experiments/k1614/k1614_results.json",
+      "experiments/k1614/README.md",
+      "experiments/k1614/codex_review.md",
+      "https://fred.stlouisfed.org/series/CPIAUCSL",
+      "https://fred.stlouisfed.org/series/PPIACO",
+      "https://fred.stlouisfed.org/series/T10YIE",
+      "https://droughtmonitor.unl.edu/DmData/DataDownload/WebServiceInfo.aspx"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-07-03T20:15:51.025678"
   }
 ]
