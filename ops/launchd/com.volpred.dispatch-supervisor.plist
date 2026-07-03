@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.volpred.dispatch-supervisor</string>
+
+  <!-- Shadow run (docs/refactor_plan_hourly_dispatch.md §4 Phase 2): started
+       2026-07-04 in --dry-run mode. Runs in PARALLEL with the existing
+       com.volpred.hourly-dispatch (legacy shell+StartCalendarInterval)
+       LaunchAgent, which stays the real dispatcher until Phase 3 cutover.
+       --dry-run means this process logs what it WOULD enqueue and updates
+       its own state file, but never spawns a real `claude -p` worker — zero
+       interference with production dispatch. Remove --dry-run only at
+       Phase 3 cutover, after the 7-day shadow diff + Codex-reviewed fixes
+       are both satisfied. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/uv</string>
+    <string>run</string>
+    <string>python</string>
+    <string>-m</string>
+    <string>scripts.dispatch_supervisor.supervisor</string>
+    <string>--dry-run</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/yhlai0911/volpred-research</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin:/Users/yhlai0911/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>HOME</key>
+    <string>/Users/yhlai0911</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <!-- Plan §7 risk mitigation: rate-limit respawn so a crash-loop doesn't
+       spin-restart faster than send_loop_crash's own 300s alert dedup. -->
+  <key>ThrottleInterval</key>
+  <integer>60</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/yhlai0911/.volpred/logs/dispatch_supervisor_launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/yhlai0911/.volpred/logs/dispatch_supervisor_launchd.err</string>
+</dict>
+</plist>

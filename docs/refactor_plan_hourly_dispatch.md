@@ -1,6 +1,6 @@
 # Refactor Plan — hourly-dispatch worker daemon
 
-**Status**: TRIGGERED (3-strike threshold crossed). Phase = DESIGN-LOCKED, IMPLEMENTATION started (Deliverable 4/8 tests+CLI done 2026-05-28 07:12 台灣時間).
+**Status**: TRIGGERED (3-strike threshold crossed). Deliverable 5/8 DONE (Codex CONDITIONAL_PASS, 2026-07-04). **Phase = SHADOW RUN (Deliverable 6/8), started 2026-07-04 02:35 台灣時間** — `com.volpred.dispatch-supervisor` LaunchAgent running `--dry-run` in parallel with legacy `com.volpred.hourly-dispatch`; 7-day observation window before Phase 3 cutover.
 **Authority**: `CLAUDE.md` Three-Strike Rule (commit `a55620b4`) — "strike 3 是 LATEST 觸發點不是 ONLY 觸發點；一旦看見結構性 root cause...就立刻三層重構".
 **Supersedes**: `docs/refactor_plan_cron_dispatch.md` (2026-05-14 pre-staged version, drafted for hang-class strikes only).
 **Parent task**: `platform_ops_refactor_hourly_dispatch_worker_daemon` (P2, `storage/next_tasks.json`).
@@ -306,6 +306,32 @@ Codex review（`codex exec`，覆蓋 commit `68d4a6d5c` 全部 8 個檔案）ver
 - `scripts/dispatch_supervisor/{state,worker,health,supervisor,procutil,alerts}.py`
 - `scripts/tests/test_dispatch_state.py`、`tests/test_dispatch_supervisor.py`、`tests/test_dispatch_supervisor_procutil.py`
 
-**下一步**：把第二輪修復再送一次 Codex review gate（§6，要求 ≥ CONDITIONAL_PASS）→ 通過後 commit + 啟動 Deliverable 6 shadow run。
+**第二輪 Codex review verdict：CONDITIONAL_PASS**（達到 §6 gate 門檻，可進 shadow run）。額外 3 個非 gate-blocking finding：
 
-*Updated 2026-07-04 02:22 台灣時間 by interactive main thread — Codex 第一輪 review FAIL（5 個 gate-blocking finding，含一個真實複現的 race condition）；全部 5 項已修復並補測試（88/88 pass）+ 2 個真實 smoke test 重驗；等待第二輪 Codex review verdict。*
+1. **Medium（cutover 前必修）**：`get_process_start_wall()` 把「`ps` 探測本身失敗（OSError/timeout）」和「`ps` 正常執行但確認 pid 不存在」都回傳 `None`，導致 `check_identity()` 把單純的探測 hiccup 誤判成 `IDENTITY_DEAD`——health.py 可能因一次性 `ps` 失敗就把還活著的正常 job 判 `silent_death` 並清空 state。**已修復**（同一 session）：新增 `PROBE_FAILED` sentinel 區分兩種情況，`check_identity()` 把 `PROBE_FAILED` 對應到 `IDENTITY_UNVERIFIED` 而非 `IDENTITY_DEAD`。Regression: `test_check_identity_probe_failed_maps_to_unverified_not_dead`。**89/89 測試通過**。
+2. **Medium（shadow 可接受，production cutover 前需要 runbook）**：`IDENTITY_UNVERIFIED` 分支正確地不 kill,但 supervisor.py 與 health.py 都會清空 state（讓排程不卡死）——若真孤兒剛好 fingerprint 缺失,會變成「沒被 kill 但也沒人管」,只能靠 alert + completion history 追。Codex 明確認可這是 shadow 階段的合理 tradeoff,但 **Phase 3 cutover 前必須**針對 `orphan_unverified_not_killed` / `timeout_unverified` 兩個 outcome 補一份「需人工檢查」runbook。**尚未做**——排入 Deliverable 7（cutover）前置工作。
+3. **Low（非 gate-blocking）**：兩階段孤兒清理解決了「crash 遺失孤兒」,但還不是完全 idempotent——若 supervisor 在 `append_completion_entry()` 之後、`finalize_restart_orphan_cleanup()` 之前又崩潰,下次 restart 重跑同一個孤兒會在 completions ring buffer 留下重複紀錄(不影響即時運作,只影響稽核歷史乾淨度)。**尚未修**——非阻斷項,列入未來 polish backlog。
+
+**Codex 額外確認**：lockfile 方案在「`dispatch_state.json.lock` 永不被刪除」的前提下健全；並行 `mkdir(exist_ok=True)` 沒問題；若未來有清理流程誤刪 `*.lock` 才會重開風險（目前無此流程，非立即風險）。
+
+### Deliverable 6 — Shadow run 已啟動（2026-07-04 02:35 台灣時間）
+
+Phase 0 快照：commit `24f3d63c0` 打 tag `pre-supervisor-refactor`(回滾點)。
+
+Phase 2 shadow run 啟動步驟：
+1. 新增 `ops/launchd/com.volpred.dispatch-supervisor.plist`（canonical，repo 版本）—— `RunAtLoad=true` + `KeepAlive=true` + `ThrottleInterval=60`（§7 risk mitigation）,`ProgramArguments` 帶 **`--dry-run`** flag。
+2. 複製到 `~/Library/LaunchAgents/` 並 `launchctl load`。
+3. **驗證**：前景手動跑 5 秒確認 scheduler_loop + health_loop 都以 `dry_run=True` 正確啟動、`RLIMIT_NOFILE` 65536 生效、state file 正確寫入 heartbeat、乾淨關閉無殘留 process；正式用 launchctl 啟動後再等 8+ 秒確認 **同一個 PID 持續存活**（無 crash-loop）。
+4. **與現有系統零干擾**：`--dry-run` 模式下 scheduler 只記錄「本該 fire」的決策 + 更新 `last_fire_at`,**不會**真的 spawn `claude -p` worker——`com.volpred.hourly-dispatch`（legacy shell）仍是唯一真正派工的系統,兩者用不同 log path、不同排程觸發機制,不會互相干擾或雙重派工。
+5. **已知副作用**：supervisor 啟動時會呼叫 `alerts.send_supervisor_restart()`(不分 dry-run,一律真的寄信)——手動測試那次已經真的觸發一封 email。這是 shadow 階段刻意保留的行為(同時測試 alert pathway),之後幾天若 daemon 重啟(launchd KeepAlive 或 crash-loop)都會再收到「supervisor restart」信,屬預期噪音,不是雙重派工或資料錯誤。
+
+**尚未做（後續 tick 推進）**：
+- 每日 diff 腳本(比對 `dispatch_state.json.last_fire_at` vs `hourly_dispatch.log` 實際 fire 時間戳,驗證 §5 gate #8 schedule fidelity ±60s)——目前靠人工/後續 session 巡檢即可,尚未寫成自動化 script。
+- 7 天 shadow 觀察期滿後才能判斷 §5 Verification Gate 全部 10 項是否 PASS,進 Phase 3 cutover。
+
+**檔案改動**：
+- 新增 `ops/launchd/com.volpred.dispatch-supervisor.plist`
+- `scripts/dispatch_supervisor/__init__.py`（version 0.3.0-d4 → 0.4.0-d5）
+- git tag `pre-supervisor-refactor`
+
+*Updated 2026-07-04 02:35 台灣時間 by interactive main thread — Codex 第二輪 CONDITIONAL_PASS；probe-failed/dead 混淆 medium finding 已修（89/89 pass）；shadow run daemon 已啟動並驗證存活；7 天觀察期開始計時，下次 session 起持續巡檢 `~/.volpred/logs/dispatch_supervisor.log` + heartbeat age。*

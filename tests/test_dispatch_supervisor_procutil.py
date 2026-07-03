@@ -34,12 +34,20 @@ def test_get_process_start_wall_returns_none_when_pid_missing(monkeypatch) -> No
     assert procutil.get_process_start_wall(123) is None
 
 
-def test_get_process_start_wall_returns_none_on_ps_failure(monkeypatch) -> None:
+def test_get_process_start_wall_returns_probe_failed_sentinel_on_ps_failure(monkeypatch) -> None:
+    """Codex review round-2 finding (2026-07-04, medium): a transient `ps`
+    invocation failure (OSError/timeout) must be distinguishable from a
+    confirmed-dead pid (`ps` ran fine and reported not-found) — conflating
+    both into a bare `None` made `check_identity()` misclassify a probe
+    hiccup as IDENTITY_DEAD, which could make health.py kill/clear a live job."""
     def boom(*a, **k):
         raise subprocess.TimeoutExpired(cmd="ps", timeout=5)
 
     monkeypatch.setattr(procutil.subprocess, "run", boom)
-    assert procutil.get_process_start_wall(123) is None
+    result = procutil.get_process_start_wall(123)
+    assert result is procutil.PROBE_FAILED
+    assert result is not None
+    assert not result  # falsy — worker.py's `if started_wall:` guard must skip it
 
 
 def test_check_identity_match_when_fingerprint_matches(monkeypatch) -> None:
@@ -78,6 +86,18 @@ def test_check_identity_dead_takes_precedence_over_unverified(monkeypatch) -> No
     UNVERIFIED — liveness is checked before the fingerprint comparison."""
     monkeypatch.setattr(procutil, "get_process_start_wall", lambda pid: None)
     assert procutil.check_identity(123, None) == procutil.IDENTITY_DEAD
+
+
+def test_check_identity_probe_failed_maps_to_unverified_not_dead(monkeypatch) -> None:
+    """Codex review round-2 finding (2026-07-04, medium): a transient `ps`
+    probe failure must NOT be treated as confirmed-dead — that would let
+    health.py's overdue-kill branch skip a kill decision correctly (both
+    UNVERIFIED and DEAD avoid the unsafe kill), but critically also let the
+    NOT-overdue branch wrongly declare `silent_death` and clear a perfectly
+    healthy job on a one-off `ps` hiccup, well before it's actually aged out."""
+    monkeypatch.setattr(procutil, "get_process_start_wall", lambda pid: procutil.PROBE_FAILED)
+    assert procutil.check_identity(123, "Wed Jul  2 00:57:15 2026") == procutil.IDENTITY_UNVERIFIED
+    assert procutil.check_identity(123, "Wed Jul  2 00:57:15 2026") != procutil.IDENTITY_DEAD
 
 
 # ---------------------------------------------------------------------------

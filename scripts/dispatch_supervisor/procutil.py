@@ -22,9 +22,36 @@ import time
 LOG = logging.getLogger(__name__)
 
 
+class _ProbeFailedType:
+    """Sentinel: the `ps` subprocess call itself could not be completed
+    (OSError / timeout). Distinct from `None`, which means `ps` ran fine and
+    confirmed the pid does not exist. Codex review round-2 finding
+    (2026-07-04, medium — before real cutover): the prior implementation
+    returned `None` for BOTH cases, so `check_identity()` treated a transient
+    `ps` hiccup as `IDENTITY_DEAD` — indistinguishable from a confirmed-dead
+    pid — which could make `health.check_once()` record `silent_death` and
+    clear a perfectly healthy, still-running job on a one-off probe failure.
+    """
+
+    def __repr__(self) -> str:
+        return "PROBE_FAILED"
+
+    def __bool__(self) -> bool:
+        # Falsy so existing `if started_wall:` guards (e.g. worker.py's
+        # update_started_wall call) correctly treat this as "no usable
+        # fingerprint" rather than accidentally serializing the sentinel.
+        return False
+
+
+PROBE_FAILED = _ProbeFailedType()
+
+
 def get_process_start_wall(pid: int) -> str | None:
     """Return `ps -o lstart=` output for `pid` (e.g. 'Wed Jul  2 00:57:15 2026'),
-    or None if pid <= 0, doesn't exist, or `ps` itself fails."""
+    `None` if pid <= 0 or `ps` ran and confirmed the pid doesn't exist, or
+    `PROBE_FAILED` if the `ps` call itself could not be completed (OSError /
+    timeout) — see `_ProbeFailedType` docstring for why these must NOT be
+    conflated."""
     if pid <= 0:
         return None
     try:
@@ -34,7 +61,7 @@ def get_process_start_wall(pid: int) -> str | None:
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         LOG.warning("get_process_start_wall pid=%d ps invocation failed: %s", pid, exc)
-        return None
+        return PROBE_FAILED
     if result.returncode != 0:
         return None  # pid not found — this IS the "does it exist" signal, not an error
     text = result.stdout.strip()
@@ -43,8 +70,8 @@ def get_process_start_wall(pid: int) -> str | None:
 
 IDENTITY_MATCH = "match"            # alive, fingerprint matches — confirmed same process
 IDENTITY_MISMATCH = "mismatch"      # alive, fingerprint present but differs — pid was reused
-IDENTITY_DEAD = "dead"               # pid no longer exists
-IDENTITY_UNVERIFIED = "unverified"  # alive, but no fingerprint was ever recorded to compare
+IDENTITY_DEAD = "dead"               # pid confirmed gone (ps ran, reported not-found)
+IDENTITY_UNVERIFIED = "unverified"  # alive-or-unknown, but no fingerprint to compare or verify against
 
 
 def check_identity(pid: int, expected_start_wall: str | None) -> str:
@@ -61,8 +88,15 @@ def check_identity(pid: int, expected_start_wall: str | None) -> str:
     fingerprint mechanism exists to close. Returning a distinct
     `IDENTITY_UNVERIFIED` forces every kill-decision call site to make that
     choice explicitly instead of silently trusting an absent fingerprint.
+
+    A `PROBE_FAILED` result from `get_process_start_wall()` (round-2 fix,
+    2026-07-04) is likewise mapped to `IDENTITY_UNVERIFIED`, not
+    `IDENTITY_DEAD` — a transient `ps` failure tells us nothing about whether
+    the pid is actually alive.
     """
     current = get_process_start_wall(pid)
+    if current is PROBE_FAILED:
+        return IDENTITY_UNVERIFIED
     if current is None:
         return IDENTITY_DEAD
     if not expected_start_wall:
