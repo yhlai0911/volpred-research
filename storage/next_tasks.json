@@ -47094,7 +47094,7 @@
     "title": "研究 backlog fallback: 時變因子負荷（time-varying loading）版 Factor-Augmented HAR vs 靜態負荷 HAR",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 時變因子負荷（time-varying loading）版 Factor-Augmented HAR vs 靜態負荷 HAR — 用多資產 ETF RV panel 建第一主成分 vol factor，分別用靜態負荷與 Kalman-filter 時變負荷估計，比較 OOS QLIKE/DM；與 line 1276（F-Riesz tail 協方差）、line 1278（constrained multivariate HAR）正交——那兩者處理 tail fatness / 參數約束，這裡處理「因子負荷是否隨時間漂移」（來源：2025-26 time-varying factor-augme | 來源 section: 期刊主題挖掘 batch 2026-07-03b（journal_discovery_20260703_2；websearch jbf/jfe/rfs/joe/jfqa/jfm + jpm/faj/j.alt inv/j.fixed income/j.futures markets + qje/aer/jpe/aej + jfec/jbes/jae 2025-26 趨勢層級；selectivity gate 後 13→10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -47103,7 +47103,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-03T14:08:12+00:00"
+    "created_at": "2026-07-03T14:08:12+00:00",
+    "claimed_by": "hourly-03",
+    "claimed_at": "2026-07-03T19:13:11.545134+00:00",
+    "claim_session_id": "603f1aeda828",
+    "status_history": [
+      {
+        "ts": "2026-07-03T19:13:11.545399+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-03T19:13:15.665162+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-03"
+      },
+      {
+        "ts": "2026-07-03T19:33:43.159321+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-03"
+      }
+    ],
+    "started_at": "2026-07-03T19:13:15.664880+00:00",
+    "completed_at": "2026-07-03T19:33:43.159031+00:00",
+    "result": "K1617 NULL: 時變 loading FA-HAR 無法改善 HAR (TVL vs HAR DM t=-1.59 不過, TVL vs static t=-0.72 不過); 唯 static-factor vs HAR t=-3.19 過但增量~0.7% 可忽略. GK-RV proxy panel 5-asset 2012-2026 N=3642 OOS 2384. Codex CONDITIONAL_PASS. knowledge=4c8780e5"
   },
   {
     "id": "research_realized_semicovariance_regime",

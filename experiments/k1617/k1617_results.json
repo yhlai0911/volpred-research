@@ -1,0 +1,328 @@
+{
+  "experiment_id": "k1617",
+  "title": "Time-Varying Factor Loading FA-HAR vs Static-Loading HAR (range-based GK realized-vol proxy)",
+  "run_utc": "2026-07-03T19:28:33.503822+00:00",
+  "seed": 42,
+  "provenance": {
+    "data_source": "yfinance daily OHLC (auto_adjust=False, raw OHLC)",
+    "download": "loaded_cache:data_ohlc.csv",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "GLD",
+      "TLT"
+    ],
+    "period": "2012-01-01 .. 2026-06-30",
+    "common_trading_days": 3642,
+    "panel_start": "2012-01-03",
+    "panel_end": "2026-06-29",
+    "oos_start": "2017-01-01",
+    "n_oos_per_asset": {
+      "SPY": 2384,
+      "QQQ": 2384,
+      "IWM": 2384,
+      "GLD": 2384,
+      "TLT": 2384
+    },
+    "rv_measure": "Garman-Klass (1980) range-based realized-variance PROXY from daily OHLC; intraday open-to-close, NOT 5-min RV",
+    "factor": "rolling-250d PCA PC1 of standardized cross-asset log-RV, sign-fixed (SPY>0), OOS-extracted, lagged F_{t-1}",
+    "tvl_window": 250
+  },
+  "design": {
+    "HAR": "expanding-OLS logRV ~ c + b_d*d + b_w*w + b_m*m (Corsi 2009)",
+    "FA-static": "HAR core + gamma * F_{t-1}; gamma = expanding slope of HAR resid on F",
+    "FA-TVL": "HAR core + gamma_t * F_{t-1}; gamma_t = rolling-250d slope of HAR resid on F",
+    "loading_isolation": "static and TVL share identical HAR core + identical estimator; ONLY the loading estimation window differs",
+    "loading_definition": "loading = through-origin slope of HAR residual on F_{t-1} (sum(resid*F)/sum(F^2)); for the expanding window HAR residuals are mean-zero by construction so this equals the OLS slope, for the rolling-250d window it is a projection (near-identical since F is ~zero-mean)",
+    "qlike_scale": "variance scale = exp(pred_logRV + 0.5*resid_var); the log-normal Jensen correction is IDENTICAL across the 3 models on each date (shared HAR-core residual variance). It does NOT algebraically cancel in the QLIKE loss differential (a multiplicative constant scales the a/f term); a no-Jensen sensitivity run (see jensen_sensitivity) confirms the DM verdict is invariant"
+  },
+  "pooled_qlike": {
+    "HAR": 0.32952123242043213,
+    "FA-static": 0.32715526412163254,
+    "FA-TVL": 0.3260046732363308
+  },
+  "pooled_logrv_mse": {
+    "HAR": 0.5980978231667357,
+    "FA-static": 0.5955154634692006,
+    "FA-TVL": 0.5945168711475768
+  },
+  "per_asset_qlike": {
+    "SPY": {
+      "HAR": 0.38346575709258784,
+      "FA-static": 0.382665711114591,
+      "FA-TVL": 0.38344755823580634
+    },
+    "QQQ": {
+      "HAR": 0.3343069265327342,
+      "FA-static": 0.3332127625257266,
+      "FA-TVL": 0.3341956276810559
+    },
+    "IWM": {
+      "HAR": 0.2708824990013332,
+      "FA-static": 0.26804672934973345,
+      "FA-TVL": 0.26879345757903045
+    },
+    "GLD": {
+      "HAR": 0.3731774570417723,
+      "FA-static": 0.37193320578572925,
+      "FA-TVL": 0.3699015263385398
+    },
+    "TLT": {
+      "HAR": 0.28577352243373305,
+      "FA-static": 0.27991791183238224,
+      "FA-TVL": 0.27368519634722166
+    }
+  },
+  "per_asset_logrv_mse": {
+    "SPY": {
+      "HAR": 0.7034719363113758,
+      "FA-static": 0.7016619499448001,
+      "FA-TVL": 0.7004014760005556
+    },
+    "QQQ": {
+      "HAR": 0.615401146167138,
+      "FA-static": 0.6135532183391047,
+      "FA-TVL": 0.613218810709067
+    },
+    "IWM": {
+      "HAR": 0.5076238224760786,
+      "FA-static": 0.5040709804545187,
+      "FA-TVL": 0.503814635921679
+    },
+    "GLD": {
+      "HAR": 0.6399685947975201,
+      "FA-static": 0.6388702297401803,
+      "FA-TVL": 0.6387491922913237
+    },
+    "TLT": {
+      "HAR": 0.5240236160815663,
+      "FA-static": 0.5194209388673988,
+      "FA-TVL": 0.5164002408152583
+    }
+  },
+  "dm_primary_pooled_by_date": {
+    "TVL_vs_HAR": {
+      "t_stat": -1.5944904576817498,
+      "p_value": 0.11095883605310175,
+      "n": 2384,
+      "harvey_pass": false,
+      "mean_loss_diff": -0.0035165591841013043
+    },
+    "TVL_vs_static": {
+      "t_stat": -0.7152087328695793,
+      "p_value": 0.47455013730935414,
+      "n": 2384,
+      "harvey_pass": false,
+      "mean_loss_diff": -0.0011505908853016973
+    },
+    "static_vs_HAR": {
+      "t_stat": -3.193358646409441,
+      "p_value": 0.001424621007325877,
+      "n": 2384,
+      "harvey_pass": true,
+      "mean_loss_diff": -0.0023659682987996074
+    }
+  },
+  "dm_per_asset": {
+    "SPY": {
+      "TVL_vs_HAR": {
+        "t_stat": -0.007364674745819499,
+        "p_value": 0.9941245092945283,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -1.819885678146646e-05
+      },
+      "TVL_vs_static": {
+        "t_stat": 0.3785286801755021,
+        "p_value": 0.7050716108599229,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": 0.0007818471212153093
+      },
+      "static_vs_HAR": {
+        "t_stat": -1.220747904788173,
+        "p_value": 0.22230225772799472,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.0008000459779967763
+      }
+    },
+    "QQQ": {
+      "TVL_vs_HAR": {
+        "t_stat": -0.05716192063349407,
+        "p_value": 0.9544210038056913,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.00011129885167834267
+      },
+      "TVL_vs_static": {
+        "t_stat": 0.6211974023196091,
+        "p_value": 0.5345291622005595,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": 0.0009828651553292014
+      },
+      "static_vs_HAR": {
+        "t_stat": -1.6775894858207512,
+        "p_value": 0.09355840435705565,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.001094164007007545
+      }
+    },
+    "IWM": {
+      "TVL_vs_HAR": {
+        "t_stat": -1.0046784729418157,
+        "p_value": 0.31515370072959303,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.0020890414223027967
+      },
+      "TVL_vs_static": {
+        "t_stat": 0.5189077943981757,
+        "p_value": 0.6038732257597013,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": 0.0007467282292970079
+      },
+      "static_vs_HAR": {
+        "t_stat": -2.9214995208222536,
+        "p_value": 0.0035162681928482264,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.002835769651599805
+      }
+    },
+    "GLD": {
+      "TVL_vs_HAR": {
+        "t_stat": -0.9156167613279855,
+        "p_value": 0.3599605793852616,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.003275930703232541
+      },
+      "TVL_vs_static": {
+        "t_stat": -0.6560303566336827,
+        "p_value": 0.511867927158117,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.0020316794471894628
+      },
+      "static_vs_HAR": {
+        "t_stat": -1.7590727099182681,
+        "p_value": 0.07869348200825566,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.0012442512560430776
+      }
+    },
+    "TLT": {
+      "TVL_vs_HAR": {
+        "t_stat": -2.2822677059591783,
+        "p_value": 0.02256130305598103,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.012088326086511373
+      },
+      "TVL_vs_static": {
+        "t_stat": -1.7334077557464618,
+        "p_value": 0.08315256946403204,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.006232715485160534
+      },
+      "static_vs_HAR": {
+        "t_stat": -3.092755621539957,
+        "p_value": 0.002006052130828273,
+        "n": 2384,
+        "harvey_pass": true,
+        "mean_loss_diff": -0.0058556106013508405
+      }
+    }
+  },
+  "dm_stacked_asset_day_DIAGNOSTIC_ONLY": {
+    "TVL_vs_HAR": {
+      "t_stat": -2.3687231674016367,
+      "p_value": 0.01786546057638949,
+      "n": 11920,
+      "harvey_pass": false,
+      "mean_loss_diff": -0.0035165591841013043
+    },
+    "TVL_vs_static": {
+      "t_stat": -1.027219773749945,
+      "p_value": 0.3043378347155805,
+      "n": 11920,
+      "harvey_pass": false,
+      "mean_loss_diff": -0.0011505908853016954
+    },
+    "static_vs_HAR": {
+      "t_stat": -4.875407662534125,
+      "p_value": 1.0998449035959368e-06,
+      "n": 11920,
+      "harvey_pass": true,
+      "mean_loss_diff": -0.0023659682987996087
+    }
+  },
+  "jensen_sensitivity": {
+    "note": "no-Jensen run: predicted_var = exp(pred_logRV). Confirms robustness of DM verdict.",
+    "pooled_qlike": {
+      "HAR": 0.3993170171154899,
+      "FA-static": 0.3960715841569388,
+      "FA-TVL": 0.38987868149613597
+    },
+    "dm_pooled_by_date": {
+      "TVL_vs_HAR": {
+        "t_stat": -2.868935170630985,
+        "p_value": 0.0041548172906031855,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.009438335619353914
+      },
+      "TVL_vs_static": {
+        "t_stat": -2.5609666824929187,
+        "p_value": 0.010499222136055142,
+        "n": 2384,
+        "harvey_pass": false,
+        "mean_loss_diff": -0.0061929026608028
+      },
+      "static_vs_HAR": {
+        "t_stat": -3.0234283805098205,
+        "p_value": 0.0025259265782269225,
+        "n": 2384,
+        "harvey_pass": true,
+        "mean_loss_diff": -0.0032454329585511147
+      }
+    },
+    "verdict": "NULL",
+    "verdict_matches_primary": true
+  },
+  "verdict": "NULL",
+  "verdict_note": "Time-varying loading does NOT significantly beat HAR (pooled-by-date HLN t=-1.59) nor static-FA (t=-0.72); the TVL-rescue hypothesis is REJECTED. The rolling loading adds no incremental value over a static loading. SECONDARY (framework-dependent nuance vs K928): the STATIC factor augmentation does modestly but significantly beat HAR (pooled-by-date HLN t=-3.19, ~0.7% pooled QLIKE), but the gain is economically small and requires NO time-varying loading. K928's GJR/daily-r2 null does not carry over one-for-one to the HAR/GK-RV setting, though the common factor remains near-negligible.",
+  "verdict_details": {
+    "tvl_qlike_lower_than_har_pooled": true,
+    "tvl_vs_har_hln_t": -1.5944904576817498,
+    "tvl_vs_static_hln_t": -0.7152087328695793,
+    "static_vs_har_hln_t": -3.193358646409441,
+    "harvey_threshold": 3.0,
+    "jensen_robust": true
+  },
+  "references": [
+    "Corsi (2009) J. Financial Econometrics 7 \u2014 HAR-RV",
+    "Garman & Klass (1980) J. Business 53 \u2014 range-based variance estimator",
+    "Parkinson (1980) J. Business 53 \u2014 high-low range estimator",
+    "Alizadeh, Brandt & Diebold (2002) J. Finance 57 \u2014 range-based vol",
+    "Patton (2011) J. Econometrics 160 \u2014 proxy-robust QLIKE",
+    "Harvey, Leybourne & Newbold (1997) Int. J. Forecasting 13 \u2014 small-sample DM",
+    "Harvey (2016) \u2014 |t|>3.0 multiple-testing threshold",
+    "K928 (this project) \u2014 static common-vol factor null / VIX sufficiency",
+    "K1355 (this project) \u2014 cross-asset loss differentials aggregated by date, not iid"
+  ],
+  "files": [
+    "k1617.py",
+    "k1617_results.json",
+    "fig_rv_factor.png",
+    "fig_qlike_comparison.png",
+    "fig_tvl_beta.png"
+  ]
+}

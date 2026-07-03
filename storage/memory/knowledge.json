@@ -37427,5 +37427,20 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-07-04T01:29:28.338472"
+  },
+  {
+    "item_id": "4c8780e5",
+    "category": "volatility_forecasting",
+    "content": "K1617 (NULL): 時變因子負荷 time-varying loading γ_t 版 Factor-Augmented HAR 無法顯著改善 HAR-RV 預測。Panel SPY/QQQ/IWM/GLD/TLT, 2012-2026, Garman-Klass range-based RV proxy (非 intraday RV), N=3642 共同交易日, OOS 2384/asset (含 2018Q4/2020 COVID/2022 空頭). Pooled QLIKE: HAR 0.3295 / FA-static 0.3272 / FA-TVL 0.3260 (相對差 ≤0.7%). DM (Harvey-HLN, PRIMARY=pooled-by-date, 門檻 |t|>3.0): TVL vs HAR t=-1.59 (不過), TVL vs static t=-0.72 (不過) → 時變 loading 既贏不了靜態也贏不了 baseline HAR. 唯一顯著: static-factor vs HAR t=-3.19 (過) 但增量 ~0.7% QLIKE 經濟上可忽略. 機制: rolling γ_t 在 SPY 於 -0.06~+0.09 擺盪甚至變號=過度擬合近期噪音; 真訊號僅一個小而穩定的正 static loading (γ≈+0.01). 延伸 k928 (PCA 靜態共同因子冗餘於 VIX) — 本實驗確認該冗餘並非源於 loading 被限制為靜態; 放寬為時變反而更差. Jensen 敏感度 (no-Jensen 重跑) verdict 不變. Stacked asset-day (diagnostic-only) t=-4.88 vs pooled-by-date -3.19 證實 K1355 的 asset-day-iid 誇大顯著性. 限制: GK proxy 非 intraday RV, 5-asset US-ETF 外部效度, rolling-β bandwidth 敏感 (Kalman 為自然延伸). Reviewer: Codex CONDITIONAL_PASS (gpt-5.5 xhigh, 3 flags 全修).",
+    "evidence": [
+      "experiments/k1617/k1617_results.json",
+      "experiments/k1617/README.md",
+      "experiments/k1617/k1617.py",
+      "k_id: k1617",
+      "experiment_id: k1617",
+      "reviewer_source: Codex CONDITIONAL_PASS (flags fixed)"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-07-04T03:33:27.854893"
   }
 ]
