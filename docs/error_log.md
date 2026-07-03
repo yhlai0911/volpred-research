@@ -2,6 +2,16 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 2026-07-03 10:31 `git_push_backup` 連日 HELD（「Host cron failure」28×）= `_claude_project_dir._warn` 新增 silent-fallback 卡 pre-push guard — **FIXED**
+
+**現象**：dreaming 2026-07-02 把 `persistent_alert Host cron failure detected`（28× / 73.7d）標 CRITICAL；老闆 Telegram 追問「到底有什麼問題」。實查 `git_push_backup.log`：每小時 `exit 1`，但內容是 `HELD: 1 new silent fallback(s) at HEAD — NOT pushing (CI would go red)` → `NEW scripts/_claude_project_dir.py:38 except Exception: pass`。即 guard 正常運作、故意擋推送，cron 把「擋下」記成 exit 1 被誤讀成 host cron 掛掉。
+
+**根因**：2026-07-03 repo-搬家修復新增的 `_claude_project_dir._warn` 用 `try import diagnostics.warn … except Exception: pass` 後在 except 外 print stderr。行為其實 fail-open 不 silent（有 stderr fallback），但 `audit_silent_fallbacks` heuristic 只看 except block 內有無 trace → 判為 NEW silent fallback（baseline new=1）→ pre-push guard held，18 commits 連日未備份到 origin。
+
+**解決**：把 stderr fallback print 搬進 `except` block（行為完全不變），消除 bare `pass`。`audit_silent_fallbacks --strict` new=0；`bash scripts/cron_git_push_backup.sh` exit 0、pushed 18 commit(s)、local==origin。（commit 9b2b16681）
+
+**教訓**：`audit_silent_fallbacks` 判 silent 只看 except block 內是否 co-located trace，「except 外面有 print」不算 —— 寫 fail-open fallback 一律把 log/print 放進 except 內。另：cron exit≠0 未必是 job 掛，可能是 guard 故意擋 —— alert 敘述宜區分「job 失敗」vs「guard 主動 hold」。
+
 ## 2026-07-03 06:07 換機備份快照失效 = `ops/claude_user_backup/memory` 被改成 symlink + backup script hardcode 舊 Desktop 路徑 — **FIXED（動態推導路徑 + 恢復真實快照）**
 
 **現象**：hourly-06 fire 巡檢 `git status` 見 `ops/claude_user_backup/memory/` 下 40 檔標 deleted（未 commit），但 `ls` 顯示 105 檔實體存在 — git 與 FS 矛盾。`git add` 該路徑回 `致命錯誤: 路徑規格 ... 位於符號連結中`。
