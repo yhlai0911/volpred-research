@@ -1,0 +1,368 @@
+{
+  "conclusion": "The public minimum-wage effective-date calendar does not provide robust evidence of higher restaurant/retail realized volatility relative to controls.",
+  "created_at": "2026-07-03T22:27:13.128933+00:00",
+  "data_sources": {
+    "event_dates": {
+      "california_fast_food": "https://www.dir.ca.gov/dlse/minimum_wage.htm",
+      "dol_consolidated_table": "https://www.dol.gov/agencies/whd/mw-consolidated",
+      "dol_state_minimum_wage": "https://www.dol.gov/agencies/whd/minimum-wage/state",
+      "epi_tracker": "https://www.epi.org/minimum-wage-tracker/",
+      "ncsl_state_minimum_wages": "https://www.ncsl.org/labor-and-employment/state-minimum-wages"
+    },
+    "market": {
+      "price_field": "Close, auto_adjust=True",
+      "provider": "yfinance"
+    }
+  },
+  "event_design": {
+    "event_table": [
+      {
+        "event_date": "2021-01-01",
+        "event_type": "multi_state_jan",
+        "label": "Annual state minimum-wage increases"
+      },
+      {
+        "event_date": "2021-07-01",
+        "event_type": "midyear_state",
+        "label": "Mid-year state/local minimum-wage increases"
+      },
+      {
+        "event_date": "2021-09-30",
+        "event_type": "florida_step",
+        "label": "Florida constitutional step increase"
+      },
+      {
+        "event_date": "2021-12-31",
+        "event_type": "ny_step",
+        "label": "New York annual step increase"
+      },
+      {
+        "event_date": "2022-01-01",
+        "event_type": "multi_state_jan",
+        "label": "Annual state minimum-wage increases"
+      },
+      {
+        "event_date": "2022-07-01",
+        "event_type": "midyear_state",
+        "label": "Mid-year state/local minimum-wage increases"
+      },
+      {
+        "event_date": "2022-09-30",
+        "event_type": "florida_step",
+        "label": "Florida constitutional step increase"
+      },
+      {
+        "event_date": "2022-12-31",
+        "event_type": "ny_step",
+        "label": "New York annual step increase"
+      },
+      {
+        "event_date": "2023-01-01",
+        "event_type": "multi_state_jan",
+        "label": "Annual state minimum-wage increases"
+      },
+      {
+        "event_date": "2023-07-01",
+        "event_type": "midyear_state",
+        "label": "Mid-year state/local minimum-wage increases"
+      },
+      {
+        "event_date": "2023-09-30",
+        "event_type": "florida_step",
+        "label": "Florida constitutional step increase"
+      },
+      {
+        "event_date": "2023-12-31",
+        "event_type": "ny_step",
+        "label": "New York annual step increase"
+      },
+      {
+        "event_date": "2024-01-01",
+        "event_type": "multi_state_jan",
+        "label": "Annual state minimum-wage increases"
+      },
+      {
+        "event_date": "2024-04-01",
+        "event_type": "ca_fast_food_20",
+        "label": "California fast-food $20 minimum wage"
+      },
+      {
+        "event_date": "2024-07-01",
+        "event_type": "midyear_state",
+        "label": "Mid-year state/local minimum-wage increases"
+      },
+      {
+        "event_date": "2024-09-30",
+        "event_type": "florida_step",
+        "label": "Florida constitutional step increase"
+      },
+      {
+        "event_date": "2025-01-01",
+        "event_type": "multi_state_jan",
+        "label": "Annual state minimum-wage increases"
+      },
+      {
+        "event_date": "2025-07-01",
+        "event_type": "midyear_state",
+        "label": "Mid-year state/local minimum-wage increases"
+      },
+      {
+        "event_date": "2025-09-30",
+        "event_type": "florida_step",
+        "label": "Florida constitutional step increase"
+      },
+      {
+        "event_date": "2026-01-01",
+        "event_type": "multi_state_jan",
+        "label": "Annual state minimum-wage increases"
+      },
+      {
+        "event_date": "2026-07-01",
+        "event_type": "midyear_state",
+        "label": "Mid-year state/local minimum-wage increases"
+      }
+    ],
+    "events_embedded": 21,
+    "events_used": 20,
+    "limitations": [
+      "Events are common public effective-date clusters, not store-level exposure shocks.",
+      "Large public chains have geographically diversified operations; state exposure is measured only indirectly.",
+      "Jan-1 events are seasonal and partly anticipated; benchmark DID and placebo tests reduce but do not eliminate this confounding."
+    ],
+    "windows_trading_days": [
+      10,
+      22
+    ]
+  },
+  "experiment_id": "research_minimum_wage_state_event_retail_vol",
+  "figures": [
+    "/Users/yhlai0911/volpred-research/experiments/research_minimum_wage_state_event_retail_vol/figures/event_did_tstats.png",
+    "/Users/yhlai0911/volpred-research/experiments/research_minimum_wage_state_event_retail_vol/figures/primary_placebo_distribution.png"
+  ],
+  "literature": [
+    {
+      "citation": "Dube, Lester, and Reich (2010), Review of Economics and Statistics",
+      "role": "state-border discontinuity motivation in restaurants and low-wage sectors",
+      "url": "https://irle.berkeley.edu/publications/scholarly-publications/minimum-wage-effects-across-state-borders-estimates-using-contiguous-counties/"
+    },
+    {
+      "citation": "Card and Krueger, The Effect of the Minimum Wage on Shareholder Wealth",
+      "role": "stock-market event-study precedent for minimum-wage news",
+      "url": "https://davidcard.berkeley.edu/papers/minwage-shareholder.pdf"
+    },
+    {
+      "citation": "Rao and Risch (2026), Quarterly Journal of Economics",
+      "role": "recent state-policy variation evidence on exposed businesses and cost pass-through",
+      "url": "https://academic.oup.com/qje/article/141/1/373/8376639"
+    },
+    {
+      "citation": "Luca and Luca, Survival of the Fittest",
+      "role": "restaurant-industry minimum-wage exposure and firm-exit channel",
+      "url": "https://www.hbs.edu/ris/Publication%20Files/17-088_9f5c63e3-fcb7-4144-b9cf-74bf594cc308.pdf"
+    }
+  ],
+  "market_data": {
+    "components": {
+      "SPY": {
+        "min_daily_count": 1,
+        "tickers": [
+          "SPY"
+        ]
+      },
+      "XLP": {
+        "min_daily_count": 1,
+        "tickers": [
+          "XLP"
+        ]
+      },
+      "XLY": {
+        "min_daily_count": 1,
+        "tickers": [
+          "XLY"
+        ]
+      },
+      "low_labor_tech": {
+        "median_daily_count": 10.0,
+        "min_daily_count": 6,
+        "tickers": [
+          "AAPL",
+          "MSFT",
+          "GOOGL",
+          "META",
+          "NVDA",
+          "ADBE",
+          "CRM",
+          "AVGO",
+          "INTU",
+          "ORCL"
+        ]
+      },
+      "restaurants": {
+        "median_daily_count": 10.0,
+        "min_daily_count": 6,
+        "tickers": [
+          "MCD",
+          "SBUX",
+          "CMG",
+          "YUM",
+          "DRI",
+          "WEN",
+          "DPZ",
+          "TXRH",
+          "EAT",
+          "SHAK"
+        ]
+      },
+      "retail": {
+        "median_daily_count": 10.0,
+        "min_daily_count": 6,
+        "tickers": [
+          "WMT",
+          "TGT",
+          "COST",
+          "DG",
+          "DLTR",
+          "TJX",
+          "ROST",
+          "M",
+          "KSS",
+          "BBY"
+        ]
+      },
+      "wage_sensitive": {
+        "median_daily_count": 20.0,
+        "min_daily_count": 10,
+        "tickers": [
+          "BBY",
+          "CMG",
+          "COST",
+          "DG",
+          "DLTR",
+          "DPZ",
+          "DRI",
+          "EAT",
+          "KSS",
+          "M",
+          "MCD",
+          "ROST",
+          "SBUX",
+          "SHAK",
+          "TGT",
+          "TJX",
+          "TXRH",
+          "WEN",
+          "WMT",
+          "YUM"
+        ]
+      }
+    },
+    "n_trading_days": 1632,
+    "return_sample_end": "2026-07-02",
+    "return_sample_start": "2020-01-03",
+    "sample_end": "2026-07-02",
+    "sample_start": "2020-01-02",
+    "tickers_requested": [
+      "AAPL",
+      "ADBE",
+      "AVGO",
+      "BBY",
+      "CMG",
+      "COST",
+      "CRM",
+      "DG",
+      "DLTR",
+      "DPZ",
+      "DRI",
+      "EAT",
+      "GOOGL",
+      "INTU",
+      "KSS",
+      "M",
+      "MCD",
+      "META",
+      "MSFT",
+      "NVDA",
+      "ORCL",
+      "ROST",
+      "SBUX",
+      "SHAK",
+      "SPY",
+      "TGT",
+      "TJX",
+      "TXRH",
+      "WEN",
+      "WMT",
+      "XLP",
+      "XLY",
+      "YUM"
+    ]
+  },
+  "output_files": {
+    "event_panel_csv": "/Users/yhlai0911/volpred-research/experiments/research_minimum_wage_state_event_retail_vol/data/event_panel.csv",
+    "placebo_csv": "/Users/yhlai0911/volpred-research/experiments/research_minimum_wage_state_event_retail_vol/data/placebo_primary_means.csv",
+    "summary_table_csv": "/Users/yhlai0911/volpred-research/experiments/research_minimum_wage_state_event_retail_vol/data/summary_table.csv"
+  },
+  "placebo_primary": {
+    "candidate_date_end": "2026-05-29",
+    "candidate_date_start": "2020-02-07",
+    "event_mean": -0.10240458478723895,
+    "event_percentile_vs_placebo": 0.011,
+    "key": "wage_sensitive_minus_XLY_22d_rv",
+    "n_candidates": 274,
+    "n_events": 20,
+    "n_placebo": 2000,
+    "one_sided_p_placebo_ge_event": 0.9890054972513743,
+    "placebo_mean": 0.16382039995702274,
+    "placebo_std": 0.11711510938004482
+  },
+  "positive_support_count": 0,
+  "primary_tests": 12,
+  "raw_positive_t_gt_2_count": 0,
+  "seed": 42,
+  "strongest_absolute_t": {
+    "bootstrap_ci_high": 0.1850466644861483,
+    "bootstrap_ci_low": -0.66223414098627,
+    "bootstrap_p_mean_gt_0": 0.126,
+    "control": "XLY",
+    "group": "retail",
+    "insufficient": false,
+    "key": "retail_minus_XLY_22d_downside",
+    "mean_did": -0.23758755917027186,
+    "median_did": -0.39754202359194313,
+    "metric": "downside",
+    "n_events": 20,
+    "p_bonferroni": 1.0,
+    "p_holm": 1.0,
+    "p_value_two_sided": 0.30494375471061175,
+    "positive_event_share": 0.35,
+    "positive_support_gate": false,
+    "std_did": 1.0077464957908135,
+    "t_stat": -1.0543562991922522,
+    "wilcoxon_p": 0.1912564806974696,
+    "window": 22
+  },
+  "strongest_positive": {
+    "bootstrap_ci_high": 0.40069321003776265,
+    "bootstrap_ci_low": -0.12079933137507459,
+    "bootstrap_p_mean_gt_0": 0.8295,
+    "control": "low_labor_tech",
+    "group": "restaurants",
+    "insufficient": false,
+    "key": "restaurants_minus_low_labor_tech_22d_rv",
+    "mean_did": 0.13139782819221574,
+    "median_did": 0.15622597491579882,
+    "metric": "rv",
+    "n_events": 20,
+    "p_bonferroni": 1.0,
+    "p_holm": 1.0,
+    "p_value_two_sided": 0.34642718893941404,
+    "positive_event_share": 0.65,
+    "positive_support_gate": false,
+    "std_did": 0.6086310023007191,
+    "t_stat": 0.9654929664212591,
+    "wilcoxon_p": 0.3904502982130381,
+    "window": 22
+  },
+  "title": "Minimum-wage effective dates and restaurant/retail realized volatility",
+  "verdict": "NULL_PUBLIC_EVENT_STUDY"
+}

@@ -47265,7 +47265,7 @@
     "title": "研究 backlog fallback: ⚠️ 中信心（dispatch 前須再查證轉譯）— 州最低工資調升生效日的邊界不連續設計 → 勞力密集零售/餐飲股波動反應",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: ⚠️ 中信心（dispatch 前須再查證轉譯）— 州最低工資調升生效日的邊界不連續設計 → 勞力密集零售/餐飲股波動反應 — 複用 AEJ:Applied 州界不連續識別設計，用公開州最低工資調升生效日曆，對勞力密集零售/餐飲類股（CMG/MCD/SBUX/TGT/M 等曝險不同州比例個股籃）做事件窗 RV/left-tail 比較 + 與非曝險對照股 DID；與既有 labor-shortage 軸（需求面稀缺）不同機制——這裡是明確法規生效日的成本面衝擊 + clean identification（來源：AEJ:Applied 州界最低工資不連續設計是勞動經濟學×asset prici | 來源 section: 期刊主題挖掘 batch 2026-07-03b（journal_discovery_20260703_2；websearch jbf/jfe/rfs/joe/jfqa/jfm + jpm/faj/j.alt inv/j.fixed income/j.futures markets + qje/aer/jpe/aej + jfec/jbes/jae 2025-26 趨勢層級；selectivity gate 後 13→10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -47274,7 +47274,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-03T14:52:11+00:00"
+    "created_at": "2026-07-03T14:52:11+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-03T22:20:58.173681+00:00",
+    "claim_session_id": "653439cd8348",
+    "status_history": [
+      {
+        "ts": "2026-07-03T22:20:58.173960+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T22:21:07.034027+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T22:28:04.403063+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-03T22:21:07.033726+00:00",
+    "completed_at": "2026-07-03T22:28:04.402772+00:00",
+    "result": "Completed experiment research_minimum_wage_state_event_retail_vol. Public minimum-wage effective-date event study on restaurant/retail RV vs SPY/XLY/low-labor-tech controls: NULL_PUBLIC_EVENT_STUDY, 0/12 primary tests pass, 0 raw positive t>2; placebo primary p(placebo>=event)=0.989. Files: README, script, results JSON, figures, knowledge_candidate."
   },
   {
     "id": "ops-drought-trigger-tighten",
