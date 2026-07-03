@@ -1,0 +1,252 @@
+{
+  "experiment_id": "K1609",
+  "title": "COMEX warehouse scarcity proxy and precious-metal volatility",
+  "run_at": "2026-07-03T00:50:39.167932+00:00",
+  "seed": 42,
+  "verdict": {
+    "verdict": "DATA_LIMITATION_PROXY_NULL",
+    "claim": "CME warehouse stock endpoints did not return data in this runtime, and the fallback ETF/futures proxy does not show a strict |t|>=3 RV/correlation signal.",
+    "strong_cells": []
+  },
+  "literature": [
+    {
+      "citation": "Barone-Adesi, Geman, and Theal (2010), 'On the Lease Rate, Convenience Yield and Speculative Effects in the Gold Futures Market'",
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1365180",
+      "use_in_design": "Motivates inventory / lease-rate tightness as a gold-futures state variable; this K cannot observe lease rates directly."
+    },
+    {
+      "citation": "Le and Zhu (2013), 'Risk Premia in Gold Lease Rates'",
+      "url": "https://conference.nber.org/confer/2013/CWf13/Le_Zhu.pdf",
+      "use_in_design": "Motivates links among lease rates, Treasury yields, VIX, and COMEX inventory growth."
+    },
+    {
+      "citation": "Fama and French (1987), Journal of Business, 'Commodity Futures Prices: Some Evidence on Forecast Power, Premiums, and the Theory of Storage'",
+      "url": "https://www.jstor.org/stable/2352877",
+      "use_in_design": "Theory-of-storage motivation for inventory scarcity and convenience yield; not directly replicated."
+    },
+    {
+      "citation": "CME Group Warehouse & Depository Stocks reports",
+      "url": "https://www.cmegroup.com/solutions/clearing/operations-and-deliveries/nymex-delivery-notices.html",
+      "use_in_design": "Primary intended public source for registered and eligible stocks; endpoint availability is audited in this script."
+    }
+  ],
+  "data_sources": {
+    "intended_cme_warehouse_reports": [
+      "https://www.cmegroup.com/delivery_reports/Gold_Stocks.xls",
+      "https://www.cmegroup.com/delivery_reports/Silver_stocks.xls"
+    ],
+    "yfinance": [
+      "GLD",
+      "SLV",
+      "GC=F",
+      "SI=F",
+      "^VIX"
+    ],
+    "fred": {
+      "DFII10": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFII10"
+    }
+  },
+  "cme_fetch_attempts": [
+    {
+      "metal": "gold",
+      "url": "https://www.cmegroup.com/delivery_reports/Gold_Stocks.xls",
+      "ok": false,
+      "status_code": null,
+      "bytes": 0,
+      "content_type": null,
+      "elapsed_sec": 8.069,
+      "error": "ReadTimeout: HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=8)"
+    },
+    {
+      "metal": "silver",
+      "url": "https://www.cmegroup.com/delivery_reports/Silver_stocks.xls",
+      "ok": false,
+      "status_code": null,
+      "bytes": 0,
+      "content_type": null,
+      "elapsed_sec": 8.067,
+      "error": "ReadTimeout: HTTPSConnectionPool(host='www.cmegroup.com', port=443): Read timed out. (read timeout=8)"
+    }
+  ],
+  "methodology": {
+    "primary_data_limitation": "CME Gold_Stocks.xls and Silver_stocks.xls were attempted with explicit timeouts. No bytes were returned in this runtime, so no registered/eligible inventory time-series inference is made.",
+    "fallback_proxy": "scarcity_proxy_raw = rolling_z(future / scaled ETF tracking basis) + 0.5 * rolling_z(log ETF dollar volume); scarcity_proxy_lag1 = scarcity_proxy_raw.shift(1).",
+    "targets": [
+      "log_fwd5_rv_ratio: next 5 trading days annualized RV vs prior 21d RV",
+      "downside_semivar_5d_ann: next 5 trading days downside semivariance",
+      "fwd21_return_real_yield_corr: future 21d ETF return correlation with real-yield changes"
+    ],
+    "controls": [
+      "prior5_return",
+      "prior21_rv_ann",
+      "vix_lag1",
+      "real_yield_lag1",
+      "real_yield_change5_lag1"
+    ],
+    "inference": "Weekly Friday origins; OLS with HAC lag 4 plus year-cluster high-proxy bootstrap.",
+    "lookahead_controls": [
+      "scarcity_proxy_lag1 is created with `.shift(1)`",
+      "targets use origin+1 through origin+5 or origin+21 trading days",
+      "FRED real yield controls are lagged"
+    ]
+  },
+  "sample": {
+    "weekly_origin_rows": 2061,
+    "rows_by_metal": {
+      "gold": 1038,
+      "silver": 1023
+    },
+    "start": "2006-01-06",
+    "end": "2026-05-29"
+  },
+  "results": {
+    "gold": {
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1021,
+          "coef": 0.016544636956381937,
+          "se_hac_lag4": 0.01179669060221875,
+          "t_hac_lag4": 1.4024812139491207,
+          "p_hac_lag4": 0.16077159648215134,
+          "ci95_low": -0.006576876623966815,
+          "ci95_high": 0.039666150536730685,
+          "r2": 0.0726759005311125
+        },
+        "year_bootstrap_high_proxy_diff": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_high_minus_low": 0.0016571603924586953,
+          "ci95_low": -0.07032139329711128,
+          "ci95_high": 0.07290669624162883,
+          "p_sign_two_sided": 0.964,
+          "high_proxy_threshold": 1.3804668827022086
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1021,
+          "coef": 0.00038506439064675383,
+          "se_hac_lag4": 0.0010759427933409124,
+          "t_hac_lag4": 0.3578855614164109,
+          "p_hac_lag4": 0.7204289563709007,
+          "ci95_low": -0.0017237834843014345,
+          "ci95_high": 0.002493912265594942,
+          "r2": 0.13586720428115484
+        },
+        "year_bootstrap_high_proxy_diff": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_high_minus_low": 0.0005189704849244865,
+          "ci95_low": -0.002880246738340039,
+          "ci95_high": 0.0043394181745844,
+          "p_sign_two_sided": 0.8176,
+          "high_proxy_threshold": 1.3804668827022086
+        }
+      },
+      "fwd21_return_real_yield_corr": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1021,
+          "coef": -0.015693070459161174,
+          "se_hac_lag4": 0.007646372330157786,
+          "t_hac_lag4": -2.0523549967958914,
+          "p_hac_lag4": 0.04013517476868729,
+          "ci95_low": -0.030679960226270432,
+          "ci95_high": -0.0007061806920519147,
+          "r2": 0.03371165131597298
+        },
+        "year_bootstrap_high_proxy_diff": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_high_minus_low": -0.017127224127193977,
+          "ci95_low": -0.0565155790561094,
+          "ci95_high": 0.020361296721702858,
+          "p_sign_two_sided": 0.3656,
+          "high_proxy_threshold": 1.3804668827022086
+        }
+      }
+    },
+    "silver": {
+      "log_fwd5_rv_ratio": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1004,
+          "coef": 0.014690361973475572,
+          "se_hac_lag4": 0.013339526687030928,
+          "t_hac_lag4": 1.1012656084535566,
+          "p_hac_lag4": 0.27078107459073686,
+          "ci95_low": -0.011455110333105046,
+          "ci95_high": 0.04083583428005619,
+          "r2": 0.0553998389610898
+        },
+        "year_bootstrap_high_proxy_diff": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_high_minus_low": 0.0060844630491570795,
+          "ci95_low": -0.04129229992044645,
+          "ci95_high": 0.052136454398882974,
+          "p_sign_two_sided": 0.8244,
+          "high_proxy_threshold": 1.21332871336522
+        }
+      },
+      "downside_semivar_5d_ann": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1004,
+          "coef": 0.007399336831363884,
+          "se_hac_lag4": 0.005219328555113373,
+          "t_hac_lag4": 1.4176798324211182,
+          "p_hac_lag4": 0.15628426072742724,
+          "ci95_low": -0.002830547136658327,
+          "ci95_high": 0.017629220799386097,
+          "r2": 0.07889895667978408
+        },
+        "year_bootstrap_high_proxy_diff": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_high_minus_low": 0.03908033793449196,
+          "ci95_low": -0.002111447452270475,
+          "ci95_high": 0.11503693288778957,
+          "p_sign_two_sided": 0.0956,
+          "high_proxy_threshold": 1.21332871336522
+        }
+      },
+      "fwd21_return_real_yield_corr": {
+        "ols_hac": {
+          "ok": true,
+          "n": 1004,
+          "coef": -0.012230963356710589,
+          "se_hac_lag4": 0.007483493308243517,
+          "t_hac_lag4": -1.634392235406618,
+          "p_hac_lag4": 0.10217651756597325,
+          "ci95_low": -0.026898610240867885,
+          "ci95_high": 0.0024366835274467046,
+          "r2": 0.019907134912465985
+        },
+        "year_bootstrap_high_proxy_diff": {
+          "ok": true,
+          "n_boot": 5000,
+          "observed_high_minus_low": -0.0070281125122647736,
+          "ci95_low": -0.04230918836656532,
+          "ci95_high": 0.03313235429416638,
+          "p_sign_two_sided": 0.6876,
+          "high_proxy_threshold": 1.21332871336522
+        }
+      }
+    }
+  },
+  "figures": [
+    "/Users/yhlai0911/volpred-research/experiments/K1609/figures/fig1_fallback_proxy_timeseries.png",
+    "/Users/yhlai0911/volpred-research/experiments/K1609/figures/fig2_proxy_coefficients.png",
+    "/Users/yhlai0911/volpred-research/experiments/K1609/figures/fig3_proxy_vs_rv_scatter.png"
+  ],
+  "limitations": [
+    "No COMEX registered/eligible warehouse time series was obtained; this is the binding limitation.",
+    "The fallback proxy uses ETF/futures tracking basis and ETF dollar volume, not physical inventory or lease rates.",
+    "GLD and SLV are ETF wrappers with fees, share mechanics, and tracking error; futures-ETF basis is not a clean convenience-yield measure.",
+    "FRED DFII10 is daily and sometimes revised/missing; it is used only as a lagged control.",
+    "Weekly origins reduce overlap but do not make the fallback proxy causal."
+  ]
+}
