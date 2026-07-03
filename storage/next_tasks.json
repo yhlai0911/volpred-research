@@ -45808,7 +45808,7 @@
     "title": "K1610: Frontier markets（FM ETF）與 EM 危機相關性收斂是否侵蝕分散效益** — yfinance FM (iShares MSCI Frontier and Select EM) + EEM/VWO + VNM 等成分代理",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1385). Original: Frontier markets（FM ETF）與 EM 危機相關性收斂是否侵蝕分散效益** — yfinance FM (iShares MSCI Frontier and Select EM) + EEM/VWO + VNM 等成分代理，計算 rolling 63d/252d FM-EM 相關係數與 FM own RV，檢定近期 EM 貨幣/信用壓力事件窗後 FM-EM 相關是否結構性上升、傳統「frontier markets 分散 EM risk」論述是否鬆動（來源：JPM/FAJ 2025-26 討論 frontier markets 逐漸被納入 broader EM beta，分散效益存疑）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1610.py with signal.shift(1) + seed=42, (c) K1610_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -45817,7 +45817,33 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-03T00:00:01Z"
+    "created_at": "2026-07-03T00:00:01Z",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-03T01:53:00.929338+00:00",
+    "claim_session_id": "8434cefbc2a9",
+    "status_history": [
+      {
+        "ts": "2026-07-03T01:53:00.929635+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T01:53:17.246933+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T02:02:21.267120+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-03T01:53:17.246688+00:00",
+    "completed_at": "2026-07-03T02:02:21.266822+00:00",
+    "result": "K1610 completed: FM frontier ETF sample 2012-09-13..2025-01-08 (n=3099) shows mixed result. 80/20 EEM/FM lowers ann vol by 0.0204, CI [0.0183,0.0225], but Sharpe gain NS; no robust secular FM-EEM convergence (HAC t=0.23), stress corr rises 0.675 vs 0.504 (p=0.008). codex_review=CONDITIONAL_PASS, knowledge item a9c857d7."
   },
   {
     "id": "K1611",

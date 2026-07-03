@@ -37284,5 +37284,18 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-07-03T08:55:39.778993"
+  },
+  {
+    "item_id": "a9c857d7",
+    "category": "diversification_analysis",
+    "content": "K1610 mixed result: FM frontier ETF sample (yfinance adjusted close, 2012-09-13 to 2025-01-08, n=3099 daily returns; FM has no current data after 2025-01-08 in this runtime) still reduces EM portfolio volatility but loses diversification in stress. 80% EEM / 20% FM reduces annualized vol by 0.0204 vs EEM alone, 21-day block bootstrap CI [0.0183, 0.0225], p <= 0.0007; Sharpe proxy improvement +0.0396 is not significant (CI [-0.0372, 0.1266]). Secular FM-EEM convergence is not supported (quarterly Fisher-z trend HAC t=0.23, p=0.819; early corr 0.514 vs late 0.569, bootstrap CI crosses zero). Stress-quarter erosion is supported descriptively: FM-EEM corr 0.675 in bottom-quintile SPY quarters vs 0.504 calm, Fisher-z diff CI [0.0758, 0.4454], p=0.008. Verdict: diversification retains normal/full-sample volatility support, but crisis/stress correlation convergence materially weakens it. reviewer=Codex self-review CONDITIONAL_PASS; experiment_id=K1610.",
+    "evidence": [
+      "experiments/K1610/README.md",
+      "experiments/K1610/K1610.py",
+      "experiments/K1610/K1610_results.json",
+      "experiments/K1610/codex_review.md"
+    ],
+    "confidence": 0.78,
+    "created_at": "2026-07-03T10:01:52.989538"
   }
 ]
