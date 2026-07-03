@@ -37366,5 +37366,21 @@
     ],
     "confidence": 0.72,
     "created_at": "2026-07-03T15:32:51.457087"
+  },
+  {
+    "item_id": "1bb50269",
+    "category": "experiment",
+    "content": "research_mutual_fund_thematic_concentration_underlying_th (2026-07-03) ETF public proxy verdict PASS_ETF_PROXY, not mutual-fund TCI replication. Data: 16 thematic ETFs with usable U.S. current top holdings from yfinance funds_data.top_holdings, 122 top-holding rows, 76 unique underlying symbols, stock panel 97,128 rows and ETF panel 20,448 rows from 2021-06-01 to 2026-07-02. Signal is lagged ETF dollar-volume attention x current ETF top-10 HHI x holding weight, summed by underlying stock; regressions include entity fixed effects and lagged recent 5d RV control, with clustered SE. Stock-level gate passes 4/4: 5d stock RV beta=0.03862, t=5.2349; 5d downside beta=0.10875, t=7.0006, high-low Welch t=7.0973; 22d stock RV beta=0.03200, t=3.9769; 22d downside beta=0.05025, t=5.4840. Interpretation: in current ETF top-holdings proxy, concentration-weighted thematic ETF attention is associated with higher next-week/month residual RV/downside in the underlying stocks. Caveats are binding: holdings are current ex-post snapshots, yfinance top holdings are incomplete, and ETF volume may reflect theme news/flow/vol clustering; a mutual-fund thematic concentration claim requires historical N-PORT holdings or author TCI data.",
+    "evidence": [
+      "experiments/research_mutual_fund_thematic_concentration_underlying_th/research_mutual_fund_thematic_concentration_underlying_th.py",
+      "experiments/research_mutual_fund_thematic_concentration_underlying_th/research_mutual_fund_thematic_concentration_underlying_th_results.json",
+      "experiments/research_mutual_fund_thematic_concentration_underlying_th/README.md",
+      "experiments/research_mutual_fund_thematic_concentration_underlying_th/codex_review.md",
+      "https://academic.oup.com/rfs/advance-article/doi/10.1093/rfs/hhag021/8701142",
+      "https://www.sec.gov/data-research/sec-markets-data/form-n-port-data-sets",
+      "https://ranaroussi.github.io/yfinance/reference/api/yfinance.scrapers.funds.FundsData.html"
+    ],
+    "confidence": 0.76,
+    "created_at": "2026-07-03T16:41:37.978243"
   }
 ]

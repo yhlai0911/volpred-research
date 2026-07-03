@@ -45446,7 +45446,7 @@
     "title": "研究 backlog fallback: Mutual-fund thematic concentration 是否預測 underlying theme crowding RV",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Mutual-fund thematic concentration 是否預測 underlying theme crowding RV — 用 RFS replication / author TCI data（若可得）、SEC N-PORT holdings、13F/ETF holdings fallback 建 fund-level thematic concentration / holdings-overlap proxy，檢定 TCI 上升後 underlying stocks 的 residual-correlation、theme ETF RV、theme drawdown 與 | 來源 section: 期刊主題挖掘 batch 2026-07-02（journal_discovery_20260702_0；websearch rfs/restud/rof/jfec/cfa/fed 2025-26 趨勢層級；硬約束避開 off-exchange short-volume、graph/gnn、thematic etf coherence、cre/nbfi、stablecoin、ai concentration 等已覆蓋 cluster；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -45455,7 +45455,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-02T16:08:47+00:00"
+    "created_at": "2026-07-02T16:08:47+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-03T08:34:54.593152+00:00",
+    "claim_session_id": "303523774d02",
+    "status_history": [
+      {
+        "ts": "2026-07-03T08:34:54.593443+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T08:34:54.818608+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T08:42:12.756196+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-03T08:34:54.818310+00:00",
+    "completed_at": "2026-07-03T08:42:12.755909+00:00",
+    "result": "Completed ETF public-proxy thematic concentration experiment. Verdict PASS_ETF_PROXY (not mutual-fund TCI replication): 16 thematic ETFs, 122 current top-holding rows, 76 underlying stocks; stock-level gate passes 4/4 after entity FE and lagged recent RV control. Strongest stock cell 5d downside beta=0.10875, clustered t=7.0006. Wrote triplet, figure, Codex review, knowledge item 1bb50269, and research_program update."
   },
   {
     "id": "research_data_driven_vc_screening_shock_public_innovation",
