@@ -37350,5 +37350,21 @@
     ],
     "confidence": 0.74,
     "created_at": "2026-07-03T15:13:50.629737"
+  },
+  {
+    "item_id": "7c9a463a",
+    "category": "experiment",
+    "content": "research_firm_level_labor_shortage_exposure_wage_sensitiv (2026-07-03) public proxy diagnostic verdict NULL_PUBLIC_PROXY_DIAGNOSTIC. Data: 24 labor-sensitive listed firms, 288 SEC 10-K/10-Q filings scored from 2023-07-13 to 2026-06-29 (216 10-Q, 72 10-K, 0 download failures), BLS JOLTS 77 monthly observations across 6 industries, yfinance adjusted closes, regression panel 17,420 rows from 2023-07-13 to 2026-07-02. SEC phrase counts: 181 core labor-shortage hits, 442 wage-pressure hits, 873 automation hits. Primary combined signal is lagged SEC labor-shortage text score x lagged BLS JOLTS openings-minus-quits z-score. Combined signal has 0/6 formal passes and 2/6 positive directions; strongest combined cell is AIQ-relative 5d RV beta=0.01596, clustered t=0.7317, p=0.4643, high-low Welch t=4.1869, gate FAIL because coefficient t is far below 3. Strongest auxiliary result is JOLTS-only 5d idio RV beta=0.04166, clustered t=2.9105, p=0.0036, high-low Welch t=4.7829; this is a near miss below the t>=3 gate and not a firm-level SEC text finding. Lookahead controls: SEC filing score uses filing_date plus one trading-day lag; JOLTS values are assumed observable 35 calendar days after month end then shifted one trading day; forward RV/downside targets start at t+1; rows before a ticker has a scored filing are excluded. Conclusion: no robust public firm-level labor-shortage exposure volatility prior; JOLTS-only industry tightness is only a follow-up lead.",
+    "evidence": [
+      "experiments/research_firm_level_labor_shortage_exposure_wage_sensitiv/research_firm_level_labor_shortage_exposure_wage_sensitiv.py",
+      "experiments/research_firm_level_labor_shortage_exposure_wage_sensitiv/research_firm_level_labor_shortage_exposure_wage_sensitiv_results.json",
+      "experiments/research_firm_level_labor_shortage_exposure_wage_sensitiv/README.md",
+      "experiments/research_firm_level_labor_shortage_exposure_wage_sensitiv/codex_review.md",
+      "https://academic.oup.com/rfs/advance-article/doi/10.1093/rfs/hhag049/8678513",
+      "https://www.bls.gov/jlt/",
+      "https://www.sec.gov/search-filings/edgar-application-programming-interfaces"
+    ],
+    "confidence": 0.72,
+    "created_at": "2026-07-03T15:32:51.457087"
   }
 ]

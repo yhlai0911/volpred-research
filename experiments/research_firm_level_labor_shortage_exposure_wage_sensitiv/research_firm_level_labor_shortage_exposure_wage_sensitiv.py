@@ -505,7 +505,7 @@ def build_daily_panel(refresh: bool = False) -> pd.DataFrame:
             )
         rows.append(firm)
     panel = pd.concat(rows, ignore_index=True)
-    panel = panel[panel["date"] >= "2021-06-01"].copy()
+    panel = panel[(panel["date"] >= "2021-06-01") & panel["score_release_date"].notna()].copy()
     panel.to_csv(REGRESSION_PANEL_CACHE, index=False)
     return panel
 

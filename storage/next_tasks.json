@@ -45207,7 +45207,7 @@
     "title": "研究 backlog fallback: Firm-level labor-shortage exposure 對 wage-sensitive idio RV 的截面預測力",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Firm-level labor-shortage exposure 對 wage-sensitive idio RV 的截面預測力 — 用 SEC 10-K / 10-Q labor-shortage mention、BLS JOLTS industry openings-quits、yfinance listed firms / sector ETF 建 firm-level shortage exposure proxy，檢定高曝險公司在 t+5/t+22 idio RV、downside semivariance、automation/AI-capex basket relative  | 來源 section: 期刊主題挖掘 batch 2026-07-02（journal_discovery_20260702_0；websearch rfs/restud/rof/jfec/cfa/fed 2025-26 趨勢層級；硬約束避開 off-exchange short-volume、graph/gnn、thematic etf coherence、cre/nbfi、stablecoin、ai concentration 等已覆蓋 cluster；selectivity gate 後 6 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -45232,9 +45232,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T07:33:26.531090+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-03T07:17:24.008339+00:00"
+    "started_at": "2026-07-03T07:17:24.008339+00:00",
+    "completed_at": "2026-07-03T07:33:26.530805+00:00",
+    "result": "Completed public-proxy labor-shortage experiment with SEC 10-K/10-Q phrase counts, BLS JOLTS industry tightness, and yfinance idio RV/downside targets. Verdict NULL_PUBLIC_PROXY_DIAGNOSTIC: combined SEC x JOLTS signal 0/6 formal passes, strongest combined AIQ-relative 5d RV beta=0.01596, t=0.7317. Wrote experiment triplet, figure, Codex review, knowledge item 7c9a463a, and research_program update."
   },
   {
     "id": "research_bank_market_to_book_tobin_s_q_divergence_delayed",
