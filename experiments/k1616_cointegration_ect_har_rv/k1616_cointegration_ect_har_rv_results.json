@@ -1,0 +1,300 @@
+{
+  "experiment_id": "k1616",
+  "title": "Cointegration error-correction term (ECT) as a HAR-RV covariate",
+  "generated_utc": "2026-07-03T17:20:51.562115+00:00",
+  "seed": 20260704,
+  "rv_proxy": "Garman-Klass daily variance (OHLC, log-RV HAR)",
+  "config": {
+    "initial_train": 750,
+    "refit_freq_days": 21,
+    "har_warmup": 22,
+    "rv_floor": 1e-08,
+    "retransform": "log-normal exp(pred + 0.5*resid_var), per-model",
+    "dm": "Newey-West HAC + Harvey-Leybourne-Newbold small-sample correction"
+  },
+  "pairs": [
+    {
+      "name": "SPY-QQQ",
+      "y": "SPY",
+      "x": "QQQ",
+      "transform": "log",
+      "note": "US large-cap vs Nasdaq-100 equity indices, same 2016- window",
+      "sample_start": "2016-01-04",
+      "sample_end": "2026-07-02",
+      "cointegration_engle_granger": {
+        "n_obs": 2639,
+        "coint_t_y_on_x": -1.9799728740987719,
+        "coint_p_y_on_x": 0.538971474184365,
+        "coint_t_x_on_y": -1.998952965462162,
+        "coint_p_x_on_y": 0.5291223052775177,
+        "ols_alpha": 1.7391588952522317,
+        "ols_beta": 0.7365361056350118,
+        "resid_adf_stat": -1.9793367531390744,
+        "resid_adf_p": 0.2957060511730779,
+        "cointegrated_5pct": false
+      },
+      "targets": [
+        {
+          "target": "SPY",
+          "oos": {
+            "n_oos": 1889,
+            "qlike_har": 0.38090277707305614,
+            "qlike_har_ect": 0.37910239690224934,
+            "qlike_har_ect_static_beta": 0.3764421174779905,
+            "qlike_pct_improvement": 0.4726613401564923,
+            "mse_har": 2.9769925570338538e-08,
+            "mse_har_ect": 3.184244685729671e-08,
+            "dm_t_ect_vs_har": 0.5955339544121987,
+            "dm_p": 0.5515579871845591,
+            "hln_t": 0.595376301476435,
+            "hln_p": 0.5516633185864368,
+            "dm_t_static_beta": 1.0929075570366502,
+            "hln_t_static_beta": 1.0926182366988113,
+            "hln_p_static_beta": 0.2747008489533773,
+            "ect_helps_dm_5pct": false,
+            "ect_helps_hln_5pct": false,
+            "ect_helps_harvey_strict": false
+          },
+          "insample_ect": {
+            "ect_coef": -0.526894045919454,
+            "ect_hac_t": -1.1910929418562612,
+            "abs_ect_coef": 0.06787871238295395,
+            "abs_ect_hac_t": 0.10313728978856918,
+            "n": 2617,
+            "hac_lag": 9
+          },
+          "sample_end_target": "2026-07-02"
+        },
+        {
+          "target": "QQQ",
+          "oos": {
+            "n_oos": 1889,
+            "qlike_har": 0.31953736542811084,
+            "qlike_har_ect": 0.31899246534442177,
+            "qlike_har_ect_static_beta": 0.3177935694265489,
+            "qlike_pct_improvement": 0.17052781384706683,
+            "mse_har": 3.711980256123151e-08,
+            "mse_har_ect": 4.6540226201554154e-08,
+            "dm_t_ect_vs_har": 0.16830695034149804,
+            "dm_p": 0.8663598335912983,
+            "hln_t": 0.1682623952248096,
+            "hln_p": 0.8663948786972355,
+            "dm_t_static_beta": 0.534557954327386,
+            "hln_t_static_beta": 0.5344164432847138,
+            "hln_p_static_beta": 0.5931163680591176,
+            "ect_helps_dm_5pct": false,
+            "ect_helps_hln_5pct": false,
+            "ect_helps_harvey_strict": false
+          },
+          "insample_ect": {
+            "ect_coef": -0.7191245543377213,
+            "ect_hac_t": -1.7347707443812737,
+            "abs_ect_coef": -0.19853804588329274,
+            "abs_ect_hac_t": -0.32411783760798224,
+            "n": 2617,
+            "hac_lag": 9
+          },
+          "sample_end_target": "2026-07-02"
+        }
+      ]
+    },
+    {
+      "name": "GLD-TLT",
+      "y": "GLD",
+      "x": "TLT",
+      "transform": "log",
+      "note": "Gold vs long Treasuries (safe-haven pair)",
+      "sample_start": "2016-01-04",
+      "sample_end": "2026-07-02",
+      "cointegration_engle_granger": {
+        "n_obs": 2639,
+        "coint_t_y_on_x": -0.7792801764694403,
+        "coint_p_y_on_x": 0.9373726966801923,
+        "coint_t_x_on_y": -1.709185186213499,
+        "coint_p_x_on_y": 0.6726955158887091,
+        "ols_alpha": 8.725410484978267,
+        "ols_beta": -0.7806044690845878,
+        "resid_adf_stat": -0.7782539537306554,
+        "resid_adf_p": 0.8254265018094111,
+        "cointegrated_5pct": false
+      },
+      "targets": [
+        {
+          "target": "GLD",
+          "oos": {
+            "n_oos": 1889,
+            "qlike_har": 0.386527087049503,
+            "qlike_har_ect": 0.3798911854535956,
+            "qlike_har_ect_static_beta": 0.40862677047064827,
+            "qlike_pct_improvement": 1.7168011811440036,
+            "mse_har": 1.7526583312927612e-08,
+            "mse_har_ect": 1.729680984029556e-08,
+            "dm_t_ect_vs_har": 1.2974718685097635,
+            "dm_p": 0.19462738717129957,
+            "hln_t": 1.2971283948125447,
+            "hln_p": 0.19474549786702444,
+            "dm_t_static_beta": -2.1787883724018,
+            "hln_t_static_beta": -2.178211591882785,
+            "hln_p_static_beta": 0.029513651056695567,
+            "ect_helps_dm_5pct": false,
+            "ect_helps_hln_5pct": false,
+            "ect_helps_harvey_strict": false
+          },
+          "insample_ect": {
+            "ect_coef": 0.27886848705967426,
+            "ect_hac_t": 4.451186153810987,
+            "abs_ect_coef": 0.0862788119974603,
+            "abs_ect_hac_t": 0.8918889524611562,
+            "n": 2617,
+            "hac_lag": 9
+          },
+          "sample_end_target": "2026-07-02"
+        },
+        {
+          "target": "TLT",
+          "oos": {
+            "n_oos": 1889,
+            "qlike_har": 0.2969430139621555,
+            "qlike_har_ect": 0.2974597542906802,
+            "qlike_har_ect_static_beta": 0.29860707185332175,
+            "qlike_pct_improvement": -0.17402003220408477,
+            "mse_har": 1.4659979527577773e-08,
+            "mse_har_ect": 1.4624805421306776e-08,
+            "dm_t_ect_vs_har": -0.28932649150119544,
+            "dm_p": 0.772363308152636,
+            "hln_t": -0.28924989944386365,
+            "hln_p": 0.7724219063859472,
+            "dm_t_static_beta": -0.6300959684304152,
+            "hln_t_static_beta": -0.6299291660533216,
+            "hln_p_static_beta": 0.5288171550460978,
+            "ect_helps_dm_5pct": false,
+            "ect_helps_hln_5pct": false,
+            "ect_helps_harvey_strict": false
+          },
+          "insample_ect": {
+            "ect_coef": 0.0825738952081777,
+            "ect_hac_t": 2.1395924530744326,
+            "abs_ect_coef": -0.36933327033745106,
+            "abs_ect_hac_t": -4.305298496994892,
+            "n": 2617,
+            "hac_lag": 9
+          },
+          "sample_end_target": "2026-07-02"
+        }
+      ]
+    },
+    {
+      "name": "SPY-EEM",
+      "y": "SPY",
+      "x": "EEM",
+      "transform": "log",
+      "note": "US vs emerging markets (SPY RV already covered by SPY-QQQ)",
+      "sample_start": "2016-01-04",
+      "sample_end": "2026-07-02",
+      "cointegration_engle_granger": {
+        "n_obs": 2639,
+        "coint_t_y_on_x": -1.5437138909049664,
+        "coint_p_y_on_x": 0.7440509571179814,
+        "coint_t_x_on_y": -1.9041425115634794,
+        "coint_p_x_on_y": 0.5779043355912672,
+        "ols_alpha": -0.3911367809715056,
+        "ols_beta": 1.7041236855725113,
+        "resid_adf_stat": -1.5433722383571942,
+        "resid_adf_p": 0.5119571240195832,
+        "cointegrated_5pct": false
+      },
+      "targets": [
+        {
+          "target": "EEM",
+          "oos": {
+            "n_oos": 1889,
+            "qlike_har": 0.33061165518849717,
+            "qlike_har_ect": 0.33327826518247394,
+            "qlike_har_ect_static_beta": 0.3338500006374688,
+            "qlike_pct_improvement": -0.8065686590681194,
+            "mse_har": 1.1379459743533066e-08,
+            "mse_har_ect": 1.1403583740531883e-08,
+            "dm_t_ect_vs_har": -1.5555592629929087,
+            "dm_p": 0.11998053336449255,
+            "hln_t": -1.5551474670193153,
+            "hln_p": 0.12007855382332111,
+            "dm_t_static_beta": -1.3111691413040865,
+            "hln_t_static_beta": -1.3108220415915044,
+            "hln_p_static_beta": 0.19007731205522904,
+            "ect_helps_dm_5pct": false,
+            "ect_helps_hln_5pct": false,
+            "ect_helps_harvey_strict": false
+          },
+          "insample_ect": {
+            "ect_coef": -0.03946706324031059,
+            "ect_hac_t": -0.6385391726856793,
+            "abs_ect_coef": -0.16639374549490563,
+            "abs_ect_hac_t": -1.1723572356528182,
+            "n": 2617,
+            "hac_lag": 9
+          },
+          "sample_end_target": "2026-07-02"
+        }
+      ]
+    },
+    {
+      "name": "VIX-VIX3M",
+      "y": "^VIX",
+      "x": "^VIX3M",
+      "transform": "level",
+      "note": "VIX term-structure ECT (1M vs 3M) predicting SPY realized vol; strongest economic prior but shorter sample (2020-)",
+      "sample_start": "2020-01-02",
+      "sample_end": "2026-07-02",
+      "cointegration_engle_granger": {
+        "n_obs": 1633,
+        "coint_t_y_on_x": -4.135077055690161,
+        "coint_p_y_on_x": 0.004565483032484988,
+        "coint_t_x_on_y": -3.4636855852912793,
+        "coint_p_x_on_y": 0.03575323726820119,
+        "ols_alpha": -5.129771614813472,
+        "ols_beta": 1.1325806623204655,
+        "resid_adf_stat": -4.1349796749799435,
+        "resid_adf_p": 0.0008473172982075288,
+        "cointegrated_5pct": true
+      },
+      "targets": [
+        {
+          "target": "SPY",
+          "oos": {
+            "n_oos": 883,
+            "qlike_har": 0.3514372565100437,
+            "qlike_har_ect": 0.35032992100408156,
+            "qlike_har_ect_static_beta": 0.3395651378040517,
+            "qlike_pct_improvement": 0.3150876822106371,
+            "mse_har": 1.3922358968513367e-08,
+            "mse_har_ect": 1.1100370916685605e-08,
+            "dm_t_ect_vs_har": 0.11439657748047122,
+            "dm_p": 0.9089494625360799,
+            "hln_t": 0.11433178190604,
+            "hln_p": 0.9090008100005114,
+            "dm_t_static_beta": 1.3200785500384882,
+            "hln_t_static_beta": 1.3193308419354317,
+            "hln_p_static_beta": 0.187400915937588,
+            "ect_helps_dm_5pct": false,
+            "ect_helps_hln_5pct": false,
+            "ect_helps_harvey_strict": false
+          },
+          "insample_ect": {
+            "ect_coef": 0.06487654790626428,
+            "ect_hac_t": 4.2641638650459495,
+            "abs_ect_coef": 0.06448594799328418,
+            "abs_ect_hac_t": 3.5442692598384777,
+            "n": 1611,
+            "hac_lag": 8
+          },
+          "sample_end_target": "2026-07-02"
+        }
+      ]
+    }
+  ],
+  "verdict": {
+    "any_pair_ect_helps_5pct": false,
+    "any_pair_ect_helps_harvey_strict": false,
+    "summary": "NULL: cointegration ECT provides no robust incremental HAR-RV forecasting power"
+  }
+}
