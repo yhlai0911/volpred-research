@@ -1,0 +1,606 @@
+{
+  "conclusion": "Rasterized candlestick images do not deliver a robust OOS edge over numeric OHLC/HAR/GARCH baselines.",
+  "created_at": "2026-07-03T23:39:50.790611+00:00",
+  "data": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "EEM",
+      "GLD",
+      "TLT",
+      "SLV"
+    ],
+    "bucket_logvar_quantiles": [
+      -4.423508166224735,
+      -3.4674731848751055
+    ],
+    "class_median_variances": [
+      0.006392004113726117,
+      0.01962861187070565,
+      0.05647120212628021
+    ],
+    "features": [
+      "log_rv1",
+      "log_rv5",
+      "log_rv20",
+      "ret5",
+      "ret20",
+      "abs_ret5",
+      "neg_share20",
+      "log_parkinson20",
+      "log_gk20",
+      "log_rs20",
+      "log_yz20",
+      "volume_z20"
+    ],
+    "horizon_days": 5,
+    "image_size": 48,
+    "oos_end": "2026-06-30",
+    "oos_start": "2021-01-01",
+    "sample_stride": 2,
+    "source": "/Users/yhlai0911/volpred-research/paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv",
+    "split_counts": {
+      "oos": 4792,
+      "train": 7861,
+      "validation": 1764
+    },
+    "train_end": "2018-12-31",
+    "validation_end": "2020-12-31",
+    "validation_start": "2019-01-01",
+    "window_days": 20
+  },
+  "experiment_id": "research_image_rendered_candlestick_cnn_vol_vs",
+  "figures": [
+    "/Users/yhlai0911/volpred-research/experiments/research_image_rendered_candlestick_cnn_vol_vs/figures/dm_cnn_vs_har_by_asset.png",
+    "/Users/yhlai0911/volpred-research/experiments/research_image_rendered_candlestick_cnn_vol_vs/figures/panel_cumulative_loss_diff.png",
+    "/Users/yhlai0911/volpred-research/experiments/research_image_rendered_candlestick_cnn_vol_vs/figures/example_candlestick_images.png"
+  ],
+  "limitations": [
+    "This is a daily OHLCV image pilot, not high-frequency realized-volatility modelling.",
+    "CNN uses bucket classification and maps class probabilities to expected variance, so QLIKE forecasts are deliberately coarse.",
+    "The visual representation may discard precise numerical scale information that numeric OHLC features retain.",
+    "No transaction-cost or trading strategy claim is made."
+  ],
+  "literature": [
+    {
+      "citation": "Bollerslev, Li, Li, and Li (2026), Journal of Financial Econometrics",
+      "role": "numeric candlestick volatility estimator baseline; orthogonal to pixel-level image learning",
+      "url": "https://academic.oup.com/jfec/article/24/1/nbaf023/8416248"
+    },
+    {
+      "citation": "Duong et al. (2025), arXiv:2501.12239",
+      "role": "pure candlestick chart image CNN direction and limitations",
+      "url": "https://arxiv.org/abs/2501.12239"
+    },
+    {
+      "citation": "Sezer and Ozbayoglu (2020), Financial Innovation",
+      "role": "candlestick/time-series image encoding with CNNs",
+      "url": "https://link.springer.com/article/10.1186/s40854-020-00187-0"
+    },
+    {
+      "citation": "Dixon and Zeng (2026), Journal of Financial Markets",
+      "role": "stock chart image-driven factors and asset-pricing relevance",
+      "url": "https://www.sciencedirect.com/science/article/pii/S1544612326001169"
+    }
+  ],
+  "models": {
+    "CNNImage": "3-channel 48x48 rasterized 20-day OHLCV candlestick image classifier; class-probability expected variance forecast.",
+    "GARCH11": "fixed-parameter GARCH(1,1) estimated pre-OOS, recursively filtered through OOS.",
+    "HAR_Ridge": "Ridge regression on numeric OHLC/HAR/range features predicting log next-week variance.",
+    "NumericLogit": "multinomial logistic regression on numeric OHLC/HAR/range features; same RV buckets.",
+    "RollingMean20": "lagged 20-day close-to-close realized variance."
+  },
+  "output_files": {
+    "predictions": "/Users/yhlai0911/volpred-research/experiments/research_image_rendered_candlestick_cnn_vol_vs/data/oos_predictions.csv",
+    "summary_table": "/Users/yhlai0911/volpred-research/experiments/research_image_rendered_candlestick_cnn_vol_vs/data/summary_table.csv"
+  },
+  "primary_gate": {
+    "panel_best_mean_qlike_model": "GARCH11",
+    "panel_dm_cnn_minus_har_p": 0.013210689835875478,
+    "panel_dm_cnn_minus_har_t": 2.4844935351183075,
+    "strict_asset_wins_vs_har": 0,
+    "support_rule": "support only if strict_asset_wins_vs_har >= 4, panel best model is CNNImage, and panel DM t < -3"
+  },
+  "runtime_seconds": 56.17442202568054,
+  "seed": 42,
+  "summary": {
+    "by_asset": [
+      {
+        "asset": "EEM",
+        "best_mean_qlike_model": "GARCH11",
+        "dm_cnn_minus_har": {
+          "holm_p": 1.0,
+          "p": 0.9721965665699366,
+          "t": 0.03486619231675462
+        },
+        "dm_cnn_minus_numeric_logit": {
+          "p": 0.015759501746124727,
+          "t": 2.4204528029067616
+        },
+        "metrics": {
+          "CNNImage": {
+            "bucket_accuracy": 0.38226744186046513,
+            "bucket_balanced_accuracy": 0.3333333333333333,
+            "log_mse": 0.9462078764552372,
+            "mean_qlike": 0.5178482655979536,
+            "median_qlike": 0.18496407655508407,
+            "model": "CNNImage",
+            "spearman": -0.014929657430677756
+          },
+          "GARCH11": {
+            "bucket_accuracy": 0.46075581395348836,
+            "bucket_balanced_accuracy": 0.39754175888617754,
+            "log_mse": 0.8970545328598053,
+            "mean_qlike": 0.36694982059004216,
+            "median_qlike": 0.16864432640885507,
+            "model": "GARCH11",
+            "spearman": 0.3958862320646678
+          },
+          "HAR_Ridge": {
+            "bucket_accuracy": 0.5058139534883721,
+            "bucket_balanced_accuracy": 0.4752356801158047,
+            "log_mse": 0.73839990547031,
+            "mean_qlike": 0.5154952580328783,
+            "median_qlike": 0.1583611654437027,
+            "model": "HAR_Ridge",
+            "spearman": 0.45548009361813385
+          },
+          "NumericLogit": {
+            "bucket_accuracy": 0.5087209302325582,
+            "bucket_balanced_accuracy": 0.4435700333912043,
+            "log_mse": 0.7342549812986873,
+            "mean_qlike": 0.39988533042131147,
+            "median_qlike": 0.15603126259053623,
+            "model": "NumericLogit",
+            "spearman": 0.4607057279717854
+          },
+          "RollingMean20": {
+            "bucket_accuracy": 0.48401162790697677,
+            "bucket_balanced_accuracy": 0.4294887481653995,
+            "log_mse": 0.8845493377767641,
+            "mean_qlike": 0.43881005375335785,
+            "median_qlike": 0.17470576945873673,
+            "model": "RollingMean20",
+            "spearman": 0.39203068928480933
+          }
+        },
+        "n_oos": 688,
+        "strict_cnn_win_vs_har": false
+      },
+      {
+        "asset": "GLD",
+        "best_mean_qlike_model": "GARCH11",
+        "dm_cnn_minus_har": {
+          "holm_p": 1.0,
+          "p": 0.45839877387147654,
+          "t": 0.7419044685688665
+        },
+        "dm_cnn_minus_numeric_logit": {
+          "p": 0.02527084360422216,
+          "t": 2.2421365232595125
+        },
+        "metrics": {
+          "CNNImage": {
+            "bucket_accuracy": 0.4316860465116279,
+            "bucket_balanced_accuracy": 0.3333333333333333,
+            "log_mse": 1.1014092520286272,
+            "mean_qlike": 0.5522222778865845,
+            "median_qlike": 0.21133859438891,
+            "model": "CNNImage",
+            "spearman": -0.02006958275843924
+          },
+          "GARCH11": {
+            "bucket_accuracy": 0.5,
+            "bucket_balanced_accuracy": 0.45066329434417907,
+            "log_mse": 0.8144341317517028,
+            "mean_qlike": 0.371709407590861,
+            "median_qlike": 0.1458376395346297,
+            "model": "GARCH11",
+            "spearman": 0.3870257390911129
+          },
+          "HAR_Ridge": {
+            "bucket_accuracy": 0.47093023255813954,
+            "bucket_balanced_accuracy": 0.44279205961670415,
+            "log_mse": 0.7378390891292532,
+            "mean_qlike": 0.4937878456285486,
+            "median_qlike": 0.14812602599386326,
+            "model": "HAR_Ridge",
+            "spearman": 0.377828342581998
+          },
+          "NumericLogit": {
+            "bucket_accuracy": 0.5072674418604651,
+            "bucket_balanced_accuracy": 0.4578207030813666,
+            "log_mse": 0.8008577821676682,
+            "mean_qlike": 0.41045900684709563,
+            "median_qlike": 0.15681937899033316,
+            "model": "NumericLogit",
+            "spearman": 0.3654025604816095
+          },
+          "RollingMean20": {
+            "bucket_accuracy": 0.49709302325581395,
+            "bucket_balanced_accuracy": 0.46770602284030405,
+            "log_mse": 0.8606608343871328,
+            "mean_qlike": 0.43823589127671136,
+            "median_qlike": 0.16662419118082472,
+            "model": "RollingMean20",
+            "spearman": 0.33665550999965654
+          }
+        },
+        "n_oos": 688,
+        "strict_cnn_win_vs_har": false
+      },
+      {
+        "asset": "IWM",
+        "best_mean_qlike_model": "NumericLogit",
+        "dm_cnn_minus_har": {
+          "holm_p": 0.05667164481127185,
+          "p": 0.008095949258753121,
+          "t": 2.655783721273735
+        },
+        "dm_cnn_minus_numeric_logit": {
+          "p": 0.00014532842291203885,
+          "t": 3.820359965170815
+        },
+        "metrics": {
+          "CNNImage": {
+            "bucket_accuracy": 0.3386627906976744,
+            "bucket_balanced_accuracy": 0.3333333333333333,
+            "log_mse": 0.7525067986673558,
+            "mean_qlike": 0.5757632139975398,
+            "median_qlike": 0.19013545458153636,
+            "model": "CNNImage",
+            "spearman": 0.0017077689225704804
+          },
+          "GARCH11": {
+            "bucket_accuracy": 0.5712209302325582,
+            "bucket_balanced_accuracy": 0.36785577699400845,
+            "log_mse": 0.6801834799478942,
+            "mean_qlike": 0.34938277627025277,
+            "median_qlike": 0.13369527787516344,
+            "model": "GARCH11",
+            "spearman": 0.2685958002135135
+          },
+          "HAR_Ridge": {
+            "bucket_accuracy": 0.559593023255814,
+            "bucket_balanced_accuracy": 0.3915317497414978,
+            "log_mse": 0.5880932604070914,
+            "mean_qlike": 0.35974292599045277,
+            "median_qlike": 0.11912782125328103,
+            "model": "HAR_Ridge",
+            "spearman": 0.3789918628749917
+          },
+          "NumericLogit": {
+            "bucket_accuracy": 0.5944767441860465,
+            "bucket_balanced_accuracy": 0.3743962379070525,
+            "log_mse": 0.595291608971077,
+            "mean_qlike": 0.3322037489351586,
+            "median_qlike": 0.12528737967525205,
+            "model": "NumericLogit",
+            "spearman": 0.38273914550090987
+          },
+          "RollingMean20": {
+            "bucket_accuracy": 0.5770348837209303,
+            "bucket_balanced_accuracy": 0.3778169662459809,
+            "log_mse": 0.750511100116244,
+            "mean_qlike": 0.3718214028865374,
+            "median_qlike": 0.14466062931961632,
+            "model": "RollingMean20",
+            "spearman": 0.26307040535873755
+          }
+        },
+        "n_oos": 688,
+        "strict_cnn_win_vs_har": false
+      },
+      {
+        "asset": "QQQ",
+        "best_mean_qlike_model": "GARCH11",
+        "dm_cnn_minus_har": {
+          "holm_p": 0.05667164481127185,
+          "p": 0.009088606698496537,
+          "t": 2.616132565282022
+        },
+        "dm_cnn_minus_numeric_logit": {
+          "p": 0.0008459601695525176,
+          "t": 3.35210152451749
+        },
+        "metrics": {
+          "CNNImage": {
+            "bucket_accuracy": 0.32703488372093026,
+            "bucket_balanced_accuracy": 0.3333333333333333,
+            "log_mse": 1.063462714823631,
+            "mean_qlike": 0.7336842077817227,
+            "median_qlike": 0.21674340321209196,
+            "model": "CNNImage",
+            "spearman": 0.16563062903055353
+          },
+          "GARCH11": {
+            "bucket_accuracy": 0.6031976744186046,
+            "bucket_balanced_accuracy": 0.47494776828110163,
+            "log_mse": 0.7459128975157251,
+            "mean_qlike": 0.35084945401438045,
+            "median_qlike": 0.12227037115300154,
+            "model": "GARCH11",
+            "spearman": 0.5851604660153763
+          },
+          "HAR_Ridge": {
+            "bucket_accuracy": 0.626453488372093,
+            "bucket_balanced_accuracy": 0.5581539139872472,
+            "log_mse": 0.639218095302661,
+            "mean_qlike": 0.37875971381974377,
+            "median_qlike": 0.1227231371289006,
+            "model": "HAR_Ridge",
+            "spearman": 0.6408840086413564
+          },
+          "NumericLogit": {
+            "bucket_accuracy": 0.5959302325581395,
+            "bucket_balanced_accuracy": 0.4606267806267806,
+            "log_mse": 0.7300211596773344,
+            "mean_qlike": 0.3988266770458595,
+            "median_qlike": 0.12890391260720524,
+            "model": "NumericLogit",
+            "spearman": 0.6443520552405357
+          },
+          "RollingMean20": {
+            "bucket_accuracy": 0.5813953488372093,
+            "bucket_balanced_accuracy": 0.4883689458689459,
+            "log_mse": 0.8152175164097959,
+            "mean_qlike": 0.3851536512683693,
+            "median_qlike": 0.1329380402862086,
+            "model": "RollingMean20",
+            "spearman": 0.5607574555429566
+          }
+        },
+        "n_oos": 688,
+        "strict_cnn_win_vs_har": false
+      },
+      {
+        "asset": "SLV",
+        "best_mean_qlike_model": "GARCH11",
+        "dm_cnn_minus_har": {
+          "holm_p": 0.21505304964856542,
+          "p": 0.053763262412141355,
+          "t": 1.9321778787642
+        },
+        "dm_cnn_minus_numeric_logit": {
+          "p": 0.01990806152342839,
+          "t": 2.3337249929095387
+        },
+        "metrics": {
+          "CNNImage": {
+            "bucket_accuracy": 0.15813253012048192,
+            "bucket_balanced_accuracy": 0.3333333333333333,
+            "log_mse": 1.7212201428083658,
+            "mean_qlike": 2.7137259258952526,
+            "median_qlike": 0.4990285542410293,
+            "model": "CNNImage",
+            "spearman": -0.06552740407416076
+          },
+          "GARCH11": {
+            "bucket_accuracy": 0.8102409638554217,
+            "bucket_balanced_accuracy": 0.3333333333333333,
+            "log_mse": 0.7714623019509184,
+            "mean_qlike": 0.35457407996045465,
+            "median_qlike": 0.13605458130153036,
+            "model": "GARCH11",
+            "spearman": 0.3654914968279883
+          },
+          "HAR_Ridge": {
+            "bucket_accuracy": 0.7093373493975904,
+            "bucket_balanced_accuracy": 0.3327019531480498,
+            "log_mse": 0.8198049111857598,
+            "mean_qlike": 0.5805314968876095,
+            "median_qlike": 0.17726669463665368,
+            "model": "HAR_Ridge",
+            "spearman": 0.321326567796037
+          },
+          "NumericLogit": {
+            "bucket_accuracy": 0.7846385542168675,
+            "bucket_balanced_accuracy": 0.3253555201510592,
+            "log_mse": 1.0673468517886533,
+            "mean_qlike": 1.2332780381754944,
+            "median_qlike": 0.21328867838487642,
+            "model": "NumericLogit",
+            "spearman": 0.32635284444005397
+          },
+          "RollingMean20": {
+            "bucket_accuracy": 0.7906626506024096,
+            "bucket_balanced_accuracy": 0.32783383489703194,
+            "log_mse": 0.8041912027433111,
+            "mean_qlike": 0.37245111726298774,
+            "median_qlike": 0.15180014379173956,
+            "model": "RollingMean20",
+            "spearman": 0.3696137798566087
+          }
+        },
+        "n_oos": 664,
+        "strict_cnn_win_vs_har": false
+      },
+      {
+        "asset": "SPY",
+        "best_mean_qlike_model": "NumericLogit",
+        "dm_cnn_minus_har": {
+          "holm_p": 0.05667164481127185,
+          "p": 0.009028635694089182,
+          "t": 2.6184151738900137
+        },
+        "dm_cnn_minus_numeric_logit": {
+          "p": 8.207332373766363e-05,
+          "t": 3.9620517118535843
+        },
+        "metrics": {
+          "CNNImage": {
+            "bucket_accuracy": 0.373546511627907,
+            "bucket_balanced_accuracy": 0.3333333333333333,
+            "log_mse": 1.41743131171228,
+            "mean_qlike": 0.5848137807771706,
+            "median_qlike": 0.2553359472028506,
+            "model": "CNNImage",
+            "spearman": 0.2463494071780093
+          },
+          "GARCH11": {
+            "bucket_accuracy": 0.48546511627906974,
+            "bucket_balanced_accuracy": 0.49071671762090047,
+            "log_mse": 0.8722928669258723,
+            "mean_qlike": 0.40752781737476323,
+            "median_qlike": 0.1553860293741225,
+            "model": "GARCH11",
+            "spearman": 0.5346306103116433
+          },
+          "HAR_Ridge": {
+            "bucket_accuracy": 0.6177325581395349,
+            "bucket_balanced_accuracy": 0.6092063009542338,
+            "log_mse": 0.6966015442350272,
+            "mean_qlike": 0.40890449613391483,
+            "median_qlike": 0.11268656381612518,
+            "model": "HAR_Ridge",
+            "spearman": 0.6151587724698777
+          },
+          "NumericLogit": {
+            "bucket_accuracy": 0.46656976744186046,
+            "bucket_balanced_accuracy": 0.49003155688345373,
+            "log_mse": 0.853085372630447,
+            "mean_qlike": 0.3775928253607786,
+            "median_qlike": 0.1361864329039595,
+            "model": "NumericLogit",
+            "spearman": 0.621933949367264
+          },
+          "RollingMean20": {
+            "bucket_accuracy": 0.5232558139534884,
+            "bucket_balanced_accuracy": 0.5289112296183064,
+            "log_mse": 0.9333566470159722,
+            "mean_qlike": 0.4828847739343924,
+            "median_qlike": 0.14909220575616433,
+            "model": "RollingMean20",
+            "spearman": 0.504296468920787
+          }
+        },
+        "n_oos": 688,
+        "strict_cnn_win_vs_har": false
+      },
+      {
+        "asset": "TLT",
+        "best_mean_qlike_model": "NumericLogit",
+        "dm_cnn_minus_har": {
+          "holm_p": 1.0,
+          "p": 0.437199067606993,
+          "t": 0.7773853343320581
+        },
+        "dm_cnn_minus_numeric_logit": {
+          "p": 0.0003292828471921361,
+          "t": 3.609344073053318
+        },
+        "metrics": {
+          "CNNImage": {
+            "bucket_accuracy": 0.42151162790697677,
+            "bucket_balanced_accuracy": 0.3333333333333333,
+            "log_mse": 0.9677371850003964,
+            "mean_qlike": 0.3512941512207331,
+            "median_qlike": 0.2042496770928689,
+            "model": "CNNImage",
+            "spearman": 0.021376995461622326
+          },
+          "GARCH11": {
+            "bucket_accuracy": 0.5261627906976745,
+            "bucket_balanced_accuracy": 0.5041837712096333,
+            "log_mse": 0.5626930757635245,
+            "mean_qlike": 0.2579397268840738,
+            "median_qlike": 0.11395135360787689,
+            "model": "GARCH11",
+            "spearman": 0.5378588853581715
+          },
+          "HAR_Ridge": {
+            "bucket_accuracy": 0.5406976744186046,
+            "bucket_balanced_accuracy": 0.5096777504105091,
+            "log_mse": 0.534026215848244,
+            "mean_qlike": 0.3199187173470885,
+            "median_qlike": 0.11526817935484701,
+            "model": "HAR_Ridge",
+            "spearman": 0.5375696634561032
+          },
+          "NumericLogit": {
+            "bucket_accuracy": 0.49273255813953487,
+            "bucket_balanced_accuracy": 0.47166803503010407,
+            "log_mse": 0.5998237170233962,
+            "mean_qlike": 0.25686247613731616,
+            "median_qlike": 0.143454659323626,
+            "model": "NumericLogit",
+            "spearman": 0.5358931049999683
+          },
+          "RollingMean20": {
+            "bucket_accuracy": 0.4941860465116279,
+            "bucket_balanced_accuracy": 0.4931376573617953,
+            "log_mse": 0.606526979082616,
+            "mean_qlike": 0.29752954924990377,
+            "median_qlike": 0.14131476998369275,
+            "model": "RollingMean20",
+            "spearman": 0.5157409821650055
+          }
+        },
+        "n_oos": 688,
+        "strict_cnn_win_vs_har": false
+      }
+    ],
+    "panel": {
+      "best_mean_qlike_model": "GARCH11",
+      "common_target_dates": 688,
+      "dm_cnn_minus_har": {
+        "p": 0.013210689835875478,
+        "t": 2.4844935351183075
+      },
+      "dm_cnn_minus_numeric_logit": {
+        "p": 0.0002926073465037149,
+        "t": 3.6404503093637204
+      },
+      "metrics": {
+        "CNNImage": {
+          "bucket_accuracy": 0.3484974958263773,
+          "bucket_balanced_accuracy": 0.3333333333333333,
+          "log_mse": 1.1356497725880164,
+          "mean_qlike": 0.8520585626274,
+          "median_qlike": 0.23231759836158317,
+          "model": "CNNImage",
+          "spearman": 0.05515354818639286
+        },
+        "GARCH11": {
+          "bucket_accuracy": 0.5640651085141903,
+          "bucket_balanced_accuracy": 0.49517319169013335,
+          "log_mse": 0.7633931147774212,
+          "mean_qlike": 0.35125963751421346,
+          "median_qlike": 0.13752944917127108,
+          "model": "GARCH11",
+          "spearman": 0.6054891761386674
+        },
+        "HAR_Ridge": {
+          "bucket_accuracy": 0.5751252086811353,
+          "bucket_balanced_accuracy": 0.5518489762805904,
+          "log_mse": 0.6784359350954601,
+          "mean_qlike": 0.4360141645068406,
+          "median_qlike": 0.1356967910793051,
+          "model": "HAR_Ridge",
+          "spearman": 0.6295465141355701
+        },
+        "NumericLogit": {
+          "bucket_accuracy": 0.5632303839732888,
+          "bucket_balanced_accuracy": 0.48452756406255776,
+          "log_mse": 0.767172898448345,
+          "mean_qlike": 0.48327790106319335,
+          "median_qlike": 0.14820466417933276,
+          "model": "NumericLogit",
+          "spearman": 0.6292487829579135
+        },
+        "RollingMean20": {
+          "bucket_accuracy": 0.5628130217028381,
+          "bucket_balanced_accuracy": 0.5127382896015765,
+          "log_mse": 0.8078774582629515,
+          "mean_qlike": 0.39825522613787206,
+          "median_qlike": 0.15118980471760368,
+          "model": "RollingMean20",
+          "spearman": 0.5845376043496133
+        }
+      }
+    }
+  },
+  "title": "Image-rendered candlestick CNN vs numeric volatility baselines",
+  "verdict": "NULL_VS_NUMERIC_BASELINES"
+}

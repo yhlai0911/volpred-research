@@ -47275,7 +47275,7 @@
     "title": "研究 backlog fallback: Image-rendered candlestick + CNN 視覺分類預測 vol vs 傳統數值估計量",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: Image-rendered candlestick + CNN 視覺分類預測 vol vs 傳統數值估計量 — 用 yfinance OHLCV 生成合成 K 線圖（mplfinance render），訓練輕量 CNN 做視覺 pattern classification 預測次日/次週 RV bucket，對比 HAR/GARCH 數值 baseline 的 QLIKE/rank accuracy；與 line 1291（JFEC 2026 Bollerslev candlestick 數值公式估計量）正交——那是解析公式，這裡是 pixel-level 電腦視覺，資料表徵完全不同（來源 | 來源 section: 期刊主題挖掘 batch 2026-07-03b（journal_discovery_20260703_2；websearch jbf/jfe/rfs/joe/jfqa/jfm + jpm/faj/j.alt inv/j.fixed income/j.futures markets + qje/aer/jpe/aej + jfec/jbes/jae 2025-26 趨勢層級；selectivity gate 後 13→10 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -47284,7 +47284,33 @@
       "auto-research-fallback",
       "research-program-backlog"
     ],
-    "created_at": "2026-07-03T14:52:11+00:00"
+    "created_at": "2026-07-03T14:52:11+00:00",
+    "claimed_by": "codex-cli",
+    "claimed_at": "2026-07-03T23:30:20.475050+00:00",
+    "claim_session_id": "82c2d65ac2b9",
+    "status_history": [
+      {
+        "ts": "2026-07-03T23:30:20.475320+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T23:30:33.064163+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-cli"
+      },
+      {
+        "ts": "2026-07-03T23:41:40.446657+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-cli"
+      }
+    ],
+    "started_at": "2026-07-03T23:30:33.063296+00:00",
+    "completed_at": "2026-07-03T23:41:40.446376+00:00",
+    "result": "Completed rasterized candlestick-image CNN volatility experiment. Result: NULL_VS_NUMERIC_BASELINES; CNN panel QLIKE 0.8521 lost to HAR_Ridge 0.4360 and GARCH11 0.3513; panel DM CNN-HAR t=+2.4845, p=0.0132, strict wins=0/7. Added README, reproducible script, results JSON, OOS predictions, summary table, figures, and knowledge_candidate.json."
   },
   {
     "id": "research_dispatch",

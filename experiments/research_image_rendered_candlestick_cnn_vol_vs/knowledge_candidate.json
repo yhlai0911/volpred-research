@@ -1,0 +1,57 @@
+{
+  "candidate_id": "K_PENDING_research_image_rendered_candlestick_cnn_vol_vs",
+  "experiment_id": "research_image_rendered_candlestick_cnn_vol_vs",
+  "status": "candidate_needs_memory_writer_gate",
+  "finding_type": "null_result",
+  "title": "Rasterized candlestick CNN does not beat numeric HAR/GARCH volatility baselines",
+  "claim": "A lightweight CNN trained on 48x48 rendered 20-day OHLCV candlestick images failed to improve next-week realized variance forecasts versus numeric OHLC/HAR/GARCH baselines across SPY, QQQ, IWM, EEM, GLD, TLT, and SLV.",
+  "evidence": {
+    "verdict": "NULL_VS_NUMERIC_BASELINES",
+    "assets": ["SPY", "QQQ", "IWM", "EEM", "GLD", "TLT", "SLV"],
+    "train_samples": 7861,
+    "validation_samples": 1764,
+    "oos_samples": 4792,
+    "oos_start": "2021-01-01",
+    "oos_end": "2026-06-30",
+    "panel_best_mean_qlike_model": "GARCH11",
+    "panel_mean_qlike": {
+      "CNNImage": 0.8520585626274,
+      "NumericLogit": 0.48327790106319335,
+      "HAR_Ridge": 0.4360141645068406,
+      "RollingMean20": 0.39825522613787206,
+      "GARCH11": 0.35125963751421346
+    },
+    "panel_dm_cnn_minus_har_t": 2.4844935351183075,
+    "panel_dm_cnn_minus_har_p": 0.013210689835875478,
+    "strict_asset_wins_vs_har": 0,
+    "cnn_bucket_accuracy": 0.3484974958263773,
+    "cnn_balanced_bucket_accuracy": 0.3333333333333333
+  },
+  "method": {
+    "data_source": "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv",
+    "feature_window_days": 20,
+    "forecast_horizon_days": 5,
+    "image_size": 48,
+    "sample_stride": 2,
+    "guardrails": [
+      "feature date t uses only OHLCV information through t",
+      "target uses close-to-close realized variance over t+1 through t+5",
+      "fixed seed 42",
+      "support requires at least 4 strict asset wins, CNN as panel best model, and panel DM t < -3"
+    ]
+  },
+  "interpretation": "For this daily OHLCV volatility task, the raster image representation appears to discard scale and rank information that numeric OHLC/HAR/range features retain. The result is consistent with prior project evidence that simple ML/image encodings often fail to beat disciplined numeric volatility baselines.",
+  "limitations": [
+    "daily OHLCV pilot only",
+    "CNN uses coarse RV bucket classification",
+    "not a high-frequency image or order-book experiment",
+    "no trading or portfolio claim"
+  ],
+  "source_files": [
+    "experiments/research_image_rendered_candlestick_cnn_vol_vs/README.md",
+    "experiments/research_image_rendered_candlestick_cnn_vol_vs/research_image_rendered_candlestick_cnn_vol_vs.py",
+    "experiments/research_image_rendered_candlestick_cnn_vol_vs/research_image_rendered_candlestick_cnn_vol_vs_results.json",
+    "experiments/research_image_rendered_candlestick_cnn_vol_vs/data/summary_table.csv"
+  ],
+  "memory_write_note": "Do not manually edit storage/memory/knowledge.json from this candidate. Route through the project K-id writer and K1259 gate."
+}
