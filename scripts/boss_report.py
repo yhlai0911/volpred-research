@@ -22,6 +22,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+from volpred.ops.boss_facing import plainify_boss_text
+
 # Absolute uv path — host-cron processes get a minimal PATH (/usr/bin:/bin)
 # without Homebrew, so bare "uv" subprocess calls fail with FileNotFoundError
 # (2026-05-22: 16:10 boss_report Overall ERROR — dashboard + cron_review both
@@ -287,7 +289,12 @@ def build_html():
     parts.append("<table><tr><th>區段</th><th>狀態</th><th>說明</th><th>建議行動</th></tr>")
     for s in dash.get("sections", []):
         st = s.get("status", "?")
-        parts.append(f"<tr><td>{_esc(s.get('section'))}</td><td class='{st}'>{_esc(st)}</td><td>{_esc(s.get('tldr'))}</td><td class='small'>{_esc(s.get('next') or '—')}</td></tr>")
+        parts.append(
+            f"<tr><td>{_esc(plainify_boss_text(s.get('section')))}</td>"
+            f"<td class='{st}'>{_esc(st)}</td>"
+            f"<td>{_esc(plainify_boss_text(s.get('tldr')))}</td>"
+            f"<td class='small'>{_esc(plainify_boss_text(s.get('next') or '—'))}</td></tr>"
+        )
     parts.append("</table>")
 
     # 1b. Cron run outcomes — did the autonomous schedulers actually run?
@@ -314,7 +321,7 @@ def build_html():
     parts.append(f"<p>Pending tasks: <strong>{pending['total']}</strong></p>")
     parts.append("<p>By type: ")
     for t, n in sorted(pending["by_type"].items(), key=lambda x: -x[1])[:6]:
-        parts.append(f"<span class='pill'>{_esc(t)} · {n}</span>")
+        parts.append(f"<span class='pill'>{_esc(plainify_boss_text(t))} · {n}</span>")
     parts.append("</p>")
     parts.append("<h3>論文組合</h3>")
     parts.append("<table><tr><th>Paper</th><th>Status</th></tr>")
@@ -331,18 +338,18 @@ def build_html():
                           "infra": "#0891b2", "fb_incident": "#b91c1c", "paper": "#ca8a04",
                           "research": "#0a8a3a"}.get(cat, "#6b7280")
             parts.append(f"<div style='border-left:3px solid {pill_color};padding:6px 12px;margin:8px 0;background:#fafbfc'>")
-            parts.append(f"<div><span class='pill' style='background:{pill_color};color:white'>{_esc(cat)}</span> <strong>{_esc(d.get('summary', ''))}</strong> <span class='small'>{_esc(_iso_to_tw(d.get('timestamp', '')))} 台灣時間</span></div>")
+            parts.append(f"<div><span class='pill' style='background:{pill_color};color:white'>{_esc(plainify_boss_text(cat))}</span> <strong>{_esc(plainify_boss_text(d.get('summary', '')))}</strong> <span class='small'>{_esc(_iso_to_tw(d.get('timestamp', '')))} 台灣時間</span></div>")
             for label, key in [("意圖", "intent"), ("推理", "reasoning"), ("執行成果", "outcome"), ("下一步", "next")]:
                 v = d.get(key)
                 if v:
-                    parts.append(f"<div class='small' style='margin-top:4px'><strong>{label}</strong>：{_esc(v)}</div>")
+                    parts.append(f"<div class='small' style='margin-top:4px'><strong>{label}</strong>：{_esc(plainify_boss_text(v))}</div>")
             parts.append("</div>")
 
     # 5. Next actions
     if next_actions:
         parts.append("<h2>⑤ 下個 cycle 行動（無需你決策）</h2><ul>")
         for a in next_actions:
-            parts.append(f"<li>{_esc(a)}</li>")
+            parts.append(f"<li>{_esc(plainify_boss_text(a))}</li>")
         parts.append("</ul>")
 
     # 6. Direction recommendations (read from a markdown file I curate)
@@ -380,14 +387,17 @@ def build_html():
         for warning in _REPORT_WARNINGS:
             plain_lines.append(f"  {warning}")
     for s in dash.get("sections", []):
-        plain_lines.append(f"  [{s.get('status', '?')}] {s.get('section')}: {s.get('tldr')}")
+        plain_lines.append(
+            f"  [{s.get('status', '?')}] "
+            f"{plainify_boss_text(s.get('section'))}: {plainify_boss_text(s.get('tldr'))}"
+        )
     plain_lines.append(f"\n== {len(commits)} commits in window ==")
     for c in commits[:10]:
         plain_lines.append(f"  {c['sha']} {c['subject']}")
     plain_lines.append(f"\n== Pending: {pending['total']} ==")
     plain_lines.append(f"\n== Next actions ==")
     for a in next_actions[:5]:
-        plain_lines.append(f"  {a}")
+        plain_lines.append(f"  {plainify_boss_text(a)}")
     plain = "\n".join(plain_lines)
 
     return title, "".join(parts), plain

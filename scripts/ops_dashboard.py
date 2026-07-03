@@ -23,6 +23,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from volpred.ops.alerts import build_alert_condition_report
+from volpred.ops.boss_facing import plainify_boss_text
 
 FB_POST_TERMINAL_STATUSES = {"success", "wont_fix", "fb_silent_reject", "expired_skip"}
 FB_POST_HANDOFF_STATUSES = {"awaiting_interactive_session"}
@@ -502,7 +503,7 @@ def main():
         recent_breach.append({
             "ts": now_iso[11:16],
             "level": item.get("level", "info"),
-            "subject": str(item.get("title") or "")[:80],
+            "subject": plainify_boss_text(item.get("title") or "")[:80],
         })
     out.append(section(
         "health_alerts_unhandled",

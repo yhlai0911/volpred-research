@@ -14,6 +14,7 @@ from volpred.ops.alerts import (
     check_alert_conditions,
     send_alert,
 )
+from volpred.ops.boss_facing import boss_facing_alert, plainify_boss_text
 
 
 def _write_text(path: Path, content: str) -> None:
@@ -102,8 +103,11 @@ def test_parse_content_quality_breaches_on_lazypack_gap(tmp_path: Path):
 
     assert result["breached"] is True
     assert result["level"] == "warn"
-    assert "content_completeness:lazypack_gap" in result["title"]
+    assert "懶人包覆蓋不足" in result["title"]
+    assert "content_completeness:lazypack_gap" not in result["title"]
     assert "m2, m3" in result["body"]
+    assert "content_completeness:lazypack_gap" not in result["body"]
+    assert "content_completeness" in result["details"]
 
 
 def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypatch):
@@ -199,13 +203,51 @@ def test_send_alert_telegram_mirror_formats_markdown_without_mutating_email_body
     tg_text = str(telegram_calls[0]["text"])
     assert telegram_calls[0]["disable_notification"] is True
     assert tg_text.startswith("ℹ️ [INFO] tg mirror format")
-    assert "📌 Hourly-22 send-alert smoke" in tg_text
+    assert "📌 白話結論" in tg_text
+    assert "系統偵測到需要處理的營運風險" in tg_text
+    assert "📌 Hourly-22 發送警報 smoke" in tg_text
     assert "🚦 觸發條件" in tg_text
     assert "• queue mirror check" in tg_text
     assert "• 項目: 結果" in tg_text
     assert "• emoji: ok" in tg_text
     assert "## " not in tg_text
     assert "|---" not in tg_text
+
+
+def test_boss_facing_alert_plainifies_jargon_and_keeps_commands():
+    title = "內容品質巡檢觸發（publish_rhythm:drought / content_completeness:lazypack_gap）"
+    body = "\n".join(
+        [
+            "## 觸發條件",
+            "- `publish_rhythm=drought` → `daily_digest_uniqueness=duplicate`",
+            "1. `content_completeness:lazypack_gap` → 補圖",
+            "   uv run volpred ops release-pool-by-settings",
+        ]
+    )
+
+    plain_title, plain_body = boss_facing_alert(title, body)
+
+    assert "發文間隔過久" in plain_title
+    assert "懶人包覆蓋不足" in plain_title
+    assert "publish_rhythm:drought" not in plain_title
+    assert "## 白話結論" in plain_body
+    assert "發文間隔過久" in plain_body
+    assert "同一天出現超過一篇每日精選導讀" in plain_body
+    assert "content_completeness:lazypack_gap" not in plain_body
+    assert "uv run volpred ops release-pool-by-settings" in plain_body
+
+
+def test_plainify_boss_text_replaces_known_terms_without_touching_paths():
+    text = (
+        "cluster-pressure and arc-dup hit content_quality, "
+        "see `storage/ops/content_quality_report.json`"
+    )
+
+    out = plainify_boss_text(text)
+
+    assert "主題集中壓力" in out
+    assert "舊題材重複" in out
+    assert "`storage/ops/content_quality_report.json`" in out
 
 
 def test_format_telegram_alert_text_truncates_to_telegram_limit():

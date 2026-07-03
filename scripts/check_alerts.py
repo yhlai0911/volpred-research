@@ -289,6 +289,7 @@ def main() -> int:
     import os
 
     from volpred.ops import check_alert_conditions  # noqa: WPS433 (deferred for sys.path)
+    from volpred.ops.boss_facing import plainify_boss_text  # noqa: WPS433
 
     # 2026-06-29: this is the canonical hourly alert path — opt into the
     # content-quality frontend render probe here (network call). content_quality_
@@ -373,18 +374,18 @@ def main() -> int:
     for condition in report.get("conditions", []):
         flag = "BREACH" if condition.get("breached") else "ok"
         print(
-            f"- [{flag}] {condition.get('id')} "
-            f"level={condition.get('level')} title={condition.get('title')}"
+            f"- [{flag}] {plainify_boss_text(condition.get('id'))} "
+            f"level={condition.get('level')} title={plainify_boss_text(condition.get('title'))}"
         )
         if condition.get("breached") and condition.get("body"):
-            for line in str(condition["body"]).splitlines():
+            for line in plainify_boss_text(condition["body"]).splitlines():
                 print(f"    {line}")
     if report.get("alerts"):
         print("dispatched:")
         for entry in report["alerts"]:
             status = "sent" if entry.get("sent") else ("skipped" if entry.get("skipped") else "failed")
             print(
-                f"  - {status}: level={entry.get('level')} title={entry.get('title')} "
+                f"  - {status}: level={entry.get('level')} title={plainify_boss_text(entry.get('title'))} "
                 f"notif_id={entry.get('notification_id')} reason={entry.get('skip_reason') or entry.get('send_error') or 'ok'}"
             )
     # Print compact JSON tail for log scrapers.

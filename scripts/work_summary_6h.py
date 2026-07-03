@@ -30,6 +30,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+from volpred.ops.boss_facing import plainify_boss_text
+
 STORAGE = PROJECT_ROOT / "storage"
 TW = timezone(timedelta(hours=8))  # email 時間以台灣時間為準（用戶 2026-05-20）
 NOW = datetime.now(timezone.utc)
@@ -132,6 +134,7 @@ def _new_notifications() -> list[dict]:
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             title = data.get("subject") or data.get("title") or data.get("message", "")[:80]
+            title = plainify_boss_text(title)
             level = data.get("level") or data.get("metadata", {}).get("alert_level", "")
         except Exception:
             title = f.name
@@ -600,7 +603,7 @@ def build_html() -> tuple[str, str, str]:
         for w in work[-15:]:
             ttype = w.get("task_type", "?")
             result = w.get("result") or w.get("outcome") or w.get("status", "?")
-            title_w = (w.get("title") or w.get("task") or w.get("description", ""))[:120]
+            title_w = plainify_boss_text(w.get("title") or w.get("task") or w.get("description", ""))[:120]
             parts.append(f"<tr><td><code>{esc(ttype)}</code></td><td>{esc(result)}</td><td>{esc(title_w)}</td></tr>")
         parts.append("</tbody></table>")
     else:
@@ -621,7 +624,7 @@ def build_html() -> tuple[str, str, str]:
         for n in notifs[-12:]:
             lvl = n.get("level", "")
             lvl_class = "level-warn" if lvl == "warn" else ("level-critical" if lvl == "critical" else "")
-            parts.append(f"<tr><td>{esc(n['time'])}</td><td class='{lvl_class}'>{esc(lvl)}</td><td>{esc(n['title'])}</td></tr>")
+            parts.append(f"<tr><td>{esc(n['time'])}</td><td class='{lvl_class}'>{esc(lvl)}</td><td>{esc(plainify_boss_text(n['title']))}</td></tr>")
         parts.append("</tbody></table>")
 
     # Top files
@@ -684,7 +687,8 @@ def build_html() -> tuple[str, str, str]:
     text_lines.append("")
     text_lines.append(f"## Work log ({len(work)} entries)")
     for w in work[-10:]:
-        text_lines.append(f"- [{w.get('task_type','?')}/{w.get('result') or w.get('outcome') or w.get('status','?')}] {(w.get('title') or w.get('task') or '')[:60]}")
+        work_title = plainify_boss_text(w.get("title") or w.get("task") or w.get("description", ""))[:60]
+        text_lines.append(f"- [{w.get('task_type','?')}/{w.get('result') or w.get('outcome') or w.get('status','?')}] {work_title}")
     if worktrees:
         text_lines.append("")
         text_lines.append(f"## Active worktrees ({len(worktrees)}): {', '.join(worktrees)}")

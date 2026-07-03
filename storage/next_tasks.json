@@ -46054,7 +46054,7 @@
     "title": "研究 backlog fallback: 天然資源實質資產籃（農地 REIT LAND/FPI、林地 WY/RYN、水資源 ETF PHO/CGW/FIW）的通膨避險與氣候風險 vol 因子",
     "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 天然資源實質資產籃（農地 REIT LAND/FPI、林地 WY/RYN、水資源 ETF PHO/CGW/FIW）的通膨避險與氣候風險 vol 因子 — yfinance LAND/FPI/WY/RYN/PHO/CGW/FIW + CPI/PPI surprise、breakeven inflation、SPY，檢定 inflation-shock 與 drought/climate event window 下 RV、downside semivariance、與大盤相關性是否真正較低；與既有 listed-infrastructure（PAVE/IFRA/IGF/GRID）題正交，這裡是農 | 來源 section: 期刊主題挖掘 batch 2026-07-03（journal_discovery_20260702_3；websearch joe/jbes/jbf/jfm/jpm/faj/jcommmkt/qje/aer/jpe/aej-macro 2025-26 趨勢層級；硬約束避開 vt/vix/garch-har 賽馬/etf fragility/cre/nbfi/stablecoin/ai concentration/labor-shortage/deposit-flightiness/market-to-book/thematic-concentration/data-driven-vc/blockbuster 等 06-30~07-02 已飽和 cluster；selectivity gate 後 10→9 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
     "priority": 3,
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "auto_research_fallback",
@@ -46064,9 +46064,6 @@
       "research-program-backlog"
     ],
     "created_at": "2026-07-03T00:08:46+00:00",
-    "claimed_by": "hourly-15",
-    "claimed_at": "2026-07-03T07:12:00.365928+00:00",
-    "claim_session_id": "e54dc7fe3b32",
     "status_history": [
       {
         "ts": "2026-07-03T07:12:00.366217+00:00",
@@ -46079,9 +46076,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-15"
+      },
+      {
+        "ts": "2026-07-03T09:50:00.938354+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-15",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "started_at": "2026-07-03T07:13:07.040197+00:00"
+    "started_at": "2026-07-03T07:13:07.040197+00:00",
+    "last_released_at": "2026-07-03T09:50:00.938347+00:00",
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "daily_digest_20260703",
@@ -46608,7 +46614,7 @@
     "title": "白話化所有 boss-facing 描述（alert/send-alert/telegram/每日摘要）— 老闆看不懂術語堆疊",
     "description": "老闆 2026-07-03 Telegram msg 77 糾正：alert/email 描述堆滿 jargon（publish_rhythm:drought、content_completeness、daily_digest_uniqueness、arc-dup、cluster-pressure…）看不懂。修：check_alerts / send-alert / content_quality 巡檢 / 每日摘要的 description 模板加白話化層——結論用白話、非講不可的內部欄位名就地翻譯或替換、一句話影響+一句話行動。內部 log/knowledge/error_log 保留術語不變，只約束 boss-facing 面。先讀 memory feedback_plain_language_boss_facing。改 scripts/check_alerts*.py + src/volpred/ops alert/telegram 格式化處。",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "task_type": "platform_ops",
     "source": "telegram_remediation",
@@ -46616,7 +46622,33 @@
       "telegram-remediation",
       "boss-facing-plain-language"
     ],
-    "created_at": "2026-07-03T08:08:25+00:00"
+    "created_at": "2026-07-03T08:08:25+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-03T09:43:42.939193+00:00",
+    "claim_session_id": "f52c35cb2a1f",
+    "status_history": [
+      {
+        "ts": "2026-07-03T09:43:42.939496+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T09:43:43.161993+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-03T09:51:38.642238+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-03T09:43:43.161687+00:00",
+    "completed_at": "2026-07-03T09:51:38.641953+00:00",
+    "result": "新增 boss-facing 白話化層：alert email/Telegram 會先給白話結論、影響、行動；check_alerts/dashboard/4h boss report/6h summary 顯示層轉譯常見內部檢查名。內部 details 與原始 task/log 欄位保留，可追溯不受影響；focused tests 36 passed + py_compile passed。"
   },
   {
     "id": "email-12559-fd1b75",

@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 from volpred.config import load_runtime_schedules
 from volpred.publisher.email_notifier import EmailNotifier
 
+from .boss_facing import boss_facing_alert, plainify_boss_text
 from .common import dump_json, load_json, project_path
 from .content_quality import (
     DIGEST_TITLE_PREFIX,
@@ -214,7 +215,8 @@ def _trim_telegram_alert_text(text: str, max_chars: int = TELEGRAM_ALERT_MAX_CHA
 def _format_telegram_alert_text(
     *, level: str, title: str, body: str, max_chars: int = TELEGRAM_ALERT_MAX_CHARS
 ) -> str:
-    """Format the Telegram mirror only; email keeps the original markdown body."""
+    """Format the Telegram mirror from the same boss-facing alert text as email."""
+    title, body = boss_facing_alert(title, body)
     level_emoji = _TELEGRAM_LEVEL_EMOJI.get(level, "🔔")
     lines: list[str] = [f"{level_emoji} [{level.upper()}] {title.strip()}"]
 
@@ -281,13 +283,14 @@ def _dispatch_alert_email(
     storage_dir: str,
 ) -> dict[str, Any]:
     notifier = EmailNotifier(storage_dir=storage_dir)
-    subject = f"[VolPred Alert][{level.upper()}] {title}"
+    display_title, display_body = boss_facing_alert(title, body)
+    subject = f"[VolPred Alert][{level.upper()}] {display_title}"
     text_body = "\n".join(
         [
             f"Alert level: {level}",
-            f"Title: {title}",
+            f"Title: {display_title}",
             "",
-            body.strip(),
+            display_body.strip(),
         ]
     ).strip()
 
@@ -299,7 +302,7 @@ def _dispatch_alert_email(
             _try_markdown_to_html,
             highlight_email_keywords,
         )
-        inner_html = _try_markdown_to_html(body.strip())
+        inner_html = _try_markdown_to_html(display_body.strip())
         # 2026-06-29 (email-12143): 對 body 套 keyword highlighter，
         # CRITICAL/WARN/INFO/PASS/FAIL/中文狀態詞/emoji 都會自動染色加粗
         inner_html = highlight_email_keywords(inner_html)
@@ -318,7 +321,7 @@ def _dispatch_alert_email(
             f'</div>'
         )
         subtitle = f"Alert level: {level}"
-        html_body = _email_shell(title, subtitle, body_html)
+        html_body = _email_shell(display_title, subtitle, body_html)
     except Exception as exc:
         # silent-ok: HTML 編排失敗 fallback 純文字（已有 text_body）
         # 但留 stderr trace，避免 invisible failure（no-silent-fallback rule）
@@ -334,7 +337,8 @@ def _dispatch_alert_email(
         metadata={
             "notification_type": "ops_alert",
             "alert_level": level,
-            "alert_title": title,
+            "alert_title": display_title,
+            "alert_title_raw": title,
             "recipient": recipient,
         },
         recipients=[recipient],
@@ -2020,15 +2024,16 @@ def _parse_content_quality_state(
         ]
     )
 
-    body = "\n".join(lines)
+    body = plainify_boss_text("\n".join(lines))
+    plain_subchecks = [plainify_boss_text(item) for item in breached_subchecks]
     return {
         "id": "content_quality",
         "breached": breached,
         "level": "critical" if critical_subchecks else ("warn" if breached else "info"),
         "title": (
-            "內容品質巡檢觸發（" + " / ".join(breached_subchecks) + "）"
+            "內容品質巡檢：" + " / ".join(plain_subchecks)
             if breached
-            else "content_quality ok"
+            else "內容品質巡檢正常"
         ),
         "body": body if breached else "",
         "details": snapshot,
