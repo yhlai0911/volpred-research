@@ -41,3 +41,15 @@ single-event evidence can support.
 - Replace causal wording such as "SHY 被壓到了" and unsupported reserve-bucket language with "SHY showed a significant event-window increase; this is consistent with, but does not identify, a duration channel."
 - If the article wants to retain forward-looking language about future depegs, add sensitivity/placebo evidence or explicitly label the inference as single-event and descriptive.
 
+## Resolution — fixes applied & live (2026-07-03, hourly-21)
+
+前輪只留下 review + required fixes，未套用。本輪主線程套用全部必修並上線（研究誠實 §6 回溯更正）：
+
+1. 標題/描述：「脫鉤那 5 天…波動率飆」→「脫鉤那幾天…日波動飆」。
+2. 事件窗正名：內文+表頭寫「事件窗 = 脫鉤日 ±5 交易日、共 11 天」，對照組 ±30 交易日（排除事件窗）。
+3. Metric 正名：H2「波動」= 每日絕對變動幅度(bps) 波動代理，與 H1 滾動月度 RV 明確區分。
+4. 移除事實錯誤前提「USDC 儲備集中 1-3 年期公債」（Circle 儲備以 <3mo bills+repo 為主），因果段改寫成「一個開放問題」（duration 機械效應 vs 儲備賣壓兩候選，明講後者證據不足）。
+5. 加單事件 caveat（n=1、無跨事件 CI/placebo、因果不可識別）。
+
+**流程**：feed.json(canonical) → `sync-all` → Supabase 上線。**線上驗證** `GET /rest/v1/articles?slug=eq.mile_c1ce6550` → title 已更新。anti-ai-gate PASS。README H2 摘要行同步軟化。
+

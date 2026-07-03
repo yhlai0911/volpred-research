@@ -132,5 +132,5 @@ uv run python K1586.py
 
 - **Verdict: NULL_PARTIAL**
 - **H1 (lead-lag)**: NULL — Granger F-test p > 0.29 across all 10 lag×target combos. HAC OLS \|t\| ≈ -4.1 是 marginal association（沒控 lagged RV），不可作 causal claim。
-- **H2 (USDC-SVB depeg)**: PASS for SHY only — Welch t=2.75, p_bonf_welch=0.038, p_bonf_boot=0.023, ratio=2.83x。BIL fully NULL (ratio 1.17, p_bonf > 0.5)。1-3yr T-bill 承受 depeg 壓力；1-3mo BIL 不受影響（duration mechanism consistent）。
+- **H2 (USDC-SVB depeg)**: descriptive PASS for SHY only — Welch t=2.75, p_bonf_welch=0.038, p_bonf_boot=0.023, ratio=2.83x（事件窗 = ED±5 交易日 / 11 obs；量測口徑為每日絕對變動幅度 bps，非 rolling RV）。BIL fully NULL (ratio 1.17, p_bonf > 0.5)。單一事件（n=1）觀察：SHY 日變動顯著放大、BIL 無顯著反應；成因（duration 敏感度 / 流動性 / 當期利率環境）不可識別，**不可**歸因於「USDC 儲備集中 1-3yr 段」——主流穩定幣儲備以 <3mo bills+repo 為主。
 - **H3 (GENIUS Act 2025-07-18)**: in-sample diagnostic — DGS1MO_RV event 升 (t=5.16, p<1e-5)，DGS3MO_RV event 降 (t=-10.24, p<1e-13)。方向相反 → 較像 coincident regime change，不純歸因法案；honest 報告為 descriptive 不作 causal。
