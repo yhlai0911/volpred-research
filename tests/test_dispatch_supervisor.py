@@ -490,6 +490,7 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     kills: list[int] = []
     reserve_calls: list[dict] = []
     attach_calls: list[dict] = []
+    fingerprint_calls: list[dict] = []
 
     monkeypatch.setattr(worker, "_spawn", lambda **kwargs: StuckProc())
     monkeypatch.setattr(worker.os, "getpgid", lambda pid: 456)
@@ -500,6 +501,9 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     )
     monkeypatch.setattr(
         worker.state, "attach_process", lambda **kwargs: attach_calls.append(kwargs),
+    )
+    monkeypatch.setattr(
+        worker.state, "update_started_wall", lambda **kwargs: fingerprint_calls.append(kwargs),
     )
 
     with caplog.at_level(logging.WARNING, logger=worker.__name__):
@@ -518,8 +522,14 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     assert duration >= 0
     assert kills == [456]
     assert reserve_calls, "reserve_fire must be called before spawn (§10 #5)"
+    # 2026-07-04 gate-blocking fix #2: attach_process() is called IMMEDIATELY
+    # after Popen with started_wall=None (fast — no `ps` subprocess call yet)
+    # to narrow the pid=None crash-recovery window; the fingerprint is filled
+    # in afterwards via a separate update_started_wall() call.
     assert attach_calls and attach_calls[0]["pid"] == 123
-    assert attach_calls[0]["started_wall"] == "Wed Jan  1 00:00:00 2026"
+    assert attach_calls[0]["started_wall"] is None
+    assert fingerprint_calls and fingerprint_calls[0]["pid"] == 123
+    assert fingerprint_calls[0]["started_wall"] == "Wed Jan  1 00:00:00 2026"
     assert "still alive after SIGKILL grace" in caplog.text
 
 

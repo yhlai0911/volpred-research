@@ -273,13 +273,39 @@ Review 抓到 7 個真 bug（**這就是它停 18 天的真因：本來就還沒
 
 **Regression tests**：`scripts/tests/test_dispatch_state.py`（`reserve_fire`/`attach_process`/`release_reservation`/`claim_and_clear_current_job`/`append_completion_entry` 全覆蓋）+ `tests/test_dispatch_supervisor.py`（新增 orphan-restart 3 tests + loop-crash-escalation 3 tests + kill_pgid PermissionError 1 test）+ 新檔 `tests/test_dispatch_supervisor_procutil.py`（8 tests）。**73/73 全數通過**。另外跑了兩個 REAL（非 mock）end-to-end smoke test：(1) 完整 reserve→spawn→attach→complete worker 生命週期用真實 Popen child；(2) 真實孤兒 process 的 identity-verified kill 路徑（kill 本身在這個特定 sandbox 被 signal 權限擋下 —— 另外用 `kill -TERM` 對照組證實這是**執行環境的 artifact**、不是程式碼缺陷；crash-avoidance fix 才是重點且已驗證）。
 
-**剩餘 must-fix：0 個。** Deliverable 5 完整關閉。
-
-**檔案改動**：
+**檔案改動（第一輪）**：
 - 新增 `scripts/dispatch_supervisor/procutil.py`
 - `scripts/dispatch_supervisor/{state,worker,health,scheduler,supervisor,alerts}.py`
 - `scripts/tests/test_dispatch_state.py`、`tests/test_dispatch_supervisor.py`、新增 `tests/test_dispatch_supervisor_procutil.py`
 
-**下一步**：提交 Codex review gate（§6，要求 ≥ CONDITIONAL_PASS）→ 通過後啟動 Deliverable 6 shadow run。
+commit `68d4a6d5c`。提交給 Codex review gate（§6）—— **結果：FAIL**（不是 rubber-stamp，抓到一個真的被複現的 race condition）。
 
-*Updated 2026-07-04 台灣時間 by interactive main thread — Deliverable 5 全部 7 個 must-fix 關閉；等待本次 Codex review verdict。*
+### Deliverable 5 第二輪 — Codex FAIL + 5 個 gate-blocking finding 全部修復（同日 2026-07-04）
+
+Codex review（`codex exec`，覆蓋 commit `68d4a6d5c` 全部 8 個檔案）verdict **FAIL**，5 個 finding：
+
+1. **fire-claim atomicity 其實沒修好（critical）**：`_locked_state()` 對「會被 `os.replace()` 換掉的 canonical 檔自己」做 flock，process B 若在 A `os.replace()` 前就 `open()` 到舊 inode，會在 A 釋放後才 flock 到舊 inode、讀到舊內容、回寫蓋掉 A 的更新 —— **Codex 自己寫了兩個重疊 `_locked_state()` writer 真的複現了**，第一個 writer 的 `current_job` 被蓋掉。這重開了 reserve_fire 想關掉的 double-dispatch 洞。
+2. **reserve_fire→attach_process 之間 crash 不可恢復**：supervisor 若在寫入 `pid=None` 佔位之後、`attach_process()` 之前被殺，`current_job` 永久卡 `pid=None`：scheduler 一直當 in-flight 跳過、restart-orphan 因 `pid is None` 直接 return 不清、health 也因 pid None 略過檢查 —— 永久卡死 + 若 Popen 其實成功過，那個 child 變成完全不受追蹤的孤兒。
+3. **restart-orphan cleanup 在清乾淨「之前」就先清空 state**：`claim_and_clear_current_job()` 在 kill/record 完成前就把 `current_job` popped 清空。若 supervisor 在 claim 之後、record 完成前又被殺，這個孤兒直接從 state 消失 —— 更糟的是若它本來就還活著沒被 kill，下一次 restart 因為 `current_job` 已是 None 而永遠不會再去找它。
+4. **fingerprint 缺失時 kill 決策方向反了**：`pid_identity_matches()` 在 `expected_start_wall` 缺失時回傳 `True`（degrade 成「假設是同一個 process」）。但 `attach_process` 若 `ps` fingerprint 失敗會傳 `started_wall=None` —— 導致新工作也會退化回舊的「pid 活著就當同一個 process」不安全行為，而這正是本次重構要修的 PID-reuse 風險本身。Kill 路徑該在證據缺失時預設「不要 kill」，不是「當作同一個 process 去 kill」。
+5. **PermissionError fix 只補了 `worker._kill_pgid()`，沒補 `health._force_kill_pgid()`**：health.py 有自己另一份近乎重複的 kill 實作，同樣的 signal-0 liveness probe PermissionError 沒被捕捉，會跳過 SIGKILL 卻仍把 job 標記為 killed/complete、清空 state —— 等於清了狀態但 worker 其實還活著。
+
+**修復內容**：
+
+- **Finding #1**：`state.py` 新增 `_lock_path()` — 一個**永不被 `os.replace()` 替換**的 sibling lockfile（`dispatch_state.json.lock`），`_locked_state()` / `read_state()` 改成先 flock 這個穩定檔案，再對 canonical JSON 做 open/read/replace。Regression: `test_lock_path_is_stable_sibling_never_the_replaced_file` + `test_no_lost_updates_under_concurrent_read_modify_write`（8 threads × 25 iters 讀-改-寫循環，驗證零遺失）。**另外用真實多進程（非同進程 thread）複測**：6 個獨立 OS process 各對同一 state file 做 50 次 read-modify-write，300 次遞增全部到位無遺失。
+- **Finding #2**：`worker.py` 把 `attach_process()` 拆成兩步 —— Popen 後立刻用 `started_wall=None` 呼叫（快，只是 syscall），fingerprint（慢，`ps` subprocess）算完後另外呼叫新的 `state.update_started_wall()` 補上，把「pid=None 視窗」縮到只剩 `Popen()` 呼叫本身。`supervisor._handle_restart_orphan()` 新增 `orphan.get("pid") is None` 分支：不再靜默 return，而是清掉卡死的 slot + 記 `reservation_abandoned_no_pid` completion + alert。
+- **Finding #3**：`state.py` 把 `claim_and_clear_current_job()` 整個換成兩階段 API —— `mark_restart_orphan_pending()`（**標記但不清空**，設 `restart_cleanup_pending=True`）+ `finalize_restart_orphan_cleanup()`（kill + `append_completion_entry()` 都完成後才是唯一清空 `current_job` 的地方）。這樣若 supervisor 在標記之後又被殺，下一次 restart 呼叫 `mark_restart_orphan_pending()` 會看到**同一個**孤兒並重試，不會遺失。Regression: `test_handle_restart_orphan_retries_after_partial_crash_mid_cleanup`。
+- **Finding #4**：`procutil.py` 把布林 `pid_identity_matches()` 換成四態 `check_identity()` —— `IDENTITY_MATCH` / `IDENTITY_MISMATCH` / `IDENTITY_DEAD` / `IDENTITY_UNVERIFIED`（fingerprint 缺失時的獨立狀態，不再 degrade 成 True）。`health.check_once()` 與 `supervisor._handle_restart_orphan()` 都新增 `IDENTITY_UNVERIFIED` 分支：**不 kill**，記 `timeout_unverified` / `orphan_unverified_not_killed`，清 slot 讓排程不卡死，但 alert 標明「未驗證，需人工確認」。
+- **Finding #5**：把 kill 實作統一搬進 `procutil.kill_pgid()`（含已修好的 PermissionError handling），`worker._kill_pgid()` 與 `health._force_kill_pgid()` 都改成薄 wrapper delegate 過去 —— 兩份重複實作合併成一份，未來再修一次就不會漏掉另一份。
+
+**Regression tests 新增**：`scripts/tests/test_dispatch_state.py`（lockfile 穩定性 + 併發壓力 + 兩階段 orphan API + `update_started_wall`，共 +14 tests）、`tests/test_dispatch_supervisor.py`（unverified 分支 × 2、pid=None restart 分支、partial-crash retry 分支，+6 tests）、`tests/test_dispatch_supervisor_procutil.py`（四態 `check_identity` + `kill_pgid` 共用實作，重寫 + 新增 6 tests）。**最終 88/88 通過**。額外用真實（非 mock）Popen 重跑兩個 smoke test 驗證新邏輯：(1) 完整 worker lifecycle（含新的 attach/fingerprint 兩段式）、(2) 真實孤兒 process 的 restart cleanup（這次 SIGTERM 確實把真實孤兒 process 殺掉，`poll()` 回傳 -15 確認）。
+
+**剩餘 must-fix：0 個。** Deliverable 5 完整關閉（含第二輪 gate-blocking 修復）。
+
+**檔案改動（第二輪）**：
+- `scripts/dispatch_supervisor/{state,worker,health,supervisor,procutil,alerts}.py`
+- `scripts/tests/test_dispatch_state.py`、`tests/test_dispatch_supervisor.py`、`tests/test_dispatch_supervisor_procutil.py`
+
+**下一步**：把第二輪修復再送一次 Codex review gate（§6，要求 ≥ CONDITIONAL_PASS）→ 通過後 commit + 啟動 Deliverable 6 shadow run。
+
+*Updated 2026-07-04 02:22 台灣時間 by interactive main thread — Codex 第一輪 review FAIL（5 個 gate-blocking finding，含一個真實複現的 race condition）；全部 5 項已修復並補測試（88/88 pass）+ 2 個真實 smoke test 重驗；等待第二輪 Codex review verdict。*
