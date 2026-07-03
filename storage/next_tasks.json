@@ -46231,5 +46231,61 @@
     "started_at": "2026-07-03T04:14:51.921144+00:00",
     "completed_at": "2026-07-03T04:28:30.450837+00:00",
     "result": "Published research-audience draft mile_7f181e3a (7429 chars) for K1611 GW(2006) conditional test. Direction verified honest: GJR-GARCH marginally+consistently beats HAR-RV in both VIX regimes, NOT significant (|HAC-DM t|<3), regime-slope test all insignificant → winner NOT regime-dependent. 2 real charts (HTTP 200). experiment_refs=[K1611] removes false arc-match. content-source audit gate passed after fixing sci-notation p-value phantom-mantissa + derived 139-sigma. Mirror sync HTTP 401 (known secondary-sync issue, Supabase primary OK)."
+  },
+  {
+    "id": "telegram-67",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-03T04:51:50.688147+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 67）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n你上網看看非農數據是不是已經出來了？你的日期是不是有錯誤？\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-03T04:52:43.857897+00:00",
+    "claim_session_id": "7b68f5c1a4cd",
+    "status_history": [
+      {
+        "ts": "2026-07-03T04:52:43.858209+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-03T04:54:41.160814+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-03T04:54:41.160514+00:00"
+  },
+  {
+    "id": "fix-nfp-date-mile_35eef830",
+    "task_type": "event_article",
+    "priority": "P1",
+    "source": "telegram-67-followup",
+    "status": "in_progress",
+    "created_at": "2026-07-03T04:54:19.750628+00:00",
+    "title": "修正已發佈 NFP 展望文 mile_35eef830 的日期錯誤（7/3→實際7/2公佈）",
+    "description": "已發佈文章 mile_35eef830『7/3 非農公布前...』把 6 月非農日期寫成 7/3（每月第一個週五通則），但因 7/4 獨立紀念日在週六、聯邦假期觀察挪到 7/3 週五，BLS 已提前一天於 2026-07-02(週四) 8:30ET 公佈：非農 +57,000、失業率 4.2%（弱）。整篇是事前展望框架已 stale。決策+執行：改寫為事後回顧（用實際 +5.7 萬/4.2% 數據 vs 原 base case），或加註更正並降級；同步 feed.json + reports/{id}.json + Supabase/Mirror。研究誠實原則：published 對外錯誤內容須即時更正。",
+    "claimed_by": "hourly-13",
+    "claimed_at": "2026-07-03T05:08:37.661483+00:00",
+    "claim_session_id": "3b2c36a9d1f6",
+    "status_history": [
+      {
+        "ts": "2026-07-03T05:08:37.661774+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-03T05:08:37.884104+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-13"
+      }
+    ],
+    "started_at": "2026-07-03T05:08:37.883816+00:00"
   }
 ]
