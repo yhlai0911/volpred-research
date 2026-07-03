@@ -35,6 +35,7 @@ paths:
 |---|---|
 | `draft_pool_low` | 派 agent 寫 daily_article draft 補池（依 publication-candidates skill 選題）|
 | `release_pool_gap > 2h` | `VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings` 手動釋出；同時查 cron 為何沒 fire |
+| `publishing_freshness`（發文脫班 dead-man switch） | **已全自動 wired**（2026-07-03 boss email-12559）：`scripts/check_alerts.py` 每小時在寄 alert email 前呼叫 `scripts/remediate_publish_drought.py --apply` → force-release（drought circuit-breaker 挑最不重複草稿）→ 若 released 0（池空 / 全 arc-dup 重寫）則 refill fresh 主題供下班 hourly dispatch 生成。**主線程/老闆都不需手動跑指令**；alert body 用「已自動修復」框架；只有連續 2 班 hourly dispatch 仍脫班才人工檢查 generator |
 | `host_cron_fail` | 查 `storage/logs/cron/<name>.log` error，修 script / 路徑 / FDA 權限 |
 | `Supabase sync fail` | 查 supabase_sync.py log，restart sync 或 manual reconcile |
 | `Agent task fail > 3` | 查 work_log outcome=failed pattern，派新 agent with better brief 或清 stale |
@@ -51,6 +52,16 @@ paths:
 - 看到 alert sent 就 stub skip（算力閒置 + alert 變 noise）
 - 只寄 email 不 action → 下次 alert 再寄 → 用戶 inbox 被 spam
 - dedup 24h 內不 re-send 不等於不處理；dedup 是防 email spam，action 仍要做
+
+### Alert body 框架：「已自動執行」不是「建議老闆行動」（2026-07-03 boss email-12559 硬性糾正）
+
+boss 原話：「你應該不是建議行動 而是你應該要直接行動吧？」凡是**有明確 auto-remediation
+路徑**的 alert（上表左欄），body 的行動段落**必須**寫成「## 系統已自動修復 / 已自動執行 +
+結果」，**不可**寫成對老闆下 imperative 指令的「## 建議行動」（`1. 跑 X 指令 2. 派 Y`）。
+老闆看到 alert = 知道系統做了什麼、是否需人工介入，而不是收到一張待辦清單。
+只有**真正需要老闆 policy 判斷**（投稿與否 / paid data 採購 / 研究 pivot）的 alert 才保留
+boss-facing 決策段，且須明標「## 需老闆決策」而非「建議行動」。此為 boss-facing 措辭原則，
+與 `feedback_plain_language_boss_facing`（白話化）並列。
 
 ## Body 三段結構（用戶 2026-04-19 要求）
 

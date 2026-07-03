@@ -46566,7 +46566,7 @@
     "title": "結構性修：release-drought(arc-dup starvation) 觸發時自動 refresh fresh-content 供給（不再發生 發文脫班）",
     "description": "根因（telegram-75 診斷）：release cadence 4h 消耗 draft 快於 fresh 非-arc-dup 內容生成；當 K-article arc 飽和 + event 超 horizon + trending daily-gated + member_qa 空 → 全 dry → anti-rehash 正確 withhold → dead-man switch 觸發但無機制自動補 fresh 素材。drought WARN 已『signalling for fresh content』但無 consumer。修法：把 release-pool-by-settings 的 release_drought 訊號 wire 到自動 (a) 強制 trending force-scan(放寬 daily gate)、(b) event horizon 動態放寬、(c) 缺料時 auto-append market-snapshot daily_article，使池永不 dry。落地後 regression：模擬全 arc-dup 池 + drought，驗證自動生出 ≥1 fresh 可發佈任務。改 scripts/refill_reader_facing_pool.py + release 流程；先讀 docs/error_log.md + memory feedback_recycling_is_release_layer_not_research。",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "task_type": "platform_ops",
     "source": "telegram_remediation",
@@ -46575,7 +46575,33 @@
       "3-strike-watch",
       "publish-drought-fix"
     ],
-    "created_at": "2026-07-03T08:06:14+00:00"
+    "created_at": "2026-07-03T08:06:14+00:00",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-03T09:20:16.476847+00:00",
+    "claim_session_id": "0912538da92f",
+    "status_history": [
+      {
+        "ts": "2026-07-03T09:20:16.477167+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-03T09:20:16.701210+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-03T09:20:16.924611+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "interactive-claude"
+      }
+    ],
+    "started_at": "2026-07-03T09:20:16.700909+00:00",
+    "completed_at": "2026-07-03T09:20:16.924330+00:00",
+    "result": "wire: check_alerts hourly fire 在送 publishing_freshness alert 前呼叫 scripts/remediate_publish_drought.py --apply (force-release drought circuit-breaker → released 0 則 refill fresh 主題供下班 hourly dispatch)。alert body 改「已自動修復」框架。tests/test_remediate_publish_drought.py 4 綠。觸發 email-12559 boss 糾正"
   },
   {
     "id": "platform_ops_plainify_alert_descriptions",
@@ -46598,7 +46624,7 @@
     "description": "Gmail UID: 12559\nMessage-ID: <DC330392-1D23-4C73-B732-87CD079CBDD7@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 3 Jul 2026 16:16:31 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 release 節奏門檻）\n\n--- 用戶回信內容 ---\n你應該不是建議行動 而是你應該要直接行動吧？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月3日 16:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 發文脫班（無新文超過 release 節奏門檻）\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> 作用窗（台北 9:00–23:00）內，feed 最新已發佈文章距今 > 6.0h（= release interval 4.0h + 2.0h grace）。\r\n> newest_published_at: 2026-07-03T01:35:38.412728+00:00\r\n> publish_gap_hours: 6.41\r\n> threshold_hours: 6.0\r\n> feed_path: storage/reports/feed.json\r\n> 影響\r\n> \r\n> 這是『發文脫班』的 outcome-level dead-man switch：不論成因（dispatch generator 死、\r\n> auth 失效、release cluster-filter 擋住、draft 池空），只要『實際沒發文』就觸發。\r\n> 直接打 Mission 第 1 條（內容）＋第 5 條（流量）。2026-06-22 整日脫班即此盲區。\r\n> 建議行動（主線程 auto-remediation）\r\n> \r\n> 查 generator 是否活著：tail -5 storage/logs/cron/hourly_dispatch.log\r\n> （看是否秒退 / auth-preflight fail；確認 ~/.local/bin/claude 存在可執行）\r\n> 立即釋出（draft 池有 fresh-theme 時）：\r\n> VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\r\n> 若 release 因 cluster-pressure 擋住（released 0）：定向釋出 fresh-theme 草稿，\r\n> 或派 daily_article 補非飽和主題（publication-candidates skill）。\n",
     "task_type": "email_reply",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "tags": [
       "email_reply",
       "user_input"
@@ -46608,6 +46634,24 @@
     "email_uid": 12559,
     "email_message_id": "<DC330392-1D23-4C73-B732-87CD079CBDD7@gmail.com>",
     "email_subject": "Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 release 節奏門檻）",
-    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "claimed_by": "interactive-claude",
+    "claimed_at": "2026-07-03T09:07:55.877248+00:00",
+    "claim_session_id": "11f3618ab5a3",
+    "status_history": [
+      {
+        "ts": "2026-07-03T09:07:55.877541+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "interactive-claude"
+      },
+      {
+        "ts": "2026-07-03T09:08:00.323433+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "interactive-claude"
+      }
+    ],
+    "started_at": "2026-07-03T09:08:00.323174+00:00"
   }
 ]

@@ -162,6 +162,50 @@ def _auto_trigger_release_pool_if_due() -> dict:
         return {"triggered": True, "ok": False, "error": str(exc)}
 
 
+def _auto_remediate_publish_drought() -> dict:
+    """2026-07-03 boss email-12559: the 發文脫班 (publishing_freshness) dead-man
+    switch must DIRECTLY REMEDIATE, not email the boss a to-do list.
+
+    Delegates to the single-owner ladder `scripts/remediate_publish_drought.py`
+    (force-release drought circuit-breaker → refill fresh topics for next hourly
+    dispatch). Runs as a bounded subprocess so any Supabase/Mirror sync hang in
+    the release path can't stall the hourly alert fire. Non-fatal: failures are
+    captured and logged, never raised.
+    """
+    from datetime import datetime, timezone
+    import subprocess
+
+    script = PROJECT_ROOT / "scripts" / "remediate_publish_drought.py"
+    try:
+        start = datetime.now(timezone.utc)
+        proc = subprocess.run(
+            ["/opt/homebrew/bin/uv", "run", "python", str(script), "--apply", "--json"],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=240,
+        )
+        # The ladder prints a single clean JSON line on stdout (--json). Parse
+        # the last JSON object; ignore any stray warn lines on stderr.
+        summary: dict = {}
+        for line in reversed((proc.stdout or "").splitlines()):
+            line = line.strip()
+            if line.startswith("{"):
+                try:
+                    summary = json.loads(line)
+                    break
+                except json.JSONDecodeError:
+                    continue
+        summary["returncode"] = proc.returncode
+        summary["ran_at"] = start.isoformat()
+        if not summary.get("attempted"):
+            return summary or {"attempted": False, "reason": "no_json_output",
+                               "stderr_tail": (proc.stderr or "")[-200:]}
+        return summary
+    except Exception as exc:  # noqa: BLE001
+        return {"attempted": False, "error": str(exc)}
+
+
 def _check_piggy_back_drift(due_summary: dict) -> dict:
     """Detect piggy-back scheduler health drift (B3.7 / finding #18).
 
@@ -272,6 +316,13 @@ def main() -> int:
     # cron :03 boundaries and .release_settings.json last_released_at.
     release_trigger = _auto_trigger_release_pool_if_due()
 
+    # 2026-07-03 (boss email-12559): the 發文脫班 (publishing_freshness) dead-man
+    # switch must DIRECTLY REMEDIATE, not email the boss a to-do list. Run the
+    # single-owner remediation ladder (force-release → refill fresh topics)
+    # BEFORE building/sending the alert, so a genuine drought self-heals and the
+    # email (if it still fires) truthfully reports what the system already did.
+    drought_remediation = _auto_remediate_publish_drought()
+
     report = check_alert_conditions(storage_dir="storage")
     print("=== ops check-alerts ===")
     if due_summary.get("ok"):
@@ -296,6 +347,23 @@ def main() -> int:
         print(
             f"  release-pool-auto: skip "
             f"reason={release_trigger.get('reason', 'unknown')}"
+        )
+    # 2026-07-03: publish-drought auto-remediation ladder (boss email-12559)
+    if drought_remediation.get("attempted"):
+        steps = drought_remediation.get("steps", [])
+        step_summary = "; ".join(
+            f"{s.get('step')}="
+            f"{s.get('released', s.get('added', s.get('error', 'ok')))}"
+            for s in steps
+        )
+        print(
+            f"  publish-drought-remediation: attempted "
+            f"gap={drought_remediation.get('gap_hours')}h [{step_summary}]"
+        )
+    else:
+        print(
+            f"  publish-drought-remediation: skip "
+            f"reason={drought_remediation.get('reason', drought_remediation.get('error', 'unknown'))}"
         )
     print(
         f"breaches={report.get('breach_count')} "
