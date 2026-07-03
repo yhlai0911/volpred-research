@@ -46291,7 +46291,7 @@
     "task_type": "event_article",
     "priority": "P1",
     "source": "telegram-67-followup",
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-03T04:54:19.750628+00:00",
     "title": "修正已發佈 NFP 展望文 mile_35eef830 的日期錯誤（7/3→實際7/2公佈）",
     "description": "已發佈文章 mile_35eef830『7/3 非農公布前...』把 6 月非農日期寫成 7/3（每月第一個週五通則），但因 7/4 獨立紀念日在週六、聯邦假期觀察挪到 7/3 週五，BLS 已提前一天於 2026-07-02(週四) 8:30ET 公佈：非農 +57,000、失業率 4.2%（弱）。整篇是事前展望框架已 stale。決策+執行：改寫為事後回顧（用實際 +5.7 萬/4.2% 數據 vs 原 base case），或加註更正並降級；同步 feed.json + reports/{id}.json + Supabase/Mirror。研究誠實原則：published 對外錯誤內容須即時更正。",
@@ -46310,8 +46310,16 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-13"
+      },
+      {
+        "ts": "2026-07-03T06:10:20.030750+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-13"
       }
     ],
-    "started_at": "2026-07-03T05:08:37.883816+00:00"
+    "started_at": "2026-07-03T05:08:37.883816+00:00",
+    "completed_at": "2026-07-03T06:10:20.030462+00:00",
+    "result": "文章 mile_35eef830 已由 hourly-13 完整改寫為事後回顧（7/3→7/2 假期提前公佈；用實際 NFP +5.7萬/失業率4.2% 取代事前 base case；含2張懶人包圖），feed.json+index+INDEX 更新、Supabase/Mirror 同步、Zeabur 線上已驗證顯示更正內容。本班 hourly-14 補完 hourly-13 漏掉的 commit + task closure。"
   }
 ]

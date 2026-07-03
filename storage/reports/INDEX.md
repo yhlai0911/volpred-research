@@ -1,23 +1,25 @@
 # Feed Index
 
-_Last built: 2026-07-03 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-03 06:01 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1727**  (with thumbnail: 71)
+- Total articles: **1729**  (with thumbnail: 71)
 - Last 30 days: **337**
-- Total chars (content): 5,192,199
+- Total chars (content): 5,207,019
 
-**Status**: published=1527, archived=123, unpublished=59, retracted=12, draft=5, wont_fix=1
+**Status**: published=1528, archived=123, unpublished=59, retracted=12, draft=6, wont_fix=1
 
-**Audience**: research=1105, general=398, daily=130, unknown=77, member_qa=12, event=5
+**Audience**: research=1106, general=399, daily=130, unknown=77, member_qa=12, event=5
 
-**Category**: milestone=863, general=749, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
+**Category**: milestone=864, general=750, unknown=73, member_qa=12, research=10, daily_article=8, qa=5, event_article=3, experiment=3, diary=1
 
 ## 最近 30 天 (337)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-03 | `mile_7f181e3a` | 危機來了要換模型嗎？GW(2006) 條件檢定實測 HAR-RV 與 GJR-GARCH 的贏家會不會隨行情翻盤 | research | milestone | draft | 7429 |  | 研究, GJR-GARCH, HAR-RV, Giacomini-White, 條件預測能力, VIX-regime |
+| 2026-07-03 | `mile_a30cfe89` | VIX 只有十幾點，選擇權市場卻在偏心加價：偏斜三讀法，讀懂它正替誰的恐懼定價 | general | general | published | 7127 |  | 一般讀者, 精選導讀, 選擇權偏斜, VIX, 半導體, 波動率 |
 | 2026-07-03 | `mile_5e43137f` | 每日策略建議：VIX 16.15（正常）— 2026-07-03 | daily | general | published | 1650 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-03 | `mile_fe6147f8` | 2026-07-03 本日持倉比率建議（依據 2026-07-02 收盤數據） | daily | milestone | published | 1048 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-02 | `mile_80cae4cb` | K1605：區域銀行 M/B 折價與後續波動，橫斷面穩健、OOS 不過關 | research | milestone | published | 7581 |  | 研究, 區域銀行, M/B, Fama-MacBeth, DM test, KRE |
@@ -33,7 +35,7 @@ _Last built: 2026-07-03 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-07-02 | `mile_9ac0c44b` | 每日策略建議：VIX 16.59（正常）— 2026-07-02 | daily | general | published | 1649 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-02 | `mile_c3621a1b` | 2026-07-02 本日持倉比率建議（依據 2026-07-01 收盤數據） | daily | milestone | published | 1048 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-02 | `mile_c8468b0d` | 你花錢升級了預測模型，對帳單卻更難看：一個關於「準」與「賺」的實測 | general | general | published | 3749 |  | 一般讀者, 波動率目標, 交易成本, 換手率, 策略回測, 研究誠實 |
-| 2026-07-01 | `mile_35eef830` | 7/3 非農公布前，先看清楚一件事：讓市場抖動的從來不是「就業數字」本身 | general | general | published | 3663 |  | 一般讀者, NFP, 非農就業, VIX, 勞動市場, 總經事件 |
+| 2026-07-01 | `mile_35eef830` | 6 月非農爆冷 5.7 萬，SPY 卻只動 0.13%：讓市場抖動的從來不是「就業數字」本身 | general | general | published | 3927 |  | 一般讀者, NFP, 非農就業, VIX, 勞動市場, 總經事件 |
 | 2026-07-01 | `mile_c0d6676f` | K 棒記了四個價格，收盤只用一個——剩下三個能預測明天的波動嗎？ | general | general | published | 2661 |  | 一般讀者, ETF, 波動率, K棒, 隔日波動, 量化方法 |
 | 2026-07-01 | `mile_4518e9d8` | 併購案宣布之後，真正該盯的不是股價，是這檔基金的心跳 | general | milestone | draft | 2939 |  | 一般讀者, 併購套利, 風險套利, ETF, VIX, 波動率 |
 | 2026-07-01 | `mile_cfa5eb89` | K1586：穩定幣儲備變化與短端 T-bill realized vol 的領先性檢定 | research | milestone | published | 7790 |  | 研究, 穩定幣, 短期公債, USDC, SVB, Granger |
@@ -353,13 +355,13 @@ _Last built: 2026-07-03 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-03 | `mile_6a4554d4` | K573：三種 VT 策略效率前緣——最低 MDD 不等於最佳風險管理 | research | research | unpublished | 6458 |  | 研究, VT策略, SPY, GLD, VIX, 波動率管理 |
 | 2026-06-03 | `mile_31b2b0bb` | AI 五層產業鏈，我們不講故事，看波動率怎麼說 | general | general | published | 3452 |  | 一般讀者, 波動率, 相關性, AI 產業鏈, 資料中心, 晶片 |
 | 2026-06-03 | `mile_96fb5f73` | 「Consistently outperforms」這句話的代價：GSP-HAR 在 5 檔美股 ETF 上的誠實複製 | research | milestone | published | 4730 |  | 研究, HAR-RV, GSP-HAR, graph-signal-processing, placebo-test, DM-test |
-| 2026-06-03 | `mile_2d4edb65` | 一套方法在 13 個市場都有效，卻不代表它會幫你賺更多 | general | milestone | published | 1477 |  | 一般讀者, 投資研究, 跨市場, 風險管理, 回撤控制, 負面結果 |
-| 2026-06-03 | `mile_7825c8a2` | 只贏一點點，很多時候還不能算模型真的比較強 | general | milestone | published | 1437 |  | 一般讀者, 波動率預測, 模型比較, 投資研究, 負面結果, VIX |
 
-<details><summary>## 2026-Q2 (718)</summary>
+<details><summary>## 2026-Q2 (720)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-03 | `mile_2d4edb65` | 一套方法在 13 個市場都有效，卻不代表它會幫你賺更多 | general | milestone | published | 1477 |  | 一般讀者, 投資研究, 跨市場, 風險管理, 回撤控制, 負面結果 |
+| 2026-06-03 | `mile_7825c8a2` | 只贏一點點，很多時候還不能算模型真的比較強 | general | milestone | published | 1437 |  | 一般讀者, 波動率預測, 模型比較, 投資研究, 負面結果, VIX |
 | 2026-06-03 | `mile_e5700a83` | 每日策略建議：VIX 15.77（正常）— 2026-06-03 | daily | general | published | 1650 | Y | 每日建議, VIX, 策略配置 |
 | 2026-06-03 | `mile_95b8086b` | 2026-06-03 本日持倉比率建議（依據 2026-06-02 收盤數據） | daily | milestone | published | 1047 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-06-02 | `mile_49616ac2` | AI 資本支出狂潮下，期權市場押的是上行而不是下行 | general | general | published | 4505 |  | 一般讀者, trending, options, implied-volatility, ai-capex, skew |
