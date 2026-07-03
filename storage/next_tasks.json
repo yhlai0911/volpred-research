@@ -46391,5 +46391,197 @@
     "started_at": "2026-07-03T05:08:37.883816+00:00",
     "completed_at": "2026-07-03T06:10:20.030462+00:00",
     "result": "文章 mile_35eef830 已由 hourly-13 完整改寫為事後回顧（7/3→7/2 假期提前公佈；用實際 NFP +5.7萬/失業率4.2% 取代事前 base case；含2張懶人包圖），feed.json+index+INDEX 更新、Supabase/Mirror 同步、Zeabur 線上已驗證顯示更正內容。本班 hourly-14 補完 hourly-13 漏掉的 commit + task closure。"
+  },
+  {
+    "id": "telegram-70",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-03T07:51:23.474976+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 70）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n所以非農已經寫好了嗎？\n這是時事文章應該是不受發文時間限制吧\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-03T07:51:49.380333+00:00",
+    "claim_session_id": "8e315867e2f4",
+    "status_history": [
+      {
+        "ts": "2026-07-03T07:51:49.380638+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-03T07:56:09.453316+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-03T07:56:09.453060+00:00"
+  },
+  {
+    "id": "telegram-75",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-03T08:01:16.025219+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 75）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n立刻徹底處理修正優化不要再發生\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n🔴 [CRITICAL] 發文脫班（無新文超過 release 節奏門檻）\n\n🚦 觸發條件\n作用窗（台北 9:00–23:00）內，feed 最新已發佈文章距今 > 6.0h（= release interval 4.0h + 2.0h grace）。\n• newest_published_at: 2026-07-03T01:35:38.412728+00:00\n• publish_gap_hours: 6.41\n• threshold_hours: 6.0\n• feed_path: storage/reports/feed.json\n\n📌 影響\n這是『發文脫班』的 outcome-level dead-man switch：不論成因（dispatch generator 死、\nauth 失效、release cluster-filter 擋住、draft 池空），只要『實際沒發文』就觸發。\n直接打 Mission 第 1 條（內容）＋第 5 條（流量）。2026-06-22 整日脫班即此盲區。\n\n🛠️ 建議行動（主線程 auto-remediation）\n1. 查 generator 是否活著：tail -5 storage/logs/cron/hourly_dispatch.log\n（看是否秒退 / auth-preflight fail；確認 ~/.local/bin/claude 存在可執行）\n2. 立即釋出（draft 池有 fresh-theme 時）：\nVOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\n3. 若 release 因 cluster-pressure 擋住（released 0）：定向釋出 fresh-theme 草稿，\n或派 daily_article 補非飽和主題\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-03T08:01:59.851900+00:00",
+    "claim_session_id": "1302801e9d17",
+    "status_history": [
+      {
+        "ts": "2026-07-03T08:01:59.852200+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-03T08:06:46.545580+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-03T08:06:46.545275+00:00"
+  },
+  {
+    "id": "telegram-77",
+    "task_type": "telegram_reply",
+    "priority": "P1",
+    "source": "telegram",
+    "status": "succeeded",
+    "created_at": "2026-07-03T08:02:05.649415+00:00",
+    "title": "回覆老闆 Telegram 訊息（msg 77）",
+    "description": "老闆（Ivan）經 Telegram 傳來訊息，全文：\n---\n描述的時候要用人看得懂的話不適用用一堆專有名詞堆疊而已\n---\n\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n⚠️ [WARN] 內容品質巡檢觸發（publish_rhythm:drought）\n\n🚦 觸發條件\n• publish_rhythm: drought — 距最新發文 384.83min > 6.0h 門檻（作用窗 TPE hour=16）\n• (context) content_completeness: 2/12 篇缺圖表或來源 marker（heuristic，可能含 frontend-rendered chart 誤判，供人工複查）\n\n📌 影響\n內容品質直接打 Mission 第 1 條（內容）+ 第 5 條（流量）。Boss 在 2026-06-24 一日內人工 spot 4 個內容問題；此 patrol 補上系統主動巡檢層，未來這類問題不再倚賴人工發現。\n\n🛠️ 建議行動（主線程 auto-remediation）\n1. daily_digest_uniqueness=duplicate → 檢視 storage/ops/content_quality_report.json items，挑 1 篇 retract：uv run volpred ops unpublish --mile-id <id>；同時排查為何 enqueue_daily_digest.py 既有冪等被繞過（race / 雙源 dispatcher）。\n2. publish_rhythm=burst → 派工節流，下一輪 hourly 跳過 reader-facing；查 dispatch log 是否雙 session 同時 fire。\n3. publish_rhythm=drought → 立即 release-pool-by-settings 或派 fresh-arc daily_article 補位；同時查 release deadlock (docs/refactor_plan_\n---\n處理規則：與 email_reply 同級（user-assigned P1）。完成實事後**必須用 Telegram 回覆**（`uv run volpred ops telegram-send --text \"...\"` 或 python: volpred.ops.telegram.send_telegram）。回覆要短、直接、口語 — 這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。",
+    "claimed_by": "telegram-responder",
+    "claimed_at": "2026-07-03T08:07:23.017157+00:00",
+    "claim_session_id": "428c26ff87da",
+    "status_history": [
+      {
+        "ts": "2026-07-03T08:07:23.017463+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "telegram-responder"
+      },
+      {
+        "ts": "2026-07-03T08:08:50.152821+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "telegram-responder"
+      }
+    ],
+    "completed_at": "2026-07-03T08:08:50.152510+00:00"
+  },
+  {
+    "id": "research_realpage_reit_vol",
+    "title": "研究 backlog fallback: 演算法定價反壟斷執法（RealPage 式租金演算法案件）事件窗對房東 REIT 與旅遊定價股 vol 的影響",
+    "description": "Article pool exhausted (all uncovered K research-saturated) → auto-queued NEW research from research_program.md open backlog to keep the pipeline flowing (Mission #2 research → #1 articles). 方向: 演算法定價反壟斷執法（RealPage 式租金演算法案件）事件窗對房東 REIT 與旅遊定價股 vol 的影響 — DOJ/FTC 公開反壟斷訴訟/和解公告日曆（RealPage、機票/飯店動態定價案件）+ yfinance 公寓 REIT（AVB/EQR/UDR/ESS）+ JETS/旅遊訂價股籃，檢定執法公告 t-1..t+10 RV、downside、超額報酬是否顯著；與 RL market-maker 流動性不對稱指紋題（line 1156）正交（那是證券市場微結構價差，這裡是租賃/旅遊業演算法定價的反壟斷法律風險）、與 M&A HSR 反壟斷 overhang 題正交（那是併購審查， | 來源 section: 期刊主題挖掘 batch 2026-07-03（journal_discovery_20260702_3；websearch joe/jbes/jbf/jfm/jpm/faj/jcommmkt/qje/aer/jpe/aej-macro 2025-26 趨勢層級；硬約束避開 vt/vix/garch-har 賽馬/etf fragility/cre/nbfi/stablecoin/ai concentration/labor-shortage/deposit-flightiness/market-to-book/thematic-concentration/data-driven-vc/blockbuster 等 06-30~07-02 已飽和 cluster；selectivity gate 後 10→9 條入單）. 主線程派 experiment agent 前先讀 docs/error_log.md + 查相似 K + ≥3 篇文獻; 完成後 Codex review → knowledge.json → 可發佈排文章。",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "experiment",
+    "dispatch_lane": "agent",
+    "source": "auto_research_fallback",
+    "research_slug": "realpage_reit_vol",
+    "tags": [
+      "auto-research-fallback",
+      "research-program-backlog"
+    ],
+    "created_at": "2026-07-03T08:04:16+00:00"
+  },
+  {
+    "id": "daily_market_vol_snapshot_20260703",
+    "title": "今日市場波動率快照（2026-07-03）— VIX/TAIEX/美股即時 vol 狀態解讀",
+    "description": "發文脫班 remediation（telegram-75）：draft 池 6 篇全 arc-dup 被 anti-rehash 正確擋下，池內無 fresh reader-facing 素材。補一筆綁 LIVE 數據的即時市場波動率快照（今日 VIX 收/盤中、TAIEX 已實現波動、美股 term structure），天生非 arc-dup。主線程/dispatch 用真 yfinance+FRED 數據寫，走 feed-publisher + anti-ai-style，含真圖表。禁 ASCII 圖、禁鬼打牆敘事。audience=general。",
+    "priority": 1,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "dispatch_lane": "agent",
+    "source": "telegram_remediation",
+    "topic_cluster": "market_snapshot",
+    "tags": [
+      "telegram-remediation",
+      "publish-drought-fix",
+      "live-data"
+    ],
+    "created_at": "2026-07-03T08:06:14+00:00",
+    "claimed_by": "hourly-16",
+    "claimed_at": "2026-07-03T08:09:42.293170+00:00",
+    "claim_session_id": "c906cd3c7b8e",
+    "status_history": [
+      {
+        "ts": "2026-07-03T08:09:42.293451+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-03T08:09:42.515029+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-16"
+      },
+      {
+        "ts": "2026-07-03T08:31:26.362011+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-16"
+      }
+    ],
+    "started_at": "2026-07-03T08:09:42.514735+00:00",
+    "completed_at": "2026-07-03T08:31:26.361709+00:00",
+    "result": "published mile_8bf06fde (VIX破16三裂縫即時快照, general, 3真圖含懶人包卡, dup_waiver entity-level誤判已查證). 線上200. yfinance+FRED真數據. 發文脫班remediation完成."
+  },
+  {
+    "id": "platform_ops_drought_auto_refresh_wiring",
+    "title": "結構性修：release-drought(arc-dup starvation) 觸發時自動 refresh fresh-content 供給（不再發生 發文脫班）",
+    "description": "根因（telegram-75 診斷）：release cadence 4h 消耗 draft 快於 fresh 非-arc-dup 內容生成；當 K-article arc 飽和 + event 超 horizon + trending daily-gated + member_qa 空 → 全 dry → anti-rehash 正確 withhold → dead-man switch 觸發但無機制自動補 fresh 素材。drought WARN 已『signalling for fresh content』但無 consumer。修法：把 release-pool-by-settings 的 release_drought 訊號 wire 到自動 (a) 強制 trending force-scan(放寬 daily gate)、(b) event horizon 動態放寬、(c) 缺料時 auto-append market-snapshot daily_article，使池永不 dry。落地後 regression：模擬全 arc-dup 池 + drought，驗證自動生出 ≥1 fresh 可發佈任務。改 scripts/refill_reader_facing_pool.py + release 流程；先讀 docs/error_log.md + memory feedback_recycling_is_release_layer_not_research。",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "task_type": "platform_ops",
+    "source": "telegram_remediation",
+    "tags": [
+      "telegram-remediation",
+      "3-strike-watch",
+      "publish-drought-fix"
+    ],
+    "created_at": "2026-07-03T08:06:14+00:00"
+  },
+  {
+    "id": "platform_ops_plainify_alert_descriptions",
+    "title": "白話化所有 boss-facing 描述（alert/send-alert/telegram/每日摘要）— 老闆看不懂術語堆疊",
+    "description": "老闆 2026-07-03 Telegram msg 77 糾正：alert/email 描述堆滿 jargon（publish_rhythm:drought、content_completeness、daily_digest_uniqueness、arc-dup、cluster-pressure…）看不懂。修：check_alerts / send-alert / content_quality 巡檢 / 每日摘要的 description 模板加白話化層——結論用白話、非講不可的內部欄位名就地翻譯或替換、一句話影響+一句話行動。內部 log/knowledge/error_log 保留術語不變，只約束 boss-facing 面。先讀 memory feedback_plain_language_boss_facing。改 scripts/check_alerts*.py + src/volpred/ops alert/telegram 格式化處。",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "task_type": "platform_ops",
+    "source": "telegram_remediation",
+    "tags": [
+      "telegram-remediation",
+      "boss-facing-plain-language"
+    ],
+    "created_at": "2026-07-03T08:08:25+00:00"
+  },
+  {
+    "id": "email-12559-fd1b75",
+    "title": "[email_reply] Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 release 節奏門檻）",
+    "description": "Gmail UID: 12559\nMessage-ID: <DC330392-1D23-4C73-B732-87CD079CBDD7@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Fri, 3 Jul 2026 16:16:31 +0800\nSubject: Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 release 節奏門檻）\n\n--- 用戶回信內容 ---\n你應該不是建議行動 而是你應該要直接行動吧？\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月3日 16:00 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 發文脫班（無新文超過 release 節奏門檻）\r\n> Alert level: critical\r\n> ✖\r\n> CRITICAL\r\n> 觸發條件\r\n> \r\n> 作用窗（台北 9:00–23:00）內，feed 最新已發佈文章距今 > 6.0h（= release interval 4.0h + 2.0h grace）。\r\n> newest_published_at: 2026-07-03T01:35:38.412728+00:00\r\n> publish_gap_hours: 6.41\r\n> threshold_hours: 6.0\r\n> feed_path: storage/reports/feed.json\r\n> 影響\r\n> \r\n> 這是『發文脫班』的 outcome-level dead-man switch：不論成因（dispatch generator 死、\r\n> auth 失效、release cluster-filter 擋住、draft 池空），只要『實際沒發文』就觸發。\r\n> 直接打 Mission 第 1 條（內容）＋第 5 條（流量）。2026-06-22 整日脫班即此盲區。\r\n> 建議行動（主線程 auto-remediation）\r\n> \r\n> 查 generator 是否活著：tail -5 storage/logs/cron/hourly_dispatch.log\r\n> （看是否秒退 / auth-preflight fail；確認 ~/.local/bin/claude 存在可執行）\r\n> 立即釋出（draft 池有 fresh-theme 時）：\r\n> VOLPRED_ACTOR=claude uv run volpred ops release-pool-by-settings\r\n> 若 release 因 cluster-pressure 擋住（released 0）：定向釋出 fresh-theme 草稿，\r\n> 或派 daily_article 補非飽和主題（publication-candidates skill）。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "pending",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-03T08:30:03.128674+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12559,
+    "email_message_id": "<DC330392-1D23-4C73-B732-87CD079CBDD7@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][CRITICAL] 發文脫班（無新文超過 release 節奏門檻）",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>"
   }
 ]
